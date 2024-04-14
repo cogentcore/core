@@ -9,20 +9,20 @@ import (
 	"image/color"
 	"log"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Colors are the material colors with padding for direct uploading to shader
 type Colors struct {
 
 	// main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering
-	Color mat32.Vec4
+	Color math32.Vector4
 
 	// X = shininess spread factor, Y = shine reflection factor, Z = brightness factor:  shiny = specular shininess factor -- how focally the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128) having a smaller more focal specular reflection.  Shine reflect = 1 for full shine white reflection (specular) color, 0 = no shine reflection.  bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters.  W is used for Tex idx.
-	ShinyBright mat32.Vec4
+	ShinyBright math32.Vector4
 
 	// color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object
-	Emissive mat32.Vec4
+	Emissive math32.Vector4
 }
 
 // NewGoColor sets the colors from standard Go colors
@@ -34,8 +34,8 @@ func NewColors(clr, emis color.Color, shiny, reflect, bright float32) *Colors {
 
 // SetColors sets the colors from standard Go colors
 func (cl *Colors) SetColors(clr, emis color.Color, shiny, reflect, bright float32) {
-	cl.Color = mat32.NewVec4Color(clr).SRGBToLinear()
-	cl.Emissive = mat32.NewVec4Color(emis).SRGBToLinear()
+	cl.Color = math32.NewVector4Color(clr).SRGBToLinear()
+	cl.Emissive = math32.NewVector4Color(emis).SRGBToLinear()
 	cl.ShinyBright.X = shiny
 	cl.ShinyBright.Y = reflect
 	cl.ShinyBright.Z = bright

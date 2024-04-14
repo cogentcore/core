@@ -10,8 +10,8 @@ import (
 	"testing"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/grr"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/errors"
+	"cogentcore.org/core/math32"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,15 +22,15 @@ func TestFromString(t *testing.T) {
 	}
 	tests := []test{
 		{"linear-gradient(#e66465, #9198e5)", NewLinear().
-			AddStop(grr.Log1(colors.FromHex("#e66465")), 0).
-			AddStop(grr.Log1(colors.FromHex("#9198e5")), 1)},
+			AddStop(errors.Log1(colors.FromHex("#e66465")), 0).
+			AddStop(errors.Log1(colors.FromHex("#9198e5")), 1)},
 		{"linear-gradient(to left, blue, purple, red)", NewLinear().
-			SetStart(mat32.V2(1, 0)).SetEnd(mat32.V2(0, 0)).
+			SetStart(math32.Vec2(1, 0)).SetEnd(math32.Vec2(0, 0)).
 			AddStop(colors.Blue, 0).
 			AddStop(colors.Purple, 0.5).
 			AddStop(colors.Red, 1)},
 		{"linear-gradient(0deg, blue, green 40%, red)", NewLinear().
-			SetStart(mat32.V2(0, 1)).SetEnd(mat32.V2(0, 0)).
+			SetStart(math32.Vec2(0, 1)).SetEnd(math32.Vec2(0, 0)).
 			AddStop(colors.Blue, 0).
 			AddStop(colors.Green, 0.4).
 			AddStop(colors.Red, 1)},
@@ -39,7 +39,7 @@ func TestFromString(t *testing.T) {
 			AddStop(colors.Blue, 0.5).
 			AddStop(colors.Green, 1)},
 		{"radial-gradient(ellipse at right, purple 0.3, yellow 60%, gray)", NewRadial().
-			SetCenter(mat32.V2(1, 0.5)).SetFocal(mat32.V2(1, 0.5)).
+			SetCenter(math32.Vec2(1, 0.5)).SetFocal(math32.Vec2(1, 0.5)).
 			AddStop(colors.Purple, 0.3).
 			AddStop(colors.Yellow, 0.6).
 			AddStop(colors.Gray, 1)},
@@ -56,13 +56,13 @@ func TestFromString(t *testing.T) {
 // used in multiple tests
 var (
 	linearTransformTest = NewLinear().
-				SetTransform(mat32.Rotate2D(mat32.Pi/2)).
-				SetStart(mat32.V2(0, 0)).SetEnd(mat32.V2(1, 0)).
+				SetTransform(math32.Rotate2D(math32.Pi/2)).
+				SetStart(math32.Vec2(0, 0)).SetEnd(math32.Vec2(1, 0)).
 				AddStop(colors.Gold, 0.05).
 				AddStop(colors.Red, 0.95)
 
 	radialTransformTest = NewRadial().
-				SetTransform(mat32.Translate2D(0.1, 0.1).Scale(0.5, 1.75)).
+				SetTransform(math32.Translate2D(0.1, 0.1).Scale(0.5, 1.75)).
 				AddStop(colors.Red, 0.3).
 				AddStop(colors.Blue, 0.6).
 				AddStop(colors.Orange, 0.95)
@@ -78,9 +78,9 @@ func TestReadXML(t *testing.T) {
 		<stop offset="0.6" stop-color="#f31" />
 		<stop offset="1.2" stop-color="#bbbff6" />
 	  </linearGradient>`, NewLinear().
-			SetEnd(mat32.V2(1, 0)).
-			AddStop(grr.Log1(colors.FromHex("#f31")), 0.6).
-			AddStop(grr.Log1(colors.FromHex("#bbbff6")), 1.2)},
+			SetEnd(math32.Vec2(1, 0)).
+			AddStop(errors.Log1(colors.FromHex("#f31")), 0.6).
+			AddStop(errors.Log1(colors.FromHex("#bbbff6")), 1.2)},
 
 		{`<linearGradient id="something" gradientTransform="rotate(90)">
 		<stop offset="5%" stop-color="gold" />

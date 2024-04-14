@@ -10,8 +10,8 @@ import (
 	"io/fs"
 	"strings"
 
-	"cogentcore.org/core/glop/dirs"
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/mergefs"
 )
 
@@ -23,7 +23,7 @@ import (
 // be extended using [AddFS]. All icons should be stored in the root directory
 // of the fs, which can be accomplished using [fs.Sub] if you have icons in a
 // subdirectory.
-var Icons = grr.Log1(fs.Sub(defaults, "svg"))
+var Icons = errors.Log1(fs.Sub(defaults, "svg"))
 
 // defaults contains the default icons.
 //

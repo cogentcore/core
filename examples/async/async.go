@@ -4,10 +4,10 @@ package main
 import (
 	"time"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/views"
 )
 
 type tableStruct struct {
@@ -15,15 +15,15 @@ type tableStruct struct {
 	IntField   int
 	FloatField float32
 	StrField   string
-	File       gi.Filename
+	File       core.Filename
 }
 
 const rows = 100000
 
 func main() {
 	table := make([]*tableStruct, 0, rows)
-	b := gi.NewBody("Async Updating")
-	tv := giv.NewTableView(b)
+	b := core.NewBody("Async Updating")
+	tv := views.NewTableView(b)
 	tv.SetReadOnly(true)
 	tv.SetSlice(&table)
 

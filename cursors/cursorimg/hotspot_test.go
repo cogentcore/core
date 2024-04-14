@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/cursors"
-	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/iox/imagex"
 )
 
 func TestHotspot(t *testing.T) {
@@ -31,7 +31,7 @@ func TestHotspot(t *testing.T) {
 		red := color.RGBA{R: 255, A: 255}
 		hs := cur.Hotspot
 		cur.Image.(draw.Image).Set(hs.X, hs.Y, red)
-		err = images.Save(cur.Image, "testdata/"+c.String()+".png")
+		err = imagex.Save(cur.Image, "testdata/"+c.String()+".png")
 		if err != nil {
 			t.Fatal(err)
 		}

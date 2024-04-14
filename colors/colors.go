@@ -15,7 +15,7 @@ import (
 
 	"cogentcore.org/core/cam/hct"
 	"cogentcore.org/core/cam/hsl"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // IsNil returns whether the color is the nil initial default color
@@ -317,7 +317,7 @@ func WithA(c color.Color, a uint8) color.RGBA {
 // between 0 and 1, with the color premultiplication updated.
 func WithAF32(c color.Color, a float32) color.RGBA {
 	n := color.NRGBAModel.Convert(c).(color.NRGBA)
-	a = mat32.Clamp(a, 0, 1)
+	a = math32.Clamp(a, 0, 1)
 	n.A = uint8(a * 255)
 	return AsRGBA(n)
 }
@@ -358,7 +358,7 @@ func ApplyOpacityNRGBA(c color.Color, opacity float32) color.NRGBA {
 func Clearer(c color.Color, amount float32) color.RGBA {
 	f32 := NRGBAF32Model.Convert(c).(NRGBAF32)
 	f32.A -= amount / 100
-	f32.A = mat32.Clamp(f32.A, 0, 1)
+	f32.A = math32.Clamp(f32.A, 0, 1)
 	return AsRGBA(f32)
 }
 
@@ -369,7 +369,7 @@ func Clearer(c color.Color, amount float32) color.RGBA {
 func Opaquer(c color.Color, amount float32) color.RGBA {
 	f32 := NRGBAF32Model.Convert(c).(NRGBAF32)
 	f32.A += amount / 100
-	f32.A = mat32.Clamp(f32.A, 0, 1)
+	f32.A = math32.Clamp(f32.A, 0, 1)
 	return AsRGBA(f32)
 }
 

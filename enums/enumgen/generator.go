@@ -25,8 +25,8 @@ import (
 	"strings"
 	"text/template"
 
-	"cogentcore.org/core/gengo"
-	"cogentcore.org/core/grease"
+	"cogentcore.org/core/cli"
+	"cogentcore.org/core/generate"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -62,7 +62,7 @@ func (g *Generator) Printf(format string, args ...any) {
 func (g *Generator) PrintHeader() {
 	// we need a manual import of enums because it is
 	// external, but goimports will handle everything else
-	gengo.PrintHeader(&g.Buf, g.Pkg.Name, "cogentcore.org/core/enums")
+	generate.PrintHeader(&g.Buf, g.Pkg.Name, "cogentcore.org/core/enums")
 }
 
 // FindEnumTypes goes through all of the types in the package
@@ -70,7 +70,7 @@ func (g *Generator) PrintHeader() {
 // or enums:bitflag. It stores the resulting types in [Generator.Types].
 func (g *Generator) FindEnumTypes() error {
 	g.Types = []*Type{}
-	return gengo.Inspect(g.Pkg, g.InspectForType)
+	return generate.Inspect(g.Pkg, g.InspectForType)
 }
 
 // AllowedEnumTypes are the types that can be used for enums
@@ -92,7 +92,7 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		return true, nil
 	}
 	for _, c := range ts.Comment.List {
-		dir, err := grease.ParseDirective(c.Text)
+		dir, err := cli.ParseDirective(c.Text)
 		if err != nil {
 			return false, fmt.Errorf("error parsing comment directive %q: %w", c.Text, err)
 		}
@@ -113,7 +113,7 @@ func (g *Generator) InspectForType(n ast.Node) (bool, error) {
 		// }
 		cfg := &Config{}
 		*cfg = *g.Config
-		leftovers, err := grease.SetFromArgs(cfg, dir.Args, grease.ErrNotFound)
+		leftovers, err := cli.SetFromArgs(cfg, dir.Args, cli.ErrNotFound)
 		if err != nil {
 			return false, fmt.Errorf("error setting config info from comment directive args: %w (from directive %q)", err, c.Text)
 		}
@@ -320,5 +320,5 @@ func (g *Generator) ExecTmpl(t *template.Template, typ *Type) {
 // ([Generator.Buf]) and writes it to the file specified by
 // [Generator.Config.Output].
 func (g *Generator) Write() error {
-	return gengo.Write(gengo.Filepath(g.Pkg, g.Config.Output), g.Buf.Bytes(), nil)
+	return generate.Write(generate.Filepath(g.Pkg, g.Config.Output), g.Buf.Bytes(), nil)
 }

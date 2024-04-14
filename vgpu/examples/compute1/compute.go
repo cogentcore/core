@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"runtime"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/vgpu"
 )
 
@@ -28,7 +28,7 @@ func main() {
 	gp.Config("compute1")
 	fmt.Printf("Running on GPU: %s\n", gp.DeviceName)
 
-	// gp.PropsString(true) // print
+	// gp.PropertiesString(true) // print
 
 	sy := gp.NewComputeSystem("compute1")
 	pl := sy.NewPipeline("compute1")
@@ -40,13 +40,13 @@ func main() {
 	n := 20 // note: not necc to spec up-front, but easier if so
 
 	threads := 64
-	nInt := mat32.IntMultiple(float32(n), float32(threads))
+	nInt := math32.IntMultiple(float32(n), float32(threads))
 	n = int(nInt)       // enforce optimal n's -- otherwise requires range checking
 	nGps := n / threads // dispatch n
 	fmt.Printf("n: %d\n", n)
 
-	inv := set.Add("In", vgpu.Float32Vec4, n, vgpu.Storage, vgpu.ComputeShader)
-	outv := set.Add("Out", vgpu.Float32Vec4, n, vgpu.Storage, vgpu.ComputeShader)
+	inv := set.Add("In", vgpu.Float32Vector4, n, vgpu.Storage, vgpu.ComputeShader)
+	outv := set.Add("Out", vgpu.Float32Vector4, n, vgpu.Storage, vgpu.ComputeShader)
 	_ = outv
 
 	set.ConfigValues(1) // one val per var

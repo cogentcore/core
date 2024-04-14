@@ -11,8 +11,8 @@ import (
 	"testing"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/glop/dirs"
-	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/gox/dirs"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/paint"
 	"github.com/stretchr/testify/assert"
 )
@@ -36,7 +36,7 @@ func TestSVG(t *testing.T) {
 		}
 		sv.Render()
 		imfn := filepath.Join("png", strings.TrimSuffix(fn, ".svg"))
-		images.Assert(t, sv.Pixels, imfn)
+		imagex.Assert(t, sv.Pixels, imfn)
 	}
 }
 
@@ -61,7 +61,7 @@ func TestViewBox(t *testing.T) {
 		sv.Render()
 		fnm := fmt.Sprintf("%s_%s", fpre, ts)
 		imfn := filepath.Join("png", fnm)
-		images.Assert(t, sv.Pixels, imfn)
+		imagex.Assert(t, sv.Pixels, imfn)
 	}
 }
 

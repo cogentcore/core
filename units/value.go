@@ -10,7 +10,7 @@ import (
 
 	"log/slog"
 
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -19,7 +19,7 @@ import (
 // makes sense and provides a nicer end-user experience.
 
 // Value and units, and converted value into raw pixels (dots in DPI)
-type Value struct { //gti:add
+type Value struct { //types:add
 
 	// Value is the value in terms of the specified unit
 	Value float32 `label:""`
@@ -118,7 +118,7 @@ func (v *Value) SetString(str string) error {
 	trstr := strings.TrimSpace(strings.Replace(str, "%", "pct", -1))
 	sz := len(trstr)
 	if sz < 2 {
-		vc, err := laser.ToFloat(str)
+		vc, err := reflectx.ToFloat(str)
 		if err != nil {
 			return fmt.Errorf("(units.Value).SetString: unable to convert string value %q into a number: %w", trstr, err)
 		}
@@ -181,7 +181,7 @@ func (v *Value) SetAny(iface any, key string) error {
 	case *Value:
 		*v = *val
 	default: // assume Px as an implicit default
-		valflt, err := laser.ToFloat(iface)
+		valflt, err := reflectx.ToFloat(iface)
 		if err == nil {
 			v.Set(float32(valflt), UnitPx)
 		} else {

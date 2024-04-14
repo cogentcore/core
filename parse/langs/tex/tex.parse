@@ -1,0 +1,854 @@
+{
+  "Lexer": {
+    "Nm": "Lexer",
+    "UniqueNm": "Lexer",
+    "Properties": null,
+    "Kids": [
+      {
+        "n": 13,
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "Comment",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "LetterText",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "Backslash",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "LBraceBf",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "LBraceEm",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "LBrace",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "LBrack",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "RBrace",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "DollarSign",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "Ampersand",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "Number",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "Quotes",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "AnyText"
+      },
+      {
+        "Nm": "Comment",
+        "UniqueNm": "Comment",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "Comment",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "%",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "EOL"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "LetterText",
+        "UniqueNm": "LetterText",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "optimization for plain letters which are always text",
+        "Token": "Text",
+        "Match": "Letter",
+        "Pos": "AnyPos",
+        "String": "",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "Backslash",
+        "UniqueNm": "Backslash",
+        "Properties": null,
+        "Kids": [
+          {
+            "n": 14,
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "Section",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "Subsection",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "Subsubsection",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "Bold",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "Emph",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "TT",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "VerbSlash",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "VerbPipe",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "Percent",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "DollarSign",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "Ampersand",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "LBrace",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "RBrace",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "AnyCmd"
+          },
+          {
+            "Nm": "Section",
+            "UniqueNm": "Section",
+            "Properties": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "cogentcore.org/core/parse/lexer.Rule",
+                "name": "SectText"
+              },
+              {
+                "Nm": "SectText",
+                "UniqueNm": "SectText",
+                "Properties": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "TextStyleHeading",
+                "Match": "AnyRune",
+                "Pos": "AnyPos",
+                "String": "",
+                "Offset": 0,
+                "SizeAdj": -1,
+                "Acts": [
+                  "ReadUntil"
+                ],
+                "Until": "}",
+                "PushState": "",
+                "NameMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
+            "Token": "NameBuiltin",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "section{",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "Subsection",
+            "UniqueNm": "Subsection",
+            "Properties": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "cogentcore.org/core/parse/lexer.Rule",
+                "name": "SubSectText"
+              },
+              {
+                "Nm": "SubSectText",
+                "UniqueNm": "SubSectText",
+                "Properties": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "TextStyleSubheading",
+                "Match": "AnyRune",
+                "Pos": "AnyPos",
+                "String": "",
+                "Offset": 0,
+                "SizeAdj": -1,
+                "Acts": [
+                  "ReadUntil"
+                ],
+                "Until": "}",
+                "PushState": "",
+                "NameMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
+            "Token": "NameBuiltin",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "subsection{",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "Subsubsection",
+            "UniqueNm": "Subsubsection",
+            "Properties": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "cogentcore.org/core/parse/lexer.Rule",
+                "name": "SubSubSectText"
+              },
+              {
+                "Nm": "SubSubSectText",
+                "UniqueNm": "SubSubSectText",
+                "Properties": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "TextStyleSubheading",
+                "Match": "AnyRune",
+                "Pos": "AnyPos",
+                "String": "",
+                "Offset": 0,
+                "SizeAdj": -1,
+                "Acts": [
+                  "ReadUntil"
+                ],
+                "Until": "}",
+                "PushState": "",
+                "NameMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
+            "Token": "NameBuiltin",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "subsubsection{",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "Bold",
+            "UniqueNm": "Bold",
+            "Properties": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "cogentcore.org/core/parse/lexer.Rule",
+                "name": "BoldText"
+              },
+              {
+                "Nm": "BoldText",
+                "UniqueNm": "BoldText",
+                "Properties": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "TextStyleStrong",
+                "Match": "AnyRune",
+                "Pos": "AnyPos",
+                "String": "",
+                "Offset": 0,
+                "SizeAdj": -1,
+                "Acts": [
+                  "ReadUntil"
+                ],
+                "Until": "}",
+                "PushState": "",
+                "NameMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
+            "Token": "NameBuiltin",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "textbf{",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "Emph",
+            "UniqueNm": "Emph",
+            "Properties": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "cogentcore.org/core/parse/lexer.Rule",
+                "name": "EmpText"
+              },
+              {
+                "Nm": "EmpText",
+                "UniqueNm": "EmpText",
+                "Properties": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "TextStyleEmph",
+                "Match": "AnyRune",
+                "Pos": "AnyPos",
+                "String": "",
+                "Offset": 0,
+                "SizeAdj": -1,
+                "Acts": [
+                  "ReadUntil"
+                ],
+                "Until": "}",
+                "PushState": "",
+                "NameMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
+            "Token": "NameBuiltin",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "emph{",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "TT",
+            "UniqueNm": "TT",
+            "Properties": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "cogentcore.org/core/parse/lexer.Rule",
+                "name": "TTText"
+              },
+              {
+                "Nm": "TTText",
+                "UniqueNm": "TTText",
+                "Properties": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "TextStyleOutput",
+                "Match": "AnyRune",
+                "Pos": "AnyPos",
+                "String": "",
+                "Offset": 0,
+                "SizeAdj": -1,
+                "Acts": [
+                  "ReadUntil"
+                ],
+                "Until": "}",
+                "PushState": "",
+                "NameMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
+            "Token": "NameBuiltin",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "textt{",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "VerbSlash",
+            "UniqueNm": "VerbSlash",
+            "Properties": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "cogentcore.org/core/parse/lexer.Rule",
+                "name": "VerbText"
+              },
+              {
+                "Nm": "VerbText",
+                "UniqueNm": "VerbText",
+                "Properties": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "TextStyleOutput",
+                "Match": "AnyRune",
+                "Pos": "AnyPos",
+                "String": "",
+                "Offset": 0,
+                "SizeAdj": -1,
+                "Acts": [
+                  "ReadUntil"
+                ],
+                "Until": "\\",
+                "PushState": "",
+                "NameMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
+            "Token": "NameBuiltin",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "verb\\",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "VerbPipe",
+            "UniqueNm": "VerbPipe",
+            "Properties": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "cogentcore.org/core/parse/lexer.Rule",
+                "name": "VerbText"
+              },
+              {
+                "Nm": "VerbText",
+                "UniqueNm": "VerbText",
+                "Properties": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "TextStyleOutput",
+                "Match": "AnyRune",
+                "Pos": "AnyPos",
+                "String": "",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "ReadUntil"
+                ],
+                "Until": "",
+                "PushState": "",
+                "NameMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
+            "Token": "NameBuiltin",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "verb|",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "Percent",
+            "UniqueNm": "Percent",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "LitNum",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "%",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "DollarSign",
+            "UniqueNm": "DollarSign",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "LitNum",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "$",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "Ampersand",
+            "UniqueNm": "Ampersand",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "None",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "\u0026",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "LBrace",
+            "UniqueNm": "LBrace",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "None",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "{",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "RBrace",
+            "UniqueNm": "RBrace",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "None",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "}",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "AnyCmd",
+            "UniqueNm": "AnyCmd",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "NameBuiltin",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Name"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
+        "Desc": "gets command after",
+        "Token": "NameBuiltin",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "\\",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "LBraceBf",
+        "UniqueNm": "LBraceBf",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "old school..",
+        "Token": "TextStyleStrong",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "{\\bf",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "ReadUntil"
+        ],
+        "Until": "}",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "LBraceEm",
+        "UniqueNm": "LBraceEm",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "old school..",
+        "Token": "TextStyleEmph",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "{\\em",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "ReadUntil"
+        ],
+        "Until": "}",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "LBrace",
+        "UniqueNm": "LBrace",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "NameVar",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "{",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "ReadUntil"
+        ],
+        "Until": "}",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "LBrack",
+        "UniqueNm": "LBrack",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "NameAttribute",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "[",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "ReadUntil"
+        ],
+        "Until": "]",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "RBrace",
+        "UniqueNm": "RBrace",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "straggler from prior special case",
+        "Token": "NameBuiltin",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "}",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "DollarSign",
+        "UniqueNm": "DollarSign",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "LitStr",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "$",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "ReadUntil"
+        ],
+        "Until": "$",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "Ampersand",
+        "UniqueNm": "Ampersand",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "PunctSep",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "\u0026",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "Number",
+        "UniqueNm": "Number",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "LitNum",
+        "Match": "Digit",
+        "Pos": "StartOfWord",
+        "String": "",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Number"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "Quotes",
+        "UniqueNm": "Quotes",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "LitStrDouble",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "``",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "ReadUntil"
+        ],
+        "Until": "''",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "AnyText",
+        "UniqueNm": "AnyText",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "Text",
+        "Match": "AnyRune",
+        "Pos": "AnyPos",
+        "String": "",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      }
+    ],
+    "Off": false,
+    "Desc": "",
+    "Token": "None",
+    "Match": "String",
+    "Pos": "AnyPos",
+    "String": "",
+    "Offset": 0,
+    "SizeAdj": 0,
+    "Acts": null,
+    "Until": "",
+    "PushState": "",
+    "NameMap": false
+  },
+  "PassTwo": {
+    "DoEos": false,
+    "Eol": false,
+    "Semi": false,
+    "Backslash": false,
+    "RBraceEos": false,
+    "EolToks": null
+  },
+  "Parser": {
+    "Nm": "Parser",
+    "UniqueNm": "Parser",
+    "Properties": null,
+    "Kids": null,
+    "Off": false,
+    "Desc": "",
+    "Rule": "",
+    "StackMatch": "",
+    "Ast": "NoAst",
+    "Acts": null,
+    "OptTokenMap": false,
+    "FirstTokenMap": false
+  },
+  "Filename": "",
+  "ReportErrs": false
+}

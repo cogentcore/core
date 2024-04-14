@@ -12,8 +12,8 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/laser"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/units"
 )
 
@@ -33,7 +33,7 @@ const (
 // If Sides contains corners, the struct field names correspond
 // to the corners as follows: Top = top left, Right = top right,
 // Bottom = bottom right, Left = bottom left.
-type Sides[T any] struct { //gti:add
+type Sides[T any] struct { //types:add
 
 	// top/top-left value
 	Top T
@@ -185,9 +185,9 @@ func (s *Sides[T]) SetString(str string) error {
 	fields := strings.Fields(str)
 	vals := make([]T, len(fields))
 	for i, field := range fields {
-		ss, ok := any(&vals[i]).(laser.SetStringer)
+		ss, ok := any(&vals[i]).(reflectx.SetStringer)
 		if !ok {
-			err := fmt.Errorf("(Sides).SetString('%s'): to set from a string, the sides type (%T) must implement laser.SetStringer (needs SetString(str string) error function)", str, s)
+			err := fmt.Errorf("(Sides).SetString('%s'): to set from a string, the sides type (%T) must implement reflectx.SetStringer (needs SetString(str string) error function)", str, s)
 			slog.Error(err.Error())
 			return err
 		}
@@ -214,7 +214,7 @@ func SidesAreZero[T comparable](s Sides[T]) bool {
 }
 
 // SideValues contains units.Value values for each side/corner of a box
-type SideValues struct { //gti:add
+type SideValues struct { //types:add
 	Sides[units.Value]
 }
 
@@ -250,7 +250,7 @@ func (sv SideValues) Dots() SideFloats {
 }
 
 // SideFloats contains float32 values for each side/corner of a box
-type SideFloats struct { //gti:add
+type SideFloats struct { //types:add
 	Sides[float32]
 }
 
@@ -288,10 +288,10 @@ func (sf SideFloats) Sub(other SideFloats) SideFloats {
 // minimum values of the two side floats
 func (sf SideFloats) Min(other SideFloats) SideFloats {
 	return NewSideFloats(
-		mat32.Min(sf.Top, other.Top),
-		mat32.Min(sf.Right, other.Right),
-		mat32.Min(sf.Bottom, other.Bottom),
-		mat32.Min(sf.Left, other.Left),
+		math32.Min(sf.Top, other.Top),
+		math32.Min(sf.Right, other.Right),
+		math32.Min(sf.Bottom, other.Bottom),
+		math32.Min(sf.Left, other.Left),
 	)
 }
 
@@ -299,10 +299,10 @@ func (sf SideFloats) Min(other SideFloats) SideFloats {
 // maximum values of the two side floats
 func (sf SideFloats) Max(other SideFloats) SideFloats {
 	return NewSideFloats(
-		mat32.Max(sf.Top, other.Top),
-		mat32.Max(sf.Right, other.Right),
-		mat32.Max(sf.Bottom, other.Bottom),
-		mat32.Max(sf.Left, other.Left),
+		math32.Max(sf.Top, other.Top),
+		math32.Max(sf.Right, other.Right),
+		math32.Max(sf.Bottom, other.Bottom),
+		math32.Max(sf.Left, other.Left),
 	)
 }
 
@@ -310,21 +310,21 @@ func (sf SideFloats) Max(other SideFloats) SideFloats {
 // rounded to the nearest whole number.
 func (sf SideFloats) Round() SideFloats {
 	return NewSideFloats(
-		mat32.Round(sf.Top),
-		mat32.Round(sf.Right),
-		mat32.Round(sf.Bottom),
-		mat32.Round(sf.Left),
+		math32.Round(sf.Top),
+		math32.Round(sf.Right),
+		math32.Round(sf.Bottom),
+		math32.Round(sf.Left),
 	)
 }
 
 // Pos returns the position offset casued by the side/corner values (Left, Top)
-func (sf SideFloats) Pos() mat32.Vec2 {
-	return mat32.V2(sf.Left, sf.Top)
+func (sf SideFloats) Pos() math32.Vector2 {
+	return math32.Vec2(sf.Left, sf.Top)
 }
 
 // Size returns the toal size the side/corner values take up (Left + Right, Top + Bottom)
-func (sf SideFloats) Size() mat32.Vec2 {
-	return mat32.V2(sf.Left+sf.Right, sf.Top+sf.Bottom)
+func (sf SideFloats) Size() math32.Vector2 {
+	return math32.Vec2(sf.Left+sf.Right, sf.Top+sf.Bottom)
 }
 
 // ToValues returns the side floats a
@@ -339,7 +339,7 @@ func (sf SideFloats) ToValues() SideValues {
 }
 
 // SideColors contains color values for each side/corner of a box
-type SideColors struct { //gti:add
+type SideColors struct { //types:add
 	Sides[color.RGBA]
 }
 

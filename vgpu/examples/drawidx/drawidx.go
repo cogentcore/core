@@ -13,7 +13,7 @@ import (
 
 	vk "github.com/goki/vulkan"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/vgpu"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -24,9 +24,9 @@ func init() {
 }
 
 type CamView struct {
-	Model mat32.Mat4
-	View  mat32.Mat4
-	Prjn  mat32.Mat4
+	Model math32.Matrix4
+	View  math32.Matrix4
+	Prjn  math32.Matrix4
 }
 
 func main() {
@@ -45,7 +45,7 @@ func main() {
 	vgpu.Debug = true
 	gp.Config("drawidx")
 
-	// gp.PropsString(true) // print
+	// gp.PropertiesString(true) // print
 
 	surfPtr, err := window.CreateWindowSurface(gp.Instance, nil)
 	if err != nil {
@@ -83,14 +83,14 @@ func main() {
 
 	nPts := 3
 
-	posv := vset.Add("Pos", vgpu.Float32Vec3, nPts, vgpu.Vertex, vgpu.VertexShader)
-	clrv := vset.Add("Color", vgpu.Float32Vec3, nPts, vgpu.Vertex, vgpu.VertexShader)
+	posv := vset.Add("Pos", vgpu.Float32Vector3, nPts, vgpu.Vertex, vgpu.VertexShader)
+	clrv := vset.Add("Color", vgpu.Float32Vector3, nPts, vgpu.Vertex, vgpu.VertexShader)
 	// note: always put indexes last so there isn't a gap in the location indexes!
 	// just the fact of adding one (and only one) Index type triggers indexed render
 	idxv := vset.Add("Index", vgpu.Uint16, nPts, vgpu.Index, vgpu.VertexShader)
 
 	camv := set.Add("Camera", vgpu.Struct, 1, vgpu.Uniform, vgpu.VertexShader)
-	camv.SizeOf = vgpu.Float32Mat4.Bytes() * 3 // no padding for these
+	camv.SizeOf = vgpu.Float32Matrix4.Bytes() * 3 // no padding for these
 
 	vset.ConfigValues(1) // one val per var
 	set.ConfigValues(1)  // one val per var
@@ -118,12 +118,12 @@ func main() {
 
 	// This is the standard camera view projection computation
 	cam, _ := camv.Values.ValueByIndexTry(0)
-	campos := mat32.V3(0, 0, 2)
-	target := mat32.V3(0, 0, 0)
-	var lookq mat32.Quat
-	lookq.SetFromRotationMatrix(mat32.NewLookAt(campos, target, mat32.V3(0, 1, 0)))
-	scale := mat32.V3(1, 1, 1)
-	var cview mat32.Mat4
+	campos := math32.Vec3(0, 0, 2)
+	target := math32.Vec3(0, 0, 0)
+	var lookq math32.Quat
+	lookq.SetFromRotationMatrix(math32.NewLookAt(campos, target, math32.Vec3(0, 1, 0)))
+	scale := math32.Vec3(1, 1, 1)
+	var cview math32.Matrix4
 	cview.SetTransform(campos, lookq, scale)
 	view, _ := cview.Inverse()
 

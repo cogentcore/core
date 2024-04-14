@@ -9,12 +9,12 @@ import (
 	"image/color"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/units"
 )
 
 // Paint provides the styling parameters for SVG-style rendering
-type Paint struct { //gti:add
+type Paint struct { //types:add
 
 	// prop: display:none -- node and everything below it are off, non-rendering
 	Off bool
@@ -38,7 +38,7 @@ type Paint struct { //gti:add
 	VectorEffect VectorEffects
 
 	// our additions to transform -- pushed to render state
-	Transform mat32.Mat2
+	Transform math32.Matrix2
 
 	// unit context -- parameters necessary for anchoring relative units
 	UnitContext units.Context
@@ -46,9 +46,9 @@ type Paint struct { //gti:add
 	// have the styles already been set?
 	StyleSet bool
 
-	PropsNil   bool
-	dotsSet    bool
-	lastUnCtxt units.Context
+	PropertiesNil bool
+	dotsSet       bool
+	lastUnCtxt    units.Context
 }
 
 func (pc *Paint) Defaults() {
@@ -59,7 +59,7 @@ func (pc *Paint) Defaults() {
 	pc.FillStyle.Defaults()
 	pc.FontStyle.Defaults()
 	pc.TextStyle.Defaults()
-	pc.Transform = mat32.Identity2()
+	pc.Transform = math32.Identity2()
 }
 
 // CopyStyleFrom copies styles from another paint
@@ -80,16 +80,16 @@ func (pc *Paint) InheritFields(parent *Paint) {
 	pc.TextStyle.InheritFields(&parent.TextStyle)
 }
 
-// SetStyleProps sets paint values based on given property map (name: value
+// SetStyleProperties sets paint values based on given property map (name: value
 // pairs), inheriting elements as appropriate from parent, and also having a
 // default style for the "initial" setting
-func (pc *Paint) SetStyleProps(parent *Paint, props map[string]any, ctxt colors.Context) {
+func (pc *Paint) SetStyleProperties(parent *Paint, properties map[string]any, ctxt colors.Context) {
 	if !pc.StyleSet && parent != nil { // first time
 		pc.InheritFields(parent)
 	}
-	pc.StyleFromProps(parent, props, ctxt)
+	pc.StyleFromProperties(parent, properties, ctxt)
 
-	pc.PropsNil = (len(props) == 0)
+	pc.PropertiesNil = (len(properties) == 0)
 	pc.StyleSet = true
 }
 
@@ -124,7 +124,7 @@ func (pc *Paint) SetUnitContextExt(size image.Point) {
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
 func (pc *Paint) ToDots() {
-	if !(pc.dotsSet && pc.UnitContext == pc.lastUnCtxt && pc.PropsNil) {
+	if !(pc.dotsSet && pc.UnitContext == pc.lastUnCtxt && pc.PropertiesNil) {
 		pc.ToDotsImpl(&pc.UnitContext)
 		pc.dotsSet = true
 		pc.lastUnCtxt = pc.UnitContext

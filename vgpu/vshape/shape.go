@@ -4,7 +4,7 @@
 
 package vshape
 
-import "cogentcore.org/core/mat32"
+import "cogentcore.org/core/math32"
 
 // Shape is an interface for all shape-constructing elements
 type Shape interface {
@@ -20,11 +20,11 @@ type Shape interface {
 	SetOffs(vtxOff, idxOff int)
 
 	// Set sets points in given allocated arrays
-	Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32)
+	Set(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32)
 
 	// BBox returns the bounding box for the shape, typically centered around 0
 	// This is only valid after Set has been called.
-	BBox() mat32.Box3
+	BBox() math32.Box3
 }
 
 // ShapeBase is the base shape element
@@ -37,10 +37,10 @@ type ShapeBase struct {
 	IndexOff int
 
 	// cubic bounding box in local coords
-	CBBox mat32.Box3
+	CBBox math32.Box3
 
 	// all shapes take a 3D position offset to enable composition
-	Pos mat32.Vec3
+	Pos math32.Vector3
 }
 
 // Offs returns starting offset for verticies, indexes in full shape array,
@@ -57,12 +57,12 @@ func (sb *ShapeBase) SetOffs(vtxOff, idxOff int) {
 
 // BBox returns the bounding box for the shape, typically centered around 0
 // This is only valid after Set has been called.
-func (sb *ShapeBase) BBox() mat32.Box3 {
+func (sb *ShapeBase) BBox() math32.Box3 {
 	return sb.CBBox
 }
 
 // SetColor sets color for given range of vertex indexes
-func SetColor(clrAry mat32.ArrayF32, vtxOff int, nvtxs int, clr mat32.Vec4) {
+func SetColor(clrAry math32.ArrayF32, vtxOff int, nvtxs int, clr math32.Vector4) {
 	cidx := vtxOff * 4
 	for vi := 0; vi < nvtxs; vi++ {
 		clr.ToArray(clrAry, cidx+vi*4)
@@ -70,10 +70,10 @@ func SetColor(clrAry mat32.ArrayF32, vtxOff int, nvtxs int, clr mat32.Vec4) {
 }
 
 // BBoxFromVtxs returns the bounding box updated from the range of vertex points
-func BBoxFromVtxs(vtxAry mat32.ArrayF32, vtxOff int, nvtxs int) mat32.Box3 {
-	bb := mat32.B3Empty()
+func BBoxFromVtxs(vtxAry math32.ArrayF32, vtxOff int, nvtxs int) math32.Box3 {
+	bb := math32.B3Empty()
 	vidx := vtxOff * 3
-	var vtx mat32.Vec3
+	var vtx math32.Vector3
 	for vi := 0; vi < nvtxs; vi++ {
 		vtx.FromArray(vtxAry, vidx+vi*3)
 		bb.ExpandByPoint(vtx)

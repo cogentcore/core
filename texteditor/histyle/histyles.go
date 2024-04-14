@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"sort"
 
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/pi"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/parse"
 )
 
 //go:embed defaults.histys
@@ -33,14 +33,14 @@ var CustomStyles = Styles{}
 var AvailableStyles Styles
 
 // StyleDefault is the default highlighting style name -- can set this to whatever you want
-var StyleDefault = gi.HiStyleName("emacs")
+var StyleDefault = core.HiStyleName("emacs")
 
 // StyleNames are all the names of all the available highlighting styles
 var StyleNames []string
 
 // AvailableStyle returns a style by name from the AvailStyles list -- if not found
 // default is used as a fallback
-func AvailableStyle(nm gi.HiStyleName) *Style {
+func AvailableStyle(nm core.HiStyleName) *Style {
 	if AvailableStyles == nil {
 		Init()
 	}
@@ -78,7 +78,7 @@ func MergeAvailStyles() {
 
 // Open hi styles from a JSON-formatted file. You can save and open
 // styles to / from files to share, experiment, transfer, etc.
-func (hs *Styles) OpenJSON(filename gi.Filename) error { //gti:add
+func (hs *Styles) OpenJSON(filename core.Filename) error { //types:add
 	b, err := os.ReadFile(string(filename))
 	if err != nil {
 		// PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
@@ -90,7 +90,7 @@ func (hs *Styles) OpenJSON(filename gi.Filename) error { //gti:add
 
 // Save hi styles to a JSON-formatted file. You can save and open
 // styles to / from files to share, experiment, transfer, etc.
-func (hs *Styles) SaveJSON(filename gi.Filename) error { //gti:add
+func (hs *Styles) SaveJSON(filename core.Filename) error { //types:add
 	b, err := json.MarshalIndent(hs, "", "  ")
 	if err != nil {
 		slog.Error(err.Error()) // unlikely
@@ -113,26 +113,26 @@ var StylesChanged = false
 
 // OpenSettings opens Styles from Cogent Core standard prefs directory, using SettingsStylesFilename
 func (hs *Styles) OpenSettings() error {
-	pdir := gi.TheApp.CogentCoreDataDir()
+	pdir := core.TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, SettingsStylesFilename)
 	StylesChanged = false
-	return hs.OpenJSON(gi.Filename(pnm))
+	return hs.OpenJSON(core.Filename(pnm))
 }
 
 // SaveSettings saves Styles to Cogent Core standard prefs directory, using SettingsStylesFilename
 func (hs *Styles) SaveSettings() error {
-	pdir := gi.TheApp.CogentCoreDataDir()
+	pdir := core.TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, SettingsStylesFilename)
 	StylesChanged = false
 	MergeAvailStyles()
-	return hs.SaveJSON(gi.Filename(pnm))
+	return hs.SaveJSON(core.Filename(pnm))
 }
 
 // SaveAll saves all styles individually to chosen directory
-func (hs *Styles) SaveAll(dir gi.Filename) {
+func (hs *Styles) SaveAll(dir core.Filename) {
 	for nm, st := range *hs {
 		fnm := filepath.Join(string(dir), nm+".histy")
-		st.SaveJSON(gi.Filename(fnm))
+		st.SaveJSON(core.Filename(fnm))
 	}
 }
 
@@ -168,7 +168,7 @@ func (hs *Styles) ViewStandard() {
 // Init must be called to initialize the hi styles -- post startup
 // so chroma stuff is all in place, and loads custom styles
 func Init() {
-	pi.LangSupport.OpenStandard()
+	parse.LangSupport.OpenStandard()
 	StandardStyles.OpenDefaults()
 	CustomStyles.OpenSettings()
 	if len(CustomStyles) == 0 {

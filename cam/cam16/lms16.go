@@ -5,7 +5,7 @@
 package cam16
 
 import (
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // XYZToLMS converts XYZ to Long, Medium, Short cone-based responses,
@@ -35,14 +35,14 @@ func LMSToXYZ(l, m, s float32) (x, y, z float32) {
 // fl = luminance adaptation factor
 func LuminanceAdaptComp(v, d, fl float32) float32 {
 	vd := v * d
-	f := mat32.Pow((fl*mat32.Abs(vd))/100, 0.42)
-	return (mat32.Sign(vd) * 400 * f) / (f + 27.13)
+	f := math32.Pow((fl*math32.Abs(vd))/100, 0.42)
+	return (math32.Sign(vd) * 400 * f) / (f + 27.13)
 }
 
 func InverseChromaticAdapt(adapted float32) float32 {
-	adaptedAbs := mat32.Abs(adapted)
-	base := mat32.Max(0, 27.13*adaptedAbs/(400.0-adaptedAbs))
-	return mat32.Sign(adapted) * mat32.Pow(base, 1.0/0.42)
+	adaptedAbs := math32.Abs(adapted)
+	base := math32.Max(0, 27.13*adaptedAbs/(400.0-adaptedAbs))
+	return math32.Sign(adapted) * math32.Pow(base, 1.0/0.42)
 }
 
 // LuminanceAdapt performs luminance adaptation

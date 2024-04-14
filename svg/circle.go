@@ -5,7 +5,7 @@
 package svg
 
 import (
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Circle is a SVG circle
@@ -13,7 +13,7 @@ type Circle struct {
 	NodeBase
 
 	// position of the center of the circle
-	Pos mat32.Vec2 `xml:"{cx,cy}"`
+	Pos math32.Vector2 `xml:"{cx,cy}"`
 
 	// radius of the circle
 	Radius float32 `xml:"r"`
@@ -25,16 +25,16 @@ func (g *Circle) OnInit() {
 	g.Radius = 1
 }
 
-func (g *Circle) SetNodePos(pos mat32.Vec2) {
+func (g *Circle) SetNodePos(pos math32.Vector2) {
 	g.Pos = pos.SubScalar(g.Radius)
 }
 
-func (g *Circle) SetNodeSize(sz mat32.Vec2) {
+func (g *Circle) SetNodeSize(sz math32.Vector2) {
 	g.Radius = 0.25 * (sz.X + sz.Y)
 }
 
-func (g *Circle) LocalBBox() mat32.Box2 {
-	bb := mat32.Box2{}
+func (g *Circle) LocalBBox() math32.Box2 {
+	bb := math32.Box2{}
 	hlw := 0.5 * g.LocalLineWidth()
 	bb.Min = g.Pos.SubScalar(g.Radius + hlw)
 	bb.Max = g.Pos.AddScalar(g.Radius + hlw)
@@ -57,13 +57,13 @@ func (g *Circle) Render(sv *SVG) {
 
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Circle) ApplyTransform(sv *SVG, xf mat32.Mat2) {
+func (g *Circle) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	rot := xf.ExtractRot()
 	if rot != 0 || !g.Paint.Transform.IsIdentity() {
 		g.Paint.Transform.SetMul(xf) // todo: could be backward
-		g.SetProp("transform", g.Paint.Transform.String())
+		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
-		g.Pos = xf.MulVec2AsPoint(g.Pos)
+		g.Pos = xf.MulVector2AsPoint(g.Pos)
 		scx, scy := xf.ExtractScale()
 		g.Radius *= 0.5 * (scx + scy)
 		g.GradientApplyTransform(sv, xf)
@@ -75,15 +75,15 @@ func (g *Circle) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Circle) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+func (g *Circle) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
 		g.Paint.Transform.SetMulCenter(xf, lpt)
-		g.SetProp("transform", g.Paint.Transform.String())
+		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
-		g.Pos = xf.MulVec2AsPointCenter(g.Pos, lpt)
+		g.Pos = xf.MulVector2AsPointCenter(g.Pos, lpt)
 		scx, scy := xf.ExtractScale()
 		g.Radius *= 0.5 * (scx + scy)
 		g.GradientApplyTransformPt(sv, xf, lpt)

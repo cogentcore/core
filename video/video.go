@@ -14,8 +14,8 @@ import (
 	"image/draw"
 	"time"
 
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/goosi"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/system"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
 	"github.com/zergon321/reisen"
@@ -24,9 +24,9 @@ import (
 // Video represents a video playback widget without any controls.
 // See [Player] for a version with controls.
 //
-//gti:add
+//types:add
 type Video struct {
-	gi.WidgetBase
+	core.WidgetBase
 
 	// Media is the video media.
 	Media *reisen.Media
@@ -63,7 +63,7 @@ func (v *Video) Destroy() {
 }
 
 // DirectRenderImage uploads the current view frame directly into the drawer
-func (v *Video) DirectRenderImage(drw goosi.Drawer, idx int) {
+func (v *Video) DirectRenderImage(drw system.Drawer, idx int) {
 	if !v.IsVisible() {
 		return
 	}
@@ -76,11 +76,11 @@ func (v *Video) DirectRenderImage(drw goosi.Drawer, idx int) {
 		return
 	}
 	v.framePlayed++
-	drw.SetGoImage(idx, 0, frame, goosi.NoFlipY)
+	drw.SetGoImage(idx, 0, frame, system.NoFlipY)
 }
 
 // DirectRenderDraw draws the current image to RenderWin drawer
-func (v *Video) DirectRenderDraw(drw goosi.Drawer, idx int, flipY bool) {
+func (v *Video) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 	if !v.IsVisible() {
 		return
 	}

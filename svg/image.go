@@ -9,8 +9,8 @@ import (
 	"image"
 	"log"
 
-	"cogentcore.org/core/grows/images"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/iox/imagex"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
@@ -21,10 +21,10 @@ type Image struct {
 	NodeBase
 
 	// position of the top-left of the image
-	Pos mat32.Vec2 `xml:"{x,y}"`
+	Pos math32.Vector2 `xml:"{x,y}"`
 
 	// rendered size of the image (imposes a scaling on image when it is rendered)
-	Size mat32.Vec2 `xml:"{width,height}"`
+	Size math32.Vector2 `xml:"{width,height}"`
 
 	// file name of image loaded -- set by OpenImage
 	Filename string
@@ -38,11 +38,11 @@ type Image struct {
 
 func (g *Image) SVGName() string { return "image" }
 
-func (g *Image) SetNodePos(pos mat32.Vec2) {
+func (g *Image) SetNodePos(pos math32.Vector2) {
 	g.Pos = pos
 }
 
-func (g *Image) SetNodeSize(sz mat32.Vec2) {
+func (g *Image) SetNodeSize(sz math32.Vector2) {
 	g.Size = sz
 }
 
@@ -68,7 +68,7 @@ func (g *Image) SetImage(img image.Image, width, height float32) {
 		g.SetImageSize(sz)
 		draw.Draw(g.Pixels, g.Pixels.Bounds(), img, image.Point{}, draw.Src)
 		if g.Size.X == 0 && g.Size.Y == 0 {
-			g.Size = mat32.V2FromPoint(sz)
+			g.Size = math32.Vector2FromPoint(sz)
 		}
 	} else {
 		tsz := sz
@@ -84,11 +84,11 @@ func (g *Image) SetImage(img image.Image, width, height float32) {
 			tsz.Y = int(height)
 		}
 		g.SetImageSize(tsz)
-		m := mat32.Scale2D(scx, scy)
+		m := math32.Scale2D(scx, scy)
 		s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 		transformer.Transform(g.Pixels, s2d, img, img.Bounds(), draw.Over, nil)
 		if g.Size.X == 0 && g.Size.Y == 0 {
-			g.Size = mat32.V2FromPoint(tsz)
+			g.Size = math32.Vector2FromPoint(tsz)
 		}
 	}
 }
@@ -104,15 +104,15 @@ func (g *Image) DrawImage(sv *SVG) {
 
 func (g *Image) NodeBBox(sv *SVG) image.Rectangle {
 	rs := &sv.RenderState
-	pos := rs.CurrentTransform.MulVec2AsPoint(g.Pos)
-	max := rs.CurrentTransform.MulVec2AsPoint(g.Pos.Add(g.Size))
+	pos := rs.CurrentTransform.MulVector2AsPoint(g.Pos)
+	max := rs.CurrentTransform.MulVector2AsPoint(g.Pos.Add(g.Size))
 	posi := pos.ToPointCeil()
 	maxi := max.ToPointCeil()
 	return image.Rectangle{posi, maxi}.Canon()
 }
 
-func (g *Image) LocalBBox() mat32.Box2 {
-	bb := mat32.Box2{}
+func (g *Image) LocalBBox() math32.Box2 {
+	bb := math32.Box2{}
 	bb.Min = g.Pos
 	bb.Max = g.Pos.Add(g.Size)
 	return bb
@@ -131,14 +131,14 @@ func (g *Image) Render(sv *SVG) {
 
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Image) ApplyTransform(sv *SVG, xf mat32.Mat2) {
+func (g *Image) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	rot := xf.ExtractRot()
 	if rot != 0 || !g.Paint.Transform.IsIdentity() {
 		g.Paint.Transform.SetMul(xf)
-		g.SetProp("transform", g.Paint.Transform.String())
+		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
-		g.Pos = xf.MulVec2AsPoint(g.Pos)
-		g.Size = xf.MulVec2AsVec(g.Size)
+		g.Pos = xf.MulVector2AsPoint(g.Pos)
+		g.Size = xf.MulVector2AsVector(g.Size)
 	}
 }
 
@@ -147,16 +147,16 @@ func (g *Image) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Image) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+func (g *Image) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
 		g.Paint.Transform.SetMulCenter(xf, lpt)
-		g.SetProp("transform", g.Paint.Transform.String())
+		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
-		g.Pos = xf.MulVec2AsPointCenter(g.Pos, lpt)
-		g.Size = xf.MulVec2AsVec(g.Size)
+		g.Pos = xf.MulVector2AsPointCenter(g.Pos, lpt)
+		g.Size = xf.MulVector2AsVector(g.Size)
 	}
 }
 
@@ -186,7 +186,7 @@ func (g *Image) ReadGeom(sv *SVG, dat []float32) {
 // or the specified size -- pass 0 for width and/or height to use the actual image size
 // for that dimension
 func (g *Image) OpenImage(filename string, width, height float32) error {
-	img, _, err := images.Open(filename)
+	img, _, err := imagex.Open(filename)
 	if err != nil {
 		log.Printf("svg.OpenImage -- could not open file: %v, err: %v\n", filename, err)
 		return err
@@ -201,5 +201,5 @@ func (g *Image) SaveImage(filename string) error {
 	if g.Pixels == nil {
 		return errors.New("svg.SaveImage Pixels is nil")
 	}
-	return images.Save(g.Pixels, filename)
+	return imagex.Save(g.Pixels, filename)
 }

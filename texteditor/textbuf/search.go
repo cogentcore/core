@@ -13,8 +13,8 @@ import (
 	"regexp"
 	"unicode/utf8"
 
-	"cogentcore.org/core/glop/runes"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/gox/runes"
+	"cogentcore.org/core/parse/lexer"
 )
 
 // Match records one match for search within file, positions in runes
@@ -105,7 +105,7 @@ func SearchRuneLines(src [][]rune, find []byte, ignoreCase bool) (int, []Match) 
 // as entire lexically tagged items,
 // with given case-sensitivity returning number of occurrences
 // and specific match position list.  Column positions are in runes.
-func SearchLexItems(src [][]rune, lexs []lex.Line, find []byte, ignoreCase bool) (int, []Match) {
+func SearchLexItems(src [][]rune, lexs []lexer.Line, find []byte, ignoreCase bool) (int, []Match) {
 	fr := bytes.Runes(find)
 	fsz := len(fr)
 	if fsz == 0 {
@@ -179,7 +179,7 @@ func Search(reader io.Reader, find []byte, ignoreCase bool) (int, []Match) {
 	if err := scan.Err(); err != nil {
 		// note: we expect: bufio.Scanner: token too long  when reading binary files
 		// not worth printing here.  otherwise is very reliable.
-		// log.Printf("giv.FileSearch error: %v\n", err)
+		// log.Printf("views.FileSearch error: %v\n", err)
 	}
 	return cnt, matches
 }
@@ -234,7 +234,7 @@ func SearchRegexp(reader io.Reader, re *regexp.Regexp) (int, []Match) {
 	if err := scan.Err(); err != nil {
 		// note: we expect: bufio.Scanner: token too long  when reading binary files
 		// not worth printing here.  otherwise is very reliable.
-		// log.Printf("giv.FileSearch error: %v\n", err)
+		// log.Printf("views.FileSearch error: %v\n", err)
 	}
 	return cnt, matches
 }

@@ -12,8 +12,8 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/grows/images"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/iox/imagex"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 	"github.com/stretchr/testify/assert"
@@ -25,21 +25,21 @@ func TestMain(m *testing.M) {
 }
 
 // RunTest makes a rendering state, paint, and image with the given size, calls the given
-// function, and then asserts the image using [images.Assert] with the given name.
+// function, and then asserts the image using [imagex.Assert] with the given name.
 func RunTest(t *testing.T, nm string, width int, height int, f func(pc *Context)) {
 	pc := NewContext(width, height)
 	pc.PushBounds(pc.Image.Rect)
 	f(pc)
-	images.Assert(t, pc.Image, nm)
+	imagex.Assert(t, pc.Image, nm)
 }
 
 func TestRender(t *testing.T) {
 	RunTest(t, "render", 300, 300, func(pc *Context) {
-		testimg, _, err := images.Open("test.png")
+		testimg, _, err := imagex.Open("test.png")
 		assert.NoError(t, err)
 		imgs := []image.Image{
 			colors.C(colors.Blue),
-			gradient.NewLinear().AddStop(colors.Orange, 0).AddStop(colors.Red, 1).SetTransform(mat32.Rotate2D(90)),
+			gradient.NewLinear().AddStop(colors.Orange, 0).AddStop(colors.Red, 1).SetTransform(math32.Rotate2D(90)),
 			gradient.NewRadial().AddStop(colors.Green, 0).AddStop(colors.Blue, 0.6, 0.4).AddStop(colors.Purple, 0.9, 0.8),
 			testimg,
 		}
@@ -79,19 +79,19 @@ func TestRender(t *testing.T) {
 		txt := &Text{}
 		txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnitContext, nil)
 
-		tsz := txt.Layout(tsty, fsty, &pc.UnitContext, mat32.V2(100, 40))
+		tsz := txt.Layout(tsty, fsty, &pc.UnitContext, math32.Vec2(100, 40))
 		if tsz.X != 100 || tsz.Y != 40 {
 			t.Errorf("unexpected text size: %v", tsz)
 		}
 
-		txt.Render(pc, mat32.V2(85, 80))
+		txt.Render(pc, math32.Vec2(85, 80))
 	})
 }
 
 func TestPaintPath(t *testing.T) {
 	test := func(nm string, f func(pc *Context)) {
 		RunTest(t, nm, 300, 300, func(pc *Context) {
-			pc.FillBox(mat32.Vec2{}, mat32.V2(300, 300), colors.C(colors.White))
+			pc.FillBox(math32.Vector2{}, math32.Vec2(300, 300), colors.C(colors.White))
 			f(pc)
 			pc.StrokeStyle.Color = colors.C(colors.Blue)
 			pc.FillStyle.Color = colors.C(colors.Yellow)
@@ -131,31 +131,31 @@ func TestPaintFill(t *testing.T) {
 		})
 	}
 	test("fill-box-color", func(pc *Context) {
-		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), colors.C(colors.Green))
+		pc.FillBox(math32.Vec2(10, 100), math32.Vec2(200, 100), colors.C(colors.Green))
 	})
 	test("fill-box-solid", func(pc *Context) {
-		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), colors.C(colors.Blue))
+		pc.FillBox(math32.Vec2(10, 100), math32.Vec2(200, 100), colors.C(colors.Blue))
 	})
 	test("fill-box-linear-gradient-black-white", func(pc *Context) {
 		g := gradient.NewLinear().AddStop(colors.Black, 0).AddStop(colors.White, 1)
-		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
+		pc.FillBox(math32.Vec2(10, 100), math32.Vec2(200, 100), g)
 	})
 	test("fill-box-linear-gradient-red-green", func(pc *Context) {
 		g := gradient.NewLinear().AddStop(colors.Red, 0).AddStop(colors.Limegreen, 1)
-		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
+		pc.FillBox(math32.Vec2(10, 100), math32.Vec2(200, 100), g)
 	})
 	test("fill-box-linear-gradient-red-yellow-green", func(pc *Context) {
 		g := gradient.NewLinear().AddStop(colors.Red, 0).AddStop(colors.Yellow, 0.3).AddStop(colors.Green, 1)
-		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
+		pc.FillBox(math32.Vec2(10, 100), math32.Vec2(200, 100), g)
 	})
 	test("fill-box-radial-gradient", func(pc *Context) {
 		g := gradient.NewRadial().AddStop(colors.ApplyOpacity(colors.Green, 0.5), 0).AddStop(colors.Blue, 0.6).
 			AddStop(colors.ApplyOpacity(colors.Purple, 0.3), 1)
-		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), g)
+		pc.FillBox(math32.Vec2(10, 100), math32.Vec2(200, 100), g)
 	})
 	test("blur-box", func(pc *Context) {
-		pc.FillBox(mat32.V2(10, 100), mat32.V2(200, 100), colors.C(colors.Green))
-		pc.BlurBox(mat32.V2(0, 50), mat32.V2(300, 200), 10)
+		pc.FillBox(math32.Vec2(10, 100), math32.Vec2(200, 100), colors.C(colors.Green))
+		pc.BlurBox(math32.Vec2(0, 50), math32.Vec2(300, 200), 10)
 	})
 
 	test("fill", func(pc *Context) {

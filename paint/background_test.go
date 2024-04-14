@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/grows/images"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/iox/imagex"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"github.com/stretchr/testify/assert"
 )
@@ -22,13 +22,13 @@ func TestBackgroundColor(t *testing.T) {
 		st.ComputeActualBackground(pabg)
 		st.ToDots()
 
-		sz := st.BoxSpace().Size().Add(mat32.V2(200, 100))
-		pc.DrawStandardBox(st, mat32.V2(50, 100), sz, pabg)
+		sz := st.BoxSpace().Size().Add(math32.Vec2(200, 100))
+		pc.DrawStandardBox(st, math32.Vec2(50, 100), sz, pabg)
 	})
 }
 
 func TestBackgroundImage(t *testing.T) {
-	img, _, err := images.Open("test.png")
+	img, _, err := imagex.Open("test.png")
 	assert.NoError(t, err)
 	RunTest(t, "background-image", 1260, 200, func(pc *Context) {
 		pabg := colors.C(colors.White)
@@ -37,31 +37,31 @@ func TestBackgroundImage(t *testing.T) {
 		st.ComputeActualBackground(pabg)
 		st.ToDots()
 
-		sz := st.BoxSpace().Size().Add(mat32.V2(200, 100))
+		sz := st.BoxSpace().Size().Add(math32.Vec2(200, 100))
 
-		test := func(of styles.ObjectFits, pos mat32.Vec2) {
+		test := func(of styles.ObjectFits, pos math32.Vector2) {
 			st.ObjectFit = of
 			pc.DrawStandardBox(st, pos, sz, pabg)
 		}
 
-		test(styles.FitFill, mat32.V2(0, 0))
-		test(styles.FitContain, mat32.V2(220, 0))
-		test(styles.FitCover, mat32.V2(440, 0))
-		test(styles.FitScaleDown, mat32.V2(660, 0))
-		test(styles.FitNone, mat32.V2(880, 0))
+		test(styles.FitFill, math32.Vec2(0, 0))
+		test(styles.FitContain, math32.Vec2(220, 0))
+		test(styles.FitCover, math32.Vec2(440, 0))
+		test(styles.FitScaleDown, math32.Vec2(660, 0))
+		test(styles.FitNone, math32.Vec2(880, 0))
 	})
 }
 
 func TestObjectFit(t *testing.T) {
-	img, _, err := images.Open("test.png")
-	// obj := mat32.V2FromPoint(img.Bounds().Size())
+	img, _, err := imagex.Open("test.png")
+	// obj := math32.Vector2FromPoint(img.Bounds().Size())
 	assert.NoError(t, err)
 	RunTest(t, "object-fit", 1260, 300, func(pc *Context) {
 		st := styles.NewStyle()
 		st.ToDots()
-		box := mat32.V2(200, 100)
+		box := math32.Vec2(200, 100)
 
-		test := func(of styles.ObjectFits, pos mat32.Vec2) {
+		test := func(of styles.ObjectFits, pos math32.Vector2) {
 			st.ObjectFit = of
 			fitimg := st.ResizeImage(img, box)
 			pc.DrawImage(fitimg, pos.X, pos.Y)
@@ -69,10 +69,10 @@ func TestObjectFit(t *testing.T) {
 			// fmt.Println(of, trgsz)
 		}
 
-		test(styles.FitFill, mat32.V2(0, 0))
-		test(styles.FitContain, mat32.V2(220, 0))
-		test(styles.FitCover, mat32.V2(440, 0))
-		test(styles.FitScaleDown, mat32.V2(660, 0))
-		test(styles.FitNone, mat32.V2(880, 0))
+		test(styles.FitFill, math32.Vec2(0, 0))
+		test(styles.FitContain, math32.Vec2(220, 0))
+		test(styles.FitCover, math32.Vec2(440, 0))
+		test(styles.FitScaleDown, math32.Vec2(660, 0))
+		test(styles.FitNone, math32.Vec2(880, 0))
 	})
 }

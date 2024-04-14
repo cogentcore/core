@@ -5,19 +5,19 @@ Cogent Core provides more than 2,000 unique icons from the Material Symbols coll
 Icons are specified using their named constant in the [[icons]] package, and they are typically used in the context of another widget, like a button:
 
 ```Go
-gi.NewButton(parent).SetIcon(icons.Send)
+core.NewButton(parent).SetIcon(icons.Send)
 ```
 
 However, you can also make a standalone icon widget:
 
 ```Go
-gi.NewIcon(parent).SetIcon(icons.Home)
+core.NewIcon(parent).SetIcon(icons.Home)
 ```
 
 You can convert an icon into its filled version:
 
 ```Go
-gi.NewButton(parent).SetIcon(icons.Home.Fill())
+core.NewButton(parent).SetIcon(icons.Home.Fill())
 ```
 
 ## Custom icons
@@ -29,14 +29,14 @@ You can add custom icons to your app using [[icons.AddFS]]:
 var myIcons embed.FS
 
 func main() { // or init()
-    icons.AddFS(grr.Log1(fs.Sub(myIcons, "icons")))
+    icons.AddFS(errors.Log1(fs.Sub(myIcons, "icons")))
 }
 ```
 
 Then, you can just use the string name of one of your icons, without the .svg extension, to specify your icon:
 
 ```go
-gi.NewButton(parent).SetIcon("my-icon-name")
+core.NewButton(parent).SetIcon("my-icon-name")
 ```
 
 Although only SVG files are supported for icons, you can easily embed a bitmap image file in an SVG file. Cogent Core provides an `svg` command line tool that can do this for you. To install it, run:

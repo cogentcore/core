@@ -10,14 +10,14 @@ import (
 	"path/filepath"
 	"strings"
 
+	"cogentcore.org/core/cli"
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/grease"
 	"cogentcore.org/core/svg"
 )
 
-func main() { //gti:skip
-	opts := grease.DefaultOptions("svg", "svg", "Command line tools for rendering and creating svg files")
-	grease.Run(opts, &Config{}, Render, EmbedImage)
+func main() { //types:skip
+	opts := cli.DefaultOptions("svg", "Command line tools for rendering and creating svg files")
+	cli.Run(opts, &Config{}, Render, EmbedImage)
 }
 
 type Config struct {
@@ -48,7 +48,7 @@ type RenderConfig struct {
 
 // Render renders the input svg file to the output image file.
 //
-//grease:cmd -root
+//cli:cmd -root
 func Render(c *Config) error {
 	if c.Render.Height == 0 {
 		c.Render.Height = c.Render.Width
@@ -89,7 +89,7 @@ func EmbedImage(c *Config) error {
 }
 
 // ApplyFill applies [Config.Fill] to the given [svg.SVG].
-func ApplyFill(c *Config, sv *svg.SVG) error { //gti:skip
+func ApplyFill(c *Config, sv *svg.SVG) error { //types:skip
 	if c.Fill == "" {
 		return nil
 	}

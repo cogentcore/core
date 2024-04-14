@@ -21,7 +21,7 @@ import (
 // marking events as processed, which is critical for simplifying logic and
 // preventing unintended multiple effects
 //
-// Goosi deals exclusively in raw "dot" pixel integer coordinates (as in
+// System deals exclusively in raw "dot" pixel integer coordinates (as in
 // go.wde) -- abstraction to different DPI etc takes place higher up in the
 // system
 
@@ -45,7 +45,7 @@ import (
    limitations under the License.
 */
 
-// Event is the interface for goosi GUI events.  also includes Stringer
+// Event is the interface for system GUI events.  also includes Stringer
 // to get a string description of the event
 type Event interface {
 	fmt.Stringer

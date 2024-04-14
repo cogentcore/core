@@ -8,7 +8,7 @@ import (
 	"slices"
 	"time"
 
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/parse/lexer"
 )
 
 // Edit describes an edit action to a buffer -- this is the data passed
@@ -102,7 +102,7 @@ func (te *Edit) CopyFrom(cp *Edit) {
 // AdjustPos adjusts the given text position as a function of the edit.
 // if the position was within a deleted region of text, del determines
 // what is returned
-func (te *Edit) AdjustPos(pos lex.Pos, del AdjustPosDel) lex.Pos {
+func (te *Edit) AdjustPos(pos lexer.Pos, del AdjustPosDel) lexer.Pos {
 	if te == nil {
 		return pos
 	}
@@ -126,7 +126,7 @@ func (te *Edit) AdjustPos(pos lex.Pos, del AdjustPosDel) lex.Pos {
 			case AdjustPosDelEnd:
 				return te.Reg.End
 			case AdjustPosDelErr:
-				return lex.PosErr
+				return lexer.PosErr
 			}
 		}
 		// this means pos.Ln == te.Reg.End.Ln, Ch >= end
@@ -149,7 +149,7 @@ func (te *Edit) AdjustPos(pos lex.Pos, del AdjustPosDel) lex.Pos {
 // it adjusts the given text position as a function of the edit
 // del determines what to do with positions within a deleted region
 // either move to start or end of the region, or return an error.
-func (te *Edit) AdjustPosIfAfterTime(pos lex.Pos, t time.Time, del AdjustPosDel) lex.Pos {
+func (te *Edit) AdjustPosIfAfterTime(pos lexer.Pos, t time.Time, del AdjustPosDel) lexer.Pos {
 	if te == nil {
 		return pos
 	}

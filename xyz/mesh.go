@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"sync"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/vgpu/vshape"
 )
 
@@ -42,20 +42,20 @@ type Mesh interface {
 	// Set sets the mesh points into given arrays, which have been allocated
 	// according to the Sizes() returned by this Mesh.
 	// The mesh is automatically marked with SetMod so that does not need to be done here.
-	Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32)
+	Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32)
 
 	// Update updates the mesh points into given arrays, which have previously
 	// been set with SetVerticies -- this can optimize by only updating whatever might
 	// need to be updated for dynamically changing meshes.
 	// You must call SetMod if the mesh was actually updated at this point.
-	Update(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32)
+	Update(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32)
 
 	// SetMod flags that the mesh data has been modified and will be sync'd
 	// at next sync of the Scene.Phong render system.
 	SetMod(sc *Scene)
 
 	// ComputeNorms automatically computes the normals from existing vertex data
-	ComputeNorms(pos, norm mat32.ArrayF32)
+	ComputeNorms(pos, norm math32.ArrayF32)
 
 	// HasColor returns true if this mesh has vertex-specific colors available
 	HasColor() bool
@@ -66,18 +66,18 @@ type Mesh interface {
 }
 
 // MeshBase provides the core implementation of Mesh interface
-type MeshBase struct { //gti:add -setters
+type MeshBase struct { //types:add -setters
 
 	// name of mesh -- meshes are linked to Solids by name so this matters
 	Nm string `set:"-"`
 
-	// number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates -- only valid after Sizes() has been called
+	// number of vertex points, as math32.Vector3 -- always includes math32.Vector3 normals and math32.Vector2 texture coordinates -- only valid after Sizes() has been called
 	NVtx int `set:"-"`
 
-	// number of indexes, as mat32.ArrayU32 -- only valid after Sizes() has been called
+	// number of indexes, as math32.ArrayU32 -- only valid after Sizes() has been called
 	NIndex int `set:"-"`
 
-	// has per-vertex colors, as mat32.Vec4 per vertex
+	// has per-vertex colors, as math32.Vector4 per vertex
 	Color bool
 
 	// if true, this mesh changes frequently -- otherwise considered to be static
@@ -106,7 +106,7 @@ func (ms *MeshBase) IsTransparent() bool {
 	return ms.Trans
 }
 
-func (ms *MeshBase) Update(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+func (ms *MeshBase) Update(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
 	// nop: default mesh is static, not dynamic
 }
 
@@ -115,8 +115,8 @@ func (ms *MeshBase) SetMod(sc *Scene) {
 }
 
 // todo!!
-func (ms *MeshBase) ComputeNorms(pos, norm mat32.ArrayF32) {
-	// norm := mat32.Normal(vtxs[0], vtxs[1], vtxs[2])
+func (ms *MeshBase) ComputeNorms(pos, norm math32.ArrayF32) {
+	// norm := math32.Normal(vtxs[0], vtxs[1], vtxs[2])
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -186,7 +186,7 @@ func (sc *Scene) PlaneMesh2D() Mesh {
 		return tm
 	}
 	tmp := NewPlane(sc, nm, 1, 1)
-	tmp.NormAxis = mat32.Z
+	tmp.NormAxis = math32.Z
 	tmp.NormNeg = false
 	return tmp
 }
@@ -252,11 +252,11 @@ func (sc *Scene) ReconfigMeshes() {
 // GenMesh is a generic, arbitrary Mesh, storing its values
 type GenMesh struct {
 	MeshBase
-	Vtx   mat32.ArrayF32
-	Norm  mat32.ArrayF32
-	Tex   mat32.ArrayF32
-	Clr   mat32.ArrayF32
-	Index mat32.ArrayU32
+	Vtx   math32.ArrayF32
+	Norm  math32.ArrayF32
+	Tex   math32.ArrayF32
+	Clr   math32.ArrayF32
+	Index math32.ArrayU32
 }
 
 func (ms *GenMesh) Sizes() (nVtx, nIndex int, hasColor bool) {
@@ -266,7 +266,7 @@ func (ms *GenMesh) Sizes() (nVtx, nIndex int, hasColor bool) {
 	return ms.NVtx, ms.NIndex, ms.Color
 }
 
-func (ms *GenMesh) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+func (ms *GenMesh) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
 	copy(vtxAry, ms.Vtx)
 	copy(normAry, ms.Norm)
 	copy(texAry, ms.Tex)

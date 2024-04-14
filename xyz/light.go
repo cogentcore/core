@@ -7,7 +7,7 @@ package xyz
 import (
 	"image/color"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Light represents a light that illuminates a scene
@@ -79,7 +79,7 @@ type DirLight struct {
 	LightBase
 
 	// position of direct light -- assumed to point at the origin so this determines direction
-	Pos mat32.Vec3
+	Pos math32.Vector3
 }
 
 // NewDirLight adds direct light to given scene, with given name, standard color, and lumens (0-1 normalized)
@@ -96,9 +96,9 @@ func NewDirLight(sc *Scene, name string, lumens float32, color LightColors) *Dir
 }
 
 // ViewDir gets the direction normal vector, pre-computing the view transform
-func (dl *DirLight) ViewDir(viewMat *mat32.Mat4) mat32.Vec3 {
+func (dl *DirLight) ViewDir(viewMat *math32.Matrix4) math32.Vector3 {
 	// adding the 0 in the 4-vector negates any translation factors from the 4 matrix
-	return dl.Pos.MulMat4AsVec4(viewMat, 0)
+	return dl.Pos.MulMatrix4AsVector4(viewMat, 0)
 }
 
 // PointLight is an omnidirectional light with a position
@@ -108,7 +108,7 @@ type PointLight struct {
 	LightBase
 
 	// position of light in world coordinates
-	Pos mat32.Vec3
+	Pos math32.Vector3
 
 	// Distance linear decay factor -- defaults to .1
 	LinDecay float32
@@ -133,8 +133,8 @@ func NewPointLight(sc *Scene, name string, lumens float32, color LightColors) *P
 }
 
 // ViewPos gets the position vector, pre-computing the view transform
-func (pl *PointLight) ViewPos(viewMat *mat32.Mat4) mat32.Vec3 {
-	return pl.Pos.MulMat4AsVec4(viewMat, 1)
+func (pl *PointLight) ViewPos(viewMat *math32.Matrix4) math32.Vector3 {
+	return pl.Pos.MulMatrix4AsVector4(viewMat, 1)
 }
 
 // Spotlight is a light with a position and direction and associated decay factors and angles.
@@ -179,23 +179,23 @@ func NewSpotLight(sc *Scene, name string, lumens float32, color LightColors) *Sp
 }
 
 // ViewDir gets the direction normal vector, pre-computing the view transform
-func (sl *SpotLight) ViewDir() mat32.Vec3 {
-	idmat := mat32.Identity4()
+func (sl *SpotLight) ViewDir() math32.Vector3 {
+	idmat := math32.Identity4()
 	sl.Pose.UpdateMatrix()
 	sl.Pose.UpdateWorldMatrix(idmat)
 	// sl.Pose.UpdateMVPMatrix(viewMat, idmat)
-	vd := mat32.V3(0, 0, -1).MulMat4AsVec4(&sl.Pose.WorldMatrix, 0).Normal()
+	vd := math32.Vec3(0, 0, -1).MulMatrix4AsVector4(&sl.Pose.WorldMatrix, 0).Normal()
 	return vd
 }
 
 // LookAt points the spotlight at given target location, using given up direction.
-func (sl *SpotLight) LookAt(target, upDir mat32.Vec3) {
+func (sl *SpotLight) LookAt(target, upDir math32.Vector3) {
 	sl.Pose.LookAt(target, upDir)
 }
 
 // LookAtOrigin points the spotlight at origin with Y axis pointing Up (i.e., standard)
 func (sl *SpotLight) LookAtOrigin() {
-	sl.LookAt(mat32.Vec3{}, mat32.V3(0, 1, 0))
+	sl.LookAt(math32.Vector3{}, math32.Vec3(0, 1, 0))
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -212,7 +212,7 @@ func (sc *Scene) ConfigLights() {
 	sc.Phong.ResetNLights()
 	for _, ltkv := range sc.Lights.Order {
 		lt := ltkv.Value
-		clr := mat32.NewVec3Color(lt.Color()).MulScalar(lt.Lumens()).SRGBToLinear()
+		clr := math32.NewVector3Color(lt.Color()).MulScalar(lt.Lumens()).SRGBToLinear()
 		switch l := lt.(type) {
 		case *AmbientLight:
 			sc.Phong.AddAmbientLight(clr)

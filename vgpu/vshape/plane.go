@@ -5,7 +5,7 @@
 package vshape
 
 import (
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Plane is a flat 2D plane, which can be oriented along any
@@ -14,23 +14,23 @@ type Plane struct {
 	ShapeBase
 
 	// axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis.
-	NormAxis mat32.Dims
+	NormAxis math32.Dims
 
 	// if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true
 	NormNeg bool
 
 	// 2D size of plane
-	Size mat32.Vec2
+	Size math32.Vector2
 
 	// number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
-	Segs mat32.Vec2i
+	Segs math32.Vector2i
 
 	// offset from origin along direction of normal to the plane
 	Offset float32
 }
 
 // NewPlane returns a Plane shape with given size
-func NewPlane(axis mat32.Dims, width, height float32) *Plane {
+func NewPlane(axis math32.Dims, width, height float32) *Plane {
 	pl := &Plane{}
 	pl.Defaults()
 	pl.NormAxis = axis
@@ -39,7 +39,7 @@ func NewPlane(axis mat32.Dims, width, height float32) *Plane {
 }
 
 func (pl *Plane) Defaults() {
-	pl.NormAxis = mat32.Y
+	pl.NormAxis = math32.Y
 	pl.NormNeg = false
 	pl.Size.Set(1, 1)
 	pl.Segs.Set(1, 1)
@@ -53,7 +53,7 @@ func (pl *Plane) N() (nVtx, nIndex int) {
 }
 
 // Set sets points in given allocated arrays
-func (pl *Plane) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+func (pl *Plane) Set(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32) {
 	sz := SetPlaneAxisSize(vtxAry, normAry, texAry, idxAry, pl.VtxOff, pl.IndexOff, pl.NormAxis, pl.NormNeg, pl.Size, pl.Segs, pl.Offset, pl.Pos)
 	mn := pl.Pos.Sub(sz)
 	mx := pl.Pos.Add(sz)
@@ -84,36 +84,36 @@ func PlaneN(wsegs, hsegs int) (nVtx, nIndex int) {
 // offset is the distance to place the plane along the orthogonal axis.
 // pos is a 3D position offset. returns 3D size of plane.
 // returns bounding box.
-func SetPlaneAxisSize(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, normAxis mat32.Dims, normNeg bool, size mat32.Vec2, segs mat32.Vec2i, offset float32, pos mat32.Vec3) mat32.Vec3 {
+func SetPlaneAxisSize(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, normAxis math32.Dims, normNeg bool, size math32.Vector2, segs math32.Vector2i, offset float32, pos math32.Vector3) math32.Vector3 {
 	hSz := size.DivScalar(2)
 	thin := float32(.0000001)
-	sz := mat32.Vec3{}
+	sz := math32.Vector3{}
 	switch normAxis {
-	case mat32.X:
+	case math32.X:
 		sz.Set(thin, hSz.Y, hSz.X)
 		if normNeg {
-			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.Z, mat32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // nx
+			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, math32.Z, math32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // nx
 			sz.X += -offset
 		} else {
-			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.Z, mat32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // px
+			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, math32.Z, math32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // px
 			sz.X += offset
 		}
-	case mat32.Y:
+	case math32.Y:
 		sz.Set(hSz.X, thin, hSz.Y)
 		if normNeg {
-			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.X, mat32.Z, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // ny
+			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, math32.X, math32.Z, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // ny
 			sz.Y += -offset
 		} else {
-			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.X, mat32.Z, 1, 1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // py
+			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, math32.X, math32.Z, 1, 1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // py
 			sz.Y += offset
 		}
-	case mat32.Z:
+	case math32.Z:
 		sz.Set(hSz.X, hSz.Y, thin)
 		if normNeg {
-			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.X, mat32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // nz
+			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, math32.X, math32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -offset, int(segs.X), int(segs.Y), pos) // nz
 			sz.Z += -offset
 		} else {
-			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, mat32.X, mat32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // pz
+			SetPlane(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, math32.X, math32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, offset, int(segs.X), int(segs.Y), pos) // pz
 			sz.Z += offset
 		}
 	}
@@ -129,19 +129,19 @@ func SetPlaneAxisSize(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.Array
 // and texture rendering (minimum of 1 will be enforced).
 // offset is the distance to place the plane along the orthogonal axis.
 // pos is a 3D position offset.
-func SetPlane(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, pos mat32.Vec3) {
-	w := mat32.Z
-	if (waxis == mat32.X && haxis == mat32.Y) || (waxis == mat32.Y && haxis == mat32.X) {
-		w = mat32.Z
-	} else if (waxis == mat32.X && haxis == mat32.Z) || (waxis == mat32.Z && haxis == mat32.X) {
-		w = mat32.Y
-	} else if (waxis == mat32.Z && haxis == mat32.Y) || (waxis == mat32.Y && haxis == mat32.Z) {
-		w = mat32.X
+func SetPlane(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, waxis, haxis math32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, pos math32.Vector3) {
+	w := math32.Z
+	if (waxis == math32.X && haxis == math32.Y) || (waxis == math32.Y && haxis == math32.X) {
+		w = math32.Z
+	} else if (waxis == math32.X && haxis == math32.Z) || (waxis == math32.Z && haxis == math32.X) {
+		w = math32.Y
+	} else if (waxis == math32.Z && haxis == math32.Y) || (waxis == math32.Y && haxis == math32.Z) {
+		w = math32.X
 	}
 	wsegs = max(wsegs, 1)
 	hsegs = max(hsegs, 1)
 
-	norm := mat32.Vec3{}
+	norm := math32.Vector3{}
 	if zoff > 0 {
 		norm.SetDim(w, 1)
 	} else {
@@ -162,8 +162,8 @@ func SetPlane(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtx
 		hoff = height + hoff
 	}
 
-	vtx := mat32.Vec3{}
-	tex := mat32.Vec2{}
+	vtx := math32.Vector3{}
+	tex := math32.Vector2{}
 	vidx := vtxOff * 3
 	tidx := vtxOff * 2
 

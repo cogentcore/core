@@ -40,20 +40,20 @@ Languages must be rational and consistent both internally and with other program
 
 # Struct fields are better than maps for things like configuration and styling
 
-Configuration settings, typically settable with a config file and / or command-line arguments, are stored as key-value maps in the widely used [cobra](https://github.com/spf13/cobra), viper and other such tools.  Likewise, in v1 of GoGi, styling was set using Props maps.
+Configuration settings, typically settable with a config file and / or command-line arguments, are stored as key-value maps in the widely used [cobra](https://github.com/spf13/cobra), viper and other such tools.  Likewise, in v1 of core, styling was set using Properties maps.
 
 However, using a `struct` with appropriately-named fields has the following advantages:
 * Compile time name-safety: the compiler ensures you didn't mistype the key name.
 * Compile time type-safety: the type of the property is not `any` but the actual type needed.
 * Tab completion and full lookup in IDEs -- much easier when _using_ config values in an app, and also when setting styling in GUI.
 * GUI editor of config opts as a StructView has full access to field tag GUI hints, etc.
-* [[gti]] can provide access to field comments for full docs for each option -- the map impl requires  separate maps of docs vs. values.
+* [[types]] can provide access to field comments for full docs for each option, whereas the map implementation requires separate maps of docs and values.
 
-This is why the [[grease]] configuration and app command management system is based structs, and v2 of GoGi uses "direct styling" functions that directly set values on the `styles.Style` style structs.
+This is why the [[cli]] configuration and app command management system is based structs, and v2 of core uses "direct styling" functions that directly set values on the `styles.Style` style structs.
 
 # Generate instead of `reflect`
 
-Generated code is faster and cleaner and can be targeted to just what is needed.  `reflect` should be reserved for things like `giv.StructView` and other such views which need to be truly generic and operate on any kind of type from any package, etc.
+Generated code is faster and cleaner and can be targeted to just what is needed.  `reflect` should be reserved for things like `views.StructView` and other such views which need to be truly generic and operate on any kind of type from any package, etc.
 
 # Interfaces instead of `reflect`
 
@@ -70,15 +70,19 @@ Try to make these packages as independent as possible; don't have them depend on
 This is what we look for, in considering whether to import a given package, so it is what we should provide.
 
 Examples:
-* [[colors]] pulled out of gi
-* [[laser]] pulled reflection stuff out of kit
-* [[greasi]] separated from [[grease]] to keep grease free of gi dependency
+* [[colors]] pulled out of core
+* [[reflectx]] pulled reflection stuff out of tree
+* [[cliview]] separated from [[cli]] to keep cli free of core dependency
 
 # Use function libraries instead of putting lots of methods on a type
 
 Go uses the `strings` package instead of adding a lot of builtin methods on the `string` type.  The advantages are:
-* More flexibility to add and change impls -- can even have a replacement impl with the same signatures.
+* More flexibility to add and change implementations; can even have a replacement implementation with the same signatures.
 * Multiple different such packages can be used for different subsets of functionality (e.g., regex, unicode etc are all separate).
 * Type itself remains small and only handles most basic functionality -- presumably this works better for checking Interface implementation etc.
 
 Consistent with this approach, [[colors]] implements functions operating on the standard `color.RGBA` data type, instead of the many methods we defined on `gist.Color` in V1.
+
+# Collections are plural
+
+Packages and types whose primary purpose is to describe/hold a collection of something should be named in the plural. For example, [[events]] holds a collection of different event types, so it has a plural name. Also, per this rule, enum types are almost always named in the plural, as they describe a collection of possible values.

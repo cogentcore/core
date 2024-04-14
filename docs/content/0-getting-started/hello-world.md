@@ -2,18 +2,18 @@
 
 This page teaches you how to make a simple Hello World example app with Cogent Core.
 
-1. Run `mkdir myapp && cd myapp && go mod init myapp && touch main.go` to make a new Go project
+1. Run `mkdir hello && cd hello && go mod init hello && touch main.go` to make a new Go project
 2. Open `main.go` using an editor of your choice
 3. Add the following code to your editor:
 
 ```Go
 package main
 
-import "cogentcore.org/core/gi"
+import "cogentcore.org/core/core"
 
 func main() {
-	b := gi.NewBody("Hello")
-	gi.NewButton(b).SetText("Hello, World!")
+	b := core.NewBody("Hello")
+	core.NewButton(b).SetText("Hello, World!")
 	b.RunMainWindow()
 }
 ```

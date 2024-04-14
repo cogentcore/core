@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 /////////////////////////////////////////////////////////////////////////////
@@ -54,7 +54,7 @@ func (sv *SVG) GradientByName(n Node, grnm string) *Gradient {
 
 // GradientApplyTransform applies the given transform to any gradients for this node,
 // that are using specific coordinates (not bounding box which is automatic)
-func (g *NodeBase) GradientApplyTransform(sv *SVG, xf mat32.Mat2) {
+func (g *NodeBase) GradientApplyTransform(sv *SVG, xf math32.Matrix2) {
 	gi := g.This().(Node)
 	gnm := NodePropURL(gi, "fill")
 	if gnm != "" {
@@ -75,7 +75,7 @@ func (g *NodeBase) GradientApplyTransform(sv *SVG, xf mat32.Mat2) {
 // GradientApplyTransformPt applies the given transform with ctr point
 // to any gradients for this node, that are using specific coordinates
 // (not bounding box which is automatic)
-func (g *NodeBase) GradientApplyTransformPt(sv *SVG, xf mat32.Mat2, pt mat32.Vec2) {
+func (g *NodeBase) GradientApplyTransformPt(sv *SVG, xf math32.Matrix2, pt math32.Vector2) {
 	gi := g.This().(Node)
 	gnm := NodePropURL(gi, "fill")
 	if gnm != "" {
@@ -235,10 +235,10 @@ func (sv *SVG) GradientNew(radial bool) (*Gradient, string) {
 
 // GradientUpdateNodeProp ensures that node has a gradient property of given type
 func (sv *SVG) GradientUpdateNodeProp(n Node, prop string, radial bool, stops string) (*Gradient, string) {
-	ps := n.Prop(prop)
+	ps := n.Property(prop)
 	if ps == nil {
 		gr, url := sv.GradientNewForNode(n, radial, stops)
-		n.SetProp(prop, url)
+		n.SetProperty(prop, url)
 		return gr, url
 	}
 	pstr := ps.(string)
@@ -259,13 +259,13 @@ func (sv *SVG) GradientUpdateNodeProp(n Node, prop string, radial bool, stops st
 		sv.GradientDeleteForNode(n, pstr)
 	}
 	gr, url := sv.GradientNewForNode(n, radial, stops)
-	n.SetProp(prop, url)
+	n.SetProperty(prop, url)
 	return gr, url
 }
 
 // GradientUpdateNodePoints updates the points for node based on current bbox
 func (sv *SVG) GradientUpdateNodePoints(n Node, prop string) {
-	ps := n.Prop(prop)
+	ps := n.Property(prop)
 	if ps == nil {
 		return
 	}
@@ -280,14 +280,14 @@ func (sv *SVG) GradientUpdateNodePoints(n Node, prop string) {
 	}
 	gb := gr.Grad.AsBase()
 	gb.SetBox(n.LocalBBox())
-	gb.SetTransform(mat32.Identity2())
+	gb.SetTransform(math32.Identity2())
 }
 
 // GradientCloneNodeProp creates a new clone of the existing gradient for node
 // if set for given property key ("fill" or "stroke").
 // returns new gradient.
 func (sv *SVG) GradientCloneNodeProp(n Node, prop string) *Gradient {
-	ps := n.Prop(prop)
+	ps := n.Property(prop)
 	if ps == nil {
 		return nil
 	}
@@ -303,7 +303,7 @@ func (sv *SVG) GradientCloneNodeProp(n Node, prop string) *Gradient {
 		return nil
 	}
 	ngr, url := sv.GradientNewForNode(n, radial, gr.StopsName)
-	n.SetProp(prop, url)
+	n.SetProperty(prop, url)
 	gradient.CopyFrom(ngr.Grad, gr.Grad)
 	// TODO(kai): should this return ngr or gr? (used to return gr but ngr seems correct)
 	return ngr
@@ -313,7 +313,7 @@ func (sv *SVG) GradientCloneNodeProp(n Node, prop string) *Gradient {
 // if set for given property key ("fill" or "stroke").
 // Returns true if deleted.
 func (sv *SVG) GradientDeleteNodeProp(n Node, prop string) bool {
-	ps := n.Prop(prop)
+	ps := n.Property(prop)
 	if ps == nil {
 		return false
 	}

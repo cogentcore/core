@@ -7,18 +7,18 @@ package filetree
 import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/vci"
+	"cogentcore.org/core/vcs"
 )
 
 func (ft *Tree) OnInit() {
 	ft.Node.OnInit()
 	ft.FRoot = ft
-	ft.NodeType = NodeType
+	ft.FileNodeType = NodeType
 	ft.OpenDepth = 4
 }
 
@@ -32,7 +32,7 @@ func (fn *Node) OnInit() {
 
 func (fn *Node) SetStyles() {
 	fn.Style(func(s *styles.Style) {
-		vcs := fn.Info.Vcs
+		status := fn.Info.VCS
 		s.Font.Weight = styles.WeightNormal
 		s.Font.Style = styles.FontNormal
 		if fn.IsExec() && !fn.IsDir() {
@@ -42,26 +42,26 @@ func (fn *Node) SetStyles() {
 			s.Font.Style = styles.Italic
 		}
 		switch {
-		case vcs == vci.Untracked:
-			s.Color = grr.Must1(gradient.FromString("#808080"))
-		case vcs == vci.Modified:
-			s.Color = grr.Must1(gradient.FromString("#4b7fd1"))
-		case vcs == vci.Added:
-			s.Color = grr.Must1(gradient.FromString("#008800"))
-		case vcs == vci.Deleted:
-			s.Color = grr.Must1(gradient.FromString("#ff4252"))
-		case vcs == vci.Conflicted:
-			s.Color = grr.Must1(gradient.FromString("#ce8020"))
-		case vcs == vci.Updated:
-			s.Color = grr.Must1(gradient.FromString("#008060"))
-		case vcs == vci.Stored:
+		case status == vcs.Untracked:
+			s.Color = errors.Must1(gradient.FromString("#808080"))
+		case status == vcs.Modified:
+			s.Color = errors.Must1(gradient.FromString("#4b7fd1"))
+		case status == vcs.Added:
+			s.Color = errors.Must1(gradient.FromString("#008800"))
+		case status == vcs.Deleted:
+			s.Color = errors.Must1(gradient.FromString("#ff4252"))
+		case status == vcs.Conflicted:
+			s.Color = errors.Must1(gradient.FromString("#ce8020"))
+		case status == vcs.Updated:
+			s.Color = errors.Must1(gradient.FromString("#008060"))
+		case status == vcs.Stored:
 			s.Color = colors.C(colors.Scheme.OnSurface)
 		}
 	})
-	fn.OnWidgetAdded(func(w gi.Widget) {
+	fn.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(fn) {
 		case "parts":
-			parts := w.(*gi.Layout)
+			parts := w.(*core.Layout)
 			w.OnClick(func(e events.Event) {
 				fn.OpenEmptyDir()
 			})
@@ -75,8 +75,8 @@ func (fn *Node) SetStyles() {
 				}
 			})
 		case "parts/branch":
-			sw := w.(*gi.Switch)
-			sw.Type = gi.SwitchCheckbox
+			sw := w.(*core.Switch)
+			sw.Type = core.SwitchCheckbox
 			sw.SetIcons(icons.FolderOpen, icons.Folder, icons.Blank)
 		}
 	})

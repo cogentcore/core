@@ -17,9 +17,8 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/ki"
-	"cogentcore.org/core/laser"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/units"
 )
@@ -27,24 +26,18 @@ import (
 // style implements CSS-based styling, as in: https://www.w3schools.com/cssref/default.asp
 // list of inherited: https://stackoverflow.com/questions/5612302/which-css-properties-are-inherited
 
-// styling strategy:
-//	- either direct Go code based styling functions or ki.Props style map[string]any settings.
-//	- we process those properties dynamically when rendering (first pass only) into state
-//   on objects that can be directly used during rendering
-//	- good for basic rendering -- lots of additional things that could be extended later..
-
-// IMPORTANT: any changes here must be updated in style_props.go StyleStyleFuncs
+// IMPORTANT: any changes here must be updated in style_properties.go StyleStyleFuncs
 // and likewise for all sub-styles as fields here.
 
 // Style has all the CSS-based style elements -- used for widget-type GUI objects.
-type Style struct { //gti:add
+type Style struct { //types:add
 	// State holds style-relevant state flags, for convenient styling access,
 	// given that styles typically depend on element states.
 	State states.States
 
 	// Abilities specifies the abilities of this element, which determine
 	// which kinds of states the element can express.
-	// This is used by the goosi/events system.  Putting this info next
+	// This is used by the system/events system.  Putting this info next
 	// to the State info makes it easy to configure and manage.
 	Abilities abilities.Abilities
 
@@ -95,7 +88,7 @@ type Style struct { //gti:add
 	// Extra available space is allocated as: Grow / sum (all Grow).
 	// Important: grow elements absorb available space and thus are not
 	// subject to alignment (Center, End).
-	Grow mat32.Vec2
+	Grow math32.Vector2
 
 	// GrowWrap is a special case for Text elements where it grows initially
 	// in the horizontal axis to allow for longer, word wrapped text to fill
@@ -278,32 +271,32 @@ const (
 
 // transition -- animation of hover, etc
 
-// SetStylePropsXML sets style props from XML style string, which contains ';'
+// SetStylePropertiesXML sets style properties from XML style string, which contains ';'
 // separated name: value pairs
-func SetStylePropsXML(style string, props *map[string]any) {
+func SetStylePropertiesXML(style string, properties *map[string]any) {
 	st := strings.Split(style, ";")
 	for _, s := range st {
 		kv := strings.Split(s, ":")
 		if len(kv) >= 2 {
 			k := strings.TrimSpace(strings.ToLower(kv[0]))
 			v := strings.TrimSpace(kv[1])
-			if *props == nil {
-				*props = make(map[string]any)
+			if *properties == nil {
+				*properties = make(map[string]any)
 			}
-			(*props)[k] = v
+			(*properties)[k] = v
 		}
 	}
 }
 
-// StylePropsXML returns style props for XML style string, which contains ';'
+// StylePropertiesXML returns style properties for XML style string, which contains ';'
 // separated name: value pairs
-func StylePropsXML(props map[string]any) string {
+func StylePropertiesXML(properties map[string]any) string {
 	var sb strings.Builder
-	for k, v := range props {
+	for k, v := range properties {
 		if k == "transform" {
 			continue
 		}
-		sb.WriteString(fmt.Sprintf("%s:%s;", k, laser.ToString(v)))
+		sb.WriteString(fmt.Sprintf("%s:%s;", k, reflectx.ToString(v)))
 	}
 	return sb.String()
 }
@@ -417,10 +410,10 @@ func (s *Style) TotalMargin() SideFloats {
 	return s.Margin.Dots().Add(mbw).Add(mbsm)
 }
 
-// SubProps returns a sub-property map from given prop map for a given styling
+// SubProperties returns a sub-property map from given prop map for a given styling
 // selector (property name) -- e.g., :normal :active :hover etc -- returns
 // false if not found
-func SubProps(prp map[string]any, selector string) (map[string]any, bool) {
+func SubProperties(prp map[string]any, selector string) (map[string]any, bool) {
 	sp, ok := prp[selector]
 	if !ok {
 		return nil, false
@@ -428,10 +421,6 @@ func SubProps(prp map[string]any, selector string) (map[string]any, bool) {
 	spm, ok := sp.(map[string]any)
 	if ok {
 		return spm, true
-	}
-	kpm, ok := sp.(ki.Props)
-	if ok {
-		return kpm, true
 	}
 	return nil, false
 }

@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Copied from golang.org/x/image/vector
@@ -35,7 +35,7 @@ func CubeLerpTo(ax, ay, bx, by, cx, cy, dx, dy float32, LineTo func(ex, ey float
 	}
 	if devsq >= 0.333 {
 		const tol = 3
-		n := 1 + int(mat32.Sqrt(mat32.Sqrt(tol*float32(devsq))))
+		n := 1 + int(math32.Sqrt(math32.Sqrt(tol*float32(devsq))))
 		t, nInv := float32(0), 1/float32(n)
 		for i := 0; i < n-1; i++ {
 			t += nInv
@@ -55,7 +55,7 @@ func QuadLerpTo(ax, ay, bx, by, cx, cy float32, LineTo func(dx, dy float32)) {
 	devsq := DevSquared(ax, ay, bx, by, cx, cy)
 	if devsq >= 0.333 {
 		const tol = 3
-		n := 1 + int(mat32.Sqrt(mat32.Sqrt(tol*float32(devsq))))
+		n := 1 + int(math32.Sqrt(math32.Sqrt(tol*float32(devsq))))
 		t, nInv := float32(0), 1/float32(n)
 		for i := 0; i < n-1; i++ {
 			t += nInv
@@ -136,12 +136,12 @@ func TestBezierCube(t *testing.T) {
 		}
 		//t.Log("Bez to", len(r1x), "lines")
 		for i, v := range r1x {
-			if mat32.Abs(float32(v-r2x[i])) > epsilon {
+			if math32.Abs(float32(v-r2x[i])) > epsilon {
 				t.Error("x mismatch", v, "vs", r2x[i], " diff ", v-r2x[i])
 			}
 		}
 		for i, v := range r1y {
-			if mat32.Abs(float32(v-r2y[i])) > epsilon {
+			if math32.Abs(float32(v-r2y[i])) > epsilon {
 				t.Error("y mismatch", v, "vs", r2y[i], " diff ", v-r2y[i])
 			}
 		}
@@ -177,12 +177,12 @@ func TestBezierQuad(t *testing.T) {
 		}
 		//t.Log("Bez to", len(r1x), "lines")
 		for i, v := range r1x {
-			if mat32.Abs(float32(v-r2x[i])) > epsilon {
+			if math32.Abs(float32(v-r2x[i])) > epsilon {
 				t.Error("x mismatch", v, "vs", r2x[i], " diff ", v-r2x[i])
 			}
 		}
 		for i, v := range r1y {
-			if mat32.Abs(float32(v-r2y[i])) > epsilon {
+			if math32.Abs(float32(v-r2y[i])) > epsilon {
 				t.Error("y mismatch", v, "vs", r2y[i], " diff ", v-r2y[i])
 			}
 		}

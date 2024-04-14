@@ -1,8 +1,6 @@
 # XYZ
 
-[![Go Reference](https://pkg.go.dev/badge/cogentcore.org/core/xyz/xyz.svg)](https://pkg.go.dev/cogentcore.org/core/xyz)
-
-`xyz` is a 3D graphics framework written in Go.  It was originally developed as `gi3d`, included in the [Cogent Core](https;//cogentcore.org/core/Cogent Core) GUI framework, but is now a separate standalone package that renders to an offscreen Vulkan framebuffer, which can easily be converted into a Go `image.RGBA`.  The `xyzv` package in Cogent Core provides an integration of xyz in Cogent Core, for dynamic and efficient 3D rendering within 2D GUI windows.
+`xyz` is a 3D graphics framework written in Go. It is a separate standalone package that renders to an offscreen Vulkan framebuffer, which can easily be converted into a Go `image.RGBA`.  The `xyzview` package in Cogent Core provides an integration of xyz in Cogent Core, for dynamic and efficient 3D rendering within 2D GUI windows.
 
 `xyz` is built on the [vgpu](https://pkg.go.dev/cogentcore.org/core/vgpu) Vulkan GPU framework, and uses the [ki](https://pkg.go.dev/cogentcore.org/core/ki) tree structure for the scenegraph.  It currently supports standard Phong-based rendering with different types of lights and materials.  It is designed for scientific and other non-game 3D applications, and lacks almost all of the advanced features one would expect in a modern 3D graphics framework.  Thus, its primary advantage is its simplicity and support for directly programming 3D visualizations in Go, its broad cross-platform support across all major desktop and mobile platforms, and the use of Vulkan which is highly efficient.  See [eve](https://github.com/emer/eve) for a virtual environment framework built on top of xyz, which provides a physics engine for simulating 3D worlds (for use in training neural network models).
 
@@ -48,7 +46,7 @@ There are standard Render types that manage the relevant GPU programs / Pipeline
     
     + `Textures` are the library of `Texture` files that define more complex colored surfaces for objects.  These can be loaded from standard image files.
     
-    + `Solid`s are the Children of the Scene, and actually determine the content of the 3D scene.  Each Solid has a `Mesh` field with the name of the mesh that defines its shape, and a `Mat` field that determines its material properties (Color, Texture, etc).  In addition, each Solid has its own `Pose` field that determines its position, scale and orientation within the scene.  Because each `Solid` is a `ki.Ki` tree node, it can contain other scene elements as its Children -- they will inherit the `Pose` settings of the parent (and so-on up the tree -- all poses are cumulative) but *not* automatically any material settings.  You can call `CopyMatToChildren` if you want to apply the current materials to the children nodes.  And use Style parameters to set these according to node name or Class name.
+    + `Solid`s are the Children of the Scene, and actually determine the content of the 3D scene.  Each Solid has a `Mesh` field with the name of the mesh that defines its shape, and a `Mat` field that determines its material properties (Color, Texture, etc).  In addition, each Solid has its own `Pose` field that determines its position, scale and orientation within the scene.  Because each `Solid` is a `tree.Node` tree node, it can contain other scene elements as its Children -- they will inherit the `Pose` settings of the parent (and so-on up the tree -- all poses are cumulative) but *not* automatically any material settings.  You can call `CopyMatToChildren` if you want to apply the current materials to the children nodes.  And use Style parameters to set these according to node name or Class name.
 
     + `Group`s can be used to apply `Pose` settings to a set of Children that are all grouped together (e.g., a multi-part complex object can be moved together etc by putting a set of `Solid`s into a Group)
 
@@ -58,7 +56,7 @@ Mouse events are handled by the standard Cogent Core Window event dispatching me
 
 # Embedded 2D Viewport
 
-A full 2D Cogent Core GUI can be embedded within a 3D scene using the `xyzv.Embed2D` Node type, which renders a `gi.Scene` onto a Texture projected onto a Plane.  It captures events within its own bounding box, and translates them into coordinates for the 2D embedded gui. This allows full 2D interactive control within whatever perspective is present in the 3D scene.  However, things like cursors and popups render in the flat 2D screen and are only approximately located.
+A full 2D Cogent Core GUI can be embedded within a 3D scene using the `xyzview.Embed2D` Node type, which renders a `core.Scene` onto a Texture projected onto a Plane.  It captures events within its own bounding box, and translates them into coordinates for the 2D embedded gui. This allows full 2D interactive control within whatever perspective is present in the 3D scene.  However, things like cursors and popups render in the flat 2D screen and are only approximately located.
 
 In addition to interactive guis, the embedded 2D node can be used for rendering full SVG graphics to a texture.
 

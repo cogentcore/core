@@ -7,7 +7,7 @@ package hsl
 import (
 	"image/color"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Lighten returns a color that is lighter by the
@@ -15,7 +15,7 @@ import (
 func Lighten(c color.Color, amount float32) color.RGBA {
 	h := FromColor(c)
 	h.L += amount / 100
-	h.L = mat32.Clamp(h.L, 0, 1)
+	h.L = math32.Clamp(h.L, 0, 1)
 	return h.AsRGBA()
 }
 
@@ -24,7 +24,7 @@ func Lighten(c color.Color, amount float32) color.RGBA {
 func Darken(c color.Color, amount float32) color.RGBA {
 	h := FromColor(c)
 	h.L -= amount / 100
-	h.L = mat32.Clamp(h.L, 0, 1)
+	h.L = math32.Clamp(h.L, 0, 1)
 	return h.AsRGBA()
 }
 
@@ -39,7 +39,7 @@ func Highlight(c color.Color, amount float32) color.RGBA {
 	} else {
 		h.L += amount / 100
 	}
-	h.L = mat32.Clamp(h.L, 0, 1)
+	h.L = math32.Clamp(h.L, 0, 1)
 	return h.AsRGBA()
 }
 
@@ -54,7 +54,7 @@ func Samelight(c color.Color, amount float32) color.RGBA {
 	} else {
 		h.L -= amount / 100
 	}
-	h.L = mat32.Clamp(h.L, 0, 1)
+	h.L = math32.Clamp(h.L, 0, 1)
 	return h.AsRGBA()
 }
 
@@ -63,7 +63,7 @@ func Samelight(c color.Color, amount float32) color.RGBA {
 func Saturate(c color.Color, amount float32) color.RGBA {
 	h := FromColor(c)
 	h.S += amount / 100
-	h.S = mat32.Clamp(h.S, 0, 1)
+	h.S = math32.Clamp(h.S, 0, 1)
 	return h.AsRGBA()
 }
 
@@ -72,7 +72,7 @@ func Saturate(c color.Color, amount float32) color.RGBA {
 func Desaturate(c color.Color, amount float32) color.RGBA {
 	h := FromColor(c)
 	h.S -= amount / 100
-	h.S = mat32.Clamp(h.S, 0, 1)
+	h.S = math32.Clamp(h.S, 0, 1)
 	return h.AsRGBA()
 }
 
@@ -81,7 +81,7 @@ func Desaturate(c color.Color, amount float32) color.RGBA {
 func Spin(c color.Color, amount float32) color.RGBA {
 	h := FromColor(c)
 	h.H += amount
-	h.H = mat32.Clamp(h.H, 0, 360)
+	h.H = math32.Clamp(h.H, 0, 360)
 	return h.AsRGBA()
 }
 

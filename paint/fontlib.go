@@ -6,7 +6,6 @@ package paint
 
 import (
 	"embed"
-	"errors"
 	"fmt"
 	"io/fs"
 	"log/slog"
@@ -16,7 +15,7 @@ import (
 	"strings"
 	"sync"
 
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 )
@@ -78,7 +77,7 @@ type FontLib struct {
 	Faces map[string]map[int]*styles.FontFace
 }
 
-// FontLibrary is the gi font library, initialized from fonts available on font paths
+// FontLibrary is the core font library, initialized from fonts available on font paths
 var FontLibrary FontLib
 
 // FontAvail determines if a given font name is available (case insensitive)
@@ -99,7 +98,7 @@ func (fl *FontLib) Init() {
 	if fl.FontPaths == nil {
 		loadFontMu.Lock()
 		// fmt.Printf("Initializing font lib\n")
-		fl.FontsFS = grr.Log1(fs.Sub(defaultFonts, "fonts"))
+		fl.FontsFS = errors.Log1(fs.Sub(defaultFonts, "fonts"))
 		fl.FontPaths = make([]string, 0)
 		fl.FontsAvail = make(map[string]string)
 		fl.FontInfo = make([]FontInfo, 0)

@@ -8,8 +8,8 @@ import (
 	"image/color"
 	"testing"
 
-	"cogentcore.org/core/glop/tolassert"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/gox/tolassert"
+	"cogentcore.org/core/math32"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -98,7 +98,7 @@ func TestHCTSet(t *testing.T) {
 }
 
 func TestGetAxis(t *testing.T) {
-	assert.Equal(t, float32(-1), GetAxis(mat32.Vec3{}, 5))
+	assert.Equal(t, float32(-1), GetAxis(math32.Vector3{}, 5))
 }
 
 func BenchmarkHCT(b *testing.B) {

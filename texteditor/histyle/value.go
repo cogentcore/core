@@ -5,37 +5,37 @@
 package histyle
 
 import (
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
+	"cogentcore.org/core/views"
 )
 
 func init() {
-	giv.AddValue(gi.HiStyleName(""), func() giv.Value { return &Value{} })
+	views.AddValue(core.HiStyleName(""), func() views.Value { return &Value{} })
 }
 
-// Value represents a [gi.HiStyleName] with a button.
+// Value represents a [core.HiStyleName] with a button.
 type Value struct {
-	giv.ValueBase[*gi.Button]
+	views.ValueBase[*core.Button]
 }
 
 func (v *Value) Config() {
-	v.Widget.SetType(gi.ButtonTonal).SetIcon(icons.Brush)
-	giv.ConfigDialogWidget(v, false)
+	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.Brush)
+	views.ConfigDialogWidget(v, false)
 }
 
 func (v *Value) Update() {
-	txt := laser.ToString(v.Value.Interface())
+	txt := reflectx.ToString(v.Value.Interface())
 	v.Widget.SetText(txt).Update()
 }
 
-func (v *Value) ConfigDialog(d *gi.Body) (bool, func()) {
+func (v *Value) ConfigDialog(d *core.Body) (bool, func()) {
 	d.SetTitle("Select a syntax highlighting style")
 	si := 0
-	cur := laser.ToString(v.Value.Interface())
-	giv.NewSliceView(d).SetSlice(&StyleNames).SetSelectedValue(cur).BindSelect(&si)
+	cur := reflectx.ToString(v.Value.Interface())
+	views.NewSliceView(d).SetSlice(&StyleNames).SetSelectedValue(cur).BindSelect(&si)
 	return true, func() {
 		if si >= 0 {
 			hs := StyleNames[si]
@@ -47,23 +47,23 @@ func (v *Value) ConfigDialog(d *gi.Body) (bool, func()) {
 
 // View opens a view of highlighting styles
 func View(st *Styles) {
-	if gi.ActivateExistingMainWindow(st) {
+	if core.ActivateExistingMainWindow(st) {
 		return
 	}
 
-	d := gi.NewBody("hi-styles").SetData(st)
+	d := core.NewBody("hi-styles").SetData(st)
 	d.AddTitle("Highlighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards.")
-	mv := giv.NewMapView(d).SetMap(st)
+	mv := views.NewMapView(d).SetMap(st)
 	StylesChanged = false
 	mv.OnChange(func(e events.Event) {
 		StylesChanged = true
 	})
-	d.AddAppBar(func(tb *gi.Toolbar) {
-		oj := giv.NewFuncButton(tb, st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
+	d.AddAppBar(func(tb *core.Toolbar) {
+		oj := views.NewFuncButton(tb, st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
 		oj.Args[0].SetTag(".ext", ".histy")
-		sj := giv.NewFuncButton(tb, st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
+		sj := views.NewFuncButton(tb, st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
 		sj.Args[0].SetTag(".ext", ".histy")
-		gi.NewSeparator(tb)
+		core.NewSeparator(tb)
 		mv.ConfigToolbar(tb)
 	})
 	d.NewWindow().Run() // note: no context here so not dialog

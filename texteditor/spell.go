@@ -8,12 +8,12 @@ import (
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/pi/lex"
-	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/keymap"
+	"cogentcore.org/core/parse/lexer"
+	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/texteditor/textbuf"
 )
 
@@ -35,8 +35,8 @@ func (ed *Editor) OfferComplete() {
 
 	ed.Buffer.Complete.SrcLn = ed.CursorPos.Ln
 	ed.Buffer.Complete.SrcCh = ed.CursorPos.Ch
-	st := lex.Pos{ed.CursorPos.Ln, 0}
-	en := lex.Pos{ed.CursorPos.Ln, ed.CursorPos.Ch}
+	st := lexer.Pos{ed.CursorPos.Ln, 0}
+	en := lexer.Pos{ed.CursorPos.Ln, ed.CursorPos.Ch}
 	tbe := ed.Buffer.Region(st, en)
 	var s string
 	if tbe != nil {
@@ -71,7 +71,7 @@ func (ed *Editor) CancelComplete() {
 
 // Lookup attempts to lookup symbol at current location, popping up a window
 // if something is found.
-func (ed *Editor) Lookup() { //gti:add
+func (ed *Editor) Lookup() { //types:add
 	if ed.Buffer.Complete == nil || ed.ISearch.On || ed.QReplace.On || ed.IsDisabled() {
 		return
 	}
@@ -94,8 +94,8 @@ func (ed *Editor) Lookup() { //gti:add
 	}
 	ed.Buffer.Complete.SrcLn = ln
 	ed.Buffer.Complete.SrcCh = ch
-	st := lex.Pos{ed.CursorPos.Ln, 0}
-	en := lex.Pos{ed.CursorPos.Ln, ch}
+	st := lexer.Pos{ed.CursorPos.Ln, 0}
+	en := lexer.Pos{ed.CursorPos.Ln, ch}
 
 	tbe := ed.Buffer.Region(st, en)
 	var s string
@@ -120,20 +120,20 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 		return
 	}
 
-	isDoc := ed.Buffer.Info.Cat == fi.Doc
+	isDoc := ed.Buffer.Info.Cat == fileinfo.Doc
 	tp := ed.CursorPos
 
-	kf := keyfun.Of(kt.KeyChord())
+	kf := keymap.Of(kt.KeyChord())
 	switch kf {
-	case keyfun.MoveUp:
+	case keymap.MoveUp:
 		if isDoc {
 			ed.Buffer.SpellCheckLineTag(tp.Ln)
 		}
-	case keyfun.MoveDown:
+	case keymap.MoveDown:
 		if isDoc {
 			ed.Buffer.SpellCheckLineTag(tp.Ln)
 		}
-	case keyfun.MoveRight:
+	case keymap.MoveRight:
 		if ed.IsWordEnd(tp) {
 			reg := ed.WordBefore(tp)
 			ed.SpellCheck(reg)
@@ -158,12 +158,12 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 		} else {
 			r = txt[tp.Ch]
 		}
-		if atend || gi.IsWordBreak(r, rune(-1)) {
+		if atend || core.IsWordBreak(r, rune(-1)) {
 			tp.Ch-- // we are one past the end of word
 			reg := ed.WordBefore(tp)
 			ed.SpellCheck(reg)
 		}
-	case keyfun.Enter:
+	case keymap.Enter:
 		tp.Ln--
 		if isDoc {
 			ed.Buffer.SpellCheckLineTag(tp.Ln) // redo prior line
@@ -171,11 +171,11 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 		tp.Ch = ed.Buffer.LineLen(tp.Ln)
 		reg := ed.WordBefore(tp)
 		ed.SpellCheck(reg)
-	case keyfun.FocusNext:
+	case keymap.FocusNext:
 		tp.Ch-- // we are one past the end of word
 		reg := ed.WordBefore(tp)
 		ed.SpellCheck(reg)
-	case keyfun.Backspace, keyfun.Delete:
+	case keymap.Backspace, keymap.Delete:
 		if ed.IsWordMiddle(ed.CursorPos) {
 			reg := ed.WordAt()
 			ed.SpellCheck(ed.Buffer.Region(reg.Start, reg.End))
@@ -183,7 +183,7 @@ func (ed *Editor) ISpellKeyInput(kt events.Event) {
 			reg := ed.WordBefore(tp)
 			ed.SpellCheck(reg)
 		}
-	case keyfun.Nil:
+	case keymap.None:
 		if unicode.IsSpace(kt.KeyRune()) || unicode.IsPunct(kt.KeyRune()) && kt.KeyRune() != '\'' { // contractions!
 			tp.Ch-- // we are one past the end of word
 			reg := ed.WordBefore(tp)
@@ -204,7 +204,7 @@ func (ed *Editor) SpellCheck(reg *textbuf.Edit) bool {
 		return false
 	}
 	wb := string(reg.ToBytes())
-	lwb := lex.FirstWordApostrophe(wb) // only lookup words
+	lwb := lexer.FirstWordApostrophe(wb) // only lookup words
 	if len(lwb) <= 2 {
 		return false
 	}

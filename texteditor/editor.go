@@ -13,18 +13,18 @@ import (
 
 	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/goosi"
-	"cogentcore.org/core/ki"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/texteditor/textbuf"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -46,7 +46,7 @@ var (
 )
 
 // Editor is a widget for editing multiple lines of complicated text (as compared to
-// [gi.TextField] for a single line of simple text).  The Editor is driven by a [Buffer]
+// [core.TextField] for a single line of simple text).  The Editor is driven by a [Buffer]
 // buffer which contains all the text, and manages all the edits,
 // sending update events out to the editors.
 //
@@ -60,7 +60,7 @@ var (
 // Editor should be within a single goroutine, as it would require
 // extensive protections throughout code otherwise.
 type Editor struct { //core:embedder
-	gi.Layout
+	core.Layout
 
 	// Buffer is the text buffer being edited.
 	Buffer *Buffer `set:"-" json:"-" xml:"-"`
@@ -99,10 +99,10 @@ type Editor struct { //core:embedder
 	LineNoRender paint.Text `set:"-" view:"-" json:"-" xml:"-"`
 
 	// current cursor position
-	CursorPos lex.Pos `set:"-" edit:"-" json:"-" xml:"-"`
+	CursorPos lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// target cursor position for externally-set targets: ensures that it is visible
-	CursorTarg lex.Pos `set:"-" edit:"-" json:"-" xml:"-"`
+	CursorTarg lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns
 	CursorCol int `set:"-" edit:"-" json:"-" xml:"-"`
@@ -111,7 +111,7 @@ type Editor struct { //core:embedder
 	PosHistIndex int `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// starting point for selection -- will either be the start or end of selected region depending on subsequent selection.
-	SelectStart lex.Pos `set:"-" edit:"-" json:"-" xml:"-"`
+	SelectStart lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// current selection region
 	SelectRegion textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
@@ -150,19 +150,19 @@ type Editor struct { //core:embedder
 	NLinesChars image.Point `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// total size of all lines as rendered
-	LinesSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
+	LinesSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// the LinesSize plus extra space and line numbers etc
-	TotalSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
+	TotalSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// the Geom.Size.Actual.Total subtracting
 	// extra space and line numbers -- this is what
 	// LayoutStdLR sees for laying out each line
-	LineLayoutSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
+	LineLayoutSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// the last LineLayoutSize used in laying out lines.
 	// Used to trigger a new layout only when needed.
-	lastlineLayoutSize mat32.Vec2 `set:"-" edit:"-" json:"-" xml:"-"`
+	lastlineLayoutSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// oscillates between on and off for blinking
 	BlinkOn bool `set:"-" edit:"-" json:"-" xml:"-"`
@@ -176,15 +176,15 @@ type Editor struct { //core:embedder
 	// handles link clicks -- if nil, they are sent to the standard web URL handler
 	LinkHandler func(tl *paint.TextLink)
 
-	lastRecenter   int         `set:"-"`
-	lastAutoInsert rune        `set:"-"`
-	lastFilename   gi.Filename `set:"-"`
+	lastRecenter   int           `set:"-"`
+	lastAutoInsert rune          `set:"-"`
+	lastFilename   core.Filename `set:"-"`
 }
 
 // NewSoloEditor returns a new [Editor] with an associated [Buffer].
 // This is appropriate for making a standalone editor in which there
 // is there is one editor per buffer.
-func NewSoloEditor(parent ki.Ki, name ...string) *Editor {
+func NewSoloEditor(parent tree.Node, name ...string) *Editor {
 	return NewEditor(parent, name...).SetBuffer(NewBuffer())
 }
 
@@ -209,12 +209,12 @@ func (ed *Editor) SetStyles() {
 
 		s.VirtualKeyboard = styles.KeyboardMultiLine
 		s.Cursor = cursors.Text
-		if gi.SystemSettings.Editor.WordWrap {
+		if core.SystemSettings.Editor.WordWrap {
 			s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 		} else {
 			s.Text.WhiteSpace = styles.WhiteSpacePre
 		}
-		s.Font.Family = string(gi.AppearanceSettings.MonoFont)
+		s.Font.Family = string(core.AppearanceSettings.MonoFont)
 		s.Grow.Set(1, 1)
 		s.Overflow.Set(styles.OverflowAuto)   // absorbs all
 		s.Border.Style.Set(styles.BorderNone) // don't render our own border
@@ -224,7 +224,7 @@ func (ed *Editor) SetStyles() {
 		s.Align.Content = styles.Start
 		s.Align.Items = styles.Start
 		s.Text.Align = styles.Start
-		s.Text.TabSize = gi.SystemSettings.Editor.TabSize
+		s.Text.TabSize = core.SystemSettings.Editor.TabSize
 		s.Color = colors.C(colors.Scheme.OnSurface)
 
 		if s.State.Is(states.Focused) {
@@ -236,11 +236,11 @@ func (ed *Editor) SetStyles() {
 }
 
 // EditorFlags extend WidgetFlags to hold [Editor] state
-type EditorFlags gi.WidgetFlags //enums:bitflag -trim-prefix View
+type EditorFlags core.WidgetFlags //enums:bitflag -trim-prefix View
 
 const (
 	// EditorHasLineNos indicates that this editor has line numbers (per Buf option)
-	EditorHasLineNos EditorFlags = EditorFlags(gi.WidgetFlagsN) + iota
+	EditorHasLineNos EditorFlags = EditorFlags(core.WidgetFlagsN) + iota
 
 	// EditorNeedsLayout is set by NeedsLayout: Editor does significant
 	// internal layout in LayoutAllLines, and its layout is simply based
@@ -271,7 +271,7 @@ func (ed *Editor) EditDone() {
 	}
 	ed.ClearSelected()
 	ed.ClearCursor()
-	goosi.TheApp.HideVirtualKeyboard()
+	system.TheApp.HideVirtualKeyboard()
 }
 
 // Remarkup triggers a complete re-markup of the entire text --
@@ -317,7 +317,7 @@ func (ed *Editor) ResetState() {
 	ed.ISearch.On = false
 	ed.QReplace.On = false
 	if ed.Buffer == nil || ed.lastFilename != ed.Buffer.Filename { // don't reset if reopening..
-		ed.CursorPos = lex.Pos{}
+		ed.CursorPos = lexer.Pos{}
 	}
 	if ed.Buffer != nil {
 		ed.Buffer.SetReadOnly(ed.IsReadOnly())
@@ -344,7 +344,7 @@ func (ed *Editor) SetBuffer(buf *Buffer) *Editor {
 			ed.PosHistIndex = bhl - 1
 			ed.SetCursorShow(cp)
 		} else {
-			ed.SetCursorShow(lex.Pos{})
+			ed.SetCursorShow(lexer.Pos{})
 		}
 	}
 	ed.LayoutAllLines()
@@ -412,7 +412,7 @@ func (ed *Editor) BufferSignal(sig BufferSignals, tbe *textbuf.Edit) {
 	case BufferMods:
 		ed.NeedsLayout()
 	case BufferInsert:
-		if ed == nil || ed.This() == nil || !ed.This().(gi.Widget).IsVisible() {
+		if ed == nil || ed.This() == nil || !ed.This().(core.Widget).IsVisible() {
 			return
 		}
 		ndup := ed.Renders == nil
@@ -427,7 +427,7 @@ func (ed *Editor) BufferSignal(sig BufferSignals, tbe *textbuf.Edit) {
 			ed.Update()
 		}
 	case BufferDelete:
-		if ed == nil || ed.This() == nil || !ed.This().(gi.Widget).IsVisible() {
+		if ed == nil || ed.This() == nil || !ed.This().(core.Widget).IsVisible() {
 			return
 		}
 		ndup := ed.Renders == nil

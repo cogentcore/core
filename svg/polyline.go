@@ -5,7 +5,7 @@
 package svg
 
 import (
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Polyline is a SVG multi-line shape
@@ -13,21 +13,21 @@ type Polyline struct {
 	NodeBase
 
 	// the coordinates to draw -- does a moveto on the first, then lineto for all the rest
-	Points []mat32.Vec2 `xml:"points"`
+	Points []math32.Vector2 `xml:"points"`
 }
 
 func (g *Polyline) SVGName() string { return "polyline" }
 
-func (g *Polyline) SetPos(pos mat32.Vec2) {
+func (g *Polyline) SetPos(pos math32.Vector2) {
 	// todo: set offset relative to bbox
 }
 
-func (g *Polyline) SetSize(sz mat32.Vec2) {
+func (g *Polyline) SetSize(sz math32.Vector2) {
 	// todo: scale bbox
 }
 
-func (g *Polyline) LocalBBox() mat32.Box2 {
-	bb := mat32.B2Empty()
+func (g *Polyline) LocalBBox() math32.Box2 {
+	bb := math32.B2Empty()
 	for _, pt := range g.Points {
 		bb.ExpandByPoint(pt)
 	}
@@ -53,13 +53,13 @@ func (g *Polyline) Render(sv *SVG) {
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
 		pt := g.Points[0]
 		ptn := g.Points[1]
-		ang := mat32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X)
+		ang := math32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X)
 		mrk.RenderMarker(sv, pt, ang, g.Paint.StrokeStyle.Width.Dots)
 	}
 	if mrk := sv.MarkerByName(g, "marker-end"); mrk != nil {
 		pt := g.Points[sz-1]
 		ptp := g.Points[sz-2]
-		ang := mat32.Atan2(pt.Y-ptp.Y, pt.X-ptp.X)
+		ang := math32.Atan2(pt.Y-ptp.Y, pt.X-ptp.X)
 		mrk.RenderMarker(sv, pt, ang, g.Paint.StrokeStyle.Width.Dots)
 	}
 	if mrk := sv.MarkerByName(g, "marker-mid"); mrk != nil {
@@ -67,7 +67,7 @@ func (g *Polyline) Render(sv *SVG) {
 			pt := g.Points[i]
 			ptp := g.Points[i-1]
 			ptn := g.Points[i+1]
-			ang := 0.5 * (mat32.Atan2(pt.Y-ptp.Y, pt.X-ptp.X) + mat32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X))
+			ang := 0.5 * (math32.Atan2(pt.Y-ptp.Y, pt.X-ptp.X) + math32.Atan2(ptn.Y-pt.Y, ptn.X-pt.X))
 			mrk.RenderMarker(sv, pt, ang, g.Paint.StrokeStyle.Width.Dots)
 		}
 	}
@@ -78,14 +78,14 @@ func (g *Polyline) Render(sv *SVG) {
 
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Polyline) ApplyTransform(sv *SVG, xf mat32.Mat2) {
+func (g *Polyline) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	rot := xf.ExtractRot()
 	if rot != 0 || !g.Paint.Transform.IsIdentity() {
 		g.Paint.Transform.SetMul(xf)
-		g.SetProp("transform", g.Paint.Transform.String())
+		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
 		for i, p := range g.Points {
-			p = xf.MulVec2AsPoint(p)
+			p = xf.MulVector2AsPoint(p)
 			g.Points[i] = p
 		}
 		g.GradientApplyTransform(sv, xf)
@@ -97,16 +97,16 @@ func (g *Polyline) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Polyline) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+func (g *Polyline) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
 		g.Paint.Transform.SetMulCenter(xf, lpt)
-		g.SetProp("transform", g.Paint.Transform.String())
+		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
 		for i, p := range g.Points {
-			p = xf.MulVec2AsPointCenter(p, lpt)
+			p = xf.MulVector2AsPointCenter(p, lpt)
 			g.Points[i] = p
 		}
 		g.GradientApplyTransformPt(sv, xf, lpt)

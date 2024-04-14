@@ -5,25 +5,25 @@ Cogent Core provides customizable meters for displaying bounded numeric values t
 You can make a meter without any custom options:
 
 ```Go
-gi.NewMeter(parent)
+core.NewMeter(parent)
 ```
 
 You can set the value of a meter:
 
 ```Go
-gi.NewMeter(parent).SetValue(0.7)
+core.NewMeter(parent).SetValue(0.7)
 ```
 
 You can set the minimum and maximum values of a meter:
 
 ```Go
-gi.NewMeter(parent).SetMin(5.7).SetMax(18).SetValue(10.2)
+core.NewMeter(parent).SetMin(5.7).SetMax(18).SetValue(10.2)
 ```
 
 You can make a meter render vertically:
 
 ```Go
-gi.NewMeter(parent).Style(func(s *styles.Style) {
+core.NewMeter(parent).Style(func(s *styles.Style) {
     s.Direction = styles.Column
 })
 ```
@@ -31,23 +31,23 @@ gi.NewMeter(parent).Style(func(s *styles.Style) {
 You can make a meter render as a circle:
 
 ```Go
-gi.NewMeter(parent).SetType(gi.MeterCircle)
+core.NewMeter(parent).SetType(core.MeterCircle)
 ```
 
 You can make a meter render as a semicircle:
 
 ```Go
-gi.NewMeter(parent).SetType(gi.MeterSemicircle)
+core.NewMeter(parent).SetType(core.MeterSemicircle)
 ```
 
 You can add text to a circular meter:
 
 ```Go
-gi.NewMeter(parent).SetType(gi.MeterCircle).SetText("50%")
+core.NewMeter(parent).SetType(core.MeterCircle).SetText("50%")
 ```
 
 You can add text to a semicircular meter:
 
 ```Go
-gi.NewMeter(parent).SetType(gi.MeterSemicircle).SetText("50%")
+core.NewMeter(parent).SetType(core.MeterSemicircle).SetText("50%")
 ```

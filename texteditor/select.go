@@ -5,13 +5,13 @@
 package texteditor
 
 import (
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
+	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/mimedata"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/texteditor/textbuf"
@@ -84,14 +84,14 @@ func (ed *Editor) SelectModeToggle() {
 
 // SelectAll selects all the text
 func (ed *Editor) SelectAll() {
-	ed.SelectRegion.Start = lex.PosZero
+	ed.SelectRegion.Start = lexer.PosZero
 	ed.SelectRegion.End = ed.Buffer.EndPos()
 	ed.NeedsRender()
 }
 
-// WordBefore returns the word before the lex.Pos
+// WordBefore returns the word before the lexer.Pos
 // uses IsWordBreak to determine the bounds of the word
-func (ed *Editor) WordBefore(tp lex.Pos) *textbuf.Edit {
+func (ed *Editor) WordBefore(tp lexer.Pos) *textbuf.Edit {
 	txt := ed.Buffer.Line(tp.Ln)
 	ch := tp.Ch
 	ch = min(ch, len(txt))
@@ -103,20 +103,20 @@ func (ed *Editor) WordBefore(tp lex.Pos) *textbuf.Edit {
 		}
 		r1 := txt[i]
 		r2 := txt[i-1]
-		if gi.IsWordBreak(r1, r2) {
+		if core.IsWordBreak(r1, r2) {
 			st = i + 1
 			break
 		}
 	}
 	if st != ch {
-		return ed.Buffer.Region(lex.Pos{Ln: tp.Ln, Ch: st}, tp)
+		return ed.Buffer.Region(lexer.Pos{Ln: tp.Ln, Ch: st}, tp)
 	}
 	return nil
 }
 
 // IsWordStart returns true if the cursor is just before the start of a word
 // word is a string of characters none of which are classified as a word break
-func (ed *Editor) IsWordStart(tp lex.Pos) bool {
+func (ed *Editor) IsWordStart(tp lexer.Pos) bool {
 	txt := ed.Buffer.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
@@ -127,19 +127,19 @@ func (ed *Editor) IsWordStart(tp lex.Pos) bool {
 	}
 	if tp.Ch == 0 { // start of line
 		r := txt[0]
-		if gi.IsWordBreak(r, rune(-1)) {
+		if core.IsWordBreak(r, rune(-1)) {
 			return false
 		}
 		return true
 	}
 	r1 := txt[tp.Ch-1]
 	r2 := txt[tp.Ch]
-	return gi.IsWordBreak(r1, rune(-1)) && !gi.IsWordBreak(r2, rune(-1))
+	return core.IsWordBreak(r1, rune(-1)) && !core.IsWordBreak(r2, rune(-1))
 }
 
 // IsWordEnd returns true if the cursor is just past the last letter of a word
 // word is a string of characters none of which are classified as a word break
-func (ed *Editor) IsWordEnd(tp lex.Pos) bool {
+func (ed *Editor) IsWordEnd(tp lexer.Pos) bool {
 	txt := ed.Buffer.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
@@ -147,27 +147,27 @@ func (ed *Editor) IsWordEnd(tp lex.Pos) bool {
 	}
 	if tp.Ch >= len(txt) { // end of line
 		r := txt[len(txt)-1]
-		if gi.IsWordBreak(r, rune(-1)) {
+		if core.IsWordBreak(r, rune(-1)) {
 			return true
 		}
 		return false
 	}
 	if tp.Ch == 0 { // start of line
 		r := txt[0]
-		if gi.IsWordBreak(r, rune(-1)) {
+		if core.IsWordBreak(r, rune(-1)) {
 			return false
 		}
 		return true
 	}
 	r1 := txt[tp.Ch-1]
 	r2 := txt[tp.Ch]
-	return !gi.IsWordBreak(r1, rune(-1)) && gi.IsWordBreak(r2, rune(-1))
+	return !core.IsWordBreak(r1, rune(-1)) && core.IsWordBreak(r2, rune(-1))
 }
 
 // IsWordMiddle - returns true if the cursor is anywhere inside a word,
 // i.e. the character before the cursor and the one after the cursor
 // are not classified as word break characters
-func (ed *Editor) IsWordMiddle(tp lex.Pos) bool {
+func (ed *Editor) IsWordMiddle(tp lexer.Pos) bool {
 	txt := ed.Buffer.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz < 2 {
@@ -181,7 +181,7 @@ func (ed *Editor) IsWordMiddle(tp lex.Pos) bool {
 	}
 	r1 := txt[tp.Ch-1]
 	r2 := txt[tp.Ch]
-	return !gi.IsWordBreak(r1, rune(-1)) && !gi.IsWordBreak(r2, rune(-1))
+	return !core.IsWordBreak(r1, rune(-1)) && !core.IsWordBreak(r2, rune(-1))
 }
 
 // SelectWord selects the word (whitespace, punctuation delimited) that the cursor is on
@@ -211,13 +211,13 @@ func (ed *Editor) WordAt() (reg textbuf.Region) {
 		return reg
 	}
 	sch := min(ed.CursorPos.Ch, sz-1)
-	if !gi.IsWordBreak(txt[sch], rune(-1)) {
+	if !core.IsWordBreak(txt[sch], rune(-1)) {
 		for sch > 0 {
 			r2 := rune(-1)
 			if sch-2 >= 0 {
 				r2 = txt[sch-2]
 			}
-			if gi.IsWordBreak(txt[sch-1], r2) {
+			if core.IsWordBreak(txt[sch-1], r2) {
 				break
 			}
 			sch--
@@ -229,7 +229,7 @@ func (ed *Editor) WordAt() (reg textbuf.Region) {
 			if ech < sz-1 {
 				r2 = rune(txt[ech+1])
 			}
-			if gi.IsWordBreak(txt[ech], r2) {
+			if core.IsWordBreak(txt[ech], r2) {
 				break
 			}
 			ech++
@@ -238,7 +238,7 @@ func (ed *Editor) WordAt() (reg textbuf.Region) {
 	} else { // keep the space start -- go to next space..
 		ech := ed.CursorPos.Ch + 1
 		for ech < sz {
-			if !gi.IsWordBreak(txt[ech], rune(-1)) {
+			if !core.IsWordBreak(txt[ech], rune(-1)) {
 				break
 			}
 			ech++
@@ -248,7 +248,7 @@ func (ed *Editor) WordAt() (reg textbuf.Region) {
 			if ech < sz-1 {
 				r2 = rune(txt[ech+1])
 			}
-			if gi.IsWordBreak(txt[ech], r2) {
+			if core.IsWordBreak(txt[ech], r2) {
 				break
 			}
 			ech++
@@ -327,7 +327,7 @@ func (ed *Editor) PasteHist() {
 		return
 	}
 	cl := ViewClipHistChooseList()
-	m := gi.NewMenuFromStrings(cl, "", func(idx int) {
+	m := core.NewMenuFromStrings(cl, "", func(idx int) {
 		clip := ViewClipHistory[idx]
 		if clip != nil {
 			ed.Clipboard().Write(mimedata.NewTextBytes(clip))
@@ -336,7 +336,7 @@ func (ed *Editor) PasteHist() {
 			ed.NeedsRender()
 		}
 	})
-	gi.NewMenuStage(m, ed, ed.CursorBBox(ed.CursorPos).Min).Run()
+	core.NewMenuStage(m, ed, ed.CursorBBox(ed.CursorPos).Min).Run()
 }
 
 // Cut cuts any selected text and adds it to the clipboard, also returns cut text
@@ -385,9 +385,9 @@ func (ed *Editor) Copy(reset bool) *textbuf.Edit {
 
 // Paste inserts text from the clipboard at current cursor position
 func (ed *Editor) Paste() {
-	data := ed.Clipboard().Read([]string{fi.TextPlain})
+	data := ed.Clipboard().Read([]string{fileinfo.TextPlain})
 	if data != nil {
-		ed.InsertAtCursor(data.TypeData(fi.TextPlain))
+		ed.InsertAtCursor(data.TypeData(fileinfo.TextPlain))
 		ed.SavePosHistory(ed.CursorPos)
 	}
 	ed.NeedsRender()
@@ -426,7 +426,7 @@ func (ed *Editor) CutRect() *textbuf.Edit {
 	if !ed.HasSelection() {
 		return nil
 	}
-	npos := lex.Pos{Ln: ed.SelectRegion.End.Ln, Ch: ed.SelectRegion.Start.Ch}
+	npos := lexer.Pos{Ln: ed.SelectRegion.End.Ln, Ch: ed.SelectRegion.Start.Ch}
 	cut := ed.Buffer.DeleteTextRect(ed.SelectRegion.Start, ed.SelectRegion.End, EditSignal)
 	if cut != nil {
 		cb := cut.ToBytes()
@@ -506,25 +506,25 @@ func (ed *Editor) ShowContextMenu(e events.Event) {
 }
 
 // ContextMenu builds the text editor context menu
-func (ed *Editor) ContextMenu(m *gi.Scene) {
-	gi.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).
-		SetKey(keyfun.Copy).SetState(!ed.HasSelection(), states.Disabled).
+func (ed *Editor) ContextMenu(m *core.Scene) {
+	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).
+		SetKey(keymap.Copy).SetState(!ed.HasSelection(), states.Disabled).
 		OnClick(func(e events.Event) {
 			ed.Copy(true)
 		})
 	if !ed.IsReadOnly() {
-		gi.NewButton(m).SetText("Cut").SetIcon(icons.ContentCopy).
-			SetKey(keyfun.Cut).SetState(!ed.HasSelection(), states.Disabled).
+		core.NewButton(m).SetText("Cut").SetIcon(icons.ContentCopy).
+			SetKey(keymap.Cut).SetState(!ed.HasSelection(), states.Disabled).
 			OnClick(func(e events.Event) {
 				ed.Cut()
 			})
-		gi.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).
-			SetKey(keyfun.Paste).SetState(ed.Clipboard().IsEmpty(), states.Disabled).
+		core.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).
+			SetKey(keymap.Paste).SetState(ed.Clipboard().IsEmpty(), states.Disabled).
 			OnClick(func(e events.Event) {
 				ed.Paste()
 			})
 	} else {
-		gi.NewButton(m).SetText("Clear").SetIcon(icons.ClearAll).
+		core.NewButton(m).SetText("Clear").SetIcon(icons.ClearAll).
 			OnClick(func(e events.Event) {
 				ed.Clear()
 			})

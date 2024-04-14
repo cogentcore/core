@@ -16,8 +16,8 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/grows/images"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/iox/imagex"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/scan"
 	"golang.org/x/image/math/fixed"
 )
@@ -242,16 +242,16 @@ func TestRoundRect(t *testing.T) {
 	f.Draw()
 	f.Clear()
 
-	images.Assert(t, img, "roundRect")
+	imagex.Assert(t, img, "roundRect")
 }
 
-func isClose(a, b mat32.Mat2, epsilon float32) bool {
-	return !(mat32.Abs(a.XX-b.XX) > epsilon ||
-		mat32.Abs(a.YX-b.YX) > epsilon ||
-		mat32.Abs(a.XY-b.XY) > epsilon ||
-		mat32.Abs(a.YY-b.YY) > epsilon ||
-		mat32.Abs(a.X0-b.X0) > epsilon ||
-		mat32.Abs(a.Y0-b.Y0) > epsilon)
+func isClose(a, b math32.Matrix2, epsilon float32) bool {
+	return !(math32.Abs(a.XX-b.XX) > epsilon ||
+		math32.Abs(a.YX-b.YX) > epsilon ||
+		math32.Abs(a.XY-b.XY) > epsilon ||
+		math32.Abs(a.YY-b.YY) > epsilon ||
+		math32.Abs(a.X0-b.X0) > epsilon ||
+		math32.Abs(a.Y0-b.Y0) > epsilon)
 }
 
 func TestCircleLineIntersect(t *testing.T) {
@@ -353,7 +353,7 @@ func TestShapes(t *testing.T) {
 	s.Draw()
 	s.Clear()
 
-	images.Assert(t, img, "shapeT1")
+	imagex.Assert(t, img, "shapeT1")
 
 	s.SetStroke(4<<6, 2<<6, SquareCap, nil, RoundGap, ArcClip)
 	getOpenCubicPath2().AddTo(s)
@@ -362,7 +362,7 @@ func TestShapes(t *testing.T) {
 	s.Draw()
 	s.Clear()
 
-	images.Assert(t, img, "shapeT2")
+	imagex.Assert(t, img, "shapeT2")
 
 	s.SetStroke(25<<6, 200<<6, CubicCap, CubicCap, CubicGap, ArcClip)
 	p := getOpenCubicPath2()
@@ -374,7 +374,7 @@ func TestShapes(t *testing.T) {
 	s.Clear()
 	p.Clear()
 
-	images.Assert(t, img, "shapeT3")
+	imagex.Assert(t, img, "shapeT3")
 
 	d.SetBounds(-20, -12) // Test min x and y value checking
 
@@ -424,7 +424,7 @@ func doShapes(t *testing.T, f Scanner, fa Adder, fname string, img image.Image) 
 	f.Draw()
 	f.Clear()
 
-	images.Assert(t, img, fname)
+	imagex.Assert(t, img, fname)
 }
 
 func TestFindElipsecenter(t *testing.T) {
@@ -454,13 +454,13 @@ func TestGradient(t *testing.T) {
 	)
 
 	linear := gradient.NewLinear().
-		SetBox(mat32.B2(50, 50, 150, 150)).
+		SetBox(math32.B2(50, 50, 150, 150)).
 		AddStop(colors.Aquamarine, 0.3).
 		AddStop(colors.Skyblue, 0.6).
 		AddStop(colors.ApplyOpacity(colors.Darksalmon, 0.75), 1)
 
 	radial := gradient.NewRadial().
-		SetBox(mat32.B2(230, 230, 330, 330)).SetSpread(gradient.Reflect).
+		SetBox(math32.B2(230, 230, 330, 330)).SetSpread(gradient.Reflect).
 		AddStop(colors.Orchid, 0.3).
 		AddStop(colors.Bisque, 0.6).
 		AddStop(colors.ApplyOpacity(colors.Chartreuse, 0.4), 1)
@@ -473,7 +473,7 @@ func TestGradient(t *testing.T) {
 	f := &d.Filler // This is the anon Filler in the Dasher. It also satisfies
 	// the Rasterizer interface, and can only perform a fill on the path.
 
-	offsetPath := &MatrixAdder{Adder: f, M: mat32.Identity2().Translate(180, 180)}
+	offsetPath := &MatrixAdder{Adder: f, M: math32.Identity2().Translate(180, 180)}
 
 	p.AddTo(offsetPath)
 
@@ -482,18 +482,18 @@ func TestGradient(t *testing.T) {
 	f.Clear()
 
 	scanner.SetClip(image.Rect(420, 350, 460, 400))
-	offsetPath.M = mat32.Identity2().Translate(340, 180)
+	offsetPath.M = math32.Identity2().Translate(340, 180)
 	scanner.SetColor(radial)
 	p.AddTo(offsetPath)
 	f.Draw()
 	f.Clear()
 	scanner.SetClip(image.ZR)
-	offsetPath.M = mat32.Identity2().Translate(180, 340)
+	offsetPath.M = math32.Identity2().Translate(180, 340)
 	p.AddTo(offsetPath)
 	f.Draw()
 	f.Clear()
 	offsetPath.Reset()
-	if isClose(offsetPath.M, mat32.Identity2(), 1e-12) == false {
+	if isClose(offsetPath.M, math32.Identity2(), 1e-12) == false {
 		t.Error("path reset failed", offsetPath)
 	}
 
@@ -521,14 +521,14 @@ func TestGradient(t *testing.T) {
 	f.Clear()
 
 	radial.SetUnits(gradient.ObjectBoundingBox).
-		SetFocal(mat32.Vec2{}).SetRadius(mat32.V2Scalar(0.2)) // move focus away from
+		SetFocal(math32.Vector2{}).SetRadius(math32.Vector2Scalar(0.2)) // move focus away from
 	scanner.SetColor(radial)
 	AddRect(300, 210, 450, 300, 0, f)
 	f.Draw()
 	f.Clear()
 
 	radial.SetUnits(gradient.UserSpaceOnUse).SetSpread(gradient.Pad).
-		SetFocal(mat32.V2(0.1, 0.1)).SetRadius(mat32.V2Scalar(0.5)) // move focus away from center
+		SetFocal(math32.Vec2(0.1, 0.1)).SetRadius(math32.Vector2Scalar(0.5)) // move focus away from center
 	scanner.SetColor(radial)
 	AddRect(20, 160, 150, 310, 0, f)
 	f.Draw()
@@ -548,8 +548,8 @@ func TestGradient(t *testing.T) {
 
 	// Lets try a sinusoidal grid pattern.
 	cf := func(x, y int) color.Color {
-		sinx, siny, sinxy := mat32.Sin(float32(x)*mat32.Pi/20), mat32.Sin(float32(y)*mat32.Pi/10),
-			mat32.Sin(float32(y+x)*mat32.Pi/30)
+		sinx, siny, sinxy := math32.Sin(float32(x)*math32.Pi/20), math32.Sin(float32(y)*math32.Pi/10),
+			math32.Sin(float32(y+x)*math32.Pi/30)
 		r := (1 + sinx) * 120
 		g := (1 + siny) * 120
 		b := (1 + sinxy) * 120
@@ -562,7 +562,7 @@ func TestGradient(t *testing.T) {
 	f.Draw()
 	f.Clear()
 
-	images.Assert(t, img, "grad")
+	imagex.Assert(t, img, "grad")
 }
 
 // TestMultiFunction tests a Dasher's ability to function
@@ -611,5 +611,5 @@ func TestMultiFunction(t *testing.T) {
 	d.Draw()
 	d.Clear()
 
-	images.Assert(t, img, "tmf")
+	imagex.Assert(t, img, "tmf")
 }

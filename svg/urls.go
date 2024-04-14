@@ -12,8 +12,8 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/ki"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/reflectx"
+	"cogentcore.org/core/tree"
 )
 
 /////////////////////////////////////////////////////////////////////////////
@@ -68,9 +68,9 @@ func NameID(nm string, id int) string {
 // It automatically renames any that are not unique or empty.
 func (sv *SVG) GatherIDs() {
 	sv.UniqueIds = make(map[int]struct{})
-	sv.Root.WalkPre(func(k ki.Ki) bool {
+	sv.Root.WalkDown(func(k tree.Node) bool {
 		sv.NodeEnsureUniqueId(k.(Node))
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -153,12 +153,12 @@ func (sv *SVG) FindNamedElement(name string) Node {
 	if def != nil {
 		return def
 	}
-	sv.Root.WalkPre(func(k ki.Ki) bool {
+	sv.Root.WalkDown(func(k tree.Node) bool {
 		if k.Name() == name {
 			def = k.This().(Node)
-			return ki.Break
+			return tree.Break
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	if def != nil {
 		return def
@@ -192,7 +192,7 @@ func NameToURL(nm string) string {
 // NodeFindURL finds a url element in the parent SVG of given node.
 // Returns nil if not found.
 // Works with full 'url(#Name)' string or plain name or "none"
-func (sv *SVG) NodeFindURL(gi Node, url string) Node {
+func (sv *SVG) NodeFindURL(n Node, url string) Node {
 	if url == "none" {
 		return nil
 	}
@@ -205,7 +205,7 @@ func (sv *SVG) NodeFindURL(gi Node, url string) Node {
 	}
 	rv := sv.FindNamedElement(ref)
 	if rv == nil {
-		log.Printf("svg.NodeFindURL could not find element named: %s for element: %s\n", url, gi.Path())
+		log.Printf("svg.NodeFindURL could not find element named: %s for element: %s\n", url, n.Path())
 	}
 	return rv
 }
@@ -213,8 +213,8 @@ func (sv *SVG) NodeFindURL(gi Node, url string) Node {
 // NodePropURL returns a url(#name) url from given prop name on node,
 // or empty string if none.  Returned value is just the 'name' part
 // of the url, not the full string.
-func NodePropURL(gi Node, prop string) string {
-	fp := gi.Prop(prop)
+func NodePropURL(n Node, prop string) string {
+	fp := n.Property(prop)
 	fs, iss := fp.(string)
 	if !iss {
 		return ""
@@ -224,10 +224,10 @@ func NodePropURL(gi Node, prop string) string {
 
 const SVGRefCountKey = "SVGRefCount"
 
-func IncRefCount(k ki.Ki) {
-	rc := k.Prop(SVGRefCountKey).(int)
+func IncRefCount(k tree.Node) {
+	rc := k.Property(SVGRefCountKey).(int)
 	rc++
-	k.SetProp(SVGRefCountKey, rc)
+	k.SetProperty(SVGRefCountKey, rc)
 }
 
 // RemoveOrphanedDefs removes any items from Defs that are not actually referred to
@@ -237,12 +237,12 @@ func IncRefCount(k ki.Ki) {
 func (sv *SVG) RemoveOrphanedDefs() bool {
 	refkey := SVGRefCountKey
 	for _, k := range sv.Defs.Kids {
-		k.SetProp(refkey, 0)
+		k.SetProperty(refkey, 0)
 	}
-	sv.Root.WalkPre(func(k ki.Ki) bool {
+	sv.Root.WalkDown(func(k tree.Node) bool {
 		pr := k.Properties()
-		for _, v := range *pr {
-			ps := laser.ToString(v)
+		for _, v := range pr {
+			ps := reflectx.ToString(v)
 			if !strings.HasPrefix(ps, "url(#") {
 				continue
 			}
@@ -264,19 +264,19 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 				}
 			}
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	sz := len(sv.Defs.Kids)
 	del := false
 	for i := sz - 1; i >= 0; i-- {
 		k := sv.Defs.Kids[i]
-		rc := k.Prop(refkey).(int)
+		rc := k.Property(refkey).(int)
 		if rc == 0 {
 			fmt.Printf("Deleting unused item: %s\n", k.Name())
 			sv.Defs.Kids.DeleteAtIndex(i)
 			del = true
 		} else {
-			k.DeleteProp(refkey)
+			k.DeleteProperty(refkey)
 		}
 	}
 	return del

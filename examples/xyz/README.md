@@ -2,7 +2,7 @@
 
 This demo shows the basic functionality of the 3D rendering framework in Cogent Core.  
 
-The gopher object that is imported is borrowed from: https://github.com/g3n/engine, which also served as the source / reference for a lot of the 3D code, including especially the mat32 math library, the file importing code, and the opengl shader programs.
+The gopher object that is imported is borrowed from: https://github.com/g3n/engine, which also served as the source / reference for a lot of the 3D code, including especially the math32 math library, the file importing code, and the opengl shader programs.
 
 ## Installation
 
@@ -79,7 +79,7 @@ Changing colors in the materials, and turning off `Mat.CullBack` are also useful
     
     + `Textures` are the library of `Texture` files that define more complex colored surfaces for objects.  These can be loaded from standard image files.
     
-    + `Solid`s are the Children of the Scene, and actually determine the content of the 3D scene.  Each Solid has a `Mesh` field with the name of the mesh that defines its shape, and a `Mat` field that determines its material properties (Color, Texture, etc).  In addition, each Solid has its own `Pose` field that determines its position, scale and orientation within the scene.  Because each `Solid` is a `ki.Ki` tree node, it can contain other scene elements as its Children -- they will inherit the `Pose` settings of the parent (and so-on up the tree -- all poses are cumulative) but *not* automatically any material settings.  You can call `CopyMatToChildren` if you want to apply the current materials to the children nodes.  And use Style parameters to set these according to node name or Class name.
+    + `Solid`s are the Children of the Scene, and actually determine the content of the 3D scene.  Each Solid has a `Mesh` field with the name of the mesh that defines its shape, and a `Mat` field that determines its material properties (Color, Texture, etc).  In addition, each Solid has its own `Pose` field that determines its position, scale and orientation within the scene.  Because each `Solid` is a `tree.Node`, it can contain other scene elements as its Children -- they will inherit the `Pose` settings of the parent (and so-on up the tree -- all poses are cumulative) but *not* automatically any material settings.  You can call `CopyMatToChildren` if you want to apply the current materials to the children nodes.  And use Style parameters to set these according to node name or Class name.
 
     + `Group`s can be used to apply `Pose` settings to a set of Children that are all grouped together (e.g., a multi-part complex object can be moved together etc by putting a set of `Solid`s into a Group)
    

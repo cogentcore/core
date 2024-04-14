@@ -23,7 +23,7 @@ import (
 	"image/color"
 
 	"cogentcore.org/core/cam/cie"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 const (
@@ -58,8 +58,8 @@ func ContrastRatio(a, b color.Color) float32 {
 // The contrast ratio will be between 1 and 21, and the tones should be
 // between 0 and 100 and will be clamped to such.
 func ToneContrastRatio(a, b float32) float32 {
-	a = mat32.Clamp(a, 0, 100)
-	b = mat32.Clamp(b, 0, 100)
+	a = math32.Clamp(a, 0, 100)
+	b = math32.Clamp(b, 0, 100)
 	return ContrastRatioOfYs(cie.LToY(a), cie.LToY(b))
 }
 
@@ -176,7 +176,7 @@ func ContrastToneLighterTry(tone, ratio float32) (float32, bool) {
 	darkY := cie.LToY(tone)
 	lightY := ratio*(darkY+5) - 5
 	realContrast := ContrastRatioOfYs(lightY, darkY)
-	delta := mat32.Abs(realContrast - ratio)
+	delta := math32.Abs(realContrast - ratio)
 	if realContrast < ratio && delta > 0.04 {
 		return -1, false
 	}
@@ -204,7 +204,7 @@ func ContrastToneDarkerTry(tone, ratio float32) (float32, bool) {
 	lightY := cie.LToY(tone)
 	darkY := ((lightY + 5) / ratio) - 5
 	realContrast := ContrastRatioOfYs(lightY, darkY)
-	delta := mat32.Abs(realContrast - ratio)
+	delta := math32.Abs(realContrast - ratio)
 	if realContrast < ratio && delta > 0.04 {
 		return -1, false
 	}

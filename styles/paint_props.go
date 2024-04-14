@@ -12,19 +12,19 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/grr"
-	"cogentcore.org/core/laser"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/errors"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/units"
 )
 
 ////////////////////////////////////////////////////////////////////////////
 //   Styling functions for setting from properties
-//     see style_props.go for master version
+//     see style_properties.go for master version
 
-// StyleFromProps sets style field values based on map[string]any properties
-func (pc *Paint) StyleFromProps(parent *Paint, props map[string]any, cc colors.Context) {
-	for key, val := range props {
+// StyleFromProperties sets style field values based on map[string]any properties
+func (pc *Paint) StyleFromProperties(parent *Paint, properties map[string]any, cc colors.Context) {
+	for key, val := range properties {
 		if len(key) == 0 {
 			continue
 		}
@@ -40,7 +40,7 @@ func (pc *Paint) StyleFromProps(parent *Paint, props map[string]any, cc colors.C
 				}
 				return
 			}
-			sval := laser.ToString(val)
+			sval := reflectx.ToString(val)
 			switch sval {
 			case "none":
 				pc.Display = false
@@ -113,7 +113,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		fs.Color = grr.Log1(gradient.FromAny(val, cc))
+		fs.Color = errors.Log1(gradient.FromAny(val, cc))
 	},
 	"stroke-opacity": StyleFuncFloat(float32(1),
 		func(obj *Stroke) *float32 { return &(obj.Opacity) }),
@@ -135,9 +135,9 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 		case string:
 			fs.Dashes = ParseDashesString(vt)
 		case []float32:
-			mat32.CopyFloat32s(&fs.Dashes, vt)
+			math32.CopyFloat32s(&fs.Dashes, vt)
 		case *[]float32:
-			mat32.CopyFloat32s(&fs.Dashes, *vt)
+			math32.CopyFloat32s(&fs.Dashes, *vt)
 		}
 	},
 	"stroke-linecap": StyleFuncEnum(LineCapButt,
@@ -163,7 +163,7 @@ var StyleFillFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		fs.Color = grr.Log1(gradient.FromAny(val, cc))
+		fs.Color = errors.Log1(gradient.FromAny(val, cc))
 	},
 	"fill-opacity": StyleFuncFloat(float32(1),
 		func(obj *Fill) *float32 { return &(obj.Opacity) }),
@@ -184,16 +184,16 @@ var StylePaintFuncs = map[string]StyleFunc{
 			if inh {
 				pc.Transform = parent.(*Paint).Transform
 			} else if init {
-				pc.Transform = mat32.Identity2()
+				pc.Transform = math32.Identity2()
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
 			pc.Transform.SetString(vt)
-		case *mat32.Mat2:
+		case *math32.Matrix2:
 			pc.Transform = *vt
-		case mat32.Mat2:
+		case math32.Matrix2:
 			pc.Transform = vt
 		}
 	},
@@ -209,7 +209,7 @@ func ParseDashesString(str string) []float32 {
 	for i, dstr := range ds {
 		d, err := strconv.ParseFloat(strings.TrimSpace(dstr), 32)
 		if err != nil {
-			log.Printf("gi.ParseDashesString parsing error: %v\n", err)
+			log.Printf("core.ParseDashesString parsing error: %v\n", err)
 			return nil
 		}
 		dl[i] = float32(d)

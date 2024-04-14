@@ -13,7 +13,7 @@ package enumgen
 
 // Config contains the configuration information
 // used by enumgen
-type Config struct { //gti:add
+type Config struct { //types:add
 
 	// the source directory to run enumgen on (can be set to multiple through paths like ./...)
 	Dir string `default:"." posarg:"0" required:"-"`

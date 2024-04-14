@@ -5,11 +5,11 @@ Cogent Core provides tooltips that give the user additional information about a 
 You can set the tooltip of any widget:
 
 ```Go
-gi.NewButton(parent).SetIcon(icons.Add).SetTooltip("Add a new item to the list")
+core.NewButton(parent).SetIcon(icons.Add).SetTooltip("Add a new item to the list")
 ```
 
-Some widgets automatically add certain information to their tooltip by implementing the [[gi.Widget.WidgetTooltip]] method, like sliders:
+Some widgets automatically add certain information to their tooltip by implementing the [[core.Widget.WidgetTooltip]] method, like sliders:
 
 ```Go
-gi.NewSlider(parent)
+core.NewSlider(parent)
 ```

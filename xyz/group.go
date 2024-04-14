@@ -7,8 +7,8 @@ package xyz
 import (
 	"sort"
 
-	"cogentcore.org/core/ki"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/tree"
 )
 
 // Group collects individual elements in a scene but does not have a Mesh or Material of
@@ -28,7 +28,7 @@ func (gp *Group) UpdateMeshBBox() {
 			continue
 		}
 		ni.PoseMu.RLock()
-		nbb := ni.MeshBBox.BBox.MulMat4(&ni.Pose.Matrix)
+		nbb := ni.MeshBBox.BBox.MulMatrix4(&ni.Pose.Matrix)
 		ni.PoseMu.RUnlock()
 		gp.MeshBBox.BBox.ExpandByPoint(nbb.Min)
 		gp.MeshBBox.BBox.ExpandByPoint(nbb.Max)
@@ -73,29 +73,29 @@ func (gp *Group) SetEulerRotation(x, y, z float32) *Group {
 // SolidPoint contains a Solid and a Point on that solid
 type SolidPoint struct {
 	Solid *Solid
-	Point mat32.Vec3
+	Point math32.Vector3
 }
 
 // RaySolidIntersections returns a list of solids whose bounding box intersects
 // with the given ray, with the point of intersection.  Results are sorted
 // from closest to furthest.
-func (gp *Group) RaySolidIntersections(ray mat32.Ray) []*SolidPoint {
+func (gp *Group) RaySolidIntersections(ray math32.Ray) []*SolidPoint {
 	var sp []*SolidPoint
-	gp.WalkPre(func(k ki.Ki) bool {
+	gp.WalkDown(func(k tree.Node) bool {
 		ni, nb := AsNode(k)
 		if ni == nil {
-			return ki.Break // going into a different type of thing, bail
+			return tree.Break // going into a different type of thing, bail
 		}
 		pt, has := ray.IntersectBox(nb.WorldBBox.BBox)
 		if !has {
-			return ki.Break
+			return tree.Break
 		}
 		if !ni.IsSolid() {
-			return ki.Continue
+			return tree.Continue
 		}
 		sd := ni.AsSolid()
 		sp = append(sp, &SolidPoint{sd, pt})
-		return ki.Break
+		return tree.Break
 	})
 
 	sort.Slice(sp, func(i, j int) bool {

@@ -76,7 +76,7 @@ func (sm *Sampler) Config(gp *GPU, dev vk.Device) {
 		AddressModeV:            sm.VMode.VkMode(),
 		AddressModeW:            sm.WMode.VkMode(),
 		AnisotropyEnable:        vk.True,
-		MaxAnisotropy:           gp.GPUProps.Limits.MaxSamplerAnisotropy,
+		MaxAnisotropy:           gp.GPUProperties.Limits.MaxSamplerAnisotropy,
 		BorderColor:             sm.Border.VkColor(),
 		UnnormalizedCoordinates: vk.False,
 		CompareEnable:           vk.False,

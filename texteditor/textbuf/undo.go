@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/parse/lexer"
 )
 
 // UndoTrace; set to true to get a report of undo actions
@@ -197,7 +197,7 @@ func (un *Undo) RedoNextIfGroup(gp int) *Edit {
 // for any edits that have taken place since that time (using the Undo stack).
 // del determines what to do with positions within a deleted region -- either move
 // to start or end of the region, or return an error
-func (un *Undo) AdjustPos(pos lex.Pos, t time.Time, del AdjustPosDel) lex.Pos {
+func (un *Undo) AdjustPos(pos lexer.Pos, t time.Time, del AdjustPosDel) lexer.Pos {
 	if un.Off {
 		return pos
 	}
@@ -205,7 +205,7 @@ func (un *Undo) AdjustPos(pos lex.Pos, t time.Time, del AdjustPosDel) lex.Pos {
 	defer un.Mu.Unlock()
 	for _, utbe := range un.Stack {
 		pos = utbe.AdjustPosIfAfterTime(pos, t, del)
-		if pos == lex.PosErr {
+		if pos == lexer.PosErr {
 			return pos
 		}
 	}

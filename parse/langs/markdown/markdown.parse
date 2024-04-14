@@ -1,0 +1,1220 @@
+{
+  "Lexer": {
+    "Nm": "Lexer",
+    "UniqueNm": "Lexer",
+    "Properties": null,
+    "Kids": [
+      {
+        "n": 26,
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "InCode",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "InLinkAttr",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "InLinkAddr",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "InLinkTag",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "LetterText",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "CodeStart",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "HeadPound",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "ItemCheck",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "ItemStar",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "ItemPlus",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "ItemMinus",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "NumList",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "CommentStart",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "QuotePara",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "BoldStars",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "BoldUnders",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "ItemStarSub",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "ItemPlusSub",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "ItemMinusSub",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "LinkTag",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "BacktickCode",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "Quote_021",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "Apostrophe",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "EmphStar",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "EmphUnder",
+        "type": "cogentcore.org/core/parse/lexer.Rule",
+        "name": "AnyText"
+      },
+      {
+        "Nm": "InCode",
+        "UniqueNm": "InCode",
+        "Properties": null,
+        "Kids": [
+          {
+            "n": 2,
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "CodeEnd",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "AnyCode"
+          },
+          {
+            "Nm": "CodeEnd",
+            "UniqueNm": "CodeEnd",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "LitStrBacktick",
+            "Match": "String",
+            "Pos": "StartOfLine",
+            "String": "```",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "PopGuestLex",
+              "PopState",
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "AnyCode",
+            "UniqueNm": "AnyCode",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "LitStrBacktick",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
+        "Desc": "",
+        "Token": "None",
+        "Match": "CurState",
+        "Pos": "AnyPos",
+        "String": "Code",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": null,
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "InLinkAttr",
+        "UniqueNm": "InLinkAttr",
+        "Properties": null,
+        "Kids": [
+          {
+            "n": 2,
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "EndLinkAttr",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "AnyLinkAttr"
+          },
+          {
+            "Nm": "EndLinkAttr",
+            "UniqueNm": "EndLinkAttr",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "NameVar",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "}",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "PopState",
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "AnyLinkAttr",
+            "UniqueNm": "AnyLinkAttr",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "NameVar",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
+        "Desc": "",
+        "Token": "None",
+        "Match": "CurState",
+        "Pos": "AnyPos",
+        "String": "LinkAttr",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": null,
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "InLinkAddr",
+        "UniqueNm": "InLinkAddr",
+        "Properties": null,
+        "Kids": [
+          {
+            "n": 3,
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "LinkAttr",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "EndLinkAddr",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "AnyLinkAddr"
+          },
+          {
+            "Nm": "LinkAttr",
+            "UniqueNm": "LinkAttr",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "NameAttribute",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "){",
+            "Offset": 0,
+            "SizeAdj": -1,
+            "Acts": [
+              "PopState",
+              "PushState",
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "LinkAttr",
+            "NameMap": false
+          },
+          {
+            "Nm": "EndLinkAddr",
+            "UniqueNm": "EndLinkAddr",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "NameAttribute",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": ")",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "PopState",
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "AnyLinkAddr",
+            "UniqueNm": "AnyLinkAddr",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "NameAttribute",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
+        "Desc": "",
+        "Token": "None",
+        "Match": "CurState",
+        "Pos": "AnyPos",
+        "String": "LinkAddr",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": null,
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "InLinkTag",
+        "UniqueNm": "InLinkTag",
+        "Properties": null,
+        "Kids": [
+          {
+            "n": 3,
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "LinkAddr",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "EndLinkTag",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "AnyLinkTag"
+          },
+          {
+            "Nm": "LinkAddr",
+            "UniqueNm": "LinkAddr",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "NameTag",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "](",
+            "Offset": 0,
+            "SizeAdj": -1,
+            "Acts": [
+              "PopState",
+              "PushState",
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "LinkAddr",
+            "NameMap": false
+          },
+          {
+            "Nm": "EndLinkTag",
+            "UniqueNm": "EndLinkTag",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "for a plain tag with no addr",
+            "Token": "NameTag",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "]",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "PopState",
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "AnyLinkTag",
+            "UniqueNm": "AnyLinkTag",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "NameTag",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
+        "Desc": "",
+        "Token": "None",
+        "Match": "CurState",
+        "Pos": "AnyPos",
+        "String": "LinkTag",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": null,
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "LetterText",
+        "UniqueNm": "LetterText",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "optimization for plain letters which are always text",
+        "Token": "Text",
+        "Match": "Letter",
+        "Pos": "AnyPos",
+        "String": "",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "CodeStart",
+        "UniqueNm": "CodeStart",
+        "Properties": null,
+        "Kids": [
+          {
+            "n": 2,
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "CodeLang",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "CodePlain"
+          },
+          {
+            "Nm": "CodeLang",
+            "UniqueNm": "CodeLang",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "KeywordNamespace",
+            "Match": "Letter",
+            "Pos": "AnyPos",
+            "String": "",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Name",
+              "SetGuestLex"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "CodePlain",
+            "UniqueNm": "CodePlain",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "LitStrBacktick",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
+        "Desc": "",
+        "Token": "LitStrBacktick",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "```",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next",
+          "PushState"
+        ],
+        "Until": "",
+        "PushState": "Code",
+        "NameMap": false
+      },
+      {
+        "Nm": "HeadPound",
+        "UniqueNm": "HeadPound",
+        "Properties": null,
+        "Kids": [
+          {
+            "n": 2,
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "HeadPound2",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "Heading"
+          },
+          {
+            "Nm": "HeadPound2",
+            "UniqueNm": "HeadPound2",
+            "Properties": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "cogentcore.org/core/parse/lexer.Rule",
+                "name": "HeadPound3",
+                "type": "cogentcore.org/core/parse/lexer.Rule",
+                "name": "SubHeading"
+              },
+              {
+                "Nm": "HeadPound3",
+                "UniqueNm": "HeadPound3",
+                "Properties": null,
+                "Kids": [
+                  {
+                    "n": 1,
+                    "type": "cogentcore.org/core/parse/lexer.Rule",
+                    "name": "SubSubHeading"
+                  },
+                  {
+                    "Nm": "SubSubHeading",
+                    "UniqueNm": "SubSubHeading",
+                    "Properties": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "",
+                    "Token": "TextStyleSubheading",
+                    "Match": "AnyRune",
+                    "Pos": "AnyPos",
+                    "String": "",
+                    "Offset": 3,
+                    "SizeAdj": 0,
+                    "Acts": [
+                      "EOL"
+                    ],
+                    "Until": "",
+                    "PushState": "",
+                    "NameMap": false
+                  }
+                ],
+                "Off": false,
+                "Desc": "",
+                "Token": "None",
+                "Match": "String",
+                "Pos": "AnyPos",
+                "String": "#",
+                "Offset": 2,
+                "SizeAdj": 0,
+                "Acts": null,
+                "Until": "",
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "SubHeading",
+                "UniqueNm": "SubHeading",
+                "Properties": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "TextStyleSubheading",
+                "Match": "WhiteSpace",
+                "Pos": "AnyPos",
+                "String": "",
+                "Offset": 2,
+                "SizeAdj": 0,
+                "Acts": [
+                  "EOL"
+                ],
+                "Until": "",
+                "PushState": "",
+                "NameMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
+            "Token": "None",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "#",
+            "Offset": 1,
+            "SizeAdj": 0,
+            "Acts": null,
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "Heading",
+            "UniqueNm": "Heading",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "TextStyleHeading",
+            "Match": "WhiteSpace",
+            "Pos": "AnyPos",
+            "String": "",
+            "Offset": 1,
+            "SizeAdj": 0,
+            "Acts": [
+              "EOL"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
+        "Desc": "",
+        "Token": "None",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "#",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": null,
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "ItemCheck",
+        "UniqueNm": "ItemCheck",
+        "Properties": null,
+        "Kids": [
+          {
+            "n": 2,
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "ItemCheckDone",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "ItemCheckTodo"
+          },
+          {
+            "Nm": "ItemCheckDone",
+            "UniqueNm": "ItemCheckDone",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "KeywordType",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "- [x] ",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "ItemCheckTodo",
+            "UniqueNm": "ItemCheckTodo",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "NameException",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "- [ ] ",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
+        "Desc": "",
+        "Token": "KeywordType",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "- [",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "ItemStar",
+        "UniqueNm": "ItemStar",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "note: these all have a space after them!",
+        "Token": "Keyword",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "* ",
+        "Offset": 0,
+        "SizeAdj": -1,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "ItemPlus",
+        "UniqueNm": "ItemPlus",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "Keyword",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "+ ",
+        "Offset": 0,
+        "SizeAdj": -1,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "ItemMinus",
+        "UniqueNm": "ItemMinus",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "Keyword",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "- ",
+        "Offset": 0,
+        "SizeAdj": -1,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "NumList",
+        "UniqueNm": "NumList",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "Keyword",
+        "Match": "Digit",
+        "Pos": "StartOfLine",
+        "String": "",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "CommentStart",
+        "UniqueNm": "CommentStart",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "Comment",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "\u003c!---",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "ReadUntil"
+        ],
+        "Until": "--\u003e",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "QuotePara",
+        "UniqueNm": "QuotePara",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "TextStyleUnderline",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "\u003e ",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "EOL"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "BoldStars",
+        "UniqueNm": "BoldStars",
+        "Properties": null,
+        "Kids": [
+          {
+            "n": 1,
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "BoldText"
+          },
+          {
+            "Nm": "BoldText",
+            "UniqueNm": "BoldText",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "TextStyleStrong",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "ReadUntil"
+            ],
+            "Until": "**",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
+        "Desc": "",
+        "Token": "TextStyleStrong",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": " **",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "**",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "BoldUnders",
+        "UniqueNm": "BoldUnders",
+        "Properties": null,
+        "Kids": [
+          {
+            "n": 1,
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "BoldText"
+          },
+          {
+            "Nm": "BoldText",
+            "UniqueNm": "BoldText",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "TextStyleStrong",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "ReadUntil"
+            ],
+            "Until": "__",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
+        "Desc": "",
+        "Token": "TextStyleStrong",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": " __",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "ItemStarSub",
+        "UniqueNm": "ItemStarSub",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "note all have space after",
+        "Token": "Keyword",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "* ",
+        "Offset": 4,
+        "SizeAdj": -1,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "ItemPlusSub",
+        "UniqueNm": "ItemPlusSub",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "Keyword",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "+ ",
+        "Offset": 4,
+        "SizeAdj": -1,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "ItemMinusSub",
+        "UniqueNm": "ItemMinusSub",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "Keyword",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "- ",
+        "Offset": 4,
+        "SizeAdj": -1,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "LinkTag",
+        "UniqueNm": "LinkTag",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "NameTag",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "[",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "PushState",
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "LinkTag",
+        "NameMap": false
+      },
+      {
+        "Nm": "BacktickCode",
+        "UniqueNm": "BacktickCode",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "LitStrBacktick",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "`",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "QuotedRaw"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "Quote",
+        "UniqueNm": "Quote_021",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "LitStrDouble",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "\"",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "QuotedRaw"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "Apostrophe",
+        "UniqueNm": "Apostrophe",
+        "Properties": null,
+        "Kids": [
+          {
+            "n": 2,
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "QuoteSingle",
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "Apost"
+          },
+          {
+            "Nm": "QuoteSingle",
+            "UniqueNm": "QuoteSingle",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "LitStrSingle",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "'",
+            "Offset": 2,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "Apost",
+            "UniqueNm": "Apost",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "None",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "'",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
+        "Desc": "",
+        "Token": "LitStrSingle",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "'",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "EmphStar",
+        "UniqueNm": "EmphStar",
+        "Properties": null,
+        "Kids": [
+          {
+            "n": 1,
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "EmphText"
+          },
+          {
+            "Nm": "EmphText",
+            "UniqueNm": "EmphText",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "TextStyleEmph",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "ReadUntil"
+            ],
+            "Until": "*",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
+        "Desc": "",
+        "Token": "TextStyleEmph",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": " *",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "EmphUnder",
+        "UniqueNm": "EmphUnder",
+        "Properties": null,
+        "Kids": [
+          {
+            "n": 1,
+            "type": "cogentcore.org/core/parse/lexer.Rule",
+            "name": "EmphUnder"
+          },
+          {
+            "Nm": "EmphUnder",
+            "UniqueNm": "EmphUnder",
+            "Properties": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "TextStyleEmph",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "ReadUntil"
+            ],
+            "Until": "_",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
+        "Desc": "",
+        "Token": "TextStyleEmph",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": " _",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "AnyText",
+        "UniqueNm": "AnyText",
+        "Properties": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "Text",
+        "Match": "AnyRune",
+        "Pos": "AnyPos",
+        "String": "",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      }
+    ],
+    "Off": false,
+    "Desc": "",
+    "Token": "None",
+    "Match": "String",
+    "Pos": "AnyPos",
+    "String": "",
+    "Offset": 0,
+    "SizeAdj": 0,
+    "Acts": null,
+    "Until": "",
+    "PushState": "",
+    "NameMap": false
+  },
+  "PassTwo": {
+    "DoEos": false,
+    "Eol": false,
+    "Semi": false,
+    "Backslash": false,
+    "RBraceEos": false,
+    "EolToks": null
+  },
+  "Parser": {
+    "Nm": "Parser",
+    "UniqueNm": "Parser",
+    "Properties": null,
+    "Kids": null,
+    "Off": false,
+    "Desc": "",
+    "Rule": "",
+    "StackMatch": "",
+    "Ast": "NoAst",
+    "Acts": null,
+    "OptTokenMap": false,
+    "FirstTokenMap": false
+  },
+  "Filename": "",
+  "ReportErrs": false
+}

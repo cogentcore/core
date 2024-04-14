@@ -5,7 +5,7 @@
 package vshape
 
 import (
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Cylinder is a generalized cylinder shape, including a cone
@@ -95,7 +95,7 @@ func (cy *Cylinder) N() (nVtx, nIndex int) {
 }
 
 // SetCylinderSector sets points in given allocated arrays
-func (cy *Cylinder) Set(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
+func (cy *Cylinder) Set(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32) {
 	cy.CBBox = SetCylinderSector(vtxAry, normAry, texAry, idxAry, cy.VtxOff, cy.IndexOff, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, cy.Pos)
 }
 
@@ -123,7 +123,7 @@ func CylinderSectorN(radialSegs, heightSegs int, top, bottom bool) (nVtx, nIndex
 // number of radial segments, number of height segments, and presence of a bottom cap.
 // Height is along the Y axis.
 // pos is an arbitrary offset (for composing shapes).
-func SetCone(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, height, radius float32, radialSegs, heightSegs int, bottom bool, pos mat32.Vec3) mat32.Box3 {
+func SetCone(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, height, radius float32, radialSegs, heightSegs int, bottom bool, pos math32.Vector3) math32.Box3 {
 	return SetCylinderSector(vtxAry, normAry, texAry, idxAry, vtxOff, idxOff, height, 0, radius, radialSegs, heightSegs, 0, 360, false, bottom, pos)
 }
 
@@ -135,37 +135,37 @@ func SetCone(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxO
 // sector size angle in degrees, and presence of a top and/or bottom cap.
 // Height is along the Y axis.
 // pos is an arbitrary offset (for composing shapes).
-func SetCylinderSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.ArrayU32, vtxOff, idxOff int, height, topRad, botRad float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool, pos mat32.Vec3) mat32.Box3 {
+func SetCylinderSector(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, height, topRad, botRad float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool, pos math32.Vector3) math32.Box3 {
 	hHt := height / 2
 	vtxs := [][]int{}
-	uvsOrig := [][]mat32.Vec2{}
+	uvsOrig := [][]math32.Vector2{}
 
-	angStRad := mat32.DegToRad(angStart)
-	angLenRad := mat32.DegToRad(angLen)
+	angStRad := math32.DegToRad(angStart)
+	angLenRad := math32.DegToRad(angLen)
 
-	bb := mat32.Box3{}
+	bb := math32.Box3{}
 	bb.SetEmpty()
 
 	idx := 0
 	vidx := vtxOff * 3
 	tidx := vtxOff * 2
 
-	var pt mat32.Vec3
+	var pt math32.Vector3
 	for y := 0; y <= heightSegs; y++ {
 		var vtxsRow = []int{}
-		var uvsRow = []mat32.Vec2{}
+		var uvsRow = []math32.Vector2{}
 		v := float32(y) / float32(heightSegs)
 		radius := v*(botRad-topRad) + topRad
 		for x := 0; x <= radialSegs; x++ {
 			u := float32(x) / float32(radialSegs)
-			pt.X = -radius * mat32.Cos(u*angLenRad+angStRad)
+			pt.X = -radius * math32.Cos(u*angLenRad+angStRad)
 			pt.Y = -v*height + hHt
-			pt.Z = radius * mat32.Sin(u*angLenRad+angStRad)
+			pt.Z = radius * math32.Sin(u*angLenRad+angStRad)
 			pt.SetAdd(pos)
-			vtxAry.SetVec3(vidx+idx*3, pt)
+			vtxAry.SetVector3(vidx+idx*3, pt)
 			bb.ExpandByPoint(pt)
 			vtxsRow = append(vtxsRow, idx)
-			uvsRow = append(uvsRow, mat32.V2(u, 1.0-v))
+			uvsRow = append(uvsRow, math32.Vec2(u, 1.0-v))
 			idx++
 		}
 		vtxs = append(vtxs, vtxsRow)
@@ -173,22 +173,22 @@ func SetCylinderSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.Arra
 	}
 
 	tanTheta := (botRad - topRad) / height
-	var na, nb mat32.Vec3
+	var na, nb math32.Vector3
 
 	vOff := uint32(vtxOff)
 	ii := idxOff
 	for x := 0; x < radialSegs; x++ {
 		if topRad != 0 {
-			vtxAry.GetVec3(3*vtxs[0][x], &na)
-			vtxAry.GetVec3(3*vtxs[0][x+1], &nb)
+			vtxAry.GetVector3(3*vtxs[0][x], &na)
+			vtxAry.GetVector3(3*vtxs[0][x+1], &nb)
 		} else {
-			vtxAry.GetVec3(3*vtxs[1][x], &na)
-			vtxAry.GetVec3(3*vtxs[1][x+1], &nb)
+			vtxAry.GetVector3(3*vtxs[1][x], &na)
+			vtxAry.GetVector3(3*vtxs[1][x+1], &nb)
 		}
 
-		na.Y = mat32.Sqrt(na.X*na.X+na.Z*na.Z) * tanTheta
+		na.Y = math32.Sqrt(na.X*na.X+na.Z*na.Z) * tanTheta
 		na.Normalize()
-		nb.Y = mat32.Sqrt(nb.X*nb.X+nb.Z*nb.Z) * tanTheta
+		nb.Y = math32.Sqrt(nb.X*nb.X+nb.Z*nb.Z) * tanTheta
 		nb.Normalize()
 
 		for y := 0; y < heightSegs; y++ {
@@ -209,20 +209,20 @@ func SetCylinderSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.Arra
 
 			idxAry.Set(ii, vOff+uint32(v1), vOff+uint32(v2), vOff+uint32(v4))
 			ii += 3
-			normAry.SetVec3(3*v1, n1)
-			normAry.SetVec3(3*v2, n2)
-			normAry.SetVec3(3*v4, n4)
+			normAry.SetVector3(3*v1, n1)
+			normAry.SetVector3(3*v2, n2)
+			normAry.SetVector3(3*v4, n4)
 
 			idxAry.Set(ii, vOff+uint32(v2), vOff+uint32(v3), vOff+uint32(v4))
 			ii += 3
-			normAry.SetVec3(3*v2, n2)
-			normAry.SetVec3(3*v3, n3)
-			normAry.SetVec3(3*v4, n4)
+			normAry.SetVector3(3*v2, n2)
+			normAry.SetVector3(3*v3, n3)
+			normAry.SetVector3(3*v4, n4)
 
-			texAry.SetVec2(2*v1, uv1)
-			texAry.SetVec2(2*v2, uv2)
-			texAry.SetVec2(2*v3, uv3)
-			texAry.SetVec2(2*v4, uv4)
+			texAry.SetVector2(2*v1, uv1)
+			texAry.SetVector2(2*v2, uv2)
+			texAry.SetVector2(2*v3, uv3)
+			texAry.SetVector2(2*v4, uv4)
 		}
 	}
 
@@ -232,45 +232,45 @@ func SetCylinderSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.Arra
 		idxsOrig := []uint32{}
 
 		// Appends top segments vtxs and builds array of its idxsOrig
-		var uv1, uv2, uv3 mat32.Vec2
+		var uv1, uv2, uv3 math32.Vector2
 		for x := 0; x < radialSegs; x++ {
 			uv1 = uvsOrig[0][x]
 			uv2 = uvsOrig[0][x+1]
-			uv3 = mat32.V2(uv2.X, 0)
+			uv3 = math32.Vec2(uv2.X, 0)
 			// Appends CENTER with its own UV.
 			vtxAry.Set(vidx+idx*3, 0, hHt, 0)
 			normAry.Set(vidx+idx*3, 0, 1, 0)
-			texAry.SetVec2(tidx+idx*2, uv3)
+			texAry.SetVector2(tidx+idx*2, uv3)
 			idxsOrig = append(idxsOrig, uint32(idx))
 			idx++
 			// Appends vertex
-			v := mat32.Vec3{}
+			v := math32.Vector3{}
 			vi := vtxs[0][x]
-			vtxAry.GetVec3(3*vi, &v)
-			vtxAry.SetVec3(vidx+idx*3, v)
+			vtxAry.GetVector3(3*vi, &v)
+			vtxAry.SetVector3(vidx+idx*3, v)
 			normAry.Set(vidx+idx*3, 0, 1, 0)
-			texAry.SetVec2(tidx+idx*2, uv1)
+			texAry.SetVector2(tidx+idx*2, uv1)
 			idxsOrig = append(idxsOrig, uint32(idx))
 			idx++
 		}
 		// Appends copy of first vertex (center)
-		var pt, norm mat32.Vec3
-		var uv mat32.Vec2
-		vtxAry.GetVec3(3*int(idxsOrig[0]), &pt)
-		normAry.GetVec3(3*int(idxsOrig[0]), &norm)
-		texAry.GetVec2(2*int(idxsOrig[0]), &uv)
-		vtxAry.SetVec3(vidx+idx*3, pt)
-		normAry.SetVec3(vidx+idx*3, norm)
-		texAry.SetVec2(tidx+idx*2, uv)
+		var pt, norm math32.Vector3
+		var uv math32.Vector2
+		vtxAry.GetVector3(3*int(idxsOrig[0]), &pt)
+		normAry.GetVector3(3*int(idxsOrig[0]), &norm)
+		texAry.GetVector2(2*int(idxsOrig[0]), &uv)
+		vtxAry.SetVector3(vidx+idx*3, pt)
+		normAry.SetVector3(vidx+idx*3, norm)
+		texAry.SetVector2(tidx+idx*2, uv)
 		idxsOrig = append(idxsOrig, uint32(idx))
 		idx++
 
-		// Appends copy of second vertex (v1) USING LAST UV2
-		vtxAry.GetVec3(3*int(idxsOrig[1]), &pt)
-		normAry.GetVec3(3*int(idxsOrig[1]), &norm)
-		vtxAry.SetVec3(vidx+idx*3, pt)
-		normAry.SetVec3(vidx+idx*3, norm)
-		texAry.SetVec2(tidx+idx*2, uv2)
+		// Appends copy of second vertex (v1) USING LAST UVec2
+		vtxAry.GetVector3(3*int(idxsOrig[1]), &pt)
+		normAry.GetVector3(3*int(idxsOrig[1]), &norm)
+		vtxAry.SetVector3(vidx+idx*3, pt)
+		normAry.SetVector3(vidx+idx*3, norm)
+		texAry.SetVector2(tidx+idx*2, uv2)
 		idxsOrig = append(idxsOrig, uint32(idx))
 		idx++
 
@@ -291,46 +291,46 @@ func SetCylinderSector(vtxAry, normAry, texAry mat32.ArrayF32, idxAry mat32.Arra
 		idxsOrig := []uint32{}
 
 		// Appends top segments vtxs and builds array of its idxsOrig
-		var uv1, uv2, uv3 mat32.Vec2
+		var uv1, uv2, uv3 math32.Vector2
 		for x := 0; x < radialSegs; x++ {
 			uv1 = uvsOrig[heightSegs][x]
 			uv2 = uvsOrig[heightSegs][x+1]
-			uv3 = mat32.V2(uv2.X, 1)
+			uv3 = math32.Vec2(uv2.X, 1)
 			// Appends CENTER with its own UV.
 			vtxAry.Set(vidx+idx*3, 0, -hHt, 0)
 			normAry.Set(vidx+idx*3, 0, -1, 0)
-			texAry.SetVec2(tidx+idx*2, uv3)
+			texAry.SetVector2(tidx+idx*2, uv3)
 			idxsOrig = append(idxsOrig, uint32(idx))
 			idx++
 			// Appends vertex
-			v := mat32.Vec3{}
+			v := math32.Vector3{}
 			vi := vtxs[heightSegs][x]
-			vtxAry.GetVec3(3*vi, &v)
-			vtxAry.SetVec3(vidx+idx*3, v)
+			vtxAry.GetVector3(3*vi, &v)
+			vtxAry.SetVector3(vidx+idx*3, v)
 			normAry.Set(vidx+idx*3, 0, -1, 0)
-			texAry.SetVec2(tidx+idx*2, uv1)
+			texAry.SetVector2(tidx+idx*2, uv1)
 			idxsOrig = append(idxsOrig, uint32(idx))
 			idx++
 		}
 
 		// Appends copy of first vertex (center)
-		var pt, norm mat32.Vec3
-		var uv mat32.Vec2
-		vtxAry.GetVec3(3*int(idxsOrig[0]), &pt)
-		normAry.GetVec3(3*int(idxsOrig[0]), &norm)
-		texAry.GetVec2(2*int(idxsOrig[0]), &uv)
-		vtxAry.SetVec3(vidx+idx*3, pt)
-		normAry.SetVec3(vidx+idx*3, norm)
-		texAry.SetVec2(tidx+idx*2, uv)
+		var pt, norm math32.Vector3
+		var uv math32.Vector2
+		vtxAry.GetVector3(3*int(idxsOrig[0]), &pt)
+		normAry.GetVector3(3*int(idxsOrig[0]), &norm)
+		texAry.GetVector2(2*int(idxsOrig[0]), &uv)
+		vtxAry.SetVector3(vidx+idx*3, pt)
+		normAry.SetVector3(vidx+idx*3, norm)
+		texAry.SetVector2(tidx+idx*2, uv)
 		idxsOrig = append(idxsOrig, uint32(idx))
 		idx++
 
-		// Appends copy of second vertex (v1) USING LAST UV2
-		vtxAry.GetVec3(3*int(idxsOrig[1]), &pt)
-		normAry.GetVec3(3*int(idxsOrig[1]), &norm)
-		vtxAry.SetVec3(vidx+idx*3, pt)
-		normAry.SetVec3(vidx+idx*3, norm)
-		texAry.SetVec2(tidx+idx*2, uv2)
+		// Appends copy of second vertex (v1) USING LAST UVec2
+		vtxAry.GetVector3(3*int(idxsOrig[1]), &pt)
+		normAry.GetVector3(3*int(idxsOrig[1]), &norm)
+		vtxAry.SetVector3(vidx+idx*3, pt)
+		normAry.SetVector3(vidx+idx*3, norm)
+		texAry.SetVector2(tidx+idx*2, uv2)
 		idxsOrig = append(idxsOrig, uint32(idx))
 		idx++
 

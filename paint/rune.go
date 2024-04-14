@@ -8,7 +8,7 @@ import (
 	"errors"
 	"image"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"golang.org/x/image/font"
 )
@@ -39,10 +39,10 @@ type Rune struct {
 
 	// relative position from start of Text for the lower-left baseline
 	// rendering position of the font character
-	RelPos mat32.Vec2
+	RelPos math32.Vector2
 
 	// size of the rune itself, exclusive of spacing that might surround it
-	Size mat32.Vec2
+	Size math32.Vector2
 
 	// rotation in radians for this character, relative to its lower-left
 	// baseline rendering position
@@ -56,10 +56,10 @@ type Rune struct {
 // the first element must be non-nil
 func (rr *Rune) HasNil() error {
 	if rr.Face == nil {
-		return errors.New("gi.Rune: Face is nil")
+		return errors.New("core.Rune: Face is nil")
 	}
 	if rr.Color == nil {
-		return errors.New("gi.Rune: Color is nil")
+		return errors.New("core.Rune: Color is nil")
 	}
 	// note: BackgroundColor can be nil -- transparent
 	return nil

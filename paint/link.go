@@ -7,7 +7,7 @@ package paint
 import (
 	"image"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 )
 
@@ -24,7 +24,7 @@ type TextLink struct {
 	Style styles.FontRender
 
 	// additional properties defined for the link, from the parsed HTML attributes
-	Props map[string]any
+	Properties map[string]any
 
 	// span index where link starts
 	StartSpan int
@@ -40,7 +40,7 @@ type TextLink struct {
 }
 
 // Bounds returns the bounds of the link
-func (tl *TextLink) Bounds(tr *Text, pos mat32.Vec2) image.Rectangle {
+func (tl *TextLink) Bounds(tr *Text, pos math32.Vector2) image.Rectangle {
 	stsp := &tr.Spans[tl.StartSpan]
 	tpos := pos.Add(stsp.RelPos)
 	sr := &(stsp.Render[tl.StartIndex])

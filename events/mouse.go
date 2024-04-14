@@ -9,13 +9,13 @@ import (
 	"image"
 
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 var (
 	// ScrollWheelSpeed controls how fast the scroll wheel moves (typically
 	// interpreted as pixels per wheel step).
-	// This is also in gi.DeviceSettings and updated from there
+	// This is also in core.DeviceSettings and updated from there
 	ScrollWheelSpeed = float32(1)
 )
 
@@ -88,14 +88,14 @@ type MouseScroll struct {
 	Mouse
 
 	// Delta is the amount of scrolling in each axis
-	Delta mat32.Vec2
+	Delta math32.Vector2
 }
 
 func (ev *MouseScroll) String() string {
 	return fmt.Sprintf("%v{Delta: %v, Pos: %v, Mods: %v, Time: %v}", ev.Type(), ev.Delta, ev.Where, key.ModsString(ev.Mods), ev.Time().Format("04:05"))
 }
 
-func NewScroll(where image.Point, delta mat32.Vec2, mods key.Modifiers) *MouseScroll {
+func NewScroll(where image.Point, delta math32.Vector2, mods key.Modifiers) *MouseScroll {
 	ev := &MouseScroll{}
 	ev.Typ = Scroll
 	// not unique, but delta integrated!

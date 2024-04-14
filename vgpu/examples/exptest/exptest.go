@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"unsafe"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/vgpu"
 )
 
@@ -28,9 +28,9 @@ func main() {
 	gp.Config("exptest")
 	fmt.Printf("Running on GPU: %s\n", gp.DeviceName)
 
-	fmt.Printf("Max StructuredBuffer Size: %X\n", gp.GPUProps.Limits.MaxStorageBufferRange)
+	fmt.Printf("Max StructuredBuffer Size: %X\n", gp.GPUProperties.Limits.MaxStorageBufferRange)
 
-	// gp.PropsString(true) // print
+	// gp.PropertiesString(true) // print
 
 	sy := gp.NewComputeSystem("exptest")
 	pl := sy.NewPipeline("exptest")
@@ -42,7 +42,7 @@ func main() {
 	n := 64
 
 	threads := 64
-	nInt := mat32.IntMultiple(float32(n), float32(threads))
+	nInt := math32.IntMultiple(float32(n), float32(threads))
 	n = int(nInt)       // enforce optimal n's -- otherwise requires range checking
 	nGps := n / threads // dispatch n
 	fmt.Printf("n: %d\n", n)
@@ -64,13 +64,13 @@ func main() {
 	cur := st
 	for i := 0; i < n; i++ {
 		ivals[i] = cur
-		// cpuValues[i] = mat32.FastExp(ivals[i]) // 0 diffs
+		// cpuValues[i] = math32.FastExp(ivals[i]) // 0 diffs
 		vbio := ivals[i]
 		eval := 0.1 * ((vbio + 90.0) + 10.0)
-		// cpuValues[i] = (vbio + 90.0) / (1.0 + mat32.FastExp(eval)) // lots of diffs
+		// cpuValues[i] = (vbio + 90.0) / (1.0 + math32.FastExp(eval)) // lots of diffs
 		// cpuValues[i] = eval // 0 diff
 		cpuValues[i] = float32(1.0) / eval // no diff from casting
-		// cpuValues[i] = 1.0 / mat32.FastExp(eval)
+		// cpuValues[i] = 1.0 / math32.FastExp(eval)
 		cur += inc
 	}
 

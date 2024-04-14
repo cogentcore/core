@@ -9,7 +9,7 @@ import (
 	"log"
 	"strings"
 
-	"cogentcore.org/core/glop/indent"
+	"cogentcore.org/core/gox/indent"
 	"cogentcore.org/core/vgpu/szalloc"
 
 	vk "github.com/goki/vulkan"

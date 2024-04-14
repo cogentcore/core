@@ -7,11 +7,11 @@ package texteditor
 import (
 	"image"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/laser"
-	"cogentcore.org/core/mat32"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/parse/lexer"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/texteditor/textbuf"
 )
 
@@ -28,7 +28,7 @@ func (ed *Editor) ValidateCursor() {
 	if ed.Buffer != nil {
 		ed.CursorPos = ed.Buffer.ValidPos(ed.CursorPos)
 	} else {
-		ed.CursorPos = lex.PosZero
+		ed.CursorPos = lexer.PosZero
 	}
 }
 
@@ -43,7 +43,7 @@ func (ed *Editor) WrappedLines(ln int) int {
 // WrappedLineNo returns the wrapped line number (span index) and rune index
 // within that span of the given character position within line in position,
 // and false if out of range (last valid position returned in that case -- still usable).
-func (ed *Editor) WrappedLineNo(pos lex.Pos) (si, ri int, ok bool) {
+func (ed *Editor) WrappedLineNo(pos lexer.Pos) (si, ri int, ok bool) {
 	if pos.Ln >= len(ed.Renders) {
 		return 0, 0, false
 	}
@@ -52,9 +52,9 @@ func (ed *Editor) WrappedLineNo(pos lex.Pos) (si, ri int, ok bool) {
 
 // SetCursor sets a new cursor position, enforcing it in range.
 // This is the main final pathway for all cursor movement.
-func (ed *Editor) SetCursor(pos lex.Pos) {
+func (ed *Editor) SetCursor(pos lexer.Pos) {
 	if ed.NLines == 0 || ed.Buffer == nil {
-		ed.CursorPos = lex.PosZero
+		ed.CursorPos = lexer.PosZero
 		return
 	}
 
@@ -68,8 +68,8 @@ func (ed *Editor) SetCursor(pos lex.Pos) {
 		if r == '{' || r == '}' || r == '(' || r == ')' || r == '[' || r == ']' {
 			tp, found := ed.Buffer.BraceMatch(txt[ch], ed.CursorPos)
 			if found {
-				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(ed.CursorPos, lex.Pos{ed.CursorPos.Ln, ed.CursorPos.Ch + 1}))
-				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(tp, lex.Pos{tp.Ln, tp.Ch + 1}))
+				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(ed.CursorPos, lexer.Pos{ed.CursorPos.Ln, ed.CursorPos.Ch + 1}))
+				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(tp, lexer.Pos{tp.Ln, tp.Ch + 1}))
 			}
 		}
 	}
@@ -78,14 +78,14 @@ func (ed *Editor) SetCursor(pos lex.Pos) {
 
 // SetCursorShow sets a new cursor position, enforcing it in range, and shows
 // the cursor (scroll to if hidden, render)
-func (ed *Editor) SetCursorShow(pos lex.Pos) {
+func (ed *Editor) SetCursorShow(pos lexer.Pos) {
 	ed.SetCursor(pos)
 	ed.ScrollCursorToCenterIfHidden()
 	ed.RenderCursor(true)
 }
 
 // SetCursorTarget sets a new cursor target position, ensures that it is visible
-func (ed *Editor) SetCursorTarget(pos lex.Pos) {
+func (ed *Editor) SetCursorTarget(pos lexer.Pos) {
 	ed.SetFlag(true, EditorTargetSet)
 	ed.CursorTarg = pos
 	ed.SetCursorShow(pos)
@@ -93,7 +93,7 @@ func (ed *Editor) SetCursorTarget(pos lex.Pos) {
 
 // SetCursorCol sets the current target cursor column (CursorCol) to that
 // of the given position
-func (ed *Editor) SetCursorCol(pos lex.Pos) {
+func (ed *Editor) SetCursorCol(pos lexer.Pos) {
 	if wln := ed.WrappedLines(pos.Ln); wln > 1 {
 		si, ri, ok := ed.WrappedLineNo(pos)
 		if ok && si > 0 {
@@ -107,7 +107,7 @@ func (ed *Editor) SetCursorCol(pos lex.Pos) {
 }
 
 // SavePosHistory saves the cursor position in history stack of cursor positions
-func (ed *Editor) SavePosHistory(pos lex.Pos) {
+func (ed *Editor) SavePosHistory(pos lexer.Pos) {
 	if ed.Buffer == nil {
 		return
 	}
@@ -119,7 +119,7 @@ func (ed *Editor) SavePosHistory(pos lex.Pos) {
 // returns true if moved
 func (ed *Editor) CursorToHistPrev() bool {
 	if ed.NLines == 0 || ed.Buffer == nil {
-		ed.CursorPos = lex.PosZero
+		ed.CursorPos = lexer.PosZero
 		return false
 	}
 	sz := len(ed.Buffer.PosHistory)
@@ -144,7 +144,7 @@ func (ed *Editor) CursorToHistPrev() bool {
 // returns true if moved
 func (ed *Editor) CursorToHistNext() bool {
 	if ed.NLines == 0 || ed.Buffer == nil {
-		ed.CursorPos = lex.PosZero
+		ed.CursorPos = lexer.PosZero
 		return false
 	}
 	sz := len(ed.Buffer.PosHistory)
@@ -166,7 +166,7 @@ func (ed *Editor) CursorToHistNext() bool {
 
 // SelectRegUpdate updates current select region based on given cursor position
 // relative to SelectStart position
-func (ed *Editor) SelectRegUpdate(pos lex.Pos) {
+func (ed *Editor) SelectRegUpdate(pos lexer.Pos) {
 	if pos.IsLess(ed.SelectStart) {
 		ed.SelectRegion.Start = pos
 		ed.SelectRegion.End = ed.SelectStart
@@ -178,7 +178,7 @@ func (ed *Editor) SelectRegUpdate(pos lex.Pos) {
 
 // CursorSelect updates selection based on cursor movements, given starting
 // cursor position and ed.CursorPos is current
-func (ed *Editor) CursorSelect(org lex.Pos) {
+func (ed *Editor) CursorSelect(org lexer.Pos) {
 	if !ed.SelectMode {
 		return
 	}
@@ -222,7 +222,7 @@ func (ed *Editor) CursorForwardWord(steps int) {
 				if ch < sz-1 {
 					r2 = txt[ch+1]
 				}
-				if gi.IsWordBreak(r1, r2) {
+				if core.IsWordBreak(r1, r2) {
 					ch++
 				} else {
 					done = true
@@ -235,7 +235,7 @@ func (ed *Editor) CursorForwardWord(steps int) {
 				if ch < sz-1 {
 					r2 = txt[ch+1]
 				}
-				if !gi.IsWordBreak(r1, r2) {
+				if !core.IsWordBreak(r1, r2) {
 					ch++
 				} else {
 					done = true
@@ -356,7 +356,7 @@ func (ed *Editor) CursorBackwardWord(steps int) {
 				if ch > 0 {
 					r2 = txt[ch-1]
 				}
-				if gi.IsWordBreak(r1, r2) {
+				if core.IsWordBreak(r1, r2) {
 					ch--
 					if ch == -1 {
 						done = true
@@ -372,7 +372,7 @@ func (ed *Editor) CursorBackwardWord(steps int) {
 				if ch > 0 {
 					r2 = txt[ch-1]
 				}
-				if !gi.IsWordBreak(r1, r2) {
+				if !core.IsWordBreak(r1, r2) {
 					ch--
 				} else {
 					done = true
@@ -703,16 +703,16 @@ func (ed *Editor) CursorTransposeWord() {
 // JumpToLinePrompt jumps to given line number (minus 1) from prompt
 func (ed *Editor) JumpToLinePrompt() {
 	val := ""
-	d := gi.NewBody().AddTitle("Jump to line").AddText("Line number to jump to")
-	tf := gi.NewTextField(d).SetPlaceholder("Line number")
+	d := core.NewBody().AddTitle("Jump to line").AddText("Line number to jump to")
+	tf := core.NewTextField(d).SetPlaceholder("Line number")
 	tf.OnChange(func(e events.Event) {
 		val = tf.Text()
 	})
-	d.AddBottomBar(func(parent gi.Widget) {
+	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText("Jump").OnClick(func(e events.Event) {
 			val = tf.Text()
-			ln, err := laser.ToInt(val)
+			ln, err := reflectx.ToInt(val)
 			if err == nil {
 				ed.JumpToLine(int(ln))
 			}
@@ -723,13 +723,13 @@ func (ed *Editor) JumpToLinePrompt() {
 
 // JumpToLine jumps to given line number (minus 1)
 func (ed *Editor) JumpToLine(ln int) {
-	ed.SetCursorShow(lex.Pos{Ln: ln - 1})
+	ed.SetCursorShow(lexer.Pos{Ln: ln - 1})
 	ed.SavePosHistory(ed.CursorPos)
 	ed.NeedsLayout()
 }
 
 // FindNextLink finds next link after given position, returns false if no such links
-func (ed *Editor) FindNextLink(pos lex.Pos) (lex.Pos, textbuf.Region, bool) {
+func (ed *Editor) FindNextLink(pos lexer.Pos) (lexer.Pos, textbuf.Region, bool) {
 	for ln := pos.Ln; ln < ed.NLines; ln++ {
 		if len(ed.Renders[ln].Links) == 0 {
 			pos.Ch = 0
@@ -755,7 +755,7 @@ func (ed *Editor) FindNextLink(pos lex.Pos) (lex.Pos, textbuf.Region, bool) {
 }
 
 // FindPrevLink finds previous link before given position, returns false if no such links
-func (ed *Editor) FindPrevLink(pos lex.Pos) (lex.Pos, textbuf.Region, bool) {
+func (ed *Editor) FindPrevLink(pos lexer.Pos) (lexer.Pos, textbuf.Region, bool) {
 	for ln := pos.Ln - 1; ln >= 0; ln-- {
 		if len(ed.Renders[ln].Links) == 0 {
 			if ln-1 >= 0 {
@@ -796,7 +796,7 @@ func (ed *Editor) CursorNextLink(wraparound bool) bool {
 		if !wraparound {
 			return false
 		}
-		npos, reg, has = ed.FindNextLink(lex.Pos{}) // wraparound
+		npos, reg, has = ed.FindNextLink(lexer.Pos{}) // wraparound
 		if !has {
 			return false
 		}
@@ -820,7 +820,7 @@ func (ed *Editor) CursorPrevLink(wraparound bool) bool {
 		if !wraparound {
 			return false
 		}
-		npos, reg, has = ed.FindPrevLink(lex.Pos{}) // wraparound
+		npos, reg, has = ed.FindPrevLink(lexer.Pos{}) // wraparound
 		if !has {
 			return false
 		}
@@ -848,7 +848,7 @@ func (ed *Editor) ScrollCursorInView() bool {
 	if ed == nil || ed.This() == nil {
 		return false
 	}
-	if ed.This().(gi.Widget).IsVisible() {
+	if ed.This().(core.Widget).IsVisible() {
 		curBBox := ed.CursorBBox(ed.CursorPos)
 		return ed.ScrollInView(curBBox)
 	}
@@ -881,7 +881,7 @@ func (ed *Editor) ScrollCursorToCenterIfHidden() bool {
 // coordinate at top of view to extent possible -- returns true if scrolled
 func (ed *Editor) ScrollToTop(pos int) bool {
 	ed.NeedsRender()
-	return ed.ScrollDimToStart(mat32.Y, pos)
+	return ed.ScrollDimToStart(math32.Y, pos)
 }
 
 // ScrollCursorToTop tells any parent scroll layout to scroll to get cursor
@@ -896,7 +896,7 @@ func (ed *Editor) ScrollCursorToTop() bool {
 // scrolled
 func (ed *Editor) ScrollToBottom(pos int) bool {
 	ed.NeedsRender()
-	return ed.ScrollDimToEnd(mat32.Y, pos)
+	return ed.ScrollDimToEnd(math32.Y, pos)
 }
 
 // ScrollCursorToBottom tells any parent scroll layout to scroll to get cursor
@@ -911,7 +911,7 @@ func (ed *Editor) ScrollCursorToBottom() bool {
 // scrolled
 func (ed *Editor) ScrollToVertCenter(pos int) bool {
 	ed.NeedsRender()
-	return ed.ScrollDimToCenter(mat32.Y, pos)
+	return ed.ScrollDimToCenter(math32.Y, pos)
 }
 
 // ScrollCursorToVertCenter tells any parent scroll layout to scroll to get
@@ -937,7 +937,7 @@ func (ed *Editor) ScrollCursorToTarget() {
 // horizontal coordinate at left of view to extent possible -- returns true if
 // scrolled
 func (ed *Editor) ScrollToLeft(pos int) bool {
-	return ed.ScrollDimToStart(mat32.X, pos)
+	return ed.ScrollDimToStart(math32.X, pos)
 }
 
 // ScrollCursorToLeft tells any parent scroll layout to scroll to get cursor
@@ -956,7 +956,7 @@ func (ed *Editor) ScrollCursorToLeft() bool {
 // horizontal coordinate at right of view to extent possible -- returns true
 // if scrolled
 func (ed *Editor) ScrollToRight(pos int) bool {
-	return ed.ScrollDimToEnd(mat32.X, pos)
+	return ed.ScrollDimToEnd(math32.X, pos)
 }
 
 // ScrollCursorToRight tells any parent scroll layout to scroll to get cursor
@@ -970,7 +970,7 @@ func (ed *Editor) ScrollCursorToRight() bool {
 // horizontal coordinate to center of view to extent possible -- returns true if
 // scrolled
 func (ed *Editor) ScrollToHorizCenter(pos int) bool {
-	return ed.ScrollDimToCenter(mat32.X, pos)
+	return ed.ScrollDimToCenter(math32.X, pos)
 }
 
 // ScrollCursorToHorizCenter tells any parent scroll layout to scroll to get
@@ -978,7 +978,7 @@ func (ed *Editor) ScrollToHorizCenter(pos int) bool {
 // scrolled.
 func (ed *Editor) ScrollCursorToHorizCenter() bool {
 	curBBox := ed.CursorBBox(ed.CursorPos)
-	mn := int(mat32.Ceil(float32(curBBox.Min.X) + ed.LineNoOff))
+	mn := int(math32.Ceil(float32(curBBox.Min.X) + ed.LineNoOff))
 	mid := (mn + curBBox.Max.X) / 2
 	return ed.ScrollToHorizCenter(mid)
 }

@@ -11,15 +11,15 @@ import (
 	"time"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/examples/assets"
 	_ "cogentcore.org/core/xyz/io/obj"
-	"cogentcore.org/core/xyzv"
+	"cogentcore.org/core/xyzview"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Anim has control for animating
@@ -44,7 +44,7 @@ type Anim struct {
 	Ticker *time.Ticker `view:"-"`
 
 	// the scene viewer
-	SceneView *xyzv.SceneView
+	SceneView *xyzview.SceneView
 
 	// the torus
 	Torus *xyz.Solid
@@ -53,15 +53,15 @@ type Anim struct {
 	Gopher *xyz.Group
 
 	// original position
-	TorusPosOrig mat32.Vec3
+	TorusPosOrig math32.Vector3
 
 	// original position
-	GopherPosOrig mat32.Vec3
+	GopherPosOrig math32.Vector3
 }
 
 // Start starts the animation ticker timer -- if on is true, then
 // animation will actually start too.
-func (an *Anim) Start(sv *xyzv.SceneView, on bool) {
+func (an *Anim) Start(sv *xyzview.SceneView, on bool) {
 	an.SceneView = sv
 	an.On = on
 	an.DoTorus = true
@@ -108,8 +108,8 @@ func (an *Anim) Animate() {
 		radius := float32(0.3)
 
 		if an.DoTorus {
-			tdx := radius * mat32.Cos(an.Ang)
-			tdz := radius * mat32.Sin(an.Ang)
+			tdx := radius * math32.Cos(an.Ang)
+			tdz := radius * math32.Sin(an.Ang)
 			tp := an.TorusPosOrig
 			tp.X += tdx
 			tp.Z += tdz
@@ -117,8 +117,8 @@ func (an *Anim) Animate() {
 		}
 
 		if an.DoGopher {
-			gdx := 0.1 * radius * mat32.Cos(an.Ang+math.Pi)
-			gdz := 0.1 * radius * mat32.Sin(an.Ang+math.Pi)
+			gdx := 0.1 * radius * math32.Cos(an.Ang+math.Pi)
+			gdz := 0.1 * radius * math32.Sin(an.Ang+math.Pi)
 			gp := an.GopherPosOrig
 			gp.X += gdx
 			gp.Z += gdz
@@ -133,24 +133,24 @@ func (an *Anim) Animate() {
 
 func main() {
 	anim := &Anim{}
-	b := gi.NewBody("XYZ Demo")
+	b := core.NewBody("XYZ Demo")
 
-	gi.NewLabel(b).SetText(`This is a demonstration of <b>XYZ</b>, the <a href="https://cogentcore.org/core">Cogent Core</a> <i>3D</i> Framework.`).
-		SetType(gi.LabelHeadlineSmall).
+	core.NewLabel(b).SetText(`This is a demonstration of <b>XYZ</b>, the <a href="https://cogentcore.org/core">Cogent Core</a> <i>3D</i> Framework.`).
+		SetType(core.LabelHeadlineSmall).
 		Style(func(s *styles.Style) {
 			s.Text.Align = styles.Center
 			s.Text.AlignV = styles.Center
 		})
 
-	gi.NewButton(b).SetText("Toggle animation").OnClick(func(e events.Event) {
+	core.NewButton(b).SetText("Toggle animation").OnClick(func(e events.Event) {
 		anim.On = !anim.On
 	})
 
-	sv := xyzv.NewSceneView(b)
+	sv := xyzview.NewSceneView(b)
 	sv.Config()
 	sw := sv.SceneWidget()
 	sc := sv.SceneXYZ()
-	sw.SelectionMode = xyzv.Manipulable
+	sw.SelectionMode = xyzview.Manipulable
 
 	// options - must be set here
 	// sc.MultiSample = 1
@@ -167,7 +167,7 @@ func main() {
 	// se.Camera.Pose.Pos.Set(-2, 9, 3)
 	sc.Camera.Pose.Pos.Set(0, 2, 10)
 	// se.Camera.Pose.Pos.Set(0, 0, 10)              // default position
-	sc.Camera.LookAt(mat32.Vec3{}, mat32.V3(0, 1, 0)) // defaults to looking at origin
+	sc.Camera.LookAt(math32.Vector3{}, math32.Vec3(0, 1, 0)) // defaults to looking at origin
 
 	// point := xyz.NewPointLight(sc, "point", 1, xyz.DirectSun)
 	// point.Pos.Set(0, 5, 5)
@@ -204,17 +204,17 @@ func main() {
 	// floor.Mat.Bright = 2 // .5 for wood / brown
 	// floor.SetDisabled() // not selectable
 
-	lnsm := xyz.NewLines(sc, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.V2(.2, .1), xyz.CloseLines)
+	lnsm := xyz.NewLines(sc, "Lines", []math32.Vector3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, math32.Vec2(.2, .1), xyz.CloseLines)
 	lns := xyz.NewSolid(sc, "hi-line").SetMesh(lnsm).SetColor(color.RGBA{255, 255, 0, 128})
 	lns.Pose.Pos.Set(0, 0, 1)
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
 	cyan := colors.FromRGB(0, 255, 255)
-	xyz.NewArrow(sc, sc, "arrow", mat32.V3(-1.5, -.5, .5), mat32.V3(2, 1, 1), .05, cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 4)
+	xyz.NewArrow(sc, sc, "arrow", math32.Vec3(-1.5, -.5, .5), math32.Vec3(2, 1, 1), .05, cyan, xyz.StartArrow, xyz.EndArrow, 4, .5, 4)
 
 	// bbclr := styles.Color{}
 	// bbclr.SetUInt8(255, 255, 0, 255)
-	// xyz.NewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.V3(-2, -2, -1), Max: mat32.V3(-1, -1, .5)}, .01, bbclr, xyz.Active)
+	// xyz.NewLineBox(sc, sc, "bbox", "bbox", math32.Box3{Min: math32.Vec3(-2, -2, -1), Max: math32.Vec3(-1, -1, .5)}, .01, bbclr, xyz.Active)
 
 	cylm := xyz.NewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
 	xyz.NewSolid(sc, "cylinder").SetMesh(cylm).SetPos(-2.25, 0, 0)
@@ -269,44 +269,44 @@ func main() {
 		emb := xyz.NewEmbed2D(sc, sc, "embed-but", 150, 100, xyz.FitContent)
 		emb.Pose.Pos.Set(-2, 2, 0)
 		// emb.Zoom = 1.5   // this is how to rescale overall size
-		evlay := gi.NewFrame(emb.Viewport, "vlay", gi.LayoutVert)
+		evlay := core.NewFrame(emb.Viewport, "vlay", core.LayoutVert)
 		evlay.SetProp("margin", units.Ex(1))
 
-		eabut := gi.NewCheckBox(evlay, "anim-but")
+		eabut := core.NewCheckBox(evlay, "anim-but")
 		eabut.SetText("Animate")
 		eabut.Tooltip = "toggle animation on and off"
-		eabut.ButtonSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(gi.ButtonToggled) {
+		eabut.ButtonSig.Connect(win.This(), func(recv, send tree.Node, sig int64, data any) {
+			if sig == int64(core.ButtonToggled) {
 				anim.On = eabut.IsChecked()
 			}
 		})
 
-		cmb := gi.NewButton(evlay, "anim-ctrl")
+		cmb := core.NewButton(evlay, "anim-ctrl")
 		cmb.SetText("Anim Ctrl")
 		cmb.Tooltip = "options for what is animated (note: menu only works when not animating -- checkboxes would be more useful here but wanted to test menu function)"
-		cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Torus"},
-			win.This(), func(recv, send ki.Ki, sig int64, data any) {
+		cmb.Menu.AddAction(core.ActOpts{Label: "Toggle Torus"},
+			win.This(), func(recv, send tree.Node, sig int64, data any) {
 				anim.DoTorus = !anim.DoTorus
 			})
-		cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Gopher"},
-			win.This(), func(recv, send ki.Ki, sig int64, data any) {
+		cmb.Menu.AddAction(core.ActOpts{Label: "Toggle Gopher"},
+			win.This(), func(recv, send tree.Node, sig int64, data any) {
 				anim.DoGopher = !anim.DoGopher
 			})
-		cmb.Menu.AddAction(gi.ActOpts{Label: "Edit Anim"},
-			win.This(), func(recv, send ki.Ki, sig int64, data any) {
-				giv.StructViewDialog(vp, anim, giv.DlgOpts{Title: "Animation Parameters"}, nil, nil)
+		cmb.Menu.AddAction(core.ActOpts{Label: "Edit Anim"},
+			win.This(), func(recv, send tree.Node, sig int64, data any) {
+				views.StructViewDialog(vp, anim, views.DlgOpts{Title: "Animation Parameters"}, nil, nil)
 			})
 
-		sprw := gi.NewLayout(evlay, "speed-lay", gi.LayoutHoriz)
-		gi.NewLabel(sprw, "speed-lbl", "Speed: ")
-		sb := gi.NewSpinBox(sprw, "anim-speed")
+		sprw := core.NewLayout(evlay, "speed-lay", core.LayoutHoriz)
+		core.NewLabel(sprw, "speed-lbl", "Speed: ")
+		sb := core.NewSpinBox(sprw, "anim-speed")
 		sb.SetMin(0.01)
 		sb.Step = 0.01
 		sb.SetValue(anim.Speed)
 		sb.Tooltip = "determines the speed of rotation (step size)"
 
-		spsld := gi.NewSlider(evlay, "speed-slider")
-		spsld.Dim = mat32.X
+		spsld := core.NewSlider(evlay, "speed-slider")
+		spsld.Dim = math32.X
 		spsld.Min = 0.01
 		spsld.Max = 1
 		spsld.Step = 0.01
@@ -317,12 +317,12 @@ func main() {
 		// spsld.Tracking = true
 		spsld.Icon = icons.RadioButtonUnchecked
 
-		sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+		sb.SpinBoxSig.Connect(rec.This(), func(recv, send tree.Node, sig int64, data any) {
 			anim.Speed = sb.Value
 			spsld.SetValue(anim.Speed)
 		})
-		spsld.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if gi.SliderSignals(sig) == gi.SliderValueChanged {
+		spsld.SliderSig.Connect(rec.This(), func(recv, send tree.Node, sig int64, data any) {
+			if core.SliderSignals(sig) == core.SliderValueChanged {
 				anim.Speed = data.(float32)
 				sb.SetValue(anim.Speed)
 			}

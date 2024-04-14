@@ -10,7 +10,7 @@ import (
 	"image/draw"
 	"unsafe"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/vgpu"
 	vk "github.com/goki/vulkan"
 )
@@ -20,8 +20,8 @@ var content embed.FS
 
 // Mtxs are the projection matricies
 type Mtxs struct {
-	MVP mat32.Mat4
-	UVP mat32.Mat4
+	MVP math32.Matrix4
+	UVP math32.Matrix4
 }
 
 // DrawerImpl contains implementation state -- ignore..
@@ -90,10 +90,10 @@ func (dw *Drawer) ConfigSys() {
 	nPts := 4
 	nIndexes := 6
 
-	posv := vset.Add("Pos", vgpu.Float32Vec2, nPts, vgpu.Vertex, vgpu.VertexShader)
+	posv := vset.Add("Pos", vgpu.Float32Vector2, nPts, vgpu.Vertex, vgpu.VertexShader)
 	idxv := vset.Add("Index", vgpu.Uint16, nIndexes, vgpu.Index, vgpu.VertexShader)
 
-	pcset.AddStruct("Mtxs", vgpu.Float32Mat4.Bytes()*2, 1, vgpu.Push, vgpu.VertexShader, vgpu.FragmentShader)
+	pcset.AddStruct("Mtxs", vgpu.Float32Matrix4.Bytes()*2, 1, vgpu.Push, vgpu.VertexShader, vgpu.FragmentShader)
 	// note: packing texidx into mvp[0][3] to fit within 128 byte limit
 
 	tximgv := txset.Add("Tex", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
@@ -132,7 +132,7 @@ func (dw *Drawer) ConfigSys() {
 // op is the drawing operation: Src = copy source directly (blit),
 // Over = alpha blend with existing
 // flipY inverts the Y axis of the source image.
-func (dw *Drawer) ConfigMtxs(src2dst mat32.Mat3, txsz image.Point, sr image.Rectangle, op draw.Op, flipY bool) *Mtxs {
+func (dw *Drawer) ConfigMtxs(src2dst math32.Matrix3, txsz image.Point, sr image.Rectangle, op draw.Op, flipY bool) *Mtxs {
 	var tmat Mtxs
 
 	if dw.YIsDown {
@@ -164,7 +164,7 @@ func (dw *Drawer) ConfigMtxs(src2dst mat32.Mat3, txsz image.Point, sr image.Rect
 		src2dst[1]*srcL+src2dst[4]*srcB+src2dst[7],
 		dw.YIsDown,
 	)
-	tmat.MVP.SetFromMat3(&matMVP) // todo render direct
+	tmat.MVP.SetFromMatrix3(&matMVP) // todo render direct
 
 	// OpenGL's fragment shaders' UV coordinates run from (0,0)-(1,1),
 	// unlike vertex shaders' XY coordinates running from (-1,+1)-(+1,-1).
@@ -198,12 +198,12 @@ func (dw *Drawer) ConfigMtxs(src2dst mat32.Mat3, txsz image.Point, sr image.Rect
 	//	  0 + a11 + a12 = sy
 
 	if flipY { // note: reversed from openGL for vulkan
-		tmat.UVP.SetFromMat3(&mat32.Mat3{
+		tmat.UVP.SetFromMatrix3(&math32.Matrix3{
 			qx - px, 0, 0,
 			0, sy - py, 0, // sy - py
 			px, py, 1})
 	} else {
-		tmat.UVP.SetFromMat3(&mat32.Mat3{
+		tmat.UVP.SetFromMatrix3(&math32.Matrix3{
 			qx - px, 0, 0,
 			0, py - sy, 0, // py - sy
 			px, sy, 1})
@@ -226,7 +226,7 @@ func (dw *Drawer) ConfigMtxs(src2dst mat32.Mat3, txsz image.Point, sr image.Rect
 // is a 2-unit by 2-unit square. The Y-axis points upwards.
 //
 // if yisdown is true, then the y=0 is at top in dest, else bottom
-func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32, yisdown bool) mat32.Mat3 {
+func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32, yisdown bool) math32.Matrix3 {
 	// Convert from pixel coords to vertex shader coords.
 	invHalfWidth := 2 / float32(widthPx)
 	invHalfHeight := 2 / float32(heightPx)
@@ -250,7 +250,7 @@ func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32, yisdow
 	//	- maps (0, 0) to (tlx, tly).
 	//	- maps (1, 0) to (trx, try).
 	//	- maps (0, 1) to (blx, bly).
-	return mat32.Mat3{
+	return math32.Matrix3{
 		trx - tlx, try - tly, 0,
 		blx - tlx, bly - tly, 0,
 		tlx, tly, 1,

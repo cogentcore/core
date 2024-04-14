@@ -10,18 +10,18 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/abilities"
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/glop/indent"
-	"cogentcore.org/core/goosi"
-	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/gox/indent"
+	"cogentcore.org/core/keymap"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/pi"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/parse"
+	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/states"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/texteditor/textbuf"
 )
 
@@ -91,10 +91,10 @@ func (ed *Editor) ShiftSelectExtend(kt events.Event) {
 
 // KeyInput handles keyboard input into the text field and from the completion menu
 func (ed *Editor) KeyInput(kt events.Event) {
-	if gi.DebugSettings.KeyEventTrace {
+	if core.DebugSettings.KeyEventTrace {
 		fmt.Printf("View KeyInput: %v\n", ed.Path())
 	}
-	kf := keyfun.Of(kt.KeyChord())
+	kf := keymap.Of(kt.KeyChord())
 
 	if kt.IsHandled() {
 		return
@@ -112,11 +112,11 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		ed.lastAutoInsert = 0
 	}
 
-	if kf != keyfun.Recenter { // always start at centering
+	if kf != keymap.Recenter { // always start at centering
 		ed.lastRecenter = 0
 	}
 
-	if kf != keyfun.Undo && ed.Is(EditorLastWasUndo) {
+	if kf != keymap.Undo && ed.Is(EditorLastWasUndo) {
 		ed.Buffer.EmacsUndoSave()
 		ed.SetFlag(false, EditorLastWasUndo)
 	}
@@ -125,141 +125,141 @@ func (ed *Editor) KeyInput(kt events.Event) {
 
 	// first all the keys that work for both inactive and active
 	switch kf {
-	case keyfun.MoveRight:
+	case keymap.MoveRight:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorForward(1)
 		ed.ShiftSelectExtend(kt)
 		ed.ISpellKeyInput(kt)
-	case keyfun.WordRight:
+	case keymap.WordRight:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorForwardWord(1)
 		ed.ShiftSelectExtend(kt)
-	case keyfun.MoveLeft:
+	case keymap.MoveLeft:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorBackward(1)
 		ed.ShiftSelectExtend(kt)
-	case keyfun.WordLeft:
+	case keymap.WordLeft:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorBackwardWord(1)
 		ed.ShiftSelectExtend(kt)
-	case keyfun.MoveUp:
+	case keymap.MoveUp:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorUp(1)
 		ed.ShiftSelectExtend(kt)
 		ed.ISpellKeyInput(kt)
-	case keyfun.MoveDown:
+	case keymap.MoveDown:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorDown(1)
 		ed.ShiftSelectExtend(kt)
 		ed.ISpellKeyInput(kt)
-	case keyfun.PageUp:
+	case keymap.PageUp:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorPageUp(1)
 		ed.ShiftSelectExtend(kt)
-	case keyfun.PageDown:
+	case keymap.PageDown:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorPageDown(1)
 		ed.ShiftSelectExtend(kt)
-	case keyfun.Home:
+	case keymap.Home:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorStartLine()
 		ed.ShiftSelectExtend(kt)
-	case keyfun.End:
+	case keymap.End:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorEndLine()
 		ed.ShiftSelectExtend(kt)
-	case keyfun.DocHome:
+	case keymap.DocHome:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorStartDoc()
 		ed.ShiftSelectExtend(kt)
-	case keyfun.DocEnd:
+	case keymap.DocEnd:
 		cancelAll()
 		kt.SetHandled()
 		ed.ShiftSelect(kt)
 		ed.CursorEndDoc()
 		ed.ShiftSelectExtend(kt)
-	case keyfun.Recenter:
+	case keymap.Recenter:
 		cancelAll()
 		kt.SetHandled()
 		ed.ReMarkup()
 		ed.CursorRecenter()
-	case keyfun.SelectMode:
+	case keymap.SelectMode:
 		cancelAll()
 		kt.SetHandled()
 		ed.SelectModeToggle()
-	case keyfun.CancelSelect:
+	case keymap.CancelSelect:
 		ed.CancelComplete()
 		kt.SetHandled()
 		ed.EscPressed() // generic cancel
-	case keyfun.SelectAll:
+	case keymap.SelectAll:
 		cancelAll()
 		kt.SetHandled()
 		ed.SelectAll()
-	case keyfun.Copy:
+	case keymap.Copy:
 		cancelAll()
 		kt.SetHandled()
 		ed.Copy(true) // reset
-	case keyfun.Search:
+	case keymap.Search:
 		kt.SetHandled()
 		ed.QReplaceCancel()
 		ed.CancelComplete()
 		ed.ISearchStart()
-	case keyfun.Abort:
+	case keymap.Abort:
 		cancelAll()
 		kt.SetHandled()
 		ed.EscPressed()
-	case keyfun.Jump:
+	case keymap.Jump:
 		cancelAll()
 		kt.SetHandled()
 		ed.JumpToLinePrompt()
-	case keyfun.HistPrev:
+	case keymap.HistPrev:
 		cancelAll()
 		kt.SetHandled()
 		ed.CursorToHistPrev()
-	case keyfun.HistNext:
+	case keymap.HistNext:
 		cancelAll()
 		kt.SetHandled()
 		ed.CursorToHistNext()
-	case keyfun.Lookup:
+	case keymap.Lookup:
 		cancelAll()
 		kt.SetHandled()
 		ed.Lookup()
 	}
 	if ed.IsReadOnly() {
 		switch {
-		case kf == keyfun.FocusNext: // tab
+		case kf == keymap.FocusNext: // tab
 			kt.SetHandled()
 			ed.CursorNextLink(true)
-		case kf == keyfun.FocusPrev: // tab
+		case kf == keymap.FocusPrev: // tab
 			kt.SetHandled()
 			ed.CursorPrevLink(true)
-		case kf == keyfun.Nil && ed.ISearch.On:
+		case kf == keymap.None && ed.ISearch.On:
 			if unicode.IsPrint(kt.KeyRune()) && !kt.HasAnyModifier(key.Control, key.Meta) {
 				ed.ISearchKeyInput(kt)
 			}
-		case kt.KeyRune() == ' ' || kf == keyfun.Accept || kf == keyfun.Enter:
+		case kt.KeyRune() == ' ' || kf == keymap.Accept || kf == keymap.Enter:
 			kt.SetHandled()
 			ed.CursorPos.Ch--
 			ed.CursorNextLink(true) // todo: cursorcurlink
@@ -272,12 +272,12 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		return
 	}
 	switch kf {
-	case keyfun.Replace:
+	case keymap.Replace:
 		kt.SetHandled()
 		ed.CancelComplete()
 		ed.ISearchCancel()
 		ed.QReplacePrompt()
-	case keyfun.Backspace:
+	case keymap.Backspace:
 		// todo: previous item in qreplace
 		if ed.ISearch.On {
 			ed.ISearchBackspace()
@@ -287,57 +287,57 @@ func (ed *Editor) KeyInput(kt events.Event) {
 			ed.ISpellKeyInput(kt)
 			ed.OfferComplete()
 		}
-	case keyfun.Kill:
+	case keymap.Kill:
 		cancelAll()
 		kt.SetHandled()
 		ed.CursorKill()
-	case keyfun.Delete:
+	case keymap.Delete:
 		cancelAll()
 		kt.SetHandled()
 		ed.CursorDelete(1)
 		ed.ISpellKeyInput(kt)
-	case keyfun.BackspaceWord:
+	case keymap.BackspaceWord:
 		cancelAll()
 		kt.SetHandled()
 		ed.CursorBackspaceWord(1)
-	case keyfun.DeleteWord:
+	case keymap.DeleteWord:
 		cancelAll()
 		kt.SetHandled()
 		ed.CursorDeleteWord(1)
-	case keyfun.Cut:
+	case keymap.Cut:
 		cancelAll()
 		kt.SetHandled()
 		ed.Cut()
-	case keyfun.Paste:
+	case keymap.Paste:
 		cancelAll()
 		kt.SetHandled()
 		ed.Paste()
-	case keyfun.Transpose:
+	case keymap.Transpose:
 		cancelAll()
 		kt.SetHandled()
 		ed.CursorTranspose()
-	case keyfun.TransposeWord:
+	case keymap.TransposeWord:
 		cancelAll()
 		kt.SetHandled()
 		ed.CursorTransposeWord()
-	case keyfun.PasteHist:
+	case keymap.PasteHist:
 		cancelAll()
 		kt.SetHandled()
 		ed.PasteHist()
-	case keyfun.Accept:
+	case keymap.Accept:
 		cancelAll()
 		kt.SetHandled()
 		ed.EditDone()
-	case keyfun.Undo:
+	case keymap.Undo:
 		cancelAll()
 		kt.SetHandled()
 		ed.Undo()
 		ed.SetFlag(true, EditorLastWasUndo)
-	case keyfun.Redo:
+	case keymap.Redo:
 		cancelAll()
 		kt.SetHandled()
 		ed.Redo()
-	case keyfun.Complete:
+	case keymap.Complete:
 		ed.ISearchCancel()
 		kt.SetHandled()
 		if ed.Buffer.IsSpellEnabled(ed.CursorPos) {
@@ -345,25 +345,25 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		} else {
 			ed.OfferComplete()
 		}
-	case keyfun.Enter:
+	case keymap.Enter:
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
 			if ed.Buffer.Opts.AutoIndent {
-				lp, _ := pi.LangSupport.Props(ed.Buffer.PiState.Sup)
-				if lp != nil && lp.Lang != nil && lp.HasFlag(pi.ReAutoIndent) {
+				lp, _ := parse.LangSupport.Properties(ed.Buffer.ParseState.Sup)
+				if lp != nil && lp.Lang != nil && lp.HasFlag(parse.ReAutoIndent) {
 					// only re-indent current line for supported types
 					tbe, _, _ := ed.Buffer.AutoIndent(ed.CursorPos.Ln) // reindent current line
 					if tbe != nil {
 						// go back to end of line!
-						npos := lex.Pos{Ln: ed.CursorPos.Ln, Ch: ed.Buffer.LineLen(ed.CursorPos.Ln)}
+						npos := lexer.Pos{Ln: ed.CursorPos.Ln, Ch: ed.Buffer.LineLen(ed.CursorPos.Ln)}
 						ed.SetCursor(npos)
 					}
 				}
 				ed.InsertAtCursor([]byte("\n"))
 				tbe, _, cpos := ed.Buffer.AutoIndent(ed.CursorPos.Ln)
 				if tbe != nil {
-					ed.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
+					ed.SetCursorShow(lexer.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 				}
 			} else {
 				ed.InsertAtCursor([]byte("\n"))
@@ -371,7 +371,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 			ed.ISpellKeyInput(kt)
 		}
 		// todo: KeFunFocusPrev -- unindent
-	case keyfun.FocusNext: // tab
+	case keymap.FocusNext: // tab
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
@@ -387,22 +387,22 @@ func (ed *Editor) KeyInput(kt events.Event) {
 			ed.NeedsRender()
 			ed.ISpellKeyInput(kt)
 		}
-	case keyfun.FocusPrev: // shift-tab
+	case keymap.FocusPrev: // shift-tab
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
 			if ed.CursorPos.Ch > 0 {
-				ind, _ := lex.LineIndent(ed.Buffer.Line(ed.CursorPos.Ln), ed.Styles.Text.TabSize)
+				ind, _ := lexer.LineIndent(ed.Buffer.Line(ed.CursorPos.Ln), ed.Styles.Text.TabSize)
 				if ind > 0 {
 					ed.Buffer.IndentLine(ed.CursorPos.Ln, ind-1)
 					intxt := indent.Bytes(ed.Buffer.Opts.IndentChar(), ind-1, ed.Styles.Text.TabSize)
-					npos := lex.Pos{Ln: ed.CursorPos.Ln, Ch: len(intxt)}
+					npos := lexer.Pos{Ln: ed.CursorPos.Ln, Ch: len(intxt)}
 					ed.SetCursorShow(npos)
 				}
 			}
 			ed.ISpellKeyInput(kt)
 		}
-	case keyfun.Nil:
+	case keymap.None:
 		if unicode.IsPrint(kt.KeyRune()) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
 				ed.KeyInputInsertRune(kt)
@@ -420,9 +420,9 @@ func (ed *Editor) KeyInputInsertBra(kt events.Event) {
 	newLine := false
 	curLn := ed.Buffer.Line(pos.Ln)
 	lnLen := len(curLn)
-	lp, _ := pi.LangSupport.Props(ed.Buffer.PiState.Sup)
+	lp, _ := parse.LangSupport.Properties(ed.Buffer.ParseState.Sup)
 	if lp != nil && lp.Lang != nil {
-		match, newLine = lp.Lang.AutoBracket(&ed.Buffer.PiState, kt.KeyRune(), pos, curLn)
+		match, newLine = lp.Lang.AutoBracket(&ed.Buffer.ParseState, kt.KeyRune(), pos, curLn)
 	} else {
 		if kt.KeyRune() == '{' {
 			if pos.Ch == lnLen {
@@ -438,12 +438,12 @@ func (ed *Editor) KeyInputInsertBra(kt events.Event) {
 		}
 	}
 	if match {
-		ket, _ := lex.BracePair(kt.KeyRune())
+		ket, _ := lexer.BracePair(kt.KeyRune())
 		if newLine && ed.Buffer.Opts.AutoIndent {
 			ed.InsertAtCursor([]byte(string(kt.KeyRune()) + "\n"))
 			tbe, _, cpos := ed.Buffer.AutoIndent(ed.CursorPos.Ln)
 			if tbe != nil {
-				pos = lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos}
+				pos = lexer.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos}
 				ed.SetCursorShow(pos)
 			}
 			ed.InsertAtCursor([]byte("\n" + string(ket)))
@@ -479,7 +479,7 @@ func (ed *Editor) KeyInputInsertRune(kt events.Event) {
 			ed.InsertAtCursor([]byte(string(kt.KeyRune())))
 			tbe, _, cpos := ed.Buffer.AutoIndent(ed.CursorPos.Ln)
 			if tbe != nil {
-				ed.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
+				ed.SetCursorShow(lexer.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 			}
 		} else if ed.lastAutoInsert == kt.KeyRune() { // if we type what we just inserted, just move past
 			ed.CursorPos.Ch++
@@ -500,8 +500,8 @@ func (ed *Editor) KeyInputInsertRune(kt events.Event) {
 			np.Ch--
 			tp, found := ed.Buffer.BraceMatch(kt.KeyRune(), np)
 			if found {
-				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(tp, lex.Pos{tp.Ln, tp.Ch + 1}))
-				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(np, lex.Pos{cp.Ln, cp.Ch}))
+				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(tp, lexer.Pos{tp.Ln, tp.Ch + 1}))
+				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(np, lexer.Pos{cp.Ln, cp.Ch}))
 			}
 		}
 	}
@@ -510,25 +510,25 @@ func (ed *Editor) KeyInputInsertRune(kt events.Event) {
 // OpenLink opens given link, either by sending LinkSig signal if there are
 // receivers, or by calling the TextLinkHandler if non-nil, or URLHandler if
 // non-nil (which by default opens user's default browser via
-// goosi/App.OpenURL())
+// system/App.OpenURL())
 func (ed *Editor) OpenLink(tl *paint.TextLink) {
 	if ed.LinkHandler != nil {
 		ed.LinkHandler(tl)
 	} else {
-		goosi.TheApp.OpenURL(tl.URL)
+		system.TheApp.OpenURL(tl.URL)
 	}
 }
 
 // LinkAt returns link at given cursor position, if one exists there --
 // returns true and the link if there is a link, and false otherwise
-func (ed *Editor) LinkAt(pos lex.Pos) (*paint.TextLink, bool) {
+func (ed *Editor) LinkAt(pos lexer.Pos) (*paint.TextLink, bool) {
 	if !(pos.Ln < len(ed.Renders) && len(ed.Renders[pos.Ln].Links) > 0) {
 		return nil, false
 	}
 	cpos := ed.CharStartPos(pos).ToPointCeil()
 	cpos.Y += 2
 	cpos.X += 2
-	lpos := ed.CharStartPos(lex.Pos{Ln: pos.Ln})
+	lpos := ed.CharStartPos(lexer.Pos{Ln: pos.Ln})
 	rend := &ed.Renders[pos.Ln]
 	for ti := range rend.Links {
 		tl := &rend.Links[ti]
@@ -542,7 +542,7 @@ func (ed *Editor) LinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 
 // OpenLinkAt opens a link at given cursor position, if one exists there --
 // returns true and the link if there is a link, and false otherwise -- highlights selected link
-func (ed *Editor) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
+func (ed *Editor) OpenLinkAt(pos lexer.Pos) (*paint.TextLink, bool) {
 	tl, ok := ed.LinkAt(pos)
 	if ok {
 		rend := &ed.Renders[pos.Ln]
@@ -659,7 +659,7 @@ func (ed *Editor) HandleLinkCursor() {
 
 // SetCursorFromMouse sets cursor position from mouse mouse action -- handles
 // the selection updating etc.
-func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode events.SelectModes) {
+func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lexer.Pos, selMode events.SelectModes) {
 	oldPos := ed.CursorPos
 	if newPos == oldPos {
 		return
@@ -694,7 +694,7 @@ func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode eve
 			ed.SelectRegUpdate(ed.CursorPos)
 		}
 		if ed.StateIs(states.Sliding) {
-			ed.AutoScroll(mat32.V2FromPoint(pt).Sub(ed.Geom.Scroll))
+			ed.AutoScroll(math32.Vector2FromPoint(pt).Sub(ed.Geom.Scroll))
 		} else {
 			ed.ScrollCursorToCenterIfHidden()
 		}

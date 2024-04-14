@@ -13,11 +13,11 @@ import (
 	"sync"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/grows/images"
-	"cogentcore.org/core/ki"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/iox/imagex"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
 
@@ -41,7 +41,7 @@ type SVG struct {
 
 	// Size is size of image, Pos is offset within any parent viewport.
 	// Node bounding boxes are based on 0 Pos offset within Pixels image
-	Geom mat32.Geom2DInt
+	Geom math32.Geom2DInt
 
 	// physical width of the drawing, e.g., when printed.
 	// Does not affect rendering, metadata.
@@ -58,7 +58,7 @@ type SVG struct {
 
 	// Translate specifies a translation to apply beyond what is specified in the SVG,
 	// and its ViewBox transform.
-	Translate mat32.Vec2
+	Translate math32.Vector2
 
 	// Scale specifies a zoom scale factor to apply beyond what is specified in the SVG,
 	// and its ViewBox transform.
@@ -116,7 +116,7 @@ func (sv *SVG) Resize(nwsz image.Point) {
 	if nwsz.X == 0 || nwsz.Y == 0 {
 		return
 	}
-	if sv.Root.Ths == nil {
+	if sv.Root.This() == nil {
 		sv.Config(nwsz.X, nwsz.Y)
 		return
 	}
@@ -177,32 +177,32 @@ func (sv *SVG) ImageByURL(url string) image.Image {
 
 func (sv *SVG) Style() {
 	// set the Defs flags
-	sv.Defs.WalkPre(func(k ki.Ki) bool {
+	sv.Defs.WalkDown(func(k tree.Node) bool {
 		ni := k.(Node)
 		if ni == nil || ni.This() == nil {
-			return ki.Break
+			return tree.Break
 		}
 		ni.SetFlag(true, IsDef)
 		ni.Style(sv)
-		return ki.Continue
+		return tree.Continue
 	})
 
 	sv.Root.Paint.Defaults()
 	if sv.Color != nil {
 		// TODO(kai): consider handling non-uniform colors here
 		c := colors.ToUniform(sv.Color)
-		sv.Root.SetColorProps("stroke", colors.AsHex(c))
-		sv.Root.SetColorProps("fill", colors.AsHex(c))
+		sv.Root.SetColorProperties("stroke", colors.AsHex(c))
+		sv.Root.SetColorProperties("fill", colors.AsHex(c))
 	}
-	sv.SetUnitContext(&sv.Root.Paint, mat32.Vec2{}, mat32.Vec2{})
+	sv.SetUnitContext(&sv.Root.Paint, math32.Vector2{}, math32.Vector2{})
 
-	sv.Root.WalkPre(func(k ki.Ki) bool {
+	sv.Root.WalkDown(func(k tree.Node) bool {
 		ni := k.(Node)
 		if ni == nil || ni.This() == nil {
-			return ki.Break
+			return tree.Break
 		}
 		ni.Style(sv)
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -226,14 +226,14 @@ func (sv *SVG) Render() {
 
 func (sv *SVG) FillViewport() {
 	pc := &paint.Context{&sv.RenderState, &sv.Root.Paint}
-	pc.FillBox(mat32.Vec2{}, mat32.V2FromPoint(sv.Geom.Size), sv.Background)
+	pc.FillBox(math32.Vector2{}, math32.Vector2FromPoint(sv.Geom.Size), sv.Background)
 }
 
 // SetRootTransform sets the Root node transform based on ViewBox, Translate, Scale
 // parameters set on the SVG object.
 func (sv *SVG) SetRootTransform() {
 	vb := &sv.Root.ViewBox
-	box := mat32.V2FromPoint(sv.Geom.Size)
+	box := math32.Vector2FromPoint(sv.Geom.Size)
 	if vb.Size.X == 0 {
 		vb.Size.X = sv.PhysWidth.Dots
 	}
@@ -260,12 +260,12 @@ func (sv *SVG) SetRootTransform() {
 func (sv *SVG) SetDPITransform(logicalDPI float32) {
 	pc := &sv.Root.Paint
 	dpisc := logicalDPI / 96.0
-	pc.Transform = mat32.Scale2D(dpisc, dpisc)
+	pc.Transform = math32.Scale2D(dpisc, dpisc)
 }
 
 // SavePNG saves the Pixels to a PNG file
 func (sv *SVG) SavePNG(fname string) error {
-	return images.Save(sv.Pixels, fname)
+	return imagex.Save(sv.Pixels, fname)
 }
 
 //////////////////////////////////////////////////////////////
@@ -293,7 +293,7 @@ func (g *SVGNode) NodeBBox(sv *SVG) image.Rectangle {
 // SetUnitContext sets the unit context based on size of viewport, element,
 // and parent element (from bbox) and then caches everything out in terms of raw pixel
 // dots for rendering -- call at start of render
-func (sv *SVG) SetUnitContext(pc *styles.Paint, el, parent mat32.Vec2) {
+func (sv *SVG) SetUnitContext(pc *styles.Paint, el, parent math32.Vector2) {
 	pc.UnitContext.Defaults()
 	pc.UnitContext.DPI = 96 // paint (SVG) context is always 96 = 1to1
 	if sv.RenderState.Image != nil {

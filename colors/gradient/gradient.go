@@ -16,7 +16,7 @@ import (
 	"image/color"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Gradient is the interface that all gradient types satisfy.
@@ -31,11 +31,11 @@ type Gradient interface {
 	// object-level transform (i.e., the current painting transform),
 	// which is applied in addition to the gradient's own Transform.
 	// This must be called before rendering the gradient, and it should only be called then.
-	Update(opacity float32, box mat32.Box2, objTransform mat32.Mat2)
+	Update(opacity float32, box math32.Box2, objTransform math32.Matrix2)
 }
 
 // Base contains the data and logic common to all gradient types.
-type Base struct { //gti:add -setters
+type Base struct { //types:add -setters
 
 	// the stops for the gradient; use AddStop to add stops
 	Stops []Stop `set:"-"`
@@ -51,11 +51,11 @@ type Base struct { //gti:add -setters
 
 	// the bounding box of the object with the gradient; this is used when rendering
 	// gradients with [Units] of [ObjectBoundingBox].
-	Box mat32.Box2
+	Box math32.Box2
 
 	// Transform is the gradient's own transformation matrix applied to the gradient's points.
 	// This is a property of the Gradient itself.
-	Transform mat32.Mat2
+	Transform math32.Matrix2
 
 	// Opacity is the overall object opacity multiplier, applied in conjunction with the
 	// stop-level opacity blending.
@@ -70,7 +70,7 @@ type Base struct { //gti:add -setters
 
 	// boxTransform is the Transform applied to the bounding Box,
 	// only for [Units] == [ObjectBoundingBox].
-	boxTransform mat32.Mat2 `set:"-"`
+	boxTransform math32.Matrix2 `set:"-"`
 
 	// stopsRGB are the computed RGB stops for blend types other than RGB
 	stopsRGB []Stop `set:"-"`
@@ -126,7 +126,7 @@ const (
 	ObjectBoundingBox Units = iota
 	// UserSpaceOnUse indicates that coordinate values are specified
 	// in the current user coordinate system when the gradient is used
-	// (ie: actual SVG/gi coordinates).
+	// (ie: actual SVG/core coordinates).
 	UserSpaceOnUse
 )
 
@@ -150,9 +150,9 @@ func (b *Base) AsBase() *Base {
 func NewBase() Base {
 	return Base{
 		Blend:     colors.RGB,
-		Box:       mat32.B2(0, 0, 100, 100),
+		Box:       math32.B2(0, 0, 100, 100),
 		Opacity:   1,
-		Transform: mat32.Identity2(),
+		Transform: math32.Identity2(),
 	}
 }
 
@@ -240,7 +240,7 @@ func (b *Base) UpdateBase() {
 func (b *Base) ComputeObjectMatrix() {
 	w, h := b.Box.Size().X, b.Box.Size().Y
 	oriX, oriY := b.Box.Min.X, b.Box.Min.Y
-	b.boxTransform = mat32.Identity2().Translate(oriX, oriY).Scale(w, h).Mul(b.Transform).
+	b.boxTransform = math32.Identity2().Translate(oriX, oriY).Scale(w, h).Mul(b.Transform).
 		Scale(1/w, 1/h).Translate(-oriX, -oriY).Inverse()
 }
 
@@ -270,7 +270,7 @@ func (b *Base) GetColorImpl(pos float32, stops []Stop) color.Color {
 	if b.Spread == Reflect {
 		modRange = 2
 	}
-	mod := mat32.Mod(pos, modRange)
+	mod := math32.Mod(pos, modRange)
 	if mod < 0 {
 		mod += modRange
 	}
@@ -381,7 +381,7 @@ func (b *Base) UpdateRGBStops() {
 		sp := b.Stops[i]
 		s := b.Stops[i+1]
 		dp := s.Pos - sp.Pos
-		np := int(mat32.Ceil(dp / tdp))
+		np := int(math32.Ceil(dp / tdp))
 		if np == 1 {
 			b.stopsRGB = append(b.stopsRGB, s)
 			continue

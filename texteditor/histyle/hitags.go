@@ -5,11 +5,11 @@
 package histyle
 
 import (
-	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/parse/token"
 	"github.com/alecthomas/chroma/v2"
 )
 
-// FromChroma converts a chroma.TokenType to a pi token.Tokens
+// FromChroma converts a chroma.TokenType to a parse token.Tokens
 func TokenFromChroma(ct chroma.TokenType) token.Tokens {
 	if ChromaToTokensMap == nil {
 		ChromaToTokensMap = make(map[chroma.TokenType]token.Tokens, len(TokensToChromaMap))

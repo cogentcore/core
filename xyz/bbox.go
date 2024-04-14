@@ -5,17 +5,17 @@
 package xyz
 
 import (
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // BBox contains bounding box and other gross solid properties
 type BBox struct {
 
 	// bounding box in local coords
-	BBox mat32.Box3
+	BBox math32.Box3
 
 	// bounding sphere in local coords
-	BSphere mat32.Sphere
+	BSphere math32.Sphere
 
 	// area
 	Area float32
@@ -25,7 +25,7 @@ type BBox struct {
 }
 
 // SetBounds sets BBox from min, max and updates other factors based on that
-func (bb *BBox) SetBounds(min, max mat32.Vec3) {
+func (bb *BBox) SetBounds(min, max math32.Vector3) {
 	bb.BBox.Set(&min, &max)
 	bb.UpdateFromBBox()
 }

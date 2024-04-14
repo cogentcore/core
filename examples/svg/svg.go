@@ -10,10 +10,10 @@ func main() {}
 /*
 var CurFilename = ""
 var TheSVG *svg.Editor
-var TheZoom *gi.Spinner
-var TheTransX *gi.Spinner
-var TheTransY *gi.Spinner
-var TheFile *gi.TextField
+var TheZoom *core.Spinner
+var TheTransX *core.Spinner
+var TheTransY *core.Spinner
+var TheFile *core.TextField
 
 func SetZoom(zf float32) {
 	TheSVG.Scale = zf
@@ -34,14 +34,14 @@ func OpenSVG(fnm string) {
 	updt := TheSVG.UpdateStart()
 	TheSVG.SetFullReRender()
 	fmt.Printf("Opening: %v\n", CurFilename)
-	TheSVG.OpenXML(gi.Filename(CurFilename))
+	TheSVG.OpenXML(core.Filename(CurFilename))
 	SetZoom(TheSVG.ParentRenderWin().LogicalDPI() / 96.0)
 	SetTrans(0, 0)
 	TheSVG.UpdateEnd(updt)
 }
 
-func FileViewOpenSVG(ctx gi.Widget) {
-	giv.FileViewDialog(ctx, giv.DlgOpts{Title: "Open SVG"}, CurFilename, func(dlg *gi.Dialog) {
+func FileViewOpenSVG(ctx core.Widget) {
+	views.FileViewDialog(ctx, views.DlgOpts{Title: "Open SVG"}, CurFilename, func(dlg *core.Dialog) {
 		if dlg.Accepted {
 			OpenSVG(dlg.Data.(string))
 		})
@@ -51,21 +51,19 @@ func main() {
 	width := 1600
 	height := 1200
 
-	gi.SetAppName("svg")
-	gi.SetAppAbout(`This is a demo of the SVG rendering (and start on editing) in the <b>Cogent Core</b> graphical interface system, within the <b>Goki</b> tree framework.  See <a href="https://github.com/goki">Cogent Core on GitHub</a>
-<p>You can drag the image around and use the scroll wheel to zoom.</p>`)
+	core.SetAppName("svg")
 
-	win := gi.NewMainRenderWin("gogi-svg-viewer", "Cogent Core SVG Viewer", width, height)
+	win := core.NewMainRenderWin("core-svg-viewer", "Cogent Core SVG Viewer", width, height)
 
 	vp := win.WinScene()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
 
-	tbar := gi.NewToolbar(mfr, "tbar")
+	tbar := core.NewToolbar(mfr, "tbar")
 	tbar.SetStretchMaxWidth()
 
-	svgrow := gi.NewLayout(mfr, "svgrow", gi.LayoutHoriz)
+	svgrow := core.NewLayout(mfr, "svgrow", core.LayoutHoriz)
 	svgrow.SetProp("horizontal-align", "center")
 	svgrow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	svgrow.SetStretchMaxWidth()
@@ -81,85 +79,85 @@ func main() {
 	svge.SetStretchMaxWidth()
 	svge.SetStretchMaxHeight()
 
-	loads := tbar.AddButton(gi.ActOpts{Label: "Open SVG", Icon: icons.Open}, func(act *gi.Button) {
+	loads := tbar.AddButton(core.ActOpts{Label: "Open SVG", Icon: icons.Open}, func(act *core.Button) {
 		FileViewOpenSVG(act)
 	})
 	loads.StartFocus()
 
-	fnm := gi.NewTextField(tbar, "cur-fname")
+	fnm := core.NewTextField(tbar, "cur-fname")
 	TheFile = fnm
 	fnm.SetMinPrefWidth(units.Ch(60))
 
-	zmlb := gi.NewLabel(tbar, "zmlb", "Zoom: ")
+	zmlb := core.NewLabel(tbar, "zmlb", "Zoom: ")
 	zmlb.SetProp("vertical-align", styles.Middle)
 	zmlb.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 
-	zoomout := tbar.AddButton(gi.ActOpts{Icon: icons.ZoomOut, Name: "zoomout", Tooltip: "zoom out"},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+	zoomout := tbar.AddButton(core.ActOpts{Icon: icons.ZoomOut, Name: "zoomout", Tooltip: "zoom out"},
+		win.This(), func(recv, send tree.Node, sig int64, data any) {
 			SetZoom(svge.Scale * 0.9)
 			win.FullReRender()
 		})
 	zoomout.SetProp("margin", 0)
 	zoomout.SetProp("padding", 0)
-	zoomout.SetProp("#icon", ki.Props{
+	zoomout.SetProp("#icon", tree.Properties{
 		"width":  units.Em(1.5),
 		"height": units.Em(1.5),
 	})
-	zoom := gi.NewSpinBox(tbar, "zoom")
+	zoom := core.NewSpinBox(tbar, "zoom")
 	// zoom.SetMinPrefWidth(units.NewEm(10))
 	zoom.SetValue(svge.Scale)
 	zoom.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 	TheZoom = zoom
-	zoom.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
-		sp := send.(*gi.Spinner)
+	zoom.SpinBoxSig.Connect(win.This(), func(recv, send tree.Node, sig int64, data any) {
+		sp := send.(*core.Spinner)
 		SetZoom(sp.Value)
 		win.FullReRender()
 	})
 
-	zoomin := tbar.AddButton(gi.ActOpts{Icon: icons.ZoomIn, Name: "zoomin", Tooltip: " zoom in"},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+	zoomin := tbar.AddButton(core.ActOpts{Icon: icons.ZoomIn, Name: "zoomin", Tooltip: " zoom in"},
+		win.This(), func(recv, send tree.Node, sig int64, data any) {
 			SetZoom(svge.Scale * 1.1)
 			win.FullReRender()
 		})
 	zoomin.SetProp("margin", 0)
 	zoomin.SetProp("padding", 0)
-	zoomin.SetProp("#icon", ki.Props{
+	zoomin.SetProp("#icon", tree.Properties{
 		"width":  units.Em(1.5),
 		"height": units.Em(1.5),
 	})
 
-	gi.NewSpace(tbar, "spctr")
-	trlb := gi.NewLabel(tbar, "trlb", "Translate: ")
+	core.NewSpace(tbar, "spctr")
+	trlb := core.NewLabel(tbar, "trlb", "Translate: ")
 	trlb.Tooltip = "Translation of overall image -- can use mouse drag to move as well"
 	trlb.SetProp("vertical-align", styles.Middle)
 
-	trx := gi.NewSpinBox(tbar, "trx")
+	trx := core.NewSpinBox(tbar, "trx")
 	// zoom.SetMinPrefWidth(units.NewEm(10))
 	trx.SetValue(svge.Trans.X)
 	TheTransX = trx
-	trx.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
+	trx.SpinBoxSig.Connect(win.This(), func(recv, send tree.Node, sig int64, data any) {
 		SetTrans(trx.Value, svge.Trans.Y)
 		win.FullReRender()
 	})
 
-	try := gi.NewSpinBox(tbar, "try")
+	try := core.NewSpinBox(tbar, "try")
 	// zoom.SetMinPrefWidth(units.NewEm(10))
 	try.SetValue(svge.Trans.Y)
 	TheTransY = try
-	try.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
+	try.SpinBoxSig.Connect(win.This(), func(recv, send tree.Node, sig int64, data any) {
 		SetTrans(svge.Trans.X, try.Value)
 		win.FullReRender()
 	})
 
-	fnm.TextFieldSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(gi.TextFieldDone) {
-			tf := send.(*gi.TextField)
+	fnm.TextFieldSig.Connect(win.This(), func(recv, send tree.Node, sig int64, data any) {
+		if sig == int64(core.TextFieldDone) {
+			tf := send.(*core.TextField)
 			fn, _ := homedir.Expand(tf.Text())
 			OpenSVG(fn)
 		}
 	})
 
-	svge.NodeSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
+	svge.NodeSig.Connect(win.This(), func(recv, send tree.Node, sig int64, data any) {
 		ssvg := send.Embed(svg.TypeEditor).(*svg.Editor)
 		SetZoom(ssvg.Scale)
 		SetTrans(ssvg.Trans.X, ssvg.Trans.Y)
@@ -168,33 +166,33 @@ func main() {
 	vp.UpdateEndNoSig(updt)
 
 	// main menu
-	appnm := gi.AppName()
+	appnm := core.AppName()
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "File", "Edit", "RenderWin"})
 
-	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
-	amen.Menu = make(gi.MenuStage, 0, 10)
+	amen := win.MainMenu.ChildByName(appnm, 0).(*core.Button)
+	amen.Menu = make(core.MenuStage, 0, 10)
 	amen.Menu.AddAppMenu(win)
 
-	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
-	emen.Menu = make(gi.MenuStage, 0, 10)
+	emen := win.MainMenu.ChildByName("Edit", 1).(*core.Button)
+	emen.Menu = make(core.MenuStage, 0, 10)
 	emen.Menu.AddCopyCutPaste(win)
 
 	// note: Command in shortcuts is automatically translated into Control for
 	// Linux, Windows or Meta for MacOS
-	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
-	fmen.Menu = make(gi.MenuStage, 0, 10)
-	fmen.Menu.AddButton(gi.ActOpts{Label: "Open", Shortcut: "Command+O"}, func(act *gi.Button) {
+	fmen := win.MainMenu.ChildByName("File", 0).(*core.Button)
+	fmen.Menu = make(core.MenuStage, 0, 10)
+	fmen.Menu.AddButton(core.ActOpts{Label: "Open", Shortcut: "Command+O"}, func(act *core.Button) {
 		FileViewOpenSVG(act)
 	})
 	fmen.Menu.AddSeparator("csep")
-	fmen.Menu.AddButton(gi.ActOpts{Label: "Close RenderWin", Shortcut: "Command+W"},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+	fmen.Menu.AddButton(core.ActOpts{Label: "Close RenderWin", Shortcut: "Command+W"},
+		win.This(), func(recv, send tree.Node, sig int64, data any) {
 			win.RenderWin.Close()
 		})
 
-	win.SetCloseCleanFunc(func(w *gi.RenderWin) {
-		go gi.Quit() // once main window is closed, quit
+	win.SetCloseCleanFunc(func(w *core.RenderWin) {
+		go core.Quit() // once main window is closed, quit
 	})
 
 	// todo: when saving works, add option to save, and change above to CloseReq

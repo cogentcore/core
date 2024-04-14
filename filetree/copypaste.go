@@ -12,14 +12,14 @@ import (
 	"path/filepath"
 	"strings"
 
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/giv"
-	"cogentcore.org/core/glop/dirs"
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/views"
 )
 
 // MimeData adds mimedata for this node: a text/plain of the Path,
@@ -27,10 +27,10 @@ import (
 func (fn *Node) MimeData(md *mimedata.Mimes) {
 	froot := fn.FRoot
 	path := string(fn.FPath)
-	punq := fn.PathFrom(froot) // note: ki paths have . escaped -> \,
+	punq := fn.PathFrom(froot) // note: tree paths have . escaped -> \,
 	*md = append(*md, mimedata.NewTextData(punq))
 	*md = append(*md, mimedata.NewTextData(path))
-	if int(fn.Info.Size) < gi.SystemSettings.BigFileSize {
+	if int(fn.Info.Size) < core.SystemSettings.BigFileSize {
 		in, err := os.Open(path)
 		if err != nil {
 			slog.Error(err.Error())
@@ -48,18 +48,18 @@ func (fn *Node) MimeData(md *mimedata.Mimes) {
 	}
 }
 
-// Cut copies to goosi.Clipboard and deletes selected items
+// Cut copies to system.Clipboard and deletes selected items
 func (fn *Node) Cut() {
 	if fn.IsRoot("Cut") {
 		return
 	}
 	fn.Copy(false)
 	// todo: move files somewhere temporary, then use those temps for paste..
-	gi.MessageDialog(fn, "File names were copied to clipboard and can be pasted to copy elsewhere, but files are not deleted because contents of files are not placed on the clipboard and thus cannot be pasted as such.  Use Delete to delete files.")
+	core.MessageDialog(fn, "File names were copied to clipboard and can be pasted to copy elsewhere, but files are not deleted because contents of files are not placed on the clipboard and thus cannot be pasted as such.  Use Delete to delete files.")
 }
 
 func (fn *Node) Paste() {
-	md := fn.Clipboard().Read([]string{fi.TextPlain})
+	md := fn.Clipboard().Read([]string{fileinfo.TextPlain})
 	if md != nil {
 		fn.PasteFiles(md, false, nil)
 	}
@@ -69,7 +69,7 @@ func (fn *Node) DragDrop(e events.Event) {
 	de := e.(*events.DragDrop)
 	md := de.Data.(mimedata.Mimes)
 	fn.PasteFiles(md, de.Source == nil, func() {
-		fn.This().(giv.TreeViewer).DropFinalize(de)
+		fn.This().(views.TreeViewer).DropFinalize(de)
 	})
 }
 
@@ -100,7 +100,7 @@ func (fn *Node) PasteCheckExisting(tfn *Node, md mimedata.Mimes, externalDrop bo
 		} else {
 			d = md[i] // just a list
 		}
-		if d.Type != fi.TextPlain {
+		if d.Type != fileinfo.TextPlain {
 			continue
 		}
 		path := string(d.Data)
@@ -109,7 +109,7 @@ func (fn *Node) PasteCheckExisting(tfn *Node, md mimedata.Mimes, externalDrop bo
 			_, fnm := filepath.Split(path)
 			path = filepath.Join(tpath, fnm)
 		}
-		if grr.Log1(dirs.FileExists(path)) {
+		if errors.Log1(dirs.FileExists(path)) {
 			existing = append(existing, path)
 		}
 	}
@@ -139,7 +139,7 @@ func (fn *Node) PasteCopyFiles(tdir *Node, md mimedata.Mimes, externalDrop bool)
 		} else {
 			d = md[i] // just a list
 		}
-		if d.Type != fi.TextPlain {
+		if d.Type != fileinfo.TextPlain {
 			continue
 		}
 		path := string(d.Data)
@@ -159,9 +159,9 @@ func (fn *Node) PasteCopyFilesCheck(tdir *Node, md mimedata.Mimes, externalDrop 
 		}
 		return
 	}
-	d := gi.NewBody().AddTitle("File(s) Exist in Target Dir, Overwrite?").
+	d := core.NewBody().AddTitle("File(s) Exist in Target Dir, Overwrite?").
 		AddText(fmt.Sprintf("File(s): %v exist, do you want to overwrite?", existing))
-	d.AddBottomBar(func(parent gi.Widget) {
+	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText("Overwrite").OnClick(func(e events.Event) {
 			fn.PasteCopyFiles(tdir, md, externalDrop)
@@ -200,7 +200,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 	if externalDrop {
 		srcpath = string(md[0].Data) // just file path
 	} else {
-		srcpath = string(md[1].Data) // 1 has file path, 0 = ki path, 2 = file data
+		srcpath = string(md[1].Data) // 1 has file path, 0 = tree path, 2 = file data
 	}
 	fname := filepath.Base(srcpath)
 	tdir := AsNode(fn.Parent())
@@ -211,15 +211,15 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 	}
 	switch {
 	case len(existing) == 1 && fname == fn.Nm:
-		d := gi.NewBody().AddTitle("Overwrite?").
+		d := core.NewBody().AddTitle("Overwrite?").
 			AddText(fmt.Sprintf("Overwrite target file: %s with source file of same name?, or diff (compare) two files?", fn.Nm))
-		d.AddBottomBar(func(parent gi.Widget) {
+		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent)
 			d.AddOK(parent).SetText("Diff (compare)").OnClick(func(e events.Event) {
 				texteditor.DiffFiles(fn, tpath, srcpath)
 			})
 			d.AddOK(parent).SetText("Overwrite").OnClick(func(e events.Event) {
-				fi.CopyFile(tpath, srcpath, mode)
+				fileinfo.CopyFile(tpath, srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()
 				}
@@ -227,9 +227,9 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 		})
 		d.NewDialog(fn).Run()
 	case len(existing) > 0:
-		d := gi.NewBody().AddTitle("Overwrite?").
+		d := core.NewBody().AddTitle("Overwrite?").
 			AddText(fmt.Sprintf("Overwrite target file: %s with source file: %s, or overwrite existing file with same name as source file (%s), or diff (compare) files?", fn.Nm, fname, fname))
-		d.AddBottomBar(func(parent gi.Widget) {
+		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent)
 			d.AddOK(parent).SetText("Diff to target").OnClick(func(e events.Event) {
 				texteditor.DiffFiles(fn, tpath, srcpath)
@@ -239,14 +239,14 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 				texteditor.DiffFiles(fn, npath, srcpath)
 			})
 			d.AddOK(parent).SetText("Overwrite target").OnClick(func(e events.Event) {
-				fi.CopyFile(tpath, srcpath, mode)
+				fileinfo.CopyFile(tpath, srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()
 				}
 			})
 			d.AddOK(parent).SetText("Overwrite existing").OnClick(func(e events.Event) {
 				npath := filepath.Join(string(tdir.FPath), fname)
-				fi.CopyFile(npath, srcpath, mode)
+				fileinfo.CopyFile(npath, srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()
 				}
@@ -254,15 +254,15 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 		})
 		d.NewDialog(fn).Run()
 	default:
-		d := gi.NewBody().AddTitle("Overwrite?").
+		d := core.NewBody().AddTitle("Overwrite?").
 			AddText(fmt.Sprintf("Overwrite target file: %s with source file: %s, or copy to: %s in current folder (which doesn't yet exist), or diff (compare) the two files?", fn.Nm, fname, fname))
-		d.AddBottomBar(func(parent gi.Widget) {
+		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent)
 			d.AddOK(parent).SetText("Diff (compare)").OnClick(func(e events.Event) {
 				texteditor.DiffFiles(fn, tpath, srcpath)
 			})
 			d.AddOK(parent).SetText("Overwrite target").OnClick(func(e events.Event) {
-				fi.CopyFile(tpath, srcpath, mode)
+				fileinfo.CopyFile(tpath, srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()
 				}
@@ -280,7 +280,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 
 // Dragged is called after target accepts the drop -- we just remove
 // elements that were moved
-// satisfies gi.DragNDropper interface and can be overridden by subtypes
+// satisfies core.DragNDropper interface and can be overridden by subtypes
 func (fn *Node) DropDeleteSource(e events.Event) {
 	de := e.(*events.DragDrop)
 	froot := fn.FRoot

@@ -54,7 +54,7 @@ const UnitsN Units = 2
 
 var _UnitsValueMap = map[string]Units{`objectBoundingBox`: 0, `userSpaceOnUse`: 1}
 
-var _UnitsDescMap = map[Units]string{0: `ObjectBoundingBox indicates that coordinate values are scaled relative to the size of the object and are specified in the normalized range of 0 to 1.`, 1: `UserSpaceOnUse indicates that coordinate values are specified in the current user coordinate system when the gradient is used (ie: actual SVG/gi coordinates).`}
+var _UnitsDescMap = map[Units]string{0: `ObjectBoundingBox indicates that coordinate values are scaled relative to the size of the object and are specified in the normalized range of 0 to 1.`, 1: `UserSpaceOnUse indicates that coordinate values are specified in the current user coordinate system when the gradient is used (ie: actual SVG/core coordinates).`}
 
 var _UnitsMap = map[Units]string{0: `objectBoundingBox`, 1: `userSpaceOnUse`}
 

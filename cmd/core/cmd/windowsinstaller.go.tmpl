@@ -1,0 +1,29 @@
+package main
+
+import (
+	_ "embed"
+	"os"
+
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/core"
+)
+
+//go:embed app.exe
+var exe []byte
+
+//go:embed icon.svg
+var icon []byte
+
+func main() {
+	b := core.NewBody("{{.Name}} Installer")
+	b.App().SetAppBarConfig(nil).SetIconBytes(icon)
+	bt := core.NewButton(b).SetText("Install {{.Name}}")
+	bt.OnClick(func(e events.Event) {
+		dir := "C:\\Program Files\\{{.Name}}"
+		err := os.MkdirAll(dir, 0777)
+		core.ErrorDialog(bt, err, "Error installing {{.Name}}")
+		err = os.WriteFile(dir+"\\{{.Name}}.exe", exe, 0666)
+		core.ErrorDialog(bt, err, "Error installing {{.Name}}")
+	})
+	b.RunMainWindow()
+}

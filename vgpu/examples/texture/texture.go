@@ -18,7 +18,7 @@ import (
 
 	vk "github.com/goki/vulkan"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/vgpu"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -29,9 +29,9 @@ func init() {
 }
 
 type CamView struct {
-	Model mat32.Mat4
-	View  mat32.Mat4
-	Prjn  mat32.Mat4
+	Model math32.Matrix4
+	View  math32.Matrix4
+	Prjn  math32.Matrix4
 }
 
 func OpenImage(fname string) image.Image {
@@ -63,7 +63,7 @@ func main() {
 	vgpu.Debug = true
 	gp.Config("texture")
 
-	// gp.PropsString(true) // print
+	// gp.PropertiesString(true) // print
 
 	surfPtr, err := window.CreateWindowSurface(gp.Instance, nil)
 	if err != nil {
@@ -103,13 +103,13 @@ func main() {
 	nPts := 4
 	nIndexes := 6
 
-	posv := vset.Add("Pos", vgpu.Float32Vec3, nPts, vgpu.Vertex, vgpu.VertexShader)
-	clrv := vset.Add("Color", vgpu.Float32Vec3, nPts, vgpu.Vertex, vgpu.VertexShader)
-	txcv := vset.Add("TexCoord", vgpu.Float32Vec2, nPts, vgpu.Vertex, vgpu.VertexShader)
+	posv := vset.Add("Pos", vgpu.Float32Vector3, nPts, vgpu.Vertex, vgpu.VertexShader)
+	clrv := vset.Add("Color", vgpu.Float32Vector3, nPts, vgpu.Vertex, vgpu.VertexShader)
+	txcv := vset.Add("TexCoord", vgpu.Float32Vector2, nPts, vgpu.Vertex, vgpu.VertexShader)
 	// note: always put indexes last so there isn't a gap in the location indexes!
 	idxv := vset.Add("Index", vgpu.Uint16, nIndexes, vgpu.Index, vgpu.VertexShader)
 
-	camv := uset.AddStruct("Camera", vgpu.Float32Mat4.Bytes()*3, 1, vgpu.Uniform, vgpu.VertexShader)
+	camv := uset.AddStruct("Camera", vgpu.Float32Matrix4.Bytes()*3, 1, vgpu.Uniform, vgpu.VertexShader)
 
 	txidxv := pcset.Add("TexIndex", vgpu.Int32, 1, vgpu.Push, vgpu.FragmentShader)
 	tximgv := txset.Add("TexSampler", vgpu.ImageRGBA32, 1, vgpu.TextureRole, vgpu.FragmentShader)
@@ -171,12 +171,12 @@ func main() {
 
 	// This is the standard camera view projection computation
 	cam, _ := camv.Values.ValueByIndexTry(0)
-	campos := mat32.V3(0, 0, 2)
-	target := mat32.V3(0, 0, 0)
-	var lookq mat32.Quat
-	lookq.SetFromRotationMatrix(mat32.NewLookAt(campos, target, mat32.V3(0, 1, 0)))
-	scale := mat32.V3(1, 1, 1)
-	var cview mat32.Mat4
+	campos := math32.Vec3(0, 0, 2)
+	target := math32.Vec3(0, 0, 0)
+	var lookq math32.Quat
+	lookq.SetFromRotationMatrix(math32.NewLookAt(campos, target, math32.Vec3(0, 1, 0)))
+	scale := math32.Vec3(1, 1, 1)
+	var cview math32.Matrix4
 	cview.SetTransform(campos, lookq, scale)
 	view, _ := cview.Inverse()
 

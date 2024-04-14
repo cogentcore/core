@@ -4,7 +4,7 @@
 
 package units
 
-import "cogentcore.org/core/laser"
+import "cogentcore.org/core/reflectx"
 
 // Context specifies everything about the current context necessary for converting the number
 // into specific display-dependent pixels
@@ -60,7 +60,7 @@ func (uc *Context) Defaults() {
 }
 
 func (uc *Context) String() string {
-	return laser.StringJSON(uc)
+	return reflectx.StringJSON(uc)
 }
 
 // SetSizes sets the context values for the non-font sizes

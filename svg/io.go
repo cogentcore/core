@@ -23,11 +23,11 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/grows/images"
-	"cogentcore.org/core/ki"
-	"cogentcore.org/core/laser"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/iox/imagex"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"golang.org/x/net/html/charset"
 )
 
@@ -159,7 +159,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					// }
 					switch attr.Name.Local {
 					case "viewBox":
-						pts := mat32.ReadPoints(attr.Value)
+						pts := math32.ReadPoints(attr.Value)
 						if len(pts) != 4 {
 							return errParamMismatch
 						}
@@ -176,7 +176,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					case "preserveAspectRatio":
 						curSvg.ViewBox.PreserveAspectRatio.SetString(attr.Value)
 					default:
-						curPar.SetProp(attr.Name.Local, attr.Value)
+						curPar.SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
 			case nm == "desc":
@@ -195,7 +195,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					default:
-						curPar.SetProp(attr.Name.Local, attr.Value)
+						curPar.SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
 			case nm == "rect":
@@ -207,19 +207,19 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "x":
-						x, err = mat32.ParseFloat32(attr.Value)
+						x, err = math32.ParseFloat32(attr.Value)
 					case "y":
-						y, err = mat32.ParseFloat32(attr.Value)
+						y, err = math32.ParseFloat32(attr.Value)
 					case "width":
-						w, err = mat32.ParseFloat32(attr.Value)
+						w, err = math32.ParseFloat32(attr.Value)
 					case "height":
-						h, err = mat32.ParseFloat32(attr.Value)
+						h, err = math32.ParseFloat32(attr.Value)
 					case "rx":
-						rx, err = mat32.ParseFloat32(attr.Value)
+						rx, err = math32.ParseFloat32(attr.Value)
 					case "ry":
-						ry, err = mat32.ParseFloat32(attr.Value)
+						ry, err = math32.ParseFloat32(attr.Value)
 					default:
-						rect.SetProp(attr.Name.Local, attr.Value)
+						rect.SetProperty(attr.Name.Local, attr.Value)
 					}
 					if err != nil {
 						return err
@@ -237,13 +237,13 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "cx":
-						cx, err = mat32.ParseFloat32(attr.Value)
+						cx, err = math32.ParseFloat32(attr.Value)
 					case "cy":
-						cy, err = mat32.ParseFloat32(attr.Value)
+						cy, err = math32.ParseFloat32(attr.Value)
 					case "r":
-						r, err = mat32.ParseFloat32(attr.Value)
+						r, err = math32.ParseFloat32(attr.Value)
 					default:
-						circle.SetProp(attr.Name.Local, attr.Value)
+						circle.SetProperty(attr.Name.Local, attr.Value)
 					}
 					if err != nil {
 						return err
@@ -260,15 +260,15 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "cx":
-						cx, err = mat32.ParseFloat32(attr.Value)
+						cx, err = math32.ParseFloat32(attr.Value)
 					case "cy":
-						cy, err = mat32.ParseFloat32(attr.Value)
+						cy, err = math32.ParseFloat32(attr.Value)
 					case "rx":
-						rx, err = mat32.ParseFloat32(attr.Value)
+						rx, err = math32.ParseFloat32(attr.Value)
 					case "ry":
-						ry, err = mat32.ParseFloat32(attr.Value)
+						ry, err = math32.ParseFloat32(attr.Value)
 					default:
-						ellipse.SetProp(attr.Name.Local, attr.Value)
+						ellipse.SetProperty(attr.Name.Local, attr.Value)
 					}
 					if err != nil {
 						return err
@@ -285,15 +285,15 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "x1":
-						x1, err = mat32.ParseFloat32(attr.Value)
+						x1, err = math32.ParseFloat32(attr.Value)
 					case "y1":
-						y1, err = mat32.ParseFloat32(attr.Value)
+						y1, err = math32.ParseFloat32(attr.Value)
 					case "x2":
-						x2, err = mat32.ParseFloat32(attr.Value)
+						x2, err = math32.ParseFloat32(attr.Value)
 					case "y2":
-						y2, err = mat32.ParseFloat32(attr.Value)
+						y2, err = math32.ParseFloat32(attr.Value)
 					default:
-						line.SetProp(attr.Name.Local, attr.Value)
+						line.SetProperty(attr.Name.Local, attr.Value)
 					}
 					if err != nil {
 						return err
@@ -309,7 +309,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "points":
-						pts := mat32.ReadPoints(attr.Value)
+						pts := math32.ReadPoints(attr.Value)
 						if pts != nil {
 							sz := len(pts)
 							if sz%2 != 0 {
@@ -317,14 +317,14 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 								log.Println(err)
 								return err
 							}
-							pvec := make([]mat32.Vec2, sz/2)
+							pvec := make([]math32.Vector2, sz/2)
 							for ci := 0; ci < sz/2; ci++ {
 								pvec[ci].Set(pts[ci*2], pts[ci*2+1])
 							}
 							polygon.Points = pvec
 						}
 					default:
-						polygon.SetProp(attr.Name.Local, attr.Value)
+						polygon.SetProperty(attr.Name.Local, attr.Value)
 					}
 					if err != nil {
 						return err
@@ -338,7 +338,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "points":
-						pts := mat32.ReadPoints(attr.Value)
+						pts := math32.ReadPoints(attr.Value)
 						if pts != nil {
 							sz := len(pts)
 							if sz%2 != 0 {
@@ -346,14 +346,14 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 								log.Println(err)
 								return err
 							}
-							pvec := make([]mat32.Vec2, sz/2)
+							pvec := make([]math32.Vector2, sz/2)
 							for ci := 0; ci < sz/2; ci++ {
 								pvec[ci].Set(pts[ci*2], pts[ci*2+1])
 							}
 							polyline.Points = pvec
 						}
 					default:
-						polyline.SetProp(attr.Name.Local, attr.Value)
+						polyline.SetProperty(attr.Name.Local, attr.Value)
 					}
 					if err != nil {
 						return err
@@ -372,7 +372,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					case "d":
 						path.SetData(attr.Value)
 					default:
-						path.SetProp(attr.Name.Local, attr.Value)
+						path.SetProperty(attr.Name.Local, attr.Value)
 					}
 					if err != nil {
 						return err
@@ -387,13 +387,13 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "x":
-						x, err = mat32.ParseFloat32(attr.Value)
+						x, err = math32.ParseFloat32(attr.Value)
 					case "y":
-						y, err = mat32.ParseFloat32(attr.Value)
+						y, err = math32.ParseFloat32(attr.Value)
 					case "width":
-						w, err = mat32.ParseFloat32(attr.Value)
+						w, err = math32.ParseFloat32(attr.Value)
 					case "height":
-						h, err = mat32.ParseFloat32(attr.Value)
+						h, err = math32.ParseFloat32(attr.Value)
 					case "preserveAspectRatio":
 						img.ViewBox.PreserveAspectRatio.SetString(attr.Value)
 					case "href":
@@ -406,7 +406,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 								log.Printf("image base64 encoding string not properly formatted: %s\n", bs64)
 							}
 							eb := []byte(es[fmti+8:])
-							im, err := images.FromBase64(fm, eb)
+							im, err := imagex.FromBase64(fm, eb)
 							if err != nil {
 								log.Println(err)
 							} else {
@@ -416,7 +416,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 
 						}
 					default:
-						img.SetProp(attr.Name.Local, attr.Value)
+						img.SetProperty(attr.Name.Local, attr.Value)
 					}
 					if err != nil {
 						return err
@@ -453,36 +453,36 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "x":
-						pts := mat32.ReadPoints(attr.Value)
+						pts := math32.ReadPoints(attr.Value)
 						if len(pts) > 1 {
 							txt.CharPosX = pts
 						} else if len(pts) == 1 {
 							txt.Pos.X = pts[0]
 						}
 					case "y":
-						pts := mat32.ReadPoints(attr.Value)
+						pts := math32.ReadPoints(attr.Value)
 						if len(pts) > 1 {
 							txt.CharPosY = pts
 						} else if len(pts) == 1 {
 							txt.Pos.Y = pts[0]
 						}
 					case "dx":
-						pts := mat32.ReadPoints(attr.Value)
+						pts := math32.ReadPoints(attr.Value)
 						if len(pts) > 0 {
 							txt.CharPosDX = pts
 						}
 					case "dy":
-						pts := mat32.ReadPoints(attr.Value)
+						pts := math32.ReadPoints(attr.Value)
 						if len(pts) > 0 {
 							txt.CharPosDY = pts
 						}
 					case "rotate":
-						pts := mat32.ReadPoints(attr.Value)
+						pts := math32.ReadPoints(attr.Value)
 						if len(pts) > 0 {
 							txt.CharRots = pts
 						}
 					case "textLength":
-						tl, err := mat32.ParseFloat32(attr.Value)
+						tl, err := math32.ParseFloat32(attr.Value)
 						if err != nil {
 							txt.TextLength = tl
 						}
@@ -493,7 +493,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 							txt.AdjustGlyphs = false
 						}
 					default:
-						txt.SetProp(attr.Name.Local, attr.Value)
+						txt.SetProperty(attr.Name.Local, attr.Value)
 					}
 					if err != nil {
 						return err
@@ -574,7 +574,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					default:
-						cp.SetProp(attr.Name.Local, attr.Value)
+						cp.SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
 			case nm == "marker":
@@ -589,13 +589,13 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "refX":
-						rx, err = mat32.ParseFloat32(attr.Value)
+						rx, err = math32.ParseFloat32(attr.Value)
 					case "refY":
-						ry, err = mat32.ParseFloat32(attr.Value)
+						ry, err = math32.ParseFloat32(attr.Value)
 					case "markerWidth":
-						szx, err = mat32.ParseFloat32(attr.Value)
+						szx, err = math32.ParseFloat32(attr.Value)
 					case "markerHeight":
-						szy, err = mat32.ParseFloat32(attr.Value)
+						szy, err = math32.ParseFloat32(attr.Value)
 					case "matrixUnits":
 						if attr.Value == "strokeWidth" {
 							mrk.Units = StrokeWidth
@@ -603,7 +603,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 							mrk.Units = UserSpaceOnUse
 						}
 					case "viewBox":
-						pts := mat32.ReadPoints(attr.Value)
+						pts := math32.ReadPoints(attr.Value)
 						if len(pts) != 4 {
 							return errParamMismatch
 						}
@@ -614,7 +614,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					case "orient":
 						mrk.Orient = attr.Value
 					default:
-						mrk.SetProp(attr.Name.Local, attr.Value)
+						mrk.SetProperty(attr.Name.Local, attr.Value)
 					}
 					if err != nil {
 						return err
@@ -635,7 +635,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 							}
 							switch attr.Name.Local {
 							default:
-								cln.SetProp(attr.Name.Local, attr.Value)
+								cln.SetProperty(attr.Name.Local, attr.Value)
 							}
 						}
 					}
@@ -666,7 +666,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					default:
-						curPar.SetProp(attr.Name.Local, attr.Value)
+						curPar.SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
 			case strings.HasPrefix(nm, "flow"):
@@ -680,7 +680,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					default:
-						curPar.SetProp(attr.Name.Local, attr.Value)
+						curPar.SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
 			case strings.HasPrefix(nm, "fe"):
@@ -698,7 +698,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					default:
-						curPar.SetProp(attr.Name.Local, attr.Value)
+						curPar.SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
 			default:
@@ -747,7 +747,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				if curPar == sv.Root.This() {
 					break
 				}
-				curSvgk := curPar.ParentByType(SVGNodeType, ki.NoEmbeds)
+				curSvgk := curPar.ParentByType(SVGNodeType, tree.NoEmbeds)
 				if curSvgk != nil {
 					curSvg = curSvgk.(*SVGNode)
 				}
@@ -768,7 +768,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				curTxt.Text = trspc
 			case inCSS && curCSS != nil:
 				curCSS.ParseString(trspc)
-				cp := curCSS.CSSProps()
+				cp := curCSS.CSSProperties()
 				if cp != nil {
 					if inDef && defPrevPar != nil {
 						defPrevPar.AsNodeBase().CSS = cp
@@ -826,8 +826,8 @@ func XMLAddAttr(attr *[]xml.Attr, name, val string) {
 	*attr = append(*attr, at)
 }
 
-// InkscapeProps are property keys that should be prefixed with "inkscape:"
-var InkscapeProps = map[string]bool{
+// InkscapeProperties are property keys that should be prefixed with "inkscape:"
+var InkscapeProperties = map[string]bool{
 	"isstock": true,
 	"stockid": true,
 }
@@ -835,15 +835,12 @@ var InkscapeProps = map[string]bool{
 // SVGNodeMarshalXML encodes just the given node under SVG to XML.
 // returns name of node, for end tag -- if empty, then children will not be
 // output.
-func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
+func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 	if itm == nil || itm.This() == nil {
 		return ""
 	}
 	se := xml.StartElement{}
-	var props ki.Props
-	if itm.Properties() != nil {
-		props = *itm.Properties()
-	}
+	properties := itm.Properties()
 	if itm.Name() != "" {
 		XMLAddAttr(&se.Attr, "id", itm.Name())
 	}
@@ -853,17 +850,17 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 	_, ismark := itm.(*Marker)
 	if !isgp {
 		if issvg && !ismark {
-			sp := styles.StylePropsXML(props)
+			sp := styles.StylePropertiesXML(properties)
 			if sp != "" {
 				XMLAddAttr(&se.Attr, "style", sp)
 			}
-			if txp, has := props["transform"]; has {
-				XMLAddAttr(&se.Attr, "transform", laser.ToString(txp))
+			if txp, has := properties["transform"]; has {
+				XMLAddAttr(&se.Attr, "transform", reflectx.ToString(txp))
 			}
 		} else {
-			for k, v := range props {
-				sv := laser.ToString(v)
-				if _, has := InkscapeProps[k]; has {
+			for k, v := range properties {
+				sv := reflectx.ToString(v)
+				if _, has := InkscapeProperties[k]; has {
 					k = "inkscape:" + k
 				} else if k == "overflow" {
 					k = "style"
@@ -884,15 +881,15 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 		nm = "g"
 		if strings.HasPrefix(strings.ToLower(itm.Name()), "layer") {
 		}
-		for k, v := range props {
-			sv := laser.ToString(v)
+		for k, v := range properties {
+			sv := reflectx.ToString(v)
 			switch k {
 			case "opacity", "transform":
 				XMLAddAttr(&se.Attr, k, sv)
 			case "groupmode":
 				XMLAddAttr(&se.Attr, "inkscape:groupmode", sv)
-				if st, has := props["style"]; has {
-					XMLAddAttr(&se.Attr, "style", laser.ToString(st))
+				if st, has := properties["style"]; has {
+					XMLAddAttr(&se.Attr, "style", reflectx.ToString(st))
 				} else {
 					XMLAddAttr(&se.Attr, "style", "display:inline")
 				}
@@ -956,8 +953,8 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "width", fmt.Sprintf("%g", nd.Size.X))
 		XMLAddAttr(&se.Attr, "height", fmt.Sprintf("%g", nd.Size.Y))
 		XMLAddAttr(&se.Attr, "preserveAspectRatio", nd.ViewBox.PreserveAspectRatio.String())
-		ib, fmt := images.ToBase64PNG(nd.Pixels)
-		XMLAddAttr(&se.Attr, "href", "data:"+fmt+";base64,"+string(images.Base64SplitLines(ib)))
+		ib, fmt := imagex.ToBase64PNG(nd.Pixels)
+		XMLAddAttr(&se.Attr, "href", "data:"+fmt+";base64,"+string(imagex.Base64SplitLines(ib)))
 	case *MetaData:
 		if strings.HasPrefix(nd.Nm, "namedview") {
 			nm = "sodipodi:namedview"
@@ -977,7 +974,7 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 	case *StyleSheet:
 		nm = "style"
 	default:
-		nm = itm.KiType().Name
+		nm = itm.NodeType().Name
 	}
 	se.Name.Local = nm
 	if setName != "" {
@@ -1014,7 +1011,7 @@ func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
 
 	if linear {
 		// must be non-zero to add
-		if gb.Box != (mat32.Box2{}) {
+		if gb.Box != (math32.Box2{}) {
 			XMLAddAttr(&me.Attr, "x1", fmt.Sprintf("%g", gb.Box.Min.X))
 			XMLAddAttr(&me.Attr, "y1", fmt.Sprintf("%g", gb.Box.Min.Y))
 			XMLAddAttr(&me.Attr, "x2", fmt.Sprintf("%g", gb.Box.Max.X))
@@ -1023,15 +1020,15 @@ func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
 	} else {
 		r := gr.(*gradient.Radial)
 		// must be non-zero to add
-		if r.Center != (mat32.Vec2{}) {
+		if r.Center != (math32.Vector2{}) {
 			XMLAddAttr(&me.Attr, "cx", fmt.Sprintf("%g", r.Center.X))
 			XMLAddAttr(&me.Attr, "cy", fmt.Sprintf("%g", r.Center.Y))
 		}
-		if r.Focal != (mat32.Vec2{}) {
+		if r.Focal != (math32.Vector2{}) {
 			XMLAddAttr(&me.Attr, "fx", fmt.Sprintf("%g", r.Focal.X))
 			XMLAddAttr(&me.Attr, "fy", fmt.Sprintf("%g", r.Focal.Y))
 		}
-		if r.Radius != (mat32.Vec2{}) {
+		if r.Radius != (math32.Vector2{}) {
 			XMLAddAttr(&me.Attr, "r", fmt.Sprintf("%g", max(r.Radius.X, r.Radius.Y)))
 		}
 	}
@@ -1041,7 +1038,7 @@ func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
 		XMLAddAttr(&me.Attr, "spreadMethod", gb.Spread.String())
 	}
 
-	if gb.Transform != mat32.Identity2() {
+	if gb.Transform != math32.Identity2() {
 		XMLAddAttr(&me.Attr, "gradientTransform", fmt.Sprintf("matrix(%g,%g,%g,%g,%g,%g)", gb.Transform.XX, gb.Transform.YX, gb.Transform.XY, gb.Transform.YY, gb.Transform.X0, gb.Transform.Y0))
 	}
 
@@ -1089,7 +1086,7 @@ func SVGNodeTreeMarshalXML(itm Node, enc *XMLEncoder, setName string) (string, e
 func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	me := xml.StartElement{}
 	me.Name.Local = "svg"
-	// todo: look for props about units?
+	// todo: look for properties about units?
 	XMLAddAttr(&me.Attr, "width", sv.PhysWidth.String())
 	XMLAddAttr(&me.Attr, "height", sv.PhysHeight.String())
 	XMLAddAttr(&me.Attr, "viewBox", fmt.Sprintf("%g %g %g %g", sv.Root.ViewBox.Min.X, sv.Root.ViewBox.Min.Y, sv.Root.ViewBox.Size.X, sv.Root.ViewBox.Size.Y))
@@ -1130,7 +1127,7 @@ func SetStdXMLAttr(ni Node, name, val string) bool {
 		nb.Class = val
 		return true
 	case "style":
-		styles.SetStylePropsXML(val, (*map[string]any)(&nb.Props))
+		styles.SetStylePropertiesXML(val, (*map[string]any)(&nb.Props))
 		return true
 	}
 	return false

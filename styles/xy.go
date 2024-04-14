@@ -7,11 +7,11 @@ package styles
 import (
 	"fmt"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // XY represents X,Y values
-type XY[T any] struct { //gti:add
+type XY[T any] struct { //types:add
 	// X is the horizontal axis value
 	X T
 
@@ -44,11 +44,11 @@ func (xy *XY[T]) Set(v ...T) {
 }
 
 // return the value for given dimension
-func (xy *XY[T]) Dim(d mat32.Dims) T {
+func (xy *XY[T]) Dim(d math32.Dims) T {
 	switch d {
-	case mat32.X:
+	case math32.X:
 		return xy.X
-	case mat32.Y:
+	case math32.Y:
 		return xy.Y
 	default:
 		panic("styles.XY dimension invalid")
@@ -56,11 +56,11 @@ func (xy *XY[T]) Dim(d mat32.Dims) T {
 }
 
 // set the value for given dimension
-func (xy *XY[T]) SetDim(d mat32.Dims, val T) {
+func (xy *XY[T]) SetDim(d math32.Dims, val T) {
 	switch d {
-	case mat32.X:
+	case math32.X:
 		xy.X = val
-	case mat32.Y:
+	case math32.Y:
 		xy.Y = val
 	default:
 		panic("styles.XY dimension invalid")

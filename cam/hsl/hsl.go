@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"image/color"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // HSL represents the Hue [0..360], Saturation [0..1], and Luminance
@@ -139,8 +139,8 @@ func HueToRGBF32(p, q, t float32) float32 {
 
 // RGBtoHSLF32 converts RGB 0..1 values (non alpha-premultiplied) to HSL -- based on https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion, https://www.w3.org/TR/css-color-3/ and github.com/lucasb-eyer/go-colorful
 func RGBtoHSLF32(r, g, b float32) (h, s, l float32) {
-	min := mat32.Min(mat32.Min(r, g), b)
-	max := mat32.Max(mat32.Max(r, g), b)
+	min := math32.Min(math32.Min(r, g), b)
+	max := math32.Max(math32.Max(r, g), b)
 
 	l = (max + min) / 2.0
 

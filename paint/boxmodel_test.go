@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -28,8 +28,8 @@ func TestBoxModel(t *testing.T) {
 		s.ComputeActualBackground(pabg)
 		s.ToDots()
 
-		sz := s.BoxSpace().Size().Add(mat32.V2(200, 100))
-		pc.DrawStandardBox(s, mat32.V2(50, 100), sz, pabg)
+		sz := s.BoxSpace().Size().Add(math32.Vec2(200, 100))
+		pc.DrawStandardBox(s, math32.Vec2(50, 100), sz, pabg)
 	})
 }
 
@@ -47,9 +47,9 @@ func TestBoxShadow(t *testing.T) {
 		s.ComputeActualBackground(pabg)
 		s.ToDots()
 
-		sz := s.BoxSpace().Size().Add(mat32.V2(200, 100))
+		sz := s.BoxSpace().Size().Add(math32.Vec2(200, 100))
 
-		pc.DrawStandardBox(s, mat32.V2(50, 100), sz, pabg)
+		pc.DrawStandardBox(s, math32.Vec2(50, 100), sz, pabg)
 	})
 }
 
@@ -59,26 +59,26 @@ func TestActualBackgroundColor(t *testing.T) {
 		a := styles.NewStyle()
 		a.Background = colors.C(colors.Lightgray)
 		a.ComputeActualBackground(pabg)
-		pc.DrawStandardBox(a, mat32.Vec2{}, mat32.V2(300, 300), pabg)
+		pc.DrawStandardBox(a, math32.Vector2{}, math32.Vec2(300, 300), pabg)
 
 		b := styles.NewStyle()
 		b.Background = colors.C(colors.Red)
 		b.Opacity = 0.5
 		b.ComputeActualBackground(a.ActualBackground)
-		pc.DrawStandardBox(b, mat32.V2(50, 50), mat32.V2(200, 200), a.ActualBackground)
+		pc.DrawStandardBox(b, math32.Vec2(50, 50), math32.Vec2(200, 200), a.ActualBackground)
 
 		c := styles.NewStyle()
 		c.Background = colors.C(colors.Blue)
 		c.Opacity = 0.5
 		c.StateLayer = 0.1
 		c.ComputeActualBackground(b.ActualBackground)
-		pc.DrawStandardBox(c, mat32.V2(75, 75), mat32.V2(150, 150), b.ActualBackground)
+		pc.DrawStandardBox(c, math32.Vec2(75, 75), math32.Vec2(150, 150), b.ActualBackground)
 
 		// d is transparent and thus should not be any different than c
 		d := styles.NewStyle()
 		d.Opacity = 0.5
 		d.ComputeActualBackground(c.ActualBackground)
-		pc.DrawStandardBox(d, mat32.V2(100, 100), mat32.V2(100, 100), c.ActualBackground)
+		pc.DrawStandardBox(d, math32.Vec2(100, 100), math32.Vec2(100, 100), c.ActualBackground)
 	})
 }
 
@@ -93,8 +93,8 @@ func TestBorderStyle(t *testing.T) {
 			s.Border.Radius.Set(units.Dp(50))
 			s.ToDots()
 
-			sz := s.BoxSpace().Size().Add(mat32.V2(200, 100))
-			pc.DrawStandardBox(s, mat32.V2(50, 100), sz, colors.C(colors.White))
+			sz := s.BoxSpace().Size().Add(math32.Vec2(200, 100))
+			pc.DrawStandardBox(s, math32.Vec2(50, 100), sz, colors.C(colors.White))
 		})
 	}
 }

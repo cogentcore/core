@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/cam/hct"
-	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/iox/imagex"
 )
 
 func TestSpacedLight(t *testing.T) {
@@ -61,7 +61,7 @@ func TestSpacedLight(t *testing.T) {
 		}
 	}
 
-	images.Assert(t, img, "spacedlight")
+	imagex.Assert(t, img, "spacedlight")
 }
 
 func TestSpacedDark(t *testing.T) {
@@ -112,5 +112,5 @@ func TestSpacedDark(t *testing.T) {
 		}
 	}
 
-	images.Assert(t, img, "spaceddark")
+	imagex.Assert(t, img, "spaceddark")
 }

@@ -9,7 +9,7 @@ import (
 )
 
 // WindowEvent reports on actions taken on a window.
-// The goosi.Window Flags and other state information
+// The system.Window Flags and other state information
 // will always be updated prior to this event being sent,
 // so those should be consulted directly for the new current state.
 type WindowEvent struct {

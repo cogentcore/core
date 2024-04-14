@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"cogentcore.org/core/glop/nptime"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/gox/nptime"
+	"cogentcore.org/core/parse/lexer"
 )
 
 // Region represents a text region as a start / end position, and includes
@@ -21,10 +21,10 @@ import (
 type Region struct {
 
 	// starting position
-	Start lex.Pos
+	Start lexer.Pos
 
 	// ending position: line number is *inclusive* but character position is *exclusive* (-1)
-	End lex.Pos
+	End lexer.Pos
 
 	// time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)
 	Time nptime.Time
@@ -56,14 +56,14 @@ func (tr *Region) TimeNow() {
 // NewRegion creates a new text region using separate line and char
 // values for start and end, and also sets the time stamp to now
 func NewRegion(stLn, stCh, edLn, edCh int) Region {
-	tr := Region{Start: lex.Pos{Ln: stLn, Ch: stCh}, End: lex.Pos{Ln: edLn, Ch: edCh}}
+	tr := Region{Start: lexer.Pos{Ln: stLn, Ch: stCh}, End: lexer.Pos{Ln: edLn, Ch: edCh}}
 	tr.TimeNow()
 	return tr
 }
 
 // NewRegionPos creates a new text region using position values
 // and also sets the time stamp to now
-func NewRegionPos(st, ed lex.Pos) Region {
+func NewRegionPos(st, ed lexer.Pos) Region {
 	tr := Region{Start: st, End: ed}
 	tr.TimeNow()
 	return tr
@@ -109,7 +109,7 @@ func (tr *Region) FromString(link string) bool {
 
 // NewRegionLen makes a new Region from a starting point and a length
 // along same line
-func NewRegionLen(start lex.Pos, len int) Region {
+func NewRegionLen(start lexer.Pos, len int) Region {
 	reg := Region{}
 	reg.Start = start
 	reg.End = start

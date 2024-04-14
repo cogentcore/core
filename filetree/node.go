@@ -15,18 +15,18 @@ import (
 	"sort"
 	"strings"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/giv"
-	"cogentcore.org/core/glop/dirs"
-	"cogentcore.org/core/gti"
+	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/ki"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/histyle"
-	"cogentcore.org/core/vci"
+	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
+	"cogentcore.org/core/vcs"
+	"cogentcore.org/core/views"
 )
 
 // NodeHiStyle is the default style for syntax highlighting to use for
@@ -37,13 +37,13 @@ var NodeHiStyle = histyle.StyleDefault
 // The name of the node is the name of the file.
 // Folders have children containing further nodes.
 type Node struct { //core:embedder
-	giv.TreeView
+	views.TreeView
 
 	// full path to this file
-	FPath gi.Filename `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	FPath core.Filename `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// full standard file info about this file
-	Info fi.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	Info fileinfo.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// file buffer for editing this file
 	Buffer *texteditor.Buffer `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
@@ -53,39 +53,33 @@ type Node struct { //core:embedder
 
 	// version control system repository for this directory,
 	// only non-nil if this is the highest-level directory in the tree under vcs control
-	DirRepo vci.Repo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	DirRepo vcs.Repo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
 	// version control system repository file status -- only valid during ReadDir
-	RepoFiles vci.Files `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	RepoFiles vcs.Files `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 }
 
 func (fn *Node) FlagType() enums.BitFlagSetter {
 	return (*NodeFlags)(&fn.Flags)
 }
 
-//	func (fn *Node) CopyFieldsFrom(frm any) {
-//		// note: not copying ki.Node as it doesn't have any copy fields
-//		// fr := frm.(*Node)
-//		// and indeed nothing here should be copied!
-//	}
-
 // NodeFlags define bitflags for Node state -- these extend TreeViewFlags
 // and storage is an int64
-type NodeFlags giv.TreeViewFlags //enums:bitflag -trim-prefix Node
+type NodeFlags views.TreeViewFlags //enums:bitflag -trim-prefix Node
 
 const (
 	// NodeOpen means file is open. For directories, this means that
 	// sub-files should be / have been loaded. For files, means that they
 	// have been opened e.g., for editing.
-	NodeOpen NodeFlags = NodeFlags(giv.TreeViewFlagsN) + iota
+	NodeOpen NodeFlags = NodeFlags(views.TreeViewFlagsN) + iota
 
 	// NodeSymLink indicates that file is a symbolic link.
 	// File info is all for the target of the symlink.
 	NodeSymLink
 )
 
-func (fn *Node) BaseType() *gti.Type {
-	return fn.KiType()
+func (fn *Node) BaseType() *types.Type {
+	return fn.NodeType()
 }
 
 // IsDir returns true if file is a directory (folder)
@@ -101,16 +95,16 @@ func (fn *Node) IsIrregular() bool {
 // IsExternal returns true if file is external to main file tree
 func (fn *Node) IsExternal() bool {
 	isExt := false
-	fn.WalkUp(func(k ki.Ki) bool {
+	fn.WalkUp(func(k tree.Node) bool {
 		sfn := AsNode(k)
 		if sfn == nil {
-			return ki.Break
+			return tree.Break
 		}
 		if sfn.IsIrregular() {
 			isExt = true
-			return ki.Break
+			return tree.Break
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return isExt
 }
@@ -118,16 +112,16 @@ func (fn *Node) IsExternal() bool {
 // HasClosedParent returns true if node has a parent node with !IsOpen flag set
 func (fn *Node) HasClosedParent() bool {
 	hasClosed := false
-	fn.WalkUpParent(func(k ki.Ki) bool {
+	fn.WalkUpParent(func(k tree.Node) bool {
 		sfn := AsNode(k)
 		if sfn == nil {
-			return ki.Break
+			return tree.Break
 		}
 		if !sfn.IsOpen() {
 			hasClosed = true
-			return ki.Break
+			return tree.Break
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return hasClosed
 }
@@ -181,10 +175,10 @@ func (fn *Node) ReadDir(path string) error {
 	if err != nil {
 		return err
 	}
-	fn.FPath = gi.Filename(pth)
+	fn.FPath = core.Filename(pth)
 	err = fn.Info.InitFile(string(fn.FPath))
 	if err != nil {
-		log.Printf("giv.Tree: could not read directory: %v err: %v\n", fn.FPath, err)
+		log.Printf("views.Tree: could not read directory: %v err: %v\n", fn.FPath, err)
 		return err
 	}
 
@@ -203,7 +197,7 @@ func (fn *Node) UpdateDir() {
 	hasExtFiles := false
 	if fn.This() == fn.FRoot.This() {
 		if len(fn.FRoot.ExtFiles) > 0 {
-			config = append(ki.Config{{Type: fn.FRoot.NodeType, Name: ExternalFilesName}}, config...)
+			config = append(tree.Config{{Type: fn.FRoot.FileNodeType, Name: ExternalFilesName}}, config...)
 			hasExtFiles = true
 		}
 	}
@@ -222,12 +216,12 @@ func (fn *Node) UpdateDir() {
 		// }
 		sf.SetNodePath(fp)
 		if sf.IsDir() {
-			sf.Info.Vcs = vci.Stored // always
+			sf.Info.VCS = vcs.Stored // always
 		} else if repo != nil {
 			rstat := rnode.RepoFiles.Status(repo, string(sf.FPath))
-			sf.Info.Vcs = rstat
+			sf.Info.VCS = rstat
 		} else {
-			sf.Info.Vcs = vci.Stored
+			sf.Info.VCS = vcs.Stored
 		}
 	}
 	if mods {
@@ -241,10 +235,10 @@ func (fn *Node) UpdateDir() {
 
 // ConfigOfFiles returns a type-and-name list for configuring nodes based on
 // files immediately within given path
-func (fn *Node) ConfigOfFiles(path string) ki.Config {
-	config1 := ki.Config{}
-	config2 := ki.Config{}
-	typ := fn.FRoot.NodeType
+func (fn *Node) ConfigOfFiles(path string) tree.Config {
+	config1 := tree.Config{}
+	config2 := tree.Config{}
+	typ := fn.FRoot.FileNodeType
 	filepath.Walk(path, func(pth string, info os.FileInfo, err error) error {
 		if err != nil {
 			emsg := fmt.Sprintf("filetree.Node ConfigFilesIn Path %q: Error: %v", path, err)
@@ -269,7 +263,7 @@ func (fn *Node) ConfigOfFiles(path string) ki.Config {
 		}
 		return nil
 	})
-	modSort := fn.FRoot.DirSortByModTime(gi.Filename(path))
+	modSort := fn.FRoot.DirSortByModTime(core.Filename(path))
 	if fn.FRoot.DirsOnTop {
 		if modSort {
 			fn.SortConfigByModTime(config2) // just sort files, not dirs
@@ -284,7 +278,7 @@ func (fn *Node) ConfigOfFiles(path string) ki.Config {
 }
 
 // SortConfigByModTime sorts given config list by mod time
-func (fn *Node) SortConfigByModTime(confg ki.Config) {
+func (fn *Node) SortConfigByModTime(confg tree.Config) {
 	sort.Slice(confg, func(i, j int) bool {
 		ifn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[i].Name))
 		jfn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[j].Name))
@@ -314,7 +308,7 @@ func (fn *Node) SetNodePath(path string) error {
 	if err != nil {
 		return err
 	}
-	fn.FPath = gi.Filename(pth)
+	fn.FPath = core.Filename(pth)
 	err = fn.InitFileInfo()
 	if err != nil {
 		return err
@@ -337,7 +331,7 @@ func (fn *Node) InitFileInfo() error {
 		// log.Printf("filetree.Node Path: %v could not be opened -- error: %v\n", fn.FPath, err)
 		return err
 	}
-	fn.FPath = gi.Filename(effpath)
+	fn.FPath = core.Filename(effpath)
 	err = fn.Info.InitFile(string(fn.FPath))
 	if err != nil {
 		emsg := fmt.Errorf("filetree.Node InitFileInfo Path %q: Error: %v", fn.FPath, err)
@@ -373,7 +367,7 @@ func (fn *Node) UpdateNode() error {
 	} else {
 		repo, _ := fn.Repo()
 		if repo != nil {
-			fn.Info.Vcs, _ = repo.Status(string(fn.FPath))
+			fn.Info.VCS, _ = repo.Status(string(fn.FPath))
 		}
 		fn.Update()
 		fn.SetFileIcon()
@@ -434,7 +428,7 @@ func (fn *Node) OpenEmptyDir() bool {
 
 // SortBys determines how to sort the selected files in the directory.
 // Default is alpha by name, optionally can be sorted by modification time.
-func (fn *Node) SortBys(modTime bool) { //gti:add
+func (fn *Node) SortBys(modTime bool) { //types:add
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
@@ -450,23 +444,23 @@ func (fn *Node) SortBy(modTime bool) {
 }
 
 // OpenAll opens all directories under this one
-func (fn *Node) OpenAll() { //gti:add
+func (fn *Node) OpenAll() { //types:add
 	fn.FRoot.InOpenAll = true // causes chaining of opening
 	fn.TreeView.OpenAll()
 	fn.FRoot.InOpenAll = false
 }
 
 // CloseAll closes all directories under this one, this included
-func (fn *Node) CloseAll() { //gti:add
-	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+func (fn *Node) CloseAll() { //types:add
+	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
-			return ki.Continue
+			return tree.Continue
 		}
 		if sfn.IsDir() {
 			sfn.Close()
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 }
 
@@ -485,8 +479,8 @@ func (fn *Node) OpenBuf() (bool, error) {
 	} else {
 		fn.Buffer = texteditor.NewBuffer()
 		fn.Buffer.OnChange(func(e events.Event) {
-			if fn.Info.Vcs == vci.Stored {
-				fn.Info.Vcs = vci.Modified
+			if fn.Info.VCS == vcs.Stored {
+				fn.Info.VCS = vcs.Modified
 			}
 		})
 	}
@@ -495,7 +489,7 @@ func (fn *Node) OpenBuf() (bool, error) {
 }
 
 // RemoveFromExterns removes file from list of external files
-func (fn *Node) RemoveFromExterns() { //gti:add
+func (fn *Node) RemoveFromExterns() { //types:add
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
@@ -519,7 +513,7 @@ func (fn *Node) CloseBuf() bool {
 }
 
 // RelPath returns the relative path from node for given full path
-func (fn *Node) RelPath(fpath gi.Filename) string {
+func (fn *Node) RelPath(fpath core.Filename) string {
 	return dirs.RelFilePath(string(fpath), string(fn.FPath))
 }
 
@@ -531,7 +525,7 @@ func (fn *Node) DirsTo(path string) (*Node, error) {
 		log.Printf("filetree.Node DirsTo path %v could not be turned into an absolute path: %v\n", path, err)
 		return nil, err
 	}
-	rpath := fn.RelPath(gi.Filename(pth))
+	rpath := fn.RelPath(core.Filename(pth))
 	if rpath == "." {
 		return fn, nil
 	}

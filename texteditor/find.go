@@ -7,9 +7,9 @@ package texteditor
 import (
 	"unicode"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/pi/lex"
+	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor/textbuf"
 )
@@ -43,7 +43,7 @@ func (ed *Editor) FindMatches(find string, useCase, lexItems bool) ([]textbuf.Ma
 }
 
 // MatchFromPos finds the match at or after the given text position -- returns 0, false if none
-func (ed *Editor) MatchFromPos(matches []textbuf.Match, cpos lex.Pos) (int, bool) {
+func (ed *Editor) MatchFromPos(matches []textbuf.Match, cpos lexer.Pos) (int, bool) {
 	for i, m := range matches {
 		reg := ed.Buffer.AdjustReg(m.Reg)
 		if reg.Start == cpos || cpos.IsLess(reg.Start) {
@@ -75,7 +75,7 @@ type ISearch struct {
 	PrevPos int `json:"-" xml:"-"`
 
 	// starting position for search -- returns there after on cancel
-	StartPos lex.Pos `json:"-" xml:"-"`
+	StartPos lexer.Pos `json:"-" xml:"-"`
 }
 
 // ViewMaxFindHighlights is the maximum number of regions to highlight on find
@@ -93,7 +93,7 @@ func (ed *Editor) ISearchMatches() bool {
 
 // ISearchNextMatch finds next match after given cursor position, and highlights
 // it, etc
-func (ed *Editor) ISearchNextMatch(cpos lex.Pos) bool {
+func (ed *Editor) ISearchNextMatch(cpos lexer.Pos) bool {
 	if len(ed.ISearch.Matches) == 0 {
 		ed.ISearchSig()
 		return false
@@ -142,7 +142,7 @@ func (ed *Editor) ISearchStart() {
 		} else { // restore prev
 			if PrevISearchString != "" {
 				ed.ISearch.Find = PrevISearchString
-				ed.ISearch.UseCase = lex.HasUpperCase(ed.ISearch.Find)
+				ed.ISearch.UseCase = lexer.HasUpperCase(ed.ISearch.Find)
 				ed.ISearchMatches()
 				ed.ISearchNextMatch(ed.CursorPos)
 				ed.ISearch.StartPos = ed.CursorPos
@@ -266,7 +266,7 @@ type QReplace struct {
 	PrevPos int `json:"-" xml:"-"`
 
 	// starting position for search -- returns there after on cancel
-	StartPos lex.Pos `json:"-" xml:"-"`
+	StartPos lexer.Pos `json:"-" xml:"-"`
 }
 
 var (
@@ -289,9 +289,9 @@ func (ed *Editor) QReplacePrompt() {
 	if ed.HasSelection() {
 		find = string(ed.Selection().ToBytes())
 	}
-	d := gi.NewBody().AddTitle("Query-Replace").
+	d := core.NewBody().AddTitle("Query-Replace").
 		AddText("Enter strings for find and replace, then select Query-Replace -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining")
-	fc := gi.NewChooser(d, "find").SetEditable(true).SetDefaultNew(true)
+	fc := core.NewChooser(d, "find").SetEditable(true).SetDefaultNew(true)
 	fc.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 		s.Min.X.Ch(80)
@@ -301,7 +301,7 @@ func (ed *Editor) QReplacePrompt() {
 		fc.SetCurrentValue(find)
 	}
 
-	rc := gi.NewChooser(d, "repl").SetEditable(true).SetDefaultNew(true)
+	rc := core.NewChooser(d, "repl").SetEditable(true).SetDefaultNew(true)
 	rc.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 		s.Min.X.Ch(80)
@@ -309,10 +309,10 @@ func (ed *Editor) QReplacePrompt() {
 	rc.SetStrings(PrevQReplaceRepls...).SetCurrentIndex(0)
 
 	lexitems := ed.QReplace.LexItems
-	lxi := gi.NewSwitch(d, "lexb").SetText("Lexical Items").SetChecked(lexitems)
+	lxi := core.NewSwitch(d, "lexb").SetText("Lexical Items").SetChecked(lexitems)
 	lxi.SetTooltip("search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything")
 
-	d.AddBottomBar(func(parent gi.Widget) {
+	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText("Query-Replace").OnClick(func(e events.Event) {
 			var find, repl string
@@ -336,12 +336,12 @@ func (ed *Editor) QReplaceStart(find, repl string, lexItems bool) {
 	ed.QReplace.Replace = repl
 	ed.QReplace.LexItems = lexItems
 	ed.QReplace.StartPos = ed.CursorPos
-	ed.QReplace.UseCase = lex.HasUpperCase(find)
+	ed.QReplace.UseCase = lexer.HasUpperCase(find)
 	ed.QReplace.Matches = nil
 	ed.QReplace.Pos = -1
 
-	gi.StringsInsertFirstUnique(&PrevQReplaceFinds, find, gi.SystemSettings.SavedPathsMax)
-	gi.StringsInsertFirstUnique(&PrevQReplaceRepls, repl, gi.SystemSettings.SavedPathsMax)
+	core.StringsInsertFirstUnique(&PrevQReplaceFinds, find, core.SystemSettings.SavedPathsMax)
+	core.StringsInsertFirstUnique(&PrevQReplaceRepls, repl, core.SystemSettings.SavedPathsMax)
 
 	ed.QReplaceMatches()
 	ed.QReplace.Pos, _ = ed.MatchFromPos(ed.QReplace.Matches, ed.CursorPos)
@@ -397,7 +397,7 @@ func (ed *Editor) QReplaceReplace(midx int) {
 	reg := ed.Buffer.AdjustReg(m.Reg)
 	pos := reg.Start
 	// last arg is matchCase, only if not using case to match and rep is also lower case
-	matchCase := !ed.QReplace.UseCase && !lex.HasUpperCase(rep)
+	matchCase := !ed.QReplace.UseCase && !lexer.HasUpperCase(rep)
 	ed.Buffer.ReplaceText(reg.Start, reg.End, pos, rep, EditSignal, matchCase)
 	ed.Highlights[midx] = textbuf.RegionNil
 	ed.SetCursor(pos)
@@ -455,7 +455,8 @@ func (ed *Editor) QReplaceCancel() {
 	ed.NeedsRender()
 }
 
-// EscPressed emitted for keyfun.Abort or keyfun.CancelSelect -- effect depends on state..
+// EscPressed emitted for [keymap.Abort] or [keymap.CancelSelect];
+// effect depends on state.
 func (ed *Editor) EscPressed() {
 	switch {
 	case ed.ISearch.On:

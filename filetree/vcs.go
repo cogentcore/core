@@ -6,40 +6,38 @@ package filetree
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
 
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/giv"
-	"cogentcore.org/core/glop/dirs"
-	"cogentcore.org/core/grr"
-	"cogentcore.org/core/ki"
-	"cogentcore.org/core/laser"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/dirs"
+	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/textbuf"
-	"cogentcore.org/core/vci"
-	"github.com/Masterminds/vcs"
+	"cogentcore.org/core/tree"
+	"cogentcore.org/core/vcs"
+	"cogentcore.org/core/views"
 )
 
 // FirstVCS returns the first VCS repository starting from this node and going down.
 // also returns the node having that repository
-func (fn *Node) FirstVCS() (vci.Repo, *Node) {
-	var repo vci.Repo
+func (fn *Node) FirstVCS() (vcs.Repo, *Node) {
+	var repo vcs.Repo
 	var rnode *Node
-	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
-			return ki.Continue
+			return tree.Continue
 		}
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
 			rnode = sfn
-			return ki.Break
+			return tree.Break
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return repo, rnode
 }
@@ -56,12 +54,12 @@ func (fn *Node) DetectVCSRepo(updateFiles bool) bool {
 		return false
 	}
 	path := string(fn.FPath)
-	rtyp := vci.DetectRepo(path)
-	if rtyp == vcs.NoVCS {
+	rtyp := vcs.DetectRepo(path)
+	if rtyp == "" {
 		return false
 	}
 	var err error
-	repo, err = vci.NewRepo("origin", path)
+	repo, err = vcs.NewRepo("origin", path)
 	if err != nil {
 		slog.Error(err.Error())
 		return false
@@ -76,32 +74,32 @@ func (fn *Node) DetectVCSRepo(updateFiles bool) bool {
 // Repo returns the version control repository associated with this file,
 // and the node for the directory where the repo is based.
 // Goes up the tree until a repository is found.
-func (fn *Node) Repo() (vci.Repo, *Node) {
+func (fn *Node) Repo() (vcs.Repo, *Node) {
 	if fn.IsExternal() {
 		return nil, nil
 	}
 	if fn.DirRepo != nil {
 		return fn.DirRepo, fn
 	}
-	var repo vci.Repo
+	var repo vcs.Repo
 	var rnode *Node
-	fn.WalkUpParent(func(k ki.Ki) bool {
+	fn.WalkUpParent(func(k tree.Node) bool {
 		if k == nil || k.This() == nil {
-			return ki.Break
+			return tree.Break
 		}
 		sfn := AsNode(k)
 		if sfn == nil {
-			return ki.Break
+			return tree.Break
 		}
 		if sfn.IsIrregular() {
-			return ki.Break
+			return tree.Break
 		}
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
 			rnode = sfn
-			return ki.Break
+			return tree.Break
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return repo, rnode
 }
@@ -114,7 +112,7 @@ func (fn *Node) UpdateRepoFiles() {
 }
 
 // AddToVCSSel adds selected files to version control system
-func (fn *Node) AddToVCSSel() { //gti:add
+func (fn *Node) AddToVCSSel() { //types:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
@@ -131,14 +129,14 @@ func (fn *Node) AddToVCS() {
 	}
 	// fmt.Printf("adding to vcs: %v\n", fn.FPath)
 	err := repo.Add(string(fn.FPath))
-	if grr.Log(err) == nil {
-		fn.Info.Vcs = vci.Added
+	if errors.Log(err) == nil {
+		fn.Info.VCS = vcs.Added
 		fn.NeedsRender()
 	}
 }
 
 // DeleteFromVCSSel removes selected files from version control system
-func (fn *Node) DeleteFromVCSSel() { //gti:add
+func (fn *Node) DeleteFromVCSSel() { //types:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
@@ -155,21 +153,21 @@ func (fn *Node) DeleteFromVCS() {
 	}
 	// fmt.Printf("deleting remote from vcs: %v\n", fn.FPath)
 	err := repo.DeleteRemote(string(fn.FPath))
-	if fn != nil && grr.Log(err) == nil {
-		fn.Info.Vcs = vci.Deleted
+	if fn != nil && errors.Log(err) == nil {
+		fn.Info.VCS = vcs.Deleted
 		fn.NeedsRender()
 	}
 }
 
 // CommitToVCSSel commits to version control system based on last selected file
-func (fn *Node) CommitToVCSSel() { //gti:add
+func (fn *Node) CommitToVCSSel() { //types:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	if n == 0 { // shouldn't happen
 		return
 	}
 	sn := AsNode(sels[n-1])
-	giv.CallFunc(sn, fn.CommitToVCS)
+	views.CallFunc(sn, fn.CommitToVCS)
 }
 
 // CommitToVCS commits file changes to version control system
@@ -178,20 +176,20 @@ func (fn *Node) CommitToVCS(message string) (err error) {
 	if repo == nil {
 		return
 	}
-	if fn.Info.Vcs == vci.Untracked {
+	if fn.Info.VCS == vcs.Untracked {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
 	err = repo.CommitFile(string(fn.FPath), message)
 	if err != nil {
 		return err
 	}
-	fn.Info.Vcs = vci.Stored
+	fn.Info.VCS = vcs.Stored
 	fn.NeedsRender()
 	return err
 }
 
 // RevertVCSSel removes selected files from version control system
-func (fn *Node) RevertVCSSel() { //gti:add
+func (fn *Node) RevertVCSSel() { //types:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
@@ -206,16 +204,16 @@ func (fn *Node) RevertVCS() (err error) {
 	if repo == nil {
 		return
 	}
-	if fn.Info.Vcs == vci.Untracked {
+	if fn.Info.VCS == vcs.Untracked {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
 	err = repo.RevertFile(string(fn.FPath))
 	if err != nil {
 		return err
 	}
-	if fn.Info.Vcs == vci.Modified {
-		fn.Info.Vcs = vci.Stored
-	} else if fn.Info.Vcs == vci.Added {
+	if fn.Info.VCS == vcs.Modified {
+		fn.Info.VCS = vcs.Stored
+	} else if fn.Info.VCS == vcs.Added {
 		// do nothing - leave in "added" state
 	}
 	if fn.Buffer != nil {
@@ -229,7 +227,7 @@ func (fn *Node) RevertVCS() (err error) {
 // revision specifiers -- if empty, defaults to A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
 // Diffs are shown in a DiffViewDialog.
-func (fn *Node) DiffVCSSel(rev_a string, rev_b string) { //gti:add
+func (fn *Node) DiffVCSSel(rev_a string, rev_b string) { //types:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
@@ -247,7 +245,7 @@ func (fn *Node) DiffVCS(rev_a, rev_b string) error {
 	if repo == nil {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
-	if fn.Info.Vcs == vci.Untracked {
+	if fn.Info.VCS == vcs.Untracked {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
 	_, err := texteditor.DiffViewDialogFromRevs(fn, repo, string(fn.FPath), fn.Buffer, rev_a, rev_b)
@@ -262,7 +260,7 @@ func (fn *Node) DiffVCS(rev_a, rev_b string) error {
 // If allFiles is true, then the log will show revisions for all files, not just
 // this one.
 // Returns the Log and also shows it in a VCSLogView which supports further actions.
-func (fn *Node) LogVCSSel(allFiles bool, since string) { //gti:add
+func (fn *Node) LogVCSSel(allFiles bool, since string) { //types:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
@@ -279,12 +277,12 @@ func (fn *Node) LogVCSSel(allFiles bool, since string) { //gti:add
 // If allFiles is true, then the log will show revisions for all files, not just
 // this one.
 // Returns the Log and also shows it in a VCSLogView which supports further actions.
-func (fn *Node) LogVCS(allFiles bool, since string) (vci.Log, error) {
+func (fn *Node) LogVCS(allFiles bool, since string) (vcs.Log, error) {
 	repo, _ := fn.Repo()
 	if repo == nil {
 		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
-	if fn.Info.Vcs == vci.Untracked {
+	if fn.Info.VCS == vcs.Untracked {
 		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
 	fnm := string(fn.FPath)
@@ -301,7 +299,7 @@ func (fn *Node) LogVCS(allFiles bool, since string) (vci.Log, error) {
 
 // BlameVCSSel shows the VCS blame report for this file, reporting for each line
 // the revision and author of the last change.
-func (fn *Node) BlameVCSSel() { //gti:add
+func (fn *Node) BlameVCSSel() { //types:add
 	sels := fn.SelectedViews()
 	n := len(sels)
 	for i := n - 1; i >= 0; i-- {
@@ -312,10 +310,10 @@ func (fn *Node) BlameVCSSel() { //gti:add
 
 // BlameDialog opens a dialog for displaying VCS blame data using textview.TwinViews.
 // blame is the annotated blame code, while fbytes is the original file contents.
-func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.TwinEditors {
+func BlameDialog(ctx core.Widget, fname string, blame, fbytes []byte) *texteditor.TwinEditors {
 	title := "VCS Blame: " + dirs.DirAndFile(fname)
 
-	d := gi.NewBody().AddTitle(title)
+	d := core.NewBody().AddTitle(title)
 	tv := texteditor.NewTwinEditors(d, "twin-view")
 	tv.SetSplits(.3, .7)
 	tv.SetFiles(fname, fname, true)
@@ -364,7 +362,7 @@ func (fn *Node) BlameVCS() ([]byte, error) {
 	if repo == nil {
 		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
-	if fn.Info.Vcs == vci.Untracked {
+	if fn.Info.VCS == vcs.Untracked {
 		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
 	fnm := string(fn.FPath)
@@ -382,17 +380,17 @@ func (fn *Node) BlameVCS() ([]byte, error) {
 
 // UpdateAllVCS does an update on any repositories below this one in file tree
 func (fn *Node) UpdateAllVCS() {
-	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
-			return ki.Continue
+			return tree.Continue
 		}
 		if !sfn.IsDir() {
-			return ki.Continue
+			return tree.Continue
 		}
 		if sfn.DirRepo == nil {
 			if !sfn.DetectVCSRepo(false) {
-				return ki.Continue
+				return tree.Continue
 			}
 		}
 		repo := sfn.DirRepo
@@ -401,12 +399,12 @@ func (fn *Node) UpdateAllVCS() {
 		if err != nil {
 			fmt.Printf("error: %v\n", err)
 		}
-		return ki.Break
+		return tree.Break
 	})
 }
 
 // VersionControlSystems is a list of supported Version Control Systems.
-// These must match the VCS Types from vci which in turn
+// These must match the VCS Types from vcs which in turn
 // is based on masterminds/vcs
 var VersionControlSystems = []string{"git", "svn", "bzr", "hg"}
 
@@ -436,34 +434,34 @@ func VersionControlNameProper(vc string) VersionControlName {
 	return ""
 }
 
-// Value registers [VersionControlValue] as the [giv.Value] for [VersionControlName]
-func (kn VersionControlName) Value() giv.Value {
+// Value registers [VersionControlValue] as the [views.Value] for [VersionControlName]
+func (kn VersionControlName) Value() views.Value {
 	return &VersionControlValue{}
 }
 
 // VersionControlValue represents a [VersionControlName] with a button.
 type VersionControlValue struct {
-	giv.ValueBase[*gi.Button]
+	views.ValueBase[*core.Button]
 }
 
 func (v *VersionControlValue) Config() {
-	v.Widget.SetType(gi.ButtonTonal)
-	giv.ConfigDialogWidget(v, false)
+	v.Widget.SetType(core.ButtonTonal)
+	views.ConfigDialogWidget(v, false)
 }
 
 func (v *VersionControlValue) Update() {
-	txt := laser.ToString(v.Value.Interface())
+	txt := reflectx.ToString(v.Value.Interface())
 	if txt == "" {
 		txt = "(none)"
 	}
 	v.Widget.SetText(txt).Update()
 }
 
-func (v *VersionControlValue) OpenDialog(ctx gi.Widget, fun func()) {
-	cur := laser.ToString(v.Value.Interface())
-	m := gi.NewMenuFromStrings(VersionControlSystems, cur, func(idx int) {
+func (v *VersionControlValue) OpenDialog(ctx core.Widget, fun func()) {
+	cur := reflectx.ToString(v.Value.Interface())
+	m := core.NewMenuFromStrings(VersionControlSystems, cur, func(idx int) {
 		v.SetValue(VersionControlSystems[idx])
 		v.Update()
 	})
-	gi.NewMenuStage(m, ctx, ctx.ContextMenuPos(nil)).Run()
+	core.NewMenuStage(m, ctx, ctx.ContextMenuPos(nil)).Run()
 }

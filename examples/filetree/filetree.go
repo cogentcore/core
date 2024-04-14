@@ -13,29 +13,29 @@ import (
 	"os"
 	"path/filepath"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/filetree"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/giv"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keyfun"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
+	"cogentcore.org/core/views"
 )
 
 // FileBrowse is a simple file browser / viewer / editor with a file tree and
 // one or more editor windows.  It is based on an early version of the Gide
 // IDE framework, and remains simple to test / demo the file tree component.
 type FileBrowse struct {
-	gi.Frame
+	core.Frame
 
-	// root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename
-	ProjRoot gi.Filename `desc:"root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename"`
+	// root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjectFilename
+	ProjectRoot core.Filename `desc:"root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjectFilename"`
 
 	// filename of the currently-active texteditor
-	ActiveFilename gi.Filename `desc:"filename of the currently-active texteditor"`
+	ActiveFilename core.Filename `desc:"filename of the currently-active texteditor"`
 
 	// has the root changed?  we receive update signals from root for changes
 	Changed bool `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
@@ -63,11 +63,11 @@ func (fb *FileBrowse) OnInit() {
 		s.Grow.Set(1, 1)
 		s.Margin.Set(units.Dp(8))
 	})
-	fb.OnWidgetAdded(func(w gi.Widget) {
+	fb.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(fb) {
 		case "title":
-			title := w.(*gi.Label)
-			title.Type = gi.LabelHeadlineSmall
+			title := w.(*core.Label)
+			title.Type = core.LabelHeadlineSmall
 			w.Style(func(s *styles.Style) {
 				s.Justify.Content = styles.Center
 			})
@@ -82,7 +82,7 @@ func (fb *FileBrowse) OnInit() {
 					s.Grow.Set(1, 1)
 					s.Min.X.Ch(20)
 					s.Min.Y.Ch(10)
-					s.Font.Family = string(gi.AppearanceSettings.MonoFont)
+					s.Font.Family = string(core.AppearanceSettings.MonoFont)
 					s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 					s.Text.TabSize = 4
 				})
@@ -92,7 +92,7 @@ func (fb *FileBrowse) OnInit() {
 }
 
 // UpdateFiles updates the list of files saved in project
-func (fb *FileBrowse) UpdateFiles() { //gti:add
+func (fb *FileBrowse) UpdateFiles() { //types:add
 	if fb.Files == nil {
 		return
 	}
@@ -101,26 +101,26 @@ func (fb *FileBrowse) UpdateFiles() { //gti:add
 
 // IsEmpty returns true if given FileBrowse project is empty -- has not been set to a valid path
 func (fb *FileBrowse) IsEmpty() bool {
-	return fb.ProjRoot == ""
+	return fb.ProjectRoot == ""
 }
 
 // OpenPath opens a new browser viewer at given path, which can either be a
 // specific file or a directory containing multiple files of interest -- opens
 // in current FileBrowse object if it is empty, or otherwise opens a new
 // window.
-func (fb *FileBrowse) OpenPath(path gi.Filename) { //gti:add
+func (fb *FileBrowse) OpenPath(path core.Filename) { //types:add
 	if !fb.IsEmpty() {
 		NewFileBrowser(string(path))
 		return
 	}
 	fb.Defaults()
-	root, pnm, fnm, ok := ProjPathParse(string(path))
+	root, pnm, fnm, ok := ProjectPathParse(string(path))
 	if !ok {
 		return
 	}
-	fb.ProjRoot = gi.Filename(root)
+	fb.ProjectRoot = core.Filename(root)
 	fb.SetName(pnm)
-	fb.UpdateProj()
+	fb.UpdateProject()
 	fb.Files.OpenPath(root)
 	// win := fb.ParentRenderWin()
 	// if win != nil {
@@ -134,25 +134,25 @@ func (fb *FileBrowse) OpenPath(path gi.Filename) { //gti:add
 	fb.UpdateFiles()
 }
 
-// UpdateProj does full update to current proj
-func (fb *FileBrowse) UpdateProj() {
+// UpdateProject does full update to current proj
+func (fb *FileBrowse) UpdateProject() {
 	fb.StandardConfig()
-	fb.SetTitle(fmt.Sprintf("FileBrowse of: %v", fb.ProjRoot)) // todo: get rid of title
+	fb.SetTitle(fmt.Sprintf("FileBrowse of: %v", fb.ProjectRoot)) // todo: get rid of title
 	fb.UpdateFiles()
 	fb.ConfigSplits()
 }
 
-// ProjPathParse parses given project path into a root directory (which could
+// ProjectPathParse parses given project path into a root directory (which could
 // be the path or just the directory portion of the path, depending in whether
 // the path is a directory or not), and a bool if all is good (otherwise error
 // message has been reported). projnm is always the last directory of the path.
-func ProjPathParse(path string) (root, projnm, fnm string, ok bool) {
+func ProjectPathParse(path string) (root, projnm, fnm string, ok bool) {
 	if path == "" {
 		return "", "blank", "", false
 	}
 	info, err := os.Lstat(path)
 	if err != nil {
-		emsg := fmt.Errorf("ProjPathParse: Cannot open at given path: %q: Error: %v", path, err)
+		emsg := fmt.Errorf("ProjectPathParse: Cannot open at given path: %q: Error: %v", path, err)
 		log.Println(emsg)
 		return
 	}
@@ -206,7 +206,7 @@ func (fb *FileBrowse) NextTextEditor() (*texteditor.Editor, int) {
 }
 
 // SaveActiveView saves the contents of the currently-active texteditor
-func (fb *FileBrowse) SaveActiveView() { //gti:add
+func (fb *FileBrowse) SaveActiveView() { //types:add
 	tv := fb.ActiveTextEditor()
 	if tv.Buffer != nil {
 		tv.Buffer.Save() // todo: errs..
@@ -216,7 +216,7 @@ func (fb *FileBrowse) SaveActiveView() { //gti:add
 
 // SaveActiveViewAs save with specified filename the contents of the
 // currently-active texteditor
-func (fb *FileBrowse) SaveActiveViewAs(filename gi.Filename) { //gti:add
+func (fb *FileBrowse) SaveActiveViewAs(filename core.Filename) { //types:add
 	tv := fb.ActiveTextEditor()
 	if tv.Buffer != nil {
 		tv.Buffer.SaveAs(filename)
@@ -255,10 +255,10 @@ func (fb *FileBrowse) ViewFile(fnm string) bool {
 
 // StandardFrameConfig returns a Config for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
-func (fb *FileBrowse) StandardFrameConfig() ki.Config {
-	config := ki.Config{}
-	config.Add(gi.LabelType, "title")
-	config.Add(gi.SplitsType, "splits")
+func (fb *FileBrowse) StandardFrameConfig() tree.Config {
+	config := tree.Config{}
+	config.Add(core.LabelType, "title")
+	config.Add(core.SplitsType, "splits")
 	return config
 }
 
@@ -279,21 +279,21 @@ func (fb *FileBrowse) SetTitle(title string) {
 
 // Title returns the title label widget, and its index, within frame -- nil,
 // -1 if not found
-func (fb *FileBrowse) TitleWidget() (*gi.Label, int) {
+func (fb *FileBrowse) TitleWidget() (*core.Label, int) {
 	idx, ok := fb.Children().IndexByName("title", 0)
 	if !ok {
 		return nil, -1
 	}
-	return fb.Child(idx).(*gi.Label), idx
+	return fb.Child(idx).(*core.Label), idx
 }
 
 // Splits returns the main Splits
-func (fb *FileBrowse) Splits() (*gi.Splits, int) {
+func (fb *FileBrowse) Splits() (*core.Splits, int) {
 	idx, ok := fb.Children().IndexByName("splits", 2)
 	if !ok {
 		return nil, -1
 	}
-	return fb.Child(idx).(*gi.Splits), idx
+	return fb.Child(idx).(*core.Splits), idx
 }
 
 // TextEditorByIndex returns the TextEditor by index, nil if not found
@@ -311,24 +311,24 @@ func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
 	return nil
 }
 
-func (fb *FileBrowse) ConfigToolbar(tb *gi.Toolbar) { //gti:add
-	giv.NewFuncButton(tb, fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
-	op := giv.NewFuncButton(tb, fb.OpenPath).SetKey(keyfun.Open)
+func (fb *FileBrowse) ConfigToolbar(tb *core.Toolbar) { //types:add
+	views.NewFuncButton(tb, fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
+	op := views.NewFuncButton(tb, fb.OpenPath).SetKey(keymap.Open)
 	op.Args[0].SetValue(fb.ActiveFilename)
 	// op.Args[0].SetTag("ext", ".json")
-	giv.NewFuncButton(tb, fb.SaveActiveView).SetKey(keyfun.Save)
+	views.NewFuncButton(tb, fb.SaveActiveView).SetKey(keymap.Save)
 	// save.SetUpdateFunc(func() {
 	// 	save.SetEnabledUpdate(fb.Changed && ge.Filename != "")
 	// })
-	sa := giv.NewFuncButton(tb, fb.SaveActiveViewAs).SetKey(keyfun.SaveAs)
+	sa := views.NewFuncButton(tb, fb.SaveActiveViewAs).SetKey(keymap.SaveAs)
 	sa.Args[0].SetValue(fb.ActiveFilename)
 	// sa.Args[0].SetTag("ext", ".json")
 }
 
 // SplitsConfig returns a Config for configuring the Splits
-func (fb *FileBrowse) SplitsConfig() ki.Config {
-	config := ki.Config{}
-	config.Add(gi.FrameType, "filetree-fr")
+func (fb *FileBrowse) SplitsConfig() tree.Config {
+	config := tree.Config{}
+	config.Add(core.FrameType, "filetree-fr")
 	for i := 0; i < fb.NTextEditors; i++ {
 		config.Add(texteditor.EditorType, fmt.Sprintf("texteditor-%v", i))
 	}
@@ -346,7 +346,7 @@ func (fb *FileBrowse) ConfigSplits() {
 
 	config := fb.SplitsConfig()
 	if split.ConfigChildren(config) {
-		ftfr := split.Child(0).(*gi.Frame)
+		ftfr := split.Child(0).(*core.Frame)
 		fb.Files = filetree.NewTree(ftfr, "filetree")
 		fb.Files.OnSelect(func(e events.Event) {
 			e.SetHandled()
@@ -391,13 +391,13 @@ func (fb *FileBrowse) FileNodeOpened(fn *filetree.Node) {
 
 // NewFileBrowser creates a new FileBrowse window with a new FileBrowse project for given
 // path, returning the window and the path
-func NewFileBrowser(path string) (*FileBrowse, *gi.Stage) {
-	_, projnm, _, _ := ProjPathParse(path)
+func NewFileBrowser(path string) (*FileBrowse, *core.Stage) {
+	_, projnm, _, _ := ProjectPathParse(path)
 
-	b := gi.NewBody("Browser: " + projnm)
+	b := core.NewBody("Browser: " + projnm)
 	fb := NewFileBrowse(b, "browser")
 	b.AddAppBar(fb.ConfigToolbar)
-	fb.OpenPath(gi.Filename(path))
+	fb.OpenPath(core.Filename(path))
 	return fb, b.NewWindow().Run()
 }
 

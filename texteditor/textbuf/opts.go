@@ -5,10 +5,10 @@
 package textbuf
 
 import (
-	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/glop/indent"
-	"cogentcore.org/core/pi"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/gox/indent"
+	"cogentcore.org/core/parse"
 )
 
 // Opts contains options for textview.Bufs
@@ -16,8 +16,8 @@ import (
 // of a given text file.
 type Opts struct {
 
-	// editor prefs from gogi prefs
-	gi.EditorSettings
+	// editor settings from core settings
+	core.EditorSettings
 
 	// character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used
 	CommentLn string
@@ -48,13 +48,13 @@ func (tb *Opts) IndentChar() indent.Char {
 	return indent.Tab
 }
 
-// ConfigKnown configures options based on the supported language info in GoPi
-// returns true if supported
-func (tb *Opts) ConfigKnown(sup fi.Known) bool {
-	if sup == fi.Unknown {
+// ConfigKnown configures options based on the supported language info in parse.
+// Returns true if supported.
+func (tb *Opts) ConfigKnown(sup fileinfo.Known) bool {
+	if sup == fileinfo.Unknown {
 		return false
 	}
-	lp, ok := pi.StandardLangProps[sup]
+	lp, ok := parse.StandardLangProperties[sup]
 	if !ok {
 		return false
 	}
@@ -63,9 +63,9 @@ func (tb *Opts) ConfigKnown(sup fi.Known) bool {
 	tb.CommentEd = lp.CommentEd
 	for _, flg := range lp.Flags {
 		switch flg {
-		case pi.IndentSpace:
+		case parse.IndentSpace:
 			tb.SpaceIndent = true
-		case pi.IndentTab:
+		case parse.IndentTab:
 			tb.SpaceIndent = false
 		}
 	}
@@ -78,15 +78,15 @@ func KnownComments(fpath string) (comLn, comSt, comEd string) {
 	comLn = "//"
 	comSt = "/*"
 	comEd = "*/"
-	mtyp, _, err := fi.MimeFromFile(fpath)
+	mtyp, _, err := fileinfo.MimeFromFile(fpath)
 	if err != nil {
 		return
 	}
-	sup := fi.MimeKnown(mtyp)
-	if sup == fi.Unknown {
+	sup := fileinfo.MimeKnown(mtyp)
+	if sup == fileinfo.Unknown {
 		return
 	}
-	lp, ok := pi.StandardLangProps[sup]
+	lp, ok := parse.StandardLangProperties[sup]
 	if !ok {
 		return
 	}

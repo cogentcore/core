@@ -14,7 +14,7 @@ import (
 // TODO: consider adding chaining methods for constructing chords
 
 // Chord represents the key chord associated with a given key function -- it
-// is linked to the KeyChordValue in the giv.Value system so you can just
+// is linked to the KeyChordValue in the views.Value system so you can just
 // type keys to set key chords.
 type Chord string
 
@@ -71,7 +71,7 @@ func (ch Chord) Decode() (r rune, code Codes, mods Modifiers, err error) {
 		r = 0
 		return
 	}
-	err = fmt.Errorf("goosi/events/key.DecodeChord got more/less than one rune: %v from remaining chord: %v", rs, string(cs))
+	err = fmt.Errorf("system/events/key.DecodeChord got more/less than one rune: %v from remaining chord: %v", rs, string(cs))
 	return
 }
 

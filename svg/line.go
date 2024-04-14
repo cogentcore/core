@@ -5,7 +5,7 @@
 package svg
 
 import (
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Line is a SVG line
@@ -13,10 +13,10 @@ type Line struct {
 	NodeBase
 
 	// position of the start of the line
-	Start mat32.Vec2 `xml:"{x1,y1}"`
+	Start math32.Vector2 `xml:"{x1,y1}"`
 
 	// position of the end of the line
-	End mat32.Vec2 `xml:"{x2,y2}"`
+	End math32.Vector2 `xml:"{x2,y2}"`
 }
 
 func (g *Line) SVGName() string { return "line" }
@@ -25,16 +25,16 @@ func (g *Line) OnInit() {
 	g.End.Set(1, 1)
 }
 
-func (g *Line) SetPos(pos mat32.Vec2) {
+func (g *Line) SetPos(pos math32.Vector2) {
 	g.Start = pos
 }
 
-func (g *Line) SetSize(sz mat32.Vec2) {
+func (g *Line) SetSize(sz math32.Vector2) {
 	g.End = g.Start.Add(sz)
 }
 
-func (g *Line) LocalBBox() mat32.Box2 {
-	bb := mat32.B2Empty()
+func (g *Line) LocalBBox() math32.Box2 {
+	bb := math32.B2Empty()
 	bb.ExpandByPoint(g.Start)
 	bb.ExpandByPoint(g.End)
 	hlw := 0.5 * g.LocalLineWidth()
@@ -53,11 +53,11 @@ func (g *Line) Render(sv *SVG) {
 	g.BBoxes(sv)
 
 	if mrk := sv.MarkerByName(g, "marker-start"); mrk != nil {
-		ang := mat32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
+		ang := math32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
 		mrk.RenderMarker(sv, g.Start, ang, g.Paint.StrokeStyle.Width.Dots)
 	}
 	if mrk := sv.MarkerByName(g, "marker-end"); mrk != nil {
-		ang := mat32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
+		ang := math32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
 		mrk.RenderMarker(sv, g.End, ang, g.Paint.StrokeStyle.Width.Dots)
 	}
 
@@ -67,14 +67,14 @@ func (g *Line) Render(sv *SVG) {
 
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Line) ApplyTransform(sv *SVG, xf mat32.Mat2) {
+func (g *Line) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	rot := xf.ExtractRot()
 	if rot != 0 || !g.Paint.Transform.IsIdentity() {
 		g.Paint.Transform.SetMul(xf)
-		g.SetProp("transform", g.Paint.Transform.String())
+		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
-		g.Start = xf.MulVec2AsPoint(g.Start)
-		g.End = xf.MulVec2AsPoint(g.End)
+		g.Start = xf.MulVector2AsPoint(g.Start)
+		g.End = xf.MulVector2AsPoint(g.End)
 		g.GradientApplyTransform(sv, xf)
 	}
 }
@@ -84,16 +84,16 @@ func (g *Line) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Line) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+func (g *Line) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
 	crot := g.Paint.Transform.ExtractRot()
 	if rot != 0 || crot != 0 {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // exclude self
 		g.Paint.Transform.SetMulCenter(xf, lpt)
-		g.SetProp("transform", g.Paint.Transform.String())
+		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
-		g.Start = xf.MulVec2AsPointCenter(g.Start, lpt)
-		g.End = xf.MulVec2AsPointCenter(g.End, lpt)
+		g.Start = xf.MulVector2AsPointCenter(g.Start, lpt)
+		g.End = xf.MulVector2AsPointCenter(g.End, lpt)
 		g.GradientApplyTransformPt(sv, xf, lpt)
 	}
 }

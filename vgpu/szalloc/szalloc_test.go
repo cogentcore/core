@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 func TestRandSzAlloc(t *testing.T) {
@@ -49,7 +49,7 @@ func TestUniqSzAlloc(t *testing.T) {
 func TestPctWin(t *testing.T) {
 	pct := float32(.7)
 	for u := float32(0); u < 3; u += .1 {
-		pu := mat32.Mod(u*pct, pct)
+		pu := math32.Mod(u*pct, pct)
 		_ = pu
 		// fmt.Printf("u: %g   pu: %g\n", u, pu)
 	}

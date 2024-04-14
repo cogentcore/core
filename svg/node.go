@@ -7,20 +7,21 @@ package svg
 import (
 	"fmt"
 	"image"
+	"maps"
 	"reflect"
 	"strings"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/grr"
-	"cogentcore.org/core/ki"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/errors"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // Node is the interface for all SVG nodes
 type Node interface {
-	ki.Ki
+	tree.Node
 
 	// AsNodeBase returns a generic svg.NodeBase for our node -- gives generic
 	// access to all the base-level data structures without requiring
@@ -40,27 +41,27 @@ type Node interface {
 	BBoxes(sv *SVG)
 
 	// LocalBBox returns the bounding box of node in local dimensions
-	LocalBBox() mat32.Box2
+	LocalBBox() math32.Box2
 
 	// NodeBBox returns the bounding box in image coordinates for this node
 	NodeBBox(sv *SVG) image.Rectangle
 
 	// SetNodePos sets the upper left effective position of this element, in local dimensions
-	SetNodePos(pos mat32.Vec2)
+	SetNodePos(pos math32.Vector2)
 
 	// SetNodeSize sets the overall effective size of this element, in local dimensions
-	SetNodeSize(sz mat32.Vec2)
+	SetNodeSize(sz math32.Vector2)
 
 	// ApplyTransform applies the given 2D transform to the geometry of this node
 	// this just does a direct transform multiplication on coordinates.
-	ApplyTransform(sv *SVG, xf mat32.Mat2)
+	ApplyTransform(sv *SVG, xf math32.Matrix2)
 
 	// ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
 	// relative to given point.  Trans translation and point are in top-level coordinates,
 	// so must be transformed into local coords first.
 	// Point is upper left corner of selection box that anchors the translation and scaling,
 	// and for rotation it is the center point around which to rotate
-	ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2)
+	ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2)
 
 	// WriteGeom writes the geometry of the node to a slice of floating point numbers
 	// the length and ordering of which is specific to each node type.
@@ -82,7 +83,7 @@ type Node interface {
 
 // svg.NodeBase is the base type for elements within the SVG scenegraph
 type NodeBase struct {
-	ki.Node
+	tree.NodeBase
 
 	// user-defined class name(s) used primarily for attaching
 	// CSS styles to different display elements.
@@ -90,14 +91,14 @@ type NodeBase struct {
 	// use spaces to separate per css standard.
 	Class string
 
-	// cascading style sheet at this level.
+	// CSS is the cascading style sheet at this level.
 	// These styles apply here and to everything below, until superceded.
-	// Use .class and #name Props elements to apply entire styles
+	// Use .class and #name Properties elements to apply entire styles
 	// to given elements, and type for element type.
-	CSS ki.Props `xml:"css" set:"-"`
+	CSS map[string]any `xml:"css" set:"-"`
 
-	// aggregated css properties from all higher nodes down to me
-	CSSAgg ki.Props `copier:"-" json:"-" xml:"-" set:"-" view:"no-inline"`
+	// CSSAgg is the aggregated css properties from all higher nodes down to this node.
+	CSSAgg map[string]any `copier:"-" json:"-" xml:"-" set:"-" view:"no-inline"`
 
 	// bounding box for the node within the SVG Pixels image.
 	// This one can be outside the visible range of the SVG image.
@@ -123,14 +124,14 @@ func (g *NodeBase) EnforceSVGName() bool {
 	return true
 }
 
-func (g *NodeBase) SetPos(pos mat32.Vec2) {
+func (g *NodeBase) SetPos(pos math32.Vector2) {
 }
 
-func (g *NodeBase) SetSize(sz mat32.Vec2) {
+func (g *NodeBase) SetSize(sz math32.Vector2) {
 }
 
-func (g *NodeBase) LocalBBox() mat32.Box2 {
-	bb := mat32.Box2{}
+func (g *NodeBase) LocalBBox() math32.Box2 {
+	bb := math32.Box2{}
 	return bb
 }
 
@@ -142,22 +143,22 @@ func (g *NodeBase) PaintStyle() *styles.Paint {
 	return &g.Paint
 }
 
-// SetColorProps sets color property from a string representation.
+// SetColorProperties sets color property from a string representation.
 // It breaks color alpha out as opacity.  prop is either "stroke" or "fill"
-func (g *NodeBase) SetColorProps(prop, color string) {
-	clr := grr.Log1(colors.FromString(color))
-	g.SetProp(prop+"-opacity", fmt.Sprintf("%g", float32(clr.A)/255))
+func (g *NodeBase) SetColorProperties(prop, color string) {
+	clr := errors.Log1(colors.FromString(color))
+	g.SetProperty(prop+"-opacity", fmt.Sprintf("%g", float32(clr.A)/255))
 	// we have consumed the A via opacity, so we reset it to 255
 	clr.A = 255
-	g.SetProp(prop, colors.AsHex(clr))
+	g.SetProperty(prop, colors.AsHex(clr))
 }
 
 // ParTransform returns the full compounded 2D transform matrix for all
 // of the parents of this node.  If self is true, then include our
 // own transform too.
-func (g *NodeBase) ParTransform(self bool) mat32.Mat2 {
+func (g *NodeBase) ParTransform(self bool) math32.Matrix2 {
 	pars := []Node{}
-	xf := mat32.Identity2()
+	xf := math32.Identity2()
 	n := g.This().(Node)
 	for {
 		if n.Parent() == nil {
@@ -182,19 +183,19 @@ func (g *NodeBase) ParTransform(self bool) mat32.Mat2 {
 
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // this just does a direct transform multiplication on coordinates.
-func (g *NodeBase) ApplyTransform(sv *SVG, xf mat32.Mat2) {
+func (g *NodeBase) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 }
 
 // DeltaTransform computes the net transform matrix for given delta transform parameters
 // and the transformed version of the reference point.  If self is true, then
 // include the current node self transform, otherwise don't.  Groups do not
 // but regular rendering nodes do.
-func (g *NodeBase) DeltaTransform(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2, self bool) (mat32.Mat2, mat32.Vec2) {
+func (g *NodeBase) DeltaTransform(trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2, self bool) (math32.Matrix2, math32.Vector2) {
 	mxi := g.ParTransform(self)
 	mxi = mxi.Inverse()
-	lpt := mxi.MulVec2AsPoint(pt)
-	ldel := mxi.MulVec2AsVec(trans)
-	xf := mat32.Scale2D(scale.X, scale.Y).Rotate(rot)
+	lpt := mxi.MulVector2AsPoint(pt)
+	ldel := mxi.MulVector2AsVector(trans)
+	xf := math32.Scale2D(scale.X, scale.Y).Rotate(rot)
 	xf.X0 = ldel.X
 	xf.Y0 = ldel.Y
 	return xf, lpt
@@ -205,7 +206,7 @@ func (g *NodeBase) DeltaTransform(trans mat32.Vec2, scale mat32.Vec2, rot float3
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *NodeBase) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+func (g *NodeBase) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
 }
 
 // SetFloat32SliceLen is a utility function to set given slice of float32 values
@@ -260,33 +261,33 @@ func (g *NodeBase) ReadGeom(sv *SVG, dat []float32) {
 	g.ReadTransform(dat, 0)
 }
 
-// SVGWalkPre does ki WalkPre on given node using given walk function
+// SVGWalkPre does [tree.Node.WalkPre] on given node using given walk function
 // with SVG Node parameters.  Automatically filters
-// nil or deleted items.  Return ki.Continue (true) to continue,
-// and ki.Break (false) to terminate.
+// nil or deleted items.  Return [tree.Continue] (true) to continue,
+// and [tree.Break] (false) to terminate.
 func SVGWalkPre(n Node, fun func(kni Node, knb *NodeBase) bool) {
-	n.WalkPre(func(k ki.Ki) bool {
+	n.WalkDown(func(k tree.Node) bool {
 		kni := k.(Node)
 		if kni == nil || kni.This() == nil {
-			return ki.Break
+			return tree.Break
 		}
 		return fun(kni, kni.AsNodeBase())
 	})
 }
 
-// SVGWalkPreNoDefs does ki WalkPre on given node using given walk function
+// SVGWalkPreNoDefs does [tree.Node.WalkPre] on given node using given walk function
 // with SVG Node parameters.  Automatically filters
 // nil or deleted items, and Defs nodes (IsDef) and MetaData,
 // i.e., it only processes concrete graphical nodes.
-// Return ki.Continue (true) to continue, and ki.Break (false) to terminate.
+// Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
 func SVGWalkPreNoDefs(n Node, fun func(kni Node, knb *NodeBase) bool) {
-	n.WalkPre(func(k ki.Ki) bool {
+	n.WalkDown(func(k tree.Node) bool {
 		kni := k.(Node)
 		if kni == nil || kni.This() == nil {
-			return ki.Break
+			return tree.Break
 		}
-		if kni.Is(IsDef) || kni.KiType() == MetaDataType {
-			return ki.Break
+		if kni.Is(IsDef) || kni.NodeType() == MetaDataType {
+			return tree.Break
 		}
 		return fun(kni, kni.AsNodeBase())
 	})
@@ -298,10 +299,10 @@ func FirstNonGroupNode(n Node) Node {
 	var ngn Node
 	SVGWalkPreNoDefs(n, func(kni Node, knb *NodeBase) bool {
 		if _, isgp := kni.This().(*Group); isgp {
-			return ki.Continue
+			return tree.Continue
 		}
 		ngn = kni
-		return ki.Break
+		return tree.Break
 	})
 	return ngn
 }
@@ -313,18 +314,18 @@ func NodesContainingPoint(n Node, pt image.Point, leavesOnly bool) []Node {
 	var cn []Node
 	SVGWalkPre(n, func(kni Node, knb *NodeBase) bool {
 		if kni.This() == n.This() {
-			return ki.Continue
+			return tree.Continue
 		}
 		if leavesOnly && kni.HasChildren() {
-			return ki.Continue
+			return tree.Continue
 		}
 		if knb.Paint.Off {
-			return ki.Break
+			return tree.Break
 		}
 		if pt.In(knb.BBox) {
 			cn = append(cn, kni)
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return cn
 }
@@ -339,15 +340,15 @@ func (g *NodeBase) Style(sv *SVG) {
 	ctxt := colors.Context(sv)
 	pc.StyleSet = false // this is always first call, restart
 
-	var parCSSAgg ki.Props
+	var parCSSAgg map[string]any
 	if g.Par != nil { // && g.Par != sv.Root.This()
 		pn := g.Par.(Node)
 		parCSSAgg = pn.AsNodeBase().CSSAgg
 		pp := pn.PaintStyle()
 		pc.CopyStyleFrom(pp)
-		pc.SetStyleProps(pp, *g.Properties(), ctxt)
+		pc.SetStyleProperties(pp, g.Properties(), ctxt)
 	} else {
-		pc.SetStyleProps(nil, *g.Properties(), ctxt)
+		pc.SetStyleProperties(nil, g.Properties(), ctxt)
 	}
 	pc.ToDotsImpl(&pc.UnitContext) // we always inherit parent's unit context -- SVG sets it once-and-for-all
 
@@ -366,23 +367,21 @@ func (g *NodeBase) Style(sv *SVG) {
 }
 
 // AggCSS aggregates css properties
-func AggCSS(agg *ki.Props, css ki.Props) {
+func AggCSS(agg *map[string]any, css map[string]any) {
 	if *agg == nil {
-		*agg = make(ki.Props, len(css))
+		*agg = make(map[string]any)
 	}
-	for key, val := range css {
-		(*agg)[key] = val
-	}
+	maps.Copy(*agg, css)
 }
 
 // ApplyCSS applies css styles to given node,
-// using key to select sub-props from overall properties list
-func (g *NodeBase) ApplyCSS(sv *SVG, key string, css ki.Props) bool {
+// using key to select sub-properties from overall properties list
+func (g *NodeBase) ApplyCSS(sv *SVG, key string, css map[string]any) bool {
 	pp, got := css[key]
 	if !got {
 		return false
 	}
-	pmap, ok := pp.(ki.Props) // must be a props map
+	pmap, ok := pp.(map[string]any) // must be a properties map
 	if !ok {
 		return false
 	}
@@ -390,17 +389,17 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css ki.Props) bool {
 	ctxt := colors.Context(sv)
 	if g.Par != sv.Root.This() {
 		pp := g.Par.(Node).PaintStyle()
-		pc.SetStyleProps(pp, pmap, ctxt)
+		pc.SetStyleProperties(pp, pmap, ctxt)
 	} else {
-		pc.SetStyleProps(nil, pmap, ctxt)
+		pc.SetStyleProperties(nil, pmap, ctxt)
 	}
 	return true
 }
 
 // StyleCSS applies css style properties to given SVG node
 // parsing out type, .class, and #name selectors
-func (g *NodeBase) StyleCSS(sv *SVG, css ki.Props) {
-	tyn := strings.ToLower(g.KiType().Name) // type is most general, first
+func (g *NodeBase) StyleCSS(sv *SVG, css map[string]any) {
+	tyn := strings.ToLower(g.NodeType().Name) // type is most general, first
 	g.ApplyCSS(sv, tyn, css)
 	cln := "." + strings.ToLower(g.Class) // then class
 	g.ApplyCSS(sv, cln, css)
@@ -414,9 +413,9 @@ func (g *NodeBase) IsDefs() bool {
 }
 
 // LocalBBoxToWin converts a local bounding box to SVG coordinates
-func (g *NodeBase) LocalBBoxToWin(bb mat32.Box2) image.Rectangle {
+func (g *NodeBase) LocalBBoxToWin(bb math32.Box2) image.Rectangle {
 	mxi := g.ParTransform(true) // include self
-	return bb.MulMat2(mxi).ToRect()
+	return bb.MulMatrix2(mxi).ToRect()
 }
 
 func (g *NodeBase) NodeBBox(sv *SVG) image.Rectangle {
@@ -424,11 +423,11 @@ func (g *NodeBase) NodeBBox(sv *SVG) image.Rectangle {
 	return rs.LastRenderBBox
 }
 
-func (g *NodeBase) SetNodePos(pos mat32.Vec2) {
+func (g *NodeBase) SetNodePos(pos math32.Vector2) {
 	// no-op by default
 }
 
-func (g *NodeBase) SetNodeSize(sz mat32.Vec2) {
+func (g *NodeBase) SetNodeSize(sz math32.Vector2) {
 	// no-op by default
 }
 
@@ -502,12 +501,9 @@ func (g *NodeBase) Render(sv *SVG) {
 	rs.PopTransform()
 }
 
-// NodeFlags extend ki.Flags to hold SVG node state
-type NodeFlags ki.Flags //enums:bitflag
+// NodeFlags extend [tree.Flags] to hold SVG node state.
+type NodeFlags tree.Flags //enums:bitflag
 
 const (
-	// Rendering means that the SVG is currently redrawing
-	// Can be useful to check for animations etc to decide whether to
-	// drive another update
-	IsDef NodeFlags = NodeFlags(ki.FlagsN) + iota
+	IsDef NodeFlags = NodeFlags(tree.FlagsN) + iota
 )

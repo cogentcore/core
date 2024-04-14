@@ -11,23 +11,23 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/giv"
-	"cogentcore.org/core/goosi"
-	"cogentcore.org/core/vci"
+	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/system"
+	"cogentcore.org/core/vcs"
+	"cogentcore.org/core/views"
 )
 
 // OSOpenCommand returns the generic file 'open' command to open file with default app
 // open on Mac, xdg-open on Linux, and start on Windows
 func OSOpenCommand() string {
-	switch gi.TheApp.Platform() {
-	case goosi.MacOS:
+	switch core.TheApp.Platform() {
+	case system.MacOS:
 		return "open"
-	case goosi.Linux:
+	case system.Linux:
 		return "xdg-open"
-	case goosi.Windows:
+	case system.Windows:
 		return "start"
 	}
 	return "open"
@@ -98,7 +98,7 @@ var _ Filer = (*Node)(nil)
 
 // OpenFilesDefault opens selected files with default app for that file type (os defined).
 // runs open on Mac, xdg-open on Linux, and start on Windows
-func (fn *Node) OpenFilesDefault() { //gti:add
+func (fn *Node) OpenFilesDefault() { //types:add
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i].This())
@@ -127,7 +127,7 @@ func (fn *Node) OpenFilesWith() {
 		if sn == nil {
 			continue
 		}
-		giv.CallFunc(sn, sn.OpenFileWith) // todo: not using interface?
+		views.CallFunc(sn, sn.OpenFileWith) // todo: not using interface?
 	}
 }
 
@@ -146,7 +146,7 @@ func (fn *Node) OpenFileWith(command string) error {
 }
 
 // DuplicateFiles makes a copy of selected files
-func (fn *Node) DuplicateFiles() { //gti:add
+func (fn *Node) DuplicateFiles() { //types:add
 	fn.FRoot.NeedsLayout()
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
@@ -171,10 +171,10 @@ func (fn *Node) DuplicateFile() error {
 
 // deletes any selected files or directories. If any directory is selected,
 // all files and subdirectories in that directory are also deleted.
-func (fn *Node) DeleteFiles() { //gti:add
-	d := gi.NewBody().AddTitle("Delete Files?").
+func (fn *Node) DeleteFiles() { //types:add
+	d := core.NewBody().AddTitle("Delete Files?").
 		AddText("Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted.")
-	d.AddBottomBar(func(parent gi.Widget) {
+	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText("Delete Files").OnClick(func(e events.Event) {
 			fn.This().(Filer).DeleteFilesImpl()
@@ -229,7 +229,7 @@ func (fn *Node) DeleteFile() error {
 	fn.CloseBuf()
 	repo, _ := fn.Repo()
 	var err error
-	if !fn.Info.IsDir() && repo != nil && fn.Info.Vcs >= vci.Stored {
+	if !fn.Info.IsDir() && repo != nil && fn.Info.VCS >= vcs.Stored {
 		// fmt.Printf("del repo: %v\n", fn.FPath)
 		err = repo.Delete(string(fn.FPath))
 	} else {
@@ -246,7 +246,7 @@ func (fn *Node) DeleteFile() error {
 }
 
 // renames any selected files
-func (fn *Node) RenameFiles() { //gti:add
+func (fn *Node) RenameFiles() { //types:add
 	fn.FRoot.NeedsRender()
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
@@ -254,13 +254,13 @@ func (fn *Node) RenameFiles() { //gti:add
 		if sn == nil || sn.IsExternal() {
 			continue
 		}
-		// giv.NewSoloFuncButton(sn, sn.Rename).SetAfterFunc(fv.UpdateFilesAction).CallFunc()
-		giv.CallFunc(sn, sn.RenameFile) // todo: not using interface?
+		// views.NewSoloFuncButton(sn, sn.Rename).SetAfterFunc(fv.UpdateFilesAction).CallFunc()
+		views.CallFunc(sn, sn.RenameFile) // todo: not using interface?
 	}
 }
 
 // RenameFile renames file to new name
-func (fn *Node) RenameFile(newpath string) error { //gti:add
+func (fn *Node) RenameFile(newpath string) error { //types:add
 	if fn.IsExternal() {
 		return nil
 	}
@@ -274,14 +274,14 @@ func (fn *Node) RenameFile(newpath string) error { //gti:add
 	}
 	if fn.IsDir() {
 		if fn.FRoot.IsDirOpen(orgpath) {
-			fn.FRoot.SetDirOpen(gi.Filename(newpath))
+			fn.FRoot.SetDirOpen(core.Filename(newpath))
 		}
 	}
 	repo, _ := fn.Repo()
 	stored := false
 	if fn.IsDir() && !fn.HasChildren() {
 		err = os.Rename(string(orgpath), newpath)
-	} else if repo != nil && fn.Info.Vcs >= vci.Stored {
+	} else if repo != nil && fn.Info.VCS >= vcs.Stored {
 		stored = true
 		err = repo.Move(string(orgpath), newpath)
 	} else {
@@ -291,7 +291,7 @@ func (fn *Node) RenameFile(newpath string) error { //gti:add
 		err = fn.Info.InitFile(newpath)
 	}
 	if err == nil {
-		fn.FPath = gi.Filename(fn.Info.Path)
+		fn.FPath = core.Filename(fn.Info.Path)
 		fn.SetName(fn.Info.Name)
 		fn.SetText(fn.Info.Name)
 	}
@@ -306,7 +306,7 @@ func (fn *Node) RenameFile(newpath string) error { //gti:add
 }
 
 // NewFiles makes a new file in selected directory
-func (fn *Node) NewFiles(filename string, addToVCS bool) { //gti:add
+func (fn *Node) NewFiles(filename string, addToVCS bool) { //types:add
 	sels := fn.SelectedViews()
 	sz := len(sels)
 	if sz == 0 { // shouldn't happen
@@ -320,7 +320,7 @@ func (fn *Node) NewFiles(filename string, addToVCS bool) { //gti:add
 }
 
 // NewFile makes a new file in this directory node
-func (fn *Node) NewFile(filename string, addToVCS bool) { //gti:add
+func (fn *Node) NewFile(filename string, addToVCS bool) { //types:add
 	if fn.IsExternal() {
 		return
 	}
@@ -331,7 +331,7 @@ func (fn *Node) NewFile(filename string, addToVCS bool) { //gti:add
 	np := filepath.Join(ppath, filename)
 	_, err := os.Create(np)
 	if err != nil {
-		gi.ErrorSnackbar(fn, err)
+		core.ErrorSnackbar(fn, err)
 		return
 	}
 	if addToVCS {
@@ -344,7 +344,7 @@ func (fn *Node) NewFile(filename string, addToVCS bool) { //gti:add
 }
 
 // makes a new folder in the given selected directory
-func (fn *Node) NewFolders(foldername string) { //gti:add
+func (fn *Node) NewFolders(foldername string) { //types:add
 	sels := fn.SelectedViews()
 	sz := len(sels)
 	if sz == 0 { // shouldn't happen
@@ -358,7 +358,7 @@ func (fn *Node) NewFolders(foldername string) { //gti:add
 }
 
 // NewFolder makes a new folder (directory) in this directory node
-func (fn *Node) NewFolder(foldername string) { //gti:add
+func (fn *Node) NewFolder(foldername string) { //types:add
 	if fn.IsExternal() {
 		return
 	}
@@ -369,7 +369,7 @@ func (fn *Node) NewFolder(foldername string) { //gti:add
 	np := filepath.Join(ppath, foldername)
 	err := os.MkdirAll(np, 0775)
 	if err != nil {
-		gi.ErrorSnackbar(fn, err)
+		core.ErrorSnackbar(fn, err)
 		return
 	}
 	fn.FRoot.UpdatePath(ppath)
@@ -384,10 +384,10 @@ func (fn *Node) CopyFileToDir(filename string, perm os.FileMode) {
 	ppath := string(fn.FPath)
 	sfn := filepath.Base(filename)
 	tpath := filepath.Join(ppath, sfn)
-	fi.CopyFile(tpath, filename, perm)
+	fileinfo.CopyFile(tpath, filename, perm)
 	fn.FRoot.UpdatePath(ppath)
 	ofn, ok := fn.FRoot.FindFile(filename)
-	if ok && ofn.Info.Vcs >= vci.Stored {
+	if ok && ofn.Info.VCS >= vcs.Stored {
 		nfn, ok := fn.FRoot.FindFile(tpath)
 		if ok && nfn.This() != fn.FRoot.This() {
 			if string(nfn.FPath) != tpath {
@@ -401,12 +401,12 @@ func (fn *Node) CopyFileToDir(filename string, perm os.FileMode) {
 }
 
 // Shows file information about selected file(s)
-func (fn *Node) ShowFileInfo() { //gti:add
+func (fn *Node) ShowFileInfo() { //types:add
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		fn := AsNode(sels[i].This())
-		d := gi.NewBody().AddTitle("File info")
-		giv.NewStructView(d).SetStruct(&fn.Info).SetReadOnly(true)
+		d := core.NewBody().AddTitle("File info")
+		views.NewStructView(d).SetStruct(&fn.Info).SetReadOnly(true)
 		d.AddOKOnly().NewFullDialog(fn).Run()
 	}
 }

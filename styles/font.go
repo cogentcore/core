@@ -13,13 +13,13 @@ import (
 	"cogentcore.org/core/units"
 )
 
-// IMPORTANT: any changes here must be updated in style_props.go StyleFontFuncs
+// IMPORTANT: any changes here must be updated in style_properties.go StyleFontFuncs
 
 // Font contains all font styling information.
 // Most of font information is inherited.
 // Font does not include all information needed
 // for rendering -- see [FontRender] for that.
-type Font struct { //gti:add
+type Font struct { //types:add
 
 	// size of font to render (inhereted); converted to points when getting font to use
 	Size units.Value
@@ -91,8 +91,8 @@ func (fs *Font) SetUnitContext(uc *units.Context) {
 	}
 }
 
-func (fs *Font) StyleFromProps(parent *Font, props map[string]any, ctxt colors.Context) {
-	for key, val := range props {
+func (fs *Font) StyleFromProperties(parent *Font, properties map[string]any, ctxt colors.Context) {
+	for key, val := range properties {
 		if len(key) == 0 {
 			continue
 		}
@@ -105,15 +105,15 @@ func (fs *Font) StyleFromProps(parent *Font, props map[string]any, ctxt colors.C
 	}
 }
 
-// SetStyleProps sets font style values based on given property map (name:
+// SetStyleProperties sets font style values based on given property map (name:
 // value pairs), inheriting elements as appropriate from parent, and also
 // having a default style for the "initial" setting.
-func (fs *Font) SetStyleProps(parent *Font, props map[string]any, ctxt colors.Context) {
+func (fs *Font) SetStyleProperties(parent *Font, properties map[string]any, ctxt colors.Context) {
 	// direct font styling is used only for special cases -- don't do this:
 	// if !fs.StyleSet && parent != nil { // first time
 	// 	fs.InheritFields(parent)
 	// }
-	fs.StyleFromProps(parent, props, ctxt)
+	fs.StyleFromProperties(parent, properties, ctxt)
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -393,7 +393,7 @@ func FixFontMods(fn string) string {
 // used by end-user code -- see [Font] for that.
 // It stores all values as pointers so that they correspond
 // to the values of the style object it was derived from.
-type FontRender struct { //gti:add
+type FontRender struct { //types:add
 	Font
 
 	// text color (inhereted)
@@ -431,20 +431,20 @@ func (fr *FontRender) InheritFields(parent *FontRender) {
 	fr.Font.InheritFields(&parent.Font)
 }
 
-// SetStyleProps sets font style values based on given property map (name:
+// SetStyleProperties sets font style values based on given property map (name:
 // value pairs), inheriting elements as appropriate from parent, and also
 // having a default style for the "initial" setting.
-func (fr *FontRender) SetStyleProps(parent *FontRender, props map[string]any, ctxt colors.Context) {
+func (fr *FontRender) SetStyleProperties(parent *FontRender, properties map[string]any, ctxt colors.Context) {
 	var pfont *Font
 	if parent != nil {
 		pfont = &parent.Font
 	}
-	fr.Font.StyleFromProps(pfont, props, ctxt)
-	fr.StyleRenderFromProps(parent, props, ctxt)
+	fr.Font.StyleFromProperties(pfont, properties, ctxt)
+	fr.StyleRenderFromProperties(parent, properties, ctxt)
 }
 
-func (fs *FontRender) StyleRenderFromProps(parent *FontRender, props map[string]any, ctxt colors.Context) {
-	for key, val := range props {
+func (fs *FontRender) StyleRenderFromProperties(parent *FontRender, properties map[string]any, ctxt colors.Context) {
+	for key, val := range properties {
 		if len(key) == 0 {
 			continue
 		}

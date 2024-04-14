@@ -6,7 +6,7 @@ package cam02
 
 import (
 	"cogentcore.org/core/cam/cie"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // XYZToLMS converts XYZ to Long, Medium, Short cone-based responses,
@@ -60,7 +60,7 @@ func LuminanceAdapt(bgLum float32) float32 {
 	k := 1.0 / (lum5 + 1)
 	k4 := k * k * k * k
 	k4m1 := 1 - k4
-	fl := 0.2*k4*lum5 + .1*k4m1*k4m1*mat32.Pow(lum5, 1.0/3.0)
+	fl := 0.2*k4*lum5 + .1*k4m1*k4m1*math32.Pow(lum5, 1.0/3.0)
 	return fl
 }
 
@@ -71,7 +71,7 @@ func LuminanceAdapt(bgLum float32) float32 {
 // background luminance level of 200 = 2, so you can skip that
 // step if you assume that level of background.
 func ResponseCompression(val float32) float32 {
-	pval := mat32.Pow(val, 0.42)
+	pval := math32.Pow(val, 0.42)
 	rc := 0.1 + 4.0*pval/(27.13+pval)
 	return rc
 }

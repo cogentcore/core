@@ -11,15 +11,15 @@ import (
 	"strings"
 	"time"
 
-	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/ki"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/tree"
 )
 
 // FindDirNode finds directory node by given path.
 // Must be a relative path already rooted at tree, or absolute path within tree.
 func (fn *Node) FindDirNode(path string) (*Node, error) {
-	rp := fn.RelPath(gi.Filename(path))
+	rp := fn.RelPath(core.Filename(path))
 	if rp == "" {
 		return nil, fmt.Errorf("FindDirNode: path: %s is not relative to this node's path: %s", path, fn.FPath)
 	}
@@ -76,17 +76,17 @@ func (fn *Node) FindFile(fnm string) (*Node, bool) {
 
 	var ffn *Node
 	found := false
-	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
-			return ki.Continue
+			return tree.Continue
 		}
 		if strings.HasSuffix(string(sfn.FPath), fneff) {
 			ffn = sfn
 			found = true
-			return ki.Break
+			return tree.Break
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return ffn, found
 }
@@ -98,10 +98,10 @@ func (fn *Node) FilesMatching(match string, ignoreCase bool) []*Node {
 	if ignoreCase {
 		match = strings.ToLower(match)
 	}
-	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
-			return ki.Continue
+			return tree.Continue
 		}
 		if ignoreCase {
 			nm := strings.ToLower(sfn.Nm)
@@ -113,7 +113,7 @@ func (fn *Node) FilesMatching(match string, ignoreCase bool) []*Node {
 				mls = append(mls, sfn)
 			}
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return mls
 }
@@ -133,18 +133,18 @@ func NodeNameCountSort(ecs []NodeNameCount) {
 
 // FileExtCounts returns a count of all the different file extensions, sorted
 // from highest to lowest.
-// If cat is != fi.Unknown then it only uses files of that type
-// (e.g., fi.Code to find any code files)
-func (fn *Node) FileExtCounts(cat fi.Cat) []NodeNameCount {
+// If cat is != fileinfo.Unknown then it only uses files of that type
+// (e.g., fileinfo.Code to find any code files)
+func (fn *Node) FileExtCounts(cat fileinfo.Categories) []NodeNameCount {
 	cmap := make(map[string]int, 20)
-	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
-			return ki.Continue
+			return tree.Continue
 		}
-		if cat != fi.UnknownCat {
+		if cat != fileinfo.UnknownCategory {
 			if sfn.Info.Cat != cat {
-				return ki.Continue
+				return tree.Continue
 			}
 		}
 		ext := strings.ToLower(filepath.Ext(sfn.Nm))
@@ -153,7 +153,7 @@ func (fn *Node) FileExtCounts(cat fi.Cat) []NodeNameCount {
 		} else {
 			cmap[ext] = 1
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	ecs := make([]NodeNameCount, len(cmap))
 	idx := 0
@@ -166,25 +166,25 @@ func (fn *Node) FileExtCounts(cat fi.Cat) []NodeNameCount {
 }
 
 // LatestFileMod returns the most recent mod time of files in the tree.
-// If cat is != fi.Unknown then it only uses files of that type
-// (e.g., fi.Code to find any code files)
-func (fn *Node) LatestFileMod(cat fi.Cat) time.Time {
+// If cat is != fileinfo.Unknown then it only uses files of that type
+// (e.g., fileinfo.Code to find any code files)
+func (fn *Node) LatestFileMod(cat fileinfo.Categories) time.Time {
 	tmod := time.Time{}
-	fn.WidgetWalkPre(func(wi gi.Widget, wb *gi.WidgetBase) bool {
+	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
-			return ki.Continue
+			return tree.Continue
 		}
-		if cat != fi.UnknownCat {
+		if cat != fileinfo.UnknownCategory {
 			if sfn.Info.Cat != cat {
-				return ki.Continue
+				return tree.Continue
 			}
 		}
 		ft := (time.Time)(sfn.Info.ModTime)
 		if ft.After(tmod) {
 			tmod = ft
 		}
-		return ki.Continue
+		return tree.Continue
 	})
 	return tmod
 }

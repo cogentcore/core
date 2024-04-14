@@ -10,7 +10,7 @@ import (
 	"log"
 	"log/slog"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/vgpu"
 )
 
@@ -161,27 +161,27 @@ func (ph *Phong) UpdateTextureName(name string) error {
 
 // UseTexturePars sets the texture parameters for the next render command:
 // how often the texture repeats along each dimension, and the offset
-func (ph *Phong) UseTexturePars(repeat mat32.Vec2, off mat32.Vec2) {
+func (ph *Phong) UseTexturePars(repeat math32.Vector2, off math32.Vector2) {
 	ph.Cur.TexPars.Set(repeat, off)
 }
 
 // UseFullTexture sets the texture parameters for the next render command:
 // to render the full texture: repeat = 1,1; off = 0,0
 func (ph *Phong) UseFullTexture() {
-	ph.Cur.TexPars.Set(mat32.V2(1, 1), mat32.Vec2{})
+	ph.Cur.TexPars.Set(math32.Vec2(1, 1), math32.Vector2{})
 }
 
 // TexPars holds texture parameters: how often to repeat the texture image and offset
 type TexPars struct {
 
 	// how often to repeat the texture in each direction
-	Repeat mat32.Vec2
+	Repeat math32.Vector2
 
 	// offset for when to start the texure in each direction
-	Off mat32.Vec2
+	Off math32.Vector2
 }
 
-func (tp *TexPars) Set(rpt, off mat32.Vec2) {
+func (tp *TexPars) Set(rpt, off math32.Vector2) {
 	tp.Repeat = rpt
 	tp.Off = off
 }

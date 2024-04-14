@@ -11,7 +11,7 @@ import (
 	"unsafe"
 
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/vgpu/szalloc"
 	vk "github.com/goki/vulkan"
 )
@@ -152,22 +152,22 @@ func (vl *Value) Bytes() []byte {
 	return (*[ByteCopyMemoryLimit]byte)(vl.MemPtr)[:vl.AllocSize]
 }
 
-// Floats32 returns mat32.ArrayF32 of the Value data -- can be written to directly.
+// Floats32 returns math32.ArrayF32 of the Value data -- can be written to directly.
 // Only recommended for Vertex data.  Otherwise, be mindful of potential padding
 // and alignment issues relative to go-based storage.
 // Set Mod flag when changes have been made.
-func (vl *Value) Floats32() mat32.ArrayF32 {
+func (vl *Value) Floats32() math32.ArrayF32 {
 	nf := vl.AllocSize / 4
-	return mat32.ArrayF32((*[ByteCopyMemoryLimit]float32)(vl.MemPtr)[:nf])
+	return math32.ArrayF32((*[ByteCopyMemoryLimit]float32)(vl.MemPtr)[:nf])
 }
 
-// UInts32 returns mat32.ArrayU32 of the Value data -- can be written to directly.
+// UInts32 returns math32.ArrayU32 of the Value data -- can be written to directly.
 // Only recommended for Vertex data.  Otherwise, be mindful of potential padding
 // and alignment issues relative to go-based storage.
 // Set Mod flag when changes have been made.
-func (vl *Value) UInts32() mat32.ArrayU32 {
+func (vl *Value) UInts32() math32.ArrayU32 {
 	nf := vl.AllocSize / 4
-	return mat32.ArrayU32((*[ByteCopyMemoryLimit]uint32)(vl.MemPtr)[:nf])
+	return math32.ArrayU32((*[ByteCopyMemoryLimit]uint32)(vl.MemPtr)[:nf])
 }
 
 // PaddedArrayCheck checks if this is an array with padding on the elements

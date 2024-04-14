@@ -7,7 +7,7 @@ package styles
 import (
 	"log/slog"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/units"
 )
 
@@ -23,7 +23,7 @@ import (
 // align-content, so they are subsumed in the AlignH parameter in this style.
 // Vertical-align works as expected, and Text.Align uses left/center/right
 
-// IMPORTANT: any changes here must be updated in style_props.go StyleLayoutFuncs
+// IMPORTANT: any changes here must be updated in style_properties.go StyleLayoutFuncs
 
 // ScrollBarWidthDefault is the default width of a scrollbar in Dp
 var ScrollBarWidthDefault = float32(10)
@@ -78,7 +78,7 @@ func AlignPos(align Aligns, inner, outer float32) float32 {
 	if extra > 0 {
 		pos += AlignFactor(align) * extra
 	}
-	return mat32.Floor(pos)
+	return math32.Floor(pos)
 }
 
 /////////////////////////////////////////////////////////////////
@@ -98,8 +98,8 @@ const (
 )
 
 // Dim returns the corresponding dimension for the direction.
-func (d Directions) Dim() mat32.Dims {
-	return mat32.Dims(d)
+func (d Directions) Dim() math32.Dims {
+	return math32.Dims(d)
 }
 
 // Other returns the opposite (other) direction.
@@ -177,7 +177,7 @@ func AlignFactor(al Aligns) float32 {
 }
 
 // AlignSet specifies the 3 levels of Justify or Align: Content, Items, and Self
-type AlignSet struct { //gti:add
+type AlignSet struct { //types:add
 	// Content specifies the distribution of the entire collection of items within
 	// any larger amount of space allocated to the container.  By contrast, Items
 	// and Self specify distribution within the individual element's allocated space.

@@ -5,7 +5,7 @@ Cogent Core provides customizable tabs, which allow you to divide widgets into l
 You can make tabs without any custom options:
 
 ```Go
-ts := gi.NewTabs(parent)
+ts := core.NewTabs(parent)
 ts.NewTab("First")
 ts.NewTab("Second")
 ```
@@ -13,17 +13,17 @@ ts.NewTab("Second")
 You can add any widgets to tabs:
 
 ```Go
-ts := gi.NewTabs(parent)
+ts := core.NewTabs(parent)
 first := ts.NewTab("First")
-gi.NewLabel(first).SetText("I am first!")
+core.NewLabel(first).SetText("I am first!")
 second := ts.NewTab("Second")
-gi.NewLabel(second).SetText("I am second!")
+core.NewLabel(second).SetText("I am second!")
 ```
 
 You can add as many tabs as you want:
 
 ```Go
-ts := gi.NewTabs(parent)
+ts := core.NewTabs(parent)
 ts.NewTab("First")
 ts.NewTab("Second")
 ts.NewTab("Third")
@@ -33,7 +33,7 @@ ts.NewTab("Fourth")
 You can add icons to tabs:
 
 ```Go
-ts := gi.NewTabs(parent)
+ts := core.NewTabs(parent)
 ts.NewTab("First", icons.Home)
 ts.NewTab("Second", icons.Explore)
 ```
@@ -41,7 +41,7 @@ ts.NewTab("Second", icons.Explore)
 You can make functional tabs, which can be closed and moved:
 
 ```Go
-ts := gi.NewTabs(parent).SetType(gi.FunctionalTabs)
+ts := core.NewTabs(parent).SetType(core.FunctionalTabs)
 ts.NewTab("First")
 ts.NewTab("Second")
 ts.NewTab("Third")
@@ -50,7 +50,7 @@ ts.NewTab("Third")
 You can make navigation tabs, which dynamically serve as a bottom navigation bar, side navigation rail, or side navigation drawer depending on the size of the screen:
 
 ```Go
-ts := gi.NewTabs(parent).SetType(gi.NavigationAuto)
+ts := core.NewTabs(parent).SetType(core.NavigationAuto)
 ts.NewTab("First", icons.Home)
 ts.NewTab("Second", icons.Explore)
 ts.NewTab("Third", icons.History)
@@ -59,7 +59,7 @@ ts.NewTab("Third", icons.History)
 You can allow the user to add new tabs:
 
 ```Go
-ts := gi.NewTabs(parent).SetNewTabButton(true)
+ts := core.NewTabs(parent).SetNewTabButton(true)
 ts.NewTab("First")
 ts.NewTab("Second")
 ```

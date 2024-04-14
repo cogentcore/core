@@ -5,7 +5,7 @@
 package xyz
 
 import (
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/vgpu/vshape"
 )
 
@@ -31,20 +31,20 @@ const (
 
 // Plane is a flat 2D plane, which can be oriented along any
 // axis facing either positive or negative
-type Plane struct { //gti:add -setters
+type Plane struct { //types:add -setters
 	MeshBase
 
 	// axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis.
-	NormAxis mat32.Dims
+	NormAxis math32.Dims
 
 	// if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true
 	NormNeg bool
 
 	// 2D size of plane
-	Size mat32.Vec2
+	Size math32.Vector2
 
 	// number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
-	Segs mat32.Vec2i
+	Segs math32.Vector2i
 
 	// offset from origin along direction of normal to the plane
 	Offset float32
@@ -57,7 +57,7 @@ type Plane struct { //gti:add -setters
 func NewPlane(sc *Scene, name string, width, height float32) *Plane {
 	pl := &Plane{}
 	pl.Nm = name
-	pl.NormAxis = mat32.Y
+	pl.NormAxis = math32.Y
 	pl.NormNeg = false
 	pl.Size.Set(width, height)
 	pl.Segs.Set(1, 1)
@@ -72,8 +72,8 @@ func (pl *Plane) Sizes() (nVtx, nIndex int, hasColor bool) {
 	return pl.NVtx, pl.NIndex, pl.Color
 }
 
-func (pl *Plane) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
-	pos := mat32.Vec3{}
+func (pl *Plane) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
+	pos := math32.Vector3{}
 	sz := vshape.SetPlaneAxisSize(vtxAry, normAry, texAry, idxAry, 0, 0, pl.NormAxis, pl.NormNeg, pl.Size, pl.Segs, pl.Offset, pos)
 	mn := pos.Sub(sz)
 	mx := pos.Add(sz)
@@ -86,14 +86,14 @@ func (pl *Plane) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, 
 //   Box
 
 // Box is a rectangular-shaped solid (cuboid)
-type Box struct { //gti:add -setters
+type Box struct { //types:add -setters
 	MeshBase
 
 	// size along each dimension
-	Size mat32.Vec3
+	Size math32.Vector3
 
 	// number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
-	Segs mat32.Vec3i
+	Segs math32.Vector3i
 }
 
 // NewBox adds Box mesh to given scene, with given name and size
@@ -112,8 +112,8 @@ func (bx *Box) Sizes() (nVtx, nIndex int, hasColor bool) {
 	return bx.NVtx, bx.NIndex, bx.Color
 }
 
-func (bx *Box) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
-	pos := mat32.Vec3{}
+func (bx *Box) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
+	pos := math32.Vector3{}
 	hSz := vshape.SetBox(vtxAry, normAry, texAry, idxAry, 0, 0, bx.Size, bx.Segs, pos)
 	mn := pos.Sub(hSz)
 	mx := pos.Add(hSz)
@@ -126,7 +126,7 @@ func (bx *Box) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, id
 //   Sphere
 
 // Sphere is a sphere mesh
-type Sphere struct { //gti:add -setters
+type Sphere struct { //types:add -setters
 	MeshBase
 
 	// radius of the sphere
@@ -183,8 +183,8 @@ func (sp *Sphere) Sizes() (nVtx, nIndex int, hasColor bool) {
 	return sp.NVtx, sp.NIndex, sp.Color
 }
 
-func (sp *Sphere) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
-	pos := mat32.Vec3{}
+func (sp *Sphere) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
+	pos := math32.Vector3{}
 	bb := vshape.SetSphereSector(vtxAry, normAry, texAry, idxAry, 0, 0, sp.Radius, sp.WidthSegs, sp.HeightSegs, sp.AngStart, sp.AngLen, sp.ElevStart, sp.ElevLen, pos)
 	sp.BBoxMu.Lock()
 	sp.BBox.SetBounds(bb.Min, bb.Max)
@@ -197,7 +197,7 @@ func (sp *Sphere) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32,
 // Cylinder is a generalized cylinder shape, including a cone
 // or truncated cone by having different size circles at either end.
 // Height is up along the Y axis.
-type Cylinder struct { //gti:add -setters
+type Cylinder struct { //types:add -setters
 	MeshBase
 
 	// height of the cylinder
@@ -282,8 +282,8 @@ func (cy *Cylinder) Sizes() (nVtx, nIndex int, hasColor bool) {
 	return cy.NVtx, cy.NIndex, cy.Color
 }
 
-func (cy *Cylinder) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
-	pos := mat32.Vec3{}
+func (cy *Cylinder) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
+	pos := math32.Vector3{}
 	bb := vshape.SetCylinderSector(vtxAry, normAry, texAry, idxAry, 0, 0, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, pos)
 	cy.BBoxMu.Lock()
 	cy.BBox.SetBounds(bb.Min, bb.Max)
@@ -296,7 +296,7 @@ func (cy *Cylinder) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF3
 // Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.
 // Supports different radii on each end.
 // Height is along the Y axis -- total height is Height + TopRad + BotRad.
-type Capsule struct { //gti:add -setters
+type Capsule struct { //types:add -setters
 	MeshBase
 
 	// height of the cylinder portion
@@ -369,8 +369,8 @@ func (cp *Capsule) Sizes() (nVtx, nIndex int, hasColor bool) {
 	return
 }
 
-func (cp *Capsule) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
-	pos := mat32.Vec3{}
+func (cp *Capsule) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
+	pos := math32.Vector3{}
 	voff := 0
 	ioff := 0
 	bb := vshape.SetCylinderSector(vtxAry, normAry, texAry, idxAry, voff, ioff, cp.Height, cp.TopRad, cp.BotRad, cp.RadialSegs, cp.HeightSegs, cp.AngStart, cp.AngLen, false, false, pos)
@@ -403,7 +403,7 @@ func (cp *Capsule) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32
 
 // Torus is a torus mesh, defined by the radius of the solid tube and the
 // larger radius of the ring.
-type Torus struct { //gti:add -setters
+type Torus struct { //types:add -setters
 	MeshBase
 
 	// larger radius of the torus ring
@@ -455,8 +455,8 @@ func (tr *Torus) Sizes() (nVtx, nIndex int, hasColor bool) {
 }
 
 // Set sets points for torus in given allocated arrays
-func (tr *Torus) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, idxAry mat32.ArrayU32) {
-	pos := mat32.Vec3{}
+func (tr *Torus) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
+	pos := math32.Vector3{}
 	bb := vshape.SetTorusSector(vtxAry, normAry, texAry, idxAry, 0, 0, tr.Radius, tr.TubeRadius, tr.RadialSegs, tr.TubeSegs, tr.AngStart, tr.AngLen, pos)
 	tr.BBoxMu.Lock()
 	tr.BBox.SetBounds(bb.Min, bb.Max)

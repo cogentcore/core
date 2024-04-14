@@ -6,22 +6,22 @@ package main
 
 import (
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/giv"
-	_ "cogentcore.org/core/grows/images"
-	"cogentcore.org/core/grr"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/mat32"
+	_ "cogentcore.org/core/iox/imagex"
+	"cogentcore.org/core/math32"
+	"cogentcore.org/core/views"
 	"cogentcore.org/core/xyz"
 	_ "cogentcore.org/core/xyz/io/obj"
-	"cogentcore.org/core/xyzv"
+	"cogentcore.org/core/xyzview"
 )
 
 func main() {
-	b := gi.NewBody("XYZ Object Viewer")
+	b := core.NewBody("XYZ Object Viewer")
 
-	sv := xyzv.NewSceneView(b)
+	sv := xyzview.NewSceneView(b)
 	sv.Config()
 	sc := sv.SceneXYZ()
 
@@ -38,7 +38,7 @@ func main() {
 	// spot := xyz.NewSpotLight(sc, "spot", 1, xyz.DirectSun)
 	// spot.Pose.Pos.Set(0, 5, 5)
 
-	sc.Camera.LookAt(mat32.Vec3{}, mat32.V3(0, 1, 0)) // defaults to looking at origin
+	sc.Camera.LookAt(math32.Vector3{}, math32.Vec3(0, 1, 0)) // defaults to looking at origin
 
 	objgp := xyz.NewGroup(sc, "obj-gp")
 
@@ -46,18 +46,18 @@ func main() {
 	// curFn := "objs/piano_005.obj"
 	exts := ".obj,.dae,.gltf"
 
-	grr.Log1(sc.OpenNewObj(curFn, objgp))
+	errors.Log1(sc.OpenNewObj(curFn, objgp))
 
-	b.AddAppBar(func(tb *gi.Toolbar) {
-		gi.NewButton(tb).SetText("Open").SetIcon(icons.Open).
+	b.AddAppBar(func(tb *core.Toolbar) {
+		core.NewButton(tb).SetText("Open").SetIcon(icons.Open).
 			SetTooltip("Open a 3D object file for viewing").
 			OnClick(func(e events.Event) {
-				giv.FileViewDialog(tb, curFn, exts, "Open 3D Object", func(selFile string) {
+				views.FileViewDialog(tb, curFn, exts, "Open 3D Object", func(selFile string) {
 					curFn = selFile
 					objgp.DeleteChildren()
 					sc.DeleteMeshes()
 					sc.DeleteTextures()
-					grr.Log1(sc.OpenNewObj(selFile, objgp))
+					errors.Log1(sc.OpenNewObj(selFile, objgp))
 					sc.SetCamera("default")
 					sc.NeedsUpdate()
 					sv.NeedsRender()

@@ -13,13 +13,13 @@ import (
 	"sync"
 	"time"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/glop/dirs"
-	"cogentcore.org/core/goosi"
-	"cogentcore.org/core/gti"
-	"cogentcore.org/core/ki"
-	"cogentcore.org/core/vci"
+	"cogentcore.org/core/gox/dirs"
+	"cogentcore.org/core/system"
+	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
+	"cogentcore.org/core/vcs"
 	"gopkg.in/fsnotify.v1"
 )
 
@@ -47,7 +47,7 @@ type Tree struct {
 	DirsOnTop bool
 
 	// type of node to create -- defaults to filetree.Node but can use custom node types
-	NodeType *gti.Type `view:"-" json:"-" xml:"-"`
+	FileNodeType *types.Type `view:"-" json:"-" xml:"-"`
 
 	// DoubleClickFun is a function to call when a node receives a DoubleClick event.
 	// if not set, defaults to OpenEmptyDir() (for folders)
@@ -94,8 +94,8 @@ func (fv *Tree) Destroy() {
 func (ft *Tree) OpenPath(path string) {
 	ft.FRoot = ft // we are our own root..
 	ft.Nm = "/"
-	if ft.NodeType == nil {
-		ft.NodeType = NodeType
+	if ft.FileNodeType == nil {
+		ft.FileNodeType = NodeType
 	}
 	effpath, err := filepath.EvalSymlinks(path)
 	if err != nil {
@@ -103,12 +103,12 @@ func (ft *Tree) OpenPath(path string) {
 	}
 	abs, err := filepath.Abs(effpath)
 	if err != nil {
-		log.Printf("giv.Tree:OpenPath: %s\n", err)
+		log.Printf("views.Tree:OpenPath: %s\n", err)
 		abs = effpath
 	}
-	ft.FPath = gi.Filename(abs)
+	ft.FPath = core.Filename(abs)
 	ft.Open()
-	ft.SetDirOpen(gi.Filename(abs))
+	ft.SetDirOpen(core.Filename(abs))
 	ft.UpdateAll()
 }
 
@@ -145,7 +145,7 @@ func (ft *Tree) UpdatePath(path string) {
 		fn.UpdateNode()
 		return
 	}
-	// gi.MessageSnackbar(ft, "UpdatePath: path not found in tree: "+path)
+	// core.MessageSnackbar(ft, "UpdatePath: path not found in tree: "+path)
 }
 
 // ConfigWatcher configures a new watcher for tree
@@ -198,7 +198,7 @@ func (ft *Tree) WatchUpdate(path string) {
 	// fmt.Println(path)
 
 	dir, _ := filepath.Split(path)
-	rp := ft.RelPath(gi.Filename(dir))
+	rp := ft.RelPath(core.Filename(dir))
 	if rp == ft.LastWatchUpdate {
 		now := time.Now()
 		lagMs := int(now.Sub(ft.LastWatchTime) / time.Millisecond)
@@ -223,9 +223,9 @@ func (ft *Tree) WatchUpdate(path string) {
 }
 
 // WatchPath adds given path to those watched
-func (ft *Tree) WatchPath(path gi.Filename) error {
+func (ft *Tree) WatchPath(path core.Filename) error {
 	return nil // TODO: disable for all platforms for now -- getting some issues
-	if gi.TheApp.Platform() == goosi.MacOS {
+	if core.TheApp.Platform() == system.MacOS {
 		return nil // mac is not supported in a high-capacity fashion at this point
 	}
 	rp := ft.RelPath(path)
@@ -246,7 +246,7 @@ func (ft *Tree) WatchPath(path gi.Filename) error {
 }
 
 // UnWatchPath removes given path from those watched
-func (ft *Tree) UnWatchPath(path gi.Filename) {
+func (ft *Tree) UnWatchPath(path core.Filename) {
 	rp := ft.RelPath(path)
 	on, has := ft.WatchedPaths[rp]
 	if !on || !has {
@@ -259,7 +259,7 @@ func (ft *Tree) UnWatchPath(path gi.Filename) {
 
 // IsDirOpen returns true if given directory path is open (i.e., has been
 // opened in the view)
-func (ft *Tree) IsDirOpen(fpath gi.Filename) bool {
+func (ft *Tree) IsDirOpen(fpath core.Filename) bool {
 	if fpath == ft.FPath { // we are always open
 		return true
 	}
@@ -267,7 +267,7 @@ func (ft *Tree) IsDirOpen(fpath gi.Filename) bool {
 }
 
 // SetDirOpen sets the given directory path to be open
-func (ft *Tree) SetDirOpen(fpath gi.Filename) {
+func (ft *Tree) SetDirOpen(fpath core.Filename) {
 	rp := ft.RelPath(fpath)
 	// fmt.Printf("setdiropen: %s\n", rp)
 	ft.Dirs.SetOpen(rp, true)
@@ -276,7 +276,7 @@ func (ft *Tree) SetDirOpen(fpath gi.Filename) {
 }
 
 // SetDirClosed sets the given directory path to be closed
-func (ft *Tree) SetDirClosed(fpath gi.Filename) {
+func (ft *Tree) SetDirClosed(fpath core.Filename) {
 	rp := ft.RelPath(fpath)
 	ft.Dirs.SetOpen(rp, false)
 	ft.Dirs.SetMark(rp)
@@ -284,17 +284,17 @@ func (ft *Tree) SetDirClosed(fpath gi.Filename) {
 }
 
 // SetDirSortBy sets the given directory path sort by option
-func (ft *Tree) SetDirSortBy(fpath gi.Filename, modTime bool) {
+func (ft *Tree) SetDirSortBy(fpath core.Filename, modTime bool) {
 	ft.Dirs.SetSortBy(ft.RelPath(fpath), modTime)
 }
 
 // DirSortByName returns true if dir is sorted by name
-func (ft *Tree) DirSortByName(fpath gi.Filename) bool {
+func (ft *Tree) DirSortByName(fpath core.Filename) bool {
 	return ft.Dirs.SortByName(ft.RelPath(fpath))
 }
 
 // DirSortByModTime returns true if dir is sorted by mod time
-func (ft *Tree) DirSortByModTime(fpath gi.Filename) bool {
+func (ft *Tree) DirSortByModTime(fpath core.Filename) bool {
 	return ft.Dirs.SortByModTime(ft.RelPath(fpath))
 }
 
@@ -363,8 +363,8 @@ func (ft *Tree) ExtNodeByPath(fpath string) (*Node, error) {
 // for ExtFiles
 func (ft *Tree) UpdateExtFiles(efn *Node) {
 	efn.Info.Mode = os.ModeDir | os.ModeIrregular // mark as dir, irregular
-	config := ki.Config{}
-	typ := ft.NodeType
+	config := tree.Config{}
+	typ := ft.FileNodeType
 	for _, f := range ft.ExtFiles {
 		config.Add(typ, dirs.DirAndFile(f))
 	}
@@ -375,6 +375,6 @@ func (ft *Tree) UpdateExtFiles(efn *Node) {
 		sf.FRoot = ft
 		fp := ft.ExtFiles[i]
 		sf.SetNodePath(fp)
-		sf.Info.Vcs = vci.Stored // no vcs in general
+		sf.Info.VCS = vcs.Stored // no vcs in general
 	}
 }

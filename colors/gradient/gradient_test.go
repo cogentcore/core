@@ -11,8 +11,8 @@ import (
 	"testing"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/grows/images"
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/iox/imagex"
+	"cogentcore.org/core/math32"
 )
 
 func ExampleLinear() {
@@ -51,7 +51,7 @@ func TestColorAt(t *testing.T) {
 				{81, 94, color.RGBA{255, 1, 0, 255}},
 			}},
 		{NewRadial().
-			SetCenter(mat32.V2(0.9, 0.5)).SetFocal(mat32.V2(0.9, 0.5)).
+			SetCenter(math32.Vec2(0.9, 0.5)).SetFocal(math32.Vec2(0.9, 0.5)).
 			AddStop(colors.Blue, 0.1).
 			AddStop(colors.Yellow, 0.85),
 			[]value{
@@ -69,7 +69,7 @@ func TestColorAt(t *testing.T) {
 	}
 	for i, test := range tests {
 		gb := test.gr.AsBase()
-		test.gr.Update(1, gb.Box, mat32.Identity2())
+		test.gr.Update(1, gb.Box, math32.Identity2())
 		for j, v := range test.want {
 			have := test.gr.At(v.x, v.y)
 			if have != v.want {
@@ -94,7 +94,7 @@ func TestColorAt(t *testing.T) {
 		}
 		ugb := ugr.AsBase()
 		ugb.SetUnits(UserSpaceOnUse)
-		ugr.Update(1, ugb.Box, mat32.Identity2())
+		ugr.Update(1, ugb.Box, math32.Identity2())
 
 		for j, v := range test.want {
 			have := ugr.At(v.x, v.y)
@@ -107,44 +107,44 @@ func TestColorAt(t *testing.T) {
 
 func TestRenderLinear(t *testing.T) {
 	r := image.Rectangle{Max: image.Point{128, 128}}
-	b := mat32.B2FromRect(r)
+	b := math32.B2FromRect(r)
 	img := image.NewRGBA(r)
 	g := CopyOf(linearTransformTest)
 	// g.AsBase().Blend = colors.HCT
-	g.Update(1, b, mat32.Rotate2D(mat32.DegToRad(45)))
+	g.Update(1, b, math32.Rotate2D(math32.DegToRad(45)))
 	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
-	images.Assert(t, img, "linear")
+	imagex.Assert(t, img, "linear")
 
 	ug := CopyOf(g).(*Linear)
 	ug.SetUnits(UserSpaceOnUse)
 	ug.Start.SetMul(ug.Box.Size())
 	ug.End.SetMul(ug.Box.Size())
-	ug.Update(1, b, mat32.Rotate2D(mat32.DegToRad(45)))
+	ug.Update(1, b, math32.Rotate2D(math32.DegToRad(45)))
 	draw.Draw(img, img.Bounds(), ug, image.Point{}, draw.Src)
-	images.Assert(t, img, "linear-user-space")
+	imagex.Assert(t, img, "linear-user-space")
 }
 
 func TestRenderRadial(t *testing.T) {
 	r := image.Rectangle{Max: image.Point{128, 128}}
-	b := mat32.B2FromRect(r)
+	b := math32.B2FromRect(r)
 	img := image.NewRGBA(r)
 	g := CopyOf(radialTransformTest)
 	// g.AsBase().Blend = colors.HCT
-	g.Update(1, b, mat32.Identity2())
+	g.Update(1, b, math32.Identity2())
 	draw.Draw(img, img.Bounds(), g, image.Point{}, draw.Src)
-	images.Assert(t, img, "radial")
+	imagex.Assert(t, img, "radial")
 
 	ug := CopyOf(g).(*Radial)
 	ug.SetUnits(UserSpaceOnUse)
 	ug.Center.SetMul(ug.Box.Size())
 	ug.Focal.SetMul(ug.Box.Size())
 	ug.Radius.SetMul(ug.Box.Size())
-	ug.Update(1, b, mat32.Identity2())
+	ug.Update(1, b, math32.Identity2())
 	draw.Draw(img, img.Bounds(), ug, image.Point{}, draw.Src)
-	images.Assert(t, img, "radial-user-space")
+	imagex.Assert(t, img, "radial-user-space")
 }
 
-// func matToRasterx(mat *mat32.Mat2) rasterx.Matrix2D {
+// func matToRasterx(mat *math32.Matrix2) rasterx.Matrix2D {
 // 	// A = XX
 // 	// B = YX
 // 	// C = XY
@@ -155,21 +155,21 @@ func TestRenderRadial(t *testing.T) {
 // }
 
 func compareTol(t *testing.T, a, c float32) {
-	if mat32.Abs(a-c) > 1.0e-5 {
+	if math32.Abs(a-c) > 1.0e-5 {
 		t.Errorf("value not in tolerance. actual: %g  correct: %g\n", a, c)
 	}
 }
 
 func TestTransform(t *testing.T) {
 	r := image.Rect(20, 20, 140, 140)
-	b := mat32.B2FromRect(r)
+	b := math32.B2FromRect(r)
 	g := CopyOf(linearTransformTest)
 	gb := g.AsBase()
-	gb.Transform = mat32.Rotate2D(mat32.DegToRad(25))
+	gb.Transform = math32.Rotate2D(math32.DegToRad(25))
 	// fmt.Println(gb.Transform)
-	g.Update(1, b, mat32.Identity2())
+	g.Update(1, b, math32.Identity2())
 	// fmt.Println(gb.boxTransform)
-	btcorrect := mat32.Mat2{XX: 0.9063079, YX: -0.42261833, XY: 0.42261833, YY: 0.9063079, X0: -6.5785227, Y0: 10.326212}
+	btcorrect := math32.Matrix2{XX: 0.9063079, YX: -0.42261833, XY: 0.42261833, YY: 0.9063079, X0: -6.5785227, Y0: 10.326212}
 	compareTol(t, gb.boxTransform.XX, btcorrect.XX)
 	compareTol(t, gb.boxTransform.YX, btcorrect.YX)
 	compareTol(t, gb.boxTransform.XY, btcorrect.XY)
@@ -177,7 +177,7 @@ func TestTransform(t *testing.T) {
 	compareTol(t, gb.boxTransform.X0, btcorrect.X0)
 	compareTol(t, gb.boxTransform.Y0, btcorrect.Y0)
 
-	// szf := mat32.V2FromPoint(r.Size())
+	// szf := math32.Vector2FromPoint(r.Size())
 	// w := float64(szf.X)
 	// h := float64(szf.Y)
 	// oriX := float64(r.Min.X)

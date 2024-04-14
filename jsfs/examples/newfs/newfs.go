@@ -12,12 +12,12 @@ package main
 import (
 	"syscall/js"
 
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/jsfs"
 )
 
 func main() {
-	fs := grr.Must1(jsfs.NewFS())
-	grr.Must1(fs.MkdirAll([]js.Value{js.ValueOf("me"), js.ValueOf(0777)}))
-	js.Global().Get("console").Call("log", "stat file info", grr.Must1(fs.Stat([]js.Value{js.ValueOf("me")})))
+	fs := errors.Must1(jsfs.NewFS())
+	errors.Must1(fs.MkdirAll([]js.Value{js.ValueOf("me"), js.ValueOf(0777)}))
+	js.Global().Get("console").Call("log", "stat file info", errors.Must1(fs.Stat([]js.Value{js.ValueOf("me")})))
 }

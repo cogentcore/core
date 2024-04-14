@@ -17,24 +17,24 @@ import (
 	"sync"
 	"time"
 
+	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fi"
-	"cogentcore.org/core/gi"
-	"cogentcore.org/core/giv"
-	"cogentcore.org/core/glop/dirs"
-	"cogentcore.org/core/glop/indent"
-	"cogentcore.org/core/glop/runes"
-	"cogentcore.org/core/grr"
+	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/gox/dirs"
+	"cogentcore.org/core/gox/indent"
+	"cogentcore.org/core/gox/runes"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/pi"
-	"cogentcore.org/core/pi/complete"
-	"cogentcore.org/core/pi/lex"
-	"cogentcore.org/core/pi/token"
+	"cogentcore.org/core/parse"
+	"cogentcore.org/core/parse/complete"
+	"cogentcore.org/core/parse/lexer"
+	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/spell"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/texteditor/textbuf"
+	"cogentcore.org/core/views"
 )
 
 // Buffer is a buffer of text, which can be viewed by [Editor](s).
@@ -52,7 +52,7 @@ type Buffer struct {
 
 	// Filename is the filename of file last loaded or saved,
 	// which is used when highlighting code.
-	Filename gi.Filename `json:"-" xml:"-"`
+	Filename core.Filename `json:"-" xml:"-"`
 
 	// Flags are key state flags
 	Flags BufferFlags
@@ -68,10 +68,10 @@ type Buffer struct {
 	Opts textbuf.Opts
 
 	// full info about file
-	Info fi.FileInfo
+	Info fileinfo.FileInfo
 
-	// Pi parsing state info for file
-	PiState pi.FileStates
+	// Parsing state info for file
+	ParseState parse.FileStates
 
 	// syntax highlighting markup parameters (language, style, etc)
 	Hi HiMarkup
@@ -87,7 +87,7 @@ type Buffer struct {
 	LineColors map[int]image.Image
 
 	// icons for each LineIcons being used
-	Icons map[icons.Icon]*gi.Icon `json:"-" xml:"-"`
+	Icons map[icons.Icon]*core.Icon `json:"-" xml:"-"`
 
 	// the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!
 	Lines [][]rune `json:"-" xml:"-"`
@@ -96,10 +96,10 @@ type Buffer struct {
 	LineBytes [][]byte `json:"-" xml:"-"`
 
 	// extra custom tagged regions for each line
-	Tags []lex.Line `json:"-" xml:"-"`
+	Tags []lexer.Line `json:"-" xml:"-"`
 
 	// syntax highlighting tags -- auto-generated
-	HiTags []lex.Line `json:"-" xml:"-"`
+	HiTags []lexer.Line `json:"-" xml:"-"`
 
 	// marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered
 	Markup [][]byte `json:"-" xml:"-"`
@@ -132,10 +132,10 @@ type Buffer struct {
 	Undos textbuf.Undo `json:"-" xml:"-"`
 
 	// history of cursor positions -- can move back through them
-	PosHistory []lex.Pos `json:"-" xml:"-"`
+	PosHistory []lexer.Pos `json:"-" xml:"-"`
 
 	// functions and data for text completion
-	Complete *gi.Complete `json:"-" xml:"-"`
+	Complete *core.Complete `json:"-" xml:"-"`
 
 	// functions and data for spelling correction
 	Spell *Spell `json:"-" xml:"-"`
@@ -143,7 +143,7 @@ type Buffer struct {
 	// current text editor -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always
 	CurView *Editor `json:"-" xml:"-"`
 
-	// supports standard goosi events sending: Change is sent for BufDone, BufInsert, BufDelete
+	// supports standard system events sending: Change is sent for BufDone, BufInsert, BufDelete
 	Listeners events.Listeners
 }
 
@@ -152,7 +152,7 @@ type Buffer struct {
 func NewBuffer() *Buffer {
 	tb := &Buffer{}
 	tb.SetHiStyle(histyle.StyleDefault)
-	tb.Opts.EditorSettings = gi.SystemSettings.Editor
+	tb.Opts.EditorSettings = core.SystemSettings.Editor
 	tb.SetText([]byte{}) // to initialize
 	return tb
 }
@@ -220,11 +220,11 @@ func (tb *Buffer) OnInput(fun func(e events.Event)) {
 }
 
 // BufferFlags hold key Buf state
-type BufferFlags gi.WidgetFlags //enums:bitflag -trim-prefix Buffer
+type BufferFlags core.WidgetFlags //enums:bitflag -trim-prefix Buffer
 
 const (
 	// BufferAutoSaving is used in atomically safe way to protect autosaving
-	BufferAutoSaving BufferFlags = BufferFlags(gi.WidgetFlagsN) + iota
+	BufferAutoSaving BufferFlags = BufferFlags(core.WidgetFlagsN) + iota
 
 	// BufferMarkingUp indicates current markup operation in progress -- don't redo
 	BufferMarkingUp
@@ -403,7 +403,7 @@ func (tb *Buffer) SetLang(lang string) *Buffer {
 }
 
 // SetHiStyle sets the highlighting style -- needs to be protected by mutex
-func (tb *Buffer) SetHiStyle(style gi.HiStyleName) *Buffer {
+func (tb *Buffer) SetHiStyle(style core.HiStyleName) *Buffer {
 	tb.MarkupMu.Lock()
 	tb.Hi.SetHiStyle(style)
 	tb.MarkupMu.Unlock()
@@ -426,9 +426,9 @@ func (tb *Buffer) SetReadOnly(readonly bool) *Buffer {
 // SetFilename sets the filename associated with the buffer and updates
 // the code highlighting information accordingly.
 func (tb *Buffer) SetFilename(fn string) *Buffer {
-	tb.Filename = gi.Filename(fn)
+	tb.Filename = core.Filename(fn)
 	tb.Stat()
-	tb.Hi.Init(&tb.Info, &tb.PiState)
+	tb.Hi.Init(&tb.Info, &tb.ParseState)
 	return tb
 }
 
@@ -443,8 +443,8 @@ func (tb *Buffer) NewBuffer(nlines int) {
 	tb.Undos.Reset()
 	tb.Lines = make([][]rune, nlines)
 	tb.LineBytes = make([][]byte, nlines)
-	tb.Tags = make([]lex.Line, nlines)
-	tb.HiTags = make([]lex.Line, nlines)
+	tb.Tags = make([]lexer.Line, nlines)
+	tb.HiTags = make([]lexer.Line, nlines)
 	tb.Markup = make([][]byte, nlines)
 
 	if cap(tb.ByteOffs) >= nlines {
@@ -462,8 +462,8 @@ func (tb *Buffer) NewBuffer(nlines int) {
 
 	tb.NLines = nlines
 
-	tb.PiState.SetSrc(string(tb.Filename), "", tb.Info.Known)
-	tb.Hi.Init(&tb.Info, &tb.PiState)
+	tb.ParseState.SetSrc(string(tb.Filename), "", tb.Info.Known)
+	tb.Hi.Init(&tb.Info, &tb.ParseState)
 
 	tb.MarkupMu.Unlock()
 	tb.LinesMu.Unlock()
@@ -481,15 +481,15 @@ func (tb *Buffer) Stat() error {
 	return nil
 }
 
-// ConfigKnown configures options based on the supported language info in GoPi
-// returns true if supported
+// ConfigKnown configures options based on the supported language info in parse.
+// Returns true if supported.
 func (tb *Buffer) ConfigKnown() bool {
-	if tb.Info.Known != fi.Unknown {
+	if tb.Info.Known != fileinfo.Unknown {
 		if tb.Spell == nil {
 			tb.SetSpell()
 		}
 		if tb.Complete == nil {
-			tb.SetCompleter(&tb.PiState, CompletePi, CompleteEditPi, LookupPi)
+			tb.SetCompleter(&tb.ParseState, CompleteParse, CompleteEditParse, LookupParse)
 		}
 		return tb.Opts.ConfigKnown(tb.Info.Known)
 	}
@@ -509,18 +509,18 @@ func (tb *Buffer) FileModCheck() bool {
 	}
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
 		sc := tb.SceneFromView()
-		d := gi.NewBody().AddTitle("File changed on disk: " + dirs.DirAndFile(string(tb.Filename))).
+		d := core.NewBody().AddTitle("File changed on disk: " + dirs.DirAndFile(string(tb.Filename))).
 			AddText(fmt.Sprintf("File has changed on disk since being opened or saved by you; what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename))
-		d.AddBottomBar(func(parent gi.Widget) {
-			gi.NewButton(parent).SetText("Save as to different file").OnClick(func(e events.Event) {
+		d.AddBottomBar(func(parent core.Widget) {
+			core.NewButton(parent).SetText("Save as to different file").OnClick(func(e events.Event) {
 				d.Close()
-				giv.CallFunc(sc, tb.SaveAs)
+				views.CallFunc(sc, tb.SaveAs)
 			})
-			gi.NewButton(parent).SetText("Revert from disk").OnClick(func(e events.Event) {
+			core.NewButton(parent).SetText("Revert from disk").OnClick(func(e events.Event) {
 				d.Close()
 				tb.Revert()
 			})
-			gi.NewButton(parent).SetText("Ignore and proceed").OnClick(func(e events.Event) {
+			core.NewButton(parent).SetText("Ignore and proceed").OnClick(func(e events.Event) {
 				d.Close()
 				tb.SetFlag(true, BufferFileModOK)
 			})
@@ -532,7 +532,7 @@ func (tb *Buffer) FileModCheck() bool {
 }
 
 // Open loads the given file into the buffer.
-func (tb *Buffer) Open(filename gi.Filename) error {
+func (tb *Buffer) Open(filename core.Filename) error {
 	err := tb.OpenFile(filename)
 	if err != nil {
 		return err
@@ -561,7 +561,7 @@ func (tb *Buffer) OpenFS(fsys fs.FS, filename string) error {
 // OpenFile just loads the given file into the buffer, without doing
 // any markup or signaling. It is typically used in other functions or
 // for temporary buffers.
-func (tb *Buffer) OpenFile(filename gi.Filename) error {
+func (tb *Buffer) OpenFile(filename core.Filename) error {
 	txt, err := os.ReadFile(string(filename))
 	if err != nil {
 		return err
@@ -586,10 +586,10 @@ func (tb *Buffer) Revert() bool {
 	if tb.NLines < DiffRevertLines {
 		ob := NewBuffer()
 		err := ob.OpenFile(tb.Filename)
-		if grr.Log(err) != nil {
+		if errors.Log(err) != nil {
 			sc := tb.SceneFromView()
 			if sc != nil { // only if viewing
-				gi.ErrorSnackbar(sc, err, "Error reopening file")
+				core.ErrorSnackbar(sc, err, "Error reopening file")
 			}
 			return false
 		}
@@ -616,19 +616,19 @@ func (tb *Buffer) Revert() bool {
 // Does an EditDone first to save edits and checks for an existing file.
 // If it does exist then prompts to overwrite or not.
 // If afterFunc is non-nil, then it is called with the status of the user action.
-func (tb *Buffer) SaveAsFunc(filename gi.Filename, afterFunc func(canceled bool)) {
+func (tb *Buffer) SaveAsFunc(filename core.Filename, afterFunc func(canceled bool)) {
 	// todo: filemodcheck!
 	tb.EditDone()
-	if !grr.Log1(dirs.FileExists(string(filename))) {
+	if !errors.Log1(dirs.FileExists(string(filename))) {
 		tb.SaveFile(filename)
 		if afterFunc != nil {
 			afterFunc(false)
 		}
 	} else {
 		sc := tb.SceneFromView()
-		d := gi.NewBody().AddTitle("File Exists, Overwrite?").
+		d := core.NewBody().AddTitle("File Exists, Overwrite?").
 			AddText(fmt.Sprintf("File already exists, overwrite?  File: %v", filename))
-		d.AddBottomBar(func(parent gi.Widget) {
+		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent).OnClick(func(e events.Event) {
 				if afterFunc != nil {
 					afterFunc(true)
@@ -647,15 +647,15 @@ func (tb *Buffer) SaveAsFunc(filename gi.Filename, afterFunc func(canceled bool)
 
 // SaveAs saves the current text into given file -- does an EditDone first to save edits
 // and checks for an existing file -- if it does exist then prompts to overwrite or not.
-func (tb *Buffer) SaveAs(filename gi.Filename) {
+func (tb *Buffer) SaveAs(filename core.Filename) {
 	tb.SaveAsFunc(filename, nil)
 }
 
 // SaveFile writes current buffer to file, with no prompting, etc
-func (tb *Buffer) SaveFile(filename gi.Filename) error {
+func (tb *Buffer) SaveFile(filename core.Filename) error {
 	err := os.WriteFile(string(filename), tb.Txt, 0644)
 	if err != nil {
-		gi.ErrorSnackbar(tb.SceneFromView(), err)
+		core.ErrorSnackbar(tb.SceneFromView(), err)
 		slog.Error(err.Error())
 	} else {
 		tb.ClearNotSaved()
@@ -669,24 +669,24 @@ func (tb *Buffer) SaveFile(filename gi.Filename) error {
 // buffer
 func (tb *Buffer) Save() error {
 	if tb.Filename == "" {
-		return fmt.Errorf("giv.Buf: filename is empty for Save")
+		return fmt.Errorf("views.Buf: filename is empty for Save")
 	}
 	tb.EditDone()
 	info, err := os.Stat(string(tb.Filename))
 	if err == nil && info.ModTime() != time.Time(tb.Info.ModTime) {
 		sc := tb.SceneFromView()
-		d := gi.NewBody().AddTitle("File Changed on Disk").
+		d := core.NewBody().AddTitle("File Changed on Disk").
 			AddText(fmt.Sprintf("File has changed on disk since you opened or saved it; what do you want to do?  File: %v", tb.Filename))
-		d.AddBottomBar(func(parent gi.Widget) {
-			gi.NewButton(parent).SetText("Save to different file").OnClick(func(e events.Event) {
+		d.AddBottomBar(func(parent core.Widget) {
+			core.NewButton(parent).SetText("Save to different file").OnClick(func(e events.Event) {
 				d.Close()
-				giv.CallFunc(sc, tb.SaveAs)
+				views.CallFunc(sc, tb.SaveAs)
 			})
-			gi.NewButton(parent).SetText("Open from disk, losing changes").OnClick(func(e events.Event) {
+			core.NewButton(parent).SetText("Open from disk, losing changes").OnClick(func(e events.Event) {
 				d.Close()
 				tb.Revert()
 			})
-			gi.NewButton(parent).SetText("Save file, overwriting").OnClick(func(e events.Event) {
+			core.NewButton(parent).SetText("Save file, overwriting").OnClick(func(e events.Event) {
 				d.Close()
 				tb.SaveFile(tb.Filename)
 			})
@@ -703,31 +703,31 @@ func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
 		tb.StopDelayedReMarkup()
 		sc := tb.SceneFromView()
 		if tb.Filename != "" {
-			d := gi.NewBody().AddTitle("Close without saving?").
+			d := core.NewBody().AddTitle("Close without saving?").
 				AddText(fmt.Sprintf("Do you want to save your changes to file: %v?", tb.Filename))
-			d.AddBottomBar(func(parent gi.Widget) {
-				gi.NewButton(parent).SetText("Cancel").OnClick(func(e events.Event) {
+			d.AddBottomBar(func(parent core.Widget) {
+				core.NewButton(parent).SetText("Cancel").OnClick(func(e events.Event) {
 					d.Close()
 					if afterFun != nil {
 						afterFun(true)
 					}
 				})
-				gi.NewButton(parent).SetText("Close without saving").OnClick(func(e events.Event) {
+				core.NewButton(parent).SetText("Close without saving").OnClick(func(e events.Event) {
 					d.Close()
 					tb.ClearNotSaved()
 					tb.AutoSaveDelete()
 					tb.Close(afterFun)
 				})
-				gi.NewButton(parent).SetText("Save").OnClick(func(e events.Event) {
+				core.NewButton(parent).SetText("Save").OnClick(func(e events.Event) {
 					tb.Save()
 					tb.Close(afterFun) // 2nd time through won't prompt
 				})
 			})
 			d.NewDialog(sc).Run()
 		} else {
-			d := gi.NewBody().AddTitle("Close without saving?").
+			d := core.NewBody().AddTitle("Close without saving?").
 				AddText("Do you want to save your changes (no filename for this buffer yet)?  If so, Cancel and then do Save As")
-			d.AddBottomBar(func(parent gi.Widget) {
+			d.AddBottomBar(func(parent core.Widget) {
 				d.AddCancel(parent).OnClick(func(e events.Event) {
 					if afterFun != nil {
 						afterFun(true)
@@ -792,7 +792,7 @@ func (tb *Buffer) AutoSave() error {
 	b := tb.LinesToBytesCopy()
 	err := os.WriteFile(asfn, b, 0644)
 	if err != nil {
-		log.Printf("giv.Buf: Could not AutoSave file: %v, error: %v\n", asfn, err)
+		log.Printf("views.Buf: Could not AutoSave file: %v, error: %v\n", asfn, err)
 	}
 	tb.SetFlag(false, BufferAutoSaving)
 	return err
@@ -818,14 +818,14 @@ func (tb *Buffer) AutoSaveCheck() bool {
 //   Appending Lines
 
 // EndPos returns the ending position at end of buffer
-func (tb *Buffer) EndPos() lex.Pos {
+func (tb *Buffer) EndPos() lexer.Pos {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
 
 	if tb.NLines == 0 {
-		return lex.PosZero
+		return lexer.PosZero
 	}
-	ed := lex.Pos{tb.NLines - 1, len(tb.Lines[tb.NLines-1])}
+	ed := lexer.Pos{tb.NLines - 1, len(tb.Lines[tb.NLines-1])}
 	return ed
 }
 
@@ -945,7 +945,7 @@ func (tb *Buffer) DeleteView(vw *Editor) {
 }
 
 // SceneFromView returns Scene from text editor, if avail
-func (tb *Buffer) SceneFromView() *gi.Scene {
+func (tb *Buffer) SceneFromView() *core.Scene {
 	if len(tb.Editors) > 0 {
 		return tb.Editors[0].Scene
 	}
@@ -1090,24 +1090,24 @@ func (tb *Buffer) SearchRegexp(re *regexp.Regexp) (int, []textbuf.Match) {
 
 // BraceMatch finds the brace, bracket, or parens that is the partner
 // of the one passed to function.
-func (tb *Buffer) BraceMatch(r rune, st lex.Pos) (en lex.Pos, found bool) {
+func (tb *Buffer) BraceMatch(r rune, st lexer.Pos) (en lexer.Pos, found bool) {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
 	tb.MarkupMu.RLock()
 	defer tb.MarkupMu.RUnlock()
-	return lex.BraceMatch(tb.Lines, tb.HiTags, r, st, MaxScopeLines)
+	return lexer.BraceMatch(tb.Lines, tb.HiTags, r, st, MaxScopeLines)
 }
 
 /////////////////////////////////////////////////////////////////////////////
 //   Edits
 
 // ValidPos returns a position that is in a valid range
-func (tb *Buffer) ValidPos(pos lex.Pos) lex.Pos {
+func (tb *Buffer) ValidPos(pos lexer.Pos) lexer.Pos {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
 
 	if tb.NLines == 0 {
-		return lex.PosZero
+		return lexer.PosZero
 	}
 	if pos.Ln < 0 {
 		pos.Ln = 0
@@ -1147,14 +1147,14 @@ const (
 // optionally signaling views after text lines have been updated.
 // Sets the timestamp on resulting Edit to now.
 // An Undo record is automatically saved depending on Undo.Off setting.
-func (tb *Buffer) DeleteText(st, ed lex.Pos, signal bool) *textbuf.Edit {
+func (tb *Buffer) DeleteText(st, ed lexer.Pos, signal bool) *textbuf.Edit {
 	st = tb.ValidPos(st)
 	ed = tb.ValidPos(ed)
 	if st == ed {
 		return nil
 	}
 	if !st.IsLess(ed) {
-		log.Printf("giv.Buf DeleteText: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		log.Printf("views.Buf DeleteText: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
 	tb.FileModCheck()
@@ -1175,7 +1175,7 @@ func (tb *Buffer) DeleteText(st, ed lex.Pos, signal bool) *textbuf.Edit {
 // DeleteTextImpl deletes region of text between start and end positions.
 // Sets the timestamp on resulting textbuf.Edit to now.  Must be called under
 // LinesMu.Lock.
-func (tb *Buffer) DeleteTextImpl(st, ed lex.Pos) *textbuf.Edit {
+func (tb *Buffer) DeleteTextImpl(st, ed lexer.Pos) *textbuf.Edit {
 	tbe := tb.RegionImpl(st, ed)
 	if tbe == nil {
 		return nil
@@ -1209,14 +1209,14 @@ func (tb *Buffer) DeleteTextImpl(st, ed lex.Pos) *textbuf.Edit {
 // defining the upper-left and lower-right corners of a rectangle.
 // Fails if st.Ch >= ed.Ch. Sets the timestamp on resulting textbuf.Edit to now.
 // An Undo record is automatically saved depending on Undo.Off setting.
-func (tb *Buffer) DeleteTextRect(st, ed lex.Pos, signal bool) *textbuf.Edit {
+func (tb *Buffer) DeleteTextRect(st, ed lexer.Pos, signal bool) *textbuf.Edit {
 	st = tb.ValidPos(st)
 	ed = tb.ValidPos(ed)
 	if st == ed {
 		return nil
 	}
 	if !st.IsLess(ed) {
-		log.Printf("giv.Buf DeleteTextRect: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		log.Printf("views.Buf DeleteTextRect: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
 	tb.FileModCheck()
@@ -1238,7 +1238,7 @@ func (tb *Buffer) DeleteTextRect(st, ed lex.Pos, signal bool) *textbuf.Edit {
 // defining the upper-left and lower-right corners of a rectangle.
 // Fails if st.Ch >= ed.Ch. Sets the timestamp on resulting textbuf.Edit to now.
 // Must be called under LinesMu.Lock.
-func (tb *Buffer) DeleteTextRectImpl(st, ed lex.Pos) *textbuf.Edit {
+func (tb *Buffer) DeleteTextRectImpl(st, ed lexer.Pos) *textbuf.Edit {
 	tbe := tb.RegionRectImpl(st, ed)
 	if tbe == nil {
 		return nil
@@ -1262,7 +1262,7 @@ func (tb *Buffer) DeleteTextRectImpl(st, ed lex.Pos) *textbuf.Edit {
 // It inserts new text at given starting position, optionally signaling
 // views after text has been inserted.  Sets the timestamp on resulting Edit to now.
 // An Undo record is automatically saved depending on Undo.Off setting.
-func (tb *Buffer) InsertText(st lex.Pos, text []byte, signal bool) *textbuf.Edit {
+func (tb *Buffer) InsertText(st lexer.Pos, text []byte, signal bool) *textbuf.Edit {
 	if len(text) == 0 {
 		return nil
 	}
@@ -1287,7 +1287,7 @@ func (tb *Buffer) InsertText(st lex.Pos, text []byte, signal bool) *textbuf.Edit
 
 // InsertTextImpl does the raw insert of new text at given starting position, returning
 // a new Edit with timestamp of Now.  LinesMu must be locked surrounding this call.
-func (tb *Buffer) InsertTextImpl(st lex.Pos, text []byte) *textbuf.Edit {
+func (tb *Buffer) InsertTextImpl(st lexer.Pos, text []byte) *textbuf.Edit {
 	lns := bytes.Split(text, []byte("\n"))
 	sz := len(lns)
 	rs := bytes.Runes(lns[0])
@@ -1414,7 +1414,7 @@ func (tb *Buffer) InsertTextRectImpl(tbe *textbuf.Edit) *textbuf.Edit {
 
 // Region returns a textbuf.Edit representation of text between start and end positions
 // returns nil if not a valid region.  sets the timestamp on the textbuf.Edit to now
-func (tb *Buffer) Region(st, ed lex.Pos) *textbuf.Edit {
+func (tb *Buffer) Region(st, ed lexer.Pos) *textbuf.Edit {
 	st = tb.ValidPos(st)
 	ed = tb.ValidPos(ed)
 	tb.LinesMu.RLock()
@@ -1426,12 +1426,12 @@ func (tb *Buffer) Region(st, ed lex.Pos) *textbuf.Edit {
 // start and end positions. Returns nil if not a valid region.
 // Sets the timestamp on the textbuf.Edit to now.
 // Impl version must be called under LinesMu.RLock or Lock
-func (tb *Buffer) RegionImpl(st, ed lex.Pos) *textbuf.Edit {
+func (tb *Buffer) RegionImpl(st, ed lexer.Pos) *textbuf.Edit {
 	if st == ed || ed.IsLess(st) {
 		return nil
 	}
 	if !st.IsLess(ed) {
-		log.Printf("giv.Buf.Region: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		log.Printf("views.Buf.Region: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
 	tbe := &textbuf.Edit{Reg: textbuf.NewRegionPos(st, ed)}
@@ -1480,7 +1480,7 @@ func (tb *Buffer) RegionImpl(st, ed lex.Pos) *textbuf.Edit {
 // RegionRect returns a textbuf.Edit representation of text between start and end positions
 // as a rectangle,
 // returns nil if not a valid region.  sets the timestamp on the textbuf.Edit to now
-func (tb *Buffer) RegionRect(st, ed lex.Pos) *textbuf.Edit {
+func (tb *Buffer) RegionRect(st, ed lexer.Pos) *textbuf.Edit {
 	st = tb.ValidPos(st)
 	ed = tb.ValidPos(ed)
 	tb.LinesMu.RLock()
@@ -1495,12 +1495,12 @@ func (tb *Buffer) RegionRect(st, ed lex.Pos) *textbuf.Edit {
 // even if line had fewer chars.
 // Sets the timestamp on the textbuf.Edit to now.
 // Impl version must be called under LinesMu.RLock or Lock
-func (tb *Buffer) RegionRectImpl(st, ed lex.Pos) *textbuf.Edit {
+func (tb *Buffer) RegionRectImpl(st, ed lexer.Pos) *textbuf.Edit {
 	if st == ed {
 		return nil
 	}
 	if !st.IsLess(ed) || st.Ch >= ed.Ch {
-		log.Printf("giv.Buf.RegionRect: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		log.Printf("views.Buf.RegionRect: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
 	tbe := &textbuf.Edit{Reg: textbuf.NewRegionPos(st, ed)}
@@ -1530,14 +1530,14 @@ func (tb *Buffer) RegionRectImpl(st, ed lex.Pos) *textbuf.Edit {
 
 // ReplaceText does DeleteText for given region, and then InsertText at given position
 // (typically same as delSt but not necessarily), optionally emitting a signal after the insert.
-// if matchCase is true, then the lex.MatchCase function is called to match the
+// if matchCase is true, then the lexer.MatchCase function is called to match the
 // case (upper / lower) of the new inserted text to that of the text being replaced.
 // returns the textbuf.Edit for the inserted text.
-func (tb *Buffer) ReplaceText(delSt, delEd, insPos lex.Pos, insTxt string, signal, matchCase bool) *textbuf.Edit {
+func (tb *Buffer) ReplaceText(delSt, delEd, insPos lexer.Pos, insTxt string, signal, matchCase bool) *textbuf.Edit {
 	if matchCase {
 		red := tb.Region(delSt, delEd)
 		cur := string(red.ToBytes())
-		insTxt = lex.MatchCase(cur, insTxt)
+		insTxt = lexer.MatchCase(cur, insTxt)
 	}
 	if len(insTxt) > 0 {
 		tb.DeleteText(delSt, delEd, EditNoSignal)
@@ -1548,9 +1548,9 @@ func (tb *Buffer) ReplaceText(delSt, delEd, insPos lex.Pos, insTxt string, signa
 
 // SavePosHistory saves the cursor position in history stack of cursor positions --
 // tracks across views -- returns false if position was on same line as last one saved
-func (tb *Buffer) SavePosHistory(pos lex.Pos) bool {
+func (tb *Buffer) SavePosHistory(pos lexer.Pos) bool {
 	if tb.PosHistory == nil {
-		tb.PosHistory = make([]lex.Pos, 0, 1000)
+		tb.PosHistory = make([]lexer.Pos, 0, 1000)
 	}
 	sz := len(tb.PosHistory)
 	if sz > 0 {
@@ -1605,14 +1605,14 @@ func (tb *Buffer) LinesInserted(tbe *textbuf.Edit) {
 	tb.Markup = nmu
 
 	// Tags
-	tmptg := make([]lex.Line, nsz)
+	tmptg := make([]lexer.Line, nsz)
 	ntg := append(tb.Tags, tmptg...)
 	copy(ntg[stln+nsz:], ntg[stln:])
 	copy(ntg[stln:], tmptg)
 	tb.Tags = ntg
 
 	// HiTags
-	tmpht := make([]lex.Line, nsz)
+	tmpht := make([]lexer.Line, nsz)
 	nht := append(tb.HiTags, tmpht...)
 	copy(nht[stln+nsz:], nht[stln:])
 	copy(nht[stln:], tmpht)
@@ -1625,8 +1625,8 @@ func (tb *Buffer) LinesInserted(tbe *textbuf.Edit) {
 	copy(nof[stln:], tmpof)
 	tb.ByteOffs = nof
 
-	if tb.Hi.UsingPi() {
-		pfs := tb.PiState.Done()
+	if tb.Hi.UsingParse() {
+		pfs := tb.ParseState.Done()
 		pfs.Src.LinesInserted(stln, nsz)
 	}
 
@@ -1660,8 +1660,8 @@ func (tb *Buffer) LinesDeleted(tbe *textbuf.Edit) {
 	tb.HiTags = append(tb.HiTags[:stln], tb.HiTags[edln:]...)
 	tb.ByteOffs = append(tb.ByteOffs[:stln], tb.ByteOffs[edln:]...)
 
-	if tb.Hi.UsingPi() {
-		pfs := tb.PiState.Done()
+	if tb.Hi.UsingParse() {
+		pfs := tb.ParseState.Done()
 		pfs.Src.LinesDeleted(stln, edln)
 	}
 
@@ -1697,8 +1697,8 @@ func (tb *Buffer) IsMarkingUp() bool {
 
 // InitialMarkup does the first-pass markup on the file
 func (tb *Buffer) InitialMarkup() {
-	if tb.Hi.UsingPi() {
-		fs := tb.PiState.Done() // initialize
+	if tb.Hi.UsingParse() {
+		fs := tb.ParseState.Done() // initialize
 		fs.Src.SetBytes(tb.Txt)
 	}
 	mxhi := min(100, tb.NLines-1)
@@ -1720,7 +1720,7 @@ func (tb *Buffer) StartDelayedReMarkup() {
 	_ = sc
 	// if vp != nil {
 	// 	cpop := vp.Win.CurPopup()
-	// 	if gi.PopupIsCompleter(cpop) {
+	// 	if core.PopupIsCompleter(cpop) {
 	// 		return
 	// 	}
 	// }
@@ -1757,19 +1757,19 @@ func (tb *Buffer) ReMarkup() {
 
 // AdjustedTags updates tag positions for edits
 // must be called under MarkupMu lock
-func (tb *Buffer) AdjustedTags(ln int) lex.Line {
+func (tb *Buffer) AdjustedTags(ln int) lexer.Line {
 	return tb.AdjustedTagsImpl(tb.Tags[ln], ln)
 }
 
 // AdjustedTagsImpl updates tag positions for edits, for given list of tags
-func (tb *Buffer) AdjustedTagsImpl(tags lex.Line, ln int) lex.Line {
+func (tb *Buffer) AdjustedTagsImpl(tags lexer.Line, ln int) lexer.Line {
 	sz := len(tags)
 	if sz == 0 {
 		return nil
 	}
-	ntags := make(lex.Line, 0, sz)
+	ntags := make(lexer.Line, 0, sz)
 	for _, tg := range tags {
-		reg := textbuf.Region{Start: lex.Pos{Ln: ln, Ch: tg.St}, End: lex.Pos{Ln: ln, Ch: tg.Ed}}
+		reg := textbuf.Region{Start: lexer.Pos{Ln: ln, Ch: tg.St}, End: lexer.Pos{Ln: ln, Ch: tg.Ed}}
 		reg.Time = tg.Time
 		reg = tb.Undos.AdjustReg(reg)
 		if !reg.IsNil() {
@@ -1777,7 +1777,7 @@ func (tb *Buffer) AdjustedTagsImpl(tags lex.Line, ln int) lex.Line {
 			ntr.Time.Now()
 		}
 	}
-	// lex.LexsCleanup(&ntags)
+	// lexer.LexsCleanup(&ntags)
 	return ntags
 }
 
@@ -1823,8 +1823,8 @@ func (tb *Buffer) MarkupAllLines(maxLines int) {
 		maxln = min(maxln, maxLines)
 	}
 
-	if tb.Hi.UsingPi() {
-		pfs := tb.PiState.Done()
+	if tb.Hi.UsingParse() {
+		pfs := tb.ParseState.Done()
 		// first update mtags with any changes since it was generated
 		for _, tbe := range tb.MarkupEdits {
 			if tbe.Delete {
@@ -1854,7 +1854,7 @@ func (tb *Buffer) MarkupAllLines(maxLines int) {
 			} else {
 				stln := tbe.Reg.Start.Ln + 1
 				nlns := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
-				tmpht := make([]lex.Line, nlns)
+				tmpht := make([]lexer.Line, nlns)
 				nht := append(mtags, tmpht...)
 				copy(nht[stln+nlns:], nht[stln:])
 				copy(nht[stln:], tmpht)
@@ -1920,7 +1920,7 @@ func (tb *Buffer) MarkupLines(st, ed int) bool {
 			allgood = false
 		}
 	}
-	// Now we trigger a background reparse of everything in a separate pi.FilesState
+	// Now we trigger a background reparse of everything in a separate parse.FilesState
 	// that gets switched into the current.
 	return allgood
 }
@@ -2067,7 +2067,7 @@ func (tb *Buffer) Redo() *textbuf.Edit {
 // for any edits that have taken place since that time (using the Undo stack).
 // del determines what to do with positions within a deleted region -- either move
 // to start or end of the region, or return an error
-func (tb *Buffer) AdjustPos(pos lex.Pos, t time.Time, del textbuf.AdjustPosDel) lex.Pos {
+func (tb *Buffer) AdjustPos(pos lexer.Pos, t time.Time, del textbuf.AdjustPosDel) lexer.Pos {
 	return tb.Undos.AdjustPos(pos, t, del)
 }
 
@@ -2088,7 +2088,7 @@ func (tb *Buffer) AddTag(ln, st, ed int, tag token.Tokens) {
 		return
 	}
 	tb.MarkupMu.Lock()
-	tr := lex.NewLex(token.KeyToken{Token: tag}, st, ed)
+	tr := lexer.NewLex(token.KeyToken{Token: tag}, st, ed)
 	tr.Time.Now()
 	if len(tb.Tags[ln]) == 0 {
 		tb.Tags[ln] = append(tb.Tags[ln], tr)
@@ -2106,7 +2106,7 @@ func (tb *Buffer) AddTagEdit(tbe *textbuf.Edit, tag token.Tokens) {
 }
 
 // TagAt returns tag at given text position, if one exists -- returns false if not
-func (tb *Buffer) TagAt(pos lex.Pos) (reg lex.Lex, ok bool) {
+func (tb *Buffer) TagAt(pos lexer.Pos) (reg lexer.Lex, ok bool) {
 	tb.MarkupMu.Lock()
 	defer tb.MarkupMu.Unlock()
 	if !tb.IsValidLine(pos.Ln) {
@@ -2123,7 +2123,7 @@ func (tb *Buffer) TagAt(pos lex.Pos) (reg lex.Lex, ok bool) {
 
 // RemoveTag removes tag (optionally only given tag if non-zero) at given position
 // if it exists -- returns tag
-func (tb *Buffer) RemoveTag(pos lex.Pos, tag token.Tokens) (reg lex.Lex, ok bool) {
+func (tb *Buffer) RemoveTag(pos lexer.Pos, tag token.Tokens) (reg lexer.Lex, ok bool) {
 	if !tb.IsValidLine(pos.Ln) {
 		return
 	}
@@ -2149,7 +2149,7 @@ func (tb *Buffer) RemoveTag(pos lex.Pos, tag token.Tokens) (reg lex.Lex, ok bool
 
 // HiTagAtPos returns the highlighting (markup) lexical tag at given position
 // using current Markup tags, and index, -- could be nil if none or out of range
-func (tb *Buffer) HiTagAtPos(pos lex.Pos) (*lex.Lex, int) {
+func (tb *Buffer) HiTagAtPos(pos lexer.Pos) (*lexer.Lex, int) {
 	tb.MarkupMu.Lock()
 	defer tb.MarkupMu.Unlock()
 	if !tb.IsValidLine(pos.Ln) {
@@ -2159,7 +2159,7 @@ func (tb *Buffer) HiTagAtPos(pos lex.Pos) (*lex.Lex, int) {
 }
 
 // LexString returns the string associated with given Lex (Tag) at given line
-func (tb *Buffer) LexString(ln int, lx *lex.Lex) string {
+func (tb *Buffer) LexString(ln int, lx *lexer.Lex) string {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
 	if !tb.IsValidLine(ln) {
@@ -2173,32 +2173,32 @@ func (tb *Buffer) LexString(ln int, lx *lex.Lex) string {
 // lex-tagged regions that include sequences of PunctSepPeriod and NameTag
 // which are used for object paths -- used for e.g., debugger to pull out
 // variable expressions that can be evaluated.
-func (tb *Buffer) LexObjPathString(ln int, lx *lex.Lex) string {
+func (tb *Buffer) LexObjPathString(ln int, lx *lexer.Lex) string {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
 	if !tb.IsValidLine(ln) {
 		return ""
 	}
-	stlx := lex.ObjPathAt(tb.HiTags[ln], lx)
+	stlx := lexer.ObjPathAt(tb.HiTags[ln], lx)
 	rns := tb.Lines[ln][stlx.St:lx.Ed]
 	return string(rns)
 }
 
 // InTokenSubCat returns true if the given text position is marked with lexical
 // type in given SubCat sub-category
-func (tb *Buffer) InTokenSubCat(pos lex.Pos, subCat token.Tokens) bool {
+func (tb *Buffer) InTokenSubCat(pos lexer.Pos, subCat token.Tokens) bool {
 	lx, _ := tb.HiTagAtPos(pos)
 	return lx != nil && lx.Token.Token.InSubCat(subCat)
 }
 
 // InLitString returns true if position is in a string literal
-func (tb *Buffer) InLitString(pos lex.Pos) bool {
+func (tb *Buffer) InLitString(pos lexer.Pos) bool {
 	return tb.InTokenSubCat(pos, token.LitStr)
 }
 
 // InTokenCode returns true if position is in a Keyword, Name, Operator, or Punctuation.
 // This is useful for turning off spell checking in docs
-func (tb *Buffer) InTokenCode(pos lex.Pos) bool {
+func (tb *Buffer) InTokenCode(pos lexer.Pos) bool {
 	lx, _ := tb.HiTagAtPos(pos)
 	if lx == nil {
 		return false
@@ -2215,12 +2215,12 @@ func (tb *Buffer) SetLineIcon(ln int, icon icons.Icon) {
 	defer tb.LinesMu.Unlock()
 	if tb.LineIcons == nil {
 		tb.LineIcons = make(map[int]icons.Icon)
-		tb.Icons = make(map[icons.Icon]*gi.Icon)
+		tb.Icons = make(map[icons.Icon]*core.Icon)
 	}
 	tb.LineIcons[ln] = icon
 	ic, has := tb.Icons[icon]
 	if !has {
-		ic = &gi.Icon{}
+		ic = &core.Icon{}
 		ic.InitName(ic, string(icon))
 		ic.SetIcon(icon)
 		ic.Style(func(s *styles.Style) {
@@ -2303,14 +2303,14 @@ func (tb *Buffer) IndentLine(ln, ind int) *textbuf.Edit {
 	}
 
 	tb.LinesMu.RLock()
-	curind, _ := lex.LineIndent(tb.Lines[ln], tabSz)
+	curind, _ := lexer.LineIndent(tb.Lines[ln], tabSz)
 	tb.LinesMu.RUnlock()
 	if ind > curind {
-		return tb.InsertText(lex.Pos{Ln: ln}, indent.Bytes(ichr, ind-curind, tabSz), EditSignal)
+		return tb.InsertText(lexer.Pos{Ln: ln}, indent.Bytes(ichr, ind-curind, tabSz), EditSignal)
 	} else if ind < curind {
 		spos := indent.Len(ichr, ind, tabSz)
 		cpos := indent.Len(ichr, curind, tabSz)
-		return tb.DeleteText(lex.Pos{Ln: ln, Ch: spos}, lex.Pos{Ln: ln, Ch: cpos}, EditSignal)
+		return tb.DeleteText(lexer.Pos{Ln: ln, Ch: spos}, lexer.Pos{Ln: ln, Ch: cpos}, EditSignal)
 	}
 	return nil
 }
@@ -2325,12 +2325,12 @@ func (tb *Buffer) AutoIndent(ln int) (tbe *textbuf.Edit, indLev, chPos int) {
 
 	tb.LinesMu.RLock()
 	tb.MarkupMu.RLock()
-	lp, _ := pi.LangSupport.Props(tb.PiState.Sup)
+	lp, _ := parse.LangSupport.Properties(tb.ParseState.Sup)
 	var pInd, delInd int
 	if lp != nil && lp.Lang != nil {
-		pInd, delInd, _, _ = lp.Lang.IndentLine(&tb.PiState, tb.Lines, tb.HiTags, ln, tabSz)
+		pInd, delInd, _, _ = lp.Lang.IndentLine(&tb.ParseState, tb.Lines, tb.HiTags, ln, tabSz)
 	} else {
-		pInd, delInd, _, _ = lex.BracketIndentLine(tb.Lines, tb.HiTags, ln, tabSz)
+		pInd, delInd, _, _ = lexer.BracketIndentLine(tb.Lines, tb.HiTags, ln, tabSz)
 	}
 	tb.MarkupMu.RUnlock()
 	tb.LinesMu.RUnlock()
@@ -2369,7 +2369,7 @@ func (tb *Buffer) CommentStart(ln int) int {
 }
 
 // InComment returns true if the given text position is within a commented region
-func (tb *Buffer) InComment(pos lex.Pos) bool {
+func (tb *Buffer) InComment(pos lexer.Pos) bool {
 	if tb.InTokenSubCat(pos, token.Comment) {
 		return true
 	}
@@ -2400,7 +2400,7 @@ func (tb *Buffer) CommentRegion(st, ed int) {
 
 	ch := 0
 	tb.LinesMu.RLock()
-	ind, _ := lex.LineIndent(tb.Lines[st], tabSz)
+	ind, _ := lexer.LineIndent(tb.Lines[st], tabSz)
 	tb.LinesMu.RUnlock()
 
 	if ind > 0 {
@@ -2413,7 +2413,7 @@ func (tb *Buffer) CommentRegion(st, ed int) {
 
 	comst, comed := tb.Opts.CommentStrs()
 	if comst == "" {
-		fmt.Printf("giv.Buf: %v attempt to comment region without any comment syntax defined\n", tb.Filename)
+		fmt.Printf("views.Buf: %v attempt to comment region without any comment syntax defined\n", tb.Filename)
 		return
 	}
 
@@ -2433,20 +2433,20 @@ func (tb *Buffer) CommentRegion(st, ed int) {
 
 	for ln := st; ln < eln; ln++ {
 		if doCom {
-			tb.InsertText(lex.Pos{Ln: ln, Ch: ch}, []byte(comst), EditSignal)
+			tb.InsertText(lexer.Pos{Ln: ln, Ch: ch}, []byte(comst), EditSignal)
 			if comed != "" {
 				lln := len(tb.Lines[ln])
-				tb.InsertText(lex.Pos{Ln: ln, Ch: lln}, []byte(comed), EditSignal)
+				tb.InsertText(lexer.Pos{Ln: ln, Ch: lln}, []byte(comed), EditSignal)
 			}
 		} else {
 			idx := tb.CommentStart(ln)
 			if idx >= 0 {
-				tb.DeleteText(lex.Pos{Ln: ln, Ch: idx}, lex.Pos{Ln: ln, Ch: idx + len(comst)}, EditSignal)
+				tb.DeleteText(lexer.Pos{Ln: ln, Ch: idx}, lexer.Pos{Ln: ln, Ch: idx + len(comst)}, EditSignal)
 			}
 			if comed != "" {
 				idx := runes.IndexFold(tb.Line(ln), []rune(comed))
 				if idx >= 0 {
-					tb.DeleteText(lex.Pos{Ln: ln, Ch: idx}, lex.Pos{Ln: ln, Ch: idx + len(comed)}, EditSignal)
+					tb.DeleteText(lexer.Pos{Ln: ln, Ch: idx}, lexer.Pos{Ln: ln, Ch: idx + len(comed)}, EditSignal)
 				}
 			}
 		}
@@ -2465,11 +2465,11 @@ func (tb *Buffer) JoinParaLines(stLn, edLn int) {
 		lbt := bytes.TrimSpace(lb)
 		if len(lbt) == 0 || ln == stLn {
 			if ln < curEd-1 {
-				stp := lex.Pos{Ln: ln + 1}
+				stp := lexer.Pos{Ln: ln + 1}
 				if ln == stLn {
 					stp.Ln--
 				}
-				ep := lex.Pos{Ln: curEd - 1}
+				ep := lexer.Pos{Ln: curEd - 1}
 				if curEd == edLn {
 					ep.Ln = curEd
 				}
@@ -2490,8 +2490,8 @@ func (tb *Buffer) TabsToSpaces(ln int) {
 	tabSz := tb.Opts.TabSize
 
 	lr := tb.Lines[ln]
-	st := lex.Pos{Ln: ln}
-	ed := lex.Pos{Ln: ln}
+	st := lexer.Pos{Ln: ln}
+	ed := lexer.Pos{Ln: ln}
 	i := 0
 	for {
 		if i >= len(lr) {
@@ -2530,8 +2530,8 @@ func (tb *Buffer) SpacesToTabs(ln int) {
 	tabSz := tb.Opts.TabSize
 
 	lr := tb.Lines[ln]
-	st := lex.Pos{Ln: ln}
-	ed := lex.Pos{Ln: ln}
+	st := lexer.Pos{Ln: ln}
+	ed := lexer.Pos{Ln: ln}
 	i := 0
 	nspc := 0
 	for {
@@ -2587,7 +2587,7 @@ func (tb *Buffer) SetCompleter(data any, matchFun complete.MatchFunc, editFun co
 		}
 		tb.DeleteCompleter()
 	}
-	tb.Complete = gi.NewComplete().SetContext(data).SetMatchFunc(matchFun).
+	tb.Complete = core.NewComplete().SetContext(data).SetMatchFunc(matchFun).
 		SetEditFunc(editFun).SetLookupFunc(lookupFun)
 	tb.Complete.OnSelect(func(e events.Event) {
 		tb.CompleteText(tb.Complete.Completion)
@@ -2595,11 +2595,11 @@ func (tb *Buffer) SetCompleter(data any, matchFun complete.MatchFunc, editFun co
 	// todo: what about CompleteExtend event type?
 	// TODO(kai/complete): clean this up and figure out what to do about Extend and only connecting once
 	// note: only need to connect once..
-	// tb.Complete.CompleteSig.ConnectOnly(func(dlg *gi.Dialog) {
+	// tb.Complete.CompleteSig.ConnectOnly(func(dlg *core.Dialog) {
 	// 	tbf, _ := recv.Embed(TypeBuf).(*Buf)
-	// 	if sig == int64(gi.CompleteSelect) {
+	// 	if sig == int64(core.CompleteSelect) {
 	// 		tbf.CompleteText(data.(string)) // always use data
-	// 	} else if sig == int64(gi.CompleteExtend) {
+	// 	} else if sig == int64(core.CompleteExtend) {
 	// 		tbf.CompleteExtend(data.(string)) // always use data
 	// 	}
 	// })
@@ -2619,18 +2619,18 @@ func (tb *Buffer) CompleteText(s string) {
 	}
 	// give the completer a chance to edit the completion before insert,
 	// also it return a number of runes past the cursor to delete
-	st := lex.Pos{tb.Complete.SrcLn, 0}
-	en := lex.Pos{tb.Complete.SrcLn, tb.LineLen(tb.Complete.SrcLn)}
+	st := lexer.Pos{tb.Complete.SrcLn, 0}
+	en := lexer.Pos{tb.Complete.SrcLn, tb.LineLen(tb.Complete.SrcLn)}
 	var tbes string
 	tbe := tb.Region(st, en)
 	if tbe != nil {
 		tbes = string(tbe.ToBytes())
 	}
 	c := tb.Complete.GetCompletion(s)
-	pos := lex.Pos{tb.Complete.SrcLn, tb.Complete.SrcCh}
+	pos := lexer.Pos{tb.Complete.SrcLn, tb.Complete.SrcCh}
 	ed := tb.Complete.EditFunc(tb.Complete.Context, tbes, tb.Complete.SrcCh, c, tb.Complete.Seed)
 	if ed.ForwardDelete > 0 {
-		delEn := lex.Pos{tb.Complete.SrcLn, tb.Complete.SrcCh + ed.ForwardDelete}
+		delEn := lexer.Pos{tb.Complete.SrcLn, tb.Complete.SrcCh + ed.ForwardDelete}
 		tb.DeleteText(pos, delEn, EditNoSignal)
 	}
 	// now the normal completion insertion
@@ -2650,7 +2650,7 @@ func (tb *Buffer) CompleteExtend(s string) {
 	if s == "" {
 		return
 	}
-	pos := lex.Pos{tb.Complete.SrcLn, tb.Complete.SrcCh}
+	pos := lexer.Pos{tb.Complete.SrcLn, tb.Complete.SrcCh}
 	st := pos
 	st.Ch -= len(tb.Complete.Seed)
 	tb.ReplaceText(st, pos, st, s, EditSignal, ReplaceNoMatchCase)
@@ -2665,14 +2665,14 @@ func (tb *Buffer) CompleteExtend(s string) {
 // IsSpellEnabled returns true if spelling correction is enabled,
 // taking into account given position in text if it is relevant for cases
 // where it is only conditionally enabled
-func (tb *Buffer) IsSpellEnabled(pos lex.Pos) bool {
+func (tb *Buffer) IsSpellEnabled(pos lexer.Pos) bool {
 	if tb.Spell == nil || !tb.Opts.SpellCorrect {
 		return false
 	}
 	switch tb.Info.Cat {
-	case fi.Doc: // not in code!
+	case fileinfo.Doc: // not in code!
 		return !tb.InTokenCode(pos)
-	case fi.Code:
+	case fileinfo.Code:
 		return tb.InComment(pos) || tb.InLitString(pos)
 	default:
 		return false
@@ -2702,7 +2702,7 @@ func (tb *Buffer) DeleteSpell() {
 
 // CorrectText edits the text using the string chosen from the correction menu
 func (tb *Buffer) CorrectText(s string) {
-	st := lex.Pos{tb.Spell.SrcLn, tb.Spell.SrcCh} // start of word
+	st := lexer.Pos{tb.Spell.SrcLn, tb.Spell.SrcCh} // start of word
 	tb.RemoveTag(st, token.TextSpellErr)
 	oend := st
 	oend.Ch += len(tb.Spell.Word)
@@ -2717,13 +2717,13 @@ func (tb *Buffer) CorrectText(s string) {
 
 // CorrectClear clears the TextSpellErr tag for given word
 func (tb *Buffer) CorrectClear(s string) {
-	st := lex.Pos{tb.Spell.SrcLn, tb.Spell.SrcCh} // start of word
+	st := lexer.Pos{tb.Spell.SrcLn, tb.Spell.SrcCh} // start of word
 	tb.RemoveTag(st, token.TextSpellErr)
 }
 
 // SpellCheckLineErrs runs spell check on given line, and returns Lex tags
 // with token.TextSpellErr for any misspelled words
-func (tb *Buffer) SpellCheckLineErrs(ln int) lex.Line {
+func (tb *Buffer) SpellCheckLineErrs(ln int) lexer.Line {
 	if !tb.IsValidLine(ln) {
 		return nil
 	}
@@ -2791,19 +2791,19 @@ func (tb *Buffer) PatchFromBuffer(ob *Buffer, diffs textbuf.Diffs, signal bool) 
 		df := diffs[i]
 		switch df.Tag {
 		case 'r':
-			tb.DeleteText(lex.Pos{Ln: df.I1}, lex.Pos{Ln: df.I2}, signal)
+			tb.DeleteText(lexer.Pos{Ln: df.I1}, lexer.Pos{Ln: df.I2}, signal)
 			// fmt.Printf("patch rep del: %v %v\n", tbe.Reg, string(tbe.ToBytes()))
-			ot := ob.Region(lex.Pos{Ln: df.J1}, lex.Pos{Ln: df.J2})
-			tb.InsertText(lex.Pos{Ln: df.I1}, ot.ToBytes(), signal)
+			ot := ob.Region(lexer.Pos{Ln: df.J1}, lexer.Pos{Ln: df.J2})
+			tb.InsertText(lexer.Pos{Ln: df.I1}, ot.ToBytes(), signal)
 			// fmt.Printf("patch rep ins: %v %v\n", tbe.Reg, string(tbe.ToBytes()))
 			mods = true
 		case 'd':
-			tb.DeleteText(lex.Pos{Ln: df.I1}, lex.Pos{Ln: df.I2}, signal)
+			tb.DeleteText(lexer.Pos{Ln: df.I1}, lexer.Pos{Ln: df.I2}, signal)
 			// fmt.Printf("patch del: %v %v\n", tbe.Reg, string(tbe.ToBytes()))
 			mods = true
 		case 'i':
-			ot := ob.Region(lex.Pos{Ln: df.J1}, lex.Pos{Ln: df.J2})
-			tb.InsertText(lex.Pos{Ln: df.I1}, ot.ToBytes(), signal)
+			ot := ob.Region(lexer.Pos{Ln: df.J1}, lexer.Pos{Ln: df.J2})
+			tb.InsertText(lexer.Pos{Ln: df.I1}, ot.ToBytes(), signal)
 			// fmt.Printf("patch ins: %v %v\n", tbe.Reg, string(tbe.ToBytes()))
 			mods = true
 		}

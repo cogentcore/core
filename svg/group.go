@@ -7,7 +7,7 @@ package svg
 import (
 	"image"
 
-	"cogentcore.org/core/mat32"
+	"cogentcore.org/core/math32"
 )
 
 // Group groups together SVG elements.
@@ -22,15 +22,15 @@ func (g *Group) SVGName() string { return "g" }
 func (g *Group) EnforceSVGName() bool { return false }
 
 // BBoxFromChildren sets the Group BBox from children
-func BBoxFromChildren(gi Node) image.Rectangle {
+func BBoxFromChildren(n Node) image.Rectangle {
 	bb := image.Rectangle{}
-	for i, kid := range *gi.Children() {
-		kgi := kid.(Node)
-		kg := kgi.AsNodeBase()
+	for i, kid := range *n.Children() {
+		kn := kid.(Node)
+		knb := kn.AsNodeBase()
 		if i == 0 {
-			bb = kg.BBox
+			bb = knb.BBox
 		} else {
-			bb = bb.Union(kg.BBox)
+			bb = bb.Union(knb.BBox)
 		}
 	}
 	return bb
@@ -57,9 +57,9 @@ func (g *Group) Render(sv *SVG) {
 
 // ApplyTransform applies the given 2D transform to the geometry of this node
 // each node must define this for itself
-func (g *Group) ApplyTransform(sv *SVG, xf mat32.Mat2) {
+func (g *Group) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 	g.Paint.Transform.SetMul(xf)
-	g.SetProp("transform", g.Paint.Transform.String())
+	g.SetProperty("transform", g.Paint.Transform.String())
 }
 
 // ApplyDeltaTransform applies the given 2D delta transforms to the geometry of this node
@@ -67,10 +67,10 @@ func (g *Group) ApplyTransform(sv *SVG, xf mat32.Mat2) {
 // so must be transformed into local coords first.
 // Point is upper left corner of selection box that anchors the translation and scaling,
 // and for rotation it is the center point around which to rotate
-func (g *Group) ApplyDeltaTransform(sv *SVG, trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+func (g *Group) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2) {
 	xf, lpt := g.DeltaTransform(trans, scale, rot, pt, false) // group does NOT include self
 	g.Paint.Transform.SetMulCenter(xf, lpt)
-	g.SetProp("transform", g.Paint.Transform.String())
+	g.SetProperty("transform", g.Paint.Transform.String())
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers

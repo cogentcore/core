@@ -41,10 +41,10 @@ MSL conversion error: Unsized array of images is not supported in MSL.
 ```
 Set: -2
     Role: Vertex
-        Var: 0:	Pos	Float32Vec3	(size: 12)	Values: 6
-        Var: 1:	Norm	Float32Vec3	(size: 12)	Values: 6
-        Var: 2:	Tex	Float32Vec2	(size: 8)	Values: 6
-        Var: 3:	Color	Float32Vec4	(size: 16)	Values: 6
+        Var: 0:	Pos	Float32Vector3	(size: 12)	Values: 6
+        Var: 1:	Norm	Float32Vector3	(size: 12)	Values: 6
+        Var: 2:	Tex	Float32Vector2	(size: 8)	Values: 6
+        Var: 3:	Color	Float32Vector4	(size: 16)	Values: 6
     Role: Index
         Var: 4:	Index	Uint32	(size: 4)	Values: 6
 Set: -1

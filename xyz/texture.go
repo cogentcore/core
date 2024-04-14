@@ -11,8 +11,8 @@ import (
 	"log"
 	"log/slog"
 
-	"cogentcore.org/core/glop/dirs"
-	"cogentcore.org/core/grows/images"
+	"cogentcore.org/core/gox/dirs"
+	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/vgpu"
 	"cogentcore.org/core/vgpu/vphong"
 )
@@ -129,7 +129,7 @@ func (tx *TextureFile) Image() *image.RGBA {
 		log.Println(err)
 		return nil
 	}
-	img, _, err := images.OpenFS(tx.FSys, tx.File)
+	img, _, err := imagex.OpenFS(tx.FSys, tx.File)
 	if err != nil {
 		slog.Error("xyz.TextureFile: Image load error", "file:", tx.File, "error", err)
 		return nil
@@ -138,12 +138,12 @@ func (tx *TextureFile) Image() *image.RGBA {
 	return tx.Img
 }
 
-// TextureGi2D is a dynamic texture material driven by a gi.Viewport2D viewport
+// TextureGi2D is a dynamic texture material driven by a core.Viewport2D viewport
 // anything rendered to the viewport will be projected onto the surface of any
 // solid using this texture.
 type TextureGi2D struct {
 	TextureBase
-	// Scene2D *gi.Scene
+	// Scene2D *core.Scene
 }
 
 ///////////////////////////////////////////////////////////////////////////

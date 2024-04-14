@@ -8,12 +8,12 @@ import (
 	"cogentcore.org/core/units"
 )
 
-// IMPORTANT: any changes here must be updated in style_props.go StyleTextFuncs
+// IMPORTANT: any changes here must be updated in style_properties.go StyleTextFuncs
 
 // Text is used for layout-level (widget, html-style) text styling --
 // FontStyle contains all the lower-level text rendering info used in SVG --
 // most of these are inherited
-type Text struct { //gti:add
+type Text struct { //types:add
 
 	// how to align text, horizontally (inhereted).
 	// This *only* applies to the text within its containing element,
