@@ -16,7 +16,7 @@ import (
 )
 
 func main() { //types:skip
-	opts := cli.DefaultOptions("svg", "svg", "Command line tools for rendering and creating svg files")
+	opts := cli.DefaultOptions("svg", "Command line tools for rendering and creating svg files")
 	cli.Run(opts, &Config{}, Render, EmbedImage)
 }
 
