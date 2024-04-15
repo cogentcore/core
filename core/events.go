@@ -344,7 +344,6 @@ func (wb *WidgetBase) HandleSelectToggle() {
 func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 	wb.On(events.MouseDown, func(e events.Event) {
 		if wb.AbilityIs(abilities.Activatable) {
-			// fmt.Println("active:", wb)
 			wb.SetState(true, states.Active)
 		}
 	})
@@ -385,14 +384,12 @@ func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 	})
 	wb.On(events.SlideStart, func(e events.Event) {
 		if wb.AbilityIs(abilities.Slideable) {
-			// fmt.Println("sliding:", wb)
 			wb.SetState(true, states.Sliding)
 		}
 	})
 	wb.On(events.SlideStop, func(e events.Event) {
 		if wb.AbilityIs(abilities.Slideable) {
 			wb.SetState(false, states.Sliding, states.Active)
-			// fmt.Println("done sliding:", wb)
 		}
 	})
 	wb.On(events.DragStart, func(e events.Event) {
@@ -433,7 +430,9 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 		NewTooltip(wi).Run()
 	})
 	wb.On(events.LongPressEnd, func(e events.Event) {
-		wb.Scene.Stage.PopupMgr.PopDeleteType(TooltipStage)
+		if wb.Scene.Stage != nil {
+			wb.Scene.Stage.PopupMgr.PopDeleteType(TooltipStage)
+		}
 	})
 }
 

@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,15 +19,35 @@ func TestHandleWidgetStateFromMouse(t *testing.T) {
 	b := NewBody()
 	w := NewBox(b)
 
+	addAbility := func(ability abilities.Abilities) {
+		w.Style(func(s *styles.Style) {
+			w.SetAbilities(true, ability)
+		})
+		w.ApplyStyle()
+	}
+
 	expect := states.States(0)
 	assert.Equal(t, expect, w.Styles.State)
 
 	w.Send(events.MouseDown)
 	assert.Equal(t, expect, w.Styles.State)
 
-	w.Styles.SetAbilities(true, abilities.Activatable)
+	addAbility(abilities.Activatable)
 	w.Send(events.MouseDown)
 	expect.SetFlag(true, states.Active)
+	assert.Equal(t, expect, w.Styles.State)
+
+	w.Send(events.MouseUp)
+	expect.SetFlag(false, states.Active)
+	assert.Equal(t, expect, w.Styles.State)
+
+	addAbility(abilities.LongPressable)
+	w.Send(events.LongPressStart)
+	expect.SetFlag(true, states.LongPressed)
+	assert.Equal(t, expect, w.Styles.State)
+
+	w.Send(events.LongPressEnd)
+	expect.SetFlag(false, states.LongPressed)
 	assert.Equal(t, expect, w.Styles.State)
 }
 
