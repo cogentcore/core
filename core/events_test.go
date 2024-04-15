@@ -42,6 +42,10 @@ func TestHandleWidgetStateFromMouse(t *testing.T) {
 
 	test(abilities.Activatable, states.Active, events.MouseDown, events.MouseUp)
 	test(abilities.LongPressable, states.LongPressed, events.LongPressStart, events.LongPressEnd)
+	test(abilities.Hoverable, states.Hovered, events.MouseEnter, events.MouseLeave)
+	test(abilities.LongHoverable, states.LongHovered, events.LongHoverStart, events.LongHoverEnd)
+	test(abilities.Slideable, states.Sliding, events.SlideStart, events.SlideStop)
+	test(abilities.Draggable, states.Dragging, events.DragStart, events.Drop)
 }
 
 func TestWidgetPrev(t *testing.T) {
