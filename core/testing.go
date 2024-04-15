@@ -15,17 +15,22 @@ import (
 // asserts that its rendered image is the same as that stored at the given
 // filename, saving the image to that filename if it does not already exist,
 // and then closes the window. It does not return until all of those steps
-// are completed. If a function is passed for the final argument, it is called
-// after the scene is shown. A testdata directory and png file extension are
-// automatically added to the the filename, and forward slashes are automatically
-// replaced with backslashes on Windows. See [Body.AssertScreenRender] for a version
+// are completed. Each (optional) function passed is called after the
+// window is shown, and all system events are handled before proessing continues.
+// A testdata directory and png file extension are automatically added to
+// the the filename, and forward slashes are automatically replaced with
+// backslashes on Windows. See [Body.AssertScreenRender] for a version
 // that asserts the rendered image of the entire screen, not just this body.
 func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 	b.RunAndShowNewWindow()
-	if len(fun) > 0 {
-		fun[0]()
+	for i := 0; i < len(fun); i++ {
+		fun[i]()
+		b.WaitNoEvents()
 	}
-	b.WaitNoEvents()
+	if len(fun) == 0 {
+		// we didn't get it above
+		b.WaitNoEvents()
+	}
 
 	b.Scene.AssertPixels(t, filename)
 	b.Close()
@@ -36,10 +41,14 @@ func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 // multi-scene tests like those of snackbars and dialogs.
 func (b *Body) AssertScreenRender(t imagex.TestingT, filename string, fun ...func()) {
 	b.RunAndShowNewWindow()
-	if len(fun) > 0 {
-		fun[0]()
+	for i := 0; i < len(fun); i++ {
+		fun[i]()
+		b.WaitNoEvents()
 	}
-	b.WaitNoEvents()
+	if len(fun) == 0 {
+		// we didn't get it above
+		b.WaitNoEvents()
+	}
 
 	system.AssertCapture(t, filename)
 	b.Close()

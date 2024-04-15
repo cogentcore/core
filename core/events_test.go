@@ -5,6 +5,7 @@
 package core
 
 import (
+	"image"
 	"testing"
 
 	"cogentcore.org/core/abilities"
@@ -62,6 +63,19 @@ func TestWidgetEventManager(t *testing.T) {
 	b.AssertRender(t, "events/event-manager", func() {
 		assert.Equal(t, w.Scene.RenderWin().SystemWindow.EventMgr(), w.SystemEventMgr())
 		assert.Equal(t, w.EventMgr().Clipboard(), w.Clipboard())
+	})
+}
+
+func TestSystemEvents(t *testing.T) {
+	b := NewBody()
+	bt := NewButton(b).SetText("Button")
+
+	b.AssertRender(t, "events/system-events", func() {
+		bt.SystemEventMgr().MouseButton(events.MouseDown, events.Left, image.Pt(20, 20), 0)
+	}, func() {
+		expect := states.States(0)
+		expect.SetFlag(true, states.Active)
+		assert.Equal(t, expect, bt.Styles.State)
 	})
 }
 
