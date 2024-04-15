@@ -7,9 +7,28 @@ package core
 import (
 	"testing"
 
+	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/states"
+	"github.com/stretchr/testify/assert"
 )
+
+func TestHandleWidgetStateFromMouse(t *testing.T) {
+	b := NewBody()
+	w := NewBox(b)
+
+	expect := states.States(0)
+	assert.Equal(t, expect, w.Styles.State)
+
+	w.Send(events.MouseDown)
+	assert.Equal(t, expect, w.Styles.State)
+
+	w.Styles.SetAbilities(true, abilities.Activatable)
+	w.Send(events.MouseDown)
+	expect.SetFlag(true, states.Active)
+	assert.Equal(t, expect, w.Styles.State)
+}
 
 func TestWidgetPrev(t *testing.T) {
 	b := NewBody()
