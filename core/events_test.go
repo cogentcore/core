@@ -53,6 +53,18 @@ func TestHandleWidgetState(t *testing.T) {
 	test(abilities.Selectable, states.Selected, events.Select, events.Select)
 }
 
+func TestWidgetEventManager(t *testing.T) {
+	b := NewBody()
+	w := NewBox(b)
+
+	assert.Equal(t, &w.Scene.EventMgr, w.EventMgr())
+
+	b.AssertRender(t, "events/event-manager", func() {
+		assert.Equal(t, w.Scene.RenderWin().SystemWindow.EventMgr(), w.SystemEventMgr())
+		assert.Equal(t, w.EventMgr().Clipboard(), w.Clipboard())
+	})
+}
+
 func TestWidgetPrev(t *testing.T) {
 	b := NewBody()
 	NewTextField(b, "tf1").AddClearButton()
