@@ -104,7 +104,7 @@ func (sw *Switch) SetIconFromState() {
 }
 
 func (sw *Switch) HandleEvents() {
-	sw.HandleSelectToggle() // on widgetbase
+	sw.HandleSelectToggle()
 	sw.HandleClickOnEnterSpace()
 	sw.OnFinal(events.Click, func(e events.Event) {
 		sw.SetChecked(sw.IsChecked())

@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHandleWidgetStateFromMouse(t *testing.T) {
+func TestHandleWidgetState(t *testing.T) {
 	b := NewBody()
 	w := NewBox(b)
 
@@ -46,6 +46,11 @@ func TestHandleWidgetStateFromMouse(t *testing.T) {
 	test(abilities.LongHoverable, states.LongHovered, events.LongHoverStart, events.LongHoverEnd)
 	test(abilities.Slideable, states.Sliding, events.SlideStart, events.SlideStop)
 	test(abilities.Draggable, states.Dragging, events.DragStart, events.Drop)
+	test(abilities.Focusable, states.Focused, events.Focus, events.FocusLost)
+	test(abilities.Checkable, states.Checked, events.Click, events.Click)
+
+	w.HandleSelectToggle()
+	test(abilities.Selectable, states.Selected, events.Select, events.Select)
 }
 
 func TestWidgetPrev(t *testing.T) {

@@ -330,7 +330,9 @@ func (wb *WidgetBase) HandleWidgetClick() {
 // their own more complex selection logic.
 func (wb *WidgetBase) HandleSelectToggle() {
 	wb.OnSelect(func(e events.Event) {
-		wb.SetState(!wb.StateIs(states.Selected), states.Selected)
+		if wb.AbilityIs(abilities.Selectable) {
+			wb.SetState(!wb.StateIs(states.Selected), states.Selected)
+		}
 	})
 }
 
