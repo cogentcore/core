@@ -19,36 +19,29 @@ func TestHandleWidgetStateFromMouse(t *testing.T) {
 	b := NewBody()
 	w := NewBox(b)
 
-	addAbility := func(ability abilities.Abilities) {
+	test := func(ability abilities.Abilities, state states.States, event events.Types, endEvent events.Types) {
+		expect := states.States(0)
+		assert.Equal(t, expect, w.Styles.State)
+
+		w.Send(event)
+		assert.Equal(t, expect, w.Styles.State)
+
 		w.Style(func(s *styles.Style) {
 			w.SetAbilities(true, ability)
 		})
 		w.ApplyStyle()
+
+		w.Send(event)
+		expect.SetFlag(true, state)
+		assert.Equal(t, expect, w.Styles.State)
+
+		w.Send(endEvent)
+		expect.SetFlag(false, state)
+		assert.Equal(t, expect, w.Styles.State)
 	}
 
-	expect := states.States(0)
-	assert.Equal(t, expect, w.Styles.State)
-
-	w.Send(events.MouseDown)
-	assert.Equal(t, expect, w.Styles.State)
-
-	addAbility(abilities.Activatable)
-	w.Send(events.MouseDown)
-	expect.SetFlag(true, states.Active)
-	assert.Equal(t, expect, w.Styles.State)
-
-	w.Send(events.MouseUp)
-	expect.SetFlag(false, states.Active)
-	assert.Equal(t, expect, w.Styles.State)
-
-	addAbility(abilities.LongPressable)
-	w.Send(events.LongPressStart)
-	expect.SetFlag(true, states.LongPressed)
-	assert.Equal(t, expect, w.Styles.State)
-
-	w.Send(events.LongPressEnd)
-	expect.SetFlag(false, states.LongPressed)
-	assert.Equal(t, expect, w.Styles.State)
+	test(abilities.Activatable, states.Active, events.MouseDown, events.MouseUp)
+	test(abilities.LongPressable, states.LongPressed, events.LongPressStart, events.LongPressEnd)
 }
 
 func TestWidgetPrev(t *testing.T) {
