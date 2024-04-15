@@ -1747,8 +1747,11 @@ func (sv *SliceViewBase) DragStart(e events.Event) {
 	if !sv.SelectRowIfNone(e) || !sv.MousePosInGrid(e) {
 		return
 	}
-	md := sv.This().(SliceViewer).CopySelectToMime()
 	ixs := sv.SelectedIndexesList(false) // ascending
+	if len(ixs) == 0 {
+		return
+	}
+	md := sv.This().(SliceViewer).CopySelectToMime()
 	w, ok := sv.This().(SliceViewer).RowFirstWidget(ixs[0] - sv.StartIndex)
 	if ok {
 		sv.Scene.Events.DragStart(w, md, e)
