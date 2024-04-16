@@ -26,7 +26,7 @@ import (
 // By default, it is [states.ReadOnly]. See [views.ConfigSVGToolbar] for a
 // toolbar with panning, selecting, and I/O buttons.
 type SVG struct {
-	Box
+	WidgetBase
 
 	// SVG is the SVG object associated with the element.
 	SVG *svg.SVG `set:"-"`
@@ -138,7 +138,7 @@ func (sv *SVG) SizeFinal() {
 }
 
 func (sv *SVG) Render() {
-	sv.Box.Render()
+	sv.WidgetBase.Render()
 
 	if sv.SVG == nil {
 		return

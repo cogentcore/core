@@ -13,7 +13,7 @@ import (
 // Separator draws a separator line. It goes in the direction
 // specified by [style.Style.Direction].
 type Separator struct {
-	Box
+	WidgetBase
 }
 
 func (sp *Separator) OnInit() {

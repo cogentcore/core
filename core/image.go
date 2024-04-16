@@ -21,7 +21,7 @@ import (
 // size in [units.Dp] units (1/160th of an inch). See [views.ConfigImageToolbar]
 // for a toolbar with I/O buttons.
 type Image struct {
-	Box
+	WidgetBase
 
 	// Image is the bitmap image.
 	Image *image.RGBA `xml:"-" json:"-" set:"-"`
@@ -77,7 +77,7 @@ func (im *Image) SetImage(img image.Image) *Image {
 }
 
 func (im *Image) Render() {
-	im.Box.Render()
+	im.WidgetBase.Render()
 
 	if im.Image == nil {
 		return

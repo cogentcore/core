@@ -18,7 +18,7 @@ import (
 // control the size of an element. The [Handle.Styles.Direction]
 // controls the direction in which the handle moves.
 type Handle struct {
-	Box
+	WidgetBase
 
 	// Min is the minimum value that the handle can go to
 	// (typically the lower bound of the dialog/splits)

@@ -15,7 +15,7 @@ import (
 // Canvas is a widget that can be arbitrarily drawn to by setting
 // its Draw function using [Canvas.SetDraw].
 type Canvas struct {
-	Box
+	WidgetBase
 
 	// Draw is the function used to draw the content of the
 	// canvas every time that it is rendered. The paint context
@@ -28,14 +28,14 @@ type Canvas struct {
 }
 
 func (c *Canvas) OnInit() {
-	c.Box.OnInit()
+	c.WidgetBase.OnInit()
 	c.Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
 	})
 }
 
 func (c *Canvas) Render() {
-	c.Box.Render()
+	c.WidgetBase.Render()
 
 	sz := c.Geom.Size.Actual.Content
 	szp := c.Geom.Size.Actual.Content.ToPoint()

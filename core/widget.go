@@ -119,7 +119,8 @@ type Widget interface {
 	// Render is the method that widgets should implement to define their
 	// custom rendering steps. It should not be called outside of
 	// [Widget.RenderWidget], which also does other steps applicable
-	// for all widgets.
+	// for all widgets. The base [WidgetBase.Render] implementation
+	// renders the standard box model.
 	Render()
 
 	// RenderWidget renders the widget and any parts and children that it has.

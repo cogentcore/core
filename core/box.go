@@ -8,7 +8,3 @@ package core
 type Box struct {
 	WidgetBase
 }
-
-func (bx *Box) Render() {
-	bx.RenderStandardBox()
-}

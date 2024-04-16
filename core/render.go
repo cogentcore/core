@@ -496,8 +496,11 @@ func (wb *WidgetBase) PopBounds() {
 // Render is the method that widgets should implement to define their
 // custom rendering steps. It should not be called outside of
 // [Widget.RenderWidget], which also does other steps applicable
-// for all widgets.
-func (wb *WidgetBase) Render() {}
+// for all widgets. The base [WidgetBase.Render] implementation
+// renders the standard box model.
+func (wb *WidgetBase) Render() {
+	wb.RenderStandardBox()
+}
 
 // RenderWidget renders the widget and any parts and children that it has.
 // It does not render if the widget is invisible. It calls Widget.Render]

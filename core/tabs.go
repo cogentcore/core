@@ -513,7 +513,7 @@ func (ts *Tabs) UnselectOtherTabs(idx int) {
 // Tab is a tab button that contains any, all, or none of a label, an icon,
 // and a close icon. Tabs should be made using the [Tabs.NewTab] function.
 type Tab struct { //core:no-new
-	Box
+	WidgetBase
 
 	// Type is the styling type of the tab. This property
 	// must be set on the parent [Tabs] for it to work correctly.
@@ -543,7 +543,7 @@ type Tab struct { //core:no-new
 }
 
 func (tb *Tab) OnInit() {
-	tb.Box.OnInit()
+	tb.WidgetBase.OnInit()
 	tb.HandleClickOnEnterSpace()
 	tb.SetStyles()
 }

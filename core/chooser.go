@@ -29,13 +29,10 @@ import (
 	"cogentcore.org/core/units"
 )
 
-// Chooser is for selecting items from a dropdown list, with an optional
-// edit TextField for typing directly.
-// The items can be of any type, including enum values -- they are converted
-// to strings for the display.  If the items are of type [icons.Icon], then they
-// are displayed using icons instead.
+// Chooser is a drop down selection widget that allows users to choose
+// one option among a list of items.
 type Chooser struct {
-	Box
+	WidgetBase
 
 	// Type is the styling type of the chooser.
 	Type ChooserTypes
@@ -137,6 +134,7 @@ const (
 	// Chooser with a background color
 	// and a bottom border
 	ChooserFilled ChooserTypes = iota
+
 	// ChooserOutlined represents an outlined
 	// Chooser with a border on all sides
 	// and no background color
@@ -144,7 +142,7 @@ const (
 )
 
 func (ch *Chooser) OnInit() {
-	ch.Box.OnInit()
+	ch.WidgetBase.OnInit()
 	ch.HandleEvents()
 	ch.SetStyles()
 }

@@ -19,7 +19,7 @@ import (
 // Switch is a widget that can toggle between an on and off state.
 // It can be displayed as a switch, checkbox, or radio button.
 type Switch struct {
-	Box
+	WidgetBase
 
 	// the type of switch that this is
 	Type SwitchTypes `set:"-"`
@@ -60,7 +60,7 @@ const (
 )
 
 func (sw *Switch) OnInit() {
-	sw.Box.OnInit()
+	sw.WidgetBase.OnInit()
 	sw.HandleEvents()
 	sw.SetStyles()
 }
@@ -330,5 +330,5 @@ func (sw *Switch) Render() {
 			ist.(*Layout).UpdateStackedVisibility()
 		}
 	}
-	sw.Box.Render()
+	sw.WidgetBase.Render()
 }

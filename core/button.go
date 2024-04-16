@@ -24,7 +24,7 @@ import (
 // and/or a menu. The standard behavior is to register a click event handler with
 // OnClick.
 type Button struct { //core:embedder
-	Box
+	WidgetBase
 
 	// Type is the type of button.
 	Type ButtonTypes
@@ -114,7 +114,7 @@ const (
 )
 
 func (bt *Button) OnInit() {
-	bt.Box.OnInit()
+	bt.WidgetBase.OnInit()
 	bt.HandleEvents()
 	bt.SetStyles()
 }
