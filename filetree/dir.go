@@ -35,7 +35,7 @@ type DirFlagMap struct {
 	Map map[string]DirFlags
 
 	// mutex for accessing map
-	Mu sync.Mutex `view:"-" json:"-" xml:"-"`
+	Mu sync.Mutex `view:"-" json:"-" xml:"-" toml:"-"`
 }
 
 // Init initializes the map, and sets the Mutex lock -- must unlock manually
