@@ -164,7 +164,7 @@ func (ly *Layout) RenderChildren() {
 	})
 }
 
-func (ly *Layout) Render() {
+func (ly *Layout) RenderWidget() {
 	if ly.PushBounds() {
 		ly.RenderChildren()
 		ly.RenderParts()

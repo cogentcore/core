@@ -124,7 +124,7 @@ type Widget interface {
 	Render()
 
 	// RenderWidget renders the widget and any parts and children that it has.
-	// It does not render if the widget is invisible. It calls Widget.Render]
+	// It does not render if the widget is invisible. It calls [Widget.Render]
 	// for widget-specific rendering.
 	RenderWidget()
 
