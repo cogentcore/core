@@ -15,17 +15,17 @@ import (
 // using various color functions.
 func Example_core_logo() {
 	inner := Scheme.Primary.Base
-	outer := hct.Darken(inner, 10)
-	core := hct.Spin(hct.Lighten(inner, 10), 180)
+	outer := hct.Darken(inner, 20)
+	core := hct.Spin(hct.Lighten(inner, 20), 180)
 
 	fmt.Println("Outer:", AsHex(outer))
 	fmt.Println("Inner:", AsHex(inner))
 	fmt.Println("Core:", AsHex(core))
 
 	// Output:
-	// Outer: #004493
+	// Outer: #002F68
 	// Inner: #005BC0
-	// Core: #987100
+	// Core: #B88A00
 }
 
 func ExampleIsNil_true() {
