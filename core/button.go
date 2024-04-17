@@ -310,7 +310,7 @@ func (bt *Button) HandleClickDismissMenu() {
 func (bt *Button) WidgetTooltip() string {
 	res := bt.Tooltip
 	if bt.Shortcut != "" {
-		res = "[ " + bt.Shortcut.Label() + " ]"
+		res = "[" + bt.Shortcut.Label() + "]"
 		if bt.Tooltip != "" {
 			res += " " + bt.Tooltip
 		}

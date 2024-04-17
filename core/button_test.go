@@ -10,6 +10,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 	"github.com/stretchr/testify/assert"
@@ -64,6 +65,30 @@ func TestButtonMenuClick(t *testing.T) {
 	b.AssertScreenRender(t, "button/menu-click", func() {
 		bt.Send(events.Click)
 	})
+}
+
+func TestButtonShortcut(t *testing.T) {
+	b := NewBody()
+	bt := NewButton(b).SetShortcut("Command+S")
+	assert.Equal(t, "[⌘S]", bt.WidgetTooltip())
+}
+
+func TestButtonShortcutWithTooltip(t *testing.T) {
+	b := NewBody()
+	bt := NewButton(b).SetShortcut("Command+S").SetTooltip("Test")
+	assert.Equal(t, "[⌘S] Test", bt.WidgetTooltip())
+}
+
+func TestButtonShortcutKey(t *testing.T) {
+	b := NewBody()
+	bt := NewButton(b).SetKey(keymap.Open)
+	assert.Equal(t, "[^O]", bt.WidgetTooltip())
+}
+
+func TestButtonShortcutMenu(t *testing.T) {
+	b := NewBody()
+	NewButton(b).SetText("Save").SetShortcut("Command+S").SetType(ButtonMenu)
+	b.AssertRender(t, "button/shortcut-menu")
 }
 
 func TestButtonTypes(t *testing.T) {
