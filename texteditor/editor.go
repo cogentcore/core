@@ -21,7 +21,6 @@ import (
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/system"
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/texteditor/textbuf"
 	"cogentcore.org/core/tree"
@@ -271,7 +270,6 @@ func (ed *Editor) EditDone() {
 	}
 	ed.ClearSelected()
 	ed.ClearCursor()
-	system.TheApp.HideVirtualKeyboard()
 }
 
 // Remarkup triggers a complete re-markup of the entire text --
