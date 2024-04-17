@@ -36,7 +36,7 @@ func TestCanvasLogo(t *testing.T) {
 	b := NewBody()
 	inner := hct.Lighten(colors.Scheme.Primary.Base, 10)
 	outer := hct.Darken(inner, 30)
-	core := hct.Saturate(hct.Spin(hct.Lighten(inner, 20), 160), 10)
+	core := hct.Saturate(hct.Lighten(hct.Spin(inner, 160), 20), 10)
 
 	fmt.Println("Outer:", colors.AsHex(outer))
 	fmt.Println("Inner:", colors.AsHex(inner))
@@ -46,16 +46,21 @@ func TestCanvasLogo(t *testing.T) {
 		pc.VectorEffect = styles.VectorEffectNone
 		pc.StrokeStyle.Width.Dots = 0.2
 
-		pc.DrawArc(0.55, 0.5, 0.4, math32.DegToRad(30), math32.DegToRad(30+300))
+		x := float32(.52)
+		pc.FillStyle.Color = colors.C(colors.Black)
+		pc.DrawRectangle(0, 0, 1, 1)
+		pc.Fill()
+
+		pc.DrawArc(x, 0.5, 0.4, math32.DegToRad(30), math32.DegToRad(30+300))
 		pc.StrokeStyle.Color = colors.C(outer)
 		pc.Stroke()
 
-		pc.DrawArc(0.55, 0.5, 0.22, math32.DegToRad(30), math32.DegToRad(30+300))
+		pc.DrawArc(x, 0.5, 0.22, math32.DegToRad(30), math32.DegToRad(30+300))
 		pc.StrokeStyle.Color = colors.C(inner)
 		pc.Stroke()
 
 		pc.FillStyle.Color = colors.C(core)
-		pc.DrawCircle(0.55, 0.5, 0.15)
+		pc.DrawCircle(x, 0.5, 0.15)
 		pc.Fill()
 	})
 	b.AssertRender(t, "canvas/logo")
