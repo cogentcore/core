@@ -4,6 +4,6 @@
 
 //go:build update
 
-package images
+package imagex
 
 var updateTestImages = true
