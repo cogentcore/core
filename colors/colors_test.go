@@ -9,13 +9,12 @@ import (
 	"image/color"
 
 	"cogentcore.org/core/cam/hct"
-	"cogentcore.org/core/errors"
 )
 
 // This example generates the colors for the Cogent Core logo
 // using various color functions.
 func Example_core_logo() {
-	inner := hct.Darken(errors.Must1(FromHex("#4285f4")), 10)
+	inner := Scheme.Primary.Base
 	outer := hct.Darken(inner, 10)
 	core := hct.Spin(hct.Lighten(inner, 10), 180)
 
@@ -24,9 +23,9 @@ func Example_core_logo() {
 	fmt.Println("Core:", AsHex(core))
 
 	// Output:
-	// Outer: #0053B0
-	// Inner: #1B6BD8
-	// Core: #AC8100
+	// Outer: #004493
+	// Inner: #005BC0
+	// Core: #987100
 }
 
 func ExampleIsNil_true() {
