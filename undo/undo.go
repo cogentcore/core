@@ -41,10 +41,10 @@ import (
 // from all the diffs.
 var DefaultRawInterval = 50
 
-// Rec is one undo record, associated with one action that changed state from one to next.
+// Record is one undo record, associated with one action that changed state from one to next.
 // The state saved in this record is the state *before* the action took place.
 // The state is either saved as a Raw value or as a diff Patch to the previous state.
-type Rec struct {
+type Record struct {
 
 	// description of this action, for user to see
 	Action string
@@ -63,7 +63,7 @@ type Rec struct {
 }
 
 // Init sets the action and data in a record -- overwriting any prior values
-func (rc *Rec) Init(action, data string) {
+func (rc *Record) Init(action, data string) {
 	rc.Action = action
 	rc.Data = data
 	rc.Patch = nil
@@ -78,7 +78,7 @@ type Stack struct {
 	Index int
 
 	// the list of saved state / action records
-	Recs []*Rec
+	Records []*Record
 
 	// interval for saving raw data -- need to do this at some interval to prevent having it take too long to compute patches from all the diffs.
 	RawInterval int
@@ -93,7 +93,7 @@ func (us *Stack) RecState(idx int) []string {
 	stidx := 0
 	var cdt []string
 	for i := idx; i >= 0; i-- {
-		r := us.Recs[i]
+		r := us.Records[i]
 		if r.Raw != nil {
 			stidx = i
 			cdt = r.Raw
@@ -101,7 +101,7 @@ func (us *Stack) RecState(idx int) []string {
 		}
 	}
 	for i := stidx + 1; i <= idx; i++ {
-		r := us.Recs[i]
+		r := us.Records[i]
 		if r.Patch != nil {
 			cdt = r.Patch.Apply(cdt)
 		}
@@ -115,31 +115,31 @@ func (us *Stack) RecState(idx int) []string {
 // full raw copy.
 func (us *Stack) Save(action, data string, state []string) {
 	us.Mu.Lock() // we start lock
-	if us.Recs == nil {
+	if us.Records == nil {
 		if us.RawInterval == 0 {
 			us.RawInterval = DefaultRawInterval
 		}
-		us.Recs = make([]*Rec, 1)
+		us.Records = make([]*Record, 1)
 		us.Index = 0
-		nr := &Rec{Action: action, Data: data, Raw: state}
-		us.Recs[0] = nr
+		nr := &Record{Action: action, Data: data, Raw: state}
+		us.Records[0] = nr
 		us.Mu.Unlock()
 		return
 	}
 	// recs will be [old..., Index] after this
 	us.Index++
-	var nr *Rec
-	if len(us.Recs) > us.Index {
-		us.Recs = us.Recs[:us.Index+1]
-		nr = us.Recs[us.Index]
-	} else if len(us.Recs) == us.Index {
-		nr = &Rec{}
-		us.Recs = append(us.Recs, nr)
+	var nr *Record
+	if len(us.Records) > us.Index {
+		us.Records = us.Records[:us.Index+1]
+		nr = us.Records[us.Index]
+	} else if len(us.Records) == us.Index {
+		nr = &Record{}
+		us.Records = append(us.Records, nr)
 	} else {
-		log.Printf("undo.Stack error: index: %d > len(um.Recs): %d\n", us.Index, len(us.Recs))
-		us.Index = len(us.Recs)
-		nr = &Rec{}
-		us.Recs = append(us.Recs, nr)
+		log.Printf("undo.Stack error: index: %d > len(um.Recs): %d\n", us.Index, len(us.Records))
+		us.Index = len(us.Records)
+		nr = &Record{}
+		us.Records = append(us.Records, nr)
 	}
 	nr.Init(action, data)
 	if state == nil {
@@ -154,7 +154,7 @@ func (us *Stack) Save(action, data string, state []string) {
 // the first Undo action when at the end of the stack.  If this returns true, then
 // call SaveUndoStart.  It sets a special flag on the record.
 func (us *Stack) MustSaveUndoStart() bool {
-	return us.Index == len(us.Recs)-1
+	return us.Index == len(us.Records)-1
 }
 
 // SaveUndoStart saves the current state -- call if MustSaveUndoStart is true.
@@ -162,8 +162,8 @@ func (us *Stack) MustSaveUndoStart() bool {
 // Does NOT increment the index, so next undo is still as expected.
 func (us *Stack) SaveUndoStart(state []string) {
 	us.Mu.Lock()
-	nr := &Rec{UndoSave: true}
-	us.Recs = append(us.Recs, nr)
+	nr := &Record{UndoSave: true}
+	us.Records = append(us.Records, nr)
 	us.SaveState(nr, us.Index+1, state) // do it now because we need to immediately do Undo, does unlock
 }
 
@@ -175,12 +175,12 @@ func (us *Stack) SaveUndoStart(state []string) {
 // in some cases it is not possible).
 func (us *Stack) SaveReplace(action, data string, state []string) {
 	us.Mu.Lock()
-	nr := us.Recs[us.Index]
+	nr := us.Records[us.Index]
 	go us.SaveState(nr, us.Index, state)
 }
 
 // SaveState saves given record of state at given index
-func (us *Stack) SaveState(nr *Rec, idx int, state []string) {
+func (us *Stack) SaveState(nr *Record, idx int, state []string) {
 	if idx%us.RawInterval == 0 {
 		nr.Raw = state
 		us.Mu.Unlock()
@@ -203,7 +203,7 @@ func (us *Stack) HasUndoAvail() bool {
 // This does NOT get the lock -- may rarely be inaccurate but is used for
 // GUI enabling so not such a big deal.
 func (us *Stack) HasRedoAvail() bool {
-	return us.Index < len(us.Recs)-2
+	return us.Index < len(us.Records)-2
 }
 
 // Undo returns the action, action data, and state at the current index
@@ -214,11 +214,11 @@ func (us *Stack) HasRedoAvail() bool {
 // to call SaveUndoStart() so that the state just before Undoing can be redone!
 func (us *Stack) Undo() (action, data string, state []string) {
 	us.Mu.Lock()
-	if us.Index < 0 || us.Index >= len(us.Recs) {
+	if us.Index < 0 || us.Index >= len(us.Records) {
 		us.Mu.Unlock()
 		return
 	}
-	rec := us.Recs[us.Index]
+	rec := us.Records[us.Index]
 	action = rec.Action
 	data = rec.Data
 	state = us.RecState(us.Index)
@@ -232,11 +232,11 @@ func (us *Stack) Undo() (action, data string, state []string) {
 // If idx is out of range then returns empty everything
 func (us *Stack) UndoTo(idx int) (action, data string, state []string) {
 	us.Mu.Lock()
-	if idx < 0 || idx >= len(us.Recs) {
+	if idx < 0 || idx >= len(us.Records) {
 		us.Mu.Unlock()
 		return
 	}
-	rec := us.Recs[idx]
+	rec := us.Records[idx]
 	action = rec.Action
 	data = rec.Data
 	state = us.RecState(idx)
@@ -250,12 +250,12 @@ func (us *Stack) UndoTo(idx int) (action, data string, state []string) {
 // returning nil if already at end of saved records.
 func (us *Stack) Redo() (action, data string, state []string) {
 	us.Mu.Lock()
-	if us.Index >= len(us.Recs)-2 {
+	if us.Index >= len(us.Records)-2 {
 		us.Mu.Unlock()
 		return
 	}
 	us.Index++
-	rec := us.Recs[us.Index] // action being redone is this one
+	rec := us.Records[us.Index] // action being redone is this one
 	action = rec.Action
 	data = rec.Data
 	state = us.RecState(us.Index + 1) // state is the one *after* it
@@ -267,12 +267,12 @@ func (us *Stack) Redo() (action, data string, state []string) {
 // returning nil if already at end of saved records.
 func (us *Stack) RedoTo(idx int) (action, data string, state []string) {
 	us.Mu.Lock()
-	if idx >= len(us.Recs)-1 || idx <= 0 {
+	if idx >= len(us.Records)-1 || idx <= 0 {
 		us.Mu.Unlock()
 		return
 	}
 	us.Index = idx
-	rec := us.Recs[idx]
+	rec := us.Records[idx]
 	action = rec.Action
 	data = rec.Data
 	state = us.RecState(idx + 1)
@@ -283,7 +283,7 @@ func (us *Stack) RedoTo(idx int) (action, data string, state []string) {
 // Reset resets the undo state
 func (us *Stack) Reset() {
 	us.Mu.Lock()
-	us.Recs = nil
+	us.Records = nil
 	us.Index = 0
 	us.Mu.Unlock()
 }
@@ -293,7 +293,7 @@ func (us *Stack) Reset() {
 func (us *Stack) UndoList() []string {
 	al := make([]string, us.Index)
 	for i := us.Index; i >= 0; i-- {
-		al[us.Index-i] = us.Recs[i].Action
+		al[us.Index-i] = us.Records[i].Action
 	}
 	return al
 }
@@ -301,7 +301,7 @@ func (us *Stack) UndoList() []string {
 // RedoList returns the list actions in order from the current forward to end
 // suitable for a menu of actions to redo
 func (us *Stack) RedoList() []string {
-	nl := len(us.Recs)
+	nl := len(us.Records)
 	if us.Index >= nl-2 {
 		return nil
 	}
@@ -309,13 +309,13 @@ func (us *Stack) RedoList() []string {
 	n := (nl - 1) - st
 	al := make([]string, n)
 	for i := st; i < nl-1; i++ {
-		al[i-st] = us.Recs[i].Action
+		al[i-st] = us.Records[i].Action
 	}
 	return al
 }
 
 // MemUsed reports the amount of memory used for record
-func (rc *Rec) MemUsed() int {
+func (rc *Record) MemUsed() int {
 	mem := 0
 	if rc.Raw != nil {
 		for _, s := range rc.Raw {

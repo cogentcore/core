@@ -163,8 +163,8 @@ type TextField struct { //core:embedder
 	// CursorMu is the mutex for updating the cursor between blinker and field.
 	CursorMu sync.Mutex `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
-	// the undo manager
-	UndoMgr TextFieldUndoMgr
+	// Undos is the undo manager for the text field.
+	Undos TextFieldUndos `json:"-" xml:"-" set:"-"`
 }
 
 // TextFieldTypes is an enum containing the
@@ -1022,21 +1022,21 @@ func (tf *TextField) ContextMenu(m *Scene) {
 ///////////////////////////////////////////////////////////////////////////////
 //    Undo
 
-// TextFieldUndoRec holds one undo record
-type TextFieldUndoRec struct {
+// TextFieldUndoRecord holds one undo record
+type TextFieldUndoRecord struct {
 	Text      []rune
 	CursorPos int
 }
 
-func (ur *TextFieldUndoRec) Set(txt []rune, curpos int) {
+func (ur *TextFieldUndoRecord) Set(txt []rune, curpos int) {
 	ur.Text = slices.Clone(txt)
 	ur.CursorPos = curpos
 }
 
-// TextFieldUndoMgr manages everything about the undo process
-type TextFieldUndoMgr struct {
+// TextFieldUndos manages everything about the undo process for a [TextField].
+type TextFieldUndos struct {
 	// stack of undo records
-	Stack []TextFieldUndoRec
+	Stack []TextFieldUndoRecord
 
 	// position within the undo stack
 	Pos int
@@ -1045,45 +1045,45 @@ type TextFieldUndoMgr struct {
 	LastSave time.Time
 }
 
-func (um *TextFieldUndoMgr) SaveUndo(txt []rune, curpos int) {
-	n := len(um.Stack)
+func (us *TextFieldUndos) SaveUndo(txt []rune, curpos int) {
+	n := len(us.Stack)
 	now := time.Now()
-	ts := now.Sub(um.LastSave)
+	ts := now.Sub(us.LastSave)
 	if n > 0 && ts < 250*time.Millisecond {
-		r := um.Stack[n-1]
+		r := us.Stack[n-1]
 		r.Set(txt, curpos)
-		um.Stack[n-1] = r
+		us.Stack[n-1] = r
 		return
 	}
-	r := TextFieldUndoRec{}
+	r := TextFieldUndoRecord{}
 	r.Set(txt, curpos)
-	um.Stack = append(um.Stack, r)
-	um.Pos = len(um.Stack)
-	um.LastSave = now
+	us.Stack = append(us.Stack, r)
+	us.Pos = len(us.Stack)
+	us.LastSave = now
 }
 
 func (tf *TextField) SaveUndo() {
-	tf.UndoMgr.SaveUndo(tf.EditTxt, tf.CursorPos)
+	tf.Undos.SaveUndo(tf.EditTxt, tf.CursorPos)
 }
 
-func (um *TextFieldUndoMgr) Undo(txt []rune, curpos int) *TextFieldUndoRec {
-	n := len(um.Stack)
-	if um.Pos <= 0 || n == 0 {
-		return &TextFieldUndoRec{}
+func (us *TextFieldUndos) Undo(txt []rune, curpos int) *TextFieldUndoRecord {
+	n := len(us.Stack)
+	if us.Pos <= 0 || n == 0 {
+		return &TextFieldUndoRecord{}
 	}
-	if um.Pos == n {
-		um.LastSave = time.Time{}
-		um.SaveUndo(txt, curpos)
-		um.Pos--
+	if us.Pos == n {
+		us.LastSave = time.Time{}
+		us.SaveUndo(txt, curpos)
+		us.Pos--
 	}
-	um.Pos--
-	um.LastSave = time.Time{} // prevent any merging
-	r := &um.Stack[um.Pos]
+	us.Pos--
+	us.LastSave = time.Time{} // prevent any merging
+	r := &us.Stack[us.Pos]
 	return r
 }
 
 func (tf *TextField) Undo() {
-	r := tf.UndoMgr.Undo(tf.EditTxt, tf.CursorPos)
+	r := tf.Undos.Undo(tf.EditTxt, tf.CursorPos)
 	if r != nil {
 		tf.EditTxt = r.Text
 		tf.CursorPos = r.CursorPos
@@ -1091,18 +1091,18 @@ func (tf *TextField) Undo() {
 	}
 }
 
-func (um *TextFieldUndoMgr) Redo() *TextFieldUndoRec {
-	n := len(um.Stack)
-	if um.Pos >= n-1 {
+func (us *TextFieldUndos) Redo() *TextFieldUndoRecord {
+	n := len(us.Stack)
+	if us.Pos >= n-1 {
 		return nil
 	}
-	um.LastSave = time.Time{} // prevent any merging
-	um.Pos++
-	return &um.Stack[um.Pos]
+	us.LastSave = time.Time{} // prevent any merging
+	us.Pos++
+	return &us.Stack[us.Pos]
 }
 
 func (tf *TextField) Redo() {
-	r := tf.UndoMgr.Redo()
+	r := tf.Undos.Redo()
 	if r != nil {
 		tf.EditTxt = r.Text
 		tf.CursorPos = r.CursorPos
