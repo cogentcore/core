@@ -29,18 +29,17 @@ import (
 	"github.com/anthonynsimon/bild/clone"
 )
 
-const (
-	DragSpriteName = "__DragSprite__"
-)
+// DragSpriteName is the name of the sprite added when dragging an object.
+const DragSpriteName = "__DragSprite__"
 
-// note: EventMgr should be in _exclusive_ control of its own state
+// note: Events should be in exclusive control of its own state
 // and IF we end up needing a mutex, it should be global on main
 // entry points (HandleEvent, anything else?)
 
-// EventMgr is an event manager that handles incoming events for a Scene.
+// Events is an event manager that handles incoming events for a [Scene].
 // It creates all the derived event types (Hover, Sliding, Dragging)
 // and Focus management for keyboard events.
-type EventMgr struct {
+type Events struct {
 
 	// Scene is the scene that we manage events for
 	Scene *Scene
@@ -133,7 +132,7 @@ type EventMgr struct {
 }
 
 // Mains returns the stack of main stages for our scene.
-func (em *EventMgr) Mains() *Stages {
+func (em *Events) Mains() *Stages {
 	if em.Scene == nil {
 		return nil
 	}
@@ -142,7 +141,7 @@ func (em *EventMgr) Mains() *Stages {
 
 // RenderWindow returns the overall render window in which we reside,
 // which could be nil.
-func (em *EventMgr) RenderWindow() *RenderWindow {
+func (em *Events) RenderWindow() *RenderWindow {
 	mgr := em.Mains()
 	if mgr == nil {
 		return nil
@@ -153,7 +152,7 @@ func (em *EventMgr) RenderWindow() *RenderWindow {
 ///////////////////////////////////////////////////////////////////////
 // 	HandleEvent
 
-func (em *EventMgr) HandleEvent(e events.Event) {
+func (em *Events) HandleEvent(e events.Event) {
 	// et := evi.Type()
 	// fmt.Printf("got event type: %v: %v\n", et, evi)
 	if e.IsHandled() {
@@ -169,11 +168,11 @@ func (em *EventMgr) HandleEvent(e events.Event) {
 	}
 }
 
-func (em *EventMgr) HandleOtherEvent(e events.Event) {
+func (em *Events) HandleOtherEvent(e events.Event) {
 	fmt.Println("TODO: Other event not handled", e)
 }
 
-func (em *EventMgr) HandleFocusEvent(e events.Event) {
+func (em *Events) HandleFocusEvent(e events.Event) {
 	// key down and key up can not give active focus, only key chord
 	if em.Focus == nil && e.Type() != events.KeyDown && e.Type() != events.KeyUp {
 		switch {
@@ -216,7 +215,7 @@ func (em *EventMgr) HandleFocusEvent(e events.Event) {
 	em.ManagerKeyChordEvents(e)
 }
 
-func (em *EventMgr) ResetOnMouseDown() {
+func (em *Events) ResetOnMouseDown() {
 	em.Press = nil
 	em.Drag = nil
 	em.DragPress = nil
@@ -238,7 +237,7 @@ func (em *EventMgr) ResetOnMouseDown() {
 	}
 }
 
-func (em *EventMgr) HandlePosEvent(e events.Event) {
+func (em *Events) HandlePosEvent(e events.Event) {
 	pos := e.Pos()
 	et := e.Type()
 	sc := em.Scene
@@ -275,7 +274,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 		w := em.MouseInBBox[i]
 		wb := w.AsWidget()
 
-		// we need to handle this here and not in [EventMgr.GetMouseInBBox] so that
+		// we need to handle this here and not in [Events.GetMouseInBBox] so that
 		// we correctly process cursors for disabled elements.
 		// in ScRenderBBoxes, everyone is effectively enabled
 		if wb.StateIs(states.Disabled) && !sc.Is(ScRenderBBoxes) {
@@ -488,7 +487,7 @@ func (em *EventMgr) HandlePosEvent(e events.Event) {
 
 // UpdateHovers updates the hovered widgets based on current
 // widgets in bounding box.
-func (em *EventMgr) UpdateHovers(hov, prev []Widget, e events.Event, enter, leave events.Types) []Widget {
+func (em *Events) UpdateHovers(hov, prev []Widget, e events.Event, enter, leave events.Types) []Widget {
 	for _, prv := range prev {
 		stillIn := false
 		for _, cur := range hov {
@@ -519,7 +518,7 @@ func (em *EventMgr) UpdateHovers(hov, prev []Widget, e events.Event, enter, leav
 }
 
 // TopLongHover returns the top-most LongHoverable widget among the Hovers
-func (em *EventMgr) TopLongHover() Widget {
+func (em *Events) TopLongHover() Widget {
 	var deep Widget
 	for i := len(em.Hovers) - 1; i >= 0; i-- {
 		h := em.Hovers[i]
@@ -532,21 +531,21 @@ func (em *EventMgr) TopLongHover() Widget {
 }
 
 // HandleLongHover handles long hover events
-func (em *EventMgr) HandleLongHover(e events.Event) {
+func (em *Events) HandleLongHover(e events.Event) {
 	em.HandleLong(e, em.TopLongHover(), &em.LongHoverWidget, &em.LongHoverPos, &em.LongHoverTimer, events.LongHoverStart, events.LongHoverEnd, DeviceSettings.LongHoverTime, DeviceSettings.LongHoverStopDistance)
 }
 
 // HandleLongPress handles long press events
-func (em *EventMgr) HandleLongPress(e events.Event) {
+func (em *Events) HandleLongPress(e events.Event) {
 	em.HandleLong(e, em.Press, &em.LongPressWidget, &em.LongPressPos, &em.LongPressTimer, events.LongPressStart, events.LongPressEnd, DeviceSettings.LongPressTime, DeviceSettings.LongPressStopDistance)
 }
 
-// HandleLong is the implementation of [EventMgr.HandleLongHover] and
+// HandleLong is the implementation of [Events.HandleLongHover] and
 // [EventManger.HandleLongPress]. It handles the logic to do with tracking
 // long events using the given pointers to event manager fields and
 // constant type, time, and distance properties. It should not need to
 // be called by anything except for the aforementioned functions.
-func (em *EventMgr) HandleLong(e events.Event, deep Widget, w *Widget, pos *image.Point, t **time.Timer, styp, etyp events.Types, stime time.Duration, sdist int) {
+func (em *Events) HandleLong(e events.Event, deep Widget, w *Widget, pos *image.Point, t **time.Timer, styp, etyp events.Types, stime time.Duration, sdist int) {
 	em.TimerMu.Lock()
 	defer em.TimerMu.Unlock()
 
@@ -644,7 +643,7 @@ func (em *EventMgr) HandleLong(e events.Event, deep Widget, w *Widget, pos *imag
 	})
 }
 
-func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
+func (em *Events) GetMouseInBBox(w Widget, pos image.Point) {
 	wb := w.AsWidget()
 	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
 		// we do not handle disabled here so that
@@ -672,7 +671,7 @@ func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
 	})
 }
 
-func (em *EventMgr) CancelLongPress() {
+func (em *Events) CancelLongPress() {
 	em.LongPressWidget = nil
 	em.LongPressPos = image.Point{}
 	if em.LongPressTimer != nil {
@@ -681,7 +680,7 @@ func (em *EventMgr) CancelLongPress() {
 	}
 }
 
-func (em *EventMgr) CancelRepeatClick() {
+func (em *Events) CancelRepeatClick() {
 	em.RepeatClick = nil
 	if em.RepeatClickTimer != nil {
 		em.RepeatClickTimer.Stop()
@@ -689,7 +688,7 @@ func (em *EventMgr) CancelRepeatClick() {
 	}
 }
 
-func (em *EventMgr) StartRepeatClickTimer() {
+func (em *Events) StartRepeatClickTimer() {
 	if em.RepeatClick == nil || !em.RepeatClick.IsVisible() {
 		return
 	}
@@ -706,7 +705,7 @@ func (em *EventMgr) StartRepeatClickTimer() {
 	})
 }
 
-func (em *EventMgr) DragStartCheck(e events.Event, dur time.Duration, dist int) bool {
+func (em *Events) DragStartCheck(e events.Event, dur time.Duration, dist int) bool {
 	since := e.SinceStart()
 	if since < dur {
 		return false
@@ -718,7 +717,7 @@ func (em *EventMgr) DragStartCheck(e events.Event, dur time.Duration, dist int) 
 // DragStart starts a drag event, capturing a sprite image of the given widget
 // and storing the data for later use during Drop.
 // A drag does not officially start until this is called.
-func (em *EventMgr) DragStart(w Widget, data any, e events.Event) {
+func (em *Events) DragStart(w Widget, data any, e events.Event) {
 	ms := em.Scene.Stage.Main
 	if ms == nil {
 		return
@@ -733,7 +732,7 @@ func (em *EventMgr) DragStart(w Widget, data any, e events.Event) {
 }
 
 // DragMove is generally handled entirely by the event manager
-func (em *EventMgr) DragMove(e events.Event) {
+func (em *Events) DragMove(e events.Event) {
 	ms := em.Scene.Stage.Main
 	if ms == nil {
 		return
@@ -747,7 +746,7 @@ func (em *EventMgr) DragMove(e events.Event) {
 	em.Scene.NeedsRender()
 }
 
-func (em *EventMgr) DragClearSprite() {
+func (em *Events) DragClearSprite() {
 	ms := em.Scene.Stage.Main
 	if ms == nil {
 		return
@@ -755,7 +754,7 @@ func (em *EventMgr) DragClearSprite() {
 	ms.Sprites.InactivateSprite(DragSpriteName)
 }
 
-func (em *EventMgr) DragMenuAddModLabel(m *Scene, mod events.DropMods) {
+func (em *Events) DragMenuAddModLabel(m *Scene, mod events.DropMods) {
 	switch mod {
 	case events.DropCopy:
 		NewLabel(m).SetText("Copy (Use Shift to Move):")
@@ -767,7 +766,7 @@ func (em *EventMgr) DragMenuAddModLabel(m *Scene, mod events.DropMods) {
 // DragDrop sends the events.Drop event to the top of the DragHovers stack.
 // clearing the current dragging sprite before doing anything.
 // It is up to the target to call
-func (em *EventMgr) DragDrop(drag Widget, e events.Event) {
+func (em *Events) DragDrop(drag Widget, e events.Event) {
 	em.DragClearSprite()
 	data := em.DragData
 	em.Drag = nil
@@ -794,7 +793,7 @@ func (em *EventMgr) DragDrop(drag Widget, e events.Event) {
 // DropFinalize should be called as the last step in the Drop event processing,
 // to send the DropDeleteSource event to the source in case of DropMod == DropMove.
 // Otherwise, nothing actually happens.
-func (em *EventMgr) DropFinalize(de *events.DragDrop) {
+func (em *Events) DropFinalize(de *events.DragDrop) {
 	if de.DropMod != events.DropMove {
 		return
 	}
@@ -805,7 +804,7 @@ func (em *EventMgr) DropFinalize(de *events.DragDrop) {
 
 // Clipboard returns the system system.Clipboard, supplying the window context
 // if available.
-func (em *EventMgr) Clipboard() system.Clipboard {
+func (em *Events) Clipboard() system.Clipboard {
 	var gwin system.Window
 	if win := em.RenderWindow(); win != nil {
 		gwin = win.SystemWindow
@@ -814,7 +813,7 @@ func (em *EventMgr) Clipboard() system.Clipboard {
 }
 
 // SetCursor sets window cursor to given Cursor
-func (em *EventMgr) SetCursor(cur cursors.Cursor) {
+func (em *Events) SetCursor(cur cursors.Cursor) {
 	win := em.RenderWindow()
 	if win == nil {
 		return
@@ -826,7 +825,7 @@ func (em *EventMgr) SetCursor(cur cursors.Cursor) {
 }
 
 // FocusClear saves current focus to FocusPrev
-func (em *EventMgr) FocusClear() bool {
+func (em *Events) FocusClear() bool {
 	if em.Focus != nil {
 		if DebugSettings.FocusTrace {
 			fmt.Println(em.Scene, "FocusClear:", em.Focus)
@@ -840,7 +839,7 @@ func (em *EventMgr) FocusClear() bool {
 // If item is nil, then nothing has focus.
 // This does NOT send the events.Focus event to the widget.
 // See [SetFocusEvent] for version that does send event.
-func (em *EventMgr) SetFocus(w Widget) bool {
+func (em *Events) SetFocus(w Widget) bool {
 	if DebugSettings.FocusTrace {
 		fmt.Println(em.Scene, "SetFocus:", w)
 	}
@@ -861,7 +860,7 @@ func (em *EventMgr) SetFocus(w Widget) bool {
 // If item is nil, then nothing has focus.
 // This sends the [events.Focus] event to the widget.
 // See [SetFocus] for a version that does not.
-func (em *EventMgr) SetFocusEvent(w Widget) bool {
+func (em *Events) SetFocusEvent(w Widget) bool {
 	if DebugSettings.FocusTrace {
 		fmt.Println(em.Scene, "SetFocusEvent:", w)
 	}
@@ -881,7 +880,7 @@ func (em *EventMgr) SetFocusEvent(w Widget) bool {
 // SetFocusImpl sets focus to given item -- returns true if focus changed.
 // If item is nil, then nothing has focus.
 // sendEvent determines whether the events.Focus event is sent to the focused item.
-func (em *EventMgr) SetFocusImpl(w Widget, sendEvent bool) bool {
+func (em *Events) SetFocusImpl(w Widget, sendEvent bool) bool {
 	cfoc := em.Focus
 	if cfoc == nil || cfoc.This() == nil {
 		em.Focus = nil
@@ -913,7 +912,7 @@ func (em *EventMgr) SetFocusImpl(w Widget, sendEvent bool) bool {
 // FocusNext sets the focus on the next item
 // that can accept focus after the current Focus item.
 // returns true if a focus item found.
-func (em *EventMgr) FocusNext() bool {
+func (em *Events) FocusNext() bool {
 	if em.Focus == nil {
 		return em.FocusFirst()
 	}
@@ -923,7 +922,7 @@ func (em *EventMgr) FocusNext() bool {
 // FocusNextFrom sets the focus on the next item
 // that can accept focus after the given item.
 // returns true if a focus item found.
-func (em *EventMgr) FocusNextFrom(from Widget) bool {
+func (em *Events) FocusNextFrom(from Widget) bool {
 	next := WidgetNextFunc(from, func(w Widget) bool {
 		return w.IsVisible() && !w.StateIs(states.Disabled) && w.AbilityIs(abilities.Focusable)
 	})
@@ -933,7 +932,7 @@ func (em *EventMgr) FocusNextFrom(from Widget) bool {
 
 // FocusOnOrNext sets the focus on the given item, or the next one that can
 // accept focus -- returns true if a new focus item found.
-func (em *EventMgr) FocusOnOrNext(foc Widget) bool {
+func (em *Events) FocusOnOrNext(foc Widget) bool {
 	cfoc := em.Focus
 	if cfoc == foc {
 		return true
@@ -951,7 +950,7 @@ func (em *EventMgr) FocusOnOrNext(foc Widget) bool {
 
 // FocusOnOrPrev sets the focus on the given item, or the previous one that can
 // accept focus -- returns true if a new focus item found.
-func (em *EventMgr) FocusOnOrPrev(foc Widget) bool {
+func (em *Events) FocusOnOrPrev(foc Widget) bool {
 	cfoc := em.Focus
 	if cfoc == foc {
 		return true
@@ -969,7 +968,7 @@ func (em *EventMgr) FocusOnOrPrev(foc Widget) bool {
 
 // FocusPrev sets the focus on the previous item before the
 // current focus item.
-func (em *EventMgr) FocusPrev() bool {
+func (em *Events) FocusPrev() bool {
 	if em.Focus == nil {
 		return em.FocusLast()
 	}
@@ -978,7 +977,7 @@ func (em *EventMgr) FocusPrev() bool {
 
 // FocusPrevFrom sets the focus on the previous item before the given item
 // (can be nil).
-func (em *EventMgr) FocusPrevFrom(from Widget) bool {
+func (em *Events) FocusPrevFrom(from Widget) bool {
 	prev := WidgetPrevFunc(from, func(w Widget) bool {
 		return w.IsVisible() && !w.StateIs(states.Disabled) && w.AbilityIs(abilities.Focusable)
 	})
@@ -988,26 +987,26 @@ func (em *EventMgr) FocusPrevFrom(from Widget) bool {
 
 // FocusFirst sets the focus on the first focusable item in the tree.
 // returns true if a focusable item was found.
-func (em *EventMgr) FocusFirst() bool {
+func (em *Events) FocusFirst() bool {
 	return em.FocusNextFrom(em.Scene.This().(Widget))
 }
 
 // FocusLast sets the focus on the last focusable item in the tree.
 // returns true if a focusable item was found.
-func (em *EventMgr) FocusLast() bool {
+func (em *Events) FocusLast() bool {
 	return em.FocusLastFrom(em.Scene)
 }
 
 // FocusLastFrom sets the focus on the last focusable item in the given tree.
 // returns true if a focusable item was found.
-func (em *EventMgr) FocusLastFrom(from Widget) bool {
+func (em *Events) FocusLastFrom(from Widget) bool {
 	last := tree.Last(from.This()).(Widget)
 	// fmt.Println("last:", last, "from:", from)
 	return em.FocusOnOrPrev(last)
 }
 
 // ClearNonFocus clears the focus of any non-w.Focus item.
-func (em *EventMgr) ClearNonFocus(foc Widget) {
+func (em *Events) ClearNonFocus(foc Widget) {
 	focRoot := em.Scene
 
 	focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
@@ -1031,13 +1030,13 @@ func (em *EventMgr) ClearNonFocus(foc Widget) {
 }
 
 // SetStartFocus sets the given item to be first focus when window opens.
-func (em *EventMgr) SetStartFocus(k Widget) {
+func (em *Events) SetStartFocus(k Widget) {
 	em.StartFocus = k
 }
 
 // ActivateStartFocus activates start focus if there is no current focus
 // and StartFocus is set -- returns true if activated
-func (em *EventMgr) ActivateStartFocus() bool {
+func (em *Events) ActivateStartFocus() bool {
 	if em.StartFocus == nil && !em.StartFocusFirst {
 		// fmt.Println("no start focus")
 		return false
@@ -1056,7 +1055,7 @@ func (em *EventMgr) ActivateStartFocus() bool {
 // MangerKeyChordEvents handles lower-priority manager-level key events.
 // Mainly tab, shift-tab, and Inspector and Settings.
 // event will be marked as processed if handled here.
-func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
+func (em *Events) ManagerKeyChordEvents(e events.Event) {
 	if e.IsHandled() {
 		return
 	}
@@ -1138,14 +1137,14 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 
 // GetShortcuts gathers all [Button]s in the Scene with a shortcut specified.
 // It recursively navigates [Button.Menu]s.
-func (em *EventMgr) GetShortcuts() {
+func (em *Events) GetShortcuts() {
 	em.Shortcuts = nil
 	em.GetShortcutsIn(em.Scene)
 }
 
 // GetShortcutsIn gathers all [Button]s in the given parent widget with
 // a shortcut specified. It recursively navigates [Button.Menu]s.
-func (em *EventMgr) GetShortcutsIn(parent Widget) {
+func (em *Events) GetShortcutsIn(parent Widget) {
 	parent.AsWidget().WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		bt := AsButton(wi.This())
 		if bt == nil {
@@ -1176,7 +1175,7 @@ func (em *EventMgr) GetShortcutsIn(parent Widget) {
 type Shortcuts map[key.Chord]*Button
 
 // AddShortcut adds given shortcut to given button.
-func (em *EventMgr) AddShortcut(chord key.Chord, bt *Button) {
+func (em *Events) AddShortcut(chord key.Chord, bt *Button) {
 	if chord == "" {
 		return
 	}
@@ -1189,7 +1188,7 @@ func (em *EventMgr) AddShortcut(chord key.Chord, bt *Button) {
 		if DebugSettings.KeyEventTrace {
 			old, exists := em.Shortcuts[cc]
 			if exists && old != bt {
-				slog.Error("core.EventMgr.AddShortcut: overwriting duplicate shortcut", "shortcut", cc, "originalButton", old, "newButton", bt)
+				slog.Error("core.Events.AddShortcut: overwriting duplicate shortcut", "shortcut", cc, "originalButton", old, "newButton", bt)
 			}
 		}
 		em.Shortcuts[cc] = bt
@@ -1197,7 +1196,7 @@ func (em *EventMgr) AddShortcut(chord key.Chord, bt *Button) {
 }
 
 // DeleteShortcut deletes given shortcut
-func (em *EventMgr) DeleteShortcut(chord key.Chord, bt *Button) {
+func (em *Events) DeleteShortcut(chord key.Chord, bt *Button) {
 	if chord == "" {
 		return
 	}
@@ -1213,7 +1212,7 @@ func (em *EventMgr) DeleteShortcut(chord key.Chord, bt *Button) {
 // TriggerShortcut attempts to trigger a shortcut, returning true if one was
 // triggered, and false otherwise.  Also eliminates any shortcuts with deleted
 // buttons, and does not trigger for Disabled buttons.
-func (em *EventMgr) TriggerShortcut(chord key.Chord) bool {
+func (em *Events) TriggerShortcut(chord key.Chord) bool {
 	if DebugSettings.KeyEventTrace {
 		fmt.Printf("Shortcut chord: %v -- looking for button\n", chord)
 	}

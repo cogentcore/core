@@ -189,7 +189,7 @@ func (st *Stage) PopupHandleEvent(e events.Event) {
 	}
 	e.SetLocalOff(st.Scene.SceneGeom.Pos)
 	// fmt.Println("pos:", evi.Pos(), "local:", evi.LocalPos())
-	st.Scene.EventMgr.HandleEvent(e)
+	st.Scene.Events.HandleEvent(e)
 }
 
 //////////////////////////////////////////////////////////////////////////////

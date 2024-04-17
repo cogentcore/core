@@ -316,7 +316,7 @@ func (sc *Scene) DoUpdate() bool {
 
 	if sc.ShowIter < SceneShowIters {
 		if sc.ShowIter == 0 { // first time
-			sc.EventMgr.GetShortcuts()
+			sc.Events.GetShortcuts()
 		}
 		sc.SetFlag(true, ScNeedsLayout)
 		sc.ShowIter++
@@ -361,7 +361,7 @@ func (sc *Scene) DoUpdate() bool {
 	if sc.ShowIter == SceneShowIters { // end of first pass
 		sc.ShowIter++
 		if !sc.Is(ScPrefSizing) {
-			sc.EventMgr.ActivateStartFocus()
+			sc.Events.ActivateStartFocus()
 		}
 	}
 

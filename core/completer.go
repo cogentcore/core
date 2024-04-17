@@ -201,7 +201,7 @@ func (c *Complete) ShowNowImpl(ctx Widget, pos image.Point, text string) bool {
 				}
 			})
 		if i == 0 {
-			sc.EventMgr.SetStartFocus(mi)
+			sc.Events.SetStartFocus(mi)
 		}
 	}
 	return true

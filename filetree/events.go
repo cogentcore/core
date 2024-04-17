@@ -192,7 +192,7 @@ func (fn *Node) ContextMenu(m *core.Scene) {
 		OnClick(func(e events.Event) {
 			fn.Paste()
 		})
-	cb := fn.EventMgr().Clipboard()
+	cb := fn.Events().Clipboard()
 	if cb != nil {
 		pbt.SetState(cb.IsEmpty(), states.Disabled)
 	}

@@ -76,7 +76,7 @@ type Scene struct {
 	Pixels *image.RGBA `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// event manager for this scene
-	EventMgr EventMgr `copier:"-" json:"-" xml:"-" set:"-"`
+	Events Events `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// current stage in which this Scene is set
 	Stage *Stage `copier:"-" json:"-" xml:"-" set:"-"`
@@ -130,7 +130,7 @@ func NewBodyScene(body *Body, name ...string) *Scene {
 		nm = name[0]
 	}
 	sc.InitName(sc, nm)
-	sc.EventMgr.Scene = sc
+	sc.Events.Scene = sc
 	sc.Body = body
 	// need to set parent immediately so that SceneConfig works,
 	// but can not add it yet because it may go elsewhere due
@@ -144,7 +144,7 @@ func NewBodyScene(body *Body, name ...string) *Scene {
 func NewScene(name ...string) *Scene {
 	sc := &Scene{}
 	sc.InitName(sc, name...)
-	sc.EventMgr.Scene = sc
+	sc.Events.Scene = sc
 	return sc
 }
 

@@ -268,7 +268,7 @@ func (st *Stage) RunDialog() *Stage {
 	if !st.FullWindow || st.NewWindow {
 		sz = sc.PrefSize(sz)
 		sz = sz.Add(image.Point{50, 50})
-		sc.EventMgr.StartFocusFirst = true // popup dialogs always need focus
+		sc.Events.StartFocusFirst = true // popup dialogs always need focus
 	}
 	if DebugSettings.WinRenderTrace {
 		slog.Info("MainStage.RunDialog", "size", sz)
@@ -348,7 +348,7 @@ func (st *Stage) MainHandleEvent(e events.Event) {
 		return
 	}
 	e.SetLocalOff(st.Scene.SceneGeom.Pos)
-	st.Scene.EventMgr.HandleEvent(e)
+	st.Scene.Events.HandleEvent(e)
 }
 
 // MainHandleEvent calls MainHandleEvent on relevant stages in reverse order.

@@ -99,7 +99,7 @@ outer:
 				fmt.Println("win IsClosed in paint:", w.Name())
 				break outer
 			}
-			w.This.EventMgr().WindowPaint()
+			w.This.Events().WindowPaint()
 		}
 	}
 }
@@ -197,7 +197,7 @@ func (w *Window[A]) CloseClean() {
 func (w *Window[A]) Close() {
 	// base implementation doesn't actually close any system windows,
 	// but platform-specific implementations can
-	w.This.EventMgr().Window(events.WinClose)
+	w.This.Events().Window(events.WinClose)
 
 	w.WinClose <- struct{}{}
 

@@ -58,11 +58,11 @@ func TestWidgetEventManager(t *testing.T) {
 	b := NewBody()
 	w := NewBox(b)
 
-	assert.Equal(t, &w.Scene.EventMgr, w.EventMgr())
+	assert.Equal(t, &w.Scene.Events, w.Events())
 
 	b.AssertRender(t, "events/event-manager", func() {
-		assert.Equal(t, w.Scene.RenderWindow().SystemWindow.EventMgr(), w.SystemEventMgr())
-		assert.Equal(t, w.EventMgr().Clipboard(), w.Clipboard())
+		assert.Equal(t, w.Scene.RenderWindow().SystemWindow.Events(), w.SystemEvents())
+		assert.Equal(t, w.Events().Clipboard(), w.Clipboard())
 	})
 }
 
@@ -71,7 +71,7 @@ func TestSystemEvents(t *testing.T) {
 	bt := NewButton(b).SetText("Button")
 
 	b.AssertRender(t, "events/system-events", func() {
-		bt.SystemEventMgr().MouseButton(events.MouseDown, events.Left, image.Pt(20, 20), 0)
+		bt.SystemEvents().MouseButton(events.MouseDown, events.Left, image.Pt(20, 20), 0)
 	}, func() {
 		expect := states.States(0)
 		expect.SetFlag(true, states.Active)

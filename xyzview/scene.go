@@ -116,7 +116,7 @@ func (sw *Scene) ConfigFrame() {
 		doConfig = true
 	}
 
-	win := sw.WidgetBase.Scene.EventMgr.RenderWindow()
+	win := sw.WidgetBase.Scene.Events.RenderWindow()
 	if win == nil {
 		return
 	}

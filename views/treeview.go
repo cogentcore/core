@@ -1326,7 +1326,7 @@ func (tv *TreeView) ContextMenu(m *core.Scene) {
 		OnClick(func(e events.Event) {
 			tvi.Paste()
 		})
-	cb := tv.Scene.EventMgr.Clipboard()
+	cb := tv.Scene.Events.Clipboard()
 	if cb != nil {
 		pbt.SetState(cb.IsEmpty(), states.Disabled)
 	}
@@ -1613,7 +1613,7 @@ func (tv *TreeView) DragStart(e events.Event) {
 			}
 		}
 	}
-	tv.Scene.EventMgr.DragStart(tv.This().(core.Widget), md, e)
+	tv.Scene.Events.DragStart(tv.This().(core.Widget), md, e)
 }
 
 // DropExternal is not handled by base case but could be in derived
@@ -1641,7 +1641,7 @@ func (tv *TreeView) DragDrop(e events.Event) {
 	}
 	md := de.Data.(mimedata.Mimes)
 	mf := func(m *core.Scene) {
-		tv.Scene.EventMgr.DragMenuAddModLabel(m, de.DropMod)
+		tv.Scene.Events.DragMenuAddModLabel(m, de.DropMod)
 		tvi.MakePasteMenu(m, md, func() {
 			tvi.DropFinalize(de)
 		})
@@ -1655,7 +1655,7 @@ func (tv *TreeView) DragDrop(e events.Event) {
 func (tv *TreeView) DropFinalize(de *events.DragDrop) {
 	tv.UnselectAll()
 	tv.DragClearStates()
-	tv.Scene.EventMgr.DropFinalize(de) // sends DropDeleteSource to Source
+	tv.Scene.Events.DropFinalize(de) // sends DropDeleteSource to Source
 }
 
 // DropDeleteSource handles delete source event for DropMove case

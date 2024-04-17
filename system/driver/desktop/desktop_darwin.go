@@ -189,7 +189,7 @@ func macOpenFile(fname *C.char, flen C.int) {
 			theApp.openFiles = append(theApp.openFiles, ofn)
 		} else {
 			// win := theApp.Window(0)
-			// win.EventMgr.NewOS(events.OSEvent, []string{ofn})
+			// win.Events.NewOS(events.OSEvent, []string{ofn})
 		}
 	*/
 }

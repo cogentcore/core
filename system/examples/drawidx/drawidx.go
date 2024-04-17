@@ -178,7 +178,7 @@ func main() {
 	haveKeyboard := false
 	go func() {
 		for {
-			evi := w.EventMgr().Deque.NextEvent()
+			evi := w.Events().Deque.NextEvent()
 			et := evi.Type()
 			if et != events.WindowPaint && et != events.MouseMove {
 				fmt.Println("got event", evi)

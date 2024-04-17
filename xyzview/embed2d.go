@@ -256,9 +256,9 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		md := &mouse.Event{}
 		*md = *me
 		md.Where = ppt
-		emm.Viewport.EventMgr.MouseEvents(md)
-		emm.Viewport.EventMgr.SendEventSignal(md, false)
-		emm.Viewport.EventMgr.MouseEventReset(md)
+		emm.Viewport.Events.MouseEvents(md)
+		emm.Viewport.Events.SendEventSignal(md, false)
+		emm.Viewport.Events.MouseEventReset(md)
 		if !md.IsProcessed() {
 			ni := em.This().(Node)
 			if ssc.CurSel != ni {
@@ -287,10 +287,10 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		del := ppt.Sub(me.Where)
 		md.Where = ppt
 		md.From = md.From.Add(del)
-		emm.Viewport.EventMgr.MouseEvents(md)
-		emm.Viewport.EventMgr.SendEventSignal(md, false)
-		emm.Viewport.EventMgr.GenMouseFocusEvents(md, false)
-		emm.Viewport.EventMgr.MouseEventReset(md)
+		emm.Viewport.Events.MouseEvents(md)
+		emm.Viewport.Events.SendEventSignal(md, false)
+		emm.Viewport.Events.GenMouseFocusEvents(md, false)
+		emm.Viewport.Events.MouseEventReset(md)
 		me.SetProcessed() // must always
 	})
 	em.ConnectEvent(sc.Win, system.MouseDragEvent, core.RegPri, func(recv, send tree.Node, sig int64, d any) {
@@ -313,9 +313,9 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		del := ppt.Sub(me.Where)
 		md.Where = ppt
 		md.From = md.From.Add(del)
-		emm.Viewport.EventMgr.MouseEvents(md)
-		emm.Viewport.EventMgr.SendEventSignal(md, false)
-		emm.Viewport.EventMgr.MouseEventReset(md)
+		emm.Viewport.Events.MouseEvents(md)
+		emm.Viewport.Events.SendEventSignal(md, false)
+		emm.Viewport.Events.MouseEventReset(md)
 		me.SetProcessed() // must always
 	})
 	em.ConnectEvent(sc.Win, system.KeyChordEvent, core.HiPri, func(recv, send tree.Node, sig int64, d any) {
@@ -331,12 +331,12 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		}
 		kt := d.(*key.ChordEvent)
 		// fmt.Printf("key event: %v\n", kt.String())
-		emm.Viewport.EventMgr.MouseEvents(kt) // also handles key..
-		emm.Viewport.EventMgr.SendEventSignal(kt, false)
+		emm.Viewport.Events.MouseEvents(kt) // also handles key..
+		emm.Viewport.Events.SendEventSignal(kt, false)
 		if !kt.IsProcessed() {
-			emm.Viewport.EventMgr.ManagerKeyChordEvents(kt)
+			emm.Viewport.Events.ManagerKeyChordEvents(kt)
 		}
-		emm.Viewport.EventMgr.MouseEventReset(kt)
+		emm.Viewport.Events.MouseEventReset(kt)
 	})
 }
 
@@ -349,7 +349,7 @@ type EmbedViewport struct {
 	core.Viewport2D
 
 	// event manager that handles dispersing events to nodes
-	EventMgr core.EventMgr `json:"-" xml:"-"`
+	Events core.Events `json:"-" xml:"-"`
 
 	// parent scene -- trigger updates
 	Scene *Scene `json:"-" xml:"-"`
@@ -373,7 +373,7 @@ func NewEmbedViewport(sc *Scene, em *Embed2D, name string, width, height int) *E
 	vp.Scene = sc
 	vp.EmbedPar = em
 	vp.Win = vp.Scene.Win
-	vp.EventMgr.Master = vp
+	vp.Events.Master = vp
 	return vp
 }
 
@@ -401,8 +401,8 @@ func (vp *EmbedViewport) VpTopUpdateEnd(updt bool) {
 	vp.TopUpdated = false
 }
 
-func (vp *EmbedViewport) VpEventMgr() *core.EventMgr {
-	return &vp.EventMgr
+func (vp *EmbedViewport) VpEvents() *core.Events {
+	return &vp.Events
 }
 
 func (vp *EmbedViewport) VpIsVisible() bool {

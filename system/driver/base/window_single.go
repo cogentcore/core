@@ -32,8 +32,8 @@ func NewWindowSingle[A AppSingler](a A, opts *system.NewWindowOptions) WindowSin
 	}
 }
 
-func (w *WindowSingle[A]) EventMgr() *events.Source {
-	return w.App.EventMgr()
+func (w *WindowSingle[A]) Events() *events.Source {
+	return w.App.Events()
 }
 
 func (w *WindowSingle[A]) Drawer() system.Drawer {

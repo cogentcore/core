@@ -1751,7 +1751,7 @@ func (sv *SliceViewBase) DragStart(e events.Event) {
 	ixs := sv.SelectedIndexesList(false) // ascending
 	w, ok := sv.This().(SliceViewer).RowFirstWidget(ixs[0] - sv.StartIndex)
 	if ok {
-		sv.Scene.EventMgr.DragStart(w, md, e)
+		sv.Scene.Events.DragStart(w, md, e)
 		e.SetHandled()
 		// } else {
 		// 	fmt.Println("SliceView DND programmer error")
@@ -1772,7 +1772,7 @@ func (sv *SliceViewBase) DragDrop(e events.Event) {
 		sv.SaveDraggedIndexes(idx)
 		md := de.Data.(mimedata.Mimes)
 		mf := func(m *core.Scene) {
-			sv.Scene.EventMgr.DragMenuAddModLabel(m, de.DropMod)
+			sv.Scene.Events.DragMenuAddModLabel(m, de.DropMod)
 			svi.MakePasteMenu(m, md, idx, de.DropMod, func() {
 				svi.DropFinalize(de)
 			})
@@ -1787,7 +1787,7 @@ func (sv *SliceViewBase) DragDrop(e events.Event) {
 func (sv *SliceViewBase) DropFinalize(de *events.DragDrop) {
 	sv.NeedsLayout()
 	sv.UnselectAllIndexes()
-	sv.Scene.EventMgr.DropFinalize(de) // sends DropDeleteSource to Source
+	sv.Scene.Events.DropFinalize(de) // sends DropDeleteSource to Source
 }
 
 // DropDeleteSource handles delete source event for DropMove case

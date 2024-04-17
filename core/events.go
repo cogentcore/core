@@ -19,21 +19,21 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// EventMgr returns the higher-level core event manager
+// Events returns the higher-level core event manager
 // for this [Widget]'s [Scene].
-func (wb *WidgetBase) EventMgr() *EventMgr {
-	return &wb.Scene.EventMgr
+func (wb *WidgetBase) Events() *Events {
+	return &wb.Scene.Events
 }
 
-// SystemEventMgr returns the lower-level system event
+// SystemEvents returns the lower-level system event
 // manager for this [Widget]'s [Scene].
-func (wb *WidgetBase) SystemEventMgr() *events.Source {
-	return wb.Scene.RenderWindow().SystemWindow.EventMgr()
+func (wb *WidgetBase) SystemEvents() *events.Source {
+	return wb.Scene.RenderWindow().SystemWindow.Events()
 }
 
 // Clipboard returns the clipboard for the [Widget] to use.
 func (wb *WidgetBase) Clipboard() system.Clipboard {
-	return wb.EventMgr().Clipboard()
+	return wb.Events().Clipboard()
 }
 
 // On adds the given event handler to the widget's Listeners for the given event type.
@@ -465,7 +465,7 @@ func (wb *WidgetBase) HandleWidgetStateFromFocus() {
 func (wb *WidgetBase) HandleWidgetMagnify() {
 	wb.On(events.Magnify, func(e events.Event) {
 		ev := e.(*events.TouchMagnify)
-		wb.EventMgr().RenderWindow().StepZoom(ev.ScaleFactor - 1)
+		wb.Events().RenderWindow().StepZoom(ev.ScaleFactor - 1)
 	})
 }
 
@@ -502,7 +502,7 @@ func (wb *WidgetBase) SetFocus() {
 			foc = wb.This().(Widget)
 		}
 	}
-	em := wb.EventMgr()
+	em := wb.Events()
 	if em != nil {
 		// fmt.Println("grab focus:", foc)
 		em.SetFocus(foc) // doesn't send event
@@ -521,7 +521,7 @@ func (wb *WidgetBase) SetFocusEvent() {
 			foc = wb.This().(Widget)
 		}
 	}
-	em := wb.EventMgr()
+	em := wb.Events()
 	if em != nil {
 		// fmt.Println("grab focus:", foc)
 		em.SetFocusEvent(foc) // doesn't send event
@@ -543,7 +543,7 @@ func (wb *WidgetBase) FocusableInMe() Widget {
 
 // FocusNext moves the focus onto the next item
 func (wb *WidgetBase) FocusNext() {
-	em := wb.EventMgr()
+	em := wb.Events()
 	if em != nil {
 		em.FocusNext()
 	}
@@ -551,7 +551,7 @@ func (wb *WidgetBase) FocusNext() {
 
 // FocusPrev moves the focus onto the previous item
 func (wb *WidgetBase) FocusPrev() {
-	em := wb.EventMgr()
+	em := wb.Events()
 	if em != nil {
 		em.FocusPrev()
 	}
@@ -559,7 +559,7 @@ func (wb *WidgetBase) FocusPrev() {
 
 // FocusClear resets focus to nil, but keeps the previous focus to pick up next time..
 func (wb *WidgetBase) FocusClear() {
-	em := wb.EventMgr()
+	em := wb.Events()
 	if em != nil {
 		em.FocusClear()
 	}
@@ -567,7 +567,7 @@ func (wb *WidgetBase) FocusClear() {
 
 // StartFocus specifies this widget to give focus to when the window opens
 func (wb *WidgetBase) StartFocus() {
-	em := wb.EventMgr()
+	em := wb.Events()
 	if em != nil {
 		em.SetStartFocus(wb.This().(Widget))
 	}
@@ -576,7 +576,7 @@ func (wb *WidgetBase) StartFocus() {
 // ContainsFocus returns true if this widget contains the current focus widget
 // as maintained in the RenderWin
 func (wb *WidgetBase) ContainsFocus() bool {
-	em := wb.EventMgr()
+	em := wb.Events()
 	if em == nil {
 		return false
 	}

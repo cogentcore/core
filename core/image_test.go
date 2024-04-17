@@ -49,6 +49,6 @@ func TestImageScrolled(t *testing.T) {
 	img := NewImage(fr)
 	assert.NoError(t, img.Open(testImagePath))
 	b.AssertRender(t, "image/scrolled", func() {
-		b.SystemEventMgr().Scroll(image.Pt(10, 10), math32.Vec2(2, 3))
+		b.SystemEvents().Scroll(image.Pt(10, 10), math32.Vec2(2, 3))
 	})
 }

@@ -487,7 +487,7 @@ func (w *RenderWindow) StopEventLoop() {
 // if nobody is listening (e.g., if a popup is posted without a surrounding
 // event, as in Complete.ShowCompletions
 func (w *RenderWindow) SendCustomEvent(data any) {
-	w.SystemWindow.EventMgr().Custom(data)
+	w.SystemWindow.Events().Custom(data)
 }
 
 // todo: fix or remove
@@ -507,7 +507,7 @@ func (w *RenderWindow) SendWinFocusEvent(act events.WinActions) {
 func (w *RenderWindow) EventLoop() {
 	defer func() { system.HandleRecover(recover()) }()
 
-	d := &w.SystemWindow.EventMgr().Deque
+	d := &w.SystemWindow.Events().Deque
 
 	for {
 		if w.HasFlag(WindowStopEventLoop) {

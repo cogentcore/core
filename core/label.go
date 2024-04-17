@@ -267,7 +267,7 @@ func (lb *Label) HandleLabelClick(openLink func(tl *paint.TextLink)) {
 
 func (lb *Label) Copy(reset bool) {
 	md := mimedata.NewText(lb.Text)
-	em := lb.EventMgr()
+	em := lb.Events()
 	if em != nil {
 		em.Clipboard().Write(md)
 	}

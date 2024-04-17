@@ -211,7 +211,7 @@ func (tb *Toolbar) AddOverflowMenu(fun func(m *Scene)) {
 
 // SetShortcuts sets the shortcuts to window associated with Toolbar
 func (tb *Toolbar) SetShortcuts() {
-	em := tb.EventMgr()
+	em := tb.Events()
 	if em == nil {
 		return
 	}
@@ -230,7 +230,7 @@ func (tb *Toolbar) Destroy() {
 
 // DeleteShortcuts deletes the shortcuts -- called when destroyed
 func (tb *Toolbar) DeleteShortcuts() {
-	em := tb.EventMgr()
+	em := tb.Events()
 	if em == nil {
 		return
 	}

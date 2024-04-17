@@ -177,7 +177,7 @@ func (ly *Layout) RenderWidget() {
 // current window focus item, or contains that focus item (along with its
 // index) -- nil, -1 if none.
 func (ly *Layout) ChildWithFocus() (Widget, int) {
-	em := ly.EventMgr()
+	em := ly.Events()
 	if em == nil {
 		return nil, -1
 	}
@@ -208,7 +208,7 @@ func (ly *Layout) FocusNextChild(updn bool) bool {
 		fmt.Println("no child foc")
 		return false
 	}
-	em := ly.EventMgr()
+	em := ly.Events()
 	if em == nil {
 		return false
 	}
@@ -244,7 +244,7 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 	if foc == nil {
 		return false
 	}
-	em := ly.EventMgr()
+	em := ly.Events()
 	if em == nil {
 		return false
 	}
@@ -297,7 +297,7 @@ func (ly *Layout) HandleKeys() {
 			}
 			return
 		}
-		em := ly.EventMgr()
+		em := ly.Events()
 		if em == nil {
 			return
 		}
@@ -392,7 +392,7 @@ func (ly *Layout) FocusOnName(e events.Event) bool {
 	focel := ChildByLabelCanFocus(ly, ly.FocusName, ly.FocusNameLast)
 	if focel != nil {
 		focel = focel.This()
-		em := ly.EventMgr()
+		em := ly.Events()
 		if em != nil {
 			em.SetFocusEvent(focel.(Widget)) // this will also scroll by default!
 		}

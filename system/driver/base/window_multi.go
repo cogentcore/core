@@ -63,7 +63,7 @@ func NewWindowMulti[A system.App, D system.Drawer](a A, opts *system.NewWindowOp
 	}
 }
 
-func (w *WindowMulti[A, D]) EventMgr() *events.Source {
+func (w *WindowMulti[A, D]) Events() *events.Source {
 	return &w.EvMgr
 }
 

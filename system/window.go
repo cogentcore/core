@@ -223,9 +223,9 @@ type Window interface {
 	// title bar is dark (as opposed to light).
 	SetTitleBarIsDark(isDark bool)
 
-	// EventMgr returns the events.Mgr for this window,
+	// Events returns the [events.Source] for this window,
 	// which manages all of the Event sending.
-	EventMgr() *events.Source
+	Events() *events.Source
 }
 
 ////////////////////////////////////////////////////////////////////////////

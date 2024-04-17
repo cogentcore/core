@@ -920,7 +920,7 @@ func (tf *TextField) Cut() {
 	}
 	cut := tf.DeleteSelection()
 	if cut != "" {
-		em := tf.EventMgr()
+		em := tf.Events()
 		if em != nil {
 			em.Clipboard().Write(mimedata.NewText(cut))
 		}
@@ -1012,7 +1012,7 @@ func (tf *TextField) ContextMenu(m *Scene) {
 			OnClick(func(e events.Event) {
 				tf.Paste()
 			})
-		cb := tf.Scene.EventMgr.Clipboard()
+		cb := tf.Scene.Events.Clipboard()
 		if cb != nil {
 			pbt.SetState(cb.IsEmpty(), states.Disabled)
 		}
