@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"cogentcore.org/core/cam/hct"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/iox/imagex"
@@ -75,4 +76,52 @@ func TestViewBoxParse(t *testing.T) {
 			t.Error("parse fail", os, "!=", ts)
 		}
 	}
+}
+
+func TestCoreLogo(t *testing.T) {
+	sv := NewSVG(720, 720)
+	sv.Background = colors.C(colors.White)
+	sv.PhysWidth.Px(720)
+	sv.PhysHeight.Px(720)
+	sv.Root.ViewBox.Size.Set(1, 1)
+
+	inner := hct.Lighten(colors.Scheme.Primary.Base, 10)
+	outer := hct.Darken(inner, 30)
+	core := hct.Saturate(hct.Lighten(hct.Spin(inner, 160), 20), 10)
+
+	ox := colors.AsHex(outer)
+	ix := colors.AsHex(inner)
+	cx := colors.AsHex(core)
+	fmt.Println("Outer:", ox)
+	fmt.Println("Inner:", ix)
+	fmt.Println("Core:", cx)
+
+	x := float32(0.52)
+	sw := float32(0.18)
+
+	o := NewPath(&sv.Root, "outer")
+	o.SetProperty("stroke", ox)
+	o.SetProperty("stroke-width", sw)
+	o.SetProperty("fill", "none")
+	o.AddPath(PcM, x, 0.5)
+	o.AddPathArc(0.4, 30, 30+300)
+	o.UpdatePathString()
+
+	i := NewPath(&sv.Root, "inner")
+	i.SetProperty("stroke", ix)
+	i.SetProperty("stroke-width", sw)
+	i.SetProperty("fill", "none")
+	i.AddPath(PcM, x, 0.5)
+	i.AddPathArc(0.22, 30, 30+300)
+	i.UpdatePathString()
+
+	c := NewCircle(&sv.Root, "core")
+	c.Pos.Set(x, 0.5)
+	c.Radius = 0.15
+	c.SetProperty("fill", cx)
+	c.SetProperty("stroke", "none")
+
+	sv.Render()
+	imagex.Assert(t, sv.Pixels, "logo/logo.png")
+	sv.SaveXML("testdata/logo/logo.svg")
 }

@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+	"unsafe"
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
@@ -105,6 +106,36 @@ func (g *Path) Render(sv *SVG) {
 
 	g.RenderChildren(sv)
 	pc.PopTransform()
+}
+
+// AddPath adds given path command to the PathData
+func (g *Path) AddPath(cmd PathCmds, args ...float32) {
+	na := len(args)
+	cd := cmd.EncCmd(na)
+	g.Data = append(g.Data, cd)
+	if na > 0 {
+		ad := unsafe.Slice((*PathData)(unsafe.Pointer(&args[0])), na)
+		g.Data = append(g.Data, ad...)
+	}
+}
+
+// AddPathArc adds an arc command using the simpler Paint.DrawArc parameters
+// with center at the current position, and the given radius
+// and angles in degrees
+func (g *Path) AddPathArc(r, angle1, angle2 float32) {
+	ra1 := math32.DegToRad(angle1)
+	ra2 := math32.DegToRad(angle2)
+	xs := r * math32.Cos(ra1)
+	ys := r * math32.Sin(ra1)
+	xe := r * math32.Cos(ra2)
+	ye := r * math32.Sin(ra2)
+	g.AddPath(Pcm, xs, ys)
+	g.AddPath(Pca, r, r, 0, 1, 1, xe-xs, ye-ys)
+}
+
+// UpdatePathString sets the path string from the Data
+func (g *Path) UpdatePathString() {
+	g.DataStr = PathDataString(g.Data)
 }
 
 // PathCmds are the commands within the path SVG drawing data type
