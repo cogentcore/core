@@ -27,7 +27,7 @@ func (wb *WidgetBase) EventMgr() *EventMgr {
 
 // SystemEventMgr returns the lower-level system event
 // manager for this [Widget]'s [Scene].
-func (wb *WidgetBase) SystemEventMgr() *events.Mgr {
+func (wb *WidgetBase) SystemEventMgr() *events.Source {
 	return wb.Scene.RenderWindow().SystemWindow.EventMgr()
 }
 

@@ -32,7 +32,7 @@ func NewWindowSingle[A AppSingler](a A, opts *system.NewWindowOptions) WindowSin
 	}
 }
 
-func (w *WindowSingle[A]) EventMgr() *events.Mgr {
+func (w *WindowSingle[A]) EventMgr() *events.Source {
 	return w.App.EventMgr()
 }
 

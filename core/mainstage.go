@@ -341,7 +341,7 @@ func (st *Stage) MainHandleEvent(e events.Event) {
 		return
 	}
 	st.Popups.PopupHandleEvent(e)
-	if e.IsHandled() || st.Popups.TopIsModal() {
+	if e.IsHandled() || (st.Popups != nil && st.Popups.TopIsModal()) {
 		if DebugSettings.EventTrace && e.Type() != events.MouseMove {
 			fmt.Println("Event handled by popup:", e)
 		}

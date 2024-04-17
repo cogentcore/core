@@ -225,7 +225,7 @@ type Window interface {
 
 	// EventMgr returns the events.Mgr for this window,
 	// which manages all of the Event sending.
-	EventMgr() *events.Mgr
+	EventMgr() *events.Source
 }
 
 ////////////////////////////////////////////////////////////////////////////

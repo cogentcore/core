@@ -27,7 +27,7 @@ type AppSingle[D system.Drawer, W system.Window] struct {
 	App
 
 	// EvMgr is the event manager for the app
-	EvMgr events.Mgr `label:"Event manger"`
+	EvMgr events.Source `label:"Event manger"`
 
 	// Draw is the single [system.Drawer] used for the app.
 	Draw D
@@ -48,7 +48,7 @@ type AppSingler interface {
 	system.App
 
 	// EventMgr returns the single [events.Mgr] associated with this app.
-	EventMgr() *events.Mgr
+	EventMgr() *events.Source
 
 	// Drawer returns the single [system.Drawer] associated with this app.
 	Drawer() system.Drawer
@@ -66,7 +66,7 @@ func NewAppSingle[D system.Drawer, W system.Window]() AppSingle[D, W] {
 	}
 }
 
-func (a *AppSingle[D, W]) EventMgr() *events.Mgr {
+func (a *AppSingle[D, W]) EventMgr() *events.Source {
 	return &a.EvMgr
 }
 

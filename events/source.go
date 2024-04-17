@@ -14,15 +14,16 @@ import (
 	"cogentcore.org/core/mimedata"
 )
 
-// TraceWindowPaint prints out a . for each WindowPaint event
-// - for other window events, * for mouse move events.
+// TraceWindowPaint prints out a . for each WindowPaint event,
+// - for other window events, and * for mouse move events.
 // Makes it easier to see what is going on in the overall flow.
 var TraceWindowPaint = false
 
-// Mgr manages the event construction and sending process,
-// for its parent window.  Caches state as needed
-// to generate derived events such as MouseDrag.
-type Mgr struct {
+// Source is a source of events that manages the event
+// construction and sending process for its parent window.
+// It caches state as needed to generate derived events such
+// as [MouseDrag].
+type Source struct {
 	// Deque is the event queue
 	Deque Deque
 
@@ -30,15 +31,15 @@ type Mgr struct {
 	ResettingPos bool
 
 	// Last has the prior state for key variables
-	Last MgrState
+	Last SourceState
 
 	// PaintCount is used for printing paint events as .
 	PaintCount int
 }
 
-// MgrState tracks basic event state over time
+// SourceState tracks basic event state over time
 // to enable recognition and full data for generating events.
-type MgrState struct {
+type SourceState struct {
 	// last mouse button event type (down or up)
 	MouseButtonType Types
 
@@ -64,16 +65,13 @@ type MgrState struct {
 	Key key.Codes
 }
 
-///////////////////////////////////////////////////////////////
-//  New Events
-
 // SendKey processes a basic key event and sends it
-func (em *Mgr) Key(typ Types, rn rune, code key.Codes, mods key.Modifiers) {
+func (es *Source) Key(typ Types, rn rune, code key.Codes, mods key.Modifiers) {
 	ev := NewKey(typ, rn, code, mods)
-	em.Last.Mods = mods
-	em.Last.Key = code
+	es.Last.Mods = mods
+	es.Last.Key = code
 	ev.Init()
-	em.Deque.Send(ev)
+	es.Deque.Send(ev)
 
 	_, mapped := key.CodeRuneMap[code]
 
@@ -81,93 +79,93 @@ func (em *Mgr) Key(typ Types, rn rune, code key.Codes, mods key.Modifiers) {
 		(ev.HasAnyModifier(key.Control, key.Meta) || !mapped || ev.Code == key.CodeTab) {
 		che := NewKey(KeyChord, rn, code, mods)
 		che.Init()
-		em.Deque.Send(che)
+		es.Deque.Send(che)
 	}
 }
 
 // KeyChord processes a basic KeyChord event and sends it
-func (em *Mgr) KeyChord(rn rune, code key.Codes, mods key.Modifiers) {
+func (es *Source) KeyChord(rn rune, code key.Codes, mods key.Modifiers) {
 	ev := NewKey(KeyChord, rn, code, mods)
 	// no further processing of these
 	ev.Init()
-	em.Deque.Send(ev)
+	es.Deque.Send(ev)
 }
 
 // MouseButton creates and sends a mouse button event with given values
-func (em *Mgr) MouseButton(typ Types, but Buttons, where image.Point, mods key.Modifiers) {
+func (es *Source) MouseButton(typ Types, but Buttons, where image.Point, mods key.Modifiers) {
 	ev := NewMouse(typ, but, where, mods)
-	em.Last.Mods = mods
-	em.Last.MouseButtonType = typ
-	em.Last.MouseButton = but
-	em.Last.MousePos = where
+	es.Last.Mods = mods
+	es.Last.MouseButtonType = typ
+	es.Last.MouseButton = but
+	es.Last.MousePos = where
 	ev.Init()
 	if typ == MouseDown {
-		em.Last.MouseDownPos = where
-		em.Last.MouseDownTime = ev.GenTime
-		em.Last.MouseMoveTime = ev.GenTime
+		es.Last.MouseDownPos = where
+		es.Last.MouseDownTime = ev.GenTime
+		es.Last.MouseMoveTime = ev.GenTime
 	}
-	em.Deque.Send(ev)
+	es.Deque.Send(ev)
 }
 
 // MouseMove creates and sends a mouse move or drag event with given values
-func (em *Mgr) MouseMove(where image.Point) {
-	lastPos := em.Last.MousePos
+func (es *Source) MouseMove(where image.Point) {
+	lastPos := es.Last.MousePos
 	var ev *Mouse
-	if em.Last.MouseButtonType == MouseDown {
-		ev = NewMouseDrag(em.Last.MouseButton, where, lastPos, em.Last.MouseDownPos, em.Last.Mods)
-		ev.StTime = em.Last.MouseDownTime
-		ev.PrvTime = em.Last.MouseMoveTime
+	if es.Last.MouseButtonType == MouseDown {
+		ev = NewMouseDrag(es.Last.MouseButton, where, lastPos, es.Last.MouseDownPos, es.Last.Mods)
+		ev.StTime = es.Last.MouseDownTime
+		ev.PrvTime = es.Last.MouseMoveTime
 	} else {
-		ev = NewMouseMove(em.Last.MouseButton, where, lastPos, em.Last.Mods)
-		ev.PrvTime = em.Last.MouseMoveTime
+		ev = NewMouseMove(es.Last.MouseButton, where, lastPos, es.Last.Mods)
+		ev.PrvTime = es.Last.MouseMoveTime
 	}
 	ev.Init()
-	em.Last.MouseMoveTime = ev.GenTime
+	es.Last.MouseMoveTime = ev.GenTime
 	// if em.Win.IsCursorEnabled() {
-	em.Last.MousePos = where
+	es.Last.MousePos = where
 	// }
 	if TraceWindowPaint {
 		fmt.Printf("*")
 	}
-	em.Deque.Send(ev)
+	es.Deque.Send(ev)
 }
 
 // Scroll creates and sends a scroll event with given values
-func (em *Mgr) Scroll(where image.Point, delta math32.Vector2) {
-	ev := NewScroll(where, delta, em.Last.Mods)
+func (es *Source) Scroll(where image.Point, delta math32.Vector2) {
+	ev := NewScroll(where, delta, es.Last.Mods)
 	ev.Init()
-	em.Deque.Send(ev)
+	es.Deque.Send(ev)
 }
 
 // DropExternal creates and sends a Drop event with given values
-func (em *Mgr) DropExternal(where image.Point, md mimedata.Mimes) {
-	ev := NewExternalDrop(Drop, em.Last.MouseButton, where, em.Last.Mods, md)
-	em.Last.MousePos = where
+func (es *Source) DropExternal(where image.Point, md mimedata.Mimes) {
+	ev := NewExternalDrop(Drop, es.Last.MouseButton, where, es.Last.Mods, md)
+	es.Last.MousePos = where
 	ev.Init()
-	em.Deque.Send(ev)
+	es.Deque.Send(ev)
 }
 
 // Touch creates and sends a touch event with the given values.
 // It also creates and sends a corresponding mouse event.
-func (em *Mgr) Touch(typ Types, seq Sequence, where image.Point) {
+func (es *Source) Touch(typ Types, seq Sequence, where image.Point) {
 	ev := NewTouch(typ, seq, where)
 	ev.Init()
-	em.Deque.Send(ev)
+	es.Deque.Send(ev)
 
 	if typ == TouchStart {
-		em.MouseButton(MouseDown, Left, where, 0) // TODO: modifiers
+		es.MouseButton(MouseDown, Left, where, 0) // TODO: modifiers
 	} else if typ == TouchEnd {
-		em.MouseButton(MouseUp, Left, where, 0) // TODO: modifiers
+		es.MouseButton(MouseUp, Left, where, 0) // TODO: modifiers
 	} else {
-		em.MouseMove(where)
+		es.MouseMove(where)
 	}
 }
 
 // Magnify creates and sends a [TouchMagnify] event with the given values.
-func (em *Mgr) Magnify(scaleFactor float32, where image.Point) {
+func (es *Source) Magnify(scaleFactor float32, where image.Point) {
 	ev := NewMagnify(scaleFactor, where)
 	ev.Init()
-	em.Deque.Send(ev)
+	es.Deque.Send(ev)
 }
 
 //	func (em *Mgr) DND(act dnd.Actions, where image.Point, data mimedata.Mimes) {
@@ -177,42 +175,42 @@ func (em *Mgr) Magnify(scaleFactor float32, where image.Point) {
 //		em.Deque.Send(ev)
 //	}
 
-func (em *Mgr) Window(act WinActions) {
+func (es *Source) Window(act WinActions) {
 	ev := NewWindow(act)
 	ev.Init()
 	if TraceWindowPaint {
 		fmt.Printf("-")
 	}
-	em.Deque.SendFirst(ev)
+	es.Deque.SendFirst(ev)
 }
 
-func (em *Mgr) WindowPaint() {
+func (es *Source) WindowPaint() {
 	ev := NewWindowPaint()
 	ev.Init()
 	if TraceWindowPaint {
 		fmt.Printf(".")
-		em.PaintCount++
-		if em.PaintCount > 60 {
+		es.PaintCount++
+		if es.PaintCount > 60 {
 			fmt.Println("")
-			em.PaintCount = 0
+			es.PaintCount = 0
 		}
 	}
-	em.Deque.SendFirst(ev) // separate channel for window!
+	es.Deque.SendFirst(ev) // separate channel for window!
 }
 
-func (em *Mgr) WindowResize() {
+func (es *Source) WindowResize() {
 	ev := NewWindowResize()
 	ev.Init()
 	if TraceWindowPaint {
 		fmt.Printf("r")
 	}
-	em.Deque.SendFirst(ev)
+	es.Deque.SendFirst(ev)
 }
 
-func (em *Mgr) Custom(data any) {
+func (es *Source) Custom(data any) {
 	ce := &CustomEvent{}
 	ce.Typ = Custom
 	ce.Data = data
 	ce.Init()
-	em.Deque.Send(ce)
+	es.Deque.Send(ce)
 }

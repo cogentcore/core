@@ -25,7 +25,7 @@ type WindowMulti[A system.App, D system.Drawer] struct {
 	Window[A]
 
 	// EvMgr is the event manager for the window
-	EvMgr events.Mgr `label:"Event manger"`
+	EvMgr events.Source `label:"Event manger"`
 
 	// Draw is the [system.Drawer] used for this window.
 	Draw D `label:"Drawer"`
@@ -63,7 +63,7 @@ func NewWindowMulti[A system.App, D system.Drawer](a A, opts *system.NewWindowOp
 	}
 }
 
-func (w *WindowMulti[A, D]) EventMgr() *events.Mgr {
+func (w *WindowMulti[A, D]) EventMgr() *events.Source {
 	return &w.EvMgr
 }
 
