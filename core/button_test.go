@@ -9,6 +9,8 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,6 +40,29 @@ func TestButtonClick(t *testing.T) {
 	})
 	bt.Send(events.Click)
 	assert.True(t, clicked)
+}
+
+func TestButtonMenu(t *testing.T) {
+	b := NewBody()
+	NewButton(b).SetText("Share").SetIcon(icons.Share).SetMenu(func(m *Scene) {
+		NewButton(m).SetText("Copy link")
+		NewButton(m).SetText("Send message")
+	})
+	b.AssertRender(t, "button/menu")
+}
+
+func TestButtonMenuClick(t *testing.T) {
+	b := NewBody()
+	b.Style(func(s *styles.Style) {
+		s.Min.Set(units.Em(20), units.Em(10))
+	})
+	bt := NewButton(b).SetText("Share").SetIcon(icons.Share).SetMenu(func(m *Scene) {
+		NewButton(m).SetText("Copy link")
+		NewButton(m).SetText("Send message")
+	})
+	b.AssertScreenRender(t, "button/menu-click", func() {
+		bt.Send(events.Click)
+	})
 }
 
 func TestButton(t *testing.T) {
