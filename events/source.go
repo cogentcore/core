@@ -168,11 +168,11 @@ func (es *Source) Magnify(scaleFactor float32, where image.Point) {
 	es.Deque.Send(ev)
 }
 
-//	func (em *Mgr) DND(act dnd.Actions, where image.Point, data mimedata.Mimes) {
+//	func (es *Source) DND(act dnd.Actions, where image.Point, data mimedata.Mimes) {
 //		ev := dnd.NewEvent(act, where, em.Last.Mods)
 //		ev.Data = data
 //		ev.Init()
-//		em.Deque.Send(ev)
+//		es.Deque.Send(ev)
 //	}
 
 func (es *Source) Window(act WinActions) {
