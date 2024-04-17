@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Command docs provides documentation of Cogent Core,
+// hosted at https://cogentcore.org/core.
 package main
 
 //go:generate core generate -pages content
