@@ -71,8 +71,8 @@ func (rc *Rec) Init(action, data string) {
 	rc.UndoSave = false
 }
 
-// Mgr is the undo manager, managing the undo / redo process
-type Mgr struct {
+// Stack is the undo stack manager that manages the undo and redo process.
+type Stack struct {
 
 	// current index in the undo records -- this is the record that will be undone if user hits undo
 	Index int
@@ -89,11 +89,11 @@ type Mgr struct {
 
 // RecState returns the state for given index, reconstructing from diffs
 // as needed.  Must be called under lock.
-func (um *Mgr) RecState(idx int) []string {
+func (us *Stack) RecState(idx int) []string {
 	stidx := 0
 	var cdt []string
 	for i := idx; i >= 0; i-- {
-		r := um.Recs[i]
+		r := us.Recs[i]
 		if r.Raw != nil {
 			stidx = i
 			cdt = r.Raw
@@ -101,7 +101,7 @@ func (um *Mgr) RecState(idx int) []string {
 		}
 	}
 	for i := stidx + 1; i <= idx; i++ {
-		r := um.Recs[i]
+		r := us.Recs[i]
 		if r.Patch != nil {
 			cdt = r.Patch.Apply(cdt)
 		}
@@ -113,58 +113,58 @@ func (um *Mgr) RecState(idx int) []string {
 // data and current full state of the system (either of which are optional).
 // The state must be available for saving -- we do not copy in case we save the
 // full raw copy.
-func (um *Mgr) Save(action, data string, state []string) {
-	um.Mu.Lock() // we start lock
-	if um.Recs == nil {
-		if um.RawInterval == 0 {
-			um.RawInterval = DefaultRawInterval
+func (us *Stack) Save(action, data string, state []string) {
+	us.Mu.Lock() // we start lock
+	if us.Recs == nil {
+		if us.RawInterval == 0 {
+			us.RawInterval = DefaultRawInterval
 		}
-		um.Recs = make([]*Rec, 1)
-		um.Index = 0
+		us.Recs = make([]*Rec, 1)
+		us.Index = 0
 		nr := &Rec{Action: action, Data: data, Raw: state}
-		um.Recs[0] = nr
-		um.Mu.Unlock()
+		us.Recs[0] = nr
+		us.Mu.Unlock()
 		return
 	}
 	// recs will be [old..., Index] after this
-	um.Index++
+	us.Index++
 	var nr *Rec
-	if len(um.Recs) > um.Index {
-		um.Recs = um.Recs[:um.Index+1]
-		nr = um.Recs[um.Index]
-	} else if len(um.Recs) == um.Index {
+	if len(us.Recs) > us.Index {
+		us.Recs = us.Recs[:us.Index+1]
+		nr = us.Recs[us.Index]
+	} else if len(us.Recs) == us.Index {
 		nr = &Rec{}
-		um.Recs = append(um.Recs, nr)
+		us.Recs = append(us.Recs, nr)
 	} else {
-		log.Printf("undo.Mgr error: index: %d > len(um.Recs): %d\n", um.Index, len(um.Recs))
-		um.Index = len(um.Recs)
+		log.Printf("undo.Stack error: index: %d > len(um.Recs): %d\n", us.Index, len(us.Recs))
+		us.Index = len(us.Recs)
 		nr = &Rec{}
-		um.Recs = append(um.Recs, nr)
+		us.Recs = append(us.Recs, nr)
 	}
 	nr.Init(action, data)
 	if state == nil {
-		um.Mu.Unlock()
+		us.Mu.Unlock()
 		return
 	}
-	go um.SaveState(nr, um.Index, state) // fork off save -- it will unlock when done
+	go us.SaveState(nr, us.Index, state) // fork off save -- it will unlock when done
 	// now we return straight away, with lock still held
 }
 
 // MustSaveUndoStart returns true if the current state must be saved as the start of
 // the first Undo action when at the end of the stack.  If this returns true, then
 // call SaveUndoStart.  It sets a special flag on the record.
-func (um *Mgr) MustSaveUndoStart() bool {
-	return um.Index == len(um.Recs)-1
+func (us *Stack) MustSaveUndoStart() bool {
+	return us.Index == len(us.Recs)-1
 }
 
 // SaveUndoStart saves the current state -- call if MustSaveUndoStart is true.
 // Sets a special flag for this record, and action, data are empty.
 // Does NOT increment the index, so next undo is still as expected.
-func (um *Mgr) SaveUndoStart(state []string) {
-	um.Mu.Lock()
+func (us *Stack) SaveUndoStart(state []string) {
+	us.Mu.Lock()
 	nr := &Rec{UndoSave: true}
-	um.Recs = append(um.Recs, nr)
-	um.SaveState(nr, um.Index+1, state) // do it now because we need to immediately do Undo, does unlock
+	us.Recs = append(us.Recs, nr)
+	us.SaveState(nr, us.Index+1, state) // do it now because we need to immediately do Undo, does unlock
 }
 
 // SaveReplace replaces the current Undo record with new state,
@@ -173,37 +173,37 @@ func (um *Mgr) SaveUndoStart(state []string) {
 // and just want to save the last (it is better to handle that case
 // up front as saving the state can be relatively expensive, but
 // in some cases it is not possible).
-func (um *Mgr) SaveReplace(action, data string, state []string) {
-	um.Mu.Lock()
-	nr := um.Recs[um.Index]
-	go um.SaveState(nr, um.Index, state)
+func (us *Stack) SaveReplace(action, data string, state []string) {
+	us.Mu.Lock()
+	nr := us.Recs[us.Index]
+	go us.SaveState(nr, us.Index, state)
 }
 
 // SaveState saves given record of state at given index
-func (um *Mgr) SaveState(nr *Rec, idx int, state []string) {
-	if idx%um.RawInterval == 0 {
+func (us *Stack) SaveState(nr *Rec, idx int, state []string) {
+	if idx%us.RawInterval == 0 {
 		nr.Raw = state
-		um.Mu.Unlock()
+		us.Mu.Unlock()
 		return
 	}
-	prv := um.RecState(idx - 1)
+	prv := us.RecState(idx - 1)
 	dif := textbuf.DiffLines(prv, state)
 	nr.Patch = dif.ToPatch(state)
-	um.Mu.Unlock()
+	us.Mu.Unlock()
 }
 
 // HasUndoAvail returns true if there is at least one undo record available.
 // This does NOT get the lock -- may rarely be inaccurate but is used for
 // gui enabling so not such a big deal.
-func (um *Mgr) HasUndoAvail() bool {
-	return um.Index >= 0
+func (us *Stack) HasUndoAvail() bool {
+	return us.Index >= 0
 }
 
 // HasRedoAvail returns true if there is at least one redo record available.
 // This does NOT get the lock -- may rarely be inaccurate but is used for
-// gui enabling so not such a big deal.
-func (um *Mgr) HasRedoAvail() bool {
-	return um.Index < len(um.Recs)-2
+// GUI enabling so not such a big deal.
+func (us *Stack) HasRedoAvail() bool {
+	return us.Index < len(us.Recs)-2
 }
 
 // Undo returns the action, action data, and state at the current index
@@ -212,104 +212,104 @@ func (um *Mgr) HasRedoAvail() bool {
 // If already at the start (Index = -1) then returns empty everything
 // Before calling, first check MustSaveUndoStart() -- if false, then you need
 // to call SaveUndoStart() so that the state just before Undoing can be redone!
-func (um *Mgr) Undo() (action, data string, state []string) {
-	um.Mu.Lock()
-	if um.Index < 0 || um.Index >= len(um.Recs) {
-		um.Mu.Unlock()
+func (us *Stack) Undo() (action, data string, state []string) {
+	us.Mu.Lock()
+	if us.Index < 0 || us.Index >= len(us.Recs) {
+		us.Mu.Unlock()
 		return
 	}
-	rec := um.Recs[um.Index]
+	rec := us.Recs[us.Index]
 	action = rec.Action
 	data = rec.Data
-	state = um.RecState(um.Index)
-	um.Index--
-	um.Mu.Unlock()
+	state = us.RecState(us.Index)
+	us.Index--
+	us.Mu.Unlock()
 	return
 }
 
 // UndoTo returns the action, action data, and state at the given index
 // and decrements the index to the previous record.
 // If idx is out of range then returns empty everything
-func (um *Mgr) UndoTo(idx int) (action, data string, state []string) {
-	um.Mu.Lock()
-	if idx < 0 || idx >= len(um.Recs) {
-		um.Mu.Unlock()
+func (us *Stack) UndoTo(idx int) (action, data string, state []string) {
+	us.Mu.Lock()
+	if idx < 0 || idx >= len(us.Recs) {
+		us.Mu.Unlock()
 		return
 	}
-	rec := um.Recs[idx]
+	rec := us.Recs[idx]
 	action = rec.Action
 	data = rec.Data
-	state = um.RecState(idx)
-	um.Index = idx - 1
-	um.Mu.Unlock()
+	state = us.RecState(idx)
+	us.Index = idx - 1
+	us.Mu.Unlock()
 	return
 }
 
 // Redo returns the action, data at the *next* index, and the state at the
 // index *after that*.
 // returning nil if already at end of saved records.
-func (um *Mgr) Redo() (action, data string, state []string) {
-	um.Mu.Lock()
-	if um.Index >= len(um.Recs)-2 {
-		um.Mu.Unlock()
+func (us *Stack) Redo() (action, data string, state []string) {
+	us.Mu.Lock()
+	if us.Index >= len(us.Recs)-2 {
+		us.Mu.Unlock()
 		return
 	}
-	um.Index++
-	rec := um.Recs[um.Index] // action being redone is this one
+	us.Index++
+	rec := us.Recs[us.Index] // action being redone is this one
 	action = rec.Action
 	data = rec.Data
-	state = um.RecState(um.Index + 1) // state is the one *after* it
-	um.Mu.Unlock()
+	state = us.RecState(us.Index + 1) // state is the one *after* it
+	us.Mu.Unlock()
 	return
 }
 
 // RedoTo returns the action, action data, and state at the given index,
 // returning nil if already at end of saved records.
-func (um *Mgr) RedoTo(idx int) (action, data string, state []string) {
-	um.Mu.Lock()
-	if idx >= len(um.Recs)-1 || idx <= 0 {
-		um.Mu.Unlock()
+func (us *Stack) RedoTo(idx int) (action, data string, state []string) {
+	us.Mu.Lock()
+	if idx >= len(us.Recs)-1 || idx <= 0 {
+		us.Mu.Unlock()
 		return
 	}
-	um.Index = idx
-	rec := um.Recs[idx]
+	us.Index = idx
+	rec := us.Recs[idx]
 	action = rec.Action
 	data = rec.Data
-	state = um.RecState(idx + 1)
-	um.Mu.Unlock()
+	state = us.RecState(idx + 1)
+	us.Mu.Unlock()
 	return
 }
 
 // Reset resets the undo state
-func (um *Mgr) Reset() {
-	um.Mu.Lock()
-	um.Recs = nil
-	um.Index = 0
-	um.Mu.Unlock()
+func (us *Stack) Reset() {
+	us.Mu.Lock()
+	us.Recs = nil
+	us.Index = 0
+	us.Mu.Unlock()
 }
 
 // UndoList returns the list actions in order from the most recent back in time
 // suitable for a menu of actions to undo.
-func (um *Mgr) UndoList() []string {
-	al := make([]string, um.Index)
-	for i := um.Index; i >= 0; i-- {
-		al[um.Index-i] = um.Recs[i].Action
+func (us *Stack) UndoList() []string {
+	al := make([]string, us.Index)
+	for i := us.Index; i >= 0; i-- {
+		al[us.Index-i] = us.Recs[i].Action
 	}
 	return al
 }
 
 // RedoList returns the list actions in order from the current forward to end
 // suitable for a menu of actions to redo
-func (um *Mgr) RedoList() []string {
-	nl := len(um.Recs)
-	if um.Index >= nl-2 {
+func (us *Stack) RedoList() []string {
+	nl := len(us.Recs)
+	if us.Index >= nl-2 {
 		return nil
 	}
-	st := um.Index + 1
+	st := us.Index + 1
 	n := (nl - 1) - st
 	al := make([]string, n)
 	for i := st; i < nl-1; i++ {
-		al[i-st] = um.Recs[i].Action
+		al[i-st] = us.Recs[i].Action
 	}
 	return al
 }
@@ -333,7 +333,7 @@ func (rc *Rec) MemUsed() int {
 
 // MemStats reports the memory usage statistics.
 // if details is true, each record is reported.
-func (um *Mgr) MemStats(details bool) string {
+func (us *Stack) MemStats(details bool) string {
 	sb := strings.Builder{}
 	// TODO(kai): add this back once we figure out how to do views.FileSize
 	/*
