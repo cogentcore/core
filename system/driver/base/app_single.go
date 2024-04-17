@@ -26,11 +26,11 @@ import (
 type AppSingle[D system.Drawer, W system.Window] struct {
 	App
 
-	// EvMgr is the event manager for the app
-	EvMgr events.Source `label:"Event manger"`
+	// Event is the event manager for the app.
+	Event events.Source `label:"Events"`
 
 	// Draw is the single [system.Drawer] used for the app.
-	Draw D
+	Draw D `label:"Drawer"`
 
 	// Win is the single [system.Window] associated with the app.
 	Win W `label:"Window"`
@@ -67,7 +67,7 @@ func NewAppSingle[D system.Drawer, W system.Window]() AppSingle[D, W] {
 }
 
 func (a *AppSingle[D, W]) Events() *events.Source {
-	return &a.EvMgr
+	return &a.Event
 }
 
 func (a *AppSingle[D, W]) Drawer() system.Drawer {

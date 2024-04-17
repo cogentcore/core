@@ -70,20 +70,20 @@ func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 		}
 	}
 
-	TheApp.EvMgr.Touch(t, events.Sequence(id), image.Pt(int(x), int(y)))
+	TheApp.Event.Touch(t, events.Sequence(id), image.Pt(int(x), int(y)))
 }
 
 //export keyboardTyped
 func keyboardTyped(str *C.char) {
 	for _, r := range C.GoString(str) {
 		code := GetCodeFromRune(r)
-		TheApp.EvMgr.KeyChord(r, code, 0) // TODO: modifiers
+		TheApp.Event.KeyChord(r, code, 0) // TODO: modifiers
 	}
 }
 
 //export keyboardDelete
 func keyboardDelete() {
-	TheApp.EvMgr.KeyChord(0, key.CodeBackspace, 0) // TODO: modifiers
+	TheApp.Event.KeyChord(0, key.CodeBackspace, 0) // TODO: modifiers
 }
 
 //export scaled
@@ -92,7 +92,7 @@ func scaled(scaleFactor, posX, posY C.float) {
 	sf := float32(scaleFactor)
 	// reduce the effective scale factor by a factor of 10
 	sf = 1 + (sf-1)/10
-	TheApp.EvMgr.Magnify(sf, where)
+	TheApp.Event.Magnify(sf, where)
 }
 
 // CodeFromRune is a map from rune to system key code

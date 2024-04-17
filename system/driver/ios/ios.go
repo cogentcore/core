@@ -158,7 +158,7 @@ func updateConfig(width, height, orientation int32) {
 	if system.OnSystemWindowCreated != nil {
 		system.OnSystemWindowCreated <- struct{}{}
 	}
-	TheApp.EvMgr.WindowResize()
+	TheApp.Event.WindowResize()
 }
 
 //export lifecycleDead
@@ -173,14 +173,14 @@ func lifecycleAlive() {
 //export lifecycleVisible
 func lifecycleVisible() {
 	if TheApp.Win != nil {
-		TheApp.EvMgr.Window(events.WinShow)
+		TheApp.Event.Window(events.WinShow)
 	}
 }
 
 //export lifecycleFocused
 func lifecycleFocused() {
 	if TheApp.Win != nil {
-		TheApp.EvMgr.Window(events.WinFocus)
+		TheApp.Event.Window(events.WinFocus)
 	}
 }
 

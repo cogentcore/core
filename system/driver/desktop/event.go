@@ -54,7 +54,7 @@ func (w *Window) KeyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action glf
 		typ = events.KeyDown
 	}
 	fw := w.FocusWindow()
-	fw.EvMgr.Key(typ, rn, ec, mods)
+	fw.Event.Key(typ, rn, ec, mods)
 	glfw.PostEmptyEvent() // todo: why??
 }
 
@@ -62,7 +62,7 @@ func (w *Window) KeyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action glf
 func (w *Window) CharEvent(gw *glfw.Window, char rune, mod glfw.ModifierKey) {
 	mods := GlfwMods(mod)
 	fw := w.FocusWindow()
-	fw.EvMgr.KeyChord(char, key.CodeUnknown, mods)
+	fw.Event.KeyChord(char, key.CodeUnknown, mods)
 	glfw.PostEmptyEvent() // todo: why?
 }
 
@@ -98,7 +98,7 @@ func (w *Window) MouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, acti
 		but = events.Right
 	}
 	where := w.CurMousePosPoint(gw)
-	w.EvMgr.MouseButton(typ, but, where, mods)
+	w.Event.MouseButton(typ, but, where, mods)
 	glfw.PostEmptyEvent() // why?
 }
 
@@ -112,25 +112,25 @@ func (w *Window) ScrollEvent(gw *glfw.Window, xoff, yoff float64) {
 	}
 	delta := math32.Vec2(float32(-xoff), float32(-yoff))
 	where := w.CurMousePosPoint(gw)
-	w.EvMgr.Scroll(where, delta)
+	w.Event.Scroll(where, delta)
 	glfw.PostEmptyEvent()
 }
 
 func (w *Window) CursorPosEvent(gw *glfw.Window, x, y float64) {
-	if w.EvMgr.ResettingPos {
+	if w.Event.ResettingPos {
 		return
 	}
 	where := w.MousePosToPoint(x, y)
 	if !w.CursorEnabled {
-		w.EvMgr.ResettingPos = true
+		w.Event.ResettingPos = true
 		if TheApp.Platform() == system.MacOS {
-			w.Glw.SetCursorPos(float64(w.EvMgr.Last.MousePos.X)/float64(w.DevicePixelRatio), float64(w.EvMgr.Last.MousePos.Y)/float64(w.DevicePixelRatio))
+			w.Glw.SetCursorPos(float64(w.Event.Last.MousePos.X)/float64(w.DevicePixelRatio), float64(w.Event.Last.MousePos.Y)/float64(w.DevicePixelRatio))
 		} else {
-			w.Glw.SetCursorPos(float64(w.EvMgr.Last.MousePos.X), float64(w.EvMgr.Last.MousePos.Y))
+			w.Glw.SetCursorPos(float64(w.Event.Last.MousePos.X), float64(w.Event.Last.MousePos.Y))
 		}
-		w.EvMgr.ResettingPos = false
+		w.Event.ResettingPos = false
 	}
-	w.EvMgr.MouseMove(where)
+	w.Event.MouseMove(where)
 	glfw.PostEmptyEvent()
 }
 
@@ -147,7 +147,7 @@ func (w *Window) DropEvent(gw *glfw.Window, names []string) {
 		md[i] = mimedata.NewTextData(s)
 	}
 	where := w.CurMousePosPoint(gw)
-	w.EvMgr.DropExternal(where, md)
+	w.Event.DropExternal(where, md)
 }
 
 // TODO: should this be a map?

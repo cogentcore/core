@@ -50,10 +50,10 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	a.Scrn.PixSize = opts.Size
 	a.GetScreens()
 
-	a.EvMgr.WindowResize()
-	a.EvMgr.Window(events.WinShow)
-	a.EvMgr.Window(events.ScreenUpdate)
-	a.EvMgr.Window(events.WinFocus)
+	a.Event.WindowResize()
+	a.Event.Window(events.WinShow)
+	a.Event.Window(events.ScreenUpdate)
+	a.Event.Window(events.WinFocus)
 
 	go a.Win.WinLoop()
 

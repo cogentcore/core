@@ -85,9 +85,9 @@ func (a *App) SetSystemWindow() {
 	a.UnderlyingPlatform = UserAgentToOS(ua)
 
 	a.Resize()
-	a.EvMgr.Window(events.WinShow)
-	a.EvMgr.Window(events.ScreenUpdate)
-	a.EvMgr.Window(events.WinFocus)
+	a.Event.Window(events.WinShow)
+	a.Event.Window(events.ScreenUpdate)
+	a.Event.Window(events.WinFocus)
 }
 
 // UserAgentToOS converts the given user agent string to a [system.Platforms] value.
@@ -148,7 +148,7 @@ func (a *App) Resize() {
 
 	a.Draw.Image = image.NewRGBA(image.Rectangle{Max: a.Scrn.PixSize})
 
-	a.EvMgr.WindowResize()
+	a.Event.WindowResize()
 }
 
 func (a *App) DataDir() string {

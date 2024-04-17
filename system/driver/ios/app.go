@@ -95,11 +95,11 @@ func (a *App) NewWindow(opts *system.NewWindowOptions) (system.Window, error) {
 	defer a.Mu.Unlock()
 	a.Win = &Window{base.NewWindowSingle(a, opts)}
 	a.Win.This = a.Win
-	a.EvMgr.Window(events.WinShow)
-	a.EvMgr.Window(events.WinFocus)
+	a.Event.Window(events.WinShow)
+	a.Event.Window(events.WinFocus)
 
-	a.EvMgr.WindowResize()
-	a.EvMgr.WindowPaint()
+	a.Event.WindowResize()
+	a.Event.WindowPaint()
 
 	go a.Win.WinLoop()
 
@@ -136,8 +136,8 @@ func (a *App) SetSystemWindow(winptr uintptr) error {
 	// if the window already exists, we are coming back to it, so we need to show it
 	// again and send a screen update
 	if a.Win != nil {
-		a.EvMgr.Window(events.WinShow)
-		a.EvMgr.Window(events.ScreenUpdate)
+		a.Event.Window(events.WinShow)
+		a.Event.Window(events.ScreenUpdate)
 	}
 	return nil
 }

@@ -348,7 +348,7 @@ func (w *Window) Moved(gw *glfw.Window, x, y int) {
 	// w.app.GetScreens() // this can crash here on win disconnect..
 	w.Screen() // gets parameters
 	w.UpdateFullscreen()
-	w.EvMgr.Window(events.WinMove)
+	w.Event.Window(events.WinMove)
 }
 
 func (w *Window) WinResized(gw *glfw.Window, width, height int) {
@@ -385,7 +385,7 @@ func (w *Window) UpdateGeom() {
 			log.Printf("vkos window: %v updtGeom() -- got new screen: %v (was: %v)\n", w.Nm, w.ScreenWindow, cursc)
 		}
 	}
-	w.EvMgr.WindowResize()
+	w.Event.WindowResize()
 }
 
 func (w *Window) FbResized(gw *glfw.Window, width, height int) {
@@ -402,19 +402,19 @@ func (w *Window) OnCloseReq(gw *glfw.Window) {
 func (w *Window) Focused(gw *glfw.Window, focused bool) {
 	// w.Flgs.SetFlag(focused, system.Focused)
 	if focused {
-		w.EvMgr.Window(events.WinFocus)
+		w.Event.Window(events.WinFocus)
 	} else {
-		w.EvMgr.Last.MousePos = image.Point{-1, -1} // key for preventing random click to same location
-		w.EvMgr.Window(events.WinFocusLost)
+		w.Event.Last.MousePos = image.Point{-1, -1} // key for preventing random click to same location
+		w.Event.Window(events.WinFocusLost)
 	}
 }
 
 func (w *Window) Iconify(gw *glfw.Window, iconified bool) {
 	w.Flgs.SetFlag(iconified, system.Minimized)
 	if iconified {
-		w.EvMgr.Window(events.WinMinimize)
+		w.Event.Window(events.WinMinimize)
 	} else {
 		w.Screen() // gets parameters
-		w.EvMgr.Window(events.WinMinimize)
+		w.Event.Window(events.WinMinimize)
 	}
 }

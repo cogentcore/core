@@ -224,7 +224,7 @@ type Window interface {
 	SetTitleBarIsDark(isDark bool)
 
 	// Events returns the [events.Source] for this window,
-	// which manages all of the Event sending.
+	// which manages all of the event sending.
 	Events() *events.Source
 }
 

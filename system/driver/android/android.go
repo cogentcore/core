@@ -147,9 +147,9 @@ func onWindowFocusChanged(activity *C.ANativeActivity, hasFocus C.int) {
 	TheApp.Mu.Lock()
 	defer TheApp.Mu.Unlock()
 	if hasFocus > 0 {
-		TheApp.EvMgr.Window(events.WinFocus)
+		TheApp.Event.Window(events.WinFocus)
 	} else {
-		TheApp.EvMgr.Window(events.WinFocusLost)
+		TheApp.Event.Window(events.WinFocusLost)
 	}
 }
 
@@ -332,7 +332,7 @@ func hideSoftInput(vm, jniEnv, ctx uintptr) error {
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
 	TheApp.Insets.Set(top, right, bottom, left)
-	TheApp.EvMgr.WindowResize()
+	TheApp.Event.WindowResize()
 }
 
 // MainUI runs the main UI loop of the app.
@@ -381,16 +381,16 @@ func (a *App) MainUI(vm, jniEnv, ctx uintptr) error {
 				system.OnSystemWindowCreated <- struct{}{}
 			}
 
-			a.EvMgr.WindowResize()
+			a.Event.WindowResize()
 		case <-windowDestroyed:
 			// we need to set the size of the window to 0 so that it detects a size difference
 			// and lets the size event go through when we come back later
 			a.Win.SetSize(image.Point{})
-			a.EvMgr.Window(events.WinMinimize)
+			a.Event.Window(events.WinMinimize)
 			a.DestroyVk()
 		case <-activityDestroyed:
 			// TODO(kai): needed to stop crashing when changing orientation
-			// a.EvMgr.Window(events.WinClose)
+			// a.Event.Window(events.WinClose)
 		}
 	}
 }

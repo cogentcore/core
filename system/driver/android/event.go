@@ -35,19 +35,19 @@ import (
 func keyboardTyped(str *C.char) {
 	for _, r := range C.GoString(str) {
 		code := ConvAndroidKeyCode(r)
-		TheApp.EvMgr.KeyChord(r, code, 0) // TODO: modifiers
+		TheApp.Event.KeyChord(r, code, 0) // TODO: modifiers
 	}
 }
 
 //export keyboardDelete
 func keyboardDelete() {
-	TheApp.EvMgr.KeyChord(0, key.CodeBackspace, 0) // TODO: modifiers
+	TheApp.Event.KeyChord(0, key.CodeBackspace, 0) // TODO: modifiers
 }
 
 //export scaled
 func scaled(scaleFactor, posX, posY C.float) {
 	where := image.Pt(int(posX), int(posY))
-	TheApp.EvMgr.Magnify(float32(scaleFactor), where)
+	TheApp.Event.Magnify(float32(scaleFactor), where)
 }
 
 // ProcessEvents processes input queue events
@@ -86,7 +86,7 @@ func ProcessEvent(env *C.JNIEnv, e *C.AInputEvent) {
 			seq := events.Sequence(C.AMotionEvent_getPointerId(e, i))
 			x := int(C.AMotionEvent_getX(e, i))
 			y := int(C.AMotionEvent_getY(e, i))
-			TheApp.EvMgr.Touch(t, seq, image.Pt(x, y))
+			TheApp.Event.Touch(t, seq, image.Pt(x, y))
 		}
 	default:
 		log.Printf("unknown input event, type=%d", C.AInputEvent_getType(e))
@@ -112,7 +112,7 @@ func ProcessKey(env *C.JNIEnv, e *C.AInputEvent) {
 		typ = events.KeyUp
 	}
 	// TODO(crawshaw): set Modifiers.
-	TheApp.EvMgr.Key(typ, r, code, 0)
+	TheApp.Event.Key(typ, r, code, 0)
 }
 
 // AndroidKeyCodes is a map from android system key codes to system key codes
