@@ -79,7 +79,7 @@ func (v *Video) DirectRenderImage(drw system.Drawer, idx int) {
 	drw.SetGoImage(idx, 0, frame, system.NoFlipY)
 }
 
-// DirectRenderDraw draws the current image to RenderWin drawer
+// DirectRenderDraw draws the current image to RenderWindow drawer
 func (v *Video) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 	if !v.IsVisible() {
 		return

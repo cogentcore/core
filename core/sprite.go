@@ -265,8 +265,8 @@ func (ss *Sprites) DrawSprites(drw system.Drawer) {
 
 // SpriteEvent processes given event for any active sprites
 // func (ss *Sprites) SelSpriteEvent(evi events.Event) {
-// 	// w.StageMgr.RenderContext.Mu.Lock()
-// 	// defer w.StageMgr.RenderContext.Mu.Unlock()
+// 	// w.Stages.RenderContext.Mu.Lock()
+// 	// defer w.Stages.RenderContext.Mu.Unlock()
 //
 // 	et := evi.Type()
 //

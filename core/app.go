@@ -117,17 +117,17 @@ func StandardAppBarBack(tb *Toolbar) *Button {
 	bt := NewButton(tb, "back").SetIcon(icons.ArrowBack).SetTooltip("Back").SetKey(keymap.HistPrev)
 	// TODO(kai/abc): app bar back button disabling
 	// bt.StyleFirst(func(s *styles.Style) {
-	// 	if tb.Scene.Stage.MainMgr == nil {
+	// 	if tb.Scene.Stage.Mains == nil {
 	// 		return
 	// 	}
-	// 	s.SetState(tb.Scene.Stage.MainMgr.Stack.Len() <= 1 && len(AllRenderWins) <= 1, states.Disabled)
+	// 	s.SetState(tb.Scene.Stage.Mains.Stack.Len() <= 1 && len(AllRenderWins) <= 1, states.Disabled)
 	// })
 	bt.OnClick(func(e events.Event) {
-		if slen := tb.Scene.Stage.MainMgr.Stack.Len(); slen > 1 {
+		if slen := tb.Scene.Stage.Mains.Stack.Len(); slen > 1 {
 			if tb.Scene.Stage.CloseOnBack {
 				tb.Scene.Close()
 			} else {
-				tb.Scene.Stage.MainMgr.Stack.ValueByIndex(slen - 2).Raise()
+				tb.Scene.Stage.Mains.Stack.ValueByIndex(slen - 2).Raise()
 			}
 			return
 		}
@@ -193,7 +193,7 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 		})
 		NewButton(m).SetText("Minimize").SetIcon(icons.Minimize).
 			OnClick(func(e events.Event) {
-				win := tb.Scene.RenderWin()
+				win := tb.Scene.RenderWindow()
 				if win != nil {
 					win.Minimize()
 				}
@@ -201,7 +201,7 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 		NewSeparator(m)
 		NewButton(m).SetText("Close window").SetIcon(icons.Close).SetKey(keymap.WinClose).
 			OnClick(func(e events.Event) {
-				win := tb.Scene.RenderWin()
+				win := tb.Scene.RenderWindow()
 				if win != nil {
 					win.CloseReq()
 				}
@@ -265,7 +265,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 
 	ch.AddItemsFunc(func() {
 		for _, rw := range AllRenderWindows {
-			for _, kv := range rw.MainStageMgr.Stack.Order {
+			for _, kv := range rw.Mains.Stack.Order {
 				st := kv.Value
 				// we do not include ourself
 				if st == tb.Scene.Stage {

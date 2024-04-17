@@ -26,14 +26,12 @@ import (
 //	- layimpl.go for layout
 //	- style.go for style
 
-// Scene contains a Widget tree, rooted in an embedded Frame layout,
-// which renders into its Pixels image.
-// The Scene is set in a Stage (pointer retained in Scene).
-// Stage has a StageMgr manager for controlling things like Popups
-// (Menus and Dialogs, etc).
+// Scene contains a [Widget] tree, rooted in an embedded [Frame] layout,
+// which renders into its [Scene.Pixels] image. The [Scene] is set in a
+// [Stage], which the [Scene] has a pointer to.
 //
-// Each Scene and Widget tree contains state specific to its particular usage
-// within a given Stage and overall rendering context, representing the unit
+// Each [Scene] contains state specific to its particular usage
+// within a given [Stage] and overall rendering context, representing the unit
 // of rendering in the Cogent Core framework.
 //
 //core:no-new
@@ -188,7 +186,7 @@ func (sc *Scene) HandleEvents() {
 		CurrentRenderWindow.SetStageTitle(sc.Stage.Title)
 	})
 	sc.OnClose(func(e events.Event) {
-		sm := sc.MainStageMgr()
+		sm := sc.Stage.Mains
 		if sm == nil {
 			return
 		}
@@ -210,33 +208,25 @@ func (sc *Scene) RenderContext() *RenderContext {
 	if sc.Stage == nil {
 		return nil
 	}
-	sm := sc.MainStageMgr()
+	sm := sc.Stage.Mains
 	if sm == nil {
 		return nil
 	}
 	return sm.RenderContext
 }
 
-// RenderWin returns the current render window for this scene.
+// RenderWindow returns the current render window for this scene.
 // In general it is best to go through RenderContext instead of the window.
 // This will be nil prior to actual rendering.
-func (sc *Scene) RenderWin() *RenderWindow {
+func (sc *Scene) RenderWindow() *RenderWindow {
 	if sc.Stage == nil {
 		return nil
 	}
-	sm := sc.MainStageMgr()
+	sm := sc.Stage.Mains
 	if sm == nil {
 		return nil
 	}
-	return sm.RenderWin
-}
-
-// MainStageMgr returns the Main StageMgr that typically lives in a RenderWin
-// and manages all of the MainStage elements (Windows, Dialogs etc),
-// which in turn manage their popups.  This Scene could be in a popup
-// or in a main stage.
-func (sc *Scene) MainStageMgr() *StageMgr {
-	return sc.Stage.MainMgr
+	return sm.RenderWindow
 }
 
 // FitInWindow fits Scene geometry (pos, size) into given window geom.
@@ -303,13 +293,13 @@ func (sc *Scene) Close() bool {
 	if e.IsHandled() {
 		return false
 	}
-	mm := sc.Stage.MainMgr
+	mm := sc.Stage.Mains
 	if mm == nil {
 		return false // todo: needed, but not sure why
 	}
 	mm.DeleteStage(sc.Stage)
-	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() && !mm.RenderWin.Is(WindowClosing) && !mm.RenderWin.Is(WindowStopEventLoop) && !TheApp.IsQuitting() {
-		mm.RenderWin.CloseReq()
+	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() && !mm.RenderWindow.Is(WindowClosing) && !mm.RenderWindow.Is(WindowStopEventLoop) && !TheApp.IsQuitting() {
+		mm.RenderWindow.CloseReq()
 	}
 	return true
 }
@@ -334,7 +324,7 @@ func (sc *Scene) UpdateTitle(title string) {
 	if sc.Scene != nil {
 		sc.Stage.Title = title
 	}
-	if rw := sc.RenderWin(); rw != nil {
+	if rw := sc.RenderWindow(); rw != nil {
 		rw.SetTitle(title)
 	}
 	if sc.Body != nil {
@@ -417,7 +407,7 @@ const (
 
 	// ScImageUpdated indicates that the Scene's image has been updated
 	// e.g., due to a render or a resize.  This is reset by the
-	// global RenderWin rendering pass, so it knows whether it needs to
+	// global RenderWindow rendering pass, so it knows whether it needs to
 	// copy the image up to the GPU or not.
 	ScImageUpdated
 

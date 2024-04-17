@@ -196,7 +196,7 @@ type Widget interface {
 	// drw.SetFrameImage with a [vgpu.FrameBuffer]
 	DirectRenderImage(drw system.Drawer, idx int)
 
-	// DirectRenderDraw draws the current image at index onto the RenderWin window,
+	// DirectRenderDraw draws the current image at index onto the RenderWindow window,
 	// typically using drw.Copy, drw.Scale, or drw.Fill.
 	// flipY is the default setting for whether the Y axis needs to be flipped during drawing,
 	// which is typically passed along to the Copy or Scale methods.
@@ -469,7 +469,7 @@ func (wb *WidgetBase) IsVisible() bool {
 func (wb *WidgetBase) DirectRenderImage(drw system.Drawer, idx int) {
 }
 
-// DirectRenderDraw draws the current image at index onto the RenderWin window,
+// DirectRenderDraw draws the current image at index onto the RenderWindow window,
 // typically using drw.Copy, drw.Scale, or drw.Fill.
 // flipY is the default setting for whether the Y axis needs to be flipped during drawing,
 // which is typically passed along to the Copy or Scale methods.

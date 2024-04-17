@@ -70,7 +70,7 @@ func (b *Body) RunAndShowNewWindow() {
 // of the body necessary. It it used internally in test infrastructure, and
 // it should typically not be used by end users.
 func (b *Body) WaitNoEvents() {
-	rw := b.Scene.RenderWin()
+	rw := b.Scene.RenderWindow()
 	rw.NoEventsChan = make(chan struct{})
 	<-rw.NoEventsChan
 	rw.NoEventsChan = nil

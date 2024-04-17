@@ -20,20 +20,20 @@ import (
 // Decor widgets that control display.
 // PopupStage are Menu, Tooltip, Snackbar, Chooser that are transitory
 // and simple, without additional decor.
-// MainStages live in a StageMgr associated with a RenderWin window,
-// and manage their own set of PopupStages via a PopupStageMgr.
+// MainStages live in a [Stages] associated with a RenderWindow window,
+// and manage their own set of PopupStages via another [Stages].
 type StageTypes int32 //enums:enum
 
 const (
 	// WindowStage is a MainStage that displays a Scene in a full window.
 	// One of these must be created first, as the primary App contents,
-	// and it typically persists throughout.  It fills the RenderWin window.
+	// and it typically persists throughout.  It fills the RenderWindow window.
 	// Additional Windows can be created either within the same RenderWin
-	// (Mobile) or in separate RenderWin windows (Desktop, NewWindow).
+	// (Mobile) or in separate RenderWindow windows (Desktop, NewWindow).
 	WindowStage StageTypes = iota
 
 	// DialogStage is a MainStage that displays Scene in a smaller dialog window
-	// on top of a Window, or in its own RenderWin (on Desktop only).
+	// on top of a Window, or in its own RenderWindow (on Desktop only).
 	// It can be Modal or not.
 	DialogStage
 
@@ -113,7 +113,7 @@ type Stage struct { //types:add -setters
 	IgnoreEvents bool
 
 	// NewWindow, if true, opens a WindowStage or DialogStage in its own
-	// separate operating system window (RenderWin).  This is true by
+	// separate operating system window (RenderWindow).  This is true by
 	// default for WindowStage on non-mobile platforms, otherwise false.
 	NewWindow bool
 
@@ -140,28 +140,28 @@ type Stage struct { //types:add -setters
 	// after a timeout duration.
 	Timeout time.Duration
 
-	// Pos is the target position for Scene to be placed within RenderWin.
+	// Pos is the target position for Scene to be placed within RenderWindow.
 	Pos image.Point
 
-	// Data is item represented by this main stage -- used for recycling windows
+	// Data is item represented by this main stage; used for recycling windows
 	Data any
 
-	// If a Popup Stage, this is the Main Stage that owns it (via its PopupMgr)
-	// If a Main Stage, it points to itself.
+	// If a popup stage, this is the main stage that owns it (via its Popups).
+	// If a main stage, it points to itself.
 	Main *Stage
 
-	// For Main stages, this is the manager for the popups within it (created
-	// specifically for the main stage).
-	// For Popups, this is the pointer to the PopupMgr within the
-	// Main Stage managing it.
-	PopupMgr *StageMgr `set:"-"`
+	// For main stages, this is the stack of the popups within it
+	// (created specifically for the main stage).
+	// For popups, this is the pointer to the Popups within the
+	// main stage managing it.
+	Popups *Stages `set:"-"`
 
-	// For all stages, this is the Main stage manager that lives in a RenderWin
-	// and manages the Main Scenes.
-	MainMgr *StageMgr `set:"-"`
+	// For all stages, this is the main [Stages] that lives in a [RenderWindow]
+	// and manages the main stages.
+	Mains *Stages `set:"-"`
 
-	// rendering context which has info about the RenderWin onto which we render.
-	// This should be used instead of the RenderWin itself for all relevant
+	// rendering context which has info about the RenderWindow onto which we render.
+	// This should be used instead of the RenderWindow itself for all relevant
 	// rendering information.  This is only available once a Stage is Run,
 	// and must always be checked for nil.
 	RenderContext *RenderContext
@@ -211,21 +211,21 @@ func (st *Stage) SetScene(sc *Scene) *Stage {
 	return st
 }
 
-// SetMainMgr sets the MainMgr to given Main StageMgr (on RenderWin)
+// SetMains sets the [Stage.Mains] to the given stack of main stages,
 // and also sets the RenderContext from that.
-func (st *Stage) SetMainMgr(sm *StageMgr) *Stage {
-	st.MainMgr = sm
+func (st *Stage) SetMains(sm *Stages) *Stage {
+	st.Mains = sm
 	st.RenderContext = sm.RenderContext
 	return st
 }
 
-// SetPopupMgr sets the PopupMgr and MainMgr from the given *Main* Stage
-// to which this PopupStage belongs.
-func (st *Stage) SetPopupMgr(mainSt *Stage) *Stage {
+// SetPopups sets the [Stage.Popups] and [Stage.Mains] from the given main
+// stage to which this popup stage belongs.
+func (st *Stage) SetPopups(mainSt *Stage) *Stage {
 	st.Main = mainSt
-	st.MainMgr = mainSt.MainMgr
-	st.PopupMgr = mainSt.PopupMgr
-	st.RenderContext = st.MainMgr.RenderContext
+	st.Mains = mainSt.Mains
+	st.Popups = mainSt.Popups
+	st.RenderContext = st.Mains.RenderContext
 	return st
 }
 
@@ -238,7 +238,7 @@ func (st *Stage) SetType(typ StageTypes) *Stage {
 			st.NewWindow = true
 		}
 		st.FullWindow = true
-		st.Modal = true // note: there is no global modal option between RenderWin windows
+		st.Modal = true // note: there is no global modal option between RenderWindow windows
 	case DialogStage:
 		st.Modal = true
 		st.Scrim = true
@@ -318,8 +318,8 @@ func (st *Stage) DoUpdate() (stageMods, sceneMods bool) {
 	if st.Scene == nil {
 		return
 	}
-	if st.Type.IsMain() && st.PopupMgr != nil {
-		stageMods, sceneMods = st.PopupMgr.UpdateAll()
+	if st.Type.IsMain() && st.Popups != nil {
+		stageMods, sceneMods = st.Popups.UpdateAll()
 	}
 	scMods := st.Scene.DoUpdate()
 	sceneMods = sceneMods || scMods
@@ -329,19 +329,19 @@ func (st *Stage) DoUpdate() (stageMods, sceneMods bool) {
 	return
 }
 
-// Raise moves the Stage to the top of its main [StageMgr]
+// Raise moves the Stage to the top of its main [Stages]
 // and raises the [RenderWindow] it is in if necessary.
 func (st *Stage) Raise() {
-	if st.MainMgr.RenderWin != CurrentRenderWindow {
-		st.MainMgr.RenderWin.Raise()
+	if st.Mains.RenderWindow != CurrentRenderWindow {
+		st.Mains.RenderWindow.Raise()
 	}
-	st.MainMgr.MoveToTop(st)
+	st.Mains.MoveToTop(st)
 	CurrentRenderWindow.SetStageTitle(st.Title)
 }
 
 func (st *Stage) Delete() {
-	if st.Type.IsMain() && st.PopupMgr != nil {
-		st.PopupMgr.DeleteAll()
+	if st.Type.IsMain() && st.Popups != nil {
+		st.Popups.DeleteAll()
 		st.Sprites.Reset()
 	}
 	if st.Scene != nil {
@@ -349,7 +349,7 @@ func (st *Stage) Delete() {
 	}
 	st.Scene = nil
 	st.Main = nil
-	st.PopupMgr = nil
-	st.MainMgr = nil
+	st.Popups = nil
+	st.Mains = nil
 	st.RenderContext = nil
 }

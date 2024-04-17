@@ -150,7 +150,7 @@ func (mgr *WindowGeometrySaver) SaveLastSave() {
 	os.WriteFile(pnm, b, 0644)
 }
 
-// Open RenderWin Geom settings from Cogent Core standard settings directory
+// Open RenderWindow Geom settings from Cogent Core standard settings directory
 // called under mutex or at start
 func (mgr *WindowGeometrySaver) Open() error {
 	mgr.Init()
@@ -183,7 +183,7 @@ func (mgr *WindowGeometrySaver) Open() error {
 	return err
 }
 
-// Save RenderWin Geom Settings to Cogent Core standard prefs directory
+// Save RenderWindow Geom Settings to Cogent Core standard prefs directory
 // assumed to be under mutex and lock still
 func (mgr *WindowGeometrySaver) Save() error {
 	if mgr.Geometries == nil {

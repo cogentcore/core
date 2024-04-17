@@ -13,28 +13,28 @@ import (
 	"cogentcore.org/core/ordmap"
 )
 
-// StageMgr manages a stack of Stage elements
-type StageMgr struct { //types:add
+// Stages manages a stack of [Stages].
+type Stages struct { //types:add
 	// stack of stages managed by this stage manager.
 	Stack ordmap.Map[string, *Stage] `set:"-"`
 
 	// Modified is set to true whenever the stack has been modified.
-	// This is cleared by the RenderWin each render cycle.
+	// This is cleared by the RenderWindow each render cycle.
 	Modified bool
 
 	// rendering context provides key rendering information and locking
-	// for the RenderWin in which the stages are running.
-	// the MainStageMgr within the RenderWin
+	// for the RenderWindow in which the stages are running.
 	RenderContext *RenderContext
 
 	// render window to which we are rendering.
 	// rely on the RenderContext wherever possible.
-	RenderWin *RenderWindow
+	RenderWindow *RenderWindow
 
 	// growing stack of viewing history of all stages.
 	History []*Stage `set:"-"`
 
-	// Main is the Main Stage that owns this StageMgr, only set for Popup stages
+	// Main is the main stage that owns this [Stages].
+	// This is only set for popup stages.
 	Main *Stage
 
 	// mutex protecting reading / updating of the Stack.
@@ -43,7 +43,7 @@ type StageMgr struct { //types:add
 }
 
 // Top returns the top-most Stage in the Stack, under Read Lock
-func (sm *StageMgr) Top() *Stage {
+func (sm *Stages) Top() *Stage {
 	sm.Mu.RLock()
 	defer sm.Mu.RUnlock()
 
@@ -56,7 +56,7 @@ func (sm *StageMgr) Top() *Stage {
 
 // TopOfType returns the top-most Stage in the Stack
 // of the given type, under Read Lock
-func (sm *StageMgr) TopOfType(typ StageTypes) *Stage {
+func (sm *Stages) TopOfType(typ StageTypes) *Stage {
 	sm.Mu.RLock()
 	defer sm.Mu.RUnlock()
 
@@ -72,7 +72,7 @@ func (sm *StageMgr) TopOfType(typ StageTypes) *Stage {
 
 // TopNotType returns the top-most Stage in the Stack
 // that is NOT the given type, under Read Lock
-func (sm *StageMgr) TopNotType(typ StageTypes) *Stage {
+func (sm *Stages) TopNotType(typ StageTypes) *Stage {
 	sm.Mu.RLock()
 	defer sm.Mu.RUnlock()
 
@@ -87,7 +87,7 @@ func (sm *StageMgr) TopNotType(typ StageTypes) *Stage {
 }
 
 // UniqueName returns unique name for given item
-func (sm *StageMgr) UniqueName(nm string) string {
+func (sm *Stages) UniqueName(nm string) string {
 	ctr := 0
 	for _, kv := range sm.Stack.Order {
 		if kv.Key == nm {
@@ -101,7 +101,7 @@ func (sm *StageMgr) UniqueName(nm string) string {
 }
 
 // Push pushes a new Stage to top, under Write lock
-func (sm *StageMgr) Push(st *Stage) {
+func (sm *Stages) Push(st *Stage) {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
@@ -111,7 +111,7 @@ func (sm *StageMgr) Push(st *Stage) {
 
 // Pop pops current Stage off the stack, returning it or nil if none.
 // It runs under Write lock.
-func (sm *StageMgr) Pop() *Stage {
+func (sm *Stages) Pop() *Stage {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
@@ -129,7 +129,7 @@ func (sm *StageMgr) Pop() *Stage {
 // DeleteStage deletes given stage (removing from stack, calling Delete
 // on Stage), returning true if found.
 // It runs under Write lock.
-func (sm *StageMgr) DeleteStage(st *Stage) bool {
+func (sm *Stages) DeleteStage(st *Stage) bool {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
@@ -150,7 +150,7 @@ func (sm *StageMgr) DeleteStage(st *Stage) bool {
 // calling Delete on Stage), returning true if found.
 // And also deletes all stages of the same type immediately below it.
 // It runs under Write lock.
-func (sm *StageMgr) DeleteStageAndBelow(st *Stage) bool {
+func (sm *Stages) DeleteStageAndBelow(st *Stage) bool {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
@@ -179,7 +179,7 @@ func (sm *StageMgr) DeleteStageAndBelow(st *Stage) bool {
 
 // MoveToTop moves the given stage to the top of the stack,
 // returning true if found. It runs under Write lock.
-func (sm *StageMgr) MoveToTop(st *Stage) bool {
+func (sm *Stages) MoveToTop(st *Stage) bool {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
@@ -199,7 +199,7 @@ func (sm *StageMgr) MoveToTop(st *Stage) bool {
 
 // PopType pops the top-most Stage of the given type of the stack,
 // returning it or nil if none. It runs under Write lock.
-func (sm *StageMgr) PopType(typ StageTypes) *Stage {
+func (sm *Stages) PopType(typ StageTypes) *Stage {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
@@ -216,7 +216,7 @@ func (sm *StageMgr) PopType(typ StageTypes) *Stage {
 }
 
 // PopDelete pops current top--most Stage off the stack and calls Delete on it.
-func (sm *StageMgr) PopDelete() {
+func (sm *Stages) PopDelete() {
 	st := sm.Pop()
 	if st != nil {
 		st.Delete()
@@ -225,7 +225,7 @@ func (sm *StageMgr) PopDelete() {
 
 // PopDeleteType pops the top-most Stage of the given type off the stack
 // and calls Delete on it.
-func (sm *StageMgr) PopDeleteType(typ StageTypes) {
+func (sm *Stages) PopDeleteType(typ StageTypes) {
 	st := sm.PopType(typ)
 	if st != nil {
 		st.Delete()
@@ -235,7 +235,7 @@ func (sm *StageMgr) PopDeleteType(typ StageTypes) {
 // DeleteAll deletes all of the stages.
 // For when Stage with Popups is Deleted, or when a RenderWindow is closed.
 // requires outer RenderContext mutex!
-func (sm *StageMgr) DeleteAll() {
+func (sm *Stages) DeleteAll() {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
@@ -253,7 +253,7 @@ func (sm *StageMgr) DeleteAll() {
 
 // Resize calls Resize on all stages within based on the given
 // window render geom.
-func (sm *StageMgr) Resize(rg math32.Geom2DInt) {
+func (sm *Stages) Resize(rg math32.Geom2DInt) {
 	for _, kv := range sm.Stack.Order {
 		st := kv.Value
 		if st.Type == WindowStage || (st.Type == DialogStage && st.FullWindow) {
@@ -269,9 +269,9 @@ func (sm *StageMgr) Resize(rg math32.Geom2DInt) {
 // and sceneMods = true if any Scenes have been modified.
 // Stage calls DoUpdate on its Scene, ensuring everything is updated at the
 // Widget level.  If nothing is needed, nothing is done.
-// This is called only during RenderWin.RenderWindow,
+// This is called only during RenderWindow.RenderWindow,
 // under the global RenderContext.Mu Write lock so nothing else can happen.
-func (sm *StageMgr) UpdateAll() (stageMods, sceneMods bool) {
+func (sm *Stages) UpdateAll() (stageMods, sceneMods bool) {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
@@ -291,7 +291,7 @@ func (sm *StageMgr) UpdateAll() (stageMods, sceneMods bool) {
 	return
 }
 
-func (sm *StageMgr) SendShowEvents() {
+func (sm *Stages) SendShowEvents() {
 	for _, kv := range sm.Stack.Order {
 		st := kv.Value
 		if st.Scene == nil {

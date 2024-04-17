@@ -97,7 +97,7 @@ func (sw *Scene) Config() {
 }
 
 // ConfigFrame configures the framebuffer for GPU rendering,
-// using the RenderWin GPU and Device.
+// using the RenderWindow GPU and Device.
 func (sw *Scene) ConfigFrame() {
 	zp := image.Point{}
 	sz := sw.Geom.Size.Actual.Content.ToPointFloor()
@@ -116,7 +116,7 @@ func (sw *Scene) ConfigFrame() {
 		doConfig = true
 	}
 
-	win := sw.WidgetBase.Scene.EventMgr.RenderWin()
+	win := sw.WidgetBase.Scene.EventMgr.RenderWindow()
 	if win == nil {
 		return
 	}
@@ -152,7 +152,7 @@ func (sw *Scene) DirectRenderImage(drw system.Drawer, idx int) {
 	drw.SetFrameImage(idx, sw.XYZ.Frame.Frames[0])
 }
 
-// DirectRenderDraw draws the current image to RenderWin drawer
+// DirectRenderDraw draws the current image to RenderWindow drawer
 func (sw *Scene) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 	if !sw.IsVisible() {
 		return

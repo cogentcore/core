@@ -97,7 +97,7 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 
 // NewMenuStage returns a new Menu stage with given scene contents,
 // in connection with given widget, which provides key context
-// for constructing the menu, at given RenderWin position
+// for constructing the menu, at given RenderWindow position
 // (e.g., use ContextMenuPos or WinPos method on ctx Widget).
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
@@ -116,7 +116,7 @@ func NewMenuStage(sc *Scene, ctx Widget, pos image.Point) *Stage {
 
 // NewMenu returns a new menu stage based on the given menu constructor
 // function, in connection with given widget, which provides key context
-// for constructing the menu at given RenderWin position
+// for constructing the menu at given RenderWindow position
 // (e.g., use ContextMenuPos or WinPos method on ctx Widget).
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.

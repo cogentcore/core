@@ -25,8 +25,8 @@ func NewMainStage(typ StageTypes, sc *Scene) *Stage {
 	st := &Stage{}
 	st.SetType(typ)
 	st.SetScene(sc)
-	st.PopupMgr = &StageMgr{}
-	st.PopupMgr.Main = st
+	st.Popups = &Stages{}
+	st.Popups.Main = st
 	st.Main = st
 	return st
 }
@@ -83,7 +83,7 @@ func (st *Stage) AddDialogDecor() *Stage {
 		np := sc.SceneGeom.Pos.Add(pd)
 		np.X = max(np.X, 0)
 		np.Y = max(np.Y, 0)
-		rw := sc.RenderWin()
+		rw := sc.RenderWindow()
 		sz := rw.SystemWindow.Size()
 		mx := sz.X - int(sc.SceneGeom.Size.X)
 		my := sz.Y - int(sc.SceneGeom.Size.Y)
@@ -117,11 +117,11 @@ func (st *Stage) InheritBars() {
 	st.Scene.InheritBarsWidget(st.Context)
 }
 
-// FirstWinManager creates a temporary Main StageMgr for the first window
-// to be able to get sizing information prior to having a RenderWin,
+// FirstWindowStages creates a temporary [Stages] for the first window
+// to be able to get sizing information prior to having a RenderWindow,
 // based on the system App Screen Size. Only adds a RenderContext.
-func (st *Stage) FirstWinManager() *StageMgr {
-	ms := &StageMgr{}
+func (st *Stage) FirstWindowStages() *Stages {
+	ms := &Stages{}
 	ms.RenderContext = NewRenderContext()
 	return ms
 }
@@ -149,10 +149,10 @@ func (st *Stage) RunWindow() *Stage {
 	sc := st.Scene
 	if CurrentRenderWindow == nil {
 		// If we have no current render window, we need to be in a new window,
-		// and we need a *temporary* MainMgr to get initial pref size
-		st.SetMainMgr(st.FirstWinManager())
+		// and we need a *temporary* Mains to get initial pref size
+		st.SetMains(st.FirstWindowStages())
 	} else {
-		st.SetMainMgr(&CurrentRenderWindow.MainStageMgr)
+		st.SetMains(&CurrentRenderWindow.Mains)
 	}
 	st.ConfigMainStage()
 
@@ -195,48 +195,48 @@ func (st *Stage) RunWindow() *Stage {
 			}
 		}
 	}
-	st.MainMgr = nil // reset
+	st.Mains = nil // reset
 	if DebugSettings.WinRenderTrace {
 		fmt.Println("MainStage.RunWindow: Window Size:", sz)
 	}
 
 	if st.NewWindow || CurrentRenderWindow == nil {
 		sc.Resize(math32.Geom2DInt{st.RenderContext.Geom.Pos, sz})
-		win := st.NewRenderWin()
+		win := st.NewRenderWindow()
 		MainRenderWindows.Add(win)
 		CurrentRenderWindow = win
 		win.GoStartEventLoop()
 		return st
 	}
 	if st.Context != nil {
-		ms := st.Context.AsWidget().Scene.MainStageMgr()
+		ms := st.Context.AsWidget().Scene.Stage.Mains
 		msc := ms.Top().Scene
 		sc.SceneGeom.Size = sz
 		sc.FitInWindow(msc.SceneGeom) // does resize
 		ms.Push(st)
-		st.SetMainMgr(ms)
+		st.SetMains(ms)
 	} else {
-		ms := &CurrentRenderWindow.MainStageMgr
+		ms := &CurrentRenderWindow.Mains
 		msc := ms.Top().Scene
 		sc.SceneGeom.Size = sz
 		sc.FitInWindow(msc.SceneGeom) // does resize
 		ms.Push(st)
-		st.SetMainMgr(ms)
+		st.SetMains(ms)
 	}
 	return st
 }
 
 // GetValidContext ensures that the Context is non-nil and has a valid
-// Scene pointer, using CurRenderWin if the current Context is not valid.
-// If CurRenderWin is nil (should not happen), then it returns false and
+// Scene pointer, using CurrentRenderWindow if the current Context is not valid.
+// If CurrentRenderWindow is nil (should not happen), then it returns false and
 // the calling function must bail.
 func (st *Stage) GetValidContext() bool {
 	if st.Context == nil || st.Context.This() == nil || st.Context.AsWidget().Scene == nil {
 		if CurrentRenderWindow == nil {
-			slog.Error("Stage Run: Context is nil and CurRenderWin is nil, cannot Run!", "Name", st.Name, "Title", st.Title)
+			slog.Error("Stage Run: Context is nil and CurrentRenderWindow is nil, cannot Run!", "Name", st.Name, "Title", st.Title)
 			return false
 		}
-		st.Context = CurrentRenderWindow.MainStageMgr.Top().Scene
+		st.Context = CurrentRenderWindow.Mains.Top().Scene
 	}
 	return true
 }
@@ -247,7 +247,7 @@ func (st *Stage) RunDialog() *Stage {
 		return st
 	}
 	ctx := st.Context.AsWidget()
-	ms := ctx.Scene.MainStageMgr()
+	ms := ctx.Scene.Stage.Mains
 
 	// if our main stage manager is nil, we wait until our context is shown and then try again
 	if ms == nil {
@@ -262,7 +262,7 @@ func (st *Stage) RunDialog() *Stage {
 	st.AddDialogDecor()
 	sc.SceneGeom.Pos = st.Pos
 
-	st.SetMainMgr(ms) // temporary for prefs
+	st.SetMains(ms) // temporary for prefs
 
 	sz := ms.RenderContext.Geom.Size
 	if !st.FullWindow || st.NewWindow {
@@ -275,11 +275,11 @@ func (st *Stage) RunDialog() *Stage {
 	}
 
 	if st.NewWindow {
-		st.MainMgr = nil
+		st.Mains = nil
 		sc.Resize(math32.Geom2DInt{st.RenderContext.Geom.Pos, sz})
 		st.Type = WindowStage            // critical: now is its own window!
 		sc.SceneGeom.Pos = image.Point{} // ignore pos
-		win := st.NewRenderWin()
+		win := st.NewRenderWindow()
 		DialogRenderWindows.Add(win)
 		CurrentRenderWindow = win
 		win.GoStartEventLoop()
@@ -289,11 +289,11 @@ func (st *Stage) RunDialog() *Stage {
 	// fmt.Println("dlg:", sc.SceneGeom, "win:", winGeom)
 	sc.FitInWindow(st.RenderContext.Geom) // does resize
 	ms.Push(st)
-	// st.SetMainMgr(ms) // already set
+	// st.SetMains(ms) // already set
 	return st
 }
 
-func (st *Stage) NewRenderWin() *RenderWindow {
+func (st *Stage) NewRenderWindow() *RenderWindow {
 	name := st.Name
 	title := st.Title
 	opts := &system.NewWindowOptions{
@@ -325,13 +325,13 @@ func (st *Stage) NewRenderWin() *RenderWindow {
 		win.SetFlag(true, WindowHasSavedGeom)
 	}
 	AllRenderWindows.Add(win)
-	// initialize MainStageMgr
-	win.MainStageMgr.RenderWin = win
-	win.MainStageMgr.RenderContext = NewRenderContext() // sets defaults according to Screen
+	// initialize Mains
+	win.Mains.RenderWindow = win
+	win.Mains.RenderContext = NewRenderContext() // sets defaults according to Screen
 	// note: win is not yet created by the OS and we don't yet know its actual size
 	// or dpi.
-	win.MainStageMgr.Push(st)
-	st.SetMainMgr(&win.MainStageMgr)
+	win.Mains.Push(st)
+	st.SetMains(&win.Mains)
 	return win
 }
 
@@ -340,8 +340,8 @@ func (st *Stage) MainHandleEvent(e events.Event) {
 	if st.Scene == nil {
 		return
 	}
-	st.PopupMgr.PopupHandleEvent(e)
-	if e.IsHandled() || st.PopupMgr.TopIsModal() {
+	st.Popups.PopupHandleEvent(e)
+	if e.IsHandled() || st.Popups.TopIsModal() {
 		if DebugSettings.EventTrace && e.Type() != events.MouseMove {
 			fmt.Println("Event handled by popup:", e)
 		}
@@ -352,7 +352,7 @@ func (st *Stage) MainHandleEvent(e events.Event) {
 }
 
 // MainHandleEvent calls MainHandleEvent on relevant stages in reverse order.
-func (sm *StageMgr) MainHandleEvent(e events.Event) {
+func (sm *Stages) MainHandleEvent(e events.Event) {
 	n := sm.Stack.Len()
 	for i := n - 1; i >= 0; i-- {
 		st := sm.Stack.ValueByIndex(i)

@@ -22,7 +22,7 @@ func NonNilContext(ctx Widget) Widget {
 	if !reflectx.AnyIsNil(ctx) {
 		return ctx
 	}
-	return CurrentRenderWindow.MainStageMgr.Top().Scene
+	return CurrentRenderWindow.Mains.Top().Scene
 }
 
 // NewDialog returns a new [DialogStage] that does not take up the

@@ -57,7 +57,7 @@ import (
 // For nodes with dynamic content that doesn't require styling or config,
 // a simple NeedsRender call will drive re-rendering.
 //
-// Updating is _always_ driven top-down by RenderWin at FPS sampling rate,
+// Updating is _always_ driven top-down by RenderWindow at FPS sampling rate,
 // in the DoUpdate() call on the Scene.
 // Three types of updates can be triggered, in order of least impact
 // and highest frequency first:
@@ -303,7 +303,7 @@ var SceneShowIters = 2
 
 // DoUpdate checks scene Needs flags to do whatever updating is required.
 // returns false if already updating.
-// This is the main update call made by the RenderWin at FPS frequency.
+// This is the main update call made by the RenderWindow at FPS frequency.
 func (sc *Scene) DoUpdate() bool {
 	if sc.Is(ScUpdating) {
 		// fmt.Println("scene bail on updt")
@@ -563,7 +563,7 @@ func (wb *WidgetBase) PointToRelPos(pt image.Point) image.Point {
 	return pt.Sub(wb.Geom.ContentBBox.Min)
 }
 
-// WinBBox returns the RenderWin based bounding box for the widget
+// WinBBox returns the RenderWindow based bounding box for the widget
 // by adding the Scene position to the ScBBox
 func (wb *WidgetBase) WinBBox() image.Rectangle {
 	if !wb.HasSc() {
@@ -572,7 +572,7 @@ func (wb *WidgetBase) WinBBox() image.Rectangle {
 	return wb.Geom.TotalBBox.Add(wb.Scene.SceneGeom.Pos)
 }
 
-// WinPos returns the RenderWin based position within the
+// WinPos returns the RenderWindow based position within the
 // bounding box of the widget, where the x, y coordinates
 // are the proportion across the bounding box to use:
 // 0 = left / top, 1 = right / bottom

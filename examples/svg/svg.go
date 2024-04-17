@@ -35,7 +35,7 @@ func OpenSVG(fnm string) {
 	TheSVG.SetFullReRender()
 	fmt.Printf("Opening: %v\n", CurFilename)
 	TheSVG.OpenXML(core.Filename(CurFilename))
-	SetZoom(TheSVG.ParentRenderWin().LogicalDPI() / 96.0)
+	SetZoom(TheSVG.ParentRenderWindow().LogicalDPI() / 96.0)
 	SetTrans(0, 0)
 	TheSVG.UpdateEnd(updt)
 }
@@ -53,7 +53,7 @@ func main() {
 
 	core.SetAppName("svg")
 
-	win := core.NewMainRenderWin("core-svg-viewer", "Cogent Core SVG Viewer", width, height)
+	win := core.NewMainRenderWindow("core-svg-viewer", "Cogent Core SVG Viewer", width, height)
 
 	vp := win.WinScene()
 	updt := vp.UpdateStart()
@@ -188,10 +188,10 @@ func main() {
 	fmen.Menu.AddSeparator("csep")
 	fmen.Menu.AddButton(core.ActOpts{Label: "Close RenderWin", Shortcut: "Command+W"},
 		win.This(), func(recv, send tree.Node, sig int64, data any) {
-			win.RenderWin.Close()
+			win.RenderWindow.Close()
 		})
 
-	win.SetCloseCleanFunc(func(w *core.RenderWin) {
+	win.SetCloseCleanFunc(func(w *core.RenderWindow) {
 		go core.Quit() // once main window is closed, quit
 	})
 

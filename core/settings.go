@@ -208,7 +208,7 @@ func SaveAllSettings() error {
 func UpdateAll() { //types:add
 	gradient.Cache = nil // the cache is invalid now
 	for _, w := range AllRenderWindows {
-		rctx := w.MainStageMgr.RenderContext
+		rctx := w.Mains.RenderContext
 		rctx.LogicalDPI = w.LogicalDPI()
 		rctx.SetFlag(true, RenderRebuild) // trigger full rebuild
 	}

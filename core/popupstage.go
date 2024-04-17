@@ -68,11 +68,11 @@ func (st *Stage) RunPopup() *Stage {
 
 	if st.Type == SnackbarStage {
 		// only one snackbar can exist
-		ms.PopupMgr.PopDeleteType(SnackbarStage)
+		ms.Popups.PopDeleteType(SnackbarStage)
 	}
 
-	ms.PopupMgr.Push(st)
-	st.SetPopupMgr(ms) // sets all pointers
+	ms.Popups.Push(st)
+	st.SetPopups(ms) // sets all pointers
 
 	maxSz := msc.SceneGeom.Size
 
@@ -131,7 +131,7 @@ func (st *Stage) RunPopup() *Stage {
 			if st.Main == nil {
 				return
 			}
-			st.PopupMgr.DeleteStage(st)
+			st.Popups.DeleteStage(st)
 		})
 	}
 
@@ -142,7 +142,7 @@ func (st *Stage) RunPopup() *Stage {
 // This version is for Asynchronous usage outside the main event loop,
 // for example in a delayed callback AfterFunc etc.
 func (st *Stage) ClosePopupAsync() {
-	rc := st.MainMgr.RenderContext
+	rc := st.Mains.RenderContext
 	rc.Lock()
 	defer rc.Unlock()
 	st.ClosePopup()
@@ -151,10 +151,10 @@ func (st *Stage) ClosePopupAsync() {
 // ClosePopup closes this stage as a popup, returning whether it was closed.
 func (st *Stage) ClosePopup() bool {
 	// NOTE: this is critical for Completer to not crash due to async closing
-	if st.Main == nil || st.PopupMgr == nil || st.MainMgr == nil {
+	if st.Main == nil || st.Popups == nil || st.Mains == nil {
 		return false
 	}
-	return st.PopupMgr.DeleteStage(st)
+	return st.Popups.DeleteStage(st)
 }
 
 // ClosePopupAndBelowAsync closes this stage as a popup,
@@ -163,7 +163,7 @@ func (st *Stage) ClosePopup() bool {
 // for example in a delayed callback AfterFunc etc.
 // It returns whether it successfully closed popups.
 func (st *Stage) ClosePopupAndBelowAsync() bool {
-	rc := st.MainMgr.RenderContext
+	rc := st.Mains.RenderContext
 	rc.Lock()
 	defer rc.Unlock()
 	return st.ClosePopupAndBelow()
@@ -174,10 +174,10 @@ func (st *Stage) ClosePopupAndBelowAsync() bool {
 // It returns whether it successfully closed popups.
 func (st *Stage) ClosePopupAndBelow() bool {
 	// NOTE: this is critical for Completer to not crash due to async closing
-	if st.Main == nil || st.PopupMgr == nil || st.MainMgr == nil {
+	if st.Main == nil || st.Popups == nil || st.Mains == nil {
 		return false
 	}
-	return st.PopupMgr.DeleteStageAndBelow(st)
+	return st.Popups.DeleteStageAndBelow(st)
 }
 
 func (st *Stage) PopupHandleEvent(e events.Event) {
@@ -193,10 +193,10 @@ func (st *Stage) PopupHandleEvent(e events.Event) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 	StageMgr for Popup
+// 	[Stages] for popups
 
 // TopIsModal returns true if there is a Top PopupStage and it is Modal.
-func (pm *StageMgr) TopIsModal() bool {
+func (pm *Stages) TopIsModal() bool {
 	top := pm.Top()
 	if top == nil {
 		return false
@@ -206,7 +206,7 @@ func (pm *StageMgr) TopIsModal() bool {
 
 // PopupHandleEvent processes Popup events.
 // requires outer RenderContext mutex.
-func (pm *StageMgr) PopupHandleEvent(e events.Event) {
+func (pm *Stages) PopupHandleEvent(e events.Event) {
 	top := pm.Top()
 	if top == nil {
 		return

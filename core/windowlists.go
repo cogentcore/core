@@ -71,9 +71,9 @@ func (wl *RenderWindowList) FindData(data any) (*RenderWindow, bool) {
 	return nil, false
 }
 
-// FindRenderWin finds window with given system.RenderWin on list -- returns
+// FindRenderWindow finds window with given system.RenderWindow on list -- returns
 // window and true if found, nil, false otherwise.
-func (wl *RenderWindowList) FindRenderWin(osw system.Window) (*RenderWindow, bool) {
+func (wl *RenderWindowList) FindRenderWindow(osw system.Window) (*RenderWindow, bool) {
 	RenderWindowGlobalMu.Lock()
 	defer RenderWindowGlobalMu.Unlock()
 	for _, wi := range *wl {

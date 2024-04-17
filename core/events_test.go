@@ -61,7 +61,7 @@ func TestWidgetEventManager(t *testing.T) {
 	assert.Equal(t, &w.Scene.EventMgr, w.EventMgr())
 
 	b.AssertRender(t, "events/event-manager", func() {
-		assert.Equal(t, w.Scene.RenderWin().SystemWindow.EventMgr(), w.SystemEventMgr())
+		assert.Equal(t, w.Scene.RenderWindow().SystemWindow.EventMgr(), w.SystemEventMgr())
 		assert.Equal(t, w.EventMgr().Clipboard(), w.Clipboard())
 	})
 }

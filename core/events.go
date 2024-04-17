@@ -28,7 +28,7 @@ func (wb *WidgetBase) EventMgr() *EventMgr {
 // SystemEventMgr returns the lower-level system event
 // manager for this [Widget]'s [Scene].
 func (wb *WidgetBase) SystemEventMgr() *events.Mgr {
-	return wb.Scene.RenderWin().SystemWindow.EventMgr()
+	return wb.Scene.RenderWindow().SystemWindow.EventMgr()
 }
 
 // Clipboard returns the clipboard for the [Widget] to use.
@@ -420,7 +420,7 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 	})
 	wb.On(events.LongHoverEnd, func(e events.Event) {
 		if wb.Scene.Stage != nil {
-			wb.Scene.Stage.PopupMgr.PopDeleteType(TooltipStage)
+			wb.Scene.Stage.Popups.PopDeleteType(TooltipStage)
 		}
 	})
 
@@ -435,7 +435,7 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 	})
 	wb.On(events.LongPressEnd, func(e events.Event) {
 		if wb.Scene.Stage != nil {
-			wb.Scene.Stage.PopupMgr.PopDeleteType(TooltipStage)
+			wb.Scene.Stage.Popups.PopDeleteType(TooltipStage)
 		}
 	})
 }
@@ -465,7 +465,7 @@ func (wb *WidgetBase) HandleWidgetStateFromFocus() {
 func (wb *WidgetBase) HandleWidgetMagnify() {
 	wb.On(events.Magnify, func(e events.Event) {
 		ev := e.(*events.TouchMagnify)
-		wb.EventMgr().RenderWin().StepZoom(ev.ScaleFactor - 1)
+		wb.EventMgr().RenderWindow().StepZoom(ev.ScaleFactor - 1)
 	})
 }
 

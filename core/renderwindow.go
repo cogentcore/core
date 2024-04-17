@@ -51,15 +51,15 @@ var RenderWindowGlobalMu sync.Mutex
 // RenderWindow provides an outer "actual" window where everything is rendered,
 // and is the point of entry for all events coming in from user actions.
 //
-// RenderWindow contents are all managed by the StageMgr that
-// handles Main Stage elements such as WindowStage and DialogStage, which in
-// turn manage their own stack of Popup Stage elements such as Menu, Tooltip, etc.
+// RenderWindow contents are all managed by the [Stages] stack that
+// handles main [Stage] elements such as [WindowStage] and [DialogStage], which in
+// turn manage their own stack of popup stage elements such as menus and tooltips.
 // The contents of each Stage is provided by a Scene, containing Widgets,
 // and the Stage Pixels image is drawn to the RenderWindow in the RenderWindow method.
 //
 // Rendering is handled by the [system.Drawer]. It is akin to a window manager overlaying Go image bitmaps
-// on top of each other in the proper order, based on the StageMgr stacking order.
-// Sprites are managed by the Main Stage, as layered textures of the same size,
+// on top of each other in the proper order, based on the [Stages] stacking order.
+// Sprites are managed by the main stage, as layered textures of the same size,
 // to enable unlimited number packed into a few descriptors for standard sizes.
 type RenderWindow struct {
 	// Flags are the flags associated with the window.
@@ -76,9 +76,9 @@ type RenderWindow struct {
 	// all the os-specific functions, including delivering events etc
 	SystemWindow system.Window `json:"-" xml:"-"`
 
-	// MainStageMgr controlling the Main Stage elements in this window.
-	// The Render Context in this manager is the original source for all Stages.
-	MainStageMgr StageMgr
+	// Mains is the stack of main stages in this render window.
+	// The [RenderContext] in this manager is the original source for all Stages.
+	Mains Stages
 
 	// RenderScenes are the Scene elements that draw directly to the window,
 	// arranged in order, and continuously updated during Render.
@@ -114,7 +114,7 @@ const (
 	// WindowResizing is atomic flag indicating window is resizing
 	WindowResizing
 
-	// WindowGotFocus indicates that have we received RenderWin focus
+	// WindowGotFocus indicates that have we received RenderWindow focus
 	WindowGotFocus
 
 	// WindowSentShow have we sent the show event yet?  Only ever sent ONCE
@@ -152,7 +152,7 @@ func NewRenderWindow(name, title string, opts *system.NewWindowOptions) *RenderW
 	var err error
 	w.SystemWindow, err = system.TheApp.NewWindow(opts)
 	if err != nil {
-		fmt.Printf("Cogent Core NewRenderWin error: %v \n", err)
+		fmt.Printf("Cogent Core NewRenderWindow error: %v \n", err)
 		return nil
 	}
 	w.SystemWindow.SetName(title)
@@ -163,7 +163,7 @@ func NewRenderWindow(name, title string, opts *system.NewWindowOptions) *RenderW
 		defer rc.Unlock()
 		w.SetFlag(true, WindowClosing)
 		// ensure that everyone is closed first
-		for _, kv := range w.MainStageMgr.Stack.Order {
+		for _, kv := range w.Mains.Stack.Order {
 			if kv.Value == nil || kv.Value.Scene == nil || kv.Value.Scene.This() == nil {
 				continue
 			}
@@ -190,10 +190,10 @@ func NewRenderWindow(name, title string, opts *system.NewWindowOptions) *RenderW
 	return w
 }
 
-// MainScene returns the current MainStageMgr Top Scene,
-// which is the current Window or FullWindow Dialog occupying the RenderWin.
+// MainScene returns the current [RenderWindow.Mains] top Scene,
+// which is the current window or full window dialog occupying the RenderWindow.
 func (w *RenderWindow) MainScene() *Scene {
-	top := w.MainStageMgr.Top()
+	top := w.Mains.Top()
 	if top == nil {
 		return nil
 	}
@@ -234,7 +234,7 @@ func ActivateExistingDialogWindow(data any) bool {
 	return true
 }
 
-// SetName sets name of this window and also the RenderWin, and applies any window
+// SetName sets name of this window and also the RenderWindow, and applies any window
 // geometry settings associated with the new name if it is different from before
 func (w *RenderWindow) SetName(name string) {
 	curnm := w.Name
@@ -268,7 +268,7 @@ func (w *RenderWindow) SetTitle(title string) {
 }
 
 // SetStageTitle sets the title of the underlying SystemWin to the given stage title
-// combined with the RenderWin title.
+// combined with the RenderWindow title.
 func (w *RenderWindow) SetStageTitle(title string) {
 	if title != w.Title {
 		title = title + " • " + w.Title
@@ -354,7 +354,7 @@ func (w *RenderWindow) Resized() {
 			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.Name, curRg)
 		}
 		// still need to apply style even if size is same
-		for _, kv := range w.MainStageMgr.Stack.Order {
+		for _, kv := range w.Mains.Stack.Order {
 			sc := kv.Value.Scene
 			sc.ApplyStyleScene()
 		}
@@ -379,7 +379,7 @@ func (w *RenderWindow) Resized() {
 	rc.SetFlag(true, RenderVisible)
 	rc.LogicalDPI = w.LogicalDPI()
 	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
-	w.MainStageMgr.Resize(rg)
+	w.Mains.Resize(rg)
 	if DebugSettings.WinGeomTrace {
 		log.Printf("WindowGeometry: recording from Resize\n")
 	}
@@ -389,7 +389,7 @@ func (w *RenderWindow) Resized() {
 // Raise requests that the window be at the top of the stack of windows,
 // and receive focus.  If it is iconified, it will be de-iconified.  This
 // is the only supported mechanism for de-iconifying. This also sets
-// CurRenderWin to the window.
+// CurrentRenderWindow to the window.
 func (w *RenderWindow) Raise() {
 	w.SystemWindow.Raise()
 	CurrentRenderWindow = w
@@ -436,7 +436,7 @@ func (w *RenderWindow) Closed() {
 
 // IsClosed reports if the window has been closed
 func (w *RenderWindow) IsClosed() bool {
-	return w.SystemWindow.IsClosed() || w.MainStageMgr.Stack.Len() == 0
+	return w.SystemWindow.IsClosed() || w.Mains.Stack.Len() == 0
 }
 
 // SetCloseReqFunc sets the function that is called whenever there is a
@@ -495,13 +495,13 @@ func (w *RenderWindow) SendCustomEvent(data any) {
 func (w *RenderWindow) SendWinFocusEvent(act events.WinActions) {
 	// se := window.NewEvent(act)
 	// se.Init()
-	// w.MainStageMgr.HandleEvent(se)
+	// w.Mains.HandleEvent(se)
 }
 
 /////////////////////////////////////////////////////////////////////////////
 //                   Main Method: EventLoop
 
-// EventLoop runs the event processing loop for the RenderWin -- grabs system
+// EventLoop runs the event processing loop for the RenderWindow -- grabs system
 // events for the window and dispatches them to receiving nodes, and manages
 // other state etc (popups, etc).
 func (w *RenderWindow) EventLoop() {
@@ -529,7 +529,7 @@ func (w *RenderWindow) EventLoop() {
 	}
 	WindowWait.Done()
 	// our last act must be self destruction!
-	w.MainStageMgr.DeleteAll()
+	w.Mains.DeleteAll()
 }
 
 // HandleEvent processes given events.Event.
@@ -556,7 +556,7 @@ func (w *RenderWindow) HandleEvent(e events.Event) {
 		return
 	}
 	// fmt.Printf("got event type: %v: %v\n", et.BitIndexString(), evi)
-	w.MainStageMgr.MainHandleEvent(e)
+	w.Mains.MainHandleEvent(e)
 	rc.Unlock()
 }
 
@@ -656,7 +656,7 @@ const (
 	MaxSpritesPerTexture = 128
 )
 
-// RenderParams are the key RenderWin params that determine if
+// RenderParams are the key RenderWindow params that determine if
 // a scene needs to be restyled since last render, if these params change.
 type RenderParams struct {
 	// LogicalDPI is the current logical dots-per-inch resolution of the
@@ -706,7 +706,7 @@ type RenderContext struct {
 	Geom math32.Geom2DInt
 
 	// Mu is mutex for locking out rendering and any destructive updates.
-	// It is locked at the RenderWin level during rendering and
+	// It is locked at the RenderWindow level during rendering and
 	// event processing to provide exclusive blocking of external updates.
 	// Use AsyncLock from any outside routine to grab the lock before
 	// doing modifications.
@@ -731,7 +731,7 @@ func NewRenderContext() *RenderContext {
 	return rc
 }
 
-// Lock is called by RenderWin during RenderWindow and HandleEvent
+// Lock is called by RenderWindow during RenderWindow and HandleEvent
 // when updating all widgets and rendering the screen.
 // Any outside access to window contents / scene must acquire this
 // lock first.  In general, use AsyncLock to do this.
@@ -764,7 +764,7 @@ func (rc *RenderContext) String() string {
 
 // RenderScenes are a list of Scene and direct rendering widgets,
 // compiled in rendering order, whose Pixels images are composed
-// directly to the RenderWin window.
+// directly to the RenderWindow window.
 type RenderScenes struct {
 
 	// starting index for this set of Scenes
@@ -884,13 +884,13 @@ func (sc *Scene) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 }
 
 //////////////////////////////////////////////////////////////////////
-//  RenderWin methods
+//  RenderWindow methods
 
 func (w *RenderWindow) RenderContext() *RenderContext {
-	return w.MainStageMgr.RenderContext
+	return w.Mains.RenderContext
 }
 
-// RenderWindow performs all rendering based on current StageMgr config.
+// RenderWindow performs all rendering based on current Stages config.
 // It sets the Write lock on RenderContext Mutex, so nothing else can update
 // during this time.  All other updates are done with a Read lock so they
 // won't interfere with each other.
@@ -903,8 +903,8 @@ func (w *RenderWindow) RenderWindow() {
 	}()
 	rebuild := rc.HasFlag(RenderRebuild)
 
-	stageMods, sceneMods := w.MainStageMgr.UpdateAll() // handles all Scene / Widget updates!
-	top := w.MainStageMgr.Top()
+	stageMods, sceneMods := w.Mains.UpdateAll() // handles all Scene / Widget updates!
+	top := w.Mains.Top()
 	if top == nil {
 		return
 	}
@@ -953,7 +953,7 @@ func (w *RenderWindow) DrawScenes() {
 
 	rs.SetImages(drw) // ensure all updated images copied
 
-	top := w.MainStageMgr.Top()
+	top := w.Mains.Top()
 	if top.Sprites.Modified {
 		top.Sprites.ConfigSprites(drw)
 	}
@@ -1015,7 +1015,7 @@ func (w *RenderWindow) GatherScenes() bool {
 	rs.Reset()
 	scIndex := make(map[Widget]int)
 
-	sm := &w.MainStageMgr
+	sm := &w.Mains
 	n := sm.Stack.Len()
 	if n == 0 {
 		slog.Error("GatherScenes stack empty")
@@ -1057,7 +1057,7 @@ func (w *RenderWindow) GatherScenes() bool {
 	top.Sprites.Modified = true // ensure configured
 
 	// then add the popups for the top main stage
-	for _, kv := range top.PopupMgr.Stack.Order {
+	for _, kv := range top.Popups.Stack.Order {
 		st := kv.Value
 		rs.Add(st.Scene, scIndex)
 		if DebugSettings.WinRenderTrace {
@@ -1069,14 +1069,14 @@ func (w *RenderWindow) GatherScenes() bool {
 }
 
 func (w *RenderWindow) SendShowEvents() {
-	w.MainStageMgr.SendShowEvents()
+	w.Mains.SendShowEvents()
 }
 
 ////////////////////////////////////////////////////////////////////////////
 //  Scrim
 
 // A Scrim is just a dummy Widget used for rendering a Scrim.
-// Only used for its type. Everything else managed by RenderWin.
+// Only used for its type. Everything else managed by RenderWindow.
 type Scrim struct {
 	WidgetBase
 }

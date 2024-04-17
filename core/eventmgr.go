@@ -132,21 +132,22 @@ type EventMgr struct {
 	DragData any
 }
 
-// MainStageMgr returns the MainStageMgr for our Main Stage
-func (em *EventMgr) MainStageMgr() *StageMgr {
+// Mains returns the stack of main stages for our scene.
+func (em *EventMgr) Mains() *Stages {
 	if em.Scene == nil {
 		return nil
 	}
-	return em.Scene.MainStageMgr()
+	return em.Scene.Stage.Mains
 }
 
-// RenderWin returns the overall render window, which could be nil
-func (em *EventMgr) RenderWin() *RenderWindow {
-	mgr := em.MainStageMgr()
+// RenderWindow returns the overall render window in which we reside,
+// which could be nil.
+func (em *EventMgr) RenderWindow() *RenderWindow {
+	mgr := em.Mains()
 	if mgr == nil {
 		return nil
 	}
-	return mgr.RenderWin
+	return mgr.RenderWindow
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -623,7 +624,7 @@ func (em *EventMgr) HandleLong(e events.Event, deep Widget, w *Widget, pos *imag
 	// fmt.Println("setting new:", deep)
 	*pos = e.WindowPos()
 	*t = time.AfterFunc(stime, func() {
-		win := em.RenderWin()
+		win := em.RenderWindow()
 		if win == nil {
 			return
 		}
@@ -806,7 +807,7 @@ func (em *EventMgr) DropFinalize(de *events.DragDrop) {
 // if available.
 func (em *EventMgr) Clipboard() system.Clipboard {
 	var gwin system.Window
-	if win := em.RenderWin(); win != nil {
+	if win := em.RenderWindow(); win != nil {
 		gwin = win.SystemWindow
 	}
 	return system.TheApp.Clipboard(gwin)
@@ -814,7 +815,7 @@ func (em *EventMgr) Clipboard() system.Clipboard {
 
 // SetCursor sets window cursor to given Cursor
 func (em *EventMgr) SetCursor(cur cursors.Cursor) {
-	win := em.RenderWin()
+	win := em.RenderWindow()
 	if win == nil {
 		return
 	}
@@ -1062,7 +1063,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	if e.Type() != events.KeyChord {
 		return
 	}
-	win := em.RenderWin()
+	win := em.RenderWindow()
 	if win == nil {
 		return
 	}
@@ -1094,7 +1095,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
 		fnm, _ := filepath.Abs("./GrabOf_" + sc.Name() + "_" + dstr + ".png")
 		imagex.Save(sc.Pixels, fnm)
-		fmt.Printf("Saved RenderWin Image to: %s\n", fnm)
+		fmt.Printf("Saved RenderWindow Image to: %s\n", fnm)
 		e.SetHandled()
 	case keymap.ZoomIn:
 		win.StepZoom(1)

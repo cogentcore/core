@@ -122,7 +122,7 @@ func (fb *FileBrowse) OpenPath(path core.Filename) { //types:add
 	fb.SetName(pnm)
 	fb.UpdateProject()
 	fb.Files.OpenPath(root)
-	// win := fb.ParentRenderWin()
+	// win := fb.ParentRenderWindow()
 	// if win != nil {
 	// 	winm := "browser-" + pnm
 	// 	win.SetName(winm)
