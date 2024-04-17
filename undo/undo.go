@@ -3,9 +3,15 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package undo supports generic undo / redo functionality, using an efficient
-diff of string-valued state representation of a 'document' being edited
-which can be JSON or XML or actual text -- whatever.
+Package undo package provides a generic undo / redo functionality based on `[]string`
+representations of any kind of state representation (typically JSON dump of the 'document'
+state). It stores the compact diffs from one state change to the next, with raw copies saved
+at infrequent intervals to tradeoff cost of computing diffs.
+
+In addition state (which is optional on any given step), a description of the action
+and arbitrary string-encoded data can be saved with each record.  Thus, for cases
+where the state doesn't change, you can just save some data about the action sufficient
+to undo / redo it.
 
 A new record must be saved of the state just *before* an action takes place
 and the nature of the action taken.
@@ -43,7 +49,7 @@ type Rec struct {
 	// description of this action, for user to see
 	Action string
 
-	// action data, encoded however you want -- some undo records can just be about this action data that can be interpeted to Undo / Redo a non-state-changing action
+	// action data, encoded however you want -- some undo records can just be about this action data that can be interpreted to Undo / Redo a non-state-changing action
 	Data string
 
 	// if present, then direct save of full state -- do this at intervals to speed up computing prior states
