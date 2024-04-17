@@ -6,7 +6,39 @@ package core
 
 import (
 	"testing"
+
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
+	"github.com/stretchr/testify/assert"
 )
+
+func TestButtonText(t *testing.T) {
+	b := NewBody()
+	NewButton(b).SetText("Download")
+	b.AssertRender(t, "button/text")
+}
+
+func TestButtonIcon(t *testing.T) {
+	b := NewBody()
+	NewButton(b).SetIcon(icons.Download)
+	b.AssertRender(t, "button/icon")
+}
+
+func TestButtonTextIcon(t *testing.T) {
+	b := NewBody()
+	NewButton(b).SetText("Download").SetIcon(icons.Download)
+	b.AssertRender(t, "button/text-icon")
+}
+
+func TestButtonClick(t *testing.T) {
+	b := NewBody()
+	clicked := false
+	bt := NewButton(b).OnClick(func(e events.Event) {
+		clicked = true
+	})
+	bt.Send(events.Click)
+	assert.True(t, clicked)
+}
 
 func TestButton(t *testing.T) {
 	for typi, typ := range ButtonTypesValues() {
