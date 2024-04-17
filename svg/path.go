@@ -121,7 +121,8 @@ func (g *Path) AddPath(cmd PathCmds, args ...float32) {
 
 // AddPathArc adds an arc command using the simpler Paint.DrawArc parameters
 // with center at the current position, and the given radius
-// and angles in degrees
+// and angles in degrees. Because the y axis points down, angles are clockwise,
+// and the rendering draws segments progressing from angle1 to angle2.
 func (g *Path) AddPathArc(r, angle1, angle2 float32) {
 	ra1 := math32.DegToRad(angle1)
 	ra2 := math32.DegToRad(angle2)
@@ -129,8 +130,16 @@ func (g *Path) AddPathArc(r, angle1, angle2 float32) {
 	ys := r * math32.Sin(ra1)
 	xe := r * math32.Cos(ra2)
 	ye := r * math32.Sin(ra2)
+	longArc := float32(0)
+	if math32.Abs(angle2-angle1) >= 180 {
+		longArc = 1
+	}
+	sweep := float32(1)
+	if angle2-angle1 < 0 {
+		sweep = 0
+	}
 	g.AddPath(Pcm, xs, ys)
-	g.AddPath(Pca, r, r, 0, 1, 1, xe-xs, ye-ys)
+	g.AddPath(Pca, r, r, 0, longArc, sweep, xe-xs, ye-ys)
 }
 
 // UpdatePathString sets the path string from the Data

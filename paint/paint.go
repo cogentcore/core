@@ -725,7 +725,8 @@ func (pc *Context) DrawRoundedShadowBlur(blurSigma, radiusFactor, x, y, w, h flo
 }
 
 // DrawEllipticalArc draws arc between angle1 and angle2 (radians)
-// along an ellipse,
+// along an ellipse. Because the y axis points down, angles are clockwise,
+// and the rendering draws segments progressing from angle1 to angle2
 // using quadratic bezier curves -- centers of ellipse are at cx, cy with
 // radii rx, ry -- see DrawEllipticalArcPath for a version compatible with SVG
 // A/a path drawing, which uses previous position instead of two angles
@@ -894,7 +895,8 @@ func (pc *Context) DrawEllipse(x, y, rx, ry float32) {
 }
 
 // DrawArc draws an arc at the given position with the given radius
-// and angles in radians.
+// and angles in radians.  Because the y axis points down, angles are clockwise,
+// and the rendering draws segments progressing from angle1 to angle2
 func (pc *Context) DrawArc(x, y, r, angle1, angle2 float32) {
 	pc.DrawEllipticalArc(x, y, r, r, angle1, angle2)
 }
