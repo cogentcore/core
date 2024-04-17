@@ -81,7 +81,7 @@ func (wb *WidgetBase) IsReadOnly() bool {
 	return wb.StateIs(states.ReadOnly) || wb.StateIs(states.Disabled)
 }
 
-// SetReadOnly sets the ReadOnly state flag to given value
+// SetReadOnly sets the [states.ReadOnly] flag to the given value.
 func (wb *WidgetBase) SetReadOnly(ro bool) *WidgetBase {
 	return wb.SetState(ro, states.ReadOnly)
 }
