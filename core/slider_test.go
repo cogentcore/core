@@ -7,6 +7,8 @@ package core
 import (
 	"testing"
 
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,4 +33,25 @@ func TestSliderBounds(t *testing.T) {
 	sr := NewSlider(b).SetMin(5.7).SetMax(18).SetValue(10.2)
 	assert.Equal(t, "(value: 10.2, minimum: 5.7, maximum: 18)", sr.WidgetTooltip())
 	b.AssertRender(t, "slider/bounds")
+}
+
+func TestSliderArrowKeys(t *testing.T) {
+	b := NewBody()
+	sr := NewSlider(b)
+	b.AssertRender(t, "slider/arrow-keys", func() {
+		sr.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeLeftArrow, 0))
+		assert.Equal(t, float32(0.4), sr.Value)
+		sr.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeDownArrow, 0))
+		assert.Equal(t, float32(0.5), sr.Value)
+		sr.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeUpArrow, 0))
+		assert.Equal(t, float32(0.4), sr.Value)
+		sr.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeRightArrow, 0))
+		assert.Equal(t, float32(0.5), sr.Value)
+		sr.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodePageUp, 0))
+		assert.Equal(t, float32(0.3), sr.Value)
+		sr.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodePageDown, 0))
+		assert.Equal(t, float32(0.5), sr.Value)
+		sr.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodePageDown, 0))
+		assert.Equal(t, float32(0.7), sr.Value)
+	})
 }
