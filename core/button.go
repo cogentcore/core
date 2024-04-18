@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/units"
 )
@@ -309,7 +310,7 @@ func (bt *Button) HandleClickDismissMenu() {
 
 func (bt *Button) WidgetTooltip() string {
 	res := bt.Tooltip
-	if bt.Shortcut != "" {
+	if bt.Shortcut != "" && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
 		res = "[" + bt.Shortcut.Label() + "]"
 		if bt.Tooltip != "" {
 			res += " " + bt.Tooltip
@@ -376,7 +377,7 @@ func (bt *Button) Config() {
 	}
 
 	sci := -1
-	if bt.Type == ButtonMenu && !TheApp.SystemPlatform().IsMobile() {
+	if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
 		if indi < 0 && bt.Shortcut != "" {
 			config.Add(StretchType, "sc-stretch")
 			sci = len(config)
