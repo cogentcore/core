@@ -30,6 +30,10 @@ func TestSpinnerBounds(t *testing.T) {
 	assert.Equal(t, "(minimum: -0.5, maximum: 2.7)", sp.WidgetTooltip())
 	sp.SetTooltip("Rating")
 	assert.Equal(t, "Rating (minimum: -0.5, maximum: 2.7)", sp.WidgetTooltip())
+	sp.SetValue(-2.1)
+	assert.Equal(t, float32(-0.5), sp.Value)
+	sp.SetValue(18)
+	assert.Equal(t, float32(2.7), sp.Value)
 	b.AssertRender(t, "spinner/bounds")
 }
 
