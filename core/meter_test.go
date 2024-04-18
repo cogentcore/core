@@ -7,6 +7,7 @@ package core
 import (
 	"testing"
 
+	"cogentcore.org/core/styles"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,4 +32,24 @@ func TestMeterBounds(t *testing.T) {
 	m := NewMeter(b).SetMin(5.7).SetMax(18).SetValue(10.2)
 	assert.Equal(t, "(value: 10.2, minimum: 5.7, maximum: 18)", m.WidgetTooltip())
 	b.AssertRender(t, "meter/bounds")
+}
+
+func TestMeterColumn(t *testing.T) {
+	b := NewBody()
+	NewMeter(b).Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
+	b.AssertRender(t, "meter/column")
+}
+
+func TestMeterCircle(t *testing.T) {
+	b := NewBody()
+	NewMeter(b).SetType(MeterCircle)
+	b.AssertRender(t, "meter/circle")
+}
+
+func TestMeterSemicircle(t *testing.T) {
+	b := NewBody()
+	NewMeter(b).SetType(MeterSemicircle)
+	b.AssertRender(t, "meter/semicircle")
 }
