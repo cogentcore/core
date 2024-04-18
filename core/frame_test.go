@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 func frameTestButtons(fr *Frame) {
@@ -43,4 +44,38 @@ func TestFrameGradient(t *testing.T) {
 	})
 	frameTestButtons(fr)
 	b.AssertRender(t, "frame/gradient")
+}
+
+func TestFrameBorder(t *testing.T) {
+	b := NewBody()
+	fr := NewFrame(b)
+	fr.Style(func(s *styles.Style) {
+		s.Border.Width.Set(units.Dp(4))
+		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+	})
+	frameTestButtons(fr)
+	b.AssertRender(t, "frame/border")
+}
+func TestFrameBorderRadius(t *testing.T) {
+	b := NewBody()
+	fr := NewFrame(b)
+	fr.Style(func(s *styles.Style) {
+		s.Border.Radius = styles.BorderRadiusLarge
+		s.Border.Width.Set(units.Dp(4))
+		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+	})
+	frameTestButtons(fr)
+	b.AssertRender(t, "frame/border-radius")
+}
+
+func TestFrameNoGrow(t *testing.T) {
+	b := NewBody()
+	fr := NewFrame(b)
+	fr.Style(func(s *styles.Style) {
+		s.Grow.Set(0, 0)
+		s.Border.Width.Set(units.Dp(4))
+		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+	})
+	frameTestButtons(fr)
+	b.AssertRender(t, "frame/no-grow")
 }
