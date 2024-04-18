@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 )
@@ -63,6 +64,7 @@ type App struct {
 func Init(a system.App, ab *App) {
 	ab.This = a
 	system.TheApp = a
+	key.SystemPlatform = a.SystemPlatform().String()
 }
 
 func (a *App) MainLoop() {

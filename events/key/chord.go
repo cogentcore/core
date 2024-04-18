@@ -6,17 +6,19 @@ package key
 
 import (
 	"fmt"
-	"runtime"
 	"strings"
 	"unicode"
 )
 
-// TODO: consider adding chaining methods for constructing chords
-
-// Chord represents the key chord associated with a given key function -- it
-// is linked to the KeyChordValue in the views.Value system so you can just
+// Chord represents the key chord associated with a given key function; it
+// is linked to the [cogentcore.org/core/views.KeyChordValue] so you can just
 // type keys to set key chords.
 type Chord string
+
+// SystemPlatform is the string version of [cogentcore.org/core/system.App.SystemPlatform],
+// which is set by system during initialization so that this package can conditionalize
+// shortcut formatting based on the underlying system platform without import cycles.
+var SystemPlatform string
 
 // NewChord returns a string representation of the keyboard event suitable for
 // keyboard function maps, etc. Printable runes are sent directly, and
@@ -42,7 +44,7 @@ func NewChord(rn rune, code Codes, mods Modifiers) Chord {
 // PlatformChord translates Command into either Control or Meta depending on the platform
 func (ch Chord) PlatformChord() Chord {
 	sc := string(ch)
-	if runtime.GOOS == "darwin" {
+	if SystemPlatform == "MacOS" {
 		sc = strings.ReplaceAll(sc, "Command+", "Meta+")
 	} else {
 		sc = strings.ReplaceAll(sc, "Command+", "Control+")
@@ -79,13 +81,13 @@ func (ch Chord) Decode() (r rune, code Codes, mods Modifiers, err error) {
 func (ch Chord) Label() string {
 	cs := string(ch.PlatformChord())
 	cs = strings.ReplaceAll(cs, "Control", "Ctrl")
-	switch runtime.GOOS {
-	case "darwin":
+	switch SystemPlatform {
+	case "MacOS":
 		cs = strings.ReplaceAll(cs, "Ctrl+", "^") // ⌃ doesn't look as good
 		cs = strings.ReplaceAll(cs, "Shift+", "⇧")
 		cs = strings.ReplaceAll(cs, "Meta+", "⌘")
 		cs = strings.ReplaceAll(cs, "Alt+", "⌥")
-	case "windows":
+	case "Windows":
 		cs = strings.ReplaceAll(cs, "Meta+", "Win+") // todo: actual windows key
 	}
 	cs = strings.ReplaceAll(cs, "Backspace", "⌫")
