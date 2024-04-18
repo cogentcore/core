@@ -62,7 +62,7 @@ func TestButtonMenuClick(t *testing.T) {
 		NewButton(m).SetText("Copy link")
 		NewButton(m).SetText("Send message")
 	})
-	b.AssertScreenRender(t, "button/menu-click", func() {
+	b.AssertRenderScreen(t, "button/menu-click", func() {
 		bt.Send(events.Click)
 	})
 }

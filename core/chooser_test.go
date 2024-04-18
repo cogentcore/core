@@ -7,7 +7,10 @@ package core
 import (
 	"testing"
 
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,6 +18,17 @@ func TestChooserSetStrings(t *testing.T) {
 	b := NewBody()
 	NewChooser(b).SetStrings("macOS", "Windows", "Linux")
 	b.AssertRender(t, "chooser/set-strings")
+}
+
+func TestChooserClick(t *testing.T) {
+	b := NewBody()
+	b.Style(func(s *styles.Style) {
+		s.Min.Set(units.Em(20), units.Em(10))
+	})
+	ch := NewChooser(b).SetStrings("macOS", "Windows", "Linux")
+	b.AssertRenderScreen(t, "chooser/click", func() {
+		ch.Send(events.Click)
+	})
 }
 
 func TestChooserSetItems(t *testing.T) {
@@ -47,4 +61,22 @@ func TestChooserOutlined(t *testing.T) {
 	b := NewBody()
 	NewChooser(b).SetType(ChooserOutlined).SetStrings("Apple", "Orange", "Strawberry")
 	b.AssertRender(t, "chooser/outlined")
+}
+
+func TestChooserIcon(t *testing.T) {
+	b := NewBody()
+	NewChooser(b).SetIcon(icons.Sort).SetStrings("Newest", "Oldest", "Popular")
+	b.AssertRender(t, "chooser/icon")
+}
+
+func TestChooserEditable(t *testing.T) {
+	b := NewBody()
+	NewChooser(b).SetEditable(true).SetStrings("Newest", "Oldest", "Popular")
+	b.AssertRender(t, "chooser/editable")
+}
+
+func TestChooserAllowNew(t *testing.T) {
+	b := NewBody()
+	NewChooser(b).SetAllowNew(true).SetStrings("Newest", "Oldest", "Popular")
+	b.AssertRender(t, "chooser/allow-new")
 }
