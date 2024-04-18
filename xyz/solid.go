@@ -204,9 +204,6 @@ func (sld *Solid) UpdateMeshBBox() {
 	if sld.MeshPtr != nil {
 		mesh := sld.MeshPtr.AsMeshBase()
 		sld.MeshBBox = mesh.BBox
-		fmt.Println("got meshbb", sld, sld.MeshBBox.BBox.Max)
-	} else {
-		fmt.Println("nil meshptr", sld)
 	}
 }
 
