@@ -235,10 +235,10 @@ func (wb *WidgetBase) SendKeyChordRune(r rune, code key.Codes, mods key.Modifier
 // It also checks if the State has changed and calls ApplyStyle if so.
 // If more significant Config level changes are needed due to an event,
 // the event handler must do this itself.
-func (wb *WidgetBase) HandleEvent(ev events.Event) {
+func (wb *WidgetBase) HandleEvent(e events.Event) {
 	if DebugSettings.EventTrace {
-		if ev.Type() != events.MouseMove {
-			fmt.Println(ev, "to", wb)
+		if e.Type() != events.MouseMove {
+			fmt.Println(e, "to", wb)
 		}
 	}
 	if wb == nil || wb.This() == nil {
@@ -250,9 +250,9 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 	shouldContinue := func() bool {
 		return wb.This() != nil
 	}
-	wb.FirstListeners.Call(ev, shouldContinue)
-	wb.Listeners.Call(ev, shouldContinue)
-	wb.FinalListeners.Call(ev, shouldContinue)
+	wb.FirstListeners.Call(e, shouldContinue)
+	wb.Listeners.Call(e, shouldContinue)
+	wb.FinalListeners.Call(e, shouldContinue)
 
 	if s.State != state {
 		wb.ApplyStyleUpdate()
@@ -261,26 +261,26 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 
 // FirstHandleEvent sends the given event to the FirstListeners for that event type.
 // Does NOT do any state updating.
-func (wb *WidgetBase) FirstHandleEvent(ev events.Event) {
+func (wb *WidgetBase) FirstHandleEvent(e events.Event) {
 	if DebugSettings.EventTrace {
-		if ev.Type() != events.MouseMove {
-			fmt.Println(ev, "first to", wb)
+		if e.Type() != events.MouseMove {
+			fmt.Println(e, "first to", wb)
 		}
 	}
-	wb.FirstListeners.Call(ev, func() bool {
+	wb.FirstListeners.Call(e, func() bool {
 		return wb.This() != nil
 	})
 }
 
 // FinalHandleEvent sends the given event to the FinalListeners for that event type.
 // Does NOT do any state updating.
-func (wb *WidgetBase) FinalHandleEvent(ev events.Event) {
+func (wb *WidgetBase) FinalHandleEvent(e events.Event) {
 	if DebugSettings.EventTrace {
-		if ev.Type() != events.MouseMove {
-			fmt.Println(ev, "final to", wb)
+		if e.Type() != events.MouseMove {
+			fmt.Println(e, "final to", wb)
 		}
 	}
-	wb.FinalListeners.Call(ev, func() bool {
+	wb.FinalListeners.Call(e, func() bool {
 		return wb.This() != nil
 	})
 }
