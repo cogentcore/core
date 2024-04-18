@@ -23,7 +23,7 @@ You can set the placeholder of a chooser:
 core.NewChooser(parent).SetPlaceholder("Choose a platform").SetStrings("macOS", "Windows", "Linux")
 ```
 
-You can set the starting value of a chooser:
+You can set the current value of a chooser:
 
 ```Go
 core.NewChooser(parent).SetStrings("Apple", "Orange", "Strawberry").SetCurrentValue("Orange")

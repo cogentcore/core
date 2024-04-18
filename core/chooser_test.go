@@ -28,3 +28,23 @@ func TestChooserSetItems(t *testing.T) {
 		assert.Equal(t, "Use a computer", ch.WidgetTooltip())
 	})
 }
+
+func TestChooserPlaceholder(t *testing.T) {
+	b := NewBody()
+	NewChooser(b).SetPlaceholder("Choose a platform").SetStrings("macOS", "Windows", "Linux")
+	b.AssertRender(t, "chooser/placeholder")
+}
+
+func TestChooserCurrentValue(t *testing.T) {
+	b := NewBody()
+	ch := NewChooser(b).SetStrings("Apple", "Orange", "Strawberry").SetCurrentValue("Orange")
+	assert.Equal(t, 1, ch.CurrentIndex)
+	assert.Equal(t, ChooserItem{Value: "Orange"}, ch.CurrentItem)
+	b.AssertRender(t, "chooser/current-value")
+}
+
+func TestChooserOutlined(t *testing.T) {
+	b := NewBody()
+	NewChooser(b).SetType(ChooserOutlined).SetStrings("Apple", "Orange", "Strawberry")
+	b.AssertRender(t, "chooser/outlined")
+}
