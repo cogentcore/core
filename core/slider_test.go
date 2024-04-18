@@ -67,3 +67,14 @@ func TestSliderStep(t *testing.T) {
 		tolassert.Equal(t, float32(0.2), sr.Value)
 	})
 }
+
+func TestSliderEnforceStep(t *testing.T) {
+	b := NewBody()
+	sr := NewSlider(b).SetStep(0.2).SetEnforceStep(true)
+	b.AssertRender(t, "slider/enforce-step", func() {
+		sr.SetValue(0.7)
+		tolassert.Equal(t, float32(0.7), sr.Value)
+		sr.SnapValue()
+		tolassert.Equal(t, float32(0.8), sr.Value)
+	})
+}
