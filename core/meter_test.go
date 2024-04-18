@@ -53,3 +53,15 @@ func TestMeterSemicircle(t *testing.T) {
 	NewMeter(b).SetType(MeterSemicircle)
 	b.AssertRender(t, "meter/semicircle")
 }
+
+func TestMeterCircleText(t *testing.T) {
+	b := NewBody()
+	NewMeter(b).SetType(MeterCircle).SetText("50%")
+	b.AssertRender(t, "meter/circle-text")
+}
+
+func TestMeterSemicircleText(t *testing.T) {
+	b := NewBody()
+	NewMeter(b).SetType(MeterSemicircle).SetText("50%")
+	b.AssertRender(t, "meter/semicircle-text")
+}
