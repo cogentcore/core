@@ -40,3 +40,9 @@ func TestLabelTextDecoration(t *testing.T) {
 		}
 	}
 }
+
+func TestLabelLink(t *testing.T) {
+	b := NewBody()
+	NewLabel(b).SetText(`Hello, <a href="https://example.com">world</a>!`)
+	b.AssertRender(t, "label/link")
+}
