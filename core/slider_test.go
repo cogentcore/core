@@ -9,6 +9,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/gox/tolassert"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -53,5 +54,16 @@ func TestSliderArrowKeys(t *testing.T) {
 		assert.Equal(t, float32(0.5), sr.Value)
 		sr.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodePageDown, 0))
 		assert.Equal(t, float32(0.7), sr.Value)
+	})
+}
+
+func TestSliderStep(t *testing.T) {
+	b := NewBody()
+	sr := NewSlider(b).SetStep(0.3)
+	b.AssertRender(t, "slider/step", func() {
+		sr.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeRightArrow, 0))
+		tolassert.Equal(t, float32(0.8), sr.Value)
+		sr.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodePageUp, 0))
+		tolassert.Equal(t, float32(0.2), sr.Value)
 	})
 }
