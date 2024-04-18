@@ -17,10 +17,9 @@ import (
 
 var testImagePath = Filename(filepath.Join("..", "icon.png"))
 
-func TestImageBasic(t *testing.T) {
+func TestImage(t *testing.T) {
 	b := NewBody()
-	fr := NewFrame(b)
-	img := NewImage(fr)
+	img := NewImage(b)
 	assert.NoError(t, img.Open(testImagePath))
 	b.AssertRender(t, "image/basic")
 }
@@ -29,11 +28,9 @@ func TestImageCropped(t *testing.T) {
 	b := NewBody()
 	b.Style(func(s *styles.Style) {
 		s.Max.Set(units.Dp(75))
-	})
-	fr := NewFrame(b).Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
-	img := NewImage(fr)
+	img := NewImage(b)
 	assert.NoError(t, img.Open(testImagePath))
 	b.AssertRender(t, "image/cropped")
 }
@@ -42,11 +39,9 @@ func TestImageScrolled(t *testing.T) {
 	b := NewBody()
 	b.Style(func(s *styles.Style) {
 		s.Max.Set(units.Dp(75))
-	})
-	fr := NewFrame(b).Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
-	img := NewImage(fr)
+	img := NewImage(b)
 	assert.NoError(t, img.Open(testImagePath))
 	b.AssertRender(t, "image/scrolled", func() {
 		b.SystemEvents().Scroll(image.Pt(10, 10), math32.Vec2(2, 3))
