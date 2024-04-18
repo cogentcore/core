@@ -195,7 +195,7 @@ func (ly *Layout) ChildWithFocus() (Widget, int) {
 }
 
 // FocusNextChild attempts to move the focus into the next layout child
-// (with wraparound to start) -- returns true if successful.
+// (with wraparound to start); returns true if successful.
 // if updn is true, then for Grid layouts, it moves down to next row
 // instead of just the sequentially next item.
 func (ly *Layout) FocusNextChild(updn bool) bool {
@@ -231,11 +231,11 @@ func (ly *Layout) FocusNextChild(updn bool) bool {
 	return true
 }
 
-// FocusPrevChild attempts to move the focus into the previous layout child
-// (with wraparound to end) -- returns true if successful.
+// FocusPreviousChild attempts to move the focus into the previous layout child
+// (with wraparound to end); returns true if successful.
 // If updn is true, then for Grid layouts, it moves up to next row
 // instead of just the sequentially next item.
-func (ly *Layout) FocusPrevChild(updn bool) bool {
+func (ly *Layout) FocusPreviousChild(updn bool) bool {
 	sz := len(ly.Kids)
 	if sz <= 1 {
 		return false
@@ -310,7 +310,7 @@ func (ly *Layout) HandleKeys() {
 				}
 				return
 			case keymap.MoveLeft:
-				if ly.FocusPrevChild(false) {
+				if ly.FocusPreviousChild(false) {
 					e.SetHandled()
 				}
 				return
@@ -324,7 +324,7 @@ func (ly *Layout) HandleKeys() {
 				}
 				return
 			case keymap.MoveUp:
-				if ly.FocusPrevChild(true) {
+				if ly.FocusPreviousChild(true) {
 					e.SetHandled()
 				}
 				return
@@ -343,7 +343,7 @@ func (ly *Layout) HandleKeys() {
 			case keymap.PageUp:
 				proc := false
 				for st := 0; st < SystemSettings.LayoutPageSteps; st++ {
-					if !ly.FocusPrevChild(true) {
+					if !ly.FocusPreviousChild(true) {
 						break
 					}
 					proc = true
