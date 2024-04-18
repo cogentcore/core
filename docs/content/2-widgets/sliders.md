@@ -8,7 +8,7 @@ You can make a slider without any custom options:
 core.NewSlider(parent)
 ```
 
-You can set the starting value of a slider:
+You can set the value of a slider:
 
 ```Go
 core.NewSlider(parent).SetValue(0.7)

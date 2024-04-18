@@ -56,8 +56,7 @@ type Slider struct { //core:embedder
 	Step float32
 
 	// EnforceStep is whether to ensure that the value is always
-	// a multiple of [Slider.Step]. This only applies to user input,
-	// not programmatic value setting.
+	// a multiple of [Slider.Step].
 	EnforceStep bool
 
 	// PageStep is the amount that the PageUp and PageDown keys
@@ -220,7 +219,7 @@ func (sr *Slider) SetStyles() {
 	})
 }
 
-// SnapValue snaps the value to step sizes if [Slider.EnforceStep] is on
+// SnapValue snaps the value to [Slider.Step] if [Slider.EnforceStep] is on.
 func (sr *Slider) SnapValue() {
 	if !sr.EnforceStep {
 		return
@@ -351,6 +350,7 @@ func (sr *Slider) SetValue(val float32) *Slider {
 	val = math32.Clamp(val, sr.Min, effmax)
 	if sr.Value != val {
 		sr.Value = val
+		sr.SnapValue()
 		sr.SetPosFromValue(val)
 	}
 	sr.NeedsRender()

@@ -8,7 +8,7 @@ You can make a spinner without any custom options:
 core.NewSpinner(parent)
 ```
 
-You can set the starting value of a spinner:
+You can set the value of a spinner:
 
 ```Go
 core.NewSpinner(parent).SetValue(12.7)
