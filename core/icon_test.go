@@ -10,8 +10,14 @@ import (
 	"cogentcore.org/core/icons"
 )
 
-func TestIconBasic(t *testing.T) {
+func TestIcon(t *testing.T) {
 	b := NewBody()
-	NewIcon(b).SetIcon(icons.Close)
+	NewIcon(b).SetIcon(icons.Home)
 	b.AssertRender(t, "icon/basic")
+}
+
+func TestIconFilled(t *testing.T) {
+	b := NewBody()
+	NewIcon(b).SetIcon(icons.Home.Fill())
+	b.AssertRender(t, "icon/filled")
 }
