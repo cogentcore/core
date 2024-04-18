@@ -5,6 +5,7 @@
 package core
 
 import (
+	"image"
 	"testing"
 
 	"cogentcore.org/core/events"
@@ -84,4 +85,12 @@ func TestSliderIcon(t *testing.T) {
 	b := NewBody()
 	NewSlider(b).SetIcon(icons.DeployedCode.Fill())
 	b.AssertRender(t, "slider/icon")
+}
+
+func TestSliderChange(t *testing.T) {
+	b := NewBody()
+	sr := NewSlider(b)
+	b.AssertRender(t, "slider/change", func() {
+		sr.SystemEvents().MouseButton(events.MouseDown, events.Left, image.Pt(20, 60), 0)
+	})
 }
