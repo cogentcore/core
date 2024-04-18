@@ -12,7 +12,7 @@ import (
 )
 
 // This file contains all the special-purpose interfaces
-// beyond the basic Node interface
+// beyond the basic [Widget] interface.
 
 // Updater defines an interface for something that has an Update() method
 // this will be called by GUI actions that update values of a type

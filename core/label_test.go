@@ -16,7 +16,7 @@ func TestLabelTypes(t *testing.T) {
 	for _, typ := range LabelTypesValues() {
 		b := NewBody()
 		NewLabel(b).SetType(typ).SetText("Hello, world!")
-		b.AssertRender(t, "label/"+strcase.ToKebab(typ.String()))
+		b.AssertRender(t, "label/type/"+strcase.ToKebab(typ.String()))
 	}
 }
 
