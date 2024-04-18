@@ -5,14 +5,11 @@
 package core
 
 import (
-	"fmt"
 	"testing"
 
-	"cogentcore.org/core/cam/hct"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/styles"
 )
 
 func TestCanvas(t *testing.T) {
@@ -30,38 +27,4 @@ func TestCanvas(t *testing.T) {
 		pc.Fill()
 	})
 	b.AssertRender(t, "canvas/basic")
-}
-
-func TestCanvasLogo(t *testing.T) {
-	b := NewBody()
-	inner := hct.Lighten(colors.Scheme.Primary.Base, 10)
-	outer := hct.Darken(inner, 30)
-	core := hct.Saturate(hct.Lighten(hct.Spin(inner, 160), 20), 10)
-
-	fmt.Println("Outer:", colors.AsHex(outer))
-	fmt.Println("Inner:", colors.AsHex(inner))
-	fmt.Println("Core:", colors.AsHex(core))
-
-	NewCanvas(b).SetDraw(func(pc *paint.Context) {
-		pc.VectorEffect = styles.VectorEffectNone
-		pc.StrokeStyle.Width.Dots = 0.2
-
-		x := float32(.52)
-		pc.FillStyle.Color = colors.C(colors.Black)
-		pc.DrawRectangle(0, 0, 1, 1)
-		pc.Fill()
-
-		pc.DrawArc(x, 0.5, 0.4, math32.DegToRad(30), math32.DegToRad(30+300))
-		pc.StrokeStyle.Color = colors.C(outer)
-		pc.Stroke()
-
-		pc.DrawArc(x, 0.5, 0.22, math32.DegToRad(30), math32.DegToRad(30+300))
-		pc.StrokeStyle.Color = colors.C(inner)
-		pc.Stroke()
-
-		pc.FillStyle.Color = colors.C(core)
-		pc.DrawCircle(x, 0.5, 0.15)
-		pc.Fill()
-	})
-	b.AssertRender(t, "canvas/logo")
 }

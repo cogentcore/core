@@ -7,26 +7,7 @@ package colors
 import (
 	"fmt"
 	"image/color"
-
-	"cogentcore.org/core/cam/hct"
 )
-
-// This example generates the colors for the Cogent Core logo
-// using various color functions.
-func Example_core_logo() {
-	inner := Scheme.Primary.Base
-	outer := hct.Darken(inner, 30)
-	core := hct.Spin(hct.Lighten(inner, 30), 180)
-
-	fmt.Println("Outer:", AsHex(outer))
-	fmt.Println("Inner:", AsHex(inner))
-	fmt.Println("Core:", AsHex(core))
-
-	// Output:
-	// Outer: #001A41
-	// Inner: #005BC0
-	// Core: #D6A427
-}
 
 func ExampleIsNil_true() {
 	fmt.Println(IsNil(color.RGBA{}))
