@@ -434,12 +434,12 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					curTxt = txt
 				} else {
 					if (inTxt && curTxt != nil) || curPar == nil {
-						txt = NewText(curTxt, fmt.Sprintf("tspan%d", curTxt.NumLifetimeChildren()))
+						txt = NewText(curTxt, "tspan")
+						tree.SetUniqueName(txt)
 						txt.Pos = curTxt.Pos
-					} else {
-						if curPar != nil && curTxt != nil {
-							txt = NewText(curPar, fmt.Sprintf("tspan%d", curTxt.NumLifetimeChildren()))
-						}
+					} else if curTxt != nil {
+						txt = NewText(curPar, "tspan")
+						tree.SetUniqueName(txt)
 					}
 					inTspn = true
 					curTspn = txt

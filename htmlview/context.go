@@ -5,7 +5,6 @@
 package htmlview
 
 import (
-	"fmt"
 	"strings"
 
 	"cogentcore.org/core/colors"
@@ -13,6 +12,7 @@ import (
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/tree"
 	"github.com/aymerick/douceur/css"
 	"github.com/aymerick/douceur/parser"
 	selcss "github.com/ericchiang/css"
@@ -137,7 +137,8 @@ func (c *Context) InlineParent() core.Widget {
 	if c.InlinePw != nil {
 		return c.InlinePw
 	}
-	c.InlinePw = core.NewLayout(c.BlockParent, fmt.Sprintf("inline-container-%d", c.BlockParent.NumLifetimeChildren()))
+	c.InlinePw = core.NewLayout(c.BlockParent, "inline-container")
+	tree.SetUniqueName(c.InlinePw)
 	c.InlinePw.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 	})

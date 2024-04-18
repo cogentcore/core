@@ -7,7 +7,6 @@ package views
 import (
 	"log/slog"
 	"reflect"
-	"strconv"
 	"strings"
 	"unicode"
 
@@ -244,8 +243,8 @@ func (fb *FuncButton) SetFuncImpl(gfun *types.Func, rfun reflect.Value) *FuncBut
 		}
 		return r
 	}, snm)
-	// func name is not guaranteed to make it unique so we ensure it is (-1 because [tree.New] adds 1 first)
-	fb.SetName(snm + "-" + strconv.FormatUint(fb.Parent().NumLifetimeChildren()-1, 10))
+	fb.SetName(snm)
+	tree.SetUniqueName(fb)
 	txt := strcase.ToSentence(snm)
 	fb.SetText(txt)
 	// doc formatting interferes with anonymous functions
