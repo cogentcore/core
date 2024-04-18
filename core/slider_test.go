@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/gox/tolassert"
+	"cogentcore.org/core/icons"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -77,4 +78,10 @@ func TestSliderEnforceStep(t *testing.T) {
 		sr.SnapValue()
 		tolassert.Equal(t, float32(0.8), sr.Value)
 	})
+}
+
+func TestSliderIcon(t *testing.T) {
+	b := NewBody()
+	NewSlider(b).SetIcon(icons.DeployedCode.Fill())
+	b.AssertRender(t, "slider/icon")
 }
