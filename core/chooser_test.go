@@ -75,8 +75,41 @@ func TestChooserEditable(t *testing.T) {
 	b.AssertRender(t, "chooser/editable")
 }
 
+func TestChooserEditableClick(t *testing.T) {
+	b := NewBody()
+	b.Style(func(s *styles.Style) {
+		s.Min.Set(units.Em(20), units.Em(10))
+	})
+	ch := NewChooser(b).SetEditable(true).SetStrings("Newest", "Oldest", "Popular")
+	b.AssertRenderScreen(t, "chooser/editable-click", func() {
+		ch.Send(events.Click)
+	})
+}
+
+func TestChooserEditableTextFieldClick(t *testing.T) {
+	b := NewBody()
+	b.Style(func(s *styles.Style) {
+		s.Min.Set(units.Em(20), units.Em(10))
+	})
+	ch := NewChooser(b).SetEditable(true).SetStrings("Newest", "Oldest", "Popular")
+	b.AssertRenderScreen(t, "chooser/editable-text-field-click", func() {
+		ch.TextField().Send(events.Click)
+	})
+}
+
 func TestChooserAllowNew(t *testing.T) {
 	b := NewBody()
 	NewChooser(b).SetAllowNew(true).SetStrings("Newest", "Oldest", "Popular")
 	b.AssertRender(t, "chooser/allow-new")
+}
+
+func TestChooserAllowNewClick(t *testing.T) {
+	b := NewBody()
+	b.Style(func(s *styles.Style) {
+		s.Min.Set(units.Em(20), units.Em(10))
+	})
+	ch := NewChooser(b).SetAllowNew(true).SetStrings("Newest", "Oldest", "Popular")
+	b.AssertRenderScreen(t, "chooser/allow-new-click", func() {
+		ch.Send(events.Click)
+	})
 }
