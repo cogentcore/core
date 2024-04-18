@@ -131,3 +131,19 @@ func TestChooserEditableAllowNewTextFieldClick(t *testing.T) {
 		ch.TextField().Send(events.Click)
 	})
 }
+
+func TestChooserChange(t *testing.T) {
+	b := NewBody()
+	ch := NewChooser(b).SetStrings("Newest", "Oldest", "Popular")
+	index := -1
+	item := ChooserItem{}
+	ch.OnChange(func(e events.Event) {
+		index = ch.CurrentIndex
+		item = ch.CurrentItem
+	})
+	b.AssertRender(t, "chooser/change", func() {
+		ch.SelectItemAction(1)
+		assert.Equal(t, 1, index)
+		assert.Equal(t, ChooserItem{Value: "Oldest"}, item)
+	})
+}

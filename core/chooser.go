@@ -423,12 +423,12 @@ func (ch *Chooser) SetCurrentValue(v any) *Chooser {
 }
 
 // SetCurrentIndex sets the current index and the item associated with it.
-func (ch *Chooser) SetCurrentIndex(idx int) *Chooser {
-	if idx < 0 || idx >= len(ch.Items) {
+func (ch *Chooser) SetCurrentIndex(index int) *Chooser {
+	if index < 0 || index >= len(ch.Items) {
 		return ch
 	}
-	ch.CurrentIndex = idx
-	ch.CurrentItem = ch.Items[idx]
+	ch.CurrentIndex = index
+	ch.CurrentItem = ch.Items[index]
 	ch.ShowCurrentItem()
 	return ch
 }
@@ -475,22 +475,22 @@ func (ch *Chooser) ShowCurrentItem() *Chooser {
 }
 
 // SelectItem selects the item at the given index and updates the chooser to display it.
-func (ch *Chooser) SelectItem(idx int) *Chooser {
+func (ch *Chooser) SelectItem(index int) *Chooser {
 	if ch.This() == nil {
 		return ch
 	}
-	ch.SetCurrentIndex(idx)
+	ch.SetCurrentIndex(index)
 	ch.NeedsLayout()
 	return ch
 }
 
 // SelectItemAction selects the item at the given index and updates the chooser to display it.
 // It also sends an [events.Change] event to indicate that the value has changed.
-func (ch *Chooser) SelectItemAction(idx int) *Chooser {
+func (ch *Chooser) SelectItemAction(index int) *Chooser {
 	if ch.This() == nil {
 		return ch
 	}
-	ch.SelectItem(idx)
+	ch.SelectItem(index)
 	ch.SendChange()
 	return ch
 }
@@ -552,38 +552,38 @@ func (ch *Chooser) HandleEvents() {
 		case kf == keymap.MoveUp:
 			e.SetHandled()
 			if len(ch.Items) > 0 {
-				idx := ch.CurrentIndex - 1
-				if idx < 0 {
-					idx += len(ch.Items)
+				index := ch.CurrentIndex - 1
+				if index < 0 {
+					index += len(ch.Items)
 				}
-				ch.SelectItemAction(idx)
+				ch.SelectItemAction(index)
 			}
 		case kf == keymap.MoveDown:
 			e.SetHandled()
 			if len(ch.Items) > 0 {
-				idx := ch.CurrentIndex + 1
-				if idx >= len(ch.Items) {
-					idx -= len(ch.Items)
+				index := ch.CurrentIndex + 1
+				if index >= len(ch.Items) {
+					index -= len(ch.Items)
 				}
-				ch.SelectItemAction(idx)
+				ch.SelectItemAction(index)
 			}
 		case kf == keymap.PageUp:
 			e.SetHandled()
 			if len(ch.Items) > 10 {
-				idx := ch.CurrentIndex - 10
-				for idx < 0 {
-					idx += len(ch.Items)
+				index := ch.CurrentIndex - 10
+				for index < 0 {
+					index += len(ch.Items)
 				}
-				ch.SelectItemAction(idx)
+				ch.SelectItemAction(index)
 			}
 		case kf == keymap.PageDown:
 			e.SetHandled()
 			if len(ch.Items) > 10 {
-				idx := ch.CurrentIndex + 10
-				for idx >= len(ch.Items) {
-					idx -= len(ch.Items)
+				index := ch.CurrentIndex + 10
+				for index >= len(ch.Items) {
+					index -= len(ch.Items)
 				}
-				ch.SelectItemAction(idx)
+				ch.SelectItemAction(index)
 			}
 		case kf == keymap.Enter || (!ch.Editable && e.KeyRune() == ' '):
 			// if !(kt.Rune == ' ' && chb.Sc.Type == ScCompleter) {
