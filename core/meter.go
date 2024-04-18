@@ -109,7 +109,7 @@ func (m *Meter) WidgetTooltip() string {
 	if res != "" {
 		res += " "
 	}
-	res += fmt.Sprintf("(value: %9.4g, minimum: %g, maximum: %g)", m.Value, m.Min, m.Max)
+	res += fmt.Sprintf("(value: %.4g, minimum: %g, maximum: %g)", m.Value, m.Min, m.Max)
 	return res
 }
 

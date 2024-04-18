@@ -5,24 +5,30 @@
 package core
 
 import (
-	"fmt"
 	"testing"
 
-	"cogentcore.org/core/strcase"
-	"cogentcore.org/core/styles"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMeter(t *testing.T) {
-	for v := float32(0); v <= 100; v += 10 {
-		for _, typ := range MeterTypesValues() {
-			b := NewBody()
-			NewMeter(b).SetMax(100).SetType(typ).SetValue(v).SetText(fmt.Sprintf("%g%%", v))
-			b.AssertRender(t, fmt.Sprintf("meter/%s/%g", strcase.ToKebab(typ.String()), v))
-		}
-		b := NewBody()
-		NewMeter(b).SetMax(100).SetValue(v).Style(func(s *styles.Style) {
-			s.Direction = styles.Column
-		})
-		b.AssertRender(t, fmt.Sprintf("meter/column/%g", v))
-	}
+	b := NewBody()
+	m := NewMeter(b)
+	assert.Equal(t, "(value: 0.5, minimum: 0, maximum: 1)", m.WidgetTooltip())
+	m.SetTooltip("Rating")
+	assert.Equal(t, "Rating (value: 0.5, minimum: 0, maximum: 1)", m.WidgetTooltip())
+	b.AssertRender(t, "meter/basic")
+}
+
+func TestMeterValue(t *testing.T) {
+	b := NewBody()
+	m := NewMeter(b).SetValue(0.7)
+	assert.Equal(t, "(value: 0.7, minimum: 0, maximum: 1)", m.WidgetTooltip())
+	b.AssertRender(t, "meter/value")
+}
+
+func TestMeterBounds(t *testing.T) {
+	b := NewBody()
+	m := NewMeter(b).SetMin(5.7).SetMax(18).SetValue(10.2)
+	assert.Equal(t, "(value: 10.2, minimum: 5.7, maximum: 18)", m.WidgetTooltip())
+	b.AssertRender(t, "meter/bounds")
 }
