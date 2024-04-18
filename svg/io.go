@@ -168,11 +168,11 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						curSvg.ViewBox.Size.X = pts[2]
 						curSvg.ViewBox.Size.Y = pts[3]
 					case "width":
-						sv.PhysWidth.SetString(attr.Value)
-						sv.PhysWidth.ToDots(&curSvg.Paint.UnitContext)
+						sv.PhysicalWidth.SetString(attr.Value)
+						sv.PhysicalWidth.ToDots(&curSvg.Paint.UnitContext)
 					case "height":
-						sv.PhysHeight.SetString(attr.Value)
-						sv.PhysHeight.ToDots(&curSvg.Paint.UnitContext)
+						sv.PhysicalHeight.SetString(attr.Value)
+						sv.PhysicalHeight.ToDots(&curSvg.Paint.UnitContext)
 					case "preserveAspectRatio":
 						curSvg.ViewBox.PreserveAspectRatio.SetString(attr.Value)
 					default:
@@ -1087,8 +1087,8 @@ func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	me := xml.StartElement{}
 	me.Name.Local = "svg"
 	// todo: look for properties about units?
-	XMLAddAttr(&me.Attr, "width", sv.PhysWidth.String())
-	XMLAddAttr(&me.Attr, "height", sv.PhysHeight.String())
+	XMLAddAttr(&me.Attr, "width", sv.PhysicalWidth.String())
+	XMLAddAttr(&me.Attr, "height", sv.PhysicalHeight.String())
 	XMLAddAttr(&me.Attr, "viewBox", fmt.Sprintf("%g %g %g %g", sv.Root.ViewBox.Min.X, sv.Root.ViewBox.Min.Y, sv.Root.ViewBox.Size.X, sv.Root.ViewBox.Size.Y))
 	XMLAddAttr(&me.Attr, "xmlns:inkscape", "http://www.inkscape.org/namespaces/inkscape")
 	XMLAddAttr(&me.Attr, "xmlns:sodipodi", "http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd")

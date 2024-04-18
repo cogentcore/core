@@ -80,8 +80,8 @@ func TestViewBoxParse(t *testing.T) {
 
 func TestCoreLogo(t *testing.T) {
 	sv := NewSVG(720, 720)
-	sv.PhysWidth.Px(720)
-	sv.PhysHeight.Px(720)
+	sv.PhysicalWidth.Px(720)
+	sv.PhysicalHeight.Px(720)
 	sv.Root.ViewBox.Size.Set(1, 1)
 
 	inner := hct.Lighten(colors.Scheme.Primary.Base, 10)

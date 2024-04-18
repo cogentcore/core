@@ -45,11 +45,11 @@ type SVG struct {
 
 	// physical width of the drawing, e.g., when printed.
 	// Does not affect rendering, metadata.
-	PhysWidth units.Value
+	PhysicalWidth units.Value
 
 	// physical height of the drawing, e.g., when printed.
 	// Does not affect rendering, metadata.
-	PhysHeight units.Value
+	PhysicalHeight units.Value
 
 	// InvertY, when applying the ViewBox transform, also flip the Y axis so that
 	// the smallest Y value is at the bottom of the SVG box,
@@ -235,10 +235,10 @@ func (sv *SVG) SetRootTransform() {
 	vb := &sv.Root.ViewBox
 	box := math32.Vector2FromPoint(sv.Geom.Size)
 	if vb.Size.X == 0 {
-		vb.Size.X = sv.PhysWidth.Dots
+		vb.Size.X = sv.PhysicalWidth.Dots
 	}
 	if vb.Size.Y == 0 {
-		vb.Size.Y = sv.PhysHeight.Dots
+		vb.Size.Y = sv.PhysicalHeight.Dots
 	}
 	_, trans, scale := vb.Transform(box)
 	if sv.InvertY {
