@@ -470,9 +470,6 @@ func (ch *Chooser) ShowCurrentItem() *Chooser {
 			ch.Update()
 		}
 	}
-	if ch.CurrentItem.Tooltip != "" {
-		ch.SetTooltip(ch.CurrentItem.Tooltip)
-	}
 	ch.NeedsRender()
 	return ch
 }
@@ -648,6 +645,13 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 			}
 		}
 	})
+}
+
+func (ch *Chooser) WidgetTooltip() string {
+	if ch.CurrentItem.Tooltip != "" {
+		return ch.CurrentItem.Tooltip
+	}
+	return ch.Tooltip
 }
 
 // CompleteMatch is the [complete.MatchFunc] used for the
