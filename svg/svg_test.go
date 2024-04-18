@@ -80,7 +80,6 @@ func TestViewBoxParse(t *testing.T) {
 
 func TestCoreLogo(t *testing.T) {
 	sv := NewSVG(720, 720)
-	sv.Background = colors.C(colors.White)
 	sv.PhysWidth.Px(720)
 	sv.PhysHeight.Px(720)
 	sv.Root.ViewBox.Size.Set(1, 1)
@@ -92,9 +91,6 @@ func TestCoreLogo(t *testing.T) {
 	ox := colors.AsHex(outer)
 	ix := colors.AsHex(inner)
 	cx := colors.AsHex(core)
-	fmt.Println("Outer:", ox)
-	fmt.Println("Inner:", ix)
-	fmt.Println("Core:", cx)
 
 	x := float32(0.52)
 	sw := float32(0.18)
@@ -104,7 +100,7 @@ func TestCoreLogo(t *testing.T) {
 	o.SetProperty("stroke-width", sw)
 	o.SetProperty("fill", "none")
 	o.AddPath(PcM, x, 0.5)
-	o.AddPathArc(0.4, 30, 30+300)
+	o.AddPathArc(0.4, 30, 330)
 	o.UpdatePathString()
 
 	i := NewPath(&sv.Root, "inner")
@@ -112,7 +108,7 @@ func TestCoreLogo(t *testing.T) {
 	i.SetProperty("stroke-width", sw)
 	i.SetProperty("fill", "none")
 	i.AddPath(PcM, x, 0.5)
-	i.AddPathArc(0.22, 30, 30+300)
+	i.AddPathArc(0.22, 30, 330)
 	i.UpdatePathString()
 
 	c := NewCircle(&sv.Root, "core")
@@ -122,6 +118,6 @@ func TestCoreLogo(t *testing.T) {
 	c.SetProperty("stroke", "none")
 
 	sv.Render()
-	imagex.Assert(t, sv.Pixels, "logo/logo.png")
-	sv.SaveXML("testdata/logo/logo.svg")
+	imagex.Assert(t, sv.Pixels, "logo")
+	sv.SaveXML("testdata/logo.svg")
 }
