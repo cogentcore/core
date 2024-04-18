@@ -46,11 +46,13 @@ type NodeBase struct {
 	// They are typically accessed through [Node.Children].
 	Kids Slice `tableview:"-" copier:"-" set:"-" label:"Children"`
 
-	// this is a pointer to ourselves as a [Node]. It can always be used to extract the
+	// Ths is a pointer to ourselves as a [Node]. It can always be used to extract the
 	// true underlying type of an object when [NodeBase] is embedded in other structs;
 	// function receivers do not have this ability, so this is necessary. This is set
 	// to nil when the node is deleted. It is typically accessed through [Node.This].
-	this Node
+	// It needs to be exported so that it can be interacted with through reflection
+	// during field copying.
+	Ths Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// numLifetimeChildren is the number of children that have ever been added to this
 	// node, which is used for automatic unique naming. It is typically accessed
@@ -78,7 +80,7 @@ func (n *NodeBase) This() Node {
 	if n == nil {
 		return nil
 	}
-	return n.this
+	return n.Ths
 }
 
 // AsTreeNode returns the [NodeBase] for this Node.
@@ -580,7 +582,7 @@ func (n *NodeBase) Destroy() {
 		return
 	}
 	n.DeleteChildren()
-	n.this = nil
+	n.Ths = nil
 }
 
 // Flags:

@@ -20,9 +20,9 @@ import (
 // on what it does.
 func initNode(this Node) {
 	n := this.AsTreeNode()
-	if n.this != this {
-		n.this = this
-		n.this.OnInit()
+	if n.Ths != this {
+		n.Ths = this
+		n.Ths.OnInit()
 	}
 }
 
