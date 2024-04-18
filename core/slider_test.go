@@ -7,6 +7,7 @@ package core
 import (
 	"image"
 	"testing"
+	"time"
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
@@ -87,10 +88,32 @@ func TestSliderIcon(t *testing.T) {
 	b.AssertRender(t, "slider/icon")
 }
 
+func TestSliderStart(t *testing.T) {
+	b := NewBody()
+	sr := NewSlider(b)
+	b.AssertRender(t, "slider/start", func() {
+		sr.SystemEvents().MouseButton(events.MouseDown, events.Left, image.Pt(60, 20), 0)
+	})
+}
+
 func TestSliderChange(t *testing.T) {
 	b := NewBody()
 	sr := NewSlider(b)
+	n := 0
+	value := float32(-1)
+	sr.OnChange(func(e events.Event) {
+		n++
+		value = sr.Value
+	})
 	b.AssertRender(t, "slider/change", func() {
-		sr.SystemEvents().MouseButton(events.MouseDown, events.Left, image.Pt(20, 60), 0)
+		sr.SystemEvents().MouseButton(events.MouseDown, events.Left, image.Pt(60, 20), 0)
+		for x := 70; x < 200; x += 10 {
+			sr.SystemEvents().MouseMove(image.Pt(x, 20))
+			time.Sleep(5 * time.Millisecond)
+		}
+		sr.SystemEvents().MouseButton(events.MouseUp, events.Left, image.Pt(200, 20), 0)
+	}, func() {
+		assert.Equal(t, 1, n)
+		tolassert.Equal(t, 0.5690789, value)
 	})
 }
