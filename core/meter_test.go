@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"testing"
 
+	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 )
 
@@ -16,12 +17,12 @@ func TestMeter(t *testing.T) {
 		for _, typ := range MeterTypesValues() {
 			b := NewBody()
 			NewMeter(b).SetMax(100).SetType(typ).SetValue(v).SetText(fmt.Sprintf("%g%%", v))
-			b.AssertRender(t, testName("meter", typ, v))
+			b.AssertRender(t, fmt.Sprintf("meter/%s/%g", strcase.ToKebab(typ.String()), v))
 		}
 		b := NewBody()
 		NewMeter(b).SetMax(100).SetValue(v).Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 		})
-		b.AssertRender(t, testName("meter", "column", v))
+		b.AssertRender(t, fmt.Sprintf("meter/column/%g", v))
 	}
 }

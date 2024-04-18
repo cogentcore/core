@@ -7,27 +7,25 @@ package core
 import (
 	"testing"
 
+	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
 
-func TestLabel(t *testing.T) {
-	for _, str := range testStrings {
-		if str == "" {
-			continue
-		}
-		for _, typ := range LabelTypesValues() {
-			b := NewBody()
-			NewLabel(b).SetType(typ).SetText(str)
-			b.AssertRender(t, testName("label", str, typ))
-		}
-
+func TestLabelTypes(t *testing.T) {
+	for _, typ := range LabelTypesValues() {
 		b := NewBody()
-		NewLabel(b).SetText(str).Style(func(s *styles.Style) {
-			s.Font.Size = units.Rem(2)
-		})
-		b.AssertRender(t, testName("label", str, "rem"))
+		NewLabel(b).SetType(typ).SetText("Hello, world!")
+		b.AssertRender(t, "label/"+strcase.ToKebab(typ.String()))
 	}
+}
+
+func TestLabelRem(t *testing.T) {
+	b := NewBody()
+	NewLabel(b).SetText("Hello, world!").Style(func(s *styles.Style) {
+		s.Font.Size = units.Rem(2)
+	})
+	b.AssertRender(t, "label/rem")
 }
 
 func TestLabelTextDecoration(t *testing.T) {

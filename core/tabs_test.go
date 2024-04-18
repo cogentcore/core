@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )
@@ -15,7 +16,7 @@ import (
 func TestTabs(t *testing.T) {
 	configTab := func(tb *Frame) {
 		NewLabel(tb).SetType(LabelHeadlineLarge).SetText(tb.Name())
-		NewLabel(tb).SetText(testStrings[len(testStrings)-1])
+		NewLabel(tb).SetText("This is a label contained within a tab called " + tb.Name())
 		NewButton(tb).SetText(tb.Name()).SetIcon(icons.Send)
 	}
 	for _, typ := range TabTypesValues() {
@@ -27,6 +28,6 @@ func TestTabs(t *testing.T) {
 		configTab(ts.NewTab("Search", icons.Search))
 		configTab(ts.NewTab("Discover", icons.Explore))
 		configTab(ts.NewTab("History", icons.History))
-		b.AssertRender(t, testName("tabs", typ))
+		b.AssertRender(t, "tabs/"+strcase.ToKebab(typ.String()))
 	}
 }
