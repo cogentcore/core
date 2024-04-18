@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/cam/hct"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/paint"
@@ -84,9 +85,11 @@ func TestCoreLogo(t *testing.T) {
 	sv.PhysicalHeight.Px(720)
 	sv.Root.ViewBox.Size.Set(1, 1)
 
-	inner := hct.Lighten(colors.Scheme.Primary.Base, 10)
-	outer := hct.Darken(inner, 30)
-	core := hct.Saturate(hct.Lighten(hct.Spin(inner, 160), 20), 10)
+	inner := hct.Saturate(hct.Lighten(colors.Scheme.Primary.Base, 5), 20)
+	outer := hct.Spin(hct.Darken(colors.Scheme.Primary.Base, 20), 5)
+	core := hct.Saturate(hct.Lighten(hct.Spin(colors.Scheme.Primary.Base, 180), 30), 20)
+
+	fmt.Println(hct.FromColor(outer), hct.FromColor(errors.Must1(colors.FromHex("1f3263"))))
 
 	ox := colors.AsHex(outer)
 	ix := colors.AsHex(inner)

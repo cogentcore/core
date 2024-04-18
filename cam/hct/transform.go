@@ -73,7 +73,7 @@ func Desaturate(c color.Color, amount float32) color.RGBA {
 }
 
 // Spin returns a color that has a different hue by the
-// given absolute HCT hue amount (0-360, ranges enforced)
+// given absolute HCT hue amount (±0-360, ranges enforced)
 func Spin(c color.Color, amount float32) color.RGBA {
 	h := FromColor(c)
 	h.SetHue(h.Hue + amount)
