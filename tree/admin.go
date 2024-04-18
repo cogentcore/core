@@ -141,3 +141,21 @@ func IsNode(typ reflect.Type) bool {
 func NewOfType(typ *types.Type) Node {
 	return typ.Instance.(Node).New()
 }
+
+// SetUniqueName sets the name of the node to be unique, using
+// the number of lifetime children of the parent node as a unique
+// identifier.  If the node already has a name, it adds this, otherwise
+// it uses the type name of the node plus the unique id.
+func SetUniqueName(n Node) {
+	pn := n.Parent()
+	if pn == nil {
+		return
+	}
+	c := pn.AsTreeNode().numLifetimeChildren
+	id := "-" + strconv.FormatUint(c-1, 10) // must subtract 1 so we start at 0
+	if n.Name() == "" {
+		n.SetName(n.NodeType().IDName + id)
+	} else {
+		n.SetName(n.Name() + id)
+	}
+}
