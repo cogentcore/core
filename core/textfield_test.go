@@ -18,6 +18,36 @@ func TestTextField(t *testing.T) {
 	b.AssertRender(t, "text-field/basic")
 }
 
+func TestTextFieldPlaceholder(t *testing.T) {
+	b := NewBody()
+	NewTextField(b).SetPlaceholder("Jane Doe")
+	b.AssertRender(t, "text-field/placeholder")
+}
+
+func TestTextFieldText(t *testing.T) {
+	b := NewBody()
+	NewTextField(b).SetText("Hello, world!")
+	b.AssertRender(t, "text-field/text")
+}
+
+func TestTextFieldOverflow(t *testing.T) {
+	b := NewBody()
+	NewTextField(b).SetText("This is a long sentence that demonstrates how text field content can overflow onto multiple lines")
+	b.AssertRender(t, "text-field/overflow")
+}
+
+func TestTextFieldOutlined(t *testing.T) {
+	b := NewBody()
+	NewTextField(b).SetType(TextFieldOutlined)
+	b.AssertRender(t, "text-field/outlined")
+}
+
+func TestTextFieldPassword(t *testing.T) {
+	b := NewBody()
+	NewTextField(b).SetTypePassword().SetText("my password")
+	b.AssertRender(t, "text-field/password")
+}
+
 func TestTextFieldValidatorValid(t *testing.T) {
 	b := NewBody()
 	tf := NewTextField(b).SetText("my secure password")
