@@ -225,6 +225,7 @@ func (ed *Editor) SetStyles() {
 		s.Text.Align = styles.Start
 		s.Text.TabSize = core.SystemSettings.Editor.TabSize
 		s.Color = colors.C(colors.Scheme.OnSurface)
+		s.Min.Set(units.Em(10), units.Em(5)) // TODO: remove after #900 is fixed
 
 		if s.State.Is(states.Focused) {
 			s.Background = colors.C(colors.Scheme.Surface)
