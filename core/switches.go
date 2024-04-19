@@ -144,27 +144,27 @@ func (sw *Switches) SelectItemAction(idx int) error {
 	return nil
 }
 
-// SelectedItem returns the first selected (checked) switch label. It is only
+// SelectedItem returns the first selected (checked) switch item. It is only
 // useful when [Switches.Mutex] is true; if it is not, use [Switches.SelectedItems].
-// If no switches are selected, it returns "".
-func (sw *Switches) SelectedItem() string {
-	for _, swi := range sw.Kids {
-		sw := swi.(*Switch)
-		if sw.IsChecked() {
-			return sw.Text
+// If no switches are selected, it returns nil.
+func (sw *Switches) SelectedItem() *SwitchItem {
+	for i, kswi := range sw.Kids {
+		ksw := kswi.(*Switch)
+		if ksw.IsChecked() {
+			return &sw.Items[i]
 		}
 	}
-	return ""
+	return nil
 }
 
-// SelectedItems returns all of the currently selected (checked) switch labels.
+// SelectedItems returns all of the currently selected (checked) switch items.
 // If [Switches.Mutex] is true, you should use [Switches.SelectedItem] instead.
-func (sw *Switches) SelectedItems() []string {
-	res := []string{}
-	for _, swi := range sw.Kids {
-		sw := swi.(*Switch)
-		if sw.IsChecked() {
-			res = append(res, sw.Text)
+func (sw *Switches) SelectedItems() []SwitchItem {
+	res := []SwitchItem{}
+	for i, kswi := range sw.Kids {
+		ksw := kswi.(*Switch)
+		if ksw.IsChecked() {
+			res = append(res, sw.Items[i])
 		}
 	}
 	return res

@@ -120,7 +120,7 @@ func (tv *TimeView) Config() {
 			if tv.Hour == 12 {
 				tv.Hour = 0
 			}
-			switch si {
+			switch si.Label {
 			case "AM":
 				tv.PM = false
 				tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
