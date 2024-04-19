@@ -69,6 +69,17 @@ func TestSpinnerArrowKeys(t *testing.T) {
 	})
 }
 
+func TestSpinnerStep(t *testing.T) {
+	b := NewBody()
+	sp := NewSpinner(b).SetStep(0.3)
+	b.AssertRender(t, "spinner/step", func() {
+		sp.LeadingIconButton().Send(events.Click)
+		assert.Equal(t, float32(-0.3), sp.Value)
+		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodePageUp, 0))
+		assert.Equal(t, float32(0.3), sp.Value)
+	})
+}
+
 func TestSpinnerEnforceStep(t *testing.T) {
 	b := NewBody()
 	NewSpinner(b).SetStep(10).SetEnforceStep(true).SetValue(43)

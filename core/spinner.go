@@ -161,7 +161,6 @@ func (sp *Spinner) IncrementValue(steps float32) *Spinner {
 		return sp
 	}
 	val := sp.Value + steps*sp.Step
-	val = math32.IntMultiple(val, sp.Step)
 	val = sp.WrapAround(val)
 	return sp.SetValueAction(val)
 }
@@ -177,7 +176,6 @@ func (sp *Spinner) PageIncrementValue(steps float32) *Spinner {
 		sp.PageStep = 2 * sp.Step
 	}
 	val := sp.Value + steps*sp.PageStep
-	val = math32.IntMultiple(val, sp.PageStep)
 	val = sp.WrapAround(val)
 	return sp.SetValueAction(val)
 }
