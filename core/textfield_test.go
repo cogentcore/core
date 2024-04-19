@@ -133,3 +133,25 @@ func TestTextFieldChange(t *testing.T) {
 		assert.Equal(t, "Go", text)
 	})
 }
+
+func TestTextFieldInput(t *testing.T) {
+	b := NewBody()
+	tf := NewTextField(b)
+	n := 0
+	text := ""
+	tf.OnInput(func(e events.Event) {
+		n++
+		text = tf.Text()
+	})
+	b.AssertRender(t, "text-field/input", func() {
+		tf.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
+		assert.Equal(t, 1, n)
+		assert.Equal(t, "G", text)
+		tf.HandleEvent(events.NewKey(events.KeyChord, 'o', 0, 0))
+		assert.Equal(t, 2, n)
+		assert.Equal(t, "Go", text)
+		tf.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, 0))
+		assert.Equal(t, 2, n)
+		assert.Equal(t, "Go", text)
+	})
+}
