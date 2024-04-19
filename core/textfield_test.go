@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 	"github.com/stretchr/testify/assert"
@@ -70,6 +71,18 @@ func TestTextFieldClearClick(t *testing.T) {
 	b.AssertRender(t, "text-field/clear-click", func() {
 		tf.TrailingIconButton().Send(events.Click)
 		assert.Equal(t, "", tf.Text())
+	})
+}
+
+func TestTextFieldIcons(t *testing.T) {
+	b := NewBody()
+	clicked := false
+	tf := NewTextField(b).SetTrailingIcon(icons.Euro).SetLeadingIcon(icons.OpenInNew, func(e events.Event) {
+		clicked = true
+	})
+	b.AssertRender(t, "text-field/icons", func() {
+		tf.LeadingIconButton().Send(events.Click)
+		assert.True(t, clicked)
 	})
 }
 
