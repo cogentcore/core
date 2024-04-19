@@ -14,6 +14,7 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/errors"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlview"
 	"cogentcore.org/core/pages"
 	"cogentcore.org/core/styles"
@@ -50,6 +51,14 @@ func main() {
 		})
 		errors.Log(core.NewSVG(ly).ReadBytes(icon))
 		core.NewLabel(ly).SetType(core.LabelDisplayLarge).SetText("Cogent Core")
+		return true
+	}
+	htmlview.ElementHandlers["get-started"] = func(ctx *htmlview.Context) bool {
+		core.NewButton(ctx.BlockParent).SetText("Get started").OnClick(func(e events.Event) {
+			pg.OpenURL("/getting-started", true)
+		}).Style(func(s *styles.Style) {
+			s.Align.Self = styles.Center
+		})
 		return true
 	}
 

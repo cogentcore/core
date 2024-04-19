@@ -12,6 +12,10 @@ This documentation is organized into six main sections: Getting Started, Basics,
 
 There are many different ways to build apps, including cross-platform frameworks like Flutter, web frameworks like React, desktop frameworks like Qt, and other Go frameworks like Fyne. However, all of those approaches fall short in various critical ways.
 
-Cogent Core is the only app framework that runs on every major platform while supporting powerful features like 3D, text editors, videos, views, and data plotting, customizable styling tailored to user preferences, elegant and easy-to-use APIs, automatic and customizable content layout, and effortless events and updating.
+Cogent Core is the only app framework that runs on every major platform while supporting powerful features like 3D, text editors, videos, value views, data plotting, and markdown, customizable styling tailored to user preferences, elegant and easy-to-use APIs, automatic and customizable content layout, and effortless events and updating.
 
 With Cogent Core, you get all of the elegance of Go, the deployability of React, and the power of Qt. You can make anything from fully featured IDEs to 3D neural network models of the brain with Cogent Core's elegant approach to powerful, easy-to-use, and fully cross-platform apps.
+
+You can install Cogent Core and build your first app in just two commands and seven lines of code, and apps compile in just a couple of seconds and run at GPU-accelerated speeds. Every part of your development experience is guided by a comprehensive set of interactive example-based documentation, easy-to-use command line tools specialized for Cogent Core, and active support and development from the Cogent Core developers.
+
+<get-started></get-started>
