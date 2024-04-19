@@ -72,7 +72,9 @@ func (b *Body) waitNoEvents() {
 	<-rw.NoEventsChan
 	rw.NoEventsChan = nil
 
+	b.AsyncLock()
 	b.DoNeedsRender()
+	b.AsyncUnlock()
 }
 
 // AssertPixels asserts that [Scene.Pixels] is equivalent
