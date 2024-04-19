@@ -8,8 +8,10 @@ import (
 	"errors"
 	"testing"
 
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTextField(t *testing.T) {
@@ -46,6 +48,29 @@ func TestTextFieldPassword(t *testing.T) {
 	b := NewBody()
 	NewTextField(b).SetTypePassword().SetText("my password")
 	b.AssertRender(t, "text-field/password")
+}
+
+func TestTextFieldPasswordClick(t *testing.T) {
+	b := NewBody()
+	tf := NewTextField(b).SetTypePassword().SetText("my password")
+	b.AssertRender(t, "text-field/password-click", func() {
+		tf.TrailingIconButton().Send(events.Click)
+	})
+}
+
+func TestTextFieldClear(t *testing.T) {
+	b := NewBody()
+	NewTextField(b).AddClearButton().SetText("Hello, world!")
+	b.AssertRender(t, "text-field/clear")
+}
+
+func TestTextFieldClearClick(t *testing.T) {
+	b := NewBody()
+	tf := NewTextField(b).AddClearButton().SetText("Hello, world!")
+	b.AssertRender(t, "text-field/clear-click", func() {
+		tf.TrailingIconButton().Send(events.Click)
+		assert.Equal(t, "", tf.Text())
+	})
 }
 
 func TestTextFieldValidatorValid(t *testing.T) {
