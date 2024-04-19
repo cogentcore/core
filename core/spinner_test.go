@@ -82,6 +82,7 @@ func TestSpinnerStep(t *testing.T) {
 
 func TestSpinnerEnforceStep(t *testing.T) {
 	b := NewBody()
-	NewSpinner(b).SetStep(10).SetEnforceStep(true).SetValue(43)
+	sp := NewSpinner(b).SetStep(10).SetEnforceStep(true).SetValue(47)
+	assert.Equal(t, float32(50), sp.Value)
 	b.AssertRender(t, "spinner/enforce-step")
 }
