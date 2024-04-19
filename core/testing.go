@@ -22,14 +22,14 @@ import (
 // backslashes on Windows. See [Body.AssertRenderScreen] for a version
 // that asserts the rendered image of the entire screen, not just this body.
 func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
-	b.RunAndShowNewWindow()
+	b.runAndShowNewWindow()
 	for i := 0; i < len(fun); i++ {
 		fun[i]()
-		b.WaitNoEvents()
+		b.waitNoEvents()
 	}
 	if len(fun) == 0 {
 		// we didn't get it above
-		b.WaitNoEvents()
+		b.waitNoEvents()
 	}
 
 	b.Scene.AssertPixels(t, filename)
@@ -40,24 +40,22 @@ func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 // rendered image of the entire screen, not just this body. It should be used for
 // multi-scene tests like those of snackbars and dialogs.
 func (b *Body) AssertRenderScreen(t imagex.TestingT, filename string, fun ...func()) {
-	b.RunAndShowNewWindow()
+	b.runAndShowNewWindow()
 	for i := 0; i < len(fun); i++ {
 		fun[i]()
-		b.WaitNoEvents()
+		b.waitNoEvents()
 	}
 	if len(fun) == 0 {
 		// we didn't get it above
-		b.WaitNoEvents()
+		b.waitNoEvents()
 	}
 
 	system.AssertCapture(t, filename)
 	b.Close()
 }
 
-// RunAndShowNewWindow runs a new window and waits for it to be shown.
-// It it used internally in test infrastructure, and it should typically
-// not be used by end users.
-func (b *Body) RunAndShowNewWindow() {
+// runAndShowNewWindow runs a new window and waits for it to be shown.
+func (b *Body) runAndShowNewWindow() {
 	showed := make(chan struct{})
 	b.OnShow(func(e events.Event) {
 		showed <- struct{}{}
@@ -66,10 +64,9 @@ func (b *Body) RunAndShowNewWindow() {
 	<-showed
 }
 
-// WaitNoEvents waits for all events to be handled and does any rendering
-// of the body necessary. It it used internally in test infrastructure, and
-// it should typically not be used by end users.
-func (b *Body) WaitNoEvents() {
+// waitNoEvents waits for all events to be handled and does any rendering
+// of the body necessary.
+func (b *Body) waitNoEvents() {
 	rw := b.Scene.RenderWindow()
 	rw.NoEventsChan = make(chan struct{})
 	<-rw.NoEventsChan
