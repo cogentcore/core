@@ -7,9 +7,11 @@ package paint
 import (
 	"errors"
 	"image"
+	"image/color"
 	"math"
 	"slices"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/raster"
@@ -375,7 +377,7 @@ func (pc *Context) BlitBox(pos, size math32.Vector2, img image.Image) {
 // with the given image, using the given draw operation.
 func (pc *Context) DrawBox(pos, size math32.Vector2, img image.Image, op draw.Op) {
 	if img == nil {
-		return
+		img = colors.C(color.RGBA{})
 	}
 	pos = pc.CurrentTransform.MulVector2AsPoint(pos)
 	size = pc.CurrentTransform.MulVector2AsVector(size)
