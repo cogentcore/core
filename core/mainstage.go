@@ -247,15 +247,16 @@ func (st *Stage) RunDialog() *Stage {
 		return st
 	}
 	ctx := st.Context.AsWidget()
-	ms := ctx.Scene.Stage.Mains
 
-	// if our main stage manager is nil, we wait until our context is shown and then try again
-	if ms == nil {
+	// if our main stages are nil, we wait until our context is shown and then try again
+	if ctx.Scene.Stage == nil || ctx.Scene.Stage.Mains == nil {
 		ctx.OnShow(func(e events.Event) {
 			st.RunDialog()
 		})
 		return st
 	}
+
+	ms := ctx.Scene.Stage.Mains
 
 	sc := st.Scene
 	st.ConfigMainStage()
