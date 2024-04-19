@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,6 +49,23 @@ func TestSpinnerButtons(t *testing.T) {
 		assert.Equal(t, float32(0), sp.Value)
 		sp.TrailingIconButton().Send(events.Click)
 		assert.Equal(t, float32(0.1), sp.Value)
+	})
+}
+
+func TestSpinnerArrowKeys(t *testing.T) {
+	b := NewBody()
+	sp := NewSpinner(b)
+	b.AssertRender(t, "spinner/arrow-keys", func() {
+		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeDownArrow, 0))
+		assert.Equal(t, float32(-0.1), sp.Value)
+		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeUpArrow, 0))
+		assert.Equal(t, float32(0), sp.Value)
+		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodePageDown, 0))
+		assert.Equal(t, float32(-0.2), sp.Value)
+		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodePageUp, 0))
+		assert.Equal(t, float32(0), sp.Value)
+		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodePageUp, 0))
+		assert.Equal(t, float32(0.2), sp.Value)
 	})
 }
 
