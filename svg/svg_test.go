@@ -125,8 +125,9 @@ func TestCoreLogo(t *testing.T) {
 
 	sv.SaveXML("testdata/logo.svg")
 
+	sv.Background = colors.C(colors.Black)
 	sv.Render()
-	imagex.Assert(t, sv.Pixels, "logo")
+	imagex.Assert(t, sv.Pixels, "logo-black")
 
 	sv.Background = colors.C(colors.White)
 	sv.Render()
