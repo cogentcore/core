@@ -11,3 +11,13 @@ func TestSwitches(t *testing.T) {
 	NewSwitches(b).SetStrings("Go", "Python", "C++")
 	b.AssertRender(t, "switches/basic")
 }
+
+func TestSwitchesItems(t *testing.T) {
+	b := NewBody()
+	NewSwitches(b).SetItems(
+		SwitchItem{Label: "Go", Tooltip: "Elegant, fast, and easy-to-use"},
+		SwitchItem{Label: "Python", Tooltip: "Slow and duck-typed"},
+		SwitchItem{Label: "C++", Tooltip: "Hard to use and slow to compile"},
+	)
+	b.AssertRender(t, "switches/items")
+}

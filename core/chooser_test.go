@@ -14,10 +14,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestChooserSetStrings(t *testing.T) {
+func TestChooser(t *testing.T) {
 	b := NewBody()
 	NewChooser(b).SetStrings("macOS", "Windows", "Linux")
-	b.AssertRender(t, "chooser/set-strings")
+	b.AssertRender(t, "chooser/basic")
 }
 
 func TestChooserClick(t *testing.T) {
@@ -31,13 +31,13 @@ func TestChooserClick(t *testing.T) {
 	})
 }
 
-func TestChooserSetItems(t *testing.T) {
+func TestChooserItems(t *testing.T) {
 	b := NewBody()
 	ch := NewChooser(b).SetItems(
 		ChooserItem{Value: "Computer", Icon: icons.Computer, Tooltip: "Use a computer"},
 		ChooserItem{Value: "Phone", Icon: icons.Smartphone, Tooltip: "Use a phone"},
 	)
-	b.AssertRender(t, "chooser/set-items", func() {
+	b.AssertRender(t, "chooser/items", func() {
 		assert.Equal(t, "", ch.Tooltip)
 		assert.Equal(t, "Use a computer", ch.WidgetTooltip())
 	})
