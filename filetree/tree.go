@@ -88,9 +88,9 @@ func (fv *Tree) Destroy() {
 	fv.TreeView.Destroy()
 }
 
-// OpenPath opens a filetree at given directory path -- reads all the files at
-// given path into this tree -- uses config children to preserve extra info
-// already stored about files.  Only paths listed in Dirs will be opened.
+// OpenPath opens the filetree at the given directory path. It reads all the files at
+// the given path into this tree. It uses config children to preserve extra info
+// already stored about files. Only paths listed in Dirs will be opened.
 func (ft *Tree) OpenPath(path string) {
 	ft.FRoot = ft // we are our own root..
 	ft.Nm = "/"
