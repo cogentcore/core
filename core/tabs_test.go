@@ -7,7 +7,9 @@ package core
 import (
 	"testing"
 
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTabs(t *testing.T) {
@@ -26,6 +28,18 @@ func TestTabsWidgets(t *testing.T) {
 	second := ts.NewTab("Second")
 	NewLabel(second).SetText("I am second!")
 	b.AssertRender(t, "tabs/widgets")
+}
+
+func TestTabsClick(t *testing.T) {
+	b := NewBody()
+	ts := NewTabs(b)
+	first := ts.NewTab("First")
+	NewLabel(first).SetText("I am first!")
+	second := ts.NewTab("Second")
+	NewLabel(second).SetText("I am second!")
+	b.AssertRender(t, "tabs/click", func() {
+		ts.Tabs().Child(1).(Widget).Send(events.Click)
+	})
 }
 
 func TestTabsMany(t *testing.T) {
@@ -70,4 +84,15 @@ func TestTabsNew(t *testing.T) {
 	ts.NewTab("First")
 	ts.NewTab("Second")
 	b.AssertRender(t, "tabs/new")
+}
+
+func TestTabsNewClick(t *testing.T) {
+	b := NewBody()
+	ts := NewTabs(b).SetNewTabButton(true)
+	ts.NewTab("First")
+	ts.NewTab("Second")
+	b.AssertRender(t, "tabs/new-click", func() {
+		ts.Tabs().ChildByName("new-tab").(Widget).Send(events.Click)
+		assert.Equal(t, ts.NTabs(), 3)
+	})
 }
