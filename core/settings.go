@@ -259,6 +259,20 @@ type AppearanceSettingsData struct { //types:add
 	MonoFont FontName `default:"Roboto Mono"`
 }
 
+// Themes are the different possible themes that a user can select in their settings.
+type Themes int32 //enums:enum -trim-prefix Theme
+
+const (
+	// ThemeAuto indicates to use the theme specified by the operating system
+	ThemeAuto Themes = iota
+
+	// ThemeLight indicates to use a light theme
+	ThemeLight
+
+	// ThemeDark indicates to use a dark theme
+	ThemeDark
+)
+
 func (as *AppearanceSettingsData) ShouldShow(field string) bool {
 	switch field {
 	case "Color":
