@@ -698,28 +698,6 @@ var PagesExamples = map[string]func(parent core.Widget){
 		ts.NewTab("First")
 		ts.NewTab("Second")
 	},
-	"widgets/text-editors-0": func(parent core.Widget) {
-		texteditor.NewSoloEditor(parent)
-	},
-	"widgets/text-editors-1": func(parent core.Widget) {
-		texteditor.NewSoloEditor(parent).Buffer.SetTextString("Hello, world!")
-	},
-	"widgets/text-editors-2": func(parent core.Widget) {
-		texteditor.NewSoloEditor(parent).Buffer.SetLang("go").SetTextString(`package main
-
-func main() {
-    fmt.Println("Hello, world!")
-}
-`)
-	},
-	"widgets/text-editors-3": func(parent core.Widget) {
-		errors.Log(texteditor.NewSoloEditor(parent).Buffer.OpenFS(myFile, "file.go"))
-	},
-	"widgets/text-editors-4": func(parent core.Widget) {
-		tb := texteditor.NewBuffer()
-		texteditor.NewEditor(parent).SetBuffer(tb)
-		texteditor.NewEditor(parent).SetBuffer(tb)
-	},
 	"widgets/text-fields-0": func(parent core.Widget) {
 		core.NewTextField(parent)
 	},
@@ -981,6 +959,28 @@ func main() {
 			Rating int
 		}
 		views.NewValue(parent, &[]language{{"Go", 10}, {"Python", 5}})
+	},
+	"views/text-editors-0": func(parent core.Widget) {
+		texteditor.NewSoloEditor(parent)
+	},
+	"views/text-editors-1": func(parent core.Widget) {
+		texteditor.NewSoloEditor(parent).Buffer.SetTextString("Hello, world!")
+	},
+	"views/text-editors-2": func(parent core.Widget) {
+		texteditor.NewSoloEditor(parent).Buffer.SetLang("go").SetTextString(`package main
+
+func main() {
+    fmt.Println("Hello, world!")
+}
+`)
+	},
+	"views/text-editors-3": func(parent core.Widget) {
+		errors.Log(texteditor.NewSoloEditor(parent).Buffer.OpenFS(myFile, "file.go"))
+	},
+	"views/text-editors-4": func(parent core.Widget) {
+		tb := texteditor.NewBuffer()
+		texteditor.NewEditor(parent).SetBuffer(tb)
+		texteditor.NewEditor(parent).SetBuffer(tb)
 	},
 	"views/tree-views-0": func(parent core.Widget) {
 		tv := views.NewTreeView(parent).SetText("Root")

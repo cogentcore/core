@@ -71,7 +71,6 @@ func widgets(ts *core.Tabs) {
 	buttons(wts)
 	inputs(wts)
 	sliders(wts)
-	editors(wts)
 	dialogs(wts)
 	makeIcons(wts)
 }
@@ -306,8 +305,8 @@ func sliders(ts *core.Tabs) {
 	})
 }
 
-func editors(ts *core.Tabs) {
-	tab := ts.NewTab("Editors")
+func textEditors(ts *core.Tabs) {
+	tab := ts.NewTab("Text editors")
 
 	core.NewLabel(tab).SetType(core.LabelHeadlineLarge).SetText("Text editors")
 	core.NewLabel(tab).SetText("Cogent Core provides powerful text editors that support advanced code editing features, like syntax highlighting, completion, undo and redo, copy and paste, rectangular selection, and word, line, and page based navigation, selection, and deletion.")
@@ -456,6 +455,8 @@ func makeViews(ts *core.Tabs) {
 			sv.SetStruct(tv.SelectedNodes[0])
 		}
 	})
+
+	textEditors(vts)
 }
 
 func makeTree(tv *views.TreeView, iter, maxIter, maxKids int) {
