@@ -12,7 +12,6 @@ import (
 
 	"cogentcore.org/core/cam/hct"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/errors"
 	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/paint"
@@ -85,11 +84,15 @@ func TestCoreLogo(t *testing.T) {
 	sv.PhysicalHeight.Px(720)
 	sv.Root.ViewBox.Size.Set(1, 1)
 
-	inner := hct.Saturate(hct.Lighten(colors.Scheme.Primary.Base, 5), 20)
-	outer := hct.Spin(hct.Darken(colors.Scheme.Primary.Base, 20), 5)
-	core := hct.Saturate(hct.Lighten(hct.Spin(colors.Scheme.Primary.Base, 180), 30), 20)
+	// Programmatic transform based:
+	// inner := hct.Saturate(hct.Lighten(colors.Scheme.Primary.Base, 5), 20)
+	// outer := hct.Spin(hct.Darken(colors.Scheme.Primary.Base, 20), 5)
+	// core := hct.Saturate(hct.Lighten(hct.Spin(colors.Scheme.Primary.Base, 180), 30), 20)
 
-	fmt.Println(hct.FromColor(outer), hct.FromColor(errors.Must1(colors.FromHex("1f3263"))))
+	// Original colors:
+	outer := hct.New(271.5041, 35.039066, 21.847864)
+	inner := hct.New(260.8216, 47.062798, 41.726074)
+	core := hct.New(87.31661, 59.082355, 81.12824)
 
 	ox := colors.AsHex(outer)
 	ix := colors.AsHex(inner)
@@ -120,7 +123,12 @@ func TestCoreLogo(t *testing.T) {
 	c.SetProperty("fill", cx)
 	c.SetProperty("stroke", "none")
 
+	sv.SaveXML("testdata/logo.svg")
+
 	sv.Render()
 	imagex.Assert(t, sv.Pixels, "logo")
-	sv.SaveXML("testdata/logo.svg")
+
+	sv.Background = colors.C(colors.White)
+	sv.Render()
+	imagex.Assert(t, sv.Pixels, "logo-white")
 }
