@@ -39,3 +39,41 @@ func TestSwitchesMutex(t *testing.T) {
 		assert.Equal(t, []SwitchItem{{Label: "Python"}}, sw.SelectedItems())
 	})
 }
+
+func TestSwitchesChips(t *testing.T) {
+	b := NewBody()
+	NewSwitches(b).SetType(SwitchChip).SetStrings("Go", "Python", "C++")
+	b.AssertRender(t, "switches/chips")
+}
+
+func TestSwitchesCheckboxes(t *testing.T) {
+	b := NewBody()
+	NewSwitches(b).SetType(SwitchCheckbox).SetStrings("Go", "Python", "C++")
+	b.AssertRender(t, "switches/checkboxes")
+}
+
+func TestSwitchesRadioButtons(t *testing.T) {
+	b := NewBody()
+	NewSwitches(b).SetType(SwitchRadioButton).SetStrings("Go", "Python", "C++")
+	b.AssertRender(t, "switches/radio-buttons")
+}
+
+func TestSwitchesSegmentedButtons(t *testing.T) {
+	b := NewBody()
+	NewSwitches(b).SetType(SwitchSegmentedButton).SetStrings("Go", "Python", "C++")
+	b.AssertRender(t, "switches/segmented-buttons")
+}
+
+func TestSwitchesChange(t *testing.T) {
+	b := NewBody()
+	sw := NewSwitches(b).SetStrings("Go", "Python", "C++")
+	selected := []SwitchItem{}
+	sw.OnChange(func(e events.Event) {
+		selected = sw.SelectedItems()
+	})
+	b.AssertRender(t, "switches/change", func() {
+		sw.Child(0).(Widget).Send(events.Click)
+		sw.Child(2).(Widget).Send(events.Click)
+		assert.Equal(t, []SwitchItem{{Label: "Go"}, {Label: "C++"}}, selected)
+	})
+}
