@@ -61,7 +61,7 @@ func SettingsView(b *core.Body) {
 
 		NewStructView(fr).SetStruct(se).OnChange(func(e events.Event) {
 			if tab := b.GetTopAppBar(); tab != nil {
-				tab.UpdateBar()
+				tab.ApplyStyleUpdate()
 			}
 			se.Apply()
 			core.ErrorSnackbar(fr, core.SaveSettings(se), "Error saving "+se.Label()+" settings")

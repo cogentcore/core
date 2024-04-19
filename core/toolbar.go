@@ -242,35 +242,6 @@ func (tb *Toolbar) DeleteShortcuts() {
 	}
 }
 
-// UpdateBar calls ApplyStyleUpdate to update to current state
-func (tb *Toolbar) UpdateBar() {
-	tb.ApplyStyleUpdate()
-}
-
-// TODO(kai/menu): figure out what to do here
-/*
-// FindButtonByName finds an button on the toolbar, or any sub-menu, with
-// given name (exact match) -- this is not the Text label but the Name of the
-// element (for AddButton items, this is the same as Label or Icon (if Label
-// is empty)) -- returns false if not found
-func (tb *Toolbar) FindButtonByName(name string) (*Button, bool) {
-	for _, mi := range tb.Kids {
-		if mi.NodeType().HasEmbed(ButtonType) {
-			ac := AsButton(mi)
-			if ac.Name() == name {
-				return ac, true
-			}
-			if ac.Menu != nil {
-				if sac, ok := ac.Menu.FindButtonByName(name); ok {
-					return sac, ok
-				}
-			}
-		}
-	}
-	return nil, false
-}
-*/
-
 //////////////////////////////////////////////////////////////////////////////
 // 	ToolbarFuncs
 
@@ -334,8 +305,8 @@ func ToolbarStyles(ly Layouter) {
 }
 
 // BasicBar is just a styled Frame layout for holding buttons
-// and other widgets.  Use this when the more advanced features
-// of the Toolbar are not needed.
+// and other widgets. Use this when the more advanced features
+// of the [Toolbar] are not needed.
 type BasicBar struct {
 	Frame
 }
