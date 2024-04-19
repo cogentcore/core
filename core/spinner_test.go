@@ -86,3 +86,16 @@ func TestSpinnerEnforceStep(t *testing.T) {
 	assert.Equal(t, float32(50), sp.Value)
 	b.AssertRender(t, "spinner/enforce-step")
 }
+
+func TestSpinnerOutlined(t *testing.T) {
+	b := NewBody()
+	NewSpinner(b).SetType(TextFieldOutlined)
+	b.AssertRender(t, "spinner/outlined")
+}
+
+func TestSpinnerFormat(t *testing.T) {
+	b := NewBody()
+	sp := NewSpinner(b).SetFormat("%X").SetStep(1).SetValue(44)
+	assert.Equal(t, "2C", sp.Txt)
+	b.AssertRender(t, "spinner/format")
+}
