@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -114,5 +115,21 @@ func TestTextFieldValidatorInvalid(t *testing.T) {
 	})
 	b.AssertRenderScreen(t, "text-field/validator-invalid", func() {
 		tf.SendChange() // trigger validation
+	})
+}
+
+func TestTextFieldChange(t *testing.T) {
+	b := NewBody()
+	tf := NewTextField(b)
+	text := ""
+	tf.OnChange(func(e events.Event) {
+		text = tf.Text()
+	})
+	b.AssertRender(t, "text-field/change", func() {
+		tf.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
+		tf.HandleEvent(events.NewKey(events.KeyChord, 'o', 0, 0))
+		assert.Equal(t, "", text)
+		tf.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, 0))
+		assert.Equal(t, "Go", text)
 	})
 }

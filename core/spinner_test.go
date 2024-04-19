@@ -136,6 +136,7 @@ func TestSpinnerChangeNumberKey(t *testing.T) {
 	})
 	b.AssertRender(t, "spinner/change-number-key", func() {
 		sp.HandleEvent(events.NewKey(events.KeyChord, '5', 0, 0))
+		tolassert.Equal(t, 0, value)
 		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, 0))
 		tolassert.Equal(t, 50, value)
 	})
