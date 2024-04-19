@@ -9,6 +9,7 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/gox/tolassert"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -98,4 +99,44 @@ func TestSpinnerFormat(t *testing.T) {
 	sp := NewSpinner(b).SetFormat("%X").SetStep(1).SetValue(44)
 	assert.Equal(t, "2C", sp.Txt)
 	b.AssertRender(t, "spinner/format")
+}
+
+func TestSpinnerChangeButton(t *testing.T) {
+	b := NewBody()
+	sp := NewSpinner(b)
+	value := float32(-1)
+	sp.OnChange(func(e events.Event) {
+		value = sp.Value
+	})
+	b.AssertRender(t, "spinner/change-button", func() {
+		sp.TrailingIconButton().Send(events.Click)
+		tolassert.Equal(t, 0.1, value)
+	})
+}
+
+func TestSpinnerChangeArrowKey(t *testing.T) {
+	b := NewBody()
+	sp := NewSpinner(b)
+	value := float32(-1)
+	sp.OnChange(func(e events.Event) {
+		value = sp.Value
+	})
+	b.AssertRender(t, "spinner/change-arrow-key", func() {
+		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeDownArrow, 0))
+		tolassert.Equal(t, -0.1, value)
+	})
+}
+
+func TestSpinnerChangeNumberKey(t *testing.T) {
+	b := NewBody()
+	sp := NewSpinner(b)
+	value := float32(-1)
+	sp.OnChange(func(e events.Event) {
+		value = sp.Value
+	})
+	b.AssertRender(t, "spinner/change-number-key", func() {
+		sp.HandleEvent(events.NewKey(events.KeyChord, '5', 0, 0))
+		sp.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, 0))
+		tolassert.Equal(t, 50, value)
+	})
 }
