@@ -7,7 +7,16 @@ package core
 import (
 	"errors"
 	"testing"
+
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
+
+func TestTextField(t *testing.T) {
+	b := NewBody()
+	NewTextField(b)
+	b.AssertRender(t, "text-field/basic")
+}
 
 func TestTextFieldValidatorValid(t *testing.T) {
 	b := NewBody()
@@ -18,13 +27,16 @@ func TestTextFieldValidatorValid(t *testing.T) {
 		}
 		return nil
 	})
-	b.AssertRender(t, "textfield/validator-valid", func() {
+	b.AssertRender(t, "text-field/validator-valid", func() {
 		tf.SendChange() // trigger validation
 	})
 }
 
 func TestTextFieldValidatorInvalid(t *testing.T) {
 	b := NewBody()
+	b.Style(func(s *styles.Style) {
+		s.Min.Set(units.Em(15), units.Em(10))
+	})
 	tf := NewTextField(b).SetText("my password")
 	tf.SetValidator(func() error {
 		if len(tf.Text()) < 12 {
@@ -32,7 +44,7 @@ func TestTextFieldValidatorInvalid(t *testing.T) {
 		}
 		return nil
 	})
-	b.AssertRender(t, "textfield/validator-invalid", func() {
+	b.AssertRenderScreen(t, "text-field/validator-invalid", func() {
 		tf.SendChange() // trigger validation
 	})
 }
