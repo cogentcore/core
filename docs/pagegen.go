@@ -1019,17 +1019,19 @@ func main() {
 		views.NewValue(parent, n)
 	},
 	"advanced/styling-0": func(parent core.Widget) {
-		parent.OnWidgetAdded(func(w core.Widget) {
+		fr := core.NewFrame(parent)
+		fr.OnWidgetAdded(func(w core.Widget) {
 			w.Style(func(s *styles.Style) {
 				s.Color = colors.C(colors.Scheme.Error.Base)
 			})
 		})
-		core.NewLabel(parent).SetText("Label")
-		core.NewSwitch(parent).SetText("Switch")
-		core.NewTextField(parent).SetText("Text field")
+		core.NewLabel(fr).SetText("Label")
+		core.NewSwitch(fr).SetText("Switch")
+		core.NewTextField(fr).SetText("Text field")
 	},
 	"advanced/styling-1": func(parent core.Widget) {
-		parent.OnWidgetAdded(func(w core.Widget) {
+		fr := core.NewFrame(parent)
+		fr.OnWidgetAdded(func(w core.Widget) {
 			switch w := w.(type) {
 			case *core.Button:
 				w.Style(func(s *styles.Style) {
@@ -1037,8 +1039,8 @@ func main() {
 				})
 			}
 		})
-		core.NewButton(parent).SetText("First")
-		core.NewButton(parent).SetText("Second")
-		core.NewButton(parent).SetText("Third")
+		core.NewButton(fr).SetText("First")
+		core.NewButton(fr).SetText("Second")
+		core.NewButton(fr).SetText("Third")
 	},
 }
