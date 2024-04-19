@@ -7,6 +7,7 @@ package core
 import (
 	"testing"
 
+	"cogentcore.org/core/events"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -35,6 +36,19 @@ func TestSpinnerBounds(t *testing.T) {
 	sp.SetValue(18)
 	assert.Equal(t, float32(2.7), sp.Value)
 	b.AssertRender(t, "spinner/bounds")
+}
+
+func TestSpinnerButtons(t *testing.T) {
+	b := NewBody()
+	sp := NewSpinner(b)
+	b.AssertRender(t, "spinner/buttons", func() {
+		sp.LeadingIconButton().Send(events.Click)
+		assert.Equal(t, float32(-0.1), sp.Value)
+		sp.TrailingIconButton().Send(events.Click)
+		assert.Equal(t, float32(0), sp.Value)
+		sp.TrailingIconButton().Send(events.Click)
+		assert.Equal(t, float32(0.1), sp.Value)
+	})
 }
 
 func TestSpinnerEnforceStep(t *testing.T) {
