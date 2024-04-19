@@ -54,7 +54,7 @@ func main() {
 		return true
 	}
 	htmlview.ElementHandlers["get-started"] = func(ctx *htmlview.Context) bool {
-		core.NewButton(ctx.BlockParent).SetText("Get started").OnClick(func(e events.Event) {
+		core.NewButton(ctx.BlockParent).SetText("Get Started").OnClick(func(e events.Event) {
 			pg.OpenURL("/getting-started", true)
 		}).Style(func(s *styles.Style) {
 			s.Align.Self = styles.Center
