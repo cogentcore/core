@@ -248,6 +248,7 @@ func (tv *TreeView) SetStyles() {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
 		tv.Indent.Em(1)
 		s.Border.Style.Set(styles.BorderNone)
+		s.Border.Radius = styles.BorderRadiusFull
 		s.MaxBorder = s.Border
 		// s.Border.Width.Left.SetDp(1)
 		// s.Border.Color.Left = colors.Scheme.OutlineVariant
