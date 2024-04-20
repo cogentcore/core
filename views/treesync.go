@@ -65,10 +65,8 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 	tv.SetName(nm)
 	tv.ViewIndex = *tvIndex
 	*tvIndex++
-	if tvp := tv.TreeViewParent(); tvp != nil {
-		if init && depth >= tv.RootView.OpenDepth {
-			tv.SetClosed(true)
-		}
+	if init && depth >= tv.RootView.OpenDepth {
+		tv.SetClosed(true)
 	}
 	skids := *sk.Children()
 	tnl := make(tree.Config, 0, len(skids))

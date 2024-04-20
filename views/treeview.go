@@ -240,13 +240,13 @@ func (tv *TreeView) SetStyles() {
 	tv.IconOpen = icons.KeyboardArrowDown
 	tv.IconClosed = icons.KeyboardArrowRight
 	tv.IconLeaf = icons.Blank
+	tv.OpenDepth = 4
 
 	tvi := tv.This().(TreeViewer)
 	tv.Style(func(s *styles.Style) {
 		// our parts are draggable and droppable, not us ourself
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
 		tv.Indent.Em(1)
-		tv.OpenDepth = 4
 		s.Border.Style.Set(styles.BorderNone)
 		s.MaxBorder = s.Border
 		// s.Border.Width.Left.SetDp(1)
