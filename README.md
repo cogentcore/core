@@ -1,9 +1,8 @@
 <h1 align="center">
     <a href="https://cogentcore.org/core">
         <img alt="Cogent Core Logo" width="250" height="250" src="icon.svg">
+        <img alt="Cogent Core Name Banner" src="name.svg">
     </a>
-
-  Cogent Core
 </h1>
 
 <p align="center">
