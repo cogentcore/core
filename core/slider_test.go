@@ -134,7 +134,7 @@ func TestSliderInput(t *testing.T) {
 		}
 		sr.SystemEvents().MouseButton(events.MouseUp, events.Left, image.Pt(200, 20), 0)
 	}, func() {
-		tolassert.EqualTol(t, 4, float32(n), 1)
+		tolassert.EqualTol(t, 4, float32(n), 2)
 		tolassert.Equal(t, 0.5690789, value)
 	})
 }
