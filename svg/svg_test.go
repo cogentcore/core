@@ -87,12 +87,12 @@ func TestCoreLogo(t *testing.T) {
 	// Programmatic transform based:
 	inner := hct.Desaturate(colors.Scheme.Primary.Base, 10)
 	outer := hct.Darken(inner, 20)
-	// core := hct.Saturate(hct.Lighten(hct.Spin(base, 180), 30), 20)
+	core := colors.FromRGB(251, 193, 21)
 
 	// Original colors:
 	// outer := hct.New(271.5041, 35.039066, 21.847864)
 	// inner = hct.New(260.8216, 47.062798, 41.726074)
-	core := hct.New(87.31661, 59.082355, 81.12824)
+	// core := hct.New(87.31661, 59.082355, 81.12824)
 
 	ox := colors.AsHex(outer)
 	ix := colors.AsHex(inner)
