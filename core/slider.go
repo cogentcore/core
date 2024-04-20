@@ -310,7 +310,7 @@ func (sr *Slider) SetSliderPos(pos float32) {
 
 // SetSliderPosAction sets the position of the slider at the given position in pixels,
 // and updates the corresponding Value based on that position.
-// This version sends tracking changes
+// This version sends input events.
 func (sr *Slider) SetSliderPosAction(pos float32) {
 	sr.SetSliderPos(pos)
 	if math32.Abs(sr.PrevSlide-sr.Value) > sr.InputThreshold {
@@ -416,11 +416,17 @@ func (sr *Slider) HandleMouse() {
 			sr.SetSliderPosAction(sr.SlideStartPos + float32(del.Y))
 		}
 	})
-	sr.On(events.SlideStop, func(e events.Event) {
+
+	// we need to send change events for both SlideStop and Click
+	// to handle the no-slide click case
+	change := func(e events.Event) {
 		pos := sr.PointToRelPos(e.Pos())
 		sr.SetSliderPosAction(pos)
 		sr.SendChanged()
-	})
+	}
+	sr.On(events.SlideStop, change)
+	sr.On(events.Click, change)
+
 	sr.On(events.Scroll, func(e events.Event) {
 		se := e.(*events.MouseScroll)
 		se.SetHandled()
