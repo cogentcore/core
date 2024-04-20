@@ -86,8 +86,8 @@ func TestCoreLogo(t *testing.T) {
 
 	// Programmatic transform based:
 	base := hct.Desaturate(colors.Scheme.Primary.Base, 10)
-	inner := hct.Lighten(base, 20)
-	outer := hct.Darken(base, 10)
+	inner := base
+	outer := colors.Transparent
 	core := colors.FromRGB(251, 193, 21)
 
 	// Original colors:
