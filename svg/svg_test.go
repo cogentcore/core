@@ -85,14 +85,16 @@ func TestCoreLogo(t *testing.T) {
 	sv.Root.ViewBox.Size.Set(1, 1)
 
 	// Programmatic transform based:
-	// inner := hct.Saturate(hct.Lighten(colors.Scheme.Primary.Base, 5), 20)
-	// outer := hct.Spin(hct.Darken(colors.Scheme.Primary.Base, 20), 5)
-	// core := hct.Saturate(hct.Lighten(hct.Spin(colors.Scheme.Primary.Base, 180), 30), 20)
+	base := hct.Desaturate(hct.Spin(colors.Scheme.Primary.Base, 0), 10)
+
+	inner := base
+	outer := hct.Darken(base, 20)
+	core := hct.Saturate(hct.Lighten(hct.Spin(base, 180), 30), 20)
 
 	// Original colors:
-	outer := hct.New(271.5041, 35.039066, 21.847864)
-	inner := hct.New(260.8216, 47.062798, 41.726074)
-	core := hct.New(87.31661, 59.082355, 81.12824)
+	// outer := hct.New(271.5041, 35.039066, 21.847864)
+	// inner = hct.New(260.8216, 47.062798, 41.726074).AsRGBA()
+	core = hct.New(87.31661, 59.082355, 81.12824).AsRGBA()
 
 	ox := colors.AsHex(outer)
 	ix := colors.AsHex(inner)
