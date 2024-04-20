@@ -116,6 +116,24 @@ func TestSliderChange(t *testing.T) {
 	})
 }
 
+func TestSliderChangeClick(t *testing.T) {
+	b := NewBody()
+	sr := NewSlider(b)
+	n := 0
+	value := float32(-1)
+	sr.OnChange(func(e events.Event) {
+		n++
+		value = sr.Value
+	})
+	b.AssertRender(t, "slider/change-click", func() {
+		sr.SystemEvents().MouseButton(events.MouseDown, events.Left, image.Pt(200, 20), 0)
+		sr.SystemEvents().MouseButton(events.MouseUp, events.Left, image.Pt(200, 20), 0)
+	}, func() {
+		assert.Equal(t, 1, n)
+		tolassert.Equal(t, 0.5690789, value)
+	})
+}
+
 func TestSliderInput(t *testing.T) {
 	b := NewBody()
 	sr := NewSlider(b)
