@@ -86,8 +86,6 @@ func TestCoreLogo(t *testing.T) {
 
 	// Programmatic transform based:
 	base := hct.Desaturate(colors.Scheme.Primary.Base, 10)
-	inner := base
-	outer := colors.Transparent
 	core := colors.FromRGB(251, 193, 21)
 
 	// Original colors:
@@ -95,32 +93,23 @@ func TestCoreLogo(t *testing.T) {
 	// inner = hct.New(260.8216, 47.062798, 41.726074)
 	// core := hct.New(87.31661, 59.082355, 81.12824)
 
-	ox := colors.AsHex(outer)
-	ix := colors.AsHex(inner)
+	bx := colors.AsHex(base)
 	cx := colors.AsHex(core)
 
 	x := float32(0.53)
-	sw := float32(0.185)
+	sw := float32(0.27)
 
 	o := NewPath(&sv.Root, "outer")
-	o.SetProperty("stroke", ox)
+	o.SetProperty("stroke", bx)
 	o.SetProperty("stroke-width", sw)
 	o.SetProperty("fill", "none")
 	o.AddPath(PcM, x, 0.5)
-	o.AddPathArc(0.4, 30, 330)
+	o.AddPathArc(0.35, 30, 330)
 	o.UpdatePathString()
-
-	i := NewPath(&sv.Root, "inner")
-	i.SetProperty("stroke", ix)
-	i.SetProperty("stroke-width", sw)
-	i.SetProperty("fill", "none")
-	i.AddPath(PcM, x, 0.5)
-	i.AddPathArc(0.22, 30, 330)
-	i.UpdatePathString()
 
 	c := NewCircle(&sv.Root, "core")
 	c.Pos.Set(x, 0.5)
-	c.Radius = 0.15
+	c.Radius = 0.23
 	c.SetProperty("fill", cx)
 	c.SetProperty("stroke", "none")
 
