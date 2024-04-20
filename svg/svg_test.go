@@ -84,23 +84,17 @@ func TestCoreLogo(t *testing.T) {
 	sv.PhysicalHeight.Px(720)
 	sv.Root.ViewBox.Size.Set(1, 1)
 
-	// Programmatic transform based:
-	base := hct.Desaturate(colors.Scheme.Primary.Base, 10)
-	core := colors.FromRGB(251, 193, 21)
-
-	// Original colors:
-	// outer := hct.New(271.5041, 35.039066, 21.847864)
-	// inner = hct.New(260.8216, 47.062798, 41.726074)
-	// core := hct.New(87.31661, 59.082355, 81.12824)
-
-	bx := colors.AsHex(base)
-	cx := colors.AsHex(core)
+	outer := colors.Scheme.Primary.Base
+	hctOuter := hct.FromColor(outer)
+	core := hct.New(hctOuter.Hue+180, hctOuter.Chroma, hctOuter.Tone+40)
+	// fmt.Println(hct.FromColor(outer))
+	// fmt.Println(hct.FromColor(core))
 
 	x := float32(0.53)
 	sw := float32(0.27)
 
 	o := NewPath(&sv.Root, "outer")
-	o.SetProperty("stroke", bx)
+	o.SetProperty("stroke", colors.AsHex(outer))
 	o.SetProperty("stroke-width", sw)
 	o.SetProperty("fill", "none")
 	o.AddPath(PcM, x, 0.5)
@@ -110,7 +104,7 @@ func TestCoreLogo(t *testing.T) {
 	c := NewCircle(&sv.Root, "core")
 	c.Pos.Set(x, 0.5)
 	c.Radius = 0.23
-	c.SetProperty("fill", cx)
+	c.SetProperty("fill", colors.AsHex(core))
 	c.SetProperty("stroke", "none")
 
 	sv.SaveXML("testdata/logo.svg")
