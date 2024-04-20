@@ -85,8 +85,9 @@ func TestCoreLogo(t *testing.T) {
 	sv.Root.ViewBox.Size.Set(1, 1)
 
 	// Programmatic transform based:
-	inner := hct.Desaturate(colors.Scheme.Primary.Base, 10)
-	outer := hct.Darken(inner, 20)
+	base := hct.Desaturate(colors.Scheme.Primary.Base, 10)
+	inner := hct.Lighten(base, 20)
+	outer := hct.Darken(base, 10)
 	core := colors.FromRGB(251, 193, 21)
 
 	// Original colors:
