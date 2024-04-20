@@ -98,8 +98,8 @@ func TestCoreLogo(t *testing.T) {
 	ix := colors.AsHex(inner)
 	cx := colors.AsHex(core)
 
-	x := float32(0.52)
-	sw := float32(0.18)
+	x := float32(0.53)
+	sw := float32(0.185)
 
 	o := NewPath(&sv.Root, "outer")
 	o.SetProperty("stroke", ox)
