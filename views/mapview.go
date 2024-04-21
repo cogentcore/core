@@ -16,20 +16,12 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// MapView represents a map, creating a property editor of the values --
-// constructs Children widgets to show the key / value pairs, within an
-// overall frame.
+// MapView represents a map using two columns of editable key and value widgets.
 type MapView struct {
 	core.Frame
 
-	// the map that we are a view onto
-	Map any `set:"-"`
-
-	// Value for the map itself, if this was created within value view framework; otherwise nil
-	MapValView Value
-
-	// has the map been edited?
-	Changed bool `set:"-"`
+	// Map is the map that we are viewing.
+	Map any
 
 	// Value representations of the map keys
 	Keys []Value `json:"-" xml:"-" set:"-"`
@@ -37,16 +29,15 @@ type MapView struct {
 	// Value representations of the map values
 	Values []Value `json:"-" xml:"-" set:"-"`
 
-	// sort by values instead of keys
-	SortVals bool
+	// SortValue is whether to sort by values instead of keys
+	SortValues bool
 
-	// the number of columns in the map; do not set externally;
-	// generally only access internally
-	NCols int `set:"-"`
-
-	// a record of parent View names that have led up to this view.
-	// Displayed as extra contextual information in view dialog windows.
+	// ViewPath is a record of parent view names that have led up to this view.
+	// It is displayed as extra contextual information in view dialogs.
 	ViewPath string
+
+	// ncols is the number of columns in the map
+	ncols int
 }
 
 func (mv *MapView) OnInit() {
@@ -64,32 +55,14 @@ func (mv *MapView) SetStyles() {
 		case "map-grid":
 			w.Style(func(s *styles.Style) {
 				s.Display = styles.Grid
-				s.Columns = mv.NCols
+				s.Columns = mv.ncols
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)
 				s.Min.X.Em(20)
 				s.Min.Y.Em(10)
 			})
 		}
-		// if w.Parent().Name() == "map-grid" {
-		// }
 	})
-}
-
-// SetMap sets the source map that we are viewing.
-// Rebuilds the children to represent this map
-func (mv *MapView) SetMap(mp any) *MapView {
-	// note: because we make new maps, and due to the strangeness of reflect, they
-	// end up not being comparable types, so we can't check if equal
-	mv.Map = mp
-	mv.Update()
-	return mv
-}
-
-// UpdateValues updates the widget display of slice values, assuming same slice config
-func (mv *MapView) UpdateValues() {
-	// maps have to re-read their values -- can't get pointers
-	mv.Update()
 }
 
 // Config configures the view
@@ -145,7 +118,7 @@ func (mv *MapView) ConfigMapGrid() {
 		ncol = 3
 		// todo: need some way of setting & getting
 		// this for given domain mapview could have a structview parent and
-		// the source node of that struct, if a Ki, could have a property --
+		// the source node of that struct, if a tree, could have a property --
 		// unlike inline case, plain mapview is not a child of struct view
 		// directly -- but field on struct view does create the mapview
 		// dialog.. a bit hacky and indirect..
@@ -156,9 +129,9 @@ func (mv *MapView) ConfigMapGrid() {
 	// valtypes = append(valtypes, kit.TypeFor[reflect.Type]())
 	valtypes := types.AllEmbeddersOf(tree.NodeBaseType) // todo: this is not right
 
-	mv.NCols = ncol
+	mv.ncols = ncol
 
-	keys := reflectx.MapSort(mv.Map, !mv.SortVals, true) // note: this is a slice of reflect.Value!
+	keys := reflectx.MapSort(mv.Map, !mv.SortValues, true) // note: this is a slice of reflect.Value!
 	for _, key := range keys {
 		kv := ToValue(key.Interface(), "")
 		if kv == nil { // shouldn't happen
@@ -226,17 +199,9 @@ func (mv *MapView) ConfigMapGrid() {
 	}
 }
 
-// SetChanged sets the Changed flag and emits the ViewSig signal for the
-// MapView, indicating that some kind of edit / change has taken place to
-// the table data.
-func (mv *MapView) SetChanged() {
-	mv.Changed = true
-	mv.SendChange()
-}
-
 // ToggleSort toggles sorting by values vs. keys
 func (mv *MapView) ToggleSort() {
-	mv.SortVals = !mv.SortVals
+	mv.SortValues = !mv.SortValues
 	mv.ConfigMapGrid()
 }
 
@@ -247,7 +212,7 @@ func (mv *MapView) MapAdd() {
 	}
 	reflectx.MapAdd(mv.Map)
 
-	mv.SetChanged()
+	mv.SendChange()
 	mv.Update()
 }
 
@@ -258,7 +223,7 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	}
 	reflectx.MapDelete(mv.Map, reflectx.NonPointerValue(key))
 
-	mv.SetChanged()
+	mv.SendChange()
 	mv.Update()
 }
 

@@ -188,12 +188,10 @@ func (t *Inspector) SetFilename(v core.Filename) *Inspector { t.Filename = v; re
 func (t *Inspector) SetTooltip(v string) *Inspector { t.Tooltip = v; return t }
 
 // MapViewType is the [types.Type] for [MapView]
-var MapViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapView", IDName: "map-view", Doc: "MapView represents a map, creating a property editor of the values --\nconstructs Children widgets to show the key / value pairs, within an\noverall frame.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "the map that we are a view onto"}, {Name: "MapValView", Doc: "Value for the map itself, if this was created within value view framework; otherwise nil"}, {Name: "Changed", Doc: "has the map been edited?"}, {Name: "Keys", Doc: "Value representations of the map keys"}, {Name: "Values", Doc: "Value representations of the map values"}, {Name: "SortVals", Doc: "sort by values instead of keys"}, {Name: "NCols", Doc: "the number of columns in the map; do not set externally;\ngenerally only access internally"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view.\nDisplayed as extra contextual information in view dialog windows."}}, Instance: &MapView{}})
+var MapViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapView", IDName: "map-view", Doc: "MapView represents a map using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the map that we are viewing."}, {Name: "Keys", Doc: "Value representations of the map keys"}, {Name: "Values", Doc: "Value representations of the map values"}, {Name: "SortValues", Doc: "SortValue is whether to sort by values instead of keys"}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "ncols", Doc: "ncols is the number of columns in the map"}}, Instance: &MapView{}})
 
 // NewMapView adds a new [MapView] with the given name to the given parent:
-// MapView represents a map, creating a property editor of the values --
-// constructs Children widgets to show the key / value pairs, within an
-// overall frame.
+// MapView represents a map using two columns of editable key and value widgets.
 func NewMapView(parent tree.Node, name ...string) *MapView {
 	return parent.NewChild(MapViewType, name...).(*MapView)
 }
@@ -204,17 +202,17 @@ func (t *MapView) NodeType() *types.Type { return MapViewType }
 // New returns a new [*MapView] value
 func (t *MapView) New() tree.Node { return &MapView{} }
 
-// SetMapValView sets the [MapView.MapValView]:
-// Value for the map itself, if this was created within value view framework; otherwise nil
-func (t *MapView) SetMapValView(v Value) *MapView { t.MapValView = v; return t }
+// SetMap sets the [MapView.Map]:
+// Map is the map that we are viewing.
+func (t *MapView) SetMap(v any) *MapView { t.Map = v; return t }
 
-// SetSortVals sets the [MapView.SortVals]:
-// sort by values instead of keys
-func (t *MapView) SetSortVals(v bool) *MapView { t.SortVals = v; return t }
+// SetSortValues sets the [MapView.SortValues]:
+// SortValue is whether to sort by values instead of keys
+func (t *MapView) SetSortValues(v bool) *MapView { t.SortValues = v; return t }
 
 // SetViewPath sets the [MapView.ViewPath]:
-// a record of parent View names that have led up to this view.
-// Displayed as extra contextual information in view dialog windows.
+// ViewPath is a record of parent view names that have led up to this view.
+// It is displayed as extra contextual information in view dialogs.
 func (t *MapView) SetViewPath(v string) *MapView { t.ViewPath = v; return t }
 
 // SetTooltip sets the [MapView.Tooltip]
