@@ -25,7 +25,7 @@ type StructViewInline struct {
 	// Struct is the pointer to the struct that we are viewing.
 	Struct any `set:"-"`
 
-	// Value for the struct itself, if this was created within value view framework -- otherwise nil
+	// StructValue is the [Value] associated with this struct view, if any.
 	StructValue Value `set:"-"`
 
 	// Values are [Value] representations of the struct fields values.

@@ -167,7 +167,7 @@ type Value interface {
 	// struct -- returns false if tag was not set.
 	Tag(tag string) (string, bool)
 
-	// AllTags returns all the tags for this value view, from structfield or set
+	// AllTags returns all the tags for this Value, from struct field or set
 	// specifically using SetTag* methods
 	AllTags() map[string]string
 }
@@ -489,7 +489,7 @@ type ValueData struct {
 	// if Owner is a map, and this is a value, this is the key for this value in the map
 	Key any `set:"-" edit:"-"`
 
-	// if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited
+	// if Owner is a map, and this is a value, this is the [Value] representing the key -- its value has the *current* value of the key, which can be edited
 	KeyView Value `set:"-" edit:"-"`
 
 	// if Owner is a slice, this is the index for the value in the slice
@@ -802,7 +802,7 @@ func (v *ValueData) AllTags() map[string]string {
 	return rvt
 }
 
-// OwnerLabel returns some extra info about the owner of this value view
+// OwnerLabel returns some extra info about the owner of this Value
 // which is useful to put in title of our object
 func (v *ValueData) OwnerLabel() string {
 	if v.Owner == nil {

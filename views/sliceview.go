@@ -247,7 +247,7 @@ type SliceViewBase struct {
 	// non-ptr reflect.Value of the slice
 	SliceNPVal reflect.Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
 
-	// Value for the slice itself, if this was created within value view framework -- otherwise nil
+	// SliceValue is the [Value] associated with this slice view, if any.
 	SliceValue Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
 
 	// Value representations of the slice values
