@@ -38,16 +38,13 @@ import (
 )
 
 // SliceView represents a slice value with index and value widgets.
-// Use [SliceViewBase.BindSelect] to make the slice view designed for selection.
+// Use [SliceViewBase.BindSelect] to make the slice view designed for item selection.
 type SliceView struct {
 	SliceViewBase
 
 	// StyleFunc is an optional styling function.
 	StyleFunc SliceViewStyleFunc `copier:"-" view:"-" json:"-" xml:"-"`
 }
-
-// check for interface impl
-var _ SliceViewer = (*SliceView)(nil)
 
 // SliceViewStyleFunc is a styling function for custom styling and
 // configuration of elements in the slice view.
@@ -200,7 +197,7 @@ type SliceViewer interface {
 // of array-like data. It automatically computes the number of rows that fit
 // within its allocated space, and manages the offset view window into the full
 // list of items, and supports row selection, copy / paste, Drag-n-Drop, etc.
-// Use [SliceViewBase.BindSelect] to make the slice view designed for selection.
+// Use [SliceViewBase.BindSelect] to make the slice view designed for item selection.
 type SliceViewBase struct {
 	core.Frame
 

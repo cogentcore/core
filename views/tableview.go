@@ -27,44 +27,40 @@ import (
 // todo:
 // * search option, both as a search field and as simple type-to-search
 
-// TableView represents a slice-of-structs as a table, where the fields are
-// the columns, within an overall frame.  It is a full-featured editor with
+// TableView represents a slice of structs as a table, where the fields are
+// the columns and the elements are the rows. It is a full-featured editor with
 // multiple-selection, cut-and-paste, and drag-and-drop.
-// If ReadOnly, it functions as a mutually-exclusive item
-// selector, highlighting the selected row and emitting a Selected action.
+// Use [SliceViewBase.BindSelect] to make the table view designed for item selection.
 type TableView struct {
 	SliceViewBase
 
-	// optional styling function
+	// StyleFunc is an optional styling function.
 	StyleFunc TableViewStyleFunc `copier:"-" view:"-" json:"-" xml:"-"`
 
-	// current selection field -- initially select value in this field
+	// SelectedField is the current selection field; initially select value in this field.
 	SelectedField string `copier:"-" view:"-" json:"-" xml:"-"`
 
-	// current sort index
+	// SortIndex is the current sort index.
 	SortIndex int
 
-	// whether current sort order is descending
-	SortDesc bool
+	// SortDescending is whether the current sort order is descending.
+	SortDescending bool
 
-	// struct type for each row
-	StruType reflect.Type `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
+	// structType is the non-pointer struct type for each row.
+	structType reflect.Type
 
-	// the visible fields
-	VisFields []reflect.StructField `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
+	// visibleFields are the visible fields.
+	visibleFields []reflect.StructField
 
-	// number of visible fields
-	NVisFields int `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
+	// numVisibleFields is the number of visible fields.
+	numVisibleFields int
 
-	// HeaderWidths has number of characters in each header, per visfields
-	HeaderWidths []int `set:"-" copier:"-" json:"-" xml:"-"`
+	// headerWidths has the number of characters in each header, per visibleFields.
+	headerWidths []int
 
-	// ColMaxWidths records maximum width in chars of string type fields
-	ColMaxWidths []int `set:"-" copier:"-" json:"-" xml:"-"`
+	// colMaxWidths records maximum width in chars of string type fields.
+	colMaxWidths []int
 }
-
-// check for interface impl
-var _ SliceViewer = (*TableView)(nil)
 
 // TableViewStyleFunc is a styling function for custom styling and
 // configuration of elements in the table view.
@@ -104,7 +100,7 @@ func (tv *TableView) SetStyles() {
 				if hdr, ok := w.(*core.Button); ok {
 					fli := hdr.Property("field-index").(int)
 					if fli == tv.SortIndex {
-						if tv.SortDesc {
+						if tv.SortDescending {
 							hdr.SetIcon(icons.KeyboardArrowDown)
 						} else {
 							hdr.SetIcon(icons.KeyboardArrowUp)
@@ -118,12 +114,12 @@ func (tv *TableView) SetStyles() {
 
 // StyleValueWidget performs additional value widget styling
 func (tv *TableView) StyleValueWidget(w core.Widget, s *styles.Style, row, col int) {
-	hw := float32(tv.HeaderWidths[col])
+	hw := float32(tv.headerWidths[col])
 	if col == tv.SortIndex {
 		hw += 6
 	}
-	if len(tv.ColMaxWidths) > col {
-		hw = max(float32(tv.ColMaxWidths[col]), hw)
+	if len(tv.colMaxWidths) > col {
+		hw = max(float32(tv.colMaxWidths[col]), hw)
 	}
 	hv := units.Ch(hw)
 	s.Min.X.Value = max(s.Min.X.Value, hv.Convert(s.Min.X.Unit, &s.UnitContext).Value)
@@ -166,18 +162,17 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 	return tv
 }
 
-// StructType sets the StruType and returns the type of the struct within the
-// slice -- this is a non-ptr type even if slice has pointers to structs
-func (tv *TableView) StructType() reflect.Type {
-	tv.StruType = reflectx.NonPointerType(reflectx.SliceElementType(tv.Slice))
-	return tv.StruType
+// getStructType sets and returns the structType, removing any pointers.
+func (tv *TableView) getStructType() reflect.Type {
+	tv.structType = reflectx.NonPointerType(reflectx.SliceElementType(tv.Slice))
+	return tv.structType
 }
 
 // CacheVisFields computes the number of visible fields in nVisFields and
 // caches those to skip in fieldSkip
 func (tv *TableView) CacheVisFields() {
-	styp := tv.StructType()
-	tv.VisFields = make([]reflect.StructField, 0)
+	styp := tv.getStructType()
+	tv.visibleFields = make([]reflect.StructField, 0)
 	shouldShow := func(fld reflect.StructField) bool {
 		if !fld.IsExported() {
 			return false
@@ -207,16 +202,16 @@ func (tv *TableView) CacheVisFields() {
 			if typ != styp {
 				rfld, has := styp.FieldByName(fld.Name)
 				if has {
-					tv.VisFields = append(tv.VisFields, rfld)
+					tv.visibleFields = append(tv.visibleFields, rfld)
 				} else {
 					fmt.Printf("TableView: Field name: %v is ambiguous from base struct type: %v, cannot be used in view!\n", fld.Name, styp.String())
 				}
 			} else {
-				tv.VisFields = append(tv.VisFields, fld)
+				tv.visibleFields = append(tv.visibleFields, fld)
 			}
 			return true
 		})
-	tv.NVisFields = len(tv.VisFields)
+	tv.numVisibleFields = len(tv.visibleFields)
 }
 
 // Config configures the view
@@ -249,25 +244,25 @@ func (tv *TableView) ConfigFrame() {
 
 func (tv *TableView) ConfigHeader() {
 	sgh := tv.SliceHeader()
-	if sgh.HasChildren() || tv.NVisFields == 0 {
+	if sgh.HasChildren() || tv.numVisibleFields == 0 {
 		return
 	}
 	hcfg := tree.Config{}
 	if tv.Is(SliceViewShowIndex) {
 		hcfg.Add(core.LabelType, "head-idx")
 	}
-	tv.HeaderWidths = make([]int, tv.NVisFields)
-	tv.ColMaxWidths = make([]int, tv.NVisFields)
-	for fli := 0; fli < tv.NVisFields; fli++ {
-		fld := tv.VisFields[fli]
+	tv.headerWidths = make([]int, tv.numVisibleFields)
+	tv.colMaxWidths = make([]int, tv.numVisibleFields)
+	for fli := 0; fli < tv.numVisibleFields; fli++ {
+		fld := tv.visibleFields[fli]
 		labnm := "head-" + fld.Name
 		hcfg.Add(core.ButtonType, labnm)
 	}
 	sgh.ConfigChildren(hcfg) // headers SHOULD be unique, but with labels..
 	_, idxOff := tv.RowWidgetNs()
-	nfld := tv.NVisFields
+	nfld := tv.numVisibleFields
 	for fli := 0; fli < nfld; fli++ {
-		field := tv.VisFields[fli]
+		field := tv.visibleFields[fli]
 		hdr := sgh.Child(idxOff + fli).(*core.Button)
 		hdr.SetType(core.ButtonMenu)
 		htxt := ""
@@ -277,10 +272,10 @@ func (tv *TableView) ConfigHeader() {
 			htxt = strcase.ToSentence(field.Name)
 		}
 		hdr.SetText(htxt)
-		tv.HeaderWidths[fli] = len(htxt)
+		tv.headerWidths[fli] = len(htxt)
 		hdr.SetProperty("field-index", fli)
 		if fli == tv.SortIndex {
-			if tv.SortDesc {
+			if tv.SortDescending {
 				hdr.SetIcon(icons.KeyboardArrowDown)
 			} else {
 				hdr.SetIcon(icons.KeyboardArrowUp)
@@ -304,7 +299,7 @@ func (tv *TableView) SliceHeader() *core.Frame {
 
 // RowWidgetNs returns number of widgets per row and offset for index label
 func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
-	nWidgPerRow = 1 + tv.NVisFields
+	nWidgPerRow = 1 + tv.numVisibleFields
 	idxOff = 1
 	if !tv.Is(SliceViewShowIndex) {
 		nWidgPerRow -= 1
@@ -340,7 +335,7 @@ func (tv *TableView) ConfigRows() {
 	nWidg := nWidgPerRow * tv.VisRows
 	sg.Styles.Columns = nWidgPerRow
 
-	tv.Values = make([]Value, tv.NVisFields*tv.VisRows)
+	tv.Values = make([]Value, tv.numVisibleFields*tv.VisRows)
 	sg.Kids = make(tree.Slice, nWidg)
 
 	for i := 0; i < tv.VisRows; i++ {
@@ -373,10 +368,10 @@ func (tv *TableView) ConfigRows() {
 		}
 
 		vpath := tv.ViewPath + "[" + sitxt + "]"
-		for fli := 0; fli < tv.NVisFields; fli++ {
-			field := tv.VisFields[fli]
+		for fli := 0; fli < tv.numVisibleFields; fli++ {
+			field := tv.visibleFields[fli]
 			fval := val.Elem().FieldByIndex(field.Index)
-			vvi := i*tv.NVisFields + fli
+			vvi := i*tv.numVisibleFields + fli
 			tags := ""
 			if fval.Kind() == reflect.Slice || fval.Kind() == reflect.Map {
 				tags = `view:"no-inline"`
@@ -402,7 +397,7 @@ func (tv *TableView) ConfigRows() {
 				vv.AsWidgetBase().OnInput(tv.HandleEvent)
 			}
 			if i == 0 && tv.SliceSize > 0 {
-				tv.ColMaxWidths[fli] = 0
+				tv.colMaxWidths[fli] = 0
 				_, isicon := vv.(*IconValue)
 				if !isicon && fval.Kind() == reflect.String {
 					mxw := 0
@@ -416,7 +411,7 @@ func (tv *TableView) ConfigRows() {
 						str := fval.String()
 						mxw = max(mxw, len(str))
 					}
-					tv.ColMaxWidths[fli] = mxw
+					tv.colMaxWidths[fli] = mxw
 				}
 			}
 		}
@@ -484,8 +479,8 @@ func (tv *TableView) UpdateWidgets() {
 				}
 			}
 		}
-		for fli := 0; fli < tv.NVisFields; fli++ {
-			field := tv.VisFields[fli]
+		for fli := 0; fli < tv.numVisibleFields; fli++ {
+			field := tv.visibleFields[fli]
 			cidx := ridx + idxOff + fli
 			if len(sg.Kids) < cidx {
 				break
@@ -507,7 +502,7 @@ func (tv *TableView) UpdateWidgets() {
 			}
 			stru := val.Interface()
 			fval := val.Elem().FieldByIndex(field.Index)
-			vvi := i*tv.NVisFields + fli
+			vvi := i*tv.numVisibleFields + fli
 			vv := tv.Values[vvi]
 			vv.SetStructValue(fval.Addr(), stru, &field, vpath)
 			vv.SetReadOnly(tv.IsReadOnly())
@@ -582,11 +577,11 @@ func (tv *TableView) SliceDeleteAt(idx int) {
 
 // SortSlice sorts the slice according to current settings
 func (tv *TableView) SortSlice() {
-	if tv.SortIndex < 0 || tv.SortIndex >= len(tv.VisFields) {
+	if tv.SortIndex < 0 || tv.SortIndex >= len(tv.visibleFields) {
 		return
 	}
-	rawIndex := tv.VisFields[tv.SortIndex].Index
-	reflectx.StructSliceSort(tv.Slice, rawIndex, !tv.SortDesc)
+	rawIndex := tv.visibleFields[tv.SortIndex].Index
+	reflectx.StructSliceSort(tv.Slice, rawIndex, !tv.SortDescending)
 }
 
 // SortSliceAction sorts the slice for given field index -- toggles ascending
@@ -597,15 +592,15 @@ func (tv *TableView) SortSliceAction(fldIndex int) {
 
 	ascending := true
 
-	for fli := 0; fli < tv.NVisFields; fli++ {
+	for fli := 0; fli < tv.numVisibleFields; fli++ {
 		hdr := sgh.Child(idxOff + fli).(*core.Button)
 		hdr.SetType(core.ButtonAction)
 		if fli == fldIndex {
 			if tv.SortIndex == fli {
-				tv.SortDesc = !tv.SortDesc
-				ascending = !tv.SortDesc
+				tv.SortDescending = !tv.SortDescending
+				ascending = !tv.SortDescending
 			} else {
-				tv.SortDesc = false
+				tv.SortDescending = false
 			}
 			if ascending {
 				hdr.SetIcon(icons.KeyboardArrowUp)
@@ -627,9 +622,9 @@ func (tv *TableView) SortSliceAction(fldIndex int) {
 // SortFieldName returns the name of the field being sorted, along with :up or
 // :down depending on descending
 func (tv *TableView) SortFieldName() string {
-	if tv.SortIndex >= 0 && tv.SortIndex < tv.NVisFields {
-		nm := tv.VisFields[tv.SortIndex].Name
-		if tv.SortDesc {
+	if tv.SortIndex >= 0 && tv.SortIndex < tv.numVisibleFields {
+		nm := tv.visibleFields[tv.SortIndex].Name
+		if tv.SortDescending {
 			nm += ":down"
 		} else {
 			nm += ":up"
@@ -647,8 +642,8 @@ func (tv *TableView) SetSortFieldName(nm string) {
 	}
 	spnm := strings.Split(nm, ":")
 	got := false
-	for fli := 0; fli < tv.NVisFields; fli++ {
-		fld := tv.VisFields[fli]
+	for fli := 0; fli < tv.numVisibleFields; fli++ {
+		fld := tv.visibleFields[fli]
 		if fld.Name == spnm[0] {
 			got = true
 			// fmt.Println("sorting on:", fld.Name, fli, "from:", nm)
@@ -657,9 +652,9 @@ func (tv *TableView) SetSortFieldName(nm string) {
 	}
 	if len(spnm) == 2 {
 		if spnm[1] == "down" {
-			tv.SortDesc = true
+			tv.SortDescending = true
 		} else {
-			tv.SortDesc = false
+			tv.SortDescending = false
 		}
 	}
 	if got {
@@ -680,7 +675,7 @@ func (tv *TableView) RowFirstVisWidget(row int) (*core.WidgetBase, bool) {
 		return w, true
 	}
 	ridx := nWidgPerRow * row
-	for fli := 0; fli < tv.NVisFields; fli++ {
+	for fli := 0; fli < tv.numVisibleFields; fli++ {
 		w := sg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.Geom.TotalBBox != (image.Rectangle{}) {
 			return w, true
@@ -700,7 +695,7 @@ func (tv *TableView) RowGrabFocus(row int) *core.WidgetBase {
 	ridx := nWidgPerRow * row
 	sg := tv.SliceGrid()
 	// first check if we already have focus
-	for fli := 0; fli < tv.NVisFields; fli++ {
+	for fli := 0; fli < tv.numVisibleFields; fli++ {
 		w := sg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.StateIs(states.Focused) || w.ContainsFocus() {
 			return w
@@ -708,7 +703,7 @@ func (tv *TableView) RowGrabFocus(row int) *core.WidgetBase {
 	}
 	tv.SetFlag(true, SliceViewInFocusGrab)
 	defer func() { tv.SetFlag(false, SliceViewInFocusGrab) }()
-	for fli := 0; fli < tv.NVisFields; fli++ {
+	for fli := 0; fli < tv.numVisibleFields; fli++ {
 		w := sg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.CanFocus() {
 			w.SetFocusEvent()
