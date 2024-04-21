@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/htmlview"
 	"cogentcore.org/core/pages"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/units"
 )
 
 //go:embed content
@@ -25,6 +26,9 @@ var content embed.FS
 
 //go:embed icon.svg
 var icon []byte
+
+//go:embed name.png
+var name embed.FS
 
 //go:embed image.png
 var myImage embed.FS
@@ -50,7 +54,11 @@ func main() {
 			s.Text.Align = styles.Center
 		})
 		errors.Log(core.NewSVG(ly).ReadBytes(icon))
-		core.NewLabel(ly).SetType(core.LabelDisplayLarge).SetText("Cogent Core")
+		img := core.NewImage(ly)
+		errors.Log(img.OpenFS(name, "name.png"))
+		img.Style(func(s *styles.Style) {
+			s.Min.Set(units.Dp(612), units.Dp(128))
+		})
 		return true
 	}
 	htmlview.ElementHandlers["get-started"] = func(ctx *htmlview.Context) bool {
