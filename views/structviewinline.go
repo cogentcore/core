@@ -17,29 +17,27 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// StructViewInline represents a struct as a single line widget,
-// for smaller structs and those explicitly marked inline.
+// StructViewInline represents a struct within a single line of
+// field labels and value widgets. This is typically used for smaller structs.
 type StructViewInline struct {
 	core.Layout
 
-	// the struct that we are a view onto
+	// Struct is the pointer to the struct that we are viewing.
 	Struct any `set:"-"`
 
 	// Value for the struct itself, if this was created within value view framework -- otherwise nil
 	StructValue Value `set:"-"`
 
-	// if true, add an edit button at the end
-	AddButton bool
+	// Values are [Value] representations of the struct fields values.
+	Values []Value `json:"-" xml:"-"`
 
-	// Value representations of the fields
-	FieldViews []Value `json:"-" xml:"-"`
-
-	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+	// ViewPath is a record of parent view names that have led up to this view.
+	// It is displayed as extra contextual information in view dialogs.
 	ViewPath string
 
-	// IsShouldShower is whether the struct implements [core.ShouldShower], which results
+	// isShouldShower is whether the struct implements [core.ShouldShower], which results
 	// in additional updating being done at certain points.
-	IsShouldShower bool `set:"-" json:"-" xml:"-" edit:"-"`
+	isShouldShower bool
 }
 
 func (sv *StructViewInline) OnInit() {
@@ -70,7 +68,7 @@ func (sv *StructViewInline) Config() {
 	config := tree.Config{}
 	// note: widget re-use does not work due to all the closures
 	sv.DeleteChildren()
-	sv.FieldViews = make([]Value, 0)
+	sv.Values = make([]Value, 0)
 	reflectx.WalkValueFlatFields(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
 		vwtag := field.Tag.Get("view")
@@ -78,7 +76,7 @@ func (sv *StructViewInline) Config() {
 			return true
 		}
 		if ss, ok := sv.Struct.(core.ShouldShower); ok {
-			sv.IsShouldShower = true
+			sv.isShouldShower = true
 			if !ss.ShouldShow(field.Name) {
 				return true
 			}
@@ -95,14 +93,11 @@ func (sv *StructViewInline) Config() {
 		valnm := "value-" + field.Name
 		config.Add(core.LabelType, labnm)
 		config.Add(vtyp, valnm) // todo: extend to diff types using interface..
-		sv.FieldViews = append(sv.FieldViews, vv)
+		sv.Values = append(sv.Values, vv)
 		return true
 	})
-	if sv.AddButton {
-		config.Add(core.ButtonType, "edit-button")
-	}
 	sv.ConfigChildren(config)
-	for i, vv := range sv.FieldViews {
+	for i, vv := range sv.Values {
 		lbl := sv.Child(i * 2).(*core.Label)
 		lbl.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
@@ -164,14 +159,14 @@ func (sv *StructViewInline) Config() {
 }
 
 func (sv *StructViewInline) UpdateFields() {
-	for _, vv := range sv.FieldViews {
+	for _, vv := range sv.Values {
 		vv.Update()
 	}
 	sv.NeedsLayout()
 }
 
 func (sv *StructViewInline) UpdateFieldAction() {
-	if sv.IsShouldShower {
+	if sv.isShouldShower {
 		sv.Update()
 	}
 }

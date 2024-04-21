@@ -196,8 +196,8 @@ type SliceViewer interface {
 	DropDeleteSource(e events.Event)
 }
 
-// SliceViewBase is the base for SliceView and TableView and any other viewers
-// of array-like data.  It automatically computes the number of rows that fit
+// SliceViewBase is the base for [SliceView] and [TableView] and any other viewers
+// of array-like data. It automatically computes the number of rows that fit
 // within its allocated space, and manages the offset view window into the full
 // list of items, and supports row selection, copy / paste, Drag-n-Drop, etc.
 // Use [SliceViewBase.BindSelect] to make the slice view designed for selection.

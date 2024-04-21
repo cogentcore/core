@@ -16,8 +16,8 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// SliceViewInline represents a slice as a single line widget,
-// for smaller slices and those explicitly marked inline.
+// SliceViewInline represents a slice within a single line of value widgets.
+// This is typically used for smaller slices.
 type SliceViewInline struct {
 	core.Layout
 

@@ -42,13 +42,11 @@ func NoSentenceCaseForType(tnm string) bool {
 	})
 }
 
-// StructView represents a struct, creating a property editor of the fields --
-// constructs Children widgets to show the field names and editor fields for
-// each field, within an overall frame.
+// StructView represents a struct with rows of field names and editable values.
 type StructView struct {
 	core.Frame
 
-	// the struct that we are a view onto
+	// Struct is the pointer to the struct that we are viewing.
 	Struct any `set:"-"`
 
 	// StructValue is the Value for the struct itself
@@ -56,18 +54,16 @@ type StructView struct {
 	// Otherwise, it is nil.
 	StructValue Value `set:"-"`
 
-	// Value representations of the fields
-	FieldViews []Value `set:"-" json:"-" xml:"-"`
+	// Values are [Value] representations of the struct field values.
+	Values []Value `set:"-" json:"-" xml:"-"`
 
-	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+	// ViewPath is a record of parent view names that have led up to this view.
+	// It is displayed as extra contextual information in view dialogs.
 	ViewPath string
 
-	// IsShouldShower is whether the struct implements [core.ShouldShower], which results
+	// isShouldShower is whether the struct implements [core.ShouldShower], which results
 	// in additional updating being done at certain points.
-	IsShouldShower bool `set:"-" json:"-" xml:"-" edit:"-"`
-
-	// extra tags by field name -- from type properties
-	TypeFieldTags map[string]string `set:"-" json:"-" xml:"-" edit:"-"`
+	isShouldShower bool
 }
 
 func (sv *StructView) OnInit() {
@@ -108,7 +104,7 @@ func (sv *StructView) SetStruct(st any) *StructView {
 // UpdateFields updates each of the value-view widgets for the fields --
 // called by the ViewSig update
 func (sv *StructView) UpdateFields() {
-	for _, vv := range sv.FieldViews {
+	for _, vv := range sv.Values {
 		// we do not update focused elements to prevent panics
 		if wb := vv.AsWidgetBase(); wb != nil {
 			if wb.StateIs(states.Focused) {
@@ -122,7 +118,7 @@ func (sv *StructView) UpdateFields() {
 
 // UpdateField updates the value-view widget for the named field
 func (sv *StructView) UpdateField(field string) {
-	for _, vv := range sv.FieldViews {
+	for _, vv := range sv.Values {
 		if vv.Name() == field {
 			vv.Update()
 			break
@@ -157,18 +153,6 @@ func (sv *StructView) StructGrid() *core.Frame {
 	return sv.ChildByName("struct-grid", 2).(*core.Frame)
 }
 
-// FieldTags returns the integrated tags for this field
-func (sv *StructView) FieldTags(fld reflect.StructField) reflect.StructTag {
-	if sv.TypeFieldTags == nil {
-		return fld.Tag
-	}
-	ft, has := sv.TypeFieldTags[fld.Name]
-	if !has {
-		return fld.Tag
-	}
-	return fld.Tag + " " + reflect.StructTag(ft)
-}
-
 // ConfigStructGrid configures the StructGrid for the current struct.
 // returns true if any fields changed.
 func (sv *StructView) ConfigStructGrid() bool {
@@ -184,16 +168,16 @@ func (sv *StructView) ConfigStructGrid() bool {
 	sg.DeleteChildren()
 	config := tree.Config{}
 	dupeFields := map[string]bool{}
-	sv.FieldViews = make([]Value, 0)
+	sv.Values = make([]Value, 0)
 
 	shouldShow := func(field reflect.StructField, stru any) bool {
-		ftags := sv.FieldTags(field)
+		ftags := field.Tag
 		vwtag := ftags.Get("view")
 		if vwtag == "-" {
 			return false
 		}
 		if ss, ok := stru.(core.ShouldShower); ok {
-			sv.IsShouldShower = true
+			sv.isShouldShower = true
 			if !ss.ShouldShow(field.Name) {
 				return false
 			}
@@ -207,7 +191,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 		},
 		func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 			// todo: check tags, skip various etc
-			ftags := sv.FieldTags(field)
+			ftags := field.Tag
 			vwtag := ftags.Get("view")
 			if !shouldShow(field, sv.Struct) {
 				return true
@@ -246,7 +230,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 						valnm := fmt.Sprintf("value-%v", fnm)
 						config.Add(core.LabelType, labnm)
 						config.Add(svtyp, valnm) // todo: extend to diff types using interface..
-						sv.FieldViews = append(sv.FieldViews, svv)
+						sv.Values = append(sv.Values, svv)
 						return true
 					})
 				return true
@@ -268,11 +252,11 @@ func (sv *StructView) ConfigStructGrid() bool {
 			valnm := fmt.Sprintf("value-%v", field.Name)
 			config.Add(core.LabelType, labnm)
 			config.Add(vtyp, valnm) // todo: extend to diff types using interface..
-			sv.FieldViews = append(sv.FieldViews, vv)
+			sv.Values = append(sv.Values, vv)
 			return true
 		})
 	sg.ConfigChildren(config) // fields could be non-unique with labels..
-	for i, vv := range sv.FieldViews {
+	for i, vv := range sv.Values {
 		lbl := sg.Child(i * 2).(*core.Label)
 		lbl.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
@@ -347,7 +331,7 @@ func (sv *StructView) UpdateFieldAction() {
 	if !sv.IsConfiged() {
 		return
 	}
-	if sv.IsShouldShower {
+	if sv.isShouldShower {
 		sv.Update()
 	}
 }
