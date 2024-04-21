@@ -20,13 +20,13 @@ import (
 type MapView struct {
 	core.Frame
 
-	// Map is the map that we are viewing.
+	// Map is the pointer to the map that we are viewing.
 	Map any
 
-	// Value representations of the map keys
+	// Keys are [Value] representations of the map keys.
 	Keys []Value `json:"-" xml:"-" set:"-"`
 
-	// Value representations of the map values
+	// Values are [Value] representations of the map values.
 	Values []Value `json:"-" xml:"-" set:"-"`
 
 	// SortValue is whether to sort by values instead of keys

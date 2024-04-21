@@ -188,7 +188,7 @@ func (t *Inspector) SetFilename(v core.Filename) *Inspector { t.Filename = v; re
 func (t *Inspector) SetTooltip(v string) *Inspector { t.Tooltip = v; return t }
 
 // MapViewType is the [types.Type] for [MapView]
-var MapViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapView", IDName: "map-view", Doc: "MapView represents a map using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the map that we are viewing."}, {Name: "Keys", Doc: "Value representations of the map keys"}, {Name: "Values", Doc: "Value representations of the map values"}, {Name: "SortValues", Doc: "SortValue is whether to sort by values instead of keys"}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "ncols", Doc: "ncols is the number of columns in the map"}}, Instance: &MapView{}})
+var MapViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapView", IDName: "map-view", Doc: "MapView represents a map using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "Keys", Doc: "Keys are [Value] representations of the map keys."}, {Name: "Values", Doc: "Values are [Value] representations of the map values."}, {Name: "SortValues", Doc: "SortValue is whether to sort by values instead of keys"}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "ncols", Doc: "ncols is the number of columns in the map"}}, Instance: &MapView{}})
 
 // NewMapView adds a new [MapView] with the given name to the given parent:
 // MapView represents a map using two columns of editable key and value widgets.
@@ -203,7 +203,7 @@ func (t *MapView) NodeType() *types.Type { return MapViewType }
 func (t *MapView) New() tree.Node { return &MapView{} }
 
 // SetMap sets the [MapView.Map]:
-// Map is the map that we are viewing.
+// Map is the pointer to the map that we are viewing.
 func (t *MapView) SetMap(v any) *MapView { t.Map = v; return t }
 
 // SetSortValues sets the [MapView.SortValues]:
@@ -219,7 +219,7 @@ func (t *MapView) SetViewPath(v string) *MapView { t.ViewPath = v; return t }
 func (t *MapView) SetTooltip(v string) *MapView { t.Tooltip = v; return t }
 
 // MapViewInlineType is the [types.Type] for [MapViewInline]
-var MapViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapViewInline", IDName: "map-view-inline", Doc: "MapViewInline represents a map within a single line of key and value widgets.\nThis is typically used for smaller maps.", Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the map that we are viewing."}, {Name: "MapValue", Doc: "MapValue is the [Value] associated with this map view, if there is one."}, {Name: "Keys", Doc: "Keys are [Value] representations of the map keys."}, {Name: "Values", Doc: "Values are [Value] representations of the map values."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "configSize", Doc: "configSize is the size of the map when the widget was configured."}}, Instance: &MapViewInline{}})
+var MapViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapViewInline", IDName: "map-view-inline", Doc: "MapViewInline represents a map within a single line of key and value widgets.\nThis is typically used for smaller maps.", Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "MapValue", Doc: "MapValue is the [Value] associated with this map view, if there is one."}, {Name: "Keys", Doc: "Keys are [Value] representations of the map keys."}, {Name: "Values", Doc: "Values are [Value] representations of the map values."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "configSize", Doc: "configSize is the size of the map when the widget was configured."}}, Instance: &MapViewInline{}})
 
 // NewMapViewInline adds a new [MapViewInline] with the given name to the given parent:
 // MapViewInline represents a map within a single line of key and value widgets.
@@ -235,7 +235,7 @@ func (t *MapViewInline) NodeType() *types.Type { return MapViewInlineType }
 func (t *MapViewInline) New() tree.Node { return &MapViewInline{} }
 
 // SetMap sets the [MapViewInline.Map]:
-// Map is the map that we are viewing.
+// Map is the pointer to the map that we are viewing.
 func (t *MapViewInline) SetMap(v any) *MapViewInline { t.Map = v; return t }
 
 // SetViewPath sets the [MapViewInline.ViewPath]:
@@ -247,14 +247,11 @@ func (t *MapViewInline) SetViewPath(v string) *MapViewInline { t.ViewPath = v; r
 func (t *MapViewInline) SetTooltip(v string) *MapViewInline { t.Tooltip = v; return t }
 
 // SliceViewType is the [types.Type] for [SliceView]
-var SliceViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceView", IDName: "slice-view", Doc: "SliceView represents a slice, creating an interactive viewer / editor of the\nelements as rows in a table.  Widgets to show the index / value pairs, within an\noverall frame.\nSet to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.", Embeds: []types.Field{{Name: "SliceViewBase"}}, Fields: []types.Field{{Name: "StyleFunc", Doc: "optional styling function"}}, Instance: &SliceView{}})
+var SliceViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceView", IDName: "slice-view", Doc: "SliceView represents a slice value with index and value widgets.\nUse [SliceViewBase.BindSelect] to make the slice view designed for selection.", Embeds: []types.Field{{Name: "SliceViewBase"}}, Fields: []types.Field{{Name: "StyleFunc", Doc: "StyleFunc is an optional styling function."}}, Instance: &SliceView{}})
 
 // NewSliceView adds a new [SliceView] with the given name to the given parent:
-// SliceView represents a slice, creating an interactive viewer / editor of the
-// elements as rows in a table.  Widgets to show the index / value pairs, within an
-// overall frame.
-// Set to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected
-// signals when selection is updated.
+// SliceView represents a slice value with index and value widgets.
+// Use [SliceViewBase.BindSelect] to make the slice view designed for selection.
 func NewSliceView(parent tree.Node, name ...string) *SliceView {
 	return parent.NewChild(SliceViewType, name...).(*SliceView)
 }
@@ -266,7 +263,7 @@ func (t *SliceView) NodeType() *types.Type { return SliceViewType }
 func (t *SliceView) New() tree.Node { return &SliceView{} }
 
 // SetStyleFunc sets the [SliceView.StyleFunc]:
-// optional styling function
+// StyleFunc is an optional styling function.
 func (t *SliceView) SetStyleFunc(v SliceViewStyleFunc) *SliceView { t.StyleFunc = v; return t }
 
 // SetTooltip sets the [SliceView.Tooltip]
@@ -288,15 +285,14 @@ func (t *SliceView) SetSelectedIndex(v int) *SliceView { t.SelectedIndex = v; re
 func (t *SliceView) SetInitSelectedIndex(v int) *SliceView { t.InitSelectedIndex = v; return t }
 
 // SliceViewBaseType is the [types.Type] for [SliceViewBase]
-var SliceViewBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewBase", IDName: "slice-view-base", Doc: "SliceViewBase is the base for SliceView and TableView and any other viewers\nof array-like data.  It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nSet to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.", Methods: []types.Method{{Name: "CopyIndexes", Doc: "CopyIndexes copies selected idxs to system.Clipboard, optionally resetting the selection", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"reset"}}, {Name: "DeleteIndexes", Doc: "DeleteIndexes deletes all selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "CutIndexes", Doc: "CutIndexes copies selected indexes to system.Clipboard and deletes selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "PasteIndex", Doc: "PasteIndex pastes clipboard at given idx", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"idx"}}, {Name: "Duplicate", Doc: "Duplicate copies selected items and inserts them after current selection --\nreturn idx of start of duplicates if successful, else -1", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"int"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "the slice that we are a view onto -- must be a pointer to that slice"}, {Name: "MinRows", Doc: "MinRows specifies the minimum number of rows to display, to ensure\nat least this amount is displayed."}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "ViewMu", Doc: "optional mutex that, if non-nil, will be used around any updates that\nread / modify the underlying Slice data.\nCan be used to protect against random updating if your code has specific\nupdate points that can be likewise protected with this same mutex."}, {Name: "Changed", Doc: "Changed indicates whether the underlying slice\nhas been edited in any way"}, {Name: "SelectedValue", Doc: "current selection value -- initially select this value if set"}, {Name: "SelectedIndex", Doc: "index of currently selected item"}, {Name: "InitSelectedIndex", Doc: "index of row to select at start"}, {Name: "SelectedIndexes", Doc: "list of currently-selected slice indexes"}, {Name: "LastClick", Doc: "LastClick is the last row that has been clicked on.\nThis is used to prevent erroneous double click events\nfrom being sent when the user clicks on multiple different\nrows in quick succession."}, {Name: "NormalCursor", Doc: "NormalCursor is the cached cursor to display when there\nis no row being hovered."}, {Name: "CurrentCursor", Doc: "CurrentCursor is the cached cursor that should currently be\ndisplayed."}, {Name: "SliceNPVal", Doc: "non-ptr reflect.Value of the slice"}, {Name: "SliceValue", Doc: "Value for the slice itself, if this was created within value view framework -- otherwise nil"}, {Name: "Values", Doc: "Value representations of the slice values"}, {Name: "HoverRow", Doc: "currently-hovered row"}, {Name: "DraggedIndexes", Doc: "list of currently-dragged indexes"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "StartIndex", Doc: "starting slice index of visible rows"}, {Name: "SliceSize", Doc: "size of slice"}, {Name: "ConfigIter", Doc: "iteration through the configuration process, reset when a new slice type is set"}, {Name: "TmpIndex", Doc: "temp idx state for e.g., dnd"}, {Name: "ElVal", Doc: "ElVal is a Value representation of the underlying element type\nwhich is used whenever there are no slice elements available"}, {Name: "MaxWidth", Doc: "maximum width of value column in chars, if string"}}, Instance: &SliceViewBase{}})
+var SliceViewBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewBase", IDName: "slice-view-base", Doc: "SliceViewBase is the base for SliceView and TableView and any other viewers\nof array-like data.  It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nUse [SliceViewBase.BindSelect] to make the slice view designed for selection.", Methods: []types.Method{{Name: "CopyIndexes", Doc: "CopyIndexes copies selected idxs to system.Clipboard, optionally resetting the selection", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"reset"}}, {Name: "DeleteIndexes", Doc: "DeleteIndexes deletes all selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "CutIndexes", Doc: "CutIndexes copies selected indexes to system.Clipboard and deletes selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "PasteIndex", Doc: "PasteIndex pastes clipboard at given idx", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"idx"}}, {Name: "Duplicate", Doc: "Duplicate copies selected items and inserts them after current selection --\nreturn idx of start of duplicates if successful, else -1", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"int"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the pointer to the slice that we are viewing."}, {Name: "MinRows", Doc: "MinRows specifies the minimum number of rows to display, to ensure\nat least this amount is displayed."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "ViewMu", Doc: "ViewMu is an optional mutex that, if non-nil, will be used around any updates that\nread / modify the underlying Slice data.\nCan be used to protect against random updating if your code has specific\nupdate points that can be likewise protected with this same mutex."}, {Name: "SelectedValue", Doc: "SelectedValue is the current selection value; initially select this value if set."}, {Name: "SelectedIndex", Doc: "index of currently selected item"}, {Name: "InitSelectedIndex", Doc: "index of row to select at start"}, {Name: "SelectedIndexes", Doc: "list of currently-selected slice indexes"}, {Name: "LastClick", Doc: "LastClick is the last row that has been clicked on.\nThis is used to prevent erroneous double click events\nfrom being sent when the user clicks on multiple different\nrows in quick succession."}, {Name: "NormalCursor", Doc: "NormalCursor is the cached cursor to display when there\nis no row being hovered."}, {Name: "CurrentCursor", Doc: "CurrentCursor is the cached cursor that should currently be\ndisplayed."}, {Name: "SliceNPVal", Doc: "non-ptr reflect.Value of the slice"}, {Name: "SliceValue", Doc: "Value for the slice itself, if this was created within value view framework -- otherwise nil"}, {Name: "Values", Doc: "Value representations of the slice values"}, {Name: "HoverRow", Doc: "currently-hovered row"}, {Name: "DraggedIndexes", Doc: "list of currently-dragged indexes"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "StartIndex", Doc: "starting slice index of visible rows"}, {Name: "SliceSize", Doc: "size of slice"}, {Name: "ConfigIter", Doc: "iteration through the configuration process, reset when a new slice type is set"}, {Name: "TmpIndex", Doc: "temp idx state for e.g., dnd"}, {Name: "ElVal", Doc: "ElVal is a Value representation of the underlying element type\nwhich is used whenever there are no slice elements available"}, {Name: "MaxWidth", Doc: "maximum width of value column in chars, if string"}}, Instance: &SliceViewBase{}})
 
 // NewSliceViewBase adds a new [SliceViewBase] with the given name to the given parent:
 // SliceViewBase is the base for SliceView and TableView and any other viewers
 // of array-like data.  It automatically computes the number of rows that fit
 // within its allocated space, and manages the offset view window into the full
 // list of items, and supports row selection, copy / paste, Drag-n-Drop, etc.
-// Set to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected
-// signals when selection is updated.
+// Use [SliceViewBase.BindSelect] to make the slice view designed for selection.
 func NewSliceViewBase(parent tree.Node, name ...string) *SliceViewBase {
 	return parent.NewChild(SliceViewBaseType, name...).(*SliceViewBase)
 }
@@ -313,11 +309,12 @@ func (t *SliceViewBase) New() tree.Node { return &SliceViewBase{} }
 func (t *SliceViewBase) SetMinRows(v int) *SliceViewBase { t.MinRows = v; return t }
 
 // SetViewPath sets the [SliceViewBase.ViewPath]:
-// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+// ViewPath is a record of parent view names that have led up to this view.
+// It is displayed as extra contextual information in view dialogs.
 func (t *SliceViewBase) SetViewPath(v string) *SliceViewBase { t.ViewPath = v; return t }
 
 // SetSelectedValue sets the [SliceViewBase.SelectedValue]:
-// current selection value -- initially select this value if set
+// SelectedValue is the current selection value; initially select this value if set.
 func (t *SliceViewBase) SetSelectedValue(v any) *SliceViewBase { t.SelectedValue = v; return t }
 
 // SetSelectedIndex sets the [SliceViewBase.SelectedIndex]:
@@ -358,7 +355,7 @@ func (t *SliceViewGrid) SetLastBackground(v image.Image) *SliceViewGrid {
 func (t *SliceViewGrid) SetTooltip(v string) *SliceViewGrid { t.Tooltip = v; return t }
 
 // SliceViewInlineType is the [types.Type] for [SliceViewInline]
-var SliceViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewInline", IDName: "slice-view-inline", Doc: "SliceViewInline represents a slice as a single line widget,\nfor smaller slices and those explicitly marked inline.", Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Slice", Doc: "the slice that we are a view onto"}, {Name: "SliceValue", Doc: "SliceValue is the Value for the slice itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "IsArray", Doc: "whether the slice is actually an array -- no modifications"}, {Name: "IsFixedLen", Doc: "whether the slice has a fixed-len flag on it"}, {Name: "Changed", Doc: "has the slice been edited?"}, {Name: "Values", Doc: "Value representations of the fields"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "ConfigSize", Doc: "size of map when gui was configured"}}, Instance: &SliceViewInline{}})
+var SliceViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewInline", IDName: "slice-view-inline", Doc: "SliceViewInline represents a slice as a single line widget,\nfor smaller slices and those explicitly marked inline.", Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the slice that we are viewing."}, {Name: "SliceValue", Doc: "SliceValue is the Value for the slice itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "Values", Doc: "Values are [Value] representations of the slice values."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}, {Name: "isFixedLength", Doc: "isFixedLength is whether the slice has a fixed-length flag on it."}, {Name: "configSize", Doc: "configSize is the size of the slice when the widget was configured."}}, Instance: &SliceViewInline{}})
 
 // NewSliceViewInline adds a new [SliceViewInline] with the given name to the given parent:
 // SliceViewInline represents a slice as a single line widget,
@@ -374,7 +371,8 @@ func (t *SliceViewInline) NodeType() *types.Type { return SliceViewInlineType }
 func (t *SliceViewInline) New() tree.Node { return &SliceViewInline{} }
 
 // SetViewPath sets the [SliceViewInline.ViewPath]:
-// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+// ViewPath is a record of parent view names that have led up to this view.
+// It is displayed as extra contextual information in view dialogs.
 func (t *SliceViewInline) SetViewPath(v string) *SliceViewInline { t.ViewPath = v; return t }
 
 // SetTooltip sets the [SliceViewInline.Tooltip]

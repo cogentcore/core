@@ -20,7 +20,7 @@ import (
 type MapViewInline struct {
 	core.Layout
 
-	// Map is the map that we are viewing.
+	// Map is the pointer to the map that we are viewing.
 	Map any
 
 	// MapValue is the [Value] associated with this map view, if there is one.

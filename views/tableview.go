@@ -397,7 +397,7 @@ func (tv *TableView) ConfigRows() {
 
 			if !tv.IsReadOnly() {
 				vv.OnChange(func(e events.Event) {
-					tv.SetChanged()
+					tv.SendChange()
 				})
 				vv.AsWidgetBase().OnInput(tv.HandleEvent)
 			}
@@ -555,7 +555,7 @@ func (tv *TableView) SliceNewAt(idx int) {
 	tv.This().(SliceViewer).UpdateSliceSize()
 	tv.SelectIndexAction(idx, events.SelectOne)
 	tv.ViewMuUnlock()
-	tv.SetChanged()
+	tv.SendChange()
 	tv.This().(SliceViewer).UpdateWidgets()
 	tv.IndexGrabFocus(idx)
 	tv.NeedsLayout()
@@ -575,7 +575,7 @@ func (tv *TableView) SliceDeleteAt(idx int) {
 	tv.This().(SliceViewer).UpdateSliceSize()
 
 	tv.ViewMuUnlock()
-	tv.SetChanged()
+	tv.SendChange()
 	tv.This().(SliceViewer).UpdateWidgets()
 	tv.NeedsLayout()
 }

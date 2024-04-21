@@ -21,7 +21,7 @@ import (
 type SliceViewInline struct {
 	core.Layout
 
-	// the slice that we are a view onto
+	// Slice is the slice that we are viewing.
 	Slice any `set:"-"`
 
 	// SliceValue is the Value for the slice itself
@@ -29,23 +29,21 @@ type SliceViewInline struct {
 	// Otherwise, it is nil.
 	SliceValue Value `set:"-"`
 
-	// whether the slice is actually an array -- no modifications
-	IsArray bool `set:"-"`
-
-	// whether the slice has a fixed-len flag on it
-	IsFixedLen bool `set:"-"`
-
-	// has the slice been edited?
-	Changed bool `set:"-"`
-
-	// Value representations of the fields
+	// Values are [Value] representations of the slice values.
 	Values []Value `json:"-" xml:"-" set:"-"`
 
-	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+	// ViewPath is a record of parent view names that have led up to this view.
+	// It is displayed as extra contextual information in view dialogs.
 	ViewPath string
 
-	// size of map when gui was configured
-	ConfigSize int `set:"-"`
+	// isArray is whether the slice is actually an array.
+	isArray bool
+
+	// isFixedLength is whether the slice has a fixed-length flag on it.
+	isFixedLength bool
+
+	// configSize is the size of the slice when the widget was configured.
+	configSize int
 }
 
 func (sv *SliceViewInline) OnInit() {
@@ -112,10 +110,10 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 	}
 	if newslc {
 		sv.Slice = sl
-		sv.IsArray = reflectx.NonPointerType(reflect.TypeOf(sl)).Kind() == reflect.Array
-		sv.IsFixedLen = false
+		sv.isArray = reflectx.NonPointerType(reflect.TypeOf(sl)).Kind() == reflect.Array
+		sv.isFixedLength = false
 		if sv.SliceValue != nil {
-			_, sv.IsFixedLen = sv.SliceValue.Tag("fixed-len")
+			_, sv.isFixedLength = sv.SliceValue.Tag("fixed-len")
 		}
 		sv.Update()
 	}
@@ -125,7 +123,7 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 func (sv *SliceViewInline) Config() {
 	sv.DeleteChildren()
 	if reflectx.AnyIsNil(sv.Slice) {
-		sv.ConfigSize = 0
+		sv.configSize = 0
 		return
 	}
 	config := tree.Config{}
@@ -133,7 +131,7 @@ func (sv *SliceViewInline) Config() {
 	sv.Values = make([]Value, 0)
 
 	sl := reflectx.NonPointerValue(reflectx.OnePointerUnderlyingValue(reflect.ValueOf(sv.Slice)))
-	sv.ConfigSize = sl.Len()
+	sv.configSize = sl.Len()
 
 	sz := min(sl.Len(), core.SystemSettings.SliceInlineLength)
 	for i := 0; i < sz; i++ {
@@ -146,13 +144,13 @@ func (sv *SliceViewInline) Config() {
 		config.Add(vtyp, valnm)
 		sv.Values = append(sv.Values, vv)
 	}
-	if !sv.IsArray && !sv.IsFixedLen {
+	if !sv.isArray && !sv.isFixedLength {
 		config.Add(core.ButtonType, "add-button")
 	}
 	config.Add(core.ButtonType, "edit-button")
 	sv.ConfigChildren(config)
 	for i, vv := range sv.Values {
-		vv.OnChange(func(e events.Event) { sv.SetChanged() })
+		vv.OnChange(func(e events.Event) { sv.SendChange() })
 		w := sv.Child(i).(core.Widget)
 		if sv.SliceValue != nil {
 			vv.SetTags(sv.SliceValue.AllTags())
@@ -174,7 +172,7 @@ func (sv *SliceViewInline) Config() {
 			})
 		}
 	}
-	if !sv.IsArray && !sv.IsFixedLen {
+	if !sv.isArray && !sv.isFixedLength {
 		adbti, err := sv.Children().ElemFromEndTry(1)
 		if err == nil {
 			adbt := adbti.(*core.Button)
@@ -193,40 +191,31 @@ func (sv *SliceViewInline) Config() {
 	sv.NeedsLayout()
 }
 
-// SetChanged sets the Changed flag and emits the ViewSig signal for the
-// SliceView, indicating that some kind of edit / change has taken place to
-// the table data.  It isn't really practical to record all the different
-// types of changes, so this is just generic.
-func (sv *SliceViewInline) SetChanged() {
-	sv.Changed = true
-	sv.SendChange()
-}
-
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end
 func (sv *SliceViewInline) SliceNewAt(idx int) {
-	if sv.IsArray || sv.IsFixedLen {
+	if sv.isArray || sv.isFixedLength {
 		return
 	}
 	reflectx.SliceNewAt(sv.Slice, idx)
 
-	sv.SetChanged()
+	sv.SendChange()
 	sv.Update()
 }
 
 // SliceDeleteAt deletes element at given index from slice
 func (sv *SliceViewInline) SliceDeleteAt(idx int) {
-	if sv.IsArray || sv.IsFixedLen {
+	if sv.isArray || sv.isFixedLength {
 		return
 	}
 	reflectx.SliceDeleteAt(sv.Slice, idx)
 
-	sv.SetChanged()
+	sv.SendChange()
 	sv.Update()
 }
 
 func (sv *SliceViewInline) ContextMenu(m *core.Scene, idx int) {
-	if sv.IsReadOnly() || sv.IsArray || sv.IsFixedLen {
+	if sv.IsReadOnly() || sv.isArray || sv.isFixedLength {
 		return
 	}
 	core.NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
@@ -246,10 +235,10 @@ func (sv *SliceViewInline) UpdateValues() {
 
 func (sv *SliceViewInline) SliceSizeChanged() bool {
 	if reflectx.AnyIsNil(sv.Slice) {
-		return sv.ConfigSize != 0
+		return sv.configSize != 0
 	}
 	sl := reflectx.NonPointerValue(reflectx.OnePointerUnderlyingValue(reflect.ValueOf(sv.Slice)))
-	return sv.ConfigSize != sl.Len()
+	return sv.configSize != sl.Len()
 }
 
 func (sv *SliceViewInline) SizeUp() {

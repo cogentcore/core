@@ -37,18 +37,12 @@ import (
 	"cogentcore.org/core/units"
 )
 
-////////////////////////////////////////////////////////
-//  SliceView
-
-// SliceView represents a slice, creating an interactive viewer / editor of the
-// elements as rows in a table.  Widgets to show the index / value pairs, within an
-// overall frame.
-// Set to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected
-// signals when selection is updated.
+// SliceView represents a slice value with index and value widgets.
+// Use [SliceViewBase.BindSelect] to make the slice view designed for selection.
 type SliceView struct {
 	SliceViewBase
 
-	// optional styling function
+	// StyleFunc is an optional styling function.
 	StyleFunc SliceViewStyleFunc `copier:"-" view:"-" json:"-" xml:"-"`
 }
 
@@ -206,32 +200,28 @@ type SliceViewer interface {
 // of array-like data.  It automatically computes the number of rows that fit
 // within its allocated space, and manages the offset view window into the full
 // list of items, and supports row selection, copy / paste, Drag-n-Drop, etc.
-// Set to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected
-// signals when selection is updated.
+// Use [SliceViewBase.BindSelect] to make the slice view designed for selection.
 type SliceViewBase struct {
 	core.Frame
 
-	// the slice that we are a view onto -- must be a pointer to that slice
+	// Slice is the pointer to the slice that we are viewing.
 	Slice any `set:"-" json:"-" xml:"-"`
 
 	// MinRows specifies the minimum number of rows to display, to ensure
 	// at least this amount is displayed.
 	MinRows int `default:"4"`
 
-	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+	// ViewPath is a record of parent view names that have led up to this view.
+	// It is displayed as extra contextual information in view dialogs.
 	ViewPath string
 
-	// optional mutex that, if non-nil, will be used around any updates that
+	// ViewMu is an optional mutex that, if non-nil, will be used around any updates that
 	// read / modify the underlying Slice data.
 	// Can be used to protect against random updating if your code has specific
 	// update points that can be likewise protected with this same mutex.
 	ViewMu *sync.Mutex `copier:"-" view:"-" json:"-" xml:"-" set:"-"`
 
-	// Changed indicates whether the underlying slice
-	// has been edited in any way
-	Changed bool `set:"-"`
-
-	// current selection value -- initially select this value if set
+	// SelectedValue is the current selection value; initially select this value if set.
 	SelectedValue any `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// index of currently selected item
@@ -821,15 +811,6 @@ func (sv *SliceViewBase) UpdateWidgets() {
 	sg.NeedsRender()
 }
 
-// SetChanged sets the Changed flag and emits the ViewSig signal for the
-// SliceViewBase, indicating that some kind of edit / change has taken place to
-// the table data.  It isn't really practical to record all the different
-// types of changes, so this is just generic.
-func (sv *SliceViewBase) SetChanged() {
-	sv.Changed = true
-	sv.SendChange()
-}
-
 // SliceNewAtRow inserts a new blank element at given display row
 func (sv *SliceViewBase) SliceNewAtRow(row int) {
 	sv.This().(SliceViewer).SliceNewAt(sv.StartIndex + row)
@@ -870,7 +851,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 							nm := fmt.Sprintf("New%v%v", nd.Type.Name, idx+1+i)
 							owntree.InsertNewChild(nd.Type, idx+1+i, nm)
 						}
-						sv.SetChanged()
+						sv.SendChange()
 					})
 				})
 				d.NewDialog(sv).Run()
@@ -898,7 +879,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 
 	sv.SelectIndexAction(idx, events.SelectOne)
 	sv.ViewMuUnlock()
-	sv.SetChanged()
+	sv.SendChange()
 	sv.This().(SliceViewer).UpdateWidgets()
 	sv.IndexGrabFocus(idx)
 	sv.NeedsLayout()
@@ -958,7 +939,7 @@ func (sv *SliceViewBase) SliceDeleteAt(i int) {
 	sv.This().(SliceViewer).UpdateSliceSize()
 
 	sv.ViewMuUnlock()
-	sv.SetChanged()
+	sv.SendChange()
 	sv.This().(SliceViewer).UpdateWidgets()
 	sv.NeedsRender()
 }
@@ -1591,7 +1572,7 @@ func (sv *SliceViewBase) DeleteIndexes() { //types:add
 	for _, i := range ixs {
 		sv.This().(SliceViewer).SliceDeleteAt(i)
 	}
-	sv.SetChanged()
+	sv.SendChange()
 	sv.This().(SliceViewer).UpdateWidgets()
 	sv.NeedsRender()
 }
@@ -1609,7 +1590,7 @@ func (sv *SliceViewBase) CutIndexes() { //types:add
 	for _, i := range ixs {
 		sv.This().(SliceViewer).SliceDeleteAt(i)
 	}
-	sv.SetChanged()
+	sv.SendChange()
 	sv.SelectIndexAction(idx, events.SelectOne)
 	sv.This().(SliceViewer).UpdateWidgets()
 	sv.NeedsRender()
@@ -1670,7 +1651,7 @@ func (sv *SliceViewBase) PasteAssign(md mimedata.Mimes, idx int) {
 	}
 	ns := sl[0]
 	sv.SliceNPVal.Index(idx).Set(reflect.ValueOf(ns).Elem())
-	sv.SetChanged()
+	sv.SendChange()
 	sv.NeedsRender()
 }
 
@@ -1697,7 +1678,7 @@ func (sv *SliceViewBase) PasteAtIndex(md mimedata.Mimes, idx int) {
 
 	sv.SliceNPVal = reflectx.NonPointerValue(reflect.ValueOf(sv.Slice)) // need to update after changes
 
-	sv.SetChanged()
+	sv.SendChange()
 	sv.SelectIndexAction(idx, events.SelectOne)
 	sv.This().(SliceViewer).UpdateWidgets()
 	sv.NeedsRender()
