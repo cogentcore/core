@@ -32,7 +32,6 @@ func MakeAppJS(c *config.Config) ([]byte, error) {
 	if c.Web.Env == nil {
 		c.Web.Env = make(map[string]string)
 	}
-	c.Web.Env["GOAPP_VERSION"] = c.Version
 	c.Web.Env["GOAPP_STATIC_RESOURCES_URL"] = "/"
 	c.Web.Env["GOAPP_ROOT_PREFIX"] = "."
 

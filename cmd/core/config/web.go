@@ -78,8 +78,7 @@ type Web struct { //types:add
 	// The environment variables that are passed to the progressive web app.
 	//
 	// Reserved keys:
-	// - GOAPP_VERSION
-	// - GOAPP_GOAPP_STATIC_RESOURCES_URL
+	// - GOAPP_STATIC_RESOURCES_URL
 	Env map[string]string
 
 	// The HTTP header to retrieve the WebAssembly file content length.
