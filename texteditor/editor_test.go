@@ -10,6 +10,9 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/errors"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestEditor(t *testing.T) {
@@ -56,4 +59,26 @@ func TestEditorMulti(t *testing.T) {
 	NewEditor(b).SetBuffer(tb)
 	NewEditor(b).SetBuffer(tb)
 	b.AssertRender(t, "multi")
+}
+
+func TestEditorInput(t *testing.T) {
+	b := core.NewBody()
+	te := NewSoloEditor(b)
+	n := 0
+	text := ""
+	te.OnInput(func(e events.Event) {
+		n++
+		text = te.Buffer.String()
+	})
+	b.AssertRender(t, "input", func() {
+		te.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
+		assert.Equal(t, 1, n)
+		assert.Equal(t, "G\n", text)
+		te.HandleEvent(events.NewKey(events.KeyChord, 'o', 0, 0))
+		assert.Equal(t, 2, n)
+		assert.Equal(t, "Go\n", text)
+		te.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, 0))
+		assert.Equal(t, 3, n)
+		assert.Equal(t, "Go\n\n", text)
+	})
 }
