@@ -38,3 +38,9 @@ func TestMapViewChange(t *testing.T) {
 		assert.Equal(t, map[string]int{"Go": 2, "C++": 3, "Python": 5}, m)
 	})
 }
+
+func TestMapViewReadOnly(t *testing.T) {
+	b := core.NewBody()
+	NewMapView(b).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
+	b.AssertRender(t, "map-view/read-only")
+}
