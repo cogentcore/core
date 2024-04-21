@@ -5,18 +5,36 @@
 package views
 
 import (
-	"strconv"
+	"maps"
 	"testing"
 
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMapView(t *testing.T) {
 	b := core.NewBody()
-	m := map[string]bool{}
-	for i := 0; i < 10; i++ {
-		m["Gopher "+strconv.Itoa(i)] = i%3 == 0
-	}
-	NewMapView(b).SetMap(&m)
-	b.AssertRender(t, "mapview/basic")
+	NewMapView(b).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
+	b.AssertRender(t, "map-view/basic")
+}
+
+func TestMapViewChange(t *testing.T) {
+	b := core.NewBody()
+	m := map[string]int{"Go": 1, "C++": 3, "Python": 5}
+
+	n := 0
+	value := map[string]int{}
+	mv := NewMapView(b).SetMap(&m)
+	mv.OnChange(func(e events.Event) {
+		n++
+		maps.Copy(value, m)
+	})
+	b.AssertRender(t, "map-view/change", func() {
+		// [3] is value of second row, which is Go since it is sorted alphabetically
+		mv.MapGrid().Child(3).(*core.Spinner).TrailingIconButton().Send(events.Click)
+		assert.Equal(t, 1, n)
+		assert.Equal(t, m, value)
+		assert.Equal(t, map[string]int{"Go": 2, "C++": 3, "Python": 5}, m)
+	})
 }
