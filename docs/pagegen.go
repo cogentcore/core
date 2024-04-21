@@ -978,7 +978,7 @@ func main() {
 		errors.Log(texteditor.NewSoloEditor(parent).Buffer.OpenFS(myFile, "file.go"))
 	},
 	"views/text-editors-4": func(parent core.Widget) {
-		tb := texteditor.NewBuffer()
+		tb := texteditor.NewBuffer().SetTextString("Hello, world!")
 		texteditor.NewEditor(parent).SetBuffer(tb)
 		texteditor.NewEditor(parent).SetBuffer(tb)
 	},

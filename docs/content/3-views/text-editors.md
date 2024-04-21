@@ -47,7 +47,7 @@ errors.Log(texteditor.NewSoloEditor(parent).Buffer.Open("file.go"))
 You can make multiple text editors that edit the same underlying text buffer:
 
 ```Go
-tb := texteditor.NewBuffer()
+tb := texteditor.NewBuffer().SetTextString("Hello, world!")
 texteditor.NewEditor(parent).SetBuffer(tb)
 texteditor.NewEditor(parent).SetBuffer(tb)
 ```
