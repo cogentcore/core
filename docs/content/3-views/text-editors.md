@@ -57,6 +57,6 @@ You can detect when the user makes any change to the content of a text editor as
 ```Go
 te := texteditor.NewSoloEditor(parent)
 te.OnInput(func(e events.Event) {
-    core.MessageSnackbar(parent, "OnInput: "+te.Buffer.TextString())
+    core.MessageSnackbar(parent, "OnInput: "+te.Buffer.String())
 })
 ```

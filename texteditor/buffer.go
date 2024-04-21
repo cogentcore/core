@@ -345,10 +345,10 @@ func (tb *Buffer) Text() []byte {
 	return tb.Txt
 }
 
-// Text returns the current text as a string, applying all current
+// String returns the current text as a string, applying all current
 // changes by calling EditDone, which will generate a signal if there have been
 // changes.
-func (tb *Buffer) TextString() string {
+func (tb *Buffer) String() string {
 	return string(tb.Text())
 }
 
