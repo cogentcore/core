@@ -17,7 +17,7 @@ import (
 	"golang.org/x/image/draw"
 )
 
-var testImagePath = Filename(filepath.Join("..", "icon.png"))
+var testImagePath = Filename(filepath.Join("..", "docs", "image.png"))
 
 func TestImage(t *testing.T) {
 	b := NewBody()
