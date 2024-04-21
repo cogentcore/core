@@ -52,7 +52,7 @@ texteditor.NewEditor(parent).SetBuffer(tb)
 texteditor.NewEditor(parent).SetBuffer(tb)
 ```
 
-You can detect when the user makes any change to the content of a text editor as they type:
+You can detect when the user makes any changes to the content of a text editor as they type:
 
 ```Go
 te := texteditor.NewSoloEditor(parent)
