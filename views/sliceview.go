@@ -405,7 +405,7 @@ func (sv *SliceViewBase) SetStyles() {
 					if sv.IsReadOnly() {
 						s.SetAbilities(true, abilities.DoubleClickable)
 						s.SetAbilities(false, abilities.Hoverable, abilities.Focusable, abilities.Activatable, abilities.TripleClickable)
-						wb.SetReadOnly(true)
+						s.SetReadOnly(true)
 					}
 					row, col := sv.WidgetIndex(w)
 					row += sv.StartIndex

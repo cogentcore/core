@@ -475,8 +475,14 @@ func (s *Style) ComputeActualBackgroundFor(bg, pabg image.Image) image.Image {
 	return bg
 }
 
+// IsFlexWrap returns whether the style is both [Style.Wrap] and [Flex].
 func (s *Style) IsFlexWrap() bool {
 	return s.Wrap && s.Display == Flex
+}
+
+// SetReadOnly sets the [states.ReadOnly] flag to the given value.
+func (s *Style) SetReadOnly(ro bool) {
+	s.SetState(ro, states.ReadOnly)
 }
 
 // SetTextWrap sets the Text.WhiteSpace and GrowWrap properties in

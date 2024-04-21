@@ -165,14 +165,18 @@ func (mv *MapView) ConfigMapGrid() {
 		})
 		keyw := sg.Child(i * ncol).(core.Widget)
 		w := sg.Child(i*ncol + 1).(core.Widget)
+		keyw.AsWidget().SetReadOnly(mv.IsReadOnly())
+		w.AsWidget().SetReadOnly(mv.IsReadOnly())
 		Config(kv, keyw)
 		Config(vv, w)
 		vv.AsWidgetBase().OnInput(mv.HandleEvent)
 		kv.AsWidgetBase().OnInput(mv.HandleEvent)
 		w.Style(func(s *styles.Style) {
+			s.SetReadOnly(mv.IsReadOnly())
 			s.SetTextWrap(false)
 		})
 		keyw.Style(func(s *styles.Style) {
+			s.SetReadOnly(mv.IsReadOnly())
 			s.SetTextWrap(false)
 		})
 		w.AddContextMenu(func(m *core.Scene) {
