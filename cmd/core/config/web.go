@@ -15,12 +15,8 @@ type Web struct { //types:add
 	// Port is the port to serve the page at when using the serve command.
 	Port string `default:"8080"`
 
-	// RandomVersion is whether to automatically add a random string to the
-	// end of the version string for the app when building for web. This is
-	// necessary in order for changes made during local development to show up,
-	// but should not be enabled in release builds to prevent constant inaccurate
-	// update messages. It is enabled by default in the serve command and disabled
-	// by default otherwise.
+	// RandomVersion is whether to make the app worker version random.
+	// It is enabled by default and should be kept on for easy deployment.
 	RandomVersion bool `default:"true"`
 
 	// Gzip is whether to gzip the app.wasm file that is built in the build command

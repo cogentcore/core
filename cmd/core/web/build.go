@@ -53,7 +53,7 @@ func MakeFiles(c *config.Config) error {
 
 	if c.Web.RandomVersion {
 		t := time.Now().UTC().String()
-		c.Version += "-" + fmt.Sprintf(`%x`, sha1.Sum([]byte(t)))
+		c.Version = fmt.Sprintf(`%x`, sha1.Sum([]byte(t)))
 	}
 
 	wej := []byte(WASMExecJS())
