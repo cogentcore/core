@@ -219,11 +219,11 @@ func (t *MapView) SetViewPath(v string) *MapView { t.ViewPath = v; return t }
 func (t *MapView) SetTooltip(v string) *MapView { t.Tooltip = v; return t }
 
 // MapViewInlineType is the [types.Type] for [MapViewInline]
-var MapViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapViewInline", IDName: "map-view-inline", Doc: "MapViewInline represents a map as a single line widget,\nfor smaller maps and those explicitly marked inline.", Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Map", Doc: "the map that we are a view onto"}, {Name: "MapValue", Doc: "MapValue is the Value for the map itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "Changed", Doc: "has the map been edited?"}, {Name: "Keys", Doc: "Value representations of the map keys"}, {Name: "Values", Doc: "Value representations of the fields"}, {Name: "ViewPath", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"}, {Name: "ConfigSize", Doc: "size of map when gui configed"}}, Instance: &MapViewInline{}})
+var MapViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapViewInline", IDName: "map-view-inline", Doc: "MapViewInline represents a map within a single line of key and value widgets.\nThis is typically used for smaller maps.", Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the map that we are viewing."}, {Name: "MapValue", Doc: "MapValue is the [Value] associated with this map view, if there is one."}, {Name: "Keys", Doc: "Keys are [Value] representations of the map keys."}, {Name: "Values", Doc: "Values are [Value] representations of the map values."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "configSize", Doc: "configSize is the size of the map when the widget was configured."}}, Instance: &MapViewInline{}})
 
 // NewMapViewInline adds a new [MapViewInline] with the given name to the given parent:
-// MapViewInline represents a map as a single line widget,
-// for smaller maps and those explicitly marked inline.
+// MapViewInline represents a map within a single line of key and value widgets.
+// This is typically used for smaller maps.
 func NewMapViewInline(parent tree.Node, name ...string) *MapViewInline {
 	return parent.NewChild(MapViewInlineType, name...).(*MapViewInline)
 }
@@ -234,8 +234,13 @@ func (t *MapViewInline) NodeType() *types.Type { return MapViewInlineType }
 // New returns a new [*MapViewInline] value
 func (t *MapViewInline) New() tree.Node { return &MapViewInline{} }
 
+// SetMap sets the [MapViewInline.Map]:
+// Map is the map that we are viewing.
+func (t *MapViewInline) SetMap(v any) *MapViewInline { t.Map = v; return t }
+
 // SetViewPath sets the [MapViewInline.ViewPath]:
-// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+// ViewPath is a record of parent view names that have led up to this view.
+// It is displayed as extra contextual information in view dialogs.
 func (t *MapViewInline) SetViewPath(v string) *MapViewInline { t.ViewPath = v; return t }
 
 // SetTooltip sets the [MapViewInline.Tooltip]

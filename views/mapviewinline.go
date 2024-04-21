@@ -15,33 +15,29 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// MapViewInline represents a map as a single line widget,
-// for smaller maps and those explicitly marked inline.
+// MapViewInline represents a map within a single line of key and value widgets.
+// This is typically used for smaller maps.
 type MapViewInline struct {
 	core.Layout
 
-	// the map that we are a view onto
-	Map any `set:"-"`
+	// Map is the map that we are viewing.
+	Map any
 
-	// MapValue is the Value for the map itself
-	// if this was created within the Value framework.
-	// Otherwise, it is nil.
+	// MapValue is the [Value] associated with this map view, if there is one.
 	MapValue Value `set:"-"`
 
-	// has the map been edited?
-	Changed bool `set:"-"`
-
-	// Value representations of the map keys
+	// Keys are [Value] representations of the map keys.
 	Keys []Value `json:"-" xml:"-" set:"-"`
 
-	// Value representations of the fields
+	// Values are [Value] representations of the map values.
 	Values []Value `json:"-" xml:"-" set:"-"`
 
-	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+	// ViewPath is a record of parent view names that have led up to this view.
+	// It is displayed as extra contextual information in view dialogs.
 	ViewPath string
 
-	// size of map when gui configed
-	ConfigSize int `set:"-"`
+	// configSize is the size of the map when the widget was configured.
+	configSize int
 }
 
 func (mv *MapViewInline) OnInit() {
@@ -94,19 +90,10 @@ func (mv *MapViewInline) SetStyles() {
 	})
 }
 
-// SetMap sets the source map that we are viewing -- rebuilds the children to represent this map
-func (mv *MapViewInline) SetMap(mp any) *MapViewInline {
-	// note: because we make new maps, and due to the strangeness of reflect, they
-	// end up not being comparable types, so we can't check if equal
-	mv.Map = mp
-	mv.Update()
-	return mv
-}
-
 func (mv *MapViewInline) Config() {
 	mv.DeleteChildren()
 	if reflectx.AnyIsNil(mv.Map) {
-		mv.ConfigSize = 0
+		mv.configSize = 0
 		return
 	}
 	config := tree.Config{}
@@ -116,7 +103,7 @@ func (mv *MapViewInline) Config() {
 	mpv := reflect.ValueOf(mv.Map)
 	mpvnp := reflectx.NonPointerValue(reflectx.OnePointerUnderlyingValue(mpv))
 	keys := mpvnp.MapKeys() // this is a slice of reflect.Value
-	mv.ConfigSize = len(keys)
+	mv.configSize = len(keys)
 
 	reflectx.ValueSliceSort(keys, true)
 	for i, key := range keys {
@@ -196,15 +183,6 @@ func (mv *MapViewInline) Config() {
 	}
 }
 
-// SetChanged sets the Changed flag and emits the ViewSig signal for the
-// SliceView, indicating that some kind of edit / change has taken place to
-// the table data.  It isn't really practical to record all the different
-// types of changes, so this is just generic.
-func (mv *MapViewInline) SetChanged() {
-	mv.Changed = true
-	mv.SendChange()
-}
-
 // MapAdd adds a new entry to the map
 func (mv *MapViewInline) MapAdd() {
 	if reflectx.AnyIsNil(mv.Map) {
@@ -212,7 +190,7 @@ func (mv *MapViewInline) MapAdd() {
 	}
 	reflectx.MapAdd(mv.Map)
 
-	mv.SetChanged()
+	mv.SendChange()
 	mv.Update()
 }
 
@@ -223,7 +201,7 @@ func (mv *MapViewInline) MapDelete(key reflect.Value) {
 	}
 	reflectx.MapDelete(mv.Map, reflectx.NonPointerValue(key))
 
-	mv.SetChanged()
+	mv.SendChange()
 	mv.Update()
 }
 
@@ -246,12 +224,12 @@ func (mv *MapViewInline) UpdateValues() {
 
 func (mv *MapViewInline) MapSizeChanged() bool {
 	if reflectx.AnyIsNil(mv.Map) {
-		return mv.ConfigSize != 0
+		return mv.configSize != 0
 	}
 	mpv := reflect.ValueOf(mv.Map)
 	mpvnp := reflectx.NonPointerValue(reflectx.OnePointerUnderlyingValue(mpv))
 	keys := mpvnp.MapKeys()
-	return mv.ConfigSize != len(keys)
+	return mv.configSize != len(keys)
 }
 
 func (mv *MapViewInline) SizeUp() {

@@ -65,7 +65,6 @@ func (mv *MapView) SetStyles() {
 	})
 }
 
-// Config configures the view
 func (mv *MapView) Config() {
 	if !mv.HasChildren() {
 		core.NewFrame(mv, "map-grid")
@@ -73,12 +72,7 @@ func (mv *MapView) Config() {
 	mv.ConfigMapGrid()
 }
 
-// IsConfiged returns true if the widget is fully configured
-func (mv *MapView) IsConfiged() bool {
-	return len(mv.Kids) != 0
-}
-
-// MapGrid returns the MapGrid grid layout widget, which contains all the fields and values
+// MapGrid returns the map grid frame widget, which contains all the fields and values.
 func (mv *MapView) MapGrid() *core.Frame {
 	return mv.ChildByName("map-grid", 0).(*core.Frame)
 }
