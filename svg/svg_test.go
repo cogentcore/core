@@ -84,11 +84,9 @@ func TestCoreLogo(t *testing.T) {
 	sv.PhysicalHeight.Px(256)
 	sv.Root.ViewBox.Size.Set(1, 1)
 
-	outer := colors.Scheme.Primary.Base
+	outer := colors.Scheme.Primary.Base // #005BC0
 	hctOuter := hct.FromColor(outer)
-	core := hct.New(hctOuter.Hue+180, hctOuter.Chroma, hctOuter.Tone+40)
-	// fmt.Println("outer", hct.FromColor(outer))
-	// fmt.Println("core", hct.FromColor(core))
+	core := hct.New(hctOuter.Hue+180, hctOuter.Chroma, hctOuter.Tone+40) // #FBBD0E
 
 	x := float32(0.53)
 	sw := float32(0.27)
