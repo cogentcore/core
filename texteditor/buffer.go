@@ -338,11 +338,18 @@ func (tb *Buffer) EditDone() {
 }
 
 // Text returns the current text as a []byte array, applying all current
-// changes -- calls EditDone and will generate that signal if there have been
-// changes
+// changes by calling EditDone, which will generate a signal if there have been
+// changes.
 func (tb *Buffer) Text() []byte {
 	tb.EditDone()
 	return tb.Txt
+}
+
+// Text returns the current text as a string, applying all current
+// changes by calling EditDone, which will generate a signal if there have been
+// changes.
+func (tb *Buffer) TextString() string {
+	return string(tb.Text())
 }
 
 // NumLines is the concurrent-safe accessor to NLines

@@ -51,3 +51,12 @@ tb := texteditor.NewBuffer().SetTextString("Hello, world!")
 texteditor.NewEditor(parent).SetBuffer(tb)
 texteditor.NewEditor(parent).SetBuffer(tb)
 ```
+
+You can detect when the user makes any change to the content of a text editor as they type:
+
+```Go
+te := texteditor.NewSoloEditor(parent)
+te.OnInput(func(e events.Event) {
+    core.MessageSnackbar(parent, "OnInput: "+te.Buffer.TextString())
+})
+```

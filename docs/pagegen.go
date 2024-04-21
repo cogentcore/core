@@ -982,6 +982,12 @@ func main() {
 		texteditor.NewEditor(parent).SetBuffer(tb)
 		texteditor.NewEditor(parent).SetBuffer(tb)
 	},
+	"views/text-editors-5": func(parent core.Widget) {
+		te := texteditor.NewSoloEditor(parent)
+		te.OnInput(func(e events.Event) {
+			core.MessageSnackbar(parent, "OnInput: "+te.Buffer.TextString())
+		})
+	},
 	"views/tree-views-0": func(parent core.Widget) {
 		tv := views.NewTreeView(parent).SetText("Root")
 		views.NewTreeView(tv, "Child 1")

@@ -65,7 +65,7 @@ tf.SetValidator(func() error {
 })
 ```
 
-You can detect when the user changes the content of the text field and then exits it:
+You can detect when the user changes the content of a text field and then exits it:
 
 ```Go
 tf := core.NewTextField(parent)
@@ -74,7 +74,7 @@ tf.OnChange(func(e events.Event) {
 })
 ```
 
-You can detect when the user makes any change to the content of the text field as they type:
+You can detect when the user makes any change to the content of a text field as they type:
 
 ```Go
 tf := core.NewTextField(parent)
