@@ -57,7 +57,12 @@ func main() {
 		img := core.NewImage(ly)
 		errors.Log(img.OpenFS(name, "name.png"))
 		img.Style(func(s *styles.Style) {
-			s.Min.Set(units.Dp(612), units.Dp(128))
+			x := func(uc *units.Context) float32 {
+				return min(uc.Dp(612), uc.Vw(90))
+			}
+			s.Min.Set(units.Custom(x), units.Custom(func(uc *units.Context) float32 {
+				return x(uc) * (128.0 / 612.0)
+			}))
 		})
 		return true
 	}
