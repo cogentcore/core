@@ -1,5 +1,5 @@
 const cacheName = "app-" + "{{.Version}}";
-const resourcesToCache = {{.ResourcesToCache}};
+const resourcesToCache = {{.ResourcesToCache }};
 
 self.addEventListener("install", (event) => {
   console.log("installing app worker {{.Version}}");
@@ -66,7 +66,7 @@ self.addEventListener("push", (event) => {
 
     delete action.path;
   }
-  notification.data.goapp = {
+  notification.data.app = {
     path: notification.path,
     actions: actions,
   };
@@ -79,10 +79,10 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
   const notification = event.notification;
-  let path = notification.data.goapp.path;
+  let path = notification.data.app.path;
 
-  for (let i in notification.data.goapp.actions) {
-    const action = notification.data.goapp.actions[i];
+  for (let i in notification.data.app.actions) {
+    const action = notification.data.app.actions[i];
     if (action.action === event.action) {
       path = action.path;
       break;
@@ -100,7 +100,7 @@ self.addEventListener("notificationclick", (event) => {
           if ("focus" in client) {
             client.focus();
             client.postMessage({
-              goapp: {
+              app: {
                 type: "notification",
                 path: path,
               },
