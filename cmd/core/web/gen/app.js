@@ -284,7 +284,7 @@ async function fetchWithProgress(url, progress) {
   let loaded = 0;
 
   const progressHandler = function (loaded, total) {
-    progress(Math.round((loaded * 100) / total));
+    progress(Math.min(100, Math.round((loaded * 100) / total)));
   };
 
   var res = new Response(
