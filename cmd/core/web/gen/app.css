@@ -45,14 +45,14 @@ body {
     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   font-size: 13px;
   font-weight: 400;
-  color: white;
-  background-color: #2d2c2c;
+  color: #E1E2EB;
+  background-color: #121316;
 }
 
 @media (prefers-color-scheme: light) {
   #app-wasm-loader {
-    color: black;
-    background-color: #f6f6f6;
+    color: #191B22;
+    background-color: #FAF8FD;
   }
 }
 
@@ -93,6 +93,12 @@ body {
 }
 
 .app-wasm-loader-rectangle {
-  background-color: gray;
+  background-color: #1F1F23;
   border-radius: 20px;
+}
+
+@media (prefers-color-scheme: light) {
+  .app-wasm-loader-rectangle {
+    background-color: #EFEDF2;
+  }
 }
