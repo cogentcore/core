@@ -33,7 +33,10 @@
     <canvas id="app" contenteditable="true"></canvas>
     <input id="text-field" type="text">
     <aside id="app-wasm-loader">
-        <img class="goapp-logo goapp-spin" src="icons/512.png" id="app-wasm-loader-icon">
+        <div id="app-wasm-loader-header">
+            <img id="app-wasm-loader-icon" src="icons/svg.svg">
+            <p id="app-wasm-loader-title">{{.Title}}</p>
+        </div>
         <p id="app-wasm-loader-label" class="goapp-label">Loading {{.Title}}...</p>
     </aside>
 </body>
