@@ -223,18 +223,17 @@ async function appInitWebAssembly() {
   if (!instantiateStreaming) {
     instantiateStreaming = async (resp, importObject) => {
       const source = await (await resp).arrayBuffer();
-      // memoryBytes = new Uint8Array(resp.instance.exports.mem.buffer);
-      // console.log("got memory bytes", memoryBytes);
       return await WebAssembly.instantiate(source, importObject);
     };
   }
 
-  const loaderIcon = document.getElementById("app-wasm-loader-icon");
   const loaderLabel = document.getElementById("app-wasm-loader-label");
+  const loaderProgress = document.getElementById("app-wasm-loader-progress");
 
   try {
     const showProgress = (progress) => {
-      loaderLabel.innerText = appLoadingLabel.replace("{progress}", progress);
+      loaderLabel.innerText = progress + "%";
+      loaderProgress.value = progress / 100;
     };
     showProgress(0);
 
@@ -263,7 +262,7 @@ function appCanLoadWebAssembly() {
   return urlParams.get("wasm") !== "false";
 }
 
-async function fetchWithProgress(url, progess) {
+async function fetchWithProgress(url, progress) {
   const response = await fetch(url);
 
   let contentLength;
@@ -281,7 +280,7 @@ async function fetchWithProgress(url, progess) {
   let loaded = 0;
 
   const progressHandler = function (loaded, total) {
-    progess(Math.round((loaded * 100) / total));
+    progress(Math.round((loaded * 100) / total));
   };
 
   var res = new Response(
