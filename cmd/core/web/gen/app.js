@@ -275,8 +275,12 @@ async function fetchWithProgress(url, progress) {
   if (!contentLength) {
     contentLength = "60000000"; // 60 mb default
   }
+  let contentEncoding = response.headers.get("Content-Encoding");
 
-  const total = parseInt(contentLength, 10);
+  let total = parseInt(contentLength, 10);
+  if (contentEncoding) {
+    total = total / 4; // we assume that compression reduces the size 4x
+  }
   let loaded = 0;
 
   const progressHandler = function (loaded, total) {
