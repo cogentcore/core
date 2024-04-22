@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlview"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/pages"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
@@ -84,9 +85,15 @@ func homeHeader(ctx *htmlview.Context) bool {
 		s.Columns = 2
 		s.Gap.Set(units.Em(1))
 	})
+
 	homeTextBlock(blocks, "CODE ONCE,\nRUN EVERYWHERE", "With Cogent Core, you can write your app once and it will instantly run on macOS, Windows, Linux, iOS, Android, and the Web, automatically scaling to any device.")
-	errors.Log(core.NewSVG(blocks).ReadBytes(icon))
-	errors.Log(core.NewSVG(blocks).ReadBytes(icon))
+	core.NewIcon(blocks).SetIcon(icons.Devices).Style(func(s *styles.Style) {
+		s.Min.Set(units.Vw(20))
+	})
+
+	core.NewIcon(blocks).SetIcon(icons.DeployedCode).Style(func(s *styles.Style) {
+		s.Min.Set(units.Vw(20))
+	})
 	homeTextBlock(blocks, "EFFORTLESS ELEGANCE", "With the power of Go, Cogent Core allows you to easily write simple, elegant, and readable code with full type safety and a robust design that never gets in your way.")
 	return true
 }
@@ -95,7 +102,7 @@ func homeTextBlock(parent core.Widget, title, text string) {
 	block := core.NewLayout(parent).Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Text.Align = styles.Start
-		s.Max.X.Vw(40)
+		s.Max.X.Vw(35)
 	})
 	core.NewLabel(block).SetType(core.LabelHeadlineLarge).SetText(title).Style(func(s *styles.Style) {
 		s.Font.Weight = styles.WeightBold
