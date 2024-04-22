@@ -148,17 +148,20 @@ body {
   }
 }
 
-/* Loading animation effect: */
 .app-wasm-loader-rectangle {
-	background-image:	linear-gradient(90deg, #0000, #fff4, #0000);
-	background-size: 160px 100%;
-	background-repeat: no-repeat;
-	background-position: left -160px top 0;
-	animation: shine 1s ease infinite;
+  animation: load-animation 1s infinite;
 }
 
-@keyframes shine {
-	to {
-		background-position: right -160px top 0;
-	}
+@keyframes load-animation {
+  0% {
+    opacity: 0.75;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.75;
+  }
 }
