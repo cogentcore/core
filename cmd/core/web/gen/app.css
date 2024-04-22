@@ -85,17 +85,14 @@ body {
 }
 
 #app-wasm-loader-rectangles {
-  display: flex;
+  display: grid;
+  columns: 3;
+  grid-template-columns: repeat(3, 1fr);
   flex-grow: 1;
   gap: 1em;
 }
 
-#app-wasm-loader-rectangle-left {
-  flex-grow: 0.5;
-}
-
 .app-wasm-loader-rectangle {
   background-color: gray;
-  flex-grow: 1;
   border-radius: 20px;
 }
