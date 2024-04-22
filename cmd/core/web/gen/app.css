@@ -47,7 +47,7 @@ body {
   font-weight: 400;
   color: #E1E2EB;
   background-color: #121316;
-  --container-color: #1F1F23;
+  --container-color: #44474E;
   --primary-color: #ADC6FF;
 }
 
@@ -55,7 +55,7 @@ body {
   #app-wasm-loader {
     color: #191B22;
     background-color: #FAF8FD;
-    --container-color: #EFEDF2;
+    --container-color: #E1E2EB;
     --primary-color: #005BC0;
   }
 }
