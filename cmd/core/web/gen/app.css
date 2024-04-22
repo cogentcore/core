@@ -84,6 +84,16 @@ body {
   flex-grow: 1;
 }
 
+#app-wasm-loader-rectangles {
+  display: flex;
+  flex-grow: 1;
+  gap: 1em;
+}
+
+#app-wasm-loader-rectangle-left {
+  flex-grow: 0.5;
+}
+
 .app-wasm-loader-rectangle {
   background-color: gray;
   flex-grow: 1;
