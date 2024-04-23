@@ -80,7 +80,7 @@ func TestParentUnits(t *testing.T) {
 	})
 	NewBox(b).Style(func(s *styles.Style) {
 		s.Background = colors.C(colors.Scheme.Primary.Base)
-		s.Min.Set(units.Pw(100), units.Ph(100))
+		s.Min.Set(units.Pw(50), units.Ph(75))
 	})
 	b.AssertRender(t, "style/parent-units")
 }

@@ -1574,18 +1574,22 @@ func (ly *Layout) SizeFinalChildren() {
 // StyleSizeUpdate updates styling size values for widget and its parent,
 // which should be called after these are updated.  Returns true if any changed.
 func (wb *WidgetBase) StyleSizeUpdate() bool {
-	el := wb.Geom.Size.Actual.Content
-	var parent math32.Vector2
-	pwb := wb.ParentWidget()
-	if pwb != nil {
-		parent = pwb.Geom.Size.Actual.Content
-	}
-	sz := wb.Scene.SceneGeom.Size
-	chg := wb.Styles.UnitContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, parent.X, parent.Y)
-	if chg {
-		wb.Styles.ToDots()
-	}
-	return chg
+	return false
+	// TODO(kai): this seems to break parent-relative units instead of making them work
+	/*
+		el := wb.Geom.Size.Actual.Content
+		var parent math32.Vector2
+		pwb := wb.ParentWidget()
+		if pwb != nil {
+			parent = pwb.Geom.Size.Actual.Content
+		}
+		sz := wb.Scene.SceneGeom.Size
+		chg := wb.Styles.UnitContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, parent.X, parent.Y)
+		if chg {
+			wb.Styles.ToDots()
+		}
+		return chg
+	*/
 }
 
 //////////////////////////////////////////////////////////////////////
