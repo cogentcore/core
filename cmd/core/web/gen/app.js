@@ -279,7 +279,7 @@ async function fetchWithProgress(url, progress) {
 
   let total = parseInt(contentLength, 10);
   if (contentEncoding) {
-    total = total * 4; // we assume that compression reduces the size 4x
+    total = total * 5; // we assume that compression reduces the size 5x
   }
   let loaded = 0;
 

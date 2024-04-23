@@ -154,7 +154,7 @@ body {
 
 @keyframes load-animation {
   0% {
-    opacity: 0.75;
+    opacity: 0.8;
   }
 
   50% {
@@ -162,6 +162,6 @@ body {
   }
 
   100% {
-    opacity: 0.75;
+    opacity: 0.8;
   }
 }
