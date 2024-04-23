@@ -72,3 +72,15 @@ func TestParentActualBackground(t *testing.T) {
 		fr.NeedsRender()
 	})
 }
+
+func TestParentUnits(t *testing.T) {
+	b := NewBody()
+	b.Style(func(s *styles.Style) {
+		s.Min.Set(units.Em(10), units.Em(20))
+	})
+	NewBox(b).Style(func(s *styles.Style) {
+		s.Background = colors.C(colors.Scheme.Primary.Base)
+		s.Min.Set(units.Pw(50), units.Ph(75))
+	})
+	b.AssertRender(t, "style/parent-units")
+}

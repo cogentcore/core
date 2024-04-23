@@ -83,6 +83,8 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 		return
 	}
 
+	pw := wb.ParentWidget()
+
 	// we do these things even if we are overriding the style
 	defer func() {
 		// note: this does not un-set the Invisible if not None, because all kinds of things
@@ -90,7 +92,11 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 		if wb.Styles.Display == styles.DisplayNone {
 			wb.SetState(true, states.Invisible)
 		}
-		SetUnitContext(&wb.Styles, wb.Scene, math32.Vector2{}, math32.Vector2{})
+		psz := math32.Vector2{}
+		if pw != nil {
+			psz = pw.Geom.Size.Actual.Content
+		}
+		SetUnitContext(&wb.Styles, wb.Scene, wb.Geom.Size.Actual.Content, psz)
 		wb.ApplyStyleParts()
 	}()
 
@@ -99,9 +105,8 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 	}
 	wb.ResetStyleWidget()
 
-	pwb := wb.ParentWidget()
-	if pwb != nil {
-		wb.Styles.InheritFields(&pwb.Styles)
+	if pw != nil {
+		wb.Styles.InheritFields(&pw.Styles)
 	}
 
 	wb.ResetStyleSettings()
