@@ -21,19 +21,19 @@ import (
 type Switch struct {
 	WidgetBase
 
-	// the type of switch that this is
+	// Type is the styling type of switch.
 	Type SwitchTypes `set:"-"`
 
-	// the label text for the switch
+	// Text is the text for the switch.
 	Text string
 
-	// icon to use for the on, checked state of the switch
+	// IconOn is the icon to use for the on, checked state of the switch.
 	IconOn icons.Icon `view:"show-name"`
 
-	// icon to use for the off, unchecked state of the switch
+	// Iconoff is the icon to use for the off, unchecked state of the switch.
 	IconOff icons.Icon `view:"show-name"`
 
-	// icon to use for the indeterminate (unknown) state
+	// IconIndeterminate is the icon to use for the indeterminate (unknown) state.
 	IconIndeterminate icons.Icon `view:"show-name"`
 }
 
@@ -219,7 +219,7 @@ func (sw *Switch) SetStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Min.X.Ch(0.1)
 			})
-		case "parts/label":
+		case "parts/text":
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
 				s.SetTextWrap(false)
@@ -260,15 +260,6 @@ func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 	return sw
 }
 
-// LabelWidget returns the label widget if present
-func (sw *Switch) LabelWidget() *Text {
-	lbi := sw.Parts.ChildByName("label")
-	if lbi == nil {
-		return nil
-	}
-	return lbi.(*Text)
-}
-
 // SetIcons sets the icons for the on (checked), off (unchecked)
 // and indeterminate (unknown) states.  See [SetIconsUpdate] for
 // a version that updates the icon rendering
@@ -301,7 +292,7 @@ func (sw *Switch) Config() {
 	if sw.Text != "" {
 		config.Add(SpaceType, "space")
 		lbi = len(config)
-		config.Add(TextType, "label")
+		config.Add(TextType, "text")
 	}
 	sw.ConfigParts(config, func() {
 		ist := sw.Parts.Child(ici).(*Layout)

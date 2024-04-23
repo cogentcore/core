@@ -20,7 +20,7 @@ import (
 )
 
 // Text is a widget for rendering text. It supports full HTML styling,
-// including links. By default, labels wrap and collapse whitespace, although
+// including links. By default, text wraps and collapses whitespace, although
 // you can change this by changing [styles.Text.WhiteSpace].
 type Text struct { //core:embedder
 	WidgetBase
@@ -28,7 +28,7 @@ type Text struct { //core:embedder
 	// Text is the text to display.
 	Text string
 
-	// Type is the styling type of label to use.
+	// Type is the styling type of text to use.
 	Type TextTypes
 
 	// paintText is the [paint.Text] for the text.
@@ -113,7 +113,7 @@ func (lb *Text) SetStyles() {
 		}
 		s.GrowWrap = true
 
-		// Label styles based on https://m3.material.io/styles/typography/type-scale-tokens
+		// Text styles based on https://m3.material.io/styles/typography/type-scale-tokens
 		switch lb.Type {
 		case TextLabelLarge:
 			s.Text.LineHeight.Dp(20)
@@ -198,7 +198,7 @@ func (lb *Text) SetStyles() {
 }
 
 func (lb *Text) HandleEvents() {
-	lb.HandleLabelClick(func(tl *paint.TextLink) {
+	lb.HandleTextClick(func(tl *paint.TextLink) {
 		system.TheApp.OpenURL(tl.URL)
 	})
 	lb.OnDoubleClick(func(e events.Event) {
@@ -209,7 +209,6 @@ func (lb *Text) HandleEvents() {
 		lb.SetSelected(false)
 	})
 	lb.OnKeyChord(func(e events.Event) {
-		// TODO(kai): get label copying working
 		if !lb.StateIs(states.Selected) {
 			return
 		}
@@ -245,9 +244,9 @@ func (lb *Text) HandleEvents() {
 	})
 }
 
-// HandleLabelClick handles click events such that the given function will be called
+// HandleTextClick handles click events such that the given function will be called
 // on any links that are clicked on.
-func (lb *Text) HandleLabelClick(openLink func(tl *paint.TextLink)) {
+func (lb *Text) HandleTextClick(openLink func(tl *paint.TextLink)) {
 	lb.OnClick(func(e events.Event) {
 		pos := lb.Geom.Pos.Content
 		for _, tl := range lb.paintText.Links {
@@ -285,15 +284,15 @@ func (lb *Text) Label() string {
 // existing line breaks (which could come from <br> and <p> in HTML),
 // so that is never able to undo initial word wrapping from constrained sizes.
 
-// ConfigLabel does the HTML and Layout in TextRender for label text,
+// Config does the HTML and Layout in TextRender for the text,
 // using actual content size to constrain layout.
 func (lb *Text) Config() {
-	lb.ConfigLabelSize(lb.Geom.Size.Actual.Content)
+	lb.ConfigTextSize(lb.Geom.Size.Actual.Content)
 }
 
-// ConfigLabel does the HTML and Layout in TextRender for label text,
+// ConfigTextSize does the HTML and Layout in TextRender for text,
 // using given size to constrain layout.
-func (lb *Text) ConfigLabelSize(sz math32.Vector2) {
+func (lb *Text) ConfigTextSize(sz math32.Vector2) {
 	// todo: last arg is CSSAgg.  Can synthesize that some other way?
 	fs := lb.Styles.FontRender()
 	txs := &lb.Styles.Text
@@ -301,12 +300,12 @@ func (lb *Text) ConfigLabelSize(sz math32.Vector2) {
 	lb.paintText.Layout(txs, fs, &lb.Styles.UnitContext, sz)
 }
 
-// ConfigLabelAlloc is used for determining how much space the label
+// ConfigTextAlloc is used for determining how much space the label
 // takes, using given size (typically Alloc).
 // In this case, alignment factors are turned off,
 // because they otherwise can absorb much more space, which should
 // instead be controlled by the base Align X,Y factors.
-func (lb *Text) ConfigLabelAlloc(sz math32.Vector2) math32.Vector2 {
+func (lb *Text) ConfigTextAlloc(sz math32.Vector2) math32.Vector2 {
 	// todo: last arg is CSSAgg.  Can synthesize that some other way?
 	fs := lb.Styles.FontRender()
 	txs := &lb.Styles.Text
@@ -357,9 +356,9 @@ func (lb *Text) SizeUp() {
 	lb.WidgetBase.SizeUp() // sets Actual size based on styles
 	sz := &lb.Geom.Size
 	if lb.Styles.Text.HasWordWrap() {
-		lb.ConfigLabelSize(TextWrapSizeEstimate(lb.Geom.Size.Actual.Content, len(lb.Text), &lb.Styles.Font))
+		lb.ConfigTextSize(TextWrapSizeEstimate(lb.Geom.Size.Actual.Content, len(lb.Text), &lb.Styles.Font))
 	} else {
-		lb.ConfigLabelSize(sz.Actual.Content)
+		lb.ConfigTextSize(sz.Actual.Content)
 	}
 	rsz := lb.paintText.Size.Ceil()
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
@@ -374,7 +373,7 @@ func (lb *Text) SizeDown(iter int) bool {
 		return false
 	}
 	sz := &lb.Geom.Size
-	rsz := lb.ConfigLabelAlloc(sz.Alloc.Content) // use allocation
+	rsz := lb.ConfigTextAlloc(sz.Alloc.Content) // use allocation
 	prevContent := sz.Actual.Content
 	// start over so we don't reflect hysteresis of prior guess
 	sz.SetInitContentMin(lb.Styles.Min.Dots().Ceil())

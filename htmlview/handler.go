@@ -215,7 +215,7 @@ func HandleElement(ctx *Context) {
 // the label click function so that URLs are opened according to [Context.OpenURL].
 func HandleLabel(ctx *Context) *core.Text {
 	lb := New[*core.Text](ctx).SetText(ExtractText(ctx))
-	lb.HandleLabelClick(func(tl *paint.TextLink) {
+	lb.HandleTextClick(func(tl *paint.TextLink) {
 		ctx.OpenURL(tl.URL)
 	})
 	return lb
@@ -230,7 +230,7 @@ func HandleLabelTag(ctx *Context) *core.Text {
 	start, end := NodeString(ctx.Node)
 	str := start + ExtractText(ctx) + end
 	lb := New[*core.Text](ctx).SetText(str)
-	lb.HandleLabelClick(func(tl *paint.TextLink) {
+	lb.HandleTextClick(func(tl *paint.TextLink) {
 		ctx.OpenURL(tl.URL)
 	})
 	return lb

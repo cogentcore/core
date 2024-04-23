@@ -19,7 +19,7 @@ import (
 //
 // SizeUp: (bottom-up) gathers Actual sizes from our Children & Parts,
 // based on Styles.Min / Max sizes and actual content sizing
-// (e.g., text size).  Flexible elements (e.g., Label, Flex Wrap,
+// (e.g., text size).  Flexible elements (e.g., Text, Flex Wrap,
 // TopAppBar) should reserve the _minimum_ size possible at this stage,
 // and then Grow based on SizeDown allocation.
 
@@ -27,7 +27,7 @@ import (
 // size allocations based initially on Scene available size and
 // the SizeUp Actual sizes.  If there is extra space available, it is
 // allocated according to the Grow factors.
-// Flexible elements (e.g., Flex Wrap layouts and Label with word wrap)
+// Flexible elements (e.g., Flex Wrap layouts and Text with word wrap)
 // update their Actual size based on available Alloc size (re-wrap),
 // to fit the allocated shape vs. the initial bottom-up guess.
 // However, do NOT grow the Actual size to match Alloc at this stage,
@@ -668,7 +668,7 @@ func (ly *Layout) LaySetContentFitOverflow(nsz math32.Vector2, pass LayoutPasses
 
 // SizeUp (bottom-up) gathers Actual sizes from our Children & Parts,
 // based on Styles.Min / Max sizes and actual content sizing
-// (e.g., text size).  Flexible elements (e.g., Label, Flex Wrap,
+// (e.g., text size).  Flexible elements (e.g., Text, Flex Wrap,
 // TopAppBar) should reserve the _minimum_ size possible at this stage,
 // and then Grow based on SizeDown allocation.
 func (wb *WidgetBase) SizeUp() {
@@ -1029,7 +1029,7 @@ func (ly *Layout) SizeFromChildrenStacked() math32.Vector2 {
 // size allocations based initially on Scene available size and
 // the SizeUp Actual sizes.  If there is extra space available, it is
 // allocated according to the Grow factors.
-// Flexible elements (e.g., Flex Wrap layouts and Label with word wrap)
+// Flexible elements (e.g., Flex Wrap layouts and Text with word wrap)
 // update their Actual size based on available Alloc size (re-wrap),
 // to fit the allocated shape vs. the initial bottom-up guess.
 // However, do NOT grow the Actual size to match Alloc at this stage,

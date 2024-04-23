@@ -44,7 +44,7 @@ type Widget interface {
 	// that it needs a new layout pass. It is the main way that end users
 	// should update widgets, and it should be called after making any
 	// changes to the core properties of a widget (for example, the text
-	// of a label, the icon of a button, or the slice of a table view).
+	// of [Text], the icon of a button, or the slice of a table view).
 	//
 	// If you are calling this in a separate goroutine outside of the main
 	// configuration, rendering, and event handling structure, you need to
@@ -80,7 +80,7 @@ type Widget interface {
 
 	// SizeUp (bottom-up) gathers Actual sizes from our Children & Parts,
 	// based on Styles.Min / Max sizes and actual content sizing
-	// (e.g., text size).  Flexible elements (e.g., Label, Flex Wrap,
+	// (e.g., text size).  Flexible elements (e.g., Text, Flex Wrap,
 	// TopAppBar) should reserve the _minimum_ size possible at this stage,
 	// and then Grow based on SizeDown allocation.
 	SizeUp()
@@ -89,7 +89,7 @@ type Widget interface {
 	// size allocations based initially on Scene available size and
 	// the SizeUp Actual sizes.  If there is extra space available, it is
 	// allocated according to the Grow factors.
-	// Flexible elements (e.g., Flex Wrap layouts and Label with word wrap)
+	// Flexible elements (e.g., Flex Wrap layouts and Text with word wrap)
 	// update their Actual size based on available Alloc size (re-wrap),
 	// to fit the allocated shape vs. the initial bottom-up guess.
 	// However, do NOT grow the Actual size to match Alloc at this stage,

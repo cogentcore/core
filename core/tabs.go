@@ -39,8 +39,8 @@ type Tabs struct { //core:embedder
 	// NewTabButton is whether to show a new tab button at the end of the list of tabs.
 	NewTabButton bool
 
-	// MaxChars is the maximum number of characters to include in the tab label.
-	// It elides labels that are longer than that.
+	// MaxChars is the maximum number of characters to include in the tab text.
+	// It elides text that are longer than that.
 	MaxChars int
 
 	// CloseIcon is the icon used for tab close buttons.
@@ -90,7 +90,7 @@ const (
 	NavigationRail
 
 	// NavigationDrawer indicates to render the tabs as a
-	// side navigation drawer, which has full text labels and icons.
+	// side navigation drawer, which has full text and icons.
 	NavigationDrawer
 )
 
@@ -519,9 +519,9 @@ type Tab struct { //core:no-new
 	// must be set on the parent [Tabs] for it to work correctly.
 	Type TabTypes
 
-	// Text is the label text for the tab.
-	// If it is nil, no label is shown.
-	// Labels are never shown for [NavigationRail] tabs.
+	// Text is the text for the tab.
+	// If it is nil, no text is shown.
+	// Text is never shown for [NavigationRail] tabs.
 	Text string
 
 	// Icon is the icon for the tab.
@@ -537,8 +537,8 @@ type Tab struct { //core:no-new
 
 	// TODO(kai): replace this with general text overflow property (#778)
 
-	// Maximum number of characters to include in tab label.
-	// Elides labels that are longer than that
+	// MaxChars is the maximum number of characters to include in tab text.
+	// It elides text that is longer than that.
 	MaxChars int
 }
 
@@ -590,12 +590,12 @@ func (tb *Tab) SetStyles() {
 				s.Margin.Zero()
 				s.Padding.Zero()
 			})
-		case "parts/label":
-			label := w.(*Text)
+		case "parts/text":
+			text := w.(*Text)
 			if tb.Type.Effective(tb) == FunctionalTabs {
-				label.Type = TextBodyMedium
+				text.Type = TextBodyMedium
 			} else {
-				label.Type = TextLabelLarge
+				text.Type = TextLabelLarge
 			}
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
@@ -655,7 +655,7 @@ func (tb *Tab) Config() {
 	}
 	if tb.Text != "" {
 		lbi = len(config)
-		config.Add(TextType, "label")
+		config.Add(TextType, "text")
 	}
 	if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
 		config.Add(SpaceType, "close-space")

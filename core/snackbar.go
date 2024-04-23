@@ -32,7 +32,7 @@ func MessageSnackbar(ctx Widget, msg string) {
 // ErrorSnackbar opens a [Snackbar] displaying the given error
 // in the context of the given widget. Optional label text can be
 // provided; if it is not, the label text will default to "Error".
-// If the given error is nil, no snackbar. is created.
+// If the given error is nil, no snackbar is created.
 func ErrorSnackbar(ctx Widget, err error, label ...string) {
 	if err == nil {
 		return
@@ -72,7 +72,7 @@ func (bd *Body) SnackbarStyles() {
 	})
 }
 
-// AddSnackbarText adds a snackbar label with the given text
+// AddSnackbarText adds a snackbar [Text] with the given text.
 func (bd *Body) AddSnackbarText(text string) *Body {
 	NewText(bd, "text").SetText(text).SetType(TextBodyMedium).
 		Style(func(s *styles.Style) {

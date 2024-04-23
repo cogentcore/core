@@ -17,10 +17,10 @@ func TestSwitch(t *testing.T) {
 	b.AssertRender(t, "switch/basic")
 }
 
-func TestSwitchLabel(t *testing.T) {
+func TestSwitchText(t *testing.T) {
 	b := NewBody()
 	NewSwitch(b).SetText("Remember me")
-	b.AssertRender(t, "switch/label")
+	b.AssertRender(t, "switch/text")
 }
 
 func TestSwitchCheckbox(t *testing.T) {
