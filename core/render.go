@@ -530,8 +530,8 @@ func (wb *WidgetBase) RenderChildren() {
 ////////////////////////////////////////////////////////////////////////////////
 //  Standard Box Model rendering
 
-// RenderBoxImpl implements the standard box model rendering -- assumes all
-// paint params have already been set
+// RenderBoxImpl implements the standard box model rendering, assuming all
+// paint parameters have already been set.
 func (wb *WidgetBase) RenderBoxImpl(pos math32.Vector2, sz math32.Vector2, bs styles.Border) {
 	wb.Scene.PaintContext.DrawBorder(pos.X, pos.Y, sz.X, sz.Y, bs)
 }
