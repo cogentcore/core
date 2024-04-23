@@ -24,8 +24,10 @@ import (
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/units"
 	"github.com/anthonynsimon/bild/clone"
 )
 
@@ -754,13 +756,17 @@ func (em *Events) DragClearSprite() {
 	ms.Sprites.InactivateSprite(DragSpriteName)
 }
 
-func (em *Events) DragMenuAddModLabel(m *Scene, mod events.DropMods) {
+func (em *Events) DragMenuAddModText(m *Scene, mod events.DropMods) {
+	text := ""
 	switch mod {
 	case events.DropCopy:
-		NewText(m).SetText("Copy (Use Shift to Move):")
+		text = "Copy (use Shift to move):"
 	case events.DropMove:
-		NewText(m).SetText("Move:")
+		text = "Move:"
 	}
+	NewText(m).SetType(TextLabelLarge).SetText(text).Style(func(s *styles.Style) {
+		s.Margin.Set(units.Em(0.5))
+	})
 }
 
 // DragDrop sends the events.Drop event to the top of the DragHovers stack.

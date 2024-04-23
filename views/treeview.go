@@ -1642,7 +1642,7 @@ func (tv *TreeView) DragDrop(e events.Event) {
 	}
 	md := de.Data.(mimedata.Mimes)
 	mf := func(m *core.Scene) {
-		tv.Scene.Events.DragMenuAddModLabel(m, de.DropMod)
+		tv.Scene.Events.DragMenuAddModText(m, de.DropMod)
 		tvi.MakePasteMenu(m, md, func() {
 			tvi.DropFinalize(de)
 		})

@@ -30,8 +30,8 @@ type Button struct { //core:embedder
 	// Type is the type of button.
 	Type ButtonTypes
 
-	// Text is the label text for the button.
-	// If it is blank, no label is shown.
+	// Text is the text for the button.
+	// If it is blank, no text is shown.
 	Text string `set:"-"`
 
 	// Icon is the icon for the button.
@@ -191,12 +191,12 @@ func (bt *Button) SetStyles() {
 				s.Margin.Zero()
 				s.Padding.Zero()
 			})
-		case "parts/label":
-			label := w.(*Text)
+		case "parts/text":
+			text := w.(*Text)
 			if bt.Type == ButtonMenu {
-				label.Type = TextBodyMedium
+				text.Type = TextBodyMedium
 			} else {
-				label.Type = TextLabelLarge
+				text.Type = TextLabelLarge
 			}
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
@@ -242,8 +242,8 @@ func (bt *Button) SetKey(kf keymap.Functions) *Button {
 // can define its own SetText method that updates the tooltip
 
 // SetText sets the [Button.Text]:
-// Text is the label text for the button.
-// If it is blank, no label is shown.
+// Text is the text for the button.
+// If it is blank, no text is shown.
 func (bt *Button) SetText(v string) *Button {
 	bt.Text = v
 	return bt
@@ -254,24 +254,6 @@ func (bt *Button) Label() string {
 		return bt.Text
 	}
 	return bt.Nm
-}
-
-// LabelWidget returns the label widget if present
-func (bt *Button) LabelWidget() *Text {
-	lbi := bt.Parts.ChildByName("label")
-	if lbi == nil {
-		return nil
-	}
-	return lbi.(*Text)
-}
-
-// IconWidget returns the icon widget if present
-func (bt *Button) IconWidget() *Icon {
-	ici := bt.Parts.ChildByName("icon")
-	if ici == nil {
-		return nil
-	}
-	return ici.(*Icon)
 }
 
 // HasMenu returns true if the button has a menu that pops up when it is clicked
@@ -366,7 +348,7 @@ func (bt *Button) Config() {
 	}
 	if bt.Text != "" {
 		lbi = len(config)
-		config.Add(TextType, "label")
+		config.Add(TextType, "text")
 	}
 
 	indi := -1

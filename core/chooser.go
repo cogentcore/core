@@ -92,7 +92,7 @@ type ChooserItem struct { //types:add
 	// Value is the underlying value of the chooser item.
 	Value any
 
-	// Label is the label displayed to the user for this item.
+	// Label is the text displayed to the user for this item.
 	// If it is empty, then [ToLabel] of [ChooserItem.Value] is
 	// used instead.
 	Label string
@@ -197,14 +197,14 @@ func (ch *Chooser) SetStyles() {
 				s.Margin.Zero()
 				s.Padding.Zero()
 			})
-		case "parts/label":
+		case "parts/text":
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
 				s.SetTextWrap(false)
 				s.Margin.Zero()
 				s.Padding.Zero()
 			})
-		case "parts/text":
+		case "parts/text-field":
 			text := w.(*TextField)
 			text.Placeholder = ch.Placeholder
 			if ch.Type == ChooserFilled {
@@ -252,11 +252,11 @@ func (ch *Chooser) Config() {
 	if ch.Editable {
 		lbi = -1
 		txi = len(config)
-		config.Add(TextFieldType, "text")
+		config.Add(TextFieldType, "text-field")
 	} else {
 		txi = -1
 		lbi = len(config)
-		config.Add(TextType, "label")
+		config.Add(TextType, "text")
 	}
 	if !ch.Indicator.IsSet() {
 		ch.Indicator = icons.KeyboardArrowRight
@@ -294,12 +294,12 @@ func (ch *Chooser) Config() {
 	})
 }
 
-// LabelWidget returns the label widget if present.
-func (ch *Chooser) LabelWidget() *Text {
+// TextWidget returns the text widget if present.
+func (ch *Chooser) TextWidget() *Text {
 	if ch.Parts == nil {
 		return nil
 	}
-	lbi := ch.Parts.ChildByName("label")
+	lbi := ch.Parts.ChildByName("text")
 	if lbi == nil {
 		return nil
 	}
@@ -312,7 +312,7 @@ func (ch *Chooser) TextField() *TextField {
 	if ch.Parts == nil {
 		return nil
 	}
-	tf := ch.Parts.ChildByName("text", 2)
+	tf := ch.Parts.ChildByName("text-field", 2)
 	if tf == nil {
 		return nil
 	}
@@ -458,7 +458,7 @@ func (ch *Chooser) ShowCurrentItem() *Chooser {
 			tf.SetText(ch.CurrentItem.GetLabel())
 		}
 	} else {
-		lbl := ch.LabelWidget()
+		lbl := ch.TextWidget()
 		if lbl != nil {
 			lbl.SetText(ch.CurrentItem.GetLabel()).Config()
 		}

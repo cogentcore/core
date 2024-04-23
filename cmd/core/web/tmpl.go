@@ -20,7 +20,6 @@ var AppJSTmpl = template.Must(template.New("app.js").Parse(AppJS))
 // AppJSData is the data passed to AppJSTmpl
 type AppJSData struct {
 	Env                     string
-	LoadingLabel            string
 	Wasm                    string
 	WasmContentLengthHeader string
 	WorkerJS                string
@@ -48,7 +47,6 @@ func MakeAppJS(c *config.Config) ([]byte, error) {
 
 	d := AppJSData{
 		Env:                     string(wenv),
-		LoadingLabel:            c.Web.LoadingLabel,
 		Wasm:                    "app.wasm",
 		WasmContentLengthHeader: c.Web.WasmContentLengthHeader,
 		WorkerJS:                "app-worker.js",

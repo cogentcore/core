@@ -35,12 +35,6 @@ type Web struct { //types:add
 	// DEFAULT: #2d2c2c.
 	ThemeColor string `default:"#2d2c2c"`
 
-	// The text displayed while loading a page. Load progress can be inserted by
-	// including "{progress}" in the loading label.
-	//
-	// DEFAULT: "{progress}%".
-	LoadingLabel string `default:"{progress}%"`
-
 	// The page language.
 	//
 	// DEFAULT: en.

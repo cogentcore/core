@@ -79,7 +79,7 @@ func (bd *Body) SetTitle(title string) *Body {
 	return bd
 }
 
-// AddTitle adds a Label with given title, and sets the Title text
+// AddTitle adds [Text] with the given title, and sets the Title text
 // which will be used by the Scene etc.
 func (bd *Body) AddTitle(title string) *Body {
 	bd.SetTitle(title)
@@ -87,7 +87,7 @@ func (bd *Body) AddTitle(title string) *Body {
 	return bd
 }
 
-// AddText adds the given supporting text Label, typically added
+// AddText adds the given supporting [Text], typically added
 // after a title.
 func (bd *Body) AddText(text string) *Body {
 	NewText(bd, "text").SetText(text).

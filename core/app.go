@@ -248,7 +248,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 	}
 
 	ch.OnWidgetAdded(func(w Widget) {
-		if w.PathFrom(ch) == "parts/text" {
+		if w.PathFrom(ch) == "parts/text-field" {
 			tf := w.(*TextField)
 			w.Style(func(s *styles.Style) {
 				s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)

@@ -1753,7 +1753,7 @@ func (sv *SliceViewBase) DragDrop(e events.Event) {
 		sv.SaveDraggedIndexes(idx)
 		md := de.Data.(mimedata.Mimes)
 		mf := func(m *core.Scene) {
-			sv.Scene.Events.DragMenuAddModLabel(m, de.DropMod)
+			sv.Scene.Events.DragMenuAddModText(m, de.DropMod)
 			svi.MakePasteMenu(m, md, idx, de.DropMod, func() {
 				svi.DropFinalize(de)
 			})
