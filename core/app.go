@@ -311,9 +311,9 @@ func AddButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 		if bt == nil || bt.IsDisabled() {
 			continue
 		}
-		lbl := bt.Text
-		if lbl == "" {
-			lbl = bt.Tooltip
+		label := bt.Text
+		if label == "" {
+			label = bt.Tooltip
 		}
 		if bt.HasMenu() {
 			tmps := NewScene()
@@ -323,16 +323,16 @@ func AddButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 				npath += " > "
 			}
 			if bt.Name() != "overflow-menu" {
-				npath += lbl
+				npath += label
 			}
 			AddButtonItems(items, tmps, npath)
 			continue
 		}
 		if path != "" {
-			lbl = path + " > " + lbl
+			label = path + " > " + label
 		}
 		*items = append(*items, ChooserItem{
-			Label:   lbl,
+			Label:   label,
 			Icon:    bt.Icon,
 			Tooltip: bt.Tooltip,
 			Func: func() {

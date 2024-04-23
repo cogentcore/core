@@ -669,8 +669,8 @@ func (tb *Tab) Config() {
 			ic.SetIcon(tb.Icon)
 		}
 		if lbi >= 0 {
-			lbl := tb.Parts.Child(lbi).(*Text)
-			lbl.SetText(tb.Text)
+			text := tb.Parts.Child(lbi).(*Text)
+			text.SetText(tb.Text)
 		}
 		if clsi >= 0 {
 			cls := tb.Parts.Child(clsi).(*Button)

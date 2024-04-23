@@ -116,7 +116,7 @@ func (fv *FileView) SetStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Gap.X.Dp(4)
 			})
-		case "path-tbar/path-lbl":
+		case "path-tbar/path-text":
 			w.Style(func(s *styles.Style) {
 				s.SetTextWrap(false)
 			})
@@ -151,7 +151,7 @@ func (fv *FileView) SetStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Gap.X.Dp(4)
 			})
-		case "sel-row/sel-lbl":
+		case "sel-row/sel-text":
 			w.Style(func(s *styles.Style) {
 				s.SetTextWrap(false)
 			})
@@ -161,7 +161,7 @@ func (fv *FileView) SetStyles() {
 				s.Max.X.Zero()
 				s.Grow.Set(1, 0)
 			})
-		case "sel-row/ext-lbl":
+		case "sel-row/ext-text":
 			w.Style(func(s *styles.Style) {
 				s.SetTextWrap(false)
 			})
@@ -408,7 +408,7 @@ func (fv *FileView) ConfigFilesRow() {
 
 func (fv *FileView) ConfigSelRow() {
 	sr := fv.SelectRow()
-	core.NewText(sr, "sel-lbl").SetText("File: ").
+	core.NewText(sr, "sel-text").SetText("File: ").
 		SetTooltip("enter file name here (or select from above list)")
 
 	sf := core.NewTextField(sr, "sel").SetText(fv.CurrentSelectedFile).
@@ -425,7 +425,7 @@ func (fv *FileView) ConfigSelRow() {
 	})
 	sf.StartFocus()
 
-	core.NewText(sr, "ext-lbl").SetText("Extension(s):").
+	core.NewText(sr, "ext-text").SetText("Extension(s):").
 		SetTooltip("target extension(s) to highlight; if multiple, separate with commas, and do include the . at the start")
 	ef := core.NewTextField(sr, "ext").SetText(fv.Ext)
 	ef.OnChange(func(e events.Event) {

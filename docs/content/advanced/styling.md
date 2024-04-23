@@ -17,7 +17,7 @@ fr.OnWidgetAdded(func(w core.Widget) {
         s.Color = colors.C(colors.Scheme.Error.Base)
     })
 })
-core.NewLabel(fr).SetText("Label")
+core.NewText(fr).SetText("Label")
 core.NewSwitch(fr).SetText("Switch")
 core.NewTextField(fr).SetText("Text field")
 ```

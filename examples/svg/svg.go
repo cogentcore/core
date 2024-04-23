@@ -88,7 +88,7 @@ func main() {
 	TheFile = fnm
 	fnm.SetMinPrefWidth(units.Ch(60))
 
-	zmlb := core.NewLabel(tbar, "zmlb", "Zoom: ")
+	zmlb := core.NewText(tbar, "zmlb", "Zoom: ")
 	zmlb.SetProp("vertical-align", styles.Middle)
 	zmlb.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 
@@ -127,7 +127,7 @@ func main() {
 	})
 
 	core.NewSpace(tbar, "spctr")
-	trlb := core.NewLabel(tbar, "trlb", "Translate: ")
+	trlb := core.NewText(tbar, "trlb", "Translate: ")
 	trlb.Tooltip = "Translation of overall image -- can use mouse drag to move as well"
 	trlb.SetProp("vertical-align", styles.Middle)
 

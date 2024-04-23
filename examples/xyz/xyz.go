@@ -298,7 +298,7 @@ func main() {
 			})
 
 		sprw := core.NewLayout(evlay, "speed-lay", core.LayoutHoriz)
-		core.NewLabel(sprw, "speed-lbl", "Speed: ")
+		core.NewText(sprw, "speed-text", "Speed: ")
 		sb := core.NewSpinBox(sprw, "anim-speed")
 		sb.SetMin(0.01)
 		sb.Step = 0.01

@@ -284,9 +284,9 @@ func (ch *Chooser) Config() {
 				tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
 			}
 		} else {
-			lbl := ch.Parts.Child(lbi).(*Text)
-			lbl.SetText(ch.CurrentItem.GetLabel())
-			lbl.Config() // this is essential
+			text := ch.Parts.Child(lbi).(*Text)
+			text.SetText(ch.CurrentItem.GetLabel())
+			text.Config() // this is essential
 
 			ic := ch.Parts.Child(indi).(*Icon)
 			ic.SetIcon(ch.Indicator)
@@ -458,9 +458,9 @@ func (ch *Chooser) ShowCurrentItem() *Chooser {
 			tf.SetText(ch.CurrentItem.GetLabel())
 		}
 	} else {
-		lbl := ch.TextWidget()
-		if lbl != nil {
-			lbl.SetText(ch.CurrentItem.GetLabel()).Config()
+		text := ch.TextWidget()
+		if text != nil {
+			text.SetText(ch.CurrentItem.GetLabel()).Config()
 		}
 	}
 	if ch.CurrentItem.Icon.IsSet() {

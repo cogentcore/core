@@ -249,7 +249,7 @@ func (cv *ColorView) Config(sc *core.Scene) {
 
 	hexlay := core.NewLayout(nl, "nums-hex-lay")
 
-	core.NewLabel(hexlay, "hexlbl").SetText("Hex")
+	core.NewText(hexlay, "hexlbl").SetText("Hex")
 
 	hex := core.NewTextField(hexlay, "nums-hex")
 	hex.Tooltip = "The color in hexadecimal form"
@@ -285,19 +285,19 @@ func (cv *ColorView) Config(sc *core.Scene) {
 	core.NewFrame(vl, "value")
 	sg := core.NewLayout(vl, "slider-grid").SetDisplay(styles.Grid)
 
-	core.NewLabel(sg, "rlab").SetText("Red:")
+	core.NewText(sg, "rlab").SetText("Red:")
 	rs := core.NewSlider(sg, "red")
-	core.NewLabel(sg, "hlab").SetText("Hue:")
+	core.NewText(sg, "hlab").SetText("Hue:")
 	hs := core.NewSlider(sg, "hue")
-	core.NewLabel(sg, "glab").SetText("Green:")
+	core.NewText(sg, "glab").SetText("Green:")
 	gs := core.NewSlider(sg, "green")
-	core.NewLabel(sg, "slab").SetText("Sat:")
+	core.NewText(sg, "slab").SetText("Sat:")
 	ss := core.NewSlider(sg, "sat")
-	core.NewLabel(sg, "blab").SetText("Blue:")
+	core.NewText(sg, "blab").SetText("Blue:")
 	bs := core.NewSlider(sg, "blue")
-	core.NewLabel(sg, "llab").SetText("Light:")
+	core.NewText(sg, "llab").SetText("Light:")
 	ls := core.NewSlider(sg, "light")
-	core.NewLabel(sg, "alab").SetText("Alpha:")
+	core.NewText(sg, "alab").SetText("Alpha:")
 	as := core.NewSlider(sg, "alpha")
 
 	cv.ConfigRGBSlider(rs, 0)

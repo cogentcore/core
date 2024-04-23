@@ -305,9 +305,9 @@ func (sw *Switch) Config() {
 		icunk.SetIcon(sw.IconIndeterminate)
 		sw.SetIconFromState()
 		if lbi >= 0 {
-			lbl := sw.Parts.Child(lbi).(*Text)
-			if lbl.Text != sw.Text {
-				lbl.SetText(sw.Text)
+			text := sw.Parts.Child(lbi).(*Text)
+			if text.Text != sw.Text {
+				text.SetText(sw.Text)
 			}
 		}
 	})

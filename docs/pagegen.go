@@ -363,27 +363,6 @@ var PagesExamples = map[string]func(parent core.Widget){
 		draw.Draw(img, image.Rect(60, 70, 80, 100), colors.C(colors.Scheme.Error.Base), image.Point{}, draw.Src)
 		core.NewImage(parent).SetImage(img)
 	},
-	"widgets/labels-0": func(parent core.Widget) {
-		core.NewText(parent).SetText("Hello, world!")
-	},
-	"widgets/labels-1": func(parent core.Widget) {
-		core.NewText(parent).SetText("This is a very long sentence that demonstrates how label content will overflow onto multiple lines when the size of the label text exceeds the size of its surrounding container; labels are a customizable widget that Cogent Core provides, allowing you to display many kinds of text")
-	},
-	"widgets/labels-2": func(parent core.Widget) {
-		core.NewText(parent).SetText(`<b>You</b> can use <i>HTML</i> <u>formatting</u> inside of <b><i><u>Cogent Core</u></i></b> labels, including <span style="color:red;background-color:yellow">custom styling</span> and <a href="https://example.com">links</a>`)
-	},
-	"widgets/labels-3": func(parent core.Widget) {
-		core.NewText(parent).SetType(core.TextHeadlineMedium).SetText("Hello, world!")
-	},
-	"widgets/labels-4": func(parent core.Widget) {
-		core.NewText(parent).SetText("Hello,\n\tworld!").Style(func(s *styles.Style) {
-			s.Font.Size.Dp(21)
-			s.Font.Style = styles.Italic
-			s.Text.WhiteSpace = styles.WhiteSpacePre
-			s.Color = colors.C(colors.Scheme.Success.Base)
-			s.Font.Family = string(core.AppearanceSettings.MonoFont)
-		})
-	},
 	"widgets/layouts-0": func(parent core.Widget) {
 		ly := core.NewLayout(parent)
 		core.NewButton(ly).SetText("First")
@@ -744,6 +723,27 @@ var PagesExamples = map[string]func(parent core.Widget){
 		tf := core.NewTextField(parent)
 		tf.OnInput(func(e events.Event) {
 			core.MessageSnackbar(parent, "OnInput: "+tf.Text())
+		})
+	},
+	"widgets/text-0": func(parent core.Widget) {
+		core.NewText(parent).SetText("Hello, world!")
+	},
+	"widgets/text-1": func(parent core.Widget) {
+		core.NewText(parent).SetText("This is a very long sentence that demonstrates how text content will overflow onto multiple lines when the size of the text exceeds the size of its surrounding container; text widgets are customizable widget that Cogent Core provides, allowing you to display many kinds of text")
+	},
+	"widgets/text-2": func(parent core.Widget) {
+		core.NewText(parent).SetText(`<b>You</b> can use <i>HTML</i> <u>formatting</u> inside of <b><i><u>Cogent Core</u></i></b> text, including <span style="color:red;background-color:yellow">custom styling</span> and <a href="https://example.com">links</a>`)
+	},
+	"widgets/text-3": func(parent core.Widget) {
+		core.NewText(parent).SetType(core.TextHeadlineMedium).SetText("Hello, world!")
+	},
+	"widgets/text-4": func(parent core.Widget) {
+		core.NewText(parent).SetText("Hello,\n\tworld!").Style(func(s *styles.Style) {
+			s.Font.Size.Dp(21)
+			s.Font.Style = styles.Italic
+			s.Text.WhiteSpace = styles.WhiteSpacePre
+			s.Color = colors.C(colors.Scheme.Success.Base)
+			s.Font.Family = string(core.AppearanceSettings.MonoFont)
 		})
 	},
 	"widgets/tooltips-0": func(parent core.Widget) {

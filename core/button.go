@@ -375,8 +375,8 @@ func (bt *Button) Config() {
 			ic.SetIcon(bt.Icon)
 		}
 		if lbi >= 0 {
-			lbl := bt.Parts.Child(lbi).(*Text)
-			lbl.SetText(bt.Text)
+			text := bt.Parts.Child(lbi).(*Text)
+			text.SetText(bt.Text)
 		}
 
 		if indi >= 0 {

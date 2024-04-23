@@ -15,9 +15,9 @@ You can add any widgets to tabs:
 ```Go
 ts := core.NewTabs(parent)
 first := ts.NewTab("First")
-core.NewLabel(first).SetText("I am first!")
+core.NewText(first).SetText("I am first!")
 second := ts.NewTab("Second")
-core.NewLabel(second).SetText("I am second!")
+core.NewText(second).SetText("I am second!")
 ```
 
 You can add as many tabs as you want:

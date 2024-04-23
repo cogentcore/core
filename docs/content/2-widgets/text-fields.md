@@ -11,7 +11,7 @@ core.NewTextField(parent)
 You can set the placeholder of a text field and add label text before it:
 
 ```Go
-core.NewLabel(parent).SetText("Name:")
+core.NewText(parent).SetText("Name:")
 core.NewTextField(parent).SetPlaceholder("Jane Doe")
 ```
 

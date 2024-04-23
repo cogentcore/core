@@ -190,7 +190,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 			s.Wrap = true
 		})
 		PlainFrames(row, math32.Vec2(0, 0))
-		// NewLabel(sc, "lbl").SetText(ShortText).Style(func(s *styles.Style) {
+		// NewText(sc).SetText(ShortText).Style(func(s *styles.Style) {
 		// })
 		HorizRow(sc).Style(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
@@ -200,7 +200,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 		sc.Style(func(s *styles.Style) {
 			s.Align.X = styles.Center
 		})
-		NewLabel(sc, "lbl").SetText(AlignText).Style(func(s *styles.Style) {
+		NewText(sc).SetText(AlignText).Style(func(s *styles.Style) {
 			s.Align.X = styles.Center
 			s.Text.Align = styles.Center
 		})
@@ -208,11 +208,11 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 		WrapText(sc, VeryLongText)
 	case "long-text-wrap-box": // text in box -- failing to adjust to full height
 		row := HorizRow(sc)
-		lbl := WrapText(row, VeryLongText)
+		text := WrapText(row, VeryLongText)
 		row.Style(func(s *styles.Style) {
 			// s.Align.X = styles.End
 		})
-		lbl.Style(func(s *styles.Style) {
+		text.Style(func(s *styles.Style) {
 			s.Align.X = styles.Center
 		})
 		fr := BoxFrame(sc) // this takes up slack
@@ -220,13 +220,13 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 		_ = sm
 	case "long-text-wrap-max-box": // text in constrained box
 		row := HorizRow(sc)
-		lbl := WrapText(row, VeryLongText) // VeryLongText)
+		text := WrapText(row, VeryLongText) // VeryLongText)
 		row.Style(func(s *styles.Style) {
 			// s.Align.X = styles.End
 			s.Max.X.Ch(100) // todo: this is *sometimes* failing to constrain..
 			// s.Overflow.X = styles.OverflowAuto
 		})
-		lbl.Style(func(s *styles.Style) {
+		text.Style(func(s *styles.Style) {
 			s.Text.Align = styles.Center
 		})
 		// fr := BoxFrame(sc) // this takes up slack
@@ -325,11 +325,11 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 			s.Grow.Set(1, 1)
 			s.Align.Set(styles.Center)
 		})
-		NewLabel(fr).SetType(LabelDisplayMedium).SetText("Event recorded!").
+		NewText(fr).SetType(LabelDisplayMedium).SetText("Event recorded!").
 			Style(func(s *styles.Style) {
 				s.Align.Set(styles.Center)
 			})
-		NewLabel(fr).SetType(LabelBodyLarge).
+		NewText(fr).SetType(LabelBodyLarge).
 			SetText("Thank you for reporting your issue!").
 			Style(func(s *styles.Style) {
 				s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
@@ -398,8 +398,7 @@ func TabFrame(parent Widget) (*Frame, *Frame) {
 }
 
 func WrapText(parent Widget, txt string) *Text {
-	lbl := NewText(parent, "wrap-text").SetText(txt)
-	return lbl
+	return NewText(parent, "wrap-text").SetText(txt)
 }
 
 func PlainFrames(parent Widget, grow math32.Vector2) {

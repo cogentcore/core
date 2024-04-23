@@ -5,7 +5,7 @@ Cogent Core provides a versatile styling system that allows you to easily custom
 You can change any style properties of a widget:
 
 ```Go
-core.NewLabel(parent).SetText("Bold text").Style(func(s *styles.Style) {
+core.NewText(parent).SetText("Bold text").Style(func(s *styles.Style) {
     s.Font.Weight = styles.WeightBold
 })
 ```
