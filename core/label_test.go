@@ -12,23 +12,23 @@ import (
 	"cogentcore.org/core/units"
 )
 
-func TestLabelTypes(t *testing.T) {
-	for _, typ := range LabelTypesValues() {
+func TestTextTypes(t *testing.T) {
+	for _, typ := range TextTypesValues() {
 		b := NewBody()
 		NewText(b).SetType(typ).SetText("Hello, world!")
-		b.AssertRender(t, "label/type/"+strcase.ToKebab(typ.String()))
+		b.AssertRender(t, "text/type/"+strcase.ToKebab(typ.String()))
 	}
 }
 
-func TestLabelRem(t *testing.T) {
+func TestTextRem(t *testing.T) {
 	b := NewBody()
 	NewText(b).SetText("Hello, world!").Style(func(s *styles.Style) {
 		s.Font.Size = units.Rem(2)
 	})
-	b.AssertRender(t, "label/rem")
+	b.AssertRender(t, "text/rem")
 }
 
-func TestLabelTextDecoration(t *testing.T) {
+func TestTextDecoration(t *testing.T) {
 	for d := styles.Underline; d <= styles.LineThrough; d++ {
 		for st := styles.FontNormal; st <= styles.Italic; st++ {
 			b := NewBody()
@@ -36,13 +36,13 @@ func TestLabelTextDecoration(t *testing.T) {
 				s.Font.SetDecoration(d)
 				s.Font.Style = st
 			})
-			b.AssertRender(t, "label/text-decoration/"+d.BitIndexString()+"-"+st.String())
+			b.AssertRender(t, "text/decoration/"+d.BitIndexString()+"-"+st.String())
 		}
 	}
 }
 
-func TestLabelLink(t *testing.T) {
+func TestTextLink(t *testing.T) {
 	b := NewBody()
 	NewText(b).SetText(`Hello, <a href="https://example.com">world</a>!`)
-	b.AssertRender(t, "label/link")
+	b.AssertRender(t, "text/link")
 }

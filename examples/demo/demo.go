@@ -81,7 +81,7 @@ func text(ts *core.Tabs) {
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Text")
 	core.NewText(tab).SetText("Cogent Core provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.")
 
-	for _, typ := range core.LabelTypesValues() {
+	for _, typ := range core.TextTypesValues() {
 		s := strcase.ToSentence(typ.String())
 		core.NewText(tab, "label"+typ.String()).SetType(typ).SetText(s)
 	}

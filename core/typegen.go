@@ -365,10 +365,10 @@ func (t *Image) New() tree.Node { return &Image{} }
 func (t *Image) SetTooltip(v string) *Image { t.Tooltip = v; return t }
 
 // TextType is the [types.Type] for [Text]
-var TextType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Label", IDName: "label", Doc: "Label is a widget for rendering text labels. It supports full HTML styling,\nincluding links. By default, labels wrap and collapse whitespace, although\nyou can change this by changing [styles.Text.WhiteSpace].", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Text", Doc: "label to display"}, {Name: "Type", Doc: "the type of label"}, {Name: "TextRender", Doc: "render data for text label"}, {Name: "NormalCursor", Doc: "NormalCursor is the cached cursor to display when there\nis no link being hovered."}}, Instance: &Text{}})
+var TextType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Text", IDName: "text", Doc: "Text is a widget for rendering text. It supports full HTML styling,\nincluding links. By default, labels wrap and collapse whitespace, although\nyou can change this by changing [styles.Text.WhiteSpace].", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Text", Doc: "Text is the text to display."}, {Name: "Type", Doc: "Type is the styling type of label to use."}, {Name: "paintText", Doc: "paintText is the [paint.Text] for the text."}, {Name: "normalCursor", Doc: "normalCursor is the cached cursor to display when there\nis no link being hovered."}}, Instance: &Text{}})
 
 // NewText adds a new [Text] with the given name to the given parent:
-// Label is a widget for rendering text labels. It supports full HTML styling,
+// Text is a widget for rendering text. It supports full HTML styling,
 // including links. By default, labels wrap and collapse whitespace, although
 // you can change this by changing [styles.Text.WhiteSpace].
 func NewText(parent tree.Node, name ...string) *Text {
@@ -381,42 +381,36 @@ func (t *Text) NodeType() *types.Type { return TextType }
 // New returns a new [*Text] value
 func (t *Text) New() tree.Node { return &Text{} }
 
-// LabelEmbedder is an interface that all types that embed Label satisfy
-type LabelEmbedder interface {
-	AsLabel() *Text
+// TextEmbedder is an interface that all types that embed Text satisfy
+type TextEmbedder interface {
+	AsText() *Text
 }
 
-// AsLabel returns the given value as a value of type Label if the type
-// of the given value embeds Label, or nil otherwise
-func AsLabel(k tree.Node) *Text {
+// AsText returns the given value as a value of type Text if the type
+// of the given value embeds Text, or nil otherwise
+func AsText(k tree.Node) *Text {
 	if k == nil || k.This() == nil {
 		return nil
 	}
-	if t, ok := k.(LabelEmbedder); ok {
-		return t.AsLabel()
+	if t, ok := k.(TextEmbedder); ok {
+		return t.AsText()
 	}
 	return nil
 }
 
-// AsLabel satisfies the [LabelEmbedder] interface
-func (t *Text) AsLabel() *Text { return t }
+// AsText satisfies the [TextEmbedder] interface
+func (t *Text) AsText() *Text { return t }
 
-// SetText sets the [Label.Text]:
-// label to display
+// SetText sets the [Text.Text]:
+// Text is the text to display.
 func (t *Text) SetText(v string) *Text { t.Text = v; return t }
 
-// SetType sets the [Label.Type]:
-// the type of label
+// SetType sets the [Text.Type]:
+// Type is the styling type of label to use.
 func (t *Text) SetType(v TextTypes) *Text { t.Type = v; return t }
 
 // SetTooltip sets the [Text.Tooltip]
 func (t *Text) SetTooltip(v string) *Text { t.Tooltip = v; return t }
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.GeomCT", IDName: "geom-ct", Doc: "GeomCT has core layout elements: Content and Total", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Content", Doc: "Content is for the contents (children, parts) of the widget,\nexcluding the Space (margin, padding, scrollbars).\nThis content includes the InnerSpace factor (Gaps in Layout)\nwhich must therefore be subtracted when allocating down to children."}, {Name: "Total", Doc: "Total is for the total exterior of the widget: Content + Space"}}})
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.GeomSize", IDName: "geom-size", Doc: "GeomSize has all of the relevant Layout sizes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Actual", Doc: "Actual is the actual size for the purposes of rendering, representing\nthe \"external\" demands of the widget for space from its parent.\nThis is initially the bottom-up constraint computed by SizeUp,\nand only changes during SizeDown when wrapping elements are reshaped\nbased on allocated size, or when scrollbars are added.\nFor elements with scrollbars (OverflowAuto), the Actual size remains\nat the initial style minimums, \"absorbing\" is internal size,\nwhile Internal records the true size of the contents.\nFor SizeFinal, Actual size can Grow up to the final Alloc size,\nwhile Internal records the actual bottom-up contents size."}, {Name: "Alloc", Doc: "Alloc is the top-down allocated size, based on available visible space,\nstarting from the Scene geometry and working downward, attempting to\naccommodate the Actual contents, and allocating extra space based on\nGrow factors.  When Actual < Alloc, alignment factors determine positioning\nwithin the allocated space."}, {Name: "Internal", Doc: "Internal is the internal size representing the true size of all contents\nof the widget.  This can be less than Actual.Content if widget has Grow\nfactors but its internal contents did not grow accordingly, or it can\nbe more than Actual.Content if it has scrollbars (OverflowAuto).\nNote that this includes InnerSpace (Gap)."}, {Name: "Space", Doc: "Space is the padding, total effective margin (border, shadow, etc),\nand scrollbars that subtracts from Total size to get Content size."}, {Name: "InnerSpace", Doc: "InnerSpace is total extra space that is included within the Content Size region\nand must be subtracted from Content when passing sizes down to children."}, {Name: "Min", Doc: "Min is the Styles.Min.Dots() (Ceil int) that constrains the Actual.Content size"}, {Name: "Max", Doc: "Max is the Styles.Max.Dots() (Ceil int) that constrains the Actual.Content size"}}})
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.GeomState", IDName: "geom-state", Doc: "GeomState contains the the layout geometry state for each widget.\nSet by the parent Layout during the Layout process.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Size", Doc: "Size has sizing data for the widget: use Actual for rendering.\nAlloc shows the potentially larger space top-down allocated."}, {Name: "Pos", Doc: "Pos is position within the overall Scene that we render into,\nincluding effects of scroll offset, for both Total outer dimension\nand inner Content dimension."}, {Name: "Cell", Doc: "Cell is the logical X, Y index coordinates (col, row) of element\nwithin its parent layout"}, {Name: "RelPos", Doc: "RelPos is top, left position relative to parent Content size space"}, {Name: "Scroll", Doc: "Scroll is additional scrolling offset within our parent layout"}, {Name: "TotalBBox", Doc: "2D bounding box for Actual.Total size occupied within parent Scene\nthat we render onto, starting at Pos.Total and ending at Pos.Total + Size.Total.\nThese are the pixels we can draw into, intersected with parent bounding boxes\n(empty for invisible). Used for render Bounds clipping.\nThis includes all space (margin, padding etc)."}, {Name: "ContentBBox", Doc: "2D bounding box for our Content, which excludes our padding, margin, etc.\nstarting at Pos.Content and ending at Pos.Content + Size.Content.\nIt is intersected with parent bounding boxes."}}})
 
 // LayoutType is the [types.Type] for [Layout]
 var LayoutType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Layout", IDName: "layout", Doc: "Layout is the primary node type responsible for organizing the sizes\nand positions of child widgets. It does not render, only organize,\nso properties like background and border will have no effect.\nAll arbitrary collections of widgets should generally be contained\nwithin a layout or a [Frame]; otherwise, the parent widget must take over\nresponsibility for positioning. Layouts automatically can add scrollbars\ndepending on the [styles.Style.Overflow].\n\nFor a [styles.Grid] layout, the [styles.Style.Columns] property should\ngenerally be set to the desired number of columns, from which the number of rows\nis computed; otherwise, it uses the square root of number of\nelements.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "StackTop", Doc: "StackTop, for a [styles.Stacked] layout, is the index of the node to use as the top of the stack.\nOnly the node at this index is rendered; if not a valid index, nothing is rendered."}, {Name: "LayImpl", Doc: "LayImpl contains implementation state info for doing layout"}, {Name: "HasScroll", Doc: "whether scrollbar is used for given dim"}, {Name: "Scrolls", Doc: "scroll bars -- we fully manage them as needed"}, {Name: "FocusName", Doc: "accumulated name to search for when keys are typed"}, {Name: "FocusNameTime", Doc: "time of last focus name event -- for timeout"}, {Name: "FocusNameLast", Doc: "last element focused on -- used as a starting point if name is the same"}}, Instance: &Layout{}})
@@ -488,6 +482,12 @@ func (t *Space) New() tree.Node { return &Space{} }
 
 // SetTooltip sets the [Space.Tooltip]
 func (t *Space) SetTooltip(v string) *Space { t.Tooltip = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.GeomCT", IDName: "geom-ct", Doc: "GeomCT has core layout elements: Content and Total", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Content", Doc: "Content is for the contents (children, parts) of the widget,\nexcluding the Space (margin, padding, scrollbars).\nThis content includes the InnerSpace factor (Gaps in Layout)\nwhich must therefore be subtracted when allocating down to children."}, {Name: "Total", Doc: "Total is for the total exterior of the widget: Content + Space"}}})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.GeomSize", IDName: "geom-size", Doc: "GeomSize has all of the relevant Layout sizes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Actual", Doc: "Actual is the actual size for the purposes of rendering, representing\nthe \"external\" demands of the widget for space from its parent.\nThis is initially the bottom-up constraint computed by SizeUp,\nand only changes during SizeDown when wrapping elements are reshaped\nbased on allocated size, or when scrollbars are added.\nFor elements with scrollbars (OverflowAuto), the Actual size remains\nat the initial style minimums, \"absorbing\" is internal size,\nwhile Internal records the true size of the contents.\nFor SizeFinal, Actual size can Grow up to the final Alloc size,\nwhile Internal records the actual bottom-up contents size."}, {Name: "Alloc", Doc: "Alloc is the top-down allocated size, based on available visible space,\nstarting from the Scene geometry and working downward, attempting to\naccommodate the Actual contents, and allocating extra space based on\nGrow factors.  When Actual < Alloc, alignment factors determine positioning\nwithin the allocated space."}, {Name: "Internal", Doc: "Internal is the internal size representing the true size of all contents\nof the widget.  This can be less than Actual.Content if widget has Grow\nfactors but its internal contents did not grow accordingly, or it can\nbe more than Actual.Content if it has scrollbars (OverflowAuto).\nNote that this includes InnerSpace (Gap)."}, {Name: "Space", Doc: "Space is the padding, total effective margin (border, shadow, etc),\nand scrollbars that subtracts from Total size to get Content size."}, {Name: "InnerSpace", Doc: "InnerSpace is total extra space that is included within the Content Size region\nand must be subtracted from Content when passing sizes down to children."}, {Name: "Min", Doc: "Min is the Styles.Min.Dots() (Ceil int) that constrains the Actual.Content size"}, {Name: "Max", Doc: "Max is the Styles.Max.Dots() (Ceil int) that constrains the Actual.Content size"}}})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.GeomState", IDName: "geom-state", Doc: "GeomState contains the the layout geometry state for each widget.\nSet by the parent Layout during the Layout process.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Size", Doc: "Size has sizing data for the widget: use Actual for rendering.\nAlloc shows the potentially larger space top-down allocated."}, {Name: "Pos", Doc: "Pos is position within the overall Scene that we render into,\nincluding effects of scroll offset, for both Total outer dimension\nand inner Content dimension."}, {Name: "Cell", Doc: "Cell is the logical X, Y index coordinates (col, row) of element\nwithin its parent layout"}, {Name: "RelPos", Doc: "RelPos is top, left position relative to parent Content size space"}, {Name: "Scroll", Doc: "Scroll is additional scrolling offset within our parent layout"}, {Name: "TotalBBox", Doc: "2D bounding box for Actual.Total size occupied within parent Scene\nthat we render onto, starting at Pos.Total and ending at Pos.Total + Size.Total.\nThese are the pixels we can draw into, intersected with parent bounding boxes\n(empty for invisible). Used for render Bounds clipping.\nThis includes all space (margin, padding etc)."}, {Name: "ContentBBox", Doc: "2D bounding box for our Content, which excludes our padding, margin, etc.\nstarting at Pos.Content and ending at Pos.Content + Size.Content.\nIt is intersected with parent bounding boxes."}}})
 
 // MeterType is the [types.Type] for [Meter]
 var MeterType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Meter", IDName: "meter", Doc: "Meter is a widget that renders a current value on as a filled\nbar/semicircle relative to a minimum and maximum potential value.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the meter."}, {Name: "Value", Doc: "Value is the current value of the meter.\nIt defaults to 0.5."}, {Name: "Min", Doc: "Min is the minimum possible value of the meter.\nIt defaults to 0."}, {Name: "Max", Doc: "Max is the maximum possible value of the meter.\nIt defaults to 1."}, {Name: "Text", Doc: "Text, for [MeterCircle] and [MeterSemicircle], is the\ntext to render inside of the circle/semicircle."}, {Name: "ValueColor", Doc: "ValueColor is the image color that will be used to\nrender the filled value bar. It should be set in Style."}, {Name: "Width", Doc: "Width, for [MeterCircle] and [MeterSemicircle], is the\nwidth of the circle/semicircle. It should be set in Style."}}, Instance: &Meter{}})
@@ -1434,12 +1434,12 @@ func (t *Toolbar) SetOverflowButton(v *Button) *Toolbar { t.OverflowButton = v; 
 func (t *Toolbar) SetTooltip(v string) *Toolbar { t.Tooltip = v; return t }
 
 // BasicBarType is the [types.Type] for [BasicBar]
-var BasicBarType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.BasicBar", IDName: "basic-bar", Doc: "BasicBar is just a styled Frame layout for holding buttons\nand other widgets.  Use this when the more advanced features\nof the Toolbar are not needed.", Embeds: []types.Field{{Name: "Frame"}}, Instance: &BasicBar{}})
+var BasicBarType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.BasicBar", IDName: "basic-bar", Doc: "BasicBar is just a styled Frame layout for holding buttons\nand other widgets. Use this when the more advanced features\nof the [Toolbar] are not needed.", Embeds: []types.Field{{Name: "Frame"}}, Instance: &BasicBar{}})
 
 // NewBasicBar adds a new [BasicBar] with the given name to the given parent:
 // BasicBar is just a styled Frame layout for holding buttons
-// and other widgets.  Use this when the more advanced features
-// of the Toolbar are not needed.
+// and other widgets. Use this when the more advanced features
+// of the [Toolbar] are not needed.
 func NewBasicBar(parent tree.Node, name ...string) *BasicBar {
 	return parent.NewChild(BasicBarType, name...).(*BasicBar)
 }
