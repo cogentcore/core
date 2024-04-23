@@ -95,26 +95,26 @@ const (
 	TextLabelSmall
 )
 
-func (lb *Text) OnInit() {
-	lb.WidgetBase.OnInit()
-	lb.HandleEvents()
-	lb.SetStyles()
+func (tx *Text) OnInit() {
+	tx.WidgetBase.OnInit()
+	tx.HandleEvents()
+	tx.SetStyles()
 }
 
-func (lb *Text) SetStyles() {
-	lb.Type = TextBodyLarge
-	lb.Style(func(s *styles.Style) {
+func (tx *Text) SetStyles() {
+	tx.Type = TextBodyLarge
+	tx.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable)
-		if len(lb.paintText.Links) > 0 {
+		if len(tx.paintText.Links) > 0 {
 			s.SetAbilities(true, abilities.Clickable, abilities.LongHoverable, abilities.LongPressable)
 		}
-		if !lb.IsReadOnly() {
+		if !tx.IsReadOnly() {
 			s.Cursor = cursors.Text
 		}
 		s.GrowWrap = true
 
 		// Text styles based on https://m3.material.io/styles/typography/type-scale-tokens
-		switch lb.Type {
+		switch tx.Type {
 		case TextLabelLarge:
 			s.Text.LineHeight.Dp(20)
 			s.Font.Size.Dp(14)
@@ -192,69 +192,69 @@ func (lb *Text) SetStyles() {
 			s.Font.Weight = styles.WeightNormal
 		}
 	})
-	lb.StyleFinal(func(s *styles.Style) {
-		lb.normalCursor = s.Cursor
+	tx.StyleFinal(func(s *styles.Style) {
+		tx.normalCursor = s.Cursor
 	})
 }
 
-func (lb *Text) HandleEvents() {
-	lb.HandleTextClick(func(tl *paint.TextLink) {
+func (tx *Text) HandleEvents() {
+	tx.HandleTextClick(func(tl *paint.TextLink) {
 		system.TheApp.OpenURL(tl.URL)
 	})
-	lb.OnDoubleClick(func(e events.Event) {
-		lb.SetSelected(true)
-		lb.SetFocus()
+	tx.OnDoubleClick(func(e events.Event) {
+		tx.SetSelected(true)
+		tx.SetFocus()
 	})
-	lb.OnFocusLost(func(e events.Event) {
-		lb.SetSelected(false)
+	tx.OnFocusLost(func(e events.Event) {
+		tx.SetSelected(false)
 	})
-	lb.OnKeyChord(func(e events.Event) {
-		if !lb.StateIs(states.Selected) {
+	tx.OnKeyChord(func(e events.Event) {
+		if !tx.StateIs(states.Selected) {
 			return
 		}
 		kf := keymap.Of(e.KeyChord())
 		if kf == keymap.Copy {
 			e.SetHandled()
-			lb.Copy(true)
+			tx.Copy(true)
 		}
 	})
-	lb.On(events.MouseMove, func(e events.Event) {
-		pos := lb.Geom.Pos.Content
+	tx.On(events.MouseMove, func(e events.Event) {
+		pos := tx.Geom.Pos.Content
 		inLink := false
-		for _, tl := range lb.paintText.Links {
+		for _, tl := range tx.paintText.Links {
 			// TODO(kai/link): is there a better way to be safe here?
 			if tl.Label == "" {
 				continue
 			}
-			tlb := tl.Bounds(&lb.paintText, pos)
+			tlb := tl.Bounds(&tx.paintText, pos)
 			if e.Pos().In(tlb) {
 				inLink = true
-				if lb.StateIs(states.LongHovered) || lb.StateIs(states.LongPressed) {
-					NewTooltipTextAt(lb, tl.URL, tlb.Min, tlb.Size()).Run()
+				if tx.StateIs(states.LongHovered) || tx.StateIs(states.LongPressed) {
+					NewTooltipTextAt(tx, tl.URL, tlb.Min, tlb.Size()).Run()
 					e.SetHandled()
 				}
 				break
 			}
 		}
 		if inLink {
-			lb.Styles.Cursor = cursors.Pointer
+			tx.Styles.Cursor = cursors.Pointer
 		} else {
-			lb.Styles.Cursor = lb.normalCursor
+			tx.Styles.Cursor = tx.normalCursor
 		}
 	})
 }
 
 // HandleTextClick handles click events such that the given function will be called
 // on any links that are clicked on.
-func (lb *Text) HandleTextClick(openLink func(tl *paint.TextLink)) {
-	lb.OnClick(func(e events.Event) {
-		pos := lb.Geom.Pos.Content
-		for _, tl := range lb.paintText.Links {
+func (tx *Text) HandleTextClick(openLink func(tl *paint.TextLink)) {
+	tx.OnClick(func(e events.Event) {
+		pos := tx.Geom.Pos.Content
+		for _, tl := range tx.paintText.Links {
 			// TODO(kai/link): is there a better way to be safe here?
 			if tl.Label == "" {
 				continue
 			}
-			tlb := tl.Bounds(&lb.paintText, pos)
+			tlb := tl.Bounds(&tx.paintText, pos)
 			if e.Pos().In(tlb) {
 				openLink(&tl)
 				e.SetHandled()
@@ -264,19 +264,19 @@ func (lb *Text) HandleTextClick(openLink func(tl *paint.TextLink)) {
 	})
 }
 
-func (lb *Text) Copy(reset bool) {
-	md := mimedata.NewText(lb.Text)
-	em := lb.Events()
+func (tx *Text) Copy(reset bool) {
+	md := mimedata.NewText(tx.Text)
+	em := tx.Events()
 	if em != nil {
 		em.Clipboard().Write(md)
 	}
 }
 
-func (lb *Text) Label() string {
-	if lb.Text != "" {
-		return lb.Text
+func (tx *Text) Label() string {
+	if tx.Text != "" {
+		return tx.Text
 	}
-	return lb.Nm
+	return tx.Nm
 }
 
 // todo: ideally it would be possible to only call SetHTML once during config
@@ -284,46 +284,46 @@ func (lb *Text) Label() string {
 // existing line breaks (which could come from <br> and <p> in HTML),
 // so that is never able to undo initial word wrapping from constrained sizes.
 
-// Config does the HTML and Layout in TextRender for the text,
+// Config does the HTML and Layout in paintText for the text,
 // using actual content size to constrain layout.
-func (lb *Text) Config() {
-	lb.ConfigTextSize(lb.Geom.Size.Actual.Content)
+func (tx *Text) Config() {
+	tx.configTextSize(tx.Geom.Size.Actual.Content)
 }
 
-// ConfigTextSize does the HTML and Layout in TextRender for text,
+// configTextSize does the HTML and Layout in paintText for text,
 // using given size to constrain layout.
-func (lb *Text) ConfigTextSize(sz math32.Vector2) {
+func (tx *Text) configTextSize(sz math32.Vector2) {
 	// todo: last arg is CSSAgg.  Can synthesize that some other way?
-	fs := lb.Styles.FontRender()
-	txs := &lb.Styles.Text
-	lb.paintText.SetHTML(lb.Text, fs, txs, &lb.Styles.UnitContext, nil)
-	lb.paintText.Layout(txs, fs, &lb.Styles.UnitContext, sz)
+	fs := tx.Styles.FontRender()
+	txs := &tx.Styles.Text
+	tx.paintText.SetHTML(tx.Text, fs, txs, &tx.Styles.UnitContext, nil)
+	tx.paintText.Layout(txs, fs, &tx.Styles.UnitContext, sz)
 }
 
-// ConfigTextAlloc is used for determining how much space the label
+// configTextAlloc is used for determining how much space the text
 // takes, using given size (typically Alloc).
 // In this case, alignment factors are turned off,
 // because they otherwise can absorb much more space, which should
 // instead be controlled by the base Align X,Y factors.
-func (lb *Text) ConfigTextAlloc(sz math32.Vector2) math32.Vector2 {
+func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 	// todo: last arg is CSSAgg.  Can synthesize that some other way?
-	fs := lb.Styles.FontRender()
-	txs := &lb.Styles.Text
+	fs := tx.Styles.FontRender()
+	txs := &tx.Styles.Text
 	align, alignV := txs.Align, txs.AlignV
 	txs.Align, txs.AlignV = styles.Start, styles.Start
-	lb.paintText.SetHTML(lb.Text, fs, txs, &lb.Styles.UnitContext, nil)
-	lb.paintText.Layout(txs, fs, &lb.Styles.UnitContext, sz)
-	rsz := lb.paintText.Size.Ceil()
+	tx.paintText.SetHTML(tx.Text, fs, txs, &tx.Styles.UnitContext, nil)
+	tx.paintText.Layout(txs, fs, &tx.Styles.UnitContext, sz)
+	rsz := tx.paintText.Size.Ceil()
 	txs.Align, txs.AlignV = align, alignV
-	lb.paintText.Layout(txs, fs, &lb.Styles.UnitContext, rsz)
+	tx.paintText.Layout(txs, fs, &tx.Styles.UnitContext, rsz)
 	return rsz
 }
 
-// TextWrapSizeEstimate is the size to use for layout during the SizeUp pass,
+// textWrapSizeEstimate is the size to use for layout during the SizeUp pass,
 // for word wrap case, where the sizing actually matters,
 // based on trying to fit the given number of characters into the given content size
 // with given font height.
-func TextWrapSizeEstimate(csz math32.Vector2, nChars int, fs *styles.Font) math32.Vector2 {
+func textWrapSizeEstimate(csz math32.Vector2, nChars int, fs *styles.Font) math32.Vector2 {
 	chars := float32(nChars)
 	fht := float32(16)
 	if fs.Face != nil {
@@ -352,43 +352,43 @@ func TextWrapSizeEstimate(csz math32.Vector2, nChars int, fs *styles.Font) math3
 	return sz
 }
 
-func (lb *Text) SizeUp() {
-	lb.WidgetBase.SizeUp() // sets Actual size based on styles
-	sz := &lb.Geom.Size
-	if lb.Styles.Text.HasWordWrap() {
-		lb.ConfigTextSize(TextWrapSizeEstimate(lb.Geom.Size.Actual.Content, len(lb.Text), &lb.Styles.Font))
+func (tx *Text) SizeUp() {
+	tx.WidgetBase.SizeUp() // sets Actual size based on styles
+	sz := &tx.Geom.Size
+	if tx.Styles.Text.HasWordWrap() {
+		tx.configTextSize(textWrapSizeEstimate(tx.Geom.Size.Actual.Content, len(tx.Text), &tx.Styles.Font))
 	} else {
-		lb.ConfigTextSize(sz.Actual.Content)
+		tx.configTextSize(sz.Actual.Content)
 	}
-	rsz := lb.paintText.Size.Ceil()
+	rsz := tx.paintText.Size.Ceil()
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.SetTotalFromContent(&sz.Actual)
 	if DebugSettings.LayoutTrace {
-		fmt.Println(lb, "Label SizeUp:", rsz, "Actual:", sz.Actual.Content)
+		fmt.Println(tx, "Label SizeUp:", rsz, "Actual:", sz.Actual.Content)
 	}
 }
 
-func (lb *Text) SizeDown(iter int) bool {
-	if !lb.Styles.Text.HasWordWrap() || iter > 1 {
+func (tx *Text) SizeDown(iter int) bool {
+	if !tx.Styles.Text.HasWordWrap() || iter > 1 {
 		return false
 	}
-	sz := &lb.Geom.Size
-	rsz := lb.ConfigTextAlloc(sz.Alloc.Content) // use allocation
+	sz := &tx.Geom.Size
+	rsz := tx.configTextAlloc(sz.Alloc.Content) // use allocation
 	prevContent := sz.Actual.Content
 	// start over so we don't reflect hysteresis of prior guess
-	sz.SetInitContentMin(lb.Styles.Min.Dots().Ceil())
+	sz.SetInitContentMin(tx.Styles.Min.Dots().Ceil())
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.SetTotalFromContent(&sz.Actual)
 	chg := prevContent != sz.Actual.Content
 	if chg {
 		if DebugSettings.LayoutTrace {
-			fmt.Println(lb, "Label Size Changed:", sz.Actual.Content, "was:", prevContent)
+			fmt.Println(tx, "Label Size Changed:", sz.Actual.Content, "was:", prevContent)
 		}
 	}
 	return chg
 }
 
-func (lb *Text) Render() {
-	lb.RenderStandardBox()
-	lb.paintText.Render(&lb.Scene.PaintContext, lb.Geom.Pos.Content)
+func (tx *Text) Render() {
+	tx.RenderStandardBox()
+	tx.paintText.Render(&tx.Scene.PaintContext, tx.Geom.Pos.Content)
 }
