@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image"
 	"log"
-	"log/slog"
 	"os"
 	"runtime"
 	"runtime/pprof"
@@ -547,16 +546,6 @@ func (wb *WidgetBase) RenderStandardBox() {
 //////////////////////////////////////////////////////////////////
 //		Widget position functions
 
-// HasSc checks that the Sc Scene has been set.
-// Called prior to using -- logs an error if not.
-func (wb *WidgetBase) HasSc() bool {
-	if wb.This() == nil || wb.Scene == nil {
-		slog.Debug("core.WidgetBase: object or scene is nil")
-		return false
-	}
-	return true
-}
-
 // PointToRelPos translates a point in Scene pixel coords
 // into relative position within node, based on the Content BBox
 func (wb *WidgetBase) PointToRelPos(pt image.Point) image.Point {
@@ -566,9 +555,6 @@ func (wb *WidgetBase) PointToRelPos(pt image.Point) image.Point {
 // WinBBox returns the RenderWindow based bounding box for the widget
 // by adding the Scene position to the ScBBox
 func (wb *WidgetBase) WinBBox() image.Rectangle {
-	if !wb.HasSc() {
-		return wb.Geom.TotalBBox
-	}
 	return wb.Geom.TotalBBox.Add(wb.Scene.SceneGeom.Pos)
 }
 
