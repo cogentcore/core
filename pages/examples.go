@@ -34,11 +34,7 @@ func ExampleHandler(ctx *htmlview.Context) bool {
 	// the node we actually care about is our first child, the <pre> element
 	ctx.Node = ctx.Node.FirstChild
 
-	core.NewLabel(ctx.Parent()).SetText(htmlview.ExtractText(ctx)).Style(func(s *styles.Style) {
-		s.Text.WhiteSpace = styles.WhiteSpacePreWrap
-		s.Background = colors.C(colors.Scheme.SurfaceContainer)
-		s.Border.Radius = styles.BorderRadiusMedium
-	})
+	ExampleCodeLabel(ctx.Parent()).SetText(htmlview.ExtractText(ctx))
 
 	id := ctx.PageURL + "-" + strconv.Itoa(NumExamples[ctx.PageURL])
 	NumExamples[ctx.PageURL]++
@@ -50,4 +46,15 @@ func ExampleHandler(ctx *htmlview.Context) bool {
 	}
 
 	return true
+}
+
+// ExampleCodeLabel adds a new label styled for displaying example code.
+func ExampleCodeLabel(parent core.Widget) *core.Label {
+	label := core.NewLabel(parent)
+	label.Style(func(s *styles.Style) {
+		s.Text.WhiteSpace = styles.WhiteSpacePreWrap
+		s.Background = colors.C(colors.Scheme.SurfaceContainer)
+		s.Border.Radius = styles.BorderRadiusMedium
+	})
+	return label
 }
