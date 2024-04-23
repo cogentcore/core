@@ -71,7 +71,7 @@ func (t *Box) New() tree.Node { return &Box{} }
 func (t *Box) SetTooltip(v string) *Box { t.Tooltip = v; return t }
 
 // ButtonType is the [types.Type] for [Button]
-var ButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Button", IDName: "button", Doc: "Button is an interactive button with text, an icon, an indicator, a shortcut,\nand/or a menu. The standard behavior is to register a click event handler with\nOnClick.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of button."}, {Name: "Text", Doc: "Text is the label text for the button.\nIf it is blank, no label is shown."}, {Name: "Icon", Doc: "Icon is the icon for the button.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "Indicator", Doc: "Indicator is the menu indicator icon to present.\nIf it is \"\" or [icons.None],, no indicator is shown.\nIt is automatically set to [icons.KeyboardArrowDown]\nwhen there is a Menu elements present unless it is\nset to [icons.None]."}, {Name: "Shortcut", Doc: "Shortcut is an optional shortcut keyboard chord to trigger this button,\nactive in window-wide scope. Avoid conflicts with other shortcuts\n(a log message will be emitted if so). Shortcuts are processed after\nall other processing of keyboard input. Use Command for\nControl / Meta (Mac Command key) per platform."}, {Name: "Menu", Doc: "Menu is a menu constructor function used to build and display\na menu whenever the button is clicked. There will be no menu\nif it is nil. The constructor function should add buttons\nto the Scene that it is passed."}}, Instance: &Button{}})
+var ButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Button", IDName: "button", Doc: "Button is an interactive button with text, an icon, an indicator, a shortcut,\nand/or a menu. The standard behavior is to register a click event handler with\nOnClick.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of button."}, {Name: "Text", Doc: "Text is the text for the button.\nIf it is blank, no text is shown."}, {Name: "Icon", Doc: "Icon is the icon for the button.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "Indicator", Doc: "Indicator is the menu indicator icon to present.\nIf it is \"\" or [icons.None],, no indicator is shown.\nIt is automatically set to [icons.KeyboardArrowDown]\nwhen there is a Menu elements present unless it is\nset to [icons.None]."}, {Name: "Shortcut", Doc: "Shortcut is an optional shortcut keyboard chord to trigger this button,\nactive in window-wide scope. Avoid conflicts with other shortcuts\n(a log message will be emitted if so). Shortcuts are processed after\nall other processing of keyboard input. Use Command for\nControl / Meta (Mac Command key) per platform."}, {Name: "Menu", Doc: "Menu is a menu constructor function used to build and display\na menu whenever the button is clicked. There will be no menu\nif it is nil. The constructor function should add buttons\nto the Scene that it is passed."}}, Instance: &Button{}})
 
 // NewButton adds a new [Button] with the given name to the given parent:
 // Button is an interactive button with text, an icon, an indicator, a shortcut,
@@ -223,7 +223,7 @@ func (t *Chooser) SetDefaultNew(v bool) *Chooser { t.DefaultNew = v; return t }
 // SetTooltip sets the [Chooser.Tooltip]
 func (t *Chooser) SetTooltip(v string) *Chooser { t.Tooltip = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ChooserItem", IDName: "chooser-item", Doc: "ChooserItem is an item that can be used in a [Chooser].", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Value", Doc: "Value is the underlying value of the chooser item."}, {Name: "Label", Doc: "Label is the label displayed to the user for this item.\nIf it is empty, then [ToLabel] of [ChooserItem.Value] is\nused instead."}, {Name: "Icon", Doc: "Icon is the icon displayed to the user for this item."}, {Name: "Tooltip", Doc: "Tooltip is the tooltip displayed to the user for this item."}, {Name: "Func", Doc: "Func, if non-nil, is a function to call whenever this\nitem is selected as the current value of the chooser."}, {Name: "SeparatorBefore", Doc: "SeparatorBefore is whether to add a separator before\nthis item in the chooser menu."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ChooserItem", IDName: "chooser-item", Doc: "ChooserItem is an item that can be used in a [Chooser].", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Value", Doc: "Value is the underlying value of the chooser item."}, {Name: "Label", Doc: "Label is the text displayed to the user for this item.\nIf it is empty, then [ToLabel] of [ChooserItem.Value] is\nused instead."}, {Name: "Icon", Doc: "Icon is the icon displayed to the user for this item."}, {Name: "Tooltip", Doc: "Tooltip is the tooltip displayed to the user for this item."}, {Name: "Func", Doc: "Func, if non-nil, is a function to call whenever this\nitem is selected as the current value of the chooser."}, {Name: "SeparatorBefore", Doc: "SeparatorBefore is whether to add a separator before\nthis item in the chooser menu."}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Complete", IDName: "complete", Doc: "Complete holds the current completion data and functions to call for building\nthe list of possible completions and for editing text after a completion is selected.\nIt also holds the [PopupStage] associated with it.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "MatchFunc", Doc: "function to get the list of possible completions"}, {Name: "LookupFunc", Doc: "function to get the text to show for lookup"}, {Name: "EditFunc", Doc: "function to edit text using the selected completion"}, {Name: "Context", Doc: "the object that implements complete.Func"}, {Name: "SrcLn", Doc: "line number in source that completion is operating on, if relevant"}, {Name: "SrcCh", Doc: "character position in source that completion is operating on"}, {Name: "Completions", Doc: "the list of potential completions"}, {Name: "Seed", Doc: "current completion seed"}, {Name: "Completion", Doc: "the user's completion selection"}, {Name: "Listeners", Doc: "the event listeners for the completer (it sends Select events)"}, {Name: "Stage", Doc: "Stage is the [PopupStage] associated with the [Complete]"}, {Name: "DelayTimer"}, {Name: "DelayMu"}, {Name: "ShowMu"}}})
 
@@ -363,54 +363,6 @@ func (t *Image) New() tree.Node { return &Image{} }
 
 // SetTooltip sets the [Image.Tooltip]
 func (t *Image) SetTooltip(v string) *Image { t.Tooltip = v; return t }
-
-// TextType is the [types.Type] for [Text]
-var TextType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Text", IDName: "text", Doc: "Text is a widget for rendering text. It supports full HTML styling,\nincluding links. By default, labels wrap and collapse whitespace, although\nyou can change this by changing [styles.Text.WhiteSpace].", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Text", Doc: "Text is the text to display."}, {Name: "Type", Doc: "Type is the styling type of label to use."}, {Name: "paintText", Doc: "paintText is the [paint.Text] for the text."}, {Name: "normalCursor", Doc: "normalCursor is the cached cursor to display when there\nis no link being hovered."}}, Instance: &Text{}})
-
-// NewText adds a new [Text] with the given name to the given parent:
-// Text is a widget for rendering text. It supports full HTML styling,
-// including links. By default, labels wrap and collapse whitespace, although
-// you can change this by changing [styles.Text.WhiteSpace].
-func NewText(parent tree.Node, name ...string) *Text {
-	return parent.NewChild(TextType, name...).(*Text)
-}
-
-// NodeType returns the [*types.Type] of [Text]
-func (t *Text) NodeType() *types.Type { return TextType }
-
-// New returns a new [*Text] value
-func (t *Text) New() tree.Node { return &Text{} }
-
-// TextEmbedder is an interface that all types that embed Text satisfy
-type TextEmbedder interface {
-	AsText() *Text
-}
-
-// AsText returns the given value as a value of type Text if the type
-// of the given value embeds Text, or nil otherwise
-func AsText(k tree.Node) *Text {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(TextEmbedder); ok {
-		return t.AsText()
-	}
-	return nil
-}
-
-// AsText satisfies the [TextEmbedder] interface
-func (t *Text) AsText() *Text { return t }
-
-// SetText sets the [Text.Text]:
-// Text is the text to display.
-func (t *Text) SetText(v string) *Text { t.Text = v; return t }
-
-// SetType sets the [Text.Type]:
-// Type is the styling type of label to use.
-func (t *Text) SetType(v TextTypes) *Text { t.Type = v; return t }
-
-// SetTooltip sets the [Text.Tooltip]
-func (t *Text) SetTooltip(v string) *Text { t.Tooltip = v; return t }
 
 // LayoutType is the [types.Type] for [Layout]
 var LayoutType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Layout", IDName: "layout", Doc: "Layout is the primary node type responsible for organizing the sizes\nand positions of child widgets. It does not render, only organize,\nso properties like background and border will have no effect.\nAll arbitrary collections of widgets should generally be contained\nwithin a layout or a [Frame]; otherwise, the parent widget must take over\nresponsibility for positioning. Layouts automatically can add scrollbars\ndepending on the [styles.Style.Overflow].\n\nFor a [styles.Grid] layout, the [styles.Style.Columns] property should\ngenerally be set to the desired number of columns, from which the number of rows\nis computed; otherwise, it uses the square root of number of\nelements.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "StackTop", Doc: "StackTop, for a [styles.Stacked] layout, is the index of the node to use as the top of the stack.\nOnly the node at this index is rendered; if not a valid index, nothing is rendered."}, {Name: "LayImpl", Doc: "LayImpl contains implementation state info for doing layout"}, {Name: "HasScroll", Doc: "whether scrollbar is used for given dim"}, {Name: "Scrolls", Doc: "scroll bars -- we fully manage them as needed"}, {Name: "FocusName", Doc: "accumulated name to search for when keys are typed"}, {Name: "FocusNameTime", Doc: "time of last focus name event -- for timeout"}, {Name: "FocusNameLast", Doc: "last element focused on -- used as a starting point if name is the same"}}, Instance: &Layout{}})
@@ -1073,7 +1025,7 @@ func (t *SVG) New() tree.Node { return &SVG{} }
 func (t *SVG) SetTooltip(v string) *SVG { t.Tooltip = v; return t }
 
 // SwitchType is the [types.Type] for [Switch]
-var SwitchType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Switch", IDName: "switch", Doc: "Switch is a widget that can toggle between an on and off state.\nIt can be displayed as a switch, checkbox, or radio button.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Type", Doc: "the type of switch that this is"}, {Name: "Text", Doc: "the label text for the switch"}, {Name: "IconOn", Doc: "icon to use for the on, checked state of the switch"}, {Name: "IconOff", Doc: "icon to use for the off, unchecked state of the switch"}, {Name: "IconIndeterminate", Doc: "icon to use for the indeterminate (unknown) state"}}, Instance: &Switch{}})
+var SwitchType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Switch", IDName: "switch", Doc: "Switch is a widget that can toggle between an on and off state.\nIt can be displayed as a switch, checkbox, or radio button.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of switch."}, {Name: "Text", Doc: "Text is the text for the switch."}, {Name: "IconOn", Doc: "IconOn is the icon to use for the on, checked state of the switch."}, {Name: "IconOff", Doc: "Iconoff is the icon to use for the off, unchecked state of the switch."}, {Name: "IconIndeterminate", Doc: "IconIndeterminate is the icon to use for the indeterminate (unknown) state."}}, Instance: &Switch{}})
 
 // NewSwitch adds a new [Switch] with the given name to the given parent:
 // Switch is a widget that can toggle between an on and off state.
@@ -1089,19 +1041,19 @@ func (t *Switch) NodeType() *types.Type { return SwitchType }
 func (t *Switch) New() tree.Node { return &Switch{} }
 
 // SetText sets the [Switch.Text]:
-// the label text for the switch
+// Text is the text for the switch.
 func (t *Switch) SetText(v string) *Switch { t.Text = v; return t }
 
 // SetIconOn sets the [Switch.IconOn]:
-// icon to use for the on, checked state of the switch
+// IconOn is the icon to use for the on, checked state of the switch.
 func (t *Switch) SetIconOn(v icons.Icon) *Switch { t.IconOn = v; return t }
 
 // SetIconOff sets the [Switch.IconOff]:
-// icon to use for the off, unchecked state of the switch
+// Iconoff is the icon to use for the off, unchecked state of the switch.
 func (t *Switch) SetIconOff(v icons.Icon) *Switch { t.IconOff = v; return t }
 
 // SetIconIndeterminate sets the [Switch.IconIndeterminate]:
-// icon to use for the indeterminate (unknown) state
+// IconIndeterminate is the icon to use for the indeterminate (unknown) state.
 func (t *Switch) SetIconIndeterminate(v icons.Icon) *Switch { t.IconIndeterminate = v; return t }
 
 // SetTooltip sets the [Switch.Tooltip]
@@ -1161,7 +1113,7 @@ func (t *Switches) SetMutex(v bool) *Switches { t.Mutex = v; return t }
 func (t *Switches) SetTooltip(v string) *Switches { t.Tooltip = v; return t }
 
 // TabsType is the [types.Type] for [Tabs]
-var TabsType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tabs", IDName: "tabs", Doc: "Tabs switches among child widgets via tabs.  The selected widget gets\nthe full allocated space avail after the tabs are accounted for.  The\nTabs is just a Vertical layout that manages two child widgets: a\nHorizFlow Layout for the tabs (which can flow across multiple rows as\nneeded) and a Stacked Frame that actually contains all the children, and\nprovides scrollbars as needed to any content within.  Typically should have\nmax stretch and a set preferred size, so it expands.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}, {Name: "NewTabButton", Doc: "NewTabButton is whether to show a new tab button at the end of the list of tabs."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in the tab label.\nIt elides labels that are longer than that."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used for tab close buttons.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "PrevEffectiveType", Doc: "PrevEffectiveType is the previous effective type of the tabs\nas computed by [TabTypes.Effective]."}, {Name: "Mu", Doc: "Mu is a mutex protecting updates to tabs. Tabs can be driven\nprogrammatically and via user input so need extra protection."}}, Instance: &Tabs{}})
+var TabsType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tabs", IDName: "tabs", Doc: "Tabs switches among child widgets via tabs.  The selected widget gets\nthe full allocated space avail after the tabs are accounted for.  The\nTabs is just a Vertical layout that manages two child widgets: a\nHorizFlow Layout for the tabs (which can flow across multiple rows as\nneeded) and a Stacked Frame that actually contains all the children, and\nprovides scrollbars as needed to any content within.  Typically should have\nmax stretch and a set preferred size, so it expands.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}, {Name: "NewTabButton", Doc: "NewTabButton is whether to show a new tab button at the end of the list of tabs."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in the tab text.\nIt elides text that are longer than that."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used for tab close buttons.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "PrevEffectiveType", Doc: "PrevEffectiveType is the previous effective type of the tabs\nas computed by [TabTypes.Effective]."}, {Name: "Mu", Doc: "Mu is a mutex protecting updates to tabs. Tabs can be driven\nprogrammatically and via user input so need extra protection."}}, Instance: &Tabs{}})
 
 // NewTabs adds a new [Tabs] with the given name to the given parent:
 // Tabs switches among child widgets via tabs.  The selected widget gets
@@ -1212,8 +1164,8 @@ func (t *Tabs) SetType(v TabTypes) *Tabs { t.Type = v; return t }
 func (t *Tabs) SetNewTabButton(v bool) *Tabs { t.NewTabButton = v; return t }
 
 // SetMaxChars sets the [Tabs.MaxChars]:
-// MaxChars is the maximum number of characters to include in the tab label.
-// It elides labels that are longer than that.
+// MaxChars is the maximum number of characters to include in the tab text.
+// It elides text that are longer than that.
 func (t *Tabs) SetMaxChars(v int) *Tabs { t.MaxChars = v; return t }
 
 // SetCloseIcon sets the [Tabs.CloseIcon]:
@@ -1228,7 +1180,7 @@ func (t *Tabs) SetCloseIcon(v icons.Icon) *Tabs { t.CloseIcon = v; return t }
 func (t *Tabs) SetTooltip(v string) *Tabs { t.Tooltip = v; return t }
 
 // TabType is the [types.Type] for [Tab]
-var TabType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tab", IDName: "tab", Doc: "Tab is a tab button that contains any, all, or none of a label, an icon,\nand a close icon. Tabs should be made using the [Tabs.NewTab] function.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tab. This property\nmust be set on the parent [Tabs] for it to work correctly."}, {Name: "Text", Doc: "Text is the label text for the tab.\nIf it is nil, no label is shown.\nLabels are never shown for [NavigationRail] tabs."}, {Name: "Icon", Doc: "Icon is the icon for the tab.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used as a close button for the tab.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "MaxChars", Doc: "Maximum number of characters to include in tab label.\nElides labels that are longer than that"}}, Instance: &Tab{}})
+var TabType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tab", IDName: "tab", Doc: "Tab is a tab button that contains any, all, or none of a label, an icon,\nand a close icon. Tabs should be made using the [Tabs.NewTab] function.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tab. This property\nmust be set on the parent [Tabs] for it to work correctly."}, {Name: "Text", Doc: "Text is the text for the tab.\nIf it is nil, no text is shown.\nText is never shown for [NavigationRail] tabs."}, {Name: "Icon", Doc: "Icon is the icon for the tab.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used as a close button for the tab.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in tab text.\nIt elides text that is longer than that."}}, Instance: &Tab{}})
 
 // NodeType returns the [*types.Type] of [Tab]
 func (t *Tab) NodeType() *types.Type { return TabType }
@@ -1242,9 +1194,9 @@ func (t *Tab) New() tree.Node { return &Tab{} }
 func (t *Tab) SetType(v TabTypes) *Tab { t.Type = v; return t }
 
 // SetText sets the [Tab.Text]:
-// Text is the label text for the tab.
-// If it is nil, no label is shown.
-// Labels are never shown for [NavigationRail] tabs.
+// Text is the text for the tab.
+// If it is nil, no text is shown.
+// Text is never shown for [NavigationRail] tabs.
 func (t *Tab) SetText(v string) *Tab { t.Text = v; return t }
 
 // SetIcon sets the [Tab.Icon]:
@@ -1261,12 +1213,60 @@ func (t *Tab) SetIcon(v icons.Icon) *Tab { t.Icon = v; return t }
 func (t *Tab) SetCloseIcon(v icons.Icon) *Tab { t.CloseIcon = v; return t }
 
 // SetMaxChars sets the [Tab.MaxChars]:
-// Maximum number of characters to include in tab label.
-// Elides labels that are longer than that
+// MaxChars is the maximum number of characters to include in tab text.
+// It elides text that is longer than that.
 func (t *Tab) SetMaxChars(v int) *Tab { t.MaxChars = v; return t }
 
 // SetTooltip sets the [Tab.Tooltip]
 func (t *Tab) SetTooltip(v string) *Tab { t.Tooltip = v; return t }
+
+// TextType is the [types.Type] for [Text]
+var TextType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Text", IDName: "text", Doc: "Text is a widget for rendering text. It supports full HTML styling,\nincluding links. By default, text wraps and collapses whitespace, although\nyou can change this by changing [styles.Text.WhiteSpace].", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Text", Doc: "Text is the text to display."}, {Name: "Type", Doc: "Type is the styling type of text to use."}, {Name: "paintText", Doc: "paintText is the [paint.Text] for the text."}, {Name: "normalCursor", Doc: "normalCursor is the cached cursor to display when there\nis no link being hovered."}}, Instance: &Text{}})
+
+// NewText adds a new [Text] with the given name to the given parent:
+// Text is a widget for rendering text. It supports full HTML styling,
+// including links. By default, text wraps and collapses whitespace, although
+// you can change this by changing [styles.Text.WhiteSpace].
+func NewText(parent tree.Node, name ...string) *Text {
+	return parent.NewChild(TextType, name...).(*Text)
+}
+
+// NodeType returns the [*types.Type] of [Text]
+func (t *Text) NodeType() *types.Type { return TextType }
+
+// New returns a new [*Text] value
+func (t *Text) New() tree.Node { return &Text{} }
+
+// TextEmbedder is an interface that all types that embed Text satisfy
+type TextEmbedder interface {
+	AsText() *Text
+}
+
+// AsText returns the given value as a value of type Text if the type
+// of the given value embeds Text, or nil otherwise
+func AsText(k tree.Node) *Text {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(TextEmbedder); ok {
+		return t.AsText()
+	}
+	return nil
+}
+
+// AsText satisfies the [TextEmbedder] interface
+func (t *Text) AsText() *Text { return t }
+
+// SetText sets the [Text.Text]:
+// Text is the text to display.
+func (t *Text) SetText(v string) *Text { t.Text = v; return t }
+
+// SetType sets the [Text.Type]:
+// Type is the styling type of text to use.
+func (t *Text) SetType(v TextTypes) *Text { t.Type = v; return t }
+
+// SetTooltip sets the [Text.Tooltip]
+func (t *Text) SetTooltip(v string) *Text { t.Tooltip = v; return t }
 
 // TextFieldType is the [types.Type] for [TextField]
 var TextFieldType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.TextField", IDName: "text-field", Doc: "TextField is a widget for editing a line of text.\nWith the default WhiteSpaceNormal style setting,\ntext will wrap onto multiple lines as needed.\nSet to WhiteSpaceNowrap (e.g., Styles.SetTextWrap(false)) to\nforce everything to be on a single line.\nWith multi-line wrapped text, the text is still treated as a contiguous\nwrapped text.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the text field."}, {Name: "Placeholder", Doc: "Placeholder is the text that is displayed\nwhen the text field is empty."}, {Name: "Validator", Doc: "Validator is a function used to validate the input\nof the text field. If it returns a non-nil error,\nthen an error color, icon, and tooltip will be displayed."}, {Name: "LeadingIcon", Doc: "LeadingIcon, if specified, indicates to add a button\nat the start of the text field with this icon."}, {Name: "LeadingIconOnClick", Doc: "LeadingIconOnClick, if specified, is the function to call when\nthe LeadingIcon is clicked. If this is nil, the leading icon\nwill not be interactive."}, {Name: "TrailingIcon", Doc: "TrailingIcon, if specified, indicates to add a button\nat the end of the text field with this icon."}, {Name: "TrailingIconOnClick", Doc: "TrailingIconOnClick, if specified, is the function to call when\nthe TrailingIcon is clicked. If this is nil, the trailing icon\nwill not be interactive."}, {Name: "NoEcho", Doc: "NoEcho is whether replace displayed characters with bullets to conceal text\n(for example, for a password input)."}, {Name: "CursorWidth", Doc: "CursorWidth is the width of the text field cursor.\nIt should be set in Style like all other style properties.\nBy default, it is 1dp."}, {Name: "CursorColor", Doc: "CursorColor is the color used for the text field cursor (caret).\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.Primary.Base]."}, {Name: "PlaceholderColor", Doc: "PlaceholderColor is the color used for the Placeholder text.\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.OnSurfaceVariant]."}, {Name: "SelectColor", Doc: "SelectColor is the color used for the text selection background color.\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.Select.Container]"}, {Name: "Complete", Doc: "Complete contains functions and data for text field completion.\nIt must be set using [TextField.SetCompleter]."}, {Name: "Txt", Doc: "Txt is the last saved value of the text string being edited."}, {Name: "Edited", Doc: "Edited is whether the text has been edited relative to the original."}, {Name: "EditTxt", Doc: "EditTxt is the live text string being edited, with the latest modifications."}, {Name: "Error", Doc: "Error is the current validation error of the text field."}, {Name: "EffPos", Doc: "EffPos is the effective position with any leading icon space added."}, {Name: "EffSize", Doc: "EffSize is the effective size, subtracting any leading and trailing icon space."}, {Name: "StartPos", Doc: "StartPos is the starting display position in the string."}, {Name: "EndPos", Doc: "EndPos is the ending display position in the string."}, {Name: "CursorPos", Doc: "CursorPos is the current cursor position."}, {Name: "CursorLine", Doc: "CursorLine is the current cursor line position."}, {Name: "CharWidth", Doc: "CharWidth is the approximate number of chars that can be\ndisplayed at any time, which is computed from the font size."}, {Name: "SelectStart", Doc: "SelectStart is the starting position of selection in the string."}, {Name: "SelectEnd", Doc: "SelectEnd is the ending position of selection in the string."}, {Name: "SelectInit", Doc: "SelectInit is the initial selection position (where it started)."}, {Name: "SelectMode", Doc: "SelectMode is whether to select text as the cursor moves."}, {Name: "RenderAll", Doc: "RenderAll is the render version of entire text, for sizing."}, {Name: "RenderVis", Doc: "RenderVis is the render version of just the visible text."}, {Name: "NLines", Doc: "number of lines from last render update, for word-wrap version"}, {Name: "FontHeight", Doc: "FontHeight is the font height cached during styling."}, {Name: "BlinkOn", Doc: "BlinkOn oscillates between on and off for blinking."}, {Name: "CursorMu", Doc: "CursorMu is the mutex for updating the cursor between blinker and field."}, {Name: "Undos", Doc: "Undos is the undo manager for the text field."}}, Instance: &TextField{}})
@@ -1454,7 +1454,7 @@ func (t *BasicBar) New() tree.Node { return &BasicBar{} }
 func (t *BasicBar) SetTooltip(v string) *BasicBar { t.Tooltip = v; return t }
 
 // WidgetBaseType is the [types.Type] for [WidgetBase]
-var WidgetBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.WidgetBase", IDName: "widget-base", Doc: "WidgetBase is the base type for all Widget Widget elements, which are\nmanaged by a containing Layout, and use all 5 rendering passes.  All\nelemental widgets must support the ReadOnly and Selected states in a\nreasonable way (Selected only essential when also ReadOnly), so they can\nfunction appropriately in a chooser (e.g., SliceView or TableView) -- this\nincludes toggling selection on left mouse press.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Methods: []types.Method{{Name: "Update", Doc: "Update does a general purpose update of the widget and everything\nbelow it by reconfiguring it, applying its styles, and indicating\nthat it needs a new layout pass. It is the main way that end users\nshould update widgets, and it should be called after making any\nchanges to the core properties of a widget (for example, the text\nof a label, the icon of a button, or the slice of a table view).\n\nIf you are calling this in a separate goroutine outside of the main\nconfiguration, rendering, and event handling structure, you need to\ncall [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and\nafter this, respectively.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Tooltip", Doc: "Tooltip is the text for the tooltip for this widget,\nwhich can use HTML formatting."}, {Name: "Parts", Doc: "Parts are a separate tree of sub-widgets that implement discrete parts\nof a widget.  Positions are relative to the parent widget.\nThese are fully managed by the parent widget"}, {Name: "Geom", Doc: "Geom has the full layout geometry for size and position of this Widget"}, {Name: "OverrideStyle", Doc: "If true, Override the computed styles and allow directly editing Style"}, {Name: "Styles", Doc: "Styles are styling settings for this widget.\nThese are set in SetApplyStyle which should be called after any Config\nchange (e.g., as done by the Update method).  See Stylers for functions\nthat set all of the styles, ordered from initial base defaults to later\nadded overrides."}, {Name: "Stylers", Doc: "Stylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using Style function. FirstStylers and\nFinalStylers are called before and after these stylers, respectively."}, {Name: "FirstStylers", Doc: "FirstStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFirst function. These stylers\nare called before Stylers and FinalStylers."}, {Name: "FinalStylers", Doc: "FinalStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFinal function. These stylers\nare called after FirstStylers and Stylers."}, {Name: "Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the On function. FirstListeners\nand FinalListeners are called before and after these listeners, respectively."}, {Name: "FirstListeners", Doc: "FirstListeners are event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the OnFirst function. These listeners\nare called before Listeners and FinalListeners."}, {Name: "FinalListeners", Doc: "FinalListeners are event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the OnFinal function. These listeners\nare called after FirstListeners and Listeners."}, {Name: "OnWidgetAdders", Doc: "A slice of functions to call on all widgets that are added as children\nto this widget or its children.  These functions are called in sequential\nascending order, so the last added one is called last and thus can\noverride anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code."}, {Name: "ContextMenus", Doc: "ContextMenus is a slice of menu functions to call to construct\nthe widget's context menu on an [events.ContextMenu]. The\nfunctions are called in reverse order such that the elements\nadded in the last function are the first in the menu.\nContext menus should be added through [Widget.AddContextMenu].\nSeparators will be added between each context menu function."}, {Name: "Scene", Doc: "Scene is the overall Scene to which we belong. It is automatically\nby widgets whenever they are added to another widget parent."}}, Instance: &WidgetBase{}})
+var WidgetBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.WidgetBase", IDName: "widget-base", Doc: "WidgetBase is the base type for all Widget Widget elements, which are\nmanaged by a containing Layout, and use all 5 rendering passes.  All\nelemental widgets must support the ReadOnly and Selected states in a\nreasonable way (Selected only essential when also ReadOnly), so they can\nfunction appropriately in a chooser (e.g., SliceView or TableView) -- this\nincludes toggling selection on left mouse press.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Methods: []types.Method{{Name: "Update", Doc: "Update does a general purpose update of the widget and everything\nbelow it by reconfiguring it, applying its styles, and indicating\nthat it needs a new layout pass. It is the main way that end users\nshould update widgets, and it should be called after making any\nchanges to the core properties of a widget (for example, the text\nof [Text], the icon of a button, or the slice of a table view).\n\nIf you are calling this in a separate goroutine outside of the main\nconfiguration, rendering, and event handling structure, you need to\ncall [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and\nafter this, respectively.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Tooltip", Doc: "Tooltip is the text for the tooltip for this widget,\nwhich can use HTML formatting."}, {Name: "Parts", Doc: "Parts are a separate tree of sub-widgets that implement discrete parts\nof a widget.  Positions are relative to the parent widget.\nThese are fully managed by the parent widget"}, {Name: "Geom", Doc: "Geom has the full layout geometry for size and position of this Widget"}, {Name: "OverrideStyle", Doc: "If true, Override the computed styles and allow directly editing Style"}, {Name: "Styles", Doc: "Styles are styling settings for this widget.\nThese are set in SetApplyStyle which should be called after any Config\nchange (e.g., as done by the Update method).  See Stylers for functions\nthat set all of the styles, ordered from initial base defaults to later\nadded overrides."}, {Name: "Stylers", Doc: "Stylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using Style function. FirstStylers and\nFinalStylers are called before and after these stylers, respectively."}, {Name: "FirstStylers", Doc: "FirstStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFirst function. These stylers\nare called before Stylers and FinalStylers."}, {Name: "FinalStylers", Doc: "FinalStylers are a slice of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus overrides all other functions) to style the element.\nThese should be set using StyleFinal function. These stylers\nare called after FirstStylers and Stylers."}, {Name: "Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the On function. FirstListeners\nand FinalListeners are called before and after these listeners, respectively."}, {Name: "FirstListeners", Doc: "FirstListeners are event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the OnFirst function. These listeners\nare called before Listeners and FinalListeners."}, {Name: "FinalListeners", Doc: "FinalListeners are event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the OnFinal function. These listeners\nare called after FirstListeners and Listeners."}, {Name: "OnWidgetAdders", Doc: "A slice of functions to call on all widgets that are added as children\nto this widget or its children.  These functions are called in sequential\nascending order, so the last added one is called last and thus can\noverride anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code."}, {Name: "ContextMenus", Doc: "ContextMenus is a slice of menu functions to call to construct\nthe widget's context menu on an [events.ContextMenu]. The\nfunctions are called in reverse order such that the elements\nadded in the last function are the first in the menu.\nContext menus should be added through [Widget.AddContextMenu].\nSeparators will be added between each context menu function."}, {Name: "Scene", Doc: "Scene is the overall Scene to which we belong. It is automatically\nby widgets whenever they are added to another widget parent."}}, Instance: &WidgetBase{}})
 
 // NodeType returns the [*types.Type] of [WidgetBase]
 func (t *WidgetBase) NodeType() *types.Type { return WidgetBaseType }

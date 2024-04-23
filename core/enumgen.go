@@ -205,49 +205,6 @@ func (i *WidgetFlags) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "WidgetFlags")
 }
 
-var _TextTypesValues = []TextTypes{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
-
-// TextTypesN is the highest valid value for type TextTypes, plus one.
-const TextTypesN TextTypes = 15
-
-var _TextTypesValueMap = map[string]TextTypes{`DisplayLarge`: 0, `DisplayMedium`: 1, `DisplaySmall`: 2, `HeadlineLarge`: 3, `HeadlineMedium`: 4, `HeadlineSmall`: 5, `TitleLarge`: 6, `TitleMedium`: 7, `TitleSmall`: 8, `BodyLarge`: 9, `BodyMedium`: 10, `BodySmall`: 11, `LabelLarge`: 12, `LabelMedium`: 13, `LabelSmall`: 14}
-
-var _TextTypesDescMap = map[TextTypes]string{0: `TextDisplayLarge is large, short, and important display text with a default font size of 57dp.`, 1: `TextDisplayMedium is medium-sized, short, and important display text with a default font size of 45dp.`, 2: `TextDisplaySmall is small, short, and important display text with a default font size of 36dp.`, 3: `TextHeadlineLarge is large, high-emphasis headline text with a default font size of 32dp.`, 4: `TextHeadlineMedium is medium-sized, high-emphasis headline text with a default font size of 28dp.`, 5: `TextHeadlineSmall is small, high-emphasis headline text with a default font size of 24dp.`, 6: `TextTitleLarge is large, medium-emphasis title text with a default font size of 22dp.`, 7: `TextTitleMedium is medium-sized, medium-emphasis title text with a default font size of 16dp.`, 8: `TextTitleSmall is small, medium-emphasis title text with a default font size of 14dp.`, 9: `TextBodyLarge is large body text used for longer passages of text with a default font size of 16dp.`, 10: `TextBodyMedium is medium-sized body text used for longer passages of text with a default font size of 14dp.`, 11: `TextBodySmall is small body text used for longer passages of text with a default font size of 12dp.`, 12: `TextLabelLarge is large text used for label text (like a caption or the text inside a button) with a default font size of 14dp.`, 13: `TextLabelMedium is medium-sized text used for label text (like a caption or the text inside a button) with a default font size of 12dp.`, 14: `TextLabelSmall is small text used for label text (like a caption or the text inside a button) with a default font size of 11dp.`}
-
-var _TextTypesMap = map[TextTypes]string{0: `DisplayLarge`, 1: `DisplayMedium`, 2: `DisplaySmall`, 3: `HeadlineLarge`, 4: `HeadlineMedium`, 5: `HeadlineSmall`, 6: `TitleLarge`, 7: `TitleMedium`, 8: `TitleSmall`, 9: `BodyLarge`, 10: `BodyMedium`, 11: `BodySmall`, 12: `LabelLarge`, 13: `LabelMedium`, 14: `LabelSmall`}
-
-// String returns the string representation of this TextTypes value.
-func (i TextTypes) String() string { return enums.String(i, _TextTypesMap) }
-
-// SetString sets the TextTypes value from its string representation,
-// and returns an error if the string is invalid.
-func (i *TextTypes) SetString(s string) error {
-	return enums.SetString(i, s, _TextTypesValueMap, "TextTypes")
-}
-
-// Int64 returns the TextTypes value as an int64.
-func (i TextTypes) Int64() int64 { return int64(i) }
-
-// SetInt64 sets the TextTypes value from an int64.
-func (i *TextTypes) SetInt64(in int64) { *i = TextTypes(in) }
-
-// Desc returns the description of the TextTypes value.
-func (i TextTypes) Desc() string { return enums.Desc(i, _TextTypesDescMap) }
-
-// TextTypesValues returns all possible values for the type TextTypes.
-func TextTypesValues() []TextTypes { return _TextTypesValues }
-
-// Values returns all possible values for the type TextTypes.
-func (i TextTypes) Values() []enums.Enum { return enums.Values(_TextTypesValues) }
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i TextTypes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *TextTypes) UnmarshalText(text []byte) error {
-	return enums.UnmarshalText(i, text, "TextTypes")
-}
-
 var _LayoutFlagsValues = []LayoutFlags{2, 3, 4}
 
 // LayoutFlagsN is the highest valid value for type LayoutFlags, plus one.
@@ -806,7 +763,7 @@ const TabTypesN TabTypes = 6
 
 var _TabTypesValueMap = map[string]TabTypes{`StandardTabs`: 0, `FunctionalTabs`: 1, `NavigationAuto`: 2, `NavigationBar`: 3, `NavigationRail`: 4, `NavigationDrawer`: 5}
 
-var _TabTypesDescMap = map[TabTypes]string{0: `StandardTabs indicates to render the standard type of Material Design style tabs.`, 1: `FunctionalTabs indicates to render functional tabs like those in Google Chrome. These tabs take up less space and are the only kind that can be closed. They can also be moved.`, 2: `NavigationAuto indicates to render the tabs as either [NavigationBar], [NavigationRail], or [NavigationDrawer], if [WidgetBase.SizeClass] is [SizeCompact], [SizeMedium], or [SizeExpanded], respectively. NavigationAuto should typically be used instead of one of the specific navigation types for better cross-platform compatability.`, 3: `NavigationBar indicates to render the tabs as a bottom navigation bar with text and icons.`, 4: `NavigationRail indicates to render the tabs as a side navigation rail, which only has icons.`, 5: `NavigationDrawer indicates to render the tabs as a side navigation drawer, which has full text labels and icons.`}
+var _TabTypesDescMap = map[TabTypes]string{0: `StandardTabs indicates to render the standard type of Material Design style tabs.`, 1: `FunctionalTabs indicates to render functional tabs like those in Google Chrome. These tabs take up less space and are the only kind that can be closed. They can also be moved.`, 2: `NavigationAuto indicates to render the tabs as either [NavigationBar], [NavigationRail], or [NavigationDrawer], if [WidgetBase.SizeClass] is [SizeCompact], [SizeMedium], or [SizeExpanded], respectively. NavigationAuto should typically be used instead of one of the specific navigation types for better cross-platform compatability.`, 3: `NavigationBar indicates to render the tabs as a bottom navigation bar with text and icons.`, 4: `NavigationRail indicates to render the tabs as a side navigation rail, which only has icons.`, 5: `NavigationDrawer indicates to render the tabs as a side navigation drawer, which has full text and icons.`}
 
 var _TabTypesMap = map[TabTypes]string{0: `StandardTabs`, 1: `FunctionalTabs`, 2: `NavigationAuto`, 3: `NavigationBar`, 4: `NavigationRail`, 5: `NavigationDrawer`}
 
@@ -839,6 +796,49 @@ func (i TabTypes) MarshalText() ([]byte, error) { return []byte(i.String()), nil
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *TabTypes) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "TabTypes") }
+
+var _TextTypesValues = []TextTypes{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
+
+// TextTypesN is the highest valid value for type TextTypes, plus one.
+const TextTypesN TextTypes = 15
+
+var _TextTypesValueMap = map[string]TextTypes{`DisplayLarge`: 0, `DisplayMedium`: 1, `DisplaySmall`: 2, `HeadlineLarge`: 3, `HeadlineMedium`: 4, `HeadlineSmall`: 5, `TitleLarge`: 6, `TitleMedium`: 7, `TitleSmall`: 8, `BodyLarge`: 9, `BodyMedium`: 10, `BodySmall`: 11, `LabelLarge`: 12, `LabelMedium`: 13, `LabelSmall`: 14}
+
+var _TextTypesDescMap = map[TextTypes]string{0: `TextDisplayLarge is large, short, and important display text with a default font size of 57dp.`, 1: `TextDisplayMedium is medium-sized, short, and important display text with a default font size of 45dp.`, 2: `TextDisplaySmall is small, short, and important display text with a default font size of 36dp.`, 3: `TextHeadlineLarge is large, high-emphasis headline text with a default font size of 32dp.`, 4: `TextHeadlineMedium is medium-sized, high-emphasis headline text with a default font size of 28dp.`, 5: `TextHeadlineSmall is small, high-emphasis headline text with a default font size of 24dp.`, 6: `TextTitleLarge is large, medium-emphasis title text with a default font size of 22dp.`, 7: `TextTitleMedium is medium-sized, medium-emphasis title text with a default font size of 16dp.`, 8: `TextTitleSmall is small, medium-emphasis title text with a default font size of 14dp.`, 9: `TextBodyLarge is large body text used for longer passages of text with a default font size of 16dp.`, 10: `TextBodyMedium is medium-sized body text used for longer passages of text with a default font size of 14dp.`, 11: `TextBodySmall is small body text used for longer passages of text with a default font size of 12dp.`, 12: `TextLabelLarge is large text used for label text (like a caption or the text inside a button) with a default font size of 14dp.`, 13: `TextLabelMedium is medium-sized text used for label text (like a caption or the text inside a button) with a default font size of 12dp.`, 14: `TextLabelSmall is small text used for label text (like a caption or the text inside a button) with a default font size of 11dp.`}
+
+var _TextTypesMap = map[TextTypes]string{0: `DisplayLarge`, 1: `DisplayMedium`, 2: `DisplaySmall`, 3: `HeadlineLarge`, 4: `HeadlineMedium`, 5: `HeadlineSmall`, 6: `TitleLarge`, 7: `TitleMedium`, 8: `TitleSmall`, 9: `BodyLarge`, 10: `BodyMedium`, 11: `BodySmall`, 12: `LabelLarge`, 13: `LabelMedium`, 14: `LabelSmall`}
+
+// String returns the string representation of this TextTypes value.
+func (i TextTypes) String() string { return enums.String(i, _TextTypesMap) }
+
+// SetString sets the TextTypes value from its string representation,
+// and returns an error if the string is invalid.
+func (i *TextTypes) SetString(s string) error {
+	return enums.SetString(i, s, _TextTypesValueMap, "TextTypes")
+}
+
+// Int64 returns the TextTypes value as an int64.
+func (i TextTypes) Int64() int64 { return int64(i) }
+
+// SetInt64 sets the TextTypes value from an int64.
+func (i *TextTypes) SetInt64(in int64) { *i = TextTypes(in) }
+
+// Desc returns the description of the TextTypes value.
+func (i TextTypes) Desc() string { return enums.Desc(i, _TextTypesDescMap) }
+
+// TextTypesValues returns all possible values for the type TextTypes.
+func TextTypesValues() []TextTypes { return _TextTypesValues }
+
+// Values returns all possible values for the type TextTypes.
+func (i TextTypes) Values() []enums.Enum { return enums.Values(_TextTypesValues) }
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i TextTypes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *TextTypes) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "TextTypes")
+}
 
 var _TextFieldTypesValues = []TextFieldTypes{0, 1}
 

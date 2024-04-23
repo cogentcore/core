@@ -3600,8 +3600,8 @@ const (
 	// NetworkWifi3Bar is https://github.com/cogentcore/core/blob/main/icons/svg/network_wifi_3_bar.svg
 	NetworkWifi3Bar Icon = "network_wifi_3_bar"
 
-	// NewText is https://github.com/cogentcore/core/blob/main/icons/svg/new_label.svg
-	NewText Icon = "new_label"
+	// NewLabel is https://github.com/cogentcore/core/blob/main/icons/svg/new_label.svg
+	NewLabel Icon = "new_label"
 
 	// NewReleases is https://github.com/cogentcore/core/blob/main/icons/svg/new_releases.svg
 	NewReleases Icon = "new_releases"
