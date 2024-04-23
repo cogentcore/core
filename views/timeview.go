@@ -100,7 +100,7 @@ func (tv *TimeView) Config() {
 	})
 
 	if !core.SystemSettings.Clock24 {
-		sw := core.NewSwitches(tv, "am-pm").SetMutex(true).SetType(core.SwitchSegmentedButton).SetItems(core.SwitchItem{Label: "AM"}, core.SwitchItem{Label: "PM"})
+		sw := core.NewSwitches(tv, "am-pm").SetMutex(true).SetType(core.SwitchSegmentedButton).SetItems(core.SwitchItem{Text: "AM"}, core.SwitchItem{Text: "PM"})
 		sw.Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 		})
@@ -120,7 +120,7 @@ func (tv *TimeView) Config() {
 			if tv.Hour == 12 {
 				tv.Hour = 0
 			}
-			switch si.Label {
+			switch si.Text {
 			case "AM":
 				tv.PM = false
 				tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())

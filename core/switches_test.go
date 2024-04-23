@@ -20,9 +20,9 @@ func TestSwitches(t *testing.T) {
 func TestSwitchesItems(t *testing.T) {
 	b := NewBody()
 	sw := NewSwitches(b).SetItems(
-		SwitchItem{Label: "Go", Tooltip: "Elegant, fast, and easy-to-use"},
-		SwitchItem{Label: "Python", Tooltip: "Slow and duck-typed"},
-		SwitchItem{Label: "C++", Tooltip: "Hard to use and slow to compile"},
+		SwitchItem{Text: "Go", Tooltip: "Elegant, fast, and easy-to-use"},
+		SwitchItem{Text: "Python", Tooltip: "Slow and duck-typed"},
+		SwitchItem{Text: "C++", Tooltip: "Hard to use and slow to compile"},
 	)
 	b.AssertRender(t, "switches/items", func() {
 		assert.Equal(t, "Slow and duck-typed", sw.Child(1).(Widget).AsWidget().Tooltip)
@@ -35,8 +35,8 @@ func TestSwitchesMutex(t *testing.T) {
 	b.AssertRender(t, "switches/mutex", func() {
 		sw.Child(0).(Widget).Send(events.Click)
 		sw.Child(1).(Widget).Send(events.Click)
-		assert.Equal(t, "Python", sw.SelectedItem().Label)
-		assert.Equal(t, []SwitchItem{{Label: "Python"}}, sw.SelectedItems())
+		assert.Equal(t, "Python", sw.SelectedItem().Text)
+		assert.Equal(t, []SwitchItem{{Text: "Python"}}, sw.SelectedItems())
 	})
 }
 
@@ -74,6 +74,6 @@ func TestSwitchesChange(t *testing.T) {
 	b.AssertRender(t, "switches/change", func() {
 		sw.Child(0).(Widget).Send(events.Click)
 		sw.Child(2).(Widget).Send(events.Click)
-		assert.Equal(t, []SwitchItem{{Label: "Go"}, {Label: "C++"}}, selected)
+		assert.Equal(t, []SwitchItem{{Text: "Go"}, {Text: "C++"}}, selected)
 	})
 }

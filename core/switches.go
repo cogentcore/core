@@ -39,8 +39,8 @@ type Switches struct { //core:embedder
 // SwitchItem contains the properties of one item in a [Switches].
 type SwitchItem struct {
 
-	// Label is the label displayed to the user for this item.
-	Label string
+	// Text is the text displayed to the user for this item.
+	Text string
 
 	// Tooltip is the tooltip displayed to the user for this item.
 	Tooltip string
@@ -196,7 +196,7 @@ func (sw *Switches) UnCheckAllBut(idx int) {
 func (sw *Switches) SetStrings(ss ...string) *Switches {
 	sw.Items = make([]SwitchItem, len(ss))
 	for i, s := range ss {
-		sw.Items[i] = SwitchItem{Label: s}
+		sw.Items[i] = SwitchItem{Text: s}
 	}
 	return sw
 }
@@ -221,7 +221,7 @@ func (sw *Switches) SetEnums(es ...enums.Enum) *Switches {
 			str, _, _ = strings.Cut(desc, " ")
 		}
 		tip := types.FormatDoc(desc, str, lbl)
-		sw.Items[i] = SwitchItem{Label: lbl, Tooltip: tip}
+		sw.Items[i] = SwitchItem{Text: lbl, Tooltip: tip}
 	}
 	return sw
 }
@@ -276,13 +276,13 @@ func (sw *Switches) HandleSwitchEvents(swi *Switch) {
 func (sw *Switches) Config() {
 	config := tree.Config{}
 	for _, item := range sw.Items {
-		config.Add(SwitchType, item.Label)
+		config.Add(SwitchType, item.Text)
 	}
 	if sw.ConfigChildren(config) || sw.NeedsRebuild() {
 		for i, swi := range sw.Kids {
 			s := swi.(*Switch)
 			item := sw.Items[i]
-			s.SetType(sw.Type).SetText(item.Label).SetTooltip(item.Tooltip)
+			s.SetType(sw.Type).SetText(item.Text).SetTooltip(item.Tooltip)
 		}
 		sw.NeedsLayout()
 	}

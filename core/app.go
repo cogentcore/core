@@ -272,7 +272,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 					continue
 				}
 				ch.Items = append(ch.Items, ChooserItem{
-					Label:   st.Title,
+					Text:    st.Title,
 					Icon:    icons.Toolbar,
 					Tooltip: "Show " + st.Title,
 					Func:    st.Raise,
@@ -332,7 +332,7 @@ func AddButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 			label = path + " > " + label
 		}
 		*items = append(*items, ChooserItem{
-			Label:   label,
+			Text:    label,
 			Icon:    bt.Icon,
 			Tooltip: bt.Tooltip,
 			Func: func() {

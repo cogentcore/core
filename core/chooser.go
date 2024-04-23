@@ -92,10 +92,10 @@ type ChooserItem struct { //types:add
 	// Value is the underlying value of the chooser item.
 	Value any
 
-	// Label is the text displayed to the user for this item.
+	// Text is the text displayed to the user for this item.
 	// If it is empty, then [ToLabel] of [ChooserItem.Value] is
 	// used instead.
-	Label string
+	Text string
 
 	// Icon is the icon displayed to the user for this item.
 	Icon icons.Icon
@@ -116,8 +116,8 @@ type ChooserItem struct { //types:add
 // If [ChooserItem.Label] is set, it returns that. Otherwise,
 // it uses [ToLabel] of [ChooserItem.Value]
 func (ci *ChooserItem) GetLabel() string {
-	if ci.Label != "" {
-		return ci.Label
+	if ci.Text != "" {
+		return ci.Text
 	}
 	if ci.Value == nil {
 		return ""
@@ -238,7 +238,7 @@ func (ch *Chooser) Config() {
 	config := tree.Config{}
 
 	// automatically select the first item if we have nothing selected and no placeholder
-	if !ch.Editable && ch.CurrentIndex < 0 && ch.CurrentItem.Label == "" {
+	if !ch.Editable && ch.CurrentIndex < 0 && ch.CurrentItem.Text == "" {
 		ch.SetCurrentIndex(0)
 	}
 
@@ -376,7 +376,7 @@ func (ch *Chooser) SetEnums(es ...enums.Enum) *Chooser {
 			str, _, _ = strings.Cut(desc, " ")
 		}
 		tip := types.FormatDoc(desc, str, lbl)
-		ch.Items[i] = ChooserItem{Value: enum, Label: lbl, Tooltip: tip}
+		ch.Items[i] = ChooserItem{Value: enum, Text: lbl, Tooltip: tip}
 	}
 	return ch
 }
@@ -401,7 +401,7 @@ func (ch *Chooser) FindItem(it any) int {
 func (ch *Chooser) SetPlaceholder(text string) *Chooser {
 	ch.Placeholder = text
 	if !ch.Editable {
-		ch.CurrentItem.Label = text
+		ch.CurrentItem.Text = text
 		ch.ShowCurrentItem()
 	}
 	ch.CurrentIndex = -1
