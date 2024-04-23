@@ -130,7 +130,7 @@ func (fn *Node) ContextMenu(m *core.Scene) {
 	}).OnClick(func(e events.Event) {
 		fn.This().(Filer).DeleteFiles()
 	})
-	core.NewButton(m).SetText("Rename").SetIcon(icons.NewText).
+	core.NewButton(m).SetText("Rename").SetIcon(icons.NewLabel).
 		Style(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).OnClick(func(e events.Event) {
