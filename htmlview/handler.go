@@ -67,7 +67,7 @@ func HandleElement(ctx *Context) {
 	}
 
 	if slices.Contains(TextTags, tag) {
-		HandleLabelTag(ctx)
+		HandleTextTag(ctx)
 		return
 	}
 
@@ -101,22 +101,22 @@ func HandleElement(ctx *Context) {
 	case "button":
 		New[*core.Button](ctx).SetText(ExtractText(ctx))
 	case "h1":
-		HandleLabel(ctx).SetType(core.TextHeadlineLarge)
+		HandleText(ctx).SetType(core.TextHeadlineLarge)
 	case "h2":
-		HandleLabel(ctx).SetType(core.TextHeadlineSmall)
+		HandleText(ctx).SetType(core.TextHeadlineSmall)
 	case "h3":
-		HandleLabel(ctx).SetType(core.TextTitleLarge)
+		HandleText(ctx).SetType(core.TextTitleLarge)
 	case "h4":
-		HandleLabel(ctx).SetType(core.TextTitleMedium)
+		HandleText(ctx).SetType(core.TextTitleMedium)
 	case "h5":
-		HandleLabel(ctx).SetType(core.TextTitleSmall)
+		HandleText(ctx).SetType(core.TextTitleSmall)
 	case "h6":
-		HandleLabel(ctx).SetType(core.TextLabelSmall)
+		HandleText(ctx).SetType(core.TextLabelSmall)
 	case "p":
-		HandleLabel(ctx)
+		HandleText(ctx)
 	case "pre":
 		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
-		HandleLabel(ctx).Style(func(s *styles.Style) {
+		HandleText(ctx).Style(func(s *styles.Style) {
 			s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 			if hasCode {
 				s.Background = colors.C(colors.Scheme.SurfaceContainer)
@@ -133,14 +133,14 @@ func HandleElement(ctx *Context) {
 			ctx.Node = ctx.Node.FirstChild.NextSibling
 		}
 
-		label := HandleLabel(ctx)
+		text := HandleText(ctx)
 		start := ""
-		if pw, ok := label.Parent().(core.Widget); ok {
+		if pw, ok := text.Parent().(core.Widget); ok {
 			switch pw.Property("tag") {
 			case "ol":
 				number := 0
 				for _, k := range *pw.Children() {
-					// we only consider labels for the number (frames may be
+					// we only consider text for the number (frames may be
 					// added for nested lists, interfering with the number)
 					if _, ok := k.(*core.Text); ok {
 						number++
@@ -152,7 +152,7 @@ func HandleElement(ctx *Context) {
 				start = "• "
 			}
 		}
-		label.SetText(start + label.Text)
+		text.SetText(start + text.Text)
 	case "img":
 		img := New[*core.Image](ctx)
 		n := ctx.Node
@@ -211,9 +211,9 @@ func HandleElement(ctx *Context) {
 	}
 }
 
-// HandleLabel creates a new label from the given information, setting the text and
-// the label click function so that URLs are opened according to [Context.OpenURL].
-func HandleLabel(ctx *Context) *core.Text {
+// HandleText creates a new [core.Text] from the given information, setting the text and
+// the text click function so that URLs are opened according to [Context.OpenURL].
+func HandleText(ctx *Context) *core.Text {
 	lb := New[*core.Text](ctx).SetText(ExtractText(ctx))
 	lb.HandleTextClick(func(tl *paint.TextLink) {
 		ctx.OpenURL(tl.URL)
@@ -221,12 +221,12 @@ func HandleLabel(ctx *Context) *core.Text {
 	return lb
 }
 
-// HandleLabelTag creates a new label from the given information, setting the text and
-// the label click function so that URLs are opened according to [Context.OpenURL]. Also,
-// it wraps the label text with the [NodeString] of the given node, meaning that it
-// should be used for standalone elements that are meant to only exist in labels
+// HandleTextTag creates a new [core.Text] from the given information, setting the text and
+// the text click function so that URLs are opened according to [Context.OpenURL]. Also,
+// it wraps the text with the [NodeString] of the given node, meaning that it
+// should be used for standalone elements that are meant to only exist in text
 // (eg: a, span, b, code, etc).
-func HandleLabelTag(ctx *Context) *core.Text {
+func HandleTextTag(ctx *Context) *core.Text {
 	start, end := NodeString(ctx.Node)
 	str := start + ExtractText(ctx) + end
 	lb := New[*core.Text](ctx).SetText(str)

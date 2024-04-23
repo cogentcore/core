@@ -83,7 +83,7 @@ func text(ts *core.Tabs) {
 
 	for _, typ := range core.TextTypesValues() {
 		s := strcase.ToSentence(typ.String())
-		core.NewText(tab, "label"+typ.String()).SetType(typ).SetText(s)
+		core.NewText(tab, "text"+typ.String()).SetType(typ).SetText(s)
 	}
 }
 
@@ -92,7 +92,7 @@ func buttons(ts *core.Tabs) {
 
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Buttons")
 
-	core.NewText(tab).SetText("Cogent Core provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.")
+	core.NewText(tab).SetText("Cogent Core provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of text, an icon, and an indicator.")
 
 	makeRow := func() core.Widget {
 		return core.NewLayout(tab).Style(func(s *styles.Style) {
@@ -159,13 +159,13 @@ func buttons(ts *core.Tabs) {
 		}
 
 		b := core.NewButton(brow, "button"+s).SetType(typ).SetText(s).SetIcon(ics[typ]).
-			SetTooltip("A standard " + sl + " button with a label and icon")
+			SetTooltip("A standard " + sl + " button with text and an icon")
 		b.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", b.Nm)
 		})
 
 		bt := core.NewButton(browt, "buttonText"+s).SetType(typ).SetText(s).
-			SetTooltip("A standard " + sl + " button with a label")
+			SetTooltip("A standard " + sl + " button with text")
 		bt.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", bt.Nm)
 		})
@@ -177,10 +177,10 @@ func buttons(ts *core.Tabs) {
 		})
 
 		core.NewButton(mbrow, "menuButton"+s).SetType(typ).SetText(s).SetIcon(ics[typ+10]).SetMenu(menu).
-			SetTooltip(art + sl + " menu button with a label and icon")
+			SetTooltip(art + sl + " menu button with text and an icon")
 
 		core.NewButton(mbrowt, "menuButtonText"+s).SetType(typ).SetText(s).SetMenu(menu).
-			SetTooltip(art + sl + " menu button with a label")
+			SetTooltip(art + sl + " menu button with text")
 
 		core.NewButton(mbrowi, "menuButtonIcon"+s).SetType(typ).SetIcon(ics[typ+15]).SetMenu(menu).
 			SetTooltip(art + sl + " menu button with an icon")

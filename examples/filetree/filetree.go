@@ -269,7 +269,7 @@ func (fb *FileBrowse) StandardConfig() bool {
 	return fb.ConfigChildren(config)
 }
 
-// SetTitle sets the optional title and updates the Title label
+// SetTitle sets the optional title and updates the title text
 func (fb *FileBrowse) SetTitle(title string) {
 	lab, _ := fb.TitleWidget()
 	if lab != nil {
@@ -277,7 +277,7 @@ func (fb *FileBrowse) SetTitle(title string) {
 	}
 }
 
-// Title returns the title label widget, and its index, within frame -- nil,
+// Title returns the title text widget, and its index, within frame; nil,
 // -1 if not found
 func (fb *FileBrowse) TitleWidget() (*core.Text, int) {
 	idx, ok := fb.Children().IndexByName("title", 0)
