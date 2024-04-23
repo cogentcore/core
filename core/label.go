@@ -25,18 +25,18 @@ import (
 type Label struct { //core:embedder
 	WidgetBase
 
-	// label to display
+	// Text is the text to display.
 	Text string
 
-	// the type of label
+	// Type is the styling type of label to use.
 	Type LabelTypes
 
-	// render data for text label
-	TextRender paint.Text `copier:"-" xml:"-" json:"-" set:"-"`
+	// paintText is the [paint.Text] for the text.
+	paintText paint.Text
 
-	// NormalCursor is the cached cursor to display when there
+	// normalCursor is the cached cursor to display when there
 	// is no link being hovered.
-	NormalCursor cursors.Cursor `copier:"-" xml:"-" json:"-" set:"-"`
+	normalCursor cursors.Cursor
 }
 
 // LabelTypes is an enum containing the different
@@ -105,7 +105,7 @@ func (lb *Label) SetStyles() {
 	lb.Type = LabelBodyLarge
 	lb.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable)
-		if len(lb.TextRender.Links) > 0 {
+		if len(lb.paintText.Links) > 0 {
 			s.SetAbilities(true, abilities.Clickable, abilities.LongHoverable, abilities.LongPressable)
 		}
 		if !lb.IsReadOnly() {
@@ -193,7 +193,7 @@ func (lb *Label) SetStyles() {
 		}
 	})
 	lb.StyleFinal(func(s *styles.Style) {
-		lb.NormalCursor = s.Cursor
+		lb.normalCursor = s.Cursor
 	})
 }
 
@@ -222,12 +222,12 @@ func (lb *Label) HandleEvents() {
 	lb.On(events.MouseMove, func(e events.Event) {
 		pos := lb.Geom.Pos.Content
 		inLink := false
-		for _, tl := range lb.TextRender.Links {
+		for _, tl := range lb.paintText.Links {
 			// TODO(kai/link): is there a better way to be safe here?
 			if tl.Label == "" {
 				continue
 			}
-			tlb := tl.Bounds(&lb.TextRender, pos)
+			tlb := tl.Bounds(&lb.paintText, pos)
 			if e.Pos().In(tlb) {
 				inLink = true
 				if lb.StateIs(states.LongHovered) || lb.StateIs(states.LongPressed) {
@@ -240,7 +240,7 @@ func (lb *Label) HandleEvents() {
 		if inLink {
 			lb.Styles.Cursor = cursors.Pointer
 		} else {
-			lb.Styles.Cursor = lb.NormalCursor
+			lb.Styles.Cursor = lb.normalCursor
 		}
 	})
 }
@@ -250,12 +250,12 @@ func (lb *Label) HandleEvents() {
 func (lb *Label) HandleLabelClick(openLink func(tl *paint.TextLink)) {
 	lb.OnClick(func(e events.Event) {
 		pos := lb.Geom.Pos.Content
-		for _, tl := range lb.TextRender.Links {
+		for _, tl := range lb.paintText.Links {
 			// TODO(kai/link): is there a better way to be safe here?
 			if tl.Label == "" {
 				continue
 			}
-			tlb := tl.Bounds(&lb.TextRender, pos)
+			tlb := tl.Bounds(&lb.paintText, pos)
 			if e.Pos().In(tlb) {
 				openLink(&tl)
 				e.SetHandled()
@@ -297,8 +297,8 @@ func (lb *Label) ConfigLabelSize(sz math32.Vector2) {
 	// todo: last arg is CSSAgg.  Can synthesize that some other way?
 	fs := lb.Styles.FontRender()
 	txs := &lb.Styles.Text
-	lb.TextRender.SetHTML(lb.Text, fs, txs, &lb.Styles.UnitContext, nil)
-	lb.TextRender.Layout(txs, fs, &lb.Styles.UnitContext, sz)
+	lb.paintText.SetHTML(lb.Text, fs, txs, &lb.Styles.UnitContext, nil)
+	lb.paintText.Layout(txs, fs, &lb.Styles.UnitContext, sz)
 }
 
 // ConfigLabelAlloc is used for determining how much space the label
@@ -312,11 +312,11 @@ func (lb *Label) ConfigLabelAlloc(sz math32.Vector2) math32.Vector2 {
 	txs := &lb.Styles.Text
 	align, alignV := txs.Align, txs.AlignV
 	txs.Align, txs.AlignV = styles.Start, styles.Start
-	lb.TextRender.SetHTML(lb.Text, fs, txs, &lb.Styles.UnitContext, nil)
-	lb.TextRender.Layout(txs, fs, &lb.Styles.UnitContext, sz)
-	rsz := lb.TextRender.Size.Ceil()
+	lb.paintText.SetHTML(lb.Text, fs, txs, &lb.Styles.UnitContext, nil)
+	lb.paintText.Layout(txs, fs, &lb.Styles.UnitContext, sz)
+	rsz := lb.paintText.Size.Ceil()
 	txs.Align, txs.AlignV = align, alignV
-	lb.TextRender.Layout(txs, fs, &lb.Styles.UnitContext, rsz)
+	lb.paintText.Layout(txs, fs, &lb.Styles.UnitContext, rsz)
 	return rsz
 }
 
@@ -361,7 +361,7 @@ func (lb *Label) SizeUp() {
 	} else {
 		lb.ConfigLabelSize(sz.Actual.Content)
 	}
-	rsz := lb.TextRender.Size.Ceil()
+	rsz := lb.paintText.Size.Ceil()
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.SetTotalFromContent(&sz.Actual)
 	if DebugSettings.LayoutTrace {
@@ -391,5 +391,5 @@ func (lb *Label) SizeDown(iter int) bool {
 
 func (lb *Label) Render() {
 	lb.RenderStandardBox()
-	lb.TextRender.Render(&lb.Scene.PaintContext, lb.Geom.Pos.Content)
+	lb.paintText.Render(&lb.Scene.PaintContext, lb.Geom.Pos.Content)
 }
