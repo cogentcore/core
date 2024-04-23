@@ -49,6 +49,7 @@ body {
   background-color: #121316;
   --container-color: #44474E;
   --primary-color: #ADC6FF;
+  --shine-color: #fff1;
 }
 
 @media (prefers-color-scheme: light) {
@@ -57,6 +58,7 @@ body {
     background-color: #FAF8FD;
     --container-color: #E1E2EB;
     --primary-color: #005BC0;
+    --shine-color: #fff4;
   }
 }
 
@@ -148,20 +150,17 @@ body {
   }
 }
 
+/* Loading animation effect: */
 .app-wasm-loader-rectangle {
-  animation: load-animation 1s infinite;
+	background-image:	linear-gradient(90deg, #0000, var(--shine-color), #0000);
+	background-size: 160px 100%;
+	background-repeat: no-repeat;
+	background-position: left -160px top 0;
+	animation: shine 1s ease infinite;
 }
 
-@keyframes load-animation {
-  0% {
-    opacity: 0.8;
-  }
-
-  50% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0.8;
-  }
+@keyframes shine {
+	to {
+		background-position: right -160px top 0;
+	}
 }
