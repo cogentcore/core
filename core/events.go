@@ -757,9 +757,9 @@ func (em *Events) DragClearSprite() {
 func (em *Events) DragMenuAddModLabel(m *Scene, mod events.DropMods) {
 	switch mod {
 	case events.DropCopy:
-		NewLabel(m).SetText("Copy (Use Shift to Move):")
+		NewText(m).SetText("Copy (Use Shift to Move):")
 	case events.DropMove:
-		NewLabel(m).SetText("Move:")
+		NewText(m).SetText("Move:")
 	}
 }
 

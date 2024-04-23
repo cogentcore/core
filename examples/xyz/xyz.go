@@ -135,8 +135,8 @@ func main() {
 	anim := &Anim{}
 	b := core.NewBody("XYZ Demo")
 
-	core.NewLabel(b).SetText(`This is a demonstration of <b>XYZ</b>, the <a href="https://cogentcore.org/core">Cogent Core</a> <i>3D</i> Framework.`).
-		SetType(core.LabelHeadlineSmall).
+	core.NewText(b).SetText(`This is a demonstration of <b>XYZ</b>, the <a href="https://cogentcore.org/core">Cogent Core</a> <i>3D</i> Framework.`).
+		SetType(core.TextHeadlineSmall).
 		Style(func(s *styles.Style) {
 			s.Text.Align = styles.Center
 			s.Text.AlignV = styles.Center

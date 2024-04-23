@@ -542,7 +542,7 @@ func (dv *DiffView) ConfigToolbar(tb *core.Toolbar) {
 	if dv.RevA != "" {
 		txta += ": " + dv.RevA
 	}
-	core.NewLabel(tb, "label-a").SetText(txta)
+	core.NewText(tb, "label-a").SetText(txta)
 	core.NewButton(tb).SetText("Next").SetIcon(icons.KeyboardArrowDown).
 		SetTooltip("move down to next diff region").
 		OnClick(func(e events.Event) {
@@ -592,7 +592,7 @@ func (dv *DiffView) ConfigToolbar(tb *core.Toolbar) {
 	if dv.RevB != "" {
 		txtb += ": " + dv.RevB
 	}
-	core.NewLabel(tb, "label-b").SetText(txtb)
+	core.NewText(tb, "label-b").SetText(txtb)
 	core.NewButton(tb).SetText("Next").SetIcon(icons.KeyboardArrowDown).
 		SetTooltip("move down to next diff region").
 		OnClick(func(e events.Event) {

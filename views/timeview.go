@@ -78,7 +78,7 @@ func (tv *TimeView) Config() {
 		tv.SendChange()
 	})
 
-	core.NewLabel(tv, "colon").SetType(core.LabelDisplayLarge).SetText(":").
+	core.NewText(tv, "colon").SetType(core.TextDisplayLarge).SetText(":").
 		Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 			s.Min.X.Ch(1)
@@ -283,8 +283,8 @@ func (dv *DateView) ConfigDateGrid() {
 					s.Justify.Items = styles.Center
 				})
 			case "parts/label":
-				lb := w.(*core.Label)
-				lb.Type = core.LabelBodyLarge
+				lb := w.(*core.Text)
+				lb.Type = core.TextBodyLarge
 			}
 		})
 	}

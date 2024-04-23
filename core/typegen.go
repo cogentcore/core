@@ -364,31 +364,31 @@ func (t *Image) New() tree.Node { return &Image{} }
 // SetTooltip sets the [Image.Tooltip]
 func (t *Image) SetTooltip(v string) *Image { t.Tooltip = v; return t }
 
-// LabelType is the [types.Type] for [Label]
-var LabelType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Label", IDName: "label", Doc: "Label is a widget for rendering text labels. It supports full HTML styling,\nincluding links. By default, labels wrap and collapse whitespace, although\nyou can change this by changing [styles.Text.WhiteSpace].", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Text", Doc: "label to display"}, {Name: "Type", Doc: "the type of label"}, {Name: "TextRender", Doc: "render data for text label"}, {Name: "NormalCursor", Doc: "NormalCursor is the cached cursor to display when there\nis no link being hovered."}}, Instance: &Label{}})
+// TextType is the [types.Type] for [Text]
+var TextType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Label", IDName: "label", Doc: "Label is a widget for rendering text labels. It supports full HTML styling,\nincluding links. By default, labels wrap and collapse whitespace, although\nyou can change this by changing [styles.Text.WhiteSpace].", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Text", Doc: "label to display"}, {Name: "Type", Doc: "the type of label"}, {Name: "TextRender", Doc: "render data for text label"}, {Name: "NormalCursor", Doc: "NormalCursor is the cached cursor to display when there\nis no link being hovered."}}, Instance: &Text{}})
 
-// NewLabel adds a new [Label] with the given name to the given parent:
+// NewText adds a new [Text] with the given name to the given parent:
 // Label is a widget for rendering text labels. It supports full HTML styling,
 // including links. By default, labels wrap and collapse whitespace, although
 // you can change this by changing [styles.Text.WhiteSpace].
-func NewLabel(parent tree.Node, name ...string) *Label {
-	return parent.NewChild(LabelType, name...).(*Label)
+func NewText(parent tree.Node, name ...string) *Text {
+	return parent.NewChild(TextType, name...).(*Text)
 }
 
-// NodeType returns the [*types.Type] of [Label]
-func (t *Label) NodeType() *types.Type { return LabelType }
+// NodeType returns the [*types.Type] of [Text]
+func (t *Text) NodeType() *types.Type { return TextType }
 
-// New returns a new [*Label] value
-func (t *Label) New() tree.Node { return &Label{} }
+// New returns a new [*Text] value
+func (t *Text) New() tree.Node { return &Text{} }
 
 // LabelEmbedder is an interface that all types that embed Label satisfy
 type LabelEmbedder interface {
-	AsLabel() *Label
+	AsLabel() *Text
 }
 
 // AsLabel returns the given value as a value of type Label if the type
 // of the given value embeds Label, or nil otherwise
-func AsLabel(k tree.Node) *Label {
+func AsLabel(k tree.Node) *Text {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -399,18 +399,18 @@ func AsLabel(k tree.Node) *Label {
 }
 
 // AsLabel satisfies the [LabelEmbedder] interface
-func (t *Label) AsLabel() *Label { return t }
+func (t *Text) AsLabel() *Text { return t }
 
 // SetText sets the [Label.Text]:
 // label to display
-func (t *Label) SetText(v string) *Label { t.Text = v; return t }
+func (t *Text) SetText(v string) *Text { t.Text = v; return t }
 
 // SetType sets the [Label.Type]:
 // the type of label
-func (t *Label) SetType(v LabelTypes) *Label { t.Type = v; return t }
+func (t *Text) SetType(v TextTypes) *Text { t.Type = v; return t }
 
-// SetTooltip sets the [Label.Tooltip]
-func (t *Label) SetTooltip(v string) *Label { t.Tooltip = v; return t }
+// SetTooltip sets the [Text.Tooltip]
+func (t *Text) SetTooltip(v string) *Text { t.Tooltip = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.GeomCT", IDName: "geom-ct", Doc: "GeomCT has core layout elements: Content and Total", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Content", Doc: "Content is for the contents (children, parts) of the widget,\nexcluding the Space (margin, padding, scrollbars).\nThis content includes the InnerSpace factor (Gaps in Layout)\nwhich must therefore be subtracted when allocating down to children."}, {Name: "Total", Doc: "Total is for the total exterior of the widget: Content + Space"}}})
 

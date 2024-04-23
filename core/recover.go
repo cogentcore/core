@@ -47,7 +47,7 @@ func HandleRecover(r any) {
 			clpath := filepath.Join(TheApp.AppDataDir(), "crash-logs")
 			txt := fmt.Sprintf("Crash log saved in %s\n\n%s", clpath, system.CrashLogText(r, stack))
 			d := NewBody("crash-details").AddTitle("Crash details")
-			NewLabel(d).SetText(txt).Style(func(s *styles.Style) {
+			NewText(d).SetText(txt).Style(func(s *styles.Style) {
 				s.Font.Family = string(AppearanceSettings.MonoFont)
 				s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 			})

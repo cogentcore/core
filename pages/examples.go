@@ -49,8 +49,8 @@ func ExampleHandler(ctx *htmlview.Context) bool {
 }
 
 // ExampleCodeLabel adds a new label styled for displaying example code.
-func ExampleCodeLabel(parent core.Widget) *core.Label {
-	label := core.NewLabel(parent)
+func ExampleCodeLabel(parent core.Widget) *core.Text {
+	label := core.NewText(parent)
 	label.Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 		s.Background = colors.C(colors.Scheme.SurfaceContainer)

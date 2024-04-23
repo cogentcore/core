@@ -228,7 +228,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 						}
 						labnm := fmt.Sprintf("label-%v", fnm)
 						valnm := fmt.Sprintf("value-%v", fnm)
-						config.Add(core.LabelType, labnm)
+						config.Add(core.TextType, labnm)
 						config.Add(svtyp, valnm) // todo: extend to diff types using interface..
 						sv.Values = append(sv.Values, svv)
 						return true
@@ -250,14 +250,14 @@ func (sv *StructView) ConfigStructGrid() bool {
 			// todo: other things with view tag..
 			labnm := fmt.Sprintf("label-%v", field.Name)
 			valnm := fmt.Sprintf("value-%v", field.Name)
-			config.Add(core.LabelType, labnm)
+			config.Add(core.TextType, labnm)
 			config.Add(vtyp, valnm) // todo: extend to diff types using interface..
 			sv.Values = append(sv.Values, vv)
 			return true
 		})
 	sg.ConfigChildren(config) // fields could be non-unique with labels..
 	for i, vv := range sv.Values {
-		lbl := sg.Child(i * 2).(*core.Label)
+		lbl := sg.Child(i * 2).(*core.Text)
 		lbl.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 		})
@@ -342,7 +342,7 @@ func (sv *StructView) UpdateFieldAction() {
 // StructViewFieldTags processes the tags for a field in a struct view, setting
 // the properties on the label or widget appropriately
 // returns true if there were any "default" default tags -- if so, needs updating
-func StructViewFieldTags(vv Value, lbl *core.Label, w core.Widget, isReadOnly bool) (hasDef, readOnlyTag bool) {
+func StructViewFieldTags(vv Value, lbl *core.Text, w core.Widget, isReadOnly bool) (hasDef, readOnlyTag bool) {
 	lbl.Text = vv.Label()
 	if et, has := vv.Tag("edit"); has && et == "-" {
 		readOnlyTag = true

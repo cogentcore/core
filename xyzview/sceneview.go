@@ -104,7 +104,7 @@ func (sv *SceneView) ConfigToolbar(tb *core.Toolbar) {
 			sv.NeedsRender()
 		})
 	core.NewSeparator(tb)
-	core.NewLabel(tb).SetText("Rot:").SetTooltip("rotate display")
+	core.NewText(tb).SetText("Rot:").SetTooltip("rotate display")
 	core.NewButton(tb).SetIcon(icons.KeyboardArrowLeft).
 		Style(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.RepeatClickable)
@@ -143,7 +143,7 @@ func (sv *SceneView) ConfigToolbar(tb *core.Toolbar) {
 		})
 	core.NewSeparator(tb)
 
-	core.NewLabel(tb).SetText("Pan:").SetTooltip("pan display")
+	core.NewText(tb).SetText("Pan:").SetTooltip("pan display")
 	core.NewButton(tb).SetIcon(icons.KeyboardArrowLeft).
 		Style(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.RepeatClickable)
@@ -182,7 +182,7 @@ func (sv *SceneView) ConfigToolbar(tb *core.Toolbar) {
 		})
 	core.NewSeparator(tb)
 
-	core.NewLabel(tb).SetText("Save:")
+	core.NewText(tb).SetText("Save:")
 	for i := 1; i <= 4; i++ {
 		nm := fmt.Sprintf("%d", i)
 		core.NewButton(tb).SetText(nm).

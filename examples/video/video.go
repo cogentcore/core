@@ -13,7 +13,7 @@ func main() {
 	bx := core.NewLayout(b).Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
-	core.NewLabel(bx).SetText("video:").Style(func(s *styles.Style) {
+	core.NewText(bx).SetText("video:").Style(func(s *styles.Style) {
 		s.SetTextWrap(false)
 	})
 	v := video.NewVideo(bx)
@@ -21,10 +21,10 @@ func main() {
 		s.Min.X.Px(200)
 		s.Grow.Set(1, 1)
 	})
-	core.NewLabel(bx).SetText("filler:").Style(func(s *styles.Style) {
+	core.NewText(bx).SetText("filler:").Style(func(s *styles.Style) {
 		s.SetTextWrap(false)
 	})
-	core.NewLabel(b).SetText("footer:")
+	core.NewText(b).SetText("footer:")
 	// errors.Log(v.Open("deer.mp4"))
 	// errors.Log(v.Open("countdown.mp4"))
 	errors.Log(v.Open("randy_first_360.mov")) // note: not uploaded -- good test case tho

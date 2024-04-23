@@ -16,7 +16,7 @@ func TestTreeView(t *testing.T) {
 
 	fr := tree.NewRoot[*core.Frame]("frame")
 	core.NewButton(fr)
-	core.NewLabel(fr)
+	core.NewText(fr)
 	core.NewButton(core.NewLayout(fr))
 
 	NewTreeView(b).SyncTree(fr)

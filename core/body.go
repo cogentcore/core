@@ -73,7 +73,7 @@ func (bd *Body) SetTitle(title string) *Body {
 			win.SetTitle(title)
 		}
 	}
-	if lb, ok := bd.ChildByName("title", 0).(*Label); ok {
+	if lb, ok := bd.ChildByName("title", 0).(*Text); ok {
 		lb.SetText(title)
 	}
 	return bd
@@ -83,15 +83,15 @@ func (bd *Body) SetTitle(title string) *Body {
 // which will be used by the Scene etc.
 func (bd *Body) AddTitle(title string) *Body {
 	bd.SetTitle(title)
-	NewLabel(bd, "title").SetText(title).SetType(LabelHeadlineSmall)
+	NewText(bd, "title").SetText(title).SetType(TextHeadlineSmall)
 	return bd
 }
 
 // AddText adds the given supporting text Label, typically added
 // after a title.
 func (bd *Body) AddText(text string) *Body {
-	NewLabel(bd, "text").SetText(text).
-		SetType(LabelBodyMedium).Style(func(s *styles.Style) {
+	NewText(bd, "text").SetText(text).
+		SetType(TextBodyMedium).Style(func(s *styles.Style) {
 		s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 	})
 	return bd

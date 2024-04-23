@@ -205,46 +205,46 @@ func (i *WidgetFlags) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "WidgetFlags")
 }
 
-var _LabelTypesValues = []LabelTypes{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
+var _LabelTypesValues = []TextTypes{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
 
 // LabelTypesN is the highest valid value for type LabelTypes, plus one.
-const LabelTypesN LabelTypes = 15
+const LabelTypesN TextTypes = 15
 
-var _LabelTypesValueMap = map[string]LabelTypes{`DisplayLarge`: 0, `DisplayMedium`: 1, `DisplaySmall`: 2, `HeadlineLarge`: 3, `HeadlineMedium`: 4, `HeadlineSmall`: 5, `TitleLarge`: 6, `TitleMedium`: 7, `TitleSmall`: 8, `BodyLarge`: 9, `BodyMedium`: 10, `BodySmall`: 11, `LabelLarge`: 12, `LabelMedium`: 13, `LabelSmall`: 14}
+var _LabelTypesValueMap = map[string]TextTypes{`DisplayLarge`: 0, `DisplayMedium`: 1, `DisplaySmall`: 2, `HeadlineLarge`: 3, `HeadlineMedium`: 4, `HeadlineSmall`: 5, `TitleLarge`: 6, `TitleMedium`: 7, `TitleSmall`: 8, `BodyLarge`: 9, `BodyMedium`: 10, `BodySmall`: 11, `LabelLarge`: 12, `LabelMedium`: 13, `LabelSmall`: 14}
 
-var _LabelTypesDescMap = map[LabelTypes]string{0: `LabelDisplayLarge is a large, short, and important display label with a default font size of 57dp.`, 1: `LabelDisplayMedium is a medium-sized, short, and important display label with a default font size of 45dp.`, 2: `LabelDisplaySmall is a small, short, and important display label with a default font size of 36dp.`, 3: `LabelHeadlineLarge is a large, high-emphasis headline label with a default font size of 32dp.`, 4: `LabelHeadlineMedium is a medium-sized, high-emphasis headline label with a default font size of 28dp.`, 5: `LabelHeadlineSmall is a small, high-emphasis headline label with a default font size of 24dp.`, 6: `LabelTitleLarge is a large, medium-emphasis title label with a default font size of 22dp.`, 7: `LabelTitleMedium is a medium-sized, medium-emphasis title label with a default font size of 16dp.`, 8: `LabelTitleSmall is a small, medium-emphasis title label with a default font size of 14dp.`, 9: `LabelBodyLarge is a large body label used for longer passages of text with a default font size of 16dp.`, 10: `LabelBodyMedium is a medium-sized body label used for longer passages of text with a default font size of 14dp.`, 11: `LabelBodySmall is a small body label used for longer passages of text with a default font size of 12dp.`, 12: `LabelLabelLarge is a large label used for label text (like a caption or the text inside a button) with a default font size of 14dp.`, 13: `LabelLabelMedium is a medium-sized label used for label text (like a caption or the text inside a button) with a default font size of 12dp.`, 14: `LabelLabelSmall is a small label used for label text (like a caption or the text inside a button) with a default font size of 11dp.`}
+var _LabelTypesDescMap = map[TextTypes]string{0: `LabelDisplayLarge is a large, short, and important display label with a default font size of 57dp.`, 1: `LabelDisplayMedium is a medium-sized, short, and important display label with a default font size of 45dp.`, 2: `LabelDisplaySmall is a small, short, and important display label with a default font size of 36dp.`, 3: `LabelHeadlineLarge is a large, high-emphasis headline label with a default font size of 32dp.`, 4: `LabelHeadlineMedium is a medium-sized, high-emphasis headline label with a default font size of 28dp.`, 5: `LabelHeadlineSmall is a small, high-emphasis headline label with a default font size of 24dp.`, 6: `LabelTitleLarge is a large, medium-emphasis title label with a default font size of 22dp.`, 7: `LabelTitleMedium is a medium-sized, medium-emphasis title label with a default font size of 16dp.`, 8: `LabelTitleSmall is a small, medium-emphasis title label with a default font size of 14dp.`, 9: `LabelBodyLarge is a large body label used for longer passages of text with a default font size of 16dp.`, 10: `LabelBodyMedium is a medium-sized body label used for longer passages of text with a default font size of 14dp.`, 11: `LabelBodySmall is a small body label used for longer passages of text with a default font size of 12dp.`, 12: `LabelLabelLarge is a large label used for label text (like a caption or the text inside a button) with a default font size of 14dp.`, 13: `LabelLabelMedium is a medium-sized label used for label text (like a caption or the text inside a button) with a default font size of 12dp.`, 14: `LabelLabelSmall is a small label used for label text (like a caption or the text inside a button) with a default font size of 11dp.`}
 
-var _LabelTypesMap = map[LabelTypes]string{0: `DisplayLarge`, 1: `DisplayMedium`, 2: `DisplaySmall`, 3: `HeadlineLarge`, 4: `HeadlineMedium`, 5: `HeadlineSmall`, 6: `TitleLarge`, 7: `TitleMedium`, 8: `TitleSmall`, 9: `BodyLarge`, 10: `BodyMedium`, 11: `BodySmall`, 12: `LabelLarge`, 13: `LabelMedium`, 14: `LabelSmall`}
+var _LabelTypesMap = map[TextTypes]string{0: `DisplayLarge`, 1: `DisplayMedium`, 2: `DisplaySmall`, 3: `HeadlineLarge`, 4: `HeadlineMedium`, 5: `HeadlineSmall`, 6: `TitleLarge`, 7: `TitleMedium`, 8: `TitleSmall`, 9: `BodyLarge`, 10: `BodyMedium`, 11: `BodySmall`, 12: `LabelLarge`, 13: `LabelMedium`, 14: `LabelSmall`}
 
 // String returns the string representation of this LabelTypes value.
-func (i LabelTypes) String() string { return enums.String(i, _LabelTypesMap) }
+func (i TextTypes) String() string { return enums.String(i, _LabelTypesMap) }
 
 // SetString sets the LabelTypes value from its string representation,
 // and returns an error if the string is invalid.
-func (i *LabelTypes) SetString(s string) error {
+func (i *TextTypes) SetString(s string) error {
 	return enums.SetString(i, s, _LabelTypesValueMap, "LabelTypes")
 }
 
 // Int64 returns the LabelTypes value as an int64.
-func (i LabelTypes) Int64() int64 { return int64(i) }
+func (i TextTypes) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the LabelTypes value from an int64.
-func (i *LabelTypes) SetInt64(in int64) { *i = LabelTypes(in) }
+func (i *TextTypes) SetInt64(in int64) { *i = TextTypes(in) }
 
 // Desc returns the description of the LabelTypes value.
-func (i LabelTypes) Desc() string { return enums.Desc(i, _LabelTypesDescMap) }
+func (i TextTypes) Desc() string { return enums.Desc(i, _LabelTypesDescMap) }
 
 // LabelTypesValues returns all possible values for the type LabelTypes.
-func LabelTypesValues() []LabelTypes { return _LabelTypesValues }
+func LabelTypesValues() []TextTypes { return _LabelTypesValues }
 
 // Values returns all possible values for the type LabelTypes.
-func (i LabelTypes) Values() []enums.Enum { return enums.Values(_LabelTypesValues) }
+func (i TextTypes) Values() []enums.Enum { return enums.Values(_LabelTypesValues) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i LabelTypes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+func (i TextTypes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *LabelTypes) UnmarshalText(text []byte) error {
+func (i *TextTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "LabelTypes")
 }
 

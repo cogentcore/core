@@ -492,12 +492,12 @@ func (tv *TreeView) IconPart() (*core.Icon, bool) {
 }
 
 // LabelPart returns the label in parts, if it exists
-func (tv *TreeView) LabelPart() (*core.Label, bool) {
+func (tv *TreeView) LabelPart() (*core.Text, bool) {
 	if tv.Parts == nil {
 		return nil, false
 	}
 	if lbl := tv.Parts.ChildByName("label", 1); lbl != nil {
-		return lbl.(*core.Label), true
+		return lbl.(*core.Text), true
 	}
 	return nil, false
 }
@@ -509,7 +509,7 @@ func (tv *TreeView) Config() {
 	if tv.Icon.IsSet() {
 		config.Add(core.IconType, "icon")
 	}
-	config.Add(core.LabelType, "label")
+	config.Add(core.TextType, "label")
 	mods := parts.ConfigChildren(config)
 	if tv.This().(TreeViewer).CanOpen() {
 		if wb, ok := tv.BranchPart(); ok {

@@ -101,17 +101,17 @@ func HandleElement(ctx *Context) {
 	case "button":
 		New[*core.Button](ctx).SetText(ExtractText(ctx))
 	case "h1":
-		HandleLabel(ctx).SetType(core.LabelHeadlineLarge)
+		HandleLabel(ctx).SetType(core.TextHeadlineLarge)
 	case "h2":
-		HandleLabel(ctx).SetType(core.LabelHeadlineSmall)
+		HandleLabel(ctx).SetType(core.TextHeadlineSmall)
 	case "h3":
-		HandleLabel(ctx).SetType(core.LabelTitleLarge)
+		HandleLabel(ctx).SetType(core.TextTitleLarge)
 	case "h4":
-		HandleLabel(ctx).SetType(core.LabelTitleMedium)
+		HandleLabel(ctx).SetType(core.TextTitleMedium)
 	case "h5":
-		HandleLabel(ctx).SetType(core.LabelTitleSmall)
+		HandleLabel(ctx).SetType(core.TextTitleSmall)
 	case "h6":
-		HandleLabel(ctx).SetType(core.LabelLabelSmall)
+		HandleLabel(ctx).SetType(core.TextLabelSmall)
 	case "p":
 		HandleLabel(ctx)
 	case "pre":
@@ -142,7 +142,7 @@ func HandleElement(ctx *Context) {
 				for _, k := range *pw.Children() {
 					// we only consider labels for the number (frames may be
 					// added for nested lists, interfering with the number)
-					if _, ok := k.(*core.Label); ok {
+					if _, ok := k.(*core.Text); ok {
 						number++
 					}
 				}
@@ -213,8 +213,8 @@ func HandleElement(ctx *Context) {
 
 // HandleLabel creates a new label from the given information, setting the text and
 // the label click function so that URLs are opened according to [Context.OpenURL].
-func HandleLabel(ctx *Context) *core.Label {
-	lb := New[*core.Label](ctx).SetText(ExtractText(ctx))
+func HandleLabel(ctx *Context) *core.Text {
+	lb := New[*core.Text](ctx).SetText(ExtractText(ctx))
 	lb.HandleLabelClick(func(tl *paint.TextLink) {
 		ctx.OpenURL(tl.URL)
 	})
@@ -226,10 +226,10 @@ func HandleLabel(ctx *Context) *core.Label {
 // it wraps the label text with the [NodeString] of the given node, meaning that it
 // should be used for standalone elements that are meant to only exist in labels
 // (eg: a, span, b, code, etc).
-func HandleLabelTag(ctx *Context) *core.Label {
+func HandleLabelTag(ctx *Context) *core.Text {
 	start, end := NodeString(ctx.Node)
 	str := start + ExtractText(ctx) + end
-	lb := New[*core.Label](ctx).SetText(str)
+	lb := New[*core.Text](ctx).SetText(str)
 	lb.HandleLabelClick(func(tl *paint.TextLink) {
 		ctx.OpenURL(tl.URL)
 	})

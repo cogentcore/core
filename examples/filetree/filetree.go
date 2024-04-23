@@ -66,8 +66,8 @@ func (fb *FileBrowse) OnInit() {
 	fb.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(fb) {
 		case "title":
-			title := w.(*core.Label)
-			title.Type = core.LabelHeadlineSmall
+			title := w.(*core.Text)
+			title.Type = core.TextHeadlineSmall
 			w.Style(func(s *styles.Style) {
 				s.Justify.Content = styles.Center
 			})
@@ -257,7 +257,7 @@ func (fb *FileBrowse) ViewFile(fnm string) bool {
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (fb *FileBrowse) StandardFrameConfig() tree.Config {
 	config := tree.Config{}
-	config.Add(core.LabelType, "title")
+	config.Add(core.TextType, "title")
 	config.Add(core.SplitsType, "splits")
 	return config
 }
@@ -279,12 +279,12 @@ func (fb *FileBrowse) SetTitle(title string) {
 
 // Title returns the title label widget, and its index, within frame -- nil,
 // -1 if not found
-func (fb *FileBrowse) TitleWidget() (*core.Label, int) {
+func (fb *FileBrowse) TitleWidget() (*core.Text, int) {
 	idx, ok := fb.Children().IndexByName("title", 0)
 	if !ok {
 		return nil, -1
 	}
-	return fb.Child(idx).(*core.Label), idx
+	return fb.Child(idx).(*core.Text), idx
 }
 
 // Splits returns the main Splits

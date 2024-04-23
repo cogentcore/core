@@ -521,7 +521,7 @@ func (v *RuneSliceValue) Update() {
 
 // NilValue represents a nil value with a label that has text "None".
 type NilValue struct {
-	ValueBase[*core.Label]
+	ValueBase[*core.Text]
 }
 
 func (v *NilValue) Config() {

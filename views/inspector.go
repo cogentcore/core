@@ -59,8 +59,8 @@ func (is *Inspector) SetStyles() {
 		path := w.PathFrom(is)
 		switch path {
 		case "title":
-			title := w.(*core.Label)
-			title.Type = core.LabelHeadlineSmall
+			title := w.(*core.Text)
+			title.Type = core.TextHeadlineSmall
 			title.Style(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
 				s.Align.Self = styles.Center
@@ -204,7 +204,7 @@ func (is *Inspector) Config() {
 		s.Direction = styles.Column
 	})
 	config := tree.Config{}
-	config.Add(core.LabelType, "title")
+	config.Add(core.TextType, "title")
 	config.Add(core.SplitsType, "splits")
 	is.ConfigChildren(config)
 	is.SetTitle(is.KiRoot)
@@ -217,8 +217,8 @@ func (is *Inspector) SetTitle(k tree.Node) {
 }
 
 // TitleWidget returns the title label widget
-func (is *Inspector) TitleWidget() *core.Label {
-	return is.ChildByName("title", 0).(*core.Label)
+func (is *Inspector) TitleWidget() *core.Text {
+	return is.ChildByName("title", 0).(*core.Text)
 }
 
 // Splits returns the main Splits

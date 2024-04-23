@@ -19,17 +19,17 @@ import (
 	"cogentcore.org/core/system"
 )
 
-// Label is a widget for rendering text labels. It supports full HTML styling,
+// Text is a widget for rendering text. It supports full HTML styling,
 // including links. By default, labels wrap and collapse whitespace, although
 // you can change this by changing [styles.Text.WhiteSpace].
-type Label struct { //core:embedder
+type Text struct { //core:embedder
 	WidgetBase
 
 	// Text is the text to display.
 	Text string
 
 	// Type is the styling type of label to use.
-	Type LabelTypes
+	Type TextTypes
 
 	// paintText is the [paint.Text] for the text.
 	paintText paint.Text
@@ -39,70 +39,70 @@ type Label struct { //core:embedder
 	normalCursor cursors.Cursor
 }
 
-// LabelTypes is an enum containing the different
-// possible types of labels
-type LabelTypes int32 //enums:enum -trim-prefix Label
+// TextTypes is an enum containing the different
+// possible styling types of [Text] widgets.
+type TextTypes int32 //enums:enum -trim-prefix Text
 
 const (
-	// LabelDisplayLarge is a large, short, and important
-	// display label with a default font size of 57dp.
-	LabelDisplayLarge LabelTypes = iota
-	// LabelDisplayMedium is a medium-sized, short, and important
-	// display label with a default font size of 45dp.
-	LabelDisplayMedium
-	// LabelDisplaySmall is a small, short, and important
-	// display label with a default font size of 36dp.
-	LabelDisplaySmall
+	// TextDisplayLarge is large, short, and important
+	// display text with a default font size of 57dp.
+	TextDisplayLarge TextTypes = iota
+	// TextDisplayMedium is medium-sized, short, and important
+	// display text with a default font size of 45dp.
+	TextDisplayMedium
+	// TextDisplaySmall is small, short, and important
+	// display text with a default font size of 36dp.
+	TextDisplaySmall
 
-	// LabelHeadlineLarge is a large, high-emphasis
-	// headline label with a default font size of 32dp.
-	LabelHeadlineLarge
-	// LabelHeadlineMedium is a medium-sized, high-emphasis
-	// headline label with a default font size of 28dp.
-	LabelHeadlineMedium
-	// LabelHeadlineSmall is a small, high-emphasis
-	// headline label with a default font size of 24dp.
-	LabelHeadlineSmall
+	// TextHeadlineLarge is large, high-emphasis
+	// headline text with a default font size of 32dp.
+	TextHeadlineLarge
+	// TextHeadlineMedium is medium-sized, high-emphasis
+	// headline text with a default font size of 28dp.
+	TextHeadlineMedium
+	// TextHeadlineSmall is small, high-emphasis
+	// headline text with a default font size of 24dp.
+	TextHeadlineSmall
 
-	// LabelTitleLarge is a large, medium-emphasis
-	// title label with a default font size of 22dp.
-	LabelTitleLarge
-	// LabelTitleMedium is a medium-sized, medium-emphasis
-	// title label with a default font size of 16dp.
-	LabelTitleMedium
-	// LabelTitleSmall is a small, medium-emphasis
-	// title label with a default font size of 14dp.
-	LabelTitleSmall
+	// TextTitleLarge is large, medium-emphasis
+	// title text with a default font size of 22dp.
+	TextTitleLarge
+	// TextTitleMedium is medium-sized, medium-emphasis
+	// title text with a default font size of 16dp.
+	TextTitleMedium
+	// TextTitleSmall is small, medium-emphasis
+	// title text with a default font size of 14dp.
+	TextTitleSmall
 
-	// LabelBodyLarge is a large body label used for longer
+	// TextBodyLarge is large body text used for longer
 	// passages of text with a default font size of 16dp.
-	LabelBodyLarge
-	// LabelBodyMedium is a medium-sized body label used for longer
+	TextBodyLarge
+	// TextBodyMedium is medium-sized body text used for longer
 	// passages of text with a default font size of 14dp.
-	LabelBodyMedium
-	// LabelBodySmall is a small body label used for longer
+	TextBodyMedium
+	// TextBodySmall is small body text used for longer
 	// passages of text with a default font size of 12dp.
-	LabelBodySmall
+	TextBodySmall
 
-	// LabelLabelLarge is a large label used for label text (like a caption
+	// TextLabelLarge is large text used for label text (like a caption
 	// or the text inside a button) with a default font size of 14dp.
-	LabelLabelLarge
-	// LabelLabelMedium is a medium-sized label used for label text (like a caption
+	TextLabelLarge
+	// TextLabelMedium is medium-sized text used for label text (like a caption
 	// or the text inside a button) with a default font size of 12dp.
-	LabelLabelMedium
-	// LabelLabelSmall is a small label used for label text (like a caption
+	TextLabelMedium
+	// TextLabelSmall is small text used for label text (like a caption
 	// or the text inside a button) with a default font size of 11dp.
-	LabelLabelSmall
+	TextLabelSmall
 )
 
-func (lb *Label) OnInit() {
+func (lb *Text) OnInit() {
 	lb.WidgetBase.OnInit()
 	lb.HandleEvents()
 	lb.SetStyles()
 }
 
-func (lb *Label) SetStyles() {
-	lb.Type = LabelBodyLarge
+func (lb *Text) SetStyles() {
+	lb.Type = TextBodyLarge
 	lb.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable)
 		if len(lb.paintText.Links) > 0 {
@@ -115,77 +115,77 @@ func (lb *Label) SetStyles() {
 
 		// Label styles based on https://m3.material.io/styles/typography/type-scale-tokens
 		switch lb.Type {
-		case LabelLabelLarge:
+		case TextLabelLarge:
 			s.Text.LineHeight.Dp(20)
 			s.Font.Size.Dp(14)
 			s.Text.LetterSpacing.Dp(0.1)
 			s.Font.Weight = styles.WeightMedium // note: excludes all fonts except Go!
-		case LabelLabelMedium:
+		case TextLabelMedium:
 			s.Text.LineHeight.Dp(16)
 			s.Font.Size.Dp(12)
 			s.Text.LetterSpacing.Dp(0.5)
 			s.Font.Weight = styles.WeightMedium
-		case LabelLabelSmall:
+		case TextLabelSmall:
 			s.Text.LineHeight.Dp(16)
 			s.Font.Size.Dp(11)
 			s.Text.LetterSpacing.Dp(0.5)
 			s.Font.Weight = styles.WeightMedium
-		case LabelBodyLarge:
+		case TextBodyLarge:
 			s.Text.LineHeight.Dp(24)
 			s.Font.Size.Dp(16)
 			s.Text.LetterSpacing.Dp(0.5)
 			s.Font.Weight = styles.WeightNormal
-		case LabelBodyMedium:
+		case TextBodyMedium:
 			s.Text.LineHeight.Dp(20)
 			s.Font.Size.Dp(14)
 			s.Text.LetterSpacing.Dp(0.25)
 			s.Font.Weight = styles.WeightNormal
-		case LabelBodySmall:
+		case TextBodySmall:
 			s.Text.LineHeight.Dp(16)
 			s.Font.Size.Dp(12)
 			s.Text.LetterSpacing.Dp(0.4)
 			s.Font.Weight = styles.WeightNormal
-		case LabelTitleLarge:
+		case TextTitleLarge:
 			s.Text.LineHeight.Dp(28)
 			s.Font.Size.Dp(22)
 			s.Text.LetterSpacing.Zero()
 			s.Font.Weight = styles.WeightNormal
-		case LabelTitleMedium:
+		case TextTitleMedium:
 			s.Text.LineHeight.Dp(24)
 			s.Font.Size.Dp(16)
 			s.Text.LetterSpacing.Dp(0.15)
 			s.Font.Weight = styles.WeightMedium
-		case LabelTitleSmall:
+		case TextTitleSmall:
 			s.Text.LineHeight.Dp(20)
 			s.Font.Size.Dp(14)
 			s.Text.LetterSpacing.Dp(0.1)
 			s.Font.Weight = styles.WeightMedium
-		case LabelHeadlineLarge:
+		case TextHeadlineLarge:
 			s.Text.LineHeight.Dp(40)
 			s.Font.Size.Dp(32)
 			s.Text.LetterSpacing.Zero()
 			s.Font.Weight = styles.WeightNormal
-		case LabelHeadlineMedium:
+		case TextHeadlineMedium:
 			s.Text.LineHeight.Dp(36)
 			s.Font.Size.Dp(28)
 			s.Text.LetterSpacing.Zero()
 			s.Font.Weight = styles.WeightNormal
-		case LabelHeadlineSmall:
+		case TextHeadlineSmall:
 			s.Text.LineHeight.Dp(32)
 			s.Font.Size.Dp(24)
 			s.Text.LetterSpacing.Zero()
 			s.Font.Weight = styles.WeightNormal
-		case LabelDisplayLarge:
+		case TextDisplayLarge:
 			s.Text.LineHeight.Dp(64)
 			s.Font.Size.Dp(57)
 			s.Text.LetterSpacing.Dp(-0.25)
 			s.Font.Weight = styles.WeightNormal
-		case LabelDisplayMedium:
+		case TextDisplayMedium:
 			s.Text.LineHeight.Dp(52)
 			s.Font.Size.Dp(45)
 			s.Text.LetterSpacing.Zero()
 			s.Font.Weight = styles.WeightNormal
-		case LabelDisplaySmall:
+		case TextDisplaySmall:
 			s.Text.LineHeight.Dp(44)
 			s.Font.Size.Dp(36)
 			s.Text.LetterSpacing.Zero()
@@ -197,7 +197,7 @@ func (lb *Label) SetStyles() {
 	})
 }
 
-func (lb *Label) HandleEvents() {
+func (lb *Text) HandleEvents() {
 	lb.HandleLabelClick(func(tl *paint.TextLink) {
 		system.TheApp.OpenURL(tl.URL)
 	})
@@ -247,7 +247,7 @@ func (lb *Label) HandleEvents() {
 
 // HandleLabelClick handles click events such that the given function will be called
 // on any links that are clicked on.
-func (lb *Label) HandleLabelClick(openLink func(tl *paint.TextLink)) {
+func (lb *Text) HandleLabelClick(openLink func(tl *paint.TextLink)) {
 	lb.OnClick(func(e events.Event) {
 		pos := lb.Geom.Pos.Content
 		for _, tl := range lb.paintText.Links {
@@ -265,7 +265,7 @@ func (lb *Label) HandleLabelClick(openLink func(tl *paint.TextLink)) {
 	})
 }
 
-func (lb *Label) Copy(reset bool) {
+func (lb *Text) Copy(reset bool) {
 	md := mimedata.NewText(lb.Text)
 	em := lb.Events()
 	if em != nil {
@@ -273,7 +273,7 @@ func (lb *Label) Copy(reset bool) {
 	}
 }
 
-func (lb *Label) Label() string {
+func (lb *Text) Label() string {
 	if lb.Text != "" {
 		return lb.Text
 	}
@@ -287,13 +287,13 @@ func (lb *Label) Label() string {
 
 // ConfigLabel does the HTML and Layout in TextRender for label text,
 // using actual content size to constrain layout.
-func (lb *Label) Config() {
+func (lb *Text) Config() {
 	lb.ConfigLabelSize(lb.Geom.Size.Actual.Content)
 }
 
 // ConfigLabel does the HTML and Layout in TextRender for label text,
 // using given size to constrain layout.
-func (lb *Label) ConfigLabelSize(sz math32.Vector2) {
+func (lb *Text) ConfigLabelSize(sz math32.Vector2) {
 	// todo: last arg is CSSAgg.  Can synthesize that some other way?
 	fs := lb.Styles.FontRender()
 	txs := &lb.Styles.Text
@@ -306,7 +306,7 @@ func (lb *Label) ConfigLabelSize(sz math32.Vector2) {
 // In this case, alignment factors are turned off,
 // because they otherwise can absorb much more space, which should
 // instead be controlled by the base Align X,Y factors.
-func (lb *Label) ConfigLabelAlloc(sz math32.Vector2) math32.Vector2 {
+func (lb *Text) ConfigLabelAlloc(sz math32.Vector2) math32.Vector2 {
 	// todo: last arg is CSSAgg.  Can synthesize that some other way?
 	fs := lb.Styles.FontRender()
 	txs := &lb.Styles.Text
@@ -353,7 +353,7 @@ func TextWrapSizeEstimate(csz math32.Vector2, nChars int, fs *styles.Font) math3
 	return sz
 }
 
-func (lb *Label) SizeUp() {
+func (lb *Text) SizeUp() {
 	lb.WidgetBase.SizeUp() // sets Actual size based on styles
 	sz := &lb.Geom.Size
 	if lb.Styles.Text.HasWordWrap() {
@@ -369,7 +369,7 @@ func (lb *Label) SizeUp() {
 	}
 }
 
-func (lb *Label) SizeDown(iter int) bool {
+func (lb *Text) SizeDown(iter int) bool {
 	if !lb.Styles.Text.HasWordWrap() || iter > 1 {
 		return false
 	}
@@ -389,7 +389,7 @@ func (lb *Label) SizeDown(iter int) bool {
 	return chg
 }
 
-func (lb *Label) Render() {
+func (lb *Text) Render() {
 	lb.RenderStandardBox()
 	lb.paintText.Render(&lb.Scene.PaintContext, lb.Geom.Pos.Content)
 }

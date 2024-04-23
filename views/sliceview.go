@@ -692,7 +692,7 @@ func (sv *SliceViewBase) ConfigRows() {
 		valnm := "value-" + itxt
 
 		if sv.Is(SliceViewShowIndex) {
-			idxlab := &core.Label{}
+			idxlab := &core.Text{}
 			sg.SetChild(idxlab, ridx, labnm)
 			idxlab.SetText(sitxt)
 			idxlab.OnSelect(func(e events.Event) {
@@ -777,9 +777,9 @@ func (sv *SliceViewBase) UpdateWidgets() {
 		si := sv.StartIndex + i // slice idx
 		invis := si >= sv.SliceSize
 
-		var idxlab *core.Label
+		var idxlab *core.Text
 		if sv.Is(SliceViewShowIndex) {
-			idxlab = sg.Kids[ridx].(*core.Label)
+			idxlab = sg.Kids[ridx].(*core.Text)
 			idxlab.SetText(strconv.Itoa(si)).Config()
 			idxlab.SetState(invis, states.Invisible)
 		}

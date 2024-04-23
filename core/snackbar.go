@@ -74,7 +74,7 @@ func (bd *Body) SnackbarStyles() {
 
 // AddSnackbarText adds a snackbar label with the given text
 func (bd *Body) AddSnackbarText(text string) *Body {
-	NewLabel(bd, "text").SetText(text).SetType(LabelBodyMedium).
+	NewText(bd, "text").SetText(text).SetType(TextBodyMedium).
 		Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 			if s.Is(states.Selected) {

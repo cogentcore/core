@@ -256,7 +256,7 @@ func (ch *Chooser) Config() {
 	} else {
 		txi = -1
 		lbi = len(config)
-		config.Add(LabelType, "label")
+		config.Add(TextType, "label")
 	}
 	if !ch.Indicator.IsSet() {
 		ch.Indicator = icons.KeyboardArrowRight
@@ -284,7 +284,7 @@ func (ch *Chooser) Config() {
 				tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
 			}
 		} else {
-			lbl := ch.Parts.Child(lbi).(*Label)
+			lbl := ch.Parts.Child(lbi).(*Text)
 			lbl.SetText(ch.CurrentItem.GetLabel())
 			lbl.Config() // this is essential
 
@@ -295,7 +295,7 @@ func (ch *Chooser) Config() {
 }
 
 // LabelWidget returns the label widget if present.
-func (ch *Chooser) LabelWidget() *Label {
+func (ch *Chooser) LabelWidget() *Text {
 	if ch.Parts == nil {
 		return nil
 	}
@@ -303,7 +303,7 @@ func (ch *Chooser) LabelWidget() *Label {
 	if lbi == nil {
 		return nil
 	}
-	return lbi.(*Label)
+	return lbi.(*Text)
 }
 
 // TextField returns the text field of an editable Chooser

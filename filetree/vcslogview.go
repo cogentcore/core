@@ -189,7 +189,7 @@ func (lv *VCSLogView) TableView() *views.TableView {
 func (lv *VCSLogView) ConfigToolbar() {
 	tb := lv.Toolbar()
 	if lv.File != "" {
-		core.NewLabel(tb, "fl", "File: "+dirs.DirAndFile(lv.File))
+		core.NewText(tb, "fl", "File: "+dirs.DirAndFile(lv.File))
 		core.NewSeparator(tb, "flsep")
 		cba := core.NewSwitch(tb, "a-rev").SetText("A Rev: ").
 			SetTooltip("If selected, double-clicking in log will set this A Revision to use for Diff")

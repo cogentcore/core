@@ -91,14 +91,14 @@ func (sv *StructViewInline) Config() {
 		// todo: other things with view tag..
 		labnm := "label-" + field.Name
 		valnm := "value-" + field.Name
-		config.Add(core.LabelType, labnm)
+		config.Add(core.TextType, labnm)
 		config.Add(vtyp, valnm) // todo: extend to diff types using interface..
 		sv.Values = append(sv.Values, vv)
 		return true
 	})
 	sv.ConfigChildren(config)
 	for i, vv := range sv.Values {
-		lbl := sv.Child(i * 2).(*core.Label)
+		lbl := sv.Child(i * 2).(*core.Text)
 		lbl.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 			s.Align.Self = styles.Center // was Start

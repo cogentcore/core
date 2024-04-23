@@ -23,7 +23,7 @@ func TestParentActualBackground(t *testing.T) {
 			s.Align.Content = styles.Center
 			s.Justify.Content = styles.Center
 		})
-		NewLabel(fr).SetType(LabelHeadlineSmall).SetText("Test")
+		NewText(fr).SetType(TextHeadlineSmall).SetText("Test")
 		return
 	}
 

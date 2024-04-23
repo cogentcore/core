@@ -397,8 +397,8 @@ func TabFrame(parent Widget) (*Frame, *Frame) {
 	return tab, tfr
 }
 
-func WrapText(parent Widget, txt string) *Label {
-	lbl := NewLabel(parent, "wrap-text").SetText(txt)
+func WrapText(parent Widget, txt string) *Text {
+	lbl := NewText(parent, "wrap-text").SetText(txt)
 	return lbl
 }
 
@@ -457,6 +457,6 @@ func TestLayoutScrollLabel(t *testing.T) {
 	fr := NewFrame(b).Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
-	NewLabel(fr).SetText(LongText)
+	NewText(fr).SetText(LongText)
 	b.AssertRender(t, "layout/scroll/label")
 }

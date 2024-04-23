@@ -59,9 +59,9 @@ func home(ts *core.Tabs) {
 
 	errors.Log(core.NewSVG(tab).ReadBytes(appIcon))
 
-	core.NewLabel(tab).SetType(core.LabelDisplayLarge).SetText("The Cogent Core Demo")
+	core.NewText(tab).SetType(core.TextDisplayLarge).SetText("The Cogent Core Demo")
 
-	core.NewLabel(tab).SetType(core.LabelTitleLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://cogentcore.org/core">Cogent Core</a> 2D and 3D Go GUI <u>framework</u>`)
+	core.NewText(tab).SetType(core.TextTitleLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://cogentcore.org/core">Cogent Core</a> 2D and 3D Go GUI <u>framework</u>`)
 }
 
 func widgets(ts *core.Tabs) {
@@ -78,21 +78,21 @@ func widgets(ts *core.Tabs) {
 func text(ts *core.Tabs) {
 	tab := ts.NewTab("Text")
 
-	core.NewLabel(tab).SetType(core.LabelHeadlineLarge).SetText("Text")
-	core.NewLabel(tab).SetText("Cogent Core provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.")
+	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Text")
+	core.NewText(tab).SetText("Cogent Core provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.")
 
 	for _, typ := range core.LabelTypesValues() {
 		s := strcase.ToSentence(typ.String())
-		core.NewLabel(tab, "label"+typ.String()).SetType(typ).SetText(s)
+		core.NewText(tab, "label"+typ.String()).SetType(typ).SetText(s)
 	}
 }
 
 func buttons(ts *core.Tabs) {
 	tab := ts.NewTab("Buttons")
 
-	core.NewLabel(tab).SetType(core.LabelHeadlineLarge).SetText("Buttons")
+	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Buttons")
 
-	core.NewLabel(tab).SetText("Cogent Core provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.")
+	core.NewText(tab).SetText("Cogent Core provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.")
 
 	makeRow := func() core.Widget {
 		return core.NewLayout(tab).Style(func(s *styles.Style) {
@@ -101,12 +101,12 @@ func buttons(ts *core.Tabs) {
 		})
 	}
 
-	core.NewLabel(tab).SetType(core.LabelHeadlineSmall).SetText("Standard buttons")
+	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Standard buttons")
 	brow := makeRow()
 	browt := makeRow()
 	browi := makeRow()
 
-	core.NewLabel(tab).SetType(core.LabelHeadlineSmall).SetText("Menu buttons")
+	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Menu buttons")
 	mbrow := makeRow()
 	mbrowt := makeRow()
 	mbrowi := makeRow()
@@ -190,8 +190,8 @@ func buttons(ts *core.Tabs) {
 func inputs(ts *core.Tabs) {
 	tab := ts.NewTab("Inputs")
 
-	core.NewLabel(tab).SetType(core.LabelHeadlineLarge).SetText("Inputs")
-	core.NewLabel(tab).SetText("Cogent Core provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.")
+	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Inputs")
+	core.NewText(tab).SetText("Cogent Core provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.")
 
 	core.NewTextField(tab).SetPlaceholder("Text field")
 	core.NewTextField(tab).SetPlaceholder("Email").SetType(core.TextFieldOutlined).Style(func(s *styles.Style) {
@@ -282,8 +282,8 @@ func inputs(ts *core.Tabs) {
 func sliders(ts *core.Tabs) {
 	tab := ts.NewTab("Sliders")
 
-	core.NewLabel(tab).SetType(core.LabelHeadlineLarge).SetText("Sliders and meters")
-	core.NewLabel(tab).SetText("Cogent Core provides interactive sliders and customizable meters, allowing you to edit and display bounded numbers.")
+	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Sliders and meters")
+	core.NewText(tab).SetText("Cogent Core provides interactive sliders and customizable meters, allowing you to edit and display bounded numbers.")
 
 	core.NewSlider(tab)
 	core.NewSlider(tab).SetValue(0.7).SetState(true, states.Disabled)
@@ -308,8 +308,8 @@ func sliders(ts *core.Tabs) {
 func textEditors(ts *core.Tabs) {
 	tab := ts.NewTab("Text editors")
 
-	core.NewLabel(tab).SetType(core.LabelHeadlineLarge).SetText("Text editors")
-	core.NewLabel(tab).SetText("Cogent Core provides powerful text editors that support advanced code editing features, like syntax highlighting, completion, undo and redo, copy and paste, rectangular selection, and word, line, and page based navigation, selection, and deletion.")
+	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Text editors")
+	core.NewText(tab).SetText("Cogent Core provides powerful text editors that support advanced code editing features, like syntax highlighting, completion, undo and redo, copy and paste, rectangular selection, and word, line, and page based navigation, selection, and deletion.")
 
 	sp := core.NewSplits(tab)
 
@@ -320,8 +320,8 @@ func textEditors(ts *core.Tabs) {
 func makeIcons(ts *core.Tabs) {
 	tab := ts.NewTab("Icons")
 
-	core.NewLabel(tab).SetType(core.LabelHeadlineLarge).SetText("Icons")
-	core.NewLabel(tab).SetText("Cogent Core provides more than 2,000 unique icons from the Material Symbols collection, allowing you to easily represent many things in a concise, visually pleasing, and language-independent way.")
+	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Icons")
+	core.NewText(tab).SetText("Cogent Core provides more than 2,000 unique icons from the Material Symbols collection, allowing you to easily represent many things in a concise, visually pleasing, and language-independent way.")
 
 	core.NewButton(tab).SetText("View icons").OnClick(func(e events.Event) {
 		d := core.NewBody().AddTitle("Cogent Core Icons")
@@ -345,7 +345,7 @@ func makeIcons(ts *core.Tabs) {
 			core.NewIcon(vb, icnm).SetIcon(icons.Icon(icnm)).Style(func(s *styles.Style) {
 				s.Min.Set(units.Em(4))
 			})
-			core.NewLabel(vb, icnm).SetText(strcase.ToSentence(icnm)).Style(func(s *styles.Style) {
+			core.NewText(vb, icnm).SetText(strcase.ToSentence(icnm)).Style(func(s *styles.Style) {
 				s.SetTextWrap(false)
 			})
 		}
@@ -356,8 +356,8 @@ func makeIcons(ts *core.Tabs) {
 func values(ts *core.Tabs) {
 	tab := ts.NewTab("Values")
 
-	core.NewLabel(tab).SetType(core.LabelHeadlineLarge).SetText("Values")
-	core.NewLabel(tab).SetText("Cogent Core provides the value views system, which allows you to instantly turn Go values into interactive widgets bound to the original values with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.")
+	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Values")
+	core.NewText(tab).SetText("Cogent Core provides the value views system, which allows you to instantly turn Go values into interactive widgets bound to the original values with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.")
 
 	core.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
 		views.InspectorWindow(ts.Scene)
@@ -388,8 +388,8 @@ func hello(firstName string, lastName string, age int, likesGo bool) (greeting s
 func makeViews(ts *core.Tabs) {
 	tab := ts.NewTab("Views")
 
-	core.NewLabel(tab).SetType(core.LabelHeadlineLarge).SetText("Views")
-	core.NewLabel(tab).SetText("Cogent Core provides powerful views that allow you to easily view and edit complex data types like structs, maps, and slices, allowing you to easily create widgets like lists, tables, and forms.")
+	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Views")
+	core.NewText(tab).SetText("Cogent Core provides powerful views that allow you to easily view and edit complex data types like structs, maps, and slices, allowing you to easily create widgets like lists, tables, and forms.")
 
 	vts := core.NewTabs(tab)
 
@@ -582,8 +582,8 @@ func (ts *testStruct) ShouldShow(field string) bool {
 func dialogs(ts *core.Tabs) {
 	tab := ts.NewTab("Dialogs")
 
-	core.NewLabel(tab).SetType(core.LabelHeadlineLarge).SetText("Dialogs, snackbars, and windows")
-	core.NewLabel(tab).SetText("Cogent Core provides completely customizable dialogs, snackbars, and windows that allow you to easily display, obtain, and organize information.")
+	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Dialogs, snackbars, and windows")
+	core.NewText(tab).SetText("Cogent Core provides completely customizable dialogs, snackbars, and windows that allow you to easily display, obtain, and organize information.")
 
 	makeRow := func() core.Widget {
 		return core.NewLayout(tab).Style(func(s *styles.Style) {
@@ -592,7 +592,7 @@ func dialogs(ts *core.Tabs) {
 		})
 	}
 
-	core.NewLabel(tab).SetType(core.LabelHeadlineSmall).SetText("Dialogs")
+	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Dialogs")
 	drow := makeRow()
 
 	md := core.NewButton(drow).SetText("Message")
@@ -650,7 +650,7 @@ func dialogs(ts *core.Tabs) {
 		core.NewBody().AddTitle("New window dialog").AddText("This dialog opens in a new window on multi-window platforms").NewDialog(nd).SetNewWindow(true).Run()
 	})
 
-	core.NewLabel(tab).SetType(core.LabelHeadlineSmall).SetText("Snackbars")
+	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Snackbars")
 	srow := makeRow()
 
 	ms := core.NewButton(srow).SetText("Message")
@@ -671,7 +671,7 @@ func dialogs(ts *core.Tabs) {
 			}).AddSnackbarIcon(icons.Close).NewSnackbar(cs).Run()
 	})
 
-	core.NewLabel(tab).SetType(core.LabelHeadlineSmall).SetText("Windows")
+	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Windows")
 	wrow := makeRow()
 
 	nw := core.NewButton(wrow).SetText("New window")
@@ -688,8 +688,8 @@ func dialogs(ts *core.Tabs) {
 func makeStyles(ts *core.Tabs) {
 	tab := ts.NewTab("Styles")
 
-	core.NewLabel(tab).SetType(core.LabelHeadlineLarge).SetText("Styles and layouts")
-	core.NewLabel(tab).SetText("Cogent Core provides a fully customizable styling and layout system that allows you to easily control the position, size, and appearance of all widgets. You can edit the style properties of the outer frame below.")
+	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Styles and layouts")
+	core.NewText(tab).SetText("Cogent Core provides a fully customizable styling and layout system that allows you to easily control the position, size, and appearance of all widgets. You can edit the style properties of the outer frame below.")
 
 	sp := core.NewSplits(tab)
 

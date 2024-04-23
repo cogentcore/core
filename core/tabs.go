@@ -591,11 +591,11 @@ func (tb *Tab) SetStyles() {
 				s.Padding.Zero()
 			})
 		case "parts/label":
-			label := w.(*Label)
+			label := w.(*Text)
 			if tb.Type.Effective(tb) == FunctionalTabs {
-				label.Type = LabelBodyMedium
+				label.Type = TextBodyMedium
 			} else {
-				label.Type = LabelLabelLarge
+				label.Type = TextLabelLarge
 			}
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
@@ -655,7 +655,7 @@ func (tb *Tab) Config() {
 	}
 	if tb.Text != "" {
 		lbi = len(config)
-		config.Add(LabelType, "label")
+		config.Add(TextType, "label")
 	}
 	if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
 		config.Add(SpaceType, "close-space")
@@ -669,7 +669,7 @@ func (tb *Tab) Config() {
 			ic.SetIcon(tb.Icon)
 		}
 		if lbi >= 0 {
-			lbl := tb.Parts.Child(lbi).(*Label)
+			lbl := tb.Parts.Child(lbi).(*Text)
 			lbl.SetText(tb.Text)
 		}
 		if clsi >= 0 {

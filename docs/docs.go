@@ -78,7 +78,7 @@ func homeHeader(ctx *htmlview.Context) bool {
 			return x(uc) * (128.0 / 612.0)
 		}))
 	})
-	core.NewLabel(ly).SetType(core.LabelHeadlineMedium).SetText("A cross-platform framework for building powerful, fast, and cogent 2D and 3D apps")
+	core.NewText(ly).SetType(core.TextHeadlineMedium).SetText("A cross-platform framework for building powerful, fast, and cogent 2D and 3D apps")
 
 	blocks := core.NewLayout(ly).Style(func(s *styles.Style) {
 		s.Display = styles.Grid
@@ -104,8 +104,8 @@ func homeTextBlock(parent core.Widget, title, text string) {
 		s.Text.Align = styles.Start
 		s.Max.X.Pw(50)
 	})
-	core.NewLabel(block).SetType(core.LabelHeadlineLarge).SetText(title).Style(func(s *styles.Style) {
+	core.NewText(block).SetType(core.TextHeadlineLarge).SetText(title).Style(func(s *styles.Style) {
 		s.Font.Weight = styles.WeightBold
 	})
-	core.NewLabel(block).SetType(core.LabelTitleLarge).SetText(text)
+	core.NewText(block).SetType(core.TextTitleLarge).SetText(text)
 }

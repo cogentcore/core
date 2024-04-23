@@ -192,11 +192,11 @@ func (bt *Button) SetStyles() {
 				s.Padding.Zero()
 			})
 		case "parts/label":
-			label := w.(*Label)
+			label := w.(*Text)
 			if bt.Type == ButtonMenu {
-				label.Type = LabelBodyMedium
+				label.Type = TextBodyMedium
 			} else {
-				label.Type = LabelLabelLarge
+				label.Type = TextLabelLarge
 			}
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
@@ -218,11 +218,11 @@ func (bt *Button) SetStyles() {
 				s.Padding.Zero()
 			})
 		case "parts/shortcut":
-			sc := w.(*Label)
+			sc := w.(*Text)
 			if bt.Type == ButtonMenu {
-				sc.Type = LabelBodyMedium
+				sc.Type = TextBodyMedium
 			} else {
-				sc.Type = LabelLabelLarge
+				sc.Type = TextLabelLarge
 			}
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
@@ -257,12 +257,12 @@ func (bt *Button) Label() string {
 }
 
 // LabelWidget returns the label widget if present
-func (bt *Button) LabelWidget() *Label {
+func (bt *Button) LabelWidget() *Text {
 	lbi := bt.Parts.ChildByName("label")
 	if lbi == nil {
 		return nil
 	}
-	return lbi.(*Label)
+	return lbi.(*Text)
 }
 
 // IconWidget returns the icon widget if present
@@ -366,7 +366,7 @@ func (bt *Button) Config() {
 	}
 	if bt.Text != "" {
 		lbi = len(config)
-		config.Add(LabelType, "label")
+		config.Add(TextType, "label")
 	}
 
 	indi := -1
@@ -381,7 +381,7 @@ func (bt *Button) Config() {
 		if indi < 0 && bt.Shortcut != "" {
 			config.Add(StretchType, "sc-stretch")
 			sci = len(config)
-			config.Add(LabelType, "shortcut")
+			config.Add(TextType, "shortcut")
 		} else if bt.Shortcut != "" {
 			slog.Error("programmer error: core.Button: shortcut cannot be used on a sub-menu for", "button", bt)
 		}
@@ -393,7 +393,7 @@ func (bt *Button) Config() {
 			ic.SetIcon(bt.Icon)
 		}
 		if lbi >= 0 {
-			lbl := bt.Parts.Child(lbi).(*Label)
+			lbl := bt.Parts.Child(lbi).(*Text)
 			lbl.SetText(bt.Text)
 		}
 
@@ -403,7 +403,7 @@ func (bt *Button) Config() {
 		}
 
 		if sci >= 0 {
-			sc := bt.Parts.Child(sci).(*Label)
+			sc := bt.Parts.Child(sci).(*Text)
 			sc.SetText(bt.Shortcut.Label())
 		}
 	})

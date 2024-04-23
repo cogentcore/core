@@ -51,7 +51,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		})
 	},
 	"basics/styling-0": func(parent core.Widget) {
-		core.NewLabel(parent).SetText("Bold text").Style(func(s *styles.Style) {
+		core.NewText(parent).SetText("Bold text").Style(func(s *styles.Style) {
 			s.Font.Weight = styles.WeightBold
 		})
 	},
@@ -364,19 +364,19 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewImage(parent).SetImage(img)
 	},
 	"widgets/labels-0": func(parent core.Widget) {
-		core.NewLabel(parent).SetText("Hello, world!")
+		core.NewText(parent).SetText("Hello, world!")
 	},
 	"widgets/labels-1": func(parent core.Widget) {
-		core.NewLabel(parent).SetText("This is a very long sentence that demonstrates how label content will overflow onto multiple lines when the size of the label text exceeds the size of its surrounding container; labels are a customizable widget that Cogent Core provides, allowing you to display many kinds of text")
+		core.NewText(parent).SetText("This is a very long sentence that demonstrates how label content will overflow onto multiple lines when the size of the label text exceeds the size of its surrounding container; labels are a customizable widget that Cogent Core provides, allowing you to display many kinds of text")
 	},
 	"widgets/labels-2": func(parent core.Widget) {
-		core.NewLabel(parent).SetText(`<b>You</b> can use <i>HTML</i> <u>formatting</u> inside of <b><i><u>Cogent Core</u></i></b> labels, including <span style="color:red;background-color:yellow">custom styling</span> and <a href="https://example.com">links</a>`)
+		core.NewText(parent).SetText(`<b>You</b> can use <i>HTML</i> <u>formatting</u> inside of <b><i><u>Cogent Core</u></i></b> labels, including <span style="color:red;background-color:yellow">custom styling</span> and <a href="https://example.com">links</a>`)
 	},
 	"widgets/labels-3": func(parent core.Widget) {
-		core.NewLabel(parent).SetType(core.LabelHeadlineMedium).SetText("Hello, world!")
+		core.NewText(parent).SetType(core.TextHeadlineMedium).SetText("Hello, world!")
 	},
 	"widgets/labels-4": func(parent core.Widget) {
-		core.NewLabel(parent).SetText("Hello,\n\tworld!").Style(func(s *styles.Style) {
+		core.NewText(parent).SetText("Hello,\n\tworld!").Style(func(s *styles.Style) {
 			s.Font.Size.Dp(21)
 			s.Font.Style = styles.Italic
 			s.Text.WhiteSpace = styles.WhiteSpacePre
@@ -554,36 +554,36 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/splits-0": func(parent core.Widget) {
 		sp := core.NewSplits(parent)
-		core.NewLabel(sp).SetText("First")
-		core.NewLabel(sp).SetText("Second")
+		core.NewText(sp).SetText("First")
+		core.NewText(sp).SetText("Second")
 	},
 	"widgets/splits-1": func(parent core.Widget) {
 		sp := core.NewSplits(parent)
-		core.NewLabel(sp).SetText("First")
-		core.NewLabel(sp).SetText("Second")
-		core.NewLabel(sp).SetText("Third")
-		core.NewLabel(sp).SetText("Fourth")
+		core.NewText(sp).SetText("First")
+		core.NewText(sp).SetText("Second")
+		core.NewText(sp).SetText("Third")
+		core.NewText(sp).SetText("Fourth")
 	},
 	"widgets/splits-2": func(parent core.Widget) {
 		sp := core.NewSplits(parent).SetSplits(0.2, 0.8)
-		core.NewLabel(sp).SetText("First")
-		core.NewLabel(sp).SetText("Second")
+		core.NewText(sp).SetText("First")
+		core.NewText(sp).SetText("Second")
 	},
 	"widgets/splits-3": func(parent core.Widget) {
 		sp := core.NewSplits(parent)
 		sp.Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 		})
-		core.NewLabel(sp).SetText("First")
-		core.NewLabel(sp).SetText("Second")
+		core.NewText(sp).SetText("First")
+		core.NewText(sp).SetText("Second")
 	},
 	"widgets/splits-4": func(parent core.Widget) {
 		sp := core.NewSplits(parent)
 		sp.Style(func(s *styles.Style) {
 			s.Direction = styles.Row
 		})
-		core.NewLabel(sp).SetText("First")
-		core.NewLabel(sp).SetText("Second")
+		core.NewText(sp).SetText("First")
+		core.NewText(sp).SetText("Second")
 	},
 	"widgets/svgs-0": func(parent core.Widget) {
 		errors.Log(core.NewSVG(parent).OpenFS(mySVG, "icon.svg"))
@@ -665,9 +665,9 @@ var PagesExamples = map[string]func(parent core.Widget){
 	"widgets/tabs-1": func(parent core.Widget) {
 		ts := core.NewTabs(parent)
 		first := ts.NewTab("First")
-		core.NewLabel(first).SetText("I am first!")
+		core.NewText(first).SetText("I am first!")
 		second := ts.NewTab("Second")
-		core.NewLabel(second).SetText("I am second!")
+		core.NewText(second).SetText("I am second!")
 	},
 	"widgets/tabs-2": func(parent core.Widget) {
 		ts := core.NewTabs(parent)
@@ -702,7 +702,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewTextField(parent)
 	},
 	"widgets/text-fields-1": func(parent core.Widget) {
-		core.NewLabel(parent).SetText("Name:")
+		core.NewText(parent).SetText("Name:")
 		core.NewTextField(parent).SetPlaceholder("Jane Doe")
 	},
 	"widgets/text-fields-2": func(parent core.Widget) {
@@ -1031,7 +1031,7 @@ func main() {
 				s.Color = colors.C(colors.Scheme.Error.Base)
 			})
 		})
-		core.NewLabel(fr).SetText("Label")
+		core.NewText(fr).SetText("Label")
 		core.NewSwitch(fr).SetText("Switch")
 		core.NewTextField(fr).SetText("Text field")
 	},

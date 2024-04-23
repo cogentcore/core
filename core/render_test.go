@@ -89,7 +89,7 @@ func TestOverflowAutoDefinedMax(t *testing.T) {
 		s.Max.Set(units.Dp(100))
 		s.Overflow.Set(styles.OverflowAuto)
 	})
-	NewLabel(fr).SetText("This is a long label that I have written for the purpose of demonstrating an issue with overflow auto on elements with a defined max")
+	NewText(fr).SetText("This is a long label that I have written for the purpose of demonstrating an issue with overflow auto on elements with a defined max")
 	b.AssertRender(t, "render/overflow-auto-defined-max")
 }
 

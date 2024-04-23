@@ -408,7 +408,7 @@ func (fv *FileView) ConfigFilesRow() {
 
 func (fv *FileView) ConfigSelRow() {
 	sr := fv.SelectRow()
-	core.NewLabel(sr, "sel-lbl").SetText("File: ").
+	core.NewText(sr, "sel-lbl").SetText("File: ").
 		SetTooltip("enter file name here (or select from above list)")
 
 	sf := core.NewTextField(sr, "sel").SetText(fv.CurrentSelectedFile).
@@ -425,7 +425,7 @@ func (fv *FileView) ConfigSelRow() {
 	})
 	sf.StartFocus()
 
-	core.NewLabel(sr, "ext-lbl").SetText("Extension(s):").
+	core.NewText(sr, "ext-lbl").SetText("Extension(s):").
 		SetTooltip("target extension(s) to highlight; if multiple, separate with commas, and do include the . at the start")
 	ef := core.NewTextField(sr, "ext").SetText(fv.Ext)
 	ef.OnChange(func(e events.Event) {

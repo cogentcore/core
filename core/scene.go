@@ -329,7 +329,7 @@ func (sc *Scene) UpdateTitle(title string) {
 	}
 	if sc.Body != nil {
 		sc.Body.Title = title
-		if tw, ok := sc.Body.ChildByName("title").(*Label); ok {
+		if tw, ok := sc.Body.ChildByName("title").(*Text); ok {
 			tw.SetText(title)
 		}
 	}

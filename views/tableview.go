@@ -89,8 +89,8 @@ func (tv *TableView) SetStyles() {
 				s.Gap.Set(units.Em(0.5)) // matches grid default
 			})
 		case "header/head-idx": // index header
-			lbl := w.(*core.Label)
-			lbl.SetText("Index").SetType(core.LabelBodyMedium)
+			lbl := w.(*core.Text)
+			lbl.SetText("Index").SetType(core.TextBodyMedium)
 			w.Style(func(s *styles.Style) {
 				s.Align.Self = styles.Center
 			})
@@ -249,7 +249,7 @@ func (tv *TableView) ConfigHeader() {
 	}
 	hcfg := tree.Config{}
 	if tv.Is(SliceViewShowIndex) {
-		hcfg.Add(core.LabelType, "head-idx")
+		hcfg.Add(core.TextType, "head-idx")
 	}
 	tv.headerWidths = make([]int, tv.numVisibleFields)
 	tv.colMaxWidths = make([]int, tv.numVisibleFields)
@@ -352,12 +352,12 @@ func (tv *TableView) ConfigRows() {
 		}
 		stru := val.Interface()
 
-		idxlab := &core.Label{}
+		idxlab := &core.Text{}
 		itxt := strconv.Itoa(i)
 		sitxt := strconv.Itoa(si)
 		labnm := "index-" + itxt
 		if tv.Is(SliceViewShowIndex) {
-			idxlab = &core.Label{}
+			idxlab = &core.Text{}
 			sg.SetChild(idxlab, ridx, labnm)
 			idxlab.SetText(sitxt)
 			idxlab.OnSelect(func(e events.Event) {
@@ -459,12 +459,12 @@ func (tv *TableView) UpdateWidgets() {
 		si := tv.StartIndex + i // slice idx
 		invis := si >= tv.SliceSize
 
-		var idxlab *core.Label
+		var idxlab *core.Text
 		if tv.Is(SliceViewShowIndex) {
 			if len(sg.Kids) == 0 {
 				break
 			}
-			idxlab = sg.Kids[ridx].(*core.Label)
+			idxlab = sg.Kids[ridx].(*core.Text)
 			idxlab.SetText(strconv.Itoa(si)).Config()
 			idxlab.SetState(invis, states.Invisible)
 		}

@@ -37,8 +37,8 @@ func (av *ArgView) SetStyles() {
 	av.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(av) {
 		case "title":
-			title := w.(*core.Label)
-			title.Type = core.LabelTitleLarge
+			title := w.(*core.Text)
+			title.Type = core.TextTitleLarge
 			title.Style(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
 				s.Text.Align = styles.Center
@@ -59,15 +59,15 @@ func (av *ArgView) SetStyles() {
 // Config configures the view
 func (av *ArgView) Config() {
 	config := tree.Config{}
-	config.Add(core.LabelType, "title")
+	config.Add(core.TextType, "title")
 	config.Add(core.FrameType, "args-grid")
 	av.ConfigChildren(config)
 	av.ConfigArgsGrid()
 }
 
 // TitleWidget returns the title label widget
-func (av *ArgView) TitleWidget() *core.Label {
-	return av.ChildByName("title", 0).(*core.Label)
+func (av *ArgView) TitleWidget() *core.Text {
+	return av.ChildByName("title", 0).(*core.Text)
 }
 
 // ArgsGrid returns the grid layout widget, which contains all the fields
@@ -96,7 +96,7 @@ func (av *ArgView) ConfigArgsGrid() {
 		argnms[knm] = true
 		labnm := "label-" + knm
 		valnm := "value-" + knm
-		config.Add(core.LabelType, labnm)
+		config.Add(core.TextType, labnm)
 		config.Add(arg.WidgetType(), valnm)
 	}
 	if sg.ConfigChildren(config) {
@@ -109,7 +109,7 @@ func (av *ArgView) ConfigArgsGrid() {
 			continue
 		}
 		arg.SetTag("grow", "1")
-		lbl := sg.Child(idx * 2).(*core.Label)
+		lbl := sg.Child(idx * 2).(*core.Text)
 		lbl.Text = arg.Label()
 		lbl.Tooltip = arg.Doc()
 		w, _ := core.AsWidget(sg.Child((idx * 2) + 1))

@@ -261,12 +261,12 @@ func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 }
 
 // LabelWidget returns the label widget if present
-func (sw *Switch) LabelWidget() *Label {
+func (sw *Switch) LabelWidget() *Text {
 	lbi := sw.Parts.ChildByName("label")
 	if lbi == nil {
 		return nil
 	}
-	return lbi.(*Label)
+	return lbi.(*Text)
 }
 
 // SetIcons sets the icons for the on (checked), off (unchecked)
@@ -301,7 +301,7 @@ func (sw *Switch) Config() {
 	if sw.Text != "" {
 		config.Add(SpaceType, "space")
 		lbi = len(config)
-		config.Add(LabelType, "label")
+		config.Add(TextType, "label")
 	}
 	sw.ConfigParts(config, func() {
 		ist := sw.Parts.Child(ici).(*Layout)
@@ -314,7 +314,7 @@ func (sw *Switch) Config() {
 		icunk.SetIcon(sw.IconIndeterminate)
 		sw.SetIconFromState()
 		if lbi >= 0 {
-			lbl := sw.Parts.Child(lbi).(*Label)
+			lbl := sw.Parts.Child(lbi).(*Text)
 			if lbl.Text != sw.Text {
 				lbl.SetText(sw.Text)
 			}
