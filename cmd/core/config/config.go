@@ -22,13 +22,17 @@ import (
 	"cogentcore.org/core/types/typegen"
 )
 
-// Config is the main config struct
-// that contains all of the configuration
-// options for the Cogent Core tool
+// Config is the main config struct that contains all of the configuration
+// options for the Cogent Core command line tool.
 type Config struct { //types:add
 
-	// the user-friendly name of the project
+	// Name is the user-friendly name of the project.
+	// The default is based on the current directory name.
 	Name string
+
+	// NamePrefix is the prefix to add to the default name of the project
+	// and any projects nested below it. A separating space is automatically included.
+	NamePrefix string
 
 	// the bundle / package ID to use of the project (required for building for mobile platforms
 	// and packaging for desktop platforms). It is typically in the format com.org.app (eg: com.core.mail)
@@ -126,7 +130,10 @@ func (c *Config) OnConfig(cmd string) error {
 		}
 		base := filepath.Base(cdir)
 		if c.Name == "" {
-			c.Name = strcase.ToSentence(base)
+			c.Name = strcase.ToTitle(base)
+			if c.NamePrefix != "" {
+				c.Name = c.NamePrefix + " " + c.Name
+			}
 		}
 
 		if c.ID == "" {

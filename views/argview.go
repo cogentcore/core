@@ -109,9 +109,9 @@ func (av *ArgView) ConfigArgsGrid() {
 			continue
 		}
 		arg.SetTag("grow", "1")
-		lbl := sg.Child(idx * 2).(*core.Text)
-		lbl.Text = arg.Label()
-		lbl.Tooltip = arg.Doc()
+		text := sg.Child(idx * 2).(*core.Text)
+		text.Text = arg.Label()
+		text.Tooltip = arg.Doc()
 		w, _ := core.AsWidget(sg.Child((idx * 2) + 1))
 		Config(arg, w)
 		idx++
