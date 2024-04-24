@@ -85,7 +85,7 @@ func homeHeader(ctx *htmlview.Context) bool {
 		s.Columns = 2
 	})
 
-	homeTextBlock(blocks, "CODE ONCE,\nRUN EVERYWHERE", "With Cogent Core, you can write your app once and it will instantly run on macOS, Windows, Linux, iOS, Android, and the Web, automatically scaling to any screen. Instead of struggling with platform-specific code in a multitude of languages, you can easily write and maintain a single pure Go codebase.")
+	homeTextBlock(blocks, "CODE ONCE, RUN EVERYWHERE", "With Cogent Core, you can write your app once and it will instantly run on macOS, Windows, Linux, iOS, Android, and the Web, automatically scaling to any screen. Instead of struggling with platform-specific code in a multitude of languages, you can easily write and maintain a single pure Go codebase.")
 	core.NewIcon(blocks).SetIcon(icons.Devices).Style(func(s *styles.Style) {
 		s.Min.Set(units.Pw(40))
 	})
@@ -117,6 +117,11 @@ func main() {
 	core.NewIcon(blocks).SetIcon(icons.PlayCircle).Style(func(s *styles.Style) {
 		s.Min.Set(units.Pw(40))
 	})
+
+	core.NewIcon(blocks).SetIcon(icons.GlobeAsia).Style(func(s *styles.Style) {
+		s.Min.Set(units.Pw(40))
+	})
+	homeTextBlock(blocks, "USED AROUND THE WORLD", "Over six years of development, Cogent Core has been used and thoroughly tested by developers and scientists around the world for a wide variety of use cases. Cogent Core is a production-ready framework actively used to power everything from end-user apps to scientific research.")
 
 	return true
 }
