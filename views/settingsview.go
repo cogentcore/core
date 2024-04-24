@@ -63,9 +63,7 @@ func SettingsView(b *core.Body) {
 			if tab := b.GetTopAppBar(); tab != nil {
 				tab.ApplyStyleUpdate()
 			}
-			se.Apply()
-			core.ErrorSnackbar(fr, core.SaveSettings(se), "Error saving "+se.Label()+" settings")
-			core.UpdateAll()
+			core.UpdateSettings(fr, se)
 		})
 	}
 }

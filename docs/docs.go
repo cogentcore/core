@@ -20,6 +20,7 @@ import (
 	"cogentcore.org/core/pages"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
+	"cogentcore.org/core/views"
 )
 
 //go:embed content
@@ -97,6 +98,9 @@ func homeHeader(ctx *htmlview.Context) bool {
 	homeTextBlock(blocks, "EFFORTLESS ELEGANCE", "Cogent Core is built on Go, a high-level language designed for building elegant, readable, and scalable code with full type safety and a robust design that never gets in your way. Cogent Core makes it easy to get started with cross-platform app development in just two commands and seven lines of simple code.")
 
 	homeTextBlock(blocks, "COMPLETELY CUSTOMIZABLE", "Cogent Core allows developers and users to fully customize apps to fit their unique needs and preferences through a robust styling system and a powerful color system that allow developers and users to instantly customize every aspect of the appearance and behavior of an app.")
+	views.NewStructView(blocks).SetStruct(core.AppearanceSettings).OnChange(func(e events.Event) {
+		core.UpdateSettings(blocks, core.AppearanceSettings)
+	})
 	return true
 }
 

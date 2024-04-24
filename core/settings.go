@@ -203,6 +203,14 @@ func SaveAllSettings() error {
 	return errors.Join(errs...)
 }
 
+// UpdateSettings applies and saves the given settings in the context of the given
+// widget and then updates all windows and triggers a full render rebuild.
+func UpdateSettings(ctx Widget, se Settings) {
+	se.Apply()
+	ErrorSnackbar(ctx, SaveSettings(se), "Error saving "+se.Label()+" settings")
+	UpdateAll()
+}
+
 // UpdateAll updates all windows and triggers a full render rebuild.
 // It is typically called when user settings are changed.
 func UpdateAll() { //types:add
