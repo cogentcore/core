@@ -1577,11 +1577,11 @@ func (wb *WidgetBase) StyleSizeUpdate() bool {
 	return false
 	// TODO(kai): this seems to break parent-relative units instead of making them work
 	/*
-		el := wb.Geom.Size.Actual.Content
+		el := wb.Geom.Size.Alloc.Content
 		var parent math32.Vector2
 		pwb := wb.ParentWidget()
 		if pwb != nil {
-			parent = pwb.Geom.Size.Actual.Content
+			parent = pwb.Geom.Size.Alloc.Content
 		}
 		sz := wb.Scene.SceneGeom.Size
 		chg := wb.Styles.UnitContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, parent.X, parent.Y)

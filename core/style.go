@@ -94,9 +94,9 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 		}
 		psz := math32.Vector2{}
 		if pw != nil {
-			psz = pw.Geom.Size.Actual.Content
+			psz = pw.Geom.Size.Alloc.Content
 		}
-		SetUnitContext(&wb.Styles, wb.Scene, wb.Geom.Size.Actual.Content, psz)
+		SetUnitContext(&wb.Styles, wb.Scene, wb.Geom.Size.Alloc.Content, psz)
 		wb.ApplyStyleParts()
 	}()
 
