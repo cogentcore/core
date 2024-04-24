@@ -123,6 +123,11 @@ func main() {
 	})
 	homeTextBlock(blocks, "USED AROUND THE WORLD", "Over six years of development, Cogent Core has been used and thoroughly tested by developers and scientists around the world for a wide variety of use cases. Cogent Core is a production-ready framework actively used to power everything from end-user apps to scientific research.")
 
+	homeTextBlock(blocks, "EXTREMELY FAST", "Cogent Core is powered by Vulkan, a modern, cross-platform, high-performance graphics framework that allows apps to run on all platforms at extremely fast speeds. All Cogent Core apps compile to machine code, allowing them to run without any overhead.")
+	core.NewIcon(blocks).SetIcon(icons.Bolt).Style(func(s *styles.Style) {
+		s.Min.Set(units.Pw(40))
+	})
+
 	return true
 }
 
