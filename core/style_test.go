@@ -20,8 +20,7 @@ func TestParentActualBackground(t *testing.T) {
 		fr = NewFrame(b)
 		fr.Style(func(s *styles.Style) {
 			s.Min.Set(units.Em(5))
-			s.Align.Content = styles.Center
-			s.Justify.Content = styles.Center
+			s.CenterAll()
 		})
 		NewText(fr).SetType(TextHeadlineSmall).SetText("Test")
 		return

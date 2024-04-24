@@ -485,6 +485,17 @@ func (s *Style) SetReadOnly(ro bool) {
 	s.SetState(ro, states.ReadOnly)
 }
 
+// CenterAll sets all of the alignment properties to [Center]
+// such that all children are fully centered.
+func (s *Style) CenterAll() {
+	s.Justify.Content = Center
+	s.Justify.Items = Center
+	s.Align.Content = Center
+	s.Align.Items = Center
+	s.Text.Align = Center
+	s.Text.AlignV = Center
+}
+
 // SetTextWrap sets the Text.WhiteSpace and GrowWrap properties in
 // a coordinated manner.  If wrap == true, then WhiteSpaceNormal
 // and GrowWrap = true; else WhiteSpaceNowrap and GrowWrap = false, which
@@ -499,7 +510,7 @@ func (s *Style) SetTextWrap(wrap bool) {
 	}
 }
 
-// SetNonSelectable turns off the Selectable and DoubleClicable
+// SetNonSelectable turns off the Selectable and DoubleClickable
 // abilities and sets the Cursor to None.
 func (s *Style) SetNonSelectable() {
 	s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)

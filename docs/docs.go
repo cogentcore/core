@@ -62,10 +62,7 @@ func main() {
 func homeHeader(ctx *htmlview.Context) bool {
 	ly := core.NewLayout(ctx.BlockParent).Style(func(s *styles.Style) {
 		s.Direction = styles.Column
-		s.Justify.Content = styles.Center
-		s.Align.Content = styles.Center
-		s.Align.Items = styles.Center
-		s.Text.Align = styles.Center
+		s.CenterAll()
 	})
 	errors.Log(core.NewSVG(ly).ReadBytes(icon))
 	img := core.NewImage(ly)

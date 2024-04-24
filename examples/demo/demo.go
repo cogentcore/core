@@ -51,10 +51,7 @@ func main() {
 func home(ts *core.Tabs) {
 	tab := ts.NewTab("Home")
 	tab.Style(func(s *styles.Style) {
-		s.Justify.Content = styles.Center
-		s.Align.Content = styles.Center
-		s.Align.Items = styles.Center
-		s.Text.Align = styles.Center
+		s.CenterAll()
 	})
 
 	errors.Log(core.NewSVG(tab).ReadBytes(appIcon))

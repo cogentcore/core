@@ -69,10 +69,7 @@ func TestRenderFrameAlignmentCenter(t *testing.T) {
 		s.Min.Set(units.Dp(30))
 		s.Padding.Zero()
 		s.Gap.Zero()
-		s.Justify.Content = styles.Center
-		s.Justify.Items = styles.Center
-		s.Align.Content = styles.Center
-		s.Align.Items = styles.Center
+		s.CenterAll()
 	})
 	NewBox(outer).Style(func(s *styles.Style) {
 		s.Background = colors.C(colors.Blue)
