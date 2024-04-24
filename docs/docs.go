@@ -12,6 +12,7 @@ import (
 	"embed"
 	"io/fs"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
@@ -110,7 +111,7 @@ func main() {
 }
 `)
 
-	homeTextBlock(blocks, "ENDLESS FEATURES", "Cogent Core comes with a powerful set of advanced features that allow you to make almost anything, including fully featured text editors, video and audio players, interactive 3D graphics, customizable data plots, Markdown and HTML rendering, SVG and canvas vector graphics, and automatic views of any Go data structure for instant data binding and transparent app inspection.")
+	homeTextBlock(blocks, "ENDLESS FEATURES", "Cogent Core comes with a powerful set of advanced features that allow you to make almost anything, including fully featured text editors, video and audio players, interactive 3D graphics, customizable data plots, Markdown and HTML rendering, SVG and canvas vector graphics, and automatic views of any Go data structure for instant data binding and advanced app inspection.")
 
 	return true
 }
@@ -124,6 +125,7 @@ func homeTextBlock(parent core.Widget, title, text string) {
 	})
 	core.NewText(block).SetType(core.TextHeadlineLarge).SetText(title).Style(func(s *styles.Style) {
 		s.Font.Weight = styles.WeightBold
+		s.Color = colors.C(colors.Scheme.Primary.Base)
 	})
 	core.NewText(block).SetType(core.TextTitleLarge).SetText(text)
 }
