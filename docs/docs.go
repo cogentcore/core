@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/pages"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/units"
 	"cogentcore.org/core/views"
 )
@@ -101,6 +102,16 @@ func homeHeader(ctx *htmlview.Context) bool {
 	views.NewStructView(blocks).SetStruct(core.AppearanceSettings).OnChange(func(e events.Event) {
 		core.UpdateSettings(blocks, core.AppearanceSettings)
 	})
+
+	texteditor.NewSoloEditor(blocks).Buffer.SetLang("go").SetTextString(`package main
+
+func main() {
+    fmt.Println("Hello, world!")
+}
+`)
+
+	homeTextBlock(blocks, "ENDLESS FEATURES", "Cogent Core comes with a powerful set of advanced features that allow you to make almost anything, including fully featured text editors, video and audio players, interactive 3D graphics, customizable data plots, Markdown and HTML rendering, SVG and canvas vector graphics, and automatic views of any Go data structure for instant data binding and transparent app inspection.")
+
 	return true
 }
 
