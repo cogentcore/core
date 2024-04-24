@@ -145,6 +145,11 @@ func main() {
 		s.Min.Set(units.Pw(40))
 	})
 
+	core.NewIcon(appBlocks).SetIcon(icons.Polyline).Style(func(s *styles.Style) {
+		s.Min.Set(units.Pw(40))
+	})
+	homeTextBlock(appBlocks, "COGENT VECTOR", "Cogent Vector is a powerful vector graphics editor with complete support for shapes, paths, curves, text, images, gradients, groups, alignment, styling, importing, exporting, undo, redo, and various other features.")
+
 	return true
 }
 
