@@ -40,7 +40,11 @@ func ExampleHandler(ctx *htmlview.Context) bool {
 		s.Border.Radius = styles.BorderRadiusMedium
 	})
 
-	id := ctx.PageURL + "-" + strconv.Itoa(NumExamples[ctx.PageURL])
+	url := ctx.PageURL
+	if url == "" {
+		url = "index"
+	}
+	id := url + "-" + strconv.Itoa(NumExamples[ctx.PageURL])
 	NumExamples[ctx.PageURL]++
 	fn := Examples[id]
 	if fn == nil {

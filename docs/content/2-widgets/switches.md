@@ -45,9 +45,9 @@ If you need to customize the items more, you can use a list of [[core.SwitchItem
 
 ```Go
 core.NewSwitches(parent).SetItems(
-    core.SwitchItem{Label: "Go", Tooltip: "Elegant, fast, and easy-to-use"},
-    core.SwitchItem{Label: "Python", Tooltip: "Slow and duck-typed"},
-    core.SwitchItem{Label: "C++", Tooltip: "Hard to use and slow to compile"},
+    core.SwitchItem{Text: "Go", Tooltip: "Elegant, fast, and easy-to-use"},
+    core.SwitchItem{Text: "Python", Tooltip: "Slow and duck-typed"},
+    core.SwitchItem{Text: "C++", Tooltip: "Hard to use and slow to compile"},
 )
 ```
 

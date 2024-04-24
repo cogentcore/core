@@ -1049,4 +1049,7 @@ func main() {
 		core.NewButton(fr).SetText("Second")
 		core.NewButton(fr).SetText("Third")
 	},
+	"index-0": func(parent core.Widget) {
+		core.NewButton(parent).SetText("Send")
+	},
 }
