@@ -34,8 +34,10 @@ type Config struct { //types:add
 	// and any projects nested below it. A separating space is automatically included.
 	NamePrefix string
 
-	// the bundle / package ID to use of the project (required for building for mobile platforms
-	// and packaging for desktop platforms). It is typically in the format com.org.app (eg: com.core.mail)
+	// ID is the bundle / package ID to use for the project
+	// (required for building for mobile platforms and packaging
+	// for desktop platforms). It is typically in the format com.org.app
+	// (eg: com.cogent.mail). It defaults to com.parentDirectory.currentDirectory.
 	ID string
 
 	// the description of the project
