@@ -9,7 +9,6 @@ const appEnv = {{.Env }};
 const appWasmContentLengthHeader = "{{.WasmContentLengthHeader}}";
 
 let wasm;
-let memoryBytes;
 
 let appServiceWorkerRegistration;
 let deferredPrompt = null;
@@ -170,10 +169,7 @@ const appCanvasCtx = appCanvas.getContext('2d');
 // and its length. Then, it gets the resulting byte slice and creates an image data
 // with the given width and height.
 function displayImage(pointer, length, w, h) {
-  // if it doesn't exist or is detached, we have to make it
-  if (!memoryBytes || memoryBytes.byteLength === 0) {
-    memoryBytes = new Uint8ClampedArray(wasm.instance.exports.mem.buffer);
-  }
+  let memoryBytes = new Uint8ClampedArray(wasm.instance.exports.mem.buffer);
 
   // using subarray instead of slice gives a 5x performance improvement due to no copying
   let bytes = memoryBytes.subarray(pointer, pointer + length);
