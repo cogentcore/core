@@ -133,6 +133,18 @@ func main() {
 	})
 	homeTextBlock(blocks, "USED AROUND THE WORLD", "Over six years of development, Cogent Core has been used and thoroughly tested by developers and scientists around the world for a wide variety of use cases. Cogent Core is a production-ready framework actively used to power everything from end-user apps to scientific research.")
 
+	core.NewText(ly).SetType(core.TextDisplaySmall).SetText("<b>What can you make with Cogent Core?</b>")
+
+	appBlocks := core.NewLayout(ly).Style(func(s *styles.Style) {
+		s.Display = styles.Grid
+		s.Columns = 2
+	})
+
+	homeTextBlock(appBlocks, "COGENT CODE", "Cogent Code is a fully featured Go IDE with support for syntax highlighting, code completion, symbol lookup, building and debugging, version control, keyboard shortcuts, and many other features.")
+	core.NewIcon(appBlocks).SetIcon(icons.Code).Style(func(s *styles.Style) {
+		s.Min.Set(units.Pw(40))
+	})
+
 	return true
 }
 
