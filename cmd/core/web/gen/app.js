@@ -235,7 +235,7 @@ async function appInitWebAssembly() {
       loaderLabel.innerText = progress + "%";
       loaderProgress.value = progress / 100;
     };
-    showProgress(0);
+    showProgress(1);
 
     const go = new Go();
     wasm = await instantiateStreaming(
@@ -284,7 +284,7 @@ async function fetchWithProgress(url, progress) {
   let loaded = 0;
 
   const progressHandler = function (loaded, total) {
-    progress(Math.min(100, Math.round((loaded * 100) / total)));
+    progress(Math.min(99, Math.max(1, Math.round((loaded * 100) / total)))); // must be 1-99
   };
 
   var res = new Response(
