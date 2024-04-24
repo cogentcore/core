@@ -82,7 +82,7 @@ func homeHeader(ctx *htmlview.Context) bool {
 		s.Columns = 2
 	})
 
-	homeTextBlock(blocks, "CODE ONCE,\nRUN EVERYWHERE", "With Cogent Core, you can write your app once and it will instantly run on macOS, Windows, Linux, iOS, Android, and the Web, automatically scaling to any device.")
+	homeTextBlock(blocks, "CODE ONCE,\nRUN EVERYWHERE", "With Cogent Core, you can write your app once and it will instantly run on macOS, Windows, Linux, iOS, Android, and the Web, automatically scaling to any screen. Instead of struggling with platform-specific code in a multitude of languages, you can easily write and maintain a single pure Go codebase.")
 	core.NewIcon(blocks).SetIcon(icons.Devices).Style(func(s *styles.Style) {
 		s.Min.Set(units.Pw(40))
 	})
@@ -94,7 +94,9 @@ func homeHeader(ctx *htmlview.Context) bool {
 	})
 	htmlview.HandleElement(ctx)
 
-	homeTextBlock(blocks, "EFFORTLESS ELEGANCE", "With the power of Go, Cogent Core allows you to easily write simple, elegant, and readable code with full type safety and a robust design that never gets in your way.")
+	homeTextBlock(blocks, "EFFORTLESS ELEGANCE", "Cogent Core is built on Go, a high-level language designed for building elegant, readable, and scalable code with full type safety and a robust design that never gets in your way. Cogent Core makes it easy to get started with cross-platform app development in just two commands and seven lines of simple code.")
+
+	homeTextBlock(blocks, "COMPLETELY CUSTOMIZABLE", "Cogent Core allows developers and users to fully customize apps to fit their unique needs and preferences through a robust styling system and a powerful color system that allow developers and users to instantly customize every aspect of the appearance and behavior of an app.")
 	return true
 }
 
