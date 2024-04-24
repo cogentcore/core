@@ -118,15 +118,20 @@ func main() {
 		s.Min.Set(units.Pw(40))
 	})
 
+	core.NewIcon(blocks).SetIcon(icons.Bolt).Style(func(s *styles.Style) {
+		s.Min.Set(units.Pw(40))
+	})
+	homeTextBlock(blocks, "EXTREMELY FAST", "Cogent Core is powered by Vulkan, a modern, cross-platform, high-performance graphics framework that allows apps to run on all platforms at extremely fast speeds. All Cogent Core apps compile to machine code, allowing them to run without any overhead.")
+
+	homeTextBlock(blocks, "FREE AND OPEN SOURCE", "Cogent Core is completely free and open source under the permissive BSD-3 License, allowing you to use Cogent Core for any purpose, commercially or personally. We believe that software works best when everyone can use it.")
+	core.NewIcon(blocks).SetIcon(icons.Code).Style(func(s *styles.Style) {
+		s.Min.Set(units.Pw(40))
+	})
+
 	core.NewIcon(blocks).SetIcon(icons.GlobeAsia).Style(func(s *styles.Style) {
 		s.Min.Set(units.Pw(40))
 	})
 	homeTextBlock(blocks, "USED AROUND THE WORLD", "Over six years of development, Cogent Core has been used and thoroughly tested by developers and scientists around the world for a wide variety of use cases. Cogent Core is a production-ready framework actively used to power everything from end-user apps to scientific research.")
-
-	homeTextBlock(blocks, "EXTREMELY FAST", "Cogent Core is powered by Vulkan, a modern, cross-platform, high-performance graphics framework that allows apps to run on all platforms at extremely fast speeds. All Cogent Core apps compile to machine code, allowing them to run without any overhead.")
-	core.NewIcon(blocks).SetIcon(icons.Bolt).Style(func(s *styles.Style) {
-		s.Min.Set(units.Pw(40))
-	})
 
 	return true
 }
