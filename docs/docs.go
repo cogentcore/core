@@ -150,6 +150,11 @@ func main() {
 	})
 	homeTextBlock(appBlocks, "COGENT VECTOR", "Cogent Vector is a powerful vector graphics editor with complete support for shapes, paths, curves, text, images, gradients, groups, alignment, styling, importing, exporting, undo, redo, and various other features.")
 
+	homeTextBlock(appBlocks, "COGENT MAIL", "Cogent Mail is a customizable email client with builtin Markdown support and an extensive set of keyboard shortcuts for advanced mail filing.")
+	core.NewIcon(appBlocks).SetIcon(icons.Mail).Style(func(s *styles.Style) {
+		s.Min.Set(units.Pw(40))
+	})
+
 	return true
 }
 
