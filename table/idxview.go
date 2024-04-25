@@ -135,7 +135,7 @@ const (
 // Only valid for 1-dimensional columns.
 // Returns error if column name not found.
 func (ix *IndexView) SortColName(colNm string, ascending bool) error { //types:add
-	ci, err := ix.Table.ColIndex(colNm)
+	ci, err := ix.Table.ColIndexTry(colNm)
 	if err != nil {
 		log.Println(err)
 		return err

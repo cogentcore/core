@@ -7,6 +7,7 @@ package table
 //go:generate core generate
 
 import (
+	"fmt"
 	"log/slog"
 	"math"
 	"strings"
@@ -75,6 +76,16 @@ func (dt *Table) ColIndex(name string) int {
 		return -1
 	}
 	return i
+}
+
+// ColIndexTry returns the index of the given column name,
+// along with an error if not found.
+func (dt *Table) ColIndexTry(name string) (int, error) {
+	i, ok := dt.ColNameMap[name]
+	if !ok {
+		return 0, fmt.Errorf("table.Table ColIndex: column named: %v not found", name)
+	}
+	return i, nil
 }
 
 // ColIndexesByNames returns the indexes of the given column names.
