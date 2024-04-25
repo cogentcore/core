@@ -152,16 +152,11 @@ func main() {
 		s.Min.Set(units.Pw(40))
 	})
 
-	emergentIcon := core.NewSVG(appBlocks)
-	errors.Log(emergentIcon.OpenFS(resources, "emergent-icon.svg"))
+	errors.Log(core.NewSVG(appBlocks).OpenFS(resources, "emergent-icon.svg"))
 	homeTextBlock(appBlocks, "EMERGENT", "Emergent is a collection of biologically based 3D neural network models of the brain that power ongoing research in computational cognitive neuroscience.")
 
 	homeTextBlock(appBlocks, "WELD", "WELD is a set of 3D computational models of a new approach to quantum physics based on wave electrodynamics.")
-	weldIcon := core.NewImage(appBlocks)
-	errors.Log(weldIcon.OpenFS(resources, "weld-icon.png"))
-	// weldIcon.Style(func(s *styles.Style) {
-	// 	s.Min.Set(units.Dp(234), units.Dp(256))
-	// })
+	errors.Log(core.NewImage(appBlocks).OpenFS(resources, "weld-icon.png"))
 
 	return true
 }
