@@ -60,12 +60,13 @@ func main() {
 }
 
 func homeHeader(ctx *htmlview.Context) bool {
-	ly := core.NewLayout(ctx.BlockParent).Style(func(s *styles.Style) {
+	fr := core.NewFrame(ctx.BlockParent).Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.CenterAll()
+		// s.Background = gradient.NewLinear().AddStop(colors.Scheme.Primary.Container, 0).AddStop(colors.Scheme.Warn.Container, 1)
 	})
-	errors.Log(core.NewSVG(ly).OpenFS(resources, "icon.svg"))
-	img := core.NewImage(ly)
+	errors.Log(core.NewSVG(fr).OpenFS(resources, "icon.svg"))
+	img := core.NewImage(fr)
 	errors.Log(img.OpenFS(resources, "name.png"))
 	img.Style(func(s *styles.Style) {
 		x := func(uc *units.Context) float32 {
@@ -75,9 +76,9 @@ func homeHeader(ctx *htmlview.Context) bool {
 			return x(uc) * (128.0 / 612.0)
 		}))
 	})
-	core.NewText(ly).SetType(core.TextHeadlineMedium).SetText("A cross-platform framework for building powerful, fast, and cogent 2D and 3D apps")
+	core.NewText(fr).SetType(core.TextHeadlineMedium).SetText("A cross-platform framework for building powerful, fast, and cogent 2D and 3D apps")
 
-	blocks := core.NewLayout(ly).Style(func(s *styles.Style) {
+	blocks := core.NewLayout(fr).Style(func(s *styles.Style) {
 		s.Display = styles.Grid
 		s.Columns = 2
 	})
@@ -130,9 +131,9 @@ func main() {
 	})
 	homeTextBlock(blocks, "USED AROUND THE WORLD", "Over six years of development, Cogent Core has been used and thoroughly tested by developers and scientists around the world for a wide variety of use cases. Cogent Core is a production-ready framework actively used to power everything from end-user apps to scientific research.")
 
-	core.NewText(ly).SetType(core.TextDisplaySmall).SetText("<b>What can you make with Cogent Core?</b>")
+	core.NewText(fr).SetType(core.TextDisplaySmall).SetText("<b>What can you make with Cogent Core?</b>")
 
-	appBlocks := core.NewLayout(ly).Style(func(s *styles.Style) {
+	appBlocks := core.NewLayout(fr).Style(func(s *styles.Style) {
 		s.Display = styles.Grid
 		s.Columns = 2
 	})
