@@ -28,11 +28,8 @@ import (
 //go:embed content
 var content embed.FS
 
-//go:embed icon.svg
-var icon []byte
-
-//go:embed name.png
-var name embed.FS
+//go:embed icon.svg name.png emergent-icon.svg weld-icon.png
+var resources embed.FS
 
 //go:embed image.png
 var myImage embed.FS
@@ -67,9 +64,9 @@ func homeHeader(ctx *htmlview.Context) bool {
 		s.Direction = styles.Column
 		s.CenterAll()
 	})
-	errors.Log(core.NewSVG(ly).ReadBytes(icon))
+	errors.Log(core.NewSVG(ly).OpenFS(resources, "icon.svg"))
 	img := core.NewImage(ly)
-	errors.Log(img.OpenFS(name, "name.png"))
+	errors.Log(img.OpenFS(resources, "name.png"))
 	img.Style(func(s *styles.Style) {
 		x := func(uc *units.Context) float32 {
 			return min(uc.Dp(612), uc.Vw(90))
@@ -155,15 +152,16 @@ func main() {
 		s.Min.Set(units.Pw(40))
 	})
 
-	core.NewIcon(appBlocks).SetIcon(icons.Cognition).Style(func(s *styles.Style) {
-		s.Min.Set(units.Pw(40))
-	})
+	emergentIcon := core.NewSVG(appBlocks)
+	errors.Log(emergentIcon.OpenFS(resources, "emergent-icon.svg"))
 	homeTextBlock(appBlocks, "EMERGENT", "Emergent is a collection of biologically based 3D neural network models of the brain that power ongoing research in computational cognitive neuroscience.")
 
 	homeTextBlock(appBlocks, "WELD", "WELD is a set of 3D computational models of a new approach to quantum physics based on wave electrodynamics.")
-	core.NewIcon(appBlocks).SetIcon(icons.Water).Style(func(s *styles.Style) {
-		s.Min.Set(units.Pw(40))
-	})
+	weldIcon := core.NewImage(appBlocks)
+	errors.Log(weldIcon.OpenFS(resources, "weld-icon.png"))
+	// weldIcon.Style(func(s *styles.Style) {
+	// 	s.Min.Set(units.Dp(234), units.Dp(256))
+	// })
 
 	return true
 }
