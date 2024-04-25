@@ -160,6 +160,11 @@ func main() {
 	})
 	homeTextBlock(appBlocks, "EMERGENT", "Emergent is a collection of biologically based 3D neural network models of the brain that power ongoing research in computational cognitive neuroscience.")
 
+	homeTextBlock(appBlocks, "WELD", "WELD is a set of 3D computational models of a new approach to quantum physics based on wave electrodynamics.")
+	core.NewIcon(appBlocks).SetIcon(icons.Water).Style(func(s *styles.Style) {
+		s.Min.Set(units.Pw(40))
+	})
+
 	return true
 }
 
