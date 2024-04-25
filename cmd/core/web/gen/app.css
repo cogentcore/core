@@ -115,9 +115,7 @@ body {
 }
 
 #app-wasm-loader-rectangles {
-  display: grid;
-  columns: 3;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   flex-grow: 1;
   gap: 1em;
 }
@@ -125,28 +123,12 @@ body {
 .app-wasm-loader-rectangle {
   background-color: var(--container-color);
   border-radius: 20px;
-}
-
-.app-wasm-loader-rectangle:first-child {
-  grid-row: 1/3;
-}
-
-.app-wasm-loader-rectangle:last-child {
-  grid-column: 2/4;
+  flex-grow: 1;
 }
 
 @media only screen and (max-width: 768px) {
   #app-wasm-loader-rectangles {
-    columns: 2;
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .app-wasm-loader-rectangle:first-child {
-    display: none;
-  }
-
-  .app-wasm-loader-rectangle:last-child {
-    grid-column: 1/3;
+    flex-direction: column;
   }
 }
 
