@@ -1,4 +1,4 @@
-// Copyright (c) 2024, The Cogent Core Authors. All rights reserved.
+// Copyright (c) 2024, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -20,7 +20,8 @@ type Float64 struct {
 	Base[float64]
 }
 
-// NewFloat64 returns a new n-dimensional tensor of float64s.
+// NewFloat64 returns a new n-dimensional tensor of float64 values
+// with the given sizes per dimension (shape), and optional dimension names.
 // Nulls are initialized to nil.
 func NewFloat64(sizes []int, names ...string) *Float64 {
 	tsr := &Float64{}
@@ -29,24 +30,13 @@ func NewFloat64(sizes []int, names ...string) *Float64 {
 	return tsr
 }
 
-// NewFloat64Shape returns a new n-dimensional tensor of float64s.
-// Using shape and optionally existing values if vals != nil
-// (must be of proper length). We directly set our internal
-// Values = vals, thereby sharing the same
-// underlying data. Nulls are initialized to nil.
-func NewFloat64Shape(shape *Shape, vals []float64) *Float64 {
+// NewFloat64Shape returns a new n-dimensional tensor of float64 values
+// using given shape.
+// Nulls are initialized to nil.
+func NewFloat64Shape(shape *Shape) *Float64 {
 	tsr := &Float64{}
 	tsr.Shp.CopyShape(shape)
-	if vals != nil {
-		if len(vals) != tsr.Len() {
-			log.Printf("tensor.NewFloat64Shape: length of provided vals: %d not proper length: %d", len(vals), tsr.Len())
-			tsr.Values = make([]float64, tsr.Len())
-		} else {
-			tsr.Values = vals
-		}
-	} else {
-		tsr.Values = make([]float64, tsr.Len())
-	}
+	tsr.Values = make([]float64, tsr.Len())
 	return tsr
 }
 
@@ -208,7 +198,7 @@ func (tsr *Float64) SetZeros() {
 // own separate memory representation of all the values, and returns
 // that as a Tensor (which can be converted into the known type as needed).
 func (tsr *Float64) Clone() Tensor {
-	csr := NewFloat64Shape(&tsr.Shp, nil)
+	csr := NewFloat64Shape(&tsr.Shp)
 	copy(csr.Values, tsr.Values)
 	if tsr.Nulls != nil {
 		csr.Nulls = tsr.Nulls.Clone()

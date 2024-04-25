@@ -1,4 +1,4 @@
-// Copyright (c) 2024, The Cogent Core Authors. All rights reserved.
+// Copyright (c) 2024, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -35,9 +35,12 @@ type Table struct { //types:add
 	MetaData map[string]string
 }
 
-// NumRows returns the number of rows (arrow / dframe api)
-func (dt *Table) NumRows() int {
-	return dt.Rows
+func NewTable(rows int, name ...string) *Table {
+	et := &Table{Rows: rows}
+	if len(name) > 0 {
+		et.SetMetaData("name", name[0])
+	}
+	return et
 }
 
 // IsValidRow returns true if the row is valid
@@ -48,7 +51,7 @@ func (dt *Table) IsValidRow(row int) bool {
 	return true
 }
 
-// NumCols returns the number of columns (arrow / dframe api)
+// NumCols returns the number of columns
 func (dt *Table) NumCols() int {
 	return len(dt.Cols)
 }
@@ -121,26 +124,24 @@ func (dt *Table) UpdateColNameMap() {
 }
 
 // AddCol adds the given tensor as a column to the table.
-// returns error if it is not a RowMajor organized tensor, and automatically
-// adjusts the shape to fit the current number of rows.
-func (dt *Table) AddCol(tsr tensor.Tensor, name string) error {
+// Automatically adjusts the shape to fit the current number of rows.
+func (dt *Table) AddCol(tsr tensor.Tensor, name string) {
 	dt.Cols = append(dt.Cols, tsr)
 	dt.ColNames = append(dt.ColNames, name)
 	dt.UpdateColNameMap()
 	rows := max(1, dt.Rows)
 	tsr.SetNumRows(rows)
-	return nil
 }
 
 // DeleteColName deletes column of given name.
-// returns false if not found.
-func (dt *Table) DeleteColName(name string) bool {
-	ci := dt.ColIndex(name)
-	if ci < 0 {
-		return false
+// returns error if not found.
+func (dt *Table) DeleteColName(name string) error {
+	ci, err := dt.ColIndexTry(name)
+	if err != nil {
+		return err
 	}
 	dt.DeleteColIndex(ci)
-	return true
+	return nil
 }
 
 // DeleteColIndex deletes column of given index
@@ -173,85 +174,31 @@ func (dt *Table) SetNumRows(rows int) { //types:add
 	}
 }
 
-// SetFromSchema configures table from given Schema.
-// The actual tensor number of rows is enforced to be > 0, because we
-// cannot have a null dimension in tensor shape.
-// does not preserve any existing columns / data.
-func (dt *Table) SetFromSchema(sc Schema, rows int) {
-	nc := len(sc)
-	dt.Cols = make([]tensor.Tensor, nc)
-	dt.ColNames = make([]string, nc)
-	dt.Rows = rows // can be 0
-	rows = max(1, rows)
-	for i := range dt.Cols {
-		cl := &sc[i]
-		dt.ColNames[i] = cl.Name
-		sh := append([]int{rows}, cl.CellShape...)
-		dn := append([]string{"row"}, cl.DimNames...)
-		_, _ = dn, sh
-		// tsr := tensor.New(cl.Type, sh, nil, dn)
-		// dt.Cols[i] = tsr
-	}
-	dt.UpdateColNameMap()
-}
-
-func NewTable(name string) *Table {
-	et := &Table{}
-	et.SetMetaData("name", name)
-	return et
-}
-
-// New returns a new Table constructed from given Schema.
-// The actual tensor number of rows is enforced to be > 0, because we
-// cannot have a null dimension in tensor shape
-func New(sc Schema, rows int) *Table {
-	dt := &Table{}
-	dt.SetFromSchema(sc, rows)
-	return dt
-}
-
-// Schema returns the Schema (column properties) for this table
-func (dt *Table) Schema() Schema {
-	nc := dt.NumCols()
-	sc := make(Schema, nc)
-	for i := range dt.Cols {
-		cl := &sc[i]
-		tsr := dt.Cols[i]
-		cl.Name = dt.ColNames[i]
-		// cl.Type = tsr.DataType()
-		cl.CellShape = tsr.Shape().Sizes[1:]
-		cl.DimNames = tsr.Shape().Names[1:]
-	}
-	return sc
-}
-
 // note: no really clean definition of CopyFrom -- no point of re-using existing
 // table -- just clone it.
 
 // Clone returns a complete copy of this table
 func (dt *Table) Clone() *Table {
-	sc := dt.Schema()
-	cp := New(sc, dt.Rows)
-	for i, cl := range dt.Cols {
-		ccl := cp.Cols[i]
-		ccl.CopyFrom(cl)
-	}
+	cp := NewTable(dt.Rows)
 	cp.CopyMetaDataFrom(dt)
+	for i, cl := range dt.Cols {
+		cp.AddCol(cl.Clone(), dt.ColNames[i])
+	}
 	return cp
 }
 
 // AppendRows appends shared columns in both tables with input table rows
 func (dt *Table) AppendRows(dt2 *Table) {
 	shared := false
-	strow := dt.NumRows()
+	strow := dt.Rows
 	for iCol := range dt.Cols {
 		colName := dt.ColName(iCol)
 		if dt2.ColIndex(colName) != -1 {
 			if !shared {
 				shared = true
-				dt.AddRows(dt2.NumRows())
+				dt.AddRows(dt2.Rows)
 			}
-			for iRow := 0; iRow < dt2.NumRows(); iRow++ {
+			for iRow := 0; iRow < dt2.Rows; iRow++ {
 				dt.CopyCell(colName, iRow+strow, dt2, colName, iRow)
 			}
 		}

@@ -4,7 +4,6 @@
 
 package table
 
-/*
 import (
 	"fmt"
 	"slices"
@@ -410,9 +409,9 @@ func (spl *Splits) AggsToTable(colName bool) *Table {
 		return nil
 	}
 	dt := spl.Splits[0].Table
-	sc := Schema{}
+	st := NewTable(nsp)
 	for _, cn := range spl.Levels {
-		sc = append(sc, Column{cn, tensor.STRING, nil, nil})
+		st.AddCol(tensor.NewString([]int{nsp}), cn)
 	}
 	for _, ag := range spl.Aggs {
 		col := dt.Cols[ag.ColIndex]
@@ -420,9 +419,8 @@ func (spl *Splits) AggsToTable(colName bool) *Table {
 		if colName == AddAggName {
 			an += ":" + ag.Name
 		}
-		sc = append(sc, Column{an, tensor.FLOAT64, col.Shapes()[1:], col.DimNames()[1:]})
+		st.AddCol(tensor.NewFloat64Shape(col.Shape()), an) // note: will over-allocate rows here
 	}
-	st := New(sc, nsp)
 	for si := range spl.Splits {
 		cidx := 0
 		for ci := range spl.Levels {
@@ -457,10 +455,10 @@ func (spl *Splits) AggsToTableCopy(colName bool) *Table {
 		return nil
 	}
 	dt := spl.Splits[0].Table
-	sc := Schema{}
+	st := NewTable(nsp)
 	exmap := make(map[string]struct{})
 	for _, cn := range spl.Levels {
-		sc = append(sc, Column{cn, tensor.STRING, nil, nil})
+		st.AddCol(tensor.NewString([]int{nsp}), cn)
 		exmap[cn] = struct{}{}
 	}
 	for _, ag := range spl.Aggs {
@@ -470,17 +468,16 @@ func (spl *Splits) AggsToTableCopy(colName bool) *Table {
 		if colName == AddAggName {
 			an += ":" + ag.Name
 		}
-		sc = append(sc, Column{an, tensor.FLOAT64, col.Shapes()[1:], col.DimNames()[1:]})
+		st.AddCol(tensor.NewFloat64Shape(col.Shape()), an) // note: will over-allocate rows here
 	}
 	var cpcol []string
 	for _, cn := range dt.ColNames {
 		if _, ok := exmap[cn]; !ok {
 			cpcol = append(cpcol, cn)
 			col := dt.ColByName(cn)
-			sc = append(sc, Column{cn, col.DataType(), col.Shapes()[1:], col.DimNames()[1:]})
+			st.AddCol(col.Clone(), cn)
 		}
 	}
-	st := New(sc, nsp)
 	for si, sidx := range spl.Splits {
 		cidx := 0
 		for ci := range spl.Levels {
@@ -521,4 +518,3 @@ func (spl *Splits) Swap(i, j int) {
 		ag.Aggs[i], ag.Aggs[j] = ag.Aggs[j], ag.Aggs[i]
 	}
 }
-*/

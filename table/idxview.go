@@ -1,4 +1,4 @@
-// Copyright (c) 2024, The Cogent Core Authors. All rights reserved.
+// Copyright (c) 2024, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -407,8 +407,8 @@ func (ix *IndexView) FilterCol(colIndex int, str string, exclude, contains, igno
 // the indexes
 func (ix *IndexView) NewTable() *Table {
 	rows := len(ix.Indexes)
-	sc := ix.Table.Schema()
-	nt := New(sc, rows)
+	nt := ix.Table.Clone()
+	nt.SetNumRows(rows)
 	if rows == 0 {
 		return nt
 	}
