@@ -31,6 +31,9 @@ type Tensor interface {
 	// NumDims returns the total number of dimensions.
 	NumDims() int
 
+	// returns true if the data type is a String. otherwise is numeric.
+	IsString() bool
+
 	// IsNull returns true if the given index has been flagged as a Null
 	// (undefined, not present) value
 	IsNull(i []int) bool

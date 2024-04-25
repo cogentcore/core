@@ -50,6 +50,10 @@ func NewFloat64Shape(shape *Shape, vals []float64) *Float64 {
 	return tsr
 }
 
+func (tsr *Float64) IsString() bool {
+	return false
+}
+
 func (tsr *Float64) AddScalar(i []int, val float64) float64 {
 	j := tsr.Shp.Offset(i)
 	tsr.Values[j] += val

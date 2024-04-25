@@ -527,7 +527,7 @@ func (dt *Table) SetTensorIndex(col, row int, val tensor.Tensor) bool {
 	_, csz := ct.Shape().RowCellSize()
 	st := row * csz
 	sz := min(csz, val.Len())
-	if ct.DataType() == tensor.STRING {
+	if ct.IsString() {
 		for j := 0; j < sz; j++ {
 			ct.SetString1D(st+j, val.String1D(j))
 		}
@@ -589,7 +589,7 @@ func (dt *Table) CopyCell(colNm string, row int, cpt *Table, cpColNm string, cpR
 	}
 	_, sz := ct.Shape().RowCellSize()
 	if sz == 1 {
-		if ct.DataType() == tensor.STRING {
+		if ct.IsString() {
 			ct.SetString1D(row, cpct.String1D(cpRow))
 		} else {
 			ct.SetFloat1D(row, cpct.Float1D(cpRow))
@@ -599,7 +599,7 @@ func (dt *Table) CopyCell(colNm string, row int, cpt *Table, cpColNm string, cpR
 		st := row * sz
 		cst := cpRow * cpsz
 		msz := min(sz, cpsz)
-		if ct.DataType() == tensor.STRING {
+		if ct.IsString() {
 			for j := 0; j < msz; j++ {
 				ct.SetString1D(st+j, cpct.String1D(cst+j))
 			}

@@ -12,8 +12,6 @@ import (
 	"slices"
 	"sort"
 	"strings"
-
-	"cogentcore.org/core/tensor"
 )
 
 // LessFunc is a function used for sort comparisons that returns
@@ -151,7 +149,7 @@ func (ix *IndexView) SortColName(colNm string, ascending bool) error { //types:a
 // Only valid for 1-dimensional columns.
 func (ix *IndexView) SortCol(colIndex int, ascending bool) {
 	cl := ix.Table.Cols[colIndex]
-	if cl.DataType() == tensor.STRING {
+	if cl.IsString() {
 		ix.Sort(func(et *Table, i, j int) bool {
 			if ascending {
 				return cl.String1D(i) < cl.String1D(j)
@@ -199,7 +197,7 @@ func (ix *IndexView) SortCols(colIndexes []int, ascending bool) {
 	ix.Sort(func(et *Table, i, j int) bool {
 		for _, ci := range colIndexes {
 			cl := ix.Table.Cols[ci]
-			if cl.DataType() == tensor.STRING {
+			if cl.IsString() {
 				if ascending {
 					if cl.String1D(i) < cl.String1D(j) {
 						return true
@@ -265,7 +263,7 @@ func (ix *IndexView) SortStableColName(colNm string, ascending bool) error {
 // Only valid for 1-dimensional columns.
 func (ix *IndexView) SortStableCol(colIndex int, ascending bool) {
 	cl := ix.Table.Cols[colIndex]
-	if cl.DataType() == tensor.STRING {
+	if cl.IsString() {
 		ix.SortStable(func(et *Table, i, j int) bool {
 			if ascending {
 				return cl.String1D(i) < cl.String1D(j)
@@ -313,7 +311,7 @@ func (ix *IndexView) SortStableCols(colIndexes []int, ascending bool) {
 	ix.SortStable(func(et *Table, i, j int) bool {
 		for _, ci := range colIndexes {
 			cl := ix.Table.Cols[ci]
-			if cl.DataType() == tensor.STRING {
+			if cl.IsString() {
 				if ascending {
 					if cl.String1D(i) < cl.String1D(j) {
 						return true
@@ -417,7 +415,7 @@ func (ix *IndexView) NewTable() *Table {
 	for ci := range nt.Cols {
 		scl := ix.Table.Cols[ci]
 		tcl := nt.Cols[ci]
-		_, csz := tcl.RowCellSize()
+		_, csz := tcl.Shape().RowCellSize()
 		for i, srw := range ix.Indexes {
 			tcl.CopyCellsFrom(scl, i*csz, srw*csz, csz)
 		}
@@ -429,9 +427,9 @@ func (ix *IndexView) NewTable() *Table {
 // conversions of the values.  init is the initial value for the agg variable.
 // Operates independently over each cell on n-dimensional columns and returns the result as a slice
 // of values per cell.
-func (ix *IndexView) AggCol(colIndex int, ini float64, fun tensor.AggFunc) []float64 {
+func (ix *IndexView) AggCol(colIndex int, ini float64, fun func(idx int, val float64, agg float64) float64) []float64 {
 	cl := ix.Table.Cols[colIndex]
-	_, csz := cl.RowCellSize()
+	_, csz := cl.Shape().RowCellSize()
 
 	ag := make([]float64, csz)
 	for i := range ag {
