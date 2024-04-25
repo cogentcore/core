@@ -70,14 +70,18 @@ func homePage(ctx *htmlview.Context) bool {
 	})
 	core.NewText(fr).SetType(core.TextHeadlineMedium).SetText("A cross-platform framework for building powerful, fast, and cogent 2D and 3D apps")
 
-	blocks := core.NewLayout(fr).Style(func(s *styles.Style) {
-		s.Display = styles.Grid
-		s.Columns = 2
-	})
+	makeBlocks := func() core.Widget {
+		return core.NewLayout(fr).Style(func(s *styles.Style) {
+			s.Display = styles.Grid
+			s.Columns = 2
+		})
+	}
+
+	blocks := makeBlocks()
 
 	homeTextBlock(blocks, "CODE ONCE, RUN EVERYWHERE", "With Cogent Core, you can write your app once and it will instantly run on macOS, Windows, Linux, iOS, Android, and the Web, automatically scaling to any screen. Instead of struggling with platform-specific code in a multitude of languages, you can easily write and maintain a single pure Go codebase.")
 	core.NewIcon(blocks).SetIcon(icons.Devices).Style(func(s *styles.Style) {
-		s.Min.Set(units.Pw(40))
+		s.Min.Set(units.Dp(256))
 	})
 
 	// we get the code example contained within the md file
@@ -105,44 +109,41 @@ func main() {
 
 	homeTextBlock(blocks, "OPTIMIZED EXPERIENCE", "Every part of your development experience is guided by a comprehensive set of interactive example-based documentation, in-depth video tutorials, easy-to-use command line tools specialized for Cogent Core, and active support and development from the Cogent Core developers.")
 	core.NewIcon(blocks).SetIcon(icons.PlayCircle).Style(func(s *styles.Style) {
-		s.Min.Set(units.Pw(40))
+		s.Min.Set(units.Dp(256))
 	})
 
 	core.NewIcon(blocks).SetIcon(icons.Bolt).Style(func(s *styles.Style) {
-		s.Min.Set(units.Pw(40))
+		s.Min.Set(units.Dp(256))
 	})
 	homeTextBlock(blocks, "EXTREMELY FAST", "Cogent Core is powered by Vulkan, a modern, cross-platform, high-performance graphics framework that allows apps to run on all platforms at extremely fast speeds. All Cogent Core apps compile to machine code, allowing them to run without any overhead.")
 
 	homeTextBlock(blocks, "FREE AND OPEN SOURCE", "Cogent Core is completely free and open source under the permissive BSD-3 License, allowing you to use Cogent Core for any purpose, commercially or personally. We believe that software works best when everyone can use it.")
 	core.NewIcon(blocks).SetIcon(icons.Code).Style(func(s *styles.Style) {
-		s.Min.Set(units.Pw(40))
+		s.Min.Set(units.Dp(256))
 	})
 
 	core.NewIcon(blocks).SetIcon(icons.GlobeAsia).Style(func(s *styles.Style) {
-		s.Min.Set(units.Pw(40))
+		s.Min.Set(units.Dp(256))
 	})
 	homeTextBlock(blocks, "USED AROUND THE WORLD", "Over six years of development, Cogent Core has been used and thoroughly tested by developers and scientists around the world for a wide variety of use cases. Cogent Core is a production-ready framework actively used to power everything from end-user apps to scientific research.")
 
 	core.NewText(fr).SetType(core.TextDisplaySmall).SetText("<b>What can you make with Cogent Core?</b>")
 
-	appBlocks := core.NewLayout(fr).Style(func(s *styles.Style) {
-		s.Display = styles.Grid
-		s.Columns = 2
-	})
+	appBlocks := makeBlocks()
 
 	homeTextBlock(appBlocks, "COGENT CODE", "Cogent Code is a fully featured Go IDE with support for syntax highlighting, code completion, symbol lookup, building and debugging, version control, keyboard shortcuts, and many other features.")
 	core.NewIcon(appBlocks).SetIcon(icons.Code).Style(func(s *styles.Style) {
-		s.Min.Set(units.Pw(40))
+		s.Min.Set(units.Dp(256))
 	})
 
 	core.NewIcon(appBlocks).SetIcon(icons.Polyline).Style(func(s *styles.Style) {
-		s.Min.Set(units.Pw(40))
+		s.Min.Set(units.Dp(256))
 	})
 	homeTextBlock(appBlocks, "COGENT VECTOR", "Cogent Vector is a powerful vector graphics editor with complete support for shapes, paths, curves, text, images, gradients, groups, alignment, styling, importing, exporting, undo, redo, and various other features.")
 
 	homeTextBlock(appBlocks, "COGENT MAIL", "Cogent Mail is a customizable email client with built-in Markdown support and an extensive set of keyboard shortcuts for advanced mail filing.")
 	core.NewIcon(appBlocks).SetIcon(icons.Mail).Style(func(s *styles.Style) {
-		s.Min.Set(units.Pw(40))
+		s.Min.Set(units.Dp(256))
 	})
 
 	errors.Log(core.NewSVG(appBlocks).OpenFS(resources, "emergent-icon.svg"))
@@ -151,6 +152,14 @@ func main() {
 	homeTextBlock(appBlocks, "WELD", "WELD is a set of 3D computational models of a new approach to quantum physics based on wave electrodynamics.")
 	errors.Log(core.NewImage(appBlocks).OpenFS(resources, "weld-icon.png"))
 
+	core.NewText(fr).SetType(core.TextDisplaySmall).SetText("<b>Why Cogent Core is better than...</b>")
+
+	otherBlocks := makeBlocks()
+
+	homeTextBlock(otherBlocks, "FLUTTER", "Despite having strong cross-platform support, Flutter lacks the elegance of Cogent Core, since it is built on Dart, a language that doesn't provide the same consistency and readability as Go.")
+	core.NewIcon(otherBlocks).SetIcon(icons.Flutter).Style(func(s *styles.Style) {
+		s.Min.Set(units.Dp(256))
+	})
 	core.NewButton(fr).SetText("Get Started").OnClick(func(e events.Event) {
 		ctx.OpenURL("getting-started")
 	})
