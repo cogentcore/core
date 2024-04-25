@@ -21,7 +21,7 @@ const (
 	SizeExpanded
 )
 
-// SizeClass returns the size class of the scene in which it is contained.
+// SizeClass returns the size class of the scene in which the widget is contained.
 func (wb *WidgetBase) SizeClass() SizeClasses {
 	dots := float32(wb.Scene.SceneGeom.Size.X)
 	dpd := wb.Scene.Styles.UnitContext.Dp(1) // dots per dp

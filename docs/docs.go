@@ -73,7 +73,11 @@ func homePage(ctx *htmlview.Context) bool {
 	makeBlocks := func() core.Widget {
 		return core.NewLayout(fr).Style(func(s *styles.Style) {
 			s.Display = styles.Grid
-			s.Columns = 2
+			if fr.SizeClass() == core.SizeCompact {
+				s.Columns = 1
+			} else {
+				s.Columns = 2
+			}
 		})
 	}
 
