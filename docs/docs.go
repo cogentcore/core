@@ -156,7 +156,7 @@ func main() {
 
 	otherBlocks := makeBlocks()
 
-	homeTextBlock(otherBlocks, "FLUTTER", "Despite having strong cross-platform support, Flutter lacks the elegance of Cogent Core, since it is built on Dart, a language that doesn't provide the same consistency and readability as Go. It also doesn't provide the same powerful features as Cogent Core, making it impractical for data science and other advanced use cases.")
+	homeTextBlock(otherBlocks, `<a href="https://flutter.dev">FLUTTER</a>`, "Flutter lacks the elegance of Cogent Core, since it is built on Dart, a language that doesn't provide the same consistency and readability as Go. It also doesn't provide the same powerful features as Cogent Core, making it impractical for data science and other advanced use cases.")
 	core.NewIcon(otherBlocks).SetIcon(icons.Flutter).Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
 	})
@@ -164,7 +164,12 @@ func main() {
 	core.NewIcon(otherBlocks).SetIcon(icons.Toolbar).Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
 	})
-	homeTextBlock(otherBlocks, "REACT", "React is built on outdated, inelegant, and inconsistent web languages like JavaScript, HTML, and CSS, making it difficult to build powerful, fast, and cogent apps. Additionally, it lacks the built-in powerful features and user customizability of Cogent Core.")
+	homeTextBlock(otherBlocks, `<a href="https://react.dev">REACT</a>`, "React is built on outdated, inelegant, and inconsistent web languages like JavaScript, HTML, and CSS, making it difficult to build powerful, fast, and cogent apps. Additionally, it lacks the built-in powerful features and user customizability of Cogent Core.")
+
+	homeTextBlock(otherBlocks, `<a href="https://qt.io">QT</a>`, "Qt is built on C++, an outdated, difficult to use, and inelegant language that makes Qt fraught with boilerplate and clunky to develop with; compile times range from minutes to hours. Also, it produces apps with unfriendly styling and no built-in user customizability.")
+	core.NewIcon(otherBlocks).SetIcon(icons.Toolbar).Style(func(s *styles.Style) {
+		s.Min.Set(units.Dp(256))
+	})
 
 	core.NewButton(fr).SetText("Get Started").OnClick(func(e events.Event) {
 		ctx.OpenURL("getting-started")
