@@ -156,7 +156,7 @@ func main() {
 
 	otherBlocks := makeBlocks()
 
-	homeTextBlock(otherBlocks, "FLUTTER", "Despite having strong cross-platform support, Flutter lacks the elegance of Cogent Core, since it is built on Dart, a language that doesn't provide the same consistency and readability as Go.")
+	homeTextBlock(otherBlocks, "FLUTTER", "Despite having strong cross-platform support, Flutter lacks the elegance of Cogent Core, since it is built on Dart, a language that doesn't provide the same consistency and readability as Go. It also doesn't provide the same powerful features as Cogent Core, making it impractical for apps like code editors and scientific models.")
 	core.NewIcon(otherBlocks).SetIcon(icons.Flutter).Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
 	})
