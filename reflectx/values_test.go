@@ -140,3 +140,30 @@ func TestSetRobustFomString(t *testing.T) {
 		t.Errorf("ToString: failed to use Stringer on enum")
 	}
 }
+
+func BenchmarkFloatToFloat(b *testing.B) {
+	sum := 0.0
+	for range b.N {
+		v, _ := ToFloat(1.0)
+		sum += v
+	}
+	b.Log(sum)
+}
+
+func BenchmarkUint64ToFloat(b *testing.B) {
+	sum := 0.0
+	for range b.N {
+		v, _ := ToFloat(uint64(1))
+		sum += v
+	}
+	b.Log(sum)
+}
+
+func BenchmarkStringToFloat(b *testing.B) {
+	sum := 0.0
+	for range b.N {
+		v, _ := ToFloat("1")
+		sum += v
+	}
+	b.Log(sum)
+}
