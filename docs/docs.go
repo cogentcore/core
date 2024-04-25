@@ -46,20 +46,12 @@ func main() {
 	pg.Context.WikilinkResolver = htmlview.PkgGoDevWikilink("cogentcore.org/core")
 	b.AddAppBar(pg.AppBar)
 
-	htmlview.ElementHandlers["home-header"] = homeHeader
-	htmlview.ElementHandlers["get-started"] = func(ctx *htmlview.Context) bool {
-		core.NewButton(ctx.BlockParent).SetText("Get Started").OnClick(func(e events.Event) {
-			pg.OpenURL("/getting-started", true)
-		}).Style(func(s *styles.Style) {
-			s.Align.Self = styles.Center
-		})
-		return true
-	}
+	htmlview.ElementHandlers["home-page"] = homePage
 
 	b.RunMainWindow()
 }
 
-func homeHeader(ctx *htmlview.Context) bool {
+func homePage(ctx *htmlview.Context) bool {
 	fr := core.NewFrame(ctx.BlockParent).Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.CenterAll()
@@ -158,6 +150,10 @@ func main() {
 
 	homeTextBlock(appBlocks, "WELD", "WELD is a set of 3D computational models of a new approach to quantum physics based on wave electrodynamics.")
 	errors.Log(core.NewImage(appBlocks).OpenFS(resources, "weld-icon.png"))
+
+	core.NewButton(fr).SetText("Get Started").OnClick(func(e events.Event) {
+		ctx.OpenURL("getting-started")
+	})
 
 	return true
 }
