@@ -455,7 +455,7 @@ func (dt *Table) TensorFloat1D(colNm string, row int, idx int) float64 {
 	if ct.NumDims() == 1 {
 		return 0
 	}
-	_, sz := ct.Shape().RowCellSize()
+	_, sz := ct.RowCellSize()
 	if idx >= sz || idx < 0 {
 		return 0
 	}
@@ -535,7 +535,7 @@ func (dt *Table) SetTensorIndex(col, row int, val tensor.Tensor) bool {
 		return false
 	}
 	ct := dt.Cols[col]
-	_, csz := ct.Shape().RowCellSize()
+	_, csz := ct.RowCellSize()
 	st := row * csz
 	sz := min(csz, val.Len())
 	if ct.IsString() {
@@ -574,7 +574,7 @@ func (dt *Table) SetTensorFloat1D(colNm string, row int, idx int, val float64) b
 	if ct == nil {
 		return false
 	}
-	_, sz := ct.Shape().RowCellSize()
+	_, sz := ct.RowCellSize()
 	if idx >= sz || idx < 0 {
 		return false
 	}
@@ -598,7 +598,7 @@ func (dt *Table) CopyCell(colNm string, row int, cpt *Table, cpColNm string, cpR
 	if cpct != nil {
 		return false
 	}
-	_, sz := ct.Shape().RowCellSize()
+	_, sz := ct.RowCellSize()
 	if sz == 1 {
 		if ct.IsString() {
 			ct.SetString1D(row, cpct.String1D(cpRow))
@@ -606,7 +606,7 @@ func (dt *Table) CopyCell(colNm string, row int, cpt *Table, cpColNm string, cpR
 			ct.SetFloat1D(row, cpct.Float1D(cpRow))
 		}
 	} else {
-		_, cpsz := cpct.Shape().RowCellSize()
+		_, cpsz := cpct.RowCellSize()
 		st := row * sz
 		cst := cpRow * cpsz
 		msz := min(sz, cpsz)

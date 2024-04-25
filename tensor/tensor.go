@@ -31,6 +31,11 @@ type Tensor interface {
 	// NumDims returns the total number of dimensions.
 	NumDims() int
 
+	// RowCellSize returns the size of the outer-most Row shape dimension,
+	// and the size of all the remaining inner dimensions (the "cell" size).
+	// Used for Tensors that are columns in a data table.
+	RowCellSize() (rows, cells int)
+
 	// returns true if the data type is a String. otherwise is numeric.
 	IsString() bool
 

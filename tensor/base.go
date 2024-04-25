@@ -26,6 +26,13 @@ func (tsr *Base[T]) Len() int { return tsr.Shp.Len() }
 
 func (tsr *Base[T]) NumDims() int { return tsr.Shp.NumDims() }
 
+// RowCellSize returns the size of the outer-most Row shape dimension,
+// and the size of all the remaining inner dimensions (the "cell" size).
+// Used for Tensors that are columns in a data table.
+func (tsr *Base[T]) RowCellSize() (rows, cells int) {
+	return tsr.Shp.RowCellSize()
+}
+
 func (tsr *Base[T]) Value(i []int) T    { j := tsr.Shp.Offset(i); return tsr.Values[j] }
 func (tsr *Base[T]) Value1D(i int) T    { return tsr.Values[i] }
 func (tsr *Base[T]) Set(i []int, val T) { j := tsr.Shp.Offset(i); tsr.Values[j] = val }

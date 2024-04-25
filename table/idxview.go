@@ -415,7 +415,7 @@ func (ix *IndexView) NewTable() *Table {
 	for ci := range nt.Cols {
 		scl := ix.Table.Cols[ci]
 		tcl := nt.Cols[ci]
-		_, csz := tcl.Shape().RowCellSize()
+		_, csz := tcl.RowCellSize()
 		for i, srw := range ix.Indexes {
 			tcl.CopyCellsFrom(scl, i*csz, srw*csz, csz)
 		}
@@ -429,7 +429,7 @@ func (ix *IndexView) NewTable() *Table {
 // of values per cell.
 func (ix *IndexView) AggCol(colIndex int, ini float64, fun func(idx int, val float64, agg float64) float64) []float64 {
 	cl := ix.Table.Cols[colIndex]
-	_, csz := cl.Shape().RowCellSize()
+	_, csz := cl.RowCellSize()
 
 	ag := make([]float64, csz)
 	for i := range ag {
