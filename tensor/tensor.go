@@ -236,9 +236,8 @@ func NewOfType(typ reflect.Kind, sizes []int, names ...string) Tensor {
 	case reflect.Int8:
 		return NewNumber[int8](sizes, names...)
 	default:
-		panic("tensor.NewOfType: type not supported!")
+		panic(fmt.Sprintf("tensor.NewOfType: type not supported: %v", typ))
 	}
-	return NewString(sizes, names...)
 }
 
 // NewOfTypeShape returns a new n-dimensional tensor of given reflect.Kind type
@@ -264,19 +263,19 @@ func CopyDense(to Tensor, dm *mat.Dense) {
 	}
 }
 
-// SetSliceLen is a utility function to set given slice to given length,
+// SetSliceLength is a utility function to set given slice to given length,
 // reusing existing where possible and making a new one as needed.
-func SetSliceLen[S ~[]E, E any](s S, sz int) S {
+func SetSliceLength[S ~[]E, E any](s S, sz int) S {
 	switch {
 	case len(s) == sz:
 	case len(s) < sz:
 		if cap(s) >= sz {
-			s = (s)[0:sz]
+			s = (s)[:sz]
 		} else {
 			s = make([]E, sz)
 		}
 	default:
-		s = s[0:sz]
+		s = s[:sz]
 	}
 	return s
 }

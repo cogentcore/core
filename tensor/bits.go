@@ -6,7 +6,7 @@ package tensor
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"reflect"
 	"strings"
 
@@ -162,7 +162,7 @@ func (tsr *Bits) SetFloatRowCell(row, cell int, val float64) {
 
 func (tsr *Bits) Floats(flt *[]float64) {
 	sz := tsr.Len()
-	*flt = SetSliceLen(*flt, sz)
+	*flt = SetSliceLength(*flt, sz)
 	for j := 0; j < sz; j++ {
 		(*flt)[j] = BoolToFloat64(tsr.Values.Index(j))
 	}
@@ -306,21 +306,21 @@ func (tsr *Bits) CopyCellsFrom(frm Tensor, to, start, n int) {
 // Dims is the gonum/mat.Matrix interface method for returning the dimensionality of the
 // 2D Matrix.  Not supported for Bits -- do not call!
 func (tsr *Bits) Dims() (r, c int) {
-	log.Println("tensor Dims gonum Matrix call made on Bits Tensor -- not supported")
+	slog.Error("tensor Dims gonum Matrix call made on Bits Tensor; not supported")
 	return 0, 0
 }
 
 // At is the gonum/mat.Matrix interface method for returning 2D matrix element at given
 // row, column index.  Not supported for Bits -- do not call!
 func (tsr *Bits) At(i, j int) float64 {
-	log.Println("tensor At gonum Matrix call made on Bits Tensor -- not supported")
+	slog.Error("tensor At gonum Matrix call made on Bits Tensor; not supported")
 	return 0
 }
 
 // T is the gonum/mat.Matrix transpose method.
 // Not supported for Bits -- do not call!
 func (tsr *Bits) T() mat.Matrix {
-	log.Println("tensor T gonum Matrix call made on Bits Tensor -- not supported")
+	slog.Error("tensor T gonum Matrix call made on Bits Tensor; not supported")
 	return mat.Transpose{tsr}
 }
 
@@ -347,6 +347,3 @@ func (tsr *Bits) String() string {
 	}
 	return b.String()
 }
-
-// Check for interface implementation
-var _ Tensor = (*Bits)(nil)

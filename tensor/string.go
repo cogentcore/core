@@ -144,7 +144,7 @@ func (tsr *String) SetFloatRowCell(row, cell int, val float64) {
 // This can be used for all of the gonum/floats methods
 // for basic math, gonum/stats, etc.
 func (tsr *String) Floats(flt *[]float64) {
-	*flt = SetSliceLen(*flt, len(tsr.Values))
+	*flt = SetSliceLength(*flt, len(tsr.Values))
 	for i, v := range tsr.Values {
 		(*flt)[i] = StringToFloat64(v)
 	}
@@ -287,6 +287,3 @@ func (tsr *String) SubSpace(offs []int) Tensor {
 	rt := &String{Base: *b}
 	return rt
 }
-
-// Check for interface implementation
-var _ Tensor = (*String)(nil)

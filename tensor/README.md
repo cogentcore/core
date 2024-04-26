@@ -7,4 +7,3 @@ Tensor and related sub-packages provide a simple yet powerful framework for repr
 * [tensorview](tensorview) provides Core views of the `Tensor` and `Table` data.
 
 * [stats](stats) implements a number of different ways of analyzing tensor and table data.
-

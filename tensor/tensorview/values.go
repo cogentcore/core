@@ -15,33 +15,16 @@ import (
 )
 
 func init() {
-	views.AddValue(tensor.Float32{}, func() views.Value {
-		return &TensorValue{}
-	})
-	views.AddValue(tensor.Float64{}, func() views.Value {
-		return &TensorValue{}
-	})
-	views.AddValue(tensor.Number[int]{}, func() views.Value {
-		return &TensorValue{}
-	})
-	views.AddValue(tensor.Number[int32]{}, func() views.Value {
-		return &TensorValue{}
-	})
-	views.AddValue(tensor.String{}, func() views.Value {
-		return &TensorValue{}
-	})
-	views.AddValue(table.Table{}, func() views.Value {
-		return &TableValue{}
-	})
-	views.AddValue(simat.SimMat{}, func() views.Value {
-		return &SimMatValue{}
-	})
+	views.AddValue(tensor.Float32{}, func() views.Value { return &TensorValue{} })
+	views.AddValue(tensor.Float64{}, func() views.Value { return &TensorValue{} })
+	views.AddValue(tensor.Int{}, func() views.Value { return &TensorValue{} })
+	views.AddValue(tensor.Number[int32]{}, func() views.Value { return &TensorValue{} })
+	views.AddValue(tensor.String{}, func() views.Value { return &TensorValue{} })
+	views.AddValue(table.Table{}, func() views.Value { return &TableValue{} })
+	views.AddValue(simat.SimMat{}, func() views.Value { return &SimMatValue{} })
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-//  TensorGridValue
-
-// TensorGridValue manages a TensorGrid view of an tensor.Tensor
+// TensorGridValue manages a [TensorGrid] view of an [tensor.Tensor].
 type TensorGridValue struct {
 	views.ValueBase[*TensorGrid]
 }
@@ -56,10 +39,7 @@ func (v *TensorGridValue) Update() {
 	v.Widget.SetTensor(tsr)
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-//  TensorValue
-
-// TensorValue presents a button that pulls up the TensorView viewer for an tensor.Tensor
+// TensorValue presents a button that pulls up the [TensorView] viewer for an [tensor.Tensor].
 type TensorValue struct {
 	views.ValueBase[*core.Button]
 }
@@ -89,10 +69,7 @@ func (v *TensorValue) ConfigDialog(d *core.Body) (bool, func()) {
 	return true, nil
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-//  TableValue
-
-// TableValue presents a button that pulls up the TableView viewer for an table.Table
+// TableValue presents a button that pulls up the [TableView] viewer for a [table.Table].
 type TableValue struct {
 	views.ValueBase[*core.Button]
 }
@@ -129,10 +106,7 @@ func (v *TableValue) ConfigDialog(d *core.Body) (bool, func()) {
 	return true, nil
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-//  SimMatValue
-
-// SimMatValue presents a button that pulls up the SimMatGridView viewer for an table.Table
+// SimMatValue presents a button that pulls up the [SimMatGridView] viewer for a [table.Table].
 type SimMatValue struct {
 	views.ValueBase[*core.Button]
 }
