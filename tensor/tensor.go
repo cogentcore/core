@@ -177,7 +177,7 @@ type Tensor interface {
 
 // New returns a new n-dimensional tensor of given value type
 // with the given sizes per dimension (shape), and optional dimension names.
-// Allowed types are: string, bool (for a Bits), or any basic numerical value.
+// Supported types are: string, bool (for a Bits), float32, float64, int, int32, int8
 // Nulls are initialized to nil.
 func New[T string | bool | num.Number](sizes []int, names ...string) Tensor {
 	var v T
@@ -192,26 +192,12 @@ func New[T string | bool | num.Number](sizes []int, names ...string) Tensor {
 		return NewNumber[float32](sizes, names...)
 	case int:
 		return NewNumber[int](sizes, names...)
-	case int64:
-		return NewNumber[int64](sizes, names...)
 	case int32:
 		return NewNumber[int32](sizes, names...)
-	case int16:
-		return NewNumber[int16](sizes, names...)
 	case int8:
 		return NewNumber[int8](sizes, names...)
-	case uint:
-		return NewNumber[uint](sizes, names...)
-	case uint64:
-		return NewNumber[uint64](sizes, names...)
-	case uint32:
-		return NewNumber[uint32](sizes, names...)
-	case uint16:
-		return NewNumber[uint16](sizes, names...)
-	case uint8:
-		return NewNumber[uint8](sizes, names...)
-	case uintptr:
-		return NewNumber[uintptr](sizes, names...)
+	default:
+		panic("tensor.New: type not supported!")
 	}
 	return NewString(sizes, names...)
 }
@@ -226,7 +212,7 @@ func NewOfShape[T string | bool | num.Number](shape *Shape) Tensor {
 
 // NewOfType returns a new n-dimensional tensor of given reflect.Kind type
 // with the given sizes per dimension (shape), and optional dimension names.
-// Allowed types are: string, bool (for a Bits), or any basic numerical value.
+// Supported types are: string, bool (for a Bits), float32, float64, int, int32, int8
 // Nulls are initialized to nil.
 func NewOfType(typ reflect.Kind, sizes []int, names ...string) Tensor {
 	switch typ {
@@ -240,26 +226,12 @@ func NewOfType(typ reflect.Kind, sizes []int, names ...string) Tensor {
 		return NewNumber[float32](sizes, names...)
 	case reflect.Int:
 		return NewNumber[int](sizes, names...)
-	case reflect.Int64:
-		return NewNumber[int64](sizes, names...)
 	case reflect.Int32:
 		return NewNumber[int32](sizes, names...)
-	case reflect.Int16:
-		return NewNumber[int16](sizes, names...)
 	case reflect.Int8:
 		return NewNumber[int8](sizes, names...)
-	case reflect.Uint:
-		return NewNumber[uint](sizes, names...)
-	case reflect.Uint64:
-		return NewNumber[uint64](sizes, names...)
-	case reflect.Uint32:
-		return NewNumber[uint32](sizes, names...)
-	case reflect.Uint16:
-		return NewNumber[uint16](sizes, names...)
-	case reflect.Uint8:
-		return NewNumber[uint8](sizes, names...)
-	case reflect.Uintptr:
-		return NewNumber[uintptr](sizes, names...)
+	default:
+		panic("tensor.NewOfType: type not supported!")
 	}
 	return NewString(sizes, names...)
 }
