@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"strings"
 
-	"cogentcore.org/core/bitslice"
 	"cogentcore.org/core/gox/num"
+	"cogentcore.org/core/tensor/bitslice"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -161,7 +161,7 @@ func (tsr *Number[T]) SetFloats(flt []float64) {
 func (tsr *Number[T]) At(i, j int) float64 {
 	nd := tsr.NumDims()
 	if nd < 2 {
-		log.Println("etensor Dims gonum Matrix call made on Tensor with dims < 2")
+		log.Println("tensor Dims gonum Matrix call made on Tensor with dims < 2")
 		return 0
 	} else if nd == 2 {
 		return tsr.Float([]int{i, j})

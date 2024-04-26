@@ -50,7 +50,7 @@ type SplitAgg struct {
 // Splits also maintains Aggs aggregate values for each split, which can be computed using
 // standard aggregation methods over data columns, using the split.Agg* functions.
 //
-// The etable code contains the structural methods for managing the Splits data.
+// The table code contains the structural methods for managing the Splits data.
 // See split package for end-user methods to generate different kinds of splits,
 // and perform aggregations, etc.
 type Splits struct {
@@ -180,7 +180,7 @@ func (spl *Splits) SortLevels() {
 // which can be a subset as well
 func (spl *Splits) SortOrder(order []int) error {
 	if len(order) == 0 || len(order) > len(spl.Levels) {
-		return fmt.Errorf("etable.Splits SortOrder: order length == 0 or > Levels")
+		return fmt.Errorf("table.Splits SortOrder: order length == 0 or > Levels")
 	}
 	spl.Sort(func(sl *Splits, i, j int) bool {
 		vli := sl.Values[i]
@@ -204,7 +204,7 @@ func (spl *Splits) SortOrder(order []int) error {
 func (spl *Splits) ReorderLevels(order []int) error {
 	nlev := len(spl.Levels)
 	if len(order) != nlev {
-		return fmt.Errorf("etable.Splits ReorderLevels: order length != Levels")
+		return fmt.Errorf("table.Splits ReorderLevels: order length != Levels")
 	}
 	old := make([]string, nlev)
 	copy(old, spl.Levels)
@@ -227,7 +227,7 @@ func (spl *Splits) ReorderLevels(order []int) error {
 func (spl *Splits) ExtractLevels(levels []int) (*Splits, error) {
 	nlv := len(levels)
 	if nlv == 0 || nlv >= len(spl.Levels) {
-		return nil, fmt.Errorf("etable.Splits ExtractLevels: levels length == 0 or >= Levels")
+		return nil, fmt.Errorf("table.Splits ExtractLevels: levels length == 0 or >= Levels")
 	}
 	aggs := spl.Aggs
 	spl.Aggs = nil
@@ -342,7 +342,7 @@ func (spl *Splits) AggByNameTry(name string) (*SplitAgg, error) {
 	if ag != nil {
 		return ag, nil
 	}
-	return nil, fmt.Errorf("etable.Splits AggByNameTry: agg results named: %v not found", name)
+	return nil, fmt.Errorf("table.Splits AggByNameTry: agg results named: %v not found", name)
 }
 
 // AggByColumnName returns Agg results for given column name, optionally including :Name agg name
@@ -378,7 +378,7 @@ func (spl *Splits) AggByColumnNameTry(name string) (*SplitAgg, error) {
 	if ag != nil {
 		return ag, nil
 	}
-	return nil, fmt.Errorf("etable.Splits AggByColumnNameTry: agg results named: %v not found", name)
+	return nil, fmt.Errorf("table.Splits AggByColumnNameTry: agg results named: %v not found", name)
 }
 
 // SetLevels sets the Levels index names -- must match actual index dimensionality

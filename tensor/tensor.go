@@ -9,7 +9,6 @@ package tensor
 import (
 	"reflect"
 
-	"cogentcore.org/core/gox/num"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -25,6 +24,8 @@ import (
 // It supports Null (non-present) values, and specific access for
 // float64 and string types.
 type Tensor interface {
+	mat.Matrix
+
 	// Shape returns a pointer to the shape that fully parameterizes the tensor shape
 	Shape() *Shape
 
@@ -33,6 +34,9 @@ type Tensor interface {
 
 	// NumDims returns the total number of dimensions.
 	NumDims() int
+
+	// DimSize returns size of given dimension
+	DimSize(dim int) int
 
 	// RowCellSize returns the size of the outer-most Row shape dimension,
 	// and the size of all the remaining inner dimensions (the "cell" size).
@@ -179,7 +183,7 @@ type Tensor interface {
 // with the given sizes per dimension (shape), and optional dimension names.
 // Supported types are: string, bool (for a Bits), float32, float64, int, int32, int8
 // Nulls are initialized to nil.
-func New[T string | bool | num.Number](sizes []int, names ...string) Tensor {
+func New[T string | bool | float32 | float64 | int | int32 | int8](sizes []int, names ...string) Tensor {
 	var v T
 	switch any(v).(type) {
 	case string:
@@ -206,7 +210,7 @@ func New[T string | bool | num.Number](sizes []int, names ...string) Tensor {
 // with the given Shape information.
 // Allowed types are: string, bool (for a Bits), or any basic numerical value.
 // Nulls are initialized to nil.
-func NewOfShape[T string | bool | num.Number](shape *Shape) Tensor {
+func NewOfShape[T string | bool | float32 | float64 | int | int32 | int8](shape *Shape) Tensor {
 	return New[T](shape.Sizes, shape.Names...)
 }
 

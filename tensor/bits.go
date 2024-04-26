@@ -10,8 +10,8 @@ import (
 	"reflect"
 	"strings"
 
-	"cogentcore.org/core/bitslice"
 	"cogentcore.org/core/reflectx"
+	"cogentcore.org/core/tensor/bitslice"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -67,11 +67,17 @@ func (tsr *Bits) DataType() reflect.Kind {
 	return reflect.Bool
 }
 
+// Shape returns a pointer to the shape that fully parameterizes the tensor shape
 func (tsr *Bits) Shape() *Shape { return &tsr.Shp }
 
+// Len returns the number of elements in the tensor (product of shape dimensions).
 func (tsr *Bits) Len() int { return tsr.Shp.Len() }
 
+// NumDims returns the total number of dimensions.
 func (tsr *Bits) NumDims() int { return tsr.Shp.NumDims() }
+
+// DimSize returns size of given dimension
+func (tsr *Bits) DimSize(dim int) int { return tsr.Shp.Size(dim) }
 
 // RowCellSize returns the size of the outer-most Row shape dimension,
 // and the size of all the remaining inner dimensions (the "cell" size).
@@ -300,21 +306,21 @@ func (tsr *Bits) CopyCellsFrom(frm Tensor, to, start, n int) {
 // Dims is the gonum/mat.Matrix interface method for returning the dimensionality of the
 // 2D Matrix.  Not supported for Bits -- do not call!
 func (tsr *Bits) Dims() (r, c int) {
-	log.Println("etensor Dims gonum Matrix call made on Bits Tensor -- not supported")
+	log.Println("tensor Dims gonum Matrix call made on Bits Tensor -- not supported")
 	return 0, 0
 }
 
 // At is the gonum/mat.Matrix interface method for returning 2D matrix element at given
 // row, column index.  Not supported for Bits -- do not call!
 func (tsr *Bits) At(i, j int) float64 {
-	log.Println("etensor At gonum Matrix call made on Bits Tensor -- not supported")
+	log.Println("tensor At gonum Matrix call made on Bits Tensor -- not supported")
 	return 0
 }
 
 // T is the gonum/mat.Matrix transpose method.
 // Not supported for Bits -- do not call!
 func (tsr *Bits) T() mat.Matrix {
-	log.Println("etensor T gonum Matrix call made on Bits Tensor -- not supported")
+	log.Println("tensor T gonum Matrix call made on Bits Tensor -- not supported")
 	return mat.Transpose{tsr}
 }
 

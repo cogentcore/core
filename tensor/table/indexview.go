@@ -25,7 +25,7 @@ type LessFunc func(et *Table, i, j int) bool
 // view of the table, and false if it should be removed.
 type FilterFunc func(et *Table, row int) bool
 
-// IndexView is an indexed wrapper around an etable.Table that provides a
+// IndexView is an indexed wrapper around an table.Table that provides a
 // specific view onto the Table defined by the set of indexes.
 // This provides an efficient way of sorting and filtering a table by only
 // updating the indexes while doing nothing to the Table itself.
@@ -123,10 +123,10 @@ func (ix *IndexView) SortIndexes() {
 }
 
 const (
-	// Ascending specifies an ascending sort direction for etable Sort routines
+	// Ascending specifies an ascending sort direction for table Sort routines
 	Ascending = true
 
-	// Descending specifies a descending sort direction for etable Sort routines
+	// Descending specifies a descending sort direction for table Sort routines
 	Descending = false
 )
 
@@ -175,7 +175,7 @@ func (ix *IndexView) SortColumn(colIndex int, ascending bool) {
 func (ix *IndexView) SortColumnNames(colNms []string, ascending bool) error {
 	nc := len(colNms)
 	if nc == 0 {
-		return fmt.Errorf("etable.IndexView.SortColumnNames: no column names provided")
+		return fmt.Errorf("table.IndexView.SortColumnNames: no column names provided")
 	}
 	cis := make([]int, nc)
 	for i, cn := range colNms {
@@ -289,7 +289,7 @@ func (ix *IndexView) SortStableColumn(colIndex int, ascending bool) {
 func (ix *IndexView) SortStableColumnNames(colNms []string, ascending bool) error {
 	nc := len(colNms)
 	if nc == 0 {
-		return fmt.Errorf("etable.IndexView.SortStableColumnNames: no column names provided")
+		return fmt.Errorf("table.IndexView.SortStableColumnNames: no column names provided")
 	}
 	cis := make([]int, nc)
 	for i, cn := range colNms {

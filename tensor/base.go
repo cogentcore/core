@@ -9,8 +9,8 @@ import (
 	"log"
 	"reflect"
 
-	"cogentcore.org/core/bitslice"
 	"cogentcore.org/core/reflectx"
+	"cogentcore.org/core/tensor/bitslice"
 )
 
 // Base is an n-dim array of float64s.
@@ -21,11 +21,17 @@ type Base[T any] struct {
 	Meta   map[string]string
 }
 
+// Shape returns a pointer to the shape that fully parameterizes the tensor shape
 func (tsr *Base[T]) Shape() *Shape { return &tsr.Shp }
 
+// Len returns the number of elements in the tensor (product of shape dimensions).
 func (tsr *Base[T]) Len() int { return tsr.Shp.Len() }
 
+// NumDims returns the total number of dimensions.
 func (tsr *Base[T]) NumDims() int { return tsr.Shp.NumDims() }
+
+// DimSize returns size of given dimension
+func (tsr *Base[T]) DimSize(dim int) int { return tsr.Shp.Size(dim) }
 
 // RowCellSize returns the size of the outer-most Row shape dimension,
 // and the size of all the remaining inner dimensions (the "cell" size).
@@ -167,7 +173,7 @@ func (tsr *Base[T]) Label() string {
 func (tsr *Base[T]) Dims() (r, c int) {
 	nd := tsr.NumDims()
 	if nd < 2 {
-		log.Println("etensor Dims gonum Matrix call made on Tensor with dims < 2")
+		log.Println("tensor Dims gonum Matrix call made on Tensor with dims < 2")
 		return 0, 0
 	}
 	return tsr.Shp.Size(nd - 2), tsr.Shp.Size(nd - 1)
@@ -178,11 +184,11 @@ func (tsr *Base[T]) Dims() (r, c int) {
 func (tsr *Base[T]) Symmetric() (r int) {
 	nd := tsr.NumDims()
 	if nd < 2 {
-		log.Println("etensor Symmetric gonum Matrix call made on Tensor with dims < 2")
+		log.Println("tensor Symmetric gonum Matrix call made on Tensor with dims < 2")
 		return 0
 	}
 	if tsr.Shp.Size(nd-2) != tsr.Shp.Size(nd-1) {
-		log.Println("etensor Symmetric gonum Matrix call made on Tensor that is not symmetric")
+		log.Println("tensor Symmetric gonum Matrix call made on Tensor that is not symmetric")
 		return 0
 	}
 	return tsr.Shp.Size(nd - 1)
@@ -192,11 +198,11 @@ func (tsr *Base[T]) Symmetric() (r int) {
 func (tsr *Base[T]) SymmetricDim() int {
 	nd := tsr.NumDims()
 	if nd < 2 {
-		log.Println("etensor Symmetric gonum Matrix call made on Tensor with dims < 2")
+		log.Println("tensor Symmetric gonum Matrix call made on Tensor with dims < 2")
 		return 0
 	}
 	if tsr.Shp.Size(nd-2) != tsr.Shp.Size(nd-1) {
-		log.Println("etensor Symmetric gonum Matrix call made on Tensor that is not symmetric")
+		log.Println("tensor Symmetric gonum Matrix call made on Tensor that is not symmetric")
 		return 0
 	}
 	return tsr.Shp.Size(nd - 1)

@@ -14,7 +14,6 @@ import (
 	"reflect"
 	"strings"
 
-	"cogentcore.org/core/gox/num"
 	"cogentcore.org/core/tensor"
 )
 
@@ -72,6 +71,16 @@ func (dt *Table) ColumnByName(name string) tensor.Tensor {
 		return nil
 	}
 	return dt.Columns[i]
+}
+
+// ColumnByNameTry returns the tensor at given column name, with error message if not found.
+// Returns nil if not found
+func (dt *Table) ColumnByNameTry(name string) (tensor.Tensor, error) {
+	i, ok := dt.ColumnNameMap[name]
+	if !ok {
+		return nil, fmt.Errorf("table.Table ColumnByNameTry: column named: %v not found", name)
+	}
+	return dt.Columns[i], nil
 }
 
 // ColumnIndex returns the index of the given column name.
@@ -137,8 +146,8 @@ func (dt *Table) UpdateColumnNameMap() error {
 // AddColumn adds a new column to the table, of given type and column name
 // (which must be unique).  The cells of this column hold a single scalar value:
 // see AddColumnTensor for n-dimensional cells.
-// Allowed types are: string, bool (for a Bits), or any basic numerical value.
-func AddColumn[T string | bool | num.Number](dt *Table, name string) tensor.Tensor {
+// Supported types are: string, bool (for a Bits), float32, float64, int, int32, int8
+func AddColumn[T string | bool | float32 | float64 | int | int32 | int8](dt *Table, name string) tensor.Tensor {
 	rows := max(1, dt.Rows)
 	tsr := tensor.New[T]([]int{rows}, "Row")
 	dt.AddColumn(tsr, name)
@@ -149,8 +158,8 @@ func AddColumn[T string | bool | num.Number](dt *Table, name string) tensor.Tens
 // (which must be unique), and dimensionality of each _cell_.
 // An outer-most Row dimension will be added to this dimensionality to create
 // the tensor column.
-// Allowed types are: string, bool (for a Bits), or any basic numerical value.
-func AddTensorColumn[T string | bool | num.Number](dt *Table, name string, cellSizes []int, dimNames ...string) tensor.Tensor {
+// Supported types are: string, bool (for a Bits), float32, float64, int, int32, int8
+func AddTensorColumn[T string | bool | float32 | float64 | int | int32 | int8](dt *Table, name string, cellSizes []int, dimNames ...string) tensor.Tensor {
 	rows := max(1, dt.Rows)
 	sz := append([]int{rows}, cellSizes...)
 	nms := append([]string{"Row"}, dimNames...)
