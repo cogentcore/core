@@ -56,6 +56,22 @@ func (bd *Body) NewFullDialog(ctx Widget) *Stage {
 	return bd.Scene.Stage
 }
 
+// RunDialogWindow returns and runs a new [DialogStage] that is placed in
+// a new window, in the context of the given widget.
+// See [Body.NewDialogWindow] to make a dialog window without running it.
+func (bd *Body) RunDialogWindow(ctx Widget) *Stage {
+	return bd.NewDialogWindow(ctx).Run()
+}
+
+// NewDialogWindow returns a new [DialogStage] that is placed in
+// a new window, in the context of the given widget.
+// See [Body.NewDialog] for a non-new-window dialog.
+func (bd *Body) NewDialogWindow(ctx Widget) *Stage {
+	bd.NewFullDialog(ctx)
+	bd.Scene.Stage.SetNewWindow(true)
+	return bd.Scene.Stage
+}
+
 // RecycleDialog looks for a dialog with the given data. If it
 // finds it, it shows it and returns true. Otherwise, it returns false.
 func RecycleDialog(data any) bool {
