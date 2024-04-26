@@ -33,7 +33,7 @@ type Table struct { //types:add
 	// the map of column names to column numbers
 	ColumnNameMap map[string]int `view:"-"`
 
-	// misc meta data for the table.  We use lower-case key names following the struct tag convention:  name = name of table; desc = description; read-only = gui is read-only; precision = n for precision to write out floats in csv.  For Column-specific data, we look for ColumnName: prefix, specifically ColumnName:desc = description of the column contents, which is shown as tooltip in the etview.TableView, and :width for width of a column
+	// misc meta data for the table.  We use lower-case key names following the struct tag convention:  name = name of table; desc = description; read-only = gui is read-only; precision = n for precision to write out floats in csv.  For Column-specific data, we look for ColumnName: prefix, specifically ColumnName:desc = description of the column contents, which is shown as tooltip in the tensorview.TableView, and :width for width of a column
 	MetaData map[string]string
 }
 
@@ -333,7 +333,7 @@ func (dt *Table) AppendRows(dt2 *Table) {
 // map if not yet initialized.  Standard Keys are:
 // * name -- name of table
 // * desc -- description of table
-// * read-only  -- makes gui read-only (inactive edits) for etview.TableView
+// * read-only  -- makes gui read-only (inactive edits) for tensorview.TableView
 // * ColumnName:* -- prefix for all column-specific meta-data
 //   - desc -- description of column
 func (dt *Table) SetMetaData(key, val string) {

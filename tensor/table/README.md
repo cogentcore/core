@@ -18,7 +18,7 @@ The following packages are included:
 
 * [eplot](eplot) provides an interactive 2D plotting GUI in [GoGi](https://cogentcore.org/core/gi) for Table data, using the [gonum plot](https://github.com/gonum/plot) plotting package.  You can select which columns to plot and specify various basic plot parameters.
 
-* [etview](etview) provides an interactive tabular, spreadsheet-style GUI using [GoGi](https://cogentcore.org/core/gi) for viewing and editing `etable.Table` and `etable.Tensor` objects.  The `etview.TensorGrid` also provides a colored grid display higher-dimensional tensor data.
+* [tensorview](tensorview) provides an interactive tabular, spreadsheet-style GUI using [GoGi](https://cogentcore.org/core/gi) for viewing and editing `etable.Table` and `etable.Tensor` objects.  The `tensorview.TensorGrid` also provides a colored grid display higher-dimensional tensor data.
 
 * [agg](agg) provides standard aggregation functions (`Sum`, `Mean`, `Var`, `Std` etc) operating over `etable.IndexView` views of Table data.  It also defines standard `AggFunc` functions such as `SumFunc` which can be used for `Agg` functions on either a Tensor or IndexView.
 
