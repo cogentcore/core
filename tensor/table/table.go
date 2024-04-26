@@ -146,8 +146,7 @@ func (dt *Table) UpdateColumnNameMap() error {
 // AddColumn adds a new column to the table, of given type and column name
 // (which must be unique).  The cells of this column hold a single scalar value:
 // see AddColumnTensor for n-dimensional cells.
-// Supported types are: string, bool (for a Bits), float32, float64, int, int32, byte
-func AddColumn[T string | bool | float32 | float64 | int | int32 | uint8](dt *Table, name string) tensor.Tensor {
+func AddColumn[T string | bool | float32 | float64 | int | int32 | byte](dt *Table, name string) tensor.Tensor {
 	rows := max(1, dt.Rows)
 	tsr := tensor.New[T]([]int{rows}, "Row")
 	dt.AddColumn(tsr, name)
@@ -158,8 +157,7 @@ func AddColumn[T string | bool | float32 | float64 | int | int32 | uint8](dt *Ta
 // (which must be unique), and dimensionality of each _cell_.
 // An outer-most Row dimension will be added to this dimensionality to create
 // the tensor column.
-// Supported types are: string, bool (for a Bits), float32, float64, int, int32, byte
-func AddTensorColumn[T string | bool | float32 | float64 | int | int32 | uint8](dt *Table, name string, cellSizes []int, dimNames ...string) tensor.Tensor {
+func AddTensorColumn[T string | bool | float32 | float64 | int | int32 | byte](dt *Table, name string, cellSizes []int, dimNames ...string) tensor.Tensor {
 	rows := max(1, dt.Rows)
 	sz := append([]int{rows}, cellSizes...)
 	nms := append([]string{"Row"}, dimNames...)

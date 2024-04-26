@@ -19,6 +19,7 @@ func init() {
 	views.AddValue(tensor.Float64{}, func() views.Value { return &TensorValue{} })
 	views.AddValue(tensor.Int{}, func() views.Value { return &TensorValue{} })
 	views.AddValue(tensor.Int32{}, func() views.Value { return &TensorValue{} })
+	views.AddValue(tensor.Byte{}, func() views.Value { return &TensorValue{} })
 	views.AddValue(tensor.String{}, func() views.Value { return &TensorValue{} })
 	views.AddValue(tensor.Bits{}, func() views.Value { return &TensorValue{} })
 	views.AddValue(table.Table{}, func() views.Value { return &TableValue{} })
