@@ -76,6 +76,8 @@ func homePage(ctx *htmlview.Context) bool {
 
 	makeBlock := func(title, text string, graphic func(parent core.Widget)) {
 		block := core.NewLayout(frame).Style(func(s *styles.Style) {
+			s.CenterAll()
+			s.Gap.Set(units.Em(1))
 			if frame.SizeClass() == core.SizeCompact {
 				s.Direction = styles.Column
 			}
