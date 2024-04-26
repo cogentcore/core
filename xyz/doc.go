@@ -3,10 +3,11 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package xyz provides a 3D scenegraph for the Cogent Core GUI framework.
-
-The scenegraph is rooted at a xyz.Scene node which is like core.Viewport2D,
-where the scene is rendered, similar to the svg.SVG node for SVG drawings.
+Package xyz is a 3D graphics framework written in Go.
+It is a separate standalone package that renders to an offscreen Vulkan framebuffer,
+which can easily be converted into a Go `image.RGBA`. The xyzview package provides an
+integration of xyz in Cogent Core, for dynamic and efficient 3D rendering within 2D
+GUI windows.
 
 Children of the Scene are Node nodes, with Group and Solid as the main
 subtypes.  NodeBase is the base implementation, which has a Pose for
