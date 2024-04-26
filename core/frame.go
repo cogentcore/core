@@ -10,8 +10,9 @@ import (
 	"cogentcore.org/core/units"
 )
 
-// Frame is a Layout that renders a background according to the
-// background-color style setting, and optional striping for grid layouts
+// Frame is a [Layout] that also renders the standard box model.
+// By default, [Frame]s grow in both the x and y directions; this
+// can be changed by setting [styles.Style.Grow].
 type Frame struct {
 	Layout
 }

@@ -58,9 +58,11 @@ const (
 // and positions of child widgets. It does not render, only organize,
 // so properties like background and border will have no effect.
 // All arbitrary collections of widgets should generally be contained
-// within a layout or a [Frame]; otherwise, the parent widget must take over
+// within a Layout or a [Frame]; otherwise, the parent widget must take over
 // responsibility for positioning. Layouts automatically can add scrollbars
-// depending on the [styles.Style.Overflow].
+// depending on the [styles.Style.Overflow]. By default, [Layout]s grow in
+// the x direction but not the y direction; this can be changed by setting
+// [styles.Style.Grow].
 //
 // For a [styles.Grid] layout, the [styles.Style.Columns] property should
 // generally be set to the desired number of columns, from which the number of rows
@@ -114,22 +116,10 @@ func (ly *Layout) SetStyles() {
 	ly.Style(func(s *styles.Style) {
 		// we never want borders on layouts
 		s.MaxBorder = styles.Border{}
+		s.Grow.Set(1, 0)
 	})
 	ly.StyleFinal(func(s *styles.Style) {
 		s.SetAbilities(s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto, abilities.Scrollable, abilities.Slideable)
-		switch {
-		case s.Display == styles.Flex:
-			if s.Wrap {
-				s.Grow.Set(1, 0)
-			} else {
-				s.Grow.SetDim(s.Direction.Dim(), 1)
-				s.Grow.SetDim(s.Direction.Dim().Other(), 0)
-			}
-		case s.Display == styles.Stacked:
-			s.Grow.Set(1, 1)
-		case s.Display == styles.Grid:
-			s.Grow.Set(1, 1)
-		}
 	})
 }
 
