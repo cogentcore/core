@@ -62,7 +62,7 @@ func homePage(ctx *htmlview.Context) bool {
 	errors.Log(img.OpenFS(resources, "name.png"))
 	img.Style(func(s *styles.Style) {
 		x := func(uc *units.Context) float32 {
-			return min(uc.Dp(612), uc.Vw(90))
+			return min(uc.Dp(612), uc.Pw(90))
 		}
 		s.Min.Set(units.Custom(x), units.Custom(func(uc *units.Context) float32 {
 			return x(uc) * (128.0 / 612.0)
@@ -75,7 +75,11 @@ func homePage(ctx *htmlview.Context) bool {
 	})
 
 	makeBlock := func(title, text string, graphic func(parent core.Widget)) {
-		block := core.NewLayout(frame)
+		block := core.NewLayout(frame).Style(func(s *styles.Style) {
+			if frame.SizeClass() == core.SizeCompact {
+				s.Direction = styles.Column
+			}
+		})
 
 		graphicFirst := frame.NumChildren()%2 == 0
 		if graphicFirst {
