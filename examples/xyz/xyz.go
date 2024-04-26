@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/examples/assets"
 	_ "cogentcore.org/core/xyz/io/obj"
-	"cogentcore.org/core/xyzview"
+	"cogentcore.org/core/xyz/xyzview"
 
 	"cogentcore.org/core/math32"
 )

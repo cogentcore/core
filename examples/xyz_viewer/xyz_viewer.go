@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/views"
 	"cogentcore.org/core/xyz"
 	_ "cogentcore.org/core/xyz/io/obj"
-	"cogentcore.org/core/xyzview"
+	"cogentcore.org/core/xyz/xyzview"
 )
 
 func main() {
