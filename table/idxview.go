@@ -130,25 +130,25 @@ const (
 	Descending = false
 )
 
-// SortColName sorts the indexes into our Table according to values in
+// SortColumnName sorts the indexes into our Table according to values in
 // given column name, using either ascending or descending order.
 // Only valid for 1-dimensional columns.
 // Returns error if column name not found.
-func (ix *IndexView) SortColName(colNm string, ascending bool) error { //types:add
-	ci, err := ix.Table.ColIndexTry(colNm)
+func (ix *IndexView) SortColumnName(colNm string, ascending bool) error { //types:add
+	ci, err := ix.Table.ColumnIndexTry(colNm)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	ix.SortCol(ci, ascending)
+	ix.SortColumn(ci, ascending)
 	return nil
 }
 
-// SortCol sorts the indexes into our Table according to values in
+// SortColumn sorts the indexes into our Table according to values in
 // given column index, using either ascending or descending order.
 // Only valid for 1-dimensional columns.
-func (ix *IndexView) SortCol(colIndex int, ascending bool) {
-	cl := ix.Table.Cols[colIndex]
+func (ix *IndexView) SortColumn(colIndex int, ascending bool) {
+	cl := ix.Table.Columns[colIndex]
 	if cl.IsString() {
 		ix.Sort(func(et *Table, i, j int) bool {
 			if ascending {
@@ -168,35 +168,35 @@ func (ix *IndexView) SortCol(colIndex int, ascending bool) {
 	}
 }
 
-// SortColNames sorts the indexes into our Table according to values in
+// SortColumnNames sorts the indexes into our Table according to values in
 // given column names, using either ascending or descending order.
 // Only valid for 1-dimensional columns.
 // Returns error if column name not found.
-func (ix *IndexView) SortColNames(colNms []string, ascending bool) error {
+func (ix *IndexView) SortColumnNames(colNms []string, ascending bool) error {
 	nc := len(colNms)
 	if nc == 0 {
-		return fmt.Errorf("etable.IndexView.SortColNames: no column names provided")
+		return fmt.Errorf("etable.IndexView.SortColumnNames: no column names provided")
 	}
 	cis := make([]int, nc)
 	for i, cn := range colNms {
-		ci, err := ix.Table.ColIndexTry(cn)
+		ci, err := ix.Table.ColumnIndexTry(cn)
 		if err != nil {
 			log.Println(err)
 			return err
 		}
 		cis[i] = ci
 	}
-	ix.SortCols(cis, ascending)
+	ix.SortColumns(cis, ascending)
 	return nil
 }
 
-// SortCols sorts the indexes into our Table according to values in
+// SortColumns sorts the indexes into our Table according to values in
 // given list of column indexes, using either ascending or descending order for
 // all of the columns.  Only valid for 1-dimensional columns.
-func (ix *IndexView) SortCols(colIndexes []int, ascending bool) {
+func (ix *IndexView) SortColumns(colIndexes []int, ascending bool) {
 	ix.Sort(func(et *Table, i, j int) bool {
 		for _, ci := range colIndexes {
-			cl := ix.Table.Cols[ci]
+			cl := ix.Table.Columns[ci]
 			if cl.IsString() {
 				if ascending {
 					if cl.String1D(i) < cl.String1D(j) {
@@ -244,25 +244,25 @@ func (ix *IndexView) SortStable(lessFunc func(et *Table, i, j int) bool) {
 	sort.Stable(ix)
 }
 
-// SortStableColName sorts the indexes into our Table according to values in
+// SortStableColumnName sorts the indexes into our Table according to values in
 // given column name, using either ascending or descending order.
 // Only valid for 1-dimensional columns.
 // Returns error if column name not found.
-func (ix *IndexView) SortStableColName(colNm string, ascending bool) error {
-	ci, err := ix.Table.ColIndexTry(colNm)
+func (ix *IndexView) SortStableColumnName(colNm string, ascending bool) error {
+	ci, err := ix.Table.ColumnIndexTry(colNm)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	ix.SortStableCol(ci, ascending)
+	ix.SortStableColumn(ci, ascending)
 	return nil
 }
 
-// SortStableCol sorts the indexes into our Table according to values in
+// SortStableColumn sorts the indexes into our Table according to values in
 // given column index, using either ascending or descending order.
 // Only valid for 1-dimensional columns.
-func (ix *IndexView) SortStableCol(colIndex int, ascending bool) {
-	cl := ix.Table.Cols[colIndex]
+func (ix *IndexView) SortStableColumn(colIndex int, ascending bool) {
+	cl := ix.Table.Columns[colIndex]
 	if cl.IsString() {
 		ix.SortStable(func(et *Table, i, j int) bool {
 			if ascending {
@@ -282,35 +282,35 @@ func (ix *IndexView) SortStableCol(colIndex int, ascending bool) {
 	}
 }
 
-// SortStableColNames sorts the indexes into our Table according to values in
+// SortStableColumnNames sorts the indexes into our Table according to values in
 // given column names, using either ascending or descending order.
 // Only valid for 1-dimensional columns.
 // Returns error if column name not found.
-func (ix *IndexView) SortStableColNames(colNms []string, ascending bool) error {
+func (ix *IndexView) SortStableColumnNames(colNms []string, ascending bool) error {
 	nc := len(colNms)
 	if nc == 0 {
-		return fmt.Errorf("etable.IndexView.SortStableColNames: no column names provided")
+		return fmt.Errorf("etable.IndexView.SortStableColumnNames: no column names provided")
 	}
 	cis := make([]int, nc)
 	for i, cn := range colNms {
-		ci, err := ix.Table.ColIndexTry(cn)
+		ci, err := ix.Table.ColumnIndexTry(cn)
 		if err != nil {
 			log.Println(err)
 			return err
 		}
 		cis[i] = ci
 	}
-	ix.SortStableCols(cis, ascending)
+	ix.SortStableColumns(cis, ascending)
 	return nil
 }
 
-// SortStableCols sorts the indexes into our Table according to values in
+// SortStableColumns sorts the indexes into our Table according to values in
 // given list of column indexes, using either ascending or descending order for
 // all of the columns.  Only valid for 1-dimensional columns.
-func (ix *IndexView) SortStableCols(colIndexes []int, ascending bool) {
+func (ix *IndexView) SortStableColumns(colIndexes []int, ascending bool) {
 	ix.SortStable(func(et *Table, i, j int) bool {
 		for _, ci := range colIndexes {
-			cl := ix.Table.Cols[ci]
+			cl := ix.Table.Columns[ci]
 			if cl.IsString() {
 				if ascending {
 					if cl.String1D(i) < cl.String1D(j) {
@@ -357,31 +357,31 @@ func (ix *IndexView) Filter(filterFunc func(et *Table, row int) bool) {
 	}
 }
 
-// FilterColName filters the indexes into our Table according to values in
+// FilterColumnName filters the indexes into our Table according to values in
 // given column name, using string representation of column values.
 // Includes rows with matching values unless exclude is set.
 // If contains, only checks if row contains string; if ignoreCase, ignores case.
 // Use named args for greater clarity.
 // Only valid for 1-dimensional columns.
 // Returns error if column name not found.
-func (ix *IndexView) FilterColName(colNm string, str string, exclude, contains, ignoreCase bool) error { //types:add
-	ci, err := ix.Table.ColIndexTry(colNm)
+func (ix *IndexView) FilterColumnName(colNm string, str string, exclude, contains, ignoreCase bool) error { //types:add
+	ci, err := ix.Table.ColumnIndexTry(colNm)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	ix.FilterCol(ci, str, exclude, contains, ignoreCase)
+	ix.FilterColumn(ci, str, exclude, contains, ignoreCase)
 	return nil
 }
 
-// FilterCol sorts the indexes into our Table according to values in
+// FilterColumn sorts the indexes into our Table according to values in
 // given column index, using string representation of column values.
 // Includes rows with matching values unless exclude is set.
 // If contains, only checks if row contains string; if ignoreCase, ignores case.
 // Use named args for greater clarity.
 // Only valid for 1-dimensional columns.
-func (ix *IndexView) FilterCol(colIndex int, str string, exclude, contains, ignoreCase bool) {
-	col := ix.Table.Cols[colIndex]
+func (ix *IndexView) FilterColumn(colIndex int, str string, exclude, contains, ignoreCase bool) {
+	col := ix.Table.Columns[colIndex]
 	lowstr := strings.ToLower(str)
 	ix.Filter(func(et *Table, row int) bool {
 		val := col.String1D(row)
@@ -412,9 +412,9 @@ func (ix *IndexView) NewTable() *Table {
 	if rows == 0 {
 		return nt
 	}
-	for ci := range nt.Cols {
-		scl := ix.Table.Cols[ci]
-		tcl := nt.Cols[ci]
+	for ci := range nt.Columns {
+		scl := ix.Table.Columns[ci]
+		tcl := nt.Columns[ci]
 		_, csz := tcl.RowCellSize()
 		for i, srw := range ix.Indexes {
 			tcl.CopyCellsFrom(scl, i*csz, srw*csz, csz)
@@ -423,12 +423,12 @@ func (ix *IndexView) NewTable() *Table {
 	return nt
 }
 
-// AggCol applies given aggregation function to each element in the given column, using float64
+// AggColumn applies given aggregation function to each element in the given column, using float64
 // conversions of the values.  init is the initial value for the agg variable.
 // Operates independently over each cell on n-dimensional columns and returns the result as a slice
 // of values per cell.
-func (ix *IndexView) AggCol(colIndex int, ini float64, fun func(idx int, val float64, agg float64) float64) []float64 {
-	cl := ix.Table.Cols[colIndex]
+func (ix *IndexView) AggColumn(colIndex int, ini float64, fun func(idx int, val float64, agg float64) float64) []float64 {
+	cl := ix.Table.Columns[colIndex]
 	_, csz := cl.RowCellSize()
 
 	ag := make([]float64, csz)
@@ -501,7 +501,7 @@ func (ix *IndexView) DeleteRows(at, n int) {
 // Use named args for greater clarity.
 func (ix *IndexView) RowsByStringIndex(colIndex int, str string, contains, ignoreCase bool) []int {
 	dt := ix.Table
-	col := dt.Cols[colIndex]
+	col := dt.Columns[colIndex]
 	lowstr := strings.ToLower(str)
 	var idxs []int
 	for idx, srw := range ix.Indexes {
@@ -531,7 +531,7 @@ func (ix *IndexView) RowsByStringIndex(colIndex int, str string, contains, ignor
 // Use named args for greater clarity.
 func (ix *IndexView) RowsByString(colNm string, str string, contains, ignoreCase bool) []int {
 	dt := ix.Table
-	ci := dt.ColIndex(colNm)
+	ci := dt.ColumnIndex(colNm)
 	if ci < 0 {
 		return nil
 	}
@@ -545,7 +545,7 @@ func (ix *IndexView) RowsByString(colNm string, str string, contains, ignoreCase
 // Use named args for greater clarity.
 func (ix *IndexView) RowsByStringTry(colNm string, str string, contains, ignoreCase bool) ([]int, error) {
 	dt := ix.Table
-	ci, err := dt.ColIndexTry(colNm)
+	ci, err := dt.ColumnIndexTry(colNm)
 	if err != nil {
 		return nil, err
 	}

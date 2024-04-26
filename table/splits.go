@@ -9,8 +9,6 @@ import (
 	"slices"
 	"sort"
 	"strings"
-
-	"cogentcore.org/core/tensor"
 )
 
 // SplitAgg contains aggregation results for splits
@@ -20,7 +18,7 @@ type SplitAgg struct {
 	Name string
 
 	// column index on which the aggregation was performed -- results will have same shape as cells in this column
-	ColIndex int
+	ColumnIndex int
 
 	// aggregation results -- outer index is length of splits, inner is the length of the cell shape for the column
 	Aggs [][]float64
@@ -276,7 +274,7 @@ func (sa *SplitAgg) Clone() *SplitAgg {
 // CopyFrom copies from other SplitAgg -- we get our own unique copy of everything
 func (sa *SplitAgg) CopyFrom(osa *SplitAgg) {
 	sa.Name = osa.Name
-	sa.ColIndex = osa.ColIndex
+	sa.ColumnIndex = osa.ColumnIndex
 	nags := len(osa.Aggs)
 	if nags > 0 {
 		sa.Aggs = make([][]float64, nags)
@@ -314,7 +312,7 @@ func (spl *Splits) CopyFrom(osp *Splits) {
 
 // AddAgg adds a new set of aggregation results for the Splits
 func (spl *Splits) AddAgg(name string, colIndex int) *SplitAgg {
-	ag := &SplitAgg{Name: name, ColIndex: colIndex}
+	ag := &SplitAgg{Name: name, ColumnIndex: colIndex}
 	spl.Aggs = append(spl.Aggs, ag)
 	return ag
 }
@@ -325,7 +323,7 @@ func (spl *Splits) DeleteAggs() {
 }
 
 // AggByName returns Agg results for given name, which does NOT include the column name, just
-// the name given to the Agg result (e.g., Mean for a standard Mean agg).  See also AggByColName.
+// the name given to the Agg result (e.g., Mean for a standard Mean agg).  See also AggByColumnName.
 // Returns nil if not found.  See also Try version for error message.
 func (spl *Splits) AggByName(name string) *SplitAgg {
 	for _, ag := range spl.Aggs {
@@ -337,7 +335,7 @@ func (spl *Splits) AggByName(name string) *SplitAgg {
 }
 
 // AggByNameTry returns Agg results for given name, which does NOT include the column name, just
-// the name given to the Agg result (e.g., Mean for a standard Mean agg).  See also AggByColName.
+// the name given to the Agg result (e.g., Mean for a standard Mean agg).  See also AggByColumnName.
 // Returns error message if not found.
 func (spl *Splits) AggByNameTry(name string) (*SplitAgg, error) {
 	ag := spl.AggByName(name)
@@ -347,21 +345,21 @@ func (spl *Splits) AggByNameTry(name string) (*SplitAgg, error) {
 	return nil, fmt.Errorf("etable.Splits AggByNameTry: agg results named: %v not found", name)
 }
 
-// AggByColName returns Agg results for given column name, optionally including :Name agg name
+// AggByColumnName returns Agg results for given column name, optionally including :Name agg name
 // appended, where Name is the name given to the Agg result (e.g., Mean for a standard Mean agg).
 // Returns nil if not found.  See also Try version for error message.
-func (spl *Splits) AggByColName(name string) *SplitAgg {
+func (spl *Splits) AggByColumnName(name string) *SplitAgg {
 	dt := spl.Table()
 	if dt == nil {
 		return nil
 	}
 	nmsp := strings.Split(name, ":")
-	colIndex := dt.ColIndex(nmsp[0])
+	colIndex := dt.ColumnIndex(nmsp[0])
 	if colIndex == -1 {
 		return nil
 	}
 	for _, ag := range spl.Aggs {
-		if ag.ColIndex != colIndex {
+		if ag.ColumnIndex != colIndex {
 			continue
 		}
 		if len(nmsp) == 2 && nmsp[1] != ag.Name {
@@ -372,15 +370,15 @@ func (spl *Splits) AggByColName(name string) *SplitAgg {
 	return nil
 }
 
-// AggByColNameTry returns Agg results for given column name, optionally including :Name agg name
+// AggByColumnNameTry returns Agg results for given column name, optionally including :Name agg name
 // appended, where Name is the name given to the Agg result (e.g., Mean for a standard Mean agg).
 // Returns error message if not found.
-func (spl *Splits) AggByColNameTry(name string) (*SplitAgg, error) {
-	ag := spl.AggByColName(name)
+func (spl *Splits) AggByColumnNameTry(name string) (*SplitAgg, error) {
+	ag := spl.AggByColumnName(name)
 	if ag != nil {
 		return ag, nil
 	}
-	return nil, fmt.Errorf("etable.Splits AggByColNameTry: agg results named: %v not found", name)
+	return nil, fmt.Errorf("etable.Splits AggByColumnNameTry: agg results named: %v not found", name)
 }
 
 // SetLevels sets the Levels index names -- must match actual index dimensionality
@@ -392,15 +390,15 @@ func (spl *Splits) SetLevels(levels ...string) {
 
 // use these for arg to ArgsToTable*
 const (
-	// ColNameOnly means resulting agg table just has the original column name, no aggregation name
-	ColNameOnly bool = true
+	// ColumnNameOnly means resulting agg table just has the original column name, no aggregation name
+	ColumnNameOnly bool = true
 	// AddAggName means resulting agg table columns have aggregation name appended
 	AddAggName = false
 )
 
 // AggsToTable returns a Table containing this Splits' aggregate data.
 // Must have Levels and Aggs all created as in the split.Agg* methods.
-// if colName == ColNameOnly, then the name of the columns for the Table
+// if colName == ColumnNameOnly, then the name of the columns for the Table
 // is just the corresponding agg column name -- otherwise it also includes
 // the name of the aggregation function with a : divider (e.g., Name:Mean)
 func (spl *Splits) AggsToTable(colName bool) *Table {
@@ -411,25 +409,25 @@ func (spl *Splits) AggsToTable(colName bool) *Table {
 	dt := spl.Splits[0].Table
 	st := NewTable(nsp)
 	for _, cn := range spl.Levels {
-		st.AddCol(tensor.NewString([]int{nsp}), cn)
+		st.AddStringColumn(cn)
 	}
 	for _, ag := range spl.Aggs {
-		col := dt.Cols[ag.ColIndex]
-		an := dt.ColNames[ag.ColIndex]
+		col := dt.Columns[ag.ColumnIndex]
+		an := dt.ColumnNames[ag.ColumnIndex]
 		if colName == AddAggName {
 			an += ":" + ag.Name
 		}
-		st.AddCol(tensor.NewFloat64Shape(col.Shape()), an) // note: will over-allocate rows here
+		st.AddFloat64TensorColumn(an, col.Shape().Sizes[1:], col.Shape().Names[1:]...)
 	}
 	for si := range spl.Splits {
 		cidx := 0
 		for ci := range spl.Levels {
-			col := st.Cols[cidx]
+			col := st.Columns[cidx]
 			col.SetString1D(si, spl.Values[si][ci])
 			cidx++
 		}
 		for _, ag := range spl.Aggs {
-			col := st.Cols[cidx]
+			col := st.Columns[cidx]
 			_, csz := col.RowCellSize()
 			sti := si * csz
 			av := ag.Aggs[si]
@@ -446,7 +444,7 @@ func (spl *Splits) AggsToTable(colName bool) *Table {
 // and a copy of the first row of data for each split for all non-agg cols,
 // which is useful for recording other data that goes along with aggregated values.
 // Must have Levels and Aggs all created as in the split.Agg* methods.
-// if colName == ColNameOnly, then the name of the columns for the Table
+// if colName == ColumnNameOnly, then the name of the columns for the Table
 // is just the corresponding agg column name -- otherwise it also includes
 // the name of the aggregation function with a : divider (e.g., Name:Mean)
 func (spl *Splits) AggsToTableCopy(colName bool) *Table {
@@ -458,35 +456,35 @@ func (spl *Splits) AggsToTableCopy(colName bool) *Table {
 	st := NewTable(nsp)
 	exmap := make(map[string]struct{})
 	for _, cn := range spl.Levels {
-		st.AddCol(tensor.NewString([]int{nsp}), cn)
+		st.AddStringColumn(cn)
 		exmap[cn] = struct{}{}
 	}
 	for _, ag := range spl.Aggs {
-		col := dt.Cols[ag.ColIndex]
-		an := dt.ColNames[ag.ColIndex]
+		col := dt.Columns[ag.ColumnIndex]
+		an := dt.ColumnNames[ag.ColumnIndex]
 		exmap[an] = struct{}{}
 		if colName == AddAggName {
 			an += ":" + ag.Name
 		}
-		st.AddCol(tensor.NewFloat64Shape(col.Shape()), an) // note: will over-allocate rows here
+		st.AddFloat64TensorColumn(an, col.Shape().Sizes[1:], col.Shape().Names[1:]...)
 	}
 	var cpcol []string
-	for _, cn := range dt.ColNames {
+	for _, cn := range dt.ColumnNames {
 		if _, ok := exmap[cn]; !ok {
 			cpcol = append(cpcol, cn)
-			col := dt.ColByName(cn)
-			st.AddCol(col.Clone(), cn)
+			col := dt.ColumnByName(cn)
+			st.AddColumn(col.Clone(), cn)
 		}
 	}
 	for si, sidx := range spl.Splits {
 		cidx := 0
 		for ci := range spl.Levels {
-			col := st.Cols[cidx]
+			col := st.Columns[cidx]
 			col.SetString1D(si, spl.Values[si][ci])
 			cidx++
 		}
 		for _, ag := range spl.Aggs {
-			col := st.Cols[cidx]
+			col := st.Columns[cidx]
 			_, csz := col.RowCellSize()
 			sti := si * csz
 			av := ag.Aggs[si]

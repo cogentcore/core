@@ -131,7 +131,7 @@ func Prjn2DCoords(shp *Shape, oddRow bool, row, col int) (rowCoords, colCoords [
 	return nil, nil
 }
 
-// Prjn2DVal returns the float64 value at given row, col coords for a 2D projection
+// Prjn2DValue returns the float64 value at given row, col coords for a 2D projection
 // of the given tensor, collapsing higher dimensions down to 2D (and 1D up to 2D).
 // For any odd number of dimensions, the remaining outer-most dimension
 // can either be multipliexed across the row or column, given the oddRow arg.

@@ -4,7 +4,6 @@
 
 package table
 
-/*
 import (
 	"bufio"
 	"encoding/csv"
@@ -14,6 +13,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -53,6 +53,7 @@ func (dl Delims) Rune() rune {
 
 const (
 	//	Headers is passed to CSV methods for the headers arg, to use headers
+	// that capture full type and tensor shape information.
 	Headers = true
 
 	// NoHeaders is passed to CSV methods for the headers arg, to not use headers
@@ -61,9 +62,10 @@ const (
 
 // SaveCSV writes a table to a comma-separated-values (CSV) file
 // (where comma = any delimiter, specified in the delim arg).
-// If headers = true then generate C++ emergent-tyle column headers.
-// These headers have full configuration information for the tensor
-// columns.  Otherwise, only the data is written.
+// If headers = true then generate column headers that capture the type
+// and tensor cell geometry of the columns, enabling full reloading
+// of exactly the same table format and data (recommended).
+// Otherwise, only the data is written.
 func (dt *Table) SaveCSV(filename core.Filename, delim Delims, headers bool) error { //types:add
 	fp, err := os.Create(string(filename))
 	defer fp.Close()
@@ -77,11 +79,12 @@ func (dt *Table) SaveCSV(filename core.Filename, delim Delims, headers bool) err
 	return err
 }
 
-// SaveCSV writes a table idx view to a comma-separated-values (CSV) file
+// SaveCSV writes a table index view to a comma-separated-values (CSV) file
 // (where comma = any delimiter, specified in the delim arg).
-// If headers = true then generate C++ emergent-tyle column headers.
-// These headers have full configuration information for the tensor
-// columns.  Otherwise, only the data is written.
+// If headers = true then generate column headers that capture the type
+// and tensor cell geometry of the columns, enabling full reloading
+// of exactly the same table format and data (recommended).
+// Otherwise, only the data is written.
 func (ix *IndexView) SaveCSV(filename core.Filename, delim Delims, headers bool) error { //types:add
 	fp, err := os.Create(string(filename))
 	defer fp.Close()
@@ -100,8 +103,8 @@ func (ix *IndexView) SaveCSV(filename core.Filename, delim Delims, headers bool)
 // using the Go standard encoding/csv reader conforming to the official CSV standard.
 // If the table does not currently have any columns, the first row of the file
 // is assumed to be headers, and columns are constructed therefrom.
-// The C++ emergent column headers are parsed -- these have full configuration
-// information for tensor dimensionality.
+// If the file was saved from table with headers, then these have full configuration
+// information for tensor type and dimensionality.
 // If the table DOES have existing columns, then those are used robustly
 // for whatever information fits from each row of the file.
 func (dt *Table) OpenCSV(filename core.Filename, delim Delims) error { //types:add
@@ -128,8 +131,8 @@ func (dt *Table) OpenFS(fsys fs.FS, filename string, delim Delims) error {
 // using the Go standard encoding/csv reader conforming to the official CSV standard.
 // If the table does not currently have any columns, the first row of the file
 // is assumed to be headers, and columns are constructed therefrom.
-// The C++ emergent column headers are parsed -- these have full configuration
-// information for tensor dimensionality.
+// If the file was saved from table with headers, then these have full configuration
+// information for tensor type and dimensionality.
 // If the table DOES have existing columns, then those are used robustly
 // for whatever information fits from each row of the file.
 func (ix *IndexView) OpenCSV(filename core.Filename, delim Delims) error { //types:add
@@ -150,8 +153,8 @@ func (ix *IndexView) OpenFS(fsys fs.FS, filename string, delim Delims) error {
 // using the Go standard encoding/csv reader conforming to the official CSV standard.
 // If the table does not currently have any columns, the first row of the file
 // is assumed to be headers, and columns are constructed therefrom.
-// The C++ emergent column headers are parsed -- these have full configuration
-// information for tensor dimensionality.
+// If the file was saved from table with headers, then these have full configuration
+// information for tensor type and dimensionality.
 // If the table DOES have existing columns, then those are used robustly
 // for whatever information fits from each row of the file.
 func (dt *Table) ReadCSV(r io.Reader, delim Delims) error {
@@ -164,15 +167,15 @@ func (dt *Table) ReadCSV(r io.Reader, delim Delims) error {
 	rows := len(rec)
 	// cols := len(rec[0])
 	strow := 0
-	if dt.NumCols() == 0 || DetectEmerHeaders(rec[0]) {
-		sc, err := SchemaFromHeaders(rec[0], rec)
+	if dt.NumColumns() == 0 || DetectTableHeaders(rec[0]) {
+		dt.DeleteAll()
+		err := ConfigFromHeaders(dt, rec[0], rec)
 		if err != nil {
 			log.Println(err.Error())
 			return err
 		}
 		strow++
 		rows--
-		dt.SetFromSchema(sc, rows)
 	}
 	dt.SetNumRows(rows)
 	for ri := 0; ri < rows; ri++ {
@@ -183,14 +186,14 @@ func (dt *Table) ReadCSV(r io.Reader, delim Delims) error {
 
 // ReadCSVRow reads a record of CSV data into given row in table
 func (dt *Table) ReadCSVRow(rec []string, row int) {
-	tc := dt.NumCols()
+	tc := dt.NumColumns()
 	ci := 0
-	if rec[0] == "_D:" { // emergent data row
+	if rec[0] == "_D:" { // data row
 		ci++
 	}
 	nan := math.NaN()
 	for j := 0; j < tc; j++ {
-		tsr := dt.Cols[j]
+		tsr := dt.Columns[j]
 		_, csz := tsr.RowCellSize()
 		stoff := row * csz
 		for cc := 0; cc < csz; cc++ {
@@ -213,17 +216,17 @@ func (dt *Table) ReadCSVRow(rec []string, row int) {
 	}
 }
 
-// SchemaFromHeaders attempts to configure a Table Schema based on the headers
-// for non-Emergent headers, data is examined to
-func SchemaFromHeaders(hdrs []string, rec [][]string) (Schema, error) {
-	if DetectEmerHeaders(hdrs) {
-		return SchemaFromEmerHeaders(hdrs)
+// ConfigFromHeaders attempts to configure Table based on the headers.
+// for non-table headers, data is examined to determine types.
+func ConfigFromHeaders(dt *Table, hdrs []string, rec [][]string) error {
+	if DetectTableHeaders(hdrs) {
+		return ConfigFromTableHeaders(dt, hdrs)
 	}
-	return SchemaFromPlainHeaders(hdrs, rec)
+	return ConfigFromDataValues(dt, hdrs, rec)
 }
 
-// DetectEmerHeaders looks for emergent header special characters -- returns true if found
-func DetectEmerHeaders(hdrs []string) bool {
+// DetectTableHeaders looks for special header characters -- returns true if found
+func DetectTableHeaders(hdrs []string) bool {
 	for _, hd := range hdrs {
 		if hd == "" {
 			continue
@@ -231,22 +234,20 @@ func DetectEmerHeaders(hdrs []string) bool {
 		if hd == "_H:" {
 			return true
 		}
-		if _, ok := EmerHdrCharToType[hd[0]]; !ok { // all must be emer
+		if _, ok := TableHeaderToType[hd[0]]; !ok { // all must be table
 			return false
 		}
 	}
 	return true
 }
 
-// SchemaFromEmerHeaders attempts to configure a Table Schema based on emergent DataTable headers
-func SchemaFromEmerHeaders(hdrs []string) (Schema, error) {
-	sc := Schema{}
+// ConfigFromTableHeaders attempts to configure a Table based on special table headers
+func ConfigFromTableHeaders(dt *Table, hdrs []string) error {
 	for _, hd := range hdrs {
 		if hd == "" || hd == "_H:" {
 			continue
 		}
-		var typ tensor.Type
-		typ, hd = EmerColType(hd)
+		typ, hd := TableColumnType(hd)
 		dimst := strings.Index(hd, "]<")
 		if dimst > 0 {
 			dims := hd[dimst+2 : len(hd)-1]
@@ -254,53 +255,50 @@ func SchemaFromEmerHeaders(hdrs []string) (Schema, error) {
 			hd = hd[:lbst]
 			csh := ShapeFromString(dims)
 			// new tensor starting
-			sc = append(sc, Column{Name: hd, Type: tensor.Type(typ), CellShape: csh})
+			dt.AddTensorColumnOfType(typ, hd, csh, "Row")
 			continue
 		}
 		dimst = strings.Index(hd, "[")
 		if dimst > 0 {
 			continue
 		}
-		sc = append(sc, Column{Name: hd, Type: tensor.Type(typ), CellShape: nil})
+		dt.AddColumnOfType(typ, hd)
 	}
-	return sc, nil
+	return nil
 }
 
-var EmerHdrCharToType = map[byte]tensor.Type{
-	'$': tensor.STRING,
-	'%': tensor.FLOAT32,
-	'#': tensor.FLOAT64,
-	'|': tensor.INT64,
-	'@': tensor.UINT8,
-	'&': tensor.STRING,
-	'^': tensor.BOOL,
+// TableHeaderToType maps special header characters to data type
+var TableHeaderToType = map[byte]reflect.Kind{
+	'$': reflect.String,
+	'%': reflect.Float32,
+	'#': reflect.Float64,
+	'|': reflect.Int,
+	'^': reflect.Bool,
 }
 
-var EmerHdrTypeToChar map[tensor.Type]byte
-
-func init() {
-	EmerHdrTypeToChar = make(map[tensor.Type]byte)
-	for k, v := range EmerHdrCharToType {
-		if k != '&' {
-			EmerHdrTypeToChar[v] = k
-		}
+// TableHeaderChar returns the special header character based on given data type
+func TableHeaderChar(typ reflect.Kind) byte {
+	switch {
+	case typ == reflect.Bool:
+		return '^'
+	case typ == reflect.Float32:
+		return '%'
+	case typ == reflect.Float64:
+		return '#'
+	case typ >= reflect.Int && typ <= reflect.Uintptr:
+		return '|'
+	default:
+		return '$'
 	}
-	EmerHdrTypeToChar[tensor.INT8] = '@'
-	EmerHdrTypeToChar[tensor.INT16] = '|'
-	EmerHdrTypeToChar[tensor.UINT16] = '|'
-	EmerHdrTypeToChar[tensor.INT32] = '|'
-	EmerHdrTypeToChar[tensor.UINT32] = '|'
-	EmerHdrTypeToChar[tensor.UINT64] = '|'
-	EmerHdrTypeToChar[tensor.INT] = '|'
 }
 
-// EmerColType parses the column header for type information using the emergent naming convention
-func EmerColType(nm string) (tensor.Type, string) {
-	typ, ok := EmerHdrCharToType[nm[0]]
+// TableColumnType parses the column header for special table type information
+func TableColumnType(nm string) (reflect.Kind, string) {
+	typ, ok := TableHeaderToType[nm[0]]
 	if ok {
 		nm = nm[1:]
 	} else {
-		typ = tensor.STRING // most general, default
+		typ = reflect.String // most general, default
 	}
 	return typ, nm
 }
@@ -326,64 +324,62 @@ func ShapeFromString(dims string) []int {
 	return sh
 }
 
-// SchemaFromPlainHeaders configures a Table Schema based on plain headers.
-// All columns are of type String and must be converted later to numerical types
-// as appropriate.
-func SchemaFromPlainHeaders(hdrs []string, rec [][]string) (Schema, error) {
-	sc := Schema{}
+// ConfigFromDataValues configures a Table based on data types inferred
+// from the string representation of given records, using header names if present.
+func ConfigFromDataValues(dt *Table, hdrs []string, rec [][]string) error {
 	nr := len(rec)
 	for ci, hd := range hdrs {
 		if hd == "" {
 			hd = fmt.Sprintf("col_%d", ci)
 		}
-		dt := tensor.STRING
 		nmatch := 0
+		typ := reflect.String
 		for ri := 1; ri < nr; ri++ {
 			rv := rec[ri][ci]
 			if rv == "" {
 				continue
 			}
-			cdt := InferDataType(rv)
+			ctyp := InferDataType(rv)
 			switch {
-			case cdt == tensor.STRING: // definitive
-				dt = cdt
+			case ctyp == reflect.String: // definitive
+				typ = ctyp
 				break
-			case dt == cdt && (nmatch > 1 || ri == nr-1): // good enough
+			case typ == ctyp && (nmatch > 1 || ri == nr-1): // good enough
 				break
-			case dt == cdt: // gather more info
+			case typ == ctyp: // gather more info
 				nmatch++
-			case dt == tensor.STRING: // always upgrade from string default
+			case typ == reflect.String: // always upgrade from string default
 				nmatch = 0
-				dt = cdt
-			case dt == tensor.INT64 && cdt == tensor.FLOAT64: // upgrade
+				typ = ctyp
+			case typ == reflect.Int && ctyp == reflect.Float64: // upgrade
 				nmatch = 0
-				dt = cdt
+				typ = ctyp
 			}
 		}
-		sc = append(sc, Column{Name: hd, Type: dt, CellShape: nil})
+		dt.AddColumnOfType(typ, hd)
 	}
-	return sc, nil
+	return nil
 }
 
 // InferDataType returns the inferred data type for the given string
 // only deals with float64, int, and string types
-func InferDataType(str string) tensor.Type {
+func InferDataType(str string) reflect.Kind {
 	if strings.Contains(str, ".") {
 		_, err := strconv.ParseFloat(str, 64)
 		if err == nil {
-			return tensor.FLOAT64
+			return reflect.Float64
 		}
 	}
 	_, err := strconv.ParseInt(str, 10, 64)
 	if err == nil {
-		return tensor.INT64
+		return reflect.Int
 	}
 	// try float again just in case..
 	_, err = strconv.ParseFloat(str, 64)
 	if err == nil {
-		return tensor.FLOAT64
+		return reflect.Float64
 	}
-	return tensor.STRING
+	return reflect.String
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -391,9 +387,10 @@ func InferDataType(str string) tensor.Type {
 
 // WriteCSV writes a table to a comma-separated-values (CSV) file
 // (where comma = any delimiter, specified in the delim arg).
-// If headers = true then generate C++ emergent-style column headers.
-// These headers have full configuration information for the tensor
-// columns.  Otherwise, only the data is written.
+// If headers = true then generate column headers that capture the type
+// and tensor cell geometry of the columns, enabling full reloading
+// of exactly the same table format and data (recommended).
+// Otherwise, only the data is written.
 func (dt *Table) WriteCSV(w io.Writer, delim Delims, headers bool) error {
 	ncol := 0
 	var err error
@@ -419,9 +416,10 @@ func (dt *Table) WriteCSV(w io.Writer, delim Delims, headers bool) error {
 
 // WriteCSV writes only rows in table idx view to a comma-separated-values (CSV) file
 // (where comma = any delimiter, specified in the delim arg).
-// If headers = true then generate C++ emergent-style column headers.
-// These headers have full configuration information for the tensor
-// columns.  Otherwise, only the data is written.
+// If headers = true then generate column headers that capture the type
+// and tensor cell geometry of the columns, enabling full reloading
+// of exactly the same table format and data (recommended).
+// Otherwise, only the data is written.
 func (ix *IndexView) WriteCSV(w io.Writer, delim Delims, headers bool) error {
 	ncol := 0
 	var err error
@@ -452,7 +450,7 @@ func (ix *IndexView) WriteCSV(w io.Writer, delim Delims, headers bool) error {
 func (dt *Table) WriteCSVHeaders(w io.Writer, delim Delims) (int, error) {
 	cw := csv.NewWriter(w)
 	cw.Comma = delim.Rune()
-	hdrs := dt.EmerHeaders()
+	hdrs := dt.TableHeaders()
 	nc := len(hdrs)
 	err := cw.Write(hdrs)
 	if err != nil {
@@ -485,13 +483,13 @@ func (dt *Table) WriteCSVRowWriter(cw *csv.Writer, row int, ncol int) error {
 		rec = make([]string, 0)
 	}
 	rc := 0
-	for i := range dt.Cols {
-		tsr := dt.Cols[i]
+	for i := range dt.Columns {
+		tsr := dt.Columns[i]
 		nd := tsr.NumDims()
 		if nd == 1 {
 			vl := ""
 			if prec <= 0 || tsr.IsString() {
-				vl = tsr.StringValue1D(row)
+				vl = tsr.String1D(row)
 			} else {
 				vl = strconv.FormatFloat(tsr.Float1D(row), 'g', prec, 64)
 			}
@@ -502,12 +500,12 @@ func (dt *Table) WriteCSVRowWriter(cw *csv.Writer, row int, ncol int) error {
 			}
 			rc++
 		} else {
-			csh := tensor.NewShape(tsr.Shapes()[1:], nil, nil) // cell shape
+			csh := tensor.NewShape(tsr.Shape().Sizes[1:]) // cell shape
 			tc := csh.Len()
 			for ti := 0; ti < tc; ti++ {
 				vl := ""
 				if prec <= 0 || tsr.IsString() {
-					vl = tsr.StringValue1D(row*tc + ti)
+					vl = tsr.String1D(row*tc + ti)
 				} else {
 					vl = strconv.FormatFloat(tsr.Float1D(row*tc+ti), 'g', prec, 64)
 				}
@@ -524,18 +522,18 @@ func (dt *Table) WriteCSVRowWriter(cw *csv.Writer, row int, ncol int) error {
 	return err
 }
 
-// EmerHeaders generates emergent DataTable header strings from the table.
-// These have full information about type and tensor cell dimensionality.
-func (dt *Table) EmerHeaders() []string {
+// TableHeaders generates special header strings from the table
+// with full information about type and tensor cell dimensionality.
+func (dt *Table) TableHeaders() []string {
 	hdrs := []string{}
-	for i := range dt.Cols {
-		tsr := dt.Cols[i]
-		nm := dt.ColNames[i]
-		nm = string([]byte{EmerHdrTypeToChar[tsr.DataType()]}) + nm
+	for i := range dt.Columns {
+		tsr := dt.Columns[i]
+		nm := dt.ColumnNames[i]
+		nm = string([]byte{TableHeaderChar(tsr.DataType())}) + nm
 		if tsr.NumDims() == 1 {
 			hdrs = append(hdrs, nm)
 		} else {
-			csh := tensor.NewShape(tsr.Shapes()[1:], nil, nil) // cell shape
+			csh := tensor.NewShape(tsr.Shape().Sizes[1:]) // cell shape
 			tc := csh.Len()
 			nd := csh.NumDims()
 			fnm := nm + fmt.Sprintf("[%v:", nd)
@@ -543,7 +541,7 @@ func (dt *Table) EmerHeaders() []string {
 			ffnm := fnm
 			for di := 0; di < nd; di++ {
 				ffnm += "0"
-				dn += fmt.Sprintf("%v", csh.Dim(di))
+				dn += fmt.Sprintf("%v", csh.Size(di))
 				if di < nd-1 {
 					ffnm += ","
 					dn += ","
@@ -567,5 +565,3 @@ func (dt *Table) EmerHeaders() []string {
 	}
 	return hdrs
 }
-
-*/

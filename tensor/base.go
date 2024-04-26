@@ -7,6 +7,7 @@ package tensor
 import (
 	"fmt"
 	"log"
+	"reflect"
 
 	"cogentcore.org/core/bitslice"
 	"cogentcore.org/core/reflectx"
@@ -31,6 +32,13 @@ func (tsr *Base[T]) NumDims() int { return tsr.Shp.NumDims() }
 // Used for Tensors that are columns in a data table.
 func (tsr *Base[T]) RowCellSize() (rows, cells int) {
 	return tsr.Shp.RowCellSize()
+}
+
+// DataType returns the type of the data elements in the tensor.
+// Bool is returned for the Bits tensor type.
+func (tsr *Base[T]) DataType() reflect.Kind {
+	var v T
+	return reflect.TypeOf(v).Kind()
 }
 
 func (tsr *Base[T]) Value(i []int) T    { j := tsr.Shp.Offset(i); return tsr.Values[j] }

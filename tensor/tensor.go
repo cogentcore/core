@@ -7,6 +7,9 @@ package tensor
 //go:generate core generate
 
 import (
+	"reflect"
+
+	"cogentcore.org/core/gox/num"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -35,6 +38,10 @@ type Tensor interface {
 	// and the size of all the remaining inner dimensions (the "cell" size).
 	// Used for Tensors that are columns in a data table.
 	RowCellSize() (rows, cells int)
+
+	// DataType returns the type of the data elements in the tensor.
+	// Bool is returned for the Bits tensor type.
+	DataType() reflect.Kind
 
 	// returns true if the data type is a String. otherwise is numeric.
 	IsString() bool
@@ -168,6 +175,103 @@ type Tensor interface {
 	CopyMetaData(from Tensor)
 }
 
+// New returns a new n-dimensional tensor of given value type
+// with the given sizes per dimension (shape), and optional dimension names.
+// Allowed types are: string, bool (for a Bits), or any basic numerical value.
+// Nulls are initialized to nil.
+func New[T string | bool | num.Number](sizes []int, names ...string) Tensor {
+	var v T
+	switch any(v).(type) {
+	case string:
+		return NewString(sizes, names...)
+	case bool:
+		return NewBits(sizes, names...)
+	case float64:
+		return NewNumber[float64](sizes, names...)
+	case float32:
+		return NewNumber[float32](sizes, names...)
+	case int:
+		return NewNumber[int](sizes, names...)
+	case int64:
+		return NewNumber[int64](sizes, names...)
+	case int32:
+		return NewNumber[int32](sizes, names...)
+	case int16:
+		return NewNumber[int16](sizes, names...)
+	case int8:
+		return NewNumber[int8](sizes, names...)
+	case uint:
+		return NewNumber[uint](sizes, names...)
+	case uint64:
+		return NewNumber[uint64](sizes, names...)
+	case uint32:
+		return NewNumber[uint32](sizes, names...)
+	case uint16:
+		return NewNumber[uint16](sizes, names...)
+	case uint8:
+		return NewNumber[uint8](sizes, names...)
+	case uintptr:
+		return NewNumber[uintptr](sizes, names...)
+	}
+	return NewString(sizes, names...)
+}
+
+// NewOfShape returns a new n-dimensional tensor of given value type
+// with the given Shape information.
+// Allowed types are: string, bool (for a Bits), or any basic numerical value.
+// Nulls are initialized to nil.
+func NewOfShape[T string | bool | num.Number](shape *Shape) Tensor {
+	return New[T](shape.Sizes, shape.Names...)
+}
+
+// NewOfType returns a new n-dimensional tensor of given reflect.Kind type
+// with the given sizes per dimension (shape), and optional dimension names.
+// Allowed types are: string, bool (for a Bits), or any basic numerical value.
+// Nulls are initialized to nil.
+func NewOfType(typ reflect.Kind, sizes []int, names ...string) Tensor {
+	switch typ {
+	case reflect.String:
+		return NewString(sizes, names...)
+	case reflect.Bool:
+		return NewBits(sizes, names...)
+	case reflect.Float64:
+		return NewNumber[float64](sizes, names...)
+	case reflect.Float32:
+		return NewNumber[float32](sizes, names...)
+	case reflect.Int:
+		return NewNumber[int](sizes, names...)
+	case reflect.Int64:
+		return NewNumber[int64](sizes, names...)
+	case reflect.Int32:
+		return NewNumber[int32](sizes, names...)
+	case reflect.Int16:
+		return NewNumber[int16](sizes, names...)
+	case reflect.Int8:
+		return NewNumber[int8](sizes, names...)
+	case reflect.Uint:
+		return NewNumber[uint](sizes, names...)
+	case reflect.Uint64:
+		return NewNumber[uint64](sizes, names...)
+	case reflect.Uint32:
+		return NewNumber[uint32](sizes, names...)
+	case reflect.Uint16:
+		return NewNumber[uint16](sizes, names...)
+	case reflect.Uint8:
+		return NewNumber[uint8](sizes, names...)
+	case reflect.Uintptr:
+		return NewNumber[uintptr](sizes, names...)
+	}
+	return NewString(sizes, names...)
+}
+
+// NewOfTypeShape returns a new n-dimensional tensor of given reflect.Kind type
+// with the given Shape information.
+// Allowed types are: string, bool (for a Bits), or any basic numerical value.
+// Nulls are initialized to nil.
+func NewOfTypeShape(typ reflect.Kind, shape *Shape) Tensor {
+	return NewOfType(typ, shape.Sizes, shape.Names...)
+}
+
 // CopyDense copies a gonum mat.Dense matrix into given Tensor
 // using standard Float64 interface
 func CopyDense(to Tensor, dm *mat.Dense) {
@@ -183,19 +287,19 @@ func CopyDense(to Tensor, dm *mat.Dense) {
 	}
 }
 
-// SetFloat64SliceLen is a utility function to set given slice of float64 values
-// to given length, reusing existing where possible and making a new one as needed.
-// For use in WriteGeom routines.
-func SetFloat64SliceLen(dat *[]float64, sz int) {
+// SetSliceLen is a utility function to set given slice to given length,
+// reusing existing where possible and making a new one as needed.
+func SetSliceLen[S ~[]E, E any](s S, sz int) S {
 	switch {
-	case len(*dat) == sz:
-	case len(*dat) < sz:
-		if cap(*dat) >= sz {
-			*dat = (*dat)[0:sz]
+	case len(s) == sz:
+	case len(s) < sz:
+		if cap(s) >= sz {
+			s = (s)[0:sz]
 		} else {
-			*dat = make([]float64, sz)
+			s = make([]E, sz)
 		}
 	default:
-		*dat = (*dat)[0:sz]
+		s = s[0:sz]
 	}
+	return s
 }
