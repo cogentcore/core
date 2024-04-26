@@ -19,7 +19,7 @@ import (
 )
 
 // Run runs an app with the given options, configuration struct,
-// and commands. It does not run the GUI; see [cogentcore.org/core/cliview.Run]
+// and commands. It does not run the GUI; see [cogentcore.org/core/cli/cliview.Run]
 // for that. The configuration struct should be passed as a pointer, and
 // configuration options should be defined as fields on the configuration
 // struct. The commands can be specified as either functions or struct

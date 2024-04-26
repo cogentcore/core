@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/cli"
-	"cogentcore.org/core/cliview"
+	"cogentcore.org/core/cli/cliview"
 )
 
 //go:generate core generate -add-types -add-methods
