@@ -70,6 +70,10 @@ func homePage(ctx *htmlview.Context) bool {
 	})
 	core.NewText(fr).SetType(core.TextHeadlineMedium).SetText("A cross-platform framework for building powerful, fast, and elegant 2D and 3D apps")
 
+	core.NewButton(fr).SetText("Get started").OnClick(func(e events.Event) {
+		ctx.OpenURL("getting-started")
+	})
+
 	makeBlocks := func() core.Widget {
 		return core.NewLayout(fr).Style(func(s *styles.Style) {
 			s.Display = styles.Grid
@@ -109,7 +113,7 @@ func main() {
 }
 `)
 
-	homeTextBlock(blocks, "ENDLESS FEATURES", "Cogent Core comes with a powerful set of advanced features that allow you to make almost anything, including fully featured text editors, video and audio players, interactive 3D graphics, customizable data plots, Markdown and HTML rendering, SVG and canvas vector graphics, and automatic views of any Go data structure for instant data binding and advanced app inspection.")
+	homeTextBlock(blocks, "POWERFUL FEATURES", "Cogent Core comes with a powerful set of advanced features that allow you to make almost anything, including fully featured text editors, video and audio players, interactive 3D graphics, customizable data plots, Markdown and HTML rendering, SVG and canvas vector graphics, and automatic views of any Go data structure for instant data binding and advanced app inspection.")
 
 	homeTextBlock(blocks, "OPTIMIZED EXPERIENCE", "Every part of your development experience is guided by a comprehensive set of interactive example-based documentation, in-depth video tutorials, easy-to-use command line tools specialized for Cogent Core, and active support and development from the Cogent Core developers.")
 	core.NewIcon(blocks).SetIcon(icons.PlayCircle).Style(func(s *styles.Style) {
@@ -131,7 +135,7 @@ func main() {
 	})
 	homeTextBlock(blocks, "USED AROUND THE WORLD", "Over six years of development, Cogent Core has been used and thoroughly tested by developers and scientists around the world for a wide variety of use cases. Cogent Core is a production-ready framework actively used to power everything from end-user apps to scientific research.")
 
-	core.NewText(fr).SetType(core.TextDisplaySmall).SetText("<b>What can you make with Cogent Core?</b>")
+	core.NewText(fr).SetType(core.TextDisplaySmall).SetText("<b>What can Cogent Core do?</b>")
 
 	appBlocks := makeBlocks()
 
@@ -156,7 +160,7 @@ func main() {
 	homeTextBlock(appBlocks, "WELD", "WELD is a set of 3D computational models of a new approach to quantum physics based on wave electrodynamics.")
 	errors.Log(core.NewImage(appBlocks).OpenFS(resources, "weld-icon.png"))
 
-	core.NewText(fr).SetType(core.TextDisplaySmall).SetText("<b>Why not use ___ instead?</b>")
+	core.NewText(fr).SetType(core.TextDisplaySmall).SetText("<b>Why Cogent Core instead of ___?</b>")
 
 	otherBlocks := makeBlocks()
 
@@ -180,7 +184,7 @@ func main() {
 	})
 	homeTextBlock(otherBlocks, `<a href="https://fyne.io">FYNE</a>`, "Fyne provides a limited set of features and no easy way to for developers and users to fully customize apps, making it difficult to build fully featured, good-looking apps. It also has no interactive documentation and provides a less streamlined developer experience.")
 
-	core.NewButton(fr).SetText("Get Started").OnClick(func(e events.Event) {
+	core.NewButton(fr).SetText("Get started").OnClick(func(e events.Event) {
 		ctx.OpenURL("getting-started")
 	})
 
