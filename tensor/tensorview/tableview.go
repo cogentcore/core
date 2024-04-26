@@ -27,7 +27,7 @@ import (
 	"cogentcore.org/core/views"
 )
 
-// TableView provides a GUI interface for table.Table's
+// TableView provides a GUI view for [table.Table] values.
 type TableView struct {
 	views.SliceViewBase
 
