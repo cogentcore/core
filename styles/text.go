@@ -149,8 +149,8 @@ func (ts *Text) AlignFactors() (ax, ay float32) {
 	return
 }
 
-// https://godoc.org/golang.org/x/text/unicode/bidi
-// UnicodeBidi determines how
+// UnicodeBidi determines the type of bidirectional text support.
+// See https://pkg.go.dev/golang.org/x/text/unicode/bidi.
 type UnicodeBidi int32 //enums:enum -trim-prefix Bidi -transform kebab
 
 const (

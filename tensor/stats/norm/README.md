@@ -1,7 +1,5 @@
 # norm
 
-Docs: [GoDoc](https://pkg.go.dev/cogentcore.org/core/tensor/stats/agg)
-
 `norm` provides normalization and norm metric computations, e.g., L2 = sqrt of sum of squares of a vector.  The basic functions operate on either `[]float32` or `[]float64` data, but Tensor versions are available too.
 
 * DivNorm does divisive normalization of elements

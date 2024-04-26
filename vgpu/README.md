@@ -1,7 +1,5 @@
 # vGPU: Vulkan GPU Framework for Graphics and Compute, in Go
 
-[![GoDocs for vGPU](https://pkg.go.dev/badge/cogentcore.org/core/vgpu.svg)](https://pkg.go.dev/cogentcore.org/core/vgpu)
-
 **Mac Installation prerequisite:** https://vulkan.lunarg.com/sdk/home -- download the Vulkan SDK installer for the mac.  Unfortunately there does not appear to be a full version of this on homebrew -- the `molten-vk` package is not enough by itself.
 
 vGPU is a Vulkan-based framework for both Graphics and Compute Engine use of GPU hardware, in the Go langauge.  It uses the basic cgo-based Go bindings to Vulkan in: https://github.com/vulkan-go/vulkan and was developed starting with the associated example code surrounding that project.  Vulkan is a relatively new, essentially universally-supported interface to GPU hardware across all types of systems from mobile phones to massive GPU-based compute hardware, and it provides high-performance "bare metal" access to the hardware, for both graphics and computational uses.

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/*
-Package minmax provides basic minimum / maximum values for float32 and float64
-*/
+// Package minmax provides a struct that holds Min and Max values.
 package minmax
+
+//go:generate core generate
 
 const (
 	MaxFloat64 float64 = 1.7976931348623158e+308

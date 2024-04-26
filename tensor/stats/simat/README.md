@@ -1,7 +1,5 @@
 # simat
 
-Docs: [GoDoc](https://pkg.go.dev/cogentcore.org/core/tensor/stats/simat)
-
 `simat` provides similarity / distance matrix functions that create a `SimMat` matrix from Tensor or Table data.  Any metric function defined in metric package (or user-created) can be used.
 
 The SimMat contains the Tensor of the similarity matrix values, and labels for the Rows and Columns.

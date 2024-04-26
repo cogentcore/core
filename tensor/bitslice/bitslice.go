@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package bitslice implements a simple slice-of-bits using a []byte slice for storage.
-// used for efficient storage of boolean data, such as projection connectivity patterns.
+// Package bitslice implements a simple slice-of-bits using a []byte slice for storage,
+// which is used for efficient storage of boolean data, such as projection connectivity patterns.
 package bitslice
 
 import "fmt"

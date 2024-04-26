@@ -4,8 +4,6 @@
 
 package minmax
 
-//go:generate core generate
-
 import "fmt"
 
 //gosl: start minmax
