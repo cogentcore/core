@@ -16,7 +16,7 @@ import (
 // NewSnackbar returns a new [SnackbarStage] in the context
 // of the given widget.
 func (bd *Body) NewSnackbar(ctx Widget) *Stage {
-	ctx = NonNilContext(ctx)
+	ctx = nonNilContext(ctx)
 	bd.SnackbarStyles()
 	bd.Scene.Stage = NewPopupStage(SnackbarStage, bd.Scene, ctx).
 		SetTimeout(SystemSettings.SnackbarTimeout)

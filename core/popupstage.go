@@ -16,7 +16,7 @@ import (
 // can be chained directly after the NewPopupStage call.
 // Use Run call at the end to start the Stage running.
 func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *Stage {
-	ctx = NonNilContext(ctx)
+	ctx = nonNilContext(ctx)
 	st := &Stage{}
 	st.SetType(typ)
 	st.SetScene(sc)

@@ -14,22 +14,18 @@ import (
 	"cogentcore.org/core/units"
 )
 
-// todo: need a mechanism for nil Context to attach later
-
-// NonNilContext returns a non-nil context widget, falling back on the top
-// scene of the current window.
-func NonNilContext(ctx Widget) Widget {
-	if !reflectx.AnyIsNil(ctx) {
-		return ctx
-	}
-	return CurrentRenderWindow.Mains.Top().Scene
+// RunDialog returns and runs a new [DialogStage] that does not take up
+// the full window it is created in, in the context of the given widget.
+// See [Body.NewDialog] to make a new dialog without running it.
+func (bd *Body) RunDialog(ctx Widget) *Stage {
+	return bd.NewDialog(ctx).Run()
 }
 
 // NewDialog returns a new [DialogStage] that does not take up the
 // full window it is created in, in the context of the given widget.
 // See [Body.NewFullDialog] for a full-window dialog.
 func (bd *Body) NewDialog(ctx Widget) *Stage {
-	ctx = NonNilContext(ctx)
+	ctx = nonNilContext(ctx)
 	bd.DialogStyles()
 	bd.Scene.Stage = NewMainStage(DialogStage, bd.Scene)
 	bd.Scene.Stage.SetModal(true)
@@ -38,9 +34,16 @@ func (bd *Body) NewDialog(ctx Widget) *Stage {
 	return bd.Scene.Stage
 }
 
+// RunFullDialog returns and runs a new [DialogStage] that takes up the full
+// window it is created in, in the context of the given widget.
+// See [Body.NewFullDialog] to make a full dialog without running it.
+func (bd *Body) RunFullDialog(ctx Widget) *Stage {
+	return bd.NewFullDialog(ctx).Run()
+}
+
 // NewFullDialog returns a new [DialogStage] that takes up the full
-// window it is created in, in the context of the given widget, optionally
-// with the given name. See [Body.NewDialog] for a non-full-window dialog.
+// window it is created in, in the context of the given widget.
+// See [Body.NewDialog] for a non-full-window dialog.
 func (bd *Body) NewFullDialog(ctx Widget) *Stage {
 	bd.DialogStyles()
 	bd.Scene.Stage = NewMainStage(DialogStage, bd.Scene)
@@ -193,4 +196,13 @@ type NewItemsData struct {
 	Number int
 	// Type is the type of elements to create
 	Type *types.Type
+}
+
+// nonNilContext returns a non-nil context widget, falling back on the top
+// scene of the current window.
+func nonNilContext(ctx Widget) Widget {
+	if !reflectx.AnyIsNil(ctx) {
+		return ctx
+	}
+	return CurrentRenderWindow.Mains.Top().Scene
 }
