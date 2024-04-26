@@ -8,8 +8,8 @@ import (
 	"image/color"
 	"log/slog"
 
-	"cogentcore.org/core/cam/cam16"
-	"cogentcore.org/core/cam/hct"
+	"cogentcore.org/core/colors/cam/cam16"
+	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/math32"
 )
 

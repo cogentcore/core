@@ -9,7 +9,7 @@ import (
 	"image/draw"
 	"testing"
 
-	"cogentcore.org/core/cam/hct"
+	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/iox/imagex"
 )
 

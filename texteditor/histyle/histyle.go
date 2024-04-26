@@ -17,8 +17,8 @@ import (
 	"os"
 	"strings"
 
-	"cogentcore.org/core/cam/hct"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/parse/token"

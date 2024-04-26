@@ -13,8 +13,8 @@ import (
 	"strconv"
 	"strings"
 
-	"cogentcore.org/core/cam/hct"
-	"cogentcore.org/core/cam/hsl"
+	"cogentcore.org/core/colors/cam/hct"
+	"cogentcore.org/core/colors/cam/hsl"
 	"cogentcore.org/core/math32"
 )
 

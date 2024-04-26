@@ -7,7 +7,7 @@ package colors
 import (
 	"image/color"
 
-	"cogentcore.org/core/cam/hct"
+	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/colors/matcolor"
 )
 

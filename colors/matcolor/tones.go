@@ -7,7 +7,7 @@ package matcolor
 import (
 	"image/color"
 
-	"cogentcore.org/core/cam/hct"
+	"cogentcore.org/core/colors/cam/hct"
 )
 
 // Tones contains cached color values for each tone

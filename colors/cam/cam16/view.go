@@ -20,7 +20,7 @@
 package cam16
 
 import (
-	"cogentcore.org/core/cam/cie"
+	"cogentcore.org/core/colors/cam/cie"
 	"cogentcore.org/core/math32"
 )
 

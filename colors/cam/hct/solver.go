@@ -20,8 +20,8 @@
 package hct
 
 import (
-	"cogentcore.org/core/cam/cam16"
-	"cogentcore.org/core/cam/cie"
+	"cogentcore.org/core/colors/cam/cam16"
+	"cogentcore.org/core/colors/cam/cie"
 	"cogentcore.org/core/math32"
 )
 

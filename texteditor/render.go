@@ -9,8 +9,8 @@ import (
 	"image"
 	"image/color"
 
-	"cogentcore.org/core/cam/hct"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/core"
