@@ -74,7 +74,7 @@ type Tensor interface {
 	// SetFloat sets the value of given index as a float64
 	SetFloat(i []int, val float64)
 
-	// note: String conflicts with stringer
+	// NOTE: String conflicts with [fmt.Stringer], so we have to use StringValue
 
 	// StringValue returns the value of given index as a string
 	StringValue(i []int) string

@@ -457,6 +457,8 @@ func (dt *Table) StringIndex(column, row int) string {
 	return ct.String1D(row)
 }
 
+// NOTE: String conflicts with [fmt.Stringer], so we have to use StringValue
+
 // StringValue returns the string value of cell at given column (by name), row index
 // for columns that have 1-dimensional tensors.
 // Returns "" if column is not a 1-dimensional tensor or row not valid.
