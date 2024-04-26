@@ -38,10 +38,10 @@ type TableView struct {
 	TsrDisp TensorDisp
 
 	// per column tensor display params
-	ColTsrDisp map[int]*TensorDisp
+	ColumnTensorDisplay map[int]*TensorDisp
 
 	// per column blank tensor values
-	ColTsrBlank map[int]*tensor.Float64
+	ColumnTensorBlank map[int]*tensor.Float64
 
 	// number of columns in table (as of last update)
 	NCols int `edit:"-"`
@@ -78,8 +78,8 @@ func (tv *TableView) SetStyles() {
 	tv.SliceViewBase.SetStyles() // handles all the basics
 	tv.SortIndex = -1
 	tv.TsrDisp.Defaults()
-	tv.ColTsrDisp = make(map[int]*TensorDisp)
-	tv.ColTsrBlank = make(map[int]*tensor.Float64)
+	tv.ColumnTensorDisplay = make(map[int]*TensorDisp)
+	tv.ColumnTensorBlank = make(map[int]*tensor.Float64)
 
 	tv.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(tv) {
@@ -474,7 +474,7 @@ func (tv *TableView) UpdateWidgets() {
 					}
 					vv.SetSoloValue(reflect.ValueOf(&fval))
 				} else {
-					tdsp := tv.ColTensorDisp(fli)
+					tdsp := tv.GetColumnTensorDisplay(fli)
 					var cell tensor.Tensor
 					cell = tv.ColTensorBlank(fli, col)
 					if ixi >= 0 {
@@ -506,33 +506,33 @@ func (tv *TableView) UpdateWidgets() {
 
 // ColTensorBlank returns tensor blanks for given tensor col
 func (tv *TableView) ColTensorBlank(cidx int, col tensor.Tensor) *tensor.Float64 {
-	if ctb, has := tv.ColTsrBlank[cidx]; has {
+	if ctb, has := tv.ColumnTensorBlank[cidx]; has {
 		return ctb
 	}
-	ctb := tensor.NewOfShape[float64](col.Shape()).(*tensor.Float64)
-	tv.ColTsrBlank[cidx] = ctb
+	ctb := tensor.New[float64](col.Shape().Sizes, col.Shape().Names...).(*tensor.Float64)
+	tv.ColumnTensorBlank[cidx] = ctb
 	return ctb
 }
 
-// ColTensorDisp returns tensor display parameters for this column
+// GetColumnTensorDisplay returns tensor display parameters for this column
 // either the overall defaults or the per-column if set
-func (tv *TableView) ColTensorDisp(col int) *TensorDisp {
-	if ctd, has := tv.ColTsrDisp[col]; has {
+func (tv *TableView) GetColumnTensorDisplay(col int) *TensorDisp {
+	if ctd, has := tv.ColumnTensorDisplay[col]; has {
 		return ctd
 	}
 	if tv.Table != nil {
 		cl := tv.Table.Table.Columns[col]
 		if len(cl.MetaDataMap()) > 0 {
-			return tv.SetColTensorDisp(col)
+			return tv.SetColumnTensorDisplay(col)
 		}
 	}
 	return &tv.TsrDisp
 }
 
-// SetColTensorDisp sets per-column tensor display params and returns them
+// SetColumnTensorDisplay sets per-column tensor display params and returns them
 // if already set, just returns them
-func (tv *TableView) SetColTensorDisp(col int) *TensorDisp {
-	if ctd, has := tv.ColTsrDisp[col]; has {
+func (tv *TableView) SetColumnTensorDisplay(col int) *TensorDisp {
+	if ctd, has := tv.ColumnTensorDisplay[col]; has {
 		return ctd
 	}
 	ctd := &TensorDisp{}
@@ -541,7 +541,7 @@ func (tv *TableView) SetColTensorDisp(col int) *TensorDisp {
 		cl := tv.Table.Table.Columns[col]
 		ctd.FromMeta(cl)
 	}
-	tv.ColTsrDisp[col] = ctd
+	tv.ColumnTensorDisplay[col] = ctd
 	return ctd
 }
 
@@ -614,14 +614,14 @@ func (tv *TableView) SortSliceAction(fldIndex int) {
 	tv.Update() // requires full update due to sort button icon
 }
 
-// TensorDispAction allows user to select tensor display options for column
+// TensorDisplayAction allows user to select tensor display options for column
 // pass -1 for global params for the entire table
-func (tv *TableView) TensorDispAction(fldIndex int) {
+func (tv *TableView) TensorDisplayAction(fldIndex int) {
 	ctd := &tv.TsrDisp
 	if fldIndex >= 0 {
-		ctd = tv.SetColTensorDisp(fldIndex)
+		ctd = tv.SetColumnTensorDisplay(fldIndex)
 	}
-	d := core.NewBody().AddTitle("Tensor Grid Display Options")
+	d := core.NewBody().AddTitle("Tensor grid display options")
 	views.NewStructView(d).SetStruct(ctd)
 	d.NewFullDialog(tv).Run()
 	// tv.UpdateSliceGrid()

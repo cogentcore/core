@@ -55,12 +55,12 @@ func (t *TableView) SetTsrDisp(v TensorDisp) *TableView { t.TsrDisp = v; return 
 
 // SetColTsrDisp sets the [TableView.ColTsrDisp]:
 // per column tensor display params
-func (t *TableView) SetColTsrDisp(v map[int]*TensorDisp) *TableView { t.ColTsrDisp = v; return t }
+func (t *TableView) SetColTsrDisp(v map[int]*TensorDisp) *TableView { t.ColumnTensorDisplay = v; return t }
 
 // SetColTsrBlank sets the [TableView.ColTsrBlank]:
 // per column blank tensor values
 func (t *TableView) SetColTsrBlank(v map[int]*tensor.Float64) *TableView {
-	t.ColTsrBlank = v
+	t.ColumnTensorBlank = v
 	return t
 }
 
