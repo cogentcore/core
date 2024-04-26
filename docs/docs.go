@@ -156,7 +156,7 @@ func main() {
 	homeTextBlock(appBlocks, "WELD", "WELD is a set of 3D computational models of a new approach to quantum physics based on wave electrodynamics.")
 	errors.Log(core.NewImage(appBlocks).OpenFS(resources, "weld-icon.png"))
 
-	core.NewText(fr).SetType(core.TextDisplaySmall).SetText("<b>Why Cogent Core is better than...</b>")
+	core.NewText(fr).SetType(core.TextDisplaySmall).SetText("<b>Why not use ___ instead?</b>")
 
 	otherBlocks := makeBlocks()
 
@@ -174,6 +174,11 @@ func main() {
 	core.NewIcon(otherBlocks).SetIcon(icons.Toolbar).Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
 	})
+
+	core.NewIcon(otherBlocks).SetIcon(icons.Toolbar).Style(func(s *styles.Style) {
+		s.Min.Set(units.Dp(256))
+	})
+	homeTextBlock(otherBlocks, `<a href="https://fyne.io">FYNE</a>`, "Fyne provides a limited set of features and no easy way to for developers and users to fully customize apps, making it difficult to build fully featured, good-looking apps. It also has no interactive documentation and provides a less streamlined developer experience.")
 
 	core.NewButton(fr).SetText("Get Started").OnClick(func(e events.Event) {
 		ctx.OpenURL("getting-started")
