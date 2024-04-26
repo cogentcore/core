@@ -68,7 +68,7 @@ func homePage(ctx *htmlview.Context) bool {
 			return x(uc) * (128.0 / 612.0)
 		}))
 	})
-	core.NewText(fr).SetType(core.TextHeadlineMedium).SetText("A cross-platform framework for building powerful, fast, and cogent 2D and 3D apps")
+	core.NewText(fr).SetType(core.TextHeadlineMedium).SetText("A cross-platform framework for building powerful, fast, and elegant 2D and 3D apps")
 
 	makeBlocks := func() core.Widget {
 		return core.NewLayout(fr).Style(func(s *styles.Style) {
@@ -168,7 +168,7 @@ func main() {
 	core.NewIcon(otherBlocks).SetIcon(icons.Toolbar).Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
 	})
-	homeTextBlock(otherBlocks, `<a href="https://react.dev">REACT</a>`, "React is built on outdated, inelegant, and inconsistent web languages like JavaScript, HTML, and CSS, making it difficult to build powerful, fast, and cogent apps. Additionally, it lacks the built-in powerful features and user customizability of Cogent Core.")
+	homeTextBlock(otherBlocks, `<a href="https://react.dev">REACT</a>`, "React is built on outdated, inelegant, and inconsistent web languages like JavaScript, HTML, and CSS, making it difficult to build powerful, fast, and elegant apps. Additionally, it lacks the built-in powerful features and user customizability of Cogent Core.")
 
 	homeTextBlock(otherBlocks, `<a href="https://qt.io">QT</a>`, "Qt is built on C++, an outdated, difficult to use, and inelegant language that makes Qt fraught with boilerplate and clunky to develop with; compile times range from minutes to hours. Also, it produces apps with unfriendly styling and no built-in user customizability.")
 	core.NewIcon(otherBlocks).SetIcon(icons.Toolbar).Style(func(s *styles.Style) {
