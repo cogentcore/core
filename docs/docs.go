@@ -212,17 +212,3 @@ func homePage(ctx *htmlview.Context) bool {
 
 	return true
 }
-
-func homeBlock(parent core.Widget, title, text string) {
-	block := core.NewLayout(parent).Style(func(s *styles.Style) {
-		s.Direction = styles.Column
-		s.Text.Align = styles.Start
-		s.Min.X.Pw(50)
-		s.Grow.Set(0, 0)
-	})
-	core.NewText(block).SetType(core.TextHeadlineLarge).SetText(title).Style(func(s *styles.Style) {
-		s.Font.Weight = styles.WeightBold
-		s.Color = colors.C(colors.Scheme.Primary.Base)
-	})
-	core.NewText(block).SetType(core.TextTitleLarge).SetText(text)
-}
