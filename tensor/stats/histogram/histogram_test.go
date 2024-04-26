@@ -11,8 +11,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNorm32(t *testing.T) {
+func TestHistogram32(t *testing.T) {
 	vals := []float32{0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1}
+	ex := []float32{4, 3, 4}
+	res := []float32{}
+
+	F32(&res, vals, 3, 0, 1)
 
 	assert.Equal(t, ex, res)
 
