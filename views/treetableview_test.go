@@ -13,5 +13,5 @@ import (
 func TestTreeTableView(t *testing.T) {
 	b := core.NewBody()
 	NewTreeTableView(b)
-	b.AssertRender(t, "tretable/basic")
+	b.AssertRender(t, "trtable/basic")
 }

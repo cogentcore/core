@@ -12,6 +12,8 @@
 // for 2D & 3D graphics.
 package math32
 
+//go:generate core generate
+
 import (
 	"math"
 	"strconv"

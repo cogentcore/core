@@ -566,3 +566,17 @@ func (ix *IndexView) Less(i, j int) bool {
 func (ix *IndexView) Swap(i, j int) {
 	ix.Indexes[i], ix.Indexes[j] = ix.Indexes[j], ix.Indexes[i]
 }
+
+// FilterNull is a FilterFunc that filters out all rows that have a Null value
+// in a 1D (scalar) column, according to the IsNull flag
+func FilterNull(et *Table, row int) bool {
+	for _, cl := range et.Columns {
+		if cl.NumDims() > 1 {
+			continue
+		}
+		if cl.IsNull1D(row) {
+			return false
+		}
+	}
+	return true
+}
