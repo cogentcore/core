@@ -183,9 +183,9 @@ type Tensor interface {
 
 // New returns a new n-dimensional tensor of given value type
 // with the given sizes per dimension (shape), and optional dimension names.
-// Supported types are: string, bool (for a Bits), float32, float64, int, int32, int8
+// Supported types are: string, bool (for a Bits), float32, float64, int, int32, byte
 // Nulls are initialized to nil.
-func New[T string | bool | float32 | float64 | int | int32 | int8](sizes []int, names ...string) Tensor {
+func New[T string | bool | float32 | float64 | int | int32 | uint8](sizes []int, names ...string) Tensor {
 	var v T
 	switch any(v).(type) {
 	case string:
@@ -200,8 +200,8 @@ func New[T string | bool | float32 | float64 | int | int32 | int8](sizes []int, 
 		return NewNumber[int](sizes, names...)
 	case int32:
 		return NewNumber[int32](sizes, names...)
-	case int8:
-		return NewNumber[int8](sizes, names...)
+	case byte:
+		return NewNumber[byte](sizes, names...)
 	default:
 		panic("tensor.New: unexpected error: type not supported")
 	}
@@ -211,13 +211,13 @@ func New[T string | bool | float32 | float64 | int | int32 | int8](sizes []int, 
 // with the given Shape information.
 // Allowed types are: string, bool (for a Bits), or any basic numerical value.
 // Nulls are initialized to nil.
-func NewOfShape[T string | bool | float32 | float64 | int | int32 | int8](shape *Shape) Tensor {
+func NewOfShape[T string | bool | float32 | float64 | int | int32 | uint8](shape *Shape) Tensor {
 	return New[T](shape.Sizes, shape.Names...)
 }
 
 // NewOfType returns a new n-dimensional tensor of given reflect.Kind type
 // with the given sizes per dimension (shape), and optional dimension names.
-// Supported types are: string, bool (for a Bits), float32, float64, int, int32, int8
+// Supported types are: string, bool (for a Bits), float32, float64, int, int32, byte
 // Nulls are initialized to nil.
 func NewOfType(typ reflect.Kind, sizes []int, names ...string) Tensor {
 	switch typ {
@@ -233,8 +233,8 @@ func NewOfType(typ reflect.Kind, sizes []int, names ...string) Tensor {
 		return NewNumber[int](sizes, names...)
 	case reflect.Int32:
 		return NewNumber[int32](sizes, names...)
-	case reflect.Int8:
-		return NewNumber[int8](sizes, names...)
+	case reflect.Uint8:
+		return NewNumber[byte](sizes, names...)
 	default:
 		panic(fmt.Sprintf("tensor.NewOfType: type not supported: %v", typ))
 	}

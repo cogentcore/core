@@ -50,7 +50,7 @@ func Sum(tsr tensor.Tensor) float64 {
 
 // Prod returns the product of non-Null, non-NaN elements in given Tensor.
 func Prod(tsr tensor.Tensor) float64 {
-	return Agg(tsr, 0, agg.ProdFunc)
+	return Agg(tsr, 1, agg.ProdFunc)
 }
 
 // Max returns the maximum of non-Null, non-NaN elements in given Tensor.

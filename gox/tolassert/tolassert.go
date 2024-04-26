@@ -7,6 +7,8 @@
 package tolassert
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/gox/num"
 	"github.com/stretchr/testify/assert"
 )
@@ -30,4 +32,21 @@ func EqualTol[T num.Float](t assert.TestingT, expected T, actual, tolerance T, m
 		return assert.Equal(t, expected, actual, msgAndArgs...)
 	}
 	return true
+}
+
+// EqualTolSlice asserts that the given two slices of numbers are about equal to each other,
+// using the given tolerance value.
+func EqualTolSlice[T num.Float](t assert.TestingT, expected, actual []T, tolerance T, msgAndArgs ...any) bool {
+	if h, ok := t.(interface{ Helper() }); ok {
+		h.Helper()
+	}
+	errs := false
+	for i, ex := range expected {
+		a := actual[i]
+		if num.Abs(a-ex) > tolerance {
+			assert.Equal(t, expected, actual, fmt.Sprintf("index: %d", i))
+			errs = true
+		}
+	}
+	return errs
 }
