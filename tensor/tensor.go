@@ -203,9 +203,8 @@ func New[T string | bool | float32 | float64 | int | int32 | int8](sizes []int, 
 	case int8:
 		return NewNumber[int8](sizes, names...)
 	default:
-		panic("tensor.New: type not supported!")
+		panic("tensor.New: unexpected error: type not supported")
 	}
-	return NewString(sizes, names...)
 }
 
 // NewOfShape returns a new n-dimensional tensor of given value type

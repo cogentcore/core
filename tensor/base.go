@@ -126,7 +126,7 @@ func (tsr *Base[T]) SetNumRows(rows int) {
 	}
 }
 
-// SubSpaceImpl returns a new tensor with innermost subspace at given
+// subSpaceImpl returns a new tensor with innermost subspace at given
 // offset(s) in outermost dimension(s) (len(offs) < NumDims).
 // The new tensor points to the values of the this tensor (i.e., modifications
 // will affect both), as its Values slice is a view onto the original (which
