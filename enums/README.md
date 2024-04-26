@@ -1,8 +1,5 @@
 # Enums in Go
 
-[![Go Reference](https://pkg.go.dev/badge/cogentcore.org/core/enums.svg)](https://pkg.go.dev/cogentcore.org/core/enums)
-[![Go Report Card](https://goreportcard.com/badge/cogentcore.org/core/enums)](https://goreportcard.com/report/cogentcore.org/core/enums)
-
 Enums provides utilities for creating and using enumerated types in Go. There are two main parts of enums: command `enumgen` and package `enums`. Most end-users should only have to interact with `enumgen`.
 
 ## Enumgen

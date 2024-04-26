@@ -1,6 +1,4 @@
-# ordmap: ordered map using Go 1.18 generics
-
-[![Go Reference](https://pkg.go.dev/badge/cogentcore.org/core/ordmap.svg)](https://pkg.go.dev/cogentcore.org/core/ordmap)
+# ordmap: ordered map using Go generics
 
 Package `ordmap` implements an ordered map that retains the order of items added to a slice, while also providing fast key-based map lookup of items, using the Go 1.18 generics system.
 
