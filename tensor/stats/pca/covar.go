@@ -22,8 +22,8 @@ import (
 // cell co-varies in its value with each other cell across the rows of the table.
 // This is the input to the PCA eigenvalue decomposition of the resulting
 // covariance matrix.
-func CovarTableCol(cmat tensor.Tensor, ix *table.IndexView, colNm string, mfun metric.Func64) error {
-	col, err := ix.Table.ColumnByNameTry(colNm)
+func CovarTableCol(cmat tensor.Tensor, ix *table.IndexView, column string, mfun metric.Func64) error {
+	col, err := ix.Table.ColumnByNameTry(column)
 	if err != nil {
 		return err
 	}
@@ -66,9 +66,9 @@ func CovarTableCol(cmat tensor.Tensor, ix *table.IndexView, colNm string, mfun m
 	}
 
 	if nm, has := ix.Table.MetaData["name"]; has {
-		cmat.SetMetaData("name", nm+"_"+colNm)
+		cmat.SetMetaData("name", nm+"_"+column)
 	} else {
-		cmat.SetMetaData("name", colNm)
+		cmat.SetMetaData("name", column)
 	}
 	if ds, has := ix.Table.MetaData["desc"]; has {
 		cmat.SetMetaData("desc", ds)
@@ -172,8 +172,8 @@ func TensorRowsVec(vec []float64, tsr tensor.Tensor, cidx int) {
 // This is the input to the PCA eigenvalue decomposition of the resulting
 // covariance matrix.
 // This Std version is usable e.g., in Python where the func cannot be passed.
-func CovarTableColStd(cmat tensor.Tensor, ix *table.IndexView, colNm string, met metric.StdMetrics) error {
-	return CovarTableCol(cmat, ix, colNm, metric.StdFunc64(met))
+func CovarTableColStd(cmat tensor.Tensor, ix *table.IndexView, column string, met metric.StdMetrics) error {
+	return CovarTableCol(cmat, ix, column, metric.StdFunc64(met))
 }
 
 // CovarTensorStd generates a covariance matrix from given tensor.Tensor,

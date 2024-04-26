@@ -16,7 +16,7 @@ import (
 type IndexViewAggFuncIndex func(ix *table.IndexView, colIndex int) []float64
 
 // IndexViewAggFunc is an aggregation function operating on IndexView, taking a column name arg
-type IndexViewAggFunc func(ix *table.IndexView, colNm string) []float64
+type IndexViewAggFunc func(ix *table.IndexView, column string) []float64
 
 // IndexViewAggFuncTry is an aggregation function operating on IndexView, taking a column name arg,
 // returning an error message
@@ -38,8 +38,8 @@ func CountIndex(ix *table.IndexView, colIndex int) []float64 {
 // If name not found, nil is returned -- use Try version for error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func Count(ix *table.IndexView, colNm string) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func Count(ix *table.IndexView, column string) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -62,8 +62,8 @@ func SumIndex(ix *table.IndexView, colIndex int) []float64 {
 // If name not found, nil is returned -- use Try version for error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func Sum(ix *table.IndexView, colNm string) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func Sum(ix *table.IndexView, column string) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -86,8 +86,8 @@ func ProdIndex(ix *table.IndexView, colIndex int) []float64 {
 // If name not found, nil is returned -- use Try version for error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func Prod(ix *table.IndexView, colNm string) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func Prod(ix *table.IndexView, column string) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -110,8 +110,8 @@ func MaxIndex(ix *table.IndexView, colIndex int) []float64 {
 // If name not found, nil is returned -- use Try version for error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func Max(ix *table.IndexView, colNm string) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func Max(ix *table.IndexView, column string) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -134,8 +134,8 @@ func MinIndex(ix *table.IndexView, colIndex int) []float64 {
 // If name not found, nil is returned -- use Try version for error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func Min(ix *table.IndexView, colNm string) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func Min(ix *table.IndexView, column string) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -168,8 +168,8 @@ func MeanIndex(ix *table.IndexView, colIndex int) []float64 {
 // If name not found, nil is returned -- use Try version for error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func Mean(ix *table.IndexView, colNm string) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func Mean(ix *table.IndexView, column string) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -216,8 +216,8 @@ func VarIndex(ix *table.IndexView, colIndex int) []float64 {
 // If name not found, nil is returned -- use Try version for error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func Var(ix *table.IndexView, colNm string) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func Var(ix *table.IndexView, column string) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -246,8 +246,8 @@ func StdIndex(ix *table.IndexView, colIndex int) []float64 {
 // If name not found, nil is returned -- use Try version for error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func Std(ix *table.IndexView, colNm string) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func Std(ix *table.IndexView, column string) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -282,8 +282,8 @@ func SemIndex(ix *table.IndexView, colIndex int) []float64 {
 // If name not found, nil is returned -- use Try version for error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func Sem(ix *table.IndexView, colNm string) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func Sem(ix *table.IndexView, column string) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -330,8 +330,8 @@ func VarPopIndex(ix *table.IndexView, colIndex int) []float64 {
 // If name not found, nil is returned -- use Try version for error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func VarPop(ix *table.IndexView, colNm string) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func VarPop(ix *table.IndexView, column string) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -360,8 +360,8 @@ func StdPopIndex(ix *table.IndexView, colIndex int) []float64 {
 // If name not found, nil is returned -- use Try version for error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func StdPop(ix *table.IndexView, colNm string) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func StdPop(ix *table.IndexView, column string) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -396,8 +396,8 @@ func SemPopIndex(ix *table.IndexView, colIndex int) []float64 {
 // If name not found, nil is returned -- use Try version for error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func SemPop(ix *table.IndexView, colNm string) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func SemPop(ix *table.IndexView, column string) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -420,8 +420,8 @@ func SumSqIndex(ix *table.IndexView, colIndex int) []float64 {
 // If name not found, nil is returned -- use Try version for error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func SumSq(ix *table.IndexView, colNm string) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func SumSq(ix *table.IndexView, column string) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -444,8 +444,8 @@ func MedianIndex(ix *table.IndexView, colIndex int) []float64 {
 // If name not found, nil is returned -- use Try version for error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func Median(ix *table.IndexView, colNm string) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func Median(ix *table.IndexView, column string) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -468,8 +468,8 @@ func Q1Index(ix *table.IndexView, colIndex int) []float64 {
 // If name not found, nil is returned -- use Try version for error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func Q1(ix *table.IndexView, colNm string) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func Q1(ix *table.IndexView, column string) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -492,8 +492,8 @@ func Q3Index(ix *table.IndexView, colIndex int) []float64 {
 // If name not found, nil is returned -- use Try version for error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func Q3(ix *table.IndexView, colNm string) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func Q3(ix *table.IndexView, column string) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}

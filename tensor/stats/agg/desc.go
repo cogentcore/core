@@ -108,8 +108,8 @@ func DescIndex(ix *table.IndexView, colIndex int) *table.Table {
 // of non-Null, non-NaN elements in given IndexView indexed view of an
 // table.Table, for given column name.
 // If name not found, nil is returned -- use Try version for error message.
-func Desc(ix *table.IndexView, colNm string) *table.Table {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func Desc(ix *table.IndexView, column string) *table.Table {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -122,8 +122,8 @@ func Desc(ix *table.IndexView, colNm string) *table.Table {
 // If name not found, returns error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func DescTry(ix *table.IndexView, colNm string) (*table.Table, error) {
-	colIndex, err := ix.Table.ColumnIndexTry(colNm)
+func DescTry(ix *table.IndexView, column string) (*table.Table, error) {
+	colIndex, err := ix.Table.ColumnIndexTry(column)
 	if err != nil {
 		return nil, err
 	}

@@ -48,11 +48,11 @@ func (pa *PCA) Init() {
 // This is the input to the PCA eigenvalue decomposition of the resulting
 // covariance matrix, which extracts the eigenvectors as directions with maximal
 // variance in this matrix.
-func (pa *PCA) TableCol(ix *table.IndexView, colNm string, mfun metric.Func64) error {
+func (pa *PCA) TableCol(ix *table.IndexView, column string, mfun metric.Func64) error {
 	if pa.Covar == nil {
 		pa.Init()
 	}
-	err := CovarTableCol(pa.Covar, ix, colNm, mfun)
+	err := CovarTableCol(pa.Covar, ix, column, mfun)
 	if err != nil {
 		return err
 	}
@@ -97,8 +97,8 @@ func (pa *PCA) Tensor(tsr tensor.Tensor, mfun metric.Func64) error {
 // covariance matrix, which extracts the eigenvectors as directions with maximal
 // variance in this matrix.
 // This Std version is usable e.g., in Python where the func cannot be passed.
-func (pa *PCA) TableColStd(ix *table.IndexView, colNm string, met metric.StdMetrics) error {
-	return pa.TableCol(ix, colNm, metric.StdFunc64(met))
+func (pa *PCA) TableColStd(ix *table.IndexView, column string, met metric.StdMetrics) error {
+	return pa.TableCol(ix, column, metric.StdFunc64(met))
 }
 
 // TensorStd is a convenience method that computes a covariance matrix
@@ -145,11 +145,11 @@ func (pa *PCA) PCA() error {
 	return nil
 }
 
-// ProjectCol projects values from the given colNm of given table (via IndexView)
+// ProjectCol projects values from the given column of given table (via IndexView)
 // onto the idx'th eigenvector (0 = largest eigenvalue, 1 = next, etc).
 // Must have already called PCA() method.
-func (pa *PCA) ProjectCol(vals *[]float64, ix *table.IndexView, colNm string, idx int) error {
-	col, err := ix.Table.ColumnByNameTry(colNm)
+func (pa *PCA) ProjectCol(vals *[]float64, ix *table.IndexView, column string, idx int) error {
+	col, err := ix.Table.ColumnByNameTry(column)
 	if err != nil {
 		return err
 	}
@@ -188,12 +188,12 @@ func (pa *PCA) ProjectCol(vals *[]float64, ix *table.IndexView, colNm string, id
 	return nil
 }
 
-// ProjectColToTable projects values from the given colNm of given table (via IndexView)
+// ProjectColToTable projects values from the given column of given table (via IndexView)
 // onto the given set of eigenvectors (idxs, 0 = largest eigenvalue, 1 = next, etc),
 // and stores results along with labels from column labNm into results table.
 // Must have already called PCA() method.
-func (pa *PCA) ProjectColToTable(prjns *table.Table, ix *table.IndexView, colNm, labNm string, idxs []int) error {
-	_, err := ix.Table.ColumnByNameTry(colNm)
+func (pa *PCA) ProjectColToTable(prjns *table.Table, ix *table.IndexView, column, labNm string, idxs []int) error {
+	_, err := ix.Table.ColumnByNameTry(column)
 	if err != nil {
 		return err
 	}
@@ -214,7 +214,7 @@ func (pa *PCA) ProjectColToTable(prjns *table.Table, ix *table.IndexView, colNm,
 
 	for ii, idx := range idxs {
 		pcol := prjns.Columns[pcolSt+ii].(*tensor.Number[float64])
-		pa.ProjectCol(&pcol.Values, ix, colNm, idx)
+		pa.ProjectCol(&pcol.Values, ix, column, idx)
 	}
 
 	if labNm != "" {

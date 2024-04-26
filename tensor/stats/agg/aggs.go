@@ -125,8 +125,8 @@ func AggIndex(ix *table.IndexView, colIndex int, ag Aggs) []float64 {
 // If name not found, nil is returned -- use Try version for error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func Agg(ix *table.IndexView, colNm string, ag Aggs) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func Agg(ix *table.IndexView, column string, ag Aggs) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}
@@ -141,8 +141,8 @@ func Agg(ix *table.IndexView, colNm string, ag Aggs) []float64 {
 // If col name not found, returns error message.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func AggTry(ix *table.IndexView, colNm string, ag Aggs) ([]float64, error) {
-	colIndex, err := ix.Table.ColumnIndexTry(colNm)
+func AggTry(ix *table.IndexView, column string, ag Aggs) ([]float64, error) {
+	colIndex, err := ix.Table.ColumnIndexTry(column)
 	if err != nil {
 		return nil, err
 	}

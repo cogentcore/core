@@ -63,8 +63,8 @@ func QuantilesIndex(ix *table.IndexView, colIndex int, qs []float64) []float64 {
 // qs are 0-1 values, 0 = min, 1 = max, .5 = median, etc.  Uses linear interpolation.
 // Because this requires a sort, it is more efficient to get as many quantiles
 // as needed in one pass.
-func Quantiles(ix *table.IndexView, colNm string, qs []float64) []float64 {
-	colIndex := ix.Table.ColumnIndex(colNm)
+func Quantiles(ix *table.IndexView, column string, qs []float64) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
 	}

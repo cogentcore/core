@@ -39,16 +39,16 @@ func (smat *SimMat) Init() {
 // if labNm is not empty, uses given column name for labels, which if blankRepeat
 // is true are filtered so that any sequentially repeated labels are blank.
 // This Std version is usable e.g., in Python where the func cannot be passed.
-func (smat *SimMat) TableColStd(ix *table.IndexView, colNm, labNm string, blankRepeat bool, met metric.StdMetrics) error {
-	return smat.TableCol(ix, colNm, labNm, blankRepeat, metric.StdFunc64(met))
+func (smat *SimMat) TableColStd(ix *table.IndexView, column, labNm string, blankRepeat bool, met metric.StdMetrics) error {
+	return smat.TableCol(ix, column, labNm, blankRepeat, metric.StdFunc64(met))
 }
 
 // TableCol generates a similarity / distance matrix from given column name
 // in given IndexView of an table.Table, and given metric function.
 // if labNm is not empty, uses given column name for labels, which if blankRepeat
 // is true are filtered so that any sequentially repeated labels are blank.
-func (smat *SimMat) TableCol(ix *table.IndexView, colNm, labNm string, blankRepeat bool, mfun metric.Func64) error {
-	col, err := ix.Table.ColumnByNameTry(colNm)
+func (smat *SimMat) TableCol(ix *table.IndexView, column, labNm string, blankRepeat bool, mfun metric.Func64) error {
+	col, err := ix.Table.ColumnByNameTry(column)
 	if err != nil {
 		return err
 	}
@@ -100,9 +100,9 @@ func (smat *SimMat) TableCol(ix *table.IndexView, colNm, labNm string, blankRepe
 	}
 
 	if nm, has := ix.Table.MetaData["name"]; has {
-		sm.SetMetaData("name", nm+"_"+colNm)
+		sm.SetMetaData("name", nm+"_"+column)
 	} else {
-		sm.SetMetaData("name", colNm)
+		sm.SetMetaData("name", column)
 	}
 	if ds, has := ix.Table.MetaData["desc"]; has {
 		sm.SetMetaData("desc", ds)

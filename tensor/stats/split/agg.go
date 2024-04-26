@@ -26,23 +26,23 @@ func AggIndex(spl *table.Splits, colIndex int, aggTyp agg.Aggs) *table.SplitAgg 
 // Agg performs aggregation using given standard aggregation function across
 // all splits, and returns the SplitAgg container of the results, which are also
 // stored in the Splits.  Column is specified by name -- see Try for error msg version.
-func Agg(spl *table.Splits, colNm string, aggTyp agg.Aggs) *table.SplitAgg {
+func Agg(spl *table.Splits, column string, aggTyp agg.Aggs) *table.SplitAgg {
 	dt := spl.Table()
 	if dt == nil {
 		return nil
 	}
-	return AggIndex(spl, dt.ColumnIndex(colNm), aggTyp)
+	return AggIndex(spl, dt.ColumnIndex(column), aggTyp)
 }
 
 // AggTry performs aggregation using given standard aggregation function across
 // all splits, and returns the SplitAgg container of the results, which are also
 // stored in the Splits.  Column is specified by name -- returns error for bad column name.
-func AggTry(spl *table.Splits, colNm string, aggTyp agg.Aggs) (*table.SplitAgg, error) {
+func AggTry(spl *table.Splits, column string, aggTyp agg.Aggs) (*table.SplitAgg, error) {
 	dt := spl.Table()
 	if dt == nil {
 		return nil, fmt.Errorf("split.AggTry: No splits to aggregate over")
 	}
-	colIndex, err := dt.ColumnIndexTry(colNm)
+	colIndex, err := dt.ColumnIndexTry(column)
 	if err != nil {
 		return nil, err
 	}
@@ -84,23 +84,23 @@ func DescIndex(spl *table.Splits, colIndex int) {
 // Desc performs aggregation using standard aggregation functions across
 // all splits, and stores results in the Splits.
 // Column is specified by name -- see Try for error msg version.
-func Desc(spl *table.Splits, colNm string) {
+func Desc(spl *table.Splits, column string) {
 	dt := spl.Table()
 	if dt == nil {
 		return
 	}
-	DescIndex(spl, dt.ColumnIndex(colNm))
+	DescIndex(spl, dt.ColumnIndex(column))
 }
 
 // DescTry performs aggregation using standard aggregation functions across
 // all splits, and stores results in the Splits.
 // Column is specified by name -- returns error for bad column name.
-func DescTry(spl *table.Splits, colNm string) error {
+func DescTry(spl *table.Splits, column string) error {
 	dt := spl.Table()
 	if dt == nil {
 		return fmt.Errorf("split.DescTry: No splits to aggregate over")
 	}
-	colIndex, err := dt.ColumnIndexTry(colNm)
+	colIndex, err := dt.ColumnIndexTry(column)
 	if err != nil {
 		return err
 	}
