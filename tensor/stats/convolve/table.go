@@ -23,12 +23,12 @@ func SmoothTable(src *table.Table, khalf int) *table.Table {
 	for ci, sci := range src.Columns {
 		switch sci.DataType() {
 		case reflect.Float32:
-			sc := sci.(*tensor.Number[float32])
-			dc := dest.Columns[ci].(*tensor.Number[float32])
+			sc := sci.(*tensor.Float32)
+			dc := dest.Columns[ci].(*tensor.Float32)
 			Slice32(&dc.Values, sc.Values, k32)
 		case reflect.Float64:
-			sc := sci.(*tensor.Number[float64])
-			dc := dest.Columns[ci].(*tensor.Number[float64])
+			sc := sci.(*tensor.Float64)
+			dc := dest.Columns[ci].(*tensor.Float64)
 			Slice64(&dc.Values, sc.Values, k64)
 		}
 	}

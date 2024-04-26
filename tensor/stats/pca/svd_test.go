@@ -9,31 +9,19 @@ import (
 	"math"
 	"testing"
 
-	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/stats/metric"
 	"cogentcore.org/core/tensor/table"
 	"gonum.org/v1/gonum/mat"
 )
 
 func TestSVDIris(t *testing.T) {
-	// sch := table.Schema{
-	// 	{"sepal_len", tensor.FLOAT64, nil, nil},
-	// 	{"sepal_wid", tensor.FLOAT64, nil, nil},
-	// 	{"petal_len", tensor.FLOAT64, nil, nil},
-	// 	{"petal_wid", tensor.FLOAT64, nil, nil},
-	// 	{"class", tensor.STRING, nil, nil},
-	// }
-
 	// note: these results are verified against this example:
 	// https://plot.ly/ipython-notebooks/principal-component-analysis/
 
-	sch := table.Schema{
-		{"data", tensor.FLOAT64, []int{4}, nil},
-		{"class", tensor.STRING, nil, nil},
-	}
-	dt := &table.Table{}
-	dt.SetFromSchema(sch, 0)
-	err := dt.OpenCSV("test_data/iris.data", table.Comma)
+	dt := table.NewTable(0)
+	dt.AddFloat64TensorColumn("data", []int{4})
+	dt.AddStringColumn("class")
+	err := dt.OpenCSV("testdata/iris.data", table.Comma)
 	if err != nil {
 		t.Error(err)
 	}

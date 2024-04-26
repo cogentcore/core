@@ -30,8 +30,8 @@ type PCA struct {
 }
 
 func (pa *PCA) Init() {
-	pa.Covar = &tensor.Number[float64]{}
-	pa.Vectors = &tensor.Number[float64]{}
+	pa.Covar = &tensor.Float64{}
+	pa.Vectors = &tensor.Float64{}
 	pa.Values = nil
 }
 
@@ -127,12 +127,12 @@ func (pa *PCA) PCA() error {
 	}
 	var eig mat.EigenSym
 	// note: MUST be a Float64 otherwise doesn't have Symmetric function
-	ok := eig.Factorize(pa.Covar.(*tensor.Number[float64]), true)
+	ok := eig.Factorize(pa.Covar.(*tensor.Float64), true)
 	if !ok {
 		return fmt.Errorf("gonum EigenSym Factorize failed")
 	}
 	if pa.Vectors == nil {
-		pa.Vectors = &tensor.Number[float64]{}
+		pa.Vectors = &tensor.Float64{}
 	}
 	var ev mat.Dense
 	eig.VectorsTo(&ev)
@@ -162,7 +162,7 @@ func (pa *PCA) ProjectCol(vals *[]float64, ix *table.IndexView, column string, i
 	}
 	cvec := make([]float64, nr)
 	eidx := nr - 1 - idx // eigens in reverse order
-	vec := pa.Vectors.(*tensor.Number[float64])
+	vec := pa.Vectors.(*tensor.Float64)
 	for ri := 0; ri < nr; ri++ {
 		cvec[ri] = vec.Value([]int{ri, eidx}) // vecs are in columns, reverse magnitude order
 	}
@@ -213,7 +213,7 @@ func (pa *PCA) ProjectColToTable(prjns *table.Table, ix *table.IndexView, column
 	prjns.SetNumRows(rows)
 
 	for ii, idx := range idxs {
-		pcol := prjns.Columns[pcolSt+ii].(*tensor.Number[float64])
+		pcol := prjns.Columns[pcolSt+ii].(*tensor.Float64)
 		pa.ProjectCol(&pcol.Values, ix, column, idx)
 	}
 

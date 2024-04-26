@@ -109,7 +109,7 @@ func GlomInit(ntot int) *Node {
 // The smat.Mat matrix must be an tensor.Float64.
 func GlomClust(root *Node, smat *simat.SimMat, dfunc DistFunc) *Node {
 	ntot := smat.Mat.DimSize(0) // number of leaves
-	smatf := smat.Mat.(*tensor.Number[float64]).Values
+	smatf := smat.Mat.(*tensor.Float64).Values
 	maxd := norm.Max64(smatf)
 	// indexes in each group
 	aidx := make([]int, ntot)

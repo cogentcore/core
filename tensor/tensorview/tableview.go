@@ -41,7 +41,7 @@ type TableView struct {
 	ColTsrDisp map[int]*TensorDisp
 
 	// per column blank tensor values
-	ColTsrBlank map[int]*tensor.Number[float64]
+	ColTsrBlank map[int]*tensor.Float64
 
 	// number of columns in table (as of last update)
 	NCols int `edit:"-"`
@@ -79,7 +79,7 @@ func (tv *TableView) SetStyles() {
 	tv.SortIndex = -1
 	tv.TsrDisp.Defaults()
 	tv.ColTsrDisp = make(map[int]*TensorDisp)
-	tv.ColTsrBlank = make(map[int]*tensor.Number[float64])
+	tv.ColTsrBlank = make(map[int]*tensor.Float64)
 
 	tv.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(tv) {
@@ -505,11 +505,11 @@ func (tv *TableView) UpdateWidgets() {
 }
 
 // ColTensorBlank returns tensor blanks for given tensor col
-func (tv *TableView) ColTensorBlank(cidx int, col tensor.Tensor) *tensor.Number[float64] {
+func (tv *TableView) ColTensorBlank(cidx int, col tensor.Tensor) *tensor.Float64 {
 	if ctb, has := tv.ColTsrBlank[cidx]; has {
 		return ctb
 	}
-	ctb := tensor.NewOfShape[float64](col.Shape()).(*tensor.Number[float64])
+	ctb := tensor.NewOfShape[float64](col.Shape()).(*tensor.Float64)
 	tv.ColTsrBlank[cidx] = ctb
 	return ctb
 }

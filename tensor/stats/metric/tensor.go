@@ -17,8 +17,8 @@ import (
 // returns the row and metric value for that row.
 // Col cell sizes must match size of probe (panics if not).
 func ClosestRow32(probe tensor.Tensor, col tensor.Tensor, mfun Func32) (int, float32) {
-	pr := probe.(*tensor.Number[float32])
-	cl := col.(*tensor.Number[float32])
+	pr := probe.(*tensor.Float32)
+	cl := col.(*tensor.Float32)
 	rows := col.Shape().Size(0)
 	csz := col.Len() / rows
 	if csz != probe.Len() {
@@ -45,8 +45,8 @@ func ClosestRow32(probe tensor.Tensor, col tensor.Tensor, mfun Func32) (int, flo
 // returns the row and metric value for that row.
 // Col cell sizes must match size of probe (panics if not).
 func ClosestRow64(probe tensor.Tensor, col tensor.Tensor, mfun Func64) (int, float64) {
-	pr := probe.(*tensor.Number[float64])
-	cl := col.(*tensor.Number[float64])
+	pr := probe.(*tensor.Float64)
+	cl := col.(*tensor.Float64)
 	rows := col.DimSize(0)
 	csz := col.Len() / rows
 	if csz != probe.Len() {

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"log/slog"
 	"math"
-	"reflect"
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tensor"
@@ -43,11 +42,11 @@ func FloatOnlyError() error {
 // TensorAbs applies the Abs function to each element in given tensor,
 // for float32 and float64 data types.
 func TensorAbs(a tensor.Tensor) {
-	switch a.DataType() {
-	case reflect.Float32:
-		Abs32(a.(*tensor.Number[float32]).Values)
-	case reflect.Float64:
-		Abs64(a.(*tensor.Number[float64]).Values)
+	switch tsr := a.(type) {
+	case *tensor.Float32:
+		Abs32(tsr.Values)
+	case *tensor.Float64:
+		Abs64(tsr.Values)
 	default:
 		FloatOnlyError()
 	}

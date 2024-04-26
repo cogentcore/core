@@ -8,22 +8,22 @@ package norm
 
 import (
 	"math"
-	"reflect"
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tensor"
 )
 
+// FloatFunc applies given functions to float tensor data, which is either Float32 or Float64
 func FloatFunc(tsr tensor.Tensor, nfunc32 Func32, nfunc64 Func64, stIdx, nIdx int, ffunc32 func(a []float32, fun Func32), ffunc64 func(a []float64, fun Func64)) {
-	switch tsr.DataType() {
-	case reflect.Float32:
-		vals := tsr.(*tensor.Number[float32]).Values
+	switch tt := tsr.(type) {
+	case *tensor.Float32:
+		vals := tt.Values
 		if nIdx > 0 {
 			vals = vals[stIdx : stIdx+nIdx]
 		}
 		ffunc32(vals, nfunc32)
-	case reflect.Float64:
-		vals := tsr.(*tensor.Number[float64]).Values
+	case *tensor.Float64:
+		vals := tt.Values
 		if nIdx > 0 {
 			vals = vals[stIdx : stIdx+nIdx]
 		}

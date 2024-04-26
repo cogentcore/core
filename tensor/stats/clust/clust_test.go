@@ -5,17 +5,31 @@
 package clust
 
 import (
-	"fmt"
 	"testing"
 
 	"cogentcore.org/core/tensor/stats/metric"
 	"cogentcore.org/core/tensor/stats/simat"
 	"cogentcore.org/core/tensor/table"
+	"github.com/stretchr/testify/assert"
 )
+
+var clustres = `
+0: 
+	9.181170003996987: 
+		5.534356399283666: 
+			4.859933131085473: 
+				3.4641016151377544: Mark_sad Mark_happy 
+				3.4641016151377544: Zane_sad Zane_happy 
+			3.4641016151377544: Alberto_sad Alberto_happy 
+		5.111664626761644: 
+			4.640135790634417: 
+				4: Lisa_sad Lisa_happy 
+				3.4641016151377544: Betty_sad Betty_happy 
+			3.605551275463989: Wendy_sad Wendy_happy `
 
 func TestClust(t *testing.T) {
 	dt := &table.Table{}
-	err := dt.OpenCSV("test_data/faces.dat", table.Tab)
+	err := dt.OpenCSV("testdata/faces.dat", table.Tab)
 	if err != nil {
 		t.Error(err)
 	}
@@ -27,5 +41,6 @@ func TestClust(t *testing.T) {
 	// cl := Glom(smat, MinDist)
 	cl := Glom(smat, AvgDist)
 	s := cl.Sprint(smat, 0)
-	fmt.Println(s)
+	// fmt.Println(s)
+	assert.Equal(t, clustres, s)
 }

@@ -21,6 +21,18 @@ type Number[T num.Number] struct {
 	Base[T]
 }
 
+// Float64 is a type alias for commonly-used tensor type
+type Float64 = Number[float64]
+
+// Float32 is a type alias for commonly-used tensor type
+type Float32 = Number[float32]
+
+// Int is a type alias for commonly-used tensor type
+type Int = Number[int]
+
+// Byte is a type alias for commonly-used tensor type
+type Byte = Number[byte]
+
 // NewNumber returns a new n-dimensional tensor of numerical values
 // with the given sizes per dimension (shape), and optional dimension names.
 // Nulls are initialized to nil.

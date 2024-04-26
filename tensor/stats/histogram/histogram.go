@@ -49,10 +49,10 @@ func F64Table(dt *table.Table, vals []float64, nBins int, min, max float64) {
 	dt.AddFloat64Column("Value")
 	dt.AddFloat64Column("Count")
 	dt.SetNumRows(nBins)
-	ct := dt.Columns[1].(*tensor.Number[float64])
+	ct := dt.Columns[1].(*tensor.Float64)
 	F64(&ct.Values, vals, nBins, min, max)
 	inc := (max - min) / float64(nBins)
-	vls := dt.Columns[0].(*tensor.Number[float64]).Values
+	vls := dt.Columns[0].(*tensor.Float64).Values
 	for i := 0; i < nBins; i++ {
 		vls[i] = math32.Truncate64(min+float64(i)*inc, 4)
 	}
@@ -98,10 +98,10 @@ func F32Table(dt *table.Table, vals []float32, nBins int, min, max float32) {
 	dt.AddFloat32Column("Value")
 	dt.AddFloat32Column("Count")
 	dt.SetNumRows(nBins)
-	ct := dt.Columns[1].(*tensor.Number[float32])
+	ct := dt.Columns[1].(*tensor.Float32)
 	F32(&ct.Values, vals, nBins, min, max)
 	inc := (max - min) / float32(nBins)
-	vls := dt.Columns[0].(*tensor.Number[float32]).Values
+	vls := dt.Columns[0].(*tensor.Float32).Values
 	for i := 0; i < nBins; i++ {
 		vls[i] = math32.Truncate(min+float32(i)*inc, 4)
 	}

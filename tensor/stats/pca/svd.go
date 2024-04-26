@@ -39,8 +39,8 @@ type SVD struct {
 func (svd *SVD) Init() {
 	svd.Kind = mat.SVDNone
 	svd.Cond = 0.01
-	svd.Covar = &tensor.Number[float64]{}
-	svd.Vectors = &tensor.Number[float64]{}
+	svd.Covar = &tensor.Float64{}
+	svd.Vectors = &tensor.Float64{}
 	svd.Values = nil
 }
 
@@ -142,7 +142,7 @@ func (svd *SVD) SVD() error {
 	}
 	if svd.Kind > mat.SVDNone {
 		if svd.Vectors == nil {
-			svd.Vectors = &tensor.Number[float64]{}
+			svd.Vectors = &tensor.Float64{}
 		}
 		var ev mat.Dense
 		eig.UTo(&ev)
@@ -174,7 +174,7 @@ func (svd *SVD) ProjectCol(vals *[]float64, ix *table.IndexView, column string, 
 	}
 	cvec := make([]float64, nr)
 	// eidx := nr - 1 - idx // eigens in reverse order
-	vec := svd.Vectors.(*tensor.Number[float64])
+	vec := svd.Vectors.(*tensor.Float64)
 	for ri := 0; ri < nr; ri++ {
 		cvec[ri] = vec.Value([]int{ri, idx}) // vecs are in columns, reverse magnitude order
 	}
@@ -225,7 +225,7 @@ func (svd *SVD) ProjectColToTable(prjns *table.Table, ix *table.IndexView, colum
 	prjns.SetNumRows(rows)
 
 	for ii, idx := range idxs {
-		pcol := prjns.Columns[pcolSt+ii].(*tensor.Number[float64])
+		pcol := prjns.Columns[pcolSt+ii].(*tensor.Float64)
 		svd.ProjectCol(&pcol.Values, ix, column, idx)
 	}
 

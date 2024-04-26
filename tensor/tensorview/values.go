@@ -15,10 +15,10 @@ import (
 )
 
 func init() {
-	views.AddValue(tensor.Number[float32]{}, func() views.Value {
+	views.AddValue(tensor.Float32{}, func() views.Value {
 		return &TensorValue{}
 	})
-	views.AddValue(tensor.Number[float64]{}, func() views.Value {
+	views.AddValue(tensor.Float64{}, func() views.Value {
 		return &TensorValue{}
 	})
 	views.AddValue(tensor.Number[int]{}, func() views.Value {

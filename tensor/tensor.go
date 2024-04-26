@@ -7,6 +7,7 @@ package tensor
 //go:generate core generate
 
 import (
+	"fmt"
 	"reflect"
 
 	"gonum.org/v1/gonum/mat"
@@ -24,6 +25,7 @@ import (
 // It supports Null (non-present) values, and specific access for
 // float64 and string types.
 type Tensor interface {
+	fmt.Stringer
 	mat.Matrix
 
 	// Shape returns a pointer to the shape that fully parameterizes the tensor shape
