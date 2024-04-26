@@ -92,7 +92,7 @@ func PctIfIndex(ix *table.IndexView, colIndex int, iffun IfFunc) []float64 {
 	pif := CountIfIndex(ix, colIndex, iffun)
 	for i := range pif {
 		if cnt[i] > 0 {
-			pif[i] /= cnt[i]
+			pif[i] = 100.0 * (pif[i] / cnt[i])
 		}
 	}
 	return pif

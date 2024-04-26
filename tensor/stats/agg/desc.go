@@ -9,7 +9,7 @@ import (
 )
 
 // DescAggs are all the standard aggregates
-var DescAggs = []Aggs{AggCount, AggMean, AggStd, AggSem, AggMin, AggQ1, AggMedian, AggQ3, AggMax}
+var DescAggs = []Aggs{AggCount, AggMean, AggStd, AggSem, AggMin, AggMax, AggQ1, AggMedian, AggQ3}
 
 // DescAggsND are all the standard aggregates for n-dimensional (n > 1) data -- cannot do quantiles
 var DescAggsND = []Aggs{AggCount, AggMean, AggStd, AggSem, AggMin, AggMax}
@@ -19,9 +19,7 @@ var DescAggsND = []Aggs{AggCount, AggMean, AggStd, AggSem, AggMin, AggMax}
 // in each column.
 func DescAll(ix *table.IndexView) *table.Table {
 	st := ix.Table
-	nonQs := []Aggs{AggCount, AggMean, AggStd, AggSem, AggMin, AggMax} // everything else done wth quantiles
-	allAggs := []Aggs{AggCount, AggMean, AggStd, AggSem, AggMin, AggMax, AggQ1, AggMedian, AggQ3}
-	nAgg := len(allAggs)
+	nAgg := len(DescAggs)
 	dt := table.NewTable(nAgg)
 	dt.AddStringColumn("Agg")
 	for ci := range st.Columns {
@@ -34,7 +32,7 @@ func DescAll(ix *table.IndexView) *table.Table {
 	dtnm := dt.Columns[0]
 	dtci := 1
 	qs := []float64{.25, .5, .75}
-	sq := len(nonQs)
+	sq := len(DescAggsND)
 	for ci := range st.Columns {
 		col := st.Columns[ci]
 		if col.IsString() {
@@ -42,7 +40,7 @@ func DescAll(ix *table.IndexView) *table.Table {
 		}
 		_, csz := col.RowCellSize()
 		dtst := dt.Columns[dtci]
-		for i, agtyp := range nonQs {
+		for i, agtyp := range DescAggsND {
 			ag := AggIndex(ix, ci, agtyp)
 			si := i * csz
 			for j := 0; j < csz; j++ {
@@ -56,7 +54,7 @@ func DescAll(ix *table.IndexView) *table.Table {
 			qvs := QuantilesIndex(ix, ci, qs)
 			for i, qv := range qvs {
 				dtst.SetFloat1D(sq+i, qv)
-				dtnm.SetString1D(sq+i, AggsName(allAggs[sq+i]))
+				dtnm.SetString1D(sq+i, AggsName(DescAggs[sq+i]))
 			}
 		}
 		dtci++
@@ -70,21 +68,18 @@ func DescAll(ix *table.IndexView) *table.Table {
 func DescIndex(ix *table.IndexView, colIndex int) *table.Table {
 	st := ix.Table
 	col := st.Columns[colIndex]
-	nonQs := []Aggs{AggCount, AggMean, AggStd, AggSem} // everything else done wth quantiles
-	allAggs := []Aggs{AggCount, AggMean, AggStd, AggSem, AggMin, AggQ1, AggMedian, AggQ3, AggMax}
-	nAgg := len(allAggs)
+	aggs := DescAggs
 	if col.NumDims() > 1 { // nd cannot do qiles
-		nonQs = append(nonQs, []Aggs{AggMin, AggMax}...)
-		allAggs = nonQs
-		nAgg += 2
+		aggs = DescAggsND
 	}
+	nAgg := len(aggs)
 	dt := table.NewTable(nAgg)
 	dt.AddStringColumn("Agg")
 	dt.AddFloat64TensorColumn(st.ColumnNames[colIndex], col.Shape().Sizes[1:], col.Shape().Names[1:]...)
 	dtnm := dt.Columns[0]
 	dtst := dt.Columns[1]
 	_, csz := col.RowCellSize()
-	for i, agtyp := range nonQs {
+	for i, agtyp := range DescAggsND {
 		ag := AggIndex(ix, colIndex, agtyp)
 		si := i * csz
 		for j := 0; j < csz; j++ {
@@ -93,12 +88,12 @@ func DescIndex(ix *table.IndexView, colIndex int) *table.Table {
 		dtnm.SetString1D(i, AggsName(agtyp))
 	}
 	if col.NumDims() == 1 {
-		qs := []float64{0, .25, .5, .75, 1}
+		sq := len(DescAggsND)
+		qs := []float64{.25, .5, .75}
 		qvs := QuantilesIndex(ix, colIndex, qs)
-		sq := len(nonQs)
 		for i, qv := range qvs {
 			dtst.SetFloat1D(sq+i, qv)
-			dtnm.SetString1D(sq+i, AggsName(allAggs[sq+i]))
+			dtnm.SetString1D(sq+i, AggsName(DescAggs[sq+i]))
 		}
 	}
 	return dt

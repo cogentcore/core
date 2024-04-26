@@ -18,10 +18,6 @@ type IndexViewAggFuncIndex func(ix *table.IndexView, colIndex int) []float64
 // IndexViewAggFunc is an aggregation function operating on IndexView, taking a column name arg
 type IndexViewAggFunc func(ix *table.IndexView, column string) []float64
 
-// IndexViewAggFuncTry is an aggregation function operating on IndexView, taking a column name arg,
-// returning an error message
-type IndexViewAggFuncTry func(ix *table.IndexView, colIndex int) ([]float64, error)
-
 ///////////////////////////////////////////////////
 //   Count
 
@@ -35,7 +31,7 @@ func CountIndex(ix *table.IndexView, colIndex int) []float64 {
 
 // Count returns the count of non-Null, non-NaN elements in given
 // IndexView indexed view of an table.Table, for given column name.
-// If name not found, nil is returned -- use Try version for error message.
+// If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func Count(ix *table.IndexView, column string) []float64 {
@@ -59,7 +55,7 @@ func SumIndex(ix *table.IndexView, colIndex int) []float64 {
 
 // Sum returns the sum of non-Null, non-NaN elements in given
 // IndexView indexed view of an table.Table, for given column name.
-// If name not found, nil is returned -- use Try version for error message.
+// If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func Sum(ix *table.IndexView, column string) []float64 {
@@ -83,7 +79,7 @@ func ProdIndex(ix *table.IndexView, colIndex int) []float64 {
 
 // Prod returns the product of non-Null, non-NaN elements in given
 // IndexView indexed view of an table.Table, for given column name.
-// If name not found, nil is returned -- use Try version for error message.
+// If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func Prod(ix *table.IndexView, column string) []float64 {
@@ -92,30 +88,6 @@ func Prod(ix *table.IndexView, column string) []float64 {
 		return nil
 	}
 	return ProdIndex(ix, colIndex)
-}
-
-///////////////////////////////////////////////////
-//   Max
-
-// MaxIndex returns the maximum of non-Null, non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column index.
-// Return value is size of each column cell -- 1 for scalar 1D columns
-// and N for higher-dimensional columns.
-func MaxIndex(ix *table.IndexView, colIndex int) []float64 {
-	return ix.AggColumn(colIndex, -math.MaxFloat64, MaxFunc)
-}
-
-// Max returns the maximum of non-Null, non-NaN elements in given
-// IndexView indexed view of an table.Table, for given column name.
-// If name not found, nil is returned -- use Try version for error message.
-// Return value is size of each column cell -- 1 for scalar 1D columns
-// and N for higher-dimensional columns.
-func Max(ix *table.IndexView, column string) []float64 {
-	colIndex := ix.Table.ColumnIndex(column)
-	if colIndex == -1 {
-		return nil
-	}
-	return MaxIndex(ix, colIndex)
 }
 
 ///////////////////////////////////////////////////
@@ -131,7 +103,7 @@ func MinIndex(ix *table.IndexView, colIndex int) []float64 {
 
 // Min returns the minimum of non-Null, non-NaN elements in given
 // IndexView indexed view of an table.Table, for given column name.
-// If name not found, nil is returned -- use Try version for error message.
+// If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func Min(ix *table.IndexView, column string) []float64 {
@@ -140,6 +112,30 @@ func Min(ix *table.IndexView, column string) []float64 {
 		return nil
 	}
 	return MinIndex(ix, colIndex)
+}
+
+///////////////////////////////////////////////////
+//   Max
+
+// MaxIndex returns the maximum of non-Null, non-NaN elements in given
+// IndexView indexed view of an table.Table, for given column index.
+// Return value is size of each column cell -- 1 for scalar 1D columns
+// and N for higher-dimensional columns.
+func MaxIndex(ix *table.IndexView, colIndex int) []float64 {
+	return ix.AggColumn(colIndex, -math.MaxFloat64, MaxFunc)
+}
+
+// Max returns the maximum of non-Null, non-NaN elements in given
+// IndexView indexed view of an table.Table, for given column name.
+// If name not found, nil is returned.
+// Return value is size of each column cell -- 1 for scalar 1D columns
+// and N for higher-dimensional columns.
+func Max(ix *table.IndexView, column string) []float64 {
+	colIndex := ix.Table.ColumnIndex(column)
+	if colIndex == -1 {
+		return nil
+	}
+	return MaxIndex(ix, colIndex)
 }
 
 ///////////////////////////////////////////////////
@@ -165,7 +161,7 @@ func MeanIndex(ix *table.IndexView, colIndex int) []float64 {
 
 // Mean returns the mean of non-Null, non-NaN elements in given
 // IndexView indexed view of an table.Table, for given column name.
-// If name not found, nil is returned -- use Try version for error message.
+// If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func Mean(ix *table.IndexView, column string) []float64 {
@@ -213,7 +209,7 @@ func VarIndex(ix *table.IndexView, colIndex int) []float64 {
 // Var returns the sample variance of non-Null, non-NaN elements in given
 // IndexView indexed view of an table.Table, for given column name.
 // Sample variance is normalized by 1/(n-1) -- see VarPop version for 1/n normalization.
-// If name not found, nil is returned -- use Try version for error message.
+// If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func Var(ix *table.IndexView, column string) []float64 {
@@ -243,7 +239,7 @@ func StdIndex(ix *table.IndexView, colIndex int) []float64 {
 // Std returns the sample std deviation of non-Null, non-NaN elements in given
 // IndexView indexed view of an table.Table, for given column name.
 // Sample std deviation is normalized by 1/(n-1) -- see StdPop version for 1/n normalization.
-// If name not found, nil is returned -- use Try version for error message.
+// If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func Std(ix *table.IndexView, column string) []float64 {
@@ -279,7 +275,7 @@ func SemIndex(ix *table.IndexView, colIndex int) []float64 {
 // Sem returns the sample standard error of the mean of non-Null, non-NaN elements in given
 // IndexView indexed view of an table.Table, for given column name.
 // Sample sem is normalized by 1/(n-1) -- see SemPop version for 1/n normalization.
-// If name not found, nil is returned -- use Try version for error message.
+// If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func Sem(ix *table.IndexView, column string) []float64 {
@@ -327,7 +323,7 @@ func VarPopIndex(ix *table.IndexView, colIndex int) []float64 {
 // VarPop returns the population variance of non-Null, non-NaN elements in given
 // IndexView indexed view of an table.Table, for given column name.
 // population variance is normalized by 1/n -- see Var version for 1/(n-1) sample normalization.
-// If name not found, nil is returned -- use Try version for error message.
+// If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func VarPop(ix *table.IndexView, column string) []float64 {
@@ -357,7 +353,7 @@ func StdPopIndex(ix *table.IndexView, colIndex int) []float64 {
 // StdPop returns the population std deviation of non-Null, non-NaN elements in given
 // IndexView indexed view of an table.Table, for given column name.
 // population std dev is normalized by 1/n -- see Var version for 1/(n-1) sample normalization.
-// If name not found, nil is returned -- use Try version for error message.
+// If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func StdPop(ix *table.IndexView, column string) []float64 {
@@ -393,7 +389,7 @@ func SemPopIndex(ix *table.IndexView, colIndex int) []float64 {
 // SemPop returns the standard error of the mean of non-Null, non-NaN elements in given
 // IndexView indexed view of an table.Table, for given column name.
 // population sem is normalized by 1/n -- see Var version for 1/(n-1) sample normalization.
-// If name not found, nil is returned -- use Try version for error message.
+// If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func SemPop(ix *table.IndexView, column string) []float64 {
@@ -417,7 +413,7 @@ func SumSqIndex(ix *table.IndexView, colIndex int) []float64 {
 
 // SumSq returns the sum-of-squares of non-Null, non-NaN elements in given
 // IndexView indexed view of an table.Table, for given column name.
-// If name not found, nil is returned -- use Try version for error message.
+// If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func SumSq(ix *table.IndexView, column string) []float64 {
@@ -441,7 +437,7 @@ func MedianIndex(ix *table.IndexView, colIndex int) []float64 {
 
 // Median returns the median of non-Null, non-NaN elements in given
 // IndexView indexed view of an table.Table, for given column name.
-// If name not found, nil is returned -- use Try version for error message.
+// If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func Median(ix *table.IndexView, column string) []float64 {
@@ -465,7 +461,7 @@ func Q1Index(ix *table.IndexView, colIndex int) []float64 {
 
 // Q1 returns the first quartile of non-Null, non-NaN elements in given
 // IndexView indexed view of an table.Table, for given column name.
-// If name not found, nil is returned -- use Try version for error message.
+// If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func Q1(ix *table.IndexView, column string) []float64 {
@@ -489,7 +485,7 @@ func Q3Index(ix *table.IndexView, colIndex int) []float64 {
 
 // Q3 returns the third quartile of non-Null, non-NaN elements in given
 // IndexView indexed view of an table.Table, for given column name.
-// If name not found, nil is returned -- use Try version for error message.
+// If name not found, nil is returned.
 // Return value is size of each column cell -- 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func Q3(ix *table.IndexView, column string) []float64 {
