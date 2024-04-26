@@ -7,7 +7,6 @@ package core
 import (
 	"fmt"
 	"image"
-	"log"
 	"os"
 	"runtime"
 	"runtime/pprof"
@@ -15,6 +14,7 @@ import (
 
 	"cogentcore.org/core/cam/hct"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/errors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/profile"
 	"cogentcore.org/core/styles"
@@ -572,7 +572,7 @@ func (wb *WidgetBase) WinPos(x, y float32) image.Point {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-//	Profiling and Benchmarking, controlled by hot-keys
+//	Profiling and Benchmarking, controlled by app bar buttons and keyboard shortcuts
 
 // ProfileToggle turns profiling on or off, which does both
 // targeted and global CPU and Memory profiling.
@@ -586,36 +586,36 @@ func ProfileToggle() { //types:add
 	}
 }
 
+// cpuProfileFile is the file created by [StartCPUMemoryProfile],
+// which needs to be stored so that it can be closed in [EndCPUMemoryProfile].
+var cpuProfileFile *os.File
+
 // StartCPUMemoryProfile starts the standard Go cpu and memory profiling.
 func StartCPUMemoryProfile() {
-	fmt.Println("Starting Std CPU / Mem Profiling")
+	fmt.Println("Starting standard cpu and memory profiling")
 	f, err := os.Create("cpu.prof")
-	if err != nil {
-		log.Fatal("could not create CPU profile: ", err)
-	}
-	if err := pprof.StartCPUProfile(f); err != nil {
-		log.Fatal("could not start CPU profile: ", err)
+	if errors.Log(err) == nil {
+		cpuProfileFile = f
+		errors.Log(pprof.StartCPUProfile(f))
 	}
 }
 
 // EndCPUMemoryProfile ends the standard Go cpu and memory profiling.
 func EndCPUMemoryProfile() {
-	fmt.Println("Ending Std CPU / Mem Profiling")
+	fmt.Println("Ending standard cpu and memory profiling")
 	pprof.StopCPUProfile()
+	errors.Log(cpuProfileFile.Close())
 	f, err := os.Create("mem.prof")
-	if err != nil {
-		log.Fatal("could not create memory profile: ", err)
+	if errors.Log(err) == nil {
+		runtime.GC() // get up-to-date statistics
+		errors.Log(pprof.WriteHeapProfile(f))
+		errors.Log(f.Close())
 	}
-	runtime.GC() // get up-to-date statistics
-	if err := pprof.WriteHeapProfile(f); err != nil {
-		log.Fatal("could not write memory profile: ", err)
-	}
-	f.Close()
 }
 
 // StartTargetedProfile starts targeted profiling using the prof package.
 func StartTargetedProfile() {
-	fmt.Printf("Starting Targeted Profiling\n")
+	fmt.Println("Starting targeted profiling")
 	profile.Reset()
 	profile.Profiling = true
 }
@@ -640,7 +640,7 @@ func (sc *Scene) BenchmarkFullRender() {
 		sc.RenderWidget()
 	}
 	td := time.Since(ts)
-	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
+	fmt.Printf("Time for %v full renders: %12.2f s\n", n, float64(td)/float64(time.Second))
 	EndTargetedProfile()
 	EndCPUMemoryProfile()
 }
@@ -657,6 +657,6 @@ func (sc *Scene) BenchmarkReRender() {
 		sc.RenderWidget()
 	}
 	td := time.Since(start)
-	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
+	fmt.Printf("Time for %v renders: %12.2f s\n", n, float64(td)/float64(time.Second))
 	EndTargetedProfile()
 }
