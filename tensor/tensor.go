@@ -215,7 +215,7 @@ func NewOfShape[T string | bool | float32 | float64 | int | int32 | byte](shape 
 
 // NewOfType returns a new n-dimensional tensor of given reflect.Kind type
 // with the given sizes per dimension (shape), and optional dimension names.
-// Supported types are: string, bool (for a Bits), float32, float64, int, int32, byte
+// Supported types are string, bool (for [Bits]), float32, float64, int, int32, and byte.
 // Nulls are initialized to nil.
 func NewOfType(typ reflect.Kind, sizes []int, names ...string) Tensor {
 	switch typ {
@@ -240,7 +240,7 @@ func NewOfType(typ reflect.Kind, sizes []int, names ...string) Tensor {
 
 // NewOfTypeShape returns a new n-dimensional tensor of given reflect.Kind type
 // with the given Shape information.
-// Allowed types are: string, bool (for a Bits), or any basic numerical value.
+// Supported types are string, bool (for [Bits]), float32, float64, int, int32, and byte.
 // Nulls are initialized to nil.
 func NewOfTypeShape(typ reflect.Kind, shape *Shape) Tensor {
 	return NewOfType(typ, shape.Sizes, shape.Names...)

@@ -185,7 +185,7 @@ func (dt *Table) AddColumn(tsr tensor.Tensor, name string) error {
 // AddColumnOfType adds a new scalar column to the table, of given reflect type,
 // column name (which must be unique),
 // The cells of this column hold a single (scalar) value of given type.
-// Allowed types are: string, bool (for a Bits), or any basic numerical value.
+// Supported types are string, bool (for [tensor.Bits]), float32, float64, int, int32, and byte.
 func (dt *Table) AddColumnOfType(typ reflect.Kind, name string) tensor.Tensor {
 	rows := max(1, dt.Rows)
 	tsr := tensor.NewOfType(typ, []int{rows}, "Row")
@@ -197,7 +197,7 @@ func (dt *Table) AddColumnOfType(typ reflect.Kind, name string) tensor.Tensor {
 // column name (which must be unique), and dimensionality of each _cell_.
 // An outer-most Row dimension will be added to this dimensionality to create
 // the tensor column.
-// Allowed types are: string, bool (for a Bits), or any basic numerical value.
+// Supported types are string, bool (for [tensor.Bits]), float32, float64, int, int32, and byte.
 func (dt *Table) AddTensorColumnOfType(typ reflect.Kind, name string, cellSizes []int, dimNames ...string) tensor.Tensor {
 	rows := max(1, dt.Rows)
 	sz := append([]int{rows}, cellSizes...)
