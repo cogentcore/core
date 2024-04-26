@@ -50,7 +50,7 @@ import (
 // during the Run() process for the Scene.
 //
 // For dynamic reconfiguration after initial display,
-// ReConfg() is the key method, calling Config then
+// Update() is the key method, calling Config then
 // ApplyStyle on the node and all of its children.
 //
 // For nodes with dynamic content that doesn't require styling or config,
@@ -578,16 +578,16 @@ func (wb *WidgetBase) WinPos(x, y float32) image.Point {
 // targeted and global CPU and Memory profiling.
 func ProfileToggle() { //types:add
 	if profile.Profiling {
-		EndTargProfile()
-		EndCPUMemProfile()
+		EndTargetedProfile()
+		EndCPUMemoryProfile()
 	} else {
-		StartTargProfile()
-		StartCPUMemProfile()
+		StartTargetedProfile()
+		StartCPUMemoryProfile()
 	}
 }
 
-// StartCPUMemProfile starts the standard Go cpu and memory profiling.
-func StartCPUMemProfile() {
+// StartCPUMemoryProfile starts the standard Go cpu and memory profiling.
+func StartCPUMemoryProfile() {
 	fmt.Println("Starting Std CPU / Mem Profiling")
 	f, err := os.Create("cpu.prof")
 	if err != nil {
@@ -598,8 +598,8 @@ func StartCPUMemProfile() {
 	}
 }
 
-// EndCPUMemProfile ends the standard Go cpu and memory profiling.
-func EndCPUMemProfile() {
+// EndCPUMemoryProfile ends the standard Go cpu and memory profiling.
+func EndCPUMemoryProfile() {
 	fmt.Println("Ending Std CPU / Mem Profiling")
 	pprof.StopCPUProfile()
 	f, err := os.Create("mem.prof")
@@ -613,27 +613,17 @@ func EndCPUMemProfile() {
 	f.Close()
 }
 
-// StartTargProfile starts targeted profiling using the prof package.
-func StartTargProfile() {
+// StartTargetedProfile starts targeted profiling using the prof package.
+func StartTargetedProfile() {
 	fmt.Printf("Starting Targeted Profiling\n")
 	profile.Reset()
 	profile.Profiling = true
 }
 
-// EndTargProfile ends targeted profiling and prints report.
-func EndTargProfile() {
+// EndTargetedProfile ends targeted profiling and prints report.
+func EndTargetedProfile() {
 	profile.Report(time.Millisecond)
 	profile.Profiling = false
-}
-
-// ReportWinNodes reports the number of nodes in this scene
-func (sc *Scene) ReportWinNodes() {
-	nn := 0
-	sc.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		nn++
-		return tree.Continue
-	})
-	fmt.Printf("Scene: %v has: %v nodes\n", sc.Name(), nn)
 }
 
 // BenchmarkFullRender runs benchmark of 50 full re-renders (full restyling, layout,
@@ -641,9 +631,8 @@ func (sc *Scene) ReportWinNodes() {
 // Go cpu.prof and mem.prof outputs.
 func (sc *Scene) BenchmarkFullRender() {
 	fmt.Println("Starting BenchmarkFullRender")
-	sc.ReportWinNodes()
-	StartCPUMemProfile()
-	StartTargProfile()
+	StartCPUMemoryProfile()
+	StartTargetedProfile()
 	ts := time.Now()
 	n := 50
 	for i := 0; i < n; i++ {
@@ -652,8 +641,8 @@ func (sc *Scene) BenchmarkFullRender() {
 	}
 	td := time.Since(ts)
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
-	EndTargProfile()
-	EndCPUMemProfile()
+	EndTargetedProfile()
+	EndCPUMemoryProfile()
 }
 
 // BenchmarkReRender runs benchmark of 50 re-render-only updates of display
@@ -661,14 +650,13 @@ func (sc *Scene) BenchmarkFullRender() {
 // results and generating standard Go cpu.prof and mem.prof outputs.
 func (sc *Scene) BenchmarkReRender() {
 	fmt.Println("Starting BenchmarkReRender")
-	sc.ReportWinNodes()
-	StartTargProfile()
-	ts := time.Now()
+	StartTargetedProfile()
+	start := time.Now()
 	n := 50
-	for i := 0; i < n; i++ {
+	for range n {
 		sc.RenderWidget()
 	}
-	td := time.Since(ts)
+	td := time.Since(start)
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
-	EndTargProfile()
+	EndTargetedProfile()
 }
