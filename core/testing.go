@@ -60,7 +60,7 @@ func (b *Body) runAndShowNewWindow() {
 	b.OnShow(func(e events.Event) {
 		showed <- struct{}{}
 	})
-	b.NewWindow().Run()
+	b.RunWindow()
 	<-showed
 }
 

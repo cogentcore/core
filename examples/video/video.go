@@ -29,7 +29,7 @@ func main() {
 	// errors.Log(v.Open("countdown.mp4"))
 	errors.Log(v.Open("randy_first_360.mov")) // note: not uploaded -- good test case tho
 	v.Rotation = -90
-	w := b.NewWindow().Run()
+	w := b.RunWindow()
 	v.Play(0, 0)
 	w.Wait()
 }

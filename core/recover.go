@@ -64,7 +64,7 @@ func HandleRecover(r any) {
 			quit <- struct{}{}
 		})
 	})
-	b.NewWindow().Run()
+	b.RunWindow()
 	<-quit
 	panic(r)
 }

@@ -66,5 +66,5 @@ func View(st *Styles) {
 		core.NewSeparator(tb)
 		mv.ConfigToolbar(tb)
 	})
-	d.NewWindow().Run() // note: no context here so not dialog
+	d.RunWindow() // note: no context here so not dialog
 }

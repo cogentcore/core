@@ -673,7 +673,7 @@ func dialogs(ts *core.Tabs) {
 
 	nw := core.NewButton(wrow).SetText("New window")
 	nw.OnClick(func(e events.Event) {
-		core.NewBody().AddTitle("New window").AddText("A standalone window that opens in a new window on multi-window platforms").NewWindow().Run()
+		core.NewBody().AddTitle("New window").AddText("A standalone window that opens in a new window on multi-window platforms").RunWindow()
 	})
 
 	fw := core.NewButton(wrow).SetText("Full window")

@@ -21,6 +21,6 @@ func init() {
 	if testing.Testing() {
 		TheApp.AppBarConfig = nil
 		// needed to prevent app from quitting prematurely
-		NewBody().NewWindow().Run()
+		NewBody().RunWindow()
 	}
 }

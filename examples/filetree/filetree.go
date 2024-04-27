@@ -398,7 +398,7 @@ func NewFileBrowser(path string) (*FileBrowse, *core.Stage) {
 	fb := NewFileBrowse(b, "browser")
 	b.AddAppBar(fb.ConfigToolbar)
 	fb.OpenPath(core.Filename(path))
-	return fb, b.NewWindow().Run()
+	return fb, b.RunWindow()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
