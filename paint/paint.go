@@ -8,13 +8,14 @@ import (
 	"errors"
 	"image"
 	"image/color"
+	"io"
 	"math"
 	"slices"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/raster"
+	"cogentcore.org/core/paint/raster"
 	"cogentcore.org/core/styles"
 	"github.com/anthonynsimon/bild/clone"
 	"golang.org/x/image/draw"
@@ -103,6 +104,9 @@ func NewContextFromRGBA(img image.Image) *Context {
 
 // FillStrokeClear is a convenience final stroke and clear draw for shapes when done
 func (pc *Context) FillStrokeClear() {
+	if pc.SVGOut != nil {
+		io.WriteString(pc.SVGOut, pc.SVGPath())
+	}
 	pc.FillPreserve()
 	pc.StrokePreserve()
 	pc.ClearPath()
@@ -314,6 +318,7 @@ func (pc *Context) StrokePreserve() {
 			pc.Raster.SetColor(pc.StrokeStyle.Color)
 		}
 	}
+
 	pc.Raster.Draw()
 	pc.Raster.Clear()
 }
@@ -322,6 +327,9 @@ func (pc *Context) StrokePreserve() {
 // line cap, line join and dash settings. The path is cleared after this
 // operation.
 func (pc *Context) Stroke() {
+	if pc.SVGOut != nil && pc.StrokeStyle.Color != nil {
+		io.WriteString(pc.SVGOut, pc.SVGPath())
+	}
 	pc.StrokePreserve()
 	pc.ClearPath()
 }
@@ -357,6 +365,10 @@ func (pc *Context) FillPreserve() {
 // Fill fills the current path with the current color. Open subpaths
 // are implicitly closed. The path is cleared after this operation.
 func (pc *Context) Fill() {
+	if pc.SVGOut != nil {
+		io.WriteString(pc.SVGOut, pc.SVGPath())
+	}
+
 	pc.FillPreserve()
 	pc.ClearPath()
 }

@@ -21,7 +21,8 @@ import (
 )
 
 // Plot is the basic type representing a plot.
-// It renders into
+// It renders into its own image.RGBA Pixels image,
+// and can also save a corresponding SVG version.
 type Plot struct {
 	// Title of the plot
 	Title Text

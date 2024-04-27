@@ -6,11 +6,12 @@ package paint
 
 import (
 	"image"
+	"io"
 	"log/slog"
 
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/raster"
-	"cogentcore.org/core/scan"
+	"cogentcore.org/core/paint/raster"
+	"cogentcore.org/core/paint/scan"
 )
 
 // The State holds all the current rendering state information used
@@ -61,6 +62,9 @@ type State struct {
 
 	// stack of clips, if needed
 	ClipStack []*image.Alpha
+
+	// if non-nil, SVG output of paint commands is sent here
+	SVGOut io.Writer
 }
 
 // Init initializes State -- must be called whenever image size changes
