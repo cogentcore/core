@@ -14,8 +14,8 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/fileinfo/vcs"
 	"cogentcore.org/core/system"
-	"cogentcore.org/core/vcs"
 	"cogentcore.org/core/views"
 )
 

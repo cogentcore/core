@@ -8,7 +8,7 @@
 // encoded in mimedata.Mimes which is just a []mimedata.Data slice -- it can
 // be encoded / decoded from mime multipart.
 //
-// see fi package for known mimetypes
+// See the fileinfo package for known mimetypes.
 package mimedata
 
 import (

@@ -10,8 +10,8 @@ import (
 	"runtime/debug"
 
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/fileinfo/mimedata"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 )

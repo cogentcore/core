@@ -24,7 +24,7 @@ import "C"
 import (
 	"unsafe"
 
-	"cogentcore.org/core/mimedata"
+	"cogentcore.org/core/fileinfo/mimedata"
 	"cogentcore.org/core/system"
 )
 

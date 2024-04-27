@@ -9,9 +9,9 @@ import (
 
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/fileinfo/mimedata"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"

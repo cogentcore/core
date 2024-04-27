@@ -32,9 +32,9 @@ import (
 	"strings"
 	"time"
 
+	"cogentcore.org/core/fileinfo/vcs"
 	"cogentcore.org/core/gox/datasize"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/vcs"
 	"github.com/Bios-Marcel/wastebasket"
 )
 

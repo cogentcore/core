@@ -9,9 +9,9 @@ import (
 	"image"
 
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/fileinfo/mimedata"
 	"cogentcore.org/core/gox/nptime"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/mimedata"
 )
 
 // TraceWindowPaint prints out a . for each WindowPaint event,

@@ -15,9 +15,9 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/fileinfo/mimedata"
 	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/gox/errors"
-	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/views"
 )

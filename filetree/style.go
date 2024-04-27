@@ -9,10 +9,10 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/fileinfo/vcs"
 	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/vcs"
 )
 
 func (ft *Tree) OnInit() {

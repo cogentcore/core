@@ -10,7 +10,7 @@ import (
 	"log/slog"
 	"syscall/js"
 
-	"cogentcore.org/core/mimedata"
+	"cogentcore.org/core/fileinfo/mimedata"
 	"cogentcore.org/core/system"
 )
 

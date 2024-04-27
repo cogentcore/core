@@ -9,14 +9,14 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/fileinfo/mimedata"
+	"cogentcore.org/core/fileinfo/vcs"
 	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/vcs"
 	"cogentcore.org/core/views"
 )
 

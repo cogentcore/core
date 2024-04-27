@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/fileinfo/vcs"
 	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/reflectx"
@@ -18,7 +19,6 @@ import (
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/textbuf"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/vcs"
 	"cogentcore.org/core/views"
 )
 
