@@ -7,7 +7,7 @@ package textbuf
 import (
 	"slices"
 
-	"cogentcore.org/core/difflib"
+	"cogentcore.org/core/texteditor/difflib"
 )
 
 // DiffSelectData contains data for one set of text

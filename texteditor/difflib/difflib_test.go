@@ -1,4 +1,4 @@
-package bytes
+package difflib
 
 import (
 	"bytes"
@@ -6,11 +6,10 @@ import (
 	"math"
 	"reflect"
 	"runtime"
-	"sort"
 	"strings"
 	"testing"
 
-	"cogentcore.org/core/difflib/tester"
+	"cogentcore.org/core/texteditor/difflib/tester"
 )
 
 func assertAlmostEqual(t *testing.T, a, b float64, places int) {
@@ -19,40 +18,24 @@ func assertAlmostEqual(t *testing.T, a, b float64, places int) {
 	}
 }
 
-func assertEqual(t *testing.T, a, b interface{}) {
+func assertEqual(t *testing.T, a, b any) {
 	if !reflect.DeepEqual(a, b) {
 		t.Errorf("%v != %v", a, b)
 	}
 }
 
-func splitChars(s string) [][]byte {
-	chars := make([][]byte, 0, len(s))
+func splitChars(s string) []string {
+	chars := make([]string, 0, len(s))
 	// Assume ASCII inputs
 	for i := 0; i != len(s); i++ {
-		chars = append(chars, []byte{s[i]})
+		chars = append(chars, string(s[i]))
 	}
 	return chars
 }
 
-func stringsToBytes(in ...string) (out [][]byte) {
-	out = make([][]byte, len(in))
-	for i, s := range in {
-		out[i] = []byte(s)
-	}
-	return
-}
-
-func bytesToStrings(in ...[]byte) (out []string) {
-	out = make([]string, len(in))
-	for i, s := range in {
-		out[i] = string(s)
-	}
-	return
-}
-
 func TestListifyString(t *testing.T) {
-	lst := listifyString([]byte("qwerty"))
-	if reflect.DeepEqual(lst, splitChars("qwerty")) != true {
+	lst := listifyString("qwerty")
+	if reflect.DeepEqual(lst, []string{"q", "w", "e", "r", "t", "y"}) != true {
 		t.Fatal("listifyString failure:", lst)
 	}
 }
@@ -86,18 +69,18 @@ i a[6:6], () b[5:6] (f)
 }
 
 func TestGroupedOpCodes(t *testing.T) {
-	a := [][]byte{}
+	a := []string{}
 	for i := 0; i != 39; i++ {
-		a = append(a, []byte(fmt.Sprintf("%02d", i)))
+		a = append(a, fmt.Sprintf("%02d", i))
 	}
-	b := [][]byte{}
+	b := []string{}
 	b = append(b, a[:8]...)
-	b = append(b, []byte(" i"))
+	b = append(b, " i")
 	b = append(b, a[8:19]...)
-	b = append(b, []byte(" x"))
+	b = append(b, " x")
 	b = append(b, a[20:22]...)
 	b = append(b, a[27:34]...)
-	b = append(b, []byte(" y"))
+	b = append(b, " y")
 	b = append(b, a[35:]...)
 	s := NewMatcher(a, b)
 	w := &bytes.Buffer{}
@@ -139,9 +122,9 @@ fmt.Printf("%s,%T",a,b)`
 one
 three
 four`
-	diff := UnifiedDiff{
-		A:        SplitLines([]byte(a)),
-		B:        SplitLines([]byte(b)),
+	diff := LineDiffParams{
+		A:        SplitLines(a),
+		B:        SplitLines(b),
 		FromFile: "Original",
 		FromDate: "2005-01-26 23:30:50",
 		ToFile:   "Current",
@@ -149,7 +132,7 @@ four`
 		Context:  3,
 	}
 	result, _ := GetUnifiedDiffString(diff)
-	fmt.Println(strings.Replace(string(result), "\t", " ", -1))
+	fmt.Println(strings.Replace(result, "\t", " ", -1))
 	// Output:
 	// --- Original 2005-01-26 23:30:50
 	// +++ Current 2010-04-02 10:20:52
@@ -173,15 +156,15 @@ one
 tree
 four`
 	diff := ContextDiff{
-		A:        SplitLines([]byte(a)),
-		B:        SplitLines([]byte(b)),
+		A:        SplitLines(a),
+		B:        SplitLines(b),
 		FromFile: "Original",
 		ToFile:   "Current",
 		Context:  3,
-		Eol:      []byte{'\n'},
+		Eol:      "\n",
 	}
 	result, _ := GetContextDiffString(diff)
-	fmt.Print(strings.Replace(string(result), "\t", " ", -1))
+	fmt.Print(strings.Replace(result, "\t", " ", -1))
 	// Output:
 	// *** Original
 	// --- Current
@@ -209,15 +192,15 @@ one
 tree
 four`
 	diff := ContextDiff{
-		A:        SplitLines([]byte(a)),
-		B:        SplitLines([]byte(b)),
+		A:        SplitLines(a),
+		B:        SplitLines(b),
 		FromFile: "Original",
 		ToFile:   "Current",
 		Context:  3,
-		Eol:      []byte{'\n'},
+		Eol:      "\n",
 	}
 	result, _ := GetContextDiffString(diff)
-	fmt.Print(strings.Replace(string(result), "\t", " ", -1))
+	fmt.Print(strings.Replace(result, "\t", " ", -1))
 	// Output:
 	// *** Original
 	// --- Current
@@ -238,41 +221,20 @@ func rep(s string, count int) string {
 	return strings.Repeat(s, count)
 }
 
-func getall(b2j *B2J, lt lineType) [][]byte {
-	result := []int{}
-	for _, slots := range b2j.store {
-		for _, slot := range slots {
-			slt := lineNORMAL
-			if len(slot) == 2 && slot[1] < 0 {
-				slt = lineType(slot[1])
-			}
-			if lt == slt {
-				result = append(result, slot[0])
-			}
-		}
-	}
-	sort.Ints(result)
-	lines := make([][]byte, len(result))
-	for i, lineno := range result {
-		lines[i] = b2j.b[lineno]
-	}
-	return lines
-}
-
 func TestWithAsciiOneInsert(t *testing.T) {
 	sm := NewMatcher(splitChars(rep("b", 100)),
 		splitChars("a"+rep("b", 100)))
 	assertAlmostEqual(t, sm.Ratio(), 0.995, 3)
 	assertEqual(t, sm.GetOpCodes(),
 		[]OpCode{{'i', 0, 0, 0, 1}, {'e', 0, 100, 1, 101}})
-	assertEqual(t, len(getall(&sm.b2j, linePOPULAR)), 0)
+	assertEqual(t, len(sm.bPopular), 0)
 
 	sm = NewMatcher(splitChars(rep("b", 100)),
 		splitChars(rep("b", 50)+"a"+rep("b", 50)))
 	assertAlmostEqual(t, sm.Ratio(), 0.995, 3)
 	assertEqual(t, sm.GetOpCodes(),
 		[]OpCode{{'e', 0, 50, 0, 50}, {'i', 50, 50, 50, 51}, {'e', 50, 100, 51, 101}})
-	assertEqual(t, len(getall(&sm.b2j, linePOPULAR)), 0)
+	assertEqual(t, len(sm.bPopular), 0)
 }
 
 func TestWithAsciiOnDelete(t *testing.T) {
@@ -284,23 +246,23 @@ func TestWithAsciiOnDelete(t *testing.T) {
 }
 
 func TestWithAsciiBJunk(t *testing.T) {
-	isJunk := func(s []byte) bool {
-		return len(s) == 1 && s[0] == ' '
+	isJunk := func(s string) bool {
+		return s == " "
 	}
 	sm := NewMatcherWithJunk(splitChars(rep("a", 40)+rep("b", 40)),
 		splitChars(rep("a", 44)+rep("b", 40)), true, isJunk)
-	assertEqual(t, getall(&sm.b2j, lineJUNK), [][]byte{})
+	assertEqual(t, sm.bJunk, map[string]bool{})
 
 	sm = NewMatcherWithJunk(splitChars(rep("a", 40)+rep("b", 40)),
 		splitChars(rep("a", 44)+rep("b", 40)+rep(" ", 20)), false, isJunk)
-	assertEqual(t, getall(&sm.b2j, lineJUNK), [][]byte{SPACE})
+	assertEqual(t, sm.bJunk, map[string]bool{" ": true})
 
-	isJunk = func(s []byte) bool {
-		return len(s) == 1 && (s[0] == ' ' || s[0] == 'b')
+	isJunk = func(s string) bool {
+		return s == " " || s == "b"
 	}
 	sm = NewMatcherWithJunk(splitChars(rep("a", 40)+rep("b", 40)),
 		splitChars(rep("a", 44)+rep("b", 40)+rep(" ", 20)), false, isJunk)
-	assertEqual(t, getall(&sm.b2j, lineJUNK), [][]byte{{'b'}, SPACE})
+	assertEqual(t, sm.bJunk, map[string]bool{" ": true, "b": true})
 }
 
 func TestSFBugsRatioForNullSeqn(t *testing.T) {
@@ -313,14 +275,14 @@ func TestSFBugsRatioForNullSeqn(t *testing.T) {
 func TestSFBugsComparingEmptyLists(t *testing.T) {
 	groups := NewMatcher(nil, nil).GetGroupedOpCodes(-1)
 	assertEqual(t, len(groups), 0)
-	diff := UnifiedDiff{
+	diff := LineDiffParams{
 		FromFile: "Original",
 		ToFile:   "Current",
 		Context:  3,
 	}
 	result, err := GetUnifiedDiffString(diff)
 	assertEqual(t, err, nil)
-	assertEqual(t, string(result), "")
+	assertEqual(t, result, "")
 }
 
 func TestOutputFormatRangeFormatUnified(t *testing.T) {
@@ -332,8 +294,7 @@ func TestOutputFormatRangeFormatUnified(t *testing.T) {
 	//  "%1d,%1d", <beginning line number>, <number of lines> otherwise.
 	// If a range is empty, its beginning line number shall be the number of
 	// the line just before the range, or 0 if the empty range starts the file.
-	fmt := formatRangeUnified
-	fm := func(a, b int) string { return string(fmt(a, b)) }
+	fm := formatRangeUnified
 	assertEqual(t, fm(3, 3), "3,0")
 	assertEqual(t, fm(3, 4), "4")
 	assertEqual(t, fm(3, 5), "4,2")
@@ -357,8 +318,7 @@ func TestOutputFormatRangeFormatContext(t *testing.T) {
 	//     "--- %d,%d ----\n", <beginning line number>, <ending line number>
 	// and the following format otherwise:
 	//     "--- %d ----\n", <ending line number>
-	fmt := formatRangeContext
-	fm := func(a, b int) string { return string(fmt(a, b)) }
+	fm := formatRangeContext
 	assertEqual(t, fm(3, 3), "3")
 	assertEqual(t, fm(3, 4), "4")
 	assertEqual(t, fm(3, 5), "4,5")
@@ -367,55 +327,55 @@ func TestOutputFormatRangeFormatContext(t *testing.T) {
 }
 
 func TestOutputFormatTabDelimiter(t *testing.T) {
-	diff := UnifiedDiff{
+	diff := LineDiffParams{
 		A:        splitChars("one"),
 		B:        splitChars("two"),
 		FromFile: "Original",
 		FromDate: "2005-01-26 23:30:50",
 		ToFile:   "Current",
 		ToDate:   "2010-04-12 10:20:52",
-		Eol:      []byte{'\n'},
+		Eol:      "\n",
 	}
 	ud, err := GetUnifiedDiffString(diff)
 	assertEqual(t, err, nil)
-	assertEqual(t, SplitLines(ud)[:2], stringsToBytes(
+	assertEqual(t, SplitLines(ud)[:2], []string{
 		"--- Original\t2005-01-26 23:30:50\n",
 		"+++ Current\t2010-04-12 10:20:52\n",
-	))
+	})
 	cd, err := GetContextDiffString(ContextDiff(diff))
 	assertEqual(t, err, nil)
-	assertEqual(t, SplitLines(cd)[:2], stringsToBytes(
+	assertEqual(t, SplitLines(cd)[:2], []string{
 		"*** Original\t2005-01-26 23:30:50\n",
 		"--- Current\t2010-04-12 10:20:52\n",
-	))
+	})
 }
 
 func TestOutputFormatNoTrailingTabOnEmptyFiledate(t *testing.T) {
-	diff := UnifiedDiff{
+	diff := LineDiffParams{
 		A:        splitChars("one"),
 		B:        splitChars("two"),
 		FromFile: "Original",
 		ToFile:   "Current",
-		Eol:      []byte{'\n'},
+		Eol:      "\n",
 	}
 	ud, err := GetUnifiedDiffString(diff)
 	assertEqual(t, err, nil)
-	assertEqual(t, SplitLines(ud)[:2], stringsToBytes("--- Original\n", "+++ Current\n"))
+	assertEqual(t, SplitLines(ud)[:2], []string{"--- Original\n", "+++ Current\n"})
 
 	cd, err := GetContextDiffString(ContextDiff(diff))
 	assertEqual(t, err, nil)
-	assertEqual(t, SplitLines(cd)[:2], stringsToBytes("*** Original\n", "--- Current\n"))
+	assertEqual(t, SplitLines(cd)[:2], []string{"*** Original\n", "--- Current\n"})
 }
 
 func TestOmitFilenames(t *testing.T) {
-	diff := UnifiedDiff{
-		A:   SplitLines([]byte("o\nn\ne\n")),
-		B:   SplitLines([]byte("t\nw\no\n")),
-		Eol: []byte{'\n'},
+	diff := LineDiffParams{
+		A:   SplitLines("o\nn\ne\n"),
+		B:   SplitLines("t\nw\no\n"),
+		Eol: "\n",
 	}
 	ud, err := GetUnifiedDiffString(diff)
 	assertEqual(t, err, nil)
-	assertEqual(t, SplitLines(ud), stringsToBytes(
+	assertEqual(t, SplitLines(ud), []string{
 		"@@ -0,0 +1,2 @@\n",
 		"+t\n",
 		"+w\n",
@@ -423,11 +383,11 @@ func TestOmitFilenames(t *testing.T) {
 		"-n\n",
 		"-e\n",
 		"\n",
-	))
+	})
 
 	cd, err := GetContextDiffString(ContextDiff(diff))
 	assertEqual(t, err, nil)
-	assertEqual(t, SplitLines(cd), stringsToBytes(
+	assertEqual(t, SplitLines(cd), []string{
 		"***************\n",
 		"*** 0 ****\n",
 		"--- 1,2 ----\n",
@@ -439,25 +399,25 @@ func TestOmitFilenames(t *testing.T) {
 		"- e\n",
 		"--- 3 ----\n",
 		"\n",
-	))
+	})
 }
 
 func TestSplitLines(t *testing.T) {
 	allTests := []struct {
 		input string
-		want  [][]byte
+		want  []string
 	}{
-		{"foo", stringsToBytes("foo\n")},
-		{"foo\nbar", stringsToBytes("foo\n", "bar\n")},
-		{"foo\nbar\n", stringsToBytes("foo\n", "bar\n", "\n")},
+		{"foo", []string{"foo\n"}},
+		{"foo\nbar", []string{"foo\n", "bar\n"}},
+		{"foo\nbar\n", []string{"foo\n", "bar\n", "\n"}},
 	}
 	for _, test := range allTests {
-		assertEqual(t, SplitLines([]byte(test.input)), test.want)
+		assertEqual(t, SplitLines(test.input), test.want)
 	}
 }
 
 func benchmarkSplitLines(b *testing.B, count int) {
-	str := bytes.Repeat([]byte("foo\n"), count)
+	str := strings.Repeat("foo\n", count)
 
 	b.ResetTimer()
 
@@ -475,19 +435,9 @@ func BenchmarkSplitLines10000(b *testing.B) {
 	benchmarkSplitLines(b, 10000)
 }
 
-func prepareFilesToDiff(count, seed int) (As, Bs [][][]byte) {
+func prepareFilesToDiff(count, seed int) (As, Bs [][]string) {
 	defer runtime.GC()
-	aux := func() { // to ensure temp variables go out of scope
-		stringsA, stringsB := tester.PrepareStringsToDiff(count, seed)
-		As = make([][][]byte, len(stringsA))
-		Bs = make([][][]byte, len(stringsB))
-		for i := range As {
-			As[i] = stringsToBytes(stringsA[i]...)
-			Bs[i] = stringsToBytes(stringsB[i]...)
-		}
-	}
-	aux()
-	return
+	return tester.PrepareStringsToDiff(count, seed)
 }
 
 func BenchmarkDiffer(b *testing.B) {
@@ -496,7 +446,7 @@ func BenchmarkDiffer(b *testing.B) {
 	b.ResetTimer()
 	differ := NewDiffer()
 	for i := range A {
-		var x [][]byte
+		var x []string
 		for n := 0; n < 5; n++ {
 			x, _ = differ.Compare(A[i], B[i])
 		}
@@ -506,13 +456,13 @@ func BenchmarkDiffer(b *testing.B) {
 }
 
 func BenchmarkMatcher(b *testing.B) {
-	As, Bs := prepareFilesToDiff(b.N, 0)
+	A, B := prepareFilesToDiff(b.N, 0)
 	fmt.Printf("\nOpcodes count:")
 	b.ResetTimer()
-	for i := range As {
+	for i := range A {
 		var x []OpCode
 		for n := 0; n < 5; n++ {
-			sm := NewMatcher(As[i], Bs[i])
+			sm := NewMatcher(A[i], B[i])
 			x = sm.GetOpCodes()
 		}
 		fmt.Printf(" %v", len(x))
@@ -523,14 +473,13 @@ func BenchmarkMatcher(b *testing.B) {
 func TestDifferCompare(t *testing.T) {
 	diff := NewDiffer()
 	// Test
-	aLst := stringsToBytes("foo\n", "bar\n", "baz\n")
-	bLst := stringsToBytes("foo\n", "bar1\n", "asdf\n", "baz\n")
+	aLst := []string{"foo\n", "bar\n", "baz\n"}
+	bLst := []string{"foo\n", "bar1\n", "asdf\n", "baz\n"}
 	out, err := diff.Compare(aLst, bLst)
 	if err != nil {
 		t.Fatal("Differ Compare() error:", err)
 	}
-	out2 := bytesToStrings(out...)
-	if reflect.DeepEqual(out2, []string{
+	if reflect.DeepEqual(out, []string{
 		"  foo\n",
 		"- bar\n",
 		"+ bar1\n",
@@ -538,17 +487,16 @@ func TestDifferCompare(t *testing.T) {
 		"+ asdf\n",
 		"  baz\n",
 	}) != true {
-		t.Fatal("Differ Compare failure:", out2)
+		t.Fatal("Differ Compare failure:", out)
 	}
 }
 
 func TestDifferStructuredDump(t *testing.T) {
 	diff := NewDiffer()
 	out := diff.StructuredDump('+',
-		stringsToBytes("foo", "bar", "baz", "quux", "qwerty"),
+		[]string{"foo", "bar", "baz", "quux", "qwerty"},
 		1, 3)
-	expected := []DiffLine{{'+', []byte("bar")},
-		{'+', []byte("baz")}}
+	expected := []DiffLine{{'+', "bar"}, {'+', "baz"}}
 	if !reflect.DeepEqual(out, expected) {
 		t.Fatal("Differ StructuredDump failure:", out)
 	}
@@ -556,63 +504,58 @@ func TestDifferStructuredDump(t *testing.T) {
 
 func TestDifferDump(t *testing.T) {
 	diff := NewDiffer()
-	out := diff.Dump(PLUS,
-		stringsToBytes("foo", "bar", "baz", "quux", "qwerty"),
+	out := diff.Dump("+",
+		[]string{"foo", "bar", "baz", "quux", "qwerty"},
 		1, 3)
-	out2 := bytesToStrings(out...)
-	if reflect.DeepEqual(out2, []string{"+ bar", "+ baz"}) != true {
-		t.Fatal("Differ Dump() failure:", out2)
+	if reflect.DeepEqual(out, []string{"+ bar", "+ baz"}) != true {
+		t.Fatal("Differ Dump() failure:", out)
 	}
 }
 
 func TestDifferPlainReplace(t *testing.T) {
 	diff := NewDiffer()
-	aLst := stringsToBytes("one\n", "two\n", "three\n", "four\n", "five\n")
-	bLst := stringsToBytes("one\n", "two2\n", "three\n", "extra\n")
+	aLst := []string{"one\n", "two\n", "three\n", "four\n", "five\n"}
+	bLst := []string{"one\n", "two2\n", "three\n", "extra\n"}
 	// Test a then b
 	out, err := diff.PlainReplace(aLst, 1, 2, bLst, 1, 2)
 	if err != nil {
 		t.Fatal("Differ PlainReplace() error:", err)
 	}
-	out2 := bytesToStrings(out...)
-	if reflect.DeepEqual(out2, []string{"- two\n", "+ two2\n"}) != true {
-		t.Fatal("Differ PlainReplace() failure:", out2)
+	if reflect.DeepEqual(out, []string{"- two\n", "+ two2\n"}) != true {
+		t.Fatal("Differ PlainReplace() failure:", out)
 	}
 	// Test b then a
 	out, err = diff.PlainReplace(aLst, 3, 5, bLst, 3, 4)
 	if err != nil {
 		t.Fatal("Differ PlainReplace() error:", err)
 	}
-	out2 = bytesToStrings(out...)
-	if reflect.DeepEqual(out2,
+	if reflect.DeepEqual(out,
 		[]string{"+ extra\n", "- four\n", "- five\n"}) != true {
-		t.Fatal("Differ PlainReplace() failure:", out2)
+		t.Fatal("Differ PlainReplace() failure:", out)
 	}
 }
 
 func TestDifferFancyReplaceAndHelper(t *testing.T) {
 	diff := NewDiffer()
 	// Test identical sync point, both full
-	aLst := stringsToBytes("one\n", "asdf\n", "three\n")
-	bLst := stringsToBytes("one\n", "two2\n", "three\n")
+	aLst := []string{"one\n", "asdf\n", "three\n"}
+	bLst := []string{"one\n", "two2\n", "three\n"}
 	out, err := diff.FancyReplace(aLst, 0, 3, bLst, 0, 3)
 	if err != nil {
 		t.Fatal("Differ FancyReplace() error:", err)
 	}
-	out2 := bytesToStrings(out...)
-	if reflect.DeepEqual(out2,
+	if reflect.DeepEqual(out,
 		[]string{"  one\n", "- asdf\n", "+ two2\n", "  three\n"}) != true {
-		t.Fatal("Differ FancyReplace() failure:", out2)
+		t.Fatal("Differ FancyReplace() failure:", out)
 	}
 	// Test close sync point, both full
-	aLst = stringsToBytes("one\n", "two123456\n", "asdf\n", "three\n")
-	bLst = stringsToBytes("one\n", "two123457\n", "qwerty\n", "three\n")
+	aLst = []string{"one\n", "two123456\n", "asdf\n", "three\n"}
+	bLst = []string{"one\n", "two123457\n", "qwerty\n", "three\n"}
 	out, err = diff.FancyReplace(aLst, 1, 3, bLst, 1, 3)
 	if err != nil {
 		t.Fatal("Differ FancyReplace() error:", err)
 	}
-	out2 = bytesToStrings(out...)
-	if reflect.DeepEqual(out2, []string{
+	if reflect.DeepEqual(out, []string{
 		"- two123456\n",
 		"?         ^\n",
 		"+ two123457\n",
@@ -620,57 +563,55 @@ func TestDifferFancyReplaceAndHelper(t *testing.T) {
 		"- asdf\n",
 		"+ qwerty\n",
 	}) != true {
-		t.Fatal("Differ FancyReplace() failure:", out2)
+		t.Fatal("Differ FancyReplace() failure:", out)
 	}
 	// Test no identical no close
-	aLst = stringsToBytes("one\n", "asdf\n", "three\n")
-	bLst = stringsToBytes("one\n", "qwerty\n", "three\n")
+	aLst = []string{"one\n", "asdf\n", "three\n"}
+	bLst = []string{"one\n", "qwerty\n", "three\n"}
 	out, err = diff.FancyReplace(aLst, 1, 2, bLst, 1, 2)
 	if err != nil {
 		t.Fatal("Differ FancyReplace() error:", err)
 	}
-	out2 = bytesToStrings(out...)
-	if reflect.DeepEqual(out2, []string{
+	if reflect.DeepEqual(out, []string{
 		"- asdf\n",
 		"+ qwerty\n",
 	}) != true {
-		t.Fatal("Differ FancyReplace() failure:", out2)
+		t.Fatal("Differ FancyReplace() failure:", out)
 	}
 }
 
 func TestDifferQFormat(t *testing.T) {
 	diff := NewDiffer()
-	aStr := []byte("\tfoo2bar\n")
-	aTag := []byte("    ^  ^")
-	bStr := []byte("\tfoo3baz\n")
-	bTag := []byte("    ^  ^")
+	aStr := "\tfoo2bar\n"
+	aTag := "    ^  ^"
+	bStr := "\tfoo3baz\n"
+	bTag := "    ^  ^"
 	out := diff.QFormat(aStr, bStr, aTag, bTag)
-	out2 := bytesToStrings(out...)
-	if reflect.DeepEqual(out2, []string{
+	if reflect.DeepEqual(out, []string{
 		"- \tfoo2bar\n",
 		"? \t   ^  ^\n",
 		"+ \tfoo3baz\n",
 		"? \t   ^  ^\n",
 	}) != true {
-		t.Fatal("Differ QFormat() failure:", out2)
+		t.Fatal("Differ QFormat() failure:", out)
 	}
 }
 
 func TestGetUnifiedDiffString(t *testing.T) {
-	A := []byte("one\ntwo\nthree\nfour\nfive\nsix\nseven\neight\nnine\nten\n")
-	B := []byte("one\ntwo\nthr33\nfour\nfive\nsix\nseven\neight\nnine\nten\n")
+	A := "one\ntwo\nthree\nfour\nfive\nsix\nseven\neight\nnine\nten\n"
+	B := "one\ntwo\nthr33\nfour\nfive\nsix\nseven\neight\nnine\nten\n"
 	// Build diff
-	diff := UnifiedDiff{A: SplitLines(A),
+	diff := LineDiffParams{A: SplitLines(A),
 		FromFile: "file", FromDate: "then",
 		B:      SplitLines(B),
-		ToFile: "tile", ToDate: "now", Eol: []byte{}, Context: 1}
+		ToFile: "tile", ToDate: "now", Eol: "", Context: 1}
 	// Run test
 	diffStr, err := GetUnifiedDiffString(diff)
 	if err != nil {
 		t.Fatal("GetUnifiedDiffString error:", err)
 	}
-	exp := []byte("--- file\tthen\n+++ tile\tnow\n@@ -2,3 +2,3 @@\n two\n-three\n+thr33\n four\n")
-	if !bytes.Equal(diffStr, exp) {
+	exp := "--- file\tthen\n+++ tile\tnow\n@@ -2,3 +2,3 @@\n two\n-three\n+thr33\n four\n"
+	if diffStr != exp {
 		t.Fatal("GetUnifiedDiffString failure:", diffStr)
 	}
 }

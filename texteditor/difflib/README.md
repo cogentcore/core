@@ -11,12 +11,6 @@ The following publicly visible classes and functions have been ported:
 * `unified_diff()`
 * `context_diff()`
 
-## Installation
-
-```sh
-$ go get cogentcore.org/core/difflib
-```
-
 ### UnifiedDiff Quick Start
 
 Diffs are configured with Unified (or ContextDiff) structures, and can
