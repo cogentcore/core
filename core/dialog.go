@@ -58,18 +58,18 @@ func (bd *Body) NewFullDialog(ctx Widget) *Stage {
 	return bd.Scene.Stage
 }
 
-// RunDialogWindow returns and runs a new [DialogStage] that is placed in
+// RunWindowDialog returns and runs a new [DialogStage] that is placed in
 // a new system window on multi-window platforms, in the context of the given widget.
-// See [Body.NewDialogWindow] to make a dialog window without running it.
-func (bd *Body) RunDialogWindow(ctx Widget) *Stage {
-	return bd.NewDialogWindow(ctx).Run()
+// See [Body.NewWindowDialog] to make a dialog window without running it.
+func (bd *Body) RunWindowDialog(ctx Widget) *Stage {
+	return bd.NewWindowDialog(ctx).Run()
 }
 
-// NewDialogWindow returns a new [DialogStage] that is placed in
+// NewWindowDialog returns a new [DialogStage] that is placed in
 // a new system window on multi-window platforms, in the context of the given widget.
-// You must call [Stage.Run] to run the dialog; see [Body.RunDialogWindow]
+// You must call [Stage.Run] to run the dialog; see [Body.RunWindowDialog]
 // for a version that automatically runs it.
-func (bd *Body) NewDialogWindow(ctx Widget) *Stage {
+func (bd *Body) NewWindowDialog(ctx Widget) *Stage {
 	bd.NewFullDialog(ctx)
 	bd.Scene.Stage.SetNewWindow(true)
 	return bd.Scene.Stage

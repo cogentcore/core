@@ -54,7 +54,7 @@ func TensorGridDialog(ctx core.Widget, tsr tensor.Tensor, title string) {
 		d.SetTitle(title)
 	}
 	NewTensorGrid(d).SetTensor(tsr)
-	d.RunDialogWindow(ctx)
+	d.RunWindowDialog(ctx)
 }
 
 // TableViewDialog is for editing an table.Table using a TableView.
@@ -65,7 +65,7 @@ func TableViewDialog(ctx core.Widget, ix *table.IndexView, title string) {
 		d.SetTitle(title)
 	}
 	NewTableView(d).SetTableView(ix)
-	d.RunDialogWindow(ctx)
+	d.RunWindowDialog(ctx)
 }
 
 // SimMatGridDialog is for viewing a tensor.Tensor using a SimMatGrid.
@@ -77,5 +77,5 @@ func SimMatGridDialog(ctx core.Widget, smat *simat.SimMat, title string) {
 		d.SetTitle(title)
 	}
 	NewSimMatGrid(d).SetSimMat(smat)
-	d.RunDialogWindow(ctx)
+	d.RunWindowDialog(ctx)
 }

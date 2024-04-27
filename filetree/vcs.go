@@ -351,7 +351,7 @@ func BlameDialog(ctx core.Widget, fname string, blame, fbytes []byte) *textedito
 		s.Min.Y.Em(40)
 	})
 	d.AddOKOnly()
-	d.RunDialogWindow(ctx)
+	d.RunWindowDialog(ctx)
 	return tv
 }
 

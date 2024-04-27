@@ -644,7 +644,7 @@ func dialogs(ts *core.Tabs) {
 
 	nd := core.NewButton(drow).SetText("New window")
 	nd.OnClick(func(e events.Event) {
-		core.NewBody().AddTitle("New window dialog").AddText("This dialog opens in a new window on multi-window platforms").RunDialogWindow(nd)
+		core.NewBody().AddTitle("New window dialog").AddText("This dialog opens in a new window on multi-window platforms").RunWindowDialog(nd)
 	})
 
 	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Snackbars")

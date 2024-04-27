@@ -391,7 +391,7 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 	d := core.NewBody().AddTitle(main).AddText(fb.Tooltip).AddOKOnly()
 	NewArgView(d).SetArgs(fb.Returns...).SetReadOnly(true)
 	if fb.NewWindow {
-		d.RunDialogWindow(ctx)
+		d.RunWindowDialog(ctx)
 	} else {
 		d.RunDialog(ctx)
 	}

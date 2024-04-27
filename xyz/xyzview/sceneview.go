@@ -218,7 +218,7 @@ func (sv *SceneView) ConfigToolbar(tb *core.Toolbar) {
 			}
 			d := core.NewBody().AddTitle("Selected Node")
 			views.NewStructView(d).SetStruct(sw.CurrentSelected)
-			d.RunDialogWindow(sv)
+			d.RunWindowDialog(sv)
 		})
 
 	core.NewButton(tb).SetText("Edit Scene").SetIcon(icons.Edit).
@@ -226,6 +226,6 @@ func (sv *SceneView) ConfigToolbar(tb *core.Toolbar) {
 		OnClick(func(e events.Event) {
 			d := core.NewBody().AddTitle("xyz.Scene")
 			views.NewStructView(d).SetStruct(sv.SceneXYZ())
-			d.RunDialogWindow(sv)
+			d.RunWindowDialog(sv)
 		})
 }

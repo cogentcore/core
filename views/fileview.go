@@ -46,7 +46,7 @@ func FileViewDialog(ctx core.Widget, filename, exts, title string, fun func(self
 			fun(fv.SelectedFile())
 		})
 	})
-	d.RunDialogWindow(ctx)
+	d.RunWindowDialog(ctx)
 }
 
 //////////////////////////////////////////////////////////////////////////

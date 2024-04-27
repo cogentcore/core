@@ -71,7 +71,7 @@ You can make a dialog that opens in a new window on multi-window platforms (not 
 bt := core.NewButton(parent).SetText("New window")
 bt.OnClick(func(e events.Event) {
     d := core.NewBody().AddTitle("New window dialog")
-    d.RunDialogWindow(bt)
+    d.RunWindowDialog(bt)
 })
 ```
 

@@ -114,7 +114,7 @@ func TextDialog(ctx core.Widget, title, text string) *Editor {
 			})
 		d.AddOK(parent)
 	})
-	d.RunDialogWindow(ctx)
+	d.RunWindowDialog(ctx)
 	return ed
 }
 

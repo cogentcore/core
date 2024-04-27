@@ -278,7 +278,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		bt := core.NewButton(parent).SetText("New window")
 		bt.OnClick(func(e events.Event) {
 			d := core.NewBody().AddTitle("New window dialog")
-			d.RunDialogWindow(bt)
+			d.RunWindowDialog(bt)
 		})
 	},
 	"widgets/frames-0": func(parent core.Widget) {
