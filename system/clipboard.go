@@ -5,7 +5,7 @@
 package system
 
 import (
-	"cogentcore.org/core/fileinfo/mimedata"
+	"cogentcore.org/core/base/fileinfo/mimedata"
 )
 
 // Clipboard defines the methods for reading and writing data to

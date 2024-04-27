@@ -8,9 +8,9 @@ import (
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/token"

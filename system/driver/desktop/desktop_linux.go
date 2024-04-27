@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/fileinfo/mimedata"
+	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/system"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )

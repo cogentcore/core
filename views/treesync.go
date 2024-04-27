@@ -10,10 +10,10 @@ import (
 	"log"
 	"strings"
 
+	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/fileinfo/mimedata"
 	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/tree"

@@ -13,8 +13,8 @@ import (
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/indent"
-	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/parse"
 	"cogentcore.org/core/parse/langs"
 	"cogentcore.org/core/parse/lexer"

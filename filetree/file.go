@@ -11,10 +11,10 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/fileinfo/vcs"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/views"
 )

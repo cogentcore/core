@@ -14,10 +14,10 @@ import (
 
 	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/fileinfo/mimedata"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/views"
 )

@@ -15,7 +15,7 @@ import (
 	"unicode/utf8"
 
 	"cogentcore.org/core/base/dirs"
-	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/parse"
 	"cogentcore.org/core/parse/syms"
 	"cogentcore.org/core/parse/token"

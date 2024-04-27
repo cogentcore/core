@@ -7,7 +7,7 @@ package langs
 import (
 	"fmt"
 
-	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/base/fileinfo"
 )
 
 var ParserBytes map[fileinfo.Known][]byte = make(map[fileinfo.Known][]byte)

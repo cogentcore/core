@@ -37,7 +37,7 @@ import (
 	"unsafe"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/fileinfo/mimedata"
+	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/system"
 )
 

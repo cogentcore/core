@@ -33,7 +33,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/datasize"
-	"cogentcore.org/core/fileinfo/vcs"
+	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/icons"
 	"github.com/Bios-Marcel/wastebasket"
 )

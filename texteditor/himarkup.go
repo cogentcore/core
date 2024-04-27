@@ -9,8 +9,8 @@ import (
 	"log/slog"
 	"strings"
 
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/parse"
 	"cogentcore.org/core/parse/lexer"
 	_ "cogentcore.org/core/parse/suplangs"

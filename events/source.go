@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"image"
 
+	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/base/nptime"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/fileinfo/mimedata"
 	"cogentcore.org/core/math32"
 )
 

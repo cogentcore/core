@@ -13,11 +13,11 @@ import (
 	"time"
 	"unicode"
 
+	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/fileinfo/mimedata"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"

@@ -9,7 +9,7 @@ import (
 	"log"
 	"time"
 
-	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/parse/langs"
 	"cogentcore.org/core/parse/lexer"
 )

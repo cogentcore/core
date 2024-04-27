@@ -64,7 +64,7 @@ func SliceDeleteAt(sl any, idx int) {
 
 // Inter is an interface that requires a method returning the value
 // as an int64. It is used in sorting and implemented by
-// [cogentcore.org/core/fileinfo.FileTime].
+// [cogentcore.org/core/base/fileinfo.FileTime].
 type Inter interface {
 	// Int returns the value as an int64.
 	Int() int64

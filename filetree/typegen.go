@@ -9,7 +9,7 @@ import (
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 	"cogentcore.org/core/units"
-	"cogentcore.org/core/fileinfo/vcs"
+	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/views"
 )
 

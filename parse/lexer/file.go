@@ -12,7 +12,7 @@ import (
 	"slices"
 	"strings"
 
-	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/parse/token"
 )
 

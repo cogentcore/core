@@ -14,9 +14,9 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/fileinfo/vcs"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"

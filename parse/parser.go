@@ -14,7 +14,7 @@ import (
 	"os"
 	"time"
 
-	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/parser"
 	"cogentcore.org/core/tree"

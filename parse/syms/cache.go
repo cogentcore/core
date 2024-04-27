@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"cogentcore.org/core/fileinfo"
+	"cogentcore.org/core/base/fileinfo"
 )
 
 // ParseCacheDir returns the parse cache directory for given language, and ensures that it exists.
