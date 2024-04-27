@@ -312,7 +312,7 @@ func (v *TimeValue) Config() {
 				v.Update()
 			})
 		})
-		d.NewDialog(dt).Run()
+		d.RunDialog(dt)
 	})
 	dt.Style(func(s *styles.Style) {
 		s.Min.X.Em(8)
@@ -341,7 +341,7 @@ func (v *TimeValue) Config() {
 				v.Update()
 			})
 		})
-		d.NewDialog(tm).Run()
+		d.RunDialog(tm)
 	})
 	tm.Style(func(s *styles.Style) {
 		s.Min.X.Em(8)

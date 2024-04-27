@@ -161,7 +161,7 @@ func (wb *WidgetBase) AddCloseDialog(config func(d *Body) bool) *WidgetBase {
 			return
 		}
 		e.SetHandled()
-		d.NewDialog(wb).Run()
+		d.RunDialog(wb)
 	})
 	return wb
 }

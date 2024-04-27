@@ -114,7 +114,7 @@ func TextDialog(ctx core.Widget, title, text string) *Editor {
 			})
 		d.AddOK(parent)
 	})
-	d.NewFullDialog(ctx).SetNewWindow(true).Run()
+	d.RunDialogWindow(ctx)
 	return ed
 }
 
@@ -239,7 +239,7 @@ func (dv *DiffView) SaveAs(ab bool, filename core.Filename) {
 				dv.SaveFile(ab, filename)
 			})
 		})
-		d.NewDialog(dv).Run()
+		d.RunDialog(dv)
 	}
 }
 

@@ -851,7 +851,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 						sv.SendChange()
 					})
 				})
-				d.NewDialog(sv).Run()
+				d.RunDialog(sv)
 			}
 		}
 	} else {

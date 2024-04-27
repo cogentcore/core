@@ -532,7 +532,7 @@ func (tb *Buffer) FileModCheck() bool {
 				tb.SetFlag(true, BufferFileModOK)
 			})
 		})
-		d.NewDialog(sc).Run()
+		d.RunDialog(sc)
 		return true
 	}
 	return false
@@ -648,7 +648,7 @@ func (tb *Buffer) SaveAsFunc(filename core.Filename, afterFunc func(canceled boo
 				}
 			})
 		})
-		d.NewDialog(sc).Run()
+		d.RunDialog(sc)
 	}
 }
 
@@ -698,7 +698,7 @@ func (tb *Buffer) Save() error {
 				tb.SaveFile(tb.Filename)
 			})
 		})
-		d.NewDialog(sc).Run()
+		d.RunDialog(sc)
 	}
 	return tb.SaveFile(tb.Filename)
 }
@@ -730,7 +730,7 @@ func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
 					tb.Close(afterFun) // 2nd time through won't prompt
 				})
 			})
-			d.NewDialog(sc).Run()
+			d.RunDialog(sc)
 		} else {
 			d := core.NewBody().AddTitle("Close without saving?").
 				AddText("Do you want to save your changes (no filename for this buffer yet)?  If so, Cancel and then do Save As")
@@ -746,7 +746,7 @@ func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
 					tb.Close(afterFun)
 				})
 			})
-			d.NewDialog(sc).Run()
+			d.RunDialog(sc)
 		}
 		return false // awaiting decisions..
 	}

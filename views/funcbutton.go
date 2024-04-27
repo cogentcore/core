@@ -299,7 +299,7 @@ func (fb *FuncButton) ConfirmDialog() {
 			fb.CallFuncShowReturns()
 		})
 	})
-	d.NewDialog(ctx).Run()
+	d.RunDialog(ctx)
 }
 
 // CallFunc calls the function or method associated with this button,
@@ -331,7 +331,7 @@ func (fb *FuncButton) CallFunc() {
 			fb.CallFuncShowReturns()
 		})
 	})
-	d.NewDialog(ctx).Run()
+	d.RunDialog(ctx)
 }
 
 // SetMethodImpl is the underlying implementation of [FuncButton.SetFunc] for methods.
@@ -391,9 +391,9 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 	d := core.NewBody().AddTitle(main).AddText(fb.Tooltip).AddOKOnly()
 	NewArgView(d).SetArgs(fb.Returns...).SetReadOnly(true)
 	if fb.NewWindow {
-		d.NewDialog(ctx).SetNewWindow(true).Run()
+		d.RunDialogWindow(ctx)
 	} else {
-		d.NewDialog(ctx).Run()
+		d.RunDialog(ctx)
 	}
 }
 

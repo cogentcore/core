@@ -170,7 +170,7 @@ func (fn *Node) PasteCopyFilesCheck(tdir *Node, md mimedata.Mimes, externalDrop 
 			}
 		})
 	})
-	d.NewDialog(fn).Run()
+	d.RunDialog(fn)
 }
 
 // PasteFiles applies a paste / drop of mime data onto this node.
@@ -225,7 +225,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 				}
 			})
 		})
-		d.NewDialog(fn).Run()
+		d.RunDialog(fn)
 	case len(existing) > 0:
 		d := core.NewBody().AddTitle("Overwrite?").
 			AddText(fmt.Sprintf("Overwrite target file: %s with source file: %s, or overwrite existing file with same name as source file (%s), or diff (compare) files?", fn.Nm, fname, fname))
@@ -252,7 +252,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 				}
 			})
 		})
-		d.NewDialog(fn).Run()
+		d.RunDialog(fn)
 	default:
 		d := core.NewBody().AddTitle("Overwrite?").
 			AddText(fmt.Sprintf("Overwrite target file: %s with source file: %s, or copy to: %s in current folder (which doesn't yet exist), or diff (compare) the two files?", fn.Nm, fname, fname))
@@ -274,7 +274,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 				}
 			})
 		})
-		d.NewDialog(fn).Run()
+		d.RunDialog(fn)
 	}
 }
 

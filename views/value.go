@@ -423,7 +423,7 @@ func (v *ValueBase[W]) SetValueMap(val any) (bool, error) {
 					v.SendChange()
 				})
 			})
-			d.NewDialog(v.Widget).Run()
+			d.RunDialog(v.Widget)
 			return false, nil // abort this action right now
 		}
 		ov.SetMapIndex(kv, reflect.Value{}) // delete old key

@@ -524,7 +524,7 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 						ch.SelectItemAction(len(ch.Items) - 1)
 					})
 				})
-				d.NewDialog(ch).Run()
+				d.RunDialog(ch)
 			})
 	}
 }

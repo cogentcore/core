@@ -773,7 +773,7 @@ func (tv *TableView) EditIndex(idx int) {
 		d.AddCancel(parent)
 		d.AddOK(parent)
 	})
-	d.NewFullDialog(tv).Run()
+	d.RunFullDialog(tv)
 }
 
 func (tv *TableView) ContextMenu(m *core.Scene) {

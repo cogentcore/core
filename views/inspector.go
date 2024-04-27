@@ -183,7 +183,7 @@ func (is *Inspector) SelectionMonitor() {
 func (is *Inspector) InspectApp() { //types:add
 	d := core.NewBody().AddTitle("Inspect app")
 	NewStructView(d).SetStruct(system.TheApp).SetReadOnly(true)
-	d.NewFullDialog(is).Run()
+	d.RunFullDialog(is)
 }
 
 // SetRoot sets the source root and ensures everything is configured

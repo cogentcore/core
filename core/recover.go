@@ -58,7 +58,7 @@ func HandleRecover(r any) {
 					})
 				d.AddOK(parent)
 			})
-			d.NewFullDialog(b).Run()
+			d.RunFullDialog(b)
 		})
 		NewButton(parent).SetText("Quit").OnClick(func(e events.Event) {
 			quit <- struct{}{}

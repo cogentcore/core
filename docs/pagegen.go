@@ -250,7 +250,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 					core.MessageSnackbar(bt, "Dialog accepted")
 				})
 			})
-			d.NewDialog(bt).Run()
+			d.RunDialog(bt)
 		})
 	},
 	"widgets/dialogs-3": func(parent core.Widget) {
@@ -264,21 +264,21 @@ var PagesExamples = map[string]func(parent core.Widget){
 					core.MessageSnackbar(bt, "Your name is "+tf.Text())
 				})
 			})
-			d.NewDialog(bt).Run()
+			d.RunDialog(bt)
 		})
 	},
 	"widgets/dialogs-4": func(parent core.Widget) {
 		bt := core.NewButton(parent).SetText("Full window")
 		bt.OnClick(func(e events.Event) {
 			d := core.NewBody().AddTitle("Full window dialog")
-			d.NewFullDialog(bt).Run()
+			d.RunFullDialog(bt)
 		})
 	},
 	"widgets/dialogs-5": func(parent core.Widget) {
 		bt := core.NewButton(parent).SetText("New window")
 		bt.OnClick(func(e events.Event) {
 			d := core.NewBody().AddTitle("New window dialog")
-			d.NewDialog(bt).SetNewWindow(true).Run()
+			d.RunDialogWindow(bt)
 		})
 	},
 	"widgets/frames-0": func(parent core.Widget) {

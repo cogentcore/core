@@ -34,7 +34,7 @@ bt.OnClick(func(e events.Event) {
             core.MessageSnackbar(bt, "Dialog accepted")
         })
     })
-    d.NewDialog(bt).Run()
+    d.RunDialog(bt)
 })
 ```
 
@@ -51,7 +51,7 @@ bt.OnClick(func(e events.Event) {
             core.MessageSnackbar(bt, "Your name is "+tf.Text())
         })
     })
-    d.NewDialog(bt).Run()
+    d.RunDialog(bt)
 })
 ```
 
@@ -61,7 +61,7 @@ You can make a dialog that takes up the entire window:
 bt := core.NewButton(parent).SetText("Full window")
 bt.OnClick(func(e events.Event) {
     d := core.NewBody().AddTitle("Full window dialog")
-    d.NewFullDialog(bt).Run()
+    d.RunFullDialog(bt)
 })
 ```
 
@@ -71,7 +71,7 @@ You can make a dialog that opens in a new window on multi-window platforms (not 
 bt := core.NewButton(parent).SetText("New window")
 bt.OnClick(func(e events.Event) {
     d := core.NewBody().AddTitle("New window dialog")
-    d.NewDialog(bt).SetNewWindow(true).Run()
+    d.RunDialogWindow(bt)
 })
 ```
 

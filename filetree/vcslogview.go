@@ -139,7 +139,7 @@ func (lv *VCSLogView) ConfigRepo(repo vcs.Repo, lg vcs.Log, file, since string) 
 				})
 			d.AddOK(parent)
 		})
-		d.NewFullDialog(lv).Run()
+		d.RunFullDialog(lv)
 	})
 }
 
@@ -254,7 +254,7 @@ func VCSLogViewDialog(ctx core.Widget, repo vcs.Repo, lg vcs.Log, file, since st
 	d := core.NewBody().AddTitle(title)
 	lv := NewVCSLogView(d, "vcslog")
 	lv.ConfigRepo(repo, lg, file, since)
-	d.NewFullDialog(ctx).SetNewWindow(true).Run()
+	d.RunDialogWindow(ctx)
 	return d
 }
 
@@ -273,7 +273,7 @@ func FileAtRevDialog(ctx core.Widget, repo vcs.Repo, file, rev string) *core.Bod
 
 	tb := texteditor.NewBuffer().SetText(fb).SetFilename(file) // file is key for getting lang
 	texteditor.NewEditor(d).SetBuffer(tb).SetReadOnly(true)
-	d.NewFullDialog(ctx).SetNewWindow(true).Run()
+	d.RunDialogWindow(ctx)
 	tb.StartDelayedReMarkup() // update markup
 	return d
 }

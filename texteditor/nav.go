@@ -718,7 +718,7 @@ func (ed *Editor) JumpToLinePrompt() {
 			}
 		})
 	})
-	d.NewDialog(ed).Run()
+	d.RunDialog(ed)
 }
 
 // JumpToLine jumps to given line number (minus 1)

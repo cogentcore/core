@@ -84,7 +84,7 @@ func (mv *MapViewInline) SetStyles() {
 					mv.Update()
 					mv.SendChange()
 				})
-				d.NewFullDialog(mv).Run()
+				d.RunFullDialog(mv)
 			})
 		}
 	})

@@ -26,7 +26,7 @@ func SettingsViewToolbarBase(tb *core.Toolbar) {
 			d := core.NewBody().AddTitle("App version")
 			core.NewText(d).SetText("App version: " + system.AppVersion)
 			core.NewText(d).SetText("Core version: " + system.CoreVersion)
-			d.AddOKOnly().NewDialog(tb).Run()
+			d.AddOKOnly().RunDialog(tb)
 		})
 
 		NewFuncButton(m, core.AppearanceSettings.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)

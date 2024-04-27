@@ -326,7 +326,7 @@ func (ed *Editor) QReplacePrompt() {
 			ed.QReplaceStart(find, repl, lexItems)
 		})
 	})
-	d.NewDialog(ed).Run()
+	d.RunDialog(ed)
 }
 
 // QReplaceStart starts query-replace using given find, replace strings

@@ -346,7 +346,7 @@ func makeIcons(ts *core.Tabs) {
 				s.SetTextWrap(false)
 			})
 		}
-		d.NewFullDialog(tab).Run()
+		d.RunFullDialog(tab)
 	})
 }
 
@@ -613,7 +613,7 @@ func dialogs(ts *core.Tabs) {
 				core.MessageSnackbar(cd, "Dialog accepted")
 			})
 		})
-		d.NewDialog(cd).Run()
+		d.RunDialog(cd)
 	})
 
 	td := core.NewButton(drow).SetText("Input")
@@ -626,7 +626,7 @@ func dialogs(ts *core.Tabs) {
 				core.MessageSnackbar(td, "Your name is "+tf.Text())
 			})
 		})
-		d.NewDialog(td).Run()
+		d.RunDialog(td)
 	})
 
 	fd := core.NewButton(drow).SetText("Full window")
@@ -639,12 +639,12 @@ func dialogs(ts *core.Tabs) {
 		d.OnClose(func(e events.Event) {
 			fmt.Println("Your information is:", u)
 		})
-		d.NewFullDialog(td).Run()
+		d.RunFullDialog(td)
 	})
 
 	nd := core.NewButton(drow).SetText("New window")
 	nd.OnClick(func(e events.Event) {
-		core.NewBody().AddTitle("New window dialog").AddText("This dialog opens in a new window on multi-window platforms").NewDialog(nd).SetNewWindow(true).Run()
+		core.NewBody().AddTitle("New window dialog").AddText("This dialog opens in a new window on multi-window platforms").RunDialogWindow(nd)
 	})
 
 	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Snackbars")

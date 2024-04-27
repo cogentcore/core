@@ -180,7 +180,7 @@ func (fn *Node) DeleteFiles() { //types:add
 			fn.This().(Filer).DeleteFilesImpl()
 		})
 	})
-	d.NewDialog(fn).Run()
+	d.RunDialog(fn)
 }
 
 // DeleteFilesImpl does the actual deletion, no prompts
@@ -407,6 +407,6 @@ func (fn *Node) ShowFileInfo() { //types:add
 		fn := AsNode(sels[i].This())
 		d := core.NewBody().AddTitle("File info")
 		views.NewStructView(d).SetStruct(&fn.Info).SetReadOnly(true)
-		d.AddOKOnly().NewFullDialog(fn).Run()
+		d.AddOKOnly().RunFullDialog(fn)
 	}
 }

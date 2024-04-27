@@ -90,7 +90,7 @@ func (sv *SliceViewInline) SetStyles() {
 					sv.Update()
 					sv.SendChange()
 				})
-				d.NewFullDialog(sv).Run()
+				d.RunFullDialog(sv)
 			})
 		}
 	})

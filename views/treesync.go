@@ -243,7 +243,7 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 			}
 		})
 	})
-	d.NewDialog(tv).Run()
+	d.RunDialog(tv)
 }
 
 // AddChildNode adds a new child node to this one in the tree,
@@ -269,7 +269,7 @@ func (tv *TreeView) AddChildNode() { //types:add
 			}
 		})
 	})
-	d.NewDialog(tv).Run()
+	d.RunDialog(tv)
 }
 
 // DeleteNode deletes the tree node or sync node corresponding
@@ -357,12 +357,12 @@ func (tv *TreeView) EditNode() { //types:add
 		tynm := tv.SyncNode.NodeType().Name
 		d := core.NewBody().AddTitle(tynm)
 		NewStructView(d).SetStruct(tv.SyncNode).SetReadOnly(tv.IsReadOnly())
-		d.NewFullDialog(tv).Run()
+		d.RunFullDialog(tv)
 	} else {
 		tynm := tv.NodeType().Name
 		d := core.NewBody().AddTitle(tynm)
 		NewStructView(d).SetStruct(tv.This()).SetReadOnly(tv.IsReadOnly())
-		d.NewFullDialog(tv).Run()
+		d.RunFullDialog(tv)
 	}
 }
 

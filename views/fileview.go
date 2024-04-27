@@ -46,7 +46,7 @@ func FileViewDialog(ctx core.Widget, filename, exts, title string, fun func(self
 			fun(fv.SelectedFile())
 		})
 	})
-	d.NewDialog(ctx).SetNewWindow(true).Run()
+	d.RunDialogWindow(ctx)
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -364,7 +364,7 @@ func (fv *FileView) ConfigFilesRow() {
 				fn := fv.Files[fsv.SelectedIndex]
 				d := core.NewBody().AddTitle("Info: " + fn.Name)
 				NewStructView(d).SetStruct(&fn).SetReadOnly(true)
-				d.AddOKOnly().NewFullDialog(fsv).Run()
+				d.AddOKOnly().RunFullDialog(fsv)
 			})
 		core.NewSeparator(m)
 		NewFuncButton(m, fv.NewFolder).SetIcon(icons.CreateNewFolder)
@@ -870,5 +870,5 @@ func (fv *FileView) EditRecentPaths() {
 			fv.UpdateFiles()
 		})
 	})
-	d.NewDialog(fv).Run()
+	d.RunDialog(fv)
 }

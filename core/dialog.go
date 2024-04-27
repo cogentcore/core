@@ -91,7 +91,7 @@ func MessageDialog(ctx Widget, msg string, title ...string) {
 		b.AddTitle(title[0])
 	}
 	b.AddText(msg).AddOKOnly()
-	b.NewDialog(ctx).Run()
+	b.RunDialog(ctx)
 }
 
 // ErrorDialog opens a new Dialog displaying the given error
@@ -108,7 +108,7 @@ func ErrorDialog(ctx Widget, err error, title ...string) {
 		ttl = title[0]
 	}
 	NewBody(ctx.Name() + "-error-dialog").AddTitle(ttl).AddText(err.Error()).
-		AddOKOnly().NewDialog(ctx).Run()
+		AddOKOnly().RunDialog(ctx)
 }
 
 // AddOK adds an OK button to given parent Widget (typically in Bottom

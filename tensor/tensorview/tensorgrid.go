@@ -242,7 +242,7 @@ func (tg *TensorGrid) EditSettings() { //types:add
 		OnChange(func(e events.Event) {
 			tg.NeedsRender()
 		})
-	d.NewFullDialog(tg).Run()
+	d.RunFullDialog(tg)
 }
 
 // MinSize returns minimum size based on tensor and display settings
