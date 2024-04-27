@@ -9,7 +9,7 @@ import (
 	"io/fs"
 
 	"cogentcore.org/core/base/dirs"
-	"cogentcore.org/core/iox/tomlx"
+	"cogentcore.org/core/base/iox/tomlx"
 	"cogentcore.org/core/reflectx"
 )
 

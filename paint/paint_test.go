@@ -10,9 +10,9 @@ import (
 	"slices"
 	"testing"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"

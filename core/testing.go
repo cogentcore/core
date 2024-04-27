@@ -5,8 +5,8 @@
 package core
 
 import (
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/system"
 )
 

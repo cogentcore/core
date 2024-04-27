@@ -10,8 +10,8 @@ import (
 	"image/draw"
 	"testing"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/math32"
 )
 

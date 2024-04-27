@@ -9,7 +9,7 @@ import (
 	"image"
 	"log"
 
-	"cogentcore.org/core/iox/imagex"
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"golang.org/x/image/draw"

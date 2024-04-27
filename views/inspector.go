@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"reflect"
 
+	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/iox/jsonx"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles"

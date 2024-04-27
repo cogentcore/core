@@ -16,7 +16,7 @@ import (
 	"time"
 	"unsafe"
 
-	"cogentcore.org/core/iox/imagex"
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/math32"
 	vk "github.com/goki/vulkan"
 

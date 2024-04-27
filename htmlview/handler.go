@@ -15,9 +15,9 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"

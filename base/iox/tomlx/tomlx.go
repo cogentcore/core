@@ -10,7 +10,7 @@ import (
 	"io/fs"
 
 	"cogentcore.org/core/base/dirs"
-	"cogentcore.org/core/iox"
+	"cogentcore.org/core/base/iox"
 	"github.com/pelletier/go-toml/v2"
 )
 

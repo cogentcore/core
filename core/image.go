@@ -8,7 +8,7 @@ import (
 	"image"
 	"io/fs"
 
-	"cogentcore.org/core/iox/imagex"
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"github.com/anthonynsimon/bild/clone"

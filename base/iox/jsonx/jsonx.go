@@ -9,7 +9,7 @@ import (
 	"io"
 	"io/fs"
 
-	"cogentcore.org/core/iox"
+	"cogentcore.org/core/base/iox"
 )
 
 // Open reads the given object from the given filename using JSON encoding

@@ -10,8 +10,8 @@ import (
 	"os"
 	"testing"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/cursors"
-	"cogentcore.org/core/iox/imagex"
 )
 
 func TestHotspot(t *testing.T) {

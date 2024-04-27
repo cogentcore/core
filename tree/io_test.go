@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"cogentcore.org/core/iox/jsonx"
+	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/tree/testdata"
 )

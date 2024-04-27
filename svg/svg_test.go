@@ -11,9 +11,9 @@ import (
 	"testing"
 
 	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/cam/hct"
-	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/paint"
 	"github.com/stretchr/testify/assert"
 )

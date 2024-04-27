@@ -10,8 +10,8 @@ import (
 	"image/color"
 	"log"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/vgpu"
 	"cogentcore.org/core/xyz"

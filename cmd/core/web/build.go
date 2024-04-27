@@ -14,9 +14,9 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/exec"
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
-	"cogentcore.org/core/iox/imagex"
 )
 
 // Build builds an app for web using the given configuration information.

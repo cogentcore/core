@@ -5,7 +5,7 @@
 package system
 
 import (
-	"cogentcore.org/core/iox/imagex"
+	"cogentcore.org/core/base/iox/imagex"
 )
 
 // AssertCapture asserts that the result of [Capture] is equivalent

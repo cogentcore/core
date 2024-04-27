@@ -7,8 +7,8 @@ package paint
 import (
 	"testing"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"github.com/stretchr/testify/assert"

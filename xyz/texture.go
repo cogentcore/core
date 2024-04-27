@@ -12,7 +12,7 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/base/dirs"
-	"cogentcore.org/core/iox/imagex"
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/vgpu"
 	"cogentcore.org/core/vgpu/vphong"
 )

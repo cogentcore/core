@@ -18,10 +18,10 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/iox/tomlx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlview"
-	"cogentcore.org/core/iox/tomlx"
 	"cogentcore.org/core/pages/wpath"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"

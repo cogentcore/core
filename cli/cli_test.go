@@ -13,8 +13,8 @@ import (
 
 	"log/slog"
 
+	"cogentcore.org/core/base/iox/tomlx"
 	"cogentcore.org/core/cli/testdata"
-	"cogentcore.org/core/iox/tomlx"
 	"cogentcore.org/core/logx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

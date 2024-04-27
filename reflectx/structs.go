@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/iox/jsonx"
+	"cogentcore.org/core/base/iox/jsonx"
 )
 
 // WalkTypeFlatFields calls a function on all the primary fields of a given

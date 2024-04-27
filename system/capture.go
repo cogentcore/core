@@ -8,7 +8,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/iox/imagex"
+	"cogentcore.org/core/base/iox/imagex"
 )
 
 // Capture tells the app drawer to capture its next frame as an image.

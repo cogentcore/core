@@ -10,7 +10,7 @@ import (
 	"image/draw"
 	"testing"
 
-	"cogentcore.org/core/iox/imagex"
+	"cogentcore.org/core/base/iox/imagex"
 )
 
 func TestAlphaBlend(t *testing.T) {

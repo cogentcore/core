@@ -13,8 +13,8 @@ import (
 	"log"
 	"unsafe"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/math32"
 	vk "github.com/goki/vulkan"
 )

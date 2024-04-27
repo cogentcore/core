@@ -14,9 +14,9 @@ import (
 
 	"testing"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/scan"
 	"golang.org/x/image/math/fixed"

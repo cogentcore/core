@@ -15,7 +15,7 @@ import (
 	"strconv"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/iox/jsonx"
+	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/types"
 )
 
