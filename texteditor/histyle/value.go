@@ -47,7 +47,7 @@ func (v *Value) ConfigDialog(d *core.Body) (bool, func()) {
 
 // View opens a view of highlighting styles
 func View(st *Styles) {
-	if core.ActivateExistingMainWindow(st) {
+	if core.RecycleMainWindow(st) {
 		return
 	}
 

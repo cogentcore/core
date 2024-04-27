@@ -200,31 +200,15 @@ func (w *RenderWindow) MainScene() *Scene {
 	return top.Scene
 }
 
-// ActivateExistingMainWindow looks for existing window with given Data.
-// If found brings that to the front, returns true for bool, else false.
-func ActivateExistingMainWindow(data any) bool {
+// RecycleMainWindow looks for an existing non-dialog window with the given Data.
+// If it finds it, it shows it and returns true. Otherwise, it returns false.
+// See [RecycleDialog] for a dialog version.
+func RecycleMainWindow(data any) bool {
 	if data == nil {
 		return false
 	}
-	ew, has := MainRenderWindows.FindData(data)
-	if !has {
-		return false
-	}
-	if DebugSettings.WinEventTrace {
-		fmt.Printf("Win: %v getting recycled based on data match\n", ew.Name)
-	}
-	ew.Raise()
-	return true
-}
-
-// ActivateExistingDialogWindow looks for existing dialog window with given Data.
-// If found brings that to the front, returns true for bool, else false.
-func ActivateExistingDialogWindow(data any) bool {
-	if data == nil {
-		return false
-	}
-	ew, has := DialogRenderWindows.FindData(data)
-	if !has {
+	ew, got := MainRenderWindows.FindData(data)
+	if !got {
 		return false
 	}
 	if DebugSettings.WinEventTrace {

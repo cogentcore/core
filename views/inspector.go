@@ -330,7 +330,7 @@ func (is *Inspector) ConfigToolbar(tb *core.Toolbar) {
 // InspectorWindow opens an interactive editor of the given tree
 // in a new window.
 func InspectorWindow(k tree.Node) {
-	if core.ActivateExistingMainWindow(k) {
+	if core.RecycleMainWindow(k) {
 		return
 	}
 	d := core.NewBody("inspector")

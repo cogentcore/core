@@ -37,7 +37,7 @@ func SettingsViewToolbarBase(tb *core.Toolbar) {
 
 // SettingsWindow makes and runs a new window for viewing user settings.
 func SettingsWindow() {
-	if core.ActivateExistingMainWindow(&core.AllSettings) {
+	if core.RecycleMainWindow(&core.AllSettings) {
 		return
 	}
 	d := core.NewBody("settings").SetTitle("Settings").SetData(&core.AllSettings)
