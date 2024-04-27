@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"cogentcore.org/core/exec"
+	"cogentcore.org/core/gox/exec"
 	"cogentcore.org/core/logx"
 )
 

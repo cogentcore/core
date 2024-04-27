@@ -12,7 +12,7 @@ import (
 
 	"cogentcore.org/core/cli"
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/exec"
+	"cogentcore.org/core/gox/exec"
 )
 
 func TestAppleBuild(t *testing.T) {

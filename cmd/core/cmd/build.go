@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile"
 	"cogentcore.org/core/cmd/core/web"
-	"cogentcore.org/core/exec"
+	"cogentcore.org/core/gox/exec"
 )
 
 // Build builds an executable for the package

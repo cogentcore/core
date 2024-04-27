@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/exec"
+	"cogentcore.org/core/gox/exec"
 	"github.com/Masterminds/semver/v3"
 )
 

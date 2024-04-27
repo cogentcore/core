@@ -11,7 +11,7 @@ import (
 	"runtime"
 
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/exec"
+	"cogentcore.org/core/gox/exec"
 	"github.com/mitchellh/go-homedir"
 )
 

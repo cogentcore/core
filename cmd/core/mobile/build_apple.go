@@ -15,7 +15,7 @@ import (
 
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
-	"cogentcore.org/core/exec"
+	"cogentcore.org/core/gox/exec"
 	"github.com/jackmordaunt/icns/v2"
 	"golang.org/x/tools/go/packages"
 )

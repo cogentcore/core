@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/exec"
+	"cogentcore.org/core/gox/exec"
 )
 
 // Log prints the logs from your app running on Android to the terminal.

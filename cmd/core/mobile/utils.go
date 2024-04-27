@@ -16,7 +16,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/exec"
+	"cogentcore.org/core/gox/exec"
 	"cogentcore.org/core/logx"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/tools/go/packages"

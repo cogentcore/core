@@ -13,7 +13,7 @@ import (
 
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
-	"cogentcore.org/core/exec"
+	"cogentcore.org/core/gox/exec"
 	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/strcase"
 	"github.com/jackmordaunt/icns/v2"

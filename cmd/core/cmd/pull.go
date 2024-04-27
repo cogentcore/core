@@ -13,7 +13,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/exec"
+	"cogentcore.org/core/gox/exec"
 )
 
 // Pull concurrently pulls all of the Git repositories within the current directory.
