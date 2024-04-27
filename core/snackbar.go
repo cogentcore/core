@@ -13,8 +13,16 @@ import (
 	"cogentcore.org/core/units"
 )
 
+// RunSnackbar returns and runs a new [SnackbarStage] in the context
+// of the given widget. See [Body.NewSnackbar] to make a snackbar without running it.
+func (bd *Body) RunSnackbar(ctx Widget) *Stage {
+	return bd.NewSnackbar(ctx).Run()
+}
+
 // NewSnackbar returns a new [SnackbarStage] in the context
-// of the given widget.
+// of the given widget. You must call [Stage.Run] to run the
+// snackbar; see [Body.RunSnackbar] for a version that
+// automatically runs it.
 func (bd *Body) NewSnackbar(ctx Widget) *Stage {
 	ctx = nonNilContext(ctx)
 	bd.SnackbarStyles()
