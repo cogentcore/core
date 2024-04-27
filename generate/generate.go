@@ -80,7 +80,7 @@ func Inspect(pkg *packages.Package, f func(n ast.Node) (bool, error)) error {
 			return cont
 		})
 		if terr != nil {
-			return fmt.Errorf("gengo.Inspect: error while calling inspect function for node %v: %w", terrNode, terr)
+			return fmt.Errorf("generate.Inspect: error while calling inspect function for node %v: %w", terrNode, terr)
 		}
 	}
 	return nil
@@ -104,10 +104,10 @@ func Write(filename string, src []byte, opt *imports.Options) error {
 	// then we handle error later
 	werr := os.WriteFile(filename, b, 0666)
 	if werr != nil {
-		return fmt.Errorf("gengo.Write: error writing file: %w", werr)
+		return fmt.Errorf("generate.Write: error writing file: %w", werr)
 	}
 	if ferr != nil {
-		return fmt.Errorf("gengo.Write: error formatting code: %w", ferr)
+		return fmt.Errorf("generate.Write: error formatting code: %w", ferr)
 	}
 	return nil
 }
@@ -120,7 +120,7 @@ func Format(filename string, src []byte, opt *imports.Options) ([]byte, error) {
 	if err != nil {
 		// Should never happen, but can arise when developing code.
 		// The user can compile the output to see the error.
-		return src, fmt.Errorf("internal/programmer error: gengo.Format: invalid Go generated: %w; compile the package to analyze the error", err)
+		return src, fmt.Errorf("internal/programmer error: generate.Format: invalid Go generated: %w; compile the package to analyze the error", err)
 	}
 	return b, nil
 }
