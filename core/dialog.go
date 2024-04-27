@@ -23,7 +23,8 @@ func (bd *Body) RunDialog(ctx Widget) *Stage {
 
 // NewDialog returns a new [DialogStage] that does not take up the
 // full window it is created in, in the context of the given widget.
-// See [Body.NewFullDialog] for a full-window dialog.
+// You must call [Stage.Run] to run the dialog; see [Body.RunDialog]
+// for a version that automatically runs it.
 func (bd *Body) NewDialog(ctx Widget) *Stage {
 	ctx = nonNilContext(ctx)
 	bd.DialogStyles()
@@ -43,7 +44,8 @@ func (bd *Body) RunFullDialog(ctx Widget) *Stage {
 
 // NewFullDialog returns a new [DialogStage] that takes up the full
 // window it is created in, in the context of the given widget.
-// See [Body.NewDialog] for a non-full-window dialog.
+// You must call [Stage.Run] to run the dialog; see [Body.RunFullDialog]
+// for a version that automatically runs it.
 func (bd *Body) NewFullDialog(ctx Widget) *Stage {
 	bd.DialogStyles()
 	bd.Scene.Stage = NewMainStage(DialogStage, bd.Scene)
@@ -57,15 +59,16 @@ func (bd *Body) NewFullDialog(ctx Widget) *Stage {
 }
 
 // RunDialogWindow returns and runs a new [DialogStage] that is placed in
-// a new window, in the context of the given widget.
+// a new system window on multi-window platforms, in the context of the given widget.
 // See [Body.NewDialogWindow] to make a dialog window without running it.
 func (bd *Body) RunDialogWindow(ctx Widget) *Stage {
 	return bd.NewDialogWindow(ctx).Run()
 }
 
 // NewDialogWindow returns a new [DialogStage] that is placed in
-// a new window, in the context of the given widget.
-// See [Body.NewDialog] for a non-new-window dialog.
+// a new system window on multi-window platforms, in the context of the given widget.
+// You must call [Stage.Run] to run the dialog; see [Body.RunDialogWindow]
+// for a version that automatically runs it.
 func (bd *Body) NewDialogWindow(ctx Widget) *Stage {
 	bd.NewFullDialog(ctx)
 	bd.Scene.Stage.SetNewWindow(true)
