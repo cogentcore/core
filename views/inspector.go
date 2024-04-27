@@ -157,7 +157,7 @@ func (is *Inspector) SelectionMonitor() {
 			return tree.Continue
 		})
 		if tv == nil {
-			core.NewBody().AddSnackbarText(fmt.Sprintf("Inspector: tree view node missing: %v", sw)).NewSnackbar(is).Run()
+			core.MessageSnackbar(is, fmt.Sprintf("Inspector: tree view node missing: %v", sw))
 			return
 		}
 	}

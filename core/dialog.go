@@ -88,12 +88,12 @@ func RecycleDialog(data any) bool {
 
 // MessageDialog opens a new Dialog displaying the given message
 // in the context of the given widget. An optional title can be provided.
-func MessageDialog(ctx Widget, msg string, title ...string) {
+func MessageDialog(ctx Widget, message string, title ...string) {
 	b := NewBody(ctx.Name() + "-message-dialog")
 	if len(title) > 0 {
 		b.AddTitle(title[0])
 	}
-	b.AddText(msg).AddOKOnly()
+	b.AddText(message).AddOKOnly()
 	b.RunDialog(ctx)
 }
 

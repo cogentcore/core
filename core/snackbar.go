@@ -25,8 +25,8 @@ func (bd *Body) NewSnackbar(ctx Widget) *Stage {
 
 // MessageSnackbar opens a [Snackbar] displaying the given message
 // in the context of the given widget.
-func MessageSnackbar(ctx Widget, msg string) {
-	NewBody().AddSnackbarText(msg).NewSnackbar(ctx).Run()
+func MessageSnackbar(ctx Widget, message string) {
+	NewBody().AddSnackbarText(message).NewSnackbar(ctx).Run()
 }
 
 // ErrorSnackbar opens a [Snackbar] displaying the given error

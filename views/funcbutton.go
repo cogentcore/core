@@ -379,7 +379,7 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 				}
 			}
 		}
-		core.NewBody().AddSnackbarText(txt).NewSnackbar(ctx).Run()
+		core.MessageSnackbar(ctx, txt)
 		return
 	}
 	// go directly to the dialog if there is one
