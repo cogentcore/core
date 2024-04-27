@@ -12,7 +12,7 @@ import (
 
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/svg"
 )
 

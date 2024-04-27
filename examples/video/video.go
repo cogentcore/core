@@ -2,7 +2,7 @@ package main
 
 import (
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/video"
 	_ "cogentcore.org/core/views"

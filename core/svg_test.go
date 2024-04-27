@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/svg"

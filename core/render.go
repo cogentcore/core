@@ -14,7 +14,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/cam/hct"
-	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/profile"
 	"cogentcore.org/core/styles"

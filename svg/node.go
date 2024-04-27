@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"

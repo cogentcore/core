@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/gox/num"
 	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/units"

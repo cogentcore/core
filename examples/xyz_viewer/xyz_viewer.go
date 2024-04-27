@@ -7,8 +7,8 @@ package main
 import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/icons"
 	_ "cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/math32"

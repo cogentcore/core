@@ -11,8 +11,8 @@ import (
 	"io"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/errors"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"

@@ -12,7 +12,7 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/system"
 	"github.com/go-gl/glfw/v3.3/glfw"

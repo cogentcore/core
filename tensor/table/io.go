@@ -18,7 +18,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/tensor"
 )
 

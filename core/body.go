@@ -6,7 +6,7 @@ package core
 
 import (
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/styles"
 )
 

@@ -12,7 +12,7 @@ package main
 import (
 	"syscall/js"
 
-	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/jsfs"
 )
 

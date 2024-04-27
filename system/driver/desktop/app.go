@@ -13,7 +13,7 @@ import (
 	"log"
 	"runtime"
 
-	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
 	"cogentcore.org/core/vgpu"

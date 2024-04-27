@@ -15,7 +15,7 @@ import (
 	"strings"
 	"sync"
 
-	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 )

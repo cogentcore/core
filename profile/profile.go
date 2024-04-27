@@ -32,7 +32,7 @@ import (
 	"sync"
 	"time"
 
-	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/errors"
 )
 
 // Main User API:

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/errors"
 )
 
 // This file contains helpful functions for dealing with slices

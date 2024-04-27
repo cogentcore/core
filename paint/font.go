@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/errors"
+	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 	"github.com/goki/freetype/truetype"
