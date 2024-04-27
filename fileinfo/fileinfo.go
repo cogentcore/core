@@ -285,7 +285,7 @@ func (fi *FileInfo) Rename(path string) (newpath string, err error) { //types:ad
 }
 
 // FindIcon uses file info to find an appropriate icon for this file -- uses
-// Kind string first to find a correspondingly-named icon, and then tries the
+// Kind string first to find a correspondingly named icon, and then tries the
 // extension.  Returns true on success.
 func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 	if fi.IsDir() {

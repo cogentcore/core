@@ -201,7 +201,7 @@ func (gl *GoLang) AstTypeName(tyast *parser.Ast) string {
 // and the goal is to fill out the type information -- the ty will definitely
 // have a name already.  In the latter case, the ty will be nil, but the
 // tyast node may have a Src name that will first be looked up to determine
-// if a previously-processed type is already available.  The tyast.Name is
+// if a previously processed type is already available.  The tyast.Name is
 // the parser categorization of the type  (BasicType, StructType, etc).
 func (gl *GoLang) TypeFromAst(fs *parse.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parser.Ast) (*syms.Type, bool) {
 	tnm := gl.AstTypeName(tyast)

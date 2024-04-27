@@ -185,7 +185,7 @@ func (ts *Tabs) NTabs() int {
 	return len(fr.Kids)
 }
 
-// CurTab returns currently-selected tab, and its index -- returns false none
+// CurTab returns currently selected tab, and its index -- returns false none
 func (ts *Tabs) CurTab() (Widget, int, bool) {
 	if ts.NTabs() == 0 {
 		return nil, -1, false

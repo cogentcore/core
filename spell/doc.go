@@ -6,6 +6,6 @@
 Package spell provides functions for spell check and correction.
 It wraps https://github.com/sajari/fuzzy as the core spelling engine.
 
-A single globally-usable spelling dictionary is managed.
+A single globally usable spelling dictionary is managed.
 */
 package spell

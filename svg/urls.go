@@ -75,7 +75,7 @@ func (sv *SVG) GatherIDs() {
 }
 
 // NodeEnsureUniqueId ensures that the given node has a unique Id
-// Call this on any newly-created nodes.
+// Call this on any newly created nodes.
 func (sv *SVG) NodeEnsureUniqueId(ni Node) {
 	elnm := ni.SVGName()
 	if elnm == "" {

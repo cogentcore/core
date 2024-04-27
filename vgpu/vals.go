@@ -34,7 +34,7 @@ type Value struct {
 	// val state flags
 	Flags ValueFlags
 
-	// if N > 1 (array) then this is the effective size of each element, which must be aligned to 16 byte modulo for Uniform types.  non naturally-aligned types require slower element-by-element syncing operations, instead of memcopy.
+	// if N > 1 (array) then this is the effective size of each element, which must be aligned to 16 byte modulo for Uniform types.  non naturally aligned types require slower element-by-element syncing operations, instead of memcopy.
 	ElSize int
 
 	// total memory size of this value in bytes, as allocated, including array alignment but not any additional buffer-required alignment padding

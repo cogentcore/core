@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/vgpu"
 )
 
-// Text2D presents 2D rendered text on a vertically-oriented plane, using a texture.
+// Text2D presents 2D rendered text on a vertically oriented plane, using a texture.
 // Call SetText() which calls RenderText to update fortext changes (re-renders texture).
 // The native scale is such that a unit height value is the height of the default font
 // set by the font-size property, and the X axis is scaled proportionally based on the

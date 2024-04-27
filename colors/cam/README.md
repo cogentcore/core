@@ -2,13 +2,13 @@
 
 Color appearance models (CAM) provide a way of organizing colors, with the overall goal of better fitting the way that people actually perceive color.  The basic RGB color model is useful for controlling the pixels on a color monitor, but it does not define a useful metric for generating colors relative to each other in ways that match our perceptions.  For example, making each of the RGB components 10% lower does not consistently produce the same perceptual effect of darkening the color by 10%.
 
-The widely-used HSL (hue, saturation, lightness) or HSV (hue, saturation, value) systems are basic examples of CAMs that do a better job than RGB, but they are designed more for computational simplicity and efficiency than perceptual accuracy.
+The widely used HSL (hue, saturation, lightness) or HSV (hue, saturation, value) systems are basic examples of CAMs that do a better job than RGB, but they are designed more for computational simplicity and efficiency than perceptual accuracy.
 
 Our color perception starts with the cones in the foveal region of the retina, which loosely correspond to the R,G,B color components, but in fact the Red and Green (Long and Medium wavelength) cones overlap considerably in their responses, while Blue (Short) cones are more separated in their response to different light frequencies.  Thus, one first pass step in a CAM is to map the RGB components into something that more closely matches the LMS (long, medium, short) cone responses.
 
 At higher levels in the visual processing pathway (in the visual cortex), the basic cone responses from the retina get organized into *color opponent* responses, reflecting the *difference* between the amount of Red vs. Green and Blue vs. Yellow (where Yellow is roughly an average of RG). In color speak Red = Long, Green = Medium, Blue = Short wavelengths, corresponding to the color absorption profile of cones in the fovea of the retina.
 
-The current best CAM in terms of the ability to predict human perceptual judgments is CAM16, which is implemented in the [cam16](cam16) package.  This is used in the latest version of [material design](https://material.io/blog/science-of-color-design) to provide algorithmically-generated color schemes with good overall psychophysical properties.
+The current best CAM in terms of the ability to predict human perceptual judgments is CAM16, which is implemented in the [cam16](cam16) package.  This is used in the latest version of [material design](https://material.io/blog/science-of-color-design) to provide algorithmically generated color schemes with good overall psychophysical properties.
 
 # cie: International Commission on Illumination
 

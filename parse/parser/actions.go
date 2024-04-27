@@ -35,10 +35,10 @@ const (
 	// in the Act action if != None
 	PushNewScope
 
-	// PopScope means remove the most recently-added scope item
+	// PopScope means remove the most recently added scope item
 	PopScope
 
-	// PopScopeReg means remove the most recently-added scope item, and also
+	// PopScopeReg means remove the most recently added scope item, and also
 	// updates the source region for that item based on final SrcReg from
 	// corresponding Ast node -- for "definitional" scope
 	PopScopeReg
@@ -145,6 +145,6 @@ const (
 	// sub-nodes are added into, *only* if this is the first time that this rule has
 	// matched within the current sequence (i.e., if the parent of this rule is the same
 	// rule then don't add a new Ast node).  This is good for starting a new list
-	// of recursively-defined elements, without creating increasing depth levels.
+	// of recursively defined elements, without creating increasing depth levels.
 	AnchorFirstAst
 )

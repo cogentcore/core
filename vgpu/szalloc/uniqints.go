@@ -27,7 +27,7 @@ func UniqSortedInts(vals []int) []int {
 	return uvals
 }
 
-// SizeGroups returns evenly-spaced size groups of max N -- could be less
+// SizeGroups returns evenly spaced size groups of max N -- could be less
 func SizeGroups(sizes []int, maxN int) []int {
 	ns := len(sizes)
 	mxgp := min(ns, maxN)

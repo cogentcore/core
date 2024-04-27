@@ -42,7 +42,7 @@ type CurRender struct {
 	// texture parameters -- repeat, offset
 	TexPars TexPars
 
-	// index of currently-selected texture
+	// index of currently selected texture
 	TexIndex int
 }
 

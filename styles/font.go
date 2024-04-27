@@ -84,7 +84,7 @@ func (fs *Font) SetDecoration(deco ...TextDecorations) {
 }
 
 // SetUnitContext sets the font-specific information in the given
-// units.Context, based on the currently-loaded face.
+// units.Context, based on the currently loaded face.
 func (fs *Font) SetUnitContext(uc *units.Context) {
 	if fs.Face != nil {
 		uc.SetFont(fs.Face.Metrics.Em, fs.Face.Metrics.Ex, fs.Face.Metrics.Ch, uc.Dp(16))

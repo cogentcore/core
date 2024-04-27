@@ -147,7 +147,7 @@ func TestStatesStringSetString(t *testing.T) {
 	var val testdata.States
 	val.SetFlag(true, testdata.Active, testdata.Hovered, testdata.Focused)
 	orig := val
-	want := "focused|vered|currently-being-pressed-by-user"
+	want := "focused|vered|currently being-pressed-by-user"
 	have := val.String()
 	if have != want {
 		t.Errorf("expected string value for %d to be %q but got %q", val, want, have)

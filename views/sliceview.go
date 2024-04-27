@@ -69,7 +69,7 @@ func (sv *SliceView) StyleRow(w core.Widget, idx, fidx int) {
 //   then the full set of visible rows is created during SizeFinal).  The
 //   SliceViewConfiged flag indicates that this has been done -- when the slice
 //   type changes (SetSlice), this flag is reset and a new layout is triggered.
-//   Other externally-driven layout changes just update VisRows accordingly.
+//   Other externally driven layout changes just update VisRows accordingly.
 //
 // * UpdateWidgets updates the view based on any changes in the slice data,
 //   scrolling, etc.
@@ -227,7 +227,7 @@ type SliceViewBase struct {
 	// index of row to select at start
 	InitSelectedIndex int `copier:"-" json:"-" xml:"-"`
 
-	// list of currently-selected slice indexes
+	// list of currently selected slice indexes
 	SelectedIndexes map[int]struct{} `set:"-" copier:"-"`
 
 	// LastClick is the last row that has been clicked on.
@@ -253,10 +253,10 @@ type SliceViewBase struct {
 	// Value representations of the slice values
 	Values []Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
 
-	// currently-hovered row
+	// currently hovered row
 	HoverRow int `set:"-" view:"-" copier:"-" json:"-" xml:"-"`
 
-	// list of currently-dragged indexes
+	// list of currently dragged indexes
 	DraggedIndexes []int `set:"-" view:"-" copier:"-" json:"-" xml:"-"`
 
 	// total number of rows visible in allocated display size

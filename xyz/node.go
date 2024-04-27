@@ -227,7 +227,7 @@ func (nb *NodeBase) IsTransparent() bool {
 }
 
 // UpdateWorldMatrix updates this node's world matrix based on parent's world matrix.
-// If a nil matrix is passed, then the previously-set parent world matrix is used.
+// If a nil matrix is passed, then the previously set parent world matrix is used.
 // This sets the WorldMatrixUpdated flag but does not check that flag -- calling
 // routine can optionally do so.
 func (nb *NodeBase) UpdateWorldMatrix(parWorld *math32.Matrix4) {

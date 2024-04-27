@@ -6,7 +6,7 @@ package types
 
 // Func represents a global function.
 type Func struct {
-	// Name is the fully-qualified name of the function
+	// Name is the fully qualified name of the function
 	// (eg: cogentcore.org/core/core.NewButton)
 	Name string
 

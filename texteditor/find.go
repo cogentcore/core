@@ -253,7 +253,7 @@ type QReplace struct {
 	// pay attention to case in isearch -- triggered by typing an upper-case letter
 	UseCase bool `json:"-" xml:"-"`
 
-	// search only as entire lexically-tagged item boundaries -- key for replacing short local variables like i
+	// search only as entire lexically tagged item boundaries -- key for replacing short local variables like i
 	LexItems bool `json:"-" xml:"-"`
 
 	// current search matches

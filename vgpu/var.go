@@ -19,7 +19,7 @@ import (
 // Each set is updated at the same time scale, and all vars in the set have the same
 // number of allocated Value instances representing a specific value of the variable.
 // There must be a unique Value instance for each value of the variable used in
-// a single render -- a previously-used Value's contents cannot be updated within
+// a single render -- a previously used Value's contents cannot be updated within
 // the render pass, but new information can be written to an as-yet unused Value
 // prior to using in a render (although this comes at a performance cost).
 type Var struct {

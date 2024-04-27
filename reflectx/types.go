@@ -29,7 +29,7 @@ func LongTypeName(typ reflect.Type) string {
 // standard Go programming, and is is used for the key to lookup reflect.Type
 // names -- i.e., this is what you should save in a JSON file.
 // The potential naming conflict is worth the brevity, and typically a given
-// file will only contain mutually-compatible, non-conflicting types.
+// file will only contain mutually compatible, non-conflicting types.
 // This is cached in ShortNames because the path.Base computation is apparently
 // a bit slow.
 func ShortTypeName(typ reflect.Type) string {

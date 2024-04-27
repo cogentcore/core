@@ -119,7 +119,7 @@ type Events struct {
 	// if StartFocus not set, activate starting focus on first element
 	StartFocusFirst bool
 
-	// previously-focused widget -- what was in Focus when FocusClear is called
+	// previously focused widget -- what was in Focus when FocusClear is called
 	PrevFocus Widget
 
 	// Last Select Mode from most recent Mouse, Keyboard events

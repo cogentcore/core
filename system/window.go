@@ -147,7 +147,7 @@ type Window interface {
 	SetCloseCleanFunc(fun func(win Window))
 
 	// CloseReq is a close request, triggered either by OS or user call (e.g.,
-	// via Close menu action) -- calls function previously-registered by
+	// via Close menu action) -- calls function previously registered by
 	// SetCloseReqFunc, which is then solely responsible for actually calling
 	// Close.
 	CloseReq()

@@ -20,7 +20,7 @@ import (
 // transforming points
 type Rune struct {
 
-	// fully-specified font rendering info, includes fully computed font size.
+	// fully specified font rendering info, includes fully computed font size.
 	// This is exactly what will be drawn, with no further transforms.
 	Face font.Face `json:"-"`
 

@@ -280,7 +280,7 @@ func (mgr *WindowGeometrySaver) RecordPref(win *RenderWindow) {
 	mgr.Mu.Unlock()
 }
 
-// AbortSave cancels any pending saving of the currently-cached info.
+// AbortSave cancels any pending saving of the currently cached info.
 // this is called if a screen event occured
 func (mgr *WindowGeometrySaver) AbortSave() {
 	mgr.Mu.Lock()

@@ -22,7 +22,7 @@ Meshes are *exclusively* defined by indexed triangles, and there are standard sh
 
 `Texture`s are loaded from Go image files, stored by unique names on the Scene, and the Node-specific Material can optionally refer to a texture -- likewise allowing efficient re-use across different Solids.
 
-The Scene also contains a `Library` of uniquely-named "objects" (Groups) which can be loaded from 3D object files, and then added into the scenegraph as needed.  Thus, a typical, efficient workflow is to initialize a Library of such objects, and then configure the specific scene from these objects.  The library objects are Cloned into the scenegraph so they can be independently configured and manipulated there.  Because the Group and Solid nodes are lightweight, this is all very efficient.
+The Scene also contains a `Library` of uniquely named "objects" (Groups) which can be loaded from 3D object files, and then added into the scenegraph as needed.  Thus, a typical, efficient workflow is to initialize a Library of such objects, and then configure the specific scene from these objects.  The library objects are Cloned into the scenegraph so they can be independently configured and manipulated there.  Because the Group and Solid nodes are lightweight, this is all very efficient.
 
 The Scene also holds the Camera and Lights for rendering -- there is no point in putting these out in the scenegraph -- if you want to add a Solid representing one of these elements, you can easily do so.
 

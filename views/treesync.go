@@ -128,7 +128,7 @@ func (tv *TreeView) UpdateReadOnly() bool {
 	return tv.IsReadOnly()
 }
 
-// SelectedSyncNodes returns a slice of the currently-selected
+// SelectedSyncNodes returns a slice of the currently selected
 // sync source nodes in the entire tree view
 func (tv *TreeView) SelectedSyncNodes() tree.Slice {
 	var sn tree.Slice

@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/colors/matcolor"
 )
 
-// Spaced returns a maximally widely-spaced sequence of colors
+// Spaced returns a maximally widely spaced sequence of colors
 // for progressive values of the index, using the HCT space.
 // This is useful, for example, for assigning colors in graphs.
 func Spaced(idx int) color.RGBA {

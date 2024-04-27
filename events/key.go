@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/events/key"
 )
 
-// events.Key is a low-level immediately-generated key event, tracking press
+// events.Key is a low-level immediately generated key event, tracking press
 // and release of keys -- suitable for fine-grained tracking of key events --
 // see also events.Key for events that are generated only on key press,
 // and that include the full chord information about all the modifier keys

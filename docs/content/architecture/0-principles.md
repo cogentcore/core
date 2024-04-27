@@ -28,7 +28,7 @@ Programs must be quick to write, compile, and run. Most compiled languages fail 
 
 ### Cross-platform and cross-compilation
 
-Every widely-used platform should be well supported, and to the greatest extent possible, the exact same code should work as expected on every platform.  Furthermore, because Go's compiler is written in Go, it is relatively straightforward to cross-compile for other platforms.  By contrast, JavaScript has to deal with the notorious inconsistency across different browsers, and because most of Python requires further C / C++ code to be compiled (to manage the performance-critical aspects), it is often a nightmare to manage all the dependencies and environment variables required to get something to work on a given platform, at the right version, etc.
+Every widely used platform should be well supported, and to the greatest extent possible, the exact same code should work as expected on every platform.  Furthermore, because Go's compiler is written in Go, it is relatively straightforward to cross-compile for other platforms.  By contrast, JavaScript has to deal with the notorious inconsistency across different browsers, and because most of Python requires further C / C++ code to be compiled (to manage the performance-critical aspects), it is often a nightmare to manage all the dependencies and environment variables required to get something to work on a given platform, at the right version, etc.
 
 ### Robust versioning and package management
 
@@ -42,7 +42,7 @@ Languages must be rational and consistent both internally and with other program
 
 Configuration settings, typically settable with a config file and / or command-line arguments, are stored as key-value maps in the widely used [cobra](https://github.com/spf13/cobra), viper and other such tools.  Likewise, in v1 of core, styling was set using Properties maps.
 
-However, using a `struct` with appropriately-named fields has the following advantages:
+However, using a `struct` with appropriately named fields has the following advantages:
 * Compile time name-safety: the compiler ensures you didn't mistype the key name.
 * Compile time type-safety: the type of the property is not `any` but the actual type needed.
 * Tab completion and full lookup in IDEs -- much easier when _using_ config values in an app, and also when setting styling in GUI.

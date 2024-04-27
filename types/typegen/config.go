@@ -29,7 +29,7 @@ type Config struct { //types:add
 	// whether to add functions to typegen by default
 	AddFuncs bool
 
-	// An ordered map of configs keyed by fully-qualified interface type names; if a type implements the interface, the config will be applied to it.
+	// An ordered map of configs keyed by fully qualified interface type names; if a type implements the interface, the config will be applied to it.
 	// The configs are applied in sequential ascending order, which means that
 	// the last config overrides the other ones, so the most specific
 	// interfaces should typically be put last.

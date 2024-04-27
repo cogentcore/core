@@ -478,7 +478,7 @@ func (ed *Editor) PasteRect() {
 	ed.NeedsRender()
 }
 
-// ReCaseSelection changes the case of the currently-selected text.
+// ReCaseSelection changes the case of the currently selected text.
 // Returns the new text -- empty if nothing selected.
 func (ed *Editor) ReCaseSelection(c strcase.Cases) string {
 	if !ed.HasSelection() {

@@ -100,7 +100,7 @@ type Editor struct { //core:embedder
 	// current cursor position
 	CursorPos lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// target cursor position for externally-set targets: ensures that it is visible
+	// target cursor position for externally set targets: ensures that it is visible
 	CursorTarg lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns

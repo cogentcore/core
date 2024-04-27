@@ -80,7 +80,7 @@ type FileView struct {
 	// files for current directory
 	Files []*fileinfo.FileInfo
 
-	// index of currently-selected file in Files list (-1 if none)
+	// index of currently selected file in Files list (-1 if none)
 	SelectedIndex int `set:"-" edit:"-"`
 
 	// change notify for current dir
@@ -222,7 +222,7 @@ func (fv *FileView) SelectedFile() string {
 	return filepath.Join(fv.DirPath, fv.CurrentSelectedFile)
 }
 
-// SelectedFileInfo returns the currently-selected fileinfo, returns
+// SelectedFileInfo returns the currently selected fileinfo, returns
 // false if none
 func (fv *FileView) SelectedFileInfo() (*fileinfo.FileInfo, bool) {
 	if fv.SelectedIndex < 0 || fv.SelectedIndex >= len(fv.Files) {

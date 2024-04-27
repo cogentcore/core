@@ -211,7 +211,7 @@ func (sv *SceneView) ConfigToolbar(tb *core.Toolbar) {
 	sm.SetCurrentValue(sw.SelectionMode)
 
 	core.NewButton(tb).SetText("Edit").SetIcon(icons.Edit).
-		SetTooltip("edit the currently-selected object").
+		SetTooltip("edit the currently selected object").
 		OnClick(func(e events.Event) {
 			if sw.CurrentSelected == nil {
 				return

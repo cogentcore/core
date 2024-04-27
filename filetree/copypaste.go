@@ -175,7 +175,7 @@ func (fn *Node) PasteCopyFilesCheck(tdir *Node, md mimedata.Mimes, externalDrop 
 
 // PasteFiles applies a paste / drop of mime data onto this node.
 // always does a copy of files into / onto target.
-// externalDrop is true if this is an externally-generated Drop event (from OS)
+// externalDrop is true if this is an externally generated Drop event (from OS)
 func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func()) {
 	if len(md) == 0 {
 		return

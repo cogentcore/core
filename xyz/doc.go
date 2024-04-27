@@ -46,7 +46,7 @@ Textures are also stored by unique names on the Scene, and the Material can
 optionally refer to a texture -- likewise allowing efficient re-use across
 different Solids.
 
-The Scene also contains a Library of uniquely-named "objects" (Groups)
+The Scene also contains a Library of uniquely named "objects" (Groups)
 which can be loaded from 3D object files, and then added into the scenegraph as
 needed.  Thus, a typical, efficient workflow is to initialize a Library of such
 objects, and then configure the specific scene from these objects.  The library

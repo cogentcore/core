@@ -136,7 +136,7 @@ func (sl *Splits) SaveSplits() {
 	copy(sl.SavedSplits, sl.Splits)
 }
 
-// RestoreSplits restores a previously-saved set of splits (if it exists), does an update
+// RestoreSplits restores a previously saved set of splits (if it exists), does an update
 func (sl *Splits) RestoreSplits() {
 	if sl.SavedSplits == nil {
 		return

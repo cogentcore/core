@@ -6,7 +6,7 @@ package xyzview
 
 /*
 
-// Embed2D embeds a 2D Viewport on a vertically-oriented plane, using a texture.
+// Embed2D embeds a 2D Viewport on a vertically oriented plane, using a texture.
 // The embedded viewport contains its own 2D scenegraph and receives events, with
 // mouse coordinates translated into the 3D plane space.  The full range of Cogent Core
 // 2D elements can be embedded.

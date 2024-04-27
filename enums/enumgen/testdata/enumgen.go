@@ -168,11 +168,11 @@ var _StatesValues = []States{1, 3, 5, 7, 9, 11, 13}
 // StatesN is the highest valid value for type States, plus one.
 const StatesN States = 14
 
-var _StatesValueMap = map[string]States{`enabled`: 1, `not-enabled`: 3, `focused`: 5, `vered`: 7, `currently-being-pressed-by-user`: 9, `actively-focused`: 11, `selected`: 13}
+var _StatesValueMap = map[string]States{`enabled`: 1, `not-enabled`: 3, `focused`: 5, `vered`: 7, `currently being-pressed-by-user`: 9, `actively focused`: 11, `selected`: 13}
 
 var _StatesDescMap = map[States]string{1: `Enabled indicates the widget is enabled`, 3: `Disabled indicates the widget is disabled`, 5: `Focused indicates the widget has keyboard focus`, 7: `Hovered indicates the widget is being hovered over`, 9: `Active indicates the widget is being interacted with`, 11: `ActivelyFocused indicates the widget has active keyboard focus`, 13: `Selected indicates the widget is selected`}
 
-var _StatesMap = map[States]string{1: `enabled`, 3: `not-enabled`, 5: `focused`, 7: `vered`, 9: `currently-being-pressed-by-user`, 11: `actively-focused`, 13: `selected`}
+var _StatesMap = map[States]string{1: `enabled`, 3: `not-enabled`, 5: `focused`, 7: `vered`, 9: `currently being-pressed-by-user`, 11: `actively focused`, 13: `selected`}
 
 // String returns the string representation of this States value.
 func (i States) String() string { return enums.BitFlagString(i, _StatesValues) }

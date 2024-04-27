@@ -455,7 +455,7 @@ func (v *ValueBase[W]) SetValueMap(val any) (bool, error) {
 // [Value] objects should extend [ValueBase], not ValueData.
 type ValueData struct {
 
-	// Nm is locally-unique name of Value
+	// Nm is locally unique name of Value
 	Nm string
 
 	// SavedLabel is the label for the Value

@@ -221,7 +221,7 @@ func ApplyShortestUniqueName(field *Field, idx int, usedNames map[string]*Field)
 }
 
 // ShortestUniqueName returns the shortest unique camel-case name for
-// the given fully-qualified nest name of a field, using the given
+// the given fully qualified nest name of a field, using the given
 // map of used names. It works backwards, so, for example, if given "A.B.C.D",
 // it would check "D", then "C.D", then "B.C.D", and finally "A.B.C.D".
 // It should not typically be used by end-user code.

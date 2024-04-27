@@ -139,7 +139,7 @@ var VulkanTypes = map[Types]vk.Format{
 // most commonly available formats: https://vulkan.gpuinfo.org/listsurfaceformats.php
 
 // ImageFormatNames translates image format into human-readable string
-// for most commonly-available formats
+// for most commonly available formats
 var ImageFormatNames = map[vk.Format]string{
 	vk.FormatR8g8b8a8Srgb:           "RGBA 8bit sRGB colorspace",
 	vk.FormatR8g8b8a8Unorm:          "RGBA 8bit unsigned linear colorspace",

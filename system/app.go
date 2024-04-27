@@ -133,7 +133,7 @@ type App interface {
 	AddQuitCleanFunc(fun func())
 
 	// QuitReq is a quit request, triggered either by OS or user call (e.g.,
-	// via Quit menu action) -- calls function previously-registered by
+	// via Quit menu action) -- calls function previously registered by
 	// SetQuitReqFunc, which is then solely responsible for actually calling
 	// Quit.
 	QuitReq()

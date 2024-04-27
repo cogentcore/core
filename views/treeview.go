@@ -157,7 +157,7 @@ type TreeView struct {
 	// set by the end user.
 	RootView *TreeView `copier:"-" json:"-" xml:"-" edit:"-"`
 
-	// SelectedNodes holds the currently-selected nodes, on the
+	// SelectedNodes holds the currently selected nodes, on the
 	// RootView node only.
 	SelectedNodes []TreeViewer `copier:"-" json:"-" xml:"-" edit:"-"`
 
@@ -694,7 +694,7 @@ func (tv *TreeView) SelectModeToggle() {
 	tv.SetSelectMode(!tv.SelectMode())
 }
 
-// SelectedViews returns a slice of the currently-selected
+// SelectedViews returns a slice of the currently selected
 // TreeViews within the entire tree, using a list maintained
 // by the root node
 func (tv *TreeView) SelectedViews() []TreeViewer {
