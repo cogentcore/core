@@ -25,8 +25,8 @@ import (
 	"strings"
 	"text/template"
 
+	"cogentcore.org/core/base/generate"
 	"cogentcore.org/core/cli"
-	"cogentcore.org/core/generate"
 	"golang.org/x/tools/go/packages"
 )
 

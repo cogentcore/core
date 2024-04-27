@@ -14,8 +14,8 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/generate"
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/generate"
 	"cogentcore.org/core/ordmap"
 	"cogentcore.org/core/pages/wpath"
 )

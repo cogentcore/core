@@ -11,7 +11,7 @@ package typegen
 import (
 	"fmt"
 
-	"cogentcore.org/core/generate"
+	"cogentcore.org/core/base/generate"
 	"golang.org/x/tools/go/packages"
 )
 

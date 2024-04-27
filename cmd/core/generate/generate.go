@@ -14,9 +14,9 @@ import (
 	"slices"
 	"text/template"
 
+	"cogentcore.org/core/base/generate"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/enums/enumgen"
-	"cogentcore.org/core/generate"
 	"cogentcore.org/core/ordmap"
 	"cogentcore.org/core/types"
 	"cogentcore.org/core/types/typegen"

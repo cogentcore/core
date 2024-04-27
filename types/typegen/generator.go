@@ -17,8 +17,8 @@ import (
 
 	"log/slog"
 
+	"cogentcore.org/core/base/generate"
 	"cogentcore.org/core/cli"
-	"cogentcore.org/core/generate"
 	"cogentcore.org/core/ordmap"
 	"cogentcore.org/core/strcase"
 	types1 "cogentcore.org/core/types"
