@@ -11,7 +11,7 @@ import (
 	"errors"
 	"reflect"
 
-	"cogentcore.org/core/gox/dirs"
+	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/iox/tomlx"
 	"cogentcore.org/core/reflectx"
 )

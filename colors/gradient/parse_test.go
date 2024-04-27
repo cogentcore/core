@@ -9,8 +9,8 @@ import (
 	"reflect"
 	"testing"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/math32"
 	"github.com/stretchr/testify/assert"
 )

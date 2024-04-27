@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile"
 	"cogentcore.org/core/cmd/core/web"
-	"cogentcore.org/core/gox/exec"
 	"cogentcore.org/core/logx"
 )
 

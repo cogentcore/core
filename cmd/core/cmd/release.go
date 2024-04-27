@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strings"
 
+	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/gox/exec"
 	"github.com/Masterminds/semver/v3"
 )
 

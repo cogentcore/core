@@ -17,9 +17,9 @@ import (
 	"path"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/htmlview"
 	"cogentcore.org/core/iox/tomlx"
 	"cogentcore.org/core/pages/wpath"

@@ -10,8 +10,8 @@ import (
 	"image"
 	"os"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
 )

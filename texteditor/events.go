@@ -9,11 +9,11 @@ import (
 	"image"
 	"unicode"
 
+	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/gox/indent"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"

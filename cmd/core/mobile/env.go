@@ -13,9 +13,9 @@ import (
 
 	"slices"
 
+	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile/sdkpath"
-	"cogentcore.org/core/gox/exec"
 	"cogentcore.org/core/logx"
 )
 

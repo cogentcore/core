@@ -7,7 +7,7 @@ package system
 import (
 	"image"
 
-	"cogentcore.org/core/gox/errors"
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/iox/imagex"
 )
 

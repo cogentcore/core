@@ -13,9 +13,9 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
-	"cogentcore.org/core/gox/exec"
 	"github.com/jackmordaunt/icns/v2"
 	"golang.org/x/tools/go/packages"
 )

@@ -18,10 +18,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile/binres"
 	"cogentcore.org/core/cmd/core/rendericon"
-	"cogentcore.org/core/gox/exec"
 	"cogentcore.org/core/logx"
 	"golang.org/x/tools/go/packages"
 )

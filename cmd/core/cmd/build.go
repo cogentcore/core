@@ -14,10 +14,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile"
 	"cogentcore.org/core/cmd/core/web"
-	"cogentcore.org/core/gox/exec"
 )
 
 // Build builds an executable for the package

@@ -24,8 +24,8 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/xyz"
 )

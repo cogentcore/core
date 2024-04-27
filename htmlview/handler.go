@@ -14,9 +14,9 @@ import (
 	"strings"
 	"time"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"

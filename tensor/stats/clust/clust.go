@@ -11,7 +11,7 @@ import (
 	"math"
 	"math/rand"
 
-	"cogentcore.org/core/gox/indent"
+	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/stats/norm"
 	"cogentcore.org/core/tensor/stats/simat"

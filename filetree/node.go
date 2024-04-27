@@ -15,12 +15,12 @@ import (
 	"sort"
 	"strings"
 
+	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/fileinfo/vcs"
-	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/histyle"

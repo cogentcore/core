@@ -10,9 +10,9 @@ import (
 	"image"
 	"syscall/js"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/math32"
 )
 

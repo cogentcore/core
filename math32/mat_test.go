@@ -7,7 +7,7 @@ package math32
 import (
 	"testing"
 
-	"cogentcore.org/core/gox/tolassert"
+	"cogentcore.org/core/base/tolassert"
 	"github.com/stretchr/testify/assert"
 )
 

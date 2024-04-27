@@ -7,7 +7,7 @@ package cie
 import (
 	"testing"
 
-	"cogentcore.org/core/gox/tolassert"
+	"cogentcore.org/core/base/tolassert"
 )
 
 func TestXYZ(t *testing.T) {

@@ -7,8 +7,8 @@ package cmd
 import (
 	"fmt"
 
+	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/gox/exec"
 )
 
 // Log prints the logs from your app running on Android to the terminal.

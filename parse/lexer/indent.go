@@ -5,7 +5,7 @@
 package lexer
 
 import (
-	"cogentcore.org/core/gox/indent"
+	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/parse/token"
 )
 

@@ -12,7 +12,7 @@ import (
 	"runtime/debug"
 	"time"
 
-	"cogentcore.org/core/gox/errors"
+	"cogentcore.org/core/base/errors"
 )
 
 // HandleRecover takes the given value of recover, and, if it is not nil,

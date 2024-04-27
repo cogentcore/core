@@ -11,7 +11,7 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/gox/errors"
+	"cogentcore.org/core/base/errors"
 	"golang.org/x/image/math/fixed"
 )
 

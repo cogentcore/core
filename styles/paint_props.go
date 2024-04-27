@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/units"

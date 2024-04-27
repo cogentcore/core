@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"cogentcore.org/core/gox/num"
+	"cogentcore.org/core/base/num"
 	"cogentcore.org/core/tensor/bitslice"
 	"gonum.org/v1/gonum/mat"
 )

@@ -15,9 +15,9 @@ import (
 	"testing"
 	"text/template"
 
+	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile/sdkpath"
-	"cogentcore.org/core/gox/exec"
 	"cogentcore.org/core/reflectx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

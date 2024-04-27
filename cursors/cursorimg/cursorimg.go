@@ -10,9 +10,9 @@ import (
 	"image"
 	_ "image/png"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/svg"
 )
 

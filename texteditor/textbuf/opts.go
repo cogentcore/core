@@ -5,9 +5,9 @@
 package textbuf
 
 import (
+	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/gox/indent"
 	"cogentcore.org/core/parse"
 )
 

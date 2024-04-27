@@ -11,7 +11,7 @@ import (
 	"log"
 	"log/slog"
 
-	"cogentcore.org/core/gox/dirs"
+	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/vgpu"
 	"cogentcore.org/core/vgpu/vphong"

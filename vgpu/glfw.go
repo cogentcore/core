@@ -7,7 +7,7 @@
 package vgpu
 
 import (
-	"cogentcore.org/core/gox/errors"
+	"cogentcore.org/core/base/errors"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	vk "github.com/goki/vulkan"
 )

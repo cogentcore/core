@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"sync/atomic"
 
-	"cogentcore.org/core/gox/errors"
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/types"
 )
 

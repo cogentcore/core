@@ -13,7 +13,7 @@ import (
 	"regexp"
 	"unicode/utf8"
 
-	"cogentcore.org/core/gox/runes"
+	"cogentcore.org/core/base/runes"
 	"cogentcore.org/core/parse/lexer"
 )
 

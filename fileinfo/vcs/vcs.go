@@ -13,7 +13,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"cogentcore.org/core/gox/dirs"
+	"cogentcore.org/core/base/dirs"
 	"github.com/Masterminds/vcs"
 )
 

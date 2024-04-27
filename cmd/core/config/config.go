@@ -16,8 +16,8 @@ import (
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/enums/enumgen"
-	"cogentcore.org/core/gox/exec"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/types/typegen"
 )

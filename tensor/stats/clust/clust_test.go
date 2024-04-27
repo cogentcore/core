@@ -7,7 +7,7 @@ package clust
 import (
 	"testing"
 
-	"cogentcore.org/core/gox/tolassert"
+	"cogentcore.org/core/base/tolassert"
 	"cogentcore.org/core/tensor/stats/metric"
 	"cogentcore.org/core/tensor/stats/simat"
 	"cogentcore.org/core/tensor/table"

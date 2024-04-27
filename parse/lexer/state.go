@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/gox/nptime"
+	"cogentcore.org/core/base/nptime"
 	"cogentcore.org/core/parse/token"
 )
 

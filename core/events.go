@@ -14,11 +14,11 @@ import (
 	"sync"
 	"time"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"

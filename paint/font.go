@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 	"github.com/goki/freetype/truetype"

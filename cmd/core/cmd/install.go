@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile"
-	"cogentcore.org/core/gox/exec"
 )
 
 // Install installs the package on the local system.

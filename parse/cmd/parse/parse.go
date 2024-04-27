@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/fileinfo"
-	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/parse"
 	_ "cogentcore.org/core/parse/langs"
 	"cogentcore.org/core/parse/syms"

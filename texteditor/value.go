@@ -7,8 +7,8 @@ package texteditor
 import (
 	"fmt"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/views"
 )

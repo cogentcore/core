@@ -21,8 +21,8 @@ import (
 
 	"maps"
 
+	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/gox/exec"
 	"cogentcore.org/core/logx"
 	"golang.org/x/tools/go/packages"
 )

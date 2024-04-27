@@ -8,10 +8,10 @@ import (
 	"log/slog"
 	"sync"
 
+	"cogentcore.org/core/base/elide"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/gox/elide"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"

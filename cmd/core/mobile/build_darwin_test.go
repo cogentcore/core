@@ -10,9 +10,9 @@ import (
 	"testing"
 	"text/template"
 
+	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/cli"
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/gox/exec"
 )
 
 func TestAppleBuild(t *testing.T) {

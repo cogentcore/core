@@ -13,8 +13,8 @@ import (
 	"strings"
 	"sync"
 
+	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/gox/exec"
 	"cogentcore.org/core/logx"
 )
 

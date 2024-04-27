@@ -13,10 +13,10 @@ import (
 	"sync"
 	"time"
 
+	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo/vcs"
-	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"

@@ -9,7 +9,7 @@ package tolassert
 import (
 	"fmt"
 
-	"cogentcore.org/core/gox/num"
+	"cogentcore.org/core/base/num"
 	"github.com/stretchr/testify/assert"
 )
 

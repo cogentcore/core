@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
+	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/cam/hct"
-	"cogentcore.org/core/gox/dirs"
 	"cogentcore.org/core/iox/imagex"
 	"cogentcore.org/core/paint"
 	"github.com/stretchr/testify/assert"

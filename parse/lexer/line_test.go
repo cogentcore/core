@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	"cogentcore.org/core/gox/nptime"
+	"cogentcore.org/core/base/nptime"
 	"cogentcore.org/core/parse/token"
 )
 

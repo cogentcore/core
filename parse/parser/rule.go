@@ -17,7 +17,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"cogentcore.org/core/gox/indent"
+	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/syms"
 	"cogentcore.org/core/parse/token"

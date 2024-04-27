@@ -8,10 +8,10 @@ import (
 	"embed"
 	"testing"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/gox/errors"
 	"github.com/stretchr/testify/assert"
 )
 

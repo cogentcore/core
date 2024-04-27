@@ -7,12 +7,12 @@ package filetree
 import (
 	"log/slog"
 
+	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/fileinfo/mimedata"
 	"cogentcore.org/core/fileinfo/vcs"
-	"cogentcore.org/core/gox/dirs"
-	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"

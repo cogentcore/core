@@ -14,9 +14,9 @@ import (
 	"strconv"
 	"time"
 
+	"cogentcore.org/core/base/bools"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/gox/bools"
 )
 
 // AnyIsNil checks if an interface value is nil. The interface itself

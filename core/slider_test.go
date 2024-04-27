@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
+	"cogentcore.org/core/base/tolassert"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/gox/tolassert"
 	"cogentcore.org/core/icons"
 	"github.com/stretchr/testify/assert"
 )

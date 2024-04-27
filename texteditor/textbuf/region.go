@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"cogentcore.org/core/gox/nptime"
+	"cogentcore.org/core/base/nptime"
 	"cogentcore.org/core/parse/lexer"
 )
 

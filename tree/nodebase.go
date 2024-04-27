@@ -14,8 +14,8 @@ import (
 
 	"github.com/jinzhu/copier"
 
+	"cogentcore.org/core/base/elide"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/gox/elide"
 	"cogentcore.org/core/types"
 )
 

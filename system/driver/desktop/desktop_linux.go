@@ -12,8 +12,8 @@ import (
 	"os/user"
 	"path/filepath"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/fileinfo/mimedata"
-	"cogentcore.org/core/gox/errors"
 	"cogentcore.org/core/system"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )

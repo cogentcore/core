@@ -7,10 +7,10 @@ package views
 import (
 	"testing"
 
+	"cogentcore.org/core/base/option"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/gox/option"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/tree"

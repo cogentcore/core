@@ -22,8 +22,8 @@ package cam16
 import (
 	"image/color"
 
+	"cogentcore.org/core/base/num"
 	"cogentcore.org/core/colors/cam/cie"
-	"cogentcore.org/core/gox/num"
 	"cogentcore.org/core/math32"
 )
 

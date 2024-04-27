@@ -13,7 +13,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"cogentcore.org/core/gox/num"
+	"cogentcore.org/core/base/num"
 	"gopkg.in/yaml.v3"
 )
 

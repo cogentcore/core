@@ -7,8 +7,8 @@ package cam16
 import (
 	"testing"
 
+	"cogentcore.org/core/base/tolassert"
 	"cogentcore.org/core/colors/cam/cie"
-	"cogentcore.org/core/gox/tolassert"
 	"cogentcore.org/core/math32"
 	"github.com/stretchr/testify/assert"
 )

@@ -10,8 +10,8 @@ import (
 	"io/fs"
 	"strings"
 
-	"cogentcore.org/core/gox/dirs"
-	"cogentcore.org/core/gox/errors"
+	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/mergefs"
 )
 

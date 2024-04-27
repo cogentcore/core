@@ -7,9 +7,9 @@ package core
 import (
 	"testing"
 
+	"cogentcore.org/core/base/tolassert"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/gox/tolassert"
 	"github.com/stretchr/testify/assert"
 )
 

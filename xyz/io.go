@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"cogentcore.org/core/gox/dirs"
+	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/tree"
 )
 
