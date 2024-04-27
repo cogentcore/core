@@ -7,7 +7,6 @@ package views
 import (
 	"log/slog"
 
-	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/colormap"
 	"cogentcore.org/core/colors/gradient"
@@ -15,6 +14,7 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/units"
 )
 

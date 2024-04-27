@@ -7,12 +7,12 @@ package xyzview
 import (
 	"fmt"
 
-	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/views"
 	"cogentcore.org/core/xyz"
 )

@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/fileinfo"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/reflectx"
-	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )

@@ -9,13 +9,13 @@ import (
 	"log/slog"
 	"strconv"
 
-	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
+	"cogentcore.org/core/styles/states"
 )
 
 // Spinner combines a TextField with up / down buttons for incrementing /

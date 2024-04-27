@@ -5,9 +5,9 @@
 package core
 
 import (
-	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles/abilities"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/tree"
 )
 

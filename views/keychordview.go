@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/reflectx"
-	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles/states"
 )
 
 // KeyChordValue represents a [key.Chord] value with a button.

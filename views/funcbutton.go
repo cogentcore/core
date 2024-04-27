@@ -10,7 +10,6 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
@@ -19,6 +18,7 @@ import (
 	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )

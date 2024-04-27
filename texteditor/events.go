@@ -9,7 +9,6 @@ import (
 	"image"
 	"unicode"
 
-	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
@@ -20,7 +19,8 @@ import (
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/parse"
 	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/states"
+	"cogentcore.org/core/styles/abilities"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/texteditor/textbuf"
 )

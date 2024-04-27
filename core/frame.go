@@ -5,8 +5,8 @@
 package core
 
 import (
-	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/units"
 )
 

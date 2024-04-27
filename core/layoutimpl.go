@@ -10,8 +10,8 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/states"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/tree"
 )
 

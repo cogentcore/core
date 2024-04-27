@@ -11,10 +11,10 @@ import (
 	"image"
 	"image/draw"
 
-	"cogentcore.org/core/abilities"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/units"
 	"cogentcore.org/core/vgpu"

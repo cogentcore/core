@@ -12,8 +12,8 @@ import (
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/mimedata"
 	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/states"
 	"cogentcore.org/core/strcase"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/texteditor/textbuf"
 )
 
