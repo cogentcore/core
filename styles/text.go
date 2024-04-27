@@ -15,21 +15,21 @@ import (
 // most of these are inherited
 type Text struct { //types:add
 
-	// how to align text, horizontally (inhereted).
+	// how to align text, horizontally (inherited).
 	// This *only* applies to the text within its containing element,
 	// and is typically relevant only for multi-line text:
 	// for single-line text, if element does not have a specified size
 	// that is different from the text size, then this has *no effect*.
 	Align Aligns
 
-	// vertical alignment of text (inhereted).
+	// vertical alignment of text (inherited).
 	// This is only applicable for SVG styling, not regular CSS / Cogent Core,
 	// which uses the global Align.Y.  It *only* applies to the text within
 	// its containing element: if that element does not have a specified size
 	// that is different from the text size, then this has *no effect*.
 	AlignV Aligns
 
-	// for svg rendering only (inhereted):
+	// for svg rendering only (inherited):
 	// determines the alignment relative to text position coordinate.
 	// For RTL start is right, not left, and start is top for TB
 	Anchor TextAnchors
@@ -37,10 +37,10 @@ type Text struct { //types:add
 	// spacing between characters and lines
 	LetterSpacing units.Value
 
-	// extra space to add between words (inhereted)
+	// extra space to add between words (inherited)
 	WordSpacing units.Value
 
-	// specified height of a line of text (inhereted); text is centered within the overall lineheight;
+	// specified height of a line of text (inherited); text is centered within the overall lineheight;
 	// the standard way to specify line height is in terms of em
 	LineHeight units.Value
 
@@ -49,31 +49,31 @@ type Text struct { //types:add
 	// See info about interactions with Grow.X setting for this and the NoWrap case.
 	WhiteSpace WhiteSpaces
 
-	// determines how to treat unicode bidirectional information (inhereted)
+	// determines how to treat unicode bidirectional information (inherited)
 	UnicodeBidi UnicodeBidi
 
-	// bidi-override or embed -- applies to all text elements (inhereted)
+	// bidi-override or embed -- applies to all text elements (inherited)
 	Direction TextDirections
 
-	// overall writing mode -- only for text elements, not span (inhereted)
+	// overall writing mode -- only for text elements, not span (inherited)
 	WritingMode TextDirections
 
-	// for TBRL writing mode (only), determines orientation of alphabetic characters (inhereted);
+	// for TBRL writing mode (only), determines orientation of alphabetic characters (inherited);
 	// 90 is default (rotated); 0 means keep upright
 	OrientationVert float32
 
-	// for horizontal LR/RL writing mode (only), determines orientation of all characters (inhereted);
+	// for horizontal LR/RL writing mode (only), determines orientation of all characters (inherited);
 	// 0 is default (upright)
 	OrientationHoriz float32
 
-	// how much to indent the first line in a paragraph (inhereted)
+	// how much to indent the first line in a paragraph (inherited)
 	Indent units.Value
 
-	// extra spacing between paragraphs (inhereted); copied from [Style.Margin] per CSS spec
+	// extra spacing between paragraphs (inherited); copied from [Style.Margin] per CSS spec
 	// if that is non-zero, else can be set directly with para-spacing
 	ParaSpacing units.Value
 
-	// tab size, in number of characters (inhereted)
+	// tab size, in number of characters (inherited)
 	TabSize int
 }
 

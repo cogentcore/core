@@ -21,22 +21,22 @@ import (
 // for rendering -- see [FontRender] for that.
 type Font struct { //types:add
 
-	// size of font to render (inhereted); converted to points when getting font to use
+	// size of font to render (inherited); converted to points when getting font to use
 	Size units.Value
 
-	// font family (inhereted): ordered list of comma-separated names from more general to more specific to use; use split on , to parse
+	// font family (inherited): ordered list of comma-separated names from more general to more specific to use; use split on , to parse
 	Family string
 
-	// style (inhereted): normal, italic, etc
+	// style (inherited): normal, italic, etc
 	Style FontStyles
 
-	// weight (inhereted): normal, bold, etc
+	// weight (inherited): normal, bold, etc
 	Weight FontWeights
 
-	// font stretch / condense options (inhereted)
+	// font stretch / condense options (inherited)
 	Stretch FontStretch
 
-	// normal or small caps (inhereted)
+	// normal or small caps (inherited)
 	Variant FontVariants
 
 	// underline, line-through, etc (not inherited)
@@ -396,7 +396,7 @@ func FixFontMods(fn string) string {
 type FontRender struct { //types:add
 	Font
 
-	// text color (inhereted)
+	// text color (inherited)
 	Color image.Image
 
 	// background color (not inherited, transparent by default)
