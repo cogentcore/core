@@ -51,17 +51,7 @@ func (bd *Body) NewWindow() *Stage {
 	return ms
 }
 
-// NewDialog in dialogs.go
-
-/////////////////////////////////////////////////////
-//		Decorate
-
-// only called when !NewWindow
-func (st *Stage) AddWindowDecor() *Stage {
-	return st
-}
-
-func (st *Stage) AddDialogDecor() *Stage {
+func (st *Stage) addDialogParts() *Stage {
 	if st.FullWindow {
 		return st
 	}
@@ -139,7 +129,6 @@ func (st *Stage) ConfigMainStage() {
 		st.Scrim = false
 	}
 	sc := st.Scene
-	st.AddWindowDecor() // sensitive to cases
 	sc.ConfigSceneBars()
 	sc.ConfigSceneWidgets()
 }
@@ -260,7 +249,7 @@ func (st *Stage) RunDialog() *Stage {
 
 	sc := st.Scene
 	st.ConfigMainStage()
-	st.AddDialogDecor()
+	st.addDialogParts()
 	sc.SceneGeom.Pos = st.Pos
 
 	st.SetMains(ms) // temporary for prefs
