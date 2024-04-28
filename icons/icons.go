@@ -12,7 +12,7 @@ import (
 
 	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/mergefs"
+	"cogentcore.org/core/base/mergefs"
 )
 
 //go:generate go run gen.go
