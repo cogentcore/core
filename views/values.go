@@ -12,12 +12,12 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"

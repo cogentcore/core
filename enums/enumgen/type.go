@@ -18,7 +18,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"cogentcore.org/core/strcase"
+	"cogentcore.org/core/base/strcase"
 )
 
 // Type represents a parsed enum type.

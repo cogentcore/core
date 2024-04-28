@@ -19,8 +19,8 @@ import (
 
 	"cogentcore.org/core/base/generate"
 	"cogentcore.org/core/base/ordmap"
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/cli"
-	"cogentcore.org/core/strcase"
 	types1 "cogentcore.org/core/types"
 	"golang.org/x/tools/go/packages"
 )

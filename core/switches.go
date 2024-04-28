@@ -9,9 +9,9 @@ import (
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/tree"

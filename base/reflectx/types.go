@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"strings"
 
-	"cogentcore.org/core/strcase"
+	"cogentcore.org/core/base/strcase"
 )
 
 // LongTypeName returns the long, full package-path qualified type name.

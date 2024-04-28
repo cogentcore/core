@@ -7,7 +7,7 @@ package core
 import (
 	"testing"
 
-	"cogentcore.org/core/strcase"
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/units"
 )

@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"cogentcore.org/core/strcase"
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/types"
 )
 

@@ -13,9 +13,9 @@ import (
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
-	"cogentcore.org/core/strcase"
 	"github.com/jackmordaunt/icns/v2"
 )
 

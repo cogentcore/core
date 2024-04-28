@@ -10,10 +10,10 @@ import (
 	"os"
 
 	"cogentcore.org/core/base/logx"
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/cli"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/views"
 )
 

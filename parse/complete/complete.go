@@ -10,7 +10,7 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/strcase"
+	"cogentcore.org/core/base/strcase"
 )
 
 // Completion holds one potential completion

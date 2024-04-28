@@ -16,7 +16,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/strcase"
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/styles"
 )
 
