@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Adapted initially from gonum/plot:
+// Adapted from gonum/plot:
 // Copyright ©2015 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -14,10 +14,10 @@ import (
 	"image/color"
 	"math"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/units"
 )
 
 // Plot is the basic type representing a plot.
@@ -46,13 +46,10 @@ type Plot struct {
 	Size image.Point
 
 	// painter for rendering
-	Paint paint.Context
+	Paint *paint.Context
 
 	// pixels that we render into
 	Pixels *image.RGBA `copier:"-" json:"-" xml:"-" edit:"-"`
-
-	// unit context: parameters necessary for anchoring relative units
-	UnitContext units.Context
 
 	// standard text style with default params
 	StdTextStyle styles.Text
@@ -65,7 +62,7 @@ func (pt *Plot) Defaults() {
 	pt.Title.Style.Align = styles.Center
 	pt.Background = color.White
 	pt.X.Defaults(math32.X)
-	pt.Y.Defaults(math32.X)
+	pt.Y.Defaults(math32.Y)
 	pt.Legend.Defaults()
 	pt.Size = image.Point{1280, 1024}
 	pt.StdTextStyle.Defaults()
@@ -102,124 +99,24 @@ func (pt *Plot) Add(ps ...Plotter) {
 	pt.Plotters = append(pt.Plotters, ps...)
 }
 
-// DrawConfig configures everything for drawing
-func (pt *Plot) DrawConfig() {
-	// todo: ensure image, do units
-
+// Resize sets the size of the output image to given size.
+// Does nothing if already the right size.
+func (pt *Plot) Resize(sz image.Point) {
+	if pt.Pixels != nil {
+		ib := pt.Pixels.Bounds().Size()
+		if ib == sz {
+			pt.Size = sz
+			return // already good
+		}
+	}
+	pt.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
+	pt.Paint = paint.NewContextFromImage(pt.Pixels)
+	pt.Size = sz
 }
 
-// Draw draws the plot to image.
-// Plotters are drawn in the order in which they were
-// added to the plot.
-func (pt *Plot) Draw() {
-	pt.DrawConfig()
-	if pt.Background != nil {
-		// c.SetColor(p.Background)
-		// c.Fill(c.Rectangle.Path())
-	}
-
-	if pt.Title.Text != "" {
-		pt.Title.Config(pt)
-		// descent := pt.Title.TextStyle.FontExtents().Descent
-		// c.FillText(pt.Title.TextStyle, vg.Point{X: c.Center().X, Y: c.Max.Y + descent}, pt.Title.Text)
-		// rect := pt.Title.TextStyle.Rectangle(pt.Title.Text)
-		// c.Max.Y -= rect.Size().Y
-		// c.Max.Y -= pt.Title.Padding
-	}
-
-	pt.X.SanitizeRange()
-	pt.Y.SanitizeRange()
-
-	ywidth := pt.Y.Size(pt)
-	xheight := pt.X.Size(pt)
-	_, _ = ywidth, xheight
-
-	// x.draw(padX(pt, draw.Crop(c, ywidth, 0, 0, 0)))
-	// y.draw(padY(pt, draw.Crop(c, 0, 0, xheight, 0)))
-
-	// dataC := padY(pt, padX(pt, draw.Crop(c, ywidth, 0, xheight, 0)))
-	for _, plt := range pt.Plotters {
-		plt.Plot(pt)
-	}
-
-	pt.Legend.Draw(pt)
+func (pt *Plot) SaveImage(filename string) error {
+	return imagex.Save(pt.Pixels, filename)
 }
-
-// DataCanvas returns a new draw.Canvas that
-// is the subset of the given draw area into which
-// the plot data will be drawn.
-// func (pt *Plot) DataCanvas(da draw.Canvas) draw.Canvas {
-// 	if pt.Title.Text != "" {
-// 		rect := pt.Title.TextStyle.Rectangle(pt.Title.Text)
-// 		da.Max.Y -= rect.Size().Y
-// 		da.Max.Y -= pt.Title.Padding
-// 	}
-// 	pt.X.sanitizeRange()
-// 	x := horizontalAxis{pt.X}
-// 	pt.Y.sanitizeRange()
-// 	y := verticalAxis{pt.Y}
-// 	return padY(pt, padX(pt, draw.Crop(da, y.size(), 0, x.size(), 0)))
-// }
-
-/*
-// padX returns a draw.Canvas that is padded horizontally
-// so that glyphs will no be clipped.
-func padX(pt *Plot, c draw.Canvas) draw.Canvas {
-	glyphs := pt.GlyphBoxes(pt)
-	l := leftMost(&c, glyphs)
-	xAxis := horizontalAxis{pt.X}
-	glyphs = append(glyphs, xAxis.GlyphBoxes(pt)...)
-	r := rightMost(&c, glyphs)
-
-	minx := c.Min.X - l.Min.X
-	maxx := c.Max.X - (r.Min.X + r.Size().X)
-	lx := vg.Length(l.X)
-	rx := vg.Length(r.X)
-	n := (lx*maxx - rx*minx) / (lx - rx)
-	m := ((lx-1)*maxx - rx*minx + minx) / (lx - rx)
-	return draw.Canvas{
-		Canvas: vg.Canvas(c),
-		Rectangle: vg.Rectangle{
-			Min: vg.Point{X: n, Y: c.Min.Y},
-			Max: vg.Point{X: m, Y: c.Max.Y},
-		},
-	}
-}
-
-// padY returns a draw.Canvas that is padded vertically
-// so that glyphs will no be clipped.
-func padY(pt *Plot, c draw.Canvas) draw.Canvas {
-	glyphs := pt.GlyphBoxes(pt)
-	b := bottomMost(&c, glyphs)
-	yAxis := verticalAxis{pt.Y}
-	glyphs = append(glyphs, yAxis.GlyphBoxes(pt)...)
-	t := topMost(&c, glyphs)
-
-	miny := c.Min.Y - b.Min.Y
-	maxy := c.Max.Y - (t.Min.Y + t.Size().Y)
-	by := vg.Length(b.Y)
-	ty := vg.Length(t.Y)
-	n := (by*maxy - ty*miny) / (by - ty)
-	m := ((by-1)*maxy - ty*miny + miny) / (by - ty)
-	return draw.Canvas{
-		Canvas: vg.Canvas(c),
-		Rectangle: vg.Rectangle{
-			Min: vg.Point{Y: n, X: c.Min.X},
-			Max: vg.Point{Y: m, X: c.Max.X},
-		},
-	}
-}
-
-// Transforms returns functions to transfrom
-// from the x and y data coordinate system to
-// the draw coordinate system of the given
-// draw area.
-func (pt *Plot) Transforms(c *draw.Canvas) (x, y func(float64) vg.Length) {
-	x = func(x float64) vg.Length { return c.X(pt.X.Norm(x)) }
-	y = func(y float64) vg.Length { return c.Y(pt.Y.Norm(y)) }
-	return
-}
-*/
 
 // NominalX configures the plot to have a nominal X
 // axis—an X axis with names instead of numbers.  The

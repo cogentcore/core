@@ -8,6 +8,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 )
 
 // DefaultFontFamily specifies a default font for plotting.
@@ -21,14 +22,24 @@ type TextStyle struct {
 	// how to align text along the relevant dimension for the text element
 	Align styles.Aligns
 
+	// Padding is used in a case-dependent manner to add space around text elements
+	Padding units.Value
+
 	// rotation of the text
 	Rotation float32
 }
 
 func (ts *TextStyle) Defaults() {
 	ts.FontRender.Defaults()
+	ts.Align = styles.Center
 	if DefaultFontFamily != "" {
 		ts.FontRender.Family = DefaultFontFamily
+	}
+}
+
+func (ts *TextStyle) openFont(pt *Plot) {
+	if ts.Font.Face == nil {
+		paint.OpenFont(&ts.FontRender, &pt.Paint.UnitContext) // calls SetUnContext after updating metrics
 	}
 }
 
@@ -49,25 +60,38 @@ func (tx *Text) Defaults() {
 	tx.Style.Defaults()
 }
 
-// Config is called during the layout of the plot, prior to drawing
-func (tx *Text) Config(pt *Plot) {
+// config is called during the layout of the plot, prior to drawing
+func (tx *Text) config(pt *Plot) {
+	uc := &pt.Paint.UnitContext
 	fs := &tx.Style.FontRender
+	fs.ToDots(uc)
+	tx.Style.Padding.ToDots(uc)
 	txln := float32(len(tx.Text))
-	fht := float32(16)
+	fht := fs.Size.Dots
 	hsz := float32(12) * txln
-	if fs.Face != nil {
-		fht = fs.Face.Metrics.Height
-		hsz = 0.75 * fht * txln
-	}
 	txs := &pt.StdTextStyle
 	txs.OrientationHoriz = tx.Style.Rotation
 	txs.Align = tx.Style.Align
 
-	tx.paintText.SetHTML(tx.Text, fs, txs, &pt.UnitContext, nil)
-	tx.paintText.Layout(txs, fs, &pt.UnitContext, math32.Vector2{X: hsz, Y: fht})
+	tx.paintText.SetHTML(tx.Text, fs, txs, uc, nil)
+	tx.paintText.Layout(txs, fs, uc, math32.Vector2{X: hsz, Y: fht})
+}
+
+// startPosX returns the starting position for a horizontally-aligned text element,
+// based on given width.  Text must have been config'd already.
+func (tx *Text) startPosX(width float32) math32.Vector2 {
+	pos := math32.Vector2{}
+	pos.X = styles.AlignFactor(tx.Style.Align) * width
+	switch tx.Style.Align {
+	case styles.Center:
+		pos.X -= 0.5 * tx.paintText.Size.X
+	case styles.End:
+		pos.X -= tx.paintText.Size.X
+	}
+	return pos
 }
 
 // Draw renders the text at given upper left position
-func (tx *Text) Draw(pt *Plot, pos math32.Vector2) {
-	tx.paintText.Render(&pt.Paint, pos)
+func (tx *Text) draw(pt *Plot, pos math32.Vector2) {
+	tx.paintText.Render(pt.Paint, pos)
 }

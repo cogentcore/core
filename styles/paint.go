@@ -108,13 +108,13 @@ func (pc *Paint) ToDotsImpl(uc *units.Context) {
 }
 
 // SetUnitContextExt sets the unit context for external usage of paint
-// outside of a Viewport, based on overall size of painting canvas.
+// outside of Core Scene context, based on overall size of painting canvas.
 // caches everything out in terms of raw pixel dots for rendering
 // call at start of render.
 func (pc *Paint) SetUnitContextExt(size image.Point) {
-	pc.UnitContext.Defaults()
-	// paint (SVG) context is always 96 = 1to1
-	pc.UnitContext.DPI = 96
+	if pc.UnitContext.DPI == 0 {
+		pc.UnitContext.Defaults()
+	}
 	// TODO: maybe should have different values for these sizes?
 	pc.UnitContext.SetSizes(float32(size.X), float32(size.Y), float32(size.X), float32(size.Y), float32(size.X), float32(size.Y))
 	pc.FontStyle.SetUnitContext(&pc.UnitContext)

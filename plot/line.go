@@ -9,6 +9,7 @@ import (
 	"image/color"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -28,5 +29,17 @@ type LineStyle struct {
 
 func (ls *LineStyle) Defaults() {
 	ls.Color = colors.C(color.Black)
-	ls.Width.Pt(0.5)
+	ls.Width.Pt(1)
+}
+
+func (ls *LineStyle) draw(pt *Plot, start, end math32.Vector2) {
+	pc := pt.Paint
+	uc := &pc.UnitContext
+	ls.Width.ToDots(uc)
+	pc.StrokeStyle.Width = ls.Width
+	pc.StrokeStyle.Color = ls.Color
+	pc.StrokeStyle.ToDots(uc)
+	pc.MoveTo(start.X, start.Y)
+	pc.LineTo(end.X, end.Y)
+	pc.Stroke()
 }

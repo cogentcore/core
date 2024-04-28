@@ -16,12 +16,6 @@ type Legend struct {
 	// TextStyle is the style given to the legend entry texts.
 	TextStyle TextStyle
 
-	// Padding is the amount of padding to add
-	// between each entry in the legend.  If Padding
-	// is zero then entries are spaced based on the
-	// font size.
-	Padding units.Value
-
 	// Top and Left specify the location of the legend.
 	// If Top is true the legend is located along the top
 	// edge of the plot, otherwise it is located along

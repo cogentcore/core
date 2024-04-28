@@ -127,9 +127,6 @@ func (sv *SVG) Resize(nwsz image.Point) {
 			return              // already good
 		}
 	}
-	if sv.Pixels != nil {
-		sv.Pixels = nil
-	}
 	sv.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
 	sv.RenderState.Init(nwsz.X, nwsz.Y, sv.Pixels)
 	sv.Geom.Size = nwsz // make sure

@@ -10,6 +10,21 @@ import (
 	"time"
 )
 
+// A Tick is a single tick mark on an axis.
+type Tick struct {
+	// Value is the data value marked by this Tick.
+	Value float64
+
+	// Label is the text to display at the tick mark.
+	// If Label is an empty string then this is a minor tick mark.
+	Label string
+}
+
+// IsMinor returns true if this is a minor tick mark.
+func (tk *Tick) IsMinor() bool {
+	return tk.Label == ""
+}
+
 // Ticker creates Ticks in a specified range
 type Ticker interface {
 	// Ticks returns Ticks in a specified range
@@ -204,22 +219,6 @@ func (t TimeTicks) Ticks(min, max float64) []Tick {
 		tick.Label = t.Time(tick.Value).Format(t.Format)
 	}
 	return ticks
-}
-
-// A Tick is a single tick mark on an axis.
-type Tick struct {
-	// Value is the data value marked by this Tick.
-	Value float64
-
-	// Label is the text to display at the tick mark.
-	// If Label is an empty string then this is a minor
-	// tick mark.
-	Label string
-}
-
-// IsMinor returns true if this is a minor tick mark.
-func (t Tick) IsMinor() bool {
-	return t.Label == ""
 }
 
 /*
