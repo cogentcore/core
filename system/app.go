@@ -30,12 +30,12 @@ var (
 
 	// ReservedWebShortcuts is a list of shortcuts that are reserved on the web
 	// platform, meaning that they are handled by the browser instead of Cogent Core.
-	// By default, this list contains important web shortcuts like Command+R and Command+(1-9).
+	// By default, this list contains important web shortcuts like Command+r and Command+(1-9).
 	// All instances of "Command" are automatically converted to "Control" on non-macOS system
 	// platforms, meaning that shortcuts should typically be expressed using "Command" for
 	// cross-platform support. Shortcuts can be removed from this list by an app whose use of
 	// them is more important than the default web action for that shortcut.
-	ReservedWebShortcuts = []string{"Command+R", "Command+1"}
+	ReservedWebShortcuts = []string{"Command+r", "Command+1"}
 )
 
 // App represents the overall OS GUI hardware, and creates Images, Textures

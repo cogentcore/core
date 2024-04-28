@@ -164,6 +164,10 @@ func (a *App) ShouldProcessKey(k string) bool {
 	if k == "Unidentified" {
 		return false
 	}
+	k = key.ModsString(a.KeyMods) + k
+	if a.SystemPlatform() == system.MacOS {
+		k = strings.ReplaceAll(k, "Meta", "Command")
+	}
 	if slices.Contains(system.ReservedWebShortcuts, k) {
 		return false
 	}
