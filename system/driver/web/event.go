@@ -8,12 +8,15 @@ package web
 
 import (
 	"image"
+	"slices"
+	"strings"
 	"syscall/js"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/system"
 )
 
 func (a *App) AddEventListeners() {
@@ -156,6 +159,24 @@ func (a *App) OnContextMenu(this js.Value, args []js.Value) any {
 	return nil
 }
 
+// ShouldProcessKey returns whether the given key string should be processed by Cogent Core.
+func (a *App) ShouldProcessKey(k string) bool {
+	if k == "Unidentified" {
+		return false
+	}
+	if slices.Contains(system.ReservedWebShortcuts, k) {
+		return false
+	}
+	if a.SystemPlatform() != system.MacOS {
+		// system.ReservedWebShortcuts uses "Command", so also try that
+		k = strings.ReplaceAll(k, "Control", "Command")
+		if slices.Contains(system.ReservedWebShortcuts, k) {
+			return false
+		}
+	}
+	return true
+}
+
 // RuneAndCodeFromKey returns the rune and key code corresponding to the given key string.
 // down is whether this is from a keyDown event (as opposed to a keyUp one)
 func (a *App) RuneAndCodeFromKey(k string, down bool) (rune, key.Codes) {
@@ -201,7 +222,7 @@ func (a *App) RuneAndCodeFromKey(k string, down bool) (rune, key.Codes) {
 func (a *App) OnKeyDown(this js.Value, args []js.Value) any {
 	e := args[0]
 	k := e.Get("key").String()
-	if k == "Unidentified" {
+	if !a.ShouldProcessKey(k) {
 		return nil
 	}
 	r, c := a.RuneAndCodeFromKey(k, true)
@@ -213,7 +234,7 @@ func (a *App) OnKeyDown(this js.Value, args []js.Value) any {
 func (a *App) OnKeyUp(this js.Value, args []js.Value) any {
 	e := args[0]
 	k := e.Get("key").String()
-	if k == "Unidentified" {
+	if !a.ShouldProcessKey(k) {
 		return nil
 	}
 	r, c := a.RuneAndCodeFromKey(k, false)
