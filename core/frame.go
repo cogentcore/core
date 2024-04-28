@@ -7,7 +7,7 @@ package core
 import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // Frame is a [Layout] that also renders the standard box model.

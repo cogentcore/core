@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 func frameTestButtons(fr *Frame) {

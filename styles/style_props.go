@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // StyleInhInit detects the style values of "inherit" and "initial",

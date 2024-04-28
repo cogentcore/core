@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 func TestDialogMessage(t *testing.T) {

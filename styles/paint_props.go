@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 ////////////////////////////////////////////////////////////////////////////

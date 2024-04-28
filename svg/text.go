@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // Text renders SVG text, handling both text and tspan elements.

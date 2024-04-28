@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // ColorMapName represents the name of a color map, which can be edited using a [ColorMapValue].

@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // For https://github.com/cogentcore/core/issues/614

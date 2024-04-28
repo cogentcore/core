@@ -18,10 +18,10 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/svg"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/units"
 )
 
 // TheApp is the current [App]; only one is ever in effect.

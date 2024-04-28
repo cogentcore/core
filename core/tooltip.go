@@ -9,7 +9,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // NewTooltipFromScene returns a new Tooltip stage with given scene contents,

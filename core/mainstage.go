@@ -13,8 +13,8 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
-	"cogentcore.org/core/units"
 )
 
 // NewMainStage returns a new MainStage with given type and scene contents.

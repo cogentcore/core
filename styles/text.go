@@ -5,7 +5,7 @@
 package styles
 
 import (
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // IMPORTANT: any changes here must be updated in style_properties.go StyleTextFuncs

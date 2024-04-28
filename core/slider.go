@@ -18,7 +18,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // Slider is a slideable widget that provides slider functionality for two Types:

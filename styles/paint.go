@@ -10,7 +10,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // Paint provides the styling parameters for SVG-style rendering

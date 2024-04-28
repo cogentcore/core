@@ -12,7 +12,7 @@ import (
 
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 func newBodyForSnackbar() *Body {

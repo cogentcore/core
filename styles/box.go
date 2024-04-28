@@ -9,7 +9,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // note: background-color is in FontStyle as it is needed to make that the

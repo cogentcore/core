@@ -8,7 +8,7 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // todo: for style

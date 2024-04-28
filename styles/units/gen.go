@@ -15,7 +15,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/strcase"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 func main() {

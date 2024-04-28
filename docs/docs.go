@@ -20,8 +20,8 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/pages"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/units"
 	"cogentcore.org/core/views"
 )
 

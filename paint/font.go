@@ -13,7 +13,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/font/opentype"
 )

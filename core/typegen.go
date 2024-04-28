@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.App", IDName: "app", Doc: "App represents a Cogent Core app. It extends [system.App] to provide both system-level\nand high-level data and functions to do with the currently running application. The\nsingle instance of it is [TheApp], which embeds [system.TheApp].", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "App"}}, Fields: []types.Field{{Name: "Icon", Doc: "Icon specifies the app icon, which is passed to [system.Window.SetIcon].\nIt should typically be set using [App.SetIconSVG]."}, {Name: "AppBarConfig", Doc: "AppBarConfig is the function that configures the AppBar,\ntypically put in the [Scene.Bars.Top] (i.e., a TopAppBar).\nIt is set to StdAppBarConfig by default, which makes the\nstandard AppBar behavior. If this is nil, then no AppBar\nwill be created by default."}, {Name: "SceneConfig", Doc: "SceneConfig is the function called on every newly created [core.Scene]\nto configure it, if it is non-nil. This can be used to set global\nconfiguration and styling for all widgets using the OnWidgetAdded\nmethod."}}})

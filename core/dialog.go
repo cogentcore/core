@@ -10,8 +10,8 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/types"
-	"cogentcore.org/core/units"
 )
 
 // RunDialog returns and runs a new [DialogStage] that does not take up

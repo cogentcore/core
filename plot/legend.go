@@ -5,7 +5,7 @@
 package plot
 
 import (
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // A Legend gives a description of the meaning of different

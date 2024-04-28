@@ -20,7 +20,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // style implements CSS-based styling, as in: https://www.w3schools.com/cssref/default.asp

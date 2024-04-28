@@ -15,8 +15,8 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
-	"cogentcore.org/core/units"
 	"cogentcore.org/core/vgpu"
 	"cogentcore.org/core/xyz"
 )

@@ -11,8 +11,8 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/svg"
-	"cogentcore.org/core/units"
 	"golang.org/x/image/draw"
 )
 

@@ -23,7 +23,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/views"
 )
 

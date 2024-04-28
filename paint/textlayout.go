@@ -7,7 +7,7 @@ package paint
 import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // RuneSpanPos returns the position (span, rune index within span) within a

@@ -16,8 +16,8 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/svg"
-	"cogentcore.org/core/units"
 	"golang.org/x/image/draw"
 )
 

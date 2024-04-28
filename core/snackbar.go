@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // RunSnackbar returns and runs a new [SnackbarStage] in the context

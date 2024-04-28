@@ -9,7 +9,7 @@ import (
 
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 func TestTextTypes(t *testing.T) {

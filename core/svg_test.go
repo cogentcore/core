@@ -11,8 +11,8 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/svg"
-	"cogentcore.org/core/units"
 )
 
 var testSVGPath = Filename(filepath.Join("..", "icon.svg"))

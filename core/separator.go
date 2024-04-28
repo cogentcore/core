@@ -7,7 +7,7 @@ package core
 import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // Separator draws a separator line. It goes in the direction

@@ -9,7 +9,7 @@ import (
 	"image/color"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // LineStyle has style properties for line drawing

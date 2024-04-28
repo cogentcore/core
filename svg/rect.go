@@ -7,7 +7,7 @@ package svg
 import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/units"
+	"cogentcore.org/core/styles/units"
 )
 
 // Rect is a SVG rectangle, optionally with rounded corners
