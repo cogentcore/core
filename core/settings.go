@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/base/iox/tomlx"
 	"cogentcore.org/core/base/option"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
@@ -24,7 +25,6 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/paint"
-	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/system"
 )
 

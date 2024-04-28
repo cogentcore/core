@@ -4,7 +4,7 @@
 
 package cli
 
-import "cogentcore.org/core/reflectx"
+import "cogentcore.org/core/base/reflectx"
 
 // SetFromDefaults sets the values of the given config object
 // from `default:` field tag values. Parsing errors are automatically logged.

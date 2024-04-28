@@ -10,7 +10,7 @@ import (
 
 	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/iox/tomlx"
-	"cogentcore.org/core/reflectx"
+	"cogentcore.org/core/base/reflectx"
 )
 
 // OpenWithIncludes reads the config struct from the given config file

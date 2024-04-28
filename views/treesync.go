@@ -12,9 +12,9 @@ import (
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fileinfo/mimedata"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"

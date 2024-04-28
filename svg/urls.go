@@ -12,7 +12,7 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/reflectx"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/tree"
 )
 

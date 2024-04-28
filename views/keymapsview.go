@@ -5,9 +5,9 @@
 package views
 
 import (
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/reflectx"
 )
 
 // KeyMapValue represents a [keymap.MapName] value with a button.

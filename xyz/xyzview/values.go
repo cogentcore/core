@@ -9,9 +9,9 @@ import (
 	"reflect"
 	"sort"
 
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/views"
 	"cogentcore.org/core/xyz"

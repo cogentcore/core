@@ -7,8 +7,8 @@ package views
 import (
 	"fmt"
 
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"

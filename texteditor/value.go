@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/views"
 )
 

@@ -5,9 +5,9 @@
 package tensorview
 
 import (
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/stats/simat"
 	"cogentcore.org/core/tensor/table"

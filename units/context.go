@@ -4,7 +4,7 @@
 
 package units
 
-import "cogentcore.org/core/reflectx"
+import "cogentcore.org/core/base/reflectx"
 
 // Context specifies everything about the current context necessary for converting the number
 // into specific display-dependent pixels

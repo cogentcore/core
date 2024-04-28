@@ -13,7 +13,7 @@ import (
 
 	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/iox/tomlx"
-	"cogentcore.org/core/reflectx"
+	"cogentcore.org/core/base/reflectx"
 )
 
 // TODO(kai): this seems bad

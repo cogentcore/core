@@ -9,10 +9,10 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/num"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/units"
 )
 

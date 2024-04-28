@@ -12,9 +12,9 @@ import (
 
 	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/textbuf"

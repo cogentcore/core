@@ -10,7 +10,7 @@ import (
 
 	"log/slog"
 
-	"cogentcore.org/core/reflectx"
+	"cogentcore.org/core/base/reflectx"
 	"golang.org/x/image/math/fixed"
 )
 

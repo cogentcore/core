@@ -22,10 +22,10 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 	"golang.org/x/net/html/charset"

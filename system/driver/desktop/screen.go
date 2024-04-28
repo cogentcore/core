@@ -8,9 +8,9 @@ import (
 	"image"
 	"log"
 
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/system"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )

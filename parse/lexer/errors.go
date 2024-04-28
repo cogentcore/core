@@ -16,7 +16,7 @@ import (
 	"path/filepath"
 	"sort"
 
-	"cogentcore.org/core/reflectx"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/tree"
 )
 

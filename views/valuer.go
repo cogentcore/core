@@ -12,12 +12,12 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )

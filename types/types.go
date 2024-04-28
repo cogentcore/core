@@ -14,7 +14,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"cogentcore.org/core/reflectx"
+	"cogentcore.org/core/base/reflectx"
 )
 
 var (

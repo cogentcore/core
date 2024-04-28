@@ -21,7 +21,7 @@ import (
 
 	"log/slog"
 
-	"cogentcore.org/core/reflectx"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/vgpu/vkinit"
 	vk "github.com/goki/vulkan"
 )

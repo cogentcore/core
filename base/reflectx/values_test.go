@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	"cogentcore.org/core/reflectx/testdata"
+	"cogentcore.org/core/base/reflectx/testdata"
 )
 
 type A struct {

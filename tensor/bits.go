@@ -10,7 +10,7 @@ import (
 	"reflect"
 	"strings"
 
-	"cogentcore.org/core/reflectx"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/tensor/bitslice"
 	"gonum.org/v1/gonum/mat"
 )
