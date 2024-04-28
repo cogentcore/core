@@ -10,8 +10,8 @@ import (
 	"testing"
 	"text/template"
 
+	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/cli"
-	"cogentcore.org/core/ordmap"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/types"
 	"cogentcore.org/core/types/typegen/testdata"

@@ -12,7 +12,7 @@ import (
 
 	"slices"
 
-	"cogentcore.org/core/ordmap"
+	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/reflectx"
 	"cogentcore.org/core/strcase"
 )

@@ -7,7 +7,7 @@ package typegen
 import (
 	"text/template"
 
-	"cogentcore.org/core/ordmap"
+	"cogentcore.org/core/base/ordmap"
 )
 
 // Config contains the configuration information

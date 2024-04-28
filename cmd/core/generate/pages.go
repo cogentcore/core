@@ -15,8 +15,8 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/generate"
+	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/cmd/core/config"
-	"cogentcore.org/core/ordmap"
 	"cogentcore.org/core/pages/wpath"
 )
 

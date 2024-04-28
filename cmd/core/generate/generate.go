@@ -15,9 +15,9 @@ import (
 	"text/template"
 
 	"cogentcore.org/core/base/generate"
+	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/enums/enumgen"
-	"cogentcore.org/core/ordmap"
 	"cogentcore.org/core/types"
 	"cogentcore.org/core/types/typegen"
 	"golang.org/x/tools/go/packages"

@@ -12,9 +12,9 @@ import (
 	"image/color"
 	"sync"
 
+	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/ordmap"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vgpu"
 	"cogentcore.org/core/vgpu/vphong"

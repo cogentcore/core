@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"image"
 
+	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/ordmap"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/vgpu/szalloc"
 	"golang.org/x/image/draw"

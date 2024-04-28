@@ -9,7 +9,7 @@ package vphong
 import (
 	"sync"
 
-	"cogentcore.org/core/ordmap"
+	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/vgpu"
 )
 
