@@ -12,28 +12,30 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestOrignal(t *testing.T) {
-	assertEqual(t, "nativeOrgURL", ToWordCase("NativeOrgURL", WordCamelCase, 0))
-	assertEqual(t, "nativeOrgUrl", ToWordCase("NativeOrgUrl", WordCamelCase, 0))
+	assert.Equal(t, "nativeOrgURL", ToWordCase("NativeOrgURL", WordCamelCase, 0))
+	assert.Equal(t, "nativeOrgUrl", ToWordCase("NativeOrgUrl", WordCamelCase, 0))
 
-	assertEqual(t, "native-org-url", ToWordCase("NativeOrgURL", WordLowerCase, '-'))
-	assertEqual(t, "json-string", ToWordCase("JSONString", WordLowerCase, '-'))
+	assert.Equal(t, "native-org-url", ToWordCase("NativeOrgURL", WordLowerCase, '-'))
+	assert.Equal(t, "json-string", ToWordCase("JSONString", WordLowerCase, '-'))
 
-	assertEqual(t, "jsonString", ToWordCase("JSONString", WordCamelCase, 0))
-	assertEqual(t, "JSONString", ToWordCase("JSONString", WordTitleCase, 0))
-	assertEqual(t, "JsonString", ToWordCase("JsonString", WordTitleCase, 0))
+	assert.Equal(t, "jsonString", ToWordCase("JSONString", WordCamelCase, 0))
+	assert.Equal(t, "JSONString", ToWordCase("JSONString", WordTitleCase, 0))
+	assert.Equal(t, "JsonString", ToWordCase("JsonString", WordTitleCase, 0))
 
-	assertEqual(t, "nasa-rocket", ToWordCase("NASARocket", WordLowerCase, '-'))
-	assertEqual(t, "nasa-Rocket", ToWordCase("NASARocket", WordCamelCase, '-'))
-	assertEqual(t, "NASA-Rocket", ToWordCase("NASARocket", WordTitleCase, '-'))
+	assert.Equal(t, "nasa-rocket", ToWordCase("NASARocket", WordLowerCase, '-'))
+	assert.Equal(t, "nasa-Rocket", ToWordCase("NASARocket", WordCamelCase, '-'))
+	assert.Equal(t, "NASA-Rocket", ToWordCase("NASARocket", WordTitleCase, '-'))
 
-	assertEqual(t, "Ps4", ToWordCase("ps4", WordTitleCase, '-'))
-	assertEqual(t, "PS4", ToWordCase("PS4", WordTitleCase, '-'))
+	assert.Equal(t, "Ps4", ToWordCase("ps4", WordTitleCase, '-'))
+	assert.Equal(t, "PS4", ToWordCase("PS4", WordTitleCase, '-'))
 
 	// Not great if you're coming from an all-caps case (you should do strings.ToLower first)
-	assertEqual(t, "SCREAMINGCASE", ToWordCase("SCREAMING_CASE", WordTitleCase, 0))
+	assert.Equal(t, "SCREAMINGCASE", ToWordCase("SCREAMING_CASE", WordTitleCase, 0))
 }
 
 func TestAll(t *testing.T) {
@@ -658,7 +660,7 @@ func TestAll(t *testing.T) {
 				line = regexp.MustCompile("\"\n").ReplaceAllString(line, "\",\n")
 				fmt.Println(line)
 			}
-			assertTrue(t, test == output)
+			assert.True(t, test == output)
 		})
 	}
 }

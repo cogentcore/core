@@ -9,6 +9,8 @@ package strcase
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestIsUnicodeType(t *testing.T) {
@@ -49,50 +51,50 @@ func TestIsUnicodeType(t *testing.T) {
 	t.Run("uppercase", func(t *testing.T) {
 		for _, r := range uppers {
 			t.Run(string(r), func(t *testing.T) {
-				assertTrue(t, isUpper(r))
-				assertTrue(t, !isLower(r))
-				assertTrue(t, !isNumber(r))
-				assertTrue(t, !isSpace(r))
+				assert.True(t, isUpper(r))
+				assert.True(t, !isLower(r))
+				assert.True(t, !isNumber(r))
+				assert.True(t, !isSpace(r))
 			})
 		}
 	})
 	t.Run("lowercase", func(t *testing.T) {
 		for _, r := range lowers {
 			t.Run(string(r), func(t *testing.T) {
-				assertTrue(t, !isUpper(r))
-				assertTrue(t, isLower(r))
-				assertTrue(t, !isNumber(r))
-				assertTrue(t, !isSpace(r))
+				assert.True(t, !isUpper(r))
+				assert.True(t, isLower(r))
+				assert.True(t, !isNumber(r))
+				assert.True(t, !isSpace(r))
 			})
 		}
 	})
 	t.Run("numbers", func(t *testing.T) {
 		for _, r := range numbers {
 			t.Run(string(r), func(t *testing.T) {
-				assertTrue(t, !isUpper(r))
-				assertTrue(t, !isLower(r))
-				assertTrue(t, isNumber(r))
-				assertTrue(t, !isSpace(r))
+				assert.True(t, !isUpper(r))
+				assert.True(t, !isLower(r))
+				assert.True(t, isNumber(r))
+				assert.True(t, !isSpace(r))
 			})
 		}
 	})
 	t.Run("spaces", func(t *testing.T) {
 		for _, r := range spaces {
 			t.Run(string(r), func(t *testing.T) {
-				assertTrue(t, !isUpper(r))
-				assertTrue(t, !isLower(r))
-				assertTrue(t, !isNumber(r))
-				assertTrue(t, isSpace(r))
+				assert.True(t, !isUpper(r))
+				assert.True(t, !isLower(r))
+				assert.True(t, !isNumber(r))
+				assert.True(t, isSpace(r))
 			})
 		}
 	})
 	t.Run("other", func(t *testing.T) {
 		for _, r := range others {
 			t.Run(string(r), func(t *testing.T) {
-				assertTrue(t, !isUpper(r))
-				assertTrue(t, !isLower(r))
-				assertTrue(t, !isNumber(r))
-				assertTrue(t, !isSpace(r))
+				assert.True(t, !isUpper(r))
+				assert.True(t, !isLower(r))
+				assert.True(t, !isNumber(r))
+				assert.True(t, !isSpace(r))
 			})
 		}
 	})
@@ -111,7 +113,7 @@ func TestToUpper(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(string(test.r), func(t *testing.T) {
-			assertTrue(t, test.want == toUpper(test.r))
+			assert.True(t, test.want == toUpper(test.r))
 		})
 	}
 }
@@ -129,7 +131,7 @@ func TestToLower(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(string(test.r), func(t *testing.T) {
-			assertTrue(t, test.want == toLower(test.r))
+			assert.True(t, test.want == toLower(test.r))
 		})
 	}
 }
