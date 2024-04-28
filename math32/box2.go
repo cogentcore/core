@@ -10,7 +10,11 @@
 
 package math32
 
-import "image"
+import (
+	"image"
+
+	"golang.org/x/image/math/fixed"
+)
 
 // Box2 represents a 2D bounding box defined by two points:
 // the point with minimum coordinates and the point with maximum coordinates.
@@ -35,6 +39,14 @@ func B2Empty() Box2 {
 func B2FromRect(rect image.Rectangle) Box2 {
 	b := Box2{}
 	b.SetFromRect(rect)
+	return b
+}
+
+// B2FromFixed returns a new [Box2] from the given [fixed.Rectangle26_6].
+func B2FromFixed(rect fixed.Rectangle26_6) Box2 {
+	b := Box2{}
+	b.Min.SetFixed(rect.Min)
+	b.Max.SetFixed(rect.Max)
 	return b
 }
 

@@ -8,6 +8,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"golang.org/x/image/font"
 )
 
 // RuneSpanPos returns the position (span, rune index within span) within a
@@ -371,15 +372,25 @@ func (tr *Text) Transform(mat math32.Matrix2, fontSty *styles.FontRender, ctxt *
 	tr.BBox = tr.BBox.MulMatrix2(mat)
 }
 
-// UpdateBBox updates the bounding box based on current positions.
+// UpdateBBox updates the overall text bounding box
+// based on actual glyph bounding boxes.
 func (tr *Text) UpdateBBox() {
 	tr.BBox.SetEmpty()
 	for si := range tr.Spans {
 		sr := &(tr.Spans[si])
+		var curfc font.Face
 		for i := range sr.Render {
+			r := sr.Text[i]
 			rn := &sr.Render[i]
-			mxp := rn.RelPos.Add(rn.Size)
-			tr.BBox.ExpandByPoint(mxp)
+			if rn.Face != nil {
+				curfc = rn.Face
+			}
+			gbf, _, ok := curfc.GlyphBounds(r)
+			if ok {
+				gb := math32.B2FromFixed(gbf)
+				gb.Translate(rn.RelPos)
+				tr.BBox.ExpandByBox(gb)
+			}
 		}
 	}
 }

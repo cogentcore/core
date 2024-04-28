@@ -12,7 +12,6 @@ package plot
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"image"
 	"io"
 	"os"
@@ -227,7 +226,6 @@ func (ax *Axis) sizeY(pt *Plot) (ywidth, tickWidth, tpad, bpad int) {
 	w := float32(0)
 	if ax.Label.Text != "" {
 		ax.Label.config(pt)
-		fmt.Println(ax.Label.paintText.BBox)
 		w += ax.Label.paintText.BBox.Size().X
 		w += ax.Label.Style.Padding.Dots
 	}
