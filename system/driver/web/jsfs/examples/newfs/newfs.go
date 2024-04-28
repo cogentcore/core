@@ -13,7 +13,7 @@ import (
 	"syscall/js"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/jsfs"
+	"cogentcore.org/core/system/driver/web/jsfs"
 )
 
 func main() {

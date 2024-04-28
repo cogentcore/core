@@ -14,7 +14,7 @@ import (
 	"syscall/js"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/jsfs"
+	"cogentcore.org/core/system/driver/web/jsfs"
 	"github.com/hack-pad/hackpadfs/indexeddb"
 )
 

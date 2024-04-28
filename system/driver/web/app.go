@@ -17,11 +17,11 @@ import (
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/jsfs"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
+	"cogentcore.org/core/system/driver/web/jsfs"
 )
 
 func Init() {

@@ -14,7 +14,7 @@ import (
 	"syscall/js"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/jsfs"
+	"cogentcore.org/core/system/driver/web/jsfs"
 	"github.com/hack-pad/hackpadfs/indexeddb"
 )
 
@@ -23,5 +23,10 @@ func main() {
 	errors.Must1(fs.MkdirAll([]js.Value{js.ValueOf("me"), js.ValueOf(0777)}))
 	ifs := errors.Must1(indexeddb.NewFS(context.Background(), "/me", indexeddb.Options{}))
 	errors.Must(fs.FS.AddMount("me", ifs))
-	js.Global().Get("console").Call("log", "stat file info", errors.Must1(fs.Stat([]js.Value{js.ValueOf("me")})))
+	callback := js.FuncOf(func(this js.Value, args []js.Value) any {
+		js.Global().Get("console").Call("log", "stat file info", args[1])
+		return nil
+	})
+	js.Global().Get("fs").Call("stat", "me", callback)
+	select {}
 }
