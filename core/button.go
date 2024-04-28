@@ -48,8 +48,8 @@ type Button struct { //core:embedder
 	// Shortcut is an optional shortcut keyboard chord to trigger this button,
 	// active in window-wide scope. Avoid conflicts with other shortcuts
 	// (a log message will be emitted if so). Shortcuts are processed after
-	// all other processing of keyboard input. Use Command for
-	// Control / Meta (Mac Command key) per platform.
+	// all other processing of keyboard input. Command is automatically translated
+	// into Meta on macOS and Control on all other platforms.
 	Shortcut key.Chord `xml:"shortcut"`
 
 	// Menu is a menu constructor function used to build and display

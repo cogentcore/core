@@ -69,7 +69,6 @@ const (
 	InsertAfter
 	ZoomOut
 	ZoomIn
-	Settings
 	Refresh
 	Recenter // Ctrl+L in emacs
 	Complete
@@ -84,7 +83,6 @@ const (
 	WinFocusNext
 	WinClose
 	WinSnapshot
-	Inspector
 	// Below are menu specific functions -- use these as shortcuts for menu buttons
 	// allows uniqueness of mapping and easy customization of all key buttons
 	New

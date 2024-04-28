@@ -164,13 +164,13 @@ func StandardOverflowMenu(tb *Toolbar) {
 // StandardOverflowMenu adds standard overflow menu items.
 func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 	if SettingsWindow != nil {
-		NewButton(m).SetText("Settings").SetIcon(icons.Settings).SetKey(keymap.Settings).
+		NewButton(m).SetText("Settings").SetIcon(icons.Settings).SetShortcut("Command+,").
 			OnClick(func(e events.Event) {
 				SettingsWindow()
 			})
 	}
 	if InspectorWindow != nil {
-		NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetKey(keymap.Inspector).
+		NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetShortcut("Command+Shift+I").
 			OnClick(func(e events.Event) {
 				InspectorWindow(tb.Scene)
 			})
