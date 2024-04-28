@@ -89,7 +89,7 @@ func (ax *Axis) Defaults(dim math32.Dims) {
 	ax.TickLine.Defaults()
 	ax.TickLength.Pt(8)
 	if dim == math32.Y {
-		ax.Label.Style.Rotation = -0.5 * math32.Pi
+		ax.Label.Style.Rotation = -90
 		ax.TickText.Style.Align = styles.End
 	}
 	ax.Scale = LinearScale{}

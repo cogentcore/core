@@ -174,7 +174,7 @@ func (ed *Editor) RenderDepthBackground(stln, edln int) {
 	lstdp := 0
 	for ln := stln; ln <= edln; ln++ {
 		lst := ed.CharStartPos(lexer.Pos{Ln: ln}).Y // note: charstart pos includes descent
-		led := lst + math32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
+		led := lst + math32.Max(ed.Renders[ln].BBox.Size().Y, ed.LineHeight)
 		if int(math32.Ceil(led)) < bb.Min.Y {
 			continue
 		}
@@ -332,7 +332,7 @@ func (ed *Editor) RenderAllLines() {
 			break
 		}
 		lst := pos.Y + ed.Offs[ln]
-		led := lst + math32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
+		led := lst + math32.Max(ed.Renders[ln].BBox.Size().Y, ed.LineHeight)
 		if int(math32.Ceil(led)) < bb.Min.Y {
 			continue
 		}
@@ -568,7 +568,7 @@ func (ed *Editor) PixelToCursor(pt image.Point) lexer.Pos {
 		for ln := stln; ln < ed.NLines; ln++ {
 			ls := ed.CharStartPos(lexer.Pos{Ln: ln}).Y - yoff
 			es := ls
-			es += math32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
+			es += math32.Max(ed.Renders[ln].BBox.Size().Y, ed.LineHeight)
 			if pt.Y >= int(math32.Floor(ls)) && pt.Y < int(math32.Ceil(es)) {
 				got = true
 				cln = ln

@@ -105,7 +105,8 @@ func (tx *Text) PosToRune(pos math32.Vector2) (si, ri int, ok bool) {
 	if pos.X < 0 || pos.Y < 0 { // note: don't bail on X yet
 		return
 	}
-	if pos.Y >= tx.Size.Y {
+	sz := tx.BBox.Size()
+	if pos.Y >= sz.Y {
 		si = len(tx.Spans) - 1
 		sr := tx.Spans[si]
 		ri = len(sr.Render)
@@ -296,8 +297,8 @@ func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctx
 	if vht > size.Y {
 		size.Y = vht
 	}
-
-	tr.Size = math32.Vec2(maxw, vht)
+	tr.BBox.Min.SetZero()
+	tr.BBox.Max = math32.Vec2(maxw, vht)
 
 	vpad := float32(0) // padding at top to achieve vertical alignment
 	vextra := size.Y - vht
@@ -334,4 +335,53 @@ func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctx
 		vpos += lspc
 	}
 	return size
+}
+
+// Transform applies given 2D transform matrix to the text character rotations,
+// scaling, and positions, so that the text is rendered according to that transform.
+// The fontSty is the font style used for specifying the font originally.
+func (tr *Text) Transform(mat math32.Matrix2, fontSty *styles.FontRender, ctxt *units.Context) {
+	orgsz := fontSty.Size
+	tmpsty := styles.FontRender{}
+	tmpsty = *fontSty
+	rot := mat.ExtractRot()
+	scx, scy := mat.ExtractScale()
+	scalex := scx / scy
+	if scalex == 1 {
+		scalex = 0
+	}
+	tr.BBox.SetEmpty()
+	for si := range tr.Spans {
+		sr := &(tr.Spans[si])
+		sr.RelPos = mat.MulVector2AsVector(sr.RelPos)
+		sr.LastPos = mat.MulVector2AsVector(sr.LastPos)
+		for i := range sr.Render {
+			rn := &sr.Render[i]
+			if rn.Face != nil {
+				tmpsty.Size = units.Value{Value: orgsz.Value * scy, Unit: orgsz.Unit, Dots: orgsz.Dots * scy} // rescale by y
+				tmpsty.Font = OpenFont(&tmpsty, ctxt)
+				rn.Face = tmpsty.Face.Face
+			}
+			rn.RelPos = mat.MulVector2AsVector(rn.RelPos)
+			rn.Size.Y *= scy
+			rn.Size.X *= scx
+			rn.RotRad = rot
+			rn.ScaleX = scalex
+			mxp := rn.RelPos.Add(rn.Size)
+			tr.BBox.ExpandByPoint(mxp)
+		}
+	}
+}
+
+// UpdateBBox updates the bounding box based on current positions.
+func (tr *Text) UpdateBBox() {
+	tr.BBox.SetEmpty()
+	for si := range tr.Spans {
+		sr := &(tr.Spans[si])
+		for i := range sr.Render {
+			rn := &sr.Render[i]
+			mxp := rn.RelPos.Add(rn.Size)
+			tr.BBox.ExpandByPoint(mxp)
+		}
+	}
 }

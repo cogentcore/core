@@ -12,6 +12,7 @@ package plot
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"image"
 	"io"
 	"os"
@@ -79,7 +80,7 @@ func (pt *Plot) Draw() {
 		pad := pt.Title.Style.Padding.Dots
 		pos.Y = pad
 		pt.Title.draw(pt, pos)
-		th := pt.Title.paintText.Size.Y + 2*pad
+		th := pt.Title.paintText.BBox.Size().Y + 2*pad
 		pth -= th
 		ptb.Min.Y += int(math32.Ceil(th))
 	}
@@ -132,7 +133,7 @@ func (ax *Axis) sizeX(pt *Plot, axw float32) (ht, lpad, rpad int) {
 	h := float32(0)
 	if ax.Label.Text != "" { // We assume that the label isn't rotated.
 		ax.Label.config(pt)
-		h += ax.Label.paintText.Size.Y
+		h += ax.Label.paintText.BBox.Size().Y
 		h += ax.Label.Style.Padding.Dots
 	}
 	lw := ax.Line.Width.Dots
@@ -149,7 +150,7 @@ func (ax *Axis) sizeX(pt *Plot, axw float32) (ht, lpad, rpad int) {
 			if px < 0 {
 				lpad += int(math32.Ceil(-px))
 			}
-			tht = max(tht, ax.TickText.paintText.Size.Y)
+			tht = max(tht, ax.TickText.paintText.BBox.Size().Y)
 		}
 		ltk := ax.lastTickLabel()
 		if ltk.Label != "" {
@@ -157,12 +158,12 @@ func (ax *Axis) sizeX(pt *Plot, axw float32) (ht, lpad, rpad int) {
 			if px+wd > axw {
 				rpad += int(math32.Ceil((px + wd) - axw))
 			}
-			tht = max(tht, ax.TickText.paintText.Size.Y)
+			tht = max(tht, ax.TickText.paintText.BBox.Size().Y)
 		}
 		ax.TickText.Text = ax.longestTickLabel()
 		if ax.TickText.Text != "" {
 			ax.TickText.config(pt)
-			tht = max(tht, ax.TickText.paintText.Size.Y)
+			tht = max(tht, ax.TickText.paintText.BBox.Size().Y)
 		}
 		h += ax.TickText.Style.Padding.Dots
 	}
@@ -183,7 +184,7 @@ func (ax *Axis) tickPosX(pt *Plot, t Tick, axw float32) (px, wd float32) {
 	ax.TickText.config(pt)
 	pos := ax.TickText.posX(0)
 	px = pos.X + x
-	wd = ax.TickText.paintText.Size.X
+	wd = ax.TickText.paintText.BBox.Size().X
 	return
 }
 
@@ -224,9 +225,10 @@ func (ax *Axis) sizeY(pt *Plot) (ywidth, tickWidth, tpad, bpad int) {
 	ax.TickLength.ToDots(uc)
 
 	w := float32(0)
-	if ax.Label.Text != "" { // We assume that the label isn't rotated.
-		ax.Label.configRot(pt, ax.Label.Style.Rotation)
-		w += ax.Label.paintText.Size.Y
+	if ax.Label.Text != "" {
+		ax.Label.config(pt)
+		fmt.Println(ax.Label.paintText.BBox)
+		w += ax.Label.paintText.BBox.Size().X
 		w += ax.Label.Style.Padding.Dots
 	}
 
@@ -241,10 +243,11 @@ func (ax *Axis) sizeY(pt *Plot) (ywidth, tickWidth, tpad, bpad int) {
 		ax.TickText.Text = ax.longestTickLabel()
 		if ax.TickText.Text != "" {
 			ax.TickText.config(pt)
-			w += ax.TickText.paintText.Size.X
-			tickWidth = int(math32.Ceil(ax.TickText.paintText.Size.X))
+			tw := ax.TickText.paintText.BBox.Size().X
+			w += tw
+			tickWidth = int(math32.Ceil(tw))
 			w += ax.TickText.Style.Padding.Dots
-			tht := int(math32.Ceil(0.5 * ax.TickText.paintText.Size.X))
+			tht := int(math32.Ceil(0.5 * ax.TickText.paintText.BBox.Size().X))
 			tpad += tht
 			bpad += tht
 		}
@@ -265,7 +268,7 @@ func (ax *Axis) drawX(pt *Plot, lpad, rpad int) {
 		ax.Label.config(pt)
 		pos := ax.Label.posX(axw)
 		pos.X += float32(ab.Min.X)
-		th := ax.Label.paintText.Size.Y
+		th := ax.Label.paintText.BBox.Size().Y
 		pos.Y = float32(ab.Max.Y) - th
 		ax.Label.draw(pt, pos)
 		ab.Max.Y -= int(math32.Ceil(th + ax.Label.Style.Padding.Dots))
@@ -281,7 +284,7 @@ func (ax *Axis) drawX(pt *Plot, lpad, rpad int) {
 		ax.TickText.config(pt)
 		pos := ax.TickText.posX(0)
 		pos.X += x + float32(ab.Min.X)
-		tickHt = ax.TickText.paintText.Size.Y + ax.TickText.Style.Padding.Dots
+		tickHt = ax.TickText.paintText.BBox.Size().Y + ax.TickText.Style.Padding.Dots
 		pos.Y = float32(ab.Max.Y) - tickHt
 		ax.TickText.draw(pt, pos)
 	}
@@ -319,10 +322,10 @@ func (ax *Axis) drawY(pt *Plot, tickWidth, tpad, bpad int) {
 	ab.Max.Y -= bpad
 	axh := float32(ab.Size().Y)
 	if ax.Label.Text != "" {
-		pos := ax.Label.posX(axh)
-		pos.Y = float32(ab.Min.Y) + pos.X + ax.Label.paintText.Size.X
-		pos.X = float32(ab.Min.X) + ax.Label.paintText.Size.Y
-		tw := ax.Label.paintText.Size.Y
+		pos := ax.Label.posY(axh)
+		pos.Y = float32(ab.Min.Y) + pos.X + ax.Label.paintText.BBox.Size().X
+		pos.X = float32(ab.Min.X) + ax.Label.paintText.BBox.Size().Y
+		tw := ax.Label.paintText.BBox.Size().Y
 		ax.Label.draw(pt, pos)
 		ab.Min.X += int(math32.Ceil(tw + ax.Label.Style.Padding.Dots))
 	}
@@ -337,8 +340,8 @@ func (ax *Axis) drawY(pt *Plot, tickWidth, tpad, bpad int) {
 		ax.TickText.config(pt)
 		pos := ax.TickText.posX(float32(tickWidth))
 		pos.X += float32(ab.Min.X)
-		pos.Y = float32(ab.Min.Y) + y - 0.5*ax.TickText.paintText.Size.Y
-		tickWd = max(tickWd, ax.TickText.paintText.Size.X+ax.TickText.Style.Padding.Dots)
+		pos.Y = float32(ab.Min.Y) + y - 0.5*ax.TickText.paintText.BBox.Size().Y
+		tickWd = max(tickWd, ax.TickText.paintText.BBox.Size().X+ax.TickText.Style.Padding.Dots)
 		ax.TickText.draw(pt, pos)
 	}
 

@@ -22,9 +22,11 @@ type Rune struct {
 
 	// fully specified font rendering info, includes fully computed font size.
 	// This is exactly what will be drawn, with no further transforms.
+	// If nil, previous one is retained.
 	Face font.Face `json:"-"`
 
-	// Color is the color to draw characters in
+	// Color is the color to draw characters in.
+	// If nil, previous one is retained.
 	Color image.Image `json:"-"`
 
 	// background color to fill background of color, for highlighting,

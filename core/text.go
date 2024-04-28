@@ -313,7 +313,7 @@ func (tx *Text) configTextAlloc(sz math32.Vector2) math32.Vector2 {
 	txs.Align, txs.AlignV = styles.Start, styles.Start
 	tx.paintText.SetHTML(tx.Text, fs, txs, &tx.Styles.UnitContext, nil)
 	tx.paintText.Layout(txs, fs, &tx.Styles.UnitContext, sz)
-	rsz := tx.paintText.Size.Ceil()
+	rsz := tx.paintText.BBox.Size().Ceil()
 	txs.Align, txs.AlignV = align, alignV
 	tx.paintText.Layout(txs, fs, &tx.Styles.UnitContext, rsz)
 	return rsz
@@ -360,7 +360,7 @@ func (tx *Text) SizeUp() {
 	} else {
 		tx.configTextSize(sz.Actual.Content)
 	}
-	rsz := tx.paintText.Size.Ceil()
+	rsz := tx.paintText.BBox.Size().Ceil()
 	sz.FitSizeMax(&sz.Actual.Content, rsz)
 	sz.SetTotalFromContent(&sz.Actual)
 	if DebugSettings.LayoutTrace {

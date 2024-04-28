@@ -25,7 +25,7 @@ type TextStyle struct {
 	// Padding is used in a case-dependent manner to add space around text elements
 	Padding units.Value
 
-	// rotation of the text
+	// rotation of the text, in Degrees
 	Rotation float32
 }
 
@@ -70,29 +70,12 @@ func (tx *Text) config(pt *Plot) {
 	fht := fs.Size.Dots
 	hsz := float32(12) * txln
 	txs := &pt.StdTextStyle
-
 	tx.paintText.SetHTML(tx.Text, fs, txs, uc, nil)
 	tx.paintText.Layout(txs, fs, uc, math32.Vector2{X: hsz, Y: fht})
-}
-
-// configRot is called during the layout of the plot, prior to drawing
-func (tx *Text) configRot(pt *Plot, rot float32) {
-	tx.Style.openFont(pt)
-	uc := &pt.Paint.UnitContext
-	fs := &tx.Style.FontRender
-	fs.ToDots(uc)
-	tx.Style.Padding.ToDots(uc)
-	txs := &pt.StdTextStyle
-
-	tx.paintText.SetString(tx.Text, fs, uc, txs, true, rot, 1)
-	sr := &(tx.paintText.Spans[0])
-	rotx := math32.Rotate2D(rot)
-	for i := range sr.Render {
-		sr.Render[i].RelPos = rotx.MulVector2AsVector(sr.Render[i].RelPos)
-		// sr.Render[i].Size.Y *= scy
-		// sr.Render[i].Size.X *= scx
+	if tx.Style.Rotation != 0 {
+		rotx := math32.Rotate2D(math32.DegToRad(tx.Style.Rotation))
+		tx.paintText.Transform(rotx, fs, uc)
 	}
-
 }
 
 // posX returns the starting position for a horizontally-aligned text element,
@@ -102,9 +85,9 @@ func (tx *Text) posX(width float32) math32.Vector2 {
 	pos.X = styles.AlignFactor(tx.Style.Align) * width
 	switch tx.Style.Align {
 	case styles.Center:
-		pos.X -= 0.5 * tx.paintText.Size.X
+		pos.X -= 0.5 * tx.paintText.BBox.Size().X
 	case styles.End:
-		pos.X -= tx.paintText.Size.X
+		pos.X -= tx.paintText.BBox.Size().X
 	}
 	return pos
 }
@@ -116,9 +99,9 @@ func (tx *Text) posY(height float32) math32.Vector2 {
 	pos.Y = styles.AlignFactor(tx.Style.Align) * height
 	switch tx.Style.Align {
 	case styles.Center:
-		pos.Y -= 0.5 * tx.paintText.Size.Y
+		pos.Y -= 0.5 * tx.paintText.BBox.Size().Y
 	case styles.End:
-		pos.Y -= tx.paintText.Size.Y
+		pos.Y -= tx.paintText.BBox.Size().Y
 	}
 	return pos
 }

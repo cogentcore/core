@@ -114,15 +114,16 @@ func (ed *Editor) LayoutAllLines() {
 		if ln >= len(ed.Renders) || ln >= len(buf.Markup) {
 			break
 		}
-		ed.Renders[ln].SetHTMLPre(buf.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProperties())
-		ed.Renders[ln].Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, sz)
-		if !ed.HasLinks && len(ed.Renders[ln].Links) > 0 {
+		rn := &ed.Renders[ln]
+		rn.SetHTMLPre(buf.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProperties())
+		rn.Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, sz)
+		if !ed.HasLinks && len(rn.Links) > 0 {
 			ed.HasLinks = true
 		}
 		ed.Offs[ln] = off
-		lsz := math32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
+		lsz := math32.Max(rn.BBox.Size().Y, ed.LineHeight)
 		off += lsz
-		mxwd = math32.Max(mxwd, ed.Renders[ln].Size.X)
+		mxwd = math32.Max(mxwd, rn.BBox.Size().X)
 	}
 	buf.MarkupMu.RUnlock()
 	ed.LinesSize = math32.Vec2(mxwd, off)
@@ -162,11 +163,12 @@ func (ed *Editor) ReLayoutAllLines() {
 		if ln >= len(ed.Renders) || ln >= len(buf.Markup) {
 			break
 		}
-		ed.Renders[ln].Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, sz)
+		rn := &ed.Renders[ln]
+		rn.Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, sz)
 		ed.Offs[ln] = off
-		lsz := math32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
+		lsz := math32.Max(rn.BBox.Size().Y, ed.LineHeight)
 		off += lsz
-		mxwd = math32.Max(mxwd, ed.Renders[ln].Size.X)
+		mxwd = math32.Max(mxwd, rn.BBox.Size().X)
 	}
 	buf.MarkupMu.RUnlock()
 
@@ -209,7 +211,7 @@ func (ed *Editor) ScenePos() {
 // lines (e.g., from word-wrap) is different, then NeedsLayout is called
 // and it returns true.
 func (ed *Editor) LayoutLine(ln int) bool {
-	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 {
+	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 || ln >= len(ed.Renders) {
 		return false
 	}
 	sty := &ed.Styles
@@ -219,17 +221,18 @@ func (ed *Editor) LayoutLine(ln int) bool {
 	needLay := false
 
 	ed.Buffer.MarkupMu.RLock()
-	curspans := len(ed.Renders[ln].Spans)
-	ed.Renders[ln].SetHTMLPre(ed.Buffer.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProperties())
-	ed.Renders[ln].Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, ed.LineLayoutSize)
-	if !ed.HasLinks && len(ed.Renders[ln].Links) > 0 {
+	rn := &ed.Renders[ln]
+	curspans := len(rn.Spans)
+	rn.SetHTMLPre(ed.Buffer.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProperties())
+	rn.Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, ed.LineLayoutSize)
+	if !ed.HasLinks && len(rn.Links) > 0 {
 		ed.HasLinks = true
 	}
-	nwspans := len(ed.Renders[ln].Spans)
+	nwspans := len(rn.Spans)
 	if nwspans != curspans && (nwspans > 1 || curspans > 1) {
 		needLay = true
 	}
-	if ed.Renders[ln].Size.X > mxwd {
+	if rn.BBox.Size().X > mxwd {
 		needLay = true
 	}
 	ed.Buffer.MarkupMu.RUnlock()

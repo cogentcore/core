@@ -43,8 +43,8 @@ import (
 type Text struct {
 	Spans []Span
 
-	// last size of overall rendered text
-	Size math32.Vector2
+	// bounding box for the rendered text.  use Size() method to get the size.
+	BBox math32.Box2
 
 	// fontheight computed in last Layout
 	FontHeight float32
@@ -284,8 +284,8 @@ func (tr *Text) SetString(str string, fontSty *styles.FontRender, ctxt *units.Co
 	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Face.Metrics().Height
-	tr.Size = math32.Vec2(ssz.X, math32.FromFixed(vht))
-
+	tr.BBox.Min.SetZero()
+	tr.BBox.Max = math32.Vec2(ssz.X, math32.FromFixed(vht))
 }
 
 // SetStringRot90 is for basic text rendering with a single style of text (see
@@ -304,7 +304,8 @@ func (tr *Text) SetStringRot90(str string, fontSty *styles.FontRender, ctxt *uni
 	sr.SetRunePosTBRot(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Face.Metrics().Height
-	tr.Size = math32.Vec2(math32.FromFixed(vht), ssz.Y)
+	tr.BBox.Min.SetZero()
+	tr.BBox.Max = math32.Vec2(math32.FromFixed(vht), ssz.Y)
 }
 
 // SetRunes is for basic text rendering with a single style of text (see
@@ -324,7 +325,8 @@ func (tr *Text) SetRunes(str []rune, fontSty *styles.FontRender, ctxt *units.Con
 	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 	ssz := sr.SizeHV()
 	vht := fontSty.Face.Face.Metrics().Height
-	tr.Size = math32.Vec2(ssz.X, math32.FromFixed(vht))
+	tr.BBox.Min.SetZero()
+	tr.BBox.Max = math32.Vec2(ssz.X, math32.FromFixed(vht))
 }
 
 // SetHTMLSimpleTag sets the styling parameters for simple html style tags

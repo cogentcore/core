@@ -40,10 +40,10 @@ type Text2D struct {
 	Styles styles.Style `set:"-" json:"-" xml:"-"`
 
 	// position offset of start of text rendering relative to upper-left corner
-	TxtPos math32.Vector2 `set:"-" xml:"-" json:"-"`
+	TextPos math32.Vector2 `set:"-" xml:"-" json:"-"`
 
 	// render data for text label
-	TxtRender paint.Text `set:"-" xml:"-" json:"-"`
+	TextRender paint.Text `set:"-" xml:"-" json:"-"`
 
 	// render state for rendering text
 	RenderState paint.State `set:"-" copier:"-" json:"-" xml:"-" view:"-"`
@@ -97,19 +97,19 @@ func (txt *Text2D) RenderText() {
 	}
 	st.ToDots()
 
-	txt.TxtRender.SetHTML(txt.Text, fr, &txt.Styles.Text, &txt.Styles.UnitContext, nil)
-	sz := txt.TxtRender.Size
-	txt.TxtRender.LayoutStdLR(&txt.Styles.Text, fr, &txt.Styles.UnitContext, sz)
-	if txt.TxtRender.Size != sz {
-		sz = txt.TxtRender.Size
-		txt.TxtRender.LayoutStdLR(&txt.Styles.Text, fr, &txt.Styles.UnitContext, sz)
-		if txt.TxtRender.Size != sz {
-			sz = txt.TxtRender.Size
+	txt.TextRender.SetHTML(txt.Text, fr, &txt.Styles.Text, &txt.Styles.UnitContext, nil)
+	sz := txt.TextRender.BBox.Size()
+	txt.TextRender.LayoutStdLR(&txt.Styles.Text, fr, &txt.Styles.UnitContext, sz)
+	if txt.TextRender.BBox.Size() != sz {
+		sz = txt.TextRender.BBox.Size()
+		txt.TextRender.LayoutStdLR(&txt.Styles.Text, fr, &txt.Styles.UnitContext, sz)
+		if txt.TextRender.BBox.Size() != sz {
+			sz = txt.TextRender.BBox.Size()
 		}
 	}
 	marg := txt.Styles.TotalMargin()
 	sz.SetAdd(marg.Size())
-	txt.TxtPos = marg.Pos().Round()
+	txt.TextPos = marg.Pos().Round()
 	szpt := sz.ToPointRound()
 	if szpt == (image.Point{}) {
 		szpt = image.Point{10, 10}
@@ -155,7 +155,7 @@ func (txt *Text2D) RenderText() {
 	if st.Background != nil {
 		draw.Draw(img, bounds, st.Background, image.Point{}, draw.Src)
 	}
-	txt.TxtRender.Render(ctx, txt.TxtPos)
+	txt.TextRender.Render(ctx, txt.TextPos)
 	rs.PopBounds()
 }
 

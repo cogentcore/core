@@ -90,7 +90,7 @@ func (tg *SimMatGrid) SizeLabel(lbs []string, col bool) (minBlank, ngps int, sz 
 	if !col {
 		tr.LayoutStdLR(&tg.Styles.Text, fr, &tg.Styles.UnitContext, tsz)
 	}
-	return minBlank, ngps, tr.Size
+	return minBlank, ngps, tr.BBox.Size()
 }
 
 func (tg *SimMatGrid) MinSize() math32.Vector2 {

@@ -10,7 +10,6 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/units"
 )
 
 // Text renders SVG text, handling both text and tspan elements.
@@ -102,19 +101,31 @@ func (g *Text) TextBBox() math32.Box2 {
 	if g.Text == "" {
 		return math32.Box2{}
 	}
+	g.LayoutText()
+	pc := &g.Paint
+	bb := g.TextRender.BBox
+	bb.Translate(math32.Vec2(0, -0.8*pc.FontStyle.Font.Face.Metrics.Height)) // adjust for baseline
+	return bb
+}
+
+// LayoutText does the full text layout without any transformations,
+// including computing the text bounding box.
+// This is called in TextBBox because that is called first prior to render.
+func (g *Text) LayoutText() {
+	if g.Text == "" {
+		return
+	}
 	pc := &g.Paint
 	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnitContext) // use original size font
+	if pc.FillStyle.Color != nil {
+		pc.FontStyle.Color = pc.FillStyle.Color
+	}
 	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnitContext, &pc.TextStyle, true, 0, 1)
 	sr := &(g.TextRender.Spans[0])
-	sr.Render[0].Face = pc.FontStyle.Face.Face // upscale
 
-	pos := g.Pos
+	// todo: align styling only affects multi-line text and is about how tspan is arranged within
+	// the overall text block.
 
-	if pc.TextStyle.Align == styles.Center || pc.TextStyle.Anchor == styles.AnchorMiddle {
-		pos.X -= g.TextRender.Size.X * .5
-	} else if pc.TextStyle.Align == styles.End || pc.TextStyle.Anchor == styles.AnchorEnd {
-		pos.X -= g.TextRender.Size.X
-	}
 	if len(g.CharPosX) > 0 {
 		mx := min(len(g.CharPosX), len(sr.Render))
 		for i := 0; i < mx; i++ {
@@ -149,110 +160,25 @@ func (g *Text) TextBBox() math32.Box2 {
 	}
 	// todo: TextLength, AdjustGlyphs -- also svg2 at least supports word wrapping!
 
-	// accumulate final bbox
-	sz := math32.Vector2{}
-	maxh := float32(0)
-	for i := range sr.Render {
-		mxp := sr.Render[i].RelPos.Add(sr.Render[i].Size)
-		sz.SetMax(mxp)
-		maxh = math32.Max(maxh, sr.Render[i].Size.Y)
-	}
-	bb := math32.Box2{}
-	bb.Min = pos
-	bb.Min.Y -= maxh * .8 // baseline adjust
-	bb.Max = bb.Min.Add(g.TextRender.Size)
-	return bb
+	g.TextRender.UpdateBBox()
 }
 
-// RenderText renders the text in full coords
 func (g *Text) RenderText(sv *SVG) {
 	pc := &paint.Context{&sv.RenderState, &g.Paint}
-	orgsz := pc.FontStyle.Size
-	pos := pc.CurrentTransform.MulVector2AsPoint(math32.Vec2(g.Pos.X, g.Pos.Y))
-	rot := pc.CurrentTransform.ExtractRot()
-	scx, scy := pc.CurrentTransform.ExtractScale()
-	scalex := scx / scy
-	if scalex == 1 {
-		scalex = 0
-	}
-	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnitContext) // use original size font
-	if pc.FillStyle.Color != nil {
-		pc.FontStyle.Color = pc.FillStyle.Color
-	}
-	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnitContext, &pc.TextStyle, true, rot, scalex)
-	pc.FontStyle.Size = units.Value{Value: orgsz.Value * scy, Unit: orgsz.Unit, Dots: orgsz.Dots * scy} // rescale by y
-	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnitContext)
-	sr := &(g.TextRender.Spans[0])
-	sr.Render[0].Face = pc.FontStyle.Face.Face // upscale
-	g.TextRender.Size = g.TextRender.Size.Mul(math32.Vec2(scx, scy))
-
-	// todo: align styling only affects multi-line text and is about how tspan is arranged within
-	// the overall text block.
-
+	mat := &pc.CurrentTransform
+	// note: layout of text has already been done in LocalBBox above
+	g.TextRender.Transform(*mat, &pc.FontStyle, &pc.UnitContext)
+	pos := mat.MulVector2AsPoint(math32.Vec2(g.Pos.X, g.Pos.Y))
 	if pc.TextStyle.Align == styles.Center || pc.TextStyle.Anchor == styles.AnchorMiddle {
-		pos.X -= g.TextRender.Size.X * .5
+		pos.X -= g.TextRender.BBox.Size().X * .5
 	} else if pc.TextStyle.Align == styles.End || pc.TextStyle.Anchor == styles.AnchorEnd {
-		pos.X -= g.TextRender.Size.X
+		pos.X -= g.TextRender.BBox.Size().X
 	}
-	for i := range sr.Render {
-		sr.Render[i].RelPos = pc.CurrentTransform.MulVector2AsVector(sr.Render[i].RelPos)
-		sr.Render[i].Size.Y *= scy
-		sr.Render[i].Size.X *= scx
-	}
-	pc.FontStyle.Size = orgsz
-	if len(g.CharPosX) > 0 {
-		mx := min(len(g.CharPosX), len(sr.Render))
-		for i := 0; i < mx; i++ {
-			// todo: this may not be fully correct, given relativity constraints
-			cpx := pc.CurrentTransform.MulVector2AsVector(math32.Vec2(g.CharPosX[i], 0))
-			sr.Render[i].RelPos.X = cpx.X
-		}
-	}
-	if len(g.CharPosY) > 0 {
-		mx := min(len(g.CharPosY), len(sr.Render))
-		for i := 0; i < mx; i++ {
-			cpy := pc.CurrentTransform.MulVector2AsPoint(math32.Vec2(g.CharPosY[i], 0))
-			sr.Render[i].RelPos.Y = cpy.Y
-		}
-	}
-	if len(g.CharPosDX) > 0 {
-		mx := min(len(g.CharPosDX), len(sr.Render))
-		for i := 0; i < mx; i++ {
-			dx := pc.CurrentTransform.MulVector2AsVector(math32.Vec2(g.CharPosDX[i], 0))
-			if i > 0 {
-				sr.Render[i].RelPos.X = sr.Render[i-1].RelPos.X + dx.X
-			} else {
-				sr.Render[i].RelPos.X = dx.X // todo: not sure this is right
-			}
-		}
-	}
-	if len(g.CharPosDY) > 0 {
-		mx := min(len(g.CharPosDY), len(sr.Render))
-		for i := 0; i < mx; i++ {
-			dy := pc.CurrentTransform.MulVector2AsVector(math32.Vec2(g.CharPosDY[i], 0))
-			if i > 0 {
-				sr.Render[i].RelPos.Y = sr.Render[i-1].RelPos.Y + dy.Y
-			} else {
-				sr.Render[i].RelPos.Y = dy.Y // todo: not sure this is right
-			}
-		}
-	}
-	// todo: TextLength, AdjustGlyphs -- also svg2 at least supports word wrapping!
-
-	// accumulate final bbox
-	sz := math32.Vector2{}
-	maxh := float32(0)
-	for i := range sr.Render {
-		mxp := sr.Render[i].RelPos.Add(sr.Render[i].Size)
-		sz.SetMax(mxp)
-		maxh = math32.Max(maxh, sr.Render[i].Size.Y)
-	}
-	g.TextRender.Size = sz
-	g.LastPos = pos
-	g.LastBBox.Min = pos
-	g.LastBBox.Min.Y -= maxh * .8 // baseline adjust
-	g.LastBBox.Max = g.LastBBox.Min.Add(g.TextRender.Size)
 	g.TextRender.Render(pc, pos)
+	g.LastPos = pos
+	bb := g.TextRender.BBox
+	bb.Translate(math32.Vec2(pos.X, pos.Y-0.8*pc.FontStyle.Font.Face.Metrics.Height)) // adjust for baseline
+	g.LastBBox = bb
 	g.BBoxes(sv)
 }
 

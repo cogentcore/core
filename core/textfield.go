@@ -1852,7 +1852,7 @@ func (tf *TextField) ConfigTextSize(sz math32.Vector2) math32.Vector2 {
 	tf.RenderAll.SetRunes(txt, fs, &st.UnitContext, txs, true, 0, 0)
 	tf.RenderAll.Layout(txs, fs, &st.UnitContext, sz)
 	txs.Align, txs.AlignV = align, alignV
-	rsz := tf.RenderAll.Size.Ceil()
+	rsz := tf.RenderAll.BBox.Size().Ceil()
 	return rsz
 }
 
