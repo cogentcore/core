@@ -323,16 +323,16 @@ func (ax *Axis) drawY(pt *Plot, tickWidth, tpad, bpad int) {
 	axh := float32(ab.Size().Y)
 	if ax.Label.Text != "" {
 		pos := ax.Label.posY(axh)
-		pos.Y = float32(ab.Min.Y) + pos.X + ax.Label.paintText.BBox.Size().X
-		pos.X = float32(ab.Min.X) + ax.Label.paintText.BBox.Size().Y
-		tw := ax.Label.paintText.BBox.Size().Y
+		tw := ax.Label.paintText.BBox.Size().X
+		pos.Y += float32(ab.Min.Y) + ax.Label.paintText.BBox.Size().Y
+		pos.X = float32(ab.Min.X)
 		ax.Label.draw(pt, pos)
 		ab.Min.X += int(math32.Ceil(tw + ax.Label.Style.Padding.Dots))
 	}
 
 	tickWd := float32(0)
 	for _, t := range ax.ticks {
-		y := axh * float32(ax.Norm(t.Value))
+		y := axh * (1 - float32(ax.Norm(t.Value)))
 		if y < 0 || y > axh || t.IsMinor() {
 			continue
 		}

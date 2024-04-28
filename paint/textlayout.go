@@ -350,7 +350,6 @@ func (tr *Text) Transform(mat math32.Matrix2, fontSty *styles.FontRender, ctxt *
 	if scalex == 1 {
 		scalex = 0
 	}
-	tr.BBox.SetEmpty()
 	for si := range tr.Spans {
 		sr := &(tr.Spans[si])
 		sr.RelPos = mat.MulVector2AsVector(sr.RelPos)
@@ -367,10 +366,9 @@ func (tr *Text) Transform(mat math32.Matrix2, fontSty *styles.FontRender, ctxt *
 			rn.Size.X *= scx
 			rn.RotRad = rot
 			rn.ScaleX = scalex
-			mxp := rn.RelPos.Add(rn.Size)
-			tr.BBox.ExpandByPoint(mxp)
 		}
 	}
+	tr.BBox = tr.BBox.MulMatrix2(mat)
 }
 
 // UpdateBBox updates the bounding box based on current positions.
