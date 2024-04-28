@@ -70,16 +70,34 @@ func (tx *Text) config(pt *Plot) {
 	fht := fs.Size.Dots
 	hsz := float32(12) * txln
 	txs := &pt.StdTextStyle
-	txs.OrientationHoriz = tx.Style.Rotation
-	txs.Align = tx.Style.Align
 
 	tx.paintText.SetHTML(tx.Text, fs, txs, uc, nil)
 	tx.paintText.Layout(txs, fs, uc, math32.Vector2{X: hsz, Y: fht})
 }
 
-// startPosX returns the starting position for a horizontally-aligned text element,
+// configRot is called during the layout of the plot, prior to drawing
+func (tx *Text) configRot(pt *Plot, rot float32) {
+	tx.Style.openFont(pt)
+	uc := &pt.Paint.UnitContext
+	fs := &tx.Style.FontRender
+	fs.ToDots(uc)
+	tx.Style.Padding.ToDots(uc)
+	txs := &pt.StdTextStyle
+
+	tx.paintText.SetString(tx.Text, fs, uc, txs, true, rot, 1)
+	sr := &(tx.paintText.Spans[0])
+	rotx := math32.Rotate2D(rot)
+	for i := range sr.Render {
+		sr.Render[i].RelPos = rotx.MulVector2AsVector(sr.Render[i].RelPos)
+		// sr.Render[i].Size.Y *= scy
+		// sr.Render[i].Size.X *= scx
+	}
+
+}
+
+// posX returns the starting position for a horizontally-aligned text element,
 // based on given width.  Text must have been config'd already.
-func (tx *Text) startPosX(width float32) math32.Vector2 {
+func (tx *Text) posX(width float32) math32.Vector2 {
 	pos := math32.Vector2{}
 	pos.X = styles.AlignFactor(tx.Style.Align) * width
 	switch tx.Style.Align {
@@ -87,6 +105,20 @@ func (tx *Text) startPosX(width float32) math32.Vector2 {
 		pos.X -= 0.5 * tx.paintText.Size.X
 	case styles.End:
 		pos.X -= tx.paintText.Size.X
+	}
+	return pos
+}
+
+// posY returns the starting position for a vertically-rotated text element,
+// based on given height.  Text must have been config'd already.
+func (tx *Text) posY(height float32) math32.Vector2 {
+	pos := math32.Vector2{}
+	pos.Y = styles.AlignFactor(tx.Style.Align) * height
+	switch tx.Style.Align {
+	case styles.Center:
+		pos.Y -= 0.5 * tx.paintText.Size.Y
+	case styles.End:
+		pos.Y -= tx.paintText.Size.Y
 	}
 	return pos
 }

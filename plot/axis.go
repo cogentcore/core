@@ -13,6 +13,7 @@ import (
 	"math"
 
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -84,8 +85,13 @@ func (ax *Axis) Defaults(dim math32.Dims) {
 	ax.Padding.Pt(5)
 	ax.TickText.Defaults()
 	ax.TickText.Style.Size.Pt(10)
+	ax.TickText.Style.Padding.Pt(1)
 	ax.TickLine.Defaults()
 	ax.TickLength.Pt(8)
+	if dim == math32.Y {
+		ax.Label.Style.Rotation = -0.5 * math32.Pi
+		ax.TickText.Style.Align = styles.End
+	}
 	ax.Scale = LinearScale{}
 	ax.Ticker = DefaultTicks{}
 }

@@ -75,32 +75,32 @@ func (pt *Plot) Draw() {
 
 	if pt.Title.Text != "" {
 		pt.Title.config(pt)
-		pos := pt.Title.startPosX(ptw)
+		pos := pt.Title.posX(ptw)
 		pad := pt.Title.Style.Padding.Dots
 		pos.Y = pad
 		pt.Title.draw(pt, pos)
 		th := pt.Title.paintText.Size.Y + 2*pad
 		pth -= th
-		ptb.Max.Y -= int(math32.Ceil(th))
+		ptb.Min.Y += int(math32.Ceil(th))
 	}
 
 	pt.X.SanitizeRange()
 	pt.Y.SanitizeRange()
 
-	ywidth := pt.Y.size(pt)
-	xheight := pt.X.size(pt)
+	ywidth, tickWidth, tpad, bpad := pt.Y.sizeY(pt)
+	xheight, lpad, rpad := pt.X.sizeX(pt, float32(pt.Size.X-int(ywidth)))
 
 	tb := ptb
 	tb.Min.X += ywidth
 	pt.Paint.PushBounds(tb)
-	pt.X.draw(pt)
+	pt.X.drawX(pt, lpad, rpad)
 	pt.Paint.PopBounds()
 
-	// tb = ptb
-	// tb.Max.Y -= xheight
-	// pt.Paint.PushBounds(tb)
-	// pt.Y.draw(pt)
-	// pt.Paint.PopBounds()
+	tb = ptb
+	tb.Max.Y -= xheight
+	pt.Paint.PushBounds(tb)
+	pt.Y.drawY(pt, tickWidth, tpad, bpad)
+	pt.Paint.PopBounds()
 
 	tb = ptb
 	tb.Min.X += ywidth
@@ -115,133 +115,96 @@ func (pt *Plot) Draw() {
 	pt.Legend.Draw(pt)
 }
 
-// DataCanvas returns a new draw.Canvas that
-// is the subset of the given draw area into which
-// the plot data will be drawn.
-// func (pt *Plot) DataCanvas(da draw.Canvas) draw.Canvas {
-// 	if pt.Title.Text != "" {
-// 		rect := pt.Title.TextStyle.Rectangle(pt.Title.Text)
-// 		da.Max.Y -= rect.Size().Y
-// 		da.Max.Y -= pt.Title.Padding
-// 	}
-// 	pt.X.sanitizeRange()
-// 	x := horizontalAxis{pt.X}
-// 	pt.Y.sanitizeRange()
-// 	y := verticalAxis{pt.Y}
-// 	return padY(pt, padX(pt, draw.Crop(da, y.size(), 0, x.size(), 0)))
-// }
-
-/*
-// padX returns a draw.Canvas that is padded horizontally
-// so that glyphs will no be clipped.
-func padX(pt *Plot, c draw.Canvas) draw.Canvas {
-	glyphs := pt.GlyphBoxes(pt)
-	l := leftMost(&c, glyphs)
-	xAxis := horizontalAxis{pt.X}
-	glyphs = append(glyphs, xAxis.GlyphBoxes(pt)...)
-	r := rightMost(&c, glyphs)
-
-	minx := c.Min.X - l.Min.X
-	maxx := c.Max.X - (r.Min.X + r.Size().X)
-	lx := vg.Length(l.X)
-	rx := vg.Length(r.X)
-	n := (lx*maxx - rx*minx) / (lx - rx)
-	m := ((lx-1)*maxx - rx*minx + minx) / (lx - rx)
-	return draw.Canvas{
-		Canvas: vg.Canvas(c),
-		Rectangle: vg.Rectangle{
-			Min: vg.Point{X: n, Y: c.Min.Y},
-			Max: vg.Point{X: m, Y: c.Max.Y},
-		},
-	}
-}
-
-// padY returns a draw.Canvas that is padded vertically
-// so that glyphs will no be clipped.
-func padY(pt *Plot, c draw.Canvas) draw.Canvas {
-	glyphs := pt.GlyphBoxes(pt)
-	b := bottomMost(&c, glyphs)
-	yAxis := verticalAxis{pt.Y}
-	glyphs = append(glyphs, yAxis.GlyphBoxes(pt)...)
-	t := topMost(&c, glyphs)
-
-	miny := c.Min.Y - b.Min.Y
-	maxy := c.Max.Y - (t.Min.Y + t.Size().Y)
-	by := vg.Length(b.Y)
-	ty := vg.Length(t.Y)
-	n := (by*maxy - ty*miny) / (by - ty)
-	m := ((by-1)*maxy - ty*miny + miny) / (by - ty)
-	return draw.Canvas{
-		Canvas: vg.Canvas(c),
-		Rectangle: vg.Rectangle{
-			Min: vg.Point{Y: n, X: c.Min.X},
-			Max: vg.Point{Y: m, X: c.Max.X},
-		},
-	}
-}
-
-// Transforms returns functions to transfrom
-// from the x and y data coordinate system to
-// the draw coordinate system of the given
-// draw area.
-func (pt *Plot) Transforms(c *draw.Canvas) (x, y func(float64) vg.Length) {
-	x = func(x float64) vg.Length { return c.X(pt.X.Norm(x)) }
-	y = func(y float64) vg.Length { return c.Y(pt.Y.Norm(y)) }
-	return
-}
-*/
-
 ////////////////////////////////////////////////////////////////
 //		Axis
-// drawTicks returns true if the tick marks should be drawn.
 
+// drawTicks returns true if the tick marks should be drawn.
 func (ax *Axis) drawTicks() bool {
 	return ax.TickLine.Width.Value > 0 && ax.TickLength.Value > 0
 }
 
-// size returns the Height of X axis or Width of Y axis
-func (ax *Axis) size(pt *Plot) int {
+// sizeX returns the total height of the axis, left and right padding
+func (ax *Axis) sizeX(pt *Plot, axw float32) (ht, lpad, rpad int) {
+	pc := pt.Paint
+	uc := &pc.UnitContext
+	ax.TickLength.ToDots(uc)
 	ax.ticks = ax.Ticker.Ticks(ax.Min, ax.Max)
-	if ax.Axis == math32.X {
-		return ax.sizeX(pt)
-	} else {
-		return ax.sizeY(pt)
-	}
-}
-
-func (ax *Axis) sizeX(pt *Plot) int {
 	h := float32(0)
 	if ax.Label.Text != "" { // We assume that the label isn't rotated.
 		ax.Label.config(pt)
 		h += ax.Label.paintText.Size.Y
 		h += ax.Label.Style.Padding.Dots
 	}
-
+	lw := ax.Line.Width.Dots
+	lpad = int(math32.Ceil(lw)) + 2
+	rpad = int(math32.Ceil(lw)) + 2
+	tht := float32(0)
 	if len(ax.ticks) > 0 {
 		if ax.drawTicks() {
 			h += ax.TickLength.Dots
 		}
+		ftk := ax.firstTickLabel()
+		if ftk.Label != "" {
+			px, _ := ax.tickPosX(pt, ftk, axw)
+			if px < 0 {
+				lpad += int(math32.Ceil(-px))
+			}
+			tht = max(tht, ax.TickText.paintText.Size.Y)
+		}
+		ltk := ax.lastTickLabel()
+		if ltk.Label != "" {
+			px, wd := ax.tickPosX(pt, ltk, axw)
+			if px+wd > axw {
+				rpad += int(math32.Ceil((px + wd) - axw))
+			}
+			tht = max(tht, ax.TickText.paintText.Size.Y)
+		}
 		ax.TickText.Text = ax.longestTickLabel()
 		if ax.TickText.Text != "" {
 			ax.TickText.config(pt)
-			h += ax.TickText.paintText.Size.Y
-			h += ax.TickText.Style.Padding.Dots
+			tht = max(tht, ax.TickText.paintText.Size.Y)
 		}
+		h += ax.TickText.Style.Padding.Dots
 	}
-	h += ax.Line.Width.Dots / 2
-	h += ax.Padding.Dots
+	h += tht + lw + ax.Padding.Dots
 
-	return int(math32.Ceil(h))
+	ht = int(math32.Ceil(h))
+	return
 }
 
-func (ax *Axis) lastTickLabel() string {
-	lst := ""
+// tickLabelPosX returns the relative position and width for given tick along X axis
+// for given total axis width
+func (ax *Axis) tickPosX(pt *Plot, t Tick, axw float32) (px, wd float32) {
+	x := axw * float32(ax.Norm(t.Value))
+	if x < 0 || x > axw {
+		return
+	}
+	ax.TickText.Text = t.Label
+	ax.TickText.config(pt)
+	pos := ax.TickText.posX(0)
+	px = pos.X + x
+	wd = ax.TickText.paintText.Size.X
+	return
+}
+
+func (ax *Axis) firstTickLabel() Tick {
 	for _, tk := range ax.ticks {
 		if tk.Label != "" {
-			lst = tk.Label
+			return tk
 		}
 	}
-	return lst
+	return Tick{}
+}
+
+func (ax *Axis) lastTickLabel() Tick {
+	n := len(ax.ticks)
+	for i := n - 1; i >= 0; i-- {
+		tk := ax.ticks[i]
+		if tk.Label != "" {
+			return tk
+		}
+	}
+	return Tick{}
 }
 
 func (ax *Axis) longestTickLabel() string {
@@ -254,13 +217,22 @@ func (ax *Axis) longestTickLabel() string {
 	return lst
 }
 
-func (ax *Axis) sizeY(pt *Plot) int {
+func (ax *Axis) sizeY(pt *Plot) (ywidth, tickWidth, tpad, bpad int) {
+	pc := pt.Paint
+	uc := &pc.UnitContext
+	ax.ticks = ax.Ticker.Ticks(ax.Min, ax.Max)
+	ax.TickLength.ToDots(uc)
+
 	w := float32(0)
 	if ax.Label.Text != "" { // We assume that the label isn't rotated.
-		ax.Label.config(pt)
-		w += ax.Label.paintText.Size.X
+		ax.Label.configRot(pt, ax.Label.Style.Rotation)
+		w += ax.Label.paintText.Size.Y
 		w += ax.Label.Style.Padding.Dots
 	}
+
+	lw := ax.Line.Width.Dots
+	tpad = int(math32.Ceil(lw)) + 2
+	bpad = int(math32.Ceil(lw)) + 2
 
 	if len(ax.ticks) > 0 {
 		if ax.drawTicks() {
@@ -270,33 +242,28 @@ func (ax *Axis) sizeY(pt *Plot) int {
 		if ax.TickText.Text != "" {
 			ax.TickText.config(pt)
 			w += ax.TickText.paintText.Size.X
+			tickWidth = int(math32.Ceil(ax.TickText.paintText.Size.X))
 			w += ax.TickText.Style.Padding.Dots
+			tht := int(math32.Ceil(0.5 * ax.TickText.paintText.Size.X))
+			tpad += tht
+			bpad += tht
 		}
 	}
-	w += ax.Line.Width.Dots / 2
-	w += ax.Padding.Dots
-
-	return int(math32.Ceil(w))
-}
-
-func (ax *Axis) draw(pt *Plot) {
-	if ax.Axis == math32.X {
-		ax.drawX(pt)
-	} else {
-		ax.drawY(pt)
-	}
+	w += lw + ax.Padding.Dots
+	ywidth = int(math32.Ceil(w))
+	return
 }
 
 // drawX draws the horizontal axis
-func (ax *Axis) drawX(pt *Plot) {
-	pc := pt.Paint
-	uc := &pc.UnitContext
+func (ax *Axis) drawX(pt *Plot, lpad, rpad int) {
 	ab := pt.Paint.Bounds
+	ab.Min.X += lpad
+	ab.Max.X -= rpad
 	axw := float32(ab.Size().X)
 	// axh := float32(ab.Size().Y) // height of entire plot
 	if ax.Label.Text != "" {
 		ax.Label.config(pt)
-		pos := ax.Label.startPosX(axw)
+		pos := ax.Label.posX(axw)
 		pos.X += float32(ab.Min.X)
 		th := ax.Label.paintText.Size.Y
 		pos.Y = float32(ab.Max.Y) - th
@@ -307,12 +274,12 @@ func (ax *Axis) drawX(pt *Plot) {
 	tickHt := float32(0)
 	for _, t := range ax.ticks {
 		x := axw * float32(ax.Norm(t.Value))
-		if x < 0 || x >= axw || t.IsMinor() {
+		if x < 0 || x > axw || t.IsMinor() {
 			continue
 		}
 		ax.TickText.Text = t.Label
 		ax.TickText.config(pt)
-		pos := ax.TickText.startPosX(0)
+		pos := ax.TickText.posX(0)
 		pos.X += x + float32(ab.Min.X)
 		tickHt = ax.TickText.paintText.Size.Y + ax.TickText.Style.Padding.Dots
 		pos.Y = float32(ab.Max.Y) - tickHt
@@ -326,120 +293,77 @@ func (ax *Axis) drawX(pt *Plot) {
 	}
 
 	if len(ax.ticks) > 0 && ax.drawTicks() {
-		ax.TickLength.ToDots(uc)
 		ln := ax.TickLength.Dots
 		for _, t := range ax.ticks {
+			yoff := float32(0)
+			if t.IsMinor() {
+				yoff = 0.5 * ln
+			}
 			x := axw * float32(ax.Norm(t.Value))
-			if x < 0 || x >= axw {
+			if x < 0 || x > axw {
 				continue
 			}
 			x += float32(ab.Min.X)
-			ax.TickLine.draw(pt, math32.Vec2(x, float32(ab.Max.Y)), math32.Vec2(x, float32(ab.Max.Y)-ln))
+			ax.TickLine.draw(pt, math32.Vec2(x, float32(ab.Max.Y)-yoff), math32.Vec2(x, float32(ab.Max.Y)-ln))
 		}
-		ab.Max.Y -= int(0.5 * ln)
+		ab.Max.Y -= int(ln - 0.5*ax.Line.Width.Dots)
 	}
 
 	ax.Line.draw(pt, math32.Vec2(float32(ab.Min.X), float32(ab.Max.Y)), math32.Vec2(float32(ab.Min.X)+axw, float32(ab.Max.Y)))
 }
 
-/*
-// GlyphBoxes returns the GlyphBoxes for the tick labels.
-func (ax horizontalAxis) GlyphBoxes(p *Plot) []GlyphBox {
-	var (
-		boxes []GlyphBox
-		yoff  font.Length
-	)
-
+// drawY draws the Y axis along the left side
+func (ax *Axis) drawY(pt *Plot, tickWidth, tpad, bpad int) {
+	ab := pt.Paint.Bounds
+	ab.Min.Y += tpad
+	ab.Max.Y -= bpad
+	axh := float32(ab.Size().Y)
 	if ax.Label.Text != "" {
-		x := ax.Norm(p.X.Max)
-		switch ax.Label.Position {
-		case draw.PosCenter:
-			x = ax.Norm(0.5 * (p.X.Max + p.X.Min))
-		case draw.PosRight:
-			x -= ax.Norm(0.5 * ax.Label.TextStyle.Width(ax.Label.Text).Points()) // FIXME(sbinet): want data coordinates
-		}
-		descent := ax.Label.TextStyle.FontExtents().Descent
-		boxes = append(boxes, GlyphBox{
-			X:         x,
-			Rectangle: ax.Label.TextStyle.Rectangle(ax.Label.Text).Add(vg.Point{Y: yoff + descent}),
-		})
-		yoff += ax.Label.TextStyle.Height(ax.Label.Text)
-		yoff += ax.Label.Padding
+		pos := ax.Label.posX(axh)
+		pos.Y = float32(ab.Min.Y) + pos.X + ax.Label.paintText.Size.X
+		pos.X = float32(ab.Min.X) + ax.Label.paintText.Size.Y
+		tw := ax.Label.paintText.Size.Y
+		ax.Label.draw(pt, pos)
+		ab.Min.X += int(math32.Ceil(tw + ax.Label.Style.Padding.Dots))
 	}
 
-	var (
-		ax.ticks   = ax.Ticker.Ticks(ax.Min, ax.Max)
-		height  = tickLabelHeight(ax.Tick.Label, ax.ticks)
-		descent = ax.Tick.Label.FontExtents().Descent
-	)
+	tickWd := float32(0)
 	for _, t := range ax.ticks {
-		if t.IsMinor() {
+		y := axh * float32(ax.Norm(t.Value))
+		if y < 0 || y > axh || t.IsMinor() {
 			continue
 		}
-		box := GlyphBox{
-			X:         ax.Norm(t.Value),
-			Rectangle: ax.Tick.Label.Rectangle(t.Label).Add(vg.Point{Y: yoff + height + descent}),
-		}
-		boxes = append(boxes, box)
+		ax.TickText.Text = t.Label
+		ax.TickText.config(pt)
+		pos := ax.TickText.posX(float32(tickWidth))
+		pos.X += float32(ab.Min.X)
+		pos.Y = float32(ab.Min.Y) + y - 0.5*ax.TickText.paintText.Size.Y
+		tickWd = max(tickWd, ax.TickText.paintText.Size.X+ax.TickText.Style.Padding.Dots)
+		ax.TickText.draw(pt, pos)
 	}
-	return boxes
-}
-*/
 
-// drawY draws the Y axis along the left side
-func (ax *Axis) drawY(pt *Plot) {
-	/*
-		var (
-			x = c.Min.X
-			y vg.Length
-		)
-		if ax.Label.Text != "" {
-			sty := ax.Label.TextStyle
-			sty.Rotation += math.Pi / 2
-			x += ax.Label.TextStyle.Height(ax.Label.Text)
-			switch ax.Label.Position {
-			case draw.PosCenter:
-				y = c.Center().Y
-			case draw.PosTop:
-				y = c.Max.Y
-				y -= ax.Label.TextStyle.Width(ax.Label.Text) / 2
-			}
-			descent := ax.Label.TextStyle.FontExtents().Descent
-			c.FillText(sty, vg.Point{X: x - descent, Y: y}, ax.Label.Text)
-			x += descent
-			x += ax.Label.Padding
-		}
-		ax.ticks := ax.Ticker.Ticks(ax.Min, ax.Max)
-		if w := tickLabelWidth(ax.Tick.Label, ax.ticks); len(ax.ticks) > 0 && w > 0 {
-			x += w
-		}
+	if len(ax.ticks) > 0 {
+		ab.Min.X += int(math32.Ceil(tickWd))
+		// } else {
+		// 	y += ax.Width / 2
+	}
 
-		major := false
-		descent := ax.Tick.Label.FontExtents().Descent
+	if len(ax.ticks) > 0 && ax.drawTicks() {
+		ln := ax.TickLength.Dots
 		for _, t := range ax.ticks {
-			y := c.Y(ax.Norm(t.Value))
-			if !c.ContainsY(y) || t.IsMinor() {
+			xoff := float32(0)
+			if t.IsMinor() {
+				xoff = 0.5 * ln
+			}
+			y := axh * float32(ax.Norm(t.Value))
+			if y < 0 || y > axh {
 				continue
 			}
-			c.FillText(ax.Tick.Label, vg.Point{X: x, Y: y + descent}, t.Label)
-			major = true
+			y += float32(ab.Min.Y)
+			ax.TickLine.draw(pt, math32.Vec2(float32(ab.Min.X)+xoff, y), math32.Vec2(float32(ab.Min.X)+ln, y))
 		}
-		if major {
-			x += ax.Tick.Label.Width(" ")
-		}
-		if ax.drawTicks() && len(ax.ticks) > 0 {
-			len := ax.Tick.Length
-			for _, t := range ax.ticks {
-				y := c.Y(ax.Norm(t.Value))
-				if !c.ContainsY(y) {
-					continue
-				}
-				start := t.lengthOffset(len)
-				c.StrokeLine2(ax.Tick.LineStyle, x+start, y, x+len, y)
-			}
-			x += len
-		}
+		ab.Min.X += int(ln + 0.5*ax.Line.Width.Dots)
+	}
 
-		c.StrokeLine2(ax.LineStyle, x, c.Min.Y, x, c.Max.Y)
-	*/
+	ax.Line.draw(pt, math32.Vec2(float32(ab.Min.X), float32(ab.Min.Y)), math32.Vec2(float32(ab.Min.X), float32(ab.Max.Y)))
 }

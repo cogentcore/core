@@ -59,7 +59,6 @@ type Plot struct {
 func (pt *Plot) Defaults() {
 	pt.Title.Defaults()
 	pt.Title.Style.Size.Pt(16)
-	pt.Title.Style.Align = styles.Center
 	pt.Background = color.White
 	pt.X.Defaults(math32.X)
 	pt.Y.Defaults(math32.Y)
