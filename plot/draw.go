@@ -297,6 +297,7 @@ func (ax *Axis) drawX(pt *Plot) {
 	if ax.Label.Text != "" {
 		ax.Label.config(pt)
 		pos := ax.Label.startPosX(axw)
+		pos.X += float32(ab.Min.X)
 		th := ax.Label.paintText.Size.Y
 		pos.Y = float32(ab.Max.Y) - th
 		ax.Label.draw(pt, pos)
