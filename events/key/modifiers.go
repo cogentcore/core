@@ -34,7 +34,7 @@ const (
 // plus symbols as seperators.
 func (mo Modifiers) ModifiersString() string {
 	modstr := ""
-	for m := Shift; m < ModifiersN; m++ {
+	for _, m := range ModifiersValues() {
 		if mo.HasFlag(m) {
 			modstr += m.BitIndexString() + "+"
 		}
@@ -46,7 +46,7 @@ func (mo Modifiers) ModifiersString() string {
 // and the remainder of the string after modifiers have been stripped
 func ModifiersFromString(cs string) (Modifiers, string) {
 	var mods Modifiers
-	for m := Shift; m < ModifiersN; m++ {
+	for _, m := range ModifiersValues() {
 		mstr := m.BitIndexString() + "+"
 		if strings.HasPrefix(cs, mstr) {
 			mods.SetFlag(true, m)
