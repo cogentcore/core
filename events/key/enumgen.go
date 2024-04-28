@@ -50,11 +50,11 @@ var _ModifiersValues = []Modifiers{0, 1, 2, 3}
 // ModifiersN is the highest valid value for type Modifiers, plus one.
 const ModifiersN Modifiers = 4
 
-var _ModifiersValueMap = map[string]Modifiers{`Shift`: 0, `Control`: 1, `Alt`: 2, `Meta`: 3}
+var _ModifiersValueMap = map[string]Modifiers{`Control`: 0, `Meta`: 1, `Alt`: 2, `Shift`: 3}
 
-var _ModifiersDescMap = map[Modifiers]string{0: ``, 1: ``, 2: ``, 3: `called &#34;Command&#34; on OS X`}
+var _ModifiersDescMap = map[Modifiers]string{0: `Control is the &#34;Control&#34; (Ctrl) key.`, 1: `Meta is the system meta key (the &#34;Command&#34; key on macOS and the Windows key on Windows).`, 2: `Alt is the &#34;Alt&#34; (&#34;Option&#34; on macOS) key.`, 3: `Shift is the &#34;Shift&#34; key.`}
 
-var _ModifiersMap = map[Modifiers]string{0: `Shift`, 1: `Control`, 2: `Alt`, 3: `Meta`}
+var _ModifiersMap = map[Modifiers]string{0: `Control`, 1: `Meta`, 2: `Alt`, 3: `Shift`}
 
 // String returns the string representation of this Modifiers value.
 func (i Modifiers) String() string { return enums.BitFlagString(i, _ModifiersValues) }

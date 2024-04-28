@@ -16,11 +16,18 @@ import (
 type Modifiers int64 //enums:bitflag
 
 const (
-	Shift Modifiers = iota
-	Control
-	Alt
-	// called "Command" on OS X
+	// Control is the "Control" (Ctrl) key.
+	Control Modifiers = iota
+
+	// Meta is the system meta key (the "Command" key on macOS
+	// and the Windows key on Windows).
 	Meta
+
+	// Alt is the "Alt" ("Option" on macOS) key.
+	Alt
+
+	// Shift is the "Shift" key.
+	Shift
 )
 
 // ModifiersString returns the string representation of the modifiers using
