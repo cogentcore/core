@@ -61,7 +61,7 @@ func NewExternalDrop(typ Types, but Buttons, where image.Point, mods key.Modifie
 }
 
 func (ev *DragDrop) String() string {
-	return fmt.Sprintf("%v{Button: %v, Pos: %v, Mods: %v, Time: %v}", ev.Type(), ev.Button, ev.Where, key.ModsString(ev.Mods), ev.Time().Format("04:05"))
+	return fmt.Sprintf("%v{Button: %v, Pos: %v, Mods: %v, Time: %v}", ev.Type(), ev.Button, ev.Where, ev.Mods.ModifiersString(), ev.Time().Format("04:05"))
 }
 
 func (ev *DragDrop) HasPos() bool {

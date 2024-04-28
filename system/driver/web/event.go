@@ -164,7 +164,7 @@ func (a *App) ShouldProcessKey(k string) bool {
 	if k == "Unidentified" {
 		return false
 	}
-	k = key.ModsString(a.KeyMods) + k
+	k = a.KeyMods.ModifiersString() + k
 	if a.SystemPlatform() == system.MacOS {
 		k = strings.ReplaceAll(k, "Meta", "Command")
 	}

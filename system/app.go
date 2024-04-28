@@ -33,7 +33,8 @@ var (
 	// By default, this list contains important web shortcuts like Command+r and Command+(1-9).
 	// All instances of "Command" are automatically converted to "Control" on non-macOS system
 	// platforms, meaning that shortcuts should typically be expressed using "Command" for
-	// cross-platform support. Shortcuts can be removed from this list by an app whose use of
+	// cross-platform support. Modifiers should be specified in the order of [key.Modifiers]:
+	// Shift, Control, Alt, Command. Shortcuts can be removed from this list by an app whose use of
 	// them is more important than the default web action for that shortcut.
 	ReservedWebShortcuts = []string{"Command+r", "Command+1"}
 )

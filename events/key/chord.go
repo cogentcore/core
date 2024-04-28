@@ -25,7 +25,7 @@ var SystemPlatform string
 // non-printable ones are converted to their corresponding code names without
 // the "Code" prefix.
 func NewChord(rn rune, code Codes, mods Modifiers) Chord {
-	modstr := ModsString(mods)
+	modstr := mods.ModifiersString()
 	if modstr != "" && code == CodeSpacebar { // modified space is not regular space
 		return Chord(modstr + "Spacebar")
 	}
@@ -61,7 +61,7 @@ func CodeIsModifier(c Codes) bool {
 func (ch Chord) Decode() (r rune, code Codes, mods Modifiers, err error) {
 	cs := string(ch.PlatformChord())
 	cs, _, _ = strings.Cut(cs, "\n") // we only care about the first chord
-	mods, cs = ModsFromString(cs)
+	mods, cs = ModifiersFromString(cs)
 	rs := ([]rune)(cs)
 	if len(rs) == 1 {
 		r = rs[0]

@@ -23,20 +23,21 @@ const (
 	Meta
 )
 
-// ModsString returns the string representation of the modifiers
-func ModsString(mods Modifiers) string {
+// ModifiersString returns the string representation of the modifiers using
+// plus symbols as seperators.
+func (mo Modifiers) ModifiersString() string {
 	modstr := ""
 	for m := Shift; m < ModifiersN; m++ {
-		if mods.HasFlag(m) {
+		if mo.HasFlag(m) {
 			modstr += m.BitIndexString() + "+"
 		}
 	}
 	return modstr
 }
 
-// ModsFromString returns the modifiers corresponding to given string
+// ModifiersFromString returns the modifiers corresponding to given string
 // and the remainder of the string after modifiers have been stripped
-func ModsFromString(cs string) (Modifiers, string) {
+func ModifiersFromString(cs string) (Modifiers, string) {
 	var mods Modifiers
 	for m := Shift; m < ModifiersN; m++ {
 		mstr := m.BitIndexString() + "+"
