@@ -13,9 +13,9 @@ import (
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
-	"cogentcore.org/core/styles/units"
 )
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.App", IDName: "app", Doc: "App represents a Cogent Core app. It extends [system.App] to provide both system-level\nand high-level data and functions to do with the currently running application. The\nsingle instance of it is [TheApp], which embeds [system.TheApp].", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "App"}}, Fields: []types.Field{{Name: "Icon", Doc: "Icon specifies the app icon, which is passed to [system.Window.SetIcon].\nIt should typically be set using [App.SetIconSVG]."}, {Name: "AppBarConfig", Doc: "AppBarConfig is the function that configures the AppBar,\ntypically put in the [Scene.Bars.Top] (i.e., a TopAppBar).\nIt is set to StdAppBarConfig by default, which makes the\nstandard AppBar behavior. If this is nil, then no AppBar\nwill be created by default."}, {Name: "SceneConfig", Doc: "SceneConfig is the function called on every newly created [core.Scene]\nto configure it, if it is non-nil. This can be used to set global\nconfiguration and styling for all widgets using the OnWidgetAdded\nmethod."}}})
@@ -71,7 +71,7 @@ func (t *Box) New() tree.Node { return &Box{} }
 func (t *Box) SetTooltip(v string) *Box { t.Tooltip = v; return t }
 
 // ButtonType is the [types.Type] for [Button]
-var ButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Button", IDName: "button", Doc: "Button is an interactive button with text, an icon, an indicator, a shortcut,\nand/or a menu. The standard behavior is to register a click event handler with\nOnClick.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of button."}, {Name: "Text", Doc: "Text is the text for the button.\nIf it is blank, no text is shown."}, {Name: "Icon", Doc: "Icon is the icon for the button.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "Indicator", Doc: "Indicator is the menu indicator icon to present.\nIf it is \"\" or [icons.None],, no indicator is shown.\nIt is automatically set to [icons.KeyboardArrowDown]\nwhen there is a Menu elements present unless it is\nset to [icons.None]."}, {Name: "Shortcut", Doc: "Shortcut is an optional shortcut keyboard chord to trigger this button,\nactive in window-wide scope. Avoid conflicts with other shortcuts\n(a log message will be emitted if so). Shortcuts are processed after\nall other processing of keyboard input. Use Command for\nControl / Meta (Mac Command key) per platform."}, {Name: "Menu", Doc: "Menu is a menu constructor function used to build and display\na menu whenever the button is clicked. There will be no menu\nif it is nil. The constructor function should add buttons\nto the Scene that it is passed."}}, Instance: &Button{}})
+var ButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Button", IDName: "button", Doc: "Button is an interactive button with text, an icon, an indicator, a shortcut,\nand/or a menu. The standard behavior is to register a click event handler with\nOnClick.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of button."}, {Name: "Text", Doc: "Text is the text for the button.\nIf it is blank, no text is shown."}, {Name: "Icon", Doc: "Icon is the icon for the button.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "Indicator", Doc: "Indicator is the menu indicator icon to present.\nIf it is \"\" or [icons.None],, no indicator is shown.\nIt is automatically set to [icons.KeyboardArrowDown]\nwhen there is a Menu elements present unless it is\nset to [icons.None]."}, {Name: "Shortcut", Doc: "Shortcut is an optional shortcut keyboard chord to trigger this button,\nactive in window-wide scope. Avoid conflicts with other shortcuts\n(a log message will be emitted if so). Shortcuts are processed after\nall other processing of keyboard input. Command is automatically translated\ninto Meta on macOS and Control on all other platforms."}, {Name: "Menu", Doc: "Menu is a menu constructor function used to build and display\na menu whenever the button is clicked. There will be no menu\nif it is nil. The constructor function should add buttons\nto the Scene that it is passed."}}, Instance: &Button{}})
 
 // NewButton adds a new [Button] with the given name to the given parent:
 // Button is an interactive button with text, an icon, an indicator, a shortcut,
@@ -128,8 +128,8 @@ func (t *Button) SetIndicator(v icons.Icon) *Button { t.Indicator = v; return t 
 // Shortcut is an optional shortcut keyboard chord to trigger this button,
 // active in window-wide scope. Avoid conflicts with other shortcuts
 // (a log message will be emitted if so). Shortcuts are processed after
-// all other processing of keyboard input. Use Command for
-// Control / Meta (Mac Command key) per platform.
+// all other processing of keyboard input. Command is automatically translated
+// into Meta on macOS and Control on all other platforms.
 func (t *Button) SetShortcut(v key.Chord) *Button { t.Shortcut = v; return t }
 
 // SetMenu sets the [Button.Menu]:
@@ -223,7 +223,7 @@ func (t *Chooser) SetDefaultNew(v bool) *Chooser { t.DefaultNew = v; return t }
 // SetTooltip sets the [Chooser.Tooltip]
 func (t *Chooser) SetTooltip(v string) *Chooser { t.Tooltip = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ChooserItem", IDName: "chooser-item", Doc: "ChooserItem is an item that can be used in a [Chooser].", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Value", Doc: "Value is the underlying value of the chooser item."}, {Name: "Label", Doc: "Label is the text displayed to the user for this item.\nIf it is empty, then [ToLabel] of [ChooserItem.Value] is\nused instead."}, {Name: "Icon", Doc: "Icon is the icon displayed to the user for this item."}, {Name: "Tooltip", Doc: "Tooltip is the tooltip displayed to the user for this item."}, {Name: "Func", Doc: "Func, if non-nil, is a function to call whenever this\nitem is selected as the current value of the chooser."}, {Name: "SeparatorBefore", Doc: "SeparatorBefore is whether to add a separator before\nthis item in the chooser menu."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ChooserItem", IDName: "chooser-item", Doc: "ChooserItem is an item that can be used in a [Chooser].", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Value", Doc: "Value is the underlying value of the chooser item."}, {Name: "Text", Doc: "Text is the text displayed to the user for this item.\nIf it is empty, then [ToLabel] of [ChooserItem.Value] is\nused instead."}, {Name: "Icon", Doc: "Icon is the icon displayed to the user for this item."}, {Name: "Tooltip", Doc: "Tooltip is the tooltip displayed to the user for this item."}, {Name: "Func", Doc: "Func, if non-nil, is a function to call whenever this\nitem is selected as the current value of the chooser."}, {Name: "SeparatorBefore", Doc: "SeparatorBefore is whether to add a separator before\nthis item in the chooser menu."}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Complete", IDName: "complete", Doc: "Complete holds the current completion data and functions to call for building\nthe list of possible completions and for editing text after a completion is selected.\nIt also holds the [PopupStage] associated with it.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "MatchFunc", Doc: "function to get the list of possible completions"}, {Name: "LookupFunc", Doc: "function to get the text to show for lookup"}, {Name: "EditFunc", Doc: "function to edit text using the selected completion"}, {Name: "Context", Doc: "the object that implements complete.Func"}, {Name: "SrcLn", Doc: "line number in source that completion is operating on, if relevant"}, {Name: "SrcCh", Doc: "character position in source that completion is operating on"}, {Name: "Completions", Doc: "the list of potential completions"}, {Name: "Seed", Doc: "current completion seed"}, {Name: "Completion", Doc: "the user's completion selection"}, {Name: "Listeners", Doc: "the event listeners for the completer (it sends Select events)"}, {Name: "Stage", Doc: "Stage is the [PopupStage] associated with the [Complete]"}, {Name: "DelayTimer"}, {Name: "DelayMu"}, {Name: "ShowMu"}}})
 
@@ -268,11 +268,12 @@ func (t *Complete) SetCompletion(v string) *Complete { t.Completion = v; return 
 func (t *Complete) SetStage(v *Stage) *Complete { t.Stage = v; return t }
 
 // FrameType is the [types.Type] for [Frame]
-var FrameType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Frame", IDName: "frame", Doc: "Frame is a Layout that renders a background according to the\nbackground-color style setting, and optional striping for grid layouts", Embeds: []types.Field{{Name: "Layout"}}, Instance: &Frame{}})
+var FrameType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Frame", IDName: "frame", Doc: "Frame is a [Layout] that also renders the standard box model.\nBy default, [Frame]s grow in both the x and y directions; this\ncan be changed by setting [styles.Style.Grow].", Embeds: []types.Field{{Name: "Layout"}}, Instance: &Frame{}})
 
 // NewFrame adds a new [Frame] with the given name to the given parent:
-// Frame is a Layout that renders a background according to the
-// background-color style setting, and optional striping for grid layouts
+// Frame is a [Layout] that also renders the standard box model.
+// By default, [Frame]s grow in both the x and y directions; this
+// can be changed by setting [styles.Style.Grow].
 func NewFrame(parent tree.Node, name ...string) *Frame {
 	return parent.NewChild(FrameType, name...).(*Frame)
 }
@@ -365,16 +366,18 @@ func (t *Image) New() tree.Node { return &Image{} }
 func (t *Image) SetTooltip(v string) *Image { t.Tooltip = v; return t }
 
 // LayoutType is the [types.Type] for [Layout]
-var LayoutType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Layout", IDName: "layout", Doc: "Layout is the primary node type responsible for organizing the sizes\nand positions of child widgets. It does not render, only organize,\nso properties like background and border will have no effect.\nAll arbitrary collections of widgets should generally be contained\nwithin a layout or a [Frame]; otherwise, the parent widget must take over\nresponsibility for positioning. Layouts automatically can add scrollbars\ndepending on the [styles.Style.Overflow].\n\nFor a [styles.Grid] layout, the [styles.Style.Columns] property should\ngenerally be set to the desired number of columns, from which the number of rows\nis computed; otherwise, it uses the square root of number of\nelements.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "StackTop", Doc: "StackTop, for a [styles.Stacked] layout, is the index of the node to use as the top of the stack.\nOnly the node at this index is rendered; if not a valid index, nothing is rendered."}, {Name: "LayImpl", Doc: "LayImpl contains implementation state info for doing layout"}, {Name: "HasScroll", Doc: "whether scrollbar is used for given dim"}, {Name: "Scrolls", Doc: "scroll bars -- we fully manage them as needed"}, {Name: "FocusName", Doc: "accumulated name to search for when keys are typed"}, {Name: "FocusNameTime", Doc: "time of last focus name event -- for timeout"}, {Name: "FocusNameLast", Doc: "last element focused on -- used as a starting point if name is the same"}}, Instance: &Layout{}})
+var LayoutType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Layout", IDName: "layout", Doc: "Layout is the primary node type responsible for organizing the sizes\nand positions of child widgets. It does not render, only organize,\nso properties like background and border will have no effect.\nAll arbitrary collections of widgets should generally be contained\nwithin a Layout or a [Frame]; otherwise, the parent widget must take over\nresponsibility for positioning. Layouts automatically can add scrollbars\ndepending on the [styles.Style.Overflow]. By default, [Layout]s grow in\nthe x direction but not the y direction; this can be changed by setting\n[styles.Style.Grow].\n\nFor a [styles.Grid] layout, the [styles.Style.Columns] property should\ngenerally be set to the desired number of columns, from which the number of rows\nis computed; otherwise, it uses the square root of number of\nelements.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "StackTop", Doc: "StackTop, for a [styles.Stacked] layout, is the index of the node to use as the top of the stack.\nOnly the node at this index is rendered; if not a valid index, nothing is rendered."}, {Name: "LayImpl", Doc: "LayImpl contains implementation state info for doing layout"}, {Name: "HasScroll", Doc: "whether scrollbar is used for given dim"}, {Name: "Scrolls", Doc: "scroll bars -- we fully manage them as needed"}, {Name: "FocusName", Doc: "accumulated name to search for when keys are typed"}, {Name: "FocusNameTime", Doc: "time of last focus name event -- for timeout"}, {Name: "FocusNameLast", Doc: "last element focused on -- used as a starting point if name is the same"}}, Instance: &Layout{}})
 
 // NewLayout adds a new [Layout] with the given name to the given parent:
 // Layout is the primary node type responsible for organizing the sizes
 // and positions of child widgets. It does not render, only organize,
 // so properties like background and border will have no effect.
 // All arbitrary collections of widgets should generally be contained
-// within a layout or a [Frame]; otherwise, the parent widget must take over
+// within a Layout or a [Frame]; otherwise, the parent widget must take over
 // responsibility for positioning. Layouts automatically can add scrollbars
-// depending on the [styles.Style.Overflow].
+// depending on the [styles.Style.Overflow]. By default, [Layout]s grow in
+// the x direction but not the y direction; this can be changed by setting
+// [styles.Style.Grow].
 //
 // For a [styles.Grid] layout, the [styles.Style.Columns] property should
 // generally be set to the desired number of columns, from which the number of rows

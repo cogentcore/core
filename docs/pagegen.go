@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
@@ -21,9 +21,9 @@ import (
 	"cogentcore.org/core/pages"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/views"
 )
 

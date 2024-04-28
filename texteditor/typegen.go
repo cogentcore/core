@@ -7,10 +7,10 @@ import (
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor/textbuf"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
-	"cogentcore.org/core/styles/units"
 )
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor.Spell", IDName: "spell", Doc: "Spell", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "SrcLn", Doc: "line number in source that spelling is operating on, if relevant"}, {Name: "SrcCh", Doc: "character position in source that spelling is operating on (start of word to be corrected)"}, {Name: "Suggest", Doc: "list of suggested corrections"}, {Name: "Word", Doc: "word being checked"}, {Name: "LastLearned", Doc: "last word learned -- can be undone -- stored in lowercase format"}, {Name: "Correction", Doc: "the user's correction selection"}, {Name: "Listeners", Doc: "the event listeners for the spell (it sends Select events)"}, {Name: "Stage", Doc: "Stage is the [PopupStage] associated with the [Spell]"}, {Name: "ShowMu"}}})

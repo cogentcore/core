@@ -10,11 +10,11 @@ import (
 )
 
 // SimMatGridType is the [types.Type] for [SimMatGrid]
-var SimMatGridType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.SimMatGrid", IDName: "sim-mat-grid", Doc: "SimMatGrid is a widget that displays a similarity / distance matrix\nwith tensor values as a grid of colored squares, and labels for rows, cols", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "TensorGrid"}}, Fields: []types.Field{{Name: "SimMat", Doc: "the similarity / distance matrix"}, {Name: "rowMaxSz"}, {Name: "rowMinBlank"}, {Name: "rowNGps"}, {Name: "colMaxSz"}, {Name: "colMinBlank"}, {Name: "colNGps"}}, Instance: &SimMatGrid{}})
+var SimMatGridType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.SimMatGrid", IDName: "sim-mat-grid", Doc: "SimMatGrid is a widget that displays a similarity / distance matrix\nwith tensor values as a grid of colored squares, and labels for rows and columns.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "TensorGrid"}}, Fields: []types.Field{{Name: "SimMat", Doc: "the similarity / distance matrix"}, {Name: "rowMaxSz"}, {Name: "rowMinBlank"}, {Name: "rowNGps"}, {Name: "colMaxSz"}, {Name: "colMinBlank"}, {Name: "colNGps"}}, Instance: &SimMatGrid{}})
 
 // NewSimMatGrid adds a new [SimMatGrid] with the given name to the given parent:
 // SimMatGrid is a widget that displays a similarity / distance matrix
-// with tensor values as a grid of colored squares, and labels for rows, cols
+// with tensor values as a grid of colored squares, and labels for rows and columns.
 func NewSimMatGrid(parent tree.Node, name ...string) *SimMatGrid {
 	return parent.NewChild(SimMatGridType, name...).(*SimMatGrid)
 }
@@ -35,10 +35,10 @@ func (t *SimMatGrid) SetDisp(v TensorDisp) *SimMatGrid { t.Disp = v; return t }
 func (t *SimMatGrid) SetColorMap(v *colormap.Map) *SimMatGrid { t.ColorMap = v; return t }
 
 // TableViewType is the [types.Type] for [TableView]
-var TableViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TableView", IDName: "table-view", Doc: "etview.TableView provides a GUI interface for table.Table's", Embeds: []types.Field{{Name: "SliceViewBase"}}, Fields: []types.Field{{Name: "Table", Doc: "the idx view of the table that we're a view of"}, {Name: "TsrDisp", Doc: "overall display options for tensor display"}, {Name: "ColTsrDisp", Doc: "per column tensor display params"}, {Name: "ColTsrBlank", Doc: "per column blank tensor values"}, {Name: "NCols", Doc: "number of columns in table (as of last update)"}, {Name: "SortIndex", Doc: "current sort index"}, {Name: "SortDesc", Doc: "whether current sort order is descending"}, {Name: "HeaderWidths", Doc: "HeaderWidths has number of characters in each header, per visfields"}, {Name: "ColMaxWidths", Doc: "ColMaxWidths records maximum width in chars of string type fields"}, {Name: "BlankString", Doc: "\tblank values for out-of-range rows"}, {Name: "BlankFloat"}}, Instance: &TableView{}})
+var TableViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TableView", IDName: "table-view", Doc: "TableView provides a GUI view for [table.Table] values.", Embeds: []types.Field{{Name: "SliceViewBase"}}, Fields: []types.Field{{Name: "Table", Doc: "the idx view of the table that we're a view of"}, {Name: "TsrDisp", Doc: "overall display options for tensor display"}, {Name: "ColumnTensorDisplay", Doc: "per column tensor display params"}, {Name: "ColumnTensorBlank", Doc: "per column blank tensor values"}, {Name: "NCols", Doc: "number of columns in table (as of last update)"}, {Name: "SortIndex", Doc: "current sort index"}, {Name: "SortDesc", Doc: "whether current sort order is descending"}, {Name: "HeaderWidths", Doc: "HeaderWidths has number of characters in each header, per visfields"}, {Name: "ColMaxWidths", Doc: "ColMaxWidths records maximum width in chars of string type fields"}, {Name: "BlankString", Doc: "\tblank values for out-of-range rows"}, {Name: "BlankFloat"}}, Instance: &TableView{}})
 
 // NewTableView adds a new [TableView] with the given name to the given parent:
-// etview.TableView provides a GUI interface for table.Table's
+// TableView provides a GUI view for [table.Table] values.
 func NewTableView(parent tree.Node, name ...string) *TableView {
 	return parent.NewChild(TableViewType, name...).(*TableView)
 }
@@ -53,13 +53,16 @@ func (t *TableView) New() tree.Node { return &TableView{} }
 // overall display options for tensor display
 func (t *TableView) SetTsrDisp(v TensorDisp) *TableView { t.TsrDisp = v; return t }
 
-// SetColTsrDisp sets the [TableView.ColTsrDisp]:
+// SetColumnTensorDisplay sets the [TableView.ColumnTensorDisplay]:
 // per column tensor display params
-func (t *TableView) SetColTsrDisp(v map[int]*TensorDisp) *TableView { t.ColumnTensorDisplay = v; return t }
+func (t *TableView) SetColumnTensorDisplay(v map[int]*TensorDisp) *TableView {
+	t.ColumnTensorDisplay = v
+	return t
+}
 
-// SetColTsrBlank sets the [TableView.ColTsrBlank]:
+// SetColumnTensorBlank sets the [TableView.ColumnTensorBlank]:
 // per column blank tensor values
-func (t *TableView) SetColTsrBlank(v map[int]*tensor.Float64) *TableView {
+func (t *TableView) SetColumnTensorBlank(v map[int]*tensor.Float64) *TableView {
 	t.ColumnTensorBlank = v
 	return t
 }
@@ -136,10 +139,10 @@ func (t *TensorGrid) SetColorMap(v *colormap.Map) *TensorGrid { t.ColorMap = v; 
 // SetTooltip sets the [TensorGrid.Tooltip]
 func (t *TensorGrid) SetTooltip(v string) *TensorGrid { t.Tooltip = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TensorGridValue", IDName: "tensor-grid-value", Doc: "TensorGridValue manages a TensorGrid view of an tensor.Tensor", Embeds: []types.Field{{Name: "ValueBase"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TensorGridValue", IDName: "tensor-grid-value", Doc: "TensorGridValue manages a [TensorGrid] view of an [tensor.Tensor].", Embeds: []types.Field{{Name: "ValueBase"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TensorValue", IDName: "tensor-value", Doc: "TensorValue presents a button that pulls up the TensorView viewer for an tensor.Tensor", Embeds: []types.Field{{Name: "ValueBase"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TensorValue", IDName: "tensor-value", Doc: "TensorValue presents a button that pulls up the [TensorView] viewer for an [tensor.Tensor].", Embeds: []types.Field{{Name: "ValueBase"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TableValue", IDName: "table-value", Doc: "TableValue presents a button that pulls up the TableView viewer for an table.Table", Embeds: []types.Field{{Name: "ValueBase"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TableValue", IDName: "table-value", Doc: "TableValue presents a button that pulls up the [TableView] viewer for a [table.Table].", Embeds: []types.Field{{Name: "ValueBase"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.SimMatValue", IDName: "sim-mat-value", Doc: "SimMatValue presents a button that pulls up the SimMatGridView viewer for an table.Table", Embeds: []types.Field{{Name: "ValueBase"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.SimMatValue", IDName: "sim-mat-value", Doc: "SimMatValue presents a button that pulls up the [SimMatGridView] viewer for a [table.Table].", Embeds: []types.Field{{Name: "ValueBase"}}})
