@@ -209,39 +209,6 @@ func (tb *Toolbar) AddOverflowMenu(fun func(m *Scene)) {
 	tb.OverflowMenus = append(tb.OverflowMenus, fun)
 }
 
-// SetShortcuts sets the shortcuts to window associated with Toolbar
-func (tb *Toolbar) SetShortcuts() {
-	em := tb.Events()
-	if em == nil {
-		return
-	}
-	for _, mi := range tb.Kids {
-		if mi.NodeType().HasEmbed(ButtonType) {
-			bt := AsButton(mi)
-			em.AddShortcut(bt.Shortcut, bt)
-		}
-	}
-}
-
-func (tb *Toolbar) Destroy() {
-	tb.DeleteShortcuts()
-	tb.Frame.Destroy()
-}
-
-// DeleteShortcuts deletes the shortcuts -- called when destroyed
-func (tb *Toolbar) DeleteShortcuts() {
-	em := tb.Events()
-	if em == nil {
-		return
-	}
-	for _, mi := range tb.Kids {
-		if mi.NodeType().HasEmbed(ButtonType) {
-			ac := AsButton(mi)
-			em.DeleteShortcut(ac.Shortcut, ac)
-		}
-	}
-}
-
 //////////////////////////////////////////////////////////////////////////////
 // 	ToolbarFuncs
 

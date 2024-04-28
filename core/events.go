@@ -1157,7 +1157,7 @@ func (em *Events) GetShortcutsIn(parent Widget) {
 			return tree.Continue
 		}
 		if bt.Shortcut != "" {
-			em.AddShortcut(bt.Shortcut, bt)
+			em.AddShortcut(bt.Shortcut.PlatformChord(), bt)
 		}
 		if bt.HasMenu() {
 			tmps := NewScene()

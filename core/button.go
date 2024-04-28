@@ -227,6 +227,7 @@ func (bt *Button) SetStyles() {
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
 				s.SetTextWrap(false)
+				s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 			})
 		}
 	})
