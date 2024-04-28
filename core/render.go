@@ -314,9 +314,6 @@ func (sc *Scene) DoUpdate() bool {
 	rc := sc.RenderContext()
 
 	if sc.ShowIter < SceneShowIters {
-		if sc.ShowIter == 0 { // first time
-			sc.Events.GetShortcuts()
-		}
 		sc.SetFlag(true, ScNeedsLayout)
 		sc.ShowIter++
 	}

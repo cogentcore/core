@@ -302,6 +302,7 @@ func (sm *Stages) SendShowEvents() {
 			sc.ShowIter++
 			if !sc.hasShown {
 				sc.hasShown = true
+				sc.Events.GetShortcuts()
 				sc.Send(events.Show)
 			}
 		}
