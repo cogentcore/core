@@ -14,9 +14,9 @@ import (
 	"slices"
 
 	"cogentcore.org/core/base/exec"
+	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/mobile/sdkpath"
-	"cogentcore.org/core/logx"
 )
 
 // General mobile build environment. Initialized by envInit.

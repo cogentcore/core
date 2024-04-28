@@ -7,8 +7,8 @@ package main
 import (
 	"fmt"
 
+	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/cli"
-	"cogentcore.org/core/logx"
 )
 
 //go:generate core generate -add-types -add-funcs

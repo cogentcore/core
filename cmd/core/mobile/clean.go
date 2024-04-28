@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 
 	"cogentcore.org/core/base/exec"
-	"cogentcore.org/core/logx"
+	"cogentcore.org/core/base/logx"
 )
 
 // Clean removes object files and cached NDK files downloaded by gomobile init

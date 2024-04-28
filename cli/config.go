@@ -12,7 +12,7 @@ import (
 	"slices"
 	"strings"
 
-	"cogentcore.org/core/logx"
+	"cogentcore.org/core/base/logx"
 )
 
 // TODO: can we get rid of ConfigFiles somehow? we need it in cliview and probably other places too

@@ -15,7 +15,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"cogentcore.org/core/logx"
+	"cogentcore.org/core/base/logx"
 )
 
 // Run runs an app with the given options, configuration struct,

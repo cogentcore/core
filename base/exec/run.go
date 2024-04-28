@@ -14,7 +14,7 @@ import (
 	"os"
 	"strings"
 
-	"cogentcore.org/core/logx"
+	"cogentcore.org/core/base/logx"
 	"github.com/mattn/go-shellwords"
 )
 

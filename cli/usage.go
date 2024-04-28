@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"cogentcore.org/core/logx"
+	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/strcase"
 	"cogentcore.org/core/types"
 )

@@ -8,7 +8,7 @@ import (
 	"log/slog"
 	"testing"
 
-	"cogentcore.org/core/logx"
+	"cogentcore.org/core/base/logx"
 )
 
 func TestRun(t *testing.T) {
