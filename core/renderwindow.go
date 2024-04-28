@@ -1067,7 +1067,7 @@ type Scrim struct {
 
 // NewScrimForScene is the proper function to use for creating a new Scrim
 // for use in rendering.  Critical to not actually add the Scrim to the
-// Scene -- just set its pointers.
+// Scene, just set its pointers.
 func NewScrimForScene(sc *Scene) *Scrim {
 	sr := &Scrim{} // critical to not add to scene!
 	sr.InitName(sr)
