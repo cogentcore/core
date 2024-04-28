@@ -13,9 +13,9 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/profile"
 	"cogentcore.org/core/parse"
 	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/profile"
 )
 
 func init() {
