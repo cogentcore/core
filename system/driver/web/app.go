@@ -84,6 +84,11 @@ func (a *App) SetSystemWindow() {
 	ua := js.Global().Get("navigator").Get("userAgent").String()
 	a.UnderlyingPlatform = UserAgentToOS(ua)
 
+	js.Global().Set("appOnUpdate", js.FuncOf(func(this js.Value, args []js.Value) any {
+		fmt.Println("update")
+		return nil
+	}))
+
 	a.Resize()
 	a.Event.Window(events.WinShow)
 	a.Event.Window(events.ScreenUpdate)
