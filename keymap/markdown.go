@@ -12,7 +12,7 @@ import (
 
 // MarkdownDoc generates a markdown table of all the key mappings
 func (km *Maps) MarkdownDoc() string { //types:add
-	mods := []string{"", "Shift", "Control", "Shift+Control", "Meta", "Shift+Meta", "Alt", "Shift+Alt", "Control+Alt", "Alt+Meta"}
+	mods := []string{"", "Shift", "Control", "Control+Shift", "Meta", "Meta+Shift", "Alt", "Alt+Shift", "Control+Alt", "Meta+Alt"}
 
 	var b strings.Builder
 

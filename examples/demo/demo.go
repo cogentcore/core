@@ -109,7 +109,7 @@ func buttons(ts *core.Tabs) {
 	mbrowi := makeRow()
 
 	menu := func(m *core.Scene) {
-		m1 := core.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Shift+Control+1").
+		m1 := core.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Control+Shift+1").
 			SetTooltip("A standard menu item with an icon")
 		m1.OnClick(func(e events.Event) {
 			fmt.Println("Clicked on menu item 1")
