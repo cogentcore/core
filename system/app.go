@@ -36,7 +36,7 @@ var (
 	// cross-platform support. Modifiers should be specified in the order of [key.Modifiers]:
 	// Shift, Control, Alt, Command. Shortcuts can be removed from this list by an app whose use of
 	// them is more important than the default web action for that shortcut.
-	ReservedWebShortcuts = []string{"Command+r", "Command+Shift+r", "Command+w", "Command+t", "Command+Shift+t", "Command+q", "Command+n", "Command+m", "Command+l", "Command+h", "Command+Shift+j", "Command+Alt+j", "Command+1", "Command+2", "Command+3", "Command+4", "Command+5", "Command+6", "Command+7", "Command+8", "Command+9"}
+	ReservedWebShortcuts = []string{"Command+r", "Command+Shift+r", "Command+w", "Command+t", "Command+Shift+t", "Command+q", "Command+n", "Command+m", "Command+l", "Command+h", "Command+Shift+j", "Command+Alt+j", "Command+Alt+∆", "Command+1", "Command+2", "Command+3", "Command+4", "Command+5", "Command+6", "Command+7", "Command+8", "Command+9"}
 )
 
 // App represents the overall OS GUI hardware, and creates Images, Textures
