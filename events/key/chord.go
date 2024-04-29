@@ -6,6 +6,7 @@ package key
 
 import (
 	"fmt"
+	"runtime"
 	"strings"
 	"unicode"
 )
@@ -83,15 +84,14 @@ func (ch Chord) Label() string {
 	cs = strings.ReplaceAll(cs, "Control", "Ctrl")
 	switch SystemPlatform {
 	case "MacOS":
-		cs = strings.ReplaceAll(cs, "Ctrl+", "^") // ⌃ doesn't look as good
-		cs = strings.ReplaceAll(cs, "Shift+", "⇧")
-		cs = strings.ReplaceAll(cs, "Meta+", "⌘")
-		cs = strings.ReplaceAll(cs, "Alt+", "⌥")
+		if runtime.GOOS == "js" { // no font to display symbol on web
+			cs = strings.ReplaceAll(cs, "Meta+", "Cmd+")
+		} else {
+			cs = strings.ReplaceAll(cs, "Meta+", "⌘")
+		}
 	case "Windows":
-		cs = strings.ReplaceAll(cs, "Meta+", "Win+") // todo: actual windows key
+		cs = strings.ReplaceAll(cs, "Meta+", "Win+")
 	}
-	cs = strings.ReplaceAll(cs, "Backspace", "⌫")
-	cs = strings.ReplaceAll(cs, "Delete", "⌦")
 	cs = strings.ReplaceAll(cs, "\n", " or ")
 	return cs
 }
