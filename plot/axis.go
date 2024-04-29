@@ -79,11 +79,11 @@ func (ax *Axis) Defaults(dim math32.Dims) {
 	ax.Axis = dim
 	ax.Line.Defaults()
 	ax.Label.Defaults()
-	ax.Label.Style.Size.Pt(12)
+	ax.Label.Style.Size.Dp(20)
 	ax.Padding.Pt(5)
 	ax.TickText.Defaults()
-	ax.TickText.Style.Size.Pt(10)
-	ax.TickText.Style.Padding.Pt(1)
+	ax.TickText.Style.Size.Dp(16)
+	ax.TickText.Style.Padding.Dp(2)
 	ax.TickLine.Defaults()
 	ax.TickLength.Pt(8)
 	if dim == math32.Y {

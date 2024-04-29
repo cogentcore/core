@@ -25,6 +25,8 @@ func main() {
 	pl.SetTable(epc)
 	pl.Params.Title = "RA25 Epoch Train"
 	pl.Params.XAxisCol = "Epoch"
+	// pl.Params.Scale = 2
+	pl.Params.Points = true
 	pl.ColumnParams("UnitErr").On = true
 
 	b.AddAppBar(pl.ConfigToolbar)

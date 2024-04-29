@@ -49,6 +49,11 @@ type Plot struct {
 	// size is the target size of the image to render to
 	Size image.Point
 
+	// DPI is the dots per inch for rendering the image.
+	// Larger numbers result in larger scaling of the plot contents
+	// which is strongly recommended for print (e.g., use 300 for print)
+	DPI float32 `default:"96,160,300"`
+
 	// painter for rendering
 	Paint *paint.Context
 
@@ -62,11 +67,12 @@ type Plot struct {
 // Defaults sets defaults
 func (pt *Plot) Defaults() {
 	pt.Title.Defaults()
-	pt.Title.Style.Size.Pt(16)
+	pt.Title.Style.Size.Dp(24)
 	pt.Background = color.White
 	pt.X.Defaults(math32.X)
 	pt.Y.Defaults(math32.Y)
 	pt.Legend.Defaults()
+	pt.DPI = 96
 	pt.Size = image.Point{1280, 1024}
 	pt.StdTextStyle.Defaults()
 	pt.StdTextStyle.WhiteSpace = styles.WhiteSpaceNowrap
@@ -109,11 +115,13 @@ func (pt *Plot) Resize(sz image.Point) {
 		ib := pt.Pixels.Bounds().Size()
 		if ib == sz {
 			pt.Size = sz
+			pt.Paint.UnitContext.DPI = pt.DPI
 			return // already good
 		}
 	}
 	pt.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
 	pt.Paint = paint.NewContextFromImage(pt.Pixels)
+	pt.Paint.UnitContext.DPI = pt.DPI
 	pt.Size = sz
 }
 

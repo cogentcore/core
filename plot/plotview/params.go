@@ -30,22 +30,25 @@ type PlotParams struct { //types:add
 	Points bool
 
 	// width of lines
-	LineWidth float64 `default:"2"`
+	LineWidth float32 `default:"1"`
 
 	// size of points
-	PointSize float64 `default:"3"`
+	PointSize float32 `default:"3"`
 
 	// the shape used to draw points
 	PointShape plots.Shapes
 
 	// width of bars for bar plot, as fraction of available space (1 = no gaps)
-	BarWidth float64 `min:"0.01" max:"1" default:"0.8"`
+	BarWidth float32 `min:"0.01" max:"1" default:"0.8"`
 
 	// draw lines that connect points with a negative X-axis direction -- otherwise these are treated as breaks between repeated series and not drawn
 	NegXDraw bool
 
-	// overall scaling factor -- the larger the number, the larger the fonts are relative to the graph
-	Scale float64 `default:"2"`
+	// Scale multiplies the plot DPI value, to change the overall scale
+	// of the rendered plot.  Larger numbers produce larger scaling.
+	// Typically use larger numbers when generating plots for inclusion in
+	// documents or other cases where the overall plot size will be small.
+	Scale float32 `default:"1,2"`
 
 	// what column to use for the common X axis -- if empty or not found, the row number is used.  This optional for Bar plots -- if present and LegendCol is also present, then an extra space will be put between X values.
 	XAxisCol string
@@ -54,7 +57,7 @@ type PlotParams struct { //types:add
 	LegendCol string
 
 	// rotation of the X Axis labels, in degrees
-	XAxisRot float64
+	XAxisRot float32
 
 	// optional label to use for XAxis instead of column name
 	XAxisLabel string
@@ -69,14 +72,14 @@ type PlotParams struct { //types:add
 // Defaults sets defaults if nil vals present
 func (pp *PlotParams) Defaults() {
 	if pp.LineWidth == 0 {
-		pp.LineWidth = 2
+		pp.LineWidth = 1
 		pp.Lines = true
 		pp.Points = false
 		pp.PointSize = 3
 		pp.BarWidth = .8
 	}
 	if pp.Scale == 0 {
-		pp.Scale = 2
+		pp.Scale = 1
 	}
 }
 
@@ -132,13 +135,22 @@ func (pp *PlotParams) FromMetaMap(meta map[string]string) {
 		}
 	}
 	if lw, has := MetaMapLower(meta, "LineWidth"); has {
-		pp.LineWidth, _ = reflectx.ToFloat(lw)
+		f, err := reflectx.ToFloat(lw)
+		if err != nil {
+			pp.LineWidth = float32(f)
+		}
 	}
 	if ps, has := MetaMapLower(meta, "PointSize"); has {
-		pp.PointSize, _ = reflectx.ToFloat(ps)
+		f, err := reflectx.ToFloat(ps)
+		if err != nil {
+			pp.PointSize = float32(f)
+		}
 	}
 	if bw, has := MetaMapLower(meta, "BarWidth"); has {
-		pp.BarWidth, _ = reflectx.ToFloat(bw)
+		f, err := reflectx.ToFloat(bw)
+		if err != nil {
+			pp.BarWidth = float32(f)
+		}
 	}
 	if op, has := MetaMapLower(meta, "NegXDraw"); has {
 		if op == "+" || op == "true" {
@@ -148,7 +160,10 @@ func (pp *PlotParams) FromMetaMap(meta map[string]string) {
 		}
 	}
 	if scl, has := MetaMapLower(meta, "Scale"); has {
-		pp.Scale, _ = reflectx.ToFloat(scl)
+		f, err := reflectx.ToFloat(scl)
+		if err != nil {
+			pp.Scale = float32(f)
+		}
 	}
 	if xc, has := MetaMapLower(meta, "XAxisCol"); has {
 		pp.XAxisCol = xc
@@ -157,7 +172,10 @@ func (pp *PlotParams) FromMetaMap(meta map[string]string) {
 		pp.LegendCol = lc
 	}
 	if xrot, has := MetaMapLower(meta, "XAxisRot"); has {
-		pp.XAxisRot, _ = reflectx.ToFloat(xrot)
+		f, err := reflectx.ToFloat(xrot)
+		if err != nil {
+			pp.XAxisRot = float32(f)
+		}
 	}
 	if lb, has := MetaMapLower(meta, "XAxisLabel"); has {
 		pp.XAxisLabel = lb
@@ -183,10 +201,10 @@ type ColumnParams struct { //types:add
 	Points option.Option[bool]
 
 	// the width of lines; uses the overall plot option if unset
-	LineWidth option.Option[float64]
+	LineWidth option.Option[float32]
 
 	// the size of points; uses the overall plot option if unset
-	PointSize option.Option[float64]
+	PointSize option.Option[float32]
 
 	// the shape used to draw points; uses the overall plot option if unset
 	PointShape option.Option[plots.Shapes]

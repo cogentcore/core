@@ -267,6 +267,7 @@ func (pl *PlotView) GenPlot() {
 	case Bar:
 		// pl.GenPlotBar()
 	}
+	pl.PlotChild().Scale = pl.Params.Scale
 	pl.PlotChild().SetPlot(pl.Plot) // redraws etc
 	pl.InPlot = false
 }
@@ -605,7 +606,7 @@ func (pl *PlotView) ConfigToolbar(tb *core.Toolbar) {
 			d := core.NewBody().AddTitle(pl.Nm + " Params")
 			views.NewStructView(d).SetStruct(&pl.Params).
 				OnChange(func(e events.Event) {
-					pl.UpdatePlot()
+					pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
 				})
 			d.NewFullDialog(pl).SetNewWindow(true).Run()
 		})

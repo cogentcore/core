@@ -25,6 +25,12 @@ import (
 type Plot struct {
 	core.WidgetBase
 
+	// Scale multiplies the plot DPI value, to change the overall scale
+	// of the rendered plot.  Larger numbers produce larger scaling.
+	// Typically use larger numbers when generating plots for inclusion in
+	// documents or other cases where the overall plot size will be small.
+	Scale float32
+
 	// Plot is the Plot to display in this widget
 	Plot *plot.Plot `set:"-"`
 }
@@ -47,6 +53,7 @@ func (pt *Plot) UpdatePlot() {
 	if sz == zp {
 		return
 	}
+	pt.Plot.DPI = pt.Scale * pt.Styles.UnitContext.DPI
 	pt.Plot.Resize(sz)
 	pt.Plot.Draw()
 	pt.NeedsRender()
@@ -54,6 +61,7 @@ func (pt *Plot) UpdatePlot() {
 
 func (pt *Plot) OnInit() {
 	pt.WidgetBase.OnInit()
+	pt.Scale = 1
 	pt.SetStyles()
 	pt.HandleEvents()
 }
@@ -134,9 +142,7 @@ func (pt *Plot) SavePNG(filename core.Filename) error { //types:add
 
 func (pt *Plot) SizeFinal() {
 	pt.WidgetBase.SizeFinal()
-	if pt.Plot != nil {
-		pt.Plot.Resize(pt.Geom.Size.Actual.Content.ToPoint())
-	}
+	pt.UpdatePlot()
 }
 
 func (pt *Plot) Render() {

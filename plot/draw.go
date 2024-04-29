@@ -365,7 +365,7 @@ func (ax *Axis) drawY(pt *Plot, tickWidth, tpad, bpad int) {
 			if t.IsMinor() {
 				xoff = 0.5 * ln
 			}
-			y := axh * float32(ax.Norm(t.Value))
+			y := axh * (1 - float32(ax.Norm(t.Value)))
 			if y < 0 || y > axh {
 				continue
 			}
