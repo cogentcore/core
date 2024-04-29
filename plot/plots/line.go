@@ -47,7 +47,7 @@ type Line struct {
 
 	// LineStyle is the style of the line connecting the points.
 	// Use zero width to disable lines.
-	plot.LineStyle
+	LineStyle plot.LineStyle
 
 	// FillColor is the color to fill the area below the plot.
 	// Use nil to disable the filling. This is the default.
@@ -66,19 +66,17 @@ func NewLine(xys XYer) (*Line, error) {
 	return ln, nil
 }
 
-/*
 // NewLinePoints returns both a Line and a
-// Points for the given point data.
+// Scatter plot for the given point data.
 func NewLinePoints(xys XYer) (*Line, *Scatter, error) {
-	s, err := NewScatter(xys)
+	sc, err := NewScatter(xys)
 	if err != nil {
 		return nil, nil, err
 	}
-	ln := &Line{XYs: s.XYs}
-	ln.Defaults()
-	return ln, s, nil
+	ln := &Line{XYs: sc.XYs}
+	ln.LineStyle.Defaults()
+	return ln, sc, nil
 }
-*/
 
 // Plot draws the Line, implementing the plot.Plotter interface.
 func (pts *Line) Plot(plt *plot.Plot) {

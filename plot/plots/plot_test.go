@@ -9,6 +9,7 @@ import (
 	"os"
 	"testing"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
@@ -20,9 +21,9 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func TestPlot(t *testing.T) {
+func TestLine(t *testing.T) {
 	pt := plot.New()
-	pt.Title.Text = "Test Plot"
+	pt.Title.Text = "Test Line"
 	pt.X.Min = 0
 	pt.X.Max = 100
 	pt.X.Label.Text = "X Axis"
@@ -33,20 +34,64 @@ func TestPlot(t *testing.T) {
 	data := make(XYs, 21)
 	for i := range data {
 		data[i].X = float32(i * 5)
-		data[i].Y = float32(50) + 60*math32.Sin((float32(i)/8)*math32.Pi)
+		data[i].Y = float32(50) + 40*math32.Sin((float32(i)/8)*math32.Pi)
 	}
-
-	// data[8].Y = math32.NaN()
 
 	l1, err := NewLine(data)
 	if err != nil {
 		t.Error(err.Error())
 	}
-	// l1.StepStyle = PostStep
-	l1.FillColor = colors.Yellow
 	pt.Add(l1)
 
 	pt.Resize(image.Point{640, 480})
 	pt.Draw()
-	pt.SaveImage("test1.png")
+	imagex.Assert(t, pt.Pixels, "line.png")
+
+	l1.FillColor = colors.Yellow
+	pt.Draw()
+	imagex.Assert(t, pt.Pixels, "line_fill.png")
+
+	l1.StepStyle = PreStep
+	pt.Draw()
+	imagex.Assert(t, pt.Pixels, "line_prestep.png")
+
+	l1.StepStyle = MidStep
+	pt.Draw()
+	imagex.Assert(t, pt.Pixels, "line_midstep.png")
+
+	l1.StepStyle = PostStep
+	pt.Draw()
+	imagex.Assert(t, pt.Pixels, "line_poststep.png")
+}
+
+func TestScatter(t *testing.T) {
+	pt := plot.New()
+	pt.Title.Text = "Test Scatter"
+	pt.X.Min = 0
+	pt.X.Max = 100
+	pt.X.Label.Text = "X Axis"
+	pt.Y.Min = 0
+	pt.Y.Max = 100
+	pt.Y.Label.Text = "Y Axis"
+
+	data := make(XYs, 21)
+	for i := range data {
+		data[i].X = float32(i * 5)
+		data[i].Y = float32(50) + 40*math32.Sin((float32(i)/8)*math32.Pi)
+	}
+
+	l1, err := NewScatter(data)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	pt.Add(l1)
+
+	pt.Resize(image.Point{640, 480})
+
+	shs := ShapesValues()
+	for _, sh := range shs {
+		l1.PointShape = sh
+		pt.Draw()
+		imagex.Assert(t, pt.Pixels, "scatter_"+sh.String()+".png")
+	}
 }
