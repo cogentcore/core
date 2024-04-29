@@ -20,6 +20,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/tomlx"
 	"cogentcore.org/core/base/strcase"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlview"
@@ -175,6 +176,9 @@ func (pg *Page) Config() {
 
 	nav := views.NewTreeViewFrame(sp, "nav").SetText(core.TheApp.Name())
 	nav.SetReadOnly(true)
+	nav.ParentWidget().Style(func(s *styles.Style) {
+		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+	})
 	nav.OnSelect(func(e events.Event) {
 		if len(nav.SelectedNodes) == 0 {
 			return
