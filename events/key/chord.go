@@ -88,6 +88,9 @@ func (ch Chord) Label() string {
 			cs = strings.ReplaceAll(cs, "Meta+", "Cmd+")
 		} else {
 			cs = strings.ReplaceAll(cs, "Meta+", "⌘")
+			// need to have + after ⌘ when before other modifiers
+			cs = strings.ReplaceAll(cs, "⌘Alt", "⌘+Alt")
+			cs = strings.ReplaceAll(cs, "⌘Shift", "⌘+Shift")
 		}
 	case "Windows":
 		cs = strings.ReplaceAll(cs, "Meta+", "Win+")
