@@ -21,4 +21,13 @@ func init() {
 			}).NewSnackbar(nil).SetTimeout(0).Run()
 		return nil
 	}))
+
+	webInstall = func() {
+		js.Global().Call("appShowInstallPrompt")
+	}
+	webCanInstall = js.Global().Call("appIsAppInstallable").Bool()
+	js.Global().Set("appOnAppInstallChange", js.FuncOf(func(this js.Value, args []js.Value) any {
+		webCanInstall = js.Global().Call("appIsAppInstallable").Bool()
+		return nil
+	}))
 }

@@ -159,10 +159,27 @@ func StandardOverflowMenu(tb *Toolbar) {
 	tb.OverflowMenus = append(tb.OverflowMenus, tb.StandardOverflowMenu)
 }
 
-// note: must be a method on toolbar to get scene
+var (
+	// webCanInstall is whether the app can be installed on the web platform
+	webCanInstall bool
+
+	// webInstall installs the app on the web platform
+	webInstall func()
+)
+
+// note: StandardOverflowMenu must be a method on toolbar to get context scene
 
 // StandardOverflowMenu adds standard overflow menu items.
 func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
+	if webCanInstall {
+		icon := icons.InstallDesktop
+		if TheApp.SystemPlatform().IsMobile() {
+			icon = icons.InstallMobile
+		}
+		NewButton(m).SetText("Install").SetIcon(icon).SetTooltip("Install this app to your device as a Progressive Web App (PWA)").OnClick(func(e events.Event) {
+			webInstall()
+		})
+	}
 	if SettingsWindow != nil {
 		NewButton(m).SetText("Settings").SetIcon(icons.Settings).SetShortcut("Command+,").
 			OnClick(func(e events.Event) {
@@ -170,7 +187,7 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 			})
 	}
 	if InspectorWindow != nil {
-		NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetShortcut("Command+Shift+I").
+		NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetTooltip("Developer tools for inspecting the content of the app").SetShortcut("Command+Shift+I").
 			OnClick(func(e events.Event) {
 				InspectorWindow(tb.Scene)
 			})
