@@ -106,31 +106,17 @@ var ManifestJSONTmpl = template.Must(template.New("manifest.webmanifest").Parse(
 
 // ManifestJSONData is the data passed to [ManifestJSONTmpl]
 type ManifestJSONData struct {
-	ShortName       string
-	Name            string
-	Description     string
-	DefaultIcon     string
-	LargeIcon       string
-	SVGIcon         string
-	BackgroundColor string
-	ThemeColor      string
-	Scope           string
-	StartURL        string
+	ShortName   string
+	Name        string
+	Description string
 }
 
 // MakeManifestJSON exectues [ManifestJSONTmpl] based on the given configuration information.
 func MakeManifestJSON(c *config.Config) ([]byte, error) {
 	d := ManifestJSONData{
-		ShortName:       c.Name,
-		Name:            c.Name,
-		Description:     c.Desc,
-		DefaultIcon:     "icons/192.png",
-		LargeIcon:       "icons/512.png",
-		SVGIcon:         "icons/svg.svg",
-		BackgroundColor: c.Web.BackgroundColor,
-		ThemeColor:      c.Web.ThemeColor,
-		Scope:           "",
-		StartURL:        "",
+		ShortName:   c.Name,
+		Name:        c.Name,
+		Description: c.Desc,
 	}
 
 	b := &bytes.Buffer{}
@@ -149,7 +135,6 @@ type IndexHTMLData struct {
 	Author                 string
 	Desc                   string
 	Keywords               []string
-	ThemeColor             string
 	Title                  string
 	Image                  string
 	VanityURL              string
@@ -162,7 +147,6 @@ func MakeIndexHTML(c *config.Config) ([]byte, error) {
 		Author:                 c.Web.Author,
 		Desc:                   c.Desc,
 		Keywords:               c.Web.Keywords,
-		ThemeColor:             c.Web.ThemeColor,
 		Title:                  c.Name,
 		Image:                  c.Web.Image,
 		VanityURL:              c.Web.VanityURL,

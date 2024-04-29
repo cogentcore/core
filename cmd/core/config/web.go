@@ -23,18 +23,6 @@ type Web struct { //types:add
 	// and serve it as a gzip-encoded file in the run command.
 	Gzip bool
 
-	// A placeholder background color for the application page to display before
-	// its stylesheets are loaded.
-	//
-	// DEFAULT: #2d2c2c.
-	BackgroundColor string `default:"#2d2c2c"`
-
-	// The theme color for the application. This affects how the OS displays the
-	// app (e.g., PWA title bar or Android's task switcher).
-	//
-	// DEFAULT: #2d2c2c.
-	ThemeColor string `default:"#2d2c2c"`
-
 	// The page language.
 	//
 	// DEFAULT: en.
