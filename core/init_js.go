@@ -15,7 +15,7 @@ import (
 func init() {
 	js.Global().Set("appOnUpdate", js.FuncOf(func(this js.Value, args []js.Value) any {
 		NewBody("web-update-available").
-			AddSnackbarText("A new version of "+TheApp.Name()+" is available").
+			AddSnackbarText("A new version is available").
 			AddSnackbarButton("Reload", func(e events.Event) {
 				js.Global().Get("location").Call("reload")
 			}).NewSnackbar(nil).SetTimeout(0).Run()
