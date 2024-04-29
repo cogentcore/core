@@ -22,12 +22,26 @@ type Table interface {
 	Data(column, row int) float32
 }
 
+func TableColumnIndex(tab Table, name string) int {
+	for i := range tab.NumColumns() {
+		if tab.ColumnName(i) == name {
+			return i
+		}
+	}
+	return -1
+}
+
 // TableXYer is an interface for providing XY access to Table data
 type TableXYer struct {
 	Table Table
 
 	// the indexes of the tensor columns to use for the X and Y data, respectively
 	XColumn, YColumn int
+}
+
+func NewTableXYer(tab Table, xcolumn, ycolumn int) *TableXYer {
+	txy := &TableXYer{Table: tab, XColumn: xcolumn, YColumn: ycolumn}
+	return txy
 }
 
 func (dt *TableXYer) Len() int {
@@ -40,7 +54,7 @@ func (dt *TableXYer) XY(i int) (x, y float32) {
 
 // AddTableLine adds Line with given x, y columns from given tabular data
 func AddTableLine(plt *plot.Plot, tab Table, xcolumn, ycolumn int) (*Line, error) {
-	txy := &TableXYer{Table: tab, XColumn: xcolumn, YColumn: ycolumn}
+	txy := NewTableXYer(tab, xcolumn, ycolumn)
 	ln, err := NewLine(txy)
 	if err != nil {
 		return nil, err
