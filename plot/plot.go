@@ -9,6 +9,8 @@
 
 package plot
 
+//go:generate core generate -add-types
+
 import (
 	"image"
 	"image/color"
