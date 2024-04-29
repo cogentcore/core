@@ -152,6 +152,7 @@ func (pl *PlotView) GenPlotXY() {
 				if lns != nil {
 					lns.LineStyle.Width.Pt(float32(cp.LineWidth.Or(pl.Params.LineWidth)))
 					lns.LineStyle.Color = colors.C(clr)
+					lns.NegativeXDraw = pl.Params.NegativeXDraw
 					plt.Add(lns)
 					// if bi == 0 {
 					// 	plt.Legend.Add(lbl, lns)

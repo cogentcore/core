@@ -31,10 +31,16 @@ func TestLine(t *testing.T) {
 	pt.Y.Max = 100
 	pt.Y.Label.Text = "Y Axis"
 
-	data := make(XYs, 21)
+	// note: making two overlapping series
+	data := make(XYs, 42)
 	for i := range data {
-		data[i].X = float32(i * 5)
-		data[i].Y = float32(50) + 40*math32.Sin((float32(i)/8)*math32.Pi)
+		x := float32(i % 21)
+		data[i].X = x * 5
+		if i < 21 {
+			data[i].Y = float32(50) + 40*math32.Sin((x/8)*math32.Pi)
+		} else {
+			data[i].Y = float32(50) + 40*math32.Cos((x/8)*math32.Pi)
+		}
 	}
 
 	l1, err := NewLine(data)
@@ -62,6 +68,13 @@ func TestLine(t *testing.T) {
 	l1.StepStyle = PostStep
 	pt.Draw()
 	imagex.Assert(t, pt.Pixels, "line_poststep.png")
+
+	l1.StepStyle = NoStep
+	l1.FillColor = nil
+	l1.NegativeXDraw = true
+	pt.Draw()
+	imagex.Assert(t, pt.Pixels, "line_negx.png")
+
 }
 
 func TestScatter(t *testing.T) {

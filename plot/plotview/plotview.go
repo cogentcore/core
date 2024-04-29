@@ -334,25 +334,6 @@ func (pl *PlotView) PlotXAxis(plt *plot.Plot, ixvw *etable.IndexView) (xi int, x
 			return true
 		})
 	}
-	if pl.Params.NegXDraw {
-		xbreaks = append(xbreaks, xview.Len())
-		return
-	}
-	lastx := -math.MaxFloat64
-	for row := 0; row < xview.Len(); row++ {
-		trow := xview.Indexes[row] // true table row
-		var xv float64
-		if xc.NumDims() > 1 {
-			xv = xc.FloatValueRowCell(trow, xp.TensorIndex)
-		} else {
-			xv = xc.FloatValue1D(trow)
-		}
-		if xv < lastx {
-			xbreaks = append(xbreaks, row)
-		}
-		lastx = xv
-	}
-	xbreaks = append(xbreaks, xview.Len())
 	return
 }
 */
@@ -562,7 +543,7 @@ func (pl *PlotView) ColumnsConfig() {
 				d := core.NewBody().AddTitle("Col Params")
 				views.NewStructView(d).SetStruct(cp).
 					OnChange(func(e events.Event) {
-						pl.UpdatePlot()
+						pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
 					})
 				d.NewFullDialog(pl).SetNewWindow(true).Run()
 			})

@@ -41,8 +41,11 @@ type PlotParams struct { //types:add
 	// width of bars for bar plot, as fraction of available space (1 = no gaps)
 	BarWidth float32 `min:"0.01" max:"1" default:"0.8"`
 
-	// draw lines that connect points with a negative X-axis direction -- otherwise these are treated as breaks between repeated series and not drawn
-	NegXDraw bool
+	// if true, draw lines that connect points with a negative X-axis direction;
+	// otherwise there is a break in the line.
+	// default is false, so that repeated series of data across the X axis
+	// are plotted separately.
+	NegativeXDraw bool
 
 	// Scale multiplies the plot DPI value, to change the overall scale
 	// of the rendered plot.  Larger numbers produce larger scaling.
@@ -152,11 +155,11 @@ func (pp *PlotParams) FromMetaMap(meta map[string]string) {
 			pp.BarWidth = float32(f)
 		}
 	}
-	if op, has := MetaMapLower(meta, "NegXDraw"); has {
+	if op, has := MetaMapLower(meta, "NegativeXDraw"); has {
 		if op == "+" || op == "true" {
-			pp.NegXDraw = true
+			pp.NegativeXDraw = true
 		} else {
-			pp.NegXDraw = false
+			pp.NegativeXDraw = false
 		}
 	}
 	if scl, has := MetaMapLower(meta, "Scale"); has {

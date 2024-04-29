@@ -52,6 +52,12 @@ type Line struct {
 	// FillColor is the color to fill the area below the plot.
 	// Use nil to disable the filling. This is the default.
 	FillColor color.Color
+
+	// if true, draw lines that connect points with a negative X-axis direction;
+	// otherwise there is a break in the line.
+	// default is false, so that repeated series of data across the X axis
+	// are plotted separately.
+	NegativeXDraw bool
 }
 
 // NewLine returns a Line that uses the default line style and
@@ -89,25 +95,48 @@ func (pts *Line) Plot(plt *plot.Plot) {
 	if pts.FillColor != nil {
 		pc.FillStyle.Color = colors.C(pts.FillColor)
 		minY := plt.PY(plt.Y.Min)
-		pc.MoveTo(ps[0].X, minY)
-		prev := XY{X: 0, Y: minY}
+		prev := XY{X: ps[0].X, Y: minY}
+		pc.MoveTo(prev.X, prev.Y)
 		for i := range ps {
 			pt := ps[i]
 			switch pts.StepStyle {
 			case NoStep:
+				if pt.X < prev.X {
+					pc.LineTo(prev.X, minY)
+					pc.ClosePath()
+					pc.MoveTo(pt.X, minY)
+				}
 				pc.LineTo(pt.X, pt.Y)
 			case PreStep:
 				if i == 0 {
 					continue
 				}
-				pc.LineTo(prev.X, pt.Y)
+				if pt.X < prev.X {
+					pc.LineTo(prev.X, minY)
+					pc.ClosePath()
+					pc.MoveTo(pt.X, minY)
+				} else {
+					pc.LineTo(prev.X, pt.Y)
+				}
 				pc.LineTo(pt.X, pt.Y)
 			case MidStep:
-				pc.LineTo(0.5*(prev.X+pt.X), prev.Y)
-				pc.LineTo(0.5*(prev.X+pt.X), pt.Y)
+				if pt.X < prev.X {
+					pc.LineTo(prev.X, minY)
+					pc.ClosePath()
+					pc.MoveTo(pt.X, minY)
+				} else {
+					pc.LineTo(0.5*(prev.X+pt.X), prev.Y)
+					pc.LineTo(0.5*(prev.X+pt.X), pt.Y)
+				}
 				pc.LineTo(pt.X, pt.Y)
 			case PostStep:
-				pc.LineTo(pt.X, prev.Y)
+				if pt.X < prev.X {
+					pc.LineTo(prev.X, minY)
+					pc.ClosePath()
+					pc.MoveTo(pt.X, minY)
+				} else {
+					pc.LineTo(pt.X, prev.Y)
+				}
 				pc.LineTo(pt.X, pt.Y)
 			}
 			prev = pt
@@ -125,16 +154,26 @@ func (pts *Line) Plot(plt *plot.Plot) {
 	pc.MoveTo(prev.X, prev.Y)
 	for i := 1; i < np; i++ {
 		pt := ps[i]
-		switch pts.StepStyle {
-		case PreStep:
-			pc.LineTo(prev.X, pt.Y)
-		case MidStep:
-			pc.LineTo(0.5*(prev.X+pt.X), prev.Y)
-			pc.LineTo(0.5*(prev.X+pt.X), pt.Y)
-		case PostStep:
-			pc.LineTo(pt.X, prev.Y)
+		if pts.StepStyle != NoStep {
+			if pt.X >= prev.X {
+				switch pts.StepStyle {
+				case PreStep:
+					pc.LineTo(prev.X, pt.Y)
+				case MidStep:
+					pc.LineTo(0.5*(prev.X+pt.X), prev.Y)
+					pc.LineTo(0.5*(prev.X+pt.X), pt.Y)
+				case PostStep:
+					pc.LineTo(pt.X, prev.Y)
+				}
+			} else {
+				pc.MoveTo(pt.X, pt.Y)
+			}
 		}
-		pc.LineTo(pt.X, pt.Y)
+		if !pts.NegativeXDraw && pt.X < prev.X {
+			pc.MoveTo(pt.X, pt.Y)
+		} else {
+			pc.LineTo(pt.X, pt.Y)
+		}
 		prev = pt
 	}
 	pc.Stroke()
