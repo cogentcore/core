@@ -243,3 +243,13 @@ func (b Box2) Translate(offset Vector2) Box2 {
 func (b Box2) IsEqual(other Box2) bool {
 	return other.Min.IsEqual(b.Min) && other.Max.IsEqual(b.Max)
 }
+
+// ProjectX projects normalized value along the X dimension of this box
+func (b Box2) ProjectX(v float32) float32 {
+	return b.Min.X + v*(b.Max.X-b.Min.X)
+}
+
+// ProjectY projects normalized value along the Y dimension of this box
+func (b Box2) ProjectY(v float32) float32 {
+	return b.Min.Y + v*(b.Max.Y-b.Min.Y)
+}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Adapted from gonum/plot:
+// Adapted from github.com/gonum/plot:
 // Copyright ©2015 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -12,7 +12,6 @@ package plot
 import (
 	"image"
 	"image/color"
-	"math"
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/math32"
@@ -30,6 +29,9 @@ type Plot struct {
 	// Background is the background color of the plot.
 	// The default is White.
 	Background color.Color
+
+	// standard text style with default params
+	StdTextStyle styles.Text
 
 	// X and Y are the horizontal and vertical axes
 	// of the plot respectively.
@@ -51,8 +53,8 @@ type Plot struct {
 	// pixels that we render into
 	Pixels *image.RGBA `copier:"-" json:"-" xml:"-" edit:"-"`
 
-	// standard text style with default params
-	StdTextStyle styles.Text
+	// Current plot bounding box in image coordinates, for plotting coordinates
+	PlotBox math32.Box2
 }
 
 // Defaults sets defaults
@@ -88,10 +90,10 @@ func (pt *Plot) Add(ps ...Plotter) {
 	for _, d := range ps {
 		if x, ok := d.(DataRanger); ok {
 			xmin, xmax, ymin, ymax := x.DataRange()
-			pt.X.Min = math.Min(pt.X.Min, xmin)
-			pt.X.Max = math.Max(pt.X.Max, xmax)
-			pt.Y.Min = math.Min(pt.Y.Min, ymin)
-			pt.Y.Max = math.Max(pt.Y.Max, ymax)
+			pt.X.Min = math32.Min(pt.X.Min, xmin)
+			pt.X.Max = math32.Max(pt.X.Max, xmax)
+			pt.Y.Min = math32.Min(pt.Y.Min, ymin)
+			pt.Y.Max = math32.Max(pt.Y.Max, ymax)
 		}
 	}
 
@@ -131,7 +133,7 @@ func (pt *Plot) NominalX(names ...string) {
 	// pt.Y.Padding.Pt(pt.X.Tick.Label.Width(names[0]) / 2)
 	ticks := make([]Tick, len(names))
 	for i, name := range names {
-		ticks[i] = Tick{float64(i), name}
+		ticks[i] = Tick{float32(i), name}
 	}
 	pt.X.Ticker = ConstantTicks(ticks)
 }
@@ -164,7 +166,18 @@ func (pt *Plot) NominalY(names ...string) {
 	// pt.X.Padding = pt.Y.Tick.Label.Height(names[0]) / 2
 	ticks := make([]Tick, len(names))
 	for i, name := range names {
-		ticks[i] = Tick{float64(i), name}
+		ticks[i] = Tick{float32(i), name}
 	}
 	pt.Y.Ticker = ConstantTicks(ticks)
+}
+
+// PX returns the X-axis plotting coordinate for given raw data value
+// using the current plot bounding region
+func (pt *Plot) PX(v float32) float32 {
+	return pt.PlotBox.ProjectX(pt.X.Norm(v))
+}
+
+// PY returns the Y-axis plotting coordinate for given raw data value
+func (pt *Plot) PY(v float32) float32 {
+	return pt.PlotBox.ProjectY(1 - pt.Y.Norm(v))
 }

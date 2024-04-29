@@ -32,14 +32,33 @@ func (ls *LineStyle) Defaults() {
 	ls.Width.Pt(1)
 }
 
-func (ls *LineStyle) draw(pt *Plot, start, end math32.Vector2) {
+// SetStroke sets the stroke style in plot paint to current line style.
+// returns false if either the Width = 0 or Color is nil
+func (ls *LineStyle) SetStroke(pt *Plot) bool {
+	if ls.Color == nil {
+		return false
+	}
 	pc := pt.Paint
 	uc := &pc.UnitContext
 	ls.Width.ToDots(uc)
+	if ls.Width.Dots == 0 {
+		return false
+	}
 	pc.StrokeStyle.Width = ls.Width
 	pc.StrokeStyle.Color = ls.Color
 	pc.StrokeStyle.ToDots(uc)
+	return true
+}
+
+// Draw draws a line between given coordinates, setting the stroke style
+// to current parameters.  Returns false if either Width = 0 or Color = nil
+func (ls *LineStyle) Draw(pt *Plot, start, end math32.Vector2) bool {
+	if !ls.SetStroke(pt) {
+		return false
+	}
+	pc := pt.Paint
 	pc.MoveTo(start.X, start.Y)
 	pc.LineTo(end.X, end.Y)
 	pc.Stroke()
+	return true
 }

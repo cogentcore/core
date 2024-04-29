@@ -103,8 +103,17 @@ func (pt *Plot) Draw() {
 	pt.Paint.PopBounds()
 
 	tb = ptb
-	tb.Min.X += ywidth
-	tb.Max.Y -= xheight
+	tb.Min.X += ywidth + lpad
+	tb.Max.X -= rpad
+	tb.Max.Y -= xheight + bpad
+	tb.Min.Y += tpad
+	pt.PlotBox.SetFromRect(tb)
+
+	// don't cut off lines
+	tb.Min.X -= 2
+	tb.Min.Y -= 2
+	tb.Max.X += 2
+	tb.Max.Y += 2
 	pt.Paint.PushBounds(tb)
 
 	for _, plt := range pt.Plotters {
@@ -305,12 +314,12 @@ func (ax *Axis) drawX(pt *Plot, lpad, rpad int) {
 				continue
 			}
 			x += float32(ab.Min.X)
-			ax.TickLine.draw(pt, math32.Vec2(x, float32(ab.Max.Y)-yoff), math32.Vec2(x, float32(ab.Max.Y)-ln))
+			ax.TickLine.Draw(pt, math32.Vec2(x, float32(ab.Max.Y)-yoff), math32.Vec2(x, float32(ab.Max.Y)-ln))
 		}
 		ab.Max.Y -= int(ln - 0.5*ax.Line.Width.Dots)
 	}
 
-	ax.Line.draw(pt, math32.Vec2(float32(ab.Min.X), float32(ab.Max.Y)), math32.Vec2(float32(ab.Min.X)+axw, float32(ab.Max.Y)))
+	ax.Line.Draw(pt, math32.Vec2(float32(ab.Min.X), float32(ab.Max.Y)), math32.Vec2(float32(ab.Min.X)+axw, float32(ab.Max.Y)))
 }
 
 // drawY draws the Y axis along the left side
@@ -361,10 +370,10 @@ func (ax *Axis) drawY(pt *Plot, tickWidth, tpad, bpad int) {
 				continue
 			}
 			y += float32(ab.Min.Y)
-			ax.TickLine.draw(pt, math32.Vec2(float32(ab.Min.X)+xoff, y), math32.Vec2(float32(ab.Min.X)+ln, y))
+			ax.TickLine.Draw(pt, math32.Vec2(float32(ab.Min.X)+xoff, y), math32.Vec2(float32(ab.Min.X)+ln, y))
 		}
 		ab.Min.X += int(ln + 0.5*ax.Line.Width.Dots)
 	}
 
-	ax.Line.draw(pt, math32.Vec2(float32(ab.Min.X), float32(ab.Min.Y)), math32.Vec2(float32(ab.Min.X), float32(ab.Max.Y)))
+	ax.Line.Draw(pt, math32.Vec2(float32(ab.Min.X), float32(ab.Min.Y)), math32.Vec2(float32(ab.Min.X), float32(ab.Max.Y)))
 }

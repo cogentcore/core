@@ -10,8 +10,6 @@
 package plot
 
 import (
-	"math"
-
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
@@ -22,7 +20,7 @@ import (
 type Normalizer interface {
 	// Normalize transforms a value x in the data coordinate system to
 	// the normalized coordinate system.
-	Normalize(min, max, x float64) float64
+	Normalize(min, max, x float32) float32
 }
 
 // Axis represents either a horizontal or vertical
@@ -30,7 +28,7 @@ type Normalizer interface {
 type Axis struct {
 	// Min and Max are the minimum and maximum data
 	// values represented by the axis.
-	Min, Max float64
+	Min, Max float32
 
 	// specifies which axis this is: X or Y
 	Axis math32.Dims
@@ -76,8 +74,8 @@ type Axis struct {
 // Sets Defaults, range is (∞, ­∞), and thus any finite
 // value is less than Min and greater than Max.
 func (ax *Axis) Defaults(dim math32.Dims) {
-	ax.Min = math.Inf(+1)
-	ax.Max = math.Inf(-1)
+	ax.Min = math32.Inf(+1)
+	ax.Max = math32.Inf(-1)
 	ax.Axis = dim
 	ax.Line.Defaults()
 	ax.Label.Defaults()
@@ -98,10 +96,10 @@ func (ax *Axis) Defaults(dim math32.Dims) {
 
 // SanitizeRange ensures that the range of the axis makes sense.
 func (ax *Axis) SanitizeRange() {
-	if math.IsInf(ax.Min, 0) {
+	if math32.IsInf(ax.Min, 0) {
 		ax.Min = 0
 	}
-	if math.IsInf(ax.Max, 0) {
+	if math32.IsInf(ax.Max, 0) {
 		ax.Max = 0
 	}
 	if ax.Min > ax.Max {
@@ -115,8 +113,8 @@ func (ax *Axis) SanitizeRange() {
 	if ax.AutoRescale {
 		marks := ax.Ticker.Ticks(ax.Min, ax.Max)
 		for _, t := range marks {
-			ax.Min = math.Min(ax.Min, t.Value)
-			ax.Max = math.Max(ax.Max, t.Value)
+			ax.Min = math32.Min(ax.Min, t.Value)
+			ax.Max = math32.Max(ax.Max, t.Value)
 		}
 	}
 }
@@ -128,7 +126,7 @@ type LinearScale struct{}
 var _ Normalizer = LinearScale{}
 
 // Normalize returns the fractional distance of x between min and max.
-func (LinearScale) Normalize(min, max, x float64) float64 {
+func (LinearScale) Normalize(min, max, x float32) float32 {
 	return (x - min) / (max - min)
 }
 
@@ -140,12 +138,12 @@ var _ Normalizer = LogScale{}
 
 // Normalize returns the fractional logarithmic distance of
 // x between min and max.
-func (LogScale) Normalize(min, max, x float64) float64 {
+func (LogScale) Normalize(min, max, x float32) float32 {
 	if min <= 0 || max <= 0 || x <= 0 {
 		panic("Values must be greater than 0 for a log scale.")
 	}
-	logMin := math.Log(min)
-	return (math.Log(x) - logMin) / (math.Log(max) - logMin)
+	logMin := math32.Log(min)
+	return (math32.Log(x) - logMin) / (math32.Log(max) - logMin)
 }
 
 // InvertedScale can be used as the value of an Axis.Scale function to
@@ -155,7 +153,7 @@ type InvertedScale struct{ Normalizer }
 var _ Normalizer = InvertedScale{}
 
 // Normalize returns a normalized [0, 1] value for the position of x.
-func (is InvertedScale) Normalize(min, max, x float64) float64 {
+func (is InvertedScale) Normalize(min, max, x float32) float32 {
 	return is.Normalizer.Normalize(max, min, x)
 }
 
@@ -163,6 +161,6 @@ func (is InvertedScale) Normalize(min, max, x float64) float64 {
 // system, normalized to its distance as a fraction of the
 // range of this axis.  For example, if x is a.Min then the return
 // value is 0, and if x is a.Max then the return value is 1.
-func (ax *Axis) Norm(x float64) float64 {
+func (ax *Axis) Norm(x float32) float32 {
 	return ax.Scale.Normalize(ax.Min, ax.Max, x)
 }
