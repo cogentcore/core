@@ -15,6 +15,7 @@ import (
 	"log/slog"
 	"net/url"
 	"path"
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
@@ -243,7 +244,7 @@ func (pg *Page) Config() {
 
 // AppBar is the default app bar for a [Page]
 func (pg *Page) AppBar(tb *core.Toolbar) {
-	// ch := tb.AppChooser()
+	ch := tb.AppChooser()
 
 	back := tb.ChildByName("back").(*core.Button)
 	back.OnClick(func(e events.Event) {
@@ -256,17 +257,19 @@ func (pg *Page) AppBar(tb *core.Toolbar) {
 		}
 	})
 
-	// TODO(kai/abc)
-	// ch.AddItemsFunc(func() {
-	// 	ch.Items = make([]any, len(pg.History))
-	// 	for i, u := range pg.History {
-	// 		// we reverse the order
-	// 		ch.Items[len(pg.History)-i-1] = u
-	// 	}
-	// })
-	// ch.OnChange(func(e events.Event) {
-	// 	// we need a slash so that it doesn't think it's a relative URL
-	// 	pg.OpenURL("/"+ch.CurrentLabel, true)
-	// 	e.SetHandled()
-	// })
+	ch.AddItemsFunc(func() {
+		urls := []string{}
+		for u := range pg.URLToPagePath {
+			urls = append(urls, u)
+		}
+		slices.Sort(urls)
+		for _, u := range urls {
+			ch.Items = append(ch.Items, core.ChooserItem{
+				Value: u,
+				Func: func() {
+					pg.OpenURL("/"+u, true)
+				},
+			})
+		}
+	})
 }
