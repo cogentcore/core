@@ -28,7 +28,7 @@ import (
 type SVG struct {
 	WidgetBase
 
-	// SVG is the SVG object associated with the element.
+	// SVG is the SVG drawing to display in this widget
 	SVG *svg.SVG `set:"-"`
 }
 

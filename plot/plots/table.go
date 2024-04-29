@@ -18,8 +18,8 @@ type Table interface {
 	//	number of rows of data
 	NumRows() int
 
-	// Data returns the data value at given column and row
-	Data(column, row int) float32
+	// PlotData returns the data value at given column and row
+	PlotData(column, row int) float32
 }
 
 func TableColumnIndex(tab Table, name string) int {
@@ -49,7 +49,7 @@ func (dt *TableXYer) Len() int {
 }
 
 func (dt *TableXYer) XY(i int) (x, y float32) {
-	return dt.Table.Data(dt.XColumn, i), dt.Table.Data(dt.YColumn, i)
+	return dt.Table.PlotData(dt.XColumn, i), dt.Table.PlotData(dt.YColumn, i)
 }
 
 // AddTableLine adds Line with given x, y columns from given tabular data

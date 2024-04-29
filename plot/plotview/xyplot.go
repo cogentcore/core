@@ -14,7 +14,7 @@ import (
 	"cogentcore.org/core/styles"
 )
 
-// GenPlotXY generates an XY (lines, points) plot, setting GPlot variable
+// GenPlotXY generates an XY (lines, points) plot, setting Plot variable
 func (pl *PlotView) GenPlotXY() {
 	plt := plot.New() // todo: not clear how to re-use, due to newtablexynames
 	plt.Title.Text = pl.Params.Title

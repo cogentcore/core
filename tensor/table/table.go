@@ -53,15 +53,14 @@ func (dt *Table) IsValidRow(row int) bool {
 	return true
 }
 
+// NumRows returns the number of rows
+func (dt *Table) NumRows() int { return dt.Rows }
+
 // NumColumns returns the number of columns
-func (dt *Table) NumColumns() int {
-	return len(dt.Columns)
-}
+func (dt *Table) NumColumns() int { return len(dt.Columns) }
 
 // Column returns the tensor at given column index
-func (dt *Table) Column(i int) tensor.Tensor {
-	return dt.Columns[i]
-}
+func (dt *Table) Column(i int) tensor.Tensor { return dt.Columns[i] }
 
 // ColumnByName returns the tensor at given column name without any error messages.
 // Returns nil if not found
@@ -653,6 +652,9 @@ func (dt *Table) SetTensorFloat1D(column string, row int, idx int, val float64) 
 	ct.SetFloat1D(off, val)
 	return true
 }
+
+// PlotData is the plots/Table interface to tabular data
+func (dt *Table) PlotData(column, row int) float32 { return float32(dt.FloatIndex(column, row)) }
 
 //////////////////////////////////////////////////////////////////////////////////////
 //  Copy Cell

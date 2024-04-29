@@ -59,8 +59,7 @@ func (pl *PlotView) CopyFieldsFrom(frm tree.Node) {
 	fr := frm.(*PlotView)
 	pl.Layout.CopyFieldsFrom(&fr.Layout)
 	pl.Params.CopyFrom(&fr.Params)
-	// pl.SetTableView(fr.Table)
-	pl.Table = fr.Table
+	pl.SetTable(fr.Table)
 	mx := min(len(pl.Columns), len(fr.Columns))
 	for i := 0; i < mx; i++ {
 		pl.Columns[i].CopyFrom(fr.Columns[i])
@@ -234,7 +233,7 @@ func (pl *PlotView) UpdatePlot() {
 	if pl == nil || pl.This() == nil {
 		return
 	}
-	if !pl.IsVisible() || pl.Table == nil || pl.InPlot {
+	if pl.Table == nil || pl.InPlot {
 		return
 	}
 	if len(pl.Kids) != 2 || len(pl.Columns) != pl.Table.NumColumns() {
@@ -247,9 +246,6 @@ func (pl *PlotView) UpdatePlot() {
 // GenPlot generates the plot and renders it to SVG
 // It surrounds operation with InPlot true / false to prevent multiple updates
 func (pl *PlotView) GenPlot() {
-	if !pl.IsVisible() { // need this to make things render better on tab opening etc
-		return
-	}
 	if pl.InPlot {
 		slog.Error("plot: in plot already")
 		return
@@ -271,6 +267,7 @@ func (pl *PlotView) GenPlot() {
 	case Bar:
 		// pl.GenPlotBar()
 	}
+	pl.PlotChild().SetPlot(pl.Plot) // redraws etc
 	pl.InPlot = false
 }
 
