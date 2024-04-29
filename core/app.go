@@ -15,7 +15,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
-	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
@@ -141,7 +140,7 @@ func StandardAppBarBack(tb *Toolbar) *Button {
 	return bt
 }
 
-// StandardAppBarChooser adds an AppChooser
+// StandardAppBarChooser adds a standard app chooser using [ConfigAppChooser].
 func StandardAppBarChooser(tb *Toolbar) *Chooser {
 	return ConfigAppChooser(NewChooser(tb, "app-chooser"), tb)
 }
@@ -274,8 +273,9 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 				}
 				s.Border.Radius = styles.BorderRadiusFull
 				s.Min.X.SetCustom(func(uc *units.Context) float32 {
-					return min(math32.Clamp(uc.Ch(40), uc.Vw(20), uc.Vw(80)), uc.Ch(80))
+					return min(uc.Ch(40), uc.Vw(80)-uc.Ch(20))
 				})
+				s.Max.X = s.Min.X
 			})
 		}
 	})
