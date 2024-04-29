@@ -84,11 +84,6 @@ func (a *App) SetSystemWindow() {
 	ua := js.Global().Get("navigator").Get("userAgent").String()
 	a.UnderlyingPlatform = UserAgentToOS(ua)
 
-	js.Global().Set("appOnUpdate", js.FuncOf(func(this js.Value, args []js.Value) any {
-		fmt.Println("update")
-		return nil
-	}))
-
 	a.Resize()
 	a.Event.Window(events.WinShow)
 	a.Event.Window(events.ScreenUpdate)
@@ -200,4 +195,11 @@ func (a *App) ShowVirtualKeyboard(typ styles.VirtualKeyboards) {
 
 func (a *App) HideVirtualKeyboard() {
 	js.Global().Get("document").Call("getElementById", "text-field").Call("blur")
+}
+
+func (a *App) SetWebOnUpdate(f func()) {
+	js.Global().Set("appOnUpdate", js.FuncOf(func(this js.Value, args []js.Value) any {
+		f()
+		return nil
+	}))
 }
