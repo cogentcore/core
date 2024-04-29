@@ -201,7 +201,3 @@ func (a *App) ShowVirtualKeyboard(typ styles.VirtualKeyboards) {
 func (a *App) HideVirtualKeyboard() {
 	// no-op by default
 }
-
-func (a *App) SetWebOnUpdate(f func()) {
-	// no-op by default
-}

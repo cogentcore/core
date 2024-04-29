@@ -196,10 +196,3 @@ func (a *App) ShowVirtualKeyboard(typ styles.VirtualKeyboards) {
 func (a *App) HideVirtualKeyboard() {
 	js.Global().Get("document").Call("getElementById", "text-field").Call("blur")
 }
-
-func (a *App) SetWebOnUpdate(f func()) {
-	js.Global().Set("appOnUpdate", js.FuncOf(func(this js.Value, args []js.Value) any {
-		f()
-		return nil
-	}))
-}

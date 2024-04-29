@@ -188,10 +188,6 @@ type App interface {
 
 	// IsDark returns whether the system color theme is dark (as oppposed to light).
 	IsDark() bool
-
-	// SetWebOnUpdate sets the function that is called when a new update to the app
-	// has been installed on the web platform.
-	SetWebOnUpdate(f func())
 }
 
 // OnSystemWindowCreated is a channel used to communicate that the underlying
