@@ -270,8 +270,8 @@ func (wb *WidgetBase) ParentScrollLayout() *Layout {
 	return ly.ParentScrollLayout()
 }
 
-// ScrollToMe tells my parent layout (that has scroll bars) to scroll to keep
-// this widget in view -- returns true if scrolled
+// ScrollToMe tells this widget's parent layout to scroll to keep
+// this widget in view. It returns whether any scrolling was done.
 func (wb *WidgetBase) ScrollToMe() bool {
 	ly := wb.ParentScrollLayout()
 	if ly == nil {
