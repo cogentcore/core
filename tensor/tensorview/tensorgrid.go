@@ -34,8 +34,8 @@ type TensorLayout struct { //types:add
 	Image bool
 }
 
-// TensorDisp are options for displaying tensors
-type TensorDisp struct { //types:add
+// TensorDisplay are options for displaying tensors
+type TensorDisplay struct { //types:add
 	TensorLayout
 
 	// range to plot
@@ -72,7 +72,7 @@ type TensorDisp struct { //types:add
 }
 
 // Defaults sets defaults for values that are at nonsensical initial values
-func (td *TensorDisp) Defaults() {
+func (td *TensorDisplay) Defaults() {
 	if td.ColorMap == "" {
 		td.ColorMap = "ColdHot"
 	}
@@ -99,7 +99,7 @@ func (td *TensorDisp) Defaults() {
 }
 
 // FromMeta sets display options from Tensor meta-data
-func (td *TensorDisp) FromMeta(tsr tensor.Tensor) {
+func (td *TensorDisplay) FromMeta(tsr tensor.Tensor) {
 	if op, has := tsr.MetaData("top-zero"); has {
 		if op == "+" || op == "true" {
 			td.TopZero = true
@@ -173,7 +173,7 @@ type TensorGrid struct {
 	Tensor tensor.Tensor `set:"-"`
 
 	// display options
-	Disp TensorDisp
+	Disp TensorDisplay
 
 	// the actual colormap
 	ColorMap *colormap.Map

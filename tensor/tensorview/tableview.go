@@ -35,13 +35,13 @@ type TableView struct {
 	Table *table.IndexView `set:"-"`
 
 	// overall display options for tensor display
-	TsrDisp TensorDisp
+	TensorDisplay TensorDisplay `set:"-"`
 
 	// per column tensor display params
-	ColumnTensorDisplay map[int]*TensorDisp
+	ColumnTensorDisplay map[int]*TensorDisplay `set:"-"`
 
 	// per column blank tensor values
-	ColumnTensorBlank map[int]*tensor.Float64
+	ColumnTensorBlank map[int]*tensor.Float64 `set:"-"`
 
 	// number of columns in table (as of last update)
 	NCols int `edit:"-"`
@@ -77,8 +77,8 @@ func (tv *TableView) OnInit() {
 func (tv *TableView) SetStyles() {
 	tv.SliceViewBase.SetStyles() // handles all the basics
 	tv.SortIndex = -1
-	tv.TsrDisp.Defaults()
-	tv.ColumnTensorDisplay = make(map[int]*TensorDisp)
+	tv.TensorDisplay.Defaults()
+	tv.ColumnTensorDisplay = make(map[int]*TensorDisplay)
 	tv.ColumnTensorBlank = make(map[int]*tensor.Float64)
 
 	tv.OnWidgetAdded(func(w core.Widget) {
@@ -516,7 +516,7 @@ func (tv *TableView) ColTensorBlank(cidx int, col tensor.Tensor) *tensor.Float64
 
 // GetColumnTensorDisplay returns tensor display parameters for this column
 // either the overall defaults or the per-column if set
-func (tv *TableView) GetColumnTensorDisplay(col int) *TensorDisp {
+func (tv *TableView) GetColumnTensorDisplay(col int) *TensorDisplay {
 	if ctd, has := tv.ColumnTensorDisplay[col]; has {
 		return ctd
 	}
@@ -526,17 +526,17 @@ func (tv *TableView) GetColumnTensorDisplay(col int) *TensorDisp {
 			return tv.SetColumnTensorDisplay(col)
 		}
 	}
-	return &tv.TsrDisp
+	return &tv.TensorDisplay
 }
 
 // SetColumnTensorDisplay sets per-column tensor display params and returns them
 // if already set, just returns them
-func (tv *TableView) SetColumnTensorDisplay(col int) *TensorDisp {
+func (tv *TableView) SetColumnTensorDisplay(col int) *TensorDisplay {
 	if ctd, has := tv.ColumnTensorDisplay[col]; has {
 		return ctd
 	}
-	ctd := &TensorDisp{}
-	*ctd = tv.TsrDisp
+	ctd := &TensorDisplay{}
+	*ctd = tv.TensorDisplay
 	if tv.Table != nil {
 		cl := tv.Table.Table.Columns[col]
 		ctd.FromMeta(cl)
@@ -617,7 +617,7 @@ func (tv *TableView) SortSliceAction(fldIndex int) {
 // TensorDisplayAction allows user to select tensor display options for column
 // pass -1 for global params for the entire table
 func (tv *TableView) TensorDisplayAction(fldIndex int) {
-	ctd := &tv.TsrDisp
+	ctd := &tv.TensorDisplay
 	if fldIndex >= 0 {
 		ctd = tv.SetColumnTensorDisplay(fldIndex)
 	}
