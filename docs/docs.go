@@ -86,9 +86,19 @@ func homePage(ctx *htmlview.Context) bool {
 		graphicFirst := frame.NumChildren()%2 == 0
 		if graphicFirst {
 			graphic(block)
+			block.Style(func(s *styles.Style) {
+				// we dynamically swap the graphic and text block so that they
+				// are ordered correctly based on our size class
+				sc := block.SizeClass()
+				wrongCompact := sc == core.SizeCompact && block.Child(1).Name() == "text-block"
+				wrongNonCompact := sc != core.SizeCompact && block.Child(0).Name() == "text-block"
+				if wrongCompact || wrongNonCompact {
+					block.Kids.Move(0, 1)
+				}
+			})
 		}
 
-		textBlock := core.NewLayout(block).Style(func(s *styles.Style) {
+		textBlock := core.NewLayout(block, "text-block").Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Text.Align = styles.Start
 		})
