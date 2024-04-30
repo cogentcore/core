@@ -59,6 +59,13 @@ type Page struct {
 
 var _ tree.Node = (*Page)(nil)
 
+// getWebURL, if non-nil, returns the current relative web URL that should
+// be passed to [Page.OpenURL] on startup.
+var getWebURL func() string
+
+// saveWebURL, if non-nil, saves the given web URL to the user's browser address bar and history.
+var saveWebURL func(u string)
+
 func (pg *Page) OnInit() {
 	pg.Frame.OnInit()
 	pg.Context = htmlview.NewContext()
@@ -133,6 +140,9 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	if addToHistory {
 		pg.HistoryIndex = len(pg.History)
 		pg.History = append(pg.History, pg.Context.PageURL)
+	}
+	if saveWebURL != nil {
+		saveWebURL(pg.Context.PageURL)
 	}
 
 	btp := []byte("+++")
@@ -248,10 +258,6 @@ func (pg *Page) Config() {
 		}
 	}
 }
-
-// getWebURL, if non-nil, returns the current relative web URL that should
-// be passed to [Page.OpenURL] on startup.
-var getWebURL func() string
 
 // AppBar is the default app bar for a [Page]
 func (pg *Page) AppBar(tb *core.Toolbar) {
