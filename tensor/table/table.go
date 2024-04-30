@@ -653,9 +653,6 @@ func (dt *Table) SetTensorFloat1D(column string, row int, idx int, val float64) 
 	return true
 }
 
-// PlotData is the plots/Table interface to tabular data
-func (dt *Table) PlotData(column, row int) float32 { return float32(dt.FloatIndex(column, row)) }
-
 //////////////////////////////////////////////////////////////////////////////////////
 //  Copy Cell
 

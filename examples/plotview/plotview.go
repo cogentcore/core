@@ -22,11 +22,11 @@ func main() {
 	epc.OpenFS(tsv, "ra25epoch.tsv", table.Tab)
 
 	pl := plotview.NewPlotView(b)
-	pl.SetTable(epc)
 	pl.Params.Title = "RA25 Epoch Train"
-	pl.Params.XAxisCol = "Epoch"
+	pl.Params.XAxisColumn = "Epoch"
 	// pl.Params.Scale = 2
 	pl.Params.Points = true
+	pl.SetTable(epc)
 	pl.ColumnParams("UnitErr").On = true
 
 	b.AddAppBar(pl.ConfigToolbar)

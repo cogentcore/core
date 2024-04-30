@@ -6,12 +6,17 @@ package plotview
 
 import (
 	"fmt"
+	"log/slog"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/plot/plots"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tensor"
+	"cogentcore.org/core/tensor/stats/split"
+	"cogentcore.org/core/tensor/table"
 )
 
 // GenPlotXY generates an XY (lines, points) plot, setting Plot variable
@@ -37,29 +42,26 @@ func (pl *PlotView) GenPlotXY() {
 	plt.Y.TickText.Style.Color = clr
 
 	// process xaxis first
-	xi, err := pl.PlotXAxis(plt)
+	xi, xview, err := pl.PlotXAxis(plt, pl.Table)
 	if err != nil {
 		return
 	}
 	xp := pl.Columns[xi]
 
-	/*
-		var lsplit *etable.Splits
-		nleg := 1
-		if pl.Params.LegendCol != "" {
-			_, err = pl.Table.Table.ColIndexTry(pl.Params.LegendCol)
-			if err != nil {
-				slog.Error("plot.LegendCol", "err", err.Error())
-			} else {
-				errors.Log(xview.SortStableColNames([]string{pl.Params.LegendCol, xp.Col}, etable.Ascending))
-				lsplit = split.GroupBy(xview, []string{pl.Params.LegendCol})
-				nleg = max(lsplit.Len(), 1)
-			}
-		}
-	*/
+	var lsplit *table.Splits
 	nleg := 1
+	if pl.Params.LegendColumn != "" {
+		_, err = pl.Table.Table.ColumnIndexTry(pl.Params.LegendColumn)
+		if err != nil {
+			slog.Error("plot.LegendColumn", "err", err.Error())
+		} else {
+			errors.Log(xview.SortStableColumnNames([]string{pl.Params.LegendColumn, xp.Column}, table.Ascending))
+			lsplit = split.GroupBy(xview, []string{pl.Params.LegendColumn})
+			nleg = max(lsplit.Len(), 1)
+		}
+	}
 
-	var firstXY *plots.TableXYer
+	var firstXY *TableXY
 	var strCols []*ColumnParams
 	nys := 0
 	for _, cp := range pl.Columns {
@@ -71,9 +73,9 @@ func (pl *PlotView) GenPlotXY() {
 			continue
 		}
 		if cp.TensorIndex < 0 {
-			// yc := pl.Table.Table.ColByName(cp.Col)
-			// _, sz := yc.RowCellSize()
-			// nys += sz
+			yc := pl.Table.Table.ColumnByName(cp.Column)
+			_, sz := yc.RowCellSize()
+			nys += sz
 		} else {
 			nys++
 		}
@@ -91,7 +93,7 @@ func (pl *PlotView) GenPlotXY() {
 
 	firstXY = nil
 	yidx := 0
-	for ci, cp := range pl.Columns {
+	for _, cp := range pl.Columns {
 		if !cp.On || cp == xp {
 			continue
 		}
@@ -99,31 +101,27 @@ func (pl *PlotView) GenPlotXY() {
 			continue
 		}
 		for li := 0; li < nleg; li++ {
-			// lview := xview
+			lview := xview
 			leg := ""
-			// if lsplit != nil && len(lsplit.Values) > li {
-			// 	leg = lsplit.Values[li][0]
-			// 	lview = lsplit.Splits[li]
-			// 	_, _, xbreaks, _ = pl.PlotXAxis(plt, lview)
-			// }
-			// stRow := 0
+			if lsplit != nil && len(lsplit.Values) > li {
+				leg = lsplit.Values[li][0]
+				lview = lsplit.Splits[li]
+			}
 			nidx := 1
 			stidx := cp.TensorIndex
-			// if cp.TensorIndex < 0 { // do all
-			// 	yc := pl.Table.Table.ColByName(cp.Col)
-			// 	_, sz := yc.RowCellSize()
-			// 	nidx = sz
-			// 	stidx = 0
-			// }
+			if cp.TensorIndex < 0 { // do all
+				yc := pl.Table.Table.ColumnByName(cp.Column)
+				_, sz := yc.RowCellSize()
+				nidx = sz
+				stidx = 0
+			}
 			for ii := 0; ii < nidx; ii++ {
 				idx := stidx + ii
-				// tix := lview.Clone()
-				// tix.Indexes = tix.Indexes[stRow:edRow]
-				// xy, _ := NewTableXYName(tix, xi, xp.TensorIndex, cp.Col, idx, cp.Range)
-				xy := plots.NewTableXYer(pl.Table, xi, ci)
-				// if xy == nil {
-				// 	continue
-				// }
+				tix := lview.Clone()
+				xy, _ := NewTableXYName(tix, xi, xp.TensorIndex, cp.Column, idx, cp.Range)
+				if xy == nil {
+					continue
+				}
 				if firstXY == nil {
 					firstXY = xy
 				}
@@ -154,9 +152,7 @@ func (pl *PlotView) GenPlotXY() {
 					lns.LineStyle.Color = colors.C(clr)
 					lns.NegativeXDraw = pl.Params.NegativeXDraw
 					plt.Add(lns)
-					// if bi == 0 {
-					// 	plt.Legend.Add(lbl, lns)
-					// }
+					// plt.Legend.Add(lbl, lns)
 				}
 				if pts != nil {
 					pts.LineStyle.Color = colors.C(clr)
@@ -164,48 +160,46 @@ func (pl *PlotView) GenPlotXY() {
 					pts.PointSize.Pt(float32(cp.PointSize.Or(pl.Params.PointSize)))
 					pts.PointShape = cp.PointShape.Or(pl.Params.PointShape)
 					plt.Add(pts)
-					// if lns == nil && bi == 0 {
+					// if lns == nil {
 					// 	plt.Legend.Add(lbl, pts)
 					// }
 				}
-				// if cp.ErrCol != "" {
-				// 	ec := pl.Table.Table.ColIndex(cp.ErrCol)
-				// 	if ec >= 0 {
-				// 		xy.ErrCol = ec
-				// 		eb, _ := plots.NewYErrorBars(xy)
-				// 		eb.LineStyle.Color = clr
-				// 		plt.Add(eb)
-				// 	}
-				// }
+				if cp.ErrColumn != "" {
+					ec := pl.Table.Table.ColumnIndex(cp.ErrColumn)
+					if ec >= 0 {
+						xy.ErrColumn = ec
+						// eb, _ := plots.NewYErrorBars(xy)
+						// eb.LineStyle.Color = clr
+						// plt.Add(eb)
+					}
+				}
 			}
 		}
 		yidx++
 	}
-	/*
-			if firstXY != nil && len(strCols) > 0 {
-				for _, cp := range strCols {
-					xy, _ := NewTableXYName(xview, xi, xp.TensorIndex, cp.Col, cp.TensorIndex, firstXY.YRange)
-					xy.LblCol = xy.YCol
-					xy.YCol = firstXY.YCol
-					xy.YIndex = firstXY.YIndex
-					lbls, _ := plots.NewLabels(xy)
-					if lbls != nil {
-						plt.Add(lbls)
-					}
-				}
-			}
-
-		// Use string labels for X axis if X is a string
-		xc := pl.Table.Table.Columns[xi]
-		if xc.DataType() == etensor.STRING {
-			xcs := xc.(*etensor.String)
-			vals := make([]string, pl.Table.Len())
-			for i, dx := range pl.Table.Indexes {
-				vals[i] = xcs.Values[dx]
-			}
-			plt.NominalX(vals...)
+	if firstXY != nil && len(strCols) > 0 {
+		for _, cp := range strCols {
+			xy, _ := NewTableXYName(xview, xi, xp.TensorIndex, cp.Column, cp.TensorIndex, firstXY.YRange)
+			xy.LabelColumn = xy.YColumn
+			xy.YColumn = firstXY.YColumn
+			xy.YIndex = firstXY.YIndex
+			// lbls, _ := plots.NewLabels(xy)
+			// if lbls != nil {
+			// 	plt.Add(lbls)
+			// }
 		}
-	*/
+	}
+
+	// Use string labels for X axis if X is a string
+	xc := pl.Table.Table.Columns[xi]
+	if xc.IsString() {
+		xcs := xc.(*tensor.String)
+		vals := make([]string, pl.Table.Len())
+		for i, dx := range pl.Table.Indexes {
+			vals[i] = xcs.Values[dx]
+		}
+		plt.NominalX(vals...)
+	}
 
 	plt.Legend.Top = true
 	plt.X.TickText.Style.Rotation = float32(pl.Params.XAxisRot)

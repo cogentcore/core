@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/plot/plots"
+	"cogentcore.org/core/tensor/table"
 )
 
 // PlotParams are parameters for overall plot
@@ -53,11 +54,11 @@ type PlotParams struct { //types:add
 	// documents or other cases where the overall plot size will be small.
 	Scale float32 `default:"1,2"`
 
-	// what column to use for the common X axis -- if empty or not found, the row number is used.  This optional for Bar plots -- if present and LegendCol is also present, then an extra space will be put between X values.
-	XAxisCol string
+	// what column to use for the common X axis -- if empty or not found, the row number is used.  This optional for Bar plots -- if present and LegendColumn is also present, then an extra space will be put between X values.
+	XAxisColumn string
 
 	// optional column for adding a separate colored / styled line or bar according to this value -- acts just like a separate Y variable, crossed with Y variables
-	LegendCol string
+	LegendColumn string
 
 	// rotation of the X Axis labels, in degrees
 	XAxisRot float32
@@ -103,10 +104,10 @@ func (pp *PlotParams) CopyFrom(fr *PlotParams) {
 	pp.Plot = pl
 }
 
-// // FromMeta sets plot params from meta data
-// func (pp *PlotParams) FromMeta(dt *etable.Table) {
-// 	pp.FromMetaMap(dt.MetaData)
-// }
+// FromMeta sets plot params from meta data
+func (pp *PlotParams) FromMeta(dt *table.Table) {
+	pp.FromMetaMap(dt.MetaData)
+}
 
 // MetaMapLower tries meta data access by lower-case version of key too
 func MetaMapLower(meta map[string]string, key string) (string, bool) {
@@ -138,22 +139,13 @@ func (pp *PlotParams) FromMetaMap(meta map[string]string) {
 		}
 	}
 	if lw, has := MetaMapLower(meta, "LineWidth"); has {
-		f, err := reflectx.ToFloat(lw)
-		if err != nil {
-			pp.LineWidth = float32(f)
-		}
+		pp.LineWidth, _ = reflectx.ToFloat32(lw)
 	}
 	if ps, has := MetaMapLower(meta, "PointSize"); has {
-		f, err := reflectx.ToFloat(ps)
-		if err != nil {
-			pp.PointSize = float32(f)
-		}
+		pp.PointSize, _ = reflectx.ToFloat32(ps)
 	}
 	if bw, has := MetaMapLower(meta, "BarWidth"); has {
-		f, err := reflectx.ToFloat(bw)
-		if err != nil {
-			pp.BarWidth = float32(f)
-		}
+		pp.BarWidth, _ = reflectx.ToFloat32(bw)
 	}
 	if op, has := MetaMapLower(meta, "NegativeXDraw"); has {
 		if op == "+" || op == "true" {
@@ -163,22 +155,16 @@ func (pp *PlotParams) FromMetaMap(meta map[string]string) {
 		}
 	}
 	if scl, has := MetaMapLower(meta, "Scale"); has {
-		f, err := reflectx.ToFloat(scl)
-		if err != nil {
-			pp.Scale = float32(f)
-		}
+		pp.Scale, _ = reflectx.ToFloat32(scl)
 	}
-	if xc, has := MetaMapLower(meta, "XAxisCol"); has {
-		pp.XAxisCol = xc
+	if xc, has := MetaMapLower(meta, "XAxisColumn"); has {
+		pp.XAxisColumn = xc
 	}
-	if lc, has := MetaMapLower(meta, "LegendCol"); has {
-		pp.LegendCol = lc
+	if lc, has := MetaMapLower(meta, "LegendColumn"); has {
+		pp.LegendColumn = lc
 	}
 	if xrot, has := MetaMapLower(meta, "XAxisRot"); has {
-		f, err := reflectx.ToFloat(xrot)
-		if err != nil {
-			pp.XAxisRot = float32(f)
-		}
+		pp.XAxisRot, _ = reflectx.ToFloat32(xrot)
 	}
 	if lb, has := MetaMapLower(meta, "XAxisLabel"); has {
 		pp.XAxisLabel = lb
@@ -213,10 +199,10 @@ type ColumnParams struct { //types:add
 	PointShape option.Option[plots.Shapes]
 
 	// effective range of data to plot -- either end can be fixed
-	Range minmax.Range64
+	Range minmax.Range32 `view:"inline"`
 
 	// full actual range of data -- only valid if specifically computed
-	FullRange minmax.F64
+	FullRange minmax.F32 `view:"inline"`
 
 	// color to use when plotting the line / column
 	Color color.Color
@@ -231,7 +217,7 @@ type ColumnParams struct { //types:add
 	TensorIndex int
 
 	// specifies a column containing error bars for this column
-	ErrCol string
+	ErrColumn string
 
 	// if true this is a string column -- plots as labels
 	IsString bool `edit:"-"`
@@ -313,16 +299,16 @@ func (cp *ColumnParams) FromMetaMap(meta map[string]string) {
 		}
 	}
 	if vl, has := MetaMapLower(meta, cp.Column+":Max"); has {
-		cp.Range.Max, _ = reflectx.ToFloat(vl)
+		cp.Range.Max, _ = reflectx.ToFloat32(vl)
 	}
 	if vl, has := MetaMapLower(meta, cp.Column+":Min"); has {
-		cp.Range.Min, _ = reflectx.ToFloat(vl)
+		cp.Range.Min, _ = reflectx.ToFloat32(vl)
 	}
 	if lb, has := MetaMapLower(meta, cp.Column+":Label"); has {
 		cp.Lbl = lb
 	}
-	if lb, has := MetaMapLower(meta, cp.Column+":ErrCol"); has {
-		cp.ErrCol = lb
+	if lb, has := MetaMapLower(meta, cp.Column+":ErrColumn"); has {
+		cp.ErrColumn = lb
 	}
 	if vl, has := MetaMapLower(meta, cp.Column+":TensorIndex"); has {
 		iv, _ := reflectx.ToInt(vl)
