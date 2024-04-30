@@ -20,9 +20,7 @@ var AppJSTmpl = template.Must(template.New("app.js").Parse(AppJS))
 // AppJSData is the data passed to AppJSTmpl
 type AppJSData struct {
 	Env                     string
-	Wasm                    string
 	WasmContentLengthHeader string
-	WorkerJS                string
 	AutoUpdateInterval      int64
 }
 
@@ -47,9 +45,7 @@ func MakeAppJS(c *config.Config) ([]byte, error) {
 
 	d := AppJSData{
 		Env:                     string(wenv),
-		Wasm:                    "app.wasm",
 		WasmContentLengthHeader: c.Web.WasmContentLengthHeader,
-		WorkerJS:                "app-worker.js",
 		AutoUpdateInterval:      c.Web.AutoUpdateInterval.Milliseconds(),
 	}
 	b := &bytes.Buffer{}

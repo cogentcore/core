@@ -25,7 +25,7 @@ async function appInitServiceWorker() {
   if ("serviceWorker" in navigator) {
     try {
       const registration = await navigator.serviceWorker.register(
-        "{{.WorkerJS}}"
+        document.documentElement.dataset.basePath + "app-worker.js"
       );
 
       appServiceWorkerRegistration = registration;
@@ -235,7 +235,7 @@ async function appInitWebAssembly() {
 
     const go = new Go();
     wasm = await instantiateStreaming(
-      fetchWithProgress("{{.Wasm}}", showProgress),
+      fetchWithProgress(document.documentElement.dataset.basePath + "app.wasm", showProgress),
       go.importObject,
     );
     go.run(wasm.instance);
