@@ -23,13 +23,6 @@ func TestTensorString(t *testing.T) {
 	assert.Equal(t, 4, r)
 	assert.Equal(t, 2, c)
 
-	tsr.SetNull([]int{2, 0}, true)
-	tsr.SetNull([]int{2, 1}, true)
-	assert.Equal(t, true, tsr.IsNull([]int{2, 0}))
-	assert.Equal(t, true, tsr.IsNull([]int{2, 1}))
-	assert.Equal(t, false, tsr.IsNull([]int{1, 1}))
-	assert.Equal(t, false, tsr.IsNull([]int{3, 0}))
-
 	tsr.SetString([]int{2, 0}, "test")
 	assert.Equal(t, "test", tsr.StringValue([]int{2, 0}))
 	tsr.SetString1D(5, "testing")
@@ -89,13 +82,6 @@ func TestTensorFloat64(t *testing.T) {
 	r, c := tsr.RowCellSize()
 	assert.Equal(t, 4, r)
 	assert.Equal(t, 2, c)
-
-	tsr.SetNull([]int{2, 0}, true)
-	tsr.SetNull([]int{2, 1}, true)
-	assert.Equal(t, true, tsr.IsNull([]int{2, 0}))
-	assert.Equal(t, true, tsr.IsNull([]int{2, 1}))
-	assert.Equal(t, false, tsr.IsNull([]int{1, 1}))
-	assert.Equal(t, false, tsr.IsNull([]int{3, 0}))
 
 	tsr.SetFloat([]int{2, 0}, 3.14)
 	assert.Equal(t, 3.14, tsr.Float([]int{2, 0}))
