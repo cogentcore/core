@@ -40,7 +40,7 @@ type Line struct {
 	// XYs is a copy of the points for this line.
 	XYs
 
-	// PXYs is the actual plotting coordinates for each XY value.
+	// PXYs is the actual pixel plotting coordinates for each XY value.
 	PXYs XYs
 
 	// StepStyle is the kind of the step line.
@@ -69,7 +69,7 @@ func NewLine(xys XYer) (*Line, error) {
 		return nil, err
 	}
 	ln := &Line{XYs: data}
-	ln.LineStyle.Defaults()
+	ln.Defaults()
 	return ln, nil
 }
 
@@ -81,8 +81,12 @@ func NewLinePoints(xys XYer) (*Line, *Scatter, error) {
 		return nil, nil, err
 	}
 	ln := &Line{XYs: sc.XYs}
-	ln.LineStyle.Defaults()
+	ln.Defaults()
 	return ln, sc, nil
+}
+
+func (pts *Line) Defaults() {
+	pts.LineStyle.Defaults()
 }
 
 // Plot draws the Line, implementing the plot.Plotter interface.

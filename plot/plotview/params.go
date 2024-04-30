@@ -69,7 +69,7 @@ type PlotParams struct { //types:add
 	LegendPosition plot.LegendPosition `view:"inline"`
 
 	// rotation of the X Axis labels, in degrees
-	XAxisRot float32
+	XAxisRotation float32
 
 	// optional label to use for XAxis instead of column name
 	XAxisLabel string
@@ -172,8 +172,8 @@ func (pp *PlotParams) FromMetaMap(meta map[string]string) {
 	if lc, has := MetaMapLower(meta, "LegendColumn"); has {
 		pp.LegendColumn = lc
 	}
-	if xrot, has := MetaMapLower(meta, "XAxisRot"); has {
-		pp.XAxisRot, _ = reflectx.ToFloat32(xrot)
+	if xrot, has := MetaMapLower(meta, "XAxisRotation"); has {
+		pp.XAxisRotation, _ = reflectx.ToFloat32(xrot)
 	}
 	if lb, has := MetaMapLower(meta, "XAxisLabel"); has {
 		pp.XAxisLabel = lb

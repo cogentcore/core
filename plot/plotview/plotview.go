@@ -296,7 +296,7 @@ func (pl *PlotView) GenPlot() {
 	case XY:
 		pl.GenPlotXY()
 	case Bar:
-		// pl.GenPlotBar()
+		pl.GenPlotBar()
 	}
 	pl.PlotChild().Scale = pl.Params.Scale
 	pl.PlotChild().SetPlot(pl.Plot) // redraws etc
@@ -322,12 +322,7 @@ func (pl *PlotView) ConfigPlot(plt *plot.Plot) {
 	}
 
 	plt.Legend.Position = pl.Params.LegendPosition
-	plt.X.TickText.Style.Rotation = float32(pl.Params.XAxisRot)
-	if pl.Params.XAxisRot > 10 {
-		plt.X.TickText.Style.Align = styles.Center
-		// plt.X.Tick.Label.Style.Align = draw.XRight
-	}
-
+	plt.X.TickText.Style.Rotation = float32(pl.Params.XAxisRotation)
 }
 
 // PlotXAxis processes the XAxis and returns its index

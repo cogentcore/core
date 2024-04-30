@@ -74,12 +74,12 @@ func (pt *Plot) Draw() {
 	}
 
 	if pt.Title.Text != "" {
-		pt.Title.config(pt)
-		pos := pt.Title.posX(ptw)
+		pt.Title.Config(pt)
+		pos := pt.Title.PosX(ptw)
 		pad := pt.Title.Style.Padding.Dots
 		pos.Y = pad
-		pt.Title.draw(pt, pos)
-		th := pt.Title.paintText.BBox.Size().Y + 2*pad
+		pt.Title.Draw(pt, pos)
+		th := pt.Title.PaintText.BBox.Size().Y + 2*pad
 		pth -= th
 		ptb.Min.Y += int(math32.Ceil(th))
 	}
@@ -142,8 +142,8 @@ func (ax *Axis) sizeX(pt *Plot, axw float32) (ht, lpad, rpad int) {
 	ax.ticks = ax.Ticker.Ticks(ax.Min, ax.Max)
 	h := float32(0)
 	if ax.Label.Text != "" { // We assume that the label isn't rotated.
-		ax.Label.config(pt)
-		h += ax.Label.paintText.BBox.Size().Y
+		ax.Label.Config(pt)
+		h += ax.Label.PaintText.BBox.Size().Y
 		h += ax.Label.Style.Padding.Dots
 	}
 	lw := ax.Line.Width.Dots
@@ -160,7 +160,7 @@ func (ax *Axis) sizeX(pt *Plot, axw float32) (ht, lpad, rpad int) {
 			if px < 0 {
 				lpad += int(math32.Ceil(-px))
 			}
-			tht = max(tht, ax.TickText.paintText.BBox.Size().Y)
+			tht = max(tht, ax.TickText.PaintText.BBox.Size().Y)
 		}
 		ltk := ax.lastTickLabel()
 		if ltk.Label != "" {
@@ -168,12 +168,12 @@ func (ax *Axis) sizeX(pt *Plot, axw float32) (ht, lpad, rpad int) {
 			if px+wd > axw {
 				rpad += int(math32.Ceil((px + wd) - axw))
 			}
-			tht = max(tht, ax.TickText.paintText.BBox.Size().Y)
+			tht = max(tht, ax.TickText.PaintText.BBox.Size().Y)
 		}
 		ax.TickText.Text = ax.longestTickLabel()
 		if ax.TickText.Text != "" {
-			ax.TickText.config(pt)
-			tht = max(tht, ax.TickText.paintText.BBox.Size().Y)
+			ax.TickText.Config(pt)
+			tht = max(tht, ax.TickText.PaintText.BBox.Size().Y)
 		}
 		h += ax.TickText.Style.Padding.Dots
 	}
@@ -191,10 +191,10 @@ func (ax *Axis) tickPosX(pt *Plot, t Tick, axw float32) (px, wd float32) {
 		return
 	}
 	ax.TickText.Text = t.Label
-	ax.TickText.config(pt)
-	pos := ax.TickText.posX(0)
+	ax.TickText.Config(pt)
+	pos := ax.TickText.PosX(0)
 	px = pos.X + x
-	wd = ax.TickText.paintText.BBox.Size().X
+	wd = ax.TickText.PaintText.BBox.Size().X
 	return
 }
 
@@ -236,8 +236,8 @@ func (ax *Axis) sizeY(pt *Plot) (ywidth, tickWidth, tpad, bpad int) {
 
 	w := float32(0)
 	if ax.Label.Text != "" {
-		ax.Label.config(pt)
-		w += ax.Label.paintText.BBox.Size().X
+		ax.Label.Config(pt)
+		w += ax.Label.PaintText.BBox.Size().X
 		w += ax.Label.Style.Padding.Dots
 	}
 
@@ -251,12 +251,12 @@ func (ax *Axis) sizeY(pt *Plot) (ywidth, tickWidth, tpad, bpad int) {
 		}
 		ax.TickText.Text = ax.longestTickLabel()
 		if ax.TickText.Text != "" {
-			ax.TickText.config(pt)
-			tw := ax.TickText.paintText.BBox.Size().X
+			ax.TickText.Config(pt)
+			tw := ax.TickText.PaintText.BBox.Size().X
 			w += tw
 			tickWidth = int(math32.Ceil(tw))
 			w += ax.TickText.Style.Padding.Dots
-			tht := int(math32.Ceil(0.5 * ax.TickText.paintText.BBox.Size().X))
+			tht := int(math32.Ceil(0.5 * ax.TickText.PaintText.BBox.Size().X))
 			tpad += tht
 			bpad += tht
 		}
@@ -274,12 +274,12 @@ func (ax *Axis) drawX(pt *Plot, lpad, rpad int) {
 	axw := float32(ab.Size().X)
 	// axh := float32(ab.Size().Y) // height of entire plot
 	if ax.Label.Text != "" {
-		ax.Label.config(pt)
-		pos := ax.Label.posX(axw)
+		ax.Label.Config(pt)
+		pos := ax.Label.PosX(axw)
 		pos.X += float32(ab.Min.X)
-		th := ax.Label.paintText.BBox.Size().Y
+		th := ax.Label.PaintText.BBox.Size().Y
 		pos.Y = float32(ab.Max.Y) - th
-		ax.Label.draw(pt, pos)
+		ax.Label.Draw(pt, pos)
 		ab.Max.Y -= int(math32.Ceil(th + ax.Label.Style.Padding.Dots))
 	}
 
@@ -290,12 +290,12 @@ func (ax *Axis) drawX(pt *Plot, lpad, rpad int) {
 			continue
 		}
 		ax.TickText.Text = t.Label
-		ax.TickText.config(pt)
-		pos := ax.TickText.posX(0)
+		ax.TickText.Config(pt)
+		pos := ax.TickText.PosX(0)
 		pos.X += x + float32(ab.Min.X)
-		tickHt = ax.TickText.paintText.BBox.Size().Y + ax.TickText.Style.Padding.Dots
-		pos.Y = float32(ab.Max.Y) - tickHt
-		ax.TickText.draw(pt, pos)
+		tickHt = ax.TickText.PaintText.BBox.Size().Y + ax.TickText.Style.Padding.Dots
+		pos.Y += float32(ab.Max.Y) - tickHt
+		ax.TickText.Draw(pt, pos)
 	}
 
 	if len(ax.ticks) > 0 {
@@ -331,11 +331,11 @@ func (ax *Axis) drawY(pt *Plot, tickWidth, tpad, bpad int) {
 	ab.Max.Y -= bpad
 	axh := float32(ab.Size().Y)
 	if ax.Label.Text != "" {
-		pos := ax.Label.posY(axh)
-		tw := ax.Label.paintText.BBox.Size().X
-		pos.Y += float32(ab.Min.Y) + ax.Label.paintText.BBox.Size().Y
+		pos := ax.Label.PosY(axh)
+		tw := ax.Label.PaintText.BBox.Size().X
+		pos.Y += float32(ab.Min.Y) + ax.Label.PaintText.BBox.Size().Y
 		pos.X = float32(ab.Min.X)
-		ax.Label.draw(pt, pos)
+		ax.Label.Draw(pt, pos)
 		ab.Min.X += int(math32.Ceil(tw + ax.Label.Style.Padding.Dots))
 	}
 
@@ -346,12 +346,12 @@ func (ax *Axis) drawY(pt *Plot, tickWidth, tpad, bpad int) {
 			continue
 		}
 		ax.TickText.Text = t.Label
-		ax.TickText.config(pt)
-		pos := ax.TickText.posX(float32(tickWidth))
+		ax.TickText.Config(pt)
+		pos := ax.TickText.PosX(float32(tickWidth))
 		pos.X += float32(ab.Min.X)
-		pos.Y = float32(ab.Min.Y) + y - 0.5*ax.TickText.paintText.BBox.Size().Y
-		tickWd = max(tickWd, ax.TickText.paintText.BBox.Size().X+ax.TickText.Style.Padding.Dots)
-		ax.TickText.draw(pt, pos)
+		pos.Y = float32(ab.Min.Y) + y - 0.5*ax.TickText.PaintText.BBox.Size().Y
+		tickWd = max(tickWd, ax.TickText.PaintText.BBox.Size().X+ax.TickText.Style.Padding.Dots)
+		ax.TickText.Draw(pt, pos)
 	}
 
 	if len(ax.ticks) > 0 {
@@ -396,6 +396,7 @@ func (lg *Legend) draw(pt *Plot) {
 	lg.TextStyle.openFont(pt)
 
 	em := lg.TextStyle.Font.Face.Metrics.Em
+	pad := math32.Ceil(lg.TextStyle.Padding.Dots)
 
 	var ltxt Text
 	ltxt.Style = lg.TextStyle
@@ -403,9 +404,9 @@ func (lg *Legend) draw(pt *Plot) {
 	maxTht := 0
 	for _, e := range lg.Entries {
 		ltxt.Text = e.Text
-		ltxt.config(pt)
-		sz.X = max(sz.X, int(math32.Ceil(ltxt.paintText.BBox.Size().X)))
-		tht := int(math32.Ceil(ltxt.paintText.BBox.Size().Y + lg.TextStyle.Padding.Dots))
+		ltxt.Config(pt)
+		sz.X = max(sz.X, int(math32.Ceil(ltxt.PaintText.BBox.Size().X)))
+		tht := int(math32.Ceil(ltxt.PaintText.BBox.Size().Y + pad))
 		maxTht = max(tht, maxTht)
 	}
 	sz.X += int(em)
@@ -429,10 +430,11 @@ func (lg *Legend) draw(pt *Plot) {
 		pc.FillBox(math32.Vector2FromPoint(pos), math32.Vector2FromPoint(sz), colors.C(lg.FillColor))
 	}
 	cp := pos
-	thsz := image.Point{X: int(lg.ThumbnailWidth.Dots), Y: maxTht - int(lg.TextStyle.Padding.Dots)}
+	thsz := image.Point{X: int(lg.ThumbnailWidth.Dots), Y: maxTht - 2*int(pad)}
 	for _, e := range lg.Entries {
 		tp := cp
 		tp.X += int(txsz.X)
+		tp.Y += int(pad)
 		tb := image.Rectangle{Min: tp, Max: tp.Add(thsz)}
 		pc.PushBounds(tb)
 		for _, t := range e.Thumbs {
@@ -440,8 +442,8 @@ func (lg *Legend) draw(pt *Plot) {
 		}
 		pc.PopBounds()
 		ltxt.Text = e.Text
-		ltxt.config(pt)
-		ltxt.draw(pt, math32.Vector2FromPoint(cp))
+		ltxt.Config(pt)
+		ltxt.Draw(pt, math32.Vector2FromPoint(cp))
 		cp.Y += maxTht
 	}
 }

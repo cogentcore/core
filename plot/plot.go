@@ -25,6 +25,9 @@ import (
 // Plot is the basic type representing a plot.
 // It renders into its own image.RGBA Pixels image,
 // and can also save a corresponding SVG version.
+// The Axis ranges are updated automatically when plots
+// are added, so setting a fixed range should happen
+// after that point.  See [UpdateRange] method as well.
 type Plot struct {
 	// Title of the plot
 	Title Text
@@ -97,13 +100,7 @@ func New() *Plot {
 // order in which they were added to the plot.
 func (pt *Plot) Add(ps ...Plotter) {
 	for _, d := range ps {
-		if x, ok := d.(DataRanger); ok {
-			xmin, xmax, ymin, ymax := x.DataRange()
-			pt.X.Min = math32.Min(pt.X.Min, xmin)
-			pt.X.Max = math32.Max(pt.X.Max, xmax)
-			pt.Y.Min = math32.Min(pt.Y.Min, ymin)
-			pt.Y.Max = math32.Max(pt.Y.Max, ymax)
-		}
+		pt.UpdateRangeFromPlotter(d)
 	}
 
 	pt.Plotters = append(pt.Plotters, ps...)
@@ -180,6 +177,29 @@ func (pt *Plot) NominalY(names ...string) {
 		ticks[i] = Tick{float32(i), name}
 	}
 	pt.Y.Ticker = ConstantTicks(ticks)
+}
+
+// UpdateRange updates the axis range values based on current Plot values.
+// This first resets the range so any fixed additional range values should
+// be set after this point.
+func (pt *Plot) UpdateRange() {
+	pt.X.Min = math32.Inf(+1)
+	pt.X.Max = math32.Inf(-1)
+	pt.Y.Min = math32.Inf(+1)
+	pt.Y.Max = math32.Inf(-1)
+	for _, d := range pt.Plotters {
+		pt.UpdateRangeFromPlotter(d)
+	}
+}
+
+func (pt *Plot) UpdateRangeFromPlotter(d Plotter) {
+	if x, ok := d.(DataRanger); ok {
+		xmin, xmax, ymin, ymax := x.DataRange()
+		pt.X.Min = math32.Min(pt.X.Min, xmin)
+		pt.X.Max = math32.Max(pt.X.Max, xmax)
+		pt.Y.Min = math32.Min(pt.Y.Min, ymin)
+		pt.Y.Max = math32.Max(pt.Y.Max, ymax)
+	}
 }
 
 // PX returns the X-axis plotting coordinate for given raw data value
