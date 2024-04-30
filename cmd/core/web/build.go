@@ -98,7 +98,7 @@ func MakeFiles(c *config.Config) error {
 		return err
 	}
 
-	iht, err := MakeIndexHTML(c)
+	iht, err := MakeIndexHTML(c, "", "")
 	if err != nil {
 		return err
 	}

@@ -132,6 +132,7 @@ var IndexHTMLTmpl = template.Must(template.New("index.html").Parse(IndexHTML))
 
 // IndexHTMLData is the data passed to [IndexHTMLTmpl]
 type IndexHTMLData struct {
+	BasePath               string
 	Author                 string
 	Desc                   string
 	Keywords               []string
@@ -141,13 +142,19 @@ type IndexHTMLData struct {
 	GithubVanityRepository string
 }
 
-// MakeIndexHTML exectues [IndexHTMLTmpl] based on the given configuration information.
-func MakeIndexHTML(c *config.Config) ([]byte, error) {
+// MakeIndexHTML exectues [IndexHTMLTmpl] based on the given configuration information,
+// base path for app resources (used in [MakePages]), and optional title (used in [MakePages],
+// defaults to [config.Config.Name] otherwise).
+func MakeIndexHTML(c *config.Config, basePath string, title string) ([]byte, error) {
+	if title == "" {
+		title = c.Name
+	}
 	d := IndexHTMLData{
+		BasePath:               basePath,
 		Author:                 c.Web.Author,
 		Desc:                   c.Desc,
 		Keywords:               c.Web.Keywords,
-		Title:                  c.Name,
+		Title:                  title,
 		Image:                  c.Web.Image,
 		VanityURL:              c.Web.VanityURL,
 		GithubVanityRepository: c.Web.GithubVanityRepository,
