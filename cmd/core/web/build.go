@@ -17,7 +17,6 @@ import (
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/iox/imagex"
-	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
 	"cogentcore.org/core/pages/wpath"
@@ -175,7 +174,11 @@ func MakePages(c *config.Config) error {
 		for range numNested {
 			basePath += "../"
 		}
-		b, err := MakeIndexHTML(c, basePath, strcase.ToSentence(filepath.Base(path)))
+		title := wpath.Label(path, c.Name)
+		if title != c.Name {
+			title += " • " + c.Name
+		}
+		b, err := MakeIndexHTML(c, basePath, title)
 		if err != nil {
 			return err
 		}
