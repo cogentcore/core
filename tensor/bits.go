@@ -95,12 +95,6 @@ func (tsr *Bits) Value1D(i int) bool { return tsr.Values.Index(i) }
 func (tsr *Bits) Set(i []int, val bool) { j := int(tsr.Shp.Offset(i)); tsr.Values.Set(j, val) }
 func (tsr *Bits) Set1D(i int, val bool) { tsr.Values.Set(i, val) }
 
-// Null not supported for bits
-func (tsr *Bits) IsNull(i []int) bool       { return false }
-func (tsr *Bits) IsNull1D(i int) bool       { return false }
-func (tsr *Bits) SetNull(i []int, nul bool) {}
-func (tsr *Bits) SetNull1D(i int, nul bool) {}
-
 // SetShape sets the shape params, resizing backing storage appropriately
 func (tsr *Bits) SetShape(sizes []int, names ...string) {
 	tsr.Shp.SetShape(sizes, names...)
@@ -268,7 +262,6 @@ func (tsr *Bits) Clone() Tensor {
 // CopyFrom copies all avail values from other tensor into this tensor, with an
 // optimized implementation if the other tensor is of the same type, and
 // otherwise it goes through appropriate standard type.
-// Copies Null state as well if present.
 func (tsr *Bits) CopyFrom(frm Tensor) {
 	if fsm, ok := frm.(*Bits); ok {
 		copy(tsr.Values, fsm.Values)

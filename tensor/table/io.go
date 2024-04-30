@@ -200,7 +200,6 @@ func (dt *Table) ReadCSVRow(rec []string, row int) {
 			str := rec[ci]
 			if !tsr.IsString() {
 				if str == "" || str == "NaN" || str == "-NaN" || str == "Inf" || str == "-Inf" {
-					tsr.SetNull1D(stoff+cc, true) // empty = missing
 					tsr.SetFloat1D(stoff+cc, nan)
 				} else {
 					tsr.SetString1D(stoff+cc, str)

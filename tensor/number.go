@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/num"
-	"cogentcore.org/core/tensor/bitslice"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -38,7 +37,6 @@ type Byte = Number[byte]
 
 // NewNumber returns a new n-dimensional tensor of numerical values
 // with the given sizes per dimension (shape), and optional dimension names.
-// Nulls are initialized to nil.
 func NewNumber[T num.Number](sizes []int, names ...string) *Number[T] {
 	tsr := &Number[T]{}
 	tsr.SetShape(sizes, names...)
@@ -48,7 +46,6 @@ func NewNumber[T num.Number](sizes []int, names ...string) *Number[T] {
 
 // NewNumberShape returns a new n-dimensional tensor of numerical values
 // using given shape.
-// Nulls are initialized to nil.
 func NewNumberShape[T num.Number](shape *Shape) *Number[T] {
 	tsr := &Number[T]{}
 	tsr.Shp.CopyShape(shape)
@@ -125,17 +122,18 @@ func (tsr *Number[T]) SetFloat(i []int, val float64) {
 	tsr.Values[j] = T(val)
 }
 
-func (tsr *Number[T]) Float1D(off int) float64 {
-	return float64(tsr.Values[off])
+func (tsr *Number[T]) Float1D(i int) float64 {
+	return float64(tsr.Values[i])
 }
 
-func (tsr *Number[T]) SetFloat1D(off int, val float64) {
-	tsr.Values[off] = T(val)
+func (tsr *Number[T]) SetFloat1D(i int, val float64) {
+	tsr.Values[i] = T(val)
 }
 
 func (tsr *Number[T]) FloatRowCell(row, cell int) float64 {
 	_, sz := tsr.Shp.RowCellSize()
-	return float64(tsr.Values[row*sz+cell])
+	i := row*sz + cell
+	return float64(tsr.Values[i])
 }
 
 func (tsr *Number[T]) SetFloatRowCell(row, cell int, val float64) {
@@ -230,33 +228,20 @@ func (tsr *Number[T]) SetZeros() {
 func (tsr *Number[T]) Clone() Tensor {
 	csr := NewNumberShape[T](&tsr.Shp)
 	copy(csr.Values, tsr.Values)
-	if tsr.Nulls != nil {
-		csr.Nulls = tsr.Nulls.Clone()
-	}
 	return csr
 }
 
 // CopyFrom copies all avail values from other tensor into this tensor, with an
 // optimized implementation if the other tensor is of the same type, and
 // otherwise it goes through appropriate standard type.
-// Copies Null state as well if present.
 func (tsr *Number[T]) CopyFrom(frm Tensor) {
 	if fsm, ok := frm.(*Number[T]); ok {
 		copy(tsr.Values, fsm.Values)
-		if fsm.Nulls != nil {
-			if tsr.Nulls == nil {
-				tsr.Nulls = bitslice.Make(tsr.Len(), 0)
-			}
-			copy(tsr.Nulls, fsm.Nulls)
-		}
 		return
 	}
 	sz := min(len(tsr.Values), frm.Len())
 	for i := 0; i < sz; i++ {
 		tsr.Values[i] = T(frm.Float1D(i))
-		if frm.IsNull1D(i) {
-			tsr.SetNull1D(i, true)
-		}
 	}
 }
 
@@ -275,17 +260,11 @@ func (tsr *Number[T]) CopyCellsFrom(frm Tensor, to, start, n int) {
 	if fsm, ok := frm.(*Number[T]); ok {
 		for i := 0; i < n; i++ {
 			tsr.Values[to+i] = fsm.Values[start+i]
-			if fsm.IsNull1D(start + i) {
-				tsr.SetNull1D(to+i, true)
-			}
 		}
 		return
 	}
 	for i := 0; i < n; i++ {
 		tsr.Values[to+i] = T(frm.Float1D(start + i))
-		if frm.IsNull1D(start + i) {
-			tsr.SetNull1D(to+i, true)
-		}
 	}
 }
 
@@ -295,7 +274,6 @@ func (tsr *Number[T]) CopyCellsFrom(frm Tensor, to, start, n int) {
 // will affect both), as its Values slice is a view onto the original (which
 // is why only inner-most contiguous supsaces are supported).
 // Use Clone() method to separate the two.
-// Null value bits are NOT shared but are copied if present.
 func (tsr *Number[T]) SubSpace(offs []int) Tensor {
 	b := tsr.subSpaceImpl(offs)
 	rt := &Number[T]{Base: *b}

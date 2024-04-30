@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package agg
+package stats
 
 import "cogentcore.org/core/tensor/table"
 
@@ -13,12 +13,12 @@ type IfFunc func(idx int, val float64) bool
 //   CountIf
 
 // CountIfIndex returns the count of true return values for given IfFunc on
-// non-Null, non-NaN elements in given IndexView indexed view of an
+// non-NaN elements in given IndexView indexed view of an
 // table.Table, for given column index.
-// Return value is size of each column cell -- 1 for scalar 1D columns
+// Return value(s) is size of column cell: 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func CountIfIndex(ix *table.IndexView, colIndex int, iffun IfFunc) []float64 {
-	return ix.AggColumn(colIndex, 0, func(idx int, val float64, agg float64) float64 {
+	return StatIndexFunc(ix, colIndex, 0, func(idx int, val float64, agg float64) float64 {
 		if iffun(idx, val) {
 			return agg + 1
 		}
@@ -26,13 +26,13 @@ func CountIfIndex(ix *table.IndexView, colIndex int, iffun IfFunc) []float64 {
 	})
 }
 
-// CountIf returns the count of true return values for given IfFunc on
-// non-Null, non-NaN elements in given IndexView indexed view of an
+// CountIfColumn returns the count of true return values for given IfFunc on
+// non-NaN elements in given IndexView indexed view of an
 // table.Table, for given column name.
-// If name not found, nil is returned -- use Try version for error message.
-// Return value is size of each column cell -- 1 for scalar 1D columns
+// If name not found, nil is returned.
+// Return value(s) is size of column cell: 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func CountIf(ix *table.IndexView, column string, iffun IfFunc) []float64 {
+func CountIfColumn(ix *table.IndexView, column string, iffun IfFunc) []float64 {
 	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
@@ -46,7 +46,7 @@ func CountIf(ix *table.IndexView, column string, iffun IfFunc) []float64 {
 // PropIfIndex returns the proportion (0-1) of true return values for given IfFunc on
 // non-Null, non-NaN elements in given IndexView indexed view of an
 // table.Table, for given column index.
-// Return value is size of each column cell -- 1 for scalar 1D columns
+// Return value(s) is size of column cell: 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func PropIfIndex(ix *table.IndexView, colIndex int, iffun IfFunc) []float64 {
 	cnt := CountIndex(ix, colIndex)
@@ -62,13 +62,13 @@ func PropIfIndex(ix *table.IndexView, colIndex int, iffun IfFunc) []float64 {
 	return pif
 }
 
-// PropIf returns the proportion (0-1) of true return values for given IfFunc on
-// non-Null, non-NaN elements in given IndexView indexed view of an
+// PropIfColumn returns the proportion (0-1) of true return values for given IfFunc on
+// non-NaN elements in given IndexView indexed view of an
 // table.Table, for given column name.
 // If name not found, nil is returned -- use Try version for error message.
-// Return value is size of each column cell -- 1 for scalar 1D columns
+// Return value(s) is size of column cell: 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func PropIf(ix *table.IndexView, column string, iffun IfFunc) []float64 {
+func PropIfColumn(ix *table.IndexView, column string, iffun IfFunc) []float64 {
 	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil
@@ -82,7 +82,7 @@ func PropIf(ix *table.IndexView, column string, iffun IfFunc) []float64 {
 // PctIfIndex returns the percentage (0-100) of true return values for given IfFunc on
 // non-Null, non-NaN elements in given IndexView indexed view of an
 // table.Table, for given column index.
-// Return value is size of each column cell -- 1 for scalar 1D columns
+// Return value(s) is size of column cell: 1 for scalar 1D columns
 // and N for higher-dimensional columns.
 func PctIfIndex(ix *table.IndexView, colIndex int, iffun IfFunc) []float64 {
 	cnt := CountIndex(ix, colIndex)
@@ -98,13 +98,13 @@ func PctIfIndex(ix *table.IndexView, colIndex int, iffun IfFunc) []float64 {
 	return pif
 }
 
-// PctIf returns the percentage (0-100) of true return values for given IfFunc on
+// PctIfColumn returns the percentage (0-100) of true return values for given IfFunc on
 // non-Null, non-NaN elements in given IndexView indexed view of an
 // table.Table, for given column name.
 // If name not found, nil is returned -- use Try version for error message.
-// Return value is size of each column cell -- 1 for scalar 1D columns
+// Return value(s) is size of column cell: 1 for scalar 1D columns
 // and N for higher-dimensional columns.
-func PctIf(ix *table.IndexView, column string, iffun IfFunc) []float64 {
+func PctIfColumn(ix *table.IndexView, column string, iffun IfFunc) []float64 {
 	colIndex := ix.Table.ColumnIndex(column)
 	if colIndex == -1 {
 		return nil

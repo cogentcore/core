@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package agg
+package stats
 
 import (
 	"math"
@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/tensor/table"
 )
 
-// QuantilesIndex returns the given quantile(s) of non-Null, non-NaN elements in given
+// QuantilesIndex returns the given quantile(s) of non-NaN elements in given
 // IndexView indexed view of an table.Table, for given column index.
 // Column must be a 1d Column -- returns nil for n-dimensional columns.
 // qs are 0-1 values, 0 = min, 1 = max, .5 = median, etc.  Uses linear interpolation.
@@ -27,8 +27,8 @@ func QuantilesIndex(ix *table.IndexView, colIndex int, qs []float64) []float64 {
 	}
 	rvs := make([]float64, nq)
 	six := ix.Clone()                                // leave original indexes intact
-	six.Filter(func(et *table.Table, row int) bool { // get rid of nulls in this column
-		if col.IsNull1D(row) {
+	six.Filter(func(et *table.Table, row int) bool { // get rid of NaNs in this column
+		if math.IsNaN(col.Float1D(row)) {
 			return false
 		}
 		return true

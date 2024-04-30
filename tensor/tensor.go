@@ -20,10 +20,11 @@ import (
 // Tensor is the interface for n-dimensional tensors.
 // Per C / Go / Python conventions, indexes are Row-Major, ordered from
 // outer to inner left-to-right, so the inner-most is right-most.
-// It is implemented by the TensorBase generic type specialized
-// by different concrete types: float64, float32, int, string, bits.
-// It supports Null (non-present) values, and specific access for
-// float64 and string types.
+// It is implemented by the Base and Number generic types specialized
+// by different concrete types: float64, float32, int, int32, byte,
+// string, bits (bools).
+// For float32 and float64 values, use NaN to indicate missing values.
+// All of the data analysis and plot packages skip NaNs.
 type Tensor interface {
 	fmt.Stringer
 	mat.Matrix
@@ -52,25 +53,7 @@ type Tensor interface {
 	// returns true if the data type is a String. otherwise is numeric.
 	IsString() bool
 
-	// IsNull returns true if the given index has been flagged as a Null
-	// (undefined, not present) value
-	IsNull(i []int) bool
-
-	// IsNull1D returns true if the given 1-dimensional index has been flagged as a Null
-	// (undefined, not present) value
-	IsNull1D(i int) bool
-
-	// SetNull sets whether given index has a null value or not.
-	// All values are assumed valid (non-Null) until marked otherwise, and calling
-	// this method creates a Null bitslice map if one has not already been set yet.
-	SetNull(i []int, nul bool)
-
-	// SetNull1D sets whether given 1-dimensional index has a null value or not.
-	// All values are assumed valid (non-Null) until marked otherwise, and calling
-	// this method creates a Null bitslice map if one has not already been set yet.
-	SetNull1D(i int, nul bool)
-
-	// Float returns the value of given index as a float64
+	// Float returns the value of given index as a float64.
 	Float(i []int) float64
 
 	// SetFloat sets the value of given index as a float64
@@ -127,7 +110,6 @@ type Tensor interface {
 	// will affect both), as its Values slice is a view onto the original (which
 	// is why only inner-most contiguous supsaces are supported).
 	// Use Clone() method to separate the two.
-	// Null value bits are NOT shared but are copied if present.
 	SubSpace(offs []int) Tensor
 
 	// Range returns the min, max (and associated indexes, -1 = no values) for the tensor.
@@ -183,7 +165,6 @@ type Tensor interface {
 
 // New returns a new n-dimensional tensor of given value type
 // with the given sizes per dimension (shape), and optional dimension names.
-// Nulls are initialized to nil.
 func New[T string | bool | float32 | float64 | int | int32 | byte](sizes []int, names ...string) Tensor {
 	var v T
 	switch any(v).(type) {
@@ -209,7 +190,6 @@ func New[T string | bool | float32 | float64 | int | int32 | byte](sizes []int, 
 // NewOfType returns a new n-dimensional tensor of given reflect.Kind type
 // with the given sizes per dimension (shape), and optional dimension names.
 // Supported types are string, bool (for [Bits]), float32, float64, int, int32, and byte.
-// Nulls are initialized to nil.
 func NewOfType(typ reflect.Kind, sizes []int, names ...string) Tensor {
 	switch typ {
 	case reflect.String:

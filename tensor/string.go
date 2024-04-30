@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 
-	"cogentcore.org/core/tensor/bitslice"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -22,7 +21,6 @@ type String struct {
 
 // NewString returns a new n-dimensional tensor of string values
 // with the given sizes per dimension (shape), and optional dimension names.
-// Nulls are initialized to nil.
 func NewString(sizes []int, names ...string) *String {
 	tsr := &String{}
 	tsr.SetShape(sizes, names...)
@@ -32,7 +30,6 @@ func NewString(sizes []int, names ...string) *String {
 
 // NewStringShape returns a new n-dimensional tensor of string values
 // using given shape.
-// Nulls are initialized to nil.
 func NewStringShape(shape *Shape) *String {
 	tsr := &String{}
 	tsr.Shp.CopyShape(shape)
@@ -216,33 +213,20 @@ func (tsr *String) SetZeros() {
 func (tsr *String) Clone() Tensor {
 	csr := NewStringShape(&tsr.Shp)
 	copy(csr.Values, tsr.Values)
-	if tsr.Nulls != nil {
-		csr.Nulls = tsr.Nulls.Clone()
-	}
 	return csr
 }
 
 // CopyFrom copies all avail values from other tensor into this tensor, with an
 // optimized implementation if the other tensor is of the same type, and
 // otherwise it goes through appropriate standard type.
-// Copies Null state as well if present.
 func (tsr *String) CopyFrom(frm Tensor) {
 	if fsm, ok := frm.(*String); ok {
 		copy(tsr.Values, fsm.Values)
-		if fsm.Nulls != nil {
-			if tsr.Nulls == nil {
-				tsr.Nulls = bitslice.Make(tsr.Len(), 0)
-			}
-			copy(tsr.Nulls, fsm.Nulls)
-		}
 		return
 	}
 	sz := min(len(tsr.Values), frm.Len())
 	for i := 0; i < sz; i++ {
 		tsr.Values[i] = Float64ToString(frm.Float1D(i))
-		if frm.IsNull1D(i) {
-			tsr.SetNull1D(i, true)
-		}
 	}
 }
 
@@ -261,17 +245,11 @@ func (tsr *String) CopyCellsFrom(frm Tensor, to, start, n int) {
 	if fsm, ok := frm.(*String); ok {
 		for i := 0; i < n; i++ {
 			tsr.Values[to+i] = fsm.Values[start+i]
-			if fsm.IsNull1D(start + i) {
-				tsr.SetNull1D(to+i, true)
-			}
 		}
 		return
 	}
 	for i := 0; i < n; i++ {
 		tsr.Values[to+i] = Float64ToString(frm.Float1D(start + i))
-		if frm.IsNull1D(start + i) {
-			tsr.SetNull1D(to+i, true)
-		}
 	}
 }
 
@@ -281,7 +259,6 @@ func (tsr *String) CopyCellsFrom(frm Tensor, to, start, n int) {
 // will affect both), as its Values slice is a view onto the original (which
 // is why only inner-most contiguous supsaces are supported).
 // Use Clone() method to separate the two.
-// Null value bits are NOT shared but are copied if present.
 func (tsr *String) SubSpace(offs []int) Tensor {
 	b := tsr.subSpaceImpl(offs)
 	rt := &String{Base: *b}

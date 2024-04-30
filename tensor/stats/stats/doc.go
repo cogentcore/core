@@ -13,4 +13,4 @@ are available that operate on column indexes and return errors, respectively.
 See tsragg package for functions that operate directly on a tensor.Tensor
 without the indexview indirection.
 */
-package agg
+package stats

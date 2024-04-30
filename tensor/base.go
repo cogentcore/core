@@ -10,14 +10,12 @@ import (
 	"reflect"
 
 	"cogentcore.org/core/base/reflectx"
-	"cogentcore.org/core/tensor/bitslice"
 )
 
 // Base is an n-dim array of float64s.
 type Base[T any] struct {
 	Shp    Shape
 	Values []T
-	Nulls  bitslice.Slice
 	Meta   map[string]string
 }
 
@@ -52,46 +50,6 @@ func (tsr *Base[T]) Value1D(i int) T    { return tsr.Values[i] }
 func (tsr *Base[T]) Set(i []int, val T) { j := tsr.Shp.Offset(i); tsr.Values[j] = val }
 func (tsr *Base[T]) Set1D(i int, val T) { tsr.Values[i] = val }
 
-// IsNull returns true if the given index has been flagged as a Null
-// (undefined, not present) value
-func (tsr *Base[T]) IsNull(i []int) bool {
-	if tsr.Nulls == nil {
-		return false
-	}
-	j := tsr.Shp.Offset(i)
-	return tsr.Nulls.Index(j)
-}
-
-// IsNull1D returns true if the given 1-dimensional index has been flagged as a Null
-// (undefined, not present) value
-func (tsr *Base[T]) IsNull1D(i int) bool {
-	if tsr.Nulls == nil {
-		return false
-	}
-	return tsr.Nulls.Index(i)
-}
-
-// SetNull sets whether given index has a null value or not.
-// All values are assumed valid (non-Null) until marked otherwise, and calling
-// this method creates a Null bitslice map if one has not already been set yet.
-func (tsr *Base[T]) SetNull(i []int, nul bool) {
-	if tsr.Nulls == nil {
-		tsr.Nulls = bitslice.Make(tsr.Len(), 0)
-	}
-	j := tsr.Shp.Offset(i)
-	tsr.Nulls.Set(j, nul)
-}
-
-// SetNull1D sets whether given 1-dimensional index has a null value or not.
-// All values are assumed valid (non-Null) until marked otherwise, and calling
-// this method creates a Null bitslice map if one has not already been set yet.
-func (tsr *Base[T]) SetNull1D(i int, nul bool) {
-	if tsr.Nulls == nil {
-		tsr.Nulls = bitslice.Make(tsr.Len(), 0)
-	}
-	tsr.Nulls.Set(i, nul)
-}
-
 // SetShape sets the shape params, resizing backing storage appropriately
 func (tsr *Base[T]) SetShape(sizes []int, names ...string) {
 	tsr.Shp.SetShape(sizes, names...)
@@ -102,9 +60,6 @@ func (tsr *Base[T]) SetShape(sizes []int, names ...string) {
 		nv := make([]T, nln)
 		copy(nv, tsr.Values)
 		tsr.Values = nv
-	}
-	if tsr.Nulls != nil {
-		tsr.Nulls.SetLen(nln)
 	}
 }
 
@@ -121,9 +76,6 @@ func (tsr *Base[T]) SetNumRows(rows int) {
 		copy(nv, tsr.Values)
 		tsr.Values = nv
 	}
-	if tsr.Nulls != nil {
-		tsr.Nulls.SetLen(nln)
-	}
 }
 
 // subSpaceImpl returns a new tensor with innermost subspace at given
@@ -132,7 +84,6 @@ func (tsr *Base[T]) SetNumRows(rows int) {
 // will affect both), as its Values slice is a view onto the original (which
 // is why only inner-most contiguous supsaces are supported).
 // Use Clone() method to separate the two.
-// Null value bits are NOT shared but are copied if present.
 func (tsr *Base[T]) subSpaceImpl(offs []int) *Base[T] {
 	nd := tsr.NumDims()
 	od := len(offs)
@@ -146,9 +97,6 @@ func (tsr *Base[T]) subSpaceImpl(offs []int) *Base[T] {
 	stoff := tsr.Shp.Offset(sti)
 	sln := stsr.Len()
 	stsr.Values = tsr.Values[stoff : stoff+sln]
-	if tsr.Nulls != nil {
-		stsr.Nulls = tsr.Nulls.SubSlice(stoff, stoff+sln)
-	}
 	return stsr
 }
 

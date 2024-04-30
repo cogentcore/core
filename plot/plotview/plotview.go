@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/plot/plots"
 	"cogentcore.org/core/styles"
@@ -280,6 +281,17 @@ func (pl *PlotView) PlotXAxis(plt *plot.Plot) (xi int, err error) {
 	if xi < 0 {
 		err = fmt.Errorf("plot.PlotXAxis: not found: %s", pl.Params.XAxisCol)
 		return
+	}
+	xp := pl.Columns[xi]
+	sz := 1
+	lim := false
+	if xp.Range.FixMin {
+		lim = true
+		plt.X.Min = math32.Min(plt.X.Min, float32(xp.Range.Min))
+	}
+	if xp.Range.FixMax {
+		lim = true
+		plt.X.Max = math32.Max(plt.X.Max, float32(xp.Range.Max))
 	}
 	return
 }

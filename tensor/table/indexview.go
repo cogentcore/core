@@ -7,7 +7,6 @@ package table
 import (
 	"fmt"
 	"log"
-	"math"
 	"math/rand"
 	"slices"
 	"sort"
@@ -423,39 +422,6 @@ func (ix *IndexView) NewTable() *Table {
 	return nt
 }
 
-// AggColumn applies given aggregation function to each element in the given column, using float64
-// conversions of the values.  init is the initial value for the agg variable.
-// Operates independently over each cell on n-dimensional columns and returns the result as a slice
-// of values per cell.
-func (ix *IndexView) AggColumn(colIndex int, ini float64, fun func(idx int, val float64, agg float64) float64) []float64 {
-	cl := ix.Table.Columns[colIndex]
-	_, csz := cl.RowCellSize()
-
-	ag := make([]float64, csz)
-	for i := range ag {
-		ag[i] = ini
-	}
-	if csz == 1 {
-		for _, srw := range ix.Indexes {
-			val := cl.Float1D(srw)
-			if !cl.IsNull1D(srw) && !math.IsNaN(val) {
-				ag[0] = fun(srw, val, ag[0])
-			}
-		}
-	} else {
-		for _, srw := range ix.Indexes {
-			si := srw * csz
-			for j := range ag {
-				val := cl.Float1D(si + j)
-				if !cl.IsNull1D(si+j) && !math.IsNaN(val) {
-					ag[j] = fun(si+j, val, ag[j])
-				}
-			}
-		}
-	}
-	return ag
-}
-
 // Clone returns a copy of the current index view with its own index memory
 func (ix *IndexView) Clone() *IndexView {
 	nix := &IndexView{}
@@ -565,18 +531,4 @@ func (ix *IndexView) Less(i, j int) bool {
 // Swap switches the indexes for i and j
 func (ix *IndexView) Swap(i, j int) {
 	ix.Indexes[i], ix.Indexes[j] = ix.Indexes[j], ix.Indexes[i]
-}
-
-// FilterNull is a FilterFunc that filters out all rows that have a Null value
-// in a 1D (scalar) column, according to the IsNull flag
-func FilterNull(et *Table, row int) bool {
-	for _, cl := range et.Columns {
-		if cl.NumDims() > 1 {
-			continue
-		}
-		if cl.IsNull1D(row) {
-			return false
-		}
-	}
-	return true
 }
