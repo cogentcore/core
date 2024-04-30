@@ -14,10 +14,10 @@ import (
 )
 
 // TableXY selects two columns from a table.Table data table to plot in a gonum plot,
-// satisfying the plotter.XYer and .Valuer interfaces (for bar charts).
+// satisfying the plot/plots.XYer and .Valuer interfaces (for bar charts).
 // For Tensor-valued cells, Index's specify tensor cell.
-// Also satisfies the plotter.Labeler interface for labels attached to a line, and
-// plotter.YErrorer for error bars.
+// Also satisfies the plot/plots.Labeler interface for labels attached to a line, and
+// plot/plots.YErrorer for error bars.
 type TableXY struct {
 
 	// the index view of data table to plot from
@@ -214,7 +214,7 @@ func (txy *TableXY) XY(row int) (x, y float32) {
 	return
 }
 
-// Label returns a label for given row in table, using plotter.Labeler interface
+// Label returns a label for given row in table, using plot/plots.Labeler interface
 func (txy *TableXY) Label(row int) string {
 	if txy.Table == nil || txy.Table.Table == nil || row >= txy.Table.Len() {
 		return ""
@@ -223,7 +223,7 @@ func (txy *TableXY) Label(row int) string {
 	return txy.Table.Table.Columns[txy.LabelColumn].String1D(trow)
 }
 
-// YError returns a error bars using ploter.YErrorer interface
+// YError returns a error bars using plot/plots.YErrorer interface
 func (txy *TableXY) YError(row int) (float32, float32) {
 	if txy.Table == nil || txy.Table.Table == nil || row >= txy.Table.Len() {
 		return 0, 0

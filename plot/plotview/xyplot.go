@@ -10,10 +10,8 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/math32"
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/plot/plots"
-	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/stats/split"
 	"cogentcore.org/core/tensor/table"
@@ -21,25 +19,7 @@ import (
 
 // GenPlotXY generates an XY (lines, points) plot, setting Plot variable
 func (pl *PlotView) GenPlotXY() {
-	plt := plot.New() // todo: not clear how to re-use, due to newtablexynames
-	plt.Title.Text = pl.Params.Title
-	plt.X.Label.Text = pl.XLabel()
-	plt.Y.Label.Text = pl.YLabel()
-
-	plt.Background = colors.Scheme.Surface
-
-	clr := colors.C(colors.Scheme.OnSurface)
-
-	plt.Title.Style.Color = clr
-	plt.Legend.TextStyle.Color = clr
-	plt.X.Line.Color = clr
-	plt.Y.Line.Color = clr
-	plt.X.Label.Style.Color = clr
-	plt.Y.Label.Style.Color = clr
-	plt.X.TickLine.Color = clr
-	plt.Y.TickLine.Color = clr
-	plt.X.TickText.Style.Color = clr
-	plt.Y.TickText.Style.Color = clr
+	plt := plot.New()
 
 	// process xaxis first
 	xi, xview, err := pl.PlotXAxis(plt, pl.Table)
@@ -199,24 +179,7 @@ func (pl *PlotView) GenPlotXY() {
 		plt.NominalX(vals...)
 	}
 
-	for _, cp := range pl.Columns { // key that this comes at the end, to actually stick
-		if !cp.On || cp.IsString {
-			continue
-		}
-		if cp.Range.FixMin {
-			plt.Y.Min = math32.Min(plt.Y.Min, float32(cp.Range.Min))
-		}
-		if cp.Range.FixMax {
-			plt.Y.Max = math32.Max(plt.Y.Max, float32(cp.Range.Max))
-		}
-	}
-
-	plt.Legend.Top = true
-	plt.X.TickText.Style.Rotation = float32(pl.Params.XAxisRot)
-	if pl.Params.XAxisRot > 10 {
-		plt.X.TickText.Style.Align = styles.Center
-		// plt.X.Tick.Label.Style.Align = draw.XRight
-	}
+	pl.ConfigPlot(plt)
 	pl.Plot = plt
 	if pl.ConfigPlotFunc != nil {
 		pl.ConfigPlotFunc()

@@ -11,6 +11,20 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
+// LegendPosition specifies where to put the legend
+type LegendPosition struct {
+	// Top and Left specify the location of the legend.
+	Top, Left bool
+
+	// XOffs and YOffs are added to the legend's final position,
+	// relative to the relevant anchor position
+	XOffs, YOffs units.Value
+}
+
+func (lg *LegendPosition) Defaults() {
+	lg.Top = true
+}
+
 // A Legend gives a description of the meaning of different
 // data elements of the plot.  Each legend entry has a name
 // and a thumbnail, where the thumbnail shows a small
@@ -19,11 +33,8 @@ type Legend struct {
 	// TextStyle is the style given to the legend entry texts.
 	TextStyle TextStyle
 
-	// Top and Left specify the location of the legend.
-	Top, Left bool
-
-	// XOffs and YOffs are added to the legend's final position.
-	XOffs, YOffs units.Value
+	// position of the legend
+	Position LegendPosition `view:"inline"`
 
 	// ThumbnailWidth is the width of legend thumbnails.
 	ThumbnailWidth units.Value
@@ -40,7 +51,7 @@ func (lg *Legend) Defaults() {
 	lg.TextStyle.Defaults()
 	lg.TextStyle.Padding.Dp(4)
 	lg.TextStyle.Font.Size.Dp(20)
-	lg.Top = true
+	lg.Position.Defaults()
 	lg.ThumbnailWidth.Pt(20)
 	lg.FillColor = colors.Clearer(colors.Scheme.Surface, 25)
 }

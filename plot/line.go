@@ -6,7 +6,6 @@ package plot
 
 import (
 	"image"
-	"image/color"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
@@ -28,7 +27,7 @@ type LineStyle struct {
 }
 
 func (ls *LineStyle) Defaults() {
-	ls.Color = colors.C(color.Black)
+	ls.Color = colors.C(colors.Scheme.OnSurface)
 	ls.Width.Pt(1)
 }
 

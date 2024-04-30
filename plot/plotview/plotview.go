@@ -48,7 +48,7 @@ type PlotView struct { //types:add
 	// the plot object
 	Plot *plot.Plot `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// ConfigPlotFunc is a function to call to configure [PlotView.Plot], the gonum plot that
+	// ConfigPlotFunc is a function to call to configure [PlotView.Plot], the plot.Plot that
 	// actually does the plotting. It is called after [Plot] is generated, and properties
 	// of [Plot] can be modified in it. Properties of [Plot] should not be modified outside
 	// of this function, as doing so will have no effect.
@@ -303,6 +303,33 @@ func (pl *PlotView) GenPlot() {
 	pl.InPlot = false
 }
 
+// ConfigPlot configures the plot with params
+func (pl *PlotView) ConfigPlot(plt *plot.Plot) {
+	plt.Title.Text = pl.Params.Title
+	plt.X.Label.Text = pl.XLabel()
+	plt.Y.Label.Text = pl.YLabel()
+
+	for _, cp := range pl.Columns { // key that this comes at the end, to actually stick
+		if !cp.On || cp.IsString {
+			continue
+		}
+		if cp.Range.FixMin {
+			plt.Y.Min = math32.Min(plt.Y.Min, float32(cp.Range.Min))
+		}
+		if cp.Range.FixMax {
+			plt.Y.Max = math32.Max(plt.Y.Max, float32(cp.Range.Max))
+		}
+	}
+
+	plt.Legend.Position = pl.Params.LegendPosition
+	plt.X.TickText.Style.Rotation = float32(pl.Params.XAxisRot)
+	if pl.Params.XAxisRot > 10 {
+		plt.X.TickText.Style.Align = styles.Center
+		// plt.X.Tick.Label.Style.Align = draw.XRight
+	}
+
+}
+
 // PlotXAxis processes the XAxis and returns its index
 func (pl *PlotView) PlotXAxis(plt *plot.Plot, ixvw *table.IndexView) (xi int, xview *table.IndexView, err error) {
 	xi, err = ixvw.Table.ColumnIndexTry(pl.Params.XAxisColumn)
@@ -332,12 +359,12 @@ func (pl *PlotView) PlotXAxis(plt *plot.Plot, ixvw *table.IndexView) (xi int, xv
 
 func (pl *PlotView) Config() {
 	if pl.Table != nil {
-		pl.ConfigPlot()
+		pl.ConfigPlotView()
 	}
 }
 
-// ConfigPlot configures the overall view widget
-func (pl *PlotView) ConfigPlot() {
+// ConfigPlotView configures the overall view widget
+func (pl *PlotView) ConfigPlotView() {
 	pl.Params.FromMeta(pl.Table.Table)
 	if !pl.HasChildren() {
 		fr := core.NewFrame(pl, "cols")
@@ -561,7 +588,7 @@ func (pl *PlotView) ConfigToolbar(tb *core.Toolbar) {
 	core.NewButton(tb).SetText("Update").SetIcon(icons.Update).
 		SetTooltip("update fully redraws display, reflecting any new settings etc").
 		OnClick(func(e events.Event) {
-			pl.ConfigPlot()
+			pl.ConfigPlotView()
 			pl.UpdatePlot()
 		})
 	core.NewButton(tb).SetText("Config").SetIcon(icons.Settings).

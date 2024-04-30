@@ -391,8 +391,8 @@ func (lg *Legend) draw(pt *Plot) {
 
 	lg.ThumbnailWidth.ToDots(uc)
 	lg.TextStyle.ToDots(uc)
-	lg.XOffs.ToDots(uc)
-	lg.YOffs.ToDots(uc)
+	lg.Position.XOffs.ToDots(uc)
+	lg.Position.YOffs.ToDots(uc)
 	lg.TextStyle.openFont(pt)
 
 	em := lg.TextStyle.Font.Face.Metrics.Em
@@ -414,14 +414,16 @@ func (lg *Legend) draw(pt *Plot) {
 	sz.X += int(lg.ThumbnailWidth.Dots)
 
 	pos := ptb.Min
-	if !lg.Left {
-		pos.X = ptb.Max.X - sz.X
+	if lg.Position.Left {
+		pos.X += int(lg.Position.XOffs.Dots)
+	} else {
+		pos.X = ptb.Max.X - sz.X - int(lg.Position.XOffs.Dots)
 	}
-	if !lg.Top {
-		pos.Y = ptb.Max.Y - sz.Y
+	if lg.Position.Top {
+		pos.Y += int(lg.Position.YOffs.Dots)
+	} else {
+		pos.Y = ptb.Max.Y - sz.Y - int(lg.Position.YOffs.Dots)
 	}
-	pos.X += int(lg.XOffs.Dots)
-	pos.Y += int(lg.YOffs.Dots)
 
 	if lg.FillColor != nil {
 		pc.FillBox(math32.Vector2FromPoint(pos), math32.Vector2FromPoint(sz), colors.C(lg.FillColor))

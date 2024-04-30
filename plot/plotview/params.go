@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/base/option"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/math32/minmax"
+	"cogentcore.org/core/plot"
 	"cogentcore.org/core/plot/plots"
 	"cogentcore.org/core/tensor/table"
 )
@@ -54,11 +55,18 @@ type PlotParams struct { //types:add
 	// documents or other cases where the overall plot size will be small.
 	Scale float32 `default:"1,2"`
 
-	// what column to use for the common X axis -- if empty or not found, the row number is used.  This optional for Bar plots -- if present and LegendColumn is also present, then an extra space will be put between X values.
+	// what column to use for the common X axis. if empty or not found,
+	// the row number is used.  This optional for Bar plots, if present and
+	// LegendColumn is also present, then an extra space will be put between X values.
 	XAxisColumn string
 
-	// optional column for adding a separate colored / styled line or bar according to this value -- acts just like a separate Y variable, crossed with Y variables
+	// optional column for adding a separate colored / styled line or bar
+	// according to this value, and acts just like a separate Y variable,
+	// crossed with Y variables.
 	LegendColumn string
+
+	// position of the Legend
+	LegendPosition plot.LegendPosition `view:"inline"`
 
 	// rotation of the X Axis labels, in degrees
 	XAxisRot float32
@@ -81,6 +89,7 @@ func (pp *PlotParams) Defaults() {
 		pp.Points = false
 		pp.PointSize = 3
 		pp.BarWidth = .8
+		pp.LegendPosition.Defaults()
 	}
 	if pp.Scale == 0 {
 		pp.Scale = 1
