@@ -77,6 +77,19 @@ func (pg *Page) OnInit() {
 	})
 }
 
+func (pg *Page) OnAdd() {
+	pg.WidgetBase.OnAdd()
+	pg.OnShow(func(e events.Event) {
+		if pg.PagePath == "" {
+			if getWebURL != nil {
+				pg.OpenURL(getWebURL(), true)
+			} else {
+				pg.OpenURL("/", true)
+			}
+		}
+	})
+}
+
 // OpenURL sets the content of the page from the given url. If the given URL
 // has no scheme (eg: "/about"), then it sets the content of the page to the
 // file specified by the URL. This is either the "index.md" file in the
@@ -145,7 +158,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		saveWebURL(pg.Context.PageURL)
 	}
 	if rw := pg.Scene.RenderWindow(); rw != nil {
-		rw.SetStageTitle(wpath.Label(pg.Context.PageURL))
+		rw.SetStageTitle(wpath.Label(pg.Context.PageURL, core.TheApp.Name()))
 	}
 
 	btp := []byte("+++")
@@ -252,14 +265,6 @@ func (pg *Page) Config() {
 	core.NewFrame(sp, "body").Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-
-	if pg.PagePath == "" {
-		if getWebURL != nil {
-			pg.OpenURL(getWebURL(), true)
-		} else {
-			pg.OpenURL("/", true)
-		}
-	}
 }
 
 // AppBar is the default app bar for a [Page]
@@ -286,7 +291,7 @@ func (pg *Page) AppBar(tb *core.Toolbar) {
 		for _, u := range urls {
 			ch.Items = append(ch.Items, core.ChooserItem{
 				Value: u,
-				Text:  wpath.Label(u),
+				Text:  wpath.Label(u, core.TheApp.Name()),
 				Func: func() {
 					pg.OpenURL("/"+u, true)
 				},
