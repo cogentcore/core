@@ -9,6 +9,7 @@ package web
 import (
 	"crypto/sha1"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"time"
@@ -104,6 +105,13 @@ func MakeFiles(c *config.Config) error {
 		return err
 	}
 
+	if c.Pages != "" {
+		err := MakePages(c)
+		if err != nil {
+			return err
+		}
+	}
+
 	err = os.MkdirAll(filepath.Join(odir, "icons"), 0777)
 	if err != nil {
 		return err
@@ -130,4 +138,19 @@ func MakeFiles(c *config.Config) error {
 	}
 
 	return nil
+}
+
+// MakePages makes a directory structure of pages for
+// the core pages located at [config.Config.Pages].
+func MakePages(c *config.Config) error {
+	return filepath.WalkDir(c.Pages, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		fmt.Println(path)
+		return nil
+	})
 }
