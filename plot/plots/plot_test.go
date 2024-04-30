@@ -58,25 +58,25 @@ func TestLine(t *testing.T) {
 
 	l1.FillColor = colors.Yellow
 	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "line_fill.png")
+	imagex.Assert(t, pt.Pixels, "line-fill.png")
 
 	l1.StepStyle = PreStep
 	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "line_prestep.png")
+	imagex.Assert(t, pt.Pixels, "line-prestep.png")
 
 	l1.StepStyle = MidStep
 	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "line_midstep.png")
+	imagex.Assert(t, pt.Pixels, "line-midstep.png")
 
 	l1.StepStyle = PostStep
 	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "line_poststep.png")
+	imagex.Assert(t, pt.Pixels, "line-poststep.png")
 
 	l1.StepStyle = NoStep
 	l1.FillColor = nil
 	l1.NegativeXDraw = true
 	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "line_negx.png")
+	imagex.Assert(t, pt.Pixels, "line-negx.png")
 
 }
 
@@ -108,7 +108,7 @@ func TestScatter(t *testing.T) {
 	for _, sh := range shs {
 		l1.PointShape = sh
 		pt.Draw()
-		imagex.Assert(t, pt.Pixels, "scatter_"+sh.String()+".png")
+		imagex.Assert(t, pt.Pixels, "scatter-"+sh.String()+".png")
 	}
 }
 
@@ -141,7 +141,7 @@ func TestLabels(t *testing.T) {
 		t.Error(err.Error())
 	}
 	l2.Offset.X.Dp(6)
-	l2.Offset.Y.Dp(-20)
+	l2.Offset.Y.Dp(-6)
 	pt.Add(l2)
 
 	pt.Resize(image.Point{640, 480})
@@ -194,7 +194,7 @@ func TestBarChart(t *testing.T) {
 
 	pt.Add(l2) // note: range updated when added!
 	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "bar_cos.png")
+	imagex.Assert(t, pt.Pixels, "bar-cos.png")
 }
 
 func TestBarChartErr(t *testing.T) {
@@ -227,14 +227,14 @@ func TestBarChartErr(t *testing.T) {
 
 	pt.Resize(image.Point{640, 480})
 	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "bar_err.png")
+	imagex.Assert(t, pt.Pixels, "bar-err.png")
 
 	l1.Horizontal = true
 	pt.UpdateRange()
 	pt.X.Min = 0
 	pt.X.Max = 100
 	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "bar_err_horiz.png")
+	imagex.Assert(t, pt.Pixels, "bar-err-horiz.png")
 }
 
 func TestBarChartStack(t *testing.T) {
@@ -276,5 +276,5 @@ func TestBarChartStack(t *testing.T) {
 
 	pt.Resize(image.Point{640, 480})
 	pt.Draw()
-	imagex.Assert(t, pt.Pixels, "bar_stacked.png")
+	imagex.Assert(t, pt.Pixels, "bar-stacked.png")
 }
