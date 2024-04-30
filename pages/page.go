@@ -144,6 +144,9 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	if saveWebURL != nil {
 		saveWebURL(pg.Context.PageURL)
 	}
+	if rw := pg.Scene.RenderWindow(); rw != nil {
+		rw.SetStageTitle(wpath.Label(pg.Context.PageURL))
+	}
 
 	btp := []byte("+++")
 	if bytes.HasPrefix(b, btp) {
@@ -281,19 +284,9 @@ func (pg *Page) AppBar(tb *core.Toolbar) {
 		}
 		slices.Sort(urls)
 		for _, u := range urls {
-			text := ""
-			if u == "" {
-				text = core.TheApp.Name()
-			} else {
-				parts := strings.Split(u, "/")
-				for i, part := range parts {
-					parts[i] = strcase.ToSentence(part)
-				}
-				text = strings.Join(parts, " • ")
-			}
 			ch.Items = append(ch.Items, core.ChooserItem{
 				Value: u,
-				Text:  text,
+				Text:  wpath.Label(u),
 				Func: func() {
 					pg.OpenURL("/"+u, true)
 				},

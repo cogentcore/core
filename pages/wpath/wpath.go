@@ -8,6 +8,9 @@ package wpath
 import (
 	"strings"
 	"unicode"
+
+	"cogentcore.org/core/base/strcase"
+	"cogentcore.org/core/core"
 )
 
 // Format formats the given path into a correct pages path
@@ -25,4 +28,19 @@ func Format(path string) string {
 		})
 	}
 	return strings.Join(parts, "/")
+}
+
+// Label returns a user friendly label for the given page URL.
+func Label(u string) string {
+	res := ""
+	if u == "" {
+		res = core.TheApp.Name()
+	} else {
+		parts := strings.Split(u, "/")
+		for i, part := range parts {
+			parts[i] = strcase.ToSentence(part)
+		}
+		res = strings.Join(parts, " • ")
+	}
+	return res
 }
