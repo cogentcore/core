@@ -37,10 +37,20 @@ func init() {
 	}
 }
 
+// originalBase is used to cache the first website base URL to prevent
+// issues with invalidation of the base URL caused by the data-base-path
+// attribute not updating when a new page is loaded (because it is a
+// Single-Page Application (SPA) so it doesn't load anything new).
+var originalBase *url.URL
+
 // getURL returns the full current URL and website base URL.
 func getURL() (full, base *url.URL, err error) {
 	full, err = url.Parse(js.Global().Get("location").Get("href").String())
 	if err != nil {
+		return
+	}
+	if originalBase != nil {
+		base = originalBase
 		return
 	}
 	basePath, err := url.Parse(js.Global().Get("document").Get("documentElement").Get("dataset").Get("basePath").String())
@@ -48,5 +58,6 @@ func getURL() (full, base *url.URL, err error) {
 		return
 	}
 	base = full.ResolveReference(basePath)
+	originalBase = base
 	return
 }
