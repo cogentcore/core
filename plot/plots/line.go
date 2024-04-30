@@ -185,29 +185,30 @@ func (pts *XYs) DataRange() (xmin, xmax, ymin, ymax float32) {
 	return XYRange(pts)
 }
 
-/*
 // Thumbnail returns the thumbnail for the LineTo, implementing the plot.Thumbnailer interface.
-func (pts *LineTo) Thumbnail(c *draw.Canvas) {
+func (pts *Line) Thumbnail(plt *plot.Plot) {
+	pc := plt.Paint
+	ptb := pc.Bounds
+	midY := 0.5 * float32(ptb.Min.Y+ptb.Max.Y)
+
 	if pts.FillColor != nil {
-		var topY vg.Length
-		if pts.LineToStyle.Width == 0 {
-			topY = c.Max.Y
+		var topY float32
+		if pts.LineStyle.Width.Value == 0 {
+			topY = float32(ptb.Min.Y)
 		} else {
-			topY = (c.Min.Y + c.Max.Y) / 2
+			topY = midY
 		}
-		points := []vg.Point{
-			{X: c.Min.X, Y: c.Min.Y},
-			{X: c.Min.X, Y: topY},
-			{X: c.Max.X, Y: topY},
-			{X: c.Max.X, Y: c.Min.Y},
-		}
-		poly := c.ClipPolygonY(points)
-		c.FillPolygon(pts.FillColor, poly)
+		pc.MoveTo(float32(ptb.Min.X), float32(ptb.Max.Y))
+		pc.LineTo(float32(ptb.Min.X), topY)
+		pc.LineTo(float32(ptb.Max.X), topY)
+		pc.LineTo(float32(ptb.Max.X), float32(ptb.Max.Y))
+		pc.ClosePath()
+		pc.Fill()
 	}
 
-	if pts.LineToStyle.Width != 0 {
-		y := c.Center().Y
-		c.StrokeLineTo2(pts.LineToStyle, c.Min.X, y, c.Max.X, y)
+	if pts.LineStyle.SetStroke(plt) {
+		pc.MoveTo(float32(ptb.Min.X), midY)
+		pc.LineTo(float32(ptb.Max.X), midY)
+		pc.Stroke()
 	}
 }
-*/

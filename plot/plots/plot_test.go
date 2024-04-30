@@ -48,6 +48,8 @@ func TestLine(t *testing.T) {
 		t.Error(err.Error())
 	}
 	pt.Add(l1)
+	pt.Legend.Add("Sine", l1)
+	pt.Legend.Add("Cos", l1)
 
 	pt.Resize(image.Point{640, 480})
 	pt.Draw()

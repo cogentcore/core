@@ -79,12 +79,6 @@ func (pl *PlotView) GenPlotXY() {
 		} else {
 			nys++
 		}
-		if cp.Range.FixMin {
-			plt.Y.Min = math32.Min(plt.Y.Min, float32(cp.Range.Min))
-		}
-		if cp.Range.FixMax {
-			plt.Y.Max = math32.Max(plt.Y.Max, float32(cp.Range.Max))
-		}
 	}
 
 	if nys == 0 {
@@ -152,7 +146,11 @@ func (pl *PlotView) GenPlotXY() {
 					lns.LineStyle.Color = colors.C(clr)
 					lns.NegativeXDraw = pl.Params.NegativeXDraw
 					plt.Add(lns)
-					// plt.Legend.Add(lbl, lns)
+					if pts != nil {
+						plt.Legend.Add(lbl, lns, pts)
+					} else {
+						plt.Legend.Add(lbl, lns)
+					}
 				}
 				if pts != nil {
 					pts.LineStyle.Color = colors.C(clr)
@@ -160,9 +158,9 @@ func (pl *PlotView) GenPlotXY() {
 					pts.PointSize.Pt(float32(cp.PointSize.Or(pl.Params.PointSize)))
 					pts.PointShape = cp.PointShape.Or(pl.Params.PointShape)
 					plt.Add(pts)
-					// if lns == nil {
-					// 	plt.Legend.Add(lbl, pts)
-					// }
+					if lns == nil {
+						plt.Legend.Add(lbl, pts)
+					}
 				}
 				if cp.ErrColumn != "" {
 					ec := pl.Table.Table.ColumnIndex(cp.ErrColumn)
@@ -199,6 +197,18 @@ func (pl *PlotView) GenPlotXY() {
 			vals[i] = xcs.Values[dx]
 		}
 		plt.NominalX(vals...)
+	}
+
+	for _, cp := range pl.Columns { // key that this comes at the end, to actually stick
+		if !cp.On || cp.IsString {
+			continue
+		}
+		if cp.Range.FixMin {
+			plt.Y.Min = math32.Min(plt.Y.Min, float32(cp.Range.Min))
+		}
+		if cp.Range.FixMax {
+			plt.Y.Max = math32.Max(plt.Y.Max, float32(cp.Range.Max))
+		}
 	}
 
 	plt.Legend.Top = true

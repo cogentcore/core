@@ -119,9 +119,11 @@ func (pt *Plot) Draw() {
 	for _, plt := range pt.Plotters {
 		plt.Plot(pt)
 	}
-	pt.Paint.PopBounds()
 
-	pt.Legend.Draw(pt)
+	pt.Legend.draw(pt)
+
+	pt.Paint.PopBounds()
+	pt.Paint.PopBounds() // global
 }
 
 ////////////////////////////////////////////////////////////////
@@ -376,4 +378,65 @@ func (ax *Axis) drawY(pt *Plot, tickWidth, tpad, bpad int) {
 	}
 
 	ax.Line.Draw(pt, math32.Vec2(float32(ab.Min.X), float32(ab.Min.Y)), math32.Vec2(float32(ab.Min.X), float32(ab.Max.Y)))
+}
+
+////////////////////////////////////////////////
+//		Legend
+
+// draw draws the legend
+func (lg *Legend) draw(pt *Plot) {
+	pc := pt.Paint
+	uc := &pc.UnitContext
+	ptb := pc.Bounds
+
+	lg.ThumbnailWidth.ToDots(uc)
+	lg.TextStyle.ToDots(uc)
+	lg.XOffs.ToDots(uc)
+	lg.YOffs.ToDots(uc)
+	lg.TextStyle.openFont(pt)
+
+	em := lg.TextStyle.Font.Face.Metrics.Em
+
+	var ltxt Text
+	ltxt.Style = lg.TextStyle
+	var sz image.Point
+	maxTht := 0
+	for _, e := range lg.Entries {
+		ltxt.Text = e.Text
+		ltxt.config(pt)
+		sz.X = max(sz.X, int(math32.Ceil(ltxt.paintText.BBox.Size().X)))
+		tht := int(math32.Ceil(ltxt.paintText.BBox.Size().Y + lg.TextStyle.Padding.Dots))
+		maxTht = max(tht, maxTht)
+	}
+	sz.X += int(em)
+	sz.Y = len(lg.Entries) * maxTht
+	txsz := sz
+	sz.X += int(lg.ThumbnailWidth.Dots)
+
+	pos := ptb.Min
+	if !lg.Left {
+		pos.X = ptb.Max.X - sz.X
+	}
+	if !lg.Top {
+		pos.Y = ptb.Max.Y - sz.Y
+	}
+	pos.X += int(lg.XOffs.Dots)
+	pos.Y += int(lg.YOffs.Dots)
+
+	cp := pos
+	thsz := image.Point{X: int(lg.ThumbnailWidth.Dots), Y: maxTht}
+	for _, e := range lg.Entries {
+		tp := cp
+		tp.X += int(txsz.X)
+		tb := image.Rectangle{Min: tp, Max: tp.Add(thsz)}
+		pc.PushBounds(tb)
+		for _, t := range e.Thumbs {
+			t.Thumbnail(pt)
+		}
+		pc.PopBounds()
+		ltxt.Text = e.Text
+		ltxt.config(pt)
+		ltxt.draw(pt, math32.Vector2FromPoint(cp))
+		cp.Y += maxTht
+	}
 }

@@ -70,10 +70,18 @@ func (pts *Scatter) DataRange() (xmin, xmax, ymin, ymax float32) {
 	return XYRange(pts)
 }
 
-/*
 // Thumbnail the thumbnail for the Scatter,
 // implementing the plot.Thumbnailer interface.
-func (pts *Scatter) Thumbnail(c *draw.Canvas) {
-	c.DrawGlyph(pts.GlyphStyle, c.Center())
+func (pts *Scatter) Thumbnail(plt *plot.Plot) {
+	if !pts.LineStyle.SetStroke(plt) {
+		return
+	}
+	pc := plt.Paint
+	pts.PointSize.ToDots(&pc.UnitContext)
+	pc.FillStyle.Color = pts.LineStyle.Color
+	ptb := pc.Bounds
+	midX := 0.5 * float32(ptb.Min.X+ptb.Max.X)
+	midY := 0.5 * float32(ptb.Min.Y+ptb.Max.Y)
+
+	DrawShape(pc, math32.Vec2(midX, midY), pts.PointSize.Dots, pts.PointShape)
 }
-*/
