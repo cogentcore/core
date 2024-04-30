@@ -4,7 +4,10 @@
 
 package norm
 
-import "cogentcore.org/core/tensor"
+import (
+	"cogentcore.org/core/tensor"
+	"cogentcore.org/core/tensor/stats/stats"
+)
 
 ///////////////////////////////////////////
 //  DivNorm
@@ -64,8 +67,8 @@ func TensorSubNorm(tsr tensor.Tensor, ndim int, nfunc32 Func32, nfunc64 Func64) 
 // ndim must be < NumDims() if not 0 (panics).
 // must be a float32 or float64 tensor
 func TensorZScore(tsr tensor.Tensor, ndim int) {
-	TensorSubNorm(tsr, ndim, Mean32, Mean64)
-	TensorDivNorm(tsr, ndim, Std32, Std64)
+	TensorSubNorm(tsr, ndim, stats.Mean32, stats.Mean64)
+	TensorDivNorm(tsr, ndim, stats.Std32, stats.Std64)
 }
 
 // TensorUnit subtracts the min and divides by the max, so that values are in 0-1 unit range
@@ -74,6 +77,6 @@ func TensorZScore(tsr tensor.Tensor, ndim int) {
 // ndim must be < NumDims() if not 0 (panics).
 // must be a float32 or float64 tensor
 func TensorUnit(tsr tensor.Tensor, ndim int) {
-	TensorSubNorm(tsr, ndim, Min32, Min64)
-	TensorDivNorm(tsr, ndim, Max32, Max64)
+	TensorSubNorm(tsr, ndim, stats.Min32, stats.Min64)
+	TensorDivNorm(tsr, ndim, stats.Max32, stats.Max64)
 }

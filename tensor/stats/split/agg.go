@@ -7,37 +7,37 @@ package split
 import (
 	"fmt"
 
-	"cogentcore.org/core/tensor/stats/agg"
+	"cogentcore.org/core/tensor/stats/stats"
 	"cogentcore.org/core/tensor/table"
 )
 
-// AggIndex performs aggregation using given standard aggregation function across
+// AggIndex performs aggregation using given standard statistic (e.g., Mean) across
 // all splits, and returns the SplitAgg container of the results, which are also
 // stored in the Splits.  Column is specified by index.
-func AggIndex(spl *table.Splits, colIndex int, aggTyp agg.Aggs) *table.SplitAgg {
-	ag := spl.AddAgg(agg.AggsName(aggTyp), colIndex)
+func AggIndex(spl *table.Splits, colIndex int, stat stats.Stats) *table.SplitAgg {
+	ag := spl.AddAgg(stat.String(), colIndex)
 	for _, sp := range spl.Splits {
-		agv := agg.AggIndex(sp, colIndex, aggTyp)
+		agv := stats.StatIndex(sp, colIndex, stat)
 		ag.Aggs = append(ag.Aggs, agv)
 	}
 	return ag
 }
 
-// Agg performs aggregation using given standard aggregation function across
+// AggColumn performs aggregation using given standard statistic (e.g., Mean) across
 // all splits, and returns the SplitAgg container of the results, which are also
 // stored in the Splits.  Column is specified by name -- see Try for error msg version.
-func Agg(spl *table.Splits, column string, aggTyp agg.Aggs) *table.SplitAgg {
+func AggColumn(spl *table.Splits, column string, stat stats.Stats) *table.SplitAgg {
 	dt := spl.Table()
 	if dt == nil {
 		return nil
 	}
-	return AggIndex(spl, dt.ColumnIndex(column), aggTyp)
+	return AggIndex(spl, dt.ColumnIndex(column), stat)
 }
 
-// AggTry performs aggregation using given standard aggregation function across
+// AggColumnTry performs aggregation using given standard statistic (e.g., Mean) across
 // all splits, and returns the SplitAgg container of the results, which are also
 // stored in the Splits.  Column is specified by name -- returns error for bad column name.
-func AggTry(spl *table.Splits, column string, aggTyp agg.Aggs) (*table.SplitAgg, error) {
+func AggColumnTry(spl *table.Splits, column string, stat stats.Stats) (*table.SplitAgg, error) {
 	dt := spl.Table()
 	if dt == nil {
 		return nil, fmt.Errorf("split.AggTry: No splits to aggregate over")
@@ -46,25 +46,25 @@ func AggTry(spl *table.Splits, column string, aggTyp agg.Aggs) (*table.SplitAgg,
 	if err != nil {
 		return nil, err
 	}
-	return AggIndex(spl, colIndex, aggTyp), nil
+	return AggIndex(spl, colIndex, stat), nil
 }
 
 // AggAllNumericCols performs aggregation using given standard aggregation function across
 // all splits, for all number-valued columns in the table.
-func AggAllNumericCols(spl *table.Splits, aggTyp agg.Aggs) {
+func AggAllNumericCols(spl *table.Splits, stat stats.Stats) {
 	dt := spl.Table()
 	for ci, cl := range dt.Columns {
 		if cl.IsString() {
 			continue
 		}
-		AggIndex(spl, ci, aggTyp)
+		AggIndex(spl, ci, stat)
 	}
 }
 
 ///////////////////////////////////////////////////
 //   Desc
 
-// DescIndex performs aggregation using standard aggregation functions across
+// DescIndex performs aggregation using standard statistics across
 // all splits, and stores results in the Splits.  Column is specified by index.
 func DescIndex(spl *table.Splits, colIndex int) {
 	dt := spl.Table()
@@ -72,19 +72,19 @@ func DescIndex(spl *table.Splits, colIndex int) {
 		return
 	}
 	col := dt.Columns[colIndex]
-	allAggs := agg.DescAggs
+	sts := stats.DescStats
 	if col.NumDims() > 1 { // nd cannot do qiles
-		allAggs = agg.DescAggsND
+		sts = stats.DescStatsND
 	}
-	for _, ag := range allAggs {
-		AggIndex(spl, colIndex, ag)
+	for _, st := range sts {
+		AggIndex(spl, colIndex, st)
 	}
 }
 
-// Desc performs aggregation using standard aggregation functions across
+// DescColumn performs aggregation using standard statistics across
 // all splits, and stores results in the Splits.
 // Column is specified by name -- see Try for error msg version.
-func Desc(spl *table.Splits, column string) {
+func DescColumn(spl *table.Splits, column string) {
 	dt := spl.Table()
 	if dt == nil {
 		return
@@ -92,10 +92,10 @@ func Desc(spl *table.Splits, column string) {
 	DescIndex(spl, dt.ColumnIndex(column))
 }
 
-// DescTry performs aggregation using standard aggregation functions across
+// DescColumnTry performs aggregation using standard statistics across
 // all splits, and stores results in the Splits.
 // Column is specified by name -- returns error for bad column name.
-func DescTry(spl *table.Splits, column string) error {
+func DescColumnTry(spl *table.Splits, column string) error {
 	dt := spl.Table()
 	if dt == nil {
 		return fmt.Errorf("split.DescTry: No splits to aggregate over")

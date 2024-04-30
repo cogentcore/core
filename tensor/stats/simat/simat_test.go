@@ -28,7 +28,7 @@ var simres = `Tensor: [12, 12]
 [11]: 6.324555320336759 5.291502622129181 9.899494936611665 9.273618495495704 9.38083151964686 8.94427190999916 5.477225575051661 4.242640687119285 9.695359714832659       9 3.4641016151377544       0 
 `
 
-func TestClust(t *testing.T) {
+func TestSimMat(t *testing.T) {
 	dt := &table.Table{}
 	err := dt.OpenCSV("../clust/testdata/faces.dat", table.Tab)
 	if err != nil {

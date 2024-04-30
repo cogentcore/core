@@ -11,6 +11,7 @@ import (
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tensor"
+	"cogentcore.org/core/tensor/stats/stats"
 )
 
 // FloatFunc applies given functions to float tensor data, which is either Float32 or Float64
@@ -76,14 +77,14 @@ func SubNorm64(a []float64, nfunc Func64) {
 
 // ZScore32 subtracts the mean and divides by the standard deviation
 func ZScore32(a []float32) {
-	SubNorm32(a, Mean32)
-	DivNorm32(a, Std32)
+	SubNorm32(a, stats.Mean32)
+	DivNorm32(a, stats.Std32)
 }
 
 // ZScore64 subtracts the mean and divides by the standard deviation
 func ZScore64(a []float64) {
-	SubNorm64(a, Mean64)
-	DivNorm64(a, Std64)
+	SubNorm64(a, stats.Mean64)
+	DivNorm64(a, stats.Std64)
 }
 
 ///////////////////////////////////////////
@@ -91,14 +92,14 @@ func ZScore64(a []float64) {
 
 // Unit32 subtracts the min and divides by the max, so that values are in 0-1 unit range
 func Unit32(a []float32) {
-	SubNorm32(a, Min32)
-	DivNorm32(a, Max32)
+	SubNorm32(a, stats.Min32)
+	DivNorm32(a, stats.Max32)
 }
 
 // Unit64 subtracts the min and divides by the max, so that values are in 0-1 unit range
 func Unit64(a []float64) {
-	SubNorm64(a, Min64)
-	DivNorm64(a, Max64)
+	SubNorm64(a, stats.Min64)
+	DivNorm64(a, stats.Max64)
 }
 
 ///////////////////////////////////////////
@@ -220,83 +221,3 @@ type Func32 func(a []float32) float32
 
 // Func64 is a norm function operating on slices of float64 numbers
 type Func64 func(a []float64) float64
-
-// StdNorms are standard norm functions, including stats
-type StdNorms int32 //enums:enum
-
-const (
-	L1 StdNorms = iota
-	L2
-	SumSquares
-	N
-	Sum
-	Mean
-	Var
-	Std
-	Max
-	MaxAbs
-	Min
-	MinAbs
-)
-
-// StdFunc32 returns a standard norm function as specified
-func StdFunc32(std StdNorms) Func32 {
-	switch std {
-	case L1:
-		return L132
-	case L2:
-		return L232
-	case SumSquares:
-		return SumSquares32
-	case N:
-		return N32
-	case Sum:
-		return Sum32
-	case Mean:
-		return Mean32
-	case Var:
-		return Var32
-	case Std:
-		return Std32
-	case Max:
-		return Max32
-	case MaxAbs:
-		return MaxAbs32
-	case Min:
-		return Min32
-	case MinAbs:
-		return MinAbs32
-	}
-	return nil
-}
-
-// StdFunc64 returns a standard norm function as specified
-func StdFunc64(std StdNorms) Func64 {
-	switch std {
-	case L1:
-		return L164
-	case L2:
-		return L264
-	case SumSquares:
-		return SumSquares64
-	case N:
-		return N64
-	case Sum:
-		return Sum64
-	case Mean:
-		return Mean64
-	case Var:
-		return Var64
-	case Std:
-		return Std64
-	case Max:
-		return Max64
-	case MaxAbs:
-		return MaxAbs64
-	case Min:
-		return Min64
-	case MinAbs:
-		return MinAbs64
-	}
-	return nil
-}

@@ -8,7 +8,7 @@ import (
 	"math"
 
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/tensor/stats/norm"
+	"cogentcore.org/core/tensor/stats/stats"
 )
 
 ///////////////////////////////////////////
@@ -354,8 +354,8 @@ func Covariance32(a, b []float32) float32 {
 		panic("metric: slice lengths do not match")
 	}
 	ss := float32(0)
-	am := norm.Mean32(a)
-	bm := norm.Mean32(b)
+	am := stats.Mean32(a)
+	bm := stats.Mean32(b)
 	n := 0
 	for i, av := range a {
 		bv := b[i]
@@ -379,8 +379,8 @@ func Covariance64(a, b []float64) float64 {
 		panic("metric: slice lengths do not match")
 	}
 	ss := float64(0)
-	am := norm.Mean64(a)
-	bm := norm.Mean64(b)
+	am := stats.Mean64(a)
+	bm := stats.Mean64(b)
 	n := 0
 	for i, av := range a {
 		bv := b[i]
@@ -411,8 +411,8 @@ func Correlation32(a, b []float32) float32 {
 		panic("metric: slice lengths do not match")
 	}
 	ss := float32(0)
-	am := norm.Mean32(a)
-	bm := norm.Mean32(b)
+	am := stats.Mean32(a)
+	bm := stats.Mean32(b)
 	var avar, bvar float32
 	for i, av := range a {
 		bv := b[i]
@@ -444,8 +444,8 @@ func Correlation64(a, b []float64) float64 {
 		panic("metric: slice lengths do not match")
 	}
 	ss := float64(0)
-	am := norm.Mean64(a)
-	bm := norm.Mean64(b)
+	am := stats.Mean64(a)
+	bm := stats.Mean64(b)
 	var avar, bvar float64
 	for i, av := range a {
 		bv := b[i]

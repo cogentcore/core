@@ -39,9 +39,9 @@ func FloatOnlyError() error {
 	return err
 }
 
-// TensorAbs applies the Abs function to each element in given tensor,
+// AbsTensor applies the Abs function to each element in given tensor,
 // for float32 and float64 data types.
-func TensorAbs(a tensor.Tensor) {
+func AbsTensor(a tensor.Tensor) {
 	switch tsr := a.(type) {
 	case *tensor.Float32:
 		Abs32(tsr.Values)

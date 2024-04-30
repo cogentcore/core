@@ -13,7 +13,7 @@ type Func32 func(a, b []float32) float32
 type Func64 func(a, b []float64) float64
 
 // StdMetrics are standard metric functions
-type StdMetrics int
+type StdMetrics int32 //enums:enum
 
 const (
 	Euclidean StdMetrics = iota

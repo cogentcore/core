@@ -13,8 +13,8 @@ import (
 
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/tensor"
-	"cogentcore.org/core/tensor/stats/norm"
 	"cogentcore.org/core/tensor/stats/simat"
+	"cogentcore.org/core/tensor/stats/stats"
 )
 
 // Node is one node in the cluster
@@ -110,7 +110,7 @@ func GlomInit(ntot int) *Node {
 func GlomClust(root *Node, smat *simat.SimMat, dfunc DistFunc) *Node {
 	ntot := smat.Mat.DimSize(0) // number of leaves
 	smatf := smat.Mat.(*tensor.Float64).Values
-	maxd := norm.Max64(smatf)
+	maxd := stats.Max64(smatf)
 	// indexes in each group
 	aidx := make([]int, ntot)
 	bidx := make([]int, ntot)
