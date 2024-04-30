@@ -499,7 +499,7 @@ type SystemSettingsData struct { //types:add
 	// extra font paths, beyond system defaults -- searched first
 	FontPaths []string
 
-	// user info -- partially filled-out automatically if empty / when prefs first created
+	// user info, which is partially filled-out automatically if empty when settings are first created
 	User User
 
 	// favorite paths, shown in FileViewer and also editable there
