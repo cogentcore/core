@@ -163,7 +163,11 @@ func MakePages(c *config.Config) error {
 		if path == "" { // exclude root index
 			return nil
 		}
-		fmt.Println(path)
+		opath := filepath.Join("bin", "web", path)
+		err = os.MkdirAll(opath, 0777)
+		if err != nil {
+			return err
+		}
 		return nil
 	})
 }
