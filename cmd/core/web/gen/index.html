@@ -20,12 +20,12 @@
         content="{{.VanityURL}} https://github.com/{{.GithubVanityRepository}} https://github.com/{{.GithubVanityRepository}}/tree/master{/dir} https://github.com/{{.GithubVanityRepository}}/blob/master{/dir}/{file}#L{line}">
     {{- end -}}
     <link type="text/css" rel="preload" href="app.css" as="style">
-    <link rel="icon" href="icons/svg.svg">
-    <link rel="apple-touch-icon" href="icons/192.png">
-    <link rel="manifest" href="manifest.webmanifest">
-    <link rel="stylesheet" type="text/css" href="app.css">
-    <script defer src="wasm_exec.js"></script>
-    <script defer src="app.js"></script>
+    <link rel="icon" href="{{.BasePath}}icons/svg.svg">
+    <link rel="apple-touch-icon" href="{{.BasePath}}icons/192.png">
+    <link rel="manifest" href="{{.BasePath}}manifest.webmanifest">
+    <link rel="stylesheet" type="text/css" href="{{.BasePath}}app.css">
+    <script defer src="{{.BasePath}}wasm_exec.js"></script>
+    <script defer src="{{.BasePath}}app.js"></script>
 </head>
 
 <body>
@@ -33,7 +33,7 @@
     <input id="text-field" type="text">
     <aside id="app-wasm-loader">
         <div id="app-wasm-loader-header">
-            <img id="app-wasm-loader-icon" src="icons/svg.svg">
+            <img id="app-wasm-loader-icon" src="{{.BasePath}}icons/svg.svg">
             <p id="app-wasm-loader-title">{{.Title}}</p>
             <p id="app-wasm-loader-label">0%</p>
             <progress id="app-wasm-loader-progress" value="0"></progress>
