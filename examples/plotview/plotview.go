@@ -6,6 +6,7 @@ package main
 
 import (
 	"embed"
+	"log/slog"
 
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/plot/plotview"
@@ -15,21 +16,46 @@ import (
 //go:embed *.tsv
 var tsv embed.FS
 
+type Data struct {
+	City       string
+	Population float32
+	Area       float32
+}
+
 func main() {
 	b := core.NewBody("plotview")
 
-	epc := table.NewTable(0, "epc")
-	epc.OpenFS(tsv, "ra25epoch.tsv", table.Tab)
+	if false {
+		epc := table.NewTable(0, "epc")
+		epc.OpenFS(tsv, "ra25epoch.tsv", table.Tab)
 
-	pl := plotview.NewPlotView(b)
-	pl.Params.Title = "RA25 Epoch Train"
-	pl.Params.XAxisColumn = "Epoch"
-	// pl.Params.Scale = 2
-	pl.Params.Points = true
-	pl.SetTable(epc)
-	pl.ColumnParams("UnitErr").On = true
+		pl := plotview.NewPlotView(b)
+		pl.Params.Title = "RA25 Epoch Train"
+		pl.Params.XAxisColumn = "Epoch"
+		// pl.Params.Scale = 2
+		pl.Params.Points = true
+		pl.SetTable(epc)
+		pl.ColumnParams("UnitErr").On = true
+		b.AddAppBar(pl.ConfigToolbar)
+	} else {
+		data := []Data{
+			{"Davis", 62000, 500},
+			{"Boulder", 85000, 800},
+		}
 
-	b.AddAppBar(pl.ConfigToolbar)
+		dt, err := table.NewSliceTable(data)
+		if err != nil {
+			slog.Error(err.Error())
+		}
+
+		pl := plotview.NewPlotView(b)
+		pl.Params.Title = "Slice Data"
+		pl.Params.XAxisColumn = "City"
+		pl.Params.Points = true
+		pl.SetTable(dt)
+		pl.ColumnParams("Population").On = true
+		b.AddAppBar(pl.ConfigToolbar)
+	}
 
 	b.RunMainWindow()
 }
