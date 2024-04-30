@@ -7,7 +7,6 @@
 package pages
 
 import (
-	"fmt"
 	"net/url"
 	"strings"
 	"syscall/js"
@@ -34,7 +33,7 @@ func init() {
 			return
 		}
 		fullNew := base.ResolveReference(new)
-		fmt.Println(fullNew)
+		js.Global().Get("history").Call("pushState", "", "", fullNew.String())
 	}
 }
 
