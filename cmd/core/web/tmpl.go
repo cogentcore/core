@@ -137,6 +137,7 @@ type IndexHTMLData struct {
 	Desc                   string
 	Keywords               []string
 	Title                  string
+	SiteName               string
 	Image                  string
 	VanityURL              string
 	GithubVanityRepository string
@@ -155,6 +156,7 @@ func MakeIndexHTML(c *config.Config, basePath string, title string) ([]byte, err
 		Desc:                   c.Desc,
 		Keywords:               c.Web.Keywords,
 		Title:                  title,
+		SiteName:               c.Name,
 		Image:                  c.Web.Image,
 		VanityURL:              c.Web.VanityURL,
 		GithubVanityRepository: c.Web.GithubVanityRepository,

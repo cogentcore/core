@@ -17,6 +17,7 @@ import (
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
 	"cogentcore.org/core/pages/wpath"
@@ -155,6 +156,7 @@ func MakePages(c *config.Config) error {
 		if filepath.Ext(path) != ".md" {
 			return nil
 		}
+		path = strings.ReplaceAll(path, `\`, "/")
 		path = strings.TrimSuffix(path, "index.md")
 		path = strings.TrimSuffix(path, ".md")
 		path = strings.TrimPrefix(path, c.Pages)
@@ -168,6 +170,12 @@ func MakePages(c *config.Config) error {
 		if err != nil {
 			return err
 		}
+		numNested := strings.Count(path, "/") + 1
+		basePath := ""
+		for range numNested {
+			basePath += "../"
+		}
+		MakeIndexHTML(c, basePath, strcase.ToSentence(filepath.Base(path)))
 		return nil
 	})
 }
