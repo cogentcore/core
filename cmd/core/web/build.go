@@ -12,12 +12,14 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
+	"cogentcore.org/core/pages/wpath"
 )
 
 // Build builds an app for web using the given configuration information.
@@ -148,6 +150,17 @@ func MakePages(c *config.Config) error {
 			return err
 		}
 		if d.IsDir() {
+			return nil
+		}
+		if filepath.Ext(path) != ".md" {
+			return nil
+		}
+		path = strings.TrimSuffix(path, "index.md")
+		path = strings.TrimSuffix(path, ".md")
+		path = strings.TrimPrefix(path, c.Pages)
+		path = strings.TrimPrefix(path, "/")
+		path = wpath.Format(path)
+		if path == "" { // exclude root index
 			return nil
 		}
 		fmt.Println(path)

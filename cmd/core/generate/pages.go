@@ -42,6 +42,9 @@ func GetPagesExamples(c *config.Config) (ordmap.Map[string, []byte], error) {
 		if d.IsDir() {
 			return nil
 		}
+		if filepath.Ext(path) != ".md" {
+			return nil
+		}
 		f, err := os.Open(path)
 		if err != nil {
 			return err
