@@ -21,8 +21,10 @@ body {
 #text-field {
   position: fixed;
   opacity: 0;
-  top: 0;
-  left: 0;
+  top: -10px;
+  left: -10px;
+  width: 0;
+  height: 0;
 }
 
 /* Loader: */
