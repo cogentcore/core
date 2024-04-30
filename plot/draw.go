@@ -423,8 +423,11 @@ func (lg *Legend) draw(pt *Plot) {
 	pos.X += int(lg.XOffs.Dots)
 	pos.Y += int(lg.YOffs.Dots)
 
+	if lg.FillColor != nil {
+		pc.FillBox(math32.Vector2FromPoint(pos), math32.Vector2FromPoint(sz), colors.C(lg.FillColor))
+	}
 	cp := pos
-	thsz := image.Point{X: int(lg.ThumbnailWidth.Dots), Y: maxTht}
+	thsz := image.Point{X: int(lg.ThumbnailWidth.Dots), Y: maxTht - int(lg.TextStyle.Padding.Dots)}
 	for _, e := range lg.Entries {
 		tp := cp
 		tp.X += int(txsz.X)

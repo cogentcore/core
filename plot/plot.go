@@ -16,6 +16,7 @@ import (
 	"image/color"
 
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
@@ -68,7 +69,7 @@ type Plot struct {
 func (pt *Plot) Defaults() {
 	pt.Title.Defaults()
 	pt.Title.Style.Size.Dp(24)
-	pt.Background = color.White
+	pt.Background = colors.Scheme.Surface
 	pt.X.Defaults(math32.X)
 	pt.Y.Defaults(math32.Y)
 	pt.Legend.Defaults()

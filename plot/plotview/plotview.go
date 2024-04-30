@@ -75,6 +75,20 @@ func (pl *PlotView) CopyFieldsFrom(frm tree.Node) {
 	}
 }
 
+// NewSubPlot returns a PlotView with its own separate Toolbar,
+// suitable for a tab or other element that is not the main plot.
+func NewSubPlot(par core.Widget, name ...string) *PlotView {
+	fr := core.NewFrame(par, name...)
+	tb := core.NewToolbar(fr, "tbar")
+	pl := NewPlotView(fr, "plot")
+	fr.Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Grow.Set(1, 1)
+	})
+	tb.ToolbarFuncs.Add(pl.ConfigToolbar)
+	return pl
+}
+
 func (pl *PlotView) OnInit() {
 	pl.Params.Plot = pl
 	pl.Params.Defaults()
@@ -239,8 +253,8 @@ func (pl *PlotView) GoUpdatePlot() {
 	pl.Scene.AsyncLock()
 	pl.Table.Sequential()
 	pl.GenPlot()
+	pl.NeedsRender()
 	pl.Scene.AsyncUnlock()
-	pl.Scene.NeedsRender()
 }
 
 // UpdatePlot updates the display based on current IndexView into table.
@@ -583,16 +597,9 @@ func (pl *PlotView) ConfigToolbar(tb *core.Toolbar) {
 	views.NewFuncButton(tb, pl.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
 }
 
-// NewSubPlot returns a PlotView with its own separate Toolbar,
-// suitable for a tab or other element that is not the main plot.
-func NewSubPlot(par core.Widget, name ...string) *PlotView {
-	fr := core.NewFrame(par, name...)
-	tb := core.NewToolbar(fr, "tbar")
-	pl := NewPlotView(fr, "plot")
-	fr.Style(func(s *styles.Style) {
-		s.Direction = styles.Column
-		s.Grow.Set(1, 1)
-	})
-	tb.ToolbarFuncs.Add(pl.ConfigToolbar)
-	return pl
+func (pt *PlotView) SizeFinal() {
+	pt.Layout.SizeFinal()
+	if pt.NeedsRebuild() {
+		pt.UpdatePlot()
+	}
 }

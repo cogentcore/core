@@ -13,6 +13,7 @@ import (
 	"image/color"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/plot"
 )
 
@@ -192,18 +193,11 @@ func (pts *Line) Thumbnail(plt *plot.Plot) {
 	midY := 0.5 * float32(ptb.Min.Y+ptb.Max.Y)
 
 	if pts.FillColor != nil {
-		var topY float32
-		if pts.LineStyle.Width.Value == 0 {
-			topY = float32(ptb.Min.Y)
-		} else {
-			topY = midY
+		tb := ptb
+		if pts.LineStyle.Width.Value > 0 {
+			tb.Min.Y = int(midY)
 		}
-		pc.MoveTo(float32(ptb.Min.X), float32(ptb.Max.Y))
-		pc.LineTo(float32(ptb.Min.X), topY)
-		pc.LineTo(float32(ptb.Max.X), topY)
-		pc.LineTo(float32(ptb.Max.X), float32(ptb.Max.Y))
-		pc.ClosePath()
-		pc.Fill()
+		pc.FillBox(math32.Vector2FromPoint(tb.Min), math32.Vector2FromPoint(tb.Size()), colors.C(pts.FillColor))
 	}
 
 	if pts.LineStyle.SetStroke(plt) {

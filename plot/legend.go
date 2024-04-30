@@ -5,6 +5,9 @@
 package plot
 
 import (
+	"image/color"
+
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -17,13 +20,6 @@ type Legend struct {
 	TextStyle TextStyle
 
 	// Top and Left specify the location of the legend.
-	// If Top is true the legend is located along the top
-	// edge of the plot, otherwise it is located along
-	// the bottom edge.  If Left is true then the legend
-	// is located along the left edge of the plot, and the
-	// text is positioned after the icons, otherwise it is
-	// located along the right edge and the text is
-	// positioned before the icons.
 	Top, Left bool
 
 	// XOffs and YOffs are added to the legend's final position.
@@ -32,6 +28,10 @@ type Legend struct {
 	// ThumbnailWidth is the width of legend thumbnails.
 	ThumbnailWidth units.Value
 
+	// FillColor specifies the background fill color for the legend box,
+	// if non-nil.
+	FillColor color.Color
+
 	// Entries are all of the LegendEntries described by this legend.
 	Entries []LegendEntry
 }
@@ -39,8 +39,10 @@ type Legend struct {
 func (lg *Legend) Defaults() {
 	lg.TextStyle.Defaults()
 	lg.TextStyle.Padding.Dp(4)
+	lg.TextStyle.Font.Size.Dp(20)
 	lg.Top = true
 	lg.ThumbnailWidth.Pt(20)
+	lg.FillColor = colors.Clearer(colors.Scheme.Surface, 25)
 }
 
 // Add adds an entry to the legend with the given name.

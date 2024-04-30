@@ -8,6 +8,7 @@ import (
 	"image"
 	"image/draw"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/plot"
@@ -80,6 +81,10 @@ func (pt *Plot) SetStyles() {
 			} else {
 				s.Cursor = cursors.Grab
 			}
+		}
+		if pt.Plot != nil {
+			pt.Plot.Background = colors.Scheme.Surface
+			pt.Plot.Legend.FillColor = colors.Clearer(colors.Scheme.Surface, 25)
 		}
 	})
 	// sv.StyleFinal(func(s *styles.Style) {
