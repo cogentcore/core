@@ -18,8 +18,8 @@
     <meta name="go-import" content="{{.VanityURL}} git https://github.com/{{.GithubVanityRepository}}">
     <meta name="go-source"
         content="{{.VanityURL}} https://github.com/{{.GithubVanityRepository}} https://github.com/{{.GithubVanityRepository}}/tree/master{/dir} https://github.com/{{.GithubVanityRepository}}/blob/master{/dir}/{file}#L{line}">
-    {{- end -}}
-    <link type="text/css" rel="preload" href="app.css" as="style">
+    {{- end}}
+    <link type="text/css" rel="preload" href="{{.BasePath}}app.css" as="style">
     <link rel="icon" href="{{.BasePath}}icons/svg.svg">
     <link rel="apple-touch-icon" href="{{.BasePath}}icons/192.png">
     <link rel="manifest" href="{{.BasePath}}manifest.webmanifest">

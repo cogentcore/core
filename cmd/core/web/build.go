@@ -175,7 +175,10 @@ func MakePages(c *config.Config) error {
 		for range numNested {
 			basePath += "../"
 		}
-		MakeIndexHTML(c, basePath, strcase.ToSentence(filepath.Base(path)))
-		return nil
+		b, err := MakeIndexHTML(c, basePath, strcase.ToSentence(filepath.Base(path)))
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(filepath.Join(opath, "index.html"), b, 0666)
 	})
 }
