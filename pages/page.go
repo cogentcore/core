@@ -79,7 +79,7 @@ func (pg *Page) OnInit() {
 
 func (pg *Page) OnAdd() {
 	pg.WidgetBase.OnAdd()
-	pg.OnShow(func(e events.Event) {
+	pg.Scene.OnFinal(events.Show, func(e events.Event) {
 		if pg.PagePath == "" {
 			if getWebURL != nil {
 				pg.OpenURL(getWebURL(), true)
