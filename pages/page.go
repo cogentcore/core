@@ -99,6 +99,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 
 	// the paths in the fs are never rooted, so we trim a rooted one
 	rawURL = strings.TrimPrefix(rawURL, "/")
+	rawURL = strings.TrimSuffix(rawURL, "/")
 
 	pg.PagePath = pg.URLToPagePath[rawURL]
 
@@ -240,9 +241,17 @@ func (pg *Page) Config() {
 	})
 
 	if pg.PagePath == "" {
-		pg.OpenURL("/", true)
+		if getWebURL != nil {
+			pg.OpenURL(getWebURL(), true)
+		} else {
+			pg.OpenURL("/", true)
+		}
 	}
 }
+
+// getWebURL, if non-nil, returns the current relative web URL that should
+// be passed to [Page.OpenURL] on startup.
+var getWebURL func() string
 
 // AppBar is the default app bar for a [Page]
 func (pg *Page) AppBar(tb *core.Toolbar) {
