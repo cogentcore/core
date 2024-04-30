@@ -12,8 +12,8 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/tensor/stats/agg"
 	"cogentcore.org/core/tensor/stats/split"
+	"cogentcore.org/core/tensor/stats/stats"
 	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/tensor/tensorview"
 )
@@ -52,18 +52,15 @@ func AnalyzePlanets() {
 
 	PlanetsAll := table.NewIndexView(Planets) // full original data
 
-	NonNull := table.NewIndexView(Planets)
-	NonNull.Filter(table.FilterNull) // filter out all rows with Null values
-
-	PlanetsDesc = agg.DescAll(PlanetsAll) // individually excludes Null values in each col, but not row-wise
-	PlanetsNNDesc = agg.DescAll(NonNull)  // standard descriptive stats for row-wise non-nulls
+	PlanetsDesc = stats.DescAll(PlanetsAll)   // individually excludes Null values in each col, but not row-wise
+	PlanetsNNDesc = stats.DescAll(PlanetsAll) // standard descriptive stats for row-wise non-nulls
 
 	byMethod := split.GroupBy(PlanetsAll, []string{"method"})
-	split.Agg(byMethod, "orbital_period", agg.AggMedian)
+	split.AggColumn(byMethod, "orbital_period", stats.Median)
 	GpMethodOrbit = byMethod.AggsToTable(table.AddAggName)
 
 	byMethod.DeleteAggs()
-	split.Desc(byMethod, "year") // full desc stats of year
+	split.DescColumn(byMethod, "year") // full desc stats of year
 
 	byMethod.Filter(func(idx int) bool {
 		ag := byMethod.AggByColumnName("year:Std")
@@ -80,14 +77,14 @@ func AnalyzePlanets() {
 	})
 	byMethodDecade.SetLevels("method", "decade")
 
-	split.Agg(byMethodDecade, "number", agg.AggSum)
+	split.AggColumn(byMethodDecade, "number", stats.Sum)
 
 	// uncomment this to switch to decade first, then method
 	// byMethodDecade.ReorderLevels([]int{1, 0})
 	// byMethodDecade.SortLevels()
 
 	decadeOnly, _ := byMethodDecade.ExtractLevels([]int{1})
-	split.Agg(decadeOnly, "number", agg.AggSum)
+	split.AggColumn(decadeOnly, "number", stats.Sum)
 	GpDecade = decadeOnly.AggsToTable(table.AddAggName)
 
 	GpMethodDecade = byMethodDecade.AggsToTable(table.AddAggName) // here to ensure that decadeOnly didn't mess up..
