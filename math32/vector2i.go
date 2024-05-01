@@ -73,22 +73,21 @@ func (v *Vector2i) SetZero() {
 	v.SetScalar(0)
 }
 
-// FromArray sets this vector's components from the specified array and offset.
-func (v *Vector2i) FromArray(array []int32, offset int) {
+// FromSlice sets this vector's components from the given slice, starting at offset.
+func (v *Vector2i) FromSlice(array []int32, offset int) {
 	v.X = array[offset]
 	v.Y = array[offset+1]
 }
 
-// ToArray copies this vector's components to array starting at offset.
-func (v Vector2i) ToArray(array []int32, offset int) {
+// ToSlice copies this vector's components to the given slice, starting at offset.
+func (v Vector2i) ToSlice(array []int32, offset int) {
 	array[offset] = v.X
 	array[offset+1] = v.Y
 }
 
-///////////////////////////////////////////////////////////////////////
-//  Basic math operations
+// Basic math operations:
 
-// Add adds other vector to this one and returns result in a new vector.
+// Add adds the other given vector to this one and returns the result as a new vector.
 func (v Vector2i) Add(other Vector2i) Vector2i {
 	return Vector2i{v.X + other.X, v.Y + other.Y}
 }
@@ -224,7 +223,7 @@ func (v *Vector2i) Clamp(min, max Vector2i) {
 	}
 }
 
-// Negate returns vector with each component negated.
+// Negate returns the vector with each component negated.
 func (v Vector2i) Negate() Vector2i {
 	return Vector2i{-v.X, -v.Y}
 }

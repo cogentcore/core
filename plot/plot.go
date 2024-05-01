@@ -223,7 +223,7 @@ func (pt *Plot) ClosestDataToPixel(px, py int) (plt Plotter, idx int, dist float
 		for i := range pxls.Len() {
 			ptx, pty := pxls.XY(i)
 			pxy := math32.Vec2(ptx, pty)
-			d := pxy.Distance(tp)
+			d := pxy.DistanceTo(tp)
 			if d < dist {
 				dist = d
 				pixel = pxy

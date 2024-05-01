@@ -345,7 +345,7 @@ func (v Vector2) Round() Vector2 {
 	return Vec2(Round(v.X), Round(v.Y))
 }
 
-// Negate returns vector with each component negated.
+// Negate returns the vector with each component negated.
 func (v Vector2) Negate() Vector2 {
 	return Vec2(-v.X, -v.Y)
 }
