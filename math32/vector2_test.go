@@ -55,4 +55,10 @@ func TestVector2(t *testing.T) {
 
 	assert.Equal(t, Vec2(-2, 19), v.SubDim(X, 5.5))
 	assert.Equal(t, Vec2(3.5, 2), v.SubDim(Y, 17))
+
+	assert.Equal(t, Vec2(7, 19), v.MulDim(X, 2))
+	assert.Equal(t, Vec2(3.5, 57), v.MulDim(Y, 3))
+
+	assert.Equal(t, Vec2(0.5, 19), v.DivDim(X, 7))
+	assert.Equal(t, Vec2(3.5, 2.375), v.DivDim(Y, 8))
 }

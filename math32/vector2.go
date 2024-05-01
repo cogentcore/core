@@ -166,36 +166,6 @@ func (a Vector2) DivDim(d Dims, value float32) Vector2 {
 	return a
 }
 
-// set the value along a given dimension to max of current val and new val
-func (a *Vector2) SetMaxDim(d Dims, value float32) {
-	switch d {
-	case X:
-		a.X = Max(a.X, value)
-	case Y:
-		a.Y = Max(a.Y, value)
-	}
-}
-
-// set the value along a given dimension to min of current val and new val
-func (a *Vector2) SetMinDim(d Dims, value float32) {
-	switch d {
-	case X:
-		a.X = Min(a.X, value)
-	case Y:
-		a.Y = Min(a.Y, value)
-	}
-}
-
-// set the value along a given dimension to min of current val and new val
-func (a *Vector2) SetMinPosDim(d Dims, value float32) {
-	switch d {
-	case X:
-		a.X = MinPos(value, a.X)
-	case Y:
-		a.Y = MinPos(value, a.Y)
-	}
-}
-
 func (a *Vector2) SetPoint(pt image.Point) {
 	a.X = float32(pt.X)
 	a.Y = float32(pt.Y)
