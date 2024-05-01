@@ -396,34 +396,30 @@ func (a Vector2) DivDim(d Dims, value float32) Vector2 {
 
 // Distance, Norm:
 
-// Dot returns the dot product of this vector with other.
+// Dot returns the dot product of this vector with the given other vector.
 func (v Vector2) Dot(other Vector2) float32 {
 	return v.X*other.X + v.Y*other.Y
 }
 
-// LengthSq returns the length squared of this vector.
-// LengthSq can be used to compare vectors' lengths without the need to perform a square root.
-func (v Vector2) LengthSq() float32 {
+// LengthSquared returns the length squared of this vector.
+// LengthSquared can be used to compare the lengths of vectors
+// without the need to perform a square root.
+func (v Vector2) LengthSquared() float32 {
 	return v.X*v.X + v.Y*v.Y
 }
 
-// Length returns the length of this vector.
+// Length returns the length (magnitude) of this vector.
 func (v Vector2) Length() float32 {
-	return Sqrt(v.X*v.X + v.Y*v.Y)
+	return Sqrt(v.LengthSquared())
 }
 
-// Normal returns this vector divided by its length
+// Normal returns this vector divided by its length (its unit vector).
 func (v Vector2) Normal() Vector2 {
 	return v.DivScalar(v.Length())
 }
 
-// SetNormal normalizes this vector so its length will be 1.
+// SetNormal normalizes this vector so its length will be 1 (a unit vector).
 func (v *Vector2) SetNormal() {
-	v.SetDivScalar(v.Length())
-}
-
-// Normalize normalizes this vector so its length will be 1.
-func (v *Vector2) Normalize() {
 	v.SetDivScalar(v.Length())
 }
 

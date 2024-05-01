@@ -8,6 +8,7 @@ import (
 	"image"
 	"testing"
 
+	"cogentcore.org/core/base/tolassert"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/image/math/fixed"
 )
@@ -146,4 +147,11 @@ func TestVector2(t *testing.T) {
 
 	assert.Equal(t, Vec2(0.5, 19), v.DivDim(X, 7))
 	assert.Equal(t, Vec2(3.5, 2.375), v.DivDim(Y, 8))
+
+	v = Vec2(2, 3)
+
+	assert.Equal(t, float32(-7), v.Dot(Vec2(4, -5)))
+
+	assert.Equal(t, float32(13), v.LengthSquared())
+	tolassert.Equal(t, Sqrt(13), v.Length())
 }
