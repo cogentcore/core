@@ -114,7 +114,7 @@ func SetLineStartEnd(ln *Solid, st, ed math32.Vector3) {
 	d := ed.Sub(st)
 	midp := st.Add(d.DivScalar(2))
 	ln.Pose.Pos = midp
-	dst := st.DistTo(ed)
+	dst := st.DistanceTo(ed)
 	ln.Pose.Scale.Set(dst, wd, wd)
 	dn := d.Normal()
 	ln.Pose.Quat.SetFromUnitVectors(math32.Vec3(1, 0, 0), dn)

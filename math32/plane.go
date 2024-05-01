@@ -64,7 +64,7 @@ func (p *Plane) Normalize() {
 // Negate negates this plane normal.
 func (p *Plane) Negate() {
 	p.Off *= -1
-	p.Norm.SetNegate()
+	p.Norm = p.Norm.Negate()
 }
 
 // DistToPoint returns the distance of this plane from point.
@@ -112,9 +112,4 @@ func (p *Plane) CoplanarPoint() Vector3 {
 // SetTranslate translates this plane in the direction of its normal by offset.
 func (p *Plane) SetTranslate(offset Vector3) {
 	p.Off -= offset.Dot(p.Norm)
-}
-
-// IsEqual returns if this plane is equal to other
-func (p *Plane) IsEqual(other *Plane) bool {
-	return other.Norm.IsEqual(p.Norm) && (other.Off == p.Off)
 }

@@ -64,9 +64,9 @@ func (ray *Ray) DistSqToPoint(point Vector3) float32 {
 	dirDist := point.Sub(ray.Origin).Dot(ray.Dir)
 	// point behind the ray
 	if dirDist < 0 {
-		return ray.Origin.DistTo(point)
+		return ray.Origin.DistanceTo(point)
 	}
-	return ray.Dir.MulScalar(dirDist).Add(ray.Origin).DistToSquared(point)
+	return ray.Dir.MulScalar(dirDist).Add(ray.Origin).DistanceToSquared(point)
 }
 
 // DistSqToSegment returns the smallest squared distance
@@ -80,11 +80,11 @@ func (ray *Ray) DistSqToSegment(v0, v1 Vector3, optPointOnRay, optPointOnSegment
 	segDir := v1.Sub(v0).Normal()
 	diff := ray.Origin.Sub(segCenter)
 
-	segExtent := v0.DistTo(v1) * 0.5
+	segExtent := v0.DistanceTo(v1) * 0.5
 	a01 := -ray.Dir.Dot(segDir)
 	b0 := diff.Dot(ray.Dir)
 	b1 := -diff.Dot(segDir)
-	c := diff.LengthSq()
+	c := diff.LengthSquared()
 	det := Abs(1 - a01*a01)
 
 	var s0, s1, sqrDist, extDet float32
@@ -389,9 +389,4 @@ func (ray *Ray) ApplyMatrix4(mat4 *Matrix4) {
 	ray.Origin = ray.Origin.MulMatrix4(mat4)
 	ray.Dir.SetSub(ray.Origin)
 	ray.Dir.SetNormal()
-}
-
-// IsEqual returns if this ray is equal to other
-func (ray *Ray) IsEqual(other Ray) bool {
-	return ray.Origin.IsEqual(other.Origin) && ray.Dir.IsEqual(other.Dir)
 }

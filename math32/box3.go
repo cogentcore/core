@@ -233,11 +233,6 @@ func (b Box3) Translate(offset Vector3) Box3 {
 	return nb
 }
 
-// IsEqual returns if this box is equal to other
-func (b Box3) IsEqual(other Box3) bool {
-	return other.Min.IsEqual(b.Min) && other.Max.IsEqual(b.Max)
-}
-
 // MVProjToNDC projects bounding box through given MVP model-view-projection Matrix4
 // with perspective divide to return normalized display coordinates (NDC).
 func (b Box3) MVProjToNDC(m *Matrix4) Box3 {

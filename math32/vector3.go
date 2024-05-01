@@ -96,53 +96,33 @@ func (a Vector3) String() string {
 	return fmt.Sprintf("(%v, %v, %v)", a.X, a.Y, a.Z)
 }
 
-// SetByName sets this vector component value by its case insensitive name: "x", "y", or "z".
-func (v *Vector3) SetByName(name string, value float32) {
-	switch name {
-	case "x", "X":
-		v.X = value
-	case "y", "Y":
-		v.Y = value
-	case "z", "Z":
-		v.Z = value
-	default:
-		panic("Invalid Vector3 component name: " + name)
-	}
-}
-
-// GenGoSet returns code to set values in object at given path (var.member etc)
+// GenGoSet returns code to set values in object at given path (var.member etc).
 func (v *Vector3) GenGoSet(path string) string {
 	return fmt.Sprintf("%s.Set(%g, %g, %g)", path, v.X, v.Y, v.Z)
 }
 
-// GenGoNew returns code to create new
-func (v *Vector3) GenGoNew() string {
-	return fmt.Sprintf("math32.Vec3(%g, %g, %g)", v.X, v.Y, v.Z)
-}
-
-// SetZero sets this vector X, Y and Z components to be zero.
+// SetZero sets all of the vector's components to zero.
 func (v *Vector3) SetZero() {
 	v.SetScalar(0)
 }
 
-// FromArray sets this vector's components from the specified array and offset.
-func (v *Vector3) FromArray(array []float32, offset int) {
+// FromSlice sets this vector's components from the given slice, starting at offset.
+func (v *Vector3) FromSlice(array []float32, offset int) {
 	v.X = array[offset]
 	v.Y = array[offset+1]
 	v.Z = array[offset+2]
 }
 
-// ToArray copies this vector's components to array starting at offset.
-func (v Vector3) ToArray(array []float32, offset int) {
+// ToSlice copies this vector's components to the given slice, starting at offset.
+func (v Vector3) ToSlice(array []float32, offset int) {
 	array[offset] = v.X
 	array[offset+1] = v.Y
 	array[offset+2] = v.Z
 }
 
-///////////////////////////////////////////////////////////////////////
-//  Basic math operations
+// Basic math operations:
 
-// Add adds other vector to this one and returns result in a new vector.
+// Add adds the other given vector to this one and returns the result as a new vector.
 func (v Vector3) Add(other Vector3) Vector3 {
 	return Vec3(v.X+other.X, v.Y+other.Y, v.Z+other.Z)
 }
@@ -292,96 +272,51 @@ func (v *Vector3) Clamp(min, max Vector3) {
 	}
 }
 
-// ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
-func (v *Vector3) ClampScalar(minVal, maxVal float32) {
-	v.Clamp(Vector3Scalar(minVal), Vector3Scalar(maxVal))
-}
-
-// Floor returns vector with math32.Floor() applied to each of this vector's components.
+// Floor returns this vector with [Floor] applied to each of its components.
 func (v Vector3) Floor() Vector3 {
 	return Vec3(Floor(v.X), Floor(v.Y), Floor(v.Z))
 }
 
-// SetFloor applies math32.Floor() to each of this vector's components.
-func (v *Vector3) SetFloor() {
-	v.X = Floor(v.X)
-	v.Y = Floor(v.Y)
-	v.Z = Floor(v.Z)
-}
-
-// Ceil returns vector with math32.Ceil() applied to each of this vector's components.
+// Ceil returns this vector with [Ceil] applied to each of its components.
 func (v Vector3) Ceil() Vector3 {
 	return Vec3(Ceil(v.X), Ceil(v.Y), Ceil(v.Z))
 }
 
-// SetCeil applies math32.Ceil() to each of this vector's components.
-func (v *Vector3) SetCeil() {
-	v.X = Ceil(v.X)
-	v.Y = Ceil(v.Y)
-	v.Z = Ceil(v.Z)
-}
-
-// Round returns vector with math32.Round() applied to each of this vector's components.
+// Round returns this vector with [Round] applied to each of its components.
 func (v Vector3) Round() Vector3 {
 	return Vec3(Round(v.X), Round(v.Y), Round(v.Z))
 }
 
-// SetRound rounds each of this vector's components.
-func (v *Vector3) SetRound() {
-	v.X = Round(v.X)
-	v.Y = Round(v.Y)
-	v.Z = Round(v.Z)
-}
-
-// Negate returns vector with each component negated.
+// Negate returns the vector with each component negated.
 func (v Vector3) Negate() Vector3 {
 	return Vec3(-v.X, -v.Y, -v.Z)
 }
 
-// SetNegate negates each of this vector's components.
-func (v *Vector3) SetNegate() {
-	v.X = -v.X
-	v.Y = -v.Y
-	v.Z = -v.Z
-}
-
-// Abs returns vector with Abs of each component.
+// Abs returns the vector with [Abs] applied to each component.
 func (v Vector3) Abs() Vector3 {
 	return Vec3(Abs(v.X), Abs(v.Y), Abs(v.Z))
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-//  Distance, Norm
+// Distance, Normal:
 
-// IsEqual returns if this vector is equal to other.
-func (v Vector3) IsEqual(other Vector3) bool {
-	return (other.X == v.X) && (other.Y == v.Y) && (other.Z == v.Z)
-}
-
-// AlmostEqual returns whether the vector is almost equal to another vector within the specified tolerance.
-func (v *Vector3) AlmostEqual(other Vector3, tol float32) bool {
-	return (Abs(v.X-other.X) < tol) &&
-		(Abs(v.Y-other.Y) < tol) &&
-		(Abs(v.Z-other.Z) < tol)
-}
-
-// Dot returns the dot product of this vector with other.
+// Dot returns the dot product of this vector with the given other vector.
 func (v Vector3) Dot(other Vector3) float32 {
 	return v.X*other.X + v.Y*other.Y + v.Z*other.Z
 }
 
-// LengthSq returns the length squared of this vector.
-// LengthSq can be used to compare vectors' lengths without the need to perform a square root.
-func (v Vector3) LengthSq() float32 {
-	return v.X*v.X + v.Y*v.Y + v.Z*v.Z
-}
-
-// Length returns the length of this vector.
+// Length returns the length (magnitude) of this vector.
 func (v Vector3) Length() float32 {
 	return Sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z)
 }
 
-// Normal returns this vector divided by its length
+// LengthSquared returns the length squared of this vector.
+// LengthSquared can be used to compare the lengths of vectors
+// without the need to perform a square root.
+func (v Vector3) LengthSquared() float32 {
+	return v.X*v.X + v.Y*v.Y + v.Z*v.Z
+}
+
+// Normal returns this vector divided by its length (its unit vector).
 func (v Vector3) Normal() Vector3 {
 	return v.DivScalar(v.Length())
 }
@@ -391,45 +326,23 @@ func (v *Vector3) SetNormal() {
 	v.SetDivScalar(v.Length())
 }
 
-// Normalize normalizes this vector so its length will be 1.
-func (v *Vector3) Normalize() {
-	v.SetDivScalar(v.Length())
+// DistanceTo returns the distance between these two vectors as points.
+func (v Vector3) DistanceTo(other Vector3) float32 {
+	return Sqrt(v.DistanceToSquared(other))
 }
 
-// DistTo returns the distance of this point to other.
-func (v Vector3) DistTo(other Vector3) float32 {
-	return Sqrt(v.DistToSquared(other))
-}
-
-// DistToSquared returns the distance squared of this point to other.
-func (v Vector3) DistToSquared(other Vector3) float32 {
+// DistanceToSquared returns the squared distance between these two vectors as points.
+func (v Vector3) DistanceToSquared(other Vector3) float32 {
 	dx := v.X - other.X
 	dy := v.Y - other.Y
 	dz := v.Z - other.Z
 	return dx*dx + dy*dy + dz*dz
 }
 
-// SetLength sets this vector to have the specified length.
-// If the current length is zero, does nothing.
-func (v *Vector3) SetLength(l float32) {
-	oldLength := v.Length()
-	if oldLength != 0 && l != oldLength {
-		v.SetMulScalar(l / oldLength)
-	}
-}
-
 // Lerp returns vector with each components as the linear interpolated value of
 // alpha between itself and the corresponding other component.
 func (v Vector3) Lerp(other Vector3, alpha float32) Vector3 {
 	return Vec3(v.X+(other.X-v.X)*alpha, v.Y+(other.Y-v.Y)*alpha, v.Z+(other.Z-v.Z)*alpha)
-}
-
-// SetLerp sets each of this vector's components to the linear interpolated value of
-// alpha between itself and the corresponding other component.
-func (v *Vector3) SetLerp(other Vector3, alpha float32) {
-	v.X += (other.X - v.X) * alpha
-	v.Y += (other.Y - v.Y) * alpha
-	v.Z += (other.Z - v.Z) * alpha
 }
 
 /////////////////////////////////////////////////////////////////////////////

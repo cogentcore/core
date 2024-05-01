@@ -25,7 +25,7 @@ func NewTriangle(a, b, c Vector3) Triangle {
 // Normal returns the triangle's normal.
 func Normal(a, b, c Vector3) Vector3 {
 	nv := c.Sub(b).Cross(a.Sub(b))
-	lenSq := nv.LengthSq()
+	lenSq := nv.LengthSquared()
 	if lenSq > 0 {
 		return nv.MulScalar(1 / Sqrt(lenSq))
 	}
@@ -113,9 +113,4 @@ func (t *Triangle) BarycoordFromPoint(point Vector3) Vector3 {
 // ContainsPoint returns whether the triangle contains a point.
 func (t *Triangle) ContainsPoint(point Vector3) bool {
 	return ContainsPoint(point, t.A, t.B, t.C)
-}
-
-// IsEqual returns whether the triangles are equal in all their vertices.
-func (t *Triangle) IsEqual(tri Triangle) bool {
-	return tri.A.IsEqual(t.A) && tri.B.IsEqual(t.B) && tri.C.IsEqual(t.C)
 }

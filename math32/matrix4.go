@@ -211,9 +211,9 @@ func (m *Matrix4) MulVector3Array(array []float32, start, count int) {
 	var v1 Vector3
 	j := start
 	for i := 0; i < count; i++ {
-		v1.FromArray(array, j)
+		v1.FromSlice(array, j)
 		mv := v1.MulMatrix4(m)
-		mv.ToArray(array, j)
+		mv.ToSlice(array, j)
 		j += 3
 	}
 }
@@ -609,14 +609,14 @@ func (m *Matrix4) SetRotationFromQuat(q Quat) {
 // looking at target and using the up vector.
 func (m *Matrix4) LookAt(eye, target, up Vector3) {
 	z := eye.Sub(target)
-	if z.LengthSq() == 0 {
+	if z.LengthSquared() == 0 {
 		// Eye and target are in the same position
 		z.Z = 1
 	}
 	z.SetNormal()
 
 	x := up.Cross(z)
-	if x.LengthSq() == 0 { // Up and Z are parallel
+	if x.LengthSquared() == 0 { // Up and Z are parallel
 		if Abs(up.Z) == 1 {
 			z.X += 0.0001
 		} else {

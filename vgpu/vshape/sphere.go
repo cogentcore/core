@@ -129,7 +129,7 @@ func SetSphereSector(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.Arra
 			pt.Set(px, py, pz)
 			pt.SetAdd(pos)
 			norm.Set(px, py, pz)
-			norm.Normalize()
+			norm.SetNormal()
 
 			vtxAry.SetVector3(vidx+idx*3, pt)
 			normAry.SetVector3(vidx+idx*3, norm)

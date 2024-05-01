@@ -287,7 +287,7 @@ func (v *Vector2) SetDivScalar(s float32) {
 	}
 }
 
-// Abs returns the absolute value for each dimension
+// Abs returns the vector with [Abs] applied to each component.
 func (v Vector2) Abs() Vector2 {
 	return Vec2(Abs(v.X), Abs(v.Y))
 }

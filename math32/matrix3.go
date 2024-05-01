@@ -208,9 +208,9 @@ func (m *Matrix3) MulVector3Array(array []float32, start, count int) {
 	var v1 Vector3
 	j := start
 	for i := 0; i < count; i++ {
-		v1.FromArray(array, j)
+		v1.FromSlice(array, j)
 		mv := v1.MulMatrix3(m)
-		mv.ToArray(array, j)
+		mv.ToSlice(array, j)
 		j += 3
 	}
 }

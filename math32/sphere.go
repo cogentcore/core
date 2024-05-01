@@ -45,7 +45,7 @@ func (s *Sphere) SetFromPoints(points []Vector3, optCenter *Vector3) {
 	}
 	var maxRadiusSq float32
 	for i := 0; i < len(points); i++ {
-		maxRadiusSq = Max(maxRadiusSq, s.Center.DistToSquared(points[i]))
+		maxRadiusSq = Max(maxRadiusSq, s.Center.DistanceToSquared(points[i]))
 	}
 	s.Radius = Sqrt(maxRadiusSq)
 }
@@ -57,18 +57,18 @@ func (s *Sphere) IsEmpty(sphere *Sphere) bool {
 
 // ContainsPoint returns if this sphere contains the specified point.
 func (s *Sphere) ContainsPoint(point Vector3) bool {
-	return point.DistToSquared(s.Center) <= (s.Radius * s.Radius)
+	return point.DistanceToSquared(s.Center) <= (s.Radius * s.Radius)
 }
 
 // DistToPoint returns the distance from the sphere surface to the specified point.
 func (s *Sphere) DistToPoint(point Vector3) float32 {
-	return point.DistTo(s.Center) - s.Radius
+	return point.DistanceTo(s.Center) - s.Radius
 }
 
 // IntersectSphere returns if other sphere intersects this one.
 func (s *Sphere) IntersectSphere(other Sphere) bool {
 	radiusSum := s.Radius + other.Radius
-	return other.Center.DistToSquared(s.Center) <= (radiusSum * radiusSum)
+	return other.Center.DistanceToSquared(s.Center) <= (radiusSum * radiusSum)
 }
 
 // ClampPoint clamps the specified point inside the sphere.
@@ -76,7 +76,7 @@ func (s *Sphere) IntersectSphere(other Sphere) bool {
 // Otherwise the clamped point is the the point in the sphere surface in the
 // nearest of the specified point.
 func (s *Sphere) ClampPoint(point Vector3) Vector3 {
-	deltaLengthSq := s.Center.DistToSquared(point)
+	deltaLengthSq := s.Center.DistanceToSquared(point)
 	rv := point
 	if deltaLengthSq > (s.Radius * s.Radius) {
 		rv = point.Sub(s.Center).Normal().MulScalar(s.Radius).Add(s.Center)

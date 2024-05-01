@@ -99,8 +99,8 @@ func (gp *Group) RaySolidIntersections(ray math32.Ray) []*SolidPoint {
 	})
 
 	sort.Slice(sp, func(i, j int) bool {
-		di := sp[i].Point.DistTo(ray.Origin)
-		dj := sp[j].Point.DistTo(ray.Origin)
+		di := sp[i].Point.DistanceTo(ray.Origin)
+		dj := sp[j].Point.DistanceTo(ray.Origin)
 		return di < dj
 	})
 

@@ -40,20 +40,15 @@ func (l *Line3) Delta() Vector3 {
 
 // DistSq returns the square of the distance from the start point to the end point.
 func (l *Line3) DistSq() float32 {
-	return l.Start.DistToSquared(l.End)
+	return l.Start.DistanceToSquared(l.End)
 }
 
 // Dist returns the distance from the start point to the end point.
 func (l *Line3) Dist() float32 {
-	return l.Start.DistTo(l.End)
+	return l.Start.DistanceTo(l.End)
 }
 
 // MulMatrix4 returns specified matrix multiplied to this line segment start and end points.
 func (l *Line3) MulMatrix4(mat *Matrix4) Line3 {
 	return Line3{l.Start.MulMatrix4(mat), l.End.MulMatrix4(mat)}
-}
-
-// IsEqual returns if this line segement is equal to other.
-func (l *Line3) IsEqual(other Line3) bool {
-	return other.Start.IsEqual(l.Start) && other.End.IsEqual(l.End)
 }

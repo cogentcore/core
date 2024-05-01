@@ -187,9 +187,9 @@ func SetCylinderSector(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.Ar
 		}
 
 		na.Y = math32.Sqrt(na.X*na.X+na.Z*na.Z) * tanTheta
-		na.Normalize()
+		na.SetNormal()
 		nb.Y = math32.Sqrt(nb.X*nb.X+nb.Z*nb.Z) * tanTheta
-		nb.Normalize()
+		nb.SetNormal()
 
 		for y := 0; y < heightSegs; y++ {
 			v1 := vtxs[y][x]

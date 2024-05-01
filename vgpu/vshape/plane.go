@@ -173,8 +173,8 @@ func SetPlane(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, v
 			vtx.SetDim(haxis, (float32(iy)*segHeight)*fhdir+hoff)
 			vtx.SetDim(w, zoff)
 			vtx.Add(pos)
-			vtx.ToArray(vtxAry, vidx)
-			norm.ToArray(normAry, vidx)
+			vtx.ToSlice(vtxAry, vidx)
+			norm.ToSlice(normAry, vidx)
 			tex.Set(float32(ix)/float32(wsegs), float32(1)-(float32(iy)/float32(hsegs)))
 			tex.ToSlice(texAry, tidx)
 			vidx += 3
