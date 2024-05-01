@@ -9,7 +9,6 @@ import (
 	"image"
 	"image/draw"
 
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
@@ -21,9 +20,8 @@ import (
 )
 
 // Plot is a Widget that renders a [plot.Plot] object.
-// If it is not [states.ReadOnly], the user can pan and zoom the display.
-// By default, it is [states.ReadOnly]. See [ConfigPlotToolbar] for a
-// toolbar with panning, selecting, and I/O buttons,
+// If it is not [states.ReadOnly], the user can pan and zoom the graph.
+// See [ConfigPlotToolbar] for a toolbar with panning, selecting, and I/O buttons,
 // and PlotView for an interactive interface for selecting columns to view.
 type Plot struct {
 	core.WidgetBase
@@ -70,44 +68,47 @@ func (pt *Plot) OnInit() {
 }
 
 func (pt *Plot) SetStyles() {
-	pt.SetReadOnly(true)
 	pt.Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
-		s.SetAbilities(true, abilities.Slideable, abilities.Activatable, abilities.Scrollable, abilities.LongHoverable)
-		if s.Is(states.Active) {
-			s.Cursor = cursors.Grabbing
-			s.StateLayer = 0
-		} else {
-			s.Cursor = cursors.Grab
-		}
-		if pt.Plot != nil {
-			pt.Plot.Background = colors.Scheme.Surface
-			pt.Plot.Legend.FillColor = colors.Clearer(colors.Scheme.Surface, 25)
+		ro := pt.IsReadOnly()
+		s.SetAbilities(!ro, abilities.Slideable, abilities.Activatable, abilities.Scrollable, abilities.LongHoverable)
+		s.SetAbilities(true, abilities.LongHoverable)
+		if !ro {
+			if s.Is(states.Active) {
+				s.Cursor = cursors.Grabbing
+				s.StateLayer = 0
+			} else {
+				s.Cursor = cursors.Grab
+			}
 		}
 	})
-	// sv.StyleFinal(func(s *styles.Style) {
-	// 	sv.Plot.Root.ViewBox.PreserveAspectRatio.SetFromStyle(s)
-	// })
 }
 
 func (pt *Plot) HandleEvents() {
 
 	pt.On(events.SlideMove, func(e events.Event) {
 		e.SetHandled()
+		if pt.Plot == nil {
+			return
+		}
 		del := e.PrevDelta()
-		pt.Plot.X.Min += float32(del.X)
-		pt.Plot.X.Max += float32(del.X)
-		pt.Plot.Y.Min += float32(del.Y)
-		pt.Plot.Y.Max += float32(del.Y)
+		dx := -float32(del.X) * (pt.Plot.X.Max - pt.Plot.X.Min) * 0.0008
+		dy := float32(del.Y) * (pt.Plot.Y.Max - pt.Plot.Y.Min) * 0.0008
+		pt.Plot.X.Min += dx
+		pt.Plot.X.Max += dx
+		pt.Plot.Y.Min += dy
+		pt.Plot.Y.Max += dy
 		pt.UpdatePlot()
 		pt.NeedsRender()
 	})
 
 	pt.On(events.Scroll, func(e events.Event) {
 		e.SetHandled()
+		if pt.Plot == nil {
+			return
+		}
 		se := e.(*events.MouseScroll)
-		sc := 1 + (float32(se.Delta.Y) / 100)
-		fmt.Println(sc)
+		sc := 1 + (float32(se.Delta.Y) * 0.001)
 		pt.Plot.X.Min *= sc
 		pt.Plot.X.Max *= sc
 		pt.Plot.Y.Min *= sc
@@ -117,6 +118,9 @@ func (pt *Plot) HandleEvents() {
 	})
 
 	pt.On(events.LongHoverStart, func(e events.Event) {
+		if pt.Plot == nil {
+			return
+		}
 		pos := e.Pos().Sub(pt.Geom.ContentBBox.Min)
 		_, idx, dist, data, _ := pt.Plot.ClosestDataToPixel(pos.X, pos.Y)
 		if dist <= 10 {
