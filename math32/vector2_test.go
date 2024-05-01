@@ -27,4 +27,24 @@ func TestVector2(t *testing.T) {
 
 	v.SetFromVector2i(Vector2i{8, 9})
 	assert.Equal(t, Vector2{8, 9}, v)
+
+	v.SetDim(X, -4)
+	assert.Equal(t, Vector2{-4, 9}, v)
+
+	v.SetDim(Y, 14.3)
+	assert.Equal(t, Vector2{-4, 14.3}, v)
+
+	assert.Equal(t, float32(-4), v.Dim(X))
+	assert.Equal(t, float32(14.3), v.Dim(Y))
+
+	pt := image.Point{}
+
+	SetPointDim(&pt, X, 2)
+	assert.Equal(t, image.Pt(2, 0), pt)
+
+	SetPointDim(&pt, Y, 43)
+	assert.Equal(t, image.Pt(2, 43), pt)
+
+	assert.Equal(t, 2, PointDim(pt, X))
+	assert.Equal(t, 43, PointDim(pt, Y))
 }

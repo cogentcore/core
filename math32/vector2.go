@@ -65,7 +65,7 @@ func (v *Vector2) SetFromVector2i(vi Vector2i) {
 	v.Y = float32(vi.Y)
 }
 
-// SetDim sets this vector component value by its dimension index.
+// SetDim sets the given vector component value by its dimension index.
 func (v *Vector2) SetDim(dim Dims, value float32) {
 	switch dim {
 	case X:
@@ -77,7 +77,7 @@ func (v *Vector2) SetDim(dim Dims, value float32) {
 	}
 }
 
-// Dim returns this vector component.
+// Dim returns the given vector component.
 func (v Vector2) Dim(dim Dims) float32 {
 	switch dim {
 	case X:
@@ -89,25 +89,25 @@ func (v Vector2) Dim(dim Dims) float32 {
 	}
 }
 
-// SetPointDim is a helper function for image.Point for setting given dimension
-func SetPointDim(v *image.Point, dim Dims, value int) {
+// SetPointDim sets the given dimension of the given [image.Point] to the given value.
+func SetPointDim(pt *image.Point, dim Dims, value int) {
 	switch dim {
 	case X:
-		v.X = value
+		pt.X = value
 	case Y:
-		v.Y = value
+		pt.Y = value
 	default:
 		panic("dim is out of range")
 	}
 }
 
-// Dim returns this vector component from given image.Point
-func PointDim(v image.Point, dim Dims) int {
+// PointDim returns the given dimension of the given [image.Point].
+func PointDim(pt image.Point, dim Dims) int {
 	switch dim {
 	case X:
-		return v.X
+		return pt.X
 	case Y:
-		return v.Y
+		return pt.Y
 	default:
 		panic("dim is out of range")
 	}
