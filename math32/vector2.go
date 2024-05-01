@@ -213,23 +213,23 @@ func (a Vector2) ToFixed() fixed.Point26_6 {
 	return ToFixedPoint(a.X, a.Y)
 }
 
-// RectFromPosSizeMax returns an image.Rectangle from max dims of pos, size
-// (floor on pos, ceil on size)
-func RectFromPosSizeMax(pos, sz Vector2) image.Rectangle {
+// RectFromPosSizeMax returns an [image.Rectangle] from the floor of pos
+// and ceil of size.
+func RectFromPosSizeMax(pos, size Vector2) image.Rectangle {
 	tp := pos.ToPointFloor()
-	ts := sz.ToPointCeil()
+	ts := size.ToPointCeil()
 	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
 }
 
-// RectFromPosSizeMin returns an image.Rectangle from min dims of pos, size
-// (ceil on pos, floor on size)
-func RectFromPosSizeMin(pos, sz Vector2) image.Rectangle {
+// RectFromPosSizeMax returns an [image.Rectangle] from the ceil of pos
+// and floor of size.
+func RectFromPosSizeMin(pos, size Vector2) image.Rectangle {
 	tp := pos.ToPointCeil()
-	ts := sz.ToPointFloor()
+	ts := size.ToPointFloor()
 	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
 }
 
-// SetZero sets this vector X and Y components to be zero.
+// SetZero sets all of the vector's components to zero.
 func (v *Vector2) SetZero() {
 	v.SetScalar(0)
 }

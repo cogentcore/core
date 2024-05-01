@@ -74,4 +74,12 @@ func TestVector2(t *testing.T) {
 	assert.Equal(t, image.Pt(4, 19), v.ToPointRound())
 
 	assert.Equal(t, fixed.Point26_6{224, 1228}, v.ToFixed())
+
+	size := Vec2(4.7, 9.3)
+
+	assert.Equal(t, image.Rect(3, 19, 8, 29), RectFromPosSizeMax(v, size))
+	assert.Equal(t, image.Rect(4, 20, 8, 29), RectFromPosSizeMin(v, size))
+
+	v.SetZero()
+	assert.Equal(t, Vec2(0, 0), v)
 }
