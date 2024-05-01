@@ -219,9 +219,9 @@ func (v *Vector3) SetDiv(other Vector3) {
 }
 
 // SetDivScalar sets this to division by scalar.
-func (v *Vector3) SetDivScalar(s float32) {
-	if s != 0 {
-		v.SetMulScalar(1 / s)
+func (v *Vector3) SetDivScalar(scalar float32) {
+	if scalar != 0 {
+		v.SetMulScalar(1 / scalar)
 	} else {
 		v.SetZero()
 	}
@@ -251,9 +251,9 @@ func (v *Vector3) SetMax(other Vector3) {
 	v.Z = Max(v.Z, other.Z)
 }
 
-// Clamp sets this vector components to be no less than the corresponding components of min
-// and not greater than the corresponding component of max.
-// Assumes min < max, if this assumption isn't true it will not operate correctly.
+// Clamp sets this vector's components to be no less than the corresponding
+// components of min and not greater than the corresponding component of max.
+// Assumes min < max; if this assumption isn't true, it will not operate correctly.
 func (v *Vector3) Clamp(min, max Vector3) {
 	if v.X < min.X {
 		v.X = min.X

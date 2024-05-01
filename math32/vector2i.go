@@ -208,9 +208,9 @@ func (v *Vector2i) SetMax(other Vector2i) {
 	v.Y = max(v.Y, other.Y)
 }
 
-// Clamp sets this vector components to be no less than the corresponding components of min
-// and not greater than the corresponding component of max.
-// Assumes min < max, if this assumption isn't true it will not operate correctly.
+// Clamp sets this vector's components to be no less than the corresponding
+// components of min and not greater than the corresponding component of max.
+// Assumes min < max; if this assumption isn't true, it will not operate correctly.
 func (v *Vector2i) Clamp(min, max Vector2i) {
 	if v.X < min.X {
 		v.X = min.X

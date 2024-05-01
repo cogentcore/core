@@ -48,7 +48,7 @@ func (v *Vector3i) SetFromVector3(vf Vector3) {
 	v.Z = int32(vf.Z)
 }
 
-// SetDim sets this vector component value by dimension index.
+// SetDim sets the given vector component value by its dimension index.
 func (v *Vector3i) SetDim(dim Dims, value int32) {
 	switch dim {
 	case X:
@@ -62,7 +62,7 @@ func (v *Vector3i) SetDim(dim Dims, value int32) {
 	}
 }
 
-// Dim returns this vector component
+// Dim returns the given vector component.
 func (v Vector3i) Dim(dim Dims) int32 {
 	switch dim {
 	case X:
@@ -76,43 +76,28 @@ func (v Vector3i) Dim(dim Dims) int32 {
 	}
 }
 
-// SetByName sets this vector component value by its case insensitive name: "x", "y", or "z".
-func (v *Vector3i) SetByName(name string, value int32) {
-	switch name {
-	case "x", "X":
-		v.X = value
-	case "y", "Y":
-		v.Y = value
-	case "z", "Z":
-		v.Z = value
-	default:
-		panic("Invalid Vector3i component name: " + name)
-	}
-}
-
-// SetZero sets this vector X, Y and Z components to be zero.
+// SetZero sets all of the vector's components to zero.
 func (v *Vector3i) SetZero() {
 	v.SetScalar(0)
 }
 
-// FromArray sets this vector's components from the specified array and offset
-func (v *Vector3i) FromArray(array []int32, offset int) {
+// FromSlice sets this vector's components from the given slice, starting at offset.
+func (v *Vector3i) FromSlice(array []int32, offset int) {
 	v.X = array[offset]
 	v.Y = array[offset+1]
 	v.Z = array[offset+2]
 }
 
-// ToArray copies this vector's components to array starting at offset.
-func (v Vector3i) ToArray(array []int32, offset int) {
+// ToSlice copies this vector's components to the given slice, starting at offset.
+func (v Vector3i) ToSlice(array []int32, offset int) {
 	array[offset] = v.X
 	array[offset+1] = v.Y
 	array[offset+2] = v.Z
 }
 
-///////////////////////////////////////////////////////////////////////
-//  Basic math operations
+// Basic math operations:
 
-// Add adds other vector to this one and returns result in a new vector.
+// Add adds the other given vector to this one and returns the result as a new vector.
 func (v Vector3i) Add(other Vector3i) Vector3i {
 	return Vector3i{v.X + other.X, v.Y + other.Y, v.Z + other.Z}
 }
@@ -195,7 +180,7 @@ func (v Vector3i) Div(other Vector3i) Vector3i {
 // If scalar is zero, returns zero.
 func (v Vector3i) DivScalar(scalar int32) Vector3i {
 	if scalar != 0 {
-		return v.MulScalar(1 / scalar)
+		return Vector3i{v.X / scalar, v.Y / scalar, v.Z / scalar}
 	} else {
 		return Vector3i{}
 	}
@@ -209,9 +194,11 @@ func (v *Vector3i) SetDiv(other Vector3i) {
 }
 
 // SetDivScalar sets this to division by scalar.
-func (v *Vector3i) SetDivScalar(s int32) {
-	if s != 0 {
-		v.SetMulScalar(1 / s)
+func (v *Vector3i) SetDivScalar(scalar int32) {
+	if scalar != 0 {
+		v.X /= scalar
+		v.Y /= scalar
+		v.Z /= scalar
 	} else {
 		v.SetZero()
 	}
@@ -241,9 +228,9 @@ func (v *Vector3i) SetMax(other Vector3i) {
 	v.Z = max(v.Z, other.Z)
 }
 
-// Clamp sets this vector components to be no less than the corresponding components of min
-// and not greater than the corresponding component of max.
-// Assumes min < max, if this assumption isn't true it will not operate correctly.
+// Clamp sets this vector's components to be no less than the corresponding
+// components of min and not greater than the corresponding component of max.
+// Assumes min < max; if this assumption isn't true, it will not operate correctly.
 func (v *Vector3i) Clamp(min, max Vector3i) {
 	if v.X < min.X {
 		v.X = min.X
@@ -262,24 +249,7 @@ func (v *Vector3i) Clamp(min, max Vector3i) {
 	}
 }
 
-// ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
-func (v *Vector3i) ClampScalar(minVal, maxVal int32) {
-	v.Clamp(Vector3iScalar(minVal), Vector3iScalar(maxVal))
-}
-
 // Negate returns vector with each component negated.
 func (v Vector3i) Negate() Vector3i {
 	return Vector3i{-v.X, -v.Y, -v.Z}
-}
-
-// SetNegate negates each of this vector's components.
-func (v *Vector3i) SetNegate() {
-	v.X = -v.X
-	v.Y = -v.Y
-	v.Z = -v.Z
-}
-
-// IsEqual returns if this vector is equal to other.
-func (v Vector3i) IsEqual(other Vector3i) bool {
-	return (other.X == v.X) && (other.Y == v.Y) && (other.Z == v.Z)
 }

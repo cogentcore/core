@@ -279,9 +279,9 @@ func (v *Vector2) SetDiv(other Vector2) {
 }
 
 // SetDivScalar sets this to division by scalar.
-func (v *Vector2) SetDivScalar(s float32) {
-	if s != 0 {
-		v.SetMulScalar(1 / s)
+func (v *Vector2) SetDivScalar(scalar float32) {
+	if scalar != 0 {
+		v.SetMulScalar(1 / scalar)
 	} else {
 		v.SetZero()
 	}
