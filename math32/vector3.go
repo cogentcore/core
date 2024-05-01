@@ -345,32 +345,16 @@ func (v Vector3) Lerp(other Vector3, alpha float32) Vector3 {
 	return Vec3(v.X+(other.X-v.X)*alpha, v.Y+(other.Y-v.Y)*alpha, v.Z+(other.Z-v.Z)*alpha)
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//  Matrix operations
+// Matrix operations:
 
-// RotateAxisAngle returns vector rotated around axis by angle.
-func (v Vector3) RotateAxisAngle(axis Vector3, angle float32) Vector3 {
-	return v.MulQuat(NewQuatAxisAngle(axis, angle))
-}
-
-// SetRotateAxisAngle sets vector rotated around axis by angle.
-func (v *Vector3) SetRotateAxisAngle(axis Vector3, angle float32) {
-	*v = v.RotateAxisAngle(axis, angle)
-}
-
-// MulMatrix3 returns vector multiplied by specified 3x3 matrix.
+// MulMatrix3 returns the vector multiplied by the given 3x3 matrix.
 func (v Vector3) MulMatrix3(m *Matrix3) Vector3 {
 	return Vector3{m[0]*v.X + m[3]*v.Y + m[6]*v.Z,
 		m[1]*v.X + m[4]*v.Y + m[7]*v.Z,
 		m[2]*v.X + m[5]*v.Y + m[8]*v.Z}
 }
 
-// SetMulMatrix3 sets vector multiplied by specified 3x3 matrix.
-func (v *Vector3) SetMulMatrix3(m *Matrix3) {
-	*v = v.MulMatrix3(m)
-}
-
-// MulMatrix4 returns vector multiplied by specified 4x4 matrix.
+// MulMatrix4 returns the vector multiplied by the given 4x4 matrix.
 func (v Vector3) MulMatrix4(m *Matrix4) Vector3 {
 	return Vector3{m[0]*v.X + m[4]*v.Y + m[8]*v.Z + m[12],
 		m[1]*v.X + m[5]*v.Y + m[9]*v.Z + m[13],
@@ -384,19 +368,6 @@ func (v Vector3) MulMatrix4(m *Matrix4) Vector3 {
 // as the 4th dim to set.
 func (v Vector3) MulMatrix4AsVector4(m *Matrix4, w float32) Vector3 {
 	return Vector3FromVector4(Vector4FromVector3(v, w).MulMatrix4(m))
-}
-
-// SetMulMatrix4 sets vector multiplied by specified 4x4 matrix.
-func (v *Vector3) SetMulMatrix4(m *Matrix4) {
-	*v = v.MulMatrix4(m)
-}
-
-// MVProjToNDC project given vector through given MVP model-view-projection Matrix4
-// and do perspective divide to return normalized display coordinates (NDC).
-// w is value for 4th coordinate -- use 1 for positions, 0 for normals.
-func (v Vector3) MVProjToNDC(m *Matrix4, w float32) Vector3 {
-	clip := Vector4FromVector3(v, w).MulMatrix4(m)
-	return clip.PerspDiv()
 }
 
 // NDCToWindow converts normalized display coordinates (NDC) to window
@@ -434,7 +405,7 @@ func (v Vector2) WindowToNDC(size, off Vector2, flipY bool) Vector3 {
 	return n
 }
 
-// MulProjection returns vector multiplied by the projection matrix m
+// MulProjection returns vector multiplied by the projection matrix m.
 func (v Vector3) MulProjection(m *Matrix4) Vector3 {
 	d := 1 / (m[3]*v.X + m[7]*v.Y + m[11]*v.Z + m[15]) // perspective divide
 	return Vector3{(m[0]*v.X + m[4]*v.Y + m[8]*v.Z + m[12]) * d,
@@ -459,13 +430,6 @@ func (v Vector3) MulQuat(q Quat) Vector3 {
 	return Vector3{ix*qw + iw*-qx + iy*-qz - iz*-qy,
 		iy*qw + iw*-qy + iz*-qx - ix*-qz,
 		iz*qw + iw*-qz + ix*-qy - iy*-qx}
-}
-
-// SetMulQuat multiplies vector by specified quaternion and
-// then by the quaternion inverse.
-// It basically applies the rotation encoded in the quaternion to this vector.
-func (v *Vector3) SetMulQuat(q Quat) {
-	*v = v.MulQuat(q)
 }
 
 // Cross returns the cross product of this vector with other.
@@ -523,14 +487,6 @@ func (v *Vector3) SetFromMatrixPos(m *Matrix4) {
 	v.X = m[12]
 	v.Y = m[13]
 	v.Z = m[14]
-}
-
-// SetFromMatrixCol set this vector with the column at index of the m matrix.
-func (v *Vector3) SetFromMatrixCol(index int, m *Matrix4) {
-	offset := index * 4
-	v.X = m[offset]
-	v.Y = m[offset+1]
-	v.Z = m[offset+2]
 }
 
 // SetEulerAnglesFromMatrix sets this vector components to the Euler angles

@@ -430,8 +430,7 @@ func (v Vector2) DistanceToSquared(other Vector2) float32 {
 	return dx*dx + dy*dy
 }
 
-// Cross returns the cross product of this vector with other
-// which is a scalar, equivalent to the Z coord in 3D: X1 * Y2 - X2 * Y1.
+// Cross returns the cross product of this vector with other.
 func (v Vector2) Cross(other Vector2) float32 {
 	return v.X*other.Y - v.Y*other.X
 }

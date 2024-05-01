@@ -179,7 +179,7 @@ func (cm *Camera) Orbit(delX, delY float32) {
 	dy := ctdir.MulQuat(dyq).Sub(ctdir)
 
 	cm.Pose.Pos = cm.Pose.Pos.Add(dx).Add(dy)
-	cm.UpDir.SetMulQuat(dyq) // this is only one that affects up
+	cm.UpDir = cm.UpDir.MulQuat(dyq) // this is only one that affects up
 	cm.CamMu.Unlock()
 
 	cm.LookAtTarget()
