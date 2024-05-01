@@ -149,10 +149,12 @@ type Widget interface {
 	Send(e events.Types, orig ...events.Event)
 
 	// WidgetTooltip returns the tooltip text that should be used for this
-	// widget. By default, it just returns [WidgetBase.Tooltip], but widgets
+	// widget, and the window-relative position to position the upper-left
+	// corner of the tooltip. By default, it just returns [WidgetBase.Tooltip],
+	// and the top of the WinBBox for the widget, but widgets
 	// can override it to do different things. For example, buttons add their
 	// shortcut to the tooltip here.
-	WidgetTooltip() string
+	WidgetTooltip() (string, image.Point)
 
 	// AddContextMenu adds the given context menu to [WidgetBase.ContextMenus].
 	// It is the main way that code should modify a widget's context menus.
@@ -669,7 +671,7 @@ func WidgetPrevFunc(wi Widget, fun func(w Widget) bool) Widget {
 }
 
 // WidgetTooltip is the base implementation of [Widget.WidgetTooltip],
-// which just returns [WidgetBase.Tooltip].
-func (wb *WidgetBase) WidgetTooltip() string {
-	return wb.Tooltip
+// which just returns [WidgetBase.Tooltip], wb.WinBBox().Min
+func (wb *WidgetBase) WidgetTooltip() (string, image.Point) {
+	return wb.Tooltip, wb.TooltipDefaultPos()
 }

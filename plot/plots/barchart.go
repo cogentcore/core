@@ -30,13 +30,16 @@ import (
 // Defaults provide a unit-spaced plot.
 type BarChart struct {
 	// Values are the plotted values
-	Values Values
+	Values plot.Values
 
 	// YErrors is a copy of the Y errors for each point.
-	Errors Values
+	Errors plot.Values
+
+	// XYs is the actual pixel plotting coordinates for each value.
+	XYs plot.XYs
 
 	// PXYs is the actual pixel plotting coordinates for each value.
-	PXYs XYs
+	PXYs plot.XYs
 
 	// Offset is offset added to each X axis value relative to the
 	// Stride computed value (X = offset + index * Stride)
@@ -79,14 +82,14 @@ type BarChart struct {
 // The bars heights correspond to the values and their x locations correspond
 // to the index of their value in the Valuer.  Optional error-bar values can be
 // provided.
-func NewBarChart(vs, ers Valuer) (*BarChart, error) {
-	values, err := CopyValues(vs)
+func NewBarChart(vs, ers plot.Valuer) (*BarChart, error) {
+	values, err := plot.CopyValues(vs)
 	if err != nil {
 		return nil, err
 	}
-	var errs Values
+	var errs plot.Values
 	if ers != nil {
-		errs, err = CopyValues(ers)
+		errs, err = plot.CopyValues(ers)
 		if err != nil {
 			return nil, err
 		}
@@ -106,6 +109,12 @@ func (b *BarChart) Defaults() {
 	b.Pad = 1
 	b.Color = colors.Scheme.OnSurface
 	b.LineStyle.Defaults()
+}
+
+func (b *BarChart) XYData() (data plot.XYer, pixels plot.XYer) {
+	data = b.XYs
+	pixels = b.PXYs
+	return
 }
 
 // BarHeight returns the maximum y value of the
@@ -146,7 +155,8 @@ func (b *BarChart) Plot(plt *plot.Plot) {
 	b.LineStyle.SetStroke(plt)
 
 	nv := len(b.Values)
-	b.PXYs = make(XYs, nv)
+	b.XYs = make(plot.XYs, nv)
+	b.PXYs = make(plot.XYs, nv)
 
 	hw := 0.5 * b.Width
 	ew := b.Width / 3
@@ -161,7 +171,8 @@ func (b *BarChart) Plot(plt *plot.Plot) {
 			bottom = b.StackedOn.BarHeight(i) // nil safe
 			valMin = plt.PX(bottom)
 			valMax = plt.PX(bottom + ht)
-			b.PXYs[i] = XY{X: valMax, Y: catVal}
+			b.XYs[i] = math32.Vec2(bottom+ht, cat)
+			b.PXYs[i] = math32.Vec2(valMax, catVal)
 			box.Min.Set(valMin, catMin)
 			box.Max.Set(valMax, catMax)
 		} else {
@@ -171,7 +182,8 @@ func (b *BarChart) Plot(plt *plot.Plot) {
 			bottom = b.StackedOn.BarHeight(i) // nil safe
 			valMin = plt.PY(bottom)
 			valMax = plt.PY(bottom + ht)
-			b.PXYs[i] = XY{X: catVal, Y: valMax}
+			b.XYs[i] = math32.Vec2(cat, bottom+ht)
+			b.PXYs[i] = math32.Vec2(catVal, valMax)
 			box.Min.Set(catMin, valMin)
 			box.Max.Set(catMax, valMax)
 		}

@@ -5,12 +5,14 @@
 package plotview
 
 import (
+	"fmt"
 	"image"
 	"image/draw"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
@@ -71,16 +73,12 @@ func (pt *Plot) SetStyles() {
 	pt.SetReadOnly(true)
 	pt.Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
-
-		ro := pt.IsReadOnly()
-		s.SetAbilities(!ro, abilities.Slideable, abilities.Activatable, abilities.Scrollable)
-		if !ro {
-			if s.Is(states.Active) {
-				s.Cursor = cursors.Grabbing
-				s.StateLayer = 0
-			} else {
-				s.Cursor = cursors.Grab
-			}
+		s.SetAbilities(true, abilities.Slideable, abilities.Activatable, abilities.Scrollable, abilities.LongHoverable)
+		if s.Is(states.Active) {
+			s.Cursor = cursors.Grabbing
+			s.StateLayer = 0
+		} else {
+			s.Cursor = cursors.Grab
 		}
 		if pt.Plot != nil {
 			pt.Plot.Background = colors.Scheme.Surface
@@ -92,45 +90,45 @@ func (pt *Plot) SetStyles() {
 	// })
 }
 
-func (sv *Plot) HandleEvents() {
-	/*
-		sv.On(events.SlideMove, func(e events.Event) {
-			if sv.IsReadOnly() {
-				return
-			}
-			e.SetHandled()
-			del := e.PrevDelta()
-			sv.Plot.Translate.X += float32(del.X)
-			sv.Plot.Translate.Y += float32(del.Y)
-			sv.NeedsRender()
-		})
+func (pt *Plot) HandleEvents() {
 
-		sv.On(events.Scroll, func(e events.Event) {
-			if sv.IsReadOnly() {
-				return
-			}
-			e.SetHandled()
-			se := e.(*events.MouseScroll)
-			sv.Plot.Scale += float32(se.Delta.Y) / 100
-			if sv.Plot.Scale <= 0.0000001 {
-				sv.Plot.Scale = 0.01
-			}
-			sv.NeedsRender()
-		})
+	pt.On(events.SlideMove, func(e events.Event) {
+		e.SetHandled()
+		del := e.PrevDelta()
+		pt.Plot.X.Min += float32(del.X)
+		pt.Plot.X.Max += float32(del.X)
+		pt.Plot.Y.Min += float32(del.Y)
+		pt.Plot.Y.Max += float32(del.Y)
+		pt.UpdatePlot()
+		pt.NeedsRender()
+	})
 
-		sv.On(events.LongHoverStart, func(e events.Event) {
-			pos := e.Pos()
-			objs := svg.NodesContainingPoint(&sv.Plot.Root, pos, true)
-			sv.Tooltip = "no objects under mouse"
-			if len(objs) > 0 {
-				els := ""
-				for _, o := range objs {
-					els += o.NodeType().Name + ": " + o.Name() + "\n"
-				}
-				sv.Tooltip = els
-			}
-		})
-	*/
+	pt.On(events.Scroll, func(e events.Event) {
+		e.SetHandled()
+		se := e.(*events.MouseScroll)
+		sc := 1 + (float32(se.Delta.Y) / 100)
+		fmt.Println(sc)
+		pt.Plot.X.Min *= sc
+		pt.Plot.X.Max *= sc
+		pt.Plot.Y.Min *= sc
+		pt.Plot.Y.Max *= sc
+		pt.UpdatePlot()
+		pt.NeedsRender()
+	})
+
+	pt.On(events.LongHoverStart, func(e events.Event) {
+		pos := e.Pos().Sub(pt.Geom.ContentBBox.Min)
+		_, idx, dist, data, _ := pt.Plot.ClosestDataToPixel(pos.X, pos.Y)
+		if dist <= 10 {
+			pt.Tooltip = fmt.Sprintf("[%d]: %g, %g", idx, data.X, data.Y)
+		} else {
+			pt.Tooltip = ""
+		}
+	})
+}
+
+func (pt *Plot) WidgetTooltip() (string, image.Point) {
+	return pt.Tooltip, pt.Events().LastMouseWindowPos
 }
 
 // SaveSVG saves the current Plot to an SVG file

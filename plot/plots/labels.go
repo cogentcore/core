@@ -20,10 +20,10 @@ import (
 // drawing a set of labels at specified points.
 type Labels struct {
 	// XYs is a copy of the points for labels
-	XYs
+	plot.XYs
 
 	// PXYs is the actual pixel plotting coordinates for each XY value.
-	PXYs XYs
+	PXYs plot.XYs
 
 	// Labels is the set of labels corresponding to each point.
 	Labels []string
@@ -39,7 +39,7 @@ type Labels struct {
 
 // NewLabels returns a new Labels using defaults
 func NewLabels(d XYLabeller) (*Labels, error) {
-	xys, err := CopyXYs(d)
+	xys, err := plot.CopyXYs(d)
 	if err != nil {
 		return nil, err
 	}
@@ -65,11 +65,17 @@ func NewLabels(d XYLabeller) (*Labels, error) {
 	}, nil
 }
 
+func (l *Labels) XYData() (data plot.XYer, pixels plot.XYer) {
+	data = l.XYs
+	pixels = l.PXYs
+	return
+}
+
 // Plot implements the Plotter interface, drawing labels.
 func (l *Labels) Plot(plt *plot.Plot) {
 	pc := plt.Paint
 	uc := &pc.UnitContext
-	ps := PlotXYs(plt, l.XYs)
+	ps := plot.PlotXYs(plt, l.XYs)
 
 	l.Offset.ToDots(uc)
 	np := len(l.XYs)
@@ -95,19 +101,20 @@ func (l *Labels) Plot(plt *plot.Plot) {
 
 // DataRange returns the minimum and maximum X and Y values
 func (l *Labels) DataRange() (xmin, xmax, ymin, ymax float32) {
-	return XYRange(l)
+	return plot.XYRange(l)
 }
 
 // XYLabeller combines the XYer and Labeller types.
+// this is
 type XYLabeller interface {
-	XYer
-	Labeller
+	plot.XYer
+	plot.Labeller
 }
 
 // XYLabels holds XY data with labels.
 // The ith label corresponds to the ith XY.
 type XYLabels struct {
-	XYs
+	plot.XYs
 	Labels []string
 }
 

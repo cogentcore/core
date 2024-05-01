@@ -39,7 +39,8 @@ func TestChooserItems(t *testing.T) {
 	)
 	b.AssertRender(t, "chooser/items", func() {
 		assert.Equal(t, "", ch.Tooltip)
-		assert.Equal(t, "Use a computer", ch.WidgetTooltip())
+		tt, _ := ch.WidgetTooltip()
+		assert.Equal(t, "Use a computer", tt)
 	})
 }
 

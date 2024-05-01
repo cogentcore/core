@@ -12,6 +12,16 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
+// TooltipDefaultPos returns the default position for the tooltip,
+// in Window coordinates, using the Window bounding box.
+func (wb *WidgetBase) TooltipDefaultPos() image.Point {
+	bb := wb.WinBBox()
+	pos := bb.Min
+	pos.X += (bb.Max.X - bb.Min.X) / 2 // center on X
+	// top of Y
+	return pos
+}
+
 // NewTooltipFromScene returns a new Tooltip stage with given scene contents,
 // in connection with given widget (which provides key context).
 // Make further configuration choices using Set* methods, which
@@ -24,15 +34,16 @@ func NewTooltipFromScene(sc *Scene, ctx Widget) *Stage {
 // NewTooltip returns a new tooltip stage displaying the tooltip text
 // for the given widget based on the widget's position and size.
 func NewTooltip(w Widget) *Stage {
-	return NewTooltipText(w, w.WidgetTooltip())
+	tt, pos := w.WidgetTooltip()
+	return NewTooltipText(w, tt, pos)
 }
 
 // NewTooltipText returns a new tooltip stage displaying the given tooltip text
 // for the given widget based on the widget's position and size.
-func NewTooltipText(w Widget, tooltip string) *Stage {
+func NewTooltipText(w Widget, tooltip string, pos image.Point) *Stage {
 	wb := w.AsWidget()
 	bb := wb.WinBBox()
-	return NewTooltipTextAt(w, tooltip, bb.Min, bb.Size())
+	return NewTooltipTextAt(w, tooltip, pos, bb.Size())
 }
 
 // NewTooltipTextAt returns a new tooltip stage displaying the given tooltip text
@@ -47,7 +58,7 @@ func NewTooltipScene(w Widget, tooltip string, pos, sz image.Point) *Scene {
 	sc := NewScene(w.Name() + "-tooltip")
 	// tooltip positioning uses the original scene geom as the context values
 	sc.SceneGeom.Pos = pos
-	sc.SceneGeom.Size = sz
+	sc.SceneGeom.Size = sz // used for positioning if needed
 	sc.Style(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Grow.Set(1, 1)

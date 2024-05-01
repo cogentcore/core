@@ -7,15 +7,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package plots
-
-//go:generate core generate
+package plot
 
 import (
 	"errors"
 
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/plot"
 )
 
 // data defines the main data interfaces for plotting.
@@ -137,10 +134,7 @@ func XYRange(xys XYer) (xmin, xmax, ymin, ymax float32) {
 }
 
 // XYs implements the XYer interface.
-type XYs []XY
-
-// XY is an x and y value.
-type XY struct{ X, Y float32 }
+type XYs []math32.Vector2
 
 func (xys XYs) Len() int {
 	return len(xys)
@@ -166,13 +160,13 @@ func CopyXYs(data XYer) (XYs, error) {
 		if err := CheckFloats(x, y); err != nil {
 			return nil, err
 		}
-		cpy = append(cpy, XY{X: x, Y: y})
+		cpy = append(cpy, math32.Vec2(x, y))
 	}
 	return cpy, nil
 }
 
 // PlotXYs returns plot coordinates for given set of XYs
-func PlotXYs(plt *plot.Plot, data XYs) XYs {
+func PlotXYs(plt *Plot, data XYs) XYs {
 	ps := make(XYs, len(data))
 	for i := range data {
 		ps[i].X, ps[i].Y = plt.PX(data[i].X), plt.PY(data[i].Y)
@@ -275,38 +269,4 @@ func (xy XYValues) XY(i int) (float32, float32) {
 type Labeller interface {
 	// Label returns a label.
 	Label(i int) string
-}
-
-//////////////////////////////////////////////////
-// 	XErrorer
-
-// XErrorer provides an interface for a list of Low, High error bar values.
-// This is used in addition to an XYer interface, if implemented.
-type XErrorer interface {
-	// XError returns Low, High error values for X data.
-	XError(i int) (low, high float32)
-}
-
-// Errors is a slice of low and high error values.
-type Errors []struct{ Low, High float32 }
-
-// XErrors implements the XErrorer interface.
-type XErrors Errors
-
-func (xe XErrors) XError(i int) (low, high float32) {
-	return xe[i].Low, xe[i].High
-}
-
-// YErrorer provides an interface for YError method.
-// This is used in addition to an XYer interface, if implemented.
-type YErrorer interface {
-	// YError returns two error values for Y data.
-	YError(i int) (float32, float32)
-}
-
-// YErrors implements the YErrorer interface.
-type YErrors Errors
-
-func (ye YErrors) YError(i int) (float32, float32) {
-	return ye[i].Low, ye[i].High
 }

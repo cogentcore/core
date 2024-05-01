@@ -33,7 +33,7 @@ func TestLine(t *testing.T) {
 	pt.Y.Label.Text = "Y Axis"
 
 	// note: making two overlapping series
-	data := make(XYs, 42)
+	data := make(plot.XYs, 42)
 	for i := range data {
 		x := float32(i % 21)
 		data[i].X = x * 5
@@ -90,7 +90,7 @@ func TestScatter(t *testing.T) {
 	pt.Y.Max = 100
 	pt.Y.Label.Text = "Y Axis"
 
-	data := make(XYs, 21)
+	data := make(plot.XYs, 21)
 	for i := range data {
 		data[i].X = float32(i * 5)
 		data[i].Y = float32(50) + 40*math32.Sin((float32(i)/8)*math32.Pi)
@@ -119,7 +119,7 @@ func TestLabels(t *testing.T) {
 	pt.Y.Label.Text = "Y Axis"
 
 	// note: making two overlapping series
-	data := make(XYs, 12)
+	data := make(plot.XYs, 12)
 	labels := make([]string, 12)
 	for i := range data {
 		x := float32(i % 21)
@@ -157,13 +157,13 @@ func TestBarChart(t *testing.T) {
 	pt.Y.Max = 100
 	pt.Y.Label.Text = "Y Axis"
 
-	data := make(Values, 21)
+	data := make(plot.Values, 21)
 	for i := range data {
 		x := float32(i % 21)
 		data[i] = float32(50) + 40*math32.Sin((x/8)*math32.Pi)
 	}
 
-	cos := make(Values, 21)
+	cos := make(plot.Values, 21)
 	for i := range data {
 		x := float32(i % 21)
 		cos[i] = float32(50) + 40*math32.Cos((x/8)*math32.Pi)
@@ -205,13 +205,13 @@ func TestBarChartErr(t *testing.T) {
 	pt.Y.Max = 100
 	pt.Y.Label.Text = "Y Axis"
 
-	data := make(Values, 21)
+	data := make(plot.Values, 21)
 	for i := range data {
 		x := float32(i % 21)
 		data[i] = float32(50) + 40*math32.Sin((x/8)*math32.Pi)
 	}
 
-	cos := make(Values, 21)
+	cos := make(plot.Values, 21)
 	for i := range data {
 		x := float32(i % 21)
 		cos[i] = float32(5) + 4*math32.Cos((x/8)*math32.Pi)
@@ -245,13 +245,13 @@ func TestBarChartStack(t *testing.T) {
 	pt.Y.Max = 100
 	pt.Y.Label.Text = "Y Axis"
 
-	data := make(Values, 21)
+	data := make(plot.Values, 21)
 	for i := range data {
 		x := float32(i % 21)
 		data[i] = float32(50) + 40*math32.Sin((x/8)*math32.Pi)
 	}
 
-	cos := make(Values, 21)
+	cos := make(plot.Values, 21)
 	for i := range data {
 		x := float32(i % 21)
 		cos[i] = float32(5) + 4*math32.Cos((x/8)*math32.Pi)
@@ -280,7 +280,7 @@ func TestBarChartStack(t *testing.T) {
 }
 
 type XYErr struct {
-	XYs
+	plot.XYs
 	YErrors
 }
 
@@ -292,7 +292,7 @@ func TestErrBar(t *testing.T) {
 	pt.Y.Max = 100
 	pt.Y.Label.Text = "Y Axis"
 
-	data := make(XYs, 21)
+	data := make(plot.XYs, 21)
 	for i := range data {
 		x := float32(i % 21)
 		data[i].X = x * 5

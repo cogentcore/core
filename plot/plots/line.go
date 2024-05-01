@@ -9,6 +9,8 @@
 
 package plots
 
+//go:generate core generate
+
 import (
 	"image/color"
 
@@ -38,10 +40,10 @@ const (
 // Line implements the Plotter interface, drawing a line using XYer data.
 type Line struct {
 	// XYs is a copy of the points for this line.
-	XYs
+	plot.XYs
 
 	// PXYs is the actual pixel plotting coordinates for each XY value.
-	PXYs XYs
+	PXYs plot.XYs
 
 	// StepStyle is the kind of the step line.
 	StepStyle StepKind
@@ -63,8 +65,8 @@ type Line struct {
 
 // NewLine returns a Line that uses the default line style and
 // does not draw glyphs.
-func NewLine(xys XYer) (*Line, error) {
-	data, err := CopyXYs(xys)
+func NewLine(xys plot.XYer) (*Line, error) {
+	data, err := plot.CopyXYs(xys)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +77,7 @@ func NewLine(xys XYer) (*Line, error) {
 
 // NewLinePoints returns both a Line and a
 // Scatter plot for the given point data.
-func NewLinePoints(xys XYer) (*Line, *Scatter, error) {
+func NewLinePoints(xys plot.XYer) (*Line, *Scatter, error) {
 	sc, err := NewScatter(xys)
 	if err != nil {
 		return nil, nil, err
@@ -89,18 +91,24 @@ func (pts *Line) Defaults() {
 	pts.LineStyle.Defaults()
 }
 
+func (pts *Line) XYData() (data plot.XYer, pixels plot.XYer) {
+	data = pts.XYs
+	pixels = pts.PXYs
+	return
+}
+
 // Plot draws the Line, implementing the plot.Plotter interface.
 func (pts *Line) Plot(plt *plot.Plot) {
 	pc := plt.Paint
 
-	ps := PlotXYs(plt, pts.XYs)
+	ps := plot.PlotXYs(plt, pts.XYs)
 	np := len(ps)
 	pts.PXYs = ps
 
 	if pts.FillColor != nil {
 		pc.FillStyle.Color = colors.C(pts.FillColor)
 		minY := plt.PY(plt.Y.Min)
-		prev := XY{X: ps[0].X, Y: minY}
+		prev := math32.Vec2(ps[0].X, minY)
 		pc.MoveTo(prev.X, prev.Y)
 		for i := range ps {
 			pt := ps[i]
@@ -186,8 +194,8 @@ func (pts *Line) Plot(plt *plot.Plot) {
 
 // DataRange returns the minimum and maximum
 // x and y values, implementing the plot.DataRanger interface.
-func (pts *XYs) DataRange() (xmin, xmax, ymin, ymax float32) {
-	return XYRange(pts)
+func (pts *Line) DataRange() (xmin, xmax, ymin, ymax float32) {
+	return plot.XYRange(pts)
 }
 
 // Thumbnail returns the thumbnail for the LineTo, implementing the plot.Thumbnailer interface.

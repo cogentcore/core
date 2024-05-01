@@ -6,6 +6,7 @@ package core
 
 import (
 	"fmt"
+	"image"
 	"log/slog"
 	"strconv"
 
@@ -251,10 +252,10 @@ func (sp *Spinner) StringToValue(str string) (float32, error) {
 	return 0, err
 }
 
-func (sp *Spinner) WidgetTooltip() string {
-	res := sp.TextField.WidgetTooltip()
+func (sp *Spinner) WidgetTooltip() (string, image.Point) {
+	res, pos := sp.TextField.WidgetTooltip()
 	if sp.Error != nil {
-		return res
+		return res, pos
 	}
 	if sp.HasMin {
 		if res != "" {
@@ -275,7 +276,7 @@ func (sp *Spinner) WidgetTooltip() string {
 		}
 		res += "maximum: " + sp.ValueToString(sp.Max) + ")"
 	}
-	return res
+	return res, pos
 }
 
 func (sp *Spinner) HandleEvents() {

@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/plot/plots"
@@ -169,13 +170,13 @@ func (pl *PlotView) GenPlotBar() {
 			xy.YIndex = firstXY.YIndex
 
 			xyl := plots.XYLabels{}
-			xyl.XYs = make(plots.XYs, n)
+			xyl.XYs = make(plot.XYs, n)
 			xyl.Labels = make([]string, n)
 
 			for i := range xview.Indexes {
 				y := firstXY.Value(i)
 				x := float32(mid + (i%maxx)*stride)
-				xyl.XYs[i] = plots.XY{x, y}
+				xyl.XYs[i] = math32.Vec2(x, y)
 				xyl.Labels[i] = xy.Label(i)
 			}
 			lbls, _ := plots.NewLabels(xyl)

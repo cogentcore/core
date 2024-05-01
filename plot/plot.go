@@ -212,3 +212,27 @@ func (pt *Plot) PX(v float32) float32 {
 func (pt *Plot) PY(v float32) float32 {
 	return pt.PlotBox.ProjectY(1 - pt.Y.Norm(v))
 }
+
+// ClosestDataToPixel returns the Plotter data point closest to given pixel point,
+// in the Pixels image.
+func (pt *Plot) ClosestDataToPixel(px, py int) (plt Plotter, idx int, dist float32, data, pixel math32.Vector2) {
+	tp := math32.Vec2(float32(px), float32(py))
+	dist = float32(math32.MaxFloat32)
+	for _, p := range pt.Plotters {
+		dts, pxls := p.XYData()
+		for i := range pxls.Len() {
+			ptx, pty := pxls.XY(i)
+			pxy := math32.Vec2(ptx, pty)
+			d := pxy.DistTo(tp)
+			if d < dist {
+				dist = d
+				pixel = pxy
+				plt = p
+				idx = i
+				dx, dy := dts.XY(i)
+				data = math32.Vec2(dx, dy)
+			}
+		}
+	}
+	return
+}

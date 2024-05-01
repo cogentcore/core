@@ -70,19 +70,22 @@ func TestButtonMenuClick(t *testing.T) {
 func TestButtonShortcut(t *testing.T) {
 	b := NewBody()
 	bt := NewButton(b).SetShortcut("Command+S")
-	assert.Equal(t, "[Ctrl+S]", bt.WidgetTooltip())
+	tt, _ := bt.WidgetTooltip()
+	assert.Equal(t, "[Ctrl+S]", tt)
 }
 
 func TestButtonShortcutWithTooltip(t *testing.T) {
 	b := NewBody()
 	bt := NewButton(b).SetShortcut("Command+S").SetTooltip("Test")
-	assert.Equal(t, "[Ctrl+S] Test", bt.WidgetTooltip())
+	tt, _ := bt.WidgetTooltip()
+	assert.Equal(t, "[Ctrl+S] Test", tt)
 }
 
 func TestButtonShortcutKey(t *testing.T) {
 	b := NewBody()
 	bt := NewButton(b).SetKey(keymap.Open)
-	assert.Equal(t, "[Ctrl+O]", bt.WidgetTooltip())
+	tt, _ := bt.WidgetTooltip()
+	assert.Equal(t, "[Ctrl+O]", tt)
 }
 
 func TestButtonShortcutMenu(t *testing.T) {

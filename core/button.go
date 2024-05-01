@@ -5,6 +5,7 @@
 package core
 
 import (
+	"image"
 	"log/slog"
 
 	"cogentcore.org/core/colors"
@@ -291,7 +292,7 @@ func (bt *Button) HandleClickDismissMenu() {
 	})
 }
 
-func (bt *Button) WidgetTooltip() string {
+func (bt *Button) WidgetTooltip() (string, image.Point) {
 	res := bt.Tooltip
 	if bt.Shortcut != "" && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
 		res = "[" + bt.Shortcut.Label() + "]"
@@ -299,7 +300,7 @@ func (bt *Button) WidgetTooltip() string {
 			res += " " + bt.Tooltip
 		}
 	}
-	return res
+	return res, bt.TooltipDefaultPos()
 }
 
 func (bt *Button) HandleEvents() {

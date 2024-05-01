@@ -7,6 +7,7 @@ package core
 import (
 	"errors"
 	"fmt"
+	"image"
 	"log/slog"
 	"slices"
 	"strconv"
@@ -647,11 +648,12 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 	})
 }
 
-func (ch *Chooser) WidgetTooltip() string {
+func (ch *Chooser) WidgetTooltip() (string, image.Point) {
+	pos := ch.TooltipDefaultPos()
 	if ch.CurrentItem.Tooltip != "" {
-		return ch.CurrentItem.Tooltip
+		return ch.CurrentItem.Tooltip, pos
 	}
-	return ch.Tooltip
+	return ch.Tooltip, pos
 }
 
 // CompleteMatch is the [complete.MatchFunc] used for the

@@ -19,10 +19,10 @@ import (
 // a shape for each point.
 type Scatter struct {
 	// XYs is a copy of the points for this scatter.
-	XYs
+	plot.XYs
 
 	// PXYs is the actual plotting coordinates for each XY value.
-	PXYs XYs
+	PXYs plot.XYs
 
 	// size of shape to draw for each point
 	PointSize units.Value
@@ -37,8 +37,8 @@ type Scatter struct {
 
 // NewScatter returns a Scatter that uses the
 // default glyph style.
-func NewScatter(xys XYer) (*Scatter, error) {
-	data, err := CopyXYs(xys)
+func NewScatter(xys plot.XYer) (*Scatter, error) {
+	data, err := plot.CopyXYs(xys)
 	if err != nil {
 		return nil, err
 	}
@@ -46,6 +46,12 @@ func NewScatter(xys XYer) (*Scatter, error) {
 	sc.LineStyle.Defaults()
 	sc.PointSize.Pt(4)
 	return sc, nil
+}
+
+func (pts *Scatter) XYData() (data plot.XYer, pixels plot.XYer) {
+	data = pts.XYs
+	pixels = pts.PXYs
+	return
 }
 
 // Plot draws the Line, implementing the plot.Plotter interface.
@@ -56,7 +62,7 @@ func (pts *Scatter) Plot(plt *plot.Plot) {
 	}
 	pts.PointSize.ToDots(&pc.UnitContext)
 	pc.FillStyle.Color = pts.LineStyle.Color
-	ps := PlotXYs(plt, pts.XYs)
+	ps := plot.PlotXYs(plt, pts.XYs)
 	for i := range ps {
 		pt := ps[i]
 		DrawShape(pc, math32.Vec2(pt.X, pt.Y), pts.PointSize.Dots, pts.PointShape)
@@ -67,7 +73,7 @@ func (pts *Scatter) Plot(plt *plot.Plot) {
 // DataRange returns the minimum and maximum
 // x and y values, implementing the plot.DataRanger interface.
 func (pts *Scatter) DataRange() (xmin, xmax, ymin, ymax float32) {
-	return XYRange(pts)
+	return plot.XYRange(pts)
 }
 
 // Thumbnail the thumbnail for the Scatter,

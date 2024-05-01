@@ -125,6 +125,12 @@ type Events struct {
 	// Last Select Mode from most recent Mouse, Keyboard events
 	LastSelMode events.SelectModes
 
+	// Last position of the mouse, in local coordinates
+	LastMousePos image.Point
+
+	// Last position of the mouse, in window coordinates
+	LastMouseWindowPos image.Point
+
 	// Currently active shortcuts for this window (shortcuts are always window-wide.
 	// Use widget key event processing for more local key functions)
 	Shortcuts Shortcuts
@@ -243,6 +249,9 @@ func (em *Events) HandlePosEvent(e events.Event) {
 	pos := e.Pos()
 	et := e.Type()
 	sc := em.Scene
+
+	em.LastMousePos = pos
+	em.LastMouseWindowPos = e.WindowPos()
 
 	switch et {
 	case events.MouseDown:

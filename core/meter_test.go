@@ -14,23 +14,27 @@ import (
 func TestMeter(t *testing.T) {
 	b := NewBody()
 	m := NewMeter(b)
-	assert.Equal(t, "(value: 0.5, minimum: 0, maximum: 1)", m.WidgetTooltip())
+	tt, _ := m.WidgetTooltip()
+	assert.Equal(t, "(value: 0.5, minimum: 0, maximum: 1)", tt)
 	m.SetTooltip("Rating")
-	assert.Equal(t, "Rating (value: 0.5, minimum: 0, maximum: 1)", m.WidgetTooltip())
+	tt, _ = m.WidgetTooltip()
+	assert.Equal(t, "Rating (value: 0.5, minimum: 0, maximum: 1)", tt)
 	b.AssertRender(t, "meter/basic")
 }
 
 func TestMeterValue(t *testing.T) {
 	b := NewBody()
 	m := NewMeter(b).SetValue(0.7)
-	assert.Equal(t, "(value: 0.7, minimum: 0, maximum: 1)", m.WidgetTooltip())
+	tt, _ := m.WidgetTooltip()
+	assert.Equal(t, "(value: 0.7, minimum: 0, maximum: 1)", tt)
 	b.AssertRender(t, "meter/value")
 }
 
 func TestMeterBounds(t *testing.T) {
 	b := NewBody()
 	m := NewMeter(b).SetMin(5.7).SetMax(18).SetValue(10.2)
-	assert.Equal(t, "(value: 10.2, minimum: 5.7, maximum: 18)", m.WidgetTooltip())
+	tt, _ := m.WidgetTooltip()
+	assert.Equal(t, "(value: 10.2, minimum: 5.7, maximum: 18)", tt)
 	b.AssertRender(t, "meter/bounds")
 }
 

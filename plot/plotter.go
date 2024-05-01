@@ -9,6 +9,11 @@ package plot
 type Plotter interface {
 	// Plot draws the data to the Plot Paint
 	Plot(pt *Plot)
+
+	// returns the data for this plot as X,Y points,
+	// including corresponding pixel data.
+	// This allows gui interface to inspect data etc.
+	XYData() (data XYer, pixels XYer)
 }
 
 // DataRanger wraps the DataRange method.

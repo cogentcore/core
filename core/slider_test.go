@@ -19,23 +19,27 @@ import (
 func TestSlider(t *testing.T) {
 	b := NewBody()
 	sr := NewSlider(b)
-	assert.Equal(t, "(value: 0.5, minimum: 0, maximum: 1)", sr.WidgetTooltip())
+	tt, _ := sr.WidgetTooltip()
+	assert.Equal(t, "(value: 0.5, minimum: 0, maximum: 1)", tt)
 	sr.SetTooltip("Rating")
-	assert.Equal(t, "Rating (value: 0.5, minimum: 0, maximum: 1)", sr.WidgetTooltip())
+	tt, _ = sr.WidgetTooltip()
+	assert.Equal(t, "Rating (value: 0.5, minimum: 0, maximum: 1)", tt)
 	b.AssertRender(t, "slider/basic")
 }
 
 func TestSliderValue(t *testing.T) {
 	b := NewBody()
 	sr := NewSlider(b).SetValue(0.7)
-	assert.Equal(t, "(value: 0.7, minimum: 0, maximum: 1)", sr.WidgetTooltip())
+	tt, _ := sr.WidgetTooltip()
+	assert.Equal(t, "(value: 0.7, minimum: 0, maximum: 1)", tt)
 	b.AssertRender(t, "slider/value")
 }
 
 func TestSliderBounds(t *testing.T) {
 	b := NewBody()
 	sr := NewSlider(b).SetMin(5.7).SetMax(18).SetValue(10.2)
-	assert.Equal(t, "(value: 10.2, minimum: 5.7, maximum: 18)", sr.WidgetTooltip())
+	tt, _ := sr.WidgetTooltip()
+	assert.Equal(t, "(value: 10.2, minimum: 5.7, maximum: 18)", tt)
 	b.AssertRender(t, "slider/bounds")
 }
 

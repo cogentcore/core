@@ -104,13 +104,13 @@ func (m *Meter) ApplyStyle() {
 	m.Width.ToDots(&m.Styles.UnitContext)
 }
 
-func (m *Meter) WidgetTooltip() string {
+func (m *Meter) WidgetTooltip() (string, image.Point) {
 	res := m.Tooltip
 	if res != "" {
 		res += " "
 	}
 	res += fmt.Sprintf("(value: %.4g, minimum: %g, maximum: %g)", m.Value, m.Min, m.Max)
-	return res
+	return res, m.TooltipDefaultPos()
 }
 
 func (m *Meter) Render() {

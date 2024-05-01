@@ -16,23 +16,27 @@ import (
 func TestSpinner(t *testing.T) {
 	b := NewBody()
 	sp := NewSpinner(b)
-	assert.Equal(t, "", sp.WidgetTooltip())
+	tt, _ := sp.WidgetTooltip()
+	assert.Equal(t, "", tt)
 	b.AssertRender(t, "spinner/basic")
 }
 
 func TestSpinnerValue(t *testing.T) {
 	b := NewBody()
 	sp := NewSpinner(b).SetValue(12.7)
-	assert.Equal(t, "", sp.WidgetTooltip())
+	tt, _ := sp.WidgetTooltip()
+	assert.Equal(t, "", tt)
 	b.AssertRender(t, "spinner/value")
 }
 
 func TestSpinnerBounds(t *testing.T) {
 	b := NewBody()
 	sp := NewSpinner(b).SetMin(-0.5).SetMax(2.7)
-	assert.Equal(t, "(minimum: -0.5, maximum: 2.7)", sp.WidgetTooltip())
+	tt, _ := sp.WidgetTooltip()
+	assert.Equal(t, "(minimum: -0.5, maximum: 2.7)", tt)
 	sp.SetTooltip("Rating")
-	assert.Equal(t, "Rating (minimum: -0.5, maximum: 2.7)", sp.WidgetTooltip())
+	tt, _ = sp.WidgetTooltip()
+	assert.Equal(t, "Rating (minimum: -0.5, maximum: 2.7)", tt)
 	sp.SetValue(-2.1)
 	assert.Equal(t, float32(-0.5), sp.Value)
 	sp.SetValue(18)

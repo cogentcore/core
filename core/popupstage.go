@@ -103,11 +103,7 @@ func (st *Stage) RunPopup() *Stage {
 		// get enough space to fit plus 10 extra pixels of margin
 		sc.SceneGeom.Pos.Y = b.Max.Y - sz.Y - 10
 	case TooltipStage:
-		// on x axis, we center on the original (widget) position
-		// on y axis, we put our bottom 10 above the top of the original (widget) position
-		wc := opos.X + osz.X/2
-		sc.SceneGeom.Pos.X = wc - sz.X/2
-
+		sc.SceneGeom.Pos.X = opos.X
 		// default to tooltip above element
 		ypos := opos.Y - sz.Y - 10
 		if ypos < 0 {
