@@ -229,3 +229,16 @@ func EqualInts(a, b []int) bool {
 	}
 	return true
 }
+
+// AddShapes returns a new shape by adding two shapes one after the other.
+func AddShapes(shape1, shape2 *Shape) *Shape {
+	sh1 := shape1.Sizes
+	sh2 := shape2.Sizes
+	nsh := make([]int, len(sh1)+len(sh2))
+	copy(nsh, sh1)
+	copy(nsh[len(sh1):], sh2)
+	nms := make([]string, len(sh1)+len(sh2))
+	copy(nms, shape1.Names)
+	copy(nms[len(sh1):], shape2.Names)
+	return NewShape(nsh, nms...)
+}
