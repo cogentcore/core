@@ -35,6 +35,36 @@ type Int32 = Number[int32]
 // Byte is an alias for Number[byte].
 type Byte = Number[byte]
 
+// NewFloat32 returns a new Float32 tensor
+// with the given sizes per dimension (shape), and optional dimension names.
+func NewFloat32(sizes []int, names ...string) *Float32 {
+	return New[float32](sizes, names...).(*Float32)
+}
+
+// NewFloat64 returns a new Float64 tensor
+// with the given sizes per dimension (shape), and optional dimension names.
+func NewFloat64(sizes []int, names ...string) *Float64 {
+	return New[float64](sizes, names...).(*Float64)
+}
+
+// NewInt returns a new Int tensor
+// with the given sizes per dimension (shape), and optional dimension names.
+func NewInt(sizes []int, names ...string) *Int {
+	return New[float64](sizes, names...).(*Int)
+}
+
+// NewInt32 returns a new Int32 tensor
+// with the given sizes per dimension (shape), and optional dimension names.
+func NewInt32(sizes []int, names ...string) *Int32 {
+	return New[float64](sizes, names...).(*Int32)
+}
+
+// NewByte returns a new Byte tensor
+// with the given sizes per dimension (shape), and optional dimension names.
+func NewByte(sizes []int, names ...string) *Byte {
+	return New[float64](sizes, names...).(*Byte)
+}
+
 // NewNumber returns a new n-dimensional tensor of numerical values
 // with the given sizes per dimension (shape), and optional dimension names.
 func NewNumber[T num.Number](sizes []int, names ...string) *Number[T] {
