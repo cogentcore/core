@@ -219,26 +219,26 @@ func (v *Vector3i) SetDivScalar(s int32) {
 
 // Min returns min of this vector components vs. other vector.
 func (v Vector3i) Min(other Vector3i) Vector3i {
-	return Vector3i{Min32i(v.X, other.X), Min32i(v.Y, other.Y), Min32i(v.Z, other.Z)}
+	return Vector3i{min(v.X, other.X), min(v.Y, other.Y), min(v.Z, other.Z)}
 }
 
 // SetMin sets this vector components to the minimum values of itself and other vector.
 func (v *Vector3i) SetMin(other Vector3i) {
-	v.X = Min32i(v.X, other.X)
-	v.Y = Min32i(v.Y, other.Y)
-	v.Z = Min32i(v.Z, other.Z)
+	v.X = min(v.X, other.X)
+	v.Y = min(v.Y, other.Y)
+	v.Z = min(v.Z, other.Z)
 }
 
 // Max returns max of this vector components vs. other vector.
 func (v Vector3i) Max(other Vector3i) Vector3i {
-	return Vector3i{Max32i(v.X, other.X), Max32i(v.Y, other.Y), Max32i(v.Z, other.Z)}
+	return Vector3i{max(v.X, other.X), max(v.Y, other.Y), max(v.Z, other.Z)}
 }
 
 // SetMax sets this vector components to the maximum value of itself and other vector.
 func (v *Vector3i) SetMax(other Vector3i) {
-	v.X = Max32i(v.X, other.X)
-	v.Y = Max32i(v.Y, other.Y)
-	v.Z = Max32i(v.Z, other.Z)
+	v.X = max(v.X, other.X)
+	v.Y = max(v.Y, other.Y)
+	v.Z = max(v.Z, other.Z)
 }
 
 // Clamp sets this vector components to be no less than the corresponding components of min

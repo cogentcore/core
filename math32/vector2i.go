@@ -10,7 +10,7 @@
 
 package math32
 
-// Vector2i is a 2D vector/point with X and Y integer32 components.
+// Vector2i is a 2D vector/point with X and Y int32 components.
 type Vector2i struct {
 	X int32
 	Y int32
@@ -38,13 +38,13 @@ func (v *Vector2i) SetScalar(s int32) {
 	v.Y = s
 }
 
-// SetFromVector2 sets from a Vector2 (float32) vector.
+// SetFromVector2 sets from a [Vector2] (float32) vector.
 func (v *Vector2i) SetFromVector2(vf Vector2) {
 	v.X = int32(vf.X)
 	v.Y = int32(vf.Y)
 }
 
-// SetDim sets this vector component value by its dimension index
+// SetDim sets the given vector component value by its dimension index.
 func (v *Vector2i) SetDim(dim Dims, value int32) {
 	switch dim {
 	case X:
@@ -56,7 +56,7 @@ func (v *Vector2i) SetDim(dim Dims, value int32) {
 	}
 }
 
-// Dim returns this vector component
+// Dim returns the given vector component.
 func (v Vector2i) Dim(dim Dims) int32 {
 	switch dim {
 	case X:
@@ -68,19 +68,7 @@ func (v Vector2i) Dim(dim Dims) int32 {
 	}
 }
 
-// SetByName sets this vector component value by its case insensitive name: "x" or "y".
-func (v *Vector2i) SetByName(name string, value int32) {
-	switch name {
-	case "x", "X":
-		v.X = value
-	case "y", "Y":
-		v.Y = value
-	default:
-		panic("Invalid Vector2i component name: " + name)
-	}
-}
-
-// SetZero sets this vector X and Y components to be zero.
+// SetZero sets all of the vector's components to zero.
 func (v *Vector2i) SetZero() {
 	v.SetScalar(0)
 }
@@ -198,42 +186,26 @@ func (v *Vector2i) SetDivScalar(s int32) {
 	}
 }
 
-// Min32i returns the min of the two int32 numbers.
-func Min32i(a, b int32) int32 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-// Max32i returns the max of the two int32 numbers.
-func Max32i(a, b int32) int32 {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 // Min returns min of this vector components vs. other vector.
 func (v Vector2i) Min(other Vector2i) Vector2i {
-	return Vector2i{Min32i(v.X, other.X), Min32i(v.Y, other.Y)}
+	return Vector2i{min(v.X, other.X), min(v.Y, other.Y)}
 }
 
 // SetMin sets this vector components to the minimum values of itself and other vector.
 func (v *Vector2i) SetMin(other Vector2i) {
-	v.X = Min32i(v.X, other.X)
-	v.Y = Min32i(v.Y, other.Y)
+	v.X = min(v.X, other.X)
+	v.Y = min(v.Y, other.Y)
 }
 
 // Max returns max of this vector components vs. other vector.
 func (v Vector2i) Max(other Vector2i) Vector2i {
-	return Vector2i{Max32i(v.X, other.X), Max32i(v.Y, other.Y)}
+	return Vector2i{max(v.X, other.X), max(v.Y, other.Y)}
 }
 
 // SetMax sets this vector components to the maximum value of itself and other vector.
 func (v *Vector2i) SetMax(other Vector2i) {
-	v.X = Max32i(v.X, other.X)
-	v.Y = Max32i(v.Y, other.Y)
+	v.X = max(v.X, other.X)
+	v.Y = max(v.Y, other.Y)
 }
 
 // Clamp sets this vector components to be no less than the corresponding components of min
@@ -252,23 +224,7 @@ func (v *Vector2i) Clamp(min, max Vector2i) {
 	}
 }
 
-// ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
-func (v *Vector2i) ClampScalar(minVal, maxVal int32) {
-	v.Clamp(Vector2iScalar(minVal), Vector2iScalar(maxVal))
-}
-
 // Negate returns vector with each component negated.
 func (v Vector2i) Negate() Vector2i {
 	return Vector2i{-v.X, -v.Y}
-}
-
-// SetNegate negates each of this vector's components.
-func (v *Vector2i) SetNegate() {
-	v.X = -v.X
-	v.Y = -v.Y
-}
-
-// IsEqual returns if this vector is equal to other.
-func (v Vector2i) IsEqual(other Vector2i) bool {
-	return (other.X == v.X) && (other.Y == v.Y)
 }

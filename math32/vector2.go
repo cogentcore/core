@@ -59,7 +59,7 @@ func (v *Vector2) SetScalar(s float32) {
 	v.Y = s
 }
 
-// SetFromVector2i sets from a Vector2i (int32) vector.
+// SetFromVector2i sets from a [Vector2i] (int32) vector.
 func (v *Vector2) SetFromVector2i(vi Vector2i) {
 	v.X = float32(vi.X)
 	v.Y = float32(vi.Y)
@@ -394,7 +394,7 @@ func (a Vector2) DivDim(d Dims, value float32) Vector2 {
 	return a
 }
 
-// Distance, Norm:
+// Distance, Normal:
 
 // Dot returns the dot product of this vector with the given other vector.
 func (v Vector2) Dot(other Vector2) float32 {
