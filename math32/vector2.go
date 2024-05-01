@@ -350,12 +350,6 @@ func (v Vector2) Negate() Vector2 {
 	return Vec2(-v.X, -v.Y)
 }
 
-// SetNegate negates each of this vector's components.
-func (v *Vector2) SetNegate() {
-	v.X = -v.X
-	v.Y = -v.Y
-}
-
 // AddDim returns the vector with the given value added on the given dimension.
 func (a Vector2) AddDim(d Dims, value float32) Vector2 {
 	switch d {
@@ -400,18 +394,7 @@ func (a Vector2) DivDim(d Dims, value float32) Vector2 {
 	return a
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-//  Distance, Norm
-
-// IsEqual returns if this vector is equal to other.
-func (v Vector2) IsEqual(other Vector2) bool {
-	return (other.X == v.X) && (other.Y == v.Y)
-}
-
-// AlmostEqual returns whether the vector is almost equal to another vector within the specified tolerance.
-func (v Vector2) AlmostEqual(other Vector2, tol float32) bool {
-	return (Abs(v.X-other.X) < tol) && (Abs(v.Y-other.Y) < tol)
-}
+// Distance, Norm:
 
 // Dot returns the dot product of this vector with other.
 func (v Vector2) Dot(other Vector2) float32 {

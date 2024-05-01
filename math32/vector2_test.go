@@ -131,6 +131,8 @@ func TestVector2(t *testing.T) {
 	assert.Equal(t, Vec2(4, 20), v.Ceil())
 	assert.Equal(t, Vec2(4, 19), v.Round())
 
+	assert.Equal(t, Vec2(-3.5, -19.2), v.Negate())
+
 	v = Vec2(3.5, 19)
 
 	assert.Equal(t, Vec2(7.5, 19), v.AddDim(X, 4))

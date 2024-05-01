@@ -239,11 +239,6 @@ func (b Box2) Translate(offset Vector2) Box2 {
 	return nb
 }
 
-// IsEqual returns if this box is equal to other.
-func (b Box2) IsEqual(other Box2) bool {
-	return other.Min.IsEqual(b.Min) && other.Max.IsEqual(b.Max)
-}
-
 // ProjectX projects normalized value along the X dimension of this box
 func (b Box2) ProjectX(v float32) float32 {
 	return b.Min.X + v*(b.Max.X-b.Min.X)
