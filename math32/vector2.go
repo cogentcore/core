@@ -111,132 +111,88 @@ func PointDim(pt image.Point, dim Dims) int {
 	default:
 		panic("dim is out of range")
 	}
-
-}
-
-// SetByName sets this vector component value by its case insensitive name: "x" or "y".
-func (v *Vector2) SetByName(name string, value float32) {
-	switch name {
-	case "x", "X":
-		v.X = value
-	case "y", "Y":
-		v.Y = value
-	default:
-		panic("Invalid Vector2 component name: " + name)
-	}
 }
 
 func (a Vector2) String() string {
 	return fmt.Sprintf("(%v, %v)", a.X, a.Y)
 }
 
+// Fixed returns the vector as a [fixed.Point26_6].
 func (a Vector2) Fixed() fixed.Point26_6 {
 	return ToFixedPoint(a.X, a.Y)
 }
 
-func (a Vector2) AddDim(d Dims, val float32) Vector2 {
+// AddDim returns the vector with the given value added on the given dimension.
+func (a Vector2) AddDim(d Dims, value float32) Vector2 {
 	switch d {
 	case X:
-		a.X += val
+		a.X += value
 	case Y:
-		a.Y += val
+		a.Y += value
 	}
 	return a
 }
 
-func (a *Vector2) SetAddDim(d Dims, val float32) {
+// SubDim returns the vector with the given value subtracted on the given dimension.
+func (a Vector2) SubDim(d Dims, value float32) Vector2 {
 	switch d {
 	case X:
-		a.X += val
+		a.X -= value
 	case Y:
-		a.Y += val
-	}
-}
-
-func (a Vector2) SubDim(d Dims, val float32) Vector2 {
-	switch d {
-	case X:
-		a.X -= val
-	case Y:
-		a.Y -= val
+		a.Y -= value
 	}
 	return a
 }
 
-func (a *Vector2) SetSubDim(d Dims, val float32) {
+// MulDim returns the vector with the given value multiplied by on the given dimension.
+func (a Vector2) MulDim(d Dims, value float32) Vector2 {
 	switch d {
 	case X:
-		a.X -= val
+		a.X *= value
 	case Y:
-		a.Y -= val
-	}
-}
-
-func (a Vector2) MulDim(d Dims, val float32) Vector2 {
-	switch d {
-	case X:
-		a.X *= val
-	case Y:
-		a.Y *= val
+		a.Y *= value
 	}
 	return a
 }
 
-func (a *Vector2) SetMulDim(d Dims, val float32) {
+// DivDim returns the vector with the given value divided by on the given dimension.
+func (a Vector2) DivDim(d Dims, value float32) Vector2 {
 	switch d {
 	case X:
-		a.X *= val
+		a.X /= value
 	case Y:
-		a.Y *= val
-	}
-}
-
-func (a Vector2) DivDim(d Dims, val float32) Vector2 {
-	switch d {
-	case X:
-		a.X /= val
-	case Y:
-		a.Y /= val
+		a.Y /= value
 	}
 	return a
-}
-
-func (a *Vector2) SetDivDim(d Dims, val float32) {
-	switch d {
-	case X:
-		a.X /= val
-	case Y:
-		a.Y /= val
-	}
 }
 
 // set the value along a given dimension to max of current val and new val
-func (a *Vector2) SetMaxDim(d Dims, val float32) {
+func (a *Vector2) SetMaxDim(d Dims, value float32) {
 	switch d {
 	case X:
-		a.X = Max(a.X, val)
+		a.X = Max(a.X, value)
 	case Y:
-		a.Y = Max(a.Y, val)
+		a.Y = Max(a.Y, value)
 	}
 }
 
 // set the value along a given dimension to min of current val and new val
-func (a *Vector2) SetMinDim(d Dims, val float32) {
+func (a *Vector2) SetMinDim(d Dims, value float32) {
 	switch d {
 	case X:
-		a.X = Min(a.X, val)
+		a.X = Min(a.X, value)
 	case Y:
-		a.Y = Min(a.Y, val)
+		a.Y = Min(a.Y, value)
 	}
 }
 
 // set the value along a given dimension to min of current val and new val
-func (a *Vector2) SetMinPosDim(d Dims, val float32) {
+func (a *Vector2) SetMinPosDim(d Dims, value float32) {
 	switch d {
 	case X:
-		a.X = MinPos(val, a.X)
+		a.X = MinPos(value, a.X)
 	case Y:
-		a.Y = MinPos(val, a.Y)
+		a.Y = MinPos(value, a.Y)
 	}
 }
 

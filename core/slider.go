@@ -527,13 +527,13 @@ func (sr *Slider) Render() {
 			thsz := sr.SlideThumbSize()
 			osz := sr.ThumbSizeDots().Dim(od)
 			tpos := pos
-			tpos.SetAddDim(dim, sr.Pos)
-			tpos.SetSubDim(dim, thsz*.5)
+			tpos = tpos.AddDim(dim, sr.Pos)
+			tpos = tpos.SubDim(dim, thsz*.5)
 			tsz := sz
 			tsz.SetDim(dim, thsz)
 			origsz := sz.Dim(od)
 			tsz.SetDim(od, osz)
-			tpos.SetAddDim(od, 0.5*(osz-origsz))
+			tpos = tpos.AddDim(od, 0.5*(osz-origsz))
 			vabg := sr.Styles.ComputeActualBackgroundFor(sr.ValueColor, pabg)
 			pc.FillStyle.Color = vabg
 			sr.RenderBoxImpl(tpos, tsz, styles.Border{Radius: st.Border.Radius}) // thumb
@@ -555,7 +555,7 @@ func (sr *Slider) Render() {
 		bsz := sz
 		bsz.SetDim(od, trsz)
 		bpos := pos
-		bpos.SetAddDim(od, .5*(sz.Dim(od)-trsz))
+		bpos = bpos.AddDim(od, .5*(sz.Dim(od)-trsz))
 		pc.FillStyle.Color = st.ActualBackground
 		sr.RenderBoxImpl(bpos, bsz, styles.Border{Radius: st.Border.Radius}) // track
 
@@ -569,7 +569,7 @@ func (sr *Slider) Render() {
 		thsz := sr.ThumbSizeDots()
 		tpos := pos
 		tpos.SetDim(dim, pos.Dim(dim)+sr.Pos)
-		tpos.SetAddDim(od, 0.5*sz.Dim(od)) // ctr
+		tpos = tpos.AddDim(od, 0.5*sz.Dim(od)) // ctr
 
 		// render thumb as icon or box
 		if sr.Icon.IsSet() && sr.Parts.HasChildren() {

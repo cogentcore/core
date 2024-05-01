@@ -14,25 +14,25 @@ import (
 
 func TestVector2(t *testing.T) {
 	assert.Equal(t, Vector2{5, 10}, Vec2(5, 10))
-	assert.Equal(t, Vector2{20, 20}, Vector2Scalar(20))
-	assert.Equal(t, Vector2{15, -5}, Vector2FromPoint(image.Pt(15, -5)))
-	assert.Equal(t, Vector2{8, 3}, Vector2FromFixed(fixed.P(8, 3)))
+	assert.Equal(t, Vec2(20, 20), Vector2Scalar(20))
+	assert.Equal(t, Vec2(15, -5), Vector2FromPoint(image.Pt(15, -5)))
+	assert.Equal(t, Vec2(8, 3), Vector2FromFixed(fixed.P(8, 3)))
 
 	v := Vector2{}
 	v.Set(-1, 7)
-	assert.Equal(t, Vector2{-1, 7}, v)
+	assert.Equal(t, Vec2(-1, 7), v)
 
 	v.SetScalar(8.12)
-	assert.Equal(t, Vector2{8.12, 8.12}, v)
+	assert.Equal(t, Vec2(8.12, 8.12), v)
 
-	v.SetFromVector2i(Vector2i{8, 9})
-	assert.Equal(t, Vector2{8, 9}, v)
+	v.SetFromVector2i(Vec2i(8, 9))
+	assert.Equal(t, Vec2(8, 9), v)
 
 	v.SetDim(X, -4)
-	assert.Equal(t, Vector2{-4, 9}, v)
+	assert.Equal(t, Vec2(-4, 9), v)
 
 	v.SetDim(Y, 14.3)
-	assert.Equal(t, Vector2{-4, 14.3}, v)
+	assert.Equal(t, Vec2(-4, 14.3), v)
 
 	assert.Equal(t, float32(-4), v.Dim(X))
 	assert.Equal(t, float32(14.3), v.Dim(Y))
@@ -47,4 +47,12 @@ func TestVector2(t *testing.T) {
 
 	assert.Equal(t, 2, PointDim(pt, X))
 	assert.Equal(t, 43, PointDim(pt, Y))
+
+	v = Vec2(3.5, 19)
+
+	assert.Equal(t, Vec2(7.5, 19), v.AddDim(X, 4))
+	assert.Equal(t, Vec2(3.5, 20), v.AddDim(Y, 1))
+
+	assert.Equal(t, Vec2(-2, 19), v.SubDim(X, 5.5))
+	assert.Equal(t, Vec2(3.5, 2), v.SubDim(Y, 17))
 }
