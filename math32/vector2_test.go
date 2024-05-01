@@ -61,4 +61,17 @@ func TestVector2(t *testing.T) {
 
 	assert.Equal(t, Vec2(0.5, 19), v.DivDim(X, 7))
 	assert.Equal(t, Vec2(3.5, 2.375), v.DivDim(Y, 8))
+
+	v = Vec2(3.5, 19.2)
+
+	assert.Equal(t, Vec2(4, 20), v.ToCeil())
+	assert.Equal(t, Vec2(3, 19), v.ToFloor())
+	assert.Equal(t, Vec2(4, 19), v.ToRound())
+
+	assert.Equal(t, image.Pt(3, 19), v.ToPoint())
+	assert.Equal(t, image.Pt(4, 20), v.ToPointCeil())
+	assert.Equal(t, image.Pt(3, 19), v.ToPointFloor())
+	assert.Equal(t, image.Pt(4, 19), v.ToPointRound())
+
+	assert.Equal(t, fixed.Point26_6{224, 1228}, v.ToFixed())
 }

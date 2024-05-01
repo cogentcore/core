@@ -35,7 +35,7 @@ func AddEllipse(cx, cy, rx, ry, rot float32, p Adder) {
 	rotRads := rot * math32.Pi / 180
 	pt := math32.Identity2().Translate(cx, cy).Rotate(rotRads).Translate(-cx, -cy).MulVector2AsPoint(math32.Vec2(cx+rx, cy))
 	points := []float32{rx, ry, rot, 1.0, 0.0, pt.X, pt.Y}
-	p.Start(pt.Fixed())
+	p.Start(pt.ToFixed())
 	AddArc(points, cx, cy, pt.X, pt.Y, p)
 	p.Stop(true)
 }

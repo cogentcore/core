@@ -193,7 +193,7 @@ func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 			}
 
 			d.Face = curFace
-			d.Dot = rp.Fixed()
+			d.Dot = rp.ToFixed()
 			dr, mask, maskp, _, ok := d.Face.Glyph(d.Dot, r)
 			if !ok {
 				// fmt.Printf("not ok rendering rune: %v\n", string(r))
@@ -239,7 +239,7 @@ func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 			Dst:  pc.Image,
 			Src:  overColor,
 			Face: overFace,
-			Dot:  overStart.Fixed(),
+			Dot:  overStart.ToFixed(),
 		}
 		dr, mask, maskp, _, _ := d.Face.Glyph(d.Dot, elipses)
 		idr := dr.Intersect(pc.Bounds)

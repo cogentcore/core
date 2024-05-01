@@ -157,7 +157,7 @@ func (pc *Context) MoveTo(x, y float32) {
 		pc.Path.Stop(false) // note: used to add a point to separate FillPath..
 	}
 	p := pc.TransformPoint(x, y)
-	pc.Path.Start(p.Fixed())
+	pc.Path.Start(p.ToFixed())
 	pc.Start = p
 	pc.Current = p
 	pc.HasCurrent = true
@@ -170,7 +170,7 @@ func (pc *Context) LineTo(x, y float32) {
 		pc.MoveTo(x, y)
 	} else {
 		p := pc.TransformPoint(x, y)
-		pc.Path.Line(p.Fixed())
+		pc.Path.Line(p.ToFixed())
 		pc.Current = p
 	}
 }
@@ -184,7 +184,7 @@ func (pc *Context) QuadraticTo(x1, y1, x2, y2 float32) {
 	}
 	p1 := pc.TransformPoint(x1, y1)
 	p2 := pc.TransformPoint(x2, y2)
-	pc.Path.QuadBezier(p1.Fixed(), p2.Fixed())
+	pc.Path.QuadBezier(p1.ToFixed(), p2.ToFixed())
 	pc.Current = p2
 }
 
@@ -200,7 +200,7 @@ func (pc *Context) CubicTo(x1, y1, x2, y2, x3, y3 float32) {
 	c := pc.TransformPoint(x2, y2)
 	d := pc.TransformPoint(x3, y3)
 
-	pc.Path.CubeBezier(b.Fixed(), c.Fixed(), d.Fixed())
+	pc.Path.CubeBezier(b.ToFixed(), c.ToFixed(), d.ToFixed())
 	pc.Current = d
 }
 

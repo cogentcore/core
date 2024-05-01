@@ -117,11 +117,6 @@ func (a Vector2) String() string {
 	return fmt.Sprintf("(%v, %v)", a.X, a.Y)
 }
 
-// Fixed returns the vector as a [fixed.Point26_6].
-func (a Vector2) Fixed() fixed.Point26_6 {
-	return ToFixedPoint(a.X, a.Y)
-}
-
 // AddDim returns the vector with the given value added on the given dimension.
 func (a Vector2) AddDim(d Dims, value float32) Vector2 {
 	switch d {
@@ -166,42 +161,56 @@ func (a Vector2) DivDim(d Dims, value float32) Vector2 {
 	return a
 }
 
+// SetPoint sets the vector from the given [image.Point].
 func (a *Vector2) SetPoint(pt image.Point) {
 	a.X = float32(pt.X)
 	a.Y = float32(pt.Y)
 }
 
+// SetFixed sets the vector from the given [fixed.Point26_6].
 func (a *Vector2) SetFixed(pt fixed.Point26_6) {
 	a.X = FromFixed(pt.X)
 	a.Y = FromFixed(pt.Y)
 }
 
+// ToCeil returns a new vector with all values [Ceil]ed.
 func (a Vector2) ToCeil() Vector2 {
 	return Vec2(Ceil(a.X), Ceil(a.Y))
 }
 
+// ToFloor returns a new vector with all values [Floor]ed.
 func (a Vector2) ToFloor() Vector2 {
 	return Vec2(Floor(a.X), Floor(a.Y))
 }
 
+// ToRound returns a new vector with all values [Round]ed.
 func (a Vector2) ToRound() Vector2 {
 	return Vec2(Round(a.X), Round(a.Y))
 }
 
+// ToPoint returns the vector as an [image.Point].
 func (a Vector2) ToPoint() image.Point {
 	return image.Point{int(a.X), int(a.Y)}
 }
 
+// ToPointCeil returns the vector as an [image.Point] with all values [Ceil]ed.
 func (a Vector2) ToPointCeil() image.Point {
 	return image.Point{int(Ceil(a.X)), int(Ceil(a.Y))}
 }
 
+// ToPointFloor returns the vector as an [image.Point] with all values [Floor]ed.
 func (a Vector2) ToPointFloor() image.Point {
 	return image.Point{int(Floor(a.X)), int(Floor(a.Y))}
 }
 
+// ToPointRound returns the vector as an [image.Point] with all values [Round]ed.
 func (a Vector2) ToPointRound() image.Point {
 	return image.Point{int(Round(a.X)), int(Round(a.Y))}
+}
+
+// ToFixed returns the vector as a [fixed.Point26_6].
+func (a Vector2) ToFixed() fixed.Point26_6 {
+	return ToFixedPoint(a.X, a.Y)
 }
 
 // RectFromPosSizeMax returns an image.Rectangle from max dims of pos, size
