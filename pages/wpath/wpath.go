@@ -6,6 +6,7 @@
 package wpath
 
 import (
+	"slices"
 	"strings"
 	"unicode"
 
@@ -40,6 +41,7 @@ func Label(u string, backup string) string {
 	for i, part := range parts {
 		parts[i] = strcase.ToSentence(part)
 	}
+	slices.Reverse(parts)
 	res = strings.Join(parts, " • ")
 	return res
 }
