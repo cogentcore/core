@@ -114,6 +114,18 @@ func TestVector2(t *testing.T) {
 	v.SetDivScalar(-3)
 	assert.Equal(t, Vec2(-8, -2), v)
 
+	assert.Equal(t, Vec2(8, 2), v.Abs())
+
+	assert.Equal(t, Vec2(-11, -2), v.Min(Vec2(-11, 3)))
+
+	v.SetMin(Vec2(-11, 3))
+	assert.Equal(t, Vec2(-11, -2), v)
+
+	assert.Equal(t, Vec2(11, -2), v.Max(Vec2(11, -3)))
+
+	v.SetMax(Vec2(11, -3))
+	assert.Equal(t, Vec2(11, -2), v)
+
 	v = Vec2(3.5, 19)
 
 	assert.Equal(t, Vec2(7.5, 19), v.AddDim(X, 4))

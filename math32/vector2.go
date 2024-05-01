@@ -329,41 +329,6 @@ func (v *Vector2) SetMax(other Vector2) {
 	v.Y = Max(v.Y, other.Y)
 }
 
-// MinPos returns minimum of all positive (> 0) numbers
-func (a Vector2) MinPos(b Vector2) Vector2 {
-	return Vec2(MinPos(a.X, b.X), MinPos(a.Y, b.Y))
-}
-
-// SetMinPos set to minpos of current vs. other
-func (v *Vector2) SetMinPos(b Vector2) {
-	v.X = MinPos(v.X, b.X)
-	v.Y = MinPos(v.Y, b.Y)
-}
-
-// set the value along a given dimension to min of current val and new val
-func (a *Vector2) SetMaxPos(o Vector2) {
-	a.X = MaxPos(o.X, a.X)
-	a.Y = MaxPos(o.Y, a.Y)
-}
-
-// SetMaxScalar sets to max of current value and scalar val
-func (v *Vector2) SetMaxScalar(val float32) {
-	v.X = Max(v.X, val)
-	v.Y = Max(v.Y, val)
-}
-
-// SetMinScalar sets to min of current value and scalar val
-func (v *Vector2) SetMinScalar(val float32) {
-	v.X = Min(v.X, val)
-	v.Y = Min(v.Y, val)
-}
-
-// SetMinPosScalar sets to minpos of current value and scalar val
-func (v *Vector2) SetMinPosScalar(val float32) {
-	v.X = MinPos(v.X, val)
-	v.Y = MinPos(v.Y, val)
-}
-
 // Clamp sets this vector components to be no less than the corresponding components of min
 // and not greater than the corresponding component of max.
 // Assumes min < max, if this assumption isn't true it will not operate correctly.
