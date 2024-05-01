@@ -158,4 +158,13 @@ func TestVector2(t *testing.T) {
 
 	assert.Equal(t, Sqrt(68), v.DistanceTo(Vec2(4, -5)))
 	assert.Equal(t, float32(68), v.DistanceToSquared(Vec2(4, -5)))
+
+	assert.Equal(t, float32(-22), v.Cross(Vec2(4, -5)))
+
+	assert.Equal(t, -7/(Sqrt(13)*Sqrt(41)), v.CosTo(Vec2(4, -5)))
+
+	assert.Equal(t, Vec2(14, -45), v.Lerp(Vec2(4, -5), 6))
+
+	assert.True(t, v.InTriangle(Vec2(0, 1), Vec2(5, 6), Vec2(3, 8)))
+	assert.False(t, v.InTriangle(Vec2(2, 4), Vec2(5, 6), Vec2(3, 8)))
 }

@@ -431,7 +431,7 @@ func (v Vector2) DistanceToSquared(other Vector2) float32 {
 }
 
 // Cross returns the cross product of this vector with other
-// which is a scalar, equivalent to the Z coord in 3D: X1 * Y2 - X2 Y1
+// which is a scalar, equivalent to the Z coord in 3D: X1 * Y2 - X2 * Y1.
 func (v Vector2) Cross(other Vector2) float32 {
 	return v.X*other.Y - v.Y*other.X
 }
@@ -456,13 +456,6 @@ func (v Vector2) AngleTo(other Vector2) float32 {
 // alpha between itself and the corresponding other component.
 func (v Vector2) Lerp(other Vector2, alpha float32) Vector2 {
 	return Vec2(v.X+(other.X-v.X)*alpha, v.Y+(other.Y-v.Y)*alpha)
-}
-
-// Lerp sets each of this vector's components to the linear interpolated value of
-// alpha between ifself and the corresponding other component.
-func (v *Vector2) SetLerp(other Vector2, alpha float32) {
-	v.X += (other.X - v.X) * alpha
-	v.Y += (other.Y - v.Y) * alpha
 }
 
 // InTriangle returns whether the vector is inside the specified triangle.
