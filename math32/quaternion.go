@@ -369,8 +369,3 @@ func (q *Quat) Slerp(other Quat, t float32) {
 	q.Y = y*ratioA + q.Y*ratioB
 	q.Z = z*ratioA + q.Z*ratioB
 }
-
-// IsEqual returns if this quaternion is equal to other.
-func (q *Quat) IsEqual(other Quat) bool {
-	return (other.X == q.X) && (other.Y == q.Y) && (other.Z == q.Z) && (other.W == q.W)
-}

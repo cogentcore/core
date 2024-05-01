@@ -97,23 +97,7 @@ func (v Vector4) String() string {
 	return fmt.Sprintf("(%v, %v, %v, %v)", v.X, v.Y, v.Z, v.W)
 }
 
-// SetByName sets this vector component value by its case insensitive name: "x", "y", "z" or "w".
-func (v *Vector4) SetByName(name string, value float32) {
-	switch name {
-	case "x", "X":
-		v.X = value
-	case "y", "Y":
-		v.Y = value
-	case "z", "Z":
-		v.Z = value
-	case "w", "W":
-		v.W = value
-	default:
-		panic("Invalid Vector4 component name: " + name)
-	}
-}
-
-// SetZero sets this vector X, Y and Z components to be zero and W to be one.
+// SetZero sets all of the vector's components to zero.
 func (v *Vector4) SetZero() {
 	v.X = 0
 	v.Y = 0
@@ -121,26 +105,25 @@ func (v *Vector4) SetZero() {
 	v.W = 1
 }
 
-// FromArray sets this vector's components from the specified array and offset
-func (v *Vector4) FromArray(array []float32, offset int) {
+// FromSlice sets this vector's components from the given slice, starting at offset.
+func (v *Vector4) FromSlice(array []float32, offset int) {
 	v.X = array[offset]
 	v.Y = array[offset+1]
 	v.Z = array[offset+2]
 	v.W = array[offset+3]
 }
 
-// ToArray copies this vector's components to array starting at offset.
-func (v Vector4) ToArray(array []float32, offset int) {
+// ToSlice copies this vector's components to the given slice, starting at offset.
+func (v Vector4) ToSlice(array []float32, offset int) {
 	array[offset] = v.X
 	array[offset+1] = v.Y
 	array[offset+2] = v.Z
 	array[offset+3] = v.W
 }
 
-///////////////////////////////////////////////////////////////////////
-//  Basic math operations
+// Basic math operations:
 
-// Add adds other vector to this one and returns result in a new vector.
+// Add adds the other given vector to this one and returns the result as a new vector.
 func (v Vector4) Add(other Vector4) Vector4 {
 	return Vector4{v.X + other.X, v.Y + other.Y, v.Z + other.Z, v.W + other.W}
 }
@@ -278,9 +261,9 @@ func (v *Vector4) SetMax(other Vector4) {
 	v.W = Max(v.W, other.W)
 }
 
-// Clamp sets this vector components to be no less than the corresponding components of min
-// and not greater than the corresponding component of max.
-// Assumes min < max, if this assumption isn't true it will not operate correctly.
+// Clamp sets this vector's components to be no less than the corresponding
+// components of min and not greater than the corresponding component of max.
+// Assumes min < max; if this assumption isn't true, it will not operate correctly.
 func (v *Vector4) Clamp(min, max Vector4) {
 	if v.X < min.X {
 		v.X = min.X
@@ -304,96 +287,46 @@ func (v *Vector4) Clamp(min, max Vector4) {
 	}
 }
 
-// ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
-func (v *Vector4) ClampScalar(minVal, maxVal float32) {
-	v.Clamp(Vector4Scalar(minVal), Vector4Scalar(maxVal))
-}
-
-// Floor returns vector with math32.Floor() applied to each of this vector's components.
+// Floor returns this vector with [Floor] applied to each of its components.
 func (v Vector4) Floor() Vector4 {
 	return Vector4{Floor(v.X), Floor(v.Y), Floor(v.Z), Floor(v.W)}
 }
 
-// SetFloor applies math32.Floor() to each of this vector's components.
-func (v *Vector4) SetFloor() {
-	v.X = Floor(v.X)
-	v.Y = Floor(v.Y)
-	v.Z = Floor(v.Z)
-	v.W = Floor(v.W)
-}
-
-// Ceil returns vector with math32.Ceil() applied to each of this vector's components.
+// Ceil returns this vector with [Ceil] applied to each of its components.
 func (v Vector4) Ceil() Vector4 {
 	return Vector4{Ceil(v.X), Ceil(v.Y), Ceil(v.Z), Ceil(v.W)}
 }
 
-// SetCeil applies math32.Ceil() to each of this vector's components.
-func (v *Vector4) SetCeil() {
-	v.X = Ceil(v.X)
-	v.Y = Ceil(v.Y)
-	v.Z = Ceil(v.Z)
-	v.W = Ceil(v.W)
-}
-
-// Round returns vector with math32.Round() applied to each of this vector's components.
+// Round returns this vector with [Round] applied to each of its components.
 func (v Vector4) Round() Vector4 {
 	return Vector4{Round(v.X), Round(v.Y), Round(v.Z), Round(v.W)}
 }
 
-// SetRound rounds each of this vector's components.
-func (v *Vector4) SetRound() {
-	v.X = Round(v.X)
-	v.Y = Round(v.Y)
-	v.Z = Round(v.Z)
-	v.W = Round(v.W)
-}
-
-// Negate returns vector with each component negated.
+// Negate returns the vector with each component negated.
 func (v Vector4) Negate() Vector4 {
 	return Vector4{-v.X, -v.Y, -v.Z, -v.W}
 }
 
-// SetNegate negates each of this vector's components.
-func (v *Vector4) SetNegate() {
-	v.X = -v.X
-	v.Y = -v.Y
-	v.Z = -v.Z
-	v.W = -v.W
-}
+// Distance, Normal:
 
-//////////////////////////////////////////////////////////////////////////////////
-//  Distance, Norm
-
-// IsEqual returns if this vector is equal to other.
-func (v *Vector4) IsEqual(other Vector4) bool {
-	return (other.X == v.X) && (other.Y == v.Y) && (other.Z == v.Z) && (other.W == v.W)
-}
-
-// AlmostEqual returns whether the vector is almost equal to another vector within the specified tolerance.
-func (v *Vector4) AlmostEqual(other Vector4, tol float32) bool {
-	return (Abs(v.X-other.X) < tol) &&
-		(Abs(v.Y-other.Y) < tol) &&
-		(Abs(v.Z-other.Z) < tol) &&
-		(Abs(v.W-other.W) < tol)
-}
-
-// Dot returns the dot product of this vector with other.
+// Dot returns the dot product of this vector with the given other vector.
 func (v Vector4) Dot(other Vector4) float32 {
 	return v.X*other.X + v.Y*other.Y + v.Z*other.Z + v.W*other.W
 }
 
-// LengthSq returns the length squared of this vector.
-// LengthSq can be used to compare vectors' lengths without the need to perform a square root.
-func (v Vector4) LengthSq() float32 {
-	return v.X*v.X + v.Y*v.Y + v.Z*v.Z + v.W*v.W
-}
-
-// Length returns the length of this vector.
+// Length returns the length (magnitude) of this vector.
 func (v Vector4) Length() float32 {
 	return Sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z + v.W*v.W)
 }
 
-// Normal returns this vector divided by its length
+// LengthSquared returns the length squared of this vector.
+// LengthSquared can be used to compare the lengths of vectors
+// without the need to perform a square root.
+func (v Vector4) LengthSquared() float32 {
+	return v.X*v.X + v.Y*v.Y + v.Z*v.Z + v.W*v.W
+}
+
+// Normal returns this vector divided by its length (its unit vector).
 func (v Vector4) Normal() Vector4 {
 	return v.DivScalar(v.Length())
 }
@@ -403,20 +336,6 @@ func (v *Vector4) SetNormal() {
 	v.SetDivScalar(v.Length())
 }
 
-// Normalize normalizes this vector so its length will be 1.
-func (v *Vector4) Normalize() {
-	v.SetDivScalar(v.Length())
-}
-
-// SetLength sets this vector to have the specified length.
-// If the current length is zero, does nothing.
-func (v *Vector4) SetLength(l float32) {
-	oldLength := v.Length()
-	if oldLength != 0 && l != oldLength {
-		v.SetMulScalar(l / oldLength)
-	}
-}
-
 // Lerp returns vector with each components as the linear interpolated value of
 // alpha between itself and the corresponding other component.
 func (v Vector4) Lerp(other Vector4, alpha float32) Vector4 {
@@ -424,17 +343,7 @@ func (v Vector4) Lerp(other Vector4, alpha float32) Vector4 {
 		v.W + (other.W-v.W)*alpha}
 }
 
-// SetLerp sets each of this vector's components to the linear interpolated value of
-// alpha between ifself and the corresponding other component.
-func (v *Vector4) SetLerp(other *Vector4, alpha float32) {
-	v.X += (other.X - v.X) * alpha
-	v.Y += (other.Y - v.Y) * alpha
-	v.Z += (other.Z - v.Z) * alpha
-	v.W += (other.W - v.W) * alpha
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//  Matrix operations
+// Matrix operations:
 
 // MulMatrix4 returns vector multiplied by specified 4x4 matrix.
 func (v Vector4) MulMatrix4(m *Matrix4) Vector4 {

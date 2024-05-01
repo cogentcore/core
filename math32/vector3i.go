@@ -249,7 +249,7 @@ func (v *Vector3i) Clamp(min, max Vector3i) {
 	}
 }
 
-// Negate returns vector with each component negated.
+// Negate returns the vector with each component negated.
 func (v Vector3i) Negate() Vector3i {
 	return Vector3i{-v.X, -v.Y, -v.Z}
 }

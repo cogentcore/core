@@ -65,7 +65,7 @@ func (sb *ShapeBase) BBox() math32.Box3 {
 func SetColor(clrAry math32.ArrayF32, vtxOff int, nvtxs int, clr math32.Vector4) {
 	cidx := vtxOff * 4
 	for vi := 0; vi < nvtxs; vi++ {
-		clr.ToArray(clrAry, cidx+vi*4)
+		clr.ToSlice(clrAry, cidx+vi*4)
 	}
 }
 

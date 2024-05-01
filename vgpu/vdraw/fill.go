@@ -35,7 +35,7 @@ func (dw *Drawer) Fill(clr color.Color, src2dst math32.Matrix3, reg image.Rectan
 	dsz := dw.DestSize()
 	tmat := dw.ConfigMtxs(src2dst, dsz, reg, op, false)
 	clr4 := math32.NewVector4Color(clr)
-	clr4.ToArray(tmat.UVP[:], 12) // last column holds color
+	clr4.ToSlice(tmat.UVP[:], 12) // last column holds color
 
 	matv, _ := vars.VarByNameTry(vgpu.PushSet, "Mtxs")
 	fpl := sy.PipelineMap["fill"]
