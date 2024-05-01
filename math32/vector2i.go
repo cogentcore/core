@@ -164,7 +164,7 @@ func (v Vector2i) Div(other Vector2i) Vector2i {
 // If scalar is zero, returns zero.
 func (v Vector2i) DivScalar(scalar int32) Vector2i {
 	if scalar != 0 {
-		return v.MulScalar(1 / scalar)
+		return Vector2i{v.X / scalar, v.Y / scalar}
 	} else {
 		return Vector2i{}
 	}
@@ -177,9 +177,10 @@ func (v *Vector2i) SetDiv(other Vector2i) {
 }
 
 // SetDivScalar sets this to division by scalar.
-func (v *Vector2i) SetDivScalar(s int32) {
-	if s != 0 {
-		v.SetMulScalar(1 / s)
+func (v *Vector2i) SetDivScalar(scalar int32) {
+	if scalar != 0 {
+		v.X /= scalar
+		v.Y /= scalar
 	} else {
 		v.SetZero()
 	}
