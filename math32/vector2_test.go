@@ -48,20 +48,6 @@ func TestVector2(t *testing.T) {
 	assert.Equal(t, 2, PointDim(pt, X))
 	assert.Equal(t, 43, PointDim(pt, Y))
 
-	v = Vec2(3.5, 19)
-
-	assert.Equal(t, Vec2(7.5, 19), v.AddDim(X, 4))
-	assert.Equal(t, Vec2(3.5, 20), v.AddDim(Y, 1))
-
-	assert.Equal(t, Vec2(-2, 19), v.SubDim(X, 5.5))
-	assert.Equal(t, Vec2(3.5, 2), v.SubDim(Y, 17))
-
-	assert.Equal(t, Vec2(7, 19), v.MulDim(X, 2))
-	assert.Equal(t, Vec2(3.5, 57), v.MulDim(Y, 3))
-
-	assert.Equal(t, Vec2(0.5, 19), v.DivDim(X, 7))
-	assert.Equal(t, Vec2(3.5, 2.375), v.DivDim(Y, 8))
-
 	v = Vec2(3.5, 19.2)
 
 	assert.Equal(t, Vec2(4, 20), v.ToCeil())
@@ -89,4 +75,18 @@ func TestVector2(t *testing.T) {
 	slice := []float32{0, 0, 0, 0, 0}
 	v.ToSlice(slice, 2)
 	assert.Equal(t, []float32{0, 0, 2, 1, 0}, slice)
+
+	v = Vec2(3.5, 19)
+
+	assert.Equal(t, Vec2(7.5, 19), v.AddDim(X, 4))
+	assert.Equal(t, Vec2(3.5, 20), v.AddDim(Y, 1))
+
+	assert.Equal(t, Vec2(-2, 19), v.SubDim(X, 5.5))
+	assert.Equal(t, Vec2(3.5, 2), v.SubDim(Y, 17))
+
+	assert.Equal(t, Vec2(7, 19), v.MulDim(X, 2))
+	assert.Equal(t, Vec2(3.5, 57), v.MulDim(Y, 3))
+
+	assert.Equal(t, Vec2(0.5, 19), v.DivDim(X, 7))
+	assert.Equal(t, Vec2(3.5, 2.375), v.DivDim(Y, 8))
 }

@@ -117,50 +117,6 @@ func (a Vector2) String() string {
 	return fmt.Sprintf("(%v, %v)", a.X, a.Y)
 }
 
-// AddDim returns the vector with the given value added on the given dimension.
-func (a Vector2) AddDim(d Dims, value float32) Vector2 {
-	switch d {
-	case X:
-		a.X += value
-	case Y:
-		a.Y += value
-	}
-	return a
-}
-
-// SubDim returns the vector with the given value subtracted on the given dimension.
-func (a Vector2) SubDim(d Dims, value float32) Vector2 {
-	switch d {
-	case X:
-		a.X -= value
-	case Y:
-		a.Y -= value
-	}
-	return a
-}
-
-// MulDim returns the vector with the given value multiplied by on the given dimension.
-func (a Vector2) MulDim(d Dims, value float32) Vector2 {
-	switch d {
-	case X:
-		a.X *= value
-	case Y:
-		a.Y *= value
-	}
-	return a
-}
-
-// DivDim returns the vector with the given value divided by on the given dimension.
-func (a Vector2) DivDim(d Dims, value float32) Vector2 {
-	switch d {
-	case X:
-		a.X /= value
-	case Y:
-		a.Y /= value
-	}
-	return a
-}
-
 // SetPoint sets the vector from the given [image.Point].
 func (a *Vector2) SetPoint(pt image.Point) {
 	a.X = float32(pt.X)
@@ -246,10 +202,9 @@ func (v Vector2) ToSlice(slice []float32, offset int) {
 	slice[offset+1] = v.Y
 }
 
-///////////////////////////////////////////////////////////////////////
-//  Basic math operations
+// Basic math operations:
 
-// Add adds other vector to this one and returns result in a new vector.
+// Add adds the other given vector to this one and returns the result as a new vector.
 func (v Vector2) Add(other Vector2) Vector2 {
 	return Vec2(v.X+other.X, v.Y+other.Y)
 }
@@ -472,6 +427,50 @@ func (v Vector2) Negate() Vector2 {
 func (v *Vector2) SetNegate() {
 	v.X = -v.X
 	v.Y = -v.Y
+}
+
+// AddDim returns the vector with the given value added on the given dimension.
+func (a Vector2) AddDim(d Dims, value float32) Vector2 {
+	switch d {
+	case X:
+		a.X += value
+	case Y:
+		a.Y += value
+	}
+	return a
+}
+
+// SubDim returns the vector with the given value subtracted on the given dimension.
+func (a Vector2) SubDim(d Dims, value float32) Vector2 {
+	switch d {
+	case X:
+		a.X -= value
+	case Y:
+		a.Y -= value
+	}
+	return a
+}
+
+// MulDim returns the vector with the given value multiplied by on the given dimension.
+func (a Vector2) MulDim(d Dims, value float32) Vector2 {
+	switch d {
+	case X:
+		a.X *= value
+	case Y:
+		a.Y *= value
+	}
+	return a
+}
+
+// DivDim returns the vector with the given value divided by on the given dimension.
+func (a Vector2) DivDim(d Dims, value float32) Vector2 {
+	switch d {
+	case X:
+		a.X /= value
+	case Y:
+		a.Y /= value
+	}
+	return a
 }
 
 //////////////////////////////////////////////////////////////////////////////////
