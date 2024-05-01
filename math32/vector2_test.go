@@ -76,6 +76,17 @@ func TestVector2(t *testing.T) {
 	v.ToSlice(slice, 2)
 	assert.Equal(t, []float32{0, 0, 2, 1, 0}, slice)
 
+	v = Vec2(-2, 4)
+
+	assert.Equal(t, Vec2(3, 1), v.Add(Vec2(5, -3)))
+	assert.Equal(t, Vec2(4, 10), v.AddScalar(6))
+
+	v.SetAdd(Vec2(2, 1))
+	assert.Equal(t, Vec2(0, 5), v)
+
+	v.SetAddScalar(-3)
+	assert.Equal(t, Vec2(-3, 2), v)
+
 	v = Vec2(3.5, 19)
 
 	assert.Equal(t, Vec2(7.5, 19), v.AddDim(X, 4))
