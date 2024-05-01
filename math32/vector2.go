@@ -129,34 +129,19 @@ func (a *Vector2) SetFixed(pt fixed.Point26_6) {
 	a.Y = FromFixed(pt.Y)
 }
 
-// ToCeil returns a new vector with all values [Ceil]ed.
-func (a Vector2) ToCeil() Vector2 {
-	return Vec2(Ceil(a.X), Ceil(a.Y))
-}
-
-// ToFloor returns a new vector with all values [Floor]ed.
-func (a Vector2) ToFloor() Vector2 {
-	return Vec2(Floor(a.X), Floor(a.Y))
-}
-
-// ToRound returns a new vector with all values [Round]ed.
-func (a Vector2) ToRound() Vector2 {
-	return Vec2(Round(a.X), Round(a.Y))
-}
-
 // ToPoint returns the vector as an [image.Point].
 func (a Vector2) ToPoint() image.Point {
 	return image.Point{int(a.X), int(a.Y)}
 }
 
-// ToPointCeil returns the vector as an [image.Point] with all values [Ceil]ed.
-func (a Vector2) ToPointCeil() image.Point {
-	return image.Point{int(Ceil(a.X)), int(Ceil(a.Y))}
-}
-
 // ToPointFloor returns the vector as an [image.Point] with all values [Floor]ed.
 func (a Vector2) ToPointFloor() image.Point {
 	return image.Point{int(Floor(a.X)), int(Floor(a.Y))}
+}
+
+// ToPointCeil returns the vector as an [image.Point] with all values [Ceil]ed.
+func (a Vector2) ToPointCeil() image.Point {
+	return image.Point{int(Ceil(a.X)), int(Ceil(a.Y))}
 }
 
 // ToPointRound returns the vector as an [image.Point] with all values [Round]ed.
@@ -329,9 +314,9 @@ func (v *Vector2) SetMax(other Vector2) {
 	v.Y = Max(v.Y, other.Y)
 }
 
-// Clamp sets this vector components to be no less than the corresponding components of min
-// and not greater than the corresponding component of max.
-// Assumes min < max, if this assumption isn't true it will not operate correctly.
+// Clamp sets this vector's components to be no less than the corresponding
+// components of min and not greater than the corresponding component of max.
+// Assumes min < max; if this assumption isn't true, it will not operate correctly.
 func (v *Vector2) Clamp(min, max Vector2) {
 	if v.X < min.X {
 		v.X = min.X
@@ -345,42 +330,19 @@ func (v *Vector2) Clamp(min, max Vector2) {
 	}
 }
 
-// ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
-func (v *Vector2) ClampScalar(minVal, maxVal float32) {
-	v.Clamp(Vector2Scalar(minVal), Vector2Scalar(maxVal))
-}
-
-// Floor returns vector with math32.Floor() applied to each of this vector's components.
+// Floor returns this vector with [Floor] applied to each of its components.
 func (v Vector2) Floor() Vector2 {
 	return Vec2(Floor(v.X), Floor(v.Y))
 }
 
-// SetFloor applies math32.Floor() to each of this vector's components.
-func (v *Vector2) SetFloor() {
-	v.X = Floor(v.X)
-	v.Y = Floor(v.Y)
-}
-
-// Ceil returns vector with math32.Ceil() applied to each of this vector's components.
+// Ceil returns this vector with [Ceil] applied to each of its components.
 func (v Vector2) Ceil() Vector2 {
 	return Vec2(Ceil(v.X), Ceil(v.Y))
 }
 
-// SetCeil applies math32.Ceil() to each of this vector's components.
-func (v *Vector2) SetCeil() {
-	v.X = Ceil(v.X)
-	v.Y = Ceil(v.Y)
-}
-
-// Round returns vector with math32.Round() applied to each of this vector's components.
+// Round returns this vector with [Round] applied to each of its components.
 func (v Vector2) Round() Vector2 {
 	return Vec2(Round(v.X), Round(v.Y))
-}
-
-// SetRound rounds each of this vector's components.
-func (v *Vector2) SetRound() {
-	v.X = Round(v.X)
-	v.Y = Round(v.Y)
 }
 
 // Negate returns vector with each component negated.

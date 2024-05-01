@@ -38,7 +38,7 @@ func (ly *Layout) ScrollGeom(d math32.Dims) (pos, sz math32.Vector2) {
 	bbsz := bbmax.Sub(bbmin)
 	sz.SetDim(d, bbsz.Dim(d)-4)
 	sz.SetDim(od, sbw)
-	sz.SetCeil()
+	sz = sz.Ceil()
 	return
 }
 

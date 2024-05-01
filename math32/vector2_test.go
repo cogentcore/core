@@ -50,13 +50,9 @@ func TestVector2(t *testing.T) {
 
 	v = Vec2(3.5, 19.2)
 
-	assert.Equal(t, Vec2(4, 20), v.ToCeil())
-	assert.Equal(t, Vec2(3, 19), v.ToFloor())
-	assert.Equal(t, Vec2(4, 19), v.ToRound())
-
 	assert.Equal(t, image.Pt(3, 19), v.ToPoint())
-	assert.Equal(t, image.Pt(4, 20), v.ToPointCeil())
 	assert.Equal(t, image.Pt(3, 19), v.ToPointFloor())
+	assert.Equal(t, image.Pt(4, 20), v.ToPointCeil())
 	assert.Equal(t, image.Pt(4, 19), v.ToPointRound())
 
 	assert.Equal(t, fixed.Point26_6{224, 1228}, v.ToFixed())
@@ -125,6 +121,15 @@ func TestVector2(t *testing.T) {
 
 	v.SetMax(Vec2(11, -3))
 	assert.Equal(t, Vec2(11, -2), v)
+
+	v.Clamp(Vec2(1, 2), Vec2(9, 5))
+	assert.Equal(t, Vec2(9, 2), v)
+
+	v = Vec2(3.5, 19.2)
+
+	assert.Equal(t, Vec2(3, 19), v.Floor())
+	assert.Equal(t, Vec2(4, 20), v.Ceil())
+	assert.Equal(t, Vec2(4, 19), v.Round())
 
 	v = Vec2(3.5, 19)
 
