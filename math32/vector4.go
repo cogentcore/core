@@ -26,8 +26,8 @@ func Vec4(x, y, z, w float32) Vector4 {
 }
 
 // Vector4Scalar returns a new [Vector4] with all components set to the given scalar value.
-func Vector4Scalar(s float32) Vector4 {
-	return Vector4{X: s, Y: s, Z: s, W: s}
+func Vector4Scalar(scalar float32) Vector4 {
+	return Vector4{X: scalar, Y: scalar, Z: scalar, W: scalar}
 }
 
 // Vector4FromVector3 returns a new [Vector4] from the given [Vector3] and w component.
@@ -43,6 +43,14 @@ func (v *Vector4) Set(x, y, z, w float32) {
 	v.Y = y
 	v.Z = z
 	v.W = w
+}
+
+// SetScalar sets all vector components to the same scalar value.
+func (v *Vector4) SetScalar(scalar float32) {
+	v.X = scalar
+	v.Y = scalar
+	v.Z = scalar
+	v.W = scalar
 }
 
 // SetFromVector3 sets this vector from a Vector3 and W

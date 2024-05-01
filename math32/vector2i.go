@@ -22,8 +22,8 @@ func Vec2i(x, y int32) Vector2i {
 }
 
 // Vector2iScalar returns a new [Vector2i] with all components set to the given scalar value.
-func Vector2iScalar(s int32) Vector2i {
-	return Vector2i{X: s, Y: s}
+func Vector2iScalar(scalar int32) Vector2i {
+	return Vector2i{X: scalar, Y: scalar}
 }
 
 // Set sets this vector X and Y components.
@@ -32,10 +32,10 @@ func (v *Vector2i) Set(x, y int32) {
 	v.Y = y
 }
 
-// SetScalar sets all vector components to same scalar value.
-func (v *Vector2i) SetScalar(s int32) {
-	v.X = s
-	v.Y = s
+// SetScalar sets all vector components to the same scalar value.
+func (v *Vector2i) SetScalar(scalar int32) {
+	v.X = scalar
+	v.Y = scalar
 }
 
 // SetFromVector2 sets from a [Vector2] (float32) vector.

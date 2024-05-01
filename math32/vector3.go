@@ -25,8 +25,8 @@ func Vec3(x, y, z float32) Vector3 {
 }
 
 // Vector3Scalar returns a new [Vector3] with all components set to the given scalar value.
-func Vector3Scalar(s float32) Vector3 {
-	return Vector3{s, s, s}
+func Vector3Scalar(scalar float32) Vector3 {
+	return Vector3{scalar, scalar, scalar}
 }
 
 // Vector3FromVector4 returns a new [Vector3] from the given [Vector4].
@@ -43,11 +43,11 @@ func (v *Vector3) Set(x, y, z float32) {
 	v.Z = z
 }
 
-// SetScalar sets all vector X, Y and Z components to same scalar value.
-func (v *Vector3) SetScalar(s float32) {
-	v.X = s
-	v.Y = s
-	v.Z = s
+// SetScalar sets all vector components to the same scalar value.
+func (v *Vector3) SetScalar(scalar float32) {
+	v.X = scalar
+	v.Y = scalar
+	v.Z = scalar
 }
 
 // SetFromVector4 sets this vector from a Vector4

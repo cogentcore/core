@@ -29,8 +29,8 @@ func Vec2(x, y float32) Vector2 {
 }
 
 // Vector2Scalar returns a new [Vector2] with all components set to the given scalar value.
-func Vector2Scalar(s float32) Vector2 {
-	return Vector2{s, s}
+func Vector2Scalar(scalar float32) Vector2 {
+	return Vector2{scalar, scalar}
 }
 
 // Vector2FromPoint returns a new [Vector2] from the given [image.Point].
@@ -53,10 +53,10 @@ func (v *Vector2) Set(x, y float32) {
 	v.Y = y
 }
 
-// SetScalar sets all vector components to same scalar value.
-func (v *Vector2) SetScalar(s float32) {
-	v.X = s
-	v.Y = s
+// SetScalar sets all vector components to the same scalar value.
+func (v *Vector2) SetScalar(scalar float32) {
+	v.X = scalar
+	v.Y = scalar
 }
 
 // SetFromVector2i sets from a [Vector2i] (int32) vector.

@@ -23,8 +23,8 @@ func Vec3i(x, y, z int32) Vector3i {
 }
 
 // Vector3iScalar returns a new [Vector3i] with all components set to the given scalar value.
-func Vector3iScalar(s int32) Vector3i {
-	return Vector3i{X: s, Y: s, Z: s}
+func Vector3iScalar(scalar int32) Vector3i {
+	return Vector3i{X: scalar, Y: scalar, Z: scalar}
 }
 
 // Set sets this vector X, Y and Z components.
@@ -34,11 +34,11 @@ func (v *Vector3i) Set(x, y, z int32) {
 	v.Z = z
 }
 
-// SetScalar sets all vector X, Y and Z components to same scalar value.
-func (v *Vector3i) SetScalar(s int32) {
-	v.X = s
-	v.Y = s
-	v.Z = s
+// SetScalar sets all vector components to the same scalar value.
+func (v *Vector3i) SetScalar(scalar int32) {
+	v.X = scalar
+	v.Y = scalar
+	v.Z = scalar
 }
 
 // SetFromVector3 sets from a Vector3 (float32) vector.
