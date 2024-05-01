@@ -540,7 +540,7 @@ func (dt *Table) TableHeaders() []string {
 			ffnm := fnm
 			for di := 0; di < nd; di++ {
 				ffnm += "0"
-				dn += fmt.Sprintf("%v", csh.Size(di))
+				dn += fmt.Sprintf("%v", csh.DimSize(di))
 				if di < nd-1 {
 					ffnm += ","
 					dn += ","

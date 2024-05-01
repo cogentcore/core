@@ -19,7 +19,7 @@ import (
 func ClosestRow32(probe tensor.Tensor, col tensor.Tensor, mfun Func32) (int, float32) {
 	pr := probe.(*tensor.Float32)
 	cl := col.(*tensor.Float32)
-	rows := col.Shape().Size(0)
+	rows := col.Shape().DimSize(0)
 	csz := col.Len() / rows
 	if csz != probe.Len() {
 		panic("metric.ClosestRow32: probe size != cell size of tensor column!\n")

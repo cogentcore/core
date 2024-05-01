@@ -20,25 +20,25 @@ func Prjn2DShape(shp *Shape, oddRow bool) (rows, cols, rowEx, colEx int) {
 	switch nd {
 	case 1:
 		if oddRow {
-			return shp.Size(0), 1, 0, 0
+			return shp.DimSize(0), 1, 0, 0
 		} else {
-			return 1, shp.Size(0), 0, 0
+			return 1, shp.DimSize(0), 0, 0
 		}
 	case 2:
-		return shp.Size(0), shp.Size(1), 0, 0
+		return shp.DimSize(0), shp.DimSize(1), 0, 0
 	case 3:
 		if oddRow {
-			return shp.Size(0) * shp.Size(1), shp.Size(2), shp.Size(0), 0
+			return shp.DimSize(0) * shp.DimSize(1), shp.DimSize(2), shp.DimSize(0), 0
 		} else {
-			return shp.Size(1), shp.Size(0) * shp.Size(2), 0, shp.Size(0)
+			return shp.DimSize(1), shp.DimSize(0) * shp.DimSize(2), 0, shp.DimSize(0)
 		}
 	case 4:
-		return shp.Size(0) * shp.Size(2), shp.Size(1) * shp.Size(3), shp.Size(0), shp.Size(1)
+		return shp.DimSize(0) * shp.DimSize(2), shp.DimSize(1) * shp.DimSize(3), shp.DimSize(0), shp.DimSize(1)
 	case 5:
 		if oddRow {
-			return shp.Size(0) * shp.Size(1) * shp.Size(3), shp.Size(2) * shp.Size(4), shp.Size(0) * shp.Size(1), 0
+			return shp.DimSize(0) * shp.DimSize(1) * shp.DimSize(3), shp.DimSize(2) * shp.DimSize(4), shp.DimSize(0) * shp.DimSize(1), 0
 		} else {
-			return shp.Size(1) * shp.Size(3), shp.Size(0) * shp.Size(2) * shp.Size(4), 0, shp.Size(0) * shp.Size(1)
+			return shp.DimSize(1) * shp.DimSize(3), shp.DimSize(0) * shp.DimSize(2) * shp.DimSize(4), 0, shp.DimSize(0) * shp.DimSize(1)
 		}
 	}
 	return 1, 1, 0, 0
@@ -63,33 +63,33 @@ func Prjn2DIndex(shp *Shape, oddRow bool, row, col int) int {
 		return shp.Offset([]int{row, col})
 	case 3:
 		if oddRow {
-			ny := shp.Size(1)
+			ny := shp.DimSize(1)
 			yy := row / ny
 			y := row % ny
 			return shp.Offset([]int{yy, y, col})
 		} else {
-			nx := shp.Size(2)
+			nx := shp.DimSize(2)
 			xx := col / nx
 			x := col % nx
 			return shp.Offset([]int{xx, row, x})
 		}
 	case 4:
-		ny := shp.Size(2)
+		ny := shp.DimSize(2)
 		yy := row / ny
 		y := row % ny
-		nx := shp.Size(3)
+		nx := shp.DimSize(3)
 		xx := col / nx
 		x := col % nx
 		return shp.Offset([]int{yy, xx, y, x})
 	case 5:
 		// todo: oddRows version!
-		nyy := shp.Size(1)
-		ny := shp.Size(3)
+		nyy := shp.DimSize(1)
+		ny := shp.DimSize(3)
 		yyy := row / (nyy * ny)
 		yy := row % (nyy * ny)
 		y := yy % ny
 		yy = yy / ny
-		nx := shp.Size(4)
+		nx := shp.DimSize(4)
 		xx := col / nx
 		x := col % nx
 		return shp.Offset([]int{yyy, yy, xx, y, x})

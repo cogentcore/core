@@ -84,16 +84,16 @@ func TestReadTableDat(t *testing.T) {
 		if sc[2].DataType() != reflect.Float32 {
 			t.Errorf("TableHeaders: sc[2] != FLOAT32\n")
 		}
-		if sc[1].Shape().Size(0) != 6 {
-			t.Errorf("TableHeaders: sc[1].Dim[0] != 6 = %v\n", sc[1].Shape().Size(0))
+		if sc[1].Shape().DimSize(0) != 6 {
+			t.Errorf("TableHeaders: sc[1].Dim[0] != 6 = %v\n", sc[1].Shape().DimSize(0))
 		}
-		if sc[1].Shape().Size(1) != 5 {
+		if sc[1].Shape().DimSize(1) != 5 {
 			t.Errorf("TableHeaders: sc[1].Dim[1] != 5\n")
 		}
-		if sc[2].Shape().Size(0) != 6 {
-			t.Errorf("TableHeaders: sc[2].Dim[0] != 6 = %v\n", sc[2].Shape().Size(0))
+		if sc[2].Shape().DimSize(0) != 6 {
+			t.Errorf("TableHeaders: sc[2].Dim[0] != 6 = %v\n", sc[2].Shape().DimSize(0))
 		}
-		if sc[2].Shape().Size(1) != 5 {
+		if sc[2].Shape().DimSize(1) != 5 {
 			t.Errorf("TableHeaders: sc[2].Dim[1] != 5\n")
 		}
 		fo, err := os.Create("testdata/emer_simple_lines_5x5_rec.dat")

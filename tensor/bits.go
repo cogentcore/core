@@ -77,7 +77,7 @@ func (tsr *Bits) Len() int { return tsr.Shp.Len() }
 func (tsr *Bits) NumDims() int { return tsr.Shp.NumDims() }
 
 // DimSize returns size of given dimension
-func (tsr *Bits) DimSize(dim int) int { return tsr.Shp.Size(dim) }
+func (tsr *Bits) DimSize(dim int) int { return tsr.Shp.DimSize(dim) }
 
 // RowCellSize returns the size of the outer-most Row shape dimension,
 // and the size of all the remaining inner dimensions (the "cell" size).

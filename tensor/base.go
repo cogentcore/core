@@ -29,7 +29,7 @@ func (tsr *Base[T]) Len() int { return tsr.Shp.Len() }
 func (tsr *Base[T]) NumDims() int { return tsr.Shp.NumDims() }
 
 // DimSize returns size of given dimension
-func (tsr *Base[T]) DimSize(dim int) int { return tsr.Shp.Size(dim) }
+func (tsr *Base[T]) DimSize(dim int) int { return tsr.Shp.DimSize(dim) }
 
 // RowCellSize returns the size of the outer-most Row shape dimension,
 // and the size of all the remaining inner dimensions (the "cell" size).
@@ -124,7 +124,7 @@ func (tsr *Base[T]) Dims() (r, c int) {
 		log.Println("tensor Dims gonum Matrix call made on Tensor with dims < 2")
 		return 0, 0
 	}
-	return tsr.Shp.Size(nd - 2), tsr.Shp.Size(nd - 1)
+	return tsr.Shp.DimSize(nd - 2), tsr.Shp.DimSize(nd - 1)
 }
 
 // Symmetric is the gonum/mat.Matrix interface method for returning the dimensionality of a symmetric
@@ -135,11 +135,11 @@ func (tsr *Base[T]) Symmetric() (r int) {
 		log.Println("tensor Symmetric gonum Matrix call made on Tensor with dims < 2")
 		return 0
 	}
-	if tsr.Shp.Size(nd-2) != tsr.Shp.Size(nd-1) {
+	if tsr.Shp.DimSize(nd-2) != tsr.Shp.DimSize(nd-1) {
 		log.Println("tensor Symmetric gonum Matrix call made on Tensor that is not symmetric")
 		return 0
 	}
-	return tsr.Shp.Size(nd - 1)
+	return tsr.Shp.DimSize(nd - 1)
 }
 
 // SymmetricDim returns the number of rows/columns in the matrix.
@@ -149,11 +149,11 @@ func (tsr *Base[T]) SymmetricDim() int {
 		log.Println("tensor Symmetric gonum Matrix call made on Tensor with dims < 2")
 		return 0
 	}
-	if tsr.Shp.Size(nd-2) != tsr.Shp.Size(nd-1) {
+	if tsr.Shp.DimSize(nd-2) != tsr.Shp.DimSize(nd-1) {
 		log.Println("tensor Symmetric gonum Matrix call made on Tensor that is not symmetric")
 		return 0
 	}
-	return tsr.Shp.Size(nd - 1)
+	return tsr.Shp.DimSize(nd - 1)
 }
 
 // SetMetaData sets a key=value meta data (stored as a map[string]string).

@@ -26,7 +26,7 @@ func TensorDivNorm(tsr tensor.Tensor, ndim int, nfunc32 Func32, nfunc64 Func64) 
 	sln := 1
 	ln := tsr.Len()
 	for i := 0; i < ndim; i++ {
-		sln *= tsr.Shape().Size(i)
+		sln *= tsr.Shape().DimSize(i)
 	}
 	dln := ln / sln
 	for sl := 0; sl < sln; sl++ {
@@ -52,7 +52,7 @@ func TensorSubNorm(tsr tensor.Tensor, ndim int, nfunc32 Func32, nfunc64 Func64) 
 	sln := 1
 	ln := tsr.Len()
 	for i := 0; i < ndim; i++ {
-		sln *= tsr.Shape().Size(i)
+		sln *= tsr.Shape().DimSize(i)
 	}
 	dln := ln / sln
 	for sl := 0; sl < sln; sl++ {

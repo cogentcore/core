@@ -69,8 +69,8 @@ func (sh *Shape) Len() int {
 // NumDims returns the total number of dimensions.
 func (sh *Shape) NumDims() int { return len(sh.Sizes) }
 
-// Size returns the size of given dimension.
-func (sh *Shape) Size(i int) int { return sh.Sizes[i] }
+// DimSize returns the size of given dimension.
+func (sh *Shape) DimSize(i int) int { return sh.Sizes[i] }
 
 // DimName returns the name of given dimension.
 func (sh *Shape) DimName(i int) string { return sh.Names[i] }
@@ -86,10 +86,10 @@ func (sh *Shape) DimByName(name string) int {
 	return -1
 }
 
-// SizeByName returns the size of given dimension, specified by name.
+// DimSizeByName returns the size of given dimension, specified by name.
 // will crash if name not found.
-func (sh *Shape) SizeByName(name string) int {
-	return sh.Size(sh.DimByName(name))
+func (sh *Shape) DimSizeByName(name string) int {
+	return sh.DimSize(sh.DimByName(name))
 }
 
 // IndexIsValid() returns true if given index is valid (within ranges for all dimensions)
