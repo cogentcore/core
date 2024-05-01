@@ -105,6 +105,15 @@ func TestVector2(t *testing.T) {
 	v.SetMulScalar(-3)
 	assert.Equal(t, Vec2(48, 6), v)
 
+	assert.Equal(t, Vec2(16, 3), v.Div(Vec2(3, 2)))
+	assert.Equal(t, Vec2(-12, -1.5), v.DivScalar(-4))
+
+	v.SetDiv(Vec2(2, 1))
+	assert.Equal(t, Vec2(24, 6), v)
+
+	v.SetDivScalar(-3)
+	assert.Equal(t, Vec2(-8, -2), v)
+
 	v = Vec2(3.5, 19)
 
 	assert.Equal(t, Vec2(7.5, 19), v.AddDim(X, 4))
