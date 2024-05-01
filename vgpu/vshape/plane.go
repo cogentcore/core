@@ -176,7 +176,7 @@ func SetPlane(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, v
 			vtx.ToArray(vtxAry, vidx)
 			norm.ToArray(normAry, vidx)
 			tex.Set(float32(ix)/float32(wsegs), float32(1)-(float32(iy)/float32(hsegs)))
-			tex.ToArray(texAry, tidx)
+			tex.ToSlice(texAry, tidx)
 			vidx += 3
 			tidx += 2
 		}

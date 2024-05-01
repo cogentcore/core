@@ -82,4 +82,11 @@ func TestVector2(t *testing.T) {
 
 	v.SetZero()
 	assert.Equal(t, Vec2(0, 0), v)
+
+	v.FromSlice([]float32{3, 2, 1}, 1)
+	assert.Equal(t, Vec2(2, 1), v)
+
+	slice := []float32{0, 0, 0, 0, 0}
+	v.ToSlice(slice, 2)
+	assert.Equal(t, []float32{0, 0, 2, 1, 0}, slice)
 }

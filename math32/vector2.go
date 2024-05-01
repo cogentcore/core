@@ -234,16 +234,16 @@ func (v *Vector2) SetZero() {
 	v.SetScalar(0)
 }
 
-// FromArray sets this vector's components from the specified array and offset.
-func (v *Vector2) FromArray(array []float32, offset int) {
-	v.X = array[offset]
-	v.Y = array[offset+1]
+// FromSlice sets this vector's components from the given slice, starting at offset.
+func (v *Vector2) FromSlice(slice []float32, offset int) {
+	v.X = slice[offset]
+	v.Y = slice[offset+1]
 }
 
-// ToArray copies this vector's components to array starting at offset.
-func (v Vector2) ToArray(array []float32, offset int) {
-	array[offset] = v.X
-	array[offset+1] = v.Y
+// ToSlice copies this vector's components to the given slice, starting at offset.
+func (v Vector2) ToSlice(slice []float32, offset int) {
+	slice[offset] = v.X
+	slice[offset+1] = v.Y
 }
 
 ///////////////////////////////////////////////////////////////////////

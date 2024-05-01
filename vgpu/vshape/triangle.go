@@ -36,9 +36,9 @@ func SetTriangle(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32
 	c.Add(pos).ToArray(vtxAry, vidx+6)
 	norm.ToArray(normAry, vidx+6)
 	if hasTex {
-		texs[0].ToArray(texAry, tidx)
-		texs[1].ToArray(texAry, tidx+2)
-		texs[2].ToArray(texAry, tidx+4)
+		texs[0].ToSlice(texAry, tidx)
+		texs[1].ToSlice(texAry, tidx+2)
+		texs[2].ToSlice(texAry, tidx+4)
 	}
 
 	idxAry.Set(idxOff, uint32(vtxOff), uint32(vtxOff+1), uint32(vtxOff+2))
@@ -74,7 +74,7 @@ func SetQuad(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vt
 		norm.ToArray(normAry, vidx)
 		vidx += 3
 		if hasTex {
-			texs[vi].ToArray(texAry, tidx)
+			texs[vi].ToSlice(texAry, tidx)
 			tidx += 2
 		}
 	}
