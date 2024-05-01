@@ -146,9 +146,9 @@ func (pl *PlotView) GenPlotXY() {
 					ec := pl.Table.Table.ColumnIndex(cp.ErrColumn)
 					if ec >= 0 {
 						xy.ErrColumn = ec
-						// eb, _ := plots.NewYErrorBars(xy)
-						// eb.LineStyle.Color = clr
-						// plt.Add(eb)
+						eb, _ := plots.NewYErrorBars(xy)
+						eb.LineStyle.Color = colors.C(clr)
+						plt.Add(eb)
 					}
 				}
 			}

@@ -278,3 +278,50 @@ func TestBarChartStack(t *testing.T) {
 	pt.Draw()
 	imagex.Assert(t, pt.Pixels, "bar-stacked.png")
 }
+
+type XYErr struct {
+	XYs
+	YErrors
+}
+
+func TestErrBar(t *testing.T) {
+	pt := plot.New()
+	pt.Title.Text = "Test Line Errors"
+	pt.X.Label.Text = "X Axis"
+	pt.Y.Min = 0
+	pt.Y.Max = 100
+	pt.Y.Label.Text = "Y Axis"
+
+	data := make(XYs, 21)
+	for i := range data {
+		x := float32(i % 21)
+		data[i].X = x * 5
+		data[i].Y = float32(50) + 40*math32.Sin((x/8)*math32.Pi)
+	}
+
+	yerr := make(YErrors, 21)
+	for i := range yerr {
+		x := float32(i % 21)
+		yerr[i].High = float32(5) + 4*math32.Cos((x/8)*math32.Pi)
+		yerr[i].Low = -yerr[i].High
+	}
+
+	xyerr := XYErr{XYs: data, YErrors: yerr}
+
+	l1, err := NewLine(data)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	pt.Add(l1)
+	pt.Legend.Add("Sine", l1)
+
+	l2, err := NewYErrorBars(xyerr)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	pt.Add(l2)
+
+	pt.Resize(image.Point{640, 480})
+	pt.Draw()
+	imagex.Assert(t, pt.Pixels, "errbar.png")
+}
