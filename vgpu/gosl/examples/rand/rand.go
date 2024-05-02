@@ -4,15 +4,15 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/math32"
-	"github.com/emer/gosl/v2/slrand"
-	"github.com/emer/gosl/v2/sltype"
+	"cogentcore.org/core/vgpu/gosl/slrand"
+	"cogentcore.org/core/vgpu/gosl/sltype"
 )
 
-//gosl: hlsl rand
+//gosl hlsl: rand
 // #include "slrand.hlsl"
-//gosl: end rand
+//gosl end: rand
 
-//gosl: start rand
+//gosl start: rand
 
 type Rnds struct {
 	Uints      sltype.Uint2
@@ -39,7 +39,7 @@ func (r *Rnds) RndGen(counter sltype.Uint2, idx uint32) {
 	r.Gauss = slrand.NormFloat2(&counter, idx)
 }
 
-//gosl: end rand
+//gosl end: rand
 
 const Tol = 1.0e-4 // fails at lower tol eventually -- -6 works for many
 

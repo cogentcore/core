@@ -1,4 +1,4 @@
-// Copyright (c) 2022, The Goki Authors. All rights reserved.
+// Copyright (c) 2022, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -140,7 +140,7 @@ func CopySlrand() error {
 	hdr := "slrand.hlsl"
 	tofn := filepath.Join(*outDir, hdr)
 
-	pnm := "github.com/emer/gosl/v2/slrand"
+	pnm := "cogentcore.org/core/vgpu/gosl/slrand"
 
 	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles}, pnm)
 	if err != nil {

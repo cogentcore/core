@@ -1,4 +1,4 @@
-// Copyright (c) 2022, The Goki Authors. All rights reserved.
+// Copyright (c) 2022, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -31,11 +31,11 @@ func ReadFileLines(fn string) ([][]byte, error) {
 // Extracts comment-directive tagged regions from .go files
 func ExtractGoFiles(files []string) map[string][]byte {
 	sls := map[string][][]byte{}
-	key := []byte("//gosl: ")
-	start := []byte("start")
-	hlsl := []byte("hlsl")
-	nohlsl := []byte("nohlsl")
-	end := []byte("end")
+	key := []byte("//gosl ")
+	start := []byte("start:")
+	hlsl := []byte("hlsl:")
+	nohlsl := []byte("nohlsl:")
+	end := []byte("end:")
 	nl := []byte("\n")
 	include := []byte("#include")
 
@@ -123,10 +123,10 @@ func ExtractGoFiles(files []string) map[string][]byte {
 // ExtractHLSL extracts the HLSL code embedded within .Go files.
 // Returns true if HLSL contains a void main( function.
 func ExtractHLSL(buf []byte) ([]byte, bool) {
-	key := []byte("//gosl: ")
-	hlsl := []byte("hlsl")
-	nohlsl := []byte("nohlsl")
-	end := []byte("end")
+	key := []byte("//gosl ")
+	hlsl := []byte("hlsl:")
+	nohlsl := []byte("nohlsl:")
+	end := []byte("end:")
 	nl := []byte("\n")
 	stComment := []byte("/*")
 	edComment := []byte("*/")

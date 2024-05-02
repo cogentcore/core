@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/emer/gosl/v2/diff"
+	"github.com/stretchr/testify/assert"
 )
 
 var update = flag.Bool("update", false, "update .golden files")
@@ -37,10 +37,8 @@ func runTest(t *testing.T, in, out string) {
 		return
 	}
 
-	outfn := ""
 	var got []byte
-	for fn, b := range sls {
-		outfn = filepath.Join(*outDir, fn+".hlsl")
+	for _, b := range sls {
 		got = b
 		break
 	}
@@ -57,8 +55,7 @@ func runTest(t *testing.T, in, out string) {
 			t.Errorf("WARNING: -update did not rewrite input file %s", in)
 		}
 
-		t.Errorf("(gosl %s) != %s (see %s.gosl)\n%s", outfn, out, in,
-			diff.Diff("expected", expected, "got", got))
+		assert.Equal(t, expected, got)
 		if err := os.WriteFile(in+".gosl", got, 0666); err != nil {
 			t.Error(err)
 		}
@@ -73,6 +70,11 @@ func runTest(t *testing.T, in, out string) {
 //
 // in the processed file within the first 20 lines, if any.
 func TestRewrite(t *testing.T) {
+	if gomod := os.Getenv("GO111MODULE"); gomod == "off" {
+		t.Error("gosl only works in go modules mode, but GO111MODULE=off")
+		return
+	}
+
 	// determine input files
 	match, err := filepath.Glob("testdata/*.go")
 	if err != nil {

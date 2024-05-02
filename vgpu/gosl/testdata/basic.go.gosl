@@ -1,12 +1,26 @@
 
+//gosl nohlsl: basic
 
-// note: here is the hlsl version, only included in hlsl
+// note: this code is included in the go pre-processing output but
+// then removed from the final hlsl output.
+// Use when you need different versions of the same function for CPU vs. GPU
 
-// MyTrickyFun this is the GPU version of the tricky function
+// MyTrickyFun this is the CPU version of the tricky function
 float MyTrickyFun(float x) {
-	return 16; // ok actually not tricky here, but whatever
+	return 10; // ok actually not tricky here, but whatever
 }
 
+//gosl end: basic
+//gosl hlsl: basic
+
+// // note: here is the hlsl version, only included in hlsl
+
+// // MyTrickyFun this is the GPU version of the tricky function
+// float MyTrickyFun(float x) {
+// 	return 16; // ok actually not tricky here, but whatever
+// }
+
+//gosl end: basic
 
 // FastExp is a quartic spline approximation to the Exp function, by N.N. Schraudolph
 // It does not have any of the sanity checking of a standard method -- returns
@@ -119,9 +133,13 @@ struct ParamStruct {
 };
 
 
+//gosl hlsl: basic
+/*
 [[vk::binding(0, 0)]] StructuredBuffer<ParamStruct> Params;
 [[vk::binding(0, 1)]] RWStructuredBuffer<DataStruct> Data;
 [numthreads(1, 1, 1)]
 void main(uint3 idx : SV_DispatchThreadID) {
     Params[0].IntegFromRaw(Data[idx.x], Data[idx.x].Pad2);
 }
+*/
+//gosl end: basic

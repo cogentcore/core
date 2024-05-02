@@ -1,4 +1,4 @@
-// Copyright (c) 2022, The Goki Authors. All rights reserved.
+// Copyright (c) 2022, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -16,7 +16,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/emer/gosl/v2/slprint"
+	"cogentcore.org/core/vgpu/gosl/slprint"
 )
 
 // flags
@@ -61,9 +61,17 @@ func GoslArgs() {
 
 func goslMain() {
 	if *outDir == "" {
-		fmt.Printf("Must have an output directory (default shaders), specified in -out arg\n")
+		fmt.Println("Must have an output directory (default shaders), specified in -out arg")
+		os.Exit(1)
 		return
 	}
+
+	if gomod := os.Getenv("GO111MODULE"); gomod == "off" {
+		fmt.Println("gosl only works in go modules mode, but GO111MODULE=off")
+		os.Exit(1)
+		return
+	}
+
 	os.MkdirAll(*outDir, 0755)
 	RemoveGenFiles(*outDir)
 

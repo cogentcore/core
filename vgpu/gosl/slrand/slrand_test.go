@@ -1,4 +1,4 @@
-// Copyright (c) 2022, The Goki Authors. All rights reserved.
+// Copyright (c) 2022, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -9,7 +9,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/emer/gosl/v2/sltype"
+	"cogentcore.org/core/vgpu/gosl/sltype"
 )
 
 // Known Answer Test for values from the DEShawREsearch reference impl

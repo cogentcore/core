@@ -1,4 +1,4 @@
-// Copyright (c) 2022, The Goki Authors. All rights reserved.
+// Copyright (c) 2022, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -8,7 +8,7 @@ import (
 	"math"
 
 	"cogentcore.org/core/math32"
-	"github.com/emer/gosl/v2/sltype"
+	"cogentcore.org/core/vgpu/gosl/sltype"
 )
 
 // These are Go versions of the same Philox2x32 based random number generator

@@ -1,7 +1,9 @@
-// Copyright (c) 2022, The Goki Authors. All rights reserved.
+// Copyright (c) 2022, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// This example just does some basic calculations on data structures and
+// reports the time difference between the CPU and GPU.
 package main
 
 import (
@@ -10,9 +12,9 @@ import (
 	"runtime"
 	"unsafe"
 
+	"cogentcore.org/core/base/timer"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/vgpu"
-	"github.com/emer/gosl/v2/timer"
 )
 
 // note: standard one to use is plain "gosl" which should be go install'd
@@ -20,8 +22,7 @@ import (
 //go:generate ../../gosl cogentcore.org/core/math32/fastexp.go compute.go
 
 func init() {
-	// must lock main thread for gpu!  this also means that vulkan must be used
-	// for gogi/oswin eventually if we want gui and compute
+	// must lock main thread for gpu!
 	runtime.LockOSThread()
 }
 

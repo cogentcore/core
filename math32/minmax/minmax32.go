@@ -6,7 +6,7 @@ package minmax
 
 import "fmt"
 
-//gosl: start minmax
+//gosl start: minmax
 
 // F32 represents a min / max range for float32 values.
 // Supports clipping, renormalizing, etc
@@ -119,7 +119,7 @@ func (mr *F32) ClipNormValue(val float32) float32 {
 	return mr.NormValue(val)
 }
 
-//gosl: end minmax
+//gosl end: minmax
 
 func (mr *F32) String() string {
 	return fmt.Sprintf("{%g %g}", mr.Min, mr.Max)

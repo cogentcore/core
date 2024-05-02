@@ -105,7 +105,10 @@ func (pl *PlotView) OnAdd() {
 	})
 }
 
-// SetTableView sets the table to view and updates view
+// SetTableView sets the table to view and does Update
+// to update the Column list, which will also trigger a Layout
+// and updating of the plot on next render pass.
+// This is safe to call from a different goroutine.
 func (pl *PlotView) SetTableView(tab *table.IndexView) *PlotView {
 	pl.Table = tab
 	pl.DeleteColumns()
@@ -113,7 +116,10 @@ func (pl *PlotView) SetTableView(tab *table.IndexView) *PlotView {
 	return pl
 }
 
-// SetTable sets the table to view and updates view
+// SetTable sets the table to view and does Update
+// to update the Column list, which will also trigger a Layout
+// and updating of the plot on next render pass.
+// This is safe to call from a different goroutine.
 func (pl *PlotView) SetTable(tab *table.Table) *PlotView {
 	pl.Table = table.NewIndexView(tab)
 	pl.DeleteColumns()
@@ -621,7 +627,5 @@ func (pl *PlotView) ConfigToolbar(tb *core.Toolbar) {
 
 func (pt *PlotView) SizeFinal() {
 	pt.Layout.SizeFinal()
-	if pt.NeedsRebuild() {
-		pt.UpdatePlot()
-	}
+	pt.UpdatePlot()
 }

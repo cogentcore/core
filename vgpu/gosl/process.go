@@ -1,4 +1,4 @@
-// Copyright (c) 2022, The Goki Authors. All rights reserved.
+// Copyright (c) 2022, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -22,8 +22,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/emer/gosl/v2/alignsl"
-	"github.com/emer/gosl/v2/slprint"
+	"cogentcore.org/core/vgpu/gosl/alignsl"
+	"cogentcore.org/core/vgpu/gosl/slprint"
 	"golang.org/x/tools/go/packages"
 )
 
