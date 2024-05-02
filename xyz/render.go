@@ -169,7 +169,12 @@ func (sc *Scene) ImageCopy() (*image.RGBA, error) {
 }
 
 // AssertImage asserts the [Scene.Image] at the given filename using [imagex.Assert].
+// It first configures, updates, and renders the scene.
 func (sc *Scene) AssertImage(t imagex.TestingT, filename string) {
+	sc.Config()
+	sc.UpdateNodes()
+	sc.Render()
+
 	img, err := sc.Image()
 	if err != nil {
 		t.Errorf("xyz.Scene.AssertImage: error getting image: %w", err)

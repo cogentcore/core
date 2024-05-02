@@ -6,7 +6,6 @@ package main
 
 import (
 	"image/color"
-	"log"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
@@ -75,9 +74,7 @@ func main() {
 
 	sc.Config()
 	sc.UpdateNodes()
-	if !sc.Render() {
-		log.Println("no render")
-	}
+	sc.Render()
 
 	img := errors.Must1(sc.Image())
 	imagex.Save(img, "render.png")
