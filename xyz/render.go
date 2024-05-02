@@ -138,7 +138,7 @@ func (sc *Scene) Image() (*image.RGBA, error) {
 	return nil, err
 }
 
-// ImageDone must be called when done using the image returned by [Image].
+// ImageDone must be called when done using the image returned by [Scene.Image].
 func (sc *Scene) ImageDone() {
 	if sc.Frame == nil {
 		return
@@ -168,14 +168,18 @@ func (sc *Scene) ImageCopy() (*image.RGBA, error) {
 	return nil, err
 }
 
-// AssertImage asserts the [Scene.Image] at the given filename using [imagex.Assert].
-// It first configures, updates, and renders the scene.
-func (sc *Scene) AssertImage(t imagex.TestingT, filename string) {
+// ImageUpdate configures, updates, and renders the scene, then returns [Scene.Image].
+func (sc *Scene) ImageUpdate() (*image.RGBA, error) {
 	sc.Config()
 	sc.UpdateNodes()
 	sc.Render()
+	return sc.Image()
+}
 
-	img, err := sc.Image()
+// AssertImage asserts the [Scene.Image] at the given filename using [imagex.Assert].
+// It first configures, updates, and renders the scene.
+func (sc *Scene) AssertImage(t imagex.TestingT, filename string) {
+	img, err := sc.ImageUpdate()
 	if err != nil {
 		t.Errorf("xyz.Scene.AssertImage: error getting image: %w", err)
 		return

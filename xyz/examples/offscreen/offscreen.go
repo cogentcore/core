@@ -72,11 +72,7 @@ func main() {
 	floor.Mat.Tiling.Repeat.Set(40, 40)
 	// floor.SetDisabled() // not selectable
 
-	sc.Config()
-	sc.UpdateNodes()
-	sc.Render()
-
-	img := errors.Must1(sc.Image())
+	img := errors.Must1(sc.ImageUpdate())
 	imagex.Save(img, "render.png")
 	sc.ImageDone()
 }
