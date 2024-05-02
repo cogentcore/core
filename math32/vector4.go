@@ -105,7 +105,8 @@ func (v Vector4) String() string {
 	return fmt.Sprintf("(%v, %v, %v, %v)", v.X, v.Y, v.Z, v.W)
 }
 
-// SetZero sets all of the vector's components to zero.
+// SetZero sets all of the vector's components to zero,
+// except for the W component, which it sets to 1, as is standard.
 func (v *Vector4) SetZero() {
 	v.X = 0
 	v.Y = 0

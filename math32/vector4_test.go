@@ -40,7 +40,7 @@ func TestVector4(t *testing.T) {
 	assert.Equal(t, float32(-21), v.Dim(W))
 
 	v.SetZero()
-	assert.Equal(t, Vec4(0, 0, 0, 1), v) // TODO: W=1?
+	assert.Equal(t, Vec4(0, 0, 0, 1), v)
 
 	v.FromSlice([]float32{3, 2, 1, 4, 5}, 1)
 	assert.Equal(t, Vec4(2, 1, 4, 5), v)
