@@ -56,10 +56,10 @@ func BodyVelBBoxIntersects(a, b Node) Contacts {
 		if aii == nil {
 			return false // going into a different type of thing, bail
 		}
-		if aii.EveNodeType() != BODY {
+		abod := aii.AsBody() // only consider bodies for collision
+		if abod == nil {
 			return true
 		}
-		abod := aii.AsBody() // only consider bodies from a
 
 		b.WalkDown(func(k tree.Node) bool {
 			bii, bi := AsNode(k)
@@ -69,11 +69,12 @@ func BodyVelBBoxIntersects(a, b Node) Contacts {
 			if !ai.BBox.IntersectsVelBox(&bi.BBox) {
 				return false // done
 			}
-			if bii.EveNodeType() == BODY {
-				cts.New(abod, bii.AsBody())
-				return false // done
+			bbod := bii.AsBody() // only consider bodies for collision
+			if bbod == nil {
+				return true
 			}
-			return true // keep going
+			cts.New(abod, bbod)
+			return false // done
 		})
 
 		return false

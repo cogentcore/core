@@ -11,12 +11,9 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Node is the common interface for all eve nodes
+// Node is the common interface for all nodes
 type Node interface {
 	tree.Node
-
-	// EveNodeType returns the type of node this is (Body, Group, Joint)
-	EveNodeType() NodeTypes
 
 	// AsNodeBase returns a generic NodeBase for our node -- gives generic
 	// access to all the base-level data structures without needing interface methods.
@@ -55,7 +52,7 @@ type Node interface {
 	Step(step float32)
 }
 
-// NodeBase is the basic eve node, which has position, rotation, velocity
+// NodeBase is the basic node, which has position, rotation, velocity
 // and computed bounding boxes, etc.
 // There are only three different kinds of Nodes: Group, Body, and Joint
 type NodeBase struct {
@@ -169,23 +166,10 @@ func AsNode(k tree.Node) (Node, *NodeBase) {
 	return nil, nil
 }
 
-/////////////////////////////////////////////////////////////////////
-// NodeTypes
-
-// NodeTypes is a list of node types
-type NodeTypes int32 //enums:enum
-
-const (
-	// note: uppercase required to not conflict with type names
-	BODY NodeTypes = iota
-	GROUP
-	JOINT
-)
-
 //////////////////////////////////////////////////////////////////////
 // NodeFlags
 
-// NodeFlags define eve node bitflags -- uses ki Flags field (64 bit capacity)
+// NodeFlags define node bitflags -- uses ki Flags field (64 bit capacity)
 type NodeFlags tree.Flags //enums:bitflag
 
 const (

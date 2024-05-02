@@ -31,10 +31,6 @@ type BodyBase struct {
 	Color string
 }
 
-func (bb *BodyBase) EveNodeType() NodeTypes {
-	return BODY
-}
-
 func (bb *BodyBase) AsBody() Body {
 	return bb.This().(Body)
 }

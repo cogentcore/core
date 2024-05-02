@@ -7,49 +7,6 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-var _NodeTypesValues = []NodeTypes{0, 1, 2}
-
-// NodeTypesN is the highest valid value for type NodeTypes, plus one.
-const NodeTypesN NodeTypes = 3
-
-var _NodeTypesValueMap = map[string]NodeTypes{`BODY`: 0, `GROUP`: 1, `JOINT`: 2}
-
-var _NodeTypesDescMap = map[NodeTypes]string{0: `note: uppercase required to not conflict with type names`, 1: ``, 2: ``}
-
-var _NodeTypesMap = map[NodeTypes]string{0: `BODY`, 1: `GROUP`, 2: `JOINT`}
-
-// String returns the string representation of this NodeTypes value.
-func (i NodeTypes) String() string { return enums.String(i, _NodeTypesMap) }
-
-// SetString sets the NodeTypes value from its string representation,
-// and returns an error if the string is invalid.
-func (i *NodeTypes) SetString(s string) error {
-	return enums.SetString(i, s, _NodeTypesValueMap, "NodeTypes")
-}
-
-// Int64 returns the NodeTypes value as an int64.
-func (i NodeTypes) Int64() int64 { return int64(i) }
-
-// SetInt64 sets the NodeTypes value from an int64.
-func (i *NodeTypes) SetInt64(in int64) { *i = NodeTypes(in) }
-
-// Desc returns the description of the NodeTypes value.
-func (i NodeTypes) Desc() string { return enums.Desc(i, _NodeTypesDescMap) }
-
-// NodeTypesValues returns all possible values for the type NodeTypes.
-func NodeTypesValues() []NodeTypes { return _NodeTypesValues }
-
-// Values returns all possible values for the type NodeTypes.
-func (i NodeTypes) Values() []enums.Enum { return enums.Values(_NodeTypesValues) }
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i NodeTypes) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *NodeTypes) UnmarshalText(text []byte) error {
-	return enums.UnmarshalText(i, text, "NodeTypes")
-}
-
 var _NodeFlagsValues = []NodeFlags{1}
 
 // NodeFlagsN is the highest valid value for type NodeFlags, plus one.

@@ -19,10 +19,6 @@ type Group struct {
 	NodeBase
 }
 
-func (gp *Group) EveNodeType() NodeTypes {
-	return GROUP
-}
-
 func (gp *Group) InitAbs(par *NodeBase) {
 	gp.InitAbsBase(par)
 }
@@ -225,10 +221,10 @@ func (gp *Group) RayBodyIntersections(ray math32.Ray) []*BodyPoint {
 		if !has {
 			return false
 		}
-		if nii.EveNodeType() != BODY {
+		bd := nii.AsBody()
+		if bd == nil {
 			return true
 		}
-		bd := nii.AsBody()
 		bs = append(bs, &BodyPoint{bd, pt})
 		return false
 	})
