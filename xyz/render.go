@@ -9,6 +9,7 @@ import (
 	"image"
 	"sort"
 
+	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vgpu"
@@ -150,7 +151,7 @@ func (sc *Scene) ImageDone() {
 // This same image is used across calls to avoid large memory allocations,
 // so it will automatically update after the next ImageCopy call.
 // The underlying image is in the [ImgCopy] field.
-// If a persistent image is required, call [iox/imagex.CloneAsRGBA].
+// If a persistent image is required, call [imagex.CloneAsRGBA].
 func (sc *Scene) ImageCopy() (*image.RGBA, error) {
 	fr := sc.Frame
 	if fr == nil {
@@ -165,6 +166,17 @@ func (sc *Scene) ImageCopy() (*image.RGBA, error) {
 		return &sc.ImgCopy, err
 	}
 	return nil, err
+}
+
+// AssertImage asserts the [Scene.Image] at the given filename using [imagex.Assert].
+func (sc *Scene) AssertImage(t imagex.TestingT, filename string) {
+	img, err := sc.Image()
+	if err != nil {
+		t.Errorf("xyz.Scene.AssertImage: error getting image: %w", err)
+		return
+	}
+	imagex.Assert(t, img, filename)
+	sc.ImageDone()
 }
 
 // DepthImage returns the current rendered depth image

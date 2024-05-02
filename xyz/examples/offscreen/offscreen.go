@@ -5,10 +5,10 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
@@ -79,11 +79,7 @@ func main() {
 		log.Println("no render")
 	}
 
-	img, err := sc.Image() // Copy() // copy needed because it is linear colorspace
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	img := errors.Must1(sc.Image())
 	imagex.Save(img, "render.png")
-	// sc.ImageDone()
+	sc.ImageDone()
 }
