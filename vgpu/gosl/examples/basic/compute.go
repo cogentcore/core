@@ -6,11 +6,11 @@ package main
 
 import "cogentcore.org/core/math32"
 
-//gosl hlsl: basic
+//gosl:hlsl basic
 // #include "fastexp.hlsl"
-//gosl end: basic
+//gosl:end basic
 
-//gosl start: basic
+//gosl:start basic
 
 // DataStruct has the test data
 type DataStruct struct {
@@ -46,7 +46,7 @@ func (ps *ParamStruct) IntegFromRaw(ds *DataStruct) {
 	ds.Exp = math32.FastExp(-ds.Integ)
 }
 
-//gosl end: basic
+//gosl:end basic
 
 // note: only core compute code needs to be in shader -- all init is done CPU-side
 
@@ -59,7 +59,7 @@ func (ps *ParamStruct) Update() {
 	ps.Dt = 1.0 / ps.Tau
 }
 
-//gosl hlsl: basic
+//gosl:hlsl basic
 /*
 // // note: double-commented lines required here -- binding is var, set
 [[vk::binding(0, 0)]] RWStructuredBuffer<ParamStruct> Params;
@@ -71,4 +71,4 @@ void main(uint3 idx : SV_DispatchThreadID) {
     Params[0].IntegFromRaw(Data[idx.x]);
 }
 */
-//gosl end: basic
+//gosl:end basic

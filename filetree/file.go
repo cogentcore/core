@@ -337,6 +337,7 @@ func (fn *Node) NewFile(filename string, addToVCS bool) { //types:add
 	if addToVCS {
 		nfn, ok := fn.FRoot.FindFile(np)
 		if ok && nfn.This() != fn.FRoot.This() {
+			// todo: this is where it is erroneously adding too many files to vcs!
 			nfn.AddToVCS()
 		}
 	}

@@ -4,7 +4,6 @@
 
 // Package timer provides a simple wall-clock duration timer based on standard
 // time.  Accumulates total and average over multiple Start / Stop intervals.
-// This is copied from emergent/timer, to avoid circular dependency.
 package timer
 
 //go:generate core generate -add-types
@@ -61,26 +60,4 @@ func (t *Time) Avg() time.Duration {
 		return 0
 	}
 	return t.Total / time.Duration(t.N)
-}
-
-// AvgSecs returns the average start / stop interval (assumes each was measuring the same thing)
-// as a float64 of seconds
-func (t *Time) AvgSecs() float64 {
-	if t.N == 0 {
-		return 0
-	}
-	return float64(t.Total) / (float64(t.N) * float64(time.Second))
-}
-
-// AvgMSecs returns the average start / stop interval as a float64 of milliseconds
-func (t *Time) AvgMSecs() float64 {
-	if t.N == 0 {
-		return 0
-	}
-	return float64(t.Total) / (float64(t.N) * float64(time.Millisecond))
-}
-
-// TotalSecs returns the total start / stop intervals as a float64 of seconds.
-func (t *Time) TotalSecs() float64 {
-	return float64(t.Total) / float64(time.Second)
 }

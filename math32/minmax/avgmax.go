@@ -6,7 +6,7 @@ package minmax
 
 import "fmt"
 
-//gosl start: minmax
+//gosl:start minmax
 
 const (
 	MaxFloat32 float32 = 3.402823466e+38
@@ -69,7 +69,7 @@ func (am *AvgMax32) CalcAvg() {
 	}
 }
 
-//gosl end: minmax
+//gosl:end minmax
 
 func (am *AvgMax32) String() string {
 	return fmt.Sprintf("{Avg: %g, Max: %g, Sum: %g, MaxIndex: %d, N: %d}", am.Avg, am.Max, am.Sum, am.MaxIndex, am.N)

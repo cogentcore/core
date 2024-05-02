@@ -1,19 +1,23 @@
 # gosl
 
-`gosl` implements Go as a shader language for GPU compute shaders: converts Go code to HLSL, and then uses the [glslc](https://github.com/google/shaderc) compiler (e.g., from a vulkan package) to compile into an `.spv` SPIR-V file that can be loaded into a vulkan compute shader.  `glslc` must be [installed](https://askubuntu.com/questions/1252585/how-to-install-glslc-on-ubuntu-20-04)!
+`gosl` implements _Go as a shader language_ for GPU compute shaders (using [Vulkan](https://www.vulkan.org)), **enabling standard Go code to run on the GPU**.
 
-Thus, `gosl` enables the same CPU-based Go code to also be run on the GPU.  The relevant subsets of Go code to use are specifically marked using `//gosl` comment directives, and this code must only use basic expressions and concrete types that will compile correctly in a shader (see [Restrictions](#restrictions) below).  Method functions and pass-by-reference pointer arguments to `struct` types are supported and incur no additional compute cost due to inlining (see notes below for more detail).
+The relevant subsets of Go code are specifically marked using `//gosl` comment directives, and this code must only use basic expressions and concrete types that will compile correctly in a shader (see [Restrictions](#restrictions) below).  Method functions and pass-by-reference pointer arguments to `struct` types are supported and incur no additional compute cost due to inlining (see notes below for more detail).
 
-See `examples/basic` and `examples/axon` examples (simple and much more complicated, respectively), using the [vgpu](https://cogentcore.org/core/vgpu) Vulkan-based GPU compute shader system.
+A large and complex biologically-based neural network simulation framework called [axon](https://github.com/emer/axon) has been implemented using `gosl`, allowing 1000's of lines of equations and data structures to run through standard Go on the CPU, and accelerated significantly on the GPU.  This allows efficient debugging and unit testing of the code in Go, whereas debugging on the GPU is notoriously difficult.
 
-You must also install `goimports` which is used on the extracted subset of Go code:
+`gosl`  converts Go code to HLSL, and then uses the DirectX shader compiler [dxc](https://github.com/microsoft/DirectXShaderCompiler) to compile that into an `.spv` SPIR-V file that can be loaded into a Vulkan GPU compute shader.  `dxc` is included with the [Vulkan SDK](https://vulkan.lunarg.com/sdk/home), which is probably the easiest way to get it installed.  [glslc](https://github.com/google/shaderc) can also compile the HLSL code, but `dxc` is a better option at this point.
+
+See [examples/basic](examples/basic) and [rand](examples/rand) for examples, using the [vgpu](../../vgpu) Vulkan-based GPU compute shader system.  It is also possible in principle to use gosl to generate shader files for any other GPU application, but this has not been tested.
+
+You must also install `goimports` which is used on the extracted subset of Go code, to get the imports right:
 ```bash
 $ go install golang.org/x/tools/cmd/goimports@latest
 ```
 
 To install the `gosl` command, do:
 ```bash
-$ go install github.com/emer/gosl/v2@latest
+$ go install cogentcore.org/core/vgpu/gosl@latest
 ```
 
 In your Go code, use these comment directives:

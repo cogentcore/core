@@ -120,9 +120,9 @@ func main() {
 	}
 	fmt.Printf("\n")
 
-	cpu := cpuTmr.TotalSecs()
-	gpu := gpuTmr.TotalSecs()
-	fmt.Printf("N: %d\t CPU: %6.4g\t GPU: %6.4g\t Full: %6.4g\t CPU/GPU: %6.4g\n", n, cpu, gpu, gpuFullTmr.TotalSecs(), cpu/gpu)
+	cpu := cpuTmr.Total
+	gpu := gpuTmr.Total
+	fmt.Printf("N: %d\t CPU: %v\t GPU: %v\t Full: %v\t CPU/GPU: %6.4g\n", n, cpu, gpu, gpuFullTmr.Total, float64(cpu)/float64(gpu))
 
 	sy.Destroy()
 	gp.Destroy()

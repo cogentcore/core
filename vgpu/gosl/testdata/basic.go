@@ -7,7 +7,7 @@ import (
 	"cogentcore.org/core/vgpu/gosl/slbool"
 )
 
-//gosl nohlsl: basic
+//gosl:endhlsl basic
 
 // note: this code is included in the go pre-processing output but
 // then removed from the final hlsl output.
@@ -18,9 +18,9 @@ func MyTrickyFun(x float32) float32 {
 	return 10 // ok actually not tricky here, but whatever
 }
 
-//gosl end: basic
+//gosl:end basic
 
-//gosl hlsl: basic
+//gosl:hlsl basic
 
 // // note: here is the hlsl version, only included in hlsl
 
@@ -29,9 +29,9 @@ func MyTrickyFun(x float32) float32 {
 // 	return 16; // ok actually not tricky here, but whatever
 // }
 
-//gosl end: basic
+//gosl:end basic
 
-//gosl start: basic
+//gosl:start basic
 
 // FastExp is a quartic spline approximation to the Exp function, by N.N. Schraudolph
 // It does not have any of the sanity checking of a standard method -- returns
@@ -143,7 +143,7 @@ func (ps *ParamStruct) AnotherMeth(ds *DataStruct) {
 	}
 }
 
-//gosl end: basic
+//gosl:end basic
 
 // note: only core compute code needs to be in shader -- all init is done CPU-side
 
@@ -156,7 +156,7 @@ func (ps *ParamStruct) Update() {
 	ps.Dt = 1.0 / ps.Tau
 }
 
-//gosl hlsl: basic
+//gosl:hlsl basic
 /*
 [[vk::binding(0, 0)]] StructuredBuffer<ParamStruct> Params;
 [[vk::binding(0, 1)]] RWStructuredBuffer<DataStruct> Data;
@@ -165,4 +165,4 @@ void main(uint3 idx : SV_DispatchThreadID) {
     Params[0].IntegFromRaw(Data[idx.x], Data[idx.x].Pad2);
 }
 */
-//gosl end: basic
+//gosl:end basic
