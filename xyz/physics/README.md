@@ -1,16 +1,12 @@
 # XYZ Physics Engine
 
-This `physics` engine is a scenegraph-based physics simulator for creating virtual environments.  It provides a `Body` for 
+This `physics` engine is a scenegraph-based 3D physics simulator for creating virtual environments.  It provides a `Body` node for rigid body physics, along with some basic geometrical shapes thereof.  The `physics` scene contains just the bare physics bodies and other elements, which can be updated independent of any visualization.
 
-Ultimately we hope to figure out how the [Bullet](https://github.com/bulletphysics/bullet3) system works and get that running here, in a clean and simple implementation.
+Currently, it provides collision detection and basic forward Euler physics updating, but it does not yet compute any forces for the interactions among the bodies.  Ultimately we hope to figure out how the [Bullet](https://github.com/bulletphysics/bullet3) system works and get that running here, in a clean and simple implementation.
 
 Incrementally, we will start with a basic explicitly driven form of physics that is sufficient to get started, and build from there.
 
-The [world](world) visualization is made using [GoKi](https://github.com/goki/ki) based trees (groups, bodies, joints).
-
-Rendering can *optionally* be performed using corresponding 3D renders in the `xyz` 3D rendering framework in the [Cogent Core](https://cogentcore.org/core) GUI framework, using an `epev.View` object that sync's the two.
-
-We also use the full-featured `math32` math / matrix library (adapted from the `g3n` 3D game environment package).
+The [world](world) visualization sub-package generates an [xyz](../xyz) 3D scenegraph based on the physics bodies, and updates this visualization efficiently as the physics is updated.  [world2d](world2d) provides a 2D projection of the 3D physics world, using corresponding SVG nodes.  This can provide simpler representations for map-like layouts etc.
 
 # Organizing the World
 
@@ -28,17 +24,17 @@ The `Group` has a set of `World*` methods that should be used on the top-level w
 
 * `WorldRelToAbs` -- for scripted mode when updating relative positions, rotations.
 
-* `WorldStepPhys` -- for either scripted or physics modes, to update from current velocities.
+* `WorldStep` -- for either scripted or physics modes, to update state from current velocities.
 
 * `WorldCollide` -- returns list of potential collision contacts based on projected motion, focusing on dynamic vs. static and dynamic vs. dynamic bodies, with optimized tree filtering.  This is the first pass for collision detection.  
  
 ## Scripted Mode
 
-For Scripted mode, each update step typically involves manually updating the `Rel.Pos` and `.Quat` fields on `Body` objects to update their relative positions.  This field is a `Phys` type and has `MoveOnAxis` and `RotateOnAxis` (and a number of other rotation methods).  The Move methods update the `LinVel` field to reflect any delta in movement.
+For Scripted mode, each update step typically involves manually updating the `Rel.Pos` and `.Quat` fields on `Body` objects to update their relative positions.  This field is a `State` type and has `MoveOnAxis` and `RotateOnAxis` (and a number of other rotation methods).  The Move methods update the `LinVel` field to reflect any delta in movement.
 
-It is also possible to manually set the `Abs.LinVel` and `Abs.AngVel` fields and call `StepPhys` to update.
+It is also possible to manually set the `Abs.LinVel` and `Abs.AngVel` fields and call `Step` to update.
 
-For collision detection, it is essential to have the `Abs.LinVel` field set to anticipate the effects of motion and determine likely future impacts.  The RelToAbs update call does this automatically, and if you're instead using StepPhys the LinVel is already set.  Both calls will automatically compute an updated BBox and VelBBox.
+For collision detection, it is essential to have the `Abs.LinVel` field set to anticipate the effects of motion and determine likely future impacts.  The RelToAbs update call does this automatically, and if you're instead using `Step` the `LinVel` is already set.  Both calls will automatically compute an updated BBox and VelBBox.
 
 It is up to the user to manage the list of potential collisions, e.g., by setting velocity to 0 or bouncing back etc.
 
@@ -46,7 +42,7 @@ It is up to the user to manage the list of potential collisions, e.g., by settin
 
 The good news so far is that the full physics version as in Bullet is actually not too bad.  The core update step is a super simple forward Euler, intuitive update (just add velocity to position, with a step size factor).  The remaining work is just in computing the forces to update those velocities.  Bullet uses a hybrid approach that is clearly described in the [Mirtich thesis](https://people.eecs.berkeley.edu/~jfc/mirtich/thesis/mirtichThesis.pdf), which combines *impulses* with a particular way of handling joints, due originally to Featherstone.  Impulses are really simple conceptually: when two objects collide, they bounce back off of each other in proportion to their `Bounce` (coefficient of restitution) factor -- these collision impact forces dominate everything else, and aren't that hard to compute (similar conceptually to the `marbles` example in GoGi).  The joint constraint stuff is a bit more complicated but not the worst.  Everything can be done incrementally.  And the resulting system will avoid the brittle nature of the full constraint-based approach taken in ODE, which caused a lot of crashes and instability in `cemer`.
 
-One of the major problems with the impulse-based approach: that it causes otherwise "still" objects to jiggle around and slip down planes, seems eminently tractable with special-case code that doesn't seem too hard.
+One of the major problems with the impulse-based approach: it causes otherwise "still" objects to jiggle around and slip down planes, seems eminently tractable with special-case code that doesn't seem too hard.
 
 more info: https://caseymuratori.com/blog_0003
 
