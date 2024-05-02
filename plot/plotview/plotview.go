@@ -109,7 +109,7 @@ func (pl *PlotView) OnAdd() {
 func (pl *PlotView) SetTableView(tab *table.IndexView) *PlotView {
 	pl.Table = tab
 	pl.DeleteColumns()
-	pl.UpdatePlot()
+	pl.Update()
 	return pl
 }
 
@@ -117,7 +117,7 @@ func (pl *PlotView) SetTableView(tab *table.IndexView) *PlotView {
 func (pl *PlotView) SetTable(tab *table.Table) *PlotView {
 	pl.Table = table.NewIndexView(tab)
 	pl.DeleteColumns()
-	pl.UpdatePlot()
+	pl.Update()
 	return pl
 }
 

@@ -18,6 +18,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/styles"
 )
 
 // SVGString returns an SVG representation of the plot as a string
@@ -331,6 +332,7 @@ func (ax *Axis) drawY(pt *Plot, tickWidth, tpad, bpad int) {
 	ab.Max.Y -= bpad
 	axh := float32(ab.Size().Y)
 	if ax.Label.Text != "" {
+		ax.Label.Style.Align = styles.Center
 		pos := ax.Label.PosY(axh)
 		tw := ax.Label.PaintText.BBox.Size().X
 		pos.Y += float32(ab.Min.Y) + ax.Label.PaintText.BBox.Size().Y
