@@ -6,40 +6,18 @@ package main
 
 import (
 	"fmt"
-	"image"
 	"image/color"
 	"log"
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/vgpu"
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/examples/assets"
 )
 
 func main() {
-	// if err := vgpu.InitNoDisplay(); err != nil {
-	// 	return
-	// }
-	// gp := vgpu.NewGPU()
-	// gp.AddInstanceExt("VK_KHR_surface", "VK_EXT_metal_surface")
-	// if err := gp.Config("offscreen", nil); err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
-	// dev, err := vgpu.NewGraphicsDevice(gp)
-	// if err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
-	gp, dev, err := vgpu.NoDisplayGPU("offscreen")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	sc := xyz.NewScene("scene").SetSize(image.Point{1280, 960})
-	sc.ConfigFrame(gp, dev)
+	sc := xyz.NewOffscreenScene()
 
 	// options - must be set here
 	// sc.MultiSample = 1

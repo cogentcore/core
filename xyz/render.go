@@ -277,9 +277,6 @@ func (sc *Scene) ConfigNodes() {
 // changes to the nodes that require Config updates.
 // This must be called on the main thread.
 func (sc *Scene) Config() {
-	if sc.Camera.FOV == 0 {
-		sc.Defaults()
-	}
 	sc.Camera.CamMu.Lock()
 	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
 	sc.Camera.CamMu.Unlock()

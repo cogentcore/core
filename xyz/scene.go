@@ -100,18 +100,27 @@ type Scene struct {
 	RenderMu sync.Mutex `view:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
-// Defaults sets default scene params (camera, bg = white)
-func (sc *Scene) Defaults() {
+func (sc *Scene) OnInit() {
 	sc.MultiSample = 4
 	sc.Camera.Defaults()
 	sc.BackgroundColor = colors.Scheme.Background
 }
 
-// NewScene creates a new Scene to contain a 3D scenegraph.
+// NewScene returns a new [Scene] for holding 3D content.
 func NewScene(name ...string) *Scene {
-	sc := &Scene{}
-	sc.Defaults()
-	sc.InitName(sc, name...)
+	return tree.NewRoot[*Scene](name...)
+}
+
+// NewOffscreenScene returns a new [Scene] designed for offscreen
+// rendering of 3D content. This can be used in unit tests and other
+// cases not involving xyzview. It makes a new [vgpu.NoDisplayGPU].
+func NewOffscreenScene(name ...string) *Scene {
+	gpu, device, err := vgpu.NoDisplayGPU("offscreen")
+	if err != nil {
+		panic(fmt.Errorf("xyz.NewOffscreenScene: error initializing vgpu.NoDisplayGPU: %w", err))
+	}
+	sc := NewScene(name...).SetSize(image.Pt(1280, 960))
+	sc.ConfigFrame(gpu, device)
 	return sc
 }
 
@@ -202,6 +211,7 @@ const (
 	ScNeedsRender
 )
 
+// SetSize sets the size of the [Scene.Frame].
 func (sc *Scene) SetSize(sz image.Point) *Scene {
 	if sz.X == 0 || sz.Y == 0 {
 		return sc
