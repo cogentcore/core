@@ -1,4 +1,4 @@
-# Makefile for glslc compiling of HLSL files for compute
+# Makefile for dxc compiling of HLSL files for compute
 
 all: rand.spv
 
