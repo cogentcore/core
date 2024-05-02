@@ -2,9 +2,11 @@
 
 **Mac Installation prerequisite:** https://vulkan.lunarg.com/sdk/home -- download the Vulkan SDK installer for the mac.  Unfortunately there does not appear to be a full version of this on homebrew -- the `molten-vk` package is not enough by itself.
 
-vGPU is a Vulkan-based framework for both Graphics and Compute Engine use of GPU hardware, in the Go langauge.  It uses the basic cgo-based Go bindings to Vulkan in: https://github.com/vulkan-go/vulkan and was developed starting with the associated example code surrounding that project.  Vulkan is a relatively new, essentially universally supported interface to GPU hardware across all types of systems from mobile phones to massive GPU-based compute hardware, and it provides high-performance "bare metal" access to the hardware, for both graphics and computational uses.
+vGPU is a Vulkan-based framework for both Graphics and Compute Engine use of GPU hardware, in the Go langauge.  It uses the basic cgo-based Go bindings to Vulkan in [vulkan-go](https://github.com/vulkan-go/vulkan) and was developed starting with the associated example code surrounding that project.  Vulkan is a relatively new, essentially universally supported interface to GPU hardware across all types of systems from mobile phones to massive GPU-based compute hardware, and it provides high-performance "bare metal" access to the hardware, for both graphics and computational uses.
 
 [Vulkan](https://www.vulkan.org) is very low-level and demands a higher-level framework to manage the complexity and verbosity.  While there are many helpful tutorials covering the basic API, many of the tutorials don't provide much of a pathway for how to organize everything at a higher level of abstraction.  vGPU represents one attempt that enforces some reasonable choices that enable a significantly simpler programming model, while still providing considerable flexibility and high levels of performance.  Everything is a tradeoff, and simplicity definitely was prioritized over performance in a few cases, but in practical use-cases, the performance differences should be minimal.
+
+* The [gosl](gosl) sub-package provides a way to translate Go code into GPU shader language code for running under vGPU, playing the role of NVIDIA's "cuda" language in other frameworks.
 
 # Platforms
 
@@ -27,9 +29,9 @@ The following environment variables can be set to specifically select a particul
 
 # vPhong and vShape
 
-The [vPhong](https://cogentcore.org/core/vgpu/tree/main/vphong) package provides a complete rendering implementation with different pipelines for different materials, and support for 4 different types of light sources based on the classic Blinn-Phong lighting model.  See the `examples/phong` example for how to use it.  It does not assume any kind of organization of the rendering elements, and just provides name and index-based access to all the resources needed to render a scene.
+The [vPhong](vphong) package provides a complete rendering implementation with different pipelines for different materials, and support for 4 different types of light sources based on the classic Blinn-Phong lighting model.  See the `examples/phong` example for how to use it.  It does not assume any kind of organization of the rendering elements, and just provides name and index-based access to all the resources needed to render a scene.
 
-[vShape](https://cogentcore.org/core/vgpu/tree/main/vshape) generates standard 3D shapes (sphere, cylinder, box, etc), with all the normals and texture coordinates.  You can compose shape elements into more complex groups of shapes, programmatically. It separates the calculation of the number of vertex and index elements from actually setting those elements, so you can allocate everything in one pass, and then configure the shape data in a second pass, consistent with the most efficient memory model provided by vgpu.  It only has a dependency on the [math32](https://cogentcore.org/core/math32) package and could be used for anything.
+[vShape](vshape) generates standard 3D shapes (sphere, cylinder, box, etc), with all the normals and texture coordinates.  You can compose shape elements into more complex groups of shapes, programmatically. It separates the calculation of the number of vertex and index elements from actually setting those elements, so you can allocate everything in one pass, and then configure the shape data in a second pass, consistent with the most efficient memory model provided by vgpu.  It only has a dependency on the [math32](../math32) package and could be used for anything.
 
 # Basic Elements and Organization
 

@@ -2,7 +2,9 @@
 
 `xyz` is a 3D graphics framework written in Go. It is a separate standalone package that renders to an offscreen Vulkan framebuffer, which can easily be converted into a Go `image.RGBA`.  The [xyzview](xyzview) package provides an integration of xyz in Cogent Core, for dynamic and efficient 3D rendering within 2D GUI windows.
 
-`xyz` is built on the [vgpu](https://pkg.go.dev/cogentcore.org/core/vgpu) Vulkan GPU framework, and uses the [tree](https://pkg.go.dev/cogentcore.org/core/tree) tree structure for the scenegraph.  It currently supports standard Phong-based rendering with different types of lights and materials.  It is designed for scientific and other non-game 3D applications, and lacks almost all of the advanced features one would expect in a modern 3D graphics framework.  Thus, its primary advantage is its simplicity and support for directly programming 3D visualizations in Go, its broad cross-platform support across all major desktop and mobile platforms, and the use of Vulkan which is highly efficient.  See [eve](https://github.com/emer/eve) for a virtual environment framework built on top of xyz, which provides a physics engine for simulating 3D worlds (for use in training neural network models).
+`xyz` is built on the [vgpu](https://pkg.go.dev/cogentcore.org/core/vgpu) Vulkan GPU framework, and uses the [tree](../tree) tree structure for the scenegraph.  It currently supports standard Phong-based rendering with different types of lights and materials.  It is designed for scientific and other non-game 3D applications, and lacks almost all of the advanced features one would expect in a modern 3D graphics framework.  Thus, its primary advantage is its simplicity and support for directly programming 3D visualizations in Go, its broad cross-platform support across all major desktop and mobile platforms, and the use of Vulkan which is highly efficient.
+
+* The [physics](physics) sub-package provides a physics engine for simulating 3D virtual worlds, using xyz.
 
 # Basic elements
 
