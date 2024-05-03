@@ -24,11 +24,11 @@ type Linear struct { //types:add -setters
 	// the ending point of the gradient (x2 and y2 in SVG)
 	End math32.Vector2
 
-	// current render version -- transformed by object matrix
-	rStart math32.Vector2 `set:"-"`
-
-	// current render version -- transformed by object matrix
-	rEnd math32.Vector2 `set:"-"`
+	// computed current render versions transformed by object matrix
+	rStart          math32.Vector2
+	rEnd            math32.Vector2
+	distance        math32.Vector2
+	distanceProduct float32 // self inner product
 }
 
 var _ Gradient = &Linear{}
@@ -69,6 +69,9 @@ func (l *Linear) Update(opacity float32, box math32.Box2, objTransform math32.Ma
 		l.rStart = objTransform.MulVector2AsPoint(l.rStart)
 		l.rEnd = objTransform.MulVector2AsPoint(l.rEnd)
 	}
+
+	l.distance = l.rEnd.Sub(l.rStart)
+	l.distanceProduct = l.distance.X*l.distance.X + l.distance.Y*l.distance.Y
 }
 
 // At returns the color of the linear gradient at the given point
@@ -80,14 +83,11 @@ func (l *Linear) At(x, y int) color.Color {
 		return l.Stops[0].OpacityColor(l.Opacity, l.ApplyFuncs)
 	}
 
-	d := l.rEnd.Sub(l.rStart)
-	dd := d.X*d.X + d.Y*d.Y // self inner prod
-
 	pt := math32.Vec2(float32(x)+0.5, float32(y)+0.5)
 	if l.Units == ObjectBoundingBox {
 		pt = l.boxTransform.MulVector2AsPoint(pt)
 	}
 	df := pt.Sub(l.rStart)
-	pos := (d.X*df.X + d.Y*df.Y) / dd
+	pos := (l.distance.X*df.X + l.distance.Y*df.Y) / l.distanceProduct
 	return l.GetColor(pos)
 }
