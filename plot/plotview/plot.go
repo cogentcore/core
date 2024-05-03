@@ -71,8 +71,7 @@ func (pt *Plot) SetStyles() {
 	pt.Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
 		ro := pt.IsReadOnly()
-		s.SetAbilities(!ro, abilities.Slideable, abilities.Activatable, abilities.Scrollable, abilities.LongHoverable)
-		s.SetAbilities(true, abilities.LongHoverable)
+		s.SetAbilities(!ro, abilities.Slideable, abilities.Activatable, abilities.Scrollable)
 		if !ro {
 			if s.Is(states.Active) {
 				s.Cursor = cursors.Grabbing
@@ -85,7 +84,6 @@ func (pt *Plot) SetStyles() {
 }
 
 func (pt *Plot) HandleEvents() {
-
 	pt.On(events.SlideMove, func(e events.Event) {
 		e.SetHandled()
 		if pt.Plot == nil {
@@ -116,23 +114,21 @@ func (pt *Plot) HandleEvents() {
 		pt.UpdatePlot()
 		pt.NeedsRender()
 	})
-
-	pt.On(events.LongHoverStart, func(e events.Event) {
-		if pt.Plot == nil {
-			return
-		}
-		pos := e.Pos().Sub(pt.Geom.ContentBBox.Min)
-		_, idx, dist, data, _ := pt.Plot.ClosestDataToPixel(pos.X, pos.Y)
-		if dist <= 10 {
-			pt.Tooltip = fmt.Sprintf("[%d]: %g, %g", idx, data.X, data.Y)
-		} else {
-			pt.Tooltip = ""
-		}
-	})
 }
 
-func (pt *Plot) WidgetTooltip() (string, image.Point) {
-	return pt.Tooltip, pt.Events().LastMouseWindowPos
+func (pt *Plot) WidgetTooltip(pos image.Point) (string, image.Point) {
+	if pos == image.Pt(-1, -1) {
+		return "_", image.Point{}
+	}
+	if pt.Plot == nil {
+		return pt.Tooltip, pt.DefaultTooltipPos()
+	}
+	pos = pos.Sub(pt.Geom.ContentBBox.Min)
+	_, idx, dist, data, _ := pt.Plot.ClosestDataToPixel(pos.X, pos.Y)
+	if dist <= 10 {
+		return fmt.Sprintf("[%d]: %g, %g", idx, data.X, data.Y), pos
+	}
+	return pt.Tooltip, pt.DefaultTooltipPos()
 }
 
 // SaveSVG saves the current Plot to an SVG file

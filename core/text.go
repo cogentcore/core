@@ -260,7 +260,7 @@ func (tx *Text) HandleTextClick(openLink func(tl *paint.TextLink)) {
 
 func (tx *Text) WidgetTooltip(pos image.Point) (string, image.Point) {
 	if pos == image.Pt(-1, -1) {
-		return tx.Tooltip, tx.DefaultTooltipPos()
+		return tx.Tooltip, image.Point{}
 	}
 	tl, bounds := tx.FindLink(pos)
 	if tl == nil {
