@@ -295,6 +295,7 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 		fn.SetName(fn.Info.Name)
 		fn.SetText(fn.Info.Name)
 	}
+	// todo: if you add orgpath here to git, then it will show the rename in status
 	if stored {
 		fn.AddToVCS()
 	}

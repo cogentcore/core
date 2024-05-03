@@ -49,7 +49,7 @@ type Legend struct {
 
 func (lg *Legend) Defaults() {
 	lg.TextStyle.Defaults()
-	lg.TextStyle.Padding.Dp(4)
+	lg.TextStyle.Padding.Dp(2)
 	lg.TextStyle.Font.Size.Dp(20)
 	lg.Position.Defaults()
 	lg.ThumbnailWidth.Pt(20)
