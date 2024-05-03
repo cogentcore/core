@@ -8,7 +8,7 @@ Incrementally, we will start with a basic explicitly driven form of physics that
 
 The [world](world) visualization sub-package generates an [xyz](../xyz) 3D scenegraph based on the physics bodies, and updates this visualization efficiently as the physics is updated.  [world2d](world2d) provides a 2D projection of the 3D physics world, using corresponding SVG nodes.  This can provide simpler representations for map-like layouts etc.
 
-See [physics example](../xyz/examples/physics) for an implemented example that shows how to do everything.
+See [physics example](../examples/physics) for an implemented example that shows how to do everything.
 
 # Organizing the World
 
