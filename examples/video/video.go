@@ -3,6 +3,7 @@ package main
 import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/video"
 	_ "cogentcore.org/core/views"
@@ -25,11 +26,9 @@ func main() {
 		s.SetTextWrap(false)
 	})
 	core.NewText(b).SetText("footer:")
-	// errors.Log(v.Open("deer.mp4"))
-	// errors.Log(v.Open("countdown.mp4"))
-	errors.Log(v.Open("randy_first_360.mov")) // note: not uploaded -- good test case tho
-	v.Rotation = -90
-	w := b.RunWindow()
-	v.Play(0, 0)
-	w.Wait()
+	errors.Log(v.Open("deer.mp4"))
+	b.OnShow(func(e events.Event) {
+		v.Play(0, 0)
+	})
+	b.RunMainWindow()
 }
