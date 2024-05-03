@@ -5,6 +5,7 @@
 package core
 
 import (
+	"image"
 	"testing"
 
 	"cogentcore.org/core/base/tolassert"
@@ -16,7 +17,7 @@ import (
 func TestSpinner(t *testing.T) {
 	b := NewBody()
 	sp := NewSpinner(b)
-	tt, _ := sp.WidgetTooltip()
+	tt, _ := sp.WidgetTooltip(image.Point{})
 	assert.Equal(t, "", tt)
 	b.AssertRender(t, "spinner/basic")
 }
@@ -24,7 +25,7 @@ func TestSpinner(t *testing.T) {
 func TestSpinnerValue(t *testing.T) {
 	b := NewBody()
 	sp := NewSpinner(b).SetValue(12.7)
-	tt, _ := sp.WidgetTooltip()
+	tt, _ := sp.WidgetTooltip(image.Point{})
 	assert.Equal(t, "", tt)
 	b.AssertRender(t, "spinner/value")
 }
@@ -32,10 +33,10 @@ func TestSpinnerValue(t *testing.T) {
 func TestSpinnerBounds(t *testing.T) {
 	b := NewBody()
 	sp := NewSpinner(b).SetMin(-0.5).SetMax(2.7)
-	tt, _ := sp.WidgetTooltip()
+	tt, _ := sp.WidgetTooltip(image.Point{})
 	assert.Equal(t, "(minimum: -0.5, maximum: 2.7)", tt)
 	sp.SetTooltip("Rating")
-	tt, _ = sp.WidgetTooltip()
+	tt, _ = sp.WidgetTooltip(image.Point{})
 	assert.Equal(t, "Rating (minimum: -0.5, maximum: 2.7)", tt)
 	sp.SetValue(-2.1)
 	assert.Equal(t, float32(-0.5), sp.Value)

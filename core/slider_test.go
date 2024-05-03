@@ -19,10 +19,10 @@ import (
 func TestSlider(t *testing.T) {
 	b := NewBody()
 	sr := NewSlider(b)
-	tt, _ := sr.WidgetTooltip()
+	tt, _ := sr.WidgetTooltip(image.Point{})
 	assert.Equal(t, "(value: 0.5, minimum: 0, maximum: 1)", tt)
 	sr.SetTooltip("Rating")
-	tt, _ = sr.WidgetTooltip()
+	tt, _ = sr.WidgetTooltip(image.Point{})
 	assert.Equal(t, "Rating (value: 0.5, minimum: 0, maximum: 1)", tt)
 	b.AssertRender(t, "slider/basic")
 }
@@ -30,7 +30,7 @@ func TestSlider(t *testing.T) {
 func TestSliderValue(t *testing.T) {
 	b := NewBody()
 	sr := NewSlider(b).SetValue(0.7)
-	tt, _ := sr.WidgetTooltip()
+	tt, _ := sr.WidgetTooltip(image.Point{})
 	assert.Equal(t, "(value: 0.7, minimum: 0, maximum: 1)", tt)
 	b.AssertRender(t, "slider/value")
 }
@@ -38,7 +38,7 @@ func TestSliderValue(t *testing.T) {
 func TestSliderBounds(t *testing.T) {
 	b := NewBody()
 	sr := NewSlider(b).SetMin(5.7).SetMax(18).SetValue(10.2)
-	tt, _ := sr.WidgetTooltip()
+	tt, _ := sr.WidgetTooltip(image.Point{})
 	assert.Equal(t, "(value: 10.2, minimum: 5.7, maximum: 18)", tt)
 	b.AssertRender(t, "slider/bounds")
 }

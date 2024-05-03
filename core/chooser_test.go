@@ -5,6 +5,7 @@
 package core
 
 import (
+	"image"
 	"testing"
 
 	"cogentcore.org/core/events"
@@ -39,7 +40,7 @@ func TestChooserItems(t *testing.T) {
 	)
 	b.AssertRender(t, "chooser/items", func() {
 		assert.Equal(t, "", ch.Tooltip)
-		tt, _ := ch.WidgetTooltip()
+		tt, _ := ch.WidgetTooltip(image.Point{})
 		assert.Equal(t, "Use a computer", tt)
 	})
 }

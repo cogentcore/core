@@ -5,6 +5,7 @@
 package core
 
 import (
+	"image"
 	"strings"
 	"testing"
 
@@ -70,21 +71,21 @@ func TestButtonMenuClick(t *testing.T) {
 func TestButtonShortcut(t *testing.T) {
 	b := NewBody()
 	bt := NewButton(b).SetShortcut("Command+S")
-	tt, _ := bt.WidgetTooltip()
+	tt, _ := bt.WidgetTooltip(image.Point{})
 	assert.Equal(t, "[Ctrl+S]", tt)
 }
 
 func TestButtonShortcutWithTooltip(t *testing.T) {
 	b := NewBody()
 	bt := NewButton(b).SetShortcut("Command+S").SetTooltip("Test")
-	tt, _ := bt.WidgetTooltip()
+	tt, _ := bt.WidgetTooltip(image.Point{})
 	assert.Equal(t, "[Ctrl+S] Test", tt)
 }
 
 func TestButtonShortcutKey(t *testing.T) {
 	b := NewBody()
 	bt := NewButton(b).SetKey(keymap.Open)
-	tt, _ := bt.WidgetTooltip()
+	tt, _ := bt.WidgetTooltip(image.Point{})
 	assert.Equal(t, "[Ctrl+O]", tt)
 }
 
