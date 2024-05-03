@@ -6,6 +6,7 @@ package core
 
 import (
 	"fmt"
+	"image"
 
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/cursors"
@@ -219,24 +220,8 @@ func (tx *Text) HandleEvents() {
 		}
 	})
 	tx.On(events.MouseMove, func(e events.Event) {
-		pos := tx.Geom.Pos.Content
-		inLink := false
-		for _, tl := range tx.paintText.Links {
-			// TODO(kai/link): is there a better way to be safe here?
-			if tl.Label == "" {
-				continue
-			}
-			tlb := tl.Bounds(&tx.paintText, pos)
-			if e.Pos().In(tlb) {
-				inLink = true
-				if tx.StateIs(states.LongHovered) || tx.StateIs(states.LongPressed) {
-					NewTooltipTextSize(tx, tl.URL, tlb.Min, tlb.Size()).Run()
-					e.SetHandled()
-				}
-				break
-			}
-		}
-		if inLink {
+		tl, _ := tx.FindLink(e.Pos())
+		if tl != nil {
 			tx.Styles.Cursor = cursors.Pointer
 		} else {
 			tx.Styles.Cursor = tx.normalCursor
@@ -244,24 +229,44 @@ func (tx *Text) HandleEvents() {
 	})
 }
 
+// FindLink finds the text link at the given scene-local position. If it
+// finds it, it returns it and its bounds; otherwise, it returns nil.
+func (tx *Text) FindLink(pos image.Point) (*paint.TextLink, image.Rectangle) {
+	for _, tl := range tx.paintText.Links {
+		// TODO(kai/link): is there a better way to be safe here?
+		if tl.Label == "" {
+			continue
+		}
+		tlb := tl.Bounds(&tx.paintText, tx.Geom.Pos.Content)
+		if pos.In(tlb) {
+			return &tl, tlb
+		}
+	}
+	return nil, image.Rectangle{}
+}
+
 // HandleTextClick handles click events such that the given function will be called
 // on any links that are clicked on.
 func (tx *Text) HandleTextClick(openLink func(tl *paint.TextLink)) {
 	tx.OnClick(func(e events.Event) {
-		pos := tx.Geom.Pos.Content
-		for _, tl := range tx.paintText.Links {
-			// TODO(kai/link): is there a better way to be safe here?
-			if tl.Label == "" {
-				continue
-			}
-			tlb := tl.Bounds(&tx.paintText, pos)
-			if e.Pos().In(tlb) {
-				openLink(&tl)
-				e.SetHandled()
-				return
-			}
+		tl, _ := tx.FindLink(e.Pos())
+		if tl == nil {
+			return
 		}
+		openLink(tl)
+		e.SetHandled()
 	})
+}
+
+func (tx *Text) WidgetTooltip(pos image.Point) (string, image.Point) {
+	if pos == image.Pt(-1, -1) {
+		return tx.Tooltip, tx.DefaultTooltipPos()
+	}
+	tl, bounds := tx.FindLink(pos)
+	if tl == nil {
+		return tx.Tooltip, tx.DefaultTooltipPos()
+	}
+	return tl.URL, bounds.Min
 }
 
 func (tx *Text) Copy(reset bool) {

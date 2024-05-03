@@ -150,10 +150,10 @@ type Widget interface {
 
 	// WidgetTooltip returns the tooltip text that should be used for this
 	// widget, and the window-relative position to use for the upper-left corner
-	// of the tooltip. The current mouse position is passed to the function;
-	// if it is {-1, -1}, that indicates that WidgetTooltip is being called
-	// in a Style function to determine whether the widget should be
-	// [abilities.LongHoverable] and [abilities.LongPressable]
+	// of the tooltip. The current mouse position in scene-local coordinates
+	// is passed to the function; if it is {-1, -1}, that indicates that
+	// WidgetTooltip is being called in a Style function to determine whether
+	// the widget should be [abilities.LongHoverable] and [abilities.LongPressable]
 	// (if the return string is not "", then it will have those abilities
 	// so that the tooltip can be displayed).
 	//
