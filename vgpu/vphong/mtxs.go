@@ -17,14 +17,14 @@ type Mtxs struct {
 	View math32.Matrix4
 
 	// Projection Matrix: transforms camera coords into 2D render coordinates
-	Prjn math32.Matrix4
+	Projection math32.Matrix4
 }
 
-// SetViewPrjn sets the camera view and projection matrixes, and updates
+// SetViewProjection sets the camera view and projection matrixes, and updates
 // uniform data, so they are ready to use.
-func (ph *Phong) SetViewPrjn(view, prjn *math32.Matrix4) {
+func (ph *Phong) SetViewProjection(view, projection *math32.Matrix4) {
 	ph.Cur.VPMtx.View = *view
-	ph.Cur.VPMtx.Prjn = *prjn
+	ph.Cur.VPMtx.Projection = *projection
 	vars := ph.Sys.Vars()
 	_, mtx, _ := vars.ValueByIndexTry(int(MtxsSet), "Mtxs", 0)
 	mtx.CopyFromBytes(unsafe.Pointer(&ph.Cur.VPMtx))

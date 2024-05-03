@@ -94,12 +94,12 @@ func (ps *Pose) UpdateWorldMatrix(parWorld *math32.Matrix4) {
 	ps.WorldMatrix.MulMatrices(&ps.ParMatrix, &ps.Matrix)
 }
 
-// UpdateMVPMatrix updates the model * view, * projection matricies based on camera view, prjn matricies
+// UpdateMVPMatrix updates the model * view, * projection matricies based on camera view, projection matricies
 // Assumes that WorldMatrix has been updated
-func (ps *Pose) UpdateMVPMatrix(viewMat, prjnMat *math32.Matrix4) {
+func (ps *Pose) UpdateMVPMatrix(viewMat, projectionMat *math32.Matrix4) {
 	ps.MVMatrix.MulMatrices(viewMat, &ps.WorldMatrix)
 	ps.NormMatrix.SetNormalMatrix(&ps.MVMatrix)
-	ps.MVPMatrix.MulMatrices(prjnMat, &ps.MVMatrix)
+	ps.MVPMatrix.MulMatrices(projectionMat, &ps.MVMatrix)
 }
 
 ///////////////////////////////////////////////////////

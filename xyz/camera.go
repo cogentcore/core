@@ -45,13 +45,13 @@ type Camera struct {
 	ViewMatrix math32.Matrix4 `view:"-"`
 
 	// projection matrix, defining the camera perspective / ortho transform
-	PrjnMatrix math32.Matrix4 `view:"-"`
+	ProjectionMatrix math32.Matrix4 `view:"-"`
 
-	// vulkan projection matrix -- required for vgpu -- produces same effect as PrjnMatrix, which should be used for all other math
-	VkPrjnMatrix math32.Matrix4 `view:"-"`
+	// vulkan projection matrix -- required for vgpu -- produces same effect as ProjectionMatrix, which should be used for all other math
+	VkProjectionMatrix math32.Matrix4 `view:"-"`
 
 	// inverse of the projection matrix
-	InvPrjnMatrix math32.Matrix4 `view:"-"`
+	InvProjectionMatrix math32.Matrix4 `view:"-"`
 
 	// frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape
 	Frustum *math32.Frustum `view:"-"`
@@ -78,7 +78,7 @@ func (cm *Camera) GenGoSet(path string) string {
 	return cm.Pose.GenGoSet(path+".Pose") + "; " + cm.Target.GenGoSet(path+".Target") + "; " + cm.UpDir.GenGoSet(path+".UpDir")
 }
 
-// UpdateMatrix updates the view and prjn matricies
+// UpdateMatrix updates the view and projection matricies
 func (cm *Camera) UpdateMatrix() {
 	cm.CamMu.Lock()
 	defer cm.CamMu.Unlock()
@@ -88,14 +88,14 @@ func (cm *Camera) UpdateMatrix() {
 	if cm.Ortho {
 		height := 2 * cm.Far * math32.Tan(math32.DegToRad(cm.FOV*0.5))
 		width := cm.Aspect * height
-		cm.PrjnMatrix.SetOrthographic(width, height, cm.Near, cm.Far)
+		cm.ProjectionMatrix.SetOrthographic(width, height, cm.Near, cm.Far)
 	} else {
-		cm.PrjnMatrix.SetPerspective(cm.FOV, cm.Aspect, cm.Near, cm.Far)     // use for everything
-		cm.VkPrjnMatrix.SetVkPerspective(cm.FOV, cm.Aspect, cm.Near, cm.Far) // Vk use for render
+		cm.ProjectionMatrix.SetPerspective(cm.FOV, cm.Aspect, cm.Near, cm.Far)     // use for everything
+		cm.VkProjectionMatrix.SetVkPerspective(cm.FOV, cm.Aspect, cm.Near, cm.Far) // Vk use for render
 	}
-	cm.InvPrjnMatrix.SetInverse(&cm.PrjnMatrix)
+	cm.InvProjectionMatrix.SetInverse(&cm.ProjectionMatrix)
 	var proj math32.Matrix4
-	proj.MulMatrices(&cm.PrjnMatrix, &cm.ViewMatrix)
+	proj.MulMatrices(&cm.ProjectionMatrix, &cm.ViewMatrix)
 	cm.Frustum = math32.NewFrustumFromMatrix(&proj)
 }
 
@@ -262,7 +262,7 @@ func (cm *Camera) ZoomTo(pt, size image.Point, zoomPct float32) {
 	fpt := math32.Vec2(float32(pt.X), float32(pt.Y))
 	ndc := fpt.WindowToNDC(fsize, math32.Vector2{}, true) // flipY
 	ndc.Z = -1                                            // at closest point
-	cdir := math32.Vector4FromVector3(ndc, 1).MulMatrix4(&cm.InvPrjnMatrix)
+	cdir := math32.Vector4FromVector3(ndc, 1).MulMatrix4(&cm.InvProjectionMatrix)
 	cdir.Z = -1
 	cdir.W = 0 // vec
 	// get world position / transform of camera: matrix is inverse of ViewMatrix

@@ -21,7 +21,7 @@ import (
 //
 // # Config:
 //
-// Unlike gi, xyz Config can only be successfully done after the
+// Unlike core, xyz Config can only be successfully done after the
 // GPU framework has been initialized, because it is all about allocating
 // GPU resources.
 // The Scene ScNeedsConfig flag indicates if any of these resources
@@ -269,7 +269,7 @@ func (sc *Scene) UpdateMVPMatrix() {
 		if ni == nil {
 			return tree.Break // going into a different type of thing, bail
 		}
-		ni.UpdateMVPMatrix(&sc.Camera.ViewMatrix, &sc.Camera.PrjnMatrix)
+		ni.UpdateMVPMatrix(&sc.Camera.ViewMatrix, &sc.Camera.ProjectionMatrix)
 		ni.UpdateBBox2D(size)
 		return tree.Continue
 	})
@@ -387,7 +387,7 @@ const (
 // all scene-level resources must be initialized and activated at this point
 func (sc *Scene) RenderImpl() {
 	sc.Phong.UpdateMu.Lock()
-	sc.Phong.SetViewPrjn(&sc.Camera.ViewMatrix, &sc.Camera.VkPrjnMatrix)
+	sc.Phong.SetViewProjection(&sc.Camera.ViewMatrix, &sc.Camera.VkProjectionMatrix)
 	sc.Phong.UpdateMu.Unlock()
 	sc.Phong.Sync()
 

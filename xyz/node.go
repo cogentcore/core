@@ -39,9 +39,9 @@ type Node interface {
 	UpdateWorldMatrix(parWorld *math32.Matrix4)
 
 	// UpdateMVPMatrix updates this node's MVP matrix based on
-	// given view and prjn matrix from camera.
+	// given view and projection matrix from camera.
 	// Called during rendering.
-	UpdateMVPMatrix(viewMat, prjnMat *math32.Matrix4)
+	UpdateMVPMatrix(viewMat, projectionMat *math32.Matrix4)
 
 	// UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
 	// groups aggregate over elements.  called from WalkPost traversal
@@ -239,11 +239,11 @@ func (nb *NodeBase) UpdateWorldMatrix(parWorld *math32.Matrix4) {
 	nb.SetFlag(true, WorldMatrixUpdated)
 }
 
-// UpdateMVPMatrix updates this node's MVP matrix based on given view, prjn matricies from camera.
+// UpdateMVPMatrix updates this node's MVP matrix based on given view, projection matricies from camera.
 // Called during rendering.
-func (nb *NodeBase) UpdateMVPMatrix(viewMat, prjnMat *math32.Matrix4) {
+func (nb *NodeBase) UpdateMVPMatrix(viewMat, projectionMat *math32.Matrix4) {
 	nb.PoseMu.Lock()
-	nb.Pose.UpdateMVPMatrix(viewMat, prjnMat)
+	nb.Pose.UpdateMVPMatrix(viewMat, projectionMat)
 	nb.PoseMu.Unlock()
 }
 
@@ -291,7 +291,7 @@ func (nb *NodeBase) RayPick(pos image.Point) math32.Ray {
 	ndc := fpos.WindowToNDC(size, math32.Vector2{}, true) // flipY
 	var err error
 	ndc.Z = -1 // at closest point
-	cdir := math32.Vector4FromVector3(ndc, 1).MulMatrix4(&nb.Sc.Camera.InvPrjnMatrix)
+	cdir := math32.Vector4FromVector3(ndc, 1).MulMatrix4(&nb.Sc.Camera.InvProjectionMatrix)
 	cdir.Z = -1
 	cdir.W = 0 // vec
 	// get world position / transform of camera: matrix is inverse of ViewMatrix

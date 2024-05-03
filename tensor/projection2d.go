@@ -4,7 +4,7 @@
 
 package tensor
 
-// Prjn2DShape returns the size of a 2D projection of the given tensor Shape,
+// Projection2DShape returns the size of a 2D projection of the given tensor Shape,
 // collapsing higher dimensions down to 2D (and 1D up to 2D).
 // For any odd number of dimensions, the remaining outer-most dimension
 // can either be multipliexed across the row or column, given the oddRow arg.
@@ -12,7 +12,7 @@ package tensor
 // RowMajor and ColMajor layouts are handled appropriately.
 // rowEx returns the number of "extra" (higher dimensional) rows
 // and colEx returns the number of extra cols
-func Prjn2DShape(shp *Shape, oddRow bool) (rows, cols, rowEx, colEx int) {
+func Projection2DShape(shp *Shape, oddRow bool) (rows, cols, rowEx, colEx int) {
 	if shp.Len() == 0 {
 		return 1, 1, 0, 0
 	}
@@ -44,13 +44,13 @@ func Prjn2DShape(shp *Shape, oddRow bool) (rows, cols, rowEx, colEx int) {
 	return 1, 1, 0, 0
 }
 
-// Prjn2DIndex returns the flat 1D index for given row, col coords for a 2D projection
+// Projection2DIndex returns the flat 1D index for given row, col coords for a 2D projection
 // of the given tensor shape, collapsing higher dimensions down to 2D (and 1D up to 2D).
 // For any odd number of dimensions, the remaining outer-most dimension
 // can either be multipliexed across the row or column, given the oddRow arg.
 // Even multiples of inner-most dimensions are assumed to be row, then column.
 // RowMajor and ColMajor layouts are handled appropriately.
-func Prjn2DIndex(shp *Shape, oddRow bool, row, col int) int {
+func Projection2DIndex(shp *Shape, oddRow bool, row, col int) int {
 	nd := shp.NumDims()
 	switch nd {
 	case 1:
@@ -97,11 +97,11 @@ func Prjn2DIndex(shp *Shape, oddRow bool, row, col int) int {
 	return 0
 }
 
-// Prjn2DCoords returns the corresponding full-dimensional coordinates
+// Projection2DCoords returns the corresponding full-dimensional coordinates
 // that go into the given row, col coords for a 2D projection of the given tensor,
 // collapsing higher dimensions down to 2D (and 1D up to 2D).
-func Prjn2DCoords(shp *Shape, oddRow bool, row, col int) (rowCoords, colCoords []int) {
-	idx := Prjn2DIndex(shp, oddRow, row, col)
+func Projection2DCoords(shp *Shape, oddRow bool, row, col int) (rowCoords, colCoords []int) {
+	idx := Projection2DIndex(shp, oddRow, row, col)
 	dims := shp.Index(idx)
 	nd := shp.NumDims()
 	switch nd {
@@ -131,24 +131,24 @@ func Prjn2DCoords(shp *Shape, oddRow bool, row, col int) (rowCoords, colCoords [
 	return nil, nil
 }
 
-// Prjn2DValue returns the float64 value at given row, col coords for a 2D projection
+// Projection2DValue returns the float64 value at given row, col coords for a 2D projection
 // of the given tensor, collapsing higher dimensions down to 2D (and 1D up to 2D).
 // For any odd number of dimensions, the remaining outer-most dimension
 // can either be multipliexed across the row or column, given the oddRow arg.
 // Even multiples of inner-most dimensions are assumed to be row, then column.
 // RowMajor and ColMajor layouts are handled appropriately.
-func Prjn2DValue(tsr Tensor, oddRow bool, row, col int) float64 {
-	idx := Prjn2DIndex(tsr.Shape(), oddRow, row, col)
+func Projection2DValue(tsr Tensor, oddRow bool, row, col int) float64 {
+	idx := Projection2DIndex(tsr.Shape(), oddRow, row, col)
 	return tsr.Float1D(idx)
 }
 
-// Prjn2DSet sets a float64 value at given row, col coords for a 2D projection
+// Projection2DSet sets a float64 value at given row, col coords for a 2D projection
 // of the given tensor, collapsing higher dimensions down to 2D (and 1D up to 2D).
 // For any odd number of dimensions, the remaining outer-most dimension
 // can either be multipliexed across the row or column, given the oddRow arg.
 // Even multiples of inner-most dimensions are assumed to be row, then column.
 // RowMajor and ColMajor layouts are handled appropriately.
-func Prjn2DSet(tsr Tensor, oddRow bool, row, col int, val float64) {
-	idx := Prjn2DIndex(tsr.Shape(), oddRow, row, col)
+func Projection2DSet(tsr Tensor, oddRow bool, row, col int, val float64) {
+	idx := Projection2DIndex(tsr.Shape(), oddRow, row, col)
 	tsr.SetFloat1D(idx, val)
 }

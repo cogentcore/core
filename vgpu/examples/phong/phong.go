@@ -177,8 +177,8 @@ func main() {
 	view := vphong.CameraViewMat(campos, math32.Vec3(0, 0, 0), math32.Vec3(0, 1, 0))
 
 	aspect := sf.Format.Aspect()
-	var prjn math32.Matrix4
-	prjn.SetVkPerspective(45, aspect, 0.01, 100)
+	var projection math32.Matrix4
+	projection.SetVkPerspective(45, aspect, 0.01, 100)
 
 	var model1 math32.Matrix4
 	model1.SetRotationY(0.5)
@@ -203,7 +203,7 @@ func main() {
 
 	ph.Config()
 
-	ph.SetViewPrjn(view, &prjn)
+	ph.SetViewProjection(view, &projection)
 
 	/////////////////////////////
 	//  Set Mesh values
@@ -245,8 +245,8 @@ func main() {
 	updateMats := func() {
 		aspect := sf.Format.Aspect()
 		view = vphong.CameraViewMat(campos, math32.Vec3(0, 0, 0), math32.Vec3(0, 1, 0))
-		prjn.SetVkPerspective(45, aspect, 0.01, 100)
-		ph.SetViewPrjn(view, &prjn)
+		projection.SetVkPerspective(45, aspect, 0.01, 100)
+		ph.SetViewProjection(view, &projection)
 	}
 
 	render1 := func() {

@@ -23,7 +23,7 @@ type View struct {
 	LineWidth float32
 
 	// projection matrix for converting 3D to 2D -- resulting X, Y coordinates are used from Vector3
-	Prjn math32.Matrix4
+	Projection math32.Matrix4
 
 	// the root Group node of the virtual world
 	World *physics.Group
@@ -83,35 +83,35 @@ func (vw *View) Image() (*image.RGBA, error) {
 
 // ProjectXY sets 2D projection to reflect 3D X,Y coords
 func (vw *View) ProjectXY() {
-	vw.Prjn.SetIdentity()
+	vw.Projection.SetIdentity()
 }
 
 // ProjectXZ sets 2D projection to reflect 3D X,Z coords
 func (vw *View) ProjectXZ() {
-	vw.Prjn.SetIdentity()
-	vw.Prjn[5] = 0 // Y->Y
-	vw.Prjn[9] = 1 // Z->Y
+	vw.Projection.SetIdentity()
+	vw.Projection[5] = 0 // Y->Y
+	vw.Projection[9] = 1 // Z->Y
 }
 
 // todo: more projections
 
-// Prjn2D projects position from 3D to 2D
-func (vw *View) Prjn2D(pos math32.Vector3) math32.Vector2 {
-	v2 := pos.MulMatrix4(&vw.Prjn)
+// Projection2D projects position from 3D to 2D
+func (vw *View) Projection2D(pos math32.Vector3) math32.Vector2 {
+	v2 := pos.MulMatrix4(&vw.Projection)
 	return math32.Vec2(v2.X, v2.Y)
 }
 
 // Transform2D returns the full 2D transform matrix for a given position and quat rotation in 3D
 func (vw *View) Transform2D(phys *physics.State) math32.Matrix2 {
-	pos2 := phys.Pos.MulMatrix4(&vw.Prjn)
+	pos2 := phys.Pos.MulMatrix4(&vw.Projection)
 	xyaxis := math32.Vec3(1, 1, 0)
 	xyaxis.SetNormal()
-	inv := vw.Prjn.Transpose()
+	inv := vw.Projection.Transpose()
 	axis := xyaxis.MulMatrix4(inv)
 	axis.SetNormal()
 	rot := axis.MulQuat(phys.Quat)
 	rot.SetNormal()
-	xyrot := rot.MulMatrix4(&vw.Prjn)
+	xyrot := rot.MulMatrix4(&vw.Projection)
 	xyrot.Z = 0
 	xyrot.SetNormal()
 	ang := xyrot.AngleTo(xyaxis)
@@ -192,7 +192,7 @@ func (vw *View) ConfigBodyShape(bod physics.Body, shp svg.Node) {
 	switch wt {
 	case "physics.Box":
 		bx := bod.(*physics.Box)
-		sz := vw.Prjn2D(bx.Size)
+		sz := vw.Projection2D(bx.Size)
 		shp.(*svg.Rect).SetSize(sz)
 		sb.Paint.Transform = math32.Translate2D(-sz.X/2, -sz.Y/2)
 		shp.SetProperty("transform", sb.Paint.Transform.String())
@@ -204,7 +204,7 @@ func (vw *View) ConfigBodyShape(bod physics.Body, shp svg.Node) {
 	case "physics.Cylinder":
 		cy := bod.(*physics.Cylinder)
 		sz3 := math32.Vec3(cy.BotRad*2, cy.Height, cy.TopRad*2)
-		sz := vw.Prjn2D(sz3)
+		sz := vw.Projection2D(sz3)
 		shp.(*svg.Ellipse).SetRadii(sz)
 		sb.Paint.Transform = math32.Translate2D(-sz.X/2, -sz.Y/2)
 		shp.SetProperty("transform", sb.Paint.Transform.String())
@@ -216,7 +216,7 @@ func (vw *View) ConfigBodyShape(bod physics.Body, shp svg.Node) {
 	case "physics.Capsule":
 		cp := bod.(*physics.Capsule)
 		sz3 := math32.Vec3(cp.BotRad*2, cp.Height, cp.TopRad*2)
-		sz := vw.Prjn2D(sz3)
+		sz := vw.Projection2D(sz3)
 		shp.(*svg.Ellipse).SetRadii(sz)
 		sb.Paint.Transform = math32.Translate2D(-sz.X/2, -sz.Y/2)
 		shp.SetProperty("transform", sb.Paint.Transform.String())
@@ -228,7 +228,7 @@ func (vw *View) ConfigBodyShape(bod physics.Body, shp svg.Node) {
 	case "physics.Sphere":
 		sp := bod.(*physics.Sphere)
 		sz3 := math32.Vec3(sp.Radius*2, sp.Radius*2, sp.Radius*2)
-		sz := vw.Prjn2D(sz3)
+		sz := vw.Projection2D(sz3)
 		shp.(*svg.Circle).SetRadius(sz.X) // should be same as Y
 		sb.Paint.Transform = math32.Translate2D(-sz.X/2, -sz.Y/2)
 		shp.SetProperty("transform", sb.Paint.Transform.String())

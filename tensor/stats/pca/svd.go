@@ -204,7 +204,7 @@ func (svd *SVD) ProjectCol(vals *[]float64, ix *table.IndexView, column string, 
 // onto the given set of eigenvectors (idxs, 0 = largest eigenvalue, 1 = next, etc),
 // and stores results along with labels from column labNm into results table.
 // Must have already called SVD() method.
-func (svd *SVD) ProjectColToTable(prjns *table.Table, ix *table.IndexView, column, labNm string, idxs []int) error {
+func (svd *SVD) ProjectColToTable(projections *table.Table, ix *table.IndexView, column, labNm string, idxs []int) error {
 	_, err := ix.Table.ColumnByNameTry(column)
 	if err != nil {
 		return err
@@ -213,26 +213,26 @@ func (svd *SVD) ProjectColToTable(prjns *table.Table, ix *table.IndexView, colum
 		return fmt.Errorf("SVD.ProjectCol Vectors are nil -- must call SVD first")
 	}
 	rows := ix.Len()
-	prjns.DeleteAll()
+	projections.DeleteAll()
 	pcolSt := 0
 	if labNm != "" {
-		prjns.AddStringColumn(labNm)
+		projections.AddStringColumn(labNm)
 		pcolSt = 1
 	}
 	for _, idx := range idxs {
-		prjns.AddFloat64Column(fmt.Sprintf("Prjn%v", idx))
+		projections.AddFloat64Column(fmt.Sprintf("Projection%v", idx))
 	}
-	prjns.SetNumRows(rows)
+	projections.SetNumRows(rows)
 
 	for ii, idx := range idxs {
-		pcol := prjns.Columns[pcolSt+ii].(*tensor.Float64)
+		pcol := projections.Columns[pcolSt+ii].(*tensor.Float64)
 		svd.ProjectCol(&pcol.Values, ix, column, idx)
 	}
 
 	if labNm != "" {
 		lcol, err := ix.Table.ColumnByNameTry(labNm)
 		if err == nil {
-			plcol := prjns.Columns[0]
+			plcol := projections.Columns[0]
 			for row := 0; row < rows; row++ {
 				plcol.SetString1D(row, lcol.String1D(row))
 			}

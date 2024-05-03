@@ -225,7 +225,7 @@ func TestSetFromArgs(t *testing.T) {
 	err := SetFromDefaults(cfg)
 	require.NoError(t, err)
 	// note: cannot use "-Includes=testcfg.toml",
-	args := []string{"-save-wts", "core", "-nogui", "-no-epoch-log", "--NoRunLog", "play", "--runs=5", "--run", "1", "--TAG", "nice", "--PatParams.Sparseness=0.1", "orange", "--Network", "{'.PFCLayer:Layer.Inhib.Gi' = '2.4', '#VSPatchPrjn:Prjn.Learn.LRate' = '0.01'}", "-Enum=TestValue2", "apple", "-Slice=3.2,2.4,1.9"}
+	args := []string{"-save-wts", "core", "-nogui", "-no-epoch-log", "--NoRunLog", "play", "--runs=5", "--run", "1", "--TAG", "nice", "--PatParams.Sparseness=0.1", "orange", "--Network", "{'.PFCLayer:Layer.Inhib.Gi' = '2.4', '#VSPatchProjection:Projection.Learn.LRate' = '0.01'}", "-Enum=TestValue2", "apple", "-Slice=3.2,2.4,1.9"}
 
 	_, err = SetFromArgs(cfg, args, ErrNotFound)
 	require.NoError(t, err)

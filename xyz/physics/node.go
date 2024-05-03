@@ -140,7 +140,7 @@ func (nb *NodeBase) RelToAbsBase(par *NodeBase) {
 	} else {
 		nb.Abs = nb.Rel
 	}
-	nb.Abs.LinVel = nb.Abs.Pos.Sub(ppos) // needed for VelBBox prjn
+	nb.Abs.LinVel = nb.Abs.Pos.Sub(ppos) // needed for VelBBox projection
 }
 
 // StepBase is base-level version of Step -- most nodes call this.

@@ -26,9 +26,9 @@ import (
 )
 
 type CamView struct {
-	Model math32.Matrix4
-	View  math32.Matrix4
-	Prjn  math32.Matrix4
+	Model      math32.Matrix4
+	View       math32.Matrix4
+	Projection math32.Matrix4
 }
 
 func init() {
@@ -163,7 +163,7 @@ func main() {
 	updateAspect := func() {
 		aspect := rf.Format.Aspect()
 		fmt.Printf("aspect: %g\n", aspect)
-		camo.Prjn.SetVkPerspective(45, aspect, 0.01, 100)
+		camo.Projection.SetVkPerspective(45, aspect, 0.01, 100)
 		cam.CopyFromBytes(unsafe.Pointer(&camo)) // sets mod
 		sy.Mem.SyncToGPU()
 	}

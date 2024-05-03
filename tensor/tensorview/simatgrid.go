@@ -103,7 +103,7 @@ func (tg *SimMatGrid) MinSize() math32.Vector2 {
 	ctxtsz := tg.colMaxSz.X / float32(tg.colMinBlank+1)
 	txtsz := math32.Max(rtxtsz, ctxtsz)
 
-	rows, cols, _, _ := tensor.Prjn2DShape(tg.Tensor.Shape(), tg.Disp.OddRow)
+	rows, cols, _, _ := tensor.Projection2DShape(tg.Tensor.Shape(), tg.Disp.OddRow)
 	rowEx := tg.rowNGps
 	colEx := tg.colNGps
 	frw := float32(rows) + float32(rowEx)*tg.Disp.DimExtra // extra spacing
@@ -135,7 +135,7 @@ func (tg *SimMatGrid) Render() {
 
 	tsr := tg.SimMat.Mat
 
-	rows, cols, _, _ := tensor.Prjn2DShape(tsr.Shape(), tg.Disp.OddRow)
+	rows, cols, _, _ := tensor.Projection2DShape(tsr.Shape(), tg.Disp.OddRow)
 	rowEx := tg.rowNGps
 	colEx := tg.colNGps
 	frw := float32(rows) + float32(rowEx)*tg.Disp.DimExtra // extra spacing
@@ -221,7 +221,7 @@ func (tg *SimMatGrid) Render() {
 			if !tg.Disp.TopZero {
 				ey = (rows - 1) - y
 			}
-			val := tensor.Prjn2DValue(tsr, tg.Disp.OddRow, ey, x)
+			val := tensor.Projection2DValue(tsr, tg.Disp.OddRow, ey, x)
 			cr := math32.Vec2(float32(x)+xex, float32(y)+yex)
 			pr := pos.Add(cr.Mul(gsz))
 			_, clr := tg.Color(val)

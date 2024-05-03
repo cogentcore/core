@@ -94,12 +94,12 @@ func (tsr *String) String() string {
 	b.WriteString(str)
 	b.WriteString("\n")
 	oddRow := true
-	rows, cols, _, _ := Prjn2DShape(&tsr.Shp, oddRow)
+	rows, cols, _, _ := Projection2DShape(&tsr.Shp, oddRow)
 	for r := 0; r < rows; r++ {
-		rc, _ := Prjn2DCoords(&tsr.Shp, oddRow, r, 0)
+		rc, _ := Projection2DCoords(&tsr.Shp, oddRow, r, 0)
 		b.WriteString(fmt.Sprintf("%v: ", rc))
 		for c := 0; c < cols; c++ {
-			idx := Prjn2DIndex(tsr.Shape(), oddRow, r, c)
+			idx := Projection2DIndex(tsr.Shape(), oddRow, r, c)
 			vl := tsr.Values[idx]
 			b.WriteString(vl)
 		}

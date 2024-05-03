@@ -253,7 +253,7 @@ func (tg *TensorGrid) MinSize() math32.Vector2 {
 	if tg.Disp.Image {
 		return math32.Vec2(float32(tg.Tensor.DimSize(1)), float32(tg.Tensor.DimSize(0)))
 	}
-	rows, cols, rowEx, colEx := tensor.Prjn2DShape(tg.Tensor.Shape(), tg.Disp.OddRow)
+	rows, cols, rowEx, colEx := tensor.Projection2DShape(tg.Tensor.Shape(), tg.Disp.OddRow)
 	frw := float32(rows) + float32(rowEx)*tg.Disp.DimExtra // extra spacing
 	fcl := float32(cols) + float32(colEx)*tg.Disp.DimExtra // extra spacing
 	mx := float32(max(frw, fcl))
@@ -382,7 +382,7 @@ func (tg *TensorGrid) Render() {
 		}
 		return
 	}
-	rows, cols, rowEx, colEx := tensor.Prjn2DShape(tsr.Shape(), tg.Disp.OddRow)
+	rows, cols, rowEx, colEx := tensor.Projection2DShape(tsr.Shape(), tg.Disp.OddRow)
 	frw := float32(rows) + float32(rowEx)*tg.Disp.DimExtra // extra spacing
 	fcl := float32(cols) + float32(colEx)*tg.Disp.DimExtra // extra spacing
 	rowsInner := rows
@@ -405,7 +405,7 @@ func (tg *TensorGrid) Render() {
 			if !tg.Disp.TopZero {
 				ey = (rows - 1) - y
 			}
-			val := tensor.Prjn2DValue(tsr, tg.Disp.OddRow, ey, x)
+			val := tensor.Projection2DValue(tsr, tg.Disp.OddRow, ey, x)
 			cr := math32.Vec2(float32(x)+xex, float32(y)+yex)
 			pr := pos.Add(cr.Mul(gsz))
 			_, clr := tg.Color(val)

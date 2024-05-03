@@ -29,9 +29,9 @@ func init() {
 }
 
 type CamView struct {
-	Model math32.Matrix4
-	View  math32.Matrix4
-	Prjn  math32.Matrix4
+	Model      math32.Matrix4
+	View       math32.Matrix4
+	Projection math32.Matrix4
 }
 
 func OpenImage(fname string) image.Image {
@@ -188,7 +188,7 @@ func main() {
 	// VkPerspective version automatically flips Y axis and shifts depth
 	// into a 0..1 range instead of -1..1, so original GL based geometry
 	// will render identically here.
-	camo.Prjn.SetVkPerspective(45, aspect, 0.01, 100)
+	camo.Projection.SetVkPerspective(45, aspect, 0.01, 100)
 
 	cam.CopyFromBytes(unsafe.Pointer(&camo)) // sets mod
 
