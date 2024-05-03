@@ -649,7 +649,7 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 }
 
 func (ch *Chooser) WidgetTooltip() (string, image.Point) {
-	pos := ch.TooltipDefaultPos()
+	pos := ch.DefaultTooltipPos()
 	if ch.CurrentItem.Tooltip != "" {
 		return ch.CurrentItem.Tooltip, pos
 	}

@@ -370,7 +370,7 @@ func (sr *Slider) SetValueAction(val float32) {
 
 func (sr *Slider) WidgetTooltip() (string, image.Point) {
 	res := sr.Tooltip
-	pos := sr.TooltipDefaultPos()
+	pos := sr.DefaultTooltipPos()
 	if sr.Type == SliderScrollbar {
 		return res, pos
 	}

@@ -300,7 +300,7 @@ func (bt *Button) WidgetTooltip() (string, image.Point) {
 			res += " " + bt.Tooltip
 		}
 	}
-	return res, bt.TooltipDefaultPos()
+	return res, bt.DefaultTooltipPos()
 }
 
 func (bt *Button) HandleEvents() {

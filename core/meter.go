@@ -110,7 +110,7 @@ func (m *Meter) WidgetTooltip() (string, image.Point) {
 		res += " "
 	}
 	res += fmt.Sprintf("(value: %.4g, minimum: %g, maximum: %g)", m.Value, m.Min, m.Max)
-	return res, m.TooltipDefaultPos()
+	return res, m.DefaultTooltipPos()
 }
 
 func (m *Meter) Render() {

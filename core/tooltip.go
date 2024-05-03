@@ -12,9 +12,9 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
-// TooltipDefaultPos returns the default position for the tooltip,
+// DefaultTooltipPos returns the default position for the tooltip,
 // in Window coordinates, using the Window bounding box.
-func (wb *WidgetBase) TooltipDefaultPos() image.Point {
+func (wb *WidgetBase) DefaultTooltipPos() image.Point {
 	bb := wb.WinBBox()
 	pos := bb.Min
 	pos.X += (bb.Max.X - bb.Min.X) / 2 // center on X

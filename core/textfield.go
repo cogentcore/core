@@ -488,7 +488,7 @@ func (tf *TextField) Validate() {
 }
 
 func (tf *TextField) WidgetTooltip() (string, image.Point) {
-	pos := tf.TooltipDefaultPos()
+	pos := tf.DefaultTooltipPos()
 	if tf.Error == nil {
 		return tf.Tooltip, pos
 	}
