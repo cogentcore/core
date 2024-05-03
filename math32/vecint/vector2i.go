@@ -14,6 +14,8 @@
 // the int is significantly easier to deal with for some use-cases.
 package vecint
 
+//go:generate core generate
+
 import "cogentcore.org/core/math32"
 
 // Vector2i is a 2D vector/point with X and Y int components.

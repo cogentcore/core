@@ -1,0 +1,120 @@
+// Copyright (c) 2020, The Emergent Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+//go:build mpi
+
+package mpi
+
+/*
+#cgo pkg-config: ompi
+#include "mpi.h"
+
+MPI_Datatype FLOAT64   = MPI_DOUBLE;
+MPI_Datatype FLOAT32   = MPI_FLOAT;
+MPI_Datatype INT64     = MPI_LONG;
+MPI_Datatype UINT64    = MPI_UNSIGNED_LONG;
+MPI_Datatype INT32     = MPI_INT;
+MPI_Datatype UINT32    = MPI_UNSIGNED;
+MPI_Datatype INT16     = MPI_SHORT;
+MPI_Datatype UINT16    = MPI_UNSIGNED_SHORT;
+MPI_Datatype BYTE      = MPI_BYTE;
+MPI_Datatype COMPLEX128 = MPI_DOUBLE_COMPLEX;
+MPI_Datatype COMPLEX64  = MPI_COMPLEX;
+MPI_Status*  StIgnore   = MPI_STATUS_IGNORE;
+*/
+import "C"
+
+import (
+	"fmt"
+	"log"
+	"unsafe"
+)
+
+{{range .In}}
+
+// Send{{.Name}} sends values to toProc, using given unique tag identifier.
+// This is Blocking. Must have a corresponding Recv call with same tag on toProc, from this proc
+func (cm *Comm) Send{{.Name}}(toProc int, tag int, vals []{{or .Type}}) error {
+	buf := unsafe.Pointer(&vals[0])
+	return Error(C.MPI_Send(buf, C.int(len(vals)), C.{{or .CType}}, C.int(toProc), C.int(tag), cm.comm), "Send{{.Name}}")
+}
+
+// Recv64{{.Name}} receives values from proc fmProc, using given unique tag identifier
+// This is Blocking. Must have a corresponding Send call with same tag on fmProc, to this proc
+func (cm *Comm) Recv{{.Name}}(fmProc int, tag int, vals []{{or .Type}}) error {
+	buf := unsafe.Pointer(&vals[0])
+	return Error(C.MPI_Recv(buf, C.int(len(vals)), C.{{or .CType}}, C.int(fmProc), C.int(tag), cm.comm, C.StIgnore), "Recv{{.Name}}")
+}
+
+// Bcast{{.Name}} broadcasts slice from fmProc to all other procs.
+// All nodes have the same vals after this call, copied from fmProc.
+func (cm *Comm) Bcast{{.Name}}(fmProc int, vals []{{or .Type}}) error {
+	buf := unsafe.Pointer(&vals[0])
+	return Error(C.MPI_Bcast(buf, C.int(len(vals)), C.{{or .CType}}, C.int(fmProc), cm.comm), "Bcast{{.Name}}")
+}
+
+// Reduce{{.Name}} reduces all values across procs to toProc in orig to dest using given operation.
+// recvbuf is ignored on all procs except toProc.
+// IMPORTANT: orig and dest must be different slices
+func (cm *Comm) Reduce{{.Name}}(toProc int, op Op, dest, orig []{{or .Type}}) error {
+	sendbuf := unsafe.Pointer(&orig[0])
+	var recvbuf unsafe.Pointer
+	if dest != nil {
+		recvbuf = unsafe.Pointer(&dest[0])
+	}
+	return Error(C.MPI_Reduce(sendbuf, recvbuf, C.int(len(dest)), C.{{or .CType}}, op.ToC(), C.int(toProc), cm.comm), "Reduce{{.Name}}")
+}
+
+// AllReduce{{.Name}} reduces all values across procs to all procs from orig into dest using given operation.
+// IMPORTANT: orig and dest must be different slices
+// To do an in-place operation, set orig to nil
+func (cm *Comm) AllReduce{{.Name}}(op Op, dest, orig []{{or .Type}}) error {
+	var sendbuf unsafe.Pointer
+	if orig != nil {
+		sendbuf = unsafe.Pointer(&orig[0])
+	} else {
+		sendbuf = C.MPI_IN_PLACE
+	}
+	recvbuf := unsafe.Pointer(&dest[0])
+	return Error(C.MPI_Allreduce(sendbuf, recvbuf, C.int(len(dest)), C.{{or .CType}}, op.ToC(), cm.comm), "AllReduce{{.Name}}")
+}
+
+// Gather{{.Name}} gathers values from all procs into toProc proc, tiled into dest of size np * len(orig).
+// This is inverse of Scatter.
+// recvbuf is ignored on all procs except toProc.
+// IMPORTANT: orig and dest must be different slices.
+func (cm *Comm) Gather{{.Name}}(toProc int, dest, orig []{{or .Type}}) error {
+	sendbuf := unsafe.Pointer(&orig[0])
+	var recvbuf unsafe.Pointer
+	if dest != nil {
+		recvbuf = unsafe.Pointer(&dest[0])
+	}
+	return Error(C.MPI_Gather(sendbuf, C.int(len(orig)), C.{{or .CType}}, recvbuf, C.int(len(orig)), C.{{or .CType}}, C.int(toProc), cm.comm), "Gather{{.Name}}")
+}
+
+// AllGather{{.Name}} gathers values from all procs into all procs,
+// tiled by proc into dest of size np * len(orig).
+// IMPORTANT: orig and dest must be different slices
+func (cm *Comm) AllGather{{.Name}}(dest, orig []{{or .Type}}) error {
+	sendbuf := unsafe.Pointer(&orig[0])
+	recvbuf := unsafe.Pointer(&dest[0])
+	return Error(C.MPI_Allgather(sendbuf, C.int(len(orig)), C.{{or .CType}}, recvbuf, C.int(len(orig)), C.{{or .CType}}, cm.comm), "Gather{{.Name}}")
+}
+
+// Scatter{{.Name}} scatters values from fmProc to all procs, distributing len(dest) size chunks to
+// each proc from orig slice, which must be of size np * len(dest).  This is inverse of Gather.
+// sendbuf is ignored on all procs except fmProc.
+// IMPORTANT: orig and dest must be different slices
+func (cm *Comm) Scatter{{.Name}}(fmProc int, dest, orig []{{or .Type}}) error {
+	var sendbuf unsafe.Pointer
+	if orig != nil {
+		sendbuf = unsafe.Pointer(&orig[0])
+	}
+	recvbuf := unsafe.Pointer(&dest[0])
+	return Error(C.MPI_Scatter(sendbuf, C.int(len(dest)), C.{{or .CType}}, recvbuf, C.int(len(dest)), C.{{or .CType}}, C.int(fmProc), cm.comm), "Gather{{.Name}}")
+}
+
+
+{{- end}}
+

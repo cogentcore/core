@@ -1,0 +1,94 @@
+[
+  {
+    "Name": "F64",
+    "Type": "float64",
+    "CType": "FLOAT64",
+    "Default": "0",
+    "Size": "8"
+  },
+  {
+    "Name": "F32",
+    "Type": "float32",
+    "CType": "FLOAT32",
+    "Default": "0",
+    "Size": "4"
+  },
+  {
+    "Name": "Int",
+    "Type": "int",
+    "CType": "INT64",
+    "Default": "0",
+    "Size": "8"
+  },
+  {
+    "Name": "I64",
+    "Type": "int64",
+    "CType": "INT64",
+    "Default": "0",
+    "Size": "8"
+  },
+  {
+    "Name": "U64",
+    "Type": "uint64",
+    "CType": "UINT64",
+    "Default": "0",
+    "Size": "8"
+  },
+  {
+    "Name": "I32",
+    "Type": "int32",
+    "CType": "INT32",
+    "Default": "0",
+    "Size": "4"
+  },
+  {
+    "Name": "U32",
+    "Type": "uint32",
+    "CType": "UINT32",
+    "Default": "0",
+    "Size": "4"
+  },
+  {
+    "Name": "I16",
+    "Type": "int16",
+    "CType": "INT16",
+    "Default": "0",
+    "Size": "2"
+  },
+  {
+    "Name": "U16",
+    "Type": "uint16",
+    "CType": "UINT16",
+    "Default": "0",
+    "Size": "2"
+  },
+  {
+    "Name": "I8",
+    "Type": "int8",
+    "CType": "BYTE",
+    "Default": "0",
+    "Size": "1"
+  },
+  {
+    "Name": "U8",
+    "Type": "uint8",
+    "CType": "BYTE",
+    "Default": "0",
+    "Size": "1"
+  },
+  {
+    "Name": "C128",
+    "Type": "complex128",
+    "CType": "COMPLEX128",
+    "Default": "0",
+    "Size": "16"
+  },
+  {
+    "Name": "C64",
+    "Type": "complex64",
+    "CType": "COMPLEX64",
+    "Default": "0",
+    "Size": "8"
+  }
+]
+
