@@ -3,11 +3,8 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package GiSt contains the style structures for the Cogent Core GUI framework.
+Package styles contains the style structures for the Cogent Core GUI framework.
 
 These are all based on the CSS standard: https://www.w3schools.com/cssref/default.asp
-
-The xml struct tags provide the (lowercase) keyword for each tag -- tags can be
-parsed from strings using these keywords.
 */
 package styles
