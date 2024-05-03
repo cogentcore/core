@@ -21,11 +21,8 @@ jobs:
     - name: Set up Core
       run: go install ./cmd/core && core setup
 
-    - name: Set Vulkan Environment Variables
-      run: export NVIDIA_DRIVER_CAPABILITIES=all && export NVIDIA_VISIBLE_DEVICES=all
-
-    - name: "Install vulkan and video dependencies (TODO: move to a command)"
-      run: sudo add-apt-repository ppa:savoury1/ffmpeg4 && sudo apt install libswscale-dev libavcodec-dev libavformat-dev libswresample-dev libavutil-dev libasound2-dev pciutils vulkan-tools mesa-utils
+    - name: "Install video dependencies (TODO: move to a command)"
+      run: sudo add-apt-repository ppa:savoury1/ffmpeg4 && sudo apt install libswscale-dev libavcodec-dev libavformat-dev libswresample-dev libavutil-dev libasound2-dev
 
     - name: Build
       run: go build -v ./...
