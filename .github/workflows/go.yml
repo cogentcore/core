@@ -27,8 +27,9 @@ jobs:
     - name: Build
       run: go build -v ./...
 
+    # we can't test vgpu and xyz on the ci since there is no vulkan support
     - name: Test
-      run: go test -v ./... -coverprofile cover.out
+      run: go test -v $(go list ./... | grep -v vgpu | grep -v xyz) -coverprofile cover.out
 
     - name: Update coverage report
       uses: ncruces/go-coverage-report@v0
