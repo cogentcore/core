@@ -552,7 +552,11 @@ func (wb *WidgetBase) PointToRelPos(pt image.Point) image.Point {
 // WinBBox returns the RenderWindow based bounding box for the widget
 // by adding the Scene position to the ScBBox
 func (wb *WidgetBase) WinBBox() image.Rectangle {
-	return wb.Geom.TotalBBox.Add(wb.Scene.SceneGeom.Pos)
+	bb := wb.Geom.TotalBBox
+	if wb.Scene != nil {
+		return bb.Add(wb.Scene.SceneGeom.Pos)
+	}
+	return bb
 }
 
 // WinPos returns the RenderWindow based position within the

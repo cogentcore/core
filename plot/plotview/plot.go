@@ -9,6 +9,7 @@ import (
 	"image"
 	"image/draw"
 
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
@@ -39,6 +40,9 @@ type Plot struct {
 // SetPlot sets the plot to given Plot, and calls UpdatePlot to ensure it is
 // drawn at the current size of this widget
 func (pt *Plot) SetPlot(pl *plot.Plot) {
+	if pl != nil && pt.Plot != nil && pt.Plot.Pixels != nil {
+		pl.SetPixels(pt.Plot.Pixels) // re-use the image!
+	}
 	pt.Plot = pl
 	pt.UpdatePlot()
 }
@@ -47,11 +51,11 @@ func (pt *Plot) SetPlot(pl *plot.Plot) {
 // and triggers a Render so the widget will be rendered.
 func (pt *Plot) UpdatePlot() {
 	if pt.Plot == nil {
+		pt.NeedsRender()
 		return
 	}
 	sz := pt.Geom.Size.Actual.Content.ToPoint()
-	zp := image.Point{}
-	if sz == zp {
+	if sz == (image.Point{}) {
 		return
 	}
 	pt.Plot.DPI = pt.Scale * pt.Styles.UnitContext.DPI
@@ -151,10 +155,11 @@ func (pt *Plot) SizeFinal() {
 func (pt *Plot) Render() {
 	pt.WidgetBase.Render()
 
-	if pt.Plot == nil || pt.Plot.Pixels == nil {
-		return
-	}
 	r := pt.Geom.ContentBBox
 	sp := pt.Geom.ScrollOffset()
-	draw.Draw(pt.Scene.Pixels, r, pt.Plot.Pixels, sp, draw.Over)
+	if pt.Plot == nil || pt.Plot.Pixels == nil {
+		draw.Draw(pt.Scene.Pixels, r, colors.C(colors.Scheme.Surface), sp, draw.Src)
+		return
+	}
+	draw.Draw(pt.Scene.Pixels, r, pt.Plot.Pixels, sp, draw.Src)
 }

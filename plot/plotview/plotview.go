@@ -284,7 +284,7 @@ func (pl *PlotView) UpdatePlot() {
 // It surrounds operation with InPlot true / false to prevent multiple updates
 func (pl *PlotView) GenPlot() {
 	if pl.InPlot {
-		slog.Error("plot: in plot already")
+		slog.Error("plot: in plot already") // note: this never seems to happen -- could probably nuke
 		return
 	}
 	pl.InPlot = true
@@ -548,24 +548,25 @@ func (pl *PlotView) ColumnsConfig() {
 			pl.UpdatePlot()
 		})
 		sw.SetState(cp.On, states.Checked)
-		bt := core.NewButton(cl, "col").SetText(cp.Column).SetType(core.ButtonAction)
-		bt.SetMenu(func(m *core.Scene) {
-			core.NewButton(m, "set-x").SetText("Set X Axis").OnClick(func(e events.Event) {
-				pl.Params.XAxisColumn = cp.Column
-				pl.UpdatePlot()
+		bt := core.NewButton(cl, "col").SetText(cp.Column).SetType(core.ButtonAction).
+			SetTooltip("edit column settings including setting as XAxis or Legend")
+		bt.OnClick(func(e events.Event) {
+			d := core.NewBody().AddTitle("Column Params")
+			views.NewStructView(d).SetStruct(cp).
+				OnChange(func(e events.Event) {
+					pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
+				})
+			d.AddAppBar(func(tb *core.Toolbar) {
+				core.NewButton(tb).SetText("Set X Axis").OnClick(func(e events.Event) {
+					pl.Params.XAxisColumn = cp.Column
+					pl.UpdatePlot()
+				})
+				core.NewButton(tb).SetText("Set Legend").OnClick(func(e events.Event) {
+					pl.Params.LegendColumn = cp.Column
+					pl.UpdatePlot()
+				})
 			})
-			core.NewButton(m, "set-legend").SetText("Set Legend").OnClick(func(e events.Event) {
-				pl.Params.LegendColumn = cp.Column
-				pl.UpdatePlot()
-			})
-			core.NewButton(m, "edit").SetText("Edit").OnClick(func(e events.Event) {
-				d := core.NewBody().AddTitle("Column Params")
-				views.NewStructView(d).SetStruct(cp).
-					OnChange(func(e events.Event) {
-						pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
-					})
-				d.NewFullDialog(pl).SetNewWindow(true).Run()
-			})
+			d.NewFullDialog(pl).SetNewWindow(true).Run()
 		})
 	}
 }

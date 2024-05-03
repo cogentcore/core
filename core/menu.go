@@ -107,8 +107,7 @@ func NewMenuStage(sc *Scene, ctx Widget, pos image.Point) *Stage {
 		return nil
 	}
 	st := NewPopupStage(MenuStage, sc, ctx)
-	zp := image.Point{}
-	if pos != zp {
+	if pos != (image.Point{}) {
 		st.Pos = pos
 	}
 	return st

@@ -106,6 +106,14 @@ func (pt *Plot) Add(ps ...Plotter) {
 	pt.Plotters = append(pt.Plotters, ps...)
 }
 
+// SetPixels sets the backing pixels image to given image.RGBA
+func (pt *Plot) SetPixels(img *image.RGBA) {
+	pt.Pixels = img
+	pt.Paint = paint.NewContextFromImage(pt.Pixels)
+	pt.Paint.UnitContext.DPI = pt.DPI
+	pt.Size = pt.Pixels.Bounds().Size()
+}
+
 // Resize sets the size of the output image to given size.
 // Does nothing if already the right size.
 func (pt *Plot) Resize(sz image.Point) {
@@ -117,10 +125,7 @@ func (pt *Plot) Resize(sz image.Point) {
 			return // already good
 		}
 	}
-	pt.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
-	pt.Paint = paint.NewContextFromImage(pt.Pixels)
-	pt.Paint.UnitContext.DPI = pt.DPI
-	pt.Size = sz
+	pt.SetPixels(image.NewRGBA(image.Rectangle{Max: sz}))
 }
 
 func (pt *Plot) SaveImage(filename string) error {

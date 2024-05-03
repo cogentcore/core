@@ -98,9 +98,8 @@ func (sw *Scene) Config() {
 // ConfigFrame configures the framebuffer for GPU rendering,
 // using the RenderWindow GPU and Device.
 func (sw *Scene) ConfigFrame() {
-	zp := image.Point{}
 	sz := sw.Geom.Size.Actual.Content.ToPointFloor()
-	if sz == zp {
+	if sz == (image.Point{}) {
 		return
 	}
 	sw.XYZ.Geom.Size = sz

@@ -63,15 +63,16 @@ func (pt *Plot) drawConfig() {
 // Plotters are drawn in the order in which they were
 // added to the plot.
 func (pt *Plot) Draw() {
+	pt.drawConfig()
+	pc := pt.Paint
 	ptw := float32(pt.Size.X)
 	pth := float32(pt.Size.X)
 
 	ptb := image.Rectangle{Max: pt.Size}
-	pt.Paint.PushBounds(ptb)
+	pc.PushBounds(ptb)
 
-	pt.drawConfig()
 	if pt.Background != nil {
-		pt.Paint.BlitBox(math32.Vector2{}, math32.Vector2FromPoint(pt.Size), colors.C(pt.Background))
+		pc.BlitBox(math32.Vector2{}, math32.Vector2FromPoint(pt.Size), colors.C(pt.Background))
 	}
 
 	if pt.Title.Text != "" {
@@ -93,15 +94,15 @@ func (pt *Plot) Draw() {
 
 	tb := ptb
 	tb.Min.X += ywidth
-	pt.Paint.PushBounds(tb)
+	pc.PushBounds(tb)
 	pt.X.drawX(pt, lpad, rpad)
-	pt.Paint.PopBounds()
+	pc.PopBounds()
 
 	tb = ptb
 	tb.Max.Y -= xheight
-	pt.Paint.PushBounds(tb)
+	pc.PushBounds(tb)
 	pt.Y.drawY(pt, tickWidth, tpad, bpad)
-	pt.Paint.PopBounds()
+	pc.PopBounds()
 
 	tb = ptb
 	tb.Min.X += ywidth + lpad
@@ -115,16 +116,15 @@ func (pt *Plot) Draw() {
 	tb.Min.Y -= 2
 	tb.Max.X += 2
 	tb.Max.Y += 2
-	pt.Paint.PushBounds(tb)
+	pc.PushBounds(tb)
 
 	for _, plt := range pt.Plotters {
 		plt.Plot(pt)
 	}
 
 	pt.Legend.draw(pt)
-
-	pt.Paint.PopBounds()
-	pt.Paint.PopBounds() // global
+	pc.PopBounds()
+	pc.PopBounds() // global
 }
 
 ////////////////////////////////////////////////////////////////

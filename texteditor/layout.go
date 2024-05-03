@@ -45,8 +45,7 @@ func (ed *Editor) UpdateFromAlloc() {
 		asz.Y -= sbw
 	}
 	ed.LineLayoutSize = asz
-	nv := math32.Vector2{}
-	if asz == nv {
+	if asz == (math32.Vector2{}) {
 		ed.NLinesChars.Y = 20
 		ed.NLinesChars.X = 80
 	} else {
