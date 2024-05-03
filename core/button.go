@@ -292,7 +292,7 @@ func (bt *Button) HandleClickDismissMenu() {
 	})
 }
 
-func (bt *Button) WidgetTooltip() (string, image.Point) {
+func (bt *Button) WidgetTooltip(pos image.Point) (string, image.Point) {
 	res := bt.Tooltip
 	if bt.Shortcut != "" && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
 		res = "[" + bt.Shortcut.Label() + "]"

@@ -368,17 +368,16 @@ func (sr *Slider) SetValueAction(val float32) {
 	sr.SendChange()
 }
 
-func (sr *Slider) WidgetTooltip() (string, image.Point) {
+func (sr *Slider) WidgetTooltip(pos image.Point) (string, image.Point) {
 	res := sr.Tooltip
-	pos := sr.DefaultTooltipPos()
 	if sr.Type == SliderScrollbar {
-		return res, pos
+		return res, sr.DefaultTooltipPos()
 	}
 	if res != "" {
 		res += " "
 	}
 	res += fmt.Sprintf("(value: %.4g, minimum: %g, maximum: %g)", sr.Value, sr.Min, sr.Max)
-	return res, pos
+	return res, sr.DefaultTooltipPos()
 }
 
 ///////////////////////////////////////////////////////////

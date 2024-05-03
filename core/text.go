@@ -230,7 +230,7 @@ func (tx *Text) HandleEvents() {
 			if e.Pos().In(tlb) {
 				inLink = true
 				if tx.StateIs(states.LongHovered) || tx.StateIs(states.LongPressed) {
-					NewTooltipTextAt(tx, tl.URL, tlb.Min, tlb.Size()).Run()
+					NewTooltipTextSize(tx, tl.URL, tlb.Min, tlb.Size()).Run()
 					e.SetHandled()
 				}
 				break

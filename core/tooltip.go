@@ -31,24 +31,16 @@ func NewTooltipFromScene(sc *Scene, ctx Widget) *Stage {
 	return NewPopupStage(TooltipStage, sc, ctx)
 }
 
-// NewTooltip returns a new tooltip stage displaying the tooltip text
-// for the given widget based on the widget's position and size.
-func NewTooltip(w Widget) *Stage {
-	tt, pos := w.WidgetTooltip()
-	return NewTooltipText(w, tt, pos)
+// NewTooltip returns a new tooltip stage displaying the given tooltip text
+// for the given widget based at the given window-level position, with the size
+// defaulting to the size of the widget.
+func NewTooltip(w Widget, tooltip string, pos image.Point) *Stage {
+	return NewTooltipTextSize(w, tooltip, pos, w.AsWidget().WinBBox().Size())
 }
 
-// NewTooltipText returns a new tooltip stage displaying the given tooltip text
-// for the given widget based on the widget's position and size.
-func NewTooltipText(w Widget, tooltip string, pos image.Point) *Stage {
-	wb := w.AsWidget()
-	bb := wb.WinBBox()
-	return NewTooltipTextAt(w, tooltip, pos, bb.Size())
-}
-
-// NewTooltipTextAt returns a new tooltip stage displaying the given tooltip text
+// NewTooltipTextSize returns a new tooltip stage displaying the given tooltip text
 // for the given widget at the given window-level position with the given size.
-func NewTooltipTextAt(w Widget, tooltip string, pos, sz image.Point) *Stage {
+func NewTooltipTextSize(w Widget, tooltip string, pos, sz image.Point) *Stage {
 	return NewTooltipFromScene(NewTooltipScene(w, tooltip, pos, sz), w)
 }
 

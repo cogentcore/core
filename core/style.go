@@ -157,7 +157,7 @@ func (wb *WidgetBase) SetStyles() {
 			return
 		}
 		// TODO(kai): what about context menus on mobile?
-		tt, _ := wb.This().(Widget).WidgetTooltip()
+		tt, _ := wb.This().(Widget).WidgetTooltip(image.Pt(-1, -1))
 		s.SetAbilities(tt != "", abilities.LongHoverable, abilities.LongPressable)
 
 		if s.Is(states.Focused) {

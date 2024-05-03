@@ -678,7 +678,7 @@ func WidgetPrevFunc(wi Widget, fun func(w Widget) bool) Widget {
 }
 
 // WidgetTooltip is the base implementation of [Widget.WidgetTooltip],
-// which just returns [WidgetBase.Tooltip], wb.WinBBox().Min
-func (wb *WidgetBase) WidgetTooltip() (string, image.Point) {
+// which just returns [WidgetBase.Tooltip] and [WidgetBase.DefaultTooltipPos].
+func (wb *WidgetBase) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return wb.Tooltip, wb.DefaultTooltipPos()
 }

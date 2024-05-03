@@ -648,12 +648,11 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 	})
 }
 
-func (ch *Chooser) WidgetTooltip() (string, image.Point) {
-	pos := ch.DefaultTooltipPos()
+func (ch *Chooser) WidgetTooltip(pos image.Point) (string, image.Point) {
 	if ch.CurrentItem.Tooltip != "" {
-		return ch.CurrentItem.Tooltip, pos
+		return ch.CurrentItem.Tooltip, ch.DefaultTooltipPos()
 	}
-	return ch.Tooltip, pos
+	return ch.Tooltip, ch.DefaultTooltipPos()
 }
 
 // CompleteMatch is the [complete.MatchFunc] used for the

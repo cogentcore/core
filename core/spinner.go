@@ -252,10 +252,10 @@ func (sp *Spinner) StringToValue(str string) (float32, error) {
 	return 0, err
 }
 
-func (sp *Spinner) WidgetTooltip() (string, image.Point) {
-	res, pos := sp.TextField.WidgetTooltip()
+func (sp *Spinner) WidgetTooltip(pos image.Point) (string, image.Point) {
+	res, rpos := sp.TextField.WidgetTooltip(pos)
 	if sp.Error != nil {
-		return res, pos
+		return res, rpos
 	}
 	if sp.HasMin {
 		if res != "" {
@@ -276,7 +276,7 @@ func (sp *Spinner) WidgetTooltip() (string, image.Point) {
 		}
 		res += "maximum: " + sp.ValueToString(sp.Max) + ")"
 	}
-	return res, pos
+	return res, rpos
 }
 
 func (sp *Spinner) HandleEvents() {

@@ -412,12 +412,12 @@ func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 func (wb *WidgetBase) HandleLongHoverTooltip() {
 	wb.On(events.LongHoverStart, func(e events.Event) {
 		wi := wb.This().(Widget)
-		tt, _ := wi.WidgetTooltip()
+		tt, pos := wi.WidgetTooltip(e.Pos())
 		if tt == "" {
 			return
 		}
 		e.SetHandled()
-		NewTooltip(wi).Run()
+		NewTooltip(wi, tt, pos).Run()
 	})
 	wb.On(events.LongHoverEnd, func(e events.Event) {
 		if wb.Scene.Stage != nil {
@@ -428,12 +428,12 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 	wb.On(events.LongPressStart, func(e events.Event) {
 		wb.Send(events.ContextMenu, e)
 		wi := wb.This().(Widget)
-		tt, _ := wi.WidgetTooltip()
+		tt, pos := wi.WidgetTooltip(e.Pos())
 		if tt == "" {
 			return
 		}
 		e.SetHandled()
-		NewTooltip(wi).Run()
+		NewTooltip(wi, tt, pos).Run()
 	})
 	wb.On(events.LongPressEnd, func(e events.Event) {
 		if wb.Scene.Stage != nil {

@@ -487,12 +487,11 @@ func (tf *TextField) Validate() {
 	tf.Send(events.LongHoverStart)
 }
 
-func (tf *TextField) WidgetTooltip() (string, image.Point) {
-	pos := tf.DefaultTooltipPos()
+func (tf *TextField) WidgetTooltip(pos image.Point) (string, image.Point) {
 	if tf.Error == nil {
-		return tf.Tooltip, pos
+		return tf.Tooltip, tf.DefaultTooltipPos()
 	}
-	return tf.Error.Error(), pos
+	return tf.Error.Error(), tf.DefaultTooltipPos()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

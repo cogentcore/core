@@ -104,7 +104,7 @@ func (m *Meter) ApplyStyle() {
 	m.Width.ToDots(&m.Styles.UnitContext)
 }
 
-func (m *Meter) WidgetTooltip() (string, image.Point) {
+func (m *Meter) WidgetTooltip(pos image.Point) (string, image.Point) {
 	res := m.Tooltip
 	if res != "" {
 		res += " "
