@@ -110,7 +110,7 @@ func (pt *Plot) HandleEvents() {
 			return
 		}
 		se := e.(*events.MouseScroll)
-		sc := 1 + (float32(se.Delta.Y) * 0.001)
+		sc := 1 + (float32(se.Delta.Y) * 0.002)
 		pt.Plot.X.Min *= sc
 		pt.Plot.X.Max *= sc
 		pt.Plot.Y.Min *= sc
