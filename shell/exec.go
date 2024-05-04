@@ -5,48 +5,12 @@
 package shell
 
 import (
-	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"cogentcore.org/core/base/exec"
-	"cogentcore.org/core/base/reflectx"
 	"github.com/mattn/go-shellwords"
 )
-
-func (sh *Shell) ExecLine(ln string) error {
-	if sh.Debug >= 1 {
-		fmt.Println("shell exec:", ln)
-	}
-	args := strings.Fields(ln)
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	cmd := args[0]
-	if len(args) == 1 {
-		_, err := sh.Exec.Exec(cmd)
-		return err
-	}
-
-	// do variable substitution based on current symbols from interpreter
-	args = args[1:]
-	sh.GetSymbols()
-	for ai, arg := range args {
-		has, v := sh.SymbolByName(arg)
-		if has {
-			str := reflectx.ToString(v.Interface())
-			if str != "" {
-				args[ai] = str
-			}
-		}
-	}
-
-	_, err := sh.Exec.Exec(cmd, args...)
-	return err
-}
 
 // Exec executes the given command string, parsing and separating any arguments.
 // If there is any error, it fatally logs it. It returns the stdout of the command,
