@@ -5,31 +5,22 @@
 package shell
 
 import (
-	"log"
 	"os"
 
 	"cogentcore.org/core/base/exec"
-	"github.com/mattn/go-shellwords"
+	"cogentcore.org/core/base/reflectx"
 )
 
 // Exec executes the given command string, parsing and separating any arguments.
 // If there is any error, it fatally logs it. It returns the stdout of the command,
 // in addition to forwarding output to [os.Stdout] and [os.Stderr] appropriately.
-func Exec(cmd string) string {
-	args, err := shellwords.Parse(cmd)
-	if err != nil {
-		log.Fatalln("shell.Exec: error parsing arguments:", err)
+func Exec(cmd any, args ...any) string {
+	scmd := reflectx.ToString(cmd)
+	sargs := make([]string, len(args))
+	for i, a := range args {
+		sargs[i] = reflectx.ToString(a)
 	}
-	if len(args) == 0 {
-		log.Fatalln("shell.Exec: no arguments")
-	}
-
-	ecmd := args[0]
-	var eargs []string
-	if len(args) > 1 {
-		eargs = args[1:]
-	}
-	out, _ := ExecConfig.Output(ecmd, eargs...)
+	out, _ := ExecConfig.Output(scmd, sargs...)
 	return out
 }
 

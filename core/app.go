@@ -180,6 +180,15 @@ var (
 
 // StandardOverflowMenu adds standard overflow menu items.
 func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
+	NewButton(m).SetText("About").SetIcon(icons.Info).OnClick(func(e events.Event) {
+		NewBody().AddTitle(TheApp.Name()).AddText(AppAbout).AddOKOnly().RunDialog(m)
+	})
+	if SettingsWindow != nil {
+		NewButton(m).SetText("Settings").SetIcon(icons.Settings).SetShortcut("Command+,").
+			OnClick(func(e events.Event) {
+				SettingsWindow()
+			})
+	}
 	if webCanInstall {
 		icon := icons.InstallDesktop
 		if TheApp.SystemPlatform().IsMobile() {
@@ -188,12 +197,6 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 		NewButton(m).SetText("Install").SetIcon(icon).SetTooltip("Install this app to your device as a Progressive Web App (PWA)").OnClick(func(e events.Event) {
 			webInstall()
 		})
-	}
-	if SettingsWindow != nil {
-		NewButton(m).SetText("Settings").SetIcon(icons.Settings).SetShortcut("Command+,").
-			OnClick(func(e events.Event) {
-				SettingsWindow()
-			})
 	}
 	if InspectorWindow != nil {
 		NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetTooltip("Developer tools for inspecting the content of the app").SetShortcut("Command+Shift+I").
