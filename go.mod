@@ -65,6 +65,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
+	github.com/traefik/yaegi v0.16.1 // indirect
 	golang.org/x/exp/shiny v0.0.0-20240416160154-fe59bbe5cc7f // indirect
 	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a // indirect
 	golang.org/x/text v0.14.0 // indirect
