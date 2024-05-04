@@ -162,8 +162,9 @@ func (c *Config) OnConfig(cmd string) error {
 	return nil
 }
 
-// VersionLinkerFlags returns the ld linker flags that specify the app and core version.
-func VersionLinkerFlags() string {
+// LinkerFlags returns the ld linker flags that specify the app and core version,
+// the app about information, and the app icon.
+func LinkerFlags() string {
 	res := ""
 	av, err := exec.Silent().Output("git", "describe", "--tags")
 	if err == nil {

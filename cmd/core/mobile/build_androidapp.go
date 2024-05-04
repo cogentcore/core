@@ -84,7 +84,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 			pkg.PkgPath,
 			AndroidEnv[t.Arch],
 			"-buildmode=c-shared",
-			"-ldflags", config.VersionLinkerFlags(),
+			"-ldflags", config.LinkerFlags(),
 			"-o", libAbsPath,
 		)
 		if err != nil {
