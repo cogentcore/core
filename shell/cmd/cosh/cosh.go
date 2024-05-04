@@ -10,11 +10,11 @@ import (
 	"io"
 	"os"
 
-	"cogentcore.org/core/shell/parse"
+	"cogentcore.org/core/shell"
 )
 
 func main() {
-	ctx := parse.NewContext()
+	sh := shell.NewShell()
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print("> ")
@@ -22,6 +22,6 @@ func main() {
 		if err == io.EOF {
 			break
 		}
-		parse.ParseLine(ctx, line)
+		sh.ParseLine(line)
 	}
 }
