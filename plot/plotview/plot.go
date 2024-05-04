@@ -127,8 +127,8 @@ func (pt *Plot) WidgetTooltip(pos image.Point) (string, image.Point) {
 	if pt.Plot == nil {
 		return pt.Tooltip, pt.DefaultTooltipPos()
 	}
-	pos = pos.Sub(pt.Geom.ContentBBox.Min)
-	_, idx, dist, data, _ := pt.Plot.ClosestDataToPixel(pos.X, pos.Y)
+	wpos := pos.Sub(pt.Geom.ContentBBox.Min)
+	_, idx, dist, data, _ := pt.Plot.ClosestDataToPixel(wpos.X, wpos.Y)
 	if dist <= 10 {
 		return fmt.Sprintf("[%d]: (%g, %g)", idx, data.X, data.Y), pos
 	}
