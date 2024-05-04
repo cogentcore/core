@@ -100,8 +100,8 @@ func PackLinux(c *config.Config) error {
 	}
 
 	// we need a description
-	if c.Desc == "" {
-		c.Desc = c.Name
+	if c.About == "" {
+		c.About = c.Name
 	}
 
 	err = os.MkdirAll(usapath, 0777)
@@ -115,7 +115,7 @@ func PackLinux(c *config.Config) error {
 	defer fapp.Close()
 	dfd := &DesktopFileData{
 		Name: c.Name,
-		Desc: c.Desc,
+		Desc: c.About,
 		Exec: anm,
 	}
 	err = DesktopFileTmpl.Execute(fapp, dfd)
@@ -135,7 +135,7 @@ func PackLinux(c *config.Config) error {
 	dcd := &DebianControlData{
 		Name:    anm,
 		Version: vnm,
-		Desc:    c.Desc,
+		Desc:    c.About,
 	}
 	err = DebianControlTmpl.Execute(fctrl, dcd)
 	if err != nil {
@@ -241,7 +241,7 @@ func PackDarwin(c *config.Config) error {
 		Executable:         filepath.Join("MacOS", anm),
 		Identifier:         c.ID,
 		Version:            c.Version,
-		InfoString:         c.Desc,
+		InfoString:         c.About,
 		ShortVersionString: c.Version,
 		IconFile:           filepath.Join("Contents", "Resources", "icon.icns"),
 	}
@@ -357,7 +357,7 @@ func PackWindows(c *config.Config) error {
 	}
 	wmd := &WindowsInstallerData{
 		Name: c.Name,
-		Desc: c.Desc,
+		Desc: c.About,
 	}
 	err = WindowsInstallerTmpl.Execute(fman, wmd)
 	fman.Close()

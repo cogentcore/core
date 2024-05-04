@@ -40,14 +40,12 @@ type Config struct { //types:add
 	// (eg: com.cogent.mail). It defaults to com.parentDirectory.currentDirectory.
 	ID string
 
-	// the description of the project
-	Desc string
+	// About is the about information for the project, which can be viewed via
+	// the "About" button in the app bar. It is also used when packaging the app.
+	About string
 
 	// the version of the project to release
 	Version string `cmd:"release" posarg:"0" save:"-"`
-
-	// the type of the project (App/Library)
-	Type Types `def:"App"`
 
 	// Pages, if specified, indicates that the app has core
 	// pages located at this directory. If so, markdown code blocks with

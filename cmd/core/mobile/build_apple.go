@@ -34,7 +34,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, targets []config.Plat
 		BundleID:           c.ID,
 		Name:               c.Name,
 		Version:            c.Version,
-		InfoString:         c.Desc,
+		InfoString:         c.About,
 		ShortVersionString: c.Version,
 		IconFile:           "icon.icns",
 	}); err != nil {

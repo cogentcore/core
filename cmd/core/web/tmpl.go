@@ -112,7 +112,7 @@ func MakeManifestJSON(c *config.Config) ([]byte, error) {
 	d := ManifestJSONData{
 		ShortName:   c.Name,
 		Name:        c.Name,
-		Description: c.Desc,
+		Description: c.About,
 	}
 
 	b := &bytes.Buffer{}
@@ -149,7 +149,7 @@ func MakeIndexHTML(c *config.Config, basePath string, title string) ([]byte, err
 	d := IndexHTMLData{
 		BasePath:               basePath,
 		Author:                 c.Web.Author,
-		Desc:                   c.Desc,
+		Desc:                   c.About,
 		Keywords:               c.Web.Keywords,
 		Title:                  title,
 		SiteName:               c.Name,
