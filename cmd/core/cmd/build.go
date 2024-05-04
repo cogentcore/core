@@ -75,7 +75,7 @@ func BuildDesktop(c *config.Config, platform config.Platform) error {
 		// see https://stackoverflow.com/questions/23250505/how-do-i-create-an-executable-from-golang-that-doesnt-open-a-console-window-whe
 		// tags = append(tags, "-ldflags", "-H=windowsgui")
 	}
-	ldflags += " " + config.LinkerFlags()
+	ldflags += " " + config.LinkerFlags(c)
 	tags = append(tags, "-ldflags", ldflags, "-o", output)
 
 	err := xc.Run("go", tags...)

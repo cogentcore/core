@@ -164,11 +164,16 @@ func (c *Config) OnConfig(cmd string) error {
 
 // LinkerFlags returns the ld linker flags that specify the app and core version,
 // the app about information, and the app icon.
-func LinkerFlags() string {
+func LinkerFlags(c *Config) string {
 	res := ""
+
+	if c.About != "" {
+		res += `-X "cogentcore.org/core/core.AppAbout=` + c.About + `" `
+	}
+
 	av, err := exec.Silent().Output("git", "describe", "--tags")
 	if err == nil {
-		res += "-X cogentcore.org/core/system.AppVersion=" + av
+		res += "-X cogentcore.org/core/system.AppVersion=" + av + " "
 	}
 
 	// workspaces can interfere with getting the right version
@@ -178,7 +183,7 @@ func LinkerFlags() string {
 		if cv == "" {
 			cv = av
 		}
-		res += " -X cogentcore.org/core/system.CoreVersion=" + cv
+		res += "-X cogentcore.org/core/system.CoreVersion=" + cv
 	}
 	return res
 }

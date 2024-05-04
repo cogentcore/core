@@ -29,7 +29,7 @@ func Build(c *config.Config) error {
 	if c.Web.Gzip {
 		opath += ".orig"
 	}
-	err := exec.Major().SetEnv("GOOS", "js").SetEnv("GOARCH", "wasm").Run("go", "build", "-o", opath, "-ldflags", config.LinkerFlags())
+	err := exec.Major().SetEnv("GOOS", "js").SetEnv("GOARCH", "wasm").Run("go", "build", "-o", opath, "-ldflags", config.LinkerFlags(c))
 	if err != nil {
 		return err
 	}
