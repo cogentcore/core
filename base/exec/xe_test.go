@@ -9,19 +9,17 @@ import (
 	"testing"
 
 	"cogentcore.org/core/base/logx"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRun(t *testing.T) {
 	logx.UserLevel = slog.LevelInfo
 	xc := Major().SetFatal(true)
-	xc.RunSh("go version")
-	xc.RunSh("git version")
-	xc.RunSh("echo hello")
+	xc.Run("go", "version")
+	xc.Run("git", "version")
+	xc.Run("echo", " hello")
 }
 
 func TestError(t *testing.T) {
-	err := Major().RunSh("go bild")
-	if err == nil { // we want it to fail
-		t.Error("expected error but got none")
-	}
+	assert.Error(t, Run("go", "bild"))
 }

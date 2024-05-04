@@ -73,10 +73,6 @@ type Config struct { //types:add -setters
 	// Commands is the writer to write the string representation of the called commands to.
 	// It can be set to nil to disable the writing of the string representations of the called commands.
 	Commands io.Writer
-
-	// Errors is the writer to write program errors to.
-	// It can be set to nil to disable the writing of program errors.
-	Errors io.Writer
 }
 
 // major is the config object for [Major] specified through [SetMajor]
@@ -106,7 +102,6 @@ func Major() *Config {
 			Stderr:   os.Stderr,
 			Stdin:    os.Stdin,
 			Commands: os.Stdout,
-			Errors:   os.Stderr,
 		}
 	}
 	return &Config{
@@ -114,7 +109,6 @@ func Major() *Config {
 		Env:    map[string]string{},
 		Stderr: os.Stderr,
 		Stdin:  os.Stdin,
-		Errors: os.Stderr,
 	}
 }
 
@@ -151,7 +145,6 @@ func Minor() *Config {
 			Stderr:   os.Stderr,
 			Stdin:    os.Stdin,
 			Commands: os.Stdout,
-			Errors:   os.Stderr,
 		}
 	}
 	return &Config{
@@ -159,7 +152,6 @@ func Minor() *Config {
 		Env:    map[string]string{},
 		Stderr: os.Stderr,
 		Stdin:  os.Stdin,
-		Errors: os.Stderr,
 	}
 }
 
@@ -196,7 +188,6 @@ func Verbose() *Config {
 			Stderr:   os.Stderr,
 			Stdin:    os.Stdin,
 			Commands: os.Stdout,
-			Errors:   os.Stderr,
 		}
 	}
 	return &Config{
@@ -204,7 +195,6 @@ func Verbose() *Config {
 		Env:    map[string]string{},
 		Stderr: os.Stderr,
 		Stdin:  os.Stdin,
-		Errors: os.Stderr,
 	}
 }
 
