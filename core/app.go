@@ -23,8 +23,18 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// TheApp is the current [App]; only one is ever in effect.
-var TheApp = &App{App: system.TheApp}
+var (
+	// TheApp is the current [App]; only one is ever in effect.
+	TheApp = &App{App: system.TheApp}
+
+	// AppAbout is the about information for the current app.
+	// It is set by a linker flag in the core command line tool.
+	AppAbout string
+
+	// AppIcon is the svg icon bytes for the current app.
+	// It is set by a linker flag in the core command line tool.
+	AppIcon []byte
+)
 
 // App represents a Cogent Core app. It extends [system.App] to provide both system-level
 // and high-level data and functions to do with the currently running application. The
