@@ -27,15 +27,10 @@ import (
 	"cogentcore.org/core/views"
 )
 
-//go:embed icon.svg
-var appIcon []byte
-
 //go:embed demo.go
 var demoFile embed.FS
 
 func main() {
-	core.TheApp.SetIconBytes(appIcon)
-
 	b := core.NewBody("Cogent Core Demo")
 	ts := core.NewTabs(b)
 
@@ -54,7 +49,7 @@ func home(ts *core.Tabs) {
 		s.CenterAll()
 	})
 
-	errors.Log(core.NewSVG(tab).ReadBytes(appIcon))
+	errors.Log(core.NewSVG(tab).ReadString(core.AppIcon))
 
 	core.NewText(tab).SetType(core.TextDisplayLarge).SetText("The Cogent Core Demo")
 
@@ -311,7 +306,7 @@ func textEditors(ts *core.Tabs) {
 	sp := core.NewSplits(tab)
 
 	errors.Log(texteditor.NewSoloEditor(sp).Buffer.OpenFS(demoFile, "demo.go"))
-	texteditor.NewSoloEditor(sp).Buffer.SetLang("svg").SetText(appIcon)
+	texteditor.NewSoloEditor(sp).Buffer.SetLang("svg").SetTextString(core.AppIcon)
 }
 
 func makeIcons(ts *core.Tabs) {

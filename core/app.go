@@ -5,10 +5,9 @@
 package core
 
 import (
-	"bytes"
 	"fmt"
 	"image"
-	"io"
+	"strings"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
@@ -42,10 +41,6 @@ var (
 type App struct { //types:add -setters
 	system.App `set:"-"`
 
-	// Icon specifies the app icon, which is passed to [system.Window.SetIcon].
-	// It should typically be set using [App.SetIconSVG].
-	Icon []image.Image
-
 	// AppBarConfig is the function that configures the AppBar,
 	// typically put in the [Scene.Bars.Top] (i.e., a TopAppBar).
 	// It is set to StdAppBarConfig by default, which makes the
@@ -60,42 +55,42 @@ type App struct { //types:add -setters
 	SceneConfig func(sc *Scene)
 }
 
-// SetIconSVG sets the icon of the app to the given SVG icon.
-// It automatically logs any errors.
-func (a *App) SetIconSVG(r io.Reader) *App {
-	a.Icon = make([]image.Image, 3)
+// AppIconImagesCache is a cached version of [AppIconImages].
+var AppIconImagesCache []image.Image
+
+// AppIconImages returns a slice of images of sizes 16x16, 32x32, and 48x48
+// rendered from [AppIcon]. It returns nil if [AppIcon] is "" or if there is
+// an error. It automatically logs any errors. It caches the result for future
+// calls in [AppIconImagesCache].
+func AppIconImages() []image.Image {
+	if AppIconImagesCache != nil {
+		return AppIconImagesCache
+	}
+	if AppIcon == "" {
+		return nil
+	}
+
+	res := make([]image.Image, 3)
 
 	sv := svg.NewSVG(16, 16)
 	sv.Color = colors.C(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
-	err := sv.ReadXML(r)
+	err := sv.ReadXML(strings.NewReader(AppIcon))
 	if errors.Log(err) != nil {
-		return a
+		return nil
 	}
 
 	sv.Render()
-	a.Icon[0] = sv.Pixels
+	res[0] = sv.Pixels
 
 	sv.Resize(image.Pt(32, 32))
 	sv.Render()
-	a.Icon[1] = sv.Pixels
+	res[1] = sv.Pixels
 
 	sv.Resize(image.Pt(48, 48))
 	sv.Render()
-	a.Icon[2] = sv.Pixels
-	return a
-}
-
-// SetIconBytes sets the icon of the app to the given SVG icon bytes.
-// It automatically logs any errors.
-func (a *App) SetIconBytes(b []byte) *App {
-	return a.SetIconSVG(bytes.NewReader(b))
-}
-
-// Quit closes all windows and exits the program.
-func Quit() {
-	if !system.TheApp.IsQuitting() {
-		system.TheApp.Quit()
-	}
+	res[2] = sv.Pixels
+	AppIconImagesCache = res
+	return res
 }
 
 //////////////////////////////////////////////////////////////////////////////

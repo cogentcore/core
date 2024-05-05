@@ -296,7 +296,7 @@ func (st *Stage) NewRenderWindow() *RenderWindow {
 	title := st.Title
 	opts := &system.NewWindowOptions{
 		Title:     title,
-		Icon:      TheApp.Icon,
+		Icon:      AppIconImages(),
 		Size:      st.Scene.SceneGeom.Size,
 		StdPixels: false,
 	}
