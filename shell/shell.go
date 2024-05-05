@@ -7,7 +7,11 @@
 // easily run terminal commands while using Go for complicated logic.
 package shell
 
-import "strings"
+import (
+	"os"
+	"slices"
+	"strings"
+)
 
 // Shell represents one running shell context.
 type Shell struct {
@@ -24,9 +28,9 @@ type Shell struct {
 	Lines []string
 }
 
+// NewShell returns a new [Shell].
 func NewShell() *Shell {
-	sh := &Shell{}
-	return sh
+	return &Shell{}
 }
 
 // TotalDepth returns the sum of any unresolved paren, brace, or bracket depths.
@@ -60,4 +64,17 @@ func (sh *Shell) TranspileCode(code string) {
 		tl := sh.TranspileLine(ln)
 		sh.AddLine(tl)
 	}
+}
+
+// TranspileFile transpiles the given input cosh file to the given output Go file,
+// adding package main and func main declarations.
+func (sh *Shell) TranspileFile(in string, out string) error {
+	b, err := os.ReadFile(in)
+	if err != nil {
+		return err
+	}
+	sh.TranspileCode(string(b))
+	sh.Lines = slices.Insert(sh.Lines, 0, "package main", "", "func main() {")
+	sh.Lines = append(sh.Lines, "}")
+	return os.WriteFile(out, []byte(sh.Code()), 0666)
 }
