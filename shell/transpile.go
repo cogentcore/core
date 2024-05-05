@@ -41,19 +41,19 @@ func (sh *Shell) TranspileLine(ln string) string {
 		return sh.TranspileGo(toks).Code()
 	case len(toks) == 1 && toks[0].Tok == token.IDENT:
 		logx.PrintlnInfo("exec: 1 word")
-		return sh.TranspileExec(toks, false).Code()
+		return sh.TranspileExec(toks).Code()
 	case toks[0].Tok == token.PERIOD: // path expr
 		logx.PrintlnInfo("exec: .")
-		return sh.TranspileExec(toks, false).Code()
+		return sh.TranspileExec(toks).Code()
 	case toks[0].Tok != token.IDENT: // exec must be IDENT
 		logx.PrintlnInfo("go:   not ident")
 		return sh.TranspileGo(toks).Code()
-	case len(toks) == 2 && toks[0].Tok == token.IDENT && toks[1].Tok == token.IDENT:
+	case len(toks) == 2 && toks[0].Tok == token.IDENT && (toks[1].Tok == token.IDENT || toks[1].Tok == token.SUB):
 		logx.PrintlnInfo("exec: word word")
-		return sh.TranspileExec(toks, false).Code()
+		return sh.TranspileExec(toks).Code()
 	case toks[0].Tok == token.IDENT && toks[1].Tok == token.LBRACE:
 		logx.PrintlnInfo("exec: word {")
-		return sh.TranspileExec(toks, false).Code()
+		return sh.TranspileExec(toks).Code()
 	default:
 		logx.PrintlnInfo("go:   default")
 		return sh.TranspileGo(toks).Code()
@@ -82,17 +82,12 @@ func (sh *Shell) TranspileExecString(str string, output bool) Tokens {
 	return sh.TranspileExec(etoks, output)
 }
 
-// TranspileExec returns transpiled tokens assuming Exec code,
-// with the given bool indicating whether [Output] is needed.
-func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
+// TranspileExec returns transpiled tokens assuming Exec code.
+func (sh *Shell) TranspileExec(toks Tokens) Tokens {
 	etoks := make(Tokens, 0, len(toks)*2+5) // return tokens
 	etoks.Add(token.IDENT, "shell")
 	etoks.Add(token.PERIOD, ".")
-	if output {
-		etoks.Add(token.IDENT, "Output")
-	} else {
-		etoks.Add(token.IDENT, "Exec")
-	}
+	etoks.Add(token.IDENT, "Exec")
 	etoks.Add(token.IDENT, "(")
 	sz := len(toks)
 	for i := 0; i < sz; i++ {
