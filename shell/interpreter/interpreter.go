@@ -30,7 +30,7 @@ func NewInterpreter(options interp.Options) *Interpreter {
 	in.Interp.Use(stdlib.Symbols)
 	in.Interp.Use(interp.Exports{
 		"cogentcore.org/core/shell/shell": map[string]reflect.Value{
-			"Shell": reflect.ValueOf(in.Shell),
+			"Exec": reflect.ValueOf(in.Shell.Exec),
 		},
 	})
 	in.Interp.ImportUsed()

@@ -92,7 +92,7 @@ func (sh *Shell) TranspileFile(in string, out string) error {
 		return err
 	}
 	sh.TranspileCode(string(b))
-	sh.Lines = slices.Insert(sh.Lines, 0, "package main", "", "func main() {")
+	sh.Lines = slices.Insert(sh.Lines, 0, "package main", "", "func main() {", "shell := shell.NewShell()")
 	sh.Lines = append(sh.Lines, "}")
 	src := []byte(sh.Code())
 	res, err := imports.Process(out, src, nil)
