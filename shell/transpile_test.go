@@ -52,7 +52,6 @@ echo {i}
 	for ti, test := range tests {
 		fmt.Println("\n########## Test: ", ti)
 		sh := NewShell()
-		sh.SetDebug(1)
 		reader := bufio.NewReader(bytes.NewBufferString(test))
 		for {
 			line, err := reader.ReadString('\n')

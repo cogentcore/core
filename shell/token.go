@@ -7,6 +7,8 @@ package shell
 import (
 	"go/scanner"
 	"go/token"
+
+	"cogentcore.org/core/base/logx"
 )
 
 // Token provides full data for one token
@@ -132,12 +134,12 @@ func (sh *Shell) Tokens(ln string) Tokens {
 		if tok == token.EOF {
 			break
 		}
-		sh.DebugPrintf(2, "	token: %s\t%s\t%q\n", fset.Position(pos), tok, lit)
+		logx.PrintfDebug("	token: %s\t%s\t%q\n", fset.Position(pos), tok, lit)
 		toks = append(toks, &Token{Tok: tok, Pos: pos, Str: lit})
 	}
 	return toks
 }
 
 func (sh *Shell) errHandler(pos token.Position, msg string) {
-	sh.DebugPrintln(1, "Scan Error:", pos, msg)
+	logx.PrintlnInfo("Scan Error:", pos, msg)
 }

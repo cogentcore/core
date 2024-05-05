@@ -6,6 +6,8 @@ package shell
 
 import (
 	"go/token"
+
+	"cogentcore.org/core/base/logx"
 )
 
 // TranspileLine is the main function for parsing a single line of shell input,
@@ -15,44 +17,44 @@ func (sh *Shell) TranspileLine(ln string) string {
 	if len(ln) == 0 {
 		return ln
 	}
-	sh.DebugPrintln(1, "######### starting line:")
-	sh.DebugPrintln(1, ln)
+	logx.PrintlnInfo("######### starting line:")
+	logx.PrintlnInfo(ln)
 
 	toks := sh.Tokens(ln)
 	if len(toks) == 0 {
 		return ln
 	}
 
-	sh.DebugPrintln(1, toks.String())
+	logx.PrintlnInfo(toks.String())
 
 	switch {
 	case toks[0].IsBacktickString():
-		sh.DebugPrintln(1, "exec: backquoted string")
+		logx.PrintlnInfo("exec: backquoted string")
 		exe := sh.TranspileExecString(toks[0].Str)
 		if len(toks) > 1 { // todo: is this an error?
 			exe.AddTokens(sh.TranspileGo(toks[1:]))
 		}
 		return exe.Code()
 	case toks[0].IsGo():
-		sh.DebugPrintln(1, "go    keyword")
+		logx.PrintlnInfo("go    keyword")
 		return sh.TranspileGo(toks).Code()
 	case len(toks) == 1 && toks[0].Tok == token.IDENT:
-		sh.DebugPrintln(1, "exec: 1 word")
+		logx.PrintlnInfo("exec: 1 word")
 		return sh.TranspileExec(toks).Code()
 	case toks[0].Tok == token.PERIOD: // path expr
-		sh.DebugPrintln(1, "exec: .")
+		logx.PrintlnInfo("exec: .")
 		return sh.TranspileExec(toks).Code()
 	case toks[0].Tok != token.IDENT: // exec must be IDENT
-		sh.DebugPrintln(1, "go:   not ident")
+		logx.PrintlnInfo("go:   not ident")
 		return sh.TranspileGo(toks).Code()
 	case len(toks) == 2 && toks[0].Tok == token.IDENT && toks[1].Tok == token.IDENT:
-		sh.DebugPrintln(1, "exec: word word")
+		logx.PrintlnInfo("exec: word word")
 		return sh.TranspileExec(toks).Code()
 	case toks[0].Tok == token.IDENT && toks[1].Tok == token.LBRACE:
-		sh.DebugPrintln(1, "exec: word {")
+		logx.PrintlnInfo("exec: word {")
 		return sh.TranspileExec(toks).Code()
 	default:
-		sh.DebugPrintln(1, "go:   default")
+		logx.PrintlnInfo("go:   default")
 		return sh.TranspileGo(toks).Code()
 	}
 }
