@@ -22,7 +22,7 @@ import (
 // Splits allocates a certain proportion of its space to each of its children
 // along [styles.Style.Direction]. It adds [Handle] widgets to its parts that
 // allow the user to customize the amount of space allocated to each child.
-type Splits struct { //core:embedder
+type Splits struct {
 	Layout
 
 	// Splits is the proportion (0-1 normalized, enforced) of space

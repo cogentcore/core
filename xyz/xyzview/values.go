@@ -53,7 +53,7 @@ func (v *MeshValue) ConfigDialog(d *core.Body) (bool, func()) {
 		slog.Error("missing parent scene for node", "node", ndi)
 		return false, nil
 	}
-	sc := xyz.AsScene(sci)
+	sc := sci.(*xyz.Scene)
 	sl := sc.MeshList()
 	sort.Strings(sl)
 

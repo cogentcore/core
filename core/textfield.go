@@ -38,7 +38,7 @@ import (
 // force everything to be on a single line.
 // With multi-line wrapped text, the text is still treated as a contiguous
 // wrapped text.
-type TextField struct { //core:embedder
+type TextField struct {
 	WidgetBase
 
 	// Type is the styling type of the text field.
@@ -1238,15 +1238,14 @@ func (tf *TextField) StartCursor() {
 	if SystemSettings.CursorBlinkTime == 0 {
 		return
 	}
-	TextFieldBlinker.Blink(SystemSettings.CursorBlinkTime, func(w Widget) {
-		ttf := AsTextField(w)
-		if !ttf.StateIs(states.Focused) || !w.IsVisible() {
-			ttf.BlinkOn = false
-			ttf.RenderCursor(false)
+	TextFieldBlinker.Blink(SystemSettings.CursorBlinkTime, func() {
+		if !tf.StateIs(states.Focused) || !tf.IsVisible() {
+			tf.BlinkOn = false
+			tf.RenderCursor(false)
 			TextFieldBlinker.Widget = nil
 		} else {
-			ttf.BlinkOn = !ttf.BlinkOn
-			ttf.RenderCursor(ttf.BlinkOn)
+			tf.BlinkOn = !tf.BlinkOn
+			tf.RenderCursor(tf.BlinkOn)
 		}
 	})
 	TextFieldBlinker.SetWidget(tf.This().(Widget))

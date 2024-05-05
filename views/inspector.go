@@ -119,7 +119,10 @@ func (is *Inspector) Open(filename core.Filename) error { //types:add
 // In selection mode, bounding boxes are rendered around each Widget,
 // and clicking on a Widget pulls it up in the inspector.
 func (is *Inspector) ToggleSelectionMode() { //types:add
-	sc := core.AsScene(is.KiRoot)
+	sc, ok := is.KiRoot.(*core.Scene)
+	if !ok {
+		return
+	}
 	sc.SetFlag(!sc.Is(core.ScRenderBBoxes), core.ScRenderBBoxes)
 	if sc.Is(core.ScRenderBBoxes) {
 		sc.SelectedWidgetChan = make(chan core.Widget)
@@ -135,8 +138,8 @@ func (is *Inspector) ToggleSelectionMode() { //types:add
 
 // SelectionMonitor monitors for the selected widget
 func (is *Inspector) SelectionMonitor() {
-	sc := core.AsScene(is.KiRoot)
-	if sc == nil {
+	sc, ok := is.KiRoot.(*core.Scene)
+	if !ok {
 		return
 	}
 	sc.Stage.Raise()
@@ -261,8 +264,8 @@ func (is *Inspector) ConfigSplits() {
 
 			is.SetTitle(sn)
 
-			sc := core.AsScene(is.KiRoot)
-			if sc == nil {
+			sc, ok := is.KiRoot.(*core.Scene)
+			if !ok {
 				return
 			}
 			if w, wb := core.AsWidget(sn); w != nil {
@@ -275,8 +278,8 @@ func (is *Inspector) ConfigSplits() {
 			}
 		})
 		renderRebuild := func() {
-			sc := core.AsScene(is.KiRoot)
-			if sc == nil {
+			sc, ok := is.KiRoot.(*core.Scene)
+			if !ok {
 				return
 			}
 			sc.RenderContext().SetFlag(true, core.RenderRebuild) // trigger full rebuild
@@ -288,8 +291,8 @@ func (is *Inspector) ConfigSplits() {
 			renderRebuild()
 		})
 		sv.OnClose(func(e events.Event) {
-			sc := core.AsScene(is.KiRoot)
-			if sc == nil {
+			sc, ok := is.KiRoot.(*core.Scene)
+			if !ok {
 				return
 			}
 			if sc.Is(core.ScRenderBBoxes) {

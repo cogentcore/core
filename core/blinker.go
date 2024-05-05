@@ -17,16 +17,16 @@ type Blinker struct {
 	// Widget is the current widget subject to blinking
 	Widget Widget
 
-	// Func is the function called every tick -- under Mu mutex protection
-	Func func(w Widget)
+	// Func is the function called every tick under Mu mutex protection
+	Func func()
 
 	Quit chan struct{}
 
 	Mu sync.Mutex
 }
 
-// Blink sets up the blinking -- does nothing if already setup
-func (bl *Blinker) Blink(dur time.Duration, fun func(w Widget)) {
+// Blink sets up the blinking; does nothing if already setup
+func (bl *Blinker) Blink(dur time.Duration, fun func()) {
 	bl.Mu.Lock()
 	defer bl.Mu.Unlock()
 	if bl.Ticker != nil {
@@ -79,7 +79,7 @@ func (bl *Blinker) BlinkLoop() {
 			bl.Mu.Unlock()
 			continue
 		}
-		bl.Func(bl.Widget)
+		bl.Func()
 		bl.Mu.Unlock()
 	}
 

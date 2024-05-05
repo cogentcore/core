@@ -23,7 +23,7 @@ import (
 // See [Widget.ConfigToolbar] for the standard toolbar config method for
 // any given widget, and [Scene.AppBars] for [ToolbarFuncs] for [Scene]
 // elements who should be represented in the main AppBar (e.g., TopAppBar).
-type Toolbar struct { //core:embedder
+type Toolbar struct {
 	Frame
 
 	// items moved from the main toolbar, will be shown in the overflow menu

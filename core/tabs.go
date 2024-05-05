@@ -21,14 +21,9 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// Tabs switches among child widgets via tabs.  The selected widget gets
-// the full allocated space avail after the tabs are accounted for.  The
-// Tabs is just a Vertical layout that manages two child widgets: a
-// HorizFlow Layout for the tabs (which can flow across multiple rows as
-// needed) and a Stacked Frame that actually contains all the children, and
-// provides scrollbars as needed to any content within.  Typically should have
-// max stretch and a set preferred size, so it expands.
-type Tabs struct { //core:embedder
+// Tabs divide widgets into logical groups and give users the ability
+// to freely navigate between them using tab buttons.
+type Tabs struct {
 	Layout
 
 	// Type is the styling type of the tabs. If it is changed after
@@ -629,12 +624,9 @@ func (tb *Tab) SetStyles() {
 	})
 }
 
+// Tabs returns the parent [Tabs] of this [Tab].
 func (tb *Tab) Tabs() *Tabs {
-	ts := tb.ParentByType(TabsType, tree.Embeds)
-	if ts == nil {
-		return nil
-	}
-	return AsTabs(ts)
+	return tb.Parent().Parent().(*Tabs)
 }
 
 func (tb *Tab) Config() {

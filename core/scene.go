@@ -35,7 +35,6 @@ import (
 // of rendering in the Cogent Core framework.
 //
 //core:no-new
-//core:embedder
 type Scene struct {
 	Frame
 

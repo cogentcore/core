@@ -23,7 +23,7 @@ import (
 // Text is a widget for rendering text. It supports full HTML styling,
 // including links. By default, text wraps and collapses whitespace, although
 // you can change this by changing [styles.Text.WhiteSpace].
-type Text struct { //core:embedder
+type Text struct {
 	WidgetBase
 
 	// Text is the text to display.

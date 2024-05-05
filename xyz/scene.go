@@ -41,7 +41,6 @@ var Update3DTrace = false
 // "first person" effects.
 //
 //core:no-new
-//core:embedder
 type Scene struct {
 	tree.NodeBase
 

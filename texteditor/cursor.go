@@ -40,15 +40,14 @@ func (ed *Editor) StartCursor() {
 	if core.SystemSettings.CursorBlinkTime == 0 {
 		return
 	}
-	EditorBlinker.Blink(core.SystemSettings.CursorBlinkTime, func(w core.Widget) {
-		eed := AsEditor(w)
-		if !eed.StateIs(states.Focused) || !w.IsVisible() {
-			eed.BlinkOn = false
-			eed.RenderCursor(false)
+	EditorBlinker.Blink(core.SystemSettings.CursorBlinkTime, func() {
+		if !ed.StateIs(states.Focused) || !ed.IsVisible() {
+			ed.BlinkOn = false
+			ed.RenderCursor(false)
 			EditorBlinker.Widget = nil
 		} else {
-			eed.BlinkOn = !eed.BlinkOn
-			eed.RenderCursor(eed.BlinkOn)
+			ed.BlinkOn = !ed.BlinkOn
+			ed.RenderCursor(ed.BlinkOn)
 		}
 	})
 	EditorBlinker.SetWidget(ed.This().(core.Widget))

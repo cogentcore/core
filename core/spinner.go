@@ -19,9 +19,9 @@ import (
 	"cogentcore.org/core/styles/states"
 )
 
-// Spinner combines a TextField with up / down buttons for incrementing /
-// decrementing values -- all configured within the Parts of the widget
-type Spinner struct { //core:embedder
+// Spinner is a [TextField] for editing numerical values. It comes with
+// fields, methods, buttons, and shortcuts to enhance numerical value editing.
+type Spinner struct {
 	TextField
 
 	// Value is the current value.
