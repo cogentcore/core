@@ -28,7 +28,7 @@ import (
 //go:embed content
 var content embed.FS
 
-//go:embed icon.svg name.png emergent-icon.svg weld-icon.png
+//go:embed name.png emergent-icon.svg weld-icon.png
 var resources embed.FS
 
 //go:embed image.png
@@ -57,7 +57,7 @@ func homePage(ctx *htmlview.Context) bool {
 		s.CenterAll()
 		// s.Background = gradient.NewLinear().AddStop(colors.Scheme.Primary.Container, 0).AddStop(colors.Scheme.Warn.Container, 1)
 	})
-	errors.Log(core.NewSVG(frame).OpenFS(resources, "icon.svg"))
+	errors.Log(core.NewSVG(frame).ReadString(core.AppIcon))
 	img := core.NewImage(frame)
 	errors.Log(img.OpenFS(resources, "name.png"))
 	img.Style(func(s *styles.Style) {

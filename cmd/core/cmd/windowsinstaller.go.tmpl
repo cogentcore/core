@@ -11,12 +11,8 @@ import (
 //go:embed app.exe
 var exe []byte
 
-//go:embed icon.svg
-var icon []byte
-
 func main() {
 	b := core.NewBody("{{.Name}} Installer")
-	b.App().SetAppBarConfig(nil).SetIconBytes(icon)
 	bt := core.NewButton(b).SetText("Install {{.Name}}")
 	bt.OnClick(func(e events.Event) {
 		dir := "C:\\Program Files\\{{.Name}}"
