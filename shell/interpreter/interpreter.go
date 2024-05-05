@@ -5,7 +5,6 @@
 package interpreter
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 
@@ -39,7 +38,6 @@ func NewInterpreter() *Interpreter {
 func (in *Interpreter) Eval(ln string) string {
 	eln := in.Shell.TranspileLine(ln)
 	errors.Log1(in.Interp.Eval(eln))
-	fmt.Println("exec:", eln)
 	return eln
 }
 
