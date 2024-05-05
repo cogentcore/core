@@ -25,16 +25,15 @@ type Interpreter struct {
 // NewInterpreter returns a new [Interpreter] initialized with the given options.
 func NewInterpreter(options interp.Options) *Interpreter {
 	in := &Interpreter{}
+	in.Shell = shell.NewShell()
 	in.Interp = interp.New(options)
 	in.Interp.Use(stdlib.Symbols)
 	in.Interp.Use(interp.Exports{
 		"cogentcore.org/core/shell/shell": map[string]reflect.Value{
-			"Exec":   reflect.ValueOf(shell.Exec),
-			"Output": reflect.ValueOf(shell.Output),
+			"Shell": reflect.ValueOf(in.Shell),
 		},
 	})
 	in.Interp.ImportUsed()
-	in.Shell = shell.NewShell()
 	return in
 }
 
