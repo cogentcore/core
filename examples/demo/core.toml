@@ -1,1 +1,2 @@
 ID = 'com.cogent.examples.demo'
+About = 'A <b>demonstration</b> of the <i>various</i> features of the <a href="https://cogentcore.org/core">Cogent Core</a> 2D and 3D Go GUI <u>framework</u>'

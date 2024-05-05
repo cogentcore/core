@@ -52,8 +52,7 @@ func home(ts *core.Tabs) {
 	errors.Log(core.NewSVG(tab).ReadString(core.AppIcon))
 
 	core.NewText(tab).SetType(core.TextDisplayLarge).SetText("The Cogent Core Demo")
-
-	core.NewText(tab).SetType(core.TextTitleLarge).SetText(`A <b>demonstration</b> of the <i>various</i> features of the <a href="https://cogentcore.org/core">Cogent Core</a> 2D and 3D Go GUI <u>framework</u>`)
+	core.NewText(tab).SetType(core.TextTitleLarge).SetText(core.AppAbout)
 }
 
 func widgets(ts *core.Tabs) {
