@@ -13,6 +13,7 @@ require (
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/aymerick/douceur v0.2.0
 	github.com/chewxy/math32 v1.10.1
+	github.com/ergochat/readline v0.1.0
 	github.com/ericchiang/css v1.3.0
 	github.com/faiface/beep v1.1.0
 	github.com/fsnotify/fsnotify v1.7.0

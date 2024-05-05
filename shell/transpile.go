@@ -56,7 +56,7 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	case toks[0].Tok != token.IDENT: // exec must be IDENT
 		logx.PrintlnDebug("go:   not ident")
 		return sh.TranspileGo(toks)
-	case len(toks) >= 2 && toks[0].Tok == token.IDENT && (toks[1].Tok == token.IDENT || toks[1].Tok == token.SUB):
+	case len(toks) >= 2 && toks[0].Tok == token.IDENT && (toks[1].Tok == token.IDENT || toks[1].Tok == token.SUB || toks[1].Tok == token.STRING):
 		logx.PrintlnDebug("exec: word word")
 		return sh.TranspileExec(toks, false)
 	case toks[0].Tok == token.IDENT && toks[1].Tok == token.LBRACE:
@@ -114,16 +114,15 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 				etoks.AddTokens(sh.TranspileGo(toks[i+1 : i+rb]))
 				i += rb
 			}
-			etoks.Add(token.COMMA)
-			continue
 		case tok.Tok == token.SUB && i < sz-1: // option
 			etoks.Add(token.STRING, `"-`+toks[i+1].Str+`"`)
-			etoks.Add(token.COMMA)
 			i++
+		case tok.Tok == token.STRING:
+			etoks.Add(token.STRING, tok.Str)
 		default:
 			etoks.Add(token.STRING, `"`+tok.Str+`"`)
-			etoks.Add(token.COMMA)
 		}
+		etoks.Add(token.COMMA)
 	}
 	etoks.DeleteLastComma()
 	etoks.Add(token.RPAREN)

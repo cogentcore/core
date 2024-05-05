@@ -1,0 +1,6 @@
+// test file for cosh run
+
+for i, fn := range strings.Split(`ls -la`, "\n") {
+	fmt.Println(i, fn)
+}
+
