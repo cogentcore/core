@@ -11,17 +11,12 @@ import (
 	"cogentcore.org/core/base/reflectx"
 )
 
-// Exec executes the given command string, parsing and separating any arguments.
-// If there is any error, it fatally logs it. It returns the stdout of the command,
-// in addition to forwarding output to [os.Stdout] and [os.Stderr] appropriately.
-func Exec(cmd any, args ...any) string {
-	scmd := reflectx.ToString(cmd)
-	sargs := make([]string, len(args))
-	for i, a := range args {
-		sargs[i] = reflectx.ToString(a)
-	}
-	out, _ := ExecConfig.Output(scmd, sargs...)
-	return out
+// Exec executes the given command string, handling the given arguments appropriately.
+// If there is any error, it fatally logs it. It forwards output to [os.Stdout] and
+// [os.Stderr] appropriately.
+func Exec(cmd any, args ...any) {
+	scmd, sargs := execArgs(cmd, args...)
+	ExecConfig.Run(scmd, sargs...)
 }
 
 // ExecConfig is the [exec.Config] used in [Exec].
@@ -31,4 +26,31 @@ var ExecConfig = &exec.Config{
 	Stdout: os.Stdout,
 	Stderr: os.Stderr,
 	Stdin:  os.Stdin,
+}
+
+// Output executes the given command string, handling the given arguments
+// appropriately. If there is any error, it fatally logs it. It returns the
+// stdout as a string and forwards stderr to [os.Stderr] appropriately.
+func Output(cmd any, args ...any) string {
+	scmd, sargs := execArgs(cmd, args...)
+	out, _ := OutputConfig.Output(scmd, sargs...)
+	return out
+}
+
+// OutputConfig is the [exec.Config] used in [Output].
+var OutputConfig = &exec.Config{
+	Fatal:  true,
+	Env:    map[string]string{},
+	Stderr: os.Stderr,
+	Stdin:  os.Stdin,
+}
+
+// execArgs converts the given command and arguments into strings.
+func execArgs(cmd any, args ...any) (string, []string) {
+	scmd := reflectx.ToString(cmd)
+	sargs := make([]string, len(args))
+	for i, a := range args {
+		sargs[i] = reflectx.ToString(a)
+	}
+	return scmd, sargs
 }
