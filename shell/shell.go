@@ -4,6 +4,8 @@
 
 package shell
 
+import "strings"
+
 // Shell represents one running shell context.
 type Shell struct {
 	// depth of parens at the end of the current line. if 0, was complete.
@@ -14,6 +16,9 @@ type Shell struct {
 
 	// depth of brackets at the end of the current line. if 0, was complete.
 	BrackDepth int
+
+	// stack of transpiled lines
+	Lines []string
 }
 
 func NewShell() *Shell {
@@ -24,4 +29,32 @@ func NewShell() *Shell {
 // TotalDepth returns the sum of any unresolved pren, brace, or bracket depths.
 func (sh *Shell) TotalDepth() int {
 	return sh.ParenDepth + sh.BraceDepth + sh.BrackDepth
+}
+
+// ResetLines resets the stack of transpiled lines
+func (sh *Shell) ResetLines() {
+	sh.Lines = nil
+}
+
+// AddLine adds line on the stack
+func (sh *Shell) AddLine(ln string) {
+	sh.Lines = append(sh.Lines, ln)
+}
+
+// Code returns the current transpiled lines
+func (sh *Shell) Code() string {
+	if len(sh.Lines) == 0 {
+		return ""
+	}
+	return strings.Join(sh.Lines, "\n")
+}
+
+// TranspileCode processes each line of given code,
+// adding the results to the LineStack
+func (sh *Shell) TranspileCode(code string) {
+	lns := strings.Split(code, "\n")
+	for _, ln := range lns {
+		tl := sh.TranspileLine(ln)
+		sh.AddLine(tl)
+	}
 }

@@ -22,9 +22,6 @@ type Interpreter struct {
 
 	// the yaegi interpreter
 	Interp *interp.Interpreter
-
-	// the stack of un-evaluated lines, based on unfinished delimiters
-	LineStack []string
 }
 
 func NewInterpreter() *Interpreter {
@@ -51,24 +48,18 @@ func (in *Interpreter) Prompt() string {
 }
 
 func (in *Interpreter) Eval(ln string) error {
-	eln := in.Shell.TranspileLine(ln)
-	in.PushLine(eln)
+	in.Shell.TranspileCode(ln)
 	if in.Shell.TotalDepth() == 0 {
-		return in.RunStack()
+		return in.RunCode()
 	}
 	return nil
 }
 
-// PushLine pushes line on the stack
-func (in *Interpreter) PushLine(ln string) {
-	in.LineStack = append(in.LineStack, ln)
-}
-
-// RunStack runs the stacked set of lines
+// RunCode runs the accumulated set of code lines
 // and clears the stack.
-func (in *Interpreter) RunStack() error {
-	cmd := strings.Join(in.LineStack, "\n")
-	in.LineStack = nil
+func (in *Interpreter) RunCode() error {
+	cmd := in.Shell.Code()
+	in.Shell.ResetLines()
 	_, err := in.Interp.Eval(cmd)
 	if err != nil {
 		slog.Error(err.Error())
