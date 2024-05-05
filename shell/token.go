@@ -110,6 +110,7 @@ func (tk Tokens) String() string {
 func (tk Tokens) Code() string {
 	str := ""
 	for _, tok := range tk {
+		// todo: detect . ( ) etc and manage spaces properly first-pass
 		str += tok.String() + " "
 	}
 	if len(str) == 0 {
