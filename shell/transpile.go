@@ -31,7 +31,7 @@ func (sh *Shell) TranspileLine(ln string) string {
 	switch {
 	case toks[0].IsBacktickString():
 		logx.PrintlnInfo("exec: backquoted string")
-		exe := sh.TranspileExecString(toks[0].Str)
+		exe := sh.TranspileExecString(toks[0].Str, false)
 		if len(toks) > 1 { // todo: is this an error?
 			exe.AddTokens(sh.TranspileGo(toks[1:]))
 		}
@@ -66,7 +66,7 @@ func (sh *Shell) TranspileGo(toks Tokens) Tokens {
 	gtoks := make(Tokens, 0, len(toks)) // return tokens
 	for _, tok := range toks {
 		if tok.IsBacktickString() {
-			gtoks = append(gtoks, sh.TranspileExecString(tok.Str)...)
+			gtoks = append(gtoks, sh.TranspileExecString(tok.Str, true)...)
 		} else {
 			gtoks = append(gtoks, tok)
 		}
@@ -75,10 +75,11 @@ func (sh *Shell) TranspileGo(toks Tokens) Tokens {
 }
 
 // TranspileExecString returns transpiled tokens assuming Exec code,
-// from a backtick-encoded string.
-func (sh *Shell) TranspileExecString(str string) Tokens {
+// from a backtick-encoded string, with the given bool indicating
+// whether [Output] is needed.
+func (sh *Shell) TranspileExecString(str string, output bool) Tokens {
 	etoks := sh.Tokens(str[1 : len(str)-1]) // enclosed string
-	return sh.TranspileExec(etoks, true)
+	return sh.TranspileExec(etoks, output)
 }
 
 // TranspileExec returns transpiled tokens assuming Exec code,
