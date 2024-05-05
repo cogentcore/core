@@ -22,7 +22,7 @@ func ParseCacheDir(lang fileinfo.Known) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	cdir := filepath.Join(filepath.Join(ucdir, "CogentCore", "parse"), lang.String())
+	cdir := filepath.Join(filepath.Join(ucdir, "Cogent Core", "parse"), lang.String())
 	err = os.MkdirAll(cdir, 0775)
 	if err != nil {
 		log.Printf("ParseCacheDir: cache not available: %v\n", err)

@@ -169,7 +169,7 @@ func SetupMoltenFramework() error {
 	if err != nil {
 		return fmt.Errorf("error getting user home directory: %w", err)
 	}
-	gdir := filepath.Join(hdir, "Library", "CogentCore")
+	gdir := filepath.Join(hdir, "Library", "Cogent Core")
 	_, err = os.Stat(filepath.Join(gdir, "MoltenVK.framework"))
 	if err == nil {
 		// it already exists
