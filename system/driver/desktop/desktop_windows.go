@@ -39,7 +39,6 @@ func (a *App) DataDir() string {
 		return "/tmp"
 	}
 	return filepath.Join(usr.HomeDir, "AppData", "Roaming")
-	// todo: convention is "manufacturer" before app -- not sure what that means in this context -- "Go"?
 }
 
 /////////////////////////////////////////////////////////////////
