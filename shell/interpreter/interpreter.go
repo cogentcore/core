@@ -5,10 +5,8 @@
 package interpreter
 
 import (
-	"fmt"
 	"log/slog"
 	"reflect"
-	"strings"
 
 	"cogentcore.org/core/shell"
 	"github.com/traefik/yaegi/interp"
@@ -24,6 +22,7 @@ type Interpreter struct {
 	Interp *interp.Interpreter
 }
 
+// NewInterpreter returns a new [Interpreter] initialized with default options.
 func NewInterpreter() *Interpreter {
 	in := &Interpreter{}
 	in.Interp = interp.New(interp.Options{})
@@ -39,14 +38,17 @@ func NewInterpreter() *Interpreter {
 	return in
 }
 
+// Prompt returns the appropriate REPL prompt to show the user.
 func (in *Interpreter) Prompt() string {
 	dp := in.Shell.TotalDepth()
-	if dp == 0 {
-		return "> "
+	res := "> "
+	for range dp {
+		res += "\t"
 	}
-	return fmt.Sprintf("%d> ", dp)
+	return res
 }
 
+// Eval evaluates (interprets) the given line.
 func (in *Interpreter) Eval(ln string) error {
 	in.Shell.TranspileCode(ln)
 	if in.Shell.TotalDepth() == 0 {
@@ -65,35 +67,4 @@ func (in *Interpreter) RunCode() error {
 		slog.Error(err.Error())
 	}
 	return err
-}
-
-// SymbolByName returns the reflect.Value for given symbol name
-// from the current Globals, Symbols (must call GetSymbols first)
-func (in *Interpreter) SymbolByName(name string) (bool, reflect.Value) {
-	globs := in.Interp.Globals()
-	syms := in.Interp.Symbols("main") // note: cannot use ""
-
-	nmpath := ""
-	dotIdx := strings.Index(name, ".")
-	if dotIdx > 0 {
-		nmpath = name[:dotIdx]
-		name = name[dotIdx+1:]
-	}
-	for path, sy := range syms {
-		if nmpath != "" && path != nmpath {
-			continue
-		}
-		for nm, v := range sy {
-			if nm == name {
-				return true, v
-			}
-		}
-	}
-
-	for nm, v := range globs {
-		if nm == name {
-			return true, v
-		}
-	}
-	return false, reflect.Value{}
 }
