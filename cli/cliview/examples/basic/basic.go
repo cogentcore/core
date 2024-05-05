@@ -40,8 +40,7 @@ func Run(c *Config) error {
 	return nil
 }
 
-//types:skip
-func main() {
+func main() { //types:skip
 	opts := cli.DefaultOptions("Basic", "Basic is a basic example application made with cliview.")
 	cliview.Run(opts, &Config{}, Build, Run)
 }

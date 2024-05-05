@@ -59,9 +59,7 @@ func Interactive(c *Config) error {
 	return nil
 }
 
-//types:skip
-func main() {
-	// logx.UserLevel = slog.LevelDebug
+func main() { //types:skip
 	opts := cli.DefaultOptions("cosh", "The Cogent Core Shell.")
 	cli.Run(opts, &Config{}, Run, Interactive)
 }
