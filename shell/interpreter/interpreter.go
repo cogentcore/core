@@ -23,6 +23,9 @@ type Interpreter struct {
 func NewInterpreter() *Interpreter {
 	in := &Interpreter{}
 	in.Interp = interp.New(interp.Options{})
+	stdlib.Symbols["cogentcore.org/core/shell"] = map[string]reflect.Value{
+		"Exec": reflect.ValueOf(shell.Exec),
+	}
 	in.Interp.Use(stdlib.Symbols) // this causes symbols to crash
 	in.Shell = shell.NewShell()
 	return in
