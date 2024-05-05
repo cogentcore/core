@@ -5,10 +5,11 @@
 package interpreter
 
 import (
+	"fmt"
+	"log/slog"
 	"reflect"
 	"strings"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/shell"
 	"github.com/traefik/yaegi/interp"
 	"github.com/traefik/yaegi/stdlib"
@@ -16,9 +17,14 @@ import (
 
 // Interpreter represents one running shell context
 type Interpreter struct {
+	// the cosh shell
 	Shell *shell.Shell
 
+	// the yaegi interpreter
 	Interp *interp.Interpreter
+
+	// the stack of un-evaluated lines, based on unfinished delimiters
+	LineStack []string
 }
 
 func NewInterpreter() *Interpreter {
@@ -36,10 +42,38 @@ func NewInterpreter() *Interpreter {
 	return in
 }
 
-func (in *Interpreter) Eval(ln string) string {
+func (in *Interpreter) Prompt() string {
+	dp := in.Shell.TotalDepth()
+	if dp == 0 {
+		return "> "
+	}
+	return fmt.Sprintf("%d> ", dp)
+}
+
+func (in *Interpreter) Eval(ln string) error {
 	eln := in.Shell.TranspileLine(ln)
-	errors.Log1(in.Interp.Eval(eln))
-	return eln
+	in.PushLine(eln)
+	if in.Shell.TotalDepth() == 0 {
+		return in.RunStack()
+	}
+	return nil
+}
+
+// PushLine pushes line on the stack
+func (in *Interpreter) PushLine(ln string) {
+	in.LineStack = append(in.LineStack, ln)
+}
+
+// RunStack runs the stacked set of lines
+// and clears the stack.
+func (in *Interpreter) RunStack() error {
+	cmd := strings.Join(in.LineStack, "\n")
+	in.LineStack = nil
+	_, err := in.Interp.Eval(cmd)
+	if err != nil {
+		slog.Error(err.Error())
+	}
+	return err
 }
 
 // SymbolByName returns the reflect.Value for given symbol name

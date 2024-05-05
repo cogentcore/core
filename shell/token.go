@@ -158,6 +158,34 @@ func (tk Tokens) RightMatching() int {
 	return -1
 }
 
+// DelimiterDepths returns the depths for the three del
+// right matching [paren, bracket, brace] given the left one that
+// is at the 0 position of the current set of tokens.
+func (tk Tokens) DelimiterDepths() (paren, brace, brack int) {
+	sz := len(tk)
+	if sz == 0 {
+		return
+	}
+	for i := 0; i < sz; i++ {
+		tok := tk[i].Tok
+		switch tok {
+		case token.LPAREN:
+			paren++
+		case token.LBRACE:
+			brace++
+		case token.LBRACK:
+			brack++
+		case token.RPAREN:
+			paren--
+		case token.RBRACE:
+			brace--
+		case token.RBRACK:
+			brack--
+		}
+	}
+	return
+}
+
 func (sh *Shell) Tokens(ln string) Tokens {
 	fset := token.NewFileSet()
 	f := fset.AddFile("", fset.Base(), len(ln))
