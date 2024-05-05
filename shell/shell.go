@@ -12,11 +12,16 @@ import (
 	"slices"
 	"strings"
 
+	"cogentcore.org/core/base/exec"
 	"golang.org/x/tools/imports"
 )
 
 // Shell represents one running shell context.
 type Shell struct {
+
+	// Config is the [exec.Config] used to run commands.
+	Config exec.Config
+
 	// depth of parens at the end of the current line. if 0, was complete.
 	ParenDepth int
 
@@ -30,9 +35,16 @@ type Shell struct {
 	Lines []string
 }
 
-// NewShell returns a new [Shell].
+// NewShell returns a new [Shell] with default options.
 func NewShell() *Shell {
-	return &Shell{}
+	return &Shell{
+		Config: exec.Config{
+			Env:    map[string]string{},
+			Stdout: os.Stdout,
+			Stderr: os.Stderr,
+			Stdin:  os.Stdin,
+		},
+	}
 }
 
 // TotalDepth returns the sum of any unresolved paren, brace, or bracket depths.

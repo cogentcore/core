@@ -5,43 +5,28 @@
 package shell
 
 import (
-	"os"
-
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/reflectx"
 )
 
 // Exec executes the given command string, handling the given arguments appropriately.
-// If there is any error, it fatally logs it. It forwards output to [os.Stdout] and
-// [os.Stderr] appropriately.
-func Exec(cmd any, args ...any) {
+// If there is any error, it adds it to the shell. It forwards output to
+// [exec.Config.Stdout] and [exec.Config.Stderr] appropriately.
+func (sh *Shell) Exec(cmd any, args ...any) {
 	scmd, sargs := execArgs(cmd, args...)
-	errors.Log(ExecConfig.Run(scmd, sargs...))
-}
-
-// ExecConfig is the [exec.Config] used in [Exec].
-var ExecConfig = &exec.Config{
-	Env:    map[string]string{},
-	Stdout: os.Stdout,
-	Stderr: os.Stderr,
-	Stdin:  os.Stdin,
+	errors.Log(sh.Config.Run(scmd, sargs...))
 }
 
 // Output executes the given command string, handling the given arguments
-// appropriately. If there is any error, it fatally logs it. It returns the
-// stdout as a string and forwards stderr to [os.Stderr] appropriately.
-func Output(cmd any, args ...any) string {
+// appropriately. If there is any error, it adds it to the shell. It returns
+// the stdout as a string and forwards stderr to [exec.Config.Stderr] appropriately.
+func (sh *Shell) Output(cmd any, args ...any) string {
 	scmd, sargs := execArgs(cmd, args...)
-	out := errors.Log1(OutputConfig.Output(scmd, sargs...))
+	// need to make a copy without Stdout for Output
+	c := sh.Config
+	sh.Config.Stdout = nil
+	out := errors.Log1(c.Output(scmd, sargs...))
 	return out
-}
-
-// OutputConfig is the [exec.Config] used in [Output].
-var OutputConfig = &exec.Config{
-	Env:    map[string]string{},
-	Stderr: os.Stderr,
-	Stdin:  os.Stdin,
 }
 
 // execArgs converts the given command and arguments into strings.
