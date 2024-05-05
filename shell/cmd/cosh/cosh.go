@@ -10,11 +10,11 @@ import (
 	"io"
 	"os"
 
-	"cogentcore.org/core/shell"
+	"cogentcore.org/core/shell/interpreter"
 )
 
 func main() {
-	sh := shell.NewShell()
+	sh := interpreter.NewInterp()
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print("> ")

@@ -16,14 +16,6 @@ import (
 
 // Shell represents one running shell context
 type Shell struct {
-	Interp *interp.Interpreter
-
-	Exec *exec.Config
-
-	Globals map[string]reflect.Value
-
-	Symbols interp.Exports
-
 	// debug levels: 2 = full detail, 1 = summary, 0 = none
 	Debug int
 }
