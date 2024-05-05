@@ -10,12 +10,14 @@ package config
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/enums/enumgen"
@@ -168,7 +170,18 @@ func LinkerFlags(c *Config) string {
 	res := ""
 
 	if c.About != "" {
+		// " is used less than ' by about info, so we use it for the surrounding quotes
 		res += `-X "cogentcore.org/core/core.AppAbout=` + c.About + `" `
+	}
+
+	b, err := os.ReadFile("icon.svg")
+	if err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			errors.Log(err)
+		}
+	} else {
+		// ' is used less than " by svg, so we use it for the surrounding quotes
+		res += "-X 'cogentcore.org/core/core.AppIcon=" + string(b) + "' "
 	}
 
 	av, err := exec.Silent().Output("git", "describe", "--tags")
