@@ -4,7 +4,7 @@
 
 /*
 Package tensorview provides GUI Views of table Table and Tensor structures
-using the Cogent Core Views framework.
+using the Cogent Core views framework.
 
 * TableView provides a row-and-column tabular GUI interface, similar to
 a spreadsheet, for viewing and editing Table data.  Any higher-dimensional
