@@ -5,7 +5,6 @@
 package offscreen
 
 import (
-	"cogentcore.org/core/system"
 	"cogentcore.org/core/system/driver/base"
 )
 
