@@ -11,5 +11,5 @@ import (
 )
 
 func TestExec(t *testing.T) {
-	assert.Equal(t, Exec("ls"), "cmd\nexec.go\nexec_test.go\nparse.go\nparse_test.go\nshell.go")
+	assert.Equal(t, Output("ls"), "cmd\nexec.go\nexec_test.go\nparse.go\nparse_test.go\nshell.go")
 }
