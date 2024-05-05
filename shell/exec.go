@@ -7,6 +7,7 @@ package shell
 import (
 	"os"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/reflectx"
 )
@@ -16,12 +17,11 @@ import (
 // [os.Stderr] appropriately.
 func Exec(cmd any, args ...any) {
 	scmd, sargs := execArgs(cmd, args...)
-	ExecConfig.Run(scmd, sargs...)
+	errors.Log(ExecConfig.Run(scmd, sargs...))
 }
 
 // ExecConfig is the [exec.Config] used in [Exec].
 var ExecConfig = &exec.Config{
-	Fatal:  true,
 	Env:    map[string]string{},
 	Stdout: os.Stdout,
 	Stderr: os.Stderr,
@@ -33,13 +33,12 @@ var ExecConfig = &exec.Config{
 // stdout as a string and forwards stderr to [os.Stderr] appropriately.
 func Output(cmd any, args ...any) string {
 	scmd, sargs := execArgs(cmd, args...)
-	out, _ := OutputConfig.Output(scmd, sargs...)
+	out := errors.Log1(OutputConfig.Output(scmd, sargs...))
 	return out
 }
 
 // OutputConfig is the [exec.Config] used in [Output].
 var OutputConfig = &exec.Config{
-	Fatal:  true,
 	Env:    map[string]string{},
 	Stderr: os.Stderr,
 	Stdin:  os.Stdin,
