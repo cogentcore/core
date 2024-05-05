@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Command cosh is an interactive cli for running and compiling Cogent Shell (cosh).
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -16,14 +16,18 @@ import (
 
 //go:generate core generate -add-types -add-funcs
 
+// Config is the configuration information for the cosh cli.
 type Config struct {
-	File string `flag:"file,f"`
+
+	// File is the file to run/compile.
+	File string `posarg:"0" required:"-"`
 }
 
-// Run compiles and runs the file
-func Run(c *Config) error {
+// Run runs the specified cosh file. If no file is specified,
+// it runs an interactive shell that allows the user to input cosh.
+func Run(c *Config) error { //cli:cmd -root
 	if c.File == "" {
-		return fmt.Errorf("File not specified")
+		return Interactive(c)
 	}
 	b, err := os.ReadFile(c.File)
 	if err != nil {
@@ -34,12 +38,11 @@ func Run(c *Config) error {
 	return err
 }
 
-// Interactive runs an interactive shell
+// Interactive runs an interactive shell that allows the user to input cosh.
 func Interactive(c *Config) error {
-	// see readline.NewFromConfig for advanced options:
 	rl, err := readline.New("> ")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer rl.Close()
 	log.SetOutput(rl.Stderr()) // redraw the prompt correctly after log output
@@ -47,19 +50,14 @@ func Interactive(c *Config) error {
 	for {
 		rl.SetPrompt(in.Prompt())
 		line, err := rl.ReadLine()
-		// `err` is either nil, io.EOF, readline.ErrInterrupt, or an unexpected
-		// condition in stdin:
 		if err != nil {
 			return err
 		}
-		// `line` is returned without the terminating \n or CRLF:
-		// fmt.Fprintf(rl, "you wrote: %s\n", line)
 		in.Eval(line)
 	}
-	return nil
 }
 
 func main() { //types:skip
-	opts := cli.DefaultOptions("cosh", "The Cogent Core Shell.")
-	cli.Run(opts, &Config{}, Run, Interactive)
+	opts := cli.DefaultOptions("cosh", "An interactive tool for running and compiling Cogent Shell (cosh).")
+	cli.Run(opts, &Config{}, Run)
 }
