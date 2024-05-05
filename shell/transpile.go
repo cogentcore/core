@@ -6,6 +6,7 @@ package shell
 
 import (
 	"go/token"
+	"log/slog"
 
 	"cogentcore.org/core/base/logx"
 )
@@ -97,7 +98,13 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 		tok := toks[i]
 		switch {
 		case tok.Tok == token.LBRACE: // todo: find the closing brace
-			etoks.AddTokens(sh.TranspileGo(toks[i+1:]))
+			rb := toks[i:].RightMatching()
+			if rb < 0 {
+				slog.Error("no right brace found in exec command line")
+			} else {
+				etoks.AddTokens(sh.TranspileGo(toks[i+1 : i+rb]))
+				i += rb
+			}
 			etoks.Add(token.COMMA, ",")
 			continue
 		case tok.Tok == token.SUB && i < sz-1: // option

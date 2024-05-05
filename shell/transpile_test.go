@@ -10,19 +10,7 @@ import (
 	"fmt"
 	"io"
 	"testing"
-
-	"github.com/traefik/yaegi/interp"
-	"github.com/traefik/yaegi/stdlib"
 )
-
-func TestSymbols(t *testing.T) {
-	t.Skip("nn")
-	i := interp.New(interp.Options{})
-	i.Use(stdlib.Symbols)
-	// https://github.com/traefik/yaegi/issues/1629
-	syms := i.Symbols("fmt") // using "" causes carash
-	fmt.Println(syms)
-}
 
 func TestTranspile(t *testing.T) {
 	tests := []string{

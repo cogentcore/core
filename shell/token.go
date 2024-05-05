@@ -99,7 +99,10 @@ func (tk *Token) IsGo() bool {
 func (tk Tokens) String() string {
 	str := ""
 	for _, tok := range tk {
-		str += "[" + tok.Tok.String() + "] " + tok.String() + " "
+		str += "[" + tok.Tok.String() + "] "
+		if tok.Str != "" {
+			str += tok.Str + " "
+		}
 	}
 	if len(str) == 0 {
 		return str
@@ -119,6 +122,40 @@ func (tk Tokens) Code() string {
 		return str
 	}
 	return str[:len(str)-1] // remove trailing space
+}
+
+// RightMatching returns the position (or -1 if not found) for the
+// right matching [paren, bracket, brace] given the left one that
+// is at the 0 position of the current set of tokens.
+func (tk Tokens) RightMatching() int {
+	sz := len(tk)
+	if sz == 0 {
+		return -1
+	}
+	rb := token.RPAREN
+	lb := tk[0].Tok
+	switch lb {
+	case token.LPAREN:
+		rb = token.RPAREN
+	case token.LBRACK:
+		rb = token.RBRACK
+	case token.LBRACE:
+		rb = token.RBRACE
+	}
+	depth := 0
+	for i := 1; i < sz; i++ {
+		tok := tk[i].Tok
+		switch tok {
+		case rb:
+			if depth <= 0 {
+				return i
+			}
+			depth--
+		case lb:
+			depth++
+		}
+	}
+	return -1
 }
 
 func (sh *Shell) Tokens(ln string) Tokens {
