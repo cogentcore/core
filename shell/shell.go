@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package shell provides the Cogent Shell (cosh), which combines the best parts
+// of Go and bash to provide an integrated shell experience that allows you to
+// easily run terminal commands while using Go for complicated logic.
 package shell
 
 import "strings"
@@ -26,7 +29,7 @@ func NewShell() *Shell {
 	return sh
 }
 
-// TotalDepth returns the sum of any unresolved pren, brace, or bracket depths.
+// TotalDepth returns the sum of any unresolved paren, brace, or bracket depths.
 func (sh *Shell) TotalDepth() int {
 	return sh.ParenDepth + sh.BraceDepth + sh.BrackDepth
 }

@@ -1,5 +1,6 @@
 # Cogent Shell (cosh)
 
+Cogent Shell (cosh) is a shell that combines the best parts of Go and bash to provide an integrated shell experience that allows you to easily run terminal commands while using Go for complicated logic. This allows you to write concise, elegant, and readable shell code that runs quickly on all platforms and transpiles to Go.
 
 # Syntax: Go vs. Exec
 
