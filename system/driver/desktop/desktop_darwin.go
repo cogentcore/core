@@ -71,10 +71,6 @@ func (a *App) DataDir() string {
 	return filepath.Join(usr.HomeDir, "Library")
 }
 
-func (w *Window) Handle() any {
-	return uintptr(w.Glw.GetCocoaWindow())
-}
-
 /////////////////////////////////////////////////////////////////
 // system.Clipboard impl
 

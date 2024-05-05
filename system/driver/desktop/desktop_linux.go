@@ -51,10 +51,6 @@ func (a *App) DataDir() string {
 	return filepath.Join(usr.HomeDir, ".config")
 }
 
-func (w *Window) Handle() any {
-	return uintptr(w.Glw.GetX11Window())
-}
-
 /////////////////////////////////////////////////////////////////
 //   Clipboard
 

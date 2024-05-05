@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"os/user"
 	"path/filepath"
-	"unsafe"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo/mimedata"
@@ -41,10 +40,6 @@ func (a *App) DataDir() string {
 	}
 	return filepath.Join(usr.HomeDir, "AppData", "Roaming")
 	// todo: convention is "manufacturer" before app -- not sure what that means in this context -- "Go"?
-}
-
-func (w *Window) Handle() any {
-	return uintptr(unsafe.Pointer(w.Glw.GetWin32Window()))
 }
 
 /////////////////////////////////////////////////////////////////

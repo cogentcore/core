@@ -13,9 +13,3 @@ import (
 type Window struct {
 	base.WindowSingle[*App]
 }
-
-var _ system.Window = &Window{}
-
-func (w *Window) Handle() any {
-	return nil
-}

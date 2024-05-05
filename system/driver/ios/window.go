@@ -14,7 +14,3 @@ import (
 type Window struct {
 	base.WindowSingle[*App]
 }
-
-func (w *Window) Handle() any {
-	return w.App.Winptr
-}
