@@ -83,18 +83,6 @@ func (sv *SVG) HandleEvents() {
 		}
 		sv.NeedsRender()
 	})
-	sv.On(events.LongHoverStart, func(e events.Event) {
-		pos := e.Pos()
-		objs := svg.NodesContainingPoint(&sv.SVG.Root, pos, true)
-		sv.Tooltip = "no objects under mouse"
-		if len(objs) > 0 {
-			els := ""
-			for _, o := range objs {
-				els += o.NodeType().Name + ": " + o.Name() + "\n"
-			}
-			sv.Tooltip = els
-		}
-	})
 }
 
 // Open opens an XML-formatted SVG file
