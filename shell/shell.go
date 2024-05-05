@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/exec"
+	"cogentcore.org/core/base/logx"
 	"golang.org/x/tools/imports"
 )
 
@@ -33,6 +34,9 @@ type Shell struct {
 
 	// stack of transpiled lines
 	Lines []string
+
+	// stack of runtime errors
+	Errors []error
 }
 
 // NewShell returns a new [Shell] with default options.
@@ -96,4 +100,11 @@ func (sh *Shell) TranspileFile(in string, out string) error {
 		return err
 	}
 	return os.WriteFile(out, res, 0666)
+}
+
+// AddError adds error to the stack: this is how errors are reported
+func (sh *Shell) AddError(err error) error {
+	sh.Errors = append(sh.Errors, err)
+	logx.PrintlnError(err)
+	return err
 }
