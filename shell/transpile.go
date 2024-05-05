@@ -34,36 +34,36 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 		return toks
 	}
 
-	logx.PrintlnInfo("line:\n", ln, "\nTokens:\n", toks.String())
+	logx.PrintlnDebug("line:\n", ln, "\nTokens:\n", toks.String())
 
 	switch {
 	case toks[0].IsBacktickString():
-		logx.PrintlnInfo("exec: backquoted string")
+		logx.PrintlnDebug("exec: backquoted string")
 		exe := sh.TranspileExecString(toks[0].Str, false)
 		if len(toks) > 1 { // todo: is this an error?
 			exe.AddTokens(sh.TranspileGo(toks[1:]))
 		}
 		return exe
 	case toks[0].IsGo():
-		logx.PrintlnInfo("go    keyword")
+		logx.PrintlnDebug("go    keyword")
 		return sh.TranspileGo(toks)
 	case len(toks) == 1 && toks[0].Tok == token.IDENT:
-		logx.PrintlnInfo("exec: 1 word")
+		logx.PrintlnDebug("exec: 1 word")
 		return sh.TranspileExec(toks, false)
 	case toks[0].Tok == token.PERIOD: // path expr
-		logx.PrintlnInfo("exec: .")
+		logx.PrintlnDebug("exec: .")
 		return sh.TranspileExec(toks, false)
 	case toks[0].Tok != token.IDENT: // exec must be IDENT
-		logx.PrintlnInfo("go:   not ident")
+		logx.PrintlnDebug("go:   not ident")
 		return sh.TranspileGo(toks)
 	case len(toks) >= 2 && toks[0].Tok == token.IDENT && (toks[1].Tok == token.IDENT || toks[1].Tok == token.SUB):
-		logx.PrintlnInfo("exec: word word")
+		logx.PrintlnDebug("exec: word word")
 		return sh.TranspileExec(toks, false)
 	case toks[0].Tok == token.IDENT && toks[1].Tok == token.LBRACE:
-		logx.PrintlnInfo("exec: word {")
+		logx.PrintlnDebug("exec: word {")
 		return sh.TranspileExec(toks, false)
 	default:
-		logx.PrintlnInfo("go:   default")
+		logx.PrintlnDebug("go:   default")
 		return sh.TranspileGo(toks)
 	}
 }

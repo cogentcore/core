@@ -5,49 +5,31 @@
 package shell
 
 import (
-	"bufio"
-	"bytes"
-	"fmt"
-	"io"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func TestTranspile(t *testing.T) {
-	tests := []string{
-		"`ls -la`\n",
-		`var name string
-name = "test"
-echo {name}
-`,
-		`name := "test"
-echo {name}
-`,
-		`number := 1.23
-echo {number}
-`,
-		`for i := 0; i < 3; i++ { print(i, "\n") }
-echo {i}
-`, // todo: following doesn't work for unknown reasons
-		`for i := 0; i < 3; i++ { fmt.Println(i) }
-echo {i}
-`, // todo: following doesn't work b/c yaegi won't process just open brace
-		`for i := 0; i < 3; i++ {
-		echo {i}
+type exIn struct {
+	i string
+	e string
 }
-`,
+
+func TestTranspile(t *testing.T) {
+	tests := []exIn{
+		{"`ls -la`\n", `shell.Exec("ls", "-la")`},
+		{`var name string`, `var name string`},
+		{`name = "test"`, `name = "test"`},
+		{`echo {name}`, `shell.Exec("echo", name)`},
+		{`number := 1.23`, `number := 1.23`},
+		{`for i := 0; i < 3; i++ { fmt.Println(i, "\n")`, `for i := 0; i < 3; i++ { fmt.Println(i, "\n")`},
+		{"for i, v := range `ls -la` {", `for i, v := range shell.Output("ls", "-la") {`},
+		{`// todo: fixit`, `// todo: fixit`},
 	}
 
-	for ti, test := range tests {
-		fmt.Println("\n########## Test: ", ti)
-		sh := NewShell()
-		reader := bufio.NewReader(bytes.NewBufferString(test))
-		for {
-			line, err := reader.ReadString('\n')
-			if err == io.EOF {
-				break
-			}
-			tln := sh.TranspileLine(line)
-			fmt.Println("## input:\n", line, "\n## output:\n", tln)
-		}
+	sh := NewShell()
+	for _, test := range tests {
+		o := sh.TranspileLine(test.i)
+		assert.Equal(t, test.e, o)
 	}
 }

@@ -163,6 +163,9 @@ func (tk Tokens) Code() string {
 	if len(str) == 0 {
 		return str
 	}
+	if str[len(str)-1] == ' ' {
+		return str[:len(str)-1]
+	}
 	return str
 }
 
@@ -264,5 +267,5 @@ func (sh *Shell) Tokens(ln string) Tokens {
 }
 
 func (sh *Shell) errHandler(pos token.Position, msg string) {
-	logx.PrintlnInfo("Scan Error:", pos, msg)
+	logx.PrintlnDebug("Scan Error:", pos, msg)
 }
