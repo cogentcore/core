@@ -66,7 +66,7 @@ type Buffer struct {
 	Autosave bool
 
 	// options for how text editing / viewing works
-	Opts textbuf.Opts
+	Options textbuf.Options
 
 	// full info about file
 	Info fileinfo.FileInfo
@@ -153,7 +153,7 @@ type Buffer struct {
 func NewBuffer() *Buffer {
 	tb := &Buffer{}
 	tb.SetHiStyle(histyle.StyleDefault)
-	tb.Opts.EditorSettings = core.SystemSettings.Editor
+	tb.Options.EditorSettings = core.SystemSettings.Editor
 	tb.SetText([]byte{}) // to initialize
 	return tb
 }
@@ -500,7 +500,7 @@ func (tb *Buffer) ConfigKnown() bool {
 		if tb.Complete == nil {
 			tb.SetCompleter(&tb.ParseState, CompleteParse, CompleteEditParse, LookupParse)
 		}
-		return tb.Opts.ConfigKnown(tb.Info.Known)
+		return tb.Options.ConfigKnown(tb.Info.Known)
 	}
 	return false
 }
@@ -1968,7 +1968,7 @@ func (tb *Buffer) Undo() *textbuf.Edit {
 			if tbe.Delete {
 				utbe := tb.InsertTextRectImpl(tbe)
 				utbe.Group = stgp + tbe.Group
-				if tb.Opts.EmacsUndo {
+				if tb.Options.EmacsUndo {
 					tb.Undos.SaveUndo(utbe)
 				}
 				tb.LinesMu.Unlock()
@@ -1976,7 +1976,7 @@ func (tb *Buffer) Undo() *textbuf.Edit {
 			} else {
 				utbe := tb.DeleteTextRectImpl(tbe.Reg.Start, tbe.Reg.End)
 				utbe.Group = stgp + tbe.Group
-				if tb.Opts.EmacsUndo {
+				if tb.Options.EmacsUndo {
 					tb.Undos.SaveUndo(utbe)
 				}
 				tb.LinesMu.Unlock()
@@ -1986,7 +1986,7 @@ func (tb *Buffer) Undo() *textbuf.Edit {
 			if tbe.Delete {
 				utbe := tb.InsertTextImpl(tbe.Reg.Start, tbe.ToBytes())
 				utbe.Group = stgp + tbe.Group
-				if tb.Opts.EmacsUndo {
+				if tb.Options.EmacsUndo {
 					tb.Undos.SaveUndo(utbe)
 				}
 				tb.LinesMu.Unlock()
@@ -1994,7 +1994,7 @@ func (tb *Buffer) Undo() *textbuf.Edit {
 			} else {
 				utbe := tb.DeleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
 				utbe.Group = stgp + tbe.Group
-				if tb.Opts.EmacsUndo {
+				if tb.Options.EmacsUndo {
 					tb.Undos.SaveUndo(utbe)
 				}
 				tb.LinesMu.Unlock()
@@ -2020,7 +2020,7 @@ func (tb *Buffer) Undo() *textbuf.Edit {
 // If EmacsUndo mode is active, saves the current UndoStack to the regular Undo stack
 // at the end, and moves undo to the very end -- undo is a constant stream.
 func (tb *Buffer) EmacsUndoSave() {
-	if !tb.Opts.EmacsUndo {
+	if !tb.Options.EmacsUndo {
 		return
 	}
 	tb.Undos.UndoStackSave()
@@ -2305,9 +2305,9 @@ func (tb *Buffer) IndentLine(ln, ind int) *textbuf.Edit {
 	asv := tb.AutoSaveOff()
 	defer tb.AutoSaveRestore(asv)
 
-	tabSz := tb.Opts.TabSize
+	tabSz := tb.Options.TabSize
 	ichr := indent.Tab
-	if tb.Opts.SpaceIndent {
+	if tb.Options.SpaceIndent {
 		ichr = indent.Space
 	}
 
@@ -2330,7 +2330,7 @@ func (tb *Buffer) IndentLine(ln, ind int) *textbuf.Edit {
 // Returns any edit that took place (could be nil), along with the auto-indented
 // level and character position for the indent of the current line.
 func (tb *Buffer) AutoIndent(ln int) (tbe *textbuf.Edit, indLev, chPos int) {
-	tabSz := tb.Opts.TabSize
+	tabSz := tb.Options.TabSize
 
 	tb.LinesMu.RLock()
 	tb.MarkupMu.RLock()
@@ -2343,7 +2343,7 @@ func (tb *Buffer) AutoIndent(ln int) (tbe *textbuf.Edit, indLev, chPos int) {
 	}
 	tb.MarkupMu.RUnlock()
 	tb.LinesMu.RUnlock()
-	ichr := tb.Opts.IndentChar()
+	ichr := tb.Options.IndentChar()
 
 	indLev = pInd + delInd
 	chPos = indent.Len(ichr, indLev, tabSz)
@@ -2368,7 +2368,7 @@ func (tb *Buffer) CommentStart(ln int) int {
 	if !tb.IsValidLine(ln) {
 		return -1
 	}
-	comst, _ := tb.Opts.CommentStrs()
+	comst, _ := tb.Options.CommentStrings()
 	if comst == "" {
 		return -1
 	}
@@ -2405,7 +2405,7 @@ func (tb *Buffer) CommentRegion(st, ed int) {
 	autoSave := tb.BatchUpdateStart()
 	defer tb.BatchUpdateEnd(autoSave)
 
-	tabSz := tb.Opts.TabSize
+	tabSz := tb.Options.TabSize
 
 	ch := 0
 	tb.LinesMu.RLock()
@@ -2413,14 +2413,14 @@ func (tb *Buffer) CommentRegion(st, ed int) {
 	tb.LinesMu.RUnlock()
 
 	if ind > 0 {
-		if tb.Opts.SpaceIndent {
-			ch = tb.Opts.TabSize * ind
+		if tb.Options.SpaceIndent {
+			ch = tb.Options.TabSize * ind
 		} else {
 			ch = ind
 		}
 	}
 
-	comst, comed := tb.Opts.CommentStrs()
+	comst, comed := tb.Options.CommentStrings()
 	if comst == "" {
 		fmt.Printf("views.Buf: %v attempt to comment region without any comment syntax defined\n", tb.Filename)
 		return
@@ -2496,7 +2496,7 @@ func (tb *Buffer) JoinParaLines(stLn, edLn int) {
 
 // TabsToSpaces replaces tabs with spaces in given line.
 func (tb *Buffer) TabsToSpaces(ln int) {
-	tabSz := tb.Opts.TabSize
+	tabSz := tb.Options.TabSize
 
 	lr := tb.Lines[ln]
 	st := lexer.Pos{Ln: ln}
@@ -2536,7 +2536,7 @@ func (tb *Buffer) TabsToSpacesRegion(st, ed int) {
 
 // SpacesToTabs replaces spaces with tabs in given line.
 func (tb *Buffer) SpacesToTabs(ln int) {
-	tabSz := tb.Opts.TabSize
+	tabSz := tb.Options.TabSize
 
 	lr := tb.Lines[ln]
 	st := lexer.Pos{Ln: ln}
@@ -2675,7 +2675,7 @@ func (tb *Buffer) CompleteExtend(s string) {
 // taking into account given position in text if it is relevant for cases
 // where it is only conditionally enabled
 func (tb *Buffer) IsSpellEnabled(pos lexer.Pos) bool {
-	if tb.Spell == nil || !tb.Opts.SpellCorrect {
+	if tb.Spell == nil || !tb.Options.SpellCorrect {
 		return false
 	}
 	switch tb.Info.Cat {

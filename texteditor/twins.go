@@ -57,10 +57,10 @@ func (te *TwinEditors) MakeBufs() {
 func (te *TwinEditors) SetFiles(fileA, fileB string, lineNos bool) {
 	te.MakeBufs()
 	te.BufA.Filename = core.Filename(fileA)
-	te.BufA.Opts.LineNos = lineNos
+	te.BufA.Options.LineNumbers = lineNos
 	te.BufA.Stat() // update markup
 	te.BufB.Filename = core.Filename(fileB)
-	te.BufB.Opts.LineNos = lineNos
+	te.BufB.Options.LineNumbers = lineNos
 	te.BufB.Stat() // update markup
 }
 

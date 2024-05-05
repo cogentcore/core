@@ -128,7 +128,7 @@ func (lv *VCSLogView) ConfigRepo(repo vcs.Repo, lg vcs.Log, file, since string) 
 		d := core.NewBody().AddTitle("Commit Info: " + cmt.Rev)
 		buf := texteditor.NewBuffer()
 		buf.Filename = core.Filename(lv.File)
-		buf.Opts.LineNos = true
+		buf.Options.LineNumbers = true
 		buf.Stat()
 		texteditor.NewEditor(d).SetBuffer(buf)
 		buf.SetText(cinfo)

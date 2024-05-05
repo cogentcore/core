@@ -11,37 +11,36 @@ import (
 	"cogentcore.org/core/parse"
 )
 
-// Opts contains options for textview.Bufs
-// Contains everything necessary to conditionalize editing
-// of a given text file.
-type Opts struct {
+// Options contains options for [texteditor.Buffer]s. It contains
+// everything necessary to customize editing of a certain text file.
+type Options struct {
 
 	// editor settings from core settings
 	core.EditorSettings
 
-	// character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used
-	CommentLn string
+	// character(s) that start a single-line comment; if empty then multi-line comment syntax will be used
+	CommentLine string
 
 	// character(s) that start a multi-line comment or one that requires both start and end
-	CommentSt string
+	CommentStart string
 
 	// character(s) that end a multi-line comment or one that requires both start and end
-	CommentEd string
+	CommentEnd string
 }
 
-// CommentStrs returns the comment start and end strings, using line-based CommentLn first if set
+// CommentStrings returns the comment start and end strings, using line-based CommentLn first if set
 // and falling back on multi-line / general purpose start / end syntax
-func (tb *Opts) CommentStrs() (comst, comed string) {
-	comst = tb.CommentLn
+func (tb *Options) CommentStrings() (comst, comed string) {
+	comst = tb.CommentLine
 	if comst == "" {
-		comst = tb.CommentSt
-		comed = tb.CommentEd
+		comst = tb.CommentStart
+		comed = tb.CommentEnd
 	}
 	return
 }
 
 // IndentChar returns the indent character based on SpaceIndent option
-func (tb *Opts) IndentChar() indent.Char {
+func (tb *Options) IndentChar() indent.Char {
 	if tb.SpaceIndent {
 		return indent.Space
 	}
@@ -50,7 +49,7 @@ func (tb *Opts) IndentChar() indent.Char {
 
 // ConfigKnown configures options based on the supported language info in parse.
 // Returns true if supported.
-func (tb *Opts) ConfigKnown(sup fileinfo.Known) bool {
+func (tb *Options) ConfigKnown(sup fileinfo.Known) bool {
 	if sup == fileinfo.Unknown {
 		return false
 	}
@@ -58,9 +57,9 @@ func (tb *Opts) ConfigKnown(sup fileinfo.Known) bool {
 	if !ok {
 		return false
 	}
-	tb.CommentLn = lp.CommentLn
-	tb.CommentSt = lp.CommentSt
-	tb.CommentEd = lp.CommentEd
+	tb.CommentLine = lp.CommentLn
+	tb.CommentStart = lp.CommentSt
+	tb.CommentEnd = lp.CommentEd
 	for _, flg := range lp.Flags {
 		switch flg {
 		case parse.IndentSpace:

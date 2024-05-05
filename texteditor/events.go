@@ -349,7 +349,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
-			if ed.Buffer.Opts.AutoIndent {
+			if ed.Buffer.Options.AutoIndent {
 				lp, _ := parse.LangSupport.Properties(ed.Buffer.ParseState.Sup)
 				if lp != nil && lp.Lang != nil && lp.HasFlag(parse.ReAutoIndent) {
 					// only re-indent current line for supported types
@@ -376,13 +376,13 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
 			lasttab := ed.Is(EditorLastWasTabAI)
-			if !lasttab && ed.CursorPos.Ch == 0 && ed.Buffer.Opts.AutoIndent {
+			if !lasttab && ed.CursorPos.Ch == 0 && ed.Buffer.Options.AutoIndent {
 				_, _, cpos := ed.Buffer.AutoIndent(ed.CursorPos.Ln)
 				ed.CursorPos.Ch = cpos
 				ed.RenderCursor(true)
 				gotTabAI = true
 			} else {
-				ed.InsertAtCursor(indent.Bytes(ed.Buffer.Opts.IndentChar(), 1, ed.Styles.Text.TabSize))
+				ed.InsertAtCursor(indent.Bytes(ed.Buffer.Options.IndentChar(), 1, ed.Styles.Text.TabSize))
 			}
 			ed.NeedsRender()
 			ed.ISpellKeyInput(kt)
@@ -395,7 +395,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 				ind, _ := lexer.LineIndent(ed.Buffer.Line(ed.CursorPos.Ln), ed.Styles.Text.TabSize)
 				if ind > 0 {
 					ed.Buffer.IndentLine(ed.CursorPos.Ln, ind-1)
-					intxt := indent.Bytes(ed.Buffer.Opts.IndentChar(), ind-1, ed.Styles.Text.TabSize)
+					intxt := indent.Bytes(ed.Buffer.Options.IndentChar(), ind-1, ed.Styles.Text.TabSize)
 					npos := lexer.Pos{Ln: ed.CursorPos.Ln, Ch: len(intxt)}
 					ed.SetCursorShow(npos)
 				}
@@ -439,7 +439,7 @@ func (ed *Editor) KeyInputInsertBra(kt events.Event) {
 	}
 	if match {
 		ket, _ := lexer.BracePair(kt.KeyRune())
-		if newLine && ed.Buffer.Opts.AutoIndent {
+		if newLine && ed.Buffer.Options.AutoIndent {
 			ed.InsertAtCursor([]byte(string(kt.KeyRune()) + "\n"))
 			tbe, _, cpos := ed.Buffer.AutoIndent(ed.CursorPos.Ln)
 			if tbe != nil {
@@ -473,7 +473,7 @@ func (ed *Editor) KeyInputInsertRune(kt events.Event) {
 	} else {
 		if kt.KeyRune() == '{' || kt.KeyRune() == '(' || kt.KeyRune() == '[' {
 			ed.KeyInputInsertBra(kt)
-		} else if kt.KeyRune() == '}' && ed.Buffer.Opts.AutoIndent && ed.CursorPos.Ch == ed.Buffer.LineLen(ed.CursorPos.Ln) {
+		} else if kt.KeyRune() == '}' && ed.Buffer.Options.AutoIndent && ed.CursorPos.Ch == ed.Buffer.LineLen(ed.CursorPos.Ln) {
 			ed.CancelComplete()
 			ed.lastAutoInsert = 0
 			ed.InsertAtCursor([]byte(string(kt.KeyRune())))

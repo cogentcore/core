@@ -21,7 +21,7 @@ func (ed *Editor) StyleSizes() {
 	ed.LineNoDigs = max(1+int(math32.Log10(float32(ed.NLines))), 3)
 	lno := true
 	if ed.Buffer != nil {
-		lno = ed.Buffer.Opts.LineNos
+		lno = ed.Buffer.Options.LineNumbers
 	}
 	if lno {
 		ed.SetFlag(true, EditorHasLineNos)

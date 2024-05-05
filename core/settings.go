@@ -605,32 +605,32 @@ type User struct { //types:add
 // EditorSettings contains text editor settings.
 type EditorSettings struct { //types:add
 
-	// size of a tab, in chars -- also determines indent level for space indent
-	TabSize int `default:"4" xml:"tab-size"`
+	// size of a tab, in chars; also determines indent level for space indent
+	TabSize int `default:"4"`
 
 	// use spaces for indentation, otherwise tabs
-	SpaceIndent bool `xml:"space-indent"`
+	SpaceIndent bool
 
-	// wrap lines at word boundaries -- otherwise long lines scroll off the end
-	WordWrap bool `default:"true" xml:"word-wrap"`
+	// wrap lines at word boundaries; otherwise long lines scroll off the end
+	WordWrap bool `default:"true"`
 
-	// show line numbers
-	LineNos bool `default:"true" xml:"line-nos"`
+	// whether to show line numbers
+	LineNumbers bool `default:"true"`
 
 	// use the completion system to suggest options while typing
-	Completion bool `default:"true" xml:"completion"`
+	Completion bool `default:"true"`
 
 	// suggest corrections for unknown words while typing
-	SpellCorrect bool `default:"true" xml:"spell-correct"`
+	SpellCorrect bool `default:"true"`
 
 	// automatically indent lines when enter, tab, }, etc pressed
-	AutoIndent bool `default:"true" xml:"auto-indent"`
+	AutoIndent bool `default:"true"`
 
 	// use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo
-	EmacsUndo bool `xml:"emacs-undo"`
+	EmacsUndo bool
 
 	// colorize the background according to nesting depth
-	DepthColor bool `default:"true" xml:"depth-color"`
+	DepthColor bool `default:"true"`
 }
 
 //////////////////////////////////////////////////////////////////

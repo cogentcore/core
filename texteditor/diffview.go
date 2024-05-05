@@ -498,9 +498,9 @@ func (dv *DiffView) ConfigDiffView() {
 	}
 	dv.BufA = NewBuffer().SetFilename(dv.FileA)
 	dv.BufB = NewBuffer().SetFilename(dv.FileB)
-	dv.BufA.Opts.LineNos = true
+	dv.BufA.Options.LineNumbers = true
 	dv.BufA.Stat() // update markup
-	dv.BufB.Opts.LineNos = true
+	dv.BufB.Options.LineNumbers = true
 	dv.BufB.Stat() // update markup
 	av := NewDiffTextEditor(dv, "text-a").SetBuffer(dv.BufA)
 	av.SetReadOnly(true)

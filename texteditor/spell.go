@@ -26,7 +26,7 @@ func (ed *Editor) OfferComplete() {
 		return
 	}
 	ed.Buffer.Complete.Cancel()
-	if !ed.Buffer.Opts.Completion {
+	if !ed.Buffer.Options.Completion {
 		return
 	}
 	if ed.Buffer.InComment(ed.CursorPos) || ed.Buffer.InLitString(ed.CursorPos) {
@@ -268,7 +268,7 @@ func (ed *Editor) CancelCorrect() {
 	if ed.Buffer.Spell == nil || ed.ISearch.On || ed.QReplace.On {
 		return
 	}
-	if !ed.Buffer.Opts.SpellCorrect {
+	if !ed.Buffer.Options.SpellCorrect {
 		return
 	}
 	ed.Buffer.CurView = nil

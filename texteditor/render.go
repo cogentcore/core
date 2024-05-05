@@ -160,7 +160,7 @@ func (ed *Editor) RenderDepthBackground(stln, edln int) {
 	if ed.Buffer == nil {
 		return
 	}
-	if !ed.Buffer.Opts.DepthColor || ed.IsDisabled() || !ed.StateIs(states.Focused) {
+	if !ed.Buffer.Options.DepthColor || ed.IsDisabled() || !ed.StateIs(states.Focused) {
 		return
 	}
 	buf := ed.Buffer
