@@ -13,6 +13,7 @@ require (
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/aymerick/douceur v0.2.0
 	github.com/chewxy/math32 v1.10.1
+	github.com/coreos/go-oidc/v3 v3.10.0
 	github.com/ergochat/readline v0.1.0
 	github.com/ericchiang/css v1.3.0
 	github.com/faiface/beep v1.1.0
@@ -38,6 +39,7 @@ require (
 	golang.org/x/image v0.15.0
 	golang.org/x/mod v0.16.0
 	golang.org/x/net v0.23.0
+	golang.org/x/oauth2 v0.20.0
 	golang.org/x/sys v0.18.0
 	golang.org/x/tools v0.19.0
 	gonum.org/v1/gonum v0.15.0
@@ -49,6 +51,7 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dlclark/regexp2 v1.11.0 // indirect
+	github.com/go-jose/go-jose/v4 v4.0.1 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/hack-pad/go-indexeddb v0.3.2 // indirect
 	github.com/hack-pad/safejs v0.1.1 // indirect
@@ -62,6 +65,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
+	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/exp/shiny v0.0.0-20240416160154-fe59bbe5cc7f // indirect
 	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a // indirect
 	golang.org/x/text v0.14.0 // indirect
