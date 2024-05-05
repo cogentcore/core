@@ -24,26 +24,27 @@ func TestSymbols(t *testing.T) {
 	fmt.Println(syms)
 }
 
-func TestParse(t *testing.T) {
+func TestTranspile(t *testing.T) {
 	tests := []string{
+		"`ls -la`\n",
 		`var name string
 name = "test"
-echo name
+echo {name}
 `,
 		`name := "test"
-echo name
+echo {name}
 `,
 		`number := 1.23
-echo number
+echo {number}
 `,
 		`for i := 0; i < 3; i++ { print(i, "\n") }
-echo i
+echo {i}
 `, // todo: following doesn't work for unknown reasons
 		`for i := 0; i < 3; i++ { fmt.Println(i) }
-echo i
+echo {i}
 `, // todo: following doesn't work b/c yaegi won't process just open brace
 		`for i := 0; i < 3; i++ {
-	echo i
+		echo {i}
 }
 `,
 	}
@@ -51,14 +52,15 @@ echo i
 	for ti, test := range tests {
 		fmt.Println("\n########## Test: ", ti)
 		sh := NewShell()
-		// sh.SetDebug(1)
+		sh.SetDebug(1)
 		reader := bufio.NewReader(bytes.NewBufferString(test))
 		for {
 			line, err := reader.ReadString('\n')
 			if err == io.EOF {
 				break
 			}
-			sh.ParseLine(line)
+			tln := sh.TranspileLine(line)
+			fmt.Println("## input:\n", line, "\n## output:\n", tln)
 		}
 	}
 }
