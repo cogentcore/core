@@ -6,7 +6,7 @@ import (
 	"cogentcore.org/core/types"
 )
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/base/randx.Rand", IDName: "rand", Doc: "Rand provides an interface with most of the standard\nrand.Rand methods, to support the use of either the\nglobal rand generator or a separate Rand source.\nAll methods take an optional thr argument for the\nthread number in the parallel threaded case.\nThe gosl.slrand generator for example supports this.\nIf not used set to 0 or -1"})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/base/randx.Rand", IDName: "rand", Doc: "Rand provides an interface with most of the standard\nrand.Rand methods, to support the use of either the\nglobal rand generator or a separate Rand source."})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/base/randx.SysRand", IDName: "sys-rand", Doc: "SysRand supports the system random number generator\nfor either a separate rand.Rand source, or, if that\nis nil, the global rand stream.", Fields: []types.Field{{Name: "Rand", Doc: "if non-nil, use this random number source instead of the global default one"}}})
 

@@ -512,33 +512,13 @@ func (t *Scrim) New() tree.Node { return &Scrim{} }
 func (t *Scrim) SetTooltip(v string) *Scrim { t.Tooltip = v; return t }
 
 // SceneType is the [types.Type] for [Scene]
-var SceneType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Scene", IDName: "scene", Doc: "Scene contains a [Widget] tree, rooted in an embedded [Frame] layout,\nwhich renders into its [Scene.Pixels] image. The [Scene] is set in a\n[Stage], which the [Scene] has a pointer to.\n\nEach [Scene] contains state specific to its particular usage\nwithin a given [Stage] and overall rendering context, representing the unit\nof rendering in the Cogent Core framework.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}, {Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Bars", Doc: "Bars contains functions for constructing the control bars for this Scene,\nattached to different sides of a Scene (e.g., TopAppBar at Top,\nNavBar at Bottom, etc).  Functions are called in forward order\nso first added are called first."}, {Name: "BarsInherit", Doc: "BarsInherit determines which of the Bars side functions are inherited\nfrom the context widget, for FullWindow Dialogs"}, {Name: "AppBars", Doc: "AppBars contains functions for configuring a top-level App toolbar,\n(e.g., TopAppBar) for elements contained within this Scene,\nthat should be represented in any app-level toolbar constructed\nfor this Scene."}, {Name: "Body", Doc: "Body provides the main contents of scenes that use control Bars\nto allow the main window contents to be specified separately\nfrom that dynamic control content.  When constructing scenes using\na Body, you can operate directly on the [Body], which has wrappers\nfor most major Scene functions."}, {Name: "Data", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one."}, {Name: "SceneGeom", Doc: "Size and position relative to overall rendering context."}, {Name: "PaintContext", Doc: "paint context for rendering"}, {Name: "Pixels", Doc: "live pixels that we render into"}, {Name: "Events", Doc: "event manager for this scene"}, {Name: "Stage", Doc: "current stage in which this Scene is set"}, {Name: "RenderBBoxHue", Doc: "RenderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode"}, {Name: "SelectedWidget", Doc: "the currently selected/hovered widget through the inspect editor selection mode\nthat should be highlighted with a background color"}, {Name: "SelectedWidgetChan", Doc: "the channel on which the selected widget through the inspect editor\nselection mode is transmitted to the inspect editor after the user is done selecting"}, {Name: "LastRender", Doc: "LastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed."}, {Name: "StyleMu", Doc: "StyleMu is RW mutex protecting access to Style-related global vars"}, {Name: "ShowIter", Doc: "ShowIter counts up at start of showing a Scene\nto trigger Show event and other steps at start of first show"}, {Name: "ReRender", Doc: "ReRender items are re-rendered after the current pass"}, {Name: "hasShown", Doc: "hasShown is whether this scene has already been shown.\nThis is used to ensure that [events.Show] is only sent once."}, {Name: "DirectRenders", Doc: "DirectRenders are widgets that render directly to the RenderWin\ninstead of rendering into the Scene Pixels image."}}, Instance: &Scene{}})
+var SceneType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Scene", IDName: "scene", Doc: "Scene contains a [Widget] tree, rooted in an embedded [Frame] layout,\nwhich renders into its [Scene.Pixels] image. The [Scene] is set in a\n[Stage], which the [Scene] has a pointer to.\n\nEach [Scene] contains state specific to its particular usage\nwithin a given [Stage] and overall rendering context, representing the unit\nof rendering in the Cogent Core framework.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Bars", Doc: "Bars contains functions for constructing the control bars for this Scene,\nattached to different sides of a Scene (e.g., TopAppBar at Top,\nNavBar at Bottom, etc).  Functions are called in forward order\nso first added are called first."}, {Name: "BarsInherit", Doc: "BarsInherit determines which of the Bars side functions are inherited\nfrom the context widget, for FullWindow Dialogs"}, {Name: "AppBars", Doc: "AppBars contains functions for configuring a top-level App toolbar,\n(e.g., TopAppBar) for elements contained within this Scene,\nthat should be represented in any app-level toolbar constructed\nfor this Scene."}, {Name: "Body", Doc: "Body provides the main contents of scenes that use control Bars\nto allow the main window contents to be specified separately\nfrom that dynamic control content.  When constructing scenes using\na Body, you can operate directly on the [Body], which has wrappers\nfor most major Scene functions."}, {Name: "Data", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one."}, {Name: "SceneGeom", Doc: "Size and position relative to overall rendering context."}, {Name: "PaintContext", Doc: "paint context for rendering"}, {Name: "Pixels", Doc: "live pixels that we render into"}, {Name: "Events", Doc: "event manager for this scene"}, {Name: "Stage", Doc: "current stage in which this Scene is set"}, {Name: "RenderBBoxHue", Doc: "RenderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode"}, {Name: "SelectedWidget", Doc: "the currently selected/hovered widget through the inspect editor selection mode\nthat should be highlighted with a background color"}, {Name: "SelectedWidgetChan", Doc: "the channel on which the selected widget through the inspect editor\nselection mode is transmitted to the inspect editor after the user is done selecting"}, {Name: "LastRender", Doc: "LastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed."}, {Name: "StyleMu", Doc: "StyleMu is RW mutex protecting access to Style-related global vars"}, {Name: "ShowIter", Doc: "ShowIter counts up at start of showing a Scene\nto trigger Show event and other steps at start of first show"}, {Name: "ReRender", Doc: "ReRender items are re-rendered after the current pass"}, {Name: "hasShown", Doc: "hasShown is whether this scene has already been shown.\nThis is used to ensure that [events.Show] is only sent once."}, {Name: "DirectRenders", Doc: "DirectRenders are widgets that render directly to the RenderWin\ninstead of rendering into the Scene Pixels image."}}, Instance: &Scene{}})
 
 // NodeType returns the [*types.Type] of [Scene]
 func (t *Scene) NodeType() *types.Type { return SceneType }
 
 // New returns a new [*Scene] value
 func (t *Scene) New() tree.Node { return &Scene{} }
-
-// SceneEmbedder is an interface that all types that embed Scene satisfy
-type SceneEmbedder interface {
-	AsScene() *Scene
-}
-
-// AsScene returns the given value as a value of type Scene if the type
-// of the given value embeds Scene, or nil otherwise
-func AsScene(k tree.Node) *Scene {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(SceneEmbedder); ok {
-		return t.AsScene()
-	}
-	return nil
-}
-
-// AsScene satisfies the [SceneEmbedder] interface
-func (t *Scene) AsScene() *Scene { return t }
 
 // SetBars sets the [Scene.Bars]:
 // Bars contains functions for constructing the control bars for this Scene,
@@ -623,14 +603,14 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.SystemSettings
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.User", IDName: "user", Doc: "User basic user information that might be needed for different apps", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "User"}}, Fields: []types.Field{{Name: "Email", Doc: "default email address -- e.g., for recording changes in a version control system"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.EditorSettings", IDName: "editor-settings", Doc: "EditorSettings contains text editor settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "TabSize", Doc: "size of a tab, in chars -- also determines indent level for space indent"}, {Name: "SpaceIndent", Doc: "use spaces for indentation, otherwise tabs"}, {Name: "WordWrap", Doc: "wrap lines at word boundaries -- otherwise long lines scroll off the end"}, {Name: "LineNos", Doc: "show line numbers"}, {Name: "Completion", Doc: "use the completion system to suggest options while typing"}, {Name: "SpellCorrect", Doc: "suggest corrections for unknown words while typing"}, {Name: "AutoIndent", Doc: "automatically indent lines when enter, tab, }, etc pressed"}, {Name: "EmacsUndo", Doc: "use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"}, {Name: "DepthColor", Doc: "colorize the background according to nesting depth"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.EditorSettings", IDName: "editor-settings", Doc: "EditorSettings contains text editor settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "TabSize", Doc: "size of a tab, in chars; also determines indent level for space indent"}, {Name: "SpaceIndent", Doc: "use spaces for indentation, otherwise tabs"}, {Name: "WordWrap", Doc: "wrap lines at word boundaries; otherwise long lines scroll off the end"}, {Name: "LineNumbers", Doc: "whether to show line numbers"}, {Name: "Completion", Doc: "use the completion system to suggest options while typing"}, {Name: "SpellCorrect", Doc: "suggest corrections for unknown words while typing"}, {Name: "AutoIndent", Doc: "automatically indent lines when enter, tab, }, etc pressed"}, {Name: "EmacsUndo", Doc: "use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"}, {Name: "DepthColor", Doc: "colorize the background according to nesting depth"}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FavPathItem", IDName: "fav-path-item", Doc: "FavPathItem represents one item in a favorite path list, for display of\nfavorites.  Is an ordered list instead of a map because user can organize\nin order", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Ic", Doc: "icon for item"}, {Name: "Name", Doc: "name of the favorite item"}, {Name: "Path", Doc: "the path of the favorite item"}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.DebugSettingsData", IDName: "debug-settings-data", Doc: "DebugSettingsData is the data type for debugging settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "SettingsBase"}}, Fields: []types.Field{{Name: "UpdateTrace", Doc: "Print a trace of updates that trigger re-rendering"}, {Name: "RenderTrace", Doc: "Print a trace of the nodes rendering"}, {Name: "LayoutTrace", Doc: "Print a trace of all layouts"}, {Name: "LayoutTraceDetail", Doc: "Print more detailed info about the underlying layout computations"}, {Name: "WinEventTrace", Doc: "Print a trace of window events"}, {Name: "WinRenderTrace", Doc: "Print the stack trace leading up to win publish events\nwhich are expensive"}, {Name: "WinGeomTrace", Doc: "Print a trace of window geometry saving / loading functions"}, {Name: "KeyEventTrace", Doc: "Print a trace of keyboard events"}, {Name: "EventTrace", Doc: "Print a trace of event handling"}, {Name: "FocusTrace", Doc: "Print a trace of focus changes"}, {Name: "DNDTrace", Doc: "Print a trace of DND event handling"}, {Name: "GoCompleteTrace", Doc: "Print a trace of Go language completion and lookup process"}, {Name: "GoTypeTrace", Doc: "Print a trace of Go language type parsing and inference process"}}})
 
 // SliderType is the [types.Type] for [Slider]
-var SliderType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Slider", IDName: "slider", Doc: "Slider is a slideable widget that provides slider functionality for two Types:\nSlider type provides a movable thumb that represents Value as the center of thumb\nPos position, with room reserved at ends for 1/2 of the thumb size.\nScrollbar has a VisiblePct factor that specifies the percent of the content\ncurrently visible, which determines the size of the thumb, and thus the range of motion\nremaining for the thumb Value (VisiblePct = 1 means thumb is full size, and no remaining\nrange of motion).\nThe Content size (inside the margin and padding) determines the outer bounds of\nthe rendered area.\nThe [styles.Style.Direction] determines the direction in which the slider slides.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of the slider, which determines its visual\nand functional properties. The default type, [SliderSlider],\nshould work for most end-user use cases."}, {Name: "Value", Doc: "Value is the current value, represented by the position of the thumb.\nIt defaults to 0.5."}, {Name: "Min", Doc: "Min is the minimum possible value.\nIt defaults to 0."}, {Name: "Max", Doc: "Max is the maximum value supported.\nIt defaults to 1."}, {Name: "Step", Doc: "Step is the amount that the arrow keys increment/decrement the value by.\nIt defaults to 0.1."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value is always\na multiple of [Slider.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by.\nIt defaults to 0.2, and will be at least as big as [Slider.Step]."}, {Name: "Icon", Doc: "Icon is an optional icon to use for the dragging knob."}, {Name: "VisiblePct", Doc: "For Scrollbar type only: proportion (1 max) of the full range of scrolled data\nthat is currently visible.  This determines the thumb size and range of motion:\nif 1, full slider is the thumb and no motion is possible."}, {Name: "ThumbSize", Doc: "Size of the thumb as a proportion of the slider thickness, which is\nContent size (inside the padding).  This is for actual X,Y dimensions,\nso must be sensitive to Dim dimension alignment."}, {Name: "TrackSize", Doc: "TrackSize is the proportion of slider thickness for the visible track\nfor the Slider type.  It is often thinner than the thumb, achieved by\nvalues < 1 (.5 default)"}, {Name: "InputThreshold", Doc: "threshold for amount of change in scroll value before emitting an input event"}, {Name: "Prec", Doc: "specifies the precision of decimal places (total, not after the decimal point)\nto use in representing the number. This helps to truncate small weird floating\npoint values in the nether regions."}, {Name: "ValueColor", Doc: "The background color that is used for styling the selected value section of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no value is rendered, so the value section of the slider\njust looks like the rest of the slider."}, {Name: "ThumbColor", Doc: "The background color that is used for styling the thumb (handle) of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the slider\njust looks like the rest of the slider."}, {Name: "StayInView", Doc: "If true, keep the slider (typically a Scrollbar) within the parent Scene\nbounding box, if the parent is in view.  This is the default behavior\nfor Layout scrollbars, and setting this flag replicates that behavior\nin other scrollbars."}, {Name: "Pos", Doc: "logical position of the slider relative to Size"}, {Name: "LastValue", Doc: "previous Change event emitted value - don't re-emit Change if it is the same"}, {Name: "PrevSlide", Doc: "previous sliding value - for computing the Input change"}, {Name: "Size", Doc: "Computed size of the slide box in the relevant dimension\nrange of motion, exclusive of spacing, based on layout allocation."}, {Name: "SlideStartPos", Doc: "underlying drag position of slider -- not subject to snapping"}}, Instance: &Slider{}})
+var SliderType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Slider", IDName: "slider", Doc: "Slider is a slideable widget that provides slider functionality for two Types:\nSlider type provides a movable thumb that represents Value as the center of thumb\nPos position, with room reserved at ends for 1/2 of the thumb size.\nScrollbar has a VisiblePct factor that specifies the percent of the content\ncurrently visible, which determines the size of the thumb, and thus the range of motion\nremaining for the thumb Value (VisiblePct = 1 means thumb is full size, and no remaining\nrange of motion).\nThe Content size (inside the margin and padding) determines the outer bounds of\nthe rendered area.\nThe [styles.Style.Direction] determines the direction in which the slider slides.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of the slider, which determines its visual\nand functional properties. The default type, [SliderSlider],\nshould work for most end-user use cases."}, {Name: "Value", Doc: "Value is the current value, represented by the position of the thumb.\nIt defaults to 0.5."}, {Name: "Min", Doc: "Min is the minimum possible value.\nIt defaults to 0."}, {Name: "Max", Doc: "Max is the maximum value supported.\nIt defaults to 1."}, {Name: "Step", Doc: "Step is the amount that the arrow keys increment/decrement the value by.\nIt defaults to 0.1."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value is always\na multiple of [Slider.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by.\nIt defaults to 0.2, and will be at least as big as [Slider.Step]."}, {Name: "Icon", Doc: "Icon is an optional icon to use for the dragging knob."}, {Name: "VisiblePct", Doc: "For Scrollbar type only: proportion (1 max) of the full range of scrolled data\nthat is currently visible.  This determines the thumb size and range of motion:\nif 1, full slider is the thumb and no motion is possible."}, {Name: "ThumbSize", Doc: "Size of the thumb as a proportion of the slider thickness, which is\nContent size (inside the padding).  This is for actual X,Y dimensions,\nso must be sensitive to Dim dimension alignment."}, {Name: "TrackSize", Doc: "TrackSize is the proportion of slider thickness for the visible track\nfor the Slider type.  It is often thinner than the thumb, achieved by\nvalues < 1 (.5 default)"}, {Name: "InputThreshold", Doc: "threshold for amount of change in scroll value before emitting an input event"}, {Name: "Prec", Doc: "specifies the precision of decimal places (total, not after the decimal point)\nto use in representing the number. This helps to truncate small weird floating\npoint values in the nether regions."}, {Name: "ValueColor", Doc: "The background color that is used for styling the selected value section of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no value is rendered, so the value section of the slider\njust looks like the rest of the slider."}, {Name: "ThumbColor", Doc: "The background color that is used for styling the thumb (handle) of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the slider\njust looks like the rest of the slider."}, {Name: "StayInView", Doc: "If true, keep the slider (typically a Scrollbar) within the parent Scene\nbounding box, if the parent is in view.  This is the default behavior\nfor Layout scrollbars, and setting this flag replicates that behavior\nin other scrollbars."}, {Name: "Pos", Doc: "logical position of the slider relative to Size"}, {Name: "LastValue", Doc: "previous Change event emitted value - don't re-emit Change if it is the same"}, {Name: "PrevSlide", Doc: "previous sliding value - for computing the Input change"}, {Name: "Size", Doc: "Computed size of the slide box in the relevant dimension\nrange of motion, exclusive of spacing, based on layout allocation."}, {Name: "SlideStartPos", Doc: "underlying drag position of slider -- not subject to snapping"}}, Instance: &Slider{}})
 
 // NewSlider adds a new [Slider] with the given name to the given parent:
 // Slider is a slideable widget that provides slider functionality for two Types:
@@ -652,26 +632,6 @@ func (t *Slider) NodeType() *types.Type { return SliderType }
 
 // New returns a new [*Slider] value
 func (t *Slider) New() tree.Node { return &Slider{} }
-
-// SliderEmbedder is an interface that all types that embed Slider satisfy
-type SliderEmbedder interface {
-	AsSlider() *Slider
-}
-
-// AsSlider returns the given value as a value of type Slider if the type
-// of the given value embeds Slider, or nil otherwise
-func AsSlider(k tree.Node) *Slider {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(SliderEmbedder); ok {
-		return t.AsSlider()
-	}
-	return nil
-}
-
-// AsSlider satisfies the [SliderEmbedder] interface
-func (t *Slider) AsSlider() *Slider { return t }
 
 // SetType sets the [Slider.Type]:
 // Type is the type of the slider, which determines its visual
@@ -756,11 +716,11 @@ func (t *Slider) SetStayInView(v bool) *Slider { t.StayInView = v; return t }
 func (t *Slider) SetTooltip(v string) *Slider { t.Tooltip = v; return t }
 
 // SpinnerType is the [types.Type] for [Spinner]
-var SpinnerType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Spinner", IDName: "spinner", Doc: "Spinner combines a TextField with up / down buttons for incrementing /\ndecrementing values -- all configured within the Parts of the widget", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "TextField"}}, Fields: []types.Field{{Name: "Value", Doc: "Value is the current value."}, {Name: "HasMin", Doc: "HasMin is whether there is a minimum value to enforce."}, {Name: "Min", Doc: "Min, if HasMin is true, is the the minimum value in range."}, {Name: "HasMax", Doc: "HaxMax is whether there is a maximum value to enforce."}, {Name: "Max", Doc: "Max, if HasMax is true, is the maximum value in range."}, {Name: "Step", Doc: "Step is the amount that the up and down buttons and arrow keys\nincrement/decrement the value by. It defaults to 0.1."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value of the spinner\nis always a multiple of [Spinner.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by.\nIt defaults to 0.2, and will be at least as big as [Spinner.Step]."}, {Name: "Prec", Doc: "Prec specifies the precision of decimal places\n(total, not after the decimal point) to use in\nrepresenting the number. This helps to truncate\nsmall weird floating point values."}, {Name: "Format", Doc: "Format is the format string to use for printing the value.\nIf it unset, %g is used. If it is decimal based\n(ends in d, b, c, o, O, q, x, X, or U) then the value is\nconverted to decimal prior to printing."}}, Instance: &Spinner{}})
+var SpinnerType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Spinner", IDName: "spinner", Doc: "Spinner is a [TextField] for editing numerical values. It comes with\nfields, methods, buttons, and shortcuts to enhance numerical value editing.", Embeds: []types.Field{{Name: "TextField"}}, Fields: []types.Field{{Name: "Value", Doc: "Value is the current value."}, {Name: "HasMin", Doc: "HasMin is whether there is a minimum value to enforce."}, {Name: "Min", Doc: "Min, if HasMin is true, is the the minimum value in range."}, {Name: "HasMax", Doc: "HaxMax is whether there is a maximum value to enforce."}, {Name: "Max", Doc: "Max, if HasMax is true, is the maximum value in range."}, {Name: "Step", Doc: "Step is the amount that the up and down buttons and arrow keys\nincrement/decrement the value by. It defaults to 0.1."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value of the spinner\nis always a multiple of [Spinner.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by.\nIt defaults to 0.2, and will be at least as big as [Spinner.Step]."}, {Name: "Prec", Doc: "Prec specifies the precision of decimal places\n(total, not after the decimal point) to use in\nrepresenting the number. This helps to truncate\nsmall weird floating point values."}, {Name: "Format", Doc: "Format is the format string to use for printing the value.\nIf it unset, %g is used. If it is decimal based\n(ends in d, b, c, o, O, q, x, X, or U) then the value is\nconverted to decimal prior to printing."}}, Instance: &Spinner{}})
 
 // NewSpinner adds a new [Spinner] with the given name to the given parent:
-// Spinner combines a TextField with up / down buttons for incrementing /
-// decrementing values -- all configured within the Parts of the widget
+// Spinner is a [TextField] for editing numerical values. It comes with
+// fields, methods, buttons, and shortcuts to enhance numerical value editing.
 func NewSpinner(parent tree.Node, name ...string) *Spinner {
 	return parent.NewChild(SpinnerType, name...).(*Spinner)
 }
@@ -770,26 +730,6 @@ func (t *Spinner) NodeType() *types.Type { return SpinnerType }
 
 // New returns a new [*Spinner] value
 func (t *Spinner) New() tree.Node { return &Spinner{} }
-
-// SpinnerEmbedder is an interface that all types that embed Spinner satisfy
-type SpinnerEmbedder interface {
-	AsSpinner() *Spinner
-}
-
-// AsSpinner returns the given value as a value of type Spinner if the type
-// of the given value embeds Spinner, or nil otherwise
-func AsSpinner(k tree.Node) *Spinner {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(SpinnerEmbedder); ok {
-		return t.AsSpinner()
-	}
-	return nil
-}
-
-// AsSpinner satisfies the [SpinnerEmbedder] interface
-func (t *Spinner) AsSpinner() *Spinner { return t }
 
 // SetStep sets the [Spinner.Step]:
 // Step is the amount that the up and down buttons and arrow keys
@@ -864,7 +804,7 @@ func (t *Spinner) SetSelectColor(v image.Image) *Spinner { t.SelectColor = v; re
 func (t *Spinner) SetSelectMode(v bool) *Spinner { t.SelectMode = v; return t }
 
 // SplitsType is the [types.Type] for [Splits]
-var SplitsType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Splits", IDName: "splits", Doc: "Splits allocates a certain proportion of its space to each of its children\nalong [styles.Style.Direction]. It adds [Handle] widgets to its parts that\nallow the user to customize the amount of space allocated to each child.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Splits", Doc: "Splits is the proportion (0-1 normalized, enforced) of space\nallocated to each element. 0 indicates that an element should\nbe completely collapsed. By default, each element gets the\nsame amount of space."}, {Name: "SavedSplits", Doc: "SavedSplits is a saved version of the splits that can be restored\nfor dynamic collapse/expand operations."}}, Instance: &Splits{}})
+var SplitsType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Splits", IDName: "splits", Doc: "Splits allocates a certain proportion of its space to each of its children\nalong [styles.Style.Direction]. It adds [Handle] widgets to its parts that\nallow the user to customize the amount of space allocated to each child.", Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Splits", Doc: "Splits is the proportion (0-1 normalized, enforced) of space\nallocated to each element. 0 indicates that an element should\nbe completely collapsed. By default, each element gets the\nsame amount of space."}, {Name: "SavedSplits", Doc: "SavedSplits is a saved version of the splits that can be restored\nfor dynamic collapse/expand operations."}}, Instance: &Splits{}})
 
 // NewSplits adds a new [Splits] with the given name to the given parent:
 // Splits allocates a certain proportion of its space to each of its children
@@ -879,26 +819,6 @@ func (t *Splits) NodeType() *types.Type { return SplitsType }
 
 // New returns a new [*Splits] value
 func (t *Splits) New() tree.Node { return &Splits{} }
-
-// SplitsEmbedder is an interface that all types that embed Splits satisfy
-type SplitsEmbedder interface {
-	AsSplits() *Splits
-}
-
-// AsSplits returns the given value as a value of type Splits if the type
-// of the given value embeds Splits, or nil otherwise
-func AsSplits(k tree.Node) *Splits {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(SplitsEmbedder); ok {
-		return t.AsSplits()
-	}
-	return nil
-}
-
-// AsSplits satisfies the [SplitsEmbedder] interface
-func (t *Splits) AsSplits() *Splits { return t }
 
 // SetTooltip sets the [Splits.Tooltip]
 func (t *Splits) SetTooltip(v string) *Splits { t.Tooltip = v; return t }
@@ -1058,7 +978,7 @@ func (t *Switch) SetIconIndeterminate(v icons.Icon) *Switch { t.IconIndeterminat
 func (t *Switch) SetTooltip(v string) *Switch { t.Tooltip = v; return t }
 
 // SwitchesType is the [types.Type] for [Switches]
-var SwitchesType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Switches", IDName: "switches", Doc: "Switches is a widget for containing a set of switches.\nIt can optionally enforce mutual exclusivity (i.e., Radio Buttons).\nThe buttons are all in the Parts of the widget and the Parts layout\ndetermines how they are displayed.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "the type of switches that will be made"}, {Name: "Items", Doc: "Items are the items displayed to the user."}, {Name: "Mutex", Doc: "whether to make the items mutually exclusive (checking one turns off all the others)"}}, Instance: &Switches{}})
+var SwitchesType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Switches", IDName: "switches", Doc: "Switches is a widget for containing a set of switches.\nIt can optionally enforce mutual exclusivity (i.e., Radio Buttons).\nThe buttons are all in the Parts of the widget and the Parts layout\ndetermines how they are displayed.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "the type of switches that will be made"}, {Name: "Items", Doc: "Items are the items displayed to the user."}, {Name: "Mutex", Doc: "whether to make the items mutually exclusive (checking one turns off all the others)"}}, Instance: &Switches{}})
 
 // NewSwitches adds a new [Switches] with the given name to the given parent:
 // Switches is a widget for containing a set of switches.
@@ -1074,26 +994,6 @@ func (t *Switches) NodeType() *types.Type { return SwitchesType }
 
 // New returns a new [*Switches] value
 func (t *Switches) New() tree.Node { return &Switches{} }
-
-// SwitchesEmbedder is an interface that all types that embed Switches satisfy
-type SwitchesEmbedder interface {
-	AsSwitches() *Switches
-}
-
-// AsSwitches returns the given value as a value of type Switches if the type
-// of the given value embeds Switches, or nil otherwise
-func AsSwitches(k tree.Node) *Switches {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(SwitchesEmbedder); ok {
-		return t.AsSwitches()
-	}
-	return nil
-}
-
-// AsSwitches satisfies the [SwitchesEmbedder] interface
-func (t *Switches) AsSwitches() *Switches { return t }
 
 // SetType sets the [Switches.Type]:
 // the type of switches that will be made
@@ -1111,16 +1011,11 @@ func (t *Switches) SetMutex(v bool) *Switches { t.Mutex = v; return t }
 func (t *Switches) SetTooltip(v string) *Switches { t.Tooltip = v; return t }
 
 // TabsType is the [types.Type] for [Tabs]
-var TabsType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tabs", IDName: "tabs", Doc: "Tabs switches among child widgets via tabs.  The selected widget gets\nthe full allocated space avail after the tabs are accounted for.  The\nTabs is just a Vertical layout that manages two child widgets: a\nHorizFlow Layout for the tabs (which can flow across multiple rows as\nneeded) and a Stacked Frame that actually contains all the children, and\nprovides scrollbars as needed to any content within.  Typically should have\nmax stretch and a set preferred size, so it expands.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}, {Name: "NewTabButton", Doc: "NewTabButton is whether to show a new tab button at the end of the list of tabs."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in the tab text.\nIt elides text that are longer than that."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used for tab close buttons.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "PrevEffectiveType", Doc: "PrevEffectiveType is the previous effective type of the tabs\nas computed by [TabTypes.Effective]."}, {Name: "Mu", Doc: "Mu is a mutex protecting updates to tabs. Tabs can be driven\nprogrammatically and via user input so need extra protection."}}, Instance: &Tabs{}})
+var TabsType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tabs", IDName: "tabs", Doc: "Tabs divide widgets into logical groups and give users the ability\nto freely navigate between them using tab buttons.", Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}, {Name: "NewTabButton", Doc: "NewTabButton is whether to show a new tab button at the end of the list of tabs."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in the tab text.\nIt elides text that are longer than that."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used for tab close buttons.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "PrevEffectiveType", Doc: "PrevEffectiveType is the previous effective type of the tabs\nas computed by [TabTypes.Effective]."}, {Name: "Mu", Doc: "Mu is a mutex protecting updates to tabs. Tabs can be driven\nprogrammatically and via user input so need extra protection."}}, Instance: &Tabs{}})
 
 // NewTabs adds a new [Tabs] with the given name to the given parent:
-// Tabs switches among child widgets via tabs.  The selected widget gets
-// the full allocated space avail after the tabs are accounted for.  The
-// Tabs is just a Vertical layout that manages two child widgets: a
-// HorizFlow Layout for the tabs (which can flow across multiple rows as
-// needed) and a Stacked Frame that actually contains all the children, and
-// provides scrollbars as needed to any content within.  Typically should have
-// max stretch and a set preferred size, so it expands.
+// Tabs divide widgets into logical groups and give users the ability
+// to freely navigate between them using tab buttons.
 func NewTabs(parent tree.Node, name ...string) *Tabs {
 	return parent.NewChild(TabsType, name...).(*Tabs)
 }
@@ -1130,26 +1025,6 @@ func (t *Tabs) NodeType() *types.Type { return TabsType }
 
 // New returns a new [*Tabs] value
 func (t *Tabs) New() tree.Node { return &Tabs{} }
-
-// TabsEmbedder is an interface that all types that embed Tabs satisfy
-type TabsEmbedder interface {
-	AsTabs() *Tabs
-}
-
-// AsTabs returns the given value as a value of type Tabs if the type
-// of the given value embeds Tabs, or nil otherwise
-func AsTabs(k tree.Node) *Tabs {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(TabsEmbedder); ok {
-		return t.AsTabs()
-	}
-	return nil
-}
-
-// AsTabs satisfies the [TabsEmbedder] interface
-func (t *Tabs) AsTabs() *Tabs { return t }
 
 // SetType sets the [Tabs.Type]:
 // Type is the styling type of the tabs. If it is changed after
@@ -1219,7 +1094,7 @@ func (t *Tab) SetMaxChars(v int) *Tab { t.MaxChars = v; return t }
 func (t *Tab) SetTooltip(v string) *Tab { t.Tooltip = v; return t }
 
 // TextType is the [types.Type] for [Text]
-var TextType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Text", IDName: "text", Doc: "Text is a widget for rendering text. It supports full HTML styling,\nincluding links. By default, text wraps and collapses whitespace, although\nyou can change this by changing [styles.Text.WhiteSpace].", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Text", Doc: "Text is the text to display."}, {Name: "Type", Doc: "Type is the styling type of text to use."}, {Name: "paintText", Doc: "paintText is the [paint.Text] for the text."}, {Name: "normalCursor", Doc: "normalCursor is the cached cursor to display when there\nis no link being hovered."}}, Instance: &Text{}})
+var TextType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Text", IDName: "text", Doc: "Text is a widget for rendering text. It supports full HTML styling,\nincluding links. By default, text wraps and collapses whitespace, although\nyou can change this by changing [styles.Text.WhiteSpace].", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Text", Doc: "Text is the text to display."}, {Name: "Type", Doc: "Type is the styling type of text to use."}, {Name: "paintText", Doc: "paintText is the [paint.Text] for the text."}, {Name: "normalCursor", Doc: "normalCursor is the cached cursor to display when there\nis no link being hovered."}}, Instance: &Text{}})
 
 // NewText adds a new [Text] with the given name to the given parent:
 // Text is a widget for rendering text. It supports full HTML styling,
@@ -1235,26 +1110,6 @@ func (t *Text) NodeType() *types.Type { return TextType }
 // New returns a new [*Text] value
 func (t *Text) New() tree.Node { return &Text{} }
 
-// TextEmbedder is an interface that all types that embed Text satisfy
-type TextEmbedder interface {
-	AsText() *Text
-}
-
-// AsText returns the given value as a value of type Text if the type
-// of the given value embeds Text, or nil otherwise
-func AsText(k tree.Node) *Text {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(TextEmbedder); ok {
-		return t.AsText()
-	}
-	return nil
-}
-
-// AsText satisfies the [TextEmbedder] interface
-func (t *Text) AsText() *Text { return t }
-
 // SetText sets the [Text.Text]:
 // Text is the text to display.
 func (t *Text) SetText(v string) *Text { t.Text = v; return t }
@@ -1267,7 +1122,7 @@ func (t *Text) SetType(v TextTypes) *Text { t.Type = v; return t }
 func (t *Text) SetTooltip(v string) *Text { t.Tooltip = v; return t }
 
 // TextFieldType is the [types.Type] for [TextField]
-var TextFieldType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.TextField", IDName: "text-field", Doc: "TextField is a widget for editing a line of text.\nWith the default WhiteSpaceNormal style setting,\ntext will wrap onto multiple lines as needed.\nSet to WhiteSpaceNowrap (e.g., Styles.SetTextWrap(false)) to\nforce everything to be on a single line.\nWith multi-line wrapped text, the text is still treated as a contiguous\nwrapped text.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the text field."}, {Name: "Placeholder", Doc: "Placeholder is the text that is displayed\nwhen the text field is empty."}, {Name: "Validator", Doc: "Validator is a function used to validate the input\nof the text field. If it returns a non-nil error,\nthen an error color, icon, and tooltip will be displayed."}, {Name: "LeadingIcon", Doc: "LeadingIcon, if specified, indicates to add a button\nat the start of the text field with this icon."}, {Name: "LeadingIconOnClick", Doc: "LeadingIconOnClick, if specified, is the function to call when\nthe LeadingIcon is clicked. If this is nil, the leading icon\nwill not be interactive."}, {Name: "TrailingIcon", Doc: "TrailingIcon, if specified, indicates to add a button\nat the end of the text field with this icon."}, {Name: "TrailingIconOnClick", Doc: "TrailingIconOnClick, if specified, is the function to call when\nthe TrailingIcon is clicked. If this is nil, the trailing icon\nwill not be interactive."}, {Name: "NoEcho", Doc: "NoEcho is whether replace displayed characters with bullets to conceal text\n(for example, for a password input)."}, {Name: "CursorWidth", Doc: "CursorWidth is the width of the text field cursor.\nIt should be set in Style like all other style properties.\nBy default, it is 1dp."}, {Name: "CursorColor", Doc: "CursorColor is the color used for the text field cursor (caret).\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.Primary.Base]."}, {Name: "PlaceholderColor", Doc: "PlaceholderColor is the color used for the Placeholder text.\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.OnSurfaceVariant]."}, {Name: "SelectColor", Doc: "SelectColor is the color used for the text selection background color.\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.Select.Container]"}, {Name: "Complete", Doc: "Complete contains functions and data for text field completion.\nIt must be set using [TextField.SetCompleter]."}, {Name: "Txt", Doc: "Txt is the last saved value of the text string being edited."}, {Name: "Edited", Doc: "Edited is whether the text has been edited relative to the original."}, {Name: "EditTxt", Doc: "EditTxt is the live text string being edited, with the latest modifications."}, {Name: "Error", Doc: "Error is the current validation error of the text field."}, {Name: "EffPos", Doc: "EffPos is the effective position with any leading icon space added."}, {Name: "EffSize", Doc: "EffSize is the effective size, subtracting any leading and trailing icon space."}, {Name: "StartPos", Doc: "StartPos is the starting display position in the string."}, {Name: "EndPos", Doc: "EndPos is the ending display position in the string."}, {Name: "CursorPos", Doc: "CursorPos is the current cursor position."}, {Name: "CursorLine", Doc: "CursorLine is the current cursor line position."}, {Name: "CharWidth", Doc: "CharWidth is the approximate number of chars that can be\ndisplayed at any time, which is computed from the font size."}, {Name: "SelectStart", Doc: "SelectStart is the starting position of selection in the string."}, {Name: "SelectEnd", Doc: "SelectEnd is the ending position of selection in the string."}, {Name: "SelectInit", Doc: "SelectInit is the initial selection position (where it started)."}, {Name: "SelectMode", Doc: "SelectMode is whether to select text as the cursor moves."}, {Name: "RenderAll", Doc: "RenderAll is the render version of entire text, for sizing."}, {Name: "RenderVis", Doc: "RenderVis is the render version of just the visible text."}, {Name: "NLines", Doc: "number of lines from last render update, for word-wrap version"}, {Name: "FontHeight", Doc: "FontHeight is the font height cached during styling."}, {Name: "BlinkOn", Doc: "BlinkOn oscillates between on and off for blinking."}, {Name: "CursorMu", Doc: "CursorMu is the mutex for updating the cursor between blinker and field."}, {Name: "Undos", Doc: "Undos is the undo manager for the text field."}}, Instance: &TextField{}})
+var TextFieldType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.TextField", IDName: "text-field", Doc: "TextField is a widget for editing a line of text.\nWith the default WhiteSpaceNormal style setting,\ntext will wrap onto multiple lines as needed.\nSet to WhiteSpaceNowrap (e.g., Styles.SetTextWrap(false)) to\nforce everything to be on a single line.\nWith multi-line wrapped text, the text is still treated as a contiguous\nwrapped text.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the text field."}, {Name: "Placeholder", Doc: "Placeholder is the text that is displayed\nwhen the text field is empty."}, {Name: "Validator", Doc: "Validator is a function used to validate the input\nof the text field. If it returns a non-nil error,\nthen an error color, icon, and tooltip will be displayed."}, {Name: "LeadingIcon", Doc: "LeadingIcon, if specified, indicates to add a button\nat the start of the text field with this icon."}, {Name: "LeadingIconOnClick", Doc: "LeadingIconOnClick, if specified, is the function to call when\nthe LeadingIcon is clicked. If this is nil, the leading icon\nwill not be interactive."}, {Name: "TrailingIcon", Doc: "TrailingIcon, if specified, indicates to add a button\nat the end of the text field with this icon."}, {Name: "TrailingIconOnClick", Doc: "TrailingIconOnClick, if specified, is the function to call when\nthe TrailingIcon is clicked. If this is nil, the trailing icon\nwill not be interactive."}, {Name: "NoEcho", Doc: "NoEcho is whether replace displayed characters with bullets to conceal text\n(for example, for a password input)."}, {Name: "CursorWidth", Doc: "CursorWidth is the width of the text field cursor.\nIt should be set in Style like all other style properties.\nBy default, it is 1dp."}, {Name: "CursorColor", Doc: "CursorColor is the color used for the text field cursor (caret).\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.Primary.Base]."}, {Name: "PlaceholderColor", Doc: "PlaceholderColor is the color used for the Placeholder text.\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.OnSurfaceVariant]."}, {Name: "SelectColor", Doc: "SelectColor is the color used for the text selection background color.\nIt should be set in Style like all other style properties.\nBy default, it is [colors.Scheme.Select.Container]"}, {Name: "Complete", Doc: "Complete contains functions and data for text field completion.\nIt must be set using [TextField.SetCompleter]."}, {Name: "Txt", Doc: "Txt is the last saved value of the text string being edited."}, {Name: "Edited", Doc: "Edited is whether the text has been edited relative to the original."}, {Name: "EditTxt", Doc: "EditTxt is the live text string being edited, with the latest modifications."}, {Name: "Error", Doc: "Error is the current validation error of the text field."}, {Name: "EffPos", Doc: "EffPos is the effective position with any leading icon space added."}, {Name: "EffSize", Doc: "EffSize is the effective size, subtracting any leading and trailing icon space."}, {Name: "StartPos", Doc: "StartPos is the starting display position in the string."}, {Name: "EndPos", Doc: "EndPos is the ending display position in the string."}, {Name: "CursorPos", Doc: "CursorPos is the current cursor position."}, {Name: "CursorLine", Doc: "CursorLine is the current cursor line position."}, {Name: "CharWidth", Doc: "CharWidth is the approximate number of chars that can be\ndisplayed at any time, which is computed from the font size."}, {Name: "SelectStart", Doc: "SelectStart is the starting position of selection in the string."}, {Name: "SelectEnd", Doc: "SelectEnd is the ending position of selection in the string."}, {Name: "SelectInit", Doc: "SelectInit is the initial selection position (where it started)."}, {Name: "SelectMode", Doc: "SelectMode is whether to select text as the cursor moves."}, {Name: "RenderAll", Doc: "RenderAll is the render version of entire text, for sizing."}, {Name: "RenderVis", Doc: "RenderVis is the render version of just the visible text."}, {Name: "NLines", Doc: "number of lines from last render update, for word-wrap version"}, {Name: "FontHeight", Doc: "FontHeight is the font height cached during styling."}, {Name: "BlinkOn", Doc: "BlinkOn oscillates between on and off for blinking."}, {Name: "CursorMu", Doc: "CursorMu is the mutex for updating the cursor between blinker and field."}, {Name: "Undos", Doc: "Undos is the undo manager for the text field."}}, Instance: &TextField{}})
 
 // NewTextField adds a new [TextField] with the given name to the given parent:
 // TextField is a widget for editing a line of text.
@@ -1286,26 +1141,6 @@ func (t *TextField) NodeType() *types.Type { return TextFieldType }
 
 // New returns a new [*TextField] value
 func (t *TextField) New() tree.Node { return &TextField{} }
-
-// TextFieldEmbedder is an interface that all types that embed TextField satisfy
-type TextFieldEmbedder interface {
-	AsTextField() *TextField
-}
-
-// AsTextField returns the given value as a value of type TextField if the type
-// of the given value embeds TextField, or nil otherwise
-func AsTextField(k tree.Node) *TextField {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(TextFieldEmbedder); ok {
-		return t.AsTextField()
-	}
-	return nil
-}
-
-// AsTextField satisfies the [TextFieldEmbedder] interface
-func (t *TextField) AsTextField() *TextField { return t }
 
 // SetType sets the [TextField.Type]:
 // Type is the styling type of the text field.
@@ -1377,7 +1212,7 @@ func (t *TextField) SetSelectMode(v bool) *TextField { t.SelectMode = v; return 
 func (t *TextField) SetTooltip(v string) *TextField { t.Tooltip = v; return t }
 
 // ToolbarType is the [types.Type] for [Toolbar]
-var ToolbarType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Toolbar", IDName: "toolbar", Doc: "Toolbar is a [Frame] that is useful for holding [Button]s that do things.\nIt automatically moves items that do not fit into an overflow menu, and\nmanages additional items that are always placed onto this overflow menu.\nIn general it should be possible to use a single toolbar + overflow to\nmanage all an app's functionality, in a way that is portable across\nmobile and desktop environments.\nSee [Widget.ConfigToolbar] for the standard toolbar config method for\nany given widget, and [Scene.AppBars] for [ToolbarFuncs] for [Scene]\nelements who should be represented in the main AppBar (e.g., TopAppBar).", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Methods: []types.Method{{Name: "StandardOverflowMenu", Doc: "StandardOverflowMenu adds standard overflow menu items.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"m"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "OverflowItems", Doc: "items moved from the main toolbar, will be shown in the overflow menu"}, {Name: "OverflowMenus", Doc: "functions for overflow menu: use AddOverflowMenu to add.\nThese are processed in _reverse_ order (last in, first called)\nso that the default items are added last."}, {Name: "ToolbarFuncs", Doc: "ToolbarFuncs contains functions for configuring this toolbar,\ncalled on Config"}, {Name: "OverflowButton", Doc: "This is the overflow button"}}, Instance: &Toolbar{}})
+var ToolbarType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Toolbar", IDName: "toolbar", Doc: "Toolbar is a [Frame] that is useful for holding [Button]s that do things.\nIt automatically moves items that do not fit into an overflow menu, and\nmanages additional items that are always placed onto this overflow menu.\nIn general it should be possible to use a single toolbar + overflow to\nmanage all an app's functionality, in a way that is portable across\nmobile and desktop environments.\nSee [Widget.ConfigToolbar] for the standard toolbar config method for\nany given widget, and [Scene.AppBars] for [ToolbarFuncs] for [Scene]\nelements who should be represented in the main AppBar (e.g., TopAppBar).", Methods: []types.Method{{Name: "StandardOverflowMenu", Doc: "StandardOverflowMenu adds standard overflow menu items.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"m"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "OverflowItems", Doc: "items moved from the main toolbar, will be shown in the overflow menu"}, {Name: "OverflowMenus", Doc: "functions for overflow menu: use AddOverflowMenu to add.\nThese are processed in _reverse_ order (last in, first called)\nso that the default items are added last."}, {Name: "ToolbarFuncs", Doc: "ToolbarFuncs contains functions for configuring this toolbar,\ncalled on Config"}, {Name: "OverflowButton", Doc: "This is the overflow button"}}, Instance: &Toolbar{}})
 
 // NewToolbar adds a new [Toolbar] with the given name to the given parent:
 // Toolbar is a [Frame] that is useful for holding [Button]s that do things.
@@ -1398,26 +1233,6 @@ func (t *Toolbar) NodeType() *types.Type { return ToolbarType }
 
 // New returns a new [*Toolbar] value
 func (t *Toolbar) New() tree.Node { return &Toolbar{} }
-
-// ToolbarEmbedder is an interface that all types that embed Toolbar satisfy
-type ToolbarEmbedder interface {
-	AsToolbar() *Toolbar
-}
-
-// AsToolbar returns the given value as a value of type Toolbar if the type
-// of the given value embeds Toolbar, or nil otherwise
-func AsToolbar(k tree.Node) *Toolbar {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(ToolbarEmbedder); ok {
-		return t.AsToolbar()
-	}
-	return nil
-}
-
-// AsToolbar satisfies the [ToolbarEmbedder] interface
-func (t *Toolbar) AsToolbar() *Toolbar { return t }
 
 // SetToolbarFuncs sets the [Toolbar.ToolbarFuncs]:
 // ToolbarFuncs contains functions for configuring this toolbar,

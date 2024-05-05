@@ -37,7 +37,7 @@ func (t *Base) SetTransform(v math32.Matrix2) *Base { t.Transform = v; return t 
 // stop-level opacity blending.
 func (t *Base) SetOpacity(v float32) *Base { t.Opacity = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/colors/gradient.Linear", IDName: "linear", Doc: "Linear represents a linear gradient. It implements the [image.Image] interface.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "Base"}}, Fields: []types.Field{{Name: "Start", Doc: "the starting point of the gradient (x1 and y1 in SVG)"}, {Name: "End", Doc: "the ending point of the gradient (x2 and y2 in SVG)"}, {Name: "rStart", Doc: "current render version -- transformed by object matrix"}, {Name: "rEnd", Doc: "current render version -- transformed by object matrix"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/colors/gradient.Linear", IDName: "linear", Doc: "Linear represents a linear gradient. It implements the [image.Image] interface.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "Base"}}, Fields: []types.Field{{Name: "Start", Doc: "the starting point of the gradient (x1 and y1 in SVG)"}, {Name: "End", Doc: "the ending point of the gradient (x2 and y2 in SVG)"}, {Name: "rStart", Doc: "computed current render versions transformed by object matrix"}, {Name: "rEnd"}, {Name: "distance"}, {Name: "distanceProduct"}}})
 
 // SetStart sets the [Linear.Start]:
 // the starting point of the gradient (x1 and y1 in SVG)
