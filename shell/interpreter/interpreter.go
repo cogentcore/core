@@ -30,11 +30,10 @@ func NewInterpreter() *Interpreter {
 
 // SymbolByName returns the reflect.Value for given symbol name
 // from the current Globals, Symbols (must call GetSymbols first)
-func (in *Shell) SymbolByName(name string) (bool, reflect.Value) {
-	globs := sh.Interp.Globals()
-	syms := sh.Interp.Symbols("main") // note: cannot use ""
+func (in *Interpreter) SymbolByName(name string) (bool, reflect.Value) {
+	globs := in.Interp.Globals()
+	syms := in.Interp.Symbols("main") // note: cannot use ""
 
-	nmorig := name
 	nmpath := ""
 	dotIdx := strings.Index(name, ".")
 	if dotIdx > 0 {
@@ -42,26 +41,20 @@ func (in *Shell) SymbolByName(name string) (bool, reflect.Value) {
 		name = name[dotIdx+1:]
 	}
 	for path, sy := range syms {
-		in.DebugPrintln(2, "	searching symbol path:", path)
 		if nmpath != "" && path != nmpath {
 			continue
 		}
 		for nm, v := range sy {
-			in.DebugPrintln(2, "	checking symbol name:", nm)
 			if nm == name {
-				in.DebugPrintln(1, "	got symbol:", path+"."+nm)
 				return true, v
 			}
 		}
 	}
 
 	for nm, v := range globs {
-		in.DebugPrintln(2, "	searching global name:", nm)
 		if nm == name {
-			in.DebugPrintln(1, "	got global:", nm)
 			return true, v
 		}
 	}
-	in.DebugPrintln(1, "	symbol not found:", nmorig)
 	return false, reflect.Value{}
 }
