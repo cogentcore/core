@@ -48,9 +48,9 @@ func (in *Interpreter) Prompt() string {
 	return res
 }
 
-// Eval evaluates (interprets) the given line.
-func (in *Interpreter) Eval(ln string) error {
-	in.Shell.TranspileCode(ln)
+// Eval evaluates (interprets) the given code.
+func (in *Interpreter) Eval(code string) error {
+	in.Shell.TranspileCode(code)
 	if in.Shell.TotalDepth() == 0 {
 		return in.RunCode()
 	}
