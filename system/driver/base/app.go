@@ -16,6 +16,8 @@ import (
 	"path/filepath"
 	"sync"
 
+	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
@@ -126,14 +128,14 @@ func (a *App) OpenFiles() []string {
 }
 
 func (a *App) AppDataDir() string {
-	pdir := filepath.Join(system.TheApp.DataDir(), a.Name())
-	os.MkdirAll(pdir, 0755)
+	pdir := filepath.Join(system.TheApp.DataDir(), strcase.ToCamel(a.Name()))
+	errors.Log(os.MkdirAll(pdir, 0755))
 	return pdir
 }
 
 func (a *App) CogentCoreDataDir() string {
 	pdir := filepath.Join(a.This.DataDir(), "CogentCore")
-	os.MkdirAll(pdir, 0755)
+	errors.Log(os.MkdirAll(pdir, 0755))
 	return pdir
 }
 

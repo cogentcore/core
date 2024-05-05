@@ -116,12 +116,12 @@ type App interface {
 	// Linux: ~/.config, Windows: ~/AppData/Roaming
 	DataDir() string
 
-	// AppDataDir returns the application-specific data directory: [App.DataDir] + [App.Name].
-	// It ensures that the directory exists first.
+	// AppDataDir returns the application-specific data directory: [App.DataDir] +
+	// [strcase.ToCamel]([App.Name]). It ensures that the directory exists first.
 	AppDataDir() string
 
-	// CogentCoreDataDir returns the Cogent Core data directory: [App.DataDir] + "CogentCoreDataDir".
-	// It ensures that the directory exists first.
+	// CogentCoreDataDir returns the Cogent Core data directory: [App.DataDir] +
+	// "CogentCore". It ensures that the directory exists first.
 	CogentCoreDataDir() string
 
 	// OpenURL opens the given URL in the user's default browser.  On Linux

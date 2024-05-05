@@ -30,7 +30,7 @@ func main() {
 	auth.Buttons(b, &auth.ButtonsConfig{
 		SuccessFunc: fun,
 		TokenFile: func(provider, email string) string {
-			return filepath.Join(core.TheApp.DataDir(), provider+"-token.json")
+			return filepath.Join(core.TheApp.AppDataDir(), provider+"-token.json")
 		},
 		Scopes: map[string][]string{
 			"google": {"https://mail.google.com/"},
