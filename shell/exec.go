@@ -5,6 +5,7 @@
 package shell
 
 import (
+	"fmt"
 	"os"
 
 	"cogentcore.org/core/base/exec"
@@ -15,6 +16,7 @@ import (
 // If there is any error, it fatally logs it. It returns the stdout of the command,
 // in addition to forwarding output to [os.Stdout] and [os.Stderr] appropriately.
 func Exec(cmd any, args ...any) string {
+	fmt.Println("running:", cmd)
 	scmd := reflectx.ToString(cmd)
 	sargs := make([]string, len(args))
 	for i, a := range args {

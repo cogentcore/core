@@ -8,13 +8,16 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 
+	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/shell/interpreter"
 )
 
 func main() {
-	sh := interpreter.NewInterp()
+	logx.UserLevel = slog.LevelWarn
+	in := interpreter.NewInterpreter()
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print("> ")
@@ -22,6 +25,6 @@ func main() {
 		if err == io.EOF {
 			break
 		}
-		sh.ParseLine(line)
+		in.Eval(line)
 	}
 }

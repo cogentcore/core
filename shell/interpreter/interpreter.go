@@ -5,9 +5,11 @@
 package interpreter
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/shell"
 	"github.com/traefik/yaegi/interp"
 	"github.com/traefik/yaegi/stdlib"
@@ -22,13 +24,21 @@ type Interpreter struct {
 
 func NewInterpreter() *Interpreter {
 	in := &Interpreter{}
-	in.Interp = interp.New(interp.Options{})
+	in.Interp = interp.New(interp.Options{}) // GoPath: "/Users/oreilly/go/src"})
 	stdlib.Symbols["cogentcore.org/core/shell"] = map[string]reflect.Value{
 		"Exec": reflect.ValueOf(shell.Exec),
 	}
 	in.Interp.Use(stdlib.Symbols) // this causes symbols to crash
+	// errors.Log1(in.Interp.Eval(`import "cogentcore.org/core/shell"`))
 	in.Shell = shell.NewShell()
 	return in
+}
+
+func (in *Interpreter) Eval(ln string) string {
+	eln := in.Shell.TranspileLine(ln)
+	errors.Log1(in.Interp.Eval(eln))
+	fmt.Println("exec:", eln)
+	return eln
 }
 
 // SymbolByName returns the reflect.Value for given symbol name
