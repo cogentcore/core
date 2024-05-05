@@ -30,7 +30,7 @@ func NewInterpreter() *Interpreter {
 			"Exec": reflect.ValueOf(shell.Exec),
 		},
 	})
-	errors.Log1(in.Interp.Eval(`import "cogentcore.org/core/shell"`))
+	in.Interp.ImportUsed()
 	in.Shell = shell.NewShell()
 	return in
 }
