@@ -123,7 +123,7 @@ func (sh *Shell) Tokens(ln string) Tokens {
 	fset := token.NewFileSet()
 	f := fset.AddFile("", fset.Base(), len(ln))
 	var sc scanner.Scanner
-	sc.Init(f, []byte(ln), sh.ErrHand, scanner.ScanComments|2) // 2 is non-exported dontInsertSemis
+	sc.Init(f, []byte(ln), sh.errHandler, scanner.ScanComments|2) // 2 is non-exported dontInsertSemis
 	// note to Go team: just export this stuff.  seriously.
 
 	var toks Tokens
@@ -138,6 +138,6 @@ func (sh *Shell) Tokens(ln string) Tokens {
 	return toks
 }
 
-func (sh *Shell) ErrHand(pos token.Position, msg string) {
+func (sh *Shell) errHandler(pos token.Position, msg string) {
 	sh.DebugPrintln(1, "Scan Error:", pos, msg)
 }

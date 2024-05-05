@@ -5,7 +5,6 @@
 package shell
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 
@@ -27,27 +26,6 @@ func NewShell() *Shell {
 	sh.Exec = exec.Major()
 	sh.Exec.Commands = nil
 	return sh
-}
-
-func (sh *Shell) SetDebug(level int) {
-	sh.Debug = level
-	if level > 0 {
-		sh.Exec.Commands = sh.Exec.Stdout
-	}
-}
-
-func (sh *Shell) DebugPrintf(level int, fmtstr string, vals ...any) {
-	if level > sh.Debug {
-		return
-	}
-	fmt.Printf(fmtstr, vals...)
-}
-
-func (sh *Shell) DebugPrintln(level int, vals ...any) {
-	if level > sh.Debug {
-		return
-	}
-	fmt.Println(vals...)
 }
 
 // GetSymbols gets the current symbols from the interpreter
