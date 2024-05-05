@@ -170,8 +170,7 @@ func LinkerFlags(c *Config) string {
 	res := ""
 
 	if c.About != "" {
-		// " is used less than ' by about info, so we use it for the surrounding quotes
-		res += `-X "cogentcore.org/core/core.AppAbout=` + c.About + `" `
+		res += "-X 'cogentcore.org/core/core.AppAbout=" + strings.ReplaceAll(c.About, "'", `\'`) + "' "
 	}
 
 	b, err := os.ReadFile("icon.svg")
@@ -180,8 +179,7 @@ func LinkerFlags(c *Config) string {
 			errors.Log(err)
 		}
 	} else {
-		// ' is used less than " by svg, so we use it for the surrounding quotes
-		res += "-X 'cogentcore.org/core/core.AppIcon=" + string(b) + "' "
+		res += "-X 'cogentcore.org/core/core.AppIcon=" + strings.ReplaceAll(string(b), "'", `\'`) + "' "
 	}
 
 	av, err := exec.Silent().Output("git", "describe", "--tags")
