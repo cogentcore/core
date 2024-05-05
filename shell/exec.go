@@ -34,9 +34,6 @@ func (sh *Shell) Output(cmd any, args ...any) string {
 		sh.AddError(err)
 	}
 	sh.Config.Stdout = oldStdout
-	if sh.Config.Stdout != nil {
-		sh.Config.Stdout.Write(buf.Bytes())
-	}
 	return strings.TrimSuffix(buf.String(), "\n")
 }
 
