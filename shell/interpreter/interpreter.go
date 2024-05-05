@@ -22,10 +22,10 @@ type Interpreter struct {
 	Interp *interp.Interpreter
 }
 
-// NewInterpreter returns a new [Interpreter] initialized with default options.
-func NewInterpreter() *Interpreter {
+// NewInterpreter returns a new [Interpreter] initialized with the given options.
+func NewInterpreter(options interp.Options) *Interpreter {
 	in := &Interpreter{}
-	in.Interp = interp.New(interp.Options{})
+	in.Interp = interp.New(options)
 	in.Interp.Use(stdlib.Symbols)
 	in.Interp.Use(interp.Exports{
 		"cogentcore.org/core/shell/shell": map[string]reflect.Value{

@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/shell"
 	"cogentcore.org/core/shell/interpreter"
 	"github.com/ergochat/readline"
+	"github.com/traefik/yaegi/interp"
 )
 
 //go:generate core generate -add-types -add-funcs
@@ -46,7 +47,7 @@ func Run(c *Config) error { //cli:cmd -root
 	if err != nil {
 		return err
 	}
-	in := interpreter.NewInterpreter()
+	in := interpreter.NewInterpreter(interp.Options{})
 	err = in.Eval(string(b))
 	return err
 }
@@ -59,7 +60,7 @@ func Interactive(c *Config) error {
 	}
 	defer rl.Close()
 	log.SetOutput(rl.Stderr()) // redraw the prompt correctly after log output
-	in := interpreter.NewInterpreter()
+	in := interpreter.NewInterpreter(interp.Options{})
 	for {
 		rl.SetPrompt(in.Prompt())
 		line, err := rl.ReadLine()
