@@ -5,19 +5,15 @@
 package exec
 
 import (
-	"log/slog"
 	"testing"
 
-	"cogentcore.org/core/base/logx"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRun(t *testing.T) {
-	logx.UserLevel = slog.LevelInfo
-	xc := Major().SetFatal(true)
-	xc.Run("go", "version")
-	xc.Run("git", "version")
-	xc.Run("echo", " hello")
+	assert.NoError(t, Run("go", "version"))
+	assert.NoError(t, Run("git", "version"))
+	assert.NoError(t, Run("echo", " hello"))
 }
 
 func TestError(t *testing.T) {
