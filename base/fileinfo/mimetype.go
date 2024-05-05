@@ -282,6 +282,7 @@ var StandardMimes = []MimeType{
 	{"text/x-asp", []string{".aspx", ".asax", ".ascx", ".ashx", ".asmx", ".axd"}, Code, Unknown},
 
 	{"text/x-sh", []string{".bash", ".sh"}, Code, Bash},
+	{"text/x-sh", []string{".cosh"}, Code, Cosh},
 	{"application/x-sh", nil, Code, Bash},
 
 	{"text/x-csrc", []string{".c", ".C", ".c++", ".cpp", ".cxx", ".cc", ".h", ".h++", ".hpp", ".hxx", ".hh", ".hlsl", ".gsl", ".frag", ".vert", ".mm"}, Code, C}, // this is apparently the main one now
@@ -455,8 +456,6 @@ var StandardMimes = []MimeType{
 	{"application/vnd.google-earth.kml+xml", []string{".kml", ".kmz"}, Data, Unknown},
 	{"application/vnd.google-earth.kmz", nil, Data, Unknown},
 	{"application/x-sql", []string{".sql"}, Data, Unknown},
-
-	{"application/vnd.cogentcore", nil, Data, CogentCore}, // our own special unregistered type..
 
 	// Text
 	{"text/plain", []string{".asc", ".txt", ".text", ".pot", ".brf", ".srt"}, Text, PlainText},
