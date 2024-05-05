@@ -181,7 +181,11 @@ var (
 // StandardOverflowMenu adds standard overflow menu items.
 func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 	NewButton(m).SetText("About").SetIcon(icons.Info).OnClick(func(e events.Event) {
-		NewBody().AddTitle(TheApp.Name()).AddText(AppAbout).AddOKOnly().RunDialog(m)
+		d := NewBody().AddTitle(TheApp.Name())
+		NewText(d).SetText(AppAbout)
+		NewText(d).SetText("App version: " + system.AppVersion)
+		NewText(d).SetText("Core version: " + system.CoreVersion)
+		d.AddOKOnly().RunDialog(m)
 	})
 	if SettingsWindow != nil {
 		NewButton(m).SetText("Settings").SetIcon(icons.Settings).SetShortcut("Command+,").

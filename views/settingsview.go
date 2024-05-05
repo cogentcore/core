@@ -8,7 +8,6 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/system"
 )
 
 // SettingsViewToolbarBase is the base toolbar configuration function used in [SettingsView].
@@ -22,12 +21,6 @@ func SettingsViewToolbarBase(tb *core.Toolbar) {
 
 	tb.AddOverflowMenu(func(m *core.Scene) {
 		NewFuncButton(m, core.ResetAllSettings).SetText("Reset settings").SetIcon(icons.Delete).SetConfirm(true)
-		core.NewButton(m).SetText("App version").SetIcon(icons.Info).OnClick(func(e events.Event) {
-			d := core.NewBody().AddTitle("App version")
-			core.NewText(d).SetText("App version: " + system.AppVersion)
-			core.NewText(d).SetText("Core version: " + system.CoreVersion)
-			d.AddOKOnly().RunDialog(tb)
-		})
 
 		NewFuncButton(m, core.AppearanceSettings.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
 		NewFuncButton(m, core.ProfileToggle).SetText("Profile performance").SetIcon(icons.Analytics)
