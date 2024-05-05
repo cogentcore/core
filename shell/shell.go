@@ -4,11 +4,8 @@
 
 package shell
 
-// Shell represents one running shell context
-type Shell struct {
-	// debug levels: 2 = full detail, 1 = summary, 0 = none
-	Debug int
-}
+// Shell represents one running shell context.
+type Shell struct{}
 
 func NewShell() *Shell {
 	sh := &Shell{}
