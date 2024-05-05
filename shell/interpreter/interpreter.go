@@ -24,12 +24,14 @@ type Interpreter struct {
 
 func NewInterpreter() *Interpreter {
 	in := &Interpreter{}
-	in.Interp = interp.New(interp.Options{}) // GoPath: "/Users/oreilly/go/src"})
-	stdlib.Symbols["cogentcore.org/core/shell"] = map[string]reflect.Value{
-		"Exec": reflect.ValueOf(shell.Exec),
-	}
-	in.Interp.Use(stdlib.Symbols) // this causes symbols to crash
-	// errors.Log1(in.Interp.Eval(`import "cogentcore.org/core/shell"`))
+	in.Interp = interp.New(interp.Options{})
+	in.Interp.Use(stdlib.Symbols)
+	in.Interp.Use(interp.Exports{
+		"cogentcore.org/core/shell/shell": map[string]reflect.Value{
+			"Exec": reflect.ValueOf(shell.Exec),
+		},
+	})
+	errors.Log1(in.Interp.Eval(`import "cogentcore.org/core/shell"`))
 	in.Shell = shell.NewShell()
 	return in
 }
