@@ -23,7 +23,7 @@ func (sh *Shell) Output(cmd any, args ...any) string {
 	scmd, sargs := execArgs(cmd, args...)
 	// need to make a copy without Stdout for Output
 	c := sh.Config
-	sh.Config.Stdout = nil
+	c.Stdout = nil
 	out, err := c.Output(scmd, sargs...)
 	sh.AddError(err)
 	return out
