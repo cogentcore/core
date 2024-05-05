@@ -138,7 +138,6 @@ func Button(par core.Widget, c *ButtonsConfig, provider string, authFunc func(c 
 func GoogleButton(par core.Widget, c *ButtonsConfig) *core.Button {
 	bt := Button(par, c, "google", Google).SetType(core.ButtonOutlined).
 		SetText("Sign in with Google").SetIcon("sign-in-with-google")
-	bt.SetName("sign-in-with-google")
 	bt.Style(func(s *styles.Style) {
 		s.Color = colors.C(colors.Scheme.OnSurface)
 	})
