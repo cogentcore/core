@@ -48,7 +48,7 @@ func (sh *Shell) TranspileLine(ln string) string {
 	case toks[0].Tok != token.IDENT: // exec must be IDENT
 		logx.PrintlnInfo("go:   not ident")
 		return sh.TranspileGo(toks).Code()
-	case len(toks) == 2 && toks[0].Tok == token.IDENT && toks[1].Tok == token.IDENT:
+	case len(toks) >= 2 && toks[0].Tok == token.IDENT && (toks[1].Tok == token.IDENT || toks[1].Tok == token.SUB):
 		logx.PrintlnInfo("exec: word word")
 		return sh.TranspileExec(toks, false).Code()
 	case toks[0].Tok == token.IDENT && toks[1].Tok == token.LBRACE:

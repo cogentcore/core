@@ -5,7 +5,15 @@
 package shell
 
 // Shell represents one running shell context.
-type Shell struct{}
+type Shell struct {
+	// depth of parens at the end of the current line -- if 0, was complete
+	ParenDepth int
+
+	// depth of parens at the end of the current line -- if 0, was complete
+	BraceDepth int
+
+	BrackDepth int
+}
 
 func NewShell() *Shell {
 	sh := &Shell{}
