@@ -11,6 +11,8 @@ import (
 	"os"
 	"slices"
 	"strings"
+
+	"golang.org/x/tools/imports"
 )
 
 // Shell represents one running shell context.
@@ -76,5 +78,10 @@ func (sh *Shell) TranspileFile(in string, out string) error {
 	sh.TranspileCode(string(b))
 	sh.Lines = slices.Insert(sh.Lines, 0, "package main", "", "func main() {")
 	sh.Lines = append(sh.Lines, "}")
-	return os.WriteFile(out, []byte(sh.Code()), 0666)
+	src := []byte(sh.Code())
+	res, err := imports.Process(out, src, nil)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(out, res, 0666)
 }
