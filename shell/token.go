@@ -29,13 +29,17 @@ type Token struct {
 type Tokens []*Token
 
 // NewToken returns a new token, for generated tokens without Pos
-func NewToken(tok token.Token, str string) *Token {
-	return &Token{Tok: tok, Str: str}
+func NewToken(tok token.Token, str ...string) *Token {
+	tk := &Token{Tok: tok}
+	if len(str) > 0 {
+		tk.Str = str[0]
+	}
+	return tk
 }
 
 // Add adds a new token, for generated tokens without Pos
-func (tk *Tokens) Add(tok token.Token, str string) *Token {
-	nt := NewToken(tok, str)
+func (tk *Tokens) Add(tok token.Token, str ...string) *Token {
+	nt := NewToken(tok, str...)
 	*tk = append(*tk, nt)
 	return nt
 }
@@ -113,15 +117,70 @@ func (tk Tokens) String() string {
 // Code returns concatenated Str values of the tokens,
 // to generate a surface-valid code string.
 func (tk Tokens) Code() string {
+	sz := len(tk)
+	if sz == 0 {
+		return ""
+	}
 	str := ""
+	prvIdent := false
 	for _, tok := range tk {
-		// todo: detect . ( ) etc and manage spaces properly first-pass
-		str += tok.String() + " "
+		switch {
+		case tok.IsOp():
+			if tok.Tok == token.INC || tok.Tok == token.DEC {
+				str += tok.String() + " "
+			} else {
+				str += " " + tok.String() + " "
+			}
+			prvIdent = false
+		case tok.IsBracket() || tok.Tok == token.PERIOD || tok.Tok == token.ELLIPSIS:
+			if tok.Tok == token.RBRACE || tok.Tok == token.LBRACE {
+				if len(str) > 0 && str[len(str)-1] != ' ' {
+					str += " "
+				}
+				str += tok.String() + " "
+			} else {
+				str += tok.String()
+			}
+			prvIdent = false
+		case tok.Tok == token.COMMA || tok.Tok == token.COLON || tok.Tok == token.SEMICOLON:
+			str += tok.String() + " "
+			prvIdent = false
+		case tok.IsGo():
+			str += tok.String() + " "
+			prvIdent = false
+		case tok.Tok == token.IDENT:
+			if prvIdent {
+				str += " " + tok.String()
+			} else {
+				str += tok.String()
+			}
+			prvIdent = true
+		default:
+			str += tok.String()
+			prvIdent = false
+		}
 	}
 	if len(str) == 0 {
 		return str
 	}
-	return str[:len(str)-1] // remove trailing space
+	return str
+}
+
+// IsOp returns true if the given token is an operator
+func (tk *Token) IsOp() bool {
+	if tk.Tok >= token.ADD && tk.Tok <= token.DEFINE {
+		return true
+	}
+	return false
+}
+
+// IsBracket returns true if the given token is a bracket delimiter:
+// paren, brace, bracket
+func (tk *Token) IsBracket() bool {
+	if (tk.Tok >= token.LPAREN && tk.Tok <= token.LBRACE) || (tk.Tok >= token.RPAREN && tk.Tok <= token.RBRACE) {
+		return true
+	}
+	return false
 }
 
 // RightMatching returns the position (or -1 if not found) for the
@@ -158,10 +217,9 @@ func (tk Tokens) RightMatching() int {
 	return -1
 }
 
-// DelimiterDepths returns the depths for the three del
-// right matching [paren, bracket, brace] given the left one that
-// is at the 0 position of the current set of tokens.
-func (tk Tokens) DelimiterDepths() (paren, brace, brack int) {
+// BracketDepths returns the depths for the three bracket delimiters
+// [paren, bracket, brace], based on unmatched right versions.
+func (tk Tokens) BracketDepths() (paren, brace, brack int) {
 	sz := len(tk)
 	if sz == 0 {
 		return

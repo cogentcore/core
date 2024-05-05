@@ -19,11 +19,11 @@ func (sh *Shell) TranspileLine(ln string) string {
 		return ln
 	}
 	toks := sh.TranspileLineTokens(ln)
-	paren, brace, brack := toks.DelimiterDepths()
+	paren, brace, brack := toks.BracketDepths()
 	sh.ParenDepth += paren
 	sh.BraceDepth += brace
 	sh.BrackDepth += brack
-	logx.PrintlnInfo("depths:", sh.ParenDepth, sh.BraceDepth, sh.BrackDepth)
+	logx.PrintlnDebug("depths: ", sh.ParenDepth, sh.BraceDepth, sh.BrackDepth)
 	return toks.Code()
 }
 
@@ -95,13 +95,13 @@ func (sh *Shell) TranspileExecString(str string, output bool) Tokens {
 func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 	etoks := make(Tokens, 0, len(toks)*2+5) // return tokens
 	etoks.Add(token.IDENT, "shell")
-	etoks.Add(token.PERIOD, ".")
+	etoks.Add(token.PERIOD)
 	if output {
 		etoks.Add(token.IDENT, "Output")
 	} else {
 		etoks.Add(token.IDENT, "Exec")
 	}
-	etoks.Add(token.IDENT, "(")
+	etoks.Add(token.LPAREN)
 	sz := len(toks)
 	for i := 0; i < sz; i++ {
 		tok := toks[i]
@@ -114,18 +114,18 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 				etoks.AddTokens(sh.TranspileGo(toks[i+1 : i+rb]))
 				i += rb
 			}
-			etoks.Add(token.COMMA, ",")
+			etoks.Add(token.COMMA)
 			continue
 		case tok.Tok == token.SUB && i < sz-1: // option
 			etoks.Add(token.STRING, `"-`+toks[i+1].Str+`"`)
-			etoks.Add(token.COMMA, ",")
+			etoks.Add(token.COMMA)
 			i++
 		default:
 			etoks.Add(token.STRING, `"`+tok.Str+`"`)
-			etoks.Add(token.COMMA, ",")
+			etoks.Add(token.COMMA)
 		}
 	}
 	etoks.DeleteLastComma()
-	etoks.Add(token.IDENT, ")")
+	etoks.Add(token.RPAREN)
 	return etoks
 }
