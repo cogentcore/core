@@ -5,7 +5,6 @@
 package shell
 
 import (
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 )
 
@@ -14,7 +13,7 @@ import (
 // [exec.Config.Stdout] and [exec.Config.Stderr] appropriately.
 func (sh *Shell) Exec(cmd any, args ...any) {
 	scmd, sargs := execArgs(cmd, args...)
-	errors.Log(sh.Config.Run(scmd, sargs...))
+	sh.AddError(sh.Config.Run(scmd, sargs...))
 }
 
 // Output executes the given command string, handling the given arguments
@@ -25,7 +24,8 @@ func (sh *Shell) Output(cmd any, args ...any) string {
 	// need to make a copy without Stdout for Output
 	c := sh.Config
 	sh.Config.Stdout = nil
-	out := errors.Log1(c.Output(scmd, sargs...))
+	out, err := c.Output(scmd, sargs...)
+	sh.AddError(err)
 	return out
 }
 

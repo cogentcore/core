@@ -102,8 +102,13 @@ func (sh *Shell) TranspileFile(in string, out string) error {
 	return os.WriteFile(out, res, 0666)
 }
 
-// AddError adds error to the stack: this is how errors are reported
+// AddError adds the given error to the error stack if it is non-nil.
+// This is the main way that shell errors are handled. It also prints
+// the error.
 func (sh *Shell) AddError(err error) error {
+	if err == nil {
+		return nil
+	}
 	sh.Errors = append(sh.Errors, err)
 	logx.PrintlnError(err)
 	return err
