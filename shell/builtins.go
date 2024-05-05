@@ -9,14 +9,18 @@ import (
 	"os"
 )
 
+func (sh *Shell) InstallBuiltins() {
+	sh.Builtins = make(map[string]func(args ...string) error)
+	sh.Builtins["cd"] = sh.Cd
+}
+
 func (sh *Shell) Cd(args ...string) error {
 	if len(args) != 1 {
-		return sh.AddError(fmt.Errorf("cd requires one argument: the directory"))
+		return fmt.Errorf("cd requires one argument: the directory")
 	}
 	dir := args[0]
-	// sh.Config.Dir = args[0]
-	os.Chdir(dir)
-	return nil
+	sh.Config.Dir = args[0]
+	return os.Chdir(dir)
 }
 
 // example alias:

@@ -20,6 +20,9 @@ import (
 // Shell represents one running shell context.
 type Shell struct {
 
+	// Builtins are all the builtin shell commands
+	Builtins map[string]func(args ...string) error
+
 	// Config is the [exec.Config] used to run commands.
 	Config exec.Config
 
@@ -41,7 +44,7 @@ type Shell struct {
 
 // NewShell returns a new [Shell] with default options.
 func NewShell() *Shell {
-	return &Shell{
+	sh := &Shell{
 		Config: exec.Config{
 			Env:    map[string]string{},
 			Stdout: os.Stdout,
@@ -49,6 +52,8 @@ func NewShell() *Shell {
 			Stdin:  os.Stdin,
 		},
 	}
+	sh.InstallBuiltins()
+	return sh
 }
 
 // TotalDepth returns the sum of any unresolved paren, brace, or bracket depths.

@@ -5,6 +5,9 @@
 package shell
 
 import (
+	"bytes"
+	"strings"
+
 	"cogentcore.org/core/base/reflectx"
 )
 
@@ -13,7 +16,9 @@ import (
 // [exec.Config.Stdout] and [exec.Config.Stderr] appropriately.
 func (sh *Shell) Exec(cmd any, args ...any) {
 	scmd, sargs := execArgs(cmd, args...)
-	sh.AddError(sh.Config.Run(scmd, sargs...))
+	if !sh.RunBuiltin(scmd, sargs...) {
+		sh.AddError(sh.Config.Run(scmd, sargs...))
+	}
 }
 
 // Output executes the given command string, handling the given arguments
@@ -21,12 +26,27 @@ func (sh *Shell) Exec(cmd any, args ...any) {
 // the stdout as a string and forwards stderr to [exec.Config.Stderr] appropriately.
 func (sh *Shell) Output(cmd any, args ...any) string {
 	scmd, sargs := execArgs(cmd, args...)
-	// need to make a copy without Stdout for Output
-	c := sh.Config
-	c.Stdout = nil
-	out, err := c.Output(scmd, sargs...)
-	sh.AddError(err)
-	return out
+	oldStdout := sh.Config.Stdout
+	buf := &bytes.Buffer{}
+	sh.Config.Stdout = buf
+	if !sh.RunBuiltin(scmd, sargs...) {
+		_, err := sh.Config.Exec(scmd, sargs...)
+		sh.AddError(err)
+	}
+	sh.Config.Stdout = oldStdout
+	if sh.Config.Stdout != nil {
+		sh.Config.Stdout.Write(buf.Bytes())
+	}
+	return strings.TrimSuffix(buf.String(), "\n")
+}
+
+func (sh *Shell) RunBuiltin(cmd string, args ...string) bool {
+	fun, has := sh.Builtins[cmd]
+	if !has {
+		return false
+	}
+	sh.AddError(fun(args...))
+	return true
 }
 
 // execArgs converts the given command and arguments into strings.
