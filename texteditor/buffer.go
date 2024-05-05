@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"sync"
 	"time"
 
@@ -404,6 +405,7 @@ func (tb *Buffer) BytesLine(ln int) []byte {
 // SetLang sets the language for highlighting and updates
 // the highlighting style and buffer accordingly.
 func (tb *Buffer) SetLang(lang string) *Buffer {
+	lang = strings.ToLower(lang)
 	tb.SetFilename("_placeholder." + lang)
 	tb.SetText(tb.Txt) // to update it
 	return tb
