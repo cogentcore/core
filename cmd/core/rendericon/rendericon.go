@@ -5,14 +5,12 @@
 package rendericon
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"image"
 	"io/fs"
-	"os"
+	"strings"
 
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/svg"
@@ -25,7 +23,6 @@ func Render(size int) (*image.RGBA, error) {
 	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
 
 	sv := svg.NewSVG(size, size)
-	sv.Color = colors.C(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
 
 	spath := "icon.svg"
 	err := sv.OpenXML(spath)
@@ -33,15 +30,7 @@ func Render(size int) (*image.RGBA, error) {
 		if !errors.Is(err, fs.ErrNotExist) {
 			return nil, fmt.Errorf("error opening svg icon file: %w", err)
 		}
-		ic, err := fs.ReadFile(icons.Icons, icons.Toolbar.Filename())
-		if err != nil {
-			return nil, err
-		}
-		err = os.WriteFile(spath, ic, 0666)
-		if err != nil {
-			return nil, err
-		}
-		err = sv.ReadXML(bytes.NewReader(ic))
+		err = sv.ReadXML(strings.NewReader(icons.DefaultAppIcon))
 		if err != nil {
 			return nil, err
 		}

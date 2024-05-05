@@ -32,7 +32,8 @@ var (
 
 	// AppIcon is the svg icon for the current app.
 	// It is set by a linker flag in the core command line tool.
-	AppIcon string
+	// It defaults to [icons.DefaultAppIcon] otherwise.
+	AppIcon string = icons.DefaultAppIcon
 )
 
 // App represents a Cogent Core app. It extends [system.App] to provide both system-level
