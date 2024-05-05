@@ -161,6 +161,7 @@ const (
 	AnyCode
 	Ada
 	Bash
+	Cosh
 	Csh
 	C // includes C++
 	CSharp
@@ -227,7 +228,6 @@ const (
 	Tsv
 	Uri
 	Color
-	CogentCore
 	Yaml
 
 	// Text is some other kind of text file
