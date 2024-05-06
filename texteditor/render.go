@@ -348,7 +348,7 @@ func (ed *Editor) RenderAllLines() {
 	if ed.HasLineNumbers() {
 		ed.RenderLineNumbersBoxAll()
 		for ln := stln; ln <= edln; ln++ {
-			ed.RenderLineNo(ln, false) // don't re-render std fill boxes
+			ed.RenderLineNumber(ln, false) // don't re-render std fill boxes
 		}
 	}
 
@@ -386,29 +386,17 @@ func (ed *Editor) RenderLineNumbersBoxAll() {
 	spos := math32.Vector2FromPoint(bb.Min)
 	epos := math32.Vector2FromPoint(bb.Max)
 	epos.X = spos.X + ed.LineNoOff
-	pc.FillBox(spos, epos.Sub(spos), ed.LineNumberColor)
+
+	sz := epos.Sub(spos)
+	pc.StrokeStyle.Color = nil
+	pc.FillStyle.Color = ed.LineNumberColor
+	pc.DrawRoundedRectangle(spos.X, spos.Y, sz.X, sz.Y, ed.Styles.Border.Radius.Dots())
 }
 
-// RenderLineNumbersBox renders the background for the line numbers in given range, in the LineNumberColor
-func (ed *Editor) RenderLineNumbersBox(st, end int) {
-	if !ed.HasLineNumbers() {
-		return
-	}
-	pc := &ed.Scene.PaintContext
-	// sty := &ed.Styles
-	// spc := sty.BoxSpace()
-	bb := ed.Geom.ContentBBox
-	spos := ed.CharStartPos(lexer.Pos{Ln: st})
-	spos.X = float32(bb.Min.X)
-	epos := ed.CharEndPos(lexer.Pos{Ln: end + 1})
-	epos.Y -= ed.LineHeight
-	epos.X = spos.X + ed.LineNoOff
-	pc.FillBox(spos, epos.Sub(spos), ed.LineNumberColor)
-}
-
-// RenderLineNo renders given line number -- called within context of other render
-// if defFill is true, it fills box color for default background color (use false for batch mode)
-func (ed *Editor) RenderLineNo(ln int, defFill bool) {
+// RenderLineNumber renders given line number; called within context of other render.
+// if defFill is true, it fills box color for default background color (use false for
+// batch mode)
+func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
 	if !ed.HasLineNumbers() || ed.Buffer == nil {
 		return
 	}
