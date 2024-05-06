@@ -20,6 +20,7 @@ import (
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
+	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/texteditor/textbuf"
@@ -214,8 +215,7 @@ func (ed *Editor) SetStyles() {
 		}
 		s.Font.Family = string(core.AppearanceSettings.MonoFont)
 		s.Grow.Set(1, 1)
-		s.Overflow.Set(styles.OverflowAuto)   // absorbs all
-		s.Border.Style.Set(styles.BorderNone) // don't render our own border
+		s.Overflow.Set(styles.OverflowAuto) // absorbs all
 		s.Border.Radius = styles.BorderRadiusLarge
 		s.Margin.Zero()
 		s.Padding.Set(units.Dp(4))
@@ -226,7 +226,14 @@ func (ed *Editor) SetStyles() {
 		s.Color = colors.C(colors.Scheme.OnSurface)
 		s.Min.Set(units.Em(10), units.Em(5)) // TODO: remove after #900 is fixed
 
-		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+		if s.Is(states.Focused) {
+			// we have a blank background and let the border
+			// indicate the focus state
+			s.StateLayer = 0
+			s.Background = nil
+		} else {
+			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+		}
 	})
 }
 
