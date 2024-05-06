@@ -373,14 +373,12 @@ func (ed *Editor) RenderAllLines() {
 		tbb.Min.X += int(ed.LineNumberOffset)
 		pc.PushBounds(tbb)
 	}
-	// desc := 0.2 * ed.LineHeight
-	desc := 0.8 * ed.LineHeight
 	for ln := stln; ln <= edln; ln++ {
 		lst := pos.Y + ed.Offsets[ln]
 		lp := pos
 		lp.Y = lst
 		lp.X += ed.LineNumberOffset
-		if lp.Y+desc > float32(bb.Max.Y) {
+		if lp.Y+ed.FontAscent > float32(bb.Max.Y) {
 			break
 		}
 		ed.Renders[ln].Render(pc, lp) // not top pos; already has baseline offset
@@ -415,12 +413,19 @@ func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
 	if !ed.HasLineNumbers() || ed.Buffer == nil {
 		return
 	}
+	bb := ed.RenderBBox()
+	tpos := math32.Vector2{
+		X: float32(bb.Min.X), // + spc.Pos().X
+		Y: ed.CharEndPos(lexer.Pos{Ln: ln}).Y - ed.FontDescent,
+	}
+	if tpos.Y > float32(bb.Max.Y) {
+		return
+	}
 
 	sc := ed.Scene
 	sty := &ed.Styles
 	fst := sty.FontRender()
 	pc := &sc.PaintContext
-	bb := ed.RenderBBox()
 
 	fst.Background = nil
 	lfmt := fmt.Sprintf("%d", ed.LineNumberDigits)
@@ -436,10 +441,6 @@ func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
 		fst.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 	}
 	ed.LineNumberRender.SetString(lnstr, fst, &sty.UnitContext, &sty.Text, true, 0, 0)
-	tpos := math32.Vector2{
-		X: float32(bb.Min.X), // + spc.Pos().X
-		Y: ed.CharEndPos(lexer.Pos{Ln: ln}).Y - ed.FontDescent,
-	}
 
 	ed.LineNumberRender.Render(pc, tpos)
 

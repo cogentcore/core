@@ -180,19 +180,6 @@ func (ed *Editor) ReLayoutAllLines() {
 
 // note: Layout reverts to basic Widget behavior for layout if no kids, like us..
 
-// ScrollValues returns the maximum size that could be scrolled,
-// the visible size (which could be less than the max size, in which
-// case no scrollbar is needed), and visSize / maxSize as the VisiblePct.
-// This is used in updating the scrollbar and determining whether one is
-// needed in the first place
-func (ed *Editor) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32) {
-	sz := &ed.Geom.Size
-	maxSize = sz.Internal.Dim(d)
-	visSize = sz.Alloc.Content.Dim(d)
-	visPct = visSize / maxSize
-	return
-}
-
 func (ed *Editor) SizeDown(iter int) bool {
 	if iter == 0 {
 		ed.LayoutAllLines()
