@@ -15,11 +15,11 @@ import (
 type TwinEditors struct {
 	core.Splits
 
-	// textbuf for A
-	BufA *Buffer `json:"-" xml:"-"`
+	// [Buffer] for A
+	BufferA *Buffer `json:"-" xml:"-"`
 
-	// textbuf for B
-	BufB *Buffer `json:"-" xml:"-"`
+	// [Buffer] for B
+	BufferB *Buffer `json:"-" xml:"-"`
 }
 
 func (te *TwinEditors) OnInit() {
@@ -43,35 +43,35 @@ func (te *TwinEditors) SetStyles() {
 	})
 }
 
-// MakeBufs ensures that the Bufs are made, if nil
-func (te *TwinEditors) MakeBufs() {
-	if te.BufA != nil {
+// MakeBuffers ensures that the [Buffer]s are made, if nil.
+func (te *TwinEditors) MakeBuffers() {
+	if te.BufferA != nil {
 		return
 	}
-	te.BufA = NewBuffer()
-	te.BufB = NewBuffer()
+	te.BufferA = NewBuffer()
+	te.BufferB = NewBuffer()
 }
 
-// SetFiles sets files for each text buf
+// SetFiles sets files for each text [Buffer].
 func (te *TwinEditors) SetFiles(fileA, fileB string, LineNumbers bool) {
-	te.MakeBufs()
-	te.BufA.Filename = core.Filename(fileA)
-	te.BufA.Options.LineNumbers = LineNumbers
-	te.BufA.Stat() // update markup
-	te.BufB.Filename = core.Filename(fileB)
-	te.BufB.Options.LineNumbers = LineNumbers
-	te.BufB.Stat() // update markup
+	te.MakeBuffers()
+	te.BufferA.Filename = core.Filename(fileA)
+	te.BufferA.Options.LineNumbers = LineNumbers
+	te.BufferA.Stat() // update markup
+	te.BufferB.Filename = core.Filename(fileB)
+	te.BufferB.Options.LineNumbers = LineNumbers
+	te.BufferB.Stat() // update markup
 }
 
 func (te *TwinEditors) ConfigTexts() {
 	if te.HasChildren() {
 		return
 	}
-	te.MakeBufs()
+	te.MakeBuffers()
 	av := NewEditor(te, "text-a")
 	bv := NewEditor(te, "text-b")
-	av.SetBuffer(te.BufA)
-	bv.SetBuffer(te.BufB)
+	av.SetBuffer(te.BufferA)
+	bv.SetBuffer(te.BufferB)
 
 	av.On(events.Scroll, func(e events.Event) {
 		// bv.ScrollDelta(e)
@@ -102,7 +102,7 @@ func (te *TwinEditors) ConfigTexts() {
 	})
 }
 
-// Editors returns the two text Editors
+// Editors returns the two text [Editor]s.
 func (te *TwinEditors) Editors() (*Editor, *Editor) {
 	ae := te.Child(0).(*Editor)
 	be := te.Child(1).(*Editor)

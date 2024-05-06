@@ -209,11 +209,11 @@ func (t *TwinEditors) New() tree.Node { return &TwinEditors{} }
 
 // SetBufA sets the [TwinEditors.BufA]:
 // textbuf for A
-func (t *TwinEditors) SetBufA(v *Buffer) *TwinEditors { t.BufA = v; return t }
+func (t *TwinEditors) SetBufA(v *Buffer) *TwinEditors { t.BufferA = v; return t }
 
 // SetBufB sets the [TwinEditors.BufB]:
 // textbuf for B
-func (t *TwinEditors) SetBufB(v *Buffer) *TwinEditors { t.BufB = v; return t }
+func (t *TwinEditors) SetBufB(v *Buffer) *TwinEditors { t.BufferB = v; return t }
 
 // SetTooltip sets the [TwinEditors.Tooltip]
 func (t *TwinEditors) SetTooltip(v string) *TwinEditors { t.Tooltip = v; return t }
