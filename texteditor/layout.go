@@ -24,10 +24,10 @@ func (ed *Editor) StyleSizes() {
 		lno = ed.Buffer.Options.LineNumbers
 	}
 	if lno {
-		ed.SetFlag(true, EditorHasLineNos)
+		ed.SetFlag(true, EditorHasLineNumbers)
 		ed.LineNoOff = float32(ed.LineNoDigs+3)*sty.Font.Face.Metrics.Ch + spc.Left // space for icon
 	} else {
-		ed.SetFlag(false, EditorHasLineNos)
+		ed.SetFlag(false, EditorHasLineNumbers)
 		ed.LineNoOff = 0
 	}
 }

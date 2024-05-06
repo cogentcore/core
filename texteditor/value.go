@@ -7,7 +7,6 @@ package texteditor
 import (
 	"fmt"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/views"
@@ -20,9 +19,8 @@ type Value struct {
 
 func (v *Value) Config() {
 	tb := NewBuffer()
-	errors.Log(tb.Stat())
 	tb.OnChange(func(e events.Event) {
-		v.SetValue(string(tb.Text()))
+		v.SetValue(tb.String())
 		fmt.Println(reflectx.OnePointerUnderlyingValue(v.Value).Interface())
 	})
 	v.Widget.SetBuffer(tb)

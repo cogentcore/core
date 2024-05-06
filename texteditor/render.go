@@ -349,8 +349,8 @@ func (ed *Editor) RenderAllLines() {
 		return
 	}
 
-	if ed.HasLineNos() {
-		ed.RenderLineNosBoxAll()
+	if ed.HasLineNumbers() {
+		ed.RenderLineNumbersBoxAll()
 		for ln := stln; ln <= edln; ln++ {
 			ed.RenderLineNo(ln, false) // don't re-render std fill boxes
 		}
@@ -360,7 +360,7 @@ func (ed *Editor) RenderAllLines() {
 	ed.RenderHighlights(stln, edln)
 	ed.RenderScopelights(stln, edln)
 	ed.RenderSelect()
-	if ed.HasLineNos() {
+	if ed.HasLineNumbers() {
 		tbb := bb
 		tbb.Min.X += int(ed.LineNoOff)
 		pc.PushBounds(tbb)
@@ -375,14 +375,14 @@ func (ed *Editor) RenderAllLines() {
 		}
 		ed.Renders[ln].Render(pc, lp) // not top pos -- already has baseline offset
 	}
-	if ed.HasLineNos() {
+	if ed.HasLineNumbers() {
 		pc.PopBounds()
 	}
 }
 
-// RenderLineNosBoxAll renders the background for the line numbers in the LineNumberColor
-func (ed *Editor) RenderLineNosBoxAll() {
-	if !ed.HasLineNos() {
+// RenderLineNumbersBoxAll renders the background for the line numbers in the LineNumberColor
+func (ed *Editor) RenderLineNumbersBoxAll() {
+	if !ed.HasLineNumbers() {
 		return
 	}
 	pc := &ed.Scene.PaintContext
@@ -393,9 +393,9 @@ func (ed *Editor) RenderLineNosBoxAll() {
 	pc.FillBox(spos, epos.Sub(spos), ed.LineNumberColor)
 }
 
-// RenderLineNosBox renders the background for the line numbers in given range, in the LineNumberColor
-func (ed *Editor) RenderLineNosBox(st, end int) {
-	if !ed.HasLineNos() {
+// RenderLineNumbersBox renders the background for the line numbers in given range, in the LineNumberColor
+func (ed *Editor) RenderLineNumbersBox(st, end int) {
+	if !ed.HasLineNumbers() {
 		return
 	}
 	pc := &ed.Scene.PaintContext
@@ -413,7 +413,7 @@ func (ed *Editor) RenderLineNosBox(st, end int) {
 // RenderLineNo renders given line number -- called within context of other render
 // if defFill is true, it fills box color for default background color (use false for batch mode)
 func (ed *Editor) RenderLineNo(ln int, defFill bool) {
-	if !ed.HasLineNos() || ed.Buffer == nil {
+	if !ed.HasLineNumbers() || ed.Buffer == nil {
 		return
 	}
 

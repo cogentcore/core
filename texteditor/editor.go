@@ -239,8 +239,9 @@ func (ed *Editor) SetStyles() {
 type EditorFlags core.WidgetFlags //enums:bitflag -trim-prefix View
 
 const (
-	// EditorHasLineNos indicates that this editor has line numbers (per Buf option)
-	EditorHasLineNos EditorFlags = EditorFlags(core.WidgetFlagsN) + iota
+	// EditorHasLineNumbers indicates that this editor has line numbers
+	// (per [Buffer] option)
+	EditorHasLineNumbers EditorFlags = EditorFlags(core.WidgetFlagsN) + iota
 
 	// EditorNeedsLayout is set by NeedsLayout: Editor does significant
 	// internal layout in LayoutAllLines, and its layout is simply based
@@ -293,9 +294,10 @@ func (ed *Editor) IsNotSaved() bool {
 	return ed.Buffer != nil && ed.Buffer.IsNotSaved()
 }
 
-// HasLineNos returns true if view is showing line numbers (per textbuf option, cached here)
-func (ed *Editor) HasLineNos() bool {
-	return ed.Is(EditorHasLineNos)
+// HasLineNumbers returns true if view is showing line numbers
+// (per [Buffer] option, cached here).
+func (ed *Editor) HasLineNumbers() bool {
+	return ed.Is(EditorHasLineNumbers)
 }
 
 // Clear resets all the text in the buffer for this view
