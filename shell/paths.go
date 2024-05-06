@@ -82,7 +82,7 @@ func (tk Tokens) Path() (string, int) {
 		if tin == 0 || tin+1 >= n {
 			return "", 0
 		}
-		if (int(tk[tin].Pos) > lastEnd+len(tid)) || !(tk[tin].Tok == token.COLON || tk[tin].IsPathDelim()) {
+		if (int(tk[tin].Pos) > lastEnd+len(tid)) || !(tk[tin].Tok == token.COLON || tk[tin].Tok == token.QUO) {
 			return "", 0
 		}
 		ci += tin + 1

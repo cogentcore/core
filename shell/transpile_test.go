@@ -16,6 +16,7 @@ type exIn struct {
 }
 
 func TestTranspile(t *testing.T) {
+	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
 		{"`ls -la`", `shell.Exec("ls", "-la")`},
 		{`var name string`, `var name string`},
@@ -40,6 +41,7 @@ func TestTranspile(t *testing.T) {
 func TestPaths(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
+		{`fmt.Println("hi")`, `fmt.Println("hi")`},
 		{"cosh -i", `shell.Exec("cosh", "-i")`},
 		{"./cosh -i", `shell.Exec("./cosh", "-i")`},
 		// {`ios\ deploy -i`, `shell.Exec("ios deploy", "-i")`},
