@@ -23,6 +23,7 @@ func TestTranspile(t *testing.T) {
 		{`echo {name}`, `shell.Exec("echo", name)`},
 		{`echo "testing"`, `shell.Exec("echo", "testing")`},
 		{`number := 1.23`, `number := 1.23`},
+		{`fmt.Println("hi")`, `fmt.Println("hi")`},
 		{`for i := 0; i < 3; i++ { fmt.Println(i, "\n")`, `for i := 0; i < 3; i++ { fmt.Println(i, "\n")`},
 		{"for i, v := range `ls -la` {", `for i, v := range shell.Output("ls", "-la") {`},
 		{`// todo: fixit`, `// todo: fixit`},
