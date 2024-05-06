@@ -433,6 +433,7 @@ func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
 	if lineColor != nil {
 		sbox := ed.CharStartPos(lexer.Pos{Ln: ln})
 		ebox := ed.CharEndPos(lexer.Pos{Ln: ln + 1})
+
 		if ln < ed.NLines-1 {
 			ebox.Y -= ed.LineHeight
 		}
@@ -440,10 +441,10 @@ func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
 			return
 		}
 
-		// ends at start of code
-		ebox.X = sbox.X
 		// starts at end of line number text
 		sbox.X = tpos.X + ed.LineNumberRender.BBox.Size().X
+		// ends at end of line number offset
+		ebox.X = float32(bb.Min.X) + ed.LineNumberOffset
 
 		r := (ebox.X - sbox.X) / 2
 		center := sbox.AddScalar(r)
