@@ -23,44 +23,54 @@ func (sh *Shell) TranspileLine(ln string) string {
 	sh.ParenDepth += paren
 	sh.BraceDepth += brace
 	sh.BrackDepth += brack
-	logx.PrintlnDebug("depths: ", sh.ParenDepth, sh.BraceDepth, sh.BrackDepth)
+	// logx.PrintlnDebug("depths: ", sh.ParenDepth, sh.BraceDepth, sh.BrackDepth)
 	return toks.Code()
 }
 
 // TranspileLineTokens returns the tokens for the full line
 func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	toks := sh.Tokens(ln)
-	if len(toks) == 0 {
+	n := len(toks)
+	if n == 0 {
 		return toks
 	}
 
-	logx.PrintlnDebug("line:\n", ln, "\nTokens:\n", toks.String())
+	logx.PrintlnDebug("\n########## line:\n", ln, "\nTokens:\n", toks.String())
+
+	t0path, t0pn := toks.Path()
+	_, t0in := toks.ExecIdent()
+
+	t1idx := max(t0pn, t0in)
+	t1pn := 0
+	t1in := 0
+	if n > 1 {
+		_, t1pn = toks[t1idx:].Path()
+		_, t1in = toks[t1idx:].ExecIdent()
+	}
 
 	switch {
 	case toks[0].IsBacktickString():
 		logx.PrintlnDebug("exec: backquoted string")
 		exe := sh.TranspileExecString(toks[0].Str, false)
-		if len(toks) > 1 { // todo: is this an error?
+		if n > 1 { // todo: is this an error?
 			exe.AddTokens(sh.TranspileGo(toks[1:]))
 		}
 		return exe
 	case toks[0].IsGo():
 		logx.PrintlnDebug("go    keyword")
 		return sh.TranspileGo(toks)
-	case len(toks) == 1 && toks[0].Tok == token.IDENT:
-		logx.PrintlnDebug("exec: 1 word")
+	case t0pn > 0: // path expr
+		logx.PrintlnDebug("exec: path...")
+		rtok := toks.ReplaceIdentAt(0, t0path, t0pn)
+		return sh.TranspileExec(rtok, false)
+	case n == t0in || t0in > 1:
+		logx.PrintlnDebug("exec: 1 word or non-go word")
 		return sh.TranspileExec(toks, false)
-	case toks[0].Tok == token.PERIOD: // path expr
-		logx.PrintlnDebug("exec: .")
-		return sh.TranspileExec(toks, false)
-	case toks[0].Tok != token.IDENT: // exec must be IDENT
+	case t0in == 0: // exec must be IDENT
 		logx.PrintlnDebug("go:   not ident")
 		return sh.TranspileGo(toks)
-	case len(toks) >= 2 && toks[0].Tok == token.IDENT && (toks[1].Tok == token.IDENT || toks[1].Tok == token.SUB || toks[1].Tok == token.STRING):
-		logx.PrintlnDebug("exec: word word")
-		return sh.TranspileExec(toks, false)
-	case toks[0].Tok == token.IDENT && toks[1].Tok == token.LBRACE:
-		logx.PrintlnDebug("exec: word {")
+	case t0in > 0 && n > t0in && (t1in > 0 || t1pn > 0 || toks[t1idx].Tok == token.SUB || toks[t1idx].Tok == token.STRING || toks[t1idx].Tok == token.RBRACE):
+		logx.PrintlnDebug("exec: word non-go...")
 		return sh.TranspileExec(toks, false)
 	default:
 		logx.PrintlnDebug("go:   default")
@@ -102,10 +112,15 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 		etoks.Add(token.IDENT, "Exec")
 	}
 	etoks.Add(token.LPAREN)
-	sz := len(toks)
-	for i := 0; i < sz; i++ {
+	n := len(toks)
+	for i := 0; i < n; i++ {
 		tok := toks[i]
+		tpath, tpn := toks[i:].Path()
+		tid, tin := toks[i:].ExecIdent()
 		switch {
+		case tpn > 0:
+			etoks.Add(token.STRING, `"`+tpath+`"`)
+			i += tpn
 		case tok.Tok == token.LBRACE: // todo: find the closing brace
 			rb := toks[i:].RightMatching()
 			if rb < 0 {
@@ -114,9 +129,18 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 				etoks.AddTokens(sh.TranspileGo(toks[i+1 : i+rb]))
 				i += rb
 			}
-		case tok.Tok == token.SUB && i < sz-1: // option
-			etoks.Add(token.STRING, `"-`+toks[i+1].Str+`"`)
-			i++
+		case tok.Tok == token.SUB && i < n-1: // option
+			nid, nin := toks[i+1:].ExecIdent()
+			if nin > 0 {
+				etoks.Add(token.STRING, `"-`+nid+`"`)
+				i += nin
+			} else {
+				etoks.Add(token.STRING, `"-`+toks[i+1].Str+`"`)
+				i++
+			}
+		case tin > 0:
+			etoks.Add(token.STRING, `"`+tid+`"`)
+			i += (tin - 1)
 		case tok.Tok == token.STRING:
 			etoks.Add(token.STRING, tok.Str)
 		default:

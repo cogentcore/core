@@ -52,11 +52,11 @@ func (tk *Tokens) AddTokens(toks Tokens) *Tokens {
 
 // Last returns the final token in the list
 func (tk Tokens) Last() *Token {
-	sz := len(tk)
-	if sz == 0 {
+	n := len(tk)
+	if n == 0 {
 		return nil
 	}
-	return tk[sz-1]
+	return tk[n-1]
 }
 
 // DeleteLastComma removes any final Comma.
@@ -117,8 +117,8 @@ func (tk Tokens) String() string {
 // Code returns concatenated Str values of the tokens,
 // to generate a surface-valid code string.
 func (tk Tokens) Code() string {
-	sz := len(tk)
-	if sz == 0 {
+	n := len(tk)
+	if n == 0 {
 		return ""
 	}
 	str := ""
@@ -190,8 +190,8 @@ func (tk *Token) IsBracket() bool {
 // right matching [paren, bracket, brace] given the left one that
 // is at the 0 position of the current set of tokens.
 func (tk Tokens) RightMatching() int {
-	sz := len(tk)
-	if sz == 0 {
+	n := len(tk)
+	if n == 0 {
 		return -1
 	}
 	rb := token.RPAREN
@@ -205,7 +205,7 @@ func (tk Tokens) RightMatching() int {
 		rb = token.RBRACE
 	}
 	depth := 0
-	for i := 1; i < sz; i++ {
+	for i := 1; i < n; i++ {
 		tok := tk[i].Tok
 		switch tok {
 		case rb:
@@ -223,11 +223,11 @@ func (tk Tokens) RightMatching() int {
 // BracketDepths returns the depths for the three bracket delimiters
 // [paren, bracket, brace], based on unmatched right versions.
 func (tk Tokens) BracketDepths() (paren, brace, brack int) {
-	sz := len(tk)
-	if sz == 0 {
+	n := len(tk)
+	if n == 0 {
 		return
 	}
-	for i := 0; i < sz; i++ {
+	for i := 0; i < n; i++ {
 		tok := tk[i].Tok
 		switch tok {
 		case token.LPAREN:
@@ -247,6 +247,7 @@ func (tk Tokens) BracketDepths() (paren, brace, brack int) {
 	return
 }
 
+// Tokens converts the string into tokens
 func (sh *Shell) Tokens(ln string) Tokens {
 	fset := token.NewFileSet()
 	f := fset.AddFile("", fset.Base(), len(ln))
@@ -260,7 +261,7 @@ func (sh *Shell) Tokens(ln string) Tokens {
 		if tok == token.EOF {
 			break
 		}
-		logx.PrintfDebug("	token: %s\t%s\t%q\n", fset.Position(pos), tok, lit)
+		// logx.PrintfDebug("	token: %s\t%s\t%q\n", fset.Position(pos), tok, lit)
 		toks = append(toks, &Token{Tok: tok, Pos: pos, Str: lit})
 	}
 	return toks

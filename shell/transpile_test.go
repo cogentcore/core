@@ -5,8 +5,10 @@
 package shell
 
 import (
+	"log/slog"
 	"testing"
 
+	"cogentcore.org/core/base/logx"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +19,7 @@ type exIn struct {
 
 func TestTranspile(t *testing.T) {
 	tests := []exIn{
-		{"`ls -la`\n", `shell.Exec("ls", "-la")`},
+		{"`ls -la`", `shell.Exec("ls", "-la")`},
 		{`var name string`, `var name string`},
 		{`name = "test"`, `name = "test"`},
 		{`echo {name}`, `shell.Exec("echo", name)`},
@@ -28,6 +30,32 @@ func TestTranspile(t *testing.T) {
 		{`// todo: fixit`, `// todo: fixit`},
 	}
 
+	sh := NewShell()
+	for _, test := range tests {
+		o := sh.TranspileLine(test.i)
+		assert.Equal(t, test.e, o)
+	}
+}
+
+func TestPaths(t *testing.T) {
+	logx.UserLevel = slog.LevelDebug
+	tests := []exIn{
+		{"cosh -i", `shell.Exec("cosh", "-i")`},
+		{"./cosh -i", `shell.Exec("./cosh", "-i")`},
+		// {`ios\ deploy -i`, `shell.Exec("ios deploy", "-i")`},
+		{"./ios-deploy -i", `shell.Exec("./ios-deploy", "-i")`},
+		{"ios_deploy -i tree_file", `shell.Exec("ios_deploy", "-i", "tree_file")`},
+		{"ios_deploy/sub -i tree_file", `shell.Exec("ios_deploy/sub", "-i", "tree_file")`},
+		{"C:/ios_deploy/sub -i tree_file", `shell.Exec("C:/ios_deploy/sub", "-i", "tree_file")`},
+		{"ios_deploy -i tree_file/path", `shell.Exec("ios_deploy", "-i", "tree_file/path")`},
+		{"ios-deploy -i", `shell.Exec("ios-deploy", "-i")`},
+		{"ios-deploy -i tree-file", `shell.Exec("ios-deploy", "-i", "tree-file")`},
+		{"ios-deploy -i tree-file/path/here", `shell.Exec("ios-deploy", "-i", "tree-file/path/here")`},
+		{"cd ..", `shell.Exec("cd", "..")`},
+		{"cd ../another/dir/to/go_to", `shell.Exec("cd", "../another/dir/to/go_to")`},
+		{"cd ../an-other/dir/", `shell.Exec("cd", "../an-other/dir/")`},
+		{"curl https://google.com/search?q=hello%20world#body", `shell.Exec("curl", "https://google.com/search?q=hello%20world#body")`},
+	}
 	sh := NewShell()
 	for _, test := range tests {
 		o := sh.TranspileLine(test.i)
