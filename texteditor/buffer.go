@@ -26,13 +26,11 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/icons"
 	"cogentcore.org/core/parse"
 	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/spell"
-	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/texteditor/textbuf"
 	"cogentcore.org/core/views"
@@ -80,15 +78,9 @@ type Buffer struct {
 	// number of lines
 	NLines int `json:"-" xml:"-"`
 
-	// icons for given lines -- use SetLineIcon and DeleteLineIcon
-	LineIcons map[int]icons.Icon
-
 	// LineColors are colors to use for rendering circles next to the line
 	// numbers of certain lines; use SetLineColor and DeleteLineColor.
 	LineColors map[int]image.Image
-
-	// icons for each LineIcons being used
-	Icons map[icons.Icon]*core.Icon `json:"-" xml:"-"`
 
 	// the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!
 	Lines [][]rune `json:"-" xml:"-"`
@@ -2216,44 +2208,7 @@ func (tb *Buffer) InTokenCode(pos lexer.Pos) bool {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-//   LineIcons / Colors
-
-// SetLineIcon sets given icon at given line (0 starting)
-func (tb *Buffer) SetLineIcon(ln int, icon icons.Icon) {
-	tb.LinesMu.Lock()
-	defer tb.LinesMu.Unlock()
-	if tb.LineIcons == nil {
-		tb.LineIcons = make(map[int]icons.Icon)
-		tb.Icons = make(map[icons.Icon]*core.Icon)
-	}
-	tb.LineIcons[ln] = icon
-	ic, has := tb.Icons[icon]
-	if !has {
-		ic = &core.Icon{}
-		ic.InitName(ic, string(icon))
-		ic.SetIcon(icon)
-		ic.Style(func(s *styles.Style) {
-			s.Min.X.Em(1)
-			s.Min.Y.Em(1)
-		})
-		tb.Icons[icon] = ic
-	}
-}
-
-// DeleteLineIcon deletes any icon at given line (0 starting)
-// if ln = -1 then delete all line icons.
-func (tb *Buffer) DeleteLineIcon(ln int) {
-	tb.LinesMu.Lock()
-	defer tb.LinesMu.Unlock()
-	if ln < 0 {
-		tb.LineIcons = nil
-		return
-	}
-	if tb.LineIcons == nil {
-		return
-	}
-	delete(tb.LineIcons, ln)
-}
+//   LineColors
 
 // SetLineColor sets given color at given line (0 starting)
 func (tb *Buffer) SetLineColor(ln int, clr image.Image) {
