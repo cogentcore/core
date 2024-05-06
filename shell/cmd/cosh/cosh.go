@@ -8,6 +8,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -67,6 +68,10 @@ func Interactive(c *Config) error {
 		line, err := rl.ReadLine()
 		if errors.Is(err, readline.ErrInterrupt) {
 			continue
+		}
+		if errors.Is(err, io.EOF) {
+			fmt.Println("exit")
+			return nil
 		}
 		if err != nil {
 			return err
