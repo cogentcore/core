@@ -5,10 +5,14 @@
 package interpreter
 
 import (
+	"context"
 	"log/slog"
+	"os"
+	"os/signal"
 	"path/filepath"
 	"reflect"
 	"strings"
+	"syscall"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/shell"
@@ -24,6 +28,10 @@ type Interpreter struct {
 
 	// the yaegi interpreter
 	Interp *interp.Interpreter
+
+	// Cancel, while the interpreter is running, can be called
+	// to stop the code interpreting.
+	Cancel func()
 }
 
 // NewInterpreter returns a new [Interpreter] initialized with the given options.
@@ -48,6 +56,7 @@ func NewInterpreter(options interp.Options) *Interpreter {
 		},
 	})
 	in.Interp.ImportUsed()
+	go in.MonitorSignals()
 	return in
 }
 
@@ -82,11 +91,28 @@ func (in *Interpreter) Eval(code string) error {
 // RunCode runs the accumulated set of code lines
 // and clears the stack.
 func (in *Interpreter) RunCode() error {
+	ctx, cancel := context.WithCancel(context.Background())
+	in.Cancel = cancel
 	cmd := in.Shell.Code()
 	in.Shell.ResetLines()
-	_, err := in.Interp.Eval(cmd)
+	_, err := in.Interp.EvalWithContext(ctx, cmd)
+	in.Cancel = nil
 	if err != nil {
 		slog.Error(err.Error())
 	}
 	return err
+}
+
+// MonitorSignals monitors the operating system signals to appropriately
+// stop the interpreter and prevent the shell from closing on Control+C.
+// It is called automatically in another goroutine in [NewInterpreter].
+func (in *Interpreter) MonitorSignals() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	for {
+		<-c
+		if in.Cancel != nil {
+			in.Cancel()
+		}
+	}
 }
