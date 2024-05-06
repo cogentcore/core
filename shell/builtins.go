@@ -7,19 +7,41 @@ package shell
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+
+	"github.com/mitchellh/go-homedir"
 )
 
+// InstallBuiltins adds the builtin shell commands to [Shell.Builtins].
 func (sh *Shell) InstallBuiltins() {
 	sh.Builtins = make(map[string]func(args ...string) error)
 	sh.Builtins["cd"] = sh.Cd
 }
 
+// Cd changes the current directory.
 func (sh *Shell) Cd(args ...string) error {
-	if len(args) != 1 {
-		return fmt.Errorf("cd requires one argument: the directory")
+	if len(args) > 1 {
+		return fmt.Errorf("no more than one argument can be passed to cd")
 	}
-	dir := args[0]
-	sh.Config.Dir = args[0]
+	dir := ""
+	if len(args) == 1 {
+		dir = args[0]
+	}
+	dir, err := homedir.Expand(dir)
+	if err != nil {
+		return err
+	}
+	if dir == "" {
+		dir, err = homedir.Dir()
+		if err != nil {
+			return err
+		}
+	}
+	dir, err = filepath.Abs(dir)
+	if err != nil {
+		return err
+	}
+	sh.Config.Dir = dir
 	return os.Chdir(dir)
 }
 
