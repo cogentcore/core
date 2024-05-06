@@ -218,7 +218,7 @@ func (ed *Editor) SetStyles() {
 		s.Overflow.Set(styles.OverflowAuto) // absorbs all
 		s.Border.Radius = styles.BorderRadiusLarge
 		s.Margin.Zero()
-		s.Padding.Set(units.Dp(4))
+		s.Padding.Set(units.Em(0.5))
 		s.Align.Content = styles.Start
 		s.Align.Items = styles.Start
 		s.Text.Align = styles.Start
@@ -226,11 +226,13 @@ func (ed *Editor) SetStyles() {
 		s.Color = colors.C(colors.Scheme.OnSurface)
 		s.Min.Set(units.Em(10), units.Em(5)) // TODO: remove after #900 is fixed
 
+		s.MaxBorder.Width.Set(units.Dp(2))
 		if s.Is(states.Focused) {
 			// we have a blank background and let the border
 			// indicate the focus state
 			s.StateLayer = 0
 			s.Background = nil
+			s.Border.Width.Set(units.Dp(2))
 		} else {
 			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
 		}

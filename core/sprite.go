@@ -37,9 +37,9 @@ type Sprite struct {
 }
 
 // NewSprite returns a new sprite with given name, which must remain
-// invariant and unique among all sprites in use, and is used for all access
-// -- prefix with package and type name to ensure uniqueness.  Starts out in
-// inactive state -- must call ActivateSprite.  If size is 0, no image is made.
+// invariant and unique among all sprites in use, and is used for all access;
+// prefix with package and type name to ensure uniqueness.  Starts out in
+// inactive state; must call ActivateSprite.  If size is 0, no image is made.
 func NewSprite(nm string, sz image.Point, pos image.Point) *Sprite {
 	sp := &Sprite{Name: nm}
 	sp.SetSize(sz)
