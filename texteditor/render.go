@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/paint"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
@@ -388,9 +389,9 @@ func (ed *Editor) RenderLineNumbersBoxAll() {
 	epos.X = spos.X + ed.LineNumberOff
 
 	sz := epos.Sub(spos)
-	pc.StrokeStyle.Color = nil
 	pc.FillStyle.Color = ed.LineNumberColor
 	pc.DrawRoundedRectangle(spos.X, spos.Y, sz.X, sz.Y, ed.Styles.Border.Radius.Dots())
+	pc.Fill()
 }
 
 // RenderLineNumber renders given line number; called within context of other render.
@@ -425,19 +426,23 @@ func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
 		if hasLClr { // split the diff!
 			bszhlf := bsz
 			bszhlf.X /= 2
-			pc.FillBox(sbox, bszhlf, lclr)
-			nsp := sbox
-			nsp.X += bszhlf.X
-			pc.FillBox(nsp, bszhlf, ed.SelectColor)
+			// pc.FillBox(sbox, bszhlf, lclr)
+			// nsp := sbox
+			// nsp.X += bszhlf.X
+			// pc.FillBox(nsp, bszhlf, ed.SelectColor)
 		} else {
 			actClr = ed.SelectColor
-			pc.FillBox(sbox, bsz, ed.SelectColor)
+			// pc.FillStyle.Color = nil
+			// pc.DrawRoundedRectangle(sbox.X, sbox.Y, bsz.X, bsz.Y, ed.Styles.Border.Radius.Dots())
+			// pc.Fill()
 		}
 	} else if hasLClr {
 		pc.FillBox(sbox, bsz, lclr)
 	} else if defFill {
 		actClr = ed.LineNumberColor
-		pc.FillBox(sbox, bsz, ed.LineNumberColor)
+		// pc.FillStyle.Color = actClr
+		// pc.DrawRoundedRectangle(sbox.X, sbox.Y, bsz.X, bsz.Y, ed.Styles.Border.Radius.Dots())
+		// pc.Fill()
 	}
 
 	fst.Background = nil
@@ -448,6 +453,14 @@ func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
 	uActClr := colors.ToUniform(actClr)
 	if hct.ContrastRatio(uActClr, colors.ToUniform(fst.Color)) < hct.ContrastAA {
 		fst.Color = colors.C(hct.ContrastColor(uActClr, hct.ContrastAA))
+	}
+	if ed.CursorPos.Ln == ln {
+		fst.Color = colors.C(colors.Scheme.Primary.Base)
+		fst.Weight = styles.WeightBold
+		// need to open with new weight
+		fst.Font = paint.OpenFont(fst, &ed.Styles.UnitContext)
+	} else {
+		fst.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 	}
 	ed.LineNumberRender.SetString(lnstr, fst, &sty.UnitContext, &sty.Text, true, 0, 0)
 	pos := math32.Vector2{
