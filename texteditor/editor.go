@@ -227,14 +227,11 @@ func (ed *Editor) SetStyles() {
 		s.Min.Set(units.Em(10), units.Em(5)) // TODO: remove after #900 is fixed
 
 		s.MaxBorder.Width.Set(units.Dp(2))
+		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+		// note: a blank background does NOT work for depth color rendering
 		if s.Is(states.Focused) {
-			// we have a blank background and let the border
-			// indicate the focus state
 			s.StateLayer = 0
-			s.Background = nil
 			s.Border.Width.Set(units.Dp(2))
-		} else {
-			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
 		}
 	})
 }
