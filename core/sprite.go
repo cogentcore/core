@@ -9,6 +9,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/base/ordmap"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/vgpu/szalloc"
@@ -21,7 +22,7 @@ import (
 type Sprite struct {
 
 	// whether this sprite is active now or not
-	On bool
+	Active bool
 
 	// unique name of sprite
 	Name string
@@ -29,11 +30,17 @@ type Sprite struct {
 	// properties for sprite, which allow for user-extensible data
 	Properties map[string]any
 
-	// position and size of the image within the overlay window texture
+	// position and size of the image within the RenderWindow
 	Geom math32.Geom2DInt
 
 	// pixels to render -- should be same size as Geom.Size
 	Pixels *image.RGBA
+
+	// Listeners are event listener functions for processing events on this widget.
+	// They are called in sequential descending order (so the last added listener
+	// is called first). They should be added using the On function. FirstListeners
+	// and FinalListeners are called before and after these listeners, respectively.
+	Listeners events.Listeners `copier:"-" json:"-" xml:"-" set:"-"`
 }
 
 // NewSprite returns a new sprite with given name, which must remain
@@ -95,6 +102,56 @@ func GrabRenderFrom(w Widget) *image.RGBA {
 	img := image.NewRGBA(image.Rectangle{Max: sz})
 	draw.Draw(img, img.Bounds(), wb.Scene.Pixels, wb.Geom.TotalBBox.Min, draw.Src)
 	return img
+}
+
+// On adds the given event handler to the sprite's Listeners for the given event type.
+// Listeners are called in sequential descending order, so this listener will be called
+// before all of the ones added before it.
+func (sp *Sprite) On(etype events.Types, fun func(e events.Event)) *Sprite {
+	sp.Listeners.Add(etype, fun)
+	return sp
+}
+
+// OnClick adds an event listener function for [events.Click] events
+func (sp *Sprite) OnClick(fun func(e events.Event)) *Sprite {
+	return sp.On(events.Click, fun)
+}
+
+// OnSlideMove adds an event listener function for [events.SlideMove] events
+func (sp *Sprite) OnSlideMove(fun func(e events.Event)) *Sprite {
+	return sp.On(events.SlideMove, fun)
+}
+
+// OnSlideStop adds an event listener function for [events.SlideStop] events
+func (sp *Sprite) OnSlideStop(fun func(e events.Event)) *Sprite {
+	return sp.On(events.SlideStop, fun)
+}
+
+// Send sends an NEW event of given type to this sprite,
+// optionally starting from values in the given original event
+// (recommended to include where possible).
+// Do NOT send an existing event using this method if you
+// want the Handled state to persist throughout the call chain;
+// call HandleEvent directly for any existing events.
+func (sp *Sprite) HandleEvent(e events.Event) {
+	sp.Listeners.Call(e)
+}
+
+// Send sends an NEW event of given type to this sprite,
+// optionally starting from values in the given original event
+// (recommended to include where possible).
+// Do NOT send an existing event using this method if you
+// want the Handled state to persist throughout the call chain;
+// call HandleEvent directly for any existing events.
+func (sp *Sprite) Send(typ events.Types, orig ...events.Event) {
+	var e events.Event
+	if len(orig) > 0 && orig[0] != nil {
+		e = orig[0].NewFromClone(typ)
+	} else {
+		e = &events.Base{Typ: typ}
+		e.Init()
+	}
+	sp.HandleEvent(e)
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -193,8 +250,8 @@ func (ss *Sprites) ActivateSprite(name string) {
 	if !ok {
 		return // not worth bothering about errs -- use a consistent string var!
 	}
-	if !sp.On {
-		sp.On = true
+	if !sp.Active {
+		sp.Active = true
 		ss.Modified = true
 	}
 }
@@ -205,8 +262,8 @@ func (ss *Sprites) InactivateSprite(name string) {
 	if !ok {
 		return // not worth bothering about errs -- use a consistent string var!
 	}
-	if sp.On {
-		sp.On = false
+	if sp.Active {
+		sp.Active = false
 		ss.Modified = true
 	}
 }
@@ -214,8 +271,8 @@ func (ss *Sprites) InactivateSprite(name string) {
 // InactivateAllSprites inactivates all sprites, setting Modified if wasn't before
 func (ss *Sprites) InactivateAllSprites() {
 	for _, sp := range ss.Names.Order {
-		if sp.Value.On {
-			sp.Value.On = false
+		if sp.Value.Active {
+			sp.Value.Active = false
 			ss.Modified = true
 		}
 	}
@@ -254,7 +311,7 @@ func (ss *Sprites) DrawSprites(drw system.Drawer) {
 				continue
 			}
 			sp := ss.Names.ValueByIndex(spi)
-			if !sp.On {
+			if !sp.Active {
 				continue
 			}
 			// fmt.Println("ds", imgidx, ii, sp.Geom.Pos)
@@ -262,33 +319,3 @@ func (ss *Sprites) DrawSprites(drw system.Drawer) {
 		}
 	}
 }
-
-// SpriteEvent processes given event for any active sprites
-// func (ss *Sprites) SelSpriteEvent(evi events.Event) {
-// 	// w.Stages.RenderContext.Mu.Lock()
-// 	// defer w.Stages.RenderContext.Mu.Unlock()
-//
-// 	et := evi.Type()
-//
-// 	for _, spkv := range w.Sprites.Names.Order {
-// 		sp := spkv.Val
-// 		if !sp.On {
-// 			continue
-// 		}
-// 		if sp.Events == nil {
-// 			continue
-// 		}
-// 		sig, ok := sp.Events[et]
-// 		if !ok {
-// 			continue
-// 		}
-// 		ep := evi.Pos()
-// 		if et == events.EventsDragEvent {
-// 			if sp.Name == w.SpriteDragging {
-// 				sig.Emit(w.This(), int64(et), evi)
-// 			}
-// 		} else if ep.In(sp.Geom.Bounds()) {
-// 			sig.Emit(w.This(), int64(et), evi)
-// 		}
-// 	}
-// }

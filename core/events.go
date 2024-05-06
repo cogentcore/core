@@ -49,6 +49,15 @@ type Events struct {
 	// mutex that protects timer variable updates (e.g., hover AfterFunc's)
 	TimerMu sync.Mutex
 
+	// stack of sprites with mouse pointer in BBox, with any listeners present
+	SpriteInBBox []*Sprite
+
+	// currently pressing sprite
+	SpritePress *Sprite
+
+	// currently sliding (dragging) sprite
+	SpriteSlide *Sprite
+
 	// stack of widgets with mouse pointer in BBox, and are not Disabled.
 	// Last item in the stack is the deepest nested widget (smallest BBox).
 	MouseInBBox []Widget
@@ -223,6 +232,8 @@ func (em *Events) ResetOnMouseDown() {
 	em.DragPress = nil
 	em.Slide = nil
 	em.SlidePress = nil
+	em.SpriteSlide = nil
+	em.SpritePress = nil
 
 	em.CancelRepeatClick()
 
@@ -248,6 +259,10 @@ func (em *Events) HandlePosEvent(e events.Event) {
 	case events.MouseDown:
 		em.ResetOnMouseDown()
 	case events.MouseDrag:
+		if em.SpriteSlide != nil {
+			em.SpriteSlide.HandleEvent(e)
+			return
+		}
 		if em.Slide != nil {
 			em.Slide.HandleEvent(e)
 			em.Slide.Send(events.SlideMove, e)
@@ -257,6 +272,17 @@ func (em *Events) HandlePosEvent(e events.Event) {
 		if em.Scroll != nil {
 			em.Scroll.HandleEvent(e)
 			return
+		}
+	}
+
+	em.SpriteInBBox = nil
+	if et != events.MouseMove {
+		em.GetSpriteInBBox(sc, e.WindowPos())
+
+		if len(em.SpriteInBBox) > 0 {
+			if em.HandleSpriteEvent(e) {
+				return
+			}
 		}
 	}
 
@@ -729,7 +755,7 @@ func (em *Events) DragStart(w Widget, data any, e events.Event) {
 	sp := NewSprite(DragSpriteName, image.Point{}, e.WindowPos())
 	sp.GrabRenderFrom(w) // TODO: maybe show the number of items being dragged
 	sp.Pixels = clone.AsRGBA(gradient.ApplyOpacityImage(sp.Pixels, 0.5))
-	sp.On = true
+	sp.Active = true
 	ms.Sprites.Add(sp)
 }
 
@@ -1245,4 +1271,55 @@ func (em *Events) TriggerShortcut(chord key.Chord) bool {
 	}
 	sa.Send(events.Click)
 	return true
+}
+
+//////////////////////////////////////////////////////////////////
+// 	Sprite Event Management
+
+func (em *Events) GetSpriteInBBox(sc *Scene, pos image.Point) {
+	st := sc.Stage
+	for _, kv := range st.Sprites.Names.Order {
+		sp := kv.Value
+		if !sp.Active {
+			continue
+		}
+		if sp.Listeners == nil {
+			continue
+		}
+		r := sp.Geom.Bounds()
+		if pos.In(r) {
+			em.SpriteInBBox = append(em.SpriteInBBox, sp)
+			fmt.Println("adding sprite:", sp.Name)
+		}
+	}
+}
+
+// HandleSpriteEvent handles the given event with sprites
+// returns true if event was handled
+func (em *Events) HandleSpriteEvent(e events.Event) bool {
+	et := e.Type()
+	for _, sp := range em.SpriteInBBox {
+		if e.IsHandled() {
+			break
+		}
+		sp.Listeners.Call(e) // everyone gets the primary event who is in scope, deepest first
+		switch et {
+		case events.MouseDown:
+			if sp.Listeners.HandlesEventType(events.SlideMove) {
+				em.SpriteSlide = sp
+			}
+			if sp.Listeners.HandlesEventType(events.Click) {
+				em.SpritePress = sp
+			}
+			break
+		case events.MouseUp:
+			if em.SpriteSlide == sp {
+				sp.Send(events.SlideStop, e)
+			}
+			if em.SpritePress == sp {
+				sp.Send(events.Click, e)
+			}
+		}
+	}
+	return e.IsHandled()
 }

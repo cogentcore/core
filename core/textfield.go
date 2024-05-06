@@ -1320,7 +1320,7 @@ func (tf *TextField) CursorSprite(on bool) *Sprite {
 			bbsz.X = 2
 		}
 		sp = NewSprite(spnm, bbsz, image.Point{})
-		sp.On = on
+		sp.Active = on
 		ibox := sp.Pixels.Bounds()
 		draw.Draw(sp.Pixels, ibox, tf.CursorColor, image.Point{}, draw.Src)
 		ms.Sprites.Add(sp)
