@@ -40,7 +40,6 @@ func (ed *Editor) RenderLayout() {
 
 func (ed *Editor) RenderWidget() {
 	if ed.PushBounds() {
-		ed.ApplyStyle()
 		if ed.Is(EditorNeedsLayout) {
 			ed.RenderLayout()
 			ed.SetFlag(false, EditorNeedsLayout)
