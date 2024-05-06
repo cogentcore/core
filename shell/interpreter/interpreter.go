@@ -6,9 +6,12 @@ package interpreter
 
 import (
 	"log/slog"
+	"path/filepath"
 	"reflect"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/shell"
+	"github.com/mitchellh/go-homedir"
 	"github.com/traefik/yaegi/interp"
 	"github.com/traefik/yaegi/stdlib"
 )
@@ -51,7 +54,9 @@ func NewInterpreter(options interp.Options) *Interpreter {
 func (in *Interpreter) Prompt() string {
 	dp := in.Shell.TotalDepth()
 	if dp == 0 {
-		return in.Shell.Config.Dir + " > "
+		hdir := errors.Log1(homedir.Dir())
+		rel := errors.Log1(filepath.Rel(hdir, in.Shell.Config.Dir))
+		return filepath.Join("~", rel) + " > "
 	}
 	res := "> "
 	for range dp {
