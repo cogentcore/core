@@ -132,7 +132,7 @@ func (wb *WidgetBase) ResetStyleWidget() {
 	// wb.Transition(&s.StateLayer, s.State.StateLayer(), 200*time.Millisecond, LinearTransition)
 	s.StateLayer = s.State.StateLayer()
 
-	s.Font.Family = string(AppearanceSettings.FontFamily)
+	s.Font.Family = string(AppearanceSettings.Font)
 }
 
 // SetStyles sets the base, widget-universal default

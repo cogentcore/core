@@ -359,7 +359,7 @@ func values(ts *core.Tabs) {
 	views.NewValue(tab, 5*time.Minute)
 	views.NewValue(tab, 500*time.Millisecond)
 	views.NewValue(tab, core.Filename("demo.go"))
-	views.NewValue(tab, core.AppearanceSettings.FontFamily)
+	views.NewValue(tab, core.AppearanceSettings.Font)
 	views.NewValue(tab, views.ColorMapName("ColdHot"))
 	views.NewFuncButton(tab, hello).SetShowReturn(true)
 }

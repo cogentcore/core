@@ -36,7 +36,7 @@ func TestValues(t *testing.T) {
 		{"nil", (*int)(nil), ""},
 		{"icon", icons.Add, ""},
 		{"icon-show-name", icons.Add, `view:"show-name"`},
-		{"font", core.AppearanceSettings.FontFamily, ""},
+		{"font", core.AppearanceSettings.Font, ""},
 		{"file", core.Filename("README.md"), ""},
 		{"func", SettingsWindow, ""},
 		{"option", option.New("an option"), ""},
