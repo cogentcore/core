@@ -38,7 +38,7 @@ import (
 // force everything to be on a single line.
 // With multi-line wrapped text, the text is still treated as a contiguous
 // wrapped text.
-type TextField struct {
+type TextField struct { //core:embedder
 	WidgetBase
 
 	// Type is the styling type of the text field.
@@ -1228,7 +1228,7 @@ func init() {
 		if w == nil {
 			return
 		}
-		tf := w.(*TextField)
+		tf := AsTextField(w)
 		if !w.StateIs(states.Focused) || !w.IsVisible() {
 			tf.BlinkOn = false
 			tf.RenderCursor(false)

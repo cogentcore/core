@@ -70,6 +70,24 @@ func (ed *Editor) TextStyleProperties() map[string]any {
 	return ed.Buffer.Hi.CSSProperties
 }
 
+// RenderStartPos is absolute rendering start position from our content pos with scroll
+// This can be offscreen (left, up) based on scrolling.
+func (ed *Editor) RenderStartPos() math32.Vector2 {
+	pos := ed.Geom.Pos.Content.Add(ed.Geom.Scroll)
+	// spc := ed.Styles.BoxSpace().Size()
+	// pos.Y += spc.Y
+	return pos
+}
+
+// RenderBBox is the render region
+func (ed *Editor) RenderBBox() image.Rectangle {
+	bb := ed.Geom.ContentBBox
+	spc := ed.Styles.BoxSpace().Size().ToPointCeil()
+	// bb.Min = bb.Min.Add(spc)
+	bb.Max = bb.Max.Sub(spc)
+	return bb
+}
+
 // CharStartPos returns the starting (top left) render coords for the given
 // position -- makes no attempt to rationalize that pos (i.e., if not in
 // visible range, position will be out of range too)
@@ -102,7 +120,7 @@ func (ed *Editor) CharStartPos(pos lexer.Pos) math32.Vector2 {
 // that is currently visible, based on bounding boxes.
 func (ed *Editor) CharStartPosVis(pos lexer.Pos) math32.Vector2 {
 	spos := ed.CharStartPos(pos)
-	bb := ed.Geom.ContentBBox
+	bb := ed.RenderBBox()
 	bbmin := math32.Vector2FromPoint(bb.Min)
 	bbmin.X += ed.LineNumberOffset
 	bbmax := math32.Vector2FromPoint(bb.Max)
@@ -166,7 +184,7 @@ func (ed *Editor) RenderDepthBackground(stln, edln int) {
 	buf.MarkupMu.RLock() // needed for HiTags access
 	defer buf.MarkupMu.RUnlock()
 
-	bb := ed.Geom.ContentBBox
+	bb := ed.RenderBBox()
 	sty := &ed.Styles
 	isDark := matcolor.SchemeIsDark
 	nclrs := len(ViewDepthColors)
@@ -258,12 +276,12 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bg i
 	spos := ed.CharStartPosVis(st)
 	epos := ed.CharStartPosVis(end)
 	epos.Y += ed.LineHeight
-	bb := ed.Geom.ContentBBox
+	bb := ed.RenderBBox()
 	stx := math32.Ceil(float32(bb.Min.X) + ed.LineNumberOffset)
 	if int(math32.Ceil(epos.Y)) < bb.Min.Y || int(math32.Floor(spos.Y)) > bb.Max.Y {
 		return
 	}
-	ex := float32(ed.Geom.ContentBBox.Max.X)
+	ex := float32(bb.Max.X)
 	if fullWidth {
 		epos.X = ex
 	}
@@ -307,19 +325,12 @@ func (ed *Editor) RenderRegionToEnd(st lexer.Pos, sty *styles.Style, bg image.Im
 	pc.FillBox(spos, epos.Sub(spos), bg) // same line, done
 }
 
-// RenderStartPos is absolute rendering start position from our content pos with scroll
-// This can be offscreen (left, up) based on scrolling.
-func (ed *Editor) RenderStartPos() math32.Vector2 {
-	pos := ed.Geom.Pos.Content.Add(ed.Geom.Scroll)
-	return pos
-}
-
 // RenderAllLines displays all the visible lines on the screen,
 // after PushBounds has already been called.
 func (ed *Editor) RenderAllLines() {
 	ed.RenderStandardBox()
 	pc := &ed.Scene.PaintContext
-	bb := ed.Geom.ContentBBox
+	bb := ed.RenderBBox()
 	pos := ed.RenderStartPos()
 	stln := -1
 	edln := -1
@@ -344,6 +355,7 @@ func (ed *Editor) RenderAllLines() {
 	if stln < 0 || edln < 0 { // shouldn't happen.
 		return
 	}
+	pc.PushBounds(bb)
 
 	if ed.HasLineNumbers() {
 		ed.RenderLineNumbersBoxAll()
@@ -361,12 +373,14 @@ func (ed *Editor) RenderAllLines() {
 		tbb.Min.X += int(ed.LineNumberOffset)
 		pc.PushBounds(tbb)
 	}
+	// desc := 0.2 * ed.LineHeight
+	desc := 0.8 * ed.LineHeight
 	for ln := stln; ln <= edln; ln++ {
 		lst := pos.Y + ed.Offsets[ln]
 		lp := pos
 		lp.Y = lst
 		lp.X += ed.LineNumberOffset
-		if lp.Y+ed.LineHeight > math32.Vector2FromPoint(bb.Max).Y {
+		if lp.Y+desc > float32(bb.Max.Y) {
 			break
 		}
 		ed.Renders[ln].Render(pc, lp) // not top pos; already has baseline offset
@@ -374,6 +388,7 @@ func (ed *Editor) RenderAllLines() {
 	if ed.HasLineNumbers() {
 		pc.PopBounds()
 	}
+	pc.PopBounds()
 }
 
 // RenderLineNumbersBoxAll renders the background for the line numbers in the LineNumberColor
@@ -382,7 +397,7 @@ func (ed *Editor) RenderLineNumbersBoxAll() {
 		return
 	}
 	pc := &ed.Scene.PaintContext
-	bb := ed.Geom.ContentBBox
+	bb := ed.RenderBBox()
 	spos := math32.Vector2FromPoint(bb.Min)
 	epos := math32.Vector2FromPoint(bb.Max)
 	epos.X = spos.X + ed.LineNumberOffset
@@ -405,7 +420,7 @@ func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
 	sty := &ed.Styles
 	fst := sty.FontRender()
 	pc := &sc.PaintContext
-	bb := ed.Geom.ContentBBox
+	bb := ed.RenderBBox()
 
 	fst.Background = nil
 	lfmt := fmt.Sprintf("%d", ed.LineNumberDigits)
@@ -462,7 +477,7 @@ func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
 // (typically cursor -- if zero, a visible line is first found) -- returns
 // stln if nothing found above it.
 func (ed *Editor) FirstVisibleLine(stln int) int {
-	bb := ed.Geom.ContentBBox
+	bb := ed.RenderBBox()
 	if stln == 0 {
 		perln := float32(ed.LinesSize.Y) / float32(ed.NLines)
 		stln = int(ed.Geom.Scroll.Y/perln) - 1
@@ -491,7 +506,7 @@ func (ed *Editor) FirstVisibleLine(stln int) int {
 // LastVisibleLine finds the last visible line, starting at given line
 // (typically cursor) -- returns stln if nothing found beyond it.
 func (ed *Editor) LastVisibleLine(stln int) int {
-	bb := ed.Geom.ContentBBox
+	bb := ed.RenderBBox()
 	lastln := stln
 	for ln := stln + 1; ln < ed.NLines; ln++ {
 		pos := lexer.Pos{Ln: ln}
@@ -511,7 +526,7 @@ func (ed *Editor) PixelToCursor(pt image.Point) lexer.Pos {
 	if ed.NLines == 0 {
 		return lexer.PosZero
 	}
-	bb := ed.Geom.ContentBBox
+	bb := ed.RenderBBox()
 	sty := &ed.Styles
 	yoff := float32(bb.Min.Y)
 	xoff := float32(bb.Min.X)

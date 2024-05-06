@@ -37,6 +37,9 @@ func (ed *Editor) StyleSizes() {
 func (ed *Editor) UpdateFromAlloc() {
 	sty := &ed.Styles
 	asz := ed.Geom.Size.Alloc.Content
+	spc := sty.BoxSpace()
+	spsz := spc.Size()
+	asz.SetSub(spsz)
 	sbw := math32.Ceil(ed.Styles.ScrollBarWidth.Dots)
 	// if ed.HasScroll[math32.Y] {
 	asz.X -= sbw
@@ -58,9 +61,9 @@ func (ed *Editor) UpdateFromAlloc() {
 }
 
 func (ed *Editor) InternalSizeFromLines() {
-	sty := &ed.Styles
-	spc := sty.BoxSpace()
-	ed.TotalSize = ed.LinesSize.Add(spc.Size())
+	// sty := &ed.Styles
+	// spc := sty.BoxSpace()
+	ed.TotalSize = ed.LinesSize // .Add(spc.Size())
 	ed.TotalSize.X += ed.LineNumberOffset
 	ed.Geom.Size.Internal = ed.TotalSize
 	ed.Geom.Size.Internal.Y += ed.LineHeight
