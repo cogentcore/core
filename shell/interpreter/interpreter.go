@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"path/filepath"
 	"reflect"
+	"strings"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/shell"
@@ -56,6 +57,10 @@ func (in *Interpreter) Prompt() string {
 	if dp == 0 {
 		hdir := errors.Log1(homedir.Dir())
 		rel := errors.Log1(filepath.Rel(hdir, in.Shell.Config.Dir))
+		// if it has to go back, then it is not in home dir, so no ~
+		if strings.Contains(rel, "..") {
+			return in.Shell.Config.Dir + " > "
+		}
 		return filepath.Join("~", rel) + " > "
 	}
 	res := "> "
