@@ -1223,6 +1223,20 @@ var (
 
 func init() {
 	TheApp.AddQuitCleanFunc(TextFieldBlinker.QuitClean)
+	TextFieldBlinker.Func = func() {
+		w := TextFieldBlinker.Widget
+		if w == nil {
+			return
+		}
+		tf := w.(*TextField)
+		if !w.StateIs(states.Focused) || !w.IsVisible() {
+			tf.BlinkOn = false
+			tf.RenderCursor(false)
+		} else {
+			tf.BlinkOn = !tf.BlinkOn
+			tf.RenderCursor(tf.BlinkOn)
+		}
+	}
 }
 
 // StartCursor starts the cursor blinking and renders it
@@ -1238,17 +1252,8 @@ func (tf *TextField) StartCursor() {
 	if SystemSettings.CursorBlinkTime == 0 {
 		return
 	}
-	TextFieldBlinker.Blink(SystemSettings.CursorBlinkTime, func() {
-		if !tf.StateIs(states.Focused) || !tf.IsVisible() {
-			tf.BlinkOn = false
-			tf.RenderCursor(false)
-			TextFieldBlinker.Widget = nil
-		} else {
-			tf.BlinkOn = !tf.BlinkOn
-			tf.RenderCursor(tf.BlinkOn)
-		}
-	})
 	TextFieldBlinker.SetWidget(tf.This().(Widget))
+	TextFieldBlinker.Blink(SystemSettings.CursorBlinkTime)
 }
 
 // ClearCursor turns off cursor and stops it from blinking

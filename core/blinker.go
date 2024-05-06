@@ -26,13 +26,12 @@ type Blinker struct {
 }
 
 // Blink sets up the blinking; does nothing if already setup
-func (bl *Blinker) Blink(dur time.Duration, fun func()) {
+func (bl *Blinker) Blink(dur time.Duration) {
 	bl.Mu.Lock()
 	defer bl.Mu.Unlock()
 	if bl.Ticker != nil {
 		return
 	}
-	bl.Func = fun
 	bl.Ticker = time.NewTicker(dur)
 	bl.Quit = make(chan struct{})
 	go bl.BlinkLoop()

@@ -15,10 +15,6 @@ import (
 	"cogentcore.org/core/styles/states"
 )
 
-func init() {
-	core.TheApp.AddQuitCleanFunc(EditorBlinker.QuitClean)
-}
-
 var (
 	// EditorBlinker manages cursor blinking
 	EditorBlinker = core.Blinker{}
@@ -26,6 +22,24 @@ var (
 	// EditorSpriteName is the name of the window sprite used for the cursor
 	EditorSpriteName = "texteditor.Editor.Cursor"
 )
+
+func init() {
+	core.TheApp.AddQuitCleanFunc(EditorBlinker.QuitClean)
+	EditorBlinker.Func = func() {
+		w := EditorBlinker.Widget
+		if w == nil {
+			return
+		}
+		ed := AsEditor(w.This())
+		if !w.StateIs(states.Focused) || !w.IsVisible() {
+			ed.BlinkOn = false
+			ed.RenderCursor(false)
+		} else {
+			ed.BlinkOn = !ed.BlinkOn
+			ed.RenderCursor(ed.BlinkOn)
+		}
+	}
+}
 
 // StartCursor starts the cursor blinking and renders it
 func (ed *Editor) StartCursor() {
@@ -40,17 +54,8 @@ func (ed *Editor) StartCursor() {
 	if core.SystemSettings.CursorBlinkTime == 0 {
 		return
 	}
-	EditorBlinker.Blink(core.SystemSettings.CursorBlinkTime, func() {
-		if !ed.StateIs(states.Focused) || !ed.IsVisible() {
-			ed.BlinkOn = false
-			ed.RenderCursor(false)
-			EditorBlinker.Widget = nil
-		} else {
-			ed.BlinkOn = !ed.BlinkOn
-			ed.RenderCursor(ed.BlinkOn)
-		}
-	})
 	EditorBlinker.SetWidget(ed.This().(core.Widget))
+	EditorBlinker.Blink(core.SystemSettings.CursorBlinkTime)
 }
 
 // ClearCursor turns off cursor and stops it from blinking

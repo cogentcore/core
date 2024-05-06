@@ -64,7 +64,6 @@ func (ed *Editor) InternalSizeFromLines() {
 	ed.TotalSize.X += ed.LineNumberOffset
 	ed.Geom.Size.Internal = ed.TotalSize
 	ed.Geom.Size.Internal.Y += ed.LineHeight
-	// fmt.Println("internal y", ed.Geom.Size.Internal.Y)
 }
 
 // LayoutAllLines generates TextRenders of lines
@@ -141,7 +140,6 @@ func (ed *Editor) ReLayoutAllLines() {
 		return
 	}
 	if ed.lastlineLayoutSize == ed.LineLayoutSize {
-		// fmt.Println("relay: last", ed.lastlineLayoutSize, " == ", ed.LineLayoutSize)
 		ed.InternalSizeFromLines()
 		return
 	}
@@ -175,7 +173,6 @@ func (ed *Editor) ReLayoutAllLines() {
 
 	ed.LinesSize = math32.Vec2(mxwd, off)
 	ed.lastlineLayoutSize = ed.LineLayoutSize
-	// fmt.Println("relay: layout", ed.lastlineLayoutSize)
 	ed.InternalSizeFromLines()
 }
 
@@ -191,27 +188,21 @@ func (ed *Editor) ScrollValues(d math32.Dims) (maxSize, visSize, visPct float32)
 	maxSize = sz.Internal.Dim(d)
 	visSize = sz.Alloc.Content.Dim(d)
 	visPct = visSize / maxSize
-	// fmt.Println(d, "maxsize:", maxSize, "visSize:", visSize)
 	return
 }
 
-func (ed *Editor) SizeUp() {
-	// fmt.Println("####### size up start")
-	ed.Layout.SizeUp()
-	ed.LayoutAllLines() // initial
-}
-
 func (ed *Editor) SizeDown(iter int) bool {
-	// fmt.Println("#### size down start")
+	if iter == 0 {
+		ed.LayoutAllLines()
+	} else {
+		ed.ReLayoutAllLines()
+	}
 	redo := ed.Layout.SizeDown(iter)
 	chg := ed.ManageOverflow(iter, true) // this must go first.
-	// fmt.Println("chg", chg)
-	ed.ReLayoutAllLines()
 	return redo || chg
 }
 
 func (ed *Editor) SizeFinal() {
-	// fmt.Println("#### size final start")
 	ed.Layout.SizeFinal()
 	ed.ReLayoutAllLines()
 }
