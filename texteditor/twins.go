@@ -38,7 +38,6 @@ func (te *TwinEditors) SetStyles() {
 				s.Grow.Set(1, 1)
 				s.Min.X.Ch(80)
 				s.Min.Y.Em(40)
-				s.Font.Family = string(core.AppearanceSettings.MonoFont)
 			})
 		}
 	})

@@ -34,6 +34,6 @@ core.NewText(parent).SetText("Hello,\n\tworld!").Style(func(s *styles.Style) {
     s.Font.Style = styles.Italic
     s.Text.WhiteSpace = styles.WhiteSpacePre
     s.Color = colors.C(colors.Scheme.Success.Base)
-    s.Font.Family = string(core.AppearanceSettings.MonoFont)
+    s.SetMono(true)
 })
 ```

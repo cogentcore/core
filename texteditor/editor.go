@@ -213,7 +213,7 @@ func (ed *Editor) SetStyles() {
 		} else {
 			s.Text.WhiteSpace = styles.WhiteSpacePre
 		}
-		s.Font.Family = string(core.AppearanceSettings.MonoFont)
+		s.SetMono(true)
 		s.Grow.Set(1, 1)
 		s.Overflow.Set(styles.OverflowAuto) // absorbs all
 		s.Border.Radius = styles.BorderRadiusLarge

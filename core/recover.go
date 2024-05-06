@@ -48,7 +48,7 @@ func HandleRecover(r any) {
 			txt := fmt.Sprintf("Crash log saved in %s\n\n%s", clpath, system.CrashLogText(r, stack))
 			d := NewBody("crash-details").AddTitle("Crash details")
 			NewText(d).SetText(txt).Style(func(s *styles.Style) {
-				s.Font.Family = string(AppearanceSettings.MonoFont)
+				s.SetMono(true)
 				s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 			})
 			d.AddBottomBar(func(parent Widget) {
