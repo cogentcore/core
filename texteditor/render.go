@@ -10,7 +10,6 @@ import (
 	"image/color"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/core"
@@ -408,41 +407,22 @@ func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
 	pc := &sc.PaintContext
 	bb := ed.Geom.ContentBBox
 
-	// render fillbox
-	sbox := ed.CharStartPos(lexer.Pos{Ln: ln})
-	sbox.X = float32(bb.Min.X)
-	ebox := ed.CharEndPos(lexer.Pos{Ln: ln + 1})
-	if ln < ed.NLines-1 {
-		ebox.Y -= ed.LineHeight
-	}
-	if ebox.Y >= float32(bb.Max.Y) {
-		return
-	}
-	ebox.X = sbox.X + ed.LineNumberOff
-	bsz := ebox.Sub(sbox)
-	lclr, hasLClr := ed.Buffer.LineColors[ln]
-	actClr := lclr
-	if ed.CursorPos.Ln == ln {
-		if hasLClr { // split the diff!
-			bszhlf := bsz
-			bszhlf.X /= 2
-			// pc.FillBox(sbox, bszhlf, lclr)
-			// nsp := sbox
-			// nsp.X += bszhlf.X
-			// pc.FillBox(nsp, bszhlf, ed.SelectColor)
-		} else {
-			actClr = ed.SelectColor
-			// pc.FillStyle.Color = nil
-			// pc.DrawRoundedRectangle(sbox.X, sbox.Y, bsz.X, bsz.Y, ed.Styles.Border.Radius.Dots())
-			// pc.Fill()
+	// render circle
+	lineColor, hasLineColor := ed.Buffer.LineColors[ln]
+	if hasLineColor {
+		sbox := ed.CharStartPos(lexer.Pos{Ln: ln})
+		sbox.X = float32(bb.Min.X)
+		ebox := ed.CharEndPos(lexer.Pos{Ln: ln + 1})
+		if ln < ed.NLines-1 {
+			ebox.Y -= ed.LineHeight
 		}
-	} else if hasLClr {
-		pc.FillBox(sbox, bsz, lclr)
-	} else if defFill {
-		actClr = ed.LineNumberColor
-		// pc.FillStyle.Color = actClr
-		// pc.DrawRoundedRectangle(sbox.X, sbox.Y, bsz.X, bsz.Y, ed.Styles.Border.Radius.Dots())
-		// pc.Fill()
+		if ebox.Y >= float32(bb.Max.Y) {
+			return
+		}
+		ebox.X = sbox.X + ed.LineNumberOff
+		bsz := ebox.Sub(sbox)
+
+		pc.FillBox(sbox, bsz, lineColor)
 	}
 
 	fst.Background = nil
@@ -450,10 +430,6 @@ func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
 	lfmt = "%" + lfmt + "d"
 	lnstr := fmt.Sprintf(lfmt, ln+1)
 
-	uActClr := colors.ToUniform(actClr)
-	if hct.ContrastRatio(uActClr, colors.ToUniform(fst.Color)) < hct.ContrastAA {
-		fst.Color = colors.C(hct.ContrastColor(uActClr, hct.ContrastAA))
-	}
 	if ed.CursorPos.Ln == ln {
 		fst.Color = colors.C(colors.Scheme.Primary.Base)
 		fst.Weight = styles.WeightBold
