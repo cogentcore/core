@@ -41,8 +41,12 @@ func (sh *Shell) Cd(args ...string) error {
 	if err != nil {
 		return err
 	}
+	err = os.Chdir(dir)
+	if err != nil {
+		return err
+	}
 	sh.Config.Dir = dir
-	return os.Chdir(dir)
+	return nil
 }
 
 // example alias:

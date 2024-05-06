@@ -6,6 +6,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -64,6 +65,9 @@ func Interactive(c *Config) error {
 	for {
 		rl.SetPrompt(in.Prompt())
 		line, err := rl.ReadLine()
+		if errors.Is(err, readline.ErrInterrupt) {
+			continue
+		}
 		if err != nil {
 			return err
 		}
