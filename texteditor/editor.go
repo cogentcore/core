@@ -214,8 +214,10 @@ func (ed *Editor) SetStyles() {
 		}
 		s.Font.Family = string(core.AppearanceSettings.MonoFont)
 		s.Grow.Set(1, 1)
-		s.Overflow.Set(styles.OverflowAuto)   // absorbs all
-		s.Border.Style.Set(styles.BorderNone) // don't render our own border
+		s.Overflow.Set(styles.OverflowAuto) // absorbs all
+		// s.Border.Style.Set(styles.BorderNone) // don't render our own border
+		s.Border.Width.Set(units.Dp(1))
+		s.Border.Color.Set(colors.C(colors.Red))
 		s.Border.Radius = styles.BorderRadiusLarge
 		s.Margin.Zero()
 		s.Padding.Set(units.Dp(4))
@@ -226,7 +228,7 @@ func (ed *Editor) SetStyles() {
 		s.Color = colors.C(colors.Scheme.OnSurface)
 		s.Min.Set(units.Em(10), units.Em(5)) // TODO: remove after #900 is fixed
 
-		s.Background = colors.C(colors.Scheme.SurfaceContainer)
+		s.Background = colors.C(colors.Red)
 	})
 }
 
