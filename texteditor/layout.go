@@ -18,22 +18,22 @@ func (ed *Editor) StyleSizes() {
 	ed.LineHeight = sty.Text.EffLineHeight(ed.FontHeight)
 	ed.FontDescent = math32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Descent)
 	ed.FontAscent = math32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Ascent)
-	ed.LineNoDigs = max(1+int(math32.Log10(float32(ed.NLines))), 3)
+	ed.LineNumberDigits = max(1+int(math32.Log10(float32(ed.NLines))), 3)
 	lno := true
 	if ed.Buffer != nil {
 		lno = ed.Buffer.Options.LineNumbers
 	}
 	if lno {
 		ed.SetFlag(true, EditorHasLineNumbers)
-		ed.LineNoOff = float32(ed.LineNoDigs+3)*sty.Font.Face.Metrics.Ch + spc.Left // space for icon
+		ed.LineNumberOff = float32(ed.LineNumberDigits+3)*sty.Font.Face.Metrics.Ch + spc.Left // space for icon
 	} else {
 		ed.SetFlag(false, EditorHasLineNumbers)
-		ed.LineNoOff = 0
+		ed.LineNumberOff = 0
 	}
 }
 
 // UpdateFromAlloc updates size info based on allocated size:
-// NLinesChars, LineNoOff, LineLayoutSize
+// NLinesChars, LineNumberOff, LineLayoutSize
 func (ed *Editor) UpdateFromAlloc() {
 	sty := &ed.Styles
 	asz := ed.Geom.Size.Alloc.Content
@@ -54,14 +54,14 @@ func (ed *Editor) UpdateFromAlloc() {
 			ed.NLinesChars.X = int(math32.Floor(float32(asz.X) / sty.Font.Face.Metrics.Ch))
 		}
 	}
-	ed.LineLayoutSize.X -= ed.LineNoOff
+	ed.LineLayoutSize.X -= ed.LineNumberOff
 }
 
 func (ed *Editor) InternalSizeFromLines() {
 	sty := &ed.Styles
 	spc := sty.BoxSpace()
 	ed.TotalSize = ed.LinesSize.Add(spc.Size())
-	ed.TotalSize.X += ed.LineNoOff
+	ed.TotalSize.X += ed.LineNumberOff
 	ed.Geom.Size.Internal = ed.TotalSize
 	ed.Geom.Size.Internal.Y += ed.LineHeight
 }

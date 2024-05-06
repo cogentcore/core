@@ -88,13 +88,13 @@ type Editor struct { //core:embedder
 	Offs []float32 `set:"-" view:"-" json:"-" xml:"-"`
 
 	// number of line number digits needed
-	LineNoDigs int `set:"-" view:"-" json:"-" xml:"-"`
+	LineNumberDigits int `set:"-" view:"-" json:"-" xml:"-"`
 
 	// horizontal offset for start of text after line numbers
-	LineNoOff float32 `set:"-" view:"-" json:"-" xml:"-"`
+	LineNumberOff float32 `set:"-" view:"-" json:"-" xml:"-"`
 
 	// render for line numbers
-	LineNoRender paint.Text `set:"-" view:"-" json:"-" xml:"-"`
+	LineNumberRender paint.Text `set:"-" view:"-" json:"-" xml:"-"`
 
 	// current cursor position
 	CursorPos lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`

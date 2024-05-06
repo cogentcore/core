@@ -40,10 +40,10 @@ func (ed *Editor) WrappedLines(ln int) int {
 	return len(ed.Renders[ln].Spans)
 }
 
-// WrappedLineNo returns the wrapped line number (span index) and rune index
+// WrappedLineNumber returns the wrapped line number (span index) and rune index
 // within that span of the given character position within line in position,
 // and false if out of range (last valid position returned in that case -- still usable).
-func (ed *Editor) WrappedLineNo(pos lexer.Pos) (si, ri int, ok bool) {
+func (ed *Editor) WrappedLineNumber(pos lexer.Pos) (si, ri int, ok bool) {
 	if pos.Ln >= len(ed.Renders) {
 		return 0, 0, false
 	}
@@ -95,7 +95,7 @@ func (ed *Editor) SetCursorTarget(pos lexer.Pos) {
 // of the given position
 func (ed *Editor) SetCursorCol(pos lexer.Pos) {
 	if wln := ed.WrappedLines(pos.Ln); wln > 1 {
-		si, ri, ok := ed.WrappedLineNo(pos)
+		si, ri, ok := ed.WrappedLineNumber(pos)
 		if ok && si > 0 {
 			ed.CursorCol = ri
 		} else {
@@ -265,7 +265,7 @@ func (ed *Editor) CursorDown(steps int) {
 	for i := 0; i < steps; i++ {
 		gotwrap := false
 		if wln := ed.WrappedLines(pos.Ln); wln > 1 {
-			si, ri, _ := ed.WrappedLineNo(pos)
+			si, ri, _ := ed.WrappedLineNumber(pos)
 			if si < wln-1 {
 				si++
 				mxlen := min(len(ed.Renders[pos.Ln].Spans[si].Text), ed.CursorCol)
@@ -402,7 +402,7 @@ func (ed *Editor) CursorUp(steps int) {
 	for i := 0; i < steps; i++ {
 		gotwrap := false
 		if wln := ed.WrappedLines(pos.Ln); wln > 1 {
-			si, ri, _ := ed.WrappedLineNo(pos)
+			si, ri, _ := ed.WrappedLineNumber(pos)
 			if si > 0 {
 				ri = ed.CursorCol
 				nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIndex(si-1, ri)
@@ -487,7 +487,7 @@ func (ed *Editor) CursorStartLine() {
 
 	gotwrap := false
 	if wln := ed.WrappedLines(pos.Ln); wln > 1 {
-		si, ri, _ := ed.WrappedLineNo(pos)
+		si, ri, _ := ed.WrappedLineNumber(pos)
 		if si > 0 {
 			ri = 0
 			nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIndex(si, ri)
@@ -532,7 +532,7 @@ func (ed *Editor) CursorEndLine() {
 
 	gotwrap := false
 	if wln := ed.WrappedLines(pos.Ln); wln > 1 {
-		si, ri, _ := ed.WrappedLineNo(pos)
+		si, ri, _ := ed.WrappedLineNumber(pos)
 		ri = len(ed.Renders[pos.Ln].Spans[si].Text) - 1
 		nwc, _ := ed.Renders[pos.Ln].SpanPosToRuneIndex(si, ri)
 		if si == len(ed.Renders[pos.Ln].Spans)-1 { // last span
@@ -647,7 +647,7 @@ func (ed *Editor) CursorKill() {
 
 	atEnd := false
 	if wln := ed.WrappedLines(pos.Ln); wln > 1 {
-		si, ri, _ := ed.WrappedLineNo(pos)
+		si, ri, _ := ed.WrappedLineNumber(pos)
 		llen := len(ed.Renders[pos.Ln].Spans[si].Text)
 		if si == wln-1 {
 			llen--
@@ -864,7 +864,7 @@ func (ed *Editor) ScrollCursorToCenterIfHidden() bool {
 	if (curBBox.Min.Y-int(ed.LineHeight)) < bb.Min.Y || (curBBox.Max.Y+int(ed.LineHeight)) > bb.Max.Y {
 		did = ed.ScrollCursorToVertCenter()
 	}
-	if curBBox.Max.X < bb.Min.X+int(ed.LineNoOff) {
+	if curBBox.Max.X < bb.Min.X+int(ed.LineNumberOff) {
 		did2 := ed.ScrollCursorToRight()
 		did = did || did2
 	} else if curBBox.Min.X > bb.Max.X {
@@ -943,7 +943,7 @@ func (ed *Editor) ScrollToLeft(pos int) bool {
 // ScrollCursorToLeft tells any parent scroll layout to scroll to get cursor
 // at left of view to extent possible -- returns true if scrolled.
 func (ed *Editor) ScrollCursorToLeft() bool {
-	_, ri, _ := ed.WrappedLineNo(ed.CursorPos)
+	_, ri, _ := ed.WrappedLineNumber(ed.CursorPos)
 	if ri <= 0 {
 		// todo: what is right thing here?
 		// return ed.ScrollToLeft(ed.ObjBBox.Min.X - int(ed.Styles.BoxSpace().Left) - 2)
@@ -978,7 +978,7 @@ func (ed *Editor) ScrollToHorizCenter(pos int) bool {
 // scrolled.
 func (ed *Editor) ScrollCursorToHorizCenter() bool {
 	curBBox := ed.CursorBBox(ed.CursorPos)
-	mn := int(math32.Ceil(float32(curBBox.Min.X) + ed.LineNoOff))
+	mn := int(math32.Ceil(float32(curBBox.Min.X) + ed.LineNumberOff))
 	mid := (mn + curBBox.Max.X) / 2
 	return ed.ScrollToHorizCenter(mid)
 }

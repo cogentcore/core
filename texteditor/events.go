@@ -639,7 +639,7 @@ func (ed *Editor) HandleLinkCursor() {
 		}
 		pos := ed.RenderStartPos()
 		pos.Y += ed.Offs[mpos.Ln]
-		pos.X += ed.LineNoOff
+		pos.X += ed.LineNumberOff
 		rend := &ed.Renders[mpos.Ln]
 		inLink := false
 		for _, tl := range rend.Links {
