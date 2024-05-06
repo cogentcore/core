@@ -16,6 +16,7 @@ import (
 func (sh *Shell) InstallBuiltins() {
 	sh.Builtins = make(map[string]func(args ...string) error)
 	sh.Builtins["cd"] = sh.Cd
+	sh.Builtins["exit"] = sh.Exit
 }
 
 // Cd changes the current directory.
@@ -46,6 +47,12 @@ func (sh *Shell) Cd(args ...string) error {
 		return err
 	}
 	sh.Config.Dir = dir
+	return nil
+}
+
+// Exit exits the shell.
+func (sh *Shell) Exit(args ...string) error {
+	os.Exit(0)
 	return nil
 }
 

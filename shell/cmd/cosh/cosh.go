@@ -70,7 +70,6 @@ func Interactive(c *Config) error {
 			continue
 		}
 		if errors.Is(err, io.EOF) {
-			fmt.Println("exit")
 			return nil
 		}
 		if err != nil {
