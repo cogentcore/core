@@ -37,8 +37,7 @@ func (ed *Editor) StyleSizes() {
 func (ed *Editor) UpdateFromAlloc() {
 	sty := &ed.Styles
 	asz := ed.Geom.Size.Alloc.Content
-	spc := sty.BoxSpace()
-	spsz := spc.Size()
+	spsz := sty.BoxSpace().Size()
 	asz.SetSub(spsz)
 	sbw := math32.Ceil(ed.Styles.ScrollBarWidth.Dots)
 	// if ed.HasScroll[math32.Y] {
