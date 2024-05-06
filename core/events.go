@@ -261,6 +261,7 @@ func (em *Events) HandlePosEvent(e events.Event) {
 	case events.MouseDrag:
 		if em.SpriteSlide != nil {
 			em.SpriteSlide.HandleEvent(e)
+			em.SpriteSlide.Send(events.SlideMove, e)
 			return
 		}
 		if em.Slide != nil {
@@ -1289,7 +1290,6 @@ func (em *Events) GetSpriteInBBox(sc *Scene, pos image.Point) {
 		r := sp.Geom.Bounds()
 		if pos.In(r) {
 			em.SpriteInBBox = append(em.SpriteInBBox, sp)
-			fmt.Println("adding sprite:", sp.Name)
 		}
 	}
 }
@@ -1306,13 +1306,16 @@ func (em *Events) HandleSpriteEvent(e events.Event) bool {
 		switch et {
 		case events.MouseDown:
 			if sp.Listeners.HandlesEventType(events.SlideMove) {
+				e.SetHandled()
 				em.SpriteSlide = sp
+				em.SpriteSlide.Send(events.SlideStart, e)
 			}
 			if sp.Listeners.HandlesEventType(events.Click) {
 				em.SpritePress = sp
 			}
 			break
 		case events.MouseUp:
+			sp.HandleEvent(e)
 			if em.SpriteSlide == sp {
 				sp.Send(events.SlideStop, e)
 			}

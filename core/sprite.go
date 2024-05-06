@@ -117,6 +117,11 @@ func (sp *Sprite) OnClick(fun func(e events.Event)) *Sprite {
 	return sp.On(events.Click, fun)
 }
 
+// OnSlideStart adds an event listener function for [events.SlideStart] events
+func (sp *Sprite) OnSlideStart(fun func(e events.Event)) *Sprite {
+	return sp.On(events.SlideStart, fun)
+}
+
 // OnSlideMove adds an event listener function for [events.SlideMove] events
 func (sp *Sprite) OnSlideMove(fun func(e events.Event)) *Sprite {
 	return sp.On(events.SlideMove, fun)
