@@ -97,7 +97,7 @@ func (in *Interpreter) RunCode() error {
 	in.Shell.ResetLines()
 	_, err := in.Interp.EvalWithContext(ctx, cmd)
 	in.Cancel = nil
-	if err != nil {
+	if err != nil && !errors.Is(err, context.Canceled) {
 		slog.Error(err.Error())
 	}
 	return err
