@@ -318,12 +318,9 @@ func (ed *Editor) RenderStartPos() math32.Vector2 {
 // RenderAllLines displays all the visible lines on the screen,
 // after PushBounds has already been called.
 func (ed *Editor) RenderAllLines() {
+	ed.RenderStandardBox()
 	pc := &ed.Scene.PaintContext
-	sty := &ed.Styles
 	bb := ed.Geom.ContentBBox
-	bbmin := math32.Vector2FromPoint(bb.Min)
-	bbmax := math32.Vector2FromPoint(bb.Max)
-	pc.FillBox(bbmin, bbmax.Sub(bbmin), sty.Background)
 	pos := ed.RenderStartPos()
 	stln := -1
 	edln := -1
@@ -370,10 +367,10 @@ func (ed *Editor) RenderAllLines() {
 		lp := pos
 		lp.Y = lst
 		lp.X += ed.LineNoOff
-		if lp.Y+ed.LineHeight > bbmax.Y {
+		if lp.Y+ed.LineHeight > math32.Vector2FromPoint(bb.Max).Y {
 			break
 		}
-		ed.Renders[ln].Render(pc, lp) // not top pos -- already has baseline offset
+		ed.Renders[ln].Render(pc, lp) // not top pos; already has baseline offset
 	}
 	if ed.HasLineNumbers() {
 		pc.PopBounds()
