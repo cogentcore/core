@@ -75,15 +75,15 @@ func (ed *Editor) TextStyleProperties() map[string]any {
 // visible range, position will be out of range too)
 func (ed *Editor) CharStartPos(pos lexer.Pos) math32.Vector2 {
 	spos := ed.RenderStartPos()
-	spos.X += ed.LineNumberOff
-	if pos.Ln >= len(ed.Offs) {
-		if len(ed.Offs) > 0 {
-			pos.Ln = len(ed.Offs) - 1
+	spos.X += ed.LineNumberOffset
+	if pos.Ln >= len(ed.Offsets) {
+		if len(ed.Offsets) > 0 {
+			pos.Ln = len(ed.Offsets) - 1
 		} else {
 			return spos
 		}
 	} else {
-		spos.Y += ed.Offs[pos.Ln]
+		spos.Y += ed.Offsets[pos.Ln]
 	}
 	if pos.Ln >= len(ed.Renders) {
 		return spos
@@ -104,7 +104,7 @@ func (ed *Editor) CharStartPosVis(pos lexer.Pos) math32.Vector2 {
 	spos := ed.CharStartPos(pos)
 	bb := ed.Geom.ContentBBox
 	bbmin := math32.Vector2FromPoint(bb.Min)
-	bbmin.X += ed.LineNumberOff
+	bbmin.X += ed.LineNumberOffset
 	bbmax := math32.Vector2FromPoint(bb.Max)
 	spos.SetMax(bbmin)
 	spos.SetMin(bbmax)
@@ -119,16 +119,16 @@ func (ed *Editor) CharEndPos(pos lexer.Pos) math32.Vector2 {
 	pos.Ln = min(pos.Ln, ed.NLines-1)
 	if pos.Ln < 0 {
 		spos.Y += float32(ed.LinesSize.Y)
-		spos.X += ed.LineNumberOff
+		spos.X += ed.LineNumberOffset
 		return spos
 	}
-	if pos.Ln >= len(ed.Offs) {
+	if pos.Ln >= len(ed.Offsets) {
 		spos.Y += float32(ed.LinesSize.Y)
-		spos.X += ed.LineNumberOff
+		spos.X += ed.LineNumberOffset
 		return spos
 	}
-	spos.Y += ed.Offs[pos.Ln]
-	spos.X += ed.LineNumberOff
+	spos.Y += ed.Offsets[pos.Ln]
+	spos.X += ed.LineNumberOffset
 	r := ed.Renders[pos.Ln]
 	if len(r.Spans) > 0 {
 		// note: Y from rune pos is baseline
@@ -259,7 +259,7 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bg i
 	epos := ed.CharStartPosVis(end)
 	epos.Y += ed.LineHeight
 	bb := ed.Geom.ContentBBox
-	stx := math32.Ceil(float32(bb.Min.X) + ed.LineNumberOff)
+	stx := math32.Ceil(float32(bb.Min.X) + ed.LineNumberOffset)
 	if int(math32.Ceil(epos.Y)) < bb.Min.Y || int(math32.Floor(spos.Y)) > bb.Max.Y {
 		return
 	}
@@ -324,10 +324,10 @@ func (ed *Editor) RenderAllLines() {
 	stln := -1
 	edln := -1
 	for ln := 0; ln < ed.NLines; ln++ {
-		if ln >= len(ed.Offs) || ln >= len(ed.Renders) {
+		if ln >= len(ed.Offsets) || ln >= len(ed.Renders) {
 			break
 		}
-		lst := pos.Y + ed.Offs[ln]
+		lst := pos.Y + ed.Offsets[ln]
 		led := lst + math32.Max(ed.Renders[ln].BBox.Size().Y, ed.LineHeight)
 		if int(math32.Ceil(led)) < bb.Min.Y {
 			continue
@@ -358,14 +358,14 @@ func (ed *Editor) RenderAllLines() {
 	ed.RenderSelect()
 	if ed.HasLineNumbers() {
 		tbb := bb
-		tbb.Min.X += int(ed.LineNumberOff)
+		tbb.Min.X += int(ed.LineNumberOffset)
 		pc.PushBounds(tbb)
 	}
 	for ln := stln; ln <= edln; ln++ {
-		lst := pos.Y + ed.Offs[ln]
+		lst := pos.Y + ed.Offsets[ln]
 		lp := pos
 		lp.Y = lst
-		lp.X += ed.LineNumberOff
+		lp.X += ed.LineNumberOffset
 		if lp.Y+ed.LineHeight > math32.Vector2FromPoint(bb.Max).Y {
 			break
 		}
@@ -385,7 +385,7 @@ func (ed *Editor) RenderLineNumbersBoxAll() {
 	bb := ed.Geom.ContentBBox
 	spos := math32.Vector2FromPoint(bb.Min)
 	epos := math32.Vector2FromPoint(bb.Max)
-	epos.X = spos.X + ed.LineNumberOff
+	epos.X = spos.X + ed.LineNumberOffset
 
 	sz := epos.Sub(spos)
 	pc.FillStyle.Color = ed.LineNumberColor
@@ -407,24 +407,6 @@ func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
 	pc := &sc.PaintContext
 	bb := ed.Geom.ContentBBox
 
-	// render circle
-	lineColor, hasLineColor := ed.Buffer.LineColors[ln]
-	if hasLineColor {
-		sbox := ed.CharStartPos(lexer.Pos{Ln: ln})
-		sbox.X = float32(bb.Min.X)
-		ebox := ed.CharEndPos(lexer.Pos{Ln: ln + 1})
-		if ln < ed.NLines-1 {
-			ebox.Y -= ed.LineHeight
-		}
-		if ebox.Y >= float32(bb.Max.Y) {
-			return
-		}
-		ebox.X = sbox.X + ed.LineNumberOff
-		bsz := ebox.Sub(sbox)
-
-		pc.FillBox(sbox, bsz, lineColor)
-	}
-
 	fst.Background = nil
 	lfmt := fmt.Sprintf("%d", ed.LineNumberDigits)
 	lfmt = "%" + lfmt + "d"
@@ -439,12 +421,40 @@ func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
 		fst.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 	}
 	ed.LineNumberRender.SetString(lnstr, fst, &sty.UnitContext, &sty.Text, true, 0, 0)
-	pos := math32.Vector2{
+	tpos := math32.Vector2{
 		X: float32(bb.Min.X), // + spc.Pos().X
 		Y: ed.CharEndPos(lexer.Pos{Ln: ln}).Y - ed.FontDescent,
 	}
 
-	ed.LineNumberRender.Render(pc, pos)
+	ed.LineNumberRender.Render(pc, tpos)
+
+	// render circle
+	lineColor := ed.Buffer.LineColors[ln]
+	if lineColor != nil {
+		sbox := ed.CharStartPos(lexer.Pos{Ln: ln})
+		ebox := ed.CharEndPos(lexer.Pos{Ln: ln + 1})
+		if ln < ed.NLines-1 {
+			ebox.Y -= ed.LineHeight
+		}
+		if ebox.Y >= float32(bb.Max.Y) {
+			return
+		}
+
+		// ends at start of code
+		ebox.X = sbox.X
+		// starts at end of line number text
+		sbox.X = tpos.X + ed.LineNumberRender.BBox.Size().X
+
+		r := (ebox.X - sbox.X) / 2
+		center := sbox.AddScalar(r)
+
+		// cut radius in half so that it doesn't look too big
+		r /= 2
+
+		pc.FillStyle.Color = lineColor
+		pc.DrawCircle(center.X, center.Y, r)
+		pc.Fill()
+	}
 }
 
 // FirstVisibleLine finds the first visible line, starting at given line
@@ -536,7 +546,7 @@ func (ed *Editor) PixelToCursor(pt image.Point) lexer.Pos {
 		return lexer.Pos{Ln: cln, Ch: 0}
 	}
 	scrl := ed.Geom.Scroll.Y
-	nolno := float32(pt.X - int(ed.LineNumberOff))
+	nolno := float32(pt.X - int(ed.LineNumberOffset))
 	sc := int((nolno + scrl) / sty.Font.Face.Metrics.Ch)
 	sc -= sc / 4
 	sc = max(0, sc)

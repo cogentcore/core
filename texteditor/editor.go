@@ -86,13 +86,13 @@ type Editor struct { //core:embedder
 	Renders []paint.Text `set:"-" json:"-" xml:"-"`
 
 	// starting render offsets for top of each line
-	Offs []float32 `set:"-" view:"-" json:"-" xml:"-"`
+	Offsets []float32 `set:"-" view:"-" json:"-" xml:"-"`
 
 	// number of line number digits needed
 	LineNumberDigits int `set:"-" view:"-" json:"-" xml:"-"`
 
 	// horizontal offset for start of text after line numbers
-	LineNumberOff float32 `set:"-" view:"-" json:"-" xml:"-"`
+	LineNumberOffset float32 `set:"-" view:"-" json:"-" xml:"-"`
 
 	// render for line numbers
 	LineNumberRender paint.Text `set:"-" view:"-" json:"-" xml:"-"`
@@ -375,18 +375,18 @@ func (ed *Editor) LinesInserted(tbe *textbuf.Edit) {
 	// Offs
 	tmpof := make([]float32, nsz)
 	ov := float32(0)
-	if stln < len(ed.Offs) {
-		ov = ed.Offs[stln]
+	if stln < len(ed.Offsets) {
+		ov = ed.Offsets[stln]
 	} else {
-		ov = ed.Offs[len(ed.Offs)-1]
+		ov = ed.Offsets[len(ed.Offsets)-1]
 	}
 	for i := range tmpof {
 		tmpof[i] = ov
 	}
-	nof := append(ed.Offs, tmpof...)
+	nof := append(ed.Offsets, tmpof...)
 	copy(nof[stln+nsz:], nof[stln:])
 	copy(nof[stln:], tmpof)
-	ed.Offs = nof
+	ed.Offsets = nof
 
 	ed.NLines += nsz
 	ed.NeedsLayout()
@@ -399,7 +399,7 @@ func (ed *Editor) LinesDeleted(tbe *textbuf.Edit) {
 	dsz := edln - stln
 
 	ed.Renders = append(ed.Renders[:stln], ed.Renders[edln:]...)
-	ed.Offs = append(ed.Offs[:stln], ed.Offs[edln:]...)
+	ed.Offsets = append(ed.Offsets[:stln], ed.Offsets[edln:]...)
 
 	ed.NLines -= dsz
 	ed.NeedsLayout()

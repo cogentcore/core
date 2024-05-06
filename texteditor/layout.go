@@ -25,10 +25,10 @@ func (ed *Editor) StyleSizes() {
 	}
 	if lno {
 		ed.SetFlag(true, EditorHasLineNumbers)
-		ed.LineNumberOff = float32(ed.LineNumberDigits+3)*sty.Font.Face.Metrics.Ch + spc.Left // space for icon
+		ed.LineNumberOffset = float32(ed.LineNumberDigits+3)*sty.Font.Face.Metrics.Ch + spc.Left // space for icon
 	} else {
 		ed.SetFlag(false, EditorHasLineNumbers)
-		ed.LineNumberOff = 0
+		ed.LineNumberOffset = 0
 	}
 }
 
@@ -54,14 +54,14 @@ func (ed *Editor) UpdateFromAlloc() {
 			ed.NLinesChars.X = int(math32.Floor(float32(asz.X) / sty.Font.Face.Metrics.Ch))
 		}
 	}
-	ed.LineLayoutSize.X -= ed.LineNumberOff
+	ed.LineLayoutSize.X -= ed.LineNumberOffset
 }
 
 func (ed *Editor) InternalSizeFromLines() {
 	sty := &ed.Styles
 	spc := sty.BoxSpace()
 	ed.TotalSize = ed.LinesSize.Add(spc.Size())
-	ed.TotalSize.X += ed.LineNumberOff
+	ed.TotalSize.X += ed.LineNumberOffset
 	ed.Geom.Size.Internal = ed.TotalSize
 	ed.Geom.Size.Internal.Y += ed.LineHeight
 }
@@ -94,10 +94,10 @@ func (ed *Editor) LayoutAllLines() {
 	} else {
 		ed.Renders = make([]paint.Text, nln)
 	}
-	if cap(ed.Offs) >= nln {
-		ed.Offs = ed.Offs[:nln]
+	if cap(ed.Offsets) >= nln {
+		ed.Offsets = ed.Offsets[:nln]
 	} else {
-		ed.Offs = make([]float32, nln)
+		ed.Offsets = make([]float32, nln)
 	}
 
 	sz := ed.LineLayoutSize
@@ -119,7 +119,7 @@ func (ed *Editor) LayoutAllLines() {
 		if !ed.HasLinks && len(rn.Links) > 0 {
 			ed.HasLinks = true
 		}
-		ed.Offs[ln] = off
+		ed.Offsets[ln] = off
 		lsz := math32.Max(rn.BBox.Size().Y, ed.LineHeight)
 		off += lsz
 		mxwd = math32.Max(mxwd, rn.BBox.Size().X)
@@ -164,7 +164,7 @@ func (ed *Editor) ReLayoutAllLines() {
 		}
 		rn := &ed.Renders[ln]
 		rn.Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, sz)
-		ed.Offs[ln] = off
+		ed.Offsets[ln] = off
 		lsz := math32.Max(rn.BBox.Size().Y, ed.LineHeight)
 		off += lsz
 		mxwd = math32.Max(mxwd, rn.BBox.Size().X)
