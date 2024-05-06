@@ -431,23 +431,23 @@ func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
 	// render circle
 	lineColor := ed.Buffer.LineColors[ln]
 	if lineColor != nil {
-		sbox := ed.CharStartPos(lexer.Pos{Ln: ln})
-		ebox := ed.CharEndPos(lexer.Pos{Ln: ln + 1})
+		start := ed.CharStartPos(lexer.Pos{Ln: ln})
+		end := ed.CharEndPos(lexer.Pos{Ln: ln + 1})
 
 		if ln < ed.NLines-1 {
-			ebox.Y -= ed.LineHeight
+			end.Y -= ed.LineHeight
 		}
-		if ebox.Y >= float32(bb.Max.Y) {
+		if end.Y >= float32(bb.Max.Y) {
 			return
 		}
 
 		// starts at end of line number text
-		sbox.X = tpos.X + ed.LineNumberRender.BBox.Size().X
+		start.X = tpos.X + ed.LineNumberRender.BBox.Size().X
 		// ends at end of line number offset
-		ebox.X = float32(bb.Min.X) + ed.LineNumberOffset
+		end.X = float32(bb.Min.X) + ed.LineNumberOffset
 
-		r := (ebox.X - sbox.X) / 2
-		center := sbox.AddScalar(r)
+		r := (end.X - start.X) / 2
+		center := start.AddScalar(r)
 
 		// cut radius in half so that it doesn't look too big
 		r /= 2

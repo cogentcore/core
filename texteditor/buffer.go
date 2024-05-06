@@ -83,8 +83,8 @@ type Buffer struct {
 	// icons for given lines -- use SetLineIcon and DeleteLineIcon
 	LineIcons map[int]icons.Icon
 
-	// LineColors are special line number background colors for circles to
-	// render for certain lines; use SetLineColor and DeleteLineColor.
+	// LineColors are colors to use for rendering circles next to the line
+	// numbers of certain lines; use SetLineColor and DeleteLineColor.
 	LineColors map[int]image.Image
 
 	// icons for each LineIcons being used
