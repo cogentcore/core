@@ -496,6 +496,25 @@ func (ch *Chooser) SelectItemAction(index int) *Chooser {
 	return ch
 }
 
+// ClearText clears the text field, for editable choosers.  Also clears any errors.
+func (ch *Chooser) ClearText() {
+	tf := ch.TextField()
+	if tf == nil {
+		return
+	}
+	tf.ClearError()
+	tf.Clear()
+}
+
+// ClearError clears any existing validation error, for editable choosers.
+func (ch *Chooser) ClearError() {
+	tf := ch.TextField()
+	if tf == nil {
+		return
+	}
+	tf.ClearError()
+}
+
 // MakeItemsMenu constructs a menu of all the items. It is used when the chooser is clicked.
 func (ch *Chooser) MakeItemsMenu(m *Scene) {
 	ch.CallItemsFuncs()
@@ -642,6 +661,7 @@ func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
 		if kf == keymap.Abort {
 			if tf.Error != nil {
 				tf.Clear()
+				tf.ClearError()
 				e.SetHandled()
 			}
 		}

@@ -510,6 +510,10 @@ func (tb *Buffer) FileModCheck() bool {
 		return false
 	}
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
+		if !tb.Is(BufferChanged) { // we haven't edited: just revert
+			tb.Revert()
+			return true
+		}
 		sc := tb.SceneFromView()
 		d := core.NewBody().AddTitle("File changed on disk: " + dirs.DirAndFile(string(tb.Filename))).
 			AddText(fmt.Sprintf("File has changed on disk since being opened or saved by you; what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename))

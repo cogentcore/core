@@ -463,6 +463,12 @@ func (tf *TextField) Clear() {
 	tf.NeedsRender()
 }
 
+// ClearError clears any existing validation error
+func (tf *TextField) ClearError() {
+	tf.Error = nil
+	tf.NeedsRender()
+}
+
 // Validate runs [TextField.Validator] and takes any necessary actions
 // as a result of that.
 func (tf *TextField) Validate() {

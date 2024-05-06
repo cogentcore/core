@@ -157,6 +157,33 @@ func (ed *Editor) CharEndPos(pos lexer.Pos) math32.Vector2 {
 	return spos
 }
 
+// LineBBox returns the bounding box for given line
+func (ed *Editor) LineBBox(ln int) math32.Box2 {
+	tbb := ed.RenderBBox()
+	var bb math32.Box2
+	bb.Min = ed.RenderStartPos()
+	bb.Min.X += ed.LineNumberOffset
+	bb.Max = bb.Min
+	bb.Max.Y += ed.LineHeight
+	bb.Max.X = float32(tbb.Max.X)
+	if ln >= len(ed.Offsets) {
+		if len(ed.Offsets) > 0 {
+			ln = len(ed.Offsets) - 1
+		} else {
+			return bb
+		}
+	} else {
+		bb.Min.Y += ed.Offsets[ln]
+		bb.Max.Y += ed.Offsets[ln]
+	}
+	if ln >= len(ed.Renders) {
+		return bb
+	}
+	rp := &ed.Renders[ln]
+	bb.Max = bb.Min.Add(rp.BBox.Size())
+	return bb
+}
+
 // ViewDepthOffsets are changes in color values from default background for different
 // depths.  For dark mode, these are increments, for light mode they are decrements.
 var ViewDepthColors = []color.RGBA{
@@ -485,8 +512,8 @@ func (ed *Editor) FirstVisibleLine(stln int) int {
 			stln = 0
 		}
 		for ln := stln; ln < ed.NLines; ln++ {
-			cpos := ed.CharStartPos(lexer.Pos{Ln: ln})
-			if int(math32.Floor(cpos.Y)) >= bb.Min.Y { // top definitely on screen
+			lbb := ed.LineBBox(ln)
+			if int(math32.Ceil(lbb.Max.Y)) > bb.Min.Y { // visible
 				stln = ln
 				break
 			}

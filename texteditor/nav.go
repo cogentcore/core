@@ -862,19 +862,26 @@ func (ed *Editor) ScrollCursorInView() bool {
 func (ed *Editor) ScrollCursorToCenterIfHidden() bool {
 	curBBox := ed.CursorBBox(ed.CursorPos)
 	did := false
+	lht := int(ed.LineHeight)
 	bb := ed.RenderBBox()
-	if bb.Size().Y <= int(ed.LineHeight) {
+	if bb.Size().Y <= lht {
 		return false
 	}
-	if (curBBox.Min.Y-int(ed.LineHeight)) < bb.Min.Y || (curBBox.Max.Y+int(ed.LineHeight)) > bb.Max.Y {
+	if (curBBox.Min.Y-lht) < bb.Min.Y || (curBBox.Max.Y+lht) > bb.Max.Y {
 		did = ed.ScrollCursorToVertCenter()
+		// fmt.Println("v min:", curBBox.Min.Y, bb.Min.Y, "max:", curBBox.Max.Y+lht, bb.Max.Y, did)
 	}
 	if curBBox.Max.X < bb.Min.X+int(ed.LineNumberOffset) {
 		did2 := ed.ScrollCursorToRight()
+		// fmt.Println("h max", curBBox.Max.X, bb.Min.X+int(ed.LineNumberOffset), did2)
 		did = did || did2
 	} else if curBBox.Min.X > bb.Max.X {
 		did2 := ed.ScrollCursorToRight()
+		// fmt.Println("h min", curBBox.Min.X, bb.Max.X, did2)
 		did = did || did2
+	}
+	if did {
+		// fmt.Println("scroll to center", did)
 	}
 	return did
 }
