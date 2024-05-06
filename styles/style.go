@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package styles provides style objects containing style properties
+// used for GUI widgets and other rendering contexts.
 package styles
 
 //go:generate core generate
@@ -23,14 +25,12 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
-// style implements CSS-based styling, as in: https://www.w3schools.com/cssref/default.asp
-// list of inherited: https://stackoverflow.com/questions/5612302/which-css-properties-are-inherited
-
 // IMPORTANT: any changes here must be updated in style_properties.go StyleStyleFuncs
 // and likewise for all sub-styles as fields here.
 
-// Style has all the CSS-based style elements -- used for widget-type GUI objects.
+// Style contains all of the style properties used for GUI widgets.
 type Style struct { //types:add
+
 	// State holds style-relevant state flags, for convenient styling access,
 	// given that styles typically depend on element states.
 	State states.States
@@ -494,6 +494,31 @@ func (s *Style) CenterAll() {
 	s.Align.Items = Center
 	s.Text.Align = Center
 	s.Text.AlignV = Center
+}
+
+// SettingsFont and SettingsMonoFont are pointers to Font and MonoFont in
+// [core.AppearanceSettings], which are used in [Style.SetMono] if non-nil.
+// They are set automatically by core, so end users should typically not have
+// to interact with them.
+var SettingsFont, SettingsMonoFont *string
+
+// SetMono sets whether the font is monospace, using the [SettingsFont]
+// and [SettingsMonoFont] pointers if possible, and falling back on "mono"
+// and "sans-serif" otherwise.
+func (s *Style) SetMono(mono bool) {
+	if mono {
+		if SettingsMonoFont != nil {
+			s.Font.Family = *SettingsMonoFont
+			return
+		}
+		s.Font.Family = "mono"
+		return
+	}
+	if SettingsFont != nil {
+		s.Font.Family = *SettingsFont
+		return
+	}
+	s.Font.Family = "sans-serif"
 }
 
 // SetTextWrap sets the Text.WhiteSpace and GrowWrap properties in
