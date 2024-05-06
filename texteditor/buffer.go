@@ -958,9 +958,8 @@ func (tb *Buffer) SceneFromView() *core.Scene {
 func (tb *Buffer) AutoScrollViews() {
 	for _, ed := range tb.Editors {
 		if ed != nil && ed.This() != nil {
-			ed.CursorPos = tb.EndPos()
-			ed.ScrollCursorInView()
-			ed.NeedsLayout()
+			ed.RenderLayout()
+			ed.SetCursorTarget(tb.EndPos())
 		}
 	}
 }

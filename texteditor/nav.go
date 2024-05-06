@@ -89,6 +89,8 @@ func (ed *Editor) SetCursorTarget(pos lexer.Pos) {
 	ed.SetFlag(true, EditorTargetSet)
 	ed.CursorTarg = pos
 	ed.SetCursorShow(pos)
+	ed.NeedsRender()
+	// fmt.Println(ed, "set target:", ed.CursorTarg)
 }
 
 // SetCursorCol sets the current target cursor column (CursorCol) to that
@@ -860,7 +862,10 @@ func (ed *Editor) ScrollCursorInView() bool {
 func (ed *Editor) ScrollCursorToCenterIfHidden() bool {
 	curBBox := ed.CursorBBox(ed.CursorPos)
 	did := false
-	bb := ed.Geom.ContentBBox
+	bb := ed.RenderBBox()
+	if bb.Size().Y <= int(ed.LineHeight) {
+		return false
+	}
 	if (curBBox.Min.Y-int(ed.LineHeight)) < bb.Min.Y || (curBBox.Max.Y+int(ed.LineHeight)) > bb.Max.Y {
 		did = ed.ScrollCursorToVertCenter()
 	}

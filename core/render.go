@@ -344,6 +344,7 @@ func (sc *Scene) DoUpdate() bool {
 		// fmt.Println("re-render")
 		for _, w := range sc.ReRender {
 			w.SetFlag(true, ScNeedsRender)
+			// fmt.Println("rerender:", w)
 		}
 		sc.ReRender = nil
 		sc.DoNeedsRender()

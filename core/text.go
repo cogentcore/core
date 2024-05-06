@@ -291,6 +291,8 @@ func (tx *Text) Label() string {
 
 // Config does the HTML and Layout in paintText for the text,
 // using actual content size to constrain layout.
+// Call this followed by NeedsRender() to do a fast render-only
+// update of the text, with its current size and style.
 func (tx *Text) Config() {
 	tx.configTextSize(tx.Geom.Size.Actual.Content)
 }
