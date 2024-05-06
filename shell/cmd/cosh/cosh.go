@@ -54,13 +54,13 @@ func Run(c *Config) error { //cli:cmd -root
 
 // Interactive runs an interactive shell that allows the user to input cosh.
 func Interactive(c *Config) error {
-	rl, err := readline.New("> ")
+	in := interpreter.NewInterpreter(interp.Options{})
+	rl, err := readline.New(in.Prompt())
 	if err != nil {
 		return err
 	}
 	defer rl.Close()
 	log.SetOutput(rl.Stderr()) // redraw the prompt correctly after log output
-	in := interpreter.NewInterpreter(interp.Options{})
 	for {
 		rl.SetPrompt(in.Prompt())
 		line, err := rl.ReadLine()

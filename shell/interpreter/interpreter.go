@@ -50,6 +50,9 @@ func NewInterpreter(options interp.Options) *Interpreter {
 // Prompt returns the appropriate REPL prompt to show the user.
 func (in *Interpreter) Prompt() string {
 	dp := in.Shell.TotalDepth()
+	if dp == 0 {
+		return in.Shell.Config.Dir + " > "
+	}
 	res := "> "
 	for range dp {
 		res += "\t"

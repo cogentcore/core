@@ -12,6 +12,7 @@ import (
 	"slices"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
 	"golang.org/x/tools/imports"
@@ -46,6 +47,7 @@ type Shell struct {
 func NewShell() *Shell {
 	sh := &Shell{
 		Config: exec.Config{
+			Dir:    errors.Log1(os.Getwd()),
 			Env:    map[string]string{},
 			Stdout: os.Stdout,
 			Stderr: os.Stderr,
