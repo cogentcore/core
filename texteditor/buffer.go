@@ -79,7 +79,8 @@ type Buffer struct {
 	NLines int `json:"-" xml:"-"`
 
 	// LineColors are colors to use for rendering circles next to the line
-	// numbers of certain lines; use SetLineColor and DeleteLineColor.
+	// numbers of certain lines; use [Buffer.SetLineColor] and
+	// [Buffer.DeleteLineColor].
 	LineColors map[int]image.Image
 
 	// the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!
@@ -2210,14 +2211,15 @@ func (tb *Buffer) InTokenCode(pos lexer.Pos) bool {
 /////////////////////////////////////////////////////////////////////////////
 //   LineColors
 
-// SetLineColor sets given color at given line (0 starting)
-func (tb *Buffer) SetLineColor(ln int, clr image.Image) {
+// SetLineColor sets the color to use for rendering a circle next to the line
+// number at the given line.
+func (tb *Buffer) SetLineColor(ln int, color image.Image) {
 	tb.LinesMu.Lock()
 	defer tb.LinesMu.Unlock()
 	if tb.LineColors == nil {
 		tb.LineColors = make(map[int]image.Image)
 	}
-	tb.LineColors[ln] = clr
+	tb.LineColors[ln] = color
 }
 
 // HasLineColor checks if given line has a line color set
@@ -2234,7 +2236,7 @@ func (tb *Buffer) HasLineColor(ln int) bool {
 	return has
 }
 
-// HasLineColor
+// DeleteLineColor deletes the line color at the given line.
 func (tb *Buffer) DeleteLineColor(ln int) {
 	tb.LinesMu.Lock()
 	defer tb.LinesMu.Unlock()
