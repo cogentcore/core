@@ -5,10 +5,8 @@
 package shell
 
 import (
-	"log/slog"
 	"testing"
 
-	"cogentcore.org/core/base/logx"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,7 +36,7 @@ func TestTranspile(t *testing.T) {
 }
 
 func TestPaths(t *testing.T) {
-	logx.UserLevel = slog.LevelDebug
+	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
 		{"cosh -i", `shell.Exec("cosh", "-i")`},
 		{"./cosh -i", `shell.Exec("./cosh", "-i")`},

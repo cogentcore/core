@@ -69,7 +69,7 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	case t0in == 0: // exec must be IDENT
 		logx.PrintlnDebug("go:   not ident")
 		return sh.TranspileGo(toks)
-	case t0in > 0 && n > t0in && (t1in > 0 || t1pn > 0 || toks[t1idx].Tok == token.SUB || toks[t1idx].Tok == token.STRING || toks[t1idx].Tok == token.RBRACE):
+	case t0in > 0 && n > t0in && (t1in > 0 || t1pn > 0 || toks[t1idx].Tok == token.SUB || toks[t1idx].Tok == token.STRING || toks[t1idx].Tok == token.LBRACE):
 		logx.PrintlnDebug("exec: word non-go...")
 		return sh.TranspileExec(toks, false)
 	default:
