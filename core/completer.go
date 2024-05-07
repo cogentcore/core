@@ -233,12 +233,12 @@ func (c *Complete) Abort() bool {
 }
 
 // Lookup is the main call for doing lookups
-func (c *Complete) Lookup(text string, posLn, posCh int, sc *Scene, pt image.Point) {
+func (c *Complete) Lookup(text string, posLine, posChar int, sc *Scene, pt image.Point) {
 	if c.LookupFunc == nil || sc == nil {
 		return
 	}
 	// c.Sc = nil
-	c.LookupFunc(c.Context, text, posLn, posCh) // this processes result directly
+	c.LookupFunc(c.Context, text, posLine, posChar) // this processes result directly
 }
 
 // Complete sends Select event to listeners, indicating that the user has made a

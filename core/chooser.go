@@ -677,7 +677,7 @@ func (ch *Chooser) WidgetTooltip(pos image.Point) (string, image.Point) {
 
 // CompleteMatch is the [complete.MatchFunc] used for the
 // editable text field part of the Chooser (if it exists).
-func (ch *Chooser) CompleteMatch(data any, text string, posLn, posCh int) (md complete.Matches) {
+func (ch *Chooser) CompleteMatch(data any, text string, posLine, posChar int) (md complete.Matches) {
 	md.Seed = text
 	comps := make(complete.Completions, len(ch.Items))
 	for i, item := range ch.Items {

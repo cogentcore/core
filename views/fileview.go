@@ -788,7 +788,7 @@ func (fv *FileView) KeyInput(kt events.Event) {
 //  Completion
 
 // FileComplete finds the possible completions for the file field
-func (fv *FileView) FileComplete(data any, text string, posLn, posCh int) (md complete.Matches) {
+func (fv *FileView) FileComplete(data any, text string, posLine, posChar int) (md complete.Matches) {
 	md.Seed = complete.SeedPath(text)
 
 	var files = []string{}
@@ -808,7 +808,7 @@ func (fv *FileView) FileComplete(data any, text string, posLn, posCh int) (md co
 }
 
 // PathComplete finds the possible completions for the path field
-func (fv *FileView) PathComplete(data any, path string, posLn, posCh int) (md complete.Matches) {
+func (fv *FileView) PathComplete(data any, path string, posLine, posChar int) (md complete.Matches) {
 	dir, seed := filepath.Split(path)
 	md.Seed = seed
 

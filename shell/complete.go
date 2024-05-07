@@ -15,9 +15,9 @@ import (
 )
 
 // CompleteMatch is the [complete.MatchFunc] for the shell.
-func (sh *Shell) CompleteMatch(data any, text string, posLn, posCh int) (md complete.Matches) {
+func (sh *Shell) CompleteMatch(data any, text string, posLine, posChar int) (md complete.Matches) {
 	comps := complete.Completions{}
-	text = text[:posCh]
+	text = text[:posChar]
 	md.Seed = complete.SeedPath(text)
 	fullPath := complete.SeedSpace(text)
 	parent := strings.TrimSuffix(fullPath, md.Seed)

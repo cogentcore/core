@@ -19,7 +19,7 @@ import (
 // CompleteParse uses [parse] symbols and language; the string is a line of text
 // up to point where user has typed.
 // The data must be the *FileState from which the language type is obtained.
-func CompleteParse(data any, text string, posLn, posCh int) (md complete.Matches) {
+func CompleteParse(data any, text string, posLine, posChar int) (md complete.Matches) {
 	sfs := data.(*parse.FileStates)
 	if sfs == nil {
 		// log.Printf("CompletePi: data is nil not FileStates or is nil - can't complete\n")
@@ -38,7 +38,7 @@ func CompleteParse(data any, text string, posLn, posCh int) (md complete.Matches
 	// must set it in pi/parse directly -- so it is changed in the fileparse too
 	parser.GuiActive = true // note: this is key for debugging -- runs slower but makes the tree unique
 
-	md = lp.Lang.CompleteLine(sfs, text, lexer.Pos{posLn, posCh})
+	md = lp.Lang.CompleteLine(sfs, text, lexer.Pos{posLine, posChar})
 	return md
 }
 
@@ -63,7 +63,7 @@ func CompleteEditParse(data any, text string, cursorPos int, comp complete.Compl
 // LookupParse uses [parse] symbols and language; the string is a line of text
 // up to point where user has typed.
 // The data must be the *FileState from which the language type is obtained.
-func LookupParse(data any, text string, posLn, posCh int) (ld complete.Lookup) {
+func LookupParse(data any, text string, posLine, posChar int) (ld complete.Lookup) {
 	sfs := data.(*parse.FileStates)
 	if sfs == nil {
 		// log.Printf("LookupPi: data is nil not FileStates or is nil - can't lookup\n")
@@ -82,7 +82,7 @@ func LookupParse(data any, text string, posLn, posCh int) (ld complete.Lookup) {
 	// must set it in pi/parse directly -- so it is changed in the fileparse too
 	parser.GuiActive = true // note: this is key for debugging -- runs slower but makes the tree unique
 
-	ld = lp.Lang.Lookup(sfs, text, lexer.Pos{posLn, posCh})
+	ld = lp.Lang.Lookup(sfs, text, lexer.Pos{posLine, posChar})
 	if len(ld.Text) > 0 {
 		TextDialog(nil, "Lookup: "+text, string(ld.Text))
 		return ld
@@ -98,7 +98,7 @@ func LookupParse(data any, text string, posLn, posCh int) (ld complete.Lookup) {
 }
 
 // CompleteText does completion for text files.
-func CompleteText(data any, text string, posLn, posCh int) (md complete.Matches) {
+func CompleteText(data any, text string, posLine, posChar int) (md complete.Matches) {
 	err := InitSpell() // text completion uses the spell code to generate completions and suggestions
 	if err != nil {
 		fmt.Printf("Could not initialize spelling model: Spelling model needed for text completion: %v", err)
