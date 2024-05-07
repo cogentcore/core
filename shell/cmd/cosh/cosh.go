@@ -12,11 +12,9 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 
 	"cogentcore.org/core/cli"
-	"cogentcore.org/core/icons"
 	"cogentcore.org/core/shell"
 	"cogentcore.org/core/shell/interpreter"
 	"github.com/ergochat/readline"
@@ -61,30 +59,7 @@ func Interactive(c *Config) error {
 	in := interpreter.NewInterpreter(interp.Options{})
 
 	rl, err := readline.NewFromConfig(&readline.Config{
-		Listener: func(line []rune, pos int, key rune) (newLine []rune, newPos int, ok bool) {
-			if key != '\t' {
-				return line, pos, true
-			}
-			newLine = slices.Delete(line, pos-1, pos) // get rid of tab
-			newPos = pos - 1
-			sline := string(newLine)
-			md := in.Shell.CompleteMatch(nil, sline, 0, newPos)
-			if len(md.Matches) == 0 {
-				return newLine, newPos, true
-			}
-			match := md.Matches[0]
-			ed := in.Shell.CompleteEdit(nil, sline, newPos, match, md.Seed)
-			newPos -= len(md.Seed)
-			newLine = newLine[:newPos]
-			newLine = append(newLine, []rune(ed.NewText)...)
-			if match.Icon == string(icons.Folder) {
-				newLine = append(newLine, filepath.Separator)
-			} else {
-				newLine = append(newLine, ' ')
-			}
-			newPos = len(newLine)
-			return newLine, newPos, true
-		},
+		AutoComplete: &shell.ReadlineCompleter{Shell: in.Shell},
 	})
 	if err != nil {
 		return err

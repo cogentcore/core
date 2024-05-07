@@ -7,6 +7,7 @@ package shell
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/icons"
@@ -37,4 +38,28 @@ func (sh *Shell) CompleteMatch(data any, text string, posLn, posCh int) (md comp
 // CompleteEdit is the [complete.EditFunc] for the shell.
 func (sh *Shell) CompleteEdit(data any, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.Edit) {
 	return complete.EditWord(text, cursorPos, completion.Text, seed)
+}
+
+// ReadlineCompleter implements [github.com/ergochat/readline.AutoCompleter].
+type ReadlineCompleter struct {
+	Shell *Shell
+}
+
+func (rc *ReadlineCompleter) Do(line []rune, pos int) (newLine [][]rune, length int) {
+	text := string(line)
+	md := rc.Shell.CompleteMatch(nil, text, 0, pos)
+	res := [][]rune{}
+	for _, match := range md.Matches {
+		after := strings.TrimPrefix(match.Text, md.Seed)
+		if after == match.Text {
+			continue // no overlap
+		}
+		if match.Icon == string(icons.Folder) {
+			after += string(filepath.Separator)
+		} else {
+			after += " "
+		}
+		res = append(res, []rune(after))
+	}
+	return res, len(md.Seed)
 }
