@@ -56,11 +56,17 @@ func Run(c *Config) error { //cli:cmd -root
 
 // Interactive runs an interactive shell that allows the user to input cosh.
 func Interactive(c *Config) error {
+	in := interpreter.NewInterpreter(interp.Options{})
+
 	rl, err := readline.NewFromConfig(&readline.Config{
 		Listener: func(line []rune, pos int, key rune) (newLine []rune, newPos int, ok bool) {
 			if key != '\t' {
 				return line, pos, true
 			}
+			line = line[:len(line)-1] // get rid of tab
+			pos -= 1
+			md := in.Shell.CompleteMatch(nil, string(line), 0, pos)
+			fmt.Println(md)
 			return line, pos, true
 		},
 	})
@@ -70,7 +76,6 @@ func Interactive(c *Config) error {
 	defer rl.Close()
 	log.SetOutput(rl.Stderr()) // redraw the prompt correctly after log output
 
-	in := interpreter.NewInterpreter(interp.Options{})
 	for {
 		rl.SetPrompt(in.Prompt())
 		line, err := rl.ReadLine()
