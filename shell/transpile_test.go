@@ -55,6 +55,8 @@ func TestPaths(t *testing.T) {
 		{`./Cogent\ Code`, `shell.Exec("./Cogent Code")`},
 		{"set something hello-1", `shell.Exec("set", "something", "hello-1")`},
 		{"set something=hello", `shell.Exec("set", "something=hello")`},
+		{`set "something=hello"`, `shell.Exec("set", "something=hello")`},
+		{`set something="hello"`, `shell.Exec("set", "something=hello")`},
 		{`ios\ deploy -i`, `shell.Exec("ios deploy", "-i")`},
 		{"./ios-deploy -i", `shell.Exec("./ios-deploy", "-i")`},
 		{"ios_deploy -i tree_file", `shell.Exec("ios_deploy", "-i", "tree_file")`},
