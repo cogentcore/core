@@ -15,6 +15,7 @@ import (
 
 // CompleteMatch is the [complete.MatchFunc] for the shell.
 func (sh *Shell) CompleteMatch(data any, text string, posLn, posCh int) (md complete.Matches) {
+	text = text[:posCh]
 	md.Seed = complete.SeedWhiteSpace(text)
 	comps := complete.Completions{}
 	entries := errors.Log1(os.ReadDir(sh.Config.Dir))

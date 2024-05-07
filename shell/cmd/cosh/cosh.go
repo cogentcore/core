@@ -12,6 +12,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/cli"
@@ -63,7 +64,7 @@ func Interactive(c *Config) error {
 			if key != '\t' {
 				return line, pos, true
 			}
-			line = line[:len(line)-1] // get rid of tab
+			line = slices.Delete(line, pos-1, pos) // get rid of tab
 			pos -= 1
 			md := in.Shell.CompleteMatch(nil, string(line), 0, pos)
 			fmt.Println(md)
