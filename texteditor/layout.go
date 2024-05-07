@@ -47,6 +47,7 @@ func (ed *Editor) UpdateFromAlloc() {
 		asz.Y -= sbw
 	}
 	ed.LineLayoutSize = asz
+
 	if asz == (math32.Vector2{}) {
 		ed.NLinesChars.Y = 20
 		ed.NLinesChars.X = 80
@@ -66,6 +67,7 @@ func (ed *Editor) InternalSizeFromLines() {
 	ed.TotalSize.X += ed.LineNumberOffset
 	ed.Geom.Size.Internal = ed.TotalSize
 	ed.Geom.Size.Internal.Y += ed.LineHeight
+	// fmt.Println(ed, "total:", ed.TotalSize)
 }
 
 // LayoutAllLines generates TextRenders of lines
@@ -122,7 +124,7 @@ func (ed *Editor) LayoutAllLines() {
 			ed.HasLinks = true
 		}
 		ed.Offsets[ln] = off
-		lsz := math32.Max(rn.BBox.Size().Y, ed.LineHeight)
+		lsz := math32.Ceil(math32.Max(rn.BBox.Size().Y, ed.LineHeight))
 		off += lsz
 		mxwd = math32.Max(mxwd, rn.BBox.Size().X)
 	}
@@ -145,37 +147,7 @@ func (ed *Editor) ReLayoutAllLines() {
 		ed.InternalSizeFromLines()
 		return
 	}
-	buf := ed.Buffer
-	buf.MarkupMu.RLock()
-
-	nln := ed.NLines
-	if nln >= len(buf.Markup) {
-		nln = len(buf.Markup)
-	}
-	sz := ed.LineLayoutSize
-
-	sty := &ed.Styles
-	fst := sty.FontRender()
-	fst.Background = nil
-	off := float32(0)
-	mxwd := sz.X // always start with our render size
-
-	for ln := 0; ln < nln; ln++ {
-		if ln >= len(ed.Renders) || ln >= len(buf.Markup) {
-			break
-		}
-		rn := &ed.Renders[ln]
-		rn.Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, sz)
-		ed.Offsets[ln] = off
-		lsz := math32.Max(rn.BBox.Size().Y, ed.LineHeight)
-		off += lsz
-		mxwd = math32.Max(mxwd, rn.BBox.Size().X)
-	}
-	buf.MarkupMu.RUnlock()
-
-	ed.LinesSize = math32.Vec2(mxwd, off)
-	ed.lastlineLayoutSize = ed.LineLayoutSize
-	ed.InternalSizeFromLines()
+	ed.LayoutAllLines()
 }
 
 // note: Layout reverts to basic Widget behavior for layout if no kids, like us..

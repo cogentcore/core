@@ -72,10 +72,7 @@ func (ed *Editor) TextStyleProperties() map[string]any {
 // RenderStartPos is absolute rendering start position from our content pos with scroll
 // This can be offscreen (left, up) based on scrolling.
 func (ed *Editor) RenderStartPos() math32.Vector2 {
-	pos := ed.Geom.Pos.Content.Add(ed.Geom.Scroll)
-	// spc := ed.Styles.BoxSpace().Size()
-	// pos.Y += spc.Y
-	return pos
+	return ed.Geom.Pos.Content.Add(ed.Geom.Scroll)
 }
 
 // RenderBBox is the render region
