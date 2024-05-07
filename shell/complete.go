@@ -54,7 +54,7 @@ func (rc *ReadlineCompleter) Do(line []rune, pos int) (newLine [][]rune, length 
 	res := [][]rune{}
 	for _, match := range md.Matches {
 		after := strings.TrimPrefix(match.Text, md.Seed)
-		if after == match.Text {
+		if md.Seed != "" && after == match.Text {
 			continue // no overlap
 		}
 		if match.Icon == string(icons.Folder) {
