@@ -49,10 +49,11 @@ func TestPaths(t *testing.T) {
 		{"cd cogent/", `shell.Exec("cd", "cogent/")`},
 		{"echo $PATH", `shell.Exec("echo", "$PATH")`},
 		{`"./Cogent Code"`, `shell.Exec("./Cogent Code")`},
-		{`./"Cogent Code"`, `shell.Exec("./Cogent Code")`},
+		// {`./"Cogent Code"`, `shell.Exec("./Cogent Code")`}, // there is no point in supporting this
+		{`Cogent\ Code`, `shell.Exec("Cogent Code")`},
 		{`./Cogent\ Code`, `shell.Exec("./Cogent Code")`},
 		{"set something hello-1", `shell.Exec("set", "something", "hello-1")`},
-		// {`ios\ deploy -i`, `shell.Exec("ios deploy", "-i")`},
+		{`ios\ deploy -i`, `shell.Exec("ios deploy", "-i")`},
 		{"./ios-deploy -i", `shell.Exec("./ios-deploy", "-i")`},
 		{"ios_deploy -i tree_file", `shell.Exec("ios_deploy", "-i", "tree_file")`},
 		{"ios_deploy/sub -i tree_file", `shell.Exec("ios_deploy/sub", "-i", "tree_file")`},

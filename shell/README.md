@@ -10,7 +10,8 @@ The critical extension from standard Go syntax is for lines that are processed b
 * Within Exec, `{}`: Go
 * Line starts with `Go` Keyword: Go
 * Line is one word: Exec
-* Line starts with `.`: Exec
+* Line starts with `path`: Exec
+* Line starts with `"string"`: Exec
 * Line starts with `word word`: Exec
 * Line starts with `word {`: Exec
 * Otherwise: Go

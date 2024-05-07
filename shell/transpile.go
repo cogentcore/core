@@ -68,6 +68,9 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 		logx.PrintlnDebug("exec: path...")
 		rtok := toks.ReplaceIdentAt(0, t0path, t0pn)
 		return sh.TranspileExec(rtok, false)
+	case toks[0].Tok == token.STRING:
+		logx.PrintlnDebug("exec: string...")
+		return sh.TranspileExec(toks, false)
 	case n == t0in || t0in > 1:
 		logx.PrintlnDebug("exec: 1 word or non-go word")
 		return sh.TranspileExec(toks, false)

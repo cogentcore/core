@@ -57,7 +57,17 @@ func (tk Tokens) ExecIdent() (string, int) {
 			return str, ci
 		}
 		ct := tk[ci]
-		if !(ct.Tok == token.IDENT || ct.Tok == token.SUB) {
+		isvalid := (ct.Tok == token.IDENT || ct.Tok == token.SUB || ct.Tok == token.INT || ct.Tok == token.FLOAT)
+		if !isvalid {
+			// escaped space:
+			if ct.Tok == token.ILLEGAL && ct.Str == `\` && ci+1 < n && int(tk[ci+1].Pos) == lastEnd+2 {
+				str += " "
+				ci++
+				lastEnd += 2
+				continue
+			}
+		}
+		if !isvalid {
 			return str, ci
 		}
 		str += ct.String()
@@ -120,6 +130,13 @@ func (tk Tokens) Path(idx0 bool) (string, int) {
 			continue
 		}
 		if !prevWasDelim {
+			if ct.Tok == token.ILLEGAL && ct.Str == `\` && ci+1 < n && int(tk[ci+1].Pos) == lastEnd+2 {
+				prevWasDelim = true
+				str += " "
+				ci++
+				lastEnd += 2
+				continue
+			}
 			return str, ci
 		}
 		if ct.IsWord() {
