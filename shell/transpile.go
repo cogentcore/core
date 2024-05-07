@@ -134,9 +134,12 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 		tok := toks[i]
 		tpath, tpn := toks[i:].Path(false)
 		tid, tin := toks[i:].ExecIdent()
+		// fmt.Println("path:", tpath, "id:", tid)
 		switch {
+		case tok.Tok == token.STRING:
+			etoks.Add(token.STRING, tok.Str)
 		case tpn > 0:
-			etoks.Add(token.STRING, `"`+tpath+`"`)
+			etoks.Add(token.STRING, AddQuotes(tpath))
 			i += tpn
 		case tok.Tok == token.LBRACE:
 			rb := toks[i:].RightMatching()
@@ -149,21 +152,19 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 		case tok.Tok == token.SUB && i < n-1: // option
 			nid, nin := toks[i+1:].ExecIdent()
 			if nin > 0 {
-				etoks.Add(token.STRING, `"-`+nid+`"`)
+				etoks.Add(token.STRING, `"-`+EscapeQuotes(nid)+`"`)
 				i += nin
 			} else {
-				etoks.Add(token.STRING, `"-`+toks[i+1].Str+`"`)
+				etoks.Add(token.STRING, `"-`+EscapeQuotes(toks[i+1].Str)+`"`)
 				i++
 			}
 		case tin > 0:
-			etoks.Add(token.STRING, `"`+tid+`"`)
+			etoks.Add(token.STRING, `"`+tid+`"`) // note: already been escaped
 			i += (tin - 1)
-		case tok.Tok == token.STRING:
-			etoks.Add(token.STRING, tok.Str)
 		case tok.Tok == token.ASSIGN:
-			etoks.Add(token.STRING, `"`+tok.String()+`"`)
+			etoks.Add(token.STRING, AddQuotes(tok.String()))
 		default:
-			etoks.Add(token.STRING, `"`+tok.Str+`"`)
+			etoks.Add(token.STRING, AddQuotes(tok.Str))
 		}
 		etoks.Add(token.COMMA)
 	}

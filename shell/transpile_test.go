@@ -39,7 +39,7 @@ func TestTranspile(t *testing.T) {
 		{`set something = "hello"`, `shell.Exec("set", "something", "=", "hello")`},
 		{`set something=hello`, `shell.Exec("set", "something=hello")`},
 		{`set "something=hello"`, `shell.Exec("set", "something=hello")`},
-		{`set something="hello"`, `shell.Exec("set", "something=hello")`},
+		{`set something="hello"`, `shell.Exec("set", "something=\"hello\"")`},
 	}
 
 	sh := NewShell()
@@ -62,6 +62,7 @@ func TestPaths(t *testing.T) {
 		{"cd cogent/", `shell.Exec("cd", "cogent/")`},
 		{"echo $PATH", `shell.Exec("echo", "$PATH")`},
 		{`"./Cogent Code"`, `shell.Exec("./Cogent Code")`},
+		{`./"Cogent Code"`, `shell.Exec("./\"Cogent Code\"")`},
 		{`Cogent\ Code`, `shell.Exec("Cogent Code")`},
 		{`./Cogent\ Code`, `shell.Exec("./Cogent Code")`},
 		{`ios\ deploy -i`, `shell.Exec("ios deploy", "-i")`},

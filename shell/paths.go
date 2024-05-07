@@ -66,6 +66,12 @@ func (tk Tokens) ExecIdent() (string, int) {
 				lastEnd += 2
 				continue
 			}
+			if ct.Tok == token.STRING {
+				str += EscapeQuotes(ct.Str)
+				lastEnd += len(ct.Str) // non-ec
+				ci++
+				continue
+			}
 		}
 		if !isvalid {
 			return str, ci
@@ -125,6 +131,13 @@ func (tk Tokens) Path(idx0 bool) (string, int) {
 		if ct.IsPathDelim() || ct.IsPathExtraDelim() {
 			prevWasDelim = true
 			str += ct.String()
+			lastEnd += len(ct.String())
+			ci++
+			continue
+		}
+		if ct.Tok == token.STRING {
+			prevWasDelim = true
+			str += EscapeQuotes(ct.String())
 			lastEnd += len(ct.String())
 			ci++
 			continue

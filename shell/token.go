@@ -8,6 +8,7 @@ import (
 	"go/scanner"
 	"go/token"
 	"log/slog"
+	"strings"
 
 	"cogentcore.org/core/base/logx"
 )
@@ -192,6 +193,17 @@ func (tk Tokens) Contains(toks ...token.Token) bool {
 		}
 	}
 	return false
+}
+
+// EscapeQuotes replaces any " with \"
+func EscapeQuotes(str string) string {
+	return strings.ReplaceAll(str, `"`, `\"`)
+}
+
+// AddQuotes surrounds given string with quotes,
+// also escaping any contained quotes
+func AddQuotes(str string) string {
+	return `"` + EscapeQuotes(str) + `"`
 }
 
 // IsBracket returns true if the given token is a bracket delimiter:
