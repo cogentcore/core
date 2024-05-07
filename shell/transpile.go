@@ -37,7 +37,7 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 
 	logx.PrintlnDebug("\n########## line:\n", ln, "\nTokens:\n", toks.String())
 
-	t0path, t0pn := toks.Path()
+	t0path, t0pn := toks.Path(true) // true = first position
 	_, t0in := toks.ExecIdent()
 
 	t1idx := max(t0pn, t0in)
@@ -47,7 +47,7 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 		if t1idx > 0 {
 			end0 := int(toks[t1idx-1].Pos) + len(toks[t1idx-1].String())
 			if int(toks[t1idx].Pos) > end0 { // only if spaced
-				_, t1pn = toks[t1idx:].Path()
+				_, t1pn = toks[t1idx:].Path(false)
 				_, t1in = toks[t1idx:].ExecIdent()
 			}
 		}
@@ -120,7 +120,7 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 	n := len(toks)
 	for i := 0; i < n; i++ {
 		tok := toks[i]
-		tpath, tpn := toks[i:].Path()
+		tpath, tpn := toks[i:].Path(false)
 		tid, tin := toks[i:].ExecIdent()
 		switch {
 		case tpn > 0:

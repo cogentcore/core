@@ -59,7 +59,7 @@ func (tk Tokens) ExecIdent() (string, int) {
 // and the number of tokens included in the path.
 // Restricts processing to contiguous elements with no spaces!
 // If it is not a path, returns nil string, 0
-func (tk Tokens) Path() (string, int) {
+func (tk Tokens) Path(idx0 bool) (string, int) {
 	n := len(tk)
 	if n == 0 {
 		return "", 0
@@ -79,10 +79,14 @@ func (tk Tokens) Path() (string, int) {
 		lastEnd = int(tk[0].Pos)
 		ci = 0
 		tid, tin := tk.ExecIdent()
-		if tin == 0 || tin+1 >= n {
+		if tin == 0 || tin >= n {
 			return "", 0
 		}
-		if (int(tk[tin].Pos) > lastEnd+len(tid)) || !(tk[tin].Tok == token.COLON || tk[tin].Tok == token.QUO) {
+		tindelim := tk[tin].IsPathDelim()
+		if idx0 {
+			tindelim = tk[tin].Tok == token.QUO
+		}
+		if (int(tk[tin].Pos) > lastEnd+len(tid)) || !(tk[tin].Tok == token.COLON || tindelim) {
 			return "", 0
 		}
 		ci += tin + 1
