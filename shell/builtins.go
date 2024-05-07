@@ -64,6 +64,10 @@ func (sh *Shell) AddPath(args ...string) error {
 	}
 	path := os.Getenv("PATH")
 	for _, arg := range args {
+		arg, err := homedir.Expand(arg)
+		if err != nil {
+			return err
+		}
 		path = path + ":" + arg
 	}
 	return os.Setenv("PATH", path)
