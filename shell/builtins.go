@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/mitchellh/go-homedir"
 )
@@ -60,10 +61,14 @@ func (sh *Shell) Exit(args ...string) error {
 
 // Set sets the given environment variable to the given value.
 func (sh *Shell) Set(args ...string) error {
-	if len(args) == 0 {
-		return fmt.Errorf("expected two arguments")
+	if len(args) != 1 {
+		return fmt.Errorf("expected one argument")
 	}
-	return os.Setenv(args[0], args[1])
+	key, value, has := strings.Cut(args[0], "=")
+	if !has {
+		return fmt.Errorf("expected equal sign (=)")
+	}
+	return os.Setenv(key, value)
 }
 
 // AddPath adds the given path(s) to $PATH.

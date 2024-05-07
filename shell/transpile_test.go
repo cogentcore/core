@@ -29,6 +29,7 @@ func TestTranspile(t *testing.T) {
 		{`for i := 0; i < 3; i++ { fmt.Println(i, "\n")`, `for i := 0; i < 3; i++ { fmt.Println(i, "\n")`},
 		{"for i, v := range `ls -la` {", `for i, v := range shell.Output("ls", "-la") {`},
 		{`// todo: fixit`, `// todo: fixit`},
+		{"go build", `shell.Exec("go", "build")`},
 	}
 
 	sh := NewShell()
@@ -53,6 +54,7 @@ func TestPaths(t *testing.T) {
 		{`Cogent\ Code`, `shell.Exec("Cogent Code")`},
 		{`./Cogent\ Code`, `shell.Exec("./Cogent Code")`},
 		{"set something hello-1", `shell.Exec("set", "something", "hello-1")`},
+		{"set something=hello", `shell.Exec("set", "something=hello")`},
 		{`ios\ deploy -i`, `shell.Exec("ios deploy", "-i")`},
 		{"./ios-deploy -i", `shell.Exec("./ios-deploy", "-i")`},
 		{"ios_deploy -i tree_file", `shell.Exec("ios_deploy", "-i", "tree_file")`},
