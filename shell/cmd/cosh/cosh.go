@@ -60,6 +60,7 @@ func Interactive(c *Config) error {
 
 	rl, err := readline.NewFromConfig(&readline.Config{
 		AutoComplete: &shell.ReadlineCompleter{Shell: in.Shell},
+		Undo:         true,
 	})
 	if err != nil {
 		return err
