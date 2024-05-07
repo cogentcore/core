@@ -5,10 +5,8 @@
 package shell
 
 import (
-	"log/slog"
 	"testing"
 
-	"cogentcore.org/core/base/logx"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,24 +17,24 @@ type exIn struct {
 
 // these are more general tests of full-line statements of various forms
 func TestTranspile(t *testing.T) {
-	logx.UserLevel = slog.LevelDebug
+	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		// {"`ls -la`", `shell.Exec("ls", "-la")`},
-		// {`var name string`, `var name string`},
-		// {`name = "test"`, `name = "test"`},
-		// {`echo {name}`, `shell.Exec("echo", name)`},
-		// {`echo "testing"`, `shell.Exec("echo", "testing")`},
-		// {`number := 1.23`, `number := 1.23`},
-		// {`println("hi")`, `println("hi")`},
-		// {`fmt.Println("hi")`, `fmt.Println("hi")`},
-		// {`for i := 0; i < 3; i++ { fmt.Println(i, "\n")`, `for i := 0; i < 3; i++ { fmt.Println(i, "\n")`},
-		// {"for i, v := range `ls -la` {", `for i, v := range shell.Output("ls", "-la") {`},
-		// {`// todo: fixit`, `// todo: fixit`},
-		// {"`go build`", `shell.Exec("go", "build")`},
-		// {"{go build()}", `go build()`},
-		// {"go build", `shell.Exec("go", "build")`},
-		// {"go build()", `go build()`},
-		// {"set something hello-1", `shell.Exec("set", "something", "hello-1")`},
+		{"`ls -la`", `shell.Exec("ls", "-la")`},
+		{`var name string`, `var name string`},
+		{`name = "test"`, `name = "test"`},
+		{`echo {name}`, `shell.Exec("echo", name)`},
+		{`echo "testing"`, `shell.Exec("echo", "testing")`},
+		{`number := 1.23`, `number := 1.23`},
+		{`println("hi")`, `println("hi")`},
+		{`fmt.Println("hi")`, `fmt.Println("hi")`},
+		{`for i := 0; i < 3; i++ { fmt.Println(i, "\n")`, `for i := 0; i < 3; i++ { fmt.Println(i, "\n")`},
+		{"for i, v := range `ls -la` {", `for i, v := range shell.Output("ls", "-la") {`},
+		{`// todo: fixit`, `// todo: fixit`},
+		{"`go build`", `shell.Exec("go", "build")`},
+		{"{go build()}", `go build()`},
+		{"go build", `shell.Exec("go", "build")`},
+		{"go build()", `go build()`},
+		{"set something hello-1", `shell.Exec("set", "something", "hello-1")`},
 		{"set something = hello", `shell.Exec("set", "something", "=", "hello")`},
 		{`set something = "hello"`, `shell.Exec("set", "something", "=", "hello")`},
 		{`set something=hello`, `shell.Exec("set", "something=hello")`},
