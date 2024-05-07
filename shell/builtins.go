@@ -17,6 +17,7 @@ func (sh *Shell) InstallBuiltins() {
 	sh.Builtins = make(map[string]func(args ...string) error)
 	sh.Builtins["cd"] = sh.Cd
 	sh.Builtins["exit"] = sh.Exit
+	sh.Builtins["set"] = sh.Set
 	sh.Builtins["add-path"] = sh.AddPath
 }
 
@@ -55,6 +56,14 @@ func (sh *Shell) Cd(args ...string) error {
 func (sh *Shell) Exit(args ...string) error {
 	os.Exit(0)
 	return nil
+}
+
+// Set sets the given environment variable to the given value.
+func (sh *Shell) Set(args ...string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("expected two arguments")
+	}
+	return os.Setenv(args[0], args[1])
 }
 
 // AddPath adds the given path(s) to $PATH.
