@@ -16,20 +16,18 @@ import (
 // Completion holds one potential completion
 type Completion struct {
 
-	// completion text: what will actually be inserted if selected
+	// Text is the completion text: what will actually be inserted if selected.
 	Text string
 
-	// label to show the user; only used for menu display if non-empty; otherwise Text is used
+	// Label is the label text to show the user. It is only used if
+	// non-empty; otherwise Text is used.
 	Label string
 
-	// icon name
+	// Icon is the icon to render in core for the completion item.
 	Icon string
 
-	// extra information, e.g. detailed description, type, arguments, etc; not currently used in Pi, but is used for tooltips in GUI
+	// Desc is extra description information used in tooltips in core.
 	Desc string
-
-	// lang specific or other, e.g. class or type
-	Extra map[string]string
 }
 
 // Completions is a full list (slice) of completion options

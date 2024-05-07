@@ -56,7 +56,14 @@ func Run(c *Config) error { //cli:cmd -root
 
 // Interactive runs an interactive shell that allows the user to input cosh.
 func Interactive(c *Config) error {
-	rl, err := readline.New("")
+	rl, err := readline.NewFromConfig(&readline.Config{
+		Listener: func(line []rune, pos int, key rune) (newLine []rune, newPos int, ok bool) {
+			if key != '\t' {
+				return line, pos, true
+			}
+			return line, pos, true
+		},
+	})
 	if err != nil {
 		return err
 	}
@@ -71,7 +78,7 @@ func Interactive(c *Config) error {
 			continue
 		}
 		if errors.Is(err, io.EOF) {
-			return nil
+			os.Exit(0)
 		}
 		if err != nil {
 			return err
