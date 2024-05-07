@@ -68,9 +68,9 @@ func (in *Interpreter) Prompt() string {
 		rel := errors.Log1(filepath.Rel(hdir, in.Shell.Config.Dir))
 		// if it has to go back, then it is not in home dir, so no ~
 		if strings.Contains(rel, "..") {
-			return in.Shell.Config.Dir + " > "
+			return in.Shell.Config.Dir + string(filepath.Separator) + " > "
 		}
-		return filepath.Join("~", rel) + " > "
+		return filepath.Join("~", rel) + string(filepath.Separator) + " > "
 	}
 	res := "> "
 	for range dp {
