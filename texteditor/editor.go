@@ -67,22 +67,29 @@ type Editor struct { //core:embedder
 	// width of cursor -- set from cursor-width property (inherited)
 	CursorWidth units.Value `xml:"cursor-width"`
 
-	// the color used for the side bar containing the line numbers; this should be set in Stylers like all other style properties
+	// the color used for the side bar containing the line numbers;
+	// this should be set in Stylers like all other style properties
 	LineNumberColor image.Image
 
-	// the color used for the user text selection background color; this should be set in Stylers like all other style properties
+	// the color used for the user text selection background color;
+	// this should be set in Stylers like all other style properties
 	SelectColor image.Image
 
-	// the color used for the text highlight background color (like in find); this should be set in Stylers like all other style properties
+	// the color used for the text highlight background color
+	// (like in find); this should be set in Stylers like all other style properties
 	HighlightColor image.Image
 
-	// the color used for the text field cursor (caret); this should be set in Stylers like all other style properties
+	// the color used for the text editor cursor bar;
+	// this should be set in Stylers like all other style properties
 	CursorColor image.Image
 
-	// number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc
+	// number of lines in the view, sync'd with the Buf after edits,
+	// but always reflects storage size of Renders etc
 	NLines int `set:"-" view:"-" json:"-" xml:"-"`
 
-	// renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)
+	// renders of the text lines, with one render per line
+	// (each line could visibly wrap-around,
+	// so these are logical lines, not display lines)
 	Renders []paint.Text `set:"-" json:"-" xml:"-"`
 
 	// starting render offsets for top of each line
@@ -103,13 +110,16 @@ type Editor struct { //core:embedder
 	// target cursor position for externally set targets: ensures that it is visible
 	CursorTarg lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns
+	// desired cursor column, where the cursor was last when moved using
+	// left / right arrows.  used when doing up / down to not always go
+	//  to short line columns
 	CursorCol int `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// current index within PosHistory
 	PosHistIndex int `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// starting point for selection -- will either be the start or end of selected region depending on subsequent selection.
+	// starting point for selection, which will either be the
+	// start or end of selected region depending on subsequent selection.
 	SelectStart lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
 	// current selection region

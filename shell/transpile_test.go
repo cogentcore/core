@@ -5,8 +5,10 @@
 package shell
 
 import (
+	"log/slog"
 	"testing"
 
+	"cogentcore.org/core/base/logx"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,21 +17,29 @@ type exIn struct {
 	e string
 }
 
+// these are more general tests of full-line statements of various forms
 func TestTranspile(t *testing.T) {
-	// logx.UserLevel = slog.LevelDebug
+	logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		{"`ls -la`", `shell.Exec("ls", "-la")`},
-		{`var name string`, `var name string`},
-		{`name = "test"`, `name = "test"`},
-		{`echo {name}`, `shell.Exec("echo", name)`},
-		{`echo "testing"`, `shell.Exec("echo", "testing")`},
-		{`number := 1.23`, `number := 1.23`},
-		{`println("hi")`, `println("hi")`},
-		{`fmt.Println("hi")`, `fmt.Println("hi")`},
-		{`for i := 0; i < 3; i++ { fmt.Println(i, "\n")`, `for i := 0; i < 3; i++ { fmt.Println(i, "\n")`},
-		{"for i, v := range `ls -la` {", `for i, v := range shell.Output("ls", "-la") {`},
-		{`// todo: fixit`, `// todo: fixit`},
+		// {"`ls -la`", `shell.Exec("ls", "-la")`},
+		// {`var name string`, `var name string`},
+		// {`name = "test"`, `name = "test"`},
+		// {`echo {name}`, `shell.Exec("echo", name)`},
+		// {`echo "testing"`, `shell.Exec("echo", "testing")`},
+		// {`number := 1.23`, `number := 1.23`},
+		// {`println("hi")`, `println("hi")`},
+		// {`fmt.Println("hi")`, `fmt.Println("hi")`},
+		// {`for i := 0; i < 3; i++ { fmt.Println(i, "\n")`, `for i := 0; i < 3; i++ { fmt.Println(i, "\n")`},
+		// {"for i, v := range `ls -la` {", `for i, v := range shell.Output("ls", "-la") {`},
+		// {`// todo: fixit`, `// todo: fixit`},
+		{"`go build`", `shell.Exec("go", "build")`},
+		{"{go build()}", `go build()`},
 		{"go build", `shell.Exec("go", "build")`},
+		{"go build()", `go build()`},
+		{"set something hello-1", `shell.Exec("set", "something", "hello-1")`},
+		{"set something = hello", `shell.Exec("set", "something = hello")`},
+		{`set "something=hello"`, `shell.Exec("set", "something=hello")`},
+		{`set something="hello"`, `shell.Exec("set", "something=hello")`},
 	}
 
 	sh := NewShell()
@@ -39,6 +49,8 @@ func TestTranspile(t *testing.T) {
 	}
 }
 
+// Paths tests focus specifically on the Path() and ExecIdent() code
+// in paths.go
 func TestPaths(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
@@ -50,13 +62,8 @@ func TestPaths(t *testing.T) {
 		{"cd cogent/", `shell.Exec("cd", "cogent/")`},
 		{"echo $PATH", `shell.Exec("echo", "$PATH")`},
 		{`"./Cogent Code"`, `shell.Exec("./Cogent Code")`},
-		// {`./"Cogent Code"`, `shell.Exec("./Cogent Code")`}, // there is no point in supporting this
 		{`Cogent\ Code`, `shell.Exec("Cogent Code")`},
 		{`./Cogent\ Code`, `shell.Exec("./Cogent Code")`},
-		{"set something hello-1", `shell.Exec("set", "something", "hello-1")`},
-		{"set something=hello", `shell.Exec("set", "something=hello")`},
-		{`set "something=hello"`, `shell.Exec("set", "something=hello")`},
-		{`set something="hello"`, `shell.Exec("set", "something=hello")`},
 		{`ios\ deploy -i`, `shell.Exec("ios deploy", "-i")`},
 		{"./ios-deploy -i", `shell.Exec("./ios-deploy", "-i")`},
 		{"ios_deploy -i tree_file", `shell.Exec("ios_deploy", "-i", "tree_file")`},

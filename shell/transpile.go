@@ -54,6 +54,9 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	}
 
 	switch {
+	case toks[0].Tok == token.LBRACE:
+		logx.PrintlnDebug("go:   { } line")
+		return sh.TranspileGo(toks[1 : n-1])
 	case toks[0].IsBacktickString():
 		logx.PrintlnDebug("exec: backquoted string")
 		exe := sh.TranspileExecString(toks[0].Str, false)
@@ -62,6 +65,12 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 		}
 		return exe
 	case toks[0].IsGo():
+		if toks[0].Tok == token.GO {
+			if !toks.Contains(token.LPAREN) {
+				logx.PrintlnDebug("exec: go command")
+				return sh.TranspileExec(toks, false)
+			}
+		}
 		logx.PrintlnDebug("go    keyword")
 		return sh.TranspileGo(toks)
 	case t0pn > 0: // path expr

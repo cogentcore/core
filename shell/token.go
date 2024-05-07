@@ -7,6 +7,7 @@ package shell
 import (
 	"go/scanner"
 	"go/token"
+	"log/slog"
 
 	"cogentcore.org/core/base/logx"
 )
@@ -173,6 +174,22 @@ func (tk Tokens) Code() string {
 func (tk *Token) IsOp() bool {
 	if tk.Tok >= token.ADD && tk.Tok <= token.DEFINE {
 		return true
+	}
+	return false
+}
+
+// Contains returns true if the token string contains any of the given token(s)
+func (tk Tokens) Contains(toks ...token.Token) bool {
+	if len(toks) == 0 {
+		slog.Error("programmer error: tokens.Contains with no args")
+		return false
+	}
+	for _, t := range tk {
+		for _, st := range toks {
+			if t.Tok == st {
+				return true
+			}
+		}
 	}
 	return false
 }

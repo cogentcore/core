@@ -70,7 +70,7 @@ func (ed *Editor) InternalSizeFromLines() {
 	// fmt.Println(ed, "total:", ed.TotalSize)
 }
 
-// LayoutAllLines generates TextRenders of lines
+// LayoutAllLines generates paint.Text Renders of lines
 // from the Markup version of the source in Buf.
 // It computes the total LinesSize and TotalSize.
 func (ed *Editor) LayoutAllLines() {
