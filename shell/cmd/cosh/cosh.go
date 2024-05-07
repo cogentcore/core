@@ -66,11 +66,13 @@ func Interactive(c *Config) error {
 			}
 			line = slices.Delete(line, pos-1, pos) // get rid of tab
 			pos -= 1
-			md := in.Shell.CompleteMatch(nil, string(line), 0, pos)
+			sline := string(line)
+			md := in.Shell.CompleteMatch(nil, sline, 0, pos)
 			if len(md.Matches) == 0 {
 				return line, pos, true
 			}
-			return line, pos, true
+			ed := in.Shell.CompleteEdit(nil, sline, pos, md.Matches[0], md.Seed)
+			return []rune(ed.NewText), len(ed.NewText), true
 		},
 	})
 	if err != nil {

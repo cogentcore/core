@@ -223,8 +223,8 @@ func SeedAfter(text string, f func(r rune) bool) string {
 }
 
 // EditWord replaces the completion seed and any text up to the next whitespace with completion
-func EditWord(text string, cp int, completion string, seed string) (ed Edit) {
-	s2 := string(text[cp:])
+func EditWord(text string, cursorPos int, completion string, seed string) (ed Edit) {
+	s2 := string(text[cursorPos:])
 
 	var fd = 0 // number of characters past seed in word to be deleted (forward delete)]
 	var r rune

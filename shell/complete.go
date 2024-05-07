@@ -33,3 +33,8 @@ func (sh *Shell) CompleteMatch(data any, text string, posLn, posCh int) (md comp
 	md.Matches = complete.MatchSeedCompletion(comps, md.Seed)
 	return md
 }
+
+// CompleteEdit is the [complete.EditFunc] for the shell.
+func (sh *Shell) CompleteEdit(data any, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.Edit) {
+	return complete.EditWord(text, cursorPos, completion.Text, seed)
+}
