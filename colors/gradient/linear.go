@@ -25,10 +25,10 @@ type Linear struct { //types:add -setters
 	End math32.Vector2
 
 	// computed current render versions transformed by object matrix
-	rStart          math32.Vector2
-	rEnd            math32.Vector2
-	distance        math32.Vector2
-	distanceProduct float32 // self inner product
+	rStart                math32.Vector2
+	rEnd                  math32.Vector2
+	distance              math32.Vector2
+	distanceLengthSquared float32
 }
 
 var _ Gradient = &Linear{}
@@ -71,7 +71,7 @@ func (l *Linear) Update(opacity float32, box math32.Box2, objTransform math32.Ma
 	}
 
 	l.distance = l.rEnd.Sub(l.rStart)
-	l.distanceProduct = l.distance.X*l.distance.X + l.distance.Y*l.distance.Y
+	l.distanceLengthSquared = l.distance.LengthSquared()
 }
 
 // At returns the color of the linear gradient at the given point
@@ -88,6 +88,6 @@ func (l *Linear) At(x, y int) color.Color {
 		pt = l.boxTransform.MulVector2AsPoint(pt)
 	}
 	df := pt.Sub(l.rStart)
-	pos := (l.distance.X*df.X + l.distance.Y*df.Y) / l.distanceProduct
+	pos := (l.distance.X*df.X + l.distance.Y*df.Y) / l.distanceLengthSquared
 	return l.GetColor(pos)
 }
