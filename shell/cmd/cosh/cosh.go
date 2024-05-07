@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/cli"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/shell"
 	"cogentcore.org/core/shell/interpreter"
 	"github.com/ergochat/readline"
@@ -71,10 +72,16 @@ func Interactive(c *Config) error {
 			if len(md.Matches) == 0 {
 				return newLine, newPos, true
 			}
-			ed := in.Shell.CompleteEdit(nil, sline, newPos, md.Matches[0], md.Seed)
+			match := md.Matches[0]
+			ed := in.Shell.CompleteEdit(nil, sline, newPos, match, md.Seed)
 			newPos -= len(md.Seed)
 			newLine = newLine[:newPos]
 			newLine = append(newLine, []rune(ed.NewText)...)
+			if match.Icon == string(icons.Folder) {
+				newLine = append(newLine, filepath.Separator)
+			} else {
+				newLine = append(newLine, ' ')
+			}
 			newPos = len(newLine)
 			return newLine, newPos, true
 		},
