@@ -27,18 +27,31 @@ func (tk Tokens) ExecIdent() (string, int) {
 		return "", 0
 	}
 	t0 := tk[0]
+	str := ""
+	ci := 0
+	stpos := int(t0.Pos)
+	if t0.Tok == token.ILLEGAL && t0.Str == "$" && n > 1 && (stpos+1 == int(tk[1].Pos)) {
+		str += t0.Str
+		ci++
+		tk = tk[1:]
+		t0 = tk[0]
+		n--
+		stpos = int(tk[0].Pos)
+	}
 	if t0.Tok != token.IDENT {
 		return "", 0
 	}
 	if n == 1 {
-		return t0.String(), 1
+		str += t0.String()
+		ci++
+		return str, ci
 	}
-	str := tk[0].String()
-	lastEnd := int(tk[0].Pos) + len(str)
+	str += t0.String()
+	ci++
+	lastEnd := stpos + len(t0.String())
 	if int(tk[1].Pos) > lastEnd {
-		return str, 1
+		return str, ci
 	}
-	ci := 1
 	for {
 		if ci >= n || int(tk[ci].Pos) > lastEnd {
 			return str, ci

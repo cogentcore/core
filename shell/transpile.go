@@ -46,7 +46,7 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	if n > 1 {
 		if t1idx > 0 {
 			end0 := int(toks[t1idx-1].Pos) + len(toks[t1idx-1].String())
-			if int(toks[t1idx].Pos) > end0 { // only if spaced
+			if t1idx < n && int(toks[t1idx].Pos) > end0 { // only if spaced
 				_, t1pn = toks[t1idx:].Path(false)
 				_, t1in = toks[t1idx:].ExecIdent()
 			}
