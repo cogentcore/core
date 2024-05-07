@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
+	"github.com/mitchellh/go-homedir"
 	"golang.org/x/tools/imports"
 )
 
@@ -119,4 +120,19 @@ func (sh *Shell) AddError(err error) error {
 	sh.Errors = append(sh.Errors, err)
 	logx.PrintlnError(err)
 	return err
+}
+
+// TranspileConfig transpiles the .cosh startup config file in the user's
+// home directory if it exists.
+func (sh *Shell) TranspileConfig() error {
+	path, err := homedir.Expand("~/.cosh")
+	if err != nil {
+		return err
+	}
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	sh.TranspileCode(string(b))
+	return nil
 }

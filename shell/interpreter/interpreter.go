@@ -35,6 +35,8 @@ type Interpreter struct {
 }
 
 // NewInterpreter returns a new [Interpreter] initialized with the given options.
+// It automatically imports the standard library and configures necessary shell
+// functions. It also calls [Interpreter.RunConfig].
 func NewInterpreter(options interp.Options) *Interpreter {
 	in := &Interpreter{}
 	in.Shell = shell.NewShell()
@@ -56,6 +58,7 @@ func NewInterpreter(options interp.Options) *Interpreter {
 		},
 	})
 	in.Interp.ImportUsed()
+	in.RunConfig()
 	go in.MonitorSignals()
 	return in
 }
@@ -101,6 +104,16 @@ func (in *Interpreter) RunCode() error {
 		slog.Error(err.Error())
 	}
 	return err
+}
+
+// RunConfig runs the .cosh startup config file in the user's
+// home directory if it exists.
+func (in *Interpreter) RunConfig() error {
+	err := in.Shell.TranspileConfig()
+	if err != nil {
+		return errors.Log(err)
+	}
+	return in.RunCode()
 }
 
 // MonitorSignals monitors the operating system signals to appropriately
