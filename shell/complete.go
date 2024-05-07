@@ -22,6 +22,9 @@ func (sh *Shell) CompleteMatch(data any, text string, posLn, posCh int) (md comp
 	fullPath := complete.SeedSpace(text)
 	parent := strings.TrimSuffix(fullPath, md.Seed)
 	dir := filepath.Join(sh.Config.Dir, parent)
+	if filepath.IsAbs(parent) {
+		dir = parent
+	}
 	entries := errors.Log1(os.ReadDir(dir))
 	for _, entry := range entries {
 		icon := icons.File

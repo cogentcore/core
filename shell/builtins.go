@@ -17,6 +17,7 @@ func (sh *Shell) InstallBuiltins() {
 	sh.Builtins = make(map[string]func(args ...string) error)
 	sh.Builtins["cd"] = sh.Cd
 	sh.Builtins["exit"] = sh.Exit
+	sh.Builtins["add-path"] = sh.AddPath
 }
 
 // Cd changes the current directory.
@@ -54,6 +55,18 @@ func (sh *Shell) Cd(args ...string) error {
 func (sh *Shell) Exit(args ...string) error {
 	os.Exit(0)
 	return nil
+}
+
+// AddPath adds the given path(s) to $PATH.
+func (sh *Shell) AddPath(args ...string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("expected at least one argument")
+	}
+	path := os.Getenv("PATH")
+	for _, arg := range args {
+		path = path + ":" + arg
+	}
+	return os.Setenv("PATH", path)
 }
 
 // example alias:
