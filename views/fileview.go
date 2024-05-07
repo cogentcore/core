@@ -13,7 +13,6 @@ import (
 	"slices"
 	"strings"
 	"sync"
-	"unicode"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/mitchellh/go-homedir"
@@ -790,15 +789,7 @@ func (fv *FileView) KeyInput(kt events.Event) {
 
 // FileComplete finds the possible completions for the file field
 func (fv *FileView) FileComplete(data any, text string, posLn, posCh int) (md complete.Matches) {
-	seedStart := 0
-	for i := len(text) - 1; i >= 0; i-- {
-		r := rune(text[i])
-		if unicode.IsSpace(r) || r == filepath.Separator {
-			seedStart = i + 1
-			break
-		}
-	}
-	md.Seed = text[seedStart:]
+	md.Seed = complete.SeedPath(text)
 
 	var files = []string{}
 	for _, f := range fv.Files {

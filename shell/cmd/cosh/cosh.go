@@ -67,7 +67,9 @@ func Interactive(c *Config) error {
 			line = slices.Delete(line, pos-1, pos) // get rid of tab
 			pos -= 1
 			md := in.Shell.CompleteMatch(nil, string(line), 0, pos)
-			fmt.Println(md)
+			if len(md.Matches) == 0 {
+				return line, pos, true
+			}
 			return line, pos, true
 		},
 	})

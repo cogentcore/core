@@ -105,7 +105,7 @@ func CompleteText(data any, text string, posLn, posCh int) (md complete.Matches)
 		return md
 	}
 
-	md.Seed = complete.SeedWhiteSpace(text)
+	md.Seed = complete.SeedSpace(text)
 	if md.Seed == "" {
 		return md
 	}

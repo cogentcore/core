@@ -6,6 +6,7 @@ package complete
 
 import (
 	"cmp"
+	"path/filepath"
 	"slices"
 	"strings"
 	"unicode"
@@ -189,17 +190,36 @@ func MatchPrecedence(lseed string, completion string) int {
 	return 2
 }
 
-// SeedWhiteSpace returns the text after the last whitespace
-func SeedWhiteSpace(text string) string {
+// SeedSpace returns the text after the last whitespace,
+// which is typically used for creating a completion seed string.
+func SeedSpace(text string) string {
+	return SeedAfter(text, func(r rune) bool {
+		return unicode.IsSpace(r)
+	})
+}
+
+// SeedPath returns the text after the last whitespace and path/filepath
+// separator, which is typically used for creating a completion seed string.
+func SeedPath(text string) string {
+	return SeedAfter(text, func(r rune) bool {
+		return unicode.IsSpace(r) || r == '/' || r == filepath.Separator
+	})
+}
+
+// SeedPath returns the text after the last rune for which the given
+// function returns true, which is typically used for creating a completion
+// seed string.
+func SeedAfter(text string, f func(r rune) bool) string {
 	seedStart := 0
-	for i := len(text) - 1; i >= 0; i-- {
-		r := rune(text[i])
-		if unicode.IsSpace(r) {
+	runes := []rune(text)
+	for i := len(runes) - 1; i >= 0; i-- {
+		r := runes[i]
+		if f(r) {
 			seedStart = i + 1
 			break
 		}
 	}
-	return text[seedStart:]
+	return string(runes[seedStart:])
 }
 
 // EditWord replaces the completion seed and any text up to the next whitespace with completion
