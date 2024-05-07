@@ -367,27 +367,27 @@ func (v *MapInlineValue) Update() {
 	}
 }
 
-// KiValue represents a [tree.Node] value with a button.
-type KiValue struct {
+// TreeValue represents a [tree.Node] value with a button.
+type TreeValue struct {
 	ValueBase[*core.Button]
 }
 
-func (v *KiValue) Config() {
+func (v *TreeValue) Config() {
 	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	ConfigDialogWidget(v, true)
 }
 
-func (v *KiValue) Update() {
+func (v *TreeValue) Update() {
 	path := "None"
-	k := v.KiValue()
+	k := v.TreeValue()
 	if k != nil && k.This() != nil {
 		path = k.AsTreeNode().String()
 	}
 	v.Widget.SetText(path).Update()
 }
 
-func (v *KiValue) ConfigDialog(d *core.Body) (bool, func()) {
-	k := v.KiValue()
+func (v *TreeValue) ConfigDialog(d *core.Body) (bool, func()) {
+	k := v.TreeValue()
 	if k == nil {
 		return false, nil
 	}
@@ -395,8 +395,8 @@ func (v *KiValue) ConfigDialog(d *core.Body) (bool, func()) {
 	return true, nil
 }
 
-// KiValue returns the actual underlying [tree.Node] value, or nil.
-func (vv *KiValue) KiValue() tree.Node {
+// TreeValue returns the actual underlying [tree.Node] value, or nil.
+func (vv *TreeValue) TreeValue() tree.Node {
 	if !vv.Value.IsValid() || vv.Value.IsNil() {
 		return nil
 	}

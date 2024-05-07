@@ -226,6 +226,12 @@ func (v *ValueBase[W]) SetWidget(w core.Widget) {
 	v.Widget = w.(W)
 }
 
+// Config is a placeholder no-op implementation of [Value.Config].
+func (v *ValueBase[W]) Config() {}
+
+// Update is a placeholder no-op implementation of [Value.Update].
+func (v *ValueBase[W]) Update() {}
+
 // Config configures the given [core.Widget] to represent the given [Value].
 func Config(v Value, w core.Widget) {
 	if w == v.AsWidget() {

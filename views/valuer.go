@@ -146,7 +146,7 @@ func ToValue(val any, tags string) Value {
 		return &StringValue{}
 	case vk == reflect.Pointer:
 		if tree.IsNode(nptyp) {
-			return &KiValue{}
+			return &TreeValue{}
 		}
 		if reflectx.AnyIsNil(val) {
 			return &NilValue{}
