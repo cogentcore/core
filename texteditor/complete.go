@@ -112,7 +112,7 @@ func CompleteText(data any, text string, posLn, posCh int) (md complete.Matches)
 	result := spell.Complete(md.Seed)
 	possibles := complete.MatchSeedString(result, md.Seed)
 	for _, p := range possibles {
-		m := complete.Completion{Text: p, Icon: ""}
+		m := complete.Completion{Text: p}
 		md.Matches = append(md.Matches, m)
 	}
 	return md

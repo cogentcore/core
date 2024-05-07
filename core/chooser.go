@@ -684,7 +684,7 @@ func (ch *Chooser) CompleteMatch(data any, text string, posLn, posCh int) (md co
 		comps[i] = complete.Completion{
 			Text: item.GetLabel(),
 			Desc: item.Tooltip,
-			Icon: string(item.Icon),
+			Icon: item.Icon,
 		}
 	}
 	md.Matches = complete.MatchSeedCompletion(comps, md.Seed)
@@ -694,7 +694,7 @@ func (ch *Chooser) CompleteMatch(data any, text string, posLn, posCh int) (md co
 		md.Matches = append(md.Matches, complete.Completion{
 			Text:  text,
 			Label: "Add " + text,
-			Icon:  string(icons.Add),
+			Icon:  icons.Add,
 			Desc:  fmt.Sprintf("Add %q to the chooser", text),
 		})
 	}

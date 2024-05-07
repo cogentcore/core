@@ -12,6 +12,7 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/base/strcase"
+	"cogentcore.org/core/icons"
 )
 
 // Completion holds one potential completion
@@ -25,7 +26,7 @@ type Completion struct {
 	Label string
 
 	// Icon is the icon to render in core for the completion item.
-	Icon string
+	Icon icons.Icon
 
 	// Desc is extra description information used in tooltips in core.
 	Desc string

@@ -79,13 +79,13 @@ func BenchmarkGVScanner150(b *testing.B) {
 }
 
 func RunLinkListSpanner(b *testing.B, mult int) {
-	beachIconNames, err := FilePathWalkDir("testdata/svg/landscapeIcons")
+	beachIcons, err := FilePathWalkDir("testdata/svg/landscapeIcons")
 	if err != nil {
 		b.Log("cannot walk file path testdata/svg")
 		b.FailNow()
 	}
 	var (
-		beachIcons  = ReadIconSet(beachIconNames)
+		beachIcons  = ReadIconSet(beachIcons)
 		wi, hi      = int(beachIcons[0].ViewBox.W), int(beachIcons[0].ViewBox.H)
 		w, h        = wi * mult / 10, hi * mult / 10
 		bounds      = image.Rect(0, 0, w, h)
@@ -109,13 +109,13 @@ func RunLinkListSpanner(b *testing.B, mult int) {
 }
 
 func RunFTScanner(b *testing.B, mult int) {
-	beachIconNames, err := FilePathWalkDir("testdata/svg/landscapeIcons")
+	beachIcons, err := FilePathWalkDir("testdata/svg/landscapeIcons")
 	if err != nil {
 		b.Log("cannot walk file path testdata/svg")
 		b.FailNow()
 	}
 	var (
-		beachIcons = ReadIconSet(beachIconNames)
+		beachIcons = ReadIconSet(beachIcons)
 		wi, hi     = int(beachIcons[0].ViewBox.W), int(beachIcons[0].ViewBox.H)
 		w, h       = wi * mult / 10, hi * mult / 10
 		bounds     = image.Rect(0, 0, w, h)
@@ -135,13 +135,13 @@ func RunFTScanner(b *testing.B, mult int) {
 }
 
 func RunImgSpanner(b *testing.B, mult int) {
-	beachIconNames, err := FilePathWalkDir("testdata/svg/landscapeIcons")
+	beachIcons, err := FilePathWalkDir("testdata/svg/landscapeIcons")
 	if err != nil {
 		b.Log("cannot walk file path testdata/svg")
 		b.FailNow()
 	}
 	var (
-		beachIcons  = ReadIconSet(beachIconNames)
+		beachIcons  = ReadIconSet(beachIcons)
 		wi, hi      = int(beachIcons[0].ViewBox.W), int(beachIcons[0].ViewBox.H)
 		w, h        = wi * mult / 10, hi * mult / 10
 		bounds      = image.Rect(0, 0, w, h)
@@ -161,13 +161,13 @@ func RunImgSpanner(b *testing.B, mult int) {
 }
 
 func RunGVScanner(b *testing.B, mult int) {
-	beachIconNames, err := FilePathWalkDir("testdata/svg/landscapeIcons")
+	beachIcons, err := FilePathWalkDir("testdata/svg/landscapeIcons")
 	if err != nil {
 		b.Log("cannot walk file path testdata/svg")
 		b.FailNow()
 	}
 	var (
-		beachIcons = ReadIconSet(beachIconNames)
+		beachIcons = ReadIconSet(beachIcons)
 		wi, hi     = int(beachIcons[0].ViewBox.W), int(beachIcons[0].ViewBox.H)
 		w, h       = wi * mult / 10, hi * mult / 10
 		bounds     = image.Rect(0, 0, w, h)

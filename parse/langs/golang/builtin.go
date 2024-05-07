@@ -31,32 +31,32 @@ func InstallBuiltinTypes() {
 func (gl *GoLang) CompleteBuiltins(fs *parse.FileState, seed string, md *complete.Matches) {
 	for _, tk := range BuiltinTypeKind {
 		if strings.HasPrefix(tk.Name, seed) {
-			c := complete.Completion{Text: tk.Name, Label: tk.Name, Icon: string(icons.Type)}
+			c := complete.Completion{Text: tk.Name, Label: tk.Name, Icon: icons.Type}
 			md.Matches = append(md.Matches, c)
 		}
 	}
 	for _, bs := range BuiltinMisc {
 		if strings.HasPrefix(bs, seed) {
-			c := complete.Completion{Text: bs, Label: bs, Icon: string(icons.Variable)}
+			c := complete.Completion{Text: bs, Label: bs, Icon: icons.Variable}
 			md.Matches = append(md.Matches, c)
 		}
 	}
 	for _, bs := range BuiltinFuncs {
 		if strings.HasPrefix(bs, seed) {
 			bs = bs + "()"
-			c := complete.Completion{Text: bs, Label: bs, Icon: string(icons.Function)}
+			c := complete.Completion{Text: bs, Label: bs, Icon: icons.Function}
 			md.Matches = append(md.Matches, c)
 		}
 	}
 	for _, bs := range BuiltinPackages {
 		if strings.HasPrefix(bs, seed) {
-			c := complete.Completion{Text: bs, Label: bs, Icon: string(icons.Type)} // todo: was types
+			c := complete.Completion{Text: bs, Label: bs, Icon: icons.Type} // todo: was types
 			md.Matches = append(md.Matches, c)
 		}
 	}
 	for _, bs := range BuiltinKeywords {
 		if strings.HasPrefix(bs, seed) {
-			c := complete.Completion{Text: bs, Label: bs, Icon: string(icons.Constant)}
+			c := complete.Completion{Text: bs, Label: bs, Icon: icons.Constant}
 			md.Matches = append(md.Matches, c)
 		}
 	}

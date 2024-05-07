@@ -70,8 +70,8 @@ func main() {
 		return iconTmpl.Execute(buf, data)
 	})
 	buf.WriteString(")\n")
-	err := os.WriteFile("iconnames.go", buf.Bytes(), 0666)
+	err := os.WriteFile("Icons.go", buf.Bytes(), 0666)
 	if err != nil {
-		log.Fatalln("error writing result to iconnames.go:", err)
+		log.Fatalln("error writing result to Icons.go:", err)
 	}
 }

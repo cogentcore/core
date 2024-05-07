@@ -30,7 +30,7 @@ func (tl *TexLang) CompleteLine(fss *parse.FileStates, str string, pos lexer.Pos
 	}
 	for _, ls := range LaTeXCommandsAll {
 		if strings.HasPrefix(ls, str) {
-			c := complete.Completion{Text: ls, Label: ls, Icon: string(icons.Function)}
+			c := complete.Completion{Text: ls, Label: ls, Icon: icons.Function}
 			md.Matches = append(md.Matches, c)
 		}
 	}

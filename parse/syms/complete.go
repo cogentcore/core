@@ -7,6 +7,7 @@ package syms
 import (
 	"strings"
 
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/parse/token"
 )
@@ -30,7 +31,7 @@ func AddCompleteSyms(sym SymMap, scope string, md *complete.Matches) {
 		if scope != "" {
 			lbl = lbl + " (" + scope + ".)"
 		}
-		c := complete.Completion{Text: nm, Label: lbl, Icon: sy.Kind.IconName(), Desc: sy.Detail}
+		c := complete.Completion{Text: nm, Label: lbl, Icon: sy.Kind.Icon(), Desc: sy.Detail}
 		// fmt.Printf("nm: %v  kind: %v  icon: %v\n", nm, sy.Kind, c.Icon)
 		md.Matches = append(md.Matches, c)
 	}
@@ -51,7 +52,7 @@ func AddCompleteTypeNames(typ *Type, scope, seed string, md *complete.Matches) {
 		if scope != "" {
 			lbl = lbl + " (" + scope + ".)"
 		}
-		icon := "field" // assume..
+		icon := icons.Field // assume..
 		c := complete.Completion{Text: nm, Label: lbl, Icon: icon}
 		// fmt.Printf("nm: %v  kind: %v  icon: %v\n", nm, sy.Kind, c.Icon)
 		md.Matches = append(md.Matches, c)
@@ -68,7 +69,7 @@ func AddCompleteTypeNames(typ *Type, scope, seed string, md *complete.Matches) {
 			lbl = lbl + " (" + scope + ".)"
 		}
 		nm += "()"
-		icon := "method" // assume..
+		icon := icons.Method // assume..
 		c := complete.Completion{Text: nm, Label: lbl, Icon: icon}
 		// fmt.Printf("nm: %v  kind: %v  icon: %v\n", nm, sy.Kind, c.Icon)
 		md.Matches = append(md.Matches, c)

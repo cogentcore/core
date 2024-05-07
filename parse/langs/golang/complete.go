@@ -290,7 +290,7 @@ func (gl *GoLang) CompleteTypeName(fs *parse.FileState, pkg *syms.Symbol, seed s
 	md.Seed = seed
 	for _, tk := range BuiltinTypeKind {
 		if strings.HasPrefix(tk.Name, seed) {
-			c := complete.Completion{Text: tk.Name, Label: tk.Name, Icon: string(icons.Type)}
+			c := complete.Completion{Text: tk.Name, Label: tk.Name, Icon: icons.Type}
 			md.Matches = append(md.Matches, c)
 		}
 	}
@@ -300,7 +300,7 @@ func (gl *GoLang) CompleteTypeName(fs *parse.FileState, pkg *syms.Symbol, seed s
 			continue
 		}
 		if strings.HasPrefix(tk.Name, seed) {
-			c := complete.Completion{Text: tk.Name, Label: tk.Name, Icon: string(icons.Type)}
+			c := complete.Completion{Text: tk.Name, Label: tk.Name, Icon: icons.Type}
 			md.Matches = append(md.Matches, c)
 		}
 	}

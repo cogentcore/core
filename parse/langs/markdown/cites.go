@@ -28,7 +28,7 @@ func (ml *MarkdownLang) CompleteCite(fss *parse.FileStates, origStr, str string,
 	md.Seed = str
 	for _, be := range bf.BibTex.Entries {
 		if strings.HasPrefix(be.CiteName, str) {
-			c := complete.Completion{Text: be.CiteName, Label: be.CiteName, Icon: string(icons.Field)}
+			c := complete.Completion{Text: be.CiteName, Label: be.CiteName, Icon: icons.Field}
 			md.Matches = append(md.Matches, c)
 		}
 	}

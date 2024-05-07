@@ -33,7 +33,7 @@ func (sh *Shell) CompleteMatch(data any, text string, posLn, posCh int) (md comp
 		}
 		comps = append(comps, complete.Completion{
 			Text: entry.Name(),
-			Icon: string(icon),
+			Icon: icon,
 			Desc: filepath.Join(sh.Config.Dir, entry.Name()),
 		})
 	}
@@ -60,7 +60,7 @@ func (rc *ReadlineCompleter) Do(line []rune, pos int) (newLine [][]rune, length 
 		if md.Seed != "" && after == match.Text {
 			continue // no overlap
 		}
-		if match.Icon == string(icons.Folder) {
+		if match.Icon == icons.Folder {
 			after += string(filepath.Separator)
 		} else {
 			after += " "
