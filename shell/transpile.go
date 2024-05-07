@@ -138,7 +138,7 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 		case tpn > 0:
 			etoks.Add(token.STRING, `"`+tpath+`"`)
 			i += tpn
-		case tok.Tok == token.LBRACE: // todo: find the closing brace
+		case tok.Tok == token.LBRACE:
 			rb := toks[i:].RightMatching()
 			if rb < 0 {
 				sh.AddError(fmt.Errorf("no right brace found in exec command line"))
@@ -160,6 +160,8 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 			i += (tin - 1)
 		case tok.Tok == token.STRING:
 			etoks.Add(token.STRING, tok.Str)
+		case tok.Tok == token.ASSIGN:
+			etoks.Add(token.STRING, `"`+tok.String()+`"`)
 		default:
 			etoks.Add(token.STRING, `"`+tok.Str+`"`)
 		}
