@@ -64,15 +64,19 @@ func Interactive(c *Config) error {
 			if key != '\t' {
 				return line, pos, true
 			}
-			line = slices.Delete(line, pos-1, pos) // get rid of tab
-			pos -= 1
-			sline := string(line)
-			md := in.Shell.CompleteMatch(nil, sline, 0, pos)
+			newLine = slices.Delete(line, pos-1, pos) // get rid of tab
+			newPos = pos - 1
+			sline := string(newLine)
+			md := in.Shell.CompleteMatch(nil, sline, 0, newPos)
 			if len(md.Matches) == 0 {
-				return line, pos, true
+				return newLine, newPos, true
 			}
-			ed := in.Shell.CompleteEdit(nil, sline, pos, md.Matches[0], md.Seed)
-			return []rune(ed.NewText), len(ed.NewText), true
+			ed := in.Shell.CompleteEdit(nil, sline, newPos, md.Matches[0], md.Seed)
+			newPos -= len(md.Seed)
+			newLine = newLine[:newPos]
+			newLine = append(newLine, []rune(ed.NewText)...)
+			newPos = len(newLine)
+			return newLine, newPos, true
 		},
 	})
 	if err != nil {

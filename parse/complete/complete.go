@@ -226,8 +226,8 @@ func SeedAfter(text string, f func(r rune) bool) string {
 func EditWord(text string, cursorPos int, completion string, seed string) (ed Edit) {
 	s2 := string(text[cursorPos:])
 
-	var fd = 0 // number of characters past seed in word to be deleted (forward delete)]
-	var r rune
+	fd := 0 // number of characters past seed in word to be deleted (forward delete)
+	r := rune(0)
 	if len(s2) > 0 {
 		for fd, r = range s2 {
 			if unicode.IsSpace(r) {

@@ -1157,7 +1157,7 @@ func (tf *TextField) CancelComplete() {
 
 // CompleteText edits the text field using the string chosen from the completion menu
 func (tf *TextField) CompleteText(s string) {
-	txt := string(tf.EditTxt) // Reminder: do NOT call tf.Text() in an active editing context!!!
+	txt := string(tf.EditTxt) // Reminder: do NOT call tf.Text() in an active editing context!
 	c := tf.Complete.GetCompletion(s)
 	ed := tf.Complete.EditFunc(tf.Complete.Context, txt, tf.CursorPos, c, tf.Complete.Seed)
 	st := tf.CursorPos - len(tf.Complete.Seed)
