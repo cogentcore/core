@@ -93,3 +93,72 @@ func TestMarkupPathsAsLinks(t *testing.T) {
 	assert.Equal(t, expectedOrig, orig)
 	assert.Equal(t, expectedLink, link)
 }
+
+func TestInnerBracketScope(t *testing.T) {
+	tests := []struct {
+		input        string
+		bracketLeft  string
+		bracketRight string
+		expected     string
+	}{
+		{
+			input:        "Hello (World)",
+			bracketLeft:  "(",
+			bracketRight: ")",
+			expected:     "Hello (World)",
+		},
+		{
+			input:        "Hello (World) (Cogent Mail)",
+			bracketLeft:  "(",
+			bracketRight: ")",
+			expected:     "Hello (World) (Cogent Mail)",
+		},
+		{
+			input:        "Hello (World",
+			bracketLeft:  "(",
+			bracketRight: ")",
+			expected:     "World",
+		},
+		{
+			input:        "Hello World)",
+			bracketLeft:  "(",
+			bracketRight: ")",
+			expected:     "Hello World",
+		},
+		{
+			input:        "Hello (World",
+			bracketLeft:  "[",
+			bracketRight: "]",
+			expected:     "Hello (World",
+		},
+		{
+			input:        "Hello [World]",
+			bracketLeft:  "[",
+			bracketRight: "]",
+			expected:     "Hello [World]",
+		},
+		{
+			input:        "Hello [World] [Cogent Mail]",
+			bracketLeft:  "[",
+			bracketRight: "]",
+			expected:     "Hello [World] [Cogent Mail]",
+		},
+		{
+			input:        "Hello [World",
+			bracketLeft:  "[",
+			bracketRight: "]",
+			expected:     "World",
+		},
+		{
+			input:        "Hello World]",
+			bracketLeft:  "[",
+			bracketRight: "]",
+			expected:     "Hello World",
+		},
+	}
+
+	for _, test := range tests {
+		result := InnerBracketScope(test.input, test.bracketLeft, test.bracketRight)
+		assert.Equal(t, test.expected, result)
+	}
+}
