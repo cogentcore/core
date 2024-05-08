@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package atomctr
+package atomiccounter
 
 import "testing"
 
 func TestCtr(t *testing.T) {
-	var a Ctr
+	var a Counter
 	if a.Value() != 0 {
 		t.Error("Ctr.Value() != 0")
 	}
