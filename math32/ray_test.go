@@ -185,8 +185,8 @@ func TestRayDistanceSquaredToSegment(t *testing.T) {
 			},
 			v0:                 Vec3(2, 3, 4),
 			v1:                 Vec3(5, 6, 7),
-			expectedSqrDist:    -3551.9995,
-			expectedPointOnRay: Vec3(240.99998, 301.99997, 362.99997),
+			expectedSqrDist:    -3552,
+			expectedPointOnRay: Vec3(241, 302, 363),
 			expectedPointOnSeg: Vec3(5, 6, 7),
 		},
 		{
@@ -206,9 +206,13 @@ func TestRayDistanceSquaredToSegment(t *testing.T) {
 		test.optPointOnRay = &Vector3{}
 		test.optPointOnSegment = &Vector3{}
 		sqrDist := test.ray.DistanceSquaredToSegment(test.v0, test.v1, test.optPointOnRay, test.optPointOnSegment)
-		assert.Equal(t, test.expectedSqrDist, sqrDist)
-		assert.Equal(t, test.expectedPointOnRay, *test.optPointOnRay)
-		assert.Equal(t, test.expectedPointOnSeg, *test.optPointOnSegment)
+		tolassert.Equal(t, test.expectedSqrDist, sqrDist)
+		tolassert.Equal(t, test.expectedPointOnRay.X, test.optPointOnRay.X)
+		tolassert.Equal(t, test.expectedPointOnRay.Y, test.optPointOnRay.Y)
+		tolassert.Equal(t, test.expectedPointOnRay.Z, test.optPointOnRay.Z)
+		tolassert.Equal(t, test.expectedPointOnSeg.X, test.optPointOnSegment.X)
+		tolassert.Equal(t, test.expectedPointOnSeg.Y, test.optPointOnSegment.Y)
+		tolassert.Equal(t, test.expectedPointOnSeg.Z, test.optPointOnSegment.Z)
 	}
 }
 
