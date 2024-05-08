@@ -57,6 +57,9 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	case toks[0].Tok == token.LBRACE:
 		logx.PrintlnDebug("go:   { } line")
 		return sh.TranspileGo(toks[1 : n-1])
+	case toks[0].Tok == token.LBRACK:
+		logx.PrintlnDebug("exec: [ ] line")
+		return sh.TranspileExec(toks, false) // it processes the [ ]
 	case toks[0].IsBacktickString():
 		logx.PrintlnDebug("exec: backquoted string")
 		exe := sh.TranspileExecString(toks[0].Str, false)
@@ -120,16 +123,42 @@ func (sh *Shell) TranspileExecString(str string, output bool) Tokens {
 // TranspileExec returns transpiled tokens assuming Exec code,
 // with the given bool indicating whether [Output] is needed.
 func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
-	etoks := make(Tokens, 0, len(toks)*2+5) // return tokens
-	etoks.Add(token.IDENT, "shell")
-	etoks.Add(token.PERIOD)
-	if output {
-		etoks.Add(token.IDENT, "Output")
-	} else {
-		etoks.Add(token.IDENT, "Exec")
-	}
-	etoks.Add(token.LPAREN)
 	n := len(toks)
+	etoks := make(Tokens, 0, n*2+5) // return tokens
+	noStop := false
+	if toks[0].Tok == token.LBRACK {
+		noStop = true
+		toks = toks[1:]
+		n--
+	}
+	var execTok *Token
+	bgJob := false
+	startExec := func() {
+		bgJob = false
+		etoks.Add(token.IDENT, "shell")
+		etoks.Add(token.PERIOD)
+		switch {
+		case output && noStop:
+			execTok = etoks.Add(token.IDENT, "OutputNoStop")
+		case output && !noStop:
+			execTok = etoks.Add(token.IDENT, "Output")
+		case !output && noStop:
+			execTok = etoks.Add(token.IDENT, "ExecNoStop")
+		case !output && !noStop:
+			execTok = etoks.Add(token.IDENT, "Exec")
+		}
+		etoks.Add(token.LPAREN)
+	}
+	endExec := func() {
+		if bgJob {
+			execTok.Str = "Start"
+		}
+		etoks.DeleteLastComma()
+		etoks.Add(token.RPAREN)
+	}
+
+	startExec()
+
 	for i := 0; i < n; i++ {
 		tok := toks[i]
 		tpath, tpn := toks[i:].Path(false)
@@ -138,9 +167,11 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 		switch {
 		case tok.Tok == token.STRING:
 			etoks.Add(token.STRING, tok.Str)
+			etoks.Add(token.COMMA)
 		case tpn > 0:
 			etoks.Add(token.STRING, AddQuotes(tpath))
 			i += (tpn - 1)
+			etoks.Add(token.COMMA)
 		case tok.Tok == token.LBRACE:
 			rb := toks[i:].RightMatching()
 			if rb < 0 {
@@ -149,6 +180,7 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 				etoks.AddTokens(sh.TranspileGo(toks[i+1 : i+rb]))
 				i += rb
 			}
+			etoks.Add(token.COMMA)
 		case tok.Tok == token.SUB && i < n-1: // option
 			nid, nin := toks[i+1:].ExecIdent()
 			if nin > 0 {
@@ -158,17 +190,30 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 				etoks.Add(token.STRING, `"-`+EscapeQuotes(toks[i+1].Str)+`"`)
 				i++
 			}
+			etoks.Add(token.COMMA)
 		case tin > 0:
 			etoks.Add(token.STRING, `"`+tid+`"`) // note: already been escaped
 			i += (tin - 1)
-		case tok.Tok == token.ASSIGN:
-			etoks.Add(token.STRING, AddQuotes(tok.String()))
+			etoks.Add(token.COMMA)
+		case tok.Tok == token.AND:
+			bgJob = true
+		case tok.Tok == token.RBRACK:
+			noStop = false
+		case tok.Tok == token.SEMICOLON:
+			endExec()
+			etoks.Add(token.SEMICOLON)
+			if i+1 < n {
+				if toks[i+1].Tok == token.LBRACK {
+					i++
+					noStop = true
+				}
+			}
+			startExec()
 		default:
-			etoks.Add(token.STRING, AddQuotes(tok.Str))
+			etoks.Add(token.STRING, AddQuotes(tok.String()))
+			etoks.Add(token.COMMA)
 		}
-		etoks.Add(token.COMMA)
 	}
-	etoks.DeleteLastComma()
-	etoks.Add(token.RPAREN)
+	endExec()
 	return etoks
 }

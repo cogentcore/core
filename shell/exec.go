@@ -12,7 +12,8 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
-// Exec executes the given command string, handling the given arguments appropriately.
+// Exec executes the given command string, waiting for the command to finish,
+// handling the given arguments appropriately.
 // If there is any error, it adds it to the shell. It forwards output to
 // [exec.Config.Stdout] and [exec.Config.Stderr] appropriately.
 func (sh *Shell) Exec(cmd any, args ...any) {
@@ -22,10 +23,49 @@ func (sh *Shell) Exec(cmd any, args ...any) {
 	}
 }
 
+// ExecNoStop executes the given command string, waiting for the command to finish,
+// handling the given arguments appropriately.  It does not stop execution if there
+// is an error.
+// If there is any error, it adds it to the shell. It forwards output to
+// [exec.Config.Stdout] and [exec.Config.Stderr] appropriately.
+func (sh *Shell) ExecNoStop(cmd any, args ...any) {
+	scmd, sargs := sh.execArgs(cmd, args...)
+	if !sh.RunBuiltin(scmd, sargs...) {
+		sh.AddError(sh.Config.Run(scmd, sargs...))
+	}
+}
+
+// Start starts the given command string without waiting for it to finish,
+// handling the given arguments appropriately.
+// If there is any error, it adds it to the shell. It forwards output to
+// [exec.Config.Stdout] and [exec.Config.Stderr] appropriately.
+func (sh *Shell) Start(cmd any, args ...any) {
+	scmd, sargs := sh.execArgs(cmd, args...)
+	if !sh.RunBuiltin(scmd, sargs...) {
+		sh.AddError(sh.Config.Start(scmd, sargs...))
+	}
+}
+
 // Output executes the given command string, handling the given arguments
 // appropriately. If there is any error, it adds it to the shell. It returns
 // the stdout as a string and forwards stderr to [exec.Config.Stderr] appropriately.
 func (sh *Shell) Output(cmd any, args ...any) string {
+	scmd, sargs := sh.execArgs(cmd, args...)
+	oldStdout := sh.Config.Stdout
+	buf := &bytes.Buffer{}
+	sh.Config.Stdout = buf
+	if !sh.RunBuiltin(scmd, sargs...) {
+		_, err := sh.Config.Exec(scmd, sargs...)
+		sh.AddError(err)
+	}
+	sh.Config.Stdout = oldStdout
+	return strings.TrimSuffix(buf.String(), "\n")
+}
+
+// OutputNoStop executes the given command string, handling the given arguments
+// appropriately. If there is any error, it adds it to the shell. It returns
+// the stdout as a string and forwards stderr to [exec.Config.Stderr] appropriately.
+func (sh *Shell) OutputNoStop(cmd any, args ...any) string {
 	scmd, sargs := sh.execArgs(cmd, args...)
 	oldStdout := sh.Config.Stdout
 	buf := &bytes.Buffer{}

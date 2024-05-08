@@ -19,6 +19,12 @@ func (c *Config) Run(cmd string, args ...string) error {
 	return err
 }
 
+// Start starts the given command using the given configuration information and arguments.
+func (c *Config) Start(cmd string, args ...string) error {
+	// todo: implement this!
+	return nil
+}
+
 // Output runs the command and returns the text from stdout.
 func (c *Config) Output(cmd string, args ...string) (string, error) {
 	oldStdout := c.Stdout
