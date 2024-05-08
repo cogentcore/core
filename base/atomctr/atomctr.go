@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package atomctr implements basic atomic int64 counter
+// Package atomctr implements a basic atomic int64 counter.
 package atomctr
 
 import (
