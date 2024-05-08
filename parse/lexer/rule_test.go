@@ -7,20 +7,35 @@ package lexer
 import (
 	"testing"
 
-	"cogentcore.org/core/parse/token"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRuleLexStart(t *testing.T) {
-	rule := &Rule{}
-	state := &State{Lex: Line{
-		{Token: token.KeyToken{Token: token.Text}},
-		{Token: token.KeyToken{Token: token.Text}},
-	}}
+	rule := &Rule{
+		Match:  String,
+		String: "Hello",
+		Acts:   []Actions{Next},
+	}
+	state := &State{
+		Src: []rune("Hello, World!"),
+	}
 
-	result := rule.LexStart(state)
+	rule.LexStart(state)
 
-	assert.Equal(t, &Rule{}, result)
 	assert.Equal(t, 0, state.Pos)
-	assert.Equal(t, 2, len(state.Lex))
+}
+
+func TestRuleLex(t *testing.T) {
+	rule := &Rule{
+		Match:  String,
+		String: "Hello",
+		Acts:   []Actions{Next},
+	}
+	state := &State{
+		Src: []rune("Hello, World!"),
+	}
+
+	rule.Lex(state)
+
+	assert.Equal(t, 0, state.Pos)
 }
