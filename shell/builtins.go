@@ -62,7 +62,7 @@ func (sh *Shell) Exit(args ...string) error {
 // Set sets the given environment variable to the given value.
 func (sh *Shell) Set(args ...string) error {
 	if len(args) != 2 {
-		return fmt.Errorf("expected two arguments")
+		return fmt.Errorf("expected two arguments, got %d", len(args))
 	}
 	return os.Setenv(args[0], args[1])
 }
