@@ -64,125 +64,126 @@ type Editor struct { //core:embedder
 	// Buffer is the text buffer being edited.
 	Buffer *Buffer `set:"-" json:"-" xml:"-"`
 
-	// width of cursor -- set from cursor-width property (inherited)
-	CursorWidth units.Value `xml:"cursor-width"`
+	// CursorWidth is the width of the cursor.
+	CursorWidth units.Value
 
-	// the color used for the side bar containing the line numbers;
-	// this should be set in Stylers like all other style properties
+	// LineNumberColor is the color used for the side bar containing the line numbers.
+	// This should be set in Stylers like all other style properties.
 	LineNumberColor image.Image
 
-	// the color used for the user text selection background color;
-	// this should be set in Stylers like all other style properties
+	// SelectColor is the color used for the user text selection background color.
+	// This should be set in Stylers like all other style properties.
 	SelectColor image.Image
 
-	// the color used for the text highlight background color
-	// (like in find); this should be set in Stylers like all other style properties
+	// HighlightColor is the color used for the text highlight background color (like in find).
+	// This should be set in Stylers like all other style properties.
 	HighlightColor image.Image
 
-	// the color used for the text editor cursor bar;
-	// this should be set in Stylers like all other style properties
+	// CursorColor is the color used for the text editor cursor bar.
+	// This should be set in Stylers like all other style properties.
 	CursorColor image.Image
 
-	// number of lines in the view, sync'd with the Buf after edits,
-	// but always reflects storage size of Renders etc
+	// NLines is the number of lines in the view, synced with the Buf after edits,
+	// but always reflects the storage size of Renders etc.
 	NLines int `set:"-" view:"-" json:"-" xml:"-"`
 
-	// renders of the text lines, with one render per line
-	// (each line could visibly wrap-around,
-	// so these are logical lines, not display lines)
+	// Renders is a slice of paint.Text representing the renders of the text lines,
+	// with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines).
 	Renders []paint.Text `set:"-" json:"-" xml:"-"`
 
-	// starting render offsets for top of each line
+	// Offsets is a slice of float32 representing the starting render offsets for the top of each line.
 	Offsets []float32 `set:"-" view:"-" json:"-" xml:"-"`
 
-	// number of line number digits needed
+	// LineNumberDigits is the number of line number digits needed.
 	LineNumberDigits int `set:"-" view:"-" json:"-" xml:"-"`
 
-	// horizontal offset for start of text after line numbers
+	// LineNumberOffset is the horizontal offset for the start of text after line numbers.
 	LineNumberOffset float32 `set:"-" view:"-" json:"-" xml:"-"`
 
-	// render for line numbers
+	// LineNumberRender is the render for line numbers.
 	LineNumberRender paint.Text `set:"-" view:"-" json:"-" xml:"-"`
 
-	// current cursor position
+	// CursorPos is the current cursor position.
 	CursorPos lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// target cursor position for externally set targets: ensures that it is visible
-	CursorTarg lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
+	// CursorTarget is the target cursor position for externally set targets.
+	// It ensures that the target position is visible.
+	CursorTarget lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// desired cursor column, where the cursor was last when moved using
-	// left / right arrows.  used when doing up / down to not always go
-	//  to short line columns
+	// CursorCol is the desired cursor column, where the cursor was last when moved using left / right arrows.
+	// It is used when doing up / down to not always go to short line columns.
 	CursorCol int `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// current index within PosHistory
+	// PosHistIndex is the current index within PosHistory.
 	PosHistIndex int `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// starting point for selection, which will either be the
-	// start or end of selected region depending on subsequent selection.
+	// SelectStart is the starting point for selection, which will either be the start or end of selected region
+	// depending on subsequent selection.
 	SelectStart lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// current selection region
+	// SelectRegion is the current selection region.
 	SelectRegion textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// previous selection region, that was actually rendered -- needed to update render
+	// PreviousSelectRegion is the previous selection region that was actually rendered.
+	// It is needed to update the render.
 	PreviousSelectRegion textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// highlighted regions, e.g., for search results
+	// Highlights is a slice of regions representing the highlighted regions, e.g., for search results.
 	Highlights []textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// highlighted regions, specific to scope markers
+	// Scopelights is a slice of regions representing the highlighted regions specific to scope markers.
 	Scopelights []textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// if true, select text as cursor moves
+	// SelectMode is a boolean indicating whether to select text as the cursor moves.
 	SelectMode bool `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// interactive search data
+	// ISearch is the interactive search data.
 	ISearch ISearch `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// query replace data
+	// QReplace is the query replace data.
 	QReplace QReplace `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// font height, cached during styling
+	// FontHeight is the font height, cached during styling.
 	FontHeight float32 `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// line height, cached during styling
+	// LineHeight is the line height, cached during styling.
 	LineHeight float32 `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// font ascent, cached during styling
+	// FontAscent is the font ascent, cached during styling.
 	FontAscent float32 `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// font descent, cached during styling
+	// FontDescent is the font descent, cached during styling.
 	FontDescent float32 `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// height in lines and width in chars of the visible area
+	// NLinesChars is the height in lines and width in chars of the visible area.
 	NLinesChars image.Point `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// total size of all lines as rendered
+	// LinesSize is the total size of all lines as rendered.
 	LinesSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// the LinesSize plus extra space and line numbers etc
+	// TotalSize is the LinesSize plus extra space and line numbers etc.
 	TotalSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// the Geom.Size.Actual.Total subtracting
-	// extra space and line numbers -- this is what
-	// LayoutStdLR sees for laying out each line
+	// LineLayoutSize is the Geom.Size.Actual.Total subtracting extra space and line numbers.
+	// This is what LayoutStdLR sees for laying out each line.
 	LineLayoutSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// the last LineLayoutSize used in laying out lines.
-	// Used to trigger a new layout only when needed.
+	// lastlineLayoutSize is the last LineLayoutSize used in laying out lines.
+	// It is used to trigger a new layout only when needed.
 	lastlineLayoutSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// oscillates between on and off for blinking
+	// BlinkOn oscillates between on and off for blinking.
 	BlinkOn bool `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// mutex protecting cursor rendering -- shared between blink and main code
+	// CursorMu is a mutex protecting cursor rendering, shared between blink and main code.
 	CursorMu sync.Mutex `set:"-" json:"-" xml:"-" view:"-"`
 
-	// at least one of the renders has links -- determines if we set the cursor for hand movements
+	// HasLinks is a boolean indicating if at least one of the renders has links.
+	// It determines if we set the cursor for hand movements.
 	HasLinks bool `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// handles link clicks -- if nil, they are sent to the standard web URL handler
+	// LinkHandler handles link clicks.
+	// If it is nil, they are sent to the standard web URL handler.
 	LinkHandler func(tl *paint.TextLink)
 
 	lastRecenter   int           `set:"-"`
