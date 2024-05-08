@@ -7,6 +7,7 @@ package lexer
 import (
 	"testing"
 
+	"cogentcore.org/core/parse/token"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -34,4 +35,56 @@ func TestReadUntil(t *testing.T) {
 
 	ls.ReadUntil("h")
 	assert.Equal(t, 26, ls.Pos)
+}
+
+func TestReadNumber(t *testing.T) {
+	ls := &State{
+		Src: []rune("0x1234"),
+		Pos: 0,
+		Ch:  '0',
+	}
+
+	tok := ls.ReadNumber()
+	assert.Equal(t, token.LitNumInteger, tok)
+	assert.Equal(t, 6, ls.Pos)
+
+	ls = &State{
+		Src: []rune("0123456789"),
+		Pos: 0,
+		Ch:  '0',
+	}
+
+	tok = ls.ReadNumber()
+	assert.Equal(t, token.LitNumInteger, tok)
+	assert.Equal(t, 10, ls.Pos)
+
+	ls = &State{
+		Src: []rune("3.14"),
+		Pos: 0,
+		Ch:  '3',
+	}
+
+	tok = ls.ReadNumber()
+	assert.Equal(t, token.LitNumFloat, tok)
+	assert.Equal(t, 4, ls.Pos)
+
+	ls = &State{
+		Src: []rune("1e10"),
+		Pos: 0,
+		Ch:  '1',
+	}
+
+	tok = ls.ReadNumber()
+	assert.Equal(t, token.LitNumFloat, tok)
+	assert.Equal(t, 4, ls.Pos)
+
+	ls = &State{
+		Src: []rune("42i"),
+		Pos: 0,
+		Ch:  '4',
+	}
+
+	tok = ls.ReadNumber()
+	assert.Equal(t, token.LitNumImag, tok)
+	assert.Equal(t, 3, ls.Pos)
 }
