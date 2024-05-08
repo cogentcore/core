@@ -12,37 +12,37 @@ import (
 // Counter implements a basic atomic int64 counter.
 type Counter int64
 
-// Add to counter.
+// Add adds to counter.
 func (a *Counter) Add(inc int64) int64 {
 	return atomic.AddInt64((*int64)(a), inc)
 }
 
-// Subtract from counter.
+// Sub subtracts from counter.
 func (a *Counter) Sub(dec int64) int64 {
 	return atomic.AddInt64((*int64)(a), -dec)
 }
 
-// Increment by 1.
+// Inc increments by 1.
 func (a *Counter) Inc() int64 {
 	return atomic.AddInt64((*int64)(a), 1)
 }
 
-// Decrement by 1.
+// Dec decrements by 1.
 func (a *Counter) Dec() int64 {
 	return atomic.AddInt64((*int64)(a), -1)
 }
 
-// Return the current value.
+// Value returns the current value.
 func (a *Counter) Value() int64 {
 	return atomic.LoadInt64((*int64)(a))
 }
 
-// Set the counter to a new value.
+// Set sets the counter to a new value.
 func (a *Counter) Set(val int64) {
 	atomic.StoreInt64((*int64)(a), val)
 }
 
-// Swap new value in and return old value.
+// Swap swaps a new value in and returns the old value.
 func (a *Counter) Swap(val int64) int64 {
 	return atomic.SwapInt64((*int64)(a), val)
 }
