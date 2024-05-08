@@ -761,7 +761,7 @@ var a,b,c,d = 32
 
 var TextViewSelectors = []string{":active", ":focus", ":inactive", ":selected", ":highlight"}
 
-func (pr *Rule) BaseIface() reflect.Type {
+func (pr *Rule) BaseInterface() reflect.Type {
 	return reflect.TypeOf((*Parser)(nil)).Elem()
 }
 

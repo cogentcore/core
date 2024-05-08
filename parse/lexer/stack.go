@@ -39,9 +39,7 @@ func (ss *Stack) Clone() Stack {
 		return nil
 	}
 	cl := make(Stack, sz)
-	for i := range *ss {
-		cl[i] = (*ss)[i]
-	}
+	copy(cl, *ss)
 	return cl
 }
 

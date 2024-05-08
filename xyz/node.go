@@ -199,7 +199,7 @@ func (nb *NodeBase) OnAdd() {
 	fmt.Println(nb, "not set from parent")
 }
 
-func (nb *NodeBase) BaseIface() reflect.Type {
+func (nb *NodeBase) BaseInterface() reflect.Type {
 	return reflect.TypeOf((*NodeBase)(nil)).Elem()
 }
 

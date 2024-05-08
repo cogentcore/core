@@ -135,7 +135,7 @@ func (g *NodeBase) LocalBBox() math32.Box2 {
 	return bb
 }
 
-func (n *NodeBase) BaseIface() reflect.Type {
+func (n *NodeBase) BaseInterface() reflect.Type {
 	return reflect.TypeOf((*NodeBase)(nil)).Elem()
 }
 

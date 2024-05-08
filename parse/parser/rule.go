@@ -143,7 +143,7 @@ const (
 )
 
 // Parser is the interface type for parsers -- likely not necessary except is essential
-// for defining the BaseIface for gui in making new nodes
+// for defining the BaseInterface for gui in making new nodes
 type Parser interface {
 	tree.Node
 
@@ -235,7 +235,7 @@ func (mm Matches) StartEndExcl(ps *State) lexer.Reg {
 ///////////////////////////////////////////////////////////////////////
 //  Rule
 
-func (pr *Rule) BaseIface() reflect.Type {
+func (pr *Rule) BaseInterface() reflect.Type {
 	return reflect.TypeOf((*Parser)(nil)).Elem()
 }
 

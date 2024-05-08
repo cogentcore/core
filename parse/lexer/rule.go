@@ -20,7 +20,7 @@ import (
 var Trace = false
 
 // Lexer is the interface type for lexers -- likely not necessary except is essential
-// for defining the BaseIface for gui in making new nodes
+// for defining the BaseInterface for GUI in making new nodes
 type Lexer interface {
 	tree.Node
 
@@ -94,7 +94,7 @@ type Rule struct {
 	NmMap map[string]*Rule `edit:"-" json:"-" xml:"-"`
 }
 
-func (lr *Rule) BaseIface() reflect.Type {
+func (lr *Rule) BaseInterface() reflect.Type {
 	return reflect.TypeOf((*Lexer)(nil)).Elem()
 }
 
