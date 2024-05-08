@@ -17,6 +17,8 @@ import (
 	"golang.org/x/crypto/ssh/knownhosts"
 )
 
+// good reference for impl: https://github.com/helloyi/go-sshclient
+
 // SSHConfig holds ssh configuration and connection info.
 // todo: probably could put this in exec, integrate with it.
 type SSHConfig struct {
