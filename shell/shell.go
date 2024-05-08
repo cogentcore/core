@@ -8,6 +8,7 @@
 package shell
 
 import (
+	"io/fs"
 	"os"
 	"slices"
 	"strings"
@@ -131,6 +132,9 @@ func (sh *Shell) TranspileConfig() error {
 	}
 	b, err := os.ReadFile(path)
 	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return nil
+		}
 		return err
 	}
 	sh.TranspileCode(string(b))

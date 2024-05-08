@@ -40,6 +40,7 @@ func TestTranspile(t *testing.T) {
 		{`set something=hello`, `shell.Exec("set", "something=hello")`},
 		{`set "something=hello"`, `shell.Exec("set", "something=hello")`},
 		{`set something="hello"`, `shell.Exec("set", "something=\"hello\"")`},
+		{`add-path /opt/sbin /opt/homebrew/bin`, `shell.Exec("add-path", "/opt/sbin", "/opt/homebrew/bin")`},
 	}
 
 	sh := NewShell()

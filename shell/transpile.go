@@ -140,7 +140,7 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 			etoks.Add(token.STRING, tok.Str)
 		case tpn > 0:
 			etoks.Add(token.STRING, AddQuotes(tpath))
-			i += tpn
+			i += (tpn - 1)
 		case tok.Tok == token.LBRACE:
 			rb := toks[i:].RightMatching()
 			if rb < 0 {
