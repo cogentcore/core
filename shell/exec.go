@@ -6,6 +6,7 @@ package shell
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 
 	"cogentcore.org/core/base/reflectx"
@@ -19,7 +20,14 @@ import (
 func (sh *Shell) Exec(cmd any, args ...any) {
 	scmd, sargs := sh.execArgs(cmd, args...)
 	if !sh.RunBuiltin(scmd, sargs...) {
-		sh.AddError(sh.Config.Run(scmd, sargs...))
+		if sh.SSHActive {
+			// todo: insert cd <curdir>; first!
+			scmd += strings.Join(sargs, " ")
+			fmt.Println("ssh running command:", scmd)
+			sh.AddError(sh.SSH.Run(scmd))
+		} else {
+			sh.AddError(sh.Config.Run(scmd, sargs...))
+		}
 	}
 }
 

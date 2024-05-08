@@ -66,14 +66,19 @@ func NewInterpreter(options interp.Options) *Interpreter {
 // Prompt returns the appropriate REPL prompt to show the user.
 func (in *Interpreter) Prompt() string {
 	dp := in.Shell.TotalDepth()
+	host := in.Shell.Host()
+	base := ""
+	if host != "" {
+		base = host + ":"
+	}
 	if dp == 0 {
 		hdir := errors.Log1(homedir.Dir())
 		rel := errors.Log1(filepath.Rel(hdir, in.Shell.Config.Dir))
 		// if it has to go back, then it is not in home dir, so no ~
 		if strings.Contains(rel, "..") {
-			return in.Shell.Config.Dir + string(filepath.Separator) + " > "
+			return base + in.Shell.Config.Dir + string(filepath.Separator) + " > "
 		}
-		return filepath.Join("~", rel) + string(filepath.Separator) + " > "
+		return base + filepath.Join("~", rel) + string(filepath.Separator) + " > "
 	}
 	res := "> "
 	for range dp {

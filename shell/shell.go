@@ -29,6 +29,12 @@ type Shell struct {
 	// Config is the [exec.Config] used to run commands.
 	Config exec.Config
 
+	// ssh connection, configuration
+	SSH SSHConfig
+
+	// SSH is active and should be used for all commands
+	SSHActive bool
+
 	// depth of parens at the end of the current line. if 0, was complete.
 	ParenDepth int
 
@@ -56,8 +62,27 @@ func NewShell() *Shell {
 			Stdin:  os.Stdin,
 		},
 	}
+	sh.SSH.Defaults()
 	sh.InstallBuiltins()
 	return sh
+}
+
+// Close closes any resources associated with the shell,
+// including terminating any commands that are not running "nohup"
+// in the background.
+func (sh *Shell) Close() {
+	sh.SSHActive = false
+	sh.SSH.Close()
+	// todo: kill jobs etc
+}
+
+// Host returns the name we're running commands on, for interactive prompt
+// this is empty if localhost (default).
+func (sh *Shell) Host() string {
+	if !sh.SSHActive {
+		return ""
+	}
+	return sh.SSH.Host
 }
 
 // TotalDepth returns the sum of any unresolved paren, brace, or bracket depths.

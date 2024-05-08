@@ -19,6 +19,7 @@ func (sh *Shell) InstallBuiltins() {
 	sh.Builtins["exit"] = sh.Exit
 	sh.Builtins["set"] = sh.Set
 	sh.Builtins["add-path"] = sh.AddPath
+	sh.Builtins["cossh"] = sh.CoSSH
 }
 
 // Cd changes the current directory.
@@ -80,6 +81,50 @@ func (sh *Shell) AddPath(args ...string) error {
 		path = path + ":" + arg
 	}
 	return os.Setenv("PATH", path)
+}
+
+// CoSSH does connects to a server specified in first arg, which is then
+// used for executing any shell commands until called with `stop` or `close`.
+// Should call 'close' when no longer needed.
+// * stop:  goes back to running locally.
+// * start: If a previous connection has been established, resumes running remotely.
+// * close: closes the connection; start after this will re-open.
+func (sh *Shell) CoSSH(args ...string) error {
+	if len(args) != 1 {
+		return fmt.Errorf("cossh: requires one argument")
+	}
+	cmd := args[0]
+	host := ""
+	switch cmd {
+	case "stop":
+		sh.SSHActive = false
+		return nil
+	case "close":
+		sh.SSHActive = false
+		sh.SSH.Close()
+		return nil
+	case "start":
+		if sh.SSH.Client != nil { // already running
+			sh.SSHActive = true
+			return nil
+		}
+		if sh.SSH.Host != "" {
+			host = sh.SSH.Host
+		} else {
+			return fmt.Errorf("cossh: start can only be called if a host name was previously specified")
+		}
+	default:
+		host = args[0]
+	}
+	err := sh.SSH.Connect(host)
+	if err != nil {
+		return err
+	}
+	// sh.SSH.Stdin = sh.Config.Stdin // this causes it to hang!  do not set.
+	sh.SSH.Stdout = sh.Config.Stdout
+	sh.SSH.Stderr = sh.Config.Stderr
+	sh.SSHActive = true
+	return nil
 }
 
 // example alias:
