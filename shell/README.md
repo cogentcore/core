@@ -42,7 +42,55 @@ cd some; [mkdir sub]; cd sub
 
 * `jobs`, `fg`, `bg`, and `kill` builtin commands function as in usual bash.
 
-# Go vs. Shell determination
+# SSH connections to remote hosts
+
+Any number of active SSH connections can be maintained and used dynamically within a script, including simple ways of copying data among the different hosts (including the local host).  The Go level execution is always on the local host in one running process, and only the shell commands are executed remotely, enabling a unique ability to easily coordinate and distribute processing and data across various hosts.
+
+Each host maintains its own working directory and environment variables, which can be configured and re-used by default whenever using a given host.
+
+* `cossh hostname.org [name]`  establishes a connection, using given optional name to refer to this connection.  If the name is not provided, a sequential number will be used, starting with 1, with 0 referring always to the local host.
+
+* `@name` refers to the given host
+
+### Explicit per-command determination of where to run a command:
+
+```sh
+@name cd subdir; ls
+```
+
+Note that @0 always refers to the localhost.
+
+### Set default command host for subsequent shell commands.
+
+```sh
+cossh @name
+```
+
+use `cossh @0` to return to localhost.
+
+### Redirect input / output among hosts
+
+```sh
+cat @0:localfile.tsv > @host:remotefile.tsv
+```
+
+note the use of colon after host name identifier when specifying files.  The files in each host are always relative to the current working directory for that host.
+
+All file redirect logic applies, including pipes between commands across hosts, e.g.,:
+
+```sh
+@0 ls *.tsv | @name git add
+```
+
+### Close connections
+
+```sh
+cossh close
+```
+
+Will close all active connections and return the default host to @0.  All active connections are also automatically closed when the shell terminates.
+
+# Rules for Go vs. Shell determination
 
 The critical extension from standard Go syntax is for lines that are processed by the `Exec` functions, used for running arbitrary programs on the user's executable path.  Here are the rules (word = IDENT token):
 
