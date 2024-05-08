@@ -49,7 +49,7 @@ func (ed *Editor) OfferComplete() {
 	cpos.X += 5
 	cpos.Y += 10
 	ed.Buffer.SetByteOffs() // make sure the pos offset is updated!!
-	ed.Buffer.CurView = ed
+	ed.Buffer.CurrentEditor = ed
 	ed.Buffer.Complete.SrcLn = ed.CursorPos.Ln
 	ed.Buffer.Complete.SrcCh = ed.CursorPos.Ch
 	ed.Buffer.Complete.Show(ed, cpos, s)
@@ -65,7 +65,7 @@ func (ed *Editor) CancelComplete() {
 		return
 	}
 	if ed.Buffer.Complete.Cancel() {
-		ed.Buffer.CurView = nil
+		ed.Buffer.CurrentEditor = nil
 	}
 }
 
@@ -109,7 +109,7 @@ func (ed *Editor) Lookup() { //types:add
 	cpos.X += 5
 	cpos.Y += 10
 	ed.Buffer.SetByteOffs() // make sure the pos offset is updated!!
-	ed.Buffer.CurView = ed
+	ed.Buffer.CurrentEditor = ed
 	ed.Buffer.Complete.Lookup(s, ed.CursorPos.Ln, ed.CursorPos.Ch, ed.Scene, cpos)
 }
 
@@ -257,7 +257,7 @@ func (ed *Editor) OfferCorrect() bool {
 	cpos := ed.CharStartPos(ed.CursorPos).ToPoint() // physical location
 	cpos.X += 5
 	cpos.Y += 10
-	ed.Buffer.CurView = ed
+	ed.Buffer.CurrentEditor = ed
 	ed.Buffer.Spell.Show(wb, ed.Scene, cpos)
 	return true
 }
@@ -271,6 +271,6 @@ func (ed *Editor) CancelCorrect() {
 	if !ed.Buffer.Options.SpellCorrect {
 		return
 	}
-	ed.Buffer.CurView = nil
+	ed.Buffer.CurrentEditor = nil
 	ed.Buffer.Spell.Cancel()
 }

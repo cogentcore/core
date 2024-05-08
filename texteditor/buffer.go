@@ -48,96 +48,91 @@ import (
 // Internally, the buffer represents new lines using \n = LF, but saving
 // and loading can deal with Windows/DOS CRLF format.
 type Buffer struct {
-
-	// Filename is the filename of file last loaded or saved,
-	// which is used when highlighting code.
+	// Filename is the filename of the file that was last loaded or saved. It is used when highlighting code.
 	Filename core.Filename `json:"-" xml:"-"`
 
-	// Flags are key state flags
+	// Flags are the key state flags for the buffer.
 	Flags BufferFlags
 
-	// Txt is the current value of the entire text being edited,
-	// as a byte slice for greater efficiency.
+	// Txt is the current value of the entire text being edited, represented as a byte slice for efficiency.
 	Txt []byte `json:"-" xml:"text"`
 
-	// if true, auto-save file after changes (in a separate routine)
+	// Autosave specifies whether the file should be automatically saved after changes are made.
 	Autosave bool
 
-	// options for how text editing / viewing works
+	// Options are the options for how text editing and viewing works.
 	Options textbuf.Options
 
-	// full info about file
+	// Info is the full information about the file.
 	Info fileinfo.FileInfo
 
-	// Parsing state info for file
+	// ParseState is the parsing state information for the file.
 	ParseState parse.FileStates
 
-	// syntax highlighting markup parameters (language, style, etc)
+	// Hi is the syntax highlighting markup parameters, such as the language and style.
 	Hi HiMarkup
 
-	// number of lines
+	// NLines is the number of lines in the buffer.
 	NLines int `json:"-" xml:"-"`
 
-	// LineColors are colors to use for rendering circles next to the line
-	// numbers of certain lines; use [Buffer.SetLineColor] and
-	// [Buffer.DeleteLineColor].
+	// LineColors are the colors to use for rendering circles next to the line numbers of certain lines.
 	LineColors map[int]image.Image
 
-	// the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!
+	// Lines are the live lines of text being edited, with the latest modifications. They are encoded as runes per line, which is necessary for one-to-one rune/glyph rendering correspondence. All TextPos positions are in rune indexes, not byte indexes.
 	Lines [][]rune `json:"-" xml:"-"`
 
-	// the live lines of text being edited, with latest modifications -- encoded in bytes per line translated from Lines, and used for input to markup -- essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes
+	// LineBytes are the live lines of text being edited, with the latest modifications. They are encoded in bytes per line, translated from Lines, and used for input to markup. It is essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes.
 	LineBytes [][]byte `json:"-" xml:"-"`
 
-	// extra custom tagged regions for each line
+	// Tags are the extra custom tagged regions for each line.
 	Tags []lexer.Line `json:"-" xml:"-"`
 
-	// syntax highlighting tags -- auto-generated
+	// HiTags are the syntax highlighting tags, which are auto-generated.
 	HiTags []lexer.Line `json:"-" xml:"-"`
 
-	// marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered
+	// Markup is the marked-up version of the edited text lines, after being run through the syntax highlighting process. This is what is actually rendered.
 	Markup [][]byte `json:"-" xml:"-"`
 
-	// edits that have been made since last full markup
+	// MarkupEdits are the edits that have been made since the last full markup.
 	MarkupEdits []*textbuf.Edit `json:"-" xml:"-"`
 
-	// offsets for start of each line in Txt byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines
+	// ByteOffs are the offsets for the start of each line in the Txt byte slice. This is not updated with edits. Call SetByteOffs to set it when needed. It is used for re-generating the Txt in LinesToBytes and set on initial open in BytesToLines.
 	ByteOffs []int `json:"-" xml:"-"`
 
-	// total bytes in document -- see ByteOffs for when it is updated
+	// TotalBytes is the total number of bytes in the document. See ByteOffs for when it is updated.
 	TotalBytes int `json:"-" xml:"-"`
 
-	// mutex for updating lines
+	// LinesMu is the mutex for updating lines.
 	LinesMu sync.RWMutex `json:"-" xml:"-"`
 
-	// mutex for updating markup
+	// MarkupMu is the mutex for updating markup.
 	MarkupMu sync.RWMutex `json:"-" xml:"-"`
 
-	// markup delay timer
+	// MarkupDelayTimer is the markup delay timer.
 	MarkupDelayTimer *time.Timer `json:"-" xml:"-"`
 
-	// mutex for updating markup delay timer
+	// MarkupDelayMu is the mutex for updating the markup delay timer.
 	MarkupDelayMu sync.Mutex `json:"-" xml:"-"`
 
-	// the [Editor]s that are currently viewing this buffer
+	// Editors are the editors that are currently viewing this buffer.
 	Editors []*Editor `json:"-" xml:"-"`
 
-	// undo manager
+	// Undos is the undo manager.
 	Undos textbuf.Undo `json:"-" xml:"-"`
 
-	// history of cursor positions -- can move back through them
+	// PosHistory is the history of cursor positions. It can be used to move back through them.
 	PosHistory []lexer.Pos `json:"-" xml:"-"`
 
-	// functions and data for text completion
+	// Complete is the functions and data for text completion.
 	Complete *core.Complete `json:"-" xml:"-"`
 
-	// functions and data for spelling correction
+	// Spell is the functions and data for spelling correction.
 	Spell *Spell `json:"-" xml:"-"`
 
-	// current text editor -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always
-	CurView *Editor `json:"-" xml:"-"`
+	// CurrentEditor is the current text editor, such as the one that initiated the Complete or Correct process. The cursor position in this view is updated, and it is reset to nil after usage.
+	CurrentEditor *Editor `json:"-" xml:"-"`
 
-	// supports standard system events sending: Change is sent for BufDone, BufInsert, BufDelete
+	// Listeners is used for sending standard system events. Change is sent for BufDone, BufInsert, and BufDelete.
 	Listeners events.Listeners
 }
 
@@ -2606,11 +2601,11 @@ func (tb *Buffer) CompleteText(s string) {
 	st = pos
 	st.Ch -= len(tb.Complete.Seed)
 	tb.ReplaceText(st, pos, st, ed.NewText, EditSignal, ReplaceNoMatchCase)
-	if tb.CurView != nil {
+	if tb.CurrentEditor != nil {
 		ep := st
 		ep.Ch += len(ed.NewText) + ed.CursorAdjust
-		tb.CurView.SetCursorShow(ep)
-		tb.CurView = nil
+		tb.CurrentEditor.SetCursorShow(ep)
+		tb.CurrentEditor = nil
 	}
 }
 
@@ -2623,11 +2618,11 @@ func (tb *Buffer) CompleteExtend(s string) {
 	st := pos
 	st.Ch -= len(tb.Complete.Seed)
 	tb.ReplaceText(st, pos, st, s, EditSignal, ReplaceNoMatchCase)
-	if tb.CurView != nil {
+	if tb.CurrentEditor != nil {
 		ep := st
 		ep.Ch += len(s)
-		tb.CurView.SetCursorShow(ep)
-		tb.CurView = nil
+		tb.CurrentEditor.SetCursorShow(ep)
+		tb.CurrentEditor = nil
 	}
 }
 
@@ -2676,11 +2671,11 @@ func (tb *Buffer) CorrectText(s string) {
 	oend := st
 	oend.Ch += len(tb.Spell.Word)
 	tb.ReplaceText(st, oend, st, s, EditSignal, ReplaceNoMatchCase)
-	if tb.CurView != nil {
+	if tb.CurrentEditor != nil {
 		ep := st
 		ep.Ch += len(s)
-		tb.CurView.SetCursorShow(ep)
-		tb.CurView = nil
+		tb.CurrentEditor.SetCursorShow(ep)
+		tb.CurrentEditor = nil
 	}
 }
 
