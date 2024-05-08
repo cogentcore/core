@@ -17,34 +17,30 @@ import "time"
 // values are being stored.
 type Time struct {
 
-	// time.Time.Unix() seconds since 1970
+	// [time.Time.Unix] seconds since 1970
 	Sec int64
 
-	// time.Time.Nanosecond() -- nanosecond offset within second, *not* UnixNano()
+	// [time.Time.Nanosecond]; nanosecond offset within second, *not* UnixNano
 	NSec uint32
 }
 
-// TimeZero is the uninitialized zero time value -- use to check whether
-// time has been set or not
-var TimeZero Time
-
-// IsZero returns true if the time is zero and has not been initialized
+// IsZero returns true if the time is zero and has not been initialized.
 func (t Time) IsZero() bool {
-	return t == TimeZero
+	return t == Time{}
 }
 
-// Time returns the time.Time value for this nptime.Time value
+// Time returns the [time.Time] value for this [Time] value.
 func (t Time) Time() time.Time {
 	return time.Unix(t.Sec, int64(t.NSec))
 }
 
-// SetTime sets the nptime.Time value based on the time.Time value
+// SetTime sets the [Time] value based on the [time.Time]. value
 func (t *Time) SetTime(tt time.Time) {
 	t.Sec = tt.Unix()
 	t.NSec = uint32(tt.Nanosecond())
 }
 
-// Now sets the time value to time.Now()
+// Now sets the time value to [time.Now].
 func (t *Time) Now() {
 	t.SetTime(time.Now())
 }
