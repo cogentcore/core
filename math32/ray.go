@@ -51,16 +51,16 @@ func (ray *Ray) ClosestPointToPoint(point Vector3) Vector3 {
 	return ray.Dir.MulScalar(dirDist).Add(ray.Origin)
 }
 
-// DistToPoint returns the smallest distance
+// DistanceToPoint returns the smallest distance
 // from the ray direction vector to the specified point.
-func (ray *Ray) DistToPoint(point Vector3) float32 {
-	return Sqrt(ray.DistSqToPoint(point))
+func (ray *Ray) DistanceToPoint(point Vector3) float32 {
+	return Sqrt(ray.DistanceSquareduaredToPoint(point))
 }
 
-// DistSqToPoint returns the smallest squared distance
+// DistanceSquareduaredToPoint returns the smallest squared distance
 // from the ray direction vector to the specified point.
 // If the ray was pointed directly at the point this distance would be 0.
-func (ray *Ray) DistSqToPoint(point Vector3) float32 {
+func (ray *Ray) DistanceSquareduaredToPoint(point Vector3) float32 {
 	dirDist := point.Sub(ray.Origin).Dot(ray.Dir)
 	// point behind the ray
 	if dirDist < 0 {
@@ -69,13 +69,13 @@ func (ray *Ray) DistSqToPoint(point Vector3) float32 {
 	return ray.Dir.MulScalar(dirDist).Add(ray.Origin).DistanceToSquared(point)
 }
 
-// DistSqToSegment returns the smallest squared distance
+// DistanceSquaredToSegment returns the smallest squared distance
 // from this ray to the line segment from v0 to v1.
 // If optPointOnRay Vector3 is not nil,
 // it is set with the coordinates of the point on the ray.
 // if optPointOnSegment Vector3 is not nil,
 // it is set with the coordinates of the point on the segment.
-func (ray *Ray) DistSqToSegment(v0, v1 Vector3, optPointOnRay, optPointOnSegment *Vector3) float32 {
+func (ray *Ray) DistanceSquaredToSegment(v0, v1 Vector3, optPointOnRay, optPointOnSegment *Vector3) float32 {
 	segCenter := v0.Add(v1).MulScalar(0.5)
 	segDir := v1.Sub(v0).Normal()
 	diff := ray.Origin.Sub(segCenter)
@@ -165,7 +165,7 @@ func (ray *Ray) DistSqToSegment(v0, v1 Vector3, optPointOnRay, optPointOnSegment
 
 // IsIntersectionSphere returns if this ray intersects with the specified sphere.
 func (ray *Ray) IsIntersectionSphere(sphere Sphere) bool {
-	return ray.DistToPoint(sphere.Center) <= sphere.Radius
+	return ray.DistanceToPoint(sphere.Center) <= sphere.Radius
 }
 
 // IntersectSphere calculates the point which is the intersection of this ray with the specified sphere.
@@ -201,7 +201,7 @@ func (ray *Ray) IntersectSphere(sphere Sphere) (Vector3, bool) {
 
 // IsIntersectPlane returns if this ray intersects the specified plane.
 func (ray *Ray) IsIntersectPlane(plane Plane) bool {
-	distToPoint := plane.DistToPoint(ray.Origin)
+	distToPoint := plane.DistanceToPoint(ray.Origin)
 	if distToPoint == 0 {
 		return true
 	}
@@ -210,13 +210,13 @@ func (ray *Ray) IsIntersectPlane(plane Plane) bool {
 	return denom*distToPoint < 0
 }
 
-// DistToPlane returns the distance of this ray origin to its intersection point in the plane.
+// DistanceToPlane returns the distance of this ray origin to its intersection point in the plane.
 // If the ray does not intersects the plane, returns NaN.
-func (ray *Ray) DistToPlane(plane Plane) float32 {
+func (ray *Ray) DistanceToPlane(plane Plane) float32 {
 	denom := plane.Norm.Dot(ray.Dir)
 	if denom == 0 {
 		// line is coplanar, return origin
-		if plane.DistToPoint(ray.Origin) == 0 {
+		if plane.DistanceToPoint(ray.Origin) == 0 {
 			return 0
 		}
 		return NaN()
@@ -232,7 +232,7 @@ func (ray *Ray) DistToPlane(plane Plane) float32 {
 // IntersectPlane calculates the point which is the intersection of this ray with the specified plane.
 // If no intersection is found false is returned.
 func (ray *Ray) IntersectPlane(plane Plane) (Vector3, bool) {
-	t := ray.DistToPlane(plane)
+	t := ray.DistanceToPlane(plane)
 	if t == NaN() {
 		return ray.Origin, false
 	}

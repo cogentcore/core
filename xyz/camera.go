@@ -130,8 +130,8 @@ func (cm *Camera) ViewVector() math32.Vector3 {
 	return cm.Pose.Pos.Sub(cm.Target)
 }
 
-// DistTo is the distance from camera to given point
-func (cm *Camera) DistTo(pt math32.Vector3) float32 {
+// DistanceTo is the distance from camera to given point
+func (cm *Camera) DistanceTo(pt math32.Vector3) float32 {
 	cm.CamMu.RLock()
 	defer cm.CamMu.RUnlock()
 	dv := cm.Pose.Pos.Sub(pt)

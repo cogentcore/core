@@ -211,8 +211,8 @@ func (b Box2) ClampPoint(point Vector2) Vector2 {
 	return point
 }
 
-// DistToPoint returns the distance from this box to the specified point.
-func (b Box2) DistToPoint(point Vector2) float32 {
+// DistanceToPoint returns the distance from this box to the specified point.
+func (b Box2) DistanceToPoint(point Vector2) float32 {
 	clamp := b.ClampPoint(point)
 	return clamp.Sub(point).Length()
 }

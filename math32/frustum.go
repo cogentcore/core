@@ -86,7 +86,7 @@ func (f *Frustum) SetFromMatrix(m *Matrix4) {
 func (f *Frustum) IntersectsSphere(sphere Sphere) bool {
 	negRadius := -sphere.Radius
 	for i := 0; i < 6; i++ {
-		dist := f.Planes[i].DistToPoint(sphere.Center)
+		dist := f.Planes[i].DistanceToPoint(sphere.Center)
 		if dist < negRadius {
 			return false
 		}
@@ -132,8 +132,8 @@ func (f *Frustum) IntersectsBox(box Box3) bool {
 			p2.Z = box.Min.Z
 		}
 
-		d1 := plane.DistToPoint(p1)
-		d2 := plane.DistToPoint(p2)
+		d1 := plane.DistanceToPoint(p1)
+		d2 := plane.DistanceToPoint(p2)
 
 		// if both outside plane, no intersection
 		if d1 < 0 && d2 < 0 {
@@ -146,7 +146,7 @@ func (f *Frustum) IntersectsBox(box Box3) bool {
 // ContainsPoint determines whether the frustum contains the specified point
 func (f *Frustum) ContainsPoint(point Vector3) bool {
 	for i := 0; i < 6; i++ {
-		if f.Planes[i].DistToPoint(point) < 0 {
+		if f.Planes[i].DistanceToPoint(point) < 0 {
 			return false
 		}
 	}

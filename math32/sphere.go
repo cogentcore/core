@@ -60,8 +60,8 @@ func (s *Sphere) ContainsPoint(point Vector3) bool {
 	return point.DistanceToSquared(s.Center) <= (s.Radius * s.Radius)
 }
 
-// DistToPoint returns the distance from the sphere surface to the specified point.
-func (s *Sphere) DistToPoint(point Vector3) float32 {
+// DistanceToPoint returns the distance from the sphere surface to the specified point.
+func (s *Sphere) DistanceToPoint(point Vector3) float32 {
 	return point.DistanceTo(s.Center) - s.Radius
 }
 

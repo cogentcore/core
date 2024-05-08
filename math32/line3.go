@@ -38,8 +38,8 @@ func (l *Line3) Delta() Vector3 {
 	return l.End.Sub(l.Start)
 }
 
-// DistSq returns the square of the distance from the start point to the end point.
-func (l *Line3) DistSq() float32 {
+// DistanceSquared returns the square of the distance from the start point to the end point.
+func (l *Line3) DistanceSquared() float32 {
 	return l.Start.DistanceToSquared(l.End)
 }
 

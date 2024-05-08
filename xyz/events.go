@@ -43,7 +43,7 @@ func NodesUnderPoint(n tree.Node, pt image.Point) []Node {
 }
 
 func (sc *Scene) SlideMoveEvent(e events.Event) {
-	cdist := math32.Max(sc.Camera.DistTo(sc.Camera.Target), 1.0)
+	cdist := math32.Max(sc.Camera.DistanceTo(sc.Camera.Target), 1.0)
 	orbDel := OrbitFactor * cdist
 	panDel := PanFactor * cdist
 
@@ -75,7 +75,7 @@ func (sc *Scene) MouseScrollEvent(e *events.MouseScroll) {
 	e.SetHandled()
 	pt := e.Pos()
 	sz := sc.Geom.Size
-	cdist := math32.Max(sc.Camera.DistTo(sc.Camera.Target), 1.0)
+	cdist := math32.Max(sc.Camera.DistanceTo(sc.Camera.Target), 1.0)
 	zoom := float32(e.Delta.Y) // float32(e.ScrollNonZeroDelta(false))
 	zoomDel := float32(.02) * cdist
 	switch {

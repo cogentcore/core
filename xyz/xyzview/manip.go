@@ -133,7 +133,7 @@ func (sw *Scene) ManipBox() {
 	xy.DeleteChildByName(nm) // get rid of existing
 	clr := sw.SelectionParams.Color
 
-	cdist := math32.Max(xy.Camera.DistTo(xy.Camera.Target), 1.0)
+	cdist := math32.Max(xy.Camera.DistanceTo(xy.Camera.Target), 1.0)
 
 	bbox := nb.WorldBBox.BBox
 	mb := xyz.NewLineBox(xy, xy, nm, nm, bbox, sw.SelectionParams.Width*cdist, clr, xyz.Inactive)
@@ -268,7 +268,7 @@ func (sw *Scene) HandleSlideEvents() {
 			dd.Y = -dy
 		}
 		// fmt.Printf("mpos: %v  camd: %v  sgn: %v  dm: %v\n", mpos, camd, sgn, dm)
-		cdist := xy.Camera.DistTo(xy.Camera.Target)
+		cdist := xy.Camera.DistanceTo(xy.Camera.Target)
 		scDel := float32(.0005) * cdist
 		panDel := float32(.0005) * cdist
 		// todo: use SVG ApplyDeltaXForm logic

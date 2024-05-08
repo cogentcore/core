@@ -67,20 +67,20 @@ func (p *Plane) Negate() {
 	p.Norm = p.Norm.Negate()
 }
 
-// DistToPoint returns the distance of this plane from point.
-func (p *Plane) DistToPoint(point Vector3) float32 {
+// DistanceToPoint returns the distance of this plane from point.
+func (p *Plane) DistanceToPoint(point Vector3) float32 {
 	return p.Norm.Dot(point) + p.Off
 }
 
-// DistToSphere returns the distance of this place from the sphere.
-func (p *Plane) DistToSphere(sphere Sphere) float32 {
-	return p.DistToPoint(sphere.Center) - sphere.Radius
+// DistanceToSphere returns the distance of this place from the sphere.
+func (p *Plane) DistanceToSphere(sphere Sphere) float32 {
+	return p.DistanceToPoint(sphere.Center) - sphere.Radius
 }
 
 // IsIntersectionLine returns the line intersects this plane.
 func (p *Plane) IsIntersectionLine(line Line3) bool {
-	startSign := p.DistToPoint(line.Start)
-	endSign := p.DistToPoint(line.End)
+	startSign := p.DistanceToPoint(line.Start)
+	endSign := p.DistanceToPoint(line.End)
 	return (startSign < 0 && endSign > 0) || (endSign < 0 && startSign > 0)
 }
 
@@ -91,7 +91,7 @@ func (p *Plane) IntersectLine(line Line3) (Vector3, bool) {
 	denom := p.Norm.Dot(dir)
 	if denom == 0 {
 		// line is coplanar, return origin
-		if p.DistToPoint(line.Start) == 0 {
+		if p.DistanceToPoint(line.Start) == 0 {
 			return line.Start, true
 		}
 		// Unsure if this is the correct method to handle this case.
