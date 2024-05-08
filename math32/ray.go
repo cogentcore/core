@@ -54,13 +54,13 @@ func (ray *Ray) ClosestPointToPoint(point Vector3) Vector3 {
 // DistanceToPoint returns the smallest distance
 // from the ray direction vector to the specified point.
 func (ray *Ray) DistanceToPoint(point Vector3) float32 {
-	return Sqrt(ray.DistanceSquareduaredToPoint(point))
+	return Sqrt(ray.DistanceSquaredToPoint(point))
 }
 
-// DistanceSquareduaredToPoint returns the smallest squared distance
+// DistanceSquaredToPoint returns the smallest squared distance
 // from the ray direction vector to the specified point.
 // If the ray was pointed directly at the point this distance would be 0.
-func (ray *Ray) DistanceSquareduaredToPoint(point Vector3) float32 {
+func (ray *Ray) DistanceSquaredToPoint(point Vector3) float32 {
 	dirDist := point.Sub(ray.Origin).Dot(ray.Dir)
 	// point behind the ray
 	if dirDist < 0 {
