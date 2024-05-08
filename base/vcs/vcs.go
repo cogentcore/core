@@ -95,15 +95,15 @@ func NewRepo(remote, local string) (Repo, error) {
 			r.SvnRepo = *(repo.(*vcs.SvnRepo))
 			return r, err
 		case vcs.Hg:
-			err = fmt.Errorf("Hg version control not yet supported")
+			err = fmt.Errorf("hg version control not yet supported")
 		case vcs.Bzr:
-			err = fmt.Errorf("Bzr version control not yet supported")
+			err = fmt.Errorf("bzr version control not yet supported")
 		}
 	}
 	return nil, err
 }
 
-// DetectRepo attemps to detect the presence of a repository at the given
+// DetectRepo attempts to detect the presence of a repository at the given
 // directory path -- returns type of repository if found, else vcs.NoVCS.
 // Very quickly just looks for signature file name:
 // .git for git
