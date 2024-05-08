@@ -239,12 +239,6 @@ func (ray *Ray) IntersectPlane(plane Plane) (Vector3, bool) {
 	return ray.At(t), true
 }
 
-// IntersectsBox returns if this ray intersects the specified box.
-func (ray *Ray) IntersectsBox(box Box3) bool {
-	_, yes := ray.IntersectBox(box)
-	return yes
-}
-
 // IntersectBox calculates the point which is the intersection of this ray with the specified box.
 // If no intersection is found false is returned.
 func (ray *Ray) IntersectBox(box Box3) (Vector3, bool) {
@@ -309,7 +303,7 @@ func (ray *Ray) IntersectBox(box Box3) (Vector3, bool) {
 		tmax = tzmax
 	}
 
-	//return point closest to the ray (positive side)
+	// return point closest to the ray (positive side)
 
 	if tmax < 0 {
 		return ray.Origin, false

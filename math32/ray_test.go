@@ -212,6 +212,121 @@ func TestRayDistanceSquaredToSegment(t *testing.T) {
 	}
 }
 
+func TestRayIsIntersectionSphere(t *testing.T) {
+	origin := Vec3(1, 2, 3)
+	dir := Vec3(4, 5, 6)
+	ray := Ray{
+		Origin: origin,
+		Dir:    dir,
+	}
+
+	sphere1 := Sphere{
+		Center: Vec3(0, 0, 0),
+		Radius: 10,
+	}
+	assert.True(t, ray.IsIntersectionSphere(sphere1))
+
+	sphere2 := Sphere{
+		Center: Vec3(10, 10, 10),
+		Radius: 5,
+	}
+	assert.False(t, ray.IsIntersectionSphere(sphere2))
+}
+
+func TestRayIntersectSphere(t *testing.T) {
+	origin := Vec3(1, 2, 3)
+	dir := Vec3(4, 5, 6)
+	ray := Ray{
+		Origin: origin,
+		Dir:    dir,
+	}
+
+	sphere1 := Sphere{
+		Center: Vec3(0, 0, 0),
+		Radius: 10,
+	}
+	expected1 := Vec3(6.2666473, 8.583309, 10.899971)
+	result1, intersect1 := ray.IntersectSphere(sphere1)
+	assert.True(t, intersect1)
+	assert.Equal(t, expected1, result1)
+
+	sphere2 := Sphere{
+		Center: Vec3(1, 1, 1),
+		Radius: 0.1,
+	}
+	expected2 := Vec3(0, -1, -2)
+	result2, intersect2 := ray.IntersectSphere(sphere2)
+	assert.False(t, intersect2)
+	assert.Equal(t, expected2, result2)
+}
+
+func TestRayIntersectBox(t *testing.T) {
+	ray := Ray{
+		Origin: Vec3(1, 2, 3),
+		Dir:    Vec3(4, 5, 6),
+	}
+
+	box1 := Box3{
+		Min: Vec3(0, 0, 0),
+		Max: Vec3(10, 10, 10),
+	}
+	expected1 := Vec3(5.666667, 7.833334, 10)
+	result1, intersect1 := ray.IntersectBox(box1)
+	assert.True(t, intersect1)
+	assert.Equal(t, expected1, result1)
+
+	box2 := Box3{
+		Min: Vec3(2, 2, 2),
+		Max: Vec3(5, 5, 5),
+	}
+	expected2 := Vec3(2, 3.25, 4.5)
+	result2, intersect2 := ray.IntersectBox(box2)
+	assert.True(t, intersect2)
+	assert.Equal(t, expected2, result2)
+
+	box3 := Box3{
+		Min: Vec3(-10, -10, -10),
+		Max: Vec3(-5, -5, -5),
+	}
+	expected3 := Vec3(1, 2, 3)
+	result3, intersect3 := ray.IntersectBox(box3)
+	assert.False(t, intersect3)
+	assert.Equal(t, expected3, result3)
+}
+
+func TestRayIntersectTriangle(t *testing.T) {
+	ray := Ray{
+		Origin: Vec3(1, 2, 3),
+		Dir:    Vec3(4, 5, 6),
+	}
+
+	a := Vec3(0, 0, 0)
+	b := Vec3(1, 0, 0)
+	c := Vec3(0, 1, 0)
+
+	expected1 := Vec3(1, 2, 3)
+	result1, intersect1 := ray.IntersectTriangle(a, b, c, false)
+	assert.False(t, intersect1)
+	assert.Equal(t, expected1, result1)
+
+	expected2 := Vec3(1, 2, 3)
+	result2, intersect2 := ray.IntersectTriangle(a, b, c, true)
+	assert.False(t, intersect2)
+	assert.Equal(t, expected2, result2)
+
+	d := Vec3(0, 0, 1)
+
+	expected3 := Vec3(1, 2, 3)
+	result3, intersect3 := ray.IntersectTriangle(a, b, d, false)
+	assert.False(t, intersect3)
+	assert.Equal(t, expected3, result3)
+
+	expected4 := Vec3(1, 2, 3)
+	result4, intersect4 := ray.IntersectTriangle(b, c, d, false)
+	assert.False(t, intersect4)
+	assert.Equal(t, expected4, result4)
+}
+
 func TestRayApplyMatrix4(t *testing.T) {
 	origin := Vec3(1, 2, 3)
 	dir := Vec3(4, 5, 6)
