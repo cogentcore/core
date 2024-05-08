@@ -12,12 +12,11 @@ import (
 	"cogentcore.org/core/parse/token"
 )
 
-// these functions provide "manual" lexing support for specific cases
-// such as completion where a string must be processed further.
+// These functions provide "manual" lexing support for specific cases, such as completion, where a string must be processed further.
 
-// FirstWord returns the first contiguous sequence of purely unicode.IsLetter runes
-// within given string -- skips over any leading non-letters until a letter is found.
-// This does not include numbers -- use FirstWordDigits for that
+// FirstWord returns the first contiguous sequence of purely [unicode.IsLetter] runes within the given string.
+// It skips over any leading non-letters until a letter is found.
+// Note that this function does not include numbers. For that, you can use the FirstWordDigits function.
 func FirstWord(str string) string {
 	rstr := ""
 	for _, s := range str {
@@ -32,8 +31,9 @@ func FirstWord(str string) string {
 	return rstr
 }
 
-// FirstWordDigits returns the first contiguous sequence of purely IsLetterOrDigit runes
-// within given string -- skips over any leading non-letters until a *letter* (not digit) is found.
+// FirstWordDigits returns the first contiguous sequence of purely [IsLetterOrDigit]
+// runes within the given string. It skips over any leading non-letters until a letter
+// (not digit) is found.
 func FirstWordDigits(str string) string {
 	rstr := ""
 	for _, s := range str {
@@ -51,8 +51,9 @@ func FirstWordDigits(str string) string {
 	return rstr
 }
 
-// FirstWordApostrophe returns the first contiguous sequence of purely unicode.IsLetter runes.
-// that can also contain an apostrophe *within* the word but not at the end
+// FirstWordApostrophe returns the first contiguous sequence of purely
+// [unicode.IsLetter] runes that can also contain an apostrophe within
+// the word but not at the end.
 func FirstWordApostrophe(str string) string {
 	rstr := ""
 	for _, s := range str {
@@ -71,7 +72,7 @@ func FirstWordApostrophe(str string) string {
 	return rstr
 }
 
-// TrimLeftToAlpha returns string without any leading non-alpha runes
+// TrimLeftToAlpha returns string without any leading non-alpha runes.
 func TrimLeftToAlpha(nm string) string {
 	return strings.TrimLeftFunc(nm, func(r rune) bool {
 		return !unicode.IsLetter(r)
@@ -103,9 +104,9 @@ func LastNonSpaceRune(src []rune) int {
 	return -1
 }
 
-// InnerBracketScope returns the inner-scope for given bracket type
-// if it is imbalanced -- it is important to do completion based
-// just on that inner scope if that is where the user is at.
+// InnerBracketScope returns the inner scope for a given bracket type if it is
+// imbalanced. It is important to do completion based on just that inner scope
+// if that is where the user is at.
 func InnerBracketScope(str string, brl, brr string) string {
 	nlb := strings.Count(str, brl)
 	nrb := strings.Count(str, brr)
