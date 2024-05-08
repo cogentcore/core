@@ -48,7 +48,7 @@ func (t *Time) Stop() time.Duration {
 		t.N = 0
 		return 0
 	}
-	iv := time.Now().Sub(t.St)
+	iv := time.Since(t.St)
 	t.Total += iv
 	t.N++
 	return iv
