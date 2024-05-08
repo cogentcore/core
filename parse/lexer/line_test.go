@@ -5,11 +5,11 @@
 package lexer
 
 import (
-	"fmt"
 	"testing"
 
 	"cogentcore.org/core/base/nptime"
 	"cogentcore.org/core/parse/token"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLineMerge(t *testing.T) {
@@ -22,8 +22,16 @@ func TestLineMerge(t *testing.T) {
 	}
 
 	ml := MergeLines(l1, l2)
-	fmt.Printf("l1:\n%v\nl2:\n%v\nml:\n%v\n", l1, l2, ml)
+	assert.Equal(t, Line{
+		Lex{token.KeyToken{Token: token.Text}, 0, 40, nptime.Time{}},
+		Lex{token.KeyToken{Token: token.TextSpellErr}, 0, 10, nptime.Time{}},
+		Lex{token.KeyToken{Token: token.TextSpellErr}, 15, 20, nptime.Time{}},
+	}, ml)
 
 	mlr := MergeLines(l2, l1)
-	fmt.Printf("l1:\n%v\nl2:\n%v\nml:\n%v\n", l2, l1, mlr)
+	assert.Equal(t, Line{
+		Lex{token.KeyToken{Token: token.Text}, 0, 40, nptime.Time{}},
+		Lex{token.KeyToken{Token: token.TextSpellErr}, 0, 10, nptime.Time{}},
+		Lex{token.KeyToken{Token: token.TextSpellErr}, 15, 20, nptime.Time{}},
+	}, mlr)
 }
