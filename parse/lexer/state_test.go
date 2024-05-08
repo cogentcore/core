@@ -88,3 +88,23 @@ func TestReadNumber(t *testing.T) {
 	assert.Equal(t, token.LitNumImag, tok)
 	assert.Equal(t, 3, ls.Pos)
 }
+
+func TestReadEscape(t *testing.T) {
+	ls := &State{
+		Src: []rune(`\n \t "hello \u03B1 \U0001F600`),
+		Pos: 0,
+		Ch:  '\\',
+	}
+
+	assert.True(t, ls.ReadEscape('"'))
+	assert.Equal(t, 1, ls.Pos)
+
+	assert.True(t, ls.ReadEscape('"'))
+	assert.Equal(t, 2, ls.Pos)
+
+	assert.False(t, ls.ReadEscape('"'))
+	assert.Equal(t, 2, ls.Pos)
+
+	assert.False(t, ls.ReadEscape('"'))
+	assert.Equal(t, 2, ls.Pos)
+}
