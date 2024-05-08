@@ -169,7 +169,7 @@ func (ray *Ray) IsIntersectionSphere(sphere Sphere) bool {
 }
 
 // IntersectSphere calculates the point which is the intersection of this ray with the specified sphere.
-// If no intersection is found false is returne.
+// If no intersection is found it returns false.
 func (ray *Ray) IntersectSphere(sphere Sphere) (Vector3, bool) {
 	v1 := sphere.Center.Sub(ray.Origin)
 	tca := v1.Dot(ray.Dir)
