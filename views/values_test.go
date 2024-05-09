@@ -47,6 +47,8 @@ func TestValues(t *testing.T) {
 
 		{"map", map[string]int{"Go": 1, "C++": 3, "Python": 5}, ""},
 		{"map-inline", map[string]int{"Go": 1, "C++": 3}, ""},
+		{"slice", []int{1, 3, 5, 7, 9}, ""},
+		{"slice-inline", []int{1, 3, 5}, ""},
 	}
 	for _, value := range values {
 		b := core.NewBody()

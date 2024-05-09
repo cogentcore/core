@@ -12,11 +12,12 @@ import (
 
 func TestSliceView(t *testing.T) {
 	b := core.NewBody()
-	sl := make([]float32, 10)
-	for i := range sl {
-		fi := float32(i)
-		sl[i] = 2*fi + (8-fi)/10
-	}
-	NewSliceView(b).SetSlice(&sl)
-	b.AssertRender(t, "sliceview/basic")
+	NewSliceView(b).SetSlice(&[]int{1, 3, 5})
+	b.AssertRender(t, "slice-view/basic")
+}
+
+func TestSliceViewReadOnly(t *testing.T) {
+	b := core.NewBody()
+	NewSliceView(b).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
+	b.AssertRender(t, "slice-view/read-only")
 }

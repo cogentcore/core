@@ -12,11 +12,6 @@ import (
 
 func TestSliceViewInline(t *testing.T) {
 	b := core.NewBody()
-	sl := make([]float32, 10)
-	for i := range sl {
-		fi := float32(i)
-		sl[i] = 2*fi + (8-fi)/10
-	}
-	NewSliceViewInline(b).SetSlice(&sl)
-	b.AssertRender(t, "sliceviewinline/basic")
+	NewSliceViewInline(b).SetSlice(&[]int{1, 3, 5})
+	b.AssertRender(t, "slice-view-inline/basic")
 }
