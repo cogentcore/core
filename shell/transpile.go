@@ -60,6 +60,9 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	case toks[0].Tok == token.LBRACK:
 		logx.PrintlnDebug("exec: [ ] line")
 		return sh.TranspileExec(toks, false) // it processes the [ ]
+	case toks[0].Tok == token.ILLEGAL:
+		logx.PrintlnDebug("exec: [ ] line")
+		return sh.TranspileExec(toks, false) // it processes the [ ]
 	case toks[0].IsBacktickString():
 		logx.PrintlnDebug("exec: backquoted string")
 		exe := sh.TranspileExecString(toks[0].Str, false)
@@ -89,7 +92,7 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	case t0in == 0: // exec must be IDENT
 		logx.PrintlnDebug("go:   not ident")
 		return sh.TranspileGo(toks)
-	case t0in > 0 && n > t0in && (t1in > 0 || t1pn > 0 || toks[t1idx].Tok == token.SUB || toks[t1idx].Tok == token.DEC || toks[t1idx].Tok == token.STRING || toks[t1idx].Tok == token.LBRACE):
+	case t0in > 0 && n > t0in && (t1in > 0 || t1pn > 0 || toks[t1idx].Tok == token.SUB || toks[t1idx].Tok == token.DEC || toks[t1idx].Tok == token.GTR || toks[t1idx].Tok == token.SHR || toks[t1idx].Tok == token.LSS || toks[t1idx].Tok == token.STRING || toks[t1idx].Tok == token.LBRACE):
 		logx.PrintlnDebug("exec: word non-go...")
 		return sh.TranspileExec(toks, false)
 	default:

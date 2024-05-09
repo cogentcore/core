@@ -5,10 +5,8 @@
 package shell
 
 import (
-	"log/slog"
 	"testing"
 
-	"cogentcore.org/core/base/logx"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,42 +17,45 @@ type exIn struct {
 
 // these are more general tests of full-line statements of various forms
 func TestTranspile(t *testing.T) {
-	logx.UserLevel = slog.LevelDebug
+	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
-		// {"`ls -la`", `shell.Run("ls", "-la")`},
+		{"ls", `shell.Run("ls")`},
+		{"`ls -la`", `shell.Run("ls", "-la")`},
 		{"ls --help", `shell.Run("ls", "--help")`},
-		// {`var name string`, `var name string`},
-		// {`name = "test"`, `name = "test"`},
-		// {`echo {name}`, `shell.Run("echo", name)`},
-		// {`echo "testing"`, `shell.Run("echo", "testing")`},
-		// {`number := 1.23`, `number := 1.23`},
-		// {`println("hi")`, `println("hi")`},
-		// {`fmt.Println("hi")`, `fmt.Println("hi")`},
-		// {`for i := 0; i < 3; i++ { fmt.Println(i, "\n")`, `for i := 0; i < 3; i++ { fmt.Println(i, "\n")`},
-		// {"for i, v := range `ls -la` {", `for i, v := range shell.Output("ls", "-la") {`},
-		// {`// todo: fixit`, `// todo: fixit`},
-		// {"`go build`", `shell.Run("go", "build")`},
-		// {"{go build()}", `go build()`},
-		// {"go build", `shell.Run("go", "build")`},
-		// {"go build()", `go build()`},
-		// {"go build &", `shell.Start("go", "build")`},
-		// {"[mkdir subdir]", `shell.RunErrOK("mkdir", "subdir")`},
-		// {"set something hello-1", `shell.Run("set", "something", "hello-1")`},
-		// {"set something = hello", `shell.Run("set", "something", "=", "hello")`},
-		// {`set something = "hello"`, `shell.Run("set", "something", "=", "hello")`},
-		// {`set something=hello`, `shell.Run("set", "something=hello")`},
-		// {`set "something=hello"`, `shell.Run("set", "something=hello")`},
-		// {`set something="hello"`, `shell.Run("set", "something=\"hello\"")`},
-		// {`add-path /opt/sbin /opt/homebrew/bin`, `shell.Run("add-path", "/opt/sbin", "/opt/homebrew/bin")`},
-		// {`cat file > test.out`, `shell.Run("cat", "file", ">", "test.out")`},
-		// {`cat file | grep -v exe > test.out`, `shell.Run("cat", "file", "|", "grep", "-v", "exe", ">", "test.out")`},
-		// {`cd sub; pwd; ls -la`, `shell.Run("cd", "sub"); shell.Run("pwd"); shell.Run("ls", "-la")`},
-		// {`cd sub; [mkdir sub]; ls -la`, `shell.Run("cd", "sub"); shell.RunErrOK("mkdir", "sub"); shell.Run("ls", "-la")`},
-		// {"ls -la > test.out", `shell.Run("ls", "-la", ">", "test.out")`},
-		// {"ls -la >test.out", `shell.Run("ls", "-la", ">", "test.out")`},
-		// {"ls -la >> test.out", `shell.Run("ls", "-la", ">>", "test.out")`},
-		// {"ls -la >& test.out", `shell.Run("ls", "-la", ">&", "test.out")`},
-		// {"ls -la >>& test.out", `shell.Run("ls", "-la", ">>&", "test.out")`},
+		{`var name string`, `var name string`},
+		{`name = "test"`, `name = "test"`},
+		{`echo {name}`, `shell.Run("echo", name)`},
+		{`echo "testing"`, `shell.Run("echo", "testing")`},
+		{`number := 1.23`, `number := 1.23`},
+		{`println("hi")`, `println("hi")`},
+		{`fmt.Println("hi")`, `fmt.Println("hi")`},
+		{`for i := 0; i < 3; i++ { fmt.Println(i, "\n")`, `for i := 0; i < 3; i++ { fmt.Println(i, "\n")`},
+		{"for i, v := range `ls -la` {", `for i, v := range shell.Output("ls", "-la") {`},
+		{`// todo: fixit`, `// todo: fixit`},
+		{"`go build`", `shell.Run("go", "build")`},
+		{"{go build()}", `go build()`},
+		{"go build", `shell.Run("go", "build")`},
+		{"go build()", `go build()`},
+		{"go build &", `shell.Start("go", "build")`},
+		{"[mkdir subdir]", `shell.RunErrOK("mkdir", "subdir")`},
+		{"set something hello-1", `shell.Run("set", "something", "hello-1")`},
+		{"set something = hello", `shell.Run("set", "something", "=", "hello")`},
+		{`set something = "hello"`, `shell.Run("set", "something", "=", "hello")`},
+		{`set something=hello`, `shell.Run("set", "something=hello")`},
+		{`set "something=hello"`, `shell.Run("set", "something=hello")`},
+		{`set something="hello"`, `shell.Run("set", "something=\"hello\"")`},
+		{`add-path /opt/sbin /opt/homebrew/bin`, `shell.Run("add-path", "/opt/sbin", "/opt/homebrew/bin")`},
+		{`cat file > test.out`, `shell.Run("cat", "file", ">", "test.out")`},
+		{`cat file | grep -v exe > test.out`, `shell.Run("cat", "file", "|", "grep", "-v", "exe", ">", "test.out")`},
+		{`cd sub; pwd; ls -la`, `shell.Run("cd", "sub"); shell.Run("pwd"); shell.Run("ls", "-la")`},
+		{`cd sub; [mkdir sub]; ls -la`, `shell.Run("cd", "sub"); shell.RunErrOK("mkdir", "sub"); shell.Run("ls", "-la")`},
+		{"ls -la > test.out", `shell.Run("ls", "-la", ">", "test.out")`},
+		{"ls > test.out", `shell.Run("ls", ">", "test.out")`},
+		{"ls -la >test.out", `shell.Run("ls", "-la", ">", "test.out")`},
+		{"ls -la >> test.out", `shell.Run("ls", "-la", ">>", "test.out")`},
+		{"ls -la >& test.out", `shell.Run("ls", "-la", ">&", "test.out")`},
+		{"ls -la >>& test.out", `shell.Run("ls", "-la", ">>&", "test.out")`},
+		{"@1 ls -la", `shell.Run("@", "1", "ls", "-la")`},
 	}
 
 	sh := NewShell()
