@@ -166,12 +166,11 @@ func (m *Matrix3) SetMul(other Matrix3) {
 	m.MulMatrices(*m, other)
 }
 
-// MulScalar returns each of this matrix's components multiplied by the specified scalar.
-// this matrix is unchanged
+// MulScalar returns each of this matrix's components multiplied by the specified
+// scalar, leaving the original matrix unchanged.
 func (m Matrix3) MulScalar(s float32) Matrix3 {
-	nm := Matrix3{}
-	nm.SetMulScalar(s)
-	return nm
+	m.SetMulScalar(s)
+	return m
 }
 
 // SetMulScalar multiplies each of this matrix's components by the specified scalar.

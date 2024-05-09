@@ -38,3 +38,62 @@ func TestMatrix3(t *testing.T) {
 
 	// xmat := Matrix3Translate2D(1, 1).Mul(Matrix3Rotate2D(DegToRad(90))).Mul(Matrix3Scale2D(2, 2)).MulVector2AsPoint(vx))
 }
+
+func TestMatrix3SetFromMatrix4(t *testing.T) {
+	m := &Matrix3{}
+	src := &Matrix4{
+		1, 2, 3, 4,
+		5, 6, 7, 8,
+		9, 10, 11, 12,
+		13, 14, 15, 16,
+	}
+
+	m.SetFromMatrix4(src)
+
+	expected := &Matrix3{
+		1, 2, 3,
+		5, 6, 7,
+		9, 10, 11,
+	}
+
+	assert.Equal(t, expected, m)
+}
+
+func TestMatrix3SetFromMatrix2(t *testing.T) {
+	m := &Matrix3{}
+	src := Matrix2{
+		XX: 1, XY: 2,
+		YX: 3, YY: 4,
+	}
+
+	m.SetFromMatrix2(src)
+
+	expected := &Matrix3{
+		1, 2, 0,
+		3, 4, 0,
+		0, 0, 1,
+	}
+
+	assert.Equal(t, expected, m)
+}
+
+func TestMatrix3MulScalar(t *testing.T) {
+	m := Matrix3{
+		1, 2, 3,
+		4, 5, 6,
+		7, 8, 9,
+	}
+	original := m
+	s := float32(2)
+
+	expected := Matrix3{
+		2, 4, 6,
+		8, 10, 12,
+		14, 16, 18,
+	}
+
+	result := m.MulScalar(s)
+
+	assert.Equal(t, expected, result)
+	assert.Equal(t, original, m)
+}
