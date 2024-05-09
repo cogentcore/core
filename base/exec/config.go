@@ -64,9 +64,9 @@ type Config struct { //types:add -setters
 	// Stdin is the reader to use as the standard input.
 	Stdin io.Reader
 
-	// Commands is the writer to write the string representation of the called commands to.
-	// It can be set to nil to disable the writing of the string representations of the called commands.
-	Commands io.Writer
+	// Echo is the writer for echoing the command string to.
+	// It can be set to nil to disable echoing.
+	Echo io.Writer
 }
 
 // major is the config object for [Major] specified through [SetMajor]
@@ -90,12 +90,12 @@ func Major() *Config {
 	}
 	if logx.UserLevel <= slog.LevelInfo {
 		return &Config{
-			Buffer:   true,
-			Env:      map[string]string{},
-			Stdout:   os.Stdout,
-			Stderr:   os.Stderr,
-			Stdin:    os.Stdin,
-			Commands: os.Stdout,
+			Buffer: true,
+			Env:    map[string]string{},
+			Stdout: os.Stdout,
+			Stderr: os.Stderr,
+			Stdin:  os.Stdin,
+			Echo:   os.Stdout,
 		}
 	}
 	return &Config{
@@ -133,12 +133,12 @@ func Minor() *Config {
 	}
 	if logx.UserLevel <= slog.LevelDebug {
 		return &Config{
-			Buffer:   true,
-			Env:      map[string]string{},
-			Stdout:   os.Stdout,
-			Stderr:   os.Stderr,
-			Stdin:    os.Stdin,
-			Commands: os.Stdout,
+			Buffer: true,
+			Env:    map[string]string{},
+			Stdout: os.Stdout,
+			Stderr: os.Stderr,
+			Stdin:  os.Stdin,
+			Echo:   os.Stdout,
 		}
 	}
 	return &Config{
@@ -176,12 +176,12 @@ func Verbose() *Config {
 	}
 	if logx.UserLevel <= slog.LevelWarn {
 		return &Config{
-			Buffer:   true,
-			Env:      map[string]string{},
-			Stdout:   os.Stdout,
-			Stderr:   os.Stderr,
-			Stdin:    os.Stdin,
-			Commands: os.Stdout,
+			Buffer: true,
+			Env:    map[string]string{},
+			Stdout: os.Stdout,
+			Stderr: os.Stderr,
+			Stdin:  os.Stdin,
+			Echo:   os.Stdout,
 		}
 	}
 	return &Config{
@@ -242,11 +242,11 @@ func (c *Config) GetWriter(w io.Writer, err error) io.Writer {
 	return res
 }
 
-// PrintCmd uses [GetWriter] to print the given command to [Config.Commands]
+// PrintCmd uses [GetWriter] to print the given command to [Config.Echo]
 // or [Config.Stderr], based on the given error and the config settings.
 // A newline is automatically inserted.
 func (c *Config) PrintCmd(cmd string, err error) {
-	cmds := c.GetWriter(c.Commands, err)
+	cmds := c.GetWriter(c.Echo, err)
 	if cmds != nil {
 		if c.Dir != "" {
 			cmds.Write([]byte(logx.SuccessColor(c.Dir) + ": "))

@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
+	"cogentcore.org/core/base/sshclient"
 	"github.com/mitchellh/go-homedir"
 	"golang.org/x/tools/imports"
 )
@@ -30,10 +31,13 @@ type Shell struct {
 	Config exec.Config
 
 	// ssh connection, configuration
-	SSH SSHConfig
+	SSH *sshclient.Config
 
-	// SSH is active and should be used for all commands
-	SSHActive bool
+	// collection of ssh clients
+	SSHClients map[string]*sshclient.Client
+
+	// SSHActive is the name of the active SSH client
+	SSHActive string
 
 	// depth of parens at the end of the current line. if 0, was complete.
 	ParenDepth int
@@ -62,7 +66,8 @@ func NewShell() *Shell {
 			Stdin:  os.Stdin,
 		},
 	}
-	sh.SSH.Defaults()
+	sh.SSH = sshclient.NewConfig(&sh.Config)
+	sh.SSHClients = make(map[string]*sshclient.Client)
 	sh.InstallBuiltins()
 	return sh
 }
@@ -71,18 +76,35 @@ func NewShell() *Shell {
 // including terminating any commands that are not running "nohup"
 // in the background.
 func (sh *Shell) Close() {
-	sh.SSHActive = false
-	sh.SSH.Close()
+	sh.CloseSSH()
 	// todo: kill jobs etc
+}
+
+// CloseSSH closes all open ssh client connections
+func (sh *Shell) CloseSSH() {
+	sh.SSHActive = ""
+	for _, cl := range sh.SSHClients {
+		cl.Close()
+	}
+	sh.SSHClients = make(map[string]*sshclient.Client)
+}
+
+// ActiveSSH returns the active ssh client
+func (sh *Shell) ActiveSSH() *sshclient.Client {
+	if sh.SSHActive == "" {
+		return nil
+	}
+	return sh.SSHClients[sh.SSHActive]
 }
 
 // Host returns the name we're running commands on, for interactive prompt
 // this is empty if localhost (default).
 func (sh *Shell) Host() string {
-	if !sh.SSHActive {
+	cl := sh.ActiveSSH()
+	if cl == nil {
 		return ""
 	}
-	return sh.SSH.Host
+	return cl.Host
 }
 
 // TotalDepth returns the sum of any unresolved paren, brace, or bracket depths.

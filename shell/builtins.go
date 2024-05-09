@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"cogentcore.org/core/base/sshclient"
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -97,33 +98,22 @@ func (sh *Shell) CoSSH(args ...string) error {
 	host := ""
 	switch cmd {
 	case "stop":
-		sh.SSHActive = false
+		sh.SSHActive = ""
 		return nil
 	case "close":
-		sh.SSHActive = false
-		sh.SSH.Close()
+		sh.CloseSSH()
 		return nil
-	case "start":
-		if sh.SSH.Client != nil { // already running
-			sh.SSHActive = true
-			return nil
-		}
-		if sh.SSH.Host != "" {
-			host = sh.SSH.Host
-		} else {
-			return fmt.Errorf("cossh: start can only be called if a host name was previously specified")
-		}
 	default:
 		host = args[0]
 	}
-	err := sh.SSH.Connect(host)
+	cl := sshclient.NewClient(sh.SSH)
+	err := cl.Connect(host)
 	if err != nil {
 		return err
 	}
-	// sh.SSH.Stdin = sh.Config.Stdin // this causes it to hang!  do not set.
-	sh.SSH.Stdout = sh.Config.Stdout
-	sh.SSH.Stderr = sh.Config.Stderr
-	sh.SSHActive = true
+	nm := "1" // todo
+	sh.SSHClients[nm] = cl
+	sh.SSHActive = nm
 	return nil
 }
 

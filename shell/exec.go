@@ -20,11 +20,10 @@ import (
 func (sh *Shell) Exec(cmd any, args ...any) {
 	scmd, sargs := sh.execArgs(cmd, args...)
 	if !sh.RunBuiltin(scmd, sargs...) {
-		if sh.SSHActive {
-			// todo: insert cd <curdir>; first!
-			scmd += strings.Join(sargs, " ")
+		cl := sh.ActiveSSH()
+		if cl != nil {
 			fmt.Println("ssh running command:", scmd)
-			sh.AddError(sh.SSH.Run(scmd))
+			sh.AddError(cl.Run(scmd, sargs...))
 		} else {
 			sh.AddError(sh.Config.Run(scmd, sargs...))
 		}
