@@ -140,3 +140,62 @@ func TestMatrix4SetRotationFromEuler(t *testing.T) {
 
 	assert.Equal(t, expected, m)
 }
+
+func TestMatrix4SetOrthographic(t *testing.T) {
+	m := Matrix4{}
+	width := float32(800)
+	height := float32(600)
+	near := float32(0.1)
+	far := float32(100)
+
+	m.SetOrthographic(width, height, near, far)
+
+	expected := Matrix4{
+		0.0025, 0, 0, 0,
+		0, 0.0033333334, 0, 0,
+		0, 0, -0.02002002, 0,
+		0, 0, -1.002002, 1,
+	}
+
+	assert.Equal(t, expected, m)
+}
+
+func TestMatrix4SetVkFrustum(t *testing.T) {
+	m := Matrix4{}
+	left := float32(-1)
+	right := float32(1)
+	bottom := float32(-1)
+	top := float32(1)
+	near := float32(0.1)
+	far := float32(100)
+
+	m.SetVkFrustum(left, right, bottom, top, near, far)
+
+	expected := Matrix4{
+		0.1, 0, 0, 0,
+		0, -0.1, 0, 0,
+		0, 0, -1.001001, -1,
+		0, 0, -0.1001001, 0,
+	}
+
+	assert.Equal(t, expected, m)
+}
+
+func TestMatrix4SetVkPerspective(t *testing.T) {
+	m := Matrix4{}
+	fov := float32(60)
+	aspect := float32(16.0 / 9.0)
+	near := float32(0.1)
+	far := float32(100)
+
+	m.SetVkPerspective(fov, aspect, near, far)
+
+	expected := Matrix4{
+		0.97427857, 0, 0, 0,
+		0, -1.7320509, 0, 0,
+		0, 0, -1.001001, -1,
+		0, 0, -0.1001001, 0,
+	}
+
+	assert.Equal(t, expected, m)
+}
