@@ -20,6 +20,9 @@ func (sh *Shell) Run(cmd any, args ...any) {
 	}
 	sh.Config.StdIO.StackStart()
 	scmd, sargs := sh.ExecArgs(false, cmd, args...)
+	if scmd == "" {
+		return
+	}
 	if !sh.RunBuiltin(scmd, sargs...) {
 		cl := sh.ActiveSSH()
 		if cl != nil {
@@ -41,6 +44,9 @@ func (sh *Shell) Run(cmd any, args ...any) {
 func (sh *Shell) RunErrOK(cmd any, args ...any) {
 	sh.Config.StdIO.StackStart()
 	scmd, sargs := sh.ExecArgs(true, cmd, args...)
+	if scmd == "" {
+		return
+	}
 	if !sh.RunBuiltin(scmd, sargs...) {
 		sh.Config.Run(scmd, sargs...)
 	}
@@ -53,6 +59,9 @@ func (sh *Shell) RunErrOK(cmd any, args ...any) {
 // [exec.Config.Stdout] and [exec.Config.Stderr] appropriately.
 func (sh *Shell) Start(cmd any, args ...any) {
 	scmd, sargs := sh.ExecArgs(false, cmd, args...)
+	if scmd == "" {
+		return
+	}
 	if !sh.RunBuiltin(scmd, sargs...) {
 		excmd, err := sh.Config.Start(scmd, sargs...)
 		if excmd != nil {

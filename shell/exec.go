@@ -38,6 +38,27 @@ func (sh *Shell) ExecArgs(errok bool, cmd any, args ...any) (string, []string) {
 		// todo: filepath.Glob
 		sargs[i] = s
 	}
+	if len(sargs) == 0 {
+		return scmd, sargs
+	}
+	if scmd == "@" {
+		if sargs[0] == "0" {
+			sh.SSHActive = "" // local
+		} else {
+			if _, ok := sh.SSHClients[sargs[0]]; ok {
+				// todo: this needs to be in a stack, popped after command is run
+				sh.SSHActive = sargs[0]
+			} else {
+				sh.HandleArgErr(errok, fmt.Errorf("cosh: ssh connection named: %q not found", sargs[0]))
+			}
+		}
+		if len(sargs) > 1 {
+			scmd = sargs[1]
+			sargs = sargs[2:]
+		} else {
+			return "", nil
+		}
+	}
 	for i := 0; i < len(sargs); i++ {
 		s := sargs[i]
 		switch {

@@ -87,34 +87,50 @@ func (sh *Shell) AddPath(args ...string) error {
 // CoSSH does connects to a server specified in first arg, which is then
 // used for executing any shell commands until called with `stop` or `close`.
 // Should call 'close' when no longer needed.
-// * stop:  goes back to running locally.
-// * start: If a previous connection has been established, resumes running remotely.
 // * close: closes the connection; start after this will re-open.
 func (sh *Shell) CoSSH(args ...string) error {
-	if len(args) != 1 {
-		return fmt.Errorf("cossh: requires one argument")
+	if len(args) < 1 {
+		return fmt.Errorf("cossh: requires at least one argument")
 	}
 	cmd := args[0]
+	var err error
 	host := ""
-	switch cmd {
-	case "stop":
-		sh.SSHActive = ""
-		return nil
-	case "close":
+	name := fmt.Sprintf("%d", 1+len(sh.SSHClients))
+	con := false
+	switch {
+	case cmd == "close":
 		sh.CloseSSH()
 		return nil
+	case cmd == "@" && len(args) == 2:
+		name = args[1]
+	case len(args) == 2:
+		con = true
+		host = args[0]
+		name = args[1]
 	default:
+		con = true
 		host = args[0]
 	}
-	cl := sshclient.NewClient(sh.SSH)
-	err := cl.Connect(host)
-	if err != nil {
-		return err
+	if con {
+		cl := sshclient.NewClient(sh.SSH)
+		err = cl.Connect(host)
+		if err != nil {
+			return err
+		}
+		sh.SSHClients[name] = cl
+		sh.SSHActive = name
+	} else {
+		if name == "0" {
+			sh.SSHActive = ""
+		} else {
+			sh.SSHActive = name
+			cl := sh.ActiveSSH()
+			if cl == nil {
+				err = fmt.Errorf("cosh: ssh connection named: %q not found", name)
+			}
+		}
 	}
-	nm := "1" // todo
-	sh.SSHClients[nm] = cl
-	sh.SSHActive = nm
-	return nil
+	return err
 }
 
 // example alias:
