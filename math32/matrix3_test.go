@@ -101,11 +101,11 @@ func TestMatrix3MulScalar(t *testing.T) {
 func TestMatrix3Determinant(t *testing.T) {
 	m := Matrix3{
 		1, 2, 3,
-		4, 5, 6,
+		4, 15, 6,
 		7, 8, 9,
 	}
 
-	expected := float32(0)
+	expected := float32(-120)
 
 	result := m.Determinant()
 

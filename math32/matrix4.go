@@ -218,7 +218,7 @@ func (m *Matrix4) MulVector3Array(array []float32, start, count int) {
 	}
 }
 
-// Determinant calculates and returns the determinat of this matrix.
+// Determinant calculates and returns the determinant of this matrix.
 func (m *Matrix4) Determinant() float32 {
 	n11 := m[0]
 	n12 := m[4]
