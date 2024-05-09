@@ -6,7 +6,6 @@ package shell
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 )
 
@@ -19,15 +18,12 @@ func (sh *Shell) Run(cmd any, args ...any) {
 		return
 	}
 	sh.Config.StdIO.StackStart()
-	scmd, sargs := sh.ExecArgs(false, cmd, args...)
+	cl, scmd, sargs := sh.ExecArgs(false, cmd, args...)
 	if scmd == "" {
 		return
 	}
 	if !sh.RunBuiltin(scmd, sargs...) {
-		cl := sh.ActiveSSH()
 		if cl != nil {
-			fmt.Println("ssh running command:", scmd)
-			// todo: need to update stdouts
 			sh.AddError(cl.Run(scmd, sargs...))
 		} else {
 			sh.AddError(sh.Config.Run(scmd, sargs...))
@@ -43,12 +39,17 @@ func (sh *Shell) Run(cmd any, args ...any) {
 // [exec.Config.Stdout] and [exec.Config.Stderr] appropriately.
 func (sh *Shell) RunErrOK(cmd any, args ...any) {
 	sh.Config.StdIO.StackStart()
-	scmd, sargs := sh.ExecArgs(true, cmd, args...)
+	cl, scmd, sargs := sh.ExecArgs(true, cmd, args...)
 	if scmd == "" {
 		return
 	}
 	if !sh.RunBuiltin(scmd, sargs...) {
-		sh.Config.Run(scmd, sargs...)
+		// key diff here: don't call AddError
+		if cl != nil {
+			cl.Run(scmd, sargs...)
+		} else {
+			sh.Config.Run(scmd, sargs...)
+		}
 	}
 	sh.Config.StdIO.PopToStart(false)
 }
@@ -58,16 +59,20 @@ func (sh *Shell) RunErrOK(cmd any, args ...any) {
 // If there is any error, it adds it to the shell. It forwards output to
 // [exec.Config.Stdout] and [exec.Config.Stderr] appropriately.
 func (sh *Shell) Start(cmd any, args ...any) {
-	scmd, sargs := sh.ExecArgs(false, cmd, args...)
+	cl, scmd, sargs := sh.ExecArgs(false, cmd, args...)
 	if scmd == "" {
 		return
 	}
 	if !sh.RunBuiltin(scmd, sargs...) {
-		excmd, err := sh.Config.Start(scmd, sargs...)
-		if excmd != nil {
-			sh.Jobs = append(sh.Jobs, excmd) // todo: add files to this
+		if cl != nil {
+			sh.AddError(cl.Start(scmd, sargs...))
+		} else {
+			excmd, err := sh.Config.Start(scmd, sargs...)
+			if excmd != nil {
+				sh.Jobs = append(sh.Jobs, excmd) // todo: add files to this
+			}
+			sh.AddError(err)
 		}
-		sh.AddError(err)
 	}
 }
 

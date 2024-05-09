@@ -10,6 +10,7 @@ import (
 	"slices"
 
 	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/base/sshclient"
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -26,28 +27,40 @@ func (sh *Shell) HandleArgErr(errok bool, err error) error {
 }
 
 // ExecArgs processes the args to given exec command,
-// handling all of the input / outpu redirection and
+// handling all of the input / output redirection and
 // file globbing, homedir expansion, etc.
-func (sh *Shell) ExecArgs(errok bool, cmd any, args ...any) (string, []string) {
+func (sh *Shell) ExecArgs(errok bool, cmd any, args ...any) (*sshclient.Client, string, []string) {
 	scmd := reflectx.ToString(cmd)
-	sargs := make([]string, len(args))
-	for i, a := range args {
-		s := reflectx.ToString(a)
-		s, err := homedir.Expand(s)
-		sh.HandleArgErr(errok, err)
-		// todo: filepath.Glob
-		sargs[i] = s
+	cl := sh.ActiveSSH()
+	if len(args) == 0 {
+		return cl, scmd, nil
 	}
-	if len(sargs) == 0 {
-		return scmd, sargs
+	sargs := make([]string, 0, len(args))
+	var err error
+	for _, a := range args {
+		s := reflectx.ToString(a)
+		if s == "" {
+			continue
+		}
+		if cl == nil {
+			s, err = homedir.Expand(s)
+			sh.HandleArgErr(errok, err)
+			// note: handling globbing in a later pass, to not clutter..
+		} else {
+			if s[0] == '~' {
+				s = "$HOME/" + s[1:]
+			}
+		}
+		sargs = append(sargs, s)
 	}
 	if scmd == "@" {
-		if sargs[0] == "0" {
-			sh.SSHActive = "" // local
+		newHost := ""
+		if sargs[0] == "0" { // local
+			cl = nil
 		} else {
-			if _, ok := sh.SSHClients[sargs[0]]; ok {
-				// todo: this needs to be in a stack, popped after command is run
-				sh.SSHActive = sargs[0]
+			if scl, ok := sh.SSHClients[sargs[0]]; ok {
+				newHost = sargs[0]
+				cl = scl
 			} else {
 				sh.HandleArgErr(errok, fmt.Errorf("cosh: ssh connection named: %q not found", sargs[0]))
 			}
@@ -55,18 +68,24 @@ func (sh *Shell) ExecArgs(errok bool, cmd any, args ...any) (string, []string) {
 		if len(sargs) > 1 {
 			scmd = sargs[1]
 			sargs = sargs[2:]
-		} else {
-			return "", nil
+		} else { // just a ssh switch
+			sh.SSHActive = newHost
+			return nil, "", nil
 		}
 	}
-	for i := 0; i < len(sargs); i++ {
+	for i := 0; i < len(sargs); i++ { // we modify so no range
 		s := sargs[i]
 		switch {
-		case len(s) > 0 && s[0] == '>':
+		case s[0] == '>':
 			sargs = sh.OutToFile(errok, sargs, i)
 		}
 	}
-	return scmd, sargs
+	// do globbing late here so we don't have to wade through everything.
+	// only for local.
+	// probably need to make a copy of sargs
+	// if cl == nil {
+	// }
+	return cl, scmd, sargs
 }
 
 // OutToFile processes the > arg that sends output to a file
