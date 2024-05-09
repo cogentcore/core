@@ -58,7 +58,7 @@ func (cv *ColorView) Config() {
 
 	sf := func(s *styles.Style) {
 		s.Min.Y.Em(2)
-		s.Min.X.Em(1)
+		s.Min.X.Em(6)
 		s.Max.X.Em(40)
 		s.Grow.Set(1, 0)
 	}
