@@ -93,3 +93,36 @@ func TestMatrix2SetString(t *testing.T) {
 		assert.Equal(t, tt.want, *a, tt.str)
 	}
 }
+
+func TestMatrix2String(t *testing.T) {
+	tests := []struct {
+		matrix Matrix2
+		want   string
+	}{
+		{
+			matrix: Identity2(),
+			want:   "none",
+		},
+		{
+			matrix: Matrix2{XX: 1, YX: 2, XY: 3, YY: 4, X0: 5, Y0: 6},
+			want:   "matrix(1,2,3,4,5,6)",
+		},
+		{
+			matrix: Matrix2{XX: 2, XY: 0, YX: 0, YY: 2, X0: 0, Y0: 0},
+			want:   "scale(2,2)",
+		},
+		{
+			matrix: Matrix2{XX: 1, XY: 0, YX: 0, YY: 1, X0: 1, Y0: 2},
+			want:   "translate(1,2)",
+		},
+		{
+			matrix: Matrix2{XX: 2, XY: 0, YX: 0, YY: 2, X0: 1, Y0: 2},
+			want:   "translate(1,2) scale(2,2)",
+		},
+	}
+
+	for _, tt := range tests {
+		got := tt.matrix.String()
+		assert.Equal(t, tt.want, got)
+	}
+}
