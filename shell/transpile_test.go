@@ -35,7 +35,7 @@ func TestTranspile(t *testing.T) {
 		{"go build", `shell.Run("go", "build")`},
 		{"go build()", `go build()`},
 		{"go build &", `shell.Start("go", "build")`},
-		{"[mkdir subdir]", `shell.ExecErrOK("mkdir", "subdir")`},
+		{"[mkdir subdir]", `shell.RunErrOK("mkdir", "subdir")`},
 		{"set something hello-1", `shell.Run("set", "something", "hello-1")`},
 		{"set something = hello", `shell.Run("set", "something", "=", "hello")`},
 		{`set something = "hello"`, `shell.Run("set", "something", "=", "hello")`},
@@ -46,7 +46,7 @@ func TestTranspile(t *testing.T) {
 		{`cat file > test.out`, `shell.Run("cat", "file", ">", "test.out")`},
 		{`cat file | grep -v exe > test.out`, `shell.Run("cat", "file", "|", "grep", "-v", "exe", ">", "test.out")`},
 		{`cd sub; pwd; ls -la`, `shell.Run("cd", "sub"); shell.Run("pwd"); shell.Run("ls", "-la")`},
-		{`cd sub; [mkdir sub]; ls -la`, `shell.Run("cd", "sub"); shell.ExecErrOK("mkdir", "sub"); shell.Run("ls", "-la")`},
+		{`cd sub; [mkdir sub]; ls -la`, `shell.Run("cd", "sub"); shell.RunErrOK("mkdir", "sub"); shell.Run("ls", "-la")`},
 	}
 
 	sh := NewShell()
