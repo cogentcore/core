@@ -53,6 +53,10 @@ type Shell struct {
 
 	// stack of runtime errors
 	Errors []error
+
+	// Cancel, while the interpreter is running, can be called
+	// to stop the code interpreting.
+	Cancel func()
 }
 
 // NewShell returns a new [Shell] with default options.
@@ -104,7 +108,7 @@ func (sh *Shell) Host() string {
 	if cl == nil {
 		return ""
 	}
-	return cl.Host
+	return "@" + sh.SSHActive + ":" + cl.Host
 }
 
 // TotalDepth returns the sum of any unresolved paren, brace, or bracket depths.
@@ -158,15 +162,17 @@ func (sh *Shell) TranspileFile(in string, out string) error {
 	return os.WriteFile(out, res, 0666)
 }
 
-// AddError adds the given error to the error stack if it is non-nil.
-// This is the main way that shell errors are handled. It also prints
-// the error.
+// AddError adds the given error to the error stack if it is non-nil,
+// and calls the Cancel function if set, to stop execution.
+// This is the main way that shell errors are handled.
+// It also prints the error.
 func (sh *Shell) AddError(err error) error {
 	if err == nil {
 		return nil
 	}
 	sh.Errors = append(sh.Errors, err)
 	logx.PrintlnError(err)
+	sh.CancelExecution()
 	return err
 }
 

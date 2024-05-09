@@ -139,11 +139,11 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 		etoks.Add(token.PERIOD)
 		switch {
 		case output && noStop:
-			execTok = etoks.Add(token.IDENT, "OutputNoStop")
+			execTok = etoks.Add(token.IDENT, "OutputErrOK")
 		case output && !noStop:
 			execTok = etoks.Add(token.IDENT, "Output")
 		case !output && noStop:
-			execTok = etoks.Add(token.IDENT, "ExecNoStop")
+			execTok = etoks.Add(token.IDENT, "ExecErrOK")
 		case !output && !noStop:
 			execTok = etoks.Add(token.IDENT, "Exec")
 		}

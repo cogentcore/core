@@ -28,10 +28,6 @@ type Interpreter struct {
 
 	// the yaegi interpreter
 	Interp *interp.Interpreter
-
-	// Cancel, while the interpreter is running, can be called
-	// to stop the code interpreting.
-	Cancel func()
 }
 
 // NewInterpreter returns a new [Interpreter] initialized with the given options.
@@ -53,8 +49,11 @@ func NewInterpreter(options interp.Options) *Interpreter {
 	in.Interp.Use(stdlib.Symbols)
 	in.Interp.Use(interp.Exports{
 		"cogentcore.org/core/shell/shell": map[string]reflect.Value{
-			"Exec":   reflect.ValueOf(in.Shell.Exec),
-			"Output": reflect.ValueOf(in.Shell.Output),
+			"Exec":        reflect.ValueOf(in.Shell.Exec),
+			"ExecErrOK":   reflect.ValueOf(in.Shell.ExecErrOK),
+			"Output":      reflect.ValueOf(in.Shell.Output),
+			"OutputErrOK": reflect.ValueOf(in.Shell.OutputErrOK),
+			"Start":       reflect.ValueOf(in.Shell.Start),
 		},
 	})
 	in.Interp.ImportUsed()
@@ -91,7 +90,8 @@ func (in *Interpreter) Prompt() string {
 func (in *Interpreter) Eval(code string) error {
 	in.Shell.TranspileCode(code)
 	if in.Shell.TotalDepth() == 0 {
-		return in.RunCode()
+		in.RunCode()
+		in.Shell.Errors = nil
 	}
 	return nil
 }
@@ -99,12 +99,15 @@ func (in *Interpreter) Eval(code string) error {
 // RunCode runs the accumulated set of code lines
 // and clears the stack.
 func (in *Interpreter) RunCode() error {
+	if len(in.Shell.Errors) > 0 {
+		return errors.Join(in.Shell.Errors...)
+	}
 	ctx, cancel := context.WithCancel(context.Background())
-	in.Cancel = cancel
+	in.Shell.Cancel = cancel
 	cmd := in.Shell.Code()
 	in.Shell.ResetLines()
 	_, err := in.Interp.EvalWithContext(ctx, cmd)
-	in.Cancel = nil
+	in.Shell.Cancel = nil
 	if err != nil && !errors.Is(err, context.Canceled) {
 		slog.Error(err.Error())
 	}
@@ -129,8 +132,6 @@ func (in *Interpreter) MonitorSignals() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	for {
 		<-c
-		if in.Cancel != nil {
-			in.Cancel()
-		}
+		in.Shell.CancelExecution()
 	}
 }
