@@ -66,13 +66,11 @@ type Shell struct {
 func NewShell() *Shell {
 	sh := &Shell{
 		Config: exec.Config{
-			Dir:    errors.Log1(os.Getwd()),
-			Env:    map[string]string{},
-			Stdout: os.Stdout,
-			Stderr: os.Stderr,
-			Stdin:  os.Stdin,
+			Dir: errors.Log1(os.Getwd()),
+			Env: map[string]string{},
 		},
 	}
+	sh.Config.StdIO.StdAll()
 	sh.SSH = sshclient.NewConfig(&sh.Config)
 	sh.SSHClients = make(map[string]*sshclient.Client)
 	sh.InstallBuiltins()

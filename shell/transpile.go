@@ -89,7 +89,7 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	case t0in == 0: // exec must be IDENT
 		logx.PrintlnDebug("go:   not ident")
 		return sh.TranspileGo(toks)
-	case t0in > 0 && n > t0in && (t1in > 0 || t1pn > 0 || toks[t1idx].Tok == token.SUB || toks[t1idx].Tok == token.STRING || toks[t1idx].Tok == token.LBRACE):
+	case t0in > 0 && n > t0in && (t1in > 0 || t1pn > 0 || toks[t1idx].Tok == token.SUB || toks[t1idx].Tok == token.DEC || toks[t1idx].Tok == token.STRING || toks[t1idx].Tok == token.LBRACE):
 		logx.PrintlnDebug("exec: word non-go...")
 		return sh.TranspileExec(toks, false)
 	default:
@@ -181,13 +181,13 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 				i += rb
 			}
 			etoks.Add(token.COMMA)
-		case tok.Tok == token.SUB && i < n-1: // option
+		case (tok.Tok == token.SUB || tok.Tok == token.DEC) && i < n-1: // option
 			nid, nin := toks[i+1:].ExecIdent()
 			if nin > 0 {
-				etoks.Add(token.STRING, `"-`+EscapeQuotes(nid)+`"`)
+				etoks.Add(token.STRING, `"`+tok.String()+EscapeQuotes(nid)+`"`)
 				i += nin
 			} else {
-				etoks.Add(token.STRING, `"-`+EscapeQuotes(toks[i+1].Str)+`"`)
+				etoks.Add(token.STRING, `"`+tok.String()+EscapeQuotes(toks[i+1].Str)+`"`)
 				i++
 			}
 			etoks.Add(token.COMMA)
@@ -195,6 +195,15 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 			etoks.Add(token.STRING, `"`+tid+`"`) // note: already been escaped
 			i += (tin - 1)
 			etoks.Add(token.COMMA)
+		case tok.Tok == token.GTR || tok.Tok == token.SHR:
+			if i < n-1 && toks[i+1].Tok == token.AND {
+				etoks.Add(token.STRING, AddQuotes(tok.String()+"&"))
+				etoks.Add(token.COMMA)
+				i++ // skip and
+			} else {
+				etoks.Add(token.STRING, AddQuotes(tok.String()))
+				etoks.Add(token.COMMA)
+			}
 		case tok.Tok == token.AND:
 			bgJob = true
 		case tok.Tok == token.RBRACK:

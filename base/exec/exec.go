@@ -65,8 +65,8 @@ func (c *Config) run(start bool, cmd string, args ...string) (excmd *exec.Cmd, r
 		cm.Stderr = ebuf
 		cm.Stdout = obuf
 	} else {
-		cm.Stderr = c.Stderr
-		cm.Stdout = c.Stdout
+		cm.Stderr = c.StdIO.Err
+		cm.Stdout = c.StdIO.Out
 	}
 	// need to do now because we aren't buffering, or we are guaranteed to print them
 	// regardless of whether there is an error anyway, so we should print it now so
@@ -75,7 +75,7 @@ func (c *Config) run(start bool, cmd string, args ...string) (excmd *exec.Cmd, r
 		c.PrintCmd(cmd+" "+strings.Join(args, " "), err)
 	}
 
-	cm.Stdin = c.Stdin
+	cm.Stdin = c.StdIO.In
 	cm.Dir = c.Dir
 
 	if !c.PrintOnly {
@@ -101,13 +101,13 @@ func (c *Config) run(start bool, cmd string, args ...string) (excmd *exec.Cmd, r
 		if c.Echo == nil {
 			c.PrintCmd(cmd+" "+strings.Join(args, " "), err)
 		}
-		sout := c.GetWriter(c.Stdout, err)
+		sout := c.GetWriter(c.StdIO.Out, err)
 		if sout != nil {
 			sout.Write(obuf.Bytes())
 		}
 		estr := ebuf.String()
-		if estr != "" && c.Stderr != nil {
-			c.Stderr.Write([]byte(logx.ErrorColor(estr)))
+		if estr != "" && c.StdIO.Err != nil {
+			c.StdIO.Err.Write([]byte(logx.ErrorColor(estr)))
 		}
 	}
 	return excmd, CmdRan(err), ExitStatus(err), err

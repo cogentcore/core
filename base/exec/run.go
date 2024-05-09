@@ -37,11 +37,11 @@ func (c *Config) Start(cmd string, args ...string) (*exec.Cmd, error) {
 func (c *Config) Output(cmd string, args ...string) (string, error) {
 	// need to use buf to capture output
 	buf := &bytes.Buffer{}
-	c.PushStdout(buf)
+	c.StdIO.PushOut(buf)
 	_, _, err := c.exec(false, cmd, args...)
-	c.PopStdout()
-	if c.Stdout != nil {
-		c.Stdout.Write(buf.Bytes())
+	c.StdIO.PopOut()
+	if c.StdIO.Out != nil {
+		c.StdIO.Out.Write(buf.Bytes())
 	}
 	return strings.TrimSuffix(buf.String(), "\n"), err
 }

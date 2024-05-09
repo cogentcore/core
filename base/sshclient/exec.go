@@ -64,8 +64,8 @@ func (cl *Client) run(ses *ssh.Session, cmd string, args ...string) (ran bool, c
 		ses.Stderr = ebuf
 		ses.Stdout = obuf
 	} else {
-		ses.Stderr = cl.Stderr
-		ses.Stdout = cl.Stdout
+		ses.Stderr = cl.StdIO.Err
+		ses.Stdout = cl.StdIO.Out
 	}
 	// need to do now because we aren't buffering, or we are guaranteed to print them
 	// regardless of whether there is an error anyway, so we should print it now so
@@ -74,7 +74,7 @@ func (cl *Client) run(ses *ssh.Session, cmd string, args ...string) (ran bool, c
 		cl.PrintCmd(cmd+" "+strings.Join(args, " "), err)
 	}
 
-	// ses.Stdin = cl.Stdin
+	// ses.Stdin = cl.StdIO.in
 	// todo: add cd command first.
 	// ses.Dir = cl.Dir
 
@@ -98,13 +98,13 @@ func (cl *Client) run(ses *ssh.Session, cmd string, args ...string) (ran bool, c
 		if cl.Echo == nil {
 			cl.PrintCmd(cmds, err)
 		}
-		sout := cl.GetWriter(cl.Stdout, err)
+		sout := cl.GetWriter(cl.StdIO.Out, err)
 		if sout != nil {
 			sout.Write(obuf.Bytes())
 		}
 		estr := ebuf.String()
-		if estr != "" && cl.Stderr != nil {
-			cl.Stderr.Write([]byte(logx.ErrorColor(estr)))
+		if estr != "" && cl.StdIO.Err != nil {
+			cl.StdIO.Err.Write([]byte(logx.ErrorColor(estr)))
 		}
 	}
 	return exec.CmdRan(err), exec.ExitStatus(err), err

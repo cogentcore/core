@@ -135,9 +135,9 @@ func (cl *Client) NewSession() (*ssh.Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	ses.Stdin = nil // cl.Stdin // todo: cannot set this like this!
-	ses.Stdout = cl.Stdout
-	ses.Stderr = cl.Stderr
+	ses.Stdin = nil // cl.StdIO.In // todo: cannot set this like this!
+	ses.Stdout = cl.StdIO.Out
+	ses.Stderr = cl.StdIO.Err
 	return ses, nil
 }
 

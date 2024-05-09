@@ -37,13 +37,13 @@ func NewInterpreter(options interp.Options) *Interpreter {
 	in := &Interpreter{}
 	in.Shell = shell.NewShell()
 	if options.Stdin != nil {
-		in.Shell.Config.Stdin = options.Stdin
+		in.Shell.Config.StdIO.In = options.Stdin
 	}
 	if options.Stdout != nil {
-		in.Shell.Config.Stdout = options.Stdout
+		in.Shell.Config.StdIO.Out = options.Stdout
 	}
 	if options.Stderr != nil {
-		in.Shell.Config.Stderr = options.Stderr
+		in.Shell.Config.StdIO.Err = options.Stderr
 	}
 	in.Interp = interp.New(options)
 	in.Interp.Use(stdlib.Symbols)

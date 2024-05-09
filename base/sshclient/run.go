@@ -25,11 +25,11 @@ func (cl *Client) Start(cmd string, args ...string) error {
 // Output runs the command and returns the text from stdout.
 func (cl *Client) Output(cmd string, args ...string) (string, error) {
 	buf := &bytes.Buffer{}
-	cl.PushStdout(buf)
+	cl.StdIO.PushOut(buf)
 	err := cl.Run(cmd, args...)
-	cl.PopStdout()
-	if cl.Stdout != nil {
-		cl.Stdout.Write(buf.Bytes())
+	cl.StdIO.PopOut()
+	if cl.StdIO.Out != nil {
+		cl.StdIO.Out.Write(buf.Bytes())
 	}
 	return strings.TrimSuffix(buf.String(), "\n"), err
 }

@@ -18,7 +18,8 @@ func (sh *Shell) Run(cmd any, args ...any) {
 	if len(sh.Errors) > 0 {
 		return
 	}
-	scmd, sargs, files := sh.ExecArgs(false, cmd, args...)
+	sh.Config.StdIO.StackStart()
+	scmd, sargs := sh.ExecArgs(false, cmd, args...)
 	if !sh.RunBuiltin(scmd, sargs...) {
 		cl := sh.ActiveSSH()
 		if cl != nil {
@@ -29,7 +30,7 @@ func (sh *Shell) Run(cmd any, args ...any) {
 			sh.AddError(sh.Config.Run(scmd, sargs...))
 		}
 	}
-	sh.CloseFiles(files)
+	sh.Config.StdIO.PopToStart(false) // not err
 }
 
 // RunErrOK executes the given command string, waiting for the command to finish,
@@ -38,11 +39,12 @@ func (sh *Shell) Run(cmd any, args ...any) {
 // If there is any error, it adds it to the shell. It forwards output to
 // [exec.Config.Stdout] and [exec.Config.Stderr] appropriately.
 func (sh *Shell) RunErrOK(cmd any, args ...any) {
-	scmd, sargs, files := sh.ExecArgs(true, cmd, args...)
+	sh.Config.StdIO.StackStart()
+	scmd, sargs := sh.ExecArgs(true, cmd, args...)
 	if !sh.RunBuiltin(scmd, sargs...) {
 		sh.Config.Run(scmd, sargs...)
 	}
-	sh.CloseFiles(files)
+	sh.Config.StdIO.PopToStart(false)
 }
 
 // Start starts the given command string without waiting for it to finish,
@@ -50,7 +52,7 @@ func (sh *Shell) RunErrOK(cmd any, args ...any) {
 // If there is any error, it adds it to the shell. It forwards output to
 // [exec.Config.Stdout] and [exec.Config.Stderr] appropriately.
 func (sh *Shell) Start(cmd any, args ...any) {
-	scmd, sargs, _ := sh.ExecArgs(false, cmd, args...)
+	scmd, sargs := sh.ExecArgs(false, cmd, args...)
 	if !sh.RunBuiltin(scmd, sargs...) {
 		excmd, err := sh.Config.Start(scmd, sargs...)
 		if excmd != nil {
@@ -65,9 +67,9 @@ func (sh *Shell) Start(cmd any, args ...any) {
 // the stdout as a string and forwards stderr to [exec.Config.Stderr] appropriately.
 func (sh *Shell) Output(cmd any, args ...any) string {
 	buf := &bytes.Buffer{}
-	sh.Config.PushStdout(buf)
+	sh.Config.StdIO.PushOut(buf)
 	sh.Run(cmd, args...)
-	sh.Config.PopStdout()
+	sh.Config.StdIO.PopOut()
 	return strings.TrimSuffix(buf.String(), "\n")
 }
 
@@ -76,9 +78,9 @@ func (sh *Shell) Output(cmd any, args ...any) string {
 // the stdout as a string and forwards stderr to [exec.Config.Stderr] appropriately.
 func (sh *Shell) OutputErrOK(cmd any, args ...any) string {
 	buf := &bytes.Buffer{}
-	sh.Config.PushStdout(buf)
+	sh.Config.StdIO.PushOut(buf)
 	sh.RunErrOK(cmd, args...)
-	sh.Config.PopStdout()
+	sh.Config.StdIO.PopOut()
 	return strings.TrimSuffix(buf.String(), "\n")
 }
 
