@@ -303,6 +303,7 @@ func (m Matrix3) Transpose() Matrix3 {
 // the diagonal components as a vector.
 func (m *Matrix3) ScaleCols(v Vector3) *Matrix3 {
 	nm := &Matrix3{}
+	*nm = *m
 	nm.SetScaleCols(v)
 	return nm
 }
@@ -335,7 +336,7 @@ func (m *Matrix3) SetNormalMatrix(src *Matrix4) error {
 	return err
 }
 
-// SetRotationFromQuat sets this matrix as a rotation matrix from the specified quaternion.
+// SetRotationFromQuat sets this matrix as a rotation matrix from the specified [Quat].
 func (m *Matrix3) SetRotationFromQuat(q Quat) {
 	x := q.X
 	y := q.Y

@@ -97,3 +97,90 @@ func TestMatrix3MulScalar(t *testing.T) {
 	assert.Equal(t, expected, result)
 	assert.Equal(t, original, m)
 }
+
+func TestMatrix3Determinant(t *testing.T) {
+	m := Matrix3{
+		1, 2, 3,
+		4, 5, 6,
+		7, 8, 9,
+	}
+
+	expected := float32(0)
+
+	result := m.Determinant()
+
+	assert.Equal(t, expected, result)
+}
+
+func TestMatrix3ScaleCols(t *testing.T) {
+	m := &Matrix3{
+		1, 2, 3,
+		4, 5, 6,
+		7, 8, 9,
+	}
+	v := Vector3{2, 3, 4}
+
+	expected := &Matrix3{
+		2, 4, 6,
+		12, 15, 18,
+		28, 32, 36,
+	}
+
+	result := m.ScaleCols(v)
+
+	assert.Equal(t, expected, result)
+	assert.NotEqual(t, m, result)
+}
+
+func TestMatrix3SetNormalMatrix(t *testing.T) {
+	src := &Matrix4{
+		12, 2, 3, 4,
+		5, 60, 7, 8,
+		9, 10, 11, 12,
+		13, 14, 15, 16,
+	}
+
+	m := &Matrix3{}
+	err := m.SetNormalMatrix(src)
+
+	expected := Matrix3{
+		0.104870245, 0.0014219694, -0.087095626,
+		0.0014219694, 0.018663349, -0.018130109,
+		-0.029505864, -0.012264486, 0.12619978,
+	}
+
+	assert.Equal(t, expected, *m)
+	assert.NoError(t, err)
+}
+
+func TestMatrix3SetNormalMatrixError(t *testing.T) {
+	src := &Matrix4{
+		1, 2, 3, 4,
+		5, 6, 7, 8,
+		9, 10, 11, 12,
+		13, 14, 15, 16,
+	}
+
+	m := &Matrix3{}
+	err := m.SetNormalMatrix(src)
+
+	expected := Identity3()
+
+	assert.Equal(t, expected, *m)
+	assert.Error(t, err)
+}
+
+func TestMatrix3SetRotationFromQuat(t *testing.T) {
+	q := Quat{X: 0.5, Y: 0.5, Z: 0.5, W: 0.5}
+
+	m := &Matrix3{}
+	m.SetRotationFromQuat(q)
+
+	expected := &Matrix3{
+		0, 1, 0,
+		0, 0, 1,
+		1, 0, 0,
+	}
+
+	assert.Equal(t, expected, m)
+}
