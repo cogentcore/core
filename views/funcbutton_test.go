@@ -20,3 +20,10 @@ func TestCallFunc(t *testing.T) {
 	CallFunc(tree.NewRoot[*core.Frame](), myFunc)
 	assert.True(t, called)
 }
+
+func TestCallFuncArgs(t *testing.T) {
+	b := core.NewBody()
+	myFunc := func(a int, b string) {}
+	CallFunc(b, myFunc)
+	b.AssertRenderScreen(t, "func-button/args")
+}
