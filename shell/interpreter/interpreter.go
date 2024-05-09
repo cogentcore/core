@@ -49,8 +49,8 @@ func NewInterpreter(options interp.Options) *Interpreter {
 	in.Interp.Use(stdlib.Symbols)
 	in.Interp.Use(interp.Exports{
 		"cogentcore.org/core/shell/shell": map[string]reflect.Value{
-			"Exec":        reflect.ValueOf(in.Shell.Exec),
-			"ExecErrOK":   reflect.ValueOf(in.Shell.ExecErrOK),
+			"Run":         reflect.ValueOf(in.Shell.Run),
+			"RunErrOK":    reflect.ValueOf(in.Shell.RunErrOK),
 			"Output":      reflect.ValueOf(in.Shell.Output),
 			"OutputErrOK": reflect.ValueOf(in.Shell.OutputErrOK),
 			"Start":       reflect.ValueOf(in.Shell.Start),

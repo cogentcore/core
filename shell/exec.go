@@ -13,11 +13,11 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
-// Exec executes the given command string, waiting for the command to finish,
+// Run executes the given command string, waiting for the command to finish,
 // handling the given arguments appropriately.
 // If there is any error, it adds it to the shell, and triggers CancelExecution.
 // It forwards output to [exec.Config.Stdout] and [exec.Config.Stderr] appropriately.
-func (sh *Shell) Exec(cmd any, args ...any) {
+func (sh *Shell) Run(cmd any, args ...any) {
 	if len(sh.Errors) > 0 {
 		return
 	}
@@ -33,12 +33,12 @@ func (sh *Shell) Exec(cmd any, args ...any) {
 	}
 }
 
-// ExecErrOK executes the given command string, waiting for the command to finish,
+// RunErrOK executes the given command string, waiting for the command to finish,
 // handling the given arguments appropriately.
 // It does not stop execution if there is an error.
 // If there is any error, it adds it to the shell. It forwards output to
 // [exec.Config.Stdout] and [exec.Config.Stderr] appropriately.
-func (sh *Shell) ExecErrOK(cmd any, args ...any) {
+func (sh *Shell) RunErrOK(cmd any, args ...any) {
 	scmd, sargs := sh.execArgs(cmd, args...)
 	if !sh.RunBuiltin(scmd, sargs...) {
 		sh.Config.Run(scmd, sargs...)
@@ -52,7 +52,11 @@ func (sh *Shell) ExecErrOK(cmd any, args ...any) {
 func (sh *Shell) Start(cmd any, args ...any) {
 	scmd, sargs := sh.execArgs(cmd, args...)
 	if !sh.RunBuiltin(scmd, sargs...) {
-		sh.AddError(sh.Config.Start(scmd, sargs...))
+		excmd, err := sh.Config.Start(scmd, sargs...)
+		if excmd != nil {
+			sh.Jobs = append(sh.Jobs, excmd)
+		}
+		sh.AddError(err)
 	}
 }
 
@@ -60,15 +64,10 @@ func (sh *Shell) Start(cmd any, args ...any) {
 // appropriately. If there is any error, it adds it to the shell. It returns
 // the stdout as a string and forwards stderr to [exec.Config.Stderr] appropriately.
 func (sh *Shell) Output(cmd any, args ...any) string {
-	scmd, sargs := sh.execArgs(cmd, args...)
-	oldStdout := sh.Config.Stdout
 	buf := &bytes.Buffer{}
-	sh.Config.Stdout = buf
-	if !sh.RunBuiltin(scmd, sargs...) {
-		_, err := sh.Config.Exec(scmd, sargs...)
-		sh.AddError(err)
-	}
-	sh.Config.Stdout = oldStdout
+	sh.Config.PushStdout(buf)
+	sh.Run(cmd, args...)
+	sh.Config.PopStdout()
 	return strings.TrimSuffix(buf.String(), "\n")
 }
 
@@ -76,14 +75,10 @@ func (sh *Shell) Output(cmd any, args ...any) string {
 // appropriately. If there is any error, it adds it to the shell. It returns
 // the stdout as a string and forwards stderr to [exec.Config.Stderr] appropriately.
 func (sh *Shell) OutputErrOK(cmd any, args ...any) string {
-	scmd, sargs := sh.execArgs(cmd, args...)
-	oldStdout := sh.Config.Stdout
 	buf := &bytes.Buffer{}
-	sh.Config.Stdout = buf
-	if !sh.RunBuiltin(scmd, sargs...) {
-		sh.Config.Exec(scmd, sargs...)
-	}
-	sh.Config.Stdout = oldStdout
+	sh.Config.PushStdout(buf)
+	sh.RunErrOK(cmd, args...)
+	sh.Config.PopStdout()
 	return strings.TrimSuffix(buf.String(), "\n")
 }
 

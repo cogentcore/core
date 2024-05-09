@@ -22,6 +22,7 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/base/logx"
+	"cogentcore.org/core/base/stack"
 )
 
 // Config contains the configuration information that
@@ -67,6 +68,10 @@ type Config struct { //types:add -setters
 	// Echo is the writer for echoing the command string to.
 	// It can be set to nil to disable echoing.
 	Echo io.Writer
+
+	OutStack stack.Stack[io.Writer]
+	ErrStack stack.Stack[io.Writer]
+	InStack  stack.Stack[io.Reader]
 }
 
 // major is the config object for [Major] specified through [SetMajor]
@@ -264,4 +269,55 @@ func PrintCmd(cmd string, err error) {
 func (c *Config) SetEnv(key, val string) *Config {
 	c.Env[key] = val
 	return c
+}
+
+// PushStdout pushes the new io.Writer as the current
+// Stdout, saving the previous one on a stack.
+// Use PopStdout to restore previous.
+func (c *Config) PushStdout(out io.Writer) {
+	c.OutStack.Push(c.Stdout)
+	c.Stdout = out
+}
+
+// PopStdout restores previous io.Writer as Stdout
+// from the stack, saved during PushStdout,
+// returning the one that was previously current.
+func (c *Config) PopStdout() io.Writer {
+	cur := c.Stdout
+	c.Stdout = c.OutStack.Pop()
+	return cur
+}
+
+// PushStderr pushes the new io.Writer as the current
+// Stderr, saving the previous one on a stack.
+// Use PopStderr to restore previous.
+func (c *Config) PushStderr(err io.Writer) {
+	c.ErrStack.Push(c.Stderr)
+	c.Stderr = err
+}
+
+// PopStderr restores previous io.Writer as Stderr
+// from the stack, saved during PushStderr,
+// returning the one that was previously current.
+func (c *Config) PopStderr() io.Writer {
+	cur := c.Stderr
+	c.Stderr = c.ErrStack.Pop()
+	return cur
+}
+
+// PushStdin pushes the new io.Reader as the current
+// Stdin, saving the previous one on a stack.
+// Use PopStdin to restore previous.
+func (c *Config) PushStdin(in io.Reader) {
+	c.InStack.Push(c.Stdin)
+	c.Stdin = in
+}
+
+// PopStdin restores previous io.Reader as Stdin
+// from the stack, saved during PushStdin,
+// returning the one that was previously current.
+func (c *Config) PopStdin() io.Reader {
+	cur := c.Stdin
+	c.Stdin = c.InStack.Pop()
+	return cur
 }

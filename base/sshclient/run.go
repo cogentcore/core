@@ -12,7 +12,7 @@ import (
 // Run runs given command, using config input / outputs.
 // Must have already made a successful Connect.
 func (cl *Client) Run(cmd string, args ...string) error {
-	_, err := cl.Exec(cmd, args...)
+	_, err := cl.exec(cmd, args...)
 	return err
 }
 
@@ -24,12 +24,10 @@ func (cl *Client) Start(cmd string, args ...string) error {
 
 // Output runs the command and returns the text from stdout.
 func (cl *Client) Output(cmd string, args ...string) (string, error) {
-	oldStdout := cl.Stdout
-	// need to use buf to capture output
 	buf := &bytes.Buffer{}
-	cl.Stdout = buf
-	_, err := cl.Exec(cmd, args...)
-	cl.Stdout = oldStdout
+	cl.PushStdout(buf)
+	err := cl.Run(cmd, args...)
+	cl.PopStdout()
 	if cl.Stdout != nil {
 		cl.Stdout.Write(buf.Bytes())
 	}

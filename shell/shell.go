@@ -54,6 +54,9 @@ type Shell struct {
 	// stack of runtime errors
 	Errors []error
 
+	// Jobs is a slice of commands running in the background (via Start instead of Run)
+	Jobs []*exec.Cmd
+
 	// Cancel, while the interpreter is running, can be called
 	// to stop the code interpreting.
 	Cancel func()

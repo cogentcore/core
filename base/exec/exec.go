@@ -18,8 +18,12 @@ import (
 	"cogentcore.org/core/base/logx"
 )
 
-// Exec executes the command, piping its stdout and stderr to the config
-// writers. If the command fails, it will return an error with the command output.
+// Cmd is a type alias for [exec.Cmd].
+type Cmd = exec.Cmd
+
+// exec executes the command, piping its stdout and stderr to the config
+// writers. If start, uses cmd.Start, else.Run.
+// If the command fails, it will return an error with the command output.
 // The given cmd and args may include references
 // to environment variables in $FOO format, in which case these will be
 // expanded before the command is run.
@@ -27,7 +31,7 @@ import (
 // Ran reports if the command ran (rather than was not found or not executable).
 // Code reports the exit code the command returned if it ran. If err == nil, ran
 // is always true and code is always 0.
-func (c *Config) Exec(cmd string, args ...string) (ran bool, err error) {
+func (c *Config) exec(start bool, cmd string, args ...string) (excmd *exec.Cmd, ran bool, err error) {
 	expand := func(s string) string {
 		s2, ok := c.Env[s]
 		if ok {
@@ -39,20 +43,15 @@ func (c *Config) Exec(cmd string, args ...string) (ran bool, err error) {
 	for i := range args {
 		args[i] = os.Expand(args[i], expand)
 	}
-	ran, code, err := c.run(cmd, args...)
+	excmd, ran, code, err := c.run(start, cmd, args...)
 	_ = code
 	if err == nil {
-		return true, nil
+		return excmd, true, nil
 	}
-	return ran, fmt.Errorf(`failed to run "%s %s: %v"`, cmd, strings.Join(args, " "), err)
+	return excmd, ran, fmt.Errorf(`failed to run "%s %s: %v"`, cmd, strings.Join(args, " "), err)
 }
 
-// Exec calls [Config.Exec] on [Major]
-func Exec(cmd string, args ...string) (ran bool, err error) {
-	return Major().Exec(cmd, args...)
-}
-
-func (c *Config) run(cmd string, args ...string) (ran bool, code int, err error) {
+func (c *Config) run(start bool, cmd string, args ...string) (excmd *exec.Cmd, ran bool, code int, err error) {
 	cm := exec.Command(cmd, args...)
 	cm.Env = os.Environ()
 	for k, v := range c.Env {
@@ -80,7 +79,12 @@ func (c *Config) run(cmd string, args ...string) (ran bool, code int, err error)
 	cm.Dir = c.Dir
 
 	if !c.PrintOnly {
-		err = cm.Run()
+		if start {
+			err = cm.Start()
+			excmd = cm
+		} else {
+			err = cm.Run()
+		}
 
 		// we must call InitColor after calling a system command
 		// TODO(kai): maybe figure out a better solution to this
@@ -106,7 +110,7 @@ func (c *Config) run(cmd string, args ...string) (ran bool, code int, err error)
 			c.Stderr.Write([]byte(logx.ErrorColor(estr)))
 		}
 	}
-	return CmdRan(err), ExitStatus(err), err
+	return excmd, CmdRan(err), ExitStatus(err), err
 }
 
 // CmdRan examines the error to determine if it was generated as a result of a

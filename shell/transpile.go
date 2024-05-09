@@ -143,9 +143,9 @@ func (sh *Shell) TranspileExec(toks Tokens, output bool) Tokens {
 		case output && !noStop:
 			execTok = etoks.Add(token.IDENT, "Output")
 		case !output && noStop:
-			execTok = etoks.Add(token.IDENT, "ExecErrOK")
+			execTok = etoks.Add(token.IDENT, "RunErrOK")
 		case !output && !noStop:
-			execTok = etoks.Add(token.IDENT, "Exec")
+			execTok = etoks.Add(token.IDENT, "Run")
 		}
 		etoks.Add(token.LPAREN)
 	}

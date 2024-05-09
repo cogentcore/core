@@ -10,29 +10,36 @@ package exec
 
 import (
 	"bytes"
+	"os/exec"
 	"strings"
 )
 
-// Run runs the given command using the given configuration information and arguments.
+// Run runs the given command using the given
+// configuration information and arguments,
+// waiting for it to complete before returning.
 func (c *Config) Run(cmd string, args ...string) error {
-	_, err := c.Exec(cmd, args...)
+	_, _, err := c.exec(false, cmd, args...)
 	return err
 }
 
-// Start starts the given command using the given configuration information and arguments.
-func (c *Config) Start(cmd string, args ...string) error {
-	// todo: implement this!
-	return nil
+// Start starts the given command using the given
+// configuration information and arguments,
+// just starting the command but not waiting for it to finish.
+// Returns the exec.Cmd command which can be used to kill the
+// command later, if necessary.  In general calling code should
+// keep track of these commands and manage them appropriately.
+func (c *Config) Start(cmd string, args ...string) (*exec.Cmd, error) {
+	excmd, _, err := c.exec(true, cmd, args...)
+	return excmd, err
 }
 
 // Output runs the command and returns the text from stdout.
 func (c *Config) Output(cmd string, args ...string) (string, error) {
-	oldStdout := c.Stdout
 	// need to use buf to capture output
 	buf := &bytes.Buffer{}
-	c.Stdout = buf
-	_, err := c.Exec(cmd, args...)
-	c.Stdout = oldStdout
+	c.PushStdout(buf)
+	_, _, err := c.exec(false, cmd, args...)
+	c.PopStdout()
 	if c.Stdout != nil {
 		c.Stdout.Write(buf.Bytes())
 	}
@@ -42,6 +49,11 @@ func (c *Config) Output(cmd string, args ...string) (string, error) {
 // Run calls [Config.Run] on [Major]
 func Run(cmd string, args ...string) error {
 	return Major().Run(cmd, args...)
+}
+
+// Start calls [Config.Start] on [Major]
+func Start(cmd string, args ...string) (*exec.Cmd, error) {
+	return Major().Start(cmd, args...)
 }
 
 // Output calls [Config.Output] on [Major]

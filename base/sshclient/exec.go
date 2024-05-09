@@ -24,7 +24,7 @@ import (
 // Ran reports if the command ran (rather than was not found or not executable).
 // Code reports the exit code the command returned if it ran. If err == nil, ran
 // is always true and code is always 0.
-func (cl *Client) Exec(cmd string, args ...string) (ran bool, err error) {
+func (cl *Client) exec(cmd string, args ...string) (ran bool, err error) {
 	ses, err := cl.NewSession()
 	if err != nil {
 		return
