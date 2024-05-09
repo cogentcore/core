@@ -119,6 +119,8 @@ func (sh *Shell) OutToFile(errok bool, sargs []string, i int) []string {
 		sh.HandleArgErr(errok, fmt.Errorf("cosh: no output file specified"))
 		return sargs
 	}
+	// todo: process @n: expressions here -- if @0 then it is the same
+	// if @1, then need to launch an ssh "cat >[>] file" with pipe from command as stdin
 	var f *os.File
 	var err error
 	if appn {
