@@ -415,6 +415,8 @@ func (a *Matrix2) SetString(str string) error {
 			} else {
 				*a = a.Skew(0, pts[0])
 			}
+		default:
+			return fmt.Errorf("unknown command %q", cmd)
 		}
 		if nxt == "" {
 			break
