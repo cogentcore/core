@@ -20,6 +20,8 @@ func TestHTML(t *testing.T) {
 		"h5":     `<h5>Test</h5>`,
 		"h6":     `<h6>Test</h6>`,
 		"p":      `<p>Test</p>`,
+		"ol":     `<ol><li>Test</li></ol>`,
+		"ul":     `<ul><li>Test</li></ul>`,
 		"button": `<button>Test</button>`,
 		"input":  `<input value="Test">`,
 	}
