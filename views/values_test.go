@@ -49,6 +49,9 @@ func TestValues(t *testing.T) {
 		{"map-inline", map[string]int{"Go": 1, "C++": 3}, ""},
 		{"slice", []int{1, 3, 5, 7, 9}, ""},
 		{"slice-inline", []int{1, 3, 5}, ""},
+		{"struct", &morePerson{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true}, ""},
+		{"struct-inline", &person{Name: "Go", Age: 35}, ""},
+		{"table", &[]language{{"Go", 10}, {"Python", 5}}, ""},
 	}
 	for _, value := range values {
 		b := core.NewBody()

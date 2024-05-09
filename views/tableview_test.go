@@ -10,17 +10,19 @@ import (
 	"cogentcore.org/core/core"
 )
 
+type language struct {
+	Name   string
+	Rating int
+}
+
 func TestTableView(t *testing.T) {
 	b := core.NewBody()
-	sl := make([]myStruct, 10)
-	for i := range sl {
-		sl[i] = myStruct{
-			Name:    "Person",
-			Age:     30 - i,
-			Rating:  1.6 * float32(i),
-			LikesGo: i%2 == 0,
-		}
-	}
-	NewTableView(b).SetSlice(&sl)
-	b.AssertRender(t, "tableview/basic")
+	NewTableView(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+	b.AssertRender(t, "table-view/basic")
+}
+
+func TestTableViewReadOnly(t *testing.T) {
+	b := core.NewBody()
+	NewTableView(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
+	b.AssertRender(t, "table-view/read-only")
 }

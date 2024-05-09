@@ -12,6 +12,6 @@ import (
 
 func TestStructViewInline(t *testing.T) {
 	b := core.NewBody()
-	NewStructViewInline(b).SetStruct(myStructValue)
-	b.AssertRender(t, "structviewinline/basic")
+	NewStructViewInline(b).SetStruct(&person{Name: "Go", Age: 35})
+	b.AssertRender(t, "struct-view-inline/basic")
 }

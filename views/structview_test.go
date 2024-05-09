@@ -10,17 +10,27 @@ import (
 	"cogentcore.org/core/core"
 )
 
-type myStruct struct {
-	Name    string `default:"Gopher"`
-	Age     int    `default:"40"`
-	Rating  float32
-	LikesGo bool `default:"true"`
+type person struct {
+	Name string
+	Age  int
 }
 
-var myStructValue = &myStruct{Name: "Gopher", Age: 30, Rating: 7.3}
+type morePerson struct {
+	Name        string
+	Age         int
+	Job         string
+	LikesGo     bool
+	LikesPython bool
+}
 
 func TestStructView(t *testing.T) {
 	b := core.NewBody()
-	NewStructView(b).SetStruct(myStructValue)
-	b.AssertRender(t, "structview/basic")
+	NewStructView(b).SetStruct(&person{Name: "Go", Age: 35})
+	b.AssertRender(t, "struct-view/basic")
+}
+
+func TestStructViewReadOnly(t *testing.T) {
+	b := core.NewBody()
+	NewStructView(b).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
+	b.AssertRender(t, "struct-view/read-only")
 }
