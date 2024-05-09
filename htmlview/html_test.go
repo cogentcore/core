@@ -26,10 +26,8 @@ func TestHTML(t *testing.T) {
 		"input":  `<input value="Test">`,
 	}
 	for nm, s := range tests {
-		t.Run(nm, func(t *testing.T) {
-			b := core.NewBody()
-			assert.NoError(t, ReadHTMLString(NewContext(), b, s))
-			b.AssertRender(t, "html/"+nm)
-		})
+		b := core.NewBody()
+		assert.NoError(t, ReadHTMLString(NewContext(), b, s))
+		b.AssertRender(t, "html/"+nm)
 	}
 }
