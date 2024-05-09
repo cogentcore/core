@@ -61,6 +61,24 @@ type Config struct { //types:add -setters
 	StdIO StdIO
 }
 
+// SetStdout sets the standard output
+func (c *Config) SetStdout(w io.Writer) *Config {
+	c.StdIO.Out = w
+	return c
+}
+
+// SetStderr sets the standard error
+func (c *Config) SetStderr(w io.Writer) *Config {
+	c.StdIO.Err = w
+	return c
+}
+
+// SetStdin sets the standard input
+func (c *Config) SetStdin(r io.Reader) *Config {
+	c.StdIO.In = r
+	return c
+}
+
 // major is the config object for [Major] specified through [SetMajor]
 var major *Config
 
