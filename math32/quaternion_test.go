@@ -7,6 +7,7 @@ package math32
 import (
 	"testing"
 
+	"cogentcore.org/core/base/tolassert"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,7 +19,10 @@ func TestQuatSetFromEuler(t *testing.T) {
 
 	expected := Quat{X: 0.034270797, Y: 0.10602052, Z: 0.14357218, W: 0.9833474}
 
-	assert.Equal(t, expected, q)
+	tolassert.Equal(t, expected.X, q.X)
+	tolassert.Equal(t, expected.Y, q.Y)
+	tolassert.Equal(t, expected.Z, q.Z)
+	tolassert.Equal(t, expected.W, q.W)
 }
 
 func TestQuatSetFromAxisAngle(t *testing.T) {
