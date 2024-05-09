@@ -127,7 +127,10 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	if err != nil {
 		// we go to the first page in the directory if there is no index page
 		if errors.Is(err, fs.ErrNotExist) && (strings.HasSuffix(pg.PagePath, "index.md") || strings.HasSuffix(pg.PagePath, "index.html")) {
-			fs.WalkDir(pg.Source, path.Dir(pg.PagePath), func(path string, d fs.DirEntry, err error) error {
+			err = fs.WalkDir(pg.Source, path.Dir(pg.PagePath), func(path string, d fs.DirEntry, err error) error {
+				if err != nil {
+					return err
+				}
 				if path == pg.PagePath || d.IsDir() {
 					return nil
 				}
@@ -141,9 +144,11 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 					break
 				}
 			}
-			b, err = fs.ReadFile(pg.Source, pg.PagePath)
+			if err == nil {
+				b, err = fs.ReadFile(pg.Source, pg.PagePath)
+			}
 		}
-		if err != nil {
+		if errors.Log(err) != nil {
 			core.ErrorSnackbar(pg, err, "Error opening page")
 			return
 		}
