@@ -23,7 +23,6 @@ func TestValues(t *testing.T) {
 		Tags  string
 	}
 	values := []test{
-		{"ki", core.NewButton(tree.NewRoot[*core.Frame]("frame")), ""},
 		{"bool", true, ""},
 		{"int", 3, ""},
 		{"float", 6.7, ""},
@@ -44,6 +43,10 @@ func TestValues(t *testing.T) {
 		{"color", colors.Orange, ""},
 		{"keychord", key.CodeReturnEnter, ""},
 		{"keymap", keymap.AvailableMaps[0], ""},
+		{"tree", core.NewButton(tree.NewRoot[*core.Frame]("frame")), ""},
+
+		{"map", map[string]int{"Go": 1, "C++": 3, "Python": 5}, ""},
+		{"map-inline", map[string]int{"Go": 1, "C++": 3}, ""},
 	}
 	for _, value := range values {
 		b := core.NewBody()

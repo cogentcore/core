@@ -5,7 +5,6 @@
 package views
 
 import (
-	"strconv"
 	"testing"
 
 	"cogentcore.org/core/core"
@@ -13,10 +12,6 @@ import (
 
 func TestMapViewInline(t *testing.T) {
 	b := core.NewBody()
-	m := map[string]bool{}
-	for i := 0; i < 10; i++ {
-		m["Gopher "+strconv.Itoa(i)] = i%3 == 0
-	}
-	NewMapViewInline(b).SetMap(&m)
-	b.AssertRender(t, "mapviewinline/basic")
+	NewMapViewInline(b).SetMap(&map[string]int{"Go": 1, "C++": 3})
+	b.AssertRender(t, "map-view-inline/basic")
 }
