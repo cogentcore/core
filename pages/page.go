@@ -79,7 +79,7 @@ func (pg *Page) OnInit() {
 
 func (pg *Page) OnAdd() {
 	pg.WidgetBase.OnAdd()
-	pg.Scene.OnFinal(events.Show, func(e events.Event) {
+	pg.OnShow(func(e events.Event) {
 		if pg.PagePath == "" {
 			if getWebURL != nil {
 				pg.OpenURL(getWebURL(), true)
@@ -88,6 +88,17 @@ func (pg *Page) OnAdd() {
 			}
 		}
 	})
+	// must be done after the default title is set elsewhere in normal OnShow
+	pg.Scene.OnFinal(events.Show, func(e events.Event) {
+		pg.setStageTitle()
+	})
+}
+
+// setStageTitle sets the title of the stage based on the current page URL.
+func (pg *Page) setStageTitle() {
+	if rw := pg.Scene.RenderWindow(); rw != nil {
+		rw.SetStageTitle(wpath.Label(pg.Context.PageURL, core.TheApp.Name()))
+	}
 }
 
 // OpenURL sets the content of the page from the given url. If the given URL
@@ -162,9 +173,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	if saveWebURL != nil {
 		saveWebURL(pg.Context.PageURL)
 	}
-	if rw := pg.Scene.RenderWindow(); rw != nil {
-		rw.SetStageTitle(wpath.Label(pg.Context.PageURL, core.TheApp.Name()))
-	}
+	pg.setStageTitle()
 
 	btp := []byte("+++")
 	if bytes.HasPrefix(b, btp) {
