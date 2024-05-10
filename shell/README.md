@@ -45,11 +45,11 @@ cd some; [mkdir sub]; cd sub
 
 ## Exec functions (aliases)
 
-Use the `efunc` keyword to define new functions for Exec mode execution, which can then be used like any other command, for example:
+Use the `command` keyword to define new functions for Exec mode execution, which can then be used like any other command, for example:
 
 ```sh
-efunc list(args) {
-    ls -la args...
+command list {
+	ls -la args...
 }
 ```
 
@@ -58,15 +58,9 @@ cd data
 list *.tsv
 ```
 
-```sh
-command list {
-	ls -la args...
-}
-```
+The `command` is transpiled into a Go function that takes `args ...string`.  In the command function body, you can use the `args...` expression to pass all of the args, or `args[1]` etc to refer to specific positional indexes, as usual.
 
-The arguments are always equivalent to this Go signature: `args ...string` and only the identifier used within the function needs to be specified.  You can use the `args...` expression to pass all of the args, or `args[1]` etc to refer to specific positional indexes, as usual.
-
-This `efunc` function is translated into a Go function with the relevant code, and the only difference from a standard Go `func` function is that using the function name establishes a line as being in Exec mode, and you do not use parens `()` to pass arguments to it.  Instead, the standard Exec mode space-delimited parsing is performed and the resulting args passed to the function.  The `cosh` parser directly translates the resulting call into a direct call of the defined `func` of the given name, so it works in compiled code as well as interactive mode.
+The command function name is registered so that the standard shell execution code can run the function, passing the args.  You can also call it directly from Go code using the standard parentheses expression.
 
 # SSH connections to remote hosts
 

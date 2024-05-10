@@ -54,6 +54,7 @@ func NewInterpreter(options interp.Options) *Interpreter {
 			"Output":      reflect.ValueOf(in.Shell.Output),
 			"OutputErrOK": reflect.ValueOf(in.Shell.OutputErrOK),
 			"Start":       reflect.ValueOf(in.Shell.Start),
+			"AddCommand":  reflect.ValueOf(in.Shell.AddCommand),
 		},
 	})
 	in.Interp.ImportUsed()

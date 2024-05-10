@@ -8,7 +8,9 @@
 package shell
 
 import (
+	"fmt"
 	"io/fs"
+	"log/slog"
 	"os"
 	"slices"
 	"strings"
@@ -54,12 +56,19 @@ type Shell struct {
 	// stack of runtime errors
 	Errors []error
 
+	// commands that have been defined, which can be run in Exec mode.
+	Commands map[string]func(args ...string)
+
 	// Jobs is a slice of commands running in the background (via Start instead of Run)
 	Jobs []*exec.Cmd
 
 	// Cancel, while the interpreter is running, can be called
 	// to stop the code interpreting.
 	Cancel func()
+
+	// if this is non-empty, it is the name of the last command defined.
+	// triggers insertion of the AddCommand call to add to list of defined commands.
+	lastCommand string
 }
 
 // NewShell returns a new [Shell] with default options.
@@ -73,6 +82,7 @@ func NewShell() *Shell {
 	sh.Config.StdIO.StdAll()
 	sh.SSH = sshclient.NewConfig(&sh.Config)
 	sh.SSHClients = make(map[string]*sshclient.Client)
+	sh.Commands = make(map[string]func(args ...string))
 	sh.InstallBuiltins()
 	return sh
 }
@@ -142,6 +152,12 @@ func (sh *Shell) TranspileCode(code string) {
 	for _, ln := range lns {
 		tl := sh.TranspileLine(ln)
 		sh.AddLine(tl)
+		if sh.TotalDepth() == 0 && sh.lastCommand != "" {
+			cmdnm := sh.lastCommand
+			sh.lastCommand = ""
+			add := sh.TranspileLine(fmt.Sprintf("shell.AddCommand(%q, %s)", cmdnm, cmdnm))
+			sh.AddLine(add)
+		}
 	}
 }
 
@@ -156,9 +172,11 @@ func (sh *Shell) TranspileFile(in string, out string) error {
 	sh.Lines = slices.Insert(sh.Lines, 0, "package main", "", "func main() {", "shell := shell.NewShell()")
 	sh.Lines = append(sh.Lines, "}")
 	src := []byte(sh.Code())
+	fmt.Println(string(src))
 	res, err := imports.Process(out, src, nil)
 	if err != nil {
-		return err
+		res = src
+		slog.Error(err.Error())
 	}
 	return os.WriteFile(out, res, 0666)
 }
@@ -193,4 +211,9 @@ func (sh *Shell) TranspileConfig() error {
 	}
 	sh.TranspileCode(string(b))
 	return nil
+}
+
+// AddCommand adds given command to list of available commands
+func (sh *Shell) AddCommand(name string, cmd func(args ...string)) {
+	sh.Commands[name] = cmd
 }

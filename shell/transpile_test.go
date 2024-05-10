@@ -105,3 +105,25 @@ func TestPaths(t *testing.T) {
 		assert.Equal(t, test.e, o)
 	}
 }
+
+// tests command generation
+func TestCommand(t *testing.T) {
+	// logx.UserLevel = slog.LevelDebug
+	tests := []exIn{
+		{
+			`command list {
+ls -la args... 
+}`,
+			`list := func (args ...string) {
+shell.Run("ls", "-la", "args", "...")
+}
+shell.AddCommand("list", list)`},
+	}
+
+	sh := NewShell()
+	for _, test := range tests {
+		sh.TranspileCode(test.i)
+		o := sh.Code()
+		assert.Equal(t, test.e, o)
+	}
+}

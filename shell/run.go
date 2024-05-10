@@ -98,11 +98,15 @@ func (sh *Shell) OutputErrOK(cmd any, args ...any) string {
 	return strings.TrimSuffix(buf.String(), "\n")
 }
 
+// RunBuiltin runs a builtin or a command
 func (sh *Shell) RunBuiltin(cmd string, args ...string) bool {
-	fun, has := sh.Builtins[cmd]
-	if !has {
-		return false
+	if fun, has := sh.Commands[cmd]; has {
+		fun(args...)
+		return true
 	}
-	sh.AddError(fun(args...))
-	return true
+	if fun, has := sh.Builtins[cmd]; has {
+		sh.AddError(fun(args...))
+		return true
+	}
+	return false
 }

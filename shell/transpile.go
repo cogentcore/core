@@ -37,6 +37,7 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 
 	logx.PrintlnDebug("\n########## line:\n", ln, "\nTokens:\n", toks.String())
 
+	t0 := toks[0]
 	t0path, t0pn := toks.Path(true) // true = first position
 	_, t0in := toks.ExecIdent()
 
@@ -54,24 +55,35 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	}
 
 	switch {
-	case toks[0].Tok == token.LBRACE:
+	case t0.Tok == token.LBRACE:
 		logx.PrintlnDebug("go:   { } line")
 		return sh.TranspileGo(toks[1 : n-1])
-	case toks[0].Tok == token.LBRACK:
+	case t0.Tok == token.LBRACK:
 		logx.PrintlnDebug("exec: [ ] line")
 		return sh.TranspileExec(toks, false) // it processes the [ ]
-	case toks[0].Tok == token.ILLEGAL:
-		logx.PrintlnDebug("exec: [ ] line")
-		return sh.TranspileExec(toks, false) // it processes the [ ]
-	case toks[0].IsBacktickString():
+	case t0.Tok == token.ILLEGAL:
+		logx.PrintlnDebug("exec: illegal")
+		return sh.TranspileExec(toks, false)
+	case t0.IsBacktickString():
 		logx.PrintlnDebug("exec: backquoted string")
-		exe := sh.TranspileExecString(toks[0].Str, false)
+		exe := sh.TranspileExecString(t0.Str, false)
 		if n > 1 { // todo: is this an error?
 			exe.AddTokens(sh.TranspileGo(toks[1:]))
 		}
 		return exe
-	case toks[0].IsGo():
-		if toks[0].Tok == token.GO {
+	case t0.Tok == token.IDENT && t0.Str == "command":
+		sh.lastCommand = toks[1].Str // 1 is the name -- triggers AddCommand
+		toks = toks[1:]              // get rid of first
+		toks.Insert(1, token.DEFINE)
+		toks.Insert(2, token.FUNC)
+		toks.Insert(3, token.LPAREN)
+		toks.Insert(4, token.IDENT, "args")
+		toks.Insert(5, token.ELLIPSIS)
+		toks.Insert(6, token.IDENT, "string")
+		toks.Insert(7, token.RPAREN)
+		return sh.TranspileGo(toks)
+	case t0.IsGo():
+		if t0.Tok == token.GO {
 			if !toks.Contains(token.LPAREN) {
 				logx.PrintlnDebug("exec: go command")
 				return sh.TranspileExec(toks, false)
@@ -83,7 +95,7 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 		logx.PrintlnDebug("exec: path...")
 		rtok := toks.ReplaceIdentAt(0, t0path, t0pn)
 		return sh.TranspileExec(rtok, false)
-	case toks[0].Tok == token.STRING:
+	case t0.Tok == token.STRING:
 		logx.PrintlnDebug("exec: string...")
 		return sh.TranspileExec(toks, false)
 	case n == t0in || t0in > 1:

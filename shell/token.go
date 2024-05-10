@@ -8,6 +8,7 @@ import (
 	"go/scanner"
 	"go/token"
 	"log/slog"
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/base/logx"
@@ -50,6 +51,13 @@ func (tk *Tokens) Add(tok token.Token, str ...string) *Token {
 func (tk *Tokens) AddTokens(toks Tokens) *Tokens {
 	*tk = append(*tk, toks...)
 	return tk
+}
+
+// Insert inserts a new token at given position
+func (tk *Tokens) Insert(i int, tok token.Token, str ...string) *Token {
+	nt := NewToken(tok, str...)
+	*tk = slices.Insert(*tk, i, nt)
+	return nt
 }
 
 // Last returns the final token in the list
@@ -140,7 +148,10 @@ func (tk Tokens) Code() string {
 				str += " " + tok.String() + " "
 			}
 			prvIdent = false
-		case tok.IsBracket() || tok.Tok == token.PERIOD || tok.Tok == token.ELLIPSIS:
+		case tok.Tok == token.ELLIPSIS:
+			str += " " + tok.String()
+			prvIdent = false
+		case tok.IsBracket() || tok.Tok == token.PERIOD:
 			if tok.Tok == token.RBRACE || tok.Tok == token.LBRACE {
 				if len(str) > 0 && str[len(str)-1] != ' ' {
 					str += " "
