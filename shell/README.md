@@ -48,10 +48,20 @@ cd some; [mkdir sub]; cd sub
 Use the `efunc` keyword to define new functions for Exec mode execution, which can then be used like any other command, for example:
 
 ```sh
-efunc list(args) { ls -la args...}
-...
+efunc list(args) {
+    ls -la args...
+}
+```
+
+```sh
 cd data
 list *.tsv
+```
+
+```sh
+command list {
+	ls -la args...
+}
 ```
 
 The arguments are always equivalent to this Go signature: `args ...string` and only the identifier used within the function needs to be specified.  You can use the `args...` expression to pass all of the args, or `args[1]` etc to refer to specific positional indexes, as usual.
