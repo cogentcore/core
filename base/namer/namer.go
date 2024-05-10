@@ -2,10 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package namer holds an interface, Namer, for types with Name() string functions
+// Package namer holds an interface, Namer, for types with a
+// Name() string method, and SetNamer for types that also have SetName()
 package namer
 
-// Namer is an interface for anything that returns a Name() string
+// Namer is an interface for anything that returns a Name() string.
 type Namer interface {
 	Name() string
+}
+
+// SetNamer is an interface for anything that returns a Name() string.
+// and has a SetName(name string) method to set the name.
+type SetNamer interface {
+	Namer
+	SetName(name string)
 }

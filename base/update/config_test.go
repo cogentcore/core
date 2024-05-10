@@ -11,12 +11,12 @@ import (
 )
 
 func TestConfig(t *testing.T) {
-	var s []nameObj
+	var s []*nameObj
 
-	config1 := Config[nameObj]{
-		{"a", func(name string) nameObj { return nameObj{name: name} }},
-		{"b", func(name string) nameObj { return nameObj{name: name} }},
-		{"c", func(name string) nameObj { return nameObj{name: name} }},
+	config1 := Config[*nameObj]{
+		{"a", func() *nameObj { return &nameObj{} }},
+		{"b", func() *nameObj { return &nameObj{} }},
+		{"c", func() *nameObj { return &nameObj{} }},
 	}
 	// fmt.Println("\n#### target", config1)
 	r1, mods := UpdateConfig(s, config1)

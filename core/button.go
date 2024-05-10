@@ -320,6 +320,7 @@ func (bt *Button) HandleEvents() {
 
 func (bt *Button) Config() {
 	config := tree.Config{}
+	// config := update.Config{}
 
 	// we check if the icons are unset, not if they are nil, so
 	// that people can manually set it to [icons.None]
@@ -347,10 +348,21 @@ func (bt *Button) Config() {
 		if bt.Text != "" {
 			config.Add(SpaceType, "space")
 		}
+		// config.Add("icon", func() Widget {
+		// 	return NewIcon().SetIcon(bt.Icon)
+		// }
+		// if bt.Text != "" {
+		// 	config.Add("space", func() Widget {
+		// 		return NewSpace()
+		// 	}
+		// }
 	}
 	if bt.Text != "" {
 		lbi = len(config)
 		config.Add(TextType, "text")
+		// config.Add("text", func() {
+		//  	NewText().SetText(bt.Text)
+		// }
 	}
 
 	indi := -1

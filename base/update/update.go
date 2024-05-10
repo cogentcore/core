@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package update provides an efficent mechanism for updating a slice
+// to contain a target list of elements, generating minimal edits to
+// modify the current slice contents to match the target.
+// The mechanism depends on the use of unique name string identifiers
+// to determine whether an element is currently configured correctly.
+// These could be algorithmically generated hash strings or any other
+// such unique identifier.
 package update
 
 import (
