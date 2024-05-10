@@ -22,6 +22,8 @@ func TestTranspile(t *testing.T) {
 		{"ls", `shell.Run("ls")`},
 		{"`ls -la`", `shell.Run("ls", "-la")`},
 		{"ls --help", `shell.Run("ls", "--help")`},
+		{"ls go", `shell.Run("ls", "go")`},
+		{"cd go", `shell.Run("cd", "go")`},
 		{`var name string`, `var name string`},
 		{`name = "test"`, `name = "test"`},
 		{`echo {name}`, `shell.Run("echo", name)`},
