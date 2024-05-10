@@ -84,10 +84,12 @@ func (sh *Shell) AddPath(args ...string) error {
 	return os.Setenv("PATH", path)
 }
 
-// CoSSH does connects to a server specified in first arg, which is then
-// used for executing any shell commands until called with `stop` or `close`.
-// Should call 'close' when no longer needed.
-// * close: closes the connection; start after this will re-open.
+// CoSSH manages SSH connections, which are referenced by the @name
+// identifier.  It handles the following cases:
+//   - @name -- switches to using given host for all subsequent commands
+//   - host [name] -- connects to a server specified in first arg and switches
+//     to using it, with optional name instead of default sequential number.
+//   - close -- closes all open connections, or the specified one
 func (sh *Shell) CoSSH(args ...string) error {
 	if len(args) < 1 {
 		return fmt.Errorf("cossh: requires at least one argument")
@@ -132,8 +134,3 @@ func (sh *Shell) CoSSH(args ...string) error {
 	}
 	return err
 }
-
-// example alias:
-// shell list(args ...string) {
-// 	ls -la {args...}
-// }

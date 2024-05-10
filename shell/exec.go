@@ -7,7 +7,9 @@ package shell
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"slices"
+	"strings"
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/sshclient"
@@ -35,6 +37,7 @@ func (sh *Shell) ExecArgs(errok bool, cmd any, args ...any) (*sshclient.Client, 
 	if len(args) == 0 {
 		return cl, scmd, nil
 	}
+	isCmd := sh.isCommand.Peek()
 	sargs := make([]string, 0, len(args))
 	var err error
 	for _, a := range args {
@@ -78,13 +81,24 @@ func (sh *Shell) ExecArgs(errok bool, cmd any, args ...any) (*sshclient.Client, 
 		switch {
 		case s[0] == '>':
 			sargs = sh.OutToFile(errok, sargs, i)
+		case isCmd && strings.HasPrefix(s, "args"):
+			sargs = sh.CmdArgs(errok, sargs, i)
 		}
 	}
 	// do globbing late here so we don't have to wade through everything.
 	// only for local.
-	// probably need to make a copy of sargs
-	// if cl == nil {
-	// }
+	if cl == nil {
+		gargs := make([]string, 0, len(sargs))
+		for _, s := range sargs {
+			g, err := filepath.Glob(s)
+			if err != nil || len(g) == 0 { // not valid
+				gargs = append(gargs, s)
+			} else {
+				gargs = append(gargs, g...)
+			}
+		}
+		sargs = gargs
+	}
 	return cl, scmd, sargs
 }
 
@@ -136,6 +150,24 @@ func (sh *Shell) OutToFile(errok bool, sargs []string, i int) []string {
 	} else {
 		sh.HandleArgErr(errok, err)
 	}
+	return sargs
+}
+
+// CmdArgs processes expressions involving "args" for commands
+func (sh *Shell) CmdArgs(errok bool, sargs []string, i int) []string {
+	n := len(sargs)
+	// s := sargs[i]
+	// sn := len(s)
+	args := sh.commandArgs.Peek()
+
+	fmt.Println("command args:", args)
+
+	switch {
+	case i < n-1 && sargs[i+1] == "...":
+		sargs = slices.Delete(sargs, i, i+2)
+		sargs = slices.Insert(sargs, i, args...)
+	}
+
 	return sargs
 }
 

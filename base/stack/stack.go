@@ -25,3 +25,14 @@ func (st *Stack[T]) Pop() T {
 	*st = (*st)[:n-1]
 	return li
 }
+
+// Peek returns the last element on the stack.
+// Returns nil / zero value if stack is empty.
+func (st *Stack[T]) Peek() T {
+	n := len(*st)
+	if n == 0 {
+		var zv T
+		return zv
+	}
+	return (*st)[n-1]
+}

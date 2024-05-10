@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/base/sshclient"
+	"cogentcore.org/core/base/stack"
 	"github.com/mitchellh/go-homedir"
 	"golang.org/x/tools/imports"
 )
@@ -50,7 +51,7 @@ type Shell struct {
 	// depth of brackets at the end of the current line. if 0, was complete.
 	BrackDepth int
 
-	// stack of transpiled lines
+	// stack of transpiled lines, that are accumulated in TranspileCode
 	Lines []string
 
 	// stack of runtime errors
@@ -65,6 +66,14 @@ type Shell struct {
 	// Cancel, while the interpreter is running, can be called
 	// to stop the code interpreting.
 	Cancel func()
+
+	// commandArgs is a stack of args passed to a command, used for simplified
+	// processing of args expressions.
+	commandArgs stack.Stack[[]string]
+
+	// isCommand is a stack of bools indicating whether the _immediate_ run context
+	// is a command, which affects the way that args are processed.
+	isCommand stack.Stack[bool]
 
 	// if this is non-empty, it is the name of the last command defined.
 	// triggers insertion of the AddCommand call to add to list of defined commands.

@@ -22,11 +22,14 @@ func (sh *Shell) Run(cmd any, args ...any) {
 	if scmd == "" {
 		return
 	}
-	if !sh.RunBuiltin(scmd, sargs...) {
-		if cl != nil {
-			sh.AddError(cl.Run(scmd, sargs...))
-		} else {
+	if cl != nil {
+		// todo: need to trap cd ?
+		sh.AddError(cl.Run(scmd, sargs...))
+	} else {
+		if !sh.RunBuiltinOrCommand(scmd, sargs...) {
+			sh.isCommand.Push(false)
 			sh.AddError(sh.Config.Run(scmd, sargs...))
+			sh.isCommand.Pop()
 		}
 	}
 	sh.Config.StdIO.PopToStart(false) // not err
@@ -43,12 +46,14 @@ func (sh *Shell) RunErrOK(cmd any, args ...any) {
 	if scmd == "" {
 		return
 	}
-	if !sh.RunBuiltin(scmd, sargs...) {
-		// key diff here: don't call AddError
-		if cl != nil {
-			cl.Run(scmd, sargs...)
-		} else {
+	// key diff here: don't call AddError
+	if cl != nil {
+		cl.Run(scmd, sargs...)
+	} else {
+		if !sh.RunBuiltinOrCommand(scmd, sargs...) {
+			sh.isCommand.Push(false)
 			sh.Config.Run(scmd, sargs...)
+			sh.isCommand.Pop()
 		}
 	}
 	sh.Config.StdIO.PopToStart(false)
@@ -63,11 +68,13 @@ func (sh *Shell) Start(cmd any, args ...any) {
 	if scmd == "" {
 		return
 	}
-	if !sh.RunBuiltin(scmd, sargs...) {
-		if cl != nil {
-			sh.AddError(cl.Start(scmd, sargs...))
-		} else {
+	if cl != nil {
+		sh.AddError(cl.Start(scmd, sargs...))
+	} else {
+		if !sh.RunBuiltinOrCommand(scmd, sargs...) {
+			sh.isCommand.Push(false)
 			excmd, err := sh.Config.Start(scmd, sargs...)
+			sh.isCommand.Pop()
 			if excmd != nil {
 				sh.Jobs = append(sh.Jobs, excmd) // todo: add files to this
 			}
@@ -98,14 +105,20 @@ func (sh *Shell) OutputErrOK(cmd any, args ...any) string {
 	return strings.TrimSuffix(buf.String(), "\n")
 }
 
-// RunBuiltin runs a builtin or a command
-func (sh *Shell) RunBuiltin(cmd string, args ...string) bool {
+// RunBuiltinOrCommand runs a builtin or a command
+func (sh *Shell) RunBuiltinOrCommand(cmd string, args ...string) bool {
 	if fun, has := sh.Commands[cmd]; has {
+		sh.commandArgs.Push(args)
+		sh.isCommand.Push(true)
 		fun(args...)
+		sh.isCommand.Pop()
+		sh.commandArgs.Pop()
 		return true
 	}
 	if fun, has := sh.Builtins[cmd]; has {
+		sh.isCommand.Push(false)
 		sh.AddError(fun(args...))
+		sh.isCommand.Pop()
 		return true
 	}
 	return false
