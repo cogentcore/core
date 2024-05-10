@@ -695,7 +695,11 @@ var RecentPaths FilePaths
 
 // Open file paths from a json-formatted file.
 func (fp *FilePaths) Open(filename string) error { //types:add
-	return errors.Log(jsonx.Open(fp, filename))
+	err := jsonx.Open(fp, filename)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		errors.Log(err)
+	}
+	return err
 }
 
 // Save file paths to a json-formatted file.
@@ -724,7 +728,10 @@ func SaveRecentPaths() {
 func OpenRecentPaths() {
 	pdir := TheApp.CogentCoreDataDir()
 	pnm := filepath.Join(pdir, SavedPathsFilename)
-	errors.Log(RecentPaths.Open(pnm))
+	err := RecentPaths.Open(pnm)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		errors.Log(err)
+	}
 }
 
 //////////////////////////////////////////////////////////////////
