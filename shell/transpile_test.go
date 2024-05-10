@@ -56,6 +56,8 @@ func TestTranspile(t *testing.T) {
 		{"ls -la >& test.out", `shell.Run("ls", "-la", ">&", "test.out")`},
 		{"ls -la >>& test.out", `shell.Run("ls", "-la", ">>&", "test.out")`},
 		{"@1 ls -la", `shell.Run("@", "1", "ls", "-la")`},
+		{"git switch main", `shell.Run("git", "switch", "main")`},
+		{"git checkout 123abc", `shell.Run("git", "checkout", "123abc")`},
 	}
 
 	sh := NewShell()

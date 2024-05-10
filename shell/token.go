@@ -100,6 +100,12 @@ func (tk *Token) IsGo() bool {
 	return false
 }
 
+// IsValidExecIdent returns true if the given token is a valid component
+// of an Exec mode identifier
+func (tk *Token) IsValidExecIdent() bool {
+	return (tk.IsGo() || tk.Tok == token.IDENT || tk.Tok == token.SUB || tk.Tok == token.DEC || tk.Tok == token.INT || tk.Tok == token.FLOAT || tk.Tok == token.ASSIGN)
+}
+
 // String is the stringer version which includes the token ID
 // in addition to the string literal
 func (tk Tokens) String() string {

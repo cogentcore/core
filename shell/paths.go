@@ -38,7 +38,7 @@ func (tk Tokens) ExecIdent() (string, int) {
 		n--
 		stpos = int(tk[0].Pos)
 	}
-	if t0.Tok != token.IDENT {
+	if !t0.IsValidExecIdent() {
 		return "", 0
 	}
 	if n == 1 {
@@ -57,7 +57,7 @@ func (tk Tokens) ExecIdent() (string, int) {
 			return str, ci
 		}
 		ct := tk[ci]
-		isvalid := (ct.Tok == token.IDENT || ct.Tok == token.SUB || ct.Tok == token.DEC || ct.Tok == token.INT || ct.Tok == token.FLOAT || ct.Tok == token.ASSIGN)
+		isvalid := ct.IsValidExecIdent()
 		if !isvalid {
 			// escaped space:
 			if ct.Tok == token.ILLEGAL && ct.Str == `\` && ci+1 < n && int(tk[ci+1].Pos) == lastEnd+2 {
