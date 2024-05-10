@@ -196,28 +196,22 @@ func homePage(ctx *htmlview.Context) bool {
 		errors.Log(core.NewImage(parent).OpenFS(resources, "weld-icon.png"))
 	})
 
-	core.NewText(frame).SetType(core.TextDisplaySmall).SetText("<b>Why Cogent Core instead of ___?</b>")
+	core.NewText(frame).SetType(core.TextDisplaySmall).SetText("<b>Why Cogent Core instead of something else?</b>")
 
-	makeBlock(`<a href="https://flutter.dev">FLUTTER</a>`, "Flutter lacks the elegance of Cogent Core, since it is built on Dart, a language that doesn't provide the same consistency and readability as Go. It also doesn't provide the same powerful features as Cogent Core, making it impractical for data science and other advanced use cases.", func(parent core.Widget) {
-		core.NewIcon(parent).SetIcon(icons.Flutter).Style(func(s *styles.Style) {
+	makeBlock(`THE PROBLEM`, "After using other frameworks built on HTML and Qt for years to make various apps ranging from simple tools to complex scientific models, we realized that we were spending more time dealing with excessive boilerplate, browser inconsistencies, and dependency management issues than actual app development.", func(parent core.Widget) {
+		core.NewIcon(parent).SetIcon(icons.Blank).Style(func(s *styles.Style) {
 			s.Min.Set(units.Dp(256))
 		})
 	})
 
-	makeBlock(`<a href="https://react.dev">REACT</a>`, "React is built on outdated, inelegant, and inconsistent web languages like JavaScript, HTML, and CSS, making it difficult to build powerful, fast, and elegant apps. Additionally, it lacks the built-in powerful features and user customizability of Cogent Core.", func(parent core.Widget) {
-		core.NewIcon(parent).SetIcon(icons.Toolbar).Style(func(s *styles.Style) {
+	makeBlock(`THE SOLUTION`, "We decided to make a framework that would allow us to focus on app content and logic by providing a consistent and elegant API that automatically handles cross-platform support, user customization, and app packaging and deployment.", func(parent core.Widget) {
+		core.NewIcon(parent).SetIcon(icons.Blank).Style(func(s *styles.Style) {
 			s.Min.Set(units.Dp(256))
 		})
 	})
 
-	makeBlock(`<a href="https://qt.io">QT</a>`, "Qt is built on C++, an outdated, difficult to use, and inelegant language that makes Qt fraught with boilerplate and clunky to develop with; compile times range from minutes to hours. Also, it produces apps with unfriendly styling and no built-in user customizability.", func(parent core.Widget) {
-		core.NewIcon(parent).SetIcon(icons.Toolbar).Style(func(s *styles.Style) {
-			s.Min.Set(units.Dp(256))
-		})
-	})
-
-	makeBlock(`<a href="https://fyne.io">FYNE</a>`, "Fyne provides a limited set of features and no easy way to for developers and users to fully customize apps, making it difficult to build fully featured, good-looking apps. It also has no interactive documentation and provides a less streamlined developer experience.", func(parent core.Widget) {
-		core.NewIcon(parent).SetIcon(icons.Toolbar).Style(func(s *styles.Style) {
+	makeBlock(`THE RESULT`, "Instead of constantly jumping through hoops to create a consistent, easy-to-use, cross-platform app, you can now take advantage of a powerful featureset on all platforms and vastly simplify your development experience.", func(parent core.Widget) {
+		core.NewIcon(parent).SetIcon(icons.Blank).Style(func(s *styles.Style) {
 			s.Min.Set(units.Dp(256))
 		})
 	})
