@@ -161,11 +161,11 @@ func (sh *Shell) TranspileCode(code string) {
 	for _, ln := range lns {
 		tl := sh.TranspileLine(ln)
 		sh.AddLine(tl)
-		if sh.TotalDepth() == 0 && sh.lastCommand != "" {
-			cmdnm := sh.lastCommand
+		if sh.BraceDepth == 0 && sh.BrackDepth == 0 && sh.ParenDepth == 1 && sh.lastCommand != "" {
 			sh.lastCommand = ""
-			add := sh.TranspileLine(fmt.Sprintf("shell.AddCommand(%q, %s)", cmdnm, cmdnm))
-			sh.AddLine(add)
+			nl := len(sh.Lines)
+			sh.Lines[nl-1] = sh.Lines[nl-1] + ")"
+			sh.ParenDepth--
 		}
 	}
 }

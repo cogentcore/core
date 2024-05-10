@@ -15,6 +15,43 @@ type exIn struct {
 	e string
 }
 
+type wexIn struct {
+	i     string
+	isErr bool
+	e     []string
+}
+
+// these are more general tests of full-line statements of various forms
+func TestExecWords(t *testing.T) {
+	tests := []wexIn{
+		{`ls`, false, []string{`ls`}},
+		{`cat "be"`, false, []string{`cat`, `"be"`}},
+		{`cat "be`, true, []string{`cat`, `"be`}},
+		{`cat "be a thing"`, false, []string{`cat`, `"be a thing"`}},
+		{`cat "{be \"a\" thing}"`, false, []string{`cat`, `"{be \"a\" thing}"`}},
+		{`cat {vals[1:10]}`, false, []string{`cat`, `{`, `vals[1:10]`, `}`}},
+		{`cat {myfunc(vals[1:10], "test", false)}`, false, []string{`cat`, `{`, `myfunc(vals[1:10],"test",false)`, `}`}},
+		{`cat vals[1:10]`, false, []string{`cat`, `vals[1:10]`}},
+		{`cat vals...`, false, []string{`cat`, `vals...`}},
+		{`[cat vals...]`, false, []string{`[`, `cat`, `vals...`, `]`}},
+		{`[cat vals...]; ls *.tsv`, false, []string{`[`, `cat`, `vals...`, `]`, `;`, `ls`, `*.tsv`}},
+		{`cat vals... | grep -v "b"`, false, []string{`cat`, `vals...`, `|`, `grep`, `-v`, `"b"`}},
+		{`cat vals...>&file.out`, false, []string{`cat`, `vals...`, `>&`, `file.out`}},
+		{`cat vals...>&@0:file.out`, false, []string{`cat`, `vals...`, `>&`, `@0:file.out`}},
+	}
+	for _, test := range tests {
+		o, err := ExecWords(test.i)
+		assert.Equal(t, test.e, o)
+		if err != nil {
+			if !test.isErr {
+				t.Error("should not have been an error:", test.i)
+			}
+		} else if test.isErr {
+			t.Error("was supposed to be an error:", test.i)
+		}
+	}
+}
+
 // these are more general tests of full-line statements of various forms
 func TestTranspile(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
@@ -57,9 +94,12 @@ func TestTranspile(t *testing.T) {
 		{"ls -la >> test.out", `shell.Run("ls", "-la", ">>", "test.out")`},
 		{"ls -la >& test.out", `shell.Run("ls", "-la", ">&", "test.out")`},
 		{"ls -la >>& test.out", `shell.Run("ls", "-la", ">>&", "test.out")`},
-		{"@1 ls -la", `shell.Run("@", "1", "ls", "-la")`},
+		{"@1 ls -la", `shell.Run("@1", "ls", "-la")`},
 		{"git switch main", `shell.Run("git", "switch", "main")`},
 		{"git checkout 123abc", `shell.Run("git", "checkout", "123abc")`},
+		{"go get cogentcore.org/core@main", `shell.Run("go", "get", "cogentcore.org/core@main")`},
+		{"ls *.go", `shell.Run("ls", "*.go")`},
+		{"ls ??.go", `shell.Run("ls", "??.go")`},
 	}
 
 	sh := NewShell()
@@ -114,10 +154,9 @@ func TestCommand(t *testing.T) {
 			`command list {
 ls -la args... 
 }`,
-			`list := func (args ...string) {
-shell.Run("ls", "-la", "args", "...")
-}
-shell.AddCommand("list", list)`},
+			`shell.AddCommand("list", func (args ...string) {
+shell.Run("ls", "-la", "args...")
+})`},
 	}
 
 	sh := NewShell()

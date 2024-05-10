@@ -155,7 +155,7 @@ func (sh *Shell) OutToFile(errok bool, sargs []string, i int) []string {
 
 // CmdArgs processes expressions involving "args" for commands
 func (sh *Shell) CmdArgs(errok bool, sargs []string, i int) []string {
-	n := len(sargs)
+	// n := len(sargs)
 	// s := sargs[i]
 	// sn := len(s)
 	args := sh.commandArgs.Peek()
@@ -163,8 +163,8 @@ func (sh *Shell) CmdArgs(errok bool, sargs []string, i int) []string {
 	fmt.Println("command args:", args)
 
 	switch {
-	case i < n-1 && sargs[i+1] == "...":
-		sargs = slices.Delete(sargs, i, i+2)
+	case sargs[i] == "args...":
+		sargs = slices.Delete(sargs, i, i+1)
 		sargs = slices.Insert(sargs, i, args...)
 	}
 

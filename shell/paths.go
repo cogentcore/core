@@ -107,7 +107,7 @@ func (tk Tokens) Path(idx0 bool) (string, int) {
 	if !ispath {
 		lastEnd = int(tk[0].Pos)
 		ci = 0
-		tid, tin := tk.ExecIdent()
+		tid, tin := tk.ExecIdent() // todo: replace this
 		if tin == 0 || tin >= n {
 			return "", 0
 		}

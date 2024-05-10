@@ -1,0 +1,137 @@
+// Copyright (c) 2024, Cogent Core. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package shell
+
+import (
+	"fmt"
+	"strings"
+	"unicode"
+)
+
+func ExecWords(ln string) ([]string, error) {
+	ln = strings.TrimSpace(ln)
+	n := len(ln)
+	if n == 0 {
+		return nil, nil
+	}
+
+	word := ""
+	esc := false
+	dQuote := false
+	bQuote := false
+	brace := 0
+	brack := 0
+	redir := false
+
+	var words []string
+	addWord := func() {
+		if brace > 0 { // always accum into one token inside brace
+			return
+		}
+		if len(word) > 0 {
+			words = append(words, word)
+			word = ""
+		}
+	}
+
+	sbrack := (ln[0] == '[')
+	if sbrack {
+		word = "["
+		addWord()
+		brack++
+		ln = ln[1:]
+	}
+
+	for _, r := range ln {
+		quote := dQuote || bQuote
+
+		if redir {
+			redir = false
+			if r == '&' {
+				word += string(r)
+				addWord()
+				continue
+			}
+			if r == '>' {
+				word += string(r)
+				redir = true
+				continue
+			}
+			addWord()
+		}
+
+		switch {
+		case esc:
+			word += string(r)
+			esc = false
+		case r == '\\':
+			esc = true
+			word += string(r)
+		case r == '"':
+			if !bQuote {
+				dQuote = !dQuote
+			}
+			word += string(r)
+		case r == '`':
+			if !dQuote {
+				bQuote = !bQuote
+			}
+			word += string(r)
+		case quote: // absorbs quote -- no need to check below
+			word += string(r)
+		case unicode.IsSpace(r):
+			addWord()
+		case r == '{':
+			if brace == 0 {
+				addWord()
+				word = "{"
+				addWord()
+			}
+			brace++
+		case r == '}':
+			brace--
+			if brace == 0 {
+				addWord()
+				word = "}"
+				addWord()
+			}
+		case r == '[':
+			word += string(r)
+			brack++
+		case r == ']':
+			brack--
+			if brack == 0 && sbrack { // only point of tracking brack is to get this end guy
+				addWord()
+				word = "]"
+				addWord()
+			} else {
+				word += string(r)
+			}
+		case r == '<' || r == '>' || r == '|':
+			addWord()
+			word += string(r)
+			redir = true
+		case r == '&' || r == ';': // & known to not be redir
+			addWord()
+			word += string(r)
+		default:
+			word += string(r)
+		}
+	}
+	addWord()
+	if dQuote || bQuote || brack > 0 {
+		return words, fmt.Errorf("cosh: exec command has unterminated quotes (\": %v, `: %v) or brackets [ %v ]", dQuote, bQuote, brack > 0)
+	}
+	return words, nil
+}
+
+// ExecWordIsCommand returns true if given exec word is a command-like string
+// (excluding any paths)
+func ExecWordIsCommand(f string) bool {
+	if strings.Contains(f, "(") || strings.Contains(f, "=") {
+		return false
+	}
+	return true
+}
