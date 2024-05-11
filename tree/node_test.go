@@ -382,11 +382,21 @@ func TestDirectives(t *testing.T) {
 	assert.Equal(t, types.Directive{Tool: "direct", Directive: "value"}, dir)
 }
 
-func TestAutoNodeName(t *testing.T) {
+func TestSetUniqueName(t *testing.T) {
 	root := NewNodeBase()
 	assert.Equal(t, "node-base", root.Name())
 	child := NewNodeBase(root)
 	assert.Equal(t, "node-base-0", child.Name())
+	child.SetName("my-name")
+	assert.Equal(t, "my-name", child.Name())
+
+	// does not change with SetParent when there is already a name
+	SetParent(child, root)
+	assert.Equal(t, "my-name", child.Name())
+
+	// but does change with SetUniqueName when there is already a name
+	SetUniqueName(child)
+	assert.Equal(t, "my-name-2", child.Name())
 }
 
 func TestTreeMod(t *testing.T) {

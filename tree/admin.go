@@ -62,7 +62,7 @@ func checkThis(n Node) error {
 func SetParent(child Node, parent Node) {
 	n := child.AsTreeNode()
 	n.Par = parent
-	SetUniqueName(n)
+	setUniqueName(n, false)
 	child.This().OnAdd()
 	n.WalkUpParent(func(k Node) bool {
 		k.This().OnChildAdded(child)
@@ -136,9 +136,15 @@ func NewOfType(typ *types.Type) Node {
 
 // SetUniqueName sets the name of the node to be unique, using
 // the number of lifetime children of the parent node as a unique
-// identifier. If the node already has a name, it adds this, otherwise
-// it uses the type name of the node plus the unique id.
+// identifier. If the node already has a name, it adds the unique id
+// to it. Otherwise, it uses the type name of the node plus the unique id.
 func SetUniqueName(n Node) {
+	setUniqueName(n, true)
+}
+
+// setUniqueName is the implementation of [SetUniqueName] that takes whether
+// to add the unique id to the name even if it is already set.
+func setUniqueName(n Node, addIfSet bool) {
 	pn := n.Parent()
 	if pn == nil {
 		return
@@ -147,7 +153,7 @@ func SetUniqueName(n Node) {
 	id := "-" + strconv.FormatUint(c-1, 10) // must subtract 1 so we start at 0
 	if n.Name() == "" {
 		n.SetName(n.NodeType().IDName + id)
-	} else {
+	} else if addIfSet {
 		n.SetName(n.Name() + id)
 	}
 }
