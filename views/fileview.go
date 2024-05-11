@@ -297,8 +297,10 @@ func (fv *FileView) ConfigToolbar(tb *core.Toolbar) {
 
 func (fv *FileView) ConfigFilesRow() {
 	fr := fv.FilesRow()
-	sv := NewTableView(fr, "favs-view")
-	fsv := NewTableView(fr, "files-view")
+	sv := NewTableView(fr)
+	sv.SetName("favs-view")
+	fsv := NewTableView(fr)
+	fsv.SetName("files-view")
 
 	sv.SelectedIndex = -1
 	sv.SetReadOnly(true)

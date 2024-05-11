@@ -238,7 +238,7 @@ func (tv *TableView) ConfigFrame() {
 	}
 	tv.SetFlag(true, SliceViewConfigured)
 	core.NewFrame(tv).SetName("header")
-	NewSliceViewGrid(tv, "grid")
+	NewSliceViewGrid(tv).SetName("grid")
 	tv.ConfigHeader()
 }
 

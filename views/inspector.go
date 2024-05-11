@@ -253,8 +253,8 @@ func (is *Inspector) ConfigSplits() {
 			s.Overflow.Set(styles.OverflowAuto)
 			s.Gap.Zero()
 		})
-		tv := NewTreeView(tvfr, "tv")
-		sv := NewStructView(split, "sv")
+		tv := NewTreeView(tvfr)
+		sv := NewStructView(split)
 		tv.OnSelect(func(e events.Event) {
 			if len(tv.SelectedNodes) == 0 {
 				return
@@ -336,7 +336,7 @@ func InspectorWindow(k tree.Node) {
 	if core.RecycleMainWindow(k) {
 		return
 	}
-	d := core.NewBody("inspector")
+	d := core.NewBody("Inspector")
 	InspectorView(d, k)
 	d.NewWindow().SetCloseOnBack(true).Run()
 }
@@ -349,7 +349,7 @@ func InspectorView(b *core.Body, k tree.Node) {
 		b.Nm += "-" + k.Name()
 		b.Title += ": " + k.Name()
 	}
-	is := NewInspector(b, "inspector")
+	is := NewInspector(b)
 	is.SetRoot(k)
 	b.AddAppBar(is.ConfigToolbar)
 }

@@ -565,7 +565,7 @@ func (sv *SliceViewBase) ConfigFrame() {
 		return
 	}
 	sv.VisRows = sv.MinRows
-	NewSliceViewGrid(sv, "grid")
+	NewSliceViewGrid(sv).SetName("grid")
 }
 
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
