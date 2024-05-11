@@ -216,9 +216,12 @@ func (pg *Page) Config() {
 	if pg.HasChildren() {
 		return
 	}
-	sp := core.NewSplits(pg, "splits").SetSplits(0.2, 0.8)
+	sp := core.NewSplits(pg).SetSplits(0.2, 0.8)
+	sp.SetName("splits")
 
 	nav := views.NewTreeViewFrame(sp).SetText(core.TheApp.Name())
+	nav.Parent().SetName("nav-frame")
+	nav.SetName("nav")
 	nav.SetReadOnly(true)
 	nav.ParentWidget().Style(func(s *styles.Style) {
 		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
@@ -266,7 +269,8 @@ func (pg *Page) Config() {
 
 		nm := strings.TrimSuffix(base, ext)
 		txt := strcase.ToSentence(nm)
-		tv := views.NewTreeView(parent, nm).SetText(txt)
+		tv := views.NewTreeView(parent).SetText(txt)
+		tv.SetName(nm)
 
 		// need index.md for page path
 		if d.IsDir() {
@@ -276,9 +280,9 @@ func (pg *Page) Config() {
 		return nil
 	}))
 
-	core.NewFrame(sp, "body").Style(func(s *styles.Style) {
+	core.NewFrame(sp).Style(func(s *styles.Style) {
 		s.Direction = styles.Column
-	})
+	}).SetName("body")
 }
 
 // AppBar is the default app bar for a [Page]
