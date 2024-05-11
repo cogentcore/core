@@ -14,10 +14,28 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// admin.go has infrastructure code outside of the Node interface.
+// admin.go has infrastructure code outside of the [Node] interface.
 
-// initNode initializes the node. See [Node.InitName] for more information
-// on what it does.
+// New returns a new node of the given the type with the given optional parent.
+// If the name is unspecified, it defaults to the ID (kebab-case) name of
+// the type, plus the [Node.NumLifetimeChildren] of the parent.
+func New[T Node](parent ...Node) T {
+	if len(parent) == 0 {
+		return newRoot[T]()
+	}
+	var n T
+	return parent[0].NewChild(n.NodeType()).(T)
+}
+
+// newRoot returns a new initialized node of the given type without a parent.
+func newRoot[T Node]() T {
+	var n T
+	res := NewOfType(n.NodeType())
+	initNode(res)
+	return res.(T)
+}
+
+// initNode initializes the node.
 func initNode(this Node) {
 	n := this.AsTreeNode()
 	if n.Ths != this {
@@ -70,32 +88,10 @@ func MoveToParent(child Node, parent Node) {
 	parent.AddChild(child)
 }
 
-// New adds a new child of the given the type
-// with the given name to the given parent.
-// If the name is unspecified, it defaults to the
-// ID (kebab-case) name of the type, plus the
-// [Node.NumLifetimeChildren] of its parent.
-// It is a generic helper function that calls [Node.NewChild].
-func New[T Node](parent Node, name ...string) T {
-	var n T
-	return parent.NewChild(n.NodeType(), name...).(T)
-}
-
-// NewRoot returns a new root node of the given the type
-// with the given name. If the name is unspecified, it
-// defaults to the ID (kebab-case) name of the type.
-// It is a generic helper function that calls [Node.InitName].
-func NewRoot[T Node](name ...string) T {
-	var n T
-	n = n.New().(T)
-	n.InitName(n, name...)
-	return n
-}
-
 // InsertNewChild is a generic helper function for [Node.InsertNewChild].
-func InsertNewChild[T Node](parent Node, at int, name ...string) T {
+func InsertNewChild[T Node](parent Node, at int) T {
 	var n T
-	return parent.InsertNewChild(n.NodeType(), at, name...).(T)
+	return parent.InsertNewChild(n.NodeType(), at).(T)
 }
 
 // ParentByType is a generic helper function for [Node.ParentByType].

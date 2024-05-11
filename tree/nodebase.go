@@ -873,7 +873,8 @@ func copyFrom(dst, src Node) {
 // cloned tree (see [Node.CopyFrom] for more information).
 func (n *NodeBase) Clone() Node {
 	nc := NewOfType(n.This().NodeType())
-	nc.InitName(nc, n.Nm)
+	initNode(nc)
+	nc.SetName(n.Nm)
 	nc.CopyFrom(n.This())
 	return nc
 }
