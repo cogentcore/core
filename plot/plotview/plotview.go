@@ -77,10 +77,10 @@ func (pl *PlotView) CopyFieldsFrom(frm tree.Node) {
 
 // NewSubPlot returns a PlotView with its own separate Toolbar,
 // suitable for a tab or other element that is not the main plot.
-func NewSubPlot(par core.Widget, name ...string) *PlotView {
-	fr := core.NewFrame(par, name...)
-	tb := core.NewToolbar(fr, "tbar")
-	pl := NewPlotView(fr, "plot")
+func NewSubPlot(parent ...tree.Node) *PlotView {
+	fr := core.NewFrame(parent...)
+	tb := core.NewToolbar(fr)
+	pl := NewPlotView(fr)
 	fr.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
@@ -368,14 +368,14 @@ func (pl *PlotView) Config() {
 func (pl *PlotView) ConfigPlotView() {
 	pl.Params.FromMeta(pl.Table.Table)
 	if !pl.HasChildren() {
-		fr := core.NewFrame(pl, "cols")
+		fr := core.NewFrame(pl)
 		fr.Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Grow.Set(0, 1)
 			s.Overflow.Y = styles.OverflowAuto
 			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
 		})
-		pt := NewPlot(pl, "plot")
+		pt := NewPlot(pl)
 		pt.Plot = pl.Plot
 		pt.Style(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
@@ -521,34 +521,34 @@ func (pl *PlotView) ColumnsConfig() {
 	if len(pl.Columns) == 0 {
 		return
 	}
-	sc := core.NewLayout(vl, "sel-cols")
-	sw := core.NewSwitch(sc, "on").SetTooltip("Toggle off all columns")
+	sc := core.NewLayout(vl)
+	sw := core.NewSwitch(sc).SetType(core.SwitchCheckbox).SetTooltip("Toggle off all columns")
 	sw.OnChange(func(e events.Event) {
 		sw.SetChecked(false)
 		pl.SetAllColumns(false)
 	})
-	core.NewButton(sc, "col").SetText("Select Columns").SetType(core.ButtonAction).
+	core.NewButton(sc).SetText("Select Columns").SetType(core.ButtonAction).
 		SetTooltip("click to select columns based on column name").
 		OnClick(func(e events.Event) {
 			views.CallFunc(pl, pl.SetColumnsByName)
 		})
-	core.NewSeparator(vl, "sep")
+	core.NewSeparator(vl)
 
 	for _, cp := range pl.Columns {
 		cp := cp
 		cp.Plot = pl
-		cl := core.NewLayout(vl, cp.Column)
+		cl := core.NewLayout(vl)
 		cl.Style(func(s *styles.Style) {
 			s.Direction = styles.Row
 			s.Grow.Set(0, 0)
 		})
-		sw := core.NewSwitch(cl, "on").SetType(core.SwitchCheckbox).SetTooltip("toggle plot on")
+		sw := core.NewSwitch(cl).SetType(core.SwitchCheckbox).SetTooltip("toggle plot on")
 		sw.OnChange(func(e events.Event) {
 			cp.On = sw.StateIs(states.Checked)
 			pl.UpdatePlot()
 		})
 		sw.SetState(cp.On, states.Checked)
-		bt := core.NewButton(cl, "col").SetText(cp.Column).SetType(core.ButtonAction).
+		bt := core.NewButton(cl).SetText(cp.Column).SetType(core.ButtonAction).
 			SetTooltip("edit column settings including setting as XAxis or Legend")
 		bt.OnClick(func(e events.Event) {
 			d := core.NewBody().AddTitle("Column Params")
