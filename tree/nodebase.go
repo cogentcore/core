@@ -404,20 +404,6 @@ func (n *NodeBase) AddChild(kid Node) error {
 	return nil
 }
 
-// NewChild creates a new child of the given type and adds it at the end
-// of the list of children. The name defaults to the ID (kebab-case) name
-// of the type, plus the [Node.NumLifetimeChildren] of the parent.
-func (n *NodeBase) NewChild(typ *types.Type) Node {
-	if err := checkThis(n); err != nil {
-		return nil
-	}
-	kid := NewOfType(typ)
-	initNode(kid)
-	n.Kids = append(n.Kids, kid)
-	SetParent(kid, n.This())
-	return kid
-}
-
 // SetChild sets the child at the given index to be the given item.
 // It just calls Init and SetParent on the child. The name defaults
 // to the ID (kebab-case) name of the type, plus the
@@ -443,20 +429,6 @@ func (n *NodeBase) InsertChild(kid Node, at int) error {
 	n.Kids.Insert(kid, at)
 	SetParent(kid, n.This())
 	return nil
-}
-
-// InsertNewChild creates a new child of given type and add at position
-// in children list. The name defaults to the ID (kebab-case) name
-// of the type, plus the [Node.NumLifetimeChildren] of the parent.
-func (n *NodeBase) InsertNewChild(typ *types.Type, at int) Node {
-	if err := checkThis(n); err != nil {
-		return nil
-	}
-	kid := NewOfType(typ)
-	initNode(kid)
-	n.Kids.Insert(kid, at)
-	SetParent(kid, n.This())
-	return kid
 }
 
 // SetNChildren ensures that there are exactly n children, deleting any

@@ -58,16 +58,6 @@ type Node interface {
 	// AsTreeNode returns the [NodeBase] for this Node.
 	AsTreeNode() *NodeBase
 
-	// InitName initializes this node to the given actual object as a Node interface
-	// and sets its name. The names should be unique among children of a node.
-	// This is called automatically when adding child nodes and using [NewRoot].
-	// If the name is unspecified, it defaults to the ID (kebab-case) name of the type.
-	// Even though this is a method and gets the method receiver, it needs
-	// an "external" version of itself passed as the first arg, from which
-	// the proper Node interface pointer will be obtained. This is the only
-	// way to get virtual functional calling to work within the Go language.
-	InitName(this Node, name ...string)
-
 	// Name returns the user-defined name of the Node, which can be
 	// used for finding elements, generating paths, I/O, etc.
 	Name() string
@@ -200,11 +190,6 @@ type Node interface {
 	// and the existing name should be unique among children.
 	AddChild(kid Node) error
 
-	// NewChild creates a new child of the given type and adds it at the end
-	// of the list of children. The name defaults to the ID (kebab-case) name
-	// of the type, plus the [Node.NumLifetimeChildren] of the parent.
-	NewChild(typ *types.Type) Node
-
 	// SetChild sets the child at the given index to be the given item.
 	// It just calls Init and SetParent on the child. The name defaults
 	// to the ID (kebab-case) name of the type, plus the
@@ -215,11 +200,6 @@ type Node interface {
 	// The kid node is assumed to not be on another tree (see [MoveToParent])
 	// and the existing name should be unique among children.
 	InsertChild(kid Node, at int) error
-
-	// InsertNewChild creates a new child of given type and add at position
-	// in children list. The name defaults to the ID (kebab-case) name
-	// of the type, plus the [Node.NumLifetimeChildren] of the parent.
-	InsertNewChild(typ *types.Type, at int) Node
 
 	// SetNChildren ensures that there are exactly n children, deleting any
 	// extra, and creating any new ones, using NewChild with given type and
