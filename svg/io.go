@@ -117,7 +117,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 	sv.DeleteAll()
 
 	curPar := sv.Root.This().(Node) // current parent node into which elements are created
-	curSvg := &sv.Root
+	curSvg := sv.Root
 	inTitle := false
 	inDesc := false
 	inDef := false
@@ -186,7 +186,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "defs":
 				inDef = true
 				defPrevPar = curPar
-				curPar = &sv.Defs
+				curPar = sv.Defs
 			case nm == "g":
 				curPar = NewGroup(curPar)
 				for _, attr := range se.Attr {
@@ -434,11 +434,11 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					curTxt = txt
 				} else {
 					if (inTxt && curTxt != nil) || curPar == nil {
-						txt = NewText(curTxt, "tspan")
+						txt = NewText(curTxt)
 						tree.SetUniqueName(txt)
 						txt.Pos = curTxt.Pos
 					} else if curTxt != nil {
-						txt = NewText(curPar, "tspan")
+						txt = NewText(curPar)
 						tree.SetUniqueName(txt)
 					}
 					inTspn = true
@@ -500,7 +500,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case nm == "linearGradient":
-				grad := NewGradient(curPar, "lin-grad")
+				grad := NewGradient(curPar)
 				for _, attr := range se.Attr {
 					if SetStdXMLAttr(grad, attr.Name.Local, attr.Value) {
 						continue
@@ -528,7 +528,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					return err
 				}
 			case nm == "radialGradient":
-				grad := NewGradient(curPar, "rad-grad")
+				grad := NewGradient(curPar)
 				for _, attr := range se.Attr {
 					if SetStdXMLAttr(grad, attr.Name.Local, attr.Value) {
 						continue
@@ -556,7 +556,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					return err
 				}
 			case nm == "style":
-				sty := NewStyleSheet(curPar, "style")
+				sty := NewStyleSheet(curPar)
 				for _, attr := range se.Attr {
 					if SetStdXMLAttr(sty, attr.Name.Local, attr.Value) {
 						continue
@@ -1095,7 +1095,7 @@ func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	XMLAddAttr(&me.Attr, "xmlns", "http://www.w3.org/2000/svg")
 	enc.EncodeToken(me)
 
-	dnm, err := SVGNodeTreeMarshalXML(&sv.Defs, enc, "defs")
+	dnm, err := SVGNodeTreeMarshalXML(sv.Defs, enc, "defs")
 	enc.WriteEnd(dnm)
 
 	for _, k := range sv.Root.Kids {
