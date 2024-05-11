@@ -15,14 +15,12 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/plot/plotview.Colum
 // PlotType is the [types.Type] for [Plot]
 var PlotType = types.AddType(&types.Type{Name: "cogentcore.org/core/plot/plotview.Plot", IDName: "plot", Doc: "Plot is a Widget that renders a [plot.Plot] object.\nIf it is not [states.ReadOnly], the user can pan and zoom the graph.\nSee [ConfigPlotToolbar] for a toolbar with panning, selecting, and I/O buttons,\nand PlotView for an interactive interface for selecting columns to view.", Methods: []types.Method{{Name: "SavePlot", Doc: "SaveSVG saves the current Plot to an SVG file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "SavePNG", Doc: "SavePNG saves the current rendered Plot image to an PNG image file.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Scale", Doc: "Scale multiplies the plot DPI value, to change the overall scale\nof the rendered plot.  Larger numbers produce larger scaling.\nTypically use larger numbers when generating plots for inclusion in\ndocuments or other cases where the overall plot size will be small."}, {Name: "Plot", Doc: "Plot is the Plot to display in this widget"}}, Instance: &Plot{}})
 
-// NewPlot adds a new [Plot] to the given optional parent:
+// NewPlot returns a new [Plot] with the given optional parent:
 // Plot is a Widget that renders a [plot.Plot] object.
 // If it is not [states.ReadOnly], the user can pan and zoom the graph.
 // See [ConfigPlotToolbar] for a toolbar with panning, selecting, and I/O buttons,
 // and PlotView for an interactive interface for selecting columns to view.
-func NewPlot(parent ...tree.Node) *Plot {
-	return tree.New[*Plot](parent...)
-}
+func NewPlot(parent ...tree.Node) *Plot { return tree.New[*Plot](parent...) }
 
 // NodeType returns the [*types.Type] of [Plot]
 func (t *Plot) NodeType() *types.Type { return PlotType }
@@ -43,13 +41,11 @@ func (t *Plot) SetTooltip(v string) *Plot { t.Tooltip = v; return t }
 // PlotViewType is the [types.Type] for [PlotView]
 var PlotViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/plot/plotview.PlotView", IDName: "plot-view", Doc: "PlotView is a Cogent Core Widget that provides an interactive 2D plot\nof selected columns of Tabular data, represented by an IndexView into\na table.Table.  Other types of tabular data can be converted into this format.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Methods: []types.Method{{Name: "SaveSVG", Doc: "SaveSVG saves the plot to an svg -- first updates to ensure that plot is current", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}}, {Name: "SavePNG", Doc: "SavePNG saves the current plot to a png, capturing current render", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}}, {Name: "SaveCSV", Doc: "SaveCSV saves the Table data to a csv (comma-separated values) file with headers (any delim)", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname", "delim"}}, {Name: "SaveAll", Doc: "SaveAll saves the current plot to a png, svg, and the data to a tsv -- full save\nAny extension is removed and appropriate extensions are added", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}}, {Name: "OpenCSV", Doc: "OpenCSV opens the Table data from a csv (comma-separated values) file (or any delim)", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename", "delim"}}, {Name: "SetColumnsByName", Doc: "SetColumnsByName turns cols On or Off if their name contains given string", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"nameContains", "on"}}}, Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Table", Doc: "the table of data being plotted"}, {Name: "Params", Doc: "the overall plot parameters"}, {Name: "Columns", Doc: "the parameters for each column of the table"}, {Name: "Plot", Doc: "the plot object"}, {Name: "ConfigPlotFunc", Doc: "ConfigPlotFunc is a function to call to configure [PlotView.Plot], the plot.Plot that\nactually does the plotting. It is called after [Plot] is generated, and properties\nof [Plot] can be modified in it. Properties of [Plot] should not be modified outside\nof this function, as doing so will have no effect."}, {Name: "SVGFile", Doc: "current svg file"}, {Name: "DataFile", Doc: "current csv data file"}, {Name: "InPlot", Doc: "currently doing a plot"}}, Instance: &PlotView{}})
 
-// NewPlotView adds a new [PlotView] to the given optional parent:
+// NewPlotView returns a new [PlotView] with the given optional parent:
 // PlotView is a Cogent Core Widget that provides an interactive 2D plot
 // of selected columns of Tabular data, represented by an IndexView into
 // a table.Table.  Other types of tabular data can be converted into this format.
-func NewPlotView(parent ...tree.Node) *PlotView {
-	return tree.New[*PlotView](parent...)
-}
+func NewPlotView(parent ...tree.Node) *PlotView { return tree.New[*PlotView](parent...) }
 
 // NodeType returns the [*types.Type] of [PlotView]
 func (t *PlotView) NodeType() *types.Type { return PlotViewType }

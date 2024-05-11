@@ -23,13 +23,11 @@ func (t *ManipPoint) SetMat(v xyz.Material) *ManipPoint { t.Mat = v; return t }
 // SceneType is the [types.Type] for [Scene]
 var SceneType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzview.Scene", IDName: "scene", Doc: "Scene is a core.Widget that manages a xyz.Scene,\nproviding the basic rendering logic for the 3D scene\nin the 2D core GUI context.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "XYZ", Doc: "XYZ is the 3D xyz.Scene"}, {Name: "SelectionMode", Doc: "how to deal with selection / manipulation events"}, {Name: "CurrentSelected", Doc: "currently selected node"}, {Name: "CurrentManipPoint", Doc: "currently selected manipulation control point"}, {Name: "SelectionParams", Doc: "parameters for selection / manipulation box"}}, Instance: &Scene{}})
 
-// NewScene adds a new [Scene] to the given optional parent:
+// NewScene returns a new [Scene] with the given optional parent:
 // Scene is a core.Widget that manages a xyz.Scene,
 // providing the basic rendering logic for the 3D scene
 // in the 2D core GUI context.
-func NewScene(parent ...tree.Node) *Scene {
-	return tree.New[*Scene](parent...)
-}
+func NewScene(parent ...tree.Node) *Scene { return tree.New[*Scene](parent...) }
 
 // NodeType returns the [*types.Type] of [Scene]
 func (t *Scene) NodeType() *types.Type { return SceneType }
@@ -59,12 +57,10 @@ func (t *Scene) SetTooltip(v string) *Scene { t.Tooltip = v; return t }
 // SceneViewType is the [types.Type] for [SceneView]
 var SceneViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzview.SceneView", IDName: "scene-view", Doc: "SceneView provides a toolbar controller for an xyz.Scene,\nand manipulation abilities.", Embeds: []types.Field{{Name: "Layout"}}, Instance: &SceneView{}})
 
-// NewSceneView adds a new [SceneView] to the given optional parent:
+// NewSceneView returns a new [SceneView] with the given optional parent:
 // SceneView provides a toolbar controller for an xyz.Scene,
 // and manipulation abilities.
-func NewSceneView(parent ...tree.Node) *SceneView {
-	return tree.New[*SceneView](parent...)
-}
+func NewSceneView(parent ...tree.Node) *SceneView { return tree.New[*SceneView](parent...) }
 
 // NodeType returns the [*types.Type] of [SceneView]
 func (t *SceneView) NodeType() *types.Type { return SceneViewType }

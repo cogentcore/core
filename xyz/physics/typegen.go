@@ -15,11 +15,9 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Body", 
 // BodyBaseType is the [types.Type] for [BodyBase]
 var BodyBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.BodyBase", IDName: "body-base", Doc: "BodyBase is the base type for all specific Body types", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Rigid", Doc: "rigid body properties, including mass, bounce, friction etc"}, {Name: "Vis", Doc: "visualization name -- looks up an entry in the scene library that provides the visual representation of this body"}, {Name: "Color", Doc: "default color of body for basic InitLibrary configuration"}}, Instance: &BodyBase{}})
 
-// NewBodyBase adds a new [BodyBase] to the given optional parent:
+// NewBodyBase returns a new [BodyBase] with the given optional parent:
 // BodyBase is the base type for all specific Body types
-func NewBodyBase(parent ...tree.Node) *BodyBase {
-	return tree.New[*BodyBase](parent...)
-}
+func NewBodyBase(parent ...tree.Node) *BodyBase { return tree.New[*BodyBase](parent...) }
 
 // NodeType returns the [*types.Type] of [BodyBase]
 func (t *BodyBase) NodeType() *types.Type { return BodyBaseType }
@@ -48,11 +46,9 @@ func (t *BodyBase) SetRel(v State) *BodyBase { t.Rel = v; return t }
 // BoxType is the [types.Type] for [Box]
 var BoxType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Box", IDName: "box", Doc: "Box is a box body shape", Embeds: []types.Field{{Name: "BodyBase"}}, Fields: []types.Field{{Name: "Size", Doc: "size of box in each dimension (units arbitrary, as long as they are all consistent -- meters is typical)"}}, Instance: &Box{}})
 
-// NewBox adds a new [Box] to the given optional parent:
+// NewBox returns a new [Box] with the given optional parent:
 // Box is a box body shape
-func NewBox(parent ...tree.Node) *Box {
-	return tree.New[*Box](parent...)
-}
+func NewBox(parent ...tree.Node) *Box { return tree.New[*Box](parent...) }
 
 // NodeType returns the [*types.Type] of [Box]
 func (t *Box) NodeType() *types.Type { return BoxType }
@@ -82,12 +78,10 @@ func (t *Box) SetColor(v string) *Box { t.Color = v; return t }
 // CapsuleType is the [types.Type] for [Capsule]
 var CapsuleType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Capsule", IDName: "capsule", Doc: "Capsule is a generalized cylinder body shape, with hemispheres at each end,\nwith separate radii for top and bottom.", Embeds: []types.Field{{Name: "BodyBase"}}, Fields: []types.Field{{Name: "Height", Doc: "height of the cylinder portion of the capsule"}, {Name: "TopRad", Doc: "radius of the top hemisphere"}, {Name: "BotRad", Doc: "radius of the bottom hemisphere"}}, Instance: &Capsule{}})
 
-// NewCapsule adds a new [Capsule] to the given optional parent:
+// NewCapsule returns a new [Capsule] with the given optional parent:
 // Capsule is a generalized cylinder body shape, with hemispheres at each end,
 // with separate radii for top and bottom.
-func NewCapsule(parent ...tree.Node) *Capsule {
-	return tree.New[*Capsule](parent...)
-}
+func NewCapsule(parent ...tree.Node) *Capsule { return tree.New[*Capsule](parent...) }
 
 // NodeType returns the [*types.Type] of [Capsule]
 func (t *Capsule) NodeType() *types.Type { return CapsuleType }
@@ -129,12 +123,10 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Contact
 // CylinderType is the [types.Type] for [Cylinder]
 var CylinderType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Cylinder", IDName: "cylinder", Doc: "Cylinder is a generalized cylinder body shape, with separate radii for top and bottom.\nA cone has a zero radius at one end.", Embeds: []types.Field{{Name: "BodyBase"}}, Fields: []types.Field{{Name: "Height", Doc: "height of the cylinder"}, {Name: "TopRad", Doc: "radius of the top -- set to 0 for a cone"}, {Name: "BotRad", Doc: "radius of the bottom"}}, Instance: &Cylinder{}})
 
-// NewCylinder adds a new [Cylinder] to the given optional parent:
+// NewCylinder returns a new [Cylinder] with the given optional parent:
 // Cylinder is a generalized cylinder body shape, with separate radii for top and bottom.
 // A cone has a zero radius at one end.
-func NewCylinder(parent ...tree.Node) *Cylinder {
-	return tree.New[*Cylinder](parent...)
-}
+func NewCylinder(parent ...tree.Node) *Cylinder { return tree.New[*Cylinder](parent...) }
 
 // NodeType returns the [*types.Type] of [Cylinder]
 func (t *Cylinder) NodeType() *types.Type { return CylinderType }
@@ -172,14 +164,12 @@ func (t *Cylinder) SetColor(v string) *Cylinder { t.Color = v; return t }
 // GroupType is the [types.Type] for [Group]
 var GroupType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Group", IDName: "group", Doc: "Group is a container of bodies, joints, or other groups\nit should be used strategically to partition the space\nand its BBox is used to optimize tree-based collision detection.\nUse a group for the top-level World node as well.", Embeds: []types.Field{{Name: "NodeBase"}}, Instance: &Group{}})
 
-// NewGroup adds a new [Group] to the given optional parent:
+// NewGroup returns a new [Group] with the given optional parent:
 // Group is a container of bodies, joints, or other groups
 // it should be used strategically to partition the space
 // and its BBox is used to optimize tree-based collision detection.
 // Use a group for the top-level World node as well.
-func NewGroup(parent ...tree.Node) *Group {
-	return tree.New[*Group](parent...)
-}
+func NewGroup(parent ...tree.Node) *Group { return tree.New[*Group](parent...) }
 
 // NodeType returns the [*types.Type] of [Group]
 func (t *Group) NodeType() *types.Type { return GroupType }
@@ -200,13 +190,11 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Node", 
 // NodeBaseType is the [types.Type] for [NodeBase]
 var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.NodeBase", IDName: "node-base", Doc: "NodeBase is the basic node, which has position, rotation, velocity\nand computed bounding boxes, etc.\nThere are only three different kinds of Nodes: Group, Body, and Joint", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Initial", Doc: "initial position, orientation, velocity in *local* coordinates (relative to parent)"}, {Name: "Rel", Doc: "current relative (local) position, orientation, velocity -- only change these values, as abs values are computed therefrom"}, {Name: "Abs", Doc: "current absolute (world) position, orientation, velocity"}, {Name: "BBox", Doc: "bounding box in world coordinates (aggregated for groups)"}}, Instance: &NodeBase{}})
 
-// NewNodeBase adds a new [NodeBase] to the given optional parent:
+// NewNodeBase returns a new [NodeBase] with the given optional parent:
 // NodeBase is the basic node, which has position, rotation, velocity
 // and computed bounding boxes, etc.
 // There are only three different kinds of Nodes: Group, Body, and Joint
-func NewNodeBase(parent ...tree.Node) *NodeBase {
-	return tree.New[*NodeBase](parent...)
-}
+func NewNodeBase(parent ...tree.Node) *NodeBase { return tree.New[*NodeBase](parent...) }
 
 // NodeType returns the [*types.Type] of [NodeBase]
 func (t *NodeBase) NodeType() *types.Type { return NodeBaseType }
@@ -229,11 +217,9 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Rigid",
 // SphereType is the [types.Type] for [Sphere]
 var SphereType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Sphere", IDName: "sphere", Doc: "Sphere is a spherical body shape.", Embeds: []types.Field{{Name: "BodyBase"}}, Fields: []types.Field{{Name: "Radius", Doc: "radius"}}, Instance: &Sphere{}})
 
-// NewSphere adds a new [Sphere] to the given optional parent:
+// NewSphere returns a new [Sphere] with the given optional parent:
 // Sphere is a spherical body shape.
-func NewSphere(parent ...tree.Node) *Sphere {
-	return tree.New[*Sphere](parent...)
-}
+func NewSphere(parent ...tree.Node) *Sphere { return tree.New[*Sphere](parent...) }
 
 // NodeType returns the [*types.Type] of [Sphere]
 func (t *Sphere) NodeType() *types.Type { return SphereType }

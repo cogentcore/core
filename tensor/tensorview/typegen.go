@@ -11,12 +11,10 @@ import (
 // SimMatGridType is the [types.Type] for [SimMatGrid]
 var SimMatGridType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.SimMatGrid", IDName: "sim-mat-grid", Doc: "SimMatGrid is a widget that displays a similarity / distance matrix\nwith tensor values as a grid of colored squares, and labels for rows and columns.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "TensorGrid"}}, Fields: []types.Field{{Name: "SimMat", Doc: "the similarity / distance matrix"}, {Name: "rowMaxSz"}, {Name: "rowMinBlank"}, {Name: "rowNGps"}, {Name: "colMaxSz"}, {Name: "colMinBlank"}, {Name: "colNGps"}}, Instance: &SimMatGrid{}})
 
-// NewSimMatGrid adds a new [SimMatGrid] to the given optional parent:
+// NewSimMatGrid returns a new [SimMatGrid] with the given optional parent:
 // SimMatGrid is a widget that displays a similarity / distance matrix
 // with tensor values as a grid of colored squares, and labels for rows and columns.
-func NewSimMatGrid(parent ...tree.Node) *SimMatGrid {
-	return tree.New[*SimMatGrid](parent...)
-}
+func NewSimMatGrid(parent ...tree.Node) *SimMatGrid { return tree.New[*SimMatGrid](parent...) }
 
 // NodeType returns the [*types.Type] of [SimMatGrid]
 func (t *SimMatGrid) NodeType() *types.Type { return SimMatGridType }
@@ -36,11 +34,9 @@ func (t *SimMatGrid) SetColorMap(v *colormap.Map) *SimMatGrid { t.ColorMap = v; 
 // TableViewType is the [types.Type] for [TableView]
 var TableViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TableView", IDName: "table-view", Doc: "TableView provides a GUI view for [table.Table] values.", Embeds: []types.Field{{Name: "SliceViewBase"}}, Fields: []types.Field{{Name: "Table", Doc: "the idx view of the table that we're a view of"}, {Name: "TensorDisplay", Doc: "overall display options for tensor display"}, {Name: "ColumnTensorDisplay", Doc: "per column tensor display params"}, {Name: "ColumnTensorBlank", Doc: "per column blank tensor values"}, {Name: "NCols", Doc: "number of columns in table (as of last update)"}, {Name: "SortIndex", Doc: "current sort index"}, {Name: "SortDesc", Doc: "whether current sort order is descending"}, {Name: "HeaderWidths", Doc: "HeaderWidths has number of characters in each header, per visfields"}, {Name: "ColMaxWidths", Doc: "ColMaxWidths records maximum width in chars of string type fields"}, {Name: "BlankString", Doc: "\tblank values for out-of-range rows"}, {Name: "BlankFloat"}}, Instance: &TableView{}})
 
-// NewTableView adds a new [TableView] to the given optional parent:
+// NewTableView returns a new [TableView] with the given optional parent:
 // TableView provides a GUI view for [table.Table] values.
-func NewTableView(parent ...tree.Node) *TableView {
-	return tree.New[*TableView](parent...)
-}
+func NewTableView(parent ...tree.Node) *TableView { return tree.New[*TableView](parent...) }
 
 // NodeType returns the [*types.Type] of [TableView]
 func (t *TableView) NodeType() *types.Type { return TableViewType }
@@ -97,11 +93,9 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.T
 // TensorGridType is the [types.Type] for [TensorGrid]
 var TensorGridType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TensorGrid", IDName: "tensor-grid", Doc: "TensorGrid is a widget that displays tensor values as a grid of colored squares.", Methods: []types.Method{{Name: "EditSettings", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Tensor", Doc: "the tensor that we view"}, {Name: "Disp", Doc: "display options"}, {Name: "ColorMap", Doc: "the actual colormap"}}, Instance: &TensorGrid{}})
 
-// NewTensorGrid adds a new [TensorGrid] to the given optional parent:
+// NewTensorGrid returns a new [TensorGrid] with the given optional parent:
 // TensorGrid is a widget that displays tensor values as a grid of colored squares.
-func NewTensorGrid(parent ...tree.Node) *TensorGrid {
-	return tree.New[*TensorGrid](parent...)
-}
+func NewTensorGrid(parent ...tree.Node) *TensorGrid { return tree.New[*TensorGrid](parent...) }
 
 // NodeType returns the [*types.Type] of [TensorGrid]
 func (t *TensorGrid) NodeType() *types.Type { return TensorGridType }

@@ -11,12 +11,10 @@ import (
 // VideoType is the [types.Type] for [Video]
 var VideoType = types.AddType(&types.Type{Name: "cogentcore.org/core/video.Video", IDName: "video", Doc: "Video represents a video playback widget without any controls.\nSee [Player] for a version with controls.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Media", Doc: "Media is the video media."}, {Name: "Rotation", Doc: "degrees of rotation to apply to the video images\n90 = left 90, -90 = right 90"}, {Name: "Stop", Doc: "setting this to true will stop the playing"}, {Name: "frameBuffer"}, {Name: "frameTarg", Doc: "target frame number to be played"}, {Name: "framePlayed", Doc: "actual frame number displayed"}, {Name: "frameStop", Doc: "frame number to stop playing at, if > 0"}}, Instance: &Video{}})
 
-// NewVideo adds a new [Video] to the given optional parent:
+// NewVideo returns a new [Video] with the given optional parent:
 // Video represents a video playback widget without any controls.
 // See [Player] for a version with controls.
-func NewVideo(parent ...tree.Node) *Video {
-	return tree.New[*Video](parent...)
-}
+func NewVideo(parent ...tree.Node) *Video { return tree.New[*Video](parent...) }
 
 // NodeType returns the [*types.Type] of [Video]
 func (t *Video) NodeType() *types.Type { return VideoType }
