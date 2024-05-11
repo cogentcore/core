@@ -18,79 +18,43 @@ import (
 )
 
 func TestNodeAddChild(t *testing.T) {
-	parent := testdata.NodeEmbed{}
-	parent.InitName(&parent, "par1")
-	child := testdata.NodeEmbed{}
-	// Note: must pass child.KiNode as a pointer  -- if it is a plain Node it is ok but
-	// as a member of a struct, for somewhat obscure reasons having to do with the
-	// fact that an interface is implicitly a pointer, you need to pass as a pointer here
-	parent.AddChild(&child)
+	parent := NewNodeBase()
+	child := &NodeBase{}
+	parent.AddChild(child)
 	child.SetName("child1")
-	if len(parent.Kids) != 1 {
-		t.Errorf("Children length != 1, was %d", len(parent.Kids))
-	}
-	if child.Parent() == nil {
-		t.Errorf("child parent is nil")
-	}
-	if child.Path() != "/par1/child1" {
-		t.Errorf("child path != correct, was %v", child.Path())
-	}
+	assert.Equal(t, 1, len(parent.Kids))
+	assert.Equal(t, parent, child.Parent())
+	assert.Equal(t, "/node-base/child1", child.Path())
 }
 
 func TestNodeEmbedAddChild(t *testing.T) {
-	parent := testdata.NodeEmbed{}
-	parent.InitName(&parent, "par1")
-	child := testdata.NodeEmbed{}
-	// Note: must pass child as a pointer  -- if it is a plain Node it is ok but
-	// as a member of a struct, for somewhat obscure reasons having to do with the
-	// fact that an interface is implicitly a pointer, you need to pass as a pointer here
-	parent.AddChild(&child)
+	parent := testdata.NewNodeEmbed()
+	child := &testdata.NodeEmbed{}
+	parent.AddChild(child)
 	child.SetName("child1")
-	if len(parent.Kids) != 1 {
-		t.Errorf("Children length != 1, was %d", len(parent.Kids))
-	}
-	if child.Path() != "/par1/child1" {
-		t.Errorf("child path != correct, was %v", child.Path())
-	}
+	assert.Len(t, parent.Kids, 1)
+	assert.Equal(t, parent, child.Parent())
+	assert.Equal(t, "/node-embed/child1", child.Path())
 }
 
 func TestNodeEmbedNewChild(t *testing.T) {
-	// nod := Node{}
-	parent := testdata.NodeEmbed{}
-	parent.InitName(&parent, "par1")
-	typ := parent.NodeType()
-	child := parent.NewChild(typ, "child1")
-	if len(parent.Kids) != 1 {
-		t.Errorf("Children length != 1, was %d", len(parent.Kids))
-	}
-	if child.Path() != "/par1/child1" {
-		t.Errorf("child path != correct, was %v", child.Path())
-	}
-	if child.NodeType() != parent.NodeType() {
-		t.Errorf("child type != correct, was %T", child)
-	}
+	parent := testdata.NewNodeEmbed()
+	child := parent.NewChild(parent.NodeType())
+	child.SetName("child1")
+	assert.Len(t, parent.Kids, 1)
+	assert.Equal(t, "/node-embed/child1", child.Path())
+	assert.Equal(t, parent.NodeType(), child.NodeType())
 }
 
 func TestNodePath(t *testing.T) {
-	parent := testdata.NodeEmbed{}
-	parent.InitName(&parent, "par1")
-	typ := parent.NodeType()
-	child := parent.NewChild(typ, "child1")
-	child2 := parent.NewChild(typ, "child2")
-	child3 := parent.NewChild(typ, "child3")
-	if len(parent.Kids) != 3 {
-		t.Errorf("Children length != 3, was %d", len(parent.Kids))
-	}
-	if pth := child.Path(); pth != "/par1/child1" {
-		t.Errorf("child path != correct, was %v", pth)
-	}
-	if pth := child2.Path(); pth != "/par1/child2" {
-		t.Errorf("child2 path != correct, was %v", pth)
-	}
-	if pth := child3.Path(); pth != "/par1/child3" {
-		t.Errorf("child3 path != correct, was %v", pth)
-	}
-
+	parent := testdata.NewNodeEmbed()
+	child1 := parent.NewChild(parent.NodeType())
+	child2 := parent.NewChild(parent.NodeType())
+	child3 := parent.NewChild(parent.NodeType())
+	assert.Len(t, parent.Kids, 3)
+	assert.Equal(t, "/node-embed/child1", child1.Path())
+	assert.Equal(t, "/node-embed/child2", child2.Path())
+	assert.Equal(t, "/node-embed/child3", child3.Path())
 }
 
 func TestNodeEscapePaths(t *testing.T) {
