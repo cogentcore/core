@@ -67,7 +67,7 @@ func (mv *MapView) SetStyles() {
 
 func (mv *MapView) Config() {
 	if !mv.HasChildren() {
-		core.NewFrame(mv, "map-grid")
+		core.NewFrame(mv).SetName("map-grid")
 	}
 	mv.ConfigMapGrid()
 }
@@ -230,12 +230,12 @@ func (mv *MapView) ConfigToolbar(tb *core.Toolbar) {
 	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
-	core.NewButton(tb, "sort").SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys vs. the values").
+	core.NewButton(tb).SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys vs. the values").
 		OnClick(func(e events.Event) {
 			mv.ToggleSort()
 		})
 	if !mv.IsReadOnly() {
-		core.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
+		core.NewButton(tb).SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
 			OnClick(func(e events.Event) {
 				mv.MapAdd()
 			})

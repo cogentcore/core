@@ -237,7 +237,7 @@ func (tv *TableView) ConfigFrame() {
 		return
 	}
 	tv.SetFlag(true, SliceViewConfigured)
-	core.NewFrame(tv, "header")
+	core.NewFrame(tv).SetName("header")
 	NewSliceViewGrid(tv, "grid")
 	tv.ConfigHeader()
 }
@@ -352,13 +352,12 @@ func (tv *TableView) ConfigRows() {
 		}
 		stru := val.Interface()
 
-		idxlab := &core.Text{}
 		itxt := strconv.Itoa(i)
 		sitxt := strconv.Itoa(si)
-		labnm := "index-" + itxt
 		if tv.Is(SliceViewShowIndex) {
-			idxlab = &core.Text{}
-			sg.SetChild(idxlab, ridx, labnm)
+			idxlab := core.NewText()
+			idxlab.SetName("index-" + itxt)
+			sg.SetChild(idxlab, ridx)
 			idxlab.SetText(sitxt)
 			idxlab.OnSelect(func(e events.Event) {
 				e.SetHandled()
@@ -385,7 +384,8 @@ func (tv *TableView) ConfigRows() {
 			valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
 			cidx := ridx + idxOff + fli
 			w := tree.NewOfType(vtyp).(core.Widget)
-			sg.SetChild(w, cidx, valnm)
+			w.SetName(valnm)
+			sg.SetChild(w, cidx)
 			Config(vv, w)
 			w.SetProperty(SliceViewRowProperty, i)
 			w.SetProperty(SliceViewColProperty, fli)

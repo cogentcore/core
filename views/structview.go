@@ -138,7 +138,7 @@ func (sv *StructView) Config() {
 		sv.ConfigStructGrid()
 		return
 	}
-	core.NewFrame(sv, "struct-grid")
+	core.NewFrame(sv).SetName("struct-grid")
 	sv.ConfigStructGrid()
 	sv.NeedsLayout()
 }

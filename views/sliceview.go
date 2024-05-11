@@ -688,12 +688,11 @@ func (sv *SliceViewBase) ConfigRows() {
 		vtyp := vv.WidgetType()
 		itxt := strconv.Itoa(i)
 		sitxt := strconv.Itoa(si)
-		labnm := "index-" + itxt
-		valnm := "value-" + itxt
 
 		if sv.Is(SliceViewShowIndex) {
-			idxlab := &core.Text{}
-			sg.SetChild(idxlab, ridx, labnm)
+			idxlab := core.NewText()
+			idxlab.SetName("index-" + itxt)
+			sg.SetChild(idxlab, ridx)
 			idxlab.SetText(sitxt)
 			idxlab.OnSelect(func(e events.Event) {
 				e.SetHandled()
@@ -704,7 +703,8 @@ func (sv *SliceViewBase) ConfigRows() {
 		}
 
 		w := tree.NewOfType(vtyp).(core.Widget)
-		sg.SetChild(w, ridx+idxOff, valnm)
+		w.SetName("value-" + itxt)
+		sg.SetChild(w, ridx+idxOff)
 		Config(vv, w)
 		w.SetProperty(SliceViewRowProperty, i)
 
@@ -846,7 +846,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 					d.AddOK(parent).OnClick(func(e events.Event) {
 						for i := 0; i < nd.Number; i++ {
 							nm := fmt.Sprintf("New%v%v", nd.Type.Name, idx+1+i)
-							owntree.InsertNewChild(nd.Type, idx+1+i, nm)
+							owntree.InsertNewChild(nd.Type, idx+1+i).SetName(nm)
 						}
 						sv.SendChange()
 					})
@@ -949,7 +949,7 @@ func (sv *SliceViewBase) ConfigToolbar(tb *core.Toolbar) {
 	if sv.Is(SliceViewIsArray) || sv.IsReadOnly() {
 		return
 	}
-	core.NewButton(tb, "slice-add").SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the slice").
+	core.NewButton(tb).SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the slice").
 		OnClick(func(e events.Event) {
 			sv.This().(SliceViewer).SliceNewAt(-1)
 		})
