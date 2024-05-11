@@ -49,7 +49,7 @@ func (ic *Icon) SetStyles() {
 }
 
 // SetIcon sets the icon, logging error if not found.
-// Does nothing if Icon is already == icon name.
+// Does nothing if Icon is already equal to the given icon.
 func (ic *Icon) SetIcon(icon icons.Icon) *Icon {
 	_, err := ic.SetIconTry(icon)
 	if err != nil {
@@ -58,16 +58,16 @@ func (ic *Icon) SetIcon(icon icons.Icon) *Icon {
 	return ic
 }
 
-// SetIconTry sets the icon, returning error
-// message if not found etc, and returning true if a new icon was actually set.
-// Does nothing and returns false if Icon is already == icon name.
+// SetIconTry sets the icon, returning error message if not found etc,
+// and returning true if a new icon was actually set.
+// Does nothing and returns false if Icon is already equal to the given icon.
 func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 	if icon.IsNil() {
 		ic.SVG.DeleteAll()
 		ic.Config()
 		return false, nil
 	}
-	if ic.SVG.Root.HasChildren() && ic.Icon == icon {
+	if ic.SVG.Root != nil && ic.SVG.Root.HasChildren() && ic.Icon == icon {
 		// fmt.Println("icon already set:", icon)
 		return false, nil
 	}
