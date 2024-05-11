@@ -58,58 +58,40 @@ func TestNodePath(t *testing.T) {
 }
 
 func TestNodeEscapePaths(t *testing.T) {
-	parent := testdata.NewNodeEmbed()
-	typ := parent.NodeType()
-	child := parent.NewChild(typ, "child1.go")
-	child2 := parent.NewChild(typ, "child1/child1")
-	child3 := parent.NewChild(typ, "child1/child1.go")
-	schild2 := child2.NewChild(typ, "subchild1")
-	if len(parent.Kids) != 3 {
-		t.Errorf("Children length != 3, was %d", len(parent.Kids))
-	}
-	if pth := child.Path(); pth != `/par1/child1\,go` {
-		t.Errorf("child path != correct, was %v", pth)
-	}
-	if pth := child2.Path(); pth != `/par1/child1\\child1` {
-		t.Errorf("child2 path != correct, was %v", pth)
-	}
-	if pth := child3.Path(); pth != `/par1/child1\\child1\,go` {
-		t.Errorf("child3 path != correct, was %v", pth)
-	}
-	ch := parent.FindPath(child.Path())
-	if ch != child {
-		t.Errorf("child path not found in parent")
-	}
-	ch = parent.FindPath(child3.Path())
-	if ch != child3 {
-		t.Errorf("child3 path not found in parent")
-	}
-	ch = parent.FindPath(child3.Path())
-	if ch != child3 {
-		t.Errorf("child3 path not found in parent")
-	}
-	ch = parent.FindPath(schild2.Path())
-	if ch != schild2 {
-		t.Errorf("schild2 path not found in parent")
-	}
-	ch = child2.FindPath(schild2.Path())
-	if ch != schild2 {
-		t.Errorf("schild2 path not found in child2")
-	}
+	parent := NewNodeBase()
+	child1 := parent.NewChild(NodeBaseType)
+	child1.SetName("child1.go")
+	child2 := parent.NewChild(NodeBaseType)
+	child2.SetName("child1/child1")
+	child3 := parent.NewChild(NodeBaseType)
+	child3.SetName("child1/child1.go")
+	schild2 := child2.NewChild(NodeBaseType)
+	schild2.SetName("subchild1")
+	assert.Len(t, parent.Kids, 3)
+	assert.Equal(t, `/node-base/child1\,go`, child1.Path())
+	assert.Equal(t, `/node-base/child1\\child1`, child2.Path())
+	assert.Equal(t, `/node-base/child1\\child1\,go`, child3.Path())
+	assert.Equal(t, `/node-base/child1\\child1/subchild1`, schild2.Path())
+	assert.Equal(t, child1, parent.FindPath(child1.Path()))
+	assert.Equal(t, child3, parent.FindPath(child3.Path()))
+	assert.Equal(t, child3, parent.FindPath(child3.Path()))
+	assert.Equal(t, schild2, parent.FindPath(schild2.Path()))
+	assert.Equal(t, schild2, child2.FindPath(schild2.Path()))
 }
 
 func TestNodePathFrom(t *testing.T) {
-	a := NewRoot[*NodeBase]("a")
-	b := NewNodeBase(a, "b")
-	c := NewNodeBase(b, "c")
-	d := NewNodeBase(c, "d")
-	NewNodeBase(d, "e")
+	a := NewNodeBase()
+	a.SetName("a")
+	b := NewNodeBase(a)
+	b.SetName("b")
+	c := NewNodeBase(b)
+	c.SetName("c")
+	d := NewNodeBase(c)
+	d.SetName("d")
+	e := NewNodeBase(d)
+	e.SetName("e")
 
-	have := d.PathFrom(b)
-	want := "c/d"
-	if have != want {
-		t.Errorf("expected PathFrom to be %q, but got %q", want, have)
-	}
+	assert.Equal(t, "c/d", d.PathFrom(b))
 }
 
 func TestNodeDeleteChild(t *testing.T) {
