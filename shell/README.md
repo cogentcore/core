@@ -123,6 +123,10 @@ cossh close
 
 Will close all active connections and return the default host to @0.  All active connections are also automatically closed when the shell terminates.
 
+# Other Utilties
+
+** need a replacement for findnm -- very powerful but garbage..
+
 # Rules for Go vs. Shell determination
 
 The critical extension from standard Go syntax is for lines that are processed by the `Exec` functions, used for running arbitrary programs on the user's executable path.  Here are the rules (word = IDENT token):
