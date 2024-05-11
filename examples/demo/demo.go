@@ -74,7 +74,7 @@ func text(ts *core.Tabs) {
 
 	for _, typ := range core.TextTypesValues() {
 		s := strcase.ToSentence(typ.String())
-		core.NewText(tab, "text"+typ.String()).SetType(typ).SetText(s)
+		core.NewText(tab).SetType(typ).SetText(s)
 	}
 }
 
@@ -149,31 +149,31 @@ func buttons(ts *core.Tabs) {
 			art = "An "
 		}
 
-		b := core.NewButton(brow, "button"+s).SetType(typ).SetText(s).SetIcon(ics[typ]).
+		b := core.NewButton(brow).SetType(typ).SetText(s).SetIcon(ics[typ]).
 			SetTooltip("A standard " + sl + " button with text and an icon")
 		b.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", b.Nm)
 		})
 
-		bt := core.NewButton(browt, "buttonText"+s).SetType(typ).SetText(s).
+		bt := core.NewButton(browt).SetType(typ).SetText(s).
 			SetTooltip("A standard " + sl + " button with text")
 		bt.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", bt.Nm)
 		})
 
-		bi := core.NewButton(browi, "buttonIcon"+s).SetType(typ).SetIcon(ics[typ+5]).
+		bi := core.NewButton(browi).SetType(typ).SetIcon(ics[typ+5]).
 			SetTooltip("A standard " + sl + " button with an icon")
 		bi.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", bi.Nm)
 		})
 
-		core.NewButton(mbrow, "menuButton"+s).SetType(typ).SetText(s).SetIcon(ics[typ+10]).SetMenu(menu).
+		core.NewButton(mbrow).SetType(typ).SetText(s).SetIcon(ics[typ+10]).SetMenu(menu).
 			SetTooltip(art + sl + " menu button with text and an icon")
 
-		core.NewButton(mbrowt, "menuButtonText"+s).SetType(typ).SetText(s).SetMenu(menu).
+		core.NewButton(mbrowt).SetType(typ).SetText(s).SetMenu(menu).
 			SetTooltip(art + sl + " menu button with text")
 
-		core.NewButton(mbrowi, "menuButtonIcon"+s).SetType(typ).SetIcon(ics[typ+15]).SetMenu(menu).
+		core.NewButton(mbrowi).SetType(typ).SetIcon(ics[typ+15]).SetMenu(menu).
 			SetTooltip(art + sl + " menu button with an icon")
 	}
 }
@@ -201,12 +201,12 @@ func inputs(ts *core.Tabs) {
 			s.SetTextWrap(true)
 		})
 
-	spinners := core.NewLayout(tab, "spinners")
+	spinners := core.NewLayout(tab)
 
 	core.NewSpinner(spinners).SetStep(5).SetMin(-50).SetMax(100).SetValue(15)
 	core.NewSpinner(spinners).SetFormat("%X").SetStep(1).SetMax(255).SetValue(44)
 
-	choosers := core.NewLayout(tab, "choosers")
+	choosers := core.NewLayout(tab)
 
 	fruits := []core.ChooserItem{
 		{Value: "Apple", Tooltip: "A round, edible fruit that typically has red skin"},
@@ -322,21 +322,21 @@ func makeIcons(ts *core.Tabs) {
 			s.Overflow.Y = styles.OverflowAuto
 		})
 
-		icnms := icons.All()
-		for _, ic := range icnms {
-			icnm := string(ic)
-			if strings.HasSuffix(icnm, "-fill") {
+		ics := icons.All()
+		for _, ic := range ics {
+			sic := string(ic)
+			if strings.HasSuffix(sic, "-fill") {
 				continue
 			}
-			vb := core.NewLayout(grid, icnm).Style(func(s *styles.Style) {
+			vb := core.NewLayout(grid).Style(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Max.X.Em(15) // constraining width exactly gives nice grid-like appearance
 				s.Min.X.Em(15)
 			})
-			core.NewIcon(vb, icnm).SetIcon(icons.Icon(icnm)).Style(func(s *styles.Style) {
+			core.NewIcon(vb).SetIcon(ic).Style(func(s *styles.Style) {
 				s.Min.Set(units.Em(4))
 			})
-			core.NewText(vb, icnm).SetText(strcase.ToSentence(icnm)).Style(func(s *styles.Style) {
+			core.NewText(vb).SetText(strcase.ToSentence(sic)).Style(func(s *styles.Style) {
 				s.SetTextWrap(false)
 			})
 		}
