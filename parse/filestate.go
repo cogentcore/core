@@ -41,7 +41,7 @@ type FileState struct {
 	ParseState parser.State `json:"-" xml:"-"`
 
 	// ast output tree from parsing
-	Ast parser.Ast `json:"-" xml:"-"`
+	Ast *parser.Ast `json:"-" xml:"-"`
 
 	// symbols contained within this file -- initialized at start of parsing and created by AddSymbol or PushNewScope actions.  These are then processed after parsing by the language-specific code, via Lang interface.
 	Syms syms.SymMap `json:"-" xml:"-"`
@@ -65,10 +65,10 @@ type FileState struct {
 // Init initializes the file state
 func (fs *FileState) Init() {
 	// fmt.Println("fs init:", fs.Src.Filename)
-	fs.Ast.InitName(&fs.Ast, "Ast")
+	fs.Ast = parser.NewAst()
 	fs.LexState.Init()
 	fs.TwoState.Init()
-	fs.ParseState.Init(&fs.Src, &fs.Ast)
+	fs.ParseState.Init(&fs.Src, fs.Ast)
 	fs.SymsMu.Lock()
 	fs.Syms = make(syms.SymMap)
 	fs.SymsMu.Unlock()

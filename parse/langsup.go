@@ -169,5 +169,5 @@ func (ll *LangSupporter) LexerByName(lang string) *lexer.Rule {
 		// log.Printf("core.LangSupport: no lexer / parser support for language: %v\n", lang)
 		return nil
 	}
-	return &lp.Parser.Lexer
+	return lp.Parser.Lexer
 }

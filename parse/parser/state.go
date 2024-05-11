@@ -278,9 +278,8 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lexer.Reg) (lexer.Pos
 
 // AddAst adds a child Ast node to given parent Ast node
 func (ps *State) AddAst(parAst *Ast, rule string, reg lexer.Reg) *Ast {
-	chAst := &Ast{}
-	chAst.InitName(chAst, rule)
-	parAst.AddChild(chAst)
+	chAst := NewAst(parAst)
+	chAst.SetName(rule)
 	chAst.SetTokReg(reg, ps.Src)
 	return chAst
 }
