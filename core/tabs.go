@@ -431,6 +431,7 @@ func (ts *Tabs) ConfigNewTabButton() bool {
 			return false
 		}
 		nt := NewButton(tb).SetIcon(icons.Add).SetType(ButtonAction)
+		nt.SetName("new-tab")
 		nt.OnClick(func(e events.Event) {
 			ts.NewTab("New tab")
 			ts.SelectTabIndex(ts.NumTabs() - 1)
