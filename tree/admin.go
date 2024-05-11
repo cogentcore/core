@@ -152,7 +152,8 @@ func setUniqueName(n Node, addIfSet bool) {
 	c := atomic.AddUint64(&pn.AsTreeNode().numLifetimeChildren, 1)
 	id := "-" + strconv.FormatUint(c-1, 10) // must subtract 1 so we start at 0
 	if n.Name() == "" {
-		n.SetName(n.NodeType().IDName + id)
+		// must get This for accurate NodeType
+		n.SetName(n.This().NodeType().IDName + id)
 	} else if addIfSet {
 		n.SetName(n.Name() + id)
 	}

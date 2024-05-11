@@ -52,9 +52,9 @@ func TestNodePath(t *testing.T) {
 	child2 := parent.NewChild(parent.NodeType())
 	child3 := parent.NewChild(parent.NodeType())
 	assert.Len(t, parent.Kids, 3)
-	assert.Equal(t, "/node-embed/node-base-0", child1.Path())
-	assert.Equal(t, "/node-embed/node-base-1", child2.Path())
-	assert.Equal(t, "/node-embed/node-base-2", child3.Path())
+	assert.Equal(t, "/node-embed/node-embed-0", child1.Path())
+	assert.Equal(t, "/node-embed/node-embed-1", child2.Path())
+	assert.Equal(t, "/node-embed/node-embed-2", child3.Path())
 }
 
 func TestNodeEscapePaths(t *testing.T) {
@@ -397,6 +397,9 @@ func TestSetUniqueName(t *testing.T) {
 	// but does change with SetUniqueName when there is already a name
 	SetUniqueName(child)
 	assert.Equal(t, "my-name-2", child.Name())
+
+	newChild := testdata.NewNodeEmbed(root)
+	assert.Equal(t, "node-embed-3", newChild.Name())
 }
 
 func TestTreeMod(t *testing.T) {
