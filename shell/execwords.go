@@ -36,12 +36,14 @@ func ExecWords(ln string) ([]string, error) {
 		}
 	}
 
+	atStart := true
 	sbrack := (ln[0] == '[')
 	if sbrack {
 		word = "["
 		addWord()
 		brack++
 		ln = ln[1:]
+		atStart = false
 	}
 
 	for _, r := range ln {
@@ -64,6 +66,9 @@ func ExecWords(ln string) ([]string, error) {
 
 		switch {
 		case esc:
+			if brace == 0 && unicode.IsSpace(r) { // we will be quoted later anyway
+				word = word[:len(word)-1]
+			}
 			word += string(r)
 			esc = false
 		case r == '\\':
@@ -83,6 +88,7 @@ func ExecWords(ln string) ([]string, error) {
 			word += string(r)
 		case unicode.IsSpace(r):
 			addWord()
+			continue // don't reset at start
 		case r == '{':
 			if brace == 0 {
 				addWord()
@@ -99,6 +105,10 @@ func ExecWords(ln string) ([]string, error) {
 			}
 		case r == '[':
 			word += string(r)
+			if atStart && brack == 0 {
+				sbrack = true
+				addWord()
+			}
 			brack++
 		case r == ']':
 			brack--
@@ -113,12 +123,19 @@ func ExecWords(ln string) ([]string, error) {
 			addWord()
 			word += string(r)
 			redir = true
-		case r == '&' || r == ';': // & known to not be redir
+		case r == '&': // known to not be redir
 			addWord()
 			word += string(r)
+		case r == ';':
+			addWord()
+			word += string(r)
+			addWord()
+			atStart = true
+			continue // avoid reset
 		default:
 			word += string(r)
 		}
+		atStart = false
 	}
 	addWord()
 	if dQuote || bQuote || brack > 0 {

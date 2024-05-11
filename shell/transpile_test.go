@@ -38,6 +38,9 @@ func TestExecWords(t *testing.T) {
 		{`cat vals... | grep -v "b"`, false, []string{`cat`, `vals...`, `|`, `grep`, `-v`, `"b"`}},
 		{`cat vals...>&file.out`, false, []string{`cat`, `vals...`, `>&`, `file.out`}},
 		{`cat vals...>&@0:file.out`, false, []string{`cat`, `vals...`, `>&`, `@0:file.out`}},
+		{`./"Cogent Code"`, false, []string{`./"Cogent Code"`}},
+		{`Cogent\ Code`, false, []string{`Cogent Code`}},
+		{`./Cogent\ Code`, false, []string{`./Cogent Code`}},
 	}
 	for _, test := range tests {
 		o, err := ExecWords(test.i)
@@ -52,12 +55,40 @@ func TestExecWords(t *testing.T) {
 	}
 }
 
+// Paths tests the Path() code
+func TestPaths(t *testing.T) {
+	// logx.UserLevel = slog.LevelDebug
+	tests := []exIn{
+		{`fmt.Println("hi")`, `fmt.Println`},
+		{"./cosh -i", `./cosh`},
+		{"main.go", `main.go`},
+		{"cogent/", `cogent/`},
+		{`./"Cogent Code"`, `./\"Cogent Code\"`},
+		{`Cogent\ Code`, ``},
+		{`./Cogent\ Code`, `./Cogent Code`},
+		{"./ios-deploy", `./ios-deploy`},
+		{"ios_deploy/sub", `ios_deploy/sub`},
+		{"C:/ios_deploy/sub", `C:/ios_deploy/sub`},
+		{"..", `..`},
+		{"../another/dir/to/go_to", `../another/dir/to/go_to`},
+		{"../an-other/dir/", `../an-other/dir/`},
+		{"https://google.com/search?q=hello%20world#body", `https://google.com/search?q=hello%20world#body`},
+	}
+	sh := NewShell()
+	for _, test := range tests {
+		toks := sh.Tokens(test.i)
+		p, _ := toks.Path(false)
+		assert.Equal(t, test.e, p)
+	}
+}
+
 // these are more general tests of full-line statements of various forms
 func TestTranspile(t *testing.T) {
 	// logx.UserLevel = slog.LevelDebug
 	tests := []exIn{
 		{"ls", `shell.Run("ls")`},
 		{"`ls -la`", `shell.Run("ls", "-la")`},
+		{"ls -la", `shell.Run("ls", "-la")`},
 		{"ls --help", `shell.Run("ls", "--help")`},
 		{"ls go", `shell.Run("ls", "go")`},
 		{"cd go", `shell.Run("cd", "go")`},
@@ -88,6 +119,7 @@ func TestTranspile(t *testing.T) {
 		{`cat file | grep -v exe > test.out`, `shell.Run("cat", "file", "|", "grep", "-v", "exe", ">", "test.out")`},
 		{`cd sub; pwd; ls -la`, `shell.Run("cd", "sub"); shell.Run("pwd"); shell.Run("ls", "-la")`},
 		{`cd sub; [mkdir sub]; ls -la`, `shell.Run("cd", "sub"); shell.RunErrOK("mkdir", "sub"); shell.Run("ls", "-la")`},
+		{`cd sub; mkdir names[4]`, `shell.Run("cd", "sub"); shell.Run("mkdir", "names[4]")`},
 		{"ls -la > test.out", `shell.Run("ls", "-la", ">", "test.out")`},
 		{"ls > test.out", `shell.Run("ls", ">", "test.out")`},
 		{"ls -la >test.out", `shell.Run("ls", "-la", ">", "test.out")`},
@@ -100,20 +132,6 @@ func TestTranspile(t *testing.T) {
 		{"go get cogentcore.org/core@main", `shell.Run("go", "get", "cogentcore.org/core@main")`},
 		{"ls *.go", `shell.Run("ls", "*.go")`},
 		{"ls ??.go", `shell.Run("ls", "??.go")`},
-	}
-
-	sh := NewShell()
-	for _, test := range tests {
-		o := sh.TranspileLine(test.i)
-		assert.Equal(t, test.e, o)
-	}
-}
-
-// Paths tests focus specifically on the Path() and ExecIdent() code
-// in paths.go
-func TestPaths(t *testing.T) {
-	// logx.UserLevel = slog.LevelDebug
-	tests := []exIn{
 		{`fmt.Println("hi")`, `fmt.Println("hi")`},
 		{"cosh -i", `shell.Run("cosh", "-i")`},
 		{"./cosh -i", `shell.Run("./cosh", "-i")`},
@@ -139,6 +157,7 @@ func TestPaths(t *testing.T) {
 		{"cd ../an-other/dir/", `shell.Run("cd", "../an-other/dir/")`},
 		{"curl https://google.com/search?q=hello%20world#body", `shell.Run("curl", "https://google.com/search?q=hello%20world#body")`},
 	}
+
 	sh := NewShell()
 	for _, test := range tests {
 		o := sh.TranspileLine(test.i)

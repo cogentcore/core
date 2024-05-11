@@ -121,9 +121,6 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	case f0exec: // now any ident
 		logx.PrintlnDebug("exec: ident..")
 		return sh.TranspileExec(ewords, false)
-	// case t0in > 0 && n > t0in && (toks[t1idx].Tok != token.ASSIGN) && (t1in > 0 || t1pn > 0 || toks[t1idx].Tok == token.SUB || toks[t1idx].Tok == token.DEC || toks[t1idx].Tok == token.GTR || toks[t1idx].Tok == token.SHR || toks[t1idx].Tok == token.LSS || toks[t1idx].Tok == token.STRING || toks[t1idx].Tok == token.LBRACE || toks[t1idx].Tok == token.ILLEGAL):
-	// 	logx.PrintlnDebug("exec: word non-go...")
-	// 	return sh.TranspileExec(ewords, false)
 	default:
 		logx.PrintlnDebug("go:   default")
 		return sh.TranspileGo(toks)
@@ -210,8 +207,11 @@ func (sh *Shell) TranspileExec(ewords []string, output bool) Tokens {
 				etoks.Add(token.COMMA)
 				i += 2
 			}
+		case f == "[":
+			noStop = true
 		case f == "]": // solo is def end
 			// just skip
+			noStop = false
 		case f == "&":
 			bgJob = true
 		case f == ";":
