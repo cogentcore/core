@@ -188,7 +188,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				defPrevPar = curPar
 				curPar = &sv.Defs
 			case nm == "g":
-				curPar = curPar.NewChild(GroupType, "g").(Node)
+				curPar = NewGroup(curPar)
 				for _, attr := range se.Attr {
 					if SetStdXMLAttr(curPar.AsNodeBase(), attr.Name.Local, attr.Value) {
 						continue
@@ -566,7 +566,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				curCSS = sty
 				// style code shows up in CharData below
 			case nm == "clipPath":
-				curPar = curPar.NewChild(ClipPathType, "clip-path").(Node)
+				curPar = NewClipPath(curPar)
 				cp := curPar.(*ClipPath)
 				for _, attr := range se.Attr {
 					if SetStdXMLAttr(cp, attr.Name.Local, attr.Value) {
@@ -578,7 +578,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case nm == "marker":
-				curPar = curPar.NewChild(MarkerType, "marker").(Node)
+				curPar = NewMarker(curPar)
 				mrk := curPar.(*Marker)
 				var rx, ry float32
 				szx := float32(3)
@@ -657,7 +657,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "guide":
 				fallthrough
 			case nm == "metadata":
-				curPar = curPar.NewChild(MetaDataType, nm).(Node)
+				curPar = NewMetaData(curPar)
 				md := curPar.(*MetaData)
 				md.Class = nm
 				for _, attr := range se.Attr {
@@ -670,7 +670,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case strings.HasPrefix(nm, "flow"):
-				curPar = curPar.NewChild(FlowType, nm).(Node)
+				curPar = NewFlow(curPar)
 				md := curPar.(*Flow)
 				md.Class = nm
 				md.FlowType = nm
@@ -688,7 +688,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case strings.HasPrefix(nm, "path-effect"):
 				fallthrough
 			case strings.HasPrefix(nm, "filter"):
-				curPar = curPar.NewChild(FilterType, nm).(Node)
+				curPar = NewFilter(curPar)
 				md := curPar.(*Filter)
 				md.Class = nm
 				md.FilterType = nm

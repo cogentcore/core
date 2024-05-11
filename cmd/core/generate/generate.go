@@ -34,10 +34,10 @@ var TreeMethodsTmpl = template.Must(template.New("TreeMethods").
 	}).Parse(
 	`
 	{{if not (HasNoNewDirective .)}}
-	// New{{.LocalName}} adds a new [{{.LocalName}}] with the given name to the given parent:
+	// New{{.LocalName}} adds a new [{{.LocalName}}] to the given optional parent:
 	{{DocToComment .Doc}}
-	func New{{.LocalName}}(parent {{TreePkg .}}Node, name ...string) *{{.LocalName}} {
-		return parent.NewChild({{.LocalName}}Type, name...).(*{{.LocalName}})
+	func New{{.LocalName}}(parent ...{{TreePkg .}}Node) *{{.LocalName}} {
+		return {{TreePkg .}}New[*{{.LocalName}}](parent...)
 	}
 	{{end}}
 

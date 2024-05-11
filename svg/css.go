@@ -9,8 +9,6 @@ import (
 
 	"github.com/aymerick/douceur/css"
 	"github.com/aymerick/douceur/parser"
-
-	"cogentcore.org/core/tree"
 )
 
 // StyleSheet is a Node2D node that contains a stylesheet -- property values
@@ -19,11 +17,6 @@ import (
 type StyleSheet struct {
 	NodeBase
 	Sheet *css.Stylesheet `copier:"-"`
-}
-
-// AddNewStyleSheet adds a new CSS stylesheet to given parent node, with given name.
-func AddNewStyleSheet(parent tree.Node, name string) *StyleSheet {
-	return parent.NewChild(StyleSheetType, name).(*StyleSheet)
 }
 
 // ParseString parses the string into a StyleSheet of rules, which can then be
