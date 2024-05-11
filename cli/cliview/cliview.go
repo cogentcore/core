@@ -63,7 +63,7 @@ func GUI[T any](opts *cli.Options, cfg T, cmds ...*cli.Cmd[T]) {
 			if cmd.Name == "gui" { // we are already in GUI so that command is irrelevant
 				continue
 			}
-			core.NewButton(tb, cmd.Name).SetText(strcase.ToSentence(cmd.Name)).SetTooltip(cmd.Doc).
+			core.NewButton(tb).SetText(strcase.ToSentence(cmd.Name)).SetTooltip(cmd.Doc).
 				OnClick(func(e events.Event) {
 					err := cmd.Func(cfg)
 					if err != nil {

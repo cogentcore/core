@@ -119,12 +119,12 @@ func (ss *Sim) ConfigPlot(plt *plotview.PlotView, dt *table.Table) *plotview.Plo
 func (ss *Sim) ConfigGUI() *core.Body {
 	b := core.NewBody("distplot")
 
-	split := core.NewSplits(b, "split")
+	split := core.NewSplits(b)
 
-	sv := views.NewStructView(split, "sv")
+	sv := views.NewStructView(split)
 	sv.SetStruct(ss)
 
-	tv := core.NewTabs(split, "tv")
+	tv := core.NewTabs(split)
 
 	pt := tv.NewTab("Histogram")
 	plt := plotview.NewPlotView(pt)

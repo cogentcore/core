@@ -98,10 +98,11 @@ func homePage(ctx *htmlview.Context) bool {
 			})
 		}
 
-		textBlock := core.NewLayout(block, "text-block").Style(func(s *styles.Style) {
+		textBlock := core.NewLayout(block).Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Text.Align = styles.Start
 		})
+		textBlock.SetName("text-block")
 		core.NewText(textBlock).SetType(core.TextHeadlineLarge).SetText(title).Style(func(s *styles.Style) {
 			s.Font.Weight = styles.WeightBold
 			s.Color = colors.C(colors.Scheme.Primary.Base)
