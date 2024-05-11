@@ -68,8 +68,10 @@ func (te *TwinEditors) ConfigTexts() {
 		return
 	}
 	te.MakeBuffers()
-	av := NewEditor(te, "text-a")
-	bv := NewEditor(te, "text-b")
+	av := NewEditor(te)
+	bv := NewEditor(te)
+	av.SetName("text-a")
+	bv.SetName("text-b")
 	av.SetBuffer(te.BufferA)
 	bv.SetBuffer(te.BufferB)
 

@@ -86,10 +86,10 @@ func DiffViewDialogFromRevs(ctx core.Widget, repo vcs.Repo, file string, fbuf *B
 
 // DiffViewDialog opens a dialog for displaying diff between two files as line-strings
 func DiffViewDialog(ctx core.Widget, title string, astr, bstr []string, afile, bfile, arev, brev string) *DiffView {
-	d := core.NewBody("diffview")
+	d := core.NewBody("Diffview")
 	d.SetTitle(title)
 
-	dv := NewDiffView(d, "diff-view")
+	dv := NewDiffView(d)
 	dv.FileA = afile
 	dv.FileB = bfile
 	dv.RevA = arev
@@ -501,9 +501,11 @@ func (dv *DiffView) ConfigDiffView() {
 	dv.BufA.Stat() // update markup
 	dv.BufB.Options.LineNumbers = true
 	dv.BufB.Stat() // update markup
-	av := NewDiffTextEditor(dv, "text-a").SetBuffer(dv.BufA)
+	av := NewDiffTextEditor(dv).SetBuffer(dv.BufA)
+	av.SetName("text-a")
 	av.SetReadOnly(true)
-	bv := NewDiffTextEditor(dv, "text-b").SetBuffer(dv.BufB)
+	bv := NewDiffTextEditor(dv).SetBuffer(dv.BufB)
+	bv.SetName("text-b")
 	bv.SetReadOnly(true)
 
 	av.On(events.Scroll, func(e events.Event) {
@@ -541,7 +543,7 @@ func (dv *DiffView) ConfigToolbar(tb *core.Toolbar) {
 	if dv.RevA != "" {
 		txta += ": " + dv.RevA
 	}
-	core.NewText(tb, "label-a").SetText(txta)
+	core.NewText(tb).SetText(txta)
 	core.NewButton(tb).SetText("Next").SetIcon(icons.KeyboardArrowDown).
 		SetTooltip("move down to next diff region").
 		OnClick(func(e events.Event) {
@@ -591,7 +593,7 @@ func (dv *DiffView) ConfigToolbar(tb *core.Toolbar) {
 	if dv.RevB != "" {
 		txtb += ": " + dv.RevB
 	}
-	core.NewText(tb, "label-b").SetText(txtb)
+	core.NewText(tb).SetText(txtb)
 	core.NewButton(tb).SetText("Next").SetIcon(icons.KeyboardArrowDown).
 		SetTooltip("move down to next diff region").
 		OnClick(func(e events.Event) {

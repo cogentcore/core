@@ -194,8 +194,8 @@ type Editor struct { //core:embedder
 // NewSoloEditor returns a new [Editor] with an associated [Buffer].
 // This is appropriate for making a standalone editor in which there
 // is there is one editor per buffer.
-func NewSoloEditor(parent tree.Node, name ...string) *Editor {
-	return NewEditor(parent, name...).SetBuffer(NewBuffer())
+func NewSoloEditor(parent ...tree.Node) *Editor {
+	return NewEditor(parent...).SetBuffer(NewBuffer())
 }
 
 func (ed *Editor) FlagType() enums.BitFlagSetter {
