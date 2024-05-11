@@ -95,51 +95,46 @@ func TestNodePathFrom(t *testing.T) {
 }
 
 func TestNodeDeleteChild(t *testing.T) {
-	parent := testdata.NodeEmbed{}
-	parent.InitName(&parent, "par1")
-	typ := parent.NodeType()
-	child := parent.NewChild(typ, "child1")
-	parent.DeleteChild(child)
-	assert.Zero(t, len(parent.Kids))
+	parent := NewNodeBase()
+	child := parent.NewChild(NodeBaseType)
+	assert.Len(t, parent.Kids, 1)
+	assert.True(t, parent.DeleteChild(child))
+	assert.Len(t, parent.Kids, 0)
 }
 
-func TestNodeDeleteChildName(t *testing.T) {
-	parent := testdata.NodeEmbed{}
-	parent.InitName(&parent, "par1")
-	typ := parent.NodeType()
-	parent.NewChild(typ, "child1")
-	parent.DeleteChildByName("child1")
-	assert.Zero(t, len(parent.Kids))
+func TestNodeDeleteChildByName(t *testing.T) {
+	parent := NewNodeBase()
+	child := parent.NewChild(NodeBaseType)
+	child.SetName("child1")
+	assert.Len(t, parent.Kids, 1)
+	assert.True(t, parent.DeleteChildByName("child1"))
+	assert.Len(t, parent.Kids, 0)
 }
 
 func TestNodeFindName(t *testing.T) {
-	names := [...]string{"name0", "name1", "name2", "name3", "name4", "name5"}
-	parent := NodeBase{}
-	parent.InitName(&parent, "par")
-	typ := parent.NodeType()
-	for _, nm := range names {
-		parent.NewChild(typ, nm)
+	names := []string{"name0", "name1", "name2", "name3", "name4", "name5"}
+	parent := NewNodeBase()
+	for _, name := range names {
+		child := parent.NewChild(NodeBaseType)
+		child.SetName(name)
 	}
-	if len(parent.Kids) != len(names) {
-		t.Errorf("Children length != n, was %d", len(parent.Kids))
-	}
+	assert.Len(t, parent.Kids, len(names))
 	for i, nm := range names {
 		for st := range names { // test all starting indexes
 			idx, ok := parent.Children().IndexByName(nm, st)
-			if !ok || idx != i {
-				t.Errorf("find index was not correct val of %d, was %d", i, idx)
-			}
+			assert.True(t, ok)
+			assert.Equal(t, i, idx)
 		}
 	}
 }
 
 func TestNodeFindType(t *testing.T) {
-	parent := NodeBase{}
-	parent.InitName(&parent, "par")
-	ne := parent.NewChild(testdata.NodeEmbedType, "child1")
-	parent.NewChild(NodeBaseType, "child2")
+	parent := NewNodeBase()
+	ne := parent.NewChild(testdata.NodeEmbedType)
+	nb := parent.NewChild(NodeBaseType)
 
 	assert.True(t, ne.NodeType().HasEmbed(NodeBaseType))
+	assert.True(t, nb.NodeType().HasEmbed(NodeBaseType))
 
 	idx, ok := parent.Children().IndexByType(testdata.NodeEmbedType, NoEmbeds, 0)
 	if assert.True(t, ok) {
@@ -158,20 +153,19 @@ func TestNodeFindType(t *testing.T) {
 }
 
 func TestNodeMove(t *testing.T) {
-	parent := testdata.NodeEmbed{}
-	parent.InitName(&parent, "par1")
-	typ := parent.NodeType()
+	parent := testdata.NewNodeEmbed()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
-	// child1 :=
-	parent.NewChild(typ, "child0")
-	var child2 = parent.NewChild(typ, "child1").(*testdata.NodeEmbed)
-	// child3 :=
-	parent.NewChild(typ, "child2")
-	//schild2 :=
-	child2.NewChild(typ, "subchild1")
-	// child4 :=
-	parent.NewChild(typ, "child3")
+	child0 := parent.NewChild(testdata.NodeEmbedType)
+	child0.SetName("child0")
+	child1 := parent.NewChild(NodeBaseType)
+	child1.SetName("child1")
+	child2 := parent.NewChild(testdata.NodeEmbedType)
+	child2.SetName("child2")
+	schild1 := child1.NewChild(testdata.NodeEmbedType)
+	schild1.SetName("subchild1")
+	child3 := parent.NewChild(NodeBaseType)
+	child3.SetName("child3")
 
 	bf := fmt.Sprintf("mv before:\n%v\n", parent.Kids)
 	parent.Children().Move(3, 1)
@@ -184,27 +178,19 @@ func TestNodeMove(t *testing.T) {
 	bft := `mv before:
 [/par1/child0 /par1/child1 /par1/child2 /par1/child3]
 `
-	if bf != bft {
-		t.Errorf("move error\n%v !=\n%v", bf, bft)
-	}
+	assert.Equal(t, bft, bf)
 	a31t := `mv 3 -> 1:
 [/par1/child0 /par1/child3 /par1/child1 /par1/child2]
 `
-	if a31 != a31t {
-		t.Errorf("move error\n%v !=\n%v", a31, a31t)
-	}
+	assert.Equal(t, a31t, a31)
 	a03t := `mv 0 -> 3:
 [/par1/child3 /par1/child1 /par1/child2 /par1/child0]
 `
-	if a03 != a03t {
-		t.Errorf("move error\n%v !=\n%v", a03, a03t)
-	}
+	assert.Equal(t, a03t, a03)
 	a12t := `mv 1 -> 2:
 [/par1/child3 /par1/child2 /par1/child1 /par1/child0]
 `
-	if a12 != a12t {
-		t.Errorf("move error\n%v !=\n%v", a12, a12t)
-	}
+	assert.Equal(t, a12t, a12)
 }
 
 func TestNodeConfig(t *testing.T) {
