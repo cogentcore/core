@@ -361,8 +361,8 @@ func (v *TimeValue) Config() {
 
 func (v *TimeValue) Update() {
 	tm := v.TimeValue()
-	v.Widget.ChildByName("date").(*core.TextField).SetText(tm.Format("1/2/2006"))
-	v.Widget.ChildByName("time").(*core.TextField).SetText(tm.Format(core.SystemSettings.TimeFormat()))
+	v.Widget.Child(0).(*core.TextField).SetText(tm.Format("1/2/2006"))
+	v.Widget.Child(1).(*core.TextField).SetText(tm.Format(core.SystemSettings.TimeFormat()))
 }
 
 // TimeValue decodes the value into a *time.Time value, also handling the [fileinfo.FileTime] case.
@@ -426,8 +426,8 @@ func (v *DurationValue) Update() {
 		adur /= float32(undur)
 	}
 
-	v.Widget.ChildByName("value").(*core.Spinner).SetValue(adur)
-	v.Widget.ChildByName("unit").(*core.Chooser).SetCurrentValue(un)
+	v.Widget.Child(0).(*core.Spinner).SetValue(adur)
+	v.Widget.Child(1).(*core.Chooser).SetCurrentValue(un)
 }
 
 var durationUnits = []string{
