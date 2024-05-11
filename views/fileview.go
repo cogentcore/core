@@ -150,20 +150,6 @@ func (fv *FileView) SetStyles() {
 			w.Style(func(s *styles.Style) {
 				s.Gap.X.Dp(4)
 			})
-		case "sel-row/sel-text":
-			w.Style(func(s *styles.Style) {
-				s.SetTextWrap(false)
-			})
-		case "sel-row/sel": // sel field
-			w.Style(func(s *styles.Style) {
-				s.Min.X.Ch(60)
-				s.Max.X.Zero()
-				s.Grow.Set(1, 0)
-			})
-		case "sel-row/ext-text":
-			w.Style(func(s *styles.Style) {
-				s.SetTextWrap(false)
-			})
 		}
 	})
 }
@@ -255,15 +241,11 @@ var FileViewKindColorMap = map[string]string{
 }
 
 func (fv *FileView) Config() {
-	fv.ConfigFileView()
-}
-
-func (fv *FileView) ConfigFileView() {
 	if fv.HasChildren() {
 		return
 	}
-	core.NewLayout(fv, "files-row")
-	core.NewLayout(fv, "sel-row")
+	core.NewLayout(fv).SetName("files-row")
+	core.NewLayout(fv).SetName("sel-row")
 
 	fv.ConfigFilesRow()
 	fv.ConfigSelRow()
@@ -407,12 +389,18 @@ func (fv *FileView) ConfigFilesRow() {
 
 func (fv *FileView) ConfigSelRow() {
 	sr := fv.SelectRow()
-	core.NewText(sr, "sel-text").SetText("File: ").
-		SetTooltip("enter file name here (or select from above list)")
+	core.NewText(sr).SetText("File: ").SetTooltip("enter file name here (or select from above list)").Style(func(s *styles.Style) {
+		s.SetTextWrap(false)
+	})
 
-	sf := core.NewTextField(sr, "sel").SetText(fv.CurrentSelectedFile).
+	sf := core.NewTextField(sr).SetText(fv.CurrentSelectedFile).
 		SetTooltip(fmt.Sprintf("Enter the file name. Special keys: up/down to move selection; %s or %s to go up to parent folder; %s or %s or %s or %s to select current file (if directory, goes into it, if file, selects and closes); %s or %s for prev / next history item; %s return to this field", keymap.WordLeft.Label(), keymap.Jump.Label(), keymap.SelectMode.Label(), keymap.Insert.Label(), keymap.InsertAfter.Label(), keymap.Open.Label(), keymap.HistPrev.Label(), keymap.HistNext.Label(), keymap.Search.Label()))
 	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
+	sf.Style(func(s *styles.Style) {
+		s.Min.X.Ch(60)
+		s.Max.X.Zero()
+		s.Grow.Set(1, 0)
+	})
 	sf.OnChange(func(e events.Event) {
 		fv.SetSelFileAction(sf.Text())
 	})
@@ -424,9 +412,12 @@ func (fv *FileView) ConfigSelRow() {
 	})
 	sf.StartFocus()
 
-	core.NewText(sr, "ext-text").SetText("Extension(s):").
-		SetTooltip("target extension(s) to highlight; if multiple, separate with commas, and do include the . at the start")
-	ef := core.NewTextField(sr, "ext").SetText(fv.Ext)
+	core.NewText(sr).SetText("Extension(s):").
+		SetTooltip("target extension(s) to highlight; if multiple, separate with commas, and do include the . at the start").
+		Style(func(s *styles.Style) {
+			s.SetTextWrap(false)
+		})
+	ef := core.NewTextField(sr).SetText(fv.Ext)
 	ef.OnChange(func(e events.Event) {
 		fv.SetExtAction(ef.Text())
 	})

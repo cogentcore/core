@@ -63,7 +63,7 @@ func (cv *ColorView) Config() {
 		s.Grow.Set(1, 0)
 	}
 
-	hue := core.NewSlider(cv, "hue").SetMin(0).SetMax(360).SetValue(cv.Color.Hue).
+	hue := core.NewSlider(cv).SetMin(0).SetMax(360).SetValue(cv.Color.Hue).
 		SetTooltip("The hue, which is the spectral identity of the color (red, green, blue, etc) in degrees")
 	hue.OnInput(func(e events.Event) {
 		cv.Color.SetHue(hue.Value)
@@ -81,7 +81,7 @@ func (cv *ColorView) Config() {
 	})
 	hue.StyleFinal(sf)
 
-	chroma := core.NewSlider(cv, "chroma").SetMin(0).SetMax(150).SetValue(cv.Color.Chroma).
+	chroma := core.NewSlider(cv).SetMin(0).SetMax(150).SetValue(cv.Color.Chroma).
 		SetTooltip("The chroma, which is the colorfulness/saturation of the color")
 	chroma.OnInput(func(e events.Event) {
 		cv.Color.SetChroma(chroma.Value)
@@ -99,7 +99,7 @@ func (cv *ColorView) Config() {
 	})
 	chroma.StyleFinal(sf)
 
-	tone := core.NewSlider(cv, "tone").SetMin(0).SetMax(100).SetValue(cv.Color.Tone).
+	tone := core.NewSlider(cv).SetMin(0).SetMax(100).SetValue(cv.Color.Tone).
 		SetTooltip("The tone, which is the lightness of the color")
 	tone.OnInput(func(e events.Event) {
 		cv.Color.SetTone(tone.Value)

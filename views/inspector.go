@@ -247,7 +247,7 @@ func (is *Inspector) ConfigSplits() {
 	split := is.Splits().SetSplits(.3, .7)
 
 	if len(split.Kids) == 0 {
-		tvfr := core.NewFrame(split, "tvfr")
+		tvfr := core.NewFrame(split)
 		tvfr.Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Overflow.Set(styles.OverflowAuto)

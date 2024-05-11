@@ -34,8 +34,7 @@ func CallFunc(ctx core.Widget, fun any) {
 // NewSoloFuncButton returns a standalone FuncButton with the given context
 // for popping up any dialog elements.
 func NewSoloFuncButton(ctx core.Widget, fun any) *FuncButton {
-	parent := tree.NewRoot[*core.WidgetBase]("solo-func-button-parent")
-	fb := NewFuncButton(parent, fun)
+	fb := NewFuncButton(core.NewBox(), fun)
 	fb.SetContext(ctx)
 	return fb
 }
@@ -485,5 +484,5 @@ func (fb *FuncButton) SetKey(kf keymap.Functions) *FuncButton {
 
 // makeTmpWidget makes a temporary widget in a temporary parent for the given value.
 func makeTmpWidget(v Value) {
-	v.SetWidget(tree.NewRoot[*core.WidgetBase]("value-tmp-parent").NewChild(v.WidgetType(), "value-tmp-widget").(core.Widget))
+	v.SetWidget(core.NewBox().NewChild(v.WidgetType()).(core.Widget))
 }
