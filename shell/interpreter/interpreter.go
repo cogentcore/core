@@ -92,9 +92,17 @@ func (in *Interpreter) Prompt() string {
 func (in *Interpreter) Eval(code string) error {
 	in.Shell.TranspileCode(code)
 	if in.Shell.TotalDepth() == 0 {
+		nl := len(in.Shell.Lines)
+		hasPrint := false
+		if nl > 0 {
+			ln := in.Shell.Lines[nl-1]
+			if strings.Contains(strings.ToLower(ln), "print") {
+				hasPrint = true
+			}
+		}
 		v, _ := in.RunCode()
 		in.Shell.Errors = nil
-		if v.IsValid() {
+		if !hasPrint && v.IsValid() && !v.IsZero() {
 			fmt.Println(v.Interface())
 		}
 	}

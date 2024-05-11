@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strings"
 
+	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/sshclient"
 	"github.com/mitchellh/go-homedir"
@@ -31,7 +32,13 @@ func (sh *Shell) HandleArgErr(errok bool, err error) error {
 // ExecArgs processes the args to given exec command,
 // handling all of the input / output redirection and
 // file globbing, homedir expansion, etc.
-func (sh *Shell) ExecArgs(errok bool, cmd any, args ...any) (*sshclient.Client, string, []string) {
+func (sh *Shell) ExecArgs(cmdIO *exec.CmdIO, errok bool, cmd any, args ...any) (*sshclient.Client, string, []string) {
+	if len(sh.Jobs) > 0 {
+		jb := sh.Jobs.Peek()
+		if jb.PipeRead != nil {
+			cmdIO.PushIn(jb.PipeRead)
+		}
+	}
 	scmd := reflectx.ToString(cmd)
 	cl := sh.ActiveSSH()
 	if len(args) == 0 {
@@ -58,19 +65,20 @@ func (sh *Shell) ExecArgs(errok bool, cmd any, args ...any) (*sshclient.Client, 
 	}
 	if scmd == "@" {
 		newHost := ""
-		if sargs[0] == "0" { // local
+		if scmd == "@0" { // local
 			cl = nil
 		} else {
-			if scl, ok := sh.SSHClients[sargs[0]]; ok {
-				newHost = sargs[0]
+			hnm := scmd[1:]
+			if scl, ok := sh.SSHClients[hnm]; ok {
+				newHost = hnm
 				cl = scl
 			} else {
-				sh.HandleArgErr(errok, fmt.Errorf("cosh: ssh connection named: %q not found", sargs[0]))
+				sh.HandleArgErr(errok, fmt.Errorf("cosh: ssh connection named: %q not found", hnm))
 			}
 		}
-		if len(sargs) > 1 {
-			scmd = sargs[1]
-			sargs = sargs[2:]
+		if len(sargs) > 0 {
+			scmd = sargs[0]
+			sargs = sargs[1:]
 		} else { // just a ssh switch
 			sh.SSHActive = newHost
 			return nil, "", nil
@@ -80,7 +88,9 @@ func (sh *Shell) ExecArgs(errok bool, cmd any, args ...any) (*sshclient.Client, 
 		s := sargs[i]
 		switch {
 		case s[0] == '>':
-			sargs = sh.OutToFile(errok, sargs, i)
+			sargs = sh.OutToFile(cmdIO, errok, sargs, i)
+		case s[0] == '|':
+			sargs = sh.OutToPipe(cmdIO, errok, sargs, i)
 		case isCmd && strings.HasPrefix(s, "args"):
 			sargs = sh.CmdArgs(errok, sargs, i)
 		}
@@ -103,7 +113,7 @@ func (sh *Shell) ExecArgs(errok bool, cmd any, args ...any) (*sshclient.Client, 
 }
 
 // OutToFile processes the > arg that sends output to a file
-func (sh *Shell) OutToFile(errok bool, sargs []string, i int) []string {
+func (sh *Shell) OutToFile(cmdIO *exec.CmdIO, errok bool, sargs []string, i int) []string {
 	n := len(sargs)
 	s := sargs[i]
 	sn := len(s)
@@ -143,13 +153,30 @@ func (sh *Shell) OutToFile(errok bool, sargs []string, i int) []string {
 		f, err = os.Create(fn)
 	}
 	if err == nil {
-		sh.Config.StdIO.PushOut(f)
+		cmdIO.PushOut(f)
 		if errf {
-			sh.Config.StdIO.PushErr(f)
+			cmdIO.PushErr(f)
 		}
 	} else {
 		sh.HandleArgErr(errok, err)
 	}
+	return sargs
+}
+
+// OutToPipe processes the | arg that sends output to a pipe
+func (sh *Shell) OutToPipe(cmdIO *exec.CmdIO, errok bool, sargs []string, i int) []string {
+	s := sargs[i]
+	sn := len(s)
+	errf := false
+	if sn > 1 && s[1] == '&' {
+		errf = true
+	}
+	sargs = slices.Delete(sargs, i, i+1)
+	cmdIO.PushOutPipe()
+	if errf {
+		cmdIO.PushErr(cmdIO.Out)
+	}
+	// sh.HandleArgErr(errok, err)
 	return sargs
 }
 

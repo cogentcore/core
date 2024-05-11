@@ -5,8 +5,7 @@
 package shell
 
 import (
-	"bytes"
-	"strings"
+	"cogentcore.org/core/base/exec"
 )
 
 // Run executes the given command string, waiting for the command to finish,
@@ -17,8 +16,9 @@ func (sh *Shell) Run(cmd any, args ...any) {
 	if len(sh.Errors) > 0 {
 		return
 	}
-	sh.Config.StdIO.StackStart()
-	cl, scmd, sargs := sh.ExecArgs(false, cmd, args...)
+	cmdIO := exec.NewCmdIO(&sh.Config)
+	cmdIO.StackStart()
+	cl, scmd, sargs := sh.ExecArgs(cmdIO, false, cmd, args...)
 	if scmd == "" {
 		return
 	}
@@ -28,11 +28,11 @@ func (sh *Shell) Run(cmd any, args ...any) {
 	} else {
 		if !sh.RunBuiltinOrCommand(scmd, sargs...) {
 			sh.isCommand.Push(false)
-			sh.AddError(sh.Config.Run(scmd, sargs...))
+			sh.AddError(sh.Config.RunIO(cmdIO, scmd, sargs...))
 			sh.isCommand.Pop()
 		}
 	}
-	sh.Config.StdIO.PopToStart(false) // not err
+	cmdIO.PopToStart(false) // don't close err
 }
 
 // RunErrOK executes the given command string, waiting for the command to finish,
@@ -41,8 +41,9 @@ func (sh *Shell) Run(cmd any, args ...any) {
 // If there is any error, it adds it to the shell. It forwards output to
 // [exec.Config.Stdout] and [exec.Config.Stderr] appropriately.
 func (sh *Shell) RunErrOK(cmd any, args ...any) {
-	sh.Config.StdIO.StackStart()
-	cl, scmd, sargs := sh.ExecArgs(true, cmd, args...)
+	cmdIO := exec.NewCmdIO(&sh.Config)
+	cmdIO.StackStart()
+	cl, scmd, sargs := sh.ExecArgs(cmdIO, true, cmd, args...)
 	if scmd == "" {
 		return
 	}
@@ -52,19 +53,21 @@ func (sh *Shell) RunErrOK(cmd any, args ...any) {
 	} else {
 		if !sh.RunBuiltinOrCommand(scmd, sargs...) {
 			sh.isCommand.Push(false)
-			sh.Config.Run(scmd, sargs...)
+			sh.Config.RunIO(cmdIO, scmd, sargs...)
 			sh.isCommand.Pop()
 		}
 	}
-	sh.Config.StdIO.PopToStart(false)
+	cmdIO.PopToStart(false) // don't close err
 }
 
-// Start starts the given command string without waiting for it to finish,
+// Start starts the given command string for running in the background,
 // handling the given arguments appropriately.
 // If there is any error, it adds it to the shell. It forwards output to
 // [exec.Config.Stdout] and [exec.Config.Stderr] appropriately.
 func (sh *Shell) Start(cmd any, args ...any) {
-	cl, scmd, sargs := sh.ExecArgs(false, cmd, args...)
+	cmdIO := exec.NewCmdIO(&sh.Config)
+	cmdIO.StackStart()
+	cl, scmd, sargs := sh.ExecArgs(cmdIO, false, cmd, args...)
 	if scmd == "" {
 		return
 	}
@@ -73,12 +76,15 @@ func (sh *Shell) Start(cmd any, args ...any) {
 	} else {
 		if !sh.RunBuiltinOrCommand(scmd, sargs...) {
 			sh.isCommand.Push(false)
-			excmd, err := sh.Config.Start(scmd, sargs...)
+			err := sh.Config.StartIO(cmdIO, scmd, sargs...)
 			sh.isCommand.Pop()
-			if excmd != nil {
-				sh.Jobs = append(sh.Jobs, excmd) // todo: add files to this
-			}
+			sh.Jobs = append(sh.Jobs, cmdIO)
 			sh.AddError(err)
+			go func() {
+				cmdIO.Cmd.Wait()
+				cmdIO.PopToStart(false)
+				sh.Jobs.Pop() // todo: remove actual guy
+			}()
 		}
 	}
 }
@@ -87,22 +93,39 @@ func (sh *Shell) Start(cmd any, args ...any) {
 // appropriately. If there is any error, it adds it to the shell. It returns
 // the stdout as a string and forwards stderr to [exec.Config.Stderr] appropriately.
 func (sh *Shell) Output(cmd any, args ...any) string {
-	buf := &bytes.Buffer{}
-	sh.Config.StdIO.PushOut(buf)
-	sh.Run(cmd, args...)
-	sh.Config.StdIO.PopOut()
-	return strings.TrimSuffix(buf.String(), "\n")
+	cmdIO := exec.NewCmdIO(&sh.Config)
+	cmdIO.StackStart()
+	cl, scmd, sargs := sh.ExecArgs(cmdIO, true, cmd, args...)
+	if scmd == "" {
+		return ""
+	}
+	out := ""
+	var err error
+	// key diff here: don't call AddError
+	if cl != nil {
+		cl.Run(scmd, sargs...)
+	} else {
+		if !sh.RunBuiltinOrCommand(scmd, sargs...) {
+			sh.isCommand.Push(false)
+			out, err = sh.Config.OutputIO(cmdIO, scmd, sargs...)
+			_ = err
+			sh.isCommand.Pop()
+		}
+	}
+	cmdIO.PopToStart(false) // don't close err
+	return out
 }
 
 // OutputErrOK executes the given command string, handling the given arguments
 // appropriately. If there is any error, it adds it to the shell. It returns
 // the stdout as a string and forwards stderr to [exec.Config.Stderr] appropriately.
 func (sh *Shell) OutputErrOK(cmd any, args ...any) string {
-	buf := &bytes.Buffer{}
-	sh.Config.StdIO.PushOut(buf)
-	sh.RunErrOK(cmd, args...)
-	sh.Config.StdIO.PopOut()
-	return strings.TrimSuffix(buf.String(), "\n")
+	// buf := &bytes.Buffer{}
+	// sh.Config.StdIO.PushOut(buf)
+	// sh.RunErrOK(cmd, args...)
+	// sh.Config.StdIO.PopOut()
+	// return strings.TrimSuffix(buf.String(), "\n")
+	return ""
 }
 
 // RunBuiltinOrCommand runs a builtin or a command
