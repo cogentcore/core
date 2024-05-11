@@ -404,37 +404,29 @@ func (n *NodeBase) AddChild(kid Node) error {
 	return nil
 }
 
-// NewChild creates a new child of the given type and adds it at end
-// of children list. The name should be unique among children. If the
-// name is unspecified, it defaults to the ID (kebab-case) name of the
-// type, plus the [Ki.NumLifetimeChildren] of its parent.
-func (n *NodeBase) NewChild(typ *types.Type, name ...string) Node {
+// NewChild creates a new child of the given type and adds it at the end
+// of the list of children. The name defaults to the ID (kebab-case) name
+// of the type, plus the [Node.NumLifetimeChildren] of the parent.
+func (n *NodeBase) NewChild(typ *types.Type) Node {
 	if err := checkThis(n); err != nil {
 		return nil
 	}
 	kid := NewOfType(typ)
 	initNode(kid)
 	n.Kids = append(n.Kids, kid)
-	if len(name) > 0 {
-		kid.SetName(name[0])
-	}
 	SetParent(kid, n.This())
 	return kid
 }
 
-// SetChild sets child at given index to be the given item; if it is passed
-// a name, then it sets the name of the child as well; just calls Init
-// (or InitName) on the child, and SetParent. Names should be unique
-// among children.
-func (n *NodeBase) SetChild(kid Node, idx int, name ...string) error {
+// SetChild sets the child at the given index to be the given item.
+// It just calls Init and SetParent on the child. The name defaults
+// to the ID (kebab-case) name of the type, plus the
+// [Node.NumLifetimeChildren] of the parent.
+func (n *NodeBase) SetChild(kid Node, idx int) error {
 	if err := n.Kids.IsValidIndex(idx); err != nil {
 		return err
 	}
-	if len(name) > 0 {
-		kid.InitName(kid, name[0])
-	} else {
-		initNode(kid)
-	}
+	initNode(kid)
 	n.Kids[idx] = kid
 	SetParent(kid, n.This())
 	return nil
@@ -454,19 +446,15 @@ func (n *NodeBase) InsertChild(kid Node, at int) error {
 }
 
 // InsertNewChild creates a new child of given type and add at position
-// in children list. The name should be unique among children. If the
-// name is unspecified, it defaults to the ID (kebab-case) name of the
-// type, plus the [Ki.NumLifetimeChildren] of its parent.
-func (n *NodeBase) InsertNewChild(typ *types.Type, at int, name ...string) Node {
+// in children list. The name defaults to the ID (kebab-case) name
+// of the type, plus the [Node.NumLifetimeChildren] of the parent.
+func (n *NodeBase) InsertNewChild(typ *types.Type, at int) Node {
 	if err := checkThis(n); err != nil {
 		return nil
 	}
 	kid := NewOfType(typ)
 	initNode(kid)
 	n.Kids.Insert(kid, at)
-	if len(name) > 0 {
-		kid.SetName(name[0])
-	}
 	SetParent(kid, n.This())
 	return kid
 }
@@ -500,7 +488,7 @@ func (n *NodeBase) SetNChildren(trgn int, typ *types.Type, nameStub ...string) b
 	for sz < trgn {
 		mods = true
 		nm := fmt.Sprintf("%s%d", ns, sz)
-		n.InsertNewChild(typ, sz, nm)
+		n.InsertNewChild(typ, sz).SetName(nm)
 		sz++
 	}
 	return mods

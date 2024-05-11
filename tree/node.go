@@ -200,17 +200,16 @@ type Node interface {
 	// and the existing name should be unique among children.
 	AddChild(kid Node) error
 
-	// NewChild creates a new child of the given type and adds it at end
-	// of children list. The name should be unique among children. If the
-	// name is unspecified, it defaults to the ID (kebab-case) name of the
-	// type, plus the [Ki.NumLifetimeChildren] of its parent.
-	NewChild(typ *types.Type, name ...string) Node
+	// NewChild creates a new child of the given type and adds it at the end
+	// of the list of children. The name defaults to the ID (kebab-case) name
+	// of the type, plus the [Node.NumLifetimeChildren] of the parent.
+	NewChild(typ *types.Type) Node
 
-	// SetChild sets child at given index to be the given item; if it is passed
-	// a name, then it sets the name of the child as well; just calls Init
-	// (or InitName) on the child, and SetParent. Names should be unique
-	// among children.
-	SetChild(kid Node, idx int, name ...string) error
+	// SetChild sets the child at the given index to be the given item.
+	// It just calls Init and SetParent on the child. The name defaults
+	// to the ID (kebab-case) name of the type, plus the
+	// [Node.NumLifetimeChildren] of the parent.
+	SetChild(kid Node, idx int) error
 
 	// InsertChild adds given child at position in children list.
 	// The kid node is assumed to not be on another tree (see [MoveToParent])
@@ -218,10 +217,9 @@ type Node interface {
 	InsertChild(kid Node, at int) error
 
 	// InsertNewChild creates a new child of given type and add at position
-	// in children list. The name should be unique among children. If the
-	// name is unspecified, it defaults to the ID (kebab-case) name of the
-	// type, plus the [Ki.NumLifetimeChildren] of its parent.
-	InsertNewChild(typ *types.Type, at int, name ...string) Node
+	// in children list. The name defaults to the ID (kebab-case) name
+	// of the type, plus the [Node.NumLifetimeChildren] of the parent.
+	InsertNewChild(typ *types.Type, at int) Node
 
 	// SetNChildren ensures that there are exactly n children, deleting any
 	// extra, and creating any new ones, using NewChild with given type and
