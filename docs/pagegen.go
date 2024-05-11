@@ -23,6 +23,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/views"
 )
 
@@ -989,38 +990,38 @@ func main() {
 	},
 	"views/tree-views-0": func(parent core.Widget) {
 		tv := views.NewTreeView(parent).SetText("Root")
-		views.NewTreeView(tv, "Child 1")
-		c2 := views.NewTreeView(tv, "Child 2")
-		views.NewTreeView(c2, "Nested child")
+		views.NewTreeView(tv)
+		c2 := views.NewTreeView(tv)
+		views.NewTreeView(c2)
 	},
 	"views/tree-views-1": func(parent core.Widget) {
-		n := tree.NewRoot[*tree.NodeBase]("Root")
-		tree.New[*tree.NodeBase](n, "Child 1")
-		c2 := tree.New[*tree.NodeBase](n, "Child 2")
-		tree.New[*tree.NodeBase](c2, "Nested child")
+		n := tree.NewNodeBase()
+		tree.NewNodeBase(n)
+		c2 := tree.NewNodeBase(n)
+		tree.NewNodeBase(c2)
 		views.NewTreeView(parent).SyncTree(n)
 	},
 	"views/tree-views-2": func(parent core.Widget) {
-		n := tree.NewRoot[*tree.NodeBase]("Root")
-		tree.New[*tree.NodeBase](n, "Child 1")
-		c2 := tree.New[*tree.NodeBase](n, "Child 2")
-		tree.New[*tree.NodeBase](c2, "Nested child")
+		n := tree.NewNodeBase()
+		tree.NewNodeBase(n)
+		c2 := tree.NewNodeBase(n)
+		tree.NewNodeBase(c2)
 		views.NewTreeView(parent).SyncTree(n).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, "Tree view changed")
 		})
 	},
 	"views/tree-views-3": func(parent core.Widget) {
-		n := tree.NewRoot[*tree.NodeBase]("Root")
-		tree.New[*tree.NodeBase](n, "Child 1")
-		c2 := tree.New[*tree.NodeBase](n, "Child 2")
-		tree.New[*tree.NodeBase](c2, "Nested child")
+		n := tree.NewNodeBase()
+		tree.NewNodeBase(n)
+		c2 := tree.NewNodeBase(n)
+		tree.NewNodeBase(c2)
 		views.NewTreeView(parent).SyncTree(n).SetReadOnly(true)
 	},
 	"views/tree-views-4": func(parent core.Widget) {
-		n := tree.NewRoot[*tree.NodeBase]("Root")
-		tree.New[*tree.NodeBase](n, "Child 1")
-		c2 := tree.New[*tree.NodeBase](n, "Child 2")
-		tree.New[*tree.NodeBase](c2, "Nested child")
+		n := tree.NewNodeBase()
+		tree.NewNodeBase(n)
+		c2 := tree.NewNodeBase(n)
+		tree.NewNodeBase(c2)
 		views.NewValue(parent, n)
 	},
 	"advanced/styling-0": func(parent core.Widget) {
