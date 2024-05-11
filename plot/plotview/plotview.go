@@ -369,6 +369,7 @@ func (pl *PlotView) ConfigPlotView() {
 	pl.Params.FromMeta(pl.Table.Table)
 	if !pl.HasChildren() {
 		fr := core.NewFrame(pl)
+		fr.SetName("cols")
 		fr.Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Grow.Set(0, 1)
@@ -376,6 +377,7 @@ func (pl *PlotView) ConfigPlotView() {
 			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
 		})
 		pt := NewPlot(pl)
+		pt.SetName("plot")
 		pt.Plot = pl.Plot
 		pt.Style(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
