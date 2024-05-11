@@ -30,9 +30,11 @@ func New[T Node](parent ...Node) T {
 // newRoot returns a new initialized node of the given type without a parent.
 func newRoot[T Node]() T {
 	var n T
-	res := NewOfType(n.NodeType())
-	initNode(res)
-	return res.(T)
+	typ := n.NodeType()
+	n = NewOfType(typ).(T)
+	initNode(n)
+	n.SetName(n.NodeType().IDName)
+	return n
 }
 
 // initNode initializes the node.
