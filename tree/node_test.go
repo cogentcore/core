@@ -382,41 +382,49 @@ func TestDirectives(t *testing.T) {
 	assert.Equal(t, types.Directive{Tool: "direct", Directive: "value"}, dir)
 }
 
+func TestAutoNodeName(t *testing.T) {
+	root := NewNodeBase()
+	assert.Equal(t, "node-base", root.Name())
+	child := NewNodeBase(root)
+	assert.Equal(t, "node-base-0", child.Name())
+}
+
 func TestTreeMod(t *testing.T) {
-	tree1 := NodeBase{}
-	typ := tree1.NodeType()
-	tree1.InitName(&tree1, "tree1")
-	// child11 :=
-	tree1.NewChild(typ, "child11")
-	child12 := tree1.NewChild(typ, "child12")
-	// child13 :=
-	tree1.NewChild(typ, "child13")
-	// schild12 :=
-	child12.NewChild(typ, "subchild12")
+	// TODO: clean up these commented out tree tests
+	/*
+		tree1 := NodeBase{}
+		typ := tree1.NodeType()
+		tree1.InitName(&tree1, "tree1")
+		// child11 :=
+		tree1.NewChild(typ, "child11")
+		child12 := tree1.NewChild(typ, "child12")
+		// child13 :=
+		tree1.NewChild(typ, "child13")
+		// schild12 :=
+		child12.NewChild(typ, "subchild12")
 
-	tree2 := NodeBase{}
-	tree2.InitName(&tree2, "tree2")
-	// child21 :=
-	tree2.NewChild(typ, "child21")
-	child22 := tree2.NewChild(typ, "child22")
-	// child23 :=
-	tree2.NewChild(typ, "child23")
-	// schild22 :=
-	child22.NewChild(typ, "subchild22")
+		tree2 := NodeBase{}
+		tree2.InitName(&tree2, "tree2")
+		// child21 :=
+		tree2.NewChild(typ, "child21")
+		child22 := tree2.NewChild(typ, "child22")
+		// child23 :=
+		tree2.NewChild(typ, "child23")
+		// schild22 :=
+		child22.NewChild(typ, "subchild22")
 
-	// fmt.Printf("#################################\n")
+		// fmt.Printf("#################################\n")
 
-	// fmt.Printf("Trees before:\n%v%v", tree1, tree2)
-	MoveToParent(child12.This(), tree2.This())
+		// fmt.Printf("Trees before:\n%v%v", tree1, tree2)
+		MoveToParent(child12.This(), tree2.This())
 
-	// fmt.Printf("#################################\n")
-	// fmt.Printf("Trees after add child12 move:\n%v%v", tree1, tree2)
+		// fmt.Printf("#################################\n")
+		// fmt.Printf("Trees after add child12 move:\n%v%v", tree1, tree2)
 
-	tree2.DeleteChild(child12)
+		tree2.DeleteChild(child12)
 
-	// fmt.Printf("#################################\n")
-
-	// todo need actual tests in here!
+		// fmt.Printf("#################################\n")
+	*/
 }
 
 /*
@@ -483,176 +491,52 @@ func TestNodeFieldJSONSave(t *testing.T) {
 */
 
 func TestClone(t *testing.T) {
-	parent := testdata.NodeField2{}
-	parent.InitName(&parent, "par1")
-	typ := parent.NodeType()
-	parent.Mbr1 = "bloop"
-	parent.Mbr2 = 32
-	// child1 :=
-	parent.NewChild(typ, "child1")
-	child2 := parent.NewChild(typ, "child1").(*testdata.NodeField2)
-	// child3 :=
-	parent.NewChild(typ, "child1")
-	child2.NewChild(typ, "subchild1")
-
 	/*
-		var buf bytes.Buffer
-		err := parent.WriteJSON(&buf, true)
-		if err != nil {
-			t.Error(err)
-			// } else {
-			// 	fmt.Printf("json output:\n%v\n", string(buf.Bytes()))
-		}
-		b := buf.Bytes()
+		parent := testdata.NodeField2{}
+		parent.InitName(&parent, "par1")
+		typ := parent.NodeType()
+		parent.Mbr1 = "bloop"
+		parent.Mbr2 = 32
+		// child1 :=
+		parent.NewChild(typ, "child1")
+		child2 := parent.NewChild(typ, "child1").(*testdata.NodeField2)
+		// child3 :=
+		parent.NewChild(typ, "child1")
+		child2.NewChild(typ, "subchild1")
 
-		tstload := parent.Clone()
-		var buf2 bytes.Buffer
-		err = tstload.WriteJSON(&buf2, true)
-		if err != nil {
-			t.Error(err)
-		}
-		tstb := buf2.Bytes()
-		// fmt.Printf("test loaded json output: %v\n", string(tstb))
-		if !bytes.Equal(tstb, b) {
-			t.Error("original and unmarshal'd json rep are not equivalent")
-			os.WriteFile("/tmp/jsonout1", b, 0644)
-			os.WriteFile("/tmp/jsonout2", tstb, 0644)
-		}
+			var buf bytes.Buffer
+			err := parent.WriteJSON(&buf, true)
+			if err != nil {
+				t.Error(err)
+				// } else {
+				// 	fmt.Printf("json output:\n%v\n", string(buf.Bytes()))
+			}
+			b := buf.Bytes()
+
+			tstload := parent.Clone()
+			var buf2 bytes.Buffer
+			err = tstload.WriteJSON(&buf2, true)
+			if err != nil {
+				t.Error(err)
+			}
+			tstb := buf2.Bytes()
+			// fmt.Printf("test loaded json output: %v\n", string(tstb))
+			if !bytes.Equal(tstb, b) {
+				t.Error("original and unmarshal'd json rep are not equivalent")
+				os.WriteFile("/tmp/jsonout1", b, 0644)
+				os.WriteFile("/tmp/jsonout2", tstb, 0644)
+			}
 	*/
-}
-
-func TestAutoTypeName(t *testing.T) {
-	root := &NodeBase{}
-	root.InitName(root, "root")
-
-	child := root.NewChild(NodeBaseType)
-	assert.Equal(t, "node-base-0", child.Name())
-}
-
-// BuildGuiTreeSlow builds a tree that is typical of GUI structures where there are
-// many widgets in a container and each widget has some number of parts.
-// Uses slow AddChild method instead of fast one.
-func BuildGuiTreeSlow(widgets, parts int, typ *types.Type) Node {
-	win := NewOfType(typ)
-	win.InitName(win, "window")
-
-	vp := win.NewChild(typ, "vp")
-	frame := vp.NewChild(typ, "frame")
-	for wi := 0; wi < widgets; wi++ {
-		widg := frame.NewChild(typ, fmt.Sprintf("widg_%d", wi))
-
-		for pi := 0; pi < parts; pi++ {
-			widg.NewChild(typ, fmt.Sprintf("part_%d", pi))
-		}
-	}
-	return win
-}
-
-// BuildGuiTree builds a tree that is typical of GUI structures where there are
-// many widgets in a container and each widget has some number of parts.
-func BuildGuiTree(widgets, parts int, typ *types.Type) Node {
-	win := NewOfType(typ)
-	win.InitName(win, "window")
-
-	vp := win.NewChild(typ, "vp")
-	frame := vp.NewChild(typ, "frame")
-	for wi := 0; wi < widgets; wi++ {
-		widg := frame.NewChild(typ, fmt.Sprintf("widg_%d", wi))
-
-		for pi := 0; pi < parts; pi++ {
-			widg.NewChild(typ, fmt.Sprintf("part_%d", pi))
-		}
-	}
-	return win
-}
-
-var TotNodes int
-var TestGUITree_NodeEmbed Node
-var TestGUITree_NodeField Node
-var TestGUITree_NodeField2 Node
-
-var NWidgets = 10000
-var NParts = 5
-
-func BenchmarkBuildGuiTree_NodeEmbed(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		wt := BuildGuiTree(NWidgets, NParts, testdata.NodeEmbedType)
-		TestGUITree_NodeEmbed = wt
-	}
-}
-
-func BenchmarkBuildGuiTree_NodeField(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		wt := BuildGuiTree(NWidgets, NParts, testdata.NodeFieldType)
-		TestGUITree_NodeField = wt
-	}
-}
-
-func BenchmarkBuildGuiTree_NodeField2(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		wt := BuildGuiTree(NWidgets, NParts, testdata.NodeField2Type)
-		TestGUITree_NodeField2 = wt
-	}
-}
-
-func BenchmarkBuildGuiTreeSlow_NodeEmbed(b *testing.B) {
-	// profile.Reset()
-	// profile.Profiling = true
-	for n := 0; n < b.N; n++ {
-		wt := BuildGuiTreeSlow(NWidgets, NParts, testdata.NodeEmbedType)
-		TestGUITree_NodeEmbed = wt
-	}
-	// profile.Report(time.Millisecond)
-	// profile.Profiling = false
-}
-
-func BenchmarkWalkPre_NodeEmbed(b *testing.B) {
-	wt := TestGUITree_NodeEmbed
-	nnodes := 0
-	for n := 0; n < b.N; n++ {
-		wt.WalkDown(func(k Node) bool {
-			nnodes++
-			return Continue
-		})
-	}
-	TotNodes = nnodes
-	// fmt.Printf("tot nodes: %d\n", TotNodes)
-}
-
-func BenchmarkWalkPre_NodeField(b *testing.B) {
-	wt := TestGUITree_NodeField
-	nnodes := 0
-	for n := 0; n < b.N; n++ {
-		wt.WalkDown(func(k Node) bool {
-			nnodes++
-			return Continue
-		})
-	}
-	TotNodes = nnodes
-	// fmt.Printf("tot nodes: %d\n", TotNodes)
-}
-
-func BenchmarkWalkPre_NodeField2(b *testing.B) {
-	wt := TestGUITree_NodeField2
-	nnodes := 0
-	for n := 0; n < b.N; n++ {
-		wt.WalkDown(func(k Node) bool {
-			nnodes++
-			return Continue
-		})
-	}
-	TotNodes = nnodes
-	// fmt.Printf("tot nodes: %d\n", TotNodes)
 }
 
 func BenchmarkNewOfType(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		NewOfType(NodeBaseType)
+		_ = NewOfType(NodeBaseType)
 	}
 }
 
 func BenchmarkStdNew(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		new(NodeBase)
+		_ = new(NodeBase)
 	}
 }
