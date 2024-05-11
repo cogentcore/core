@@ -52,14 +52,13 @@ func TestNodePath(t *testing.T) {
 	child2 := parent.NewChild(parent.NodeType())
 	child3 := parent.NewChild(parent.NodeType())
 	assert.Len(t, parent.Kids, 3)
-	assert.Equal(t, "/node-embed/child1", child1.Path())
-	assert.Equal(t, "/node-embed/child2", child2.Path())
-	assert.Equal(t, "/node-embed/child3", child3.Path())
+	assert.Equal(t, "/node-embed/node-embed-0", child1.Path())
+	assert.Equal(t, "/node-embed/node-embed-1", child2.Path())
+	assert.Equal(t, "/node-embed/node-embed-2", child3.Path())
 }
 
 func TestNodeEscapePaths(t *testing.T) {
-	parent := testdata.NodeEmbed{}
-	parent.InitName(&parent, "par1")
+	parent := testdata.NewNodeEmbed()
 	typ := parent.NodeType()
 	child := parent.NewChild(typ, "child1.go")
 	child2 := parent.NewChild(typ, "child1/child1")

@@ -36,11 +36,11 @@ func newRoot[T Node]() T {
 }
 
 // initNode initializes the node.
-func initNode(this Node) {
-	n := this.AsTreeNode()
-	if n.Ths != this {
-		n.Ths = this
-		n.Ths.OnInit()
+func initNode(n Node) {
+	nb := n.AsTreeNode()
+	if nb.Ths != n {
+		nb.Ths = n
+		nb.Ths.OnInit()
 	}
 }
 
@@ -60,13 +60,7 @@ func checkThis(n Node) error {
 func SetParent(child Node, parent Node) {
 	n := child.AsTreeNode()
 	n.Par = parent
-	if parent != nil {
-		pn := parent.AsTreeNode()
-		c := atomic.AddUint64(&pn.numLifetimeChildren, 1)
-		if child.Name() == "" {
-			child.SetName(child.NodeType().IDName + "-" + strconv.FormatUint(c-1, 10)) // must subtract 1 so we start at 0
-		}
-	}
+	SetUniqueName(n)
 	child.This().OnAdd()
 	n.WalkUpParent(func(k Node) bool {
 		k.This().OnChildAdded(child)
@@ -140,14 +134,14 @@ func NewOfType(typ *types.Type) Node {
 
 // SetUniqueName sets the name of the node to be unique, using
 // the number of lifetime children of the parent node as a unique
-// identifier.  If the node already has a name, it adds this, otherwise
+// identifier. If the node already has a name, it adds this, otherwise
 // it uses the type name of the node plus the unique id.
 func SetUniqueName(n Node) {
 	pn := n.Parent()
 	if pn == nil {
 		return
 	}
-	c := pn.AsTreeNode().numLifetimeChildren
+	c := atomic.AddUint64(&pn.AsTreeNode().numLifetimeChildren, 1)
 	id := "-" + strconv.FormatUint(c-1, 10) // must subtract 1 so we start at 0
 	if n.Name() == "" {
 		n.SetName(n.NodeType().IDName + id)
