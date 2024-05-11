@@ -218,7 +218,7 @@ func (pg *Page) Config() {
 	}
 	sp := core.NewSplits(pg, "splits").SetSplits(0.2, 0.8)
 
-	nav := views.NewTreeViewFrame(sp, "nav").SetText(core.TheApp.Name())
+	nav := views.NewTreeViewFrame(sp).SetText(core.TheApp.Name())
 	nav.SetReadOnly(true)
 	nav.ParentWidget().Style(func(s *styles.Style) {
 		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)

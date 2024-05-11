@@ -45,7 +45,7 @@ func (tv *TimeView) Config() {
 		return
 	}
 
-	hour := core.NewSpinner(tv, "hour")
+	hour := core.NewSpinner(tv)
 	hour.SetStep(1).SetEnforceStep(true)
 	if core.SystemSettings.Clock24 {
 		tv.Hour = tv.Time.Hour()
@@ -78,13 +78,13 @@ func (tv *TimeView) Config() {
 		tv.SendChange()
 	})
 
-	core.NewText(tv, "colon").SetType(core.TextDisplayLarge).SetText(":").
+	core.NewText(tv).SetType(core.TextDisplayLarge).SetText(":").
 		Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 			s.Min.X.Ch(1)
 		})
 
-	minute := core.NewSpinner(tv, "minute").
+	minute := core.NewSpinner(tv).
 		SetStep(1).SetEnforceStep(true).
 		SetMin(0).SetMax(60).SetFormat("%02d").
 		SetValue(float32(tv.Time.Minute()))
@@ -100,7 +100,7 @@ func (tv *TimeView) Config() {
 	})
 
 	if !core.SystemSettings.Clock24 {
-		sw := core.NewSwitches(tv, "am-pm").SetMutex(true).SetType(core.SwitchSegmentedButton).SetItems(core.SwitchItem{Text: "AM"}, core.SwitchItem{Text: "PM"})
+		sw := core.NewSwitches(tv).SetMutex(true).SetType(core.SwitchSegmentedButton).SetItems(core.SwitchItem{Text: "AM"}, core.SwitchItem{Text: "PM"})
 		sw.Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 		})
@@ -186,7 +186,7 @@ func (dv *DateView) Config() {
 	for i, sm := range shortMonths {
 		sms[i] = core.ChooserItem{Value: sm}
 	}
-	month := core.NewChooser(trow, "month").SetItems(sms...)
+	month := core.NewChooser(trow).SetItems(sms...)
 	month.SetCurrentIndex(int(dv.Time.Month() - 1))
 	month.OnChange(func(e events.Event) {
 		// set our month
@@ -207,7 +207,7 @@ func (dv *DateView) Config() {
 	for i := yr - 100; i <= yr+100; i++ {
 		yrs = append(yrs, core.ChooserItem{Value: i})
 	}
-	year := core.NewChooser(trow, "year").SetItems(yrs...)
+	year := core.NewChooser(trow).SetItems(yrs...)
 	year.SetCurrentValue(yr)
 	year.OnChange(func(e events.Event) {
 		// we are centered at current year with 100 in each direction
@@ -225,7 +225,7 @@ func (dv *DateView) Config() {
 }
 
 func (dv *DateView) ConfigDateGrid() {
-	grid := core.NewLayout(dv, "grid")
+	grid := core.NewLayout(dv)
 	grid.Style(func(s *styles.Style) {
 		s.Display = styles.Grid
 		s.Columns = 7
@@ -250,11 +250,10 @@ func (dv *DateView) ConfigDateGrid() {
 	}
 
 	for yd := somwyd; yd <= eomwyd; yd++ {
-		yds := strconv.Itoa(yd)
 		// actual time of this date
 		dt := somw.AddDate(0, 0, yd-somwyd)
 		ds := strconv.Itoa(dt.Day())
-		bt := core.NewButton(grid, "day-"+yds).SetType(core.ButtonAction).SetText(ds)
+		bt := core.NewButton(grid).SetType(core.ButtonAction).SetText(ds)
 		bt.OnClick(func(e events.Event) {
 			dv.SetTime(dt)
 		})
@@ -301,7 +300,7 @@ func (v *TimeValue) Config() {
 		s.Grow.Set(0, 0)
 	})
 
-	dt := core.NewTextField(v.Widget, "date").SetTooltip("The date")
+	dt := core.NewTextField(v.Widget).SetTooltip("The date")
 	dt.SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
 		d := core.NewBody().AddTitle("Select date")
 		dv := NewDateView(d).SetTime(*v.TimeValue())
@@ -330,7 +329,7 @@ func (v *TimeValue) Config() {
 		return nil
 	})
 
-	tm := core.NewTextField(v.Widget, "time").SetTooltip("The time")
+	tm := core.NewTextField(v.Widget).SetTooltip("The time")
 	tm.SetLeadingIcon(icons.Schedule, func(e events.Event) {
 		d := core.NewBody().AddTitle("Edit time")
 		tv := NewTimeView(d).SetTime(*v.TimeValue())
@@ -390,7 +389,7 @@ func (v *DurationValue) Config() {
 
 	var ch *core.Chooser
 
-	sp := core.NewSpinner(v.Widget, "value").SetTooltip("The value of time").SetStep(1).SetPageStep(10)
+	sp := core.NewSpinner(v.Widget).SetTooltip("The value of time").SetStep(1).SetPageStep(10)
 	sp.OnChange(func(e events.Event) {
 		v.SetValue(sp.Value * float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
 	})
@@ -400,7 +399,7 @@ func (v *DurationValue) Config() {
 		units[i] = core.ChooserItem{Value: u}
 	}
 
-	ch = core.NewChooser(v.Widget, "unit").SetTooltip("The unit of time").SetItems(units...)
+	ch = core.NewChooser(v.Widget).SetTooltip("The unit of time").SetItems(units...)
 	ch.OnChange(func(e events.Event) {
 		// we update the value to fit the unit
 		npv := reflectx.NonPointerValue(v.Value)

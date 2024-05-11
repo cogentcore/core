@@ -169,20 +169,14 @@ type TreeView struct {
 	actStateLayer float32 `set:"-"`
 }
 
-// NewTreeViewFrame adds a new [TreeView] with the given name to a new
-// frame in the given parent that ensures that the tree view scrolls
-// separately from the surrounding context. If a name is provided, it
-// sets the name of the tree view to that and the name of the frame to
-// that plus "-frame".
-func NewTreeViewFrame(parent tree.Node, name ...string) *TreeView {
-	frnm := []string{}
-	if len(name) > 0 {
-		frnm = []string{name[0] + "-frame"}
-	}
-	fr := core.NewFrame(parent, frnm...).Style(func(s *styles.Style) {
+// NewTreeViewFrame adds a new [TreeView] to a new frame with the given
+// optional parent that ensures that the tree view scrolls
+// separately from the surrounding context.
+func NewTreeViewFrame(parent ...tree.Node) *TreeView {
+	fr := core.NewFrame(parent...).Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
-	return NewTreeView(fr, name...)
+	return NewTreeView(fr)
 }
 
 func (tv *TreeView) FlagType() enums.BitFlagSetter {

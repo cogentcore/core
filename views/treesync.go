@@ -175,8 +175,8 @@ func (tv *TreeView) InsertBefore() { //types:add
 func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *types.Type, n int) {
 	var stv *TreeView
 	for i := 0; i < n; i++ {
-		nm := fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i)
-		nn := tv.InsertNewChild(typ, myidx+i, nm)
+		nn := tv.InsertNewChild(typ, myidx+i)
+		nn.SetName(fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i))
 		ntv := AsTreeView(nn)
 		ntv.Update()
 		if i == n-1 {
@@ -195,8 +195,8 @@ func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *types.Type, n int) {
 	parent := tv.SyncNode
 	var sn tree.Node
 	for i := 0; i < n; i++ {
-		nm := fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i)
-		nn := parent.InsertNewChild(typ, myidx+i, nm)
+		nn := parent.InsertNewChild(typ, myidx+i)
+		nn.SetName(fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i))
 		if i == n-1 {
 			sn = nn
 		}

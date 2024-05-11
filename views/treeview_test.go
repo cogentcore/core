@@ -8,13 +8,12 @@ import (
 	"testing"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/tree"
 )
 
 func TestTreeView(t *testing.T) {
 	b := core.NewBody()
 
-	fr := tree.NewRoot[*core.Frame]("frame")
+	fr := core.NewFrame()
 	core.NewButton(fr)
 	core.NewText(fr)
 	core.NewButton(core.NewLayout(fr))
@@ -26,7 +25,7 @@ func TestTreeView(t *testing.T) {
 func TestTreeViewReadOnly(t *testing.T) {
 	b := core.NewBody()
 
-	fr := tree.NewRoot[*core.Frame]("frame")
+	fr := core.NewFrame()
 	core.NewButton(fr)
 	core.NewText(fr)
 	core.NewButton(core.NewLayout(fr))
