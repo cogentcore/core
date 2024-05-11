@@ -70,7 +70,7 @@ func (st *Stage) addDialogParts() *Stage {
 		s.Grow.Set(0, 1)
 		s.Gap.Zero()
 	})
-	mv := NewHandle(parts, "move").Style(func(s *styles.Style) {
+	mv := NewHandle(parts).Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	}).StyleFinal(func(s *styles.Style) {
 		s.Cursor = cursors.Move
@@ -90,7 +90,7 @@ func (st *Stage) addDialogParts() *Stage {
 		sc.SceneGeom.Pos = np
 		sc.NeedsRender()
 	})
-	rsz := NewHandle(parts, "resize").Style(func(s *styles.Style) {
+	rsz := NewHandle(parts).Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.FillMargin = false
 	}).StyleFinal(func(s *styles.Style) {

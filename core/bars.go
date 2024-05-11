@@ -60,15 +60,15 @@ func (sc *Scene) ConfigSceneBars() {
 		}
 	}
 	if !sc.Bars.Top.IsEmpty() {
-		head := NewLayout(sc, "top-bar").Style(func(s *styles.Style) {
+		head := NewLayout(sc).Style(func(s *styles.Style) {
 			s.Align.Items = styles.Center
 		})
 		sc.Bars.Top.Call(head)
 	}
 	if !sc.Bars.Left.IsEmpty() || !sc.Bars.Right.IsEmpty() {
-		mid := NewLayout(sc, "body-area")
+		mid := NewLayout(sc)
 		if !sc.Bars.Left.IsEmpty() {
-			left := NewLayout(mid, "left-bar").Style(func(s *styles.Style) {
+			left := NewLayout(mid).Style(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Align.Items = styles.Center
 			})
@@ -78,7 +78,7 @@ func (sc *Scene) ConfigSceneBars() {
 			mid.AddChild(sc.Body)
 		}
 		if !sc.Bars.Right.IsEmpty() {
-			right := NewLayout(mid, "right-bar").Style(func(s *styles.Style) {
+			right := NewLayout(mid).Style(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Align.Items = styles.Center
 			})
@@ -90,7 +90,7 @@ func (sc *Scene) ConfigSceneBars() {
 		}
 	}
 	if !sc.Bars.Bottom.IsEmpty() {
-		foot := NewLayout(sc, "bottom-bar").Style(func(s *styles.Style) {
+		foot := NewLayout(sc).Style(func(s *styles.Style) {
 			s.Justify.Content = styles.End
 			s.Align.Items = styles.Center
 		})

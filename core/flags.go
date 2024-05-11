@@ -52,10 +52,11 @@ func (wb *WidgetBase) SetAbilities(on bool, able ...abilities.Abilities) *Widget
 
 // SetSelected sets the Selected flag to given value for the entire Widget
 // and calls ApplyStyleTree to apply any style changes.
-func (wb *WidgetBase) SetSelected(sel bool) {
+func (wb *WidgetBase) SetSelected(sel bool) *WidgetBase {
 	wb.SetState(sel, states.Selected)
 	wb.ApplyStyleTree()
 	wb.NeedsRender()
+	return wb
 }
 
 // CanFocus checks if this node can receive keyboard focus

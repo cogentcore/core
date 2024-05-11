@@ -10,7 +10,6 @@ import (
 	"image"
 	"log/slog"
 	"slices"
-	"strconv"
 	"strings"
 	"unicode"
 
@@ -519,12 +518,10 @@ func (ch *Chooser) ClearError() {
 func (ch *Chooser) MakeItemsMenu(m *Scene) {
 	ch.CallItemsFuncs()
 	for i, it := range ch.Items {
-		nm := "item-" + strconv.Itoa(i)
 		if it.SeparatorBefore {
-			NewSeparator(m, "separator-"+nm)
+			NewSeparator(m)
 		}
-		bt := NewButton(m, nm)
-		bt.SetText(it.GetLabel()).SetIcon(it.Icon).SetTooltip(it.Tooltip)
+		bt := NewButton(m).SetText(it.GetLabel()).SetIcon(it.Icon).SetTooltip(it.Tooltip)
 		bt.SetSelected(i == ch.CurrentIndex)
 		bt.OnClick(func(e events.Event) {
 			ch.SelectItemAction(i)

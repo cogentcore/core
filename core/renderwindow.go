@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
 )
 
@@ -1029,7 +1030,7 @@ func (w *RenderWindow) GatherScenes() bool {
 	for i := winIndex + 1; i < n; i++ {
 		st := sm.Stack.ValueByIndex(i)
 		if st.Scrim && i == n-1 {
-			rs.Add(NewScrimForScene(winScene), scIndex)
+			rs.Add(NewScrim(winScene), scIndex)
 		}
 		rs.Add(st.Scene, scIndex)
 		if DebugSettings.WinRenderTrace {
@@ -1061,18 +1062,16 @@ func (w *RenderWindow) SendShowEvents() {
 
 // A Scrim is just a dummy Widget used for rendering a Scrim.
 // Only used for its type. Everything else managed by RenderWindow.
-type Scrim struct {
+type Scrim struct { //core:no-new
 	WidgetBase
 }
 
-// NewScrimForScene is the proper function to use for creating a new Scrim
-// for use in rendering.  Critical to not actually add the Scrim to the
-// Scene, just set its pointers.
-func NewScrimForScene(sc *Scene) *Scrim {
-	sr := &Scrim{} // critical to not add to scene!
-	sr.InitName(sr)
-	sr.Par = sc
-	sr.Scene = sc
+// NewScrim creates a new Scrim for use in rendering.
+// It does not actually add the Scrim to the Scene,
+// just sets its pointers.
+func NewScrim(sc *Scene) *Scrim {
+	sr := tree.New[*Scrim]() // critical to not add to scene!
+	tree.SetParent(sr, sc)
 	return sr
 }
 

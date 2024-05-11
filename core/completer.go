@@ -169,7 +169,7 @@ func (c *Complete) ShowNowImpl(ctx Widget, pos image.Point, text string) bool {
 			text = cmp.Label
 		}
 		icon := cmp.Icon
-		mi := NewButton(sc, text).SetText(text).SetIcon(icons.Icon(icon)).SetTooltip(cmp.Desc).
+		mi := NewButton(sc).SetText(text).SetIcon(icons.Icon(icon)).SetTooltip(cmp.Desc).
 			OnClick(func(e events.Event) {
 				c.Complete(cmp.Text)
 			}).

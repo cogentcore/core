@@ -119,7 +119,8 @@ func StandardAppBarStart(tb *Toolbar) {
 
 // StandardAppBarBack adds a back button
 func StandardAppBarBack(tb *Toolbar) *Button {
-	bt := NewButton(tb, "back").SetIcon(icons.ArrowBack).SetTooltip("Back").SetKey(keymap.HistPrev)
+	bt := NewButton(tb).SetIcon(icons.ArrowBack).SetTooltip("Back").SetKey(keymap.HistPrev)
+	bt.SetName("back")
 	// TODO(kai/abc): app bar back button disabling
 	// bt.StyleFirst(func(s *styles.Style) {
 	// 	if tb.Scene.Stage.Mains == nil {
@@ -148,7 +149,7 @@ func StandardAppBarBack(tb *Toolbar) *Button {
 
 // StandardAppBarChooser adds a standard app chooser using [ConfigAppChooser].
 func StandardAppBarChooser(tb *Toolbar) *Chooser {
-	return ConfigAppChooser(NewChooser(tb, "app-chooser"), tb)
+	return ConfigAppChooser(NewChooser(tb), tb)
 }
 
 // todo: use CurrentMainScene instead?
@@ -244,10 +245,11 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 					win.CloseReq()
 				}
 			})
-		NewButton(m, "quit-app").SetText("Quit").SetIcon(icons.Close).SetShortcut("Command+Q").
+		quit := NewButton(m).SetText("Quit").SetIcon(icons.Close).SetShortcut("Command+Q").
 			OnClick(func(e events.Event) {
 				go TheApp.QuitReq()
 			})
+		quit.SetName("quit-app")
 		NewSeparator(m)
 		for _, w := range MainRenderWindows {
 			if w != nil {
@@ -278,6 +280,7 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 // of the AppBar. You can extend the resources available for access
 // in the app chooser using [Chooser.AddItemsFunc] and [ChooserItem.Func].
 func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
+	ch.SetName("app-chooser")
 	ch.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
 	if TheApp.SystemPlatform().IsMobile() {
 		ch.SetPlaceholder("Search")

@@ -120,13 +120,8 @@ func ErrorDialog(ctx Widget, err error, title ...string) {
 // Close sends a Change event to the Scene for listeners there.
 // Should add an OnClick listener to this button to perform additional
 // specific actions needed beyond Close.
-// Name should be passed when there are multiple effective OK buttons.
-func (bd *Body) AddOK(parent Widget, name ...string) *Button {
-	nm := "ok"
-	if len(name) > 0 {
-		nm = name[0]
-	}
-	bt := NewButton(parent, nm).SetText("OK")
+func (bd *Body) AddOK(parent Widget) *Button {
+	bt := NewButton(parent).SetText("OK")
 	bt.OnFirst(events.Click, func(e events.Event) { // first de-focus any active editors
 		bt.FocusClear()
 	})
@@ -157,13 +152,8 @@ func (bd *Body) AddOKOnly() *Body {
 // Close sends a Change event to the Scene for listeners there.
 // Should add an OnClick listener to this button to perform additional
 // specific actions needed beyond Close.
-// Name should be passed when there are multiple effective Cancel buttons (rare).
-func (bd *Body) AddCancel(parent Widget, name ...string) *Button {
-	nm := "cancel"
-	if len(name) > 0 {
-		nm = name[0]
-	}
-	bt := NewButton(parent, nm).SetType(ButtonOutlined).SetText("Cancel")
+func (bd *Body) AddCancel(parent Widget) *Button {
+	bt := NewButton(parent).SetType(ButtonOutlined).SetText("Cancel")
 	bt.OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		bd.Close()

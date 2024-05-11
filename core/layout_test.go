@@ -350,8 +350,8 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 }
 */
 
-func BoxFrame(parent Widget, nm ...string) *Frame {
-	fr := NewFrame(parent, nm...)
+func BoxFrame(parent Widget) *Frame {
+	fr := NewFrame(parent)
 	fr.Style(func(s *styles.Style) {
 		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 		s.Border.Width.Set(units.Dp(2))
@@ -359,8 +359,8 @@ func BoxFrame(parent Widget, nm ...string) *Frame {
 	return fr
 }
 
-func SpaceFrame(parent Widget, nm ...string) (*Frame, *Space) {
-	fr := NewFrame(parent, nm...)
+func SpaceFrame(parent Widget) (*Frame, *Space) {
+	fr := NewFrame(parent)
 	fr.Style(func(s *styles.Style) {
 		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 		s.Border.Width.Set(units.Dp(2))
@@ -369,8 +369,8 @@ func SpaceFrame(parent Widget, nm ...string) (*Frame, *Space) {
 	return fr, sp
 }
 
-func HorizontalRow(parent Widget, nm ...string) *Frame {
-	row := BoxFrame(parent, nm...)
+func HorizontalRow(parent Widget) *Frame {
+	row := BoxFrame(parent)
 	row.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 	})
@@ -398,13 +398,12 @@ func TabFrame(parent Widget) (*Frame, *Frame) {
 }
 
 func WrapText(parent Widget, txt string) *Text {
-	return NewText(parent, "wrap-text").SetText(txt)
+	return NewText(parent).SetText(txt)
 }
 
 func PlainFrames(parent Widget, grow math32.Vector2) {
-	for i, sz := range FrameSizes {
-		nm := fmt.Sprintf("fr%v", i)
-		fr := BoxFrame(parent, nm)
+	for _, sz := range FrameSizes {
+		fr := BoxFrame(parent)
 		fr.Style(func(s *styles.Style) {
 			s.Min.X.Px(sz.X)
 			s.Min.Y.Px(sz.Y)
