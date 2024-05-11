@@ -17,11 +17,11 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Camera", IDName
 // GroupType is the [types.Type] for [Group]
 var GroupType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Group", IDName: "group", Doc: "Group collects individual elements in a scene but does not have a Mesh or Material of\nits own.  It does have a transform that applies to all nodes under it.", Embeds: []types.Field{{Name: "NodeBase"}}, Instance: &Group{}})
 
-// NewGroup adds a new [Group] with the given name to the given parent:
+// NewGroup adds a new [Group] to the given optional parent:
 // Group collects individual elements in a scene but does not have a Mesh or Material of
 // its own.  It does have a transform that applies to all nodes under it.
-func NewGroup(parent tree.Node, name ...string) *Group {
-	return parent.NewChild(GroupType, name...).(*Group)
+func NewGroup(parent ...tree.Node) *Group {
+	return tree.New[*Group](parent...)
 }
 
 // NodeType returns the [*types.Type] of [Group]
@@ -111,12 +111,12 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Node", IDName: 
 // NodeBaseType is the [types.Type] for [NodeBase]
 var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.NodeBase", IDName: "node-base", Doc: "NodeBase is the basic 3D scenegraph node, which has the full transform information\nrelative to parent, and computed bounding boxes, etc.\nThere are only two different kinds of Nodes: Group and Solid", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pose", Doc: "complete specification of position and orientation"}, {Name: "Sc", Doc: "Sc is the cached Scene"}, {Name: "PoseMu", Doc: "mutex on pose access -- needed for parallel updating"}, {Name: "MeshBBox", Doc: "mesh-based local bounding box (aggregated for groups)"}, {Name: "WorldBBox", Doc: "world coordinates bounding box"}, {Name: "NDCBBox", Doc: "normalized display coordinates bounding box, used for frustrum clipping"}, {Name: "BBox", Doc: "raw original bounding box for the widget within its parent Scene.\nThis is prior to intersecting with Frame bounds."}, {Name: "ScBBox", Doc: "2D bounding box for region occupied within Scene Frame that we render onto.\nThis is BBox intersected with Frame bounds."}}, Instance: &NodeBase{}})
 
-// NewNodeBase adds a new [NodeBase] with the given name to the given parent:
+// NewNodeBase adds a new [NodeBase] to the given optional parent:
 // NodeBase is the basic 3D scenegraph node, which has the full transform information
 // relative to parent, and computed bounding boxes, etc.
 // There are only two different kinds of Nodes: Group and Solid
-func NewNodeBase(parent tree.Node, name ...string) *NodeBase {
-	return parent.NewChild(NodeBaseType, name...).(*NodeBase)
+func NewNodeBase(parent ...tree.Node) *NodeBase {
+	return tree.New[*NodeBase](parent...)
 }
 
 // NodeType returns the [*types.Type] of [NodeBase]
@@ -375,12 +375,12 @@ func (t *Torus) SetTrans(v bool) *Torus { t.Trans = v; return t }
 // SolidType is the [types.Type] for [Solid]
 var SolidType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Solid", IDName: "solid", Doc: "Solid represents an individual 3D solid element.\nIt has its own unique spatial transforms and material properties,\nand points to a mesh structure defining the shape of the solid.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Mesh", Doc: "name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene"}, {Name: "Mat", Doc: "material properties of the surface (color, shininess, texture, etc)"}, {Name: "MeshPtr", Doc: "cached pointer to mesh"}}, Instance: &Solid{}})
 
-// NewSolid adds a new [Solid] with the given name to the given parent:
+// NewSolid adds a new [Solid] to the given optional parent:
 // Solid represents an individual 3D solid element.
 // It has its own unique spatial transforms and material properties,
 // and points to a mesh structure defining the shape of the solid.
-func NewSolid(parent tree.Node, name ...string) *Solid {
-	return parent.NewChild(SolidType, name...).(*Solid)
+func NewSolid(parent ...tree.Node) *Solid {
+	return tree.New[*Solid](parent...)
 }
 
 // NodeType returns the [*types.Type] of [Solid]
@@ -396,7 +396,7 @@ func (t *Solid) SetMat(v Material) *Solid { t.Mat = v; return t }
 // Text2DType is the [types.Type] for [Text2D]
 var Text2DType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Text2D", IDName: "text2-d", Doc: "Text2D presents 2D rendered text on a vertically oriented plane, using a texture.\nCall SetText() which calls RenderText to update fortext changes (re-renders texture).\nThe native scale is such that a unit height value is the height of the default font\nset by the font-size property, and the X axis is scaled proportionally based on the\nrendered text size to maintain the aspect ratio.  Further scaling can be applied on\ntop of that by setting the Pose.Scale values as usual.\nStandard styling properties can be set on the node to set font size, family,\nand text alignment relative to the Pose.Pos position (e.g., Left, Top puts the\nupper-left corner of text at Pos).\nNote that higher quality is achieved by using a larger font size (36 default).\nThe margin property creates blank margin of the background color around the text\n(2 px default) and the background-color defaults to transparent\nbut can be set to any color.", Embeds: []types.Field{{Name: "Solid"}}, Fields: []types.Field{{Name: "Text", Doc: "the text string to display"}, {Name: "Styles", Doc: "styling settings for the text"}, {Name: "TextPos", Doc: "position offset of start of text rendering relative to upper-left corner"}, {Name: "TextRender", Doc: "render data for text label"}, {Name: "RenderState", Doc: "render state for rendering text"}}, Instance: &Text2D{}})
 
-// NewText2D adds a new [Text2D] with the given name to the given parent:
+// NewText2D adds a new [Text2D] to the given optional parent:
 // Text2D presents 2D rendered text on a vertically oriented plane, using a texture.
 // Call SetText() which calls RenderText to update fortext changes (re-renders texture).
 // The native scale is such that a unit height value is the height of the default font
@@ -410,8 +410,8 @@ var Text2DType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Text2D
 // The margin property creates blank margin of the background color around the text
 // (2 px default) and the background-color defaults to transparent
 // but can be set to any color.
-func NewText2D(parent tree.Node, name ...string) *Text2D {
-	return parent.NewChild(Text2DType, name...).(*Text2D)
+func NewText2D(parent ...tree.Node) *Text2D {
+	return tree.New[*Text2D](parent...)
 }
 
 // NodeType returns the [*types.Type] of [Text2D]

@@ -68,7 +68,7 @@ type NodeBase struct {
 	depth int
 }
 
-// String implements the fmt.Stringer interface by returning the path of the node.
+// String implements the [fmt.Stringer] interface by returning the path of the node.
 func (n *NodeBase) String() string {
 	return elide.Middle(n.This().Path(), 38)
 }
@@ -86,21 +86,6 @@ func (n *NodeBase) This() Node {
 // AsTreeNode returns the [NodeBase] for this Node.
 func (n *NodeBase) AsTreeNode() *NodeBase {
 	return n
-}
-
-// InitName initializes this node to the given actual object as a Node interface
-// and sets its name. The names should be unique among children of a node.
-// This is called automatically when adding child nodes and using [NewRoot].
-// If the name is unspecified, it defaults to the ID (kebab-case) name of the type.
-// Even though this is a method and gets the method receiver, it needs
-// an "external" version of itself passed as the first arg, from which
-// the proper Node interface pointer will be obtained. This is the only
-// way to get virtual functional calling to work within the Go language.
-func (n *NodeBase) InitName(k Node, name ...string) {
-	initNode(k)
-	if len(name) > 0 {
-		n.SetName(name[0])
-	}
 }
 
 // Name returns the user-defined name of the Node, which can be
