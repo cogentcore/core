@@ -398,6 +398,7 @@ func TestSetUniqueName(t *testing.T) {
 	SetUniqueName(child)
 	assert.Equal(t, "my-name-2", child.Name())
 
+	// ensure SetUniqueName works with different types
 	newChild := testdata.NewNodeEmbed(root)
 	assert.Equal(t, "node-embed-3", newChild.Name())
 }
