@@ -500,7 +500,7 @@ func (sr *Slider) Config() {
 	}
 	parts := sr.NewParts()
 	if !parts.HasChildren() {
-		NewIcon(parts, "icon")
+		NewIcon(parts).SetName("icon")
 	}
 	ic := sr.Parts.Child(0).(*Icon)
 	ic.SetIcon(sr.Icon)

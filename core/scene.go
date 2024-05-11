@@ -122,14 +122,8 @@ func (sc *Scene) FlagType() enums.BitFlagSetter {
 // contains the main content of the Scene (e.g., a Window, Dialog, etc).
 // It will be constructed from the Bars-configured control bars on each
 // side, with the given Body as the central content.
-func NewBodyScene(body *Body, name ...string) *Scene {
-	sc := &Scene{}
-	nm := body.Nm + " scene"
-	if len(name) > 0 {
-		nm = name[0]
-	}
-	sc.InitName(sc, nm)
-	sc.Events.Scene = sc
+func NewBodyScene(body *Body) *Scene {
+	sc := NewScene(body.Name() + " scene")
 	sc.Body = body
 	// need to set parent immediately so that SceneConfig works,
 	// but can not add it yet because it may go elsewhere due
@@ -141,8 +135,10 @@ func NewBodyScene(body *Body, name ...string) *Scene {
 // NewScene creates a new Scene object without a Body, e.g., for use
 // in a Menu, Tooltip or other such simple popups or non-control-bar Scenes.
 func NewScene(name ...string) *Scene {
-	sc := &Scene{}
-	sc.InitName(sc, name...)
+	sc := tree.New[*Scene]()
+	if len(name) > 0 {
+		sc.SetName(name[0])
+	}
 	sc.Events.Scene = sc
 	return sc
 }

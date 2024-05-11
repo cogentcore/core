@@ -469,12 +469,7 @@ func (t *Meter) SetWidth(v units.Value) *Meter { t.Width = v; return t }
 func (t *Meter) SetTooltip(v string) *Meter { t.Tooltip = v; return t }
 
 // ScrimType is the [types.Type] for [Scrim]
-var ScrimType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Scrim", IDName: "scrim", Doc: "A Scrim is just a dummy Widget used for rendering a Scrim.\nOnly used for its type. Everything else managed by RenderWindow.", Embeds: []types.Field{{Name: "WidgetBase"}}, Instance: &Scrim{}})
-
-// NewScrim returns a new [Scrim] with the given optional parent:
-// A Scrim is just a dummy Widget used for rendering a Scrim.
-// Only used for its type. Everything else managed by RenderWindow.
-func NewScrim(parent ...tree.Node) *Scrim { return tree.New[*Scrim](parent...) }
+var ScrimType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Scrim", IDName: "scrim", Doc: "A Scrim is just a dummy Widget used for rendering a Scrim.\nOnly used for its type. Everything else managed by RenderWindow.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Instance: &Scrim{}})
 
 // NodeType returns the [*types.Type] of [Scrim]
 func (t *Scrim) NodeType() *types.Type { return ScrimType }

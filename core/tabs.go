@@ -171,8 +171,8 @@ func (ts *Tabs) SetStyles() {
 	})
 }
 
-// NTabs returns number of tabs
-func (ts *Tabs) NTabs() int {
+// NumTabs returns number of tabs
+func (ts *Tabs) NumTabs() int {
 	fr := ts.Frame()
 	if fr == nil {
 		return 0
@@ -182,7 +182,7 @@ func (ts *Tabs) NTabs() int {
 
 // CurTab returns currently selected tab, and its index -- returns false none
 func (ts *Tabs) CurTab() (Widget, int, bool) {
-	if ts.NTabs() == 0 {
+	if ts.NumTabs() == 0 {
 		return nil, -1, false
 	}
 	ts.Mu.Lock()
@@ -209,8 +209,9 @@ func (ts *Tabs) NewTab(label string, icon ...icons.Icon) *Frame {
 // within the list of tabs and returns the resulting tab frame. An optional icon
 // can also be passed for the tab button.
 func (ts *Tabs) InsertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
-	fr := ts.Frame()
-	frame := fr.InsertNewChild(FrameType, idx, label).(*Frame)
+	tfr := ts.Frame()
+	frame := tree.InsertNewChild[*Frame](tfr, idx)
+	frame.SetName(label)
 	frame.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
@@ -233,12 +234,9 @@ func (ts *Tabs) AddTab(frame *Frame, label string) int {
 // for internal use only. An optional icon can also be passed for the tab button.
 func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, icon ...icons.Icon) {
 	tb := ts.Tabs()
-	tab := tb.InsertNewChild(TabType, idx, label).(*Tab)
-	tab.Tooltip = label
-	tab.Type = ts.Type
-	tab.CloseIcon = ts.CloseIcon
-	tab.MaxChars = ts.MaxChars
-	tab.SetText(label)
+	tab := tree.InsertNewChild[*Tab](tb, idx)
+	tab.SetName(label)
+	tab.SetText(label).SetType(ts.Type).SetCloseIcon(ts.CloseIcon).SetMaxChars(ts.MaxChars).SetTooltip(label)
 	if len(icon) > 0 {
 		tab.SetIcon(icon[0])
 	}
@@ -381,10 +379,9 @@ func (ts *Tabs) RecycleTab(name string, sel bool) *Frame {
 func (ts *Tabs) RecycleTabWidget(name string, sel bool, typ *types.Type) Widget {
 	fr := ts.RecycleTab(name, sel)
 	if fr.HasChildren() {
-		wi, _ := AsWidget(fr.Child(0))
-		return wi
+		return fr.Child(0).(Widget)
 	}
-	wi, _ := AsWidget(fr.NewChild(typ, fr.Nm))
+	wi := fr.NewChild(typ).(Widget)
 	wi.Config()
 	return wi
 }
@@ -410,7 +407,7 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 	}
 	// if we didn't delete the current tab and have at least one
 	// other tab, we go to the next tab over
-	if nidx < 0 && ts.NTabs() > 1 {
+	if nidx < 0 && ts.NumTabs() > 1 {
 		nidx = max(idx-1, 0)
 	}
 	fr.DeleteChildAtIndex(idx)
@@ -426,25 +423,24 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 
 // ConfigNewTabButton configures the new tab button at the end of the list of tabs, if applicable.
 func (ts *Tabs) ConfigNewTabButton() bool {
-	sz := ts.NTabs()
+	ntabs := ts.NumTabs()
 	tb := ts.Tabs()
-	ntb := len(tb.Kids)
+	nkids := len(tb.Kids)
 	if ts.NewTabButton {
-		if ntb == sz+1 {
+		if nkids == ntabs+1 {
 			return false
 		}
-		tab := tb.InsertNewChild(ButtonType, ntb, "new-tab").(*Button)
-		tab.SetIcon(icons.Add).SetType(ButtonAction)
-		tab.OnClick(func(e events.Event) {
+		nt := NewButton(tb).SetIcon(icons.Add).SetType(ButtonAction)
+		nt.OnClick(func(e events.Event) {
 			ts.NewTab("New tab")
-			ts.SelectTabIndex(len(*ts.Frame().Children()) - 1)
+			ts.SelectTabIndex(ts.NumTabs() - 1)
 		})
 		return true
 	} else {
-		if ntb == sz {
+		if nkids == ntabs {
 			return false
 		}
-		tb.DeleteChildAtIndex(ntb - 1)
+		tb.DeleteChildAtIndex(nkids - 1)
 		return true
 	}
 }
@@ -489,7 +485,7 @@ func (ts *Tabs) Frame() *Frame {
 
 // UnselectOtherTabs turns off all the tabs except given one
 func (ts *Tabs) UnselectOtherTabs(idx int) {
-	sz := ts.NTabs()
+	sz := ts.NumTabs()
 	tbs := ts.Tabs()
 	for i := 0; i < sz; i++ {
 		if i == idx {

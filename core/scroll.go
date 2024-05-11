@@ -5,7 +5,6 @@
 package core
 
 import (
-	"fmt"
 	"image"
 	"time"
 
@@ -60,9 +59,8 @@ func (ly *Layout) ConfigScroll(d math32.Dims) {
 	if ly.Scrolls[d] != nil {
 		return
 	}
-	ly.Scrolls[d] = &Slider{}
+	ly.Scrolls[d] = NewSlider()
 	sb := ly.Scrolls[d]
-	sb.InitName(sb, fmt.Sprintf("scroll%v", d))
 	tree.SetParent(sb, ly.This())
 	// sr.SetFlag(true, tree.Field) // note: do not turn on -- breaks pos
 	sb.SetType(SliderScrollbar)

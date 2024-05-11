@@ -82,7 +82,7 @@ func (bd *Body) SnackbarStyles() {
 
 // AddSnackbarText adds a snackbar [Text] with the given text.
 func (bd *Body) AddSnackbarText(text string) *Body {
-	NewText(bd, "text").SetText(text).SetType(TextBodyMedium).
+	NewText(bd).SetText(text).SetType(TextBodyMedium).
 		Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 			if s.Is(states.Selected) {
@@ -97,8 +97,8 @@ func (bd *Body) AddSnackbarText(text string) *Body {
 // snackbar is automatically closed when the button is clicked regardless of
 // whether there is an event handler passed.
 func (bd *Body) AddSnackbarButton(text string, onClick ...func(e events.Event)) *Body {
-	NewStretch(bd, "stretch")
-	bt := NewButton(bd, "button").SetType(ButtonText).SetText(text)
+	NewStretch(bd)
+	bt := NewButton(bd).SetType(ButtonText).SetText(text)
 	bt.Style(func(s *styles.Style) {
 		s.Color = colors.C(colors.Scheme.InversePrimary)
 	})
@@ -116,7 +116,7 @@ func (bd *Body) AddSnackbarButton(text string, onClick ...func(e events.Event)) 
 // snackbar is automatically closed when the button is clicked regardless of whether
 // there is an event handler passed.
 func (bd *Body) AddSnackbarIcon(icon icons.Icon, onClick ...func(e events.Event)) *Body {
-	ic := NewButton(bd, "icon").SetType(ButtonAction).SetIcon(icon)
+	ic := NewButton(bd).SetType(ButtonAction).SetIcon(icon)
 	ic.Style(func(s *styles.Style) {
 		s.Color = colors.C(colors.Scheme.InverseOnSurface)
 	})

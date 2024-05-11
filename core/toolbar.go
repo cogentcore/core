@@ -109,8 +109,8 @@ func (tb *Toolbar) AllItemsToChildren() {
 		if tb.Styles.Direction != styles.Row {
 			ic = icons.MoreHoriz
 		}
-		tb.OverflowButton = NewButton(tb, "overflow-menu").SetIcon(ic).
-			SetTooltip("Additional menu items")
+		tb.OverflowButton = NewButton(tb).SetIcon(ic).SetTooltip("Additional menu items")
+		tb.OverflowButton.SetName("overflow-menu")
 		tb.OverflowButton.Menu = tb.OverflowMenu
 	}
 	if len(tb.OverflowItems) > 0 {

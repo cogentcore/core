@@ -413,14 +413,14 @@ func (wb *WidgetBase) NewParts() *Layout {
 	if wb.Parts != nil {
 		return wb.Parts
 	}
-	parts := tree.NewRoot[*Layout]("parts")
-	tree.SetParent(parts, wb.This())
-	parts.SetFlag(true, tree.Field)
-	parts.Style(func(s *styles.Style) {
+	wb.Parts = NewLayout()
+	wb.Parts.SetName("parts")
+	tree.SetParent(wb.Parts, wb.This()) // don't add to children list
+	wb.Parts.SetFlag(true, tree.Field)
+	wb.Parts.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
-	wb.Parts = parts
-	return parts
+	return wb.Parts
 }
 
 // ParentWidget returns the parent as a [WidgetBase] or nil
