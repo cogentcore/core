@@ -191,13 +191,6 @@ func (ch *Chooser) SetStyles() {
 				// indicator does not need to be focused
 				s.SetAbilities(false, abilities.Focusable)
 			})
-		case "parts/indicator":
-			w.Style(func(s *styles.Style) {
-				s.Font.Size.Dp(16)
-				s.Min.X.Em(1)
-				s.Min.Y.Em(1)
-				s.Justify.Self = styles.End
-			})
 		}
 	})
 }
@@ -269,7 +262,13 @@ func (ch *Chooser) Config(c *Config) {
 	// editable handles through TextField
 	if !ch.Editable {
 		AddConfig(c, "parts/indicator",
-			func() *Icon { return NewIcon() },
+			func() *Icon {
+				w := NewIcon()
+				w.Style(func(s *styles.Style) {
+					s.Justify.Self = styles.End
+				})
+				return w
+			},
 			func(w *Icon) { w.SetIcon(ch.Indicator) })
 	}
 }
