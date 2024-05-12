@@ -198,7 +198,8 @@ const (
 
 // SetScene sets group with with all the decoded objects.
 func (dec *Decoder) SetScene(sc *xyz.Scene) {
-	gp := xyz.NewGroup(sc, dec.Objfile)
+	gp := xyz.NewGroup(sc)
+	gp.SetName(dec.Objfile)
 	dec.SetGroup(sc, gp)
 }
 
@@ -210,7 +211,8 @@ func (dec *Decoder) SetGroup(sc *xyz.Scene, gp *xyz.Group) {
 		if len(obj.Faces) == 0 {
 			continue
 		}
-		objgp := xyz.NewGroup(gp, obj.Name)
+		objgp := xyz.NewGroup(gp)
+		objgp.SetName(obj.Name)
 		dec.SetObject(sc, objgp, obj)
 	}
 	dec.Destroy()
@@ -230,7 +232,8 @@ func (dec *Decoder) SetObject(sc *xyz.Scene, objgp *xyz.Group, ob *Object) {
 			ms = &xyz.GenMesh{}
 			ms.Nm = sldnm
 			sc.AddMeshUnique(ms)
-			sld = xyz.NewSolid(objgp, sldnm).SetMesh(ms)
+			sld = xyz.NewSolid(objgp).SetMesh(ms)
+			sld.SetName(sldnm)
 			matName = face.Material
 			dec.SetMat(sc, sld, matName)
 			sldidx++

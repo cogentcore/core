@@ -40,7 +40,7 @@ func main() {
 
 	sc.Camera.LookAt(math32.Vector3{}, math32.Vec3(0, 1, 0)) // defaults to looking at origin
 
-	objgp := xyz.NewGroup(sc, "obj-gp")
+	objgp := xyz.NewGroup(sc)
 
 	curFn := "objs/airplane_prop_001.obj"
 	// curFn := "objs/piano_005.obj"

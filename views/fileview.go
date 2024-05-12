@@ -397,6 +397,7 @@ func (fv *FileView) ConfigSelRow() {
 
 	sf := core.NewTextField(sr).SetText(fv.CurrentSelectedFile).
 		SetTooltip(fmt.Sprintf("Enter the file name. Special keys: up/down to move selection; %s or %s to go up to parent folder; %s or %s or %s or %s to select current file (if directory, goes into it, if file, selects and closes); %s or %s for prev / next history item; %s return to this field", keymap.WordLeft.Label(), keymap.Jump.Label(), keymap.SelectMode.Label(), keymap.Insert.Label(), keymap.InsertAfter.Label(), keymap.Open.Label(), keymap.HistPrev.Label(), keymap.HistNext.Label(), keymap.Search.Label()))
+	sf.SetName("sel")
 	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
 	sf.Style(func(s *styles.Style) {
 		s.Min.X.Ch(60)
@@ -420,6 +421,7 @@ func (fv *FileView) ConfigSelRow() {
 			s.SetTextWrap(false)
 		})
 	ef := core.NewTextField(sr).SetText(fv.Ext)
+	ef.SetName("ext")
 	ef.OnChange(func(e events.Event) {
 		fv.SetExtAction(ef.Text())
 	})

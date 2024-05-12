@@ -32,22 +32,22 @@ type FileBrowse struct {
 	core.Frame
 
 	// root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjectFilename
-	ProjectRoot core.Filename `desc:"root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjectFilename"`
+	ProjectRoot core.Filename
 
 	// filename of the currently active texteditor
-	ActiveFilename core.Filename `desc:"filename of the currently active texteditor"`
+	ActiveFilename core.Filename
 
 	// has the root changed?  we receive update signals from root for changes
-	Changed bool `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
+	Changed bool `json:"-"`
 
 	// all the files in the project directory and subdirectories
-	Files *filetree.Tree `desc:"all the files in the project directory and subdirectories"`
+	Files *filetree.Tree
 
 	// number of texteditors available for editing files (default 2) -- configurable with n-text-views property
-	NTextEditors int `xml:"n-text-views" desc:"number of texteditors available for editing files (default 2) -- configurable with n-text-views property"`
+	NTextEditors int `xml:"n-text-views"`
 
 	// index of the currently active texteditor -- new files will be viewed in other views if available
-	ActiveTextEditorIndex int `json:"-" desc:"index of the currently active texteditor -- new files will be viewed in other views if available"`
+	ActiveTextEditorIndex int `json:"-"`
 }
 
 func (fb *FileBrowse) Defaults() {

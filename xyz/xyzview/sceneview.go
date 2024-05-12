@@ -40,8 +40,9 @@ func (sv *SceneView) ConfigSceneView() {
 		sv.UpdateToolbar()
 		return
 	}
-	NewScene(sv, "scene")
-	tb := core.NewToolbar(sv, "tb")
+	NewScene(sv).SetName("scene")
+	tb := core.NewToolbar(sv)
+	tb.SetName("tb")
 	sv.ConfigToolbar(tb)
 }
 
@@ -204,7 +205,8 @@ func (sv *SceneView) ConfigToolbar(tb *core.Toolbar) {
 	}
 	core.NewSeparator(tb)
 
-	sm := core.NewChooser(tb, "selmode").SetEnum(sw.SelectionMode)
+	sm := core.NewChooser(tb).SetEnum(sw.SelectionMode)
+	sm.SetName("selmode")
 	sm.OnChange(func(e events.Event) {
 		sw.SelectionMode = sm.CurrentItem.Value.(SelectionModes)
 	})

@@ -39,8 +39,6 @@ var Update3DTrace = false
 // the camera (i.e., its Pose is copied) -- Solids in that group can
 // set their relative Pos etc to display relative to the camera, to achieve
 // "first person" effects.
-//
-//core:no-new
 type Scene struct {
 	tree.NodeBase
 
@@ -105,20 +103,15 @@ func (sc *Scene) OnInit() {
 	sc.BackgroundColor = colors.Scheme.Background
 }
 
-// NewScene returns a new [Scene] for holding 3D content.
-func NewScene(name ...string) *Scene {
-	return tree.NewRoot[*Scene](name...)
-}
-
 // NewOffscreenScene returns a new [Scene] designed for offscreen
 // rendering of 3D content. This can be used in unit tests and other
 // cases not involving xyzview. It makes a new [vgpu.NoDisplayGPU].
-func NewOffscreenScene(name ...string) *Scene {
+func NewOffscreenScene() *Scene {
 	gpu, device, err := vgpu.NoDisplayGPU("offscreen")
 	if err != nil {
 		panic(fmt.Errorf("xyz.NewOffscreenScene: error initializing vgpu.NoDisplayGPU: %w", err))
 	}
-	sc := NewScene(name...).SetSize(image.Pt(1280, 960))
+	sc := NewScene().SetSize(image.Pt(1280, 960))
 	sc.ConfigFrame(gpu, device)
 	return sc
 }

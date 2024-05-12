@@ -23,8 +23,8 @@ func (sc *Scene) AddToLibrary(gp *Group) {
 // NewInLibrary makes a new Group in library, using given name as unique key
 // in Library map.
 func (sc *Scene) NewInLibrary(nm string) *Group {
-	gp := &Group{}
-	gp.InitName(gp, nm)
+	gp := NewGroup()
+	gp.SetName(nm)
 	gp.Sc = sc
 	sc.AddToLibrary(gp)
 	return gp

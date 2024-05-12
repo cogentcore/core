@@ -141,8 +141,8 @@ func (ev *Env) ConfigScene(se *xyz.Scene) {
 
 // MakeWorld constructs a new virtual physics world
 func (ev *Env) MakeWorld() {
-	ev.World = &physics.Group{}
-	ev.World.InitName(ev.World, "RoomWorld")
+	ev.World = physics.NewGroup()
+	ev.World.SetName("RoomWorld")
 
 	MakeRoom(ev.World, "room1", ev.Width, ev.Depth, ev.Height, ev.Thick)
 	ev.Emer = MakeEmer(ev.World, ev.EmerHt)
@@ -179,7 +179,8 @@ func (ev *Env) ReMakeWorld() { //types:add
 // ConfigView3D makes the 3D view
 func (ev *Env) ConfigView3D(sc *xyz.Scene) {
 	// sc.MultiSample = 1 // we are using depth grab so we need this = 1
-	wgp := xyz.NewGroup(sc, "world")
+	wgp := xyz.NewGroup(sc)
+	wgp.SetName("world")
 	ev.View3D = world.NewView(ev.World, sc, wgp)
 	ev.View3D.InitLibrary() // this makes a basic library based on body shapes, sizes
 	// at this point the library can be updated to configure custom visualizations
@@ -189,7 +190,8 @@ func (ev *Env) ConfigView3D(sc *xyz.Scene) {
 
 // ConfigView2D makes the 2D view
 func (ev *Env) ConfigView2D(sc *svg.SVG) {
-	wgp := svg.NewGroup(&sc.Root, "world")
+	wgp := svg.NewGroup(sc.Root)
+	wgp.SetName("world")
 	ev.View2D = world2d.NewView(ev.World, sc, wgp)
 	ev.View2D.InitLibrary() // this makes a basic library based on body shapes, sizes
 	// at this point the library can be updated to configure custom visualizations
@@ -308,48 +310,51 @@ func (ev *Env) RotHeadRight() { //types:add
 
 // MakeRoom constructs a new room in given parent group with given params
 func MakeRoom(par *physics.Group, name string, width, depth, height, thick float32) *physics.Group {
-	rm := physics.NewGroup(par, name)
-	physics.NewBox(rm, "floor").SetSize(math32.Vec3(width, thick, depth)).
-		SetColor("grey").SetInitPos(math32.Vec3(0, -thick/2, 0))
+	rm := physics.NewGroup(par)
+	rm.SetName(name)
+	physics.NewBox(rm).SetSize(math32.Vec3(width, thick, depth)).
+		SetColor("grey").SetInitPos(math32.Vec3(0, -thick/2, 0)).SetName("floor")
 
-	physics.NewBox(rm, "back-wall").SetSize(math32.Vec3(width, height, thick)).
-		SetColor("blue").SetInitPos(math32.Vec3(0, height/2, -depth/2))
-	physics.NewBox(rm, "left-wall").SetSize(math32.Vec3(thick, height, depth)).
-		SetColor("red").SetInitPos(math32.Vec3(-width/2, height/2, 0))
-	physics.NewBox(rm, "right-wall").SetSize(math32.Vec3(thick, height, depth)).
-		SetColor("green").SetInitPos(math32.Vec3(width/2, height/2, 0))
-	physics.NewBox(rm, "front-wall").SetSize(math32.Vec3(width, height, thick)).
-		SetColor("yellow").SetInitPos(math32.Vec3(0, height/2, depth/2))
+	physics.NewBox(rm).SetSize(math32.Vec3(width, height, thick)).
+		SetColor("blue").SetInitPos(math32.Vec3(0, height/2, -depth/2)).SetName("back-wall")
+	physics.NewBox(rm).SetSize(math32.Vec3(thick, height, depth)).
+		SetColor("red").SetInitPos(math32.Vec3(-width/2, height/2, 0)).SetName("left-wall")
+	physics.NewBox(rm).SetSize(math32.Vec3(thick, height, depth)).
+		SetColor("green").SetInitPos(math32.Vec3(width/2, height/2, 0)).SetName("right-wall")
+	physics.NewBox(rm).SetSize(math32.Vec3(width, height, thick)).
+		SetColor("yellow").SetInitPos(math32.Vec3(0, height/2, depth/2)).SetName("front-wall")
 	return rm
 }
 
 // MakeEmer constructs a new Emer virtual robot of given height (e.g., 1)
 func MakeEmer(par *physics.Group, height float32) *physics.Group {
-	emr := physics.NewGroup(par, "emer")
+	emr := physics.NewGroup(par)
+	emr.SetName("emer")
 	width := height * .4
 	depth := height * .15
 
-	physics.NewBox(emr, "body").SetSize(math32.Vec3(width, height, depth)).
+	physics.NewBox(emr).SetSize(math32.Vec3(width, height, depth)).
 		SetColor("purple").SetDynamic().
-		SetInitPos(math32.Vec3(0, height/2, 0))
+		SetInitPos(math32.Vec3(0, height/2, 0)).SetName("body")
 	// body := physics.NewCapsule(emr, "body", math32.Vec3(0, height / 2, 0), height, width/2)
 	// body := physics.NewCylinder(emr, "body", math32.Vec3(0, height / 2, 0), height, width/2)
 
 	headsz := depth * 1.5
 	hhsz := .5 * headsz
-	hgp := physics.NewGroup(emr, "head").SetInitPos(math32.Vec3(0, height+hhsz, 0))
+	hgp := physics.NewGroup(emr).SetInitPos(math32.Vec3(0, height+hhsz, 0))
+	hgp.SetName("head")
 
-	physics.NewBox(hgp, "head").SetSize(math32.Vec3(headsz, headsz, headsz)).
-		SetColor("tan").SetDynamic().SetInitPos(math32.Vec3(0, 0, 0))
+	physics.NewBox(hgp).SetSize(math32.Vec3(headsz, headsz, headsz)).
+		SetColor("tan").SetDynamic().SetInitPos(math32.Vec3(0, 0, 0)).SetName("head")
 
 	eyesz := headsz * .2
-	physics.NewBox(hgp, "eye-l").SetSize(math32.Vec3(eyesz, eyesz*.5, eyesz*.2)).
+	physics.NewBox(hgp).SetSize(math32.Vec3(eyesz, eyesz*.5, eyesz*.2)).
 		SetColor("green").SetDynamic().
-		SetInitPos(math32.Vec3(-hhsz*.6, headsz*.1, -(hhsz + eyesz*.3)))
+		SetInitPos(math32.Vec3(-hhsz*.6, headsz*.1, -(hhsz + eyesz*.3))).SetName("eye-l")
 
-	physics.NewBox(hgp, "eye-r").SetSize(math32.Vec3(eyesz, eyesz*.5, eyesz*.2)).
+	physics.NewBox(hgp).SetSize(math32.Vec3(eyesz, eyesz*.5, eyesz*.2)).
 		SetColor("green").SetDynamic().
-		SetInitPos(math32.Vec3(hhsz*.6, headsz*.1, -(hhsz + eyesz*.3)))
+		SetInitPos(math32.Vec3(hhsz*.6, headsz*.1, -(hhsz + eyesz*.3))).SetName("eye-r")
 
 	return emr
 }
@@ -361,10 +366,10 @@ func (ev *Env) ConfigGUI() *core.Body {
 
 	ev.MakeWorld()
 
-	split := core.NewSplits(b, "split")
+	split := core.NewSplits(b)
 
-	tv := views.NewTreeView(core.NewFrame(split), "tv").SyncTree(ev.World)
-	sv := views.NewStructView(split, "sv").SetStruct(ev)
+	tv := views.NewTreeView(core.NewFrame(split)).SyncTree(ev.World)
+	sv := views.NewStructView(split).SetStruct(ev)
 	imfr := core.NewFrame(split)
 	tbvw := core.NewTabs(split)
 
@@ -382,7 +387,7 @@ func (ev *Env) ConfigGUI() *core.Body {
 	//////////////////////////////////////////
 	//    3D Scene
 
-	ev.SceneView = xyzview.NewSceneView(scfr, "sceneview")
+	ev.SceneView = xyzview.NewSceneView(scfr)
 	ev.SceneView.Config()
 	se := ev.SceneView.SceneXYZ()
 	ev.ConfigScene(se)
@@ -408,17 +413,19 @@ func (ev *Env) ConfigGUI() *core.Body {
 		s.Direction = styles.Column
 	})
 	core.NewText(imfr).SetText("Right Eye Image:")
-	ev.EyeRImg = core.NewImage(imfr, "eye-r-img")
+	ev.EyeRImg = core.NewImage(imfr)
+	ev.EyeRImg.SetName("eye-r-img")
 	ev.EyeRImg.Image = image.NewRGBA(image.Rectangle{Max: ev.Camera.Size})
 
 	core.NewText(imfr).SetText("Right Eye Depth:")
-	ev.DepthImage = core.NewImage(imfr, "depth-img")
+	ev.DepthImage = core.NewImage(imfr)
+	ev.DepthImage.SetName("depth-img")
 	ev.DepthImage.Image = image.NewRGBA(image.Rectangle{Max: ev.Camera.Size})
 
 	//////////////////////////////////////////
 	//    2D Scene
 
-	twov := core.NewSVG(twofr, "sceneview")
+	twov := core.NewSVG(twofr)
 	ev.Scene2D = twov
 	twov.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
@@ -483,7 +490,7 @@ func (ev *Env) NoGUIRun() {
 	if err != nil {
 		panic(err)
 	}
-	se := world.NoDisplayScene("virtroom", gp, dev)
+	se := world.NoDisplayScene(gp, dev)
 	ev.ConfigScene(se)
 	ev.MakeWorld()
 	ev.ConfigView3D(se)

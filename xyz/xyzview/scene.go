@@ -44,7 +44,7 @@ type Scene struct {
 }
 
 func (sw *Scene) OnInit() {
-	sw.XYZ = xyz.NewScene("Scene")
+	sw.XYZ = xyz.NewScene()
 	sw.SelectionParams.Defaults()
 	sw.WidgetBase.OnInit()
 	sw.HandleEvents()

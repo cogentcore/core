@@ -47,23 +47,23 @@ func main() {
 	cbm := xyz.NewBox(sc, "cube1", 1, 1, 1)
 	cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 
-	rbgp := xyz.NewGroup(sc, "r-b-group")
+	rbgp := xyz.NewGroup(sc)
 
-	rcb := xyz.NewSolid(rbgp, "red-cube").SetMesh(cbm)
+	rcb := xyz.NewSolid(rbgp).SetMesh(cbm)
 	rcb.Pose.Pos.Set(-1, 0, 0)
 	rcb.Mat.SetColor(colors.Red).SetShiny(500)
 
-	bcb := xyz.NewSolid(rbgp, "blue-cube").SetMesh(cbm)
+	bcb := xyz.NewSolid(rbgp).SetMesh(cbm)
 	bcb.Pose.Pos.Set(1, 1, 0)
 	bcb.Pose.Scale.X = 2 // somehow causing to not render
 	bcb.Mat.SetColor(colors.Blue).SetShiny(10).SetReflective(0.2)
 
-	gcb := xyz.NewSolid(rbgp, "green-trans-cube").SetMesh(cbm)
+	gcb := xyz.NewSolid(rbgp).SetMesh(cbm)
 	gcb.Pose.Pos.Set(0, 0, 1)
 	gcb.Mat.SetColor(color.RGBA{0, 255, 0, 128}).SetShiny(20) // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
 
-	floorp := xyz.NewPlane(sc, "floor-plane", 100, 100)
-	floor := xyz.NewSolid(sc, "floor").SetMesh(floorp)
+	floorp := xyz.NewPlane(sc, "floor", 100, 100)
+	floor := xyz.NewSolid(sc).SetMesh(floorp)
 	floor.Pose.Pos.Set(0, -5, 0)
 	floor.Mat.Color = colors.Tan
 	// floor.Mat.Emissive.SetName("brown")

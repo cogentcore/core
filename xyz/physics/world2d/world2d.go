@@ -127,8 +127,8 @@ func (vw *View) NewInLibrary(nm string) *svg.Group {
 	if vw.Library == nil {
 		vw.Library = make(map[string]*svg.Group)
 	}
-	gp := &svg.Group{}
-	gp.InitName(gp, nm)
+	gp := svg.NewGroup()
+	gp.SetName(nm)
 	vw.Library[nm] = gp
 	return gp
 }
@@ -171,16 +171,16 @@ func (vw *View) InitLibShape(bod physics.Body) {
 	switch wt {
 	case "physics.Box":
 		mnm := "eveBox"
-		svg.NewRect(lgp, mnm).SetPos(math32.Vec2(0, 0)).SetSize(math32.Vec2(1, 1))
+		svg.NewRect(lgp).SetPos(math32.Vec2(0, 0)).SetSize(math32.Vec2(1, 1)).SetName(mnm)
 	case "physics.Cylinder":
 		mnm := "eveCylinder"
-		svg.NewEllipse(lgp, mnm).SetPos(math32.Vec2(0, 0)).SetRadii(math32.Vec2(.1, .1))
+		svg.NewEllipse(lgp).SetPos(math32.Vec2(0, 0)).SetRadii(math32.Vec2(.1, .1)).SetName(mnm)
 	case "physics.Capsule":
 		mnm := "eveCapsule"
-		svg.NewEllipse(lgp, mnm).SetPos(math32.Vec2(0, 0)).SetRadii(math32.Vec2(.1, .1))
+		svg.NewEllipse(lgp).SetPos(math32.Vec2(0, 0)).SetRadii(math32.Vec2(.1, .1)).SetName(mnm)
 	case "physics.Sphere":
 		mnm := "eveSphere"
-		svg.NewCircle(lgp, mnm).SetPos(math32.Vec2(0, 0)).SetRadius(.1)
+		svg.NewCircle(lgp).SetPos(math32.Vec2(0, 0)).SetRadius(.1).SetName(mnm)
 	}
 }
 

@@ -129,7 +129,8 @@ func (vw *View) InitLibSolid(bod physics.Body, sc *xyz.Scene) {
 		return
 	}
 	lgp := sc.NewInLibrary(nm)
-	sld := xyz.NewSolid(lgp, nm)
+	sld := xyz.NewSolid(lgp)
+	sld.SetName(nm)
 	wt := bod.NodeType().ShortName()
 	switch wt {
 	case "physics.Box":
