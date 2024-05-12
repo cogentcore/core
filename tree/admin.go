@@ -59,9 +59,10 @@ func checkThis(n Node) error {
 // This is only for nodes with no existing parent; see [MoveToParent] to
 // move nodes that already have a parent. It does not add the node to the
 // parent's list of children; see [Node.AddChild] for a version that does.
+// It automatically gets the [Node.This] of the parent.
 func SetParent(child Node, parent Node) {
 	n := child.AsTreeNode()
-	n.Par = parent
+	n.Par = parent.This()
 	setUniqueName(n, false)
 	child.This().OnAdd()
 	n.WalkUpParent(func(k Node) bool {

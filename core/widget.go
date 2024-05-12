@@ -427,7 +427,7 @@ func (wb *WidgetBase) NewParts() *Layout {
 	}
 	wb.Parts = NewLayout()
 	wb.Parts.SetName("parts")
-	tree.SetParent(wb.Parts, wb.This()) // don't add to children list
+	tree.SetParent(wb.Parts, wb) // don't add to children list
 	wb.Parts.SetFlag(true, tree.Field)
 	wb.Parts.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)

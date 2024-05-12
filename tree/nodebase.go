@@ -385,7 +385,7 @@ func (n *NodeBase) AddChild(kid Node) error {
 	}
 	initNode(kid)
 	n.Kids = append(n.Kids, kid)
-	SetParent(kid, n.This()) // key to set new parent before deleting: indicates move instead of delete
+	SetParent(kid, n) // key to set new parent before deleting: indicates move instead of delete
 	return nil
 }
 
@@ -399,7 +399,7 @@ func (n *NodeBase) NewChild(typ *types.Type) Node {
 	kid := NewOfType(typ)
 	initNode(kid)
 	n.Kids = append(n.Kids, kid)
-	SetParent(kid, n.This())
+	SetParent(kid, n)
 	return kid
 }
 
@@ -413,7 +413,7 @@ func (n *NodeBase) SetChild(kid Node, idx int) error {
 	}
 	initNode(kid)
 	n.Kids[idx] = kid
-	SetParent(kid, n.This())
+	SetParent(kid, n)
 	return nil
 }
 
@@ -426,7 +426,7 @@ func (n *NodeBase) InsertChild(kid Node, at int) error {
 	}
 	initNode(kid)
 	n.Kids.Insert(kid, at)
-	SetParent(kid, n.This())
+	SetParent(kid, n)
 	return nil
 }
 
@@ -440,7 +440,7 @@ func (n *NodeBase) InsertNewChild(typ *types.Type, at int) Node {
 	kid := NewOfType(typ)
 	initNode(kid)
 	n.Kids.Insert(kid, at)
-	SetParent(kid, n.This())
+	SetParent(kid, n)
 	return kid
 }
 

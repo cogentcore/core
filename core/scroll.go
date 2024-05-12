@@ -61,7 +61,7 @@ func (ly *Layout) ConfigScroll(d math32.Dims) {
 	}
 	ly.Scrolls[d] = NewSlider()
 	sb := ly.Scrolls[d]
-	tree.SetParent(sb, ly.This())
+	tree.SetParent(sb, ly)
 	// sr.SetFlag(true, tree.Field) // note: do not turn on -- breaks pos
 	sb.SetType(SliderScrollbar)
 	sb.InputThreshold = 1

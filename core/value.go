@@ -5,17 +5,24 @@
 package core
 
 import (
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 )
 
 // ValueWidget is a widget that has an associated value representation.
-// ValueWidgets can be bound to values using [Bind].
+// It can be bound to a value using [Bind].
 type ValueWidget interface {
 	Widget
 
 	// WidgetValue returns the pointer to the associated value of the widget.
 	WidgetValue() any
+}
+
+// WidgetValueSetter is an optional interface that [ValueWidget]s can implement
+// to customize how the associated widget value is set from the bound value.
+type WidgetValueSetter interface {
+
+	// SetWidgetValue sets the associated widget value from the bound value.
+	SetWidgetValue(value any) error
 }
 
 // Bind binds the given value to the given [ValueWidget] such that the values of
@@ -24,10 +31,14 @@ type ValueWidget interface {
 func Bind[T ValueWidget](value any, vw T) T {
 	wb := vw.AsWidget()
 	wb.ValueUpdate = func() {
-		errors.Log(reflectx.SetRobust(vw.WidgetValue(), value))
+		if vws, ok := ValueWidget(vw).(WidgetValueSetter); ok {
+			ErrorSnackbar(vw, vws.SetWidgetValue(value))
+		} else {
+			ErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))
+		}
 	}
 	wb.ValueOnChange = func() {
-		errors.Log(reflectx.SetRobust(value, vw.WidgetValue()))
+		ErrorSnackbar(vw, reflectx.SetRobust(value, vw.WidgetValue()))
 	}
 	return vw
 }
