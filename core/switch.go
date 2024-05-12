@@ -290,7 +290,7 @@ func (sw *Switch) ClearIcons() *Switch {
 	return sw
 }
 
-func (sw *Switch) Config() {
+func (sw *Switch) Config(c *Config) {
 	config := tree.Config{}
 	if sw.IconOn == "" {
 		sw.IconOn = icons.ToggleOn.Fill() // fallback

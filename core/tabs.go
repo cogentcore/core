@@ -450,7 +450,7 @@ func (ts *Tabs) ConfigNewTabButton() bool {
 // Only the 2 primary children (Frames) need to be configured.
 // Re-config is needed when the type of tabs changes, but not
 // when a new tab is added, which only requires a new layout pass.
-func (ts *Tabs) Config() {
+func (ts *Tabs) Config(c *Config) {
 	config := tree.Config{}
 	// frame only comes before tabs in bottom nav bar
 	if ts.Type.Effective(ts) == NavigationBar {
@@ -626,7 +626,7 @@ func (tb *Tab) Tabs() *Tabs {
 	return tb.Parent().Parent().(*Tabs)
 }
 
-func (tb *Tab) Config() {
+func (tb *Tab) Config(c *Config) {
 	config := tree.Config{}
 	if tb.MaxChars > 0 {
 		tb.Text = elide.Middle(tb.Text, tb.MaxChars)

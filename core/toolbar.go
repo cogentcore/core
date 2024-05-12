@@ -61,7 +61,7 @@ func (tb *Toolbar) AppChooser() *Chooser {
 	return ch
 }
 
-func (tb *Toolbar) Config() {
+func (tb *Toolbar) Config(c *Config) {
 	if len(tb.Kids) == 0 {
 		if len(tb.ToolbarFuncs) > 0 {
 			for _, f := range tb.ToolbarFuncs {
@@ -69,7 +69,7 @@ func (tb *Toolbar) Config() {
 			}
 		}
 	}
-	tb.Frame.Config()
+	tb.Frame.Config(c)
 }
 
 func (tb *Toolbar) SizeUp() {

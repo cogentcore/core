@@ -1812,7 +1812,7 @@ func (tf *TextField) HandleKeyEvents() {
 	})
 }
 
-func (tf *TextField) Config() {
+func (tf *TextField) Config(c *Config) {
 	config := tree.Config{}
 
 	tf.EditTxt = []rune(tf.Txt)

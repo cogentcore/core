@@ -223,7 +223,7 @@ func (sl *Splits) SetSplitAction(idx int, nwval float32) {
 	sl.NeedsLayout()
 }
 
-func (sl *Splits) Config() {
+func (sl *Splits) Config(c *Config) {
 	sl.UpdateSplits()
 	sl.ConfigSplitters()
 }

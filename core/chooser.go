@@ -234,7 +234,7 @@ func (ch *Chooser) SetStyles() {
 	})
 }
 
-func (ch *Chooser) Config() {
+func (ch *Chooser) Config(c *Config) {
 	config := tree.Config{}
 
 	// automatically select the first item if we have nothing selected and no placeholder

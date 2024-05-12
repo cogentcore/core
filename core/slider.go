@@ -493,7 +493,7 @@ func (sr *Slider) HandleKeys() {
 ///////////////////////////////////////////////////////////
 // 	Config
 
-func (sr *Slider) Config() {
+func (sr *Slider) Config(c *Config) {
 	if sr.Icon.IsNil() {
 		if sr.Parts != nil {
 			sr.DeleteParts()

@@ -273,7 +273,7 @@ func (sw *Switches) HandleSwitchEvents(swi *Switch) {
 	})
 }
 
-func (sw *Switches) Config() {
+func (sw *Switches) Config(c *Config) {
 	config := tree.Config{}
 	for _, item := range sw.Items {
 		config.Add(SwitchType, item.Text)
