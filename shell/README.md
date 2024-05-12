@@ -141,5 +141,9 @@ The critical extension from standard Go syntax is for lines that are processed b
 * Line starts with `word {`: Exec
 * Otherwise: Go
 
+# TODO:
+
+* probably need to have wrapper StdIO for every exec so we can flexibly redirect for fg, bg commands.
+* likewise, need to run everything effectively as a bg job with our own explicit Wait, which we can then communicate with to move from fg to bg.
 
 

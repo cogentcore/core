@@ -32,6 +32,9 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 	}
 	cmdIO := exec.NewCmdIO(&sh.Config)
 	cmdIO.StackStart()
+	if start {
+		cmdIO.PushIn(nil) // no stdin for bg
+	}
 	cl, scmd, sargs := sh.ExecArgs(cmdIO, errOk, cmd, args...)
 	if scmd == "" {
 		return retstr
@@ -54,7 +57,7 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 					}
 					cmdIO.Cmd.Wait()
 					cmdIO.PopToStart()
-					sh.Jobs.Pop() // todo: remove actual guy
+					sh.DeleteJob(cmdIO)
 				}()
 			case output:
 				retstr, err = sh.Config.OutputIO(cmdIO, scmd, sargs...)

@@ -13,6 +13,7 @@ import (
 	"log/slog"
 	"os"
 	"slices"
+	"strconv"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
@@ -26,9 +27,6 @@ import (
 
 // Shell represents one running shell context.
 type Shell struct {
-
-	// Builtins are all the builtin shell commands
-	Builtins map[string]func(cmdIO *exec.CmdIO, args ...string) error
 
 	// Config is the [exec.Config] used to run commands.
 	Config exec.Config
@@ -56,6 +54,9 @@ type Shell struct {
 
 	// stack of runtime errors
 	Errors []error
+
+	// Builtins are all the builtin shell commands
+	Builtins map[string]func(cmdIO *exec.CmdIO, args ...string) error
 
 	// commands that have been defined, which can be run in Exec mode.
 	Commands map[string]func(args ...string)
@@ -226,4 +227,37 @@ func (sh *Shell) TranspileConfig() error {
 // AddCommand adds given command to list of available commands
 func (sh *Shell) AddCommand(name string, cmd func(args ...string)) {
 	sh.Commands[name] = cmd
+}
+
+// DeleteJob deletes the given job and returns true if successful
+func (sh *Shell) DeleteJob(cmdIO *exec.CmdIO) bool {
+	idx := slices.Index(sh.Jobs, cmdIO)
+	if idx >= 0 {
+		sh.Jobs = slices.Delete(sh.Jobs, idx, idx+1)
+		return true
+	}
+	return false
+}
+
+// JobIDExpand expands %n job id values in args with the full PID
+// returns number of PIDs expanded
+func (sh *Shell) JobIDExpand(args []string) int {
+	exp := 0
+	for i, id := range args {
+		if id[0] == '%' {
+			idx, err := strconv.Atoi(id[1:])
+			if err == nil {
+				if idx > 0 && idx <= len(sh.Jobs) {
+					jb := sh.Jobs[idx-1]
+					if jb.Cmd != nil && jb.Cmd.Process != nil {
+						args[i] = fmt.Sprintf("%d", jb.Cmd.Process.Pid)
+						exp++
+					}
+				} else {
+					sh.AddError(fmt.Errorf("cosh: job number out of range: %d", idx))
+				}
+			}
+		}
+	}
+	return exp
 }

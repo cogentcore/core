@@ -75,31 +75,41 @@ func (sh *Shell) Set(cmdIO *exec.CmdIO, args ...string) error {
 // JobsCmd is the builtin jobs command
 func (sh *Shell) JobsCmd(cmdIO *exec.CmdIO, args ...string) error {
 	for i, jb := range sh.Jobs {
-		fmt.Fprintf(cmdIO.Out, "[%d]  %s\n", i+1, jb.String())
+		cmdIO.Printf("[%d]  %s\n", i+1, jb.String())
 	}
 	return nil
 }
 
-// Kill kills a job by job number or PID
+// Kill kills a job by job number or PID.
+// Just expands the job id expressions %n into PIDs and calls system kill.
 func (sh *Shell) Kill(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("cosh kill expected at least one argument")
+		return fmt.Errorf("cosh kill: expected at least one argument")
 	}
-	for _, id := range args {
-		if id[0] == '%' {
-			idx, err := strconv.Atoi(id[1:])
-			if err == nil {
-				if idx > 0 && idx <= len(sh.Jobs) {
-					jb := sh.Jobs[idx-1]
-					if jb.Cmd != nil && jb.Cmd.Process != nil {
-						jb.Cmd.Process.Kill()
-					}
-				} else {
-					sh.AddError(fmt.Errorf("cosh kill: job number out of range: %d", idx))
-				}
-			}
-		}
+	sh.JobIDExpand(args)
+	sh.Config.RunIO(cmdIO, "kill", args...)
+	return nil
+}
+
+// Fg foregrounds a job by job number
+func (sh *Shell) Fg(cmdIO *exec.CmdIO, args ...string) error {
+	if len(args) != 1 {
+		return fmt.Errorf("cosh fg: requires exactly one job id argument")
 	}
+	jid := args[0]
+	exp := sh.JobIDExpand(args)
+	if exp != 1 {
+		return fmt.Errorf("cosh fg: argument was not a job id in the form %%n")
+	}
+	jno, _ := strconv.Atoi(jid[1:]) // guaranteed good
+	job := sh.Jobs[jno]
+	fmt.Printf("foregrounding job [%d]\n", jno)
+	_ = job
+	// todo: the problem here is we need to change the stdio for running job
+	// job.Cmd.Wait() // wait
+	// * probably need to have wrapper StdIO for every exec so we can flexibly redirect for fg, bg commands.
+	// * likewise, need to run everything effectively as a bg job with our own explicit Wait, which we can then communicate with to move from fg to bg.
+
 	return nil
 }
 

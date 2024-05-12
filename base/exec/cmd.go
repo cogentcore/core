@@ -34,7 +34,7 @@ func (c *CmdIO) String() string {
 	} else {
 		str = "no process info"
 	}
-	str += c.Cmd.String()
+	str += " " + c.Cmd.String()
 	return str
 }
 

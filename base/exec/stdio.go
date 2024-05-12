@@ -35,6 +35,21 @@ func (st *StdIO) StdAll() {
 	st.In = os.Stdin
 }
 
+// Print prints to the [StdIO.Out] Stdout
+func (st *StdIO) Print(v ...any) {
+	fmt.Fprint(st.Out, v...)
+}
+
+// Println prints to the [StdIO.Out]
+func (st *StdIO) Println(v ...any) {
+	fmt.Fprintln(st.Out, v...)
+}
+
+// Printf prints to the [StdIO.Out] Stdout
+func (st *StdIO) Printf(f string, v ...any) {
+	fmt.Fprintf(st.Out, f, v...)
+}
+
 // IsPipe returns true if the given object is an os.File corresponding to a Pipe,
 // which is also not the same as the current os.Stdout, in case that is a Pipe.
 func IsPipe(rw any) bool {
