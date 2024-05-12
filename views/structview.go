@@ -76,21 +76,6 @@ func (sv *StructView) SetStyles() {
 		s.Direction = styles.Column
 		s.Grow.Set(0, 0)
 	})
-	sv.OnWidgetAdded(func(w core.Widget) {
-		pfrom := w.PathFrom(sv)
-		switch {
-		case pfrom == "struct-grid":
-			w.Style(func(s *styles.Style) {
-				s.Display = styles.Grid
-				s.Grow.Set(0, 0)
-				if sv.SizeClass() == core.SizeCompact {
-					s.Columns = 1
-				} else {
-					s.Columns = 2
-				}
-			})
-		}
-	})
 }
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the
@@ -138,7 +123,17 @@ func (sv *StructView) Config() {
 		sv.ConfigStructGrid()
 		return
 	}
-	core.NewFrame(sv).SetName("struct-grid")
+	sg := core.NewFrame(sv)
+	sg.SetName("struct-grid")
+	sg.Style(func(s *styles.Style) {
+		s.Display = styles.Grid
+		s.Grow.Set(0, 0)
+		if sv.SizeClass() == core.SizeCompact {
+			s.Columns = 1
+		} else {
+			s.Columns = 2
+		}
+	})
 	sv.ConfigStructGrid()
 	sv.NeedsLayout()
 }
