@@ -117,10 +117,10 @@ type Layouter interface {
 	// ManageOverflow uses overflow settings to determine if scrollbars
 	// are needed, based on difference between ActualOverflow (full actual size)
 	// and Alloc allocation.  Returns true if size changes as a result.
-	// If updtSize is false, then the Actual and Alloc sizes are NOT
+	// If updateSize is false, then the Actual and Alloc sizes are NOT
 	// updated as a result of change from adding scrollbars
 	// (generally should be true, but some cases not)
-	ManageOverflow(iter int, updtSize bool) bool
+	ManageOverflow(iter int, updateSize bool) bool
 
 	// ScrollChanged is called in the OnInput event handler for updating
 	// when the scrollbar value has changed, for given dimension
@@ -1179,10 +1179,10 @@ func (ly *Layout) SizeDownSetAllocs(iter int) {
 
 // ManageOverflow uses overflow settings to determine if scrollbars
 // are needed (Internal > Alloc).  Returns true if size changes as a result.
-// If updtSize is false, then the Actual and Alloc sizes are NOT
+// If updateSize is false, then the Actual and Alloc sizes are NOT
 // updated as a result of change from adding scrollbars
 // (generally should be true, but some cases not)
-func (ly *Layout) ManageOverflow(iter int, updtSize bool) bool {
+func (ly *Layout) ManageOverflow(iter int, updateSize bool) bool {
 	sz := &ly.Geom.Size
 	sbw := math32.Ceil(ly.Styles.ScrollBarWidth.Dots)
 	change := false
@@ -1229,7 +1229,7 @@ func (ly *Layout) ManageOverflow(iter int, updtSize bool) bool {
 		}
 	}
 	ly.This().(Layouter).LayoutSpace() // adds the scroll space
-	if updtSize {
+	if updateSize {
 		sz.SetTotalFromContent(&sz.Actual)
 		sz.SetContentFromTotal(&sz.Alloc) // alloc is *decreased* from any increase in space
 	}

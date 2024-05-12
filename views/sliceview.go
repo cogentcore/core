@@ -883,7 +883,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 }
 
 // SliceDeleteAtRow deletes element at given display row
-// if updt is true, then update the grid after
+// if update is true, then update the grid after
 func (sv *SliceViewBase) SliceDeleteAtRow(row int) {
 	sv.This().(SliceViewer).SliceDeleteAt(sv.StartIndex + row)
 }
@@ -1090,11 +1090,11 @@ func (sv *SliceViewBase) ScrollToIndexNoUpdate(idx int) bool {
 // ScrollToIndex ensures that given slice idx is visible
 // by scrolling display as needed.
 func (sv *SliceViewBase) ScrollToIndex(idx int) bool {
-	updt := sv.ScrollToIndexNoUpdate(idx)
-	if updt {
+	update := sv.ScrollToIndexNoUpdate(idx)
+	if update {
 		sv.This().(SliceViewer).UpdateWidgets()
 	}
-	return updt
+	return update
 }
 
 // SelectValue sets SelVal and attempts to find corresponding row, setting

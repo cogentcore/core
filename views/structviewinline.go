@@ -144,9 +144,9 @@ func (sv *StructViewInline) Config() {
 			vv.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()
 				if !reflectx.KindIsBasic(reflectx.NonPointerValue(vv.Val()).Kind()) {
-					if updtr, ok := sv.Struct.(core.Updater); ok {
-						// fmt.Printf("updating: %v kind: %v\n", updtr, vvv.Value.Kind())
-						updtr.Update()
+					if updater, ok := sv.Struct.(core.Updater); ok {
+						// fmt.Printf("updating: %v kind: %v\n", updater, vvv.Value.Kind())
+						updater.Update()
 					}
 				}
 				if hasDef {

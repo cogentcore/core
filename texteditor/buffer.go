@@ -1618,7 +1618,7 @@ func (tb *Buffer) LinesInserted(tbe *textbuf.Edit) {
 	copy(nht[stln:], tmpht)
 	tb.HiTags = nht
 
-	// ByteOffs -- maintain mem updt
+	// ByteOffs -- maintain mem update
 	tmpof := make([]int, nsz)
 	nof := append(tb.ByteOffs, tmpof...)
 	copy(nof[stln+nsz:], nof[stln:])

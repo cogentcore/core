@@ -821,10 +821,10 @@ func (tv *TableView) PasteAssign(md mimedata.Mimes, idx int) {
 	if len(recs) == 0 {
 		return
 	}
-	updt := tv.UpdateStart()
+	update := tv.UpdateStart()
 	tv.Table.Table.ReadCSVRow(recs[1], tv.Table.Indexes[idx])
 	tv.This().(views.SliceViewer).UpdateSliceGrid()
-	tv.UpdateEnd(updt)
+	tv.UpdateEnd(update)
 }
 
 // PasteAtIndex inserts object(s) from mime data at (before) given slice index
@@ -835,9 +835,9 @@ func (tv *TableView) PasteAtIndex(md mimedata.Mimes, idx int) {
 	if nr <= 0 {
 		return
 	}
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
-	updt := tv.UpdateStart()
+	wupdate := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdate)
+	update := tv.UpdateStart()
 	tv.Table.InsertRows(idx, nr)
 	for ri := 0; ri < nr; ri++ {
 		rec := recs[1+ri]
@@ -845,7 +845,7 @@ func (tv *TableView) PasteAtIndex(md mimedata.Mimes, idx int) {
 		tv.Table.Table.ReadCSVRow(rec, rw)
 	}
 	tv.This().(views.SliceViewer).UpdateSliceGrid()
-	tv.UpdateEnd(updt)
+	tv.UpdateEnd(update)
 	tv.SelectIndexAction(idx, events.SelectOne)
 }
 

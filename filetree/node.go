@@ -352,7 +352,7 @@ func (fn *Node) UpdateNode() error {
 	if fn.IsIrregular() {
 		return nil
 	}
-	// fmt.Println(fn, "updt node start")
+	// fmt.Println(fn, "update node start")
 	if fn.IsDir() {
 		openAll := fn.FRoot.InOpenAll && !fn.Info.IsHidden()
 		if openAll || fn.FRoot.IsDirOpen(fn.FPath) {
@@ -372,7 +372,7 @@ func (fn *Node) UpdateNode() error {
 		fn.Update()
 		fn.SetFileIcon()
 	}
-	// fmt.Println(fn, "updt node end")
+	// fmt.Println(fn, "update node end")
 	return nil
 }
 

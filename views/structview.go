@@ -308,8 +308,8 @@ func (sv *StructView) ConfigStructGrid() bool {
 				sv.UpdateFieldAction()
 				// note: updating vv here is redundant -- relevant field will have already updated
 				if !reflectx.KindIsBasic(reflectx.NonPointerValue(vv.Val()).Kind()) {
-					if updtr, ok := sv.Struct.(core.Updater); ok {
-						updtr.Update()
+					if updater, ok := sv.Struct.(core.Updater); ok {
+						updater.Update()
 					}
 				}
 				if hasDef {

@@ -169,11 +169,11 @@ func (cv *ColorView) OnInit() {
 
 // SetColor sets the source color
 func (cv *ColorView) SetColor(clr color.Color) *ColorView {
-	updt := cv.UpdateStart()
+	update := cv.UpdateStart()
 	cv.Color = colors.AsRGBA(clr)
 	cv.ColorHSLA = hsl.FromColor(clr)
 	cv.ColorHSLA.Round()
-	cv.UpdateEndRender(updt)
+	cv.UpdateEndRender(update)
 	cv.SendChange()
 	return cv
 }
@@ -183,7 +183,7 @@ func (cv *ColorView) Config(sc *core.Scene) {
 	if cv.HasChildren() {
 		return
 	}
-	updt := cv.UpdateStart()
+	update := cv.UpdateStart()
 	vl := core.NewLayout(cv, "slider-lay")
 	nl := core.NewLayout(cv, "num-lay")
 
@@ -310,7 +310,7 @@ func (cv *ColorView) Config(sc *core.Scene) {
 
 	cv.ConfigPalette()
 
-	cv.UpdateEnd(updt)
+	cv.UpdateEnd(update)
 }
 
 func (cv *ColorView) NumLay() *core.Layout {
@@ -411,7 +411,7 @@ func (cv *ColorView) UpdateHSLSlider(sl *core.Slider, hsl int) {
 
 func (cv *ColorView) UpdateSliderGrid() {
 	sg := cv.SliderGrid()
-	updt := sg.UpdateStart()
+	update := sg.UpdateStart()
 	cv.UpdateRGBSlider(sg.ChildByName("red", 0).(*core.Slider), 0)
 	cv.UpdateRGBSlider(sg.ChildByName("green", 0).(*core.Slider), 1)
 	cv.UpdateRGBSlider(sg.ChildByName("blue", 0).(*core.Slider), 2)
@@ -419,7 +419,7 @@ func (cv *ColorView) UpdateSliderGrid() {
 	cv.UpdateHSLSlider(sg.ChildByName("hue", 0).(*core.Slider), 0)
 	cv.UpdateHSLSlider(sg.ChildByName("sat", 0).(*core.Slider), 1)
 	cv.UpdateHSLSlider(sg.ChildByName("light", 0).(*core.Slider), 2)
-	sg.UpdateEndRender(updt)
+	sg.UpdateEndRender(update)
 }
 
 func (cv *ColorView) ConfigPalette() {
@@ -439,9 +439,9 @@ func (cv *ColorView) ConfigPalette() {
 }
 
 func (cv *ColorView) Update() {
-	updt := cv.UpdateStart()
+	update := cv.UpdateStart()
 	cv.UpdateImpl()
-	cv.UpdateEndRender(updt)
+	cv.UpdateEndRender(update)
 }
 
 // UpdateImpl does the raw updates based on current value,

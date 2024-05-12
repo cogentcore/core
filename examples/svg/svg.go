@@ -31,13 +31,13 @@ func SetTrans(xt, yt float32) {
 func OpenSVG(fnm string) {
 	CurFilename = fnm
 	TheFile.SetText(CurFilename)
-	updt := TheSVG.UpdateStart()
+	update := TheSVG.UpdateStart()
 	TheSVG.SetFullReRender()
 	fmt.Printf("Opening: %v\n", CurFilename)
 	TheSVG.OpenXML(core.Filename(CurFilename))
 	SetZoom(TheSVG.ParentRenderWindow().LogicalDPI() / 96.0)
 	SetTrans(0, 0)
-	TheSVG.UpdateEnd(updt)
+	TheSVG.UpdateEnd(update)
 }
 
 func FileViewOpenSVG(ctx core.Widget) {
@@ -56,7 +56,7 @@ func main() {
 	win := core.NewMainRenderWindow("core-svg-viewer", "Cogent Core SVG Viewer", width, height)
 
 	vp := win.WinScene()
-	updt := vp.UpdateStart()
+	update := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
 
@@ -163,7 +163,7 @@ func main() {
 		SetTrans(ssvg.Trans.X, ssvg.Trans.Y)
 	})
 
-	vp.UpdateEndNoSig(updt)
+	vp.UpdateEndNoSig(update)
 
 	// main menu
 	appnm := core.AppName()

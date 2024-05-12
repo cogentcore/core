@@ -393,8 +393,8 @@ func (vp *EmbedViewport) VpTopUpdateStart() bool {
 	return true
 }
 
-func (vp *EmbedViewport) VpTopUpdateEnd(updt bool) {
-	if !updt {
+func (vp *EmbedViewport) VpTopUpdateEnd(update bool) {
+	if !update {
 		return
 	}
 	vp.VpUploadAll()
@@ -417,14 +417,14 @@ func (vp *EmbedViewport) VpUploadAll() {
 		return
 	}
 	// fmt.Printf("embed vp upload all\n")
-	updt := vp.Scene.UpdateStart()
-	if updt {
+	update := vp.Scene.UpdateStart()
+	if update {
 		ssc := vp.EmbedPar.Viewport.Scene
 		if !ssc.IsRendering() {
 			vp.EmbedPar.UploadViewTex(vp.Scene)
 		}
 	}
-	vp.Scene.UpdateEnd(updt)
+	vp.Scene.UpdateEnd(update)
 }
 
 // VpUploadVp uploads our viewport image into the parent window -- e.g., called
@@ -453,8 +453,8 @@ func (vp *EmbedViewport) EventTopUpdateStart() bool {
 	return vp.VpTopUpdateStart()
 }
 
-func (vp *EmbedViewport) EventTopUpdateEnd(updt bool) {
-	vp.VpTopUpdateEnd(updt)
+func (vp *EmbedViewport) EventTopUpdateEnd(update bool) {
+	vp.VpTopUpdateEnd(update)
 }
 
 // IsInScope returns whether given node is in scope for receiving events

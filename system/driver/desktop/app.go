@@ -88,7 +88,7 @@ func (a *App) InitVk() {
 	var err error
 	a.ShareWin, err = glfw.CreateWindow(16, 16, "Share Window", nil, nil)
 	if err != nil {
-		log.Fatalln("system.vkos failed to create hidden share window", err)
+		log.Fatalln("desktop.App failed to create hidden share window", err)
 	}
 
 	winext := a.ShareWin.GetRequiredInstanceExtensions()

@@ -295,9 +295,7 @@ func (bt *Button) Config() {
 
 	if bt.Icon.IsSet() {
 		config.Add("parts/icon",
-			func() Widget {
-				return NewIcon()
-			},
+			func() Widget { return NewIcon() },
 			func(w Widget) {
 				w.(*Icon).SetIcon(bt.Icon)
 			})

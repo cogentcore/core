@@ -42,8 +42,8 @@ type Config []*ConfigItem
 // Add adds given config.  This should be called on the root level Config
 // list.  Any items with nested paths are added to Children lists as
 // appropriate.
-func (c *Config) Add(path string, nw func() Widget, updt func(w Widget)) {
-	itm := &ConfigItem{Path: path, New: nw, Update: updt}
+func (c *Config) Add(path string, nw func() Widget, update func(w Widget)) {
+	itm := &ConfigItem{Path: path, New: nw, Update: update}
 	plist := strings.Split(path, "/")
 	if len(plist) == 1 {
 		*c = append(*c, itm)
