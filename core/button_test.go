@@ -5,12 +5,10 @@
 package core
 
 import (
-	"fmt"
 	"image"
 	"strings"
 	"testing"
 
-	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
@@ -22,10 +20,7 @@ import (
 func TestButtonText(t *testing.T) {
 	b := NewBody()
 	bt := NewButton(b).SetText("Download")
-	b.AssertRender(t, "button/text", func() {
-		txt := bt.Parts.Child(0).(*Text)
-		fmt.Printf(reflectx.StringJSON(txt.Styles))
-	})
+	b.AssertRender(t, "button/text")
 }
 
 func TestButtonIcon(t *testing.T) {

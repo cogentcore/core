@@ -265,7 +265,6 @@ func (bt *Button) HandleEvents() {
 
 func (bt *Button) Config() {
 	var config Config
-
 	// we check if the icons are unset, not if they are nil, so
 	// that people can manually set it to [icons.None]
 	if bt.HasMenu() {
