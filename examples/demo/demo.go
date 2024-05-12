@@ -355,7 +355,7 @@ func values(ts *core.Tabs) {
 		fmt.Println("Your name is now", name)
 	})
 
-	age := 35
+	age := "35"
 	core.Bind(&age, core.NewSpinner(tab)).OnChange(func(e events.Event) {
 		fmt.Println("Your age is now", age)
 	})

@@ -295,7 +295,7 @@ func (bt *Button) Config() {
 
 	if bt.Icon.IsSet() {
 		config.Add("parts/icon", func() Widget { return NewIcon() },
-			func(w Widget) { w.(*Icon).SetIcon(bt.Icon) })
+			func(w Widget) { w.(*Icon).SetIcon(bt.Icon).Update() })
 		if bt.Text != "" {
 			config.Add("parts/space", func() Widget { return NewSpace() }, nil)
 		}
@@ -336,7 +336,7 @@ func (bt *Button) Config() {
 			})
 			return w
 		}, func(w Widget) {
-			w.(*Icon).SetIcon(bt.Indicator)
+			w.(*Icon).SetIcon(bt.Indicator).Update()
 		})
 	}
 
@@ -357,7 +357,7 @@ func (bt *Button) Config() {
 				})
 				return w
 			}, func(w Widget) {
-				w.(*Text).SetText(bt.Shortcut.Label())
+				w.(*Text).SetText(bt.Shortcut.Label()).Update()
 			})
 		} else if bt.Shortcut != "" {
 			slog.Error("programmer error: core.Button: shortcut cannot be used on a sub-menu for", "button", bt)

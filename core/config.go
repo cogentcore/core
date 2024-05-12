@@ -142,31 +142,59 @@ func (c *Config) ConfigWidget(w Widget, parpath string) {
 	wb := w.AsWidget()
 	parts, children := c.SplitParts(parpath)
 	if parts != nil {
-		wparts := parts.New()
-		wparts.SetName("parts")
-		wb.Parts = wparts.(*Layout)
-		tree.SetParent(wb.Parts, wb)
-		parts.Children.ConfigWidget(wparts, parts.ChildPath("parts"))
+		if wb.Parts == nil {
+			wparts := parts.New()
+			wparts.SetName("parts")
+			wb.Parts = wparts.(*Layout)
+			tree.SetParent(wb.Parts, wb)
+			parts.Children.ConfigWidget(wparts, parts.ChildPath("parts"))
+		}
+	}
+	n := len(children)
+	if n > 0 {
+		wb.Kids, _ = update.Update(wb.Kids, n,
+			func(i int) string { return children[i].ItemName() },
+			func(name string, i int) tree.Node {
+				child := children[i]
+				ne := child.New()
+				ne.SetName(name)
+				tree.SetParent(ne, wb)
+				if child.Update != nil {
+					child.Update(ne)
+				}
+				if len(child.Children) > 0 {
+					child.Children.ConfigWidget(ne, child.Path)
+				}
+				return ne
+			})
+	}
+	if parpath == "" { // top level
+		c.UpdateWidget(w, parpath) // this is recursive
+	}
+}
+
+// UpdateWidget runs the Update methods on the given widget,
+// and recursively on all of its children as specified in the Config.
+// Called after ConfigWidget.
+func (c *Config) UpdateWidget(w Widget, parpath string) {
+	wb := w.AsWidget()
+	parts, children := c.SplitParts(parpath)
+	if parts != nil {
+		parts.Children.UpdateWidget(wb.Parts, parts.ChildPath("parts"))
 	}
 	n := len(children)
 	if n == 0 {
 		return
 	}
-	wb.Kids, _ = update.Update(wb.Kids, n,
-		func(i int) string { return children[i].ItemName() },
-		func(name string, i int) tree.Node {
-			child := children[i]
-			ne := child.New()
-			ne.SetName(name)
-			tree.SetParent(ne, wb)
-			if child.Update != nil {
-				child.Update(ne)
-			}
-			if len(child.Children) > 0 {
-				child.Children.ConfigWidget(ne, child.Path)
-			}
-			return ne
-		})
+	for i, child := range children {
+		k := wb.Kids[i].(Widget)
+		if child.Update != nil {
+			child.Update(k)
+		}
+		if len(child.Children) > 0 {
+			child.Children.UpdateWidget(k, child.Path)
+		}
+	}
 }
 
 // ConfigWidget is the base implementation of [Widget.ConfigWidget] that
