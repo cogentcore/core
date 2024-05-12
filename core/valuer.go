@@ -4,7 +4,10 @@
 
 package core
 
-import "cogentcore.org/core/types"
+import (
+	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
+)
 
 // ValueWidgeter is an interface that types can implement to specify the
 // [ValueWidget] that should be used to represent them in the GUI.
@@ -18,8 +21,9 @@ type ValueWidgeter interface {
 
 // ValueWidgetTypes is a map of functions that return a [ValueWidget]
 // for a value of a certain fully package path qualified type name.
-// You can add to this using [AddValueWidgetType]. It is used by [ToValueWidget].
-// If a function returns nil, it falls back onto the next step.
+// It is used by [ToValueWidget]. If a function returns nil, it falls
+// back onto the next step. You can add to this using the [AddValueWidgetType]
+// helper function.
 var ValueWidgetTypes = map[string]func(value any) ValueWidget{}
 
 // ValueWidgetConverters is a slice of functions that return a [ValueWidget]
@@ -28,6 +32,17 @@ var ValueWidgetTypes = map[string]func(value any) ValueWidget{}
 // it falls back on the default bindings. These functions do NOT need to call
 // [core.Bind].
 var ValueWidgetConverters []func(value any) ValueWidget
+
+// AddValueWidgetType binds the given value type to the given [ValueWidget] type,
+// meaning that [ToValueWidget] will return a new [ValueWidget] of the given type
+// when it receives values of the given value type. It uses [ValueWidgetTypes].
+func AddValueWidgetType[T any, W ValueWidget]() {
+	var v T
+	name := types.TypeNameValue(v)
+	ValueWidgetTypes[name] = func(value any) ValueWidget {
+		return tree.New[W]()
+	}
+}
 
 // ToValueWidget converts the given value into an appropriate [ValueWidget]
 // whose associated value is bound to the given value. It first checks the
@@ -40,7 +55,7 @@ func ToValueWidget(value any) ValueWidget {
 			return vw
 		}
 	}
-	if vwt, ok := ValueWidgetTypes[types.TypeNameObj(value)]; ok {
+	if vwt, ok := ValueWidgetTypes[types.TypeNameValue(value)]; ok {
 		if vw := vwt(value); vw != nil {
 			return vw
 		}

@@ -28,8 +28,8 @@ var (
 )
 
 // TypeByName returns a Type by name (package_url.Type, e.g., cogentcore.org/core/core.Button),
-func TypeByName(nm string) *Type {
-	tp, ok := Types[nm]
+func TypeByName(name string) *Type {
+	tp, ok := Types[name]
 	if !ok {
 		return nil
 	}
@@ -38,23 +38,23 @@ func TypeByName(nm string) *Type {
 
 // TypeByNameTry returns a Type by name (package_url.Type, e.g., cogentcore.org/core/core.Button),
 // or error if not found
-func TypeByNameTry(nm string) (*Type, error) {
-	tp, ok := Types[nm]
+func TypeByNameTry(name string) (*Type, error) {
+	tp, ok := Types[name]
 	if !ok {
-		return nil, fmt.Errorf("type %q not found", nm)
+		return nil, fmt.Errorf("type %q not found", name)
 	}
 	return tp, nil
 }
 
 // TypeByValue returns the [Type] of the given value
-func TypeByValue(val any) *Type {
-	return TypeByName(TypeNameObj(val))
+func TypeByValue(v any) *Type {
+	return TypeByName(TypeNameValue(v))
 }
 
 // TypeByValueTry returns the [Type] of the given value,
 // or an error if it is not found
-func TypeByValueTry(val any) (*Type, error) {
-	return TypeByNameTry(TypeNameObj(val))
+func TypeByValueTry(v any) (*Type, error) {
+	return TypeByNameTry(TypeNameValue(v))
 }
 
 // TypeByReflectType returns the [Type] of the given reflect type
@@ -86,10 +86,10 @@ func TypeName(typ reflect.Type) string {
 	return reflectx.LongTypeName(typ)
 }
 
-// TypeNameObj returns the long, full package-path qualified type name
-// from given object.  Automatically finds the non-pointer base type.
+// TypeNameValue returns the long, full package-path qualified type name
+// of the given Go value. Automatically finds the non-pointer base type.
 // This is guaranteed to be unique and used for the Types registry.
-func TypeNameObj(v any) string {
+func TypeNameValue(v any) string {
 	typ := reflectx.NonPointerType(reflect.TypeOf(v))
 	return TypeName(typ)
 }

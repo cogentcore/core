@@ -69,7 +69,7 @@ var ValueMap = map[string]func() Value{}
 //
 //	AddValue(icons.Icon(""), func() Value { return &IconValue{} })
 func AddValue(val any, fun func() Value) {
-	nm := types.TypeNameObj(val)
+	nm := types.TypeNameValue(val)
 	ValueMap[nm] = fun
 }
 

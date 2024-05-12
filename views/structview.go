@@ -156,7 +156,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 	}
 	sc := true
 	if len(NoSentenceCaseFor) > 0 {
-		sc = !NoSentenceCaseForType(types.TypeNameObj(sv.Struct))
+		sc = !NoSentenceCaseForType(types.TypeNameValue(sv.Struct))
 	}
 	sg := sv.StructGrid()
 	// note: widget re-use does not work due to all the closures

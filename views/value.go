@@ -554,7 +554,7 @@ func (v *ValueData) Label() string {
 	// whether to sentence case
 	sc := true
 	if v.Owner != nil && len(NoSentenceCaseFor) > 0 {
-		sc = !NoSentenceCaseForType(types.TypeNameObj(v.Owner))
+		sc = !NoSentenceCaseForType(types.TypeNameValue(v.Owner))
 	}
 
 	switch {
