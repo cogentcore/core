@@ -287,7 +287,8 @@ func StructTags(tags reflect.StructTag) map[string]string {
 	return smap
 }
 
-// StringJSON returns a JSON string representation of the given value for printing/debugging.
+// StringJSON returns an indented JSON string representation
+// of the given value for printing/debugging.
 func StringJSON(v any) string {
-	return string(errors.Log1(jsonx.WriteBytes(v)))
+	return string(errors.Log1(jsonx.WriteBytesIndent(v)))
 }
