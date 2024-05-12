@@ -53,21 +53,30 @@ type Widget interface {
 	Update()
 
 	// Config is the method that widgets should implement to do their
-	// own widget-specific configuration steps.
-	// It typically primarily configures the widget's Parts.
-	// It does not call Config on its children, just on itself.
-	// ApplyStyle must generally be called after Config; it is called
-	// automatically when the Scene is first shown, but must be called
-	// manually thereafter as needed after configuration changes.
-	// See Update for a convenience function that does both and also
-	// triggers a new layout pass. ConfigScene on Scene handles the full
-	// tree configuration.
-	Config()
+	// own widget-specific configuration steps. You can do this however
+	// you want, but typically you should add configuration closures to
+	// the [Config] object passed to the method, using [Config.Add].
+	// If there are items added to the [Config] object, they will be
+	// automatically applied afterward using [Config.ConfigWidget].
+	//
+	// You should call [Widget.ConfigWidget] or [Widget.Update] to actually
+	// reconfigure or update a widget from an end user perspective; Config
+	// should rarely be called except when extending the Config method
+	// of another widget type in a Config method.
+	Config(c *Config)
 
 	// ConfigWidget configures the widget by doing steps that apply for
 	// all widgets and then calling [Widget.Config] for widget-specific
 	// configuration steps. Widgets should typically implement [Widget.Config],
 	// not this method.
+	//
+	// It does not call ConfigWidget on its children, just on itself.
+	// ApplyStyle must generally be called after ConfigWidget; it is called
+	// automatically when the Scene is first shown, but must be called
+	// manually thereafter as needed after configuration changes.
+	// See [Widget.Update] for a convenience function that does both and also
+	// triggers a new layout pass. ConfigScene on Scene handles the full
+	// tree configuration.
 	ConfigWidget()
 
 	// StateIs returns whether the widget has the given [states.States] flag set

@@ -5,8 +5,10 @@
 package core
 
 import (
+	"fmt"
 	"strings"
 
+	"cogentcore.org/core/base/profile"
 	"cogentcore.org/core/base/update"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -138,9 +140,11 @@ func (c *Config) SplitParts(parpath string) (parts *ConfigItem, children Config)
 
 // ConfigWidget runs the Config on the given widget, ensuring that
 // the widget has the specified parts and direct Children.
-func (c *Config) ConfigWidget(w Widget, parpath string) {
+// The given parent path is used for recursion and should be blank
+// when calling the function externally.
+func (c *Config) ConfigWidget(w Widget, parentPath string) {
 	wb := w.AsWidget()
-	parts, children := c.SplitParts(parpath)
+	parts, children := c.SplitParts(parentPath)
 	if parts != nil {
 		if wb.Parts == nil {
 			wparts := parts.New()
@@ -168,17 +172,19 @@ func (c *Config) ConfigWidget(w Widget, parpath string) {
 				return ne
 			})
 	}
-	if parpath == "" { // top level
-		c.UpdateWidget(w, parpath) // this is recursive
+	if parentPath == "" { // top level
+		c.UpdateWidget(w, parentPath) // this is recursive
 	}
 }
 
 // UpdateWidget runs the [ConfigItem.Update] functions on the given widget,
 // and recursively on all of its children as specified in the Config.
 // It is called at the end of [Config.ConfigWidget].
-func (c *Config) UpdateWidget(w Widget, parpath string) {
+// The given parent path is used for recursion and should be blank
+// when calling the function externally.
+func (c *Config) UpdateWidget(w Widget, parentPath string) {
 	wb := w.AsWidget()
-	parts, children := c.SplitParts(parpath)
+	parts, children := c.SplitParts(parentPath)
 	if parts != nil {
 		parts.Children.UpdateWidget(wb.Parts, parts.ChildPath("parts"))
 	}
@@ -197,17 +203,9 @@ func (c *Config) UpdateWidget(w Widget, parpath string) {
 	}
 }
 
-// ConfigWidget is the base implementation of [Widget.ConfigWidget] that
-// configures the widget by doing steps that apply to all widgets and then
-// calling [Widget.Config] for widget-specific configuration steps.
-func (wb *WidgetBase) ConfigWidget() {
-	if wb.ValueUpdate != nil {
-		wb.ValueUpdate()
-	}
-	wb.This().(Widget).Config()
-}
-
-// NewParts makes a new Parts layout
+// NewParts returns a new [Layout] that serves as the internal parts
+// of a widget, which typically contain content that the widget automatically
+// manages through its [Widget.Config] method.
 func NewParts() *Layout {
 	w := NewLayout()
 	w.SetName("parts")
@@ -216,4 +214,81 @@ func NewParts() *Layout {
 		s.Grow.Set(1, 1)
 	})
 	return w
+}
+
+// ConfigWidget is the base implementation of [Widget.ConfigWidget] that
+// configures the widget by doing steps that apply to all widgets and then
+// calling [Widget.Config] for widget-specific configuration steps.
+func (wb *WidgetBase) ConfigWidget() {
+	if wb.ValueUpdate != nil {
+		wb.ValueUpdate()
+	}
+	c := Config{}
+	wb.This().(Widget).Config(&c)
+	if len(c) > 0 {
+		c.ConfigWidget(wb.This().(Widget), "")
+	}
+}
+
+// Config is the interface method called by Config that
+// should be defined for each Widget type, which actually does
+// the configuration work.
+func (wb *WidgetBase) Config(c *Config) {
+	// this must be defined for each widget type
+}
+
+// ConfigParts initializes the parts of the widget if they
+// are not already through [WidgetBase.NewParts], calls
+// [tree.NodeBase.ConfigChildren] on those parts with the given config,
+// calls the given after function if it is specified,
+// and then handles necessary updating logic.
+func (wb *WidgetBase) ConfigParts(config tree.Config, after ...func()) {
+	parts := wb.NewParts()
+	mods := parts.ConfigChildren(config)
+	if len(after) > 0 {
+		after[0]()
+	}
+	if !mods && !wb.NeedsRebuild() {
+		return
+	}
+	parts.Update()
+}
+
+// ConfigTree calls [Widget.ConfigWidget] on every Widget in the tree from me.
+func (wb *WidgetBase) ConfigTree() {
+	if wb.This() == nil {
+		return
+	}
+	pr := profile.Start(wb.This().NodeType().ShortName())
+	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+		wi.ConfigWidget()
+		return tree.Continue
+	})
+	pr.End()
+}
+
+// Update does a general purpose update of the widget and everything
+// below it by reconfiguring it, applying its styles, and indicating
+// that it needs a new layout pass. It is the main way that end users
+// should update widgets, and it should be called after making any
+// changes to the core properties of a widget (for example, the text
+// of [Text], the icon of a [Button], or the slice of a table view).
+//
+// If you are calling this in a separate goroutine outside of the main
+// configuration, rendering, and event handling structure, you need to
+// call [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and
+// after this, respectively.
+func (wb *WidgetBase) Update() { //types:add
+	if wb == nil || wb.This() == nil {
+		return
+	}
+	if DebugSettings.UpdateTrace {
+		fmt.Println("\tDebugSettings.UpdateTrace Update:", wb)
+	}
+	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+		wi.ConfigWidget()
+		wi.ApplyStyle()
+		return tree.Continue
+	})
+	wb.NeedsLayout()
 }

@@ -263,8 +263,7 @@ func (bt *Button) HandleEvents() {
 	})
 }
 
-func (bt *Button) Config() {
-	var config Config
+func (bt *Button) Config(c *Config) {
 	// we check if the icons are unset, not if they are nil, so
 	// that people can manually set it to [icons.None]
 	if bt.HasMenu() {
@@ -283,7 +282,7 @@ func (bt *Button) Config() {
 		}
 	}
 
-	config.Add("parts", func() Widget {
+	c.Add("parts", func() Widget {
 		w := NewParts()
 		w.Style(func(s *styles.Style) {
 			s.Gap.Zero()
@@ -294,17 +293,17 @@ func (bt *Button) Config() {
 	}, nil)
 
 	if bt.Icon.IsSet() {
-		config.Add("parts/icon",
+		c.Add("parts/icon",
 			func() Widget { return NewIcon() },
 			func(w Widget) {
 				w.(*Icon).SetIcon(bt.Icon)
 			})
 		if bt.Text != "" {
-			config.Add("parts/space", func() Widget { return NewSpace() }, nil)
+			c.Add("parts/space", func() Widget { return NewSpace() }, nil)
 		}
 	}
 	if bt.Text != "" {
-		config.Add("parts/text", func() Widget {
+		c.Add("parts/text", func() Widget {
 			w := NewText()
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
@@ -324,13 +323,13 @@ func (bt *Button) Config() {
 	}
 
 	if bt.Indicator.IsSet() {
-		config.Add("parts/ind-stretch", func() Widget {
+		c.Add("parts/ind-stretch", func() Widget {
 			w := NewStretch().Style(func(s *styles.Style) {
 				s.Min.X.Em(0.2)
 			})
 			return w
 		}, nil)
-		config.Add("parts/indicator", func() Widget {
+		c.Add("parts/indicator", func() Widget {
 			w := NewIcon()
 			w.Style(func(s *styles.Style) {
 				s.Min.X.Dp(18)
@@ -346,8 +345,8 @@ func (bt *Button) Config() {
 
 	if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
 		if !bt.Indicator.IsSet() && bt.Shortcut != "" {
-			config.Add("parts/sc-stretch", func() Widget { return NewStretch() }, nil)
-			config.Add("parts/shortcut", func() Widget {
+			c.Add("parts/sc-stretch", func() Widget { return NewStretch() }, nil)
+			c.Add("parts/shortcut", func() Widget {
 				w := NewText()
 				w.Style(func(s *styles.Style) {
 					s.SetNonSelectable()
@@ -368,5 +367,4 @@ func (bt *Button) Config() {
 			slog.Error("programmer error: core.Button: shortcut cannot be used on a sub-menu for", "button", bt)
 		}
 	}
-	config.ConfigWidget(bt, "")
 }
