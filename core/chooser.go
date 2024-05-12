@@ -238,6 +238,7 @@ func (ch *Chooser) Config(c *Config) {
 				} else {
 					w.SetType(TextFieldOutlined)
 				}
+				w.ConfigWidget() // this is actually essential (TODO: figure out a way to get rid of this?)
 				if !ch.DefaultNew {
 					w.SetCompleter(w, ch.CompleteMatch, ch.CompleteEdit)
 				}
