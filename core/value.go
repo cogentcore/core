@@ -20,6 +20,7 @@ type ValueWidget interface {
 // ValueWidgetSetter is an optional interface that [ValueWidget]s can implement
 // to customize how the associated widget value is set from the bound value.
 type ValueWidgetSetter interface {
+	ValueWidget
 
 	// SetWidgetValue sets the associated widget value from the bound value.
 	SetWidgetValue(value any) error
