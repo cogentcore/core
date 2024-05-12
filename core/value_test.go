@@ -8,7 +8,17 @@ import "testing"
 
 func TestBind(t *testing.T) {
 	b := NewBody()
-	name := "Gopher"
-	Bind(&name, NewTextField(b))
+	Bind("Gopher", NewTextField(b))
 	b.AssertRender(t, "bind/basic")
+}
+
+func TestBindUpdate(t *testing.T) {
+	b := NewBody()
+	name := "Gopher"
+	tf := NewTextField(b)
+	Bind(&name, tf)
+	b.AssertRender(t, "bind/update", func() {
+		name = "Cogent Core"
+		tf.Update()
+	})
 }
