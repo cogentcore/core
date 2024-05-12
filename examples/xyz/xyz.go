@@ -147,7 +147,7 @@ func main() {
 	})
 
 	sv := xyzview.NewSceneView(b)
-	sv.Config()
+	sv.ConfigWidget()
 	sw := sv.SceneWidget()
 	sc := sv.SceneXYZ()
 	sw.SelectionMode = xyzview.Manipulable

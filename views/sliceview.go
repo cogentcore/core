@@ -780,7 +780,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 		var idxlab *core.Text
 		if sv.Is(SliceViewShowIndex) {
 			idxlab = sg.Kids[ridx].(*core.Text)
-			idxlab.SetText(strconv.Itoa(si)).Config()
+			idxlab.SetText(strconv.Itoa(si)).ConfigWidget()
 			idxlab.SetState(invis, states.Invisible)
 		}
 		w.SetState(invis, states.Invisible)

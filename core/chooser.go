@@ -279,14 +279,14 @@ func (ch *Chooser) Config() {
 			tx.SetTrailingIcon(ch.Indicator, func(e events.Event) {
 				ch.OpenMenu(e)
 			})
-			tx.Config() // this is essential
+			tx.ConfigWidget() // this is essential
 			if !ch.DefaultNew {
 				tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
 			}
 		} else {
 			text := ch.Parts.Child(lbi).(*Text)
 			text.SetText(ch.CurrentItem.GetLabel())
-			text.Config() // this is essential
+			text.ConfigWidget() // this is essential
 
 			ic := ch.Parts.Child(indi).(*Icon)
 			ic.SetIcon(ch.Indicator)
@@ -460,7 +460,7 @@ func (ch *Chooser) ShowCurrentItem() *Chooser {
 	} else {
 		text := ch.TextWidget()
 		if text != nil {
-			text.SetText(ch.CurrentItem.GetLabel()).Config()
+			text.SetText(ch.CurrentItem.GetLabel()).ConfigWidget()
 		}
 	}
 	if ch.CurrentItem.Icon.IsSet() {

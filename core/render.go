@@ -173,14 +173,14 @@ func (wb *WidgetBase) ConfigParts(config tree.Config, after ...func()) {
 	parts.Update()
 }
 
-// ConfigTree calls Config on every Widget in the tree from me.
+// ConfigTree calls [Widget.ConfigWidget] on every Widget in the tree from me.
 func (wb *WidgetBase) ConfigTree() {
 	if wb.This() == nil {
 		return
 	}
 	pr := profile.Start(wb.This().NodeType().ShortName())
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		wi.Config()
+		wi.ConfigWidget()
 		return tree.Continue
 	})
 	pr.End()
@@ -205,7 +205,7 @@ func (wb *WidgetBase) Update() { //types:add
 		fmt.Println("\tDebugSettings.UpdateTrace Update:", wb)
 	}
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		wi.Config()
+		wi.ConfigWidget()
 		wi.ApplyStyle()
 		return tree.Continue
 	})

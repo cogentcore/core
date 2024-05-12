@@ -508,7 +508,7 @@ func (tv *TreeView) Config() {
 	if tv.This().(TreeViewer).CanOpen() {
 		if wb, ok := tv.BranchPart(); ok {
 			tv.SetBranchState()
-			wb.Config()
+			wb.ConfigWidget()
 		}
 	}
 	if tv.Icon.IsSet() {

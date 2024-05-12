@@ -69,7 +69,7 @@ func (tb *Toolbar) Config() {
 			}
 		}
 	}
-	tb.Frame.Config()
+	tb.Frame.ConfigWidget()
 }
 
 func (tb *Toolbar) SizeUp() {
@@ -189,7 +189,7 @@ func (tb *Toolbar) OverflowMenu(m *Scene) {
 			}
 			cl := k.This().Clone()
 			m.AddChild(cl)
-			cl.This().(Widget).Config()
+			cl.This().(Widget).ConfigWidget()
 		}
 		if nm > 1 { // default includes sep
 			NewSeparator(m)

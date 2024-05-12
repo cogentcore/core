@@ -195,7 +195,7 @@ func (is *Inspector) SetRoot(root tree.Node) {
 		is.KiRoot = root
 		// ge.GetAllUpdates(root)
 	}
-	is.Config()
+	is.ConfigWidget()
 }
 
 // Config configures the widget

@@ -388,7 +388,7 @@ func (ev *Env) ConfigGUI() *core.Body {
 	//    3D Scene
 
 	ev.SceneView = xyzview.NewSceneView(scfr)
-	ev.SceneView.Config()
+	ev.SceneView.ConfigWidget()
 	se := ev.SceneView.SceneXYZ()
 	ev.ConfigScene(se)
 	ev.ConfigView3D(se)

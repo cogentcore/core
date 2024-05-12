@@ -465,7 +465,7 @@ func (tv *TableView) UpdateWidgets() {
 				break
 			}
 			idxlab = sg.Kids[ridx].(*core.Text)
-			idxlab.SetText(strconv.Itoa(si)).Config()
+			idxlab.SetText(strconv.Itoa(si)).ConfigWidget()
 			idxlab.SetState(invis, states.Invisible)
 		}
 
