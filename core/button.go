@@ -336,7 +336,7 @@ func (bt *Button) Config() {
 			})
 			return w
 		}, func(w Widget) {
-			bt.SetIcon(bt.Icon)
+			w.(*Icon).SetIcon(bt.Indicator)
 		})
 	}
 
@@ -356,7 +356,9 @@ func (bt *Button) Config() {
 					s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 				})
 				return w
-			}, func(w Widget) { w.(*Text).SetText(bt.Shortcut.Label()) })
+			}, func(w Widget) {
+				w.(*Text).SetText(bt.Shortcut.Label())
+			})
 		} else if bt.Shortcut != "" {
 			slog.Error("programmer error: core.Button: shortcut cannot be used on a sub-menu for", "button", bt)
 		}

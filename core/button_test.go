@@ -19,7 +19,7 @@ import (
 
 func TestButtonText(t *testing.T) {
 	b := NewBody()
-	bt := NewButton(b).SetText("Download")
+	NewButton(b).SetText("Download")
 	b.AssertRender(t, "button/text")
 }
 
