@@ -162,9 +162,9 @@ func (c *Config) ConfigWidget(w Widget, parpath string) {
 			if child.Update != nil {
 				child.Update(ne)
 			}
-			// if len(child.Children) > 0 {
-			// 	child.Children.ConfigWidget(ne, child.Path)
-			// }
+			if len(child.Children) > 0 {
+				child.Children.ConfigWidget(ne, child.Path)
+			}
 			return ne
 		})
 }
