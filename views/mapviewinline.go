@@ -90,7 +90,7 @@ func (mv *MapViewInline) SetStyles() {
 	})
 }
 
-func (mv *MapViewInline) Config() {
+func (mv *MapViewInline) Config(c *core.Config) {
 	mv.DeleteChildren()
 	if reflectx.AnyIsNil(mv.Map) {
 		mv.configSize = 0

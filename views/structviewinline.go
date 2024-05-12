@@ -61,7 +61,7 @@ func (sv *StructViewInline) SetStruct(st any) *StructViewInline {
 	return sv
 }
 
-func (sv *StructViewInline) Config() {
+func (sv *StructViewInline) Config(c *core.Config) {
 	if reflectx.AnyIsNil(sv.Struct) {
 		return
 	}

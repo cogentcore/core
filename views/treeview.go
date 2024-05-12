@@ -496,7 +496,7 @@ func (tv *TreeView) LabelPart() (*core.Text, bool) {
 	return nil, false
 }
 
-func (tv *TreeView) Config() {
+func (tv *TreeView) Config(c *core.Config) {
 	parts := tv.NewParts()
 	config := tree.Config{}
 	config.Add(core.SwitchType, "branch")

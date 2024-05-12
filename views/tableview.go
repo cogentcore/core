@@ -215,11 +215,7 @@ func (tv *TableView) CacheVisFields() {
 }
 
 // Config configures the view
-func (tv *TableView) Config() {
-	tv.ConfigTableView()
-}
-
-func (tv *TableView) ConfigTableView() {
+func (tv *TableView) Config(c *core.Config) {
 	if tv.Is(SliceViewConfigured) {
 		tv.This().(SliceViewer).UpdateWidgets()
 		return

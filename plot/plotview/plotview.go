@@ -358,14 +358,10 @@ func (pl *PlotView) PlotXAxis(plt *plot.Plot, ixvw *table.IndexView) (xi int, xv
 	return
 }
 
-func (pl *PlotView) Config() {
-	if pl.Table != nil {
-		pl.ConfigPlotView()
+func (pl *PlotView) Config(c *core.Config) {
+	if pl.Table == nil {
+		return
 	}
-}
-
-// ConfigPlotView configures the overall view widget
-func (pl *PlotView) ConfigPlotView() {
 	pl.Params.FromMeta(pl.Table.Table)
 	if !pl.HasChildren() {
 		fr := core.NewFrame(pl)
@@ -592,7 +588,7 @@ func (pl *PlotView) ConfigToolbar(tb *core.Toolbar) {
 	core.NewButton(tb).SetText("Update").SetIcon(icons.Update).
 		SetTooltip("update fully redraws display, reflecting any new settings etc").
 		OnClick(func(e events.Event) {
-			pl.ConfigPlotView()
+			pl.ConfigWidget()
 			pl.UpdatePlot()
 		})
 	core.NewButton(tb).SetText("Config").SetIcon(icons.Settings).

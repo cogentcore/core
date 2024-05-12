@@ -31,11 +31,7 @@ func (sv *SceneView) OnInit() {
 	})
 }
 
-func (sv *SceneView) Config() {
-	sv.ConfigSceneView()
-}
-
-func (sv *SceneView) ConfigSceneView() {
+func (sv *SceneView) Config(c *core.Config) {
 	if sv.HasChildren() {
 		sv.UpdateToolbar()
 		return

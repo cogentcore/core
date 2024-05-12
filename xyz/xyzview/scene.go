@@ -91,13 +91,7 @@ func (sw *Scene) HandleEvents() {
 	sw.HandleSelectEvents()
 }
 
-func (sw *Scene) Config() {
-	sw.ConfigFrame()
-}
-
-// ConfigFrame configures the framebuffer for GPU rendering,
-// using the RenderWindow GPU and Device.
-func (sw *Scene) ConfigFrame() {
+func (sw *Scene) Config(c *core.Config) {
 	sz := sw.Geom.Size.Actual.Content.ToPointFloor()
 	if sz == (image.Point{}) {
 		return
@@ -130,7 +124,7 @@ func (sw *Scene) ConfigFrame() {
 }
 
 func (sw *Scene) Render() {
-	sw.ConfigFrame() // no-op if all good
+	// sw.ConfigWidget() // TODO: do we need this? no-op if all good?
 	if sw.XYZ.Frame == nil {
 		return
 	}

@@ -120,7 +120,7 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 	return sv
 }
 
-func (sv *SliceViewInline) Config() {
+func (sv *SliceViewInline) Config(c *core.Config) {
 	sv.DeleteChildren()
 	if reflectx.AnyIsNil(sv.Slice) {
 		sv.configSize = 0

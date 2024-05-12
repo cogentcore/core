@@ -183,12 +183,7 @@ func (tv *TableView) UpdateSliceSize() int {
 	return tv.SliceSize
 }
 
-// Config configures the view
-func (tv *TableView) Config() {
-	tv.ConfigTableView()
-}
-
-func (tv *TableView) ConfigTableView() {
+func (tv *TableView) Config(c *core.Config) {
 	if tv.Is(views.SliceViewConfigured) {
 		tv.This().(views.SliceViewer).UpdateWidgets()
 		return

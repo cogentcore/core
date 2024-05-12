@@ -199,7 +199,7 @@ func (is *Inspector) SetRoot(root tree.Node) {
 }
 
 // Config configures the widget
-func (is *Inspector) Config() {
+func (is *Inspector) Config(c *core.Config) {
 	if is.KiRoot == nil {
 		return
 	}

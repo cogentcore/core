@@ -542,13 +542,7 @@ func (sv *SliceViewBase) BindSelect(val *int) *SliceViewBase {
 }
 
 // Config configures a standard setup of the overall Frame
-func (sv *SliceViewBase) Config() {
-	sv.ConfigSliceView()
-}
-
-// ConfigSliceView handles entire config.
-// ReConfig calls this, followed by ApplyStyleTree so we don't need to call that.
-func (sv *SliceViewBase) ConfigSliceView() {
+func (sv *SliceViewBase) Config(c *core.Config) {
 	if sv.Is(SliceViewConfigured) {
 		sv.This().(SliceViewer).UpdateWidgets()
 		return

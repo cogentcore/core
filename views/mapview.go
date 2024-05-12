@@ -65,7 +65,7 @@ func (mv *MapView) SetStyles() {
 	})
 }
 
-func (mv *MapView) Config() {
+func (mv *MapView) Config(c *core.Config) {
 	if !mv.HasChildren() {
 		core.NewFrame(mv).SetName("map-grid")
 	}

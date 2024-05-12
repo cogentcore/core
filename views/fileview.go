@@ -240,7 +240,7 @@ var FileViewKindColorMap = map[string]string{
 	"folder": "pref(link)",
 }
 
-func (fv *FileView) Config() {
+func (fv *FileView) Config(c *core.Config) {
 	if fv.HasChildren() {
 		return
 	}
