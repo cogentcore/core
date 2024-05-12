@@ -17,9 +17,9 @@ type ValueWidget interface {
 	WidgetValue() any
 }
 
-// WidgetValueSetter is an optional interface that [ValueWidget]s can implement
+// ValueWidgetSetter is an optional interface that [ValueWidget]s can implement
 // to customize how the associated widget value is set from the bound value.
-type WidgetValueSetter interface {
+type ValueWidgetSetter interface {
 
 	// SetWidgetValue sets the associated widget value from the bound value.
 	SetWidgetValue(value any) error
@@ -31,7 +31,7 @@ type WidgetValueSetter interface {
 func Bind[T ValueWidget](value any, vw T) T {
 	wb := vw.AsWidget()
 	wb.ValueUpdate = func() {
-		if vws, ok := ValueWidget(vw).(WidgetValueSetter); ok {
+		if vws, ok := ValueWidget(vw).(ValueWidgetSetter); ok {
 			ErrorSnackbar(vw, vws.SetWidgetValue(value))
 		} else {
 			ErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))
