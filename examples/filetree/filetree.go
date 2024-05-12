@@ -346,7 +346,7 @@ func (fb *FileBrowse) ConfigSplits() {
 	config := fb.SplitsConfig()
 	if split.ConfigChildren(config) {
 		ftfr := split.Child(0).(*core.Frame)
-		fb.Files = filetree.NewTree(ftfr, "filetree")
+		fb.Files = filetree.NewTree(ftfr)
 		fb.Files.OnSelect(func(e events.Event) {
 			e.SetHandled()
 			if len(fb.Files.SelectedNodes) > 0 {
@@ -394,7 +394,7 @@ func NewFileBrowser(path string) (*FileBrowse, *core.Stage) {
 	_, projnm, _, _ := ProjectPathParse(path)
 
 	b := core.NewBody("Browser: " + projnm)
-	fb := NewFileBrowse(b, "browser")
+	fb := NewFileBrowse(b)
 	b.AddAppBar(fb.ConfigToolbar)
 	fb.OpenPath(core.Filename(path))
 	return fb, b.RunWindow()
