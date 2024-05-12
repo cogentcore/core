@@ -294,8 +294,13 @@ func (bt *Button) Config() {
 	}, nil)
 
 	if bt.Icon.IsSet() {
-		config.Add("parts/icon", func() Widget { return NewIcon() },
-			func(w Widget) { w.(*Icon).SetIcon(bt.Icon).Update() })
+		config.Add("parts/icon",
+			func() Widget {
+				return NewIcon()
+			},
+			func(w Widget) {
+				w.(*Icon).SetIcon(bt.Icon)
+			})
 		if bt.Text != "" {
 			config.Add("parts/space", func() Widget { return NewSpace() }, nil)
 		}
@@ -303,11 +308,6 @@ func (bt *Button) Config() {
 	if bt.Text != "" {
 		config.Add("parts/text", func() Widget {
 			w := NewText()
-			if bt.Type == ButtonMenu {
-				w.Type = TextBodyMedium
-			} else {
-				w.Type = TextLabelLarge
-			}
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
 				s.SetTextWrap(false)
@@ -315,7 +315,13 @@ func (bt *Button) Config() {
 			})
 			return w
 		}, func(w Widget) {
-			w.(*Text).SetText(bt.Text)
+			text := w.(*Text)
+			if bt.Type == ButtonMenu {
+				text.SetType(TextBodyMedium)
+			} else {
+				text.SetType(TextLabelLarge)
+			}
+			text.SetText(bt.Text)
 		})
 	}
 
@@ -345,11 +351,6 @@ func (bt *Button) Config() {
 			config.Add("parts/sc-stretch", func() Widget { return NewStretch() }, nil)
 			config.Add("parts/shortcut", func() Widget {
 				w := NewText()
-				if bt.Type == ButtonMenu {
-					w.Type = TextBodyMedium
-				} else {
-					w.Type = TextLabelLarge
-				}
 				w.Style(func(s *styles.Style) {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
@@ -357,7 +358,13 @@ func (bt *Button) Config() {
 				})
 				return w
 			}, func(w Widget) {
-				w.(*Text).SetText(bt.Shortcut.Label())
+				text := w.(*Text)
+				if bt.Type == ButtonMenu {
+					text.SetType(TextBodyMedium)
+				} else {
+					text.SetType(TextLabelLarge)
+				}
+				text.SetText(bt.Shortcut.Label())
 			})
 		} else if bt.Shortcut != "" {
 			slog.Error("programmer error: core.Button: shortcut cannot be used on a sub-menu for", "button", bt)
