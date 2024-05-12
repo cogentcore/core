@@ -4,7 +4,13 @@
 
 package core
 
-import "testing"
+import (
+	"testing"
+
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
+	"github.com/stretchr/testify/assert"
+)
 
 func TestBind(t *testing.T) {
 	b := NewBody()
@@ -20,5 +26,20 @@ func TestBindUpdate(t *testing.T) {
 	b.AssertRender(t, "bind/update", func() {
 		name = "Cogent Core"
 		tf.Update()
+	})
+}
+
+func TestBindChange(t *testing.T) {
+	b := NewBody()
+	name := "Gopher"
+	tf := NewTextField(b)
+	Bind(&name, tf)
+	b.AssertRender(t, "bind/change", func() {
+		tf.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
+		tf.HandleEvent(events.NewKey(events.KeyChord, 'o', 0, 0))
+		tf.HandleEvent(events.NewKey(events.KeyChord, ' ', 0, 0))
+		assert.Equal(t, "Gopher", name)
+		tf.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, 0))
+		assert.Equal(t, "Go Gopher", name)
 	})
 }
