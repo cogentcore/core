@@ -295,9 +295,7 @@ func (bt *Button) Config(c *Config) {
 	if bt.Icon.IsSet() {
 		c.Add("parts/icon",
 			func() Widget { return NewIcon() },
-			func(w Widget) {
-				w.(*Icon).SetIcon(bt.Icon)
-			})
+			func(w Widget) { w.(*Icon).SetIcon(bt.Icon) })
 		if bt.Text != "" {
 			c.Add("parts/space", func() Widget { return NewSpace() }, nil)
 		}

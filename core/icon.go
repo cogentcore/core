@@ -16,7 +16,7 @@ import (
 	"golang.org/x/image/draw"
 )
 
-// Icon contains a svg.SVG element.
+// Icon renders an [svg.SVG] icon.
 // The rendered version is cached for a given size.
 // Icons do not render a background or border independent of their SVG object.
 // The size of on Icon is determined by the [styles.Font.Size] property.

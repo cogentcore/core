@@ -25,7 +25,6 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
 
@@ -187,37 +186,6 @@ func (ch *Chooser) SetStyles() {
 	})
 	ch.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(ch) {
-		case "parts":
-			w.Style(func(s *styles.Style) {
-				s.Align.Content = styles.Center
-				s.Align.Items = styles.Center
-			})
-		case "parts/icon":
-			w.Style(func(s *styles.Style) {
-				s.Margin.Zero()
-				s.Padding.Zero()
-			})
-		case "parts/text":
-			w.Style(func(s *styles.Style) {
-				s.SetNonSelectable()
-				s.SetTextWrap(false)
-				s.Margin.Zero()
-				s.Padding.Zero()
-			})
-		case "parts/text-field":
-			text := w.(*TextField)
-			text.Placeholder = ch.Placeholder
-			if ch.Type == ChooserFilled {
-				text.Type = TextFieldFilled
-			} else {
-				text.Type = TextFieldOutlined
-			}
-			ch.HandleChooserTextFieldEvents(text)
-			text.Style(func(s *styles.Style) {
-				s.Grow = ch.Styles.Grow // we grow like our parent
-				s.Max.X.Zero()          // constrained by parent
-				s.SetTextWrap(false)
-			})
 		case "parts/text.parts/trail-icon":
 			w.Style(func(s *styles.Style) {
 				// indicator does not need to be focused
@@ -235,63 +203,76 @@ func (ch *Chooser) SetStyles() {
 }
 
 func (ch *Chooser) Config(c *Config) {
-	config := tree.Config{}
-
 	// automatically select the first item if we have nothing selected and no placeholder
 	if !ch.Editable && ch.CurrentIndex < 0 && ch.CurrentItem.Text == "" {
 		ch.SetCurrentIndex(0)
 	}
 
-	ici := -1
-	var lbi, txi, indi int
-	// editable handles through textfield
+	c.Add("parts", func() Widget {
+		w := NewParts()
+		w.Style(func(s *styles.Style) {
+			s.Align.Content = styles.Center
+			s.Align.Items = styles.Center
+		})
+		return w
+	}, nil)
+
+	// editable handles through TextField
 	if ch.Icon.IsSet() && !ch.Editable {
-		ici = len(config)
-		config.Add(IconType, "icon")
+		c.Add("parts/icon",
+			func() Widget { return NewIcon() },
+			func(w Widget) { w.(*Icon).SetIcon(ch.Icon) })
 	}
 	if ch.Editable {
-		lbi = -1
-		txi = len(config)
-		config.Add(TextFieldType, "text-field")
+		c.Add("parts/text-field",
+			func() Widget {
+				w := NewTextField().SetPlaceholder(ch.Placeholder)
+				ch.HandleChooserTextFieldEvents(w)
+				w.Style(func(s *styles.Style) {
+					s.Grow = ch.Styles.Grow // we grow like our parent
+					s.Max.X.Zero()          // constrained by parent
+					s.SetTextWrap(false)
+				})
+				return w
+			},
+			func(w Widget) {
+				tf := w.(*TextField)
+				tf.SetText(ch.CurrentItem.GetLabel()).SetLeadingIcon(ch.Icon).
+					SetTrailingIcon(ch.Indicator, func(e events.Event) {
+						ch.OpenMenu(e)
+					})
+				if ch.Type == ChooserFilled {
+					tf.SetType(TextFieldFilled)
+				} else {
+					tf.SetType(TextFieldOutlined)
+				}
+				if !ch.DefaultNew {
+					tf.SetCompleter(tf, ch.CompleteMatch, ch.CompleteEdit)
+				}
+			})
 	} else {
-		txi = -1
-		lbi = len(config)
-		config.Add(TextType, "text")
+		c.Add("parts/text",
+			func() Widget {
+				w := NewText()
+				w.Style(func(s *styles.Style) {
+					s.SetNonSelectable()
+					s.SetTextWrap(false)
+				})
+				return w
+			},
+			func(w Widget) {
+				w.(*Text).SetText(ch.CurrentItem.GetLabel())
+			})
 	}
-	if !ch.Indicator.IsSet() {
+	if ch.Indicator == "" {
 		ch.Indicator = icons.KeyboardArrowRight
 	}
-	// editable handles through textfield
+	// editable handles through TextField
 	if !ch.Editable {
-		indi = len(config)
-		config.Add(IconType, "indicator")
+		c.Add("parts/indicator",
+			func() Widget { return NewIcon() },
+			func(w Widget) { w.(*Icon).SetIcon(ch.Indicator) })
 	}
-
-	ch.ConfigParts(config, func() {
-		if ici >= 0 {
-			ic := ch.Parts.Child(ici).(*Icon)
-			ic.SetIcon(ch.Icon)
-		}
-		if ch.Editable {
-			tx := ch.Parts.Child(txi).(*TextField)
-			tx.SetText(ch.CurrentItem.GetLabel())
-			tx.SetLeadingIcon(ch.Icon)
-			tx.SetTrailingIcon(ch.Indicator, func(e events.Event) {
-				ch.OpenMenu(e)
-			})
-			tx.ConfigWidget() // this is essential
-			if !ch.DefaultNew {
-				tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
-			}
-		} else {
-			text := ch.Parts.Child(lbi).(*Text)
-			text.SetText(ch.CurrentItem.GetLabel())
-			text.ConfigWidget() // this is essential
-
-			ic := ch.Parts.Child(indi).(*Icon)
-			ic.SetIcon(ch.Indicator)
-		}
-	})
 }
 
 // TextWidget returns the text widget if present.
