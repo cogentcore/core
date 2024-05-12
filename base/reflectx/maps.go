@@ -95,6 +95,7 @@ func WalkMapStructElements(mp any, fun func(mp any, typ reflect.Type, val reflec
 	switch vk {
 	case reflect.Map:
 		keys := v.MapKeys()
+	mapLoop:
 		for _, key := range keys {
 			val := v.MapIndex(key)
 			vali := val.Interface()
@@ -110,21 +111,22 @@ func WalkMapStructElements(mp any, fun func(mp any, typ reflect.Type, val reflec
 			case reflect.Map:
 				rval = WalkMapStructElements(vali, fun)
 				if !rval {
-					break
+					break mapLoop
 				}
 			case reflect.Struct:
 				rval = WalkMapStructElements(vali, fun)
 				if !rval {
-					break
+					break mapLoop
 				}
 			default:
 				rval = fun(vali, typ, val)
 				if !rval {
-					break
+					break mapLoop
 				}
 			}
 		}
 	case reflect.Struct:
+	structLoop:
 		for i := 0; i < typ.NumField(); i++ {
 			f := typ.Field(i)
 			vf := v.Field(i)
@@ -140,17 +142,17 @@ func WalkMapStructElements(mp any, fun func(mp any, typ reflect.Type, val reflec
 			case reflect.Map:
 				rval = WalkMapStructElements(vfi, fun)
 				if !rval {
-					break
+					break structLoop
 				}
 			case reflect.Struct:
 				rval = WalkMapStructElements(vfi, fun)
 				if !rval {
-					break
+					break structLoop
 				}
 			default:
 				rval = fun(vfi, typ, vf)
 				if !rval {
-					break
+					break structLoop
 				}
 			}
 		}
