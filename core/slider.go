@@ -208,17 +208,6 @@ func (sr *Slider) SetStyles() {
 			}
 		}
 	})
-	sr.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(sr) {
-		case "parts/icon":
-			w.Style(func(s *styles.Style) {
-				s.Font.Size.Dp(24)
-				s.Margin.Zero()
-				s.Padding.Zero()
-				s.Color = sr.ThumbColor
-			})
-		}
-	})
 }
 
 // SnapValue snaps the value to [Slider.Step] if [Slider.EnforceStep] is on.
@@ -495,18 +484,21 @@ func (sr *Slider) HandleKeys() {
 
 func (sr *Slider) Config(c *Config) {
 	if sr.Icon.IsNil() {
-		if sr.Parts != nil {
-			sr.DeleteParts()
-		}
+		sr.DeleteParts()
 		return
 	}
-	parts := sr.NewParts()
-	if !parts.HasChildren() {
-		NewIcon(parts).SetName("icon")
-	}
-	ic := sr.Parts.Child(0).(*Icon)
-	ic.SetIcon(sr.Icon)
-	ic.Update()
+	AddConfig(c, "parts",
+		func() *Layout { return NewParts() })
+	AddConfig(c, "parts/icon",
+		func() *Icon {
+			w := NewIcon()
+			w.Style(func(s *styles.Style) {
+				s.Font.Size.Dp(24)
+				s.Color = sr.ThumbColor
+			})
+			return w
+		},
+		func(w *Icon) { w.SetIcon(sr.Icon) })
 }
 
 func (sr *Slider) Render() {

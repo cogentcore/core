@@ -421,9 +421,10 @@ func (wb *WidgetBase) Destroy() {
 	wb.NodeBase.Destroy()
 }
 
+// DeleteParts deletes the widget's parts (and the children of the parts).
 func (wb *WidgetBase) DeleteParts() {
 	if wb.Parts != nil {
-		wb.Parts.DeleteChildren() // first delete all my children
+		wb.Parts.Destroy()
 	}
 	wb.Parts = nil
 }
