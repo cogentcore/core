@@ -14,7 +14,6 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/tree"
 )
 
 // Switch is a widget that can toggle between an on and off state.
@@ -164,84 +163,6 @@ func (sw *Switch) SetStyles() {
 			s.Background = colors.C(colors.Scheme.Select.Container)
 		}
 	})
-	sw.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(sw) {
-		case "parts":
-			w.Style(func(s *styles.Style) {
-				s.Gap.Zero()
-				s.Align.Content = styles.Center
-				s.Align.Items = styles.Center
-				s.Text.AlignV = styles.Center
-			})
-		case "parts/stack":
-			w.Style(func(s *styles.Style) {
-				s.Display = styles.Stacked
-				s.Grow.Set(0, 0)
-				s.Gap.Zero()
-			})
-		case "parts/stack/icon0": // on
-			w.Style(func(s *styles.Style) {
-				if sw.Type == SwitchChip {
-					s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
-				} else {
-					s.Color = colors.C(colors.Scheme.Primary.Base)
-				}
-				// switches need to be bigger
-				if sw.Type == SwitchSwitch {
-					s.Min.X.Em(2)
-					s.Min.Y.Em(1.5)
-				} else {
-					s.Min.X.Em(1.5)
-					s.Min.Y.Em(1.5)
-				}
-			})
-		case "parts/stack/icon1": // off
-			w.Style(func(s *styles.Style) {
-				switch sw.Type {
-				case SwitchSwitch:
-					// switches need to be bigger
-					s.Min.X.Em(2)
-					s.Min.Y.Em(1.5)
-				case SwitchChip:
-					// chips render no icon when off
-					s.Min.X.Zero()
-					s.Min.Y.Zero()
-				default:
-					s.Min.X.Em(1.5)
-					s.Min.Y.Em(1.5)
-				}
-			})
-		case "parts/stack/icon2": // indeterminate
-			w.Style(func(s *styles.Style) {
-				switch sw.Type {
-				case SwitchSwitch:
-					// switches need to be bigger
-					s.Min.X.Em(2)
-					s.Min.Y.Em(1.5)
-				case SwitchChip:
-					// chips render no icon when off
-					s.Min.X.Zero()
-					s.Min.Y.Zero()
-				default:
-					s.Min.X.Em(1.5)
-					s.Min.Y.Em(1.5)
-				}
-			})
-		case "parts/space":
-			w.Style(func(s *styles.Style) {
-				s.Min.X.Ch(0.1)
-			})
-		case "parts/text":
-			w.Style(func(s *styles.Style) {
-				s.SetNonSelectable()
-				s.SetTextWrap(false)
-				s.Margin.Zero()
-				s.Padding.Zero()
-				s.Text.AlignV = styles.Center
-				s.FillMargin = false
-			})
-		}
-	})
 }
 
 // SetType sets the styling type of the switch
@@ -291,38 +212,112 @@ func (sw *Switch) ClearIcons() *Switch {
 }
 
 func (sw *Switch) Config(c *Config) {
-	config := tree.Config{}
 	if sw.IconOn == "" {
 		sw.IconOn = icons.ToggleOn.Fill() // fallback
 	}
 	if sw.IconOff == "" {
 		sw.IconOff = icons.ToggleOff // fallback
 	}
-	ici := 0 // always there
-	lbi := -1
-	config.Add(LayoutType, "stack")
-	if sw.Text != "" {
-		config.Add(SpaceType, "space")
-		lbi = len(config)
-		config.Add(TextType, "text")
-	}
-	sw.ConfigParts(config, func() {
-		ist := sw.Parts.Child(ici).(*Layout)
-		ist.SetNChildren(3, IconType, "icon")
-		icon := ist.Child(0).(*Icon)
-		icon.SetIcon(sw.IconOn)
-		icoff := ist.Child(1).(*Icon)
-		icoff.SetIcon(sw.IconOff)
-		icunk := ist.Child(2).(*Icon)
-		icunk.SetIcon(sw.IconIndeterminate)
-		sw.SetIconFromState()
-		if lbi >= 0 {
-			text := sw.Parts.Child(lbi).(*Text)
-			if text.Text != sw.Text {
-				text.SetText(sw.Text)
-			}
-		}
+	sw.SetIconFromState()
+
+	AddConfig(c, "parts", func() *Layout {
+		w := NewParts()
+		w.Style(func(s *styles.Style) {
+			s.Gap.Zero()
+			s.Align.Content = styles.Center
+			s.Align.Items = styles.Center
+			s.Text.AlignV = styles.Center
+		})
+		return w
 	})
+	AddConfig(c, "parts/stack", func() *Layout {
+		w := NewLayout()
+		w.Style(func(s *styles.Style) {
+			s.Display = styles.Stacked
+			s.Grow.Set(0, 0)
+			s.Gap.Zero()
+		})
+		return w
+	})
+	AddConfig(c, "parts/stack/icon-on", func() *Icon {
+		w := NewIcon()
+		w.Style(func(s *styles.Style) {
+			if sw.Type == SwitchChip {
+				s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+			} else {
+				s.Color = colors.C(colors.Scheme.Primary.Base)
+			}
+			// switches need to be bigger
+			if sw.Type == SwitchSwitch {
+				s.Min.X.Em(2)
+				s.Min.Y.Em(1.5)
+			} else {
+				s.Min.X.Em(1.5)
+				s.Min.Y.Em(1.5)
+			}
+		})
+		return w
+	}, func(w *Icon) { w.SetIcon(sw.IconOn) })
+	AddConfig(c, "parts/stack/icon-off", func() *Icon {
+		w := NewIcon()
+		w.Style(func(s *styles.Style) {
+			switch sw.Type {
+			case SwitchSwitch:
+				// switches need to be bigger
+				s.Min.X.Em(2)
+				s.Min.Y.Em(1.5)
+			case SwitchChip:
+				// chips render no icon when off
+				s.Min.X.Zero()
+				s.Min.Y.Zero()
+			default:
+				s.Min.X.Em(1.5)
+				s.Min.Y.Em(1.5)
+			}
+		})
+		return w
+	}, func(w *Icon) { w.SetIcon(sw.IconOff) })
+	AddConfig(c, "parts/stack/icon-indeterminate", func() *Icon {
+		w := NewIcon()
+		w.Style(func(s *styles.Style) {
+			switch sw.Type {
+			case SwitchSwitch:
+				// switches need to be bigger
+				s.Min.X.Em(2)
+				s.Min.Y.Em(1.5)
+			case SwitchChip:
+				// chips render no icon when off
+				s.Min.X.Zero()
+				s.Min.Y.Zero()
+			default:
+				s.Min.X.Em(1.5)
+				s.Min.Y.Em(1.5)
+			}
+		})
+		return w
+	}, func(w *Icon) { w.SetIcon(sw.IconIndeterminate) })
+
+	if sw.Text != "" {
+		AddConfig(c, "parts/space", func() *Space {
+			w := NewSpace()
+			w.Style(func(s *styles.Style) {
+				s.Min.X.Ch(0.1)
+			})
+			return w
+		})
+		AddConfig(c, "parts/text", func() *Text {
+			w := NewText()
+			w.Style(func(s *styles.Style) {
+				s.SetNonSelectable()
+				s.SetTextWrap(false)
+				s.FillMargin = false
+			})
+			return w
+		}, func(w *Text) {
+			w.SetText(sw.Text)
+		})
+	}
+
 }
 
 func (sw *Switch) Render() {
