@@ -76,21 +76,22 @@ func (sw *Switch) OnInit() {
 	sw.SetStyles()
 }
 
-// IsChecked tests if this switch is checked
+// IsChecked returns whether the switch is checked.
 func (sw *Switch) IsChecked() bool {
 	return sw.StateIs(states.Checked)
 }
 
-// SetChecked sets the checked state and updates the icon accordingly
+// SetChecked sets whether the switch it checked.
 func (sw *Switch) SetChecked(on bool) *Switch {
 	sw.SetState(on, states.Checked)
 	sw.SetState(false, states.Indeterminate)
-	sw.SetIconFromState()
 	return sw
 }
 
-// SetIconFromState updates icon state based on checked status
-func (sw *Switch) SetIconFromState() {
+// UpdateStackTop updates the [Layout.StackTop] of the stack in the switch
+// according to the current icon. It is called automatically to keep the
+// switch up-to-date.
+func (sw *Switch) UpdateStackTop() {
 	if sw.Parts == nil {
 		return
 	}
@@ -120,6 +121,7 @@ func (sw *Switch) HandleEvents() {
 	sw.OnFinal(events.Click, func(e events.Event) {
 		sw.SetChecked(sw.IsChecked())
 		if sw.Type == SwitchChip {
+			sw.UpdateStackTop() // must update here
 			sw.NeedsLayout()
 		} else {
 			sw.NeedsRender()
@@ -218,7 +220,6 @@ func (sw *Switch) Config(c *Config) {
 	if sw.IconOff == "" {
 		sw.IconOff = icons.ToggleOff // fallback
 	}
-	sw.SetIconFromState()
 
 	AddConfig(c, "parts", func() *Layout {
 		w := NewParts()
@@ -238,6 +239,8 @@ func (sw *Switch) Config(c *Config) {
 			s.Gap.Zero()
 		})
 		return w
+	}, func(w *Layout) {
+		sw.UpdateStackTop() // need to update here
 	})
 	AddConfig(c, "parts/stack/icon-on", func() *Icon {
 		w := NewIcon()
@@ -321,7 +324,7 @@ func (sw *Switch) Config(c *Config) {
 }
 
 func (sw *Switch) Render() {
-	sw.SetIconFromState() // make sure we're always up-to-date on render
+	sw.UpdateStackTop() // important: make sure we're always up-to-date on render
 	if sw.Parts != nil {
 		ist := sw.Parts.ChildByName("stack", 0)
 		if ist != nil {
