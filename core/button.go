@@ -290,14 +290,14 @@ func (bt *Button) Config(c *Config) {
 			s.Align.Items = styles.Center
 		})
 		return w
-	}, nil)
+	})
 
 	if bt.Icon.IsSet() {
 		AddConfig(c, "parts/icon",
 			func() *Icon { return NewIcon() },
 			func(w *Icon) { w.SetIcon(bt.Icon) })
 		if bt.Text != "" {
-			AddConfig(c, "parts/space", func() *Space { return NewSpace() }, nil)
+			AddConfig(c, "parts/space", func() *Space { return NewSpace() })
 		}
 	}
 	if bt.Text != "" {
@@ -326,7 +326,7 @@ func (bt *Button) Config(c *Config) {
 				s.Min.X.Em(0.2)
 			})
 			return w
-		}, nil)
+		})
 		AddConfig(c, "parts/indicator", func() *Icon {
 			w := NewIcon()
 			w.Style(func(s *styles.Style) {
@@ -343,7 +343,7 @@ func (bt *Button) Config(c *Config) {
 
 	if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
 		if !bt.Indicator.IsSet() && bt.Shortcut != "" {
-			AddConfig(c, "parts/sc-stretch", func() *Stretch { return NewStretch() }, nil)
+			AddConfig(c, "parts/sc-stretch", func() *Stretch { return NewStretch() })
 			AddConfig(c, "parts/shortcut", func() *Text {
 				w := NewText()
 				w.Style(func(s *styles.Style) {

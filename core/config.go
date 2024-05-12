@@ -42,12 +42,13 @@ type Config []*ConfigItem
 
 // AddConfig adds a new config item to the given [Config] for a widget at the
 // given forward-slash-separated path with the given function for constructing
-// the widget and the given function for updating the widget.
-func AddConfig[T Widget](c *Config, path string, make func() T, update func(w T)) {
-	if update == nil {
+// the widget and the given optional function for updating the widget.
+func AddConfig[T Widget](c *Config, path string, make func() T, update ...func(w T)) {
+	if len(update) == 0 {
 		c.Add(path, func() Widget { return make() }, nil)
 	} else {
-		c.Add(path, func() Widget { return make() }, func(w Widget) { update(w.(T)) })
+		u := update[0]
+		c.Add(path, func() Widget { return make() }, func(w Widget) { u(w.(T)) })
 	}
 }
 
@@ -56,7 +57,7 @@ func AddConfig[T Widget](c *Config, path string, make func() T, update func(w T)
 // for updating the widget. This should be called on the root level Config
 // list. Any items with nested paths are added to Children lists as
 // appropriate. Consider using the [AddConfig] global generic function for
-// better type safety.
+// better type safety and increased convenience.
 func (c *Config) Add(path string, make func() Widget, update func(w Widget)) {
 	itm := &ConfigItem{Path: path, New: make, Update: update}
 	plist := strings.Split(path, "/")
