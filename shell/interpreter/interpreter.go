@@ -6,6 +6,7 @@ package interpreter
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -91,28 +92,39 @@ func (in *Interpreter) Prompt() string {
 func (in *Interpreter) Eval(code string) error {
 	in.Shell.TranspileCode(code)
 	if in.Shell.TotalDepth() == 0 {
-		in.RunCode()
+		nl := len(in.Shell.Lines)
+		hasPrint := false
+		if nl > 0 {
+			ln := in.Shell.Lines[nl-1]
+			if strings.Contains(strings.ToLower(ln), "print") {
+				hasPrint = true
+			}
+		}
+		v, _ := in.RunCode()
 		in.Shell.Errors = nil
+		if !hasPrint && v.IsValid() && !v.IsZero() {
+			fmt.Println(v.Interface())
+		}
 	}
 	return nil
 }
 
 // RunCode runs the accumulated set of code lines
 // and clears the stack.
-func (in *Interpreter) RunCode() error {
+func (in *Interpreter) RunCode() (reflect.Value, error) {
 	if len(in.Shell.Errors) > 0 {
-		return errors.Join(in.Shell.Errors...)
+		return reflect.Value{}, errors.Join(in.Shell.Errors...)
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	in.Shell.Cancel = cancel
 	cmd := in.Shell.Code()
 	in.Shell.ResetLines()
-	_, err := in.Interp.EvalWithContext(ctx, cmd)
+	v, err := in.Interp.EvalWithContext(ctx, cmd)
 	in.Shell.Cancel = nil
 	if err != nil && !errors.Is(err, context.Canceled) {
 		slog.Error(err.Error())
 	}
-	return err
+	return v, err
 }
 
 // RunConfig runs the .cosh startup config file in the user's
@@ -122,7 +134,8 @@ func (in *Interpreter) RunConfig() error {
 	if err != nil {
 		return errors.Log(err)
 	}
-	return in.RunCode()
+	_, err = in.RunCode()
+	return err
 }
 
 // MonitorSignals monitors the operating system signals to appropriately

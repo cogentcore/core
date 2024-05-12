@@ -18,18 +18,18 @@ import (
 // configuration information and arguments,
 // waiting for it to complete before returning.
 func (c *Config) Run(cmd string, args ...string) error {
-	_, _, err := c.exec(false, cmd, args...)
+	_, _, err := c.exec(&c.StdIO, false, cmd, args...)
 	return err
 }
 
 // Start starts the given command using the given
 // configuration information and arguments,
 // just starting the command but not waiting for it to finish.
-// Returns the exec.Cmd command which can be used to kill the
-// command later, if necessary.  In general calling code should
-// keep track of these commands and manage them appropriately.
+// Returns the [exec.Cmd] command on which you can Wait for
+// the command to finish (in a separate goroutine).
+// See [StartIO] for a version that manages dynamic IO routing for you.
 func (c *Config) Start(cmd string, args ...string) (*exec.Cmd, error) {
-	excmd, _, err := c.exec(true, cmd, args...)
+	excmd, _, err := c.exec(&c.StdIO, true, cmd, args...)
 	return excmd, err
 }
 
@@ -37,9 +37,9 @@ func (c *Config) Start(cmd string, args ...string) (*exec.Cmd, error) {
 func (c *Config) Output(cmd string, args ...string) (string, error) {
 	// need to use buf to capture output
 	buf := &bytes.Buffer{}
-	c.StdIO.PushOut(buf)
-	_, _, err := c.exec(false, cmd, args...)
-	c.StdIO.PopOut()
+	sio := c.StdIO // copy
+	sio.Out = buf
+	_, _, err := c.exec(&sio, false, cmd, args...)
 	if c.StdIO.Out != nil {
 		c.StdIO.Out.Write(buf.Bytes())
 	}

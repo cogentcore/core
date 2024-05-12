@@ -18,9 +18,6 @@ import (
 	"cogentcore.org/core/base/logx"
 )
 
-// Cmd is a type alias for [exec.Cmd].
-type Cmd = exec.Cmd
-
 // exec executes the command, piping its stdout and stderr to the config
 // writers. If start, uses cmd.Start, else.Run.
 // If the command fails, it will return an error with the command output.
@@ -31,7 +28,7 @@ type Cmd = exec.Cmd
 // Ran reports if the command ran (rather than was not found or not executable).
 // Code reports the exit code the command returned if it ran. If err == nil, ran
 // is always true and code is always 0.
-func (c *Config) exec(start bool, cmd string, args ...string) (excmd *exec.Cmd, ran bool, err error) {
+func (c *Config) exec(sio *StdIO, start bool, cmd string, args ...string) (excmd *exec.Cmd, ran bool, err error) {
 	expand := func(s string) string {
 		s2, ok := c.Env[s]
 		if ok {
@@ -43,7 +40,7 @@ func (c *Config) exec(start bool, cmd string, args ...string) (excmd *exec.Cmd, 
 	for i := range args {
 		args[i] = os.Expand(args[i], expand)
 	}
-	excmd, ran, code, err := c.run(start, cmd, args...)
+	excmd, ran, code, err := c.run(sio, start, cmd, args...)
 	_ = code
 	if err == nil {
 		return excmd, true, nil
@@ -51,7 +48,7 @@ func (c *Config) exec(start bool, cmd string, args ...string) (excmd *exec.Cmd, 
 	return excmd, ran, fmt.Errorf(`failed to run "%s %s: %v"`, cmd, strings.Join(args, " "), err)
 }
 
-func (c *Config) run(start bool, cmd string, args ...string) (excmd *exec.Cmd, ran bool, code int, err error) {
+func (c *Config) run(sio *StdIO, start bool, cmd string, args ...string) (excmd *exec.Cmd, ran bool, code int, err error) {
 	cm := exec.Command(cmd, args...)
 	cm.Env = os.Environ()
 	for k, v := range c.Env {
@@ -61,21 +58,21 @@ func (c *Config) run(start bool, cmd string, args ...string) (excmd *exec.Cmd, r
 	// (need to declare regardless even if we aren't using so that it is accessible)
 	ebuf := &bytes.Buffer{}
 	obuf := &bytes.Buffer{}
-	if c.Buffer {
+	if !start && c.Buffer {
 		cm.Stderr = ebuf
 		cm.Stdout = obuf
 	} else {
-		cm.Stderr = c.StdIO.Err
-		cm.Stdout = c.StdIO.Out
+		cm.Stderr = sio.Err
+		cm.Stdout = sio.Out
 	}
 	// need to do now because we aren't buffering, or we are guaranteed to print them
 	// regardless of whether there is an error anyway, so we should print it now so
 	// people can see it earlier (especially important if it runs for a long time).
-	if !c.Buffer || c.Echo != nil {
+	if !start || !c.Buffer || c.Echo != nil {
 		c.PrintCmd(cmd+" "+strings.Join(args, " "), err)
 	}
 
-	cm.Stdin = c.StdIO.In
+	cm.Stdin = sio.In
 	cm.Dir = c.Dir
 
 	if !c.PrintOnly {
@@ -94,20 +91,20 @@ func (c *Config) run(start bool, cmd string, args ...string) (excmd *exec.Cmd, r
 		}
 	}
 
-	if c.Buffer {
+	if !start && c.Buffer {
 		// if we have an error, we print the commands and stdout regardless of the config info
 		// (however, we don't print the command if we are guaranteed to print it regardless, as
 		// we already printed it above in that case)
 		if c.Echo == nil {
 			c.PrintCmd(cmd+" "+strings.Join(args, " "), err)
 		}
-		sout := c.GetWriter(c.StdIO.Out, err)
+		sout := c.GetWriter(sio.Out, err)
 		if sout != nil {
 			sout.Write(obuf.Bytes())
 		}
 		estr := ebuf.String()
-		if estr != "" && c.StdIO.Err != nil {
-			c.StdIO.Err.Write([]byte(logx.ErrorColor(estr)))
+		if estr != "" && sio.Err != nil {
+			sio.Err.Write([]byte(logx.ErrorColor(estr)))
 		}
 	}
 	return excmd, CmdRan(err), ExitStatus(err), err

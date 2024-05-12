@@ -18,71 +18,6 @@ func (tk Tokens) ReplaceIdentAt(at int, str string, n int) Tokens {
 	return ntk
 }
 
-// ExecIdent returns an identifier according to Exec parsing rules,
-// for contiguous (no-space) ident's with - (SUB) allowed.
-// Returns the string and the length in tokens (0 = not ident).
-func (tk Tokens) ExecIdent() (string, int) {
-	n := len(tk)
-	if n == 0 {
-		return "", 0
-	}
-	t0 := tk[0]
-	str := ""
-	ci := 0
-	stpos := int(t0.Pos)
-	if t0.Tok == token.ILLEGAL && t0.Str == "$" && n > 1 && (stpos+1 == int(tk[1].Pos)) {
-		str += t0.Str
-		ci++
-		tk = tk[1:]
-		t0 = tk[0]
-		n--
-		stpos = int(tk[0].Pos)
-	}
-	if !t0.IsValidExecIdent() {
-		return "", 0
-	}
-	if n == 1 {
-		str += t0.String()
-		ci++
-		return str, ci
-	}
-	str += t0.String()
-	ci++
-	lastEnd := stpos + len(t0.String())
-	if int(tk[1].Pos) > lastEnd {
-		return str, ci
-	}
-	for {
-		if ci >= n || int(tk[ci].Pos) > lastEnd {
-			return str, ci
-		}
-		ct := tk[ci]
-		isvalid := ct.IsValidExecIdent()
-		if !isvalid {
-			// escaped space:
-			if ct.Tok == token.ILLEGAL && ct.Str == `\` && ci+1 < n && int(tk[ci+1].Pos) == lastEnd+2 {
-				str += " "
-				ci++
-				lastEnd += 2
-				continue
-			}
-			if ct.Tok == token.STRING {
-				str += EscapeQuotes(ct.Str)
-				lastEnd += len(ct.Str) // non-ec
-				ci++
-				continue
-			}
-		}
-		if !isvalid {
-			return str, ci
-		}
-		str += ct.String()
-		lastEnd += len(ct.String())
-		ci++
-	}
-	return str, ci
-}
-
 // Path extracts a standard path or URL expression from the current
 // list of tokens (starting at index 0), returning the path string
 // and the number of tokens included in the path.
@@ -107,10 +42,11 @@ func (tk Tokens) Path(idx0 bool) (string, int) {
 	if !ispath {
 		lastEnd = int(tk[0].Pos)
 		ci = 0
-		tid, tin := tk.ExecIdent() // todo: replace this
-		if tin == 0 || tin >= n {
+		if t0.Tok != token.IDENT {
 			return "", 0
 		}
+		tin := 1
+		tid := t0.Str
 		tindelim := tk[tin].IsPathDelim()
 		if idx0 {
 			tindelim = tk[tin].Tok == token.QUO

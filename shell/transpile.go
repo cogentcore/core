@@ -43,25 +43,8 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	t0 := toks[0]
 	_, t0pn := toks.Path(true) // true = first position
 	en := len(ewords)
-	// f0 := ewords[0]
-	// f1 := ""
-	// if n > 0 {
-	// 	f1 = ewords[1]
-	// }
 
 	f0exec := (t0.Tok == token.IDENT && ExecWordIsCommand(ewords[0]))
-
-	// t1idx := max(t0pn, )
-	// t1pn := 0
-	// t1in := 0
-	// if n > 1 {
-	// 	if t1idx > 0 {
-	// 		end0 := int(toks[t1idx-1].Pos) + len(toks[t1idx-1].String())
-	// 		if t1idx < n && int(toks[t1idx].Pos) > end0 { // only if spaced
-	// 			_, t1pn = toks[t1idx:].Path(false)
-	// 		}
-	// 	}
-	// }
 
 	switch {
 	case t0.Tok == token.LBRACE:
@@ -214,6 +197,14 @@ func (sh *Shell) TranspileExec(ewords []string, output bool) Tokens {
 			noStop = false
 		case f == "&":
 			bgJob = true
+		case f[0] == '|':
+			execTok.Str = "Start"
+			etoks.Add(token.IDENT, AddQuotes(f))
+			etoks.Add(token.COMMA)
+			endExec()
+			etoks.Add(token.SEMICOLON)
+			etoks.AddTokens(sh.TranspileExec(ewords[i+1:], output))
+			return etoks
 		case f == ";":
 			endExec()
 			etoks.Add(token.SEMICOLON)

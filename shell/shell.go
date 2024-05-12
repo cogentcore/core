@@ -60,8 +60,8 @@ type Shell struct {
 	// commands that have been defined, which can be run in Exec mode.
 	Commands map[string]func(args ...string)
 
-	// Jobs is a slice of commands running in the background (via Start instead of Run)
-	Jobs []*exec.Cmd
+	// Jobs is a stack of commands running in the background (via Start instead of Run)
+	Jobs stack.Stack[*exec.CmdIO]
 
 	// Cancel, while the interpreter is running, can be called
 	// to stop the code interpreting.
@@ -84,8 +84,9 @@ type Shell struct {
 func NewShell() *Shell {
 	sh := &Shell{
 		Config: exec.Config{
-			Dir: errors.Log1(os.Getwd()),
-			Env: map[string]string{},
+			Dir:    errors.Log1(os.Getwd()),
+			Env:    map[string]string{},
+			Buffer: false,
 		},
 	}
 	sh.Config.StdIO.StdAll()

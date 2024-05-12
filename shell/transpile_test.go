@@ -116,7 +116,7 @@ func TestTranspile(t *testing.T) {
 		{`set something="hello"`, `shell.Run("set", "something=\"hello\"")`},
 		{`add-path /opt/sbin /opt/homebrew/bin`, `shell.Run("add-path", "/opt/sbin", "/opt/homebrew/bin")`},
 		{`cat file > test.out`, `shell.Run("cat", "file", ">", "test.out")`},
-		{`cat file | grep -v exe > test.out`, `shell.Run("cat", "file", "|", "grep", "-v", "exe", ">", "test.out")`},
+		{`cat file | grep -v exe > test.out`, `shell.Start("cat", "file", "|"); shell.Run("grep", "-v", "exe", ">", "test.out")`},
 		{`cd sub; pwd; ls -la`, `shell.Run("cd", "sub"); shell.Run("pwd"); shell.Run("ls", "-la")`},
 		{`cd sub; [mkdir sub]; ls -la`, `shell.Run("cd", "sub"); shell.RunErrOK("mkdir", "sub"); shell.Run("ls", "-la")`},
 		{`cd sub; mkdir names[4]`, `shell.Run("cd", "sub"); shell.Run("mkdir", "names[4]")`},
