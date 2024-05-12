@@ -4,7 +4,12 @@
 
 package core
 
-import "strings"
+import (
+	"strings"
+
+	"cogentcore.org/core/base/update"
+	"cogentcore.org/core/tree"
+)
 
 // ConfigItem represents a Widget configuration element,
 // with one New function to create and configure a new child Widget,
@@ -47,11 +52,26 @@ func (c *Config) Add(path string, nw func() Widget, updt func(w Widget)) {
 	next.AddSubItem(plist[1:], itm)
 }
 
+// ChildPath returns this item's path + "/" + child
+func (c *ConfigItem) ChildPath(child string) string {
+	return c.Path + "/" + child
+}
+
+// ItemName returns this item's name from its path,
+// as the last element in the path.
+func (c *ConfigItem) ItemName() string {
+	pi := strings.LastIndex(c.Path, "/")
+	if pi < 0 {
+		return c.Path
+	}
+	return c.Path[pi+1:]
+}
+
 // AddSubItem adds given sub item to this config item, based on the
 // list of path elements, where the first path element should be
 // immediate Children of this item, etc.
 func (c *ConfigItem) AddSubItem(path []string, itm *ConfigItem) {
-	fpath := c.Path + "/" + path[0]
+	fpath := c.ChildPath(path[0])
 	child := c.Children.FindMakeChild(fpath)
 	if len(path) == 1 {
 		*child = *itm
@@ -97,10 +117,48 @@ func (c *Config) String() string {
 	return str
 }
 
+// SplitParts splits out a config item with sub-name "parts" from remainder
+// returning both (each of which could be nil).  parpath contains any parent
+// path to add to the path
+func (c *Config) SplitParts(parpath string) (parts *ConfigItem, children Config) {
+	partnm := "parts"
+	if parpath != "" {
+		partnm = parpath + "/" + partnm
+	}
+	for _, itm := range *c {
+		if itm.Path == partnm {
+			parts = itm
+		} else {
+			children = append(children, itm)
+		}
+	}
+	return
+}
+
 // ConfigWidget runs the Config on the given widget, ensuring that
 // the widget has the specified parts and direct Children.
-func (c *Config) ConfigWidget(w Widget) {
-
+func (c *Config) ConfigWidget(parpath string, w Widget) {
+	wb := w.AsWidget()
+	parts, children := c.SplitParts(parpath)
+	if parts != nil {
+		wparts := wb.NewParts()
+		parts.Children.ConfigWidget(parts.ChildPath("parts"), wparts)
+	}
+	n := len(children)
+	if n == 0 {
+		return
+	}
+	var mods bool
+	wb.Kids, mods = update.Update(wb.Kids, n,
+		func(i int) string { return children[i].ItemName() },
+		func(name string, i int) tree.Node {
+			ne := children[i].New()
+			ne.SetName(name)
+			return ne
+		})
+	if mods {
+		w.Update()
+	}
 }
 
 // ConfigWidget is the base implementation of [Widget.ConfigWidget] that
