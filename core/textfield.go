@@ -182,6 +182,8 @@ const (
 	TextFieldOutlined
 )
 
+func (tf *TextField) WidgetValue() any { return &tf.Txt }
+
 func (tf *TextField) OnInit() {
 	tf.WidgetBase.OnInit()
 	tf.HandleEvents()
