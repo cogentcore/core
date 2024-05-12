@@ -151,8 +151,7 @@ func (c *Config) ConfigWidget(w Widget, parpath string) {
 	if n == 0 {
 		return
 	}
-	var mods bool
-	wb.Kids, mods = update.Update(wb.Kids, n,
+	wb.Kids, _ = update.Update(wb.Kids, n,
 		func(i int) string { return children[i].ItemName() },
 		func(name string, i int) tree.Node {
 			child := children[i]
@@ -163,9 +162,6 @@ func (c *Config) ConfigWidget(w Widget, parpath string) {
 			}
 			return ne
 		})
-	if mods {
-		w.Update()
-	}
 }
 
 // ConfigWidget is the base implementation of [Widget.ConfigWidget] that
