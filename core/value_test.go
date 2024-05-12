@@ -21,8 +21,7 @@ func TestBind(t *testing.T) {
 func TestBindUpdate(t *testing.T) {
 	b := NewBody()
 	name := "Gopher"
-	tf := NewTextField(b)
-	Bind(&name, tf)
+	tf := Bind(&name, NewTextField(b))
 	b.AssertRender(t, "bind/update", func() {
 		name = "Cogent Core"
 		tf.Update()
@@ -32,8 +31,8 @@ func TestBindUpdate(t *testing.T) {
 func TestBindChange(t *testing.T) {
 	b := NewBody()
 	name := "Gopher"
-	tf := NewTextField(b)
-	Bind(&name, tf)
+
+	tf := Bind(&name, NewTextField(b))
 	b.AssertRender(t, "bind/change", func() {
 		tf.HandleEvent(events.NewKey(events.KeyChord, 'G', 0, 0))
 		tf.HandleEvent(events.NewKey(events.KeyChord, 'o', 0, 0))

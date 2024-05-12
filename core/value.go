@@ -20,8 +20,8 @@ type ValueWidget interface {
 
 // Bind binds the given value to the given [ValueWidget] such that the values of
 // the two will be linked and updated appropriately after [events.Change] events
-// and during [Widget.ConfigWidget].
-func Bind(value any, vw ValueWidget) {
+// and during [Widget.ConfigWidget]. It returns the widget to enable method chaining.
+func Bind[T ValueWidget](value any, vw T) T {
 	wb := vw.AsWidget()
 	wb.ValueUpdate = func() {
 		errors.Log(reflectx.SetRobust(vw.WidgetValue(), value))
@@ -29,4 +29,5 @@ func Bind(value any, vw ValueWidget) {
 	wb.ValueOnChange = func() {
 		errors.Log(reflectx.SetRobust(value, vw.WidgetValue()))
 	}
+	return vw
 }
