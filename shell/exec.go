@@ -41,7 +41,7 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 		// todo: improve!
 		sh.AddError(cl.Run(scmd, sargs...))
 	} else {
-		if !sh.RunBuiltinOrCommand(scmd, sargs...) {
+		if !sh.RunBuiltinOrCommand(cmdIO, scmd, sargs...) {
 			sh.isCommand.Push(false)
 			var err error
 			switch {
@@ -49,6 +49,9 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 				err = sh.Config.StartIO(cmdIO, scmd, sargs...)
 				sh.Jobs.Push(cmdIO)
 				go func() {
+					if !cmdIO.OutIsPipe() {
+						fmt.Printf("[%d]  %s\n", len(sh.Jobs), cmdIO.String())
+					}
 					cmdIO.Cmd.Wait()
 					cmdIO.PopToStart()
 					sh.Jobs.Pop() // todo: remove actual guy
@@ -71,7 +74,7 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 }
 
 // RunBuiltinOrCommand runs a builtin or a command
-func (sh *Shell) RunBuiltinOrCommand(cmd string, args ...string) bool {
+func (sh *Shell) RunBuiltinOrCommand(cmdIO *exec.CmdIO, cmd string, args ...string) bool {
 	if fun, has := sh.Commands[cmd]; has {
 		sh.commandArgs.Push(args)
 		sh.isCommand.Push(true)
@@ -82,7 +85,7 @@ func (sh *Shell) RunBuiltinOrCommand(cmd string, args ...string) bool {
 	}
 	if fun, has := sh.Builtins[cmd]; has {
 		sh.isCommand.Push(false)
-		sh.AddError(fun(args...)) // todo: IO!
+		sh.AddError(fun(cmdIO, args...)) // todo: IO!
 		sh.isCommand.Pop()
 		return true
 	}

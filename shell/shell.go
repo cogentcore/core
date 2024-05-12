@@ -28,7 +28,7 @@ import (
 type Shell struct {
 
 	// Builtins are all the builtin shell commands
-	Builtins map[string]func(args ...string) error
+	Builtins map[string]func(cmdIO *exec.CmdIO, args ...string) error
 
 	// Config is the [exec.Config] used to run commands.
 	Config exec.Config
