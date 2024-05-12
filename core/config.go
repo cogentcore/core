@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"strings"
 
-	"cogentcore.org/core/base/profile"
 	"cogentcore.org/core/base/update"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
@@ -259,12 +258,12 @@ func (wb *WidgetBase) ConfigTree() {
 	if wb.This() == nil {
 		return
 	}
-	pr := profile.Start(wb.This().NodeType().ShortName())
+	// pr := profile.Start(wb.This().NodeType().ShortName())
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wi.ConfigWidget()
 		return tree.Continue
 	})
-	pr.End()
+	// pr.End()
 }
 
 // Update does a general purpose update of the widget and everything

@@ -152,12 +152,12 @@ func (wb *WidgetBase) ApplyStyleTree() {
 	if wb.This() == nil {
 		return
 	}
-	pr := profile.Start(wb.This().NodeType().ShortName())
+	// pr := profile.Start(wb.This().NodeType().ShortName())
 	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
 		wi.ApplyStyle()
 		return tree.Continue
 	})
-	pr.End()
+	// pr.End()
 }
 
 // LayoutScene does a layout of the scene: Size, Position
@@ -211,7 +211,7 @@ func (wb *WidgetBase) DoNeedsRender() {
 	if wb.This() == nil {
 		return
 	}
-	pr := profile.Start(wb.This().NodeType().ShortName())
+	// pr := profile.Start(wb.This().NodeType().ShortName())
 	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
 		if kwi.Is(NeedsRender) {
 			kwi.RenderWidget()
@@ -226,7 +226,7 @@ func (wb *WidgetBase) DoNeedsRender() {
 		}
 		return tree.Continue
 	})
-	pr.End()
+	// pr.End()
 }
 
 //////////////////////////////////////////////////////////////////
