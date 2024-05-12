@@ -69,7 +69,7 @@ func (tb *Toolbar) Config() {
 			}
 		}
 	}
-	tb.Frame.ConfigWidget()
+	tb.Frame.Config()
 }
 
 func (tb *Toolbar) SizeUp() {

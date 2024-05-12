@@ -65,6 +65,8 @@ type Spinner struct {
 	Format string
 }
 
+func (sp *Spinner) WidgetValue() any { return &sp.Value }
+
 func (sp *Spinner) OnInit() {
 	sp.WidgetBase.OnInit()
 	sp.HandleEvents()

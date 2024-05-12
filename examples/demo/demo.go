@@ -351,6 +351,7 @@ func values(ts *core.Tabs) {
 	core.NewText(tab).SetText("Cogent Core provides the value views system, which allows you to instantly turn Go values into interactive widgets bound to the original values with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.")
 
 	core.Bind("Gohper", core.NewTextField(tab))
+	core.Bind(12.5, core.NewSpinner(tab))
 
 	core.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
 		views.InspectorWindow(ts.Scene)
