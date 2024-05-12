@@ -81,14 +81,17 @@ func (sh *Shell) RunBuiltinOrCommand(cmdIO *exec.CmdIO, cmd string, args ...stri
 	if fun, has := sh.Commands[cmd]; has {
 		sh.commandArgs.Push(args)
 		sh.isCommand.Push(true)
-		fun(args...) // todo: need to do the IO associated with this!
+		oldio := cmdIO.SetToOS()
+		fmt.Println("out:", os.Stdout)
+		fun(args...)
+		oldio.SetToOS()
 		sh.isCommand.Pop()
 		sh.commandArgs.Pop()
 		return true
 	}
 	if fun, has := sh.Builtins[cmd]; has {
 		sh.isCommand.Push(false)
-		sh.AddError(fun(cmdIO, args...)) // todo: IO!
+		sh.AddError(fun(cmdIO, args...))
 		sh.isCommand.Pop()
 		return true
 	}
@@ -171,6 +174,7 @@ func (sh *Shell) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (
 			sargs = sh.OutToPipe(cmdIO, errOk, sargs, i)
 		case isCmd && strings.HasPrefix(s, "args"):
 			sargs = sh.CmdArgs(errOk, sargs, i)
+			i-- // back up because we consume this one
 		}
 	}
 	// do globbing late here so we don't have to wade through everything.
@@ -198,7 +202,7 @@ func (sh *Shell) OutToFile(cmdIO *exec.CmdIO, errOk bool, sargs []string, i int)
 	fn := ""
 	narg := 1
 	if i < n-1 {
-		fn = sargs[1+1]
+		fn = sargs[i+1]
 		narg = 2
 	}
 	appn := false
@@ -215,7 +219,6 @@ func (sh *Shell) OutToFile(cmdIO *exec.CmdIO, errOk bool, sargs []string, i int)
 		fn = s[1:]
 		narg = 1
 	}
-	fmt.Println(s, appn, errf, narg, fn)
 	sargs = slices.Delete(sargs, i, i+narg)
 	if fn == "" {
 		sh.HandleArgErr(errOk, fmt.Errorf("cosh: no output file specified"))
@@ -232,6 +235,7 @@ func (sh *Shell) OutToFile(cmdIO *exec.CmdIO, errOk bool, sargs []string, i int)
 	}
 	if err == nil {
 		cmdIO.PushOut(f)
+		fmt.Println("out to file:", f)
 		if errf {
 			cmdIO.PushErr(f)
 		}
@@ -265,7 +269,7 @@ func (sh *Shell) CmdArgs(errOk bool, sargs []string, i int) []string {
 	// sn := len(s)
 	args := sh.commandArgs.Peek()
 
-	fmt.Println("command args:", args)
+	// fmt.Println("command args:", args)
 
 	switch {
 	case sargs[i] == "args...":

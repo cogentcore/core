@@ -90,7 +90,7 @@ func NewShell() *Shell {
 			Buffer: false,
 		},
 	}
-	sh.Config.StdIO.StdAll()
+	sh.Config.StdIO.SetFromOS()
 	sh.SSH = sshclient.NewConfig(&sh.Config)
 	sh.SSHClients = make(map[string]*sshclient.Client)
 	sh.Commands = make(map[string]func(args ...string))

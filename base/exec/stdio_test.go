@@ -15,7 +15,7 @@ import (
 
 func TestStdIO(t *testing.T) {
 	var st StdIO
-	st.StdAll()
+	st.SetFromOS()
 	assert.Equal(t, os.Stdout, st.Out)
 	assert.Equal(t, os.Stderr, st.Err)
 	assert.Equal(t, os.Stdin, st.In)
@@ -24,7 +24,7 @@ func TestStdIO(t *testing.T) {
 	obuf := &bytes.Buffer{}
 	ibuf := &bytes.Buffer{}
 	var ss StdIOState
-	ss.StdAll()
+	ss.SetFromOS()
 	ss.StackStart()
 	assert.Equal(t, false, ss.OutIsPipe())
 

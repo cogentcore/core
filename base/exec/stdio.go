@@ -28,11 +28,25 @@ type StdIO struct {
 	In io.Reader
 }
 
-// StdAll sets all to os.Std*
-func (st *StdIO) StdAll() {
-	st.Out = os.Stdout
-	st.Err = os.Stderr
-	st.In = os.Stdin
+// SetFromOS sets all our IO to current os.Std*
+func (st *StdIO) SetFromOS() {
+	st.Out, st.Err, st.In = os.Stdout, os.Stderr, os.Stdin
+}
+
+// SetToOS sets the current IO to os.Std*, returning
+// a StdIO with the current IO settings prior to this call,
+// which can be used to restore.
+// Note: os.Std* are *os.File types, and this function will panic
+// if the current IO are not actually *os.Files.
+// The results of a prior SetToOS call will do the right thing for
+// saving and restoring the os state.
+func (st *StdIO) SetToOS() *StdIO {
+	cur := &StdIO{}
+	cur.SetFromOS()
+	os.Stdout = st.Out.(*os.File)
+	os.Stderr = st.Err.(*os.File)
+	os.Stdin = st.In.(*os.File)
+	return cur
 }
 
 // Print prints to the [StdIO.Out] Stdout
