@@ -47,12 +47,60 @@ func (c *Config) Add(path string, nw func() Widget, updt func(w Widget)) {
 	next.AddSubItem(plist[1:], itm)
 }
 
-// AddSubItem adds given sub item
+// AddSubItem adds given sub item to this config item, based on the
+// list of path elements, where the first path element should be
+// immediate Children of this item, etc.
 func (c *ConfigItem) AddSubItem(path []string, itm *ConfigItem) {
+	fpath := c.Path + "/" + path[0]
+	child := c.Children.FindMakeChild(fpath)
+	if len(path) == 1 {
+		*child = *itm
+		return
+	}
+	child.AddSubItem(path[1:], itm)
 }
 
-func (c *Config) FindMakeChild(name string) *ConfigItem {
+// FindChild finds item with given path string within this list.
+// Does not search within any Children of items here.
+// Returns nil if not found.
+func (c *Config) FindChild(path string) *ConfigItem {
+	for _, itm := range *c {
+		if itm.Path == path {
+			return itm
+		}
+	}
 	return nil
+}
+
+// FindMakeChild finds item with given path element within this list.
+// Does not search within any Children of items here.
+// Makes a new item if not found.
+func (c *Config) FindMakeChild(path string) *ConfigItem {
+	for _, itm := range *c {
+		if itm.Path == path {
+			return itm
+		}
+	}
+	itm := &ConfigItem{Path: path}
+	*c = append(*c, itm)
+	return itm
+}
+
+// String returns a newline separated list of paths for all the items,
+// including the Children of items.
+func (c *Config) String() string {
+	str := ""
+	for _, itm := range *c {
+		str += itm.Path + "\n"
+		str += itm.Children.String()
+	}
+	return str
+}
+
+// ConfigWidget runs the Config on the given widget, ensuring that
+// the widget has the specified parts and direct Children.
+func (c *Config) ConfigWidget(w Widget) {
+
 }
 
 // ConfigWidget is the base implementation of [Widget.ConfigWidget] that
