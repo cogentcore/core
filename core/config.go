@@ -29,3 +29,13 @@ type Config ordmap.Map[string, ConfigItem]
 func (c *Config) Add(path string, nw func() Widget, updt func(w Widget)) {
 
 }
+
+// ConfigWidget is the base implementation of [Widget.ConfigWidget] that
+// configures the widget by doing steps that apply to all widgets and then
+// calling [Widget.Config] for widget-specific configuration steps.
+func (wb *WidgetBase) ConfigWidget() {
+	if wb.ValueUpdate != nil {
+		wb.ValueUpdate()
+	}
+	wb.This().(Widget).Config()
+}

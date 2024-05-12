@@ -52,8 +52,10 @@ type Widget interface {
 	// after this, respectively.
 	Update()
 
-	// Config configures the widget, typically primarily configuring its Parts.
-	// it does not call Config on its children, just on itself.
+	// Config is the method that widgets should implement to do their
+	// own widget-specific configuration steps.
+	// It typically primarily configures the widget's Parts.
+	// It does not call Config on its children, just on itself.
 	// ApplyStyle must generally be called after Config; it is called
 	// automatically when the Scene is first shown, but must be called
 	// manually thereafter as needed after configuration changes.
@@ -61,6 +63,12 @@ type Widget interface {
 	// triggers a new layout pass. ConfigScene on Scene handles the full
 	// tree configuration.
 	Config()
+
+	// ConfigWidget configures the widget by doing steps that apply for
+	// all widgets and then calling [Widget.Config] for widget-specific
+	// configuration steps. Widgets should typically implement [Widget.Config],
+	// not this method.
+	ConfigWidget()
 
 	// StateIs returns whether the widget has the given [states.States] flag set
 	StateIs(flag states.States) bool
@@ -212,12 +220,7 @@ type Widget interface {
 	DirectRenderDraw(drw system.Drawer, idx int, flipY bool)
 }
 
-// WidgetBase is the base type for all Widget Widget elements, which are
-// managed by a containing Layout, and use all 5 rendering passes.  All
-// elemental widgets must support the ReadOnly and Selected states in a
-// reasonable way (Selected only essential when also ReadOnly), so they can
-// function appropriately in a chooser (e.g., SliceView or TableView) -- this
-// includes toggling selection on left mouse press.
+// WidgetBase is the base type for all [Widget]s.
 type WidgetBase struct { //core:no-new
 	tree.NodeBase
 
@@ -227,7 +230,7 @@ type WidgetBase struct { //core:no-new
 
 	// Parts are a separate tree of sub-widgets that implement discrete parts
 	// of a widget.  Positions are relative to the parent widget.
-	// These are fully managed by the parent widget
+	// These are fully managed by the parent widget.
 	Parts *Layout `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Geom has the full layout geometry for size and position of this Widget
@@ -300,6 +303,15 @@ type WidgetBase struct { //core:no-new
 	// Scene is the overall Scene to which we belong. It is automatically
 	// by widgets whenever they are added to another widget parent.
 	Scene *Scene `copier:"-" json:"-" xml:"-" set:"-"`
+
+	// ValueUpdate is a function set by [Bind] that is called in
+	// [Widget.Config] to update the widget's value from the bound value.
+	ValueUpdate func() `copier:"-" json:"-" xml:"-" set:"-"`
+
+	// ValueOnChange is a function set by [Bind] that is called when
+	// the widget receives an [event.Change] to update the bound value
+	// from the widget's value.
+	ValueOnChange func() `copier:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
