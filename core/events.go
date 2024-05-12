@@ -1298,6 +1298,7 @@ func (em *Events) GetSpriteInBBox(sc *Scene, pos image.Point) {
 // returns true if event was handled
 func (em *Events) HandleSpriteEvent(e events.Event) bool {
 	et := e.Type()
+loop:
 	for _, sp := range em.SpriteInBBox {
 		if e.IsHandled() {
 			break
@@ -1313,7 +1314,7 @@ func (em *Events) HandleSpriteEvent(e events.Event) bool {
 			if sp.Listeners.HandlesEventType(events.Click) {
 				em.SpritePress = sp
 			}
-			break
+			break loop
 		case events.MouseUp:
 			sp.HandleEvent(e)
 			if em.SpriteSlide == sp {
