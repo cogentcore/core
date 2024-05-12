@@ -191,7 +191,7 @@ func (wb *WidgetBase) ConfigTree() {
 // that it needs a new layout pass. It is the main way that end users
 // should update widgets, and it should be called after making any
 // changes to the core properties of a widget (for example, the text
-// of [Text], the icon of a button, or the slice of a table view).
+// of [Text], the icon of a [Button], or the slice of a table view).
 //
 // If you are calling this in a separate goroutine outside of the main
 // configuration, rendering, and event handling structure, you need to
