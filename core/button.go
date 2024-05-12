@@ -282,7 +282,7 @@ func (bt *Button) Config(c *Config) {
 		}
 	}
 
-	c.Add("parts", func() Widget {
+	AddConfig(c, "parts", func() *Layout {
 		w := NewParts()
 		w.Style(func(s *styles.Style) {
 			s.Gap.Zero()
@@ -293,15 +293,15 @@ func (bt *Button) Config(c *Config) {
 	}, nil)
 
 	if bt.Icon.IsSet() {
-		c.Add("parts/icon",
-			func() Widget { return NewIcon() },
-			func(w Widget) { w.(*Icon).SetIcon(bt.Icon) })
+		AddConfig(c, "parts/icon",
+			func() *Icon { return NewIcon() },
+			func(w *Icon) { w.SetIcon(bt.Icon) })
 		if bt.Text != "" {
-			c.Add("parts/space", func() Widget { return NewSpace() }, nil)
+			AddConfig(c, "parts/space", func() *Space { return NewSpace() }, nil)
 		}
 	}
 	if bt.Text != "" {
-		c.Add("parts/text", func() Widget {
+		AddConfig(c, "parts/text", func() *Text {
 			w := NewText()
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
@@ -309,25 +309,25 @@ func (bt *Button) Config(c *Config) {
 				s.FillMargin = false
 			})
 			return w
-		}, func(w Widget) {
-			text := w.(*Text)
+		}, func(w *Text) {
 			if bt.Type == ButtonMenu {
-				text.SetType(TextBodyMedium)
+				w.SetType(TextBodyMedium)
 			} else {
-				text.SetType(TextLabelLarge)
+				w.SetType(TextLabelLarge)
 			}
-			text.SetText(bt.Text)
+			w.SetText(bt.Text)
 		})
 	}
 
 	if bt.Indicator.IsSet() {
-		c.Add("parts/ind-stretch", func() Widget {
-			w := NewStretch().Style(func(s *styles.Style) {
+		AddConfig(c, "parts/ind-stretch", func() *Stretch {
+			w := NewStretch()
+			w.Style(func(s *styles.Style) {
 				s.Min.X.Em(0.2)
 			})
 			return w
 		}, nil)
-		c.Add("parts/indicator", func() Widget {
+		AddConfig(c, "parts/indicator", func() *Icon {
 			w := NewIcon()
 			w.Style(func(s *styles.Style) {
 				s.Min.X.Dp(18)
@@ -336,15 +336,15 @@ func (bt *Button) Config(c *Config) {
 				s.Padding.Zero()
 			})
 			return w
-		}, func(w Widget) {
-			w.(*Icon).SetIcon(bt.Indicator)
+		}, func(w *Icon) {
+			w.SetIcon(bt.Indicator)
 		})
 	}
 
 	if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
 		if !bt.Indicator.IsSet() && bt.Shortcut != "" {
-			c.Add("parts/sc-stretch", func() Widget { return NewStretch() }, nil)
-			c.Add("parts/shortcut", func() Widget {
+			AddConfig(c, "parts/sc-stretch", func() *Stretch { return NewStretch() }, nil)
+			AddConfig(c, "parts/shortcut", func() *Text {
 				w := NewText()
 				w.Style(func(s *styles.Style) {
 					s.SetNonSelectable()
@@ -352,14 +352,13 @@ func (bt *Button) Config(c *Config) {
 					s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 				})
 				return w
-			}, func(w Widget) {
-				text := w.(*Text)
+			}, func(w *Text) {
 				if bt.Type == ButtonMenu {
-					text.SetType(TextBodyMedium)
+					w.SetType(TextBodyMedium)
 				} else {
-					text.SetType(TextLabelLarge)
+					w.SetType(TextLabelLarge)
 				}
-				text.SetText(bt.Shortcut.Label())
+				w.SetText(bt.Shortcut.Label())
 			})
 		} else if bt.Shortcut != "" {
 			slog.Error("programmer error: core.Button: shortcut cannot be used on a sub-menu for", "button", bt)
