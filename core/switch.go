@@ -5,6 +5,7 @@
 package core
 
 import (
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
@@ -60,6 +61,15 @@ const (
 )
 
 func (sw *Switch) WidgetValue() any { return sw.IsChecked() }
+
+func (sw *Switch) SetWidgetValue(value any) error {
+	b, err := reflectx.ToBool(value)
+	if err != nil {
+		return err
+	}
+	sw.SetChecked(b)
+	return nil
+}
 
 func (sw *Switch) OnInit() {
 	sw.WidgetBase.OnInit()

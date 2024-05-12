@@ -360,7 +360,10 @@ func values(ts *core.Tabs) {
 		fmt.Println("Your age is now", age)
 	})
 
-	core.Bind(true, core.NewSwitch(tab))
+	on := true
+	core.Bind(&on, core.NewSwitch(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The switch is now", on)
+	})
 
 	core.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
 		views.InspectorWindow(ts.Scene)
