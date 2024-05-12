@@ -93,6 +93,9 @@ type Widget interface {
 
 	// ApplyStyle applies style functions to the widget based on current state.
 	// It is typically not overridden; instead, call Style to apply custom styling.
+	// If you do need to override it (for example, to convert a custom unit value
+	// to dots), then you should call [WidgetBase.ApplyStyleWidget] at the start
+	// of your method.
 	ApplyStyle()
 
 	// SizeUp (bottom-up) gathers Actual sizes from our Children & Parts,
