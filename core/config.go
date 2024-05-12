@@ -173,9 +173,9 @@ func (c *Config) ConfigWidget(w Widget, parpath string) {
 	}
 }
 
-// UpdateWidget runs the Update methods on the given widget,
+// UpdateWidget runs the [ConfigItem.Update] functions on the given widget,
 // and recursively on all of its children as specified in the Config.
-// Called after ConfigWidget.
+// It is called at the end of [Config.ConfigWidget].
 func (c *Config) UpdateWidget(w Widget, parpath string) {
 	wb := w.AsWidget()
 	parts, children := c.SplitParts(parpath)
