@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/update"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
 
@@ -137,12 +138,14 @@ func (c *Config) SplitParts(parpath string) (parts *ConfigItem, children Config)
 
 // ConfigWidget runs the Config on the given widget, ensuring that
 // the widget has the specified parts and direct Children.
-func (c *Config) ConfigWidget(parpath string, w Widget) {
+func (c *Config) ConfigWidget(w Widget, parpath string) {
 	wb := w.AsWidget()
 	parts, children := c.SplitParts(parpath)
 	if parts != nil {
-		wparts := wb.NewParts()
-		parts.Children.ConfigWidget(parts.ChildPath("parts"), wparts)
+		wparts := parts.New()
+		wparts.SetName("parts")
+		wb.Parts = wparts.(*Layout)
+		parts.Children.ConfigWidget(wparts, parts.ChildPath("parts"))
 	}
 	n := len(children)
 	if n == 0 {
@@ -152,8 +155,12 @@ func (c *Config) ConfigWidget(parpath string, w Widget) {
 	wb.Kids, mods = update.Update(wb.Kids, n,
 		func(i int) string { return children[i].ItemName() },
 		func(name string, i int) tree.Node {
-			ne := children[i].New()
+			child := children[i]
+			ne := child.New()
 			ne.SetName(name)
+			if child.Update != nil {
+				child.Update(ne)
+			}
 			return ne
 		})
 	if mods {
@@ -169,4 +176,15 @@ func (wb *WidgetBase) ConfigWidget() {
 		wb.ValueUpdate()
 	}
 	wb.This().(Widget).Config()
+}
+
+// NewParts makes a new Parts layout
+func NewParts() *Layout {
+	w := NewLayout()
+	w.SetName("parts")
+	w.SetFlag(true, tree.Field)
+	w.Style(func(s *styles.Style) {
+		s.Grow.Set(1, 1)
+	})
+	return w
 }
