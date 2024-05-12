@@ -5,18 +5,20 @@
 package core
 
 import (
-	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestConfig(t *testing.T) {
 	var c Config
 	c.Add("parts", nil, nil)
 	c.Add("parts/icon", nil, nil)
-	c.Add("parts/icon/parts", nil, nil)
 	c.Add("parts/text", nil, nil)
 	c.Add("tree", nil, nil)
 	c.Add("tree/child1", nil, nil)
+	c.Add("parts/icon/parts", nil, nil) // still works out of order
 	c.Add("tree/child2", nil, nil)
-	fmt.Println(c.String())
+	expected := "parts\nparts/icon\nparts/icon/parts\nparts/text\ntree\ntree/child1\ntree/child2\n"
+	assert.Equal(t, expected, c.String())
 }
