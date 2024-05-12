@@ -64,7 +64,9 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 			sh.isCommand.Pop()
 		}
 	}
-	cmdIO.PopToStart()
+	if !start {
+		cmdIO.PopToStart()
+	}
 	return retstr
 }
 

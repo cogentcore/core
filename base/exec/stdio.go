@@ -5,6 +5,7 @@
 package exec
 
 import (
+	"fmt"
 	"io"
 	"io/fs"
 	"log/slog"
@@ -179,6 +180,7 @@ func (st *StdIOState) PopToStart() {
 	for len(st.ErrStack) > st.ErrStart {
 		er := st.PopErr()
 		if !st.ErrIsInOut(er) {
+			fmt.Println("close err")
 			CloseWriter(er)
 		}
 	}
