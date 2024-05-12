@@ -320,7 +320,6 @@ func (sw *Switch) Config(c *Config) {
 			w.SetText(sw.Text)
 		})
 	}
-
 }
 
 func (sw *Switch) Render() {
