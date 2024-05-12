@@ -208,24 +208,24 @@ func (ch *Chooser) Config(c *Config) {
 		ch.SetCurrentIndex(0)
 	}
 
-	c.Add("parts", func() Widget {
+	AddConfig(c, "parts", func() *Layout {
 		w := NewParts()
 		w.Style(func(s *styles.Style) {
 			s.Align.Content = styles.Center
 			s.Align.Items = styles.Center
 		})
 		return w
-	}, nil)
+	})
 
 	// editable handles through TextField
 	if ch.Icon.IsSet() && !ch.Editable {
-		c.Add("parts/icon",
-			func() Widget { return NewIcon() },
-			func(w Widget) { w.(*Icon).SetIcon(ch.Icon) })
+		AddConfig(c, "parts/icon",
+			func() *Icon { return NewIcon() },
+			func(w *Icon) { w.SetIcon(ch.Icon) })
 	}
 	if ch.Editable {
-		c.Add("parts/text-field",
-			func() Widget {
+		AddConfig(c, "parts/text-field",
+			func() *TextField {
 				w := NewTextField().SetPlaceholder(ch.Placeholder)
 				ch.HandleChooserTextFieldEvents(w)
 				w.Style(func(s *styles.Style) {
@@ -235,24 +235,23 @@ func (ch *Chooser) Config(c *Config) {
 				})
 				return w
 			},
-			func(w Widget) {
-				tf := w.(*TextField)
-				tf.SetText(ch.CurrentItem.GetLabel()).SetLeadingIcon(ch.Icon).
+			func(w *TextField) {
+				w.SetText(ch.CurrentItem.GetLabel()).SetLeadingIcon(ch.Icon).
 					SetTrailingIcon(ch.Indicator, func(e events.Event) {
 						ch.OpenMenu(e)
 					})
 				if ch.Type == ChooserFilled {
-					tf.SetType(TextFieldFilled)
+					w.SetType(TextFieldFilled)
 				} else {
-					tf.SetType(TextFieldOutlined)
+					w.SetType(TextFieldOutlined)
 				}
 				if !ch.DefaultNew {
-					tf.SetCompleter(tf, ch.CompleteMatch, ch.CompleteEdit)
+					w.SetCompleter(w, ch.CompleteMatch, ch.CompleteEdit)
 				}
 			})
 	} else {
-		c.Add("parts/text",
-			func() Widget {
+		AddConfig(c, "parts/text",
+			func() *Text {
 				w := NewText()
 				w.Style(func(s *styles.Style) {
 					s.SetNonSelectable()
@@ -260,8 +259,8 @@ func (ch *Chooser) Config(c *Config) {
 				})
 				return w
 			},
-			func(w Widget) {
-				w.(*Text).SetText(ch.CurrentItem.GetLabel())
+			func(w *Text) {
+				w.SetText(ch.CurrentItem.GetLabel())
 			})
 	}
 	if ch.Indicator == "" {
@@ -269,9 +268,9 @@ func (ch *Chooser) Config(c *Config) {
 	}
 	// editable handles through TextField
 	if !ch.Editable {
-		c.Add("parts/indicator",
-			func() Widget { return NewIcon() },
-			func(w Widget) { w.(*Icon).SetIcon(ch.Indicator) })
+		AddConfig(c, "parts/indicator",
+			func() *Icon { return NewIcon() },
+			func(w *Icon) { w.SetIcon(ch.Indicator) })
 	}
 }
 
