@@ -141,6 +141,8 @@ const (
 	SliderScrollbar
 )
 
+func (sr *Slider) WidgetValue() any { return &sr.Value }
+
 func (sr *Slider) OnInit() {
 	sr.WidgetBase.OnInit()
 	sr.HandleEvents()

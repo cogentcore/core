@@ -96,6 +96,8 @@ const (
 	TextLabelSmall
 )
 
+func (tx *Text) WidgetValue() any { return &tx.Text }
+
 func (tx *Text) OnInit() {
 	tx.WidgetBase.OnInit()
 	tx.HandleEvents()

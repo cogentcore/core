@@ -64,6 +64,8 @@ const (
 	MeterSemicircle
 )
 
+func (m *Meter) WidgetValue() any { return &m.Value }
+
 func (m *Meter) OnInit() {
 	m.WidgetBase.OnInit()
 	m.Value = 0.5

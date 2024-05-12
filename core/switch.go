@@ -59,6 +59,8 @@ const (
 	SwitchSegmentedButton
 )
 
+func (sw *Switch) WidgetValue() any { return sw.IsChecked() }
+
 func (sw *Switch) OnInit() {
 	sw.WidgetBase.OnInit()
 	sw.HandleEvents()

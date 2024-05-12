@@ -6,6 +6,7 @@ package core
 
 import (
 	"testing"
+	"time"
 
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
@@ -41,4 +42,28 @@ func TestBindChange(t *testing.T) {
 		tf.HandleEvent(events.NewKey(events.KeyChord, 0, key.CodeReturnEnter, 0))
 		assert.Equal(t, "Go Gopher", name)
 	})
+}
+
+func TestBindSpinner(t *testing.T) {
+	b := NewBody()
+	Bind("1.4", NewSpinner(b))
+	b.AssertRender(t, "bind/spinner")
+}
+
+func TestBindSlider(t *testing.T) {
+	b := NewBody()
+	Bind(0.65, NewSpinner(b))
+	b.AssertRender(t, "bind/slider")
+}
+
+func TestBindMeter(t *testing.T) {
+	b := NewBody()
+	Bind(15*time.Second, NewMeter(b)).SetMin(float32(time.Second)).SetMax(float32(time.Minute))
+	b.AssertRender(t, "bind/meter")
+}
+
+func TestBindText(t *testing.T) {
+	b := NewBody()
+	Bind("Hello", NewText(b))
+	b.AssertRender(t, "bind/text")
 }
