@@ -287,12 +287,14 @@ func (wb *WidgetBase) FinalHandleEvent(e events.Event) {
 
 // HandleEvents sets the default WidgetBase event handlers
 func (wb *WidgetBase) HandleEvents() {
+	// TODO(kai): maybe move all of these event handling functions into one function
 	wb.HandleWidgetClick()
 	wb.HandleWidgetStateFromMouse()
 	wb.HandleLongHoverTooltip()
 	wb.HandleWidgetStateFromFocus()
 	wb.HandleWidgetContextMenu()
 	wb.HandleWidgetMagnify()
+	wb.HandleValueOnChange()
 }
 
 // PosInScBBox returns true if given position is within
@@ -468,6 +470,15 @@ func (wb *WidgetBase) HandleWidgetMagnify() {
 	wb.On(events.Magnify, func(e events.Event) {
 		ev := e.(*events.TouchMagnify)
 		wb.Events().RenderWindow().StepZoom(ev.ScaleFactor - 1)
+	})
+}
+
+// HandleValueOnChange adds a handler that calls [WidgetBase.ValueOnChange].
+func (wb *WidgetBase) HandleValueOnChange() {
+	wb.OnChange(func(e events.Event) {
+		if wb.ValueOnChange != nil {
+			wb.ValueOnChange()
+		}
 	})
 }
 
