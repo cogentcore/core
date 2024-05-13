@@ -25,7 +25,7 @@ import (
 // and/or a menu. The standard behavior is to register a click event handler with
 // OnClick.
 type Button struct { //core:embedder
-	WidgetBase
+	Frame
 
 	// Type is the type of button.
 	Type ButtonTypes
@@ -134,7 +134,9 @@ func (bt *Button) SetStyles() {
 		if bt.Text == "" {
 			s.Padding.Right.Dp(16)
 		}
-		s.Justify.Content = styles.Center
+		s.Gap.Zero()
+		s.CenterAll()
+
 		s.MaxBoxShadow = styles.BoxShadow1()
 		switch bt.Type {
 		case ButtonFilled:
@@ -216,7 +218,7 @@ func (bt *Button) OpenMenu(e events.Event) bool {
 		return false
 	}
 	pos := bt.ContextMenuPos(e)
-	if indic := bt.Parts.ChildByName("indicator", 3); indic != nil {
+	if indic := bt.ChildByName("indicator", 3); indic != nil {
 		pos = indic.(Widget).ContextMenuPos(nil) // use the pos
 	}
 	m := NewMenu(bt.Menu, bt.This().(Widget), pos)
@@ -282,26 +284,16 @@ func (bt *Button) Config(c *Config) {
 		}
 	}
 
-	AddConfig(c, "parts", func() *Layout {
-		w := NewParts()
-		w.Style(func(s *styles.Style) {
-			s.Gap.Zero()
-			s.Align.Content = styles.Center
-			s.Align.Items = styles.Center
-		})
-		return w
-	})
-
 	if bt.Icon.IsSet() {
-		AddConfig(c, "parts/icon",
+		AddConfig(c, "icon",
 			func() *Icon { return NewIcon() },
 			func(w *Icon) { w.SetIcon(bt.Icon) })
 		if bt.Text != "" {
-			AddConfig(c, "parts/space", func() *Space { return NewSpace() })
+			AddConfig(c, "space", func() *Space { return NewSpace() })
 		}
 	}
 	if bt.Text != "" {
-		AddConfig(c, "parts/text", func() *Text {
+		AddConfig(c, "text", func() *Text {
 			w := NewText()
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
@@ -320,14 +312,14 @@ func (bt *Button) Config(c *Config) {
 	}
 
 	if bt.Indicator.IsSet() {
-		AddConfig(c, "parts/ind-stretch", func() *Stretch {
+		AddConfig(c, "ind-stretch", func() *Stretch {
 			w := NewStretch()
 			w.Style(func(s *styles.Style) {
 				s.Min.X.Em(0.2)
 			})
 			return w
 		})
-		AddConfig(c, "parts/indicator", func() *Icon {
+		AddConfig(c, "indicator", func() *Icon {
 			w := NewIcon()
 			w.Style(func(s *styles.Style) {
 				s.Min.X.Dp(18)
@@ -343,8 +335,8 @@ func (bt *Button) Config(c *Config) {
 
 	if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
 		if !bt.Indicator.IsSet() && bt.Shortcut != "" {
-			AddConfig(c, "parts/sc-stretch", func() *Stretch { return NewStretch() })
-			AddConfig(c, "parts/shortcut", func() *Text {
+			AddConfig(c, "sc-stretch", func() *Stretch { return NewStretch() })
+			AddConfig(c, "shortcut", func() *Text {
 				w := NewText()
 				w.Style(func(s *styles.Style) {
 					s.SetNonSelectable()
