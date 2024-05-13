@@ -285,11 +285,15 @@ func (bt *Button) Config(c *Config) {
 	}
 
 	if bt.Icon.IsSet() {
-		AddConfig(c, "icon",
-			func() *Icon { return NewIcon() },
-			func(w *Icon) { w.SetIcon(bt.Icon) })
+		AddConfig(c, "icon", func() *Icon {
+			return NewIcon()
+		}, func(w *Icon) {
+			w.SetIcon(bt.Icon)
+		})
 		if bt.Text != "" {
-			AddConfig(c, "space", func() *Space { return NewSpace() })
+			AddConfig(c, "space", func() *Space {
+				return NewSpace()
+			})
 		}
 	}
 	if bt.Text != "" {
@@ -336,7 +340,9 @@ func (bt *Button) Config(c *Config) {
 
 	if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
 		if !bt.Indicator.IsSet() && bt.Shortcut != "" {
-			AddConfig(c, "shortcut-stretch", func() *Stretch { return NewStretch() })
+			AddConfig(c, "shortcut-stretch", func() *Stretch {
+				return NewStretch()
+			})
 			AddConfig(c, "shortcut", func() *Text {
 				w := NewText()
 				w.Style(func(s *styles.Style) {

@@ -212,9 +212,11 @@ func (ch *Chooser) Config(c *Config) {
 
 	// editable handles through TextField
 	if ch.Icon.IsSet() && !ch.Editable {
-		AddConfig(c, "parts/icon",
-			func() *Icon { return NewIcon() },
-			func(w *Icon) { w.SetIcon(ch.Icon) })
+		AddConfig(c, "parts/icon", func() *Icon {
+			return NewIcon()
+		}, func(w *Icon) {
+			w.SetIcon(ch.Icon)
+		})
 	}
 	if ch.Editable {
 		AddConfig(c, "parts/text-field",
@@ -227,8 +229,7 @@ func (ch *Chooser) Config(c *Config) {
 					s.SetTextWrap(false)
 				})
 				return w
-			},
-			func(w *TextField) {
+			}, func(w *TextField) {
 				w.SetText(ch.CurrentItem.GetLabel()).SetLeadingIcon(ch.Icon).
 					SetTrailingIcon(ch.Indicator, func(e events.Event) {
 						ch.OpenMenu(e)
@@ -252,8 +253,7 @@ func (ch *Chooser) Config(c *Config) {
 					s.SetTextWrap(false)
 				})
 				return w
-			},
-			func(w *Text) {
+			}, func(w *Text) {
 				w.SetText(ch.CurrentItem.GetLabel())
 			})
 	}
@@ -269,8 +269,9 @@ func (ch *Chooser) Config(c *Config) {
 					s.Justify.Self = styles.End
 				})
 				return w
-			},
-			func(w *Icon) { w.SetIcon(ch.Indicator) })
+			}, func(w *Icon) {
+				w.SetIcon(ch.Indicator)
+			})
 	}
 }
 

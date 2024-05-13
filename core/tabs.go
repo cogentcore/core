@@ -482,7 +482,7 @@ func (ts *Tabs) UnselectOtherTabs(idx int) {
 // Tab is a tab button that contains any, all, or none of a label, an icon,
 // and a close icon. Tabs should be made using the [Tabs.NewTab] function.
 type Tab struct { //core:no-new
-	WidgetBase
+	Frame
 
 	// Type is the styling type of the tab. This property
 	// must be set on the parent [Tabs] for it to work correctly.
@@ -536,6 +536,10 @@ func (tb *Tab) SetStyles() {
 			s.Padding.Set(units.Dp(10))
 		}
 
+		s.Gap.Zero()
+		s.Align.Content = styles.Center
+		s.Align.Items = styles.Center
+
 		if tb.StateIs(states.Selected) {
 			s.Color = colors.C(colors.Scheme.Select.OnContainer)
 		} else {
@@ -543,57 +547,6 @@ func (tb *Tab) SetStyles() {
 			if tb.Type.Effective(tb) == FunctionalTabs {
 				s.Background = colors.C(colors.Scheme.SurfaceContainer)
 			}
-		}
-	})
-	tb.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(tb) {
-		case "parts":
-			w.Style(func(s *styles.Style) {
-				s.Gap.Zero()
-				s.Align.Content = styles.Center
-				s.Align.Items = styles.Center
-			})
-		case "parts/icon":
-			w.Style(func(s *styles.Style) {
-				s.Font.Size.Dp(18)
-				s.Margin.Zero()
-				s.Padding.Zero()
-			})
-		case "parts/text":
-			text := w.(*Text)
-			if tb.Type.Effective(tb) == FunctionalTabs {
-				text.Type = TextBodyMedium
-			} else {
-				text.Type = TextLabelLarge
-			}
-			w.Style(func(s *styles.Style) {
-				s.SetNonSelectable()
-				s.SetTextWrap(false)
-				s.Margin.Zero()
-				s.Padding.Zero()
-			})
-		case "parts/close.parts/icon":
-			w.Style(func(s *styles.Style) {
-				s.Font.Size.Dp(16)
-			})
-		case "parts/close":
-			w.Style(func(s *styles.Style) {
-				s.Padding.Zero()
-				s.Border.Radius = styles.BorderRadiusFull
-			})
-			w.OnClick(func(e events.Event) {
-				ts := tb.Tabs()
-				if ts == nil {
-					return
-				}
-				idx := ts.TabIndexByName(tb.Nm)
-				// if OnlyCloseActiveTab is on, only process delete when already selected
-				if SystemSettings.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
-					ts.SelectTabIndex(idx)
-				} else {
-					ts.DeleteTabIndex(idx)
-				}
-			})
 		}
 	})
 }
@@ -604,43 +557,66 @@ func (tb *Tab) Tabs() *Tabs {
 }
 
 func (tb *Tab) Config(c *Config) {
-	config := tree.Config{}
 	if tb.MaxChars > 0 {
 		tb.Text = elide.Middle(tb.Text, tb.MaxChars)
 	}
 
-	ici := -1
-	lbi := -1
-	clsi := -1
 	if tb.Icon.IsSet() {
-		ici = len(config)
-		config.Add(IconType, "icon")
+		AddConfig(c, "icon", func() *Icon {
+			w := NewIcon()
+			w.Style(func(s *styles.Style) {
+				s.Font.Size.Dp(18)
+			})
+			return w
+		}, func(w *Icon) {
+			w.SetIcon(tb.Icon)
+		})
 		if tb.Text != "" {
-			config.Add(SpaceType, "space")
+			AddConfig(c, "space", func() *Space {
+				return NewSpace()
+			})
 		}
 	}
 	if tb.Text != "" {
-		lbi = len(config)
-		config.Add(TextType, "text")
+		AddConfig(c, "text", func() *Text {
+			w := NewText()
+			w.Style(func(s *styles.Style) {
+				s.SetNonSelectable()
+				s.SetTextWrap(false)
+			})
+			return w
+		}, func(w *Text) {
+			if tb.Type.Effective(tb) == FunctionalTabs {
+				w.SetType(TextBodyMedium)
+			} else {
+				w.SetType(TextLabelLarge)
+			}
+			w.SetText(tb.Text)
+		})
 	}
 	if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
-		config.Add(SpaceType, "close-space")
-		clsi = len(config)
-		config.Add(ButtonType, "close")
+		AddConfig(c, "close-space", func() *Space {
+			return NewSpace()
+		})
+		AddConfig(c, "close", func() *Button {
+			w := NewButton().SetType(ButtonAction)
+			w.Style(func(s *styles.Style) {
+				s.Padding.Zero()
+				s.Border.Radius = styles.BorderRadiusFull
+			})
+			w.OnClick(func(e events.Event) {
+				ts := tb.Tabs()
+				idx := ts.TabIndexByName(tb.Nm)
+				// if OnlyCloseActiveTab is on, only process delete when already selected
+				if SystemSettings.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
+					ts.SelectTabIndex(idx)
+				} else {
+					ts.DeleteTabIndex(idx)
+				}
+			})
+			return w
+		}, func(w *Button) {
+			w.SetIcon(tb.CloseIcon)
+		})
 	}
-
-	tb.ConfigParts(config, func() {
-		if ici >= 0 {
-			ic := tb.Parts.Child(ici).(*Icon)
-			ic.SetIcon(tb.Icon)
-		}
-		if lbi >= 0 {
-			text := tb.Parts.Child(lbi).(*Text)
-			text.SetText(tb.Text)
-		}
-		if clsi >= 0 {
-			cls := tb.Parts.Child(clsi).(*Button)
-			cls.SetType(ButtonAction).SetIcon(tb.CloseIcon)
-		}
-	})
 }

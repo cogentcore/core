@@ -260,7 +260,9 @@ func (sw *Switch) Config(c *Config) {
 			}
 		})
 		return w
-	}, func(w *Icon) { w.SetIcon(sw.IconOn) })
+	}, func(w *Icon) {
+		w.SetIcon(sw.IconOn)
+	})
 	AddConfig(c, "parts/stack/icon-off", func() *Icon {
 		w := NewIcon()
 		w.Style(func(s *styles.Style) {
@@ -279,7 +281,9 @@ func (sw *Switch) Config(c *Config) {
 			}
 		})
 		return w
-	}, func(w *Icon) { w.SetIcon(sw.IconOff) })
+	}, func(w *Icon) {
+		w.SetIcon(sw.IconOff)
+	})
 	AddConfig(c, "parts/stack/icon-indeterminate", func() *Icon {
 		w := NewIcon()
 		w.Style(func(s *styles.Style) {
@@ -298,7 +302,9 @@ func (sw *Switch) Config(c *Config) {
 			}
 		})
 		return w
-	}, func(w *Icon) { w.SetIcon(sw.IconIndeterminate) })
+	}, func(w *Icon) {
+		w.SetIcon(sw.IconIndeterminate)
+	})
 
 	if sw.Text != "" {
 		AddConfig(c, "parts/space", func() *Space {

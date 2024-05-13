@@ -487,18 +487,19 @@ func (sr *Slider) Config(c *Config) {
 		sr.DeleteParts()
 		return
 	}
-	AddConfig(c, "parts",
-		func() *Layout { return NewParts() })
-	AddConfig(c, "parts/icon",
-		func() *Icon {
-			w := NewIcon()
-			w.Style(func(s *styles.Style) {
-				s.Font.Size.Dp(24)
-				s.Color = sr.ThumbColor
-			})
-			return w
-		},
-		func(w *Icon) { w.SetIcon(sr.Icon) })
+	AddConfig(c, "parts", func() *Layout {
+		return NewParts()
+	})
+	AddConfig(c, "parts/icon", func() *Icon {
+		w := NewIcon()
+		w.Style(func(s *styles.Style) {
+			s.Font.Size.Dp(24)
+			s.Color = sr.ThumbColor
+		})
+		return w
+	}, func(w *Icon) {
+		w.SetIcon(sr.Icon)
+	})
 }
 
 func (sr *Slider) Render() {

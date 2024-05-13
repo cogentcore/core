@@ -1789,8 +1789,9 @@ func (tf *TextField) Config(c *Config) {
 			})
 		}
 		if tf.TrailingIcon.IsSet() {
-			AddConfig(c, "parts/trail-icon-stretch",
-				func() *Stretch { return NewStretch() })
+			AddConfig(c, "parts/trail-icon-stretch", func() *Stretch {
+				return NewStretch()
+			})
 			AddConfig(c, "parts/trail-icon", func() *Button {
 				w := NewButton().SetType(ButtonAction)
 				w.Style(func(s *styles.Style) {
