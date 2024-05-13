@@ -174,17 +174,21 @@ func (c *Config) ConfigWidget(w Widget, parentPath string) {
 			func(i int) string { return children[i].ItemName() },
 			func(name string, i int) tree.Node {
 				child := children[i]
-				ne := child.New()
-				ne.SetName(name)
-				tree.SetParent(ne, wb)
+				cw := child.New()
+				cw.SetName(name)
+				tree.SetParent(cw, wb)
 				if child.Update != nil {
-					child.Update(ne)
+					child.Update(cw)
 				}
 				if len(child.Children) > 0 {
-					child.Children.ConfigWidget(ne, child.Path)
+					child.Children.ConfigWidget(cw, child.Path)
 				}
-				return ne
+				return cw
 			})
+		for i, child := range children { // always config children even if not new
+			cw := wb.Child(i).(Widget)
+			child.Children.ConfigWidget(cw, child.Path)
+		}
 	}
 	if parentPath == "" { // top level
 		c.UpdateWidget(w, parentPath) // this is recursive
