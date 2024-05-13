@@ -52,10 +52,10 @@ func init() {
 }
 
 // NewWidgetValue converts the given value into an appropriate [WidgetValue]
-// whose associated value is bound to the given value. It also adds the
-// resulting [WidgetValue] to the given optional parent if it specified.
-// The specifics on how it determines what type of [WidgetValue] to make
-// are further documented on [ToValueWidget].
+// whose associated value is bound to the given value. The given value should
+// typically be a pointer. It also adds the resulting [WidgetValue] to the given
+// optional parent if it specified. The specifics on how it determines what type
+// of [WidgetValue] to make are further documented on [ToValueWidget].
 func NewValueWidget(value any, parent ...tree.Node) ValueWidget {
 	vw := ToValueWidget(value)
 	Bind(value, vw)
@@ -66,9 +66,10 @@ func NewValueWidget(value any, parent ...tree.Node) ValueWidget {
 }
 
 // ToValueWidget converts the given value into an appropriate [ValueWidget].
-// It does NOT call [Bind]; see [NewValueWidget] for a version that does.
-// It first checks the [ValueWidgeter] interface, then the [ValueWidgetTypes],
-// then the [ValueWidgetConverters], and finally it falls back on a set of default
+// The given value should typically be a pointer. It does NOT call [Bind];
+// see [NewValueWidget] for a version that does. It first checks the
+// [ValueWidgeter] interface, then the [ValueWidgetTypes], then the
+// [ValueWidgetConverters], and finally it falls back on a set of default
 // bindings. If any step results in nil, it falls back on the next step.
 func ToValueWidget(value any) ValueWidget {
 	if vwr, ok := value.(ValueWidgeter); ok {
