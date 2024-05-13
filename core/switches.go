@@ -18,20 +18,20 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// Switches is a widget for containing a set of switches.
-// It can optionally enforce mutual exclusivity (i.e., Radio Buttons).
-// The buttons are all in the Parts of the widget and the Parts layout
-// determines how they are displayed.
+// Switches is a widget for containing a set of [Switch]es.
+// It can optionally enforce mutual exclusivity (ie: radio buttons)
+// through the [Switches.Mutex] field.
 type Switches struct {
 	Frame
 
-	// the type of switches that will be made
+	// Type is the type of switches that will be made.
 	Type SwitchTypes
 
 	// Items are the items displayed to the user.
 	Items []SwitchItem
 
-	// whether to make the items mutually exclusive (checking one turns off all the others)
+	// Mutex is whether to make the items mutually exclusive
+	// (checking one turns off all the others).
 	Mutex bool
 }
 

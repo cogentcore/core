@@ -38,7 +38,7 @@ import (
 // With multi-line wrapped text, the text is still treated as a contiguous
 // wrapped text.
 type TextField struct { //core:embedder
-	WidgetBase
+	Layout
 
 	// Type is the styling type of the text field.
 	Type TextFieldTypes
@@ -214,6 +214,7 @@ func (tf *TextField) SetStyles() {
 		s.Min.Y.Em(1.1)
 		s.Min.X.Ch(20)
 		s.Max.X.Ch(40)
+		s.Gap.Zero()
 		s.Padding.Set(units.Dp(8), units.Dp(8))
 		if tf.LeadingIcon.IsSet() {
 			s.Padding.Left.Dp(12)
@@ -1742,20 +1743,9 @@ func (tf *TextField) Config(c *Config) {
 	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
 
-	AddConfig(c, "parts", func() *Layout {
-		w := NewParts()
-		w.Style(func(s *styles.Style) {
-			s.Align.Content = styles.Center
-			s.Align.Items = styles.Center
-			s.Text.AlignV = styles.Center
-			s.Gap.Zero()
-		})
-		return w
-	})
-
 	if !tf.IsReadOnly() {
 		if tf.LeadingIcon.IsSet() {
-			AddConfig(c, "parts/lead-icon", func() *Button {
+			AddConfig(c, "lead-icon", func() *Button {
 				w := NewButton().SetType(ButtonAction)
 				w.Style(func(s *styles.Style) {
 					s.Padding.Zero()
@@ -1789,10 +1779,10 @@ func (tf *TextField) Config(c *Config) {
 			})
 		}
 		if tf.TrailingIcon.IsSet() {
-			AddConfig(c, "parts/trail-icon-stretch", func() *Stretch {
+			AddConfig(c, "trail-icon-stretch", func() *Stretch {
 				return NewStretch()
 			})
-			AddConfig(c, "parts/trail-icon", func() *Button {
+			AddConfig(c, "trail-icon", func() *Button {
 				w := NewButton().SetType(ButtonAction)
 				w.Style(func(s *styles.Style) {
 					s.Padding.Zero()
@@ -1866,7 +1856,7 @@ func (tf *TextField) IconsSize() math32.Vector2 {
 }
 
 func (tf *TextField) SizeUp() {
-	tf.WidgetBase.SizeUp() // sets Actual size based on styles
+	tf.Layout.SizeUp()
 	tmptxt := tf.EditTxt
 	if len(tf.Txt) == 0 && len(tf.Placeholder) > 0 {
 		tf.EditTxt = []rune(tf.Placeholder)
@@ -1898,7 +1888,7 @@ func (tf *TextField) SizeUp() {
 
 func (tf *TextField) SizeDown(iter int) bool {
 	if !tf.HasWordWrap() {
-		return tf.SizeDownParts(iter)
+		return tf.Layout.SizeDown(iter)
 	}
 	sz := &tf.Geom.Size
 	pgrow, _ := tf.GrowToAllocSize(sz.Actual.Content, sz.Alloc.Content) // key to grow
@@ -1917,7 +1907,7 @@ func (tf *TextField) SizeDown(iter int) bool {
 			fmt.Println(tf, "TextField Size Changed:", sz.Actual.Content, "was:", prevContent)
 		}
 	}
-	sdp := tf.SizeDownParts(iter)
+	sdp := tf.Layout.SizeDown(iter)
 	return chg || sdp
 }
 
@@ -1928,26 +1918,14 @@ func (tf *TextField) ScenePos() {
 
 // LeadingIconButton returns the [LeadingIcon] [Button] if present.
 func (tf *TextField) LeadingIconButton() *Button {
-	if tf.Parts == nil {
-		return nil
-	}
-	bi := tf.Parts.ChildByName("lead-icon", 0)
-	if bi == nil {
-		return nil
-	}
-	return bi.(*Button)
+	bt, _ := tf.ChildByName("lead-icon", 0).(*Button)
+	return bt
 }
 
 // TrailingIconButton returns the [TrailingIcon] [Button] if present.
 func (tf *TextField) TrailingIconButton() *Button {
-	if tf.Parts == nil {
-		return nil
-	}
-	bi := tf.Parts.ChildByName("trail-icon", 1)
-	if bi == nil {
-		return nil
-	}
-	return bi.(*Button)
+	bt, _ := tf.ChildByName("trail-icon", 1).(*Button)
+	return bt
 }
 
 // SetEffPosAndSize sets the effective position and size of
