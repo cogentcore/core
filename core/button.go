@@ -135,7 +135,7 @@ func (bt *Button) SetStyles() {
 			s.Padding.Right.Dp(16)
 		}
 		s.Gap.Zero()
-		s.CenterAll()
+		// s.CenterAll() // TODO(kai): fix button layout
 
 		s.MaxBoxShadow = styles.BoxShadow1()
 		switch bt.Type {
