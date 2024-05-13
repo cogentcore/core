@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/bramvdbogaerde/go-scp"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/knownhosts"
 )
@@ -29,6 +30,9 @@ type Client struct {
 	// sessionCounter increments number of Sessions added
 	// over the lifetime of the Client.
 	sessionCounter int
+
+	// scpClient manages scp file copying
+	scpClient *scp.Client
 }
 
 // NewClient returns a new Client using given [Config] configuration
@@ -45,6 +49,7 @@ func (cl *Client) Close() {
 	if cl.Client != nil {
 		cl.Client.Close()
 	}
+	cl.scpClient = nil
 	cl.Client = nil
 }
 

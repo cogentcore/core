@@ -33,9 +33,9 @@ func (us *User) Defaults() {
 	}
 }
 
-// Config contains the configuration information that
-// controls the behavior of ssh commands. It is used
-// to establish a Client connection.
+// Config contains the configuration information that controls
+// the behavior of ssh connections and commands. It is used
+// to establish a Client connection to a remote host.
 // It builds on the shared settings in [exec.Config]
 type Config struct {
 	exec.Config
@@ -46,6 +46,11 @@ type Config struct {
 	// host name / ip address to connect to. can be blank, in which
 	// case it must be specified in the Client.Connect call.
 	Host string
+
+	// ScpPath is the path to the `scp` executable on the host,
+	// for copying files between local and remote host.
+	// Defaults to /usr/bin/scp
+	ScpPath string `default:"/usr/bin/scp"`
 }
 
 // NewConfig returns a new ssh Config based on given
@@ -53,5 +58,6 @@ type Config struct {
 func NewConfig(cfg *exec.Config) *Config {
 	c := &Config{Config: *cfg}
 	c.User.Defaults()
+	c.ScpPath = "/usr/bin/scp"
 	return c
 }
