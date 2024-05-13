@@ -315,7 +315,8 @@ func (bt *Button) Config(c *Config) {
 		AddConfig(c, "indicator-stretch", func() *Stretch {
 			w := NewStretch()
 			w.Style(func(s *styles.Style) {
-				s.Min.X.Em(0.2)
+				s.Min.Set(units.Em(0.2))
+				s.Grow.Set(1, 0)
 			})
 			return w
 		})
