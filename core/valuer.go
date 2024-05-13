@@ -15,7 +15,7 @@ type ValueWidgeter interface {
 
 	// ValueWidget returns the [ValueWidget] that should be used to represent
 	// the value in the GUI. If it returns nil, then [ToValueWidget] will
-	// fall back onto the next step. This function does NOT need to call [Bind].
+	// fall back onto the next step. This function must NOT call [Bind].
 	ValueWidget() ValueWidget
 }
 
@@ -23,14 +23,14 @@ type ValueWidgeter interface {
 // for a value of a certain fully package path qualified type name.
 // It is used by [ToValueWidget]. If a function returns nil, it falls
 // back onto the next step. You can add to this using the [AddValueWidgetType]
-// helper function.
+// helper function. These functions must NOT call [Bind].
 var ValueWidgetTypes = map[string]func(value any) ValueWidget{}
 
 // ValueWidgetConverters is a slice of functions that return a [ValueWidget]
 // for a value. It is used by [ToValueWidget]. If a function returns nil,
 // it falls back on the next function in the slice, and if all functions return nil,
-// it falls back on the default bindings. These functions do NOT need to call
-// [Bind]. These functions are called in sequential order, so you can insert
+// it falls back on the default bindings. These functions must NOT call [Bind].
+// These functions are called in sequential order, so you can insert
 // a function at the start to take precedence over others.
 var ValueWidgetConverters []func(value any) ValueWidget
 
