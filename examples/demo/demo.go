@@ -425,28 +425,22 @@ func makeViews(ts *core.Tabs) {
 
 	views.NewMapView(vts.NewTab("Map view")).SetMap(&mp)
 
-	sl := make([]string, 20)
-
+	sl := make([]string, 100)
 	for i := 0; i < len(sl); i++ {
 		sl[i] = fmt.Sprintf("el: %v", i)
 	}
 	sl[10] = "this is a particularly long slice value"
-
 	views.NewSliceView(vts.NewTab("Slice view")).SetSlice(&sl)
 
 	tbl := make([]*tableStruct, 100)
-
 	for i := range tbl {
 		ts := &tableStruct{IntField: i, FloatField: float32(i) / 10}
 		tbl[i] = ts
 	}
-
 	tbl[0].StrField = "this is a particularly long field"
-
 	views.NewTableView(vts.NewTab("Table view")).SetSlice(&tbl)
 
 	sp := core.NewSplits(vts.NewTab("Tree view")).SetSplits(0.3, 0.7)
-
 	tv := views.NewTreeViewFrame(sp).SetText("Root")
 	makeTree(tv, 0, 3, 5)
 

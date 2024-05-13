@@ -9,16 +9,20 @@ import (
 	"image"
 	"log/slog"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 )
 
 // todo:
@@ -66,47 +70,10 @@ type TableViewStyleFunc func(w core.Widget, s *styles.Style, row, col int)
 func (tv *TableView) OnInit() {
 	tv.Frame.OnInit()
 	tv.SliceViewBase.HandleEvents()
-	tv.SetStyles()
-	tv.AddContextMenu(tv.SliceViewBase.ContextMenu)
-	tv.AddContextMenu(tv.ContextMenu)
-}
-
-func (tv *TableView) SetStyles() {
 	tv.SliceViewBase.SetStyles() // handles all the basics
 	tv.SortIndex = -1
-
-	// we only have to handle the header
-	tv.OnWidgetAdded(func(w core.Widget) {
-		switch w.PathFrom(tv) {
-		case "header": // slice header
-			sh := w.(*core.Frame)
-			core.ToolbarStyles(sh)
-			sh.Style(func(s *styles.Style) {
-				s.Grow.Set(0, 0)
-				s.Gap.Set(units.Em(0.5)) // matches grid default
-			})
-		case "header/head-idx": // index header
-			lbl := w.(*core.Text)
-			lbl.SetText("Index").SetType(core.TextBodyMedium)
-			w.Style(func(s *styles.Style) {
-				s.Align.Self = styles.Center
-			})
-		}
-		if w.Parent().PathFrom(tv) == "header" {
-			w.Style(func(s *styles.Style) {
-				if hdr, ok := w.(*core.Button); ok {
-					fli := hdr.Property("field-index").(int)
-					if fli == tv.SortIndex {
-						if tv.SortDescending {
-							hdr.SetIcon(icons.KeyboardArrowDown)
-						} else {
-							hdr.SetIcon(icons.KeyboardArrowUp)
-						}
-					}
-				}
-			})
-		}
-	})
+	tv.AddContextMenu(tv.SliceViewBase.ContextMenu)
+	tv.AddContextMenu(tv.ContextMenu)
 }
 
 // StyleValueWidget performs additional value widget styling
@@ -209,219 +176,21 @@ func (tv *TableView) CacheVisFields() {
 			return true
 		})
 	tv.numVisibleFields = len(tv.visibleFields)
+	tv.headerWidths = make([]int, tv.numVisibleFields)
+	tv.colMaxWidths = make([]int, tv.numVisibleFields)
 }
 
 // Config configures the view
 func (tv *TableView) Config(c *core.Config) {
+	svi := tv.This().(SliceViewer)
+	svi.UpdateSliceSize()
+	nWidgPerRow, idxOff := svi.RowWidgetNs()
+	_ = idxOff
+
+	tv.ViewMuLock()
+	defer tv.ViewMuUnlock()
+
 	tv.SortSlice()
-}
-
-// SliceHeader returns the Frame header for slice grid
-func (tv *TableView) SliceHeader() *core.Frame {
-	return tv.Child(0).(*core.Frame)
-}
-
-/*
-func (tv *TableView) ConfigFrame() {
-	if tv.HasChildren() {
-		return
-	}
-	tv.SetFlag(true, SliceViewConfigured)
-	core.NewFrame(tv).SetName("header")
-	NewSliceViewGrid(tv).SetName("grid")
-	tv.ConfigHeader()
-}
-
-func (tv *TableView) ConfigHeader() {
-	sgh := tv.SliceHeader()
-	if sgh.HasChildren() || tv.numVisibleFields == 0 {
-		return
-	}
-	hcfg := tree.Config{}
-	if tv.Is(SliceViewShowIndex) {
-		hcfg.Add(core.TextType, "head-idx")
-	}
-	tv.headerWidths = make([]int, tv.numVisibleFields)
-	tv.colMaxWidths = make([]int, tv.numVisibleFields)
-	for fli := 0; fli < tv.numVisibleFields; fli++ {
-		fld := tv.visibleFields[fli]
-		labnm := "head-" + fld.Name
-		hcfg.Add(core.ButtonType, labnm)
-	}
-	sgh.ConfigChildren(hcfg) // headers SHOULD be unique, but with labels..
-	_, idxOff := tv.RowWidgetNs()
-	nfld := tv.numVisibleFields
-	for fli := 0; fli < nfld; fli++ {
-		field := tv.visibleFields[fli]
-		hdr := sgh.Child(idxOff + fli).(*core.Button)
-		hdr.SetType(core.ButtonMenu)
-		htxt := ""
-		if lbl, ok := field.Tag.Lookup("label"); ok {
-			htxt = lbl
-		} else {
-			htxt = strcase.ToSentence(field.Name)
-		}
-		hdr.SetText(htxt)
-		tv.headerWidths[fli] = len(htxt)
-		hdr.SetProperty("field-index", fli)
-		if fli == tv.SortIndex {
-			if tv.SortDescending {
-				hdr.SetIcon(icons.KeyboardArrowDown)
-			} else {
-				hdr.SetIcon(icons.KeyboardArrowUp)
-			}
-		}
-		hdr.Tooltip = hdr.Text + " (tap to sort by)"
-		doc, ok := types.GetDoc(reflect.Value{}, tv.ElVal, &field, hdr.Text)
-		if ok && doc != "" {
-			hdr.Tooltip += ": " + doc
-		}
-		hdr.OnClick(func(e events.Event) {
-			tv.SortSliceAction(fli)
-		})
-	}
-}
-
-
-// RowWidgetNs returns number of widgets per row and offset for index label
-func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
-	nWidgPerRow = 1 + tv.numVisibleFields
-	idxOff = 1
-	if !tv.Is(SliceViewShowIndex) {
-		nWidgPerRow -= 1
-		idxOff = 0
-	}
-	return
-}
-
-// ConfigRows configures VisRows worth of widgets
-// to display slice data.  It should only be called
-// when NeedsConfigRows is true: when VisRows changes.
-func (tv *TableView) ConfigRows() {
-	sg := tv.This().(SliceViewer).SliceGrid()
-	if sg == nil {
-		return
-	}
-	tv.SetFlag(true, SliceViewConfigured)
-	sg.SetFlag(true, core.LayoutNoKeys)
-
-	tv.ViewMuLock()
-	defer tv.ViewMuUnlock()
-
-	sg.DeleteChildren()
-	tv.Values = nil
-
-	tv.This().(SliceViewer).UpdateSliceSize()
-
-	if tv.IsNil() {
-		return
-	}
-
-	nWidgPerRow, idxOff := tv.RowWidgetNs()
-	nWidg := nWidgPerRow * tv.VisRows
-	sg.Styles.Columns = nWidgPerRow
-
-	tv.Values = make([]Value, tv.numVisibleFields*tv.VisRows)
-	sg.Kids = make(tree.Slice, nWidg)
-
-	for i := 0; i < tv.VisRows; i++ {
-		si := i
-		ridx := i * nWidgPerRow
-		var val reflect.Value
-		if si < tv.SliceSize {
-			val = reflectx.OnePointerUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
-		} else {
-			val = tv.ElVal
-		}
-		if val.IsZero() {
-			val = tv.ElVal
-		}
-		stru := val.Interface()
-
-		itxt := strconv.Itoa(i)
-		sitxt := strconv.Itoa(si)
-		if tv.Is(SliceViewShowIndex) {
-			idxlab := core.NewText()
-			idxlab.SetName("index-" + itxt)
-			sg.SetChild(idxlab, ridx)
-			idxlab.SetText(sitxt)
-			idxlab.OnSelect(func(e events.Event) {
-				e.SetHandled()
-				tv.UpdateSelectRow(i, e.SelectMode())
-			})
-			idxlab.SetProperty(SliceViewRowProperty, i)
-		}
-
-		vpath := tv.ViewPath + "[" + sitxt + "]"
-		for fli := 0; fli < tv.numVisibleFields; fli++ {
-			field := tv.visibleFields[fli]
-			fval := val.Elem().FieldByIndex(field.Index)
-			vvi := i*tv.numVisibleFields + fli
-			tags := ""
-			if fval.Kind() == reflect.Slice || fval.Kind() == reflect.Map {
-				tags = `view:"no-inline"`
-			}
-			vv := ToValue(fval.Interface(), tags)
-			tv.Values[vvi] = vv
-			vv.SetStructValue(fval.Addr(), stru, &field, vpath)
-			vv.SetReadOnly(tv.IsReadOnly())
-
-			vtyp := vv.WidgetType()
-			valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
-			cidx := ridx + idxOff + fli
-			w := tree.NewOfType(vtyp).(core.Widget)
-			w.SetName(valnm)
-			sg.SetChild(w, cidx)
-			Config(vv, w)
-			w.SetProperty(SliceViewRowProperty, i)
-			w.SetProperty(SliceViewColProperty, fli)
-
-			if !tv.IsReadOnly() {
-				vv.OnChange(func(e events.Event) {
-					tv.SendChange()
-				})
-				vv.AsWidgetBase().OnInput(tv.HandleEvent)
-			}
-			if i == 0 && tv.SliceSize > 0 {
-				tv.colMaxWidths[fli] = 0
-				_, isicon := vv.(*IconValue)
-				if !isicon && fval.Kind() == reflect.String {
-					mxw := 0
-					for rw := 0; rw < tv.SliceSize; rw++ {
-						sval := reflectx.OnePointerUnderlyingValue(tv.SliceNPVal.Index(rw))
-						elem := sval.Elem()
-						if !elem.IsValid() {
-							continue
-						}
-						fval := elem.FieldByIndex(field.Index)
-						str := fval.String()
-						mxw = max(mxw, len(str))
-					}
-					tv.colMaxWidths[fli] = mxw
-				}
-			}
-		}
-	}
-	tv.ConfigTree()
-	tv.ApplyStyleTree()
-}
-
-// UpdateWidgets updates the row widget display to
-// represent the current state of the slice data,
-// including which range of data is being displayed.
-// This is called for scrolling, navigation etc.
-func (tv *TableView) UpdateWidgets() {
-	sg := tv.This().(SliceViewer).SliceGrid()
-	if sg == nil || tv.VisRows == 0 || sg.VisRows == 0 || !sg.HasChildren() {
-		return
-	}
-
-	tv.ViewMuLock()
-	defer tv.ViewMuUnlock()
-
-	tv.This().(SliceViewer).UpdateSliceSize()
-
-	nWidgPerRow, idxOff := tv.RowWidgetNs()
 
 	scrollTo := -1
 	if tv.SelectedField != "" && tv.SelectedValue != nil {
@@ -440,78 +209,202 @@ func (tv *TableView) UpdateWidgets() {
 	}
 	tv.UpdateStartIndex()
 
+	tv.ConfigHeader(c)
+
+	tv.ConfigGrid(c, nWidgPerRow)
+
 	for i := 0; i < tv.VisRows; i++ {
-		ridx := i * nWidgPerRow
-		si := tv.StartIndex + i // slice idx
-		invis := si >= tv.SliceSize
-
-		var idxlab *core.Text
-		if tv.Is(SliceViewShowIndex) {
-			if len(sg.Kids) == 0 {
-				break
-			}
-			idxlab = sg.Kids[ridx].(*core.Text)
-			idxlab.SetText(strconv.Itoa(si)).ConfigWidget()
-			idxlab.SetState(invis, states.Invisible)
-		}
-
-		sitxt := strconv.Itoa(si)
-		vpath := tv.ViewPath + "[" + sitxt + "]"
+		si := tv.StartIndex + i
+		var val reflect.Value
 		if si < tv.SliceSize {
-			if lblr, ok := tv.Slice.(core.SliceLabeler); ok {
-				slbl := lblr.ElemLabel(si)
-				if slbl != "" {
-					vpath = JoinViewPath(tv.ViewPath, slbl)
-				}
-			}
+			val = reflectx.OnePointerUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
+		} else {
+			val = tv.ElVal
 		}
-		for fli := 0; fli < tv.numVisibleFields; fli++ {
-			field := tv.visibleFields[fli]
-			cidx := ridx + idxOff + fli
-			if len(sg.Kids) < cidx {
-				break
-			}
-			if sg.Kids[cidx] == nil {
-				return
-			}
-			w := sg.Kids[cidx].(core.Widget)
-			wb := w.AsWidget()
 
-			var val reflect.Value
-			if !invis {
-				val = reflectx.OnePointerUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
-				if val.IsZero() {
-					val = tv.ElVal
-				}
+		svi.ConfigRow(c, i, si, val)
+	}
+}
+
+// SliceHeader returns the Frame header for slice grid
+func (tv *TableView) SliceHeader() *core.Frame {
+	return tv.Child(0).(*core.Frame)
+}
+
+func (tv *TableView) ConfigHeader(c *core.Config) {
+	core.AddConfig(c, "header", func() *core.Frame {
+		w := core.NewFrame()
+		core.ToolbarStyles(w)
+		w.Style(func(s *styles.Style) {
+			s.Grow.Set(0, 0)
+			s.Gap.Set(units.Em(0.5)) // matches grid default
+		})
+		return w
+	})
+
+	if tv.Is(SliceViewShowIndex) {
+		core.AddConfig(c, "header/head-idx", func() *core.Text {
+			w := core.NewText()
+			w.SetType(core.TextBodyMedium)
+			w.Style(func(s *styles.Style) {
+				s.Align.Self = styles.Center
+			})
+			return w
+		}, func(w *core.Text) {
+			w.SetText("Index")
+		})
+	}
+	for fli := 0; fli < tv.numVisibleFields; fli++ {
+		field := tv.visibleFields[fli]
+		core.AddConfig(c, "header/head-"+field.Name, func() *core.Button {
+			w := core.NewButton()
+			w.SetType(core.ButtonMenu)
+			w.SetProperty("field-index", fli)
+			w.OnClick(func(e events.Event) {
+				tv.SortSliceAction(fli)
+			})
+			return w
+		}, func(w *core.Button) {
+			htxt := ""
+			if lbl, ok := field.Tag.Lookup("label"); ok {
+				htxt = lbl
 			} else {
-				val = tv.ElVal
+				htxt = strcase.ToSentence(field.Name)
 			}
-			stru := val.Interface()
-			fval := val.Elem().FieldByIndex(field.Index)
-			vvi := i*tv.numVisibleFields + fli
-			vv := tv.Values[vvi]
-			vv.SetStructValue(fval.Addr(), stru, &field, vpath)
-			vv.SetReadOnly(tv.IsReadOnly())
-			vv.Update()
-			w.SetState(invis, states.Invisible)
-			if !invis {
-				if tv.IsReadOnly() {
-					wb.SetReadOnly(true)
-				}
-			} else {
-				wb.SetSelected(false)
-				if tv.Is(SliceViewShowIndex) {
-					idxlab.SetSelected(false)
+			w.SetText(htxt)
+			w.Tooltip = htxt + " (tap to sort by)"
+			doc, ok := types.GetDoc(reflect.Value{}, tv.ElVal, &field, htxt)
+			if ok && doc != "" {
+				w.Tooltip += ": " + doc
+			}
+			tv.headerWidths[fli] = len(htxt)
+			if fli == tv.SortIndex {
+				if tv.SortDescending {
+					w.SetIcon(icons.KeyboardArrowDown)
+				} else {
+					w.SetIcon(icons.KeyboardArrowUp)
 				}
 			}
-			if tv.This().(SliceViewer).HasStyleFunc() {
-				w.ApplyStyle()
+		})
+	}
+}
+
+// RowWidgetNs returns number of widgets per row and offset for index label
+func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
+	nWidgPerRow = 1 + tv.numVisibleFields
+	idxOff = 1
+	if !tv.Is(SliceViewShowIndex) {
+		nWidgPerRow -= 1
+		idxOff = 0
+	}
+	return
+}
+
+func (tv *TableView) ConfigRow(c *core.Config, i, si int, val reflect.Value) {
+	svi := tv.This().(SliceViewer)
+	itxt := strconv.Itoa(i)
+	sitxt := strconv.Itoa(si)
+	invis := si >= tv.SliceSize
+	// stru := val.Interface()
+
+	if tv.Is(SliceViewShowIndex) {
+		tv.ConfigGridIndex(c, i, si, itxt, invis)
+	}
+
+	vpath := tv.ViewPath + "[" + sitxt + "]"
+	if si < tv.SliceSize {
+		if lblr, ok := tv.Slice.(core.SliceLabeler); ok {
+			slbl := lblr.ElemLabel(si)
+			if slbl != "" {
+				vpath = JoinViewPath(tv.ViewPath, slbl)
 			}
 		}
 	}
-	sg.NeedsRender()
+	_ = vpath
+
+	for fli := 0; fli < tv.numVisibleFields; fli++ {
+		field := tv.visibleFields[fli]
+		fval := val.Elem().FieldByIndex(field.Index)
+		valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
+		tags := ""
+		if fval.Kind() == reflect.Slice || fval.Kind() == reflect.Map {
+			tags = `view:"no-inline"`
+		}
+		_ = tags
+
+		core.AddConfig(c, "grid/"+valnm, func() core.ValueWidget {
+			w := core.NewValueWidget(fval.Interface())
+			wb := w.AsWidget()
+
+			// vv.SetStructValue(fval.Addr(), stru, &field, vpath)
+			wb.SetReadOnly(tv.IsReadOnly())
+
+			w.SetProperty(SliceViewRowProperty, i)
+			w.SetProperty(SliceViewColProperty, fli)
+
+			w.Style(func(s *styles.Style) {
+				if tv.IsReadOnly() {
+					s.SetAbilities(true, abilities.DoubleClickable)
+					s.SetAbilities(false, abilities.Hoverable, abilities.Focusable, abilities.Activatable, abilities.TripleClickable)
+					s.SetReadOnly(true)
+				}
+				row, col := tv.WidgetIndex(w)
+				row += tv.StartIndex
+				svi.StyleValueWidget(w, s, row, col)
+				if row < tv.SliceSize {
+					svi.StyleRow(w, row, col)
+				}
+			})
+			wb.OnSelect(func(e events.Event) {
+				e.SetHandled()
+				row, _ := tv.WidgetIndex(w)
+				tv.UpdateSelectRow(row, e.SelectMode())
+				tv.LastClick = row + tv.StartIndex
+			})
+			wb.OnDoubleClick(tv.HandleEvent)
+			w.On(events.ContextMenu, tv.HandleEvent)
+			if !tv.IsReadOnly() {
+				wb.OnChange(func(e events.Event) {
+					tv.SendChange()
+				})
+				wb.OnInput(tv.HandleEvent)
+			}
+			if i == 0 && tv.SliceSize > 0 {
+				tv.colMaxWidths[fli] = 0
+				// _, isicon := vv.(*IconValue)
+				isicon := false
+				isString := fval.Type().Kind() == reflect.String
+				if !isicon && isString {
+					mxw := 0
+					for rw := 0; rw < tv.SliceSize; rw++ {
+						sval := reflectx.OnePointerUnderlyingValue(tv.SliceNPVal.Index(rw))
+						elem := sval.Elem()
+						if !elem.IsValid() {
+							continue
+						}
+						fval := elem.FieldByIndex(field.Index)
+						str := fval.String()
+						mxw = max(mxw, len(str))
+					}
+					tv.colMaxWidths[fli] = mxw
+				}
+			}
+			return w
+		}, func(w core.ValueWidget) {
+			wb := w.AsWidget()
+			// w.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
+			core.Bind(fval.Interface(), w)
+			wb.SetReadOnly(tv.IsReadOnly())
+			w.SetState(invis, states.Invisible)
+			if svi.HasStyleFunc() {
+				w.ApplyStyle()
+			}
+			if invis {
+				wb.SetSelected(false)
+			}
+		})
+	}
 }
-*/
 
 func (tv *TableView) HasStyleFunc() bool {
 	return tv.StyleFunc != nil
@@ -598,9 +491,7 @@ func (tv *TableView) SortSliceAction(fldIndex int) {
 
 	tv.SortIndex = fldIndex
 	tv.SortSlice()
-	sgh.Update() // requires full update due to sort button icon
-	// tv.UpdateWidgets()
-	tv.NeedsLayout()
+	tv.Update()
 }
 
 // SortFieldName returns the name of the field being sorted, along with :up or
