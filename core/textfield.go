@@ -27,7 +27,6 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
 )
 
@@ -276,79 +275,6 @@ func (tf *TextField) SetStyles() {
 	})
 	tf.StyleFinal(func(s *styles.Style) {
 		tf.SetAbilities(!tf.IsReadOnly(), abilities.Focusable)
-	})
-	tf.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(tf) {
-		case "parts":
-			w.Style(func(s *styles.Style) {
-				s.Align.Content = styles.Center
-				s.Align.Items = styles.Center
-				s.Text.AlignV = styles.Center
-				s.Gap.Zero()
-			})
-		case "parts/lead-icon":
-			lead := w.(*Button)
-			lead.Type = ButtonAction
-			lead.Style(func(s *styles.Style) {
-				s.Padding.Zero()
-				s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
-				s.Margin.SetRight(units.Dp(8))
-				if tf.LeadingIconOnClick == nil {
-					s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
-					s.Cursor = cursors.None
-				}
-				// If we are responsible for a positive (non-disabled) state layer
-				// (instead of our parent), then we amplify it so that it is clear
-				// that we ourself are receiving a state layer amplifying event.
-				// Otherwise, we set our state color to that of our parent
-				// so that it does not appear as if we are getting interaction ourself;
-				// instead, we are a part of our parent and render a background color no
-				// different than them.
-				if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
-					s.StateLayer *= 3
-				} else {
-					s.StateColor = tf.Styles.Color
-				}
-			})
-			lead.OnClick(func(e events.Event) {
-				if tf.LeadingIconOnClick != nil {
-					tf.LeadingIconOnClick(e)
-				}
-			})
-		case "parts/trail-icon":
-			trail := w.(*Button)
-			trail.Type = ButtonAction
-			trail.Style(func(s *styles.Style) {
-				s.Padding.Zero()
-				s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
-				if tf.Error != nil {
-					s.Color = colors.C(colors.Scheme.Error.Base)
-				}
-				s.Margin.SetLeft(units.Dp(8))
-				if tf.TrailingIconOnClick == nil || tf.Error != nil {
-					s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
-					s.Cursor = cursors.None
-					// need to clear state in case it was set when there
-					// was no error
-					s.State = 0
-				}
-				// same reasoning as for leading icon
-				if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
-					s.StateLayer *= 3
-				} else {
-					s.StateColor = tf.Styles.Color
-				}
-			})
-			trail.OnClick(func(e events.Event) {
-				if tf.TrailingIconOnClick != nil {
-					tf.TrailingIconOnClick(e)
-				}
-			})
-		case "parts/error":
-			w.Style(func(s *styles.Style) {
-				s.Color = colors.C(colors.Scheme.Error.Base)
-			})
-		}
 	})
 }
 
@@ -1813,33 +1739,92 @@ func (tf *TextField) HandleKeyEvents() {
 }
 
 func (tf *TextField) Config(c *Config) {
-	config := tree.Config{}
-
 	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
 
-	lii, tii := -1, -1
+	AddConfig(c, "parts", func() *Layout {
+		w := NewParts()
+		w.Style(func(s *styles.Style) {
+			s.Align.Content = styles.Center
+			s.Align.Items = styles.Center
+			s.Text.AlignV = styles.Center
+			s.Gap.Zero()
+		})
+		return w
+	})
+
 	if !tf.IsReadOnly() {
 		if tf.LeadingIcon.IsSet() {
-			lii = len(config)
-			config.Add(ButtonType, "lead-icon")
+			AddConfig(c, "parts/lead-icon", func() *Button {
+				w := NewButton().SetType(ButtonAction)
+				w.Style(func(s *styles.Style) {
+					s.Padding.Zero()
+					s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+					s.Margin.SetRight(units.Dp(8))
+					if tf.LeadingIconOnClick == nil {
+						s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
+						s.Cursor = cursors.None
+					}
+					// If we are responsible for a positive (non-disabled) state layer
+					// (instead of our parent), then we amplify it so that it is clear
+					// that we ourself are receiving a state layer amplifying event.
+					// Otherwise, we set our state color to that of our parent
+					// so that it does not appear as if we are getting interaction ourself;
+					// instead, we are a part of our parent and render a background color no
+					// different than them.
+					if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
+						s.StateLayer *= 3
+					} else {
+						s.StateColor = tf.Styles.Color
+					}
+				})
+				w.OnClick(func(e events.Event) {
+					if tf.LeadingIconOnClick != nil {
+						tf.LeadingIconOnClick(e)
+					}
+				})
+				return w
+			}, func(w *Button) {
+				w.SetIcon(tf.LeadingIcon)
+			})
 		}
 		if tf.TrailingIcon.IsSet() {
-			config.Add(StretchType, "trail-icon-str")
-			tii = len(config)
-			config.Add(ButtonType, "trail-icon")
+			AddConfig(c, "parts/trail-icon-stretch",
+				func() *Stretch { return NewStretch() })
+			AddConfig(c, "parts/trail-icon", func() *Button {
+				w := NewButton().SetType(ButtonAction)
+				w.Style(func(s *styles.Style) {
+					s.Padding.Zero()
+					s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+					if tf.Error != nil {
+						s.Color = colors.C(colors.Scheme.Error.Base)
+					}
+					s.Margin.SetLeft(units.Dp(8))
+					if tf.TrailingIconOnClick == nil || tf.Error != nil {
+						s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
+						s.Cursor = cursors.None
+						// need to clear state in case it was set when there
+						// was no error
+						s.State = 0
+					}
+					// same reasoning as for leading icon
+					if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
+						s.StateLayer *= 3
+					} else {
+						s.StateColor = tf.Styles.Color
+					}
+				})
+				w.OnClick(func(e events.Event) {
+					if tf.TrailingIconOnClick != nil {
+						tf.TrailingIconOnClick(e)
+					}
+				})
+				return w
+			}, func(w *Button) {
+				w.SetIcon(tf.TrailingIcon)
+			})
 		}
 	}
-	tf.ConfigParts(config, func() {
-		if lii >= 0 {
-			li := tf.Parts.Child(lii).(*Button)
-			li.SetIcon(tf.LeadingIcon)
-		}
-		if tii >= 0 {
-			ti := tf.Parts.Child(tii).(*Button)
-			ti.SetIcon(tf.TrailingIcon)
-		}
-	})
 }
 
 ////////////////////////////////////////////////////

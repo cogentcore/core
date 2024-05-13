@@ -312,7 +312,7 @@ func (bt *Button) Config(c *Config) {
 	}
 
 	if bt.Indicator.IsSet() {
-		AddConfig(c, "ind-stretch", func() *Stretch {
+		AddConfig(c, "indicator-stretch", func() *Stretch {
 			w := NewStretch()
 			w.Style(func(s *styles.Style) {
 				s.Min.X.Em(0.2)

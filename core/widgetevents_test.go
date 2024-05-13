@@ -92,7 +92,7 @@ func TestWidgetPrev(t *testing.T) {
 		"/body scene/body/text-field-1",
 		"/body scene/body/text-field-0.parts/trail-icon.parts/icon",
 		"/body scene/body/text-field-0.parts/trail-icon",
-		"/body scene/body/text-field-0.parts/trail-icon-str",
+		"/body scene/body/text-field-0.parts/trail-icon-stretch",
 		"/body scene/body/text-field-0",
 		"/body scene/body",
 		"/body scene",
@@ -117,7 +117,7 @@ func TestWidgetNext(t *testing.T) {
 	b.ConfigTree()
 
 	paths := []string{
-		"/body scene/body/text-field-0.parts/trail-icon-str",
+		"/body scene/body/text-field-0.parts/trail-icon-stretch",
 		"/body scene/body/text-field-0.parts/trail-icon",
 		"/body scene/body/text-field-0.parts/trail-icon.parts/icon",
 		"/body scene/body/text-field-1",
