@@ -46,6 +46,10 @@ func NewInterpreter(options interp.Options) *Interpreter {
 	if options.Stderr != nil {
 		in.Shell.Config.StdIO.Err = options.Stderr
 	}
+	in.Shell.StdIOWrappers.NewWrappers(&in.Shell.Config.StdIO)
+	options.Stdout = in.Shell.StdIOWrappers.Out
+	options.Stderr = in.Shell.StdIOWrappers.Err
+	options.Stdin = in.Shell.StdIOWrappers.In
 	in.Interp = interp.New(options)
 	in.Interp.Use(stdlib.Symbols)
 	in.Interp.Use(interp.Exports{

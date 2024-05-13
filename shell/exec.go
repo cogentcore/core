@@ -81,10 +81,17 @@ func (sh *Shell) RunBuiltinOrCommand(cmdIO *exec.CmdIO, cmd string, args ...stri
 	if fun, has := sh.Commands[cmd]; has {
 		sh.commandArgs.Push(args)
 		sh.isCommand.Push(true)
-		oldio := cmdIO.SetToOS()
-		fmt.Println("out:", os.Stdout)
+
+		// note: we need to set both os. and wrapper versions, so it works the same
+		// in compiled vs. interpreted mode
+		oldsh := sh.Config.StdIO.Set(&cmdIO.StdIO)
+		oldwrap := sh.StdIOWrappers.SetWrappers(&cmdIO.StdIO)
+		oldstd := cmdIO.SetToOS()
 		fun(args...)
-		oldio.SetToOS()
+		oldstd.SetToOS()
+		sh.StdIOWrappers.SetWrappers(oldwrap)
+		sh.Config.StdIO = *oldsh
+
 		sh.isCommand.Pop()
 		sh.commandArgs.Pop()
 		return true
@@ -235,7 +242,6 @@ func (sh *Shell) OutToFile(cmdIO *exec.CmdIO, errOk bool, sargs []string, i int)
 	}
 	if err == nil {
 		cmdIO.PushOut(f)
-		fmt.Println("out to file:", f)
 		if errf {
 			cmdIO.PushErr(f)
 		}
