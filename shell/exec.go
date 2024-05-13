@@ -137,9 +137,6 @@ func (sh *Shell) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (
 	}
 	scmd := reflectx.ToString(cmd)
 	cl := sh.ActiveSSH()
-	if len(args) == 0 {
-		return cl, scmd, nil
-	}
 	isCmd := sh.isCommand.Peek()
 	sargs := make([]string, 0, len(args))
 	var err error
@@ -159,7 +156,7 @@ func (sh *Shell) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (
 		}
 		sargs = append(sargs, s)
 	}
-	if scmd == "@" {
+	if scmd[0] == '@' {
 		newHost := ""
 		if scmd == "@0" { // local
 			cl = nil
@@ -184,10 +181,10 @@ func (sh *Shell) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (
 		s := sargs[i]
 		switch {
 		case s[0] == '>':
-			sargs = sh.OutToFile(cmdIO, errOk, sargs, i)
+			sargs = sh.OutToFile(cl, cmdIO, errOk, sargs, i)
 		case s[0] == '|':
-			sargs = sh.OutToPipe(cmdIO, errOk, sargs, i)
-		case isCmd && strings.HasPrefix(s, "args"):
+			sargs = sh.OutToPipe(cl, cmdIO, errOk, sargs, i)
+		case cl == nil && isCmd && strings.HasPrefix(s, "args"):
 			sargs = sh.CmdArgs(errOk, sargs, i)
 			i-- // back up because we consume this one
 		}
@@ -210,7 +207,7 @@ func (sh *Shell) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (
 }
 
 // OutToFile processes the > arg that sends output to a file
-func (sh *Shell) OutToFile(cmdIO *exec.CmdIO, errOk bool, sargs []string, i int) []string {
+func (sh *Shell) OutToFile(cl *sshclient.Client, cmdIO *exec.CmdIO, errOk bool, sargs []string, i int) []string {
 	n := len(sargs)
 	s := sargs[i]
 	sn := len(s)
@@ -234,11 +231,17 @@ func (sh *Shell) OutToFile(cmdIO *exec.CmdIO, errOk bool, sargs []string, i int)
 		fn = s[1:]
 		narg = 1
 	}
-	sargs = slices.Delete(sargs, i, i+narg)
 	if fn == "" {
 		sh.HandleArgErr(errOk, fmt.Errorf("cosh: no output file specified"))
 		return sargs
 	}
+	if cl != nil {
+		if !strings.HasPrefix(fn, "@0:") {
+			return sargs
+		}
+		fn = fn[3:]
+	}
+	sargs = slices.Delete(sargs, i, i+narg)
 	// todo: process @n: expressions here -- if @0 then it is the same
 	// if @1, then need to launch an ssh "cat >[>] file" with pipe from command as stdin
 	var f *os.File
@@ -260,13 +263,14 @@ func (sh *Shell) OutToFile(cmdIO *exec.CmdIO, errOk bool, sargs []string, i int)
 }
 
 // OutToPipe processes the | arg that sends output to a pipe
-func (sh *Shell) OutToPipe(cmdIO *exec.CmdIO, errOk bool, sargs []string, i int) []string {
+func (sh *Shell) OutToPipe(cl *sshclient.Client, cmdIO *exec.CmdIO, errOk bool, sargs []string, i int) []string {
 	s := sargs[i]
 	sn := len(s)
 	errf := false
 	if sn > 1 && s[1] == '&' {
 		errf = true
 	}
+	// todo: what to do here?
 	sargs = slices.Delete(sargs, i, i+1)
 	cmdIO.PushOutPipe()
 	if errf {
