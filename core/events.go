@@ -674,7 +674,7 @@ func (em *Events) HandleLong(e events.Event, deep Widget, w *Widget, pos *image.
 
 func (em *Events) GetMouseInBBox(w Widget, pos image.Point) {
 	wb := w.AsWidget()
-	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(kwi Widget, kwb *WidgetBase) bool {
 		// we do not handle disabled here so that
 		// we correctly process cursors for disabled elements.
 		// it needs to be handled downstream by anyone who needs it.
@@ -1042,7 +1042,7 @@ func (em *Events) FocusLastFrom(from Widget) bool {
 func (em *Events) ClearNonFocus(foc Widget) {
 	focRoot := em.Scene
 
-	focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+	focRoot.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		if wi == focRoot { // skip top-level
 			return tree.Continue
 		}
@@ -1178,7 +1178,7 @@ func (em *Events) GetShortcuts() {
 // GetShortcutsIn gathers all [Button]s in the given parent widget with
 // a shortcut specified. It recursively navigates [Button.Menu]s.
 func (em *Events) GetShortcutsIn(parent Widget) {
-	parent.AsWidget().WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+	parent.AsWidget().WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		bt := AsButton(wi.This())
 		if bt == nil {
 			return tree.Continue

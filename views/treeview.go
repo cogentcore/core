@@ -198,7 +198,7 @@ func (tv *TreeView) BaseType() *types.Type {
 // Returns the total number of leaves in the tree.
 func (tv *TreeView) RootSetViewIndex() int {
 	idx := 0
-	tv.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
+	tv.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
 		tvn := AsTreeView(wi)
 		if tvn != nil {
 			tvn.ViewIndex = idx
@@ -1205,7 +1205,7 @@ func (tv *TreeView) ToggleClose() {
 
 // OpenAll opens the given node and all of its sub-nodes
 func (tv *TreeView) OpenAll() { //types:add
-	tv.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
+	tv.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
 		tvn := AsTreeView(wi)
 		if tvn != nil {
 			tvn.Open()
@@ -1218,7 +1218,7 @@ func (tv *TreeView) OpenAll() { //types:add
 
 // CloseAll closes the given node and all of its sub-nodes.
 func (tv *TreeView) CloseAll() { //types:add
-	tv.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
+	tv.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
 		tvn := AsTreeView(wi)
 		if tvn != nil {
 			tvn.Close()

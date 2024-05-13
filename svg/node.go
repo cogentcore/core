@@ -261,11 +261,11 @@ func (g *NodeBase) ReadGeom(sv *SVG, dat []float32) {
 	g.ReadTransform(dat, 0)
 }
 
-// SVGWalkPre does [tree.Node.WalkPre] on given node using given walk function
+// SVGWalkDown does [tree.Node.WalkDown] on given node using given walk function
 // with SVG Node parameters.  Automatically filters
 // nil or deleted items.  Return [tree.Continue] (true) to continue,
 // and [tree.Break] (false) to terminate.
-func SVGWalkPre(n Node, fun func(kni Node, knb *NodeBase) bool) {
+func SVGWalkDown(n Node, fun func(kni Node, knb *NodeBase) bool) {
 	n.WalkDown(func(k tree.Node) bool {
 		kni := k.(Node)
 		if kni == nil || kni.This() == nil {
@@ -275,12 +275,12 @@ func SVGWalkPre(n Node, fun func(kni Node, knb *NodeBase) bool) {
 	})
 }
 
-// SVGWalkPreNoDefs does [tree.Node.WalkPre] on given node using given walk function
+// SVGWalkDownNoDefs does [tree.Node.WalkDown] on given node using given walk function
 // with SVG Node parameters.  Automatically filters
 // nil or deleted items, and Defs nodes (IsDef) and MetaData,
 // i.e., it only processes concrete graphical nodes.
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
-func SVGWalkPreNoDefs(n Node, fun func(kni Node, knb *NodeBase) bool) {
+func SVGWalkDownNoDefs(n Node, fun func(kni Node, knb *NodeBase) bool) {
 	n.WalkDown(func(k tree.Node) bool {
 		kni := k.(Node)
 		if kni == nil || kni.This() == nil {
@@ -297,7 +297,7 @@ func SVGWalkPreNoDefs(n Node, fun func(kni Node, knb *NodeBase) bool) {
 // recursing into groups until a non-group item is found.
 func FirstNonGroupNode(n Node) Node {
 	var ngn Node
-	SVGWalkPreNoDefs(n, func(kni Node, knb *NodeBase) bool {
+	SVGWalkDownNoDefs(n, func(kni Node, knb *NodeBase) bool {
 		if _, isgp := kni.This().(*Group); isgp {
 			return tree.Continue
 		}
@@ -312,7 +312,7 @@ func FirstNonGroupNode(n Node) Node {
 // Excludes the starting node.
 func NodesContainingPoint(n Node, pt image.Point, leavesOnly bool) []Node {
 	var cn []Node
-	SVGWalkPre(n, func(kni Node, knb *NodeBase) bool {
+	SVGWalkDown(n, func(kni Node, knb *NodeBase) bool {
 		if kni.This() == n.This() {
 			return tree.Continue
 		}

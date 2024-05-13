@@ -545,7 +545,7 @@ func (wb *WidgetBase) SetFocusEvent() {
 // FocusableInMe returns the first Focusable element within this widget
 func (wb *WidgetBase) FocusableInMe() Widget {
 	var foc Widget
-	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		if !wb.AbilityIs(abilities.Focusable) {
 			return tree.Continue
 		}

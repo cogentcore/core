@@ -452,7 +452,7 @@ func (fn *Node) OpenAll() { //types:add
 
 // CloseAll closes all directories under this one, this included
 func (fn *Node) CloseAll() { //types:add
-	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
+	fn.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
 			return tree.Continue

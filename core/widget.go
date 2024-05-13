@@ -352,7 +352,7 @@ func (wb *WidgetBase) OnAdd() {
 // This can be necessary when creating widgets outside the usual "NewWidget" paradigm,
 // e.g., when reading from a JSON file.
 func (wb *WidgetBase) SetScene(sc *Scene) {
-	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(kwi Widget, kwb *WidgetBase) bool {
 		kwb.Scene = sc
 		return tree.Continue
 	})
@@ -520,7 +520,7 @@ func (wb *WidgetBase) FieldByName(field string) (tree.Node, error) {
 
 // NodeWalkDown extends [tree.Node.WalkDown] to [WidgetBase.Parts],
 // which is key for getting full tree traversal to work when updating,
-// configuring, and styling.
+// configuring, and styling. This implements [tree.Node.NodeWalkDown].
 func (wb *WidgetBase) NodeWalkDown(fun func(tree.Node) bool) {
 	if wb.Parts == nil {
 		return
@@ -563,10 +563,10 @@ func (wb *WidgetBase) VisibleKidsIter(fun func(i int, kwi Widget, kwb *WidgetBas
 	}
 }
 
-// WidgetWalkPre is a version of the ki WalkPre iterator that automatically filters
-// nil or deleted items and operates on Widget types.
-// Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
-func (wb *WidgetBase) WidgetWalkPre(fun func(kwi Widget, kwb *WidgetBase) bool) {
+// WidgetWalkDown is a version of [tree.Node.WalkDown] that automatically filters
+// nil or deleted items and operates on [Widget] types.
+// Return [tree.Continue] to continue and [tree.Break] to terminate.
+func (wb *WidgetBase) WidgetWalkDown(fun func(kwi Widget, kwb *WidgetBase) bool) {
 	wb.WalkDown(func(k tree.Node) bool {
 		kwi, kwb := AsWidget(k)
 		if kwi == nil || kwi.This() == nil {

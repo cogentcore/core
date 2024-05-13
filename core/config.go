@@ -274,7 +274,7 @@ func (wb *WidgetBase) ConfigTree() {
 		return
 	}
 	// pr := profile.Start(wb.This().NodeType().ShortName())
-	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		wi.ConfigWidget()
 		return tree.Continue
 	})
@@ -299,7 +299,7 @@ func (wb *WidgetBase) Update() { //types:add
 	if DebugSettings.UpdateTrace {
 		fmt.Println("\tDebugSettings.UpdateTrace Update:", wb)
 	}
-	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		wi.ConfigWidget()
 		wi.ApplyStyle()
 		return tree.Continue

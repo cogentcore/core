@@ -153,7 +153,7 @@ func (wb *WidgetBase) ApplyStyleTree() {
 		return
 	}
 	// pr := profile.Start(wb.This().NodeType().ShortName())
-	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		wi.ApplyStyle()
 		return tree.Continue
 	})
@@ -212,7 +212,7 @@ func (wb *WidgetBase) DoNeedsRender() {
 		return
 	}
 	// pr := profile.Start(wb.This().NodeType().ShortName())
-	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(kwi Widget, kwb *WidgetBase) bool {
 		if kwi.Is(NeedsRender) {
 			kwi.RenderWidget()
 			return tree.Break // done

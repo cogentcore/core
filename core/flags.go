@@ -91,7 +91,7 @@ func (wb *WidgetBase) SetReadOnly(ro bool) *WidgetBase {
 // of its children have the given flag.
 func (wb *WidgetBase) HasFlagWithin(flag enums.BitFlag) bool {
 	got := false
-	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		if wb.Is(flag) {
 			got = true
 			return tree.Break
@@ -105,7 +105,7 @@ func (wb *WidgetBase) HasFlagWithin(flag enums.BitFlag) bool {
 // of its children have the given state flag.
 func (wb *WidgetBase) HasStateWithin(state states.States) bool {
 	got := false
-	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		if wb.StateIs(state) {
 			got = true
 			return tree.Break

@@ -61,7 +61,7 @@ func TestFieldValidatorValid(t *testing.T) {
 	b := core.NewBody()
 	v := NewStructView(b).SetStruct(&fieldValidator{Name: "Go Gopher", Email: "me@example.com"})
 	b.AssertRender(t, "text/field-validator-valid", func() {
-		v.WidgetWalkPre(func(kwi core.Widget, kwb *core.WidgetBase) bool {
+		v.WidgetWalkDown(func(kwi core.Widget, kwb *core.WidgetBase) bool {
 			kwb.SendChange() // trigger validation
 			return tree.Continue
 		})
@@ -72,7 +72,7 @@ func TestFieldValidatorInvalid(t *testing.T) {
 	b := core.NewBody()
 	v := NewStructView(b).SetStruct(&fieldValidator{Name: "Go Gopher", Email: "me@example"})
 	b.AssertRender(t, "text/field-validator-invalid", func() {
-		v.WidgetWalkPre(func(kwi core.Widget, kwb *core.WidgetBase) bool {
+		v.WidgetWalkDown(func(kwi core.Widget, kwb *core.WidgetBase) bool {
 			kwb.SendChange() // trigger validation
 			return tree.Continue
 		})
