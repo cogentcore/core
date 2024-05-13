@@ -52,11 +52,11 @@ func init() {
 	AddValueWidgetType[float32, *Spinner]()
 }
 
-// NewWidgetValue converts the given value into an appropriate [WidgetValue]
+// NewValueWidget converts the given value into an appropriate [ValueWidget]
 // whose associated value is bound to the given value. The given value should
-// typically be a pointer. It also adds the resulting [WidgetValue] to the given
+// typically be a pointer. It also adds the resulting [ValueWidget] to the given
 // optional parent if it specified. The specifics on how it determines what type
-// of [WidgetValue] to make are further documented on [ToValueWidget].
+// of [ValueWidget] to make are further documented on [ToValueWidget].
 func NewValueWidget(value any, parent ...tree.Node) ValueWidget {
 	vw := ToValueWidget(value)
 	Bind(value, vw)
