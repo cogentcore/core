@@ -320,7 +320,11 @@ func (bt *Button) Config(c *Config) {
 			w := NewStretch()
 			w.Style(func(s *styles.Style) {
 				s.Min.Set(units.Em(0.2))
-				s.Grow.Set(1, 0)
+				if bt.Type == ButtonMenu {
+					s.Grow.Set(1, 0)
+				} else {
+					s.Grow.Set(0, 0)
+				}
 			})
 			return w
 		})
