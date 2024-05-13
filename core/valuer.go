@@ -36,12 +36,18 @@ var ValueWidgetConverters []func(value any) ValueWidget
 // AddValueWidgetType binds the given value type to the given [ValueWidget] type,
 // meaning that [ToValueWidget] will return a new [ValueWidget] of the given type
 // when it receives values of the given value type. It uses [ValueWidgetTypes].
+// This function is called with various standard types automatically.
 func AddValueWidgetType[T any, W ValueWidget]() {
 	var v T
 	name := types.TypeNameValue(v)
 	ValueWidgetTypes[name] = func(value any) ValueWidget {
 		return tree.New[W]()
 	}
+}
+
+func init() {
+	AddValueWidgetType[string, *Text]()
+	AddValueWidgetType[bool, *Switch]()
 }
 
 // ToValueWidget converts the given value into an appropriate [ValueWidget]
@@ -52,17 +58,17 @@ func AddValueWidgetType[T any, W ValueWidget]() {
 func ToValueWidget(value any) ValueWidget {
 	if vwr, ok := value.(ValueWidgeter); ok {
 		if vw := vwr.ValueWidget(); vw != nil {
-			return vw
+			return Bind(value, vw)
 		}
 	}
 	if vwt, ok := ValueWidgetTypes[types.TypeNameValue(value)]; ok {
 		if vw := vwt(value); vw != nil {
-			return vw
+			return Bind(value, vw)
 		}
 	}
 	for _, converter := range ValueWidgetConverters {
 		if vw := converter(value); vw != nil {
-			return vw
+			return Bind(value, vw)
 		}
 	}
 	return nil
