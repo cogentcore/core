@@ -19,7 +19,7 @@ import (
 // Switch is a widget that can toggle between an on and off state.
 // It can be displayed as a switch, checkbox, or radio button.
 type Switch struct {
-	WidgetBase
+	Frame
 
 	// Type is the styling type of switch.
 	Type SwitchTypes `set:"-"`
@@ -92,14 +92,10 @@ func (sw *Switch) SetChecked(on bool) *Switch {
 // according to the current icon. It is called automatically to keep the
 // switch up-to-date.
 func (sw *Switch) UpdateStackTop() {
-	if sw.Parts == nil {
+	st, ok := sw.ChildByName("stack", 0).(*Layout)
+	if !ok {
 		return
 	}
-	ist := sw.Parts.ChildByName("stack", 0)
-	if ist == nil {
-		return
-	}
-	st := ist.(*Layout)
 	switch {
 	case sw.StateIs(states.Indeterminate):
 		st.StackTop = 2
@@ -140,6 +136,7 @@ func (sw *Switch) SetStyles() {
 		s.Text.AlignV = styles.Center
 		s.Padding.Set(units.Dp(4))
 		s.Border.Radius = styles.BorderRadiusSmall
+		s.Gap.Zero()
 
 		if sw.Type == SwitchChip {
 			if s.Is(states.Checked) {
@@ -221,17 +218,7 @@ func (sw *Switch) Config(c *Config) {
 		sw.IconOff = icons.ToggleOff // fallback
 	}
 
-	AddConfig(c, "parts", func() *Layout {
-		w := NewParts()
-		w.Style(func(s *styles.Style) {
-			s.Gap.Zero()
-			s.Align.Content = styles.Center
-			s.Align.Items = styles.Center
-			s.Text.AlignV = styles.Center
-		})
-		return w
-	})
-	AddConfig(c, "parts/stack", func() *Layout {
+	AddConfig(c, "stack", func() *Layout {
 		w := NewLayout()
 		w.Style(func(s *styles.Style) {
 			s.Display = styles.Stacked
@@ -242,7 +229,7 @@ func (sw *Switch) Config(c *Config) {
 	}, func(w *Layout) {
 		sw.UpdateStackTop() // need to update here
 	})
-	AddConfig(c, "parts/stack/icon-on", func() *Icon {
+	AddConfig(c, "stack/icon-on", func() *Icon {
 		w := NewIcon()
 		w.Style(func(s *styles.Style) {
 			if sw.Type == SwitchChip {
@@ -263,7 +250,7 @@ func (sw *Switch) Config(c *Config) {
 	}, func(w *Icon) {
 		w.SetIcon(sw.IconOn)
 	})
-	AddConfig(c, "parts/stack/icon-off", func() *Icon {
+	AddConfig(c, "stack/icon-off", func() *Icon {
 		w := NewIcon()
 		w.Style(func(s *styles.Style) {
 			switch sw.Type {
@@ -284,7 +271,7 @@ func (sw *Switch) Config(c *Config) {
 	}, func(w *Icon) {
 		w.SetIcon(sw.IconOff)
 	})
-	AddConfig(c, "parts/stack/icon-indeterminate", func() *Icon {
+	AddConfig(c, "stack/icon-indeterminate", func() *Icon {
 		w := NewIcon()
 		w.Style(func(s *styles.Style) {
 			switch sw.Type {
@@ -307,14 +294,14 @@ func (sw *Switch) Config(c *Config) {
 	})
 
 	if sw.Text != "" {
-		AddConfig(c, "parts/space", func() *Space {
+		AddConfig(c, "space", func() *Space {
 			w := NewSpace()
 			w.Style(func(s *styles.Style) {
 				s.Min.X.Ch(0.1)
 			})
 			return w
 		})
-		AddConfig(c, "parts/text", func() *Text {
+		AddConfig(c, "text", func() *Text {
 			w := NewText()
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
@@ -330,11 +317,9 @@ func (sw *Switch) Config(c *Config) {
 
 func (sw *Switch) Render() {
 	sw.UpdateStackTop() // important: make sure we're always up-to-date on render
-	if sw.Parts != nil {
-		ist := sw.Parts.ChildByName("stack", 0)
-		if ist != nil {
-			ist.(*Layout).UpdateStackedVisibility()
-		}
+	st, ok := sw.ChildByName("stack", 0).(*Layout)
+	if ok {
+		st.UpdateStackedVisibility()
 	}
 	sw.WidgetBase.Render()
 }
