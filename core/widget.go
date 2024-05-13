@@ -518,7 +518,9 @@ func (wb *WidgetBase) FieldByName(field string) (tree.Node, error) {
 	return nil, fmt.Errorf("no field %q for %v; only parts", field, wb)
 }
 
-// NodeWalkDown extends WalkPre to Parts, which is key for getting full Update protection.
+// NodeWalkDown extends [tree.Node.WalkDown] to [WidgetBase.Parts],
+// which is key for getting full tree traversal to work when updating,
+// configuring, and styling.
 func (wb *WidgetBase) NodeWalkDown(fun func(tree.Node) bool) {
 	if wb.Parts == nil {
 		return

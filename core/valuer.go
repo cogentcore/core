@@ -88,5 +88,5 @@ func ToValueWidget(value any) ValueWidget {
 			return vw
 		}
 	}
-	return nil
+	return NewTextField()
 }
