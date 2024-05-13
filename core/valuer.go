@@ -15,7 +15,7 @@ type ValueWidgeter interface {
 
 	// ValueWidget returns the [ValueWidget] that should be used to represent
 	// the value in the GUI. If it returns nil, then [ToValueWidget] will
-	// fall back onto the next step. This function does NOT need to call [core.Bind].
+	// fall back onto the next step. This function does NOT need to call [Bind].
 	ValueWidget() ValueWidget
 }
 
@@ -30,7 +30,8 @@ var ValueWidgetTypes = map[string]func(value any) ValueWidget{}
 // for a value. It is used by [ToValueWidget]. If a function returns nil,
 // it falls back on the next function in the slice, and if all functions return nil,
 // it falls back on the default bindings. These functions do NOT need to call
-// [core.Bind].
+// [Bind]. These functions are called in sequential order, so you can insert
+// a function at the start to take precedence over others.
 var ValueWidgetConverters []func(value any) ValueWidget
 
 // AddValueWidgetType binds the given value type to the given [ValueWidget] type,
@@ -50,25 +51,39 @@ func init() {
 	AddValueWidgetType[bool, *Switch]()
 }
 
-// ToValueWidget converts the given value into an appropriate [ValueWidget]
-// whose associated value is bound to the given value. It first checks the
-// [ValueWidgeter] interface, then the [ValueWidgetTypes], then the
-// [ValueWidgetConverters], and finally it falls back on a set of default
+// NewWidgetValue converts the given value into an appropriate [WidgetValue]
+// whose associated value is bound to the given value. It also adds the
+// resulting [WidgetValue] to the given optional parent if it specified.
+// The specifics on how it determines what type of [WidgetValue] to make
+// are further documented on [ToValueWidget].
+func NewValueWidget(value any, parent ...tree.Node) ValueWidget {
+	vw := ToValueWidget(value)
+	Bind(value, vw)
+	if len(parent) > 0 {
+		parent[0].AddChild(vw)
+	}
+	return vw
+}
+
+// ToValueWidget converts the given value into an appropriate [ValueWidget].
+// It does NOT call [Bind]; see [NewValueWidget] for a version that does.
+// It first checks the [ValueWidgeter] interface, then the [ValueWidgetTypes],
+// then the [ValueWidgetConverters], and finally it falls back on a set of default
 // bindings. If any step results in nil, it falls back on the next step.
 func ToValueWidget(value any) ValueWidget {
 	if vwr, ok := value.(ValueWidgeter); ok {
 		if vw := vwr.ValueWidget(); vw != nil {
-			return Bind(value, vw)
+			return vw
 		}
 	}
 	if vwt, ok := ValueWidgetTypes[types.TypeNameValue(value)]; ok {
 		if vw := vwt(value); vw != nil {
-			return Bind(value, vw)
+			return vw
 		}
 	}
 	for _, converter := range ValueWidgetConverters {
 		if vw := converter(value); vw != nil {
-			return Bind(value, vw)
+			return vw
 		}
 	}
 	return nil

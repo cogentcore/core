@@ -188,6 +188,7 @@ type Node interface {
 	// AddChild adds given child at end of children list.
 	// The kid node is assumed to not be on another tree (see [MoveToParent])
 	// and the existing name should be unique among children.
+	// Any error is automatically logged in addition to being returned.
 	AddChild(kid Node) error
 
 	// NewChild creates a new child of the given type and adds it at the end
@@ -199,11 +200,13 @@ type Node interface {
 	// It just calls Init and SetParent on the child. The name defaults
 	// to the ID (kebab-case) name of the type, plus the
 	// [Node.NumLifetimeChildren] of the parent.
+	// Any error is automatically logged in addition to being returned.
 	SetChild(kid Node, idx int) error
 
 	// InsertChild adds given child at position in children list.
 	// The kid node is assumed to not be on another tree (see [MoveToParent])
 	// and the existing name should be unique among children.
+	// Any error is automatically logged in addition to being returned.
 	InsertChild(kid Node, at int) error
 
 	// InsertNewChild creates a new child of given type and add at position

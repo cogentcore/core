@@ -8,8 +8,8 @@ import (
 	"testing"
 )
 
-func TestToValueWidget(t *testing.T) {
+func TestNewValueWidget(t *testing.T) {
 	b := NewBody()
-	b.AddChild(ToValueWidget(true))
+	NewValueWidget(true, b)
 	b.AssertRender(t, "valuer/bool")
 }

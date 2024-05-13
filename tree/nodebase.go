@@ -379,6 +379,7 @@ func (n *NodeBase) FieldByName(field string) (Node, error) {
 // AddChild adds given child at end of children list.
 // The kid node is assumed to not be on another tree (see [MoveToParent])
 // and the existing name should be unique among children.
+// Any error is automatically logged in addition to being returned.
 func (n *NodeBase) AddChild(kid Node) error {
 	if err := checkThis(n); err != nil {
 		return err
@@ -407,6 +408,7 @@ func (n *NodeBase) NewChild(typ *types.Type) Node {
 // It just calls Init and SetParent on the child. The name defaults
 // to the ID (kebab-case) name of the type, plus the
 // [Node.NumLifetimeChildren] of the parent.
+// Any error is automatically logged in addition to being returned.
 func (n *NodeBase) SetChild(kid Node, idx int) error {
 	if err := n.Kids.IsValidIndex(idx); err != nil {
 		return err
@@ -420,6 +422,7 @@ func (n *NodeBase) SetChild(kid Node, idx int) error {
 // InsertChild adds given child at position in children list.
 // The kid node is assumed to not be on another tree (see [MoveToParent])
 // and the existing name should be unique among children.
+// Any error is automatically logged in addition to being returned.
 func (n *NodeBase) InsertChild(kid Node, at int) error {
 	if err := checkThis(n); err != nil {
 		return err
