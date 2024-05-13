@@ -5,31 +5,23 @@
 package sshclient
 
 import (
-	"bytes"
-	"strings"
+	"cogentcore.org/core/base/exec"
 )
 
 // Run runs given command, using config input / outputs.
 // Must have already made a successful Connect.
-func (cl *Client) Run(cmd string, args ...string) error {
-	_, err := cl.exec(cmd, args...)
+func (cl *Client) Run(sio *exec.StdIOState, cmd string, args ...string) error {
+	_, err := cl.Exec(sio, false, false, cmd, args...)
 	return err
 }
 
 // Start starts the given command with arguments.
-func (cl *Client) Start(cmd string, args ...string) error {
-	// todo: implement this!
-	return nil
+func (cl *Client) Start(sio *exec.StdIOState, cmd string, args ...string) error {
+	_, err := cl.Exec(sio, true, false, cmd, args...)
+	return err
 }
 
 // Output runs the command and returns the text from stdout.
-func (cl *Client) Output(cmd string, args ...string) (string, error) {
-	buf := &bytes.Buffer{}
-	sio := cl.StdIO
-	sio.Out = buf
-	err := cl.Run(cmd, args...) // todo: need to take cio arg
-	if cl.StdIO.Out != nil {
-		cl.StdIO.Out.Write(buf.Bytes())
-	}
-	return strings.TrimSuffix(buf.String(), "\n"), err
+func (cl *Client) Output(sio *exec.StdIOState, cmd string, args ...string) (string, error) {
+	return cl.Exec(sio, false, true, cmd, args...)
 }

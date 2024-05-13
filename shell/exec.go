@@ -26,9 +26,9 @@ import (
 //     a goroutine forked to Wait for it and close its IO
 //   - output = return the output of the command as a string (otherwise return is "")
 func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
-	retstr := ""
+	out := ""
 	if !errOk && len(sh.Errors) > 0 {
-		return retstr
+		return out
 	}
 	cmdIO := exec.NewCmdIO(&sh.Config)
 	cmdIO.StackStart()
@@ -37,16 +37,24 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 	}
 	cl, scmd, sargs := sh.ExecArgs(cmdIO, errOk, cmd, args...)
 	if scmd == "" {
-		return retstr
+		return out
 	}
+	var err error
 	if cl != nil {
-		// todo: need to trap cd ?
-		// todo: improve!
-		sh.AddError(cl.Run(scmd, sargs...))
+		switch {
+		case start:
+			err = cl.Start(&cmdIO.StdIOState, scmd, sargs...)
+		case output:
+			out, err = cl.Output(&cmdIO.StdIOState, scmd, sargs...)
+		default:
+			err = cl.Run(&cmdIO.StdIOState, scmd, sargs...)
+		}
+		if !errOk {
+			sh.AddError(err)
+		}
 	} else {
 		if !sh.RunBuiltinOrCommand(cmdIO, scmd, sargs...) {
 			sh.isCommand.Push(false)
-			var err error
 			switch {
 			case start:
 				err = sh.Config.StartIO(cmdIO, scmd, sargs...)
@@ -60,7 +68,7 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 					sh.DeleteJob(cmdIO)
 				}()
 			case output:
-				retstr, err = sh.Config.OutputIO(cmdIO, scmd, sargs...)
+				out, err = sh.Config.OutputIO(cmdIO, scmd, sargs...)
 			default:
 				err = sh.Config.RunIO(cmdIO, scmd, sargs...)
 			}
@@ -73,7 +81,7 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 	if !start {
 		cmdIO.PopToStart()
 	}
-	return retstr
+	return out
 }
 
 // RunBuiltinOrCommand runs a builtin or a command
