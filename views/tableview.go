@@ -9,11 +9,9 @@ import (
 	"image"
 	"log/slog"
 	"reflect"
-	"strconv"
 	"strings"
 
 	"cogentcore.org/core/base/reflectx"
-	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -21,7 +19,6 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/types"
 )
 
 // todo:
@@ -216,18 +213,15 @@ func (tv *TableView) CacheVisFields() {
 
 // Config configures the view
 func (tv *TableView) Config(c *core.Config) {
-	if tv.Is(SliceViewConfigured) {
-		tv.This().(SliceViewer).UpdateWidgets()
-		return
-	}
 	tv.SortSlice()
-	tv.ConfigFrame()
-	tv.This().(SliceViewer).ConfigRows()
-	tv.This().(SliceViewer).UpdateWidgets()
-	tv.ApplyStyleTree()
-	tv.NeedsLayout()
 }
 
+// SliceHeader returns the Frame header for slice grid
+func (tv *TableView) SliceHeader() *core.Frame {
+	return tv.Child(0).(*core.Frame)
+}
+
+/*
 func (tv *TableView) ConfigFrame() {
 	if tv.HasChildren() {
 		return
@@ -288,10 +282,6 @@ func (tv *TableView) ConfigHeader() {
 	}
 }
 
-// SliceHeader returns the Frame header for slice grid
-func (tv *TableView) SliceHeader() *core.Frame {
-	return tv.Child(0).(*core.Frame)
-}
 
 // RowWidgetNs returns number of widgets per row and offset for index label
 func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
@@ -521,6 +511,7 @@ func (tv *TableView) UpdateWidgets() {
 	}
 	sg.NeedsRender()
 }
+*/
 
 func (tv *TableView) HasStyleFunc() bool {
 	return tv.StyleFunc != nil
@@ -547,9 +538,8 @@ func (tv *TableView) SliceNewAt(idx int) {
 	tv.SelectIndexAction(idx, events.SelectOne)
 	tv.ViewMuUnlock()
 	tv.SendChange()
-	tv.This().(SliceViewer).UpdateWidgets()
+	tv.Update()
 	tv.IndexGrabFocus(idx)
-	tv.NeedsLayout()
 }
 
 // SliceDeleteAt deletes element at given index from slice
@@ -564,11 +554,9 @@ func (tv *TableView) SliceDeleteAt(idx int) {
 	reflectx.SliceDeleteAt(tv.Slice, idx)
 
 	tv.This().(SliceViewer).UpdateSliceSize()
-
 	tv.ViewMuUnlock()
 	tv.SendChange()
-	tv.This().(SliceViewer).UpdateWidgets()
-	tv.NeedsLayout()
+	tv.Update()
 }
 
 // SortSlice sorts the slice according to current settings
@@ -611,7 +599,7 @@ func (tv *TableView) SortSliceAction(fldIndex int) {
 	tv.SortIndex = fldIndex
 	tv.SortSlice()
 	sgh.Update() // requires full update due to sort button icon
-	tv.UpdateWidgets()
+	// tv.UpdateWidgets()
 	tv.NeedsLayout()
 }
 
