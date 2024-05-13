@@ -255,23 +255,6 @@ func (wb *WidgetBase) Config(c *Config) {
 	// this must be defined for each widget type
 }
 
-// ConfigParts initializes the parts of the widget if they
-// are not already through [WidgetBase.NewParts], calls
-// [tree.NodeBase.ConfigChildren] on those parts with the given config,
-// calls the given after function if it is specified,
-// and then handles necessary updating logic.
-func (wb *WidgetBase) ConfigParts(config tree.Config, after ...func()) {
-	parts := wb.NewParts()
-	mods := parts.ConfigChildren(config)
-	if len(after) > 0 {
-		after[0]()
-	}
-	if !mods && !wb.NeedsRebuild() {
-		return
-	}
-	parts.Update()
-}
-
 // ConfigTree calls [Widget.ConfigWidget] on every Widget in the tree from me.
 func (wb *WidgetBase) ConfigTree() {
 	if wb.This() == nil {
