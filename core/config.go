@@ -248,8 +248,8 @@ func (wb *WidgetBase) ConfigWidget() {
 	}
 }
 
-// Config is the interface method called by Config that
-// should be defined for each Widget type, which actually does
+// Config is the interface method called by [Widget.ConfigWidget] that
+// should be defined for each [Widget] type, which actually does
 // the configuration work.
 func (wb *WidgetBase) Config(c *Config) {
 	// this must be defined for each widget type

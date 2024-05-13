@@ -56,14 +56,7 @@ func (sl *Splits) SetStyles() {
 		}
 	})
 	sl.OnWidgetAdded(func(w Widget) {
-		if hl, ok := w.(*Handle); ok && w.Parent() == sl.Parts {
-			hl.OnChange(func(e events.Event) {
-				sl.SetSplitAction(hl.IndexInParent(), hl.Value())
-			})
-			w.Style(func(s *styles.Style) {
-				s.Direction = sl.Styles.Direction
-			})
-		} else if w.Parent() == sl.This() {
+		if w.Parent() == sl.This() { // TODO(config): need some way to do this with the new config paradigm
 			// splits elements must scroll independently and grow
 			w.Style(func(s *styles.Style) {
 				s.Overflow.Set(styles.OverflowAuto)
@@ -225,14 +218,19 @@ func (sl *Splits) SetSplitAction(idx int, nwval float32) {
 
 func (sl *Splits) Config(c *Config) {
 	sl.UpdateSplits()
-	sl.ConfigSplitters()
-}
 
-func (sl *Splits) ConfigSplitters() {
-	parts := sl.NewParts()
-	sz := len(sl.Kids)
-	if parts.SetNChildren(sz-1, HandleType, "handle-") {
-		parts.Update()
+	AddConfig(c, "parts", func() *Layout { return NewParts() })
+	for i := range len(sl.Kids) - 1 { // one less handle than children
+		AddConfig(c, "parts/handle-"+strconv.Itoa(i), func() *Handle {
+			w := NewHandle()
+			w.OnChange(func(e events.Event) {
+				sl.SetSplitAction(w.IndexInParent(), w.Value())
+			})
+			w.Style(func(s *styles.Style) {
+				s.Direction = sl.Styles.Direction
+			})
+			return w
+		})
 	}
 }
 
@@ -265,12 +263,6 @@ func (sl *Splits) HandleEvents() {
 			}
 		}
 	})
-}
-
-func (sl *Splits) ApplyStyle() {
-	sl.UpdateSplits()
-	sl.ApplyStyleWidget()
-	sl.ConfigSplitters()
 }
 
 func (sl *Splits) SizeDownSetAllocs(iter int) {
