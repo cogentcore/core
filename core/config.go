@@ -207,12 +207,12 @@ func (c *Config) UpdateWidget(w Widget, parentPath string) {
 		return
 	}
 	for i, child := range children {
-		k := wb.Kids[i].(Widget)
+		cw := wb.Child(i).(Widget)
 		if child.Update != nil {
-			child.Update(k)
+			child.Update(cw)
 		}
 		if len(child.Children) > 0 {
-			child.Children.UpdateWidget(k, child.Path)
+			child.Children.UpdateWidget(cw, child.Path)
 		}
 	}
 }
