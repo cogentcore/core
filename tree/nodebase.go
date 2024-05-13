@@ -678,7 +678,7 @@ func (n *NodeBase) WalkDown(fun func(n Node) bool) {
 outer:
 	for {
 		if cur.This() != nil && fun(cur) { // false return means stop
-			n.This().NodeWalkDown(fun)
+			cur.This().NodeWalkDown(fun)
 			if cur.HasChildren() {
 				tm[cur] = 0 // 0 for no fields
 				nxt := cur.Child(0)
