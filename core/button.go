@@ -335,7 +335,7 @@ func (bt *Button) Config(c *Config) {
 
 	if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
 		if !bt.Indicator.IsSet() && bt.Shortcut != "" {
-			AddConfig(c, "sc-stretch", func() *Stretch { return NewStretch() })
+			AddConfig(c, "shortcut-stretch", func() *Stretch { return NewStretch() })
 			AddConfig(c, "shortcut", func() *Text {
 				w := NewText()
 				w.Style(func(s *styles.Style) {
