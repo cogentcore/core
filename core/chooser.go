@@ -31,7 +31,7 @@ import (
 // Chooser is a drop down selection widget that allows users to choose
 // one option among a list of items.
 type Chooser struct {
-	WidgetBase
+	Frame
 
 	// Type is the styling type of the chooser.
 	Type ChooserTypes
@@ -186,7 +186,7 @@ func (ch *Chooser) SetStyles() {
 	})
 	ch.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(ch) {
-		case "parts/text.parts/trail-icon": // TODO(config): need some way to do this with the new config paradigm
+		case "text.parts/trail-icon": // TODO(config): need some way to do this with the new config paradigm
 			w.Style(func(s *styles.Style) {
 				// indicator does not need to be focused
 				s.SetAbilities(false, abilities.Focusable)
@@ -201,25 +201,16 @@ func (ch *Chooser) Config(c *Config) {
 		ch.SetCurrentIndex(0)
 	}
 
-	AddConfig(c, "parts", func() *Layout {
-		w := NewParts()
-		w.Style(func(s *styles.Style) {
-			s.Align.Content = styles.Center
-			s.Align.Items = styles.Center
-		})
-		return w
-	})
-
 	// editable handles through TextField
 	if ch.Icon.IsSet() && !ch.Editable {
-		AddConfig(c, "parts/icon", func() *Icon {
+		AddConfig(c, "icon", func() *Icon {
 			return NewIcon()
 		}, func(w *Icon) {
 			w.SetIcon(ch.Icon)
 		})
 	}
 	if ch.Editable {
-		AddConfig(c, "parts/text-field",
+		AddConfig(c, "text-field",
 			func() *TextField {
 				w := NewTextField().SetPlaceholder(ch.Placeholder)
 				ch.HandleChooserTextFieldEvents(w)
@@ -245,7 +236,7 @@ func (ch *Chooser) Config(c *Config) {
 				}
 			})
 	} else {
-		AddConfig(c, "parts/text",
+		AddConfig(c, "text",
 			func() *Text {
 				w := NewText()
 				w.Style(func(s *styles.Style) {
@@ -262,7 +253,7 @@ func (ch *Chooser) Config(c *Config) {
 	}
 	// editable handles through TextField
 	if !ch.Editable {
-		AddConfig(c, "parts/indicator",
+		AddConfig(c, "indicator",
 			func() *Icon {
 				w := NewIcon()
 				w.Style(func(s *styles.Style) {
@@ -277,27 +268,14 @@ func (ch *Chooser) Config(c *Config) {
 
 // TextWidget returns the text widget if present.
 func (ch *Chooser) TextWidget() *Text {
-	if ch.Parts == nil {
-		return nil
-	}
-	lbi := ch.Parts.ChildByName("text")
-	if lbi == nil {
-		return nil
-	}
-	return lbi.(*Text)
+	text, _ := ch.ChildByName("text").(*Text)
+	return text
 }
 
-// TextField returns the text field of an editable Chooser
-// if present.
+// TextField returns the text field widget of an editable Chooser if present.
 func (ch *Chooser) TextField() *TextField {
-	if ch.Parts == nil {
-		return nil
-	}
-	tf := ch.Parts.ChildByName("text-field", 2)
-	if tf == nil {
-		return nil
-	}
-	return tf.(*TextField)
+	tf, _ := ch.ChildByName("text-field").(*TextField)
+	return tf
 }
 
 // AddItemsFunc adds the given function to [Chooser.ItemsFuncs].
@@ -603,10 +581,8 @@ func (ch *Chooser) HandleEvents() {
 // It returns false if there are no items.
 func (ch *Chooser) OpenMenu(e events.Event) bool {
 	pos := ch.ContextMenuPos(e)
-	if ch.Parts != nil {
-		if indic := ch.Parts.ChildByName("indicator", 3); indic != nil {
-			pos = indic.(Widget).ContextMenuPos(nil) // use the pos
-		}
+	if indicator, ok := ch.ChildByName("indicator").(Widget); ok {
+		pos = indicator.ContextMenuPos(nil) // use the pos
 	}
 	m := NewMenu(ch.MakeItemsMenu, ch.This().(Widget), pos)
 	if m == nil {

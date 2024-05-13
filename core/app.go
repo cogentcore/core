@@ -288,8 +288,8 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 		ch.SetPlaceholder(fmt.Sprintf("Search (%s)", keymap.Menu.Label()))
 	}
 
-	ch.OnWidgetAdded(func(w Widget) {
-		if w.PathFrom(ch) == "parts/text-field" {
+	ch.OnWidgetAdded(func(w Widget) { // TODO(config)
+		if w.PathFrom(ch) == "text-field" {
 			tf := w.(*TextField)
 			w.Style(func(s *styles.Style) {
 				s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
