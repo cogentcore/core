@@ -8,6 +8,7 @@
 package shell
 
 import (
+	"context"
 	"fmt"
 	"io/fs"
 	"log/slog"
@@ -70,8 +71,11 @@ type Shell struct {
 	Jobs stack.Stack[*exec.CmdIO]
 
 	// Cancel, while the interpreter is running, can be called
-	// to stop the code interpreting.
+	// to stop the code interpreting.  It is connected to the Ctx context.
 	Cancel func()
+
+	// Ctx is the context used for cancelling current shell running
+	Ctx context.Context
 
 	// commandArgs is a stack of args passed to a command, used for simplified
 	// processing of args expressions.
@@ -99,6 +103,7 @@ func NewShell() *Shell {
 	sh.SSH = sshclient.NewConfig(&sh.Config)
 	sh.SSHClients = make(map[string]*sshclient.Client)
 	sh.Commands = make(map[string]func(args ...string))
+	sh.Ctx, sh.Cancel = context.WithCancel(context.Background())
 	sh.InstallBuiltins()
 	return sh
 }
@@ -136,6 +141,14 @@ func (sh *Shell) Host() string {
 		return ""
 	}
 	return "@" + sh.SSHActive + ":" + cl.Host
+}
+
+// SSHByHost returns the SSH client for given host name, with err if not found
+func (sh *Shell) SSHByHost(host string) (*sshclient.Client, error) {
+	if scl, ok := sh.SSHClients[host]; ok {
+		return scl, nil
+	}
+	return nil, fmt.Errorf("ssh connection named: %q not found", host)
 }
 
 // TotalDepth returns the sum of any unresolved paren, brace, or bracket depths.

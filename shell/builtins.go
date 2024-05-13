@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/sshclient"
@@ -25,6 +26,7 @@ func (sh *Shell) InstallBuiltins() {
 	sh.Builtins["set"] = sh.Set
 	sh.Builtins["add-path"] = sh.AddPath
 	sh.Builtins["cossh"] = sh.CoSSH
+	sh.Builtins["scp"] = sh.Scp
 }
 
 // Cd changes the current directory.
@@ -176,6 +178,48 @@ func (sh *Shell) CoSSH(cmdIO *exec.CmdIO, args ...string) error {
 				err = fmt.Errorf("cosh: ssh connection named: %q not found", name)
 			}
 		}
+	}
+	return err
+}
+
+// Scp performs file copy over SSH connection, with the remote filename
+// prefixed with the @name: and the local filename un-prefixed.
+// The order is from -> to, as in standard cp.
+// The remote filename is automatically relative to the current working
+// directory on the remote host.
+func (sh *Shell) Scp(cmdIO *exec.CmdIO, args ...string) error {
+	if len(args) != 2 {
+		return fmt.Errorf("scp: requires exactly two arguments")
+	}
+	var lfn, hfn string
+	toHost := false
+	if args[0][0] == '@' {
+		hfn = args[0]
+		lfn = args[1]
+	} else if args[1][0] == '@' {
+		hfn = args[1]
+		lfn = args[0]
+		toHost = true
+	} else {
+		return fmt.Errorf("scp: one of the files must a remote host filename, specified by @name:")
+	}
+
+	ci := strings.Index(hfn, ":")
+	if ci < 0 {
+		return fmt.Errorf("scp: remote host filename does not contain a : after the host name")
+	}
+	host := hfn[1:ci]
+	hfn = hfn[ci+1:]
+
+	cl, err := sh.SSHByHost(host)
+	if err != nil {
+		return err
+	}
+
+	if toHost {
+		err = cl.CopyLocalFileToHost(sh.Ctx, lfn, hfn)
+	} else {
+		err = cl.CopyHostToLocalFile(sh.Ctx, hfn, lfn)
 	}
 	return err
 }

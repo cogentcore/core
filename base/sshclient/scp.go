@@ -56,13 +56,13 @@ func (cl *Client) CopyLocalToHost(ctx context.Context, r io.Reader, size int64, 
 // If the host filename is not absolute (i.e, doesn't start with /)
 // then the current Dir path on the Client is prepended to the target path.
 // Use context.Background() for a basic context if none otherwise in use.
-func (cl *Client) CopyHostToLocalFile(ctx context.Context, localFilename, hostFilename string) error {
+func (cl *Client) CopyHostToLocalFile(ctx context.Context, hostFilename, localFilename string) error {
 	f, err := os.Create(localFilename)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	return cl.CopyHostToLocal(ctx, f, hostFilename)
+	return cl.CopyHostToLocal(ctx, hostFilename, f)
 }
 
 // CopyHostToLocal copies given filename on the already-connected remote host,
@@ -71,7 +71,7 @@ func (cl *Client) CopyHostToLocalFile(ctx context.Context, localFilename, hostFi
 // If the host filename is not absolute (i.e, doesn't start with /)
 // then the current Dir path on the Client is prepended to the target path.
 // Use context.Background() for a basic context if none otherwise in use.
-func (cl *Client) CopyHostToLocal(ctx context.Context, w io.Writer, hostFilename string) error {
+func (cl *Client) CopyHostToLocal(ctx context.Context, hostFilename string, w io.Writer) error {
 	if err := cl.mustScpClient(); err != nil {
 		return err
 	}

@@ -102,13 +102,15 @@ ls *.tsv | @host cat > files.txt
 
 ### scp to copy files easily
 
-The builtin `scp` function allows easy copying of files across hosts, using the persistent connections established with `cossh` instead of creating new connections as in the standard cp command:
+The builtin `scp` function allows easy copying of files across hosts, using the persistent connections established with `cossh` instead of creating new connections as in the standard scp command.
+
+`scp` is _always_ run from the local host, with the remote host filename specified as `@name:remotefile`
 
 ```sh
-scp @name:hostfile.tsv @0:localfile.tsv
+scp @name:hostfile.tsv localfile.tsv
 ```
 
-Importantly, file wildcard globbing works as expected:
+TODO: Importantly, file wildcard globbing works as expected:
 ```sh
 scp @name:*.tsv @0:data/
 ```
