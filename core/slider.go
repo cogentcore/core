@@ -32,7 +32,7 @@ import (
 // the rendered area.
 // The [styles.Style.Direction] determines the direction in which the slider slides.
 type Slider struct {
-	WidgetBase
+	Layout
 
 	// Type is the type of the slider, which determines its visual
 	// and functional properties. The default type, [SliderSlider],
@@ -484,13 +484,10 @@ func (sr *Slider) HandleKeys() {
 
 func (sr *Slider) Config(c *Config) {
 	if sr.Icon.IsNil() {
-		sr.DeleteParts()
+		sr.DeleteChildren()
 		return
 	}
-	AddConfig(c, "parts", func() *Layout {
-		return NewParts()
-	})
-	AddConfig(c, "parts/icon", func() *Icon {
+	AddConfig(c, "icon", func() *Icon {
 		w := NewIcon()
 		w.Style(func(s *styles.Style) {
 			s.Font.Size.Dp(24)
@@ -566,13 +563,12 @@ func (sr *Slider) Render() {
 		tpos = tpos.AddDim(od, 0.5*sz.Dim(od)) // ctr
 
 		// render thumb as icon or box
-		if sr.Icon.IsSet() && sr.Parts.HasChildren() {
-			ic := sr.Parts.Child(0).(*Icon)
+		if sr.Icon.IsSet() && sr.HasChildren() {
+			ic := sr.Child(0).(*Icon)
 			tpos.SetSub(thsz.MulScalar(.5))
 			ic.Geom.Pos.Total = tpos
 			ic.SetContentPosFromPos()
 			ic.SetBBoxes()
-			sr.Parts.RenderWidget()
 		} else {
 			tabg := sr.Styles.ComputeActualBackgroundFor(sr.ThumbColor, pabg)
 			pc.FillStyle.Color = tabg

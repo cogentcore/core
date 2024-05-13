@@ -157,12 +157,15 @@ func (ly *Layout) RenderChildren() {
 
 func (ly *Layout) RenderWidget() {
 	if ly.PushBounds() {
-		ly.RenderChildren()
+		ly.This().(Widget).Render()
 		ly.RenderParts()
+		ly.RenderChildren()
 		ly.RenderScrolls()
 		ly.PopBounds()
 	}
 }
+
+func (ly *Layout) Render() {}
 
 // ChildWithFocus returns a direct child of this layout that either is the
 // current window focus item, or contains that focus item (along with its
