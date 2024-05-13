@@ -130,39 +130,7 @@ func (ts *Tabs) SetStyles() {
 		}
 	})
 	ts.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(ts) {
-		case "tabs":
-			w.Style(func(s *styles.Style) {
-				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
-				s.Margin.Zero()
-				s.Padding.Zero()
-				s.Gap.Set(units.Dp(4))
-
-				if ts.Type.Effective(ts).IsColumn() {
-					s.Direction = styles.Column
-					s.Grow.Set(0, 1)
-				} else {
-					s.Direction = styles.Row
-					s.Grow.Set(1, 0)
-					s.Wrap = true
-				}
-
-				// s.Border.Style.Set(styles.BorderNone)
-				// s.Border.Style.Bottom = styles.BorderSolid
-				// s.Border.Width.Bottom.SetDp(1)
-				// s.Border.Color.Bottom = colors.Scheme.OutlineVariant
-			})
-		case "frame":
-			frame := w.(*Frame)
-			w.Style(func(s *styles.Style) {
-				s.Display = styles.Stacked
-				frame.SetFlag(true, LayoutStackTopOnly) // key for allowing each tab to have its own size
-				s.Min.X.Dp(160)
-				s.Min.Y.Dp(96)
-				s.Grow.Set(1, 1)
-			})
-		}
-		if w.Parent() == ts.ChildByName("frame") {
+		if w.Parent() == ts.ChildByName("frame") { // TODO(config): figure out how to get this to work with new config paradigm
 			// tab frames must scroll independently
 			w.Style(func(s *styles.Style) {
 				s.Overflow.Set(styles.OverflowAuto)
@@ -421,49 +389,58 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 	return true
 }
 
-// ConfigNewTabButton configures the new tab button at the end of the list of tabs, if applicable.
-func (ts *Tabs) ConfigNewTabButton() bool {
-	ntabs := ts.NumTabs()
-	tb := ts.Tabs()
-	nkids := len(tb.Kids)
-	if ts.NewTabButton {
-		if nkids == ntabs+1 {
-			return false
-		}
-		nt := NewButton(tb).SetIcon(icons.Add).SetType(ButtonAction)
-		nt.SetName("new-tab")
-		nt.OnClick(func(e events.Event) {
-			ts.NewTab("New tab")
-			ts.SelectTabIndex(ts.NumTabs() - 1)
-		})
-		return true
-	} else {
-		if nkids == ntabs {
-			return false
-		}
-		tb.DeleteChildAtIndex(nkids - 1)
-		return true
-	}
-}
-
 // Config configures the tabs widget children if necessary.
 // Only the 2 primary children (Frames) need to be configured.
 // Re-config is needed when the type of tabs changes, but not
 // when a new tab is added, which only requires a new layout pass.
 func (ts *Tabs) Config(c *Config) {
-	config := tree.Config{}
-	// frame only comes before tabs in bottom nav bar
+	AddConfig(c, "tabs", func() *Frame {
+		w := NewFrame()
+		w.Style(func(s *styles.Style) {
+			s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
+			s.Margin.Zero()
+			s.Padding.Zero()
+			s.Gap.Set(units.Dp(4))
+
+			if ts.Type.Effective(ts).IsColumn() {
+				s.Direction = styles.Column
+				s.Grow.Set(0, 1)
+			} else {
+				s.Direction = styles.Row
+				s.Grow.Set(1, 0)
+				s.Wrap = true
+			}
+		})
+		return w
+	}, func(w *Frame) {
+		tc := &Config{}
+		if ts.NewTabButton {
+			AddConfig(tc, "new-tab", func() *Button {
+				w := NewButton().SetIcon(icons.Add).SetType(ButtonAction)
+				w.OnClick(func(e events.Event) {
+					ts.NewTab("New tab")
+					ts.SelectTabIndex(ts.NumTabs() - 1)
+				})
+				return w
+			})
+		}
+		tc.ConfigWidget(w, "")
+	})
+	AddConfig(c, "frame", func() *Frame {
+		w := NewFrame()
+		w.Style(func(s *styles.Style) {
+			s.Display = styles.Stacked
+			w.SetFlag(true, LayoutStackTopOnly) // key for allowing each tab to have its own size
+			s.Min.X.Dp(160)
+			s.Min.Y.Dp(96)
+			s.Grow.Set(1, 1)
+		})
+		return w
+	})
+	// frame comes before tabs in bottom navigation bar
 	if ts.Type.Effective(ts) == NavigationBar {
-		config.Add(FrameType, "frame")
-		config.Add(FrameType, "tabs")
-	} else {
-		config.Add(FrameType, "tabs")
-		config.Add(FrameType, "frame")
+		(*c)[0], (*c)[1] = (*c)[1], (*c)[0]
 	}
-	if ts.ConfigChildren(config) {
-		ts.NeedsLayout()
-	}
-	ts.ConfigNewTabButton()
 }
 
 // Tabs returns the layout containing the tabs (the first element within us).
