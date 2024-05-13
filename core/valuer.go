@@ -49,6 +49,7 @@ func AddValueWidgetType[T any, W ValueWidget]() {
 func init() {
 	AddValueWidgetType[string, *Text]()
 	AddValueWidgetType[bool, *Switch]()
+	AddValueWidgetType[float32, *Spinner]()
 }
 
 // NewWidgetValue converts the given value into an appropriate [WidgetValue]
