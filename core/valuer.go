@@ -5,6 +5,10 @@
 package core
 
 import (
+	"fmt"
+	"reflect"
+
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
@@ -68,8 +72,8 @@ func NewValueWidget(value any, parent ...tree.Node) ValueWidget {
 // ToValueWidget converts the given value into an appropriate [ValueWidget].
 // The given value should typically be a pointer. It does NOT call [Bind];
 // see [NewValueWidget] for a version that does. It first checks the
-// [ValueWidgeter] interface, then the [ValueWidgetTypes], then the
-// [ValueWidgetConverters], and finally it falls back on a set of default
+// [ValueWidgeter] interface, then the [ValueWidgetConverters], then
+// the [ValueWidgetTypes], and finally it falls back on a set of default
 // bindings. If any step results in nil, it falls back on the next step.
 func ToValueWidget(value any) ValueWidget {
 	if vwr, ok := value.(ValueWidgeter); ok {
@@ -77,15 +81,24 @@ func ToValueWidget(value any) ValueWidget {
 			return vw
 		}
 	}
-	if vwt, ok := ValueWidgetTypes[types.TypeNameValue(value)]; ok {
-		if vw := vwt(value); vw != nil {
-			return vw
-		}
-	}
 	for _, converter := range ValueWidgetConverters {
 		if vw := converter(value); vw != nil {
 			return vw
 		}
+	}
+	typ := reflectx.NonPointerType(reflect.TypeOf(value))
+	if vwt, ok := ValueWidgetTypes[types.TypeName(typ)]; ok {
+		if vw := vwt(value); vw != nil {
+			return vw
+		}
+	}
+	kind := typ.Kind()
+	switch {
+	case kind >= reflect.Int && kind <= reflect.Float64:
+		if _, ok := value.(fmt.Stringer); ok {
+			return NewTextField()
+		}
+		return NewSpinner()
 	}
 	return NewTextField()
 }
