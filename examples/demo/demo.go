@@ -370,6 +370,13 @@ func values(ts *core.Tabs) {
 		fmt.Println("The alignment is now", align)
 	})
 
+	var state states.States
+	state.SetFlag(true, states.Hovered)
+	state.SetFlag(true, states.Dragging)
+	core.Bind(&state, core.NewSwitches(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The state is now", state)
+	})
+
 	core.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
 		views.InspectorWindow(ts.Scene)
 	})

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
@@ -33,6 +34,9 @@ type Switches struct {
 	// Mutex is whether to make the items mutually exclusive
 	// (checking one turns off all the others).
 	Mutex bool
+
+	// bitFlagValue is the associated bit flag value if non-nil (for [ValueWidget]).
+	bitFlagValue enums.BitFlagSetter
 }
 
 // SwitchItem contains the properties of one item in a [Switches].
@@ -43,6 +47,38 @@ type SwitchItem struct {
 
 	// Tooltip is the tooltip displayed to the user for this item.
 	Tooltip string
+}
+
+func (sw *Switches) WidgetValue() any {
+	if sw.bitFlagValue != nil {
+		sw.UpdateBitFlag(sw.bitFlagValue)
+		return sw.bitFlagValue
+	}
+	item := sw.SelectedItem()
+	if item == nil {
+		return nil
+	}
+	return item.Text
+}
+
+func (sw *Switches) SetWidgetValue(value any) error {
+	if bf, ok := value.(enums.BitFlag); ok {
+		sw.UpdateFromBitFlag(bf)
+		return nil
+	}
+	return sw.SetSelectedItem(reflectx.ToString(value))
+}
+
+func (sw *Switches) OnBind(value any) {
+	if e, ok := value.(enums.Enum); ok {
+		sw.SetEnum(e)
+	}
+	if bf, ok := value.(enums.BitFlagSetter); ok {
+		sw.bitFlagValue = bf
+		sw.SetType(SwitchChip)
+	} else {
+		sw.bitFlagValue = nil
+	}
 }
 
 func (sw *Switches) OnInit() {
@@ -73,14 +109,14 @@ func (sw *Switches) SetStyles() {
 // SelectItem activates a given item but does NOT send a change event.
 // See SelectItemAction for event emitting version.
 // returns error if index is out of range.
-func (sw *Switches) SelectItem(idx int) error {
-	if idx >= sw.NumChildren() || idx < 0 {
-		return fmt.Errorf("core.Switches: SelectItem, index out of range: %v", idx)
+func (sw *Switches) SelectItem(index int) error {
+	if index >= sw.NumChildren() || index < 0 {
+		return fmt.Errorf("core.Switches.SelectItem: index out of range: %v", index)
 	}
 	if sw.Mutex {
-		sw.UnCheckAllBut(idx)
+		sw.UnCheckAllBut(index)
 	}
-	cs := sw.Child(idx).(*Switch)
+	cs := sw.Child(index).(*Switch)
 	cs.SetChecked(true)
 	sw.NeedsRender()
 	return nil
@@ -89,8 +125,8 @@ func (sw *Switches) SelectItem(idx int) error {
 // SelectItemAction activates a given item and emits a change event.
 // This is mainly for Mutex use.
 // returns error if index is out of range.
-func (sw *Switches) SelectItemAction(idx int) error {
-	err := sw.SelectItem(idx)
+func (sw *Switches) SelectItemAction(index int) error {
+	err := sw.SelectItem(index)
 	if err != nil {
 		return err
 	}
@@ -109,6 +145,16 @@ func (sw *Switches) SelectedItem() *SwitchItem {
 		}
 	}
 	return nil
+}
+
+// SetSelectedItem selects the item with the given text.
+func (sw *Switches) SetSelectedItem(text string) error {
+	for i, item := range sw.Items {
+		if item.Text == text {
+			return sw.SelectItem(i)
+		}
+	}
+	return fmt.Errorf("core.Switches.SetSelectedItem: item not found: %v", text)
 }
 
 // SelectedItems returns all of the currently selected (checked) switch items.
