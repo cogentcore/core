@@ -19,7 +19,6 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
@@ -86,43 +85,12 @@ func (sv *StructView) SetStruct(st any) *StructView {
 	return sv
 }
 
-// UpdateFields updates each of the value-view widgets for the fields --
-// called by the ViewSig update
-func (sv *StructView) UpdateFields() {
-	for _, vv := range sv.Values {
-		// we do not update focused elements to prevent panics
-		if wb := vv.AsWidgetBase(); wb != nil {
-			if wb.StateIs(states.Focused) {
-				continue
-			}
-		}
-		vv.Update()
-	}
-	sv.NeedsRender()
-}
-
-// UpdateField updates the value-view widget for the named field
-func (sv *StructView) UpdateField(field string) {
-	for _, vv := range sv.Values {
-		if vv.Name() == field {
-			vv.Update()
-			break
-		}
-	}
-	sv.NeedsRender()
-}
-
-// Config configures the view
 func (sv *StructView) Config(c *core.Config) {
-	if ks, ok := sv.Struct.(tree.Node); ok {
-		if ks == nil || ks.This() == nil {
-			return
-		}
-	}
-	if sv.HasChildren() {
-		sv.ConfigStructGrid()
-		return
-	}
+	core.AddConfig(c, "grid", func() *core.Frame {
+		w := core.NewFrame()
+		return w
+	})
+
 	sg := core.NewFrame(sv)
 	sg.SetName("struct-grid")
 	sg.Style(func(s *styles.Style) {
