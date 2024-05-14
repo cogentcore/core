@@ -140,6 +140,13 @@ const (
 	ChooserOutlined
 )
 
+func (ch *Chooser) WidgetValue() any { return &ch.CurrentItem.Value }
+
+func (ch *Chooser) SetWidgetValue(value any) error {
+	ch.SetCurrentValue(value)
+	return nil
+}
+
 func (ch *Chooser) OnInit() {
 	ch.WidgetBase.OnInit()
 	ch.HandleEvents()

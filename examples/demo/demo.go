@@ -365,6 +365,11 @@ func values(ts *core.Tabs) {
 		fmt.Println("The switch is now", on)
 	})
 
+	align := styles.Center
+	core.Bind(&align, core.NewChooser(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The alignment is now", align)
+	})
+
 	core.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
 		views.InspectorWindow(ts.Scene)
 	})
