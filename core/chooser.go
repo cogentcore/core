@@ -186,7 +186,7 @@ func (ch *Chooser) SetStyles() {
 	})
 	ch.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(ch) {
-		case "text.parts/trail-icon": // TODO(config): need some way to do this with the new config paradigm
+		case "text-field/trail-icon": // TODO(config): need some way to do this with the new config paradigm
 			w.Style(func(s *styles.Style) {
 				// indicator does not need to be focused
 				s.SetAbilities(false, abilities.Focusable)
