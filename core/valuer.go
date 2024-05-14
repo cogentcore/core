@@ -52,7 +52,6 @@ func AddValueWidgetType[T any, W ValueWidget]() {
 
 func init() {
 	AddValueWidgetType[bool, *Switch]()
-	AddValueWidgetType[float32, *Spinner]()
 }
 
 // NewValueWidget converts the given value into an appropriate [ValueWidget]

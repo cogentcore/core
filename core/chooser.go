@@ -9,10 +9,12 @@ import (
 	"fmt"
 	"image"
 	"log/slog"
+	"reflect"
 	"slices"
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
@@ -143,6 +145,7 @@ const (
 func (ch *Chooser) WidgetValue() any { return &ch.CurrentItem.Value }
 
 func (ch *Chooser) SetWidgetValue(value any) error {
+	value = reflectx.NonPointerValue(reflect.ValueOf(value)).Interface()
 	ch.SetCurrentValue(value)
 	return nil
 }
