@@ -286,7 +286,11 @@ func (bt *Button) Config(c *Config) {
 
 	if bt.Icon.IsSet() {
 		AddConfig(c, "icon", func() *Icon {
-			return NewIcon()
+			w := NewIcon()
+			w.Style(func(s *styles.Style) {
+				s.Font.Size.Dp(18)
+			})
+			return w
 		}, func(w *Icon) {
 			w.SetIcon(bt.Icon)
 		})
