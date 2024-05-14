@@ -10,14 +10,12 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"reflect"
 	"strings"
 	"syscall"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/shell"
-	"github.com/mitchellh/go-homedir"
 	"github.com/traefik/yaegi/interp"
 	"github.com/traefik/yaegi/stdlib"
 )
@@ -71,19 +69,8 @@ func NewInterpreter(options interp.Options) *Interpreter {
 // Prompt returns the appropriate REPL prompt to show the user.
 func (in *Interpreter) Prompt() string {
 	dp := in.Shell.TotalDepth()
-	host := in.Shell.Host()
-	base := ""
-	if host != "" {
-		base = host + ":"
-	}
 	if dp == 0 {
-		hdir := errors.Log1(homedir.Dir())
-		rel := errors.Log1(filepath.Rel(hdir, in.Shell.Config.Dir))
-		// if it has to go back, then it is not in home dir, so no ~
-		if strings.Contains(rel, "..") {
-			return base + in.Shell.Config.Dir + string(filepath.Separator) + " > "
-		}
-		return base + filepath.Join("~", rel) + string(filepath.Separator) + " > "
+		return in.Shell.HostAndDir() + " > "
 	}
 	res := "> "
 	for range dp {

@@ -179,7 +179,7 @@ func (cl *Client) GetHomeDir() error {
 	if err != nil {
 		return fmt.Errorf("ssh: unable to get home directory through pwd: %v", err)
 	}
-	cl.HomeDir = buf.String()
+	cl.HomeDir = strings.TrimSpace(buf.String())
 	cl.Dir = cl.HomeDir
 	fmt.Println("home directory:", cl.HomeDir)
 	return nil
