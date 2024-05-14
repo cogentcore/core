@@ -9,7 +9,19 @@ import (
 )
 
 func TestNewValueWidget(t *testing.T) {
-	b := NewBody()
-	NewValueWidget(true, b)
-	b.AssertRender(t, "valuer/bool")
+	type test struct {
+		name  string
+		value any
+	}
+	values := []test{
+		{"bool", true},
+		{"int", 42},
+		{"float", 3.14},
+		{"string", "hello"},
+	}
+	for _, value := range values {
+		b := NewBody()
+		NewValueWidget(value.value, b)
+		b.AssertRender(t, "valuer/"+value.name)
+	}
 }
