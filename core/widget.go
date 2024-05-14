@@ -240,9 +240,12 @@ type WidgetBase struct { //core:no-new
 	// which can use HTML formatting.
 	Tooltip string
 
-	// Parts are a separate tree of sub-widgets that implement discrete parts
-	// of a widget.  Positions are relative to the parent widget.
-	// These are fully managed by the parent widget.
+	// Parts are a separate tree of sub-widgets that can be used to store
+	// orthogonal parts of a widget when necessary to separate them from children.
+	// For example, tree views use parts to separate their internal parts from
+	// the other child tree view nodes. Composite widgets like buttons should
+	// NOT use parts to store their components; parts should only be used when
+	// absolutely necessary.
 	Parts *Layout `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Geom has the full layout geometry for size and position of this Widget

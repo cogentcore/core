@@ -97,7 +97,7 @@ func (sp *Spinner) SetStyles() {
 	})
 	sp.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(sp) {
-		case "parts/lead-icon", "parts/trail-icon":
+		case "lead-icon", "trail-icon": // TODO(config)
 			w.Style(func(s *styles.Style) {
 				// icons do not get separate focus, as people can
 				// use the arrow keys to get the same effect
