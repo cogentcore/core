@@ -31,7 +31,7 @@ type Interpreter struct {
 
 // NewInterpreter returns a new [Interpreter] initialized with the given options.
 // It automatically imports the standard library and configures necessary shell
-// functions. It also calls [Interpreter.RunConfig].
+// functions. End user app must call [Interp.ImportUsed() and [Interpreter.RunConfig].
 func NewInterpreter(options interp.Options) *Interpreter {
 	in := &Interpreter{}
 	in.Shell = shell.NewShell()
@@ -60,8 +60,6 @@ func NewInterpreter(options interp.Options) *Interpreter {
 			"AddCommand":  reflect.ValueOf(in.Shell.AddCommand),
 		},
 	})
-	in.Interp.ImportUsed()
-	in.RunConfig()
 	go in.MonitorSignals()
 	return in
 }

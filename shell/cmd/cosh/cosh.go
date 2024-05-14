@@ -50,6 +50,9 @@ func Run(c *Config) error { //cli:cmd -root
 		return err
 	}
 	in := interpreter.NewInterpreter(interp.Options{})
+	in.Interp.ImportUsed() // todo: this must be run in context of "main" app,
+	// can't build it in.
+	in.RunConfig()
 	err = in.Eval(string(b))
 	return err
 }
@@ -57,6 +60,8 @@ func Run(c *Config) error { //cli:cmd -root
 // Interactive runs an interactive shell that allows the user to input cosh.
 func Interactive(c *Config) error {
 	in := interpreter.NewInterpreter(interp.Options{})
+	in.Interp.ImportUsed()
+	in.RunConfig()
 
 	rl, err := readline.NewFromConfig(&readline.Config{
 		AutoComplete: &shell.ReadlineCompleter{Shell: in.Shell},
