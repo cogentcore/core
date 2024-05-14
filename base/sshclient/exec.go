@@ -7,6 +7,7 @@ package sshclient
 import (
 	"bytes"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"cogentcore.org/core/base/exec"
@@ -60,10 +61,15 @@ func (cl *Client) run(ses *ssh.Session, sio *exec.StdIOState, start, output bool
 	if exec.IsPipe(sio.In) {
 		ses.Stdin = sio.In
 	}
-	// todo: add cd command first.
-	// ses.Dir = cl.Dir
 
+	cdto := ""
 	cmds := cmd + " " + strings.Join(args, " ")
+	if cl.Dir != "" {
+		if cmd == "cd" {
+			cdto = args[0]
+		}
+		cmds = `cd "` + cl.Dir + `"; ` + cmds
+	}
 
 	if !cl.PrintOnly {
 		switch {
@@ -90,6 +96,14 @@ func (cl *Client) run(ses *ssh.Session, sio *exec.StdIOState, start, output bool
 		// or expand this list
 		if cmd == "cp" || cmd == "ls" || cmd == "mv" {
 			logx.InitColor()
+		}
+
+		if cdto != "" {
+			if filepath.IsAbs(cdto) {
+				cl.Dir = filepath.Clean(cdto)
+			} else {
+				cl.Dir = filepath.Clean(filepath.Join(cl.Dir, cdto))
+			}
 		}
 	}
 	return out, err

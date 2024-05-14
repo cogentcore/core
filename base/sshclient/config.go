@@ -47,6 +47,10 @@ type Config struct {
 	// case it must be specified in the Client.Connect call.
 	Host string
 
+	// home directory of user on remote host,
+	// which is captured at initial connection time.
+	HomeDir string
+
 	// ScpPath is the path to the `scp` executable on the host,
 	// for copying files between local and remote host.
 	// Defaults to /usr/bin/scp
@@ -58,6 +62,7 @@ type Config struct {
 func NewConfig(cfg *exec.Config) *Config {
 	c := &Config{Config: *cfg}
 	c.User.Defaults()
+	c.Dir = "" // start empty until we get homedir
 	c.ScpPath = "/usr/bin/scp"
 	return c
 }
