@@ -9,6 +9,7 @@ import (
 	"reflect"
 
 	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/enums"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
@@ -91,6 +92,11 @@ func ToValueWidget(value any) ValueWidget {
 			return vw
 		}
 	}
+
+	if _, ok := value.(enums.Enum); ok {
+		return NewChooser()
+	}
+
 	kind := typ.Kind()
 	switch {
 	case kind >= reflect.Int && kind <= reflect.Float64:

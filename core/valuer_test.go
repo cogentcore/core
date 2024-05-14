@@ -6,6 +6,8 @@ package core
 
 import (
 	"testing"
+
+	"cogentcore.org/core/styles"
 )
 
 func TestNewValueWidget(t *testing.T) {
@@ -18,6 +20,7 @@ func TestNewValueWidget(t *testing.T) {
 		{"int", 42},
 		{"float", 3.14},
 		{"string", "hello"},
+		{"enum", styles.Center},
 	}
 	for _, value := range values {
 		b := NewBody()
