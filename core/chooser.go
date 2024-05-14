@@ -147,6 +147,12 @@ func (ch *Chooser) SetWidgetValue(value any) error {
 	return nil
 }
 
+func (ch *Chooser) OnBind(value any) {
+	if e, ok := value.(enums.Enum); ok {
+		ch.SetEnum(e)
+	}
+}
+
 func (ch *Chooser) OnInit() {
 	ch.WidgetBase.OnInit()
 	ch.HandleEvents()

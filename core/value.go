@@ -20,10 +20,17 @@ type ValueWidget interface {
 // ValueWidgetSetter is an optional interface that [ValueWidget]s can implement
 // to customize how the associated widget value is set from the bound value.
 type ValueWidgetSetter interface {
-	ValueWidget
 
 	// SetWidgetValue sets the associated widget value from the bound value.
 	SetWidgetValue(value any) error
+}
+
+// OnBinder is an optional interface that [ValueWidget]s can implement to
+// do something when the widget is bound to a value.
+type OnBinder interface {
+
+	// OnBind is called when the widget is bound to the given value.
+	OnBind(value any)
 }
 
 // Bind binds the given value to the given [ValueWidget] such that the values of
@@ -32,7 +39,7 @@ type ValueWidgetSetter interface {
 func Bind[T ValueWidget](value any, vw T) T {
 	wb := vw.AsWidget()
 	wb.ValueUpdate = func() {
-		if vws, ok := ValueWidget(vw).(ValueWidgetSetter); ok {
+		if vws, ok := any(vw).(ValueWidgetSetter); ok {
 			ErrorSnackbar(vw, vws.SetWidgetValue(value))
 		} else {
 			ErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))
@@ -40,6 +47,9 @@ func Bind[T ValueWidget](value any, vw T) T {
 	}
 	wb.ValueOnChange = func() {
 		ErrorSnackbar(vw, reflectx.SetRobust(value, vw.WidgetValue()))
+	}
+	if ob, ok := any(vw).(OnBinder); ok {
+		ob.OnBind(value)
 	}
 	return vw
 }
