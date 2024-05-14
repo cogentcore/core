@@ -6,6 +6,7 @@ package exec
 
 import (
 	"bytes"
+	"fmt"
 	"os/exec"
 	"strings"
 )
@@ -19,6 +20,22 @@ type CmdIO struct {
 
 	// Cmd is the [exec.Cmd]
 	Cmd *exec.Cmd
+}
+
+func (c *CmdIO) String() string {
+	if c.Cmd == nil {
+		return "<nil>"
+	}
+	str := ""
+	if c.Cmd.ProcessState != nil {
+		str = c.Cmd.ProcessState.String()
+	} else if c.Cmd.Process != nil {
+		str = fmt.Sprintf("%d  	", c.Cmd.Process.Pid)
+	} else {
+		str = "no process info"
+	}
+	str += " " + c.Cmd.String()
+	return str
 }
 
 // NewCmdIO returns a new [CmdIO] initialized with StdIO settings from given Config

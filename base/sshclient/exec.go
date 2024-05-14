@@ -6,8 +6,8 @@ package sshclient
 
 import (
 	"bytes"
-	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"cogentcore.org/core/base/exec"
@@ -24,10 +24,10 @@ import (
 // Ran reports if the command ran (rather than was not found or not executable).
 // Code reports the exit code the command returned if it ran. If err == nil, ran
 // is always true and code is always 0.
-func (cl *Client) exec(cmd string, args ...string) (ran bool, err error) {
+func (cl *Client) Exec(sio *exec.StdIOState, start, output bool, cmd string, args ...string) (string, error) {
 	ses, err := cl.NewSession()
 	if err != nil {
-		return
+		return "", err
 	}
 	defer ses.Close()
 
@@ -43,45 +43,53 @@ func (cl *Client) exec(cmd string, args ...string) (ran bool, err error) {
 	for i := range args {
 		args[i] = os.Expand(args[i], expand)
 	}
-	ran, code, err := cl.run(ses, cmd, args...)
-	_ = code
-	if err == nil {
-		return true, nil
-	}
-	return ran, fmt.Errorf(`failed to run "%s %s: %v"`, cmd, strings.Join(args, " "), err)
+	return cl.run(ses, sio, start, output, cmd, args...)
 }
 
-func (cl *Client) run(ses *ssh.Session, cmd string, args ...string) (ran bool, code int, err error) {
+func (cl *Client) run(ses *ssh.Session, sio *exec.StdIOState, start, output bool, cmd string, args ...string) (string, error) {
 	// todo: env is established on connection!
 	// for k, v := range cl.Env {
 	// 	ses.Env = append(ses.Env, k+"="+v)
 	// }
-	// need to store in buffer so we can color and print commands and stdout correctly
-	// (need to declare regardless even if we aren't using so that it is accessible)
-	ebuf := &bytes.Buffer{}
-	obuf := &bytes.Buffer{}
-	if cl.Buffer {
-		ses.Stderr = ebuf
-		ses.Stdout = obuf
-	} else {
-		ses.Stderr = cl.StdIO.Err
-		ses.Stdout = cl.StdIO.Out
-	}
-	// need to do now because we aren't buffering, or we are guaranteed to print them
-	// regardless of whether there is an error anyway, so we should print it now so
-	// people can see it earlier (especially important if it runs for a long time).
-	if !cl.Buffer || cl.Echo != nil {
+	var err error
+	out := ""
+	ses.Stderr = sio.Err // note: no need to save previous b/c not retained
+	ses.Stdout = sio.Out
+	if cl.Echo != nil {
 		cl.PrintCmd(cmd+" "+strings.Join(args, " "), err)
 	}
+	if exec.IsPipe(sio.In) {
+		ses.Stdin = sio.In
+	}
 
-	// ses.Stdin = cl.StdIO.in
-	// todo: add cd command first.
-	// ses.Dir = cl.Dir
-
+	cdto := ""
 	cmds := cmd + " " + strings.Join(args, " ")
+	if cl.Dir != "" {
+		if cmd == "cd" {
+			cdto = args[0]
+		}
+		cmds = `cd "` + cl.Dir + `"; ` + cmds
+	}
 
 	if !cl.PrintOnly {
-		err = ses.Run(cmds)
+		switch {
+		case start:
+			err = ses.Start(cmds)
+			go func() {
+				ses.Wait()
+				sio.PopToStart()
+			}()
+		case output:
+			buf := &bytes.Buffer{}
+			ses.Stdout = buf
+			err = ses.Run(cmds)
+			if sio.Out != nil {
+				sio.Out.Write(buf.Bytes())
+			}
+			out = strings.TrimSuffix(buf.String(), "\n")
+		default:
+			err = ses.Run(cmds)
+		}
 
 		// we must call InitColor after calling a system command
 		// TODO(kai): maybe figure out a better solution to this
@@ -89,23 +97,14 @@ func (cl *Client) run(ses *ssh.Session, cmd string, args ...string) (ran bool, c
 		if cmd == "cp" || cmd == "ls" || cmd == "mv" {
 			logx.InitColor()
 		}
-	}
 
-	if cl.Buffer {
-		// if we have an error, we print the commands and stdout regardless of the config info
-		// (however, we don't print the command if we are guaranteed to print it regardless, as
-		// we already printed it above in that case)
-		if cl.Echo == nil {
-			cl.PrintCmd(cmds, err)
-		}
-		sout := cl.GetWriter(cl.StdIO.Out, err)
-		if sout != nil {
-			sout.Write(obuf.Bytes())
-		}
-		estr := ebuf.String()
-		if estr != "" && cl.StdIO.Err != nil {
-			cl.StdIO.Err.Write([]byte(logx.ErrorColor(estr)))
+		if cdto != "" {
+			if filepath.IsAbs(cdto) {
+				cl.Dir = filepath.Clean(cdto)
+			} else {
+				cl.Dir = filepath.Clean(filepath.Join(cl.Dir, cdto))
+			}
 		}
 	}
-	return exec.CmdRan(err), exec.ExitStatus(err), err
+	return out, err
 }

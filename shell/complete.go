@@ -37,6 +37,24 @@ func (sh *Shell) CompleteMatch(data any, text string, posLine, posChar int) (md 
 			Desc: filepath.Join(sh.Config.Dir, entry.Name()),
 		})
 	}
+	if parent == "" {
+		for cmd, _ := range sh.Builtins {
+			comps = append(comps, complete.Completion{
+				Text: cmd,
+				Icon: icons.Terminal,
+				Desc: "Builtin command: " + cmd,
+			})
+		}
+		for cmd, _ := range sh.Commands {
+			comps = append(comps, complete.Completion{
+				Text: cmd,
+				Icon: icons.Terminal,
+				Desc: "Command: " + cmd,
+			})
+		}
+		// todo: write something that looks up all files on path -- should cache that per
+		// path string setting
+	}
 	md.Matches = complete.MatchSeedCompletion(comps, md.Seed)
 	return md
 }

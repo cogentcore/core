@@ -8,11 +8,13 @@
 package shell
 
 import (
+	"context"
 	"fmt"
 	"io/fs"
 	"log/slog"
 	"os"
 	"slices"
+	"strconv"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
@@ -27,11 +29,13 @@ import (
 // Shell represents one running shell context.
 type Shell struct {
 
-	// Builtins are all the builtin shell commands
-	Builtins map[string]func(args ...string) error
-
 	// Config is the [exec.Config] used to run commands.
 	Config exec.Config
+
+	// StdIOWrappers are IO wrappers sent to the interpreter, so we can
+	// control the IO streams used within the interpreter.
+	// Call SetWrappers on this with another StdIO object to update settings.
+	StdIOWrappers exec.StdIO
 
 	// ssh connection, configuration
 	SSH *sshclient.Config
@@ -57,15 +61,27 @@ type Shell struct {
 	// stack of runtime errors
 	Errors []error
 
+	// Builtins are all the builtin shell commands
+	Builtins map[string]func(cmdIO *exec.CmdIO, args ...string) error
+
 	// commands that have been defined, which can be run in Exec mode.
 	Commands map[string]func(args ...string)
 
-	// Jobs is a stack of commands running in the background (via Start instead of Run)
+	// Jobs is a stack of commands running in the background
+	// (via Start instead of Run)
 	Jobs stack.Stack[*exec.CmdIO]
 
 	// Cancel, while the interpreter is running, can be called
 	// to stop the code interpreting.
+	// It is connected to the Ctx context, by StartContext()
+	// Both can be nil.
 	Cancel func()
+
+	// Ctx is the context used for cancelling current shell running
+	// a single chunk of code, typically from the interpreter.
+	// We are not able to pass the context around so it is set here,
+	// in the StartContext function. Clear when done with ClearContext.
+	Ctx context.Context
 
 	// commandArgs is a stack of args passed to a command, used for simplified
 	// processing of args expressions.
@@ -89,12 +105,27 @@ func NewShell() *Shell {
 			Buffer: false,
 		},
 	}
-	sh.Config.StdIO.StdAll()
+	sh.Config.StdIO.SetFromOS()
 	sh.SSH = sshclient.NewConfig(&sh.Config)
 	sh.SSHClients = make(map[string]*sshclient.Client)
 	sh.Commands = make(map[string]func(args ...string))
 	sh.InstallBuiltins()
 	return sh
+}
+
+// StartContext starts a processing context,
+// setting the Ctx and Cancel Fields.
+// Call EndContext when current operation finishes.
+func (sh *Shell) StartContext() context.Context {
+	sh.Ctx, sh.Cancel = context.WithCancel(context.Background())
+	return sh.Ctx
+}
+
+// EndContext ends a processing context, clearing the
+// Ctx and Cancel fields.
+func (sh *Shell) EndContext() {
+	sh.Ctx = nil
+	sh.Cancel = nil
 }
 
 // Close closes any resources associated with the shell,
@@ -130,6 +161,14 @@ func (sh *Shell) Host() string {
 		return ""
 	}
 	return "@" + sh.SSHActive + ":" + cl.Host
+}
+
+// SSHByHost returns the SSH client for given host name, with err if not found
+func (sh *Shell) SSHByHost(host string) (*sshclient.Client, error) {
+	if scl, ok := sh.SSHClients[host]; ok {
+		return scl, nil
+	}
+	return nil, fmt.Errorf("ssh connection named: %q not found", host)
 }
 
 // TotalDepth returns the sum of any unresolved paren, brace, or bracket depths.
@@ -226,4 +265,37 @@ func (sh *Shell) TranspileConfig() error {
 // AddCommand adds given command to list of available commands
 func (sh *Shell) AddCommand(name string, cmd func(args ...string)) {
 	sh.Commands[name] = cmd
+}
+
+// DeleteJob deletes the given job and returns true if successful
+func (sh *Shell) DeleteJob(cmdIO *exec.CmdIO) bool {
+	idx := slices.Index(sh.Jobs, cmdIO)
+	if idx >= 0 {
+		sh.Jobs = slices.Delete(sh.Jobs, idx, idx+1)
+		return true
+	}
+	return false
+}
+
+// JobIDExpand expands %n job id values in args with the full PID
+// returns number of PIDs expanded
+func (sh *Shell) JobIDExpand(args []string) int {
+	exp := 0
+	for i, id := range args {
+		if id[0] == '%' {
+			idx, err := strconv.Atoi(id[1:])
+			if err == nil {
+				if idx > 0 && idx <= len(sh.Jobs) {
+					jb := sh.Jobs[idx-1]
+					if jb.Cmd != nil && jb.Cmd.Process != nil {
+						args[i] = fmt.Sprintf("%d", jb.Cmd.Process.Pid)
+						exp++
+					}
+				} else {
+					sh.AddError(fmt.Errorf("cosh: job number out of range: %d", idx))
+				}
+			}
+		}
+	}
+	return exp
 }

@@ -8,4 +8,8 @@ Each command execution process creates its own `ssh.Session` object that manages
 
 A good reference for similar package: https://github.com/helloyi/go-sshclient
 
+# scp
+
+The https://github.com/bramvdbogaerde/go-scp package is used to implement the `scp` protocol on top of our client.
+
 

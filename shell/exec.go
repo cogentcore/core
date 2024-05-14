@@ -26,35 +26,49 @@ import (
 //     a goroutine forked to Wait for it and close its IO
 //   - output = return the output of the command as a string (otherwise return is "")
 func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
-	retstr := ""
+	out := ""
 	if !errOk && len(sh.Errors) > 0 {
-		return retstr
+		return out
 	}
 	cmdIO := exec.NewCmdIO(&sh.Config)
 	cmdIO.StackStart()
+	if start {
+		cmdIO.PushIn(nil) // no stdin for bg
+	}
 	cl, scmd, sargs := sh.ExecArgs(cmdIO, errOk, cmd, args...)
 	if scmd == "" {
-		return retstr
+		return out
 	}
+	var err error
 	if cl != nil {
-		// todo: need to trap cd ?
-		// todo: improve!
-		sh.AddError(cl.Run(scmd, sargs...))
+		switch {
+		case start:
+			err = cl.Start(&cmdIO.StdIOState, scmd, sargs...)
+		case output:
+			out, err = cl.Output(&cmdIO.StdIOState, scmd, sargs...)
+		default:
+			err = cl.Run(&cmdIO.StdIOState, scmd, sargs...)
+		}
+		if !errOk {
+			sh.AddError(err)
+		}
 	} else {
-		if !sh.RunBuiltinOrCommand(scmd, sargs...) {
+		if !sh.RunBuiltinOrCommand(cmdIO, scmd, sargs...) {
 			sh.isCommand.Push(false)
-			var err error
 			switch {
 			case start:
 				err = sh.Config.StartIO(cmdIO, scmd, sargs...)
 				sh.Jobs.Push(cmdIO)
 				go func() {
+					if !cmdIO.OutIsPipe() {
+						fmt.Printf("[%d]  %s\n", len(sh.Jobs), cmdIO.String())
+					}
 					cmdIO.Cmd.Wait()
 					cmdIO.PopToStart()
-					sh.Jobs.Pop() // todo: remove actual guy
+					sh.DeleteJob(cmdIO)
 				}()
 			case output:
-				retstr, err = sh.Config.OutputIO(cmdIO, scmd, sargs...)
+				out, err = sh.Config.OutputIO(cmdIO, scmd, sargs...)
 			default:
 				err = sh.Config.RunIO(cmdIO, scmd, sargs...)
 			}
@@ -64,23 +78,35 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 			sh.isCommand.Pop()
 		}
 	}
-	cmdIO.PopToStart()
-	return retstr
+	if !start {
+		cmdIO.PopToStart()
+	}
+	return out
 }
 
 // RunBuiltinOrCommand runs a builtin or a command
-func (sh *Shell) RunBuiltinOrCommand(cmd string, args ...string) bool {
+func (sh *Shell) RunBuiltinOrCommand(cmdIO *exec.CmdIO, cmd string, args ...string) bool {
 	if fun, has := sh.Commands[cmd]; has {
 		sh.commandArgs.Push(args)
 		sh.isCommand.Push(true)
-		fun(args...) // todo: need to do the IO associated with this!
+
+		// note: we need to set both os. and wrapper versions, so it works the same
+		// in compiled vs. interpreted mode
+		oldsh := sh.Config.StdIO.Set(&cmdIO.StdIO)
+		oldwrap := sh.StdIOWrappers.SetWrappers(&cmdIO.StdIO)
+		oldstd := cmdIO.SetToOS()
+		fun(args...)
+		oldstd.SetToOS()
+		sh.StdIOWrappers.SetWrappers(oldwrap)
+		sh.Config.StdIO = *oldsh
+
 		sh.isCommand.Pop()
 		sh.commandArgs.Pop()
 		return true
 	}
 	if fun, has := sh.Builtins[cmd]; has {
 		sh.isCommand.Push(false)
-		sh.AddError(fun(args...)) // todo: IO!
+		sh.AddError(fun(cmdIO, args...))
 		sh.isCommand.Pop()
 		return true
 	}
@@ -111,9 +137,6 @@ func (sh *Shell) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (
 	}
 	scmd := reflectx.ToString(cmd)
 	cl := sh.ActiveSSH()
-	if len(args) == 0 {
-		return cl, scmd, nil
-	}
 	isCmd := sh.isCommand.Peek()
 	sargs := make([]string, 0, len(args))
 	var err error
@@ -133,7 +156,7 @@ func (sh *Shell) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (
 		}
 		sargs = append(sargs, s)
 	}
-	if scmd == "@" {
+	if scmd[0] == '@' {
 		newHost := ""
 		if scmd == "@0" { // local
 			cl = nil
@@ -158,11 +181,12 @@ func (sh *Shell) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (
 		s := sargs[i]
 		switch {
 		case s[0] == '>':
-			sargs = sh.OutToFile(cmdIO, errOk, sargs, i)
+			sargs = sh.OutToFile(cl, cmdIO, errOk, sargs, i)
 		case s[0] == '|':
-			sargs = sh.OutToPipe(cmdIO, errOk, sargs, i)
-		case isCmd && strings.HasPrefix(s, "args"):
+			sargs = sh.OutToPipe(cl, cmdIO, errOk, sargs, i)
+		case cl == nil && isCmd && strings.HasPrefix(s, "args"):
 			sargs = sh.CmdArgs(errOk, sargs, i)
+			i-- // back up because we consume this one
 		}
 	}
 	// do globbing late here so we don't have to wade through everything.
@@ -183,14 +207,14 @@ func (sh *Shell) ExecArgs(cmdIO *exec.CmdIO, errOk bool, cmd any, args ...any) (
 }
 
 // OutToFile processes the > arg that sends output to a file
-func (sh *Shell) OutToFile(cmdIO *exec.CmdIO, errOk bool, sargs []string, i int) []string {
+func (sh *Shell) OutToFile(cl *sshclient.Client, cmdIO *exec.CmdIO, errOk bool, sargs []string, i int) []string {
 	n := len(sargs)
 	s := sargs[i]
 	sn := len(s)
 	fn := ""
 	narg := 1
 	if i < n-1 {
-		fn = sargs[1+1]
+		fn = sargs[i+1]
 		narg = 2
 	}
 	appn := false
@@ -207,12 +231,17 @@ func (sh *Shell) OutToFile(cmdIO *exec.CmdIO, errOk bool, sargs []string, i int)
 		fn = s[1:]
 		narg = 1
 	}
-	fmt.Println(s, appn, errf, narg, fn)
-	sargs = slices.Delete(sargs, i, i+narg)
 	if fn == "" {
 		sh.HandleArgErr(errOk, fmt.Errorf("cosh: no output file specified"))
 		return sargs
 	}
+	if cl != nil {
+		if !strings.HasPrefix(fn, "@0:") {
+			return sargs
+		}
+		fn = fn[3:]
+	}
+	sargs = slices.Delete(sargs, i, i+narg)
 	// todo: process @n: expressions here -- if @0 then it is the same
 	// if @1, then need to launch an ssh "cat >[>] file" with pipe from command as stdin
 	var f *os.File
@@ -234,13 +263,14 @@ func (sh *Shell) OutToFile(cmdIO *exec.CmdIO, errOk bool, sargs []string, i int)
 }
 
 // OutToPipe processes the | arg that sends output to a pipe
-func (sh *Shell) OutToPipe(cmdIO *exec.CmdIO, errOk bool, sargs []string, i int) []string {
+func (sh *Shell) OutToPipe(cl *sshclient.Client, cmdIO *exec.CmdIO, errOk bool, sargs []string, i int) []string {
 	s := sargs[i]
 	sn := len(s)
 	errf := false
 	if sn > 1 && s[1] == '&' {
 		errf = true
 	}
+	// todo: what to do here?
 	sargs = slices.Delete(sargs, i, i+1)
 	cmdIO.PushOutPipe()
 	if errf {
@@ -257,7 +287,7 @@ func (sh *Shell) CmdArgs(errOk bool, sargs []string, i int) []string {
 	// sn := len(s)
 	args := sh.commandArgs.Peek()
 
-	fmt.Println("command args:", args)
+	// fmt.Println("command args:", args)
 
 	switch {
 	case sargs[i] == "args...":

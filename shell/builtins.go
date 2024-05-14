@@ -5,26 +5,33 @@
 package shell
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
+	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/sshclient"
 	"github.com/mitchellh/go-homedir"
 )
 
 // InstallBuiltins adds the builtin shell commands to [Shell.Builtins].
 func (sh *Shell) InstallBuiltins() {
-	sh.Builtins = make(map[string]func(args ...string) error)
+	sh.Builtins = make(map[string]func(cmdIO *exec.CmdIO, args ...string) error)
 	sh.Builtins["cd"] = sh.Cd
 	sh.Builtins["exit"] = sh.Exit
+	sh.Builtins["jobs"] = sh.JobsCmd
+	sh.Builtins["kill"] = sh.Kill
 	sh.Builtins["set"] = sh.Set
 	sh.Builtins["add-path"] = sh.AddPath
 	sh.Builtins["cossh"] = sh.CoSSH
+	sh.Builtins["scp"] = sh.Scp
 }
 
 // Cd changes the current directory.
-func (sh *Shell) Cd(args ...string) error {
+func (sh *Shell) Cd(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) > 1 {
 		return fmt.Errorf("no more than one argument can be passed to cd")
 	}
@@ -55,23 +62,64 @@ func (sh *Shell) Cd(args ...string) error {
 }
 
 // Exit exits the shell.
-func (sh *Shell) Exit(args ...string) error {
+func (sh *Shell) Exit(cmdIO *exec.CmdIO, args ...string) error {
 	os.Exit(0)
 	return nil
 }
 
 // Set sets the given environment variable to the given value.
-func (sh *Shell) Set(args ...string) error {
+func (sh *Shell) Set(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) != 2 {
 		return fmt.Errorf("expected two arguments, got %d", len(args))
 	}
 	return os.Setenv(args[0], args[1])
 }
 
-// AddPath adds the given path(s) to $PATH.
-func (sh *Shell) AddPath(args ...string) error {
+// JobsCmd is the builtin jobs command
+func (sh *Shell) JobsCmd(cmdIO *exec.CmdIO, args ...string) error {
+	for i, jb := range sh.Jobs {
+		cmdIO.Printf("[%d]  %s\n", i+1, jb.String())
+	}
+	return nil
+}
+
+// Kill kills a job by job number or PID.
+// Just expands the job id expressions %n into PIDs and calls system kill.
+func (sh *Shell) Kill(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("expected at least one argument")
+		return fmt.Errorf("cosh kill: expected at least one argument")
+	}
+	sh.JobIDExpand(args)
+	sh.Config.RunIO(cmdIO, "kill", args...)
+	return nil
+}
+
+// Fg foregrounds a job by job number
+func (sh *Shell) Fg(cmdIO *exec.CmdIO, args ...string) error {
+	if len(args) != 1 {
+		return fmt.Errorf("cosh fg: requires exactly one job id argument")
+	}
+	jid := args[0]
+	exp := sh.JobIDExpand(args)
+	if exp != 1 {
+		return fmt.Errorf("cosh fg: argument was not a job id in the form %%n")
+	}
+	jno, _ := strconv.Atoi(jid[1:]) // guaranteed good
+	job := sh.Jobs[jno]
+	fmt.Printf("foregrounding job [%d]\n", jno)
+	_ = job
+	// todo: the problem here is we need to change the stdio for running job
+	// job.Cmd.Wait() // wait
+	// * probably need to have wrapper StdIO for every exec so we can flexibly redirect for fg, bg commands.
+	// * likewise, need to run everything effectively as a bg job with our own explicit Wait, which we can then communicate with to move from fg to bg.
+
+	return nil
+}
+
+// AddPath adds the given path(s) to $PATH.
+func (sh *Shell) AddPath(cmdIO *exec.CmdIO, args ...string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("cosh add-path expected at least one argument")
 	}
 	path := os.Getenv("PATH")
 	for _, arg := range args {
@@ -90,7 +138,7 @@ func (sh *Shell) AddPath(args ...string) error {
 //   - host [name] -- connects to a server specified in first arg and switches
 //     to using it, with optional name instead of default sequential number.
 //   - close -- closes all open connections, or the specified one
-func (sh *Shell) CoSSH(args ...string) error {
+func (sh *Shell) CoSSH(cmdIO *exec.CmdIO, args ...string) error {
 	if len(args) < 1 {
 		return fmt.Errorf("cossh: requires at least one argument")
 	}
@@ -131,6 +179,53 @@ func (sh *Shell) CoSSH(args ...string) error {
 				err = fmt.Errorf("cosh: ssh connection named: %q not found", name)
 			}
 		}
+	}
+	return err
+}
+
+// Scp performs file copy over SSH connection, with the remote filename
+// prefixed with the @name: and the local filename un-prefixed.
+// The order is from -> to, as in standard cp.
+// The remote filename is automatically relative to the current working
+// directory on the remote host.
+func (sh *Shell) Scp(cmdIO *exec.CmdIO, args ...string) error {
+	if len(args) != 2 {
+		return fmt.Errorf("scp: requires exactly two arguments")
+	}
+	var lfn, hfn string
+	toHost := false
+	if args[0][0] == '@' {
+		hfn = args[0]
+		lfn = args[1]
+	} else if args[1][0] == '@' {
+		hfn = args[1]
+		lfn = args[0]
+		toHost = true
+	} else {
+		return fmt.Errorf("scp: one of the files must a remote host filename, specified by @name:")
+	}
+
+	ci := strings.Index(hfn, ":")
+	if ci < 0 {
+		return fmt.Errorf("scp: remote host filename does not contain a : after the host name")
+	}
+	host := hfn[1:ci]
+	hfn = hfn[ci+1:]
+
+	cl, err := sh.SSHByHost(host)
+	if err != nil {
+		return err
+	}
+
+	ctx := sh.Ctx
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	if toHost {
+		err = cl.CopyLocalFileToHost(ctx, lfn, hfn)
+	} else {
+		err = cl.CopyHostToLocalFile(ctx, hfn, lfn)
 	}
 	return err
 }

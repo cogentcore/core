@@ -5,12 +5,14 @@
 package sshclient
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/bramvdbogaerde/go-scp"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/knownhosts"
 )
@@ -29,6 +31,9 @@ type Client struct {
 	// sessionCounter increments number of Sessions added
 	// over the lifetime of the Client.
 	sessionCounter int
+
+	// scpClient manages scp file copying
+	scpClient *scp.Client
 }
 
 // NewClient returns a new Client using given [Config] configuration
@@ -45,6 +50,7 @@ func (cl *Client) Close() {
 	if cl.Client != nil {
 		cl.Client.Close()
 	}
+	cl.scpClient = nil
 	cl.Client = nil
 }
 
@@ -122,6 +128,7 @@ func (cl *Client) Connect(host string) error {
 
 	cl.Sessions = make(map[string]*ssh.Session)
 	cl.Client = client
+	cl.GetHomeDir()
 	return nil
 }
 
@@ -156,4 +163,24 @@ func (cl *Client) WaitSession(name string, ses *ssh.Session) error {
 	cl.Sessions[name] = ses
 	cl.sessionCounter++
 	return ses.Wait()
+}
+
+// GetHomeDir runs "pwd" on the host to get the users home dir,
+// called right after connecting.
+func (cl *Client) GetHomeDir() error {
+	ses, err := cl.NewSession()
+	if err != nil {
+		return err
+	}
+	defer ses.Close()
+	buf := &bytes.Buffer{}
+	ses.Stdout = buf
+	err = ses.Run("pwd")
+	if err != nil {
+		return fmt.Errorf("ssh: unable to get home directory through pwd: %v", err)
+	}
+	cl.HomeDir = buf.String()
+	cl.Dir = cl.HomeDir
+	fmt.Println("home directory:", cl.HomeDir)
+	return nil
 }

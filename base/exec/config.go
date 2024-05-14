@@ -104,14 +104,14 @@ func Major() *Config {
 			Env:    map[string]string{},
 			Echo:   os.Stdout,
 		}
-		c.StdIO.StdAll()
+		c.StdIO.SetFromOS()
 		return c
 	}
 	c := &Config{
 		Buffer: true,
 		Env:    map[string]string{},
 	}
-	c.StdIO.StdAll()
+	c.StdIO.SetFromOS()
 	c.StdIO.Out = nil
 	return c
 }
@@ -147,14 +147,14 @@ func Minor() *Config {
 			Env:    map[string]string{},
 			Echo:   os.Stdout,
 		}
-		c.StdIO.StdAll()
+		c.StdIO.SetFromOS()
 		return c
 	}
 	c := &Config{
 		Buffer: true,
 		Env:    map[string]string{},
 	}
-	c.StdIO.StdAll()
+	c.StdIO.SetFromOS()
 	c.StdIO.Out = nil
 	return c
 }
@@ -190,14 +190,14 @@ func Verbose() *Config {
 			Env:    map[string]string{},
 			Echo:   os.Stdout,
 		}
-		c.StdIO.StdAll()
+		c.StdIO.SetFromOS()
 		return c
 	}
 	c := &Config{
 		Buffer: true,
 		Env:    map[string]string{},
 	}
-	c.StdIO.StdAll()
+	c.StdIO.SetFromOS()
 	c.StdIO.Out = nil
 	return c
 }

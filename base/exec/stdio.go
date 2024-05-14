@@ -5,6 +5,7 @@
 package exec
 
 import (
+	"fmt"
 	"io"
 	"io/fs"
 	"log/slog"
@@ -27,11 +28,53 @@ type StdIO struct {
 	In io.Reader
 }
 
-// StdAll sets all to os.Std*
-func (st *StdIO) StdAll() {
-	st.Out = os.Stdout
-	st.Err = os.Stderr
-	st.In = os.Stdin
+// SetFromOS sets all our IO to current os.Std*
+func (st *StdIO) SetFromOS() {
+	st.Out, st.Err, st.In = os.Stdout, os.Stderr, os.Stdin
+}
+
+// SetAll sets all our IO from given args
+func (st *StdIO) SetAll(out, err io.Writer, in io.Reader) {
+	st.Out, st.Err, st.In = out, err, in
+}
+
+// Set sets our values from other StdIO, returning
+// the current values at time of call, to restore later.
+func (st *StdIO) Set(o *StdIO) *StdIO {
+	cur := *st
+	*st = *o
+	return &cur
+}
+
+// SetToOS sets the current IO to os.Std*, returning
+// a StdIO with the current IO settings prior to this call,
+// which can be used to restore.
+// Note: os.Std* are *os.File types, and this function will panic
+// if the current IO are not actually *os.Files.
+// The results of a prior SetToOS call will do the right thing for
+// saving and restoring the os state.
+func (st *StdIO) SetToOS() *StdIO {
+	cur := &StdIO{}
+	cur.SetFromOS()
+	os.Stdout = st.Out.(*os.File)
+	os.Stderr = st.Err.(*os.File)
+	os.Stdin = st.In.(*os.File)
+	return cur
+}
+
+// Print prints to the [StdIO.Out] Stdout
+func (st *StdIO) Print(v ...any) {
+	fmt.Fprint(st.Out, v...)
+}
+
+// Println prints to the [StdIO.Out]
+func (st *StdIO) Println(v ...any) {
+	fmt.Fprintln(st.Out, v...)
+}
+
+// Printf prints to the [StdIO.Out] Stdout
+func (st *StdIO) Printf(f string, v ...any) {
+	fmt.Fprintf(st.Out, f, v...)
 }
 
 // IsPipe returns true if the given object is an os.File corresponding to a Pipe,
@@ -179,6 +222,7 @@ func (st *StdIOState) PopToStart() {
 	for len(st.ErrStack) > st.ErrStart {
 		er := st.PopErr()
 		if !st.ErrIsInOut(er) {
+			fmt.Println("close err")
 			CloseWriter(er)
 		}
 	}
@@ -215,4 +259,43 @@ func CloseReader(r io.Reader) {
 	if st, ok := r.(io.Closer); ok {
 		st.Close()
 	}
+}
+
+// WriteWrapper is an io.Writer that wraps another io.Writer
+type WriteWrapper struct {
+	io.Writer
+}
+
+// ReadWrapper is an io.Reader that wraps another io.Reader
+type ReadWrapper struct {
+	io.Reader
+}
+
+// NewWrappers initializes this StdIO with wrappers around given StdIO
+func (st *StdIO) NewWrappers(o *StdIO) {
+	st.Out = &WriteWrapper{Writer: o.Out}
+	st.Err = &WriteWrapper{Writer: o.Err}
+	st.In = &ReadWrapper{Reader: o.In}
+}
+
+// SetWrappers sets the wrappers to current values from given StdIO,
+// returning a copy of the wrapped values previously in place at start of call,
+// which can be used in restoring state later.
+// The wrappers must have been created using NewWrappers initially.
+func (st *StdIO) SetWrappers(o *StdIO) *StdIO {
+	cur := st.GetWrapped()
+	st.Out.(*WriteWrapper).Writer = o.Out
+	st.Err.(*WriteWrapper).Writer = o.Err
+	st.In.(*ReadWrapper).Reader = o.In
+	return cur
+}
+
+// GetWrapped returns the current wrapped values as a StdIO.
+// The wrappers must have been created using NewWrappers initially.
+func (st *StdIO) GetWrapped() *StdIO {
+	o := &StdIO{}
+	o.Out = st.Out.(*WriteWrapper).Writer
+	o.Err = st.Err.(*WriteWrapper).Writer
+	o.In = st.In.(*ReadWrapper).Reader
+	return o
 }
