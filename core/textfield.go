@@ -281,7 +281,7 @@ func (tf *TextField) SetStyles() {
 
 func (tf *TextField) Destroy() {
 	tf.StopCursor()
-	tf.WidgetBase.Destroy()
+	tf.Layout.Destroy()
 }
 
 // Text returns the current text -- applies any unapplied changes first, and
@@ -1912,7 +1912,7 @@ func (tf *TextField) SizeDown(iter int) bool {
 }
 
 func (tf *TextField) ScenePos() {
-	tf.WidgetBase.ScenePos()
+	tf.Layout.ScenePos()
 	tf.SetEffPosAndSize()
 }
 
