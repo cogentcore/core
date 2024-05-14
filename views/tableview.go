@@ -18,7 +18,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
@@ -213,16 +212,36 @@ func (tv *TableView) Config(c *core.Config) {
 
 	tv.ConfigGrid(c, nWidgPerRow)
 
+	svi.UpdateMaxWidths()
+
 	for i := 0; i < tv.VisRows; i++ {
 		si := tv.StartIndex + i
-		var val reflect.Value
-		if si < tv.SliceSize {
-			val = reflectx.OnePointerUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
-		} else {
-			val = tv.ElVal
-		}
+		svi.ConfigRow(c, i, si)
+	}
+}
 
-		svi.ConfigRow(c, i, si, val)
+func (tv *TableView) UpdateMaxWidths() {
+	if tv.SliceSize == 0 {
+		return
+	}
+	for fli := 0; fli < tv.numVisibleFields; fli++ {
+		field := tv.visibleFields[fli]
+		tv.colMaxWidths[fli] = 0
+		val := tv.SliceElValue(0).Elem()
+		fval := val.FieldByIndex(field.Index)
+		// _, isicon := vv.(*IconValue)
+		isicon := false
+		isString := fval.Type().Kind() == reflect.String
+		if !isString || isicon {
+			continue
+		}
+		mxw := 0
+		for rw := 0; rw < tv.SliceSize; rw++ {
+			val := tv.SliceElValue(rw).Elem()
+			str := reflectx.ToString(val.FieldByIndex(field.Index).Interface())
+			mxw = max(mxw, len(str))
+		}
+		tv.colMaxWidths[fli] = mxw
 	}
 }
 
@@ -300,11 +319,12 @@ func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	return
 }
 
-func (tv *TableView) ConfigRow(c *core.Config, i, si int, val reflect.Value) {
+func (tv *TableView) ConfigRow(c *core.Config, i, si int) {
 	svi := tv.This().(SliceViewer)
 	itxt := strconv.Itoa(i)
 	sitxt := strconv.Itoa(si)
 	invis := si >= tv.SliceSize
+	val := tv.SliceElValue(si)
 	// stru := val.Interface()
 
 	if tv.Is(SliceViewShowIndex) {
@@ -335,59 +355,14 @@ func (tv *TableView) ConfigRow(c *core.Config, i, si int, val reflect.Value) {
 		core.AddConfig(c, "grid/"+valnm, func() core.ValueWidget {
 			w := core.NewValueWidget(fval.Interface())
 			wb := w.AsWidget()
-
+			tv.ConfigValueWidget(w, i)
 			// vv.SetStructValue(fval.Addr(), stru, &field, vpath)
-			wb.SetReadOnly(tv.IsReadOnly())
-
-			w.SetProperty(SliceViewRowProperty, i)
 			w.SetProperty(SliceViewColProperty, fli)
-
-			w.Style(func(s *styles.Style) {
-				if tv.IsReadOnly() {
-					s.SetAbilities(true, abilities.DoubleClickable)
-					s.SetAbilities(false, abilities.Hoverable, abilities.Focusable, abilities.Activatable, abilities.TripleClickable)
-					s.SetReadOnly(true)
-				}
-				row, col := tv.WidgetIndex(w)
-				row += tv.StartIndex
-				svi.StyleValueWidget(w, s, row, col)
-				if row < tv.SliceSize {
-					svi.StyleRow(w, row, col)
-				}
-			})
-			wb.OnSelect(func(e events.Event) {
-				e.SetHandled()
-				row, _ := tv.WidgetIndex(w)
-				tv.UpdateSelectRow(row, e.SelectMode())
-				tv.LastClick = row + tv.StartIndex
-			})
-			wb.OnDoubleClick(tv.HandleEvent)
-			w.On(events.ContextMenu, tv.HandleEvent)
 			if !tv.IsReadOnly() {
 				wb.OnChange(func(e events.Event) {
 					tv.SendChange()
 				})
 				wb.OnInput(tv.HandleEvent)
-			}
-			if i == 0 && tv.SliceSize > 0 {
-				tv.colMaxWidths[fli] = 0
-				// _, isicon := vv.(*IconValue)
-				isicon := false
-				isString := fval.Type().Kind() == reflect.String
-				if !isicon && isString {
-					mxw := 0
-					for rw := 0; rw < tv.SliceSize; rw++ {
-						sval := reflectx.OnePointerUnderlyingValue(tv.SliceNPVal.Index(rw))
-						elem := sval.Elem()
-						if !elem.IsValid() {
-							continue
-						}
-						fval := elem.FieldByIndex(field.Index)
-						str := fval.String()
-						mxw = max(mxw, len(str))
-					}
-					tv.colMaxWidths[fli] = mxw
-				}
 			}
 			return w
 		}, func(w core.ValueWidget) {

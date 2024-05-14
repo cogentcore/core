@@ -120,9 +120,13 @@ type SliceViewer interface {
 	// and sets SliceSize if changed.
 	UpdateSliceSize() int
 
+	// UpdateMaxWidths updates the maximum widths per column based
+	// on estimates from length of strings (for string values)
+	UpdateMaxWidths()
+
 	// ConfigRow adds config for one row at given widget row index,
-	// and starting index: si = i + StartIndex, and given val
-	ConfigRow(c *core.Config, i, si int, val reflect.Value)
+	// and starting index: si = i + StartIndex
+	ConfigRow(c *core.Config, i, si int)
 
 	// StyleValueWidget performs additional value widget styling
 	StyleValueWidget(w core.Widget, s *styles.Style, row, col int)
@@ -456,20 +460,42 @@ func (sv *SliceViewBase) Config(c *core.Config) {
 
 	sv.ConfigGrid(c, nWidgPerRow)
 
+	svi.UpdateMaxWidths()
+
 	for i := 0; i < sv.VisRows; i++ {
 		si := sv.StartIndex + i
-		var val reflect.Value
-		if si < sv.SliceSize {
-			val = reflectx.OnePointerUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
-		} else {
-			val = sv.ElVal
-		}
-		if val.IsZero() {
-			val = sv.ElVal
-		}
-
-		svi.ConfigRow(c, i, si, val)
+		svi.ConfigRow(c, i, si)
 	}
+}
+
+func (sv *SliceViewBase) UpdateMaxWidths() {
+	sv.MaxWidth = 0
+	npv := reflectx.NonPointerValue(sv.ElVal)
+	isString := npv.Type().Kind() == reflect.String
+	if !isString || sv.SliceSize == 0 {
+		return
+	}
+	mxw := 0
+	for rw := 0; rw < sv.SliceSize; rw++ {
+		str := reflectx.ToString(sv.SliceElValue(rw).Interface())
+		mxw = max(mxw, len(str))
+	}
+	sv.MaxWidth = mxw
+}
+
+// SliceElValue returns reflect.Value of slice element at given index
+// or ElVal if out of range.
+func (sv *SliceViewBase) SliceElValue(si int) reflect.Value {
+	var val reflect.Value
+	if si < sv.SliceSize {
+		val = reflectx.OnePointerUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
+	} else {
+		val = sv.ElVal
+	}
+	if val.IsZero() {
+		val = sv.ElVal
+	}
+	return val
 }
 
 func (sv *SliceViewBase) ConfigGrid(c *core.Config, nWidgPerRow int) {
@@ -506,9 +532,40 @@ func (sv *SliceViewBase) ConfigGrid(c *core.Config, nWidgPerRow int) {
 	})
 }
 
-func (sv *SliceViewBase) ConfigRow(c *core.Config, i, si int, val reflect.Value) {
+func (sv *SliceViewBase) ConfigValueWidget(w core.ValueWidget, i int) {
+	svi := sv.This().(SliceViewer)
+	wb := w.AsWidget()
+	w.SetProperty(SliceViewRowProperty, i)
+	w.Style(func(s *styles.Style) {
+		if sv.IsReadOnly() {
+			s.SetAbilities(true, abilities.DoubleClickable)
+			s.SetAbilities(false, abilities.Hoverable, abilities.Focusable, abilities.Activatable, abilities.TripleClickable)
+			s.SetReadOnly(true)
+		}
+		row, col := sv.WidgetIndex(w)
+		row += sv.StartIndex
+		svi.StyleValueWidget(w, s, row, col)
+		if row < sv.SliceSize {
+			svi.StyleRow(w, row, col)
+		}
+	})
+	wb.OnSelect(func(e events.Event) {
+		e.SetHandled()
+		row, _ := sv.WidgetIndex(w)
+		sv.UpdateSelectRow(row, e.SelectMode())
+		sv.LastClick = row + sv.StartIndex
+	})
+	wb.OnDoubleClick(sv.HandleEvent)
+	w.On(events.ContextMenu, sv.HandleEvent)
+	if !sv.IsReadOnly() {
+		wb.OnInput(sv.HandleEvent)
+	}
+}
+
+func (sv *SliceViewBase) ConfigRow(c *core.Config, i, si int) {
 	itxt := strconv.Itoa(i)
 	invis := si >= sv.SliceSize
+	val := sv.SliceElValue(si)
 
 	if sv.Is(SliceViewShowIndex) {
 		sv.ConfigGridIndex(c, i, si, itxt, invis)
@@ -517,47 +574,11 @@ func (sv *SliceViewBase) ConfigRow(c *core.Config, i, si int, val reflect.Value)
 	core.AddConfig(c, "grid/value-"+itxt, func() core.ValueWidget {
 		w := core.NewValueWidget(val.Interface())
 		wb := w.AsWidget()
-		w.SetProperty(SliceViewRowProperty, i)
-		w.Style(func(s *styles.Style) {
-			if sv.IsReadOnly() {
-				s.SetAbilities(true, abilities.DoubleClickable)
-				s.SetAbilities(false, abilities.Hoverable, abilities.Focusable, abilities.Activatable, abilities.TripleClickable)
-				s.SetReadOnly(true)
-			}
-			row, col := sv.WidgetIndex(w)
-			row += sv.StartIndex
-			sv.This().(SliceViewer).StyleValueWidget(w, s, row, col)
-			if row < sv.SliceSize {
-				sv.This().(SliceViewer).StyleRow(w, row, col)
-			}
-		})
-		wb.OnSelect(func(e events.Event) {
-			e.SetHandled()
-			row, _ := sv.WidgetIndex(w)
-			sv.UpdateSelectRow(row, e.SelectMode())
-			sv.LastClick = row + sv.StartIndex
-		})
-		wb.OnDoubleClick(sv.HandleEvent)
-		w.On(events.ContextMenu, sv.HandleEvent)
+		sv.ConfigValueWidget(w, i)
 		if !sv.IsReadOnly() {
 			wb.OnChange(func(e events.Event) {
 				sv.SendChange(e)
 			})
-			wb.OnInput(sv.HandleEvent)
-		}
-		if i == 0 {
-			sv.MaxWidth = 0
-			isString := val.Type().Kind() == reflect.String
-			npv := reflectx.NonPointerValue(val)
-			if isString && sv.SliceSize > 0 && npv.Kind() == reflect.String {
-				mxw := 0
-				for rw := 0; rw < sv.SliceSize; rw++ {
-					val := reflectx.OnePointerUnderlyingValue(sv.SliceNPVal.Index(rw)).Elem()
-					str := val.String()
-					mxw = max(mxw, len(str))
-				}
-				sv.MaxWidth = mxw
-			}
 		}
 		return w
 	}, func(w core.ValueWidget) {

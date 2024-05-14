@@ -32,7 +32,7 @@ func (t *SimMatGrid) SetDisp(v TensorDisplay) *SimMatGrid { t.Disp = v; return t
 func (t *SimMatGrid) SetColorMap(v *colormap.Map) *SimMatGrid { t.ColorMap = v; return t }
 
 // TableViewType is the [types.Type] for [TableView]
-var TableViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TableView", IDName: "table-view", Doc: "TableView provides a GUI view for [table.Table] values.", Embeds: []types.Field{{Name: "SliceViewBase"}}, Fields: []types.Field{{Name: "Table", Doc: "the idx view of the table that we're a view of"}, {Name: "TensorDisplay", Doc: "overall display options for tensor display"}, {Name: "ColumnTensorDisplay", Doc: "per column tensor display params"}, {Name: "ColumnTensorBlank", Doc: "per column blank tensor values"}, {Name: "NCols", Doc: "number of columns in table (as of last update)"}, {Name: "SortIndex", Doc: "current sort index"}, {Name: "SortDesc", Doc: "whether current sort order is descending"}, {Name: "HeaderWidths", Doc: "HeaderWidths has number of characters in each header, per visfields"}, {Name: "ColMaxWidths", Doc: "ColMaxWidths records maximum width in chars of string type fields"}, {Name: "BlankString", Doc: "\tblank values for out-of-range rows"}, {Name: "BlankFloat"}}, Instance: &TableView{}})
+var TableViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TableView", IDName: "table-view", Doc: "TableView provides a GUI view for [table.Table] values.", Embeds: []types.Field{{Name: "SliceViewBase"}}, Fields: []types.Field{{Name: "Table", Doc: "the idx view of the table that we're a view of"}, {Name: "TensorDisplay", Doc: "overall display options for tensor display"}, {Name: "ColumnTensorDisplay", Doc: "per column tensor display params"}, {Name: "ColumnTensorBlank", Doc: "per column blank tensor values"}, {Name: "NCols", Doc: "number of columns in table (as of last update)"}, {Name: "SortIndex", Doc: "current sort index"}, {Name: "SortDescending", Doc: "whether current sort order is descending"}, {Name: "headerWidths", Doc: "headerWidths has number of characters in each header, per visfields"}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields"}, {Name: "BlankString", Doc: "\tblank values for out-of-range rows"}, {Name: "BlankFloat"}}, Instance: &TableView{}})
 
 // NewTableView returns a new [TableView] with the given optional parent:
 // TableView provides a GUI view for [table.Table] values.
@@ -52,13 +52,9 @@ func (t *TableView) SetNCols(v int) *TableView { t.NCols = v; return t }
 // current sort index
 func (t *TableView) SetSortIndex(v int) *TableView { t.SortIndex = v; return t }
 
-// SetSortDesc sets the [TableView.SortDesc]:
+// SetSortDescending sets the [TableView.SortDescending]:
 // whether current sort order is descending
-func (t *TableView) SetSortDesc(v bool) *TableView { t.SortDesc = v; return t }
-
-// SetHeaderWidths sets the [TableView.HeaderWidths]:
-// HeaderWidths has number of characters in each header, per visfields
-func (t *TableView) SetHeaderWidths(v ...int) *TableView { t.HeaderWidths = v; return t }
+func (t *TableView) SetSortDescending(v bool) *TableView { t.SortDescending = v; return t }
 
 // SetBlankString sets the [TableView.BlankString]:
 //
