@@ -71,11 +71,11 @@ func (sw *Switches) SetWidgetValue(value any) error {
 
 func (sw *Switches) OnBind(value any) {
 	if e, ok := value.(enums.Enum); ok {
-		sw.SetEnum(e)
+		sw.SetEnum(e).SetType(SwitchSegmentedButton).SetMutex(true)
 	}
 	if bf, ok := value.(enums.BitFlagSetter); ok {
 		sw.bitFlagValue = bf
-		sw.SetType(SwitchChip)
+		sw.SetType(SwitchChip).SetMutex(false)
 	} else {
 		sw.bitFlagValue = nil
 	}

@@ -355,7 +355,7 @@ func values(ts *core.Tabs) {
 		fmt.Println("Your name is now", name)
 	})
 
-	age := "35"
+	age := 35
 	core.Bind(&age, core.NewSpinner(tab)).OnChange(func(e events.Event) {
 		fmt.Println("Your age is now", age)
 	})
@@ -365,8 +365,8 @@ func values(ts *core.Tabs) {
 		fmt.Println("The switch is now", on)
 	})
 
-	align := styles.Center
-	core.Bind(&align, core.NewChooser(tab)).OnChange(func(e events.Event) {
+	align := core.ThemeLight
+	core.Bind(&align, core.NewSwitches(tab)).OnChange(func(e events.Event) {
 		fmt.Println("The alignment is now", align)
 	})
 
