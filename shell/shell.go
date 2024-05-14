@@ -67,14 +67,20 @@ type Shell struct {
 	// commands that have been defined, which can be run in Exec mode.
 	Commands map[string]func(args ...string)
 
-	// Jobs is a stack of commands running in the background (via Start instead of Run)
+	// Jobs is a stack of commands running in the background
+	// (via Start instead of Run)
 	Jobs stack.Stack[*exec.CmdIO]
 
 	// Cancel, while the interpreter is running, can be called
-	// to stop the code interpreting.  It is connected to the Ctx context.
+	// to stop the code interpreting.
+	// It is connected to the Ctx context, by StartContext()
+	// Both can be nil.
 	Cancel func()
 
 	// Ctx is the context used for cancelling current shell running
+	// a single chunk of code, typically from the interpreter.
+	// We are not able to pass the context around so it is set here,
+	// in the StartContext function. Clear when done with ClearContext.
 	Ctx context.Context
 
 	// commandArgs is a stack of args passed to a command, used for simplified
@@ -103,9 +109,23 @@ func NewShell() *Shell {
 	sh.SSH = sshclient.NewConfig(&sh.Config)
 	sh.SSHClients = make(map[string]*sshclient.Client)
 	sh.Commands = make(map[string]func(args ...string))
-	sh.Ctx, sh.Cancel = context.WithCancel(context.Background())
 	sh.InstallBuiltins()
 	return sh
+}
+
+// StartContext starts a processing context,
+// setting the Ctx and Cancel Fields.
+// Call EndContext when current operation finishes.
+func (sh *Shell) StartContext() context.Context {
+	sh.Ctx, sh.Cancel = context.WithCancel(context.Background())
+	return sh.Ctx
+}
+
+// EndContext ends a processing context, clearing the
+// Ctx and Cancel fields.
+func (sh *Shell) EndContext() {
+	sh.Ctx = nil
+	sh.Cancel = nil
 }
 
 // Close closes any resources associated with the shell,

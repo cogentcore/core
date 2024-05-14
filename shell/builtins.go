@@ -5,6 +5,7 @@
 package shell
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -216,10 +217,15 @@ func (sh *Shell) Scp(cmdIO *exec.CmdIO, args ...string) error {
 		return err
 	}
 
+	ctx := sh.Ctx
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
 	if toHost {
-		err = cl.CopyLocalFileToHost(sh.Ctx, lfn, hfn)
+		err = cl.CopyLocalFileToHost(ctx, lfn, hfn)
 	} else {
-		err = cl.CopyHostToLocalFile(sh.Ctx, hfn, lfn)
+		err = cl.CopyHostToLocalFile(ctx, hfn, lfn)
 	}
 	return err
 }

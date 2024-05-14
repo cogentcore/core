@@ -121,7 +121,9 @@ func (in *Interpreter) RunCode() (reflect.Value, error) {
 	}
 	cmd := in.Shell.Code()
 	in.Shell.ResetLines()
-	v, err := in.Interp.EvalWithContext(in.Shell.Ctx, cmd)
+	ctx := in.Shell.StartContext()
+	v, err := in.Interp.EvalWithContext(ctx, cmd)
+	in.Shell.EndContext()
 	if err != nil && !errors.Is(err, context.Canceled) {
 		slog.Error(err.Error())
 	}
