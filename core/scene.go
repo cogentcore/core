@@ -52,7 +52,11 @@ type Scene struct {
 	// (e.g., TopAppBar) for elements contained within this Scene,
 	// that should be represented in any app-level toolbar constructed
 	// for this Scene.
-	AppBars ToolbarFuncs `json:"-" xml:"-"`
+	AppBars ConfigFuncs `json:"-" xml:"-"`
+
+	// AppChoosers contains functions for configuring a top-level App chooser,
+	// (e.g., TopAppBar) for elements contained within this Scene.
+	AppChoosers ConfigChooserFuncs `json:"-" xml:"-"`
 
 	// Body provides the main contents of scenes that use control Bars
 	// to allow the main window contents to be specified separately

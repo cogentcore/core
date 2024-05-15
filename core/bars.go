@@ -46,9 +46,14 @@ func (bf *BarFuncs) Inherit(obf BarFuncs) {
 	*bf = nbf
 }
 
-// AddAppBar adds an AppBar function for an element within the scene
-func (sc *Scene) AddAppBar(fun func(tb *Toolbar)) {
+// AddAppBar adds an AppBar Config function for an element within the scene
+func (sc *Scene) AddAppBar(fun func(cf *Config)) {
 	sc.AppBars.Add(fun)
+}
+
+// AddAppChooser adds an AppChooser Config function for an element within the scene
+func (sc *Scene) AddAppChooser(fun func(ch *Chooser)) {
+	sc.AppChoosers.Add(fun)
 }
 
 // ConfigSceneBars configures the side control bars, for main scenes
@@ -195,8 +200,13 @@ func (bd *Body) AddBottomBar(fun func(parent Widget)) {
 }
 
 // AddAppBar adds an AppBar function for an element within the scene
-func (bd *Body) AddAppBar(fun func(tb *Toolbar)) {
+func (bd *Body) AddAppBar(fun func(c *Config)) {
 	bd.Scene.AddAppBar(fun)
+}
+
+// AddAppChooser adds a ConfigAppChooser function for an element within the scene
+func (bd *Body) AddAppChooser(fun func(ch *Chooser)) {
+	bd.Scene.AddAppChooser(fun)
 }
 
 // GetTopAppBar returns the TopAppBar Toolbar if it exists, nil otherwise.

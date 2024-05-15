@@ -39,6 +39,7 @@ func FileViewDialog(ctx core.Widget, filename, exts, title string, fun func(self
 	}
 	fv := NewFileView(d).SetFilename(filename, exts)
 	d.AddAppBar(fv.ConfigToolbar)
+	d.AddAppChooser(fv.ConfigAppChooser)
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
@@ -254,16 +255,23 @@ func (fv *FileView) Config(c *core.Config) {
 
 // ConfigToolbar configures the given toolbar to have file view
 // actions and completions.
-func (fv *FileView) ConfigToolbar(tb *core.Toolbar) {
-	NewFuncButton(tb, fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
-	NewFuncButton(tb, fv.AddPathToFavs).SetIcon(icons.Favorite).SetText("Favorite")
-	NewFuncButton(tb, fv.UpdateFilesAction).SetIcon(icons.Refresh).SetText("Update")
-	NewFuncButton(tb, fv.NewFolder).SetIcon(icons.CreateNewFolder)
+func (fv *FileView) ConfigToolbar(c *core.Config) {
+	ConfigFuncButton(c, fv.DirPathUp, func(w *FuncButton) {
+		w.SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
+	})
+	ConfigFuncButton(c, fv.AddPathToFavs, func(w *FuncButton) {
+		w.SetIcon(icons.Favorite).SetText("Favorite")
+	})
+	ConfigFuncButton(c, fv.UpdateFilesAction, func(w *FuncButton) {
+		w.SetIcon(icons.Refresh).SetText("Update")
+	})
+	ConfigFuncButton(c, fv.NewFolder, func(w *FuncButton) {
+		w.SetIcon(icons.CreateNewFolder)
+	})
+}
 
-	ch := tb.AppChooser()
-	if ch == nil {
-		return
-	}
+// ConfigAppChooser configures given app chooser
+func (fv *FileView) ConfigAppChooser(ch *core.Chooser) {
 	ch.ItemsFuncs = slices.Insert(ch.ItemsFuncs, 0, func() {
 		for _, sp := range core.RecentPaths {
 			ch.Items = append(ch.Items, core.ChooserItem{

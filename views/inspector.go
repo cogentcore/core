@@ -311,23 +311,33 @@ func (is *Inspector) ConfigSplits() {
 	sv.SetStruct(is.KiRoot)
 }
 
-func (is *Inspector) ConfigToolbar(tb *core.Toolbar) {
-	NewFuncButton(tb, is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool).
-		StyleFirst(func(s *styles.Style) {
-			_, ok := is.KiRoot.(*core.Scene)
-			s.SetEnabled(ok)
-		})
-	core.NewSeparator(tb)
-	op := NewFuncButton(tb, is.Open).SetKey(keymap.Open)
-	op.Args[0].SetValue(is.Filename)
-	op.Args[0].SetTag("ext", ".json")
-	NewFuncButton(tb, is.Save).SetKey(keymap.Save).
-		StyleFirst(func(s *styles.Style) { s.SetEnabled(is.Changed && is.Filename != "") })
-	sa := NewFuncButton(tb, is.SaveAs).SetKey(keymap.SaveAs)
-	sa.Args[0].SetValue(is.Filename)
-	sa.Args[0].SetTag("ext", ".json")
-	core.NewSeparator(tb)
-	NewFuncButton(tb, is.InspectApp).SetIcon(icons.Devices)
+func (is *Inspector) ConfigToolbar(c *core.Config) {
+	ConfigFuncButton(c, is.ToggleSelectionMode, func(w *FuncButton) {
+		w.SetText("Select element").SetIcon(icons.ArrowSelectorTool).
+			StyleFirst(func(s *styles.Style) {
+				_, ok := is.KiRoot.(*core.Scene)
+				s.SetEnabled(ok)
+			})
+	})
+	core.ConfigSeparator(c)
+	ConfigFuncButton(c, is.Open, func(w *FuncButton) {
+		w.SetKey(keymap.Open)
+		w.Args[0].SetValue(is.Filename)
+		w.Args[0].SetTag("ext", ".json")
+	})
+	ConfigFuncButton(c, is.Save, func(w *FuncButton) {
+		w.SetKey(keymap.Save).
+			StyleFirst(func(s *styles.Style) { s.SetEnabled(is.Changed && is.Filename != "") })
+	})
+	ConfigFuncButton(c, is.SaveAs, func(w *FuncButton) {
+		w.SetKey(keymap.SaveAs)
+		w.Args[0].SetValue(is.Filename)
+		w.Args[0].SetTag("ext", ".json")
+	})
+	core.ConfigSeparator(c)
+	ConfigFuncButton(c, is.InspectApp, func(w *FuncButton) {
+		w.SetIcon(icons.Devices)
+	})
 }
 
 // InspectorWindow opens an interactive editor of the given tree

@@ -120,6 +120,30 @@ func NewFuncButton(parent tree.Node, fun any) *FuncButton {
 	return parent.NewChild(FuncButtonType).(*FuncButton).SetFunc(fun)
 }
 
+// ConfigFuncButton adds a new config item to the given [core.Config] for
+// a FuncButton for given function, with up to 2 optional functions:
+// the first is called only during initial Config of a new Button;
+// the second is called during Update.
+func ConfigFuncButton(c *core.Config, fun any, funcs ...func(w *FuncButton)) {
+	n := len(funcs)
+	switch n {
+	case 0:
+		c.Add("", func() core.Widget { return NewFuncButton(nil, fun) }, nil)
+	case 1:
+		c.Add("", func() core.Widget {
+			w := NewFuncButton(nil, fun)
+			funcs[0](w)
+			return w
+		}, nil)
+	case 2:
+		c.Add("", func() core.Widget {
+			w := NewFuncButton(nil, fun)
+			funcs[0](w)
+			return w
+		}, func(w core.Widget) { funcs[1](w.(*FuncButton)) })
+	}
+}
+
 func (fb *FuncButton) OnInit() {
 	fb.Button.OnInit()
 	fb.WarnUnadded = true

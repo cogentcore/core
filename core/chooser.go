@@ -679,3 +679,28 @@ func (ch *Chooser) CompleteEdit(data any, text string, cursorPos int, completion
 		ForwardDelete: len([]rune(text)),
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////
+// 	ConfigChooserFuncs
+
+// ConfigChooserFuncs is a stack of chooser config functions,
+// which take a Config and add to it.
+type ConfigChooserFuncs []func(ch *Chooser)
+
+// Add adds the given function for configuring a toolbar
+func (cf *ConfigChooserFuncs) Add(fun func(ch *Chooser)) *ConfigChooserFuncs {
+	*cf = append(*cf, fun)
+	return cf
+}
+
+// Call calls all the functions for configuring given toolbar
+func (cf *ConfigChooserFuncs) Call(ch *Chooser) {
+	for _, fun := range *cf {
+		fun(ch)
+	}
+}
+
+// IsEmpty returns true if there are no functions added
+func (cf *ConfigChooserFuncs) IsEmpty() bool {
+	return len(*cf) == 0
+}

@@ -21,7 +21,7 @@ import (
 // manage all an app's functionality, in a way that is portable across
 // mobile and desktop environments.
 // See [Widget.ConfigToolbar] for the standard toolbar config method for
-// any given widget, and [Scene.AppBars] for [ToolbarFuncs] for [Scene]
+// any given widget, and [Scene.AppBars] for [ConfigFuncs] for [Scene]
 // elements who should be represented in the main AppBar (e.g., TopAppBar).
 type Toolbar struct {
 	Frame
@@ -34,9 +34,9 @@ type Toolbar struct {
 	// so that the default items are added last.
 	OverflowMenus []func(m *Scene) `set:"-" json:"-" xml:"-"`
 
-	// ToolbarFuncs contains functions for configuring this toolbar,
+	// ConfigFuncs contains functions for configuring this toolbar,
 	// called on Config
-	ToolbarFuncs ToolbarFuncs
+	ConfigFuncs ConfigFuncs
 
 	// This is the overflow button
 	OverflowButton *Button `copier:"-"`
@@ -62,14 +62,12 @@ func (tb *Toolbar) AppChooser() *Chooser {
 }
 
 func (tb *Toolbar) Config(c *Config) {
-	if len(tb.Kids) == 0 {
-		if len(tb.ToolbarFuncs) > 0 {
-			for _, f := range tb.ToolbarFuncs {
-				f(tb)
-			}
+	tb.Frame.Config(c)
+	if len(tb.ConfigFuncs) > 0 {
+		for _, f := range tb.ConfigFuncs {
+			f(c)
 		}
 	}
-	tb.Frame.Config(c)
 }
 
 func (tb *Toolbar) SizeUp() {
@@ -207,33 +205,6 @@ func (tb *Toolbar) OverflowMenu(m *Scene) {
 // is called first when constructing the menu.
 func (tb *Toolbar) AddOverflowMenu(fun func(m *Scene)) {
 	tb.OverflowMenus = append(tb.OverflowMenus, fun)
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// 	ToolbarFuncs
-
-// ToolbarFuncs are functions for creating control bars,
-// attached to different sides of a Scene (e.g., TopAppBar at Top,
-// NavBar at Bottom, etc).  Functions are called in forward order
-// so first added are called first.
-type ToolbarFuncs []func(tb *Toolbar)
-
-// Add adds the given function for configuring a toolbar
-func (bf *ToolbarFuncs) Add(fun func(tb *Toolbar)) *ToolbarFuncs {
-	*bf = append(*bf, fun)
-	return bf
-}
-
-// Call calls all the functions for configuring given toolbar
-func (bf *ToolbarFuncs) Call(tb *Toolbar) {
-	for _, fun := range *bf {
-		fun(tb)
-	}
-}
-
-// IsEmpty returns true if there are no functions added
-func (bf *ToolbarFuncs) IsEmpty() bool {
-	return len(*bf) == 0
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -115,7 +115,7 @@ func (sv *StructView) Config(c *core.Config) {
 
 	addField := func(c *core.Config, structVal, fieldVal any, field reflect.StructField, fnm string) {
 		if fieldVal == nil || reflectx.AnyIsNil(fieldVal) {
-			fmt.Println("field is nil:", fnm)
+			// fmt.Println("field is nil:", fnm)
 			return
 		}
 		if _, exists := dupeFields[fnm]; exists {

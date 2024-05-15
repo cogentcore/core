@@ -72,7 +72,12 @@ type SliceLabeler interface {
 
 // Toolbarer interface is for ConfigToolbar function access for those that define it
 type Toolbarer interface {
-	ConfigToolbar(tb *Toolbar)
+	ConfigToolbar(c *Config)
+}
+
+// AppChooserer is for ConfigAppBar function access for those that define it
+type AppChooserer interface {
+	ConfigAppChooser(ch *Chooser)
 }
 
 // Validator is an interface for types to provide a Validate method

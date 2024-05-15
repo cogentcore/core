@@ -56,6 +56,36 @@ func Configure[T Widget](c *Config, path string, new func() T, update ...func(w 
 	}
 }
 
+// ConfigButton adds a new config item to the given [Config] for
+// a Button, with up to 2 optional functions:
+// the first is called only during initial Config of a new Button;
+// the second is called during Update.
+func ConfigButton(c *Config, funcs ...func(w *Button)) {
+	n := len(funcs)
+	switch n {
+	case 0:
+		c.Add("", func() Widget { return NewButton() }, nil)
+	case 1:
+		c.Add("", func() Widget {
+			w := NewButton()
+			funcs[0](w)
+			return w
+		}, nil)
+	case 2:
+		c.Add("", func() Widget {
+			w := NewButton()
+			funcs[0](w)
+			return w
+		}, func(w Widget) { funcs[1](w.(*Button)) })
+	}
+}
+
+// ConfigSeparator adds a new config item to the given [Config] for
+// a Separator, with no further configuration.
+func ConfigSeparator(c *Config) {
+	c.Add("", func() Widget { return NewSeparator() }, nil)
+}
+
 // Add adds a new config item for a widget at the given forward-slash-separated
 // path with the given function for constructing the widget and the given function
 // for updating the widget. This should be called on the root level Config
@@ -303,4 +333,29 @@ func (wb *WidgetBase) Update() { //types:add
 		return tree.Continue
 	})
 	wb.NeedsLayout()
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// 	ConfigFuncs
+
+// ConfigFuncs is a stack of config functions, which take a Config
+// and add to it.
+type ConfigFuncs []func(c *Config)
+
+// Add adds the given function for configuring a toolbar
+func (cf *ConfigFuncs) Add(fun ...func(c *Config)) *ConfigFuncs {
+	*cf = append(*cf, fun...)
+	return cf
+}
+
+// Call calls all the functions for configuring given toolbar
+func (cf *ConfigFuncs) Call(c *Config) {
+	for _, fun := range *cf {
+		fun(c)
+	}
+}
+
+// IsEmpty returns true if there are no functions added
+func (cf *ConfigFuncs) IsEmpty() bool {
+	return len(*cf) == 0
 }

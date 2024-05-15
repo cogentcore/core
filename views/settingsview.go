@@ -11,21 +11,25 @@ import (
 )
 
 // SettingsViewToolbarBase is the base toolbar configuration function used in [SettingsView].
-func SettingsViewToolbarBase(tb *core.Toolbar) {
-	NewFuncButton(tb, core.AppearanceSettings.SaveScreenZoom).SetIcon(icons.ZoomIn).
-		SetAfterFunc(func() {
-			core.AppearanceSettings.Apply()
-			core.UpdateAll()
-		})
-		// todo: doesn't work to update..
-
-	tb.AddOverflowMenu(func(m *core.Scene) {
-		NewFuncButton(m, core.ResetAllSettings).SetText("Reset settings").SetIcon(icons.Delete).SetConfirm(true)
-
-		NewFuncButton(m, core.AppearanceSettings.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
-		NewFuncButton(m, core.ProfileToggle).SetText("Profile performance").SetIcon(icons.Analytics)
-		core.NewSeparator(m)
+func SettingsViewToolbarBase(c *core.Config) {
+	ConfigFuncButton(c, core.AppearanceSettings.SaveScreenZoom, func(w *FuncButton) {
+		w.SetIcon(icons.ZoomIn).
+			SetAfterFunc(func() {
+				core.AppearanceSettings.Apply()
+				core.UpdateAll()
+			})
+		// todo: update..
 	})
+
+	/*
+		tb.AddOverflowMenu(func(m *core.Scene) {
+			NewFuncButton(m, core.ResetAllSettings).SetText("Reset settings").SetIcon(icons.Delete).SetConfirm(true)
+
+			NewFuncButton(m, core.AppearanceSettings.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
+			NewFuncButton(m, core.ProfileToggle).SetText("Profile performance").SetIcon(icons.Analytics)
+			core.NewSeparator(m)
+		})
+	*/
 }
 
 // SettingsWindow makes and runs a new window for viewing user settings.
@@ -40,10 +44,10 @@ func SettingsWindow() {
 
 // SettingsView adds to the given body a view of user settings
 func SettingsView(b *core.Body) {
-	b.AddAppBar(func(tb *core.Toolbar) {
-		SettingsViewToolbarBase(tb)
+	b.AddAppBar(func(c *core.Config) {
+		SettingsViewToolbarBase(c)
 		for _, se := range core.AllSettings {
-			se.ConfigToolbar(tb)
+			se.ConfigToolbar(c)
 		}
 	})
 
