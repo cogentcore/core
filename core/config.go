@@ -6,6 +6,8 @@ package core
 
 import (
 	"fmt"
+	"runtime"
+	"strconv"
 	"strings"
 
 	"cogentcore.org/core/base/update"
@@ -59,6 +61,10 @@ func Configure[T Widget](c *Config, path string, new func() T, update ...func(w 
 // appropriate. Consider using the [Configure] global generic function for
 // better type safety and increased convenience.
 func (c *Config) Add(path string, new func() Widget, update func(w Widget)) {
+	if path == "" {
+		_, file, line, _ := runtime.Caller(1)
+		path = file + ":" + strconv.Itoa(line)
+	}
 	itm := &ConfigItem{Path: path, New: new, Update: update}
 	plist := strings.Split(path, "/")
 	if len(plist) == 1 {
