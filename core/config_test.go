@@ -5,6 +5,8 @@
 package core
 
 import (
+	"runtime"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -23,16 +25,10 @@ func TestConfig(t *testing.T) {
 	assert.Equal(t, expected, c.String())
 }
 
-/*
-todo: this is currently not possible but would be nice
-https://github.com/golang/go/issues/50285
-func TestConfigComp(t *testing.T) {
-	type compfunc func[T any]() T // cannot define an anonymous generic function right now
-	c := make(map[string]compfunc)
-	ts := NewTabs()
-	c["splits/tabs"] = func() *Tabs { return ts }
-
-	myt := c["splits/tabs"]()
-	assert.Equal(t, ts, myt)
+func BenchmarkCaller(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_, file, line, _ := runtime.Caller(1)
+		name := file + ":" + strconv.Itoa(line)
+		_ = name
+	}
 }
-*/
