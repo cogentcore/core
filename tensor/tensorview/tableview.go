@@ -237,6 +237,7 @@ func (tv *TableView) ConfigHeader(c *core.Config) {
 			w := core.NewButton()
 			w.SetType(core.ButtonMenu)
 			w.SetProperty("field-index", fli)
+			w.SetText(field)
 			w.OnClick(func(e events.Event) {
 				tv.SortSliceAction(fli)
 			})
@@ -280,7 +281,7 @@ func (tv *TableView) ConfigRow(c *core.Config, i, si int) {
 	if si < len(tv.Table.Indexes) {
 		ixi = tv.Table.Indexes[si]
 	}
-	invis := ixi >= 0
+	invis := ixi < 0
 
 	if tv.Is(views.SliceViewShowIndex) {
 		tv.ConfigGridIndex(c, i, si, itxt, invis)
@@ -335,8 +336,10 @@ func (tv *TableView) ConfigRow(c *core.Config, i, si int) {
 				if si < len(tv.Table.Indexes) {
 					if isstr {
 						str = tv.Table.Table.StringIndex(fli, tv.Table.Indexes[si])
+						core.Bind(&str, w)
 					} else {
 						fval = tv.Table.Table.FloatIndex(fli, tv.Table.Indexes[si])
+						core.Bind(&fval, w)
 					}
 				}
 				wb.SetReadOnly(tv.IsReadOnly())
