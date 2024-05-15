@@ -40,7 +40,7 @@ type ConfigItem struct {
 // The Key of the map is the path of the element.
 type Config []*ConfigItem
 
-// AddConfig adds a new config item to the given [Config] for a widget at the
+// Configure adds a new config item to the given [Config] for a widget at the
 // given forward-slash-separated path with the given function for constructing
 // the widget and the given optional function for updating the widget.
 func Configure[T Widget](c *Config, path string, new func() T, update ...func(w T)) {
@@ -56,7 +56,7 @@ func Configure[T Widget](c *Config, path string, new func() T, update ...func(w 
 // path with the given function for constructing the widget and the given function
 // for updating the widget. This should be called on the root level Config
 // list. Any items with nested paths are added to Children lists as
-// appropriate. Consider using the [AddConfig] global generic function for
+// appropriate. Consider using the [Configure] global generic function for
 // better type safety and increased convenience.
 func (c *Config) Add(path string, new func() Widget, update func(w Widget)) {
 	itm := &ConfigItem{Path: path, New: new, Update: update}

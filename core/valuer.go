@@ -14,9 +14,9 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// Valueer is an interface that types can implement to specify the
+// Valuer is an interface that types can implement to specify the
 // [Value] that should be used to represent them in the GUI.
-type Valueer interface {
+type Valuer interface {
 
 	// Value returns the [Value] that should be used to represent
 	// the value in the GUI. If it returns nil, then [ToValue] will
@@ -72,11 +72,11 @@ func NewValue(value any, parent ...tree.Node) Value {
 // ToValue converts the given value into an appropriate [Value].
 // The given value should typically be a pointer. It does NOT call [Bind];
 // see [NewValue] for a version that does. It first checks the
-// [Valueer] interface, then the [ValueConverters], then
+// [Valuer] interface, then the [ValueConverters], then
 // the [ValueTypes], and finally it falls back on a set of default
 // bindings. If any step results in nil, it falls back on the next step.
 func ToValue(value any) Value {
-	if vwr, ok := value.(Valueer); ok {
+	if vwr, ok := value.(Valuer); ok {
 		if vw := vwr.Value(); vw != nil {
 			return vw
 		}

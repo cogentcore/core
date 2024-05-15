@@ -55,7 +55,7 @@ type Widget interface {
 	// Config is the method that widgets should implement to do their
 	// own widget-specific configuration steps. You can do this however
 	// you want, but typically you should add configuration closures to
-	// the [Config] object passed to the method, using [AddConfig].
+	// the [Config] object passed to the method, using [Configure].
 	// If there are items added to the [Config] object, they will be
 	// automatically applied afterward using [Config.ConfigWidget].
 	//
