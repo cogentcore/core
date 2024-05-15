@@ -14,7 +14,9 @@ import (
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/types"
@@ -128,6 +130,7 @@ func (sv *StructView) Config(c *core.Config) {
 		}
 		labnm := fmt.Sprintf("label-%v", fnm)
 		valnm := fmt.Sprintf("value-%v", fnm)
+		readOnlyTag := field.Tag.Get("edit") == "-"
 
 		core.AddConfig(c, labnm, func() *core.Text {
 			w := core.NewText()
@@ -136,40 +139,38 @@ func (sv *StructView) Config(c *core.Config) {
 			})
 			// w.Tooltip = vv.Doc()
 			// vv.AsValueData().ViewPath = sv.ViewPath
-			/*
-				hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, w, sv.IsReadOnly())
-				if hasDef {
-					w.Style(func(s *styles.Style) {
-						dtag, _ := vv.Tag("default")
-						isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPointerValue(vv.Val()).Kind())
-						dcr := "(Double click to reset to default) "
-						if !isDef {
-							s.Color = colors.C(colors.Scheme.Primary.Base)
-							s.Cursor = cursors.Poof
-							if !strings.HasPrefix(w.Tooltip, dcr) {
-								w.Tooltip = dcr + w.Tooltip
-							}
-						} else {
-							w.Tooltip = strings.TrimPrefix(w.Tooltip, dcr)
+			def, hasDef := field.Tag.Lookup("default")
+			// hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, w, sv.IsReadOnly())
+			if hasDef {
+				var isDef bool
+				w.Style(func(s *styles.Style) {
+					isDef = reflectx.ValueIsDefault(reflect.ValueOf(fieldVal), def)
+					dcr := "(Double click to reset to default) "
+					if !isDef {
+						s.Color = colors.C(colors.Scheme.Primary.Base)
+						s.Cursor = cursors.Poof
+						if !strings.HasPrefix(w.Tooltip, dcr) {
+							w.Tooltip = dcr + w.Tooltip
 						}
-					})
-					w.OnDoubleClick(func(e events.Event) {
-						dtag, _ := vv.Tag("default")
-						isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPointerValue(vv.Val()).Kind())
-						if isDef {
-							return
-						}
-						e.SetHandled()
-						err := reflectx.SetFromDefaultTag(vv.Val(), dtag)
-						if err != nil {
-							core.ErrorSnackbar(w, err, "Error setting default value")
-						} else {
-							vv.Update()
-							vv.SendChange(e)
-						}
-					})
-				}
-			*/
+					} else {
+						w.Tooltip = strings.TrimPrefix(w.Tooltip, dcr)
+					}
+				})
+				w.OnDoubleClick(func(e events.Event) {
+					fmt.Println(fnm, "doubleclick", isDef)
+					if isDef {
+						return
+					}
+					e.SetHandled()
+					err := reflectx.SetFromDefaultTag(reflect.ValueOf(fieldVal), def)
+					if err != nil {
+						core.ErrorSnackbar(w, err, "Error setting default value")
+					} else {
+						w.Update() // TODO: critically this needs to be the value widget, and the text separately
+						sv.SendChange(e)
+					}
+				})
+			}
 			return w
 		}, func(w *core.Text) {
 			w.SetText(flab)
@@ -192,7 +193,7 @@ func (sv *StructView) Config(c *core.Config) {
 			// 	}
 			// 	sv.Send(events.Input, e)
 			// })
-			if !sv.IsReadOnly() { // && !readOnlyTag {
+			if !sv.IsReadOnly() && !readOnlyTag {
 				wb.OnChange(func(e events.Event) {
 					// sv.UpdateFieldAction()
 					// note: updating vv here is redundant -- relevant field will have already updated
@@ -208,6 +209,8 @@ func (sv *StructView) Config(c *core.Config) {
 				})
 			}
 			return w
+		}, func(w core.ValueWidget) {
+			w.AsWidget().SetReadOnly(sv.IsReadOnly() || readOnlyTag)
 		})
 	}
 
@@ -313,98 +316,4 @@ func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string)
 		}
 	}
 	return false, defStr
-}
-
-// StructFieldVals represents field values in a struct, at multiple
-// levels of depth potentially (represented by the Path field)
-// used for StructNonDefFields for example.
-type StructFieldVals struct {
-
-	// path of field.field parent fields to this field
-	Path string
-
-	// type information for field
-	Field reflect.StructField
-
-	// value of field (as a pointer)
-	Val reflect.Value
-
-	// def tag information for default values
-	Defs string
-}
-
-// StructNonDefFields processses "default" tag for default value(s)
-// of fields in given struct and starting path, and returns all
-// fields not at their default values.
-// See also StructNoDefFieldsStr for a string representation of this information.
-// Uses reflectx.FlatFieldsValueFunc to get all embedded fields.
-// Uses a recursive strategy -- any fields that are themselves structs are
-// expanded, and the field name represented by dots path separators.
-func StructNonDefFields(structPtr any, path string) []StructFieldVals {
-	var flds []StructFieldVals
-	reflectx.WalkValueFlatFields(structPtr, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-		vvp := fieldVal.Addr()
-		dtag, got := field.Tag.Lookup("default")
-		if field.Type.Kind() == reflect.Struct && (!got || dtag == "") {
-			spath := path
-			if path != "" {
-				spath += "."
-			}
-			spath += field.Name
-			subs := StructNonDefFields(vvp.Interface(), spath)
-			if len(subs) > 0 {
-				flds = append(flds, subs...)
-			}
-			return true
-		}
-		if !got {
-			return true
-		}
-		def, defStr := StructFieldIsDef(dtag, vvp.Interface(), field.Type.Kind())
-		if def {
-			return true
-		}
-		flds = append(flds, StructFieldVals{Path: path, Field: field, Val: vvp, Defs: defStr})
-		return true
-	})
-	return flds
-}
-
-// StructNonDefFieldsStr processses "default" tag for default value(s) of fields in
-// given struct, and returns a string of all those not at their default values,
-// in format: Path.Field: val // default value(s)
-// Uses a recursive strategy -- any fields that are themselves structs are
-// expanded, and the field name represented by dots path separators.
-func StructNonDefFieldsStr(structPtr any, path string) string {
-	flds := StructNonDefFields(structPtr, path)
-	if len(flds) == 0 {
-		return ""
-	}
-	str := ""
-	for _, fld := range flds {
-		pth := fld.Path
-		fnm := fld.Field.Name
-		val := reflectx.ToStringPrec(fld.Val.Interface(), 6)
-		dfs := fld.Defs
-		if len(pth) > 0 {
-			fnm = pth + "." + fnm
-		}
-		str += fmt.Sprintf("%s: %s // %s<br>\n", fnm, val, dfs)
-	}
-	return str
-}
-
-// StructViewDialog opens a dialog (optionally in a new, separate window)
-// for viewing / editing the given struct object, in the context of given ctx widget
-func StructViewDialog(ctx core.Widget, stru any, title string, newWindow bool) {
-	d := core.NewBody().AddTitle(title)
-	NewStructView(d).SetStruct(stru)
-	if tb, ok := stru.(core.Toolbarer); ok {
-		d.AddAppBar(tb.ConfigToolbar)
-	}
-	ds := d.NewFullDialog(ctx)
-	if newWindow {
-		ds.SetNewWindow(true)
-	}
-	ds.Run()
 }

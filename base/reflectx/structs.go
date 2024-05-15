@@ -166,13 +166,32 @@ func NumAllFields(typ reflect.Type) int {
 	return n
 }
 
+// ValueIsDefault returns whether the given value is equivalent to the
+// given string representation used in a field default tag.
+func ValueIsDefault(fv reflect.Value, def string) bool {
+	def = FormatDefault(def)
+	if def == "" {
+		return fv.IsZero()
+	}
+	dv := reflect.New(fv.Type())
+	err := SetRobust(dv.Interface(), def)
+	if err != nil {
+		slog.Error("reflectx.ValueIsDefault: error getting value from default struct tag", "defaultStructTag", def, "value", fv, "err", err)
+		return false
+	}
+	if !reflect.DeepEqual(fv.Interface(), dv.Elem().Interface()) {
+		return false
+	}
+	return true
+}
+
 // SetFromDefaultTags sets the values of fields in the given struct based on
 // `default:` default value struct field tags.
-func SetFromDefaultTags(obj any) error {
-	if AnyIsNil(obj) {
+func SetFromDefaultTags(v any) error {
+	if AnyIsNil(v) {
 		return nil
 	}
-	ov := reflect.ValueOf(obj)
+	ov := reflect.ValueOf(v)
 	if ov.Kind() == reflect.Pointer && ov.IsNil() {
 		return nil
 	}
@@ -203,6 +222,8 @@ func SetFromDefaultTag(v reflect.Value, def string) error {
 	return SetRobust(PointerValue(v).Interface(), def)
 }
 
+// TODO: this needs to return an ordmap of the fields
+
 // NonDefaultFields returns a map representing all of the fields of the given
 // struct (or pointer to a struct) that have values different than their default
 // values as specified by the `default:` struct tag. The resulting map is then typically
@@ -232,21 +253,7 @@ func NonDefaultFields(v any) map[string]any {
 			}
 			continue
 		}
-		def = FormatDefault(def)
-		if def == "" {
-			if !fv.IsZero() {
-				res[ft.Name] = fv.Interface()
-			}
-			continue
-		}
-		dv := reflect.New(ft.Type)
-		err := SetRobust(dv.Interface(), def)
-		if err != nil {
-			slog.Error("reflectx.NonDefaultFields: error getting value from default struct tag", "field", ft.Name, "type", rt, "defaultStructTag", def, "err", err)
-			res[ft.Name] = fv.Interface()
-			continue
-		}
-		if !reflect.DeepEqual(fv.Interface(), dv.Elem().Interface()) {
+		if !ValueIsDefault(fv, def) {
 			res[ft.Name] = fv.Interface()
 		}
 	}
