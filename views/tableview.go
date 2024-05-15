@@ -344,7 +344,7 @@ func (tv *TableView) ConfigRow(c *core.Config, i, si int) {
 
 	for fli := 0; fli < tv.numVisibleFields; fli++ {
 		field := tv.visibleFields[fli]
-		fval := val.Elem().FieldByIndex(field.Index)
+		fval := reflectx.OnePointerValue(val.Elem().FieldByIndex(field.Index))
 		valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
 		tags := ""
 		if fval.Kind() == reflect.Slice || fval.Kind() == reflect.Map {
