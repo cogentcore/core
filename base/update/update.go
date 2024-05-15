@@ -12,6 +12,7 @@
 package update
 
 import (
+	"log/slog"
 	"slices"
 
 	"cogentcore.org/core/base/findfast"
@@ -32,6 +33,9 @@ func Update[T namer.Namer](s []T, n int, name func(i int) string, newEl func(nam
 	for i := range n {
 		nm := name(i)
 		names[i] = nm
+		if _, has := nmap[nm]; has {
+			slog.Error("update.Update: duplicate name", "name", nm)
+		}
 		nmap[nm] = i
 	}
 	// first remove anything we don't want
