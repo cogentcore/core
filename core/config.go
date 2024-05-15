@@ -62,8 +62,10 @@ func Configure[T Widget](c *Config, path string, new func() T, update ...func(w 
 // better type safety and increased convenience.
 func (c *Config) Add(path string, new func() Widget, update func(w Widget)) {
 	if path == "" {
+		// autogenerate unique name
 		_, file, line, _ := runtime.Caller(1)
-		path = file + ":" + strconv.Itoa(line)
+		// need to get rid of slashes and dots for path name
+		path = strings.ReplaceAll(strings.ReplaceAll(file, "/", ""), ".", "") + "-" + strconv.Itoa(line)
 	}
 	itm := &ConfigItem{Path: path, New: new, Update: update}
 	plist := strings.Split(path, "/")

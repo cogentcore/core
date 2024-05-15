@@ -21,7 +21,8 @@ func TestConfig(t *testing.T) {
 	c.Add("tree/child1", nil, nil)
 	c.Add("parts/icon/parts", nil, nil) // still works out of order
 	c.Add("tree/child2", nil, nil)
-	expected := "parts\nparts/icon\nparts/icon/parts\nparts/text\ntree\ntree/child1\ntree/child2\n"
+	c.Add("", nil, nil)
+	expected := "parts\nparts/icon\nparts/icon/parts\nparts/text\ntree\ntree/child1\ntree/child2\nUserskaioreillycogentcorecoreconfig_testgo-24\n"
 	assert.Equal(t, expected, c.String())
 }
 
