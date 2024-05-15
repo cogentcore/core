@@ -132,7 +132,7 @@ func (sv *StructView) Config(c *core.Config) {
 		valnm := fmt.Sprintf("value-%v", fnm)
 		readOnlyTag := field.Tag.Get("edit") == "-"
 
-		core.AddConfig(c, labnm, func() *core.Text {
+		core.Configure(c, labnm, func() *core.Text {
 			w := core.NewText()
 			w.Style(func(s *styles.Style) {
 				s.SetTextWrap(false)
@@ -176,8 +176,8 @@ func (sv *StructView) Config(c *core.Config) {
 			w.SetText(flab)
 		})
 
-		core.AddConfig(c, valnm, func() core.ValueWidget {
-			w := core.NewValueWidget(fieldVal)
+		core.Configure(c, valnm, func() core.Value {
+			w := core.NewValue(fieldVal)
 			wb := w.AsWidget()
 			// svv := FieldToValue(fvalp, sfield.Name, sfval)
 			// if svv == nil { // shouldn't happen
@@ -209,7 +209,7 @@ func (sv *StructView) Config(c *core.Config) {
 				})
 			}
 			return w
-		}, func(w core.ValueWidget) {
+		}, func(w core.Value) {
 			w.AsWidget().SetReadOnly(sv.IsReadOnly() || readOnlyTag)
 		})
 	}

@@ -79,8 +79,8 @@ func (tv *TableView) SetStyles() {
 	tv.ColumnTensorBlank = make(map[int]*tensor.Float64)
 }
 
-// StyleValueWidget performs additional value widget styling
-func (tv *TableView) StyleValueWidget(w core.Widget, s *styles.Style, row, col int) {
+// StyleValue performs additional value widget styling
+func (tv *TableView) StyleValue(w core.Widget, s *styles.Style, row, col int) {
 	hw := float32(tv.headerWidths[col])
 	if col == tv.SortIndex {
 		hw += 6
@@ -209,7 +209,7 @@ func (tv *TableView) Config(c *core.Config) {
 }
 
 func (tv *TableView) ConfigHeader(c *core.Config) {
-	core.AddConfig(c, "header", func() *core.Frame {
+	core.Configure(c, "header", func() *core.Frame {
 		w := core.NewFrame()
 		core.ToolbarStyles(w)
 		w.Style(func(s *styles.Style) {
@@ -220,7 +220,7 @@ func (tv *TableView) ConfigHeader(c *core.Config) {
 	})
 
 	if tv.Is(views.SliceViewShowIndex) {
-		core.AddConfig(c, "header/head-idx", func() *core.Text {
+		core.Configure(c, "header/head-idx", func() *core.Text {
 			w := core.NewText()
 			w.SetType(core.TextBodyMedium)
 			w.Style(func(s *styles.Style) {
@@ -233,7 +233,7 @@ func (tv *TableView) ConfigHeader(c *core.Config) {
 	}
 	for fli := 0; fli < tv.NCols; fli++ {
 		field := tv.Table.Table.ColumnNames[fli]
-		core.AddConfig(c, "header/head-"+field, func() *core.Button {
+		core.Configure(c, "header/head-"+field, func() *core.Button {
 			w := core.NewButton()
 			w.SetType(core.ButtonMenu)
 			w.SetProperty("field-index", fli)
@@ -307,15 +307,15 @@ func (tv *TableView) ConfigRow(c *core.Config, i, si int) {
 		if col.NumDims() == 1 {
 			str := ""
 			fval := float64(0)
-			core.AddConfig(c, "grid/"+valnm, func() core.ValueWidget {
-				var w core.ValueWidget
+			core.Configure(c, "grid/"+valnm, func() core.Value {
+				var w core.Value
 				if isstr {
-					w = core.NewValueWidget(&str)
+					w = core.NewValue(&str)
 				} else {
-					w = core.NewValueWidget(&fval)
+					w = core.NewValue(&fval)
 				}
 				wb := w.AsWidget()
-				tv.ConfigValueWidget(w, i)
+				tv.ConfigValue(w, i)
 				w.SetProperty(views.SliceViewColProperty, fli)
 				if !tv.IsReadOnly() {
 					wb.OnChange(func(e events.Event) {
@@ -330,7 +330,7 @@ func (tv *TableView) ConfigRow(c *core.Config, i, si int) {
 					})
 				}
 				return w
-			}, func(w core.ValueWidget) {
+			}, func(w core.Value) {
 				wb := w.AsWidget()
 				if si < len(tv.Table.Indexes) {
 					if isstr {
@@ -350,8 +350,8 @@ func (tv *TableView) ConfigRow(c *core.Config, i, si int) {
 			})
 		} else {
 			/*
-					core.AddConfig(c, "grid/"+valnm, func() core.ValueWidget {
-						var w core.ValueWidget
+					core.Configure(c, "grid/"+valnm, func() core.Value {
+						var w core.Value
 						// tdsp := tv.ColTensorDisp(fli)
 						cell := tv.ColTensorBlank(fli, col)
 						tvv := &TensorGridValue{}

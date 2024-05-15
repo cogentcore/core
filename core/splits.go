@@ -219,11 +219,11 @@ func (sl *Splits) SetSplitAction(idx int, nwval float32) {
 func (sl *Splits) Config(c *Config) {
 	sl.UpdateSplits()
 
-	AddConfig(c, "parts", func() *Layout {
+	Configure(c, "parts", func() *Layout {
 		return NewParts()
 	})
 	for i := range len(sl.Kids) - 1 { // one less handle than children
-		AddConfig(c, "parts/handle-"+strconv.Itoa(i), func() *Handle {
+		Configure(c, "parts/handle-"+strconv.Itoa(i), func() *Handle {
 			w := NewHandle()
 			w.OnChange(func(e events.Event) {
 				sl.SetSplitAction(w.IndexInParent(), w.Value())

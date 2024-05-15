@@ -1745,7 +1745,7 @@ func (tf *TextField) Config(c *Config) {
 
 	if !tf.IsReadOnly() {
 		if tf.LeadingIcon.IsSet() {
-			AddConfig(c, "lead-icon", func() *Button {
+			Configure(c, "lead-icon", func() *Button {
 				w := NewButton().SetType(ButtonAction)
 				w.Style(func(s *styles.Style) {
 					s.Padding.Zero()
@@ -1779,10 +1779,10 @@ func (tf *TextField) Config(c *Config) {
 			})
 		}
 		if tf.TrailingIcon.IsSet() {
-			AddConfig(c, "trail-icon-stretch", func() *Stretch {
+			Configure(c, "trail-icon-stretch", func() *Stretch {
 				return NewStretch()
 			})
-			AddConfig(c, "trail-icon", func() *Button {
+			Configure(c, "trail-icon", func() *Button {
 				w := NewButton().SetType(ButtonAction)
 				w.Style(func(s *styles.Style) {
 					s.Padding.Zero()

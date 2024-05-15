@@ -8,24 +8,24 @@ import (
 	"cogentcore.org/core/base/reflectx"
 )
 
-// ValueWidget is a widget that has an associated value representation.
+// Value is a widget that has an associated value representation.
 // It can be bound to a value using [Bind].
-type ValueWidget interface {
+type Value interface {
 	Widget
 
 	// WidgetValue returns the pointer to the associated value of the widget.
 	WidgetValue() any
 }
 
-// ValueWidgetSetter is an optional interface that [ValueWidget]s can implement
+// ValueSetter is an optional interface that [Value]s can implement
 // to customize how the associated widget value is set from the bound value.
-type ValueWidgetSetter interface {
+type ValueSetter interface {
 
 	// SetWidgetValue sets the associated widget value from the bound value.
 	SetWidgetValue(value any) error
 }
 
-// OnBinder is an optional interface that [ValueWidget]s can implement to
+// OnBinder is an optional interface that [Value]s can implement to
 // do something when the widget is bound to a value.
 type OnBinder interface {
 
@@ -33,13 +33,13 @@ type OnBinder interface {
 	OnBind(value any)
 }
 
-// Bind binds the given value to the given [ValueWidget] such that the values of
+// Bind binds the given value to the given [Value] such that the values of
 // the two will be linked and updated appropriately after [events.Change] events
 // and during [Widget.ConfigWidget]. It returns the widget to enable method chaining.
-func Bind[T ValueWidget](value any, vw T) T {
+func Bind[T Value](value any, vw T) T {
 	wb := vw.AsWidget()
 	wb.ValueUpdate = func() {
-		if vws, ok := any(vw).(ValueWidgetSetter); ok {
+		if vws, ok := any(vw).(ValueSetter); ok {
 			ErrorSnackbar(vw, vws.SetWidgetValue(value))
 		} else {
 			ErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))

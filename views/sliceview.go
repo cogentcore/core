@@ -128,8 +128,8 @@ type SliceViewer interface {
 	// and starting index: si = i + StartIndex
 	ConfigRow(c *core.Config, i, si int)
 
-	// StyleValueWidget performs additional value widget styling
-	StyleValueWidget(w core.Widget, s *styles.Style, row, col int)
+	// StyleValue performs additional value widget styling
+	StyleValue(w core.Widget, s *styles.Style, row, col int)
 
 	// HasStyleFunc returns whether there is a custom style function.
 	HasStyleFunc() bool
@@ -315,8 +315,8 @@ func (sv *SliceViewBase) SetStyles() {
 	})
 }
 
-// StyleValueWidget performs additional value widget styling
-func (sv *SliceViewBase) StyleValueWidget(w core.Widget, s *styles.Style, row, col int) {
+// StyleValue performs additional value widget styling
+func (sv *SliceViewBase) StyleValue(w core.Widget, s *styles.Style, row, col int) {
 	if sv.MaxWidth > 0 {
 		hv := units.Ch(float32(sv.MaxWidth))
 		s.Min.X.Value = max(s.Min.X.Value, hv.Convert(s.Min.X.Unit, &s.UnitContext).Value)
@@ -499,7 +499,7 @@ func (sv *SliceViewBase) SliceElValue(si int) reflect.Value {
 }
 
 func (sv *SliceViewBase) ConfigGrid(c *core.Config, nWidgPerRow int) {
-	core.AddConfig(c, "grid", func() *SliceViewGrid {
+	core.Configure(c, "grid", func() *SliceViewGrid {
 		w := NewSliceViewGrid()
 		w.Style(func(s *styles.Style) {
 			w.MinRows = sv.MinRows
@@ -532,7 +532,7 @@ func (sv *SliceViewBase) ConfigGrid(c *core.Config, nWidgPerRow int) {
 	})
 }
 
-func (sv *SliceViewBase) ConfigValueWidget(w core.ValueWidget, i int) {
+func (sv *SliceViewBase) ConfigValue(w core.Value, i int) {
 	svi := sv.This().(SliceViewer)
 	wb := w.AsWidget()
 	w.SetProperty(SliceViewRowProperty, i)
@@ -544,7 +544,7 @@ func (sv *SliceViewBase) ConfigValueWidget(w core.ValueWidget, i int) {
 		}
 		row, col := sv.WidgetIndex(w)
 		row += sv.StartIndex
-		svi.StyleValueWidget(w, s, row, col)
+		svi.StyleValue(w, s, row, col)
 		if row < sv.SliceSize {
 			svi.StyleRow(w, row, col)
 		}
@@ -571,17 +571,17 @@ func (sv *SliceViewBase) ConfigRow(c *core.Config, i, si int) {
 		sv.ConfigGridIndex(c, i, si, itxt, invis)
 	}
 
-	core.AddConfig(c, "grid/value-"+itxt, func() core.ValueWidget {
-		w := core.NewValueWidget(val.Interface())
+	core.Configure(c, "grid/value-"+itxt, func() core.Value {
+		w := core.NewValue(val.Interface())
 		wb := w.AsWidget()
-		sv.ConfigValueWidget(w, i)
+		sv.ConfigValue(w, i)
 		if !sv.IsReadOnly() {
 			wb.OnChange(func(e events.Event) {
 				sv.SendChange(e)
 			})
 		}
 		return w
-	}, func(w core.ValueWidget) {
+	}, func(w core.Value) {
 		wb := w.AsWidget()
 		// w.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
 		core.Bind(val.Interface(), w)
@@ -600,7 +600,7 @@ func (sv *SliceViewBase) ConfigRow(c *core.Config, i, si int) {
 func (sv *SliceViewBase) ConfigGridIndex(c *core.Config, i, si int, itxt string, invis bool) {
 	sitxt := strconv.Itoa(si)
 	svi := sv.This().(SliceViewer)
-	core.AddConfig(c, "grid/index-"+itxt, func() *core.Text {
+	core.Configure(c, "grid/index-"+itxt, func() *core.Text {
 		w := core.NewText()
 		w.SetProperty(SliceViewRowProperty, i)
 		w.Style(func(s *styles.Style) {

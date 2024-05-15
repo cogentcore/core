@@ -219,14 +219,14 @@ func (ch *Chooser) Config(c *Config) {
 
 	// editable handles through TextField
 	if ch.Icon.IsSet() && !ch.Editable {
-		AddConfig(c, "icon", func() *Icon {
+		Configure(c, "icon", func() *Icon {
 			return NewIcon()
 		}, func(w *Icon) {
 			w.SetIcon(ch.Icon)
 		})
 	}
 	if ch.Editable {
-		AddConfig(c, "text-field",
+		Configure(c, "text-field",
 			func() *TextField {
 				w := NewTextField().SetPlaceholder(ch.Placeholder)
 				ch.HandleChooserTextFieldEvents(w)
@@ -252,7 +252,7 @@ func (ch *Chooser) Config(c *Config) {
 				}
 			})
 	} else {
-		AddConfig(c, "text",
+		Configure(c, "text",
 			func() *Text {
 				w := NewText()
 				w.Style(func(s *styles.Style) {
@@ -269,7 +269,7 @@ func (ch *Chooser) Config(c *Config) {
 	}
 	// editable handles through TextField
 	if !ch.Editable {
-		AddConfig(c, "indicator",
+		Configure(c, "indicator",
 			func() *Icon {
 				w := NewIcon()
 				w.Style(func(s *styles.Style) {

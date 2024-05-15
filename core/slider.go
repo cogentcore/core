@@ -487,7 +487,7 @@ func (sr *Slider) Config(c *Config) {
 		sr.DeleteChildren()
 		return
 	}
-	AddConfig(c, "icon", func() *Icon {
+	Configure(c, "icon", func() *Icon {
 		w := NewIcon()
 		w.Style(func(s *styles.Style) {
 			s.Font.Size.Dp(24)

@@ -35,7 +35,7 @@ type Switches struct {
 	// (checking one turns off all the others).
 	Mutex bool
 
-	// bitFlagValue is the associated bit flag value if non-nil (for [ValueWidget]).
+	// bitFlagValue is the associated bit flag value if non-nil (for [Value]).
 	bitFlagValue enums.BitFlagSetter
 }
 
@@ -265,7 +265,7 @@ func (sw *Switches) UpdateBitFlag(bitflag enums.BitFlagSetter) {
 
 func (sw *Switches) Config(c *Config) {
 	for _, item := range sw.Items {
-		AddConfig(c, item.Text, func() *Switch {
+		Configure(c, item.Text, func() *Switch {
 			w := NewSwitch()
 			w.OnChange(func(e events.Event) {
 				if sw.Mutex && w.IsChecked() {

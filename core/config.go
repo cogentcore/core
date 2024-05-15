@@ -43,7 +43,7 @@ type Config []*ConfigItem
 // AddConfig adds a new config item to the given [Config] for a widget at the
 // given forward-slash-separated path with the given function for constructing
 // the widget and the given optional function for updating the widget.
-func AddConfig[T Widget](c *Config, path string, new func() T, update ...func(w T)) {
+func Configure[T Widget](c *Config, path string, new func() T, update ...func(w T)) {
 	if len(update) == 0 {
 		c.Add(path, func() Widget { return new() }, nil)
 	} else {

@@ -75,8 +75,8 @@ func (tv *TableView) OnInit() {
 	tv.AddContextMenu(tv.ContextMenu)
 }
 
-// StyleValueWidget performs additional value widget styling
-func (tv *TableView) StyleValueWidget(w core.Widget, s *styles.Style, row, col int) {
+// StyleValue performs additional value widget styling
+func (tv *TableView) StyleValue(w core.Widget, s *styles.Style, row, col int) {
 	hw := float32(tv.headerWidths[col])
 	if col == tv.SortIndex {
 		hw += 6
@@ -251,7 +251,7 @@ func (tv *TableView) SliceHeader() *core.Frame {
 }
 
 func (tv *TableView) ConfigHeader(c *core.Config) {
-	core.AddConfig(c, "header", func() *core.Frame {
+	core.Configure(c, "header", func() *core.Frame {
 		w := core.NewFrame()
 		core.ToolbarStyles(w)
 		w.Style(func(s *styles.Style) {
@@ -262,7 +262,7 @@ func (tv *TableView) ConfigHeader(c *core.Config) {
 	})
 
 	if tv.Is(SliceViewShowIndex) {
-		core.AddConfig(c, "header/head-idx", func() *core.Text {
+		core.Configure(c, "header/head-idx", func() *core.Text {
 			w := core.NewText()
 			w.SetType(core.TextBodyMedium)
 			w.Style(func(s *styles.Style) {
@@ -275,7 +275,7 @@ func (tv *TableView) ConfigHeader(c *core.Config) {
 	}
 	for fli := 0; fli < tv.numVisibleFields; fli++ {
 		field := tv.visibleFields[fli]
-		core.AddConfig(c, "header/head-"+field.Name, func() *core.Button {
+		core.Configure(c, "header/head-"+field.Name, func() *core.Button {
 			w := core.NewButton()
 			w.SetType(core.ButtonMenu)
 			w.SetProperty("field-index", fli)
@@ -352,10 +352,10 @@ func (tv *TableView) ConfigRow(c *core.Config, i, si int) {
 		}
 		_ = tags
 
-		core.AddConfig(c, "grid/"+valnm, func() core.ValueWidget {
-			w := core.NewValueWidget(fval.Interface())
+		core.Configure(c, "grid/"+valnm, func() core.Value {
+			w := core.NewValue(fval.Interface())
 			wb := w.AsWidget()
-			tv.ConfigValueWidget(w, i)
+			tv.ConfigValue(w, i)
 			// vv.SetStructValue(fval.Addr(), stru, &field, vpath)
 			w.SetProperty(SliceViewColProperty, fli)
 			if !tv.IsReadOnly() {
@@ -365,7 +365,7 @@ func (tv *TableView) ConfigRow(c *core.Config, i, si int) {
 				wb.OnInput(tv.HandleEvent)
 			}
 			return w
-		}, func(w core.ValueWidget) {
+		}, func(w core.Value) {
 			wb := w.AsWidget()
 			// w.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
 			core.Bind(fval.Interface(), w)

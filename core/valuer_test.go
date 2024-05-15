@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/styles"
 )
 
-func TestNewValueWidget(t *testing.T) {
+func TestNewValue(t *testing.T) {
 	type test struct {
 		name  string
 		value any
@@ -24,7 +24,7 @@ func TestNewValueWidget(t *testing.T) {
 	}
 	for _, value := range values {
 		b := NewBody()
-		NewValueWidget(value.value, b)
+		NewValue(value.value, b)
 		b.AssertRender(t, "valuer/"+value.name)
 	}
 }

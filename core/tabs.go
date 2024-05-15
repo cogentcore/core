@@ -394,7 +394,7 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 // Re-config is needed when the type of tabs changes, but not
 // when a new tab is added, which only requires a new layout pass.
 func (ts *Tabs) Config(c *Config) {
-	AddConfig(c, "tabs", func() *Frame {
+	Configure(c, "tabs", func() *Frame {
 		w := NewFrame()
 		w.Style(func(s *styles.Style) {
 			s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
@@ -415,7 +415,7 @@ func (ts *Tabs) Config(c *Config) {
 	}, func(w *Frame) {
 		tc := &Config{}
 		if ts.NewTabButton {
-			AddConfig(tc, "new-tab", func() *Button {
+			Configure(tc, "new-tab", func() *Button {
 				w := NewButton().SetIcon(icons.Add).SetType(ButtonAction)
 				w.OnClick(func(e events.Event) {
 					ts.NewTab("New tab")
@@ -426,7 +426,7 @@ func (ts *Tabs) Config(c *Config) {
 		}
 		tc.ConfigWidget(w, "")
 	})
-	AddConfig(c, "frame", func() *Frame {
+	Configure(c, "frame", func() *Frame {
 		w := NewFrame()
 		w.Style(func(s *styles.Style) {
 			s.Display = styles.Stacked
@@ -562,7 +562,7 @@ func (tb *Tab) Config(c *Config) {
 	}
 
 	if tb.Icon.IsSet() {
-		AddConfig(c, "icon", func() *Icon {
+		Configure(c, "icon", func() *Icon {
 			w := NewIcon()
 			w.Style(func(s *styles.Style) {
 				s.Font.Size.Dp(18)
@@ -572,13 +572,13 @@ func (tb *Tab) Config(c *Config) {
 			w.SetIcon(tb.Icon)
 		})
 		if tb.Text != "" {
-			AddConfig(c, "space", func() *Space {
+			Configure(c, "space", func() *Space {
 				return NewSpace()
 			})
 		}
 	}
 	if tb.Text != "" {
-		AddConfig(c, "text", func() *Text {
+		Configure(c, "text", func() *Text {
 			w := NewText()
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
@@ -595,10 +595,10 @@ func (tb *Tab) Config(c *Config) {
 		})
 	}
 	if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
-		AddConfig(c, "close-space", func() *Space {
+		Configure(c, "close-space", func() *Space {
 			return NewSpace()
 		})
-		AddConfig(c, "close", func() *Button {
+		Configure(c, "close", func() *Button {
 			w := NewButton().SetType(ButtonAction)
 			w.Style(func(s *styles.Style) {
 				s.Padding.Zero()
