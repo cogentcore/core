@@ -68,6 +68,7 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 					sh.DeleteJob(cmdIO)
 				}()
 			case output:
+				cmdIO.PushOut(nil)
 				out, err = sh.Config.OutputIO(cmdIO, scmd, sargs...)
 			default:
 				err = sh.Config.RunIO(cmdIO, scmd, sargs...)
