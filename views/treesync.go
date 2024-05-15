@@ -230,8 +230,8 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	}
 	d := core.NewBody().AddTitle(actNm).AddText("Number and type of items to insert:")
 	nd := &core.NewItemsData{Number: 1, Type: typ}
-	sg := NewStructView(d).SetStruct(nd).StructGrid()
-	tree.ChildByType[*core.Chooser](sg, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
+	sv := NewStructView(d).SetStruct(nd) // TODO(config)
+	tree.ChildByType[*core.Chooser](sv, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
@@ -257,8 +257,8 @@ func (tv *TreeView) AddChildNode() { //types:add
 	}
 	d := core.NewBody().AddTitle(ttl).AddText("Number and type of items to insert:")
 	nd := &core.NewItemsData{Number: 1, Type: typ}
-	sg := NewStructView(d).SetStruct(nd).StructGrid()
-	tree.ChildByType[*core.Chooser](sg, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
+	sv := NewStructView(d).SetStruct(nd) // TODO(config)
+	tree.ChildByType[*core.Chooser](sv, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {

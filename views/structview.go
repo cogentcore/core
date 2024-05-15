@@ -14,12 +14,9 @@ import (
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
 
@@ -53,9 +50,6 @@ type StructView struct {
 	// Otherwise, it is nil.
 	StructValue Value `set:"-"`
 
-	// Values are [Value] representations of the struct field values.
-	Values []Value `set:"-" json:"-" xml:"-"`
-
 	// ViewPath is a record of parent view names that have led up to this view.
 	// It is displayed as extra contextual information in view dialogs.
 	ViewPath string
@@ -72,8 +66,13 @@ func (sv *StructView) OnInit() {
 
 func (sv *StructView) SetStyles() {
 	sv.Style(func(s *styles.Style) {
-		s.Direction = styles.Column
+		s.Display = styles.Grid
 		s.Grow.Set(0, 0)
+		if sv.SizeClass() == core.SizeCompact {
+			s.Columns = 1
+		} else {
+			s.Columns = 2
+		}
 	})
 }
 
@@ -86,52 +85,16 @@ func (sv *StructView) SetStruct(st any) *StructView {
 }
 
 func (sv *StructView) Config(c *core.Config) {
-	core.AddConfig(c, "grid", func() *core.Frame {
-		w := core.NewFrame()
-		return w
-	})
-
-	sg := core.NewFrame(sv)
-	sg.SetName("struct-grid")
-	sg.Style(func(s *styles.Style) {
-		s.Display = styles.Grid
-		s.Grow.Set(0, 0)
-		if sv.SizeClass() == core.SizeCompact {
-			s.Columns = 1
-		} else {
-			s.Columns = 2
-		}
-	})
-	sv.ConfigStructGrid()
-	sv.NeedsLayout()
-}
-
-// IsConfiged returns true if the widget is fully configured
-func (sv *StructView) IsConfiged() bool {
-	return len(sv.Kids) != 0
-}
-
-// StructGrid returns the grid layout widget, which contains all the fields and values
-func (sv *StructView) StructGrid() *core.Frame {
-	return sv.ChildByName("struct-grid", 2).(*core.Frame)
-}
-
-// ConfigStructGrid configures the StructGrid for the current struct.
-// returns true if any fields changed.
-func (sv *StructView) ConfigStructGrid() bool {
 	if reflectx.AnyIsNil(sv.Struct) {
-		return false
+		return
 	}
+
 	sc := true
 	if len(NoSentenceCaseFor) > 0 {
 		sc = !NoSentenceCaseForType(types.TypeNameValue(sv.Struct))
 	}
-	sg := sv.StructGrid()
-	// note: widget re-use does not work due to all the closures
-	sg.DeleteChildren()
-	config := tree.Config{}
-	dupeFields := map[string]bool{}
-	sv.Values = make([]Value, 0)
+
+	dupeFields := map[string]bool{} // todo: build this into basic config
 
 	shouldShow := func(field reflect.StructField, stru any) bool {
 		ftags := field.Tag
@@ -146,6 +109,106 @@ func (sv *StructView) ConfigStructGrid() bool {
 			}
 		}
 		return true
+	}
+
+	addField := func(c *core.Config, structVal, fieldVal any, field reflect.StructField, fnm string) {
+		if fieldVal == nil || reflectx.AnyIsNil(fieldVal) {
+			fmt.Println("field is nil:", fnm)
+			return
+		}
+		if _, exists := dupeFields[fnm]; exists {
+			slog.Error("StructView: duplicate field name:", "name:", fnm)
+			return
+		} else {
+			dupeFields[fnm] = true
+		}
+		flab := fnm
+		if sc {
+			flab = strcase.ToSentence(fnm)
+		}
+		labnm := fmt.Sprintf("label-%v", fnm)
+		valnm := fmt.Sprintf("value-%v", fnm)
+
+		core.AddConfig(c, labnm, func() *core.Text {
+			w := core.NewText()
+			w.Style(func(s *styles.Style) {
+				s.SetTextWrap(false)
+			})
+			// w.Tooltip = vv.Doc()
+			// vv.AsValueData().ViewPath = sv.ViewPath
+			/*
+				hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, w, sv.IsReadOnly())
+				if hasDef {
+					w.Style(func(s *styles.Style) {
+						dtag, _ := vv.Tag("default")
+						isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPointerValue(vv.Val()).Kind())
+						dcr := "(Double click to reset to default) "
+						if !isDef {
+							s.Color = colors.C(colors.Scheme.Primary.Base)
+							s.Cursor = cursors.Poof
+							if !strings.HasPrefix(w.Tooltip, dcr) {
+								w.Tooltip = dcr + w.Tooltip
+							}
+						} else {
+							w.Tooltip = strings.TrimPrefix(w.Tooltip, dcr)
+						}
+					})
+					w.OnDoubleClick(func(e events.Event) {
+						dtag, _ := vv.Tag("default")
+						isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPointerValue(vv.Val()).Kind())
+						if isDef {
+							return
+						}
+						e.SetHandled()
+						err := reflectx.SetFromDefaultTag(vv.Val(), dtag)
+						if err != nil {
+							core.ErrorSnackbar(w, err, "Error setting default value")
+						} else {
+							vv.Update()
+							vv.SendChange(e)
+						}
+					})
+				}
+			*/
+			return w
+		}, func(w *core.Text) {
+			w.SetText(flab)
+		})
+
+		core.AddConfig(c, valnm, func() core.ValueWidget {
+			w := core.NewValueWidget(fieldVal)
+			wb := w.AsWidget()
+			// svv := FieldToValue(fvalp, sfield.Name, sfval)
+			// if svv == nil { // shouldn't happen
+			// 	return true
+			// }
+			// svvp := sfieldVal.Addr()
+			// svv.SetStructValue(svvp, fvalp, &sfield, sv.ViewPath)
+			// todo: other things with view tag..
+			// vv.AsWidgetBase().OnInput(func(e events.Event) {
+			// 	if tag, _ := vv.Tag("immediate"); tag == "+" {
+			// 		wb.SendChange(e)
+			// 		sv.SendChange(e)
+			// 	}
+			// 	sv.Send(events.Input, e)
+			// })
+			if !sv.IsReadOnly() { // && !readOnlyTag {
+				wb.OnChange(func(e events.Event) {
+					// sv.UpdateFieldAction()
+					// note: updating vv here is redundant -- relevant field will have already updated
+					// if !reflectx.KindIsBasic(reflectx.NonPointerValue(vv.Val()).Kind()) {
+					// 	if updater, ok := sv.Struct.(core.Updater); ok {
+					// 		updater.Update()
+					// 	}
+					// }
+					// if hasDef {
+					// 	lbl.Update()
+					// }
+					sv.SendChange(e)
+				})
+			}
+			return w
+		})
 	}
 
 	reflectx.WalkValueFlatFieldsIf(sv.Struct,
@@ -169,134 +232,15 @@ func (sv *StructView) ConfigStructGrid() bool {
 						if !shouldShow(sfield, fvalp) {
 							return true
 						}
-						svv := FieldToValue(fvalp, sfield.Name, sfval)
-						if svv == nil { // shouldn't happen
-							return true
-						}
-						svvp := sfieldVal.Addr()
-						svv.SetStructValue(svvp, fvalp, &sfield, sv.ViewPath)
-
-						svtyp := svv.WidgetType()
-						// todo: other things with view tag..
 						fnm := field.Name + " • " + sfield.Name
-						if _, exists := dupeFields[fnm]; exists {
-							slog.Error("StructView: duplicate field name:", "name:", fnm)
-						} else {
-							dupeFields[fnm] = true
-						}
-						if sc {
-							svv.SetLabel(strcase.ToSentence(fnm))
-						} else {
-							svv.SetLabel(fnm)
-						}
-						labnm := fmt.Sprintf("label-%v", fnm)
-						valnm := fmt.Sprintf("value-%v", fnm)
-						config.Add(core.TextType, labnm)
-						config.Add(svtyp, valnm) // todo: extend to diff types using interface..
-						sv.Values = append(sv.Values, svv)
+						addField(c, fvalp, sfval, sfield, fnm)
 						return true
 					})
 				return true
 			}
-			vv := FieldToValue(sv.Struct, field.Name, fval)
-			if vv == nil { // shouldn't happen
-				return true
-			}
-			if _, exists := dupeFields[field.Name]; exists {
-				slog.Error("StructView: duplicate field name:", "name:", field.Name)
-			} else {
-				dupeFields[field.Name] = true
-			}
-			vvp := fieldVal.Addr()
-			vv.SetStructValue(vvp, sv.Struct, &field, sv.ViewPath)
-			vtyp := vv.WidgetType()
-			// todo: other things with view tag..
-			labnm := fmt.Sprintf("label-%v", field.Name)
-			valnm := fmt.Sprintf("value-%v", field.Name)
-			config.Add(core.TextType, labnm)
-			config.Add(vtyp, valnm) // todo: extend to diff types using interface..
-			sv.Values = append(sv.Values, vv)
+			addField(c, sv.Struct, fval, field, field.Name)
 			return true
 		})
-	sg.ConfigChildren(config) // fields could be non-unique with labels..
-	for i, vv := range sv.Values {
-		lbl := sg.Child(i * 2).(*core.Text)
-		lbl.Style(func(s *styles.Style) {
-			s.SetTextWrap(false)
-		})
-		lbl.Tooltip = vv.Doc()
-		vv.AsValueData().ViewPath = sv.ViewPath
-		w, wb := core.AsWidget(sg.Child((i * 2) + 1))
-		hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, w, sv.IsReadOnly())
-		if hasDef {
-			lbl.Style(func(s *styles.Style) {
-				dtag, _ := vv.Tag("default")
-				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPointerValue(vv.Val()).Kind())
-				dcr := "(Double click to reset to default) "
-				if !isDef {
-					s.Color = colors.C(colors.Scheme.Primary.Base)
-					s.Cursor = cursors.Poof
-					if !strings.HasPrefix(lbl.Tooltip, dcr) {
-						lbl.Tooltip = dcr + lbl.Tooltip
-					}
-				} else {
-					lbl.Tooltip = strings.TrimPrefix(lbl.Tooltip, dcr)
-				}
-			})
-			lbl.OnDoubleClick(func(e events.Event) {
-				dtag, _ := vv.Tag("default")
-				isDef, _ := StructFieldIsDef(dtag, vv.Val().Interface(), reflectx.NonPointerValue(vv.Val()).Kind())
-				if isDef {
-					return
-				}
-				e.SetHandled()
-				err := reflectx.SetFromDefaultTag(vv.Val(), dtag)
-				if err != nil {
-					core.ErrorSnackbar(lbl, err, "Error setting default value")
-				} else {
-					vv.Update()
-					vv.SendChange(e)
-				}
-			})
-		}
-		if w.NodeType() != vv.WidgetType() {
-			slog.Error("StructView: Widget Type is not the proper type.  This usually means there are duplicate field names (including across embedded types", "field:", lbl.Text, "is:", w.NodeType().Name, "should be:", vv.WidgetType().Name)
-			break
-		}
-		Config(vv, w)
-		vv.AsWidgetBase().OnInput(func(e events.Event) {
-			if tag, _ := vv.Tag("immediate"); tag == "+" {
-				wb.SendChange(e)
-				sv.SendChange(e)
-			}
-			sv.Send(events.Input, e)
-		})
-		if !sv.IsReadOnly() && !readOnlyTag {
-			vv.OnChange(func(e events.Event) {
-				sv.UpdateFieldAction()
-				// note: updating vv here is redundant -- relevant field will have already updated
-				if !reflectx.KindIsBasic(reflectx.NonPointerValue(vv.Val()).Kind()) {
-					if updater, ok := sv.Struct.(core.Updater); ok {
-						updater.Update()
-					}
-				}
-				if hasDef {
-					lbl.Update()
-				}
-				sv.SendChange(e)
-			})
-		}
-	}
-	return true
-}
-
-func (sv *StructView) UpdateFieldAction() {
-	if !sv.IsConfiged() {
-		return
-	}
-	if sv.isShouldShower {
-		sv.Update()
-	}
 }
 
 /////////////////////////////////////////////////////////////////////////
