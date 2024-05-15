@@ -290,6 +290,24 @@ func (st *StdIO) SetWrappers(o *StdIO) *StdIO {
 	return cur
 }
 
+// SetWrappedOut sets the wrapped Out to given writer.
+// The wrappers must have been created using NewWrappers initially.
+func (st *StdIO) SetWrappedOut(w io.Writer) {
+	st.Out.(*WriteWrapper).Writer = w
+}
+
+// SetWrappedErr sets the wrapped Err to given writer.
+// The wrappers must have been created using NewWrappers initially.
+func (st *StdIO) SetWrappedErr(w io.Writer) {
+	st.Err.(*WriteWrapper).Writer = w
+}
+
+// SetWrappedIn sets the wrapped In to given reader.
+// The wrappers must have been created using NewWrappers initially.
+func (st *StdIO) SetWrappedIn(r io.Reader) {
+	st.In.(*ReadWrapper).Reader = r
+}
+
 // GetWrapped returns the current wrapped values as a StdIO.
 // The wrappers must have been created using NewWrappers initially.
 func (st *StdIO) GetWrapped() *StdIO {
