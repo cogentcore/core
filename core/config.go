@@ -44,7 +44,9 @@ type Config []*ConfigItem
 
 // Configure adds a new config item to the given [Config] for a widget at the
 // given forward-slash-separated path with the given function for constructing
-// the widget and the given optional function for updating the widget.
+// the widget and the given optional function for updating the widget. If the
+// given path is blank, it is automatically set to a unique name based on the
+// filepath and line number of the calling function.
 func Configure[T Widget](c *Config, path string, new func() T, update ...func(w T)) {
 	if len(update) == 0 {
 		c.Add(path, func() Widget { return new() }, nil)
@@ -58,7 +60,9 @@ func Configure[T Widget](c *Config, path string, new func() T, update ...func(w 
 // path with the given function for constructing the widget and the given function
 // for updating the widget. This should be called on the root level Config
 // list. Any items with nested paths are added to Children lists as
-// appropriate. Consider using the [Configure] global generic function for
+// appropriate. If the given path is blank, it is automatically set to
+// a unique name based on the filepath and line number of the calling function.
+// Consider using the [Configure] global generic function for
 // better type safety and increased convenience.
 func (c *Config) Add(path string, new func() Widget, update func(w Widget)) {
 	if path == "" {
