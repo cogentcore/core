@@ -232,8 +232,9 @@ type Widget interface {
 	DirectRenderDraw(drw system.Drawer, idx int, flipY bool)
 }
 
-// WidgetBase is the base type for all [Widget]s.
-type WidgetBase struct { //core:no-new
+// WidgetBase is the base type for all [Widget]s. It renders the
+// standard box model, but does not layout or render any children.
+type WidgetBase struct {
 	tree.NodeBase
 
 	// Tooltip is the text for the tooltip for this widget,

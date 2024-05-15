@@ -62,7 +62,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		})
 	},
 	"basics/styling-2": func(parent core.Widget) {
-		core.NewBox(parent).Style(func(s *styles.Style) {
+		core.NewFrame(parent).Style(func(s *styles.Style) {
 			s.Min.Set(units.Dp(50))
 			s.Background = colors.C(colors.Scheme.Primary.Base)
 		})

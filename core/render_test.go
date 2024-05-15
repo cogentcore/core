@@ -16,7 +16,7 @@ import (
 // For https://github.com/cogentcore/core/issues/614
 func TestRenderOneSideBorder(t *testing.T) {
 	b := NewBody()
-	NewBox(b).Style(func(s *styles.Style) {
+	NewWidgetBase(b).Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(100))
 		s.Border.Width.Bottom.Dp(10)
 		s.Border.Color.Bottom = colors.C(colors.Scheme.Outline)
@@ -54,7 +54,7 @@ func TestRenderFrameAlignment(t *testing.T) {
 		s.Padding.Zero()
 		s.Gap.Zero()
 	})
-	NewBox(outer).Style(func(s *styles.Style) {
+	NewWidgetBase(outer).Style(func(s *styles.Style) {
 		s.Background = colors.C(colors.Blue)
 		s.Grow.Set(1, 1)
 	})
@@ -71,7 +71,7 @@ func TestRenderFrameAlignmentCenter(t *testing.T) {
 		s.Gap.Zero()
 		s.CenterAll()
 	})
-	NewBox(outer).Style(func(s *styles.Style) {
+	NewWidgetBase(outer).Style(func(s *styles.Style) {
 		s.Background = colors.C(colors.Blue)
 		s.Min.Set(units.Dp(15))
 	})

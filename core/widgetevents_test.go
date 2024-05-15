@@ -18,7 +18,7 @@ import (
 
 func TestHandleWidgetState(t *testing.T) {
 	b := NewBody()
-	w := NewBox(b)
+	w := NewWidgetBase(b)
 
 	test := func(ability abilities.Abilities, state states.States, event events.Types, endEvent events.Types) {
 		expect := states.States(0)
@@ -56,7 +56,7 @@ func TestHandleWidgetState(t *testing.T) {
 
 func TestWidgetEventManager(t *testing.T) {
 	b := NewBody()
-	w := NewBox(b)
+	w := NewWidgetBase(b)
 
 	assert.Equal(t, &w.Scene.Events, w.Events())
 
