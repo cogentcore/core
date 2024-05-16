@@ -30,18 +30,11 @@ const (
 	FrameStackTopOnly FrameFlags = FrameFlags(WidgetFlagsN) + iota
 )
 
-///////////////////////////////////////////////////////////////////
-// Layout
-
 // Frame is the primary node type responsible for organizing the sizes
-// and positions of child widgets. It does not render, only organize,
-// so properties like background and border will have no effect.
-// All arbitrary collections of widgets should generally be contained
-// within a Frame or a [Frame]; otherwise, the parent widget must take over
-// responsibility for positioning. Layouts automatically can add scrollbars
-// depending on the [styles.Style.Overflow]. By default, [Frame]s grow in
-// the x direction but not the y direction; this can be changed by setting
-// [styles.Style.Grow].
+// and positions of child widgets. It also renders the standard box model.
+// All collections of widgets should generally be contained within a [Frame];
+// otherwise, the parent widget must take over responsibility for positioning.
+// Frames automatically can add scrollbars depending on the [styles.Style.Overflow].
 //
 // For a [styles.Grid] layout, the [styles.Style.Columns] property should
 // generally be set to the desired number of columns, from which the number of rows
@@ -143,8 +136,6 @@ func (ly *Frame) RenderWidget() {
 		ly.PopBounds()
 	}
 }
-
-func (ly *Frame) Render() {}
 
 // ChildWithFocus returns a direct child of this layout that either is the
 // current window focus item, or contains that focus item (along with its

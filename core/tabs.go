@@ -148,19 +148,19 @@ func (ts *Tabs) NumTabs() int {
 	return len(fr.Kids)
 }
 
-// CurTab returns currently selected tab, and its index -- returns false none
-func (ts *Tabs) CurTab() (Widget, int, bool) {
+// CurrentTab returns currently selected tab and its index; returns nil if none.
+func (ts *Tabs) CurrentTab() (Widget, int) {
 	if ts.NumTabs() == 0 {
-		return nil, -1, false
+		return nil, -1
 	}
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
 	fr := ts.FrameWidget()
 	if fr.StackTop < 0 {
-		return nil, -1, false
+		return nil, -1
 	}
 	w := fr.Child(fr.StackTop).(Widget)
-	return w, fr.StackTop, true
+	return w, fr.StackTop
 }
 
 // NewTab adds a new tab with the given label and returns the resulting tab frame.
