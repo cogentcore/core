@@ -54,6 +54,7 @@ func main() {
 func homePage(ctx *htmlview.Context) bool {
 	frame := core.NewFrame(ctx.BlockParent).Style(func(s *styles.Style) {
 		s.Direction = styles.Column
+		s.Grow.Set(1, 1)
 		s.CenterAll()
 		// s.Background = gradient.NewLinear().AddStop(colors.Scheme.Primary.Container, 0).AddStop(colors.Scheme.Warn.Container, 1)
 	})
@@ -76,8 +77,8 @@ func homePage(ctx *htmlview.Context) bool {
 
 	makeBlock := func(title, text string, graphic func(parent core.Widget)) {
 		block := core.NewFrame(frame).Style(func(s *styles.Style) {
-			s.CenterAll()
 			s.Gap.Set(units.Em(1))
+			s.Grow.Set(1, 0)
 			if frame.SizeClass() == core.SizeCompact {
 				s.Direction = styles.Column
 			}
@@ -101,6 +102,7 @@ func homePage(ctx *htmlview.Context) bool {
 		textBlock := core.NewFrame(block).Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Text.Align = styles.Start
+			s.Grow.Set(1, 1)
 		})
 		textBlock.SetName("text-block")
 		core.NewText(textBlock).SetType(core.TextHeadlineLarge).SetText(title).Style(func(s *styles.Style) {

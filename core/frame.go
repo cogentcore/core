@@ -138,7 +138,7 @@ func (ly *Frame) RenderWidget() {
 
 func (fr *Frame) Render() {
 	// if we don't need to render, don't render
-	// TODO: check border here also
+	// TODO(config): check border here also
 	if fr.Styles.Background == nil && fr.Styles.StateLayer == 0 && !fr.HasAnyScroll() {
 		return
 	}
