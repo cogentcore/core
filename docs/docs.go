@@ -28,7 +28,7 @@ import (
 //go:embed content
 var content embed.FS
 
-//go:embed name.png emergent-icon.svg weld-icon.png
+//go:embed name.png code-icon.svg mail-icon.svg emergent-icon.svg weld-icon.png
 var resources embed.FS
 
 //go:embed image.png
@@ -44,7 +44,7 @@ func main() {
 	b := core.NewBody("Cogent Core Docs")
 	pg := pages.NewPage(b).SetSource(errors.Log1(fs.Sub(content, "content")))
 	pg.Context.WikilinkResolver = htmlview.PkgGoDevWikilink("cogentcore.org/core")
-	b.AddAppBar(pg.AppBar)
+	// b.AddAppBar(pg.AppBar)
 
 	htmlview.ElementHandlers["home-page"] = homePage
 
@@ -172,9 +172,7 @@ func homePage(ctx *htmlview.Context) bool {
 	core.NewText(frame).SetType(core.TextDisplaySmall).SetText("<b>What can Cogent Core do?</b>")
 
 	makeBlock("COGENT CODE", "Cogent Code is a fully featured Go IDE with support for syntax highlighting, code completion, symbol lookup, building and debugging, version control, keyboard shortcuts, and many other features.", func(parent core.Widget) {
-		core.NewIcon(parent).SetIcon(icons.Code).Style(func(s *styles.Style) {
-			s.Min.Set(units.Dp(256))
-		})
+		errors.Log(core.NewSVG(parent).OpenFS(resources, "code-icon.svg"))
 	})
 
 	makeBlock("COGENT VECTOR", "Cogent Vector is a powerful vector graphics editor with complete support for shapes, paths, curves, text, images, gradients, groups, alignment, styling, importing, exporting, undo, redo, and various other features.", func(parent core.Widget) {
@@ -184,9 +182,7 @@ func homePage(ctx *htmlview.Context) bool {
 	})
 
 	makeBlock("COGENT MAIL", "Cogent Mail is a customizable email client with built-in Markdown support and an extensive set of keyboard shortcuts for advanced mail filing.", func(parent core.Widget) {
-		core.NewIcon(parent).SetIcon(icons.Mail).Style(func(s *styles.Style) {
-			s.Min.Set(units.Dp(256))
-		})
+		errors.Log(core.NewSVG(parent).OpenFS(resources, "mail-icon.svg"))
 	})
 
 	makeBlock("EMERGENT", "Emergent is a collection of biologically based 3D neural network models of the brain that power ongoing research in computational cognitive neuroscience.", func(parent core.Widget) {
