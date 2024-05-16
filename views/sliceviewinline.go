@@ -108,6 +108,11 @@ func (sv *SliceViewInline) Config(c *core.Config) {
 				})
 			}
 			return w
+		}, func(w core.Value) {
+			wb := w.AsWidget()
+			core.Bind(val.Interface(), w)
+			// vv.SetSliceValue(val, sv.Slice, i, sv.ViewPath)
+			wb.SetReadOnly(sv.IsReadOnly())
 		})
 	}
 	if !sv.isArray && !sv.isFixedLength {

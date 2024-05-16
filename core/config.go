@@ -62,18 +62,19 @@ func Configure[T Widget](c *Config, path string, new func() T, update ...func(w 
 // the first is called only during initial Config of a new Button;
 // the second is called during Update.
 func ConfigButton(c *Config, funcs ...func(w *Button)) {
+	path := ConfigCallerPath(2)
 	n := len(funcs)
 	switch n {
 	case 0:
-		c.Add("", func() Widget { return NewButton() }, nil)
+		c.Add(path, func() Widget { return NewButton() }, nil)
 	case 1:
-		c.Add("", func() Widget {
+		c.Add(path, func() Widget {
 			w := NewButton()
 			funcs[0](w)
 			return w
 		}, nil)
 	case 2:
-		c.Add("", func() Widget {
+		c.Add(path, func() Widget {
 			w := NewButton()
 			funcs[0](w)
 			return w

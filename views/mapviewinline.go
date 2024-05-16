@@ -85,6 +85,11 @@ func (mv *MapViewInline) Config(c *core.Config) {
 				})
 			}
 			return w
+		}, func(w core.Value) {
+			wb := w.AsWidget()
+			core.Bind(key.Interface(), w)
+			// vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value value to track updates
+			wb.SetReadOnly(mv.IsReadOnly())
 		})
 		core.Configure(c, valnm, func() core.Value {
 			w := core.NewValue(val.Interface())
@@ -103,6 +108,11 @@ func (mv *MapViewInline) Config(c *core.Config) {
 				})
 			}
 			return w
+		}, func(w core.Value) {
+			wb := w.AsWidget()
+			core.Bind(val.Interface(), w)
+			// vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value value to track updates
+			wb.SetReadOnly(mv.IsReadOnly())
 		})
 	}
 	if !mv.IsReadOnly() {
