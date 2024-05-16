@@ -219,6 +219,10 @@ var FileViewKindColorMap = map[string]string{
 }
 
 func (fv *FileView) Config(c *core.Config) {
+	core.RecentPaths.AddPath(fv.DirPath, core.SystemSettings.SavedPathsMax)
+	core.SaveRecentPaths()
+	fv.ReadFiles()
+
 	core.Configure(c, "files", func() *core.Frame {
 		w := core.NewFrame()
 		w.Style(func(s *styles.Style) {
@@ -569,15 +573,10 @@ func (fv *FileView) UpdateFiles() {
 	if len(core.RecentPaths) == 0 {
 		core.OpenRecentPaths()
 	}
-	core.RecentPaths.AddPath(fv.DirPath, core.SystemSettings.SavedPathsMax)
-	core.SaveRecentPaths()
 	sf := fv.SelectField()
 	sf.SetText(fv.CurrentSelectedFile)
 
 	fv.Scene.UpdateTitle("Files: " + fv.DirPath)
-
-	fv.ReadFiles()
-
 	fvv := fv.FavesView()
 	fvv.ResetSelectedIndexes()
 
