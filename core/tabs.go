@@ -430,7 +430,7 @@ func (ts *Tabs) Config(c *Config) {
 		w := NewFrame()
 		w.Style(func(s *styles.Style) {
 			s.Display = styles.Stacked
-			w.SetFlag(true, LayoutStackTopOnly) // key for allowing each tab to have its own size
+			w.SetFlag(true, FrameStackTopOnly) // key for allowing each tab to have its own size
 			s.Min.X.Dp(160)
 			s.Min.Y.Dp(96)
 			s.Grow.Set(1, 1)

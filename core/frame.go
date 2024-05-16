@@ -20,35 +20,14 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-var (
-	// LayoutPrefMaxRows is maximum number of rows to use in a grid layout
-	// when computing the preferred size (ScPrefSizing)
-	LayoutPrefMaxRows = 20
-
-	// LayoutPrefMaxCols is maximum number of columns to use in a grid layout
-	// when computing the preferred size (ScPrefSizing)
-	LayoutPrefMaxCols = 20
-
-	// AutoScrollRate determines the rate of auto-scrolling of layouts
-	AutoScrollRate = float32(1.0)
-)
-
-// Layoutlags has bool flags for Layout
-type LayoutFlags WidgetFlags //enums:bitflag -trim-prefix Layout
+// FrameFlags has state bit flags for [Frame].
+type FrameFlags WidgetFlags //enums:bitflag -trim-prefix Frame
 
 const (
-	// for stacked layout, only layout the top widget.
-	// this is appropriate for e.g., tab layout, which does a full
-	// redraw on stack changes, but not for e.g., check boxes which don't
-	LayoutStackTopOnly LayoutFlags = LayoutFlags(WidgetFlagsN) + iota
-
-	// true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration
-	LayoutNeedsRedo
-
-	// LayoutNoKeys prevents processing of keyboard events for this layout.
-	// By default, Layout handles focus navigation events, but if an
-	// outer Widget handles these instead, then this should be set.
-	LayoutNoKeys
+	// FrameStackTopOnly is whether to only layout the top widget for a stacked
+	// frame layout. This is appropriate for e.g., tab layout, which does a full
+	// redraw on stack changes, but not for e.g., check boxes which don't.
+	FrameStackTopOnly FrameFlags = FrameFlags(WidgetFlagsN) + iota
 )
 
 ///////////////////////////////////////////////////////////////////
@@ -95,7 +74,7 @@ type Frame struct {
 }
 
 func (ly *Frame) FlagType() enums.BitFlagSetter {
-	return (*LayoutFlags)(&ly.Flags)
+	return (*FrameFlags)(&ly.Flags)
 }
 
 func (ly *Frame) OnInit() {
@@ -278,9 +257,6 @@ func (ly *Frame) HandleEvents() {
 // done by default if FocusWithinable Ability is set.
 func (ly *Frame) HandleKeys() {
 	ly.OnFinal(events.KeyChord, func(e events.Event) {
-		if ly.Is(LayoutNoKeys) {
-			return
-		}
 		kf := keymap.Of(e.KeyChord())
 		if DebugSettings.KeyEventTrace {
 			slog.Info("Layout KeyInput", "widget", ly, "keyFunction", kf)

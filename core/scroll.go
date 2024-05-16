@@ -17,6 +17,9 @@ import (
 	"cogentcore.org/core/tree"
 )
 
+// AutoScrollRate determines the rate of auto-scrolling of layouts
+var AutoScrollRate = float32(1)
+
 // HasAnyScroll returns true if layout has
 func (ly *Frame) HasAnyScroll() bool {
 	return ly.HasScroll[math32.X] || ly.HasScroll[math32.Y]

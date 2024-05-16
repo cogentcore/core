@@ -205,72 +205,72 @@ func (i *WidgetFlags) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "WidgetFlags")
 }
 
-var _LayoutFlagsValues = []LayoutFlags{2, 3, 4}
+var _LayoutFlagsValues = []FrameFlags{2, 3, 4}
 
 // LayoutFlagsN is the highest valid value for type LayoutFlags, plus one.
-const LayoutFlagsN LayoutFlags = 5
+const LayoutFlagsN FrameFlags = 5
 
-var _LayoutFlagsValueMap = map[string]LayoutFlags{`StackTopOnly`: 2, `NeedsRedo`: 3, `NoKeys`: 4}
+var _LayoutFlagsValueMap = map[string]FrameFlags{`StackTopOnly`: 2, `NeedsRedo`: 3, `NoKeys`: 4}
 
-var _LayoutFlagsDescMap = map[LayoutFlags]string{2: `for stacked layout, only layout the top widget. this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don&#39;t`, 3: `true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration`, 4: `LayoutNoKeys prevents processing of keyboard events for this layout. By default, Layout handles focus navigation events, but if an outer Widget handles these instead, then this should be set.`}
+var _LayoutFlagsDescMap = map[FrameFlags]string{2: `for stacked layout, only layout the top widget. this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don&#39;t`, 3: `true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration`, 4: `LayoutNoKeys prevents processing of keyboard events for this layout. By default, Layout handles focus navigation events, but if an outer Widget handles these instead, then this should be set.`}
 
-var _LayoutFlagsMap = map[LayoutFlags]string{2: `StackTopOnly`, 3: `NeedsRedo`, 4: `NoKeys`}
+var _LayoutFlagsMap = map[FrameFlags]string{2: `StackTopOnly`, 3: `NeedsRedo`, 4: `NoKeys`}
 
 // String returns the string representation of this LayoutFlags value.
-func (i LayoutFlags) String() string {
+func (i FrameFlags) String() string {
 	return enums.BitFlagStringExtended(i, _LayoutFlagsValues, WidgetFlagsValues())
 }
 
 // BitIndexString returns the string representation of this LayoutFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
-func (i LayoutFlags) BitIndexString() string {
-	return enums.BitIndexStringExtended[LayoutFlags, WidgetFlags](i, _LayoutFlagsMap)
+func (i FrameFlags) BitIndexString() string {
+	return enums.BitIndexStringExtended[FrameFlags, WidgetFlags](i, _LayoutFlagsMap)
 }
 
 // SetString sets the LayoutFlags value from its string representation,
 // and returns an error if the string is invalid.
-func (i *LayoutFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
+func (i *FrameFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 
 // SetStringOr sets the LayoutFlags value from its string representation
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
-func (i *LayoutFlags) SetStringOr(s string) error {
+func (i *FrameFlags) SetStringOr(s string) error {
 	return enums.SetStringOrExtended(i, (*WidgetFlags)(i), s, _LayoutFlagsValueMap)
 }
 
 // Int64 returns the LayoutFlags value as an int64.
-func (i LayoutFlags) Int64() int64 { return int64(i) }
+func (i FrameFlags) Int64() int64 { return int64(i) }
 
 // SetInt64 sets the LayoutFlags value from an int64.
-func (i *LayoutFlags) SetInt64(in int64) { *i = LayoutFlags(in) }
+func (i *FrameFlags) SetInt64(in int64) { *i = FrameFlags(in) }
 
 // Desc returns the description of the LayoutFlags value.
-func (i LayoutFlags) Desc() string {
-	return enums.DescExtended[LayoutFlags, WidgetFlags](i, _LayoutFlagsDescMap)
+func (i FrameFlags) Desc() string {
+	return enums.DescExtended[FrameFlags, WidgetFlags](i, _LayoutFlagsDescMap)
 }
 
 // LayoutFlagsValues returns all possible values for the type LayoutFlags.
-func LayoutFlagsValues() []LayoutFlags {
+func LayoutFlagsValues() []FrameFlags {
 	return enums.ValuesGlobalExtended(_LayoutFlagsValues, WidgetFlagsValues())
 }
 
 // Values returns all possible values for the type LayoutFlags.
-func (i LayoutFlags) Values() []enums.Enum {
+func (i FrameFlags) Values() []enums.Enum {
 	return enums.ValuesExtended(_LayoutFlagsValues, WidgetFlagsValues())
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i LayoutFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i FrameFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
-func (i *LayoutFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
+func (i *FrameFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i LayoutFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+func (i FrameFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *LayoutFlags) UnmarshalText(text []byte) error {
+func (i *FrameFlags) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "LayoutFlags")
 }
 
