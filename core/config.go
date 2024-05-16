@@ -295,8 +295,6 @@ func NewParts() *Frame {
 	w.SetFlag(true, tree.Field)
 	w.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
-		s.Background = nil
-		s.FillMargin = false
 	})
 	return w
 }

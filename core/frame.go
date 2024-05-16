@@ -136,6 +136,15 @@ func (ly *Frame) RenderWidget() {
 	}
 }
 
+func (fr *Frame) Render() {
+	// if we don't need to render, don't render
+	// TODO: check border here also
+	if fr.Styles.Background == nil && fr.Styles.StateLayer == 0 && !fr.HasAnyScroll() {
+		return
+	}
+	fr.WidgetBase.Render()
+}
+
 // ChildWithFocus returns a direct child of this layout that either is the
 // current window focus item, or contains that focus item (along with its
 // index) -- nil, -1 if none.

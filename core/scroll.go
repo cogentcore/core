@@ -20,7 +20,7 @@ import (
 // AutoScrollRate determines the rate of auto-scrolling of layouts
 var AutoScrollRate = float32(1)
 
-// HasAnyScroll returns true if layout has
+// HasAnyScroll returns true if the frame has any scrollbars.
 func (ly *Frame) HasAnyScroll() bool {
 	return ly.HasScroll[math32.X] || ly.HasScroll[math32.Y]
 }
