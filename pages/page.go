@@ -74,6 +74,7 @@ func (pg *Page) OnInit() {
 	}
 	pg.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
+		s.Grow.Set(1, 1)
 	})
 }
 

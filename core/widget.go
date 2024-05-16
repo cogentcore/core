@@ -448,6 +448,8 @@ func (wb *WidgetBase) NewParts() *Frame {
 	wb.Parts.SetFlag(true, tree.Field)
 	wb.Parts.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
+		s.Background = nil
+		s.FillMargin = false
 	})
 	return wb.Parts
 }

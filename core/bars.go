@@ -67,6 +67,7 @@ func (sc *Scene) ConfigSceneBars() {
 	if !sc.Bars.Top.IsEmpty() {
 		head := NewFrame(sc).Style(func(s *styles.Style) {
 			s.Align.Items = styles.Center
+			s.Grow.Set(1, 0)
 		})
 		sc.Bars.Top.Call(head)
 	}
@@ -76,6 +77,7 @@ func (sc *Scene) ConfigSceneBars() {
 			left := NewFrame(mid).Style(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Align.Items = styles.Center
+				s.Grow.Set(0, 1)
 			})
 			sc.Bars.Left.Call(left)
 		}
@@ -86,6 +88,7 @@ func (sc *Scene) ConfigSceneBars() {
 			right := NewFrame(mid).Style(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Align.Items = styles.Center
+				s.Grow.Set(0, 1)
 			})
 			sc.Bars.Right.Call(right)
 		}
@@ -98,6 +101,7 @@ func (sc *Scene) ConfigSceneBars() {
 		foot := NewFrame(sc).Style(func(s *styles.Style) {
 			s.Justify.Content = styles.End
 			s.Align.Items = styles.Center
+			s.Grow.Set(1, 0)
 		})
 		sc.Bars.Bottom.Call(foot)
 	}
