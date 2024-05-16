@@ -185,15 +185,15 @@ func homePage(ctx *htmlview.Context) bool {
 		errors.Log(core.NewSVG(parent).OpenFS(resources, "numbers-icon.svg"))
 	})
 
-	makeBlock("COGENT MAIL", "Cogent Mail is a customizable email client with built-in Markdown support and an extensive set of keyboard shortcuts for advanced mail filing.", func(parent core.Widget) {
+	makeBlock("COGENT MAIL", "Cogent Mail is a customizable email client with built-in Markdown support, automatic mail filtering, and an extensive set of keyboard shortcuts for advanced mail filing.", func(parent core.Widget) {
 		errors.Log(core.NewSVG(parent).OpenFS(resources, "mail-icon.svg"))
 	})
 
-	makeBlock("EMERGENT", "Emergent is a collection of biologically based 3D neural network models of the brain that power ongoing research in computational cognitive neuroscience.", func(parent core.Widget) {
+	makeBlock(`<a href="https://emersim.org">EMERGENT</a>`, "Emergent is a collection of biologically based 3D neural network models of the brain that power ongoing research in computational cognitive neuroscience.", func(parent core.Widget) {
 		errors.Log(core.NewSVG(parent).OpenFS(resources, "emergent-icon.svg"))
 	})
 
-	makeBlock("WELD", "WELD is a set of 3D computational models of a new approach to quantum physics based on wave electrodynamics.", func(parent core.Widget) {
+	makeBlock(`<a href="https://github.com/WaveELD/WELDBook/blob/main/textmd/ch01_intro.md">WELD</a>`, "WELD is a set of 3D computational models of a new approach to quantum physics based on the de Broglie-Bohm pilot wave theory.", func(parent core.Widget) {
 		errors.Log(core.NewImage(parent).OpenFS(resources, "weld-icon.png"))
 	})
 
