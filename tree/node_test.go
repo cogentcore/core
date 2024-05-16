@@ -69,14 +69,15 @@ func TestNodeEscapePaths(t *testing.T) {
 	schild2.SetName("subchild1")
 	assert.Len(t, parent.Kids, 3)
 	assert.Equal(t, `/node-base/child1\,go`, child1.Path())
+	assert.Equal(t, `child1\,go`, child1.PathFrom(parent))
 	assert.Equal(t, `/node-base/child1\\child1`, child2.Path())
 	assert.Equal(t, `/node-base/child1\\child1\,go`, child3.Path())
 	assert.Equal(t, `/node-base/child1\\child1/subchild1`, schild2.Path())
-	assert.Equal(t, child1, parent.FindPath(child1.Path()))
-	assert.Equal(t, child3, parent.FindPath(child3.Path()))
-	assert.Equal(t, child3, parent.FindPath(child3.Path()))
-	assert.Equal(t, schild2, parent.FindPath(schild2.Path()))
-	assert.Equal(t, schild2, child2.FindPath(schild2.Path()))
+	assert.Equal(t, child1, parent.FindPath(child1.PathFrom(parent)))
+	assert.Equal(t, child3, parent.FindPath(child3.PathFrom(parent)))
+	assert.Equal(t, child3, parent.FindPath(child3.PathFrom(parent)))
+	assert.Equal(t, schild2, parent.FindPath(schild2.PathFrom(parent)))
+	assert.Equal(t, schild2, child2.FindPath(schild2.PathFrom(child2)))
 }
 
 func TestNodePathFrom(t *testing.T) {

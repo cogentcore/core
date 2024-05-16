@@ -281,7 +281,7 @@ func (n *NodeBase) PathFrom(parent Node) string {
 	parent = parent.This()
 	// we bail a level below the parent so it isn't in the path
 	if n.Par == nil || n.Par == parent {
-		return n.Nm
+		return EscapePathName(n.Nm)
 	}
 	ppath := ""
 	if n.Par == parent {
@@ -317,7 +317,7 @@ func findPathChild(k Node, child string) (int, bool) {
 	return k.Children().IndexByName(child, 0)
 }
 
-// FindPath returns the node at the given path, starting from this node.
+// FindPath returns the node at the given path from this node.
 // FindPath only works correctly when names are unique.
 // Path has [Node.Name]s separated by / and fields by .
 // Node names escape any existing / and . characters to \\ and \,

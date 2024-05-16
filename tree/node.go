@@ -166,7 +166,7 @@ type Node interface {
 	// so a base type can be passed in without manually calling [Node.This].
 	PathFrom(parent Node) string
 
-	// FindPath returns the node at the given path, starting from this node.
+	// FindPath returns the node at the given path from this node.
 	// FindPath only works correctly when names are unique.
 	// Path has [Node.Name]s separated by / and fields by .
 	// Node names escape any existing / and . characters to \\ and \,
