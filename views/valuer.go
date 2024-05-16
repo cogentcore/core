@@ -28,6 +28,18 @@ func init() {
 	core.SettingsWindow = SettingsWindow
 	core.InspectorWindow = InspectorWindow
 
+	core.AddValueConverter(func(value any) core.Value {
+		typ := reflectx.NonPointerType(reflect.TypeOf(value))
+		kind := typ.Kind()
+		switch kind {
+		case reflect.Array, reflect.Slice:
+			return NewSliceViewInline()
+		}
+		return nil
+	})
+
+	//////// old:
+
 	AddValue(icons.Icon(""), func() Value { return &IconValue{} })
 	AddValue(core.FontName(""), func() Value { return &FontValue{} })
 	AddValue(core.Filename(""), func() Value { return &FileValue{} })

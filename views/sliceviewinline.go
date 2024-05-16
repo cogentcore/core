@@ -42,12 +42,10 @@ type SliceViewInline struct {
 	configSize int
 }
 
+func (sv *SliceViewInline) WidgetValue() any { return &sv.Slice }
+
 func (sv *SliceViewInline) OnInit() {
 	sv.Frame.OnInit()
-	sv.SetStyles()
-}
-
-func (sv *SliceViewInline) SetStyles() {
 	sv.Style(func(s *styles.Style) {
 		s.Grow.Set(0, 0)
 	})

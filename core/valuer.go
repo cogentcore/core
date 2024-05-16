@@ -31,14 +31,6 @@ type Valuer interface {
 // helper function. These functions must NOT call [Bind].
 var ValueTypes = map[string]func(value any) Value{}
 
-// ValueConverters is a slice of functions that return a [Value]
-// for a value. It is used by [ToValue]. If a function returns nil,
-// it falls back on the next function in the slice, and if all functions return nil,
-// it falls back on the default bindings. These functions must NOT call [Bind].
-// These functions are called in sequential order, so you can insert
-// a function at the start to take precedence over others.
-var ValueConverters []func(value any) Value
-
 // AddValueType binds the given value type to the given [Value] type,
 // meaning that [ToValue] will return a new [Value] of the given type
 // when it receives values of the given value type. It uses [ValueTypes].
@@ -49,6 +41,20 @@ func AddValueType[T any, W Value]() {
 	ValueTypes[name] = func(value any) Value {
 		return tree.New[W]()
 	}
+}
+
+// ValueConverters is a slice of functions that return a [Value]
+// for a value. It is used by [ToValue]. If a function returns nil,
+// it falls back on the next function in the slice, and if all functions return nil,
+// it falls back on the default bindings. These functions must NOT call [Bind].
+// These functions are called in sequential order, so you can insert
+// a function at the start to take precedence over others.
+// You can add to this using the [AddValueConverter] helper function.
+var ValueConverters []func(value any) Value
+
+// AddValueConverter adds a converter function to [ValueConverters].
+func AddValueConverter(f func(value any) Value) {
+	ValueConverters = append(ValueConverters, f)
 }
 
 func init() {
