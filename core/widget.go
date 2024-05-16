@@ -247,7 +247,7 @@ type WidgetBase struct {
 	// the other child tree view nodes. Composite widgets like buttons should
 	// NOT use parts to store their components; parts should only be used when
 	// absolutely necessary.
-	Parts *Layout `copier:"-" json:"-" xml:"-" set:"-"`
+	Parts *Frame `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Geom has the full layout geometry for size and position of this Widget
 	Geom GeomState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
@@ -438,7 +438,7 @@ func (wb *WidgetBase) BaseType() *types.Type {
 }
 
 // NewParts makes the Parts layout if not already there.
-func (wb *WidgetBase) NewParts() *Layout {
+func (wb *WidgetBase) NewParts() *Frame {
 	if wb.Parts != nil {
 		return wb.Parts
 	}

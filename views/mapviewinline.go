@@ -17,7 +17,7 @@ import (
 // MapViewInline represents a map within a single line of key and value widgets.
 // This is typically used for smaller maps.
 type MapViewInline struct {
-	core.Layout
+	core.Frame
 
 	// Map is the pointer to the map that we are viewing.
 	Map any
@@ -34,7 +34,7 @@ type MapViewInline struct {
 }
 
 func (mv *MapViewInline) OnInit() {
-	mv.Layout.OnInit()
+	mv.Frame.OnInit()
 	mv.SetStyles()
 }
 
@@ -208,5 +208,5 @@ func (mv *MapViewInline) SizeUp() {
 	if mv.MapSizeChanged() {
 		mv.Update()
 	}
-	mv.Layout.SizeUp()
+	mv.Frame.SizeUp()
 }

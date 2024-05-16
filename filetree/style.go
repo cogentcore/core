@@ -61,7 +61,7 @@ func (fn *Node) SetStyles() {
 	fn.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(fn) {
 		case "parts":
-			parts := w.(*core.Layout)
+			parts := w.(*core.Frame)
 			w.OnClick(func(e events.Event) {
 				fn.OpenEmptyDir()
 			})

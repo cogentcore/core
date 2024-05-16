@@ -292,7 +292,7 @@ func (dv *DateView) ConfigDateGrid() {
 // TimeValue presents two text fields for editing a date and time,
 // both of which can pull up corresponding picker view dialogs.
 type TimeValue struct {
-	ValueBase[*core.Layout]
+	ValueBase[*core.Frame]
 }
 
 func (v *TimeValue) Config() {
@@ -379,7 +379,7 @@ func (v *TimeValue) TimeValue() *time.Time {
 
 // DurationValue represents a [time.Duration] value with a spinner and unit chooser.
 type DurationValue struct {
-	ValueBase[*core.Layout]
+	ValueBase[*core.Frame]
 }
 
 func (v *DurationValue) Config() {

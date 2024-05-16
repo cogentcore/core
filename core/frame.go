@@ -54,13 +54,13 @@ const (
 ///////////////////////////////////////////////////////////////////
 // Layout
 
-// Layout is the primary node type responsible for organizing the sizes
+// Frame is the primary node type responsible for organizing the sizes
 // and positions of child widgets. It does not render, only organize,
 // so properties like background and border will have no effect.
 // All arbitrary collections of widgets should generally be contained
-// within a Layout or a [Frame]; otherwise, the parent widget must take over
+// within a Frame or a [Frame]; otherwise, the parent widget must take over
 // responsibility for positioning. Layouts automatically can add scrollbars
-// depending on the [styles.Style.Overflow]. By default, [Layout]s grow in
+// depending on the [styles.Style.Overflow]. By default, [Frame]s grow in
 // the x direction but not the y direction; this can be changed by setting
 // [styles.Style.Grow].
 //
@@ -68,7 +68,7 @@ const (
 // generally be set to the desired number of columns, from which the number of rows
 // is computed; otherwise, it uses the square root of number of
 // elements.
-type Layout struct {
+type Frame struct {
 	WidgetBase
 
 	// StackTop, for a [styles.Stacked] layout, is the index of the node to use as the top of the stack.
@@ -94,17 +94,17 @@ type Layout struct {
 	FocusNameLast tree.Node `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
-func (ly *Layout) FlagType() enums.BitFlagSetter {
+func (ly *Frame) FlagType() enums.BitFlagSetter {
 	return (*LayoutFlags)(&ly.Flags)
 }
 
-func (ly *Layout) OnInit() {
+func (ly *Frame) OnInit() {
 	ly.WidgetBase.OnInit()
 	ly.SetStyles()
 	ly.HandleEvents()
 }
 
-func (ly *Layout) ApplyStyle() {
+func (ly *Frame) ApplyStyle() {
 	ly.ApplyStyleWidget()
 	for d := math32.X; d <= math32.Y; d++ {
 		if ly.HasScroll[d] && ly.Scrolls[d] != nil {
@@ -113,7 +113,7 @@ func (ly *Layout) ApplyStyle() {
 	}
 }
 
-func (ly *Layout) SetStyles() {
+func (ly *Frame) SetStyles() {
 	ly.Style(func(s *styles.Style) {
 		// we never want borders on layouts
 		s.MaxBorder = styles.Border{}
@@ -124,7 +124,7 @@ func (ly *Layout) SetStyles() {
 	})
 }
 
-func (ly *Layout) Destroy() {
+func (ly *Frame) Destroy() {
 	for d := math32.X; d <= math32.Y; d++ {
 		ly.DeleteScroll(d)
 	}
@@ -132,7 +132,7 @@ func (ly *Layout) Destroy() {
 }
 
 // DeleteScroll deletes scrollbar along given dimesion.
-func (ly *Layout) DeleteScroll(d math32.Dims) {
+func (ly *Frame) DeleteScroll(d math32.Dims) {
 	if ly.Scrolls[d] == nil {
 		return
 	}
@@ -141,7 +141,7 @@ func (ly *Layout) DeleteScroll(d math32.Dims) {
 	ly.Scrolls[d] = nil
 }
 
-func (ly *Layout) RenderChildren() {
+func (ly *Frame) RenderChildren() {
 	if ly.Styles.Display == styles.Stacked {
 		kwi, _ := ly.StackTopWidget()
 		if kwi != nil {
@@ -155,7 +155,7 @@ func (ly *Layout) RenderChildren() {
 	})
 }
 
-func (ly *Layout) RenderWidget() {
+func (ly *Frame) RenderWidget() {
 	if ly.PushBounds() {
 		ly.This().(Widget).Render()
 		ly.RenderParts()
@@ -165,12 +165,12 @@ func (ly *Layout) RenderWidget() {
 	}
 }
 
-func (ly *Layout) Render() {}
+func (ly *Frame) Render() {}
 
 // ChildWithFocus returns a direct child of this layout that either is the
 // current window focus item, or contains that focus item (along with its
 // index) -- nil, -1 if none.
-func (ly *Layout) ChildWithFocus() (Widget, int) {
+func (ly *Frame) ChildWithFocus() (Widget, int) {
 	em := ly.Events()
 	if em == nil {
 		return nil, -1
@@ -192,7 +192,7 @@ func (ly *Layout) ChildWithFocus() (Widget, int) {
 // (with wraparound to start); returns true if successful.
 // if updn is true, then for Grid layouts, it moves down to next row
 // instead of just the sequentially next item.
-func (ly *Layout) FocusNextChild(updn bool) bool {
+func (ly *Frame) FocusNextChild(updn bool) bool {
 	sz := len(ly.Kids)
 	if sz <= 1 {
 		return false
@@ -229,7 +229,7 @@ func (ly *Layout) FocusNextChild(updn bool) bool {
 // (with wraparound to end); returns true if successful.
 // If updn is true, then for Grid layouts, it moves up to next row
 // instead of just the sequentially next item.
-func (ly *Layout) FocusPreviousChild(updn bool) bool {
+func (ly *Frame) FocusPreviousChild(updn bool) bool {
 	sz := len(ly.Kids)
 	if sz <= 1 {
 		return false
@@ -259,7 +259,7 @@ func (ly *Layout) FocusPreviousChild(updn bool) bool {
 	return true
 }
 
-func (ly *Layout) HandleEvents() {
+func (ly *Frame) HandleEvents() {
 	ly.WidgetBase.HandleEvents()
 	ly.HandleKeys()
 	ly.On(events.Scroll, func(e events.Event) {
@@ -276,7 +276,7 @@ func (ly *Layout) HandleEvents() {
 // HandleKeys handles all key events for navigating focus within a Layout.
 // Typically this is done by the parent Scene level layout, but can be
 // done by default if FocusWithinable Ability is set.
-func (ly *Layout) HandleKeys() {
+func (ly *Frame) HandleKeys() {
 	ly.OnFinal(events.KeyChord, func(e events.Event) {
 		if ly.Is(LayoutNoKeys) {
 			return
@@ -353,7 +353,7 @@ func (ly *Layout) HandleKeys() {
 }
 
 // FocusOnName processes key events to look for an element starting with given name
-func (ly *Layout) FocusOnName(e events.Event) bool {
+func (ly *Frame) FocusOnName(e events.Event) bool {
 	kf := keymap.Of(e.KeyChord())
 	if DebugSettings.KeyEventTrace {
 		slog.Info("Layout FocusOnName", "widget", ly, "keyFunction", kf)
@@ -405,7 +405,7 @@ func (ly *Layout) FocusOnName(e events.Event) bool {
 // the first focusable element within the layout whose Label (using
 // [ToLabel]) matches the given name using [complete.IsSeedMatching].
 // If after is non-nil, it only finds after that element.
-func ChildByLabelCanFocus(ly *Layout, name string, after tree.Node) tree.Node {
+func ChildByLabelCanFocus(ly *Frame, name string, after tree.Node) tree.Node {
 	gotAfter := false
 	completions := []complete.Completion{}
 	ly.WalkDownBreadth(func(k tree.Node) bool {

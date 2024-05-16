@@ -242,7 +242,7 @@ func (t *Complete) SetStage(v *Stage) *Complete { t.Stage = v; return t }
 var FrameType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Frame", IDName: "frame", Doc: "Frame is a [Layout] that also renders the standard box model.\nBy default, [Frame]s grow in both the x and y directions; this\ncan be changed by setting [styles.Style.Grow].", Embeds: []types.Field{{Name: "Layout"}}, Instance: &Frame{}})
 
 // NewFrame returns a new [Frame] with the given optional parent:
-// Frame is a [Layout] that also renders the standard box model.
+// Frame is a [Frame] that also renders the standard box model.
 // By default, [Frame]s grow in both the x and y directions; this
 // can be changed by setting [styles.Style.Grow].
 func NewFrame(parent ...tree.Node) *Frame { return tree.New[*Frame](parent...) }
@@ -328,17 +328,17 @@ func (t *Image) New() tree.Node { return &Image{} }
 // SetTooltip sets the [Image.Tooltip]
 func (t *Image) SetTooltip(v string) *Image { t.Tooltip = v; return t }
 
-// LayoutType is the [types.Type] for [Layout]
-var LayoutType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Layout", IDName: "layout", Doc: "Layout is the primary node type responsible for organizing the sizes\nand positions of child widgets. It does not render, only organize,\nso properties like background and border will have no effect.\nAll arbitrary collections of widgets should generally be contained\nwithin a Layout or a [Frame]; otherwise, the parent widget must take over\nresponsibility for positioning. Layouts automatically can add scrollbars\ndepending on the [styles.Style.Overflow]. By default, [Layout]s grow in\nthe x direction but not the y direction; this can be changed by setting\n[styles.Style.Grow].\n\nFor a [styles.Grid] layout, the [styles.Style.Columns] property should\ngenerally be set to the desired number of columns, from which the number of rows\nis computed; otherwise, it uses the square root of number of\nelements.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "StackTop", Doc: "StackTop, for a [styles.Stacked] layout, is the index of the node to use as the top of the stack.\nOnly the node at this index is rendered; if not a valid index, nothing is rendered."}, {Name: "LayImpl", Doc: "LayImpl contains implementation state info for doing layout"}, {Name: "HasScroll", Doc: "whether scrollbar is used for given dim"}, {Name: "Scrolls", Doc: "scroll bars -- we fully manage them as needed"}, {Name: "FocusName", Doc: "accumulated name to search for when keys are typed"}, {Name: "FocusNameTime", Doc: "time of last focus name event -- for timeout"}, {Name: "FocusNameLast", Doc: "last element focused on -- used as a starting point if name is the same"}}, Instance: &Layout{}})
+// LayoutType is the [types.Type] for [Frame]
+var LayoutType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Layout", IDName: "layout", Doc: "Layout is the primary node type responsible for organizing the sizes\nand positions of child widgets. It does not render, only organize,\nso properties like background and border will have no effect.\nAll arbitrary collections of widgets should generally be contained\nwithin a Layout or a [Frame]; otherwise, the parent widget must take over\nresponsibility for positioning. Layouts automatically can add scrollbars\ndepending on the [styles.Style.Overflow]. By default, [Layout]s grow in\nthe x direction but not the y direction; this can be changed by setting\n[styles.Style.Grow].\n\nFor a [styles.Grid] layout, the [styles.Style.Columns] property should\ngenerally be set to the desired number of columns, from which the number of rows\nis computed; otherwise, it uses the square root of number of\nelements.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "StackTop", Doc: "StackTop, for a [styles.Stacked] layout, is the index of the node to use as the top of the stack.\nOnly the node at this index is rendered; if not a valid index, nothing is rendered."}, {Name: "LayImpl", Doc: "LayImpl contains implementation state info for doing layout"}, {Name: "HasScroll", Doc: "whether scrollbar is used for given dim"}, {Name: "Scrolls", Doc: "scroll bars -- we fully manage them as needed"}, {Name: "FocusName", Doc: "accumulated name to search for when keys are typed"}, {Name: "FocusNameTime", Doc: "time of last focus name event -- for timeout"}, {Name: "FocusNameLast", Doc: "last element focused on -- used as a starting point if name is the same"}}, Instance: &Frame{}})
 
-// NewLayout returns a new [Layout] with the given optional parent:
+// NewLayout returns a new [Frame] with the given optional parent:
 // Layout is the primary node type responsible for organizing the sizes
 // and positions of child widgets. It does not render, only organize,
 // so properties like background and border will have no effect.
 // All arbitrary collections of widgets should generally be contained
 // within a Layout or a [Frame]; otherwise, the parent widget must take over
 // responsibility for positioning. Layouts automatically can add scrollbars
-// depending on the [styles.Style.Overflow]. By default, [Layout]s grow in
+// depending on the [styles.Style.Overflow]. By default, [Frame]s grow in
 // the x direction but not the y direction; this can be changed by setting
 // [styles.Style.Grow].
 //
@@ -346,16 +346,16 @@ var LayoutType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Layou
 // generally be set to the desired number of columns, from which the number of rows
 // is computed; otherwise, it uses the square root of number of
 // elements.
-func NewLayout(parent ...tree.Node) *Layout { return tree.New[*Layout](parent...) }
+func NewLayout(parent ...tree.Node) *Frame { return tree.New[*Frame](parent...) }
 
-// NodeType returns the [*types.Type] of [Layout]
-func (t *Layout) NodeType() *types.Type { return LayoutType }
+// NodeType returns the [*types.Type] of [Frame]
+func (t *Frame) NodeType() *types.Type { return LayoutType }
 
-// New returns a new [*Layout] value
-func (t *Layout) New() tree.Node { return &Layout{} }
+// New returns a new [*Frame] value
+func (t *Frame) New() tree.Node { return &Frame{} }
 
-// SetTooltip sets the [Layout.Tooltip]
-func (t *Layout) SetTooltip(v string) *Layout { t.Tooltip = v; return t }
+// SetTooltip sets the [Frame.Tooltip]
+func (t *Frame) SetTooltip(v string) *Frame { t.Tooltip = v; return t }
 
 // StretchType is the [types.Type] for [Stretch]
 var StretchType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Stretch", IDName: "stretch", Doc: "Stretch adds a stretchy element that grows to fill all\navailable space. You can set [styles.Style.Grow] to change\nhow much it grows relative to other growing elements.\nIt does not render anything.", Embeds: []types.Field{{Name: "WidgetBase"}}, Instance: &Stretch{}})

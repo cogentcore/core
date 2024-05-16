@@ -20,11 +20,11 @@ import (
 // SceneView provides a toolbar controller for an xyz.Scene,
 // and manipulation abilities.
 type SceneView struct {
-	core.Layout
+	core.Frame
 }
 
 func (sv *SceneView) OnInit() {
-	sv.Layout.OnInit()
+	sv.Frame.OnInit()
 	sv.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)

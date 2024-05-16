@@ -23,7 +23,7 @@ import (
 // along [styles.Style.Direction]. It adds [Handle] widgets to its parts that
 // allow the user to customize the amount of space allocated to each child.
 type Splits struct {
-	Layout
+	Frame
 
 	// Splits is the proportion (0-1 normalized, enforced) of space
 	// allocated to each element. 0 indicates that an element should
@@ -219,7 +219,7 @@ func (sl *Splits) SetSplitAction(idx int, nwval float32) {
 func (sl *Splits) Config(c *Config) {
 	sl.UpdateSplits()
 
-	Configure(c, "parts", func() *Layout {
+	Configure(c, "parts", func() *Frame {
 		return NewParts()
 	})
 	for i := range len(sl.Kids) - 1 { // one less handle than children
@@ -287,7 +287,7 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 
 func (sl *Splits) Position() {
 	if !sl.HasChildren() {
-		sl.Layout.Position()
+		sl.Frame.Position()
 		return
 	}
 	sl.UpdateSplits()

@@ -22,7 +22,7 @@ import (
 
 // VCSLogView is a view of the VCS log data
 type VCSLogView struct {
-	core.Layout
+	core.Frame
 
 	// current log
 	Log vcs.Log

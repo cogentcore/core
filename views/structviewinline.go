@@ -22,7 +22,7 @@ import (
 // StructViewInline represents a struct within a single line of
 // field labels and value widgets. This is typically used for smaller structs.
 type StructViewInline struct {
-	core.Layout
+	core.Frame
 
 	// Struct is the pointer to the struct that we are viewing.
 	Struct any `set:"-"`
@@ -40,7 +40,7 @@ type StructViewInline struct {
 }
 
 func (sv *StructViewInline) OnInit() {
-	sv.Layout.OnInit()
+	sv.Frame.OnInit()
 	sv.SetStyles()
 }
 

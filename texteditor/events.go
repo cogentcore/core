@@ -26,7 +26,7 @@ import (
 )
 
 func (ed *Editor) HandleEvents() {
-	ed.Layout.HandleEvents()
+	ed.Frame.HandleEvents()
 	ed.HandleKeyChord()
 	ed.HandleMouse()
 	ed.HandleLinkCursor()
@@ -35,7 +35,7 @@ func (ed *Editor) HandleEvents() {
 }
 
 func (ed *Editor) OnAdd() {
-	ed.Layout.OnAdd()
+	ed.Frame.OnAdd()
 	ed.HandleClose()
 }
 

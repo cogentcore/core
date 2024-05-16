@@ -104,7 +104,7 @@ func (sc *Scene) ConfigSceneBars() {
 }
 
 // GetBar returns Bar layout widget at given side, nil if not there.
-func (sc *Scene) GetBar(side styles.SideIndexes) *Layout {
+func (sc *Scene) GetBar(side styles.SideIndexes) *Frame {
 	nm := strings.ToLower(side.String()) + "-bar"
 	bar := sc.ChildByName(nm)
 	if bar != nil {

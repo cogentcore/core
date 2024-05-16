@@ -38,7 +38,7 @@ import (
 // With multi-line wrapped text, the text is still treated as a contiguous
 // wrapped text.
 type TextField struct { //core:embedder
-	Layout
+	Frame
 
 	// Type is the styling type of the text field.
 	Type TextFieldTypes
@@ -281,7 +281,7 @@ func (tf *TextField) SetStyles() {
 
 func (tf *TextField) Destroy() {
 	tf.StopCursor()
-	tf.Layout.Destroy()
+	tf.Frame.Destroy()
 }
 
 // Text returns the current text -- applies any unapplied changes first, and
@@ -1856,7 +1856,7 @@ func (tf *TextField) IconsSize() math32.Vector2 {
 }
 
 func (tf *TextField) SizeUp() {
-	tf.Layout.SizeUp()
+	tf.Frame.SizeUp()
 	tmptxt := tf.EditTxt
 	if len(tf.Txt) == 0 && len(tf.Placeholder) > 0 {
 		tf.EditTxt = []rune(tf.Placeholder)
@@ -1888,7 +1888,7 @@ func (tf *TextField) SizeUp() {
 
 func (tf *TextField) SizeDown(iter int) bool {
 	if !tf.HasWordWrap() {
-		return tf.Layout.SizeDown(iter)
+		return tf.Frame.SizeDown(iter)
 	}
 	sz := &tf.Geom.Size
 	pgrow, _ := tf.GrowToAllocSize(sz.Actual.Content, sz.Alloc.Content) // key to grow
@@ -1907,12 +1907,12 @@ func (tf *TextField) SizeDown(iter int) bool {
 			fmt.Println(tf, "TextField Size Changed:", sz.Actual.Content, "was:", prevContent)
 		}
 	}
-	sdp := tf.Layout.SizeDown(iter)
+	sdp := tf.Frame.SizeDown(iter)
 	return chg || sdp
 }
 
 func (tf *TextField) ScenePos() {
-	tf.Layout.ScenePos()
+	tf.Frame.ScenePos()
 	tf.SetEffPosAndSize()
 }
 

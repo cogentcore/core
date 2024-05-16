@@ -18,7 +18,7 @@ import (
 // SliceViewInline represents a slice within a single line of value widgets.
 // This is typically used for smaller slices.
 type SliceViewInline struct {
-	core.Layout
+	core.Frame
 
 	// Slice is the slice that we are viewing.
 	Slice any `set:"-"`
@@ -43,7 +43,7 @@ type SliceViewInline struct {
 }
 
 func (sv *SliceViewInline) OnInit() {
-	sv.Layout.OnInit()
+	sv.Frame.OnInit()
 	sv.SetStyles()
 }
 
@@ -202,5 +202,5 @@ func (sv *SliceViewInline) SizeUp() {
 	if sv.SliceSizeChanged() {
 		sv.Update()
 	}
-	sv.Layout.SizeUp()
+	sv.Frame.SizeUp()
 }

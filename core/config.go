@@ -224,7 +224,7 @@ func (c *Config) ConfigWidget(w Widget, parentPath string) {
 		if wb.Parts == nil {
 			wparts := parts.New()
 			wparts.SetName("parts")
-			wb.Parts = wparts.(*Layout)
+			wb.Parts = wparts.(*Frame)
 			tree.SetParent(wb.Parts, wb)
 			parts.Children.ConfigWidget(wparts, parts.ChildPath("parts"))
 		}
@@ -286,10 +286,10 @@ func (c *Config) UpdateWidget(w Widget, parentPath string) {
 	}
 }
 
-// NewParts returns a new [Layout] that serves as the internal parts
+// NewParts returns a new [Frame] that serves as the internal parts
 // of a widget, which typically contain content that the widget automatically
 // manages through its [Widget.Config] method.
-func NewParts() *Layout {
+func NewParts() *Frame {
 	w := NewLayout()
 	w.SetName("parts")
 	w.SetFlag(true, tree.Field)

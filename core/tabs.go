@@ -24,7 +24,7 @@ import (
 // Tabs divide widgets into logical groups and give users the ability
 // to freely navigate between them using tab buttons.
 type Tabs struct {
-	Layout
+	Frame
 
 	// Type is the styling type of the tabs. If it is changed after
 	// the tabs are first configured, Update needs to be called on
@@ -113,7 +113,7 @@ func (tt TabTypes) IsColumn() bool {
 
 func (ts *Tabs) OnInit() {
 	ts.WidgetBase.OnInit()
-	ts.Layout.HandleEvents()
+	ts.Frame.HandleEvents()
 	ts.SetStyles()
 }
 
@@ -454,7 +454,7 @@ func (ts *Tabs) Tabs() *Frame {
 
 // Frame returns the stacked frame layout (the second element within us).
 // It configures the Tabs if necessary.
-func (ts *Tabs) Frame() *Frame {
+func (ts *Tabs) FrameWidget() *Frame {
 	if ts.ChildByName("frame", 1) == nil {
 		ts.ConfigWidget()
 	}

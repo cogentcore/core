@@ -32,7 +32,7 @@ import (
 // the rendered area.
 // The [styles.Style.Direction] determines the direction in which the slider slides.
 type Slider struct {
-	Layout
+	Frame
 
 	// Type is the type of the slider, which determines its visual
 	// and functional properties. The default type, [SliderSlider],

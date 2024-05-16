@@ -34,7 +34,7 @@ import (
 // of selected columns of Tabular data, represented by an IndexView into
 // a table.Table.  Other types of tabular data can be converted into this format.
 type PlotView struct { //types:add
-	core.Layout
+	core.Frame
 
 	// the table of data being plotted
 	Table *table.IndexView `set:"-"`
@@ -66,7 +66,7 @@ type PlotView struct { //types:add
 
 func (pl *PlotView) CopyFieldsFrom(frm tree.Node) {
 	fr := frm.(*PlotView)
-	pl.Layout.CopyFieldsFrom(&fr.Layout)
+	pl.Frame.CopyFieldsFrom(&fr.Frame)
 	pl.Params.CopyFrom(&fr.Params)
 	pl.SetTableView(fr.Table)
 	mx := min(len(pl.Columns), len(fr.Columns))
@@ -99,7 +99,7 @@ func (pl *PlotView) OnInit() {
 }
 
 func (pl *PlotView) OnAdd() {
-	pl.Layout.OnAdd()
+	pl.Frame.OnAdd()
 	pl.OnShow(func(e events.Event) {
 		pl.UpdatePlot()
 	})
@@ -625,6 +625,6 @@ func (pl *PlotView) ConfigToolbar(tb *core.Toolbar) {
 }
 
 func (pt *PlotView) SizeFinal() {
-	pt.Layout.SizeFinal()
+	pt.Frame.SizeFinal()
 	pt.UpdatePlot()
 }

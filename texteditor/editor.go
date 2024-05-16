@@ -59,7 +59,7 @@ var (
 // Editor should be within a single goroutine, as it would require
 // extensive protections throughout code otherwise.
 type Editor struct { //core:embedder
-	core.Layout
+	core.Frame
 
 	// Buffer is the text buffer being edited.
 	Buffer *Buffer `set:"-" json:"-" xml:"-"`
@@ -273,7 +273,7 @@ const (
 
 func (ed *Editor) Destroy() {
 	ed.StopCursor()
-	ed.Layout.Destroy()
+	ed.Frame.Destroy()
 }
 
 // EditDone completes editing and copies the active edited text to the text --

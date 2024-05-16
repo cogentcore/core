@@ -88,7 +88,7 @@ func (sw *Switch) SetChecked(on bool) *Switch {
 	return sw
 }
 
-// UpdateStackTop updates the [Layout.StackTop] of the stack in the switch
+// UpdateStackTop updates the [Frame.StackTop] of the stack in the switch
 // according to the current icon. It is called automatically to keep the
 // switch up-to-date.
 func (sw *Switch) UpdateStackTop() {
@@ -218,7 +218,7 @@ func (sw *Switch) Config(c *Config) {
 		sw.IconOff = icons.ToggleOff // fallback
 	}
 
-	Configure(c, "stack", func() *Layout {
+	Configure(c, "stack", func() *Frame {
 		w := NewLayout()
 		w.Style(func(s *styles.Style) {
 			s.Display = styles.Stacked
@@ -226,7 +226,7 @@ func (sw *Switch) Config(c *Config) {
 			s.Gap.Zero()
 		})
 		return w
-	}, func(w *Layout) {
+	}, func(w *Frame) {
 		sw.UpdateStackTop() // need to update here
 	})
 	Configure(c, "stack/icon-on", func() *Icon {
