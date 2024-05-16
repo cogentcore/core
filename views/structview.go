@@ -212,6 +212,7 @@ func (sv *StructView) Config(c *core.Config) {
 			return w
 		}, func(w core.Value) {
 			w.AsWidget().SetReadOnly(sv.IsReadOnly() || readOnlyTag)
+			core.Bind(fieldVal, w)
 		})
 	}
 

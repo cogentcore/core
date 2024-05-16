@@ -98,6 +98,7 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 // satisfying the Labeler interface
 func (tv *TreeView) Label() string {
 	if tv.SyncNode != nil {
+		// TODO: make this an option?
 		if lbl, has := core.ToLabeler(tv.SyncNode); has {
 			return lbl
 		}

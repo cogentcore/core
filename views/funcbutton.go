@@ -129,18 +129,19 @@ func NewFuncButton(parent tree.Node, fun any) *FuncButton {
 // the first is called only during initial Config of a new Button;
 // the second is called during Update.
 func ConfigFuncButton(c *core.Config, fun any, funcs ...func(w *FuncButton)) {
+	path := core.ConfigCallerPath(2)
 	n := len(funcs)
 	switch n {
 	case 0:
-		c.Add("", func() core.Widget { return NewFuncButton(nil, fun) }, nil)
+		c.Add(path, func() core.Widget { return NewFuncButton(nil, fun) }, nil)
 	case 1:
-		c.Add("", func() core.Widget {
+		c.Add(path, func() core.Widget {
 			w := NewFuncButton(nil, fun)
 			funcs[0](w)
 			return w
 		}, nil)
 	case 2:
-		c.Add("", func() core.Widget {
+		c.Add(path, func() core.Widget {
 			w := NewFuncButton(nil, fun)
 			funcs[0](w)
 			return w
@@ -270,8 +271,6 @@ func (fb *FuncButton) SetFuncImpl(gfun *types.Func, rfun reflect.Value) *FuncBut
 		}
 		return r
 	}, snm)
-	fb.SetName(snm)
-	tree.SetUniqueName(fb)
 	txt := strcase.ToSentence(snm)
 	fb.SetText(txt)
 	// doc formatting interferes with anonymous functions
@@ -445,7 +444,7 @@ func (fb *FuncButton) SetArgs() {
 		label := strcase.ToSentence(name)
 		val := reflect.New(atyp)
 
-		view := ToValue(val.Interface(), "")
+		view := ToValue(val.Interface(), "") // TODO(config)
 		view.SetSoloValue(val)
 		view.SetName(name)
 		view.SetLabel(label)
@@ -482,7 +481,7 @@ func (fb *FuncButton) SetReturns() {
 		label := strcase.ToSentence(name)
 		val := reflect.New(rtyp)
 
-		view := ToValue(val.Interface(), "")
+		view := ToValue(val.Interface(), "") // TODO(config)
 		view.SetSoloValue(val)
 		view.SetName(name)
 		view.SetLabel(label)

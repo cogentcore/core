@@ -261,6 +261,7 @@ func (is *Inspector) ConfigSplits() {
 			}
 			sn := tv.SelectedNodes[0].AsTreeView().SyncNode
 			sv.SetStruct(sn)
+			sv.Update()
 
 			is.SetTitle(sn)
 

@@ -6,6 +6,7 @@ package core
 
 import (
 	"fmt"
+	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
@@ -83,7 +84,27 @@ func ConfigButton(c *Config, funcs ...func(w *Button)) {
 // ConfigSeparator adds a new config item to the given [Config] for
 // a Separator, with no further configuration.
 func ConfigSeparator(c *Config) {
-	c.Add("", func() Widget { return NewSeparator() }, nil)
+	path := ConfigCallerPath(2)
+	c.Add(path, func() Widget { return NewSeparator() }, nil)
+}
+
+// ConfigCallerPath returns the dir-filename of runtime.Caller(level),
+// with all / . replaced to -, which is suitable as a unique name
+// for a ConfigItem path.  This is used with level 1 by default for
+// blank names in [Config.Add], but wrappers around that may need to
+// generate these paths with a relevant level if they wrap the Configure
+// call.
+func ConfigCallerPath(level int) string {
+	_, file, line, _ := runtime.Caller(level)
+	dir, fn := filepath.Split(file)
+	d1 := ""
+	if len(dir) > 1 {
+		_, d1 = filepath.Split(dir[:len(dir)-1])
+	}
+	path := fn + "-" + d1
+	// need to get rid of slashes and dots for path name
+	path = strings.ReplaceAll(strings.ReplaceAll(path, "/", "-"), ".", "-") + "-" + strconv.Itoa(line)
+	return path
 }
 
 // Add adds a new config item for a widget at the given forward-slash-separated
@@ -96,10 +117,7 @@ func ConfigSeparator(c *Config) {
 // better type safety and increased convenience.
 func (c *Config) Add(path string, new func() Widget, update func(w Widget)) {
 	if path == "" {
-		// autogenerate unique name
-		_, file, line, _ := runtime.Caller(1)
-		// need to get rid of slashes and dots for path name
-		path = strings.ReplaceAll(strings.ReplaceAll(file, "/", ""), ".", "") + "-" + strconv.Itoa(line)
+		path = ConfigCallerPath(1)
 	}
 	itm := &ConfigItem{Path: path, New: new, Update: update}
 	plist := strings.Split(path, "/")
