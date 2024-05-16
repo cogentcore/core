@@ -337,7 +337,7 @@ func (t *SliceViewGrid) SetLastBackground(v image.Image) *SliceViewGrid {
 func (t *SliceViewGrid) SetTooltip(v string) *SliceViewGrid { t.Tooltip = v; return t }
 
 // SliceViewInlineType is the [types.Type] for [SliceViewInline]
-var SliceViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewInline", IDName: "slice-view-inline", Doc: "SliceViewInline represents a slice within a single line of value widgets.\nThis is typically used for smaller slices.", Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the slice that we are viewing."}, {Name: "SliceValue", Doc: "SliceValue is the Value for the slice itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "Values", Doc: "Values are [Value] representations of the slice values."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}, {Name: "isFixedLength", Doc: "isFixedLength is whether the slice has a fixed-length flag on it."}, {Name: "configSize", Doc: "configSize is the size of the slice when the widget was configured."}}, Instance: &SliceViewInline{}})
+var SliceViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewInline", IDName: "slice-view-inline", Doc: "SliceViewInline represents a slice within a single line of value widgets.\nThis is typically used for smaller slices.", Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the slice that we are viewing."}, {Name: "SliceValue", Doc: "SliceValue is the Value for the slice itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}, {Name: "isFixedLength", Doc: "isFixedLength is whether the slice has a fixed-length flag on it."}, {Name: "configSize", Doc: "size when configured"}}, Instance: &SliceViewInline{}})
 
 // NewSliceViewInline returns a new [SliceViewInline] with the given optional parent:
 // SliceViewInline represents a slice within a single line of value widgets.
@@ -361,7 +361,7 @@ func (t *SliceViewInline) SetViewPath(v string) *SliceViewInline { t.ViewPath = 
 func (t *SliceViewInline) SetTooltip(v string) *SliceViewInline { t.Tooltip = v; return t }
 
 // StructViewType is the [types.Type] for [StructView]
-var StructViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructView", IDName: "struct-view", Doc: "StructView represents a struct with rows of field names and editable values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "StructValue", Doc: "StructValue is the Value for the struct itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "Values", Doc: "Values are [Value] representations of the struct field values."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [core.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructView{}})
+var StructViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructView", IDName: "struct-view", Doc: "StructView represents a struct with rows of field names and editable values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "StructValue", Doc: "StructValue is the Value for the struct itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [core.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructView{}})
 
 // NewStructView returns a new [StructView] with the given optional parent:
 // StructView represents a struct with rows of field names and editable values.
@@ -382,7 +382,7 @@ func (t *StructView) SetViewPath(v string) *StructView { t.ViewPath = v; return 
 func (t *StructView) SetTooltip(v string) *StructView { t.Tooltip = v; return t }
 
 // StructViewInlineType is the [types.Type] for [StructViewInline]
-var StructViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructViewInline", IDName: "struct-view-inline", Doc: "StructViewInline represents a struct within a single line of\nfield labels and value widgets. This is typically used for smaller structs.", Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "StructValue", Doc: "StructValue is the [Value] associated with this struct view, if any."}, {Name: "Values", Doc: "Values are [Value] representations of the struct fields values."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [core.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructViewInline{}})
+var StructViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructViewInline", IDName: "struct-view-inline", Doc: "StructViewInline represents a struct within a single line of\nfield labels and value widgets. This is typically used for smaller structs.", Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "StructValue", Doc: "StructValue is the [Value] associated with this struct view, if any."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [core.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructViewInline{}})
 
 // NewStructViewInline returns a new [StructViewInline] with the given optional parent:
 // StructViewInline represents a struct within a single line of
@@ -396,10 +396,6 @@ func (t *StructViewInline) NodeType() *types.Type { return StructViewInlineType 
 
 // New returns a new [*StructViewInline] value
 func (t *StructViewInline) New() tree.Node { return &StructViewInline{} }
-
-// SetValues sets the [StructViewInline.Values]:
-// Values are [Value] representations of the struct fields values.
-func (t *StructViewInline) SetValues(v ...Value) *StructViewInline { t.Values = v; return t }
 
 // SetViewPath sets the [StructViewInline.ViewPath]:
 // ViewPath is a record of parent view names that have led up to this view.

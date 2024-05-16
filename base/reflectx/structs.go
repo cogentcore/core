@@ -9,6 +9,7 @@ import (
 	"log"
 	"log/slog"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
@@ -169,20 +170,38 @@ func NumAllFields(typ reflect.Type) int {
 // ValueIsDefault returns whether the given value is equivalent to the
 // given string representation used in a field default tag.
 func ValueIsDefault(fv reflect.Value, def string) bool {
-	def = FormatDefault(def)
-	if def == "" {
-		return fv.IsZero()
+	kind := fv.Kind()
+	if kind >= reflect.Int && kind <= reflect.Complex128 && strings.Contains(def, ":") {
+		dtags := strings.Split(def, ":")
+		lo, _ := strconv.ParseFloat(dtags[0], 64)
+		hi, _ := strconv.ParseFloat(dtags[1], 64)
+		vf, err := ToFloat(fv)
+		if err != nil {
+			slog.Error("reflectx.ValueIsDefault: error parsing struct field numerical range def tag", "def", def, "err", err)
+			return true
+		}
+		return lo <= vf && vf <= hi
 	}
-	dv := reflect.New(fv.Type())
-	err := SetRobust(dv.Interface(), def)
-	if err != nil {
-		slog.Error("reflectx.ValueIsDefault: error getting value from default struct tag", "defaultStructTag", def, "value", fv, "err", err)
-		return false
+	dtags := strings.Split(def, ",")
+	if strings.ContainsAny(def, "{[") { // complex type, so don't split on commas
+		dtags = []string{def}
 	}
-	if !reflect.DeepEqual(fv.Interface(), dv.Elem().Interface()) {
-		return false
+	for _, df := range dtags {
+		df = FormatDefault(df)
+		if df == "" {
+			return fv.IsZero()
+		}
+		dv := reflect.New(fv.Type())
+		err := SetRobust(dv.Interface(), df)
+		if err != nil {
+			slog.Error("reflectx.ValueIsDefault: error getting value from default struct tag", "defaultStructTag", df, "value", fv, "err", err)
+			return false
+		}
+		if reflect.DeepEqual(fv.Interface(), dv.Elem().Interface()) {
+			return true
+		}
 	}
-	return true
+	return false
 }
 
 // SetFromDefaultTags sets the values of fields in the given struct based on

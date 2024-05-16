@@ -9,7 +9,6 @@ import (
 	"log/slog"
 	"reflect"
 	"slices"
-	"strconv"
 	"strings"
 
 	"cogentcore.org/core/base/reflectx"
@@ -131,6 +130,8 @@ func (sv *StructView) Config(c *core.Config) {
 		labnm := fmt.Sprintf("label-%v", fnm)
 		valnm := fmt.Sprintf("value-%v", fnm)
 		readOnlyTag := field.Tag.Get("edit") == "-"
+		ttip := "" // TODO:
+		def, hasDef := field.Tag.Lookup("default")
 
 		core.Configure(c, labnm, func() *core.Text {
 			w := core.NewText()
@@ -139,9 +140,8 @@ func (sv *StructView) Config(c *core.Config) {
 			})
 			// w.Tooltip = vv.Doc()
 			// vv.AsValueData().ViewPath = sv.ViewPath
-			def, hasDef := field.Tag.Lookup("default")
-			// hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, w, sv.IsReadOnly())
 			if hasDef {
+				ttip = "(Default: " + def + ") " + ttip
 				var isDef bool
 				w.Style(func(s *styles.Style) {
 					isDef = reflectx.ValueIsDefault(reflect.ValueOf(fieldVal), def)
@@ -179,6 +179,7 @@ func (sv *StructView) Config(c *core.Config) {
 		core.Configure(c, valnm, func() core.Value {
 			w := core.NewValue(fieldVal)
 			wb := w.AsWidget()
+			// vv.AsValueData().ViewPath = sv.ViewPath
 			// svv := FieldToValue(fvalp, sfield.Name, sfval)
 			// if svv == nil { // shouldn't happen
 			// 	return true
@@ -244,76 +245,4 @@ func (sv *StructView) Config(c *core.Config) {
 			addField(c, sv.Struct, fval, field, field.Name)
 			return true
 		})
-}
-
-/////////////////////////////////////////////////////////////////////////
-//  Tag parsing
-
-// StructViewFieldTags processes the tags for a field in a struct view, setting
-// the properties on the label or widget appropriately
-// returns true if there were any "default" default tags -- if so, needs updating
-func StructViewFieldTags(vv Value, lbl *core.Text, w core.Widget, isReadOnly bool) (hasDef, readOnlyTag bool) {
-	lbl.Text = vv.Label()
-	if et, has := vv.Tag("edit"); has && et == "-" {
-		readOnlyTag = true
-		w.AsWidget().SetReadOnly(true)
-	} else {
-		if isReadOnly {
-			w.AsWidget().SetReadOnly(true)
-			vv.SetTag("edit", "-")
-		}
-	}
-	defStr, hasDef := vv.Tag("default")
-	if hasDef {
-		lbl.Tooltip = "(Default: " + defStr + ") " + vv.Doc()
-	} else {
-		lbl.Tooltip = vv.Doc()
-	}
-	return
-}
-
-// StructFieldIsDef processses "default" tag for default value(s) of field
-// defs = default values as strings as either comma-separated list of valid values
-// or low:high value range (only for int or float numeric types)
-// valPtr = pointer to value
-// returns true if value is default, and string to add to tooltip for default values.
-// Uses JSON format for composite types (struct, slice, map), replacing " with '
-// so it is easier to use in def tag.
-func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string) {
-	defStr := "(Default: " + defs + ")"
-	if kind >= reflect.Int && kind <= reflect.Complex128 && strings.Contains(defs, ":") {
-		dtags := strings.Split(defs, ":")
-		lo, _ := strconv.ParseFloat(dtags[0], 64)
-		hi, _ := strconv.ParseFloat(dtags[1], 64)
-		vf, err := reflectx.ToFloat(valPtr)
-		if err != nil {
-			slog.Error("views.StructFieldIsDef: error parsing struct field numerical range def tag", "type", reflectx.NonPointerType(reflect.TypeOf(valPtr)), "def", defs, "err", err)
-			return true, defStr
-		}
-		return lo <= vf && vf <= hi, defStr
-	}
-	v := reflectx.NonPointerValue(reflect.ValueOf(valPtr))
-	dtags := strings.Split(defs, ",")
-	if strings.ContainsAny(defs, "{[") { // complex type, so don't split on commas
-		dtags = []string{defs}
-	}
-	for _, def := range dtags {
-		def = reflectx.FormatDefault(def)
-		if def == "" {
-			if v.IsZero() {
-				return true, defStr
-			}
-			continue
-		}
-		dv := reflect.New(v.Type())
-		err := reflectx.SetRobust(dv.Interface(), def)
-		if err != nil {
-			slog.Error("views.StructFieldIsDef: error parsing struct field def tag", "type", v.Type(), "def", def, "err", err)
-			return true, defStr
-		}
-		if reflect.DeepEqual(v.Interface(), dv.Elem().Interface()) {
-			return true, defStr
-		}
-	}
-	return false, defStr
 }

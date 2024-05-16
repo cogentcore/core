@@ -85,7 +85,7 @@ func (sv *SliceViewInline) Config(c *core.Config) {
 	for i := 0; i < sz; i++ {
 		itxt := strconv.Itoa(i)
 		val := reflectx.OnePointerUnderlyingValue(sl.Index(i)) // deal with pointer lists
-		core.Configure(c, "grid/value-"+itxt, func() core.Value {
+		core.Configure(c, "value-"+itxt, func() core.Value {
 			w := core.NewValue(val.Interface())
 			wb := w.AsWidget()
 			// vv.SetSliceValue(val, sv.Slice, i, sv.ViewPath)

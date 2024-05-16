@@ -216,6 +216,10 @@ func (c *Config) ConfigWidget(w Widget, parentPath string) {
 			func(i int) string { return children[i].ItemName() },
 			func(name string, i int) tree.Node {
 				child := children[i]
+				if child.New == nil {
+					fmt.Println("core.Config child.New is nil:", child.ItemName())
+					return nil
+				}
 				cw := child.New()
 				cw.SetName(name)
 				tree.SetParent(cw, wb)
