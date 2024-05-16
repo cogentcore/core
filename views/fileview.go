@@ -219,9 +219,29 @@ var FileViewKindColorMap = map[string]string{
 }
 
 func (fv *FileView) Config(c *core.Config) {
+	if len(core.RecentPaths) == 0 {
+		core.OpenRecentPaths()
+	}
+	fv.Scene.UpdateTitle("Files: " + fv.DirPath)
 	core.RecentPaths.AddPath(fv.DirPath, core.SystemSettings.SavedPathsMax)
 	core.SaveRecentPaths()
 	fv.ReadFiles()
+
+	if fv.PrevPath != fv.DirPath {
+		if core.TheApp.Platform() != system.MacOS {
+			// mac is not supported in a high-capacity fashion at this point
+			if fv.PrevPath == "" {
+				fv.ConfigWatcher()
+			} else {
+				fv.Watcher.Remove(fv.PrevPath)
+			}
+			fv.Watcher.Add(fv.DirPath)
+			if fv.PrevPath == "" {
+				fv.WatchWatcher()
+			}
+		}
+		fv.PrevPath = fv.DirPath
+	}
 
 	core.Configure(c, "files", func() *core.Frame {
 		w := core.NewFrame()
@@ -280,7 +300,7 @@ func (fv *FileView) ConfigAppChooser(ch *core.Chooser) {
 			Func: func() {
 				core.RecentPaths = make(core.FilePaths, 1, core.SystemSettings.SavedPathsMax)
 				core.RecentPaths[0] = fv.DirPath
-				fv.UpdateFiles()
+				fv.Update()
 			},
 		})
 		ch.Items = append(ch.Items, core.ChooserItem{
@@ -310,6 +330,8 @@ func (fv *FileView) ConfigFilesRow(c *core.Config) {
 			fv.FavesSelect(w.SelectedIndex)
 		})
 		return w
+	}, func(w *TableView) {
+		w.ResetSelectedIndexes()
 	})
 	core.Configure(c, "files/files", func() *TableView {
 		w := NewTableView()
@@ -395,6 +417,15 @@ func (fv *FileView) ConfigFilesRow(c *core.Config) {
 			NewFuncButton(m, fv.NewFolder).SetIcon(icons.CreateNewFolder)
 		})
 		return w
+	}, func(w *TableView) {
+		w.ResetSelectedIndexes()
+		w.SelectedField = "Name"
+		w.SelectedValue = fv.CurrentSelectedFile
+		fv.SelectedIndex = w.SelectedIndex
+		if w.SelectedIndex >= 0 {
+			w.ScrollToIndex(w.SelectedIndex)
+		}
+		// w.SortSlice()
 	})
 }
 
@@ -428,6 +459,7 @@ func (fv *FileView) ConfigSelRow(c *core.Config) {
 		})
 		return w
 	}, func(w *core.TextField) {
+		w.SetText(fv.CurrentSelectedFile)
 		w.StartFocus()
 	})
 
@@ -478,7 +510,7 @@ func (fv *FileView) WatchWatcher() {
 				case event.Op&fsnotify.Create == fsnotify.Create ||
 					event.Op&fsnotify.Remove == fsnotify.Remove ||
 					event.Op&fsnotify.Rename == fsnotify.Rename:
-					fv.UpdateFiles()
+					fv.Update()
 				}
 			case err := <-watch.Errors:
 				_ = err
@@ -518,9 +550,9 @@ func (fv *FileView) UpdatePath() {
 
 // UpdateFilesAction updates the list of files and other views for the current path.
 func (fv *FileView) UpdateFilesAction() { //types:add
-	fv.UpdateFiles()
-	sf := fv.SelectField()
-	sf.SetFocusEvent()
+	fv.Update()
+	// sf := fv.SelectField()
+	// sf.SetFocusEvent()
 }
 
 func (fv *FileView) ReadFiles() {
@@ -562,51 +594,6 @@ func (fv *FileView) ReadFiles() {
 		}
 		return nil
 	})
-}
-
-// UpdateFiles updates list of files and other views for current path
-func (fv *FileView) UpdateFiles() {
-	fv.UpdateMu.Lock()
-	defer fv.UpdateMu.Unlock()
-
-	fv.UpdatePath()
-	if len(core.RecentPaths) == 0 {
-		core.OpenRecentPaths()
-	}
-	sf := fv.SelectField()
-	sf.SetText(fv.CurrentSelectedFile)
-
-	fv.Scene.UpdateTitle("Files: " + fv.DirPath)
-	fvv := fv.FavesView()
-	fvv.ResetSelectedIndexes()
-
-	sv := fv.FilesView()
-	sv.ResetSelectedIndexes()
-	sv.SelectedField = "Name"
-	sv.SelectedValue = fv.CurrentSelectedFile
-	sv.SortSlice()
-	sv.Update()
-
-	fv.SelectedIndex = sv.SelectedIndex
-	if sv.SelectedIndex >= 0 {
-		sv.ScrollToIndex(sv.SelectedIndex)
-	}
-
-	if fv.PrevPath != fv.DirPath {
-		if core.TheApp.Platform() != system.MacOS {
-			// mac is not supported in a high-capacity fashion at this point
-			if fv.PrevPath == "" {
-				fv.ConfigWatcher()
-			} else {
-				fv.Watcher.Remove(fv.PrevPath)
-			}
-			fv.Watcher.Add(fv.DirPath)
-			if fv.PrevPath == "" {
-				fv.WatchWatcher()
-			}
-		}
-		fv.PrevPath = fv.DirPath
-	}
 }
 
 // UpdateFaves updates list of files and other views for current path
@@ -730,7 +717,7 @@ func (fv *FileView) SetExt(ext string) *FileView {
 // SetExtAction sets the current extension to highlight, and redisplays files
 func (fv *FileView) SetExtAction(ext string) *FileView {
 	fv.SetExt(ext)
-	fv.UpdateFiles()
+	fv.Update()
 	return fv
 }
 
@@ -862,7 +849,7 @@ func (fv *FileView) EditRecentPaths() {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
 			core.SaveRecentPaths()
-			fv.UpdateFiles()
+			fv.Update()
 		})
 	})
 	d.RunDialog(fv)
