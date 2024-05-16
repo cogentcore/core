@@ -167,8 +167,6 @@ type Node interface {
 	PathFrom(parent Node) string
 
 	// FindPath returns the node at the given path, starting from this node.
-	// If this node is not the root, then the path to this node is subtracted
-	// from the start of the path if present there.
 	// FindPath only works correctly when names are unique.
 	// Path has [Node.Name]s separated by / and fields by .
 	// Node names escape any existing / and . characters to \\ and \,

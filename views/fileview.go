@@ -37,7 +37,7 @@ func FileViewDialog(ctx core.Widget, filename, exts, title string, fun func(self
 	if title != "" {
 		d.SetTitle(title)
 	}
-	fv := NewFileView(d).SetFilename(filename, exts)
+	fv := NewFileView(d) // .SetFilename(filename, exts)
 	d.AddAppBar(fv.ConfigToolbar)
 	d.AddAppChooser(fv.ConfigAppChooser)
 	d.AddBottomBar(func(parent core.Widget) {
@@ -229,6 +229,7 @@ func (fv *FileView) Config(c *core.Config) {
 	core.Configure(c, "sel", func() *core.Frame {
 		w := core.NewFrame()
 		w.Style(func(s *styles.Style) {
+			s.Grow.Set(1, 0)
 			s.Gap.X.Dp(4)
 		})
 		return w
@@ -241,11 +242,10 @@ func (fv *FileView) Config(c *core.Config) {
 // ConfigToolbar configures the given toolbar to have file view
 // actions and completions.
 func (fv *FileView) ConfigToolbar(c *core.Config) {
-	return
 	ConfigFuncButton(c, fv.DirPathUp, func(w *FuncButton) {
 		w.SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
 	})
-	ConfigFuncButton(c, fv.AddPathToFavs, func(w *FuncButton) {
+	ConfigFuncButton(c, fv.AddPathToFaves, func(w *FuncButton) {
 		w.SetIcon(icons.Favorite).SetText("Favorite")
 	})
 	ConfigFuncButton(c, fv.UpdateFilesAction, func(w *FuncButton) {
@@ -303,7 +303,7 @@ func (fv *FileView) ConfigFilesRow(c *core.Config) {
 		})
 		w.SetSlice(&core.SystemSettings.FavPaths)
 		w.OnSelect(func(e events.Event) {
-			fv.FavSelect(w.SelectedIndex)
+			fv.FavesSelect(w.SelectedIndex)
 		})
 		return w
 	})
@@ -422,8 +422,9 @@ func (fv *FileView) ConfigSelRow(c *core.Config) {
 				fv.SetSelFileAction(w.Text())
 			}
 		})
-		w.StartFocus()
 		return w
+	}, func(w *core.TextField) {
+		w.StartFocus()
 	})
 
 	core.Configure(c, "sel/ext-text", func() *core.Text {
@@ -482,9 +483,9 @@ func (fv *FileView) WatchWatcher() {
 	}()
 }
 
-// FavsView returns the TableView of the favorites
-func (fv *FileView) FavsView() *TableView {
-	return fv.FindPath("files/favs").(*TableView)
+// FavesView returns the TableView of the favorites
+func (fv *FileView) FavesView() *TableView {
+	return fv.FindPath("files/faves").(*TableView)
 }
 
 // FilesView returns the TableView of the files
@@ -577,7 +578,7 @@ func (fv *FileView) UpdateFiles() {
 
 	fv.ReadFiles()
 
-	fvv := fv.FavsView()
+	fvv := fv.FavesView()
 	fvv.ResetSelectedIndexes()
 
 	sv := fv.FilesView()
@@ -609,14 +610,14 @@ func (fv *FileView) UpdateFiles() {
 	}
 }
 
-// UpdateFavs updates list of files and other views for current path
-func (fv *FileView) UpdateFavs() {
-	sv := fv.FavsView()
+// UpdateFaves updates list of files and other views for current path
+func (fv *FileView) UpdateFaves() {
+	sv := fv.FavesView()
 	sv.Update()
 }
 
-// AddPathToFavs adds the current path to favorites
-func (fv *FileView) AddPathToFavs() { //types:add
+// AddPathToFaves adds the current path to favorites
+func (fv *FileView) AddPathToFaves() { //types:add
 	dp := fv.DirPath
 	if dp == "" {
 		return
@@ -638,7 +639,7 @@ func (fv *FileView) AddPathToFavs() { //types:add
 	core.SystemSettings.FavPaths = append(core.SystemSettings.FavPaths, fi)
 	core.ErrorSnackbar(fv, core.SaveSettings(core.SystemSettings), "Error saving settings")
 	// fv.FileSig.Emit(fv.This(), int64(FileViewFavAdded), fi)
-	fv.UpdateFavs()
+	fv.UpdateFaves()
 }
 
 // DirPathUp moves up one directory in the path
@@ -734,8 +735,8 @@ func (fv *FileView) SetExtAction(ext string) *FileView {
 	return fv
 }
 
-// FavSelect selects a favorite path and goes there
-func (fv *FileView) FavSelect(idx int) {
+// FavesSelect selects a favorite path and goes there
+func (fv *FileView) FavesSelect(idx int) {
 	if idx < 0 || idx >= len(core.SystemSettings.FavPaths) {
 		return
 	}

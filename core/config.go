@@ -62,19 +62,18 @@ func Configure[T Widget](c *Config, path string, new func() T, update ...func(w 
 // the first is called only during initial Config of a new Button;
 // the second is called during Update.
 func ConfigButton(c *Config, funcs ...func(w *Button)) {
-	path := ConfigCallerPath(2)
 	n := len(funcs)
 	switch n {
 	case 0:
-		c.Add(path, func() Widget { return NewButton() }, nil)
+		c.Add("", func() Widget { return NewButton() }, nil)
 	case 1:
-		c.Add(path, func() Widget {
+		c.Add("", func() Widget {
 			w := NewButton()
 			funcs[0](w)
 			return w
 		}, nil)
 	case 2:
-		c.Add(path, func() Widget {
+		c.Add("", func() Widget {
 			w := NewButton()
 			funcs[0](w)
 			return w
@@ -85,13 +84,12 @@ func ConfigButton(c *Config, funcs ...func(w *Button)) {
 // ConfigSeparator adds a new config item to the given [Config] for
 // a Separator, with no further configuration.
 func ConfigSeparator(c *Config) {
-	path := ConfigCallerPath(2)
-	c.Add(path, func() Widget { return NewSeparator() }, nil)
+	c.Add("", func() Widget { return NewSeparator() }, nil)
 }
 
 // ConfigCallerPath returns the dir-filename of runtime.Caller(level),
 // with all / . replaced to -, which is suitable as a unique name
-// for a ConfigItem path.  This is used with level 1 by default for
+// for a ConfigItem path.  This is used with level 3 by default for
 // blank names in [Config.Add], but wrappers around that may need to
 // generate these paths with a relevant level if they wrap the Configure
 // call.
@@ -118,7 +116,7 @@ func ConfigCallerPath(level int) string {
 // better type safety and increased convenience.
 func (c *Config) Add(path string, new func() Widget, update func(w Widget)) {
 	if path == "" {
-		path = ConfigCallerPath(1)
+		path = ConfigCallerPath(3)
 	}
 	itm := &ConfigItem{Path: path, New: new, Update: update}
 	plist := strings.Split(path, "/")

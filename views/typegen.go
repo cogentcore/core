@@ -54,7 +54,7 @@ func (t *ColorView) New() tree.Node { return &ColorView{} }
 func (t *ColorView) SetTooltip(v string) *ColorView { t.Tooltip = v; return t }
 
 // FileViewType is the [types.Type] for [FileView]
-var FileViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FileView", IDName: "file-view", Doc: "FileView is a viewer onto files -- core of the file chooser dialog", Methods: []types.Method{{Name: "UpdateFilesAction", Doc: "UpdateFilesAction updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddPathToFavs", Doc: "AddPathToFavs adds the current path to favorites", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DirPathUp", Doc: "DirPathUp moves up one directory in the path", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "NewFolder", Doc: "NewFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "DirPath", Doc: "path to directory of files to display"}, {Name: "CurrentSelectedFile", Doc: "currently selected file"}, {Name: "Ext", Doc: "target extension(s) (comma separated if multiple, including initial .), if any"}, {Name: "FilterFunc", Doc: "optional styling function"}, {Name: "ExtMap", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"}, {Name: "Files", Doc: "files for current directory"}, {Name: "SelectedIndex", Doc: "index of currently selected file in Files list (-1 if none)"}, {Name: "Watcher", Doc: "change notify for current dir"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "UpdateMu", Doc: "UpdateFiles mutex"}, {Name: "PrevPath", Doc: "Previous path that was processed via UpdateFiles"}}, Instance: &FileView{}})
+var FileViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FileView", IDName: "file-view", Doc: "FileView is a viewer onto files -- core of the file chooser dialog", Methods: []types.Method{{Name: "UpdateFilesAction", Doc: "UpdateFilesAction updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddPathToFaves", Doc: "AddPathToFaves adds the current path to favorites", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DirPathUp", Doc: "DirPathUp moves up one directory in the path", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "NewFolder", Doc: "NewFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "DirPath", Doc: "path to directory of files to display"}, {Name: "CurrentSelectedFile", Doc: "currently selected file"}, {Name: "Ext", Doc: "target extension(s) (comma separated if multiple, including initial .), if any"}, {Name: "FilterFunc", Doc: "optional styling function"}, {Name: "ExtMap", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"}, {Name: "Files", Doc: "files for current directory"}, {Name: "SelectedIndex", Doc: "index of currently selected file in Files list (-1 if none)"}, {Name: "Watcher", Doc: "change notify for current dir"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "UpdateMu", Doc: "UpdateFiles mutex"}, {Name: "PrevPath", Doc: "Previous path that was processed via UpdateFiles"}}, Instance: &FileView{}})
 
 // NewFileView returns a new [FileView] with the given optional parent:
 // FileView is a viewer onto files -- core of the file chooser dialog
@@ -373,6 +373,10 @@ func (t *StructView) NodeType() *types.Type { return StructViewType }
 // New returns a new [*StructView] value
 func (t *StructView) New() tree.Node { return &StructView{} }
 
+// SetStruct sets the [StructView.Struct]:
+// Struct is the pointer to the struct that we are viewing.
+func (t *StructView) SetStruct(v any) *StructView { t.Struct = v; return t }
+
 // SetViewPath sets the [StructView.ViewPath]:
 // ViewPath is a record of parent view names that have led up to this view.
 // It is displayed as extra contextual information in view dialogs.
@@ -396,6 +400,10 @@ func (t *StructViewInline) NodeType() *types.Type { return StructViewInlineType 
 
 // New returns a new [*StructViewInline] value
 func (t *StructViewInline) New() tree.Node { return &StructViewInline{} }
+
+// SetStruct sets the [StructViewInline.Struct]:
+// Struct is the pointer to the struct that we are viewing.
+func (t *StructViewInline) SetStruct(v any) *StructViewInline { t.Struct = v; return t }
 
 // SetViewPath sets the [StructViewInline.ViewPath]:
 // ViewPath is a record of parent view names that have led up to this view.

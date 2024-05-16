@@ -318,8 +318,6 @@ func findPathChild(k Node, child string) (int, bool) {
 }
 
 // FindPath returns the node at the given path, starting from this node.
-// If this node is not the root, then the path to this node is subtracted
-// from the start of the path if present there.
 // FindPath only works correctly when names are unique.
 // Path has [Node.Name]s separated by / and fields by .
 // Node names escape any existing / and . characters to \\ and \,
@@ -327,17 +325,10 @@ func findPathChild(k Node, child string) (int, bool) {
 // element, for cases when indexes are more useful than names.
 // Returns nil if not found.
 func (n *NodeBase) FindPath(path string) Node {
-	if n.Par != nil { // we are not root..
-		myp := n.Path()
-		path = strings.TrimPrefix(path, myp)
-	}
 	curn := n.This()
 	pels := strings.Split(strings.Trim(strings.TrimSpace(path), "\""), "/")
-	for i, pe := range pels {
+	for _, pe := range pels {
 		if len(pe) == 0 {
-			continue
-		}
-		if i <= 1 && curn.Name() == UnescapePathName(pe) {
 			continue
 		}
 		if strings.Contains(pe, ".") { // has fields

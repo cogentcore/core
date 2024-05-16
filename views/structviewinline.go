@@ -25,7 +25,7 @@ type StructViewInline struct {
 	core.Frame
 
 	// Struct is the pointer to the struct that we are viewing.
-	Struct any `set:"-"`
+	Struct any
 
 	// StructValue is the [Value] associated with this struct view, if any.
 	StructValue Value `set:"-"`
@@ -48,16 +48,6 @@ func (sv *StructViewInline) SetStyles() {
 	sv.Style(func(s *styles.Style) {
 		s.Grow.Set(0, 0)
 	})
-}
-
-// SetStruct sets the source struct that we are viewing -- rebuilds the
-// children to represent this struct
-func (sv *StructViewInline) SetStruct(st any) *StructViewInline {
-	if sv.Struct != st {
-		sv.Struct = st
-		sv.Update()
-	}
-	return sv
 }
 
 func (sv *StructViewInline) Config(c *core.Config) {

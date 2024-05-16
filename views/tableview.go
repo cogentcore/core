@@ -89,15 +89,14 @@ func (tv *TableView) StyleValue(w core.Widget, s *styles.Style, row, col int) {
 	s.SetTextWrap(false)
 }
 
-// SetSlice sets the source slice that we are viewing -- rebuilds the children
-// to represent this slice (does Update if already viewing).
+// SetSlice sets the source slice that we are viewing.
+// Must call Update if already open.
 func (tv *TableView) SetSlice(sl any) *TableView {
 	if reflectx.AnyIsNil(sl) {
 		tv.Slice = nil
 		return tv
 	}
 	if tv.Slice == sl && tv.Is(SliceViewConfigured) {
-		tv.Update()
 		return tv
 	}
 
@@ -121,7 +120,6 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 	tv.SliceNPVal = reflectx.NonPointerValue(reflect.ValueOf(tv.Slice))
 	tv.ElVal = reflectx.OnePointerValue(reflectx.SliceElementValue(sl))
 	tv.CacheVisFields()
-	tv.Update()
 	return tv
 }
 

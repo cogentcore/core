@@ -44,7 +44,7 @@ type StructView struct {
 	core.Frame
 
 	// Struct is the pointer to the struct that we are viewing.
-	Struct any `set:"-"`
+	Struct any
 
 	// StructValue is the Value for the struct itself
 	// if this was created within the Value framework.
@@ -75,14 +75,6 @@ func (sv *StructView) SetStyles() {
 			s.Columns = 2
 		}
 	})
-}
-
-// SetStruct sets the source struct that we are viewing -- rebuilds the
-// children to represent this struct
-func (sv *StructView) SetStruct(st any) *StructView {
-	sv.Struct = st
-	sv.Update()
-	return sv
 }
 
 func (sv *StructView) Config(c *core.Config) {
