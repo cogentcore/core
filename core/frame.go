@@ -89,7 +89,6 @@ func (ly *Frame) SetStyles() {
 	ly.Style(func(s *styles.Style) {
 		// we never want borders on layouts
 		s.MaxBorder = styles.Border{}
-		s.Grow.Set(1, 0)
 	})
 	ly.StyleFinal(func(s *styles.Style) {
 		s.SetAbilities(s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto, abilities.Scrollable, abilities.Slideable)
