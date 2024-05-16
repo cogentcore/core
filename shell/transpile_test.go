@@ -156,6 +156,7 @@ func TestTranspile(t *testing.T) {
 		{"cd ../another/dir/to/go_to", `shell.Run("cd", "../another/dir/to/go_to")`},
 		{"cd ../an-other/dir/", `shell.Run("cd", "../an-other/dir/")`},
 		{"curl https://google.com/search?q=hello%20world#body", `shell.Run("curl", "https://google.com/search?q=hello%20world#body")`},
+		{"func splitLines(str string) []string {", `splitLines := func(str string)[]string {`},
 	}
 
 	sh := NewShell()
@@ -173,7 +174,7 @@ func TestCommand(t *testing.T) {
 			`command list {
 ls -la args... 
 }`,
-			`shell.AddCommand("list", func (args ...string) {
+			`shell.AddCommand("list", func(args ...string) {
 shell.Run("ls", "-la", "args...")
 })`},
 	}

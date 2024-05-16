@@ -26,6 +26,8 @@ func (sh *Shell) InstallBuiltins() {
 	sh.Builtins["kill"] = sh.Kill
 	sh.Builtins["set"] = sh.Set
 	sh.Builtins["add-path"] = sh.AddPath
+	sh.Builtins["which"] = sh.Which
+	sh.Builtins["source"] = sh.Source
 	sh.Builtins["cossh"] = sh.CoSSH
 	sh.Builtins["scp"] = sh.Scp
 }
@@ -130,6 +132,38 @@ func (sh *Shell) AddPath(cmdIO *exec.CmdIO, args ...string) error {
 		path = path + ":" + arg
 	}
 	return os.Setenv("PATH", path)
+}
+
+// Which reports the executable associated with the given command.
+// Processes builtins and commands, and if not found, then passes on
+// to exec which.
+func (sh *Shell) Which(cmdIO *exec.CmdIO, args ...string) error {
+	if len(args) != 1 {
+		return fmt.Errorf("cosh which: requires one argument")
+	}
+	cmd := args[0]
+	if _, hasCmd := sh.Commands[cmd]; hasCmd {
+		fmt.Println(cmd, "is a user-defined command")
+		return nil
+	}
+	if _, hasBlt := sh.Builtins[cmd]; hasBlt {
+		fmt.Println(cmd, "is a cosh builtin command")
+		return nil
+	}
+	sh.Config.RunIO(cmdIO, "which", args...)
+	return nil
+}
+
+// Source loads and evaluates the given file(s)
+func (sh *Shell) Source(cmdIO *exec.CmdIO, args ...string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("cosh source: requires at least one argument")
+	}
+	for _, fn := range args {
+		sh.TranspileCodeFromFile(fn)
+	}
+	// note that we do not execute the file -- just loads it in
+	return nil
 }
 
 // CoSSH manages SSH connections, which are referenced by the @name

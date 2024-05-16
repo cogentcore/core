@@ -114,6 +114,17 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 // TranspileGo returns transpiled tokens assuming Go code.
 // Unpacks any backtick encapsulated shell commands.
 func (sh *Shell) TranspileGo(toks Tokens) Tokens {
+	n := len(toks)
+	if n == 0 {
+		return toks
+	}
+	if toks[0].Tok == token.FUNC { // reorder as an assignment
+		if len(toks) > 1 && toks[1].Tok == token.IDENT {
+			toks[0] = toks[1]
+			toks.Insert(1, token.DEFINE)
+			toks[2] = &Token{Tok: token.FUNC}
+		}
+	}
 	gtoks := make(Tokens, 0, len(toks)) // return tokens
 	for _, tok := range toks {
 		if tok.IsBacktickString() {

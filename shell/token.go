@@ -164,7 +164,7 @@ func (tk Tokens) Code() string {
 		case tok.Tok == token.COMMA || tok.Tok == token.COLON || tok.Tok == token.SEMICOLON:
 			str += tok.String() + " "
 			prvIdent = false
-		case tok.IsGo():
+		case tok.IsGo() && (tok.Tok != token.FUNC):
 			str += tok.String() + " "
 			prvIdent = false
 		case tok.Tok == token.IDENT:

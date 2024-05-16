@@ -232,18 +232,27 @@ func (sh *Shell) TranspileCode(code string) {
 	}
 }
 
-// TranspileFile transpiles the given input cosh file to the given output Go file,
-// adding package main and func main declarations.
-func (sh *Shell) TranspileFile(in string, out string) error {
-	b, err := os.ReadFile(in)
+// TranspileCodeFromFile transpiles the code in given file
+func (sh *Shell) TranspileCodeFromFile(file string) error {
+	b, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}
 	sh.TranspileCode(string(b))
+	return nil
+}
+
+// TranspileFile transpiles the given input cosh file to the given output Go file,
+// adding package main and func main declarations.
+func (sh *Shell) TranspileFile(in string, out string) error {
+	err := sh.TranspileCodeFromFile(in)
+	if err != nil {
+		return err
+	}
 	sh.Lines = slices.Insert(sh.Lines, 0, "package main", "", "func main() {", "shell := shell.NewShell()")
 	sh.Lines = append(sh.Lines, "}")
 	src := []byte(sh.Code())
-	fmt.Println(string(src))
+	// fmt.Println(string(src))
 	res, err := imports.Process(out, src, nil)
 	if err != nil {
 		res = src
@@ -269,6 +278,7 @@ func (sh *Shell) AddError(err error) error {
 // TranspileConfig transpiles the .cosh startup config file in the user's
 // home directory if it exists.
 func (sh *Shell) TranspileConfig() error {
+	sh.TranspileCode(CoshLib)
 	path, err := homedir.Expand("~/.cosh")
 	if err != nil {
 		return err

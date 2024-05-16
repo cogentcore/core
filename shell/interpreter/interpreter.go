@@ -50,6 +50,7 @@ func NewInterpreter(options interp.Options) *Interpreter {
 	options.Stdin = in.Shell.StdIOWrappers.In
 	in.Interp = interp.New(options)
 	in.Interp.Use(stdlib.Symbols)
+
 	in.Interp.Use(interp.Exports{
 		"cogentcore.org/core/shell/shell": map[string]reflect.Value{
 			"Run":         reflect.ValueOf(in.Shell.Run),
@@ -80,6 +81,7 @@ func (in *Interpreter) Prompt() string {
 // Eval evaluates (interprets) the given code.
 func (in *Interpreter) Eval(code string) error {
 	in.Shell.TranspileCode(code)
+	source := strings.HasPrefix(code, "source")
 	if in.Shell.TotalDepth() == 0 {
 		nl := len(in.Shell.Lines)
 		hasPrint := false
@@ -94,12 +96,17 @@ func (in *Interpreter) Eval(code string) error {
 		if !hasPrint && v.IsValid() && !v.IsZero() {
 			fmt.Println(v.Interface())
 		}
+	} else {
+		fmt.Println("depth != 0", in.Shell.TotalDepth())
+	}
+	if source {
+		in.RunCode() // run accumulated code
 	}
 	return nil
 }
 
 // RunCode runs the accumulated set of code lines
-// and clears the stack.
+// and clears the stack of code lines
 func (in *Interpreter) RunCode() (reflect.Value, error) {
 	if len(in.Shell.Errors) > 0 {
 		return reflect.Value{}, errors.Join(in.Shell.Errors...)
@@ -120,7 +127,7 @@ func (in *Interpreter) RunCode() (reflect.Value, error) {
 func (in *Interpreter) RunConfig() error {
 	err := in.Shell.TranspileConfig()
 	if err != nil {
-		return errors.Log(err)
+		errors.Log(err)
 	}
 	_, err = in.RunCode()
 	return err
