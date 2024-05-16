@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/strcase"
 )
 
 // This file contains helpful functions for dealing with slices
@@ -21,7 +22,7 @@ import (
 // a pointer to a slice or a direct slice); just [reflect.Type.Elem] of slice type, but
 // using this function bypasses any pointer issues and makes it more explicit what is going on.
 func SliceElementType(sl any) reflect.Type {
-	return NonPointerValue(OnePointerUnderlyingValue(reflect.ValueOf(sl))).Type().Elem()
+	return NonPointerUnderlyingValue(reflect.ValueOf(sl)).Type().Elem()
 }
 
 // SliceElementValue returns a new [reflect.Value] of the [SliceElementType].
@@ -35,10 +36,31 @@ func SliceElementValue(sl any) reflect.Value {
 	return val
 }
 
+// FriendlySliceLabel returns a user-friendly label for the given slice value.
+func FriendlySliceLabel(v reflect.Value) string {
+	npv := NonPointerUnderlyingValue(v)
+	label := ""
+	if !npv.IsValid() {
+		label = "None"
+	} else {
+		if npv.Kind() == reflect.Array || !npv.IsNil() {
+			bnm := FriendlyTypeName(SliceElementType(v.Interface()))
+			if strings.HasSuffix(bnm, "s") {
+				label = strcase.ToSentence(fmt.Sprintf("%d lists of %s", npv.Len(), bnm))
+			} else {
+				label = strcase.ToSentence(fmt.Sprintf("%d %ss", npv.Len(), bnm))
+			}
+		} else {
+			label = "None"
+		}
+	}
+	return label
+}
+
 // SliceNewAt inserts a new blank element at the given index in the given slice.
 // -1 means the end.
 func SliceNewAt(sl any, idx int) {
-	svl := OnePointerValue(reflect.ValueOf(sl))
+	svl := OnePointerUnderlyingValue(reflect.ValueOf(sl))
 	svnp := NonPointerValue(svl)
 	val := SliceElementValue(sl)
 	sz := svnp.Len()
@@ -381,8 +403,8 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 func CopySliceRobust(to, from any) error {
 	tov := reflect.ValueOf(to)
 	fmv := reflect.ValueOf(from)
-	tonp := NonPointerValue(tov)
-	fmnp := NonPointerValue(fmv)
+	tonp := NonPointerUnderlyingValue(tov)
+	fmnp := NonPointerUnderlyingValue(fmv)
 	totyp := tonp.Type()
 	// eltyp := SliceElType(tonp)
 	if totyp.Kind() != reflect.Slice {
@@ -396,7 +418,7 @@ func CopySliceRobust(to, from any) error {
 	}
 	fmlen := fmnp.Len()
 	if tonp.IsNil() {
-		OnePointerValue(tonp).Elem().Set(reflect.MakeSlice(totyp, fmlen, fmlen))
+		tonp.Set(reflect.MakeSlice(totyp, fmlen, fmlen))
 	} else {
 		if tonp.Len() > fmlen {
 			tonp.SetLen(fmlen)

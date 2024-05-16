@@ -235,22 +235,7 @@ func (v *SliceValue) Config() {
 }
 
 func (v *SliceValue) Update() {
-	npv := reflectx.OnePointerUnderlyingValue(v.Value).Elem()
-	txt := ""
-	if !npv.IsValid() {
-		txt = "None"
-	} else {
-		if npv.Kind() == reflect.Array || !npv.IsNil() {
-			bnm := reflectx.FriendlyTypeName(reflectx.SliceElementType(v.Value.Interface()))
-			if strings.HasSuffix(bnm, "s") {
-				txt = strcase.ToSentence(fmt.Sprintf("%d lists of %s", npv.Len(), bnm))
-			} else {
-				txt = strcase.ToSentence(fmt.Sprintf("%d %ss", npv.Len(), bnm))
-			}
-		} else {
-			txt = "None"
-		}
-	}
+	txt := reflectx.FriendlySliceLabel(v.Value)
 	v.Widget.SetText(txt).Update()
 }
 

@@ -116,7 +116,7 @@ func (sv *SliceViewInline) Config(c *core.Config) {
 	if !sv.isArray && !sv.isFixedLength {
 		core.Configure(c, "add-button", func() *core.Button {
 			w := core.NewButton().SetIcon(icons.Add).SetType(core.ButtonTonal)
-			w.Tooltip = "add an element to the slice"
+			w.Tooltip = "Add an element to the list"
 			w.OnClick(func(e events.Event) {
 				sv.SliceNewAt(-1)
 			})
@@ -125,7 +125,7 @@ func (sv *SliceViewInline) Config(c *core.Config) {
 	}
 	core.Configure(c, "edit-button", func() *core.Button {
 		w := core.NewButton().SetIcon(icons.Edit).SetType(core.ButtonTonal)
-		w.Tooltip = "edit in a dialog"
+		w.Tooltip = "Edit list in a dialog"
 		w.OnClick(func(e events.Event) {
 			vpath := sv.ViewPath
 			title := ""
@@ -138,8 +138,7 @@ func (sv *SliceViewInline) Config(c *core.Config) {
 				}
 				vpath = JoinViewPath(sv.ViewPath, newPath)
 			} else {
-				elType := reflectx.NonPointerType(reflect.TypeOf(sv.Slice).Elem().Elem())
-				title = "Slice of " + reflectx.NonPointerType(elType).Name()
+				title = reflectx.FriendlySliceLabel(reflect.ValueOf(sv.Slice))
 			}
 			d := core.NewBody().AddTitle(title)
 			NewSliceView(d).SetViewPath(vpath).SetSlice(sv.Slice)

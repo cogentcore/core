@@ -348,6 +348,8 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 		sv.Slice = nil
 		return sv
 	}
+	// TODO: a lot of this garbage needs to be cleaned up.
+	// New is not working!
 	newslc := false
 	if reflect.TypeOf(sl).Kind() != reflect.Pointer { // prevent crash on non-comparable
 		newslc = true
@@ -356,25 +358,23 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 	}
 	if !newslc && sv.Is(SliceViewConfigured) {
 		sv.ConfigIter = 0
-		sv.Update()
 		return sv
 	}
 
 	sv.SetSliceBase()
 	sv.Slice = sl
-	sv.SliceNPVal = reflectx.NonPointerValue(reflect.ValueOf(sv.Slice))
+	sv.SliceNPVal = reflectx.NonPointerUnderlyingValue(reflect.ValueOf(sv.Slice))
 	isArray := reflectx.NonPointerType(reflect.TypeOf(sl)).Kind() == reflect.Array
 	sv.SetFlag(isArray, SliceViewIsArray)
 	// make sure elements aren't nil to prevent later panics
-	for i := 0; i < sv.SliceNPVal.Len(); i++ {
-		val := sv.SliceNPVal.Index(i)
-		k := val.Kind()
-		if (k == reflect.Chan || k == reflect.Func || k == reflect.Interface || k == reflect.Map || k == reflect.Pointer || k == reflect.Slice) && val.IsNil() {
-			val.Set(reflect.New(reflectx.NonPointerType(val.Type())))
-		}
-	}
+	// for i := 0; i < sv.SliceNPVal.Len(); i++ {
+	// 	val := sv.SliceNPVal.Index(i)
+	// 	k := val.Kind()
+	// 	if (k == reflect.Chan || k == reflect.Func || k == reflect.Interface || k == reflect.Map || k == reflect.Pointer || k == reflect.Slice) && val.IsNil() {
+	// 		val.Set(reflect.New(reflectx.NonPointerType(val.Type())))
+	// 	}
+	// }
 	sv.ElVal = reflectx.SliceElementValue(sl)
-	sv.Update()
 	return sv
 }
 
@@ -743,10 +743,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	sltyp := reflectx.SliceElementType(sv.Slice) // has pointer if it is there
 	isNode := tree.IsNode(sltyp)
 	slptr := sltyp.Kind() == reflect.Pointer
-
-	svl := reflect.ValueOf(sv.Slice)
 	sz := sv.SliceSize
-
 	svnp := sv.SliceNPVal
 
 	if isNode && sv.SliceValue != nil {
@@ -780,7 +777,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 			reflect.Copy(svnp.Slice(idx+1, sz+1), svnp.Slice(idx, sz))
 			svnp.Index(idx).Set(nval)
 		}
-		svl.Elem().Set(svnp)
+		svnp.Set(svnp)
 	}
 	if idx < 0 {
 		idx = sz

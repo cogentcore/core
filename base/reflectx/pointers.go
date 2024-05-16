@@ -90,6 +90,12 @@ func OnePointerValue(v reflect.Value) reflect.Value {
 	return v
 }
 
+// NonPointerUnderlyingValue returns a non-pointer version of the given value.
+// It also goes through any interfaces to find the actual underlying value.
+func NonPointerUnderlyingValue(v reflect.Value) reflect.Value {
+	return OnePointerUnderlyingValue(v).Elem()
+}
+
 // OnePointerUnderlyingValue returns a value that is exactly one pointer
 // away from a non-pointer value. It also goes through any interfaces to
 // find the actual underlying value.

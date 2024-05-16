@@ -424,7 +424,7 @@ func makeViews(ts *core.Tabs) {
 			File:       "views.go",
 		},
 		Things: make([]tableStruct, 2),
-		Stuff:  make([]float32, 3),
+		Stuff:  []float32{0.1, 0.2, 0.3},
 	}
 
 	views.NewStructView(vts.NewTab("Struct view")).SetStruct(&str)
