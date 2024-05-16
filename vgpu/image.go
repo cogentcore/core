@@ -941,14 +941,14 @@ func (im *Image) TransitionDstToGeneral(cmd vk.CommandBuffer) {
 }
 
 // Transition transitions image to new layout
-func (im *Image) Transition(cmd vk.CommandBuffer, format vk.Format, oldLayout, NewFrame vk.ImageLayout, srcStage, dstStage vk.PipelineStageFlagBits) {
+func (im *Image) Transition(cmd vk.CommandBuffer, format vk.Format, oldLayout, NewLayout vk.ImageLayout, srcStage, dstStage vk.PipelineStageFlagBits) {
 
 	imgMemBar := vk.ImageMemoryBarrier{
 		SType:               vk.StructureTypeImageMemoryBarrier,
 		SrcQueueFamilyIndex: vk.QueueFamilyIgnored,
 		DstQueueFamilyIndex: vk.QueueFamilyIgnored,
 		OldLayout:           oldLayout,
-		NewFrame:            NewFrame,
+		NewLayout:           NewLayout,
 		Image:               im.Image,
 		SubresourceRange: vk.ImageSubresourceRange{
 			AspectMask: vk.ImageAspectFlags(vk.ImageAspectColorBit),
@@ -957,7 +957,7 @@ func (im *Image) Transition(cmd vk.CommandBuffer, format vk.Format, oldLayout, N
 		},
 	}
 
-	switch NewFrame {
+	switch NewLayout {
 	case vk.ImageLayoutTransferDstOptimal:
 		// make sure anything that was copying from this image has completed
 		imgMemBar.DstAccessMask = vk.AccessFlags(vk.AccessTransferWriteBit)
