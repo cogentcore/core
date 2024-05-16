@@ -63,7 +63,7 @@ func main() {
 	tbar := core.NewToolbar(mfr, "tbar")
 	tbar.SetStretchMaxWidth()
 
-	svgrow := core.NewLayout(mfr, "svgrow", core.LayoutHoriz)
+	svgrow := core.NewFrame(mfr, "svgrow", core.LayoutHoriz)
 	svgrow.SetProp("horizontal-align", "center")
 	svgrow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	svgrow.SetStretchMaxWidth()

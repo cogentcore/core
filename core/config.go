@@ -290,7 +290,7 @@ func (c *Config) UpdateWidget(w Widget, parentPath string) {
 // of a widget, which typically contain content that the widget automatically
 // manages through its [Widget.Config] method.
 func NewParts() *Frame {
-	w := NewLayout()
+	w := NewFrame()
 	w.SetName("parts")
 	w.SetFlag(true, tree.Field)
 	w.Style(func(s *styles.Style) {

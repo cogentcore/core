@@ -43,9 +43,8 @@ type Toolbar struct {
 }
 
 func (tb *Toolbar) OnInit() {
-	tb.WidgetBase.OnInit()
+	tb.Frame.OnInit()
 	ToolbarStyles(tb)
-	tb.Layout.HandleEvents()
 }
 
 func (tb *Toolbar) IsVisible() bool {
@@ -250,9 +249,8 @@ type BasicBar struct {
 }
 
 func (tb *BasicBar) OnInit() {
-	tb.WidgetBase.OnInit()
+	tb.Frame.OnInit()
 	ToolbarStyles(tb)
-	tb.Layout.HandleEvents()
 }
 
 // UpdateBar calls ApplyStyleUpdate to update to current state

@@ -55,7 +55,7 @@ type ButtonsConfig struct {
 // [ButtonsConfig] for more information on the configuration options. The
 // configuration options can be nil, in which case default values will be used.
 func Buttons(par core.Widget, c *ButtonsConfig) *core.Frame {
-	ly := core.NewLayout(par)
+	ly := core.NewFrame(par)
 	ly.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})

@@ -86,7 +86,7 @@ func buttons(ts *core.Tabs) {
 	core.NewText(tab).SetText("Cogent Core provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of text, an icon, and an indicator.")
 
 	makeRow := func() core.Widget {
-		return core.NewLayout(tab).Style(func(s *styles.Style) {
+		return core.NewFrame(tab).Style(func(s *styles.Style) {
 			s.Wrap = true
 			s.Align.Items = styles.Center
 		})
@@ -201,12 +201,12 @@ func inputs(ts *core.Tabs) {
 			s.SetTextWrap(true)
 		})
 
-	spinners := core.NewLayout(tab)
+	spinners := core.NewFrame(tab)
 
 	core.NewSpinner(spinners).SetStep(5).SetMin(-50).SetMax(100).SetValue(15)
 	core.NewSpinner(spinners).SetFormat("%X").SetStep(1).SetMax(255).SetValue(44)
 
-	choosers := core.NewLayout(tab)
+	choosers := core.NewFrame(tab)
 
 	fruits := []core.ChooserItem{
 		{Value: "Apple", Tooltip: "A round, edible fruit that typically has red skin"},
@@ -279,7 +279,7 @@ func sliders(ts *core.Tabs) {
 	core.NewSlider(tab)
 	core.NewSlider(tab).SetValue(0.7).SetState(true, states.Disabled)
 
-	csliders := core.NewLayout(tab)
+	csliders := core.NewFrame(tab)
 
 	core.NewSlider(csliders).SetValue(0.3).Style(func(s *styles.Style) {
 		s.Direction = styles.Column
@@ -328,7 +328,7 @@ func makeIcons(ts *core.Tabs) {
 			if strings.HasSuffix(sic, "-fill") {
 				continue
 			}
-			vb := core.NewLayout(grid).Style(func(s *styles.Style) {
+			vb := core.NewFrame(grid).Style(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Max.X.Em(15) // constraining width exactly gives nice grid-like appearance
 				s.Min.X.Em(15)
@@ -598,7 +598,7 @@ func dialogs(ts *core.Tabs) {
 	core.NewText(tab).SetText("Cogent Core provides completely customizable dialogs, snackbars, and windows that allow you to easily display, obtain, and organize information.")
 
 	makeRow := func() core.Widget {
-		return core.NewLayout(tab).Style(func(s *styles.Style) {
+		return core.NewFrame(tab).Style(func(s *styles.Style) {
 			s.Wrap = true
 			s.Align.Items = styles.Center
 		})

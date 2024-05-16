@@ -364,13 +364,13 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewImage(parent).SetImage(img)
 	},
 	"widgets/layouts-0": func(parent core.Widget) {
-		ly := core.NewLayout(parent)
+		ly := core.NewFrame(parent)
 		core.NewButton(ly).SetText("First")
 		core.NewButton(ly).SetText("Second")
 		core.NewButton(ly).SetText("Third")
 	},
 	"widgets/layouts-1": func(parent core.Widget) {
-		ly := core.NewLayout(parent)
+		ly := core.NewFrame(parent)
 		ly.Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 		})
@@ -379,7 +379,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewButton(ly).SetText("Third")
 	},
 	"widgets/layouts-2": func(parent core.Widget) {
-		ly := core.NewLayout(parent)
+		ly := core.NewFrame(parent)
 		ly.Style(func(s *styles.Style) {
 			s.Gap.Set(units.Em(2))
 		})
@@ -388,7 +388,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewButton(ly).SetText("Third")
 	},
 	"widgets/layouts-3": func(parent core.Widget) {
-		ly := core.NewLayout(parent)
+		ly := core.NewFrame(parent)
 		ly.Style(func(s *styles.Style) {
 			s.Max.X.Em(10)
 		})
@@ -397,7 +397,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewButton(ly).SetText("Third")
 	},
 	"widgets/layouts-4": func(parent core.Widget) {
-		ly := core.NewLayout(parent)
+		ly := core.NewFrame(parent)
 		ly.Style(func(s *styles.Style) {
 			s.Overflow.X = styles.OverflowAuto
 			s.Max.X.Em(10)
@@ -407,7 +407,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewButton(ly).SetText("Third")
 	},
 	"widgets/layouts-5": func(parent core.Widget) {
-		ly := core.NewLayout(parent)
+		ly := core.NewFrame(parent)
 		ly.Style(func(s *styles.Style) {
 			s.Wrap = true
 			s.Max.X.Em(10)
@@ -417,7 +417,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewButton(ly).SetText("Third")
 	},
 	"widgets/layouts-6": func(parent core.Widget) {
-		ly := core.NewLayout(parent)
+		ly := core.NewFrame(parent)
 		ly.Style(func(s *styles.Style) {
 			s.Display = styles.Grid
 			s.Columns = 2

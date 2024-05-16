@@ -141,7 +141,7 @@ func (ts *Tabs) SetStyles() {
 
 // NumTabs returns number of tabs
 func (ts *Tabs) NumTabs() int {
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	if fr == nil {
 		return 0
 	}
@@ -155,7 +155,7 @@ func (ts *Tabs) CurTab() (Widget, int, bool) {
 	}
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	if fr.StackTop < 0 {
 		return nil, -1, false
 	}
@@ -167,7 +167,7 @@ func (ts *Tabs) CurTab() (Widget, int, bool) {
 // It is the main end-user API for creating new tabs. An optional icon can also
 // be passed for the tab button.
 func (ts *Tabs) NewTab(label string, icon ...icons.Icon) *Frame {
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	idx := len(*fr.Children())
 	frame := ts.InsertNewTab(label, idx, icon...)
 	return frame
@@ -177,7 +177,7 @@ func (ts *Tabs) NewTab(label string, icon ...icons.Icon) *Frame {
 // within the list of tabs and returns the resulting tab frame. An optional icon
 // can also be passed for the tab button.
 func (ts *Tabs) InsertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
-	tfr := ts.Frame()
+	tfr := ts.FrameWidget()
 	frame := tree.InsertNewChild[*Frame](tfr, idx)
 	frame.SetName(label)
 	frame.Style(func(s *styles.Style) {
@@ -191,7 +191,7 @@ func (ts *Tabs) InsertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
 // AddTab adds an already existing frame as a new tab with the given tab label
 // and returns the index of that tab.
 func (ts *Tabs) AddTab(frame *Frame, label string) int {
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	idx := len(*fr.Children())
 	ts.InsertTab(frame, label, idx)
 	return idx
@@ -211,7 +211,7 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, icon ...ico
 	tab.OnClick(func(e events.Event) {
 		ts.SelectTabByName(tab.Nm)
 	})
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	if len(fr.Kids) == 1 {
 		fr.StackTop = 0
 		tab.SetSelected(true)
@@ -226,7 +226,7 @@ func (ts *Tabs) InsertTab(frame *Frame, label string, idx int, icon ...icons.Ico
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
 
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	fr.InsertChild(frame, idx)
 	ts.InsertTabOnlyAt(frame, label, idx, icon...)
 	ts.NeedsLayout()
@@ -238,7 +238,7 @@ func (ts *Tabs) TabAtIndex(idx int) (*Frame, *Tab, bool) {
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
 
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	tb := ts.Tabs()
 	sz := len(*fr.Children())
 	if idx < 0 || idx >= sz {
@@ -258,7 +258,7 @@ func (ts *Tabs) SelectTabIndex(idx int) (*Frame, bool) {
 	if !ok {
 		return nil, false
 	}
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	if fr.StackTop == idx {
 		return frame, true
 	}
@@ -277,7 +277,7 @@ func (ts *Tabs) SelectTabIndex(idx int) (*Frame, bool) {
 func (ts *Tabs) TabByName(name string) *Frame {
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	frame, _ := fr.ChildByName(name).(*Frame)
 	return frame
 }
@@ -318,7 +318,7 @@ func (ts *Tabs) SelectTabByName(name string) *Frame {
 		return nil
 	}
 	ts.SelectTabIndex(idx)
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	return fr.Child(idx).(*Frame)
 }
 
@@ -362,7 +362,7 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 	}
 
 	ts.Mu.Lock()
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	sz := len(*fr.Children())
 	tb := ts.Tabs()
 	nidx := -1

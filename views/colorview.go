@@ -184,10 +184,10 @@ func (cv *ColorView) Config(sc *core.Scene) {
 		return
 	}
 	update := cv.UpdateStart()
-	vl := core.NewLayout(cv, "slider-lay")
-	nl := core.NewLayout(cv, "num-lay")
+	vl := core.NewFrame(cv, "slider-lay")
+	nl := core.NewFrame(cv, "num-lay")
 
-	rgbalay := core.NewLayout(nl, "nums-rgba-lay")
+	rgbalay := core.NewFrame(nl, "nums-rgba-lay")
 
 	nrgba := NewStructViewInline(rgbalay, "nums-rgba")
 	nrgba.SetStruct(&cv.Color)
@@ -217,7 +217,7 @@ func (cv *ColorView) Config(sc *core.Scene) {
 		})
 	}
 
-	hslalay := core.NewLayout(nl, "nums-hsla-lay")
+	hslalay := core.NewFrame(nl, "nums-hsla-lay")
 
 	nhsla := NewStructViewInline(hslalay, "nums-hsla")
 	nhsla.SetStruct(&cv.ColorHSLA)
@@ -247,7 +247,7 @@ func (cv *ColorView) Config(sc *core.Scene) {
 		})
 	}
 
-	hexlay := core.NewLayout(nl, "nums-hex-lay")
+	hexlay := core.NewFrame(nl, "nums-hex-lay")
 
 	core.NewText(hexlay, "hexlbl").SetText("Hex")
 
@@ -283,7 +283,7 @@ func (cv *ColorView) Config(sc *core.Scene) {
 	}
 
 	core.NewFrame(vl, "value")
-	sg := core.NewLayout(vl, "slider-grid").SetDisplay(styles.Grid)
+	sg := core.NewFrame(vl, "slider-grid").SetDisplay(styles.Grid)
 
 	core.NewText(sg, "rlab").SetText("Red:")
 	rs := core.NewSlider(sg, "red")
@@ -423,7 +423,7 @@ func (cv *ColorView) UpdateSliderGrid() {
 }
 
 func (cv *ColorView) ConfigPalette() {
-	pg := core.NewLayout(cv, "palette").SetDisplay(styles.Grid)
+	pg := core.NewFrame(cv, "palette").SetDisplay(styles.Grid)
 
 	// STYTOOD: use hct sorted names here (see https://github.com/cogentcore/core/issues/619)
 	nms := colors.Names

@@ -205,59 +205,59 @@ func (i *WidgetFlags) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "WidgetFlags")
 }
 
-var _LayoutFlagsValues = []FrameFlags{2, 3, 4}
+var _FrameFlagsValues = []FrameFlags{2}
 
-// LayoutFlagsN is the highest valid value for type LayoutFlags, plus one.
-const LayoutFlagsN FrameFlags = 5
+// FrameFlagsN is the highest valid value for type FrameFlags, plus one.
+const FrameFlagsN FrameFlags = 3
 
-var _LayoutFlagsValueMap = map[string]FrameFlags{`StackTopOnly`: 2, `NeedsRedo`: 3, `NoKeys`: 4}
+var _FrameFlagsValueMap = map[string]FrameFlags{`StackTopOnly`: 2}
 
-var _LayoutFlagsDescMap = map[FrameFlags]string{2: `for stacked layout, only layout the top widget. this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don&#39;t`, 3: `true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration`, 4: `LayoutNoKeys prevents processing of keyboard events for this layout. By default, Layout handles focus navigation events, but if an outer Widget handles these instead, then this should be set.`}
+var _FrameFlagsDescMap = map[FrameFlags]string{2: `FrameStackTopOnly is whether to only layout the top widget for a stacked frame layout. This is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don&#39;t.`}
 
-var _LayoutFlagsMap = map[FrameFlags]string{2: `StackTopOnly`, 3: `NeedsRedo`, 4: `NoKeys`}
+var _FrameFlagsMap = map[FrameFlags]string{2: `StackTopOnly`}
 
-// String returns the string representation of this LayoutFlags value.
+// String returns the string representation of this FrameFlags value.
 func (i FrameFlags) String() string {
-	return enums.BitFlagStringExtended(i, _LayoutFlagsValues, WidgetFlagsValues())
+	return enums.BitFlagStringExtended(i, _FrameFlagsValues, WidgetFlagsValues())
 }
 
-// BitIndexString returns the string representation of this LayoutFlags value
+// BitIndexString returns the string representation of this FrameFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
 func (i FrameFlags) BitIndexString() string {
-	return enums.BitIndexStringExtended[FrameFlags, WidgetFlags](i, _LayoutFlagsMap)
+	return enums.BitIndexStringExtended[FrameFlags, WidgetFlags](i, _FrameFlagsMap)
 }
 
-// SetString sets the LayoutFlags value from its string representation,
+// SetString sets the FrameFlags value from its string representation,
 // and returns an error if the string is invalid.
 func (i *FrameFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 
-// SetStringOr sets the LayoutFlags value from its string representation
+// SetStringOr sets the FrameFlags value from its string representation
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
 func (i *FrameFlags) SetStringOr(s string) error {
-	return enums.SetStringOrExtended(i, (*WidgetFlags)(i), s, _LayoutFlagsValueMap)
+	return enums.SetStringOrExtended(i, (*WidgetFlags)(i), s, _FrameFlagsValueMap)
 }
 
-// Int64 returns the LayoutFlags value as an int64.
+// Int64 returns the FrameFlags value as an int64.
 func (i FrameFlags) Int64() int64 { return int64(i) }
 
-// SetInt64 sets the LayoutFlags value from an int64.
+// SetInt64 sets the FrameFlags value from an int64.
 func (i *FrameFlags) SetInt64(in int64) { *i = FrameFlags(in) }
 
-// Desc returns the description of the LayoutFlags value.
+// Desc returns the description of the FrameFlags value.
 func (i FrameFlags) Desc() string {
-	return enums.DescExtended[FrameFlags, WidgetFlags](i, _LayoutFlagsDescMap)
+	return enums.DescExtended[FrameFlags, WidgetFlags](i, _FrameFlagsDescMap)
 }
 
-// LayoutFlagsValues returns all possible values for the type LayoutFlags.
-func LayoutFlagsValues() []FrameFlags {
-	return enums.ValuesGlobalExtended(_LayoutFlagsValues, WidgetFlagsValues())
+// FrameFlagsValues returns all possible values for the type FrameFlags.
+func FrameFlagsValues() []FrameFlags {
+	return enums.ValuesGlobalExtended(_FrameFlagsValues, WidgetFlagsValues())
 }
 
-// Values returns all possible values for the type LayoutFlags.
+// Values returns all possible values for the type FrameFlags.
 func (i FrameFlags) Values() []enums.Enum {
-	return enums.ValuesExtended(_LayoutFlagsValues, WidgetFlagsValues())
+	return enums.ValuesExtended(_FrameFlagsValues, WidgetFlagsValues())
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
@@ -271,7 +271,7 @@ func (i FrameFlags) MarshalText() ([]byte, error) { return []byte(i.String()), n
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *FrameFlags) UnmarshalText(text []byte) error {
-	return enums.UnmarshalText(i, text, "LayoutFlags")
+	return enums.UnmarshalText(i, text, "FrameFlags")
 }
 
 var _LayoutPassesValues = []LayoutPasses{0, 1, 2}

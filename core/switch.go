@@ -92,7 +92,7 @@ func (sw *Switch) SetChecked(on bool) *Switch {
 // according to the current icon. It is called automatically to keep the
 // switch up-to-date.
 func (sw *Switch) UpdateStackTop() {
-	st, ok := sw.ChildByName("stack", 0).(*Layout)
+	st, ok := sw.ChildByName("stack", 0).(*Frame)
 	if !ok {
 		return
 	}
@@ -219,7 +219,7 @@ func (sw *Switch) Config(c *Config) {
 	}
 
 	Configure(c, "stack", func() *Frame {
-		w := NewLayout()
+		w := NewFrame()
 		w.Style(func(s *styles.Style) {
 			s.Display = styles.Stacked
 			s.Grow.Set(0, 0)
@@ -317,7 +317,7 @@ func (sw *Switch) Config(c *Config) {
 
 func (sw *Switch) Render() {
 	sw.UpdateStackTop() // important: make sure we're always up-to-date on render
-	st, ok := sw.ChildByName("stack", 0).(*Layout)
+	st, ok := sw.ChildByName("stack", 0).(*Frame)
 	if ok {
 		st.UpdateStackedVisibility()
 	}

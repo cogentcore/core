@@ -519,7 +519,7 @@ func (pl *PlotView) ColumnsConfig() {
 	if len(pl.Columns) == 0 {
 		return
 	}
-	sc := core.NewLayout(vl)
+	sc := core.NewFrame(vl)
 	sw := core.NewSwitch(sc).SetType(core.SwitchCheckbox).SetTooltip("Toggle off all columns")
 	sw.OnChange(func(e events.Event) {
 		sw.SetChecked(false)
@@ -535,7 +535,7 @@ func (pl *PlotView) ColumnsConfig() {
 	for _, cp := range pl.Columns {
 		cp := cp
 		cp.Plot = pl
-		cl := core.NewLayout(vl)
+		cl := core.NewFrame(vl)
 		cl.Style(func(s *styles.Style) {
 			s.Direction = styles.Row
 			s.Grow.Set(0, 0)

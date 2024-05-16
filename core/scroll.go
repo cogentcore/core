@@ -251,7 +251,7 @@ func (ly *Frame) ScrollDelta(e events.Event) {
 
 // ParentLayout returns the parent layout
 func (wb *WidgetBase) ParentLayout() *Frame {
-	ly := wb.ParentByType(LayoutType, tree.Embeds)
+	ly := wb.ParentByType(FrameType, tree.Embeds)
 	if ly == nil {
 		return nil
 	}
@@ -260,7 +260,7 @@ func (wb *WidgetBase) ParentLayout() *Frame {
 
 // ParentScrollLayout returns the parent layout that has active scrollbars
 func (wb *WidgetBase) ParentScrollLayout() *Frame {
-	lyk := wb.ParentByType(LayoutType, tree.Embeds)
+	lyk := wb.ParentByType(FrameType, tree.Embeds)
 	if lyk == nil {
 		return nil
 	}

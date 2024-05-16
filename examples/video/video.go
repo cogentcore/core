@@ -11,7 +11,7 @@ import (
 
 func main() {
 	b := core.NewBody("Basic Video Example")
-	bx := core.NewLayout(b).Style(func(s *styles.Style) {
+	bx := core.NewFrame(b).Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
 	core.NewText(bx).SetText("video:").Style(func(s *styles.Style) {

@@ -65,15 +65,15 @@ func (sc *Scene) ConfigSceneBars() {
 		}
 	}
 	if !sc.Bars.Top.IsEmpty() {
-		head := NewLayout(sc).Style(func(s *styles.Style) {
+		head := NewFrame(sc).Style(func(s *styles.Style) {
 			s.Align.Items = styles.Center
 		})
 		sc.Bars.Top.Call(head)
 	}
 	if !sc.Bars.Left.IsEmpty() || !sc.Bars.Right.IsEmpty() {
-		mid := NewLayout(sc)
+		mid := NewFrame(sc)
 		if !sc.Bars.Left.IsEmpty() {
-			left := NewLayout(mid).Style(func(s *styles.Style) {
+			left := NewFrame(mid).Style(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Align.Items = styles.Center
 			})
@@ -83,7 +83,7 @@ func (sc *Scene) ConfigSceneBars() {
 			mid.AddChild(sc.Body)
 		}
 		if !sc.Bars.Right.IsEmpty() {
-			right := NewLayout(mid).Style(func(s *styles.Style) {
+			right := NewFrame(mid).Style(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Align.Items = styles.Center
 			})
@@ -95,7 +95,7 @@ func (sc *Scene) ConfigSceneBars() {
 		}
 	}
 	if !sc.Bars.Bottom.IsEmpty() {
-		foot := NewLayout(sc).Style(func(s *styles.Style) {
+		foot := NewFrame(sc).Style(func(s *styles.Style) {
 			s.Justify.Content = styles.End
 			s.Align.Items = styles.Center
 		})
@@ -108,7 +108,7 @@ func (sc *Scene) GetBar(side styles.SideIndexes) *Frame {
 	nm := strings.ToLower(side.String()) + "-bar"
 	bar := sc.ChildByName(nm)
 	if bar != nil {
-		return bar.(*Layout)
+		return bar.(*Frame)
 	}
 	return nil
 }

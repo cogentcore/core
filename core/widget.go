@@ -442,7 +442,7 @@ func (wb *WidgetBase) NewParts() *Frame {
 	if wb.Parts != nil {
 		return wb.Parts
 	}
-	wb.Parts = NewLayout()
+	wb.Parts = NewFrame()
 	wb.Parts.SetName("parts")
 	tree.SetParent(wb.Parts, wb) // don't add to children list
 	wb.Parts.SetFlag(true, tree.Field)

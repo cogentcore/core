@@ -300,7 +300,7 @@ func main() {
 				views.StructViewDialog(vp, anim, views.DlgOpts{Title: "Animation Parameters"}, nil, nil)
 			})
 
-		sprw := core.NewLayout(evlay, "speed-lay", core.LayoutHoriz)
+		sprw := core.NewFrame(evlay, "speed-lay", core.LayoutHoriz)
 		core.NewText(sprw, "speed-text", "Speed: ")
 		sb := core.NewSpinBox(sprw, "anim-speed")
 		sb.SetMin(0.01)

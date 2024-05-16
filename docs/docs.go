@@ -75,7 +75,7 @@ func homePage(ctx *htmlview.Context) bool {
 	})
 
 	makeBlock := func(title, text string, graphic func(parent core.Widget)) {
-		block := core.NewLayout(frame).Style(func(s *styles.Style) {
+		block := core.NewFrame(frame).Style(func(s *styles.Style) {
 			s.CenterAll()
 			s.Gap.Set(units.Em(1))
 			if frame.SizeClass() == core.SizeCompact {
@@ -98,7 +98,7 @@ func homePage(ctx *htmlview.Context) bool {
 			})
 		}
 
-		textBlock := core.NewLayout(block).Style(func(s *styles.Style) {
+		textBlock := core.NewFrame(block).Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Text.Align = styles.Start
 		})
@@ -123,7 +123,7 @@ func homePage(ctx *htmlview.Context) bool {
 	makeBlock("EFFORTLESS ELEGANCE", "Cogent Core is built on Go, a high-level language designed for building elegant, readable, and scalable code with full type safety and a robust design that never gets in your way. Cogent Core makes it easy to get started with cross-platform app development in just two commands and seven lines of simple code.", func(parent core.Widget) {
 		// we get the code example contained within the md file
 		ctx.Node = ctx.Node.FirstChild.NextSibling
-		ctx.BlockParent = core.NewLayout(parent).Style(func(s *styles.Style) {
+		ctx.BlockParent = core.NewFrame(parent).Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 		})
 		htmlview.HandleElement(ctx)

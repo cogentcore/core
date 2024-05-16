@@ -168,7 +168,7 @@ func (dv *DateView) Config(c *core.Config) {
 		})
 	}
 
-	trow := core.NewLayout(dv)
+	trow := core.NewFrame(dv)
 	trow.Style(func(s *styles.Style) {
 		s.Gap.Zero()
 	})
@@ -225,7 +225,7 @@ func (dv *DateView) Config(c *core.Config) {
 }
 
 func (dv *DateView) ConfigDateGrid() {
-	grid := core.NewLayout(dv)
+	grid := core.NewFrame(dv)
 	grid.Style(func(s *styles.Style) {
 		s.Display = styles.Grid
 		s.Columns = 7

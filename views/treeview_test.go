@@ -16,7 +16,7 @@ func TestTreeView(t *testing.T) {
 	fr := core.NewFrame()
 	core.NewButton(fr)
 	core.NewText(fr)
-	core.NewButton(core.NewLayout(fr))
+	core.NewButton(core.NewFrame(fr))
 
 	NewTreeView(b).SyncTree(fr)
 	b.AssertRender(t, "tree-view/basic")
@@ -28,7 +28,7 @@ func TestTreeViewReadOnly(t *testing.T) {
 	fr := core.NewFrame()
 	core.NewButton(fr)
 	core.NewText(fr)
-	core.NewButton(core.NewLayout(fr))
+	core.NewButton(core.NewFrame(fr))
 
 	NewTreeView(b).SyncTree(fr).SetReadOnly(true)
 	b.AssertRender(t, "tree-view/read-only")
