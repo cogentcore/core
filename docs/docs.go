@@ -28,7 +28,7 @@ import (
 //go:embed content
 var content embed.FS
 
-//go:embed name.png code-icon.svg vector-icon.svg mail-icon.svg emergent-icon.svg weld-icon.png
+//go:embed name.png code-icon.svg vector-icon.svg numbers-icon.svg mail-icon.svg emergent-icon.svg weld-icon.png
 var resources embed.FS
 
 //go:embed image.png
