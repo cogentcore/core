@@ -97,13 +97,22 @@ type Style struct { //types:add
 	// available space).
 	GrowWrap bool
 
+	// RenderBox determines whether to render the standard box model for the element.
+	// This is typically necessary for most elements and helps prevent text, border,
+	// and box shadow from rendering over themselves. Therefore, it should be kept at
+	// its default value of true in most circumstances, but it can be set to false
+	// when the element is fully managed by something that is guaranteed to render the
+	// appropriate background color and/or border for the element.
+	RenderBox bool
+
 	// FillMargin determines is whether to fill the margin with
 	// the surrounding background color before rendering the element itself.
-	// This is typically necessary to prevent text, border, and box shadow from rendering
-	// over themselves. It should be kept at its default value of true
-	// in most circumstances, but it can be set to false when the element
+	// This is typically necessary to prevent text, border, and box shadow from
+	// rendering over themselves. Therefore, it should be kept at its default value
+	// of true in most circumstances, but it can be set to false when the element
 	// is fully managed by something that is guaranteed to render the
-	// appropriate background color for the element.
+	// appropriate background color for the element. It is irrelevant if RenderBox
+	// is false.
 	FillMargin bool
 
 	// Overflow determines how to handle overflowing content in a layout.
@@ -213,6 +222,7 @@ func (s *Style) Defaults() {
 	s.LayoutDefaults()
 	s.Color = colors.C(colors.Scheme.OnSurface)
 	s.Opacity = 1
+	s.RenderBox = true
 	s.FillMargin = true
 	s.Font.Defaults()
 	s.Text.Defaults()
