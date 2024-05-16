@@ -57,8 +57,8 @@ func (sl *Splits) SetStyles() {
 	})
 	sl.OnWidgetAdded(func(w Widget) {
 		if w.Parent() == sl.This() { // TODO(config): need some way to do this with the new config paradigm
-			// splits elements must scroll independently and grow
 			w.Style(func(s *styles.Style) {
+				// splits elements must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)
 			})

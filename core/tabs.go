@@ -112,8 +112,7 @@ func (tt TabTypes) IsColumn() bool {
 }
 
 func (ts *Tabs) OnInit() {
-	ts.WidgetBase.OnInit()
-	ts.Frame.HandleEvents()
+	ts.Frame.OnInit()
 	ts.SetStyles()
 }
 
@@ -131,9 +130,10 @@ func (ts *Tabs) SetStyles() {
 	})
 	ts.OnWidgetAdded(func(w Widget) {
 		if w.Parent() == ts.ChildByName("frame") { // TODO(config): figure out how to get this to work with new config paradigm
-			// tab frames must scroll independently
 			w.Style(func(s *styles.Style) {
+				// tab frames must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)
+				s.Grow.Set(1, 1)
 			})
 		}
 	})
