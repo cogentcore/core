@@ -290,7 +290,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	"widgets/frames-1": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
 		fr.Style(func(s *styles.Style) {
-			s.Background = colors.C(colors.Scheme.Warn.Container)
+			s.Direction = styles.Column
 		})
 		core.NewButton(fr).SetText("First")
 		core.NewButton(fr).SetText("Second")
@@ -299,13 +299,71 @@ var PagesExamples = map[string]func(parent core.Widget){
 	"widgets/frames-2": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
 		fr.Style(func(s *styles.Style) {
-			s.Background = gradient.NewLinear().AddStop(colors.Yellow, 0).AddStop(colors.Orange, 0.5).AddStop(colors.Red, 1)
+			s.Gap.Set(units.Em(2))
 		})
 		core.NewButton(fr).SetText("First")
 		core.NewButton(fr).SetText("Second")
 		core.NewButton(fr).SetText("Third")
 	},
 	"widgets/frames-3": func(parent core.Widget) {
+		fr := core.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Max.X.Em(10)
+		})
+		core.NewButton(fr).SetText("First")
+		core.NewButton(fr).SetText("Second")
+		core.NewButton(fr).SetText("Third")
+	},
+	"widgets/frames-4": func(parent core.Widget) {
+		fr := core.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Overflow.X = styles.OverflowAuto
+			s.Max.X.Em(10)
+		})
+		core.NewButton(fr).SetText("First")
+		core.NewButton(fr).SetText("Second")
+		core.NewButton(fr).SetText("Third")
+	},
+	"widgets/frames-5": func(parent core.Widget) {
+		fr := core.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Wrap = true
+			s.Max.X.Em(10)
+		})
+		core.NewButton(fr).SetText("First")
+		core.NewButton(fr).SetText("Second")
+		core.NewButton(fr).SetText("Third")
+	},
+	"widgets/frames-6": func(parent core.Widget) {
+		fr := core.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Display = styles.Grid
+			s.Columns = 2
+		})
+		core.NewButton(fr).SetText("First")
+		core.NewButton(fr).SetText("Second")
+		core.NewButton(fr).SetText("Third")
+		core.NewButton(fr).SetText("Fourth")
+	},
+	"widgets/frames-7": func(parent core.Widget) {
+		fr := core.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Background = colors.C(colors.Scheme.Warn.Container)
+		})
+		core.NewButton(fr).SetText("First")
+		core.NewButton(fr).SetText("Second")
+		core.NewButton(fr).SetText("Third")
+	},
+	"widgets/frames-8": func(parent core.Widget) {
+		fr := core.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Background = gradient.NewLinear().AddStop(colors.Yellow, 0).AddStop(colors.Orange, 0.5).AddStop(colors.Red, 1)
+		})
+		core.NewButton(fr).SetText("First")
+		core.NewButton(fr).SetText("Second")
+		core.NewButton(fr).SetText("Third")
+	},
+	"widgets/frames-9": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
 		fr.Style(func(s *styles.Style) {
 			s.Border.Width.Set(units.Dp(4))
@@ -315,7 +373,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewButton(fr).SetText("Second")
 		core.NewButton(fr).SetText("Third")
 	},
-	"widgets/frames-4": func(parent core.Widget) {
+	"widgets/frames-10": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
 		fr.Style(func(s *styles.Style) {
 			s.Border.Radius = styles.BorderRadiusLarge
@@ -326,10 +384,10 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewButton(fr).SetText("Second")
 		core.NewButton(fr).SetText("Third")
 	},
-	"widgets/frames-5": func(parent core.Widget) {
+	"widgets/frames-11": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
 		fr.Style(func(s *styles.Style) {
-			s.Grow.Set(0, 0)
+			s.Grow.Set(1, 1)
 			s.Border.Width.Set(units.Dp(4))
 			s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 		})
@@ -362,70 +420,6 @@ var PagesExamples = map[string]func(parent core.Widget){
 		draw.Draw(img, image.Rect(20, 20, 60, 50), colors.C(colors.Scheme.Success.Base), image.Point{}, draw.Src)
 		draw.Draw(img, image.Rect(60, 70, 80, 100), colors.C(colors.Scheme.Error.Base), image.Point{}, draw.Src)
 		core.NewImage(parent).SetImage(img)
-	},
-	"widgets/layouts-0": func(parent core.Widget) {
-		ly := core.NewFrame(parent)
-		core.NewButton(ly).SetText("First")
-		core.NewButton(ly).SetText("Second")
-		core.NewButton(ly).SetText("Third")
-	},
-	"widgets/layouts-1": func(parent core.Widget) {
-		ly := core.NewFrame(parent)
-		ly.Style(func(s *styles.Style) {
-			s.Direction = styles.Column
-		})
-		core.NewButton(ly).SetText("First")
-		core.NewButton(ly).SetText("Second")
-		core.NewButton(ly).SetText("Third")
-	},
-	"widgets/layouts-2": func(parent core.Widget) {
-		ly := core.NewFrame(parent)
-		ly.Style(func(s *styles.Style) {
-			s.Gap.Set(units.Em(2))
-		})
-		core.NewButton(ly).SetText("First")
-		core.NewButton(ly).SetText("Second")
-		core.NewButton(ly).SetText("Third")
-	},
-	"widgets/layouts-3": func(parent core.Widget) {
-		ly := core.NewFrame(parent)
-		ly.Style(func(s *styles.Style) {
-			s.Max.X.Em(10)
-		})
-		core.NewButton(ly).SetText("First")
-		core.NewButton(ly).SetText("Second")
-		core.NewButton(ly).SetText("Third")
-	},
-	"widgets/layouts-4": func(parent core.Widget) {
-		ly := core.NewFrame(parent)
-		ly.Style(func(s *styles.Style) {
-			s.Overflow.X = styles.OverflowAuto
-			s.Max.X.Em(10)
-		})
-		core.NewButton(ly).SetText("First")
-		core.NewButton(ly).SetText("Second")
-		core.NewButton(ly).SetText("Third")
-	},
-	"widgets/layouts-5": func(parent core.Widget) {
-		ly := core.NewFrame(parent)
-		ly.Style(func(s *styles.Style) {
-			s.Wrap = true
-			s.Max.X.Em(10)
-		})
-		core.NewButton(ly).SetText("First")
-		core.NewButton(ly).SetText("Second")
-		core.NewButton(ly).SetText("Third")
-	},
-	"widgets/layouts-6": func(parent core.Widget) {
-		ly := core.NewFrame(parent)
-		ly.Style(func(s *styles.Style) {
-			s.Display = styles.Grid
-			s.Columns = 2
-		})
-		core.NewButton(ly).SetText("First")
-		core.NewButton(ly).SetText("Second")
-		core.NewButton(ly).SetText("Third")
-		core.NewButton(ly).SetText("Fourth")
 	},
 	"widgets/meters-0": func(parent core.Widget) {
 		core.NewMeter(parent)
