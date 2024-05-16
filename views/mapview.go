@@ -55,7 +55,8 @@ func (mv *MapView) Config(c *core.Config) {
 		return
 	}
 	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := reflectx.NonPointerValue(mpv)
+	mpvnp := reflectx.NonPointerValue(reflectx.OnePointerUnderlyingValue(mpv)) // from inline
+	// mpvnp := reflectx.NonPointerValue(mpv) // original
 
 	valtyp := reflectx.NonPointerType(reflect.TypeOf(mv.Map)).Elem()
 	ncol := 2
@@ -100,9 +101,11 @@ func (mv *MapView) Config(c *core.Config) {
 			})
 			wb.SetReadOnly(mv.IsReadOnly())
 			wb.OnInput(mv.HandleEvent)
-			w.AddContextMenu(func(m *core.Scene) {
-				mv.ContextMenu(m, key)
-			})
+			if !mv.IsReadOnly() {
+				w.AddContextMenu(func(m *core.Scene) {
+					mv.ContextMenu(m, key)
+				})
+			}
 			return w
 		})
 		core.Configure(c, valnm, func() core.Value {
@@ -116,9 +119,11 @@ func (mv *MapView) Config(c *core.Config) {
 				s.SetReadOnly(mv.IsReadOnly())
 				s.SetTextWrap(false)
 			})
-			w.AddContextMenu(func(m *core.Scene) {
-				mv.ContextMenu(m, key)
-			})
+			if !mv.IsReadOnly() {
+				w.AddContextMenu(func(m *core.Scene) {
+					mv.ContextMenu(m, key)
+				})
+			}
 			return w
 		})
 

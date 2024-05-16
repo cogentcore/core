@@ -12,7 +12,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/tree"
 )
 
 // MapViewInline represents a map within a single line of key and value widgets.
@@ -25,12 +24,6 @@ type MapViewInline struct {
 
 	// MapValue is the [Value] associated with this map view, if there is one.
 	MapValue Value `set:"-"`
-
-	// Keys are [Value] representations of the map keys.
-	Keys []Value `json:"-" xml:"-" set:"-"`
-
-	// Values are [Value] representations of the map values.
-	Values []Value `json:"-" xml:"-" set:"-"`
 
 	// ViewPath is a record of parent view names that have led up to this view.
 	// It is displayed as extra contextual information in view dialogs.
@@ -49,138 +42,107 @@ func (mv *MapViewInline) SetStyles() {
 	mv.Style(func(s *styles.Style) {
 		s.Grow.Set(0, 0)
 	})
-	mv.OnWidgetAdded(func(w core.Widget) {
-		switch w.PathFrom(mv) {
-		case "add-button":
-			ab := w.(*core.Button)
-			w.Style(func(s *styles.Style) {
-				ab.SetType(core.ButtonTonal)
-			})
-			w.OnClick(func(e events.Event) {
-				mv.MapAdd()
-			})
-		case "edit-button":
-			w.Style(func(s *styles.Style) {
-				w.(*core.Button).SetType(core.ButtonTonal)
-			})
-			w.OnClick(func(e events.Event) {
-				vpath := mv.ViewPath
-				title := ""
-				if mv.MapValue != nil {
-					newPath := ""
-					isZero := false
-					title, newPath, isZero = mv.MapValue.AsValueData().GetTitle()
-					if isZero {
-						return
-					}
-					vpath = JoinViewPath(mv.ViewPath, newPath)
-				} else {
-					tmptyp := reflectx.NonPointerType(reflect.TypeOf(mv.Map))
-					title = "Map of " + tmptyp.String()
-				}
-				d := core.NewBody().AddTitle(title).AddText(mv.Tooltip)
-				NewMapView(d).SetViewPath(vpath).SetMap(mv.Map)
-				d.OnClose(func(e events.Event) {
-					mv.Update()
-					mv.SendChange()
-				})
-				d.RunFullDialog(mv)
-			})
-		}
-	})
 }
 
 func (mv *MapViewInline) Config(c *core.Config) {
-	mv.DeleteChildren()
 	if reflectx.AnyIsNil(mv.Map) {
 		mv.configSize = 0
 		return
 	}
-	config := tree.Config{}
-	mv.Keys = make([]Value, 0)
-	mv.Values = make([]Value, 0)
-
 	mpv := reflect.ValueOf(mv.Map)
 	mpvnp := reflectx.NonPointerValue(reflectx.OnePointerUnderlyingValue(mpv))
 	keys := mpvnp.MapKeys() // this is a slice of reflect.Value
+	reflectx.ValueSliceSort(keys, true)
 	mv.configSize = len(keys)
 
-	reflectx.ValueSliceSort(keys, true)
 	for i, key := range keys {
 		if i >= core.SystemSettings.MapInlineLength {
 			break
 		}
-		kv := ToValue(key.Interface(), "")
-		if kv == nil { // shouldn't happen
-			continue
-		}
-		kv.SetMapKey(key, mv.Map)
-
-		val := reflectx.OnePointerUnderlyingValue(mpvnp.MapIndex(key))
-		vv := ToValue(val.Interface(), "")
-		if vv == nil { // shouldn't happen
-			continue
-		}
-		vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value to track updates
-
 		keytxt := reflectx.ToString(key.Interface())
 		keynm := "key-" + keytxt
 		valnm := "value-" + keytxt
+		val := reflectx.OnePointerUnderlyingValue(mpvnp.MapIndex(key))
 
-		config.Add(kv.WidgetType(), keynm)
-		config.Add(vv.WidgetType(), valnm)
-		mv.Keys = append(mv.Keys, kv)
-		mv.Values = append(mv.Values, vv)
-	}
-	config.Add(core.ButtonType, "add-button")
-	config.Add(core.ButtonType, "edit-button")
-	mv.ConfigChildren(config)
-	for i, vv := range mv.Values {
-		kv := mv.Keys[i]
-		vv.OnChange(func(e events.Event) { mv.SendChange() })
-		kv.OnChange(func(e events.Event) {
-			mv.SendChange()
-			mv.Update()
-		})
-		w, wb := core.AsWidget(mv.Child((i * 2) + 1))
-		kw, kwb := core.AsWidget(mv.Child(i * 2))
-		Config(vv, w)
-		Config(kv, kw)
-		vv.AsWidgetBase().OnInput(mv.HandleEvent)
-		kv.AsWidgetBase().OnInput(mv.HandleEvent)
-		w.Style(func(s *styles.Style) {
-			s.SetTextWrap(false)
-		})
-		kw.Style(func(s *styles.Style) {
-			s.SetTextWrap(false)
-		})
-		if mv.IsReadOnly() {
-			wb.SetReadOnly(true)
-			kwb.SetReadOnly(true)
-		} else {
-			wb.AddContextMenu(func(m *core.Scene) {
-				mv.ContextMenu(m, kv.Val())
+		core.Configure(c, keynm, func() core.Value {
+			w := core.NewValue(key.Interface())
+			wb := w.AsWidget()
+			wb.SetReadOnly(mv.IsReadOnly())
+			// kv.SetMapKey(key, mv.Map)
+			w.Style(func(s *styles.Style) {
+				s.SetReadOnly(mv.IsReadOnly())
+				s.SetTextWrap(false)
 			})
-			kwb.AddContextMenu(func(m *core.Scene) {
-				mv.ContextMenu(m, kv.Val())
+			wb.OnChange(func(e events.Event) {
+				mv.SendChange(e)
+				mv.Update()
 			})
-		}
+			wb.SetReadOnly(mv.IsReadOnly())
+			wb.OnInput(mv.HandleEvent)
+			if !mv.IsReadOnly() {
+				w.AddContextMenu(func(m *core.Scene) {
+					mv.ContextMenu(m, key)
+				})
+			}
+			return w
+		})
+		core.Configure(c, valnm, func() core.Value {
+			w := core.NewValue(val.Interface())
+			wb := w.AsWidget()
+			wb.SetReadOnly(mv.IsReadOnly())
+			// vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value value to track updates
+			wb.OnChange(func(e events.Event) { mv.SendChange(e) })
+			wb.OnInput(mv.HandleEvent)
+			w.Style(func(s *styles.Style) {
+				s.SetReadOnly(mv.IsReadOnly())
+				s.SetTextWrap(false)
+			})
+			if !mv.IsReadOnly() {
+				w.AddContextMenu(func(m *core.Scene) {
+					mv.ContextMenu(m, key)
+				})
+			}
+			return w
+		})
 	}
-	adack, err := mv.Children().ElemFromEndTry(1)
-	if err == nil {
-		adbt := adack.(*core.Button)
-		adbt.SetType(core.ButtonTonal)
-		adbt.SetIcon(icons.Add)
-		adbt.Tooltip = "add an entry to the map"
-
+	if !mv.IsReadOnly() {
+		core.Configure(c, "add-button", func() *core.Button {
+			w := core.NewButton().SetIcon(icons.Add).SetType(core.ButtonTonal)
+			w.Tooltip = "add an element to the map"
+			w.OnClick(func(e events.Event) {
+				mv.MapAdd()
+			})
+			return w
+		})
 	}
-	edack, err := mv.Children().ElemFromEndTry(0)
-	if err == nil {
-		edbt := edack.(*core.Button)
-		edbt.SetType(core.ButtonTonal)
-		edbt.SetIcon(icons.Edit)
-		edbt.Tooltip = "map edit dialog"
-	}
+	core.Configure(c, "edit-button", func() *core.Button {
+		w := core.NewButton().SetIcon(icons.Edit).SetType(core.ButtonTonal)
+		w.Tooltip = "edit in a dialog"
+		w.OnClick(func(e events.Event) {
+			vpath := mv.ViewPath
+			title := ""
+			if mv.MapValue != nil {
+				newPath := ""
+				isZero := false
+				title, newPath, isZero = mv.MapValue.AsValueData().GetTitle()
+				if isZero {
+					return
+				}
+				vpath = JoinViewPath(mv.ViewPath, newPath)
+			} else {
+				tmptyp := reflectx.NonPointerType(reflect.TypeOf(mv.Map))
+				title = "Map of " + tmptyp.String()
+			}
+			d := core.NewBody().AddTitle(title).AddText(mv.Tooltip)
+			NewMapView(d).SetViewPath(vpath).SetMap(mv.Map)
+			d.OnClose(func(e events.Event) {
+				mv.Update()
+				mv.SendChange()
+			})
+			d.RunFullDialog(mv)
+		})
+		return w
+	})
 }
 
 // MapAdd adds a new entry to the map

@@ -124,9 +124,6 @@ func (sv *SliceViewInline) Config(c *core.Config) {
 		w := core.NewButton().SetIcon(icons.Edit).SetType(core.ButtonTonal)
 		w.Tooltip = "edit in a dialog"
 		w.OnClick(func(e events.Event) {
-			sv.SliceNewAt(-1)
-		})
-		w.OnClick(func(e events.Event) {
 			vpath := sv.ViewPath
 			title := ""
 			if sv.SliceValue != nil {
