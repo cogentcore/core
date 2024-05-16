@@ -28,7 +28,7 @@ import (
 //go:embed content
 var content embed.FS
 
-//go:embed name.png code-icon.svg mail-icon.svg emergent-icon.svg weld-icon.png
+//go:embed name.png code-icon.svg vector-icon.svg mail-icon.svg emergent-icon.svg weld-icon.png
 var resources embed.FS
 
 //go:embed image.png
@@ -176,9 +176,7 @@ func homePage(ctx *htmlview.Context) bool {
 	})
 
 	makeBlock("COGENT VECTOR", "Cogent Vector is a powerful vector graphics editor with complete support for shapes, paths, curves, text, images, gradients, groups, alignment, styling, importing, exporting, undo, redo, and various other features.", func(parent core.Widget) {
-		core.NewIcon(parent).SetIcon(icons.Polyline).Style(func(s *styles.Style) {
-			s.Min.Set(units.Dp(256))
-		})
+		errors.Log(core.NewSVG(parent).OpenFS(resources, "vector-icon.svg"))
 	})
 
 	makeBlock("COGENT MAIL", "Cogent Mail is a customizable email client with built-in Markdown support and an extensive set of keyboard shortcuts for advanced mail filing.", func(parent core.Widget) {
