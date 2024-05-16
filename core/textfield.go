@@ -237,12 +237,8 @@ func (tf *TextField) SetStyles() {
 			s.MaxBorder.Width.Bottom = units.Dp(2)
 			s.MaxBorder.Color.Bottom = colors.C(colors.Scheme.Primary.Base)
 
-			if !tf.IsReadOnly() && s.Is(states.Focused) {
-				s.Border = s.MaxBorder
-			} else {
-				s.Border.Width.Bottom = units.Dp(1)
-				s.Border.Color.Bottom = colors.C(colors.Scheme.OnSurfaceVariant)
-			}
+			s.Border.Width.Bottom = units.Dp(1)
+			s.Border.Color.Bottom = colors.C(colors.Scheme.OnSurfaceVariant)
 			if tf.Error != nil {
 				s.Border.Color.Bottom = colors.C(colors.Scheme.Error.Base)
 			}
@@ -253,12 +249,8 @@ func (tf *TextField) SetStyles() {
 			s.MaxBorder = s.Border
 			s.MaxBorder.Width.Set(units.Dp(2))
 			s.MaxBorder.Color.Set(colors.C(colors.Scheme.Primary.Base))
-			if !tf.IsReadOnly() && s.Is(states.Focused) {
-				s.Border = s.MaxBorder
-			} else {
-				s.Border.Width.Set(units.Dp(1))
-				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
-			}
+			s.Border.Width.Set(units.Dp(1))
+			s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 			if tf.Error != nil {
 				s.Border.Color.Set(colors.C(colors.Scheme.Error.Base))
 			}

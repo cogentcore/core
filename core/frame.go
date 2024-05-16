@@ -86,10 +86,6 @@ func (fr *Frame) ApplyStyle() {
 }
 
 func (fr *Frame) SetStyles() {
-	fr.Style(func(s *styles.Style) {
-		// we never want borders on layouts
-		s.MaxBorder = styles.Border{}
-	})
 	fr.StyleFinal(func(s *styles.Style) {
 		s.SetAbilities(s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto, abilities.Scrollable, abilities.Slideable)
 	})

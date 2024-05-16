@@ -160,12 +160,20 @@ func (wb *WidgetBase) SetStyles() {
 		tt, _ := wb.This().(Widget).WidgetTooltip(image.Pt(-1, -1))
 		s.SetAbilities(tt != "", abilities.LongHoverable, abilities.LongPressable)
 
-		if s.Is(states.Focused) {
-			s.Border = s.MaxBorder
-		}
 		if s.Is(states.Selected) {
 			s.Background = colors.C(colors.Scheme.Select.Container)
 			s.Color = colors.C(colors.Scheme.Select.OnContainer)
+		}
+	})
+	wb.StyleFinal(func(s *styles.Style) {
+		if s.Is(states.Focused) {
+			s.Border.Style = s.MaxBorder.Style
+			s.Border.Color = s.MaxBorder.Color
+			s.Border.Width = s.MaxBorder.Width
+		}
+		if !s.AbilityIs(abilities.Focusable) {
+			// never need bigger border if not focusable
+			s.MaxBorder = s.Border
 		}
 	})
 }
