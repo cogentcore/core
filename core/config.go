@@ -222,6 +222,7 @@ func (c *Config) ConfigWidget(w Widget, parentPath string) {
 				}
 				cw := child.New()
 				cw.SetName(name)
+				// fmt.Println(name, cw, wb)
 				tree.SetParent(cw, wb)
 				if child.Update != nil { // do initial setting in case children might reference
 					child.Update(cw)

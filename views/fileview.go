@@ -107,52 +107,29 @@ func (fv *FileView) SetStyles() {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
-	fv.OnWidgetAdded(func(w core.Widget) {
-		pfrom := w.PathFrom(fv)
-		switch pfrom {
-		case "path-tbar":
-			fr := w.(*core.Frame)
-			core.ToolbarStyles(fr)
-			w.Style(func(s *styles.Style) {
-				s.Gap.X.Dp(4)
-			})
-		case "path-tbar/path-text":
-			w.Style(func(s *styles.Style) {
-				s.SetTextWrap(false)
-			})
-		case "path-tbar/path":
-			w.Style(func(s *styles.Style) {
-				s.Min.X.Ch(60)
-				s.Max.X.Zero()
-				s.Grow.Set(1, 0)
-			})
-		case "files-row":
-			w.Style(func(s *styles.Style) {
-				s.Grow.Set(1, 1)
-			})
-		case "files-row/favs-view":
-			fv := w.(*TableView)
-			fv.SetFlag(false, SliceViewShowIndex)
-			fv.SetFlag(false, SliceViewReadOnlyKeyNav) // can only have one active -- files..
-			fv.SetReadOnly(true)
-			w.Style(func(s *styles.Style) {
-				s.Grow.Set(0, 1)
-				s.Min.X.Ch(25)
-				s.Overflow.X = styles.OverflowHidden
-			})
-		case "files-row/files-view":
-			fv := w.(*TableView)
-			fv.SetFlag(false, SliceViewShowIndex)
-			fv.SetReadOnly(true)
-			fv.Style(func(s *styles.Style) {
-				// s.Grow.Set(1, 1)
-			})
-		case "sel-row":
-			w.Style(func(s *styles.Style) {
-				s.Gap.X.Dp(4)
-			})
-		}
-	})
+	/*
+		fv.OnWidgetAdded(func(w core.Widget) {
+			pfrom := w.PathFrom(fv)
+			switch pfrom {
+			case "path-tbar":
+				fr := w.(*core.Frame)
+				core.ToolbarStyles(fr)
+				w.Style(func(s *styles.Style) {
+					s.Gap.X.Dp(4)
+				})
+			case "path-tbar/path-text":
+				w.Style(func(s *styles.Style) {
+					s.SetTextWrap(false)
+				})
+			case "path-tbar/path":
+				w.Style(func(s *styles.Style) {
+					s.Min.X.Ch(60)
+					s.Max.X.Zero()
+					s.Grow.Set(1, 0)
+				})
+			}
+		})
+	*/
 }
 
 func (fv *FileView) Disconnect() {
@@ -242,20 +219,29 @@ var FileViewKindColorMap = map[string]string{
 }
 
 func (fv *FileView) Config(c *core.Config) {
-	if fv.HasChildren() {
-		return
-	}
-	core.NewLayout(fv).SetName("files-row")
-	core.NewLayout(fv).SetName("sel-row")
+	core.Configure(c, "files", func() *core.Frame {
+		w := core.NewFrame()
+		w.Style(func(s *styles.Style) {
+			s.Grow.Set(1, 1)
+		})
+		return w
+	})
+	core.Configure(c, "sel", func() *core.Frame {
+		w := core.NewFrame()
+		w.Style(func(s *styles.Style) {
+			s.Gap.X.Dp(4)
+		})
+		return w
+	})
 
-	fv.ConfigFilesRow()
-	fv.ConfigSelRow()
-	fv.UpdateFiles()
+	fv.ConfigFilesRow(c)
+	fv.ConfigSelRow(c)
 }
 
 // ConfigToolbar configures the given toolbar to have file view
 // actions and completions.
 func (fv *FileView) ConfigToolbar(c *core.Config) {
+	return
 	ConfigFuncButton(c, fv.DirPathUp, func(w *FuncButton) {
 		w.SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
 	})
@@ -303,135 +289,158 @@ func (fv *FileView) ConfigAppChooser(ch *core.Chooser) {
 	})
 }
 
-func (fv *FileView) ConfigFilesRow() {
-	fr := fv.FilesRow()
-	sv := NewTableView(fr)
-	sv.SetName("favs-view")
-	fsv := NewTableView(fr)
-	fsv.SetName("files-view")
-
-	sv.SelectedIndex = -1
-	sv.SetReadOnly(true)
-	sv.SetSlice(&core.SystemSettings.FavPaths)
-	sv.OnSelect(func(e events.Event) {
-		fv.FavSelect(sv.SelectedIndex)
+func (fv *FileView) ConfigFilesRow(c *core.Config) {
+	core.Configure(c, "files/faves", func() *TableView {
+		w := NewTableView()
+		w.SelectedIndex = -1
+		w.SetReadOnly(true)
+		w.SetFlag(false, SliceViewShowIndex)
+		w.SetFlag(false, SliceViewReadOnlyKeyNav) // can only have one active -- files..
+		w.Style(func(s *styles.Style) {
+			s.Grow.Set(0, 1)
+			s.Min.X.Ch(25)
+			s.Overflow.X = styles.OverflowHidden
+		})
+		w.SetSlice(&core.SystemSettings.FavPaths)
+		w.OnSelect(func(e events.Event) {
+			fv.FavSelect(w.SelectedIndex)
+		})
+		return w
 	})
-
-	fsv.ContextMenus = nil
-	fsv.AddContextMenu(func(m *core.Scene) {
-		core.NewButton(m).SetText("Open").SetIcon(icons.Open).
-			SetTooltip("Open the selected file using the default app").
-			OnClick(func(e events.Event) {
-				core.TheApp.OpenURL(fv.SelectedFile())
-			})
-		core.NewSeparator(m)
-		core.NewButton(m).SetText("Duplicate").SetIcon(icons.FileCopy).
-			SetTooltip("Make a copy of the selected file").
-			OnClick(func(e events.Event) {
-				fn := fv.Files[fsv.SelectedIndex]
-				fn.Duplicate()
-				fv.UpdateFilesAction()
-			})
-		tip := "Delete moves the selected file to the trash / recycling bin"
-		if core.TheApp.Platform().IsMobile() {
-			tip = "Delete deletes the selected file"
-		}
-		core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
-			SetTooltip(tip).
-			OnClick(func(e events.Event) {
-				fn := fv.Files[fsv.SelectedIndex]
-				NewSoloFuncButton(fsv, fn.Delete).SetTooltip(tip).SetConfirm(true).
-					SetAfterFunc(fv.UpdateFilesAction).CallFunc()
-			})
-		core.NewButton(m).SetText("Rename").SetIcon(icons.EditNote).
-			SetTooltip("Rename the selected file").
-			OnClick(func(e events.Event) {
-				fn := fv.Files[fsv.SelectedIndex]
-				NewSoloFuncButton(fsv, fn.Rename).SetAfterFunc(fv.UpdateFilesAction).CallFunc()
-			})
-		core.NewButton(m).SetText("Info").SetIcon(icons.Info).
-			SetTooltip("View information about the selected file").
-			OnClick(func(e events.Event) {
-				fn := fv.Files[fsv.SelectedIndex]
-				d := core.NewBody().AddTitle("Info: " + fn.Name)
-				NewStructView(d).SetStruct(&fn).SetReadOnly(true)
-				d.AddOKOnly().RunFullDialog(fsv)
-			})
-		core.NewSeparator(m)
-		NewFuncButton(m, fv.NewFolder).SetIcon(icons.CreateNewFolder)
-	})
-	fv.ReadFiles()
-	fsv.SetReadOnly(true)
-	fsv.SetSlice(&fv.Files)
-	fsv.StyleFunc = func(w core.Widget, s *styles.Style, row, col int) {
-		if clr, got := FileViewKindColorMap[fv.Files[row].Kind]; got {
-			s.Color = errors.Log1(gradient.FromString(clr))
-			return
-		}
-		fn := fv.Files[row].Name
-		ext := strings.ToLower(filepath.Ext(fn))
-		if _, has := fv.ExtMap[ext]; has {
-			s.Color = colors.C(colors.Scheme.Primary.Base)
-		} else {
-			s.Color = colors.C(colors.Scheme.OnSurface)
-		}
-	}
-
-	if core.SystemSettings.FileViewSort != "" {
-		fsv.SetSortFieldName(core.SystemSettings.FileViewSort)
-	}
-	fsv.Style(func(s *styles.Style) {
-		s.Cursor = cursors.Pointer
-	})
-	fsv.OnSelect(func(e events.Event) {
-		fv.FileSelectAction(fsv.SelectedIndex)
-	})
-	fsv.OnDoubleClick(func(e events.Event) {
-		if fsv.ClickSelectEvent(e) {
-			if !fv.SelectFile() {
-				e.SetHandled() // don't pass along; keep dialog open
+	core.Configure(c, "files/files", func() *TableView {
+		w := NewTableView()
+		w.SetFlag(false, SliceViewShowIndex)
+		w.SetReadOnly(true)
+		w.Style(func(s *styles.Style) {
+			// s.Grow.Set(1, 1)
+		})
+		w.SetSlice(&fv.Files)
+		w.StyleFunc = func(w core.Widget, s *styles.Style, row, col int) {
+			if clr, got := FileViewKindColorMap[fv.Files[row].Kind]; got {
+				s.Color = errors.Log1(gradient.FromString(clr))
+				return
+			}
+			fn := fv.Files[row].Name
+			ext := strings.ToLower(filepath.Ext(fn))
+			if _, has := fv.ExtMap[ext]; has {
+				s.Color = colors.C(colors.Scheme.Primary.Base)
 			} else {
-				fv.Scene.SendKey(keymap.Accept, e) // activates Ok button code
+				s.Color = colors.C(colors.Scheme.OnSurface)
 			}
 		}
+
+		if core.SystemSettings.FileViewSort != "" {
+			w.SetSortFieldName(core.SystemSettings.FileViewSort)
+		}
+		w.Style(func(s *styles.Style) {
+			s.Cursor = cursors.Pointer
+		})
+		w.OnSelect(func(e events.Event) {
+			fv.FileSelectAction(w.SelectedIndex)
+		})
+		w.OnDoubleClick(func(e events.Event) {
+			if w.ClickSelectEvent(e) {
+				if !fv.SelectFile() {
+					e.SetHandled() // don't pass along; keep dialog open
+				} else {
+					fv.Scene.SendKey(keymap.Accept, e) // activates Ok button code
+				}
+			}
+		})
+		w.ContextMenus = nil
+		w.AddContextMenu(func(m *core.Scene) {
+			core.NewButton(m).SetText("Open").SetIcon(icons.Open).
+				SetTooltip("Open the selected file using the default app").
+				OnClick(func(e events.Event) {
+					core.TheApp.OpenURL(fv.SelectedFile())
+				})
+			core.NewSeparator(m)
+			core.NewButton(m).SetText("Duplicate").SetIcon(icons.FileCopy).
+				SetTooltip("Make a copy of the selected file").
+				OnClick(func(e events.Event) {
+					fn := fv.Files[w.SelectedIndex]
+					fn.Duplicate()
+					fv.UpdateFilesAction()
+				})
+			tip := "Delete moves the selected file to the trash / recycling bin"
+			if core.TheApp.Platform().IsMobile() {
+				tip = "Delete deletes the selected file"
+			}
+			core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
+				SetTooltip(tip).
+				OnClick(func(e events.Event) {
+					fn := fv.Files[w.SelectedIndex]
+					NewSoloFuncButton(w, fn.Delete).SetTooltip(tip).SetConfirm(true).
+						SetAfterFunc(fv.UpdateFilesAction).CallFunc()
+				})
+			core.NewButton(m).SetText("Rename").SetIcon(icons.EditNote).
+				SetTooltip("Rename the selected file").
+				OnClick(func(e events.Event) {
+					fn := fv.Files[w.SelectedIndex]
+					NewSoloFuncButton(w, fn.Rename).SetAfterFunc(fv.UpdateFilesAction).CallFunc()
+				})
+			core.NewButton(m).SetText("Info").SetIcon(icons.Info).
+				SetTooltip("View information about the selected file").
+				OnClick(func(e events.Event) {
+					fn := fv.Files[w.SelectedIndex]
+					d := core.NewBody().AddTitle("Info: " + fn.Name)
+					NewStructView(d).SetStruct(&fn).SetReadOnly(true)
+					d.AddOKOnly().RunFullDialog(w)
+				})
+			core.NewSeparator(m)
+			NewFuncButton(m, fv.NewFolder).SetIcon(icons.CreateNewFolder)
+		})
+		return w
 	})
 }
 
-func (fv *FileView) ConfigSelRow() {
-	sr := fv.SelectRow()
-	core.NewText(sr).SetText("File: ").SetTooltip("enter file name here (or select from above list)").Style(func(s *styles.Style) {
-		s.SetTextWrap(false)
-	})
-
-	sf := core.NewTextField(sr).SetText(fv.CurrentSelectedFile).
-		SetTooltip(fmt.Sprintf("Enter the file name. Special keys: up/down to move selection; %s or %s to go up to parent folder; %s or %s or %s or %s to select current file (if directory, goes into it, if file, selects and closes); %s or %s for prev / next history item; %s return to this field", keymap.WordLeft.Label(), keymap.Jump.Label(), keymap.SelectMode.Label(), keymap.Insert.Label(), keymap.InsertAfter.Label(), keymap.Open.Label(), keymap.HistPrev.Label(), keymap.HistNext.Label(), keymap.Search.Label()))
-	sf.SetName("sel")
-	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
-	sf.Style(func(s *styles.Style) {
-		s.Min.X.Ch(60)
-		s.Max.X.Zero()
-		s.Grow.Set(1, 0)
-	})
-	sf.OnChange(func(e events.Event) {
-		fv.SetSelFileAction(sf.Text())
-	})
-	sf.OnKeyChord(func(e events.Event) {
-		kf := keymap.Of(e.KeyChord())
-		if kf == keymap.Accept {
-			fv.SetSelFileAction(sf.Text())
-		}
-	})
-	sf.StartFocus()
-
-	core.NewText(sr).SetText("Extension(s):").
-		SetTooltip("target extension(s) to highlight; if multiple, separate with commas, and do include the . at the start").
-		Style(func(s *styles.Style) {
+func (fv *FileView) ConfigSelRow(c *core.Config) {
+	core.Configure(c, "sel/file-text", func() *core.Text {
+		w := core.NewText().SetText("File: ")
+		w.SetTooltip("enter file name here (or select from above list)")
+		w.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 		})
-	ef := core.NewTextField(sr).SetText(fv.Ext)
-	ef.SetName("ext")
-	ef.OnChange(func(e events.Event) {
-		fv.SetExtAction(ef.Text())
+		return w
+	})
+
+	core.Configure(c, "sel/file", func() *core.TextField {
+		w := core.NewTextField().SetText(fv.CurrentSelectedFile)
+		w.SetTooltip(fmt.Sprintf("Enter the file name. Special keys: up/down to move selection; %s or %s to go up to parent folder; %s or %s or %s or %s to select current file (if directory, goes into it, if file, selects and closes); %s or %s for prev / next history item; %s return to this field", keymap.WordLeft.Label(), keymap.Jump.Label(), keymap.SelectMode.Label(), keymap.Insert.Label(), keymap.InsertAfter.Label(), keymap.Open.Label(), keymap.HistPrev.Label(), keymap.HistNext.Label(), keymap.Search.Label()))
+		w.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
+		w.Style(func(s *styles.Style) {
+			s.Min.X.Ch(60)
+			s.Max.X.Zero()
+			s.Grow.Set(1, 0)
+		})
+		w.OnChange(func(e events.Event) {
+			fv.SetSelFileAction(w.Text())
+		})
+		w.OnKeyChord(func(e events.Event) {
+			kf := keymap.Of(e.KeyChord())
+			if kf == keymap.Accept {
+				fv.SetSelFileAction(w.Text())
+			}
+		})
+		w.StartFocus()
+		return w
+	})
+
+	core.Configure(c, "sel/ext-text", func() *core.Text {
+		w := core.NewText().SetText("Extension(s):")
+		w.SetTooltip("target extension(s) to highlight; if multiple, separate with commas, and do include the . at the start").
+			Style(func(s *styles.Style) {
+				s.SetTextWrap(false)
+			})
+		return w
+	})
+
+	core.Configure(c, "sel/ext", func() *core.TextField {
+		w := core.NewTextField().SetText(fv.Ext)
+		w.OnChange(func(e events.Event) {
+			fv.SetExtAction(w.Text())
+		})
+		return w
 	})
 }
 
@@ -473,32 +482,24 @@ func (fv *FileView) WatchWatcher() {
 	}()
 }
 
-func (fv *FileView) FilesRow() *core.Layout {
-	return fv.ChildByName("files-row", 2).(*core.Layout)
-}
-
 // FavsView returns the TableView of the favorites
 func (fv *FileView) FavsView() *TableView {
-	return fv.FilesRow().ChildByName("favs-view", 1).(*TableView)
+	return fv.FindPath("files/favs").(*TableView)
 }
 
 // FilesView returns the TableView of the files
 func (fv *FileView) FilesView() *TableView {
-	return fv.FilesRow().ChildByName("files-view", 1).(*TableView)
-}
-
-func (fv *FileView) SelectRow() *core.Layout {
-	return fv.ChildByName("sel-row", 4).(*core.Layout)
+	return fv.FindPath("files/files").(*TableView)
 }
 
 // SelectField returns the TextField of the select file
 func (fv *FileView) SelectField() *core.TextField {
-	return fv.SelectRow().ChildByName("sel", 1).(*core.TextField)
+	return fv.FindPath("sel/file").(*core.TextField)
 }
 
 // ExtField returns the TextField of the extension
 func (fv *FileView) ExtField() *core.TextField {
-	return fv.SelectRow().ChildByName("ext", 2).(*core.TextField)
+	return fv.FindPath("sel/ext").(*core.TextField)
 }
 
 // UpdatePath ensures that path is in abs form and ready to be used..

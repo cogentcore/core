@@ -117,7 +117,11 @@ type FuncButton struct { //core:no-new
 // NewFuncButton adds a new [FuncButton] with the given function
 // to the given parent.
 func NewFuncButton(parent tree.Node, fun any) *FuncButton {
-	return parent.NewChild(FuncButtonType).(*FuncButton).SetFunc(fun)
+	if parent == nil {
+		return tree.New[*FuncButton]().SetFunc(fun)
+	} else {
+		return parent.NewChild(FuncButtonType).(*FuncButton).SetFunc(fun)
+	}
 }
 
 // ConfigFuncButton adds a new config item to the given [core.Config] for
