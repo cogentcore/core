@@ -66,87 +66,87 @@ type Frame struct {
 	FocusNameLast tree.Node `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
-func (ly *Frame) FlagType() enums.BitFlagSetter {
-	return (*FrameFlags)(&ly.Flags)
+func (fr *Frame) FlagType() enums.BitFlagSetter {
+	return (*FrameFlags)(&fr.Flags)
 }
 
-func (ly *Frame) OnInit() {
-	ly.WidgetBase.OnInit()
-	ly.SetStyles()
-	ly.HandleEvents()
+func (fr *Frame) OnInit() {
+	fr.WidgetBase.OnInit()
+	fr.SetStyles()
+	fr.HandleEvents()
 }
 
-func (ly *Frame) ApplyStyle() {
-	ly.ApplyStyleWidget()
+func (fr *Frame) ApplyStyle() {
+	fr.ApplyStyleWidget()
 	for d := math32.X; d <= math32.Y; d++ {
-		if ly.HasScroll[d] && ly.Scrolls[d] != nil {
-			ly.Scrolls[d].ApplyStyle()
+		if fr.HasScroll[d] && fr.Scrolls[d] != nil {
+			fr.Scrolls[d].ApplyStyle()
 		}
 	}
 }
 
-func (ly *Frame) SetStyles() {
-	ly.Style(func(s *styles.Style) {
+func (fr *Frame) SetStyles() {
+	fr.Style(func(s *styles.Style) {
 		// we never want borders on layouts
 		s.MaxBorder = styles.Border{}
 	})
-	ly.StyleFinal(func(s *styles.Style) {
+	fr.StyleFinal(func(s *styles.Style) {
 		s.SetAbilities(s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto, abilities.Scrollable, abilities.Slideable)
 	})
 }
 
-func (ly *Frame) Destroy() {
+func (fr *Frame) Destroy() {
 	for d := math32.X; d <= math32.Y; d++ {
-		ly.DeleteScroll(d)
+		fr.DeleteScroll(d)
 	}
-	ly.WidgetBase.Destroy()
+	fr.WidgetBase.Destroy()
 }
 
 // DeleteScroll deletes scrollbar along given dimesion.
-func (ly *Frame) DeleteScroll(d math32.Dims) {
-	if ly.Scrolls[d] == nil {
+func (fr *Frame) DeleteScroll(d math32.Dims) {
+	if fr.Scrolls[d] == nil {
 		return
 	}
-	sb := ly.Scrolls[d]
+	sb := fr.Scrolls[d]
 	sb.This().Destroy()
-	ly.Scrolls[d] = nil
+	fr.Scrolls[d] = nil
 }
 
-func (ly *Frame) RenderChildren() {
-	if ly.Styles.Display == styles.Stacked {
-		kwi, _ := ly.StackTopWidget()
+func (fr *Frame) RenderChildren() {
+	if fr.Styles.Display == styles.Stacked {
+		kwi, _ := fr.StackTopWidget()
 		if kwi != nil {
 			kwi.RenderWidget()
 		}
 		return
 	}
-	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	fr.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.RenderWidget()
 		return tree.Continue
 	})
 }
 
-func (ly *Frame) RenderWidget() {
-	if ly.PushBounds() {
-		ly.This().(Widget).Render()
-		ly.RenderParts()
-		ly.RenderChildren()
-		ly.RenderScrolls()
-		ly.PopBounds()
+func (fr *Frame) RenderWidget() {
+	if fr.PushBounds() {
+		fr.This().(Widget).Render()
+		fr.RenderParts()
+		fr.RenderChildren()
+		fr.RenderScrolls()
+		fr.PopBounds()
 	}
 }
 
 // ChildWithFocus returns a direct child of this layout that either is the
 // current window focus item, or contains that focus item (along with its
 // index) -- nil, -1 if none.
-func (ly *Frame) ChildWithFocus() (Widget, int) {
-	em := ly.Events()
+func (fr *Frame) ChildWithFocus() (Widget, int) {
+	em := fr.Events()
 	if em == nil {
 		return nil, -1
 	}
 	var foc Widget
 	focIndex := -1
-	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+	fr.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		if kwb.ContainsFocus() {
 			foc = kwi
 			focIndex = i
@@ -161,31 +161,31 @@ func (ly *Frame) ChildWithFocus() (Widget, int) {
 // (with wraparound to start); returns true if successful.
 // if updn is true, then for Grid layouts, it moves down to next row
 // instead of just the sequentially next item.
-func (ly *Frame) FocusNextChild(updn bool) bool {
-	sz := len(ly.Kids)
+func (fr *Frame) FocusNextChild(updn bool) bool {
+	sz := len(fr.Kids)
 	if sz <= 1 {
 		return false
 	}
-	foc, idx := ly.ChildWithFocus()
+	foc, idx := fr.ChildWithFocus()
 	if foc == nil {
 		fmt.Println("no child foc")
 		return false
 	}
-	em := ly.Events()
+	em := fr.Events()
 	if em == nil {
 		return false
 	}
 	cur := em.Focus
 	nxti := idx + 1
-	if ly.Styles.Display == styles.Grid && updn {
-		nxti = idx + ly.Styles.Columns
+	if fr.Styles.Display == styles.Grid && updn {
+		nxti = idx + fr.Styles.Columns
 	}
 	did := false
 	if nxti < sz {
-		nx := ly.Child(nxti).(Widget)
+		nx := fr.Child(nxti).(Widget)
 		did = em.FocusOnOrNext(nx)
 	} else {
-		nx := ly.Child(0).(Widget)
+		nx := fr.Child(0).(Widget)
 		did = em.FocusOnOrNext(nx)
 	}
 	if !did || em.Focus == cur {
@@ -198,29 +198,29 @@ func (ly *Frame) FocusNextChild(updn bool) bool {
 // (with wraparound to end); returns true if successful.
 // If updn is true, then for Grid layouts, it moves up to next row
 // instead of just the sequentially next item.
-func (ly *Frame) FocusPreviousChild(updn bool) bool {
-	sz := len(ly.Kids)
+func (fr *Frame) FocusPreviousChild(updn bool) bool {
+	sz := len(fr.Kids)
 	if sz <= 1 {
 		return false
 	}
-	foc, idx := ly.ChildWithFocus()
+	foc, idx := fr.ChildWithFocus()
 	if foc == nil {
 		return false
 	}
-	em := ly.Events()
+	em := fr.Events()
 	if em == nil {
 		return false
 	}
 	cur := em.Focus
 	nxti := idx - 1
-	if ly.Styles.Display == styles.Grid && updn {
-		nxti = idx - ly.Styles.Columns
+	if fr.Styles.Display == styles.Grid && updn {
+		nxti = idx - fr.Styles.Columns
 	}
 	did := false
 	if nxti >= 0 {
-		did = em.FocusOnOrPrev(ly.Child(nxti).(Widget))
+		did = em.FocusOnOrPrev(fr.Child(nxti).(Widget))
 	} else {
-		did = em.FocusOnOrPrev(ly.Child(sz - 1).(Widget))
+		did = em.FocusOnOrPrev(fr.Child(sz - 1).(Widget))
 	}
 	if !did || em.Focus == cur {
 		return false
@@ -228,70 +228,70 @@ func (ly *Frame) FocusPreviousChild(updn bool) bool {
 	return true
 }
 
-func (ly *Frame) HandleEvents() {
-	ly.WidgetBase.HandleEvents()
-	ly.HandleKeys()
-	ly.On(events.Scroll, func(e events.Event) {
-		ly.ScrollDelta(e)
+func (fr *Frame) HandleEvents() {
+	fr.WidgetBase.HandleEvents()
+	fr.HandleKeys()
+	fr.On(events.Scroll, func(e events.Event) {
+		fr.ScrollDelta(e)
 	})
 	// we treat slide events on layouts as scroll events
 	// we must reverse the delta for "natural" scrolling behavior
-	ly.On(events.SlideMove, func(e events.Event) {
+	fr.On(events.SlideMove, func(e events.Event) {
 		del := math32.Vector2FromPoint(e.PrevDelta()).MulScalar(-0.1)
-		ly.ScrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
+		fr.ScrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
 	})
 }
 
 // HandleKeys handles all key events for navigating focus within a Layout.
 // Typically this is done by the parent Scene level layout, but can be
 // done by default if FocusWithinable Ability is set.
-func (ly *Frame) HandleKeys() {
-	ly.OnFinal(events.KeyChord, func(e events.Event) {
+func (fr *Frame) HandleKeys() {
+	fr.OnFinal(events.KeyChord, func(e events.Event) {
 		kf := keymap.Of(e.KeyChord())
 		if DebugSettings.KeyEventTrace {
-			slog.Info("Layout KeyInput", "widget", ly, "keyFunction", kf)
+			slog.Info("Layout KeyInput", "widget", fr, "keyFunction", kf)
 		}
 		if kf == keymap.Abort {
-			if ly.Scene.Stage.ClosePopupAndBelow() {
+			if fr.Scene.Stage.ClosePopupAndBelow() {
 				e.SetHandled()
 			}
 			return
 		}
-		em := ly.Events()
+		em := fr.Events()
 		if em == nil {
 			return
 		}
-		grid := ly.Styles.Display == styles.Grid
-		if ly.Styles.Direction == styles.Row || grid {
+		grid := fr.Styles.Display == styles.Grid
+		if fr.Styles.Direction == styles.Row || grid {
 			switch kf {
 			case keymap.MoveRight:
-				if ly.FocusNextChild(false) {
+				if fr.FocusNextChild(false) {
 					e.SetHandled()
 				}
 				return
 			case keymap.MoveLeft:
-				if ly.FocusPreviousChild(false) {
+				if fr.FocusPreviousChild(false) {
 					e.SetHandled()
 				}
 				return
 			}
 		}
-		if ly.Styles.Direction == styles.Column || grid {
+		if fr.Styles.Direction == styles.Column || grid {
 			switch kf {
 			case keymap.MoveDown:
-				if ly.FocusNextChild(true) {
+				if fr.FocusNextChild(true) {
 					e.SetHandled()
 				}
 				return
 			case keymap.MoveUp:
-				if ly.FocusPreviousChild(true) {
+				if fr.FocusPreviousChild(true) {
 					e.SetHandled()
 				}
 				return
 			case keymap.PageDown:
 				proc := false
 				for st := 0; st < SystemSettings.LayoutPageSteps; st++ {
-					if !ly.FocusNextChild(true) {
+					if !fr.FocusNextChild(true) {
 						break
 					}
 					proc = true
@@ -303,7 +303,7 @@ func (ly *Frame) HandleKeys() {
 			case keymap.PageUp:
 				proc := false
 				for st := 0; st < SystemSettings.LayoutPageSteps; st++ {
-					if !ly.FocusPreviousChild(true) {
+					if !fr.FocusPreviousChild(true) {
 						break
 					}
 					proc = true
@@ -314,55 +314,55 @@ func (ly *Frame) HandleKeys() {
 				return
 			}
 		}
-		ly.FocusOnName(e)
+		fr.FocusOnName(e)
 	})
 }
 
 // FocusOnName processes key events to look for an element starting with given name
-func (ly *Frame) FocusOnName(e events.Event) bool {
+func (fr *Frame) FocusOnName(e events.Event) bool {
 	kf := keymap.Of(e.KeyChord())
 	if DebugSettings.KeyEventTrace {
-		slog.Info("Layout FocusOnName", "widget", ly, "keyFunction", kf)
+		slog.Info("Layout FocusOnName", "widget", fr, "keyFunction", kf)
 	}
-	delay := e.Time().Sub(ly.FocusNameTime)
-	ly.FocusNameTime = e.Time()
+	delay := e.Time().Sub(fr.FocusNameTime)
+	fr.FocusNameTime = e.Time()
 	if kf == keymap.FocusNext { // tab means go to next match -- don't worry about time
-		if ly.FocusName == "" || delay > SystemSettings.LayoutFocusNameTabTime {
-			ly.FocusName = ""
-			ly.FocusNameLast = nil
+		if fr.FocusName == "" || delay > SystemSettings.LayoutFocusNameTabTime {
+			fr.FocusName = ""
+			fr.FocusNameLast = nil
 			return false
 		}
 	} else {
 		if delay > SystemSettings.LayoutFocusNameTimeout {
-			ly.FocusName = ""
+			fr.FocusName = ""
 		}
 		if !unicode.IsPrint(e.KeyRune()) || e.Modifiers() != 0 {
 			return false
 		}
 		sr := string(e.KeyRune())
-		if ly.FocusName == sr {
+		if fr.FocusName == sr {
 			// re-search same letter
 		} else {
-			ly.FocusName += sr
-			ly.FocusNameLast = nil // only use last if tabbing
+			fr.FocusName += sr
+			fr.FocusNameLast = nil // only use last if tabbing
 		}
 	}
 	// e.SetHandled()
 	// fmt.Printf("searching for: %v  last: %v\n", ly.FocusName, ly.FocusNameLast)
-	focel := ChildByLabelCanFocus(ly, ly.FocusName, ly.FocusNameLast)
+	focel := ChildByLabelCanFocus(fr, fr.FocusName, fr.FocusNameLast)
 	if focel != nil {
 		focel = focel.This()
-		em := ly.Events()
+		em := fr.Events()
 		if em != nil {
 			em.SetFocusEvent(focel.(Widget)) // this will also scroll by default!
 		}
-		ly.FocusNameLast = focel
+		fr.FocusNameLast = focel
 		return true
 	} else {
-		if ly.FocusNameLast == nil {
-			ly.FocusName = "" // nothing being found
+		if fr.FocusNameLast == nil {
+			fr.FocusName = "" // nothing being found
 		}
-		ly.FocusNameLast = nil // start over
+		fr.FocusNameLast = nil // start over
 	}
 	return false
 }
@@ -371,11 +371,11 @@ func (ly *Frame) FocusOnName(e events.Event) bool {
 // the first focusable element within the layout whose Label (using
 // [ToLabel]) matches the given name using [complete.IsSeedMatching].
 // If after is non-nil, it only finds after that element.
-func ChildByLabelCanFocus(ly *Frame, name string, after tree.Node) tree.Node {
+func ChildByLabelCanFocus(fr *Frame, name string, after tree.Node) tree.Node {
 	gotAfter := false
 	completions := []complete.Completion{}
-	ly.WalkDownBreadth(func(k tree.Node) bool {
-		if k == ly.This() { // skip us
+	fr.WalkDownBreadth(func(k tree.Node) bool {
+		if k == fr.This() { // skip us
 			return tree.Continue
 		}
 		_, ni := AsWidget(k)
@@ -390,13 +390,13 @@ func ChildByLabelCanFocus(ly *Frame, name string, after tree.Node) tree.Node {
 		}
 		completions = append(completions, complete.Completion{
 			Text: ToLabel(k),
-			Desc: k.PathFrom(ly),
+			Desc: k.PathFrom(fr),
 		})
 		return tree.Continue
 	})
 	matches := complete.MatchSeedCompletion(completions, name)
 	if len(matches) > 0 {
-		return ly.FindPath(matches[0].Desc)
+		return fr.FindPath(matches[0].Desc)
 	}
 	return nil
 }
