@@ -28,7 +28,7 @@ import (
 //go:embed content
 var content embed.FS
 
-//go:embed name.png code-icon.svg vector-icon.svg numbers-icon.svg mail-icon.svg emergent-icon.svg weld-icon.png
+//go:embed *.svg name.png weld-icon.png
 var resources embed.FS
 
 //go:embed image.png
@@ -179,6 +179,10 @@ func homePage(ctx *htmlview.Context) bool {
 
 	makeBlock("COGENT VECTOR", "Cogent Vector is a powerful vector graphics editor with complete support for shapes, paths, curves, text, images, gradients, groups, alignment, styling, importing, exporting, undo, redo, and various other features.", func(parent core.Widget) {
 		errors.Log(core.NewSVG(parent).OpenFS(resources, "vector-icon.svg"))
+	})
+
+	makeBlock("COGENT NUMBERS", "Cogent Numbers is a highly extensible math, data science, and statistics platform that combines the power of programming with the convenience of spreadsheets and graphing calculators.", func(parent core.Widget) {
+		errors.Log(core.NewSVG(parent).OpenFS(resources, "numbers-icon.svg"))
 	})
 
 	makeBlock("COGENT MAIL", "Cogent Mail is a customizable email client with built-in Markdown support and an extensive set of keyboard shortcuts for advanced mail filing.", func(parent core.Widget) {
