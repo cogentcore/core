@@ -13,7 +13,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/tree"
 )
 
 // SliceViewInline represents a slice within a single line of value widgets.
@@ -29,9 +28,6 @@ type SliceViewInline struct {
 	// Otherwise, it is nil.
 	SliceValue Value `set:"-"`
 
-	// Values are [Value] representations of the slice values.
-	Values []Value `json:"-" xml:"-" set:"-"`
-
 	// ViewPath is a record of parent view names that have led up to this view.
 	// It is displayed as extra contextual information in view dialogs.
 	ViewPath string
@@ -42,7 +38,7 @@ type SliceViewInline struct {
 	// isFixedLength is whether the slice has a fixed-length flag on it.
 	isFixedLength bool
 
-	// configSize is the size of the slice when the widget was configured.
+	// size when configured
 	configSize int
 }
 
@@ -54,45 +50,6 @@ func (sv *SliceViewInline) OnInit() {
 func (sv *SliceViewInline) SetStyles() {
 	sv.Style(func(s *styles.Style) {
 		s.Grow.Set(0, 0)
-	})
-	sv.OnWidgetAdded(func(w core.Widget) {
-		switch w.PathFrom(sv) {
-		case "add-button":
-			ab := w.(*core.Button)
-			w.Style(func(s *styles.Style) {
-				ab.SetType(core.ButtonTonal)
-			})
-			ab.OnClick(func(e events.Event) {
-				sv.SliceNewAt(-1)
-			})
-		case "edit-button":
-			w.Style(func(s *styles.Style) {
-				w.(*core.Button).SetType(core.ButtonTonal)
-			})
-			w.OnClick(func(e events.Event) {
-				vpath := sv.ViewPath
-				title := ""
-				if sv.SliceValue != nil {
-					newPath := ""
-					isZero := false
-					title, newPath, isZero = sv.SliceValue.AsValueData().GetTitle()
-					if isZero {
-						return
-					}
-					vpath = JoinViewPath(sv.ViewPath, newPath)
-				} else {
-					elType := reflectx.NonPointerType(reflect.TypeOf(sv.Slice).Elem().Elem())
-					title = "Slice of " + reflectx.NonPointerType(elType).Name()
-				}
-				d := core.NewBody().AddTitle(title)
-				NewSliceView(d).SetViewPath(vpath).SetSlice(sv.Slice)
-				d.OnClose(func(e events.Event) {
-					sv.Update()
-					sv.SendChange()
-				})
-				d.RunFullDialog(sv)
-			})
-		}
 	})
 }
 
@@ -121,74 +78,79 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 }
 
 func (sv *SliceViewInline) Config(c *core.Config) {
-	sv.DeleteChildren()
-	if reflectx.AnyIsNil(sv.Slice) {
-		sv.configSize = 0
-		return
-	}
-	config := tree.Config{}
-	// always start fresh!
-	sv.Values = make([]Value, 0)
-
 	sl := reflectx.NonPointerValue(reflectx.OnePointerUnderlyingValue(reflect.ValueOf(sv.Slice)))
-	sv.configSize = sl.Len()
 
 	sz := min(sl.Len(), core.SystemSettings.SliceInlineLength)
+	sv.configSize = sz
 	for i := 0; i < sz; i++ {
+		itxt := strconv.Itoa(i)
 		val := reflectx.OnePointerUnderlyingValue(sl.Index(i)) // deal with pointer lists
-		vv := ToValue(val.Interface(), "")
-		vv.SetSliceValue(val, sv.Slice, i, sv.ViewPath)
-		vtyp := vv.WidgetType()
-		idxtxt := strconv.Itoa(i)
-		valnm := "value-" + idxtxt
-		config.Add(vtyp, valnm)
-		sv.Values = append(sv.Values, vv)
-	}
-	if !sv.isArray && !sv.isFixedLength {
-		config.Add(core.ButtonType, "add-button")
-	}
-	config.Add(core.ButtonType, "edit-button")
-	sv.ConfigChildren(config)
-	for i, vv := range sv.Values {
-		vv.OnChange(func(e events.Event) { sv.SendChange() })
-		w := sv.Child(i).(core.Widget)
-		if sv.SliceValue != nil {
-			vv.SetTags(sv.SliceValue.AllTags())
-		}
-		Config(vv, w)
-		wb := w.AsWidget()
-		wb.OnInput(func(e events.Event) {
-			if tag, _ := vv.Tag("immediate"); tag == "+" {
-				wb.SendChange(e)
-				sv.SendChange(e)
-			}
-			sv.Send(events.Input, e)
-		})
-		if sv.IsReadOnly() {
-			wb.SetReadOnly(true)
-		} else {
-			wb.AddContextMenu(func(m *core.Scene) {
-				sv.ContextMenu(m, i)
+		core.Configure(c, "grid/value-"+itxt, func() core.Value {
+			w := core.NewValue(val.Interface())
+			wb := w.AsWidget()
+			// vv.SetSliceValue(val, sv.Slice, i, sv.ViewPath)
+			wb.OnChange(func(e events.Event) { sv.SendChange() })
+			// if sv.SliceValue != nil {
+			// 	vv.SetTags(sv.SliceValue.AllTags())
+			// }
+			wb.OnInput(func(e events.Event) {
+				// if tag, _ := vv.Tag("immediate"); tag == "+" {
+				// 	wb.SendChange(e)
+				// 	sv.SendChange(e)
+				// }
+				sv.Send(events.Input, e)
 			})
-		}
+			if sv.IsReadOnly() {
+				wb.SetReadOnly(true)
+			} else {
+				wb.AddContextMenu(func(m *core.Scene) {
+					sv.ContextMenu(m, i)
+				})
+			}
+			return w
+		})
 	}
 	if !sv.isArray && !sv.isFixedLength {
-		adbti, err := sv.Children().ElemFromEndTry(1)
-		if err == nil {
-			adbt := adbti.(*core.Button)
-			adbt.SetType(core.ButtonTonal)
-			adbt.SetIcon(icons.Add)
-			adbt.Tooltip = "add an element to the slice"
-		}
+		core.Configure(c, "add-button", func() *core.Button {
+			w := core.NewButton().SetIcon(icons.Add).SetType(core.ButtonTonal)
+			w.Tooltip = "add an element to the slice"
+			w.OnClick(func(e events.Event) {
+				sv.SliceNewAt(-1)
+			})
+			return w
+		})
 	}
-	edbti, err := sv.Children().ElemFromEndTry(0)
-	if err == nil {
-		edbt := edbti.(*core.Button)
-		edbt.SetType(core.ButtonTonal)
-		edbt.SetIcon(icons.Edit)
-		edbt.Tooltip = "edit in a dialog"
-	}
-	sv.NeedsLayout()
+	core.Configure(c, "edit-button", func() *core.Button {
+		w := core.NewButton().SetIcon(icons.Edit).SetType(core.ButtonTonal)
+		w.Tooltip = "edit in a dialog"
+		w.OnClick(func(e events.Event) {
+			sv.SliceNewAt(-1)
+		})
+		w.OnClick(func(e events.Event) {
+			vpath := sv.ViewPath
+			title := ""
+			if sv.SliceValue != nil {
+				newPath := ""
+				isZero := false
+				title, newPath, isZero = sv.SliceValue.AsValueData().GetTitle()
+				if isZero {
+					return
+				}
+				vpath = JoinViewPath(sv.ViewPath, newPath)
+			} else {
+				elType := reflectx.NonPointerType(reflect.TypeOf(sv.Slice).Elem().Elem())
+				title = "Slice of " + reflectx.NonPointerType(elType).Name()
+			}
+			d := core.NewBody().AddTitle(title)
+			NewSliceView(d).SetViewPath(vpath).SetSlice(sv.Slice)
+			d.OnClose(func(e events.Event) {
+				sv.Update()
+				sv.SendChange()
+			})
+			d.RunFullDialog(sv)
+		})
+		return w
+	})
 }
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
@@ -224,13 +186,6 @@ func (sv *SliceViewInline) ContextMenu(m *core.Scene, idx int) {
 	core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
 		sv.SliceDeleteAt(idx)
 	})
-}
-
-func (sv *SliceViewInline) UpdateValues() {
-	for _, vv := range sv.Values {
-		vv.Update()
-	}
-	sv.NeedsRender()
 }
 
 func (sv *SliceViewInline) SliceSizeChanged() bool {
