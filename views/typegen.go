@@ -4,6 +4,7 @@ package views
 
 import (
 	"image"
+	"image/color"
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/core"
@@ -52,6 +53,41 @@ func (t *ColorView) New() tree.Node { return &ColorView{} }
 
 // SetTooltip sets the [ColorView.Tooltip]
 func (t *ColorView) SetTooltip(v string) *ColorView { t.Tooltip = v; return t }
+
+// ColorButtonType is the [types.Type] for [ColorButton]
+var ColorButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ColorButton", IDName: "color-button", Doc: "ColorButton represents a color value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Color", Doc: "Color is the color value being represented."}}, Instance: &ColorButton{}})
+
+// NewColorButton returns a new [ColorButton] with the given optional parent:
+// ColorButton represents a color value with a button.
+func NewColorButton(parent ...tree.Node) *ColorButton { return tree.New[*ColorButton](parent...) }
+
+// NodeType returns the [*types.Type] of [ColorButton]
+func (t *ColorButton) NodeType() *types.Type { return ColorButtonType }
+
+// New returns a new [*ColorButton] value
+func (t *ColorButton) New() tree.Node { return &ColorButton{} }
+
+// SetColor sets the [ColorButton.Color]:
+// Color is the color value being represented.
+func (t *ColorButton) SetColor(v color.RGBA) *ColorButton { t.Color = v; return t }
+
+// SetTooltip sets the [ColorButton.Tooltip]
+func (t *ColorButton) SetTooltip(v string) *ColorButton { t.Tooltip = v; return t }
+
+// SetType sets the [ColorButton.Type]
+func (t *ColorButton) SetType(v core.ButtonTypes) *ColorButton { t.Type = v; return t }
+
+// SetIcon sets the [ColorButton.Icon]
+func (t *ColorButton) SetIcon(v icons.Icon) *ColorButton { t.Icon = v; return t }
+
+// SetIndicator sets the [ColorButton.Indicator]
+func (t *ColorButton) SetIndicator(v icons.Icon) *ColorButton { t.Indicator = v; return t }
+
+// SetShortcut sets the [ColorButton.Shortcut]
+func (t *ColorButton) SetShortcut(v key.Chord) *ColorButton { t.Shortcut = v; return t }
+
+// SetMenu sets the [ColorButton.Menu]
+func (t *ColorButton) SetMenu(v func(m *core.Scene)) *ColorButton { t.Menu = v; return t }
 
 // FileViewType is the [types.Type] for [FileView]
 var FileViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FileView", IDName: "file-view", Doc: "FileView is a viewer onto files -- core of the file chooser dialog", Methods: []types.Method{{Name: "UpdateFilesAction", Doc: "UpdateFilesAction updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddPathToFaves", Doc: "AddPathToFaves adds the current path to favorites", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DirPathUp", Doc: "DirPathUp moves up one directory in the path", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "NewFolder", Doc: "NewFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "DirPath", Doc: "path to directory of files to display"}, {Name: "CurrentSelectedFile", Doc: "currently selected file"}, {Name: "Ext", Doc: "target extension(s) (comma separated if multiple, including initial .), if any"}, {Name: "FilterFunc", Doc: "optional styling function"}, {Name: "ExtMap", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"}, {Name: "Files", Doc: "files for current directory"}, {Name: "SelectedIndex", Doc: "index of currently selected file in Files list (-1 if none)"}, {Name: "Watcher", Doc: "change notify for current dir"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "UpdateMu", Doc: "UpdateFiles mutex"}, {Name: "PrevPath", Doc: "Previous path that was processed via UpdateFiles"}}, Instance: &FileView{}})

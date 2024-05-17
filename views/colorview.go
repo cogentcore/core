@@ -485,8 +485,25 @@ func (cv *ColorView) UpdateNums() {
 
 */
 
-////////////////////////////////////////////////////////////////////////////////////////
-//  ColorValue
+// ColorButton represents a color value with a button.
+type ColorButton struct {
+	core.Button
+	Color color.RGBA
+}
+
+func (cb *ColorButton) WidgetValue() any { return &cb.Color }
+
+func (cb *ColorButton) OnInit() {
+	cb.Button.OnInit()
+	cb.SetType(core.ButtonTonal).SetText("Edit color").SetIcon(icons.Colors)
+	cb.Style(func(s *styles.Style) {
+		// we need to display button as non-transparent
+		// so that it can be seen
+		dclr := colors.WithAF32(cb.Color, 1)
+		s.Background = colors.C(dclr)
+		s.Color = colors.C(hct.ContrastColor(dclr, hct.ContrastAAA))
+	})
+}
 
 // ColorValue represents a color value with a button.
 type ColorValue struct {

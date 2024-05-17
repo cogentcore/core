@@ -5,6 +5,7 @@
 package views
 
 import (
+	"image/color"
 	"reflect"
 
 	"cogentcore.org/core/base/reflectx"
@@ -19,6 +20,10 @@ func init() {
 	core.InspectorWindow = InspectorWindow
 
 	core.AddValueConverter(func(value any, tags ...string) core.Value {
+		if _, ok := value.(color.Color); ok {
+			return NewColorButton()
+		}
+
 		forceInline := reflectx.StructTagIs(tags, "view", "inline")
 		forceNoInline := reflectx.StructTagIs(tags, "view", "no-inline")
 		typ := reflectx.NonPointerType(reflect.TypeOf(value))
