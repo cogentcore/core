@@ -149,12 +149,7 @@ func homePage(ctx *htmlview.Context) bool {
 	})
 
 	makeBlock("POWERFUL FEATURES", "Cogent Core comes with a powerful set of advanced features that allow you to make almost anything, including fully featured text editors, video and audio players, interactive 3D graphics, customizable data plots, Markdown and HTML rendering, SVG and canvas vector graphics, and automatic views of any Go data structure for instant data binding and advanced app inspection.", func(parent core.Widget) {
-		texteditor.NewSoloEditor(parent).Buffer.SetLang("go").SetTextString(`package main
-
-		func main() {
-			fmt.Println("Hello, world!")
-		}
-		`)
+		makeIcon(parent).SetIcon(icons.ScatterPlot)
 	})
 
 	makeBlock("OPTIMIZED EXPERIENCE", "Every part of your development experience is guided by a comprehensive set of interactive example-based documentation, in-depth video tutorials, easy-to-use command line tools specialized for Cogent Core, and active support and development from the Cogent Core developers.", func(parent core.Widget) {
