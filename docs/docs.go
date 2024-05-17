@@ -130,12 +130,15 @@ func homePage(ctx *htmlview.Context) bool {
 	})
 
 	makeBlock("EFFORTLESS ELEGANCE", "Cogent Core is built on Go, a high-level language designed for building elegant, readable, and scalable code with full type safety and a robust design that never gets in your way. Cogent Core makes it easy to get started with cross-platform app development in just two commands and seven lines of simple code.", func(parent core.Widget) {
-		// we get the code example contained within the md file
-		ctx.Node = ctx.Node.FirstChild.NextSibling
-		ctx.BlockParent = core.NewFrame(parent).Style(func(s *styles.Style) {
-			s.Direction = styles.Column
+		te := texteditor.NewSoloEditor(parent)
+		te.Buffer.SetLang("go").SetTextString(`func main() {
+			b := core.NewBody("Hello")
+			core.NewButton(b).SetText("Hello, World!")
+			b.RunMainWindow()
+		}`)
+		te.Style(func(s *styles.Style) {
+			s.Min.X.Pw(50)
 		})
-		htmlview.HandleElement(ctx)
 	})
 
 	makeBlock("COMPLETELY CUSTOMIZABLE", "Cogent Core allows developers and users to fully customize apps to fit their unique needs and preferences through a robust styling system and a powerful color system that allow developers and users to instantly customize every aspect of the appearance and behavior of an app.", func(parent core.Widget) {
