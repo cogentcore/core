@@ -191,7 +191,11 @@ func homePage(ctx *htmlview.Context) bool {
 	})
 
 	makeBlock(`<a href="https://github.com/WaveELD/WELDBook/blob/main/textmd/ch01_intro.md">WELD</a>`, "WELD is a set of 3D computational models of a new approach to quantum physics based on the de Broglie-Bohm pilot wave theory.", func(parent core.Widget) {
-		errors.Log(core.NewImage(parent).OpenFS(resources, "weld-icon.png"))
+		img := core.NewImage(parent)
+		errors.Log(img.OpenFS(resources, "weld-icon.png"))
+		img.Style(func(s *styles.Style) {
+			s.Min.Set(units.Dp(256))
+		})
 	})
 
 	core.NewText(frame).SetType(core.TextDisplaySmall).SetText("<b>Why Cogent Core instead of something else?</b>")
