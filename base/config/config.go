@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package update provides an efficent mechanism for updating a slice
+// Package config provides an efficent mechanism for updating a slice
 // to contain a target list of elements, generating minimal edits to
 // modify the current slice contents to match the target.
 // The mechanism depends on the use of unique name string identifiers
 // to determine whether an element is currently configured correctly.
 // These could be algorithmically generated hash strings or any other
 // such unique identifier.
-package update
+package config
 
 import (
 	"log/slog"
@@ -19,13 +19,13 @@ import (
 	"cogentcore.org/core/base/namer"
 )
 
-// Update ensures that the elements of the slice contain
+// Config ensures that the elements of the slice contain
 // the desired elements in a specific order, specified by unique
 // element names, with n = total number of items in the target slice.
 // If a new item is needed then newEl is called to create it,
 // for given name at given index position.
 // Returns the updated slice and true if any changes were made.
-func Update[T namer.Namer](s []T, n int, name func(i int) string, newEl func(name string, i int) T) (r []T, mods bool) {
+func Config[T namer.Namer](s []T, n int, name func(i int) string, newEl func(name string, i int) T) (r []T, mods bool) {
 	// first make a map for looking up the indexes of the target names
 	names := make([]string, n)
 	nmap := make(map[string]int, n)
@@ -34,7 +34,7 @@ func Update[T namer.Namer](s []T, n int, name func(i int) string, newEl func(nam
 		nm := name(i)
 		names[i] = nm
 		if _, has := nmap[nm]; has {
-			slog.Error("update.Update: duplicate name", "name", nm)
+			slog.Error("config.Config: duplicate name", "name", nm)
 		}
 		nmap[nm] = i
 	}

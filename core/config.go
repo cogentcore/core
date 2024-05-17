@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"cogentcore.org/core/base/update"
+	"cogentcore.org/core/base/config"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
@@ -229,7 +229,7 @@ func (c *Config) ConfigWidget(w Widget, parentPath string) {
 	}
 	n := len(children)
 	if n > 0 {
-		wb.Kids, _ = update.Update(wb.Kids, n,
+		wb.Kids, _ = config.Config(wb.Kids, n,
 			func(i int) string { return children[i].ItemName() },
 			func(name string, i int) tree.Node {
 				child := children[i]
