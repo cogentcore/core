@@ -572,7 +572,7 @@ func (sv *SliceViewBase) ConfigRow(c *core.Config, i, si int) {
 	}
 
 	core.Configure(c, "grid/value-"+itxt, func() core.Value {
-		w := core.NewValue(val.Interface())
+		w := core.NewValue(val.Interface(), "")
 		wb := w.AsWidget()
 		sv.ConfigValue(w, i)
 		if !sv.IsReadOnly() {

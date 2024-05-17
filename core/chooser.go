@@ -14,6 +14,7 @@ import (
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/colors"
@@ -123,7 +124,7 @@ func (ci *ChooserItem) GetLabel() string {
 	if ci.Value == nil {
 		return ""
 	}
-	return ToLabel(ci.Value)
+	return labels.ToLabel(ci.Value)
 }
 
 // ChooserTypes is an enum containing the
@@ -144,14 +145,14 @@ const (
 
 func (ch *Chooser) WidgetValue() any { return ch.CurrentItem.Value }
 
-func (ch *Chooser) SetWidgetValue() error {
-	value := reflectx.NonPointerValue(reflect.ValueOf(ch.BindValue)).Interface()
+func (ch *Chooser) SetWidgetValue(value any) error {
+	value = reflectx.NonPointerValue(reflect.ValueOf(value)).Interface()
 	ch.SetCurrentValue(value)
 	return nil
 }
 
-func (ch *Chooser) OnBind() {
-	if e, ok := ch.BindValue.(enums.Enum); ok {
+func (ch *Chooser) OnBind(value any) {
+	if e, ok := value.(enums.Enum); ok {
 		ch.SetEnum(e)
 	}
 }

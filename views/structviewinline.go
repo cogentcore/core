@@ -39,6 +39,8 @@ type StructViewInline struct {
 	isShouldShower bool
 }
 
+func (sv *StructViewInline) WidgetValue() any { return &sv.Struct }
+
 func (sv *StructViewInline) OnInit() {
 	sv.Frame.OnInit()
 	sv.SetStyles()
@@ -60,7 +62,9 @@ func (sv *StructViewInline) Config(c *core.Config) {
 		sc = !NoSentenceCaseForType(types.TypeNameValue(sv.Struct))
 	}
 
-	reflectx.WalkValueFlatFields(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	sval := reflectx.OnePointerUnderlyingValue(reflect.ValueOf(sv.Struct)).Interface()
+
+	reflectx.WalkValueFlatFields(sval, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
 		vwtag := field.Tag.Get("view")
 		if vwtag == "-" {
@@ -70,7 +74,7 @@ func (sv *StructViewInline) Config(c *core.Config) {
 			// fmt.Println("field is nil:", fnm)
 			return true
 		}
-		if ss, ok := sv.Struct.(core.ShouldShower); ok {
+		if ss, ok := sval.(core.ShouldShower); ok {
 			sv.isShouldShower = true
 			if !ss.ShouldShow(field.Name) {
 				return true
@@ -131,7 +135,7 @@ func (sv *StructViewInline) Config(c *core.Config) {
 		})
 
 		core.Configure(c, valnm, func() core.Value {
-			w := core.NewValue(fieldVal)
+			w := core.NewValue(fieldVal.Interface(), string(field.Tag))
 			wb := w.AsWidget()
 			// vvp := fieldVal.Addr()
 			// vv.SetStructValue(vvp, sv.Struct, &field, sv.ViewPath)

@@ -20,6 +20,7 @@ import (
 // a pointer to a map or a direct map) -- just Elem() of map type, but using
 // this function makes it more explicit what is going on.
 func MapValueType(mp any) reflect.Type {
+	// return NonPointerUnderlyingValue(reflect.ValueOf(sl)).Type().Elem()
 	return NonPointerType(reflect.TypeOf(mp)).Elem()
 }
 

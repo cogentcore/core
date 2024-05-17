@@ -7,9 +7,6 @@ package reflectx
 import (
 	"path"
 	"reflect"
-	"strings"
-
-	"cogentcore.org/core/base/strcase"
 )
 
 // LongTypeName returns the long, full package-path qualified type name.
@@ -39,59 +36,6 @@ func ShortTypeName(typ reflect.Type) string {
 		return path.Base(nptyp.PkgPath()) + "." + nm
 	}
 	return typ.String()
-}
-
-// FriendlyTypeName returns a user-friendly version of the name of the given type.
-// It transforms it into sentence case, excludes the package, and converts various
-// builtin types into more friendly forms (eg: "int" to "Number").
-func FriendlyTypeName(typ reflect.Type) string {
-	nptyp := NonPointerType(typ)
-	nm := nptyp.Name()
-
-	// if it is named, we use that
-	if nm != "" {
-		switch nm {
-		case "string":
-			return "Text"
-		case "float32", "float64", "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "uintptr":
-			return "Number"
-		}
-		return strcase.ToSentence(nm)
-	}
-
-	// otherwise, we fall back on Kind
-	switch nptyp.Kind() {
-	case reflect.Slice, reflect.Array, reflect.Map:
-		bnm := FriendlyTypeName(nptyp.Elem())
-		if strings.HasSuffix(bnm, "s") {
-			return "List of " + bnm
-		} else if strings.Contains(bnm, "Function of") {
-			return strings.ReplaceAll(bnm, "Function of", "Functions of") + "s"
-		} else {
-			return bnm + "s"
-		}
-	case reflect.Func:
-		str := "Function"
-		ni := nptyp.NumIn()
-		if ni > 0 {
-			str += " of"
-		}
-		for i := 0; i < ni; i++ {
-			str += " " + FriendlyTypeName(nptyp.In(i))
-			if ni == 2 && i == 0 {
-				str += " and"
-			} else if i == ni-2 {
-				str += ", and"
-			} else if i < ni-1 {
-				str += ","
-			}
-		}
-		return str
-	}
-	if nptyp.String() == "interface {}" {
-		return "Value"
-	}
-	return nptyp.String()
 }
 
 // CloneToType creates a new pointer to the given type

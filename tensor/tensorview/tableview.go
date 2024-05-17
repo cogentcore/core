@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -289,7 +290,7 @@ func (tv *TableView) ConfigRow(c *core.Config, i, si int) {
 
 	vpath := tv.ViewPath + "[" + sitxt + "]"
 	if si < tv.SliceSize {
-		if lblr, ok := tv.Slice.(core.SliceLabeler); ok {
+		if lblr, ok := tv.Slice.(labels.SliceLabeler); ok {
 			slbl := lblr.ElemLabel(si)
 			if slbl != "" {
 				vpath = views.JoinViewPath(tv.ViewPath, slbl)

@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"strconv"
 
+	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -84,7 +85,7 @@ func (sv *SliceViewInline) Config(c *core.Config) {
 		itxt := strconv.Itoa(i)
 		val := reflectx.OnePointerUnderlyingValue(sl.Index(i)) // deal with pointer lists
 		core.Configure(c, "value-"+itxt, func() core.Value {
-			w := core.NewValue(val.Interface())
+			w := core.NewValue(val.Interface(), "")
 			wb := w.AsWidget()
 			// vv.SetSliceValue(val, sv.Slice, i, sv.ViewPath)
 			wb.OnChange(func(e events.Event) { sv.SendChange() })
@@ -138,7 +139,7 @@ func (sv *SliceViewInline) Config(c *core.Config) {
 				}
 				vpath = JoinViewPath(sv.ViewPath, newPath)
 			} else {
-				title = reflectx.FriendlySliceLabel(reflect.ValueOf(sv.Slice))
+				title = labels.FriendlySliceLabel(reflect.ValueOf(sv.Slice))
 			}
 			d := core.NewBody().AddTitle(title)
 			NewSliceView(d).SetViewPath(vpath).SetSlice(sv.Slice)

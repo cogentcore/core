@@ -46,11 +46,6 @@ type StructView struct {
 	// Struct is the pointer to the struct that we are viewing.
 	Struct any
 
-	// StructValue is the Value for the struct itself
-	// if this was created within the Value framework.
-	// Otherwise, it is nil.
-	StructValue Value `set:"-"`
-
 	// ViewPath is a record of parent view names that have led up to this view.
 	// It is displayed as extra contextual information in view dialogs.
 	ViewPath string
@@ -169,7 +164,7 @@ func (sv *StructView) Config(c *core.Config) {
 		})
 
 		core.Configure(c, valnm, func() core.Value {
-			w := core.NewValue(fieldVal)
+			w := core.NewValue(fieldVal, string(field.Tag))
 			wb := w.AsWidget()
 			// vv.AsValueData().ViewPath = sv.ViewPath
 			// svv := FieldToValue(fvalp, sfield.Name, sfval)
@@ -199,6 +194,8 @@ func (sv *StructView) Config(c *core.Config) {
 					// 	lbl.Update()
 					// }
 					sv.SendChange(e)
+					fmt.Println("updating", sv)
+					// sv.Update()
 				})
 			}
 			return w

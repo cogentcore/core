@@ -10,6 +10,7 @@ import (
 	"time"
 	"unicode"
 
+	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keymap"
@@ -385,7 +386,7 @@ func ChildByLabelCanFocus(fr *Frame, name string, after tree.Node) tree.Node {
 			return tree.Continue // skip to next
 		}
 		completions = append(completions, complete.Completion{
-			Text: ToLabel(k),
+			Text: labels.ToLabel(k),
 			Desc: k.PathFrom(fr),
 		})
 		return tree.Continue

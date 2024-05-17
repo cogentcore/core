@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fileinfo/mimedata"
+	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -99,7 +100,7 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 func (tv *TreeView) Label() string {
 	if tv.SyncNode != nil {
 		// TODO: make this an option?
-		if lbl, has := core.ToLabeler(tv.SyncNode); has {
+		if lbl, has := labels.ToLabeler(tv.SyncNode); has {
 			return lbl
 		}
 		return tv.SyncNode.Name()

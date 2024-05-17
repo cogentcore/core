@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/core"
@@ -331,7 +332,7 @@ func (tv *TableView) ConfigRow(c *core.Config, i, si int) {
 
 	vpath := tv.ViewPath + "[" + sitxt + "]"
 	if si < tv.SliceSize {
-		if lblr, ok := tv.Slice.(core.SliceLabeler); ok {
+		if lblr, ok := tv.Slice.(labels.SliceLabeler); ok {
 			slbl := lblr.ElemLabel(si)
 			if slbl != "" {
 				vpath = JoinViewPath(tv.ViewPath, slbl)
@@ -351,7 +352,7 @@ func (tv *TableView) ConfigRow(c *core.Config, i, si int) {
 		_ = tags
 
 		core.Configure(c, "grid/"+valnm, func() core.Value {
-			w := core.NewValue(fval.Interface())
+			w := core.NewValue(fval.Interface(), "")
 			wb := w.AsWidget()
 			tv.ConfigValue(w, i)
 			// vv.SetStructValue(fval.Addr(), stru, &field, vpath)
@@ -611,7 +612,7 @@ func (tv *TableView) EditIndex(idx int) {
 	val := reflectx.OnePointerUnderlyingValue(tv.SliceNPVal.Index(idx))
 	stru := val.Interface()
 	tynm := reflectx.NonPointerType(val.Type()).Name()
-	lbl := core.ToLabel(stru)
+	lbl := labels.ToLabel(stru)
 	if lbl != "" {
 		tynm += ": " + lbl
 	}

@@ -219,7 +219,7 @@ func (wb *WidgetBase) DoNeedsRender() {
 		}
 		if ly := AsLayout(kwi); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
-				if ly.HasScroll[d] {
+				if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 					ly.Scrolls[d].DoNeedsRender()
 				}
 			}

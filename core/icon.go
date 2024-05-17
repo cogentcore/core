@@ -33,6 +33,8 @@ type Icon struct {
 	SVG svg.SVG `set:"-" copier:"-"`
 }
 
+func (ic *Icon) WidgetValue() any { return &ic.Icon }
+
 func (ic *Icon) OnInit() {
 	ic.WidgetBase.OnInit()
 	ic.SetStyles()

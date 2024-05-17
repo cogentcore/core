@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/strcase"
 )
 
 // This file contains helpful functions for dealing with slices
@@ -34,27 +33,6 @@ func SliceElementValue(sl any) reflect.Value {
 		val = val.Elem() // use concrete value
 	}
 	return val
-}
-
-// FriendlySliceLabel returns a user-friendly label for the given slice value.
-func FriendlySliceLabel(v reflect.Value) string {
-	npv := NonPointerUnderlyingValue(v)
-	label := ""
-	if !npv.IsValid() {
-		label = "None"
-	} else {
-		if npv.Kind() == reflect.Array || !npv.IsNil() {
-			bnm := FriendlyTypeName(SliceElementType(v.Interface()))
-			if strings.HasSuffix(bnm, "s") {
-				label = strcase.ToSentence(fmt.Sprintf("%d lists of %s", npv.Len(), bnm))
-			} else {
-				label = strcase.ToSentence(fmt.Sprintf("%d %ss", npv.Len(), bnm))
-			}
-		} else {
-			label = "None"
-		}
-	}
-	return label
 }
 
 // SliceNewAt inserts a new blank element at the given index in the given slice.

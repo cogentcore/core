@@ -65,7 +65,7 @@ func (mv *MapViewInline) Config(c *core.Config) {
 		val := reflectx.OnePointerUnderlyingValue(mpvnp.MapIndex(key))
 
 		core.Configure(c, keynm, func() core.Value {
-			w := core.NewValue(key.Interface())
+			w := core.NewValue(key.Interface(), "")
 			wb := w.AsWidget()
 			wb.SetReadOnly(mv.IsReadOnly())
 			// kv.SetMapKey(key, mv.Map)
@@ -92,7 +92,7 @@ func (mv *MapViewInline) Config(c *core.Config) {
 			wb.SetReadOnly(mv.IsReadOnly())
 		})
 		core.Configure(c, valnm, func() core.Value {
-			w := core.NewValue(val.Interface())
+			w := core.NewValue(val.Interface(), "")
 			wb := w.AsWidget()
 			wb.SetReadOnly(mv.IsReadOnly())
 			// vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value value to track updates

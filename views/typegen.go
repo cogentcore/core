@@ -361,7 +361,7 @@ func (t *SliceViewInline) SetViewPath(v string) *SliceViewInline { t.ViewPath = 
 func (t *SliceViewInline) SetTooltip(v string) *SliceViewInline { t.Tooltip = v; return t }
 
 // StructViewType is the [types.Type] for [StructView]
-var StructViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructView", IDName: "struct-view", Doc: "StructView represents a struct with rows of field names and editable values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "StructValue", Doc: "StructValue is the Value for the struct itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [core.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructView{}})
+var StructViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructView", IDName: "struct-view", Doc: "StructView represents a struct with rows of field names and editable values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [core.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructView{}})
 
 // NewStructView returns a new [StructView] with the given optional parent:
 // StructView represents a struct with rows of field names and editable values.
@@ -581,7 +581,7 @@ func (t *TreeView) SetSelectedNodes(v ...TreeViewer) *TreeView { t.SelectedNodes
 func (t *TreeView) SetTooltip(v string) *TreeView { t.Tooltip = v; return t }
 
 // SliceButtonType is the [types.Type] for [SliceButton]
-var SliceButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceButton", IDName: "slice-button", Doc: "SliceButton represents a slice or array value with a button.", Embeds: []types.Field{{Name: "Button"}}, Instance: &SliceButton{}})
+var SliceButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceButton", IDName: "slice-button", Doc: "SliceButton represents a slice or array value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Slice"}}, Instance: &SliceButton{}})
 
 // NewSliceButton returns a new [SliceButton] with the given optional parent:
 // SliceButton represents a slice or array value with a button.
@@ -592,6 +592,9 @@ func (t *SliceButton) NodeType() *types.Type { return SliceButtonType }
 
 // New returns a new [*SliceButton] value
 func (t *SliceButton) New() tree.Node { return &SliceButton{} }
+
+// SetSlice sets the [SliceButton.Slice]
+func (t *SliceButton) SetSlice(v any) *SliceButton { t.Slice = v; return t }
 
 // SetTooltip sets the [SliceButton.Tooltip]
 func (t *SliceButton) SetTooltip(v string) *SliceButton { t.Tooltip = v; return t }
@@ -610,3 +613,71 @@ func (t *SliceButton) SetShortcut(v key.Chord) *SliceButton { t.Shortcut = v; re
 
 // SetMenu sets the [SliceButton.Menu]
 func (t *SliceButton) SetMenu(v func(m *core.Scene)) *SliceButton { t.Menu = v; return t }
+
+// StructButtonType is the [types.Type] for [StructButton]
+var StructButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructButton", IDName: "struct-button", Doc: "StructButton represents a slice or array value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Struct"}}, Instance: &StructButton{}})
+
+// NewStructButton returns a new [StructButton] with the given optional parent:
+// StructButton represents a slice or array value with a button.
+func NewStructButton(parent ...tree.Node) *StructButton { return tree.New[*StructButton](parent...) }
+
+// NodeType returns the [*types.Type] of [StructButton]
+func (t *StructButton) NodeType() *types.Type { return StructButtonType }
+
+// New returns a new [*StructButton] value
+func (t *StructButton) New() tree.Node { return &StructButton{} }
+
+// SetStruct sets the [StructButton.Struct]
+func (t *StructButton) SetStruct(v any) *StructButton { t.Struct = v; return t }
+
+// SetTooltip sets the [StructButton.Tooltip]
+func (t *StructButton) SetTooltip(v string) *StructButton { t.Tooltip = v; return t }
+
+// SetType sets the [StructButton.Type]
+func (t *StructButton) SetType(v core.ButtonTypes) *StructButton { t.Type = v; return t }
+
+// SetIcon sets the [StructButton.Icon]
+func (t *StructButton) SetIcon(v icons.Icon) *StructButton { t.Icon = v; return t }
+
+// SetIndicator sets the [StructButton.Indicator]
+func (t *StructButton) SetIndicator(v icons.Icon) *StructButton { t.Indicator = v; return t }
+
+// SetShortcut sets the [StructButton.Shortcut]
+func (t *StructButton) SetShortcut(v key.Chord) *StructButton { t.Shortcut = v; return t }
+
+// SetMenu sets the [StructButton.Menu]
+func (t *StructButton) SetMenu(v func(m *core.Scene)) *StructButton { t.Menu = v; return t }
+
+// MapButtonType is the [types.Type] for [MapButton]
+var MapButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapButton", IDName: "map-button", Doc: "MapButton represents a slice or array value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Map"}}, Instance: &MapButton{}})
+
+// NewMapButton returns a new [MapButton] with the given optional parent:
+// MapButton represents a slice or array value with a button.
+func NewMapButton(parent ...tree.Node) *MapButton { return tree.New[*MapButton](parent...) }
+
+// NodeType returns the [*types.Type] of [MapButton]
+func (t *MapButton) NodeType() *types.Type { return MapButtonType }
+
+// New returns a new [*MapButton] value
+func (t *MapButton) New() tree.Node { return &MapButton{} }
+
+// SetMap sets the [MapButton.Map]
+func (t *MapButton) SetMap(v any) *MapButton { t.Map = v; return t }
+
+// SetTooltip sets the [MapButton.Tooltip]
+func (t *MapButton) SetTooltip(v string) *MapButton { t.Tooltip = v; return t }
+
+// SetType sets the [MapButton.Type]
+func (t *MapButton) SetType(v core.ButtonTypes) *MapButton { t.Type = v; return t }
+
+// SetIcon sets the [MapButton.Icon]
+func (t *MapButton) SetIcon(v icons.Icon) *MapButton { t.Icon = v; return t }
+
+// SetIndicator sets the [MapButton.Indicator]
+func (t *MapButton) SetIndicator(v icons.Icon) *MapButton { t.Indicator = v; return t }
+
+// SetShortcut sets the [MapButton.Shortcut]
+func (t *MapButton) SetShortcut(v key.Chord) *MapButton { t.Shortcut = v; return t }
+
+// SetMenu sets the [MapButton.Menu]
+func (t *MapButton) SetMenu(v func(m *core.Scene)) *MapButton { t.Menu = v; return t }

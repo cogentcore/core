@@ -5,6 +5,8 @@
 package core
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/base/reflectx"
 )
 
@@ -18,19 +20,19 @@ type Value interface {
 }
 
 // ValueSetter is an optional interface that [Value]s can implement
-// to customize how the associated widget value is set from the [WidgetBase.BindValue].
+// to customize how the associated widget value is set from the given value.
 type ValueSetter interface {
 
-	// SetWidgetValue sets the associated widget value from the [WidgetBase.BindValue].
-	SetWidgetValue() error
+	// SetWidgetValue sets the associated widget value from the given value.
+	SetWidgetValue(value any) error
 }
 
 // OnBinder is an optional interface that [Value]s can implement to
-// do something when the widget is bound to [WidgetBase.BindValue].
+// do something when the widget is bound to the given value.
 type OnBinder interface {
 
-	// OnBind is called when the widget is bound to [WidgetBase.BindValue].
-	OnBind()
+	// OnBind is called when the widget is bound to given value.
+	OnBind(value any)
 }
 
 // Bind binds the given value to the given [Value] such that the values of
@@ -38,22 +40,19 @@ type OnBinder interface {
 // and during [Widget.ConfigWidget]. It returns the widget to enable method chaining.
 func Bind[T Value](value any, vw T) T {
 	wb := vw.AsWidget()
-	// if value == wb.BindValue {
-	// 	return vw
-	// }
-	wb.BindValue = value
 	wb.ValueUpdate = func() {
 		if vws, ok := any(vw).(ValueSetter); ok {
-			ErrorSnackbar(vw, vws.SetWidgetValue())
+			ErrorSnackbar(vw, vws.SetWidgetValue(value))
 		} else {
 			ErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))
 		}
 	}
 	wb.ValueOnChange = func() {
+		fmt.Println("setting value:", wb, value, vw.WidgetValue())
 		ErrorSnackbar(vw, reflectx.SetRobust(value, vw.WidgetValue()))
 	}
 	if ob, ok := any(vw).(OnBinder); ok {
-		ob.OnBind()
+		ob.OnBind(value)
 	}
 	return vw
 }
