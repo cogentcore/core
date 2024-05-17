@@ -38,9 +38,9 @@ type OnBinder interface {
 // and during [Widget.ConfigWidget]. It returns the widget to enable method chaining.
 func Bind[T Value](value any, vw T) T {
 	wb := vw.AsWidget()
-	if value == wb.BindValue {
-		return vw
-	}
+	// if value == wb.BindValue {
+	// 	return vw
+	// }
 	wb.BindValue = value
 	wb.ValueUpdate = func() {
 		if vws, ok := any(vw).(ValueSetter); ok {

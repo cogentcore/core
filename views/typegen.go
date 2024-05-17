@@ -209,7 +209,7 @@ func (t *MapView) SetViewPath(v string) *MapView { t.ViewPath = v; return t }
 func (t *MapView) SetTooltip(v string) *MapView { t.Tooltip = v; return t }
 
 // MapViewInlineType is the [types.Type] for [MapViewInline]
-var MapViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapViewInline", IDName: "map-view-inline", Doc: "MapViewInline represents a map within a single line of key and value widgets.\nThis is typically used for smaller maps.", Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "MapValue", Doc: "MapValue is the [Value] associated with this map view, if there is one."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "configSize", Doc: "configSize is the size of the map when the widget was configured."}}, Instance: &MapViewInline{}})
+var MapViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapViewInline", IDName: "map-view-inline", Doc: "MapViewInline represents a map within a single line of key and value widgets.\nThis is typically used for smaller maps.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "MapValue", Doc: "MapValue is the [Value] associated with this map view, if there is one."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "configSize", Doc: "configSize is the size of the map when the widget was configured."}}, Instance: &MapViewInline{}})
 
 // NewMapViewInline returns a new [MapViewInline] with the given optional parent:
 // MapViewInline represents a map within a single line of key and value widgets.
@@ -337,7 +337,7 @@ func (t *SliceViewGrid) SetLastBackground(v image.Image) *SliceViewGrid {
 func (t *SliceViewGrid) SetTooltip(v string) *SliceViewGrid { t.Tooltip = v; return t }
 
 // SliceViewInlineType is the [types.Type] for [SliceViewInline]
-var SliceViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewInline", IDName: "slice-view-inline", Doc: "SliceViewInline represents a slice within a single line of value widgets.\nThis is typically used for smaller slices.", Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the slice that we are viewing."}, {Name: "SliceValue", Doc: "SliceValue is the Value for the slice itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}, {Name: "isFixedLength", Doc: "isFixedLength is whether the slice has a fixed-length flag on it."}, {Name: "configSize", Doc: "size when configured"}}, Instance: &SliceViewInline{}})
+var SliceViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewInline", IDName: "slice-view-inline", Doc: "SliceViewInline represents a slice within a single line of value widgets.\nThis is typically used for smaller slices.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the slice that we are viewing."}, {Name: "SliceValue", Doc: "SliceValue is the Value for the slice itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}, {Name: "isFixedLength", Doc: "isFixedLength is whether the slice has a fixed-length flag on it."}, {Name: "configSize", Doc: "size when configured"}}, Instance: &SliceViewInline{}})
 
 // NewSliceViewInline returns a new [SliceViewInline] with the given optional parent:
 // SliceViewInline represents a slice within a single line of value widgets.
@@ -386,7 +386,7 @@ func (t *StructView) SetViewPath(v string) *StructView { t.ViewPath = v; return 
 func (t *StructView) SetTooltip(v string) *StructView { t.Tooltip = v; return t }
 
 // StructViewInlineType is the [types.Type] for [StructViewInline]
-var StructViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructViewInline", IDName: "struct-view-inline", Doc: "StructViewInline represents a struct within a single line of\nfield labels and value widgets. This is typically used for smaller structs.", Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "StructValue", Doc: "StructValue is the [Value] associated with this struct view, if any."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [core.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructViewInline{}})
+var StructViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructViewInline", IDName: "struct-view-inline", Doc: "StructViewInline represents a struct within a single line of\nfield labels and value widgets. This is typically used for smaller structs.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "StructValue", Doc: "StructValue is the [Value] associated with this struct view, if any."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [core.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructViewInline{}})
 
 // NewStructViewInline returns a new [StructViewInline] with the given optional parent:
 // StructViewInline represents a struct within a single line of
@@ -579,3 +579,34 @@ func (t *TreeView) SetSelectedNodes(v ...TreeViewer) *TreeView { t.SelectedNodes
 
 // SetTooltip sets the [TreeView.Tooltip]
 func (t *TreeView) SetTooltip(v string) *TreeView { t.Tooltip = v; return t }
+
+// SliceButtonType is the [types.Type] for [SliceButton]
+var SliceButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceButton", IDName: "slice-button", Doc: "SliceButton represents a slice or array value with a button.", Embeds: []types.Field{{Name: "Button"}}, Instance: &SliceButton{}})
+
+// NewSliceButton returns a new [SliceButton] with the given optional parent:
+// SliceButton represents a slice or array value with a button.
+func NewSliceButton(parent ...tree.Node) *SliceButton { return tree.New[*SliceButton](parent...) }
+
+// NodeType returns the [*types.Type] of [SliceButton]
+func (t *SliceButton) NodeType() *types.Type { return SliceButtonType }
+
+// New returns a new [*SliceButton] value
+func (t *SliceButton) New() tree.Node { return &SliceButton{} }
+
+// SetTooltip sets the [SliceButton.Tooltip]
+func (t *SliceButton) SetTooltip(v string) *SliceButton { t.Tooltip = v; return t }
+
+// SetType sets the [SliceButton.Type]
+func (t *SliceButton) SetType(v core.ButtonTypes) *SliceButton { t.Type = v; return t }
+
+// SetIcon sets the [SliceButton.Icon]
+func (t *SliceButton) SetIcon(v icons.Icon) *SliceButton { t.Icon = v; return t }
+
+// SetIndicator sets the [SliceButton.Indicator]
+func (t *SliceButton) SetIndicator(v icons.Icon) *SliceButton { t.Indicator = v; return t }
+
+// SetShortcut sets the [SliceButton.Shortcut]
+func (t *SliceButton) SetShortcut(v key.Chord) *SliceButton { t.Shortcut = v; return t }
+
+// SetMenu sets the [SliceButton.Menu]
+func (t *SliceButton) SetMenu(v func(m *core.Scene)) *SliceButton { t.Menu = v; return t }

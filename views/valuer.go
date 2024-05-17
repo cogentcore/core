@@ -28,12 +28,39 @@ func init() {
 	core.SettingsWindow = SettingsWindow
 	core.InspectorWindow = InspectorWindow
 
+	forceInline := false
+	forceNoInline := false
+
 	core.AddValueConverter(func(value any) core.Value {
+		// stag := reflect.StructTag(tags)
+		// vtag := stag.Get("view")
+		//
+		// switch vtag {
+		// case "inline":
+		// 	forceInline = true
+		// case "no-inline":
+		// 	forceNoInline = true
+		// }
+
 		typ := reflectx.NonPointerType(reflect.TypeOf(value))
 		kind := typ.Kind()
 		switch kind {
 		case reflect.Array, reflect.Slice:
-			return NewSliceViewInline()
+			v := reflect.ValueOf(value)
+			sz := v.Len()
+			eltyp := reflectx.SliceElementType(value)
+			if _, ok := value.([]byte); ok {
+				return core.NewTextField()
+			}
+			if _, ok := value.([]rune); ok {
+				return core.NewTextField()
+			}
+			isstru := (reflectx.NonPointerType(eltyp).Kind() == reflect.Struct)
+			if !forceNoInline && (forceInline || (!isstru && sz <= core.SystemSettings.SliceInlineLength && !tree.IsNode(eltyp))) {
+				return NewSliceViewInline()
+			} else {
+				return NewSliceButton()
+			}
 		}
 		return nil
 	})
