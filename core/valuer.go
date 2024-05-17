@@ -61,6 +61,7 @@ func AddValueConverter(f func(value any, tags ...string) Value) {
 
 func init() {
 	AddValueType[bool, *Switch]()
+	AddValueType[icons.Icon, *Icon]()
 }
 
 // NewValue converts the given value into an appropriate [Value]
@@ -102,12 +103,11 @@ func ToValue(value any, tags ...string) Value {
 		}
 	}
 
+	if _, ok := value.(enums.BitFlag); ok {
+		return NewSwitches()
+	}
 	if _, ok := value.(enums.Enum); ok {
 		return NewChooser()
-	}
-
-	if _, ok := value.(*icons.Icon); ok {
-		return NewIcon()
 	}
 
 	kind := typ.Kind()
