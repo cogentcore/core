@@ -116,10 +116,17 @@ func homePage(ctx *htmlview.Context) bool {
 		}
 	}
 
-	makeBlock("CODE ONCE, RUN EVERYWHERE", "With Cogent Core, you can write your app once and it will instantly run on macOS, Windows, Linux, iOS, Android, and the Web, automatically scaling to any screen. Instead of struggling with platform-specific code in a multitude of languages, you can easily write and maintain a single pure Go codebase.", func(parent core.Widget) {
-		core.NewIcon(parent).SetIcon(icons.Devices).Style(func(s *styles.Style) {
+	makeIcon := func(parent core.Widget) *core.Icon {
+		icon := core.NewIcon(parent)
+		icon.Style(func(s *styles.Style) {
 			s.Min.Set(units.Dp(256))
+			s.Color = colors.C(colors.Scheme.Primary.Base)
 		})
+		return icon
+	}
+
+	makeBlock("CODE ONCE, RUN EVERYWHERE", "With Cogent Core, you can write your app once and it will instantly run on macOS, Windows, Linux, iOS, Android, and the Web, automatically scaling to any screen. Instead of struggling with platform-specific code in a multitude of languages, you can easily write and maintain a single pure Go codebase.", func(parent core.Widget) {
+		makeIcon(parent).SetIcon(icons.Devices)
 	})
 
 	makeBlock("EFFORTLESS ELEGANCE", "Cogent Core is built on Go, a high-level language designed for building elegant, readable, and scalable code with full type safety and a robust design that never gets in your way. Cogent Core makes it easy to get started with cross-platform app development in just two commands and seven lines of simple code.", func(parent core.Widget) {
@@ -148,27 +155,19 @@ func homePage(ctx *htmlview.Context) bool {
 	})
 
 	makeBlock("OPTIMIZED EXPERIENCE", "Every part of your development experience is guided by a comprehensive set of interactive example-based documentation, in-depth video tutorials, easy-to-use command line tools specialized for Cogent Core, and active support and development from the Cogent Core developers.", func(parent core.Widget) {
-		core.NewIcon(parent).SetIcon(icons.PlayCircle).Style(func(s *styles.Style) {
-			s.Min.Set(units.Dp(256))
-		})
+		makeIcon(parent).SetIcon(icons.PlayCircle)
 	})
 
 	makeBlock("EXTREMELY FAST", "Cogent Core is powered by Vulkan, a modern, cross-platform, high-performance graphics framework that allows apps to run on all platforms at extremely fast speeds. All Cogent Core apps compile to machine code, allowing them to run without any overhead.", func(parent core.Widget) {
-		core.NewIcon(parent).SetIcon(icons.Bolt).Style(func(s *styles.Style) {
-			s.Min.Set(units.Dp(256))
-		})
+		makeIcon(parent).SetIcon(icons.Bolt)
 	})
 
 	makeBlock("FREE AND OPEN SOURCE", "Cogent Core is completely free and open source under the permissive BSD-3 License, allowing you to use Cogent Core for any purpose, commercially or personally. We believe that software works best when everyone can use it.", func(parent core.Widget) {
-		core.NewIcon(parent).SetIcon(icons.Code).Style(func(s *styles.Style) {
-			s.Min.Set(units.Dp(256))
-		})
+		makeIcon(parent).SetIcon(icons.Code)
 	})
 
 	makeBlock("USED AROUND THE WORLD", "Over six years of development, Cogent Core has been used and thoroughly tested by developers and scientists around the world for a wide variety of use cases. Cogent Core is a production-ready framework actively used to power everything from end-user apps to scientific research.", func(parent core.Widget) {
-		core.NewIcon(parent).SetIcon(icons.GlobeAsia).Style(func(s *styles.Style) {
-			s.Min.Set(units.Dp(256))
-		})
+		makeIcon(parent).SetIcon(icons.GlobeAsia)
 	})
 
 	core.NewText(frame).SetType(core.TextDisplaySmall).SetText("<b>What can Cogent Core do?</b>")
@@ -200,21 +199,15 @@ func homePage(ctx *htmlview.Context) bool {
 	core.NewText(frame).SetType(core.TextDisplaySmall).SetText("<b>Why Cogent Core instead of something else?</b>")
 
 	makeBlock(`THE PROBLEM`, "After using other frameworks built on HTML and Qt for years to make various apps ranging from simple tools to complex scientific models, we realized that we were spending more time dealing with excessive boilerplate, browser inconsistencies, and dependency management issues than actual app development.", func(parent core.Widget) {
-		core.NewIcon(parent).SetIcon(icons.Blank).Style(func(s *styles.Style) {
-			s.Min.Set(units.Dp(256))
-		})
+		makeIcon(parent).SetIcon(icons.Blank)
 	})
 
 	makeBlock(`THE SOLUTION`, "We decided to make a framework that would allow us to focus on app content and logic by providing a consistent and elegant API that automatically handles cross-platform support, user customization, and app packaging and deployment.", func(parent core.Widget) {
-		core.NewIcon(parent).SetIcon(icons.Blank).Style(func(s *styles.Style) {
-			s.Min.Set(units.Dp(256))
-		})
+		makeIcon(parent).SetIcon(icons.Blank)
 	})
 
 	makeBlock(`THE RESULT`, "Instead of constantly jumping through hoops to create a consistent, easy-to-use, cross-platform app, you can now take advantage of a powerful featureset on all platforms and vastly simplify your development experience.", func(parent core.Widget) {
-		core.NewIcon(parent).SetIcon(icons.Blank).Style(func(s *styles.Style) {
-			s.Min.Set(units.Dp(256))
-		})
+		makeIcon(parent).SetIcon(icons.Blank)
 	})
 
 	core.NewButton(frame).SetText("Get started").OnClick(func(e events.Event) {
