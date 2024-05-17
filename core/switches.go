@@ -61,19 +61,19 @@ func (sw *Switches) WidgetValue() any {
 	return item.Text
 }
 
-func (sw *Switches) SetWidgetValue(value any) error {
-	if bf, ok := value.(enums.BitFlag); ok {
+func (sw *Switches) SetWidgetValue() error {
+	if bf, ok := sw.BindValue.(enums.BitFlag); ok {
 		sw.UpdateFromBitFlag(bf)
 		return nil
 	}
-	return sw.SetSelectedItem(reflectx.ToString(value))
+	return sw.SetSelectedItem(reflectx.ToString(sw.BindValue))
 }
 
-func (sw *Switches) OnBind(value any) {
-	if e, ok := value.(enums.Enum); ok {
+func (sw *Switches) OnBind() {
+	if e, ok := sw.BindValue.(enums.Enum); ok {
 		sw.SetEnum(e).SetType(SwitchSegmentedButton).SetMutex(true)
 	}
-	if bf, ok := value.(enums.BitFlagSetter); ok {
+	if bf, ok := sw.BindValue.(enums.BitFlagSetter); ok {
 		sw.bitFlagValue = bf
 		sw.SetType(SwitchChip).SetMutex(false)
 	} else {

@@ -25,6 +25,52 @@ import (
 
 // This file contains the standard [Value]s built into views.
 
+// SliceButton represents a slice or array value with a button.
+type SliceButton struct {
+	core.Button
+}
+
+func (sb *SliceButton) WidgetValue() any { return &sb.BindValue }
+
+func (sb *SliceButton) OnInit() {
+	sb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	sb.OnClick(func(e events.Event) {
+		// ConfigDialogWidget(sb, true)
+	})
+}
+
+func (sb *SliceButton) Config(c *core.Config) {
+	sb.SetText(reflectx.FriendlySliceLabel(reflect.ValueOf(sb.BindValue)))
+	sb.Button.Config(c)
+}
+
+/*
+func (sb *SliceButton) ConfigDialog(d *core.Body) (bool, func()) {
+	npv := reflectx.NonPointerValue(sb.Value)
+	if sb.Value.IsZero() || npv.IsZero() {
+		return false, nil
+	}
+	vvp := reflectx.OnePointerValue(sb.Value)
+	if vvp.Kind() != reflect.Pointer {
+		slog.Error("views.SliceButton: Cannot view unadressable (non-pointer) slices", "type", sb.Value.Type())
+		return false, nil
+	}
+	slci := vvp.Interface()
+	if npv.Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(sb.Value.Interface())).Kind() == reflect.Struct {
+		tv := NewTableView(d).SetSlice(slci).SetViewPath(sb.ViewPath)
+		tv.SetReadOnly(sb.IsReadOnly())
+		// d.AddAppBar(tv.ConfigToolbar) // todo
+	} else {
+		sv := NewSliceView(d).SetSlice(slci).SetViewPath(sb.ViewPath)
+		sv.SetReadOnly(sb.IsReadOnly())
+		// d.AddAppBar(sv.ConfigToolbar)
+	}
+	return true, nil
+}
+*/
+
+////////////////////////////////////////////// OLD:
+
 // StringValue represents any value with a text field.
 type StringValue struct {
 	ValueBase[*core.TextField]

@@ -61,8 +61,8 @@ const (
 
 func (sw *Switch) WidgetValue() any { return sw.IsChecked() }
 
-func (sw *Switch) SetWidgetValue(value any) error {
-	b, err := reflectx.ToBool(value)
+func (sw *Switch) SetWidgetValue() error {
+	b, err := reflectx.ToBool(sw.BindValue)
 	if err != nil {
 		return err
 	}

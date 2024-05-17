@@ -320,6 +320,10 @@ type WidgetBase struct {
 	// by widgets whenever they are added to another widget parent.
 	Scene *Scene `copier:"-" json:"-" xml:"-" set:"-"`
 
+	// BindValue is the source value that this widget is bound to
+	// when functioning as a [Value].
+	BindValue any `copier:"-" json:"-" xml:"-" set:"-"`
+
 	// ValueUpdate is a function set by [Bind] that is called in
 	// [Widget.Config] to update the widget's value from the bound value.
 	ValueUpdate func() `copier:"-" json:"-" xml:"-" set:"-"`
@@ -328,6 +332,11 @@ type WidgetBase struct {
 	// the widget receives an [event.Change] to update the bound value
 	// from the widget's value.
 	ValueOnChange func() `copier:"-" json:"-" xml:"-" set:"-"`
+
+	// ValueContext is a record of parent value names that
+	// have led up to this [Value]. It is displayed as extra
+	// contextual information in dialogs.
+	ValueContext string `copier:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
