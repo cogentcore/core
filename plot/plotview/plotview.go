@@ -79,13 +79,14 @@ func (pl *PlotView) CopyFieldsFrom(frm tree.Node) {
 // suitable for a tab or other element that is not the main plot.
 func NewSubPlot(parent ...tree.Node) *PlotView {
 	fr := core.NewFrame(parent...)
-	tb := core.NewToolbar(fr)
+	// tb := core.NewToolbar(fr)
 	pl := NewPlotView(fr)
 	fr.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
-	tb.ConfigFuncs.Add(pl.ConfigToolbar)
+	// TODO(config)
+	//tb.ConfigFuncs.Add(pl.ConfigToolbar)
 	return pl
 }
 
@@ -453,7 +454,7 @@ func (pl *PlotView) ColumnsUpdate() {
 		}
 		ci := i - PlotColumnsHeaderN
 		cp := pl.Columns[ci]
-		cl := cli.(*core.Layout)
+		cl := cli.(*core.Frame)
 		sw := cl.Child(0).(*core.Switch)
 		if sw.StateIs(states.Checked) != cp.On {
 			sw.SetChecked(cp.On)
@@ -475,7 +476,7 @@ func (pl *PlotView) SetAllColumns(on bool) {
 			continue
 		}
 		cp.On = on
-		cl := cli.(*core.Layout)
+		cl := cli.(*core.Frame)
 		sw := cl.Child(0).(*core.Switch)
 		sw.SetChecked(cp.On)
 	}
@@ -499,7 +500,7 @@ func (pl *PlotView) SetColumnsByName(nameContains string, on bool) { //types:add
 			continue
 		}
 		cp.On = on
-		cl := cli.(*core.Layout)
+		cl := cli.(*core.Frame)
 		sw := cl.Child(0).(*core.Switch)
 		sw.SetChecked(cp.On)
 	}
@@ -554,16 +555,17 @@ func (pl *PlotView) ColumnsConfig() {
 				OnChange(func(e events.Event) {
 					pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
 				})
-			d.AddAppBar(func(tb *core.Toolbar) {
-				core.NewButton(tb).SetText("Set X Axis").OnClick(func(e events.Event) {
-					pl.Params.XAxisColumn = cp.Column
-					pl.UpdatePlot()
-				})
-				core.NewButton(tb).SetText("Set Legend").OnClick(func(e events.Event) {
-					pl.Params.LegendColumn = cp.Column
-					pl.UpdatePlot()
-				})
-			})
+				// TODO(config)
+			// d.AddAppBar(func(tb *core.Toolbar) {
+			// 	core.NewButton(tb).SetText("Set X Axis").OnClick(func(e events.Event) {
+			// 		pl.Params.XAxisColumn = cp.Column
+			// 		pl.UpdatePlot()
+			// 	})
+			// 	core.NewButton(tb).SetText("Set Legend").OnClick(func(e events.Event) {
+			// 		pl.Params.LegendColumn = cp.Column
+			// 		pl.UpdatePlot()
+			// 	})
+			// })
 			d.NewFullDialog(pl).SetNewWindow(true).Run()
 		})
 	}
@@ -605,8 +607,9 @@ func (pl *PlotView) ConfigToolbar(tb *core.Toolbar) {
 		SetTooltip("open a TableView window of the data").
 		OnClick(func(e events.Event) {
 			d := core.NewBody().AddTitle(pl.Nm + " Data")
-			etv := tensorview.NewTableView(d).SetTable(pl.Table.Table)
-			d.AddAppBar(etv.ConfigToolbar)
+			tensorview.NewTableView(d).SetTable(pl.Table.Table)
+			// TODO(config)
+			// d.AddAppBar(etv.ConfigToolbar)
 			d.NewFullDialog(pl).SetNewWindow(true).Run()
 		})
 	core.NewSeparator(tb)

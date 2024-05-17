@@ -313,20 +313,20 @@ func (cv *ColorView) Config(sc *core.Scene) {
 	cv.UpdateEnd(update)
 }
 
-func (cv *ColorView) NumLay() *core.Layout {
-	return cv.ChildByName("num-lay", 1).(*core.Layout)
+func (cv *ColorView) NumLay() *core.Frame {
+	return cv.ChildByName("num-lay", 1).(*core.Frame)
 }
 
-func (cv *ColorView) SliderLay() *core.Layout {
-	return cv.ChildByName("slider-lay", 0).(*core.Layout)
+func (cv *ColorView) SliderLay() *core.Frame {
+	return cv.ChildByName("slider-lay", 0).(*core.Frame)
 }
 
 func (cv *ColorView) Value() *core.Frame {
 	return cv.SliderLay().ChildByName("value", 0).(*core.Frame)
 }
 
-func (cv *ColorView) SliderGrid() *core.Layout {
-	return cv.SliderLay().ChildByName("slider-grid", 0).(*core.Layout)
+func (cv *ColorView) SliderGrid() *core.Frame {
+	return cv.SliderLay().ChildByName("slider-grid", 0).(*core.Frame)
 }
 
 func (cv *ColorView) SetRGBValue(val float32, rgb int) {
