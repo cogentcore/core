@@ -201,15 +201,15 @@ func homePage(ctx *htmlview.Context) bool {
 	core.NewText(frame).SetType(core.TextDisplaySmall).SetText("<b>Why Cogent Core instead of something else?</b>")
 
 	makeBlock(`THE PROBLEM`, "After using other frameworks built on HTML and Qt for years to make various apps ranging from simple tools to complex scientific models, we realized that we were spending more time dealing with excessive boilerplate, browser inconsistencies, and dependency management issues than actual app development.", func(parent core.Widget) {
-		makeIcon(parent).SetIcon(icons.Blank)
+		makeIcon(parent).SetIcon(icons.Problem)
 	})
 
 	makeBlock(`THE SOLUTION`, "We decided to make a framework that would allow us to focus on app content and logic by providing a consistent and elegant API that automatically handles cross-platform support, user customization, and app packaging and deployment.", func(parent core.Widget) {
-		makeIcon(parent).SetIcon(icons.Blank)
+		makeIcon(parent).SetIcon(icons.Build)
 	})
 
 	makeBlock(`THE RESULT`, "Instead of constantly jumping through hoops to create a consistent, easy-to-use, cross-platform app, you can now take advantage of a powerful featureset on all platforms and vastly simplify your development experience.", func(parent core.Widget) {
-		makeIcon(parent).SetIcon(icons.Blank)
+		makeIcon(parent).SetIcon(icons.Check)
 	})
 
 	core.NewButton(frame).SetText("Get started").OnClick(func(e events.Event) {
