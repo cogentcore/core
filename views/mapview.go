@@ -76,7 +76,7 @@ func (mv *MapView) Config(c *core.Config) {
 
 	mv.ncols = ncol
 
-	keys := reflectx.MapSort(mv.Map, !mv.SortValues, true) // note: this is a slice of reflect.Value!
+	keys := reflectx.MapSort(mv.Map, !mv.SortValues, true)
 	for _, key := range keys {
 		keytxt := reflectx.ToString(key.Interface())
 		keynm := "key-" + keytxt
@@ -87,7 +87,6 @@ func (mv *MapView) Config(c *core.Config) {
 			BindMapKey(mapv, key, w)
 			wb := w.AsWidget()
 			wb.SetReadOnly(mv.IsReadOnly())
-			// kv.SetMapKey(key, mv.Map)
 			w.Style(func(s *styles.Style) {
 				s.SetReadOnly(mv.IsReadOnly())
 				s.SetTextWrap(false)

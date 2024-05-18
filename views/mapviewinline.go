@@ -45,7 +45,7 @@ func (mv *MapViewInline) Config(c *core.Config) {
 	}
 	mpv := reflect.ValueOf(mv.Map)
 	mpvnp := reflectx.NonPointerValue(reflectx.UnderlyingPointer(mpv))
-	keys := mpvnp.MapKeys() // this is a slice of reflect.Value
+	keys := mpvnp.MapKeys()
 	reflectx.ValueSliceSort(keys, true)
 	mv.configSize = len(keys)
 
@@ -62,7 +62,6 @@ func (mv *MapViewInline) Config(c *core.Config) {
 			w := core.NewValue(key.Interface(), "")
 			wb := w.AsWidget()
 			wb.SetReadOnly(mv.IsReadOnly())
-			// kv.SetMapKey(key, mv.Map)
 			w.Style(func(s *styles.Style) {
 				s.SetReadOnly(mv.IsReadOnly())
 				s.SetTextWrap(false)
@@ -82,14 +81,12 @@ func (mv *MapViewInline) Config(c *core.Config) {
 		}, func(w core.Value) {
 			wb := w.AsWidget()
 			core.Bind(key.Interface(), w)
-			// vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value value to track updates
 			wb.SetReadOnly(mv.IsReadOnly())
 		})
 		core.ConfigureNew(c, valnm, func() core.Value {
 			w := core.NewValue(val.Interface(), "")
 			wb := w.AsWidget()
 			wb.SetReadOnly(mv.IsReadOnly())
-			// vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value value to track updates
 			wb.OnChange(func(e events.Event) { mv.SendChange(e) })
 			wb.OnInput(mv.HandleEvent)
 			w.Style(func(s *styles.Style) {
@@ -105,7 +102,6 @@ func (mv *MapViewInline) Config(c *core.Config) {
 		}, func(w core.Value) {
 			wb := w.AsWidget()
 			core.Bind(val.Interface(), w)
-			// vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value value to track updates
 			wb.SetReadOnly(mv.IsReadOnly())
 		})
 	}
