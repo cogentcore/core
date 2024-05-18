@@ -429,11 +429,11 @@ func makeViews(ts *core.Tabs) {
 
 	views.NewStructView(vts.NewTab("Struct view")).SetStruct(&str)
 
-	mp := map[string]string{}
+	mp := map[string]any{}
 
 	mp["Go"] = "Elegant, fast, and easy-to-use"
-	mp["Python"] = "Slow and duck-typed"
-	mp["C++"] = "Hard to use and slow to compile"
+	mp["Python"] = true
+	mp["C++"] = 4
 
 	views.NewMapView(vts.NewTab("Map view")).SetMap(&mp)
 
