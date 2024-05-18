@@ -228,12 +228,13 @@ func BindMapKey[T core.Value](mapv reflect.Value, key reflect.Value, vw T) T {
 			mapv.SetMapIndex(key, reflect.Value{})
 			return
 		}
-		d := core.NewBody().AddTitle("Key already exists").AddText(fmt.Sprintf("The key %v already exists", newKey))
+		d := core.NewBody().AddTitle("Key already exists").AddText(fmt.Sprintf("The key %q already exists", reflectx.ToString(newKey)))
 		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent)
 			d.AddOK(parent).SetText("Overwrite").OnClick(func(e events.Event) {
-				mapv.SetMapIndex(key, reflect.Value{})
 				mapv.SetMapIndex(newKey, mapv.MapIndex(key))
+				mapv.SetMapIndex(key, reflect.Value{})
+				wb.SendChange()
 			})
 		})
 		d.RunDialog(vw)
