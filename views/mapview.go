@@ -34,9 +34,11 @@ type MapView struct {
 	// It is displayed as extra contextual information in view dialogs.
 	ViewPath string
 
-	// ncols is the number of columns to display in the view.
+	// ncols is the number of columns to display if the map view is not inline.
 	ncols int
 }
+
+func (mv *MapView) WidgetValue() any { return &mv.Map }
 
 func (mv *MapView) OnInit() {
 	mv.Frame.OnInit()
