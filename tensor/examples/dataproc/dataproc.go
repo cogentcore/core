@@ -47,7 +47,7 @@ var csv embed.FS
 //
 //	https://jakevdp.github.io/PythonDataScienceHandbook/03.08-aggregation-and-grouping.html
 func AnalyzePlanets() {
-	Planets = table.NewTable(0, "planets")
+	Planets = table.NewTable("planets")
 	Planets.OpenFS(csv, "planets.csv", table.Comma)
 
 	PlanetsAll := table.NewIndexView(Planets) // full original data

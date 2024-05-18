@@ -37,8 +37,8 @@ type Table struct { //types:add
 	MetaData map[string]string
 }
 
-func NewTable(rows int, name ...string) *Table {
-	et := &Table{Rows: rows}
+func NewTable(name ...string) *Table {
+	et := &Table{}
 	if len(name) > 0 {
 		et.SetMetaData("name", name[0])
 	}
@@ -287,12 +287,13 @@ func (dt *Table) AddRows(n int) { //types:add
 
 // SetNumRows sets the number of rows in the table, across all columns
 // if rows = 0 then effective number of rows in tensors is 1, as this dim cannot be 0
-func (dt *Table) SetNumRows(rows int) { //types:add
+func (dt *Table) SetNumRows(rows int) *Table { //types:add
 	dt.Rows = rows // can be 0
 	rows = max(1, rows)
 	for _, tsr := range dt.Columns {
 		tsr.SetNumRows(rows)
 	}
+	return dt
 }
 
 // note: no really clean definition of CopyFrom -- no point of re-using existing
@@ -300,7 +301,7 @@ func (dt *Table) SetNumRows(rows int) { //types:add
 
 // Clone returns a complete copy of this table
 func (dt *Table) Clone() *Table {
-	cp := NewTable(dt.Rows)
+	cp := NewTable().SetNumRows(dt.Rows)
 	cp.CopyMetaDataFrom(dt)
 	for i, cl := range dt.Columns {
 		cp.AddColumn(cl.Clone(), dt.ColumnNames[i])

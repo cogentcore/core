@@ -407,7 +407,7 @@ func (spl *Splits) AggsToTable(colName bool) *Table {
 		return nil
 	}
 	dt := spl.Splits[0].Table
-	st := NewTable(nsp)
+	st := NewTable().SetNumRows(nsp)
 	for _, cn := range spl.Levels {
 		st.AddStringColumn(cn)
 	}
@@ -453,7 +453,7 @@ func (spl *Splits) AggsToTableCopy(colName bool) *Table {
 		return nil
 	}
 	dt := spl.Splits[0].Table
-	st := NewTable(nsp)
+	st := NewTable().SetNumRows(nsp)
 	exmap := make(map[string]struct{})
 	for _, cn := range spl.Levels {
 		st.AddStringColumn(cn)

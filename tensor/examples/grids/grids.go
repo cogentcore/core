@@ -17,7 +17,7 @@ import (
 var tsv embed.FS
 
 func main() {
-	pats := table.NewTable(0, "pats")
+	pats := table.NewTable("pats")
 	pats.SetMetaData("name", "TrainPats")
 	pats.SetMetaData("desc", "Training patterns")
 	// todo: meta data for grid size

@@ -20,7 +20,7 @@ var DescStatsND = []Stats{Count, Mean, Std, Sem, Min, Max}
 func DescAll(ix *table.IndexView) *table.Table {
 	st := ix.Table
 	nAgg := len(DescStats)
-	dt := table.NewTable(nAgg)
+	dt := table.NewTable().SetNumRows(nAgg)
 	dt.AddStringColumn("Stat")
 	for ci := range st.Columns {
 		col := st.Columns[ci]
@@ -73,7 +73,7 @@ func DescIndex(ix *table.IndexView, colIndex int) *table.Table {
 		stats = DescStatsND
 	}
 	nAgg := len(stats)
-	dt := table.NewTable(nAgg)
+	dt := table.NewTable().SetNumRows(nAgg)
 	dt.AddStringColumn("Stat")
 	dt.AddFloat64TensorColumn(st.ColumnNames[colIndex], col.Shape().Sizes[1:], col.Shape().Names[1:]...)
 	dtnm := dt.Columns[0]

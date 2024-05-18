@@ -26,7 +26,7 @@ func main() {
 	b := core.NewBody("Plot View")
 
 	if true {
-		epc := table.NewTable(0, "epc")
+		epc := table.NewTable("epc")
 		epc.OpenFS(tsv, "ra25epoch.tsv", table.Tab)
 
 		pl := plotview.NewPlotView(b)
