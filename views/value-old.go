@@ -296,7 +296,7 @@ func OpenDialog(v Value, ctx core.Widget, fun, beforeFunc func()) bool {
 // to configure the dialog contents.
 func OpenDialogBase(v Value, cd ConfigDialoger, ctx core.Widget, fun func()) {
 	vd := v.AsValueData()
-	opv := reflectx.OnePointerUnderlyingValue(vd.Value)
+	opv := reflectx.UnderlyingPointer(vd.Value)
 	if !opv.IsValid() {
 		return
 	}
@@ -827,7 +827,7 @@ func (v *ValueData) GetTitle() (label, newPath string, isZero bool) {
 		npt = reflectx.NonPointerType(v.Value.Type())
 		isZero = true
 	} else {
-		opv := reflectx.OnePointerUnderlyingValue(v.Value)
+		opv := reflectx.UnderlyingPointer(v.Value)
 		npt = reflectx.NonPointerType(opv.Type())
 	}
 	newPath = labels.FriendlyTypeName(npt)

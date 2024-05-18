@@ -62,7 +62,7 @@ func (sv *StructViewInline) Config(c *core.Config) {
 		sc = !NoSentenceCaseForType(types.TypeNameValue(sv.Struct))
 	}
 
-	sval := reflectx.OnePointerUnderlyingValue(reflect.ValueOf(sv.Struct)).Interface()
+	sval := reflectx.UnderlyingPointer(reflect.ValueOf(sv.Struct)).Interface()
 
 	reflectx.WalkValueFlatFields(sval, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc

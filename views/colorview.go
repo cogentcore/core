@@ -530,7 +530,7 @@ func (v *ColorValue) ConfigDialog(d *core.Body) (bool, func()) {
 	d.SetTitle("Edit color")
 	cv := NewColorView(d).SetColor(v.ColorValue())
 	return true, func() {
-		if u, ok := reflectx.OnePointerUnderlyingValue(v.Value).Interface().(*image.Uniform); ok {
+		if u, ok := reflectx.UnderlyingPointer(v.Value).Interface().(*image.Uniform); ok {
 			u.C = cv.Color.AsRGBA()
 		} else {
 			v.SetValue(cv.Color.AsRGBA())

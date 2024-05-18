@@ -77,13 +77,13 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 }
 
 func (sv *SliceViewInline) Config(c *core.Config) {
-	sl := reflectx.NonPointerValue(reflectx.OnePointerUnderlyingValue(reflect.ValueOf(sv.Slice)))
+	sl := reflectx.NonPointerValue(reflectx.UnderlyingPointer(reflect.ValueOf(sv.Slice)))
 
 	sz := min(sl.Len(), core.SystemSettings.SliceInlineLength)
 	sv.configSize = sz
 	for i := 0; i < sz; i++ {
 		itxt := strconv.Itoa(i)
-		val := reflectx.OnePointerUnderlyingValue(sl.Index(i)) // deal with pointer lists
+		val := reflectx.UnderlyingPointer(sl.Index(i)) // deal with pointer lists
 		core.ConfigureNew(c, "value-"+itxt, func() core.Value {
 			w := core.NewValue(val.Interface(), "")
 			wb := w.AsWidget()
@@ -190,7 +190,7 @@ func (sv *SliceViewInline) SliceSizeChanged() bool {
 	if reflectx.AnyIsNil(sv.Slice) {
 		return sv.configSize != 0
 	}
-	sl := reflectx.NonPointerValue(reflectx.OnePointerUnderlyingValue(reflect.ValueOf(sv.Slice)))
+	sl := reflectx.NonPointerValue(reflectx.UnderlyingPointer(reflect.ValueOf(sv.Slice)))
 	return sv.configSize != sl.Len()
 }
 

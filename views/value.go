@@ -94,7 +94,7 @@ func OpenDialogValue(v core.Value, ctx core.Widget, fun, beforeFunc func()) bool
 // do not implement [OpenDialoger] but do implement [ConfigDialoger]
 // to configure the dialog contents.
 func OpenDialogValueBase(v core.Value, cd ConfigDialoger, ctx core.Widget, fun func()) {
-	opv := reflectx.OnePointerUnderlyingValue(reflect.ValueOf(v.WidgetValue()))
+	opv := reflectx.UnderlyingPointer(reflect.ValueOf(v.WidgetValue()))
 	if !opv.IsValid() {
 		return
 	}

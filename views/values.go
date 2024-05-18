@@ -40,7 +40,7 @@ func (sb *SliceButton) ConfigDialog(d *core.Body) (bool, func()) {
 	if reflectx.AnyIsNil(sb.Slice) || npv.IsZero() {
 		return false, nil
 	}
-	vvp := reflectx.OnePointerUnderlyingValue(reflect.ValueOf(sb.Slice))
+	vvp := reflectx.UnderlyingPointer(reflect.ValueOf(sb.Slice))
 	if vvp.Kind() != reflect.Pointer {
 		slog.Error("views.SliceButton: Cannot view unadressable (non-pointer) slices", "type", npv.Type())
 		return false, nil
@@ -82,7 +82,7 @@ func (sb *StructButton) ConfigDialog(d *core.Body) (bool, func()) {
 	if reflectx.AnyIsNil(sb.Struct) {
 		return false, nil
 	}
-	opv := reflectx.OnePointerUnderlyingValue(reflect.ValueOf(sb.Struct))
+	opv := reflectx.UnderlyingPointer(reflect.ValueOf(sb.Struct))
 	str := opv.Interface()
 	NewStructView(d).SetStruct(str).SetViewPath(sb.ValueContext).
 		SetReadOnly(sb.IsReadOnly())

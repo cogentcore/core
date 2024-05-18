@@ -363,7 +363,7 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 
 	sv.SetSliceBase()
 	sv.Slice = sl
-	sv.SliceNPVal = reflectx.NonPointerUnderlyingValue(reflect.ValueOf(sv.Slice))
+	sv.SliceNPVal = reflectx.Underlying(reflect.ValueOf(sv.Slice))
 	isArray := reflectx.NonPointerType(reflect.TypeOf(sl)).Kind() == reflect.Array
 	sv.SetFlag(isArray, SliceViewIsArray)
 	// make sure elements aren't nil to prevent later panics
@@ -488,7 +488,7 @@ func (sv *SliceViewBase) UpdateMaxWidths() {
 func (sv *SliceViewBase) SliceElValue(si int) reflect.Value {
 	var val reflect.Value
 	if si < sv.SliceSize {
-		val = reflectx.OnePointerUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
+		val = reflectx.UnderlyingPointer(sv.SliceNPVal.Index(si)) // deal with pointer lists
 	} else {
 		val = sv.ElVal
 	}
@@ -877,7 +877,7 @@ func (sv *SliceViewBase) SliceVal(idx int) any {
 		fmt.Printf("views.SliceViewBase: slice index out of range: %v\n", idx)
 		return nil
 	}
-	val := reflectx.OnePointerUnderlyingValue(sv.SliceNPVal.Index(idx)) // deal with pointer lists
+	val := reflectx.UnderlyingPointer(sv.SliceNPVal.Index(idx)) // deal with pointer lists
 	vali := val.Interface()
 	return vali
 }

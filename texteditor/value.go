@@ -21,7 +21,7 @@ func (v *Value) Config() {
 	tb := NewBuffer()
 	tb.OnChange(func(e events.Event) {
 		v.SetValue(tb.String())
-		fmt.Println(reflectx.OnePointerUnderlyingValue(v.Value).Interface())
+		fmt.Println(reflectx.UnderlyingPointer(v.Value).Interface())
 	})
 	v.Widget.SetBuffer(tb)
 }

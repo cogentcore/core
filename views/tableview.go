@@ -586,7 +586,7 @@ func StructSliceIndexByValue(struSlice any, fldName string, fldVal any) (int, er
 	}
 	fldIndex := fld.Index
 	for idx := 0; idx < sz; idx++ {
-		rval := reflectx.OnePointerUnderlyingValue(svnp.Index(idx))
+		rval := reflectx.UnderlyingPointer(svnp.Index(idx))
 		fval := rval.Elem().FieldByIndex(fldIndex)
 		if !fval.IsValid() {
 			continue
@@ -602,7 +602,7 @@ func (tv *TableView) EditIndex(idx int) {
 	if idx < 0 || idx >= tv.SliceNPVal.Len() {
 		return
 	}
-	val := reflectx.OnePointerUnderlyingValue(tv.SliceNPVal.Index(idx))
+	val := reflectx.UnderlyingPointer(tv.SliceNPVal.Index(idx))
 	stru := val.Interface()
 	tynm := reflectx.NonPointerType(val.Type()).Name()
 	lbl := labels.ToLabel(stru)

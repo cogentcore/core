@@ -186,7 +186,7 @@ func (v *StructValue) ConfigDialog(d *core.Body) (bool, func()) {
 	if v.Value.IsZero() {
 		return false, nil
 	}
-	opv := reflectx.OnePointerUnderlyingValue(v.Value)
+	opv := reflectx.UnderlyingPointer(v.Value)
 	str := opv.Interface()
 	NewStructView(d).SetStruct(str).SetViewPath(v.ViewPath).
 		SetReadOnly(v.IsReadOnly())
@@ -380,7 +380,7 @@ type EnumValue struct {
 }
 
 func (v *EnumValue) Config() {
-	e := reflectx.OnePointerUnderlyingValue(v.Value).Interface().(enums.Enum)
+	e := reflectx.UnderlyingPointer(v.Value).Interface().(enums.Enum)
 	v.Widget.SetEnum(e)
 	v.Widget.OnChange(func(e events.Event) {
 		v.SetValue(v.Widget.CurrentItem.Value)

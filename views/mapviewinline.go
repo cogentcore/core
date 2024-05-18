@@ -50,7 +50,7 @@ func (mv *MapViewInline) Config(c *core.Config) {
 		return
 	}
 	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := reflectx.NonPointerValue(reflectx.OnePointerUnderlyingValue(mpv))
+	mpvnp := reflectx.NonPointerValue(reflectx.UnderlyingPointer(mpv))
 	keys := mpvnp.MapKeys() // this is a slice of reflect.Value
 	reflectx.ValueSliceSort(keys, true)
 	mv.configSize = len(keys)
@@ -62,7 +62,7 @@ func (mv *MapViewInline) Config(c *core.Config) {
 		keytxt := reflectx.ToString(key.Interface())
 		keynm := "key-" + keytxt
 		valnm := "value-" + keytxt
-		val := reflectx.OnePointerUnderlyingValue(mpvnp.MapIndex(key))
+		val := reflectx.UnderlyingPointer(mpvnp.MapIndex(key))
 
 		core.ConfigureNew(c, keynm, func() core.Value {
 			w := core.NewValue(key.Interface(), "")
@@ -197,7 +197,7 @@ func (mv *MapViewInline) MapSizeChanged() bool {
 		return mv.configSize != 0
 	}
 	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := reflectx.NonPointerValue(reflectx.OnePointerUnderlyingValue(mpv))
+	mpvnp := reflectx.NonPointerValue(reflectx.UnderlyingPointer(mpv))
 	keys := mpvnp.MapKeys()
 	return mv.configSize != len(keys)
 }

@@ -21,7 +21,7 @@ import (
 // a pointer to a slice or a direct slice); just [reflect.Type.Elem] of slice type, but
 // using this function bypasses any pointer issues and makes it more explicit what is going on.
 func SliceElementType(sl any) reflect.Type {
-	return NonPointerUnderlyingValue(reflect.ValueOf(sl)).Type().Elem()
+	return Underlying(reflect.ValueOf(sl)).Type().Elem()
 }
 
 // SliceElementValue returns a new [reflect.Value] of the [SliceElementType].
@@ -38,7 +38,7 @@ func SliceElementValue(sl any) reflect.Value {
 // SliceNewAt inserts a new blank element at the given index in the given slice.
 // -1 means the end.
 func SliceNewAt(sl any, idx int) {
-	svl := OnePointerUnderlyingValue(reflect.ValueOf(sl))
+	svl := UnderlyingPointer(reflect.ValueOf(sl))
 	svnp := NonPointerValue(svl)
 	val := SliceElementValue(sl)
 	sz := svnp.Len()
@@ -381,8 +381,8 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 func CopySliceRobust(to, from any) error {
 	tov := reflect.ValueOf(to)
 	fmv := reflect.ValueOf(from)
-	tonp := NonPointerUnderlyingValue(tov)
-	fmnp := NonPointerUnderlyingValue(fmv)
+	tonp := Underlying(tov)
+	fmnp := Underlying(fmv)
 	totyp := tonp.Type()
 	// eltyp := SliceElType(tonp)
 	if totyp.Kind() != reflect.Slice {

@@ -52,7 +52,7 @@ func (mv *MapView) Config(c *core.Config) {
 	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
-	mapv := reflectx.NonPointerUnderlyingValue(reflect.ValueOf(mv.Map))
+	mapv := reflectx.Underlying(reflect.ValueOf(mv.Map))
 
 	valtyp := mapv.Type().Elem()
 	ncol := 2
@@ -213,7 +213,7 @@ func BindMapKey[T core.Value](mapv reflect.Value, key reflect.Value, vw T) T {
 	// We must have an addressable key so that we can use Addr when we set it down below.
 	// This address doesn't point to the actual key, but it serves as a shadow pointer we
 	// can use to keep the key in sync here.
-	key = reflectx.OnePointerUnderlyingValue(key).Elem()
+	key = reflectx.UnderlyingPointer(key).Elem()
 	wb := vw.AsWidget()
 	wb.ValueUpdate = func() {
 		if vws, ok := any(vw).(core.ValueSetter); ok {

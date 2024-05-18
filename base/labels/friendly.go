@@ -72,7 +72,7 @@ func FriendlyStructLabel(v reflect.Value) string {
 	if v.IsZero() {
 		return "None"
 	}
-	opv := reflectx.OnePointerUnderlyingValue(v)
+	opv := reflectx.UnderlyingPointer(v)
 	if lbler, ok := opv.Interface().(Labeler); ok {
 		return lbler.Label()
 	}
@@ -81,7 +81,7 @@ func FriendlyStructLabel(v reflect.Value) string {
 
 // FriendlySliceLabel returns a user-friendly label for the given slice value.
 func FriendlySliceLabel(v reflect.Value) string {
-	npv := reflectx.NonPointerUnderlyingValue(v)
+	npv := reflectx.Underlying(v)
 	label := ""
 	if !npv.IsValid() {
 		label = "None"
@@ -102,7 +102,7 @@ func FriendlySliceLabel(v reflect.Value) string {
 
 // FriendlyMapLabel returns a user-friendly label for the given map value.
 func FriendlyMapLabel(v reflect.Value) string {
-	npv := reflectx.NonPointerUnderlyingValue(v)
+	npv := reflectx.Underlying(v)
 	mpi := v.Interface()
 	txt := ""
 	if !npv.IsValid() || npv.IsNil() {

@@ -62,7 +62,7 @@ func (v *TensorValue) Update() {
 }
 
 func (v *TensorValue) ConfigDialog(d *core.Body) (bool, func()) {
-	opv := reflectx.OnePointerUnderlyingValue(v.Value)
+	opv := reflectx.UnderlyingPointer(v.Value)
 	et := opv.Interface().(tensor.Tensor)
 	if et == nil {
 		return false, nil
@@ -86,7 +86,7 @@ func (v *TableValue) Update() {
 	if !v.Value.IsValid() || v.Value.IsZero() || !npv.IsValid() || npv.IsZero() {
 		v.Widget.SetText("nil")
 	} else {
-		opv := reflectx.OnePointerUnderlyingValue(v.Value)
+		opv := reflectx.UnderlyingPointer(v.Value)
 		et := opv.Interface().(*table.Table)
 		if et != nil {
 			if nm, has := et.MetaData["name"]; has {
@@ -99,7 +99,7 @@ func (v *TableValue) Update() {
 }
 
 func (v *TableValue) ConfigDialog(d *core.Body) (bool, func()) {
-	opv := reflectx.OnePointerUnderlyingValue(v.Value)
+	opv := reflectx.UnderlyingPointer(v.Value)
 	et := opv.Interface().(*table.Table)
 	if et == nil {
 		return false, nil
@@ -123,7 +123,7 @@ func (v *SimMatValue) Update() {
 	if !v.Value.IsValid() || v.Value.IsZero() || !npv.IsValid() || npv.IsZero() {
 		v.Widget.SetText("nil")
 	} else {
-		opv := reflectx.OnePointerUnderlyingValue(v.Value)
+		opv := reflectx.UnderlyingPointer(v.Value)
 		smat := opv.Interface().(*simat.SimMat)
 		if smat != nil && smat.Mat != nil {
 			if nm, has := smat.Mat.MetaData("name"); has {
@@ -138,7 +138,7 @@ func (v *SimMatValue) Update() {
 }
 
 func (v *SimMatValue) ConfigDialog(d *core.Body) (bool, func()) {
-	opv := reflectx.OnePointerUnderlyingValue(v.Value)
+	opv := reflectx.UnderlyingPointer(v.Value)
 	smat := opv.Interface().(*simat.SimMat)
 	if smat == nil || smat.Mat == nil {
 		return false, nil

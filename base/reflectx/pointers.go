@@ -22,34 +22,6 @@ func NonPointerType(typ reflect.Type) reflect.Type {
 	return typ
 }
 
-// PointerType returns the pointer version of the given type
-// if it is not already a pointer type.
-func PointerType(typ reflect.Type) reflect.Type {
-	if typ == nil {
-		return typ
-	}
-	if typ.Kind() != reflect.Pointer {
-		typ = reflect.PointerTo(typ)
-	}
-	return typ
-}
-
-// OnePointerType returns a type that is exactly one pointer away
-// from a non-pointer type.
-func OnePointerType(typ reflect.Type) reflect.Type {
-	if typ == nil {
-		return typ
-	}
-	if typ.Kind() != reflect.Pointer {
-		typ = reflect.PointerTo(typ)
-	} else {
-		for typ.Elem().Kind() == reflect.Pointer {
-			typ = typ.Elem()
-		}
-	}
-	return typ
-}
-
 // NonPointerValue returns a non-pointer version of the given value.
 func NonPointerValue(v reflect.Value) reflect.Value {
 	for v.Kind() == reflect.Pointer {
@@ -91,16 +63,15 @@ func OnePointerValue(v reflect.Value) reflect.Value {
 	return v
 }
 
-// NonPointerUnderlyingValue returns a non-pointer version of the given value.
-// It also goes through any interfaces to find the actual underlying value.
-func NonPointerUnderlyingValue(v reflect.Value) reflect.Value {
-	return OnePointerUnderlyingValue(v).Elem()
+// Underlying returns the actual underlying version of the given value,
+// going through any pointers and interfaces.
+func Underlying(v reflect.Value) reflect.Value {
+	return UnderlyingPointer(v).Elem()
 }
 
-// OnePointerUnderlyingValue returns a value that is exactly one pointer
-// away from a non-pointer value. It also goes through any interfaces to
-// find the actual underlying value.
-func OnePointerUnderlyingValue(v reflect.Value) reflect.Value {
+// UnderlyingPointer returns a pointer to the actual underlying version of the
+// given value, going through any pointers and interfaces.
+func UnderlyingPointer(v reflect.Value) reflect.Value {
 	npv := NonPointerValue(v)
 	if !npv.IsValid() {
 		return v
