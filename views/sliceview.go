@@ -598,8 +598,7 @@ func (sv *SliceViewBase) ConfigRow(c *core.Config, i, si int) {
 func (sv *SliceViewBase) ConfigGridIndex(c *core.Config, i, si int, itxt string, invis bool) {
 	sitxt := strconv.Itoa(si)
 	svi := sv.This().(SliceViewer)
-	core.ConfigureNew(c, "grid/index-"+itxt, func() *core.Text {
-		w := core.NewText()
+	core.Configure(c, "grid/index-"+itxt, func(w *core.Text) {
 		w.SetProperty(SliceViewRowProperty, i)
 		w.Style(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.DoubleClickable)
@@ -637,7 +636,6 @@ func (sv *SliceViewBase) ConfigGridIndex(c *core.Config, i, si int, itxt string,
 				svi.DropDeleteSource(e)
 			})
 		}
-		return w
 	}, func(w *core.Text) {
 		w.SetText(sitxt)
 		w.SetReadOnly(sv.IsReadOnly())

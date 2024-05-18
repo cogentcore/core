@@ -67,7 +67,7 @@ func View(st *Styles) {
 			w.SetText("Save from file").SetIcon(icons.Save)
 			w.Args[0].SetTag(".ext", ".histy")
 		})
-		core.ConfigSeparator(c)
+		core.Configure[*core.Separator](c, "")
 		// mv.ConfigToolbar(c)
 	})
 	d.RunWindow() // note: no context here so not dialog

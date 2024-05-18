@@ -210,38 +210,32 @@ func (tv *TableView) Config(c *core.Config) {
 }
 
 func (tv *TableView) ConfigHeader(c *core.Config) {
-	core.Configure(c, "header", func() *core.Frame {
-		w := core.NewFrame()
+	core.Configure(c, "header", func(w *core.Frame) {
 		core.ToolbarStyles(w)
 		w.Style(func(s *styles.Style) {
 			s.Grow.Set(0, 0)
 			s.Gap.Set(units.Em(0.5)) // matches grid default
 		})
-		return w
 	})
 
 	if tv.Is(views.SliceViewShowIndex) {
-		core.Configure(c, "header/head-index", func() *core.Text {
-			w := core.NewText()
+		core.Configure(c, "header/head-index", func(w *core.Text) {
 			w.SetType(core.TextBodyMedium)
 			w.Style(func(s *styles.Style) {
 				s.Align.Self = styles.Center
 			})
-			return w
 		}, func(w *core.Text) {
 			w.SetText("Index")
 		})
 	}
 	for fli := 0; fli < tv.NCols; fli++ {
 		field := tv.Table.Table.ColumnNames[fli]
-		core.Configure(c, "header/head-"+field, func() *core.Button {
-			w := core.NewButton()
+		core.Configure(c, "header/head-"+field, func(w *core.Button) {
 			w.SetType(core.ButtonMenu)
 			w.SetText(field)
 			w.OnClick(func(e events.Event) {
 				tv.SortSliceAction(fli)
 			})
-			return w
 		}, func(w *core.Button) {
 			w.SetText(field)
 			w.Tooltip = field + " (tap to sort by)"
@@ -308,7 +302,7 @@ func (tv *TableView) ConfigRow(c *core.Config, i, si int) {
 		if col.NumDims() == 1 {
 			str := ""
 			fval := float64(0)
-			core.Configure(c, "grid/"+valnm, func() core.Value {
+			core.ConfigureNew(c, "grid/"+valnm, func() core.Value {
 				var w core.Value
 				if isstr {
 					w = core.NewValue(&str, "")
