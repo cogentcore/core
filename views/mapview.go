@@ -82,7 +82,8 @@ func (mv *MapView) Config(c *core.Config) {
 		valnm := "value-" + keytxt
 
 		core.ConfigureNew(c, keynm, func() core.Value {
-			w := core.NewValue(key.Interface(), "")
+			w := core.ToValue(key.Interface(), "")
+			BindMapKey(mapv, key, w)
 			wb := w.AsWidget()
 			wb.SetReadOnly(mv.IsReadOnly())
 			// kv.SetMapKey(key, mv.Map)
@@ -104,7 +105,7 @@ func (mv *MapView) Config(c *core.Config) {
 			return w
 		}, func(w core.Value) {
 			wb := w.AsWidget()
-			core.Bind(key.Interface(), w)
+			BindMapKey(mapv, key, w)
 			wb.SetReadOnly(mv.IsReadOnly())
 		})
 		core.ConfigureNew(c, valnm, func() core.Value {
@@ -205,6 +206,33 @@ func (mv *MapView) ConfigToolbar(c *core.Config) {
 				})
 		})
 	}
+}
+
+// BindMapKey is a version of [core.Bind] that works for keys in a map.
+func BindMapKey[T core.Value](mapv reflect.Value, key reflect.Value, vw T) T {
+	// We must have an addressable key so that we can use Addr when we set it down below.
+	// This address doesn't point to the actual key, but it serves as a shadow pointer we
+	// can use to keep the key in sync here.
+	key = reflectx.OnePointerUnderlyingValue(key).Elem()
+	wb := vw.AsWidget()
+	wb.ValueUpdate = func() {
+		if vws, ok := any(vw).(core.ValueSetter); ok {
+			core.ErrorSnackbar(vw, vws.SetWidgetValue(key.Interface()))
+		} else {
+			core.ErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), key.Interface()))
+		}
+	}
+	wb.ValueOnChange = func() {
+		// TODO(config): check for duplicates
+		value := mapv.MapIndex(key)
+		mapv.SetMapIndex(key, reflect.ValueOf(nil))
+		core.ErrorSnackbar(vw, reflectx.SetRobust(key.Addr().Interface(), vw.WidgetValue())) // must set using address
+		mapv.SetMapIndex(key, value)
+	}
+	if ob, ok := any(vw).(core.OnBinder); ok {
+		ob.OnBind(key.Interface())
+	}
+	return vw
 }
 
 // BindMapValue is a version of [core.Bind] that works for values in a map.
