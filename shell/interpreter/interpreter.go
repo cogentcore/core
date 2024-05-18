@@ -93,7 +93,7 @@ func (in *Interpreter) Eval(code string) error {
 		}
 		v, _ := in.RunCode()
 		in.Shell.Errors = nil
-		if !hasPrint && v.IsValid() && !v.IsZero() {
+		if !hasPrint && v.IsValid() && !v.IsZero() && v.Kind() != reflect.Func {
 			fmt.Println(v.Interface())
 		}
 	} else {
