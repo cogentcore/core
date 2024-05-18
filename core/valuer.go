@@ -52,10 +52,10 @@ func AddValueType[T any, W Value]() {
 // These functions are called in sequential order, so you can insert
 // a function at the start to take precedence over others.
 // You can add to this using the [AddValueConverter] helper function.
-var ValueConverters []func(value any, tags ...string) Value
+var ValueConverters []func(value any, tags reflect.StructTag) Value
 
 // AddValueConverter adds a converter function to [ValueConverters].
-func AddValueConverter(f func(value any, tags ...string) Value) {
+func AddValueConverter(f func(value any, tags reflect.StructTag) Value) {
 	ValueConverters = append(ValueConverters, f)
 }
 
@@ -65,11 +65,12 @@ func init() {
 }
 
 // NewValue converts the given value into an appropriate [Value]
-// whose associated value is bound to the given value. The given value should
-// typically be a pointer. It also adds the resulting [Value] to the given
-// optional parent if it specified. The specifics on how it determines what type
-// of [Value] to make are further documented on [ToValue].
-func NewValue(value any, tags string, parent ...tree.Node) Value {
+// whose associated value is bound to the given value. The given value must
+// be a pointer. It uses the given optional struct tags for additional context.
+// It also adds the resulting [Value] to the given optional parent if it specified.
+// The specifics on how it determines what type of [Value] to make are further
+// documented on [ToValue].
+func NewValue(value any, tags reflect.StructTag, parent ...tree.Node) Value {
 	vw := ToValue(value, tags)
 	Bind(value, vw)
 	if len(parent) > 0 {
@@ -79,20 +80,20 @@ func NewValue(value any, tags string, parent ...tree.Node) Value {
 }
 
 // ToValue converts the given value into an appropriate [Value],
-// optionally using the given
+// using the given optional struct tags for additional context.
 // The given value should typically be a pointer. It does NOT call [Bind];
 // see [NewValue] for a version that does. It first checks the
 // [Valuer] interface, then the [ValueConverters], then
 // the [ValueTypes], and finally it falls back on a set of default
 // bindings. If any step results in nil, it falls back on the next step.
-func ToValue(value any, tags ...string) Value {
+func ToValue(value any, tags reflect.StructTag) Value {
 	if vwr, ok := value.(Valuer); ok {
 		if vw := vwr.Value(); vw != nil {
 			return vw
 		}
 	}
 	for _, converter := range ValueConverters {
-		if vw := converter(value, tags...); vw != nil {
+		if vw := converter(value, tags); vw != nil {
 			return vw
 		}
 	}

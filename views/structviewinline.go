@@ -133,7 +133,7 @@ func (sv *StructViewInline) Config(c *core.Config) {
 		})
 
 		core.ConfigureNew(c, valnm, func() core.Value {
-			w := core.NewValue(fieldVal.Interface(), string(field.Tag))
+			w := core.NewValue(fieldVal.Interface(), field.Tag)
 			wb := w.AsWidget()
 			// vvp := fieldVal.Addr()
 			// vv.SetStructValue(vvp, sv.Struct, &field, sv.ViewPath)

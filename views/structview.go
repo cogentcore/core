@@ -162,7 +162,7 @@ func (sv *StructView) Config(c *core.Config) {
 		})
 
 		core.ConfigureNew(c, valnm, func() core.Value {
-			w := core.NewValue(fieldVal, string(field.Tag))
+			w := core.NewValue(fieldVal, field.Tag)
 			wb := w.AsWidget()
 			// vv.AsValueData().ViewPath = sv.ViewPath
 			// svv := FieldToValue(fvalp, sfield.Name, sfval)

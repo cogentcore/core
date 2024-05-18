@@ -313,17 +313,6 @@ func StructTags(tags reflect.StructTag) map[string]string {
 	return smap
 }
 
-// StructTagIs returns true if any of the given StructTags
-// has a key with given value, false otherewise.
-func StructTagIs(tags []string, key, value string) bool {
-	for _, tag := range tags {
-		if reflect.StructTag(tag).Get(key) == value {
-			return true
-		}
-	}
-	return false
-}
-
 // StringJSON returns an indented JSON string representation
 // of the given value for printing/debugging.
 func StringJSON(v any) string {

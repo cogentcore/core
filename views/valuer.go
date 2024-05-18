@@ -19,13 +19,13 @@ func init() {
 	core.SettingsWindow = SettingsWindow
 	core.InspectorWindow = InspectorWindow
 
-	core.AddValueConverter(func(value any, tags ...string) core.Value {
+	core.AddValueConverter(func(value any, tags reflect.StructTag) core.Value {
 		if _, ok := value.(color.Color); ok {
 			return NewColorButton()
 		}
 
-		forceInline := reflectx.StructTagIs(tags, "view", "inline")
-		forceNoInline := reflectx.StructTagIs(tags, "view", "no-inline")
+		forceInline := tags.Get("view") == "inline"
+		forceNoInline := tags.Get("view") == "no-inline"
 		typ := reflectx.NonPointerType(reflect.TypeOf(value))
 		kind := typ.Kind()
 		switch kind {
