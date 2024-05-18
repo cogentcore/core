@@ -250,38 +250,31 @@ func (tv *TableView) SliceHeader() *core.Frame {
 }
 
 func (tv *TableView) ConfigHeader(c *core.Config) {
-	core.Configure(c, "header", func() *core.Frame {
-		w := core.NewFrame()
+	core.Configure(c, "header", func(w *core.Frame) {
 		core.ToolbarStyles(w)
 		w.Style(func(s *styles.Style) {
 			s.Grow.Set(0, 0)
 			s.Gap.Set(units.Em(0.5)) // matches grid default
 		})
-		return w
 	})
 
 	if tv.Is(SliceViewShowIndex) {
-		core.Configure(c, "header/head-idx", func() *core.Text {
-			w := core.NewText()
+		core.Configure(c, "header/head-index", func(w *core.Text) {
 			w.SetType(core.TextBodyMedium)
 			w.Style(func(s *styles.Style) {
 				s.Align.Self = styles.Center
 			})
-			return w
 		}, func(w *core.Text) {
 			w.SetText("Index")
 		})
 	}
 	for fli := 0; fli < tv.numVisibleFields; fli++ {
 		field := tv.visibleFields[fli]
-		core.Configure(c, "header/head-"+field.Name, func() *core.Button {
-			w := core.NewButton()
+		core.Configure(c, "header/head-"+field.Name, func(w *core.Button) {
 			w.SetType(core.ButtonMenu)
-			w.SetProperty("field-index", fli)
 			w.OnClick(func(e events.Event) {
 				tv.SortSliceAction(fli)
 			})
-			return w
 		}, func(w *core.Button) {
 			htxt := ""
 			if lbl, ok := field.Tag.Lookup("label"); ok {
@@ -351,7 +344,7 @@ func (tv *TableView) ConfigRow(c *core.Config, i, si int) {
 		}
 		_ = tags
 
-		core.Configure(c, "grid/"+valnm, func() core.Value {
+		core.ConfigureNew(c, "grid/"+valnm, func() core.Value {
 			w := core.NewValue(fval.Interface(), "")
 			wb := w.AsWidget()
 			tv.ConfigValue(w, i)

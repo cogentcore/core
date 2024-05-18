@@ -84,7 +84,7 @@ func (sv *SliceViewInline) Config(c *core.Config) {
 	for i := 0; i < sz; i++ {
 		itxt := strconv.Itoa(i)
 		val := reflectx.OnePointerUnderlyingValue(sl.Index(i)) // deal with pointer lists
-		core.Configure(c, "value-"+itxt, func() core.Value {
+		core.ConfigureNew(c, "value-"+itxt, func() core.Value {
 			w := core.NewValue(val.Interface(), "")
 			wb := w.AsWidget()
 			// vv.SetSliceValue(val, sv.Slice, i, sv.ViewPath)
@@ -115,17 +115,16 @@ func (sv *SliceViewInline) Config(c *core.Config) {
 		})
 	}
 	if !sv.isArray && !sv.isFixedLength {
-		core.Configure(c, "add-button", func() *core.Button {
-			w := core.NewButton().SetIcon(icons.Add).SetType(core.ButtonTonal)
+		core.Configure(c, "add-button", func(w *core.Button) {
+			w.SetIcon(icons.Add).SetType(core.ButtonTonal)
 			w.Tooltip = "Add an element to the list"
 			w.OnClick(func(e events.Event) {
 				sv.SliceNewAt(-1)
 			})
-			return w
 		})
 	}
-	core.Configure(c, "edit-button", func() *core.Button {
-		w := core.NewButton().SetIcon(icons.Edit).SetType(core.ButtonTonal)
+	core.Configure(c, "edit-button", func(w *core.Button) {
+		w.SetIcon(icons.Edit).SetType(core.ButtonTonal)
 		w.Tooltip = "Edit list in a dialog"
 		w.OnClick(func(e events.Event) {
 			vpath := sv.ViewPath
@@ -149,7 +148,6 @@ func (sv *SliceViewInline) Config(c *core.Config) {
 			})
 			d.RunFullDialog(sv)
 		})
-		return w
 	})
 }
 

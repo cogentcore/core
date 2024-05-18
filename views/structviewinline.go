@@ -91,8 +91,7 @@ func (sv *StructViewInline) Config(c *core.Config) {
 		ttip := "" // TODO:
 		def, hasDef := field.Tag.Lookup("default")
 
-		core.Configure(c, labnm, func() *core.Text {
-			w := core.NewText()
+		core.Configure(c, labnm, func(w *core.Text) {
 			w.Style(func(s *styles.Style) {
 				s.SetTextWrap(false)
 				s.Align.Self = styles.Center // was Start
@@ -129,12 +128,11 @@ func (sv *StructViewInline) Config(c *core.Config) {
 					}
 				})
 			}
-			return w
 		}, func(w *core.Text) {
 			w.SetText(flab)
 		})
 
-		core.Configure(c, valnm, func() core.Value {
+		core.ConfigureNew(c, valnm, func() core.Value {
 			w := core.NewValue(fieldVal.Interface(), string(field.Tag))
 			wb := w.AsWidget()
 			// vvp := fieldVal.Addr()

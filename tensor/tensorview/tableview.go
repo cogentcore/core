@@ -221,7 +221,7 @@ func (tv *TableView) ConfigHeader(c *core.Config) {
 	})
 
 	if tv.Is(views.SliceViewShowIndex) {
-		core.Configure(c, "header/head-idx", func() *core.Text {
+		core.Configure(c, "header/head-index", func() *core.Text {
 			w := core.NewText()
 			w.SetType(core.TextBodyMedium)
 			w.Style(func(s *styles.Style) {
@@ -237,7 +237,6 @@ func (tv *TableView) ConfigHeader(c *core.Config) {
 		core.Configure(c, "header/head-"+field, func() *core.Button {
 			w := core.NewButton()
 			w.SetType(core.ButtonMenu)
-			w.SetProperty("field-index", fli)
 			w.SetText(field)
 			w.OnClick(func(e events.Event) {
 				tv.SortSliceAction(fli)

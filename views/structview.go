@@ -117,11 +117,10 @@ func (sv *StructView) Config(c *core.Config) {
 		labnm := fmt.Sprintf("label-%v", fnm)
 		valnm := fmt.Sprintf("value-%v", fnm)
 		readOnlyTag := field.Tag.Get("edit") == "-"
-		ttip := "" // TODO:
+		ttip := "" // TODO(config)
 		def, hasDef := field.Tag.Lookup("default")
 
-		core.Configure(c, labnm, func() *core.Text {
-			w := core.NewText()
+		core.Configure(c, labnm, func(w *core.Text) {
 			w.Style(func(s *styles.Style) {
 				s.SetTextWrap(false)
 			})
@@ -158,12 +157,11 @@ func (sv *StructView) Config(c *core.Config) {
 					}
 				})
 			}
-			return w
 		}, func(w *core.Text) {
 			w.SetText(flab)
 		})
 
-		core.Configure(c, valnm, func() core.Value {
+		core.ConfigureNew(c, valnm, func() core.Value {
 			w := core.NewValue(fieldVal, string(field.Tag))
 			wb := w.AsWidget()
 			// vv.AsValueData().ViewPath = sv.ViewPath

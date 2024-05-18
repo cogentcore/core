@@ -193,12 +193,11 @@ func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 }
 
 // SetIcons sets the icons for the on (checked), off (unchecked)
-// and indeterminate (unknown) states.  See [SetIconsUpdate] for
-// a version that updates the icon rendering
-func (sw *Switch) SetIcons(on, off, unk icons.Icon) *Switch {
+// and indeterminate (unknown) states.
+func (sw *Switch) SetIcons(on, off, ind icons.Icon) *Switch {
 	sw.IconOn = on
 	sw.IconOff = off
-	sw.IconIndeterminate = unk
+	sw.IconIndeterminate = ind
 	return sw
 }
 
