@@ -28,9 +28,6 @@ type MapViewInline struct {
 	// ViewPath is a record of parent view names that have led up to this view.
 	// It is displayed as extra contextual information in view dialogs.
 	ViewPath string
-
-	// configSize is the size of the map when the widget was configured.
-	configSize int
 }
 
 func (mv *MapViewInline) OnInit() {
@@ -40,13 +37,11 @@ func (mv *MapViewInline) OnInit() {
 
 func (mv *MapViewInline) Config(c *core.Config) {
 	if reflectx.AnyIsNil(mv.Map) {
-		mv.configSize = 0
 		return
 	}
 	mapv := reflectx.Underlying(reflect.ValueOf(mv.Map))
 	keys := mapv.MapKeys()
 	reflectx.ValueSliceSort(keys, true)
-	mv.configSize = len(keys)
 
 	for i, key := range keys {
 		if i >= core.SystemSettings.MapInlineLength {
@@ -176,21 +171,4 @@ func (mv *MapViewInline) ContextMenu(m *core.Scene, keyv reflect.Value) {
 	core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
 		mv.MapDelete(keyv)
 	})
-}
-
-func (mv *MapViewInline) MapSizeChanged() bool {
-	if reflectx.AnyIsNil(mv.Map) {
-		return mv.configSize != 0
-	}
-	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := reflectx.NonPointerValue(reflectx.UnderlyingPointer(mpv))
-	keys := mpvnp.MapKeys()
-	return mv.configSize != len(keys)
-}
-
-func (mv *MapViewInline) SizeUp() {
-	if mv.MapSizeChanged() {
-		mv.Update()
-	}
-	mv.Frame.SizeUp()
 }
