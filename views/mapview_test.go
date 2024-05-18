@@ -19,6 +19,12 @@ func TestMapView(t *testing.T) {
 	b.AssertRender(t, "map-view/basic")
 }
 
+func TestMapViewReadOnly(t *testing.T) {
+	b := core.NewBody()
+	NewMapView(b).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
+	b.AssertRender(t, "map-view/read-only")
+}
+
 func TestMapViewChange(t *testing.T) {
 	b := core.NewBody()
 	m := map[string]int{"Go": 1, "C++": 3, "Python": 5}
@@ -39,8 +45,22 @@ func TestMapViewChange(t *testing.T) {
 	})
 }
 
-func TestMapViewReadOnly(t *testing.T) {
+func TestMapViewChangeKey(t *testing.T) {
 	b := core.NewBody()
-	NewMapView(b).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
-	b.AssertRender(t, "map-view/read-only")
+	m := map[string]int{"Go": 1, "C++": 3, "Python": 5}
+
+	n := 0
+	value := map[string]int{}
+	mv := NewMapView(b).SetMap(&m)
+	mv.OnChange(func(e events.Event) {
+		n++
+		maps.Copy(value, m)
+	})
+	b.AssertRender(t, "map-view/change-key", func() {
+		// [4] is key of third row, which is "Python" since it is sorted alphabetically
+		mv.Child(4).(*core.TextField).SetText("JavaScript").SendChange()
+		assert.Equal(t, 1, n)
+		assert.Equal(t, m, value)
+		assert.Equal(t, map[string]int{"Go": 1, "C++": 3, "JavaScript": 5}, m)
+	})
 }
