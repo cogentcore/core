@@ -202,10 +202,10 @@ func (dt *Table) ReadCSVRow(rec []string, row int) {
 				if str == "" || str == "NaN" || str == "-NaN" || str == "Inf" || str == "-Inf" {
 					tsr.SetFloat1D(stoff+cc, nan)
 				} else {
-					tsr.SetString1D(stoff+cc, str)
+					tsr.SetString1D(stoff+cc, strings.TrimSpace(str))
 				}
 			} else {
-				tsr.SetString1D(stoff+cc, str)
+				tsr.SetString1D(stoff+cc, strings.TrimSpace(str))
 			}
 			ci++
 			if ci >= len(rec) {
@@ -227,6 +227,7 @@ func ConfigFromHeaders(dt *Table, hdrs []string, rec [][]string) error {
 // DetectTableHeaders looks for special header characters -- returns true if found
 func DetectTableHeaders(hdrs []string) bool {
 	for _, hd := range hdrs {
+		hd = strings.TrimSpace(hd)
 		if hd == "" {
 			continue
 		}
@@ -243,6 +244,7 @@ func DetectTableHeaders(hdrs []string) bool {
 // ConfigFromTableHeaders attempts to configure a Table based on special table headers
 func ConfigFromTableHeaders(dt *Table, hdrs []string) error {
 	for _, hd := range hdrs {
+		hd = strings.TrimSpace(hd)
 		if hd == "" || hd == "_H:" {
 			continue
 		}
@@ -328,6 +330,7 @@ func ShapeFromString(dims string) []int {
 func ConfigFromDataValues(dt *Table, hdrs []string, rec [][]string) error {
 	nr := len(rec)
 	for ci, hd := range hdrs {
+		hd = strings.TrimSpace(hd)
 		if hd == "" {
 			hd = fmt.Sprintf("col_%d", ci)
 		}
