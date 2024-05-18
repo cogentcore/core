@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"image"
 	"log/slog"
+	"reflect"
 
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
@@ -142,6 +144,13 @@ const (
 )
 
 func (sr *Slider) WidgetValue() any { return &sr.Value }
+
+func (sr *Slider) OnBind(value any) {
+	kind := reflectx.NonPointerType(reflect.TypeOf(value)).Kind()
+	if kind >= reflect.Int && kind <= reflect.Uintptr {
+		sr.SetStep(1).SetEnforceStep(true)
+	}
+}
 
 func (sr *Slider) OnInit() {
 	sr.WidgetBase.OnInit()
