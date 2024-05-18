@@ -16,13 +16,20 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// ConfigItem represents a Widget configuration element,
-// with one New function to create and configure a new child Widget,
-// and an Update function to update the state of that child Widget.
-// Contains a list of Config for its children, which is all sorted
-// out as items are added.
+// Config is an ordered list of [ConfigItem]s,
+// ordered in progressive hierarchical order
+// so that parents are listed before any children.
+// The Key of the map is the path of the element.
+type Config []*ConfigItem
+
+// ConfigItem represents a widget configuration element,
+// with one New function to make and configure a new child widget,
+// and an Update function to update the state of that child widget.
+// It contains another [Config] for its children, which is handled
+// automatically as items are added.
 type ConfigItem struct {
-	// Path is the / delimited path to the element
+
+	// Path is the forward slash delimited path to the element.
 	Path string
 
 	// New returns a new Widget of the correct type for this element,
@@ -37,76 +44,37 @@ type ConfigItem struct {
 	Children Config
 }
 
-// Config is an ordered list of [ConfigItem]s,
-// ordered in progressive hierarchical order
-// so that parents are listed before any children.
-// The Key of the map is the path of the element.
-type Config []*ConfigItem
-
 // Configure adds a new config item to the given [Config] for a widget at the
-// given forward-slash-separated path with the given function for constructing
-// the widget and the given optional function for updating the widget. If the
-// given path is blank, it is automatically set to a unique name based on the
-// filepath and line number of the calling function.
-func Configure[T Widget](c *Config, path string, new func() T, update ...func(w T)) {
-	if len(update) == 0 {
-		c.Add(path, func() Widget { return new() }, nil)
-	} else {
-		u := update[0]
-		c.Add(path, func() Widget { return new() }, func(w Widget) { u(w.(T)) })
-	}
-}
-
-// ConfigButton adds a new config item to the given [Config] for
-// a Button, with up to 2 optional functions:
-// the first is called only during initial Config of a new Button;
-// the second is called during Update.
-func ConfigButton(c *Config, funcs ...func(w *Button)) {
-	n := len(funcs)
-	switch n {
+// given forward-slash-separated path with the given optional function(s). The
+// first function is called to initially configure the widget, and the second
+// function is called to update the widget. If the given path is blank, it is
+// automatically set to a unique name based on the filepath and line number of
+// the calling function.
+func Configure[T Widget](c *Config, path string, funcs ...func(w T)) {
+	switch len(funcs) {
 	case 0:
-		c.Add("", func() Widget { return NewButton() }, nil)
+		c.Add(path, func() Widget { return tree.New[T]() }, nil)
 	case 1:
-		c.Add("", func() Widget {
-			w := NewButton()
-			funcs[0](w)
+		init := funcs[0]
+		c.Add(path, func() Widget {
+			w := tree.New[T]()
+			init(w)
 			return w
 		}, nil)
-	case 2:
-		c.Add("", func() Widget {
-			w := NewButton()
-			funcs[0](w)
+	default:
+		init := funcs[0]
+		update := funcs[1]
+		c.Add(path, func() Widget {
+			w := tree.New[T]()
+			init(w)
 			return w
-		}, func(w Widget) { funcs[1](w.(*Button)) })
+		}, func(w Widget) {
+			update(w.(T))
+		})
 	}
 }
 
-// ConfigSeparator adds a new config item to the given [Config] for
-// a Separator, with no further configuration.
-func ConfigSeparator(c *Config) {
-	c.Add("", func() Widget { return NewSeparator() }, nil)
-}
-
-// ConfigCallerPath returns the dir-filename of runtime.Caller(level),
-// with all / . replaced to -, which is suitable as a unique name
-// for a ConfigItem path.  This is used with level 3 by default for
-// blank names in [Config.Add], but wrappers around that may need to
-// generate these paths with a relevant level if they wrap the Configure
-// call.
-func ConfigCallerPath(level int) string {
-	_, file, line, _ := runtime.Caller(level)
-	dir, fn := filepath.Split(file)
-	d1 := ""
-	if len(dir) > 1 {
-		_, d1 = filepath.Split(dir[:len(dir)-1])
-	}
-	path := fn + "-" + d1
-	// need to get rid of slashes and dots for path name
-	path = strings.ReplaceAll(strings.ReplaceAll(path, "/", "-"), ".", "-") + "-" + strconv.Itoa(line)
-	return path
-}
-
-// Add adds a new config item for a widget at the given forward-slash-separated
+// Add adds a new config item for a widget at the given forward slash separated
 // path with the given function for constructing the widget and the given function
 // for updating the widget. This should be called on the root level Config
 // list. Any items with nested paths are added to Children lists as
@@ -126,6 +94,22 @@ func (c *Config) Add(path string, new func() Widget, update func(w Widget)) {
 	}
 	next := c.FindMakeChild(plist[0])
 	next.AddSubItem(plist[1:], itm)
+}
+
+// ConfigCallerPath returns the dir-filename of [runtime.Caller](level),
+// with all / . replaced to -, which is suitable as a unique name
+// for a [ConfigItem.Path].
+func ConfigCallerPath(level int) string {
+	_, file, line, _ := runtime.Caller(level)
+	dir, fn := filepath.Split(file)
+	d1 := ""
+	if len(dir) > 1 {
+		_, d1 = filepath.Split(dir[:len(dir)-1])
+	}
+	path := fn + "-" + d1
+	// need to get rid of slashes and dots for path name
+	path = strings.ReplaceAll(strings.ReplaceAll(path, "/", "-"), ".", "-") + "-" + strconv.Itoa(line)
+	return path
 }
 
 // ChildPath returns this item's path + "/" + child
