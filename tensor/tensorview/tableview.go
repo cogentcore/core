@@ -312,9 +312,9 @@ func (tv *TableView) ConfigRow(c *core.Config, i, si int) {
 			core.Configure(c, "grid/"+valnm, func() core.Value {
 				var w core.Value
 				if isstr {
-					w = core.NewValue(&str)
+					w = core.NewValue(&str, "")
 				} else {
-					w = core.NewValue(&fval)
+					w = core.NewValue(&fval, "")
 				}
 				wb := w.AsWidget()
 				tv.ConfigValue(w, i)
