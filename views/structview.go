@@ -45,6 +45,9 @@ type StructView struct {
 	// Struct is the pointer to the struct that we are viewing.
 	Struct any
 
+	// Inline is whether to display the struct in one line.
+	Inline bool
+
 	// ViewPath is a record of parent view names that have led up to this view.
 	// It is displayed as extra contextual information in view dialogs.
 	ViewPath string
@@ -54,13 +57,15 @@ type StructView struct {
 	isShouldShower bool
 }
 
+func (sv *StructView) WidgetValue() any { return &sv.Struct }
+
 func (sv *StructView) OnInit() {
 	sv.Frame.OnInit()
-	sv.SetStyles()
-}
-
-func (sv *StructView) SetStyles() {
 	sv.Style(func(s *styles.Style) {
+		if sv.Inline {
+			s.Align.Items = styles.Center
+			return
+		}
 		s.Display = styles.Grid
 		if sv.SizeClass() == core.SizeCompact {
 			s.Columns = 1

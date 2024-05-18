@@ -8,6 +8,12 @@ You can make a map view from any map pointer:
 views.NewMapView(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
 ```
 
+You can make a map view that fits in one line:
+
+```Go
+views.NewMapView(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
+```
+
 You can detect when the user changes the value of the map:
 
 ```Go
@@ -27,12 +33,6 @@ You can make a map view with elements of any type:
 
 ```Go
 views.NewMapView(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
-```
-
-You can make a map view that fits in one line:
-
-```Go
-views.NewMapView(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
 ```
 
 When you use [[views.NewValue]] with a map value, it will create an inline map view if the map has two or fewer elements:

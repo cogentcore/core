@@ -31,6 +31,12 @@ func TestStructView(t *testing.T) {
 	b.AssertRender(t, "struct-view/basic")
 }
 
+func TestStructViewInline(t *testing.T) {
+	b := core.NewBody()
+	NewStructView(b).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
+	b.AssertRender(t, "struct-view/inline")
+}
+
 func TestStructViewReadOnly(t *testing.T) {
 	b := core.NewBody()
 	NewStructView(b).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)

@@ -215,7 +215,7 @@ func (t *Inspector) SetFilename(v core.Filename) *Inspector { t.Filename = v; re
 func (t *Inspector) SetTooltip(v string) *Inspector { t.Tooltip = v; return t }
 
 // MapViewType is the [types.Type] for [MapView]
-var MapViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapView", IDName: "map-view", Doc: "MapView represents a map using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the map in one line."}, {Name: "SortValues", Doc: "SortValue is whether to sort by values instead of keys."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "ncols", Doc: "ncols is the number of columns to display in the view."}}, Instance: &MapView{}})
+var MapViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapView", IDName: "map-view", Doc: "MapView represents a map using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the map in one line."}, {Name: "SortValues", Doc: "SortValue is whether to sort by values instead of keys."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "ncols", Doc: "ncols is the number of columns to display if the map view is not inline."}}, Instance: &MapView{}})
 
 // NewMapView returns a new [MapView] with the given optional parent:
 // MapView represents a map using two columns of editable key and value widgets.
@@ -374,7 +374,7 @@ func (t *SliceViewInline) SetViewPath(v string) *SliceViewInline { t.ViewPath = 
 func (t *SliceViewInline) SetTooltip(v string) *SliceViewInline { t.Tooltip = v; return t }
 
 // StructViewType is the [types.Type] for [StructView]
-var StructViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructView", IDName: "struct-view", Doc: "StructView represents a struct with rows of field names and editable values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [core.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructView{}})
+var StructViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructView", IDName: "struct-view", Doc: "StructView represents a struct with rows of field names and editable values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the struct in one line."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [core.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructView{}})
 
 // NewStructView returns a new [StructView] with the given optional parent:
 // StructView represents a struct with rows of field names and editable values.
@@ -390,6 +390,10 @@ func (t *StructView) New() tree.Node { return &StructView{} }
 // Struct is the pointer to the struct that we are viewing.
 func (t *StructView) SetStruct(v any) *StructView { t.Struct = v; return t }
 
+// SetInline sets the [StructView.Inline]:
+// Inline is whether to display the struct in one line.
+func (t *StructView) SetInline(v bool) *StructView { t.Inline = v; return t }
+
 // SetViewPath sets the [StructView.ViewPath]:
 // ViewPath is a record of parent view names that have led up to this view.
 // It is displayed as extra contextual information in view dialogs.
@@ -397,34 +401,6 @@ func (t *StructView) SetViewPath(v string) *StructView { t.ViewPath = v; return 
 
 // SetTooltip sets the [StructView.Tooltip]
 func (t *StructView) SetTooltip(v string) *StructView { t.Tooltip = v; return t }
-
-// StructViewInlineType is the [types.Type] for [StructViewInline]
-var StructViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructViewInline", IDName: "struct-view-inline", Doc: "StructViewInline represents a struct within a single line of\nfield labels and value widgets. This is typically used for smaller structs.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "StructValue", Doc: "StructValue is the [Value] associated with this struct view, if any."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [core.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructViewInline{}})
-
-// NewStructViewInline returns a new [StructViewInline] with the given optional parent:
-// StructViewInline represents a struct within a single line of
-// field labels and value widgets. This is typically used for smaller structs.
-func NewStructViewInline(parent ...tree.Node) *StructViewInline {
-	return tree.New[*StructViewInline](parent...)
-}
-
-// NodeType returns the [*types.Type] of [StructViewInline]
-func (t *StructViewInline) NodeType() *types.Type { return StructViewInlineType }
-
-// New returns a new [*StructViewInline] value
-func (t *StructViewInline) New() tree.Node { return &StructViewInline{} }
-
-// SetStruct sets the [StructViewInline.Struct]:
-// Struct is the pointer to the struct that we are viewing.
-func (t *StructViewInline) SetStruct(v any) *StructViewInline { t.Struct = v; return t }
-
-// SetViewPath sets the [StructViewInline.ViewPath]:
-// ViewPath is a record of parent view names that have led up to this view.
-// It is displayed as extra contextual information in view dialogs.
-func (t *StructViewInline) SetViewPath(v string) *StructViewInline { t.ViewPath = v; return t }
-
-// SetTooltip sets the [StructViewInline.Tooltip]
-func (t *StructViewInline) SetTooltip(v string) *StructViewInline { t.Tooltip = v; return t }
 
 // TableViewType is the [types.Type] for [TableView]
 var TableViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TableView", IDName: "table-view", Doc: "TableView represents a slice of structs as a table, where the fields are\nthe columns and the elements are the rows. It is a full-featured editor with\nmultiple-selection, cut-and-paste, and drag-and-drop.\nUse [SliceViewBase.BindSelect] to make the table view designed for item selection.", Embeds: []types.Field{{Name: "SliceViewBase"}}, Fields: []types.Field{{Name: "StyleFunc", Doc: "StyleFunc is an optional styling function."}, {Name: "SelectedField", Doc: "SelectedField is the current selection field; initially select value in this field."}, {Name: "SortIndex", Doc: "SortIndex is the current sort index."}, {Name: "SortDescending", Doc: "SortDescending is whether the current sort order is descending."}, {Name: "structType", Doc: "structType is the non-pointer struct type for each row."}, {Name: "visibleFields", Doc: "visibleFields are the visible fields."}, {Name: "numVisibleFields", Doc: "numVisibleFields is the number of visible fields."}, {Name: "headerWidths", Doc: "headerWidths has the number of characters in each header, per visibleFields."}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields."}}, Instance: &TableView{}})

@@ -12,6 +12,16 @@ type person struct {
 views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35})
 ```
 
+You can make a struct view that fits in one line:
+
+```Go
+type person struct {
+    Name string
+    Age  int
+}
+views.NewStructView(parent).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
+```
+
 You can detect when the user changes the value of the struct:
 
 ```Go
@@ -120,18 +130,6 @@ type person struct { //types:add
     Name string
 }
 ```
-
-You can make a struct view that fits in one line:
-
-```Go
-type person struct {
-    Name string
-    Age  int
-}
-views.NewStructViewInline(parent).SetStruct(&person{Name: "Go", Age: 35})
-```
-
-Inline struct views support everything that normal struct views do, including everything documented above.
 
 When you use [[views.NewValue]] with a struct value, it will create an inline struct view if the struct has four or fewer fields:
 

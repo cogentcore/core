@@ -43,14 +43,15 @@ func (mv *MapView) WidgetValue() any { return &mv.Map }
 func (mv *MapView) OnInit() {
 	mv.Frame.OnInit()
 	mv.Style(func(s *styles.Style) {
-		if !mv.Inline {
-			s.Display = styles.Grid
-			s.Columns = mv.ncols
-			s.Overflow.Set(styles.OverflowAuto)
-			s.Grow.Set(1, 1)
-			s.Min.X.Em(20)
-			s.Min.Y.Em(10)
+		if mv.Inline {
+			return
 		}
+		s.Display = styles.Grid
+		s.Columns = mv.ncols
+		s.Overflow.Set(styles.OverflowAuto)
+		s.Grow.Set(1, 1)
+		s.Min.X.Em(20)
+		s.Min.Y.Em(10)
 	})
 }
 

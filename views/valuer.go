@@ -48,7 +48,7 @@ func init() {
 		case reflect.Struct:
 			nfld := reflectx.NumAllFields(typ)
 			if nfld > 0 && !forceNoInline && (forceInline || nfld <= core.SystemSettings.StructInlineLength) {
-				return NewStructViewInline()
+				return NewStructView().SetInline(true)
 			} else {
 				return NewStructButton()
 			}

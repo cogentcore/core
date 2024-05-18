@@ -762,19 +762,19 @@ var PagesExamples = map[string]func(parent core.Widget){
 		views.NewMapView(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
 	},
 	"views/map-views-1": func(parent core.Widget) {
+		views.NewMapView(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
+	},
+	"views/map-views-2": func(parent core.Widget) {
 		m := map[string]int{"Go": 1, "C++": 3, "Python": 5}
 		views.NewMapView(parent).SetMap(&m).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, fmt.Sprintf("Map: %v", m))
 		})
 	},
-	"views/map-views-2": func(parent core.Widget) {
+	"views/map-views-3": func(parent core.Widget) {
 		views.NewMapView(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
 	},
-	"views/map-views-3": func(parent core.Widget) {
-		views.NewMapView(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
-	},
 	"views/map-views-4": func(parent core.Widget) {
-		views.NewMapView(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
+		views.NewMapView(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
 	},
 	"views/map-views-5": func(parent core.Widget) {
 		views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
@@ -815,14 +815,11 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Name string
 			Age  int
 		}
-		p := person{Name: "Go", Age: 35}
-		views.NewStructView(parent).SetStruct(&p).OnChange(func(e events.Event) {
-			core.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
-		})
+		views.NewStructView(parent).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
 	},
 	"views/struct-views-2": func(parent core.Widget) {
 		type person struct {
-			Name string `immediate:"+"`
+			Name string
 			Age  int
 		}
 		p := person{Name: "Go", Age: 35}
@@ -832,26 +829,36 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"views/struct-views-3": func(parent core.Widget) {
 		type person struct {
+			Name string `immediate:"+"`
+			Age  int
+		}
+		p := person{Name: "Go", Age: 35}
+		views.NewStructView(parent).SetStruct(&p).OnChange(func(e events.Event) {
+			core.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
+		})
+	},
+	"views/struct-views-4": func(parent core.Widget) {
+		type person struct {
 			Name string
 			Age  int `view:"-"`
 		}
 		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35})
 	},
-	"views/struct-views-4": func(parent core.Widget) {
+	"views/struct-views-5": func(parent core.Widget) {
 		type person struct {
 			Name string `edit:"-"`
 			Age  int
 		}
 		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35})
 	},
-	"views/struct-views-5": func(parent core.Widget) {
+	"views/struct-views-6": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
 		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
 	},
-	"views/struct-views-6": func(parent core.Widget) {
+	"views/struct-views-7": func(parent core.Widget) {
 		type Person struct {
 			Name string
 			Age  int
@@ -862,7 +869,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		}
 		views.NewStructView(parent).SetStruct(&employee{Person{Name: "Go", Age: 35}, "Programmer"})
 	},
-	"views/struct-views-7": func(parent core.Widget) {
+	"views/struct-views-8": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
@@ -873,20 +880,13 @@ var PagesExamples = map[string]func(parent core.Widget){
 		}
 		views.NewStructView(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
 	},
-	"views/struct-views-8": func(parent core.Widget) {
+	"views/struct-views-9": func(parent core.Widget) {
 		type person struct {
 			Name      string `default:"Gopher"`
 			Age       int    `default:"20:30"`
 			Precision int    `default:"64,32"`
 		}
 		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
-	},
-	"views/struct-views-9": func(parent core.Widget) {
-		type person struct {
-			Name string
-			Age  int
-		}
-		views.NewStructViewInline(parent).SetStruct(&person{Name: "Go", Age: 35})
 	},
 	"views/struct-views-10": func(parent core.Widget) {
 		type person struct {

@@ -198,11 +198,11 @@ func (v *StructValue) ConfigDialog(d *core.Body) (bool, func()) {
 
 // StructInlineValue represents a struct value with a [StructViewInline].
 type StructInlineValue struct {
-	ValueBase[*StructViewInline]
+	ValueBase[*StructView]
 }
 
 func (v *StructInlineValue) Config() {
-	v.Widget.StructValue = v
+	// v.Widget.StructValue = v
 	v.Widget.ViewPath = v.ViewPath
 	v.Widget.SetStruct(v.Value.Interface())
 	v.Widget.OnChange(func(e events.Event) {
