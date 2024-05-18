@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"image"
 	"log/slog"
+	"reflect"
 	"strconv"
 
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
@@ -66,6 +68,13 @@ type Spinner struct {
 }
 
 func (sp *Spinner) WidgetValue() any { return &sp.Value }
+
+func (sp *Spinner) OnBind(value any) {
+	kind := reflectx.NonPointerType(reflect.TypeOf(value)).Kind()
+	if kind >= reflect.Int && kind <= reflect.Uintptr {
+		sp.SetStep(1)
+	}
+}
 
 func (sp *Spinner) OnInit() {
 	sp.WidgetBase.OnInit()

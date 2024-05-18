@@ -31,7 +31,7 @@ func TestMapViewChange(t *testing.T) {
 		maps.Copy(value, m)
 	})
 	b.AssertRender(t, "map-view/change", func() {
-		// [3] is value of second row, which is Go since it is sorted alphabetically
+		// [3] is value of second row, which is "Go" since it is sorted alphabetically
 		mv.Child(3).(*core.Spinner).TrailingIconButton().Send(events.Click)
 		assert.Equal(t, 1, n)
 		assert.Equal(t, m, value)
