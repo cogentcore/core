@@ -62,8 +62,8 @@ func (sv *StructView) WidgetValue() any { return &sv.Struct }
 func (sv *StructView) OnInit() {
 	sv.Frame.OnInit()
 	sv.Style(func(s *styles.Style) {
+		s.Align.Items = styles.Center
 		if sv.Inline {
-			s.Align.Items = styles.Center
 			return
 		}
 		s.Display = styles.Grid
