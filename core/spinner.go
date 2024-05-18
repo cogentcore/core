@@ -73,6 +73,9 @@ func (sp *Spinner) OnBind(value any) {
 	kind := reflectx.NonPointerType(reflect.TypeOf(value)).Kind()
 	if kind >= reflect.Int && kind <= reflect.Uintptr {
 		sp.SetStep(1).SetEnforceStep(true)
+		if kind >= reflect.Uint {
+			sp.SetMin(0)
+		}
 	}
 }
 
@@ -126,21 +129,21 @@ func (sp *Spinner) SizeUp() {
 	sp.TextField.SizeUp()
 }
 
-// SetMin sets the min limits on the value
+// SetMin sets the minimum bound on the value.
 func (sp *Spinner) SetMin(min float32) *Spinner {
 	sp.HasMin = true
 	sp.Min = min
 	return sp
 }
 
-// SetMax sets the max limits on the value
+// SetMax sets the maximum bound on the value.
 func (sp *Spinner) SetMax(max float32) *Spinner {
 	sp.HasMax = true
 	sp.Max = max
 	return sp
 }
 
-// SetValue sets the value, enforcing any limits, and updates the display
+// SetValue sets the value, enforcing any limits, and updates the display.
 func (sp *Spinner) SetValue(val float32) *Spinner {
 	sp.Value = val
 	if sp.HasMax && sp.Value > sp.Max {
@@ -158,7 +161,7 @@ func (sp *Spinner) SetValue(val float32) *Spinner {
 	return sp
 }
 
-// SetValueAction calls SetValue and also emits the signal
+// SetValueAction calls SetValue and also sends a change event.
 func (sp *Spinner) SetValueAction(val float32) *Spinner {
 	sp.SetValue(val)
 	sp.SendChange()
@@ -167,7 +170,7 @@ func (sp *Spinner) SetValueAction(val float32) *Spinner {
 
 // IncrementValue increments the value by given number of steps (+ or -),
 // and enforces it to be an even multiple of the step size (snap-to-value),
-// and emits the signal
+// and sends a change event.
 func (sp *Spinner) IncrementValue(steps float32) *Spinner {
 	if sp.IsReadOnly() {
 		return sp
@@ -179,7 +182,7 @@ func (sp *Spinner) IncrementValue(steps float32) *Spinner {
 
 // PageIncrementValue increments the value by given number of page steps (+ or -),
 // and enforces it to be an even multiple of the step size (snap-to-value),
-// and emits the signal
+// and sends a change event.
 func (sp *Spinner) PageIncrementValue(steps float32) *Spinner {
 	if sp.IsReadOnly() {
 		return sp

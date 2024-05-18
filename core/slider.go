@@ -148,7 +148,7 @@ func (sr *Slider) WidgetValue() any { return &sr.Value }
 func (sr *Slider) OnBind(value any) {
 	kind := reflectx.NonPointerType(reflect.TypeOf(value)).Kind()
 	if kind >= reflect.Int && kind <= reflect.Uintptr {
-		sr.SetStep(1).SetEnforceStep(true)
+		sr.SetStep(1).SetEnforceStep(true).SetMax(100)
 	}
 }
 
