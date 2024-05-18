@@ -21,21 +21,11 @@ import (
 // has, passing the current (embedded) type and StructField, effectively
 // flattening the reflect field list; if fun returns false then iteration
 // stops; overall return value is false if iteration was stopped or there was an
-// error (logged), true otherwise.
-func WalkTypeFlatFields(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
-	return WalkTypeFlatFieldsIf(typ, nil, fun)
-}
-
-// WalkTypeFlatFieldsIf calls a function on all the primary fields of a given
-// struct type, including those on anonymous embedded structs that this struct
-// has, passing the current (embedded) type and StructField, effectively
-// flattening the reflect field list; if fun returns false then iteration
-// stops; overall return value is false if iteration was stopped or there was an
 // error (logged), true otherwise. If the given ifFun is non-nil, it is called
 // on every embedded struct field to determine whether the fields of that embedded
 // field should be handled (a return value of true indicates to continue down and
 // a value of false indicates to not).
-func WalkTypeFlatFieldsIf(typ reflect.Type, ifFun, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
+func WalkTypeFlatFields(typ reflect.Type, ifFun, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
 	typ = NonPointerType(typ)
 	if typ.Kind() != reflect.Struct {
 		log.Printf("reflectx.WalkTypeFlatFieldsIf: Must call on a struct type, not: %v\n", typ)
@@ -50,7 +40,7 @@ func WalkTypeFlatFieldsIf(typ reflect.Type, ifFun, fun func(typ reflect.Type, fi
 					continue
 				}
 			}
-			rval = WalkTypeFlatFields(f.Type, fun) // no err here
+			rval = WalkTypeFlatFields(f.Type, ifFun, fun)
 			if !rval {
 				break
 			}
@@ -92,66 +82,32 @@ func WalkTypeAllFields(typ reflect.Type, fun func(typ reflect.Type, field reflec
 	return rval
 }
 
-// WalkValueFlatFields calls a function on all the primary fields of a
-// given struct value (must pass a pointer to the struct) including those on
-// anonymous embedded structs that this struct has, passing the current
-// (embedded) type and StructField, which effectively flattens the reflect field list.
-func WalkValueFlatFields(stru any, fun func(str any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
-	return WalkValueFlatFieldsIf(stru, nil, fun)
-}
-
-// WalkValueFlatFieldsIf calls a function on all the primary fields of a
-// given struct value (must pass a pointer to the struct) including those on
-// anonymous embedded structs that this struct has, passing the current
-// (embedded) type and StructField, which effectively flattens the reflect field
-// list. If the given ifFun is non-nil, it is called on every embedded struct field to
-// determine whether the fields of that embedded field should be handled (a return value
-// of true indicates to continue down and a value of false indicates to not).
-func WalkValueFlatFieldsIf(stru any, ifFun, fun func(str any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
-	vv := reflect.ValueOf(stru)
-	if stru == nil || vv.Kind() != reflect.Pointer {
-		log.Printf("reflectx.WalkValueFlatFieldsIf: must pass a non-nil pointer to the struct: %v\n", stru)
-		return false
-	}
-	v := NonPointerValue(vv)
-	if !v.IsValid() {
-		return true
-	}
-	typ := v.Type()
-	if typ.Kind() != reflect.Struct {
-		log.Printf("reflectx.WalkValueFlatFieldsIf: non-pointer type is not a struct: %v\n", typ.String())
-		return false
-	}
-	rval := true
+// WalkFlatFields calls a function on all the primary fields of the
+// given parent struct value, including those on anonymous embedded
+// structs that this struct has. It passes the current parent struct, current
+// [reflect.StructField], and current field value to the given function.
+// It effectively flattens all of the fields of the struct.
+//
+// If the given ifFun is non-nil, it is called on every struct field (including
+// on embedded structs themselves) to determine whether that field and any fields
+// it has embedded should be handled (a return value of true indicates to continue
+// down and a value of false indicates to not).
+func WalkFlatFields(parent reflect.Value, ifFun, fun func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool) {
+	typ := parent.Type()
 	for i := 0; i < typ.NumField(); i++ {
-		f := typ.Field(i)
-		vf := v.Field(i)
-		if !vf.CanInterface() {
-			continue
-		}
-		vfi := vf.Interface()
-		if vfi == stru {
-			continue
-		}
-		if f.Type.Kind() == reflect.Struct && f.Anonymous {
-			if ifFun != nil {
-				if !ifFun(vfi, typ, f, vf) {
-					continue
-				}
+		field := typ.Field(i)
+		value := parent.Field(i)
+		if ifFun != nil {
+			if !ifFun(parent, field, value) {
+				continue
 			}
-			// key to take addr here so next level is addressable
-			rval = WalkValueFlatFields(PointerValue(vf).Interface(), fun)
-			if !rval {
-				break
-			}
+		}
+		if field.Type.Kind() == reflect.Struct && field.Anonymous {
+			WalkFlatFields(value, ifFun, fun)
 		} else {
-			rval = fun(vfi, typ, f, vf)
-			if !rval {
-				break
-			}
+			fun(parent, field, value)
 		}
 	}
-	return rval
 }
 
 // NumAllFields returns the number of elemental fields in the given struct type.

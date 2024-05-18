@@ -153,7 +153,7 @@ func (tv *TableView) CacheVisFields() {
 			return fld.Tag.Get("view") != "-"
 		}
 	}
-	reflectx.WalkTypeFlatFieldsIf(styp,
+	reflectx.WalkTypeFlatFields(styp,
 		func(typ reflect.Type, fld reflect.StructField) bool {
 			return shouldShow(fld)
 		},

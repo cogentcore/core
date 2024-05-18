@@ -85,13 +85,11 @@ func (sv *StructView) Config(c *core.Config) {
 		sc = !NoSentenceCaseForType(types.TypeNameValue(sv.Struct))
 	}
 
-	shouldShow := func(field reflect.StructField, stru any) bool {
-		ftags := field.Tag
-		vwtag := ftags.Get("view")
-		if vwtag == "-" {
+	shouldShow := func(parent reflect.Value, field reflect.StructField) bool {
+		if field.Tag.Get("view") == "-" {
 			return false
 		}
-		if ss, ok := stru.(core.ShouldShower); ok {
+		if ss, ok := reflectx.UnderlyingPointer(parent).Interface().(core.ShouldShower); ok {
 			sv.isShouldShower = true
 			if !ss.ShouldShow(field.Name) {
 				return false
@@ -100,16 +98,13 @@ func (sv *StructView) Config(c *core.Config) {
 		return true
 	}
 
-	addField := func(c *core.Config, structVal, fieldVal any, field reflect.StructField, fnm string) {
-		if fieldVal == nil {
-			return
-		}
-		flab := fnm
+	addField := func(field reflect.StructField, value reflect.Value, name string) {
+		label := name
 		if sc {
-			flab = strcase.ToSentence(fnm)
+			label = strcase.ToSentence(name)
 		}
-		labnm := fmt.Sprintf("label-%v", fnm)
-		valnm := fmt.Sprintf("value-%v", fnm)
+		labnm := fmt.Sprintf("label-%v", name)
+		valnm := fmt.Sprintf("value-%v", name)
 		readOnlyTag := field.Tag.Get("edit") == "-"
 		ttip := "" // TODO(config)
 		def, hasDef := field.Tag.Lookup("default")
@@ -124,7 +119,7 @@ func (sv *StructView) Config(c *core.Config) {
 				ttip = "(Default: " + def + ") " + ttip
 				var isDef bool
 				w.Style(func(s *styles.Style) {
-					isDef = reflectx.ValueIsDefault(reflect.ValueOf(fieldVal), def)
+					isDef = reflectx.ValueIsDefault(value, def)
 					dcr := "(Double click to reset to default) "
 					if !isDef {
 						s.Color = colors.C(colors.Scheme.Primary.Base)
@@ -137,12 +132,12 @@ func (sv *StructView) Config(c *core.Config) {
 					}
 				})
 				w.OnDoubleClick(func(e events.Event) {
-					fmt.Println(fnm, "doubleclick", isDef)
+					fmt.Println(label, "doubleclick", isDef)
 					if isDef {
 						return
 					}
 					e.SetHandled()
-					err := reflectx.SetFromDefaultTag(reflect.ValueOf(fieldVal), def)
+					err := reflectx.SetFromDefaultTag(value, def)
 					if err != nil {
 						core.ErrorSnackbar(w, err, "Error setting default value")
 					} else {
@@ -152,11 +147,11 @@ func (sv *StructView) Config(c *core.Config) {
 				})
 			}
 		}, func(w *core.Text) {
-			w.SetText(flab)
+			w.SetText(label)
 		})
 
 		core.ConfigureNew(c, valnm, func() core.Value {
-			w := core.NewValue(fieldVal, field.Tag)
+			w := core.NewValue(reflectx.UnderlyingPointer(value).Interface(), field.Tag)
 			wb := w.AsWidget()
 			// vv.AsValueData().ViewPath = sv.ViewPath
 			// svv := FieldToValue(fvalp, sfield.Name, sfval)
@@ -186,45 +181,33 @@ func (sv *StructView) Config(c *core.Config) {
 					// 	lbl.Update()
 					// }
 					sv.SendChange(e)
-					fmt.Println("updating", sv)
 					// sv.Update()
 				})
 			}
 			return w
 		}, func(w core.Value) {
 			w.AsWidget().SetReadOnly(sv.IsReadOnly() || readOnlyTag)
-			core.Bind(fieldVal, w)
+			core.Bind(reflectx.UnderlyingPointer(value).Interface(), w)
 		})
 	}
 
-	reflectx.WalkValueFlatFieldsIf(sv.Struct,
-		func(stru any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-			return shouldShow(field, sv.Struct)
+	reflectx.WalkFlatFields(reflectx.Underlying(reflect.ValueOf(sv.Struct)),
+		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
+			return shouldShow(parent, field)
 		},
-		func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-			// todo: check tags, skip various etc
-			ftags := field.Tag
-			vwtag := ftags.Get("view")
-			if !shouldShow(field, sv.Struct) {
-				return true
-			}
-			if vwtag == "add-fields" && field.Type.Kind() == reflect.Struct {
-				fvalp := fieldVal.Addr().Interface()
-				reflectx.WalkValueFlatFieldsIf(fvalp,
-					func(stru any, typ reflect.Type, sfield reflect.StructField, fieldVal reflect.Value) bool {
-						return shouldShow(sfield, fvalp)
+		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
+			if field.Tag.Get("view") == "add-fields" && field.Type.Kind() == reflect.Struct {
+				reflectx.WalkFlatFields(value,
+					func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) bool {
+						return shouldShow(parent, sfield)
 					},
-					func(sfval any, styp reflect.Type, sfield reflect.StructField, sfieldVal reflect.Value) bool {
-						if !shouldShow(sfield, fvalp) {
-							return true
-						}
-						fnm := field.Name + " • " + sfield.Name
-						addField(c, fvalp, sfval, sfield, fnm)
+					func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) bool {
+						addField(sfield, value, field.Name+" • "+sfield.Name)
 						return true
 					})
 				return true
 			}
-			addField(c, sv.Struct, fval, field, field.Name)
+			addField(field, value, field.Name)
 			return true
 		})
 }
