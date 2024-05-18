@@ -5,6 +5,7 @@
 package views
 
 import (
+	"fmt"
 	"reflect"
 
 	"cogentcore.org/core/base/reflectx"
@@ -193,7 +194,7 @@ func (mv *MapView) ConfigToolbar(c *core.Config) {
 		return
 	}
 	core.Configure(c, "", func(w *core.Button) {
-		w.SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys vs. the values").
+		w.SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys and the values").
 			OnClick(func(e events.Event) {
 				mv.ToggleSort()
 			})
@@ -210,10 +211,6 @@ func (mv *MapView) ConfigToolbar(c *core.Config) {
 
 // BindMapKey is a version of [core.Bind] that works for keys in a map.
 func BindMapKey[T core.Value](mapv reflect.Value, key reflect.Value, vw T) T {
-	// We must have an addressable key so that we can use Addr when we set it down below.
-	// This address doesn't point to the actual key, but it serves as a fake pointer we
-	// can use to keep the key in sync locally here.
-	key = reflectx.NewFrom(key).Elem()
 	wb := vw.AsWidget()
 	wb.ValueUpdate = func() {
 		if vws, ok := any(vw).(core.ValueSetter); ok {
@@ -223,11 +220,23 @@ func BindMapKey[T core.Value](mapv reflect.Value, key reflect.Value, vw T) T {
 		}
 	}
 	wb.ValueOnChange = func() {
-		// TODO(config): check for duplicates
-		value := mapv.MapIndex(key)
-		mapv.SetMapIndex(key, reflect.ValueOf(nil))
-		core.ErrorSnackbar(vw, reflectx.SetRobust(key.Addr().Interface(), vw.WidgetValue())) // must set using address
-		mapv.SetMapIndex(key, value)
+		newKey := reflect.New(key.Type())
+		core.ErrorSnackbar(vw, reflectx.SetRobust(newKey.Interface(), vw.WidgetValue()))
+		newKey = newKey.Elem()
+		if !mapv.MapIndex(newKey).IsValid() { // not already taken
+			mapv.SetMapIndex(newKey, mapv.MapIndex(key))
+			mapv.SetMapIndex(key, reflect.Value{})
+			return
+		}
+		d := core.NewBody().AddTitle("Key already exists").AddText(fmt.Sprintf("The key %v already exists", newKey))
+		d.AddBottomBar(func(parent core.Widget) {
+			d.AddCancel(parent)
+			d.AddOK(parent).SetText("Overwrite").OnClick(func(e events.Event) {
+				mapv.SetMapIndex(key, reflect.Value{})
+				mapv.SetMapIndex(newKey, mapv.MapIndex(key))
+			})
+		})
+		d.RunDialog(vw)
 	}
 	if ob, ok := any(vw).(core.OnBinder); ok {
 		ob.OnBind(key.Interface())
