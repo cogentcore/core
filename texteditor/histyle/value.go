@@ -59,12 +59,12 @@ func View(st *Styles) {
 		StylesChanged = true
 	})
 	d.AddAppBar(func(c *core.Config) {
-		views.ConfigFuncButton(c, st.OpenJSON, func(w *views.FuncButton) {
-			w.SetText("Open from file").SetIcon(icons.Open)
+		core.Configure(c, "", func(w *views.FuncButton) {
+			w.SetFunc(st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
 			w.Args[0].SetTag(".ext", ".histy")
 		})
-		views.ConfigFuncButton(c, st.SaveJSON, func(w *views.FuncButton) {
-			w.SetText("Save from file").SetIcon(icons.Save)
+		core.Configure(c, "", func(w *views.FuncButton) {
+			w.SetFunc(st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
 			w.Args[0].SetTag(".ext", ".histy")
 		})
 		core.Configure[*core.Separator](c, "")

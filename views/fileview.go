@@ -262,17 +262,17 @@ func (fv *FileView) Config(c *core.Config) {
 // ConfigToolbar configures the given toolbar to have file view
 // actions and completions.
 func (fv *FileView) ConfigToolbar(c *core.Config) {
-	ConfigFuncButton(c, fv.DirPathUp, func(w *FuncButton) {
-		w.SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
+	core.Configure(c, "", func(w *FuncButton) {
+		w.SetFunc(fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
 	})
-	ConfigFuncButton(c, fv.AddPathToFaves, func(w *FuncButton) {
-		w.SetIcon(icons.Favorite).SetText("Favorite")
+	core.Configure(c, "", func(w *FuncButton) {
+		w.SetFunc(fv.AddPathToFaves).SetIcon(icons.Favorite).SetText("Favorite")
 	})
-	ConfigFuncButton(c, fv.UpdateFilesAction, func(w *FuncButton) {
-		w.SetIcon(icons.Refresh).SetText("Update")
+	core.Configure(c, "", func(w *FuncButton) {
+		w.SetFunc(fv.UpdateFilesAction).SetIcon(icons.Refresh).SetText("Update")
 	})
-	ConfigFuncButton(c, fv.NewFolder, func(w *FuncButton) {
-		w.SetIcon(icons.CreateNewFolder)
+	core.Configure(c, "", func(w *FuncButton) {
+		w.SetFunc(fv.NewFolder).SetIcon(icons.CreateNewFolder)
 	})
 }
 
