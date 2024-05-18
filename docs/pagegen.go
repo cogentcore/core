@@ -771,7 +771,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		views.NewMapView(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
 	},
 	"views/map-views-3": func(parent core.Widget) {
-		views.NewMapViewInline(parent).SetMap(&map[string]int{"Go": 1, "C++": 3})
+		views.NewMapView(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
 	},
 	"views/map-views-4": func(parent core.Widget) {
 		views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
@@ -1042,8 +1042,5 @@ func main() {
 		core.NewButton(fr).SetText("First")
 		core.NewButton(fr).SetText("Second")
 		core.NewButton(fr).SetText("Third")
-	},
-	"index-0": func(parent core.Widget) {
-		core.NewButton(parent).SetText("Send")
 	},
 }

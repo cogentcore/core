@@ -26,10 +26,8 @@ views.NewMapView(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
 You can make a map view that fits in one line:
 
 ```Go
-views.NewMapViewInline(parent).SetMap(&map[string]int{"Go": 1, "C++": 3})
+views.NewMapView(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
 ```
-
-Inline map views support everything that normal map views do, including everything documented above.
 
 When you use [[views.NewValue]] with a map value, it will create an inline map view if the map has two or fewer elements:
 
