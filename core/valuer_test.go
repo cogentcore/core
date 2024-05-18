@@ -24,7 +24,7 @@ func TestNewValue(t *testing.T) {
 	}
 	for _, value := range values {
 		b := NewBody()
-		NewValue(value.value, b)
+		NewValue(value.value, "", b)
 		b.AssertRender(t, "valuer/"+value.name)
 	}
 }

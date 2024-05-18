@@ -265,8 +265,7 @@ func (sw *Switches) UpdateBitFlag(bitflag enums.BitFlagSetter) {
 
 func (sw *Switches) Config(c *Config) {
 	for _, item := range sw.Items {
-		Configure(c, item.Text, func() *Switch {
-			w := NewSwitch()
+		Configure(c, item.Text, func(w *Switch) {
 			w.OnChange(func(e events.Event) {
 				if sw.Mutex && w.IsChecked() {
 					sw.UnCheckAllBut(w.IndexInParent())
@@ -312,7 +311,6 @@ func (sw *Switches) Config(c *Config) {
 					s.Border.Radius.Zero()
 				}
 			})
-			return w
 		}, func(w *Switch) {
 			w.SetType(sw.Type).SetText(item.Text).SetTooltip(item.Tooltip)
 		})

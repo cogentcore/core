@@ -1737,8 +1737,8 @@ func (tf *TextField) Config(c *Config) {
 
 	if !tf.IsReadOnly() {
 		if tf.LeadingIcon.IsSet() {
-			Configure(c, "lead-icon", func() *Button {
-				w := NewButton().SetType(ButtonAction)
+			Configure(c, "lead-icon", func(w *Button) {
+				w.SetType(ButtonAction)
 				w.Style(func(s *styles.Style) {
 					s.Padding.Zero()
 					s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
@@ -1765,17 +1765,14 @@ func (tf *TextField) Config(c *Config) {
 						tf.LeadingIconOnClick(e)
 					}
 				})
-				return w
 			}, func(w *Button) {
 				w.SetIcon(tf.LeadingIcon)
 			})
 		}
 		if tf.TrailingIcon.IsSet() {
-			Configure(c, "trail-icon-stretch", func() *Stretch {
-				return NewStretch()
-			})
-			Configure(c, "trail-icon", func() *Button {
-				w := NewButton().SetType(ButtonAction)
+			Configure[*Stretch](c, "trail-icon-stretch")
+			Configure(c, "trail-icon", func(w *Button) {
+				w.SetType(ButtonAction)
 				w.Style(func(s *styles.Style) {
 					s.Padding.Zero()
 					s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
@@ -1802,7 +1799,6 @@ func (tf *TextField) Config(c *Config) {
 						tf.TrailingIconOnClick(e)
 					}
 				})
-				return w
 			}, func(w *Button) {
 				w.SetIcon(tf.TrailingIcon)
 			})

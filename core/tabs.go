@@ -394,8 +394,7 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 // Re-config is needed when the type of tabs changes, but not
 // when a new tab is added, which only requires a new layout pass.
 func (ts *Tabs) Config(c *Config) {
-	Configure(c, "tabs", func() *Frame {
-		w := NewFrame()
+	Configure(c, "tabs", func(w *Frame) {
 		w.Style(func(s *styles.Style) {
 			s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 			s.Margin.Zero()
@@ -411,23 +410,20 @@ func (ts *Tabs) Config(c *Config) {
 				s.Wrap = true
 			}
 		})
-		return w
 	}, func(w *Frame) {
 		tc := &Config{}
 		if ts.NewTabButton {
-			Configure(tc, "new-tab", func() *Button {
-				w := NewButton().SetIcon(icons.Add).SetType(ButtonAction)
+			Configure(tc, "new-tab", func(w *Button) { // TODO(config)
+				w.SetIcon(icons.Add).SetType(ButtonAction)
 				w.OnClick(func(e events.Event) {
 					ts.NewTab("New tab")
 					ts.SelectTabIndex(ts.NumTabs() - 1)
 				})
-				return w
 			})
 		}
 		tc.ConfigWidget(w, "")
 	})
-	Configure(c, "frame", func() *Frame {
-		w := NewFrame()
+	Configure(c, "frame", func(w *Frame) {
 		w.Style(func(s *styles.Style) {
 			s.Display = styles.Stacked
 			w.SetFlag(true, FrameStackTopOnly) // key for allowing each tab to have its own size
@@ -435,7 +431,6 @@ func (ts *Tabs) Config(c *Config) {
 			s.Min.Y.Dp(96)
 			s.Grow.Set(1, 1)
 		})
-		return w
 	})
 	// frame comes before tabs in bottom navigation bar
 	if ts.Type.Effective(ts) == NavigationBar {
@@ -562,29 +557,23 @@ func (tb *Tab) Config(c *Config) {
 	}
 
 	if tb.Icon.IsSet() {
-		Configure(c, "icon", func() *Icon {
-			w := NewIcon()
+		Configure(c, "icon", func(w *Icon) {
 			w.Style(func(s *styles.Style) {
 				s.Font.Size.Dp(18)
 			})
-			return w
 		}, func(w *Icon) {
 			w.SetIcon(tb.Icon)
 		})
 		if tb.Text != "" {
-			Configure(c, "space", func() *Space {
-				return NewSpace()
-			})
+			Configure[*Space](c, "space")
 		}
 	}
 	if tb.Text != "" {
-		Configure(c, "text", func() *Text {
-			w := NewText()
+		Configure(c, "text", func(w *Text) {
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
 				s.SetTextWrap(false)
 			})
-			return w
 		}, func(w *Text) {
 			if tb.Type.Effective(tb) == FunctionalTabs {
 				w.SetType(TextBodyMedium)
@@ -595,11 +584,9 @@ func (tb *Tab) Config(c *Config) {
 		})
 	}
 	if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
-		Configure(c, "close-space", func() *Space {
-			return NewSpace()
-		})
-		Configure(c, "close", func() *Button {
-			w := NewButton().SetType(ButtonAction)
+		Configure[*Space](c, "close-space")
+		Configure(c, "close", func(w *Button) {
+			w.SetType(ButtonAction)
 			w.Style(func(s *styles.Style) {
 				s.Padding.Zero()
 				s.Border.Radius = styles.BorderRadiusFull
@@ -614,7 +601,6 @@ func (tb *Tab) Config(c *Config) {
 					ts.DeleteTabIndex(idx)
 				}
 			})
-			return w
 		}, func(w *Button) {
 			w.SetIcon(tb.CloseIcon)
 		})

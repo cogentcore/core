@@ -268,18 +268,15 @@ func (c *Config) UpdateWidget(w Widget, parentPath string) {
 	}
 }
 
-// NewParts returns a new [Frame] that serves as the internal parts
-// of a widget, which typically contain content that the widget automatically
-// manages through its [Widget.Config] method.
-func NewParts() *Frame {
-	w := NewFrame()
+// ConfigParts configures the given [Frame] to be ready
+// to serve as [WidgetBase.Parts] in a [Config] context.
+func ConfigParts(w *Frame) {
 	w.SetName("parts")
 	w.SetFlag(true, tree.Field)
 	w.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		s.RenderBox = false
 	})
-	return w
 }
 
 // ConfigWidget is the base implementation of [Widget.ConfigWidget] that

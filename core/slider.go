@@ -487,13 +487,11 @@ func (sr *Slider) Config(c *Config) {
 		sr.DeleteChildren()
 		return
 	}
-	Configure(c, "icon", func() *Icon {
-		w := NewIcon()
+	Configure(c, "icon", func(w *Icon) {
 		w.Style(func(s *styles.Style) {
 			s.Font.Size.Dp(24)
 			s.Color = sr.ThumbColor
 		})
-		return w
 	}, func(w *Icon) {
 		w.SetIcon(sr.Icon)
 	})
