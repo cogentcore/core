@@ -6,7 +6,6 @@ package views
 
 import (
 	"fmt"
-	"log/slog"
 	"reflect"
 	"slices"
 	"strings"
@@ -81,8 +80,6 @@ func (sv *StructView) Config(c *core.Config) {
 		sc = !NoSentenceCaseForType(types.TypeNameValue(sv.Struct))
 	}
 
-	dupeFields := map[string]bool{} // todo: build this into basic config
-
 	shouldShow := func(field reflect.StructField, stru any) bool {
 		ftags := field.Tag
 		vwtag := ftags.Get("view")
@@ -99,16 +96,6 @@ func (sv *StructView) Config(c *core.Config) {
 	}
 
 	addField := func(c *core.Config, structVal, fieldVal any, field reflect.StructField, fnm string) {
-		if fieldVal == nil || reflectx.AnyIsNil(fieldVal) {
-			// fmt.Println("field is nil:", fnm)
-			return
-		}
-		if _, exists := dupeFields[fnm]; exists {
-			slog.Error("StructView: duplicate field name:", "name:", fnm)
-			return
-		} else {
-			dupeFields[fnm] = true
-		}
 		flab := fnm
 		if sc {
 			flab = strcase.ToSentence(fnm)
