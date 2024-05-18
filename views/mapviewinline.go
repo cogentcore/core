@@ -64,7 +64,7 @@ func (mv *MapViewInline) Config(c *core.Config) {
 		valnm := "value-" + keytxt
 		val := reflectx.OnePointerUnderlyingValue(mpvnp.MapIndex(key))
 
-		core.Configure(c, keynm, func() core.Value {
+		core.ConfigureNew(c, keynm, func() core.Value {
 			w := core.NewValue(key.Interface(), "")
 			wb := w.AsWidget()
 			wb.SetReadOnly(mv.IsReadOnly())
@@ -91,7 +91,7 @@ func (mv *MapViewInline) Config(c *core.Config) {
 			// vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value value to track updates
 			wb.SetReadOnly(mv.IsReadOnly())
 		})
-		core.Configure(c, valnm, func() core.Value {
+		core.ConfigureNew(c, valnm, func() core.Value {
 			w := core.NewValue(val.Interface(), "")
 			wb := w.AsWidget()
 			wb.SetReadOnly(mv.IsReadOnly())
@@ -116,18 +116,17 @@ func (mv *MapViewInline) Config(c *core.Config) {
 		})
 	}
 	if !mv.IsReadOnly() {
-		core.Configure(c, "add-button", func() *core.Button {
-			w := core.NewButton().SetIcon(icons.Add).SetType(core.ButtonTonal)
-			w.Tooltip = "add an element to the map"
+		core.Configure(c, "add-button", func(w *core.Button) {
+			w.SetIcon(icons.Add).SetType(core.ButtonTonal)
+			w.Tooltip = "Add an element"
 			w.OnClick(func(e events.Event) {
 				mv.MapAdd()
 			})
-			return w
 		})
 	}
-	core.Configure(c, "edit-button", func() *core.Button {
-		w := core.NewButton().SetIcon(icons.Edit).SetType(core.ButtonTonal)
-		w.Tooltip = "edit in a dialog"
+	core.Configure(c, "edit-button", func(w *core.Button) {
+		w.SetIcon(icons.Edit).SetType(core.ButtonTonal)
+		w.Tooltip = "Edit in a dialog"
 		w.OnClick(func(e events.Event) {
 			vpath := mv.ViewPath
 			title := ""
@@ -151,7 +150,6 @@ func (mv *MapViewInline) Config(c *core.Config) {
 			})
 			d.RunFullDialog(mv)
 		})
-		return w
 	})
 }
 

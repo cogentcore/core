@@ -45,7 +45,7 @@ type ConfigItem struct {
 }
 
 // Configure adds a new config item to the given [Config] for a widget at the
-// given forward-slash-separated path with the given optional function(s). The
+// given forward slash separated path with the given optional function(s). The
 // first function is called to initially configure the widget, and the second
 // function is called to update the widget. If the given path is blank, it is
 // automatically set to a unique name based on the filepath and line number of
@@ -71,6 +71,20 @@ func Configure[T Widget](c *Config, path string, funcs ...func(w T)) {
 		}, func(w Widget) {
 			update(w.(T))
 		})
+	}
+}
+
+// ConfigureNew adds a new config item to the given [Config] for a widget at the
+// given forward slash separated path with the given function for constructing
+// the widget and the given optional function for updating the widget. If the
+// given path is blank, it is automatically set to a unique name based on the
+// filepath and line number of the calling function.
+func ConfigureNew[T Widget](c *Config, path string, new func() T, update ...func(w T)) {
+	if len(update) == 0 {
+		c.Add(path, func() Widget { return new() }, nil)
+	} else {
+		u := update[0]
+		c.Add(path, func() Widget { return new() }, func(w Widget) { u(w.(T)) })
 	}
 }
 

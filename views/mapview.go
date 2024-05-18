@@ -86,7 +86,7 @@ func (mv *MapView) Config(c *core.Config) {
 		valnm := "value-" + keytxt
 		val := reflectx.OnePointerUnderlyingValue(mpvnp.MapIndex(key))
 
-		core.Configure(c, keynm, func() core.Value {
+		core.ConfigureNew(c, keynm, func() core.Value {
 			w := core.NewValue(key.Interface(), "")
 			wb := w.AsWidget()
 			wb.SetReadOnly(mv.IsReadOnly())
@@ -113,7 +113,7 @@ func (mv *MapView) Config(c *core.Config) {
 			// vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value value to track updates
 			wb.SetReadOnly(mv.IsReadOnly())
 		})
-		core.Configure(c, valnm, func() core.Value {
+		core.ConfigureNew(c, valnm, func() core.Value {
 			w := core.NewValue(val.Interface(), "")
 			wb := w.AsWidget()
 			wb.SetReadOnly(mv.IsReadOnly())
@@ -139,15 +139,13 @@ func (mv *MapView) Config(c *core.Config) {
 
 		if ifaceType {
 			typnm := "type-" + keytxt
-			core.Configure(c, typnm, func() *core.Chooser {
-				w := core.NewChooser()
+			core.Configure(c, typnm, func(w *core.Chooser) {
 				w.SetTypes(valtypes...)
 				vtyp := reflectx.NonPointerType(reflect.TypeOf(val.Interface()))
 				if vtyp == nil {
 					vtyp = reflect.TypeOf("") // default to string
 				}
 				w.SetCurrentValue(vtyp)
-				return w
 			})
 		}
 	}
