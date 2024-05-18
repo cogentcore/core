@@ -7,9 +7,10 @@
 package types
 
 import (
+	"cmp"
 	"fmt"
 	"reflect"
-	"sort"
+	"slices"
 	"strings"
 	"sync/atomic"
 
@@ -55,11 +56,7 @@ func addBuiltin[T any](name string) {
 
 // TypeByName returns a Type by name (package_url.Type, e.g., cogentcore.org/core/core.Button),
 func TypeByName(name string) *Type {
-	tp, ok := Types[name]
-	if !ok {
-		return nil
-	}
-	return tp
+	return Types[name]
 }
 
 // TypeByNameTry returns a Type by name (package_url.Type, e.g., cogentcore.org/core/core.Button),
@@ -112,7 +109,7 @@ func TypeName(typ reflect.Type) string {
 // of the given Go value. Automatically finds the non-pointer base type.
 // This is guaranteed to be unique and used for the Types registry.
 func TypeNameValue(v any) string {
-	typ := reflectx.NonPointerType(reflect.TypeOf(v))
+	typ := reflectx.Underlying(reflect.ValueOf(v)).Type()
 	return TypeName(typ)
 }
 
@@ -124,22 +121,25 @@ func BuiltinTypes() []*Type {
 			res = append(res, t)
 		}
 	}
+	slices.SortFunc(res, func(a, b *Type) int {
+		return cmp.Compare(a.Name, b.Name)
+	})
 	return res
 }
 
 // AllEmbeddersOf returns all registered types that embed the given type.
 // List is sorted in alpha order by fully package-path-qualified Name.
 func AllEmbeddersOf(typ *Type) []*Type {
-	var typs []*Type
+	var res []*Type
 	for _, t := range Types {
 		if t.HasEmbed(typ) {
-			typs = append(typs, t)
+			res = append(res, t)
 		}
 	}
-	sort.Slice(typs, func(i, j int) bool {
-		return typs[i].Name < typs[j].Name
+	slices.SortFunc(res, func(a, b *Type) int {
+		return cmp.Compare(a.Name, b.Name)
 	})
-	return typs
+	return res
 }
 
 // GetDoc gets the documentation for the given value with the given owner value, field, and label.

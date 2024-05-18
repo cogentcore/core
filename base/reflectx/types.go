@@ -16,7 +16,11 @@ func LongTypeName(typ reflect.Type) string {
 	nptyp := NonPointerType(typ)
 	nm := nptyp.Name()
 	if nm != "" {
-		return nptyp.PkgPath() + "." + nm
+		p := nptyp.PkgPath()
+		if p != "" {
+			return p + "." + nm
+		}
+		return nm
 	}
 	return typ.String()
 }

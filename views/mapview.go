@@ -77,6 +77,7 @@ func (mv *MapView) Config(c *core.Config) {
 		keytxt := reflectx.ToString(key.Interface())
 		keynm := "key-" + keytxt
 		valnm := "value-" + keytxt
+		val := mapv.MapIndex(key).Interface()
 
 		core.ConfigureNew(c, keynm, func() core.Value {
 			w := core.ToValue(key.Interface(), "")
@@ -105,7 +106,6 @@ func (mv *MapView) Config(c *core.Config) {
 			wb.SetReadOnly(mv.IsReadOnly())
 		})
 		core.ConfigureNew(c, valnm, func() core.Value {
-			val := mapv.MapIndex(key).Interface()
 			w := core.ToValue(val, "")
 			BindMapValue(mapv, key, w)
 			wb := w.AsWidget()
@@ -132,11 +132,11 @@ func (mv *MapView) Config(c *core.Config) {
 			typnm := "type-" + keytxt
 			core.Configure(c, typnm, func(w *core.Chooser) {
 				w.SetTypes(builtinTypes...)
-				// vtyp := reflectx.NonPointerType(reflect.TypeOf(val))
-				// if vtyp == nil {
-				// 	vtyp = reflect.TypeOf("") // default to string
-				// }
-				// w.SetCurrentValue(vtyp)
+				vtyp := types.TypeByValue(val)
+				if vtyp == nil {
+					vtyp = types.TypeByName("string") // default to string
+				}
+				w.SetCurrentValue(vtyp)
 			})
 		}
 	}
