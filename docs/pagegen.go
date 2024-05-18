@@ -771,12 +771,15 @@ var PagesExamples = map[string]func(parent core.Widget){
 		views.NewMapView(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
 	},
 	"views/map-views-3": func(parent core.Widget) {
-		views.NewMapView(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
+		views.NewMapView(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
 	},
 	"views/map-views-4": func(parent core.Widget) {
-		views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
+		views.NewMapView(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
 	},
 	"views/map-views-5": func(parent core.Widget) {
+		views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
+	},
+	"views/map-views-6": func(parent core.Widget) {
 		views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
 	},
 	"views/slice-views-0": func(parent core.Widget) {

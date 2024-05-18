@@ -141,6 +141,8 @@ func (mv *MapView) Config(c *core.Config) {
 					mv.DeleteChildByName("value-" + keytxt) // force it to be updated
 					mv.Update()
 				})
+			}, func(w *core.Chooser) {
+				w.SetReadOnly(mv.IsReadOnly())
 			})
 		}
 	}

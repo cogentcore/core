@@ -23,6 +23,12 @@ You can prevent the user from editing the map:
 views.NewMapView(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
 ```
 
+You can make a map view with elements of any type:
+
+```Go
+views.NewMapView(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
+```
+
 You can make a map view that fits in one line:
 
 ```Go
