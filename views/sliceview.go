@@ -264,6 +264,8 @@ type SliceViewBase struct {
 	MaxWidth int `set:"-" copier:"-" json:"-" xml:"-"`
 }
 
+func (sv *SliceViewBase) WidgetValue() any { return &sv.Slice }
+
 func (sv *SliceViewBase) FlagType() enums.BitFlagSetter {
 	return (*SliceViewFlags)(&sv.Flags)
 }

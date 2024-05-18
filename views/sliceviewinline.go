@@ -37,9 +37,6 @@ type SliceViewInline struct {
 
 	// isFixedLength is whether the slice has a fixed-length flag on it.
 	isFixedLength bool
-
-	// size when configured
-	configSize int
 }
 
 func (sv *SliceViewInline) WidgetValue() any { return &sv.Slice }
@@ -72,7 +69,6 @@ func (sv *SliceViewInline) Config(c *core.Config) {
 	sl := reflectx.NonPointerValue(reflectx.UnderlyingPointer(reflect.ValueOf(sv.Slice)))
 
 	sz := min(sl.Len(), core.SystemSettings.SliceInlineLength)
-	sv.configSize = sz
 	for i := 0; i < sz; i++ {
 		itxt := strconv.Itoa(i)
 		val := reflectx.UnderlyingPointer(sl.Index(i)) // deal with pointer lists
@@ -176,19 +172,4 @@ func (sv *SliceViewInline) ContextMenu(m *core.Scene, idx int) {
 	core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
 		sv.SliceDeleteAt(idx)
 	})
-}
-
-func (sv *SliceViewInline) SliceSizeChanged() bool {
-	if reflectx.AnyIsNil(sv.Slice) {
-		return sv.configSize != 0
-	}
-	sl := reflectx.NonPointerValue(reflectx.UnderlyingPointer(reflect.ValueOf(sv.Slice)))
-	return sv.configSize != sl.Len()
-}
-
-func (sv *SliceViewInline) SizeUp() {
-	if sv.SliceSizeChanged() {
-		sv.Update()
-	}
-	sv.Frame.SizeUp()
 }

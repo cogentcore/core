@@ -786,16 +786,16 @@ var PagesExamples = map[string]func(parent core.Widget){
 		views.NewSliceView(parent).SetSlice(&[]int{1, 3, 5})
 	},
 	"views/slice-views-1": func(parent core.Widget) {
+		views.NewSliceViewInline(parent).SetSlice(&[]int{1, 3, 5})
+	},
+	"views/slice-views-2": func(parent core.Widget) {
 		sl := []int{1, 3, 5}
 		views.NewSliceView(parent).SetSlice(&sl).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, fmt.Sprintf("Slice: %v", sl))
 		})
 	},
-	"views/slice-views-2": func(parent core.Widget) {
-		views.NewSliceView(parent).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
-	},
 	"views/slice-views-3": func(parent core.Widget) {
-		views.NewSliceViewInline(parent).SetSlice(&[]int{1, 3, 5})
+		views.NewSliceView(parent).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
 	},
 	"views/slice-views-4": func(parent core.Widget) {
 		views.NewValue(parent, &[]int{1, 3, 5})
