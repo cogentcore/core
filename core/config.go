@@ -58,6 +58,7 @@ func Configure[T Widget](c *Config, path string, funcs ...func(w T)) {
 		init := funcs[0]
 		c.Add(path, func() Widget {
 			w := tree.New[T]()
+			// w.SetName(path)
 			init(w)
 			return w
 		}, nil)
@@ -66,6 +67,7 @@ func Configure[T Widget](c *Config, path string, funcs ...func(w T)) {
 		update := funcs[1]
 		c.Add(path, func() Widget {
 			w := tree.New[T]()
+			// w.SetName(path)
 			init(w)
 			return w
 		}, func(w Widget) {

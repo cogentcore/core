@@ -192,18 +192,22 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 }
 
 // ConfigToolbar configures a [core.Toolbar] for this view
-func (mv *MapView) ConfigToolbar(tb *core.Toolbar) {
+func (mv *MapView) ConfigToolbar(c *core.Config) {
 	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
-	core.NewButton(tb).SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys vs. the values").
-		OnClick(func(e events.Event) {
-			mv.ToggleSort()
-		})
-	if !mv.IsReadOnly() {
-		core.NewButton(tb).SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
+	core.Configure(c, "", func(w *core.Button) {
+		w.SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys vs. the values").
 			OnClick(func(e events.Event) {
-				mv.MapAdd()
+				mv.ToggleSort()
 			})
+	})
+	if !mv.IsReadOnly() {
+		core.Configure(c, "", func(w *core.Button) {
+			w.SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
+				OnClick(func(e events.Event) {
+					mv.MapAdd()
+				})
+		})
 	}
 }

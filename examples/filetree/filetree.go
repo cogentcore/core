@@ -310,18 +310,26 @@ func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
 	return nil
 }
 
-func (fb *FileBrowse) ConfigToolbar(tb *core.Toolbar) { //types:add
-	views.NewFuncButton(tb, fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
-	op := views.NewFuncButton(tb, fb.OpenPath).SetKey(keymap.Open)
-	op.Args[0].SetValue(fb.ActiveFilename)
-	// op.Args[0].SetTag("ext", ".json")
-	views.NewFuncButton(tb, fb.SaveActiveView).SetKey(keymap.Save)
-	// save.SetUpdateFunc(func() {
-	// 	save.SetEnabledUpdate(fb.Changed && ge.Filename != "")
-	// })
-	sa := views.NewFuncButton(tb, fb.SaveActiveViewAs).SetKey(keymap.SaveAs)
-	sa.Args[0].SetValue(fb.ActiveFilename)
-	// sa.Args[0].SetTag("ext", ".json")
+func (fb *FileBrowse) ConfigToolbar(c *core.Config) { //types:add
+	core.Configure(c, "", func(w *views.FuncButton) {
+		w.SetFunc(fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
+	})
+	core.Configure(c, "", func(w *views.FuncButton) {
+		w.SetFunc(fb.OpenPath).SetKey(keymap.Open)
+		w.Args[0].SetValue(fb.ActiveFilename)
+		// w.Args[0].SetTag("ext", ".json")
+	})
+	core.Configure(c, "", func(w *views.FuncButton) {
+		w.SetFunc(fb.SaveActiveView).SetKey(keymap.Save)
+		w.Style(func(s *styles.Style) {
+			s.SetEnabled(fb.Changed && fb.ActiveFilename != "")
+		})
+	})
+	core.Configure(c, "", func(w *views.FuncButton) {
+		w.SetFunc(fb.SaveActiveViewAs).SetKey(keymap.SaveAs)
+		w.Args[0].SetValue(fb.ActiveFilename)
+		// w.Args[0].SetTag("ext", ".json")
+	})
 }
 
 // SplitsConfig returns a Config for configuring the Splits

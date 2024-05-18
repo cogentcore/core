@@ -48,21 +48,23 @@ func main() {
 
 	errors.Log1(sc.OpenNewObj(curFn, objgp))
 
-	b.AddAppBar(func(tb *core.Toolbar) {
-		core.NewButton(tb).SetText("Open").SetIcon(icons.Open).
-			SetTooltip("Open a 3D object file for viewing").
-			OnClick(func(e events.Event) {
-				views.FileViewDialog(tb, curFn, exts, "Open 3D Object", func(selFile string) {
-					curFn = selFile
-					objgp.DeleteChildren()
-					sc.DeleteMeshes()
-					sc.DeleteTextures()
-					errors.Log1(sc.OpenNewObj(selFile, objgp))
-					sc.SetCamera("default")
-					sc.NeedsUpdate()
-					sv.NeedsRender()
+	b.AddAppBar(func(c *core.Config) {
+		core.Configure(c, "", func(w *core.Button) {
+			w.SetText("Open").SetIcon(icons.Open).
+				SetTooltip("Open a 3D object file for viewing").
+				OnClick(func(e events.Event) {
+					views.FileViewDialog(b, curFn, exts, "Open 3D Object", func(selFile string) {
+						curFn = selFile
+						objgp.DeleteChildren()
+						sc.DeleteMeshes()
+						sc.DeleteTextures()
+						errors.Log1(sc.OpenNewObj(selFile, objgp))
+						sc.SetCamera("default")
+						sc.NeedsUpdate()
+						sv.NeedsRender()
+					})
 				})
-			})
+		})
 	})
 
 	sc.NeedsConfig()

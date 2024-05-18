@@ -15,7 +15,6 @@ import (
 	"log/slog"
 	"net/url"
 	"path"
-	"slices"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
@@ -287,34 +286,37 @@ func (pg *Page) Config(c *core.Config) {
 }
 
 // AppBar is the default app bar for a [Page]
-func (pg *Page) AppBar(tb *core.Toolbar) {
-	ch := tb.AppChooser()
+func (pg *Page) AppBar(c *core.Config) {
+	// todo: needs a different config
+	/*
+		ch := tb.AppChooser()
 
-	back := tb.ChildByName("back").(*core.Button)
-	back.OnClick(func(e events.Event) {
-		if pg.HistoryIndex > 0 {
-			pg.HistoryIndex--
-			// we reverse the order
-			// ch.SelectItem(len(pg.History) - pg.HistoryIndex - 1)
-			// we need a slash so that it doesn't think it's a relative URL
-			pg.OpenURL("/"+pg.History[pg.HistoryIndex], false)
-		}
-	})
+		back := tb.ChildByName("back").(*core.Button)
+		back.OnClick(func(e events.Event) {
+			if pg.HistoryIndex > 0 {
+				pg.HistoryIndex--
+				// we reverse the order
+				// ch.SelectItem(len(pg.History) - pg.HistoryIndex - 1)
+				// we need a slash so that it doesn't think it's a relative URL
+				pg.OpenURL("/"+pg.History[pg.HistoryIndex], false)
+			}
+		})
 
-	ch.AddItemsFunc(func() {
-		urls := []string{}
-		for u := range pg.URLToPagePath {
-			urls = append(urls, u)
-		}
-		slices.Sort(urls)
-		for _, u := range urls {
-			ch.Items = append(ch.Items, core.ChooserItem{
-				Value: u,
-				Text:  wpath.Label(u, core.TheApp.Name()),
-				Func: func() {
-					pg.OpenURL("/"+u, true)
-				},
-			})
-		}
-	})
+		ch.AddItemsFunc(func() {
+			urls := []string{}
+			for u := range pg.URLToPagePath {
+				urls = append(urls, u)
+			}
+			slices.Sort(urls)
+			for _, u := range urls {
+				ch.Items = append(ch.Items, core.ChooserItem{
+					Value: u,
+					Text:  wpath.Label(u, core.TheApp.Name()),
+					Func: func() {
+						pg.OpenURL("/"+u, true)
+					},
+				})
+			}
+		})
+	*/
 }

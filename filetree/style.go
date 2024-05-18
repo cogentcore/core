@@ -78,6 +78,10 @@ func (fn *Node) SetStyles() {
 			sw := w.(*core.Switch)
 			sw.Type = core.SwitchCheckbox
 			sw.SetIcons(icons.FolderOpen, icons.Folder, icons.Blank)
+			sw.Style(func(s *styles.Style) {
+				s.Min.X.Em(0.8)
+				s.Min.Y.Em(0.8)
+			})
 		}
 	})
 }

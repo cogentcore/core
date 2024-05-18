@@ -107,10 +107,12 @@ func main() {
 	nt := tv.NewTab("Planets Data")
 	tbv := tensorview.NewTableView(nt).SetTable(Planets)
 	b.AddAppBar(tbv.ConfigToolbar)
-	b.AddAppBar(func(tb *core.Toolbar) {
-		core.NewButton(tb).SetText("README").SetIcon(icons.FileMarkdown).
-			SetTooltip("open README help file").OnClick(func(e events.Event) {
-			core.TheApp.OpenURL("https://github.com/emer/table/blob/master/examples/dataproc/README.md")
+	b.AddAppBar(func(c *core.Config) {
+		core.Configure(c, "", func(w *core.Button) {
+			w.SetText("README").SetIcon(icons.FileMarkdown).
+				SetTooltip("open README help file").OnClick(func(e events.Event) {
+				core.TheApp.OpenURL("https://github.com/cogentcore/core/blob/main/tensor/examples/dataproc/README.md")
+			})
 		})
 	})
 

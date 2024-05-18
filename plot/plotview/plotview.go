@@ -571,60 +571,79 @@ func (pl *PlotView) ColumnsConfig() {
 	}
 }
 
-func (pl *PlotView) ConfigToolbar(tb *core.Toolbar) {
+func (pl *PlotView) ConfigToolbar(c *core.Config) {
 	if pl.Table == nil {
 		return
 	}
-	core.NewButton(tb).SetIcon(icons.PanTool).
-		SetTooltip("toggle the ability to zoom and pan the view").OnClick(func(e events.Event) {
-		pc := pl.PlotChild()
-		pc.SetReadOnly(!pc.IsReadOnly())
-		pc.ApplyStyleUpdate()
+	core.Configure(c, "", func(w *core.Button) {
+		w.SetIcon(icons.PanTool).
+			SetTooltip("toggle the ability to zoom and pan the view").OnClick(func(e events.Event) {
+			pc := pl.PlotChild()
+			pc.SetReadOnly(!pc.IsReadOnly())
+			pc.ApplyStyleUpdate()
+		})
 	})
-	core.NewButton(tb).SetIcon(icons.ArrowForward).
-		SetTooltip("turn on select mode for selecting Plot elements").
-		OnClick(func(e events.Event) {
-			fmt.Println("this will select select mode")
-		})
-	core.NewSeparator(tb)
-	core.NewButton(tb).SetText("Update").SetIcon(icons.Update).
-		SetTooltip("update fully redraws display, reflecting any new settings etc").
-		OnClick(func(e events.Event) {
-			pl.ConfigWidget()
-			pl.UpdatePlot()
-		})
-	core.NewButton(tb).SetText("Config").SetIcon(icons.Settings).
-		SetTooltip("set parameters that control display (font size etc)").
-		OnClick(func(e events.Event) {
-			d := core.NewBody().AddTitle(pl.Nm + " Params")
-			views.NewStructView(d).SetStruct(&pl.Params).
-				OnChange(func(e events.Event) {
-					pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
-				})
-			d.NewFullDialog(pl).SetNewWindow(true).Run()
-		})
-	core.NewButton(tb).SetText("Table").SetIcon(icons.Edit).
-		SetTooltip("open a TableView window of the data").
-		OnClick(func(e events.Event) {
-			d := core.NewBody().AddTitle(pl.Nm + " Data")
-			tensorview.NewTableView(d).SetTable(pl.Table.Table)
-			// TODO(config)
-			// d.AddAppBar(etv.ConfigToolbar)
-			d.NewFullDialog(pl).SetNewWindow(true).Run()
-		})
-	core.NewSeparator(tb)
+	core.Configure(c, "", func(w *core.Button) {
+		w.SetIcon(icons.ArrowForward).
+			SetTooltip("turn on select mode for selecting Plot elements").
+			OnClick(func(e events.Event) {
+				fmt.Println("this will select select mode")
+			})
+	})
+	core.Configure[*core.Separator](c, "")
 
-	core.NewButton(tb).SetText("Save").SetIcon(icons.Save).SetMenu(func(m *core.Scene) {
-		views.NewFuncButton(m, pl.SaveSVG).SetIcon(icons.Save)
-		views.NewFuncButton(m, pl.SavePNG).SetIcon(icons.Save)
-		views.NewFuncButton(m, pl.SaveCSV).SetIcon(icons.Save)
-		core.NewSeparator(m)
-		views.NewFuncButton(m, pl.SaveAll).SetIcon(icons.Save)
+	core.Configure(c, "", func(w *core.Button) {
+		w.SetText("Update").SetIcon(icons.Update).
+			SetTooltip("update fully redraws display, reflecting any new settings etc").
+			OnClick(func(e events.Event) {
+				pl.ConfigWidget()
+				pl.UpdatePlot()
+			})
 	})
-	views.NewFuncButton(tb, pl.OpenCSV).SetIcon(icons.Open)
-	core.NewSeparator(tb)
-	views.NewFuncButton(tb, pl.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
-	views.NewFuncButton(tb, pl.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
+	core.Configure(c, "", func(w *core.Button) {
+		w.SetText("Config").SetIcon(icons.Settings).
+			SetTooltip("set parameters that control display (font size etc)").
+			OnClick(func(e events.Event) {
+				d := core.NewBody().AddTitle(pl.Nm + " Params")
+				views.NewStructView(d).SetStruct(&pl.Params).
+					OnChange(func(e events.Event) {
+						pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
+					})
+				d.NewFullDialog(pl).SetNewWindow(true).Run()
+			})
+	})
+	core.Configure(c, "", func(w *core.Button) {
+		w.SetText("Table").SetIcon(icons.Edit).
+			SetTooltip("open a TableView window of the data").
+			OnClick(func(e events.Event) {
+				d := core.NewBody().AddTitle(pl.Nm + " Data")
+				tensorview.NewTableView(d).SetTable(pl.Table.Table)
+				// TODO(config)
+				// d.AddAppBar(etv.ConfigToolbar)
+				d.NewFullDialog(pl).SetNewWindow(true).Run()
+			})
+	})
+	core.Configure[*core.Separator](c, "")
+
+	core.Configure(c, "", func(w *core.Button) {
+		w.SetText("Save").SetIcon(icons.Save).SetMenu(func(m *core.Scene) {
+			views.NewFuncButton(m, pl.SaveSVG).SetIcon(icons.Save)
+			views.NewFuncButton(m, pl.SavePNG).SetIcon(icons.Save)
+			views.NewFuncButton(m, pl.SaveCSV).SetIcon(icons.Save)
+			core.NewSeparator(m)
+			views.NewFuncButton(m, pl.SaveAll).SetIcon(icons.Save)
+		})
+	})
+	core.Configure(c, "", func(w *views.FuncButton) {
+		w.SetFunc(pl.OpenCSV).SetIcon(icons.Open)
+	})
+	core.Configure[*core.Separator](c, "")
+	core.Configure(c, "", func(w *views.FuncButton) {
+		w.SetFunc(pl.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
+	})
+	core.Configure(c, "", func(w *views.FuncButton) {
+		w.SetFunc(pl.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
+	})
 }
 
 func (pt *PlotView) SizeFinal() {

@@ -641,16 +641,28 @@ func (tv *TableView) SizeFinal() {
 //////////////////////////////////////////////////////////////////////////////
 //    Copy / Cut / Paste
 
-func (tv *TableView) ConfigToolbar(tb *core.Toolbar) {
+func (tv *TableView) ConfigToolbar(c *core.Config) {
 	if tv.Table == nil || tv.Table.Table == nil {
 		return
 	}
-	views.NewFuncButton(tb, tv.Table.AddRows).SetIcon(icons.Add)
-	views.NewFuncButton(tb, tv.Table.SortColumnName).SetText("Sort").SetIcon(icons.Sort)
-	views.NewFuncButton(tb, tv.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
-	views.NewFuncButton(tb, tv.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
-	views.NewFuncButton(tb, tv.Table.OpenCSV).SetIcon(icons.Open)
-	views.NewFuncButton(tb, tv.Table.SaveCSV).SetIcon(icons.Save)
+	core.Configure(c, "", func(w *views.FuncButton) {
+		w.SetFunc(tv.Table.AddRows).SetIcon(icons.Add)
+	})
+	core.Configure(c, "", func(w *views.FuncButton) {
+		w.SetFunc(tv.Table.SortColumnName).SetText("Sort").SetIcon(icons.Sort)
+	})
+	core.Configure(c, "", func(w *views.FuncButton) {
+		w.SetFunc(tv.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
+	})
+	core.Configure(c, "", func(w *views.FuncButton) {
+		w.SetFunc(tv.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
+	})
+	core.Configure(c, "", func(w *views.FuncButton) {
+		w.SetFunc(tv.Table.OpenCSV).SetIcon(icons.Open)
+	})
+	core.Configure(c, "", func(w *views.FuncButton) {
+		w.SetFunc(tv.Table.SaveCSV).SetIcon(icons.Save)
+	})
 }
 
 /*

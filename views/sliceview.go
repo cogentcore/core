@@ -850,17 +850,19 @@ func (sv *SliceViewBase) SliceDeleteAt(i int) {
 }
 
 // ConfigToolbar configures a [core.Toolbar] for this view
-func (sv *SliceViewBase) ConfigToolbar(tb *core.Toolbar) {
+func (sv *SliceViewBase) ConfigToolbar(c *core.Config) {
 	if reflectx.AnyIsNil(sv.Slice) {
 		return
 	}
 	if sv.Is(SliceViewIsArray) || sv.IsReadOnly() {
 		return
 	}
-	core.NewButton(tb).SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the slice").
-		OnClick(func(e events.Event) {
-			sv.This().(SliceViewer).SliceNewAt(-1)
-		})
+	core.Configure(c, "", func(w *core.Button) {
+		w.SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the slice").
+			OnClick(func(e events.Event) {
+				sv.This().(SliceViewer).SliceNewAt(-1)
+			})
+	})
 }
 
 ////////////////////////////////////////////////////////////

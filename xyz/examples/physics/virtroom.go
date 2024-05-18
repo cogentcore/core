@@ -439,48 +439,70 @@ func (ev *Env) ConfigGUI() *core.Body {
 	//////////////////////////////////////////
 	//    Toolbar
 
-	b.AddAppBar(func(tb *core.Toolbar) {
-		core.NewButton(tb).SetText("Edit Env").SetIcon(icons.Edit).
-			SetTooltip("Edit the settings for the environment").
-			OnClick(func(e events.Event) {
-				sv.SetStruct(ev)
-			})
-		views.NewFuncButton(tb, ev.WorldInit).SetText("Init").SetIcon(icons.Update)
-		views.NewFuncButton(tb, ev.ReMakeWorld).SetText("Make").SetIcon(icons.Update)
-		views.NewFuncButton(tb, ev.GrabEyeImg).SetText("Grab Image").SetIcon(icons.Image)
-		core.NewSeparator(tb)
+	b.AddAppBar(func(c *core.Config) {
+		core.Configure(c, "", func(w *core.Button) {
+			w.SetText("Edit Env").SetIcon(icons.Edit).
+				SetTooltip("Edit the settings for the environment").
+				OnClick(func(e events.Event) {
+					sv.SetStruct(ev)
+				})
+		})
+		core.Configure(c, "", func(w *views.FuncButton) {
+			w.SetFunc(ev.WorldInit).SetText("Init").SetIcon(icons.Update)
+		})
+		core.Configure(c, "", func(w *views.FuncButton) {
+			w.SetFunc(ev.ReMakeWorld).SetText("Make").SetIcon(icons.Update)
+		})
+		core.Configure(c, "", func(w *views.FuncButton) {
+			w.SetFunc(ev.GrabEyeImg).SetText("Grab Image").SetIcon(icons.Image)
+		})
+		core.Configure[*core.Separator](c, "")
 
-		views.NewFuncButton(tb, ev.StepForward).SetText("Fwd").SetIcon(icons.SkipNext).
-			Style(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.RepeatClickable)
-			})
-		views.NewFuncButton(tb, ev.StepBackward).SetText("Bkw").SetIcon(icons.SkipPrevious).
-			Style(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.RepeatClickable)
-			})
-		views.NewFuncButton(tb, ev.RotBodyLeft).SetText("Body Left").SetIcon(icons.KeyboardArrowLeft).
-			Style(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.RepeatClickable)
-			})
-		views.NewFuncButton(tb, ev.RotBodyRight).SetText("Body Right").SetIcon(icons.KeyboardArrowRight).
-			Style(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.RepeatClickable)
-			})
-		views.NewFuncButton(tb, ev.RotHeadLeft).SetText("Head Left").SetIcon(icons.KeyboardArrowLeft).
-			Style(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.RepeatClickable)
-			})
-		views.NewFuncButton(tb, ev.RotHeadRight).SetText("Head Right").SetIcon(icons.KeyboardArrowRight).
-			Style(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.RepeatClickable)
-			})
-		core.NewSeparator(tb)
+		core.Configure(c, "", func(w *views.FuncButton) {
+			w.SetFunc(ev.StepForward).SetText("Fwd").SetIcon(icons.SkipNext).
+				Style(func(s *styles.Style) {
+					s.SetAbilities(true, abilities.RepeatClickable)
+				})
+		})
+		core.Configure(c, "", func(w *views.FuncButton) {
+			w.SetFunc(ev.StepBackward).SetText("Bkw").SetIcon(icons.SkipPrevious).
+				Style(func(s *styles.Style) {
+					s.SetAbilities(true, abilities.RepeatClickable)
+				})
+		})
+		core.Configure(c, "", func(w *views.FuncButton) {
+			w.SetFunc(ev.RotBodyLeft).SetText("Body Left").SetIcon(icons.KeyboardArrowLeft).
+				Style(func(s *styles.Style) {
+					s.SetAbilities(true, abilities.RepeatClickable)
+				})
+		})
+		core.Configure(c, "", func(w *views.FuncButton) {
+			w.SetFunc(ev.RotBodyRight).SetText("Body Right").SetIcon(icons.KeyboardArrowRight).
+				Style(func(s *styles.Style) {
+					s.SetAbilities(true, abilities.RepeatClickable)
+				})
+		})
+		core.Configure(c, "", func(w *views.FuncButton) {
+			w.SetFunc(ev.RotHeadLeft).SetText("Head Left").SetIcon(icons.KeyboardArrowLeft).
+				Style(func(s *styles.Style) {
+					s.SetAbilities(true, abilities.RepeatClickable)
+				})
+		})
+		core.Configure(c, "", func(w *views.FuncButton) {
+			w.SetFunc(ev.RotHeadRight).SetText("Head Right").SetIcon(icons.KeyboardArrowRight).
+				Style(func(s *styles.Style) {
+					s.SetAbilities(true, abilities.RepeatClickable)
+				})
+		})
+		core.Configure[*core.Separator](c, "")
 
-		core.NewButton(tb).SetText("README").SetIcon(icons.FileMarkdown).
-			SetTooltip("Open browser on README.").
-			OnClick(func(e events.Event) {
-				core.TheApp.OpenURL("https://github.com/emer/eve/blob/master/examples/virtroom/README.md")
-			})
+		core.Configure(c, "", func(w *core.Button) {
+			w.SetText("README").SetIcon(icons.FileMarkdown).
+				SetTooltip("Open browser on README.").
+				OnClick(func(e events.Event) {
+					core.TheApp.OpenURL("https://github.com/emer/eve/blob/master/examples/virtroom/README.md")
+				})
+		})
 	})
 	return b
 }
