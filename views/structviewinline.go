@@ -41,17 +41,6 @@ type StructViewInline struct {
 
 func (sv *StructViewInline) WidgetValue() any { return &sv.Struct }
 
-func (sv *StructViewInline) OnInit() {
-	sv.Frame.OnInit()
-	sv.SetStyles()
-}
-
-func (sv *StructViewInline) SetStyles() {
-	sv.Style(func(s *styles.Style) {
-		s.Grow.Set(0, 0)
-	})
-}
-
 func (sv *StructViewInline) Config(c *core.Config) {
 	if reflectx.AnyIsNil(sv.Struct) {
 		return

@@ -13,7 +13,6 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/styles"
 )
 
 // SliceViewInline represents a slice within a single line of value widgets.
@@ -44,13 +43,6 @@ type SliceViewInline struct {
 }
 
 func (sv *SliceViewInline) WidgetValue() any { return &sv.Slice }
-
-func (sv *SliceViewInline) OnInit() {
-	sv.Frame.OnInit()
-	sv.Style(func(s *styles.Style) {
-		s.Grow.Set(0, 0)
-	})
-}
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice
 func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {

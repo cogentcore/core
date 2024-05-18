@@ -63,7 +63,6 @@ func (sv *StructView) OnInit() {
 func (sv *StructView) SetStyles() {
 	sv.Style(func(s *styles.Style) {
 		s.Display = styles.Grid
-		s.Grow.Set(0, 0)
 		if sv.SizeClass() == core.SizeCompact {
 			s.Columns = 1
 		} else {

@@ -38,12 +38,6 @@ func (mv *MapViewInline) OnInit() {
 	mv.SetStyles()
 }
 
-func (mv *MapViewInline) SetStyles() {
-	mv.Style(func(s *styles.Style) {
-		s.Grow.Set(0, 0)
-	})
-}
-
 func (mv *MapViewInline) Config(c *core.Config) {
 	if reflectx.AnyIsNil(mv.Map) {
 		mv.configSize = 0
