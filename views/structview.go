@@ -96,6 +96,9 @@ func (sv *StructView) Config(c *core.Config) {
 	}
 
 	addField := func(c *core.Config, structVal, fieldVal any, field reflect.StructField, fnm string) {
+		if fieldVal == nil {
+			return
+		}
 		flab := fnm
 		if sc {
 			flab = strcase.ToSentence(fnm)
