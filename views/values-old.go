@@ -326,7 +326,7 @@ func (v *MapInlineValue) Update() {
 	if v.Widget.Map != cmp {
 		v.Widget.SetMap(cmp)
 	} else {
-		v.Widget.UpdateValues()
+		v.Widget.Update()
 	}
 }
 

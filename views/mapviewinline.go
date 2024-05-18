@@ -187,11 +187,6 @@ func (mv *MapViewInline) ContextMenu(m *core.Scene, keyv reflect.Value) {
 	})
 }
 
-func (mv *MapViewInline) UpdateValues() {
-	// maps have to re-read their values because they can't get pointers!
-	mv.Update()
-}
-
 func (mv *MapViewInline) MapSizeChanged() bool {
 	if reflectx.AnyIsNil(mv.Map) {
 		return mv.configSize != 0
