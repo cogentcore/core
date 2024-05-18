@@ -285,30 +285,24 @@ func (bt *Button) Config(c *Config) {
 	}
 
 	if bt.Icon.IsSet() {
-		Configure(c, "icon", func() *Icon {
-			w := NewIcon()
+		Configure(c, "icon", func(w *Icon) {
 			w.Style(func(s *styles.Style) {
 				s.Font.Size.Dp(18)
 			})
-			return w
 		}, func(w *Icon) {
 			w.SetIcon(bt.Icon)
 		})
 		if bt.Text != "" {
-			Configure(c, "space", func() *Space {
-				return NewSpace()
-			})
+			Configure[*Space](c, "space")
 		}
 	}
 	if bt.Text != "" {
-		Configure(c, "text", func() *Text {
-			w := NewText()
+		Configure(c, "text", func(w *Text) {
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
 				s.SetTextWrap(false)
 				s.FillMargin = false
 			})
-			return w
 		}, func(w *Text) {
 			if bt.Type == ButtonMenu {
 				w.SetType(TextBodyMedium)
@@ -320,8 +314,7 @@ func (bt *Button) Config(c *Config) {
 	}
 
 	if bt.Indicator.IsSet() {
-		Configure(c, "indicator-stretch", func() *Stretch {
-			w := NewStretch()
+		Configure(c, "indicator-stretch", func(w *Stretch) {
 			w.Style(func(s *styles.Style) {
 				s.Min.Set(units.Em(0.2))
 				if bt.Type == ButtonMenu {
@@ -330,17 +323,14 @@ func (bt *Button) Config(c *Config) {
 					s.Grow.Set(0, 0)
 				}
 			})
-			return w
 		})
-		Configure(c, "indicator", func() *Icon {
-			w := NewIcon()
+		Configure(c, "indicator", func(w *Icon) {
 			w.Style(func(s *styles.Style) {
 				s.Min.X.Dp(18)
 				s.Min.Y.Dp(18)
 				s.Margin.Zero()
 				s.Padding.Zero()
 			})
-			return w
 		}, func(w *Icon) {
 			w.SetIcon(bt.Indicator)
 		})
@@ -348,17 +338,13 @@ func (bt *Button) Config(c *Config) {
 
 	if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
 		if !bt.Indicator.IsSet() && bt.Shortcut != "" {
-			Configure(c, "shortcut-stretch", func() *Stretch {
-				return NewStretch()
-			})
-			Configure(c, "shortcut", func() *Text {
-				w := NewText()
+			Configure[*Stretch](c, "shortcut-stretch")
+			Configure(c, "shortcut", func(w *Text) {
 				w.Style(func(s *styles.Style) {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
 					s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 				})
-				return w
 			}, func(w *Text) {
 				if bt.Type == ButtonMenu {
 					w.SetType(TextBodyMedium)

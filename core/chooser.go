@@ -220,66 +220,56 @@ func (ch *Chooser) Config(c *Config) {
 
 	// editable handles through TextField
 	if ch.Icon.IsSet() && !ch.Editable {
-		Configure(c, "icon", func() *Icon {
-			return NewIcon()
-		}, func(w *Icon) {
+		Configure(c, "icon", func(w *Icon) {}, func(w *Icon) {
 			w.SetIcon(ch.Icon)
 		})
 	}
 	if ch.Editable {
-		Configure(c, "text-field",
-			func() *TextField {
-				w := NewTextField().SetPlaceholder(ch.Placeholder)
-				ch.HandleChooserTextFieldEvents(w)
-				w.Style(func(s *styles.Style) {
-					s.Grow = ch.Styles.Grow // we grow like our parent
-					s.Max.X.Zero()          // constrained by parent
-					s.SetTextWrap(false)
-				})
-				return w
-			}, func(w *TextField) {
-				w.SetText(ch.CurrentItem.GetLabel()).SetLeadingIcon(ch.Icon).
-					SetTrailingIcon(ch.Indicator, func(e events.Event) {
-						ch.OpenMenu(e)
-					})
-				if ch.Type == ChooserFilled {
-					w.SetType(TextFieldFilled)
-				} else {
-					w.SetType(TextFieldOutlined)
-				}
-				w.ConfigWidget() // this is actually essential (TODO: figure out a way to get rid of this?)
-				if !ch.DefaultNew {
-					w.SetCompleter(w, ch.CompleteMatch, ch.CompleteEdit)
-				}
+		Configure(c, "text-field", func(w *TextField) {
+			w.SetPlaceholder(ch.Placeholder)
+			ch.HandleChooserTextFieldEvents(w)
+			w.Style(func(s *styles.Style) {
+				s.Grow = ch.Styles.Grow // we grow like our parent
+				s.Max.X.Zero()          // constrained by parent
+				s.SetTextWrap(false)
 			})
+		}, func(w *TextField) {
+			w.SetText(ch.CurrentItem.GetLabel()).SetLeadingIcon(ch.Icon).
+				SetTrailingIcon(ch.Indicator, func(e events.Event) {
+					ch.OpenMenu(e)
+				})
+			if ch.Type == ChooserFilled {
+				w.SetType(TextFieldFilled)
+			} else {
+				w.SetType(TextFieldOutlined)
+			}
+			w.ConfigWidget() // this is actually essential (TODO: figure out a way to get rid of this?)
+			if !ch.DefaultNew {
+				w.SetCompleter(w, ch.CompleteMatch, ch.CompleteEdit)
+			}
+		})
 	} else {
-		Configure(c, "text",
-			func() *Text {
-				w := NewText()
-				w.Style(func(s *styles.Style) {
-					s.SetNonSelectable()
-					s.SetTextWrap(false)
-				})
-				return w
-			}, func(w *Text) {
-				w.SetText(ch.CurrentItem.GetLabel())
+		Configure(c, "text", func(w *Text) {
+			w.Style(func(s *styles.Style) {
+				s.SetNonSelectable()
+				s.SetTextWrap(false)
 			})
+		}, func(w *Text) {
+			w.SetText(ch.CurrentItem.GetLabel())
+		})
 	}
 	if ch.Indicator == "" {
 		ch.Indicator = icons.KeyboardArrowRight
 	}
 	// editable handles through TextField
 	if !ch.Editable {
-		Configure(c, "indicator",
-			func() *Icon {
-				w := NewIcon()
-				w.Style(func(s *styles.Style) {
-					s.Justify.Self = styles.End
-				})
-				return w
-			}, func(w *Icon) {
-				w.SetIcon(ch.Indicator)
+		Configure(c, "indicator", func(w *Icon) {
+			w.Style(func(s *styles.Style) {
+				s.Justify.Self = styles.End
 			})
+		}, func(w *Icon) {
+			w.SetIcon(ch.Indicator)
+		})
 	}
 }
 
