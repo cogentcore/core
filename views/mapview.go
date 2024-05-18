@@ -40,10 +40,6 @@ type MapView struct {
 
 func (mv *MapView) OnInit() {
 	mv.Frame.OnInit()
-	mv.SetStyles()
-}
-
-func (mv *MapView) SetStyles() {
 	mv.Style(func(s *styles.Style) {
 		if !mv.Inline {
 			s.Display = styles.Grid
@@ -137,6 +133,14 @@ func (mv *MapView) Config(c *core.Config) {
 					vtyp = types.TypeByName("string") // default to string
 				}
 				w.SetCurrentValue(vtyp)
+				w.OnChange(func(e events.Event) {
+					typ := reflect.TypeOf(w.CurrentItem.Value.(*types.Type).Instance)
+					newVal := reflect.New(typ)
+					reflectx.SetRobust(newVal.Interface(), val) // try our best to convert the existing value to the new type
+					mapv.SetMapIndex(key, newVal.Elem())
+					mv.DeleteChildByName("value-" + keytxt) // force it to be updated
+					mv.Update()
+				})
 			})
 		}
 	}
