@@ -5,6 +5,7 @@
 package core
 
 import (
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
@@ -104,7 +105,7 @@ func MessageDialog(ctx Widget, message string, title ...string) {
 // "There was an error". If the given error is nil, no dialog
 // is created.
 func ErrorDialog(ctx Widget, err error, title ...string) {
-	if err == nil {
+	if errors.Log(err) == nil {
 		return
 	}
 	ttl := "There was an error"

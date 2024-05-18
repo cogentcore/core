@@ -373,6 +373,9 @@ func (wb *WidgetBase) PushBounds() bool {
 	}
 	wb.Styles.ComputeActualBackground(wb.ParentActualBackground())
 	pc := &wb.Scene.PaintContext
+	if pc.State == nil {
+		return false
+	}
 	pc.PushBounds(wb.Geom.TotalBBox)
 	pc.Defaults() // start with default values
 	if DebugSettings.RenderTrace {

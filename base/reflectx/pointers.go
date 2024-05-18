@@ -79,6 +79,7 @@ func OnePointerValue(v reflect.Value) reflect.Value {
 		if v.CanAddr() {
 			return v.Addr()
 		}
+		// slog.Error("reflectx.OnePointerValue: cannot take address of value", "value", v)
 		pv := reflect.New(v.Type())
 		pv.Elem().Set(v)
 		return pv

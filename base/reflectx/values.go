@@ -173,7 +173,7 @@ func ToBool(v any) (bool, error) {
 	if AnyIsNil(v) {
 		return false, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := NonPointerValue(reflect.ValueOf(v))
+	npv := NonPointerUnderlyingValue(reflect.ValueOf(v))
 	vk := npv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
@@ -330,7 +330,7 @@ func ToInt(v any) (int64, error) {
 	if AnyIsNil(v) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := NonPointerValue(reflect.ValueOf(v))
+	npv := NonPointerUnderlyingValue(reflect.ValueOf(v))
 	vk := npv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
@@ -487,7 +487,7 @@ func ToFloat(v any) (float64, error) {
 	if AnyIsNil(v) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := NonPointerValue(reflect.ValueOf(v))
+	npv := NonPointerUnderlyingValue(reflect.ValueOf(v))
 	vk := npv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
@@ -644,7 +644,7 @@ func ToFloat32(v any) (float32, error) {
 	if AnyIsNil(v) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := NonPointerValue(reflect.ValueOf(v))
+	npv := NonPointerUnderlyingValue(reflect.ValueOf(v))
 	vk := npv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
@@ -828,7 +828,7 @@ func ToString(v any) string {
 	if AnyIsNil(v) {
 		return nilstr
 	}
-	npv := NonPointerValue(reflect.ValueOf(v))
+	npv := NonPointerUnderlyingValue(reflect.ValueOf(v))
 	vk := npv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
@@ -988,13 +988,9 @@ func SetRobust(to, from any) error {
 		return fmt.Errorf("got nil destination value")
 	}
 	v := reflect.ValueOf(to)
-	vnp := NonPointerValue(v)
-	if !vnp.IsValid() {
-		return fmt.Errorf("got invalid destination value %v of type %T", to, to)
-	}
-	typ := vnp.Type()
-	vp := OnePointerValue(vnp)
-	vk := vnp.Kind()
+	vp := OnePointerUnderlyingValue(v)
+	typ := vp.Elem().Type()
+	vk := typ.Kind()
 	if !vp.Elem().CanSet() {
 		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", vp, vp)
 	}
@@ -1063,7 +1059,7 @@ func SetRobust(to, from any) error {
 		return CopyMapRobust(to, from)
 	}
 
-	fv := NonPointerValue(reflect.ValueOf(from))
+	fv := NonPointerUnderlyingValue(reflect.ValueOf(from))
 	// just set it if possible to assign
 	if fv.Type().AssignableTo(typ) {
 		vp.Elem().Set(fv)

@@ -5,6 +5,7 @@
 package core
 
 import (
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -42,7 +43,7 @@ func MessageSnackbar(ctx Widget, message string) {
 // provided; if it is not, the label text will default to "Error".
 // If the given error is nil, no snackbar is created.
 func ErrorSnackbar(ctx Widget, err error, label ...string) {
-	if err == nil {
+	if errors.Log(err) == nil {
 		return
 	}
 	lbl := "Error"

@@ -97,7 +97,7 @@ func ToValue(value any, tags reflect.StructTag) Value {
 			return vw
 		}
 	}
-	typ := reflectx.NonPointerType(reflect.TypeOf(value))
+	typ := reflectx.NonPointerUnderlyingValue(reflect.ValueOf(value)).Type()
 	if vwt, ok := ValueTypes[types.TypeName(typ)]; ok {
 		if vw := vwt(value); vw != nil {
 			return vw

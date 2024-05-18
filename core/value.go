@@ -5,8 +5,6 @@
 package core
 
 import (
-	"fmt"
-
 	"cogentcore.org/core/base/reflectx"
 )
 
@@ -48,7 +46,6 @@ func Bind[T Value](value any, vw T) T {
 		}
 	}
 	wb.ValueOnChange = func() {
-		fmt.Println("setting value:", wb, value, vw.WidgetValue())
 		ErrorSnackbar(vw, reflectx.SetRobust(value, vw.WidgetValue()))
 	}
 	if ob, ok := any(vw).(OnBinder); ok {

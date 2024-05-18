@@ -12,8 +12,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/tree"
-	"cogentcore.org/core/types"
 )
 
 // MapView represents a map using two columns of editable key and value widgets.
@@ -54,11 +52,9 @@ func (mv *MapView) Config(c *core.Config) {
 	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
-	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := reflectx.NonPointerValue(reflectx.OnePointerUnderlyingValue(mpv)) // from inline
-	// mpvnp := reflectx.NonPointerValue(mpv) // original
+	mapv := reflectx.NonPointerUnderlyingValue(reflect.ValueOf(mv.Map))
 
-	valtyp := reflectx.NonPointerType(reflect.TypeOf(mv.Map)).Elem()
+	valtyp := mapv.Type().Elem()
 	ncol := 2
 	ifaceType := false
 	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
@@ -75,7 +71,7 @@ func (mv *MapView) Config(c *core.Config) {
 	// valtypes := append(kit.Types.AllTagged(typeTag), kit.Enums.AllTagged(typeTag)...)
 	// valtypes = append(valtypes, kit.Types.AllTagged("basic-type")...)
 	// valtypes = append(valtypes, kit.TypeFor[reflect.Type]())
-	valtypes := types.AllEmbeddersOf(tree.NodeBaseType) // todo: this is not right
+	// valtypes := types.AllEmbeddersOf(tree.NodeBaseType) // todo: this is not right
 
 	mv.ncols = ncol
 
@@ -84,7 +80,6 @@ func (mv *MapView) Config(c *core.Config) {
 		keytxt := reflectx.ToString(key.Interface())
 		keynm := "key-" + keytxt
 		valnm := "value-" + keytxt
-		val := reflectx.OnePointerUnderlyingValue(mpvnp.MapIndex(key))
 
 		core.ConfigureNew(c, keynm, func() core.Value {
 			w := core.NewValue(key.Interface(), "")
@@ -110,14 +105,14 @@ func (mv *MapView) Config(c *core.Config) {
 		}, func(w core.Value) {
 			wb := w.AsWidget()
 			core.Bind(key.Interface(), w)
-			// vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value value to track updates
 			wb.SetReadOnly(mv.IsReadOnly())
 		})
 		core.ConfigureNew(c, valnm, func() core.Value {
-			w := core.NewValue(val.Interface(), "")
+			val := mapv.MapIndex(key).Interface()
+			w := core.ToValue(val, "")
+			BindMapValue(mapv, key, w)
 			wb := w.AsWidget()
 			wb.SetReadOnly(mv.IsReadOnly())
-			// vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value value to track updates
 			wb.OnChange(func(e events.Event) { mv.SendChange(e) })
 			wb.OnInput(mv.HandleEvent)
 			w.Style(func(s *styles.Style) {
@@ -132,21 +127,21 @@ func (mv *MapView) Config(c *core.Config) {
 			return w
 		}, func(w core.Value) {
 			wb := w.AsWidget()
-			core.Bind(val.Interface(), w)
-			// vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value value to track updates
+			BindMapValue(mapv, key, w)
 			wb.SetReadOnly(mv.IsReadOnly())
 		})
 
 		if ifaceType {
-			typnm := "type-" + keytxt
-			core.Configure(c, typnm, func(w *core.Chooser) {
-				w.SetTypes(valtypes...)
-				vtyp := reflectx.NonPointerType(reflect.TypeOf(val.Interface()))
-				if vtyp == nil {
-					vtyp = reflect.TypeOf("") // default to string
-				}
-				w.SetCurrentValue(vtyp)
-			})
+			// TODO(config)
+			// typnm := "type-" + keytxt
+			// core.Configure(c, typnm, func(w *core.Chooser) {
+			// 	w.SetTypes(valtypes...)
+			// 	vtyp := reflectx.NonPointerType(reflect.TypeOf(val))
+			// 	if vtyp == nil {
+			// 		vtyp = reflect.TypeOf("") // default to string
+			// 	}
+			// 	w.SetCurrentValue(vtyp)
+			// })
 		}
 	}
 }
@@ -210,4 +205,27 @@ func (mv *MapView) ConfigToolbar(c *core.Config) {
 				})
 		})
 	}
+}
+
+// BindMapValue is a version of [core.Bind] that works for values in a map.
+func BindMapValue[T core.Value](mapv reflect.Value, key reflect.Value, vw T) T {
+	wb := vw.AsWidget()
+	wb.ValueUpdate = func() {
+		value := mapv.MapIndex(key).Interface()
+		if vws, ok := any(vw).(core.ValueSetter); ok {
+			core.ErrorSnackbar(vw, vws.SetWidgetValue(value))
+		} else {
+			core.ErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))
+		}
+	}
+	wb.ValueOnChange = func() {
+		value := reflect.New(mapv.Type().Elem())
+		core.ErrorSnackbar(vw, reflectx.SetRobust(value.Interface(), vw.WidgetValue()))
+		mapv.SetMapIndex(key, value.Elem())
+	}
+	if ob, ok := any(vw).(core.OnBinder); ok {
+		value := mapv.MapIndex(key).Interface()
+		ob.OnBind(value)
+	}
+	return vw
 }
