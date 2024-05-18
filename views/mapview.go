@@ -73,7 +73,6 @@ func (mv *MapView) Config(c *core.Config) {
 		keytxt := reflectx.ToString(key.Interface())
 		keynm := "key-" + keytxt
 		valnm := "value-" + keytxt
-		val := mapv.MapIndex(key).Interface()
 
 		core.ConfigureNew(c, keynm, func() core.Value {
 			w := core.ToValue(key.Interface(), "")
@@ -102,6 +101,7 @@ func (mv *MapView) Config(c *core.Config) {
 			wb.SetReadOnly(mv.IsReadOnly())
 		})
 		core.ConfigureNew(c, valnm, func() core.Value {
+			val := mapv.MapIndex(key).Interface()
 			w := core.ToValue(val, "")
 			BindMapValue(mapv, key, w)
 			wb := w.AsWidget()
@@ -128,21 +128,22 @@ func (mv *MapView) Config(c *core.Config) {
 			typnm := "type-" + keytxt
 			core.Configure(c, typnm, func(w *core.Chooser) {
 				w.SetTypes(builtinTypes...)
-				vtyp := types.TypeByValue(val)
-				if vtyp == nil {
-					vtyp = types.TypeByName("string") // default to string
-				}
-				w.SetCurrentValue(vtyp)
 				w.OnChange(func(e events.Event) {
 					typ := reflect.TypeOf(w.CurrentItem.Value.(*types.Type).Instance)
 					newVal := reflect.New(typ)
-					reflectx.SetRobust(newVal.Interface(), val) // try our best to convert the existing value to the new type
+					// try our best to convert the existing value to the new type
+					reflectx.SetRobust(newVal.Interface(), mapv.MapIndex(key).Interface())
 					mapv.SetMapIndex(key, newVal.Elem())
 					mv.DeleteChildByName("value-" + keytxt) // force it to be updated
 					mv.Update()
 				})
 			}, func(w *core.Chooser) {
 				w.SetReadOnly(mv.IsReadOnly())
+				vtyp := types.TypeByValue(mapv.MapIndex(key).Interface())
+				if vtyp == nil {
+					vtyp = types.TypeByName("string") // default to string
+				}
+				w.SetCurrentValue(vtyp)
 			})
 		}
 	}
