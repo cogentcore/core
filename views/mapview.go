@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/types"
 )
 
 // MapView represents a map using two columns of editable key and value widgets.
@@ -61,26 +62,15 @@ func (mv *MapView) Config(c *core.Config) {
 	}
 	mapv := reflectx.Underlying(reflect.ValueOf(mv.Map))
 
-	valtyp := mapv.Type().Elem()
-	ncol := 2
-	ifaceType := false
-	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
-		ifaceType = true
-		ncol = 3
-		// todo: need some way of setting & getting
-		// this for given domain mapview could have a structview parent and
-		// the source node of that struct, if a tree, could have a property --
-		// unlike inline case, plain mapview is not a child of struct view
-		// directly -- but field on struct view does create the mapview
-		// dialog.. a bit hacky and indirect..
+	mv.ncols = 2
+	typeAny := false
+	valueType := mapv.Type().Elem()
+	if valueType.String() == "interface {}" {
+		mv.ncols = 3
+		typeAny = true
 	}
 
-	// valtypes := append(kit.Types.AllTagged(typeTag), kit.Enums.AllTagged(typeTag)...)
-	// valtypes = append(valtypes, kit.Types.AllTagged("basic-type")...)
-	// valtypes = append(valtypes, kit.TypeFor[reflect.Type]())
-	// valtypes := types.AllEmbeddersOf(tree.NodeBaseType) // todo: this is not right
-
-	mv.ncols = ncol
+	builtinTypes := types.BuiltinTypes()
 
 	keys := reflectx.MapSort(mv.Map, !mv.SortValues, true)
 	for _, key := range keys {
@@ -138,17 +128,16 @@ func (mv *MapView) Config(c *core.Config) {
 			wb.SetReadOnly(mv.IsReadOnly())
 		})
 
-		if ifaceType {
-			// TODO(config)
-			// typnm := "type-" + keytxt
-			// core.Configure(c, typnm, func(w *core.Chooser) {
-			// 	w.SetTypes(valtypes...)
-			// 	vtyp := reflectx.NonPointerType(reflect.TypeOf(val))
-			// 	if vtyp == nil {
-			// 		vtyp = reflect.TypeOf("") // default to string
-			// 	}
-			// 	w.SetCurrentValue(vtyp)
-			// })
+		if typeAny {
+			typnm := "type-" + keytxt
+			core.Configure(c, typnm, func(w *core.Chooser) {
+				w.SetTypes(builtinTypes...)
+				// vtyp := reflectx.NonPointerType(reflect.TypeOf(val))
+				// if vtyp == nil {
+				// 	vtyp = reflect.TypeOf("") // default to string
+				// }
+				// w.SetCurrentValue(vtyp)
+			})
 		}
 	}
 	if mv.Inline {
@@ -257,7 +246,7 @@ func BindMapKey[T core.Value](mapv reflect.Value, key reflect.Value, vw T) T {
 			mapv.SetMapIndex(key, reflect.Value{})
 			return
 		}
-		d := core.NewBody().AddTitle("Key already exists").AddText(fmt.Sprintf("The key %q already exists", reflectx.ToString(newKey)))
+		d := core.NewBody().AddTitle("Key already exists").AddText(fmt.Sprintf("The key %q already exists", reflectx.ToString(newKey.Interface())))
 		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent)
 			d.AddOK(parent).SetText("Overwrite").OnClick(func(e events.Event) {

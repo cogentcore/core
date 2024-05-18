@@ -8,7 +8,6 @@ package types
 
 import (
 	"fmt"
-	"log/slog"
 	"reflect"
 	"sort"
 	"strings"
@@ -18,14 +17,41 @@ import (
 )
 
 var (
-	// Types records all types (i.e., a type registry)
-	// key is long type name: package_url.Type, e.g., cogentcore.org/core/core.Button
+	// Types is a type registry, initialized to contain all builtin types. New types
+	// can be added with [AddType]. The key is the long type name: package/path.Type,
+	// e.g., cogentcore.org/core/core.Button.
 	Types = map[string]*Type{}
 
-	// TypeIDCounter is an atomically incremented uint64 used
-	// for assigning new [Type.ID] numbers
-	TypeIDCounter uint64
+	// typeIDCounter is an atomically incremented uint64 used
+	// for assigning new [Type.ID] numbers.
+	typeIDCounter uint64
 )
+
+func init() {
+	addBuiltin[bool]("bool")
+	addBuiltin[complex64]("complex64")
+	addBuiltin[complex128]("complex128")
+	addBuiltin[float32]("float32")
+	addBuiltin[float64]("float64")
+	addBuiltin[int]("int")
+	addBuiltin[int64]("int8")
+	addBuiltin[int16]("int16")
+	addBuiltin[int32]("int32")
+	addBuiltin[int64]("int64")
+	addBuiltin[string]("string")
+	addBuiltin[uint]("uint")
+	addBuiltin[uint8]("uint8")
+	addBuiltin[uint16]("uint16")
+	addBuiltin[uint32]("uint32")
+	addBuiltin[uint64]("uint64")
+	addBuiltin[uint64]("uintptr")
+}
+
+// addBuiltin adds the given builtin type with the given name to the type registry.
+func addBuiltin[T any](name string) {
+	var v T
+	AddType(&Type{Name: name, IDName: name, Instance: v})
+}
 
 // TypeByName returns a Type by name (package_url.Type, e.g., cogentcore.org/core/core.Button),
 func TypeByName(name string) *Type {
@@ -71,11 +97,7 @@ func TypeByReflectTypeTry(typ reflect.Type) (*Type, error) {
 // AddType adds a constructed [Type] to the registry
 // and returns it. This sets the ID.
 func AddType(typ *Type) *Type {
-	if _, has := Types[typ.Name]; has {
-		slog.Debug("types.AddType: Type already exists", "Type.Name", typ.Name)
-		return typ
-	}
-	typ.ID = atomic.AddUint64(&TypeIDCounter, 1)
+	typ.ID = atomic.AddUint64(&typeIDCounter, 1)
 	Types[typ.Name] = typ
 	return typ
 }
@@ -92,6 +114,17 @@ func TypeName(typ reflect.Type) string {
 func TypeNameValue(v any) string {
 	typ := reflectx.NonPointerType(reflect.TypeOf(v))
 	return TypeName(typ)
+}
+
+// BuiltinTypes returns all of the builtin types in the type registry.
+func BuiltinTypes() []*Type {
+	res := []*Type{}
+	for _, t := range Types {
+		if !strings.Contains(t.Name, ".") {
+			res = append(res, t)
+		}
+	}
+	return res
 }
 
 // AllEmbeddersOf returns all registered types that embed the given type.
