@@ -269,7 +269,7 @@ func (c *Config) UpdateWidget(w Widget, parentPath string) {
 }
 
 // ConfigParts configures the given [Frame] to be ready
-// to serve as [WidgetBase.Parts] in a [Config] context.
+// to serve as [WidgetBase.Parts] in a [Configure] context.
 func ConfigParts(w *Frame) {
 	w.SetName("parts")
 	w.SetFlag(true, tree.Field)

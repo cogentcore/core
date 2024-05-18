@@ -320,7 +320,7 @@ func (is *Inspector) ConfigToolbar(c *core.Config) {
 				s.SetEnabled(ok)
 			})
 	})
-	core.ConfigSeparator(c)
+	core.Configure[*core.Separator](c, "")
 	ConfigFuncButton(c, is.Open, func(w *FuncButton) {
 		w.SetKey(keymap.Open)
 		w.Args[0].SetValue(is.Filename)
@@ -335,7 +335,7 @@ func (is *Inspector) ConfigToolbar(c *core.Config) {
 		w.Args[0].SetValue(is.Filename)
 		w.Args[0].SetTag("ext", ".json")
 	})
-	core.ConfigSeparator(c)
+	core.Configure[*core.Separator](c, "")
 	ConfigFuncButton(c, is.InspectApp, func(w *FuncButton) {
 		w.SetIcon(icons.Devices)
 	})
