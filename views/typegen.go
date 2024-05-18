@@ -55,7 +55,7 @@ func (t *ColorView) New() tree.Node { return &ColorView{} }
 func (t *ColorView) SetTooltip(v string) *ColorView { t.Tooltip = v; return t }
 
 // ColorButtonType is the [types.Type] for [ColorButton]
-var ColorButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ColorButton", IDName: "color-button", Doc: "ColorButton represents a color value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Color", Doc: "Color is the color value being represented."}}, Instance: &ColorButton{}})
+var ColorButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ColorButton", IDName: "color-button", Doc: "ColorButton represents a color value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Color"}}, Instance: &ColorButton{}})
 
 // NewColorButton returns a new [ColorButton] with the given optional parent:
 // ColorButton represents a color value with a button.
@@ -67,8 +67,7 @@ func (t *ColorButton) NodeType() *types.Type { return ColorButtonType }
 // New returns a new [*ColorButton] value
 func (t *ColorButton) New() tree.Node { return &ColorButton{} }
 
-// SetColor sets the [ColorButton.Color]:
-// Color is the color value being represented.
+// SetColor sets the [ColorButton.Color]
 func (t *ColorButton) SetColor(v color.RGBA) *ColorButton { t.Color = v; return t }
 
 // SetTooltip sets the [ColorButton.Tooltip]
@@ -216,7 +215,7 @@ func (t *Inspector) SetFilename(v core.Filename) *Inspector { t.Filename = v; re
 func (t *Inspector) SetTooltip(v string) *Inspector { t.Tooltip = v; return t }
 
 // MapViewType is the [types.Type] for [MapView]
-var MapViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapView", IDName: "map-view", Doc: "MapView represents a map using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "SortValues", Doc: "SortValue is whether to sort by values instead of keys"}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "ncols", Doc: "ncols is the number of columns in the map"}}, Instance: &MapView{}})
+var MapViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapView", IDName: "map-view", Doc: "MapView represents a map using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the map in one line."}, {Name: "SortValues", Doc: "SortValue is whether to sort by values instead of keys."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "ncols", Doc: "ncols is the number of columns to display in the view."}}, Instance: &MapView{}})
 
 // NewMapView returns a new [MapView] with the given optional parent:
 // MapView represents a map using two columns of editable key and value widgets.
@@ -232,8 +231,12 @@ func (t *MapView) New() tree.Node { return &MapView{} }
 // Map is the pointer to the map that we are viewing.
 func (t *MapView) SetMap(v any) *MapView { t.Map = v; return t }
 
+// SetInline sets the [MapView.Inline]:
+// Inline is whether to display the map in one line.
+func (t *MapView) SetInline(v bool) *MapView { t.Inline = v; return t }
+
 // SetSortValues sets the [MapView.SortValues]:
-// SortValue is whether to sort by values instead of keys
+// SortValue is whether to sort by values instead of keys.
 func (t *MapView) SetSortValues(v bool) *MapView { t.SortValues = v; return t }
 
 // SetViewPath sets the [MapView.ViewPath]:
@@ -243,32 +246,6 @@ func (t *MapView) SetViewPath(v string) *MapView { t.ViewPath = v; return t }
 
 // SetTooltip sets the [MapView.Tooltip]
 func (t *MapView) SetTooltip(v string) *MapView { t.Tooltip = v; return t }
-
-// MapViewInlineType is the [types.Type] for [MapViewInline]
-var MapViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapViewInline", IDName: "map-view-inline", Doc: "MapViewInline represents a map within a single line of key and value widgets.\nThis is typically used for smaller maps.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "MapValue", Doc: "MapValue is the [Value] associated with this map view, if there is one."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "configSize", Doc: "configSize is the size of the map when the widget was configured."}}, Instance: &MapViewInline{}})
-
-// NewMapViewInline returns a new [MapViewInline] with the given optional parent:
-// MapViewInline represents a map within a single line of key and value widgets.
-// This is typically used for smaller maps.
-func NewMapViewInline(parent ...tree.Node) *MapViewInline { return tree.New[*MapViewInline](parent...) }
-
-// NodeType returns the [*types.Type] of [MapViewInline]
-func (t *MapViewInline) NodeType() *types.Type { return MapViewInlineType }
-
-// New returns a new [*MapViewInline] value
-func (t *MapViewInline) New() tree.Node { return &MapViewInline{} }
-
-// SetMap sets the [MapViewInline.Map]:
-// Map is the pointer to the map that we are viewing.
-func (t *MapViewInline) SetMap(v any) *MapViewInline { t.Map = v; return t }
-
-// SetViewPath sets the [MapViewInline.ViewPath]:
-// ViewPath is a record of parent view names that have led up to this view.
-// It is displayed as extra contextual information in view dialogs.
-func (t *MapViewInline) SetViewPath(v string) *MapViewInline { t.ViewPath = v; return t }
-
-// SetTooltip sets the [MapViewInline.Tooltip]
-func (t *MapViewInline) SetTooltip(v string) *MapViewInline { t.Tooltip = v; return t }
 
 // SliceViewType is the [types.Type] for [SliceView]
 var SliceViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceView", IDName: "slice-view", Doc: "SliceView represents a slice value with index and value widgets.\nUse [SliceViewBase.BindSelect] to make the slice view designed for item selection.", Embeds: []types.Field{{Name: "SliceViewBase"}}, Fields: []types.Field{{Name: "StyleFunc", Doc: "StyleFunc is an optional styling function."}}, Instance: &SliceView{}})

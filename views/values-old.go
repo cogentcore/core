@@ -309,11 +309,11 @@ func (v *MapValue) ConfigDialog(d *core.Body) (bool, func()) {
 
 // MapInlineValue represents a map value with a [MapViewInline].
 type MapInlineValue struct {
-	ValueBase[*MapViewInline]
+	ValueBase[*MapView]
 }
 
 func (v *MapInlineValue) Config() {
-	v.Widget.MapValue = v
+	// v.Widget.MapValue = v
 	v.Widget.ViewPath = v.ViewPath
 	v.Widget.SetMap(v.Value.Interface())
 	v.Widget.OnChange(func(e events.Event) {

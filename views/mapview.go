@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -22,14 +23,17 @@ type MapView struct {
 	// Map is the pointer to the map that we are viewing.
 	Map any
 
-	// SortValue is whether to sort by values instead of keys
+	// Inline is whether to display the map in one line.
+	Inline bool
+
+	// SortValue is whether to sort by values instead of keys.
 	SortValues bool
 
 	// ViewPath is a record of parent view names that have led up to this view.
 	// It is displayed as extra contextual information in view dialogs.
 	ViewPath string
 
-	// ncols is the number of columns in the map
+	// ncols is the number of columns to display in the view.
 	ncols int
 }
 
@@ -40,12 +44,14 @@ func (mv *MapView) OnInit() {
 
 func (mv *MapView) SetStyles() {
 	mv.Style(func(s *styles.Style) {
-		s.Display = styles.Grid
-		s.Columns = mv.ncols
-		s.Overflow.Set(styles.OverflowAuto)
-		s.Grow.Set(1, 1)
-		s.Min.X.Em(20)
-		s.Min.Y.Em(10)
+		if !mv.Inline {
+			s.Display = styles.Grid
+			s.Columns = mv.ncols
+			s.Overflow.Set(styles.OverflowAuto)
+			s.Grow.Set(1, 1)
+			s.Min.X.Em(20)
+			s.Min.Y.Em(10)
+		}
 	})
 }
 
@@ -144,6 +150,30 @@ func (mv *MapView) Config(c *core.Config) {
 			// 	w.SetCurrentValue(vtyp)
 			// })
 		}
+	}
+	if mv.Inline {
+		if !mv.IsReadOnly() {
+			core.Configure(c, "add-button", func(w *core.Button) {
+				w.SetIcon(icons.Add).SetType(core.ButtonTonal)
+				w.Tooltip = "Add an element"
+				w.OnClick(func(e events.Event) {
+					mv.MapAdd()
+				})
+			})
+		}
+		core.Configure(c, "edit-button", func(w *core.Button) {
+			w.SetIcon(icons.Edit).SetType(core.ButtonTonal)
+			w.Tooltip = "Edit in a dialog"
+			w.OnClick(func(e events.Event) {
+				d := core.NewBody().AddTitle(labels.FriendlyMapLabel(mapv)).AddText(mv.Tooltip)
+				NewMapView(d).SetMap(mv.Map)
+				d.OnClose(func(e events.Event) {
+					mv.Update()
+					mv.SendChange()
+				})
+				d.RunFullDialog(mv)
+			})
+		})
 	}
 }
 

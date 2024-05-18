@@ -19,6 +19,12 @@ func TestMapView(t *testing.T) {
 	b.AssertRender(t, "map-view/basic")
 }
 
+func TestMapViewInline(t *testing.T) {
+	b := core.NewBody()
+	NewMapView(b).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
+	b.AssertRender(t, "map-view/inline")
+}
+
 func TestMapViewReadOnly(t *testing.T) {
 	b := core.NewBody()
 	NewMapView(b).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
