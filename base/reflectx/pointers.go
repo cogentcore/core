@@ -84,3 +84,17 @@ func UnderlyingPointer(v reflect.Value) reflect.Value {
 	}
 	return OnePointerValue(npv)
 }
+
+// NewFrom returns a value that is guaranteed to be a pointer to the [Underlying] version of
+// the given value. If that value is not addressable, it makes a new fake pointer that points
+// to a copy of the value, not the actual value. This should only be used you do not need the
+// pointer to actually point to the original value.
+func NewFrom(v reflect.Value) reflect.Value {
+	u := Underlying(v)
+	if u.CanAddr() {
+		return u.Addr()
+	}
+	p := reflect.New(u.Type())
+	p.Elem().Set(u)
+	return p
+}

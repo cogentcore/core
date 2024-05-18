@@ -211,9 +211,9 @@ func (mv *MapView) ConfigToolbar(c *core.Config) {
 // BindMapKey is a version of [core.Bind] that works for keys in a map.
 func BindMapKey[T core.Value](mapv reflect.Value, key reflect.Value, vw T) T {
 	// We must have an addressable key so that we can use Addr when we set it down below.
-	// This address doesn't point to the actual key, but it serves as a shadow pointer we
-	// can use to keep the key in sync here.
-	key = reflectx.UnderlyingPointer(key).Elem()
+	// This address doesn't point to the actual key, but it serves as a fake pointer we
+	// can use to keep the key in sync locally here.
+	key = reflectx.NewFrom(key).Elem()
 	wb := vw.AsWidget()
 	wb.ValueUpdate = func() {
 		if vws, ok := any(vw).(core.ValueSetter); ok {
