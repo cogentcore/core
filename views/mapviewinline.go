@@ -43,9 +43,8 @@ func (mv *MapViewInline) Config(c *core.Config) {
 		mv.configSize = 0
 		return
 	}
-	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := reflectx.NonPointerValue(reflectx.UnderlyingPointer(mpv))
-	keys := mpvnp.MapKeys()
+	mapv := reflectx.Underlying(reflect.ValueOf(mv.Map))
+	keys := mapv.MapKeys()
 	reflectx.ValueSliceSort(keys, true)
 	mv.configSize = len(keys)
 
@@ -56,10 +55,10 @@ func (mv *MapViewInline) Config(c *core.Config) {
 		keytxt := reflectx.ToString(key.Interface())
 		keynm := "key-" + keytxt
 		valnm := "value-" + keytxt
-		val := reflectx.UnderlyingPointer(mpvnp.MapIndex(key))
 
 		core.ConfigureNew(c, keynm, func() core.Value {
-			w := core.NewValue(key.Interface(), "")
+			w := core.ToValue(key.Interface(), "")
+			BindMapKey(mapv, key, w)
 			wb := w.AsWidget()
 			wb.SetReadOnly(mv.IsReadOnly())
 			w.Style(func(s *styles.Style) {
@@ -80,11 +79,13 @@ func (mv *MapViewInline) Config(c *core.Config) {
 			return w
 		}, func(w core.Value) {
 			wb := w.AsWidget()
-			core.Bind(key.Interface(), w)
+			BindMapKey(mapv, key, w)
 			wb.SetReadOnly(mv.IsReadOnly())
 		})
 		core.ConfigureNew(c, valnm, func() core.Value {
-			w := core.NewValue(val.Interface(), "")
+			val := mapv.MapIndex(key).Interface()
+			w := core.ToValue(val, "")
+			BindMapValue(mapv, key, w)
 			wb := w.AsWidget()
 			wb.SetReadOnly(mv.IsReadOnly())
 			wb.OnChange(func(e events.Event) { mv.SendChange(e) })
@@ -101,7 +102,7 @@ func (mv *MapViewInline) Config(c *core.Config) {
 			return w
 		}, func(w core.Value) {
 			wb := w.AsWidget()
-			core.Bind(val.Interface(), w)
+			BindMapValue(mapv, key, w)
 			wb.SetReadOnly(mv.IsReadOnly())
 		})
 	}
