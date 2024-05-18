@@ -72,7 +72,7 @@ func (sp *Spinner) WidgetValue() any { return &sp.Value }
 func (sp *Spinner) OnBind(value any) {
 	kind := reflectx.NonPointerType(reflect.TypeOf(value)).Kind()
 	if kind >= reflect.Int && kind <= reflect.Uintptr {
-		sp.SetStep(1)
+		sp.SetStep(1).SetEnforceStep(true)
 	}
 }
 
