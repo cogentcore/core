@@ -54,34 +54,6 @@ func WalkTypeFlatFields(typ reflect.Type, ifFun, fun func(typ reflect.Type, fiel
 	return rval
 }
 
-// WalkTypeAllFields calls a function on all the fields of a given struct type,
-// including those on *any* fields of struct fields that this struct has; if fun
-// returns false then iteration stops; overall return value is false if iteration
-// was stopped or there was an error (logged), true otherwise.
-func WalkTypeAllFields(typ reflect.Type, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
-	typ = NonPointerType(typ)
-	if typ.Kind() != reflect.Struct {
-		log.Printf("reflectx.WalkTypeAllFields: Must call on a struct type, not: %v\n", typ)
-		return false
-	}
-	rval := true
-	for i := 0; i < typ.NumField(); i++ {
-		f := typ.Field(i)
-		if f.Type.Kind() == reflect.Struct {
-			rval = WalkTypeAllFields(f.Type, fun) // no err here
-			if !rval {
-				break
-			}
-		} else {
-			rval = fun(typ, f)
-			if !rval {
-				break
-			}
-		}
-	}
-	return rval
-}
-
 // WalkFlatFields calls a function on all the primary fields of the
 // given parent struct value, including those on anonymous embedded
 // structs that this struct has. It passes the current parent struct, current
@@ -108,19 +80,6 @@ func WalkFlatFields(parent reflect.Value, ifFun, fun func(parent reflect.Value, 
 			fun(parent, field, value)
 		}
 	}
-}
-
-// NumAllFields returns the number of elemental fields in the given struct type.
-func NumAllFields(typ reflect.Type) int {
-	n := 0
-	falseErr := WalkTypeAllFields(typ, func(typ reflect.Type, field reflect.StructField) bool {
-		n++
-		return true
-	})
-	if !falseErr {
-		return 0
-	}
-	return n
 }
 
 // ValueIsDefault returns whether the given value is equivalent to the

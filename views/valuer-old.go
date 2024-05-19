@@ -176,7 +176,8 @@ func ToValue(val any, tags string) Value {
 			return &MapValue{}
 		}
 	case vk == reflect.Struct:
-		nfld := reflectx.NumAllFields(nptyp)
+		// nfld := reflectx.NumAllFields(nptyp)
+		nfld := 10
 		if nfld > 0 && !forceNoInline && (forceInline || nfld <= core.SystemSettings.StructInlineLength) {
 			return &StructInlineValue{}
 		} else {

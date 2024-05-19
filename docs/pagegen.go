@@ -893,7 +893,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Name string
 			Age  int
 		}
-		views.NewValue(parent, &person{Name: "Go", Age: 35})
+		core.NewValue(&person{Name: "Go", Age: 35}, "", parent)
 	},
 	"views/struct-views-11": func(parent core.Widget) {
 		type person struct {
@@ -903,7 +903,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			LikesGo     bool
 			LikesPython bool
 		}
-		views.NewValue(parent, &person{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true})
+		core.NewValue(&person{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true}, "", parent)
 	},
 	"views/table-views-0": func(parent core.Widget) {
 		type language struct {

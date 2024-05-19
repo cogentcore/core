@@ -46,8 +46,8 @@ func init() {
 				return NewSliceButton()
 			}
 		case reflect.Struct:
-			nfld := reflectx.NumAllFields(typ)
-			if nfld > 0 && !forceNoInline && (forceInline || nfld <= core.SystemSettings.StructInlineLength) {
+			num := typ.NumField()
+			if !forceNoInline && (forceInline || num <= core.SystemSettings.StructInlineLength) {
 				return NewStructView().SetInline(true)
 			} else {
 				return NewStructButton()

@@ -131,14 +131,14 @@ type person struct { //types:add
 }
 ```
 
-When you use [[views.NewValue]] with a struct value, it will create an inline struct view if the struct has four or fewer fields:
+When you use [[core.NewValue]] with a struct value, it will create an inline struct view if the struct has four or fewer fields:
 
 ```Go
 type person struct {
     Name string
     Age  int
 }
-views.NewValue(parent, &person{Name: "Go", Age: 35})
+core.NewValue(&person{Name: "Go", Age: 35}, "", parent)
 ```
 
 Otherwise, it will create a button that opens a dialog with a normal struct view:
@@ -151,5 +151,5 @@ type person struct {
     LikesGo     bool
     LikesPython bool
 }
-views.NewValue(parent, &person{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true})
+core.NewValue(&person{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true}, "", parent)
 ```
