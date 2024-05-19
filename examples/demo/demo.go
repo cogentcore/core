@@ -412,7 +412,7 @@ func makeViews(ts *core.Tabs) {
 	vts := core.NewTabs(tab)
 
 	str := testStruct{
-		Name:   "happy",
+		Name:   "Go",
 		Cond:   2,
 		Value:  3.1415,
 		Vec:    math32.Vec2(5, 7),
@@ -544,7 +544,7 @@ type testStruct struct { //types:add
 	Enum core.ButtonTypes
 
 	// a string
-	Name string
+	Name string `default:"Go"`
 
 	// click to show next
 	ShowNext bool
