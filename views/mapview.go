@@ -137,7 +137,7 @@ func (mv *MapView) Config(c *core.Config) {
 					// try our best to convert the existing value to the new type
 					reflectx.SetRobust(newVal.Interface(), mapv.MapIndex(key).Interface())
 					mapv.SetMapIndex(key, newVal.Elem())
-					mv.DeleteChildByName("value-" + keytxt) // force it to be updated
+					mv.DeleteChildByName(valnm) // force it to be updated
 					mv.Update()
 				})
 			}, func(w *core.Chooser) {
