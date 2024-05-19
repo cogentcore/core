@@ -165,13 +165,13 @@ func (sv *StructView) Config(c *core.Config) {
 			})
 			if !sv.IsReadOnly() && !readOnlyTag {
 				wb.OnChange(func(e events.Event) {
+					sv.SendChange(e)
 					if hasDef {
 						labelWidget.Update()
 					}
 					if sv.isShouldShower {
 						sv.Update()
 					}
-					sv.SendChange(e)
 				})
 			}
 			return w
