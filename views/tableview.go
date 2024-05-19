@@ -120,7 +120,7 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 	tv.Slice = sl
 	tv.SliceNPVal = reflectx.NonPointerValue(reflect.ValueOf(tv.Slice))
 	tv.ElVal = reflectx.OnePointerValue(reflectx.SliceElementValue(sl))
-	tv.CacheVisFields()
+	tv.cacheVisibleFields()
 	return tv
 }
 
@@ -130,16 +130,12 @@ func (tv *TableView) getStructType() reflect.Type {
 	return tv.structType
 }
 
-// CacheVisFields computes the number of visible fields in nVisFields and
-// caches those to skip in fieldSkip
-func (tv *TableView) CacheVisFields() {
+// cacheVisibleFields caches the visible struct fields.
+func (tv *TableView) cacheVisibleFields() {
 	styp := tv.getStructType()
 	tv.visibleFields = make([]reflect.StructField, 0)
-	shouldShow := func(fld reflect.StructField) bool {
-		if !fld.IsExported() {
-			return false
-		}
-		tvtag := fld.Tag.Get("tableview")
+	shouldShow := func(field reflect.StructField) bool {
+		tvtag := field.Tag.Get("tableview")
 		switch {
 		case tvtag == "+":
 			return true
@@ -150,27 +146,17 @@ func (tv *TableView) CacheVisFields() {
 		case tvtag == "-edit" && !tv.IsReadOnly():
 			return false
 		default:
-			return fld.Tag.Get("view") != "-"
+			return field.Tag.Get("view") != "-"
 		}
 	}
-	reflectx.WalkTypeFlatFields(styp,
-		func(typ reflect.Type, fld reflect.StructField) bool {
-			return shouldShow(fld)
+
+	temp := reflect.New(styp).Elem()
+	reflectx.WalkFlatFields(temp,
+		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
+			return shouldShow(field)
 		},
-		func(typ reflect.Type, fld reflect.StructField) bool {
-			if !shouldShow(fld) {
-				return true
-			}
-			if typ != styp {
-				rfld, has := styp.FieldByName(fld.Name)
-				if has {
-					tv.visibleFields = append(tv.visibleFields, rfld)
-				} else {
-					fmt.Printf("TableView: Field name: %v is ambiguous from base struct type: %v, cannot be used in view!\n", fld.Name, styp.String())
-				}
-			} else {
-				tv.visibleFields = append(tv.visibleFields, fld)
-			}
+		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
+			tv.visibleFields = append(tv.visibleFields, field)
 			return true
 		})
 	tv.numVisibleFields = len(tv.visibleFields)

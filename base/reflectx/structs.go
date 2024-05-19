@@ -6,7 +6,6 @@ package reflectx
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
 	"reflect"
 	"strconv"
@@ -16,45 +15,7 @@ import (
 	"cogentcore.org/core/base/iox/jsonx"
 )
 
-// WalkTypeFlatFields calls a function on all the primary fields of a given
-// struct type, including those on anonymous embedded structs that this struct
-// has, passing the current (embedded) type and StructField, effectively
-// flattening the reflect field list; if fun returns false then iteration
-// stops; overall return value is false if iteration was stopped or there was an
-// error (logged), true otherwise. If the given ifFun is non-nil, it is called
-// on every embedded struct field to determine whether the fields of that embedded
-// field should be handled (a return value of true indicates to continue down and
-// a value of false indicates to not).
-func WalkTypeFlatFields(typ reflect.Type, ifFun, fun func(typ reflect.Type, field reflect.StructField) bool) bool {
-	typ = NonPointerType(typ)
-	if typ.Kind() != reflect.Struct {
-		log.Printf("reflectx.WalkTypeFlatFieldsIf: Must call on a struct type, not: %v\n", typ)
-		return false
-	}
-	rval := true
-	for i := 0; i < typ.NumField(); i++ {
-		f := typ.Field(i)
-		if f.Type.Kind() == reflect.Struct && f.Anonymous {
-			if ifFun != nil {
-				if !ifFun(typ, f) {
-					continue
-				}
-			}
-			rval = WalkTypeFlatFields(f.Type, ifFun, fun)
-			if !rval {
-				break
-			}
-		} else {
-			rval = fun(typ, f)
-			if !rval {
-				break
-			}
-		}
-	}
-	return rval
-}
-
-// WalkFlatFields calls a function on all the primary fields of the
+// WalkFlatFields calls a function on all the exported primary fields of the
 // given parent struct value, including those on anonymous embedded
 // structs that this struct has. It passes the current parent struct, current
 // [reflect.StructField], and current field value to the given function.
@@ -68,6 +29,9 @@ func WalkFlatFields(parent reflect.Value, ifFun, fun func(parent reflect.Value, 
 	typ := parent.Type()
 	for i := 0; i < typ.NumField(); i++ {
 		field := typ.Field(i)
+		if !field.IsExported() {
+			continue
+		}
 		value := parent.Field(i)
 		if ifFun != nil {
 			if !ifFun(parent, field, value) {

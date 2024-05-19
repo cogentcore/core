@@ -26,12 +26,12 @@ func init() {
 
 		forceInline := tags.Get("view") == "inline"
 		forceNoInline := tags.Get("view") == "no-inline"
-		typ := reflectx.NonPointerType(reflect.TypeOf(value))
+		rval := reflectx.Underlying(reflect.ValueOf(value))
+		typ := rval.Type()
 		kind := typ.Kind()
 		switch kind {
 		case reflect.Array, reflect.Slice:
-			v := reflect.ValueOf(value)
-			sz := v.Len()
+			sz := rval.Len()
 			eltyp := reflectx.SliceElementType(value)
 			if _, ok := value.([]byte); ok {
 				return core.NewTextField()
