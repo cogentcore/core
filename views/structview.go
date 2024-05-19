@@ -108,6 +108,8 @@ func (sv *StructView) Config(c *core.Config) {
 		readOnlyTag := field.Tag.Get("edit") == "-"
 		def, hasDef := field.Tag.Lookup("default")
 
+		var valueWidget core.Value
+
 		core.Configure(c, labnm, func(w *core.Text) {
 			w.Style(func(s *styles.Style) {
 				s.SetTextWrap(false)
@@ -131,7 +133,6 @@ func (sv *StructView) Config(c *core.Config) {
 					}
 				})
 				w.OnDoubleClick(func(e events.Event) {
-					fmt.Println(label, "doubleclick", isDef)
 					if isDef {
 						return
 					}
@@ -140,8 +141,9 @@ func (sv *StructView) Config(c *core.Config) {
 					if err != nil {
 						core.ErrorSnackbar(w, err, "Error setting default value")
 					} else {
-						w.Update() // TODO: critically this needs to be the value widget, and the text separately
-						sv.SendChange(e)
+						w.Update()
+						valueWidget.Update()
+						valueWidget.AsWidget().SendChange(e)
 					}
 				})
 			}
@@ -151,6 +153,7 @@ func (sv *StructView) Config(c *core.Config) {
 
 		core.ConfigureNew(c, valnm, func() core.Value {
 			w := core.NewValue(reflectx.UnderlyingPointer(value).Interface(), field.Tag)
+			valueWidget = w
 			wb := w.AsWidget()
 			// vv.AsValueData().ViewPath = sv.ViewPath
 			// svv := FieldToValue(fvalp, sfield.Name, sfval)
