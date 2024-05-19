@@ -228,9 +228,8 @@ func (sv *SceneView) ConfigToolbar(c *core.Config) {
 	}
 	core.Configure[*core.Separator](c, "")
 
-	core.Configure(c, "", func(w *core.Chooser) {
+	core.Configure(c, "selmode", func(w *core.Chooser) {
 		w.SetEnum(sw.SelectionMode)
-		w.SetName("selmode")
 		w.OnChange(func(e events.Event) {
 			sw.SelectionMode = w.CurrentItem.Value.(SelectionModes)
 		})
