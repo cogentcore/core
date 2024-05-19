@@ -108,9 +108,11 @@ func (sv *StructView) Config(c *core.Config) {
 		readOnlyTag := field.Tag.Get("edit") == "-"
 		def, hasDef := field.Tag.Lookup("default")
 
+		var labelWidget *core.Text
 		var valueWidget core.Value
 
 		core.Configure(c, labnm, func(w *core.Text) {
+			labelWidget = w
 			w.Style(func(s *styles.Style) {
 				s.SetTextWrap(false)
 			})
@@ -155,35 +157,21 @@ func (sv *StructView) Config(c *core.Config) {
 			w := core.NewValue(reflectx.UnderlyingPointer(value).Interface(), field.Tag)
 			valueWidget = w
 			wb := w.AsWidget()
-			// vv.AsValueData().ViewPath = sv.ViewPath
-			// svv := FieldToValue(fvalp, sfield.Name, sfval)
-			// if svv == nil { // shouldn't happen
-			// 	return true
-			// }
-			// svvp := sfieldVal.Addr()
-			// svv.SetStructValue(svvp, fvalp, &sfield, sv.ViewPath)
-			// todo: other things with view tag..
-			// vv.AsWidgetBase().OnInput(func(e events.Event) {
-			// 	if tag, _ := vv.Tag("immediate"); tag == "+" {
-			// 		wb.SendChange(e)
-			// 		sv.SendChange(e)
-			// 	}
-			// 	sv.Send(events.Input, e)
-			// })
+			wb.OnInput(func(e events.Event) {
+				sv.Send(events.Input, e)
+				if field.Tag.Get("immediate") == "+" {
+					wb.SendChange(e)
+				}
+			})
 			if !sv.IsReadOnly() && !readOnlyTag {
 				wb.OnChange(func(e events.Event) {
-					// sv.UpdateFieldAction()
-					// note: updating vv here is redundant -- relevant field will have already updated
-					// if !reflectx.KindIsBasic(reflectx.NonPointerValue(vv.Val()).Kind()) {
-					// 	if updater, ok := sv.Struct.(core.Updater); ok {
-					// 		updater.Update()
-					// 	}
-					// }
-					// if hasDef {
-					// 	lbl.Update()
-					// }
+					if hasDef {
+						labelWidget.Update()
+					}
+					if sv.isShouldShower {
+						sv.Update()
+					}
 					sv.SendChange(e)
-					// sv.Update()
 				})
 			}
 			return w
