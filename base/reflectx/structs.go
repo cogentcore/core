@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/base/iox/jsonx"
 )
 
-// WalkFlatFields calls the given walk function on all the exported primary fields of the
+// WalkFields calls the given walk function on all the exported primary fields of the
 // given parent struct value, including those on anonymous embedded
 // structs that this struct has. It effectively flattens all of the embedded fields
 // of the struct.
@@ -27,7 +27,7 @@ import (
 // on embedded structs themselves) to determine whether that field and any fields
 // it has embedded should be handled (a return value of true indicates to continue
 // down and a value of false indicates to not).
-func WalkFlatFields(parent reflect.Value, should func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool, walk func(parent reflect.Value, field reflect.StructField, value reflect.Value)) {
+func WalkFields(parent reflect.Value, should func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool, walk func(parent reflect.Value, field reflect.StructField, value reflect.Value)) {
 	typ := parent.Type()
 	for i := 0; i < typ.NumField(); i++ {
 		field := typ.Field(i)
@@ -39,7 +39,7 @@ func WalkFlatFields(parent reflect.Value, should func(parent reflect.Value, fiel
 			continue
 		}
 		if field.Type.Kind() == reflect.Struct && field.Anonymous {
-			WalkFlatFields(value, should, walk)
+			WalkFields(value, should, walk)
 		} else {
 			walk(parent, field, value)
 		}

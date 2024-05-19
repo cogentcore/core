@@ -143,7 +143,7 @@ func (tv *TableView) cacheVisibleFields() {
 		}
 	}
 
-	reflectx.WalkFlatFields(tv.ElementValue,
+	reflectx.WalkFields(tv.ElementValue,
 		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
 			return shouldShow(field)
 		},
