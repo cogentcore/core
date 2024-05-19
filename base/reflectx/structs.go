@@ -15,17 +15,19 @@ import (
 	"cogentcore.org/core/base/iox/jsonx"
 )
 
-// WalkFlatFields calls a function on all the exported primary fields of the
+// WalkFlatFields calls the given walk function on all the exported primary fields of the
 // given parent struct value, including those on anonymous embedded
-// structs that this struct has. It passes the current parent struct, current
-// [reflect.StructField], and current field value to the given function.
-// It effectively flattens all of the fields of the struct.
+// structs that this struct has. It effectively flattens all of the embedded fields
+// of the struct.
 //
-// If the given ifFun is non-nil, it is called on every struct field (including
+// It passes the current parent struct, current [reflect.StructField],
+// and current field value to the given should and walk functions.
+//
+// The given should function is called on every struct field (including
 // on embedded structs themselves) to determine whether that field and any fields
 // it has embedded should be handled (a return value of true indicates to continue
 // down and a value of false indicates to not).
-func WalkFlatFields(parent reflect.Value, ifFun, fun func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool) {
+func WalkFlatFields(parent reflect.Value, should func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool, walk func(parent reflect.Value, field reflect.StructField, value reflect.Value)) {
 	typ := parent.Type()
 	for i := 0; i < typ.NumField(); i++ {
 		field := typ.Field(i)
@@ -33,15 +35,13 @@ func WalkFlatFields(parent reflect.Value, ifFun, fun func(parent reflect.Value, 
 			continue
 		}
 		value := parent.Field(i)
-		if ifFun != nil {
-			if !ifFun(parent, field, value) {
-				continue
-			}
+		if !should(parent, field, value) {
+			continue
 		}
 		if field.Type.Kind() == reflect.Struct && field.Anonymous {
-			WalkFlatFields(value, ifFun, fun)
+			WalkFlatFields(value, should, walk)
 		} else {
-			fun(parent, field, value)
+			walk(parent, field, value)
 		}
 	}
 }

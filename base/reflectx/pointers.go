@@ -8,9 +8,6 @@ import (
 	"reflect"
 )
 
-// These are a set of consistently named functions for navigating pointer
-// types and values within the reflect system.
-
 // NonPointerType returns a non-pointer version of the given type.
 func NonPointerType(typ reflect.Type) reflect.Type {
 	if typ == nil {

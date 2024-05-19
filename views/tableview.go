@@ -155,9 +155,8 @@ func (tv *TableView) cacheVisibleFields() {
 		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
 			return shouldShow(field)
 		},
-		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
+		func(parent reflect.Value, field reflect.StructField, value reflect.Value) {
 			tv.visibleFields = append(tv.visibleFields, field)
-			return true
 		})
 	tv.numVisibleFields = len(tv.visibleFields)
 	tv.headerWidths = make([]int, tv.numVisibleFields)

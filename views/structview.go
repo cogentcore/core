@@ -195,19 +195,16 @@ func (sv *StructView) Config(c *core.Config) {
 		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
 			return shouldShow(parent, field)
 		},
-		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
+		func(parent reflect.Value, field reflect.StructField, value reflect.Value) {
 			if field.Tag.Get("view") == "add-fields" && field.Type.Kind() == reflect.Struct {
 				reflectx.WalkFlatFields(value,
 					func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) bool {
 						return shouldShow(parent, sfield)
 					},
-					func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) bool {
+					func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) {
 						addField(sfield, value, field.Name+" • "+sfield.Name)
-						return true
 					})
-				return true
 			}
 			addField(field, value, field.Name)
-			return true
 		})
 }
