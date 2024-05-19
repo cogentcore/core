@@ -8,7 +8,6 @@ package xyzview
 //go:generate core generate
 
 import (
-	"fmt"
 	"image"
 	"image/draw"
 
@@ -54,7 +53,6 @@ func (sw *Scene) OnInit() {
 
 func (sw *Scene) OnAdd() {
 	sw.WidgetBase.OnAdd()
-	fmt.Println("xyz.Scene on add", sw.Name)
 	sw.Scene.AddDirectRender(sw)
 }
 
@@ -125,7 +123,7 @@ func (sw *Scene) Config(c *core.Config) {
 }
 
 func (sw *Scene) Render() {
-	// sw.ConfigWidget() // TODO: do we need this? no-op if all good?
+	sw.ConfigWidget() // Note: this is indeed essential here -- doesn't work without it.
 	if sw.XYZ.Frame == nil {
 		return
 	}
