@@ -33,11 +33,6 @@ type Shell struct {
 	// Config is the [exec.Config] used to run commands.
 	Config exec.Config
 
-	// StdIOWrappers are IO wrappers sent to the interpreter, so we can
-	// control the IO streams used within the interpreter.
-	// Call SetWrappers on this with another StdIO object to update settings.
-	StdIOWrappers exec.StdIO
-
 	// ssh connection, configuration
 	SSH *sshclient.Config
 
@@ -83,6 +78,14 @@ type Shell struct {
 	// We are not able to pass the context around so it is set here,
 	// in the StartContext function. Clear when done with ClearContext.
 	Ctx context.Context
+
+	// StdIOWrappers are IO wrappers sent to the interpreter, so we can
+	// control the IO streams used within the interpreter.
+	// Call SetWrappers on this with another StdIO object to update settings.
+	StdIOWrappers exec.StdIO
+
+	// original standard IO setings, to restore
+	OrigStdIO exec.StdIO
 
 	// commandArgs is a stack of args passed to a command, used for simplified
 	// processing of args expressions.
@@ -133,6 +136,20 @@ func (sh *Shell) StartContext() context.Context {
 func (sh *Shell) EndContext() {
 	sh.Ctx = nil
 	sh.Cancel = nil
+}
+
+// SaveOrigStdIO saves the current Config.StdIO as the original to revert to
+// after an error, and sets the StdIOWrappers to use them.
+func (sh *Shell) SaveOrigStdIO() {
+	sh.OrigStdIO = sh.Config.StdIO
+	sh.StdIOWrappers.NewWrappers(&sh.OrigStdIO)
+}
+
+// RestoreOrigStdIO reverts to using the saved OrigStdIO
+func (sh *Shell) RestoreOrigStdIO() {
+	sh.Config.StdIO = sh.OrigStdIO
+	sh.OrigStdIO.SetToOS()
+	sh.StdIOWrappers.SetWrappers(&sh.OrigStdIO)
 }
 
 // Close closes any resources associated with the shell,
@@ -207,6 +224,11 @@ func (sh *Shell) TotalDepth() int {
 // ResetLines resets the stack of transpiled lines
 func (sh *Shell) ResetLines() {
 	sh.Lines = nil
+}
+
+// ResetDepth resets the current depths to 0
+func (sh *Shell) ResetDepth() {
+	sh.ParenDepth, sh.BraceDepth, sh.BrackDepth = 0, 0, 0
 }
 
 // AddLine adds line on the stack

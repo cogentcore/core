@@ -34,7 +34,8 @@ type Interpreter struct {
 
 // NewInterpreter returns a new [Interpreter] initialized with the given options.
 // It automatically imports the standard library and configures necessary shell
-// functions. End user app must call [Interp.ImportUsed() and [Interpreter.RunConfig].
+// functions. End user app must call [Interp.Config] after importing any additional
+// symbols, prior to running the interpreter.
 func NewInterpreter(options interp.Options) *Interpreter {
 	in := &Interpreter{}
 	in.Shell = shell.NewShell()
@@ -47,7 +48,7 @@ func NewInterpreter(options interp.Options) *Interpreter {
 	if options.Stderr != nil {
 		in.Shell.Config.StdIO.Err = options.Stderr
 	}
-	in.Shell.StdIOWrappers.NewWrappers(&in.Shell.Config.StdIO)
+	in.Shell.SaveOrigStdIO()
 	options.Stdout = in.Shell.StdIOWrappers.Out
 	options.Stderr = in.Shell.StdIOWrappers.Err
 	options.Stdin = in.Shell.StdIOWrappers.In
@@ -76,7 +77,7 @@ func (in *Interpreter) Prompt() string {
 	}
 	res := "> "
 	for range dp {
-		res += "\t"
+		res += "    " // note: /t confuses readline
 	}
 	return res
 }
@@ -94,9 +95,9 @@ func (in *Interpreter) Eval(code string) error {
 				hasPrint = true
 			}
 		}
-		v, _ := in.RunCode()
+		v, err := in.RunCode()
 		in.Shell.Errors = nil
-		if !hasPrint && v.IsValid() && !v.IsZero() && v.Kind() != reflect.Func {
+		if err == nil && !hasPrint && v.IsValid() && !v.IsZero() && v.Kind() != reflect.Func {
 			fmt.Println(v.Interface())
 		}
 	} else {
@@ -119,8 +120,15 @@ func (in *Interpreter) RunCode() (reflect.Value, error) {
 	ctx := in.Shell.StartContext()
 	v, err := in.Interp.EvalWithContext(ctx, cmd)
 	in.Shell.EndContext()
-	if err != nil && !errors.Is(err, context.Canceled) {
-		slog.Error(err.Error())
+	if err != nil {
+		cancelled := errors.Is(err, context.Canceled)
+		// fmt.Println("cancelled:", cancelled)
+		in.Shell.RestoreOrigStdIO()
+		in.Shell.ResetDepth()
+		in.Interp.Eval("\n")
+		if !cancelled {
+			slog.Error(err.Error())
+		}
 	}
 	return v, err
 }
