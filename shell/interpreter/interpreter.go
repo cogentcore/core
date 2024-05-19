@@ -7,6 +7,8 @@ package interpreter
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -16,6 +18,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/shell"
+	"github.com/ergochat/readline"
 	"github.com/traefik/yaegi/interp"
 	"github.com/traefik/yaegi/stdlib"
 )
@@ -142,5 +145,40 @@ func (in *Interpreter) MonitorSignals() {
 	for {
 		<-c
 		in.Shell.CancelExecution()
+	}
+}
+
+// Config performs final configuration after all the imports have been Use'd
+func (in *Interpreter) Config() {
+	in.Interp.ImportUsed()
+	in.RunConfig()
+}
+
+// Interactive runs an interactive shell that allows the user to input cosh.
+func (in *Interpreter) Interactive() error {
+	in.Config()
+	rl, err := readline.NewFromConfig(&readline.Config{
+		AutoComplete: &shell.ReadlineCompleter{Shell: in.Shell},
+		Undo:         true,
+	})
+	if err != nil {
+		return err
+	}
+	defer rl.Close()
+	log.SetOutput(rl.Stderr()) // redraw the prompt correctly after log output
+
+	for {
+		rl.SetPrompt(in.Prompt())
+		line, err := rl.ReadLine()
+		if errors.Is(err, readline.ErrInterrupt) {
+			continue
+		}
+		if errors.Is(err, io.EOF) {
+			os.Exit(0)
+		}
+		if err != nil {
+			return err
+		}
+		in.Eval(line)
 	}
 }

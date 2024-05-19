@@ -6,10 +6,7 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,7 +14,6 @@ import (
 	"cogentcore.org/core/cli"
 	"cogentcore.org/core/shell"
 	"cogentcore.org/core/shell/interpreter"
-	"github.com/ergochat/readline"
 	"github.com/traefik/yaegi/interp"
 )
 
@@ -60,33 +56,8 @@ func Run(c *Config) error { //cli:cmd -root
 // Interactive runs an interactive shell that allows the user to input cosh.
 func Interactive(c *Config) error {
 	in := interpreter.NewInterpreter(interp.Options{})
-	in.Interp.ImportUsed()
-	in.RunConfig()
-
-	rl, err := readline.NewFromConfig(&readline.Config{
-		AutoComplete: &shell.ReadlineCompleter{Shell: in.Shell},
-		Undo:         true,
-	})
-	if err != nil {
-		return err
-	}
-	defer rl.Close()
-	log.SetOutput(rl.Stderr()) // redraw the prompt correctly after log output
-
-	for {
-		rl.SetPrompt(in.Prompt())
-		line, err := rl.ReadLine()
-		if errors.Is(err, readline.ErrInterrupt) {
-			continue
-		}
-		if errors.Is(err, io.EOF) {
-			os.Exit(0)
-		}
-		if err != nil {
-			return err
-		}
-		in.Eval(line)
-	}
+	in.Interactive()
+	return nil
 }
 
 // Build builds the specified input cosh file to the specified output Go file.
