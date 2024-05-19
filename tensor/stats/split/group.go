@@ -65,10 +65,10 @@ func GroupByIndex(ix *table.IndexView, colIndexes []int) *table.Splits {
 }
 
 // GroupBy returns a new Splits set based on the groups of values
-// across the given set of column names (see Try for version with error)
+// across the given set of column names.
 // Uses a stable sort on columns, so ordering of other dimensions is preserved.
-func GroupBy(ix *table.IndexView, columns []string) *table.Splits {
-	return GroupByIndex(ix, ix.Table.ColumnIndexesByNames(columns))
+func GroupBy(ix *table.IndexView, columns ...string) *table.Splits {
+	return GroupByIndex(ix, ix.Table.ColumnIndexesByNames(columns...))
 }
 
 // GroupByFunc returns a new Splits set based on the given function

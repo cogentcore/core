@@ -21,7 +21,7 @@ func TestHistogram32(t *testing.T) {
 	assert.Equal(t, ex, res)
 
 	exvals := []float32{0, 0.3333, 0.6667}
-	dt := table.NewTable(0)
+	dt := table.NewTable()
 	F32Table(dt, vals, 3, 0, 1)
 	for ri, v := range ex {
 		vv := float32(dt.Float("Value", ri))
@@ -41,7 +41,7 @@ func TestHistogram64(t *testing.T) {
 	assert.Equal(t, ex, res)
 
 	exvals := []float64{0, 0.3333, 0.6667}
-	dt := table.NewTable(0)
+	dt := table.NewTable()
 	F64Table(dt, vals, 3, 0, 1)
 	for ri, v := range ex {
 		vv := dt.Float("Value", ri)

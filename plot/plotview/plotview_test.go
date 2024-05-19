@@ -21,7 +21,7 @@ type Data struct {
 func TestTablePlotView(t *testing.T) {
 	b := core.NewBody("Plot View")
 
-	epc := table.NewTable(0, "epc")
+	epc := table.NewTable("epc")
 	epc.OpenCSV("testdata/ra25epoch.tsv", table.Tab)
 
 	pl := NewPlotView(b)

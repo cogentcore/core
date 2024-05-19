@@ -55,7 +55,7 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 		}
 	} else {
 		ran := false
-		ran, out = sh.RunBuiltinOrCommand(cmdIO, output, scmd, sargs...)
+		ran, out = sh.RunBuiltinOrCommand(cmdIO, errOk, output, scmd, sargs...)
 		if !ran {
 			sh.isCommand.Push(false)
 			switch {
@@ -90,12 +90,16 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 
 // RunBuiltinOrCommand runs a builtin or a command, returning true if it ran,
 // and the output string if running in output mode.
-func (sh *Shell) RunBuiltinOrCommand(cmdIO *exec.CmdIO, output bool, cmd string, args ...string) (bool, string) {
+func (sh *Shell) RunBuiltinOrCommand(cmdIO *exec.CmdIO, errOk, output bool, cmd string, args ...string) (bool, string) {
 	out := ""
 	cmdFun, hasCmd := sh.Commands[cmd]
 	bltFun, hasBlt := sh.Builtins[cmd]
 
 	if !hasCmd && !hasBlt {
+		ran, out := sh.RunSubShell(cmdIO, errOk, output, cmd, args...)
+		if ran {
+			return true, out
+		}
 		return false, out
 	}
 

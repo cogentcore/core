@@ -59,7 +59,7 @@ func (vw *View) UpdatePose() {
 
 // UpdateBodyView updates the display properties of given body name
 // recurses the tree until this body name is found.
-func (vw *View) UpdateBodyView(bodyNames []string) {
+func (vw *View) UpdateBodyView(bodyNames ...string) {
 	vw.UpdateBodyViewNode(bodyNames, vw.World, vw.Root)
 	vw.Scene.NeedsUpdate()
 }

@@ -95,6 +95,12 @@ type Shell struct {
 	// if this is non-empty, it is the name of the last command defined.
 	// triggers insertion of the AddCommand call to add to list of defined commands.
 	lastCommand string
+
+	// script files in current working directory: have .cosh suffix
+	cwdScriptFiles []string
+
+	// Dir directory for cwdScriptFiles
+	cwdScriptFilesDir string
 }
 
 // NewShell returns a new [Shell] with default options.

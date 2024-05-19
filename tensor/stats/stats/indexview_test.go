@@ -15,7 +15,7 @@ import (
 )
 
 func TestIndexView(t *testing.T) {
-	dt := table.NewTable(5)
+	dt := table.NewTable().SetNumRows(5)
 	dt.AddFloat64Column("data")
 	dt.SetFloat("data", 0, 1)
 	dt.SetFloat("data", 1, 2)

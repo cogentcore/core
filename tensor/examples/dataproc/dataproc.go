@@ -55,7 +55,7 @@ func AnalyzePlanets() {
 	PlanetsDesc = stats.DescAll(PlanetsAll)   // individually excludes Null values in each col, but not row-wise
 	PlanetsNNDesc = stats.DescAll(PlanetsAll) // standard descriptive stats for row-wise non-nulls
 
-	byMethod := split.GroupBy(PlanetsAll, []string{"method"})
+	byMethod := split.GroupBy(PlanetsAll, "method")
 	split.AggColumn(byMethod, "orbital_period", stats.Median)
 	GpMethodOrbit = byMethod.AggsToTable(table.AddAggName)
 

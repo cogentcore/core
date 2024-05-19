@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/cli"
 	"cogentcore.org/core/shell"
 	"cogentcore.org/core/shell/interpreter"
@@ -28,6 +30,11 @@ type Config struct {
 	// Output is the name of the Go file to output to.
 	// It defaults to the input file with .cosh changed to .go.
 	Output string `cmd:"build" posarg:"1" required:"-"`
+
+	// Expr is an optional expression to evaluate, which can be
+	// used in addition to a file to run, to execute commands
+	// defined within that file for example.
+	Expr string `flag:"e,exec"`
 }
 
 func main() { //types:skip
@@ -38,19 +45,26 @@ func main() { //types:skip
 // Run runs the specified cosh file. If no file is specified,
 // it runs an interactive shell that allows the user to input cosh.
 func Run(c *Config) error { //cli:cmd -root
-	if c.Input == "" {
+	if c.Input == "" && c.Expr == "" {
 		return Interactive(c)
 	}
-	b, err := os.ReadFile(c.Input)
-	if err != nil {
-		return err
+	code := ""
+	if errors.Log1(dirs.FileExists(c.Input)) {
+		b, err := os.ReadFile(c.Input)
+		if err != nil && c.Expr == "" {
+			return err
+		}
+		code = string(b)
+	}
+	if c.Expr != "" {
+		if code != "" {
+			code += "\n"
+		}
+		code += c.Expr + "\n"
 	}
 	in := interpreter.NewInterpreter(interp.Options{})
-	in.Interp.ImportUsed() // todo: this must be run in context of "main" app,
-	// can't build it in.
-	in.RunConfig()
-	err = in.Eval(string(b))
-	return err
+	in.Config()
+	return in.Eval(code)
 }
 
 // Interactive runs an interactive shell that allows the user to input cosh.

@@ -9,7 +9,7 @@ import (
 )
 
 func TestAdd3DCol(t *testing.T) {
-	dt := NewTable(0)
+	dt := NewTable()
 	dt.AddFloat32TensorColumn("Values", []int{11, 1, 16})
 
 	col := dt.ColumnByName("Values")

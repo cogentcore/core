@@ -6,7 +6,7 @@ import (
 	"cogentcore.org/core/types"
 )
 
-var _ = types.AddType(&types.Type{Name: "main.Config", IDName: "config", Doc: "Config is the configuration information for the cosh cli.", Directives: []types.Directive{{Tool: "go", Directive: "generate", Args: []string{"core", "generate", "-add-types", "-add-funcs"}}}, Fields: []types.Field{{Name: "Input", Doc: "Input is the name of the input file to run/compile."}, {Name: "Output", Doc: "Output is the name of the Go file to output to.\nIt defaults to the input file with .cosh changed to .go."}}})
+var _ = types.AddType(&types.Type{Name: "main.Config", IDName: "config", Doc: "Config is the configuration information for the cosh cli.", Directives: []types.Directive{{Tool: "go", Directive: "generate", Args: []string{"core", "generate", "-add-types", "-add-funcs"}}}, Fields: []types.Field{{Name: "Input", Doc: "Input is the name of the input file to run/compile."}, {Name: "Output", Doc: "Output is the name of the Go file to output to.\nIt defaults to the input file with .cosh changed to .go."}, {Name: "Expr", Doc: "Expr is an optional expression to evaluate, which can be\nused in addition to a file to run, to execute commands\ndefined within that file for example."}}})
 
 var _ = types.AddFunc(&types.Func{Name: "main.Run", Doc: "Run runs the specified cosh file. If no file is specified,\nit runs an interactive shell that allows the user to input cosh.", Directives: []types.Directive{{Tool: "cli", Directive: "cmd", Args: []string{"-root"}}}, Args: []string{"c"}, Returns: []string{"error"}})
 

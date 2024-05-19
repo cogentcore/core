@@ -104,7 +104,7 @@ func (dt *Table) ColumnIndexTry(name string) (int, error) {
 
 // ColumnIndexesByNames returns the indexes of the given column names.
 // idxs have -1 if name not found -- see Try version for error message.
-func (dt *Table) ColumnIndexesByNames(names []string) []int {
+func (dt *Table) ColumnIndexesByNames(names ...string) []int {
 	nc := len(names)
 	if nc == 0 {
 		return nil

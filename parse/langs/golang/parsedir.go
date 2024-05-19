@@ -160,7 +160,7 @@ func (gl *GoLang) ParseDirImpl(fs *parse.FileState, path string, opts parse.Lang
 		// fmt.Printf("Parsing, loading path: %v\n", path)
 	}
 
-	files = dirs.ExtFilenames(pkgPathAbs, []string{".go"})
+	files = dirs.ExtFilenames(pkgPathAbs, ".go")
 	if len(files) == 0 {
 		// fmt.Printf("No go files, bailing\n")
 		return nil
@@ -180,7 +180,7 @@ func (gl *GoLang) ParseDirImpl(fs *parse.FileState, path string, opts parse.Lang
 			if diffPath || (!gl.Pr.ModTime.IsZero() && cts.Before(gl.Pr.ModTime)) {
 				// fmt.Printf("rebuilding %v because parser: %v is newer than cache: %v\n", path, gl.Pr.ModTime, cts)
 			} else {
-				lstmod := dirs.LatestMod(pkgPathAbs, []string{".go"})
+				lstmod := dirs.LatestMod(pkgPathAbs, ".go")
 				if lstmod.Before(cts) {
 					// fmt.Printf("loaded cache for: %v from: %v\n", pkgPathAbs, cts)
 					return csy

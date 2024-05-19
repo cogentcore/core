@@ -23,7 +23,7 @@ func Open(v any, filename string) error {
 }
 
 // OpenFiles reads the given object from the given filenames using TOML encoding
-func OpenFiles(v any, filenames []string) error {
+func OpenFiles(v any, filenames ...string) error {
 	return iox.OpenFiles(v, filenames, NewDecoder)
 }
 
@@ -35,7 +35,7 @@ func OpenFS(v any, fsys fs.FS, filename string) error {
 
 // OpenFilesFS reads the given object from the given filenames using TOML encoding,
 // using the given [fs.FS] filesystem (e.g., for embed files)
-func OpenFilesFS(v any, fsys fs.FS, filenames []string) error {
+func OpenFilesFS(v any, fsys fs.FS, filenames ...string) error {
 	return iox.OpenFilesFS(v, fsys, filenames, NewDecoder)
 }
 
@@ -74,7 +74,7 @@ func WriteBytes(v any) ([]byte, error) {
 
 // OpenFromPaths reads the given object from the given TOML file,
 // looking on paths for the file.
-func OpenFromPaths(v any, file string, paths []string) error {
+func OpenFromPaths(v any, file string, paths ...string) error {
 	filenames := dirs.FindFilesOnPaths(paths, file)
 	if len(filenames) == 0 {
 		return fmt.Errorf("OpenFromPaths: no files found")

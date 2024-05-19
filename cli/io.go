@@ -24,7 +24,7 @@ func OpenWithIncludes(opts *Options, cfg any, file string) error {
 	if len(files) == 0 {
 		return fmt.Errorf("OpenWithIncludes: no files found for %q", file)
 	}
-	err := tomlx.OpenFiles(cfg, files)
+	err := tomlx.OpenFiles(cfg, files...)
 	if err != nil {
 		return err
 	}
@@ -39,13 +39,13 @@ func OpenWithIncludes(opts *Options, cfg any, file string) error {
 	}
 	for i := ni - 1; i >= 0; i-- {
 		inc := incs[i]
-		err = tomlx.OpenFiles(cfg, dirs.FindFilesOnPaths(opts.IncludePaths, inc))
+		err = tomlx.OpenFiles(cfg, dirs.FindFilesOnPaths(opts.IncludePaths, inc)...)
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
 	// reopen original
-	err = tomlx.OpenFiles(cfg, dirs.FindFilesOnPaths(opts.IncludePaths, file))
+	err = tomlx.OpenFiles(cfg, dirs.FindFilesOnPaths(opts.IncludePaths, file)...)
 	if err != nil {
 		return err
 	}
