@@ -558,8 +558,8 @@ func (v *ValueData) Doc() string {
 	if v.Is(ValueHasSavedDoc) {
 		return v.SavedDoc
 	}
-	doc, _ := types.GetDoc(v.Value, reflect.ValueOf(v.Owner), v.Field, v.Label())
-	v.SavedDoc = doc
+	// doc, _ := types.GetDoc(v.Value, reflect.ValueOf(v.Owner), v.Field, v.Label())
+	// v.SavedDoc = doc
 	v.SetFlag(true, ValueHasSavedDoc)
 	return v.SavedDoc
 }

@@ -142,18 +142,16 @@ func AllEmbeddersOf(typ *Type) []*Type {
 	return res
 }
 
-// GetDoc gets the documentation for the given value with the given owner value, field, and label.
-// The value, owner value, and field may be nil/invalid. The owner value, if valid, is the value that
-// contains the value (the parent struct, map, slice, or array). The field, if non-nil,
-// is the struct field that the value represents. GetDoc uses the given label to format
+// GetDoc gets the documentation for the given value with the given parent struct, field, and label.
+// The value, parent value, and field may be nil/invalid. GetDoc uses the given label to format
 // the documentation with [FormatDoc] before returning it.
-func GetDoc(val, owner reflect.Value, field *reflect.StructField, label string) (string, bool) {
+func GetDoc(value, parent reflect.Value, field reflect.StructField, label string) (string, bool) {
 	// if we are not part of a struct, we just get the documentation for our type
-	if field == nil || !owner.IsValid() {
-		if !val.IsValid() {
+	if !parent.IsValid() {
+		if !value.IsValid() {
 			return "", false
 		}
-		rtyp := reflectx.NonPointerType(val.Type())
+		rtyp := reflectx.NonPointerType(value.Type())
 		typ := TypeByName(TypeName(rtyp))
 		if typ == nil {
 			return "", false
@@ -162,16 +160,16 @@ func GetDoc(val, owner reflect.Value, field *reflect.StructField, label string) 
 	}
 
 	// otherwise, we get our field documentation in our parent
-	f := GetField(owner, field.Name)
+	f := GetField(parent, field.Name)
 	if f != nil {
 		return FormatDoc(f.Doc, field.Name, label), true
 	}
 	// if we aren't in the type registry, we fall back on struct tag
-	desc, ok := field.Tag.Lookup("desc")
+	doc, ok := field.Tag.Lookup("doc")
 	if !ok {
 		return "", false
 	}
-	return FormatDoc(desc, field.Name, label), true
+	return FormatDoc(doc, field.Name, label), true
 }
 
 // FormatDoc formats the given Go documentation string for an identifier with the given

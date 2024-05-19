@@ -98,25 +98,24 @@ func (sv *StructView) Config(c *core.Config) {
 		return true
 	}
 
-	addField := func(field reflect.StructField, value reflect.Value, name string) {
+	addField := func(parent reflect.Value, field reflect.StructField, value reflect.Value, name string) {
 		label := name
 		if sc {
-			label = strcase.ToSentence(name)
+			label = strcase.ToSentence(label)
 		}
 		labnm := fmt.Sprintf("label-%v", name)
 		valnm := fmt.Sprintf("value-%v", name)
 		readOnlyTag := field.Tag.Get("edit") == "-"
-		ttip := "" // TODO(config)
 		def, hasDef := field.Tag.Lookup("default")
 
 		core.Configure(c, labnm, func(w *core.Text) {
 			w.Style(func(s *styles.Style) {
 				s.SetTextWrap(false)
 			})
-			// w.Tooltip = vv.Doc()
-			// vv.AsValueData().ViewPath = sv.ViewPath
+			doc, _ := types.GetDoc(value, parent, field, label)
+			w.SetTooltip(doc)
 			if hasDef {
-				ttip = "(Default: " + def + ") " + ttip
+				w.SetTooltip("(Default: " + def + ") " + w.Tooltip)
 				var isDef bool
 				w.Style(func(s *styles.Style) {
 					isDef = reflectx.ValueIsDefault(value, def)
@@ -125,10 +124,10 @@ func (sv *StructView) Config(c *core.Config) {
 						s.Color = colors.C(colors.Scheme.Primary.Base)
 						s.Cursor = cursors.Poof
 						if !strings.HasPrefix(w.Tooltip, dcr) {
-							w.Tooltip = dcr + w.Tooltip
+							w.SetTooltip(dcr + w.Tooltip)
 						}
 					} else {
-						w.Tooltip = strings.TrimPrefix(w.Tooltip, dcr)
+						w.SetTooltip(strings.TrimPrefix(w.Tooltip, dcr))
 					}
 				})
 				w.OnDoubleClick(func(e events.Event) {
@@ -202,9 +201,9 @@ func (sv *StructView) Config(c *core.Config) {
 						return shouldShow(parent, sfield)
 					},
 					func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) {
-						addField(sfield, value, field.Name+" • "+sfield.Name)
+						addField(parent, sfield, value, field.Name+" • "+sfield.Name)
 					})
 			}
-			addField(field, value, field.Name)
+			addField(parent, field, value, field.Name)
 		})
 }

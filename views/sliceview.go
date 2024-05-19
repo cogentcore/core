@@ -226,8 +226,8 @@ type SliceViewBase struct {
 	// displayed.
 	CurrentCursor cursors.Cursor `copier:"-" xml:"-" json:"-" set:"-"`
 
-	// non-ptr reflect.Value of the slice
-	SliceNPVal reflect.Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
+	// SliceUnderlying is the underlying slice value.
+	SliceUnderlying reflect.Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
 
 	// SliceValue is the [Value] associated with this slice view, if any.
 	SliceValue Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
@@ -256,9 +256,9 @@ type SliceViewBase struct {
 	// temp idx state for e.g., dnd
 	TmpIndex int `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
 
-	// ElVal is a Value representation of the underlying element type
+	// ElementValue is a [reflect.Value] representation of the underlying element type
 	// which is used whenever there are no slice elements available
-	ElVal reflect.Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
+	ElementValue reflect.Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
 
 	// maximum width of value column in chars, if string
 	MaxWidth int `set:"-" copier:"-" json:"-" xml:"-"`
@@ -365,18 +365,18 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 
 	sv.SetSliceBase()
 	sv.Slice = sl
-	sv.SliceNPVal = reflectx.Underlying(reflect.ValueOf(sv.Slice))
+	sv.SliceUnderlying = reflectx.Underlying(reflect.ValueOf(sv.Slice))
 	isArray := reflectx.NonPointerType(reflect.TypeOf(sl)).Kind() == reflect.Array
 	sv.SetFlag(isArray, SliceViewIsArray)
 	// make sure elements aren't nil to prevent later panics
-	// for i := 0; i < sv.SliceNPVal.Len(); i++ {
-	// 	val := sv.SliceNPVal.Index(i)
+	// for i := 0; i < sv.SliceUnderlying.Len(); i++ {
+	// 	val := sv.SliceUnderlying.Index(i)
 	// 	k := val.Kind()
 	// 	if (k == reflect.Chan || k == reflect.Func || k == reflect.Interface || k == reflect.Map || k == reflect.Pointer || k == reflect.Slice) && val.IsNil() {
 	// 		val.Set(reflect.New(reflectx.NonPointerType(val.Type())))
 	// 	}
 	// }
-	sv.ElVal = reflectx.SliceElementValue(sl)
+	sv.ElementValue = reflectx.SliceElementValue(sl)
 	return sv
 }
 
@@ -472,7 +472,7 @@ func (sv *SliceViewBase) Config(c *core.Config) {
 
 func (sv *SliceViewBase) UpdateMaxWidths() {
 	sv.MaxWidth = 0
-	npv := reflectx.NonPointerValue(sv.ElVal)
+	npv := reflectx.NonPointerValue(sv.ElementValue)
 	isString := npv.Type().Kind() == reflect.String
 	if !isString || sv.SliceSize == 0 {
 		return
@@ -490,12 +490,12 @@ func (sv *SliceViewBase) UpdateMaxWidths() {
 func (sv *SliceViewBase) SliceElValue(si int) reflect.Value {
 	var val reflect.Value
 	if si < sv.SliceSize {
-		val = reflectx.UnderlyingPointer(sv.SliceNPVal.Index(si)) // deal with pointer lists
+		val = reflectx.UnderlyingPointer(sv.SliceUnderlying.Index(si)) // deal with pointer lists
 	} else {
-		val = sv.ElVal
+		val = sv.ElementValue
 	}
 	if val.IsZero() {
-		val = sv.ElVal
+		val = sv.ElementValue
 	}
 	return val
 }
@@ -668,7 +668,7 @@ func (sv *SliceViewBase) RowWidgetNs() (nWidgPerRow, idxOff int) {
 // UpdateSliceSize updates and returns the size of the slice
 // and sets SliceSize
 func (sv *SliceViewBase) UpdateSliceSize() int {
-	sz := sv.SliceNPVal.Len()
+	sz := sv.SliceUnderlying.Len()
 	sv.SliceSize = sz
 	return sz
 }
@@ -742,7 +742,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	isNode := tree.IsNode(sltyp)
 	slptr := sltyp.Kind() == reflect.Pointer
 	sz := sv.SliceSize
-	svnp := sv.SliceNPVal
+	svnp := sv.SliceUnderlying
 
 	if isNode && sv.SliceValue != nil {
 		vd := sv.SliceValue.AsValueData()
@@ -781,7 +781,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 		idx = sz
 	}
 
-	sv.SliceNPVal = reflectx.NonPointerValue(reflect.ValueOf(sv.Slice)) // need to update after changes
+	sv.SliceUnderlying = reflectx.NonPointerValue(reflect.ValueOf(sv.Slice)) // need to update after changes
 
 	sv.This().(SliceViewer).UpdateSliceSize()
 
@@ -879,7 +879,7 @@ func (sv *SliceViewBase) SliceVal(idx int) any {
 		fmt.Printf("views.SliceViewBase: slice index out of range: %v\n", idx)
 		return nil
 	}
-	val := reflectx.UnderlyingPointer(sv.SliceNPVal.Index(idx)) // deal with pointer lists
+	val := reflectx.UnderlyingPointer(sv.SliceUnderlying.Index(idx)) // deal with pointer lists
 	vali := val.Interface()
 	return vali
 }
@@ -1417,7 +1417,7 @@ func (sv *SliceViewBase) MimeDataIndex(md *mimedata.Mimes, idx int) {
 
 // FromMimeData creates a slice of structs from mime data
 func (sv *SliceViewBase) FromMimeData(md mimedata.Mimes) []any {
-	svtyp := sv.SliceNPVal.Type()
+	svtyp := sv.SliceUnderlying.Type()
 	sl := make([]any, 0, len(md))
 	for _, d := range md {
 		if d.Type == fileinfo.DataJson {
@@ -1554,7 +1554,7 @@ func (sv *SliceViewBase) PasteAssign(md mimedata.Mimes, idx int) {
 		return
 	}
 	ns := sl[0]
-	sv.SliceNPVal.Index(idx).Set(reflect.ValueOf(ns).Elem())
+	sv.SliceUnderlying.Index(idx).Set(reflect.ValueOf(ns).Elem())
 	sv.SendChange()
 	sv.NeedsRender()
 }
@@ -1566,7 +1566,7 @@ func (sv *SliceViewBase) PasteAtIndex(md mimedata.Mimes, idx int) {
 		return
 	}
 	svl := reflect.ValueOf(sv.Slice)
-	svnp := sv.SliceNPVal
+	svnp := sv.SliceUnderlying
 
 	for _, ns := range sl {
 		sz := svnp.Len()
@@ -1580,7 +1580,7 @@ func (sv *SliceViewBase) PasteAtIndex(md mimedata.Mimes, idx int) {
 		idx++
 	}
 
-	sv.SliceNPVal = reflectx.NonPointerValue(reflect.ValueOf(sv.Slice)) // need to update after changes
+	sv.SliceUnderlying = reflectx.NonPointerValue(reflect.ValueOf(sv.Slice)) // need to update after changes
 
 	sv.SendChange()
 	sv.SelectIndexAction(idx, events.SelectOne)

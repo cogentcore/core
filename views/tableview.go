@@ -118,21 +118,14 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 
 	tv.SetSliceBase()
 	tv.Slice = sl
-	tv.SliceNPVal = reflectx.NonPointerValue(reflect.ValueOf(tv.Slice))
-	tv.ElVal = reflectx.OnePointerValue(reflectx.SliceElementValue(sl))
+	tv.SliceUnderlying = reflectx.Underlying(reflect.ValueOf(tv.Slice))
+	tv.ElementValue = reflectx.Underlying(reflectx.SliceElementValue(sl))
 	tv.cacheVisibleFields()
 	return tv
 }
 
-// getStructType sets and returns the structType, removing any pointers.
-func (tv *TableView) getStructType() reflect.Type {
-	tv.structType = reflectx.NonPointerType(reflectx.SliceElementType(tv.Slice))
-	return tv.structType
-}
-
 // cacheVisibleFields caches the visible struct fields.
 func (tv *TableView) cacheVisibleFields() {
-	styp := tv.getStructType()
 	tv.visibleFields = make([]reflect.StructField, 0)
 	shouldShow := func(field reflect.StructField) bool {
 		tvtag := field.Tag.Get("tableview")
@@ -150,8 +143,7 @@ func (tv *TableView) cacheVisibleFields() {
 		}
 	}
 
-	temp := reflect.New(styp).Elem()
-	reflectx.WalkFlatFields(temp,
+	reflectx.WalkFlatFields(tv.ElementValue,
 		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
 			return shouldShow(field)
 		},
@@ -268,8 +260,8 @@ func (tv *TableView) ConfigHeader(c *core.Config) {
 				htxt = strcase.ToSentence(field.Name)
 			}
 			w.SetText(htxt)
-			w.Tooltip = htxt + " (tap to sort by)"
-			doc, ok := types.GetDoc(reflect.Value{}, tv.ElVal, &field, htxt)
+			w.Tooltip = htxt + " (click to sort by)"
+			doc, ok := types.GetDoc(reflect.Value{}, tv.ElementValue, field, htxt)
 			if ok && doc != "" {
 				w.Tooltip += ": " + doc
 			}
@@ -584,10 +576,10 @@ func StructSliceIndexByValue(struSlice any, fldName string, fldVal any) (int, er
 }
 
 func (tv *TableView) EditIndex(idx int) {
-	if idx < 0 || idx >= tv.SliceNPVal.Len() {
+	if idx < 0 || idx >= tv.SliceUnderlying.Len() {
 		return
 	}
-	val := reflectx.UnderlyingPointer(tv.SliceNPVal.Index(idx))
+	val := reflectx.UnderlyingPointer(tv.SliceUnderlying.Index(idx))
 	stru := val.Interface()
 	tynm := reflectx.NonPointerType(val.Type()).Name()
 	lbl := labels.ToLabel(stru)
