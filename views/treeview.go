@@ -360,7 +360,7 @@ func (tv *TreeView) LabelPart() (*core.Text, bool) {
 	return nil, false
 }
 
-func (tv *TreeView) Config(c *core.Config) {
+func (tv *TreeView) Config(c *core.Plan) {
 	tvi := tv.This().(TreeViewer)
 	core.Configure(c, "parts", func(w *core.Frame) {
 		core.ConfigParts(w)

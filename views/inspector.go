@@ -199,7 +199,7 @@ func (is *Inspector) SetRoot(root tree.Node) {
 }
 
 // Config configures the widget
-func (is *Inspector) Config(c *core.Config) {
+func (is *Inspector) Config(c *core.Plan) {
 	if is.KiRoot == nil {
 		return
 	}
@@ -312,7 +312,7 @@ func (is *Inspector) ConfigSplits() {
 	sv.SetStruct(is.KiRoot)
 }
 
-func (is *Inspector) ConfigToolbar(c *core.Config) {
+func (is *Inspector) ConfigToolbar(c *core.Plan) {
 	core.Configure(c, "", func(w *FuncButton) {
 		w.SetFunc(is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool).
 			StyleFirst(func(s *styles.Style) {

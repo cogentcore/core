@@ -218,7 +218,7 @@ var FileViewKindColorMap = map[string]string{
 	"folder": "pref(link)",
 }
 
-func (fv *FileView) Config(c *core.Config) {
+func (fv *FileView) Config(c *core.Plan) {
 	if len(core.RecentPaths) == 0 {
 		core.OpenRecentPaths()
 	}
@@ -261,7 +261,7 @@ func (fv *FileView) Config(c *core.Config) {
 
 // ConfigToolbar configures the given toolbar to have file view
 // actions and completions.
-func (fv *FileView) ConfigToolbar(c *core.Config) {
+func (fv *FileView) ConfigToolbar(c *core.Plan) {
 	core.Configure(c, "", func(w *FuncButton) {
 		w.SetFunc(fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
 	})
@@ -309,7 +309,7 @@ func (fv *FileView) ConfigAppChooser(ch *core.Chooser) {
 	})
 }
 
-func (fv *FileView) ConfigFilesRow(c *core.Config) {
+func (fv *FileView) ConfigFilesRow(c *core.Plan) {
 	core.Configure(c, "files/faves", func(w *TableView) {
 		w.SelectedIndex = -1
 		w.SetReadOnly(true)
@@ -421,7 +421,7 @@ func (fv *FileView) ConfigFilesRow(c *core.Config) {
 	})
 }
 
-func (fv *FileView) ConfigSelRow(c *core.Config) {
+func (fv *FileView) ConfigSelRow(c *core.Plan) {
 	core.Configure(c, "sel/file-text", func(w *core.Text) {
 		w.SetText("File: ")
 		w.SetTooltip("Enter file name here (or select from list above)")

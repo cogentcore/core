@@ -47,7 +47,7 @@ func (bf *BarFuncs) Inherit(obf BarFuncs) {
 }
 
 // AddAppBar adds an AppBar Config function for an element within the scene
-func (sc *Scene) AddAppBar(fun func(cf *Config)) {
+func (sc *Scene) AddAppBar(fun func(cf *Plan)) {
 	sc.AppBars.Add(fun)
 }
 
@@ -204,7 +204,7 @@ func (bd *Body) AddBottomBar(fun func(parent Widget)) {
 }
 
 // AddAppBar adds an AppBar function for an element within the scene
-func (bd *Body) AddAppBar(fun func(c *Config)) {
+func (bd *Body) AddAppBar(fun func(c *Plan)) {
 	bd.Scene.AddAppBar(fun)
 }
 

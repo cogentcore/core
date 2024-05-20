@@ -439,7 +439,7 @@ func (ev *Env) ConfigGUI() *core.Body {
 	//////////////////////////////////////////
 	//    Toolbar
 
-	b.AddAppBar(func(c *core.Config) {
+	b.AddAppBar(func(c *core.Plan) {
 		core.Configure(c, "", func(w *core.Button) {
 			w.SetText("Edit Env").SetIcon(icons.Edit).
 				SetTooltip("Edit the settings for the environment").

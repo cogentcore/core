@@ -75,7 +75,7 @@ func (sv *StructView) OnInit() {
 	})
 }
 
-func (sv *StructView) Config(c *core.Config) {
+func (sv *StructView) Config(c *core.Plan) {
 	if reflectx.AnyIsNil(sv.Struct) {
 		return
 	}

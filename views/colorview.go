@@ -47,7 +47,7 @@ func (cv *ColorView) OnInit() {
 }
 
 // Config configures a standard setup of entire view
-func (cv *ColorView) Config(c *core.Config) {
+func (cv *ColorView) Config(c *core.Plan) {
 	if cv.HasChildren() {
 		return
 	}

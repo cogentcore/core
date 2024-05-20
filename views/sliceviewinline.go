@@ -65,7 +65,7 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 	return sv
 }
 
-func (sv *SliceViewInline) Config(c *core.Config) {
+func (sv *SliceViewInline) Config(c *core.Plan) {
 	sl := reflectx.NonPointerValue(reflectx.UnderlyingPointer(reflect.ValueOf(sv.Slice)))
 
 	sz := min(sl.Len(), core.SystemSettings.SliceInlineLength)

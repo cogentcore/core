@@ -60,7 +60,7 @@ func (tb *Toolbar) AppChooser() *Chooser {
 	return ch
 }
 
-func (tb *Toolbar) Config(c *Config) {
+func (tb *Toolbar) Config(c *Plan) {
 	tb.Frame.Config(c)
 	if len(tb.ConfigFuncs) > 0 {
 		for _, f := range tb.ConfigFuncs {

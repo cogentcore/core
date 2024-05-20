@@ -55,7 +55,7 @@ func (mv *MapView) OnInit() {
 	})
 }
 
-func (mv *MapView) Config(c *core.Config) {
+func (mv *MapView) Config(c *core.Plan) {
 	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
@@ -217,7 +217,7 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 }
 
 // ConfigToolbar configures a [core.Toolbar] for this view
-func (mv *MapView) ConfigToolbar(c *core.Config) {
+func (mv *MapView) ConfigToolbar(c *core.Plan) {
 	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}

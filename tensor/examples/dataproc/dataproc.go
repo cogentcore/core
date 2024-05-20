@@ -107,7 +107,7 @@ func main() {
 	nt := tv.NewTab("Planets Data")
 	tbv := tensorview.NewTableView(nt).SetTable(Planets)
 	b.AddAppBar(tbv.ConfigToolbar)
-	b.AddAppBar(func(c *core.Config) {
+	b.AddAppBar(func(c *core.Plan) {
 		core.Configure(c, "", func(w *core.Button) {
 			w.SetText("README").SetIcon(icons.FileMarkdown).
 				SetTooltip("open README help file").OnClick(func(e events.Event) {

@@ -212,7 +212,7 @@ func (ch *Chooser) SetStyles() {
 	})
 }
 
-func (ch *Chooser) Config(c *Config) {
+func (ch *Chooser) Config(c *Plan) {
 	// automatically select the first item if we have nothing selected and no placeholder
 	if !ch.Editable && ch.CurrentIndex < 0 && ch.CurrentItem.Text == "" {
 		ch.SetCurrentIndex(0)

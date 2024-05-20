@@ -126,7 +126,7 @@ type SliceViewer interface {
 
 	// ConfigRow adds config for one row at given widget row index,
 	// and starting index: si = i + StartIndex
-	ConfigRow(c *core.Config, i, si int)
+	ConfigRow(c *core.Plan, i, si int)
 
 	// StyleValue performs additional value widget styling
 	StyleValue(w core.Widget, s *styles.Style, row, col int)
@@ -432,7 +432,7 @@ func (sv *SliceViewBase) BindSelect(val *int) *SliceViewBase {
 }
 
 // Config configures the slice view
-func (sv *SliceViewBase) Config(c *core.Config) {
+func (sv *SliceViewBase) Config(c *core.Plan) {
 	svi := sv.This().(SliceViewer)
 	svi.UpdateSliceSize()
 
@@ -497,7 +497,7 @@ func (sv *SliceViewBase) SliceElValue(si int) reflect.Value {
 	return val
 }
 
-func (sv *SliceViewBase) ConfigGrid(c *core.Config) {
+func (sv *SliceViewBase) ConfigGrid(c *core.Plan) {
 	core.Configure(c, "grid", func(w *SliceViewGrid) {
 		w.Style(func(s *styles.Style) {
 			nWidgPerRow, _ := sv.This().(SliceViewer).RowWidgetNs()
@@ -560,7 +560,7 @@ func (sv *SliceViewBase) ConfigValue(w core.Value, i int) {
 	}
 }
 
-func (sv *SliceViewBase) ConfigRow(c *core.Config, i, si int) {
+func (sv *SliceViewBase) ConfigRow(c *core.Plan, i, si int) {
 	itxt := strconv.Itoa(i)
 	invis := si >= sv.SliceSize
 	val := sv.SliceElValue(si)
@@ -595,7 +595,7 @@ func (sv *SliceViewBase) ConfigRow(c *core.Config, i, si int) {
 
 }
 
-func (sv *SliceViewBase) ConfigGridIndex(c *core.Config, i, si int, itxt string, invis bool) {
+func (sv *SliceViewBase) ConfigGridIndex(c *core.Plan, i, si int, itxt string, invis bool) {
 	sitxt := strconv.Itoa(si)
 	svi := sv.This().(SliceViewer)
 	core.Configure(c, "grid/index-"+itxt, func(w *core.Text) {
@@ -854,7 +854,7 @@ func (sv *SliceViewBase) SliceDeleteAt(i int) {
 }
 
 // ConfigToolbar configures a [core.Toolbar] for this view
-func (sv *SliceViewBase) ConfigToolbar(c *core.Config) {
+func (sv *SliceViewBase) ConfigToolbar(c *core.Plan) {
 	if reflectx.AnyIsNil(sv.Slice) {
 		return
 	}

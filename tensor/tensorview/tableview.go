@@ -180,7 +180,7 @@ func (tv *TableView) UpdateMaxWidths() {
 }
 
 // Config configures the view
-func (tv *TableView) Config(c *core.Config) {
+func (tv *TableView) Config(c *core.Plan) {
 	svi := tv.This().(views.SliceViewer)
 	svi.UpdateSliceSize()
 
@@ -209,7 +209,7 @@ func (tv *TableView) Config(c *core.Config) {
 	}
 }
 
-func (tv *TableView) ConfigHeader(c *core.Config) {
+func (tv *TableView) ConfigHeader(c *core.Plan) {
 	core.Configure(c, "header", func(w *core.Frame) {
 		core.ToolbarStyles(w)
 		w.Style(func(s *styles.Style) {
@@ -267,7 +267,7 @@ func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	return
 }
 
-func (tv *TableView) ConfigRow(c *core.Config, i, si int) {
+func (tv *TableView) ConfigRow(c *core.Plan, i, si int) {
 	svi := tv.This().(views.SliceViewer)
 	itxt := strconv.Itoa(i)
 	sitxt := strconv.Itoa(si)
@@ -641,7 +641,7 @@ func (tv *TableView) SizeFinal() {
 //////////////////////////////////////////////////////////////////////////////
 //    Copy / Cut / Paste
 
-func (tv *TableView) ConfigToolbar(c *core.Config) {
+func (tv *TableView) ConfigToolbar(c *core.Plan) {
 	if tv.Table == nil || tv.Table.Table == nil {
 		return
 	}

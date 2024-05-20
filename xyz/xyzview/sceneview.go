@@ -31,7 +31,7 @@ func (sv *SceneView) OnInit() {
 	})
 }
 
-func (sv *SceneView) Config(c *core.Config) {
+func (sv *SceneView) Config(c *core.Plan) {
 	core.Configure(c, "scene", func(w *Scene) {})
 	core.Configure(c, "tb", func(w *core.Toolbar) {
 		w.ConfigFuncs.Add(sv.ConfigToolbar)
@@ -69,7 +69,7 @@ func (sv *SceneView) UpdateToolbar() {
 	}
 }
 
-func (sv *SceneView) ConfigToolbar(c *core.Config) {
+func (sv *SceneView) ConfigToolbar(c *core.Plan) {
 	sw := sv.SceneWidget()
 	sc := sv.SceneXYZ()
 	core.Configure(c, "", func(w *core.Button) {

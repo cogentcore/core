@@ -216,7 +216,7 @@ func (sl *Splits) SetSplitAction(idx int, nwval float32) {
 	sl.NeedsLayout()
 }
 
-func (sl *Splits) Config(c *Config) {
+func (sl *Splits) Config(c *Plan) {
 	sl.UpdateSplits()
 
 	Configure(c, "parts", func(w *Frame) {

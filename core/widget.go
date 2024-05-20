@@ -63,7 +63,7 @@ type Widget interface {
 	// reconfigure or update a widget from an end user perspective; Config
 	// should rarely be called except when extending the Config method
 	// of another widget type in a Config method.
-	Config(c *Config)
+	Config(c *Plan)
 
 	// ConfigWidget configures the widget by doing steps that apply for
 	// all widgets and then calling [Widget.Config] for widget-specific

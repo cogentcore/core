@@ -1731,7 +1731,7 @@ func (tf *TextField) HandleKeyEvents() {
 	})
 }
 
-func (tf *TextField) Config(c *Config) {
+func (tf *TextField) Config(c *Plan) {
 	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
 

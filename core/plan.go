@@ -16,18 +16,20 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Config is an ordered list of [ConfigItem]s,
-// ordered in progressive hierarchical order
-// so that parents are listed before any children.
-// The Key of the map is the path of the element.
-type Config []*ConfigItem
+// Plan represents a plan for how a widget should be configured and updated.
+// An instance of it is passed to [Widget.Make], which is responsible for making
+// the plan that is then used to configure and update the widget in [Widget.Build].
+// To add an item to a plan, use [Add], [AddAt], or [AddNew].
+type Plan []*PlanItem
 
-// ConfigItem represents a widget configuration element,
-// with one New function to make and configure a new child widget,
-// and an Update function to update the state of that child widget.
-// It contains another [Config] for its children, which is handled
-// automatically as items are added.
-type ConfigItem struct {
+// PlanItem represents one item of a [Plan] that specifies how a single widget
+// and its children should be configured and updated in [Widget.Build]. It contains
+// closures responsible for creating and updating the widget. Also, it can contain
+// an additional [Plan] for configuring the children of the widget. To add a new
+// PlanItem, call [Add], [AddAt], or [AddNew]. Those functions return a [Plan]
+// that you can use as an argument to future Add calls to add more [PlanItem]s
+// for children nested under the already added widget.
+type PlanItem struct {
 
 	// Path is the forward slash delimited path to the element.
 	Path string
@@ -41,16 +43,16 @@ type ConfigItem struct {
 	Update func(w Widget)
 
 	// Config for Children elements.
-	Children Config
+	Children Plan
 }
 
-// Configure adds a new config item to the given [Config] for a widget at the
+// Configure adds a new config item to the given [Plan] for a widget at the
 // given forward slash separated path with the given optional function(s). The
 // first function is called to initially configure the widget, and the second
 // function is called to update the widget. If the given path is blank, it is
 // automatically set to a unique name based on the filepath and line number of
 // the calling function.
-func Configure[T Widget](c *Config, path string, funcs ...func(w T)) {
+func Configure[T Widget](c *Plan, path string, funcs ...func(w T)) {
 	switch len(funcs) {
 	case 0:
 		c.Add(path, func() Widget { return tree.New[T]() }, nil)
@@ -76,12 +78,12 @@ func Configure[T Widget](c *Config, path string, funcs ...func(w T)) {
 	}
 }
 
-// ConfigureNew adds a new config item to the given [Config] for a widget at the
+// ConfigureNew adds a new config item to the given [Plan] for a widget at the
 // given forward slash separated path with the given function for constructing
 // the widget and the given optional function for updating the widget. If the
 // given path is blank, it is automatically set to a unique name based on the
 // filepath and line number of the calling function.
-func ConfigureNew[T Widget](c *Config, path string, new func() T, update ...func(w T)) {
+func ConfigureNew[T Widget](c *Plan, path string, new func() T, update ...func(w T)) {
 	if len(update) == 0 {
 		c.Add(path, func() Widget { return new() }, nil)
 	} else {
@@ -98,11 +100,11 @@ func ConfigureNew[T Widget](c *Config, path string, new func() T, update ...func
 // a unique name based on the filepath and line number of the calling function.
 // Consider using the [Configure] global generic function for
 // better type safety and increased convenience.
-func (c *Config) Add(path string, new func() Widget, update func(w Widget)) {
+func (c *Plan) Add(path string, new func() Widget, update func(w Widget)) {
 	if path == "" {
 		path = ConfigCallerPath(3)
 	}
-	itm := &ConfigItem{Path: path, New: new, Update: update}
+	itm := &PlanItem{Path: path, New: new, Update: update}
 	plist := strings.Split(path, "/")
 	if len(plist) == 1 {
 		*c = append(*c, itm)
@@ -114,7 +116,7 @@ func (c *Config) Add(path string, new func() Widget, update func(w Widget)) {
 
 // ConfigCallerPath returns the dir-filename of [runtime.Caller](level),
 // with all / . replaced to -, which is suitable as a unique name
-// for a [ConfigItem.Path].
+// for a [PlanItem.Path].
 func ConfigCallerPath(level int) string {
 	_, file, line, _ := runtime.Caller(level)
 	dir, fn := filepath.Split(file)
@@ -129,13 +131,13 @@ func ConfigCallerPath(level int) string {
 }
 
 // ChildPath returns this item's path + "/" + child
-func (c *ConfigItem) ChildPath(child string) string {
+func (c *PlanItem) ChildPath(child string) string {
 	return c.Path + "/" + child
 }
 
 // ItemName returns this item's name from its path,
 // as the last element in the path.
-func (c *ConfigItem) ItemName() string {
+func (c *PlanItem) ItemName() string {
 	pi := strings.LastIndex(c.Path, "/")
 	if pi < 0 {
 		return c.Path
@@ -146,7 +148,7 @@ func (c *ConfigItem) ItemName() string {
 // AddSubItem adds given sub item to this config item, based on the
 // list of path elements, where the first path element should be
 // immediate Children of this item, etc.
-func (c *ConfigItem) AddSubItem(path []string, itm *ConfigItem) {
+func (c *PlanItem) AddSubItem(path []string, itm *PlanItem) {
 	fpath := c.ChildPath(path[0])
 	child := c.Children.FindMakeChild(fpath)
 	if len(path) == 1 {
@@ -159,7 +161,7 @@ func (c *ConfigItem) AddSubItem(path []string, itm *ConfigItem) {
 // FindChild finds item with given path string within this list.
 // Does not search within any Children of items here.
 // Returns nil if not found.
-func (c *Config) FindChild(path string) *ConfigItem {
+func (c *Plan) FindChild(path string) *PlanItem {
 	for _, itm := range *c {
 		if itm.Path == path {
 			return itm
@@ -171,20 +173,20 @@ func (c *Config) FindChild(path string) *ConfigItem {
 // FindMakeChild finds item with given path element within this list.
 // Does not search within any Children of items here.
 // Makes a new item if not found.
-func (c *Config) FindMakeChild(path string) *ConfigItem {
+func (c *Plan) FindMakeChild(path string) *PlanItem {
 	for _, itm := range *c {
 		if itm.Path == path {
 			return itm
 		}
 	}
-	itm := &ConfigItem{Path: path}
+	itm := &PlanItem{Path: path}
 	*c = append(*c, itm)
 	return itm
 }
 
 // String returns a newline separated list of paths for all the items,
 // including the Children of items.
-func (c *Config) String() string {
+func (c *Plan) String() string {
 	str := ""
 	for _, itm := range *c {
 		str += itm.Path + "\n"
@@ -196,7 +198,7 @@ func (c *Config) String() string {
 // SplitParts splits out a config item with sub-name "parts" from remainder
 // returning both (each of which could be nil).  parpath contains any parent
 // path to add to the path
-func (c *Config) SplitParts(parpath string) (parts *ConfigItem, children Config) {
+func (c *Plan) SplitParts(parpath string) (parts *PlanItem, children Plan) {
 	partnm := "parts"
 	if parpath != "" {
 		partnm = parpath + "/" + partnm
@@ -215,7 +217,7 @@ func (c *Config) SplitParts(parpath string) (parts *ConfigItem, children Config)
 // the widget has the specified parts and direct Children.
 // The given parent path is used for recursion and should be blank
 // when calling the function externally.
-func (c *Config) ConfigWidget(w Widget, parentPath string) {
+func (c *Plan) ConfigWidget(w Widget, parentPath string) {
 	wb := w.AsWidget()
 	parts, children := c.SplitParts(parentPath)
 	if parts != nil {
@@ -258,12 +260,12 @@ func (c *Config) ConfigWidget(w Widget, parentPath string) {
 	}
 }
 
-// UpdateWidget runs the [ConfigItem.Update] functions on the given widget,
+// UpdateWidget runs the [PlanItem.Update] functions on the given widget,
 // and recursively on all of its children as specified in the Config.
-// It is called at the end of [Config.ConfigWidget].
+// It is called at the end of [Plan.ConfigWidget].
 // The given parent path is used for recursion and should be blank
 // when calling the function externally.
-func (c *Config) UpdateWidget(w Widget, parentPath string) {
+func (c *Plan) UpdateWidget(w Widget, parentPath string) {
 	wb := w.AsWidget()
 	parts, children := c.SplitParts(parentPath)
 	if parts != nil {
@@ -302,7 +304,7 @@ func (wb *WidgetBase) ConfigWidget() {
 	if wb.ValueUpdate != nil {
 		wb.ValueUpdate()
 	}
-	c := Config{}
+	c := Plan{}
 	wb.This().(Widget).Config(&c)
 	if len(c) > 0 {
 		c.ConfigWidget(wb.This().(Widget), "")
@@ -312,7 +314,7 @@ func (wb *WidgetBase) ConfigWidget() {
 // Config is the interface method called by [Widget.ConfigWidget] that
 // should be defined for each [Widget] type, which actually does
 // the configuration work.
-func (wb *WidgetBase) Config(c *Config) {
+func (wb *WidgetBase) Config(c *Plan) {
 	// this must be defined for each widget type
 }
 
@@ -360,16 +362,16 @@ func (wb *WidgetBase) Update() { //types:add
 
 // ConfigFuncs is a stack of config functions, which take a Config
 // and add to it.
-type ConfigFuncs []func(c *Config)
+type ConfigFuncs []func(c *Plan)
 
 // Add adds the given function for configuring a toolbar
-func (cf *ConfigFuncs) Add(fun ...func(c *Config)) *ConfigFuncs {
+func (cf *ConfigFuncs) Add(fun ...func(c *Plan)) *ConfigFuncs {
 	*cf = append(*cf, fun...)
 	return cf
 }
 
 // Call calls all the functions for configuring given toolbar
-func (cf *ConfigFuncs) Call(c *Config) {
+func (cf *ConfigFuncs) Call(c *Plan) {
 	for _, fun := range *cf {
 		fun(c)
 	}

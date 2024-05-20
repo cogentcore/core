@@ -359,7 +359,7 @@ func (pl *PlotView) PlotXAxis(plt *plot.Plot, ixvw *table.IndexView) (xi int, xv
 	return
 }
 
-func (pl *PlotView) Config(c *core.Config) {
+func (pl *PlotView) Config(c *core.Plan) {
 	if pl.Table == nil {
 		return
 	}
@@ -571,7 +571,7 @@ func (pl *PlotView) ColumnsConfig() {
 	}
 }
 
-func (pl *PlotView) ConfigToolbar(c *core.Config) {
+func (pl *PlotView) ConfigToolbar(c *core.Plan) {
 	if pl.Table == nil {
 		return
 	}

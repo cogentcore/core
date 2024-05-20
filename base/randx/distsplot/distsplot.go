@@ -132,7 +132,7 @@ func (ss *Sim) ConfigGUI() *core.Body {
 
 	split.SetSplits(.3, .7)
 
-	b.AddAppBar(func(c *core.Config) {
+	b.AddAppBar(func(c *core.Plan) {
 		core.Configure(c, "", func(w *core.Button) {
 			w.SetText("Run").SetIcon(icons.Update).
 				SetTooltip("Generate data and plot histogram.").

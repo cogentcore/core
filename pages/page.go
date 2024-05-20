@@ -212,7 +212,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	fr.Update()
 }
 
-func (pg *Page) Config(c *core.Config) {
+func (pg *Page) Config(c *core.Plan) {
 	if pg.HasChildren() {
 		return
 	}
@@ -286,7 +286,7 @@ func (pg *Page) Config(c *core.Config) {
 }
 
 // AppBar is the default app bar for a [Page]
-func (pg *Page) AppBar(c *core.Config) {
+func (pg *Page) AppBar(c *core.Plan) {
 	// todo: needs a different config
 	/*
 		ch := tb.AppChooser()

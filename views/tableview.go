@@ -156,7 +156,7 @@ func (tv *TableView) cacheVisibleFields() {
 }
 
 // Config configures the view
-func (tv *TableView) Config(c *core.Config) {
+func (tv *TableView) Config(c *core.Plan) {
 	svi := tv.This().(SliceViewer)
 	svi.UpdateSliceSize()
 
@@ -223,7 +223,7 @@ func (tv *TableView) SliceHeader() *core.Frame {
 	return tv.Child(0).(*core.Frame)
 }
 
-func (tv *TableView) ConfigHeader(c *core.Config) {
+func (tv *TableView) ConfigHeader(c *core.Plan) {
 	core.Configure(c, "header", func(w *core.Frame) {
 		core.ToolbarStyles(w)
 		w.Style(func(s *styles.Style) {
@@ -285,7 +285,7 @@ func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	return
 }
 
-func (tv *TableView) ConfigRow(c *core.Config, i, si int) {
+func (tv *TableView) ConfigRow(c *core.Plan, i, si int) {
 	svi := tv.This().(SliceViewer)
 	itxt := strconv.Itoa(i)
 	sitxt := strconv.Itoa(si)

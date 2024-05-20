@@ -114,13 +114,13 @@ func StandardAppBarConfig(parent Widget) {
 
 // StandardAppBarStart adds standard items to start of an AppBar:
 // [StandardAppBarBack] and [StandardAppBarChooser]
-func StandardAppBarStart(c *Config) {
+func StandardAppBarStart(c *Plan) {
 	StandardAppBarBack(c)
 	StandardAppBarChooser(c)
 }
 
 // StandardAppBarBack adds a back button
-func StandardAppBarBack(c *Config) {
+func StandardAppBarBack(c *Plan) {
 	Configure(c, "back", func(w *Button) {
 		w.SetIcon(icons.ArrowBack).SetTooltip("Back").SetKey(keymap.HistPrev)
 		w.OnClick(func(e events.Event) {
@@ -150,7 +150,7 @@ func StandardAppBarBack(c *Config) {
 }
 
 // StandardAppBarChooser adds a standard app chooser using [ConfigAppChooser].
-func StandardAppBarChooser(c *Config) {
+func StandardAppBarChooser(c *Plan) {
 	Configure(c, "app-chooser", ConfigAppChooser)
 }
 

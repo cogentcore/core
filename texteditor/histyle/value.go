@@ -58,7 +58,7 @@ func View(st *Styles) {
 	mv.OnChange(func(e events.Event) {
 		StylesChanged = true
 	})
-	d.AddAppBar(func(c *core.Config) {
+	d.AddAppBar(func(c *core.Plan) {
 		core.Configure(c, "", func(w *views.FuncButton) {
 			w.SetFunc(st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
 			w.Args[0].SetTag(".ext", ".histy")

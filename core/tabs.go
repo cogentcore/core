@@ -393,7 +393,7 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 // Only the 2 primary children (Frames) need to be configured.
 // Re-config is needed when the type of tabs changes, but not
 // when a new tab is added, which only requires a new layout pass.
-func (ts *Tabs) Config(c *Config) {
+func (ts *Tabs) Config(c *Plan) {
 	Configure(c, "tabs", func(w *Frame) {
 		w.Style(func(s *styles.Style) {
 			s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
@@ -411,7 +411,7 @@ func (ts *Tabs) Config(c *Config) {
 			}
 		})
 	}, func(w *Frame) {
-		tc := &Config{}
+		tc := &Plan{}
 		if ts.NewTabButton {
 			Configure(tc, "new-tab", func(w *Button) { // TODO(config)
 				w.SetIcon(icons.Add).SetType(ButtonAction)
@@ -551,7 +551,7 @@ func (tb *Tab) Tabs() *Tabs {
 	return tb.Parent().Parent().(*Tabs)
 }
 
-func (tb *Tab) Config(c *Config) {
+func (tb *Tab) Config(c *Plan) {
 	if tb.MaxChars > 0 {
 		tb.Text = elide.Middle(tb.Text, tb.MaxChars)
 	}

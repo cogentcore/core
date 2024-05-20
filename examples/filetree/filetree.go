@@ -310,7 +310,7 @@ func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
 	return nil
 }
 
-func (fb *FileBrowse) ConfigToolbar(c *core.Config) { //types:add
+func (fb *FileBrowse) ConfigToolbar(c *core.Plan) { //types:add
 	core.Configure(c, "", func(w *views.FuncButton) {
 		w.SetFunc(fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
 	})

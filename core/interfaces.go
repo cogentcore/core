@@ -20,7 +20,7 @@ type Updater interface {
 
 // Toolbarer interface is for ConfigToolbar function access for those that define it
 type Toolbarer interface {
-	ConfigToolbar(c *Config)
+	ConfigToolbar(c *Plan)
 }
 
 // AppChooserer is for ConfigAppBar function access for those that define it

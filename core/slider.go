@@ -491,7 +491,7 @@ func (sr *Slider) HandleKeys() {
 ///////////////////////////////////////////////////////////
 // 	Config
 
-func (sr *Slider) Config(c *Config) {
+func (sr *Slider) Config(c *Plan) {
 	if sr.Icon.IsNil() {
 		sr.DeleteChildren()
 		return
