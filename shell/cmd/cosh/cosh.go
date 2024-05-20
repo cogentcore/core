@@ -34,7 +34,7 @@ type Config struct {
 	// Expr is an optional expression to evaluate, which can be
 	// used in addition to a file to run, to execute commands
 	// defined within that file for example.
-	Expr string `flag:"e,exec"`
+	Expr string `flag:"e,expr"`
 }
 
 func main() { //types:skip
