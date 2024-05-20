@@ -1,0 +1,6 @@
+// add standard imports here -- mostly base
+
+command base {
+	yaegi extract cogentcore.org/core/base/dirs cogentcore.org/core/base/errors
+}
+

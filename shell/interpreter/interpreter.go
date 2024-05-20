@@ -54,6 +54,7 @@ func NewInterpreter(options interp.Options) *Interpreter {
 	options.Stdin = in.Shell.StdIOWrappers.In
 	in.Interp = interp.New(options)
 	in.Interp.Use(stdlib.Symbols)
+	in.Interp.Use(Symbols)
 
 	in.Interp.Use(interp.Exports{
 		"cogentcore.org/core/shell/shell": map[string]reflect.Value{
