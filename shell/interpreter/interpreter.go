@@ -82,31 +82,31 @@ func (in *Interpreter) Prompt() string {
 	return res
 }
 
-// Eval evaluates (interprets) the given code.
-func (in *Interpreter) Eval(code string) error {
+// Eval evaluates (interprets) the given code,
+// returning the value returned from the interpreter,
+// and hasPrint indicates whether the last line of code
+// has the string print in it -- for determining whether to
+// print the result in interactive mode.
+func (in *Interpreter) Eval(code string) (v reflect.Value, hasPrint bool, err error) {
 	in.Shell.TranspileCode(code)
 	source := strings.HasPrefix(code, "source")
 	if in.Shell.TotalDepth() == 0 {
 		nl := len(in.Shell.Lines)
-		hasPrint := false
 		if nl > 0 {
 			ln := in.Shell.Lines[nl-1]
 			if strings.Contains(strings.ToLower(ln), "print") {
 				hasPrint = true
 			}
 		}
-		v, err := in.RunCode()
+		v, err = in.RunCode()
 		in.Shell.Errors = nil
-		if err == nil && !hasPrint && v.IsValid() && !v.IsZero() && v.Kind() != reflect.Func {
-			fmt.Println(v.Interface())
-		}
 	} else {
 		fmt.Println("depth != 0", in.Shell.TotalDepth())
 	}
 	if source {
-		in.RunCode() // run accumulated code
+		v, err = in.RunCode() // run accumulated code
 	}
-	return nil
+	return
 }
 
 // RunCode runs the accumulated set of code lines
@@ -187,6 +187,9 @@ func (in *Interpreter) Interactive() error {
 		if err != nil {
 			return err
 		}
-		in.Eval(line)
+		v, hasPrint, err := in.Eval(line)
+		if err == nil && !hasPrint && v.IsValid() && !v.IsZero() && v.Kind() != reflect.Func {
+			fmt.Println(v.Interface())
+		}
 	}
 }

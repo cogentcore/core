@@ -64,7 +64,8 @@ func Run(c *Config) error { //cli:cmd -root
 	}
 	in := interpreter.NewInterpreter(interp.Options{})
 	in.Config()
-	return in.Eval(code)
+	_, _, err := in.Eval(code)
+	return err
 }
 
 // Interactive runs an interactive shell that allows the user to input cosh.

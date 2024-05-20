@@ -681,6 +681,9 @@ func ToFloat32(v any) (float32, error) {
 // pointers, and byte is converted as string(byte), not the decimal representation.
 func ToString(v any) string {
 	nilstr := "nil"
+	if AnyIsNil(v) {
+		return nilstr
+	}
 	switch vt := v.(type) {
 	case string:
 		return vt

@@ -435,8 +435,6 @@ func (sv *SliceViewBase) BindSelect(val *int) *SliceViewBase {
 func (sv *SliceViewBase) Config(c *core.Config) {
 	svi := sv.This().(SliceViewer)
 	svi.UpdateSliceSize()
-	nWidgPerRow, idxOff := svi.RowWidgetNs()
-	_ = idxOff
 
 	sv.ViewMuLock()
 	defer sv.ViewMuUnlock()
@@ -460,8 +458,7 @@ func (sv *SliceViewBase) Config(c *core.Config) {
 	}
 	sv.UpdateStartIndex()
 
-	sv.ConfigGrid(c, nWidgPerRow)
-
+	sv.ConfigGrid(c)
 	svi.UpdateMaxWidths()
 
 	for i := 0; i < sv.VisRows; i++ {
@@ -500,9 +497,10 @@ func (sv *SliceViewBase) SliceElValue(si int) reflect.Value {
 	return val
 }
 
-func (sv *SliceViewBase) ConfigGrid(c *core.Config, nWidgPerRow int) {
+func (sv *SliceViewBase) ConfigGrid(c *core.Config) {
 	core.Configure(c, "grid", func(w *SliceViewGrid) {
 		w.Style(func(s *styles.Style) {
+			nWidgPerRow, _ := sv.This().(SliceViewer).RowWidgetNs()
 			w.MinRows = sv.MinRows
 			s.Display = styles.Grid
 			s.Columns = nWidgPerRow
@@ -651,7 +649,11 @@ func (sv *SliceViewBase) ConfigGridIndex(c *core.Config, i, si int, itxt string,
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
 // fields and values
 func (sv *SliceViewBase) SliceGrid() *SliceViewGrid {
-	return sv.ChildByName("grid", 0).(*SliceViewGrid)
+	sg := sv.ChildByName("grid", 0)
+	if sg == nil {
+		return nil
+	}
+	return sg.(*SliceViewGrid)
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label
@@ -2000,6 +2002,7 @@ func (sg *SliceViewGrid) SizeFromChildren(iter int, pass core.LayoutPasses) math
 	}
 	sg.VisRows = max(sg.VisRows, sg.MinRows)
 	minHt := sg.RowHeight * float32(sg.MinRows)
+	// fmt.Println("VisRows:", sg.VisRows, "rh:", sg.RowHeight, "ht:", minHt)
 	// visHt := sg.RowHeight * float32(sg.VisRows)
 	csz.Y = minHt
 	return csz

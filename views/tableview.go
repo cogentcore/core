@@ -159,8 +159,6 @@ func (tv *TableView) cacheVisibleFields() {
 func (tv *TableView) Config(c *core.Config) {
 	svi := tv.This().(SliceViewer)
 	svi.UpdateSliceSize()
-	nWidgPerRow, idxOff := svi.RowWidgetNs()
-	_ = idxOff
 
 	tv.ViewMuLock()
 	defer tv.ViewMuUnlock()
@@ -185,8 +183,7 @@ func (tv *TableView) Config(c *core.Config) {
 	tv.UpdateStartIndex()
 
 	tv.ConfigHeader(c)
-
-	tv.ConfigGrid(c, nWidgPerRow)
+	tv.ConfigGrid(c)
 
 	svi.UpdateMaxWidths()
 

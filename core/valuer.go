@@ -97,7 +97,11 @@ func ToValue(value any, tags reflect.StructTag) Value {
 			return vw
 		}
 	}
-	typ := reflectx.Underlying(reflect.ValueOf(value)).Type()
+	rval := reflectx.Underlying(reflect.ValueOf(value))
+	if rval == (reflect.Value{}) {
+		return NewText()
+	}
+	typ := rval.Type()
 	if vwt, ok := ValueTypes[types.TypeName(typ)]; ok {
 		if vw := vwt(value); vw != nil {
 			return vw

@@ -27,6 +27,9 @@ func init() {
 		forceInline := tags.Get("view") == "inline"
 		forceNoInline := tags.Get("view") == "no-inline"
 		rval := reflectx.Underlying(reflect.ValueOf(value))
+		if rval == (reflect.Value{}) {
+			return nil
+		}
 		typ := rval.Type()
 		kind := typ.Kind()
 		switch kind {

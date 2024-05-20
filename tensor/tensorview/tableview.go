@@ -143,6 +143,9 @@ func (tv *TableView) SetTableView(ix *table.IndexView) *TableView {
 
 func (tv *TableView) UpdateSliceSize() int {
 	tv.Table.DeleteInvalid() // table could have changed
+	if tv.Table.Len() == 0 {
+		tv.Table.Sequential()
+	}
 	tv.SliceSize = tv.Table.Len()
 	tv.NCols = tv.Table.Table.NumColumns()
 	return tv.SliceSize
@@ -180,8 +183,6 @@ func (tv *TableView) UpdateMaxWidths() {
 func (tv *TableView) Config(c *core.Config) {
 	svi := tv.This().(views.SliceViewer)
 	svi.UpdateSliceSize()
-	nWidgPerRow, idxOff := svi.RowWidgetNs()
-	_ = idxOff
 
 	tv.ViewMuLock()
 	defer tv.ViewMuUnlock()
@@ -200,8 +201,7 @@ func (tv *TableView) Config(c *core.Config) {
 	tv.UpdateMaxWidths()
 
 	tv.ConfigHeader(c)
-
-	tv.ConfigGrid(c, nWidgPerRow)
+	tv.ConfigGrid(c)
 
 	for i := 0; i < tv.VisRows; i++ {
 		si := tv.StartIndex + i
