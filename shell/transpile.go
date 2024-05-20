@@ -34,6 +34,9 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	}
 	toks := sh.Tokens(ln)
 	n := len(toks)
+	if n == 0 {
+		return toks
+	}
 	ewords, err := ExecWords(ln)
 	if err != nil {
 		sh.AddError(err)
