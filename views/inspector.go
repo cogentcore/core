@@ -305,11 +305,10 @@ func (is *Inspector) ConfigSplits() {
 
 func (is *Inspector) MakeToolbar(p *core.Plan) {
 	core.Add(p, func(w *FuncButton) {
-		w.SetFunc(is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool).
-			StyleFirst(func(s *styles.Style) {
-				_, ok := is.TreeRoot.(*core.Scene)
-				s.SetEnabled(ok)
-			})
+		w.SetFunc(is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool)
+	}, func(w *FuncButton) {
+		_, ok := is.TreeRoot.(*core.Scene)
+		w.SetEnabled(ok)
 	})
 	core.Add[*core.Separator](p)
 	core.Add(p, func(w *FuncButton) {
@@ -319,6 +318,8 @@ func (is *Inspector) MakeToolbar(p *core.Plan) {
 	})
 	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.Save).SetKey(keymap.Save)
+	}, func(w *FuncButton) {
+		w.SetEnabled(is.Filename != "")
 	})
 	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.SaveAs).SetKey(keymap.SaveAs)
