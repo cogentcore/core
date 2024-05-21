@@ -432,7 +432,7 @@ func (sv *SliceViewBase) BindSelect(val *int) *SliceViewBase {
 }
 
 // Config configures the slice view
-func (sv *SliceViewBase) Make(c *core.Plan) {
+func (sv *SliceViewBase) Make(p *core.Plan) {
 	svi := sv.This().(SliceViewer)
 	svi.UpdateSliceSize()
 
@@ -458,12 +458,12 @@ func (sv *SliceViewBase) Make(c *core.Plan) {
 	}
 	sv.UpdateStartIndex()
 
-	sv.ConfigGrid(c)
+	sv.ConfigGrid(p)
 	svi.UpdateMaxWidths()
 
 	for i := 0; i < sv.VisRows; i++ {
 		si := sv.StartIndex + i
-		svi.ConfigRow(c, i, si)
+		svi.ConfigRow(p, i, si)
 	}
 }
 
@@ -497,8 +497,8 @@ func (sv *SliceViewBase) SliceElValue(si int) reflect.Value {
 	return val
 }
 
-func (sv *SliceViewBase) ConfigGrid(c *core.Plan) {
-	core.AddAt(c, "grid", func(w *SliceViewGrid) {
+func (sv *SliceViewBase) ConfigGrid(p *core.Plan) {
+	core.AddAt(p, "grid", func(w *SliceViewGrid) {
 		w.Style(func(s *styles.Style) {
 			nWidgPerRow, _ := sv.This().(SliceViewer).RowWidgetNs()
 			w.MinRows = sv.MinRows
@@ -1954,7 +1954,7 @@ func (sv *SliceViewBase) SizeFinal() {
 
 // SliceViewGrid handles the resizing logic for SliceView, TableView.
 type SliceViewGrid struct {
-	core.Frame // note: must be a frame to support stripes!
+	core.Frame
 
 	// MinRows is set from parent SV
 	MinRows int `set:"-" edit:"-"`
