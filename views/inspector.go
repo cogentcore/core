@@ -10,13 +10,11 @@ import (
 
 	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/base/labels"
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
@@ -28,8 +26,11 @@ import (
 type Inspector struct {
 	core.Frame
 
-	// root of tree being edited
-	TreeRoot tree.Node `set:"-"`
+	// Root is the root of the tree being edited.
+	Root tree.Node
+
+	// CurrentNode is the currently selected node in the tree.
+	CurrentNode tree.Node `set:"-"`
 
 	// Filename is the current filename for saving / loading
 	Filename core.Filename `set:"-"`
@@ -38,9 +39,8 @@ type Inspector struct {
 func (is *Inspector) OnInit() {
 	is.Frame.OnInit()
 	is.Style(func(s *styles.Style) {
-		s.Color = colors.C(colors.Scheme.OnBackground)
 		s.Grow.Set(1, 1)
-		s.Margin.Set(units.Dp(8))
+		s.Direction = styles.Column
 	})
 	is.OnWidgetAdded(func(w core.Widget) {
 		// TODO(config)
@@ -48,31 +48,20 @@ func (is *Inspector) OnInit() {
 			tw.Style(func(s *styles.Style) {
 				s.Max.X.Em(20)
 			})
-			return
-		}
-		path := w.PathFrom(is)
-		switch path {
-		case "title":
-			title := w.(*core.Text)
-			title.Type = core.TextHeadlineSmall
-			title.Style(func(s *styles.Style) {
-				s.Grow.Set(1, 0)
-				s.Align.Self = styles.Center
-			})
 		}
 	})
 }
 
 // Save saves tree to current filename, in a standard JSON-formatted file
 func (is *Inspector) Save() error { //types:add
-	if is.TreeRoot == nil {
+	if is.Root == nil {
 		return nil
 	}
 	if is.Filename == "" {
 		return nil
 	}
 
-	err := jsonx.Save(is.TreeRoot, string(is.Filename))
+	err := jsonx.Save(is.Root, string(is.Filename))
 	if err != nil {
 		return err
 	}
@@ -81,10 +70,10 @@ func (is *Inspector) Save() error { //types:add
 
 // SaveAs saves tree to given filename, in a standard JSON-formatted file
 func (is *Inspector) SaveAs(filename core.Filename) error { //types:add
-	if is.TreeRoot == nil {
+	if is.Root == nil {
 		return nil
 	}
-	err := jsonx.Save(is.TreeRoot, string(filename))
+	err := jsonx.Save(is.Root, string(filename))
 	if err != nil {
 		return err
 	}
@@ -95,10 +84,10 @@ func (is *Inspector) SaveAs(filename core.Filename) error { //types:add
 
 // Open opens tree from given filename, in a standard JSON-formatted file
 func (is *Inspector) Open(filename core.Filename) error { //types:add
-	if is.TreeRoot == nil {
+	if is.Root == nil {
 		return nil
 	}
-	err := jsonx.Open(is.TreeRoot, string(filename))
+	err := jsonx.Open(is.Root, string(filename))
 	if err != nil {
 		return err
 	}
@@ -111,7 +100,7 @@ func (is *Inspector) Open(filename core.Filename) error { //types:add
 // In selection mode, bounding boxes are rendered around each Widget,
 // and clicking on a Widget pulls it up in the inspector.
 func (is *Inspector) ToggleSelectionMode() { //types:add
-	sc, ok := is.TreeRoot.(*core.Scene)
+	sc, ok := is.Root.(*core.Scene)
 	if !ok {
 		return
 	}
@@ -130,7 +119,7 @@ func (is *Inspector) ToggleSelectionMode() { //types:add
 
 // SelectionMonitor monitors for the selected widget
 func (is *Inspector) SelectionMonitor() {
-	sc, ok := is.TreeRoot.(*core.Scene)
+	sc, ok := is.Root.(*core.Scene)
 	if !ok {
 		return
 	}
@@ -181,82 +170,47 @@ func (is *Inspector) InspectApp() { //types:add
 	d.RunFullDialog(is)
 }
 
-// SetRoot sets the source root and ensures everything is configured
-func (is *Inspector) SetRoot(root tree.Node) {
-	if is.TreeRoot != root {
-		is.TreeRoot = root
-		// ge.GetAllUpdates(root)
-	}
-	is.Build()
-}
-
 func (is *Inspector) Make(p *core.Plan) {
-	if is.TreeRoot == nil {
+	if is.Root == nil {
 		return
 	}
-	is.Style(func(s *styles.Style) {
-		s.Direction = styles.Column
+	core.AddAt(p, "title", func(w *core.Text) {
+		w.SetType(core.TextHeadlineSmall)
+		w.Style(func(s *styles.Style) {
+			s.Grow.Set(1, 0)
+			s.Align.Self = styles.Center
+		})
+	}, func(w *core.Text) {
+		w.SetText(fmt.Sprintf("Inspector of %s (%s)", is.Root.Name(), labels.FriendlyTypeName(reflect.TypeOf(is.Root))))
 	})
-	config := tree.Config{}
-	config.Add(core.TextType, "title")
-	config.Add(core.SplitsType, "splits")
-	is.ConfigChildren(config)
-	is.SetTitle(is.TreeRoot)
-	is.ConfigSplits()
-}
-
-// SetTitle sets the title to correspond to the given node.
-func (is *Inspector) SetTitle(k tree.Node) {
-	is.TitleWidget().SetText(fmt.Sprintf("Inspector of %s (%s)", k.Name(), labels.FriendlyTypeName(reflect.TypeOf(k))))
-}
-
-// TitleWidget returns the title label widget
-func (is *Inspector) TitleWidget() *core.Text {
-	return is.ChildByName("title", 0).(*core.Text)
-}
-
-// Splits returns the main Splits
-func (is *Inspector) Splits() *core.Splits {
-	return is.ChildByName("splits", 2).(*core.Splits)
-}
-
-// TreeView returns the main TreeSyncView
-func (is *Inspector) TreeView() *TreeView {
-	return is.Splits().Child(0).Child(0).(*TreeView)
-}
-
-// StructView returns the main StructView
-func (is *Inspector) StructView() *StructView {
-	return is.Splits().Child(1).(*StructView)
-}
-
-// ConfigSplits configures the Splits.
-func (is *Inspector) ConfigSplits() {
-	if is.TreeRoot == nil {
-		return
-	}
-	split := is.Splits().SetSplits(.3, .7)
-
-	if len(split.Kids) == 0 {
-		tvfr := core.NewFrame(split)
-		tvfr.Style(func(s *styles.Style) {
+	splits := core.AddAt(p, "splits", func(w *core.Splits) {
+		w.SetSplits(.3, .7)
+	})
+	frame := core.AddAt(splits, "tree-frame", func(w *core.Frame) {
+		w.Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Overflow.Set(styles.OverflowAuto)
 			s.Gap.Zero()
 		})
-		tv := NewTreeView(tvfr)
-		sv := NewStructView(split)
-		tv.OnSelect(func(e events.Event) {
-			if len(tv.SelectedNodes) == 0 {
+	})
+	renderRebuild := func() {
+		sc, ok := is.Root.(*core.Scene)
+		if !ok {
+			return
+		}
+		sc.RenderContext().SetFlag(true, core.RenderRebuild) // trigger full rebuild
+	}
+	core.AddAt(frame, "tree", func(w *TreeView) {
+		is.CurrentNode = is.Root
+		w.OnSelect(func(e events.Event) {
+			if len(w.SelectedNodes) == 0 {
 				return
 			}
-			sn := tv.SelectedNodes[0].AsTreeView().SyncNode
-			sv.SetStruct(sn)
-			sv.Update()
+			sn := w.SelectedNodes[0].AsTreeView().SyncNode
+			is.CurrentNode = sn
+			is.Update()
 
-			is.SetTitle(sn)
-
-			sc, ok := is.TreeRoot.(*core.Scene)
+			sc, ok := is.Root.(*core.Scene)
 			if !ok {
 				return
 			}
@@ -269,21 +223,18 @@ func (is *Inspector) ConfigSplits() {
 				}
 			}
 		})
-		renderRebuild := func() {
-			sc, ok := is.TreeRoot.(*core.Scene)
-			if !ok {
-				return
-			}
-			sc.RenderContext().SetFlag(true, core.RenderRebuild) // trigger full rebuild
-		}
-		tv.OnChange(func(e events.Event) {
+		w.OnChange(func(e events.Event) {
 			renderRebuild()
 		})
-		sv.OnChange(func(e events.Event) {
+	}, func(w *TreeView) {
+		w.SyncTree(is.Root)
+	})
+	core.AddAt(frame, "struct", func(w *StructView) {
+		w.OnChange(func(e events.Event) {
 			renderRebuild()
 		})
-		sv.OnClose(func(e events.Event) {
-			sc, ok := is.TreeRoot.(*core.Scene)
+		w.OnClose(func(e events.Event) {
+			sc, ok := is.Root.(*core.Scene)
 			if !ok {
 				return
 			}
@@ -296,18 +247,21 @@ func (is *Inspector) ConfigSplits() {
 				pselw.AsWidget().NeedsRender()
 			}
 		})
-	}
-	tv := is.TreeView()
-	tv.SyncTree(is.TreeRoot)
-	sv := is.StructView()
-	sv.SetStruct(is.TreeRoot)
+	}, func(w *StructView) {
+		w.SetStruct(is.CurrentNode)
+	})
+}
+
+// TreeView returns the tree view widget.
+func (is *Inspector) TreeView() *TreeView {
+	return is.FindPath("splits/tree-frame/tree").(*TreeView)
 }
 
 func (is *Inspector) MakeToolbar(p *core.Plan) {
 	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool)
 	}, func(w *FuncButton) {
-		_, ok := is.TreeRoot.(*core.Scene)
+		_, ok := is.Root.(*core.Scene)
 		w.SetEnabled(ok)
 	})
 	core.Add[*core.Separator](p)
