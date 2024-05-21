@@ -29,27 +29,21 @@ type Inspector struct {
 	core.Frame
 
 	// root of tree being edited
-	KiRoot tree.Node
+	TreeRoot tree.Node `set:"-"`
 
-	// has the root changed via gui actions?  updated from treeview and structview for changes
-	Changed bool `set:"-"`
-
-	// current filename for saving / loading
-	Filename core.Filename
+	// Filename is the current filename for saving / loading
+	Filename core.Filename `set:"-"`
 }
 
 func (is *Inspector) OnInit() {
 	is.Frame.OnInit()
-	is.SetStyles()
-}
-
-func (is *Inspector) SetStyles() {
 	is.Style(func(s *styles.Style) {
 		s.Color = colors.C(colors.Scheme.OnBackground)
 		s.Grow.Set(1, 1)
 		s.Margin.Set(units.Dp(8))
 	})
 	is.OnWidgetAdded(func(w core.Widget) {
+		// TODO(config)
 		if tw, ok := w.(*TreeView); ok {
 			tw.Style(func(s *styles.Style) {
 				s.Max.X.Em(20)
@@ -71,31 +65,29 @@ func (is *Inspector) SetStyles() {
 
 // Save saves tree to current filename, in a standard JSON-formatted file
 func (is *Inspector) Save() error { //types:add
-	if is.KiRoot == nil {
+	if is.TreeRoot == nil {
 		return nil
 	}
 	if is.Filename == "" {
 		return nil
 	}
 
-	err := jsonx.Save(is.KiRoot, string(is.Filename))
+	err := jsonx.Save(is.TreeRoot, string(is.Filename))
 	if err != nil {
 		return err
 	}
-	is.Changed = false
 	return nil
 }
 
 // SaveAs saves tree to given filename, in a standard JSON-formatted file
 func (is *Inspector) SaveAs(filename core.Filename) error { //types:add
-	if is.KiRoot == nil {
+	if is.TreeRoot == nil {
 		return nil
 	}
-	err := jsonx.Save(is.KiRoot, string(filename))
+	err := jsonx.Save(is.TreeRoot, string(filename))
 	if err != nil {
 		return err
 	}
-	is.Changed = false
 	is.Filename = filename
 	is.NeedsRender() // notify our editor
 	return nil
@@ -103,10 +95,10 @@ func (is *Inspector) SaveAs(filename core.Filename) error { //types:add
 
 // Open opens tree from given filename, in a standard JSON-formatted file
 func (is *Inspector) Open(filename core.Filename) error { //types:add
-	if is.KiRoot == nil {
+	if is.TreeRoot == nil {
 		return nil
 	}
-	err := jsonx.Open(is.KiRoot, string(filename))
+	err := jsonx.Open(is.TreeRoot, string(filename))
 	if err != nil {
 		return err
 	}
@@ -119,7 +111,7 @@ func (is *Inspector) Open(filename core.Filename) error { //types:add
 // In selection mode, bounding boxes are rendered around each Widget,
 // and clicking on a Widget pulls it up in the inspector.
 func (is *Inspector) ToggleSelectionMode() { //types:add
-	sc, ok := is.KiRoot.(*core.Scene)
+	sc, ok := is.TreeRoot.(*core.Scene)
 	if !ok {
 		return
 	}
@@ -138,7 +130,7 @@ func (is *Inspector) ToggleSelectionMode() { //types:add
 
 // SelectionMonitor monitors for the selected widget
 func (is *Inspector) SelectionMonitor() {
-	sc, ok := is.KiRoot.(*core.Scene)
+	sc, ok := is.TreeRoot.(*core.Scene)
 	if !ok {
 		return
 	}
@@ -191,8 +183,8 @@ func (is *Inspector) InspectApp() { //types:add
 
 // SetRoot sets the source root and ensures everything is configured
 func (is *Inspector) SetRoot(root tree.Node) {
-	if is.KiRoot != root {
-		is.KiRoot = root
+	if is.TreeRoot != root {
+		is.TreeRoot = root
 		// ge.GetAllUpdates(root)
 	}
 	is.Build()
@@ -200,7 +192,7 @@ func (is *Inspector) SetRoot(root tree.Node) {
 
 // Config configures the widget
 func (is *Inspector) Make(c *core.Plan) {
-	if is.KiRoot == nil {
+	if is.TreeRoot == nil {
 		return
 	}
 	is.Style(func(s *styles.Style) {
@@ -210,7 +202,7 @@ func (is *Inspector) Make(c *core.Plan) {
 	config.Add(core.TextType, "title")
 	config.Add(core.SplitsType, "splits")
 	is.ConfigChildren(config)
-	is.SetTitle(is.KiRoot)
+	is.SetTitle(is.TreeRoot)
 	is.ConfigSplits()
 }
 
@@ -241,7 +233,7 @@ func (is *Inspector) StructView() *StructView {
 
 // ConfigSplits configures the Splits.
 func (is *Inspector) ConfigSplits() {
-	if is.KiRoot == nil {
+	if is.TreeRoot == nil {
 		return
 	}
 	split := is.Splits().SetSplits(.3, .7)
@@ -265,7 +257,7 @@ func (is *Inspector) ConfigSplits() {
 
 			is.SetTitle(sn)
 
-			sc, ok := is.KiRoot.(*core.Scene)
+			sc, ok := is.TreeRoot.(*core.Scene)
 			if !ok {
 				return
 			}
@@ -279,7 +271,7 @@ func (is *Inspector) ConfigSplits() {
 			}
 		})
 		renderRebuild := func() {
-			sc, ok := is.KiRoot.(*core.Scene)
+			sc, ok := is.TreeRoot.(*core.Scene)
 			if !ok {
 				return
 			}
@@ -292,7 +284,7 @@ func (is *Inspector) ConfigSplits() {
 			renderRebuild()
 		})
 		sv.OnClose(func(e events.Event) {
-			sc, ok := is.KiRoot.(*core.Scene)
+			sc, ok := is.TreeRoot.(*core.Scene)
 			if !ok {
 				return
 			}
@@ -307,16 +299,16 @@ func (is *Inspector) ConfigSplits() {
 		})
 	}
 	tv := is.TreeView()
-	tv.SyncTree(is.KiRoot)
+	tv.SyncTree(is.TreeRoot)
 	sv := is.StructView()
-	sv.SetStruct(is.KiRoot)
+	sv.SetStruct(is.TreeRoot)
 }
 
 func (is *Inspector) MakeToolbar(c *core.Plan) {
 	core.Add(c, func(w *FuncButton) {
 		w.SetFunc(is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool).
 			StyleFirst(func(s *styles.Style) {
-				_, ok := is.KiRoot.(*core.Scene)
+				_, ok := is.TreeRoot.(*core.Scene)
 				s.SetEnabled(ok)
 			})
 	})
@@ -327,8 +319,7 @@ func (is *Inspector) MakeToolbar(c *core.Plan) {
 		w.Args[0].SetTag("ext", ".json")
 	})
 	core.Add(c, func(w *FuncButton) {
-		w.SetFunc(is.Save).SetKey(keymap.Save).
-			StyleFirst(func(s *styles.Style) { s.SetEnabled(is.Changed && is.Filename != "") })
+		w.SetFunc(is.Save).SetKey(keymap.Save)
 	})
 	core.Add(c, func(w *FuncButton) {
 		w.SetFunc(is.SaveAs).SetKey(keymap.SaveAs)
@@ -343,24 +334,24 @@ func (is *Inspector) MakeToolbar(c *core.Plan) {
 
 // InspectorWindow opens an interactive editor of the given tree
 // in a new window.
-func InspectorWindow(k tree.Node) {
-	if core.RecycleMainWindow(k) {
+func InspectorWindow(n tree.Node) {
+	if core.RecycleMainWindow(n) {
 		return
 	}
 	d := core.NewBody("Inspector")
-	InspectorView(d, k)
+	InspectorView(d, n)
 	d.NewWindow().SetCloseOnBack(true).Run()
 }
 
 // InspectorView configures the given body to have an interactive inspector
 // of the given tree.
-func InspectorView(b *core.Body, k tree.Node) {
-	b.SetTitle("Inspector").SetData(k).SetName("inspector")
-	if k != nil {
-		b.Nm += "-" + k.Name()
-		b.Title += ": " + k.Name()
+func InspectorView(b *core.Body, n tree.Node) {
+	b.SetTitle("Inspector").SetData(n)
+	if n != nil {
+		b.Nm += "-" + n.Name()
+		b.Title += ": " + n.Name()
 	}
 	is := NewInspector(b)
-	is.SetRoot(k)
+	is.SetRoot(n)
 	b.AddAppBar(is.MakeToolbar)
 }
