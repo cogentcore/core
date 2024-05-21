@@ -116,34 +116,30 @@ func ConfigCallerPath(level int) string {
 // The given parent path is used for recursion and should be blank
 // when calling the function externally.
 func (p *Plan) ConfigWidget(w Widget) {
-	p.build(w, "")
+	p.buildWidget(w, "")
 }
 
-// build is the recursive implementation of [Plan.Build].
-func (p *Plan) build(w Widget, parentPath string) {
+// build is the recursive implementation of [Plan.BuildWidget].
+func (p *Plan) buildWidget(w Widget, parentPath string) {
 	wb := w.AsWidget()
-	if len(p.Children) > 0 {
-		wb.Kids, _ = config.Config(wb.Kids, len(p.Children),
-			func(i int) string { return p.Children[i].Name },
-			func(name string, i int) tree.Node {
-				child := p.Children[i]
-				cw := child.New()
-				cw.SetName(name)
-				tree.SetParent(cw, wb)
-				if child.Update != nil { // do initial setting in case children might reference
-					child.Update(cw)
-				}
-				return cw
-			})
-		for i, child := range p.Children { // always config children even if not new
-			if len(child.Children) > 0 {
-				cw := wb.Child(i).(Widget)
-				child.ConfigWidget(cw)
+	wb.Kids, _ = config.Config(wb.Kids, len(p.Children),
+		func(i int) string { return p.Children[i].Name },
+		func(name string, i int) tree.Node {
+			child := p.Children[i]
+			cw := child.New()
+			cw.SetName(name)
+			tree.SetParent(cw, wb)
+			if child.Update != nil { // do initial setting in case children might reference
+				child.Update(cw)
 			}
-		}
+			return cw
+		})
+	for i, child := range p.Children { // always config children even if not new
+		cw := wb.Child(i).(Widget)
+		child.ConfigWidget(cw)
 	}
 	if parentPath == "" { // top level
-		p.UpdateWidget(w, parentPath) // this is recursive
+		p.UpdateWidget(w) // this gets everything
 	}
 }
 
@@ -152,24 +148,19 @@ func (p *Plan) build(w Widget, parentPath string) {
 // It is called at the end of [Plan.ConfigWidget].
 // The given parent path is used for recursion and should be blank
 // when calling the function externally.
-func (c *Plan) UpdateWidget(w Widget, parentPath string) {
+func (p *Plan) UpdateWidget(w Widget) {
+	p.updateWidget(w, "")
+}
+
+// updateWidget is the recursive implementation of [Plan.UpdateWidget].
+func (p *Plan) updateWidget(w Widget, parentPath string) {
 	wb := w.AsWidget()
-	parts, children := c.SplitParts(parentPath)
-	if parts != nil {
-		parts.Children.UpdateWidget(wb.Parts, parts.ChildPath("parts"))
-	}
-	n := len(children)
-	if n == 0 {
-		return
-	}
-	for i, child := range children {
+	for i, child := range p.Children {
 		cw := wb.Child(i).(Widget)
 		if child.Update != nil {
 			child.Update(cw)
 		}
-		if len(child.Children) > 0 {
-			child.Children.UpdateWidget(cw, child.Path)
-		}
+		child.UpdateWidget(cw)
 	}
 }
 
