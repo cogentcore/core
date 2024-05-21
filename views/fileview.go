@@ -38,7 +38,7 @@ func FileViewDialog(ctx core.Widget, filename, exts, title string, fun func(self
 		d.SetTitle(title)
 	}
 	fv := NewFileView(d) // .SetFilename(filename, exts)
-	d.AddAppBar(fv.ConfigToolbar)
+	d.AddAppBar(fv.MakeToolbar)
 	d.AddAppChooser(fv.ConfigAppChooser)
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
@@ -259,9 +259,9 @@ func (fv *FileView) Make(c *core.Plan) {
 	fv.ConfigSelRow(c)
 }
 
-// ConfigToolbar configures the given toolbar to have file view
+// MakeToolbar configures the given toolbar to have file view
 // actions and completions.
-func (fv *FileView) ConfigToolbar(c *core.Plan) {
+func (fv *FileView) MakeToolbar(c *core.Plan) {
 	core.AddAt(c, "", func(w *FuncButton) {
 		w.SetFunc(fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
 	})

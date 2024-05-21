@@ -853,8 +853,8 @@ func (sv *SliceViewBase) SliceDeleteAt(i int) {
 	sv.Update()
 }
 
-// ConfigToolbar configures a [core.Toolbar] for this view
-func (sv *SliceViewBase) ConfigToolbar(c *core.Plan) {
+// MakeToolbar configures a [core.Toolbar] for this view
+func (sv *SliceViewBase) MakeToolbar(c *core.Plan) {
 	if reflectx.AnyIsNil(sv.Slice) {
 		return
 	}

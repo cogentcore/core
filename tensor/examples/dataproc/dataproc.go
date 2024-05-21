@@ -106,7 +106,7 @@ func main() {
 
 	nt := tv.NewTab("Planets Data")
 	tbv := tensorview.NewTableView(nt).SetTable(Planets)
-	b.AddAppBar(tbv.ConfigToolbar)
+	b.AddAppBar(tbv.MakeToolbar)
 	b.AddAppBar(func(c *core.Plan) {
 		core.AddAt(c, "", func(w *core.Button) {
 			w.SetText("README").SetIcon(icons.FileMarkdown).

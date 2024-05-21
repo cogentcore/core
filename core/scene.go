@@ -48,15 +48,11 @@ type Scene struct {
 	// from the context widget, for FullWindow Dialogs
 	BarsInherit styles.Sides[bool]
 
-	// AppBars contains functions for configuring a top-level App toolbar,
-	// (e.g., TopAppBar) for elements contained within this Scene,
-	// that should be represented in any app-level toolbar constructed
-	// for this Scene.
-	AppBars ConfigFuncs `json:"-" xml:"-"`
+	// AppBars contains functions for making the plan for the top app bar.
+	AppBars []func(p *Plan) `json:"-" xml:"-"`
 
-	// AppChoosers contains functions for configuring a top-level App chooser,
-	// (e.g., TopAppBar) for elements contained within this Scene.
-	AppChoosers ConfigChooserFuncs `json:"-" xml:"-"`
+	// AppChoosers contains functions for configuring the app chooser in the top app bar.
+	AppChoosers []func(ch *Chooser) `json:"-" xml:"-"`
 
 	// Body provides the main contents of scenes that use control Bars
 	// to allow the main window contents to be specified separately

@@ -49,10 +49,10 @@ type Settings interface {
 	// Apply does anything necessary to apply the settings to the app.
 	Apply()
 
-	// ConfigToolbar is an optional method that settings objects can implement in order to
+	// MakeToolbar is an optional method that settings objects can implement in order to
 	// configure the settings view toolbar with settings-related actions that the user can
 	// perform.
-	ConfigToolbar(c *Plan)
+	MakeToolbar(c *Plan)
 }
 
 // SettingsOpener is an optional additional interface that
@@ -99,8 +99,8 @@ func (sb *SettingsBase) Defaults() {}
 // Apply does nothing by default and can be extended by other settings data types.
 func (sb *SettingsBase) Apply() {}
 
-// ConfigToolbar does nothing by default and can be extended by other settings data types.
-func (sb *SettingsBase) ConfigToolbar(c *Plan) {}
+// MakeToolbar does nothing by default and can be extended by other settings data types.
+func (sb *SettingsBase) MakeToolbar(c *Plan) {}
 
 // OpenSettings opens the given settings from their [Settings.Filename].
 // The settings are assumed to be in TOML unless they have a .json file

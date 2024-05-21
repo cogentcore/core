@@ -95,6 +95,8 @@ func AddAt[T Widget](p *Plan, path string, funcs ...func(w T)) *Plan {
 // AddNew adds a new [Plan] item to the given [Plan] for a widget with
 // the given name, function for constructing the widget, and optional
 // function for updating the widget. It returns the new [Plan] item.
+// It should only be called instead of [Add] and [AddAt] when the widget
+// must be made new, like when using [NewValue].
 func AddNew[T Widget](p *Plan, path string, new func() T, update ...func(w T)) *Plan {
 	if len(update) == 0 {
 		return p.Add(path, func() Widget { return new() }, nil)
@@ -224,29 +226,4 @@ func (wb *WidgetBase) Update() { //types:add
 		return tree.Continue
 	})
 	wb.NeedsLayout()
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// 	ConfigFuncs
-
-// ConfigFuncs is a stack of config functions, which take a Config
-// and add to it.
-type ConfigFuncs []func(c *Plan)
-
-// Add adds the given function for configuring a toolbar
-func (cf *ConfigFuncs) Add(fun ...func(c *Plan)) *ConfigFuncs {
-	*cf = append(*cf, fun...)
-	return cf
-}
-
-// Call calls all the functions for configuring given toolbar
-func (cf *ConfigFuncs) Call(c *Plan) {
-	for _, fun := range *cf {
-		fun(c)
-	}
-}
-
-// IsEmpty returns true if there are no functions added
-func (cf *ConfigFuncs) IsEmpty() bool {
-	return len(*cf) == 0
 }

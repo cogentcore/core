@@ -20,23 +20,23 @@ import (
 // In general it should be possible to use a single toolbar + overflow to
 // manage all an app's functionality, in a way that is portable across
 // mobile and desktop environments.
-// See [Widget.ConfigToolbar] for the standard toolbar config method for
+// See [Widget.MakeToolbar] for the standard toolbar config method for
 // any given widget, and [Scene.AppBars] for [ConfigFuncs] for [Scene]
 // elements who should be represented in the main AppBar (e.g., TopAppBar).
 type Toolbar struct {
 	Frame
 
-	// items moved from the main toolbar, will be shown in the overflow menu
+	// OverflowItems are items moved from the main toolbar that will be shown in the overflow menu.
 	OverflowItems tree.Slice `set:"-" json:"-" xml:"-"`
 
-	// functions for overflow menu: use AddOverflowMenu to add.
-	// These are processed in _reverse_ order (last in, first called)
+	// OverflowMenus are functions for the overflow menu; use [Toolbar.AddOverflowMenu] to add.
+	// These are processed in reverse order (last in, first called)
 	// so that the default items are added last.
 	OverflowMenus []func(m *Scene) `set:"-" json:"-" xml:"-"`
 
-	// ConfigFuncs contains functions for configuring this toolbar,
-	// called on Config
-	ConfigFuncs ConfigFuncs
+	// Makers contains functions for making the plan for the toolbar.
+	// You can use [Toolbar.AddMaker] to add a new one.
+	Makers []func(p *Plan)
 
 	// This is the overflow button
 	OverflowButton *Button `copier:"-"`
@@ -45,6 +45,12 @@ type Toolbar struct {
 func (tb *Toolbar) OnInit() {
 	tb.Frame.OnInit()
 	ToolbarStyles(tb)
+}
+
+// AddMaker adds the given function(s) for making the plan for the toolbar.
+func (tb *Toolbar) AddMaker(m ...func(p *Plan)) *Toolbar {
+	tb.Makers = append(tb.Makers, m...)
+	return tb
 }
 
 func (tb *Toolbar) IsVisible() bool {
@@ -61,10 +67,8 @@ func (tb *Toolbar) AppChooser() *Chooser {
 }
 
 func (tb *Toolbar) Make(p *Plan) {
-	if len(tb.ConfigFuncs) > 0 {
-		for _, f := range tb.ConfigFuncs {
-			f(p)
-		}
+	for _, f := range tb.Makers {
+		f(p)
 	}
 }
 

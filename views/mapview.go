@@ -216,8 +216,8 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	mv.Update()
 }
 
-// ConfigToolbar configures a [core.Toolbar] for this view
-func (mv *MapView) ConfigToolbar(c *core.Plan) {
+// MakeToolbar configures a [core.Toolbar] for this view
+func (mv *MapView) MakeToolbar(c *core.Plan) {
 	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}

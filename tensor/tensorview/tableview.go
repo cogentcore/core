@@ -641,7 +641,7 @@ func (tv *TableView) SizeFinal() {
 //////////////////////////////////////////////////////////////////////////////
 //    Copy / Cut / Paste
 
-func (tv *TableView) ConfigToolbar(c *core.Plan) {
+func (tv *TableView) MakeToolbar(c *core.Plan) {
 	if tv.Table == nil || tv.Table.Table == nil {
 		return
 	}

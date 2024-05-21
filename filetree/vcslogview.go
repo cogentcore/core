@@ -80,7 +80,7 @@ func (lv *VCSLogView) ConfigRepo(repo vcs.Repo, lg vcs.Log, file, since string) 
 	lv.RevA = "HEAD"
 	lv.RevB = ""
 	lv.SetA = true
-	lv.ConfigToolbar()
+	lv.MakeToolbar()
 	tv.AddContextMenu(func(m *core.Scene) {
 		core.NewButton(m).SetText("Set Revision A").
 			SetTooltip("Set Buffer A's revision to this").
@@ -186,8 +186,8 @@ func (lv *VCSLogView) TableView() *views.TableView {
 	return lv.ChildByName("log", 1).(*views.TableView)
 }
 
-// ConfigToolbar
-func (lv *VCSLogView) ConfigToolbar() {
+// MakeToolbar
+func (lv *VCSLogView) MakeToolbar() {
 	tb := lv.Toolbar()
 	if lv.File != "" {
 		core.NewText(tb).SetText("File: " + dirs.DirAndFile(lv.File))

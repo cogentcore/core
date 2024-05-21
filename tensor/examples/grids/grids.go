@@ -30,7 +30,7 @@ func main() {
 	// nt := tv.NewTab("First")
 	nt := tv.NewTab("Patterns")
 	etv := tensorview.NewTableView(nt).SetTable(pats)
-	b.AddAppBar(etv.ConfigToolbar)
+	b.AddAppBar(etv.MakeToolbar)
 
 	b.RunMainWindow()
 }

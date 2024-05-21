@@ -99,15 +99,15 @@ func AppIconImages() []image.Image {
 
 // StandardAppBarConfig is the standard impl for a [App.AppBarConfig].
 // It adds a Back navigation buttons and the AppChooser,
-// followed by the [Widget.ConfigToolbar] for the current FullWindow
+// followed by the [Widget.MakeToolbar] for the current FullWindow
 // Scene being viewed, along with [StandardOverflowMenu] items.
 // and calls AddDefaultOverflowMenu to provide default menu items,
 // which will appear below any other OverflowMenu items added.
 func StandardAppBarConfig(parent Widget) {
 	tb := RecycleToolbar(parent)
-	tb.ConfigFuncs.Add(StandardAppBarStart)
+	tb.AddMaker(StandardAppBarStart)
 	if len(tb.Scene.AppBars) > 0 {
-		tb.ConfigFuncs.Add(tb.Scene.AppBars...)
+		tb.AddMaker(tb.Scene.AppBars...)
 	}
 	StandardOverflowMenu(tb) // todo -- need a config option for this
 }

@@ -31,7 +31,7 @@ func TestTablePlotView(t *testing.T) {
 	pl.Params.Points = true
 	pl.SetTable(epc)
 	pl.ColumnParams("UnitErr").On = true
-	b.AddAppBar(pl.ConfigToolbar)
+	b.AddAppBar(pl.MakeToolbar)
 	b.AssertRender(t, "plotview_table")
 }
 
@@ -53,7 +53,7 @@ func TestSlicePlotView(t *testing.T) {
 	pl.Params.Points = true
 	pl.SetTable(dt)
 	pl.ColumnParams("Population").On = true
-	b.AddAppBar(pl.ConfigToolbar)
+	b.AddAppBar(pl.MakeToolbar)
 
 	b.AssertRender(t, "plotview_slice")
 }

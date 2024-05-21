@@ -18,14 +18,9 @@ type Updater interface {
 	Update()
 }
 
-// Toolbarer interface is for ConfigToolbar function access for those that define it
-type Toolbarer interface {
-	ConfigToolbar(c *Plan)
-}
-
-// AppChooserer is for ConfigAppBar function access for those that define it
-type AppChooserer interface {
-	ConfigAppChooser(ch *Chooser)
+// ToolbarMaker is an interface that types can implement to make a toolbar plan.
+type ToolbarMaker interface {
+	MakeToolbar(p *Plan)
 }
 
 // Validator is an interface for types to provide a Validate method

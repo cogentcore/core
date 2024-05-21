@@ -312,7 +312,7 @@ func (is *Inspector) ConfigSplits() {
 	sv.SetStruct(is.KiRoot)
 }
 
-func (is *Inspector) ConfigToolbar(c *core.Plan) {
+func (is *Inspector) MakeToolbar(c *core.Plan) {
 	core.AddAt(c, "", func(w *FuncButton) {
 		w.SetFunc(is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool).
 			StyleFirst(func(s *styles.Style) {
@@ -362,5 +362,5 @@ func InspectorView(b *core.Body, k tree.Node) {
 	}
 	is := NewInspector(b)
 	is.SetRoot(k)
-	b.AddAppBar(is.ConfigToolbar)
+	b.AddAppBar(is.MakeToolbar)
 }

@@ -47,7 +47,7 @@ func SettingsView(b *core.Body) {
 	b.AddAppBar(func(c *core.Plan) {
 		SettingsViewToolbarBase(c)
 		for _, se := range core.AllSettings {
-			se.ConfigToolbar(c)
+			se.MakeToolbar(c)
 		}
 	})
 
@@ -57,9 +57,6 @@ func SettingsView(b *core.Body) {
 		fr := tabs.NewTab(se.Label())
 
 		NewStructView(fr).SetStruct(se).OnChange(func(e events.Event) {
-			if tab := b.GetTopAppBar(); tab != nil {
-				tab.ApplyStyleUpdate()
-			}
 			core.UpdateSettings(fr, se)
 		})
 	}

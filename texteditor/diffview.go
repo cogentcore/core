@@ -96,7 +96,7 @@ func DiffViewDialog(ctx core.Widget, title string, astr, bstr []string, afile, b
 	dv.RevB = brev
 	dv.Build()
 	dv.DiffStrings(astr, bstr)
-	// d.AddAppBar(dv.ConfigToolbar) TODO(config)
+	// d.AddAppBar(dv.MakeToolbar) TODO(config)
 	d.NewWindow().SetContext(ctx).SetNewWindow(true).Run()
 	return dv
 }
@@ -533,8 +533,8 @@ func (dv *DiffView) Make(c *core.Plan) {
 	})
 }
 
-// ConfigToolbar configures a [core.Toolbar] for this view
-func (dv *DiffView) ConfigToolbar(tb *core.Toolbar) {
+// MakeToolbar configures a [core.Toolbar] for this view
+func (dv *DiffView) MakeToolbar(tb *core.Toolbar) {
 	txta := "A: " + dirs.DirAndFile(dv.FileA)
 	if dv.RevA != "" {
 		txta += ": " + dv.RevA

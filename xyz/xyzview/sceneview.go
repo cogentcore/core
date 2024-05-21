@@ -34,7 +34,7 @@ func (sv *SceneView) OnInit() {
 func (sv *SceneView) Make(c *core.Plan) {
 	core.AddAt(c, "scene", func(w *Scene) {})
 	core.AddAt(c, "tb", func(w *core.Toolbar) {
-		w.ConfigFuncs.Add(sv.ConfigToolbar)
+		w.Makers.Add(sv.MakeToolbar)
 	})
 }
 
@@ -69,7 +69,7 @@ func (sv *SceneView) UpdateToolbar() {
 	}
 }
 
-func (sv *SceneView) ConfigToolbar(c *core.Plan) {
+func (sv *SceneView) MakeToolbar(c *core.Plan) {
 	sw := sv.SceneWidget()
 	sc := sv.SceneXYZ()
 	core.AddAt(c, "", func(w *core.Button) {

@@ -36,7 +36,7 @@ func main() {
 		pl.Params.Points = true
 		pl.SetTable(epc)
 		pl.ColumnParams("UnitErr").On = true
-		b.AddAppBar(pl.ConfigToolbar)
+		b.AddAppBar(pl.MakeToolbar)
 	} else {
 		data := []Data{
 			{"Davis", 62000, 500},
@@ -54,7 +54,7 @@ func main() {
 		pl.Params.Points = true
 		pl.SetTable(dt)
 		pl.ColumnParams("Population").On = true
-		b.AddAppBar(pl.ConfigToolbar)
+		b.AddAppBar(pl.MakeToolbar)
 	}
 
 	b.RunMainWindow()

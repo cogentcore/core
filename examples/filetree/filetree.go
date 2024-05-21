@@ -310,7 +310,7 @@ func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
 	return nil
 }
 
-func (fb *FileBrowse) ConfigToolbar(c *core.Plan) { //types:add
+func (fb *FileBrowse) MakeToolbar(c *core.Plan) { //types:add
 	core.AddAt(c, "", func(w *views.FuncButton) {
 		w.SetFunc(fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
 	})
@@ -403,7 +403,7 @@ func NewFileBrowser(path string) (*FileBrowse, *core.Stage) {
 
 	b := core.NewBody("Browser: " + projnm)
 	fb := NewFileBrowse(b)
-	b.AddAppBar(fb.ConfigToolbar)
+	b.AddAppBar(fb.MakeToolbar)
 	fb.OpenPath(core.Filename(path))
 	return fb, b.RunWindow()
 }

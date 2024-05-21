@@ -85,7 +85,7 @@ func NewSubPlot(parent ...tree.Node) *PlotView {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
-	tb.ConfigFuncs.Add(pl.ConfigToolbar)
+	tb.Makers.Add(pl.MakeToolbar)
 	return pl
 }
 
@@ -570,7 +570,7 @@ func (pl *PlotView) ColumnsConfig() {
 	}
 }
 
-func (pl *PlotView) ConfigToolbar(c *core.Plan) {
+func (pl *PlotView) MakeToolbar(c *core.Plan) {
 	if pl.Table == nil {
 		return
 	}
@@ -617,7 +617,7 @@ func (pl *PlotView) ConfigToolbar(c *core.Plan) {
 			OnClick(func(e events.Event) {
 				d := core.NewBody().AddTitle(pl.Nm + " Data")
 				tv := tensorview.NewTableView(d).SetTable(pl.Table.Table)
-				d.AddAppBar(tv.ConfigToolbar)
+				d.AddAppBar(tv.MakeToolbar)
 				d.NewFullDialog(pl).SetNewWindow(true).Run()
 			})
 	})
