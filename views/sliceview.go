@@ -474,15 +474,15 @@ func (sv *SliceViewBase) UpdateMaxWidths() {
 	}
 	mxw := 0
 	for rw := 0; rw < sv.SliceSize; rw++ {
-		str := reflectx.ToString(sv.SliceElValue(rw).Interface())
+		str := reflectx.ToString(sv.SliceElementValue(rw).Interface())
 		mxw = max(mxw, len(str))
 	}
 	sv.MaxWidth = mxw
 }
 
-// SliceElValue returns reflect.Value of slice element at given index
-// or ElVal if out of range.
-func (sv *SliceViewBase) SliceElValue(si int) reflect.Value {
+// SliceElementValue returns reflect.Value of slice element at given index
+// or ElementValue if out of range.
+func (sv *SliceViewBase) SliceElementValue(si int) reflect.Value {
 	var val reflect.Value
 	if si < sv.SliceSize {
 		val = reflectx.Underlying(sv.SliceUnderlying.Index(si)) // deal with pointer lists
@@ -561,7 +561,7 @@ func (sv *SliceViewBase) MakeValue(w core.Value, i int) {
 func (sv *SliceViewBase) MakeRow(p *core.Plan, i, si int) {
 	itxt := strconv.Itoa(i)
 	invis := si >= sv.SliceSize
-	val := sv.SliceElValue(si)
+	val := sv.SliceElementValue(si)
 
 	if sv.Is(SliceViewShowIndex) {
 		sv.MakeGridIndex(p, i, si, itxt, invis)

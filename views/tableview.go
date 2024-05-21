@@ -201,7 +201,7 @@ func (tv *TableView) UpdateMaxWidths() {
 	for fli := 0; fli < tv.numVisibleFields; fli++ {
 		field := tv.visibleFields[fli]
 		tv.colMaxWidths[fli] = 0
-		val := tv.SliceElValue(0)
+		val := tv.SliceElementValue(0)
 		fval := val.FieldByIndex(field.Index)
 		// _, isicon := vv.(*IconValue)
 		isicon := false
@@ -211,7 +211,7 @@ func (tv *TableView) UpdateMaxWidths() {
 		}
 		mxw := 0
 		for rw := 0; rw < tv.SliceSize; rw++ {
-			val := tv.SliceElValue(rw)
+			val := tv.SliceElementValue(rw)
 			str := reflectx.ToString(val.FieldByIndex(field.Index).Interface())
 			mxw = max(mxw, len(str))
 		}
@@ -291,7 +291,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
 	itxt := strconv.Itoa(i)
 	sitxt := strconv.Itoa(si)
 	invis := si >= tv.SliceSize
-	val := tv.SliceElValue(si)
+	val := tv.SliceElementValue(si)
 	// stru := val.Interface()
 
 	if tv.Is(SliceViewShowIndex) {
