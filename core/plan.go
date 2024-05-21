@@ -57,13 +57,9 @@ func Add[T Widget](p *Plan, funcs ...func(w T)) *Plan {
 // for a [PlanItem.Path].
 func autoPlanPath(level int) string {
 	_, file, line, _ := runtime.Caller(level)
-	dir, fn := filepath.Split(file)
-	d1 := ""
-	if len(dir) > 1 {
-		_, d1 = filepath.Split(dir[:len(dir)-1])
-	}
-	path := fn + "-" + d1
-	// need to get rid of slashes and dots for path name
+	name := filepath.Base(file)
+	dir := filepath.Base(filepath.Dir(file))
+	path := dir + "-" + name
 	path = strings.ReplaceAll(strings.ReplaceAll(path, "/", "-"), ".", "-") + "-" + strconv.Itoa(line)
 	return path
 }
@@ -72,13 +68,13 @@ func autoPlanPath(level int) string {
 // the given name and optional function(s). The first function is called
 // to initially configure the widget, and the second function is called
 // to update the widget. It returns the new [Plan] item.
-func AddAt[T Widget](c *Plan, path string, funcs ...func(w T)) *Plan {
+func AddAt[T Widget](p *Plan, path string, funcs ...func(w T)) *Plan {
 	switch len(funcs) {
 	case 0:
-		return c.Add(path, func() Widget { return tree.New[T]() }, nil)
+		return p.Add(path, func() Widget { return tree.New[T]() }, nil)
 	case 1:
 		init := funcs[0]
-		return c.Add(path, func() Widget {
+		return p.Add(path, func() Widget {
 			w := tree.New[T]()
 			init(w)
 			return w
@@ -86,7 +82,7 @@ func AddAt[T Widget](c *Plan, path string, funcs ...func(w T)) *Plan {
 	default:
 		init := funcs[0]
 		update := funcs[1]
-		return c.Add(path, func() Widget {
+		return p.Add(path, func() Widget {
 			w := tree.New[T]()
 			init(w)
 			return w
@@ -99,12 +95,12 @@ func AddAt[T Widget](c *Plan, path string, funcs ...func(w T)) *Plan {
 // AddNew adds a new [Plan] item to the given [Plan] for a widget with
 // the given name, function for constructing the widget, and optional
 // function for updating the widget. It returns the new [Plan] item.
-func AddNew[T Widget](c *Plan, path string, new func() T, update ...func(w T)) *Plan {
+func AddNew[T Widget](p *Plan, path string, new func() T, update ...func(w T)) *Plan {
 	if len(update) == 0 {
-		return c.Add(path, func() Widget { return new() }, nil)
+		return p.Add(path, func() Widget { return new() }, nil)
 	}
 	u := update[0]
-	return c.Add(path, func() Widget { return new() }, func(w Widget) { u(w.(T)) })
+	return p.Add(path, func() Widget { return new() }, func(w Widget) { u(w.(T)) })
 }
 
 // Add adds a new [Plan] item to the given [Plan] with the given name and functions.
@@ -187,7 +183,7 @@ func (wb *WidgetBase) ConfigWidget() {
 // Config is the interface method called by [Widget.ConfigWidget] that
 // should be defined for each [Widget] type, which actually does
 // the configuration work.
-func (wb *WidgetBase) Config(c *Plan) {
+func (wb *WidgetBase) Config(p *Plan) {
 	// this must be defined for each widget type
 }
 
