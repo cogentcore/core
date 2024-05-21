@@ -221,14 +221,14 @@ func (mv *MapView) MakeToolbar(c *core.Plan) {
 	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
-	core.AddAt(c, "", func(w *core.Button) {
+	core.Add(c, func(w *core.Button) {
 		w.SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys and the values").
 			OnClick(func(e events.Event) {
 				mv.ToggleSort()
 			})
 	})
 	if !mv.IsReadOnly() {
-		core.AddAt(c, "", func(w *core.Button) {
+		core.Add(c, func(w *core.Button) {
 			w.SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
 				OnClick(func(e events.Event) {
 					mv.MapAdd()

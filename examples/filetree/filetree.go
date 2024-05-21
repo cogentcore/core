@@ -311,21 +311,21 @@ func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
 }
 
 func (fb *FileBrowse) MakeToolbar(c *core.Plan) { //types:add
-	core.AddAt(c, "", func(w *views.FuncButton) {
+	core.Add(c, func(w *views.FuncButton) {
 		w.SetFunc(fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
 	})
-	core.AddAt(c, "", func(w *views.FuncButton) {
+	core.Add(c, func(w *views.FuncButton) {
 		w.SetFunc(fb.OpenPath).SetKey(keymap.Open)
 		w.Args[0].SetValue(fb.ActiveFilename)
 		// w.Args[0].SetTag("ext", ".json")
 	})
-	core.AddAt(c, "", func(w *views.FuncButton) {
+	core.Add(c, func(w *views.FuncButton) {
 		w.SetFunc(fb.SaveActiveView).SetKey(keymap.Save)
 		w.Style(func(s *styles.Style) {
 			s.SetEnabled(fb.Changed && fb.ActiveFilename != "")
 		})
 	})
-	core.AddAt(c, "", func(w *views.FuncButton) {
+	core.Add(c, func(w *views.FuncButton) {
 		w.SetFunc(fb.SaveActiveViewAs).SetKey(keymap.SaveAs)
 		w.Args[0].SetValue(fb.ActiveFilename)
 		// w.Args[0].SetTag("ext", ".json")

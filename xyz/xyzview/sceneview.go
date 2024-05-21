@@ -72,7 +72,7 @@ func (sv *SceneView) UpdateToolbar() {
 func (sv *SceneView) MakeToolbar(c *core.Plan) {
 	sw := sv.SceneWidget()
 	sc := sv.SceneXYZ()
-	core.AddAt(c, "", func(w *core.Button) {
+	core.Add(c, func(w *core.Button) {
 		w.SetIcon(icons.Update).SetTooltip("reset to default initial display").
 			OnClick(func(e events.Event) {
 				sc.SetCamera("default")
@@ -80,7 +80,7 @@ func (sv *SceneView) MakeToolbar(c *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.AddAt(c, "", func(w *core.Button) {
+	core.Add(c, func(w *core.Button) {
 		w.SetIcon(icons.ZoomIn).SetTooltip("zoom in").
 			Style(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -91,7 +91,7 @@ func (sv *SceneView) MakeToolbar(c *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.AddAt(c, "", func(w *core.Button) {
+	core.Add(c, func(w *core.Button) {
 		w.SetIcon(icons.ZoomOut).SetTooltip("zoom out").
 			Style(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -103,10 +103,10 @@ func (sv *SceneView) MakeToolbar(c *core.Plan) {
 	})
 	core.AddAt[*core.Separator](c, "")
 
-	core.AddAt(c, "", func(w *core.Text) {
+	core.Add(c, func(w *core.Text) {
 		w.SetText("Rot:").SetTooltip("rotate display")
 	})
-	core.AddAt(c, "", func(w *core.Button) {
+	core.Add(c, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowLeft).
 			Style(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -117,7 +117,7 @@ func (sv *SceneView) MakeToolbar(c *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.AddAt(c, "", func(w *core.Button) {
+	core.Add(c, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowUp).
 			Style(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -128,7 +128,7 @@ func (sv *SceneView) MakeToolbar(c *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.AddAt(c, "", func(w *core.Button) {
+	core.Add(c, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowDown).
 			Style(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -139,7 +139,7 @@ func (sv *SceneView) MakeToolbar(c *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.AddAt(c, "", func(w *core.Button) {
+	core.Add(c, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowRight).
 			Style(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -152,10 +152,10 @@ func (sv *SceneView) MakeToolbar(c *core.Plan) {
 	})
 	core.AddAt[*core.Separator](c, "")
 
-	core.AddAt(c, "", func(w *core.Text) {
+	core.Add(c, func(w *core.Text) {
 		w.SetText("Pan:").SetTooltip("pan display")
 	})
-	core.AddAt(c, "", func(w *core.Button) {
+	core.Add(c, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowLeft).
 			Style(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -166,7 +166,7 @@ func (sv *SceneView) MakeToolbar(c *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.AddAt(c, "", func(w *core.Button) {
+	core.Add(c, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowUp).
 			Style(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -177,7 +177,7 @@ func (sv *SceneView) MakeToolbar(c *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.AddAt(c, "", func(w *core.Button) {
+	core.Add(c, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowDown).
 			Style(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -188,7 +188,7 @@ func (sv *SceneView) MakeToolbar(c *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.AddAt(c, "", func(w *core.Button) {
+	core.Add(c, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowRight).
 			Style(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -201,7 +201,7 @@ func (sv *SceneView) MakeToolbar(c *core.Plan) {
 	})
 	core.AddAt[*core.Separator](c, "")
 
-	core.AddAt(c, "", func(w *core.Text) {
+	core.Add(c, func(w *core.Text) {
 		w.SetText("Save:")
 	})
 
@@ -236,7 +236,7 @@ func (sv *SceneView) MakeToolbar(c *core.Plan) {
 		w.SetCurrentValue(sw.SelectionMode)
 	})
 
-	core.AddAt(c, "", func(w *core.Button) {
+	core.Add(c, func(w *core.Button) {
 		w.SetText("Edit").SetIcon(icons.Edit).
 			SetTooltip("edit the currently selected object").
 			OnClick(func(e events.Event) {
@@ -249,7 +249,7 @@ func (sv *SceneView) MakeToolbar(c *core.Plan) {
 			})
 	})
 
-	core.AddAt(c, "", func(w *core.Button) {
+	core.Add(c, func(w *core.Button) {
 		w.SetText("Edit Scene").SetIcon(icons.Edit).
 			SetTooltip("edit the 3D Scene object (for access to meshes, textures etc)").
 			OnClick(func(e events.Event) {

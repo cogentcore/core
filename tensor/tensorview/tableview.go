@@ -645,22 +645,22 @@ func (tv *TableView) MakeToolbar(c *core.Plan) {
 	if tv.Table == nil || tv.Table.Table == nil {
 		return
 	}
-	core.AddAt(c, "", func(w *views.FuncButton) {
+	core.Add(c, func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.AddRows).SetIcon(icons.Add)
 	})
-	core.AddAt(c, "", func(w *views.FuncButton) {
+	core.Add(c, func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.SortColumnName).SetText("Sort").SetIcon(icons.Sort)
 	})
-	core.AddAt(c, "", func(w *views.FuncButton) {
+	core.Add(c, func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
 	})
-	core.AddAt(c, "", func(w *views.FuncButton) {
+	core.Add(c, func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
 	})
-	core.AddAt(c, "", func(w *views.FuncButton) {
+	core.Add(c, func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.OpenCSV).SetIcon(icons.Open)
 	})
-	core.AddAt(c, "", func(w *views.FuncButton) {
+	core.Add(c, func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.SaveCSV).SetIcon(icons.Save)
 	})
 }

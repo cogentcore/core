@@ -262,16 +262,16 @@ func (fv *FileView) Make(c *core.Plan) {
 // MakeToolbar configures the given toolbar to have file view
 // actions and completions.
 func (fv *FileView) MakeToolbar(c *core.Plan) {
-	core.AddAt(c, "", func(w *FuncButton) {
+	core.Add(c, func(w *FuncButton) {
 		w.SetFunc(fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
 	})
-	core.AddAt(c, "", func(w *FuncButton) {
+	core.Add(c, func(w *FuncButton) {
 		w.SetFunc(fv.AddPathToFaves).SetIcon(icons.Favorite).SetText("Favorite")
 	})
-	core.AddAt(c, "", func(w *FuncButton) {
+	core.Add(c, func(w *FuncButton) {
 		w.SetFunc(fv.UpdateFilesAction).SetIcon(icons.Refresh).SetText("Update")
 	})
-	core.AddAt(c, "", func(w *FuncButton) {
+	core.Add(c, func(w *FuncButton) {
 		w.SetFunc(fv.NewFolder).SetIcon(icons.CreateNewFolder)
 	})
 }

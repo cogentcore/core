@@ -49,7 +49,7 @@ func main() {
 	errors.Log1(sc.OpenNewObj(curFn, objgp))
 
 	b.AddAppBar(func(c *core.Plan) {
-		core.AddAt(c, "", func(w *core.Button) {
+		core.Add(c, func(w *core.Button) {
 			w.SetText("Open").SetIcon(icons.Open).
 				SetTooltip("Open a 3D object file for viewing").
 				OnClick(func(e events.Event) {

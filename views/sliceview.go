@@ -861,7 +861,7 @@ func (sv *SliceViewBase) MakeToolbar(c *core.Plan) {
 	if sv.Is(SliceViewIsArray) || sv.IsReadOnly() {
 		return
 	}
-	core.AddAt(c, "", func(w *core.Button) {
+	core.Add(c, func(w *core.Button) {
 		w.SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the slice").
 			OnClick(func(e events.Event) {
 				sv.This().(SliceViewer).SliceNewAt(-1)
