@@ -209,7 +209,7 @@ func (tv *TableView) Make(p *core.Plan) {
 }
 
 func (tv *TableView) MakeHeader(p *core.Plan) {
-	hp := core.AddAt(p, "header", func(w *core.Frame) {
+	header := core.AddAt(p, "header", func(w *core.Frame) {
 		core.ToolbarStyles(w)
 		w.Style(func(s *styles.Style) {
 			s.Grow.Set(0, 0)
@@ -218,7 +218,7 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 	})
 
 	if tv.Is(views.SliceViewShowIndex) {
-		core.AddAt(hp, "head-index", func(w *core.Text) {
+		core.AddAt(header, "head-index", func(w *core.Text) {
 			w.SetType(core.TextBodyMedium)
 			w.Style(func(s *styles.Style) {
 				s.Align.Self = styles.Center
@@ -229,7 +229,7 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 	}
 	for fli := 0; fli < tv.NCols; fli++ {
 		field := tv.Table.Table.ColumnNames[fli]
-		core.AddAt(hp, "head-"+field, func(w *core.Button) {
+		core.AddAt(header, "head-"+field, func(w *core.Button) {
 			w.SetType(core.ButtonMenu)
 			w.SetText(field)
 			w.OnClick(func(e events.Event) {
