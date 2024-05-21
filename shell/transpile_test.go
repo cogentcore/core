@@ -97,6 +97,8 @@ func TestTranspile(t *testing.T) {
 		{`echo {name}`, `shell.Run("echo", name)`},
 		{`echo "testing"`, `shell.Run("echo", "testing")`},
 		{`number := 1.23`, `number := 1.23`},
+		{`res1, res2 := FunTwoRet()`, `res1, res2 := FunTwoRet()`},
+		{`res1, res2, res3 := FunThreeRet()`, `res1, res2, res3 := FunThreeRet()`},
 		{`println("hi")`, `println("hi")`},
 		{`fmt.Println("hi")`, `fmt.Println("hi")`},
 		{`for i := 0; i < 3; i++ { fmt.Println(i, "\n")`, `for i := 0; i < 3; i++ { fmt.Println(i, "\n")`},

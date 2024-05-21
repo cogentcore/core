@@ -101,7 +101,7 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	case !f0exec: // exec must be IDENT
 		logx.PrintlnDebug("go:   not ident")
 		return sh.TranspileGo(toks)
-	case f0exec && en > 1 && (ewords[1][0] == '=' || ewords[1][0] == ':'):
+	case f0exec && en > 1 && (ewords[1][0] == '=' || ewords[1][0] == ':' || toks[1].Tok == token.COMMA):
 		logx.PrintlnDebug("go:   assignment or defn")
 		return sh.TranspileGo(toks)
 	case f0exec: // now any ident
