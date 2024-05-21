@@ -79,14 +79,13 @@ func (pl *PlotView) CopyFieldsFrom(frm tree.Node) {
 // suitable for a tab or other element that is not the main plot.
 func NewSubPlot(parent ...tree.Node) *PlotView {
 	fr := core.NewFrame(parent...)
-	// tb := core.NewToolbar(fr)
+	tb := core.NewToolbar(fr)
 	pl := NewPlotView(fr)
 	fr.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
-	// TODO(config)
-	//tb.ConfigFuncs.Add(pl.ConfigToolbar)
+	tb.ConfigFuncs.Add(pl.ConfigToolbar)
 	return pl
 }
 
@@ -617,9 +616,8 @@ func (pl *PlotView) ConfigToolbar(c *core.Plan) {
 			SetTooltip("open a TableView window of the data").
 			OnClick(func(e events.Event) {
 				d := core.NewBody().AddTitle(pl.Nm + " Data")
-				tensorview.NewTableView(d).SetTable(pl.Table.Table)
-				// TODO(config)
-				// d.AddAppBar(etv.ConfigToolbar)
+				tv := tensorview.NewTableView(d).SetTable(pl.Table.Table)
+				d.AddAppBar(tv.ConfigToolbar)
 				d.NewFullDialog(pl).SetNewWindow(true).Run()
 			})
 	})

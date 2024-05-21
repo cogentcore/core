@@ -68,7 +68,7 @@ func View(st *Styles) {
 			w.Args[0].SetTag(".ext", ".histy")
 		})
 		core.AddAt[*core.Separator](c, "")
-		// mv.ConfigToolbar(c)
+		mv.ConfigToolbar(c)
 	})
 	d.RunWindow() // note: no context here so not dialog
 }

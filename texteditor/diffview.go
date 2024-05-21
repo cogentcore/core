@@ -96,7 +96,7 @@ func DiffViewDialog(ctx core.Widget, title string, astr, bstr []string, afile, b
 	dv.RevB = brev
 	dv.Build()
 	dv.DiffStrings(astr, bstr)
-	// d.AddAppBar(dv.ConfigToolbar)
+	// d.AddAppBar(dv.ConfigToolbar) TODO(config)
 	d.NewWindow().SetContext(ctx).SetNewWindow(true).Run()
 	return dv
 }

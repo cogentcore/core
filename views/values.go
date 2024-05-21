@@ -49,11 +49,11 @@ func (sb *SliceButton) ConfigDialog(d *core.Body) (bool, func()) {
 	if npv.Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(sb.Slice)).Kind() == reflect.Struct {
 		tv := NewTableView(d).SetSlice(slci).SetViewPath(sb.ValueContext)
 		tv.SetReadOnly(sb.IsReadOnly())
-		// d.AddAppBar(tv.ConfigToolbar) // todo
+		d.AddAppBar(tv.ConfigToolbar)
 	} else {
 		sv := NewSliceView(d).SetSlice(slci).SetViewPath(sb.ValueContext)
 		sv.SetReadOnly(sb.IsReadOnly())
-		// d.AddAppBar(sv.ConfigToolbar)
+		d.AddAppBar(sv.ConfigToolbar)
 	}
 	return true, nil
 }
@@ -118,6 +118,6 @@ func (sb *MapButton) ConfigDialog(d *core.Body) (bool, func()) {
 	mpi := sb.Map
 	mv := NewMapView(d).SetMap(mpi)
 	mv.SetViewPath(sb.ValueContext).SetReadOnly(sb.IsReadOnly())
-	// d.AddAppBar(mv.ConfigToolbar)  // todo
+	d.AddAppBar(mv.ConfigToolbar)
 	return true, nil
 }

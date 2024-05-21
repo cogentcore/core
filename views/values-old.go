@@ -243,11 +243,11 @@ func (v *SliceValue) ConfigDialog(d *core.Body) (bool, func()) {
 	if npv.Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(v.Value.Interface())).Kind() == reflect.Struct {
 		tv := NewTableView(d).SetSlice(slci).SetViewPath(v.ViewPath)
 		tv.SetReadOnly(v.IsReadOnly())
-		// d.AddAppBar(tv.ConfigToolbar) // todo
+		d.AddAppBar(tv.ConfigToolbar)
 	} else {
 		sv := NewSliceView(d).SetSlice(slci).SetViewPath(v.ViewPath)
 		sv.SetReadOnly(v.IsReadOnly())
-		// d.AddAppBar(sv.ConfigToolbar)
+		d.AddAppBar(sv.ConfigToolbar)
 	}
 	return true, nil
 }
@@ -303,7 +303,7 @@ func (v *MapValue) ConfigDialog(d *core.Body) (bool, func()) {
 	mpi := v.Value.Interface()
 	mv := NewMapView(d).SetMap(mpi)
 	mv.SetViewPath(v.ViewPath).SetReadOnly(v.IsReadOnly())
-	// d.AddAppBar(mv.ConfigToolbar)  // todo
+	d.AddAppBar(mv.ConfigToolbar)
 	return true, nil
 }
 
