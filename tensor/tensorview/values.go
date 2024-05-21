@@ -5,7 +5,6 @@
 package tensorview
 
 import (
-	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/tensor"
@@ -18,6 +17,7 @@ func init() {
 	// new:
 	core.AddValueType[tensor.Float32, *TensorButton]()
 	core.AddValueType[table.Table, *TableButton]()
+	core.AddValueType[simat.SimMat, *SimMatButton]()
 
 	// old:
 	// views.AddValue(tensor.Float32{}, func() views.Value { return &TensorValue{} })
@@ -49,105 +49,101 @@ func (v *TensorGridValue) Update() {
 // TensorButton represents a Tensor with a button for making a [TensorView]
 // viewer for an [tensor.Tensor].
 type TensorButton struct {
-	*core.Button
+	core.Button
 	Tensor tensor.Tensor
 }
 
-func (v *TensorButton) WidgetValue() any { return &v.Tensor }
+func (tb *TensorButton) WidgetValue() any { return &tb.Tensor }
 
-func (v *TensorButton) OnInit() {
-	v.Button.OnInit()
-	v.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	views.ConfigDialogValue(v, true)
+func (tb *TensorButton) OnInit() {
+	tb.Button.OnInit()
+	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	views.ConfigDialogValue(tb, true)
 }
 
-func (v *TensorButton) Make(p *core.Plan) {
+func (tb *TensorButton) Make(p *core.Plan) {
 	txt := "nil"
-	if v.Tensor != nil {
+	if tb.Tensor != nil {
 		txt = "Tensor"
 	}
-	v.SetText(txt)
-	v.Button.Make(p)
+	tb.SetText(txt)
+	tb.Button.Make(p)
 }
 
-func (v *TensorButton) ConfigDialog(d *core.Body) (bool, func()) {
-	if v.Tensor == nil {
+func (tb *TensorButton) ConfigDialog(d *core.Body) (bool, func()) {
+	if tb.Tensor == nil {
 		return false, nil
 	}
-	NewTensorGrid(d).SetTensor(v.Tensor)
+	NewTensorGrid(d).SetTensor(tb.Tensor)
 	return true, nil
 }
 
 // TableButton presents a button that pulls up the [TableView] viewer for a [table.Table].
 type TableButton struct {
-	*core.Button
+	core.Button
 	Table *table.Table
 }
 
-func (v *TableButton) WidgetValue() any { return &v.Table }
+func (tb *TableButton) WidgetValue() any { return &tb.Table }
 
-func (v *TableButton) OnInit() {
-	v.Button.OnInit()
-	v.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	views.ConfigDialogValue(v, true)
+func (tb *TableButton) OnInit() {
+	tb.Button.OnInit()
+	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	views.ConfigDialogValue(tb, true)
 }
 
-func (v *TableButton) Make(p *core.Plan) {
+func (tb *TableButton) Make(p *core.Plan) {
 	txt := "nil"
-	if v.Table != nil {
-		if nm, has := v.Table.MetaData["name"]; has {
+	if tb.Table != nil {
+		if nm, has := tb.Table.MetaData["name"]; has {
 			txt = nm
 		} else {
-			txt = "Table"
+			txt = "aTable"
 		}
 	}
-	v.SetText(txt)
-	v.Button.Make(p)
+	tb.SetText(txt)
+	tb.Button.Make(p)
 }
 
-func (v *TableButton) ConfigDialog(d *core.Body) (bool, func()) {
-	if v.Table == nil {
+func (tb *TableButton) ConfigDialog(d *core.Body) (bool, func()) {
+	if tb.Table == nil {
 		return false, nil
 	}
-	NewTableView(d).SetTable(v.Table)
+	NewTableView(d).SetTable(tb.Table)
 	return true, nil
 }
 
 // SimMatValue presents a button that pulls up the [SimMatGridView] viewer for a [table.Table].
-type SimMatValue struct {
-	views.ValueBase[*core.Button]
+type SimMatButton struct {
+	core.Button
+	SimMat *simat.SimMat
 }
 
-func (v *SimMatValue) Config() {
-	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	views.ConfigDialogWidget(v, false)
+func (tb *SimMatButton) WidgetValue() any { return &tb.SimMat }
+
+func (tb *SimMatButton) OnInit() {
+	tb.Button.OnInit()
+	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	views.ConfigDialogValue(tb, true)
 }
 
-func (v *SimMatValue) Update() {
-	npv := reflectx.NonPointerValue(v.Value)
-	if !v.Value.IsValid() || v.Value.IsZero() || !npv.IsValid() || npv.IsZero() {
-		v.Widget.SetText("nil")
-	} else {
-		opv := reflectx.UnderlyingPointer(v.Value)
-		smat := opv.Interface().(*simat.SimMat)
-		if smat != nil && smat.Mat != nil {
-			if nm, has := smat.Mat.MetaData("name"); has {
-				v.Widget.SetText(nm)
-			} else {
-				v.Widget.SetText("simat.SimMat")
-			}
+func (tb *SimMatButton) Make(p *core.Plan) {
+	txt := "nil"
+	if tb.SimMat != nil && tb.SimMat.Mat != nil {
+		if nm, has := tb.SimMat.Mat.MetaData("name"); has {
+			txt = nm
 		} else {
-			v.Widget.SetText("simat.SimMat")
+			txt = "SimMat"
 		}
 	}
+	tb.SetText(txt)
+	tb.Button.Make(p)
 }
 
-func (v *SimMatValue) ConfigDialog(d *core.Body) (bool, func()) {
-	opv := reflectx.UnderlyingPointer(v.Value)
-	smat := opv.Interface().(*simat.SimMat)
-	if smat == nil || smat.Mat == nil {
+func (tb *SimMatButton) ConfigDialog(d *core.Body) (bool, func()) {
+	if tb.SimMat == nil || tb.SimMat.Mat == nil {
 		return false, nil
 	}
-	NewSimMatGrid(d).SetSimMat(smat)
+	NewSimMatGrid(d).SetSimMat(tb.SimMat)
 	return true, nil
 }
