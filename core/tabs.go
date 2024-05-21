@@ -421,7 +421,7 @@ func (ts *Tabs) Config(c *Plan) {
 				})
 			})
 		}
-		tc.ConfigWidget(w)
+		tc.BuildWidget(w)
 	})
 	AddAt(c, "frame", func(w *Frame) {
 		w.Style(func(s *styles.Style) {
