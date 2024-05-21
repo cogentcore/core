@@ -243,12 +243,12 @@ func (fv *FileView) Config(c *core.Plan) {
 		fv.PrevPath = fv.DirPath
 	}
 
-	core.Configure(c, "files", func(w *core.Frame) {
+	core.AddAt(c, "files", func(w *core.Frame) {
 		w.Style(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
 		})
 	})
-	core.Configure(c, "sel", func(w *core.Frame) {
+	core.AddAt(c, "sel", func(w *core.Frame) {
 		w.Style(func(s *styles.Style) {
 			s.Grow.Set(1, 0)
 			s.Gap.X.Dp(4)
@@ -262,16 +262,16 @@ func (fv *FileView) Config(c *core.Plan) {
 // ConfigToolbar configures the given toolbar to have file view
 // actions and completions.
 func (fv *FileView) ConfigToolbar(c *core.Plan) {
-	core.Configure(c, "", func(w *FuncButton) {
+	core.AddAt(c, "", func(w *FuncButton) {
 		w.SetFunc(fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
 	})
-	core.Configure(c, "", func(w *FuncButton) {
+	core.AddAt(c, "", func(w *FuncButton) {
 		w.SetFunc(fv.AddPathToFaves).SetIcon(icons.Favorite).SetText("Favorite")
 	})
-	core.Configure(c, "", func(w *FuncButton) {
+	core.AddAt(c, "", func(w *FuncButton) {
 		w.SetFunc(fv.UpdateFilesAction).SetIcon(icons.Refresh).SetText("Update")
 	})
-	core.Configure(c, "", func(w *FuncButton) {
+	core.AddAt(c, "", func(w *FuncButton) {
 		w.SetFunc(fv.NewFolder).SetIcon(icons.CreateNewFolder)
 	})
 }
@@ -310,7 +310,7 @@ func (fv *FileView) ConfigAppChooser(ch *core.Chooser) {
 }
 
 func (fv *FileView) ConfigFilesRow(c *core.Plan) {
-	core.Configure(c, "files/faves", func(w *TableView) {
+	core.AddAt(c, "files/faves", func(w *TableView) {
 		w.SelectedIndex = -1
 		w.SetReadOnly(true)
 		w.SetFlag(false, SliceViewShowIndex)
@@ -327,7 +327,7 @@ func (fv *FileView) ConfigFilesRow(c *core.Plan) {
 	}, func(w *TableView) {
 		w.ResetSelectedIndexes()
 	})
-	core.Configure(c, "files/files", func(w *TableView) {
+	core.AddAt(c, "files/files", func(w *TableView) {
 		w.SetFlag(false, SliceViewShowIndex)
 		w.SetReadOnly(true)
 		w.Style(func(s *styles.Style) {
@@ -422,7 +422,7 @@ func (fv *FileView) ConfigFilesRow(c *core.Plan) {
 }
 
 func (fv *FileView) ConfigSelRow(c *core.Plan) {
-	core.Configure(c, "sel/file-text", func(w *core.Text) {
+	core.AddAt(c, "sel/file-text", func(w *core.Text) {
 		w.SetText("File: ")
 		w.SetTooltip("Enter file name here (or select from list above)")
 		w.Style(func(s *styles.Style) {
@@ -430,7 +430,7 @@ func (fv *FileView) ConfigSelRow(c *core.Plan) {
 		})
 	})
 
-	core.Configure(c, "sel/file", func(w *core.TextField) {
+	core.AddAt(c, "sel/file", func(w *core.TextField) {
 		w.SetText(fv.CurrentSelectedFile)
 		w.SetTooltip(fmt.Sprintf("Enter the file name. Special keys: up/down to move selection; %s or %s to go up to parent folder; %s or %s or %s or %s to select current file (if directory, goes into it, if file, selects and closes); %s or %s for prev / next history item; %s return to this field", keymap.WordLeft.Label(), keymap.Jump.Label(), keymap.SelectMode.Label(), keymap.Insert.Label(), keymap.InsertAfter.Label(), keymap.Open.Label(), keymap.HistPrev.Label(), keymap.HistNext.Label(), keymap.Search.Label()))
 		w.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
@@ -453,14 +453,14 @@ func (fv *FileView) ConfigSelRow(c *core.Plan) {
 		w.SetText(fv.CurrentSelectedFile)
 	})
 
-	core.Configure(c, "sel/ext-text", func(w *core.Text) {
+	core.AddAt(c, "sel/ext-text", func(w *core.Text) {
 		w.SetText("Extension(s):").SetTooltip("target extension(s) to highlight; if multiple, separate with commas, and include the . at the start")
 		w.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 		})
 	})
 
-	core.Configure(c, "sel/ext", func(w *core.TextField) {
+	core.AddAt(c, "sel/ext", func(w *core.TextField) {
 		w.SetText(fv.Ext)
 		w.OnChange(func(e events.Event) {
 			fv.SetExtAction(w.Text())

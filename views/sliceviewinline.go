@@ -72,7 +72,7 @@ func (sv *SliceViewInline) Config(c *core.Plan) {
 	for i := 0; i < sz; i++ {
 		itxt := strconv.Itoa(i)
 		val := reflectx.UnderlyingPointer(sl.Index(i)) // deal with pointer lists
-		core.ConfigureNew(c, "value-"+itxt, func() core.Value {
+		core.AddNew(c, "value-"+itxt, func() core.Value {
 			w := core.NewValue(val.Interface(), "")
 			wb := w.AsWidget()
 			// vv.SetSliceValue(val, sv.Slice, i, sv.ViewPath)
@@ -103,7 +103,7 @@ func (sv *SliceViewInline) Config(c *core.Plan) {
 		})
 	}
 	if !sv.isArray && !sv.isFixedLength {
-		core.Configure(c, "add-button", func(w *core.Button) {
+		core.AddAt(c, "add-button", func(w *core.Button) {
 			w.SetIcon(icons.Add).SetType(core.ButtonTonal)
 			w.Tooltip = "Add an element to the list"
 			w.OnClick(func(e events.Event) {
@@ -111,7 +111,7 @@ func (sv *SliceViewInline) Config(c *core.Plan) {
 			})
 		})
 	}
-	core.Configure(c, "edit-button", func(w *core.Button) {
+	core.AddAt(c, "edit-button", func(w *core.Button) {
 		w.SetIcon(icons.Edit).SetType(core.ButtonTonal)
 		w.Tooltip = "Edit list in a dialog"
 		w.OnClick(func(e events.Event) {

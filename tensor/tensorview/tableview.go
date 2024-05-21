@@ -210,7 +210,7 @@ func (tv *TableView) Config(c *core.Plan) {
 }
 
 func (tv *TableView) ConfigHeader(c *core.Plan) {
-	core.Configure(c, "header", func(w *core.Frame) {
+	core.AddAt(c, "header", func(w *core.Frame) {
 		core.ToolbarStyles(w)
 		w.Style(func(s *styles.Style) {
 			s.Grow.Set(0, 0)
@@ -219,7 +219,7 @@ func (tv *TableView) ConfigHeader(c *core.Plan) {
 	})
 
 	if tv.Is(views.SliceViewShowIndex) {
-		core.Configure(c, "header/head-index", func(w *core.Text) {
+		core.AddAt(c, "header/head-index", func(w *core.Text) {
 			w.SetType(core.TextBodyMedium)
 			w.Style(func(s *styles.Style) {
 				s.Align.Self = styles.Center
@@ -230,7 +230,7 @@ func (tv *TableView) ConfigHeader(c *core.Plan) {
 	}
 	for fli := 0; fli < tv.NCols; fli++ {
 		field := tv.Table.Table.ColumnNames[fli]
-		core.Configure(c, "header/head-"+field, func(w *core.Button) {
+		core.AddAt(c, "header/head-"+field, func(w *core.Button) {
 			w.SetType(core.ButtonMenu)
 			w.SetText(field)
 			w.OnClick(func(e events.Event) {
@@ -302,7 +302,7 @@ func (tv *TableView) ConfigRow(c *core.Plan, i, si int) {
 		if col.NumDims() == 1 {
 			str := ""
 			fval := float64(0)
-			core.ConfigureNew(c, "grid/"+valnm, func() core.Value {
+			core.AddNew(c, "grid/"+valnm, func() core.Value {
 				var w core.Value
 				if isstr {
 					w = core.NewValue(&str, "")
@@ -645,22 +645,22 @@ func (tv *TableView) ConfigToolbar(c *core.Plan) {
 	if tv.Table == nil || tv.Table.Table == nil {
 		return
 	}
-	core.Configure(c, "", func(w *views.FuncButton) {
+	core.AddAt(c, "", func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.AddRows).SetIcon(icons.Add)
 	})
-	core.Configure(c, "", func(w *views.FuncButton) {
+	core.AddAt(c, "", func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.SortColumnName).SetText("Sort").SetIcon(icons.Sort)
 	})
-	core.Configure(c, "", func(w *views.FuncButton) {
+	core.AddAt(c, "", func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
 	})
-	core.Configure(c, "", func(w *views.FuncButton) {
+	core.AddAt(c, "", func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
 	})
-	core.Configure(c, "", func(w *views.FuncButton) {
+	core.AddAt(c, "", func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.OpenCSV).SetIcon(icons.Open)
 	})
-	core.Configure(c, "", func(w *views.FuncButton) {
+	core.AddAt(c, "", func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.SaveCSV).SetIcon(icons.Save)
 	})
 }

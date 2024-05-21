@@ -498,7 +498,7 @@ func (sv *SliceViewBase) SliceElValue(si int) reflect.Value {
 }
 
 func (sv *SliceViewBase) ConfigGrid(c *core.Plan) {
-	core.Configure(c, "grid", func(w *SliceViewGrid) {
+	core.AddAt(c, "grid", func(w *SliceViewGrid) {
 		w.Style(func(s *styles.Style) {
 			nWidgPerRow, _ := sv.This().(SliceViewer).RowWidgetNs()
 			w.MinRows = sv.MinRows
@@ -569,7 +569,7 @@ func (sv *SliceViewBase) ConfigRow(c *core.Plan, i, si int) {
 		sv.ConfigGridIndex(c, i, si, itxt, invis)
 	}
 
-	core.ConfigureNew(c, "grid/value-"+itxt, func() core.Value {
+	core.AddNew(c, "grid/value-"+itxt, func() core.Value {
 		w := core.NewValue(val.Interface(), "")
 		wb := w.AsWidget()
 		sv.ConfigValue(w, i)
@@ -598,7 +598,7 @@ func (sv *SliceViewBase) ConfigRow(c *core.Plan, i, si int) {
 func (sv *SliceViewBase) ConfigGridIndex(c *core.Plan, i, si int, itxt string, invis bool) {
 	sitxt := strconv.Itoa(si)
 	svi := sv.This().(SliceViewer)
-	core.Configure(c, "grid/index-"+itxt, func(w *core.Text) {
+	core.AddAt(c, "grid/index-"+itxt, func(w *core.Text) {
 		w.SetProperty(SliceViewRowProperty, i)
 		w.Style(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.DoubleClickable)
@@ -861,7 +861,7 @@ func (sv *SliceViewBase) ConfigToolbar(c *core.Plan) {
 	if sv.Is(SliceViewIsArray) || sv.IsReadOnly() {
 		return
 	}
-	core.Configure(c, "", func(w *core.Button) {
+	core.AddAt(c, "", func(w *core.Button) {
 		w.SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the slice").
 			OnClick(func(e events.Event) {
 				sv.This().(SliceViewer).SliceNewAt(-1)

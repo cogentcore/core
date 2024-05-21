@@ -42,13 +42,13 @@ type Plan struct {
 	Children []*Plan
 }
 
-// Configure adds a new config item to the given [Plan] for a widget at the
+// AddAt adds a new config item to the given [Plan] for a widget at the
 // given forward slash separated path with the given optional function(s). The
 // first function is called to initially configure the widget, and the second
 // function is called to update the widget. If the given path is blank, it is
 // automatically set to a unique name based on the filepath and line number of
 // the calling function.
-func Configure[T Widget](c *Plan, path string, funcs ...func(w T)) {
+func AddAt[T Widget](c *Plan, path string, funcs ...func(w T)) {
 	switch len(funcs) {
 	case 0:
 		c.Add(path, func() Widget { return tree.New[T]() }, nil)
@@ -74,12 +74,12 @@ func Configure[T Widget](c *Plan, path string, funcs ...func(w T)) {
 	}
 }
 
-// ConfigureNew adds a new config item to the given [Plan] for a widget at the
+// AddNew adds a new config item to the given [Plan] for a widget at the
 // given forward slash separated path with the given function for constructing
 // the widget and the given optional function for updating the widget. If the
 // given path is blank, it is automatically set to a unique name based on the
 // filepath and line number of the calling function.
-func ConfigureNew[T Widget](c *Plan, path string, new func() T, update ...func(w T)) {
+func AddNew[T Widget](c *Plan, path string, new func() T, update ...func(w T)) {
 	if len(update) == 0 {
 		c.Add(path, func() Widget { return new() }, nil)
 	} else {
@@ -111,16 +111,17 @@ func ConfigCallerPath(level int) string {
 	return path
 }
 
-// ConfigWidget runs the Config on the given widget, ensuring that
+// BuildWidget runs the Config on the given widget, ensuring that
 // the widget has the specified parts and direct Children.
 // The given parent path is used for recursion and should be blank
 // when calling the function externally.
-func (p *Plan) ConfigWidget(w Widget) {
-	p.buildWidget(w, "")
+func (p *Plan) BuildWidget(w Widget) {
+	p.buildWidget(w)
+	p.UpdateWidget(w) // this gets everything
 }
 
-// build is the recursive implementation of [Plan.BuildWidget].
-func (p *Plan) buildWidget(w Widget, parentPath string) {
+// buildWidget is the recursive implementation of [Plan.BuildWidget].
+func (p *Plan) buildWidget(w Widget) {
 	wb := w.AsWidget()
 	wb.Kids, _ = config.Config(wb.Kids, len(p.Children),
 		func(i int) string { return p.Children[i].Name },
@@ -134,12 +135,9 @@ func (p *Plan) buildWidget(w Widget, parentPath string) {
 			}
 			return cw
 		})
-	for i, child := range p.Children { // always config children even if not new
+	for i, child := range p.Children { // always build children even if not new
 		cw := wb.Child(i).(Widget)
-		child.ConfigWidget(cw)
-	}
-	if parentPath == "" { // top level
-		p.UpdateWidget(w) // this gets everything
+		child.buildWidget(cw)
 	}
 }
 
@@ -149,11 +147,6 @@ func (p *Plan) buildWidget(w Widget, parentPath string) {
 // The given parent path is used for recursion and should be blank
 // when calling the function externally.
 func (p *Plan) UpdateWidget(w Widget) {
-	p.updateWidget(w, "")
-}
-
-// updateWidget is the recursive implementation of [Plan.UpdateWidget].
-func (p *Plan) updateWidget(w Widget, parentPath string) {
 	wb := w.AsWidget()
 	for i, child := range p.Children {
 		cw := wb.Child(i).(Widget)
@@ -165,7 +158,7 @@ func (p *Plan) updateWidget(w Widget, parentPath string) {
 }
 
 // ConfigParts configures the given [Frame] to be ready
-// to serve as [WidgetBase.Parts] in a [Configure] context.
+// to serve as [WidgetBase.Parts] in a [AddAt] context.
 func ConfigParts(w *Frame) {
 	w.SetName("parts")
 	w.SetFlag(true, tree.Field)
@@ -184,7 +177,7 @@ func (wb *WidgetBase) ConfigWidget() {
 	}
 	c := Plan{}
 	wb.This().(Widget).Config(&c)
-	c.ConfigWidget(wb.This().(Widget))
+	c.BuildWidget(wb.This().(Widget))
 }
 
 // Config is the interface method called by [Widget.ConfigWidget] that

@@ -121,7 +121,7 @@ func StandardAppBarStart(c *Plan) {
 
 // StandardAppBarBack adds a back button
 func StandardAppBarBack(c *Plan) {
-	Configure(c, "back", func(w *Button) {
+	AddAt(c, "back", func(w *Button) {
 		w.SetIcon(icons.ArrowBack).SetTooltip("Back").SetKey(keymap.HistPrev)
 		w.OnClick(func(e events.Event) {
 			if slen := w.Scene.Stage.Mains.Stack.Len(); slen > 1 {
@@ -151,7 +151,7 @@ func StandardAppBarBack(c *Plan) {
 
 // StandardAppBarChooser adds a standard app chooser using [ConfigAppChooser].
 func StandardAppBarChooser(c *Plan) {
-	Configure(c, "app-chooser", ConfigAppChooser)
+	AddAt(c, "app-chooser", ConfigAppChooser)
 }
 
 // StandardOverflowMenu adds the standard overflow menu function.

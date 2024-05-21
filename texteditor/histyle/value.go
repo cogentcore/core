@@ -59,15 +59,15 @@ func View(st *Styles) {
 		StylesChanged = true
 	})
 	d.AddAppBar(func(c *core.Plan) {
-		core.Configure(c, "", func(w *views.FuncButton) {
+		core.AddAt(c, "", func(w *views.FuncButton) {
 			w.SetFunc(st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
 			w.Args[0].SetTag(".ext", ".histy")
 		})
-		core.Configure(c, "", func(w *views.FuncButton) {
+		core.AddAt(c, "", func(w *views.FuncButton) {
 			w.SetFunc(st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
 			w.Args[0].SetTag(".ext", ".histy")
 		})
-		core.Configure[*core.Separator](c, "")
+		core.AddAt[*core.Separator](c, "")
 		// mv.ConfigToolbar(c)
 	})
 	d.RunWindow() // note: no context here so not dialog

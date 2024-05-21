@@ -224,7 +224,7 @@ func (tv *TableView) SliceHeader() *core.Frame {
 }
 
 func (tv *TableView) ConfigHeader(c *core.Plan) {
-	core.Configure(c, "header", func(w *core.Frame) {
+	core.AddAt(c, "header", func(w *core.Frame) {
 		core.ToolbarStyles(w)
 		w.Style(func(s *styles.Style) {
 			s.Grow.Set(0, 0)
@@ -233,7 +233,7 @@ func (tv *TableView) ConfigHeader(c *core.Plan) {
 	})
 
 	if tv.Is(SliceViewShowIndex) {
-		core.Configure(c, "header/head-index", func(w *core.Text) {
+		core.AddAt(c, "header/head-index", func(w *core.Text) {
 			w.SetType(core.TextBodyMedium)
 			w.Style(func(s *styles.Style) {
 				s.Align.Self = styles.Center
@@ -244,7 +244,7 @@ func (tv *TableView) ConfigHeader(c *core.Plan) {
 	}
 	for fli := 0; fli < tv.numVisibleFields; fli++ {
 		field := tv.visibleFields[fli]
-		core.Configure(c, "header/head-"+field.Name, func(w *core.Button) {
+		core.AddAt(c, "header/head-"+field.Name, func(w *core.Button) {
 			w.SetType(core.ButtonMenu)
 			w.OnClick(func(e events.Event) {
 				tv.SortSliceAction(fli)
@@ -318,7 +318,7 @@ func (tv *TableView) ConfigRow(c *core.Plan, i, si int) {
 		}
 		_ = tags
 
-		core.ConfigureNew(c, "grid/"+valnm, func() core.Value {
+		core.AddNew(c, "grid/"+valnm, func() core.Value {
 			w := core.NewValue(fval.Interface(), "")
 			wb := w.AsWidget()
 			tv.ConfigValue(w, i)

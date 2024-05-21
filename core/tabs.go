@@ -394,7 +394,7 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 // Re-config is needed when the type of tabs changes, but not
 // when a new tab is added, which only requires a new layout pass.
 func (ts *Tabs) Config(c *Plan) {
-	Configure(c, "tabs", func(w *Frame) {
+	AddAt(c, "tabs", func(w *Frame) {
 		w.Style(func(s *styles.Style) {
 			s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 			s.Margin.Zero()
@@ -413,7 +413,7 @@ func (ts *Tabs) Config(c *Plan) {
 	}, func(w *Frame) {
 		tc := &Plan{}
 		if ts.NewTabButton {
-			Configure(tc, "new-tab", func(w *Button) { // TODO(config)
+			AddAt(tc, "new-tab", func(w *Button) { // TODO(config)
 				w.SetIcon(icons.Add).SetType(ButtonAction)
 				w.OnClick(func(e events.Event) {
 					ts.NewTab("New tab")
@@ -423,7 +423,7 @@ func (ts *Tabs) Config(c *Plan) {
 		}
 		tc.ConfigWidget(w)
 	})
-	Configure(c, "frame", func(w *Frame) {
+	AddAt(c, "frame", func(w *Frame) {
 		w.Style(func(s *styles.Style) {
 			s.Display = styles.Stacked
 			w.SetFlag(true, FrameStackTopOnly) // key for allowing each tab to have its own size
@@ -557,7 +557,7 @@ func (tb *Tab) Config(c *Plan) {
 	}
 
 	if tb.Icon.IsSet() {
-		Configure(c, "icon", func(w *Icon) {
+		AddAt(c, "icon", func(w *Icon) {
 			w.Style(func(s *styles.Style) {
 				s.Font.Size.Dp(18)
 			})
@@ -565,11 +565,11 @@ func (tb *Tab) Config(c *Plan) {
 			w.SetIcon(tb.Icon)
 		})
 		if tb.Text != "" {
-			Configure[*Space](c, "space")
+			AddAt[*Space](c, "space")
 		}
 	}
 	if tb.Text != "" {
-		Configure(c, "text", func(w *Text) {
+		AddAt(c, "text", func(w *Text) {
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
 				s.SetTextWrap(false)
@@ -584,8 +584,8 @@ func (tb *Tab) Config(c *Plan) {
 		})
 	}
 	if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
-		Configure[*Space](c, "close-space")
-		Configure(c, "close", func(w *Button) {
+		AddAt[*Space](c, "close-space")
+		AddAt(c, "close", func(w *Button) {
 			w.SetType(ButtonAction)
 			w.Style(func(s *styles.Style) {
 				s.Padding.Zero()

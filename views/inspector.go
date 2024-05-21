@@ -313,30 +313,30 @@ func (is *Inspector) ConfigSplits() {
 }
 
 func (is *Inspector) ConfigToolbar(c *core.Plan) {
-	core.Configure(c, "", func(w *FuncButton) {
+	core.AddAt(c, "", func(w *FuncButton) {
 		w.SetFunc(is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool).
 			StyleFirst(func(s *styles.Style) {
 				_, ok := is.KiRoot.(*core.Scene)
 				s.SetEnabled(ok)
 			})
 	})
-	core.Configure[*core.Separator](c, "")
-	core.Configure(c, "", func(w *FuncButton) {
+	core.AddAt[*core.Separator](c, "")
+	core.AddAt(c, "", func(w *FuncButton) {
 		w.SetFunc(is.Open).SetKey(keymap.Open)
 		w.Args[0].SetValue(is.Filename)
 		w.Args[0].SetTag("ext", ".json")
 	})
-	core.Configure(c, "", func(w *FuncButton) {
+	core.AddAt(c, "", func(w *FuncButton) {
 		w.SetFunc(is.Save).SetKey(keymap.Save).
 			StyleFirst(func(s *styles.Style) { s.SetEnabled(is.Changed && is.Filename != "") })
 	})
-	core.Configure(c, "", func(w *FuncButton) {
+	core.AddAt(c, "", func(w *FuncButton) {
 		w.SetFunc(is.SaveAs).SetKey(keymap.SaveAs)
 		w.Args[0].SetValue(is.Filename)
 		w.Args[0].SetTag("ext", ".json")
 	})
-	core.Configure[*core.Separator](c, "")
-	core.Configure(c, "", func(w *FuncButton) {
+	core.AddAt[*core.Separator](c, "")
+	core.AddAt(c, "", func(w *FuncButton) {
 		w.SetFunc(is.InspectApp).SetIcon(icons.Devices)
 	})
 }

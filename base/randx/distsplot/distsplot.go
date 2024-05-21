@@ -133,14 +133,14 @@ func (ss *Sim) ConfigGUI() *core.Body {
 	split.SetSplits(.3, .7)
 
 	b.AddAppBar(func(c *core.Plan) {
-		core.Configure(c, "", func(w *core.Button) {
+		core.AddAt(c, "", func(w *core.Button) {
 			w.SetText("Run").SetIcon(icons.Update).
 				SetTooltip("Generate data and plot histogram.").
 				OnClick(func(e events.Event) {
 					ss.Run()
 				})
 		})
-		core.Configure(c, "", func(w *core.Button) {
+		core.AddAt(c, "", func(w *core.Button) {
 			w.SetText("README").SetIcon(icons.FileMarkdown).
 				SetTooltip("Opens your browser on the README file that contains instructions for how to run this model.").
 				OnClick(func(e events.Event) {

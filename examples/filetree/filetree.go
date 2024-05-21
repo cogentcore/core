@@ -311,21 +311,21 @@ func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
 }
 
 func (fb *FileBrowse) ConfigToolbar(c *core.Plan) { //types:add
-	core.Configure(c, "", func(w *views.FuncButton) {
+	core.AddAt(c, "", func(w *views.FuncButton) {
 		w.SetFunc(fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
 	})
-	core.Configure(c, "", func(w *views.FuncButton) {
+	core.AddAt(c, "", func(w *views.FuncButton) {
 		w.SetFunc(fb.OpenPath).SetKey(keymap.Open)
 		w.Args[0].SetValue(fb.ActiveFilename)
 		// w.Args[0].SetTag("ext", ".json")
 	})
-	core.Configure(c, "", func(w *views.FuncButton) {
+	core.AddAt(c, "", func(w *views.FuncButton) {
 		w.SetFunc(fb.SaveActiveView).SetKey(keymap.Save)
 		w.Style(func(s *styles.Style) {
 			s.SetEnabled(fb.Changed && fb.ActiveFilename != "")
 		})
 	})
-	core.Configure(c, "", func(w *views.FuncButton) {
+	core.AddAt(c, "", func(w *views.FuncButton) {
 		w.SetFunc(fb.SaveActiveViewAs).SetKey(keymap.SaveAs)
 		w.Args[0].SetValue(fb.ActiveFilename)
 		// w.Args[0].SetTag("ext", ".json")

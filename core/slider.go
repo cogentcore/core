@@ -496,7 +496,7 @@ func (sr *Slider) Config(c *Plan) {
 		sr.DeleteChildren()
 		return
 	}
-	Configure(c, "icon", func(w *Icon) {
+	AddAt(c, "icon", func(w *Icon) {
 		w.Style(func(s *styles.Style) {
 			s.Font.Size.Dp(24)
 			s.Color = sr.ThumbColor

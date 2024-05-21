@@ -362,7 +362,7 @@ func (tv *TreeView) LabelPart() (*core.Text, bool) {
 
 func (tv *TreeView) Config(c *core.Plan) {
 	tvi := tv.This().(TreeViewer)
-	core.Configure(c, "parts", func(w *core.Frame) {
+	core.AddAt(c, "parts", func(w *core.Frame) {
 		core.ConfigParts(w)
 		w.Style(func(s *styles.Style) {
 			s.Cursor = cursors.Pointer
@@ -444,7 +444,7 @@ func (tv *TreeView) Config(c *core.Plan) {
 			tv.ShowContextMenu(e)
 		})
 	})
-	core.Configure(c, "parts/branch", func(w *core.Switch) {
+	core.AddAt(c, "parts/branch", func(w *core.Switch) {
 		w.SetType(core.SwitchCheckbox)
 		w.SetIcons(tv.IconOpen, tv.IconClosed, tv.IconLeaf)
 		w.Style(func(s *styles.Style) {
@@ -483,7 +483,7 @@ func (tv *TreeView) Config(c *core.Plan) {
 		}
 	})
 	if tv.Icon.IsSet() {
-		core.Configure(c, "parts/icon", func(w *core.Icon) {
+		core.AddAt(c, "parts/icon", func(w *core.Icon) {
 			w.Style(func(s *styles.Style) {
 				s.Font.Size.Dp(16)
 				s.Margin.Zero()
@@ -493,7 +493,7 @@ func (tv *TreeView) Config(c *core.Plan) {
 			w.SetIcon(tv.Icon)
 		})
 	}
-	core.Configure(c, "parts/label", func(w *core.Text) {
+	core.AddAt(c, "parts/label", func(w *core.Text) {
 		w.Style(func(s *styles.Style) {
 			s.SetNonSelectable()
 			s.SetTextWrap(false)

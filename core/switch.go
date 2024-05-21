@@ -217,7 +217,7 @@ func (sw *Switch) Config(c *Plan) {
 		sw.IconOff = icons.ToggleOff // fallback
 	}
 
-	Configure(c, "stack", func(w *Frame) {
+	AddAt(c, "stack", func(w *Frame) {
 		w.Style(func(s *styles.Style) {
 			s.Display = styles.Stacked
 			s.Gap.Zero()
@@ -225,7 +225,7 @@ func (sw *Switch) Config(c *Plan) {
 	}, func(w *Frame) {
 		sw.UpdateStackTop() // need to update here
 	})
-	Configure(c, "stack/icon-on", func(w *Icon) {
+	AddAt(c, "stack/icon-on", func(w *Icon) {
 		w.Style(func(s *styles.Style) {
 			if sw.Type == SwitchChip {
 				s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
@@ -244,7 +244,7 @@ func (sw *Switch) Config(c *Plan) {
 	}, func(w *Icon) {
 		w.SetIcon(sw.IconOn)
 	})
-	Configure(c, "stack/icon-off", func(w *Icon) {
+	AddAt(c, "stack/icon-off", func(w *Icon) {
 		w.Style(func(s *styles.Style) {
 			switch sw.Type {
 			case SwitchSwitch:
@@ -263,7 +263,7 @@ func (sw *Switch) Config(c *Plan) {
 	}, func(w *Icon) {
 		w.SetIcon(sw.IconOff)
 	})
-	Configure(c, "stack/icon-indeterminate", func(w *Icon) {
+	AddAt(c, "stack/icon-indeterminate", func(w *Icon) {
 		w.Style(func(s *styles.Style) {
 			switch sw.Type {
 			case SwitchSwitch:
@@ -284,12 +284,12 @@ func (sw *Switch) Config(c *Plan) {
 	})
 
 	if sw.Text != "" {
-		Configure(c, "space", func(w *Space) {
+		AddAt(c, "space", func(w *Space) {
 			w.Style(func(s *styles.Style) {
 				s.Min.X.Ch(0.1)
 			})
 		})
-		Configure(c, "text", func(w *Text) {
+		AddAt(c, "text", func(w *Text) {
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
 				s.SetTextWrap(false)

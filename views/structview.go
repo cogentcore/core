@@ -111,7 +111,7 @@ func (sv *StructView) Config(c *core.Plan) {
 		var labelWidget *core.Text
 		var valueWidget core.Value
 
-		core.Configure(c, labnm, func(w *core.Text) {
+		core.AddAt(c, labnm, func(w *core.Text) {
 			labelWidget = w
 			w.Style(func(s *styles.Style) {
 				s.SetTextWrap(false)
@@ -153,7 +153,7 @@ func (sv *StructView) Config(c *core.Plan) {
 			w.SetText(label)
 		})
 
-		core.ConfigureNew(c, valnm, func() core.Value {
+		core.AddNew(c, valnm, func() core.Value {
 			w := core.NewValue(reflectx.UnderlyingPointer(value).Interface(), field.Tag)
 			valueWidget = w
 			wb := w.AsWidget()

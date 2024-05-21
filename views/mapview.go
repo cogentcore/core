@@ -77,7 +77,7 @@ func (mv *MapView) Config(c *core.Plan) {
 		keynm := "key-" + keytxt
 		valnm := "value-" + keytxt
 
-		core.ConfigureNew(c, keynm, func() core.Value {
+		core.AddNew(c, keynm, func() core.Value {
 			w := core.ToValue(key.Interface(), "")
 			BindMapKey(mapv, key, w)
 			wb := w.AsWidget()
@@ -103,7 +103,7 @@ func (mv *MapView) Config(c *core.Plan) {
 			BindMapKey(mapv, key, w)
 			wb.SetReadOnly(mv.IsReadOnly())
 		})
-		core.ConfigureNew(c, valnm, func() core.Value {
+		core.AddNew(c, valnm, func() core.Value {
 			val := mapv.MapIndex(key).Interface()
 			w := core.ToValue(val, "")
 			BindMapValue(mapv, key, w)
@@ -129,7 +129,7 @@ func (mv *MapView) Config(c *core.Plan) {
 
 		if typeAny {
 			typnm := "type-" + keytxt
-			core.Configure(c, typnm, func(w *core.Chooser) {
+			core.AddAt(c, typnm, func(w *core.Chooser) {
 				w.SetTypes(builtinTypes...)
 				w.OnChange(func(e events.Event) {
 					typ := reflect.TypeOf(w.CurrentItem.Value.(*types.Type).Instance)
@@ -152,7 +152,7 @@ func (mv *MapView) Config(c *core.Plan) {
 	}
 	if mv.Inline {
 		if !mv.IsReadOnly() {
-			core.Configure(c, "add-button", func(w *core.Button) {
+			core.AddAt(c, "add-button", func(w *core.Button) {
 				w.SetIcon(icons.Add).SetType(core.ButtonTonal)
 				w.Tooltip = "Add an element"
 				w.OnClick(func(e events.Event) {
@@ -160,7 +160,7 @@ func (mv *MapView) Config(c *core.Plan) {
 				})
 			})
 		}
-		core.Configure(c, "edit-button", func(w *core.Button) {
+		core.AddAt(c, "edit-button", func(w *core.Button) {
 			w.SetIcon(icons.Edit).SetType(core.ButtonTonal)
 			w.Tooltip = "Edit in a dialog"
 			w.OnClick(func(e events.Event) {
@@ -221,14 +221,14 @@ func (mv *MapView) ConfigToolbar(c *core.Plan) {
 	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
-	core.Configure(c, "", func(w *core.Button) {
+	core.AddAt(c, "", func(w *core.Button) {
 		w.SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys and the values").
 			OnClick(func(e events.Event) {
 				mv.ToggleSort()
 			})
 	})
 	if !mv.IsReadOnly() {
-		core.Configure(c, "", func(w *core.Button) {
+		core.AddAt(c, "", func(w *core.Button) {
 			w.SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
 				OnClick(func(e events.Event) {
 					mv.MapAdd()

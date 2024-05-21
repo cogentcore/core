@@ -285,7 +285,7 @@ func (bt *Button) Config(c *Plan) {
 	}
 
 	if bt.Icon.IsSet() {
-		Configure(c, "icon", func(w *Icon) {
+		AddAt(c, "icon", func(w *Icon) {
 			w.Style(func(s *styles.Style) {
 				s.Font.Size.Dp(18)
 			})
@@ -293,11 +293,11 @@ func (bt *Button) Config(c *Plan) {
 			w.SetIcon(bt.Icon)
 		})
 		if bt.Text != "" {
-			Configure[*Space](c, "space")
+			AddAt[*Space](c, "space")
 		}
 	}
 	if bt.Text != "" {
-		Configure(c, "text", func(w *Text) {
+		AddAt(c, "text", func(w *Text) {
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
 				s.SetTextWrap(false)
@@ -314,7 +314,7 @@ func (bt *Button) Config(c *Plan) {
 	}
 
 	if bt.Indicator.IsSet() {
-		Configure(c, "indicator-stretch", func(w *Stretch) {
+		AddAt(c, "indicator-stretch", func(w *Stretch) {
 			w.Style(func(s *styles.Style) {
 				s.Min.Set(units.Em(0.2))
 				if bt.Type == ButtonMenu {
@@ -324,7 +324,7 @@ func (bt *Button) Config(c *Plan) {
 				}
 			})
 		})
-		Configure(c, "indicator", func(w *Icon) {
+		AddAt(c, "indicator", func(w *Icon) {
 			w.Style(func(s *styles.Style) {
 				s.Min.X.Dp(18)
 				s.Min.Y.Dp(18)
@@ -338,8 +338,8 @@ func (bt *Button) Config(c *Plan) {
 
 	if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
 		if !bt.Indicator.IsSet() && bt.Shortcut != "" {
-			Configure[*Stretch](c, "shortcut-stretch")
-			Configure(c, "shortcut", func(w *Text) {
+			AddAt[*Stretch](c, "shortcut-stretch")
+			AddAt(c, "shortcut", func(w *Text) {
 				w.Style(func(s *styles.Style) {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
