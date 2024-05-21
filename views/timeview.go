@@ -41,98 +41,98 @@ func (tv *TimeView) SetTime(tim time.Time) *TimeView {
 }
 
 func (tv *TimeView) Make(p *core.Plan) {
-	if tv.HasChildren() {
-		return
-	}
-
-	hour := core.NewSpinner(tv)
-	hour.SetStep(1).SetEnforceStep(true)
-	if core.SystemSettings.Clock24 {
-		tv.Hour = tv.Time.Hour()
-		hour.SetMax(24).SetMin(0)
-	} else {
-		tv.Hour = tv.Time.Hour() % 12
-		if tv.Hour == 0 {
-			tv.Hour = 12
+	core.Add(p, func(w *core.Spinner) {
+		w.SetStep(1).SetEnforceStep(true)
+		if core.SystemSettings.Clock24 {
+			tv.Hour = tv.Time.Hour()
+			w.SetMax(24).SetMin(0)
+		} else {
+			tv.Hour = tv.Time.Hour() % 12
+			if tv.Hour == 0 {
+				tv.Hour = 12
+			}
+			w.SetMax(12).SetMin(1)
 		}
-		hour.SetMax(12).SetMin(1)
-	}
-	hour.SetValue(float32(tv.Hour))
-	hour.Style(func(s *styles.Style) {
-		s.Font.Size.Dp(57)
-		s.Min.X.Dp(96)
+		w.SetValue(float32(tv.Hour))
+		w.Style(func(s *styles.Style) {
+			s.Font.Size.Dp(57)
+			s.Min.X.Dp(96)
+		})
+		w.OnChange(func(e events.Event) {
+			hr := int(w.Value)
+			if hr == 12 && !core.SystemSettings.Clock24 {
+				hr = 0
+			}
+			tv.Hour = hr
+			if tv.PM {
+				// only add to local variable
+				hr += 12
+			}
+			// we set our hour and keep everything else
+			tt := tv.Time
+			tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), hr, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
+			tv.SendChange()
+		})
 	})
-	hour.OnChange(func(e events.Event) {
-		hr := int(hour.Value)
-		if hr == 12 && !core.SystemSettings.Clock24 {
-			hr = 0
-		}
-		tv.Hour = hr
-		if tv.PM {
-			// only add to local variable
-			hr += 12
-		}
-		// we set our hour and keep everything else
-		tt := tv.Time
-		tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), hr, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
-		tv.SendChange()
-	})
-
-	core.NewText(tv).SetType(core.TextDisplayLarge).SetText(":").
-		Style(func(s *styles.Style) {
+	core.Add(p, func(w *core.Text) {
+		w.SetType(core.TextDisplayLarge).SetText(":")
+		w.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 			s.Min.X.Ch(1)
 		})
-
-	minute := core.NewSpinner(tv).
-		SetStep(1).SetEnforceStep(true).
-		SetMin(0).SetMax(60).SetFormat("%02d").
-		SetValue(float32(tv.Time.Minute()))
-	minute.Style(func(s *styles.Style) {
-		s.Font.Size.Dp(57)
-		s.Min.X.Dp(96)
 	})
-	minute.OnChange(func(e events.Event) {
-		// we set our minute and keep everything else
-		tt := tv.Time
-		tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), int(minute.Value), tt.Second(), tt.Nanosecond(), tt.Location())
-		tv.SendChange()
+	core.Add(p, func(w *core.Spinner) {
+		w.SetStep(1).SetEnforceStep(true).
+			SetMin(0).SetMax(60).SetFormat("%02d").
+			SetValue(float32(tv.Time.Minute()))
+		w.Style(func(s *styles.Style) {
+			s.Font.Size.Dp(57)
+			s.Min.X.Dp(96)
+		})
+		w.OnChange(func(e events.Event) {
+			// we set our minute and keep everything else
+			tt := tv.Time
+			tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), int(minute.Value), tt.Second(), tt.Nanosecond(), tt.Location())
+			tv.SendChange()
+		})
 	})
 
 	if !core.SystemSettings.Clock24 {
-		sw := core.NewSwitches(tv).SetMutex(true).SetType(core.SwitchSegmentedButton).SetItems(core.SwitchItem{Text: "AM"}, core.SwitchItem{Text: "PM"})
-		sw.Style(func(s *styles.Style) {
-			s.Direction = styles.Column
-		})
-		sw.OnShow(func(e events.Event) {
-			if tv.Time.Hour() < 12 {
-				tv.PM = false
-				sw.SelectItem(0)
-			} else {
-				tv.PM = true
-				sw.SelectItem(1)
-			}
-			sw.Update()
-		})
-		sw.OnChange(func(e events.Event) {
-			si := sw.SelectedItem()
-			tt := tv.Time
-			if tv.Hour == 12 {
-				tv.Hour = 0
-			}
-			switch si.Text {
-			case "AM":
-				tv.PM = false
-				tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
-			case "PM":
-				tv.PM = true
-				tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour+12, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
-			default:
-				// must always have something valid selected
-				tv.PM = false
-				sw.SelectItem(0)
-				tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
-			}
+		core.Add(p, func(w *core.Switches) {
+			w.SetMutex(true).SetType(core.SwitchSegmentedButton).SetItems(core.SwitchItem{Text: "AM"}, core.SwitchItem{Text: "PM"})
+			w.Style(func(s *styles.Style) {
+				s.Direction = styles.Column
+			})
+			w.OnShow(func(e events.Event) {
+				if tv.Time.Hour() < 12 {
+					tv.PM = false
+					w.SelectItem(0)
+				} else {
+					tv.PM = true
+					w.SelectItem(1)
+				}
+				w.Update()
+			})
+			w.OnChange(func(e events.Event) {
+				si := w.SelectedItem()
+				tt := tv.Time
+				if tv.Hour == 12 {
+					tv.Hour = 0
+				}
+				switch si.Text {
+				case "AM":
+					tv.PM = false
+					tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
+				case "PM":
+					tv.PM = true
+					tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour+12, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
+				default:
+					// must always have something valid selected
+					tv.PM = false
+					w.SelectItem(0)
+					tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
+				}
+			})
 		})
 	}
 }
