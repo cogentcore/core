@@ -115,46 +115,35 @@ func ConfigCallerPath(level int) string {
 // the widget has the specified parts and direct Children.
 // The given parent path is used for recursion and should be blank
 // when calling the function externally.
-func (c *Plan) ConfigWidget(w Widget, parentPath string) {
+func (p *Plan) ConfigWidget(w Widget) {
+	p.build(w, "")
+}
+
+// build is the recursive implementation of [Plan.Build].
+func (p *Plan) build(w Widget, parentPath string) {
 	wb := w.AsWidget()
-	parts, children := c.SplitParts(parentPath)
-	if parts != nil {
-		if wb.Parts == nil {
-			wparts := parts.New()
-			wparts.SetName("parts")
-			wb.Parts = wparts.(*Frame)
-			tree.SetParent(wb.Parts, wb)
-			parts.Children.ConfigWidget(wparts, parts.ChildPath("parts"))
-		}
-	}
-	n := len(children)
-	if n > 0 {
-		wb.Kids, _ = config.Config(wb.Kids, n,
-			func(i int) string { return children[i].ItemName() },
+	if len(p.Children) > 0 {
+		wb.Kids, _ = config.Config(wb.Kids, len(p.Children),
+			func(i int) string { return p.Children[i].Name },
 			func(name string, i int) tree.Node {
-				child := children[i]
-				if child.New == nil {
-					fmt.Println("core.Config child.New is nil:", child.ItemName())
-					return nil
-				}
+				child := p.Children[i]
 				cw := child.New()
 				cw.SetName(name)
-				// fmt.Println(name, cw, wb)
 				tree.SetParent(cw, wb)
 				if child.Update != nil { // do initial setting in case children might reference
 					child.Update(cw)
 				}
 				return cw
 			})
-		for i, child := range children { // always config children even if not new
+		for i, child := range p.Children { // always config children even if not new
 			if len(child.Children) > 0 {
 				cw := wb.Child(i).(Widget)
-				child.Children.ConfigWidget(cw, child.Path)
+				child.ConfigWidget(cw)
 			}
 		}
 	}
 	if parentPath == "" { // top level
-		c.UpdateWidget(w, parentPath) // this is recursive
+		p.UpdateWidget(w, parentPath) // this is recursive
 	}
 }
 
