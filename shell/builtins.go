@@ -7,12 +7,14 @@ package shell
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 
 	"cogentcore.org/core/base/exec"
+	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/base/sshclient"
 	"github.com/mitchellh/go-homedir"
 )
@@ -30,6 +32,7 @@ func (sh *Shell) InstallBuiltins() {
 	sh.Builtins["source"] = sh.Source
 	sh.Builtins["cossh"] = sh.CoSSH
 	sh.Builtins["scp"] = sh.Scp
+	sh.Builtins["debug"] = sh.Debug
 }
 
 // Cd changes the current directory.
@@ -262,4 +265,24 @@ func (sh *Shell) Scp(cmdIO *exec.CmdIO, args ...string) error {
 		err = cl.CopyHostToLocalFile(ctx, hfn, lfn)
 	}
 	return err
+}
+
+// Debug changes log level
+func (sh *Shell) Debug(cmdIO *exec.CmdIO, args ...string) error {
+	if len(args) == 0 {
+		if logx.UserLevel == slog.LevelDebug {
+			logx.UserLevel = slog.LevelInfo
+		} else {
+			logx.UserLevel = slog.LevelDebug
+		}
+	}
+	if len(args) == 1 {
+		lev := args[0]
+		if lev == "on" || lev == "true" || lev == "1" {
+			logx.UserLevel = slog.LevelDebug
+		} else {
+			logx.UserLevel = slog.LevelInfo
+		}
+	}
+	return nil
 }

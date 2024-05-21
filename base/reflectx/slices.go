@@ -407,7 +407,7 @@ func CopySliceRobust(to, from any) error {
 		if i >= tolen {
 			SliceNewAt(to, i)
 		}
-		SetRobust(PointerValue(tonp.Index(i)).Interface(), fmnp.Index(i).Interface())
+		// SetRobust(PointerValue(tonp.Index(i)).Interface(), fmnp.Index(i).Interface())
 	}
 	return nil
 }

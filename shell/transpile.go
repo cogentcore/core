@@ -23,6 +23,12 @@ func (sh *Shell) TranspileLine(ln string) string {
 	sh.ParenDepth += paren
 	sh.BraceDepth += brace
 	sh.BrackDepth += brack
+	if sh.TypeDepth > 0 && brace < 0 {
+		sh.TypeDepth = 0
+	}
+	if len(toks) > 0 && toks[0].Tok == token.TYPE {
+		sh.TypeDepth++
+	}
 	// logx.PrintlnDebug("depths: ", sh.ParenDepth, sh.BraceDepth, sh.BrackDepth)
 	return toks.Code()
 }
@@ -42,6 +48,11 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 		sh.AddError(err)
 	}
 	logx.PrintlnDebug("\n########## line:\n", ln, "\nTokens:\n", toks.String(), "\nWords:\n", ewords)
+
+	if sh.TypeDepth > 0 {
+		logx.PrintlnDebug("go:   type defn")
+		return sh.TranspileGo(toks)
+	}
 
 	t0 := toks[0]
 	_, t0pn := toks.Path(true) // true = first position

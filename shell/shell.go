@@ -42,14 +42,8 @@ type Shell struct {
 	// SSHActive is the name of the active SSH client
 	SSHActive string
 
-	// depth of parens at the end of the current line. if 0, was complete.
-	ParenDepth int
-
-	// depth of braces at the end of the current line. if 0, was complete.
-	BraceDepth int
-
-	// depth of brackets at the end of the current line. if 0, was complete.
-	BrackDepth int
+	// depth of delim at the end of the current line. if 0, was complete.
+	ParenDepth, BraceDepth, BrackDepth, TypeDepth int
 
 	// stack of transpiled lines, that are accumulated in TranspileCode
 	Lines []string
@@ -228,7 +222,7 @@ func (sh *Shell) ResetLines() {
 
 // ResetDepth resets the current depths to 0
 func (sh *Shell) ResetDepth() {
-	sh.ParenDepth, sh.BraceDepth, sh.BrackDepth = 0, 0, 0
+	sh.ParenDepth, sh.BraceDepth, sh.BrackDepth, sh.TypeDepth = 0, 0, 0, 0
 }
 
 // AddLine adds line on the stack

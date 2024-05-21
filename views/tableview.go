@@ -201,7 +201,7 @@ func (tv *TableView) UpdateMaxWidths() {
 	for fli := 0; fli < tv.numVisibleFields; fli++ {
 		field := tv.visibleFields[fli]
 		tv.colMaxWidths[fli] = 0
-		val := tv.SliceElValue(0).Elem()
+		val := tv.SliceElValue(0)
 		fval := val.FieldByIndex(field.Index)
 		// _, isicon := vv.(*IconValue)
 		isicon := false
@@ -211,7 +211,7 @@ func (tv *TableView) UpdateMaxWidths() {
 		}
 		mxw := 0
 		for rw := 0; rw < tv.SliceSize; rw++ {
-			val := tv.SliceElValue(rw).Elem()
+			val := tv.SliceElValue(rw)
 			str := reflectx.ToString(val.FieldByIndex(field.Index).Interface())
 			mxw = max(mxw, len(str))
 		}
@@ -311,7 +311,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
 
 	for fli := 0; fli < tv.numVisibleFields; fli++ {
 		field := tv.visibleFields[fli]
-		fval := reflectx.OnePointerValue(val.Elem().FieldByIndex(field.Index))
+		fval := reflectx.OnePointerValue(val.FieldByIndex(field.Index))
 		valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
 		tags := ""
 		if fval.Kind() == reflect.Slice || fval.Kind() == reflect.Map {
@@ -608,6 +608,9 @@ func (tv *TableView) ContextMenu(m *core.Scene) {
 func (tv *TableView) SizeFinal() {
 	tv.SliceViewBase.SizeFinal()
 	sg := tv.This().(SliceViewer).SliceGrid()
+	if sg == nil {
+		return
+	}
 	sh := tv.SliceHeader()
 	sh.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
 		_, sgb := core.AsWidget(sg.Child(i))

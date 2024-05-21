@@ -159,6 +159,9 @@ func TestTranspile(t *testing.T) {
 		{"cd ../an-other/dir/", `shell.Run("cd", "../an-other/dir/")`},
 		{"curl https://google.com/search?q=hello%20world#body", `shell.Run("curl", "https://google.com/search?q=hello%20world#body")`},
 		{"func splitLines(str string) []string {", `splitLines := func(str string)[]string {`},
+		{"type Result struct {", `type Result struct {`},
+		{"var Jobs *table.Table", `var Jobs *table.Table`},
+		{"type Result struct { JobID string", `type Result struct { JobID string`},
 	}
 
 	sh := NewShell()

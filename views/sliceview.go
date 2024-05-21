@@ -485,7 +485,7 @@ func (sv *SliceViewBase) UpdateMaxWidths() {
 func (sv *SliceViewBase) SliceElValue(si int) reflect.Value {
 	var val reflect.Value
 	if si < sv.SliceSize {
-		val = reflectx.UnderlyingPointer(sv.SliceUnderlying.Index(si)) // deal with pointer lists
+		val = reflectx.Underlying(sv.SliceUnderlying.Index(si)) // deal with pointer lists
 	} else {
 		val = sv.ElementValue
 	}
@@ -1932,6 +1932,10 @@ func (sv *SliceViewBase) HandleEvents() {
 
 func (sv *SliceViewBase) SizeFinal() {
 	sg := sv.This().(SliceViewer).SliceGrid()
+	if sg == nil {
+		sv.Frame.SizeFinal()
+		return
+	}
 	localIter := 0
 	for (sv.MakeIter < 2 || sv.VisRows != sg.VisRows) && localIter < 2 {
 		if sv.VisRows != sg.VisRows {

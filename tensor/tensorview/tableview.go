@@ -637,6 +637,21 @@ func (tv *TableView) SizeFinal() {
 	ksz.Alloc.Content.X = gsz.Alloc.Content.X
 }
 
+// SelectedColumnStrings returns the string values of given column name.
+func (tv *TableView) SelectedColumnStrings(colName string) []string {
+	dt := tv.Table.Table
+	jis := tv.SelectedIndexesList(false)
+	if len(jis) == 0 || dt == nil {
+		return nil
+	}
+	var s []string
+	for _, i := range jis {
+		v := dt.StringValue(colName, i)
+		s = append(s, v)
+	}
+	return s
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //    Copy / Cut / Paste
 
