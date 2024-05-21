@@ -448,9 +448,9 @@ func (fv *FileView) ConfigSelRow(sel *core.Plan) {
 				fv.SetSelFileAction(w.Text())
 			}
 		})
-		w.StartFocus()
 	}, func(w *core.TextField) {
 		w.SetText(fv.CurrentSelectedFile)
+		w.StartFocus()
 	})
 
 	core.AddAt(sel, "ext-text", func(w *core.Text) {
@@ -729,37 +729,27 @@ func (fv *FileView) SaveSortSettings() {
 	core.ErrorSnackbar(fv, core.SaveSettings(core.SystemSettings), "Error saving settings")
 }
 
-func (fv *FileView) ApplyStyle() {
-	fv.Frame.ApplyStyle()
-	sf := fv.SelectField()
-	sf.StartFocus() // need to call this when window is actually active
-}
-
 func (fv *FileView) HandleEvents() {
 	fv.OnKeyChord(func(e events.Event) {
-		fv.KeyInput(e)
-	})
-}
-
-func (fv *FileView) KeyInput(kt events.Event) {
-	kf := keymap.Of(kt.KeyChord())
-	if core.DebugSettings.KeyEventTrace {
-		slog.Info("FileView KeyInput", "widget", fv, "keyFunction", kf)
-	}
-	switch kf {
-	case keymap.Jump, keymap.WordLeft:
-		kt.SetHandled()
-		fv.DirPathUp()
-	case keymap.Insert, keymap.InsertAfter, keymap.Open, keymap.SelectMode:
-		kt.SetHandled()
-		if fv.SelectFile() {
-			fv.Send(events.DoubleClick, kt) // will close dialog
+		kf := keymap.Of(e.KeyChord())
+		if core.DebugSettings.KeyEventTrace {
+			slog.Info("FileView KeyInput", "widget", fv, "keyFunction", kf)
 		}
-	case keymap.Search:
-		kt.SetHandled()
-		sf := fv.SelectField()
-		sf.SetFocusEvent()
-	}
+		switch kf {
+		case keymap.Jump, keymap.WordLeft:
+			e.SetHandled()
+			fv.DirPathUp()
+		case keymap.Insert, keymap.InsertAfter, keymap.Open, keymap.SelectMode:
+			e.SetHandled()
+			if fv.SelectFile() {
+				fv.Send(events.DoubleClick, e) // will close dialog
+			}
+		case keymap.Search:
+			e.SetHandled()
+			sf := fv.SelectField()
+			sf.SetFocusEvent()
+		}
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////
