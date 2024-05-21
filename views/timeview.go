@@ -40,7 +40,7 @@ func (tv *TimeView) SetTime(tim time.Time) *TimeView {
 	return tv
 }
 
-func (tv *TimeView) Make(c *core.Plan) {
+func (tv *TimeView) Make(p *core.Plan) {
 	if tv.HasChildren() {
 		return
 	}
@@ -158,7 +158,7 @@ func (dv *DateView) SetTime(tim time.Time) *DateView {
 	return dv
 }
 
-func (dv *DateView) Make(c *core.Plan) {
+func (dv *DateView) Make(p *core.Plan) {
 	if dv.HasChildren() {
 		dv.DeleteChildren()
 	} else {

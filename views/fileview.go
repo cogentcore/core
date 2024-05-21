@@ -218,7 +218,7 @@ var FileViewKindColorMap = map[string]string{
 	"folder": "pref(link)",
 }
 
-func (fv *FileView) Make(c *core.Plan) {
+func (fv *FileView) Make(p *core.Plan) {
 	if len(core.RecentPaths) == 0 {
 		core.OpenRecentPaths()
 	}
@@ -243,35 +243,35 @@ func (fv *FileView) Make(c *core.Plan) {
 		fv.PrevPath = fv.DirPath
 	}
 
-	core.AddAt(c, "files", func(w *core.Frame) {
+	files := core.AddAt(p, "files", func(w *core.Frame) {
 		w.Style(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
 		})
 	})
-	core.AddAt(c, "sel", func(w *core.Frame) {
+	sel := core.AddAt(p, "sel", func(w *core.Frame) {
 		w.Style(func(s *styles.Style) {
 			s.Grow.Set(1, 0)
 			s.Gap.X.Dp(4)
 		})
 	})
 
-	fv.ConfigFilesRow(c)
-	fv.ConfigSelRow(c)
+	fv.ConfigFilesRow(files)
+	fv.ConfigSelRow(sel)
 }
 
 // MakeToolbar configures the given toolbar to have file view
 // actions and completions.
-func (fv *FileView) MakeToolbar(c *core.Plan) {
-	core.Add(c, func(w *FuncButton) {
+func (fv *FileView) MakeToolbar(p *core.Plan) {
+	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
 	})
-	core.Add(c, func(w *FuncButton) {
+	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(fv.AddPathToFaves).SetIcon(icons.Favorite).SetText("Favorite")
 	})
-	core.Add(c, func(w *FuncButton) {
+	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(fv.UpdateFilesAction).SetIcon(icons.Refresh).SetText("Update")
 	})
-	core.Add(c, func(w *FuncButton) {
+	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(fv.NewFolder).SetIcon(icons.CreateNewFolder)
 	})
 }
@@ -309,8 +309,8 @@ func (fv *FileView) ConfigAppChooser(ch *core.Chooser) {
 	})
 }
 
-func (fv *FileView) ConfigFilesRow(c *core.Plan) {
-	core.AddAt(c, "files/faves", func(w *TableView) {
+func (fv *FileView) ConfigFilesRow(files *core.Plan) {
+	core.AddAt(files, "faves", func(w *TableView) {
 		w.SelectedIndex = -1
 		w.SetReadOnly(true)
 		w.SetFlag(false, SliceViewShowIndex)
@@ -327,7 +327,7 @@ func (fv *FileView) ConfigFilesRow(c *core.Plan) {
 	}, func(w *TableView) {
 		w.ResetSelectedIndexes()
 	})
-	core.AddAt(c, "files/files", func(w *TableView) {
+	core.AddAt(files, "files", func(w *TableView) {
 		w.SetFlag(false, SliceViewShowIndex)
 		w.SetReadOnly(true)
 		w.Style(func(s *styles.Style) {
@@ -421,8 +421,8 @@ func (fv *FileView) ConfigFilesRow(c *core.Plan) {
 	})
 }
 
-func (fv *FileView) ConfigSelRow(c *core.Plan) {
-	core.AddAt(c, "sel/file-text", func(w *core.Text) {
+func (fv *FileView) ConfigSelRow(sel *core.Plan) {
+	core.AddAt(sel, "file-text", func(w *core.Text) {
 		w.SetText("File: ")
 		w.SetTooltip("Enter file name here (or select from list above)")
 		w.Style(func(s *styles.Style) {
@@ -430,7 +430,7 @@ func (fv *FileView) ConfigSelRow(c *core.Plan) {
 		})
 	})
 
-	core.AddAt(c, "sel/file", func(w *core.TextField) {
+	core.AddAt(sel, "file", func(w *core.TextField) {
 		w.SetText(fv.CurrentSelectedFile)
 		w.SetTooltip(fmt.Sprintf("Enter the file name. Special keys: up/down to move selection; %s or %s to go up to parent folder; %s or %s or %s or %s to select current file (if directory, goes into it, if file, selects and closes); %s or %s for prev / next history item; %s return to this field", keymap.WordLeft.Label(), keymap.Jump.Label(), keymap.SelectMode.Label(), keymap.Insert.Label(), keymap.InsertAfter.Label(), keymap.Open.Label(), keymap.HistPrev.Label(), keymap.HistNext.Label(), keymap.Search.Label()))
 		w.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
@@ -453,14 +453,14 @@ func (fv *FileView) ConfigSelRow(c *core.Plan) {
 		w.SetText(fv.CurrentSelectedFile)
 	})
 
-	core.AddAt(c, "sel/ext-text", func(w *core.Text) {
+	core.AddAt(sel, "ext-text", func(w *core.Text) {
 		w.SetText("Extension(s):").SetTooltip("target extension(s) to highlight; if multiple, separate with commas, and include the . at the start")
 		w.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 		})
 	})
 
-	core.AddAt(c, "sel/ext", func(w *core.TextField) {
+	core.AddAt(sel, "ext", func(w *core.TextField) {
 		w.SetText(fv.Ext)
 		w.OnChange(func(e events.Event) {
 			fv.SetExtAction(w.Text())

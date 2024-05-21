@@ -286,8 +286,8 @@ func (pg *Page) Make(p *core.Plan) {
 }
 
 // AppBar is the default app bar for a [Page]
-func (pg *Page) AppBar(c *core.Plan) {
-	// todo: needs a different config
+func (pg *Page) AppBar(p *core.Plan) {
+	// TODO(config): needs a different config
 	/*
 		ch := tb.AppChooser()
 

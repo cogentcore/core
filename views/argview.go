@@ -56,8 +56,7 @@ func (av *ArgView) SetStyles() {
 	})
 }
 
-// Config configures the view
-func (av *ArgView) Make(c *core.Plan) {
+func (av *ArgView) Make(p *core.Plan) {
 	config := tree.Config{}
 	config.Add(core.TextType, "title")
 	config.Add(core.FrameType, "args-grid")

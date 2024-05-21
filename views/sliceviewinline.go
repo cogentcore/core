@@ -65,14 +65,14 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 	return sv
 }
 
-func (sv *SliceViewInline) Make(c *core.Plan) {
+func (sv *SliceViewInline) Make(p *core.Plan) {
 	sl := reflectx.NonPointerValue(reflectx.UnderlyingPointer(reflect.ValueOf(sv.Slice)))
 
 	sz := min(sl.Len(), core.SystemSettings.SliceInlineLength)
 	for i := 0; i < sz; i++ {
 		itxt := strconv.Itoa(i)
 		val := reflectx.UnderlyingPointer(sl.Index(i)) // deal with pointer lists
-		core.AddNew(c, "value-"+itxt, func() core.Value {
+		core.AddNew(p, "value-"+itxt, func() core.Value {
 			w := core.NewValue(val.Interface(), "")
 			wb := w.AsWidget()
 			// vv.SetSliceValue(val, sv.Slice, i, sv.ViewPath)
@@ -103,7 +103,7 @@ func (sv *SliceViewInline) Make(c *core.Plan) {
 		})
 	}
 	if !sv.isArray && !sv.isFixedLength {
-		core.AddAt(c, "add-button", func(w *core.Button) {
+		core.AddAt(p, "add-button", func(w *core.Button) {
 			w.SetIcon(icons.Add).SetType(core.ButtonTonal)
 			w.Tooltip = "Add an element to the list"
 			w.OnClick(func(e events.Event) {
@@ -111,7 +111,7 @@ func (sv *SliceViewInline) Make(c *core.Plan) {
 			})
 		})
 	}
-	core.AddAt(c, "edit-button", func(w *core.Button) {
+	core.AddAt(p, "edit-button", func(w *core.Button) {
 		w.SetIcon(icons.Edit).SetType(core.ButtonTonal)
 		w.Tooltip = "Edit list in a dialog"
 		w.OnClick(func(e events.Event) {

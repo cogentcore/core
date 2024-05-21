@@ -91,7 +91,7 @@ func (sw *Scene) HandleEvents() {
 	sw.HandleSelectEvents()
 }
 
-func (sw *Scene) Make(c *core.Plan) {
+func (sw *Scene) Build() {
 	sz := sw.Geom.Size.Actual.Content.ToPointFloor()
 	if sz == (image.Point{}) {
 		return

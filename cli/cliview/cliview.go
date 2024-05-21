@@ -58,12 +58,12 @@ func Run[T any, C cli.CmdOrFunc[T]](opts *cli.Options, cfg T, cmds ...C) error {
 func GUI[T any](opts *cli.Options, cfg T, cmds ...*cli.Cmd[T]) {
 	b := core.NewBody(opts.AppName)
 
-	b.AddAppBar(func(c *core.Plan) {
+	b.AddAppBar(func(p *core.Plan) {
 		for _, cmd := range cmds {
 			if cmd.Name == "gui" { // we are already in GUI so that command is irrelevant
 				continue
 			}
-			core.AddAt(c, cmd.Name, func(w *core.Button) {
+			core.AddAt(p, cmd.Name, func(w *core.Button) {
 				w.SetText(strcase.ToSentence(cmd.Name)).SetTooltip(cmd.Doc).
 					OnClick(func(e events.Event) {
 						err := cmd.Func(cfg)

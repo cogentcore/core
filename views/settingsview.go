@@ -11,8 +11,8 @@ import (
 )
 
 // SettingsViewToolbarBase is the base toolbar configuration function used in [SettingsView].
-func SettingsViewToolbarBase(c *core.Plan) {
-	core.Add(c, func(w *FuncButton) {
+func SettingsViewToolbarBase(p *core.Plan) {
+	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(core.AppearanceSettings.SaveScreenZoom).SetIcon(icons.ZoomIn).
 			SetAfterFunc(func() {
 				core.AppearanceSettings.Apply()
@@ -44,10 +44,10 @@ func SettingsWindow() {
 
 // SettingsView adds to the given body a view of user settings
 func SettingsView(b *core.Body) {
-	b.AddAppBar(func(c *core.Plan) {
-		SettingsViewToolbarBase(c)
+	b.AddAppBar(func(p *core.Plan) {
+		SettingsViewToolbarBase(p)
 		for _, se := range core.AllSettings {
-			se.MakeToolbar(c)
+			se.MakeToolbar(p)
 		}
 	})
 

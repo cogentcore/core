@@ -107,8 +107,8 @@ func main() {
 	nt := tv.NewTab("Planets Data")
 	tbv := tensorview.NewTableView(nt).SetTable(Planets)
 	b.AddAppBar(tbv.MakeToolbar)
-	b.AddAppBar(func(c *core.Plan) {
-		core.Add(c, func(w *core.Button) {
+	b.AddAppBar(func(p *core.Plan) {
+		core.Add(p, func(w *core.Button) {
 			w.SetText("README").SetIcon(icons.FileMarkdown).
 				SetTooltip("open README help file").OnClick(func(e events.Event) {
 				core.TheApp.OpenURL("https://github.com/cogentcore/core/blob/main/tensor/examples/dataproc/README.md")

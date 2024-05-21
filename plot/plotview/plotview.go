@@ -358,7 +358,7 @@ func (pl *PlotView) PlotXAxis(plt *plot.Plot, ixvw *table.IndexView) (xi int, xv
 	return
 }
 
-func (pl *PlotView) Make(c *core.Plan) {
+func (pl *PlotView) Make(p *core.Plan) {
 	if pl.Table == nil {
 		return
 	}
@@ -570,11 +570,11 @@ func (pl *PlotView) ColumnsConfig() {
 	}
 }
 
-func (pl *PlotView) MakeToolbar(c *core.Plan) {
+func (pl *PlotView) MakeToolbar(p *core.Plan) {
 	if pl.Table == nil {
 		return
 	}
-	core.Add(c, func(w *core.Button) {
+	core.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.PanTool).
 			SetTooltip("toggle the ability to zoom and pan the view").OnClick(func(e events.Event) {
 			pc := pl.PlotChild()
@@ -582,16 +582,16 @@ func (pl *PlotView) MakeToolbar(c *core.Plan) {
 			pc.ApplyStyleUpdate()
 		})
 	})
-	core.Add(c, func(w *core.Button) {
+	core.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.ArrowForward).
 			SetTooltip("turn on select mode for selecting Plot elements").
 			OnClick(func(e events.Event) {
 				fmt.Println("this will select select mode")
 			})
 	})
-	core.Add[*core.Separator](c)
+	core.Add[*core.Separator](p)
 
-	core.Add(c, func(w *core.Button) {
+	core.Add(p, func(w *core.Button) {
 		w.SetText("Update").SetIcon(icons.Update).
 			SetTooltip("update fully redraws display, reflecting any new settings etc").
 			OnClick(func(e events.Event) {
@@ -599,7 +599,7 @@ func (pl *PlotView) MakeToolbar(c *core.Plan) {
 				pl.UpdatePlot()
 			})
 	})
-	core.Add(c, func(w *core.Button) {
+	core.Add(p, func(w *core.Button) {
 		w.SetText("Config").SetIcon(icons.Settings).
 			SetTooltip("set parameters that control display (font size etc)").
 			OnClick(func(e events.Event) {
@@ -611,7 +611,7 @@ func (pl *PlotView) MakeToolbar(c *core.Plan) {
 				d.NewFullDialog(pl).SetNewWindow(true).Run()
 			})
 	})
-	core.Add(c, func(w *core.Button) {
+	core.Add(p, func(w *core.Button) {
 		w.SetText("Table").SetIcon(icons.Edit).
 			SetTooltip("open a TableView window of the data").
 			OnClick(func(e events.Event) {
@@ -621,9 +621,9 @@ func (pl *PlotView) MakeToolbar(c *core.Plan) {
 				d.NewFullDialog(pl).SetNewWindow(true).Run()
 			})
 	})
-	core.Add[*core.Separator](c)
+	core.Add[*core.Separator](p)
 
-	core.Add(c, func(w *core.Button) {
+	core.Add(p, func(w *core.Button) {
 		w.SetText("Save").SetIcon(icons.Save).SetMenu(func(m *core.Scene) {
 			views.NewFuncButton(m, pl.SaveSVG).SetIcon(icons.Save)
 			views.NewFuncButton(m, pl.SavePNG).SetIcon(icons.Save)
@@ -632,14 +632,14 @@ func (pl *PlotView) MakeToolbar(c *core.Plan) {
 			views.NewFuncButton(m, pl.SaveAll).SetIcon(icons.Save)
 		})
 	})
-	core.Add(c, func(w *views.FuncButton) {
+	core.Add(p, func(w *views.FuncButton) {
 		w.SetFunc(pl.OpenCSV).SetIcon(icons.Open)
 	})
-	core.Add[*core.Separator](c)
-	core.Add(c, func(w *views.FuncButton) {
+	core.Add[*core.Separator](p)
+	core.Add(p, func(w *views.FuncButton) {
 		w.SetFunc(pl.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
 	})
-	core.Add(c, func(w *views.FuncButton) {
+	core.Add(p, func(w *views.FuncButton) {
 		w.SetFunc(pl.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
 	})
 }

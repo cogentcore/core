@@ -75,7 +75,7 @@ func (sv *StructView) OnInit() {
 	})
 }
 
-func (sv *StructView) Make(c *core.Plan) {
+func (sv *StructView) Make(p *core.Plan) {
 	if reflectx.AnyIsNil(sv.Struct) {
 		return
 	}
@@ -111,7 +111,7 @@ func (sv *StructView) Make(c *core.Plan) {
 		var labelWidget *core.Text
 		var valueWidget core.Value
 
-		core.AddAt(c, labnm, func(w *core.Text) {
+		core.AddAt(p, labnm, func(w *core.Text) {
 			labelWidget = w
 			w.Style(func(s *styles.Style) {
 				s.SetTextWrap(false)
@@ -153,7 +153,7 @@ func (sv *StructView) Make(c *core.Plan) {
 			w.SetText(label)
 		})
 
-		core.AddNew(c, valnm, func() core.Value {
+		core.AddNew(p, valnm, func() core.Value {
 			w := core.NewValue(reflectx.UnderlyingPointer(value).Interface(), field.Tag)
 			valueWidget = w
 			wb := w.AsWidget()

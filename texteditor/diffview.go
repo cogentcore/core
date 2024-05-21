@@ -487,7 +487,7 @@ func (dv *DiffView) UndoDiff(ab int) error {
 	return nil
 }
 
-func (dv *DiffView) Make(c *core.Plan) {
+func (dv *DiffView) Make(p *core.Plan) {
 	if dv.HasChildren() {
 		return
 	}

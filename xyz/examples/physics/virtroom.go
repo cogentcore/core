@@ -439,64 +439,64 @@ func (ev *Env) ConfigGUI() *core.Body {
 	//////////////////////////////////////////
 	//    Toolbar
 
-	b.AddAppBar(func(c *core.Plan) {
-		core.Add(c, func(w *core.Button) {
+	b.AddAppBar(func(p *core.Plan) {
+		core.Add(p, func(w *core.Button) {
 			w.SetText("Edit Env").SetIcon(icons.Edit).
 				SetTooltip("Edit the settings for the environment").
 				OnClick(func(e events.Event) {
 					sv.SetStruct(ev)
 				})
 		})
-		core.Add(c, func(w *views.FuncButton) {
+		core.Add(p, func(w *views.FuncButton) {
 			w.SetFunc(ev.WorldInit).SetText("Init").SetIcon(icons.Update)
 		})
-		core.Add(c, func(w *views.FuncButton) {
+		core.Add(p, func(w *views.FuncButton) {
 			w.SetFunc(ev.ReMakeWorld).SetText("Make").SetIcon(icons.Update)
 		})
-		core.Add(c, func(w *views.FuncButton) {
+		core.Add(p, func(w *views.FuncButton) {
 			w.SetFunc(ev.GrabEyeImg).SetText("Grab Image").SetIcon(icons.Image)
 		})
-		core.Add[*core.Separator](c)
+		core.Add[*core.Separator](p)
 
-		core.Add(c, func(w *views.FuncButton) {
+		core.Add(p, func(w *views.FuncButton) {
 			w.SetFunc(ev.StepForward).SetText("Fwd").SetIcon(icons.SkipNext).
 				Style(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
-		core.Add(c, func(w *views.FuncButton) {
+		core.Add(p, func(w *views.FuncButton) {
 			w.SetFunc(ev.StepBackward).SetText("Bkw").SetIcon(icons.SkipPrevious).
 				Style(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
-		core.Add(c, func(w *views.FuncButton) {
+		core.Add(p, func(w *views.FuncButton) {
 			w.SetFunc(ev.RotBodyLeft).SetText("Body Left").SetIcon(icons.KeyboardArrowLeft).
 				Style(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
-		core.Add(c, func(w *views.FuncButton) {
+		core.Add(p, func(w *views.FuncButton) {
 			w.SetFunc(ev.RotBodyRight).SetText("Body Right").SetIcon(icons.KeyboardArrowRight).
 				Style(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
-		core.Add(c, func(w *views.FuncButton) {
+		core.Add(p, func(w *views.FuncButton) {
 			w.SetFunc(ev.RotHeadLeft).SetText("Head Left").SetIcon(icons.KeyboardArrowLeft).
 				Style(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
-		core.Add(c, func(w *views.FuncButton) {
+		core.Add(p, func(w *views.FuncButton) {
 			w.SetFunc(ev.RotHeadRight).SetText("Head Right").SetIcon(icons.KeyboardArrowRight).
 				Style(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
-		core.Add[*core.Separator](c)
+		core.Add[*core.Separator](p)
 
-		core.Add(c, func(w *core.Button) {
+		core.Add(p, func(w *core.Button) {
 			w.SetText("README").SetIcon(icons.FileMarkdown).
 				SetTooltip("Open browser on README.").
 				OnClick(func(e events.Event) {

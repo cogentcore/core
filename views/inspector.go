@@ -190,8 +190,7 @@ func (is *Inspector) SetRoot(root tree.Node) {
 	is.Build()
 }
 
-// Config configures the widget
-func (is *Inspector) Make(c *core.Plan) {
+func (is *Inspector) Make(p *core.Plan) {
 	if is.TreeRoot == nil {
 		return
 	}
@@ -304,30 +303,30 @@ func (is *Inspector) ConfigSplits() {
 	sv.SetStruct(is.TreeRoot)
 }
 
-func (is *Inspector) MakeToolbar(c *core.Plan) {
-	core.Add(c, func(w *FuncButton) {
+func (is *Inspector) MakeToolbar(p *core.Plan) {
+	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool).
 			StyleFirst(func(s *styles.Style) {
 				_, ok := is.TreeRoot.(*core.Scene)
 				s.SetEnabled(ok)
 			})
 	})
-	core.Add[*core.Separator](c)
-	core.Add(c, func(w *FuncButton) {
+	core.Add[*core.Separator](p)
+	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.Open).SetKey(keymap.Open)
 		w.Args[0].SetValue(is.Filename)
 		w.Args[0].SetTag("ext", ".json")
 	})
-	core.Add(c, func(w *FuncButton) {
+	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.Save).SetKey(keymap.Save)
 	})
-	core.Add(c, func(w *FuncButton) {
+	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.SaveAs).SetKey(keymap.SaveAs)
 		w.Args[0].SetValue(is.Filename)
 		w.Args[0].SetTag("ext", ".json")
 	})
-	core.Add[*core.Separator](c)
-	core.Add(c, func(w *FuncButton) {
+	core.Add[*core.Separator](p)
+	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.InspectApp).SetIcon(icons.Devices)
 	})
 }
