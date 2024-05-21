@@ -19,31 +19,27 @@ import (
 // Plan represents a plan for how a widget should be configured and updated.
 // An instance of it is passed to [Widget.Make], which is responsible for making
 // the plan that is then used to configure and update the widget in [Widget.Build].
-// To add an item to a plan, use [Add], [AddAt], or [AddNew].
-type Plan []*PlanItem
+// To add a child item to a plan, use [Add], [AddAt], or [AddNew]. Those functions
+// return a Plan that you can use as an argument to future Add calls to add more
+// Plans for children nested under the already added Plan. Plan contains closures
+// responsible for creating and updating a widget.
+type Plan struct {
 
-// PlanItem represents one item of a [Plan] that specifies how a single widget
-// and its children should be configured and updated in [Widget.Build]. It contains
-// closures responsible for creating and updating the widget. Also, it can contain
-// an additional [Plan] for configuring the children of the widget. To add a new
-// PlanItem, call [Add], [AddAt], or [AddNew]. Those functions return a [Plan]
-// that you can use as an argument to future Add calls to add more [PlanItem]s
-// for children nested under the already added widget.
-type PlanItem struct {
+	// Name is the name of the planned widget. If it is blank, this [Plan]
+	// is assumed to be the root Plan, and only its children are handled.
+	Name string
 
-	// Path is the forward slash delimited path to the element.
-	Path string
-
-	// New returns a new Widget of the correct type for this element,
+	// New returns a new [Widget] of the correct type for this element,
 	// fully configured and ready for use.
 	New func() Widget
 
-	// Update updates the widget based on current state, so that it
-	// propertly renders the correct information.
+	// Update updates the widget based on current state so that it
+	// propertly represents the correct information.
 	Update func(w Widget)
 
-	// Config for Children elements.
-	Children Plan
+	// Children is a list of [Plan]s that are used to configure and update children
+	// nested under the widget of this [Plan].
+	Children []*Plan
 }
 
 // Configure adds a new config item to the given [Plan] for a widget at the
