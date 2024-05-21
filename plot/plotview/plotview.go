@@ -85,7 +85,7 @@ func NewSubPlot(parent ...tree.Node) *PlotView {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
-	tb.Makers.Add(pl.MakeToolbar)
+	tb.AddMaker(pl.MakeToolbar)
 	return pl
 }
 
