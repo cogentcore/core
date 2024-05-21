@@ -88,26 +88,11 @@ func ConfigureNew[T Widget](c *Plan, path string, new func() T, update ...func(w
 	}
 }
 
-// Add adds a new config item for a widget at the given forward slash separated
-// path with the given function for constructing the widget and the given function
-// for updating the widget. This should be called on the root level Config
-// list. Any items with nested paths are added to Children lists as
-// appropriate. If the given path is blank, it is automatically set to
-// a unique name based on the filepath and line number of the calling function.
-// Consider using the [Configure] global generic function for
-// better type safety and increased convenience.
-func (c *Plan) Add(path string, new func() Widget, update func(w Widget)) {
-	if path == "" {
-		path = ConfigCallerPath(3)
-	}
-	itm := &PlanItem{Path: path, New: new, Update: update}
-	plist := strings.Split(path, "/")
-	if len(plist) == 1 {
-		*c = append(*c, itm)
-		return
-	}
-	next := c.FindMakeChild(plist[0])
-	next.AddSubItem(plist[1:], itm)
+// Add adds a new [Plan] item to the given [Plan] with the given name and functions.
+// It should typically not be called by end-user code; see the generic
+// [Add], [AddAt], and [AddNew] functions instead.
+func (p *Plan) Add(name string, new func() Widget, update func(w Widget)) {
+	p.Children = append(p.Children, &Plan{Name: name, New: new, Update: update})
 }
 
 // ConfigCallerPath returns the dir-filename of [runtime.Caller](level),
@@ -124,89 +109,6 @@ func ConfigCallerPath(level int) string {
 	// need to get rid of slashes and dots for path name
 	path = strings.ReplaceAll(strings.ReplaceAll(path, "/", "-"), ".", "-") + "-" + strconv.Itoa(line)
 	return path
-}
-
-// ChildPath returns this item's path + "/" + child
-func (c *PlanItem) ChildPath(child string) string {
-	return c.Path + "/" + child
-}
-
-// ItemName returns this item's name from its path,
-// as the last element in the path.
-func (c *PlanItem) ItemName() string {
-	pi := strings.LastIndex(c.Path, "/")
-	if pi < 0 {
-		return c.Path
-	}
-	return c.Path[pi+1:]
-}
-
-// AddSubItem adds given sub item to this config item, based on the
-// list of path elements, where the first path element should be
-// immediate Children of this item, etc.
-func (c *PlanItem) AddSubItem(path []string, itm *PlanItem) {
-	fpath := c.ChildPath(path[0])
-	child := c.Children.FindMakeChild(fpath)
-	if len(path) == 1 {
-		*child = *itm
-		return
-	}
-	child.AddSubItem(path[1:], itm)
-}
-
-// FindChild finds item with given path string within this list.
-// Does not search within any Children of items here.
-// Returns nil if not found.
-func (c *Plan) FindChild(path string) *PlanItem {
-	for _, itm := range *c {
-		if itm.Path == path {
-			return itm
-		}
-	}
-	return nil
-}
-
-// FindMakeChild finds item with given path element within this list.
-// Does not search within any Children of items here.
-// Makes a new item if not found.
-func (c *Plan) FindMakeChild(path string) *PlanItem {
-	for _, itm := range *c {
-		if itm.Path == path {
-			return itm
-		}
-	}
-	itm := &PlanItem{Path: path}
-	*c = append(*c, itm)
-	return itm
-}
-
-// String returns a newline separated list of paths for all the items,
-// including the Children of items.
-func (c *Plan) String() string {
-	str := ""
-	for _, itm := range *c {
-		str += itm.Path + "\n"
-		str += itm.Children.String()
-	}
-	return str
-}
-
-// SplitParts splits out a config item with sub-name "parts" from remainder
-// returning both (each of which could be nil).  parpath contains any parent
-// path to add to the path
-func (c *Plan) SplitParts(parpath string) (parts *PlanItem, children Plan) {
-	partnm := "parts"
-	if parpath != "" {
-		partnm = parpath + "/" + partnm
-	}
-	for _, itm := range *c {
-		if itm.Path == partnm {
-			parts = itm
-		} else {
-			children = append(children, itm)
-		}
-	}
-	return
 }
 
 // ConfigWidget runs the Config on the given widget, ensuring that
