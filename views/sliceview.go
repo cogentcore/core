@@ -70,11 +70,8 @@ func (sv *SliceView) StyleRow(w core.Widget, idx, fidx int) {
 type SliceViewFlags core.WidgetFlags //enums:bitflag -trim-prefix SliceView
 
 const (
-	// SliceViewConfigured indicates that the widgets have been configured
-	SliceViewConfigured SliceViewFlags = SliceViewFlags(core.WidgetFlagsN) + iota
-
 	// SliceViewIsArray is whether the slice is actually an array -- no modifications -- set by SetSlice
-	SliceViewIsArray
+	SliceViewIsArray SliceViewFlags = SliceViewFlags(core.WidgetFlagsN) + iota
 
 	// SliceViewShowIndex is whether to show index or not
 	SliceViewShowIndex
@@ -124,9 +121,10 @@ type SliceViewer interface {
 	// on estimates from length of strings (for string values)
 	UpdateMaxWidths()
 
-	// ConfigRow adds config for one row at given widget row index,
-	// and starting index: si = i + StartIndex
-	ConfigRow(c *core.Plan, i, si int)
+	// MakeRow adds config for one row at given widget row index,
+	// and starting index: si = i + StartIndex.
+	// Plan must be the StructGrid Plan.
+	MakeRow(p *core.Plan, i, si int)
 
 	// StyleValue performs additional value widget styling
 	StyleValue(w core.Widget, s *styles.Style, row, col int)
@@ -251,7 +249,7 @@ type SliceViewBase struct {
 	SliceSize int `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
 
 	// iteration through the configuration process, reset when a new slice type is set
-	ConfigIter int `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
+	MakeIter int `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
 
 	// temp idx state for e.g., dnd
 	TmpIndex int `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
@@ -331,8 +329,8 @@ func (sv *SliceViewBase) AsSliceViewBase() *SliceViewBase {
 }
 
 func (sv *SliceViewBase) SetSliceBase() {
-	sv.SetFlag(false, SliceViewConfigured, SliceViewSelectMode)
-	sv.ConfigIter = 0
+	sv.SetFlag(false, SliceViewSelectMode)
+	sv.MakeIter = 0
 	sv.StartIndex = 0
 	sv.VisRows = sv.MinRows
 	if !sv.IsReadOnly() {
@@ -342,7 +340,7 @@ func (sv *SliceViewBase) SetSliceBase() {
 }
 
 // SetSlice sets the source slice that we are viewing.
-// This ReConfigs the view for this slice if different.
+// This ReMakes the view for this slice if different.
 // Note: it is important to at least set an empty slice of
 // the desired type at the start to enable initial configuration.
 func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
@@ -358,8 +356,8 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 	} else {
 		newslc = sv.Slice != sl
 	}
-	if !newslc && sv.Is(SliceViewConfigured) {
-		sv.ConfigIter = 0
+	if !newslc {
+		sv.MakeIter = 0
 		return sv
 	}
 
@@ -431,7 +429,7 @@ func (sv *SliceViewBase) BindSelect(val *int) *SliceViewBase {
 	return sv
 }
 
-// Config configures the slice view
+// Make configures the slice view
 func (sv *SliceViewBase) Make(p *core.Plan) {
 	svi := sv.This().(SliceViewer)
 	svi.UpdateSliceSize()
@@ -458,12 +456,12 @@ func (sv *SliceViewBase) Make(p *core.Plan) {
 	}
 	sv.UpdateStartIndex()
 
-	sv.ConfigGrid(p)
+	sgp := sv.MakeGrid(p)
 	svi.UpdateMaxWidths()
 
 	for i := 0; i < sv.VisRows; i++ {
 		si := sv.StartIndex + i
-		svi.ConfigRow(p, i, si)
+		svi.MakeRow(sgp, i, si)
 	}
 }
 
@@ -497,8 +495,8 @@ func (sv *SliceViewBase) SliceElValue(si int) reflect.Value {
 	return val
 }
 
-func (sv *SliceViewBase) ConfigGrid(p *core.Plan) {
-	core.AddAt(p, "grid", func(w *SliceViewGrid) {
+func (sv *SliceViewBase) MakeGrid(p *core.Plan) *core.Plan {
+	return core.AddAt(p, "grid", func(w *SliceViewGrid) {
 		w.Style(func(s *styles.Style) {
 			nWidgPerRow, _ := sv.This().(SliceViewer).RowWidgetNs()
 			w.MinRows = sv.MinRows
@@ -530,7 +528,7 @@ func (sv *SliceViewBase) ConfigGrid(p *core.Plan) {
 	})
 }
 
-func (sv *SliceViewBase) ConfigValue(w core.Value, i int) {
+func (sv *SliceViewBase) MakeValue(w core.Value, i int) {
 	svi := sv.This().(SliceViewer)
 	wb := w.AsWidget()
 	w.SetProperty(SliceViewRowProperty, i)
@@ -560,19 +558,19 @@ func (sv *SliceViewBase) ConfigValue(w core.Value, i int) {
 	}
 }
 
-func (sv *SliceViewBase) ConfigRow(c *core.Plan, i, si int) {
+func (sv *SliceViewBase) MakeRow(p *core.Plan, i, si int) {
 	itxt := strconv.Itoa(i)
 	invis := si >= sv.SliceSize
 	val := sv.SliceElValue(si)
 
 	if sv.Is(SliceViewShowIndex) {
-		sv.ConfigGridIndex(c, i, si, itxt, invis)
+		sv.MakeGridIndex(p, i, si, itxt, invis)
 	}
 
-	core.AddNew(c, "grid/value-"+itxt, func() core.Value {
+	core.AddNew(p, "value-"+itxt, func() core.Value {
 		w := core.NewValue(val.Interface(), "")
 		wb := w.AsWidget()
-		sv.ConfigValue(w, i)
+		sv.MakeValue(w, i)
 		if !sv.IsReadOnly() {
 			wb.OnChange(func(e events.Event) {
 				sv.SendChange(e)
@@ -595,10 +593,10 @@ func (sv *SliceViewBase) ConfigRow(c *core.Plan, i, si int) {
 
 }
 
-func (sv *SliceViewBase) ConfigGridIndex(c *core.Plan, i, si int, itxt string, invis bool) {
+func (sv *SliceViewBase) MakeGridIndex(p *core.Plan, i, si int, itxt string, invis bool) {
 	sitxt := strconv.Itoa(si)
 	svi := sv.This().(SliceViewer)
-	core.AddAt(c, "grid/index-"+itxt, func(w *core.Text) {
+	core.AddAt(p, "index-"+itxt, func(w *core.Text) {
 		w.SetProperty(SliceViewRowProperty, i)
 		w.Style(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.DoubleClickable)
@@ -854,14 +852,14 @@ func (sv *SliceViewBase) SliceDeleteAt(i int) {
 }
 
 // MakeToolbar configures a [core.Toolbar] for this view
-func (sv *SliceViewBase) MakeToolbar(c *core.Plan) {
+func (sv *SliceViewBase) MakeToolbar(p *core.Plan) {
 	if reflectx.AnyIsNil(sv.Slice) {
 		return
 	}
 	if sv.Is(SliceViewIsArray) || sv.IsReadOnly() {
 		return
 	}
-	core.Add(c, func(w *core.Button) {
+	core.Add(p, func(w *core.Button) {
 		w.SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the slice").
 			OnClick(func(e events.Event) {
 				sv.This().(SliceViewer).SliceNewAt(-1)
@@ -1935,7 +1933,7 @@ func (sv *SliceViewBase) HandleEvents() {
 func (sv *SliceViewBase) SizeFinal() {
 	sg := sv.This().(SliceViewer).SliceGrid()
 	localIter := 0
-	for (sv.ConfigIter < 2 || sv.VisRows != sg.VisRows) && localIter < 2 {
+	for (sv.MakeIter < 2 || sv.VisRows != sg.VisRows) && localIter < 2 {
 		if sv.VisRows != sg.VisRows {
 			sv.VisRows = sg.VisRows
 			sv.Update()
@@ -1943,7 +1941,7 @@ func (sv *SliceViewBase) SizeFinal() {
 			sg.ApplyStyleTree()
 		}
 		sg.SizeFinalUpdateChildrenSizes()
-		sv.ConfigIter++
+		sv.MakeIter++
 		localIter++
 	}
 	sv.Frame.SizeFinal()

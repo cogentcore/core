@@ -97,7 +97,8 @@ func (tv *TableView) SetSlice(sl any) *TableView {
 		tv.Slice = nil
 		return tv
 	}
-	if tv.Slice == sl && tv.Is(SliceViewConfigured) {
+	if tv.Slice == sl {
+		tv.MakeIter = 0
 		return tv
 	}
 
@@ -155,8 +156,8 @@ func (tv *TableView) cacheVisibleFields() {
 	tv.colMaxWidths = make([]int, tv.numVisibleFields)
 }
 
-// Config configures the view
-func (tv *TableView) Make(c *core.Plan) {
+// Make configures the view
+func (tv *TableView) Make(p *core.Plan) {
 	svi := tv.This().(SliceViewer)
 	svi.UpdateSliceSize()
 
@@ -182,14 +183,14 @@ func (tv *TableView) Make(c *core.Plan) {
 	}
 	tv.UpdateStartIndex()
 
-	tv.ConfigHeader(c)
-	tv.ConfigGrid(c)
+	tv.MakeHeader(p)
+	sgp := tv.MakeGrid(p)
 
 	svi.UpdateMaxWidths()
 
 	for i := 0; i < tv.VisRows; i++ {
 		si := tv.StartIndex + i
-		svi.ConfigRow(c, i, si)
+		svi.MakeRow(sgp, i, si)
 	}
 }
 
@@ -223,8 +224,8 @@ func (tv *TableView) SliceHeader() *core.Frame {
 	return tv.Child(0).(*core.Frame)
 }
 
-func (tv *TableView) ConfigHeader(c *core.Plan) {
-	core.AddAt(c, "header", func(w *core.Frame) {
+func (tv *TableView) MakeHeader(p *core.Plan) {
+	hp := core.AddAt(p, "header", func(w *core.Frame) {
 		core.ToolbarStyles(w)
 		w.Style(func(s *styles.Style) {
 			s.Grow.Set(0, 0)
@@ -233,7 +234,7 @@ func (tv *TableView) ConfigHeader(c *core.Plan) {
 	})
 
 	if tv.Is(SliceViewShowIndex) {
-		core.AddAt(c, "header/head-index", func(w *core.Text) {
+		core.AddAt(hp, "head-index", func(w *core.Text) {
 			w.SetType(core.TextBodyMedium)
 			w.Style(func(s *styles.Style) {
 				s.Align.Self = styles.Center
@@ -244,7 +245,7 @@ func (tv *TableView) ConfigHeader(c *core.Plan) {
 	}
 	for fli := 0; fli < tv.numVisibleFields; fli++ {
 		field := tv.visibleFields[fli]
-		core.AddAt(c, "header/head-"+field.Name, func(w *core.Button) {
+		core.AddAt(hp, "head-"+field.Name, func(w *core.Button) {
 			w.SetType(core.ButtonMenu)
 			w.OnClick(func(e events.Event) {
 				tv.SortSliceAction(fli)
@@ -285,7 +286,7 @@ func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	return
 }
 
-func (tv *TableView) ConfigRow(c *core.Plan, i, si int) {
+func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
 	svi := tv.This().(SliceViewer)
 	itxt := strconv.Itoa(i)
 	sitxt := strconv.Itoa(si)
@@ -294,7 +295,7 @@ func (tv *TableView) ConfigRow(c *core.Plan, i, si int) {
 	// stru := val.Interface()
 
 	if tv.Is(SliceViewShowIndex) {
-		tv.ConfigGridIndex(c, i, si, itxt, invis)
+		tv.MakeGridIndex(p, i, si, itxt, invis)
 	}
 
 	vpath := tv.ViewPath + "[" + sitxt + "]"
@@ -318,10 +319,10 @@ func (tv *TableView) ConfigRow(c *core.Plan, i, si int) {
 		}
 		_ = tags
 
-		core.AddNew(c, "grid/"+valnm, func() core.Value {
+		core.AddNew(p, valnm, func() core.Value {
 			w := core.NewValue(fval.Interface(), "")
 			wb := w.AsWidget()
-			tv.ConfigValue(w, i)
+			tv.MakeValue(w, i)
 			// vv.SetStructValue(fval.Addr(), stru, &field, vpath)
 			w.SetProperty(SliceViewColProperty, fli)
 			if !tv.IsReadOnly() {
