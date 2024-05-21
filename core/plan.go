@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -127,6 +128,24 @@ func (p *Plan) buildWidget(w Widget) {
 		return
 	}
 	wb := w.AsWidget()
+	for i, child := range p.Children { // TODO(config): figure out a better way to handle this?
+		if child.Name != "parts" {
+			continue
+		}
+		if wb.Parts == nil {
+			wparts := child.New()
+			wparts.SetName("parts")
+			wb.Parts = wparts.(*Frame)
+			tree.SetParent(wb.Parts, wb)
+			child.buildWidget(wparts)
+		}
+		// if we only have parts, then we must bail to avoid deleting children
+		if len(p.Children) == 1 {
+			return
+		}
+		p.Children = slices.Delete(p.Children, i, i+1) // not a real child
+		break
+	}
 	wb.Kids, _ = config.Config(wb.Kids, len(p.Children),
 		func(i int) string { return p.Children[i].Name },
 		func(name string, i int) tree.Node {
