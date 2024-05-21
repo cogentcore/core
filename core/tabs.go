@@ -393,8 +393,8 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 // Only the 2 primary children (Frames) need to be configured.
 // Re-config is needed when the type of tabs changes, but not
 // when a new tab is added, which only requires a new layout pass.
-func (ts *Tabs) Make(c *Plan) {
-	AddAt(c, "tabs", func(w *Frame) {
+func (ts *Tabs) Make(p *Plan) {
+	AddAt(p, "tabs", func(w *Frame) {
 		w.Style(func(s *styles.Style) {
 			s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 			s.Margin.Zero()
@@ -423,7 +423,7 @@ func (ts *Tabs) Make(c *Plan) {
 		}
 		tc.BuildWidget(w)
 	})
-	AddAt(c, "frame", func(w *Frame) {
+	AddAt(p, "frame", func(w *Frame) {
 		w.Style(func(s *styles.Style) {
 			s.Display = styles.Stacked
 			w.SetFlag(true, FrameStackTopOnly) // key for allowing each tab to have its own size
@@ -434,7 +434,7 @@ func (ts *Tabs) Make(c *Plan) {
 	})
 	// frame comes before tabs in bottom navigation bar
 	if ts.Type.Effective(ts) == NavigationBar {
-		c.Children[0], c.Children[1] = c.Children[1], c.Children[0]
+		p.Children[0], p.Children[1] = p.Children[1], p.Children[0]
 	}
 }
 
@@ -551,13 +551,13 @@ func (tb *Tab) Tabs() *Tabs {
 	return tb.Parent().Parent().(*Tabs)
 }
 
-func (tb *Tab) Make(c *Plan) {
+func (tb *Tab) Make(p *Plan) {
 	if tb.MaxChars > 0 {
 		tb.Text = elide.Middle(tb.Text, tb.MaxChars)
 	}
 
 	if tb.Icon.IsSet() {
-		AddAt(c, "icon", func(w *Icon) {
+		AddAt(p, "icon", func(w *Icon) {
 			w.Style(func(s *styles.Style) {
 				s.Font.Size.Dp(18)
 			})
@@ -565,11 +565,11 @@ func (tb *Tab) Make(c *Plan) {
 			w.SetIcon(tb.Icon)
 		})
 		if tb.Text != "" {
-			AddAt[*Space](c, "space")
+			AddAt[*Space](p, "space")
 		}
 	}
 	if tb.Text != "" {
-		AddAt(c, "text", func(w *Text) {
+		AddAt(p, "text", func(w *Text) {
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
 				s.SetTextWrap(false)
@@ -584,8 +584,8 @@ func (tb *Tab) Make(c *Plan) {
 		})
 	}
 	if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
-		AddAt[*Space](c, "close-space")
-		AddAt(c, "close", func(w *Button) {
+		AddAt[*Space](p, "close-space")
+		AddAt(p, "close", func(w *Button) {
 			w.SetType(ButtonAction)
 			w.Style(func(s *styles.Style) {
 				s.Padding.Zero()

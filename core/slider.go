@@ -491,12 +491,12 @@ func (sr *Slider) HandleKeys() {
 ///////////////////////////////////////////////////////////
 // 	Config
 
-func (sr *Slider) Make(c *Plan) {
+func (sr *Slider) Make(p *Plan) {
 	if sr.Icon.IsNil() {
 		sr.DeleteChildren()
 		return
 	}
-	AddAt(c, "icon", func(w *Icon) {
+	AddAt(p, "icon", func(w *Icon) {
 		w.Style(func(s *styles.Style) {
 			s.Font.Size.Dp(24)
 			s.Color = sr.ThumbColor

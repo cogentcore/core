@@ -291,11 +291,11 @@ func (tx *Text) Label() string {
 // existing line breaks (which could come from <br> and <p> in HTML),
 // so that is never able to undo initial word wrapping from constrained sizes.
 
-// Config does the HTML and Layout in paintText for the text,
+// Build does the HTML and Layout in paintText for the text,
 // using actual content size to constrain layout.
 // Call this followed by NeedsRender() to do a fast render-only
 // update of the text, with its current size and style.
-func (tx *Text) Make(c *Plan) {
+func (tx *Text) Build() {
 	tx.configTextSize(tx.Geom.Size.Actual.Content)
 }
 

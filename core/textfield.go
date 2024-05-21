@@ -1731,13 +1731,13 @@ func (tf *TextField) HandleKeyEvents() {
 	})
 }
 
-func (tf *TextField) Make(c *Plan) {
+func (tf *TextField) Make(p *Plan) {
 	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
 
 	if !tf.IsReadOnly() {
 		if tf.LeadingIcon.IsSet() {
-			AddAt(c, "lead-icon", func(w *Button) {
+			AddAt(p, "lead-icon", func(w *Button) {
 				w.SetType(ButtonAction)
 				w.Style(func(s *styles.Style) {
 					s.Padding.Zero()
@@ -1770,8 +1770,8 @@ func (tf *TextField) Make(c *Plan) {
 			})
 		}
 		if tf.TrailingIcon.IsSet() {
-			AddAt[*Stretch](c, "trail-icon-stretch")
-			AddAt(c, "trail-icon", func(w *Button) {
+			AddAt[*Stretch](p, "trail-icon-stretch")
+			AddAt(p, "trail-icon", func(w *Button) {
 				w.SetType(ButtonAction)
 				w.Style(func(s *styles.Style) {
 					s.Padding.Zero()

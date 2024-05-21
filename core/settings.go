@@ -52,7 +52,7 @@ type Settings interface {
 	// MakeToolbar is an optional method that settings objects can implement in order to
 	// configure the settings view toolbar with settings-related actions that the user can
 	// perform.
-	MakeToolbar(c *Plan)
+	MakeToolbar(p *Plan)
 }
 
 // SettingsOpener is an optional additional interface that
@@ -100,7 +100,7 @@ func (sb *SettingsBase) Defaults() {}
 func (sb *SettingsBase) Apply() {}
 
 // MakeToolbar does nothing by default and can be extended by other settings data types.
-func (sb *SettingsBase) MakeToolbar(c *Plan) {}
+func (sb *SettingsBase) MakeToolbar(p *Plan) {}
 
 // OpenSettings opens the given settings from their [Settings.Filename].
 // The settings are assumed to be in TOML unless they have a .json file

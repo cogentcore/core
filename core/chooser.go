@@ -212,7 +212,7 @@ func (ch *Chooser) SetStyles() {
 	})
 }
 
-func (ch *Chooser) Make(c *Plan) {
+func (ch *Chooser) Make(p *Plan) {
 	// automatically select the first item if we have nothing selected and no placeholder
 	if !ch.Editable && ch.CurrentIndex < 0 && ch.CurrentItem.Text == "" {
 		ch.SetCurrentIndex(0)
@@ -220,12 +220,12 @@ func (ch *Chooser) Make(c *Plan) {
 
 	// editable handles through TextField
 	if ch.Icon.IsSet() && !ch.Editable {
-		AddAt(c, "icon", func(w *Icon) {}, func(w *Icon) {
+		AddAt(p, "icon", func(w *Icon) {}, func(w *Icon) {
 			w.SetIcon(ch.Icon)
 		})
 	}
 	if ch.Editable {
-		AddAt(c, "text-field", func(w *TextField) {
+		AddAt(p, "text-field", func(w *TextField) {
 			w.SetPlaceholder(ch.Placeholder)
 			ch.HandleChooserTextFieldEvents(w)
 			w.Style(func(s *styles.Style) {
@@ -249,7 +249,7 @@ func (ch *Chooser) Make(c *Plan) {
 			}
 		})
 	} else {
-		AddAt(c, "text", func(w *Text) {
+		AddAt(p, "text", func(w *Text) {
 			w.Style(func(s *styles.Style) {
 				s.SetNonSelectable()
 				s.SetTextWrap(false)
@@ -263,7 +263,7 @@ func (ch *Chooser) Make(c *Plan) {
 	}
 	// editable handles through TextField
 	if !ch.Editable {
-		AddAt(c, "indicator", func(w *Icon) {
+		AddAt(p, "indicator", func(w *Icon) {
 			w.Style(func(s *styles.Style) {
 				s.Justify.Self = styles.End
 			})

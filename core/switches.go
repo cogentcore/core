@@ -263,9 +263,9 @@ func (sw *Switches) UpdateBitFlag(bitflag enums.BitFlagSetter) {
 	}
 }
 
-func (sw *Switches) Make(c *Plan) {
+func (sw *Switches) Make(p *Plan) {
 	for _, item := range sw.Items {
-		AddAt(c, item.Text, func(w *Switch) {
+		AddAt(p, item.Text, func(w *Switch) {
 			w.OnChange(func(e events.Event) {
 				if sw.Mutex && w.IsChecked() {
 					sw.UnCheckAllBut(w.IndexInParent())
