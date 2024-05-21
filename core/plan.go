@@ -111,10 +111,8 @@ func ConfigCallerPath(level int) string {
 	return path
 }
 
-// BuildWidget runs the Config on the given widget, ensuring that
-// the widget has the specified parts and direct Children.
-// The given parent path is used for recursion and should be blank
-// when calling the function externally.
+// BuildWidget builds (configures and updates) the given widget and
+// all of its children in accordance with the [Plan].
 func (p *Plan) BuildWidget(w Widget) {
 	p.buildWidget(w)
 	p.UpdateWidget(w) // this gets everything
@@ -141,11 +139,9 @@ func (p *Plan) buildWidget(w Widget) {
 	}
 }
 
-// UpdateWidget runs the [PlanItem.Update] functions on the given widget,
-// and recursively on all of its children as specified in the Config.
-// It is called at the end of [Plan.ConfigWidget].
-// The given parent path is used for recursion and should be blank
-// when calling the function externally.
+// UpdateWidget updates the given widget and all of its children to reflect
+// the current state in accordance with the [Plan]. It does not change the
+// actual structure of the widget tree; see [Plan.BuildWidget] for that.
 func (p *Plan) UpdateWidget(w Widget) {
 	wb := w.AsWidget()
 	for i, child := range p.Children {
