@@ -153,6 +153,27 @@ func AllFiles(path string) ([]string, error) {
 	return fnms, er
 }
 
+// AllFilesGlob returns a slice of all the files, recursively
+// within a given directory, that match given pattern expression
+// for the individual filename.
+func AllFilesGlob(path, pattern string) ([]string, error) {
+	_, err := filepath.Match("test", pattern)
+	if err != nil {
+		return nil, err
+	}
+	var fnms []string
+	er := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if match, _ := filepath.Match(path, pattern); match {
+			fnms = append(fnms, path)
+		}
+		return nil
+	})
+	return fnms, er
+}
+
 // HasFile returns true if given directory has given file (exact match)
 func HasFile(path, file string) bool {
 	files, err := os.ReadDir(path)
