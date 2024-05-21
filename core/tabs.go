@@ -350,7 +350,7 @@ func (ts *Tabs) RecycleTabWidget(name string, sel bool, typ *types.Type) Widget 
 		return fr.Child(0).(Widget)
 	}
 	wi := fr.NewChild(typ).(Widget)
-	wi.ConfigWidget()
+	wi.Build()
 	return wi
 }
 
@@ -393,7 +393,7 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 // Only the 2 primary children (Frames) need to be configured.
 // Re-config is needed when the type of tabs changes, but not
 // when a new tab is added, which only requires a new layout pass.
-func (ts *Tabs) Config(c *Plan) {
+func (ts *Tabs) Make(c *Plan) {
 	AddAt(c, "tabs", func(w *Frame) {
 		w.Style(func(s *styles.Style) {
 			s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
@@ -442,7 +442,7 @@ func (ts *Tabs) Config(c *Plan) {
 // It configures the Tabs if necessary.
 func (ts *Tabs) Tabs() *Frame {
 	if ts.ChildByName("tabs", 0) == nil {
-		ts.ConfigWidget()
+		ts.Build()
 	}
 	return ts.ChildByName("tabs", 0).(*Frame)
 }
@@ -451,7 +451,7 @@ func (ts *Tabs) Tabs() *Frame {
 // It configures the Tabs if necessary.
 func (ts *Tabs) FrameWidget() *Frame {
 	if ts.ChildByName("frame", 1) == nil {
-		ts.ConfigWidget()
+		ts.Build()
 	}
 	return ts.ChildByName("frame", 1).(*Frame)
 }
@@ -551,7 +551,7 @@ func (tb *Tab) Tabs() *Tabs {
 	return tb.Parent().Parent().(*Tabs)
 }
 
-func (tb *Tab) Config(c *Plan) {
+func (tb *Tab) Make(c *Plan) {
 	if tb.MaxChars > 0 {
 		tb.Text = elide.Middle(tb.Text, tb.MaxChars)
 	}

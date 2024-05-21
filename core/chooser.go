@@ -212,7 +212,7 @@ func (ch *Chooser) SetStyles() {
 	})
 }
 
-func (ch *Chooser) Config(c *Plan) {
+func (ch *Chooser) Make(c *Plan) {
 	// automatically select the first item if we have nothing selected and no placeholder
 	if !ch.Editable && ch.CurrentIndex < 0 && ch.CurrentItem.Text == "" {
 		ch.SetCurrentIndex(0)
@@ -243,7 +243,7 @@ func (ch *Chooser) Config(c *Plan) {
 			} else {
 				w.SetType(TextFieldOutlined)
 			}
-			w.ConfigWidget() // this is actually essential (TODO: figure out a way to get rid of this?)
+			w.Build() // this is actually essential (TODO: figure out a way to get rid of this?)
 			if !ch.DefaultNew {
 				w.SetCompleter(w, ch.CompleteMatch, ch.CompleteEdit)
 			}
@@ -426,7 +426,7 @@ func (ch *Chooser) ShowCurrentItem() *Chooser {
 	} else {
 		text := ch.TextWidget()
 		if text != nil {
-			text.SetText(ch.CurrentItem.GetLabel()).ConfigWidget()
+			text.SetText(ch.CurrentItem.GetLabel()).Build()
 		}
 	}
 	if ch.CurrentItem.Icon.IsSet() {

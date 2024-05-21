@@ -60,11 +60,10 @@ func (tb *Toolbar) AppChooser() *Chooser {
 	return ch
 }
 
-func (tb *Toolbar) Config(c *Plan) {
-	tb.Frame.Config(c)
+func (tb *Toolbar) Make(p *Plan) {
 	if len(tb.ConfigFuncs) > 0 {
 		for _, f := range tb.ConfigFuncs {
-			f(c)
+			f(p)
 		}
 	}
 }
@@ -186,7 +185,7 @@ func (tb *Toolbar) OverflowMenu(m *Scene) {
 			}
 			cl := k.This().Clone()
 			m.AddChild(cl)
-			cl.This().(Widget).ConfigWidget()
+			cl.This().(Widget).Build()
 		}
 		if nm > 1 { // default includes sep
 			NewSeparator(m)

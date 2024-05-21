@@ -432,7 +432,7 @@ func (sv *SliceViewBase) BindSelect(val *int) *SliceViewBase {
 }
 
 // Config configures the slice view
-func (sv *SliceViewBase) Config(c *core.Plan) {
+func (sv *SliceViewBase) Make(c *core.Plan) {
 	svi := sv.This().(SliceViewer)
 	svi.UpdateSliceSize()
 

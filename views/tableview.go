@@ -156,7 +156,7 @@ func (tv *TableView) cacheVisibleFields() {
 }
 
 // Config configures the view
-func (tv *TableView) Config(c *core.Plan) {
+func (tv *TableView) Make(c *core.Plan) {
 	svi := tv.This().(SliceViewer)
 	svi.UpdateSliceSize()
 

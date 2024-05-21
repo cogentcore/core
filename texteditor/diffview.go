@@ -94,7 +94,7 @@ func DiffViewDialog(ctx core.Widget, title string, astr, bstr []string, afile, b
 	dv.FileB = bfile
 	dv.RevA = arev
 	dv.RevB = brev
-	dv.ConfigWidget()
+	dv.Build()
 	dv.DiffStrings(astr, bstr)
 	// d.AddAppBar(dv.ConfigToolbar)
 	d.NewWindow().SetContext(ctx).SetNewWindow(true).Run()
@@ -487,7 +487,7 @@ func (dv *DiffView) UndoDiff(ab int) error {
 	return nil
 }
 
-func (dv *DiffView) Config(c *core.Plan) {
+func (dv *DiffView) Make(c *core.Plan) {
 	if dv.HasChildren() {
 		return
 	}

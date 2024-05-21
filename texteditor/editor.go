@@ -498,7 +498,7 @@ func (ed *Editor) Redo() {
 ////////////////////////////////////////////////////
 //  Widget Interface
 
-func (ed *Editor) Config(c *core.Plan) {
+func (ed *Editor) Make(c *core.Plan) {
 	ed.NeedsLayout()
 }
 

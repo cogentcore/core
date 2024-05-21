@@ -168,33 +168,33 @@ func InitParts(w *Frame) {
 	})
 }
 
-// ConfigWidget is the base implementation of [Widget.ConfigWidget] that
+// Build is the base implementation of [Widget.Build] that
 // configures the widget by doing steps that apply to all widgets and then
 // calling [Widget.Config] for widget-specific configuration steps.
-func (wb *WidgetBase) ConfigWidget() {
+func (wb *WidgetBase) Build() {
 	if wb.ValueUpdate != nil {
 		wb.ValueUpdate()
 	}
-	c := Plan{}
-	wb.This().(Widget).Config(&c)
-	c.BuildWidget(wb.This().(Widget))
+	p := Plan{}
+	wb.This().(Widget).Make(&p)
+	p.BuildWidget(wb.This().(Widget))
 }
 
-// Config is the interface method called by [Widget.ConfigWidget] that
+// Config is the interface method called by [Widget.Build] that
 // should be defined for each [Widget] type, which actually does
 // the configuration work.
-func (wb *WidgetBase) Config(p *Plan) {
+func (wb *WidgetBase) Make(p *Plan) {
 	// this must be defined for each widget type
 }
 
-// ConfigTree calls [Widget.ConfigWidget] on every Widget in the tree from me.
+// ConfigTree calls [Widget.Build] on every Widget in the tree from me.
 func (wb *WidgetBase) ConfigTree() {
 	if wb.This() == nil {
 		return
 	}
 	// pr := profile.Start(wb.This().NodeType().ShortName())
 	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		wi.ConfigWidget()
+		wi.Build()
 		return tree.Continue
 	})
 	// pr.End()
@@ -219,7 +219,7 @@ func (wb *WidgetBase) Update() { //types:add
 		fmt.Println("\tDebugSettings.UpdateTrace Update:", wb)
 	}
 	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		wi.ConfigWidget()
+		wi.Build()
 		wi.ApplyStyle()
 		return tree.Continue
 	})

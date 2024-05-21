@@ -295,7 +295,7 @@ func (tx *Text) Label() string {
 // using actual content size to constrain layout.
 // Call this followed by NeedsRender() to do a fast render-only
 // update of the text, with its current size and style.
-func (tx *Text) Config(c *Plan) {
+func (tx *Text) Make(c *Plan) {
 	tx.configTextSize(tx.Geom.Size.Actual.Content)
 }
 

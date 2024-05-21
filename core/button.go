@@ -265,7 +265,7 @@ func (bt *Button) HandleEvents() {
 	})
 }
 
-func (bt *Button) Config(c *Plan) {
+func (bt *Button) Make(c *Plan) {
 	// we check if the icons are unset, not if they are nil, so
 	// that people can manually set it to [icons.None]
 	if bt.HasMenu() {

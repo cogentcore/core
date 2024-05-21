@@ -30,9 +30,9 @@ func (sb *SliceButton) OnInit() {
 	ConfigDialogValue(sb, true)
 }
 
-func (sb *SliceButton) Config(c *core.Plan) {
+func (sb *SliceButton) Make(p *core.Plan) {
 	sb.SetText(labels.FriendlySliceLabel(reflect.ValueOf(sb.Slice)))
-	sb.Button.Config(c)
+	sb.Button.Make(p)
 }
 
 func (sb *SliceButton) ConfigDialog(d *core.Body) (bool, func()) {
@@ -72,10 +72,10 @@ func (sb *StructButton) OnInit() {
 	ConfigDialogValue(sb, true)
 }
 
-func (sb *StructButton) Config(c *core.Plan) {
+func (sb *StructButton) Make(p *core.Plan) {
 	sb.SetReadOnly(false)
 	sb.SetText(labels.FriendlyStructLabel(reflect.ValueOf(sb.Struct)))
-	sb.Button.Config(c)
+	sb.Button.Make(p)
 }
 
 func (sb *StructButton) ConfigDialog(d *core.Body) (bool, func()) {
@@ -106,9 +106,9 @@ func (sb *MapButton) OnInit() {
 	ConfigDialogValue(sb, true)
 }
 
-func (sb *MapButton) Config(c *core.Plan) {
+func (sb *MapButton) Make(p *core.Plan) {
 	sb.SetText(labels.FriendlyMapLabel(reflect.ValueOf(sb.Map)))
-	sb.Button.Config(c)
+	sb.Button.Make(p)
 }
 
 func (sb *MapButton) ConfigDialog(d *core.Body) (bool, func()) {

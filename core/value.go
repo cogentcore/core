@@ -35,7 +35,7 @@ type OnBinder interface {
 
 // Bind binds the given value to the given [Value] such that the values of
 // the two will be linked and updated appropriately after [events.Change] events
-// and during [Widget.ConfigWidget]. It returns the widget to enable method chaining.
+// and during [Widget.Build]. It returns the widget to enable method chaining.
 func Bind[T Value](value any, vw T) T {
 	wb := vw.AsWidget()
 	wb.ValueUpdate = func() {

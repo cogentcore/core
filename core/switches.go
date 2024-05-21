@@ -263,7 +263,7 @@ func (sw *Switches) UpdateBitFlag(bitflag enums.BitFlagSetter) {
 	}
 }
 
-func (sw *Switches) Config(c *Plan) {
+func (sw *Switches) Make(c *Plan) {
 	for _, item := range sw.Items {
 		AddAt(c, item.Text, func(w *Switch) {
 			w.OnChange(func(e events.Event) {

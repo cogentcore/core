@@ -55,7 +55,7 @@ func (mv *MapView) OnInit() {
 	})
 }
 
-func (mv *MapView) Config(c *core.Plan) {
+func (mv *MapView) Make(c *core.Plan) {
 	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}

@@ -91,7 +91,7 @@ func (sw *Scene) HandleEvents() {
 	sw.HandleSelectEvents()
 }
 
-func (sw *Scene) Config(c *core.Plan) {
+func (sw *Scene) Make(c *core.Plan) {
 	sz := sw.Geom.Size.Actual.Content.ToPointFloor()
 	if sz == (image.Point{}) {
 		return
@@ -123,7 +123,7 @@ func (sw *Scene) Config(c *core.Plan) {
 }
 
 func (sw *Scene) Render() {
-	sw.ConfigWidget() // Note: this is indeed essential here -- doesn't work without it.
+	sw.Build() // Note: this is indeed essential here -- doesn't work without it.
 	if sw.XYZ.Frame == nil {
 		return
 	}

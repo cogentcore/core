@@ -218,7 +218,7 @@ var FileViewKindColorMap = map[string]string{
 	"folder": "pref(link)",
 }
 
-func (fv *FileView) Config(c *core.Plan) {
+func (fv *FileView) Make(c *core.Plan) {
 	if len(core.RecentPaths) == 0 {
 		core.OpenRecentPaths()
 	}

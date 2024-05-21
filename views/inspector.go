@@ -195,11 +195,11 @@ func (is *Inspector) SetRoot(root tree.Node) {
 		is.KiRoot = root
 		// ge.GetAllUpdates(root)
 	}
-	is.ConfigWidget()
+	is.Build()
 }
 
 // Config configures the widget
-func (is *Inspector) Config(c *core.Plan) {
+func (is *Inspector) Make(c *core.Plan) {
 	if is.KiRoot == nil {
 		return
 	}

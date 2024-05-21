@@ -212,7 +212,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	fr.Update()
 }
 
-func (pg *Page) Config(c *core.Plan) {
+func (pg *Page) Make(p *core.Plan) {
 	if pg.HasChildren() {
 		return
 	}

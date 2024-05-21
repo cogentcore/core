@@ -26,21 +26,18 @@ import (
 type Widget interface {
 	tree.Node
 
-	// AsWidget returns the WidgetBase embedded field for any Widget node.
-	// The Widget interface defines only methods that can be overridden
-	// or need to be called on other nodes. Everything else that is common
-	// to all Widgets is in the WidgetBase.
+	// AsWidget returns the [WidgetBase] embedded field.
 	AsWidget() *WidgetBase
 
 	// OnWidgetAdded adds a function to call when a widget is added
 	// as a child to the widget or any of its children.
 	OnWidgetAdded(f func(w Widget)) *WidgetBase
 
-	// Style sets the styling of the widget by adding a Styler function.
+	// Style sets the styling properties of the widget by adding a styler function.
 	Style(s func(s *styles.Style)) *WidgetBase
 
 	// Update does a general purpose update of the widget and everything
-	// below it by reconfiguring it, applying its styles, and indicating
+	// below it by building it, applying its styles, and indicating
 	// that it needs a new layout pass. It is the main way that end users
 	// should update widgets, and it should be called after making any
 	// changes to the core properties of a widget (for example, the text
@@ -52,32 +49,22 @@ type Widget interface {
 	// after this, respectively.
 	Update()
 
-	// Config is the method that widgets should implement to do their
-	// own widget-specific configuration steps. You can do this however
-	// you want, but typically you should add configuration closures to
-	// the [Config] object passed to the method, using [Configure].
-	// If there are items added to the [Config] object, they will be
-	// automatically applied afterward using [Config.ConfigWidget].
+	// Make is the method that widgets can implement to make a plan for
+	// how their widget will be built, which is then applied in [Widget.Build].
+	// You can do this using the [Add], [AddAt], and [AddNew] methods.
 	//
-	// You should call [Widget.ConfigWidget] or [Widget.Update] to actually
-	// reconfigure or update a widget from an end user perspective; Config
-	// should rarely be called except when extending the Config method
-	// of another widget type in a Config method.
-	Config(c *Plan)
+	// You should call [Widget.Update] or [Widget.Build] to actually
+	// reconfigure or update a widget from an end user perspective; Make
+	// should rarely be called except when extending the Make method
+	// of another widget type in a Make method.
+	Make(p *Plan)
 
-	// ConfigWidget configures the widget by doing steps that apply for
-	// all widgets and then calling [Widget.Config] for widget-specific
-	// configuration steps. Widgets should typically implement [Widget.Config],
-	// not this method.
-	//
-	// It does not call ConfigWidget on its children, just on itself.
-	// ApplyStyle must generally be called after ConfigWidget; it is called
-	// automatically when the Scene is first shown, but must be called
-	// manually thereafter as needed after configuration changes.
-	// See [Widget.Update] for a convenience function that does both and also
-	// triggers a new layout pass. ConfigScene on Scene handles the full
-	// tree configuration.
-	ConfigWidget()
+	// Build configures the widget by applying the [Plan] created by [Widget.Make].
+	// Widgets should typically implement [Widget.Make], not this, although they can
+	// implement this if necessary. In general, [Widget.Update] should be called to
+	// trigger a full update of the widget, as Build does not call Build on children
+	// and does not apply styles.
+	Build()
 
 	// StateIs returns whether the widget has the given [states.States] flag set
 	StateIs(flag states.States) bool

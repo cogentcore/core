@@ -209,7 +209,7 @@ func (sw *Switch) ClearIcons() *Switch {
 	return sw
 }
 
-func (sw *Switch) Config(p *Plan) {
+func (sw *Switch) Make(p *Plan) {
 	if sw.IconOn == "" {
 		sw.IconOn = icons.ToggleOn.Fill() // fallback
 	}
