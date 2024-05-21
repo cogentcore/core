@@ -220,7 +220,7 @@ func (sl *Splits) Config(c *Plan) {
 	sl.UpdateSplits()
 
 	AddAt(c, "parts", func(w *Frame) {
-		ConfigParts(w)
+		InitParts(w)
 	})
 	for i := range len(sl.Kids) - 1 { // one less handle than children
 		AddAt(c, "parts/handle-"+strconv.Itoa(i), func(w *Handle) {

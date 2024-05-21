@@ -42,63 +42,20 @@ type Plan struct {
 	Children []*Plan
 }
 
-// AddAt adds a new config item to the given [Plan] for a widget at the
-// given forward slash separated path with the given optional function(s). The
-// first function is called to initially configure the widget, and the second
-// function is called to update the widget. If the given path is blank, it is
-// automatically set to a unique name based on the filepath and line number of
-// the calling function.
-func AddAt[T Widget](c *Plan, path string, funcs ...func(w T)) {
-	switch len(funcs) {
-	case 0:
-		c.Add(path, func() Widget { return tree.New[T]() }, nil)
-	case 1:
-		init := funcs[0]
-		c.Add(path, func() Widget {
-			w := tree.New[T]()
-			// w.SetName(path)
-			init(w)
-			return w
-		}, nil)
-	default:
-		init := funcs[0]
-		update := funcs[1]
-		c.Add(path, func() Widget {
-			w := tree.New[T]()
-			// w.SetName(path)
-			init(w)
-			return w
-		}, func(w Widget) {
-			update(w.(T))
-		})
-	}
+// Add adds a new [Plan] item to the given [Plan] for a widget with
+// the given optional function(s). The first function is called
+// to initially configure the widget, and the second function is called
+// to update the widget. The name of the widget is automatically generated
+// based on the file and line number of the calling function.
+// It returns the new [Plan] item.
+func Add[T Widget](p *Plan, funcs ...func(w T)) *Plan {
+	return AddAt(p, autoPlanPath(2), funcs...)
 }
 
-// AddNew adds a new config item to the given [Plan] for a widget at the
-// given forward slash separated path with the given function for constructing
-// the widget and the given optional function for updating the widget. If the
-// given path is blank, it is automatically set to a unique name based on the
-// filepath and line number of the calling function.
-func AddNew[T Widget](c *Plan, path string, new func() T, update ...func(w T)) {
-	if len(update) == 0 {
-		c.Add(path, func() Widget { return new() }, nil)
-	} else {
-		u := update[0]
-		c.Add(path, func() Widget { return new() }, func(w Widget) { u(w.(T)) })
-	}
-}
-
-// Add adds a new [Plan] item to the given [Plan] with the given name and functions.
-// It should typically not be called by end-user code; see the generic
-// [Add], [AddAt], and [AddNew] functions instead.
-func (p *Plan) Add(name string, new func() Widget, update func(w Widget)) {
-	p.Children = append(p.Children, &Plan{Name: name, New: new, Update: update})
-}
-
-// ConfigCallerPath returns the dir-filename of [runtime.Caller](level),
+// autoPlanPath returns the dir-filename of [runtime.Caller](level),
 // with all / . replaced to -, which is suitable as a unique name
 // for a [PlanItem.Path].
-func ConfigCallerPath(level int) string {
+func autoPlanPath(level int) string {
 	_, file, line, _ := runtime.Caller(level)
 	dir, fn := filepath.Split(file)
 	d1 := ""
@@ -109,6 +66,54 @@ func ConfigCallerPath(level int) string {
 	// need to get rid of slashes and dots for path name
 	path = strings.ReplaceAll(strings.ReplaceAll(path, "/", "-"), ".", "-") + "-" + strconv.Itoa(line)
 	return path
+}
+
+// AddAt adds a new [Plan] item to the given [Plan] for a widget with
+// the given name and optional function(s). The first function is called
+// to initially configure the widget, and the second function is called
+// to update the widget. It returns the new [Plan] item.
+func AddAt[T Widget](c *Plan, path string, funcs ...func(w T)) *Plan {
+	switch len(funcs) {
+	case 0:
+		return c.Add(path, func() Widget { return tree.New[T]() }, nil)
+	case 1:
+		init := funcs[0]
+		return c.Add(path, func() Widget {
+			w := tree.New[T]()
+			init(w)
+			return w
+		}, nil)
+	default:
+		init := funcs[0]
+		update := funcs[1]
+		return c.Add(path, func() Widget {
+			w := tree.New[T]()
+			init(w)
+			return w
+		}, func(w Widget) {
+			update(w.(T))
+		})
+	}
+}
+
+// AddNew adds a new [Plan] item to the given [Plan] for a widget with
+// the given name, function for constructing the widget, and optional
+// function for updating the widget. It returns the new [Plan] item.
+func AddNew[T Widget](c *Plan, path string, new func() T, update ...func(w T)) *Plan {
+	if len(update) == 0 {
+		return c.Add(path, func() Widget { return new() }, nil)
+	}
+	u := update[0]
+	return c.Add(path, func() Widget { return new() }, func(w Widget) { u(w.(T)) })
+}
+
+// Add adds a new [Plan] item to the given [Plan] with the given name and functions.
+// It should typically not be called by end-user code; see the generic
+// [Add], [AddAt], and [AddNew] functions instead. It returns the new [Plan] item.
+func (p *Plan) Add(name string, new func() Widget, update func(w Widget)) *Plan {
+	newPlan := &Plan{Name: name, New: new, Update: update}
+	p.Children = append(p.Children, newPlan)
+	return newPlan
 }
 
 // BuildWidget builds (configures and updates) the given widget and
@@ -156,9 +161,9 @@ func (p *Plan) UpdateWidget(w Widget) {
 	}
 }
 
-// ConfigParts configures the given [Frame] to be ready
-// to serve as [WidgetBase.Parts] in a [AddAt] context.
-func ConfigParts(w *Frame) {
+// InitParts configures the given [Frame] to be ready
+// to serve as [WidgetBase.Parts] in a [Add] context.
+func InitParts(w *Frame) {
 	w.SetName("parts")
 	w.SetFlag(true, tree.Field)
 	w.Style(func(s *styles.Style) {

@@ -363,7 +363,7 @@ func (tv *TreeView) LabelPart() (*core.Text, bool) {
 func (tv *TreeView) Config(c *core.Plan) {
 	tvi := tv.This().(TreeViewer)
 	core.AddAt(c, "parts", func(w *core.Frame) {
-		core.ConfigParts(w)
+		core.InitParts(w)
 		w.Style(func(s *styles.Style) {
 			s.Cursor = cursors.Pointer
 			s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
