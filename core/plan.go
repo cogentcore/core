@@ -139,11 +139,11 @@ func (p *Plan) buildWidget(w Widget) {
 			tree.SetParent(wb.Parts, wb)
 			child.buildWidget(wparts)
 		}
-		// if we only have parts, then we must bail to avoid deleting children
-		if len(p.Children) == 1 {
+		p.Children = slices.Delete(p.Children, i, i+1) // not a real child
+		// if we only have parts, then we must bail to avoid affecting real children
+		if len(p.Children) == 0 {
 			return
 		}
-		p.Children = slices.Delete(p.Children, i, i+1) // not a real child
 		break
 	}
 	wb.Kids, _ = config.Config(wb.Kids, len(p.Children),

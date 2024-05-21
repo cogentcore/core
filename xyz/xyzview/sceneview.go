@@ -101,7 +101,7 @@ func (sv *SceneView) MakeToolbar(c *core.Plan) {
 			sv.NeedsRender()
 		})
 	})
-	core.AddAt[*core.Separator](c, "")
+	core.Add[*core.Separator](c)
 
 	core.Add(c, func(w *core.Text) {
 		w.SetText("Rot:").SetTooltip("rotate display")
@@ -150,7 +150,7 @@ func (sv *SceneView) MakeToolbar(c *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.AddAt[*core.Separator](c, "")
+	core.Add[*core.Separator](c)
 
 	core.Add(c, func(w *core.Text) {
 		w.SetText("Pan:").SetTooltip("pan display")
@@ -199,7 +199,7 @@ func (sv *SceneView) MakeToolbar(c *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.AddAt[*core.Separator](c, "")
+	core.Add[*core.Separator](c)
 
 	core.Add(c, func(w *core.Text) {
 		w.SetText("Save:")
@@ -226,7 +226,7 @@ func (sv *SceneView) MakeToolbar(c *core.Plan) {
 				})
 		})
 	}
-	core.AddAt[*core.Separator](c, "")
+	core.Add[*core.Separator](c)
 
 	core.AddAt(c, "selmode", func(w *core.Chooser) {
 		w.SetEnum(sw.SelectionMode)

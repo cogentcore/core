@@ -589,7 +589,7 @@ func (pl *PlotView) MakeToolbar(c *core.Plan) {
 				fmt.Println("this will select select mode")
 			})
 	})
-	core.AddAt[*core.Separator](c, "")
+	core.Add[*core.Separator](c)
 
 	core.Add(c, func(w *core.Button) {
 		w.SetText("Update").SetIcon(icons.Update).
@@ -621,7 +621,7 @@ func (pl *PlotView) MakeToolbar(c *core.Plan) {
 				d.NewFullDialog(pl).SetNewWindow(true).Run()
 			})
 	})
-	core.AddAt[*core.Separator](c, "")
+	core.Add[*core.Separator](c)
 
 	core.Add(c, func(w *core.Button) {
 		w.SetText("Save").SetIcon(icons.Save).SetMenu(func(m *core.Scene) {
@@ -635,7 +635,7 @@ func (pl *PlotView) MakeToolbar(c *core.Plan) {
 	core.Add(c, func(w *views.FuncButton) {
 		w.SetFunc(pl.OpenCSV).SetIcon(icons.Open)
 	})
-	core.AddAt[*core.Separator](c, "")
+	core.Add[*core.Separator](c)
 	core.Add(c, func(w *views.FuncButton) {
 		w.SetFunc(pl.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
 	})

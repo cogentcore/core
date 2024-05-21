@@ -456,7 +456,7 @@ func (ev *Env) ConfigGUI() *core.Body {
 		core.Add(c, func(w *views.FuncButton) {
 			w.SetFunc(ev.GrabEyeImg).SetText("Grab Image").SetIcon(icons.Image)
 		})
-		core.AddAt[*core.Separator](c, "")
+		core.Add[*core.Separator](c)
 
 		core.Add(c, func(w *views.FuncButton) {
 			w.SetFunc(ev.StepForward).SetText("Fwd").SetIcon(icons.SkipNext).
@@ -494,7 +494,7 @@ func (ev *Env) ConfigGUI() *core.Body {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
-		core.AddAt[*core.Separator](c, "")
+		core.Add[*core.Separator](c)
 
 		core.Add(c, func(w *core.Button) {
 			w.SetText("README").SetIcon(icons.FileMarkdown).
