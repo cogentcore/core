@@ -162,6 +162,7 @@ func TestTranspile(t *testing.T) {
 		{"type Result struct {", `type Result struct {`},
 		{"var Jobs *table.Table", `var Jobs *table.Table`},
 		{"type Result struct { JobID string", `type Result struct { JobID string`},
+		{"type Result struct { JobID string `width:\"60\"`", "type Result struct { JobID string `width:\"60\"`"},
 	}
 
 	sh := NewShell()

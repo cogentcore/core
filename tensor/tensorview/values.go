@@ -15,15 +15,20 @@ import (
 )
 
 func init() {
-	views.AddValue(tensor.Float32{}, func() views.Value { return &TensorValue{} })
-	views.AddValue(tensor.Float64{}, func() views.Value { return &TensorValue{} })
-	views.AddValue(tensor.Int{}, func() views.Value { return &TensorValue{} })
-	views.AddValue(tensor.Int32{}, func() views.Value { return &TensorValue{} })
-	views.AddValue(tensor.Byte{}, func() views.Value { return &TensorValue{} })
-	views.AddValue(tensor.String{}, func() views.Value { return &TensorValue{} })
-	views.AddValue(tensor.Bits{}, func() views.Value { return &TensorValue{} })
-	views.AddValue(table.Table{}, func() views.Value { return &TableValue{} })
-	views.AddValue(simat.SimMat{}, func() views.Value { return &SimMatValue{} })
+	// new:
+	core.AddValueType[tensor.Float32, *TensorButton]()
+	core.AddValueType[table.Table, *TableButton]()
+
+	// old:
+	// views.AddValue(tensor.Float32{}, func() views.Value { return &TensorValue{} })
+	// views.AddValue(tensor.Float64{}, func() views.Value { return &TensorValue{} })
+	// views.AddValue(tensor.Int{}, func() views.Value { return &TensorValue{} })
+	// views.AddValue(tensor.Int32{}, func() views.Value { return &TensorValue{} })
+	// views.AddValue(tensor.Byte{}, func() views.Value { return &TensorValue{} })
+	// views.AddValue(tensor.String{}, func() views.Value { return &TensorValue{} })
+	// views.AddValue(tensor.Bits{}, func() views.Value { return &TensorValue{} })
+	// views.AddValue(table.Table{}, func() views.Value { return &TableValue{} })
+	// views.AddValue(simat.SimMat{}, func() views.Value { return &SimMatValue{} })
 }
 
 // TensorGridValue manages a [TensorGrid] view of an [tensor.Tensor].
@@ -41,70 +46,70 @@ func (v *TensorGridValue) Update() {
 	v.Widget.SetTensor(tsr)
 }
 
-// TensorValue presents a button that pulls up the [TensorView] viewer for an [tensor.Tensor].
-type TensorValue struct {
-	views.ValueBase[*core.Button]
+// TensorButton represents a Tensor with a button for making a [TensorView]
+// viewer for an [tensor.Tensor].
+type TensorButton struct {
+	*core.Button
+	Tensor tensor.Tensor
 }
 
-func (v *TensorValue) Config() {
-	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	views.ConfigDialogWidget(v, true)
+func (v *TensorButton) WidgetValue() any { return &v.Tensor }
+
+func (v *TensorButton) OnInit() {
+	v.Button.OnInit()
+	v.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	views.ConfigDialogValue(v, true)
 }
 
-func (v *TensorValue) Update() {
-	npv := reflectx.NonPointerValue(v.Value)
-	if !v.Value.IsValid() || v.Value.IsZero() || !npv.IsValid() || npv.IsZero() {
-		v.Widget.SetText("nil")
-	} else {
-		// opv := reflectx.OnePointerUnderlyingValue(vv.Value)
-		v.Widget.SetText("tensor.Tensor")
+func (v *TensorButton) Make(p *core.Plan) {
+	txt := "nil"
+	if v.Tensor != nil {
+		txt = "Tensor"
 	}
+	v.SetText(txt)
+	v.Button.Make(p)
 }
 
-func (v *TensorValue) ConfigDialog(d *core.Body) (bool, func()) {
-	opv := reflectx.UnderlyingPointer(v.Value)
-	et := opv.Interface().(tensor.Tensor)
-	if et == nil {
+func (v *TensorButton) ConfigDialog(d *core.Body) (bool, func()) {
+	if v.Tensor == nil {
 		return false, nil
 	}
-	NewTensorGrid(d).SetTensor(et)
+	NewTensorGrid(d).SetTensor(v.Tensor)
 	return true, nil
 }
 
-// TableValue presents a button that pulls up the [TableView] viewer for a [table.Table].
-type TableValue struct {
-	views.ValueBase[*core.Button]
+// TableButton presents a button that pulls up the [TableView] viewer for a [table.Table].
+type TableButton struct {
+	*core.Button
+	Table *table.Table
 }
 
-func (v *TableValue) Config() {
-	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	views.ConfigDialogWidget(v, true)
+func (v *TableButton) WidgetValue() any { return &v.Table }
+
+func (v *TableButton) OnInit() {
+	v.Button.OnInit()
+	v.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	views.ConfigDialogValue(v, true)
 }
 
-func (v *TableValue) Update() {
-	npv := reflectx.NonPointerValue(v.Value)
-	if !v.Value.IsValid() || v.Value.IsZero() || !npv.IsValid() || npv.IsZero() {
-		v.Widget.SetText("nil")
-	} else {
-		opv := reflectx.UnderlyingPointer(v.Value)
-		et := opv.Interface().(*table.Table)
-		if et != nil {
-			if nm, has := et.MetaData["name"]; has {
-				v.Widget.SetText(nm)
-			} else {
-				v.Widget.SetText("table.Table")
-			}
+func (v *TableButton) Make(p *core.Plan) {
+	txt := "nil"
+	if v.Table != nil {
+		if nm, has := v.Table.MetaData["name"]; has {
+			txt = nm
+		} else {
+			txt = "Table"
 		}
 	}
+	v.SetText(txt)
+	v.Button.Make(p)
 }
 
-func (v *TableValue) ConfigDialog(d *core.Body) (bool, func()) {
-	opv := reflectx.UnderlyingPointer(v.Value)
-	et := opv.Interface().(*table.Table)
-	if et == nil {
+func (v *TableButton) ConfigDialog(d *core.Body) (bool, func()) {
+	if v.Table == nil {
 		return false, nil
 	}
-	NewTableView(d).SetTable(et)
+	NewTableView(d).SetTable(v.Table)
 	return true, nil
 }
 

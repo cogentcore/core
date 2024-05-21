@@ -26,9 +26,6 @@ func (sh *Shell) TranspileLine(ln string) string {
 	if sh.TypeDepth > 0 && brace < 0 {
 		sh.TypeDepth = 0
 	}
-	if len(toks) > 0 && toks[0].Tok == token.TYPE {
-		sh.TypeDepth++
-	}
 	// logx.PrintlnDebug("depths: ", sh.ParenDepth, sh.BraceDepth, sh.BrackDepth)
 	return toks.Code()
 }
@@ -48,6 +45,10 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 		sh.AddError(err)
 	}
 	logx.PrintlnDebug("\n########## line:\n", ln, "\nTokens:\n", toks.String(), "\nWords:\n", ewords)
+
+	if toks[0].Tok == token.TYPE {
+		sh.TypeDepth++
+	}
 
 	if sh.TypeDepth > 0 {
 		logx.PrintlnDebug("go:   type defn")
@@ -141,7 +142,7 @@ func (sh *Shell) TranspileGo(toks Tokens) Tokens {
 	}
 	gtoks := make(Tokens, 0, len(toks)) // return tokens
 	for _, tok := range toks {
-		if tok.IsBacktickString() {
+		if sh.TypeDepth == 0 && tok.IsBacktickString() {
 			gtoks = append(gtoks, sh.TranspileExecString(tok.Str, true)...)
 		} else {
 			gtoks = append(gtoks, tok)

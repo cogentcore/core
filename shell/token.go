@@ -171,7 +171,7 @@ func (tk Tokens) Code() string {
 		case tok.IsGo() && (tok.Tok != token.FUNC):
 			str += tok.String() + " "
 			prvIdent = false
-		case tok.Tok == token.IDENT:
+		case tok.Tok == token.IDENT || tok.Tok == token.STRING:
 			if prvIdent {
 				str += " " + tok.String()
 			} else {
