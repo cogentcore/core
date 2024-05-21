@@ -120,6 +120,9 @@ func (p *Plan) BuildWidget(w Widget) {
 
 // buildWidget is the recursive implementation of [Plan.BuildWidget].
 func (p *Plan) buildWidget(w Widget) {
+	if len(p.Children) == 0 { // TODO(config): figure out a better way to handle this?
+		return
+	}
 	wb := w.AsWidget()
 	wb.Kids, _ = config.Config(wb.Kids, len(p.Children),
 		func(i int) string { return p.Children[i].Name },
