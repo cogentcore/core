@@ -421,7 +421,7 @@ func (ts *Tabs) Config(c *Plan) {
 				})
 			})
 		}
-		tc.ConfigWidget(w, "")
+		tc.ConfigWidget(w)
 	})
 	Configure(c, "frame", func(w *Frame) {
 		w.Style(func(s *styles.Style) {
@@ -434,7 +434,7 @@ func (ts *Tabs) Config(c *Plan) {
 	})
 	// frame comes before tabs in bottom navigation bar
 	if ts.Type.Effective(ts) == NavigationBar {
-		(*c)[0], (*c)[1] = (*c)[1], (*c)[0]
+		c.Children[0], c.Children[1] = c.Children[1], c.Children[0]
 	}
 }
 

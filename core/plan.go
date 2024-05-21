@@ -184,9 +184,7 @@ func (wb *WidgetBase) ConfigWidget() {
 	}
 	c := Plan{}
 	wb.This().(Widget).Config(&c)
-	if len(c) > 0 {
-		c.ConfigWidget(wb.This().(Widget), "")
-	}
+	c.ConfigWidget(wb.This().(Widget))
 }
 
 // Config is the interface method called by [Widget.ConfigWidget] that
