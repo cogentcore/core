@@ -303,11 +303,15 @@ func (sm *Stages) SendShowEvents() {
 			sc.ShowIter++
 			if !sc.hasShown {
 				sc.hasShown = true
+				// profile.Profiling = true
+				// pr := profile.Start("send show")
 				sc.Events.GetShortcuts()
 				sc.WidgetWalkDown(func(kwi Widget, kwb *WidgetBase) bool {
 					kwi.Send(events.Show)
 					return tree.Continue
 				})
+				// pr.End()
+				// profile.Report(time.Millisecond)
 			}
 		}
 	}
