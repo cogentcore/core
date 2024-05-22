@@ -43,7 +43,7 @@ type Shell struct {
 	SSHActive string
 
 	// depth of delim at the end of the current line. if 0, was complete.
-	ParenDepth, BraceDepth, BrackDepth, TypeDepth int
+	ParenDepth, BraceDepth, BrackDepth, TypeDepth, DeclDepth int
 
 	// stack of transpiled lines, that are accumulated in TranspileCode
 	Lines []string
@@ -222,7 +222,7 @@ func (sh *Shell) ResetLines() {
 
 // ResetDepth resets the current depths to 0
 func (sh *Shell) ResetDepth() {
-	sh.ParenDepth, sh.BraceDepth, sh.BrackDepth, sh.TypeDepth = 0, 0, 0, 0
+	sh.ParenDepth, sh.BraceDepth, sh.BrackDepth, sh.TypeDepth, sh.DeclDepth = 0, 0, 0, 0, 0
 }
 
 // AddLine adds line on the stack

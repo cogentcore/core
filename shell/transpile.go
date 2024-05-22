@@ -23,8 +23,11 @@ func (sh *Shell) TranspileLine(ln string) string {
 	sh.ParenDepth += paren
 	sh.BraceDepth += brace
 	sh.BrackDepth += brack
-	if sh.TypeDepth > 0 && brace < 0 {
+	if sh.TypeDepth > 0 && sh.BraceDepth == 0 {
 		sh.TypeDepth = 0
+	}
+	if sh.DeclDepth > 0 && sh.ParenDepth == 0 {
+		sh.DeclDepth = 0
 	}
 	// logx.PrintlnDebug("depths: ", sh.ParenDepth, sh.BraceDepth, sh.BrackDepth)
 	return toks.Code()
@@ -46,12 +49,15 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	}
 	logx.PrintlnDebug("\n########## line:\n", ln, "\nTokens:\n", toks.String(), "\nWords:\n", ewords)
 
-	if toks[0].Tok == token.TYPE || toks[0].Tok == token.IMPORT {
+	if toks[0].Tok == token.TYPE {
 		sh.TypeDepth++
 	}
+	if toks[0].Tok == token.IMPORT || toks[0].Tok == token.VAR || toks[0].Tok == token.CONST {
+		sh.DeclDepth++
+	}
 
-	if sh.TypeDepth > 0 {
-		logx.PrintlnDebug("go:   type defn")
+	if sh.TypeDepth > 0 || sh.DeclDepth > 0 {
+		logx.PrintlnDebug("go:   type / decl defn")
 		return sh.TranspileGo(toks)
 	}
 
