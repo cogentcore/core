@@ -83,8 +83,8 @@ func NewValue(value any, tags reflect.StructTag, parent ...tree.Node) Value {
 // using the given optional struct tags for additional context.
 // The given value should typically be a pointer. It does NOT call [Bind];
 // see [NewValue] for a version that does. It first checks the
-// [Valuer] interface, then the [ValueConverters], then
-// the [ValueTypes], and finally it falls back on a set of default
+// [Valuer] interface, then the [ValueTypes], then
+// the [ValueConverters], and finally it falls back on a set of default
 // bindings. If any step results in nil, it falls back on the next step.
 func ToValue(value any, tags reflect.StructTag) Value {
 	if vwr, ok := value.(Valuer); ok {
@@ -92,18 +92,18 @@ func ToValue(value any, tags reflect.StructTag) Value {
 			return vw
 		}
 	}
-	for _, converter := range ValueConverters {
-		if vw := converter(value, tags); vw != nil {
-			return vw
-		}
-	}
 	rval := reflectx.Underlying(reflect.ValueOf(value))
-	if rval == (reflect.Value{}) {
+	if !rval.IsValid() {
 		return NewText()
 	}
 	typ := rval.Type()
 	if vwt, ok := ValueTypes[types.TypeName(typ)]; ok {
 		if vw := vwt(value); vw != nil {
+			return vw
+		}
+	}
+	for _, converter := range ValueConverters {
+		if vw := converter(value, tags); vw != nil {
 			return vw
 		}
 	}
