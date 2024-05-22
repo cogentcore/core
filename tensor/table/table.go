@@ -208,50 +208,50 @@ func (dt *Table) AddTensorColumnOfType(typ reflect.Kind, name string, cellSizes 
 
 // AddStringColumn adds a new String column with given name.
 // The cells of this column hold a single string value.
-func (dt *Table) AddStringColumn(name string) tensor.Tensor {
-	return AddColumn[string](dt, name)
+func (dt *Table) AddStringColumn(name string) *tensor.String {
+	return AddColumn[string](dt, name).(*tensor.String)
 }
 
 // AddFloat64Column adds a new float64 column with given name.
 // The cells of this column hold a single scalar value.
-func (dt *Table) AddFloat64Column(name string) tensor.Tensor {
-	return AddColumn[float64](dt, name)
+func (dt *Table) AddFloat64Column(name string) *tensor.Float64 {
+	return AddColumn[float64](dt, name).(*tensor.Float64)
 }
 
 // AddFloat64TensorColumn adds a new n-dimensional float64 column with given name
 // and dimensionality of each _cell_.
 // An outer-most Row dimension will be added to this dimensionality to create
 // the tensor column.
-func (dt *Table) AddFloat64TensorColumn(name string, cellSizes []int, dimNames ...string) tensor.Tensor {
-	return AddTensorColumn[float64](dt, name, cellSizes, dimNames...)
+func (dt *Table) AddFloat64TensorColumn(name string, cellSizes []int, dimNames ...string) *tensor.Float64 {
+	return AddTensorColumn[float64](dt, name, cellSizes, dimNames...).(*tensor.Float64)
 }
 
 // AddFloat32Column adds a new float32 column with given name.
 // The cells of this column hold a single scalar value.
-func (dt *Table) AddFloat32Column(name string) tensor.Tensor {
-	return AddColumn[float32](dt, name)
+func (dt *Table) AddFloat32Column(name string) *tensor.Float32 {
+	return AddColumn[float32](dt, name).(*tensor.Float32)
 }
 
 // AddFloat32TensorColumn adds a new n-dimensional float32 column with given name
 // and dimensionality of each _cell_.
 // An outer-most Row dimension will be added to this dimensionality to create
 // the tensor column.
-func (dt *Table) AddFloat32TensorColumn(name string, cellSizes []int, dimNames ...string) tensor.Tensor {
-	return AddTensorColumn[float32](dt, name, cellSizes, dimNames...)
+func (dt *Table) AddFloat32TensorColumn(name string, cellSizes []int, dimNames ...string) *tensor.Float32 {
+	return AddTensorColumn[float32](dt, name, cellSizes, dimNames...).(*tensor.Float32)
 }
 
 // AddIntColumn adds a new int column with given name.
 // The cells of this column hold a single scalar value.
-func (dt *Table) AddIntColumn(name string) tensor.Tensor {
-	return AddColumn[int](dt, name)
+func (dt *Table) AddIntColumn(name string) *tensor.Int {
+	return AddColumn[int](dt, name).(*tensor.Int)
 }
 
 // AddIntTensorColumn adds a new n-dimensional int column with given name
 // and dimensionality of each _cell_.
 // An outer-most Row dimension will be added to this dimensionality to create
 // the tensor column.
-func (dt *Table) AddIntTensorColumn(name string, cellSizes []int, dimNames ...string) tensor.Tensor {
-	return AddTensorColumn[int](dt, name, cellSizes, dimNames...)
+func (dt *Table) AddIntTensorColumn(name string, cellSizes []int, dimNames ...string) *tensor.Int {
+	return AddTensorColumn[int](dt, name, cellSizes, dimNames...).(*tensor.Int)
 }
 
 // DeleteColumnName deletes column of given name.

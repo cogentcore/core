@@ -46,7 +46,7 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	}
 	logx.PrintlnDebug("\n########## line:\n", ln, "\nTokens:\n", toks.String(), "\nWords:\n", ewords)
 
-	if toks[0].Tok == token.TYPE {
+	if toks[0].Tok == token.TYPE || toks[0].Tok == token.IMPORT {
 		sh.TypeDepth++
 	}
 

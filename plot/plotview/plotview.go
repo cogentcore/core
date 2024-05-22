@@ -111,7 +111,6 @@ func (pl *PlotView) OnAdd() {
 // This is safe to call from a different goroutine.
 func (pl *PlotView) SetTableView(tab *table.IndexView) *PlotView {
 	pl.Table = tab
-	pl.DeleteColumns()
 	pl.Update()
 	return pl
 }
@@ -122,7 +121,6 @@ func (pl *PlotView) SetTableView(tab *table.IndexView) *PlotView {
 // This is safe to call from a different goroutine.
 func (pl *PlotView) SetTable(tab *table.Table) *PlotView {
 	pl.Table = table.NewIndexView(tab)
-	pl.DeleteColumns()
 	pl.Update()
 	return pl
 }
@@ -363,37 +361,24 @@ func (pl *PlotView) Make(p *core.Plan) {
 		return
 	}
 	pl.Params.FromMeta(pl.Table.Table)
-	if !pl.HasChildren() {
-		fr := core.NewFrame(pl)
-		fr.SetName("cols")
-		fr.Style(func(s *styles.Style) {
+	cols := core.AddAt(p, "cols", func(w *core.Frame) {
+		w.Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Grow.Set(0, 1)
 			s.Overflow.Y = styles.OverflowAuto
 			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
 		})
-		pt := NewPlot(pl)
-		pt.SetName("plot")
-		pt.Plot = pl.Plot
-		pt.Style(func(s *styles.Style) {
+	})
+	core.AddAt(p, "plot", func(w *Plot) {
+		w.Plot = pl.Plot
+		w.Style(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
 		})
-	}
-
-	pl.ColumnsConfig()
-	pl.NeedsLayout()
+	})
+	pl.MakeColumns(cols)
 }
 
-// DeleteColumns deletes any existing cols, to ensure an update to new table
-func (pl *PlotView) DeleteColumns() {
-	pl.Columns = nil
-	if pl.HasChildren() {
-		vl := pl.ColumnsLay()
-		vl.DeleteChildren()
-	}
-}
-
-func (pl *PlotView) ColumnsLay() *core.Frame {
+func (pl *PlotView) ColumnsFrame() *core.Frame {
 	return pl.ChildByName("cols", 0).(*core.Frame)
 }
 
@@ -444,28 +429,10 @@ func (pl *PlotView) ColumnsFromMetaMap(meta map[string]string) {
 	}
 }
 
-// ColumnsUpdate updates the display toggles for all the cols
-func (pl *PlotView) ColumnsUpdate() {
-	vl := pl.ColumnsLay()
-	for i, cli := range *vl.Children() {
-		if i < PlotColumnsHeaderN {
-			continue
-		}
-		ci := i - PlotColumnsHeaderN
-		cp := pl.Columns[ci]
-		cl := cli.(*core.Frame)
-		sw := cl.Child(0).(*core.Switch)
-		if sw.StateIs(states.Checked) != cp.On {
-			sw.SetChecked(cp.On)
-			sw.NeedsRender()
-		}
-	}
-}
-
 // SetAllColumns turns all Columns on or off (except X axis)
 func (pl *PlotView) SetAllColumns(on bool) {
-	vl := pl.ColumnsLay()
-	for i, cli := range *vl.Children() {
+	fr := pl.ColumnsFrame()
+	for i, cli := range *fr.Children() {
 		if i < PlotColumnsHeaderN {
 			continue
 		}
@@ -485,8 +452,8 @@ func (pl *PlotView) SetAllColumns(on bool) {
 
 // SetColumnsByName turns cols On or Off if their name contains given string
 func (pl *PlotView) SetColumnsByName(nameContains string, on bool) { //types:add
-	vl := pl.ColumnsLay()
-	for i, cli := range *vl.Children() {
+	fr := pl.ColumnsFrame()
+	for i, cli := range *fr.Children() {
 		if i < PlotColumnsHeaderN {
 			continue
 		}
@@ -507,65 +474,72 @@ func (pl *PlotView) SetColumnsByName(nameContains string, on bool) { //types:add
 	pl.NeedsRender()
 }
 
-// ColumnsConfig configures the column gui buttons
-func (pl *PlotView) ColumnsConfig() {
-	vl := pl.ColumnsLay()
+// MakeColumns makes the Plans for columns
+func (pl *PlotView) MakeColumns(p *core.Plan) {
 	pl.ColumnsListUpdate()
-	if len(vl.Kids) == len(pl.Columns)+PlotColumnsHeaderN {
-		pl.ColumnsUpdate()
-		return
-	}
-	vl.DeleteChildren()
-	if len(pl.Columns) == 0 {
-		return
-	}
-	sc := core.NewFrame(vl)
-	sw := core.NewSwitch(sc).SetType(core.SwitchCheckbox).SetTooltip("Toggle off all columns")
-	sw.OnChange(func(e events.Event) {
-		sw.SetChecked(false)
-		pl.SetAllColumns(false)
-	})
-	core.NewButton(sc).SetText("Select Columns").SetType(core.ButtonAction).
-		SetTooltip("click to select columns based on column name").
-		OnClick(func(e events.Event) {
-			views.CallFunc(pl, pl.SetColumnsByName)
-		})
-	core.NewSeparator(vl)
-
-	for _, cp := range pl.Columns {
-		cp := cp
-		cp.Plot = pl
-		cl := core.NewFrame(vl)
-		cl.Style(func(s *styles.Style) {
+	fr := core.Add(p, func(w *core.Frame) {
+		w.Style(func(s *styles.Style) {
 			s.Direction = styles.Row
 			s.Grow.Set(0, 0)
 		})
-		sw := core.NewSwitch(cl).SetType(core.SwitchCheckbox).SetTooltip("toggle plot on")
-		sw.OnChange(func(e events.Event) {
-			cp.On = sw.StateIs(states.Checked)
-			pl.UpdatePlot()
+	})
+	core.Add(fr, func(w *core.Switch) {
+		w.SetType(core.SwitchCheckbox).SetTooltip("Toggle off all columns")
+		w.OnChange(func(e events.Event) {
+			w.SetChecked(false)
+			pl.SetAllColumns(false)
 		})
-		sw.SetState(cp.On, states.Checked)
-		bt := core.NewButton(cl).SetText(cp.Column).SetType(core.ButtonAction).
-			SetTooltip("edit column settings including setting as XAxis or Legend")
-		bt.OnClick(func(e events.Event) {
-			d := core.NewBody().AddTitle("Column Params")
-			views.NewStructView(d).SetStruct(cp).
-				OnChange(func(e events.Event) {
-					pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
+	})
+	core.Add(fr, func(w *core.Button) {
+		w.SetText("Select Columns").SetType(core.ButtonAction).
+			SetTooltip("click to select columns based on column name").
+			OnClick(func(e events.Event) {
+				views.CallFunc(pl, pl.SetColumnsByName)
+			})
+	})
+	core.Add[*core.Separator](p)
+	for _, cp := range pl.Columns {
+		cp.Plot = pl
+		fr := core.AddAt(p, cp.Column, func(w *core.Frame) {
+			w.Style(func(s *styles.Style) {
+				s.Direction = styles.Row
+				s.Grow.Set(0, 0)
+			})
+		})
+		core.Add(fr, func(w *core.Switch) {
+			w.SetType(core.SwitchCheckbox).SetTooltip("toggle plot on")
+			w.OnChange(func(e events.Event) {
+				cp.On = w.StateIs(states.Checked)
+				pl.UpdatePlot()
+			})
+		}, func(w *core.Switch) {
+			w.SetState(cp.On, states.Checked)
+		})
+		core.Add(fr, func(w *core.Button) {
+			w.SetText(cp.Column).SetType(core.ButtonAction).
+				SetTooltip("edit column settings including setting as XAxis or Legend")
+			w.OnClick(func(e events.Event) {
+				d := core.NewBody().AddTitle("Column Params")
+				views.NewStructView(d).SetStruct(cp).
+					OnChange(func(e events.Event) {
+						pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
+					})
+				d.AddAppBar(func(p *core.Plan) {
+					core.Add(p, func(w *core.Button) {
+						w.SetText("Set X Axis").OnClick(func(e events.Event) {
+							pl.Params.XAxisColumn = cp.Column
+							pl.UpdatePlot()
+						})
+					})
+					core.Add(p, func(w *core.Button) {
+						w.SetText("Set Legend").OnClick(func(e events.Event) {
+							pl.Params.LegendColumn = cp.Column
+							pl.UpdatePlot()
+						})
+					})
 				})
-				// TODO(config)
-			// d.AddAppBar(func(tb *core.Toolbar) {
-			// 	core.NewButton(tb).SetText("Set X Axis").OnClick(func(e events.Event) {
-			// 		pl.Params.XAxisColumn = cp.Column
-			// 		pl.UpdatePlot()
-			// 	})
-			// 	core.NewButton(tb).SetText("Set Legend").OnClick(func(e events.Event) {
-			// 		pl.Params.LegendColumn = cp.Column
-			// 		pl.UpdatePlot()
-			// 	})
-			// })
-			d.NewFullDialog(pl).SetNewWindow(true).Run()
+				d.NewFullDialog(pl).SetNewWindow(true).Run()
+			})
 		})
 	}
 }
