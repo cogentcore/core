@@ -186,7 +186,7 @@ func (is *Inspector) Make(p *core.Plan) {
 	splits := core.AddAt(p, "splits", func(w *core.Splits) {
 		w.SetSplits(.3, .7)
 	})
-	frame := core.AddAt(splits, "tree-frame", func(w *core.Frame) {
+	treeFrame := core.AddAt(splits, "tree-frame", func(w *core.Frame) {
 		w.Style(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Overflow.Set(styles.OverflowAuto)
@@ -200,7 +200,7 @@ func (is *Inspector) Make(p *core.Plan) {
 		}
 		sc.RenderContext().SetFlag(true, core.RenderRebuild) // trigger full rebuild
 	}
-	core.AddAt(frame, "tree", func(w *TreeView) {
+	core.AddAt(treeFrame, "tree", func(w *TreeView) {
 		is.CurrentNode = is.Root
 		w.OnSelect(func(e events.Event) {
 			if len(w.SelectedNodes) == 0 {
@@ -229,7 +229,7 @@ func (is *Inspector) Make(p *core.Plan) {
 	}, func(w *TreeView) {
 		w.SyncTree(is.Root)
 	})
-	core.AddAt(frame, "struct", func(w *StructView) {
+	core.AddAt(splits, "struct", func(w *StructView) {
 		w.OnChange(func(e events.Event) {
 			renderRebuild()
 		})
