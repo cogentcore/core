@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/bools"
+	"cogentcore.org/core/base/elide"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/enums"
 )
@@ -1062,11 +1063,17 @@ func SetRobust(to, from any) error {
 		return CopyMapRobust(to, from)
 	}
 
-	fv := Underlying(reflect.ValueOf(from))
-	// just set it if possible to assign
+	fv := reflect.ValueOf(from)
 	if fv.Type().AssignableTo(typ) {
 		vp.Elem().Set(fv)
 		return nil
 	}
-	return fmt.Errorf("unable to set value %v of type %T from value %v of type %T (not a supported type pair and direct assigning is not possible)", to, to, from, from)
+	fv = Underlying(reflect.ValueOf(from))
+	if fv.Type().AssignableTo(typ) {
+		vp.Elem().Set(fv)
+		return nil
+	}
+	tos := elide.End(fmt.Sprintf("%v", to), 40)
+	fms := elide.End(fmt.Sprintf("%v", from), 40)
+	return fmt.Errorf("unable to set value %s of type %T (using underlying type: %s) from value %s of type %T (using underlying type: %s): not a supported type pair and direct assigning is not possible", tos, to, typ.String(), fms, from, fv.Type().String())
 }
