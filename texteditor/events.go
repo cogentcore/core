@@ -32,14 +32,6 @@ func (ed *Editor) HandleEvents() {
 	ed.HandleLinkCursor()
 	ed.HandleFocus()
 	ed.AddContextMenu(ed.ContextMenu)
-}
-
-func (ed *Editor) OnAdd() {
-	ed.Frame.OnAdd()
-	ed.HandleClose()
-}
-
-func (ed *Editor) HandleClose() {
 	ed.OnClose(func(e events.Event) {
 		ed.EditDone()
 	})

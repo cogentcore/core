@@ -96,10 +96,6 @@ func (pl *PlotView) OnInit() {
 		s.Direction = styles.Row
 		s.Grow.Set(1, 1)
 	})
-}
-
-func (pl *PlotView) OnAdd() {
-	pl.Frame.OnAdd()
 	pl.OnShow(func(e events.Event) {
 		pl.UpdatePlot()
 	})

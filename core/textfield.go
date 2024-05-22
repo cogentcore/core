@@ -190,13 +190,6 @@ func (tf *TextField) OnInit() {
 	tf.AddContextMenu(tf.ContextMenu)
 }
 
-func (tf *TextField) OnAdd() {
-	tf.WidgetBase.OnAdd()
-	tf.OnClose(func(e events.Event) {
-		tf.EditDone() // todo: this must be protected against something else, for race detector
-	})
-}
-
 func (tf *TextField) SetStyles() {
 	tf.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
@@ -1552,6 +1545,9 @@ func (tf *TextField) HandleEvents() {
 			tf.SelectModeToggle()
 		}
 		tf.SetCursorFromPixel(e.Pos(), events.SelectOne)
+	})
+	tf.OnClose(func(e events.Event) {
+		tf.EditDone() // todo: this must be protected against something else, for race detector
 	})
 }
 

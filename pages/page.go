@@ -75,10 +75,6 @@ func (pg *Page) OnInit() {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
-}
-
-func (pg *Page) OnAdd() {
-	pg.WidgetBase.OnAdd()
 	pg.OnShow(func(e events.Event) {
 		if pg.PagePath == "" {
 			if getWebURL != nil {
