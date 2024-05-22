@@ -91,8 +91,9 @@ func (tv *TimeView) Make(p *core.Plan) {
 		})
 		w.OnChange(func(e events.Event) {
 			// we set our minute and keep everything else
-			tt := tv.Time
-			tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), int(minute.Value), tt.Second(), tt.Nanosecond(), tt.Location())
+			// TODO(config)
+			// tt := tv.Time
+			// tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), int(minute.Value), tt.Second(), tt.Nanosecond(), tt.Location())
 			tv.SendChange()
 		})
 	})

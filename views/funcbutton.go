@@ -328,7 +328,7 @@ func (fb *FuncButton) CallFunc() {
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText(fb.Text).OnClick(func(e events.Event) {
-			d.Scene.Send(events.Close, e) // note: the other Close event happens too late!
+			d.Close() // note: the other Close event happens too late!
 			fb.CallFuncShowReturns()
 		})
 	})

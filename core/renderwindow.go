@@ -554,7 +554,7 @@ func (w *RenderWindow) HandleWindowEvents(e events.Event) {
 		rc.Unlock() // one case where we need to break lock
 		w.RenderWindow()
 		rc.Lock()
-		w.SendShowEvents()
+		w.Mains.SendShowEvents()
 
 	case events.WindowResize:
 		e.SetHandled()
@@ -1051,10 +1051,6 @@ func (w *RenderWindow) GatherScenes() bool {
 	}
 	rs.SceneIndex = scIndex
 	return true
-}
-
-func (w *RenderWindow) SendShowEvents() {
-	w.Mains.SendShowEvents()
 }
 
 ////////////////////////////////////////////////////////////////////////////

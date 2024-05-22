@@ -566,9 +566,6 @@ func (wb *WidgetBase) VisibleKidsIter(fun func(i int, kwi Widget, kwb *WidgetBas
 func (wb *WidgetBase) WidgetWalkDown(fun func(kwi Widget, kwb *WidgetBase) bool) {
 	wb.WalkDown(func(k tree.Node) bool {
 		kwi, kwb := AsWidget(k)
-		if kwi == nil || kwi.This() == nil {
-			return tree.Break
-		}
 		return fun(kwi, kwb)
 	})
 }

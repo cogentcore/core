@@ -67,62 +67,56 @@ func (wb *WidgetBase) OnFinal(etype events.Types, fun func(e events.Event)) Widg
 	return wb.This().(Widget)
 }
 
-// Helper functions for common event types
+// Helper functions for common event types:
 
-// OnClick adds an event listener function for [events.Click] events
+// OnClick adds an event listener function for [events.Click] events.
 func (wb *WidgetBase) OnClick(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.Click, fun)
 }
 
-// OnDoubleClick adds an event listener function for [events.DoubleClick] events
+// OnDoubleClick adds an event listener function for [events.DoubleClick] events.
 func (wb *WidgetBase) OnDoubleClick(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.DoubleClick, fun)
 }
 
-// OnChange adds an event listener function for [events.Change] events
+// OnChange adds an event listener function for [events.Change] events.
 func (wb *WidgetBase) OnChange(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.Change, fun)
 }
 
-// OnInput adds an event listener function for [events.Input] events
+// OnInput adds an event listener function for [events.Input] events.
 func (wb *WidgetBase) OnInput(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.Input, fun)
 }
 
-// OnKeyChord adds an event listener function for [events.KeyChord] events
+// OnKeyChord adds an event listener function for [events.KeyChord] events.
 func (wb *WidgetBase) OnKeyChord(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.KeyChord, fun)
 }
 
-// OnFocus adds an event listener function for [events.Focus] events
+// OnFocus adds an event listener function for [events.Focus] events.
 func (wb *WidgetBase) OnFocus(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.Focus, fun)
 }
 
-// OnFocusLost adds an event listener function for [events.FocusLost] events
+// OnFocusLost adds an event listener function for [events.FocusLost] events.
 func (wb *WidgetBase) OnFocusLost(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.FocusLost, fun)
 }
 
-// OnSelect adds an event listener function for [events.Select] events
+// OnSelect adds an event listener function for [events.Select] events.
 func (wb *WidgetBase) OnSelect(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.Select, fun)
 }
 
-// OnShow adds an event listener function for [events.Show] events on
-// the widget's Scene. Directly listening to Show events for non-scene
-// widgets does not work, so it must go through the Scene.
-// This must typically be called in OnAdd() or later, and
-// definitely NOT in OnInit, because only then will the Scene be set.
+// OnShow adds an event listener function for [events.Show] events.
 func (wb *WidgetBase) OnShow(fun func(e events.Event)) *WidgetBase {
-	return wb.Scene.On(events.Show, fun)
+	return wb.On(events.Show, fun)
 }
 
-// OnClose adds an event listener function for [events.Close] events on
-// the widget's Scene. Directly listening to Close events for non-scene
-// widgets does not work, so it must go through the Scene.
+// OnClose adds an event listener function for [events.Close] events.
 func (wb *WidgetBase) OnClose(fun func(e events.Event)) *WidgetBase {
-	return wb.Scene.On(events.Close, fun)
+	return wb.On(events.Close, fun)
 }
 
 // AddCloseDialog adds a dialog that confirms that the user wants to close the Scene

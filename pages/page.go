@@ -89,7 +89,7 @@ func (pg *Page) OnAdd() {
 		}
 	})
 	// must be done after the default title is set elsewhere in normal OnShow
-	pg.Scene.OnFinal(events.Show, func(e events.Event) {
+	pg.OnFinal(events.Show, func(e events.Event) {
 		pg.setStageTitle()
 	})
 }
