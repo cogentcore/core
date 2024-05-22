@@ -231,6 +231,7 @@ func (is *Inspector) Make(p *core.Plan) {
 			renderRebuild()
 		})
 	}, func(w *TreeView) {
+		// fmt.Println("sync tree")
 		w.SyncTree(is.Root)
 	})
 	core.AddAt(splits, "struct", func(w *StructView) {

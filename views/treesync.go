@@ -33,7 +33,7 @@ func (tv *TreeView) SyncTree(n tree.Node) *TreeView {
 	}
 	tvIndex := 0
 	tv.SyncToSrc(&tvIndex, true, 0)
-	tv.NeedsLayout()
+	tv.Update()
 	return tv
 }
 
@@ -54,6 +54,7 @@ func (tv *TreeView) SetSyncNode(sn tree.Node, tvIndex *int, init bool, depth int
 func (tv *TreeView) ReSync() {
 	tvIndex := tv.ViewIndex
 	tv.SyncToSrc(&tvIndex, false, 0)
+	tv.Update()
 }
 
 // SyncToSrc updates the view tree to match the sync tree, using
@@ -75,7 +76,7 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 	for _, skid := range skids {
 		tnl.Add(typ, "tv_"+skid.Name())
 	}
-	mods := tv.ConfigChildren(tnl)
+	tv.ConfigChildren(tnl)
 	idx := 0
 	for _, skid := range *sk.Children() {
 		if len(tv.Kids) <= idx {
@@ -88,11 +89,6 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 	if !sk.HasChildren() {
 		tv.SetClosed(true)
 	}
-	if mods {
-		tv.Update()
-		tv.TreeViewChanged(nil)
-	}
-	tv.NeedsLayout()
 }
 
 // Label returns the display label for this node,

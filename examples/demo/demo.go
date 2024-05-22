@@ -454,7 +454,9 @@ func makeViews(ts *core.Tabs) {
 
 	sp := core.NewSplits(vts.NewTab("Tree view")).SetSplits(0.3, 0.7)
 	tv := views.NewTreeViewFrame(sp).SetText("Root")
+	// fmt.Println("calling make tree")
 	makeTree(tv, 0, 3, 5)
+	tv.RootSetViewIndex()
 
 	sv := views.NewStructView(sp)
 	sv.Style(func(s *styles.Style) {
@@ -465,8 +467,10 @@ func makeViews(ts *core.Tabs) {
 	tv.OnSelect(func(e events.Event) {
 		if len(tv.SelectedNodes) > 0 {
 			sv.SetStruct(tv.SelectedNodes[0])
+			sv.Update()
 		}
 	})
+	// fmt.Println(&tv, tv.Listeners)
 
 	textEditors(vts)
 }

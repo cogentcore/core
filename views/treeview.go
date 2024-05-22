@@ -203,6 +203,7 @@ func (tv *TreeView) RootSetViewIndex() int {
 		if tvn != nil {
 			tvn.ViewIndex = idx
 			tvn.RootView = tv
+			// fmt.Println(idx, tvn, "root:", tv, &tv)
 			idx++
 		}
 		return tree.Continue
@@ -226,6 +227,7 @@ func (tv *TreeView) OnAdd() {
 		tv.IconClosed = ptv.IconClosed
 		tv.IconLeaf = ptv.IconLeaf
 	} else {
+		// fmt.Println("set root to:", tv, &tv)
 		tv.RootView = tv
 	}
 }
@@ -841,6 +843,7 @@ func (tv *TreeView) SelectUpdate(mode events.SelectModes) bool {
 // SendSelectEvent sends the events.Select event on the
 // RootView node, using context event if avail (else nil).
 func (tv *TreeView) SendSelectEvent(ctx events.Event) {
+	// fmt.Println("root:", &tv.RootView, tv.RootView.Listeners)
 	tv.RootView.Send(events.Select, nil)
 }
 
