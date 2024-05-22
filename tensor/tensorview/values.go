@@ -101,7 +101,7 @@ func (tb *TableButton) Make(p *core.Plan) {
 		if nm, has := tb.Table.MetaData["name"]; has {
 			txt = nm
 		} else {
-			txt = "aTable"
+			txt = "Table"
 		}
 	}
 	tb.SetText(txt)
