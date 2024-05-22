@@ -17,7 +17,7 @@ func (sc *Scene) AddToLibrary(gp *Group) {
 		sc.Library = make(map[string]*Group)
 	}
 	sc.Library[gp.Name()] = gp
-	gp.Sc = sc
+	gp.Scene = sc
 }
 
 // NewInLibrary makes a new Group in library, using given name as unique key
@@ -25,7 +25,7 @@ func (sc *Scene) AddToLibrary(gp *Group) {
 func (sc *Scene) NewInLibrary(nm string) *Group {
 	gp := NewGroup()
 	gp.SetName(nm)
-	gp.Sc = sc
+	gp.Scene = sc
 	sc.AddToLibrary(gp)
 	return gp
 }
@@ -46,7 +46,7 @@ func (sc *Scene) AddFromLibrary(nm string, parent tree.Node) (*Group, error) {
 		if ni == nil {
 			return tree.Break
 		}
-		nb.Sc = sc
+		nb.Scene = sc
 		return tree.Continue
 	})
 	return nwgp, nil

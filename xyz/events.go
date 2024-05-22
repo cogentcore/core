@@ -34,7 +34,7 @@ func NodesUnderPoint(n tree.Node, pt image.Point) []Node {
 		if !ni.IsVisible() {
 			return tree.Break
 		}
-		if pt.In(nb.ScBBox) {
+		if pt.In(nb.SceneBBox) {
 			ns = append(ns, ni)
 		}
 		return tree.Continue
