@@ -5,7 +5,10 @@
 package table
 
 import (
+	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAdd3DCol(t *testing.T) {
@@ -31,5 +34,43 @@ func TestAdd3DCol(t *testing.T) {
 
 	if col.Shape().DimSize(3) != 16 {
 		t.Errorf("Add4DCol: dim 0 len != 16, was: %v\n", col.Shape().DimSize(3))
+	}
+}
+
+func NewTestTable() *Table {
+	dt := NewTable()
+	dt.AddStringColumn("Str")
+	dt.AddFloat64Column("Flt64")
+	dt.AddIntColumn("Int")
+	dt.SetNumRows(3)
+	for i := 0; i < dt.Rows; i++ {
+		dt.SetString("Str", i, strconv.Itoa(i))
+		dt.SetFloat("Flt64", i, float64(i))
+		dt.SetFloat("Int", i, float64(i))
+	}
+	return dt
+}
+
+func TestAppendRows(t *testing.T) {
+	st := NewTestTable()
+	dt := NewTestTable()
+	dt.AppendRows(st)
+	dt.AppendRows(st)
+	dt.AppendRows(st)
+	for j := 0; j < 3; j++ {
+		for i := 0; i < st.Rows; i++ {
+			sr := j*3 + i
+			ss := st.StringValue("Str", i)
+			ds := dt.StringValue("Str", sr)
+			assert.Equal(t, ss, ds)
+
+			sf := st.Float("Flt64", i)
+			df := dt.Float("Flt64", sr)
+			assert.Equal(t, sf, df)
+
+			sf = st.Float("Int", i)
+			df = dt.Float("Int", sr)
+			assert.Equal(t, sf, df)
+		}
 	}
 }

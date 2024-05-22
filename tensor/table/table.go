@@ -662,11 +662,11 @@ func (dt *Table) SetTensorFloat1D(column string, row int, idx int, val float64) 
 // Returns error if column names are invalid.
 func (dt *Table) CopyCell(column string, row int, cpt *Table, cpColNm string, cpRow int) bool {
 	ct := dt.ColumnByName(column)
-	if ct != nil {
+	if ct == nil {
 		return false
 	}
 	cpct := cpt.ColumnByName(cpColNm)
-	if cpct != nil {
+	if cpct == nil {
 		return false
 	}
 	_, sz := ct.RowCellSize()
