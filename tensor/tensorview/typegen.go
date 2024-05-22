@@ -4,6 +4,12 @@ package tensorview
 
 import (
 	"cogentcore.org/core/colors/colormap"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/tensor"
+	"cogentcore.org/core/tensor/stats/simat"
+	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
@@ -112,8 +118,105 @@ func (t *TensorGrid) SetTooltip(v string) *TensorGrid { t.Tooltip = v; return t 
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TensorGridValue", IDName: "tensor-grid-value", Doc: "TensorGridValue manages a [TensorGrid] view of an [tensor.Tensor].", Embeds: []types.Field{{Name: "ValueBase"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TensorValue", IDName: "tensor-value", Doc: "TensorValue presents a button that pulls up the [TensorView] viewer for an [tensor.Tensor].", Embeds: []types.Field{{Name: "ValueBase"}}})
+// TensorButtonType is the [types.Type] for [TensorButton]
+var TensorButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TensorButton", IDName: "tensor-button", Doc: "TensorButton represents a Tensor with a button for making a [TensorView]\nviewer for an [tensor.Tensor].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Tensor"}}, Instance: &TensorButton{}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TableValue", IDName: "table-value", Doc: "TableValue presents a button that pulls up the [TableView] viewer for a [table.Table].", Embeds: []types.Field{{Name: "ValueBase"}}})
+// NewTensorButton returns a new [TensorButton] with the given optional parent:
+// TensorButton represents a Tensor with a button for making a [TensorView]
+// viewer for an [tensor.Tensor].
+func NewTensorButton(parent ...tree.Node) *TensorButton { return tree.New[*TensorButton](parent...) }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.SimMatValue", IDName: "sim-mat-value", Doc: "SimMatValue presents a button that pulls up the [SimMatGridView] viewer for a [table.Table].", Embeds: []types.Field{{Name: "ValueBase"}}})
+// NodeType returns the [*types.Type] of [TensorButton]
+func (t *TensorButton) NodeType() *types.Type { return TensorButtonType }
+
+// New returns a new [*TensorButton] value
+func (t *TensorButton) New() tree.Node { return &TensorButton{} }
+
+// SetTensor sets the [TensorButton.Tensor]
+func (t *TensorButton) SetTensor(v tensor.Tensor) *TensorButton { t.Tensor = v; return t }
+
+// SetTooltip sets the [TensorButton.Tooltip]
+func (t *TensorButton) SetTooltip(v string) *TensorButton { t.Tooltip = v; return t }
+
+// SetType sets the [TensorButton.Type]
+func (t *TensorButton) SetType(v core.ButtonTypes) *TensorButton { t.Type = v; return t }
+
+// SetIcon sets the [TensorButton.Icon]
+func (t *TensorButton) SetIcon(v icons.Icon) *TensorButton { t.Icon = v; return t }
+
+// SetIndicator sets the [TensorButton.Indicator]
+func (t *TensorButton) SetIndicator(v icons.Icon) *TensorButton { t.Indicator = v; return t }
+
+// SetShortcut sets the [TensorButton.Shortcut]
+func (t *TensorButton) SetShortcut(v key.Chord) *TensorButton { t.Shortcut = v; return t }
+
+// SetMenu sets the [TensorButton.Menu]
+func (t *TensorButton) SetMenu(v func(m *core.Scene)) *TensorButton { t.Menu = v; return t }
+
+// TableButtonType is the [types.Type] for [TableButton]
+var TableButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TableButton", IDName: "table-button", Doc: "TableButton presents a button that pulls up the [TableView] viewer for a [table.Table].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Table"}}, Instance: &TableButton{}})
+
+// NewTableButton returns a new [TableButton] with the given optional parent:
+// TableButton presents a button that pulls up the [TableView] viewer for a [table.Table].
+func NewTableButton(parent ...tree.Node) *TableButton { return tree.New[*TableButton](parent...) }
+
+// NodeType returns the [*types.Type] of [TableButton]
+func (t *TableButton) NodeType() *types.Type { return TableButtonType }
+
+// New returns a new [*TableButton] value
+func (t *TableButton) New() tree.Node { return &TableButton{} }
+
+// SetTable sets the [TableButton.Table]
+func (t *TableButton) SetTable(v *table.Table) *TableButton { t.Table = v; return t }
+
+// SetTooltip sets the [TableButton.Tooltip]
+func (t *TableButton) SetTooltip(v string) *TableButton { t.Tooltip = v; return t }
+
+// SetType sets the [TableButton.Type]
+func (t *TableButton) SetType(v core.ButtonTypes) *TableButton { t.Type = v; return t }
+
+// SetIcon sets the [TableButton.Icon]
+func (t *TableButton) SetIcon(v icons.Icon) *TableButton { t.Icon = v; return t }
+
+// SetIndicator sets the [TableButton.Indicator]
+func (t *TableButton) SetIndicator(v icons.Icon) *TableButton { t.Indicator = v; return t }
+
+// SetShortcut sets the [TableButton.Shortcut]
+func (t *TableButton) SetShortcut(v key.Chord) *TableButton { t.Shortcut = v; return t }
+
+// SetMenu sets the [TableButton.Menu]
+func (t *TableButton) SetMenu(v func(m *core.Scene)) *TableButton { t.Menu = v; return t }
+
+// SimMatButtonType is the [types.Type] for [SimMatButton]
+var SimMatButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.SimMatButton", IDName: "sim-mat-button", Doc: "SimMatValue presents a button that pulls up the [SimMatGridView] viewer for a [table.Table].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "SimMat"}}, Instance: &SimMatButton{}})
+
+// NewSimMatButton returns a new [SimMatButton] with the given optional parent:
+// SimMatValue presents a button that pulls up the [SimMatGridView] viewer for a [table.Table].
+func NewSimMatButton(parent ...tree.Node) *SimMatButton { return tree.New[*SimMatButton](parent...) }
+
+// NodeType returns the [*types.Type] of [SimMatButton]
+func (t *SimMatButton) NodeType() *types.Type { return SimMatButtonType }
+
+// New returns a new [*SimMatButton] value
+func (t *SimMatButton) New() tree.Node { return &SimMatButton{} }
+
+// SetSimMat sets the [SimMatButton.SimMat]
+func (t *SimMatButton) SetSimMat(v *simat.SimMat) *SimMatButton { t.SimMat = v; return t }
+
+// SetTooltip sets the [SimMatButton.Tooltip]
+func (t *SimMatButton) SetTooltip(v string) *SimMatButton { t.Tooltip = v; return t }
+
+// SetType sets the [SimMatButton.Type]
+func (t *SimMatButton) SetType(v core.ButtonTypes) *SimMatButton { t.Type = v; return t }
+
+// SetIcon sets the [SimMatButton.Icon]
+func (t *SimMatButton) SetIcon(v icons.Icon) *SimMatButton { t.Icon = v; return t }
+
+// SetIndicator sets the [SimMatButton.Indicator]
+func (t *SimMatButton) SetIndicator(v icons.Icon) *SimMatButton { t.Indicator = v; return t }
+
+// SetShortcut sets the [SimMatButton.Shortcut]
+func (t *SimMatButton) SetShortcut(v key.Chord) *SimMatButton { t.Shortcut = v; return t }
+
+// SetMenu sets the [SimMatButton.Menu]
+func (t *SimMatButton) SetMenu(v func(m *core.Scene)) *SimMatButton { t.Menu = v; return t }

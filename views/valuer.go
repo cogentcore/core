@@ -49,7 +49,7 @@ func init() {
 				return NewSliceButton()
 			}
 		case reflect.Struct:
-			num := typ.NumField()
+			num := reflectx.NumAllFields(rval)
 			if !forceNoInline && (forceInline || num <= core.SystemSettings.StructInlineLength) {
 				return NewStructView().SetInline(true)
 			} else {

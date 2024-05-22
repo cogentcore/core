@@ -208,7 +208,11 @@ func (is *Inspector) Make(p *core.Plan) {
 			}
 			sn := w.SelectedNodes[0].AsTreeView().SyncNode
 			is.CurrentNode = sn
-			is.Update()
+			// note: doing Update on entire Inspector undoes all tree expansion
+			// only want to update the struct view.
+			stru := is.FindPath("splits/struct").(*StructView)
+			stru.SetStruct(sn)
+			stru.Update()
 
 			sc, ok := is.Root.(*core.Scene)
 			if !ok {

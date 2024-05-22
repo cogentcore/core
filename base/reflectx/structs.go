@@ -46,6 +46,18 @@ func WalkFields(parent reflect.Value, should func(parent reflect.Value, field re
 	}
 }
 
+// NumAllFields returns the number of elemental fields in the given struct type.
+func NumAllFields(parent reflect.Value) int {
+	n := 0
+	WalkFields(parent,
+		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
+			return true
+		}, func(parent reflect.Value, field reflect.StructField, value reflect.Value) {
+			n++
+		})
+	return n
+}
+
 // ValueIsDefault returns whether the given value is equivalent to the
 // given string representation used in a field default tag.
 func ValueIsDefault(fv reflect.Value, def string) bool {

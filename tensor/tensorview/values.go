@@ -15,8 +15,11 @@ import (
 
 func init() {
 	// new:
-	core.AddValueType[tensor.Float32, *TensorButton]()
 	core.AddValueType[table.Table, *TableButton]()
+	core.AddValueType[tensor.Float32, *TensorButton]()
+	core.AddValueType[tensor.Float64, *TensorButton]()
+	core.AddValueType[tensor.String, *TensorButton]()
+	core.AddValueType[tensor.Int, *TensorButton]()
 	core.AddValueType[simat.SimMat, *SimMatButton]()
 
 	// old:
