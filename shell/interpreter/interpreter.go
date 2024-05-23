@@ -94,7 +94,10 @@ func (in *Interpreter) Prompt() string {
 // print the result in interactive mode.
 func (in *Interpreter) Eval(code string) (v reflect.Value, hasPrint bool, err error) {
 	in.Shell.TranspileCode(code)
-	source := strings.HasPrefix(code, "source")
+	source := false
+	if in.Shell.SSHActive == "" {
+		source = strings.HasPrefix(code, "source")
+	}
 	if in.Shell.TotalDepth() == 0 {
 		nl := len(in.Shell.Lines)
 		if nl > 0 {
