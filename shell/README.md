@@ -81,6 +81,8 @@ The `make` package defines a number of useful utility functions that accomplish 
 
 TODO: implement and document.
 
+**NOTE:** for now, if it doesn't find a new file in the current directory, type `cd .` and it will refresh the cache of files in current directory.  TODO: fix this with time-stamp of some sort!
+
 # SSH connections to remote hosts
 
 Any number of active SSH connections can be maintained and used dynamically within a script, including simple ways of copying data among the different hosts (including the local host).  The Go mode execution is always on the local host in one running process, and only the shell commands are executed remotely, enabling a unique ability to easily coordinate and distribute processing and data across various hosts.
