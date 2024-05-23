@@ -168,15 +168,20 @@ func (tk Tokens) Code() string {
 			prvIdent = false
 		case tok.Tok == token.STRUCT:
 			str += " " + tok.String() + " "
-		case tok.IsGo() && (tok.Tok != token.FUNC):
+		case tok.Tok == token.FUNC:
+			if prvIdent {
+				str += " "
+			}
+			str += tok.String()
+			prvIdent = false
+		case tok.IsGo():
 			str += tok.String() + " "
 			prvIdent = false
 		case tok.Tok == token.IDENT || tok.Tok == token.STRING:
 			if prvIdent {
-				str += " " + tok.String()
-			} else {
-				str += tok.String()
+				str += " "
 			}
+			str += tok.String()
 			prvIdent = true
 		default:
 			str += tok.String()
