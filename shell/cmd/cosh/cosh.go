@@ -65,6 +65,9 @@ func Run(c *Config) error { //cli:cmd -root
 	in := interpreter.NewInterpreter(interp.Options{})
 	in.Config()
 	_, _, err := in.Eval(code)
+	if err == nil {
+		err = in.Shell.DepthError()
+	}
 	return err
 }
 

@@ -64,6 +64,10 @@ func NewInterpreter(options interp.Options) *Interpreter {
 			"OutputErrOK": reflect.ValueOf(in.Shell.OutputErrOK),
 			"Start":       reflect.ValueOf(in.Shell.Start),
 			"AddCommand":  reflect.ValueOf(in.Shell.AddCommand),
+			"SplitLines":  reflect.ValueOf(shell.SplitLines),
+			"FileExists":  reflect.ValueOf(shell.FileExists),
+			"WriteFile":   reflect.ValueOf(shell.WriteFile),
+			"ReadFile":    reflect.ValueOf(shell.ReadFile),
 		},
 	})
 	go in.MonitorSignals()
@@ -101,8 +105,6 @@ func (in *Interpreter) Eval(code string) (v reflect.Value, hasPrint bool, err er
 		}
 		v, err = in.RunCode()
 		in.Shell.Errors = nil
-	} else {
-		fmt.Println("depth != 0", in.Shell.TotalDepth())
 	}
 	if source {
 		v, err = in.RunCode() // run accumulated code
@@ -116,19 +118,24 @@ func (in *Interpreter) RunCode() (reflect.Value, error) {
 	if len(in.Shell.Errors) > 0 {
 		return reflect.Value{}, errors.Join(in.Shell.Errors...)
 	}
-	cmd := in.Shell.Code()
-	in.Shell.ResetLines()
-	ctx := in.Shell.StartContext()
-	v, err := in.Interp.EvalWithContext(ctx, cmd)
-	in.Shell.EndContext()
-	if err != nil {
-		cancelled := errors.Is(err, context.Canceled)
-		// fmt.Println("cancelled:", cancelled)
-		in.Shell.RestoreOrigStdIO()
-		in.Shell.ResetDepth()
-		in.Interp.Eval("\n")
-		if !cancelled {
-			slog.Error(err.Error())
+	in.Shell.AddChunk()
+	code := in.Shell.Chunks
+	in.Shell.ResetCode()
+	var v reflect.Value
+	var err error
+	for _, ch := range code {
+		ctx := in.Shell.StartContext()
+		v, err = in.Interp.EvalWithContext(ctx, ch)
+		in.Shell.EndContext()
+		if err != nil {
+			cancelled := errors.Is(err, context.Canceled)
+			// fmt.Println("cancelled:", cancelled)
+			in.Shell.RestoreOrigStdIO()
+			in.Shell.ResetDepth()
+			if !cancelled {
+				slog.Error(err.Error())
+			}
+			break
 		}
 	}
 	return v, err

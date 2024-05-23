@@ -164,6 +164,8 @@ func TestTranspile(t *testing.T) {
 		{"type Result struct { JobID string", `type Result struct { JobID string`},
 		{"type Result struct { JobID string `width:\"60\"`", "type Result struct { JobID string `width:\"60\"`"},
 		{"func RunInExamples(fun func()) {", "RunInExamples := func(fun func()) {"},
+		{"ctr++", "ctr++"},
+		{"stru.ctr++", "stru.ctr++"},
 	}
 
 	sh := NewShell()

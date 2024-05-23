@@ -4,16 +4,42 @@
 
 package shell
 
-// CoshLib is the automatically-included cosh standard library code
-var CoshLib = `
-// splitLines returns a slice of given string split by lines
-func splitLines(str string) []string {
- 	return strings.Split(str, "\n")
+import (
+	"os"
+	"strings"
+
+	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/errors"
+)
+
+// these are special functions
+
+// SplitLines returns a slice of given string split by lines
+func SplitLines(str string) []string {
+	return strings.Split(str, "\n")
 }
 
-// fileExists returns true if given file exists
-func fileExists(path string) bool {
- 	ex := dirs.FileExists(path)
+// FileExists returns true if given file exists
+func FileExists(path string) bool {
+	ex := errors.Log1(dirs.FileExists(path))
 	return ex
 }
-`
+
+// WriteFile writes string to given file with standard permissions,
+// logging any errors.
+func WriteFile(filename, str string) error {
+	err := os.WriteFile(filename, []byte(str), 0666)
+	if err != nil {
+		errors.Log(err)
+	}
+	return err
+}
+
+// ReadFile reads the string from the given file, logging any errors.
+func ReadFile(filename string) string {
+	str, err := os.ReadFile(filename)
+	if err != nil {
+		errors.Log(err)
+	}
+	return string(str)
+}

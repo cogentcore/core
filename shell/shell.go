@@ -21,6 +21,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
+	"cogentcore.org/core/base/num"
 	"cogentcore.org/core/base/sshclient"
 	"cogentcore.org/core/base/stack"
 	"github.com/mitchellh/go-homedir"
@@ -45,7 +46,13 @@ type Shell struct {
 	// depth of delim at the end of the current line. if 0, was complete.
 	ParenDepth, BraceDepth, BrackDepth, TypeDepth, DeclDepth int
 
-	// stack of transpiled lines, that are accumulated in TranspileCode
+	// Chunks of code lines that are accumulated during Transpile,
+	// each of which should be evaluated separately, to avoid
+	// issues with contextual effects from import, package etc.
+	Chunks []string
+
+	// current stack of transpiled lines, that are accumulated into
+	// code Chunks
 	Lines []string
 
 	// stack of runtime errors
@@ -212,11 +219,12 @@ func (sh *Shell) SSHByHost(host string) (*sshclient.Client, error) {
 
 // TotalDepth returns the sum of any unresolved paren, brace, or bracket depths.
 func (sh *Shell) TotalDepth() int {
-	return sh.ParenDepth + sh.BraceDepth + sh.BrackDepth
+	return num.Abs(sh.ParenDepth) + num.Abs(sh.BraceDepth) + num.Abs(sh.BrackDepth)
 }
 
-// ResetLines resets the stack of transpiled lines
-func (sh *Shell) ResetLines() {
+// ResetCode resets the stack of transpiled code
+func (sh *Shell) ResetCode() {
+	sh.Chunks = nil
 	sh.Lines = nil
 }
 
@@ -225,24 +233,63 @@ func (sh *Shell) ResetDepth() {
 	sh.ParenDepth, sh.BraceDepth, sh.BrackDepth, sh.TypeDepth, sh.DeclDepth = 0, 0, 0, 0, 0
 }
 
+// DepthError reports an error if any of the parsing depths are not zero,
+// to be called at the end of transpiling a complete block of code.
+func (sh *Shell) DepthError() error {
+	if sh.TotalDepth() == 0 {
+		return nil
+	}
+	str := ""
+	if sh.ParenDepth != 0 {
+		str += fmt.Sprintf("Incomplete parentheses (), remaining depth: %d\n", sh.ParenDepth)
+	}
+	if sh.BraceDepth != 0 {
+		str += fmt.Sprintf("Incomplete braces [], remaining depth: %d\n", sh.BraceDepth)
+	}
+	if sh.BrackDepth != 0 {
+		str += fmt.Sprintf("Incomplete brackets {}, remaining depth: %d\n", sh.BrackDepth)
+	}
+	if str != "" {
+		slog.Error(str)
+		return errors.New(str)
+	}
+	return nil
+}
+
 // AddLine adds line on the stack
 func (sh *Shell) AddLine(ln string) {
 	sh.Lines = append(sh.Lines, ln)
 }
 
-// Code returns the current transpiled lines
+// Code returns the current transpiled lines,
+// split into chunks that should be compiled separately.
 func (sh *Shell) Code() string {
 	if len(sh.Lines) == 0 {
 		return ""
 	}
-	return strings.Join(sh.Lines, "\n")
+	return strings.Join(sh.Chunks, "\n")
+}
+
+// AddChunk adds current lines into a chunk of code
+// that should be compiled separately.
+func (sh *Shell) AddChunk() {
+	if len(sh.Lines) == 0 {
+		return
+	}
+	sh.Chunks = append(sh.Chunks, strings.Join(sh.Lines, "\n"))
+	sh.Lines = nil
 }
 
 // TranspileCode processes each line of given code,
 // adding the results to the LineStack
 func (sh *Shell) TranspileCode(code string) {
 	lns := strings.Split(code, "\n")
+	n := len(lns)
+	if n == 0 {
+		return
+	}
 	for _, ln := range lns {
+		hasDecl := sh.DeclDepth > 0
 		tl := sh.TranspileLine(ln)
 		sh.AddLine(tl)
 		if sh.BraceDepth == 0 && sh.BrackDepth == 0 && sh.ParenDepth == 1 && sh.lastCommand != "" {
@@ -250,6 +297,9 @@ func (sh *Shell) TranspileCode(code string) {
 			nl := len(sh.Lines)
 			sh.Lines[nl-1] = sh.Lines[nl-1] + ")"
 			sh.ParenDepth--
+		}
+		if hasDecl && sh.DeclDepth == 0 { // break at decl
+			sh.AddChunk()
 		}
 	}
 }
@@ -279,8 +329,11 @@ func (sh *Shell) TranspileFile(in string, out string) error {
 	if err != nil {
 		res = src
 		slog.Error(err.Error())
+	} else {
+		err = sh.DepthError()
 	}
-	return os.WriteFile(out, res, 0666)
+	werr := os.WriteFile(out, res, 0666)
+	return errors.Join(err, werr)
 }
 
 // AddError adds the given error to the error stack if it is non-nil,
@@ -300,7 +353,6 @@ func (sh *Shell) AddError(err error) error {
 // TranspileConfig transpiles the .cosh startup config file in the user's
 // home directory if it exists.
 func (sh *Shell) TranspileConfig() error {
-	sh.TranspileCode(CoshLib)
 	path, err := homedir.Expand("~/.cosh")
 	if err != nil {
 		return err

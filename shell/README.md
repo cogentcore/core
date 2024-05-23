@@ -10,7 +10,7 @@ The simple idea is that each line is either Go or shell commands, determined in 
 Examples:
 
 ```go
-for i, f := range splitLines(`ls -la`) {   // `ls` executes returns string
+for i, f := range shell.SplitLines(`ls -la`) {   // `ls` executes returns string
     echo {i} {strings.ToLower(f)}           // {} surrounds go within shell
 }
 ```

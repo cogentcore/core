@@ -107,6 +107,8 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 		}
 		logx.PrintlnDebug("go    keyword")
 		return sh.TranspileGo(toks)
+	case toks[n-1].Tok == token.INC:
+		return sh.TranspileGo(toks)
 	case t0pn > 0: // path expr
 		logx.PrintlnDebug("exec: path...")
 		return sh.TranspileExec(ewords, false)
