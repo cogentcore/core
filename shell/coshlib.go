@@ -15,8 +15,13 @@ import (
 // these are special functions
 
 // SplitLines returns a slice of given string split by lines
+// with any extra whitespace trimmed.
 func SplitLines(str string) []string {
-	return strings.Split(str, "\n")
+	sl := strings.Split(str, "\n")
+	for i, s := range sl {
+		sl[i] = strings.TrimSpace(s)
+	}
+	return sl
 }
 
 // FileExists returns true if given file exists
@@ -42,4 +47,13 @@ func ReadFile(filename string) string {
 		errors.Log(err)
 	}
 	return string(str)
+}
+
+// ReplaceInFile replaces all occurrences of given string with replacement
+// in given file, rewriting the file.  Also returns the updated string.
+func ReplaceInFile(filename, old, new string) string {
+	str := ReadFile(filename)
+	str = strings.ReplaceAll(str, old, new)
+	WriteFile(filename, str)
+	return str
 }

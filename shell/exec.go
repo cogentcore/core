@@ -46,6 +46,7 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 		case start:
 			err = cl.Start(&cmdIO.StdIOState, scmd, sargs...)
 		case output:
+			cmdIO.PushOut(nil)
 			out, err = cl.Output(&cmdIO.StdIOState, scmd, sargs...)
 		default:
 			err = cl.Run(&cmdIO.StdIOState, scmd, sargs...)

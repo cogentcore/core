@@ -264,7 +264,8 @@ func (sh *Shell) AddLine(ln string) {
 // Code returns the current transpiled lines,
 // split into chunks that should be compiled separately.
 func (sh *Shell) Code() string {
-	if len(sh.Lines) == 0 {
+	sh.AddChunk()
+	if len(sh.Chunks) == 0 {
 		return ""
 	}
 	return strings.Join(sh.Chunks, "\n")

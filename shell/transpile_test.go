@@ -166,6 +166,7 @@ func TestTranspile(t *testing.T) {
 		{"func RunInExamples(fun func()) {", "RunInExamples := func(fun func()) {"},
 		{"ctr++", "ctr++"},
 		{"stru.ctr++", "stru.ctr++"},
+		{"meta += ln", "meta += ln"},
 	}
 
 	sh := NewShell()
