@@ -411,7 +411,7 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 		if len(fb.Returns) > 0 {
 			txt += ": "
 			for i, ret := range fb.Returns {
-				txt += reflectx.NonPointerValue(ret.Val()).String()
+				txt += reflectx.ToString(ret.Value)
 				if i < len(fb.Returns)-1 {
 					txt += ", "
 				}
@@ -420,14 +420,16 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 		core.MessageSnackbar(ctx, txt)
 		return
 	}
-	// go directly to the dialog if there is one
-	if len(fb.Returns) == 1 && OpenDialog(fb.Returns[0], ctx, nil, func() {
-		makeTmpWidget(fb.Returns[0])
-	}) {
-		return
-	}
+	// TODO(config)
+	// // go directly to the dialog if there is one
+	// if len(fb.Returns) == 1 && OpenDialog(fb.Returns[0], ctx, nil, func() {
+	// 	makeTmpWidget(fb.Returns[0])
+	// }) {
+	// 	return
+	// }
 	d := core.NewBody().AddTitle(main).AddText(fb.Tooltip).AddOKOnly()
-	NewArgView(d).SetArgs(fb.Returns...).SetReadOnly(true)
+	str := FuncArgsToStruct(fb.Returns)
+	NewStructView(d).SetStruct(str.Addr().Interface()).SetReadOnly(true)
 	if fb.NewWindow {
 		d.RunWindowDialog(ctx)
 	} else {
@@ -441,27 +443,21 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 // be called by end-user code.
 func (fb *FuncButton) SetArgs() {
 	narg := fb.ReflectFunc.Type().NumIn()
-	fb.Args = make([]Value, narg)
+	fb.Args = make([]FuncArg, narg)
 	for i := range fb.Args {
 		atyp := fb.ReflectFunc.Type().In(i)
 
 		name := ""
-		doc := ""
 		if fb.Func.Args != nil && len(fb.Func.Args) > i {
 			name = fb.Func.Args[i]
 		} else {
 			name = reflectx.NonPointerType(atyp).Name()
 		}
 
-		label := strcase.ToSentence(name)
-		val := reflect.New(atyp)
-
-		view := ToValue(val.Interface(), "") // TODO(config)
-		view.SetSoloValue(val)
-		view.SetName(name)
-		view.SetLabel(label)
-		view.SetDoc(doc)
-		fb.Args[i] = view
+		fb.Args[i] = FuncArg{
+			Name:  name,
+			Value: reflect.New(atyp).Elem().Interface(),
+		}
 	}
 }
 
