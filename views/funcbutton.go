@@ -10,6 +10,7 @@ import (
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/core"
@@ -401,7 +402,9 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 	if ctx == nil {
 		return
 	}
-	fb.SetReturnValues(rets)
+	for i, ret := range fb.Returns {
+		errors.Log(reflectx.SetRobust(&ret.Value, rets[i].Interface()))
+	}
 	main := "Result of " + fb.Text
 	if len(rets) == 0 {
 		main = fb.Text + " succeeded"
@@ -492,16 +495,6 @@ func (fb *FuncButton) SetReturns() {
 	}
 	if nret > 1 || hasComplex {
 		fb.ShowReturnAsDialog = true
-	}
-}
-
-// SetReturnValues sets the [reflect.Value]s of the return
-// value [Value] objects. It assumes that [FuncButton.SetReturns]
-// has already been called. It is called in [FuncButton.CallFunc]
-// and should typically not be called by end-user code.
-func (fb *FuncButton) SetReturnValues(rets []reflect.Value) {
-	for i, ret := range fb.Returns {
-		ret.SetSoloValue(rets[i])
 	}
 }
 
