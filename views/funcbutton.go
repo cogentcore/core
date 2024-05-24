@@ -445,18 +445,18 @@ func (fb *FuncButton) SetArgs() {
 	narg := fb.ReflectFunc.Type().NumIn()
 	fb.Args = make([]FuncArg, narg)
 	for i := range fb.Args {
-		atyp := fb.ReflectFunc.Type().In(i)
+		typ := fb.ReflectFunc.Type().In(i)
 
 		name := ""
 		if fb.Func.Args != nil && len(fb.Func.Args) > i {
 			name = fb.Func.Args[i]
 		} else {
-			name = reflectx.NonPointerType(atyp).Name()
+			name = reflectx.NonPointerType(typ).Name()
 		}
 
 		fb.Args[i] = FuncArg{
 			Name:  name,
-			Value: reflect.New(atyp).Elem().Interface(),
+			Value: reflect.New(typ).Elem().Interface(),
 		}
 	}
 }
@@ -467,34 +467,28 @@ func (fb *FuncButton) SetArgs() {
 // typically not be called by end-user code.
 func (fb *FuncButton) SetReturns() {
 	nret := fb.ReflectFunc.Type().NumOut()
-	fb.Returns = make([]Value, nret)
+	fb.Returns = make([]FuncArg, nret)
 	hasComplex := false
 	for i := range fb.Returns {
-		rtyp := fb.ReflectFunc.Type().Out(i)
+		typ := fb.ReflectFunc.Type().Out(i)
 		if !hasComplex {
-			k := rtyp.Kind()
+			k := typ.Kind()
 			if k == reflect.Pointer || k == reflect.Struct || k == reflect.Slice || k == reflect.Array || k == reflect.Map {
 				hasComplex = true
 			}
 		}
 
 		name := ""
-		doc := ""
 		if fb.Func.Returns != nil && len(fb.Func.Returns) > i {
 			name = fb.Func.Returns[i]
 		} else {
-			name = reflectx.NonPointerType(rtyp).Name()
+			name = reflectx.NonPointerType(typ).Name()
 		}
 
-		label := strcase.ToSentence(name)
-		val := reflect.New(rtyp)
-
-		view := ToValue(val.Interface(), "") // TODO(config)
-		view.SetSoloValue(val)
-		view.SetName(name)
-		view.SetLabel(label)
-		view.SetDoc(doc)
-		fb.Returns[i] = view
+		fb.Returns[i] = FuncArg{
+			Name:  name,
+			Value: reflect.New(typ).Elem().Interface(),
+		}
 	}
 	if nret > 1 || hasComplex {
 		fb.ShowReturnAsDialog = true
