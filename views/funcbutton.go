@@ -167,10 +167,15 @@ func (fb *FuncButton) SetText(v string) *FuncButton {
 	return fb
 }
 
+// SetKey sets the shortcut of the function button from the given [keymap.Functions].
+func (fb *FuncButton) SetKey(kf keymap.Functions) *FuncButton {
+	fb.Button.SetKey(kf)
+	return fb
+}
+
 // SetFunc sets the function associated with the FuncButton to the
 // given function or method value. For documentation information for
-// the function to be obtained, it must be added to [types]. SetFunc is
-// automatically called by [NewFuncButton].
+// the function to be obtained, it must be added to [types].
 func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	fnm := types.FuncName(fun)
 	// the "-fm" suffix indicates that it is a method
@@ -205,12 +210,12 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 				met = &types.Method{Name: metnm}
 			}
 		}
-		return fb.SetMethodImpl(met, reflect.ValueOf(fun))
+		return fb.setMethodImpl(met, reflect.ValueOf(fun))
 	}
 
 	if isAnonymousFunction(fnm) {
 		f := &types.Func{Name: fnm, Doc: "Anonymous function " + fnm}
-		return fb.SetFuncImpl(f, reflect.ValueOf(fun))
+		return fb.setFuncImpl(f, reflect.ValueOf(fun))
 	}
 
 	f := types.FuncByName(fnm)
@@ -220,7 +225,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 		}
 		f = &types.Func{Name: fnm}
 	}
-	return fb.SetFuncImpl(f, reflect.ValueOf(fun))
+	return fb.setFuncImpl(f, reflect.ValueOf(fun))
 }
 
 func isAnonymousFunction(fnm string) bool {
@@ -228,13 +233,13 @@ func isAnonymousFunction(fnm string) bool {
 	return len(fnm) > 0 && unicode.IsDigit(rune(fnm[len(fnm)-1])) && strings.Contains(fnm, ".func")
 }
 
-// SetFuncImpl is the underlying implementation of [FuncButton.SetFunc].
+// setFuncImpl is the underlying implementation of [FuncButton.SetFunc].
 // It should typically not be used by end-user code.
-func (fb *FuncButton) SetFuncImpl(gfun *types.Func, rfun reflect.Value) *FuncButton {
+func (fb *FuncButton) setFuncImpl(gfun *types.Func, rfun reflect.Value) *FuncButton {
 	fb.Func = gfun
 	fb.ReflectFunc = rfun
-	fb.SetArgs()
-	fb.SetReturns()
+	fb.setArgs()
+	fb.setReturns()
 	snm := fb.Func.Name
 	// get name without package
 	li := strings.LastIndex(snm, ".")
@@ -278,7 +283,7 @@ func (fb *FuncButton) SetFuncImpl(gfun *types.Func, rfun reflect.Value) *FuncBut
 	return fb
 }
 
-func (fb *FuncButton) GoodContext() core.Widget {
+func (fb *FuncButton) goodContext() core.Widget {
 	ctx := fb.Context
 	if fb.Context == nil {
 		if fb.This() == nil {
@@ -289,13 +294,13 @@ func (fb *FuncButton) GoodContext() core.Widget {
 	return ctx
 }
 
-func (fb *FuncButton) CallFuncShowReturns() {
+func (fb *FuncButton) callFuncShowReturns() {
 	if fb.AfterFunc != nil {
 		defer fb.AfterFunc()
 	}
 	if len(fb.Args) == 0 {
 		rets := fb.ReflectFunc.Call(nil)
-		fb.ShowReturnsDialog(rets)
+		fb.showReturnsDialog(rets)
 		return
 	}
 	rargs := make([]reflect.Value, len(fb.Args))
@@ -303,38 +308,38 @@ func (fb *FuncButton) CallFuncShowReturns() {
 		rargs[i] = reflect.ValueOf(arg.Value)
 	}
 	rets := fb.ReflectFunc.Call(rargs)
-	fb.ShowReturnsDialog(rets)
+	fb.showReturnsDialog(rets)
 }
 
-// ConfirmDialog runs the confirm dialog
-func (fb *FuncButton) ConfirmDialog() {
-	ctx := fb.GoodContext()
+// confirmDialog runs the confirm dialog.
+func (fb *FuncButton) confirmDialog() {
+	ctx := fb.goodContext()
 	d := core.NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip)
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText(fb.Text).OnClick(func(e events.Event) {
-			fb.CallFuncShowReturns()
+			fb.callFuncShowReturns()
 		})
 	})
 	d.RunDialog(ctx)
 }
 
-// CallFunc calls the function or method associated with this button,
+// CallFunc calls the function associated with this button,
 // prompting the user for any arguments.
 func (fb *FuncButton) CallFunc() {
-	ctx := fb.GoodContext()
+	ctx := fb.goodContext()
 	if len(fb.Args) == 0 {
 		if !fb.Confirm {
-			fb.CallFuncShowReturns()
+			fb.callFuncShowReturns()
 			return
 		}
-		fb.ConfirmDialog()
+		fb.confirmDialog()
 		return
 	}
 	// TODO(config)
 	// // go directly to the dialog if there is one
 	// if len(fb.Args) == 1 && OpenDialog(fb.Args[0], ctx, func() {
-	// 	fb.CallFuncShowReturns()
+	// 	fb.callFuncShowReturns()
 	// }, func() {
 	// 	makeTmpWidget(fb.Args[0])
 	// }) {
@@ -347,7 +352,7 @@ func (fb *FuncButton) CallFunc() {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText(fb.Text).OnClick(func(e events.Event) {
 			d.Close() // note: the other Close event happens too late!
-			fb.CallFuncShowReturns()
+			fb.callFuncShowReturns()
 		})
 	})
 	d.RunDialog(ctx)
@@ -372,10 +377,10 @@ func FuncArgsToStruct(args []FuncArg) reflect.Value {
 	return value
 }
 
-// SetMethodImpl is the underlying implementation of [FuncButton.SetFunc] for methods.
+// setMethodImpl is the underlying implementation of [FuncButton.SetFunc] for methods.
 // It should typically not be used by end-user code.
-func (fb *FuncButton) SetMethodImpl(gmet *types.Method, rmet reflect.Value) *FuncButton {
-	return fb.SetFuncImpl(&types.Func{
+func (fb *FuncButton) setMethodImpl(gmet *types.Method, rmet reflect.Value) *FuncButton {
+	return fb.setFuncImpl(&types.Func{
 		Name:       gmet.Name,
 		Doc:        gmet.Doc,
 		Directives: gmet.Directives,
@@ -384,10 +389,10 @@ func (fb *FuncButton) SetMethodImpl(gmet *types.Method, rmet reflect.Value) *Fun
 	}, rmet)
 }
 
-// ShowReturnsDialog runs a dialog displaying the given function return
+// showReturnsDialog runs a dialog displaying the given function return
 // values for the function associated with the function button. It does
-// nothing if [FuncButton.ShowReturn] is dialog
-func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
+// nothing if [FuncButton.ShowReturn] is false.
+func (fb *FuncButton) showReturnsDialog(rets []reflect.Value) {
 	if !fb.ShowReturn {
 		for _, ret := range rets {
 			if err, ok := ret.Interface().(error); ok && err != nil {
@@ -397,7 +402,7 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 		}
 		return
 	}
-	ctx := fb.GoodContext()
+	ctx := fb.goodContext()
 	if ctx == nil {
 		return
 	}
@@ -439,11 +444,9 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 	}
 }
 
-// SetArgs sets the appropriate [Value] objects for the
+// setArgs sets the appropriate [Value] objects for the
 // arguments of the function associated with the function button.
-// It is called in [FuncButton.SetFunc] and should typically not
-// be called by end-user code.
-func (fb *FuncButton) SetArgs() {
+func (fb *FuncButton) setArgs() {
 	narg := fb.ReflectFunc.Type().NumIn()
 	fb.Args = make([]FuncArg, narg)
 	for i := range fb.Args {
@@ -463,11 +466,10 @@ func (fb *FuncButton) SetArgs() {
 	}
 }
 
-// SetReturns sets the appropriate [Value] objects for the
+// setReturns sets the appropriate [Value] objects for the
 // return values of the function associated with the function
-// button. It is called in [FuncButton.SetFunc] and should
-// typically not be called by end-user code.
-func (fb *FuncButton) SetReturns() {
+// button.
+func (fb *FuncButton) setReturns() {
 	nret := fb.ReflectFunc.Type().NumOut()
 	fb.Returns = make([]FuncArg, nret)
 	hasComplex := false
@@ -495,12 +497,6 @@ func (fb *FuncButton) SetReturns() {
 	if nret > 1 || hasComplex {
 		fb.ShowReturnAsDialog = true
 	}
-}
-
-// SetKey sets the shortcut of the function button from the given [keymap.Functions]
-func (fb *FuncButton) SetKey(kf keymap.Functions) *FuncButton {
-	fb.Button.SetKey(kf)
-	return fb
 }
 
 // makeTmpWidget makes a temporary widget in a temporary parent for the given value.
