@@ -10,7 +10,6 @@ import (
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/core"
@@ -402,8 +401,8 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 	if ctx == nil {
 		return
 	}
-	for i, ret := range fb.Returns {
-		errors.Log(reflectx.SetRobust(&ret.Value, rets[i].Interface()))
+	for i, ret := range rets {
+		fb.Returns[i].Value = ret.Interface()
 	}
 	main := "Result of " + fb.Text
 	if len(rets) == 0 {
