@@ -272,8 +272,7 @@ func (is *Inspector) MakeToolbar(p *core.Plan) {
 	core.Add[*core.Separator](p)
 	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.Open).SetKey(keymap.Open)
-		w.Args[0].Value = is.Filename
-		w.Args[0].Tag = `ext:".json"`
+		w.Args[0].SetValue(is.Filename).SetTag(`ext:".json"`)
 	})
 	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.Save).SetKey(keymap.Save)
@@ -282,8 +281,7 @@ func (is *Inspector) MakeToolbar(p *core.Plan) {
 	})
 	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.SaveAs).SetKey(keymap.SaveAs)
-		w.Args[0].Value = is.Filename
-		w.Args[0].Tag = `ext:".json"`
+		w.Args[0].SetValue(is.Filename).SetTag(`ext:".json"`)
 	})
 	core.Add[*core.Separator](p)
 	core.Add(p, func(w *FuncButton) {

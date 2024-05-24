@@ -117,7 +117,7 @@ type FuncButton struct { //core:no-new
 
 // FuncArg represents one argument or return value of a function
 // in the context of a [FuncButton].
-type FuncArg struct {
+type FuncArg struct { //types:add -setters
 
 	// Name is the name of the argument or return value.
 	Name string
