@@ -62,19 +62,19 @@ type FuncButton struct { //core:no-new
 	// bet set using [FuncButton.SetFunc].
 	ReflectFunc reflect.Value `set:"-"`
 
-	// Args are the [Value] objects associated with the
+	// Args are the [FuncArg] objects associated with the
 	// arguments of the function. They are automatically set in
 	// [SetFunc], but they can be customized to configure
 	// default values and other options.
-	Args []Value `set:"-"`
+	Args []FuncArg `set:"-"`
 
-	// Returns are the [Value] objects associated with the
+	// Returns are the [FuncArg] objects associated with the
 	// return values of the function. They are automatically
 	// set in [SetFunc], but they can be customized to configure
-	// default values and other options. The [reflect.Value]s of
-	// the [Value] objects are not set until the function is
-	// called, and are thus not typically applicable to access.
-	Returns []Value `set:"-"`
+	// options. The [FuncArg.Value]s are not set until the
+	// function is called, and are thus not typically applicable
+	// to access.
+	Returns []FuncArg `set:"-"`
 
 	// Confirm is whether to prompt the user for confirmation
 	// before calling the function.
@@ -300,7 +300,7 @@ func (fb *FuncButton) CallFuncShowReturns() {
 	}
 	rargs := make([]reflect.Value, len(fb.Args))
 	for i, arg := range fb.Args {
-		rargs[i] = arg.Val().Elem()
+		rargs[i] = reflect.ValueOf(arg.Value)
 	}
 	rets := fb.ReflectFunc.Call(rargs)
 	fb.ShowReturnsDialog(rets)
@@ -331,16 +331,18 @@ func (fb *FuncButton) CallFunc() {
 		fb.ConfirmDialog()
 		return
 	}
-	// go directly to the dialog if there is one
-	if len(fb.Args) == 1 && OpenDialog(fb.Args[0], ctx, func() {
-		fb.CallFuncShowReturns()
-	}, func() {
-		makeTmpWidget(fb.Args[0])
-	}) {
-		return
-	}
+	// TODO(config)
+	// // go directly to the dialog if there is one
+	// if len(fb.Args) == 1 && OpenDialog(fb.Args[0], ctx, func() {
+	// 	fb.CallFuncShowReturns()
+	// }, func() {
+	// 	makeTmpWidget(fb.Args[0])
+	// }) {
+	// 	return
+	// }
 	d := core.NewBody().AddTitle(fb.Text).AddText(fb.Tooltip)
-	NewArgView(d).SetArgs(fb.Args...)
+	str := FuncArgsToStruct(fb.Args)
+	NewStructView(d).SetStruct(str.Addr().Interface())
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText(fb.Text).OnClick(func(e events.Event) {
@@ -349,6 +351,25 @@ func (fb *FuncButton) CallFunc() {
 		})
 	})
 	d.RunDialog(ctx)
+}
+
+// FuncArgsToStruct converts a slice of [FuncArg] objects
+// to a new non-pointer struct [reflect.Value].
+func FuncArgsToStruct(args []FuncArg) reflect.Value {
+	fields := make([]reflect.StructField, len(args))
+	for i, arg := range args {
+		fields[i] = reflect.StructField{
+			Name: strcase.ToCamel(arg.Name),
+			Type: reflect.TypeOf(arg.Value),
+			Tag:  arg.Tag,
+		}
+	}
+	typ := reflect.StructOf(fields)
+	value := reflect.New(typ).Elem()
+	for i, arg := range args {
+		value.Field(i).Set(reflect.ValueOf(arg.Value))
+	}
+	return value
 }
 
 // SetMethodImpl is the underlying implementation of [FuncButton.SetFunc] for methods.
