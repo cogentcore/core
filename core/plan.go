@@ -157,7 +157,7 @@ func (p *Plan) buildWidget(w Widget) {
 				child.Update(cw)
 			}
 			return cw
-		}, nil)
+		}, func(n tree.Node) { n.Destroy() })
 	for i, child := range p.Children { // always build children even if not new
 		cw := wb.Child(i).(Widget)
 		child.buildWidget(cw)
