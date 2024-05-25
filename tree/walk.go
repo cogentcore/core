@@ -25,10 +25,7 @@ func Last(nd Node) Node {
 // or the node itself if it has no children.
 func LastChild(nd Node) Node {
 	if nd.HasChildren() {
-		ek, err := nd.Children().ElemFromEndTry(0)
-		if err == nil {
-			return LastChild(ek)
-		}
+		return LastChild(nd.Child(nd.NumChildren() - 1))
 	}
 	return nd
 }

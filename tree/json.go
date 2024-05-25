@@ -105,7 +105,7 @@ func (sl *Slice) UnmarshalJSON(b []byte) error {
 	}
 	// fmt.Printf("n parsed: %d from %v\n", n, string(bn))
 
-	tnl := make(Config, n)
+	tnl := make(Plan, n)
 
 	for i := 0; i < n; i++ {
 		fld := flds[2*i+1]
@@ -125,7 +125,7 @@ func (sl *Slice) UnmarshalJSON(b []byte) error {
 		tnl[i].Name = nm
 	}
 
-	sl.Config(nil, tnl)
+	BuildSlice(sl, nil, tnl)
 
 	nwk := make([]Node, n) // allocate new slice containing *pointers* to kids
 	copy(nwk, *sl)

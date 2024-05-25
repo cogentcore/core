@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package config provides an efficent mechanism for updating a slice
+// Package plan provides an efficent mechanism for updating a slice
 // to contain a target list of elements, generating minimal edits to
 // modify the current slice contents to match the target.
 // The mechanism depends on the use of unique name string identifiers
 // to determine whether an element is currently configured correctly.
 // These could be algorithmically generated hash strings or any other
 // such unique identifier.
-package config
+package plan
 
 import (
 	"log/slog"
@@ -19,13 +19,15 @@ import (
 	"cogentcore.org/core/base/namer"
 )
 
-// Config ensures that the elements of the slice contain
-// the desired elements in a specific order, specified by unique
+// Build ensures that the elements of the slice contain
+// the elements according to the plan, specified by unique
 // element names, with n = total number of items in the target slice.
 // If a new item is needed then newEl is called to create it,
 // for given name at given index position.
+// if destroyEl is not-nil, then it is called on any element
+// that is being deleted from the slice.
 // Returns the updated slice and true if any changes were made.
-func Config[T namer.Namer](s []T, n int, name func(i int) string, newEl func(name string, i int) T) (r []T, mods bool) {
+func Build[T namer.Namer](s []T, n int, name func(i int) string, newEl func(name string, i int) T, destroyEl func(e T)) (r []T, mods bool) {
 	// first make a map for looking up the indexes of the target names
 	names := make([]string, n)
 	nmap := make(map[string]int, n)
@@ -34,7 +36,7 @@ func Config[T namer.Namer](s []T, n int, name func(i int) string, newEl func(nam
 		nm := name(i)
 		names[i] = nm
 		if _, has := nmap[nm]; has {
-			slog.Error("config.Config: duplicate name", "name", nm)
+			slog.Error("plan.Build: duplicate name", "name", nm)
 		}
 		nmap[nm] = i
 	}
@@ -46,6 +48,9 @@ func Config[T namer.Namer](s []T, n int, name func(i int) string, newEl func(nam
 		if _, ok := nmap[nm]; !ok {
 			mods = true
 			// fmt.Println("delete at:", i, "bad name:", nm)
+			if destroyEl != nil {
+				destroyEl(r[i])
+			}
 			r = slices.Delete(r, i, i+1)
 		}
 		smap[nm] = i

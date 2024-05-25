@@ -6,7 +6,6 @@ package tree
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"maps"
 	"strconv"
@@ -436,51 +435,6 @@ func (n *NodeBase) InsertNewChild(typ *types.Type, at int) Node {
 	n.Kids.Insert(kid, at)
 	SetParent(kid, n)
 	return kid
-}
-
-// SetNChildren ensures that there are exactly n children, deleting any
-// extra, and creating any new ones, using NewChild with given type and
-// naming according to nameStubX where X is the index of the child.
-// If nameStub is not specified, it defaults to the ID (kebab-case)
-// name of the type. It returns whether any changes were made to the
-// children.
-//
-// Note that this does not ensure existing children are of given type, or
-// change their names, or call UniquifyNames; use ConfigChildren for
-// those cases; this function is for simpler cases where a parent uses
-// this function consistently to manage children all of the same type.
-func (n *NodeBase) SetNChildren(trgn int, typ *types.Type, nameStub ...string) bool {
-	sz := len(n.Kids)
-	if trgn == sz {
-		return false
-	}
-	mods := false
-	for sz > trgn {
-		mods = true
-		sz--
-		n.DeleteChildAtIndex(sz)
-	}
-	ns := typ.IDName
-	if len(nameStub) > 0 {
-		ns = nameStub[0]
-	}
-	for sz < trgn {
-		mods = true
-		nm := fmt.Sprintf("%s%d", ns, sz)
-		n.InsertNewChild(typ, sz).SetName(nm)
-		sz++
-	}
-	return mods
-}
-
-// ConfigChildren configures children according to the given list of
-// [TypeAndName]s; it attempts to have minimal impact relative to existing
-// items that fit the type and name constraints (they are moved into the
-// corresponding positions), and any extra children are removed, and new
-// ones added, to match the specified config. It is important that names
-// are unique. It returns whether any changes were made to the children.
-func (n *NodeBase) ConfigChildren(config Config) bool {
-	return n.Kids.Config(n.This(), config)
 }
 
 // Deleting Children:

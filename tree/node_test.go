@@ -205,17 +205,17 @@ func TestNodeConfig(t *testing.T) {
 	child3 := NewNodeBase(parent)
 	child3.SetName("child3")
 
-	config1 := Config{
+	plan1 := Plan{
 		{Type: testdata.NodeEmbedType, Name: "child2"},
 		{Type: testdata.NodeEmbedType, Name: "child3"},
 		{Type: testdata.NodeEmbedType, Name: "child1"},
 	}
 
-	parent.ConfigChildren(config1)
+	Build(parent, plan1)
 
-	cf1 := fmt.Sprintf("config1:\n%v\n", parent.Kids)
+	cf1 := fmt.Sprintf("plan1:\n%v\n", parent.Kids)
 
-	config2 := Config{
+	plan2 := Plan{
 		{testdata.NodeEmbedType, "child4"},
 		{NodeBaseType, "child1"}, // note: changing this to Node type removes child1.subchild1
 		{testdata.NodeEmbedType, "child5"},
@@ -223,16 +223,16 @@ func TestNodeConfig(t *testing.T) {
 		{testdata.NodeEmbedType, "child6"},
 	}
 
-	parent.ConfigChildren(config2)
+	Build(parent, plan2)
 
-	cf2 := fmt.Sprintf("config2:\n%v\n", parent.Kids)
+	cf2 := fmt.Sprintf("plan2:\n%v\n", parent.Kids)
 
-	cf1t := `config1:
+	cf1t := `plan1:
 [/node-embed/child2 /node-embed/child3 /node-embed/child1]
 `
 	assert.Equal(t, cf1t, cf1)
 
-	cf2t := `config2:
+	cf2t := `plan2:
 [/node-embed/child4 /node-embed/child1 /node-embed/child5 /node-embed/child3 /node-embed/child6]
 `
 	assert.Equal(t, cf2t, cf2)
