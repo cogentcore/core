@@ -352,6 +352,9 @@ func (fb *FuncButton) CallFunc() {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText(fb.Text).OnClick(func(e events.Event) {
 			d.Close() // note: the other Close event happens too late!
+			for i := range fb.Args {
+				fb.Args[i].Value = str.Field(i).Interface()
+			}
 			fb.callFuncShowReturns()
 		})
 	})
