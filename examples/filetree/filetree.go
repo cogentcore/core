@@ -135,7 +135,7 @@ func (fb *FileBrowse) OpenPath(path core.Filename) { //types:add
 
 // UpdateProject does full update to current proj
 func (fb *FileBrowse) UpdateProject() {
-	fb.StandardConfig()
+	fb.StandardPlan()
 	fb.SetTitle(fmt.Sprintf("FileBrowse of: %v", fb.ProjectRoot)) // todo: get rid of title
 	fb.UpdateFiles()
 	fb.ConfigSplits()
@@ -250,22 +250,22 @@ func (fb *FileBrowse) ViewFile(fnm string) bool {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
-//   GUI configs
+//   GUI plans
 
-// StandardFrameConfig returns a Config for configuring a standard Frame
-// -- can modify as desired before calling ConfigChildren on Frame using this
-func (fb *FileBrowse) StandardFrameConfig() tree.Config {
-	config := tree.Config{}
-	config.Add(core.TextType, "title")
-	config.Add(core.SplitsType, "splits")
-	return config
+// StandardFramePlan returns a Plan for configuring a standard Frame
+// -- can modify as desired before calling Build on Frame using this
+func (fb *FileBrowse) StandardFramePlan() tree.Plan {
+	plan := tree.Plan{}
+	plan.Add(core.TextType, "title")
+	plan.Add(core.SplitsType, "splits")
+	return plan
 }
 
-// StandardConfig configures a standard setup of the overall Frame.
+// StandardPlan configures a standard setup of the overall Frame.
 // It returns whether any modifications were made.
-func (fb *FileBrowse) StandardConfig() bool {
-	config := fb.StandardFrameConfig()
-	return fb.ConfigChildren(config)
+func (fb *FileBrowse) StandardPlan() bool {
+	plan := fb.StandardFramePlan()
+	return tree.Build(fb, plan)
 }
 
 // SetTitle sets the optional title and updates the title text
@@ -332,15 +332,15 @@ func (fb *FileBrowse) MakeToolbar(p *core.Plan) { //types:add
 	})
 }
 
-// SplitsConfig returns a Config for configuring the Splits
-func (fb *FileBrowse) SplitsConfig() tree.Config {
-	config := tree.Config{}
-	config.Add(core.FrameType, "filetree-fr")
+// SplitsPlan returns a Plan for configuring the Splits
+func (fb *FileBrowse) SplitsPlan() tree.Plan {
+	plan := tree.Plan{}
+	plan.Add(core.FrameType, "filetree-fr")
 	for i := 0; i < fb.NTextEditors; i++ {
-		config.Add(texteditor.EditorType, fmt.Sprintf("texteditor-%v", i))
+		plan.Add(texteditor.EditorType, fmt.Sprintf("texteditor-%v", i))
 	}
 	// todo: tab view
-	return config
+	return plan
 }
 
 // ConfigSplits configures the Splits.
@@ -351,8 +351,8 @@ func (fb *FileBrowse) ConfigSplits() {
 	}
 	split.SetSplits(.2, .4, .4)
 
-	config := fb.SplitsConfig()
-	if split.ConfigChildren(config) {
+	plan := fb.SplitsPlan()
+	if tree.Build(split, plan) {
 		ftfr := split.Child(0).(*core.Frame)
 		fb.Files = filetree.NewTree(ftfr)
 		fb.Files.OnSelect(func(e events.Event) {

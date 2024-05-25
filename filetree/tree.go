@@ -353,7 +353,7 @@ func (ft *Tree) ExtNodeByPath(fpath string) (*Node, error) {
 	ekids := *ekid.Children()
 	err := ekids.IsValidIndex(i)
 	if err == nil {
-		kn := AsNode(ekids.Elem(i))
+		kn := AsNode(ekids[i])
 		return kn, nil
 	}
 	return nil, fmt.Errorf("ExtFile not updated: %v", err)
@@ -363,12 +363,12 @@ func (ft *Tree) ExtNodeByPath(fpath string) (*Node, error) {
 // for ExtFiles
 func (ft *Tree) UpdateExtFiles(efn *Node) {
 	efn.Info.Mode = os.ModeDir | os.ModeIrregular // mark as dir, irregular
-	config := tree.Config{}
+	plan := tree.Plan{}
 	typ := ft.FileNodeType
 	for _, f := range ft.ExtFiles {
-		config.Add(typ, dirs.DirAndFile(f))
+		plan.Add(typ, dirs.DirAndFile(f))
 	}
-	efn.ConfigChildren(config) // NOT unique names
+	tree.Build(efn, plan) // NOT unique names
 	// always go through kids, regardless of mods
 	for i, sfk := range efn.Kids {
 		sf := AsNode(sfk)

@@ -71,12 +71,12 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 		tv.SetClosed(true)
 	}
 	skids := *sk.Children()
-	tnl := make(tree.Config, 0, len(skids))
+	p := make(tree.Plan, 0, len(skids))
 	typ := tv.This().NodeType()
 	for _, skid := range skids {
-		tnl.Add(typ, "tv_"+skid.Name())
+		p.Add(typ, "tv_"+skid.Name())
 	}
-	tv.ConfigChildren(tnl)
+	tree.Build(tv, p)
 	idx := 0
 	for _, skid := range *sk.Children() {
 		if len(tv.Kids) <= idx {

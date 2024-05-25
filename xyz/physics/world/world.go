@@ -218,17 +218,17 @@ func (vw *View) ConfigView(wn physics.Node, vn xyz.Node, sc *xyz.Scene) {
 }
 
 // SyncNode updates the view tree to match the world tree, using
-// ConfigChildren to maximally preserve existing tree elements
+// efficient plan-based Build to maximally preserve existing tree elements
 // returns true if view tree was modified (elements added / removed etc)
 func (vw *View) SyncNode(wn physics.Node, vn xyz.Node, sc *xyz.Scene) bool {
 	nm := wn.Name()
 	vn.SetName(nm) // guaranteed to be unique
 	skids := *wn.Children()
-	tnl := make(tree.Config, 0, len(skids))
+	p := make(tree.Plan, 0, len(skids))
 	for _, skid := range skids {
-		tnl.Add(xyz.GroupType, skid.Name())
+		p.Add(xyz.GroupType, skid.Name())
 	}
-	mod := vn.ConfigChildren(tnl)
+	mod := tree.Build(vn, p)
 	modall := mod
 	for idx := range skids {
 		wk := wn.Child(idx).(physics.Node)

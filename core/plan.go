@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"cogentcore.org/core/base/config"
+	"cogentcore.org/core/base/plan"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
@@ -146,7 +146,7 @@ func (p *Plan) buildWidget(w Widget) {
 		}
 		break
 	}
-	wb.Kids, _ = config.Config(wb.Kids, len(p.Children),
+	wb.Kids, _ = plan.Build(wb.Kids, len(p.Children),
 		func(i int) string { return p.Children[i].Name },
 		func(name string, i int) tree.Node {
 			child := p.Children[i]
@@ -157,7 +157,7 @@ func (p *Plan) buildWidget(w Widget) {
 				child.Update(cw)
 			}
 			return cw
-		})
+		}, nil)
 	for i, child := range p.Children { // always build children even if not new
 		cw := wb.Child(i).(Widget)
 		child.buildWidget(cw)

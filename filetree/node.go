@@ -164,8 +164,9 @@ func (fn *Node) MyRelPath() string {
 	return dirs.RelFilePath(string(fn.FPath), string(fn.FRoot.FPath))
 }
 
-// ReadDir reads all the files at given directory into this directory node --
-// uses config children to preserve extra info already stored about files.
+// ReadDir reads all the files at given directory into this directory node.
+// Uses efficient plan-based Build of children to preserve extra info
+// already stored about files.
 // The root node represents the directory at the given path.
 // Returns os.Stat error if path cannot be accessed.
 func (fn *Node) ReadDir(path string) error {
@@ -193,15 +194,15 @@ func (fn *Node) UpdateDir() {
 	// fmt.Printf("path: %v  node: %v\n", path, fn.Path())
 	repo, rnode := fn.Repo()
 	fn.Open() // ensure
-	config := fn.ConfigOfFiles(path)
+	plan := fn.PlanOfFiles(path)
 	hasExtFiles := false
 	if fn.This() == fn.FRoot.This() {
 		if len(fn.FRoot.ExtFiles) > 0 {
-			config = append(tree.Config{{Type: fn.FRoot.FileNodeType, Name: ExternalFilesName}}, config...)
+			plan = append(tree.Plan{{Type: fn.FRoot.FileNodeType, Name: ExternalFilesName}}, plan...)
 			hasExtFiles = true
 		}
 	}
-	mods := fn.ConfigChildren(config) // NOT unique names
+	mods := tree.Build(fn, plan) // NOT unique names
 	// always go through kids, regardless of mods
 	for _, sfk := range fn.Kids {
 		sf := AsNode(sfk)
@@ -233,15 +234,15 @@ func (fn *Node) UpdateDir() {
 	}
 }
 
-// ConfigOfFiles returns a type-and-name list for configuring nodes based on
+// PlanOfFiles returns a type-and-name plan for building nodes based on
 // files immediately within given path
-func (fn *Node) ConfigOfFiles(path string) tree.Config {
-	config1 := tree.Config{}
-	config2 := tree.Config{}
+func (fn *Node) PlanOfFiles(path string) tree.Plan {
+	plan1 := tree.Plan{}
+	plan2 := tree.Plan{}
 	typ := fn.FRoot.FileNodeType
 	filepath.Walk(path, func(pth string, info os.FileInfo, err error) error {
 		if err != nil {
-			emsg := fmt.Sprintf("filetree.Node ConfigFilesIn Path %q: Error: %v", path, err)
+			emsg := fmt.Sprintf("filetree.Node PlanFilesIn Path %q: Error: %v", path, err)
 			log.Println(emsg)
 			return nil // ignore
 		}
@@ -251,12 +252,12 @@ func (fn *Node) ConfigOfFiles(path string) tree.Config {
 		_, fnm := filepath.Split(pth)
 		if fn.FRoot.DirsOnTop {
 			if info.IsDir() {
-				config1.Add(typ, fnm)
+				plan1.Add(typ, fnm)
 			} else {
-				config2.Add(typ, fnm)
+				plan2.Add(typ, fnm)
 			}
 		} else {
-			config1.Add(typ, fnm)
+			plan1.Add(typ, fnm)
 		}
 		if info.IsDir() {
 			return filepath.SkipDir
@@ -266,19 +267,19 @@ func (fn *Node) ConfigOfFiles(path string) tree.Config {
 	modSort := fn.FRoot.DirSortByModTime(core.Filename(path))
 	if fn.FRoot.DirsOnTop {
 		if modSort {
-			fn.SortConfigByModTime(config2) // just sort files, not dirs
+			fn.SortPlanByModTime(plan2) // just sort files, not dirs
 		}
-		config1 = append(config1, config2...)
+		plan1 = append(plan1, plan2...)
 	} else {
 		if modSort {
-			fn.SortConfigByModTime(config1) // all
+			fn.SortPlanByModTime(plan1) // all
 		}
 	}
-	return config1
+	return plan1
 }
 
-// SortConfigByModTime sorts given config list by mod time
-func (fn *Node) SortConfigByModTime(confg tree.Config) {
+// SortPlanByModTime sorts given plan list by mod time
+func (fn *Node) SortPlanByModTime(confg tree.Plan) {
 	sort.Slice(confg, func(i, j int) bool {
 		ifn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[i].Name))
 		jfn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[j].Name))

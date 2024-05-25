@@ -1061,11 +1061,8 @@ func (tv *TreeView) MoveToLastChild(selMode events.SelectModes) *TreeView {
 		return nil
 	}
 	if !tv.IsClosed() && tv.HasChildren() {
-		nnk, err := tv.Children().ElemFromEndTry(0)
-		if err == nil {
-			nn := AsTreeView(nnk)
-			return nn.MoveToLastChild(selMode)
-		}
+		nn := AsTreeView(tv.Child(tv.NumChildren() - 1))
+		return nn.MoveToLastChild(selMode)
 	} else {
 		tv.SelectUpdate(selMode)
 		return tv

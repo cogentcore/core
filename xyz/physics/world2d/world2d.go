@@ -271,11 +271,11 @@ func (vw *View) SyncNode(wn physics.Node, vn svg.Node) bool {
 	nm := wn.Name()
 	vn.SetName(nm) // guaranteed to be unique
 	skids := *wn.Children()
-	tnl := make(tree.Config, 0, len(skids))
+	p := make(tree.Plan, 0, len(skids))
 	for _, skid := range skids {
-		tnl.Add(svg.GroupType, skid.Name())
+		p.Add(svg.GroupType, skid.Name())
 	}
-	mod := vn.ConfigChildren(tnl)
+	mod := tree.Build(vn, p)
 	modall := mod
 	for idx := range skids {
 		wk := wn.Child(idx).(physics.Node)

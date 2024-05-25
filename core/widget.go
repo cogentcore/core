@@ -629,17 +629,11 @@ func WidgetPrev(wi Widget) Widget {
 // or node itself if no children.  Starts with Parts,
 func WidgetLastChildParts(wi Widget) Widget {
 	wb := wi.AsWidget()
-	if wb.Parts != nil {
-		ew, err := wb.Parts.Children().ElemFromEndTry(0)
-		if err == nil {
-			return WidgetLastChildParts(ew.(Widget))
-		}
+	if wb.Parts != nil && wb.Parts.HasChildren() {
+		return WidgetLastChildParts(wb.Parts.Child(wb.Parts.NumChildren() - 1).(Widget))
 	}
 	if wi.HasChildren() {
-		ew, err := wi.Children().ElemFromEndTry(0)
-		if err == nil {
-			return WidgetLastChildParts(ew.(Widget))
-		}
+		return WidgetLastChildParts(wi.Child(wi.NumChildren() - 1).(Widget))
 	}
 	return wi
 }
@@ -648,10 +642,7 @@ func WidgetLastChildParts(wi Widget) Widget {
 // or node itself if no children. Starts with Children, not Parts
 func WidgetLastChild(wi Widget) Widget {
 	if wi.HasChildren() {
-		ew, err := wi.Children().ElemFromEndTry(0)
-		if err == nil {
-			return WidgetLastChildParts(ew.(Widget))
-		}
+		return WidgetLastChildParts(wi.Child(wi.NumChildren() - 1).(Widget))
 	}
 	return wi
 }
