@@ -17,28 +17,6 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// ArgViewType is the [types.Type] for [ArgView]
-var ArgViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ArgView", IDName: "arg-view", Doc: "ArgView represents a slice of reflect.Value's and associated names, for the\npurpose of supplying arguments to methods called via the MethodView\nframework.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Args", Doc: "Args are the args that we are a view onto"}}, Instance: &ArgView{}})
-
-// NewArgView returns a new [ArgView] with the given optional parent:
-// ArgView represents a slice of reflect.Value's and associated names, for the
-// purpose of supplying arguments to methods called via the MethodView
-// framework.
-func NewArgView(parent ...tree.Node) *ArgView { return tree.New[*ArgView](parent...) }
-
-// NodeType returns the [*types.Type] of [ArgView]
-func (t *ArgView) NodeType() *types.Type { return ArgViewType }
-
-// New returns a new [*ArgView] value
-func (t *ArgView) New() tree.Node { return &ArgView{} }
-
-// SetArgs sets the [ArgView.Args]:
-// Args are the args that we are a view onto
-func (t *ArgView) SetArgs(v ...Value) *ArgView { t.Args = v; return t }
-
-// SetTooltip sets the [ArgView.Tooltip]
-func (t *ArgView) SetTooltip(v string) *ArgView { t.Tooltip = v; return t }
-
 // ColorViewType is the [types.Type] for [ColorView]
 var ColorViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ColorView", IDName: "color-view", Doc: "ColorView shows a color, using sliders or numbers to set values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Color", Doc: "the color that we view"}}, Instance: &ColorView{}})
 
