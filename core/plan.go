@@ -5,6 +5,7 @@
 package core
 
 import (
+	"log/slog"
 	"path/filepath"
 	"runtime"
 	"slices"
@@ -19,10 +20,8 @@ import (
 // Plan represents a plan for how a widget should be configured and updated.
 // An instance of it is passed to [Widget.Make], which is responsible for making
 // the plan that is then used to configure and update the widget in [Widget.Build].
-// To add a child item to a plan, use [Add], [AddAt], or [AddNew]. Those functions
-// return a Plan that you can use as an argument to future Add calls to add more
-// Plans for children nested under the already added Plan. Plan contains closures
-// responsible for creating and updating a widget.
+// To add a child item to a plan, use [Add], [AddAt], or [AddNew]. To extend an
+// existing child item, use [AddInit].
 type Plan struct {
 
 	// Name is the name of the planned widget. If it is blank, this [Plan]
@@ -32,6 +31,10 @@ type Plan struct {
 	// New returns a new [Widget] of the correct type for this element,
 	// fully configured and ready for use.
 	New func() Widget
+
+	// Init is a list of functions that are called once after [Plan.New] to initialize the
+	// widget for the first time; see [AddInit].
+	Init []func(w Widget)
 
 	// Update updates the widget based on current state so that it
 	// propertly represents the correct information.
@@ -105,6 +108,22 @@ func AddNew[T Widget](p *Plan, path string, new func() T, update ...func(w T)) *
 	return p.Add(path, func() Widget { return new() }, func(w Widget) { u(w.(T)) })
 }
 
+// AddInit adds a new function for initializing the child with the given name
+// in the given [Plan]. The child must already exist in the plan; this is for
+// extending an existing [Plan] item, not adding a new one. The child is guaranteed
+// to have its parent set before the init function is called.
+func AddInit[T Widget](p *Plan, name string, init func(w T)) {
+	for _, child := range p.Children {
+		if child.Name == name {
+			child.Init = append(child.Init, func(w Widget) {
+				init(w.(T))
+			})
+			return
+		}
+	}
+	slog.Error("core.AddInit: child not found", "name", name)
+}
+
 // Add adds a new [Plan] item to the given [Plan] with the given name and functions.
 // It should typically not be called by end-user code; see the generic
 // [Add], [AddAt], and [AddNew] functions instead. It returns the new [Plan] item.
@@ -151,6 +170,9 @@ func (p *Plan) buildWidget(w Widget) {
 			cw := child.New()
 			cw.SetName(name)
 			tree.SetParent(cw, wb)
+			for _, i := range child.Init {
+				i(wb.This().(Widget))
+			}
 			return cw
 		}, func(n tree.Node) { n.Destroy() })
 	for i, child := range p.Children { // always build children even if not new

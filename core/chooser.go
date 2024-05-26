@@ -195,15 +195,6 @@ func (ch *Chooser) OnInit() {
 			}
 		}
 	})
-	ch.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(ch) {
-		case "text-field/trail-icon": // TODO(config): need some way to do this with the new config paradigm
-			w.Style(func(s *styles.Style) {
-				// indicator does not need to be focused
-				s.SetAbilities(false, abilities.Focusable)
-			})
-		}
-	})
 
 	ch.HandleSelectToggle()
 	ch.OnClick(func(e events.Event) {
@@ -338,6 +329,14 @@ func (ch *Chooser) OnInit() {
 					} else if !ch.DefaultNew && w.Complete == nil {
 						w.SetCompleter(w, ch.CompleteMatch, ch.CompleteEdit)
 					}
+				})
+				w.AddMaker(func(p *Plan) {
+					AddInit(p, "trail-icon", func(w *Button) {
+						w.Style(func(s *styles.Style) {
+							// indicator does not need to be focused
+							s.SetAbilities(false, abilities.Focusable)
+						})
+					})
 				})
 			})
 		} else {
