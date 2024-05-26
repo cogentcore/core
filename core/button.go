@@ -224,13 +224,14 @@ func (bt *Button) OnInit() {
 					s.SetTextWrap(false)
 					s.FillMargin = false
 				})
-			}, func(w *Text) {
-				if bt.Type == ButtonMenu {
-					w.SetType(TextBodyMedium)
-				} else {
-					w.SetType(TextLabelLarge)
-				}
-				w.SetText(bt.Text)
+				w.AddBuilder(func() {
+					if bt.Type == ButtonMenu {
+						w.SetType(TextBodyMedium)
+					} else {
+						w.SetType(TextLabelLarge)
+					}
+					w.SetText(bt.Text)
+				})
 			})
 		}
 
