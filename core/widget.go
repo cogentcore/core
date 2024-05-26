@@ -239,7 +239,18 @@ type WidgetBase struct {
 	// Geom has the full layout geometry for size and position of this Widget
 	Geom GeomState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
-	// If true, Override the computed styles and allow directly editing Style
+	// Builders are a slice of functions called in sequential ascending order
+	// in [Widget.Build] to build the widget. You can use [WidgetBase.AddBuilder]
+	// to add one. By default, this slice contains a function that builds the widget
+	// using [Widget.Make].
+	Builders []func() `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
+
+	// Makers are a slice of functions called in sequential ascending order
+	// in [Widget.Make] to make the plan for the widget. You can use
+	// [WidgetBase.AddMaker] to add one.
+	Makers []func(p *Plan) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
+
+	// If true, override the computed styles and allow directly editing Styles.
 	OverrideStyle bool `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Styles are styling settings for this widget.
