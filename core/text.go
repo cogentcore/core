@@ -193,6 +193,7 @@ func (tx *Text) OnInit() {
 	tx.StyleFinal(func(s *styles.Style) {
 		tx.normalCursor = s.Cursor
 	})
+
 	tx.HandleTextClick(func(tl *paint.TextLink) {
 		system.TheApp.OpenURL(tl.URL)
 	})
@@ -221,6 +222,7 @@ func (tx *Text) OnInit() {
 			tx.Styles.Cursor = tx.normalCursor
 		}
 	})
+
 	// todo: ideally it would be possible to only call SetHTML once during config
 	// and then do the layout only during sizing.  However, layout starts with
 	// existing line breaks (which could come from <br> and <p> in HTML),

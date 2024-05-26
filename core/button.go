@@ -174,6 +174,7 @@ func (bt *Button) OnInit() {
 			s.BoxShadow = s.MaxBoxShadow
 		}
 	})
+
 	bt.HandleClickOnEnterSpace()
 	bt.OnClick(func(e events.Event) {
 		if bt.OpenMenu(e) {
@@ -186,6 +187,7 @@ func (bt *Button) OnInit() {
 	bt.On(events.TripleClick, func(e events.Event) {
 		bt.Send(events.Click, e)
 	})
+
 	bt.AddMaker(func(p *Plan) {
 		// we check if the icons are unset, not if they are nil, so
 		// that people can manually set it to [icons.None]
@@ -204,7 +206,6 @@ func (bt *Button) OnInit() {
 				}
 			}
 		}
-
 		if bt.Icon.IsSet() {
 			AddAt(p, "icon", func(w *Icon) {
 				w.Style(func(s *styles.Style) {
@@ -234,7 +235,6 @@ func (bt *Button) OnInit() {
 				})
 			})
 		}
-
 		if bt.Indicator.IsSet() {
 			AddAt(p, "indicator-stretch", func(w *Stretch) {
 				w.Style(func(s *styles.Style) {
@@ -257,7 +257,6 @@ func (bt *Button) OnInit() {
 				w.SetIcon(bt.Indicator)
 			})
 		}
-
 		if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
 			if !bt.Indicator.IsSet() && bt.Shortcut != "" {
 				AddAt[*Stretch](p, "shortcut-stretch")

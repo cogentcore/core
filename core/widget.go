@@ -376,6 +376,7 @@ func (wb *WidgetBase) OnInit() {
 			s.MaxBorder = s.Border
 		}
 	})
+
 	// TODO(kai): maybe move all of these event handling functions into one function
 	wb.HandleWidgetClick()
 	wb.HandleWidgetStateFromMouse()
