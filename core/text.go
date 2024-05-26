@@ -100,12 +100,7 @@ func (tx *Text) WidgetValue() any { return &tx.Text }
 
 func (tx *Text) OnInit() {
 	tx.WidgetBase.OnInit()
-	tx.HandleEvents()
-	tx.SetStyles()
-}
-
-func (tx *Text) SetStyles() {
-	tx.Type = TextBodyLarge
+	tx.SetType(TextBodyLarge)
 	tx.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable)
 		if len(tx.paintText.Links) > 0 {
@@ -198,9 +193,6 @@ func (tx *Text) SetStyles() {
 	tx.StyleFinal(func(s *styles.Style) {
 		tx.normalCursor = s.Cursor
 	})
-}
-
-func (tx *Text) HandleEvents() {
 	tx.HandleTextClick(func(tl *paint.TextLink) {
 		system.TheApp.OpenURL(tl.URL)
 	})
@@ -228,6 +220,13 @@ func (tx *Text) HandleEvents() {
 		} else {
 			tx.Styles.Cursor = tx.normalCursor
 		}
+	})
+	// todo: ideally it would be possible to only call SetHTML once during config
+	// and then do the layout only during sizing.  However, layout starts with
+	// existing line breaks (which could come from <br> and <p> in HTML),
+	// so that is never able to undo initial word wrapping from constrained sizes.
+	tx.AddBuilder(func() {
+		tx.configTextSize(tx.Geom.Size.Actual.Content)
 	})
 }
 
@@ -284,19 +283,6 @@ func (tx *Text) Label() string {
 		return tx.Text
 	}
 	return tx.Nm
-}
-
-// todo: ideally it would be possible to only call SetHTML once during config
-// and then do the layout only during sizing.  However, layout starts with
-// existing line breaks (which could come from <br> and <p> in HTML),
-// so that is never able to undo initial word wrapping from constrained sizes.
-
-// Build does the HTML and Layout in paintText for the text,
-// using actual content size to constrain layout.
-// Call this followed by NeedsRender() to do a fast render-only
-// update of the text, with its current size and style.
-func (tx *Text) Build() {
-	tx.configTextSize(tx.Geom.Size.Actual.Content)
 }
 
 // configTextSize does the HTML and Layout in paintText for text,
@@ -398,6 +384,6 @@ func (tx *Text) SizeDown(iter int) bool {
 }
 
 func (tx *Text) Render() {
-	tx.RenderStandardBox()
+	tx.WidgetBase.Render()
 	tx.paintText.Render(&tx.Scene.PaintContext, tx.Geom.Pos.Content)
 }
