@@ -265,22 +265,11 @@ func (tv *TreeView) SetStyles() {
 	})
 
 	tv.OnWidgetAdded(func(w core.Widget) {
-		// TODO(config deep override)
+		// TODO(config)
 		switch w.PathFrom(tv) {
-		case "parts/branch.parts/stack/icon0":
+		case "parts/branch/stack/icon-on", "parts/branch/stack/icon-off", "parts/branch/stack/icon-indeterminate":
 			w.Style(func(s *styles.Style) {
-				s.Min.X.Em(1.0)
-				s.Min.Y.Em(1.0)
-			})
-		case "parts/branch.parts/stack/icon1":
-			w.Style(func(s *styles.Style) {
-				s.Min.X.Em(1.0)
-				s.Min.Y.Em(1.0)
-			})
-		case "parts/branch.parts/stack/icon2":
-			w.Style(func(s *styles.Style) {
-				s.Min.X.Em(1.0)
-				s.Min.Y.Em(1.0)
+				s.Min.Set(units.Em(1))
 			})
 		}
 	})
