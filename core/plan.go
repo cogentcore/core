@@ -139,11 +139,10 @@ func (p *Plan) buildWidget(w Widget) {
 			child.buildWidget(wparts)
 		}
 		p.Children = slices.Delete(p.Children, i, i+1) // not a real child
-		// if we only have parts, then we must bail to avoid affecting real children
-		if len(p.Children) == 0 {
-			return
-		}
 		break
+	}
+	if len(p.Children) == 0 { // check again after potentially removing parts
+		return
 	}
 	wb.Kids, _ = plan.Build(wb.Kids, len(p.Children),
 		func(i int) string { return p.Children[i].Name },
@@ -152,9 +151,6 @@ func (p *Plan) buildWidget(w Widget) {
 			cw := child.New()
 			cw.SetName(name)
 			tree.SetParent(cw, wb)
-			if child.Update != nil { // do initial setting in case children might reference
-				child.Update(cw)
-			}
 			return cw
 		}, func(n tree.Node) { n.Destroy() })
 	for i, child := range p.Children { // always build children even if not new
