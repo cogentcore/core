@@ -68,7 +68,6 @@ func (ic *Icon) SetIcon(icon icons.Icon) *Icon {
 func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 	if icon.IsNil() {
 		ic.SVG.DeleteAll()
-		ic.Build()
 		return false, nil
 	}
 	if ic.SVG.Root != nil && ic.SVG.Root.HasChildren() && ic.Icon == icon {

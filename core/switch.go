@@ -129,70 +129,76 @@ func (sw *Switch) OnInit() {
 			sw.IconOff = icons.ToggleOff // fallback
 		}
 
-		stack := AddAt(p, "stack", func(w *Frame) {
+		AddAt(p, "stack", func(w *Frame) {
 			w.Style(func(s *styles.Style) {
 				s.Display = styles.Stacked
 				s.Gap.Zero()
 			})
-		}, func(w *Frame) {
-			sw.UpdateStackTop() // need to update here
-		})
-		AddAt(stack, "icon-on", func(w *Icon) {
-			w.Style(func(s *styles.Style) {
-				if sw.Type == SwitchChip {
-					s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
-				} else {
-					s.Color = colors.C(colors.Scheme.Primary.Base)
-				}
-				// switches need to be bigger
-				if sw.Type == SwitchSwitch {
-					s.Min.X.Em(2)
-					s.Min.Y.Em(1.5)
-				} else {
-					s.Min.X.Em(1.5)
-					s.Min.Y.Em(1.5)
-				}
+			w.AddBuilder(func() {
+				sw.UpdateStackTop() // need to update here
 			})
-		}, func(w *Icon) {
-			w.SetIcon(sw.IconOn)
-		})
-		AddAt(stack, "icon-off", func(w *Icon) {
-			w.Style(func(s *styles.Style) {
-				switch sw.Type {
-				case SwitchSwitch:
-					// switches need to be bigger
-					s.Min.X.Em(2)
-					s.Min.Y.Em(1.5)
-				case SwitchChip:
-					// chips render no icon when off
-					s.Min.X.Zero()
-					s.Min.Y.Zero()
-				default:
-					s.Min.X.Em(1.5)
-					s.Min.Y.Em(1.5)
-				}
+			w.AddMaker(func(p *Plan) {
+				AddAt(p, "icon-on", func(w *Icon) {
+					w.Style(func(s *styles.Style) {
+						if sw.Type == SwitchChip {
+							s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+						} else {
+							s.Color = colors.C(colors.Scheme.Primary.Base)
+						}
+						// switches need to be bigger
+						if sw.Type == SwitchSwitch {
+							s.Min.X.Em(2)
+							s.Min.Y.Em(1.5)
+						} else {
+							s.Min.X.Em(1.5)
+							s.Min.Y.Em(1.5)
+						}
+					})
+					w.AddBuilder(func() {
+						w.SetIcon(sw.IconOn)
+					})
+				})
+				AddAt(p, "icon-off", func(w *Icon) {
+					w.Style(func(s *styles.Style) {
+						switch sw.Type {
+						case SwitchSwitch:
+							// switches need to be bigger
+							s.Min.X.Em(2)
+							s.Min.Y.Em(1.5)
+						case SwitchChip:
+							// chips render no icon when off
+							s.Min.X.Zero()
+							s.Min.Y.Zero()
+						default:
+							s.Min.X.Em(1.5)
+							s.Min.Y.Em(1.5)
+						}
+					})
+					w.AddBuilder(func() {
+						w.SetIcon(sw.IconOff)
+					})
+				})
+				AddAt(p, "icon-indeterminate", func(w *Icon) {
+					w.Style(func(s *styles.Style) {
+						switch sw.Type {
+						case SwitchSwitch:
+							// switches need to be bigger
+							s.Min.X.Em(2)
+							s.Min.Y.Em(1.5)
+						case SwitchChip:
+							// chips render no icon when off
+							s.Min.X.Zero()
+							s.Min.Y.Zero()
+						default:
+							s.Min.X.Em(1.5)
+							s.Min.Y.Em(1.5)
+						}
+					})
+					w.AddBuilder(func() {
+						w.SetIcon(sw.IconIndeterminate)
+					})
+				})
 			})
-		}, func(w *Icon) {
-			w.SetIcon(sw.IconOff)
-		})
-		AddAt(stack, "icon-indeterminate", func(w *Icon) {
-			w.Style(func(s *styles.Style) {
-				switch sw.Type {
-				case SwitchSwitch:
-					// switches need to be bigger
-					s.Min.X.Em(2)
-					s.Min.Y.Em(1.5)
-				case SwitchChip:
-					// chips render no icon when off
-					s.Min.X.Zero()
-					s.Min.Y.Zero()
-				default:
-					s.Min.X.Em(1.5)
-					s.Min.Y.Em(1.5)
-				}
-			})
-		}, func(w *Icon) {
-			w.SetIcon(sw.IconIndeterminate)
 		})
 
 		if sw.Text != "" {
