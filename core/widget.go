@@ -12,11 +12,14 @@ import (
 	"image"
 	"log/slog"
 
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
@@ -341,8 +344,47 @@ func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
 // OnInit if it has one to establish all the default styling
 // and event handling that applies to all widgets.
 func (wb *WidgetBase) OnInit() {
-	wb.SetStyles()
-	wb.HandleEvents()
+	wb.Style(func(s *styles.Style) {
+		s.MaxBorder.Style.Set(styles.BorderSolid)
+		s.MaxBorder.Color.Set(colors.C(colors.Scheme.Primary.Base))
+		s.MaxBorder.Width.Set(units.Dp(1))
+
+		// if we are disabled, we do not react to any state changes,
+		// and instead always have the same gray colors
+		if s.Is(states.Disabled) {
+			s.Cursor = cursors.NotAllowed
+			s.Opacity = 0.38
+			return
+		}
+		// TODO(kai): what about context menus on mobile?
+		tt, _ := wb.This().(Widget).WidgetTooltip(image.Pt(-1, -1))
+		s.SetAbilities(tt != "", abilities.LongHoverable, abilities.LongPressable)
+
+		if s.Is(states.Selected) {
+			s.Background = colors.C(colors.Scheme.Select.Container)
+			s.Color = colors.C(colors.Scheme.Select.OnContainer)
+		}
+	})
+	wb.StyleFinal(func(s *styles.Style) {
+		if s.Is(states.Focused) {
+			s.Border.Style = s.MaxBorder.Style
+			s.Border.Color = s.MaxBorder.Color
+			s.Border.Width = s.MaxBorder.Width
+		}
+		if !s.AbilityIs(abilities.Focusable) {
+			// never need bigger border if not focusable
+			s.MaxBorder = s.Border
+		}
+	})
+	// TODO(kai): maybe move all of these event handling functions into one function
+	wb.HandleWidgetClick()
+	wb.HandleWidgetStateFromMouse()
+	wb.HandleLongHoverTooltip()
+	wb.HandleWidgetStateFromFocus()
+	wb.HandleWidgetContextMenu()
+	wb.HandleWidgetMagnify()
+	wb.HandleValueOnChange()
+
 	wb.AddBuilder(wb.baseBuild)
 }
 

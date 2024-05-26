@@ -25,18 +25,6 @@ import (
 	"cogentcore.org/core/texteditor/textbuf"
 )
 
-func (ed *Editor) HandleEvents() {
-	ed.Frame.HandleEvents()
-	ed.HandleKeyChord()
-	ed.HandleMouse()
-	ed.HandleLinkCursor()
-	ed.HandleFocus()
-	ed.AddContextMenu(ed.ContextMenu)
-	ed.OnClose(func(e events.Event) {
-		ed.EditDone()
-	})
-}
-
 func (ed *Editor) HandleFocus() {
 	ed.OnFocusLost(func(e events.Event) {
 		if ed.IsReadOnly() {

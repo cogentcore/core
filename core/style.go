@@ -7,14 +7,10 @@ package core
 import (
 	"image"
 
-	"cogentcore.org/core/colors"
-	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 )
 
@@ -133,49 +129,6 @@ func (wb *WidgetBase) ResetStyleWidget() {
 	s.StateLayer = s.State.StateLayer()
 
 	s.SetMono(false)
-}
-
-// SetStyles sets the base, widget-universal default
-// style function that applies to all widgets.
-// It is added and called first in the styling order.
-// Because it handles default styling in response to
-// State flags such as Disabled and Selected, these state
-// flags must be set prior to calling this.
-// Use [StyleFirst] to add a function that is called prior to
-// this, to update state flags.
-func (wb *WidgetBase) SetStyles() {
-	wb.Style(func(s *styles.Style) {
-		s.MaxBorder.Style.Set(styles.BorderSolid)
-		s.MaxBorder.Color.Set(colors.C(colors.Scheme.Primary.Base))
-		s.MaxBorder.Width.Set(units.Dp(1))
-
-		// if we are disabled, we do not react to any state changes,
-		// and instead always have the same gray colors
-		if s.Is(states.Disabled) {
-			s.Cursor = cursors.NotAllowed
-			s.Opacity = 0.38
-			return
-		}
-		// TODO(kai): what about context menus on mobile?
-		tt, _ := wb.This().(Widget).WidgetTooltip(image.Pt(-1, -1))
-		s.SetAbilities(tt != "", abilities.LongHoverable, abilities.LongPressable)
-
-		if s.Is(states.Selected) {
-			s.Background = colors.C(colors.Scheme.Select.Container)
-			s.Color = colors.C(colors.Scheme.Select.OnContainer)
-		}
-	})
-	wb.StyleFinal(func(s *styles.Style) {
-		if s.Is(states.Focused) {
-			s.Border.Style = s.MaxBorder.Style
-			s.Border.Color = s.MaxBorder.Color
-			s.Border.Width = s.MaxBorder.Width
-		}
-		if !s.AbilityIs(abilities.Focusable) {
-			// never need bigger border if not focusable
-			s.MaxBorder = s.Border
-		}
-	})
 }
 
 // RunStylers runs the stylers specified in the widget's FirstStylers,

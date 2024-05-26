@@ -115,7 +115,7 @@ const (
 )
 
 func (bt *Button) OnInit() {
-	bt.WidgetBase.OnInit()
+	bt.Frame.OnInit()
 	bt.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.DoubleClickable, abilities.TripleClickable)
 		if !bt.IsDisabled() {

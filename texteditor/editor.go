@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/parse/lexer"
@@ -203,12 +204,7 @@ func (ed *Editor) FlagType() enums.BitFlagSetter {
 }
 
 func (ed *Editor) OnInit() {
-	ed.WidgetBase.OnInit()
-	ed.HandleEvents()
-	ed.SetStyles()
-}
-
-func (ed *Editor) SetStyles() {
+	ed.Frame.OnInit()
 	ed.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		ed.CursorWidth.Dp(2)
@@ -244,6 +240,14 @@ func (ed *Editor) SetStyles() {
 			s.StateLayer = 0
 			s.Border.Width.Set(units.Dp(2))
 		}
+	})
+	ed.HandleKeyChord()
+	ed.HandleMouse()
+	ed.HandleLinkCursor()
+	ed.HandleFocus()
+	ed.AddContextMenu(ed.ContextMenu)
+	ed.OnClose(func(e events.Event) {
+		ed.EditDone()
 	})
 }
 

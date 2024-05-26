@@ -145,15 +145,7 @@ func NewScene(name ...string) *Scene {
 
 func (sc *Scene) OnInit() {
 	sc.Scene = sc
-	sc.WidgetBase.OnInit()
-	sc.SetStyles()
-	sc.HandleEvents()
-	if TheApp.SceneConfig != nil {
-		TheApp.SceneConfig(sc)
-	}
-}
-
-func (sc *Scene) SetStyles() {
+	sc.Frame.OnInit()
 	sc.Style(func(s *styles.Style) {
 		s.Cursor = cursors.Arrow
 		s.Background = colors.C(colors.Scheme.Background)
@@ -173,10 +165,6 @@ func (sc *Scene) SetStyles() {
 
 		s.Padding.Set(units.Dp(8))
 	})
-}
-
-func (sc *Scene) HandleEvents() {
-	sc.Frame.HandleEvents()
 	sc.OnShow(func(e events.Event) {
 		CurrentRenderWindow.SetStageTitle(sc.Stage.Title)
 	})
@@ -195,6 +183,9 @@ func (sc *Scene) HandleEvents() {
 		st := sm.Stack.ValueByIndex(sm.Stack.Len() - 2)
 		CurrentRenderWindow.SetStageTitle(st.Title)
 	})
+	if TheApp.SceneConfig != nil {
+		TheApp.SceneConfig(sc)
+	}
 }
 
 // RenderContext returns the current render context.

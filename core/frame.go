@@ -73,8 +73,88 @@ func (fr *Frame) FlagType() enums.BitFlagSetter {
 
 func (fr *Frame) OnInit() {
 	fr.WidgetBase.OnInit()
-	fr.SetStyles()
-	fr.HandleEvents()
+	fr.StyleFinal(func(s *styles.Style) {
+		s.SetAbilities(s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto, abilities.Scrollable, abilities.Slideable)
+	})
+	fr.OnFinal(events.KeyChord, func(e events.Event) {
+		kf := keymap.Of(e.KeyChord())
+		if DebugSettings.KeyEventTrace {
+			slog.Info("Layout KeyInput", "widget", fr, "keyFunction", kf)
+		}
+		if kf == keymap.Abort {
+			if fr.Scene.Stage.ClosePopupAndBelow() {
+				e.SetHandled()
+			}
+			return
+		}
+		em := fr.Events()
+		if em == nil {
+			return
+		}
+		grid := fr.Styles.Display == styles.Grid
+		if fr.Styles.Direction == styles.Row || grid {
+			switch kf {
+			case keymap.MoveRight:
+				if fr.FocusNextChild(false) {
+					e.SetHandled()
+				}
+				return
+			case keymap.MoveLeft:
+				if fr.FocusPreviousChild(false) {
+					e.SetHandled()
+				}
+				return
+			}
+		}
+		if fr.Styles.Direction == styles.Column || grid {
+			switch kf {
+			case keymap.MoveDown:
+				if fr.FocusNextChild(true) {
+					e.SetHandled()
+				}
+				return
+			case keymap.MoveUp:
+				if fr.FocusPreviousChild(true) {
+					e.SetHandled()
+				}
+				return
+			case keymap.PageDown:
+				proc := false
+				for st := 0; st < SystemSettings.LayoutPageSteps; st++ {
+					if !fr.FocusNextChild(true) {
+						break
+					}
+					proc = true
+				}
+				if proc {
+					e.SetHandled()
+				}
+				return
+			case keymap.PageUp:
+				proc := false
+				for st := 0; st < SystemSettings.LayoutPageSteps; st++ {
+					if !fr.FocusPreviousChild(true) {
+						break
+					}
+					proc = true
+				}
+				if proc {
+					e.SetHandled()
+				}
+				return
+			}
+		}
+		fr.FocusOnName(e)
+	})
+	fr.On(events.Scroll, func(e events.Event) {
+		fr.ScrollDelta(e)
+	})
+	// we treat slide events on layouts as scroll events
+	// we must reverse the delta for "natural" scrolling behavior
+	fr.On(events.SlideMove, func(e events.Event) {
+		del := math32.Vector2FromPoint(e.PrevDelta()).MulScalar(-0.1)
+		fr.ScrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
+	})
 }
 
 func (fr *Frame) ApplyStyle() {
@@ -84,12 +164,6 @@ func (fr *Frame) ApplyStyle() {
 			fr.Scrolls[d].ApplyStyle()
 		}
 	}
-}
-
-func (fr *Frame) SetStyles() {
-	fr.StyleFinal(func(s *styles.Style) {
-		s.SetAbilities(s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto, abilities.Scrollable, abilities.Slideable)
-	})
 }
 
 func (fr *Frame) Destroy() {
@@ -225,96 +299,6 @@ func (fr *Frame) FocusPreviousChild(updn bool) bool {
 	return true
 }
 
-func (fr *Frame) HandleEvents() {
-	fr.WidgetBase.HandleEvents()
-	fr.HandleKeys()
-	fr.On(events.Scroll, func(e events.Event) {
-		fr.ScrollDelta(e)
-	})
-	// we treat slide events on layouts as scroll events
-	// we must reverse the delta for "natural" scrolling behavior
-	fr.On(events.SlideMove, func(e events.Event) {
-		del := math32.Vector2FromPoint(e.PrevDelta()).MulScalar(-0.1)
-		fr.ScrollDelta(events.NewScroll(e.WindowPos(), del, e.Modifiers()))
-	})
-}
-
-// HandleKeys handles all key events for navigating focus within a Layout.
-// Typically this is done by the parent Scene level layout, but can be
-// done by default if FocusWithinable Ability is set.
-func (fr *Frame) HandleKeys() {
-	fr.OnFinal(events.KeyChord, func(e events.Event) {
-		kf := keymap.Of(e.KeyChord())
-		if DebugSettings.KeyEventTrace {
-			slog.Info("Layout KeyInput", "widget", fr, "keyFunction", kf)
-		}
-		if kf == keymap.Abort {
-			if fr.Scene.Stage.ClosePopupAndBelow() {
-				e.SetHandled()
-			}
-			return
-		}
-		em := fr.Events()
-		if em == nil {
-			return
-		}
-		grid := fr.Styles.Display == styles.Grid
-		if fr.Styles.Direction == styles.Row || grid {
-			switch kf {
-			case keymap.MoveRight:
-				if fr.FocusNextChild(false) {
-					e.SetHandled()
-				}
-				return
-			case keymap.MoveLeft:
-				if fr.FocusPreviousChild(false) {
-					e.SetHandled()
-				}
-				return
-			}
-		}
-		if fr.Styles.Direction == styles.Column || grid {
-			switch kf {
-			case keymap.MoveDown:
-				if fr.FocusNextChild(true) {
-					e.SetHandled()
-				}
-				return
-			case keymap.MoveUp:
-				if fr.FocusPreviousChild(true) {
-					e.SetHandled()
-				}
-				return
-			case keymap.PageDown:
-				proc := false
-				for st := 0; st < SystemSettings.LayoutPageSteps; st++ {
-					if !fr.FocusNextChild(true) {
-						break
-					}
-					proc = true
-				}
-				if proc {
-					e.SetHandled()
-				}
-				return
-			case keymap.PageUp:
-				proc := false
-				for st := 0; st < SystemSettings.LayoutPageSteps; st++ {
-					if !fr.FocusPreviousChild(true) {
-						break
-					}
-					proc = true
-				}
-				if proc {
-					e.SetHandled()
-				}
-				return
-			}
-		}
-		fr.FocusOnName(e)
-	})
-}
-
 // FocusOnName processes key events to look for an element starting with given name
 func (fr *Frame) FocusOnName(e events.Event) bool {
 	kf := keymap.Of(e.KeyChord())
@@ -398,7 +382,7 @@ func ChildByLabelCanFocus(fr *Frame, name string, after tree.Node) tree.Node {
 	return nil
 }
 
-// Stretch and Space: spacing elements for layouts
+// Stretch and Space: spacing elements
 
 // Stretch adds a stretchy element that grows to fill all
 // available space. You can set [styles.Style.Grow] to change
@@ -409,16 +393,14 @@ type Stretch struct {
 }
 
 func (st *Stretch) OnInit() {
-	st.WidgetBase.SetStyles()
-	// note: not getting base events
+	st.WidgetBase.OnInit()
 	st.Style(func(s *styles.Style) {
+		s.RenderBox = false
 		s.Min.X.Ch(1)
 		s.Min.Y.Em(1)
 		s.Grow.Set(1, 1)
 	})
 }
-
-func (st *Stretch) Render() {}
 
 // Space is a fixed size blank space, with
 // a default width of 1ch and a height of 1em.
@@ -429,9 +411,9 @@ type Space struct {
 }
 
 func (sp *Space) OnInit() {
-	sp.WidgetBase.SetStyles()
-	// note: not getting base events
+	sp.WidgetBase.OnInit()
 	sp.Style(func(s *styles.Style) {
+		s.RenderBox = false
 		s.Min.X.Ch(1)
 		s.Min.Y.Em(1)
 		s.Padding.Zero()
@@ -440,5 +422,3 @@ func (sp *Space) OnInit() {
 		s.Border.Width.Zero()
 	})
 }
-
-func (sp *Space) Render() {}

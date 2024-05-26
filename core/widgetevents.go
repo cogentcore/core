@@ -279,18 +279,6 @@ func (wb *WidgetBase) FinalHandleEvent(e events.Event) {
 	})
 }
 
-// HandleEvents sets the default WidgetBase event handlers
-func (wb *WidgetBase) HandleEvents() {
-	// TODO(kai): maybe move all of these event handling functions into one function
-	wb.HandleWidgetClick()
-	wb.HandleWidgetStateFromMouse()
-	wb.HandleLongHoverTooltip()
-	wb.HandleWidgetStateFromFocus()
-	wb.HandleWidgetContextMenu()
-	wb.HandleWidgetMagnify()
-	wb.HandleValueOnChange()
-}
-
 // PosInScBBox returns true if given position is within
 // this node's scene bbox
 func (wb *WidgetBase) PosInScBBox(pos image.Point) bool {
