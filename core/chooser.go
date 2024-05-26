@@ -282,33 +282,63 @@ func (ch *Chooser) OnInit() {
 
 		// editable handles through TextField
 		if ch.Icon.IsSet() && !ch.Editable {
-			AddAt(p, "icon", func(w *Icon) {}, func(w *Icon) {
-				w.SetIcon(ch.Icon)
+			AddAt(p, "icon", func(w *Icon) {
+				w.AddBuilder(func() {
+					w.SetIcon(ch.Icon)
+				})
 			})
 		}
 		if ch.Editable {
 			AddAt(p, "text-field", func(w *TextField) {
 				w.SetPlaceholder(ch.Placeholder)
-				ch.HandleChooserTextFieldEvents(w)
 				w.Style(func(s *styles.Style) {
 					s.Grow = ch.Styles.Grow // we grow like our parent
 					s.Max.X.Zero()          // constrained by parent
 					s.SetTextWrap(false)
 				})
-			}, func(w *TextField) {
-				w.SetText(ch.CurrentItem.GetLabel()).SetLeadingIcon(ch.Icon).
-					SetTrailingIcon(ch.Indicator, func(e events.Event) {
-						ch.OpenMenu(e)
-					})
-				if ch.Type == ChooserFilled {
-					w.SetType(TextFieldFilled)
-				} else {
-					w.SetType(TextFieldOutlined)
-				}
-				w.Build() // this is actually essential (TODO: figure out a way to get rid of this?)
-				if !ch.DefaultNew {
-					w.SetCompleter(w, ch.CompleteMatch, ch.CompleteEdit)
-				}
+				w.SetValidator(func() error {
+					err := ch.SetCurrentText(w.Text())
+					if err == nil {
+						ch.SendChange()
+					}
+					return err
+				})
+				w.OnFocus(func(e events.Event) {
+					if ch.IsReadOnly() {
+						return
+					}
+					ch.CallItemsFuncs()
+				})
+				w.OnClick(func(e events.Event) {
+					ch.CallItemsFuncs()
+					w.OfferComplete()
+				})
+				w.OnKeyChord(func(e events.Event) {
+					kf := keymap.Of(e.KeyChord())
+					if kf == keymap.Abort {
+						if w.Error != nil {
+							w.Clear()
+							w.ClearError()
+							e.SetHandled()
+						}
+					}
+				})
+				w.AddBuilder(func() {
+					w.SetText(ch.CurrentItem.GetLabel()).SetLeadingIcon(ch.Icon).
+						SetTrailingIcon(ch.Indicator, func(e events.Event) {
+							ch.OpenMenu(e)
+						})
+					if ch.Type == ChooserFilled {
+						w.SetType(TextFieldFilled)
+					} else {
+						w.SetType(TextFieldOutlined)
+					}
+					if ch.DefaultNew && w.Complete != nil {
+						w.Complete = nil
+					} else if !ch.DefaultNew && w.Complete == nil {
+						w.SetCompleter(w, ch.CompleteMatch, ch.CompleteEdit)
+					}
+				})
 			})
 		} else {
 			AddAt(p, "text", func(w *Text) {
@@ -316,8 +346,9 @@ func (ch *Chooser) OnInit() {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
 				})
-			}, func(w *Text) {
-				w.SetText(ch.CurrentItem.GetLabel())
+				w.AddBuilder(func() {
+					w.SetText(ch.CurrentItem.GetLabel())
+				})
 			})
 		}
 		if ch.Indicator == "" {
@@ -329,8 +360,9 @@ func (ch *Chooser) OnInit() {
 				w.Style(func(s *styles.Style) {
 					s.Justify.Self = styles.End
 				})
-			}, func(w *Icon) {
-				w.SetIcon(ch.Indicator)
+				w.AddBuilder(func() {
+					w.SetIcon(ch.Indicator)
+				})
 			})
 		}
 	})
@@ -588,36 +620,6 @@ func (ch *Chooser) OpenMenu(e events.Event) bool {
 	}
 	m.Run()
 	return true
-}
-
-func (ch *Chooser) HandleChooserTextFieldEvents(tf *TextField) {
-	tf.SetValidator(func() error {
-		err := ch.SetCurrentText(tf.Text())
-		if err == nil {
-			ch.SendChange()
-		}
-		return err
-	})
-	tf.OnFocus(func(e events.Event) {
-		if ch.IsReadOnly() {
-			return
-		}
-		ch.CallItemsFuncs()
-	})
-	tf.OnClick(func(e events.Event) {
-		ch.CallItemsFuncs()
-		tf.OfferComplete()
-	})
-	tf.OnKeyChord(func(e events.Event) {
-		kf := keymap.Of(e.KeyChord())
-		if kf == keymap.Abort {
-			if tf.Error != nil {
-				tf.Clear()
-				tf.ClearError()
-				e.SetHandled()
-			}
-		}
-	})
 }
 
 func (ch *Chooser) WidgetTooltip(pos image.Point) (string, image.Point) {
