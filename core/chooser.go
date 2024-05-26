@@ -158,14 +158,8 @@ func (ch *Chooser) OnBind(value any) {
 }
 
 func (ch *Chooser) OnInit() {
-	ch.WidgetBase.OnInit()
-	ch.HandleEvents()
-	ch.SetStyles()
-}
-
-func (ch *Chooser) SetStyles() {
-	ch.Icon = icons.None
-	ch.Indicator = icons.KeyboardArrowDown
+	ch.Frame.OnInit()
+	ch.SetIcon(icons.None).SetIndicator(icons.KeyboardArrowDown)
 	ch.CurrentIndex = -1
 	ch.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Hoverable, abilities.LongHoverable)
@@ -210,67 +204,136 @@ func (ch *Chooser) SetStyles() {
 			})
 		}
 	})
-}
 
-func (ch *Chooser) Make(p *Plan) {
-	// automatically select the first item if we have nothing selected and no placeholder
-	if !ch.Editable && ch.CurrentIndex < 0 && ch.CurrentItem.Text == "" {
-		ch.SetCurrentIndex(0)
-	}
+	ch.HandleSelectToggle()
+	ch.OnClick(func(e events.Event) {
+		if ch.OpenMenu(e) {
+			e.SetHandled()
+		}
+	})
+	ch.OnChange(func(e events.Event) {
+		if ch.CurrentItem.Func != nil {
+			ch.CurrentItem.Func()
+		}
+	})
+	ch.OnFinal(events.KeyChord, func(e events.Event) {
+		tf := ch.TextField()
+		kf := keymap.Of(e.KeyChord())
+		if DebugSettings.KeyEventTrace {
+			slog.Info("Chooser KeyChordEvent", "widget", ch, "keyFunction", kf)
+		}
+		switch {
+		case kf == keymap.MoveUp:
+			e.SetHandled()
+			if len(ch.Items) > 0 {
+				index := ch.CurrentIndex - 1
+				if index < 0 {
+					index += len(ch.Items)
+				}
+				ch.SelectItemAction(index)
+			}
+		case kf == keymap.MoveDown:
+			e.SetHandled()
+			if len(ch.Items) > 0 {
+				index := ch.CurrentIndex + 1
+				if index >= len(ch.Items) {
+					index -= len(ch.Items)
+				}
+				ch.SelectItemAction(index)
+			}
+		case kf == keymap.PageUp:
+			e.SetHandled()
+			if len(ch.Items) > 10 {
+				index := ch.CurrentIndex - 10
+				for index < 0 {
+					index += len(ch.Items)
+				}
+				ch.SelectItemAction(index)
+			}
+		case kf == keymap.PageDown:
+			e.SetHandled()
+			if len(ch.Items) > 10 {
+				index := ch.CurrentIndex + 10
+				for index >= len(ch.Items) {
+					index -= len(ch.Items)
+				}
+				ch.SelectItemAction(index)
+			}
+		case kf == keymap.Enter || (!ch.Editable && e.KeyRune() == ' '):
+			// if !(kt.Rune == ' ' && chb.Sc.Type == ScCompleter) {
+			e.SetHandled()
+			ch.Send(events.Click, e)
+		// }
+		default:
+			if tf == nil {
+				break
+			}
+			// if we don't have anything special to do,
+			// we just give our key event to our textfield
+			tf.HandleEvent(e)
+		}
+	})
 
-	// editable handles through TextField
-	if ch.Icon.IsSet() && !ch.Editable {
-		AddAt(p, "icon", func(w *Icon) {}, func(w *Icon) {
-			w.SetIcon(ch.Icon)
-		})
-	}
-	if ch.Editable {
-		AddAt(p, "text-field", func(w *TextField) {
-			w.SetPlaceholder(ch.Placeholder)
-			ch.HandleChooserTextFieldEvents(w)
-			w.Style(func(s *styles.Style) {
-				s.Grow = ch.Styles.Grow // we grow like our parent
-				s.Max.X.Zero()          // constrained by parent
-				s.SetTextWrap(false)
+	ch.AddMaker(func(p *Plan) {
+		// automatically select the first item if we have nothing selected and no placeholder
+		if !ch.Editable && ch.CurrentIndex < 0 && ch.CurrentItem.Text == "" {
+			ch.SetCurrentIndex(0)
+		}
+
+		// editable handles through TextField
+		if ch.Icon.IsSet() && !ch.Editable {
+			AddAt(p, "icon", func(w *Icon) {}, func(w *Icon) {
+				w.SetIcon(ch.Icon)
 			})
-		}, func(w *TextField) {
-			w.SetText(ch.CurrentItem.GetLabel()).SetLeadingIcon(ch.Icon).
-				SetTrailingIcon(ch.Indicator, func(e events.Event) {
-					ch.OpenMenu(e)
+		}
+		if ch.Editable {
+			AddAt(p, "text-field", func(w *TextField) {
+				w.SetPlaceholder(ch.Placeholder)
+				ch.HandleChooserTextFieldEvents(w)
+				w.Style(func(s *styles.Style) {
+					s.Grow = ch.Styles.Grow // we grow like our parent
+					s.Max.X.Zero()          // constrained by parent
+					s.SetTextWrap(false)
 				})
-			if ch.Type == ChooserFilled {
-				w.SetType(TextFieldFilled)
-			} else {
-				w.SetType(TextFieldOutlined)
-			}
-			w.Build() // this is actually essential (TODO: figure out a way to get rid of this?)
-			if !ch.DefaultNew {
-				w.SetCompleter(w, ch.CompleteMatch, ch.CompleteEdit)
-			}
-		})
-	} else {
-		AddAt(p, "text", func(w *Text) {
-			w.Style(func(s *styles.Style) {
-				s.SetNonSelectable()
-				s.SetTextWrap(false)
+			}, func(w *TextField) {
+				w.SetText(ch.CurrentItem.GetLabel()).SetLeadingIcon(ch.Icon).
+					SetTrailingIcon(ch.Indicator, func(e events.Event) {
+						ch.OpenMenu(e)
+					})
+				if ch.Type == ChooserFilled {
+					w.SetType(TextFieldFilled)
+				} else {
+					w.SetType(TextFieldOutlined)
+				}
+				w.Build() // this is actually essential (TODO: figure out a way to get rid of this?)
+				if !ch.DefaultNew {
+					w.SetCompleter(w, ch.CompleteMatch, ch.CompleteEdit)
+				}
 			})
-		}, func(w *Text) {
-			w.SetText(ch.CurrentItem.GetLabel())
-		})
-	}
-	if ch.Indicator == "" {
-		ch.Indicator = icons.KeyboardArrowRight
-	}
-	// editable handles through TextField
-	if !ch.Editable {
-		AddAt(p, "indicator", func(w *Icon) {
-			w.Style(func(s *styles.Style) {
-				s.Justify.Self = styles.End
+		} else {
+			AddAt(p, "text", func(w *Text) {
+				w.Style(func(s *styles.Style) {
+					s.SetNonSelectable()
+					s.SetTextWrap(false)
+				})
+			}, func(w *Text) {
+				w.SetText(ch.CurrentItem.GetLabel())
 			})
-		}, func(w *Icon) {
-			w.SetIcon(ch.Indicator)
-		})
-	}
+		}
+		if ch.Indicator == "" {
+			ch.Indicator = icons.KeyboardArrowRight
+		}
+		// editable handles through TextField
+		if !ch.Editable {
+			AddAt(p, "indicator", func(w *Icon) {
+				w.Style(func(s *styles.Style) {
+					s.Justify.Self = styles.End
+				})
+			}, func(w *Icon) {
+				w.SetIcon(ch.Indicator)
+			})
+		}
+	})
 }
 
 // TextWidget returns the text widget if present.
@@ -510,78 +573,6 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 				d.RunDialog(ch)
 			})
 	}
-}
-
-func (ch *Chooser) HandleEvents() {
-	ch.HandleSelectToggle()
-
-	ch.OnClick(func(e events.Event) {
-		if ch.OpenMenu(e) {
-			e.SetHandled()
-		}
-	})
-	ch.OnChange(func(e events.Event) {
-		if ch.CurrentItem.Func != nil {
-			ch.CurrentItem.Func()
-		}
-	})
-	ch.OnFinal(events.KeyChord, func(e events.Event) {
-		tf := ch.TextField()
-		kf := keymap.Of(e.KeyChord())
-		if DebugSettings.KeyEventTrace {
-			slog.Info("Chooser KeyChordEvent", "widget", ch, "keyFunction", kf)
-		}
-		switch {
-		case kf == keymap.MoveUp:
-			e.SetHandled()
-			if len(ch.Items) > 0 {
-				index := ch.CurrentIndex - 1
-				if index < 0 {
-					index += len(ch.Items)
-				}
-				ch.SelectItemAction(index)
-			}
-		case kf == keymap.MoveDown:
-			e.SetHandled()
-			if len(ch.Items) > 0 {
-				index := ch.CurrentIndex + 1
-				if index >= len(ch.Items) {
-					index -= len(ch.Items)
-				}
-				ch.SelectItemAction(index)
-			}
-		case kf == keymap.PageUp:
-			e.SetHandled()
-			if len(ch.Items) > 10 {
-				index := ch.CurrentIndex - 10
-				for index < 0 {
-					index += len(ch.Items)
-				}
-				ch.SelectItemAction(index)
-			}
-		case kf == keymap.PageDown:
-			e.SetHandled()
-			if len(ch.Items) > 10 {
-				index := ch.CurrentIndex + 10
-				for index >= len(ch.Items) {
-					index -= len(ch.Items)
-				}
-				ch.SelectItemAction(index)
-			}
-		case kf == keymap.Enter || (!ch.Editable && e.KeyRune() == ' '):
-			// if !(kt.Rune == ' ' && chb.Sc.Type == ScCompleter) {
-			e.SetHandled()
-			ch.Send(events.Click, e)
-		// }
-		default:
-			if tf == nil {
-				break
-			}
-			// if we don't have anything special to do,
-			// we just give our key event to our textfield
-			tf.HandleEvent(e)
-		}
-	})
 }
 
 // OpenMenu opens the chooser menu that displays all of the items.
