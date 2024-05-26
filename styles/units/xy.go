@@ -35,10 +35,10 @@ func (xy *XY) Zero() {
 	xy.Y.Zero()
 }
 
-// Set sets the X, Y values according to the given values.
-// no values: set to 0.
-// 1 value: set both to that value.
-// 2 values, set X, Y to the two values respectively.
+// Set sets the x and y values according to the given values.
+// No values: set both to 0.
+// One value: set both to that value.
+// Two values: set x to the first value and y to the second value.
 func (xy *XY) Set(v ...Value) {
 	switch len(v) {
 	case 0:
