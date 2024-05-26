@@ -343,6 +343,7 @@ func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
 func (wb *WidgetBase) OnInit() {
 	wb.SetStyles()
 	wb.HandleEvents()
+	wb.AddBuilder(wb.baseBuild)
 }
 
 // OnAdd is called when widgets are added to a parent.

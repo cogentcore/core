@@ -5,7 +5,6 @@
 package core
 
 import (
-	"fmt"
 	"path/filepath"
 	"runtime"
 	"slices"
@@ -187,62 +186,4 @@ func InitParts(w *Frame) {
 		s.Grow.Set(1, 1)
 		s.RenderBox = false
 	})
-}
-
-// Build is the base implementation of [Widget.Build] that
-// configures the widget by doing steps that apply to all widgets and then
-// calling [Widget.Config] for widget-specific configuration steps.
-func (wb *WidgetBase) Build() {
-	if wb.ValueUpdate != nil {
-		wb.ValueUpdate()
-	}
-	p := Plan{}
-	wb.This().(Widget).Make(&p)
-	p.BuildWidget(wb.This().(Widget))
-}
-
-// Config is the interface method called by [Widget.Build] that
-// should be defined for each [Widget] type, which actually does
-// the configuration work.
-func (wb *WidgetBase) Make(p *Plan) {
-	// this must be defined for each widget type
-}
-
-// ConfigTree calls [Widget.Build] on every Widget in the tree from me.
-func (wb *WidgetBase) ConfigTree() {
-	if wb.This() == nil {
-		return
-	}
-	// pr := profile.Start(wb.This().NodeType().ShortName())
-	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		wi.Build()
-		return tree.Continue
-	})
-	// pr.End()
-}
-
-// Update does a general purpose update of the widget and everything
-// below it by reconfiguring it, applying its styles, and indicating
-// that it needs a new layout pass. It is the main way that end users
-// should update widgets, and it should be called after making any
-// changes to the core properties of a widget (for example, the text
-// of [Text], the icon of a [Button], or the slice of a table view).
-//
-// If you are calling this in a separate goroutine outside of the main
-// configuration, rendering, and event handling structure, you need to
-// call [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and
-// after this, respectively.
-func (wb *WidgetBase) Update() { //types:add
-	if wb == nil || wb.This() == nil {
-		return
-	}
-	if DebugSettings.UpdateTrace {
-		fmt.Println("\tDebugSettings.UpdateTrace Update:", wb)
-	}
-	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		wi.Build()
-		wi.ApplyStyle()
-		return tree.Continue
-	})
-	wb.NeedsLayout()
 }
