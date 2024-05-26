@@ -11,7 +11,7 @@ import (
 )
 
 // AddBuilder adds a new function to [WidgetBase.Builders], which are called in sequential
-// ascending order in [Widget.Build].
+// descending (reverse) order in [Widget.Build].
 func (wb *WidgetBase) AddBuilder(builder func()) {
 	wb.Builders = append(wb.Builders, builder)
 }
@@ -25,8 +25,8 @@ func (wb *WidgetBase) AddMaker(maker func(p *Plan)) {
 // Build is the base implementation of [Widget.Build] that
 // runs [WidgetBase.Builders].
 func (wb *WidgetBase) Build() {
-	for _, builder := range wb.Builders {
-		builder()
+	for i := len(wb.Builders) - 1; i >= 0; i-- {
+		wb.Builders[i]()
 	}
 }
 
