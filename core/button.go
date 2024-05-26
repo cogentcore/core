@@ -116,11 +116,6 @@ const (
 
 func (bt *Button) OnInit() {
 	bt.WidgetBase.OnInit()
-	bt.HandleEvents()
-	bt.SetStyles()
-}
-
-func (bt *Button) SetStyles() {
 	bt.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.DoubleClickable, abilities.TripleClickable)
 		if !bt.IsDisabled() {
@@ -179,6 +174,111 @@ func (bt *Button) SetStyles() {
 			s.BoxShadow = s.MaxBoxShadow
 		}
 	})
+	bt.HandleClickOnEnterSpace()
+	bt.OnClick(func(e events.Event) {
+		if bt.OpenMenu(e) {
+			e.SetHandled()
+		}
+	})
+	bt.OnDoubleClick(func(e events.Event) {
+		bt.Send(events.Click, e)
+	})
+	bt.On(events.TripleClick, func(e events.Event) {
+		bt.Send(events.Click, e)
+	})
+	bt.AddMaker(func(p *Plan) {
+		// we check if the icons are unset, not if they are nil, so
+		// that people can manually set it to [icons.None]
+		if bt.HasMenu() {
+			if bt.Type == ButtonMenu {
+				if bt.Indicator == "" {
+					bt.Indicator = icons.KeyboardArrowRight
+				}
+			} else if bt.Text != "" {
+				if bt.Indicator == "" {
+					bt.Indicator = icons.KeyboardArrowDown
+				}
+			} else {
+				if bt.Icon == "" {
+					bt.Icon = icons.Menu
+				}
+			}
+		}
+
+		if bt.Icon.IsSet() {
+			AddAt(p, "icon", func(w *Icon) {
+				w.Style(func(s *styles.Style) {
+					s.Font.Size.Dp(18)
+				})
+			}, func(w *Icon) {
+				w.SetIcon(bt.Icon)
+			})
+			if bt.Text != "" {
+				AddAt[*Space](p, "space")
+			}
+		}
+		if bt.Text != "" {
+			AddAt(p, "text", func(w *Text) {
+				w.Style(func(s *styles.Style) {
+					s.SetNonSelectable()
+					s.SetTextWrap(false)
+					s.FillMargin = false
+				})
+			}, func(w *Text) {
+				if bt.Type == ButtonMenu {
+					w.SetType(TextBodyMedium)
+				} else {
+					w.SetType(TextLabelLarge)
+				}
+				w.SetText(bt.Text)
+			})
+		}
+
+		if bt.Indicator.IsSet() {
+			AddAt(p, "indicator-stretch", func(w *Stretch) {
+				w.Style(func(s *styles.Style) {
+					s.Min.Set(units.Em(0.2))
+					if bt.Type == ButtonMenu {
+						s.Grow.Set(1, 0)
+					} else {
+						s.Grow.Set(0, 0)
+					}
+				})
+			})
+			AddAt(p, "indicator", func(w *Icon) {
+				w.Style(func(s *styles.Style) {
+					s.Min.X.Dp(18)
+					s.Min.Y.Dp(18)
+					s.Margin.Zero()
+					s.Padding.Zero()
+				})
+			}, func(w *Icon) {
+				w.SetIcon(bt.Indicator)
+			})
+		}
+
+		if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
+			if !bt.Indicator.IsSet() && bt.Shortcut != "" {
+				AddAt[*Stretch](p, "shortcut-stretch")
+				AddAt(p, "shortcut", func(w *Text) {
+					w.Style(func(s *styles.Style) {
+						s.SetNonSelectable()
+						s.SetTextWrap(false)
+						s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+					})
+				}, func(w *Text) {
+					if bt.Type == ButtonMenu {
+						w.SetType(TextBodyMedium)
+					} else {
+						w.SetType(TextLabelLarge)
+					}
+					w.SetText(bt.Shortcut.Label())
+				})
+			} else if bt.Shortcut != "" {
+				slog.Error("programmer error: core.Button: shortcut cannot be used on a sub-menu for", "button", bt)
+			}
+		}
+	})
 }
 
 // SetKey sets the shortcut of the button from the given [keymap.Functions]
@@ -229,10 +329,7 @@ func (bt *Button) OpenMenu(e events.Event) bool {
 	return true
 }
 
-//////////////////////////////////////////////////////////////////
-//		Events
-
-func (bt *Button) HandleClickDismissMenu() {
+func (bt *Button) handleClickDismissMenu() {
 	// note: must be called last so widgets aren't deleted when the click arrives
 	bt.OnFinal(events.Click, func(e events.Event) {
 		bt.Scene.Stage.ClosePopupAndBelow()
@@ -248,113 +345,4 @@ func (bt *Button) WidgetTooltip(pos image.Point) (string, image.Point) {
 		}
 	}
 	return res, bt.DefaultTooltipPos()
-}
-
-func (bt *Button) HandleEvents() {
-	bt.HandleClickOnEnterSpace()
-	bt.OnClick(func(e events.Event) {
-		if bt.OpenMenu(e) {
-			e.SetHandled()
-		}
-	})
-	bt.OnDoubleClick(func(e events.Event) {
-		bt.Send(events.Click, e)
-	})
-	bt.On(events.TripleClick, func(e events.Event) {
-		bt.Send(events.Click, e)
-	})
-}
-
-func (bt *Button) Make(p *Plan) {
-	// we check if the icons are unset, not if they are nil, so
-	// that people can manually set it to [icons.None]
-	if bt.HasMenu() {
-		if bt.Type == ButtonMenu {
-			if bt.Indicator == "" {
-				bt.Indicator = icons.KeyboardArrowRight
-			}
-		} else if bt.Text != "" {
-			if bt.Indicator == "" {
-				bt.Indicator = icons.KeyboardArrowDown
-			}
-		} else {
-			if bt.Icon == "" {
-				bt.Icon = icons.Menu
-			}
-		}
-	}
-
-	if bt.Icon.IsSet() {
-		AddAt(p, "icon", func(w *Icon) {
-			w.Style(func(s *styles.Style) {
-				s.Font.Size.Dp(18)
-			})
-		}, func(w *Icon) {
-			w.SetIcon(bt.Icon)
-		})
-		if bt.Text != "" {
-			AddAt[*Space](p, "space")
-		}
-	}
-	if bt.Text != "" {
-		AddAt(p, "text", func(w *Text) {
-			w.Style(func(s *styles.Style) {
-				s.SetNonSelectable()
-				s.SetTextWrap(false)
-				s.FillMargin = false
-			})
-		}, func(w *Text) {
-			if bt.Type == ButtonMenu {
-				w.SetType(TextBodyMedium)
-			} else {
-				w.SetType(TextLabelLarge)
-			}
-			w.SetText(bt.Text)
-		})
-	}
-
-	if bt.Indicator.IsSet() {
-		AddAt(p, "indicator-stretch", func(w *Stretch) {
-			w.Style(func(s *styles.Style) {
-				s.Min.Set(units.Em(0.2))
-				if bt.Type == ButtonMenu {
-					s.Grow.Set(1, 0)
-				} else {
-					s.Grow.Set(0, 0)
-				}
-			})
-		})
-		AddAt(p, "indicator", func(w *Icon) {
-			w.Style(func(s *styles.Style) {
-				s.Min.X.Dp(18)
-				s.Min.Y.Dp(18)
-				s.Margin.Zero()
-				s.Padding.Zero()
-			})
-		}, func(w *Icon) {
-			w.SetIcon(bt.Indicator)
-		})
-	}
-
-	if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
-		if !bt.Indicator.IsSet() && bt.Shortcut != "" {
-			AddAt[*Stretch](p, "shortcut-stretch")
-			AddAt(p, "shortcut", func(w *Text) {
-				w.Style(func(s *styles.Style) {
-					s.SetNonSelectable()
-					s.SetTextWrap(false)
-					s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
-				})
-			}, func(w *Text) {
-				if bt.Type == ButtonMenu {
-					w.SetType(TextBodyMedium)
-				} else {
-					w.SetType(TextLabelLarge)
-				}
-				w.SetText(bt.Shortcut.Label())
-			})
-		} else if bt.Shortcut != "" {
-			slog.Error("programmer error: core.Button: shortcut cannot be used on a sub-menu for", "button", bt)
-		}
-	}
 }

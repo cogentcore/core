@@ -78,7 +78,7 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 		}
 		if bt := AsButton(wi); bt != nil {
 			if bt.Menu == nil {
-				bt.HandleClickDismissMenu()
+				bt.handleClickDismissMenu()
 			}
 		}
 		if !hasSelected && wb.StateIs(states.Selected) {
