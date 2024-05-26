@@ -49,10 +49,6 @@ func NewBody(name ...string) *Body {
 
 func (bd *Body) OnInit() {
 	bd.Frame.OnInit()
-	bd.SetStyles()
-}
-
-func (bd *Body) SetStyles() {
 	bd.Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 		s.Direction = styles.Column
@@ -74,7 +70,7 @@ func (bd *Body) SetTitle(title string) *Body {
 			win.SetTitle(title)
 		}
 	}
-	if lb, ok := bd.ChildByName("title", 0).(*Text); ok {
+	if lb, ok := bd.ChildByName("body-title", 0).(*Text); ok {
 		lb.SetText(title)
 	}
 	return bd
@@ -84,7 +80,7 @@ func (bd *Body) SetTitle(title string) *Body {
 // which will be used by the Scene etc.
 func (bd *Body) AddTitle(title string) *Body {
 	bd.SetTitle(title)
-	NewText(bd).SetText(title).SetType(TextHeadlineSmall)
+	NewText(bd).SetText(title).SetType(TextHeadlineSmall).SetName("body-title")
 	return bd
 }
 
