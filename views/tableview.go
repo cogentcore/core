@@ -306,14 +306,14 @@ func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
 		field := tv.visibleFields[fli]
 		fval := reflectx.OnePointerValue(val.FieldByIndex(field.Index))
 		valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
-		tags := ""
+		tags := reflect.StructTag("")
 		if fval.Kind() == reflect.Slice || fval.Kind() == reflect.Map {
 			tags = `view:"no-inline"`
 		}
-		_ = tags
 
 		core.AddNew(p, valnm, func() core.Value {
-			w := core.NewValue(fval.Interface(), "")
+			return core.NewValue(fval.Interface(), tags)
+		}, func(w core.Value) {
 			wb := w.AsWidget()
 			tv.MakeValue(w, i)
 			// vv.SetStructValue(fval.Addr(), stru, &field, vpath)
@@ -336,7 +336,6 @@ func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
 					wb.SetSelected(false)
 				}
 			})
-			return w
 		})
 	}
 }

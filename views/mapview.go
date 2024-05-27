@@ -77,7 +77,8 @@ func (mv *MapView) OnInit() {
 			valnm := "value-" + keytxt
 
 			core.AddNew(p, keynm, func() core.Value {
-				w := core.ToValue(key.Interface(), "")
+				return core.ToValue(key.Interface(), "")
+			}, func(w core.Value) {
 				BindMapKey(mapv, key, w)
 				wb := w.AsWidget()
 				wb.SetReadOnly(mv.IsReadOnly())
@@ -100,12 +101,12 @@ func (mv *MapView) OnInit() {
 					BindMapKey(mapv, key, w)
 					wb.SetReadOnly(mv.IsReadOnly())
 				})
-				return w
 			})
 			core.AddNew(p, valnm, func() core.Value {
 				val := mapv.MapIndex(key).Interface()
 				w := core.ToValue(val, "")
-				BindMapValue(mapv, key, w)
+				return BindMapValue(mapv, key, w)
+			}, func(w core.Value) {
 				wb := w.AsWidget()
 				wb.SetReadOnly(mv.IsReadOnly())
 				wb.OnChange(func(e events.Event) { mv.SendChange(e) })
@@ -123,7 +124,6 @@ func (mv *MapView) OnInit() {
 					BindMapValue(mapv, key, w)
 					wb.SetReadOnly(mv.IsReadOnly())
 				})
-				return w
 			})
 
 			if typeAny {

@@ -621,7 +621,8 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i, si int) {
 	}
 
 	core.AddNew(p, "value-"+itxt, func() core.Value {
-		w := core.NewValue(val.Interface(), "")
+		return core.NewValue(val.Interface(), "")
+	}, func(w core.Value) {
 		wb := w.AsWidget()
 		sv.MakeValue(w, i)
 		if !sv.IsReadOnly() {
@@ -642,7 +643,6 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i, si int) {
 				wb.SetSelected(false)
 			}
 		})
-		return w
 	})
 
 }

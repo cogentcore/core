@@ -154,7 +154,8 @@ func (sv *StructView) OnInit() {
 			})
 
 			core.AddNew(p, valnm, func() core.Value {
-				w := core.NewValue(reflectx.UnderlyingPointer(value).Interface(), field.Tag)
+				return core.NewValue(reflectx.UnderlyingPointer(value).Interface(), field.Tag)
+			}, func(w core.Value) {
 				valueWidget = w
 				wb := w.AsWidget()
 				wb.OnInput(func(e events.Event) {
@@ -178,7 +179,6 @@ func (sv *StructView) OnInit() {
 					wb.SetReadOnly(sv.IsReadOnly() || readOnlyTag)
 					core.Bind(reflectx.UnderlyingPointer(value).Interface(), w)
 				})
-				return w
 			})
 		}
 

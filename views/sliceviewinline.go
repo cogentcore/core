@@ -51,7 +51,8 @@ func (sv *SliceViewInline) OnInit() {
 			itxt := strconv.Itoa(i)
 			val := reflectx.UnderlyingPointer(sl.Index(i)) // deal with pointer lists
 			core.AddNew(p, "value-"+itxt, func() core.Value {
-				w := core.NewValue(val.Interface(), "")
+				return core.NewValue(val.Interface(), "")
+			}, func(w core.Value) {
 				wb := w.AsWidget()
 				// vv.SetSliceValue(val, sv.Slice, i, sv.ViewPath)
 				wb.OnChange(func(e events.Event) { sv.SendChange() })
@@ -76,7 +77,6 @@ func (sv *SliceViewInline) OnInit() {
 					core.Bind(val.Interface(), w)
 					wb.SetReadOnly(sv.IsReadOnly())
 				})
-				return w
 			})
 		}
 		if !sv.isArray && !sv.isFixedLength {

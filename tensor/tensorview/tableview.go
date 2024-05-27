@@ -293,13 +293,13 @@ func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
 		if col.NumDims() == 1 {
 			str := ""
 			fval := float64(0)
-			core.AddNew(p, "grid/"+valnm, func() core.Value { // TODO(config)
-				var w core.Value
+			core.AddNew(p, "grid/"+valnm, func() core.Value { // TODO(config): path nesting
 				if isstr {
-					w = core.NewValue(&str, "")
+					return core.NewValue(&str, "")
 				} else {
-					w = core.NewValue(&fval, "")
+					return core.NewValue(&fval, "")
 				}
+			}, func(w core.Value) {
 				wb := w.AsWidget()
 				tv.MakeValue(w, i)
 				w.SetProperty(views.SliceViewColProperty, fli)
@@ -334,7 +334,6 @@ func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
 						wb.SetSelected(false)
 					}
 				})
-				return w
 			})
 		} else { // TODO(config)
 			/*
