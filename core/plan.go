@@ -32,8 +32,8 @@ type Plan struct {
 	// fully configured and ready for use.
 	New func() Widget
 
-	// Init is a list of functions that are called once after [Plan.New] to initialize the
-	// widget for the first time; see [AddInit].
+	// Init is a list of functions that are called once in sequential ascending order
+	// after [Plan.New] to initialize the widget for the first time; see [AddInit].
 	Init []func(w Widget)
 
 	// Update updates the widget based on current state so that it
@@ -111,7 +111,8 @@ func AddNew[T Widget](p *Plan, path string, new func() T, update ...func(w T)) *
 // AddInit adds a new function for initializing the child with the given name
 // in the given [Plan]. The child must already exist in the plan; this is for
 // extending an existing [Plan] item, not adding a new one. The child is guaranteed
-// to have its parent set before the init function is called.
+// to have its parent set before the init function is called. The init functions are
+// called in sequential ascending order.
 func AddInit[T Widget](p *Plan, name string, init func(w T)) {
 	for _, child := range p.Children {
 		if child.Name == name {

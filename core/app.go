@@ -107,7 +107,7 @@ func StandardAppBarConfig(parent Widget) {
 	tb := RecycleToolbar(parent)
 	tb.Maker(StandardAppBarStart)
 	if len(tb.Scene.AppBars) > 0 {
-		tb.Maker(tb.Scene.AppBars...)
+		tb.Makers = append(tb.Makers, tb.Scene.AppBars...)
 	}
 	StandardOverflowMenu(tb) // todo -- need a config option for this
 }

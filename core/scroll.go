@@ -255,7 +255,7 @@ func (wb *WidgetBase) ParentLayout() *Frame {
 	if ly == nil {
 		return nil
 	}
-	return AsLayout(ly)
+	return AsFrame(ly)
 }
 
 // ParentScrollLayout returns the parent layout that has active scrollbars
@@ -264,7 +264,7 @@ func (wb *WidgetBase) ParentScrollLayout() *Frame {
 	if lyk == nil {
 		return nil
 	}
-	ly := AsLayout(lyk)
+	ly := AsFrame(lyk)
 	if ly.HasAnyScroll() {
 		return ly
 	}

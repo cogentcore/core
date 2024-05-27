@@ -95,8 +95,8 @@ const (
 type Layouter interface {
 	Widget
 
-	// AsLayout returns the base Layout type
-	AsLayout() *Frame
+	// AsFrame returns the Layouter as a [Frame].
+	AsFrame() *Frame
 
 	// LayoutSpace sets our Space based on Styles, Scroll, and Gap Spacing.
 	// Other layout types can change this if they want to.
@@ -142,20 +142,20 @@ type Layouter interface {
 	SetScrollParams(d math32.Dims, sb *Slider)
 }
 
-// AsLayout returns the given value as a value of type Layout if the type
+// AsFrame returns the given value as a value of type Layout if the type
 // of the given value embeds Layout, or nil otherwise
-func AsLayout(k tree.Node) *Frame {
+func AsFrame(k tree.Node) *Frame {
 	if k == nil || k.This() == nil {
 		return nil
 	}
 	if t, ok := k.(Layouter); ok {
-		return t.AsLayout()
+		return t.AsFrame()
 	}
 	return nil
 }
 
-// AsLayout satisfies the [LayoutEmbedder] interface
-func (t *Frame) AsLayout() *Frame {
+// AsFrame satisfies the [LayoutEmbedder] interface
+func (t *Frame) AsFrame() *Frame {
 	return t
 }
 

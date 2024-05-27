@@ -217,7 +217,7 @@ func (wb *WidgetBase) DoNeedsRender() {
 			kwi.RenderWidget()
 			return tree.Break // done
 		}
-		if ly := AsLayout(kwi); ly != nil {
+		if ly := AsFrame(kwi); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
 				if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 					ly.Scrolls[d].DoNeedsRender()
