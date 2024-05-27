@@ -12,13 +12,13 @@ import (
 )
 
 // TypeAndName holds a type and a name. It is used for specifying [Plan]
-// objects in [Node.BuildChildren].
+// objects in [BuildSlice].
 type TypeAndName struct {
 	Type *types.Type
 	Name string
 }
 
-// Plan is a list of [TypeAndName]s used in [Node.BuildChildren].
+// Plan is a list of [TypeAndName]s used in [BuildSlice].
 type Plan []TypeAndName
 
 // Add adds a new Plan element with the given type and name.

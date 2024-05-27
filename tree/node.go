@@ -41,8 +41,7 @@ import (
 // via [Node.InitName], which is called automatically when adding children
 // and using [NewRoot].
 //
-// Nodes support children configuration through [Node.ConfigChildren].
-// They also support full JSON I/O.
+// Nodes support full JSON I/O.
 //
 // All types that implement the Node interface will automatically
 // be added to the Cogent Core type registry (types)
