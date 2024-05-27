@@ -205,6 +205,7 @@ func (ed *Editor) FlagType() enums.BitFlagSetter {
 
 func (ed *Editor) OnInit() {
 	ed.Frame.OnInit()
+	ed.AddContextMenu(ed.ContextMenu)
 	ed.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		ed.CursorWidth.Dp(2)
@@ -241,14 +242,16 @@ func (ed *Editor) OnInit() {
 			s.Border.Width.Set(units.Dp(2))
 		}
 	})
+
 	ed.HandleKeyChord()
 	ed.HandleMouse()
 	ed.HandleLinkCursor()
 	ed.HandleFocus()
-	ed.AddContextMenu(ed.ContextMenu)
 	ed.OnClose(func(e events.Event) {
 		ed.EditDone()
 	})
+
+	ed.Builder(ed.NeedsLayout)
 }
 
 // EditorFlags extend WidgetFlags to hold [Editor] state
@@ -497,13 +500,6 @@ func (ed *Editor) Redo() {
 	}
 	ed.SavePosHistory(ed.CursorPos)
 	ed.NeedsRender()
-}
-
-////////////////////////////////////////////////////
-//  Widget Interface
-
-func (ed *Editor) Build() {
-	ed.NeedsLayout()
 }
 
 // StyleView sets the style of widget

@@ -66,6 +66,37 @@ func (sw *Scene) OnInit() {
 	})
 	sw.handleSlideEvents()
 	sw.handleSelectEvents()
+
+	sw.Builder(func() {
+		sz := sw.Geom.Size.Actual.Content.ToPointFloor()
+		if sz == (image.Point{}) {
+			return
+		}
+		sw.XYZ.Geom.Size = sz
+
+		doConfig := false
+		if sw.XYZ.Frame != nil {
+			cursz := sw.XYZ.Frame.Format.Size
+			if cursz == sz {
+				return
+			}
+		} else {
+			doConfig = true
+		}
+
+		win := sw.WidgetBase.Scene.Events.RenderWindow()
+		if win == nil {
+			return
+		}
+		drw := win.SystemWindow.Drawer()
+		system.TheApp.RunOnMain(func() {
+			sw.XYZ.ConfigFrameFromSurface(drw.Surface().(*vgpu.Surface))
+			if doConfig {
+				sw.XYZ.Config()
+			}
+		})
+		sw.XYZ.SetFlag(true, xyz.ScNeedsRender)
+	})
 }
 
 func (sw *Scene) OnAdd() {
@@ -82,37 +113,6 @@ func (sw *Scene) Destroy() {
 // SceneXYZ returns the xyz.Scene
 func (sw *Scene) SceneXYZ() *xyz.Scene {
 	return sw.XYZ
-}
-
-func (sw *Scene) Build() {
-	sz := sw.Geom.Size.Actual.Content.ToPointFloor()
-	if sz == (image.Point{}) {
-		return
-	}
-	sw.XYZ.Geom.Size = sz
-
-	doConfig := false
-	if sw.XYZ.Frame != nil {
-		cursz := sw.XYZ.Frame.Format.Size
-		if cursz == sz {
-			return
-		}
-	} else {
-		doConfig = true
-	}
-
-	win := sw.WidgetBase.Scene.Events.RenderWindow()
-	if win == nil {
-		return
-	}
-	drw := win.SystemWindow.Drawer()
-	system.TheApp.RunOnMain(func() {
-		sw.XYZ.ConfigFrameFromSurface(drw.Surface().(*vgpu.Surface))
-		if doConfig {
-			sw.XYZ.Config()
-		}
-	})
-	sw.XYZ.SetFlag(true, xyz.ScNeedsRender)
 }
 
 func (sw *Scene) Render() {
