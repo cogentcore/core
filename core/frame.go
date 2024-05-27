@@ -74,7 +74,10 @@ func (fr *Frame) FlagType() enums.BitFlagSetter {
 func (fr *Frame) OnInit() {
 	fr.WidgetBase.OnInit()
 	fr.StyleFinal(func(s *styles.Style) {
-		s.SetAbilities(s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto, abilities.Scrollable, abilities.Slideable)
+		// we only enable, not disable, since some other widget like Slider may want to enable
+		if s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto {
+			s.SetAbilities(true, abilities.Scrollable, abilities.Slideable)
+		}
 	})
 	fr.OnFinal(events.KeyChord, func(e events.Event) {
 		kf := keymap.Of(e.KeyChord())
