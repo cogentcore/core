@@ -184,13 +184,9 @@ const (
 func (tf *TextField) WidgetValue() any { return &tf.Txt }
 
 func (tf *TextField) OnInit() {
-	tf.WidgetBase.OnInit()
-	tf.HandleEvents()
-	tf.SetStyles()
+	tf.Frame.OnInit()
 	tf.AddContextMenu(tf.ContextMenu)
-}
 
-func (tf *TextField) SetStyles() {
 	tf.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		tf.CursorWidth.Dp(1)
@@ -261,6 +257,146 @@ func (tf *TextField) SetStyles() {
 	})
 	tf.StyleFinal(func(s *styles.Style) {
 		tf.SetAbilities(!tf.IsReadOnly(), abilities.Focusable)
+	})
+
+	tf.HandleKeyEvents()
+	tf.HandleSelectToggle()
+	tf.OnFirst(events.Change, func(e events.Event) {
+		tf.Validate()
+		if tf.Error != nil {
+			e.SetHandled()
+		}
+	})
+	tf.On(events.MouseDown, func(e events.Event) {
+		if !tf.StateIs(states.Focused) {
+			tf.SetFocusEvent() // always grab, even if read only..
+		}
+		if tf.IsReadOnly() {
+			return
+		}
+		e.SetHandled()
+		switch e.MouseButton() {
+		case events.Left:
+			tf.SetCursorFromPixel(e.Pos(), e.SelectMode())
+		case events.Middle:
+			e.SetHandled()
+			tf.SetCursorFromPixel(e.Pos(), e.SelectMode())
+			tf.Paste()
+		}
+	})
+	tf.OnClick(func(e events.Event) {
+		if tf.IsReadOnly() {
+			return
+		}
+		tf.SetFocusEvent()
+	})
+	tf.On(events.DoubleClick, func(e events.Event) {
+		if tf.IsReadOnly() {
+			return
+		}
+		if !tf.IsReadOnly() && !tf.StateIs(states.Focused) {
+			tf.SetFocusEvent()
+		}
+		e.SetHandled()
+		tf.SelectWord()
+	})
+	tf.On(events.TripleClick, func(e events.Event) {
+		if tf.IsReadOnly() {
+			return
+		}
+		if !tf.IsReadOnly() && !tf.StateIs(states.Focused) {
+			tf.SetFocusEvent()
+		}
+		e.SetHandled()
+		tf.SelectAll()
+	})
+	tf.On(events.SlideMove, func(e events.Event) {
+		if tf.IsReadOnly() {
+			return
+		}
+		e.SetHandled()
+		if !tf.SelectMode {
+			tf.SelectModeToggle()
+		}
+		tf.SetCursorFromPixel(e.Pos(), events.SelectOne)
+	})
+	tf.OnClose(func(e events.Event) {
+		tf.EditDone() // todo: this must be protected against something else, for race detector
+	})
+
+	tf.AddMaker(func(p *Plan) {
+		tf.EditTxt = []rune(tf.Txt)
+		tf.Edited = false
+
+		if !tf.IsReadOnly() {
+			if tf.LeadingIcon.IsSet() {
+				AddAt(p, "lead-icon", func(w *Button) {
+					w.SetType(ButtonAction)
+					w.Style(func(s *styles.Style) {
+						s.Padding.Zero()
+						s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+						s.Margin.SetRight(units.Dp(8))
+						if tf.LeadingIconOnClick == nil {
+							s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
+							s.Cursor = cursors.None
+						}
+						// If we are responsible for a positive (non-disabled) state layer
+						// (instead of our parent), then we amplify it so that it is clear
+						// that we ourself are receiving a state layer amplifying event.
+						// Otherwise, we set our state color to that of our parent
+						// so that it does not appear as if we are getting interaction ourself;
+						// instead, we are a part of our parent and render a background color no
+						// different than them.
+						if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
+							s.StateLayer *= 3
+						} else {
+							s.StateColor = tf.Styles.Color
+						}
+					})
+					w.OnClick(func(e events.Event) {
+						if tf.LeadingIconOnClick != nil {
+							tf.LeadingIconOnClick(e)
+						}
+					})
+				}, func(w *Button) {
+					w.SetIcon(tf.LeadingIcon)
+				})
+			}
+			if tf.TrailingIcon.IsSet() {
+				AddAt[*Stretch](p, "trail-icon-stretch")
+				AddAt(p, "trail-icon", func(w *Button) {
+					w.SetType(ButtonAction)
+					w.Style(func(s *styles.Style) {
+						s.Padding.Zero()
+						s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+						if tf.Error != nil {
+							s.Color = colors.C(colors.Scheme.Error.Base)
+						}
+						s.Margin.SetLeft(units.Dp(8))
+						if tf.TrailingIconOnClick == nil || tf.Error != nil {
+							s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
+							s.Cursor = cursors.None
+							// need to clear state in case it was set when there
+							// was no error
+							s.State = 0
+						}
+						// same reasoning as for leading icon
+						if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
+							s.StateLayer *= 3
+						} else {
+							s.StateColor = tf.Styles.Color
+						}
+					})
+					w.OnClick(func(e events.Event) {
+						if tf.TrailingIconOnClick != nil {
+							tf.TrailingIconOnClick(e)
+						}
+					})
+				}, func(w *Button) {
+					w.SetIcon(tf.TrailingIcon)
+				})
+			}
+		}
 	})
 }
 
@@ -1481,76 +1617,6 @@ func (tf *TextField) SetCursorFromPixel(pt image.Point, selMode events.SelectMod
 	tf.NeedsRender()
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//    Event handling
-
-func (tf *TextField) HandleEvents() {
-	tf.HandleKeyEvents()
-	tf.HandleSelectToggle()
-	tf.OnFirst(events.Change, func(e events.Event) {
-		tf.Validate()
-		if tf.Error != nil {
-			e.SetHandled()
-		}
-	})
-	tf.On(events.MouseDown, func(e events.Event) {
-		if !tf.StateIs(states.Focused) {
-			tf.SetFocusEvent() // always grab, even if read only..
-		}
-		if tf.IsReadOnly() {
-			return
-		}
-		e.SetHandled()
-		switch e.MouseButton() {
-		case events.Left:
-			tf.SetCursorFromPixel(e.Pos(), e.SelectMode())
-		case events.Middle:
-			e.SetHandled()
-			tf.SetCursorFromPixel(e.Pos(), e.SelectMode())
-			tf.Paste()
-		}
-	})
-	tf.OnClick(func(e events.Event) {
-		if tf.IsReadOnly() {
-			return
-		}
-		tf.SetFocusEvent()
-	})
-	tf.On(events.DoubleClick, func(e events.Event) {
-		if tf.IsReadOnly() {
-			return
-		}
-		if !tf.IsReadOnly() && !tf.StateIs(states.Focused) {
-			tf.SetFocusEvent()
-		}
-		e.SetHandled()
-		tf.SelectWord()
-	})
-	tf.On(events.TripleClick, func(e events.Event) {
-		if tf.IsReadOnly() {
-			return
-		}
-		if !tf.IsReadOnly() && !tf.StateIs(states.Focused) {
-			tf.SetFocusEvent()
-		}
-		e.SetHandled()
-		tf.SelectAll()
-	})
-	tf.On(events.SlideMove, func(e events.Event) {
-		if tf.IsReadOnly() {
-			return
-		}
-		e.SetHandled()
-		if !tf.SelectMode {
-			tf.SelectModeToggle()
-		}
-		tf.SetCursorFromPixel(e.Pos(), events.SelectOne)
-	})
-	tf.OnClose(func(e events.Event) {
-		tf.EditDone() // todo: this must be protected against something else, for race detector
-	})
-}
-
 func (tf *TextField) HandleKeyEvents() {
 	tf.OnKeyChord(func(e events.Event) {
 		kf := keymap.Of(e.KeyChord())
@@ -1725,81 +1791,6 @@ func (tf *TextField) HandleKeyEvents() {
 		}
 		tf.EditDone()
 	})
-}
-
-func (tf *TextField) Make(p *Plan) {
-	tf.EditTxt = []rune(tf.Txt)
-	tf.Edited = false
-
-	if !tf.IsReadOnly() {
-		if tf.LeadingIcon.IsSet() {
-			AddAt(p, "lead-icon", func(w *Button) {
-				w.SetType(ButtonAction)
-				w.Style(func(s *styles.Style) {
-					s.Padding.Zero()
-					s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
-					s.Margin.SetRight(units.Dp(8))
-					if tf.LeadingIconOnClick == nil {
-						s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
-						s.Cursor = cursors.None
-					}
-					// If we are responsible for a positive (non-disabled) state layer
-					// (instead of our parent), then we amplify it so that it is clear
-					// that we ourself are receiving a state layer amplifying event.
-					// Otherwise, we set our state color to that of our parent
-					// so that it does not appear as if we are getting interaction ourself;
-					// instead, we are a part of our parent and render a background color no
-					// different than them.
-					if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
-						s.StateLayer *= 3
-					} else {
-						s.StateColor = tf.Styles.Color
-					}
-				})
-				w.OnClick(func(e events.Event) {
-					if tf.LeadingIconOnClick != nil {
-						tf.LeadingIconOnClick(e)
-					}
-				})
-			}, func(w *Button) {
-				w.SetIcon(tf.LeadingIcon)
-			})
-		}
-		if tf.TrailingIcon.IsSet() {
-			AddAt[*Stretch](p, "trail-icon-stretch")
-			AddAt(p, "trail-icon", func(w *Button) {
-				w.SetType(ButtonAction)
-				w.Style(func(s *styles.Style) {
-					s.Padding.Zero()
-					s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
-					if tf.Error != nil {
-						s.Color = colors.C(colors.Scheme.Error.Base)
-					}
-					s.Margin.SetLeft(units.Dp(8))
-					if tf.TrailingIconOnClick == nil || tf.Error != nil {
-						s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
-						s.Cursor = cursors.None
-						// need to clear state in case it was set when there
-						// was no error
-						s.State = 0
-					}
-					// same reasoning as for leading icon
-					if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
-						s.StateLayer *= 3
-					} else {
-						s.StateColor = tf.Styles.Color
-					}
-				})
-				w.OnClick(func(e events.Event) {
-					if tf.TrailingIconOnClick != nil {
-						tf.TrailingIconOnClick(e)
-					}
-				})
-			}, func(w *Button) {
-				w.SetIcon(tf.TrailingIcon)
-			})
-		}
-	}
 }
 
 ////////////////////////////////////////////////////

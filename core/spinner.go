@@ -80,7 +80,7 @@ func (sp *Spinner) OnBind(value any) {
 }
 
 func (sp *Spinner) OnInit() {
-	sp.WidgetBase.OnInit()
+	sp.TextField.OnInit()
 	sp.HandleEvents()
 	sp.SetStyles()
 }
@@ -95,7 +95,6 @@ func (sp *Spinner) SetStyles() {
 	}).SetTrailingIcon(icons.Add, func(e events.Event) {
 		sp.IncrementValue(1)
 	})
-	sp.TextField.SetStyles()
 	sp.Style(func(s *styles.Style) {
 		s.VirtualKeyboard = styles.KeyboardNumber
 		if sp.IsReadOnly() {
@@ -294,7 +293,6 @@ func (sp *Spinner) WidgetTooltip(pos image.Point) (string, image.Point) {
 }
 
 func (sp *Spinner) HandleEvents() {
-	sp.TextField.HandleEvents()
 	sp.On(events.Scroll, func(e events.Event) {
 		if sp.IsReadOnly() || !sp.StateIs(states.Focused) {
 			return
