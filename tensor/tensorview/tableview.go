@@ -65,19 +65,40 @@ type TableView struct {
 var _ views.SliceViewer = (*TableView)(nil)
 
 func (tv *TableView) OnInit() {
-	tv.Frame.OnInit()
-	tv.SliceViewBase.HandleEvents()
-	tv.SetStyles()
-	tv.AddContextMenu(tv.SliceViewBase.ContextMenu)
-	// tv.AddContextMenu(tv.ContextMenu)
-}
-
-func (tv *TableView) SetStyles() {
-	tv.SliceViewBase.SetStyles() // handles all the basics
+	tv.SliceViewBase.OnInit()
 	tv.SortIndex = -1
 	tv.TensorDisplay.Defaults()
-	tv.ColumnTensorDisplay = make(map[int]*TensorDisplay)
-	tv.ColumnTensorBlank = make(map[int]*tensor.Float64)
+	tv.ColumnTensorDisplay = map[int]*TensorDisplay{}
+	tv.ColumnTensorBlank = map[int]*tensor.Float64{}
+
+	tv.Makers[0] = func(p *core.Plan) { // TODO: reduce redundancy with SliceViewBase Maker
+		svi := tv.This().(views.SliceViewer)
+		svi.UpdateSliceSize()
+
+		tv.ViewMuLock()
+		defer tv.ViewMuUnlock()
+
+		scrollTo := -1
+		if tv.InitSelectedIndex >= 0 {
+			tv.SelectedIndex = tv.InitSelectedIndex
+			tv.InitSelectedIndex = -1
+			scrollTo = tv.SelectedIndex
+		}
+		if scrollTo >= 0 {
+			tv.ScrollToIndex(scrollTo)
+		}
+
+		tv.UpdateStartIndex()
+		tv.UpdateMaxWidths()
+
+		tv.MakeHeader(p)
+		sgp := tv.MakeGrid(p)
+
+		for i := 0; i < tv.VisRows; i++ {
+			si := tv.StartIndex + i
+			svi.MakeRow(sgp, i, si)
+		}
+	}
 }
 
 // StyleValue performs additional value widget styling
@@ -175,36 +196,6 @@ func (tv *TableView) UpdateMaxWidths() {
 			}
 		}
 		tv.colMaxWidths[fli] = mxw
-	}
-}
-
-// Make configures the view
-func (tv *TableView) Make(p *core.Plan) {
-	svi := tv.This().(views.SliceViewer)
-	svi.UpdateSliceSize()
-
-	tv.ViewMuLock()
-	defer tv.ViewMuUnlock()
-
-	scrollTo := -1
-	if tv.InitSelectedIndex >= 0 {
-		tv.SelectedIndex = tv.InitSelectedIndex
-		tv.InitSelectedIndex = -1
-		scrollTo = tv.SelectedIndex
-	}
-	if scrollTo >= 0 {
-		tv.ScrollToIndex(scrollTo)
-	}
-
-	tv.UpdateStartIndex()
-	tv.UpdateMaxWidths()
-
-	tv.MakeHeader(p)
-	sgp := tv.MakeGrid(p)
-
-	for i := 0; i < tv.VisRows; i++ {
-		si := tv.StartIndex + i
-		svi.MakeRow(sgp, i, si)
 	}
 }
 
