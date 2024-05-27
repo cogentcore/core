@@ -211,8 +211,9 @@ func (bt *Button) OnInit() {
 				w.Style(func(s *styles.Style) {
 					s.Font.Size.Dp(18)
 				})
-			}, func(w *Icon) {
-				w.SetIcon(bt.Icon)
+				w.Builder(func() {
+					w.SetIcon(bt.Icon)
+				})
 			})
 			if bt.Text != "" {
 				AddAt[*Space](p, "space")
@@ -267,13 +268,14 @@ func (bt *Button) OnInit() {
 						s.SetTextWrap(false)
 						s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 					})
-				}, func(w *Text) {
-					if bt.Type == ButtonMenu {
-						w.SetType(TextBodyMedium)
-					} else {
-						w.SetType(TextLabelLarge)
-					}
-					w.SetText(bt.Shortcut.Label())
+					w.Builder(func() {
+						if bt.Type == ButtonMenu {
+							w.SetType(TextBodyMedium)
+						} else {
+							w.SetType(TextLabelLarge)
+						}
+						w.SetText(bt.Shortcut.Label())
+					})
 				})
 			} else if bt.Shortcut != "" {
 				slog.Error("programmer error: core.Button: shortcut cannot be used on a sub-menu for", "button", bt)

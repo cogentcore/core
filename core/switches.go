@@ -83,10 +83,6 @@ func (sw *Switches) OnBind(value any) {
 
 func (sw *Switches) OnInit() {
 	sw.Frame.OnInit()
-	sw.SetStyles()
-}
-
-func (sw *Switches) SetStyles() {
 	sw.Style(func(s *styles.Style) {
 		s.Padding.Set(units.Dp(2))
 		s.Margin.Set(units.Dp(2))
@@ -102,6 +98,61 @@ func (sw *Switches) SetStyles() {
 		} else {
 			// if we wrap, it just goes in the x direction
 			s.Wrap = false
+		}
+	})
+
+	sw.Maker(func(p *Plan) {
+		for _, item := range sw.Items {
+			AddAt(p, item.Text, func(w *Switch) {
+				w.OnChange(func(e events.Event) {
+					if sw.Mutex && w.IsChecked() {
+						sw.UnCheckAllBut(w.IndexInParent())
+					}
+					sw.SendChange(e)
+				})
+				w.Style(func(s *styles.Style) {
+					if sw.Type != SwitchSegmentedButton {
+						return
+					}
+					ip := w.IndexInParent()
+					brf := styles.BorderRadiusFull.Top
+					ps := &sw.Styles
+					if ip == 0 {
+						if ps.Direction == styles.Row {
+							s.Border.Radius.Set(brf, units.Zero(), units.Zero(), brf)
+						} else {
+							s.Border.Radius.Set(brf, brf, units.Zero(), units.Zero())
+						}
+					} else if ip == sw.NumChildren()-1 {
+						if ps.Direction == styles.Row {
+							if !s.Is(states.Focused) {
+								s.Border.Width.SetLeft(units.Zero())
+								s.MaxBorder.Width = s.Border.Width
+							}
+							s.Border.Radius.Set(units.Zero(), brf, brf, units.Zero())
+						} else {
+							if !s.Is(states.Focused) {
+								s.Border.Width.SetTop(units.Zero())
+								s.MaxBorder.Width = s.Border.Width
+							}
+							s.Border.Radius.Set(units.Zero(), units.Zero(), brf, brf)
+						}
+					} else {
+						if !s.Is(states.Focused) {
+							if ps.Direction == styles.Row {
+								s.Border.Width.SetLeft(units.Zero())
+							} else {
+								s.Border.Width.SetTop(units.Zero())
+							}
+							s.MaxBorder.Width = s.Border.Width
+						}
+						s.Border.Radius.Zero()
+					}
+				})
+				w.Builder(func() {
+					w.SetType(sw.Type).SetText(item.Text).SetTooltip(item.Tooltip)
+				})
+			})
 		}
 	})
 }
@@ -260,59 +311,5 @@ func (sw *Switches) UpdateBitFlag(bitflag enums.BitFlagSetter) {
 		if sw.IsChecked() {
 			bitflag.SetFlag(true, ev.(enums.BitFlag))
 		}
-	}
-}
-
-func (sw *Switches) Make(p *Plan) {
-	for _, item := range sw.Items {
-		AddAt(p, item.Text, func(w *Switch) {
-			w.OnChange(func(e events.Event) {
-				if sw.Mutex && w.IsChecked() {
-					sw.UnCheckAllBut(w.IndexInParent())
-				}
-				sw.SendChange(e)
-			})
-			w.Style(func(s *styles.Style) {
-				if sw.Type != SwitchSegmentedButton {
-					return
-				}
-				ip := w.IndexInParent()
-				brf := styles.BorderRadiusFull.Top
-				ps := &sw.Styles
-				if ip == 0 {
-					if ps.Direction == styles.Row {
-						s.Border.Radius.Set(brf, units.Zero(), units.Zero(), brf)
-					} else {
-						s.Border.Radius.Set(brf, brf, units.Zero(), units.Zero())
-					}
-				} else if ip == sw.NumChildren()-1 {
-					if ps.Direction == styles.Row {
-						if !s.Is(states.Focused) {
-							s.Border.Width.SetLeft(units.Zero())
-							s.MaxBorder.Width = s.Border.Width
-						}
-						s.Border.Radius.Set(units.Zero(), brf, brf, units.Zero())
-					} else {
-						if !s.Is(states.Focused) {
-							s.Border.Width.SetTop(units.Zero())
-							s.MaxBorder.Width = s.Border.Width
-						}
-						s.Border.Radius.Set(units.Zero(), units.Zero(), brf, brf)
-					}
-				} else {
-					if !s.Is(states.Focused) {
-						if ps.Direction == styles.Row {
-							s.Border.Width.SetLeft(units.Zero())
-						} else {
-							s.Border.Width.SetTop(units.Zero())
-						}
-						s.MaxBorder.Width = s.Border.Width
-					}
-					s.Border.Radius.Zero()
-				}
-			})
-		}, func(w *Switch) {
-			w.SetType(sw.Type).SetText(item.Text).SetTooltip(item.Tooltip)
-		})
 	}
 }

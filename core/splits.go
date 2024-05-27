@@ -16,9 +16,6 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Config notes: only needs config when number of kids changes
-// otherwise just needs new layout
-
 // Splits allocates a certain proportion of its space to each of its children
 // along [styles.Style.Direction]. It adds [Handle] widgets to its parts that
 // allow the user to customize the amount of space allocated to each child.
