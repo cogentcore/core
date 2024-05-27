@@ -36,64 +36,63 @@ func (tv *TimeView) WidgetValue() any { return &tv.Time }
 
 func (tv *TimeView) OnInit() {
 	tv.Frame.OnInit()
-	tv.Maker(func(p *core.Plan) {
-		core.Add(p, func(w *core.Spinner) {
-			w.SetStep(1).SetEnforceStep(true)
-			if core.SystemSettings.Clock24 {
-				tv.Hour = tv.Time.Hour()
-				w.SetMax(24).SetMin(0)
-			} else {
-				tv.Hour = tv.Time.Hour() % 12
-				if tv.Hour == 0 {
-					tv.Hour = 12
-				}
-				w.SetMax(12).SetMin(1)
+	core.AddChild(tv, func(w *core.Spinner) {
+		w.SetStep(1).SetEnforceStep(true)
+		if core.SystemSettings.Clock24 {
+			tv.Hour = tv.Time.Hour()
+			w.SetMax(24).SetMin(0)
+		} else {
+			tv.Hour = tv.Time.Hour() % 12
+			if tv.Hour == 0 {
+				tv.Hour = 12
 			}
-			w.SetValue(float32(tv.Hour))
-			w.Style(func(s *styles.Style) {
-				s.Font.Size.Dp(57)
-				s.Min.X.Dp(96)
-			})
-			w.OnChange(func(e events.Event) {
-				hr := int(w.Value)
-				if hr == 12 && !core.SystemSettings.Clock24 {
-					hr = 0
-				}
-				tv.Hour = hr
-				if tv.PM {
-					// only add to local variable
-					hr += 12
-				}
-				// we set our hour and keep everything else
-				tt := tv.Time
-				tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), hr, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
-				tv.SendChange()
-			})
+			w.SetMax(12).SetMin(1)
+		}
+		w.SetValue(float32(tv.Hour))
+		w.Style(func(s *styles.Style) {
+			s.Font.Size.Dp(57)
+			s.Min.X.Dp(96)
 		})
-		core.Add(p, func(w *core.Text) {
-			w.SetType(core.TextDisplayLarge).SetText(":")
-			w.Style(func(s *styles.Style) {
-				s.SetTextWrap(false)
-				s.Min.X.Ch(1)
-			})
+		w.OnChange(func(e events.Event) {
+			hr := int(w.Value)
+			if hr == 12 && !core.SystemSettings.Clock24 {
+				hr = 0
+			}
+			tv.Hour = hr
+			if tv.PM {
+				// only add to local variable
+				hr += 12
+			}
+			// we set our hour and keep everything else
+			tt := tv.Time
+			tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), hr, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
+			tv.SendChange()
 		})
-		core.Add(p, func(w *core.Spinner) {
-			w.SetStep(1).SetEnforceStep(true).
-				SetMin(0).SetMax(60).SetFormat("%02d").
-				SetValue(float32(tv.Time.Minute()))
-			w.Style(func(s *styles.Style) {
-				s.Font.Size.Dp(57)
-				s.Min.X.Dp(96)
-			})
-			w.OnChange(func(e events.Event) {
-				// we set our minute and keep everything else
-				// TODO(config)
-				// tt := tv.Time
-				// tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), int(minute.Value), tt.Second(), tt.Nanosecond(), tt.Location())
-				tv.SendChange()
-			})
+	})
+	core.AddChild(tv, func(w *core.Text) {
+		w.SetType(core.TextDisplayLarge).SetText(":")
+		w.Style(func(s *styles.Style) {
+			s.SetTextWrap(false)
+			s.Min.X.Ch(1)
 		})
-
+	})
+	core.AddChild(tv, func(w *core.Spinner) {
+		w.SetStep(1).SetEnforceStep(true).
+			SetMin(0).SetMax(60).SetFormat("%02d").
+			SetValue(float32(tv.Time.Minute()))
+		w.Style(func(s *styles.Style) {
+			s.Font.Size.Dp(57)
+			s.Min.X.Dp(96)
+		})
+		w.OnChange(func(e events.Event) {
+			// we set our minute and keep everything else
+			// TODO(config)
+			// tt := tv.Time
+			// tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), int(minute.Value), tt.Second(), tt.Nanosecond(), tt.Location())
+			tv.SendChange()
+		})
+	})
+	tv.Maker(func(p *core.Plan) {
 		if !core.SystemSettings.Clock24 {
 			core.Add(p, func(w *core.Switches) {
 				w.SetMutex(true).SetType(core.SwitchSegmentedButton).SetItems(core.SwitchItem{Text: "AM"}, core.SwitchItem{Text: "PM"})

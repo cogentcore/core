@@ -352,154 +352,145 @@ func (tv *TreeView) OnInit() {
 		}
 	})
 
-	tv.Maker(func(p *core.Plan) {
+	core.AddChildAt(tv, "parts", func(w *core.Frame) {
+		core.InitParts(w)
 		tvi := tv.This().(TreeViewer)
-		core.AddAt(p, "parts", func(w *core.Frame) {
-			core.InitParts(w)
-			w.Style(func(s *styles.Style) {
-				s.Cursor = cursors.Pointer
-				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
-				s.SetAbilities(!tv.IsReadOnly() && !tv.RootIsReadOnly(), abilities.Draggable, abilities.Droppable)
-				s.Gap.X.Ch(0.1)
-				s.Padding.Zero()
+		w.Style(func(s *styles.Style) {
+			s.Cursor = cursors.Pointer
+			s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
+			s.SetAbilities(!tv.IsReadOnly() && !tv.RootIsReadOnly(), abilities.Draggable, abilities.Droppable)
+			s.Gap.X.Ch(0.1)
+			s.Padding.Zero()
 
-				// we manually inherit our state layer from the treeview state
-				// layer so that the parts get it but not the other tree views
-				s.StateLayer = tv.actStateLayer
-			})
-			w.AsWidget().StyleFinal(func(s *styles.Style) {
-				s.Grow.Set(1, 0)
-			})
-			// we let the parts handle our state
-			// so that we only get it when we are doing
-			// something with this treeview specifically,
-			// not with any of our children (see HandleTreeViewMouse)
-			w.On(events.MouseEnter, func(e events.Event) {
-				tv.SetState(true, states.Hovered)
-				tv.ApplyStyle()
-				tv.NeedsRender()
-				e.SetHandled()
-			})
-			w.On(events.MouseLeave, func(e events.Event) {
-				tv.SetState(false, states.Hovered)
-				tv.ApplyStyle()
-				tv.NeedsRender()
-				e.SetHandled()
-			})
-			w.On(events.MouseDown, func(e events.Event) {
-				tv.SetState(true, states.Active)
-				tv.ApplyStyle()
-				tv.NeedsRender()
-				e.SetHandled()
-			})
-			w.On(events.MouseUp, func(e events.Event) {
-				tv.SetState(false, states.Active)
-				tv.ApplyStyle()
-				tv.NeedsRender()
-				e.SetHandled()
+			// we manually inherit our state layer from the treeview state
+			// layer so that the parts get it but not the other tree views
+			s.StateLayer = tv.actStateLayer
+		})
+		w.AsWidget().StyleFinal(func(s *styles.Style) {
+			s.Grow.Set(1, 0)
+		})
+		// we let the parts handle our state
+		// so that we only get it when we are doing
+		// something with this treeview specifically,
+		// not with any of our children (see HandleTreeViewMouse)
+		w.On(events.MouseEnter, func(e events.Event) {
+			tv.SetState(true, states.Hovered)
+			tv.ApplyStyle()
+			tv.NeedsRender()
+			e.SetHandled()
+		})
+		w.On(events.MouseLeave, func(e events.Event) {
+			tv.SetState(false, states.Hovered)
+			tv.ApplyStyle()
+			tv.NeedsRender()
+			e.SetHandled()
+		})
+		w.On(events.MouseDown, func(e events.Event) {
+			tv.SetState(true, states.Active)
+			tv.ApplyStyle()
+			tv.NeedsRender()
+			e.SetHandled()
+		})
+		w.On(events.MouseUp, func(e events.Event) {
+			tv.SetState(false, states.Active)
+			tv.ApplyStyle()
+			tv.NeedsRender()
+			e.SetHandled()
+		})
+		w.OnClick(func(e events.Event) {
+			tv.SelectAction(e.SelectMode())
+			e.SetHandled()
+		})
+		w.AsWidget().OnDoubleClick(func(e events.Event) {
+			tv.This().(TreeViewer).OnDoubleClick(e)
+		})
+		w.On(events.DragStart, func(e events.Event) {
+			tvi.DragStart(e)
+		})
+		w.On(events.DragEnter, func(e events.Event) {
+			tv.SetState(true, states.DragHovered)
+			tv.ApplyStyle()
+			tv.NeedsRender()
+			e.SetHandled()
+		})
+		w.On(events.DragLeave, func(e events.Event) {
+			tv.SetState(false, states.DragHovered)
+			tv.ApplyStyle()
+			tv.NeedsRender()
+			e.SetHandled()
+		})
+		w.On(events.Drop, func(e events.Event) {
+			tvi.DragDrop(e)
+		})
+		w.On(events.DropDeleteSource, func(e events.Event) {
+			tvi.DropDeleteSource(e)
+		})
+		// the context menu events will get sent to the parts, so it
+		// needs to intercept them and send them up
+		w.On(events.ContextMenu, func(e events.Event) {
+			sels := tv.SelectedViews()
+			if len(sels) == 0 {
+				tv.SelectAction(e.SelectMode())
+			}
+			tv.ShowContextMenu(e)
+		})
+		core.AddChildAt(w, "branch", func(w *core.Switch) {
+			w.SetType(core.SwitchCheckbox)
+			w.SetIcons(tv.IconOpen, tv.IconClosed, tv.IconLeaf)
+			w.Style(func(s *styles.Style) {
+				s.SetAbilities(false, abilities.Focusable)
+				// parent will handle our cursor
+				s.Cursor = cursors.None
+				s.Color = colors.C(colors.Scheme.Primary.Base)
+				s.Padding.Zero()
+				s.Align.Self = styles.Center
+				if !w.StateIs(states.Indeterminate) {
+					// we amplify any state layer we receiver so that it is clear
+					// we are receiving it, not just our parent
+					s.StateLayer *= 3
+				} else {
+					// no state layer for indeterminate because they are not interactive
+					s.StateLayer = 0
+				}
 			})
 			w.OnClick(func(e events.Event) {
-				tv.SelectAction(e.SelectMode())
-				e.SetHandled()
-			})
-			w.AsWidget().OnDoubleClick(func(e events.Event) {
-				tv.This().(TreeViewer).OnDoubleClick(e)
-			})
-			w.On(events.DragStart, func(e events.Event) {
-				tvi.DragStart(e)
-			})
-			w.On(events.DragEnter, func(e events.Event) {
-				tv.SetState(true, states.DragHovered)
-				tv.ApplyStyle()
-				tv.NeedsRender()
-				e.SetHandled()
-			})
-			w.On(events.DragLeave, func(e events.Event) {
-				tv.SetState(false, states.DragHovered)
-				tv.ApplyStyle()
-				tv.NeedsRender()
-				e.SetHandled()
-			})
-			w.On(events.Drop, func(e events.Event) {
-				tvi.DragDrop(e)
-			})
-			w.On(events.DropDeleteSource, func(e events.Event) {
-				tvi.DropDeleteSource(e)
-			})
-			// the context menu events will get sent to the parts, so it
-			// needs to intercept them and send them up
-			w.On(events.ContextMenu, func(e events.Event) {
-				sels := tv.SelectedViews()
-				if len(sels) == 0 {
-					tv.SelectAction(e.SelectMode())
+				if w.IsChecked() && !w.StateIs(states.Indeterminate) {
+					if !tv.IsClosed() {
+						tv.Close()
+					}
+				} else {
+					if tv.IsClosed() {
+						tv.Open()
+					}
 				}
-				tv.ShowContextMenu(e)
 			})
-			w.Maker(func(p *core.Plan) {
-				core.AddAt(p, "branch", func(w *core.Switch) {
-					w.SetType(core.SwitchCheckbox)
-					w.SetIcons(tv.IconOpen, tv.IconClosed, tv.IconLeaf)
+			w.Builder(func() {
+				if tv.This().(TreeViewer).CanOpen() {
+					tv.SetBranchState()
+				}
+			})
+		})
+		w.Maker(func(p *core.Plan) {
+			if tv.Icon.IsSet() {
+				core.AddAt(p, "icon", func(w *core.Icon) {
 					w.Style(func(s *styles.Style) {
-						s.SetAbilities(false, abilities.Focusable)
-						// parent will handle our cursor
-						s.Cursor = cursors.None
-						s.Color = colors.C(colors.Scheme.Primary.Base)
-						s.Margin.Zero()
-						s.Padding.Zero()
-						s.Min.X.Em(0.8)
-						s.Min.Y.Em(0.8)
-						s.Align.Self = styles.Center
-						if !w.StateIs(states.Indeterminate) {
-							// we amplify any state layer we receiver so that it is clear
-							// we are receiving it, not just our parent
-							s.StateLayer *= 3
-						} else {
-							// no state layer for indeterminate because they are not interactive
-							s.StateLayer = 0
-						}
-					})
-					w.OnClick(func(e events.Event) {
-						if w.IsChecked() && !w.StateIs(states.Indeterminate) {
-							if !tv.IsClosed() {
-								tv.Close()
-							}
-						} else {
-							if tv.IsClosed() {
-								tv.Open()
-							}
-						}
+						s.Font.Size.Dp(16)
 					})
 					w.Builder(func() {
-						if tv.This().(TreeViewer).CanOpen() {
-							tv.SetBranchState()
-						}
+						w.SetIcon(tv.Icon)
 					})
 				})
-				if tv.Icon.IsSet() {
-					core.AddAt(p, "icon", func(w *core.Icon) {
-						w.Style(func(s *styles.Style) {
-							s.Font.Size.Dp(16)
-							s.Margin.Zero()
-							s.Padding.Zero()
-						})
-						w.Builder(func() {
-							w.SetIcon(tv.Icon)
-						})
-					})
-				}
-				core.AddAt(p, "text", func(w *core.Text) {
-					w.Style(func(s *styles.Style) {
-						s.SetNonSelectable()
-						s.SetTextWrap(false)
-						s.Margin.Zero()
-						s.Padding.Zero()
-						s.Min.X.Ch(16)
-						s.Min.Y.Em(1.2)
-					})
-					w.Builder(func() {
-						w.SetText(tv.Label())
-					})
-				})
+			}
+		})
+		core.AddChildAt(w, "text", func(w *core.Text) {
+			w.Style(func(s *styles.Style) {
+				s.SetNonSelectable()
+				s.SetTextWrap(false)
+				s.Min.X.Ch(16)
+				s.Min.Y.Em(1.2)
+			})
+			w.Builder(func() {
+				w.SetText(tv.Label())
 			})
 		})
 	})
