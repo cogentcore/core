@@ -11,6 +11,9 @@ import (
 	"cogentcore.org/core/types"
 )
 
+// Plan is a list of [TypeAndName]s used in [BuildSlice].
+type Plan []TypeAndName
+
 // TypeAndName holds a type and a name. It is used for specifying [Plan]
 // objects in [BuildSlice].
 type TypeAndName struct {
@@ -18,20 +21,9 @@ type TypeAndName struct {
 	Name string
 }
 
-// Plan is a list of [TypeAndName]s used in [BuildSlice].
-type Plan []TypeAndName
-
 // Add adds a new Plan element with the given type and name.
 func (t *Plan) Add(typ *types.Type, name string) {
 	*t = append(*t, TypeAndName{typ, name})
-}
-
-func (t Plan) GoString() string {
-	var str string
-	for i, tn := range t {
-		str += fmt.Sprintf("[%02d: %20s\t %20s\n", i, tn.Name, tn.Type.Name)
-	}
-	return str
 }
 
 // BuildSlice ensures that the given Slice contains the elements
@@ -39,18 +31,18 @@ func (t Plan) GoString() string {
 // with n = total number of items in the target slice.
 // The given Node is set as the parent of the created nodes.
 // Returns true if any changes were made.
-func BuildSlice(sl *Slice, n Node, p Plan) bool {
+func BuildSlice(sl *Slice, parent Node, p Plan) bool {
 	mods := false
 	*sl, mods = plan.Build(*sl, len(p),
 		func(i int) string { return p[i].Name },
 		func(name string, i int) Node {
-			nk := NewOfType(p[i].Type)
-			nk.SetName(name)
-			initNode(nk)
-			if n != nil {
-				SetParent(nk, n)
+			n := NewOfType(p[i].Type)
+			n.SetName(name)
+			initNode(n)
+			if parent != nil {
+				SetParent(n, parent)
 			}
-			return nk
+			return n
 		}, func(k Node) { k.Destroy() })
 	return mods
 }
