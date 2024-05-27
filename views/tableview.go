@@ -47,9 +47,6 @@ type TableView struct {
 	// SortDescending is whether the current sort order is descending.
 	SortDescending bool
 
-	// structType is the non-pointer struct type for each row.
-	structType reflect.Type
-
 	// visibleFields are the visible fields.
 	visibleFields []reflect.StructField
 
@@ -68,12 +65,46 @@ type TableView struct {
 type TableViewStyleFunc func(w core.Widget, s *styles.Style, row, col int)
 
 func (tv *TableView) OnInit() {
-	tv.Frame.OnInit()
-	tv.SliceViewBase.HandleEvents()
-	tv.SliceViewBase.SetStyles() // handles all the basics
-	tv.SortIndex = -1
-	tv.AddContextMenu(tv.SliceViewBase.ContextMenu)
+	tv.SliceViewBase.OnInit()
 	tv.AddContextMenu(tv.ContextMenu)
+	tv.SortIndex = -1
+
+	tv.Makers[0] = func(p *core.Plan) { // TODO: reduce redundancy with SliceViewBase Maker
+		svi := tv.This().(SliceViewer)
+		svi.UpdateSliceSize()
+
+		tv.ViewMuLock()
+		defer tv.ViewMuUnlock()
+
+		tv.SortSlice()
+
+		scrollTo := -1
+		if tv.SelectedField != "" && tv.SelectedValue != nil {
+			tv.SelectedIndex, _ = StructSliceIndexByValue(tv.Slice, tv.SelectedField, tv.SelectedValue)
+			tv.SelectedField = ""
+			tv.SelectedValue = nil
+			tv.InitSelectedIndex = -1
+			scrollTo = tv.SelectedIndex
+		} else if tv.InitSelectedIndex >= 0 {
+			tv.SelectedIndex = tv.InitSelectedIndex
+			tv.InitSelectedIndex = -1
+			scrollTo = tv.SelectedIndex
+		}
+		if scrollTo >= 0 {
+			tv.ScrollToIndex(scrollTo)
+		}
+		tv.UpdateStartIndex()
+
+		tv.MakeHeader(p)
+		sgp := tv.MakeGrid(p)
+
+		svi.UpdateMaxWidths()
+
+		for i := 0; i < tv.VisRows; i++ {
+			si := tv.StartIndex + i
+			svi.MakeRow(sgp, i, si)
+		}
+	}
 }
 
 // StyleValue performs additional value widget styling
@@ -154,44 +185,6 @@ func (tv *TableView) cacheVisibleFields() {
 	tv.numVisibleFields = len(tv.visibleFields)
 	tv.headerWidths = make([]int, tv.numVisibleFields)
 	tv.colMaxWidths = make([]int, tv.numVisibleFields)
-}
-
-// Make configures the view
-func (tv *TableView) Make(p *core.Plan) {
-	svi := tv.This().(SliceViewer)
-	svi.UpdateSliceSize()
-
-	tv.ViewMuLock()
-	defer tv.ViewMuUnlock()
-
-	tv.SortSlice()
-
-	scrollTo := -1
-	if tv.SelectedField != "" && tv.SelectedValue != nil {
-		tv.SelectedIndex, _ = StructSliceIndexByValue(tv.Slice, tv.SelectedField, tv.SelectedValue)
-		tv.SelectedField = ""
-		tv.SelectedValue = nil
-		tv.InitSelectedIndex = -1
-		scrollTo = tv.SelectedIndex
-	} else if tv.InitSelectedIndex >= 0 {
-		tv.SelectedIndex = tv.InitSelectedIndex
-		tv.InitSelectedIndex = -1
-		scrollTo = tv.SelectedIndex
-	}
-	if scrollTo >= 0 {
-		tv.ScrollToIndex(scrollTo)
-	}
-	tv.UpdateStartIndex()
-
-	tv.MakeHeader(p)
-	sgp := tv.MakeGrid(p)
-
-	svi.UpdateMaxWidths()
-
-	for i := 0; i < tv.VisRows; i++ {
-		si := tv.StartIndex + i
-		svi.MakeRow(sgp, i, si)
-	}
 }
 
 func (tv *TableView) UpdateMaxWidths() {

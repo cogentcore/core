@@ -53,127 +53,127 @@ func (mv *MapView) OnInit() {
 		s.Min.X.Em(20)
 		s.Min.Y.Em(10)
 	})
-}
 
-func (mv *MapView) Make(p *core.Plan) {
-	if reflectx.AnyIsNil(mv.Map) {
-		return
-	}
-	mapv := reflectx.Underlying(reflect.ValueOf(mv.Map))
+	mv.Maker(func(p *core.Plan) {
+		if reflectx.AnyIsNil(mv.Map) {
+			return
+		}
+		mapv := reflectx.Underlying(reflect.ValueOf(mv.Map))
 
-	mv.ncols = 2
-	typeAny := false
-	valueType := mapv.Type().Elem()
-	if valueType.String() == "interface {}" {
-		mv.ncols = 3
-		typeAny = true
-	}
+		mv.ncols = 2
+		typeAny := false
+		valueType := mapv.Type().Elem()
+		if valueType.String() == "interface {}" {
+			mv.ncols = 3
+			typeAny = true
+		}
 
-	builtinTypes := types.BuiltinTypes()
+		builtinTypes := types.BuiltinTypes()
 
-	keys := reflectx.MapSort(mv.Map, !mv.SortValues, true)
-	for _, key := range keys {
-		keytxt := reflectx.ToString(key.Interface())
-		keynm := "key-" + keytxt
-		valnm := "value-" + keytxt
+		keys := reflectx.MapSort(mv.Map, !mv.SortValues, true)
+		for _, key := range keys {
+			keytxt := reflectx.ToString(key.Interface())
+			keynm := "key-" + keytxt
+			valnm := "value-" + keytxt
 
-		core.AddNew(p, keynm, func() core.Value {
-			w := core.ToValue(key.Interface(), "")
-			BindMapKey(mapv, key, w)
-			wb := w.AsWidget()
-			wb.SetReadOnly(mv.IsReadOnly())
-			w.Style(func(s *styles.Style) {
-				s.SetReadOnly(mv.IsReadOnly())
-				s.SetTextWrap(false)
-			})
-			wb.OnChange(func(e events.Event) {
-				mv.SendChange(e)
-				mv.Update()
-			})
-			wb.SetReadOnly(mv.IsReadOnly())
-			wb.OnInput(mv.HandleEvent)
-			if !mv.IsReadOnly() {
-				w.AddContextMenu(func(m *core.Scene) {
-					mv.ContextMenu(m, key)
+			core.AddNew(p, keynm, func() core.Value {
+				w := core.ToValue(key.Interface(), "")
+				BindMapKey(mapv, key, w)
+				wb := w.AsWidget()
+				wb.SetReadOnly(mv.IsReadOnly())
+				w.Style(func(s *styles.Style) {
+					s.SetReadOnly(mv.IsReadOnly())
+					s.SetTextWrap(false)
 				})
-			}
-			return w
-		}, func(w core.Value) {
-			wb := w.AsWidget()
-			BindMapKey(mapv, key, w)
-			wb.SetReadOnly(mv.IsReadOnly())
-		})
-		core.AddNew(p, valnm, func() core.Value {
-			val := mapv.MapIndex(key).Interface()
-			w := core.ToValue(val, "")
-			BindMapValue(mapv, key, w)
-			wb := w.AsWidget()
-			wb.SetReadOnly(mv.IsReadOnly())
-			wb.OnChange(func(e events.Event) { mv.SendChange(e) })
-			wb.OnInput(mv.HandleEvent)
-			w.Style(func(s *styles.Style) {
-				s.SetReadOnly(mv.IsReadOnly())
-				s.SetTextWrap(false)
-			})
-			if !mv.IsReadOnly() {
-				w.AddContextMenu(func(m *core.Scene) {
-					mv.ContextMenu(m, key)
-				})
-			}
-			return w
-		}, func(w core.Value) {
-			wb := w.AsWidget()
-			BindMapValue(mapv, key, w)
-			wb.SetReadOnly(mv.IsReadOnly())
-		})
-
-		if typeAny {
-			typnm := "type-" + keytxt
-			core.AddAt(p, typnm, func(w *core.Chooser) {
-				w.SetTypes(builtinTypes...)
-				w.OnChange(func(e events.Event) {
-					typ := reflect.TypeOf(w.CurrentItem.Value.(*types.Type).Instance)
-					newVal := reflect.New(typ)
-					// try our best to convert the existing value to the new type
-					reflectx.SetRobust(newVal.Interface(), mapv.MapIndex(key).Interface())
-					mapv.SetMapIndex(key, newVal.Elem())
-					mv.DeleteChildByName(valnm) // force it to be updated
+				wb.OnChange(func(e events.Event) {
+					mv.SendChange(e)
 					mv.Update()
 				})
-			}, func(w *core.Chooser) {
-				w.SetReadOnly(mv.IsReadOnly())
-				vtyp := types.TypeByValue(mapv.MapIndex(key).Interface())
-				if vtyp == nil {
-					vtyp = types.TypeByName("string") // default to string
+				wb.SetReadOnly(mv.IsReadOnly())
+				wb.OnInput(mv.HandleEvent)
+				if !mv.IsReadOnly() {
+					w.AddContextMenu(func(m *core.Scene) {
+						mv.ContextMenu(m, key)
+					})
 				}
-				w.SetCurrentValue(vtyp)
+				return w
+			}, func(w core.Value) {
+				wb := w.AsWidget()
+				BindMapKey(mapv, key, w)
+				wb.SetReadOnly(mv.IsReadOnly())
 			})
+			core.AddNew(p, valnm, func() core.Value {
+				val := mapv.MapIndex(key).Interface()
+				w := core.ToValue(val, "")
+				BindMapValue(mapv, key, w)
+				wb := w.AsWidget()
+				wb.SetReadOnly(mv.IsReadOnly())
+				wb.OnChange(func(e events.Event) { mv.SendChange(e) })
+				wb.OnInput(mv.HandleEvent)
+				w.Style(func(s *styles.Style) {
+					s.SetReadOnly(mv.IsReadOnly())
+					s.SetTextWrap(false)
+				})
+				if !mv.IsReadOnly() {
+					w.AddContextMenu(func(m *core.Scene) {
+						mv.ContextMenu(m, key)
+					})
+				}
+				return w
+			}, func(w core.Value) {
+				wb := w.AsWidget()
+				BindMapValue(mapv, key, w)
+				wb.SetReadOnly(mv.IsReadOnly())
+			})
+
+			if typeAny {
+				typnm := "type-" + keytxt
+				core.AddAt(p, typnm, func(w *core.Chooser) {
+					w.SetTypes(builtinTypes...)
+					w.OnChange(func(e events.Event) {
+						typ := reflect.TypeOf(w.CurrentItem.Value.(*types.Type).Instance)
+						newVal := reflect.New(typ)
+						// try our best to convert the existing value to the new type
+						reflectx.SetRobust(newVal.Interface(), mapv.MapIndex(key).Interface())
+						mapv.SetMapIndex(key, newVal.Elem())
+						mv.DeleteChildByName(valnm) // force it to be updated
+						mv.Update()
+					})
+				}, func(w *core.Chooser) {
+					w.SetReadOnly(mv.IsReadOnly())
+					vtyp := types.TypeByValue(mapv.MapIndex(key).Interface())
+					if vtyp == nil {
+						vtyp = types.TypeByName("string") // default to string
+					}
+					w.SetCurrentValue(vtyp)
+				})
+			}
 		}
-	}
-	if mv.Inline {
-		if !mv.IsReadOnly() {
-			core.AddAt(p, "add-button", func(w *core.Button) {
-				w.SetIcon(icons.Add).SetType(core.ButtonTonal)
-				w.Tooltip = "Add an element"
+		if mv.Inline {
+			if !mv.IsReadOnly() {
+				core.AddAt(p, "add-button", func(w *core.Button) {
+					w.SetIcon(icons.Add).SetType(core.ButtonTonal)
+					w.Tooltip = "Add an element"
+					w.OnClick(func(e events.Event) {
+						mv.MapAdd()
+					})
+				})
+			}
+			core.AddAt(p, "edit-button", func(w *core.Button) {
+				w.SetIcon(icons.Edit).SetType(core.ButtonTonal)
+				w.Tooltip = "Edit in a dialog"
 				w.OnClick(func(e events.Event) {
-					mv.MapAdd()
+					d := core.NewBody().AddTitle(labels.FriendlyMapLabel(mapv)).AddText(mv.Tooltip)
+					NewMapView(d).SetMap(mv.Map)
+					d.OnClose(func(e events.Event) {
+						mv.Update()
+						mv.SendChange()
+					})
+					d.RunFullDialog(mv)
 				})
 			})
 		}
-		core.AddAt(p, "edit-button", func(w *core.Button) {
-			w.SetIcon(icons.Edit).SetType(core.ButtonTonal)
-			w.Tooltip = "Edit in a dialog"
-			w.OnClick(func(e events.Event) {
-				d := core.NewBody().AddTitle(labels.FriendlyMapLabel(mapv)).AddText(mv.Tooltip)
-				NewMapView(d).SetMap(mv.Map)
-				d.OnClose(func(e events.Event) {
-					mv.Update()
-					mv.SendChange()
-				})
-				d.RunFullDialog(mv)
-			})
-		})
-	}
+	})
 }
 
 func (mv *MapView) ContextMenu(m *core.Scene, keyv reflect.Value) {

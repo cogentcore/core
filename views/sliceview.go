@@ -270,12 +270,7 @@ func (sv *SliceViewBase) FlagType() enums.BitFlagSetter {
 
 func (sv *SliceViewBase) OnInit() {
 	sv.Frame.OnInit()
-	sv.HandleEvents()
-	sv.SetStyles()
 	sv.AddContextMenu(sv.ContextMenu)
-}
-
-func (sv *SliceViewBase) SetStyles() {
 	sv.InitSelectedIndex = -1
 	sv.HoverRow = -1
 	sv.MinRows = 4
@@ -312,6 +307,100 @@ func (sv *SliceViewBase) SetStyles() {
 	}
 	sv.StyleFinal(func(s *styles.Style) {
 		sv.NormalCursor = s.Cursor
+	})
+
+	sv.OnFinal(events.KeyChord, func(e events.Event) {
+		if sv.IsReadOnly() {
+			if sv.Is(SliceViewReadOnlyKeyNav) {
+				sv.KeyInputReadOnly(e)
+			}
+		} else {
+			sv.KeyInputEditable(e)
+		}
+	})
+	sv.On(events.MouseMove, func(e events.Event) {
+		row, _, isValid := sv.RowFromEventPos(e)
+		prevHoverRow := sv.HoverRow
+		if !isValid {
+			sv.HoverRow = -1
+			sv.Styles.Cursor = sv.NormalCursor
+		} else {
+			sv.HoverRow = row
+			sv.Styles.Cursor = cursors.Pointer
+		}
+		sv.CurrentCursor = sv.Styles.Cursor
+		if sv.HoverRow != prevHoverRow {
+			sv.NeedsRender()
+		}
+	})
+	sv.On(events.MouseDrag, func(e events.Event) {
+		row, idx, isValid := sv.RowFromEventPos(e)
+		if !isValid {
+			return
+		}
+		sv.This().(SliceViewer).SliceGrid().AutoScroll(math32.Vec2(0, float32(idx)))
+		prevHoverRow := sv.HoverRow
+		if !isValid {
+			sv.HoverRow = -1
+			sv.Styles.Cursor = sv.NormalCursor
+		} else {
+			sv.HoverRow = row
+			sv.Styles.Cursor = cursors.Pointer
+		}
+		sv.CurrentCursor = sv.Styles.Cursor
+		if sv.HoverRow != prevHoverRow {
+			sv.NeedsRender()
+		}
+	})
+	sv.OnFirst(events.DoubleClick, func(e events.Event) {
+		row, _, isValid := sv.RowFromEventPos(e)
+		if !isValid {
+			return
+		}
+		if sv.LastClick != row+sv.StartIndex {
+			sv.This().(SliceViewer).SliceGrid().Send(events.Click, e)
+			e.SetHandled()
+		}
+	})
+	// we must interpret triple click events as double click
+	// events for rapid cross-row double clicking to work correctly
+	sv.OnFirst(events.TripleClick, func(e events.Event) {
+		sv.Send(events.DoubleClick, e)
+	})
+
+	sv.Maker(func(p *core.Plan) {
+		svi := sv.This().(SliceViewer)
+		svi.UpdateSliceSize()
+
+		sv.ViewMuLock()
+		defer sv.ViewMuUnlock()
+
+		scrollTo := -1
+		if sv.SelectedValue != nil {
+			idx, ok := SliceIndexByValue(sv.Slice, sv.SelectedValue)
+			if ok {
+				sv.SelectedIndex = idx
+				scrollTo = sv.SelectedIndex
+			}
+			sv.SelectedValue = nil
+			sv.InitSelectedIndex = -1
+		} else if sv.InitSelectedIndex >= 0 {
+			sv.SelectedIndex = sv.InitSelectedIndex
+			sv.InitSelectedIndex = -1
+			scrollTo = sv.SelectedIndex
+		}
+		if scrollTo >= 0 {
+			sv.ScrollToIndex(scrollTo)
+		}
+		sv.UpdateStartIndex()
+
+		sgp := sv.MakeGrid(p)
+		svi.UpdateMaxWidths()
+
+		for i := 0; i < sv.VisRows; i++ {
+			si := sv.StartIndex + i
+			svi.MakeRow(sgp, i, si)
+		}
 	})
 }
 
@@ -427,42 +516,6 @@ func (sv *SliceViewBase) BindSelect(val *int) *SliceViewBase {
 		}
 	})
 	return sv
-}
-
-// Make configures the slice view
-func (sv *SliceViewBase) Make(p *core.Plan) {
-	svi := sv.This().(SliceViewer)
-	svi.UpdateSliceSize()
-
-	sv.ViewMuLock()
-	defer sv.ViewMuUnlock()
-
-	scrollTo := -1
-	if sv.SelectedValue != nil {
-		idx, ok := SliceIndexByValue(sv.Slice, sv.SelectedValue)
-		if ok {
-			sv.SelectedIndex = idx
-			scrollTo = sv.SelectedIndex
-		}
-		sv.SelectedValue = nil
-		sv.InitSelectedIndex = -1
-	} else if sv.InitSelectedIndex >= 0 {
-		sv.SelectedIndex = sv.InitSelectedIndex
-		sv.InitSelectedIndex = -1
-		scrollTo = sv.SelectedIndex
-	}
-	if scrollTo >= 0 {
-		sv.ScrollToIndex(scrollTo)
-	}
-	sv.UpdateStartIndex()
-
-	sgp := sv.MakeGrid(p)
-	svi.UpdateMaxWidths()
-
-	for i := 0; i < sv.VisRows; i++ {
-		si := sv.StartIndex + i
-		svi.MakeRow(sgp, i, si)
-	}
 }
 
 func (sv *SliceViewBase) UpdateMaxWidths() {
@@ -1867,67 +1920,6 @@ func (sv *SliceViewBase) KeyInputReadOnly(kt events.Event) {
 		sv.Send(events.DoubleClick, kt)
 		kt.SetHandled()
 	}
-}
-
-func (sv *SliceViewBase) HandleEvents() {
-	sv.OnFinal(events.KeyChord, func(e events.Event) {
-		if sv.IsReadOnly() {
-			if sv.Is(SliceViewReadOnlyKeyNav) {
-				sv.KeyInputReadOnly(e)
-			}
-		} else {
-			sv.KeyInputEditable(e)
-		}
-	})
-	sv.On(events.MouseMove, func(e events.Event) {
-		row, _, isValid := sv.RowFromEventPos(e)
-		prevHoverRow := sv.HoverRow
-		if !isValid {
-			sv.HoverRow = -1
-			sv.Styles.Cursor = sv.NormalCursor
-		} else {
-			sv.HoverRow = row
-			sv.Styles.Cursor = cursors.Pointer
-		}
-		sv.CurrentCursor = sv.Styles.Cursor
-		if sv.HoverRow != prevHoverRow {
-			sv.NeedsRender()
-		}
-	})
-	sv.On(events.MouseDrag, func(e events.Event) {
-		row, idx, isValid := sv.RowFromEventPos(e)
-		if !isValid {
-			return
-		}
-		sv.This().(SliceViewer).SliceGrid().AutoScroll(math32.Vec2(0, float32(idx)))
-		prevHoverRow := sv.HoverRow
-		if !isValid {
-			sv.HoverRow = -1
-			sv.Styles.Cursor = sv.NormalCursor
-		} else {
-			sv.HoverRow = row
-			sv.Styles.Cursor = cursors.Pointer
-		}
-		sv.CurrentCursor = sv.Styles.Cursor
-		if sv.HoverRow != prevHoverRow {
-			sv.NeedsRender()
-		}
-	})
-	sv.OnFirst(events.DoubleClick, func(e events.Event) {
-		row, _, isValid := sv.RowFromEventPos(e)
-		if !isValid {
-			return
-		}
-		if sv.LastClick != row+sv.StartIndex {
-			sv.This().(SliceViewer).SliceGrid().Send(events.Click, e)
-			e.SetHandled()
-		}
-	})
-	// we must interpret triple click events as double click
-	// events for rapid cross-row double clicking to work correctly
-	sv.OnFirst(events.TripleClick, func(e events.Event) {
-		sv.Send(events.DoubleClick, e)
-	})
 }
 
 func (sv *SliceViewBase) SizeFinal() {
