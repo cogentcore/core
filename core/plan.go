@@ -45,9 +45,8 @@ type Plan struct {
 // the given optional function to initialize the widget. The name of
 // the widget is automatically generated based on the file and line
 // number of the calling function.
-// It returns the new [Plan] item.
-func Add[T Widget](p *Plan, init ...func(w T)) *Plan {
-	return AddAt(p, autoPlanPath(2), init...)
+func Add[T Widget](p *Plan, init ...func(w T)) {
+	AddAt(p, autoPlanPath(2), init...)
 }
 
 // autoPlanPath returns the dir-filename of [runtime.Caller](level),
@@ -66,16 +65,16 @@ func autoPlanPath(level int) string {
 // the given name and optional function to initialize the widget. The
 // widget is guaranteed to have its parent set before the init function
 // is called.
-// It returns the new [Plan] item.
-func AddAt[T Widget](p *Plan, path string, init ...func(w T)) *Plan {
+func AddAt[T Widget](p *Plan, path string, init ...func(w T)) {
 	new := func() Widget {
 		return tree.New[T]()
 	}
 	if len(init) == 0 {
-		return p.Add(path, new)
+		p.Add(path, new)
+		return
 	}
 	f := init[0]
-	return p.Add(path, new, func(w Widget) {
+	p.Add(path, new, func(w Widget) {
 		f(w.(T))
 	})
 }
@@ -83,12 +82,11 @@ func AddAt[T Widget](p *Plan, path string, init ...func(w T)) *Plan {
 // AddNew adds a new [Plan] item to the given [Plan] for a widget with
 // the given name, function for constructing the widget, and function
 // for initializing the widget. The widget is guaranteed to
-// have its parent set before the init function is called. It returns
-// the new [Plan] item.
+// have its parent set before the init function is called.
 // It should only be called instead of [Add] and [AddAt] when the widget
 // must be made new, like when using [NewValue].
-func AddNew[T Widget](p *Plan, path string, new func() T, init func(w T)) *Plan {
-	return p.Add(path, func() Widget {
+func AddNew[T Widget](p *Plan, path string, new func() T, init func(w T)) {
+	p.Add(path, func() Widget {
 		return new()
 	}, func(w Widget) {
 		init(w.(T))
@@ -114,11 +112,10 @@ func AddInit[T Widget](p *Plan, name string, init func(w T)) {
 
 // Add adds a new [Plan] item to the given [Plan] with the given name and functions.
 // It should typically not be called by end-user code; see the generic
-// [Add], [AddAt], and [AddNew] functions instead. It returns the new [Plan] item.
-func (p *Plan) Add(name string, new func() Widget, init ...func(w Widget)) *Plan {
+// [Add], [AddAt], [AddNew], and [AddInit] functions instead.
+func (p *Plan) Add(name string, new func() Widget, init ...func(w Widget)) {
 	newPlan := &Plan{Name: name, New: new, Init: init}
 	p.Children = append(p.Children, newPlan)
-	return newPlan
 }
 
 // BuildWidget builds (configures and updates) the given widget and
