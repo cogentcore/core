@@ -17,31 +17,29 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Plan represents a plan for how a widget should be constructed and initialized.
-// An instance of it is passed to [Widget.Make], which is responsible for making
-// the plan that is then used to configure and update the widget in [Widget.Build].
+// Plan represents a plan for how the children of a widget should be configured.
+// An instance of it is passed to [WidgetBase.Make], which is responsible
+// for making the plan that is then used to configure the widget in [WidgetBase.Build].
 // To add a child item to a plan, use [Add], [AddAt], or [AddNew]. To extend an
 // existing child item, use [AddInit].
-type Plan struct {
+type Plan []*PlanItem
 
-	// Name is the name of the planned widget. If it is blank, this [Plan]
-	// is assumed to be the root Plan, and only its children are handled.
+// PlanItem represents a plan for how a child widget should be constructed and initialized.
+// See [Plan] for more information.
+type PlanItem struct {
+
+	// Name is the name of the planned widget.
 	Name string
 
-	// New returns a new [Widget] of the correct type for this element,
-	// fully configured and ready for use.
+	// New returns a new widget of the correct type for this child.
 	New func() Widget
 
 	// Init is a list of functions that are called once in sequential ascending order
-	// after [Plan.New] to initialize the widget for the first time; see [AddInit].
+	// after [PlanItem.New] to initialize the widget for the first time.
 	Init []func(w Widget)
-
-	// Children is a list of [Plan]s that are used to configure and update children
-	// nested under the widget of this [Plan].
-	Children []*Plan
 }
 
-// Add adds a new [Plan] item to the given [Plan] for a widget with
+// Add adds a new [PlanItem] to the given [Plan] for a widget with
 // the given optional function to initialize the widget. The name of
 // the widget is automatically generated based on the file and line
 // number of the calling function.
@@ -61,32 +59,32 @@ func autoPlanPath(level int) string {
 	return path
 }
 
-// AddAt adds a new [Plan] item to the given [Plan] for a widget with
+// AddAt adds a new [PlanItem] to the given [Plan] for a widget with
 // the given name and optional function to initialize the widget. The
 // widget is guaranteed to have its parent set before the init function
 // is called.
-func AddAt[T Widget](p *Plan, path string, init ...func(w T)) {
+func AddAt[T Widget](p *Plan, name string, init ...func(w T)) {
 	new := func() Widget {
 		return tree.New[T]()
 	}
 	if len(init) == 0 {
-		p.Add(path, new)
+		p.Add(name, new)
 		return
 	}
 	f := init[0]
-	p.Add(path, new, func(w Widget) {
+	p.Add(name, new, func(w Widget) {
 		f(w.(T))
 	})
 }
 
-// AddNew adds a new [Plan] item to the given [Plan] for a widget with
+// AddNew adds a new [PlanItem] to the given [Plan] for a widget with
 // the given name, function for constructing the widget, and function
 // for initializing the widget. The widget is guaranteed to
 // have its parent set before the init function is called.
 // It should only be called instead of [Add] and [AddAt] when the widget
 // must be made new, like when using [NewValue].
-func AddNew[T Widget](p *Plan, path string, new func() T, init func(w T)) {
-	p.Add(path, func() Widget {
+func AddNew[T Widget](p *Plan, name string, new func() T, init func(w T)) {
+	p.Add(name, func() Widget {
 		return new()
 	}, func(w Widget) {
 		init(w.(T))
@@ -95,11 +93,11 @@ func AddNew[T Widget](p *Plan, path string, new func() T, init func(w T)) {
 
 // AddInit adds a new function for initializing the widget with the given name
 // in the given [Plan]. The widget must already exist in the plan; this is for
-// extending an existing [Plan] item, not adding a new one. The widget is guaranteed
+// extending an existing [PlanItem], not adding a new one. The widget is guaranteed
 // to have its parent set before the init function is called. The init functions are
 // called in sequential ascending order.
 func AddInit[T Widget](p *Plan, name string, init func(w T)) {
-	for _, child := range p.Children {
+	for _, child := range *p {
 		if child.Name == name {
 			child.Init = append(child.Init, func(w Widget) {
 				init(w.(T))
@@ -110,12 +108,11 @@ func AddInit[T Widget](p *Plan, name string, init func(w T)) {
 	slog.Error("core.AddInit: child not found", "name", name)
 }
 
-// Add adds a new [Plan] item to the given [Plan] with the given name and functions.
+// Add adds a new [PlanItem] to the given [Plan] with the given name and functions.
 // It should typically not be called by end-user code; see the generic
 // [Add], [AddAt], [AddNew], and [AddInit] functions instead.
 func (p *Plan) Add(name string, new func() Widget, init ...func(w Widget)) {
-	newPlan := &Plan{Name: name, New: new, Init: init}
-	p.Children = append(p.Children, newPlan)
+	*p = append(*p, &PlanItem{Name: name, New: new, Init: init})
 }
 
 // BuildWidget builds (configures and updates) the given widget and
