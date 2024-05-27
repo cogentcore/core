@@ -265,7 +265,7 @@ func (ch *Chooser) OnInit() {
 		}
 	})
 
-	ch.AddMaker(func(p *Plan) {
+	ch.Maker(func(p *Plan) {
 		// automatically select the first item if we have nothing selected and no placeholder
 		if !ch.Editable && ch.CurrentIndex < 0 && ch.CurrentItem.Text == "" {
 			ch.SetCurrentIndex(0)
@@ -274,7 +274,7 @@ func (ch *Chooser) OnInit() {
 		// editable handles through TextField
 		if ch.Icon.IsSet() && !ch.Editable {
 			AddAt(p, "icon", func(w *Icon) {
-				w.AddBuilder(func() {
+				w.Builder(func() {
 					w.SetIcon(ch.Icon)
 				})
 			})
@@ -314,7 +314,7 @@ func (ch *Chooser) OnInit() {
 						}
 					}
 				})
-				w.AddBuilder(func() {
+				w.Builder(func() {
 					w.SetText(ch.CurrentItem.GetLabel()).SetLeadingIcon(ch.Icon).
 						SetTrailingIcon(ch.Indicator, func(e events.Event) {
 							ch.OpenMenu(e)
@@ -330,7 +330,7 @@ func (ch *Chooser) OnInit() {
 						w.SetCompleter(w, ch.CompleteMatch, ch.CompleteEdit)
 					}
 				})
-				w.AddMaker(func(p *Plan) {
+				w.Maker(func(p *Plan) {
 					AddInit(p, "trail-icon", func(w *Button) {
 						w.Style(func(s *styles.Style) {
 							// indicator does not need to be focused
@@ -345,7 +345,7 @@ func (ch *Chooser) OnInit() {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
 				})
-				w.AddBuilder(func() {
+				w.Builder(func() {
 					w.SetText(ch.CurrentItem.GetLabel())
 				})
 			})
@@ -359,7 +359,7 @@ func (ch *Chooser) OnInit() {
 				w.Style(func(s *styles.Style) {
 					s.Justify.Self = styles.End
 				})
-				w.AddBuilder(func() {
+				w.Builder(func() {
 					w.SetIcon(ch.Indicator)
 				})
 			})

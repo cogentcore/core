@@ -10,15 +10,15 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// AddBuilder adds a new function to [WidgetBase.Builders], which are called in sequential
+// Builder adds a new function to [WidgetBase.Builders], which are called in sequential
 // descending (reverse) order in [Widget.Build].
-func (wb *WidgetBase) AddBuilder(builder func()) {
+func (wb *WidgetBase) Builder(builder func()) {
 	wb.Builders = append(wb.Builders, builder)
 }
 
-// AddMaker adds a new function to [WidgetBase.Makers], which are called in sequential
+// Maker adds a new function to [WidgetBase.Makers], which are called in sequential
 // ascending order in [Widget.Make].
-func (wb *WidgetBase) AddMaker(maker func(p *Plan)) {
+func (wb *WidgetBase) Maker(maker func(p *Plan)) {
 	wb.Makers = append(wb.Makers, maker)
 }
 

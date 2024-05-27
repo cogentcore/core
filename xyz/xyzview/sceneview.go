@@ -34,7 +34,7 @@ func (sv *SceneView) OnInit() {
 func (sv *SceneView) Make(p *core.Plan) {
 	core.AddAt(p, "scene", func(w *Scene) {})
 	core.AddAt(p, "tb", func(w *core.Toolbar) {
-		w.AddMaker(sv.MakeToolbar)
+		w.Maker(sv.MakeToolbar)
 	})
 }
 

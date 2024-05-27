@@ -105,9 +105,9 @@ func AppIconImages() []image.Image {
 // which will appear below any other OverflowMenu items added.
 func StandardAppBarConfig(parent Widget) {
 	tb := RecycleToolbar(parent)
-	tb.AddMaker(StandardAppBarStart)
+	tb.Maker(StandardAppBarStart)
 	if len(tb.Scene.AppBars) > 0 {
-		tb.AddMaker(tb.Scene.AppBars...)
+		tb.Maker(tb.Scene.AppBars...)
 	}
 	StandardOverflowMenu(tb) // todo -- need a config option for this
 }

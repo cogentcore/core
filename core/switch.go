@@ -121,7 +121,7 @@ func (sw *Switch) OnInit() {
 		sw.SendChange(e)
 	})
 
-	sw.AddMaker(func(p *Plan) {
+	sw.Maker(func(p *Plan) {
 		if sw.IconOn == "" {
 			sw.IconOn = icons.ToggleOn.Fill() // fallback
 		}
@@ -134,10 +134,10 @@ func (sw *Switch) OnInit() {
 				s.Display = styles.Stacked
 				s.Gap.Zero()
 			})
-			w.AddBuilder(func() {
+			w.Builder(func() {
 				sw.UpdateStackTop() // need to update here
 			})
-			w.AddMaker(func(p *Plan) {
+			w.Maker(func(p *Plan) {
 				AddAt(p, "icon-on", func(w *Icon) {
 					w.Style(func(s *styles.Style) {
 						if sw.Type == SwitchChip {
@@ -152,7 +152,7 @@ func (sw *Switch) OnInit() {
 							s.Min.Set(units.Em(1.5))
 						}
 					})
-					w.AddBuilder(func() {
+					w.Builder(func() {
 						w.SetIcon(sw.IconOn)
 					})
 				})
@@ -171,13 +171,13 @@ func (sw *Switch) OnInit() {
 				}
 				AddAt(p, "icon-off", func(w *Icon) {
 					w.Style(iconStyle)
-					w.AddBuilder(func() {
+					w.Builder(func() {
 						w.SetIcon(sw.IconOff)
 					})
 				})
 				AddAt(p, "icon-indeterminate", func(w *Icon) {
 					w.Style(iconStyle)
-					w.AddBuilder(func() {
+					w.Builder(func() {
 						w.SetIcon(sw.IconIndeterminate)
 					})
 				})

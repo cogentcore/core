@@ -35,7 +35,7 @@ type Toolbar struct {
 	OverflowMenus []func(m *Scene) `set:"-" json:"-" xml:"-"`
 
 	// Makers contains functions for making the plan for the toolbar.
-	// You can use [Toolbar.AddMaker] to add a new one.
+	// You can use [Toolbar.Maker] to add a new one.
 	Makers []func(p *Plan)
 
 	// This is the overflow button
@@ -47,8 +47,8 @@ func (tb *Toolbar) OnInit() {
 	ToolbarStyles(tb)
 }
 
-// AddMaker adds the given function(s) for making the plan for the toolbar.
-func (tb *Toolbar) AddMaker(m ...func(p *Plan)) *Toolbar {
+// Maker adds the given function(s) for making the plan for the toolbar.
+func (tb *Toolbar) Maker(m ...func(p *Plan)) *Toolbar {
 	tb.Makers = append(tb.Makers, m...)
 	return tb
 }

@@ -227,7 +227,7 @@ func (tx *Text) OnInit() {
 	// and then do the layout only during sizing.  However, layout starts with
 	// existing line breaks (which could come from <br> and <p> in HTML),
 	// so that is never able to undo initial word wrapping from constrained sizes.
-	tx.AddBuilder(func() {
+	tx.Builder(func() {
 		tx.configTextSize(tx.Geom.Size.Actual.Content)
 	})
 }

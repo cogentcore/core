@@ -188,7 +188,7 @@ func (bt *Button) OnInit() {
 		bt.Send(events.Click, e)
 	})
 
-	bt.AddMaker(func(p *Plan) {
+	bt.Maker(func(p *Plan) {
 		// we check if the icons are unset, not if they are nil, so
 		// that people can manually set it to [icons.None]
 		if bt.HasMenu() {
@@ -225,7 +225,7 @@ func (bt *Button) OnInit() {
 					s.SetTextWrap(false)
 					s.FillMargin = false
 				})
-				w.AddBuilder(func() {
+				w.Builder(func() {
 					if bt.Type == ButtonMenu {
 						w.SetType(TextBodyMedium)
 					} else {
@@ -253,8 +253,9 @@ func (bt *Button) OnInit() {
 					s.Margin.Zero()
 					s.Padding.Zero()
 				})
-			}, func(w *Icon) {
-				w.SetIcon(bt.Indicator)
+				w.Builder(func() {
+					w.SetIcon(bt.Indicator)
+				})
 			})
 		}
 		if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {

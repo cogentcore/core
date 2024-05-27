@@ -243,14 +243,14 @@ type WidgetBase struct {
 	Geom GeomState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Builders are a slice of functions called in sequential descending (reverse) order
-	// in [Widget.Build] to build the widget. You can use [WidgetBase.AddBuilder]
+	// in [Widget.Build] to build the widget. You can use [WidgetBase.Builder]
 	// to add one. By default, this slice contains a function that builds the widget
 	// using [Widget.Make].
 	Builders []func() `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// Makers are a slice of functions called in sequential ascending order
 	// in [Widget.Make] to make the plan for the widget. You can use
-	// [WidgetBase.AddMaker] to add one.
+	// [WidgetBase.Maker] to add one.
 	Makers []func(p *Plan) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// If true, override the computed styles and allow directly editing Styles.
@@ -386,7 +386,7 @@ func (wb *WidgetBase) OnInit() {
 	wb.HandleWidgetMagnify()
 	wb.HandleValueOnChange()
 
-	wb.AddBuilder(wb.baseBuild)
+	wb.Builder(wb.baseBuild)
 }
 
 // OnAdd is called when widgets are added to a parent.

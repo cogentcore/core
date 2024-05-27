@@ -324,7 +324,7 @@ func (tf *TextField) OnInit() {
 		tf.EditDone() // todo: this must be protected against something else, for race detector
 	})
 
-	tf.AddMaker(func(p *Plan) {
+	tf.Maker(func(p *Plan) {
 		tf.EditTxt = []rune(tf.Txt)
 		tf.Edited = false
 
