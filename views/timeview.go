@@ -22,8 +22,8 @@ import (
 type TimeView struct {
 	core.Frame
 
-	// the time that we are viewing
-	Time time.Time `set:"-"`
+	// Time is the time that we are viewing
+	Time time.Time
 
 	// the raw input hour
 	Hour int `set:"-"`
@@ -32,110 +32,107 @@ type TimeView struct {
 	PM bool `set:"-"`
 }
 
-// SetTime sets the source time and updates the view
-func (tv *TimeView) SetTime(tim time.Time) *TimeView {
-	tv.Time = tim
-	tv.SendChange()
-	tv.NeedsLayout()
-	return tv
-}
+func (tv *TimeView) WidgetValue() any { return &tv.Time }
 
-func (tv *TimeView) Make(p *core.Plan) {
-	core.Add(p, func(w *core.Spinner) {
-		w.SetStep(1).SetEnforceStep(true)
-		if core.SystemSettings.Clock24 {
-			tv.Hour = tv.Time.Hour()
-			w.SetMax(24).SetMin(0)
-		} else {
-			tv.Hour = tv.Time.Hour() % 12
-			if tv.Hour == 0 {
-				tv.Hour = 12
-			}
-			w.SetMax(12).SetMin(1)
-		}
-		w.SetValue(float32(tv.Hour))
-		w.Style(func(s *styles.Style) {
-			s.Font.Size.Dp(57)
-			s.Min.X.Dp(96)
-		})
-		w.OnChange(func(e events.Event) {
-			hr := int(w.Value)
-			if hr == 12 && !core.SystemSettings.Clock24 {
-				hr = 0
-			}
-			tv.Hour = hr
-			if tv.PM {
-				// only add to local variable
-				hr += 12
-			}
-			// we set our hour and keep everything else
-			tt := tv.Time
-			tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), hr, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
-			tv.SendChange()
-		})
-	})
-	core.Add(p, func(w *core.Text) {
-		w.SetType(core.TextDisplayLarge).SetText(":")
-		w.Style(func(s *styles.Style) {
-			s.SetTextWrap(false)
-			s.Min.X.Ch(1)
-		})
-	})
-	core.Add(p, func(w *core.Spinner) {
-		w.SetStep(1).SetEnforceStep(true).
-			SetMin(0).SetMax(60).SetFormat("%02d").
-			SetValue(float32(tv.Time.Minute()))
-		w.Style(func(s *styles.Style) {
-			s.Font.Size.Dp(57)
-			s.Min.X.Dp(96)
-		})
-		w.OnChange(func(e events.Event) {
-			// we set our minute and keep everything else
-			// TODO(config)
-			// tt := tv.Time
-			// tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), int(minute.Value), tt.Second(), tt.Nanosecond(), tt.Location())
-			tv.SendChange()
-		})
-	})
-
-	if !core.SystemSettings.Clock24 {
-		core.Add(p, func(w *core.Switches) {
-			w.SetMutex(true).SetType(core.SwitchSegmentedButton).SetItems(core.SwitchItem{Text: "AM"}, core.SwitchItem{Text: "PM"})
-			w.Style(func(s *styles.Style) {
-				s.Direction = styles.Column
-			})
-			w.OnShow(func(e events.Event) {
-				if tv.Time.Hour() < 12 {
-					tv.PM = false
-					w.SelectItem(0)
-				} else {
-					tv.PM = true
-					w.SelectItem(1)
+func (tv *TimeView) OnInit() {
+	tv.Frame.OnInit()
+	tv.Maker(func(p *core.Plan) {
+		core.Add(p, func(w *core.Spinner) {
+			w.SetStep(1).SetEnforceStep(true)
+			if core.SystemSettings.Clock24 {
+				tv.Hour = tv.Time.Hour()
+				w.SetMax(24).SetMin(0)
+			} else {
+				tv.Hour = tv.Time.Hour() % 12
+				if tv.Hour == 0 {
+					tv.Hour = 12
 				}
-				w.Update()
+				w.SetMax(12).SetMin(1)
+			}
+			w.SetValue(float32(tv.Hour))
+			w.Style(func(s *styles.Style) {
+				s.Font.Size.Dp(57)
+				s.Min.X.Dp(96)
 			})
 			w.OnChange(func(e events.Event) {
-				si := w.SelectedItem()
+				hr := int(w.Value)
+				if hr == 12 && !core.SystemSettings.Clock24 {
+					hr = 0
+				}
+				tv.Hour = hr
+				if tv.PM {
+					// only add to local variable
+					hr += 12
+				}
+				// we set our hour and keep everything else
 				tt := tv.Time
-				if tv.Hour == 12 {
-					tv.Hour = 0
-				}
-				switch si.Text {
-				case "AM":
-					tv.PM = false
-					tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
-				case "PM":
-					tv.PM = true
-					tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour+12, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
-				default:
-					// must always have something valid selected
-					tv.PM = false
-					w.SelectItem(0)
-					tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
-				}
+				tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), hr, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
+				tv.SendChange()
 			})
 		})
-	}
+		core.Add(p, func(w *core.Text) {
+			w.SetType(core.TextDisplayLarge).SetText(":")
+			w.Style(func(s *styles.Style) {
+				s.SetTextWrap(false)
+				s.Min.X.Ch(1)
+			})
+		})
+		core.Add(p, func(w *core.Spinner) {
+			w.SetStep(1).SetEnforceStep(true).
+				SetMin(0).SetMax(60).SetFormat("%02d").
+				SetValue(float32(tv.Time.Minute()))
+			w.Style(func(s *styles.Style) {
+				s.Font.Size.Dp(57)
+				s.Min.X.Dp(96)
+			})
+			w.OnChange(func(e events.Event) {
+				// we set our minute and keep everything else
+				// TODO(config)
+				// tt := tv.Time
+				// tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), int(minute.Value), tt.Second(), tt.Nanosecond(), tt.Location())
+				tv.SendChange()
+			})
+		})
+
+		if !core.SystemSettings.Clock24 {
+			core.Add(p, func(w *core.Switches) {
+				w.SetMutex(true).SetType(core.SwitchSegmentedButton).SetItems(core.SwitchItem{Text: "AM"}, core.SwitchItem{Text: "PM"})
+				w.Style(func(s *styles.Style) {
+					s.Direction = styles.Column
+				})
+				w.OnShow(func(e events.Event) {
+					if tv.Time.Hour() < 12 {
+						tv.PM = false
+						w.SelectItem(0)
+					} else {
+						tv.PM = true
+						w.SelectItem(1)
+					}
+					w.Update()
+				})
+				w.OnChange(func(e events.Event) {
+					si := w.SelectedItem()
+					tt := tv.Time
+					if tv.Hour == 12 {
+						tv.Hour = 0
+					}
+					switch si.Text {
+					case "AM":
+						tv.PM = false
+						tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
+					case "PM":
+						tv.PM = true
+						tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour+12, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
+					default:
+						// must always have something valid selected
+						tv.PM = false
+						w.SelectItem(0)
+						tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
+					}
+				})
+			})
+		}
+	})
 }
 
 var shortMonths = []string{"Jan", "Feb", "Apr", "Mar", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
@@ -144,88 +141,86 @@ var shortMonths = []string{"Jan", "Feb", "Apr", "Mar", "May", "Jun", "Jul", "Aug
 type DateView struct {
 	core.Frame
 
-	// the time that we are viewing
+	// Time is the time that we are viewing
 	Time time.Time `set:"-"`
-
-	// ConfigTime is the time that was configured
-	ConfigTime time.Time `set:"-" view:"-"`
 }
 
 // SetTime sets the source time and updates the view
-func (dv *DateView) SetTime(tim time.Time) *DateView {
+func (dv *DateView) SetTime(tim time.Time) *DateView { // TODO(config)
 	dv.Time = tim
 	dv.SendChange()
 	dv.Update()
 	return dv
 }
 
-func (dv *DateView) Make(p *core.Plan) {
-	if dv.HasChildren() {
-		dv.DeleteChildren()
-	} else {
-		dv.Style(func(s *styles.Style) {
-			s.Direction = styles.Column
-			s.Grow.Set(0, 0)
+func (dv *DateView) OnInit() {
+	dv.Frame.OnInit()
+	dv.Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
+
+	dv.Maker(func(p *core.Plan) {
+		if dv.HasChildren() {
+			dv.DeleteChildren()
+		}
+
+		trow := core.NewFrame(dv)
+		trow.Style(func(s *styles.Style) {
+			s.Gap.Zero()
 		})
-	}
 
-	trow := core.NewFrame(dv)
-	trow.Style(func(s *styles.Style) {
-		s.Gap.Zero()
+		arrowStyle := func(s *styles.Style) {
+			s.Padding.SetHorizontal(units.Dp(12))
+			s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+		}
+
+		core.NewButton(trow).SetType(core.ButtonAction).SetIcon(icons.NavigateBefore).OnClick(func(e events.Event) {
+			dv.SetTime(dv.Time.AddDate(0, -1, 0))
+		}).Style(arrowStyle)
+
+		sms := make([]core.ChooserItem, len(shortMonths))
+		for i, sm := range shortMonths {
+			sms[i] = core.ChooserItem{Value: sm}
+		}
+		month := core.NewChooser(trow).SetItems(sms...)
+		month.SetCurrentIndex(int(dv.Time.Month() - 1))
+		month.OnChange(func(e events.Event) {
+			// set our month
+			dv.SetTime(dv.Time.AddDate(0, month.CurrentIndex+1-int(dv.Time.Month()), 0))
+		})
+
+		core.NewButton(trow).SetType(core.ButtonAction).SetIcon(icons.NavigateNext).OnClick(func(e events.Event) {
+			dv.SetTime(dv.Time.AddDate(0, 1, 0))
+		}).Style(arrowStyle)
+
+		core.NewButton(trow).SetType(core.ButtonAction).SetIcon(icons.NavigateBefore).OnClick(func(e events.Event) {
+			dv.SetTime(dv.Time.AddDate(-1, 0, 0))
+		}).Style(arrowStyle)
+
+		yr := dv.Time.Year()
+		var yrs []core.ChooserItem
+		// we go 100 in each direction from the current year
+		for i := yr - 100; i <= yr+100; i++ {
+			yrs = append(yrs, core.ChooserItem{Value: i})
+		}
+		year := core.NewChooser(trow).SetItems(yrs...)
+		year.SetCurrentValue(yr)
+		year.OnChange(func(e events.Event) {
+			// we are centered at current year with 100 in each direction
+			nyr := year.CurrentIndex + yr - 100
+			// set our year
+			dv.SetTime(dv.Time.AddDate(nyr-dv.Time.Year(), 0, 0))
+		})
+
+		core.NewButton(trow).SetType(core.ButtonAction).SetIcon(icons.NavigateNext).OnClick(func(e events.Event) {
+			dv.SetTime(dv.Time.AddDate(1, 0, 0))
+		}).Style(arrowStyle)
+
+		dv.ConfigDateGrid()
 	})
-
-	arrowStyle := func(s *styles.Style) {
-		s.Padding.SetHorizontal(units.Dp(12))
-		s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
-	}
-
-	core.NewButton(trow).SetType(core.ButtonAction).SetIcon(icons.NavigateBefore).OnClick(func(e events.Event) {
-		dv.SetTime(dv.Time.AddDate(0, -1, 0))
-	}).Style(arrowStyle)
-
-	sms := make([]core.ChooserItem, len(shortMonths))
-	for i, sm := range shortMonths {
-		sms[i] = core.ChooserItem{Value: sm}
-	}
-	month := core.NewChooser(trow).SetItems(sms...)
-	month.SetCurrentIndex(int(dv.Time.Month() - 1))
-	month.OnChange(func(e events.Event) {
-		// set our month
-		dv.SetTime(dv.Time.AddDate(0, month.CurrentIndex+1-int(dv.Time.Month()), 0))
-	})
-
-	core.NewButton(trow).SetType(core.ButtonAction).SetIcon(icons.NavigateNext).OnClick(func(e events.Event) {
-		dv.SetTime(dv.Time.AddDate(0, 1, 0))
-	}).Style(arrowStyle)
-
-	core.NewButton(trow).SetType(core.ButtonAction).SetIcon(icons.NavigateBefore).OnClick(func(e events.Event) {
-		dv.SetTime(dv.Time.AddDate(-1, 0, 0))
-	}).Style(arrowStyle)
-
-	yr := dv.Time.Year()
-	var yrs []core.ChooserItem
-	// we go 100 in each direction from the current year
-	for i := yr - 100; i <= yr+100; i++ {
-		yrs = append(yrs, core.ChooserItem{Value: i})
-	}
-	year := core.NewChooser(trow).SetItems(yrs...)
-	year.SetCurrentValue(yr)
-	year.OnChange(func(e events.Event) {
-		// we are centered at current year with 100 in each direction
-		nyr := year.CurrentIndex + yr - 100
-		// set our year
-		dv.SetTime(dv.Time.AddDate(nyr-dv.Time.Year(), 0, 0))
-	})
-
-	core.NewButton(trow).SetType(core.ButtonAction).SetIcon(icons.NavigateNext).OnClick(func(e events.Event) {
-		dv.SetTime(dv.Time.AddDate(1, 0, 0))
-	}).Style(arrowStyle)
-
-	dv.ConfigDateGrid()
-	dv.NeedsLayout()
 }
 
-func (dv *DateView) ConfigDateGrid() {
+func (dv *DateView) ConfigDateGrid() { // TODO(config)
 	grid := core.NewFrame(dv)
 	grid.Style(func(s *styles.Style) {
 		s.Display = styles.Grid
@@ -297,10 +292,6 @@ type TimeValue struct {
 }
 
 func (v *TimeValue) Config() {
-	v.Widget.Style(func(s *styles.Style) {
-		s.Grow.Set(0, 0)
-	})
-
 	dt := core.NewTextField(v.Widget).SetTooltip("The date")
 	dt.SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
 		d := core.NewBody().AddTitle("Select date")
@@ -384,10 +375,6 @@ type DurationValue struct {
 }
 
 func (v *DurationValue) Config() {
-	v.Widget.Style(func(s *styles.Style) {
-		s.Grow.Set(0, 0)
-	})
-
 	var ch *core.Chooser
 
 	sp := core.NewSpinner(v.Widget).SetTooltip("The value of time").SetStep(1).SetPageStep(10)

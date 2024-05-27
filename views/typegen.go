@@ -6,6 +6,7 @@ import (
 	"image"
 	"image/color"
 	"reflect"
+	"time"
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/core"
@@ -394,7 +395,7 @@ func (t *StructView) SetViewPath(v string) *StructView { t.ViewPath = v; return 
 func (t *StructView) SetTooltip(v string) *StructView { t.Tooltip = v; return t }
 
 // TableViewType is the [types.Type] for [TableView]
-var TableViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TableView", IDName: "table-view", Doc: "TableView represents a slice of structs as a table, where the fields are\nthe columns and the elements are the rows. It is a full-featured editor with\nmultiple-selection, cut-and-paste, and drag-and-drop.\nUse [SliceViewBase.BindSelect] to make the table view designed for item selection.", Embeds: []types.Field{{Name: "SliceViewBase"}}, Fields: []types.Field{{Name: "StyleFunc", Doc: "StyleFunc is an optional styling function."}, {Name: "SelectedField", Doc: "SelectedField is the current selection field; initially select value in this field."}, {Name: "SortIndex", Doc: "SortIndex is the current sort index."}, {Name: "SortDescending", Doc: "SortDescending is whether the current sort order is descending."}, {Name: "structType", Doc: "structType is the non-pointer struct type for each row."}, {Name: "visibleFields", Doc: "visibleFields are the visible fields."}, {Name: "numVisibleFields", Doc: "numVisibleFields is the number of visible fields."}, {Name: "headerWidths", Doc: "headerWidths has the number of characters in each header, per visibleFields."}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields."}}, Instance: &TableView{}})
+var TableViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TableView", IDName: "table-view", Doc: "TableView represents a slice of structs as a table, where the fields are\nthe columns and the elements are the rows. It is a full-featured editor with\nmultiple-selection, cut-and-paste, and drag-and-drop.\nUse [SliceViewBase.BindSelect] to make the table view designed for item selection.", Embeds: []types.Field{{Name: "SliceViewBase"}}, Fields: []types.Field{{Name: "StyleFunc", Doc: "StyleFunc is an optional styling function."}, {Name: "SelectedField", Doc: "SelectedField is the current selection field; initially select value in this field."}, {Name: "SortIndex", Doc: "SortIndex is the current sort index."}, {Name: "SortDescending", Doc: "SortDescending is whether the current sort order is descending."}, {Name: "visibleFields", Doc: "visibleFields are the visible fields."}, {Name: "numVisibleFields", Doc: "numVisibleFields is the number of visible fields."}, {Name: "headerWidths", Doc: "headerWidths has the number of characters in each header, per visibleFields."}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields."}}, Instance: &TableView{}})
 
 // NewTableView returns a new [TableView] with the given optional parent:
 // TableView represents a slice of structs as a table, where the fields are
@@ -444,7 +445,7 @@ func (t *TableView) SetSelectedIndex(v int) *TableView { t.SelectedIndex = v; re
 func (t *TableView) SetInitSelectedIndex(v int) *TableView { t.InitSelectedIndex = v; return t }
 
 // TimeViewType is the [types.Type] for [TimeView]
-var TimeViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TimeView", IDName: "time-view", Doc: "TimeView is a view for selecting a time", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "the time that we are viewing"}, {Name: "Hour", Doc: "the raw input hour"}, {Name: "PM", Doc: "whether we are in PM mode (so we have to add 12h to everything)"}}, Instance: &TimeView{}})
+var TimeViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TimeView", IDName: "time-view", Doc: "TimeView is a view for selecting a time", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "Time is the time that we are viewing"}, {Name: "Hour", Doc: "the raw input hour"}, {Name: "PM", Doc: "whether we are in PM mode (so we have to add 12h to everything)"}}, Instance: &TimeView{}})
 
 // NewTimeView returns a new [TimeView] with the given optional parent:
 // TimeView is a view for selecting a time
@@ -456,11 +457,15 @@ func (t *TimeView) NodeType() *types.Type { return TimeViewType }
 // New returns a new [*TimeView] value
 func (t *TimeView) New() tree.Node { return &TimeView{} }
 
+// SetTime sets the [TimeView.Time]:
+// Time is the time that we are viewing
+func (t *TimeView) SetTime(v time.Time) *TimeView { t.Time = v; return t }
+
 // SetTooltip sets the [TimeView.Tooltip]
 func (t *TimeView) SetTooltip(v string) *TimeView { t.Tooltip = v; return t }
 
 // DateViewType is the [types.Type] for [DateView]
-var DateViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.DateView", IDName: "date-view", Doc: "DateView is a view for selecting a date", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "the time that we are viewing"}, {Name: "ConfigTime", Doc: "ConfigTime is the time that was configured"}}, Instance: &DateView{}})
+var DateViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.DateView", IDName: "date-view", Doc: "DateView is a view for selecting a date", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "Time is the time that we are viewing"}}, Instance: &DateView{}})
 
 // NewDateView returns a new [DateView] with the given optional parent:
 // DateView is a view for selecting a date
