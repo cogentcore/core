@@ -103,6 +103,24 @@ func AddInit[T Widget](p *Plan, name string, init func(w T)) {
 	slog.Error("core.AddInit: child not found", "name", name)
 }
 
+// AddChild adds a new [WidgetBase.Maker] to the the given parent widget that
+// adds a [PlanItem] with the given init function using [Add]. In other words,
+// this adds a maker that will add a child to the given parent.
+func AddChild[T Widget](parent Widget, init func(w T)) {
+	parent.AsWidget().Maker(func(p *Plan) {
+		Add(p, init)
+	})
+}
+
+// AddChildAt adds a new [WidgetBase.Maker] to the the given parent widget that
+// adds a [PlanItem] with the given name and init function using [AddAt]. In other
+// words, this adds a maker that will add a child to the given parent.
+func AddChildAt[T Widget](parent Widget, name string, init func(w T)) {
+	parent.AsWidget().Maker(func(p *Plan) {
+		AddAt(p, name, init)
+	})
+}
+
 // Add adds a new [PlanItem] to the given [Plan] with the given name and functions.
 // It should typically not be called by end-user code; see the generic
 // [Add], [AddAt], [AddNew], and [AddInit] functions instead.
