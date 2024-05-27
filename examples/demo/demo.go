@@ -9,7 +9,7 @@ package main
 import (
 	"embed"
 	"fmt"
-	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 
@@ -454,15 +454,10 @@ func makeViews(ts *core.Tabs) {
 
 	sp := core.NewSplits(vts.NewTab("Tree view")).SetSplits(0.3, 0.7)
 	tv := views.NewTreeViewFrame(sp).SetText("Root")
-	// fmt.Println("calling make tree")
-	makeTree(tv, 0, 3, 5)
+	makeTree(tv, 0)
 	tv.RootSetViewIndex()
 
-	sv := views.NewStructView(sp)
-	sv.Style(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-	})
-	sv.SetStruct(tv)
+	sv := views.NewStructView(sp).SetStruct(tv)
 
 	tv.OnSelect(func(e events.Event) {
 		if len(tv.SelectedNodes) > 0 {
@@ -470,24 +465,17 @@ func makeViews(ts *core.Tabs) {
 			sv.Update()
 		}
 	})
-	// fmt.Println(&tv, tv.Listeners)
 
 	textEditors(vts)
 }
 
-func makeTree(tv *views.TreeView, iter, maxIter, maxKids int) {
-	if iter > maxIter {
+func makeTree(tv *views.TreeView, round int) {
+	if round > 2 {
 		return
 	}
-	n := rand.Intn(maxKids)
-	if iter == 0 {
-		n = maxKids
-	}
-	iter++
-	tv.SetNChildren(n, views.TreeViewType, "Child ")
-	for j := 0; j < n; j++ {
-		kt := tv.Child(j).(*views.TreeView)
-		makeTree(kt, iter, maxIter, maxKids)
+	for i := range 3 {
+		n := views.NewTreeView(tv).SetText("Child " + strconv.Itoa(i))
+		makeTree(n, round+1)
 	}
 }
 
