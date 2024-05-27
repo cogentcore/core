@@ -73,128 +73,128 @@ func (sv *StructView) OnInit() {
 			s.Columns = 2
 		}
 	})
-}
 
-func (sv *StructView) Make(p *core.Plan) {
-	if reflectx.AnyIsNil(sv.Struct) {
-		return
-	}
-
-	sc := true
-	if len(NoSentenceCaseFor) > 0 {
-		sc = !NoSentenceCaseForType(types.TypeNameValue(sv.Struct))
-	}
-
-	shouldShow := func(parent reflect.Value, field reflect.StructField) bool {
-		if field.Tag.Get("view") == "-" {
-			return false
+	sv.Maker(func(p *core.Plan) {
+		if reflectx.AnyIsNil(sv.Struct) {
+			return
 		}
-		if ss, ok := reflectx.UnderlyingPointer(parent).Interface().(core.ShouldShower); ok {
-			sv.isShouldShower = true
-			if !ss.ShouldShow(field.Name) {
+
+		sc := true
+		if len(NoSentenceCaseFor) > 0 {
+			sc = !NoSentenceCaseForType(types.TypeNameValue(sv.Struct))
+		}
+
+		shouldShow := func(parent reflect.Value, field reflect.StructField) bool {
+			if field.Tag.Get("view") == "-" {
 				return false
 			}
-		}
-		return true
-	}
-
-	addField := func(parent reflect.Value, field reflect.StructField, value reflect.Value, name string) {
-		label := name
-		if sc {
-			label = strcase.ToSentence(label)
-		}
-		labnm := fmt.Sprintf("label-%v", name)
-		valnm := fmt.Sprintf("value-%v", name)
-		readOnlyTag := field.Tag.Get("edit") == "-"
-		def, hasDef := field.Tag.Lookup("default")
-
-		var labelWidget *core.Text
-		var valueWidget core.Value
-
-		core.AddAt(p, labnm, func(w *core.Text) {
-			labelWidget = w
-			w.Style(func(s *styles.Style) {
-				s.SetTextWrap(false)
-			})
-			doc, _ := types.GetDoc(value, parent, field, label)
-			w.SetTooltip(doc)
-			if hasDef {
-				w.SetTooltip("(Default: " + def + ") " + w.Tooltip)
-				var isDef bool
-				w.Style(func(s *styles.Style) {
-					isDef = reflectx.ValueIsDefault(value, def)
-					dcr := "(Double click to reset to default) "
-					if !isDef {
-						s.Color = colors.C(colors.Scheme.Primary.Base)
-						s.Cursor = cursors.Poof
-						if !strings.HasPrefix(w.Tooltip, dcr) {
-							w.SetTooltip(dcr + w.Tooltip)
-						}
-					} else {
-						w.SetTooltip(strings.TrimPrefix(w.Tooltip, dcr))
-					}
-				})
-				w.OnDoubleClick(func(e events.Event) {
-					if isDef {
-						return
-					}
-					e.SetHandled()
-					err := reflectx.SetFromDefaultTag(value, def)
-					if err != nil {
-						core.ErrorSnackbar(w, err, "Error setting default value")
-					} else {
-						w.Update()
-						valueWidget.Update()
-						valueWidget.AsWidget().SendChange(e)
-					}
-				})
-			}
-		}, func(w *core.Text) {
-			w.SetText(label)
-		})
-
-		core.AddNew(p, valnm, func() core.Value {
-			w := core.NewValue(reflectx.UnderlyingPointer(value).Interface(), field.Tag)
-			valueWidget = w
-			wb := w.AsWidget()
-			wb.OnInput(func(e events.Event) {
-				sv.Send(events.Input, e)
-				if field.Tag.Get("immediate") == "+" {
-					wb.SendChange(e)
+			if ss, ok := reflectx.UnderlyingPointer(parent).Interface().(core.ShouldShower); ok {
+				sv.isShouldShower = true
+				if !ss.ShouldShow(field.Name) {
+					return false
 				}
+			}
+			return true
+		}
+
+		addField := func(parent reflect.Value, field reflect.StructField, value reflect.Value, name string) {
+			label := name
+			if sc {
+				label = strcase.ToSentence(label)
+			}
+			labnm := fmt.Sprintf("label-%v", name)
+			valnm := fmt.Sprintf("value-%v", name)
+			readOnlyTag := field.Tag.Get("edit") == "-"
+			def, hasDef := field.Tag.Lookup("default")
+
+			var labelWidget *core.Text
+			var valueWidget core.Value
+
+			core.AddAt(p, labnm, func(w *core.Text) {
+				labelWidget = w
+				w.Style(func(s *styles.Style) {
+					s.SetTextWrap(false)
+				})
+				doc, _ := types.GetDoc(value, parent, field, label)
+				w.SetTooltip(doc)
+				if hasDef {
+					w.SetTooltip("(Default: " + def + ") " + w.Tooltip)
+					var isDef bool
+					w.Style(func(s *styles.Style) {
+						isDef = reflectx.ValueIsDefault(value, def)
+						dcr := "(Double click to reset to default) "
+						if !isDef {
+							s.Color = colors.C(colors.Scheme.Primary.Base)
+							s.Cursor = cursors.Poof
+							if !strings.HasPrefix(w.Tooltip, dcr) {
+								w.SetTooltip(dcr + w.Tooltip)
+							}
+						} else {
+							w.SetTooltip(strings.TrimPrefix(w.Tooltip, dcr))
+						}
+					})
+					w.OnDoubleClick(func(e events.Event) {
+						if isDef {
+							return
+						}
+						e.SetHandled()
+						err := reflectx.SetFromDefaultTag(value, def)
+						if err != nil {
+							core.ErrorSnackbar(w, err, "Error setting default value")
+						} else {
+							w.Update()
+							valueWidget.Update()
+							valueWidget.AsWidget().SendChange(e)
+						}
+					})
+				}
+			}, func(w *core.Text) {
+				w.SetText(label)
 			})
-			if !sv.IsReadOnly() && !readOnlyTag {
-				wb.OnChange(func(e events.Event) {
-					sv.SendChange(e)
-					if hasDef {
-						labelWidget.Update()
-					}
-					if sv.isShouldShower {
-						sv.Update()
+
+			core.AddNew(p, valnm, func() core.Value {
+				w := core.NewValue(reflectx.UnderlyingPointer(value).Interface(), field.Tag)
+				valueWidget = w
+				wb := w.AsWidget()
+				wb.OnInput(func(e events.Event) {
+					sv.Send(events.Input, e)
+					if field.Tag.Get("immediate") == "+" {
+						wb.SendChange(e)
 					}
 				})
-			}
-			return w
-		}, func(w core.Value) {
-			w.AsWidget().SetReadOnly(sv.IsReadOnly() || readOnlyTag)
-			core.Bind(reflectx.UnderlyingPointer(value).Interface(), w)
-		})
-	}
-
-	reflectx.WalkFields(reflectx.Underlying(reflect.ValueOf(sv.Struct)),
-		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
-			return shouldShow(parent, field)
-		},
-		func(parent reflect.Value, field reflect.StructField, value reflect.Value) {
-			if field.Tag.Get("view") == "add-fields" && field.Type.Kind() == reflect.Struct {
-				reflectx.WalkFields(value,
-					func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) bool {
-						return shouldShow(parent, sfield)
-					},
-					func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) {
-						addField(parent, sfield, value, field.Name+" • "+sfield.Name)
+				if !sv.IsReadOnly() && !readOnlyTag {
+					wb.OnChange(func(e events.Event) {
+						sv.SendChange(e)
+						if hasDef {
+							labelWidget.Update()
+						}
+						if sv.isShouldShower {
+							sv.Update()
+						}
 					})
-			}
-			addField(parent, field, value, field.Name)
-		})
+				}
+				return w
+			}, func(w core.Value) {
+				w.AsWidget().SetReadOnly(sv.IsReadOnly() || readOnlyTag)
+				core.Bind(reflectx.UnderlyingPointer(value).Interface(), w)
+			})
+		}
+
+		reflectx.WalkFields(reflectx.Underlying(reflect.ValueOf(sv.Struct)),
+			func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
+				return shouldShow(parent, field)
+			},
+			func(parent reflect.Value, field reflect.StructField, value reflect.Value) {
+				if field.Tag.Get("view") == "add-fields" && field.Type.Kind() == reflect.Struct {
+					reflectx.WalkFields(value,
+						func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) bool {
+							return shouldShow(parent, sfield)
+						},
+						func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) {
+							addField(parent, sfield, value, field.Name+" • "+sfield.Name)
+						})
+				}
+				addField(parent, field, value, field.Name)
+			})
+	})
 }
