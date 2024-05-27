@@ -171,7 +171,7 @@ func (p *Plan) buildWidget(w Widget) {
 			cw.SetName(name)
 			tree.SetParent(cw, wb)
 			for _, i := range child.Init {
-				i(wb.This().(Widget))
+				i(cw)
 			}
 			return cw
 		}, func(n tree.Node) { n.Destroy() })
