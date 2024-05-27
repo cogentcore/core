@@ -44,77 +44,76 @@ func (cv *ColorView) SetHCT(hct hct.HCT) *ColorView {
 
 func (cv *ColorView) OnInit() {
 	cv.Frame.OnInit()
-}
-
-func (cv *ColorView) Make(p *core.Plan) {
-	if cv.HasChildren() {
-		return
-	}
-
-	cv.Style(func(s *styles.Style) {
-		s.Direction = styles.Column
-	})
-
-	sf := func(s *styles.Style) {
-		s.Min.Y.Em(2)
-		s.Min.X.Em(6)
-		s.Max.X.Em(40)
-		s.Grow.Set(1, 0)
-	}
-
-	hue := core.NewSlider(cv).SetMin(0).SetMax(360).SetValue(cv.Color.Hue).
-		SetTooltip("The hue, which is the spectral identity of the color (red, green, blue, etc) in degrees")
-	hue.OnInput(func(e events.Event) {
-		cv.Color.SetHue(hue.Value)
-		cv.SetHCT(cv.Color)
-	})
-	hue.Style(func(s *styles.Style) {
-		hue.ValueColor = nil
-		hue.ThumbColor = colors.C(cv.Color)
-		g := gradient.NewLinear()
-		for h := float32(0); h <= 360; h += 5 {
-			gc := cv.Color.WithHue(h)
-			g.AddStop(gc.AsRGBA(), h/360)
+	cv.Maker(func(p *core.Plan) {
+		if cv.HasChildren() { // TODO(config)
+			return
 		}
-		s.Background = g
-	})
-	hue.StyleFinal(sf)
 
-	chroma := core.NewSlider(cv).SetMin(0).SetMax(150).SetValue(cv.Color.Chroma).
-		SetTooltip("The chroma, which is the colorfulness/saturation of the color")
-	chroma.OnInput(func(e events.Event) {
-		cv.Color.SetChroma(chroma.Value)
-		cv.SetHCT(cv.Color)
-	})
-	chroma.Style(func(s *styles.Style) {
-		chroma.ValueColor = nil
-		chroma.ThumbColor = colors.C(cv.Color)
-		g := gradient.NewLinear()
-		for c := float32(0); c <= 150; c += 5 {
-			gc := cv.Color.WithChroma(c)
-			g.AddStop(gc.AsRGBA(), c/150)
-		}
-		s.Background = g
-	})
-	chroma.StyleFinal(sf)
+		cv.Style(func(s *styles.Style) {
+			s.Direction = styles.Column
+		})
 
-	tone := core.NewSlider(cv).SetMin(0).SetMax(100).SetValue(cv.Color.Tone).
-		SetTooltip("The tone, which is the lightness of the color")
-	tone.OnInput(func(e events.Event) {
-		cv.Color.SetTone(tone.Value)
-		cv.SetHCT(cv.Color)
-	})
-	tone.Style(func(s *styles.Style) {
-		tone.ValueColor = nil
-		tone.ThumbColor = colors.C(cv.Color)
-		g := gradient.NewLinear()
-		for c := float32(0); c <= 100; c += 5 {
-			gc := cv.Color.WithTone(c)
-			g.AddStop(gc.AsRGBA(), c/100)
+		sf := func(s *styles.Style) {
+			s.Min.Y.Em(2)
+			s.Min.X.Em(6)
+			s.Max.X.Em(40)
+			s.Grow.Set(1, 0)
 		}
-		s.Background = g
+
+		hue := core.NewSlider(cv).SetMin(0).SetMax(360).SetValue(cv.Color.Hue).
+			SetTooltip("The hue, which is the spectral identity of the color (red, green, blue, etc) in degrees")
+		hue.OnInput(func(e events.Event) {
+			cv.Color.SetHue(hue.Value)
+			cv.SetHCT(cv.Color)
+		})
+		hue.Style(func(s *styles.Style) {
+			hue.ValueColor = nil
+			hue.ThumbColor = colors.C(cv.Color)
+			g := gradient.NewLinear()
+			for h := float32(0); h <= 360; h += 5 {
+				gc := cv.Color.WithHue(h)
+				g.AddStop(gc.AsRGBA(), h/360)
+			}
+			s.Background = g
+		})
+		hue.StyleFinal(sf)
+
+		chroma := core.NewSlider(cv).SetMin(0).SetMax(150).SetValue(cv.Color.Chroma).
+			SetTooltip("The chroma, which is the colorfulness/saturation of the color")
+		chroma.OnInput(func(e events.Event) {
+			cv.Color.SetChroma(chroma.Value)
+			cv.SetHCT(cv.Color)
+		})
+		chroma.Style(func(s *styles.Style) {
+			chroma.ValueColor = nil
+			chroma.ThumbColor = colors.C(cv.Color)
+			g := gradient.NewLinear()
+			for c := float32(0); c <= 150; c += 5 {
+				gc := cv.Color.WithChroma(c)
+				g.AddStop(gc.AsRGBA(), c/150)
+			}
+			s.Background = g
+		})
+		chroma.StyleFinal(sf)
+
+		tone := core.NewSlider(cv).SetMin(0).SetMax(100).SetValue(cv.Color.Tone).
+			SetTooltip("The tone, which is the lightness of the color")
+		tone.OnInput(func(e events.Event) {
+			cv.Color.SetTone(tone.Value)
+			cv.SetHCT(cv.Color)
+		})
+		tone.Style(func(s *styles.Style) {
+			tone.ValueColor = nil
+			tone.ThumbColor = colors.C(cv.Color)
+			g := gradient.NewLinear()
+			for c := float32(0); c <= 100; c += 5 {
+				gc := cv.Color.WithTone(c)
+				g.AddStop(gc.AsRGBA(), c/100)
+			}
+			s.Background = g
+		})
+		tone.StyleFinal(sf)
 	})
-	tone.StyleFinal(sf)
 }
 
 /*

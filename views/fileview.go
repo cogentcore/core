@@ -98,38 +98,72 @@ type FileView struct {
 
 func (fv *FileView) OnInit() {
 	fv.Frame.OnInit()
-	fv.HandleEvents()
-	fv.SetStyles()
-}
-
-func (fv *FileView) SetStyles() {
 	fv.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
-	/*
-		fv.OnWidgetAdded(func(w core.Widget) {
-			pfrom := w.PathFrom(fv)
-			switch pfrom {
-			case "path-tbar":
-				fr := w.(*core.Frame)
-				core.ToolbarStyles(fr)
-				w.Style(func(s *styles.Style) {
-					s.Gap.X.Dp(4)
-				})
-			case "path-tbar/path-text":
-				w.Style(func(s *styles.Style) {
-					s.SetTextWrap(false)
-				})
-			case "path-tbar/path":
-				w.Style(func(s *styles.Style) {
-					s.Min.X.Ch(60)
-					s.Max.X.Zero()
-					s.Grow.Set(1, 0)
-				})
+
+	fv.OnKeyChord(func(e events.Event) {
+		kf := keymap.Of(e.KeyChord())
+		if core.DebugSettings.KeyEventTrace {
+			slog.Info("FileView KeyInput", "widget", fv, "keyFunction", kf)
+		}
+		switch kf {
+		case keymap.Jump, keymap.WordLeft:
+			e.SetHandled()
+			fv.DirPathUp()
+		case keymap.Insert, keymap.InsertAfter, keymap.Open, keymap.SelectMode:
+			e.SetHandled()
+			if fv.SelectFile() {
+				fv.Send(events.DoubleClick, e) // will close dialog
 			}
+		case keymap.Search:
+			e.SetHandled()
+			sf := fv.SelectField()
+			sf.SetFocusEvent()
+		}
+	})
+
+	fv.Maker(func(p *core.Plan) {
+		if len(core.RecentPaths) == 0 {
+			core.OpenRecentPaths()
+		}
+		fv.Scene.UpdateTitle("Files: " + fv.DirPath)
+		core.RecentPaths.AddPath(fv.DirPath, core.SystemSettings.SavedPathsMax)
+		core.SaveRecentPaths()
+		fv.ReadFiles()
+
+		if fv.PrevPath != fv.DirPath {
+			if core.TheApp.Platform() != system.MacOS {
+				// mac is not supported in a high-capacity fashion at this point
+				if fv.PrevPath == "" {
+					fv.ConfigWatcher()
+				} else {
+					fv.Watcher.Remove(fv.PrevPath)
+				}
+				fv.Watcher.Add(fv.DirPath)
+				if fv.PrevPath == "" {
+					fv.WatchWatcher()
+				}
+			}
+			fv.PrevPath = fv.DirPath
+		}
+
+		files := core.AddAt(p, "files", func(w *core.Frame) {
+			w.Style(func(s *styles.Style) {
+				s.Grow.Set(1, 1)
+			})
 		})
-	*/
+		sel := core.AddAt(p, "sel", func(w *core.Frame) {
+			w.Style(func(s *styles.Style) {
+				s.Grow.Set(1, 0)
+				s.Gap.X.Dp(4)
+			})
+		})
+
+		fv.ConfigFilesRow(files)
+		fv.ConfigSelRow(sel)
+	})
 }
 
 func (fv *FileView) Disconnect() {
@@ -218,49 +252,6 @@ var FileViewKindColorMap = map[string]string{
 	"folder": "pref(link)",
 }
 
-func (fv *FileView) Make(p *core.Plan) {
-	if len(core.RecentPaths) == 0 {
-		core.OpenRecentPaths()
-	}
-	fv.Scene.UpdateTitle("Files: " + fv.DirPath)
-	core.RecentPaths.AddPath(fv.DirPath, core.SystemSettings.SavedPathsMax)
-	core.SaveRecentPaths()
-	fv.ReadFiles()
-
-	if fv.PrevPath != fv.DirPath {
-		if core.TheApp.Platform() != system.MacOS {
-			// mac is not supported in a high-capacity fashion at this point
-			if fv.PrevPath == "" {
-				fv.ConfigWatcher()
-			} else {
-				fv.Watcher.Remove(fv.PrevPath)
-			}
-			fv.Watcher.Add(fv.DirPath)
-			if fv.PrevPath == "" {
-				fv.WatchWatcher()
-			}
-		}
-		fv.PrevPath = fv.DirPath
-	}
-
-	files := core.AddAt(p, "files", func(w *core.Frame) {
-		w.Style(func(s *styles.Style) {
-			s.Grow.Set(1, 1)
-		})
-	})
-	sel := core.AddAt(p, "sel", func(w *core.Frame) {
-		w.Style(func(s *styles.Style) {
-			s.Grow.Set(1, 0)
-			s.Gap.X.Dp(4)
-		})
-	})
-
-	fv.ConfigFilesRow(files)
-	fv.ConfigSelRow(sel)
-}
-
-// MakeToolbar configures the given toolbar to have file view
-// actions and completions.
 func (fv *FileView) MakeToolbar(p *core.Plan) {
 	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
@@ -728,32 +719,6 @@ func (fv *FileView) SaveSortSettings() {
 	// fmt.Printf("sort: %v\n", core.Settings.FileViewSort)
 	core.ErrorSnackbar(fv, core.SaveSettings(core.SystemSettings), "Error saving settings")
 }
-
-func (fv *FileView) HandleEvents() {
-	fv.OnKeyChord(func(e events.Event) {
-		kf := keymap.Of(e.KeyChord())
-		if core.DebugSettings.KeyEventTrace {
-			slog.Info("FileView KeyInput", "widget", fv, "keyFunction", kf)
-		}
-		switch kf {
-		case keymap.Jump, keymap.WordLeft:
-			e.SetHandled()
-			fv.DirPathUp()
-		case keymap.Insert, keymap.InsertAfter, keymap.Open, keymap.SelectMode:
-			e.SetHandled()
-			if fv.SelectFile() {
-				fv.Send(events.DoubleClick, e) // will close dialog
-			}
-		case keymap.Search:
-			e.SetHandled()
-			sf := fv.SelectField()
-			sf.SetFocusEvent()
-		}
-	})
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//  Completion
 
 // FileComplete finds the possible completions for the file field
 func (fv *FileView) FileComplete(data any, text string, posLine, posChar int) (md complete.Matches) {
