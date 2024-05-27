@@ -153,21 +153,63 @@ type DiffView struct {
 
 func (dv *DiffView) OnInit() {
 	dv.Frame.OnInit()
-	dv.SetStyles()
-}
-
-func (dv *DiffView) SetStyles() {
 	dv.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
 	dv.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(dv) {
-		case "text-a", "text-b":
+		case "text-a", "text-b": // TODO(config)
 			w.Style(func(s *styles.Style) {
 				s.Min.X.Ch(80)
 				s.Min.Y.Em(40)
 			})
 		}
+	})
+
+	dv.Maker(func(p *core.Plan) {
+		if dv.HasChildren() { // TODO(config)
+			return
+		}
+		dv.BufA = NewBuffer().SetFilename(dv.FileA)
+		dv.BufB = NewBuffer().SetFilename(dv.FileB)
+		dv.BufA.Options.LineNumbers = true
+		dv.BufA.Stat() // update markup
+		dv.BufB.Options.LineNumbers = true
+		dv.BufB.Stat() // update markup
+		av := NewDiffTextEditor(dv).SetBuffer(dv.BufA)
+		av.SetName("text-a")
+		av.SetReadOnly(true)
+		bv := NewDiffTextEditor(dv).SetBuffer(dv.BufB)
+		bv.SetName("text-b")
+		bv.SetReadOnly(true)
+
+		av.On(events.Scroll, func(e events.Event) {
+			// bv.ScrollDelta(e)
+			bv.Geom.Scroll.Y = av.Geom.Scroll.Y
+			bv.NeedsRender()
+		})
+		bv.On(events.Scroll, func(e events.Event) {
+			// av.ScrollDelta(e)
+			av.Geom.Scroll.Y = bv.Geom.Scroll.Y
+			av.NeedsRender()
+		})
+		inInputEvent := false
+		av.On(events.Input, func(e events.Event) {
+			if inInputEvent {
+				return
+			}
+			inInputEvent = true
+			bv.SetCursorShow(av.CursorPos)
+			inInputEvent = false
+		})
+		bv.On(events.Input, func(e events.Event) {
+			if inInputEvent {
+				return
+			}
+			inInputEvent = true
+			av.SetCursorShow(bv.CursorPos)
+			inInputEvent = false
+		})
 	})
 }
 
@@ -487,53 +529,6 @@ func (dv *DiffView) UndoDiff(ab int) error {
 	return nil
 }
 
-func (dv *DiffView) Make(p *core.Plan) {
-	if dv.HasChildren() {
-		return
-	}
-	dv.BufA = NewBuffer().SetFilename(dv.FileA)
-	dv.BufB = NewBuffer().SetFilename(dv.FileB)
-	dv.BufA.Options.LineNumbers = true
-	dv.BufA.Stat() // update markup
-	dv.BufB.Options.LineNumbers = true
-	dv.BufB.Stat() // update markup
-	av := NewDiffTextEditor(dv).SetBuffer(dv.BufA)
-	av.SetName("text-a")
-	av.SetReadOnly(true)
-	bv := NewDiffTextEditor(dv).SetBuffer(dv.BufB)
-	bv.SetName("text-b")
-	bv.SetReadOnly(true)
-
-	av.On(events.Scroll, func(e events.Event) {
-		// bv.ScrollDelta(e)
-		bv.Geom.Scroll.Y = av.Geom.Scroll.Y
-		bv.NeedsRender()
-	})
-	bv.On(events.Scroll, func(e events.Event) {
-		// av.ScrollDelta(e)
-		av.Geom.Scroll.Y = bv.Geom.Scroll.Y
-		av.NeedsRender()
-	})
-	inInputEvent := false
-	av.On(events.Input, func(e events.Event) {
-		if inInputEvent {
-			return
-		}
-		inInputEvent = true
-		bv.SetCursorShow(av.CursorPos)
-		inInputEvent = false
-	})
-	bv.On(events.Input, func(e events.Event) {
-		if inInputEvent {
-			return
-		}
-		inInputEvent = true
-		av.SetCursorShow(bv.CursorPos)
-		inInputEvent = false
-	})
-}
-
-// MakeToolbar configures a [core.Toolbar] for this view
 func (dv *DiffView) MakeToolbar(tb *core.Toolbar) {
 	txta := "A: " + dirs.DirAndFile(dv.FileA)
 	if dv.RevA != "" {

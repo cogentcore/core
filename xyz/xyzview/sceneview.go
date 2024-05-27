@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/xyz"
 )
 
-// SceneView provides a toolbar controller for an xyz.Scene,
+// SceneView provides a toolbar controller for an [xyz.Scene],
 // and manipulation abilities.
 type SceneView struct {
 	core.Frame
@@ -29,12 +29,12 @@ func (sv *SceneView) OnInit() {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
-}
 
-func (sv *SceneView) Make(p *core.Plan) {
-	core.AddAt(p, "scene", func(w *Scene) {})
-	core.AddAt(p, "tb", func(w *core.Toolbar) {
-		w.Maker(sv.MakeToolbar)
+	sv.Maker(func(p *core.Plan) {
+		core.AddAt(p, "scene", func(w *Scene) {})
+		core.AddAt(p, "tb", func(w *core.Toolbar) {
+			w.Maker(sv.MakeToolbar)
+		})
 	})
 }
 
