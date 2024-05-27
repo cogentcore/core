@@ -176,7 +176,7 @@ func (ts *Tabs) OnInit() {
 	})
 }
 
-// NumTabs returns number of tabs
+// NumTabs returns the number of tabs.
 func (ts *Tabs) NumTabs() int {
 	fr := ts.FrameWidget()
 	if fr == nil {
@@ -459,9 +459,6 @@ func (ts *Tabs) UnselectOtherTabs(idx int) {
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// Tab
-
 // Tab is a tab button that contains any, all, or none of a label, an icon,
 // and a close icon. Tabs should be made using the [Tabs.NewTab] function.
 type Tab struct { //core:no-new
@@ -495,12 +492,7 @@ type Tab struct { //core:no-new
 }
 
 func (tb *Tab) OnInit() {
-	tb.WidgetBase.OnInit()
-	tb.HandleClickOnEnterSpace()
-	tb.SetStyles()
-}
-
-func (tb *Tab) SetStyles() {
+	tb.Frame.OnInit()
 	tb.MaxChars = 16
 	tb.CloseIcon = icons.Close
 	tb.Style(func(s *styles.Style) {
@@ -532,65 +524,67 @@ func (tb *Tab) SetStyles() {
 			}
 		}
 	})
+
+	tb.HandleClickOnEnterSpace()
+
+	tb.Maker(func(p *Plan) {
+		if tb.MaxChars > 0 { // TODO(config): find a better time to do this?
+			tb.Text = elide.Middle(tb.Text, tb.MaxChars)
+		}
+
+		if tb.Icon.IsSet() {
+			AddAt(p, "icon", func(w *Icon) {
+				w.Style(func(s *styles.Style) {
+					s.Font.Size.Dp(18)
+				})
+			}, func(w *Icon) {
+				w.SetIcon(tb.Icon)
+			})
+			if tb.Text != "" {
+				AddAt[*Space](p, "space")
+			}
+		}
+		if tb.Text != "" {
+			AddAt(p, "text", func(w *Text) {
+				w.Style(func(s *styles.Style) {
+					s.SetNonSelectable()
+					s.SetTextWrap(false)
+				})
+			}, func(w *Text) {
+				if tb.Type.Effective(tb) == FunctionalTabs {
+					w.SetType(TextBodyMedium)
+				} else {
+					w.SetType(TextLabelLarge)
+				}
+				w.SetText(tb.Text)
+			})
+		}
+		if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
+			AddAt[*Space](p, "close-space")
+			AddAt(p, "close", func(w *Button) {
+				w.SetType(ButtonAction)
+				w.Style(func(s *styles.Style) {
+					s.Padding.Zero()
+					s.Border.Radius = styles.BorderRadiusFull
+				})
+				w.OnClick(func(e events.Event) {
+					ts := tb.Tabs()
+					idx := ts.TabIndexByName(tb.Nm)
+					// if OnlyCloseActiveTab is on, only process delete when already selected
+					if SystemSettings.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
+						ts.SelectTabIndex(idx)
+					} else {
+						ts.DeleteTabIndex(idx)
+					}
+				})
+			}, func(w *Button) {
+				w.SetIcon(tb.CloseIcon)
+			})
+		}
+	})
 }
 
 // Tabs returns the parent [Tabs] of this [Tab].
 func (tb *Tab) Tabs() *Tabs {
 	return tb.Parent().Parent().(*Tabs)
-}
-
-func (tb *Tab) Make(p *Plan) {
-	if tb.MaxChars > 0 {
-		tb.Text = elide.Middle(tb.Text, tb.MaxChars)
-	}
-
-	if tb.Icon.IsSet() {
-		AddAt(p, "icon", func(w *Icon) {
-			w.Style(func(s *styles.Style) {
-				s.Font.Size.Dp(18)
-			})
-		}, func(w *Icon) {
-			w.SetIcon(tb.Icon)
-		})
-		if tb.Text != "" {
-			AddAt[*Space](p, "space")
-		}
-	}
-	if tb.Text != "" {
-		AddAt(p, "text", func(w *Text) {
-			w.Style(func(s *styles.Style) {
-				s.SetNonSelectable()
-				s.SetTextWrap(false)
-			})
-		}, func(w *Text) {
-			if tb.Type.Effective(tb) == FunctionalTabs {
-				w.SetType(TextBodyMedium)
-			} else {
-				w.SetType(TextLabelLarge)
-			}
-			w.SetText(tb.Text)
-		})
-	}
-	if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
-		AddAt[*Space](p, "close-space")
-		AddAt(p, "close", func(w *Button) {
-			w.SetType(ButtonAction)
-			w.Style(func(s *styles.Style) {
-				s.Padding.Zero()
-				s.Border.Radius = styles.BorderRadiusFull
-			})
-			w.OnClick(func(e events.Event) {
-				ts := tb.Tabs()
-				idx := ts.TabIndexByName(tb.Nm)
-				// if OnlyCloseActiveTab is on, only process delete when already selected
-				if SystemSettings.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
-					ts.SelectTabIndex(idx)
-				} else {
-					ts.DeleteTabIndex(idx)
-				}
-			})
-		}, func(w *Button) {
-			w.SetIcon(tb.CloseIcon)
-		})
-	}
 }
