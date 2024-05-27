@@ -30,11 +30,9 @@ func (sv *SceneView) OnInit() {
 		s.Grow.Set(1, 1)
 	})
 
-	sv.Maker(func(p *core.Plan) {
-		core.AddAt(p, "scene", func(w *Scene) {})
-		core.AddAt(p, "tb", func(w *core.Toolbar) {
-			w.Maker(sv.MakeToolbar)
-		})
+	core.AddChildAt(sv, "scene", func(w *Scene) {})
+	core.AddChildAt(sv, "tb", func(w *core.Toolbar) {
+		w.Maker(sv.MakeToolbar)
 	})
 }
 
