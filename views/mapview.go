@@ -96,11 +96,11 @@ func (mv *MapView) OnInit() {
 						mv.ContextMenu(m, key)
 					})
 				}
+				wb.Builder(func() {
+					BindMapKey(mapv, key, w)
+					wb.SetReadOnly(mv.IsReadOnly())
+				})
 				return w
-			}, func(w core.Value) {
-				wb := w.AsWidget()
-				BindMapKey(mapv, key, w)
-				wb.SetReadOnly(mv.IsReadOnly())
 			})
 			core.AddNew(p, valnm, func() core.Value {
 				val := mapv.MapIndex(key).Interface()
@@ -119,11 +119,11 @@ func (mv *MapView) OnInit() {
 						mv.ContextMenu(m, key)
 					})
 				}
+				wb.Builder(func() {
+					BindMapValue(mapv, key, w)
+					wb.SetReadOnly(mv.IsReadOnly())
+				})
 				return w
-			}, func(w core.Value) {
-				wb := w.AsWidget()
-				BindMapValue(mapv, key, w)
-				wb.SetReadOnly(mv.IsReadOnly())
 			})
 
 			if typeAny {
@@ -139,13 +139,14 @@ func (mv *MapView) OnInit() {
 						mv.DeleteChildByName(valnm) // force it to be updated
 						mv.Update()
 					})
-				}, func(w *core.Chooser) {
-					w.SetReadOnly(mv.IsReadOnly())
-					vtyp := types.TypeByValue(mapv.MapIndex(key).Interface())
-					if vtyp == nil {
-						vtyp = types.TypeByName("string") // default to string
-					}
-					w.SetCurrentValue(vtyp)
+					w.Builder(func() {
+						w.SetReadOnly(mv.IsReadOnly())
+						vtyp := types.TypeByValue(mapv.MapIndex(key).Interface())
+						if vtyp == nil {
+							vtyp = types.TypeByName("string") // default to string
+						}
+						w.SetCurrentValue(vtyp)
+					})
 				})
 			}
 		}

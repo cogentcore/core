@@ -315,8 +315,9 @@ func (fv *FileView) ConfigFilesRow(files *core.Plan) {
 		w.OnSelect(func(e events.Event) {
 			fv.FavesSelect(w.SelectedIndex)
 		})
-	}, func(w *TableView) {
-		w.ResetSelectedIndexes()
+		w.Builder(func() {
+			w.ResetSelectedIndexes()
+		})
 	})
 	core.AddAt(files, "files", func(w *TableView) {
 		w.SetFlag(false, SliceViewShowIndex)
@@ -400,15 +401,16 @@ func (fv *FileView) ConfigFilesRow(files *core.Plan) {
 			core.NewSeparator(m)
 			NewFuncButton(m, fv.NewFolder).SetIcon(icons.CreateNewFolder)
 		})
-	}, func(w *TableView) {
-		w.ResetSelectedIndexes()
-		w.SelectedField = "Name"
-		w.SelectedValue = fv.CurrentSelectedFile
-		fv.SelectedIndex = w.SelectedIndex
-		if w.SelectedIndex >= 0 {
-			w.ScrollToIndex(w.SelectedIndex)
-		}
-		// w.SortSlice()
+		w.Builder(func() {
+			w.ResetSelectedIndexes()
+			w.SelectedField = "Name"
+			w.SelectedValue = fv.CurrentSelectedFile
+			fv.SelectedIndex = w.SelectedIndex
+			if w.SelectedIndex >= 0 {
+				w.ScrollToIndex(w.SelectedIndex)
+			}
+			// w.SortSlice()
+		})
 	})
 }
 
@@ -439,9 +441,10 @@ func (fv *FileView) ConfigSelRow(sel *core.Plan) {
 				fv.SetSelFileAction(w.Text())
 			}
 		})
-	}, func(w *core.TextField) {
-		w.SetText(fv.CurrentSelectedFile)
 		w.StartFocus()
+		w.Builder(func() {
+			w.SetText(fv.CurrentSelectedFile)
+		})
 	})
 
 	core.AddAt(sel, "ext-text", func(w *core.Text) {

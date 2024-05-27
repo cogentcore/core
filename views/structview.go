@@ -148,8 +148,9 @@ func (sv *StructView) OnInit() {
 						}
 					})
 				}
-			}, func(w *core.Text) {
-				w.SetText(label)
+				w.Builder(func() {
+					w.SetText(label)
+				})
 			})
 
 			core.AddNew(p, valnm, func() core.Value {
@@ -173,10 +174,11 @@ func (sv *StructView) OnInit() {
 						}
 					})
 				}
+				wb.Builder(func() {
+					wb.SetReadOnly(sv.IsReadOnly() || readOnlyTag)
+					core.Bind(reflectx.UnderlyingPointer(value).Interface(), w)
+				})
 				return w
-			}, func(w core.Value) {
-				w.AsWidget().SetReadOnly(sv.IsReadOnly() || readOnlyTag)
-				core.Bind(reflectx.UnderlyingPointer(value).Interface(), w)
 			})
 		}
 

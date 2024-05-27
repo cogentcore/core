@@ -61,8 +61,9 @@ func (is *Inspector) OnInit() {
 				s.Grow.Set(1, 0)
 				s.Align.Self = styles.Center
 			})
-		}, func(w *core.Text) {
-			w.SetText(fmt.Sprintf("Inspector of %s (%s)", is.Root.Name(), labels.FriendlyTypeName(reflect.TypeOf(is.Root))))
+			w.Builder(func() {
+				w.SetText(fmt.Sprintf("Inspector of %s (%s)", is.Root.Name(), labels.FriendlyTypeName(reflect.TypeOf(is.Root))))
+			})
 		})
 		splits := core.AddAt(p, "splits", func(w *core.Splits) {
 			w.SetSplits(.3, .7)
@@ -111,9 +112,9 @@ func (is *Inspector) OnInit() {
 			w.OnChange(func(e events.Event) {
 				renderRebuild()
 			})
-		}, func(w *TreeView) {
-			// fmt.Println("sync tree")
-			w.SyncTree(is.Root)
+			w.Builder(func() {
+				w.SyncTree(is.Root)
+			})
 		})
 		core.AddAt(splits, "struct", func(w *StructView) {
 			w.OnChange(func(e events.Event) {
@@ -133,8 +134,9 @@ func (is *Inspector) OnInit() {
 					pselw.AsWidget().NeedsRender()
 				}
 			})
-		}, func(w *StructView) {
-			w.SetStruct(is.CurrentNode)
+			w.Builder(func() {
+				w.SetStruct(is.CurrentNode)
+			})
 		})
 	})
 }
@@ -265,9 +267,10 @@ func (is *Inspector) TreeView() *TreeView {
 func (is *Inspector) MakeToolbar(p *core.Plan) {
 	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool)
-	}, func(w *FuncButton) {
-		_, ok := is.Root.(*core.Scene)
-		w.SetEnabled(ok)
+		w.Builder(func() {
+			_, ok := is.Root.(*core.Scene)
+			w.SetEnabled(ok)
+		})
 	})
 	core.Add[*core.Separator](p)
 	core.Add(p, func(w *FuncButton) {
@@ -276,8 +279,9 @@ func (is *Inspector) MakeToolbar(p *core.Plan) {
 	})
 	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.Save).SetKey(keymap.Save)
-	}, func(w *FuncButton) {
-		w.SetEnabled(is.Filename != "")
+		w.Builder(func() {
+			w.SetEnabled(is.Filename != "")
+		})
 	})
 	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.SaveAs).SetKey(keymap.SaveAs)

@@ -72,12 +72,11 @@ func (sv *SliceViewInline) OnInit() {
 						sv.ContextMenu(m, i)
 					})
 				}
+				wb.Builder(func() {
+					core.Bind(val.Interface(), w)
+					wb.SetReadOnly(sv.IsReadOnly())
+				})
 				return w
-			}, func(w core.Value) {
-				wb := w.AsWidget()
-				core.Bind(val.Interface(), w)
-				// vv.SetSliceValue(val, sv.Slice, i, sv.ViewPath)
-				wb.SetReadOnly(sv.IsReadOnly())
 			})
 		}
 		if !sv.isArray && !sv.isFixedLength {

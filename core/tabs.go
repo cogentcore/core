@@ -537,8 +537,9 @@ func (tb *Tab) OnInit() {
 				w.Style(func(s *styles.Style) {
 					s.Font.Size.Dp(18)
 				})
-			}, func(w *Icon) {
-				w.SetIcon(tb.Icon)
+				w.Builder(func() {
+					w.SetIcon(tb.Icon)
+				})
 			})
 			if tb.Text != "" {
 				AddAt[*Space](p, "space")
@@ -550,13 +551,14 @@ func (tb *Tab) OnInit() {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
 				})
-			}, func(w *Text) {
-				if tb.Type.Effective(tb) == FunctionalTabs {
-					w.SetType(TextBodyMedium)
-				} else {
-					w.SetType(TextLabelLarge)
-				}
-				w.SetText(tb.Text)
+				w.Builder(func() {
+					if tb.Type.Effective(tb) == FunctionalTabs {
+						w.SetType(TextBodyMedium)
+					} else {
+						w.SetType(TextLabelLarge)
+					}
+					w.SetText(tb.Text)
+				})
 			})
 		}
 		if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
@@ -577,8 +579,9 @@ func (tb *Tab) OnInit() {
 						ts.DeleteTabIndex(idx)
 					}
 				})
-			}, func(w *Button) {
-				w.SetIcon(tb.CloseIcon)
+				w.Builder(func() {
+					w.SetIcon(tb.CloseIcon)
+				})
 			})
 		}
 	})

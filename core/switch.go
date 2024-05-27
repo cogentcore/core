@@ -196,8 +196,9 @@ func (sw *Switch) OnInit() {
 					s.SetTextWrap(false)
 					s.FillMargin = false
 				})
-			}, func(w *Text) {
-				w.SetText(sw.Text)
+				w.Builder(func() {
+					w.SetText(sw.Text)
+				})
 			})
 		}
 	})

@@ -358,8 +358,9 @@ func (tf *TextField) OnInit() {
 							tf.LeadingIconOnClick(e)
 						}
 					})
-				}, func(w *Button) {
-					w.SetIcon(tf.LeadingIcon)
+					w.Builder(func() {
+						w.SetIcon(tf.LeadingIcon)
+					})
 				})
 			}
 			if tf.TrailingIcon.IsSet() {
@@ -392,8 +393,9 @@ func (tf *TextField) OnInit() {
 							tf.TrailingIconOnClick(e)
 						}
 					})
-				}, func(w *Button) {
-					w.SetIcon(tf.TrailingIcon)
+					w.Builder(func() {
+						w.SetIcon(tf.TrailingIcon)
+					})
 				})
 			}
 		}

@@ -232,7 +232,6 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 			w.Style(func(s *styles.Style) {
 				s.Align.Self = styles.Center
 			})
-		}, func(w *core.Text) {
 			w.SetText("Index")
 		})
 	}
@@ -243,27 +242,28 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 			w.OnClick(func(e events.Event) {
 				tv.SortSliceAction(fli)
 			})
-		}, func(w *core.Button) {
-			htxt := ""
-			if lbl, ok := field.Tag.Lookup("label"); ok {
-				htxt = lbl
-			} else {
-				htxt = strcase.ToSentence(field.Name)
-			}
-			w.SetText(htxt)
-			w.Tooltip = htxt + " (click to sort by)"
-			doc, ok := types.GetDoc(reflect.Value{}, tv.ElementValue, field, htxt)
-			if ok && doc != "" {
-				w.Tooltip += ": " + doc
-			}
-			tv.headerWidths[fli] = len(htxt)
-			if fli == tv.SortIndex {
-				if tv.SortDescending {
-					w.SetIcon(icons.KeyboardArrowDown)
+			w.Builder(func() {
+				htxt := ""
+				if lbl, ok := field.Tag.Lookup("label"); ok {
+					htxt = lbl
 				} else {
-					w.SetIcon(icons.KeyboardArrowUp)
+					htxt = strcase.ToSentence(field.Name)
 				}
-			}
+				w.SetText(htxt)
+				w.Tooltip = htxt + " (click to sort by)"
+				doc, ok := types.GetDoc(reflect.Value{}, tv.ElementValue, field, htxt)
+				if ok && doc != "" {
+					w.Tooltip += ": " + doc
+				}
+				tv.headerWidths[fli] = len(htxt)
+				if fli == tv.SortIndex {
+					if tv.SortDescending {
+						w.SetIcon(icons.KeyboardArrowDown)
+					} else {
+						w.SetIcon(icons.KeyboardArrowUp)
+					}
+				}
+			})
 		})
 	}
 }
@@ -324,19 +324,19 @@ func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
 				})
 				wb.OnInput(tv.HandleEvent)
 			}
+			wb.Builder(func() {
+				// w.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
+				core.Bind(fval.Interface(), w)
+				wb.SetReadOnly(tv.IsReadOnly())
+				w.SetState(invis, states.Invisible)
+				if svi.HasStyleFunc() {
+					w.ApplyStyle()
+				}
+				if invis {
+					wb.SetSelected(false)
+				}
+			})
 			return w
-		}, func(w core.Value) {
-			wb := w.AsWidget()
-			// w.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
-			core.Bind(fval.Interface(), w)
-			wb.SetReadOnly(tv.IsReadOnly())
-			w.SetState(invis, states.Invisible)
-			if svi.HasStyleFunc() {
-				w.ApplyStyle()
-			}
-			if invis {
-				wb.SetSelected(false)
-			}
 		})
 	}
 }

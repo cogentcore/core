@@ -509,8 +509,9 @@ func (pl *PlotView) MakeColumns(p *core.Plan) {
 				cp.On = w.StateIs(states.Checked)
 				pl.UpdatePlot()
 			})
-		}, func(w *core.Switch) {
-			w.SetState(cp.On, states.Checked)
+			w.Builder(func() {
+				w.SetState(cp.On, states.Checked)
+			})
 		})
 		core.Add(fr, func(w *core.Button) {
 			w.SetText(cp.Column).SetType(core.ButtonAction).

@@ -214,8 +214,9 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 			w.Style(func(s *styles.Style) {
 				s.Align.Self = styles.Center
 			})
-		}, func(w *core.Text) {
-			w.SetText("Index")
+			w.Builder(func() {
+				w.SetText("Index")
+			})
 		})
 	}
 	for fli := 0; fli < tv.NCols; fli++ {
@@ -226,17 +227,17 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 			w.OnClick(func(e events.Event) {
 				tv.SortSliceAction(fli)
 			})
-		}, func(w *core.Button) {
-			w.SetText(field)
-			w.Tooltip = field + " (tap to sort by)"
-			tv.headerWidths[fli] = len(field)
-			if fli == tv.SortIndex {
-				if tv.SortDescending {
-					w.SetIcon(icons.KeyboardArrowDown)
-				} else {
-					w.SetIcon(icons.KeyboardArrowUp)
+			w.Builder(func() {
+				w.SetText(field).SetTooltip(field + " (tap to sort by)")
+				tv.headerWidths[fli] = len(field)
+				if fli == tv.SortIndex {
+					if tv.SortDescending {
+						w.SetIcon(icons.KeyboardArrowDown)
+					} else {
+						w.SetIcon(icons.KeyboardArrowUp)
+					}
 				}
-			}
+			})
 		})
 	}
 }
@@ -292,7 +293,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
 		if col.NumDims() == 1 {
 			str := ""
 			fval := float64(0)
-			core.AddNew(p, "grid/"+valnm, func() core.Value {
+			core.AddNew(p, "grid/"+valnm, func() core.Value { // TODO(config)
 				var w core.Value
 				if isstr {
 					w = core.NewValue(&str, "")
@@ -314,28 +315,28 @@ func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
 						tv.SendChange()
 					})
 				}
-				return w
-			}, func(w core.Value) {
-				wb := w.AsWidget()
-				if si < len(tv.Table.Indexes) {
-					if isstr {
-						str = tv.Table.Table.StringIndex(fli, tv.Table.Indexes[si])
-						core.Bind(&str, w)
-					} else {
-						fval = tv.Table.Table.FloatIndex(fli, tv.Table.Indexes[si])
-						core.Bind(&fval, w)
+				wb.Builder(func() {
+					if si < len(tv.Table.Indexes) {
+						if isstr {
+							str = tv.Table.Table.StringIndex(fli, tv.Table.Indexes[si])
+							core.Bind(&str, w)
+						} else {
+							fval = tv.Table.Table.FloatIndex(fli, tv.Table.Indexes[si])
+							core.Bind(&fval, w)
+						}
 					}
-				}
-				wb.SetReadOnly(tv.IsReadOnly())
-				w.SetState(invis, states.Invisible)
-				if svi.HasStyleFunc() {
-					w.ApplyStyle()
-				}
-				if invis {
-					wb.SetSelected(false)
-				}
+					wb.SetReadOnly(tv.IsReadOnly())
+					w.SetState(invis, states.Invisible)
+					if svi.HasStyleFunc() {
+						w.ApplyStyle()
+					}
+					if invis {
+						wb.SetSelected(false)
+					}
+				})
+				return w
 			})
-		} else {
+		} else { // TODO(config)
 			/*
 					core.Configure(c, "grid/"+valnm, func() core.Value {
 						var w core.Value

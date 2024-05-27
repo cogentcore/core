@@ -469,10 +469,11 @@ func (tv *TreeView) OnInit() {
 					}
 				}
 			})
-		}, func(w *core.Switch) {
-			if tv.This().(TreeViewer).CanOpen() {
-				tv.SetBranchState()
-			}
+			w.Builder(func() {
+				if tv.This().(TreeViewer).CanOpen() {
+					tv.SetBranchState()
+				}
+			})
 		})
 		if tv.Icon.IsSet() {
 			core.AddAt(parts, "icon", func(w *core.Icon) {
@@ -481,8 +482,9 @@ func (tv *TreeView) OnInit() {
 					s.Margin.Zero()
 					s.Padding.Zero()
 				})
-			}, func(w *core.Icon) {
-				w.SetIcon(tv.Icon)
+				w.Builder(func() {
+					w.SetIcon(tv.Icon)
+				})
 			})
 		}
 		core.AddAt(parts, "text", func(w *core.Text) {

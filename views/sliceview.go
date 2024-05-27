@@ -629,19 +629,20 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i, si int) {
 				sv.SendChange(e)
 			})
 		}
+		wb.Builder(func() {
+			wb := w.AsWidget()
+			// w.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
+			core.Bind(val.Interface(), w)
+			wb.SetReadOnly(sv.IsReadOnly())
+			w.SetState(invis, states.Invisible)
+			if sv.This().(SliceViewer).HasStyleFunc() {
+				w.ApplyStyle()
+			}
+			if invis {
+				wb.SetSelected(false)
+			}
+		})
 		return w
-	}, func(w core.Value) {
-		wb := w.AsWidget()
-		// w.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
-		core.Bind(val.Interface(), w)
-		wb.SetReadOnly(sv.IsReadOnly())
-		w.SetState(invis, states.Invisible)
-		if sv.This().(SliceViewer).HasStyleFunc() {
-			w.ApplyStyle()
-		}
-		if invis {
-			wb.SetSelected(false)
-		}
 	})
 
 }
@@ -687,13 +688,14 @@ func (sv *SliceViewBase) MakeGridIndex(p *core.Plan, i, si int, itxt string, inv
 				svi.DropDeleteSource(e)
 			})
 		}
-	}, func(w *core.Text) {
-		w.SetText(sitxt)
-		w.SetReadOnly(sv.IsReadOnly())
-		w.SetState(invis, states.Invisible)
-		if invis {
-			w.SetSelected(false)
-		}
+		w.Builder(func() {
+			w.SetText(sitxt)
+			w.SetReadOnly(sv.IsReadOnly())
+			w.SetState(invis, states.Invisible)
+			if invis {
+				w.SetSelected(false)
+			}
+		})
 	})
 }
 
