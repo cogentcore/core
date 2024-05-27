@@ -542,7 +542,7 @@ func (tb *Tab) OnInit() {
 				})
 			})
 			if tb.Text != "" {
-				AddAt[*Space](p, "space")
+				AddAt(p, "space", func(w *Space) {})
 			}
 		}
 		if tb.Text != "" {
@@ -562,7 +562,7 @@ func (tb *Tab) OnInit() {
 			})
 		}
 		if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
-			AddAt[*Space](p, "close-space")
+			AddAt(p, "close-space", func(w *Space) {})
 			AddAt(p, "close", func(w *Button) {
 				w.SetType(ButtonAction)
 				w.Style(func(s *styles.Style) {

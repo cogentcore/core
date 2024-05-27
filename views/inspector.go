@@ -276,7 +276,7 @@ func (is *Inspector) MakeToolbar(p *core.Plan) {
 			w.SetEnabled(ok)
 		})
 	})
-	core.Add[*core.Separator](p)
+	core.Add(p, func(w *core.Separator) {})
 	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.Open).SetKey(keymap.Open)
 		w.Args[0].SetValue(is.Filename).SetTag(`ext:".json"`)
@@ -291,7 +291,7 @@ func (is *Inspector) MakeToolbar(p *core.Plan) {
 		w.SetFunc(is.SaveAs).SetKey(keymap.SaveAs)
 		w.Args[0].SetValue(is.Filename).SetTag(`ext:".json"`)
 	})
-	core.Add[*core.Separator](p)
+	core.Add(p, func(w *core.Separator) {})
 	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.InspectApp).SetIcon(icons.Devices)
 	})

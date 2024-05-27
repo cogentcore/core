@@ -494,7 +494,7 @@ func (pl *PlotView) MakeColumns(p *core.Plan) {
 				views.CallFunc(pl, pl.SetColumnsByName)
 			})
 	})
-	core.Add[*core.Separator](p)
+	core.Add(p, func(w *core.Separator) {})
 	for _, cp := range pl.Columns {
 		cp.Plot = pl
 		fr := core.AddAt(p, cp.Column, func(w *core.Frame) {
@@ -561,7 +561,7 @@ func (pl *PlotView) MakeToolbar(p *core.Plan) {
 				fmt.Println("this will select select mode")
 			})
 	})
-	core.Add[*core.Separator](p)
+	core.Add(p, func(w *core.Separator) {})
 
 	core.Add(p, func(w *core.Button) {
 		w.SetText("Update").SetIcon(icons.Update).
@@ -593,7 +593,7 @@ func (pl *PlotView) MakeToolbar(p *core.Plan) {
 				d.NewFullDialog(pl).SetNewWindow(true).Run()
 			})
 	})
-	core.Add[*core.Separator](p)
+	core.Add(p, func(w *core.Separator) {})
 
 	core.Add(p, func(w *core.Button) {
 		w.SetText("Save").SetIcon(icons.Save).SetMenu(func(m *core.Scene) {
@@ -607,7 +607,7 @@ func (pl *PlotView) MakeToolbar(p *core.Plan) {
 	core.Add(p, func(w *views.FuncButton) {
 		w.SetFunc(pl.OpenCSV).SetIcon(icons.Open)
 	})
-	core.Add[*core.Separator](p)
+	core.Add(p, func(w *core.Separator) {})
 	core.Add(p, func(w *views.FuncButton) {
 		w.SetFunc(pl.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
 	})

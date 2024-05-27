@@ -67,7 +67,7 @@ func View(st *Styles) {
 			w.SetFunc(st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
 			w.Args[0].SetTag(`ext:".histy"`)
 		})
-		core.Add[*core.Separator](p)
+		core.Add(p, func(w *core.Separator) {})
 		mv.MakeToolbar(p)
 	})
 	d.RunWindow() // note: no context here so not dialog

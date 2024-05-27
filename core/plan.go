@@ -40,11 +40,12 @@ type PlanItem struct {
 }
 
 // Add adds a new [PlanItem] to the given [Plan] for a widget with
-// the given optional function to initialize the widget. The name of
-// the widget is automatically generated based on the file and line
-// number of the calling function.
-func Add[T Widget](p *Plan, init ...func(w T)) {
-	AddAt(p, autoPlanPath(2), init...)
+// the given function to initialize the widget. The widget
+// is guaranteed to have its parent set before the init function
+// is called. The name of the widget is automatically generated based
+// on the file and line number of the calling function.
+func Add[T Widget](p *Plan, init func(w T)) {
+	AddAt(p, autoPlanPath(2), init)
 }
 
 // autoPlanPath returns the dir-filename of [runtime.Caller](level),
@@ -60,20 +61,14 @@ func autoPlanPath(level int) string {
 }
 
 // AddAt adds a new [PlanItem] to the given [Plan] for a widget with
-// the given name and optional function to initialize the widget. The
-// widget is guaranteed to have its parent set before the init function
+// the given name and function to initialize the widget. The widget
+// is guaranteed to have its parent set before the init function
 // is called.
-func AddAt[T Widget](p *Plan, name string, init ...func(w T)) {
-	new := func() Widget {
+func AddAt[T Widget](p *Plan, name string, init func(w T)) {
+	p.Add(name, func() Widget {
 		return tree.New[T]()
-	}
-	if len(init) == 0 {
-		p.Add(name, new)
-		return
-	}
-	f := init[0]
-	p.Add(name, new, func(w Widget) {
-		f(w.(T))
+	}, func(w Widget) {
+		init(w.(T))
 	})
 }
 
@@ -111,8 +106,8 @@ func AddInit[T Widget](p *Plan, name string, init func(w T)) {
 // Add adds a new [PlanItem] to the given [Plan] with the given name and functions.
 // It should typically not be called by end-user code; see the generic
 // [Add], [AddAt], [AddNew], and [AddInit] functions instead.
-func (p *Plan) Add(name string, new func() Widget, init ...func(w Widget)) {
-	*p = append(*p, &PlanItem{Name: name, New: new, Init: init})
+func (p *Plan) Add(name string, new func() Widget, init func(w Widget)) {
+	*p = append(*p, &PlanItem{Name: name, New: new, Init: []func(w Widget){init}})
 }
 
 // Build configures the given widget and

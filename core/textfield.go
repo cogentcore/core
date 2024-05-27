@@ -364,7 +364,7 @@ func (tf *TextField) OnInit() {
 				})
 			}
 			if tf.TrailingIcon.IsSet() {
-				AddAt[*Stretch](p, "trail-icon-stretch")
+				AddAt(p, "trail-icon-stretch", func(w *Stretch) {})
 				AddAt(p, "trail-icon", func(w *Button) {
 					w.SetType(ButtonAction)
 					w.Style(func(s *styles.Style) {

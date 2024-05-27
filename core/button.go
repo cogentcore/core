@@ -216,7 +216,7 @@ func (bt *Button) OnInit() {
 				})
 			})
 			if bt.Text != "" {
-				AddAt[*Space](p, "space")
+				AddAt(p, "space", func(w *Space) {})
 			}
 		}
 		if bt.Text != "" {
@@ -261,7 +261,7 @@ func (bt *Button) OnInit() {
 		}
 		if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
 			if !bt.Indicator.IsSet() && bt.Shortcut != "" {
-				AddAt[*Stretch](p, "shortcut-stretch")
+				AddAt(p, "shortcut-stretch", func(w *Stretch) {})
 				AddAt(p, "shortcut", func(w *Text) {
 					w.Style(func(s *styles.Style) {
 						s.SetNonSelectable()
