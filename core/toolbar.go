@@ -17,12 +17,7 @@ import (
 // Toolbar is a [Frame] that is useful for holding [Button]s that do things.
 // It automatically moves items that do not fit into an overflow menu, and
 // manages additional items that are always placed onto this overflow menu.
-// In general it should be possible to use a single toolbar + overflow to
-// manage all an app's functionality, in a way that is portable across
-// mobile and desktop environments.
-// See [Widget.MakeToolbar] for the standard toolbar config method for
-// any given widget, and [Scene.AppBars] for [ConfigFuncs] for [Scene]
-// elements who should be represented in the main AppBar (e.g., TopAppBar).
+// Use [Body.AddAppBar] to add to the default toolbar at the top of an app.
 type Toolbar struct {
 	Frame
 

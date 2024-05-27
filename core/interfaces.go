@@ -7,18 +7,8 @@ package core
 // This file contains all the special-purpose interfaces
 // beyond the basic [Widget] interface.
 
-// Updater defines an interface for something that has an Update() method
-// this will be called by GUI actions that update values of a type
-// including struct, slice, and map views in giv
-type Updater interface {
-	// Update updates anything in this type that might depend on other state
-	// which could have just been changed.  It is the responsibility of the
-	// type to determine what might have changed, or just generically update
-	// everything assuming anything could have changed.
-	Update()
-}
-
 // ToolbarMaker is an interface that types can implement to make a toolbar plan.
+// It is automatically used when making value view dialogs.
 type ToolbarMaker interface {
 	MakeToolbar(p *Plan)
 }
@@ -39,7 +29,7 @@ type FieldValidator interface {
 
 // ShouldShower is an interface determining when you should take a shower.
 // Actually, it determines whether a named field should be displayed
-// (in views.StructView and views.StructViewInline).
+// (in [views.StructView]).
 type ShouldShower interface {
 	// ShouldShow returns whether the given named field should be displayed.
 	ShouldShow(field string) bool

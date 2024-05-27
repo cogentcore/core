@@ -362,9 +362,9 @@ func (v *ValueBase[W]) SetValue(value any) bool {
 		case reflect.Slice:
 			err = reflectx.SetRobust(reflectx.PointerValue(v.Value).Interface(), value)
 		}
-		if updater, ok := v.Owner.(core.Updater); ok {
-			updater.Update()
-		}
+		// if updater, ok := v.Owner.(core.Updater); ok {
+		// 	updater.Update()
+		// }
 	} else {
 		err = reflectx.SetRobust(reflectx.PointerValue(v.Value).Interface(), value)
 		wasSet = true
