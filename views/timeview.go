@@ -256,8 +256,8 @@ func (dv *DateView) OnInit() {
 						dv.SetTime(dt)
 					})
 					w.Style(func(s *styles.Style) {
-						s.Min.X.Dp(32)
-						s.Min.Y.Dp(32)
+						s.CenterAll()
+						s.Min.Set(units.Dp(32))
 						s.Padding.Set(units.Dp(6))
 						if dt.Month() != som.Month() {
 							s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
@@ -272,17 +272,10 @@ func (dv *DateView) OnInit() {
 							s.Color = colors.C(colors.Scheme.Primary.On)
 						}
 					})
-					w.OnWidgetAdded(func(w core.Widget) {
-						switch w.PathFrom(w) {
-						case "parts":
-							w.Style(func(s *styles.Style) {
-								s.Justify.Content = styles.Center
-								s.Justify.Items = styles.Center
-							})
-						case "parts/label":
-							lb := w.(*core.Text)
-							lb.Type = core.TextBodyLarge
-						}
+					w.Maker(func(p *core.Plan) {
+						core.AddInit(p, "text", func(w *core.Text) {
+							w.SetType(core.TextBodyLarge)
+						})
 					})
 				})
 			}
