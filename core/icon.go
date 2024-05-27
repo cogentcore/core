@@ -37,10 +37,6 @@ func (ic *Icon) WidgetValue() any { return &ic.Icon }
 
 func (ic *Icon) OnInit() {
 	ic.WidgetBase.OnInit()
-	ic.SetStyles()
-}
-
-func (ic *Icon) SetStyles() {
 	ic.SVG.Scale = 1
 	ic.Style(func(s *styles.Style) {
 		s.Min.Set(units.Em(1))

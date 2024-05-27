@@ -81,11 +81,6 @@ func (sp *Spinner) OnBind(value any) {
 
 func (sp *Spinner) OnInit() {
 	sp.TextField.OnInit()
-	sp.HandleEvents()
-	sp.SetStyles()
-}
-
-func (sp *Spinner) SetStyles() {
 	sp.Step = 0.1
 	sp.PageStep = 0.2
 	sp.Max = 1.0
@@ -115,6 +110,47 @@ func (sp *Spinner) SetStyles() {
 				s.SetAbilities(false, abilities.Focusable)
 				s.SetAbilities(true, abilities.RepeatClickable)
 			})
+		}
+	})
+
+	sp.On(events.Scroll, func(e events.Event) {
+		if sp.IsReadOnly() || !sp.StateIs(states.Focused) {
+			return
+		}
+		se := e.(*events.MouseScroll)
+		se.SetHandled()
+		sp.IncrementValue(float32(se.Delta.Y))
+	})
+	sp.SetValidator(func() error {
+		text := sp.Text()
+		val, err := sp.StringToValue(text)
+		if err != nil {
+			return err
+		}
+		sp.SetValue(val)
+		return nil
+	})
+	sp.OnKeyChord(func(e events.Event) {
+		if sp.IsReadOnly() {
+			return
+		}
+		kf := keymap.Of(e.KeyChord())
+		if DebugSettings.KeyEventTrace {
+			slog.Info("Spinner KeyChordEvent", "widget", sp, "keyFunction", kf)
+		}
+		switch {
+		case kf == keymap.MoveUp:
+			e.SetHandled()
+			sp.IncrementValue(1)
+		case kf == keymap.MoveDown:
+			e.SetHandled()
+			sp.IncrementValue(-1)
+		case kf == keymap.PageUp:
+			e.SetHandled()
+			sp.PageIncrementValue(1)
+		case kf == keymap.PageDown:
+			e.SetHandled()
+			sp.PageIncrementValue(-1)
 		}
 	})
 }
@@ -290,47 +326,4 @@ func (sp *Spinner) WidgetTooltip(pos image.Point) (string, image.Point) {
 		res += "maximum: " + sp.ValueToString(sp.Max) + ")"
 	}
 	return res, rpos
-}
-
-func (sp *Spinner) HandleEvents() {
-	sp.On(events.Scroll, func(e events.Event) {
-		if sp.IsReadOnly() || !sp.StateIs(states.Focused) {
-			return
-		}
-		se := e.(*events.MouseScroll)
-		se.SetHandled()
-		sp.IncrementValue(float32(se.Delta.Y))
-	})
-	sp.SetValidator(func() error {
-		text := sp.Text()
-		val, err := sp.StringToValue(text)
-		if err != nil {
-			return err
-		}
-		sp.SetValue(val)
-		return nil
-	})
-	sp.OnKeyChord(func(e events.Event) {
-		if sp.IsReadOnly() {
-			return
-		}
-		kf := keymap.Of(e.KeyChord())
-		if DebugSettings.KeyEventTrace {
-			slog.Info("Spinner KeyChordEvent", "widget", sp, "keyFunction", kf)
-		}
-		switch {
-		case kf == keymap.MoveUp:
-			e.SetHandled()
-			sp.IncrementValue(1)
-		case kf == keymap.MoveDown:
-			e.SetHandled()
-			sp.IncrementValue(-1)
-		case kf == keymap.PageUp:
-			e.SetHandled()
-			sp.PageIncrementValue(1)
-		case kf == keymap.PageDown:
-			e.SetHandled()
-			sp.PageIncrementValue(-1)
-		}
-	})
 }

@@ -33,11 +33,6 @@ type Handle struct {
 
 func (hl *Handle) OnInit() {
 	hl.WidgetBase.OnInit()
-	hl.HandleEvents()
-	hl.SetStyles()
-}
-
-func (hl *Handle) SetStyles() {
 	hl.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 
@@ -63,9 +58,7 @@ func (hl *Handle) SetStyles() {
 			}
 		}
 	})
-}
 
-func (hl *Handle) HandleEvents() {
 	hl.On(events.SlideMove, func(e events.Event) {
 		pos := hl.ParentWidget().PointToRelPos(e.Pos())
 		hl.Pos = math32.Vector2FromPoint(pos).Dim(hl.Styles.Direction.Dim())
