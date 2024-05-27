@@ -37,12 +37,7 @@ type Splits struct {
 }
 
 func (sl *Splits) OnInit() {
-	sl.WidgetBase.OnInit()
-	sl.HandleEvents()
-	sl.SetStyles()
-}
-
-func (sl *Splits) SetStyles() {
+	sl.Frame.OnInit()
 	sl.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		s.Margin.Zero()
@@ -63,6 +58,54 @@ func (sl *Splits) SetStyles() {
 				s.Grow.Set(1, 1)
 			})
 		}
+	})
+
+	sl.OnKeyChord(func(e events.Event) {
+		kc := string(e.KeyChord())
+		mod := "Control+"
+		if TheApp.Platform() == system.MacOS {
+			mod = "Meta+"
+		}
+		if !strings.HasPrefix(kc, mod) {
+			return
+		}
+		kns := kc[len(mod):]
+
+		knc, err := strconv.Atoi(kns)
+		if err != nil {
+			return
+		}
+		kn := int(knc)
+		if kn == 0 {
+			e.SetHandled()
+			sl.EvenSplits()
+		} else if kn <= len(sl.Kids) {
+			e.SetHandled()
+			if sl.Splits[kn-1] <= 0.01 {
+				sl.RestoreChild(kn - 1)
+			} else {
+				sl.CollapseChild(true, kn-1)
+			}
+		}
+	})
+
+	sl.Maker(func(p *Plan) {
+		sl.UpdateSplits()
+		AddAt(p, "parts", func(w *Frame) {
+			InitParts(w)
+			w.Maker(func(p *Plan) {
+				for i := range len(sl.Kids) - 1 { // one less handle than children
+					AddAt(p, "handle-"+strconv.Itoa(i), func(w *Handle) {
+						w.OnChange(func(e events.Event) {
+							sl.SetSplitAction(w.IndexInParent(), w.Value())
+						})
+						w.Style(func(s *styles.Style) {
+							s.Direction = sl.Styles.Direction
+						})
+					})
+				}
+			})
+		})
 	})
 }
 
@@ -214,55 +257,6 @@ func (sl *Splits) SetSplitAction(idx int, nwval float32) {
 	sl.Splits[idx] = uval
 	sl.UpdateSplits()
 	sl.NeedsLayout()
-}
-
-func (sl *Splits) Make(p *Plan) {
-	sl.UpdateSplits()
-
-	parts := AddAt(p, "parts", func(w *Frame) {
-		InitParts(w)
-	})
-	for i := range len(sl.Kids) - 1 { // one less handle than children
-		AddAt(parts, "handle-"+strconv.Itoa(i), func(w *Handle) {
-			w.OnChange(func(e events.Event) {
-				sl.SetSplitAction(w.IndexInParent(), w.Value())
-			})
-			w.Style(func(s *styles.Style) {
-				s.Direction = sl.Styles.Direction
-			})
-		})
-	}
-}
-
-func (sl *Splits) HandleEvents() {
-	sl.OnKeyChord(func(e events.Event) {
-		kc := string(e.KeyChord())
-		mod := "Control+"
-		if TheApp.Platform() == system.MacOS {
-			mod = "Meta+"
-		}
-		if !strings.HasPrefix(kc, mod) {
-			return
-		}
-		kns := kc[len(mod):]
-
-		knc, err := strconv.Atoi(kns)
-		if err != nil {
-			return
-		}
-		kn := int(knc)
-		if kn == 0 {
-			e.SetHandled()
-			sl.EvenSplits()
-		} else if kn <= len(sl.Kids) {
-			e.SetHandled()
-			if sl.Splits[kn-1] <= 0.01 {
-				sl.RestoreChild(kn - 1)
-			} else {
-				sl.CollapseChild(true, kn-1)
-			}
-		}
-	})
 }
 
 func (sl *Splits) SizeDownSetAllocs(iter int) {
