@@ -113,10 +113,6 @@ func (tt TabTypes) IsColumn() bool {
 
 func (ts *Tabs) OnInit() {
 	ts.Frame.OnInit()
-	ts.SetStyles()
-}
-
-func (ts *Tabs) SetStyles() {
 	ts.MaxChars = 16
 	ts.CloseIcon = icons.Close
 	ts.Style(func(s *styles.Style) {
@@ -135,6 +131,47 @@ func (ts *Tabs) SetStyles() {
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)
 			})
+		}
+	})
+
+	ts.Maker(func(p *Plan) {
+		AddAt(p, "tabs", func(w *Frame) {
+			w.Style(func(s *styles.Style) {
+				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
+				s.Gap.Set(units.Dp(4))
+
+				if ts.Type.Effective(ts).IsColumn() {
+					s.Direction = styles.Column
+					s.Grow.Set(0, 1)
+				} else {
+					s.Direction = styles.Row
+					s.Grow.Set(1, 0)
+					s.Wrap = true
+				}
+			})
+			w.Maker(func(p *Plan) {
+				if ts.NewTabButton {
+					AddAt(p, "new-tab", func(w *Button) { // TODO(config)
+						w.SetIcon(icons.Add).SetType(ButtonAction)
+						w.OnClick(func(e events.Event) {
+							ts.NewTab("New tab")
+							ts.SelectTabIndex(ts.NumTabs() - 1)
+						})
+					})
+				}
+			})
+		})
+		AddAt(p, "frame", func(w *Frame) {
+			w.Style(func(s *styles.Style) {
+				s.Display = styles.Stacked
+				w.SetFlag(true, FrameStackTopOnly) // key for allowing each tab to have its own size
+				s.Min.Set(units.Dp(160), units.Dp(96))
+				s.Grow.Set(1, 1)
+			})
+		})
+		// frame comes before tabs in bottom navigation bar
+		if ts.Type.Effective(ts) == NavigationBar {
+			p.Children[0], p.Children[1] = p.Children[1], p.Children[0]
 		}
 	})
 }
@@ -387,55 +424,6 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 	}
 	ts.NeedsLayout()
 	return true
-}
-
-// Config configures the tabs widget children if necessary.
-// Only the 2 primary children (Frames) need to be configured.
-// Re-config is needed when the type of tabs changes, but not
-// when a new tab is added, which only requires a new layout pass.
-func (ts *Tabs) Make(p *Plan) {
-	AddAt(p, "tabs", func(w *Frame) {
-		w.Style(func(s *styles.Style) {
-			s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
-			s.Margin.Zero()
-			s.Padding.Zero()
-			s.Gap.Set(units.Dp(4))
-
-			if ts.Type.Effective(ts).IsColumn() {
-				s.Direction = styles.Column
-				s.Grow.Set(0, 1)
-			} else {
-				s.Direction = styles.Row
-				s.Grow.Set(1, 0)
-				s.Wrap = true
-			}
-		})
-	}, func(w *Frame) {
-		tc := &Plan{}
-		if ts.NewTabButton {
-			AddAt(tc, "new-tab", func(w *Button) { // TODO(config)
-				w.SetIcon(icons.Add).SetType(ButtonAction)
-				w.OnClick(func(e events.Event) {
-					ts.NewTab("New tab")
-					ts.SelectTabIndex(ts.NumTabs() - 1)
-				})
-			})
-		}
-		tc.BuildWidget(w)
-	})
-	AddAt(p, "frame", func(w *Frame) {
-		w.Style(func(s *styles.Style) {
-			s.Display = styles.Stacked
-			w.SetFlag(true, FrameStackTopOnly) // key for allowing each tab to have its own size
-			s.Min.X.Dp(160)
-			s.Min.Y.Dp(96)
-			s.Grow.Set(1, 1)
-		})
-	})
-	// frame comes before tabs in bottom navigation bar
-	if ts.Type.Effective(ts) == NavigationBar {
-		p.Children[0], p.Children[1] = p.Children[1], p.Children[0]
-	}
 }
 
 // Tabs returns the layout containing the tabs (the first element within us).
