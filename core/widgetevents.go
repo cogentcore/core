@@ -166,13 +166,13 @@ func (wb *WidgetBase) AddCloseDialog(config func(d *Body) bool) *WidgetBase {
 // Do NOT send an existing event using this method if you
 // want the Handled state to persist throughout the call chain;
 // call HandleEvent directly for any existing events.
-func (wb *WidgetBase) Send(typ events.Types, orig ...events.Event) {
+func (wb *WidgetBase) Send(typ events.Types, original ...events.Event) {
 	if wb.This() == nil {
 		return
 	}
 	var e events.Event
-	if len(orig) > 0 && orig[0] != nil {
-		e = orig[0].NewFromClone(typ)
+	if len(original) > 0 && original[0] != nil {
+		e = original[0].NewFromClone(typ)
 	} else {
 		e = &events.Base{Typ: typ}
 		e.Init()
@@ -187,31 +187,31 @@ func (wb *WidgetBase) Send(typ events.Types, orig ...events.Event) {
 // SendChange sends the [events.Change] event, which is widely used to signal
 // updating for most widgets. It takes the event that the new change event
 // is derived from, if any.
-func (wb *WidgetBase) SendChange(orig ...events.Event) {
-	wb.Send(events.Change, orig...)
+func (wb *WidgetBase) SendChange(original ...events.Event) {
+	wb.Send(events.Change, original...)
 }
 
-func (wb *WidgetBase) SendKey(kf keymap.Functions, orig ...events.Event) {
+func (wb *WidgetBase) SendKey(kf keymap.Functions, original ...events.Event) {
 	if wb.This() == nil {
 		return
 	}
 	kc := kf.Chord()
-	wb.SendKeyChord(kc, orig...)
+	wb.SendKeyChord(kc, original...)
 }
 
-func (wb *WidgetBase) SendKeyChord(kc key.Chord, orig ...events.Event) {
+func (wb *WidgetBase) SendKeyChord(kc key.Chord, original ...events.Event) {
 	r, code, mods, err := kc.Decode()
 	if err != nil {
 		fmt.Println("SendKeyChord: Decode error:", err)
 		return
 	}
-	wb.SendKeyChordRune(r, code, mods, orig...)
+	wb.SendKeyChordRune(r, code, mods, original...)
 }
 
-func (wb *WidgetBase) SendKeyChordRune(r rune, code key.Codes, mods key.Modifiers, orig ...events.Event) {
+func (wb *WidgetBase) SendKeyChordRune(r rune, code key.Codes, mods key.Modifiers, original ...events.Event) {
 	ke := events.NewKey(events.KeyChord, r, code, mods)
-	if len(orig) > 0 && orig[0] != nil {
-		kb := *orig[0].AsBase()
+	if len(original) > 0 && original[0] != nil {
+		kb := *original[0].AsBase()
 		ke.GenTime = kb.GenTime
 		ke.ClearHandled()
 	} else {

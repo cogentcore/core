@@ -460,9 +460,10 @@ func makeViews(ts *core.Tabs) {
 	sv := views.NewStructView(sp).SetStruct(tv)
 
 	tv.OnSelect(func(e events.Event) {
+		fmt.Println("sel")
 		if len(tv.SelectedNodes) > 0 {
-			sv.SetStruct(tv.SelectedNodes[0])
-			sv.Update()
+			fmt.Println("sel", tv.SelectedNodes)
+			sv.SetStruct(tv.SelectedNodes[0]).Update()
 		}
 	})
 

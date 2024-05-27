@@ -914,33 +914,30 @@ func (tv *TreeView) SelectUpdate(mode events.SelectModes) bool {
 	return sel
 }
 
-// SendSelectEvent sends the events.Select event on the
-// RootView node, using context event if avail (else nil).
-func (tv *TreeView) SendSelectEvent(ctx events.Event) {
+// SendSelectEvent sends an [events.Select] event on the RootView node.
+func (tv *TreeView) SendSelectEvent(original ...events.Event) {
 	// fmt.Println("root:", &tv.RootView, tv.RootView.Listeners)
-	tv.RootView.Send(events.Select, nil)
+	tv.RootView.Send(events.Select, original...)
 }
 
-// SendChangeEvent sends the events.Change event on the
-// RootView node, using context event if avail (else nil).
-func (tv *TreeView) SendChangeEvent(ctx events.Event) {
-	tv.RootView.SendChange(nil)
+// SendChangeEvent sends an [events.Change] event on the RootView node.
+func (tv *TreeView) SendChangeEvent(original ...events.Event) {
+	tv.RootView.SendChange(original...)
 }
 
 // TreeViewChanged must be called after any structural
 // change to the TreeView (adding or deleting nodes).
-// It calls: RootSetViewIndex() to update indexes and
+// It calls RootSetViewIndex to update indexes and
 // SendChangeEvent to notify of changes.
-func (tv *TreeView) TreeViewChanged(ctx events.Event) {
+func (tv *TreeView) TreeViewChanged(original ...events.Event) {
 	tv.RootView.RootSetViewIndex()
-	// tv.SendChangeEvent(ctx)
+	tv.SendChangeEvent(original...)
 }
 
-// SendChangeEventReSync sends the events.Change event on the
-// RootView node, using context event if avail (else nil).
-// If SyncNode != nil, also does a re-sync from root.
-func (tv *TreeView) SendChangeEventReSync(ctx events.Event) {
-	tv.RootView.SendChange(nil)
+// SendChangeEventReSync sends an [events.Change] event on the RootView node.
+// If SyncNode != nil, it also does a re-sync from root.
+func (tv *TreeView) SendChangeEventReSync(original ...events.Event) {
+	tv.RootView.SendChange(original...)
 	if tv.RootView.SyncNode != nil {
 		tv.RootView.ReSync()
 	}
@@ -952,7 +949,7 @@ func (tv *TreeView) SendChangeEventReSync(ctx events.Event) {
 func (tv *TreeView) SelectAction(mode events.SelectModes) bool {
 	sel := tv.SelectUpdate(mode)
 	if sel {
-		tv.SendSelectEvent(nil)
+		tv.SendSelectEvent()
 	}
 	return sel
 }
@@ -962,7 +959,7 @@ func (tv *TreeView) SelectAction(mode events.SelectModes) bool {
 func (tv *TreeView) UnselectAction() {
 	if tv.StateIs(states.Selected) {
 		tv.Unselect()
-		tv.SendSelectEvent(nil)
+		tv.SendSelectEvent()
 	}
 }
 
@@ -998,7 +995,7 @@ func (tv *TreeView) MoveDownAction(selMode events.SelectModes) *TreeView {
 	if nn != nil && nn != tv {
 		nn.SetFocus()
 		nn.ScrollToMe()
-		tv.SendSelectEvent(nil)
+		tv.SendSelectEvent()
 	}
 	return nn
 }
@@ -1058,7 +1055,7 @@ func (tv *TreeView) MoveUpAction(selMode events.SelectModes) *TreeView {
 	if nn != nil && nn != tv {
 		nn.SetFocus()
 		nn.ScrollToMe()
-		tv.SendSelectEvent(nil)
+		tv.SendSelectEvent()
 	}
 	return nn
 }
@@ -1091,7 +1088,7 @@ func (tv *TreeView) MovePageUpAction(selMode events.SelectModes) *TreeView {
 		}
 		fnn.SetFocus()
 		fnn.ScrollToMe()
-		tv.SendSelectEvent(nil)
+		tv.SendSelectEvent()
 	}
 	tv.NeedsRender()
 	return fnn
@@ -1122,7 +1119,7 @@ func (tv *TreeView) MovePageDownAction(selMode events.SelectModes) *TreeView {
 		}
 		fnn.SetFocus()
 		fnn.ScrollToMe()
-		tv.SendSelectEvent(nil)
+		tv.SendSelectEvent()
 	}
 	tv.NeedsRender()
 	return fnn
@@ -1179,7 +1176,7 @@ func (tv *TreeView) MoveEndAction(selMode events.SelectModes) *TreeView {
 		}
 		fnn.SetFocus()
 		fnn.ScrollToMe()
-		tv.SendSelectEvent(nil)
+		tv.SendSelectEvent()
 	}
 	return fnn
 }
@@ -1482,7 +1479,7 @@ func (tv *TreeView) Cut() { //types:add
 		sn.Delete()
 	}
 	root.Update()
-	root.TreeViewChanged(nil)
+	root.TreeViewChanged()
 }
 
 // Paste pastes clipboard at given node.
@@ -1551,7 +1548,7 @@ func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
 	tv.SetScene(tv.Scene)     // ensure children have scene
 	tv.Update()               // could have children
 	tv.Open()
-	tv.TreeViewChanged(nil)
+	tv.TreeViewChanged()
 }
 
 // PasteBefore inserts object(s) from mime data before this node.
@@ -1620,7 +1617,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 			selTv = ntv
 		}
 	}
-	tv.TreeViewChanged(nil)
+	tv.TreeViewChanged()
 	parent.NeedsLayout()
 	if selTv != nil {
 		selTv.SelectAction(events.SelectOne)
@@ -1645,7 +1642,7 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 	}
 	tv.Update()
 	tv.Open()
-	tv.TreeViewChanged(nil)
+	tv.TreeViewChanged()
 }
 
 //////////////////////////////////////////////////////////////////////////////
