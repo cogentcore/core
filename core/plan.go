@@ -81,22 +81,17 @@ func AddAt[T Widget](p *Plan, path string, init ...func(w T)) *Plan {
 }
 
 // AddNew adds a new [Plan] item to the given [Plan] for a widget with
-// the given name, function for constructing the widget, and optional
-// function for initializing the widget. The widget is guaranteed to
+// the given name, function for constructing the widget, and function
+// for initializing the widget. The widget is guaranteed to
 // have its parent set before the init function is called. It returns
 // the new [Plan] item.
 // It should only be called instead of [Add] and [AddAt] when the widget
 // must be made new, like when using [NewValue].
-func AddNew[T Widget](p *Plan, path string, new func() T, init ...func(w T)) *Plan {
-	newf := func() Widget {
+func AddNew[T Widget](p *Plan, path string, new func() T, init func(w T)) *Plan {
+	return p.Add(path, func() Widget {
 		return new()
-	}
-	if len(init) == 0 {
-		return p.Add(path, newf)
-	}
-	f := init[0]
-	return p.Add(path, newf, func(w Widget) {
-		f(w.(T))
+	}, func(w Widget) {
+		init(w.(T))
 	})
 }
 
