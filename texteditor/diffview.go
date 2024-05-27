@@ -529,7 +529,7 @@ func (dv *DiffView) UndoDiff(ab int) error {
 	return nil
 }
 
-func (dv *DiffView) MakeToolbar(tb *core.Toolbar) {
+func (dv *DiffView) MakeToolbar(tb *core.Toolbar) { // TODO(config)
 	txta := "A: " + dirs.DirAndFile(dv.FileA)
 	if dv.RevA != "" {
 		txta += ": " + dv.RevA
