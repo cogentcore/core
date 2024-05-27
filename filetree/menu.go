@@ -5,7 +5,6 @@
 package filetree
 
 import (
-	"fmt"
 	"strings"
 
 	"cogentcore.org/core/base/vcs"
@@ -17,48 +16,6 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/views"
 )
-
-func (fn *Node) HandleEvents() {
-	fn.On(events.KeyChord, func(e events.Event) {
-		kt := e.(*events.Key)
-		fn.KeyInput(kt)
-	})
-}
-
-func (fn *Node) KeyInput(kt events.Event) {
-	if core.DebugSettings.KeyEventTrace {
-		fmt.Printf("TreeView KeyInput: %v\n", fn.Path())
-	}
-	kf := keymap.Of(kt.KeyChord())
-	selMode := events.SelectModeBits(kt.Modifiers())
-
-	if selMode == events.SelectOne {
-		if fn.SelectMode() {
-			selMode = events.ExtendContinuous
-		}
-	}
-
-	// first all the keys that work for ReadOnly and active
-	if !fn.IsReadOnly() && !kt.IsHandled() {
-		switch kf {
-		case keymap.Delete:
-			fn.DeleteFiles()
-			kt.SetHandled()
-		case keymap.Backspace:
-			fn.DeleteFiles()
-			kt.SetHandled()
-		case keymap.Duplicate:
-			fn.DuplicateFiles()
-			kt.SetHandled()
-		case keymap.Insert: // New File
-			views.CallFunc(fn, fn.NewFile)
-			kt.SetHandled()
-		case keymap.InsertAfter: // New Folder
-			views.CallFunc(fn, fn.NewFolder)
-			kt.SetHandled()
-		}
-	}
-}
 
 // VCSLabelFunc gets the appropriate label for removing from version control
 func VCSLabelFunc(fn *Node, label string) string {
@@ -96,7 +53,7 @@ func (fn *Node) VCSContextMenu(m *core.Scene) {
 		Style(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
-	views.NewFuncButton(m, fn.BlameVCSSel).SetText(VCSLabelFunc(fn, "Blame VCS")).SetIcon(icons.CreditScore).
+	views.NewFuncButton(m, fn.BlameVCSSel).SetText(VCSLabelFunc(fn, "Blame VC S")).SetIcon(icons.CreditScore).
 		Style(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})

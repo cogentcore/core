@@ -5,6 +5,8 @@
 package filetree
 
 import (
+	"fmt"
+
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/colors"
@@ -12,7 +14,9 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/views"
 )
 
 func (ft *Tree) OnInit() {
@@ -24,13 +28,8 @@ func (ft *Tree) OnInit() {
 
 func (fn *Node) OnInit() {
 	fn.TreeView.OnInit()
-	fn.HandleEvents()
-	fn.SetStyles()
 	fn.ContextMenus = nil // do not include treeview
 	fn.AddContextMenu(fn.ContextMenu)
-}
-
-func (fn *Node) SetStyles() {
 	fn.Style(func(s *styles.Style) {
 		status := fn.Info.VCS
 		s.Font.Weight = styles.WeightNormal
@@ -60,7 +59,7 @@ func (fn *Node) SetStyles() {
 	})
 	fn.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(fn) {
-		case "parts":
+		case "parts": // TODO(config)
 			parts := w.(*core.Frame)
 			w.OnClick(func(e events.Event) {
 				fn.OpenEmptyDir()
@@ -82,6 +81,41 @@ func (fn *Node) SetStyles() {
 				s.Min.X.Em(0.8)
 				s.Min.Y.Em(0.8)
 			})
+		}
+	})
+
+	fn.On(events.KeyChord, func(e events.Event) {
+		if core.DebugSettings.KeyEventTrace {
+			fmt.Printf("TreeView KeyInput: %v\n", fn.Path())
+		}
+		kf := keymap.Of(e.KeyChord())
+		selMode := events.SelectModeBits(e.Modifiers())
+
+		if selMode == events.SelectOne {
+			if fn.SelectMode() {
+				selMode = events.ExtendContinuous
+			}
+		}
+
+		// first all the keys that work for ReadOnly and active
+		if !fn.IsReadOnly() && !e.IsHandled() {
+			switch kf {
+			case keymap.Delete:
+				fn.DeleteFiles()
+				e.SetHandled()
+			case keymap.Backspace:
+				fn.DeleteFiles()
+				e.SetHandled()
+			case keymap.Duplicate:
+				fn.DuplicateFiles()
+				e.SetHandled()
+			case keymap.Insert: // New File
+				views.CallFunc(fn, fn.NewFile)
+				e.SetHandled()
+			case keymap.InsertAfter: // New Folder
+				views.CallFunc(fn, fn.NewFolder)
+				e.SetHandled()
+			}
 		}
 	})
 }
