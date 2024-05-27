@@ -65,16 +65,6 @@ func (is *Inspector) OnInit() {
 				w.SetText(fmt.Sprintf("Inspector of %s (%s)", is.Root.Name(), labels.FriendlyTypeName(reflect.TypeOf(is.Root))))
 			})
 		})
-		splits := core.AddAt(p, "splits", func(w *core.Splits) {
-			w.SetSplits(.3, .7)
-		})
-		treeFrame := core.AddAt(splits, "tree-frame", func(w *core.Frame) {
-			w.Style(func(s *styles.Style) {
-				s.Direction = styles.Column
-				s.Overflow.Set(styles.OverflowAuto)
-				s.Gap.Zero()
-			})
-		})
 		renderRebuild := func() {
 			sc, ok := is.Root.(*core.Scene)
 			if !ok {
@@ -82,60 +72,74 @@ func (is *Inspector) OnInit() {
 			}
 			sc.RenderContext().SetFlag(true, core.RenderRebuild) // trigger full rebuild
 		}
-		core.AddAt(treeFrame, "tree", func(w *TreeView) {
-			is.CurrentNode = is.Root
-			w.OnSelect(func(e events.Event) {
-				if len(w.SelectedNodes) == 0 {
-					return
-				}
-				sn := w.SelectedNodes[0].AsTreeView().SyncNode
-				is.CurrentNode = sn
-				// note: doing Update on entire Inspector undoes all tree expansion
-				// only want to update the struct view.
-				stru := is.FindPath("splits/struct").(*StructView)
-				stru.SetStruct(sn)
-				stru.Update()
+		core.AddAt(p, "splits", func(w *core.Splits) {
+			w.SetSplits(.3, .7)
+			w.Maker(func(p *core.Plan) {
+				core.AddAt(p, "tree-frame", func(w *core.Frame) {
+					w.Style(func(s *styles.Style) {
+						s.Direction = styles.Column
+						s.Overflow.Set(styles.OverflowAuto)
+						s.Gap.Zero()
+					})
+					w.Maker(func(p *core.Plan) {
+						core.AddAt(p, "tree", func(w *TreeView) {
+							is.CurrentNode = is.Root
+							w.OnSelect(func(e events.Event) {
+								if len(w.SelectedNodes) == 0 {
+									return
+								}
+								sn := w.SelectedNodes[0].AsTreeView().SyncNode
+								is.CurrentNode = sn
+								// note: doing Update on entire Inspector undoes all tree expansion
+								// only want to update the struct view.
+								stru := is.FindPath("splits/struct").(*StructView)
+								stru.SetStruct(sn)
+								stru.Update()
 
-				sc, ok := is.Root.(*core.Scene)
-				if !ok {
-					return
-				}
-				if w, wb := core.AsWidget(sn); w != nil {
-					pselw := sc.SelectedWidget
-					sc.SelectedWidget = w
-					wb.NeedsRender()
-					if pselw != nil {
-						pselw.AsWidget().NeedsRender()
-					}
-				}
-			})
-			w.OnChange(func(e events.Event) {
-				renderRebuild()
-			})
-			w.Builder(func() {
-				w.SyncTree(is.Root)
-			})
-		})
-		core.AddAt(splits, "struct", func(w *StructView) {
-			w.OnChange(func(e events.Event) {
-				renderRebuild()
-			})
-			w.OnClose(func(e events.Event) {
-				sc, ok := is.Root.(*core.Scene)
-				if !ok {
-					return
-				}
-				if sc.Is(core.ScRenderBBoxes) {
-					is.ToggleSelectionMode()
-				}
-				pselw := sc.SelectedWidget
-				sc.SelectedWidget = nil
-				if pselw != nil {
-					pselw.AsWidget().NeedsRender()
-				}
-			})
-			w.Builder(func() {
-				w.SetStruct(is.CurrentNode)
+								sc, ok := is.Root.(*core.Scene)
+								if !ok {
+									return
+								}
+								if w, wb := core.AsWidget(sn); w != nil {
+									pselw := sc.SelectedWidget
+									sc.SelectedWidget = w
+									wb.NeedsRender()
+									if pselw != nil {
+										pselw.AsWidget().NeedsRender()
+									}
+								}
+							})
+							w.OnChange(func(e events.Event) {
+								renderRebuild()
+							})
+							w.Builder(func() {
+								w.SyncTree(is.Root)
+							})
+						})
+					})
+				})
+				core.AddAt(p, "struct", func(w *StructView) {
+					w.OnChange(func(e events.Event) {
+						renderRebuild()
+					})
+					w.OnClose(func(e events.Event) {
+						sc, ok := is.Root.(*core.Scene)
+						if !ok {
+							return
+						}
+						if sc.Is(core.ScRenderBBoxes) {
+							is.ToggleSelectionMode()
+						}
+						pselw := sc.SelectedWidget
+						sc.SelectedWidget = nil
+						if pselw != nil {
+							pselw.AsWidget().NeedsRender()
+						}
+					})
+					w.Builder(func() {
+						w.SetStruct(is.CurrentNode)
+					})
+				})
 			})
 		})
 	})

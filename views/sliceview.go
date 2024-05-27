@@ -394,13 +394,14 @@ func (sv *SliceViewBase) OnInit() {
 		}
 		sv.UpdateStartIndex()
 
-		sgp := sv.MakeGrid(p)
-		svi.UpdateMaxWidths()
+		sv.MakeGrid(p, func(p *core.Plan) {
+			svi.UpdateMaxWidths()
 
-		for i := 0; i < sv.VisRows; i++ {
-			si := sv.StartIndex + i
-			svi.MakeRow(sgp, i, si)
-		}
+			for i := 0; i < sv.VisRows; i++ {
+				si := sv.StartIndex + i
+				svi.MakeRow(p, i, si)
+			}
+		})
 	})
 }
 
@@ -548,8 +549,8 @@ func (sv *SliceViewBase) SliceElementValue(si int) reflect.Value {
 	return val
 }
 
-func (sv *SliceViewBase) MakeGrid(p *core.Plan) *core.Plan {
-	return core.AddAt(p, "grid", func(w *SliceViewGrid) {
+func (sv *SliceViewBase) MakeGrid(p *core.Plan, maker func(p *core.Plan)) {
+	core.AddAt(p, "grid", func(w *SliceViewGrid) {
 		w.Style(func(s *styles.Style) {
 			nWidgPerRow, _ := sv.This().(SliceViewer).RowWidgetNs()
 			w.MinRows = sv.MinRows
@@ -578,6 +579,7 @@ func (sv *SliceViewBase) MakeGrid(p *core.Plan) *core.Plan {
 			oc(e)
 			sv.HandleEvent(e)
 		})
+		w.Maker(maker)
 	})
 }
 

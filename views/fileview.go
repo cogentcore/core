@@ -149,20 +149,19 @@ func (fv *FileView) OnInit() {
 			fv.PrevPath = fv.DirPath
 		}
 
-		files := core.AddAt(p, "files", func(w *core.Frame) {
+		core.AddAt(p, "files", func(w *core.Frame) {
 			w.Style(func(s *styles.Style) {
 				s.Grow.Set(1, 1)
 			})
+			w.Maker(fv.makeFilesRow)
 		})
-		sel := core.AddAt(p, "sel", func(w *core.Frame) {
+		core.AddAt(p, "sel", func(w *core.Frame) {
 			w.Style(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
 				s.Gap.X.Dp(4)
 			})
+			w.Maker(fv.makeSelRow)
 		})
-
-		fv.ConfigFilesRow(files)
-		fv.ConfigSelRow(sel)
 	})
 }
 
@@ -300,8 +299,8 @@ func (fv *FileView) ConfigAppChooser(ch *core.Chooser) {
 	})
 }
 
-func (fv *FileView) ConfigFilesRow(files *core.Plan) {
-	core.AddAt(files, "faves", func(w *TableView) {
+func (fv *FileView) makeFilesRow(p *core.Plan) {
+	core.AddAt(p, "faves", func(w *TableView) {
 		w.SelectedIndex = -1
 		w.SetReadOnly(true)
 		w.SetFlag(false, SliceViewShowIndex)
@@ -319,7 +318,7 @@ func (fv *FileView) ConfigFilesRow(files *core.Plan) {
 			w.ResetSelectedIndexes()
 		})
 	})
-	core.AddAt(files, "files", func(w *TableView) {
+	core.AddAt(p, "files", func(w *TableView) {
 		w.SetFlag(false, SliceViewShowIndex)
 		w.SetReadOnly(true)
 		w.Style(func(s *styles.Style) {
@@ -414,7 +413,7 @@ func (fv *FileView) ConfigFilesRow(files *core.Plan) {
 	})
 }
 
-func (fv *FileView) ConfigSelRow(sel *core.Plan) {
+func (fv *FileView) makeSelRow(sel *core.Plan) {
 	core.AddAt(sel, "file-text", func(w *core.Text) {
 		w.SetText("File: ")
 		w.SetTooltip("Enter file name here (or select from list above)")

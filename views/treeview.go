@@ -354,7 +354,7 @@ func (tv *TreeView) OnInit() {
 
 	tv.Maker(func(p *core.Plan) {
 		tvi := tv.This().(TreeViewer)
-		parts := core.AddAt(p, "parts", func(w *core.Frame) {
+		core.AddAt(p, "parts", func(w *core.Frame) {
 			core.InitParts(w)
 			w.Style(func(s *styles.Style) {
 				s.Cursor = cursors.Pointer
@@ -435,69 +435,71 @@ func (tv *TreeView) OnInit() {
 				}
 				tv.ShowContextMenu(e)
 			})
-		})
-		core.AddAt(parts, "branch", func(w *core.Switch) {
-			w.SetType(core.SwitchCheckbox)
-			w.SetIcons(tv.IconOpen, tv.IconClosed, tv.IconLeaf)
-			w.Style(func(s *styles.Style) {
-				s.SetAbilities(false, abilities.Focusable)
-				// parent will handle our cursor
-				s.Cursor = cursors.None
-				s.Color = colors.C(colors.Scheme.Primary.Base)
-				s.Margin.Zero()
-				s.Padding.Zero()
-				s.Min.X.Em(0.8)
-				s.Min.Y.Em(0.8)
-				s.Align.Self = styles.Center
-				if !w.StateIs(states.Indeterminate) {
-					// we amplify any state layer we receiver so that it is clear
-					// we are receiving it, not just our parent
-					s.StateLayer *= 3
-				} else {
-					// no state layer for indeterminate because they are not interactive
-					s.StateLayer = 0
-				}
-			})
-			w.OnClick(func(e events.Event) {
-				if w.IsChecked() && !w.StateIs(states.Indeterminate) {
-					if !tv.IsClosed() {
-						tv.Close()
-					}
-				} else {
-					if tv.IsClosed() {
-						tv.Open()
-					}
-				}
-			})
-			w.Builder(func() {
-				if tv.This().(TreeViewer).CanOpen() {
-					tv.SetBranchState()
-				}
-			})
-		})
-		if tv.Icon.IsSet() {
-			core.AddAt(parts, "icon", func(w *core.Icon) {
-				w.Style(func(s *styles.Style) {
-					s.Font.Size.Dp(16)
-					s.Margin.Zero()
-					s.Padding.Zero()
+			w.Maker(func(p *core.Plan) {
+				core.AddAt(p, "branch", func(w *core.Switch) {
+					w.SetType(core.SwitchCheckbox)
+					w.SetIcons(tv.IconOpen, tv.IconClosed, tv.IconLeaf)
+					w.Style(func(s *styles.Style) {
+						s.SetAbilities(false, abilities.Focusable)
+						// parent will handle our cursor
+						s.Cursor = cursors.None
+						s.Color = colors.C(colors.Scheme.Primary.Base)
+						s.Margin.Zero()
+						s.Padding.Zero()
+						s.Min.X.Em(0.8)
+						s.Min.Y.Em(0.8)
+						s.Align.Self = styles.Center
+						if !w.StateIs(states.Indeterminate) {
+							// we amplify any state layer we receiver so that it is clear
+							// we are receiving it, not just our parent
+							s.StateLayer *= 3
+						} else {
+							// no state layer for indeterminate because they are not interactive
+							s.StateLayer = 0
+						}
+					})
+					w.OnClick(func(e events.Event) {
+						if w.IsChecked() && !w.StateIs(states.Indeterminate) {
+							if !tv.IsClosed() {
+								tv.Close()
+							}
+						} else {
+							if tv.IsClosed() {
+								tv.Open()
+							}
+						}
+					})
+					w.Builder(func() {
+						if tv.This().(TreeViewer).CanOpen() {
+							tv.SetBranchState()
+						}
+					})
 				})
-				w.Builder(func() {
-					w.SetIcon(tv.Icon)
+				if tv.Icon.IsSet() {
+					core.AddAt(p, "icon", func(w *core.Icon) {
+						w.Style(func(s *styles.Style) {
+							s.Font.Size.Dp(16)
+							s.Margin.Zero()
+							s.Padding.Zero()
+						})
+						w.Builder(func() {
+							w.SetIcon(tv.Icon)
+						})
+					})
+				}
+				core.AddAt(p, "text", func(w *core.Text) {
+					w.Style(func(s *styles.Style) {
+						s.SetNonSelectable()
+						s.SetTextWrap(false)
+						s.Margin.Zero()
+						s.Padding.Zero()
+						s.Min.X.Ch(16)
+						s.Min.Y.Em(1.2)
+					})
+					w.Builder(func() {
+						w.SetText(tv.Label())
+					})
 				})
-			})
-		}
-		core.AddAt(parts, "text", func(w *core.Text) {
-			w.Style(func(s *styles.Style) {
-				s.SetNonSelectable()
-				s.SetTextWrap(false)
-				s.Margin.Zero()
-				s.Padding.Zero()
-				s.Min.X.Ch(16)
-				s.Min.Y.Em(1.2)
-			})
-			w.Builder(func() {
-				w.SetText(tv.Label())
 			})
 		})
 	})

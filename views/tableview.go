@@ -96,14 +96,14 @@ func (tv *TableView) OnInit() {
 		tv.UpdateStartIndex()
 
 		tv.MakeHeader(p)
-		sgp := tv.MakeGrid(p)
+		tv.MakeGrid(p, func(p *core.Plan) {
+			svi.UpdateMaxWidths()
 
-		svi.UpdateMaxWidths()
-
-		for i := 0; i < tv.VisRows; i++ {
-			si := tv.StartIndex + i
-			svi.MakeRow(sgp, i, si)
-		}
+			for i := 0; i < tv.VisRows; i++ {
+				si := tv.StartIndex + i
+				svi.MakeRow(p, i, si)
+			}
+		})
 	}
 }
 
@@ -218,54 +218,55 @@ func (tv *TableView) SliceHeader() *core.Frame {
 }
 
 func (tv *TableView) MakeHeader(p *core.Plan) {
-	header := core.AddAt(p, "header", func(w *core.Frame) {
+	core.AddAt(p, "header", func(w *core.Frame) {
 		core.ToolbarStyles(w)
 		w.Style(func(s *styles.Style) {
 			s.Grow.Set(0, 0)
 			s.Gap.Set(units.Em(0.5)) // matches grid default
 		})
+		w.Maker(func(p *core.Plan) {
+			if tv.Is(SliceViewShowIndex) {
+				core.AddAt(p, "head-index", func(w *core.Text) {
+					w.SetType(core.TextBodyMedium)
+					w.Style(func(s *styles.Style) {
+						s.Align.Self = styles.Center
+					})
+					w.SetText("Index")
+				})
+			}
+			for fli := 0; fli < tv.numVisibleFields; fli++ {
+				field := tv.visibleFields[fli]
+				core.AddAt(p, "head-"+field.Name, func(w *core.Button) {
+					w.SetType(core.ButtonMenu)
+					w.OnClick(func(e events.Event) {
+						tv.SortSliceAction(fli)
+					})
+					w.Builder(func() {
+						htxt := ""
+						if lbl, ok := field.Tag.Lookup("label"); ok {
+							htxt = lbl
+						} else {
+							htxt = strcase.ToSentence(field.Name)
+						}
+						w.SetText(htxt)
+						w.Tooltip = htxt + " (click to sort by)"
+						doc, ok := types.GetDoc(reflect.Value{}, tv.ElementValue, field, htxt)
+						if ok && doc != "" {
+							w.Tooltip += ": " + doc
+						}
+						tv.headerWidths[fli] = len(htxt)
+						if fli == tv.SortIndex {
+							if tv.SortDescending {
+								w.SetIcon(icons.KeyboardArrowDown)
+							} else {
+								w.SetIcon(icons.KeyboardArrowUp)
+							}
+						}
+					})
+				})
+			}
+		})
 	})
-
-	if tv.Is(SliceViewShowIndex) {
-		core.AddAt(header, "head-index", func(w *core.Text) {
-			w.SetType(core.TextBodyMedium)
-			w.Style(func(s *styles.Style) {
-				s.Align.Self = styles.Center
-			})
-			w.SetText("Index")
-		})
-	}
-	for fli := 0; fli < tv.numVisibleFields; fli++ {
-		field := tv.visibleFields[fli]
-		core.AddAt(header, "head-"+field.Name, func(w *core.Button) {
-			w.SetType(core.ButtonMenu)
-			w.OnClick(func(e events.Event) {
-				tv.SortSliceAction(fli)
-			})
-			w.Builder(func() {
-				htxt := ""
-				if lbl, ok := field.Tag.Lookup("label"); ok {
-					htxt = lbl
-				} else {
-					htxt = strcase.ToSentence(field.Name)
-				}
-				w.SetText(htxt)
-				w.Tooltip = htxt + " (click to sort by)"
-				doc, ok := types.GetDoc(reflect.Value{}, tv.ElementValue, field, htxt)
-				if ok && doc != "" {
-					w.Tooltip += ": " + doc
-				}
-				tv.headerWidths[fli] = len(htxt)
-				if fli == tv.SortIndex {
-					if tv.SortDescending {
-						w.SetIcon(icons.KeyboardArrowDown)
-					} else {
-						w.SetIcon(icons.KeyboardArrowUp)
-					}
-				}
-			})
-		})
-	}
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label

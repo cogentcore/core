@@ -92,12 +92,12 @@ func (tv *TableView) OnInit() {
 		tv.UpdateMaxWidths()
 
 		tv.MakeHeader(p)
-		sgp := tv.MakeGrid(p)
-
-		for i := 0; i < tv.VisRows; i++ {
-			si := tv.StartIndex + i
-			svi.MakeRow(sgp, i, si)
-		}
+		tv.MakeGrid(p, func(p *core.Plan) {
+			for i := 0; i < tv.VisRows; i++ {
+				si := tv.StartIndex + i
+				svi.MakeRow(p, i, si)
+			}
+		})
 	}
 }
 
@@ -200,46 +200,47 @@ func (tv *TableView) UpdateMaxWidths() {
 }
 
 func (tv *TableView) MakeHeader(p *core.Plan) {
-	header := core.AddAt(p, "header", func(w *core.Frame) {
+	core.AddAt(p, "header", func(w *core.Frame) {
 		core.ToolbarStyles(w)
 		w.Style(func(s *styles.Style) {
 			s.Grow.Set(0, 0)
 			s.Gap.Set(units.Em(0.5)) // matches grid default
 		})
+		w.Maker(func(p *core.Plan) {
+			if tv.Is(views.SliceViewShowIndex) {
+				core.AddAt(p, "head-index", func(w *core.Text) {
+					w.SetType(core.TextBodyMedium)
+					w.Style(func(s *styles.Style) {
+						s.Align.Self = styles.Center
+					})
+					w.Builder(func() {
+						w.SetText("Index")
+					})
+				})
+			}
+			for fli := 0; fli < tv.NCols; fli++ {
+				field := tv.Table.Table.ColumnNames[fli]
+				core.AddAt(p, "head-"+field, func(w *core.Button) {
+					w.SetType(core.ButtonMenu)
+					w.SetText(field)
+					w.OnClick(func(e events.Event) {
+						tv.SortSliceAction(fli)
+					})
+					w.Builder(func() {
+						w.SetText(field).SetTooltip(field + " (tap to sort by)")
+						tv.headerWidths[fli] = len(field)
+						if fli == tv.SortIndex {
+							if tv.SortDescending {
+								w.SetIcon(icons.KeyboardArrowDown)
+							} else {
+								w.SetIcon(icons.KeyboardArrowUp)
+							}
+						}
+					})
+				})
+			}
+		})
 	})
-
-	if tv.Is(views.SliceViewShowIndex) {
-		core.AddAt(header, "head-index", func(w *core.Text) {
-			w.SetType(core.TextBodyMedium)
-			w.Style(func(s *styles.Style) {
-				s.Align.Self = styles.Center
-			})
-			w.Builder(func() {
-				w.SetText("Index")
-			})
-		})
-	}
-	for fli := 0; fli < tv.NCols; fli++ {
-		field := tv.Table.Table.ColumnNames[fli]
-		core.AddAt(header, "head-"+field, func(w *core.Button) {
-			w.SetType(core.ButtonMenu)
-			w.SetText(field)
-			w.OnClick(func(e events.Event) {
-				tv.SortSliceAction(fli)
-			})
-			w.Builder(func() {
-				w.SetText(field).SetTooltip(field + " (tap to sort by)")
-				tv.headerWidths[fli] = len(field)
-				if fli == tv.SortIndex {
-					if tv.SortDescending {
-						w.SetIcon(icons.KeyboardArrowDown)
-					} else {
-						w.SetIcon(icons.KeyboardArrowUp)
-					}
-				}
-			})
-		})
-	}
 }
 
 // SliceHeader returns the Frame header for slice grid
