@@ -84,7 +84,7 @@ func TestWidgetPrev(t *testing.T) {
 	NewTextField(b).AddClearButton()
 	NewTextField(b).SetLeadingIcon(icons.Search)
 	lt := NewTextField(b)
-	b.ConfigTree()
+	b.BuildTree()
 
 	paths := []string{
 		"/body scene/body/text-field-1.parts/lead-icon.parts/icon",
@@ -114,7 +114,7 @@ func TestWidgetNext(t *testing.T) {
 	ft := NewTextField(b).AddClearButton()
 	NewTextField(b).SetLeadingIcon(icons.Search)
 	NewTextField(b)
-	b.ConfigTree()
+	b.BuildTree()
 
 	paths := []string{
 		"/body scene/body/text-field-0.parts/trail-icon-stretch",

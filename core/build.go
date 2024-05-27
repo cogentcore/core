@@ -48,8 +48,9 @@ func (wb *WidgetBase) Make(p *Plan) {
 	}
 }
 
-// ConfigTree calls [Widget.Build] on every Widget in the tree from me.
-func (wb *WidgetBase) ConfigTree() {
+// BuildTree calls [WidgetBase.Build] on every widget in the tree starting
+// with this one and going down.
+func (wb *WidgetBase) BuildTree() {
 	if wb.This() == nil {
 		return
 	}
