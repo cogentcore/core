@@ -23,8 +23,11 @@ func (wb *WidgetBase) Maker(maker func(p *Plan)) {
 }
 
 // Build is the base implementation of [Widget.Build] that
-// runs [WidgetBase.Builders].
+// runs [WidgetBase.Builders] after [WidgetBase.ValueBuild].
 func (wb *WidgetBase) Build() {
+	if wb.ValueBuild != nil {
+		wb.ValueBuild()
+	}
 	for i := len(wb.Builders) - 1; i >= 0; i-- {
 		wb.Builders[i]()
 	}
@@ -32,9 +35,6 @@ func (wb *WidgetBase) Build() {
 
 // baseBuild is the base builder added to [WidgetBase.Builders] in OnInit.
 func (wb *WidgetBase) baseBuild() {
-	if wb.ValueUpdate != nil {
-		wb.ValueUpdate()
-	}
 	p := Plan{}
 	wb.This().(Widget).Make(&p)
 	p.BuildWidget(wb.This().(Widget))

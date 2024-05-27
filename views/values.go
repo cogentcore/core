@@ -14,8 +14,6 @@ import (
 	"cogentcore.org/core/icons"
 )
 
-// This file contains the standard [Value]s built into views.
-
 // SliceButton represents a slice or array value with a button.
 type SliceButton struct {
 	core.Button
@@ -28,11 +26,9 @@ func (sb *SliceButton) OnInit() {
 	sb.Button.OnInit()
 	sb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	ConfigDialogValue(sb, true)
-}
-
-func (sb *SliceButton) Make(p *core.Plan) {
-	sb.SetText(labels.FriendlySliceLabel(reflect.ValueOf(sb.Slice)))
-	sb.Button.Make(p)
+	sb.Builder(func() {
+		sb.SetText(labels.FriendlySliceLabel(reflect.ValueOf(sb.Slice)))
+	})
 }
 
 func (sb *SliceButton) ConfigDialog(d *core.Body) (bool, func()) {
@@ -70,12 +66,9 @@ func (sb *StructButton) OnInit() {
 	sb.Button.OnInit()
 	sb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	ConfigDialogValue(sb, true)
-}
-
-func (sb *StructButton) Make(p *core.Plan) {
-	sb.SetReadOnly(false)
-	sb.SetText(labels.FriendlyStructLabel(reflect.ValueOf(sb.Struct)))
-	sb.Button.Make(p)
+	sb.Builder(func() {
+		sb.SetText(labels.FriendlyStructLabel(reflect.ValueOf(sb.Struct)))
+	})
 }
 
 func (sb *StructButton) ConfigDialog(d *core.Body) (bool, func()) {
@@ -98,26 +91,24 @@ type MapButton struct {
 	Map any
 }
 
-func (sb *MapButton) WidgetValue() any { return &sb.Map }
+func (mb *MapButton) WidgetValue() any { return &mb.Map }
 
-func (sb *MapButton) OnInit() {
-	sb.Button.OnInit()
-	sb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	ConfigDialogValue(sb, true)
+func (mb *MapButton) OnInit() {
+	mb.Button.OnInit()
+	mb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	ConfigDialogValue(mb, true)
+	mb.Builder(func() {
+		mb.SetText(labels.FriendlyMapLabel(reflect.ValueOf(mb.Map)))
+	})
 }
 
-func (sb *MapButton) Make(p *core.Plan) {
-	sb.SetText(labels.FriendlyMapLabel(reflect.ValueOf(sb.Map)))
-	sb.Button.Make(p)
-}
-
-func (sb *MapButton) ConfigDialog(d *core.Body) (bool, func()) {
-	if reflectx.AnyIsNil(sb.Map) || reflectx.NonPointerValue(reflect.ValueOf(sb.Map)).IsZero() {
+func (mb *MapButton) ConfigDialog(d *core.Body) (bool, func()) {
+	if reflectx.AnyIsNil(mb.Map) || reflectx.NonPointerValue(reflect.ValueOf(mb.Map)).IsZero() {
 		return false, nil
 	}
-	mpi := sb.Map
+	mpi := mb.Map
 	mv := NewMapView(d).SetMap(mpi)
-	mv.SetViewPath(sb.ValueContext).SetReadOnly(sb.IsReadOnly())
+	mv.SetViewPath(mb.ValueContext).SetReadOnly(mb.IsReadOnly())
 	d.AddAppBar(mv.MakeToolbar)
 	return true, nil
 }

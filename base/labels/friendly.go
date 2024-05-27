@@ -69,7 +69,7 @@ func FriendlyTypeName(typ reflect.Type) string {
 // FriendlyStructLabel returns a user-friendly label for the given struct value.
 func FriendlyStructLabel(v reflect.Value) string {
 	npv := reflectx.NonPointerValue(v)
-	if v.IsZero() {
+	if !v.IsValid() || v.IsZero() {
 		return "None"
 	}
 	opv := reflectx.UnderlyingPointer(v)
