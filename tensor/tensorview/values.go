@@ -62,15 +62,13 @@ func (tb *TensorButton) OnInit() {
 	tb.Button.OnInit()
 	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	views.ConfigDialogValue(tb, true)
-}
-
-func (tb *TensorButton) Make(p *core.Plan) {
-	txt := "nil"
-	if tb.Tensor != nil {
-		txt = "Tensor"
-	}
-	tb.SetText(txt)
-	tb.Button.Make(p)
+	tb.Builder(func() {
+		text := "None"
+		if tb.Tensor != nil {
+			text = "Tensor"
+		}
+		tb.SetText(text)
+	})
 }
 
 func (tb *TensorButton) ConfigDialog(d *core.Body) (bool, func()) {
@@ -93,19 +91,17 @@ func (tb *TableButton) OnInit() {
 	tb.Button.OnInit()
 	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	views.ConfigDialogValue(tb, true)
-}
-
-func (tb *TableButton) Make(p *core.Plan) {
-	txt := "nil"
-	if tb.Table != nil {
-		if nm, has := tb.Table.MetaData["name"]; has {
-			txt = nm
-		} else {
-			txt = "Table"
+	tb.Builder(func() {
+		text := "None"
+		if tb.Table != nil {
+			if nm, has := tb.Table.MetaData["name"]; has {
+				text = nm
+			} else {
+				text = "Table"
+			}
 		}
-	}
-	tb.SetText(txt)
-	tb.Button.Make(p)
+		tb.SetText(text)
+	})
 }
 
 func (tb *TableButton) ConfigDialog(d *core.Body) (bool, func()) {
@@ -128,19 +124,17 @@ func (tb *SimMatButton) OnInit() {
 	tb.Button.OnInit()
 	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	views.ConfigDialogValue(tb, true)
-}
-
-func (tb *SimMatButton) Make(p *core.Plan) {
-	txt := "nil"
-	if tb.SimMat != nil && tb.SimMat.Mat != nil {
-		if nm, has := tb.SimMat.Mat.MetaData("name"); has {
-			txt = nm
-		} else {
-			txt = "SimMat"
+	tb.Builder(func() {
+		text := "None"
+		if tb.SimMat != nil && tb.SimMat.Mat != nil {
+			if nm, has := tb.SimMat.Mat.MetaData("name"); has {
+				text = nm
+			} else {
+				text = "SimMat"
+			}
 		}
-	}
-	tb.SetText(txt)
-	tb.Button.Make(p)
+		tb.SetText(text)
+	})
 }
 
 func (tb *SimMatButton) ConfigDialog(d *core.Body) (bool, func()) {
