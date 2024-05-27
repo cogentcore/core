@@ -63,8 +63,11 @@ func (tv *TreeView) ReSync() {
 // (only during init).
 func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 	sk := tv.SyncNode
-	nm := "tv_" + sk.Name()
-	tv.SetName(nm)
+	// root must keep the same name for continuity with surrounding context
+	if tv != tv.RootView {
+		nm := "tv_" + sk.Name()
+		tv.SetName(nm)
+	}
 	tv.ViewIndex = *tvIndex
 	*tvIndex++
 	if init && depth >= tv.RootView.OpenDepth {

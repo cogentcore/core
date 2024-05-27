@@ -70,6 +70,7 @@ func (is *Inspector) OnInit() {
 	}
 	core.AddChildAt(is, "splits", func(w *core.Splits) {
 		w.SetSplits(.3, .7)
+		var structView *StructView
 		core.AddChildAt(w, "tree-frame", func(w *core.Frame) {
 			w.Style(func(s *styles.Style) {
 				s.Direction = styles.Column
@@ -86,9 +87,7 @@ func (is *Inspector) OnInit() {
 					is.CurrentNode = sn
 					// note: doing Update on entire Inspector undoes all tree expansion
 					// only want to update the struct view.
-					stru := is.FindPath("splits/struct").(*StructView)
-					stru.SetStruct(sn)
-					stru.Update()
+					structView.SetStruct(sn).Update()
 
 					sc, ok := is.Root.(*core.Scene)
 					if !ok {
@@ -110,6 +109,7 @@ func (is *Inspector) OnInit() {
 			})
 		})
 		core.AddChildAt(w, "struct", func(w *StructView) {
+			structView = w
 			w.OnChange(func(e events.Event) {
 				renderRebuild()
 			})
