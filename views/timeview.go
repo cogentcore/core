@@ -158,130 +158,136 @@ func (dv *DateView) OnInit() {
 		s.Direction = styles.Column
 	})
 
-	dv.Maker(func(p *core.Plan) {
-		if dv.HasChildren() {
-			dv.DeleteChildren()
-		}
-
-		trow := core.NewFrame(dv)
-		trow.Style(func(s *styles.Style) {
+	core.AddChild(dv, func(w *core.Frame) {
+		w.Style(func(s *styles.Style) {
 			s.Gap.Zero()
 		})
-
 		arrowStyle := func(s *styles.Style) {
 			s.Padding.SetHorizontal(units.Dp(12))
 			s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 		}
-
-		core.NewButton(trow).SetType(core.ButtonAction).SetIcon(icons.NavigateBefore).OnClick(func(e events.Event) {
-			dv.SetTime(dv.Time.AddDate(0, -1, 0))
-		}).Style(arrowStyle)
-
-		sms := make([]core.ChooserItem, len(shortMonths))
-		for i, sm := range shortMonths {
-			sms[i] = core.ChooserItem{Value: sm}
-		}
-		month := core.NewChooser(trow).SetItems(sms...)
-		month.SetCurrentIndex(int(dv.Time.Month() - 1))
-		month.OnChange(func(e events.Event) {
-			// set our month
-			dv.SetTime(dv.Time.AddDate(0, month.CurrentIndex+1-int(dv.Time.Month()), 0))
+		core.AddChild(w, func(w *core.Button) {
+			w.SetType(core.ButtonAction).SetIcon(icons.NavigateBefore)
+			w.OnClick(func(e events.Event) {
+				dv.SetTime(dv.Time.AddDate(0, -1, 0))
+			})
+			w.Style(arrowStyle)
 		})
-
-		core.NewButton(trow).SetType(core.ButtonAction).SetIcon(icons.NavigateNext).OnClick(func(e events.Event) {
-			dv.SetTime(dv.Time.AddDate(0, 1, 0))
-		}).Style(arrowStyle)
-
-		core.NewButton(trow).SetType(core.ButtonAction).SetIcon(icons.NavigateBefore).OnClick(func(e events.Event) {
-			dv.SetTime(dv.Time.AddDate(-1, 0, 0))
-		}).Style(arrowStyle)
-
-		yr := dv.Time.Year()
-		var yrs []core.ChooserItem
-		// we go 100 in each direction from the current year
-		for i := yr - 100; i <= yr+100; i++ {
-			yrs = append(yrs, core.ChooserItem{Value: i})
-		}
-		year := core.NewChooser(trow).SetItems(yrs...)
-		year.SetCurrentValue(yr)
-		year.OnChange(func(e events.Event) {
-			// we are centered at current year with 100 in each direction
-			nyr := year.CurrentIndex + yr - 100
-			// set our year
-			dv.SetTime(dv.Time.AddDate(nyr-dv.Time.Year(), 0, 0))
+		core.AddChild(w, func(w *core.Chooser) {
+			sms := make([]core.ChooserItem, len(shortMonths))
+			for i, sm := range shortMonths {
+				sms[i] = core.ChooserItem{Value: sm}
+			}
+			w.SetItems(sms...)
+			w.SetCurrentIndex(int(dv.Time.Month() - 1))
+			w.OnChange(func(e events.Event) {
+				// set our month
+				dv.SetTime(dv.Time.AddDate(0, w.CurrentIndex+1-int(dv.Time.Month()), 0))
+			})
 		})
-
-		core.NewButton(trow).SetType(core.ButtonAction).SetIcon(icons.NavigateNext).OnClick(func(e events.Event) {
-			dv.SetTime(dv.Time.AddDate(1, 0, 0))
-		}).Style(arrowStyle)
-
-		dv.ConfigDateGrid()
+		core.AddChild(w, func(w *core.Button) {
+			w.SetType(core.ButtonAction).SetIcon(icons.NavigateNext)
+			w.OnClick(func(e events.Event) {
+				dv.SetTime(dv.Time.AddDate(0, 1, 0))
+			})
+			w.Style(arrowStyle)
+		})
+		core.AddChild(w, func(w *core.Button) {
+			w.SetType(core.ButtonAction).SetIcon(icons.NavigateBefore)
+			w.OnClick(func(e events.Event) {
+				dv.SetTime(dv.Time.AddDate(-1, 0, 0))
+			})
+			w.Style(arrowStyle)
+		})
+		core.AddChild(w, func(w *core.Chooser) {
+			yr := dv.Time.Year()
+			var yrs []core.ChooserItem
+			// we go 100 in each direction from the current year
+			for i := yr - 100; i <= yr+100; i++ {
+				yrs = append(yrs, core.ChooserItem{Value: i})
+			}
+			w.SetItems(yrs...)
+			w.SetCurrentValue(yr)
+			w.OnChange(func(e events.Event) {
+				// we are centered at current year with 100 in each direction
+				nyr := w.CurrentIndex + yr - 100
+				// set our year
+				dv.SetTime(dv.Time.AddDate(nyr-dv.Time.Year(), 0, 0))
+			})
+		})
+		core.AddChild(w, func(w *core.Button) {
+			w.SetType(core.ButtonAction).SetIcon(icons.NavigateNext)
+			w.OnClick(func(e events.Event) {
+				dv.SetTime(dv.Time.AddDate(1, 0, 0))
+			})
+			w.Style(arrowStyle)
+		})
 	})
-}
-
-func (dv *DateView) ConfigDateGrid() { // TODO(config)
-	grid := core.NewFrame(dv)
-	grid.Style(func(s *styles.Style) {
-		s.Display = styles.Grid
-		s.Columns = 7
-	})
-
-	// start of the month
-	som := dv.Time.AddDate(0, 0, -dv.Time.Day()+1)
-	// end of the month
-	eom := dv.Time.AddDate(0, 1, -dv.Time.Day())
-	// start of the week containing the start of the month
-	somw := som.AddDate(0, 0, -int(som.Weekday()))
-	// year day of the start of the week containing the start of the month
-	somwyd := somw.YearDay()
-	// end of the week containing the end of the month
-	eomw := eom.AddDate(0, 0, int(6-eom.Weekday()))
-	// year day of the end of the week containing the end of the month
-	eomwyd := eomw.YearDay()
-	// if we have moved up a year (happens in December),
-	// we add the number of days in this year
-	if eomw.Year() > somw.Year() {
-		eomwyd += time.Date(somw.Year(), 13, -1, 0, 0, 0, 0, somw.Location()).YearDay()
-	}
-
-	for yd := somwyd; yd <= eomwyd; yd++ {
-		// actual time of this date
-		dt := somw.AddDate(0, 0, yd-somwyd)
-		ds := strconv.Itoa(dt.Day())
-		bt := core.NewButton(grid).SetType(core.ButtonAction).SetText(ds)
-		bt.OnClick(func(e events.Event) {
-			dv.SetTime(dt)
+	core.AddChild(dv, func(w *core.Frame) {
+		w.Style(func(s *styles.Style) {
+			s.Display = styles.Grid
+			s.Columns = 7
 		})
-		bt.Style(func(s *styles.Style) {
-			s.Min.X.Dp(32)
-			s.Min.Y.Dp(32)
-			s.Padding.Set(units.Dp(6))
-			if dt.Month() != som.Month() {
-				s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+		w.Maker(func(p *core.Plan) {
+			// start of the month
+			som := dv.Time.AddDate(0, 0, -dv.Time.Day()+1)
+			// end of the month
+			eom := dv.Time.AddDate(0, 1, -dv.Time.Day())
+			// start of the week containing the start of the month
+			somw := som.AddDate(0, 0, -int(som.Weekday()))
+			// year day of the start of the week containing the start of the month
+			somwyd := somw.YearDay()
+			// end of the week containing the end of the month
+			eomw := eom.AddDate(0, 0, int(6-eom.Weekday()))
+			// year day of the end of the week containing the end of the month
+			eomwyd := eomw.YearDay()
+			// if we have moved up a year (happens in December),
+			// we add the number of days in this year
+			if eomw.Year() > somw.Year() {
+				eomwyd += time.Date(somw.Year(), 13, -1, 0, 0, 0, 0, somw.Location()).YearDay()
 			}
-			if dt.Year() == time.Now().Year() && dt.YearDay() == time.Now().YearDay() {
-				s.Border.Width.Set(units.Dp(1))
-				s.Border.Color.Set(colors.C(colors.Scheme.Primary.Base))
-				s.Color = colors.C(colors.Scheme.Primary.Base)
-			}
-			if dt.Year() == dv.Time.Year() && dt.YearDay() == dv.Time.YearDay() {
-				s.Background = colors.C(colors.Scheme.Primary.Base)
-				s.Color = colors.C(colors.Scheme.Primary.On)
-			}
-		})
-		bt.OnWidgetAdded(func(w core.Widget) {
-			switch w.PathFrom(bt) {
-			case "parts":
-				w.Style(func(s *styles.Style) {
-					s.Justify.Content = styles.Center
-					s.Justify.Items = styles.Center
+			for yd := somwyd; yd <= eomwyd; yd++ {
+				core.AddAt(p, strconv.Itoa(yd), func(w *core.Button) {
+					// actual time of this date
+					dt := somw.AddDate(0, 0, yd-somwyd)
+					ds := strconv.Itoa(dt.Day())
+					w.SetType(core.ButtonAction).SetText(ds)
+					w.OnClick(func(e events.Event) {
+						dv.SetTime(dt)
+					})
+					w.Style(func(s *styles.Style) {
+						s.Min.X.Dp(32)
+						s.Min.Y.Dp(32)
+						s.Padding.Set(units.Dp(6))
+						if dt.Month() != som.Month() {
+							s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+						}
+						if dt.Year() == time.Now().Year() && dt.YearDay() == time.Now().YearDay() {
+							s.Border.Width.Set(units.Dp(1))
+							s.Border.Color.Set(colors.C(colors.Scheme.Primary.Base))
+							s.Color = colors.C(colors.Scheme.Primary.Base)
+						}
+						if dt.Year() == dv.Time.Year() && dt.YearDay() == dv.Time.YearDay() {
+							s.Background = colors.C(colors.Scheme.Primary.Base)
+							s.Color = colors.C(colors.Scheme.Primary.On)
+						}
+					})
+					w.OnWidgetAdded(func(w core.Widget) {
+						switch w.PathFrom(w) {
+						case "parts":
+							w.Style(func(s *styles.Style) {
+								s.Justify.Content = styles.Center
+								s.Justify.Items = styles.Center
+							})
+						case "parts/label":
+							lb := w.(*core.Text)
+							lb.Type = core.TextBodyLarge
+						}
+					})
 				})
-			case "parts/label":
-				lb := w.(*core.Text)
-				lb.Type = core.TextBodyLarge
 			}
 		})
-	}
+	})
 }
 
 // TimeValue presents two text fields for editing a date and time,

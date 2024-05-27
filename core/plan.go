@@ -46,13 +46,13 @@ type PlanItem struct {
 // is called. The name of the widget is automatically generated based
 // on the file and line number of the calling function.
 func Add[T Widget](p *Plan, init func(w T)) {
-	AddAt(p, autoPlanPath(2), init)
+	AddAt(p, autoPlanName(2), init)
 }
 
-// autoPlanPath returns the dir-filename of [runtime.Caller](level),
+// autoPlanName returns the dir-filename of [runtime.Caller](level),
 // with all / . replaced to -, which is suitable as a unique name
-// for a [PlanItem.Path].
-func autoPlanPath(level int) string {
+// for a [PlanItem.Name].
+func autoPlanName(level int) string {
 	_, file, line, _ := runtime.Caller(level)
 	name := filepath.Base(file)
 	dir := filepath.Base(filepath.Dir(file))
@@ -108,8 +108,9 @@ func AddInit[T Widget](p *Plan, name string, init func(w T)) {
 // adds a [PlanItem] with the given init function using [Add]. In other words,
 // this adds a maker that will add a child to the given parent.
 func AddChild[T Widget](parent Widget, init func(w T)) {
+	name := autoPlanName(2) // must get here to get correct name
 	parent.AsWidget().Maker(func(p *Plan) {
-		Add(p, init)
+		AddAt(p, name, init)
 	})
 }
 
