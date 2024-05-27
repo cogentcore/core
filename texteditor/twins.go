@@ -24,16 +24,9 @@ type TwinEditors struct {
 
 func (te *TwinEditors) OnInit() {
 	te.Splits.OnInit()
-	te.SetStyles()
-}
-
-func (te *TwinEditors) SetStyles() {
-	te.Style(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-	})
 	te.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(te) {
-		case "text-a", "text-b":
+		case "text-a", "text-b": // TODO(config)
 			w.Style(func(s *styles.Style) {
 				s.Grow.Set(1, 1)
 				s.Min.X.Ch(80)
@@ -63,7 +56,7 @@ func (te *TwinEditors) SetFiles(fileA, fileB string, lineNumbers bool) {
 	te.BufferB.Stat() // update markup
 }
 
-func (te *TwinEditors) ConfigTexts() {
+func (te *TwinEditors) ConfigTexts() { // TODO(config)
 	if te.HasChildren() {
 		return
 	}

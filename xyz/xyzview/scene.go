@@ -44,11 +44,28 @@ type Scene struct {
 }
 
 func (sw *Scene) OnInit() {
+	sw.WidgetBase.OnInit()
 	sw.XYZ = xyz.NewScene()
 	sw.SelectionParams.Defaults()
-	sw.WidgetBase.OnInit()
-	sw.HandleEvents()
-	sw.SetStyles()
+	sw.Style(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Activatable, abilities.Slideable, abilities.LongHoverable, abilities.DoubleClickable)
+		s.Grow.Set(1, 1)
+		s.Min.Set(units.Em(20))
+	})
+
+	sw.On(events.Scroll, func(e events.Event) {
+		// pos := sw.Geom.ContentBBox.Min
+		// fmt.Println("loc off:", e.LocalOff(), "pos:", pos, "e pos:", e.WindowPos())
+		// e.SetLocalOff(e.LocalOff().Add(pos))
+		sw.XYZ.MouseScrollEvent(e.(*events.MouseScroll))
+		sw.NeedsRender()
+	})
+	sw.On(events.KeyChord, func(e events.Event) {
+		sw.XYZ.KeyChordEvent(e)
+		sw.NeedsRender()
+	})
+	sw.handleSlideEvents()
+	sw.handleSelectEvents()
 }
 
 func (sw *Scene) OnAdd() {
@@ -65,30 +82,6 @@ func (sw *Scene) Destroy() {
 // SceneXYZ returns the xyz.Scene
 func (sw *Scene) SceneXYZ() *xyz.Scene {
 	return sw.XYZ
-}
-
-func (sw *Scene) SetStyles() {
-	sw.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Activatable, abilities.Slideable, abilities.LongHoverable, abilities.DoubleClickable)
-		s.Grow.Set(1, 1)
-		s.Min.Set(units.Em(20))
-	})
-}
-
-func (sw *Scene) HandleEvents() {
-	sw.On(events.Scroll, func(e events.Event) {
-		// pos := sw.Geom.ContentBBox.Min
-		// fmt.Println("loc off:", e.LocalOff(), "pos:", pos, "e pos:", e.WindowPos())
-		// e.SetLocalOff(e.LocalOff().Add(pos))
-		sw.XYZ.MouseScrollEvent(e.(*events.MouseScroll))
-		sw.NeedsRender()
-	})
-	sw.On(events.KeyChord, func(e events.Event) {
-		sw.XYZ.KeyChordEvent(e)
-		sw.NeedsRender()
-	})
-	sw.HandleSlideEvents()
-	sw.HandleSelectEvents()
 }
 
 func (sw *Scene) Build() {

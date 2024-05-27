@@ -67,11 +67,6 @@ func (pt *Plot) UpdatePlot() {
 func (pt *Plot) OnInit() {
 	pt.WidgetBase.OnInit()
 	pt.Scale = 1
-	pt.SetStyles()
-	pt.HandleEvents()
-}
-
-func (pt *Plot) SetStyles() {
 	pt.Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
 		ro := pt.IsReadOnly()
@@ -85,9 +80,7 @@ func (pt *Plot) SetStyles() {
 			}
 		}
 	})
-}
 
-func (pt *Plot) HandleEvents() {
 	pt.On(events.SlideMove, func(e events.Event) {
 		e.SetHandled()
 		if pt.Plot == nil {

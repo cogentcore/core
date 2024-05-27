@@ -173,16 +173,12 @@ func NewManipPoint(parent tree.Node, name string, meshName string, clr color.RGB
 	return mpt
 }
 
-func (sw *Scene) HandleSelectEvents() {
-	sw.On(events.MouseDown, func(e events.Event) {
-		sw.HandleSelectEventsImpl(e)
-	})
-	sw.On(events.DoubleClick, func(e events.Event) {
-		sw.HandleSelectEventsImpl(e)
-	})
+func (sw *Scene) handleSelectEvents() {
+	sw.On(events.MouseDown, sw.handleSelectEventsImpl)
+	sw.On(events.DoubleClick, sw.handleSelectEventsImpl)
 }
 
-func (sw *Scene) HandleSelectEventsImpl(e events.Event) {
+func (sw *Scene) handleSelectEventsImpl(e events.Event) {
 	xy := sw.XYZ
 	pos := sw.Geom.ContentBBox.Min
 	e.SetLocalOff(e.LocalOff().Add(pos))
@@ -222,7 +218,7 @@ func (sw *Scene) HandleSelectEventsImpl(e events.Event) {
 	}
 }
 
-func (sw *Scene) HandleSlideEvents() {
+func (sw *Scene) handleSlideEvents() {
 	sw.On(events.SlideMove, func(e events.Event) {
 		pos := sw.Geom.ContentBBox.Min
 		e.SetLocalOff(e.LocalOff().Add(pos))

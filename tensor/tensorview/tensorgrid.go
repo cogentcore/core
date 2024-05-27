@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/views"
 )
@@ -183,16 +184,17 @@ func (tg *TensorGrid) OnInit() {
 	tg.WidgetBase.OnInit()
 	tg.Disp.GridView = tg
 	tg.Disp.Defaults()
-	tg.HandleEvents()
-	tg.SetStyles()
-}
-
-func (tg *TensorGrid) SetStyles() {
 	tg.Style(func(s *styles.Style) {
 		ms := tg.MinSize()
-		s.Min.X.Dot(ms.X)
-		s.Min.Y.Dot(ms.Y)
+		s.Min.Set(units.Dot(ms.X), units.Dot(ms.Y))
 		s.Grow.Set(1, 1)
+	})
+
+	tg.OnDoubleClick(func(e events.Event) {
+		tg.OpenTensorView()
+	})
+	tg.AddContextMenu(func(m *core.Scene) { // todo: still not getting the context menu event at all
+		views.NewFuncButton(m, tg.EditSettings).SetIcon(icons.Edit)
 	})
 }
 
@@ -225,15 +227,6 @@ func (tg *TensorGrid) OpenTensorView() {
 			})
 		}
 	*/
-}
-
-func (tg *TensorGrid) HandleEvents() {
-	tg.OnDoubleClick(func(e events.Event) {
-		tg.OpenTensorView()
-	})
-	tg.AddContextMenu(func(m *core.Scene) { // todo: still not getting the context menu event at all
-		views.NewFuncButton(m, tg.EditSettings).SetIcon(icons.Edit)
-	})
 }
 
 func (tg *TensorGrid) EditSettings() { //types:add
