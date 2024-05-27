@@ -96,8 +96,31 @@ func (pl *PlotView) OnInit() {
 		s.Direction = styles.Row
 		s.Grow.Set(1, 1)
 	})
+
 	pl.OnShow(func(e events.Event) {
 		pl.UpdatePlot()
+	})
+
+	pl.Maker(func(p *core.Plan) {
+		if pl.Table == nil {
+			return
+		}
+		pl.Params.FromMeta(pl.Table.Table)
+		cols := core.AddAt(p, "cols", func(w *core.Frame) {
+			w.Style(func(s *styles.Style) {
+				s.Direction = styles.Column
+				s.Grow.Set(0, 1)
+				s.Overflow.Y = styles.OverflowAuto
+				s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+			})
+		})
+		core.AddAt(p, "plot", func(w *Plot) {
+			w.Plot = pl.Plot
+			w.Style(func(s *styles.Style) {
+				s.Grow.Set(1, 1)
+			})
+		})
+		pl.MakeColumns(cols)
 	})
 }
 
@@ -350,28 +373,6 @@ func (pl *PlotView) PlotXAxis(plt *plot.Plot, ixvw *table.IndexView) (xi int, xv
 		}
 	}
 	return
-}
-
-func (pl *PlotView) Make(p *core.Plan) {
-	if pl.Table == nil {
-		return
-	}
-	pl.Params.FromMeta(pl.Table.Table)
-	cols := core.AddAt(p, "cols", func(w *core.Frame) {
-		w.Style(func(s *styles.Style) {
-			s.Direction = styles.Column
-			s.Grow.Set(0, 1)
-			s.Overflow.Y = styles.OverflowAuto
-			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
-		})
-	})
-	core.AddAt(p, "plot", func(w *Plot) {
-		w.Plot = pl.Plot
-		w.Style(func(s *styles.Style) {
-			s.Grow.Set(1, 1)
-		})
-	})
-	pl.MakeColumns(cols)
 }
 
 func (pl *PlotView) ColumnsFrame() *core.Frame {

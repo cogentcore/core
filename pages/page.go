@@ -75,6 +75,7 @@ func (pg *Page) OnInit() {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
+
 	pg.OnShow(func(e events.Event) {
 		if pg.PagePath == "" {
 			if getWebURL != nil {
@@ -87,6 +88,79 @@ func (pg *Page) OnInit() {
 	// must be done after the default title is set elsewhere in normal OnShow
 	pg.OnFinal(events.Show, func(e events.Event) {
 		pg.setStageTitle()
+	})
+
+	pg.Maker(func(p *core.Plan) {
+		if pg.HasChildren() { // TODO(config)
+			return
+		}
+		sp := core.NewSplits(pg).SetSplits(0.2, 0.8)
+		sp.SetName("splits")
+
+		nav := views.NewTreeViewFrame(sp).SetText(core.TheApp.Name())
+		nav.Parent().SetName("nav-frame")
+		nav.SetName("nav")
+		nav.SetReadOnly(true)
+		nav.ParentWidget().Style(func(s *styles.Style) {
+			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+		})
+		nav.OnSelect(func(e events.Event) {
+			if len(nav.SelectedNodes) == 0 {
+				return
+			}
+			sn := nav.SelectedNodes[0]
+			url := "/"
+			if sn != nav {
+				// we need a slash so that it doesn't think it's a relative URL
+				url = "/" + sn.PathFrom(nav)
+			}
+			pg.OpenURL(url, true)
+		})
+
+		pg.URLToPagePath = map[string]string{"": "index.md"}
+
+		errors.Log(fs.WalkDir(pg.Source, ".", func(fpath string, d fs.DirEntry, err error) error {
+			// already handled
+			if fpath == "" || fpath == "." {
+				return nil
+			}
+
+			p := wpath.Format(fpath)
+
+			pdir := path.Dir(p)
+			base := path.Base(p)
+
+			// already handled
+			if base == "index.md" {
+				return nil
+			}
+
+			ext := path.Ext(base)
+			if ext != "" && ext != ".md" {
+				return nil
+			}
+
+			parent := nav
+			if pdir != "" && pdir != "." {
+				parent = nav.FindPath(pdir).(*views.TreeView)
+			}
+
+			nm := strings.TrimSuffix(base, ext)
+			txt := strcase.ToSentence(nm)
+			tv := views.NewTreeView(parent).SetText(txt)
+			tv.SetName(nm)
+
+			// need index.md for page path
+			if d.IsDir() {
+				fpath += "/index.md"
+			}
+			pg.URLToPagePath[tv.PathFrom(nav)] = fpath
+			return nil
+		}))
+
+		core.NewFrame(sp).Style(func(s *styles.Style) {
+			s.Direction = styles.Column
+		}).SetName("body")
 	})
 }
 
@@ -206,79 +280,6 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		return
 	}
 	fr.Update()
-}
-
-func (pg *Page) Make(p *core.Plan) {
-	if pg.HasChildren() {
-		return
-	}
-	sp := core.NewSplits(pg).SetSplits(0.2, 0.8)
-	sp.SetName("splits")
-
-	nav := views.NewTreeViewFrame(sp).SetText(core.TheApp.Name())
-	nav.Parent().SetName("nav-frame")
-	nav.SetName("nav")
-	nav.SetReadOnly(true)
-	nav.ParentWidget().Style(func(s *styles.Style) {
-		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
-	})
-	nav.OnSelect(func(e events.Event) {
-		if len(nav.SelectedNodes) == 0 {
-			return
-		}
-		sn := nav.SelectedNodes[0]
-		url := "/"
-		if sn != nav {
-			// we need a slash so that it doesn't think it's a relative URL
-			url = "/" + sn.PathFrom(nav)
-		}
-		pg.OpenURL(url, true)
-	})
-
-	pg.URLToPagePath = map[string]string{"": "index.md"}
-
-	errors.Log(fs.WalkDir(pg.Source, ".", func(fpath string, d fs.DirEntry, err error) error {
-		// already handled
-		if fpath == "" || fpath == "." {
-			return nil
-		}
-
-		p := wpath.Format(fpath)
-
-		pdir := path.Dir(p)
-		base := path.Base(p)
-
-		// already handled
-		if base == "index.md" {
-			return nil
-		}
-
-		ext := path.Ext(base)
-		if ext != "" && ext != ".md" {
-			return nil
-		}
-
-		parent := nav
-		if pdir != "" && pdir != "." {
-			parent = nav.FindPath(pdir).(*views.TreeView)
-		}
-
-		nm := strings.TrimSuffix(base, ext)
-		txt := strcase.ToSentence(nm)
-		tv := views.NewTreeView(parent).SetText(txt)
-		tv.SetName(nm)
-
-		// need index.md for page path
-		if d.IsDir() {
-			fpath += "/index.md"
-		}
-		pg.URLToPagePath[tv.PathFrom(nav)] = fpath
-		return nil
-	}))
-
-	core.NewFrame(sp).Style(func(s *styles.Style) {
-		s.Direction = styles.Column
-	}).SetName("body")
 }
 
 // AppBar is the default app bar for a [Page]
