@@ -409,7 +409,12 @@ func (spl *Splits) AggsToTable(colName bool) *Table {
 	dt := spl.Splits[0].Table
 	st := NewTable().SetNumRows(nsp)
 	for _, cn := range spl.Levels {
-		st.AddStringColumn(cn)
+		oc := dt.ColumnByName(cn)
+		if oc != nil {
+			st.AddColumnOfType(oc.DataType(), cn)
+		} else {
+			st.AddStringColumn(cn)
+		}
 	}
 	for _, ag := range spl.Aggs {
 		col := dt.Columns[ag.ColumnIndex]
