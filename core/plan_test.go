@@ -45,8 +45,7 @@ func BenchmarkBuildPlan(bn *testing.B) {
 					})
 				})
 			}
-			p.BuildWidget(b)
+			p.Build(b)
 		}
 	}
 }
-

@@ -37,7 +37,7 @@ func (wb *WidgetBase) Build() {
 func (wb *WidgetBase) baseBuild() {
 	p := Plan{}
 	wb.This().(Widget).Make(&p)
-	p.BuildWidget(wb.This().(Widget))
+	p.Build(wb)
 }
 
 // Make is the base implementation of [Widget.Make] that runs

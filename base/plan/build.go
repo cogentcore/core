@@ -22,12 +22,12 @@ import (
 // Build ensures that the elements of the slice contain
 // the elements according to the plan, specified by unique
 // element names, with n = total number of items in the target slice.
-// If a new item is needed then newEl is called to create it,
+// If a new item is needed then new is called to create it,
 // for given name at given index position.
-// if destroyEl is not-nil, then it is called on any element
+// if destroy is not-nil, then it is called on any element
 // that is being deleted from the slice.
 // Returns the updated slice and true if any changes were made.
-func Build[T namer.Namer](s []T, n int, name func(i int) string, newEl func(name string, i int) T, destroyEl func(e T)) (r []T, mods bool) {
+func Build[T namer.Namer](s []T, n int, name func(i int) string, new func(name string, i int) T, destroy func(e T)) (r []T, mods bool) {
 	// first make a map for looking up the indexes of the target names
 	names := make([]string, n)
 	nmap := make(map[string]int, n)
@@ -47,29 +47,26 @@ func Build[T namer.Namer](s []T, n int, name func(i int) string, newEl func(name
 		nm := r[i].Name()
 		if _, ok := nmap[nm]; !ok {
 			mods = true
-			// fmt.Println("delete at:", i, "bad name:", nm)
-			if destroyEl != nil {
-				destroyEl(r[i])
+			if destroy != nil {
+				destroy(r[i])
 			}
 			r = slices.Delete(r, i, i+1)
 		}
 		smap[nm] = i
 	}
-	// next add and move items as needed -- in order so guaranteed
+	// next add and move items as needed; in order so guaranteed
 	for i, tn := range names {
 		ci := findfast.FindName(r, tn, smap[tn])
 		if ci < 0 { // item not currently on the list
 			mods = true
-			ne := newEl(tn, i)
+			ne := new(tn, i)
 			r = slices.Insert(r, i, ne)
-			// fmt.Println("new item needed at:", i, "name:", tn)
-		} else { // on the list -- is it in the right place?
+		} else { // on the list; is it in the right place?
 			if ci != i {
 				mods = true
 				e := r[ci]
 				r = slices.Delete(r, ci, ci+1)
 				r = slices.Insert(r, i, e)
-				// fmt.Println("moved item:", tn, "from:", ci, "to:", i)
 			}
 		}
 	}

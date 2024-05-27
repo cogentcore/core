@@ -171,7 +171,7 @@ func (ts *Tabs) OnInit() {
 		})
 		// frame comes before tabs in bottom navigation bar
 		if ts.Type.Effective(ts) == NavigationBar {
-			p.Children[0], p.Children[1] = p.Children[1], p.Children[0]
+			(*p)[0], (*p)[1] = (*p)[1], (*p)[0]
 		}
 	})
 }

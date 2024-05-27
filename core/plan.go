@@ -115,52 +115,48 @@ func (p *Plan) Add(name string, new func() Widget, init ...func(w Widget)) {
 	*p = append(*p, &PlanItem{Name: name, New: new, Init: init})
 }
 
-// BuildWidget builds (configures and updates) the given widget and
+// Build configures the given widget and
 // all of its children in accordance with the [Plan].
-func (p *Plan) BuildWidget(w Widget) {
-	if len(p.Children) == 0 { // TODO(config): figure out a better way to handle this?
+func (p *Plan) Build(w Widget) {
+	if len(*p) == 0 { // TODO(config): figure out a better way to handle this?
 		return
 	}
 	wb := w.AsWidget()
-	for i, child := range p.Children { // TODO(config): figure out a better way to handle this?
-		if child.Name != "parts" {
+	makeNew := func(item *PlanItem) Widget {
+		child := item.New()
+		child.SetName(item.Name)
+		tree.SetParent(child, wb)
+		for _, f := range item.Init {
+			f(child)
+		}
+		return child
+	}
+	for i, item := range *p { // TODO(config): figure out a better way to handle this?
+		if item.Name != "parts" {
 			continue
 		}
 		if wb.Parts == nil {
-			wparts := child.New()
-			wparts.SetName("parts")
-			wb.Parts = wparts.(*Frame)
-			tree.SetParent(wb.Parts, wb)
-			child.BuildWidget(wparts)
+			wb.Parts = makeNew(item).(*Frame)
 		}
-		p.Children = slices.Delete(p.Children, i, i+1) // not a real child
+		*p = slices.Delete(*p, i, i+1) // not a real child
 		break
 	}
-	if len(p.Children) == 0 { // check again after potentially removing parts
+	if len(*p) == 0 { // check again after potentially removing parts
 		return
 	}
-	wb.Kids, _ = plan.Build(wb.Kids, len(p.Children),
-		func(i int) string { return p.Children[i].Name },
-		func(name string, i int) tree.Node {
-			child := p.Children[i]
-			cw := child.New()
-			cw.SetName(name)
-			tree.SetParent(cw, wb)
-			for _, f := range child.Init {
-				f(cw)
-			}
-			return cw
-		}, func(n tree.Node) { n.Destroy() })
-	for i, child := range p.Children { // always build children even if not new
-		cw := wb.Child(i).(Widget)
-		child.BuildWidget(cw)
-	}
+	wb.Kids, _ = plan.Build(wb.Kids, len(*p),
+		func(i int) string {
+			return (*p)[i].Name
+		}, func(name string, i int) tree.Node {
+			return makeNew((*p)[i])
+		}, func(n tree.Node) {
+			n.Destroy()
+		})
 }
 
 // InitParts configures the given [Frame] to be ready
 // to serve as [WidgetBase.Parts] in a [Add] context.
 func InitParts(w *Frame) {
-	w.SetName("parts")
 	w.SetFlag(true, tree.Field)
 	w.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
