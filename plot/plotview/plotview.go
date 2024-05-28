@@ -101,26 +101,23 @@ func (pl *PlotView) OnInit() {
 		pl.UpdatePlot()
 	})
 
-	pl.Maker(func(p *core.Plan) {
-		if pl.Table == nil {
-			return
-		}
+	pl.Builder(func() {
 		pl.Params.FromMeta(pl.Table.Table)
-		cols := core.AddAt(p, "cols", func(w *core.Frame) {
-			w.Style(func(s *styles.Style) {
-				s.Direction = styles.Column
-				s.Grow.Set(0, 1)
-				s.Overflow.Y = styles.OverflowAuto
-				s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
-			})
+	})
+	core.AddChildAt(pl, "cols", func(w *core.Frame) {
+		w.Style(func(s *styles.Style) {
+			s.Direction = styles.Column
+			s.Grow.Set(0, 1)
+			s.Overflow.Y = styles.OverflowAuto
+			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
 		})
-		core.AddAt(p, "plot", func(w *Plot) {
-			w.Plot = pl.Plot
-			w.Style(func(s *styles.Style) {
-				s.Grow.Set(1, 1)
-			})
+		w.Maker(pl.makeColumns)
+	})
+	core.AddChildAt(pl, "plot", func(w *Plot) {
+		w.Plot = pl.Plot
+		w.Style(func(s *styles.Style) {
+			s.Grow.Set(1, 1)
 		})
-		pl.MakeColumns(cols)
 	})
 }
 
@@ -471,72 +468,72 @@ func (pl *PlotView) SetColumnsByName(nameContains string, on bool) { //types:add
 	pl.NeedsRender()
 }
 
-// MakeColumns makes the Plans for columns
-func (pl *PlotView) MakeColumns(p *core.Plan) {
+// makeColumns makes the Plans for columns
+func (pl *PlotView) makeColumns(p *core.Plan) {
 	pl.ColumnsListUpdate()
-	fr := core.Add(p, func(w *core.Frame) {
+	core.Add(p, func(w *core.Frame) {
 		w.Style(func(s *styles.Style) {
 			s.Direction = styles.Row
 			s.Grow.Set(0, 0)
 		})
-	})
-	core.Add(fr, func(w *core.Switch) {
-		w.SetType(core.SwitchCheckbox).SetTooltip("Toggle off all columns")
-		w.OnChange(func(e events.Event) {
-			w.SetChecked(false)
-			pl.SetAllColumns(false)
-		})
-	})
-	core.Add(fr, func(w *core.Button) {
-		w.SetText("Select Columns").SetType(core.ButtonAction).
-			SetTooltip("click to select columns based on column name").
-			OnClick(func(e events.Event) {
-				views.CallFunc(pl, pl.SetColumnsByName)
+		core.AddChild(w, func(w *core.Switch) {
+			w.SetType(core.SwitchCheckbox).SetTooltip("Toggle off all columns")
+			w.OnChange(func(e events.Event) {
+				w.SetChecked(false)
+				pl.SetAllColumns(false)
 			})
+		})
+		core.AddChild(w, func(w *core.Button) {
+			w.SetText("Select Columns").SetType(core.ButtonAction).
+				SetTooltip("click to select columns based on column name").
+				OnClick(func(e events.Event) {
+					views.CallFunc(pl, pl.SetColumnsByName)
+				})
+		})
 	})
 	core.Add(p, func(w *core.Separator) {})
 	for _, cp := range pl.Columns {
 		cp.Plot = pl
-		fr := core.AddAt(p, cp.Column, func(w *core.Frame) {
+		core.AddAt(p, cp.Column, func(w *core.Frame) {
 			w.Style(func(s *styles.Style) {
 				s.Direction = styles.Row
 				s.Grow.Set(0, 0)
 			})
-		})
-		core.Add(fr, func(w *core.Switch) {
-			w.SetType(core.SwitchCheckbox).SetTooltip("toggle plot on")
-			w.OnChange(func(e events.Event) {
-				cp.On = w.StateIs(states.Checked)
-				pl.UpdatePlot()
-			})
-			w.Builder(func() {
-				w.SetState(cp.On, states.Checked)
-			})
-		})
-		core.Add(fr, func(w *core.Button) {
-			w.SetText(cp.Column).SetType(core.ButtonAction).
-				SetTooltip("edit column settings including setting as XAxis or Legend")
-			w.OnClick(func(e events.Event) {
-				d := core.NewBody().AddTitle("Column Params")
-				views.NewStructView(d).SetStruct(cp).
-					OnChange(func(e events.Event) {
-						pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
-					})
-				d.AddAppBar(func(p *core.Plan) {
-					core.Add(p, func(w *core.Button) {
-						w.SetText("Set X Axis").OnClick(func(e events.Event) {
-							pl.Params.XAxisColumn = cp.Column
-							pl.UpdatePlot()
-						})
-					})
-					core.Add(p, func(w *core.Button) {
-						w.SetText("Set Legend").OnClick(func(e events.Event) {
-							pl.Params.LegendColumn = cp.Column
-							pl.UpdatePlot()
-						})
-					})
+			core.AddChild(w, func(w *core.Switch) {
+				w.SetType(core.SwitchCheckbox).SetTooltip("toggle plot on")
+				w.OnChange(func(e events.Event) {
+					cp.On = w.StateIs(states.Checked)
+					pl.UpdatePlot()
 				})
-				d.NewFullDialog(pl).SetNewWindow(true).Run()
+				w.Builder(func() {
+					w.SetState(cp.On, states.Checked)
+				})
+			})
+			core.AddChild(w, func(w *core.Button) {
+				w.SetText(cp.Column).SetType(core.ButtonAction).
+					SetTooltip("edit column settings including setting as XAxis or Legend")
+				w.OnClick(func(e events.Event) {
+					d := core.NewBody().AddTitle("Column Params")
+					views.NewStructView(d).SetStruct(cp).
+						OnChange(func(e events.Event) {
+							pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
+						})
+					d.AddAppBar(func(p *core.Plan) {
+						core.Add(p, func(w *core.Button) {
+							w.SetText("Set X Axis").OnClick(func(e events.Event) {
+								pl.Params.XAxisColumn = cp.Column
+								pl.UpdatePlot()
+							})
+						})
+						core.Add(p, func(w *core.Button) {
+							w.SetText("Set Legend").OnClick(func(e events.Event) {
+								pl.Params.LegendColumn = cp.Column
+								pl.UpdatePlot()
+							})
+						})
+					})
+					d.NewFullDialog(pl).SetNewWindow(true).Run()
+				})
 			})
 		})
 	}
