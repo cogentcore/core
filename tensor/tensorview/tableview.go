@@ -66,7 +66,6 @@ var _ views.SliceViewer = (*TableView)(nil)
 
 func (tv *TableView) OnInit() {
 	tv.SliceViewBase.OnInit()
-	tv.SetFlag(false, views.SliceViewShowIndex) // note: updating is not working for index for some reason
 	tv.SortIndex = -1
 	tv.TensorDisplay.Defaults()
 	tv.ColumnTensorDisplay = map[int]*TensorDisplay{}
