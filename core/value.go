@@ -48,6 +48,7 @@ func Bind[T Value](value any, vw T) T {
 	wb.ValueOnChange = func() {
 		ErrorSnackbar(vw, reflectx.SetRobust(value, vw.WidgetValue()))
 	}
+	wb.ValueBuild()
 	if ob, ok := any(vw).(OnBinder); ok {
 		ob.OnBind(value)
 	}
