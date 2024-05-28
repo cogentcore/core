@@ -579,6 +579,10 @@ func (sv *SliceViewBase) MakeGrid(p *core.Plan, maker func(p *core.Plan)) {
 			oc(e)
 			sv.HandleEvent(e)
 		})
+		w.Builder(func() {
+			nWidgPerRow, _ := sv.This().(SliceViewer).RowWidgetNs()
+			w.Styles.Columns = nWidgPerRow
+		})
 		w.Maker(maker)
 	})
 }
@@ -634,6 +638,8 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i, si int) {
 		}
 		wb.Builder(func() {
 			wb := w.AsWidget()
+			si := sv.StartIndex + i
+			val := sv.SliceElementValue(si)
 			// w.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
 			core.Bind(val.Interface(), w)
 			wb.SetReadOnly(sv.IsReadOnly())

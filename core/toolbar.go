@@ -99,6 +99,9 @@ func (tb *Toolbar) AllItemsToChildren() {
 	ovi := -1
 	for i, k := range tb.Kids {
 		_, wb := AsWidget(k)
+		if wb == nil {
+			continue
+		}
 		if wb.This() == tb.overflowButton.This() {
 			ovi = i
 			break

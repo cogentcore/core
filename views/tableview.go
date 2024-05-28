@@ -327,6 +327,9 @@ func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
 			}
 			wb.Builder(func() {
 				// w.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
+				si := tv.StartIndex + i
+				val := tv.SliceElementValue(si)
+				fval := reflectx.OnePointerValue(val.FieldByIndex(field.Index))
 				core.Bind(fval.Interface(), w)
 				wb.SetReadOnly(tv.IsReadOnly())
 				w.SetState(invis, states.Invisible)

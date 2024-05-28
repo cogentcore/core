@@ -66,6 +66,7 @@ var _ views.SliceViewer = (*TableView)(nil)
 
 func (tv *TableView) OnInit() {
 	tv.SliceViewBase.OnInit()
+	tv.SetFlag(false, views.SliceViewShowIndex) // note: updating is not working for index for some reason
 	tv.SortIndex = -1
 	tv.TensorDisplay.Defaults()
 	tv.ColumnTensorDisplay = map[int]*TensorDisplay{}
@@ -208,7 +209,7 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 		})
 		w.Maker(func(p *core.Plan) {
 			if tv.Is(views.SliceViewShowIndex) {
-				core.AddAt(p, "head-index", func(w *core.Text) {
+				core.AddAt(p, "head-index", func(w *core.Text) { // TODO: is not working
 					w.SetType(core.TextBodyMedium)
 					w.Style(func(s *styles.Style) {
 						s.Align.Self = styles.Center
@@ -227,6 +228,7 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 						tv.SortSliceAction(fli)
 					})
 					w.Builder(func() {
+						field := tv.Table.Table.ColumnNames[fli]
 						w.SetText(field).SetTooltip(field + " (tap to sort by)")
 						tv.headerWidths[fli] = len(field)
 						if fli == tv.SortIndex {
@@ -294,7 +296,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
 		if col.NumDims() == 1 {
 			str := ""
 			fval := float64(0)
-			core.AddNew(p, "grid/"+valnm, func() core.Value { // TODO(config): path nesting
+			core.AddNew(p, valnm, func() core.Value { // TODO(config): path nesting
 				if isstr {
 					return core.NewValue(&str, "")
 				} else {
@@ -317,6 +319,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
 					})
 				}
 				wb.Builder(func() {
+					si := tv.StartIndex + i
 					if si < len(tv.Table.Indexes) {
 						if isstr {
 							str = tv.Table.Table.StringIndex(fli, tv.Table.Indexes[si])
