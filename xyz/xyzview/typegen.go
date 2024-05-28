@@ -55,10 +55,10 @@ func (t *Scene) SetSelectionParams(v SelectionParams) *Scene { t.SelectionParams
 func (t *Scene) SetTooltip(v string) *Scene { t.Tooltip = v; return t }
 
 // SceneViewType is the [types.Type] for [SceneView]
-var SceneViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzview.SceneView", IDName: "scene-view", Doc: "SceneView provides a toolbar controller for an xyz.Scene,\nand manipulation abilities.", Embeds: []types.Field{{Name: "Layout"}}, Instance: &SceneView{}})
+var SceneViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzview.SceneView", IDName: "scene-view", Doc: "SceneView provides a toolbar controller for an [xyz.Scene],\nand manipulation abilities.", Embeds: []types.Field{{Name: "Frame"}}, Instance: &SceneView{}})
 
 // NewSceneView returns a new [SceneView] with the given optional parent:
-// SceneView provides a toolbar controller for an xyz.Scene,
+// SceneView provides a toolbar controller for an [xyz.Scene],
 // and manipulation abilities.
 func NewSceneView(parent ...tree.Node) *SceneView { return tree.New[*SceneView](parent...) }
 
