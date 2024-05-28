@@ -38,6 +38,15 @@ func NoSentenceCaseForType(tnm string) bool {
 	})
 }
 
+// structField represents the values of one field being viewed
+type structField struct {
+	path string
+
+	field reflect.StructField
+
+	value, parent reflect.Value
+}
+
 // StructView represents a struct with rows of field names and editable values.
 type StructView struct {
 	core.Frame
@@ -52,12 +61,52 @@ type StructView struct {
 	// It is displayed as extra contextual information in view dialogs.
 	ViewPath string
 
+	// structFields are the fields of the current struct.
+	structFields []*structField
+
 	// isShouldShower is whether the struct implements [core.ShouldShower], which results
 	// in additional updating being done at certain points.
 	isShouldShower bool
 }
 
 func (sv *StructView) WidgetValue() any { return &sv.Struct }
+
+func (sv *StructView) getStructFields() {
+	var fields []*structField
+
+	shouldShow := func(parent reflect.Value, field reflect.StructField) bool {
+		if field.Tag.Get("view") == "-" {
+			return false
+		}
+		if ss, ok := reflectx.UnderlyingPointer(parent).Interface().(core.ShouldShower); ok {
+			sv.isShouldShower = true
+			if !ss.ShouldShow(field.Name) {
+				return false
+			}
+		}
+		return true
+	}
+
+	reflectx.WalkFields(reflectx.Underlying(reflect.ValueOf(sv.Struct)),
+		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
+			return shouldShow(parent, field)
+		},
+		func(parent reflect.Value, field reflect.StructField, value reflect.Value) {
+			if field.Tag.Get("view") == "add-fields" && field.Type.Kind() == reflect.Struct {
+				reflectx.WalkFields(value,
+					func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) bool {
+						return shouldShow(parent, sfield)
+					},
+					func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) {
+						fields = append(fields, &structField{path: field.Name + " • " + sfield.Name, field: sfield, value: value, parent: parent})
+						// addField(parent, sfield, value, path)
+					})
+			}
+			fields = append(fields, &structField{path: field.Name, field: field, value: value, parent: parent})
+			// addField(parent, field, value, field.Name)
+		})
+	sv.structFields = fields
+}
 
 func (sv *StructView) OnInit() {
 	sv.Frame.OnInit()
@@ -79,33 +128,23 @@ func (sv *StructView) OnInit() {
 			return
 		}
 
+		// fmt.Println("get struct fields:", sv.Struct)
+		sv.getStructFields()
+
 		sc := true
 		if len(NoSentenceCaseFor) > 0 {
 			sc = !NoSentenceCaseForType(types.TypeNameValue(sv.Struct))
 		}
 
-		shouldShow := func(parent reflect.Value, field reflect.StructField) bool {
-			if field.Tag.Get("view") == "-" {
-				return false
-			}
-			if ss, ok := reflectx.UnderlyingPointer(parent).Interface().(core.ShouldShower); ok {
-				sv.isShouldShower = true
-				if !ss.ShouldShow(field.Name) {
-					return false
-				}
-			}
-			return true
-		}
-
-		addField := func(parent reflect.Value, field reflect.StructField, value reflect.Value, name string) {
-			label := name
+		for i, f := range sv.structFields {
+			label := f.path
 			if sc {
 				label = strcase.ToSentence(label)
 			}
-			labnm := fmt.Sprintf("label-%v", name)
-			valnm := fmt.Sprintf("value-%v", name)
-			readOnlyTag := field.Tag.Get("edit") == "-"
-			def, hasDef := field.Tag.Lookup("default")
+			labnm := fmt.Sprintf("label-%v", f.path)
+			valnm := fmt.Sprintf("value-%v", f.path)
+			readOnlyTag := f.field.Tag.Get("edit") == "-"
+			def, hasDef := f.field.Tag.Lookup("default")
 
 			var labelWidget *core.Text
 			var valueWidget core.Value
@@ -115,13 +154,13 @@ func (sv *StructView) OnInit() {
 				w.Style(func(s *styles.Style) {
 					s.SetTextWrap(false)
 				})
-				doc, _ := types.GetDoc(value, parent, field, label)
+				doc, _ := types.GetDoc(f.value, f.parent, f.field, label)
 				w.SetTooltip(doc)
 				if hasDef {
 					w.SetTooltip("(Default: " + def + ") " + w.Tooltip)
 					var isDef bool
 					w.Style(func(s *styles.Style) {
-						isDef = reflectx.ValueIsDefault(value, def)
+						isDef = reflectx.ValueIsDefault(f.value, def)
 						dcr := "(Double click to reset to default) "
 						if !isDef {
 							s.Color = colors.C(colors.Scheme.Primary.Base)
@@ -138,7 +177,7 @@ func (sv *StructView) OnInit() {
 							return
 						}
 						e.SetHandled()
-						err := reflectx.SetFromDefaultTag(value, def)
+						err := reflectx.SetFromDefaultTag(f.value, def)
 						if err != nil {
 							core.ErrorSnackbar(w, err, "Error setting default value")
 						} else {
@@ -154,13 +193,13 @@ func (sv *StructView) OnInit() {
 			})
 
 			core.AddNew(p, valnm, func() core.Value {
-				return core.NewValue(reflectx.UnderlyingPointer(value).Interface(), field.Tag)
+				return core.NewValue(reflectx.UnderlyingPointer(f.value).Interface(), f.field.Tag)
 			}, func(w core.Value) {
 				valueWidget = w
 				wb := w.AsWidget()
 				wb.OnInput(func(e events.Event) {
 					sv.Send(events.Input, e)
-					if field.Tag.Get("immediate") == "+" {
+					if f.field.Tag.Get("immediate") == "+" {
 						wb.SendChange(e)
 					}
 				})
@@ -177,26 +216,13 @@ func (sv *StructView) OnInit() {
 				}
 				wb.Builder(func() {
 					wb.SetReadOnly(sv.IsReadOnly() || readOnlyTag)
-					core.Bind(reflectx.UnderlyingPointer(value).Interface(), w)
+					// if i == 0 {
+					// 	fmt.Println("sv builder:", f.path, reflectx.Underlying(sv.structFields[i].value).Interface())
+					// }
+					core.Bind(reflectx.UnderlyingPointer(sv.structFields[i].value).Interface(), w)
+					// note: the above call does not update immediately, but rather one behind
 				})
 			})
 		}
-
-		reflectx.WalkFields(reflectx.Underlying(reflect.ValueOf(sv.Struct)),
-			func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
-				return shouldShow(parent, field)
-			},
-			func(parent reflect.Value, field reflect.StructField, value reflect.Value) {
-				if field.Tag.Get("view") == "add-fields" && field.Type.Kind() == reflect.Struct {
-					reflectx.WalkFields(value,
-						func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) bool {
-							return shouldShow(parent, sfield)
-						},
-						func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) {
-							addField(parent, sfield, value, field.Name+" • "+sfield.Name)
-						})
-				}
-				addField(parent, field, value, field.Name)
-			})
 	})
 }

@@ -88,6 +88,7 @@ func (is *Inspector) OnInit() {
 					// note: doing Update on entire Inspector undoes all tree expansion
 					// only want to update the struct view.
 					structView.SetStruct(sn).Update()
+					// fmt.Println("cur node:", sn)
 
 					sc, ok := is.Root.(*core.Scene)
 					if !ok {
