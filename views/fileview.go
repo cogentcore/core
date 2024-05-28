@@ -256,7 +256,7 @@ func (fv *FileView) MakeToolbar(p *core.Plan) {
 		w.SetFunc(fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
 	})
 	core.Add(p, func(w *FuncButton) {
-		w.SetFunc(fv.AddPathToFaves).SetIcon(icons.Favorite).SetText("Favorite")
+		w.SetFunc(fv.AddPathToFavorites).SetIcon(icons.Favorite).SetText("Favorite")
 	})
 	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(fv.UpdateFilesAction).SetIcon(icons.Refresh).SetText("Update")
@@ -300,7 +300,7 @@ func (fv *FileView) ConfigAppChooser(ch *core.Chooser) {
 }
 
 func (fv *FileView) makeFilesRow(p *core.Plan) {
-	core.AddAt(p, "faves", func(w *TableView) {
+	core.AddAt(p, "favorites", func(w *TableView) {
 		w.SelectedIndex = -1
 		w.SetReadOnly(true)
 		w.SetFlag(false, SliceViewShowIndex)
@@ -312,7 +312,7 @@ func (fv *FileView) makeFilesRow(p *core.Plan) {
 		})
 		w.SetSlice(&core.SystemSettings.FavPaths)
 		w.OnSelect(func(e events.Event) {
-			fv.FavesSelect(w.SelectedIndex)
+			fv.FavoritesSelect(w.SelectedIndex)
 		})
 		w.Builder(func() {
 			w.ResetSelectedIndexes()
@@ -499,9 +499,9 @@ func (fv *FileView) WatchWatcher() {
 	}()
 }
 
-// FavesView returns the TableView of the favorites
-func (fv *FileView) FavesView() *TableView {
-	return fv.FindPath("files/faves").(*TableView)
+// FavoritesView returns the TableView of the favorites
+func (fv *FileView) FavoritesView() *TableView {
+	return fv.FindPath("files/favorites").(*TableView)
 }
 
 // FilesView returns the TableView of the files
@@ -576,14 +576,14 @@ func (fv *FileView) ReadFiles() {
 	})
 }
 
-// UpdateFaves updates list of files and other views for current path
-func (fv *FileView) UpdateFaves() {
-	sv := fv.FavesView()
+// UpdateFavorites updates list of files and other views for current path
+func (fv *FileView) UpdateFavorites() {
+	sv := fv.FavoritesView()
 	sv.Update()
 }
 
-// AddPathToFaves adds the current path to favorites
-func (fv *FileView) AddPathToFaves() { //types:add
+// AddPathToFavorites adds the current path to favorites
+func (fv *FileView) AddPathToFavorites() { //types:add
 	dp := fv.DirPath
 	if dp == "" {
 		return
@@ -605,7 +605,7 @@ func (fv *FileView) AddPathToFaves() { //types:add
 	core.SystemSettings.FavPaths = append(core.SystemSettings.FavPaths, fi)
 	core.ErrorSnackbar(fv, core.SaveSettings(core.SystemSettings), "Error saving settings")
 	// fv.FileSig.Emit(fv.This(), int64(FileViewFavAdded), fi)
-	fv.UpdateFaves()
+	fv.UpdateFavorites()
 }
 
 // DirPathUp moves up one directory in the path
@@ -701,8 +701,8 @@ func (fv *FileView) SetExtAction(ext string) *FileView {
 	return fv
 }
 
-// FavesSelect selects a favorite path and goes there
-func (fv *FileView) FavesSelect(idx int) {
+// FavoritesSelect selects a favorite path and goes there
+func (fv *FileView) FavoritesSelect(idx int) {
 	if idx < 0 || idx >= len(core.SystemSettings.FavPaths) {
 		return
 	}
