@@ -17,165 +17,17 @@ import (
 // in the reflect system
 
 // MapValueType returns the type of the value for the given map (which can be
-// a pointer to a map or a direct map) -- just Elem() of map type, but using
+// a pointer to a map or a direct map); just Elem() of map type, but using
 // this function makes it more explicit what is going on.
 func MapValueType(mp any) reflect.Type {
-	// return NonPointerUnderlyingValue(reflect.ValueOf(sl)).Type().Elem()
 	return NonPointerType(reflect.TypeOf(mp)).Elem()
 }
 
 // MapKeyType returns the type of the key for the given map (which can be a
-// pointer to a map or a direct map) -- just Key() of map type, but using
+// pointer to a map or a direct map); just Key() of map type, but using
 // this function makes it more explicit what is going on.
 func MapKeyType(mp any) reflect.Type {
 	return NonPointerType(reflect.TypeOf(mp)).Key()
-}
-
-// WalkMapElements calls a function on all the "basic" elements of
-// the given map; it iterates over maps within maps (but not structs
-// and slices within maps).
-func WalkMapElements(mp any, fun func(mp any, typ reflect.Type, key, val reflect.Value) bool) bool {
-	vv := reflect.ValueOf(mp)
-	if mp == nil {
-		log.Printf("reflectx.MapElsValueFun: must pass a non-nil pointer to the map: %v\n", mp)
-		return false
-	}
-	v := Underlying(vv)
-	if !v.IsValid() {
-		return true
-	}
-	typ := v.Type()
-	if typ.Kind() != reflect.Map {
-		log.Printf("reflectx.MapElsValueFun: non-pointer type is not a map: %v\n", typ.String())
-		return false
-	}
-	rval := true
-	keys := v.MapKeys()
-	for _, key := range keys {
-		val := v.MapIndex(key)
-		vali := val.Interface()
-		// vt := val.Type()
-		vt := reflect.TypeOf(vali)
-		// fmt.Printf("key %v val %v kind: %v\n", key, val, vt.Kind())
-		if vt.Kind() == reflect.Map {
-			rval = WalkMapElements(vali, fun)
-			if !rval {
-				break
-			}
-			// } else if vt.Kind() == reflect.Struct { // todo
-			// 	rval = MapElsValueFun(vali, fun)
-			// 	if !rval {
-			// 		break
-			// 	}
-		} else {
-			rval = fun(vali, typ, key, val)
-			if !rval {
-				break
-			}
-		}
-	}
-	return rval
-}
-
-// WalkMapStructElements calls a function on all the "basic" elements
-// of the given map or struct; it iterates over maps within maps and
-// fields within structs.
-func WalkMapStructElements(mp any, fun func(mp any, typ reflect.Type, val reflect.Value) bool) bool {
-	vv := reflect.ValueOf(mp)
-	if mp == nil {
-		log.Printf("reflectx.MapElsValueFun: must pass a non-nil pointer to the map: %v\n", mp)
-		return false
-	}
-	v := Underlying(vv)
-	if !v.IsValid() {
-		return true
-	}
-	typ := v.Type()
-	vk := typ.Kind()
-	rval := true
-	switch vk {
-	case reflect.Map:
-		keys := v.MapKeys()
-	mapLoop:
-		for _, key := range keys {
-			val := v.MapIndex(key)
-			vali := val.Interface()
-			if AnyIsNil(vali) {
-				continue
-			}
-			vt := reflect.TypeOf(vali)
-			if vt == nil {
-				continue
-			}
-			vtk := vt.Kind()
-			switch vtk {
-			case reflect.Map:
-				rval = WalkMapStructElements(vali, fun)
-				if !rval {
-					break mapLoop
-				}
-			case reflect.Struct:
-				rval = WalkMapStructElements(vali, fun)
-				if !rval {
-					break mapLoop
-				}
-			default:
-				rval = fun(vali, typ, val)
-				if !rval {
-					break mapLoop
-				}
-			}
-		}
-	case reflect.Struct:
-	structLoop:
-		for i := 0; i < typ.NumField(); i++ {
-			f := typ.Field(i)
-			vf := v.Field(i)
-			if !vf.CanInterface() {
-				continue
-			}
-			vfi := vf.Interface()
-			if vfi == mp {
-				continue
-			}
-			vtk := f.Type.Kind()
-			switch vtk {
-			case reflect.Map:
-				rval = WalkMapStructElements(vfi, fun)
-				if !rval {
-					break structLoop
-				}
-			case reflect.Struct:
-				rval = WalkMapStructElements(vfi, fun)
-				if !rval {
-					break structLoop
-				}
-			default:
-				rval = fun(vfi, typ, vf)
-				if !rval {
-					break structLoop
-				}
-			}
-		}
-	default:
-		log.Printf("reflectx.MapStructElsValueFun: non-pointer type is not a map or struct: %v\n", typ.String())
-		return false
-	}
-	return rval
-}
-
-// NumMapStructElements returns the number of elemental fields
-// in the given map / struct, using [WalkMapStructElements].
-func NumMapStructElements(mp any) int {
-	n := 0
-	falseErr := WalkMapStructElements(mp, func(mp any, typ reflect.Type, val reflect.Value) bool {
-		n++
-		return true
-	})
-	if !falseErr {
-		return 0
-	}
-	return n
 }
 
 // MapAdd adds a new blank entry to the map.
@@ -185,8 +37,7 @@ func MapAdd(mv any) {
 	mvtyp := mpvnp.Type()
 	valtyp := MapValueType(mv)
 	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
-		str := ""
-		valtyp = reflect.TypeOf(str)
+		valtyp = reflect.TypeOf("")
 	}
 	nkey := reflect.New(MapKeyType(mv))
 	nval := reflect.New(valtyp)
