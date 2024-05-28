@@ -656,21 +656,27 @@ func (tv *TableView) MakeToolbar(p *core.Plan) {
 	}
 	core.Add(p, func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.AddRows).SetIcon(icons.Add)
+		w.SetAfterFunc(func() { tv.Update() })
 	})
 	core.Add(p, func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.SortColumnName).SetText("Sort").SetIcon(icons.Sort)
+		w.SetAfterFunc(func() { tv.Update() })
 	})
 	core.Add(p, func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
+		w.SetAfterFunc(func() { tv.Update() })
 	})
 	core.Add(p, func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
+		w.SetAfterFunc(func() { tv.Update() })
 	})
 	core.Add(p, func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.OpenCSV).SetIcon(icons.Open)
+		w.SetAfterFunc(func() { tv.Update() })
 	})
 	core.Add(p, func(w *views.FuncButton) {
 		w.SetFunc(tv.Table.SaveCSV).SetIcon(icons.Save)
+		w.SetAfterFunc(func() { tv.Update() })
 	})
 }
 
