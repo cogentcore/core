@@ -90,6 +90,8 @@ func NewSubPlot(parent ...tree.Node) *PlotView {
 }
 
 func (pl *PlotView) OnInit() {
+	pl.Frame.OnInit()
+
 	pl.Params.Plot = pl
 	pl.Params.Defaults()
 	pl.Style(func(s *styles.Style) {
