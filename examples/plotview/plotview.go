@@ -35,7 +35,8 @@ func main() {
 		// pl.Params.Scale = 2
 		pl.Params.Points = true
 		pl.SetTable(epc)
-		pl.ColumnParams("UnitErr").On = true
+		pl.Update()
+		// pl.ColumnParams("UnitErr").On = true
 		b.AddAppBar(pl.MakeToolbar)
 	} else {
 		data := []Data{
