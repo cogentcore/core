@@ -384,7 +384,6 @@ func CopySliceRobust(to, from any) error {
 	tonp := Underlying(tov)
 	fmnp := Underlying(fmv)
 	totyp := tonp.Type()
-	// eltyp := SliceElType(tonp)
 	if totyp.Kind() != reflect.Slice {
 		err := fmt.Errorf("reflectx.CopySliceRobust: 'to' is not slice, is: %v", totyp.String())
 		return errors.Log(err)
@@ -407,7 +406,7 @@ func CopySliceRobust(to, from any) error {
 		if i >= tolen {
 			SliceNewAt(to, i)
 		}
-		// SetRobust(PointerValue(tonp.Index(i)).Interface(), fmnp.Index(i).Interface())
+		SetRobust(PointerValue(tonp.Index(i)).Interface(), fmnp.Index(i).Interface())
 	}
 	return nil
 }
