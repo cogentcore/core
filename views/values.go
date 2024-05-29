@@ -5,7 +5,6 @@
 package views
 
 import (
-	"log/slog"
 	"reflect"
 
 	"cogentcore.org/core/base/labels"
@@ -36,12 +35,8 @@ func (sb *SliceButton) ConfigDialog(d *core.Body) (bool, func()) {
 	if reflectx.AnyIsNil(sb.Slice) || npv.IsZero() {
 		return false, nil
 	}
-	vvp := reflectx.UnderlyingPointer(reflect.ValueOf(sb.Slice))
-	if vvp.Kind() != reflect.Pointer {
-		slog.Error("views.SliceButton: Cannot view unadressable (non-pointer) slices", "type", npv.Type())
-		return false, nil
-	}
-	slci := vvp.Interface()
+	up := reflectx.UnderlyingPointer(reflect.ValueOf(sb.Slice))
+	slci := up.Interface()
 	if npv.Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(sb.Slice)).Kind() == reflect.Struct {
 		tv := NewTableView(d).SetSlice(slci).SetViewPath(sb.ValueContext)
 		tv.SetReadOnly(sb.IsReadOnly())
