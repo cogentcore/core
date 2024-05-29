@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package plan provides an efficent mechanism for updating a slice
+// Package plan provides an efficient mechanism for updating a slice
 // to contain a target list of elements, generating minimal edits to
 // modify the current slice contents to match the target.
 // The mechanism depends on the use of unique name string identifiers
