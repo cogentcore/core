@@ -81,17 +81,17 @@ func FriendlyStructLabel(v reflect.Value) string {
 
 // FriendlySliceLabel returns a user-friendly label for the given slice value.
 func FriendlySliceLabel(v reflect.Value) string {
-	npv := reflectx.Underlying(v)
+	uv := reflectx.Underlying(v)
 	label := ""
-	if !npv.IsValid() {
+	if !uv.IsValid() {
 		label = "None"
 	} else {
-		if npv.Kind() == reflect.Array || !npv.IsNil() {
+		if uv.Kind() == reflect.Array || !uv.IsNil() {
 			bnm := FriendlyTypeName(reflectx.SliceElementType(v.Interface()))
 			if strings.HasSuffix(bnm, "s") {
-				label = strcase.ToSentence(fmt.Sprintf("%d lists of %s", npv.Len(), bnm))
+				label = strcase.ToSentence(fmt.Sprintf("%d lists of %s", uv.Len(), bnm))
 			} else {
-				label = strcase.ToSentence(fmt.Sprintf("%d %ss", npv.Len(), bnm))
+				label = strcase.ToSentence(fmt.Sprintf("%d %ss", uv.Len(), bnm))
 			}
 		} else {
 			label = "None"
@@ -102,18 +102,18 @@ func FriendlySliceLabel(v reflect.Value) string {
 
 // FriendlyMapLabel returns a user-friendly label for the given map value.
 func FriendlyMapLabel(v reflect.Value) string {
-	npv := reflectx.Underlying(v)
+	uv := reflectx.Underlying(v)
 	mpi := v.Interface()
-	txt := ""
-	if !npv.IsValid() || npv.IsNil() {
-		txt = "None"
+	label := ""
+	if !uv.IsValid() || uv.IsNil() {
+		label = "None"
 	} else {
 		bnm := FriendlyTypeName(reflectx.MapValueType(mpi))
 		if strings.HasSuffix(bnm, "s") {
-			txt = strcase.ToSentence(fmt.Sprintf("%d lists of %s", npv.Len(), bnm))
+			label = strcase.ToSentence(fmt.Sprintf("%d lists of %s", uv.Len(), bnm))
 		} else {
-			txt = strcase.ToSentence(fmt.Sprintf("%d %ss", npv.Len(), bnm))
+			label = strcase.ToSentence(fmt.Sprintf("%d %ss", uv.Len(), bnm))
 		}
 	}
-	return txt
+	return label
 }
