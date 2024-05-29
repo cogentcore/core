@@ -197,6 +197,9 @@ func (fb *FuncButton) SetKey(kf keymap.Functions) *FuncButton {
 // the function to be obtained, it must be added to [types].
 func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	fnm := types.FuncName(fun)
+	if fnm == "" {
+		return fb.SetText("None")
+	}
 	// the "-fm" suffix indicates that it is a method
 	if strings.HasSuffix(fnm, "-fm") {
 		fnm = strings.TrimSuffix(fnm, "-fm")
@@ -346,6 +349,9 @@ func (fb *FuncButton) confirmDialog() {
 // CallFunc calls the function associated with this button,
 // prompting the user for any arguments.
 func (fb *FuncButton) CallFunc() {
+	if !fb.ReflectFunc.IsValid() {
+		return
+	}
 	ctx := fb.goodContext()
 	if len(fb.Args) == 0 {
 		if !fb.Confirm {
