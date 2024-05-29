@@ -999,6 +999,19 @@ func SetRobust(to, from any) error {
 		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", pointer, pointer)
 	}
 
+	if v.Kind() == reflect.Pointer {
+		fv := reflect.ValueOf(from)
+		if fv.Type().AssignableTo(typ) {
+			pointer.Elem().Set(fv)
+			return nil
+		}
+		ufv := Underlying(fv)
+		if ufv.IsValid() && ufv.Type().AssignableTo(typ) {
+			pointer.Elem().Set(ufv)
+			return nil
+		}
+	}
+
 	switch {
 	case kind >= reflect.Int && kind <= reflect.Int64:
 		fm, err := ToInt(from)
@@ -1063,17 +1076,7 @@ func SetRobust(to, from any) error {
 		return CopyMapRobust(to, from)
 	}
 
-	fv := reflect.ValueOf(from)
-	if fv.Type().AssignableTo(typ) {
-		pointer.Elem().Set(fv)
-		return nil
-	}
-	fv = Underlying(reflect.ValueOf(from))
-	if fv.Type().AssignableTo(typ) {
-		pointer.Elem().Set(fv)
-		return nil
-	}
 	tos := elide.End(fmt.Sprintf("%v", to), 40)
 	fms := elide.End(fmt.Sprintf("%v", from), 40)
-	return fmt.Errorf("unable to set value %s of type %T (using underlying type: %s) from value %s of type %T (using underlying type: %s): not a supported type pair and direct assigning is not possible", tos, to, typ.String(), fms, from, fv.Type().String())
+	return fmt.Errorf("unable to set value %s of type %T (using underlying type: %s) from value %s of type %T (using underlying type: %s): not a supported type pair and direct assigning is not possible", tos, to, typ.String(), fms, from, LongTypeName(reflect.TypeOf(from)))
 }
