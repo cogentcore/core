@@ -9,27 +9,29 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// Plan is a list of [TypeAndName]s used in [BuildSlice].
-type Plan []TypeAndName
+// TypePlan is a plan for the organization of a list of tree nodes,
+// specified by the Type of element at a given index, with a given name.
+// Used in Build and BuildSlice to actually build the items according
+// to the plan.
+type TypePlan []TypePlanItem
 
-// TypeAndName holds a type and a name. It is used for specifying [Plan]
-// objects in [BuildSlice].
-type TypeAndName struct {
+// TypePlanItem holds a type and a name, for specifying the [TypePlan].
+type TypePlanItem struct {
 	Type *types.Type
 	Name string
 }
 
-// Add adds a new Plan element with the given type and name.
-func (t *Plan) Add(typ *types.Type, name string) {
-	*t = append(*t, TypeAndName{typ, name})
+// Add adds a new TypePlan element with the given type and name.
+func (t *TypePlan) Add(typ *types.Type, name string) {
+	*t = append(*t, TypePlanItem{typ, name})
 }
 
 // BuildSlice ensures that the given Slice contains the elements
-// according to the Plan, specified by unique element names,
+// according to the TypePlan, specified by unique element names,
 // with n = total number of items in the target slice.
 // The given Node is set as the parent of the created nodes.
 // Returns true if any changes were made.
-func BuildSlice(sl *Slice, parent Node, p Plan) bool {
+func BuildSlice(sl *Slice, parent Node, p TypePlan) bool {
 	mods := false
 	*sl, mods = plan.Build(*sl, len(p),
 		func(i int) string { return p[i].Name },
@@ -46,9 +48,9 @@ func BuildSlice(sl *Slice, parent Node, p Plan) bool {
 }
 
 // Build ensures that the Children of given Node contains the elements
-// according to the Plan, specified by unique element names.
+// according to the TypePlan, specified by unique element names.
 // Returns true if any changes were made.
-func Build(n Node, p Plan) bool {
+func Build(n Node, p TypePlan) bool {
 	nb := n.AsTreeNode()
 	return BuildSlice(&nb.Kids, n, p)
 }

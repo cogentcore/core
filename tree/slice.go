@@ -170,7 +170,7 @@ func (sl *Slice) CopyFrom(frm Slice) {
 func (sl *Slice) ConfigCopy(n Node, frm Slice) {
 	sz := len(frm)
 	if sz > 0 || n == nil {
-		p := make(Plan, sz)
+		p := make(TypePlan, sz)
 		for i, kid := range frm {
 			p[i].Type = kid.NodeType()
 			p[i].Name = kid.Name()

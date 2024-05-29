@@ -74,7 +74,7 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 		tv.SetClosed(true)
 	}
 	skids := *sk.Children()
-	p := make(tree.Plan, 0, len(skids))
+	p := make(tree.TypePlan, 0, len(skids))
 	typ := tv.This().NodeType()
 	for _, skid := range skids {
 		p.Add(typ, "tv_"+skid.Name())

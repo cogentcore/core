@@ -205,7 +205,7 @@ func TestNodeConfig(t *testing.T) {
 	child3 := NewNodeBase(parent)
 	child3.SetName("child3")
 
-	plan1 := Plan{
+	plan1 := TypePlan{
 		{Type: testdata.NodeEmbedType, Name: "child2"},
 		{Type: testdata.NodeEmbedType, Name: "child3"},
 		{Type: testdata.NodeEmbedType, Name: "child1"},
@@ -215,7 +215,7 @@ func TestNodeConfig(t *testing.T) {
 
 	cf1 := fmt.Sprintf("plan1:\n%v\n", parent.Kids)
 
-	plan2 := Plan{
+	plan2 := TypePlan{
 		{testdata.NodeEmbedType, "child4"},
 		{NodeBaseType, "child1"}, // note: changing this to Node type removes child1.subchild1
 		{testdata.NodeEmbedType, "child5"},

@@ -55,7 +55,7 @@ type Node struct { //core:embedder
 	// only non-nil if this is the highest-level directory in the tree under vcs control
 	DirRepo vcs.Repo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
-	// version control system repository file status -- only valid during ReadDir
+	// version control system repository file status -- only valid during SetPath
 	RepoFiles vcs.Files `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 }
 
@@ -164,12 +164,10 @@ func (fn *Node) MyRelPath() string {
 	return dirs.RelFilePath(string(fn.FPath), string(fn.FRoot.FPath))
 }
 
-// ReadDir reads all the files at given directory into this directory node.
-// Uses efficient plan-based Build of children to preserve extra info
-// already stored about files.
-// The root node represents the directory at the given path.
-// Returns os.Stat error if path cannot be accessed.
-func (fn *Node) ReadDir(path string) error {
+// SetPath sets the current node to represent the given path.
+// This then calls [SyncDir] to synchronize the tree with the file
+// system tree at this path.
+func (fn *Node) SetPath(path string) error {
 	_, fnm := filepath.Split(path)
 	fn.SetText(fnm)
 	pth, err := filepath.Abs(path)
@@ -183,12 +181,14 @@ func (fn *Node) ReadDir(path string) error {
 		return err
 	}
 
-	fn.UpdateDir()
+	fn.SyncDir()
 	return nil
 }
 
-// UpdateDir updates the directory and all the nodes under it
-func (fn *Node) UpdateDir() {
+// SyncDir synchronizes the current directory node with all the files
+// contained within the directory on the filesystem, using the efficient
+// Plan-based diff-driven updating of only what is different.
+func (fn *Node) SyncDir() {
 	fn.DetectVCSRepo(true) // update files
 	path := string(fn.FPath)
 	// fmt.Printf("path: %v  node: %v\n", path, fn.Path())
@@ -198,11 +198,11 @@ func (fn *Node) UpdateDir() {
 	hasExtFiles := false
 	if fn.This() == fn.FRoot.This() {
 		if len(fn.FRoot.ExtFiles) > 0 {
-			plan = append(tree.Plan{{Type: fn.FRoot.FileNodeType, Name: ExternalFilesName}}, plan...)
+			plan = append(tree.TypePlan{{Type: fn.FRoot.FileNodeType, Name: ExternalFilesName}}, plan...)
 			hasExtFiles = true
 		}
 	}
-	mods := tree.Build(fn, plan) // NOT unique names
+	mods := tree.Build(fn, plan)
 	// always go through kids, regardless of mods
 	for _, sfk := range fn.Kids {
 		sf := AsNode(sfk)
@@ -236,9 +236,9 @@ func (fn *Node) UpdateDir() {
 
 // PlanOfFiles returns a type-and-name plan for building nodes based on
 // files immediately within given path
-func (fn *Node) PlanOfFiles(path string) tree.Plan {
-	plan1 := tree.Plan{}
-	plan2 := tree.Plan{}
+func (fn *Node) PlanOfFiles(path string) tree.TypePlan {
+	plan1 := tree.TypePlan{}
+	plan2 := tree.TypePlan{}
 	typ := fn.FRoot.FileNodeType
 	filepath.Walk(path, func(pth string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -279,7 +279,7 @@ func (fn *Node) PlanOfFiles(path string) tree.Plan {
 }
 
 // SortPlanByModTime sorts given plan list by mod time
-func (fn *Node) SortPlanByModTime(confg tree.Plan) {
+func (fn *Node) SortPlanByModTime(confg tree.TypePlan) {
 	sort.Slice(confg, func(i, j int) bool {
 		ifn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[i].Name))
 		jfn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[j].Name))
@@ -317,7 +317,7 @@ func (fn *Node) SetNodePath(path string) error {
 	if fn.IsDir() && !fn.IsIrregular() {
 		openAll := fn.FRoot.InOpenAll && !fn.Info.IsHidden()
 		if openAll || fn.FRoot.IsDirOpen(fn.FPath) {
-			fn.ReadDir(string(fn.FPath)) // keep going down..
+			fn.SetPath(string(fn.FPath)) // keep going down..
 		}
 	}
 	fn.SetFileIcon()
@@ -344,7 +344,7 @@ func (fn *Node) InitFileInfo() error {
 
 // UpdateNode updates information in node based on its associated file in FPath.
 // This is intended to be called ad-hoc for individual nodes that might need
-// updating -- use ReadDir for mass updates as it is more efficient.
+// updating -- use SetPath for mass updates as it is more efficient.
 func (fn *Node) UpdateNode() error {
 	err := fn.InitFileInfo()
 	if err != nil {
@@ -363,7 +363,7 @@ func (fn *Node) UpdateNode() error {
 			if repo != nil {
 				rnode.UpdateRepoFiles()
 			}
-			fn.UpdateDir()
+			fn.SyncDir()
 		}
 	} else {
 		repo, _ := fn.Repo()

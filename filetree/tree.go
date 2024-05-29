@@ -112,12 +112,12 @@ func (ft *Tree) OpenPath(path string) {
 	ft.UpdateAll()
 }
 
-// UpdateAll does a full update of the tree -- calls ReadDir on current path
+// UpdateAll does a full update of the tree -- calls SetPath on current path
 func (ft *Tree) UpdateAll() {
 	// update := ft.AsyncLock() // note: safe for async updating
 	ft.UpdateMu.Lock()
 	ft.Dirs.ClearMarks()
-	ft.ReadDir(string(ft.FPath))
+	ft.SetPath(string(ft.FPath))
 	// the problem here is that closed dirs are not visited but we want to keep their settings:
 	// ft.Dirs.DeleteStale()
 	ft.Update()
@@ -313,7 +313,7 @@ func (ft *Tree) AddExtFile(fpath string) (*Node, error) {
 		return ft.ExtNodeByPath(pth)
 	}
 	ft.ExtFiles = append(ft.ExtFiles, pth)
-	ft.UpdateDir()
+	ft.SyncDir()
 	return ft.ExtNodeByPath(pth)
 }
 
@@ -363,7 +363,7 @@ func (ft *Tree) ExtNodeByPath(fpath string) (*Node, error) {
 // for ExtFiles
 func (ft *Tree) UpdateExtFiles(efn *Node) {
 	efn.Info.Mode = os.ModeDir | os.ModeIrregular // mark as dir, irregular
-	plan := tree.Plan{}
+	plan := tree.TypePlan{}
 	typ := ft.FileNodeType
 	for _, f := range ft.ExtFiles {
 		plan.Add(typ, dirs.DirAndFile(f))

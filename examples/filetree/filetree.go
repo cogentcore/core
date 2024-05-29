@@ -254,8 +254,8 @@ func (fb *FileBrowse) ViewFile(fnm string) bool {
 
 // StandardFramePlan returns a Plan for configuring a standard Frame
 // -- can modify as desired before calling Build on Frame using this
-func (fb *FileBrowse) StandardFramePlan() tree.Plan {
-	plan := tree.Plan{}
+func (fb *FileBrowse) StandardFramePlan() tree.TypePlan {
+	plan := tree.TypePlan{}
 	plan.Add(core.TextType, "title")
 	plan.Add(core.SplitsType, "splits")
 	return plan
@@ -333,8 +333,8 @@ func (fb *FileBrowse) MakeToolbar(p *core.Plan) { //types:add
 }
 
 // SplitsPlan returns a Plan for configuring the Splits
-func (fb *FileBrowse) SplitsPlan() tree.Plan {
-	plan := tree.Plan{}
+func (fb *FileBrowse) SplitsPlan() tree.TypePlan {
+	plan := tree.TypePlan{}
 	plan.Add(core.FrameType, "filetree-fr")
 	for i := 0; i < fb.NTextEditors; i++ {
 		plan.Add(texteditor.EditorType, fmt.Sprintf("texteditor-%v", i))
