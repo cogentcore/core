@@ -490,7 +490,7 @@ func (w *RenderWindow) SendWinFocusEvent(act events.WinActions) {
 // events for the window and dispatches them to receiving nodes, and manages
 // other state etc (popups, etc).
 func (w *RenderWindow) EventLoop() {
-	defer func() { system.HandleRecover(recover()) }()
+	// defer func() { system.HandleRecover(recover()) }()
 
 	d := &w.SystemWindow.Events().Deque
 

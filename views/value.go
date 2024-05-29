@@ -7,6 +7,7 @@ package views
 //go:generate core generate
 
 import (
+	"fmt"
 	"reflect"
 
 	"cogentcore.org/core/base/reflectx"
@@ -117,6 +118,7 @@ func OpenDialogValueBase(v core.Value, cd ConfigDialoger, ctx core.Widget, fun f
 	// OK and Cancel buttons
 	if okfun == nil && fun == nil {
 		d.OnClose(func(e events.Event) {
+			fmt.Println(obj)
 			wb.SendChange()
 			v.Update()
 		})

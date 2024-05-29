@@ -105,22 +105,22 @@ func AppIconImages() []image.Image {
 // which will appear below any other OverflowMenu items added.
 func StandardAppBarConfig(parent Widget) {
 	tb := RecycleToolbar(parent)
-	tb.Maker(StandardAppBarStart)
+	tb.Maker(StandardAppBarMaker)
 	if len(tb.Scene.AppBars) > 0 {
 		tb.Makers = append(tb.Makers, tb.Scene.AppBars...)
 	}
 	StandardOverflowMenu(tb) // todo -- need a config option for this
 }
 
-// StandardAppBarStart adds standard items to start of an AppBar:
-// [StandardAppBarBack] and [StandardAppBarChooser]
-func StandardAppBarStart(p *Plan) {
-	StandardAppBarBack(p)
-	StandardAppBarChooser(p)
+// StandardAppBarMaker adds standard items to start of an AppBar:
+// [AppBarBackMaker] and [AppBarChooserMaker]
+func StandardAppBarMaker(p *Plan) {
+	AppBarBackMaker(p)
+	AppBarChooserMaker(p)
 }
 
-// StandardAppBarBack adds a back button
-func StandardAppBarBack(p *Plan) {
+// AppBarBackMaker adds a back button
+func AppBarBackMaker(p *Plan) {
 	AddAt(p, "back", func(w *Button) {
 		w.SetIcon(icons.ArrowBack).SetTooltip("Back").SetKey(keymap.HistPrev)
 		w.OnClick(func(e events.Event) {
@@ -149,8 +149,8 @@ func StandardAppBarBack(p *Plan) {
 	})
 }
 
-// StandardAppBarChooser adds a standard app chooser using [ConfigAppChooser].
-func StandardAppBarChooser(p *Plan) {
+// AppBarChooserMaker adds a standard app chooser using [ConfigAppChooser].
+func AppBarChooserMaker(p *Plan) {
 	AddAt(p, "app-chooser", ConfigAppChooser)
 }
 

@@ -43,6 +43,39 @@ func (tb *Toolbar) IsVisible() bool {
 	return tb.WidgetBase.IsVisible() && len(tb.Kids) > 0
 }
 
+// toolbarOverflowMenuMaker adds the overflow menu,
+// automatically added to top of the Maker stack
+func (tb *Toolbar) toolbarOverflowMenuMaker(p *Plan) {
+	AddAt(p, "overflow-menu", func(w *Button) {
+		ic := icons.MoreVert
+		if tb.Styles.Direction != styles.Row {
+			ic = icons.MoreHoriz
+		}
+		w.SetIcon(ic).SetTooltip("Additional menu items")
+		w.Builder(func() {
+			tb, ok := w.Parent().(*Toolbar)
+			if ok {
+				w.Menu = tb.OverflowMenu
+			}
+		})
+	})
+}
+
+func (tb *Toolbar) AddOverflowMenuMaker() {
+	if tb.overflowButton != nil {
+		return
+	}
+	tb.Maker(tb.toolbarOverflowMenuMaker)
+}
+
+func (tb *Toolbar) Build() {
+	tb.AddOverflowMenuMaker()
+	tb.Frame.Build()
+	if tb.overflowButton == nil {
+		tb.overflowButton = tb.ChildByName("overflow-menu", tb.NumChildren()-1).(*Button)
+	}
+}
+
 // AppChooser returns the app [Chooser] used for searching for
 // items. It will only be non-nil if this toolbar has been configured
 // with an app chooser, which typically only happens for app bars.
@@ -83,15 +116,6 @@ func (tb *Toolbar) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 
 // and ensures the overflow button is made and moves it
 // to the end of the list.
 func (tb *Toolbar) AllItemsToChildren() {
-	if tb.overflowButton == nil {
-		ic := icons.MoreVert
-		if tb.Styles.Direction != styles.Row {
-			ic = icons.MoreHoriz
-		}
-		tb.overflowButton = NewButton(tb).SetIcon(ic).SetTooltip("Additional menu items")
-		tb.overflowButton.SetName("overflow-menu")
-		tb.overflowButton.Menu = tb.OverflowMenu
-	}
 	if len(tb.overflowItems) > 0 {
 		tb.Kids = append(tb.Kids, tb.overflowItems...)
 		tb.overflowItems = nil
