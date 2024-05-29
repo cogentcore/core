@@ -208,7 +208,7 @@ func (fn *Node) SyncDir() {
 		sf := AsNode(sfk)
 		sf.FRoot = fn.FRoot
 		if hasExtFiles && sf.Nm == ExternalFilesName {
-			fn.FRoot.UpdateExtFiles(sf)
+			fn.FRoot.SyncExtFiles(sf)
 			continue
 		}
 		fp := filepath.Join(path, sf.Nm)
@@ -234,8 +234,8 @@ func (fn *Node) SyncDir() {
 	}
 }
 
-// PlanOfFiles returns a type-and-name plan for building nodes based on
-// files immediately within given path
+// PlanOfFiles returns a tree.TypePlan for building nodes based on
+// files immediately within given path.
 func (fn *Node) PlanOfFiles(path string) tree.TypePlan {
 	plan1 := tree.TypePlan{}
 	plan2 := tree.TypePlan{}

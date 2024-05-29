@@ -359,9 +359,9 @@ func (ft *Tree) ExtNodeByPath(fpath string) (*Node, error) {
 	return nil, fmt.Errorf("ExtFile not updated: %v", err)
 }
 
-// UpdateExtFiles returns a type-and-name list for configuring nodes
+// SyncExtFiles returns a type-and-name list for configuring nodes
 // for ExtFiles
-func (ft *Tree) UpdateExtFiles(efn *Node) {
+func (ft *Tree) SyncExtFiles(efn *Node) {
 	efn.Info.Mode = os.ModeDir | os.ModeIrregular // mark as dir, irregular
 	plan := tree.TypePlan{}
 	typ := ft.FileNodeType
