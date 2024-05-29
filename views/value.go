@@ -117,8 +117,8 @@ func OpenDialogValueBase(v core.Value, cd ConfigDialoger, ctx core.Widget, fun f
 	// OK and Cancel buttons
 	if okfun == nil && fun == nil {
 		d.OnClose(func(e events.Event) {
-			v.Update()
 			wb.SendChange()
+			v.Update()
 		})
 	} else {
 		// otherwise, we have to make the bottom bar
@@ -128,8 +128,8 @@ func OpenDialogValueBase(v core.Value, cd ConfigDialoger, ctx core.Widget, fun f
 				if okfun != nil {
 					okfun()
 				}
-				v.Update()
 				wb.SendChange()
+				v.Update()
 				if fun != nil {
 					fun()
 				}
