@@ -546,8 +546,8 @@ func (sv *SliceViewBase) UpdateMaxWidths() {
 	sv.MaxWidth = mxw
 }
 
-// SliceElementValue returns reflect.Value of slice element at given index
-// or ElementValue if out of range.
+// SliceElementValue returns an underlying non-pointer [reflect.Value]
+// of slice element at given index or ElementValue if out of range.
 func (sv *SliceViewBase) SliceElementValue(si int) reflect.Value {
 	var val reflect.Value
 	if si < sv.SliceSize {
@@ -640,7 +640,7 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i int) {
 	}
 
 	core.AddNew(p, "value-"+itxt, func() core.Value {
-		return core.NewValue(val.Interface(), "")
+		return core.NewValue(val.Addr().Interface(), "")
 	}, func(w core.Value) {
 		wb := w.AsWidget()
 		sv.MakeValue(w, i)
@@ -654,7 +654,7 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i int) {
 			_, vi, invis := svi.SliceIndex(i)
 			val := sv.SliceElementValue(vi)
 			// w.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
-			core.Bind(val.Interface(), w)
+			core.Bind(val.Addr().Interface(), w)
 			wb.SetReadOnly(sv.IsReadOnly())
 			w.SetState(invis, states.Invisible)
 			if sv.This().(SliceViewer).HasStyleFunc() {
