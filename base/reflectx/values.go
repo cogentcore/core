@@ -1001,14 +1001,16 @@ func SetRobust(to, from any) error {
 
 	if v.Kind() == reflect.Pointer {
 		fv := reflect.ValueOf(from)
-		if fv.Type().AssignableTo(typ) {
-			pointer.Elem().Set(fv)
-			return nil
-		}
-		ufv := Underlying(fv)
-		if ufv.IsValid() && ufv.Type().AssignableTo(typ) {
-			pointer.Elem().Set(ufv)
-			return nil
+		if fv.IsValid() {
+			if fv.Type().AssignableTo(typ) {
+				pointer.Elem().Set(fv)
+				return nil
+			}
+			ufv := Underlying(fv)
+			if ufv.IsValid() && ufv.Type().AssignableTo(typ) {
+				pointer.Elem().Set(ufv)
+				return nil
+			}
 		}
 	}
 
