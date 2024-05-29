@@ -200,6 +200,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	if fnm == "" {
 		return fb.SetText("None")
 	}
+	fnm = strings.ReplaceAll(fnm, "[...]", "") // remove any labeling for generics
 	// the "-fm" suffix indicates that it is a method
 	if strings.HasSuffix(fnm, "-fm") {
 		fnm = strings.TrimSuffix(fnm, "-fm")
