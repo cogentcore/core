@@ -139,8 +139,8 @@ func (sv *StructView) OnInit() {
 			if sc {
 				label = strcase.ToSentence(label)
 			}
-			labnm := fmt.Sprintf("label-%v", f.path)
-			valnm := fmt.Sprintf("value-%v", f.path)
+			labnm := fmt.Sprintf("label-%s", f.path)
+			valnm := fmt.Sprintf("value-%s-%s", f.path, reflectx.ShortTypeName(f.field.Type))
 			readOnlyTag := f.field.Tag.Get("edit") == "-"
 			def, hasDef := f.field.Tag.Lookup("default")
 

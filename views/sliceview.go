@@ -399,10 +399,13 @@ func (sv *SliceViewBase) OnInit() {
 		if scrollTo >= 0 {
 			sv.ScrollToIndex(scrollTo)
 		}
-		sv.UpdateStartIndex()
+
+		sv.Builder(func() {
+			sv.UpdateStartIndex()
+			svi.UpdateMaxWidths()
+		})
 
 		sv.MakeGrid(p, func(p *core.Plan) {
-			svi.UpdateMaxWidths()
 			for i := 0; i < sv.VisRows; i++ {
 				svi.MakeRow(p, i)
 			}
@@ -639,7 +642,8 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i int) {
 		sv.MakeGridIndex(p, i, si, itxt, invis)
 	}
 
-	core.AddNew(p, "value-"+itxt, func() core.Value {
+	valnm := fmt.Sprintf("value-%s-%s", itxt, reflectx.ShortTypeName(sv.ElementValue.Type()))
+	core.AddNew(p, valnm, func() core.Value {
 		return core.NewValue(val.Addr().Interface(), "")
 	}, func(w core.Value) {
 		wb := w.AsWidget()

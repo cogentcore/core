@@ -308,7 +308,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 	for fli := 0; fli < tv.numVisibleFields; fli++ {
 		field := tv.visibleFields[fli]
 		fval := reflectx.OnePointerValue(val.FieldByIndex(field.Index))
-		valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
+		valnm := fmt.Sprintf("value-%d-%s-%s", fli, itxt, reflectx.ShortTypeName(field.Type))
 		tags := reflect.StructTag("")
 		if fval.Kind() == reflect.Slice || fval.Kind() == reflect.Map {
 			tags = `view:"no-inline"`

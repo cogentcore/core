@@ -30,7 +30,7 @@ type Interpreter struct {
 	Shell *shell.Shell
 
 	// HistFile is the name of the history file to open / save.
-	// Defaults to ~/.coshhist for the default cosh shell.
+	// Defaults to ~/.cosh-history for the default cosh shell.
 	// Update this prior to running Config() to take effect.
 	HistFile string
 
@@ -43,7 +43,7 @@ type Interpreter struct {
 // functions. End user app must call [Interp.Config] after importing any additional
 // symbols, prior to running the interpreter.
 func NewInterpreter(options interp.Options) *Interpreter {
-	in := &Interpreter{HistFile: "~/.coshhist"}
+	in := &Interpreter{HistFile: "~/.cosh-history"}
 	in.Shell = shell.NewShell()
 	if options.Stdin != nil {
 		in.Shell.Config.StdIO.In = options.Stdin
@@ -233,7 +233,7 @@ func (in *Interpreter) Interactive() error {
 				line = in.Shell.Hist[hl]
 				fmt.Printf("h:%d\t%s\n", hl, line)
 			}
-		} else if !strings.HasPrefix(line, "history") && line != "h" {
+		} else if line != "" && !strings.HasPrefix(line, "history") && line != "h" {
 			in.Shell.AddHistory(line)
 		}
 		v, hasPrint, err := in.Eval(line)
