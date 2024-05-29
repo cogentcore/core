@@ -11,6 +11,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"cogentcore.org/core/base/errors"
 )
 
 // This file contains helpful functions for dealing with maps
@@ -213,14 +215,12 @@ func CopyMapRobust(to, from any) error {
 	totyp := tonp.Type()
 	if totyp.Kind() != reflect.Map {
 		err := fmt.Errorf("reflectx.CopyMapRobust: 'to' is not map, is: %v", totyp)
-		log.Println(err)
-		return err
+		return errors.Log(err)
 	}
 	fmtyp := fmnp.Type()
 	if fmtyp.Kind() != reflect.Map {
 		err := fmt.Errorf("reflectx.CopyMapRobust: 'from' is not map, is: %v", fmtyp)
-		log.Println(err)
-		return err
+		return errors.Log(err)
 	}
 	if tonp.IsNil() {
 		OnePointerValue(tov).Elem().Set(reflect.MakeMap(totyp))
