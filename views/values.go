@@ -31,18 +31,17 @@ func (sb *SliceButton) OnInit() {
 }
 
 func (sb *SliceButton) ConfigDialog(d *core.Body) (bool, func()) {
-	npv := reflectx.NonPointerValue(reflect.ValueOf(sb.Slice))
-	if reflectx.AnyIsNil(sb.Slice) || npv.IsZero() {
+	up := reflectx.UnderlyingPointer(reflect.ValueOf(sb.Slice))
+	if !up.IsValid() || up.IsZero() {
 		return false, nil
 	}
-	up := reflectx.UnderlyingPointer(reflect.ValueOf(sb.Slice))
-	slci := up.Interface()
-	if npv.Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(sb.Slice)).Kind() == reflect.Struct {
-		tv := NewTableView(d).SetSlice(slci).SetViewPath(sb.ValueContext)
+	upi := up.Interface()
+	if up.Elem().Type().Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(sb.Slice)).Kind() == reflect.Struct {
+		tv := NewTableView(d).SetSlice(upi).SetViewPath(sb.ValueContext)
 		tv.SetReadOnly(sb.IsReadOnly())
 		d.AddAppBar(tv.MakeToolbar)
 	} else {
-		sv := NewSliceView(d).SetSlice(slci).SetViewPath(sb.ValueContext)
+		sv := NewSliceView(d).SetSlice(upi).SetViewPath(sb.ValueContext)
 		sv.SetReadOnly(sb.IsReadOnly())
 		d.AddAppBar(sv.MakeToolbar)
 	}
