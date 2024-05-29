@@ -37,7 +37,6 @@ func (sb *SliceButton) ConfigDialog(d *core.Body) (bool, func()) {
 	}
 	upi := up.Interface()
 	if up.Elem().Type().Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(sb.Slice)).Kind() == reflect.Struct {
-		// fmt.Println(upi)
 		tv := NewTableView(d).SetSlice(upi).SetViewPath(sb.ValueContext)
 		tv.SetReadOnly(sb.IsReadOnly())
 		d.AddAppBar(tv.MakeToolbar)
