@@ -33,6 +33,7 @@ func (sh *Shell) InstallBuiltins() {
 	sh.Builtins["cossh"] = sh.CoSSH
 	sh.Builtins["scp"] = sh.Scp
 	sh.Builtins["debug"] = sh.Debug
+	sh.Builtins["history"] = sh.History
 }
 
 // Cd changes the current directory.
@@ -112,7 +113,7 @@ func (sh *Shell) Fg(cmdIO *exec.CmdIO, args ...string) error {
 	}
 	jno, _ := strconv.Atoi(jid[1:]) // guaranteed good
 	job := sh.Jobs[jno]
-	fmt.Printf("foregrounding job [%d]\n", jno)
+	cmdIO.Printf("foregrounding job [%d]\n", jno)
 	_ = job
 	// todo: the problem here is we need to change the stdio for running job
 	// job.Cmd.Wait() // wait
@@ -147,11 +148,11 @@ func (sh *Shell) Which(cmdIO *exec.CmdIO, args ...string) error {
 	}
 	cmd := args[0]
 	if _, hasCmd := sh.Commands[cmd]; hasCmd {
-		fmt.Println(cmd, "is a user-defined command")
+		cmdIO.Println(cmd, "is a user-defined command")
 		return nil
 	}
 	if _, hasBlt := sh.Builtins[cmd]; hasBlt {
-		fmt.Println(cmd, "is a cosh builtin command")
+		cmdIO.Println(cmd, "is a cosh builtin command")
 		return nil
 	}
 	sh.Config.RunIO(cmdIO, "which", args...)
@@ -284,6 +285,25 @@ func (sh *Shell) Debug(cmdIO *exec.CmdIO, args ...string) error {
 		} else {
 			logx.UserLevel = slog.LevelInfo
 		}
+	}
+	return nil
+}
+
+// History shows history
+func (sh *Shell) History(cmdIO *exec.CmdIO, args ...string) error {
+	n := len(sh.Hist)
+	nh := n
+	if len(args) == 1 {
+		an, err := strconv.Atoi(args[0])
+		if err != nil {
+			return fmt.Errorf("history: error parsing number of history items: %q, error: %s", args[0], err.Error())
+		}
+		nh = min(n, an)
+	} else if len(args) > 1 {
+		return fmt.Errorf("history: uses at most one argument")
+	}
+	for i := n - nh; i < n; i++ {
+		cmdIO.Printf("%d:\t%s\n", i, sh.Hist[i])
 	}
 	return nil
 }

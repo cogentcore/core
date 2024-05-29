@@ -88,6 +88,11 @@ type Shell struct {
 	// original standard IO setings, to restore
 	OrigStdIO exec.StdIO
 
+	// Hist is the accumulated list of command-line input,
+	// which is displayed with the history builtin command,
+	// and saved / restored from ~/.coshhist file
+	Hist []string
+
 	// commandArgs is a stack of args passed to a command, used for simplified
 	// processing of args expressions.
 	commandArgs stack.Stack[[]string]
@@ -366,6 +371,47 @@ func (sh *Shell) TranspileConfig() error {
 		return err
 	}
 	sh.TranspileCode(string(b))
+	return nil
+}
+
+// AddHistory adds given line to the Hist record of commands
+func (sh *Shell) AddHistory(line string) {
+	sh.Hist = append(sh.Hist, line)
+}
+
+// SaveHistory saves up to the given number of lines of current history
+// to given file, e.g., ~/.coshhist for the default cosh program.
+// If n is <= 0 all lines are saved.  n is typically 500 by default.
+func (sh *Shell) SaveHistory(n int, file string) error {
+	path, err := homedir.Expand(file)
+	if err != nil {
+		return err
+	}
+	hn := len(sh.Hist)
+	sn := hn
+	if n > 0 {
+		sn = min(n, hn)
+	}
+	lh := strings.Join(sh.Hist[hn-sn:hn], "\n")
+	err = os.WriteFile(path, []byte(lh), 0666)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// OpenHistory opens Hist history lines from given file,
+// e.g., ~/.coshhist
+func (sh *Shell) OpenHistory(file string) error {
+	path, err := homedir.Expand(file)
+	if err != nil {
+		return err
+	}
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	sh.Hist = strings.Split(string(b), "\n")
 	return nil
 }
 

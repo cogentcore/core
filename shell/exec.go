@@ -150,7 +150,7 @@ func (sh *Shell) HandleArgErr(errok bool, err error) error {
 		return err
 	}
 	if errok {
-		fmt.Fprintln(sh.Config.StdIO.Err, err.Error())
+		sh.Config.StdIO.ErrPrintln(err.Error())
 	} else {
 		sh.AddError(err)
 	}

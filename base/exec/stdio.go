@@ -62,7 +62,7 @@ func (st *StdIO) SetToOS() *StdIO {
 	return cur
 }
 
-// Print prints to the [StdIO.Out] Stdout
+// Print prints to the [StdIO.Out]
 func (st *StdIO) Print(v ...any) {
 	fmt.Fprint(st.Out, v...)
 }
@@ -72,9 +72,24 @@ func (st *StdIO) Println(v ...any) {
 	fmt.Fprintln(st.Out, v...)
 }
 
-// Printf prints to the [StdIO.Out] Stdout
+// Printf prints to the [StdIO.Out]
 func (st *StdIO) Printf(f string, v ...any) {
 	fmt.Fprintf(st.Out, f, v...)
+}
+
+// ErrPrint prints to the [StdIO.Err]
+func (st *StdIO) ErrPrint(v ...any) {
+	fmt.Fprint(st.Err, v...)
+}
+
+// ErrPrintln prints to the [StdIO.Err]
+func (st *StdIO) ErrPrintln(v ...any) {
+	fmt.Fprintln(st.Err, v...)
+}
+
+// ErrPrintf prints to the [StdIO.Err]
+func (st *StdIO) ErrPrintf(f string, v ...any) {
+	fmt.Fprintf(st.Err, f, v...)
 }
 
 // IsPipe returns true if the given object is an os.File corresponding to a Pipe,

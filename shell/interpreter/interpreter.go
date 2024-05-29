@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"reflect"
+	"strconv"
 	"strings"
 	"syscall"
 
@@ -28,6 +29,11 @@ type Interpreter struct {
 	// the cosh shell
 	Shell *shell.Shell
 
+	// HistFile is the name of the history file to open / save.
+	// Defaults to ~/.coshhist for the default cosh shell.
+	// Update this prior to running Config() to take effect.
+	HistFile string
+
 	// the yaegi interpreter
 	Interp *interp.Interpreter
 }
@@ -37,7 +43,7 @@ type Interpreter struct {
 // functions. End user app must call [Interp.Config] after importing any additional
 // symbols, prior to running the interpreter.
 func NewInterpreter(options interp.Options) *Interpreter {
-	in := &Interpreter{}
+	in := &Interpreter{HistFile: "~/.coshhist"}
 	in.Shell = shell.NewShell()
 	if options.Stdin != nil {
 		in.Shell.Config.StdIO.In = options.Stdin
@@ -159,6 +165,33 @@ func (in *Interpreter) Config() {
 	in.RunConfig()
 }
 
+// OpenHistory opens history from the current HistFile
+// and loads it into the readline history for given rl instance
+func (in *Interpreter) OpenHistory(rl *readline.Instance) error {
+	err := in.Shell.OpenHistory(in.HistFile)
+	if err == nil {
+		for _, h := range in.Shell.Hist {
+			rl.SaveToHistory(h)
+		}
+	}
+	return err
+}
+
+// SaveHistory saves last 500 (or HISTFILESIZE env value) lines of history,
+// to the current HistFile.
+func (in *Interpreter) SaveHistory() error {
+	n := 500
+	if hfs := os.Getenv("HISTFILESIZE"); hfs != "" {
+		en, err := strconv.Atoi(hfs)
+		if err != nil {
+			in.Shell.Config.StdIO.ErrPrintf("SaveHistory: environment variable HISTFILESIZE: %q not a number: %s", hfs, err.Error())
+		} else {
+			n = en
+		}
+	}
+	return in.Shell.SaveHistory(n, in.HistFile)
+}
+
 // Interactive runs an interactive shell that allows the user to input cosh.
 // Must have done in.Config() prior to calling.
 func (in *Interpreter) Interactive() error {
@@ -169,6 +202,7 @@ func (in *Interpreter) Interactive() error {
 	if err != nil {
 		return err
 	}
+	in.OpenHistory(rl)
 	defer rl.Close()
 	log.SetOutput(rl.Stderr()) // redraw the prompt correctly after log output
 
@@ -179,10 +213,28 @@ func (in *Interpreter) Interactive() error {
 			continue
 		}
 		if errors.Is(err, io.EOF) {
+			in.SaveHistory()
 			os.Exit(0)
 		}
 		if err != nil {
+			in.SaveHistory()
 			return err
+		}
+		if len(line) > 0 && line[0] == '!' { // history command
+			hl, err := strconv.Atoi(line[1:])
+			nh := len(in.Shell.Hist)
+			if err != nil {
+				in.Shell.Config.StdIO.ErrPrintf("history number: %q not a number: %s", line[1:], err.Error())
+				line = ""
+			} else if hl >= nh {
+				in.Shell.Config.StdIO.ErrPrintf("history number: %d not in range: [0:%d]", hl, nh)
+				line = ""
+			} else {
+				line = in.Shell.Hist[hl]
+				fmt.Printf("h:%d\t%s\n", hl, line)
+			}
+		} else if !strings.HasPrefix(line, "history") && line != "h" {
+			in.Shell.AddHistory(line)
 		}
 		v, hasPrint, err := in.Eval(line)
 		if err == nil && !hasPrint && v.IsValid() && !v.IsZero() && v.Kind() != reflect.Func {
