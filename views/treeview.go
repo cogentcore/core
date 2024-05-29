@@ -249,7 +249,7 @@ func (tv *TreeView) OnInit() {
 		switch w.PathFrom(tv) {
 		case "parts/branch/stack/icon-on", "parts/branch/stack/icon-off", "parts/branch/stack/icon-indeterminate":
 			w.Style(func(s *styles.Style) {
-				s.Min.Set(units.Em(1))
+				s.Min.Set(units.Em(0.8))
 			})
 		}
 	})

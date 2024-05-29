@@ -2176,10 +2176,13 @@ func (sg *SliceViewGrid) RenderStripes() {
 		ht, _ := sg.LayImpl.RowHeight(r, 0)
 		miny := st.Y
 		for c := 0; c < cols; c++ {
-			kw := sg.Child(r*cols + c).(core.Widget).AsWidget()
-			pyi := math32.Floor(kw.Geom.Pos.Total.Y)
-			if pyi < miny {
-				miny = pyi
+			ki := r*cols + c
+			if ki < sg.NumChildren() {
+				kw := sg.Child(ki).(core.Widget).AsWidget()
+				pyi := math32.Floor(kw.Geom.Pos.Total.Y)
+				if pyi < miny {
+					miny = pyi
+				}
 			}
 		}
 		st.Y = miny
