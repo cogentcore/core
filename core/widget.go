@@ -52,16 +52,6 @@ type Widget interface {
 	// after this, respectively.
 	Update()
 
-	// Make is the method that widgets can implement to make a plan for
-	// how their widget will be built, which is then applied in [Widget.Build].
-	// You can do this using the [Add], [AddAt], and [AddNew] methods.
-	//
-	// You should call [Widget.Update] or [Widget.Build] to actually
-	// reconfigure or update a widget from an end user perspective; Make
-	// should rarely be called except when extending the Make method
-	// of another widget type in a Make method.
-	Make(p *Plan)
-
 	// Build configures the widget by applying the [Plan] created by [Widget.Make].
 	// Widgets should typically implement [Widget.Make], not this, although they can
 	// implement this if necessary. In general, [Widget.Update] should be called to
@@ -249,8 +239,8 @@ type WidgetBase struct {
 	Builders []func() `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// Makers are a slice of functions called in sequential ascending order
-	// in [Widget.Make] to make the plan for the widget. You can use
-	// [WidgetBase.Maker] to add one.
+	// in [WidgetBase.Make] to make the plan for how the widget's children should
+	// be configured. You can use [WidgetBase.Maker] to add one.
 	Makers []func(p *Plan) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// If true, override the computed styles and allow directly editing Styles.

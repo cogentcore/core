@@ -17,7 +17,8 @@ func (wb *WidgetBase) Builder(builder func()) {
 }
 
 // Maker adds a new function to [WidgetBase.Makers], which are called in sequential
-// ascending order in [Widget.Make].
+// ascending order in [WidgetBase.Make] to make the plan for how the widget's children
+// should be configured.
 func (wb *WidgetBase) Maker(maker func(p *Plan)) {
 	wb.Makers = append(wb.Makers, maker)
 }
@@ -36,12 +37,14 @@ func (wb *WidgetBase) Build() {
 // baseBuild is the base builder added to [WidgetBase.Builders] in OnInit.
 func (wb *WidgetBase) baseBuild() {
 	p := Plan{}
-	wb.This().(Widget).Make(&p)
+	wb.Make(&p)
 	p.Build(wb)
 }
 
-// Make is the base implementation of [Widget.Make] that runs
-// [WidgetBase.Makers].
+// Make makes a plan for how the widget's children should be structured.
+// It does this by running [WidgetBase.Makers] in sequential ascending order.
+// Make is called by [WidgetBase.UpdateWidget] to determine how the widget
+// should be updated.
 func (wb *WidgetBase) Make(p *Plan) {
 	for _, maker := range wb.Makers {
 		maker(p)
