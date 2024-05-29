@@ -93,7 +93,6 @@ func (fv *Tree) Destroy() {
 // already stored about files. Only paths listed in Dirs will be opened.
 func (ft *Tree) OpenPath(path string) {
 	ft.FRoot = ft // we are our own root..
-	ft.Nm = "/"
 	if ft.FileNodeType == nil {
 		ft.FileNodeType = NodeType
 	}

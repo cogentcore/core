@@ -191,7 +191,6 @@ func (fn *Node) SetPath(path string) error {
 func (fn *Node) SyncDir() {
 	fn.DetectVCSRepo(true) // update files
 	path := string(fn.FPath)
-	// fmt.Printf("path: %v  node: %v\n", path, fn.Path())
 	repo, rnode := fn.Repo()
 	fn.Open() // ensure
 	plan := fn.PlanOfFiles(path)
