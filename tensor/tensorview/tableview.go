@@ -91,14 +91,28 @@ func (tv *TableView) OnInit() {
 		tv.UpdateStartIndex()
 		tv.UpdateMaxWidths()
 
+		tv.Builder(func() {
+			tv.UpdateStartIndex()
+			tv.UpdateMaxWidths()
+		})
+
 		tv.MakeHeader(p)
 		tv.MakeGrid(p, func(p *core.Plan) {
 			for i := 0; i < tv.VisRows; i++ {
-				si := tv.StartIndex + i
-				svi.MakeRow(p, i, si)
+				svi.MakeRow(p, i)
 			}
 		})
 	}
+}
+
+func (tv *TableView) SliceIndex(i int) (si, vi int, invis bool) {
+	si = tv.StartIndex + i
+	vi = -1
+	if si < len(tv.Table.Indexes) {
+		vi = tv.Table.Indexes[si]
+	}
+	invis = vi < 0
+	return
 }
 
 // StyleValue performs additional value widget styling
@@ -213,9 +227,7 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 					w.Style(func(s *styles.Style) {
 						s.Align.Self = styles.Center
 					})
-					w.Builder(func() {
-						w.SetText("Index")
-					})
+					w.SetText("Index")
 				})
 			}
 			for fli := 0; fli < tv.NCols; fli++ {
@@ -260,21 +272,17 @@ func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	return
 }
 
-func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
+func (tv *TableView) MakeRow(p *core.Plan, i int) {
 	svi := tv.This().(views.SliceViewer)
+	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
 	sitxt := strconv.Itoa(si)
-	ixi := -1
-	if si < len(tv.Table.Indexes) {
-		ixi = tv.Table.Indexes[si]
-	}
-	invis := ixi < 0
 
 	if tv.Is(views.SliceViewShowIndex) {
 		tv.MakeGridIndex(p, i, si, itxt, invis)
 	}
 
-	vpath := tv.ViewPath + "[" + sitxt + "]"
+	vpath := tv.ViewPath + "[" + sitxt + "]" // todo: needs to be in builder
 	if si < tv.SliceSize {
 		if lblr, ok := tv.Slice.(labels.SliceLabeler); ok {
 			slbl := lblr.ElemLabel(si)
@@ -318,14 +326,20 @@ func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
 					})
 				}
 				wb.Builder(func() {
-					si := tv.StartIndex + i
-					if si < len(tv.Table.Indexes) {
+					_, vi, invis := svi.SliceIndex(i)
+					if !invis {
 						if isstr {
-							str = tv.Table.Table.StringIndex(fli, tv.Table.Indexes[si])
+							str = tv.Table.Table.StringIndex(fli, vi)
 							core.Bind(&str, w)
 						} else {
-							fval = tv.Table.Table.FloatIndex(fli, tv.Table.Indexes[si])
+							fval = tv.Table.Table.FloatIndex(fli, vi)
 							core.Bind(&fval, w)
+						}
+					} else {
+						if isstr {
+							core.Bind(tv.BlankString, w)
+						} else {
+							core.Bind(tv.BlankFloat, w)
 						}
 					}
 					wb.SetReadOnly(tv.IsReadOnly())
@@ -616,6 +630,9 @@ func (tv *TableView) SizeFinal() {
 	sh.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
 		_, sgb := core.AsWidget(sg.Child(i))
 		gsz := &sgb.Geom.Size
+		if gsz.Actual.Total.X == 0 {
+			return tree.Continue
+		}
 		ksz := &kwb.Geom.Size
 		ksz.Actual.Total.X = gsz.Actual.Total.X
 		ksz.Actual.Content.X = gsz.Actual.Content.X
@@ -625,10 +642,12 @@ func (tv *TableView) SizeFinal() {
 	})
 	gsz := &sg.Geom.Size
 	ksz := &sh.Geom.Size
-	ksz.Actual.Total.X = gsz.Actual.Total.X
-	ksz.Actual.Content.X = gsz.Actual.Content.X
-	ksz.Alloc.Total.X = gsz.Alloc.Total.X
-	ksz.Alloc.Content.X = gsz.Alloc.Content.X
+	if gsz.Actual.Total.X > 0 {
+		ksz.Actual.Total.X = gsz.Actual.Total.X
+		ksz.Actual.Content.X = gsz.Actual.Content.X
+		ksz.Alloc.Total.X = gsz.Alloc.Total.X
+		ksz.Alloc.Content.X = gsz.Alloc.Content.X
+	}
 }
 
 // SelectedColumnStrings returns the string values of given column name.

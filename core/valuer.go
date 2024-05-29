@@ -87,12 +87,19 @@ func NewValue(value any, tags reflect.StructTag, parent ...tree.Node) Value {
 // the [ValueConverters], and finally it falls back on a set of default
 // bindings. If any step results in nil, it falls back on the next step.
 func ToValue(value any, tags reflect.StructTag) Value {
+	if reflectx.AnyIsNil(value) {
+		return NewText()
+	}
 	if vwr, ok := value.(Valuer); ok {
 		if vw := vwr.Value(); vw != nil {
 			return vw
 		}
 	}
-	rval := reflectx.Underlying(reflect.ValueOf(value))
+	rv := reflect.ValueOf(value)
+	if rv == (reflect.Value{}) || rv.IsZero() {
+		return NewText()
+	}
+	rval := reflectx.Underlying(rv)
 	if !rval.IsValid() {
 		return NewText()
 	}

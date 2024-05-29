@@ -95,13 +95,15 @@ func (tv *TableView) OnInit() {
 		}
 		tv.UpdateStartIndex()
 
+		tv.Builder(func() {
+			tv.UpdateStartIndex()
+			svi.UpdateMaxWidths()
+		})
+
 		tv.MakeHeader(p)
 		tv.MakeGrid(p, func(p *core.Plan) {
-			svi.UpdateMaxWidths()
-
 			for i := 0; i < tv.VisRows; i++ {
-				si := tv.StartIndex + i
-				svi.MakeRow(p, i, si)
+				svi.MakeRow(p, i)
 			}
 		})
 	}
@@ -282,9 +284,9 @@ func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 
 func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
 	svi := tv.This().(SliceViewer)
+	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
 	sitxt := strconv.Itoa(si)
-	invis := si >= tv.SliceSize
 	val := tv.SliceElementValue(si)
 	// stru := val.Interface()
 
@@ -292,8 +294,8 @@ func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
 		tv.MakeGridIndex(p, i, si, itxt, invis)
 	}
 
-	vpath := tv.ViewPath + "[" + sitxt + "]"
-	if si < tv.SliceSize {
+	vpath := tv.ViewPath + "[" + sitxt + "]" // todo: should be in builder, sitxt will change
+	if !invis {
 		if lblr, ok := tv.Slice.(labels.SliceLabeler); ok {
 			slbl := lblr.ElemLabel(si)
 			if slbl != "" {
@@ -327,8 +329,8 @@ func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
 			}
 			wb.Builder(func() {
 				// w.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
-				si := tv.StartIndex + i
-				val := tv.SliceElementValue(si)
+				_, vi, invis := svi.SliceIndex(i)
+				val := tv.SliceElementValue(vi)
 				fval := reflectx.OnePointerValue(val.FieldByIndex(field.Index))
 				core.Bind(fval.Interface(), w)
 				wb.SetReadOnly(tv.IsReadOnly())

@@ -99,11 +99,10 @@ func (sv *StructView) getStructFields() {
 					},
 					func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) {
 						fields = append(fields, &structField{path: field.Name + " • " + sfield.Name, field: sfield, value: value, parent: parent})
-						// addField(parent, sfield, value, path)
 					})
+			} else {
+				fields = append(fields, &structField{path: field.Name, field: field, value: value, parent: parent})
 			}
-			fields = append(fields, &structField{path: field.Name, field: field, value: value, parent: parent})
-			// addField(parent, field, value, field.Name)
 		})
 	sv.structFields = fields
 }
@@ -128,7 +127,6 @@ func (sv *StructView) OnInit() {
 			return
 		}
 
-		// fmt.Println("get struct fields:", sv.Struct)
 		sv.getStructFields()
 
 		sc := true
@@ -216,11 +214,7 @@ func (sv *StructView) OnInit() {
 				}
 				wb.Builder(func() {
 					wb.SetReadOnly(sv.IsReadOnly() || readOnlyTag)
-					// if i == 0 {
-					// 	fmt.Println("sv builder:", f.path, reflectx.Underlying(sv.structFields[i].value).Interface())
-					// }
 					core.Bind(reflectx.UnderlyingPointer(sv.structFields[i].value).Interface(), w)
-					// note: the above call does not update immediately, but rather one behind
 				})
 			})
 		}

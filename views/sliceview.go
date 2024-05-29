@@ -121,10 +121,17 @@ type SliceViewer interface {
 	// on estimates from length of strings (for string values)
 	UpdateMaxWidths()
 
-	// MakeRow adds config for one row at given widget row index,
-	// and starting index: si = i + StartIndex.
+	// SliceIndex returns the logical slice index: si = i + StartIndex,
+	// the actual value index vi into the slice value (typically = si),
+	// which can be different if there is an index indirection as in
+	// tensorview table.IndexView), and a bool that is true if the
+	// index is beyond the available data and is thus invisible,
+	// given the row index provided.
+	SliceIndex(i int) (si, vi int, invis bool)
+
+	// MakeRow adds config for one row at given widget row index.
 	// Plan must be the StructGrid Plan.
-	MakeRow(p *core.Plan, i, si int)
+	MakeRow(p *core.Plan, i int)
 
 	// StyleValue performs additional value widget styling
 	StyleValue(w core.Widget, s *styles.Style, row, col int)
@@ -396,13 +403,18 @@ func (sv *SliceViewBase) OnInit() {
 
 		sv.MakeGrid(p, func(p *core.Plan) {
 			svi.UpdateMaxWidths()
-
 			for i := 0; i < sv.VisRows; i++ {
-				si := sv.StartIndex + i
-				svi.MakeRow(p, i, si)
+				svi.MakeRow(p, i)
 			}
 		})
 	})
+}
+
+func (sv *SliceViewBase) SliceIndex(i int) (si, vi int, invis bool) {
+	si = sv.StartIndex + i
+	vi = si
+	invis = si >= sv.SliceSize
+	return
 }
 
 // StyleValue performs additional value widget styling
@@ -617,10 +629,11 @@ func (sv *SliceViewBase) MakeValue(w core.Value, i int) {
 	}
 }
 
-func (sv *SliceViewBase) MakeRow(p *core.Plan, i, si int) {
+func (sv *SliceViewBase) MakeRow(p *core.Plan, i int) {
+	svi := sv.This().(SliceViewer)
+	si, vi, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
-	invis := si >= sv.SliceSize
-	val := sv.SliceElementValue(si)
+	val := sv.SliceElementValue(vi)
 
 	if sv.Is(SliceViewShowIndex) {
 		sv.MakeGridIndex(p, i, si, itxt, invis)
@@ -638,8 +651,8 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i, si int) {
 		}
 		wb.Builder(func() {
 			wb := w.AsWidget()
-			si := sv.StartIndex + i
-			val := sv.SliceElementValue(si)
+			_, vi, invis := svi.SliceIndex(i)
+			val := sv.SliceElementValue(vi)
 			// w.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
 			core.Bind(val.Interface(), w)
 			wb.SetReadOnly(sv.IsReadOnly())
@@ -656,7 +669,6 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i, si int) {
 }
 
 func (sv *SliceViewBase) MakeGridIndex(p *core.Plan, i, si int, itxt string, invis bool) {
-	sitxt := strconv.Itoa(si)
 	svi := sv.This().(SliceViewer)
 	core.AddAt(p, "index-"+itxt, func(w *core.Text) {
 		w.SetProperty(SliceViewRowProperty, i)
@@ -697,6 +709,8 @@ func (sv *SliceViewBase) MakeGridIndex(p *core.Plan, i, si int, itxt string, inv
 			})
 		}
 		w.Builder(func() {
+			si, _, invis := svi.SliceIndex(i)
+			sitxt := strconv.Itoa(si)
 			w.SetText(sitxt)
 			w.SetReadOnly(sv.IsReadOnly())
 			w.SetState(invis, states.Invisible)
