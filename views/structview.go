@@ -214,7 +214,9 @@ func (sv *StructView) OnInit() {
 				}
 				wb.Builder(func() {
 					wb.SetReadOnly(sv.IsReadOnly() || readOnlyTag)
-					core.Bind(reflectx.UnderlyingPointer(sv.structFields[i].value).Interface(), w)
+					if i < len(sv.structFields) {
+						core.Bind(reflectx.UnderlyingPointer(sv.structFields[i].value).Interface(), w)
+					}
 				})
 			})
 		}

@@ -7,7 +7,6 @@ package interpreter
 import (
 	"reflect"
 
-	"cogentcore.org/core/shell"
 	"github.com/traefik/yaegi/interp"
 )
 
@@ -31,17 +30,12 @@ func init() {
 func (in *Interpreter) ImportShell() {
 	in.Interp.Use(interp.Exports{
 		"cogentcore.org/core/shell/shell": map[string]reflect.Value{
-			"Run":           reflect.ValueOf(in.Shell.Run),
-			"RunErrOK":      reflect.ValueOf(in.Shell.RunErrOK),
-			"Output":        reflect.ValueOf(in.Shell.Output),
-			"OutputErrOK":   reflect.ValueOf(in.Shell.OutputErrOK),
-			"Start":         reflect.ValueOf(in.Shell.Start),
-			"AddCommand":    reflect.ValueOf(in.Shell.AddCommand),
-			"SplitLines":    reflect.ValueOf(shell.SplitLines),
-			"FileExists":    reflect.ValueOf(shell.FileExists),
-			"WriteFile":     reflect.ValueOf(shell.WriteFile),
-			"ReadFile":      reflect.ValueOf(shell.ReadFile),
-			"ReplaceInFile": reflect.ValueOf(shell.ReplaceInFile),
+			"Run":         reflect.ValueOf(in.Shell.Run),
+			"RunErrOK":    reflect.ValueOf(in.Shell.RunErrOK),
+			"Output":      reflect.ValueOf(in.Shell.Output),
+			"OutputErrOK": reflect.ValueOf(in.Shell.OutputErrOK),
+			"Start":       reflect.ValueOf(in.Shell.Start),
+			"AddCommand":  reflect.ValueOf(in.Shell.AddCommand),
 		},
 	})
 }

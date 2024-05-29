@@ -1,10 +1,6 @@
 // test file for cosh cli
 
-func splitLines(str string) []string {
-	return strings.Split(str, "\n")
-}
-
-for i, fn := range splitLines(`ls`) {
+for i, fn := range cosh.SplitLines(`/bin/ls -1`) {
 	fmt.Println(i, fn)
 }
 

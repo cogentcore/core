@@ -160,8 +160,8 @@ func (in *Interpreter) Config() {
 }
 
 // Interactive runs an interactive shell that allows the user to input cosh.
+// Must have done in.Config() prior to calling.
 func (in *Interpreter) Interactive() error {
-	in.Config()
 	rl, err := readline.NewFromConfig(&readline.Config{
 		AutoComplete: &shell.ReadlineCompleter{Shell: in.Shell},
 		Undo:         true,

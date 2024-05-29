@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package shell
+// Package cosh defines convenient utility functions for
+// use in the cosh shell, available with the cosh prefix.
+package cosh
 
 import (
 	"os"
@@ -11,8 +13,6 @@ import (
 	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
 )
-
-// these are special functions
 
 // SplitLines returns a slice of given string split by lines
 // with any extra whitespace trimmed.
