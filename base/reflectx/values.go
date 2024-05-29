@@ -992,47 +992,47 @@ func SetRobust(to, from any) error {
 		return fmt.Errorf("got nil destination value")
 	}
 	v := reflect.ValueOf(to)
-	vp := UnderlyingPointer(v)
-	typ := vp.Elem().Type()
-	vk := typ.Kind()
-	if !vp.Elem().CanSet() {
-		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", vp, vp)
+	pointer := UnderlyingPointer(v)
+	typ := pointer.Elem().Type()
+	kind := typ.Kind()
+	if !pointer.Elem().CanSet() {
+		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", pointer, pointer)
 	}
 
 	switch {
-	case vk >= reflect.Int && vk <= reflect.Int64:
+	case kind >= reflect.Int && kind <= reflect.Int64:
 		fm, err := ToInt(from)
 		if err != nil {
 			return err
 		}
-		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return nil
-	case vk >= reflect.Uint && vk <= reflect.Uint64:
+	case kind >= reflect.Uint && kind <= reflect.Uint64:
 		fm, err := ToInt(from)
 		if err != nil {
 			return err
 		}
-		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return nil
-	case vk == reflect.Bool:
+	case kind == reflect.Bool:
 		fm, err := ToBool(from)
 		if err != nil {
 			return err
 		}
-		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return nil
-	case vk >= reflect.Float32 && vk <= reflect.Float64:
+	case kind >= reflect.Float32 && kind <= reflect.Float64:
 		fm, err := ToFloat(from)
 		if err != nil {
 			return err
 		}
-		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return nil
-	case vk == reflect.String:
+	case kind == reflect.String:
 		fm := ToString(from)
-		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return nil
-	case vk == reflect.Struct:
+	case kind == reflect.Struct:
 		if NonPointerType(reflect.TypeOf(from)).Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to) // todo: this is not working -- see what marshal says, etc
 			if err != nil {
@@ -1041,7 +1041,7 @@ func SetRobust(to, from any) error {
 			}
 			return nil
 		}
-	case vk == reflect.Slice:
+	case kind == reflect.Slice:
 		if NonPointerType(reflect.TypeOf(from)).Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to)
 			if err != nil {
@@ -1051,7 +1051,7 @@ func SetRobust(to, from any) error {
 			return nil
 		}
 		return CopySliceRobust(to, from)
-	case vk == reflect.Map:
+	case kind == reflect.Map:
 		if NonPointerType(reflect.TypeOf(from)).Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to)
 			if err != nil {
@@ -1065,12 +1065,12 @@ func SetRobust(to, from any) error {
 
 	fv := reflect.ValueOf(from)
 	if fv.Type().AssignableTo(typ) {
-		vp.Elem().Set(fv)
+		pointer.Elem().Set(fv)
 		return nil
 	}
 	fv = Underlying(reflect.ValueOf(from))
 	if fv.Type().AssignableTo(typ) {
-		vp.Elem().Set(fv)
+		pointer.Elem().Set(fv)
 		return nil
 	}
 	tos := elide.End(fmt.Sprintf("%v", to), 40)
