@@ -6,7 +6,6 @@ package core
 
 import (
 	"fmt"
-	"log/slog"
 
 	"cogentcore.org/core/tree"
 )
@@ -30,11 +29,7 @@ func (wb *WidgetBase) Build() {
 		wb.ValueBuild()
 	}
 	for i := len(wb.Builders) - 1; i >= 0; i-- {
-		if wb.Builders[i] != nil {
-			wb.Builders[i]()
-		} else {
-			slog.Error("nil builder:", i, "in:", wb)
-		}
+		wb.Builders[i]()
 	}
 }
 
@@ -48,11 +43,7 @@ func (wb *WidgetBase) baseBuild() {
 // Make is the base implementation of [Widget.Make] that runs
 // [WidgetBase.Makers].
 func (wb *WidgetBase) Make(p *Plan) {
-	for i, maker := range wb.Makers {
-		if maker == nil {
-			slog.Error("nil maker:", i, "in:", wb)
-			continue
-		}
+	for _, maker := range wb.Makers {
 		maker(p)
 	}
 }
