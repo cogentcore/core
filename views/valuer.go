@@ -56,7 +56,9 @@ func init() {
 				return NewStructButton()
 			}
 		case reflect.Map:
-			return NewMapButton()
+			return NewMapButton() // TODO(config): inline map value
+		case reflect.Func:
+			return tree.New[*FuncButton]() // TODO(config): update to NewFuncButton after changing its signature
 		}
 		return nil
 	})

@@ -140,6 +140,25 @@ func NewFuncButton(parent tree.Node, fun any) *FuncButton {
 	}
 }
 
+func (fb *FuncButton) WidgetValue() any {
+	if !fb.ReflectFunc.IsValid() {
+		return nil
+	}
+	return fb.ReflectFunc.Interface()
+}
+
+func (fb *FuncButton) SetWidgetValue(value any) error {
+	fb.SetFunc(reflectx.Underlying(reflect.ValueOf(value)).Interface())
+	return nil
+}
+
+func (fb *FuncButton) OnBind(value any) {
+	// If someone is viewing a function value, there is a good chance
+	// that it is not added to types (and that is out of their control)
+	// (eg: in the inspector), so we do not warn on unadded functions.
+	fb.SetWarnUnadded(false).SetType(core.ButtonTonal)
+}
+
 func (fb *FuncButton) OnInit() {
 	fb.Button.OnInit()
 	fb.WarnUnadded = true

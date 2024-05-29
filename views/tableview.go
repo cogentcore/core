@@ -282,7 +282,7 @@ func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	return
 }
 
-func (tv *TableView) MakeRow(p *core.Plan, i, si int) {
+func (tv *TableView) MakeRow(p *core.Plan, i int) {
 	svi := tv.This().(SliceViewer)
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
