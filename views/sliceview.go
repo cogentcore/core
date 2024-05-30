@@ -655,7 +655,7 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i int) {
 		}
 		wb.Builder(func() {
 			wb := w.AsWidget()
-			_, vi, invis := svi.SliceIndex(i)
+			si, vi, invis := svi.SliceIndex(i)
 			val := sv.SliceElementValue(vi)
 			// w.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
 			core.Bind(val.Addr().Interface(), w)
@@ -666,6 +666,8 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i int) {
 			}
 			if invis {
 				wb.SetSelected(false)
+			} else {
+				wb.SetSelected(sv.IndexIsSelected(si))
 			}
 		})
 	})
@@ -720,6 +722,8 @@ func (sv *SliceViewBase) MakeGridIndex(p *core.Plan, i, si int, itxt string, inv
 			w.SetState(invis, states.Invisible)
 			if invis {
 				w.SetSelected(false)
+			} else {
+				w.SetSelected(sv.IndexIsSelected(si))
 			}
 		})
 	})
@@ -1223,68 +1227,6 @@ func (sv *SliceViewBase) MovePageUpAction(selMode events.SelectModes) int {
 //////////////////////////////////////////////////////////
 //    Selection: user operates on the index labels
 
-// RowWidgetsFunc calls function on each widget in given row
-// (row, not index), with an UpdateStart / EndRender wrapper
-func (sv *SliceViewBase) RowWidgetsFunc(row int, fun func(w core.Widget)) {
-	if row < 0 {
-		return
-	}
-
-	sg := sv.This().(SliceViewer).SliceGrid()
-	nWidgPerRow, _ := sv.This().(SliceViewer).RowWidgetNs()
-	rowidx := row * nWidgPerRow
-	for col := 0; col < nWidgPerRow; col++ {
-		kidx := rowidx + col
-		if sg.Kids.IsValidIndex(kidx) == nil {
-			w := sg.Child(rowidx).(core.Widget)
-			fun(w)
-		}
-	}
-	sv.NeedsRender()
-}
-
-// SetRowWidgetsStateEvent sets given state conditional on given
-// ability for widget, for given event.
-// returns the row and whether it represents an valid slice idex
-func (sv *SliceViewBase) SetRowWidgetsStateEvent(e events.Event, ability abilities.Abilities, on bool, state states.States) (int, bool) {
-	row, _, isValid := sv.RowFromEventPos(e)
-	if isValid {
-		sv.SetRowWidgetsState(row, ability, on, state)
-	}
-	return row, isValid
-}
-
-// SetRowWidgetsState sets given state conditional on given
-// ability for widget
-func (sv *SliceViewBase) SetRowWidgetsState(row int, ability abilities.Abilities, on bool, state states.States) {
-	sv.RowWidgetsFunc(row, func(w core.Widget) {
-		wb := w.AsWidget()
-		if wb.AbilityIs(ability) {
-			wb.SetState(on, state)
-		}
-	})
-}
-
-// SelectRowWidgets sets the selection state of given row of widgets
-func (sv *SliceViewBase) SelectRowWidgets(row int, sel bool) {
-	if row < 0 {
-		return
-	}
-	sv.RowWidgetsFunc(row, func(w core.Widget) {
-		w.AsWidget().SetSelected(sel)
-	})
-}
-
-// SelectIndexWidgets sets the selection state of given slice index
-// returns false if index is not visible
-func (sv *SliceViewBase) SelectIndexWidgets(idx int, sel bool) bool {
-	if !sv.IsIndexVisible(idx) {
-		return false
-	}
-	sv.SelectRowWidgets(idx-sv.StartIndex, sel)
-	return true
-}
-
 // UpdateSelectRow updates the selection for the given row
 func (sv *SliceViewBase) UpdateSelectRow(row int, selMode events.SelectModes) {
 	idx := row + sv.StartIndex
@@ -1315,7 +1257,7 @@ func (sv *SliceViewBase) UpdateSelectIndex(idx int, sel bool, selMode events.Sel
 func (sv *SliceViewBase) IndexIsSelected(idx int) bool {
 	sv.ViewMuLock()
 	defer sv.ViewMuUnlock()
-	if sv.IsReadOnly() {
+	if sv.IsReadOnly() && !sv.Is(SliceViewReadOnlyMultiSelect) {
 		return idx == sv.SelectedIndex
 	}
 	_, ok := sv.SelectedIndexes[idx]
@@ -1356,7 +1298,6 @@ func (sv *SliceViewBase) SelectedIndexesList(descendingSort bool) []int {
 // status of index label
 func (sv *SliceViewBase) SelectIndex(idx int) {
 	sv.SelectedIndexes[idx] = struct{}{}
-	// sv.SelectIndexWidgets(idx, true)
 }
 
 // UnselectIndex unselects given idx (if selected)
@@ -1364,14 +1305,10 @@ func (sv *SliceViewBase) UnselectIndex(idx int) {
 	if sv.IndexIsSelected(idx) {
 		delete(sv.SelectedIndexes, idx)
 	}
-	// sv.SelectIndexWidgets(idx, false)
 }
 
 // UnselectAllIndexes unselects all selected idxs
 func (sv *SliceViewBase) UnselectAllIndexes() {
-	// for r := range sv.SelectedIndexes {
-	// 	sv.SelectIndexWidgets(r, false)
-	// }
 	sv.ResetSelectedIndexes()
 }
 
@@ -1381,7 +1318,6 @@ func (sv *SliceViewBase) SelectAllIndexes() {
 	sv.SelectedIndexes = make(map[int]struct{}, sv.SliceSize)
 	for idx := 0; idx < sv.SliceSize; idx++ {
 		sv.SelectedIndexes[idx] = struct{}{}
-		// sv.SelectIndexWidgets(idx, true)
 	}
 	sv.NeedsRender()
 }

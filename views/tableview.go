@@ -319,7 +319,6 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 		}, func(w core.Value) {
 			wb := w.AsWidget()
 			tv.MakeValue(w, i)
-			// vv.SetStructValue(fval.Addr(), stru, &field, vpath)
 			w.SetProperty(SliceViewColProperty, fli)
 			if !tv.IsReadOnly() {
 				wb.OnChange(func(e events.Event) {
@@ -328,8 +327,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 				wb.OnInput(tv.HandleEvent)
 			}
 			wb.Builder(func() {
-				// w.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
-				_, vi, invis := svi.SliceIndex(i)
+				si, vi, invis := svi.SliceIndex(i)
 				val := tv.SliceElementValue(vi)
 				fval := reflectx.OnePointerValue(val.FieldByIndex(field.Index))
 				core.Bind(fval.Interface(), w)
@@ -340,6 +338,8 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 				}
 				if invis {
 					wb.SetSelected(false)
+				} else {
+					wb.SetSelected(tv.IndexIsSelected(si))
 				}
 			})
 		})
