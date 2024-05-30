@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
@@ -308,7 +309,8 @@ func (fn *Node) NewFile(filename string, addToVCS bool) { //types:add
 		nfn, ok := fn.FRoot.FindFile(np)
 		if ok && nfn.This() != fn.FRoot.This() && string(nfn.FPath) == np {
 			// todo: this is where it is erroneously adding too many files to vcs!
-			fmt.Println("adding new file to VCS:", nfn.FPath)
+			fmt.Println("Adding new file to VCS:", nfn.FPath)
+			core.MessageSnackbar(fn, "Adding new file to VCS: "+dirs.DirAndFile(string(nfn.FPath)))
 			nfn.AddToVCS()
 		}
 	}
