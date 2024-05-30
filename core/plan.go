@@ -20,9 +20,9 @@ import (
 // Plan represents a plan for how the children of a widget should be configured.
 // An instance of it is passed to [WidgetBase.Make], which is responsible
 // for making the plan that is then used to configure the widget in [WidgetBase.Build].
-// To add a child item to a plan, use [Add], [AddAt], or [AddNew]. To extend an
-// existing child item, use [AddInit]. To add a child item maker to a widget and
-// do the Add in one step, use [AddChild], [AddChildAt], or [AddChildInit].
+// To add a child item to a plan, use [Add], [AddAt], or [AddNew]. To add a child
+// item maker to a widget, use [AddChild] or [AddChildAt]. To extend an existing
+// child item, use [AddInit] or [AddChildInit].
 type Plan []*PlanItem
 
 // PlanItem represents a plan for how a child widget should be constructed and initialized.
@@ -137,7 +137,8 @@ func AddChildInit[T Widget](parent Widget, name string, init func(w T)) {
 
 // Add adds a new [PlanItem] to the given [Plan] with the given name and functions.
 // It should typically not be called by end-user code; see the generic
-// [Add], [AddAt], [AddNew], [AddInit], [AddChild], and [AddChildAt] functions instead.
+// [Add], [AddAt], [AddNew], [AddChild], [AddChildAt], [AddInit], and [AddChildInit]
+// functions instead.
 func (p *Plan) Add(name string, new func() Widget, init func(w Widget)) {
 	*p = append(*p, &PlanItem{Name: name, New: new, Init: []func(w Widget){init}})
 }
