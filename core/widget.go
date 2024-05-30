@@ -225,11 +225,11 @@ type WidgetBase struct {
 	// Geom has the full layout geometry for size and position of this Widget
 	Geom GeomState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
-	// Builders are a slice of functions called in sequential descending (reverse) order
+	// Updaters are a slice of functions called in sequential descending (reverse) order
 	// in [Widget.Build] to build the widget. You can use [WidgetBase.Builder]
 	// to add one. By default, this slice contains a function that builds the widget
 	// using [Widget.Make].
-	Builders []func() `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
+	Updaters []func() `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// Makers are a slice of functions called in sequential ascending order
 	// in [WidgetBase.Make] to make the plan for how the widget's children should

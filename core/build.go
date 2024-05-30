@@ -10,10 +10,10 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Builder adds a new function to [WidgetBase.Builders], which are called in sequential
+// Builder adds a new function to [WidgetBase.Updaters], which are called in sequential
 // descending (reverse) order in [Widget.Build].
 func (wb *WidgetBase) Builder(builder func()) {
-	wb.Builders = append(wb.Builders, builder)
+	wb.Updaters = append(wb.Updaters, builder)
 }
 
 // Maker adds a new function to [WidgetBase.Makers], which are called in sequential
@@ -23,19 +23,19 @@ func (wb *WidgetBase) Maker(maker func(p *Plan)) {
 	wb.Makers = append(wb.Makers, maker)
 }
 
-// Build updates the widget by running [WidgetBase.Builders] after
+// Build updates the widget by running [WidgetBase.Updaters] after
 // [WidgetBase.ValueBuild]. This includes applying the result of
 // [WidgetBase.Make].
 func (wb *WidgetBase) Build() {
 	if wb.ValueBuild != nil {
 		wb.ValueBuild()
 	}
-	for i := len(wb.Builders) - 1; i >= 0; i-- {
-		wb.Builders[i]()
+	for i := len(wb.Updaters) - 1; i >= 0; i-- {
+		wb.Updaters[i]()
 	}
 }
 
-// baseBuild is the base builder added to [WidgetBase.Builders] in OnInit.
+// baseBuild is the base builder added to [WidgetBase.Updaters] in OnInit.
 func (wb *WidgetBase) baseBuild() {
 	p := Plan{}
 	wb.Make(&p)
