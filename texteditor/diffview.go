@@ -20,6 +20,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/styles"
@@ -193,7 +194,7 @@ func (dv *DiffView) SyncViews(typ events.Types, e events.Event, name string) {
 	switch typ {
 	case events.Scroll:
 		other.Geom.Scroll.Y = me.Geom.Scroll.Y
-		other.NeedsRender()
+		other.ScrollUpdateFromGeom(math32.Y)
 	case events.Input:
 		if dv.inInputEvent {
 			return

@@ -105,6 +105,20 @@ func (ly *Frame) ScrollChanged(d math32.Dims, sb *Slider) {
 	ly.NeedsRender()
 }
 
+// ScrollUpdateFromGeom updates the scrollbar for given dimension
+// based on the current Geom.Scroll value for that dimension.
+// This can be used to programatically update the scroll value.
+func (ly *Frame) ScrollUpdateFromGeom(d math32.Dims) {
+	if !ly.HasScroll[d] || ly.Scrolls[d] == nil {
+		return
+	}
+	sb := ly.Scrolls[d]
+	cv := ly.Geom.Scroll.Dim(d)
+	sb.SetValueAction(-cv)
+	ly.This().(Layouter).ScenePos() // computes updated positions
+	ly.NeedsRender()
+}
+
 // ScrollValues returns the maximum size that could be scrolled,
 // the visible size (which could be less than the max size, in which
 // case no scrollbar is needed), and visSize / maxSize as the VisiblePct.
