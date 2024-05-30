@@ -23,8 +23,9 @@ func (wb *WidgetBase) Maker(maker func(p *Plan)) {
 	wb.Makers = append(wb.Makers, maker)
 }
 
-// Build is the base implementation of [Widget.Build] that
-// runs [WidgetBase.Builders] after [WidgetBase.ValueBuild].
+// Build updates the widget by running [WidgetBase.Builders] after
+// [WidgetBase.ValueBuild]. This includes applying the result of
+// [WidgetBase.Make].
 func (wb *WidgetBase) Build() {
 	if wb.ValueBuild != nil {
 		wb.ValueBuild()
@@ -59,7 +60,7 @@ func (wb *WidgetBase) BuildTree() {
 	}
 	// pr := profile.Start(wb.This().NodeType().ShortName())
 	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		wi.Build()
+		wb.Build()
 		return tree.Continue
 	})
 	// pr.End()
@@ -84,7 +85,7 @@ func (wb *WidgetBase) Update() { //types:add
 		fmt.Println("\tDebugSettings.UpdateTrace Update:", wb)
 	}
 	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		wi.Build()
+		wb.Build()
 		wi.ApplyStyle()
 		return tree.Continue
 	})

@@ -387,7 +387,7 @@ func (ts *Tabs) RecycleTabWidget(name string, sel bool, typ *types.Type) Widget 
 		return fr.Child(0).(Widget)
 	}
 	wi := fr.NewChild(typ).(Widget)
-	wi.Build()
+	wi.AsWidget().Build()
 	return wi
 }
 

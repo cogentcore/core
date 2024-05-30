@@ -52,13 +52,6 @@ type Widget interface {
 	// after this, respectively.
 	Update()
 
-	// Build configures the widget by applying the [Plan] created by [Widget.Make].
-	// Widgets should typically implement [Widget.Make], not this, although they can
-	// implement this if necessary. In general, [Widget.Update] should be called to
-	// trigger a full update of the widget, as Build does not call Build on children
-	// and does not apply styles.
-	Build()
-
 	// StateIs returns whether the widget has the given [states.States] flag set
 	StateIs(flag states.States) bool
 

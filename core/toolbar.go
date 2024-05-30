@@ -36,17 +36,9 @@ type Toolbar struct {
 func (tb *Toolbar) OnInit() {
 	tb.Frame.OnInit()
 	ToolbarStyles(tb)
-}
 
-func (tb *Toolbar) IsVisible() bool {
-	// do not render toolbars with no buttons
-	return tb.WidgetBase.IsVisible() && len(tb.Kids) > 0
-}
-
-// toolbarOverflowMenuMaker adds the overflow menu,
-// automatically added to top of the Maker stack
-func (tb *Toolbar) toolbarOverflowMenuMaker(p *Plan) {
-	AddAt(p, "overflow-menu", func(w *Button) {
+	AddChildAt(tb, "overflow-menu", func(w *Button) {
+		tb.overflowButton = w
 		ic := icons.MoreVert
 		if tb.Styles.Direction != styles.Row {
 			ic = icons.MoreHoriz
@@ -61,19 +53,9 @@ func (tb *Toolbar) toolbarOverflowMenuMaker(p *Plan) {
 	})
 }
 
-func (tb *Toolbar) AddOverflowMenuMaker() {
-	if tb.overflowButton != nil {
-		return
-	}
-	tb.Maker(tb.toolbarOverflowMenuMaker)
-}
-
-func (tb *Toolbar) Build() {
-	tb.AddOverflowMenuMaker()
-	tb.Frame.Build()
-	if tb.overflowButton == nil {
-		tb.overflowButton = tb.ChildByName("overflow-menu", tb.NumChildren()-1).(*Button)
-	}
+func (tb *Toolbar) IsVisible() bool {
+	// do not render toolbars with no buttons
+	return tb.WidgetBase.IsVisible() && len(tb.Kids) > 0
 }
 
 // AppChooser returns the app [Chooser] used for searching for
@@ -195,7 +177,7 @@ func (tb *Toolbar) OverflowMenu(m *Scene) {
 			}
 			cl := k.This().Clone()
 			m.AddChild(cl)
-			cl.This().(Widget).Build()
+			cl.(Widget).AsWidget().Build()
 		}
 		if nm > 1 { // default includes sep
 			NewSeparator(m)
