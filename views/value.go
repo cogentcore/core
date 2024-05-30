@@ -48,18 +48,11 @@ type OpenDialoger interface {
 // If allowReadOnly is false, the dialog will not be opened if the value
 // is read only.
 func InitValueButton(v core.Value, allowReadOnly bool) {
-	doc := "" // v.Doc()
-	tip := ""
+	wb := v.AsWidget()
 	// windows are never new on mobile
 	if !core.TheApp.Platform().IsMobile() {
-		tip += "[Shift: new window]"
-		if doc != "" {
-			tip += " "
-		}
+		wb.SetTooltip("[Shift: new window]")
 	}
-	tip += doc
-	wb := v.AsWidget()
-	wb.SetTooltip(tip)
 	v.OnClick(func(e events.Event) {
 		if allowReadOnly || !wb.IsReadOnly() {
 			v.SetFlag(e.HasAnyModifier(key.Shift), ValueDialogNewWindow)
