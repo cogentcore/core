@@ -92,7 +92,7 @@ func OpenDialogValueBase(v core.Value, cd ConfigDialoger, ctx core.Widget, fun f
 		return
 	}
 	// title, _, _ := vd.GetTitle()
-	title := "need a title"
+	title := v.AsWidget().ValueContext
 	obj := opv.Interface()
 	if core.RecycleDialog(obj) {
 		return
