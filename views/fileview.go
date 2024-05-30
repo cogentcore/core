@@ -314,7 +314,7 @@ func (fv *FileView) makeFilesRow(p *core.Plan) {
 		w.OnSelect(func(e events.Event) {
 			fv.FavoritesSelect(w.SelectedIndex)
 		})
-		w.Builder(func() {
+		w.Updater(func() {
 			w.ResetSelectedIndexes()
 		})
 	})
@@ -400,7 +400,7 @@ func (fv *FileView) makeFilesRow(p *core.Plan) {
 			core.NewSeparator(m)
 			NewFuncButton(m, fv.NewFolder).SetIcon(icons.CreateNewFolder)
 		})
-		w.Builder(func() {
+		w.Updater(func() {
 			w.ResetSelectedIndexes()
 			w.SelectedField = "Name"
 			w.SelectedValue = fv.CurrentSelectedFile
@@ -441,7 +441,7 @@ func (fv *FileView) makeSelRow(sel *core.Plan) {
 			}
 		})
 		w.StartFocus()
-		w.Builder(func() {
+		w.Updater(func() {
 			w.SetText(fv.CurrentSelectedFile)
 		})
 	})

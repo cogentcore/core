@@ -358,7 +358,7 @@ func (tf *TextField) OnInit() {
 							tf.LeadingIconOnClick(e)
 						}
 					})
-					w.Builder(func() {
+					w.Updater(func() {
 						w.SetIcon(tf.LeadingIcon)
 					})
 				})
@@ -393,7 +393,7 @@ func (tf *TextField) OnInit() {
 							tf.TrailingIconOnClick(e)
 						}
 					})
-					w.Builder(func() {
+					w.Updater(func() {
 						w.SetIcon(tf.TrailingIcon)
 					})
 				})

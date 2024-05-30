@@ -67,7 +67,7 @@ func (sw *Scene) OnInit() {
 	sw.handleSlideEvents()
 	sw.handleSelectEvents()
 
-	sw.Builder(func() {
+	sw.Updater(func() {
 		sz := sw.Geom.Size.Actual.Content.ToPointFloor()
 		if sz == (image.Point{}) {
 			return

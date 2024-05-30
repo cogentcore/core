@@ -44,7 +44,7 @@ func (tb *Toolbar) OnInit() {
 			ic = icons.MoreHoriz
 		}
 		w.SetIcon(ic).SetTooltip("Additional menu items")
-		w.Builder(func() {
+		w.Updater(func() {
 			tb, ok := w.Parent().(*Toolbar)
 			if ok {
 				w.Menu = tb.OverflowMenu

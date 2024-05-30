@@ -454,7 +454,7 @@ func (tv *TreeView) OnInit() {
 					}
 				}
 			})
-			w.Builder(func() {
+			w.Updater(func() {
 				if tv.This().(TreeViewer).CanOpen() {
 					tv.SetBranchState()
 				}
@@ -466,7 +466,7 @@ func (tv *TreeView) OnInit() {
 					w.Style(func(s *styles.Style) {
 						s.Font.Size.Dp(16)
 					})
-					w.Builder(func() {
+					w.Updater(func() {
 						w.SetIcon(tv.Icon)
 					})
 				})
@@ -479,7 +479,7 @@ func (tv *TreeView) OnInit() {
 				s.Min.X.Ch(16)
 				s.Min.Y.Em(1.2)
 			})
-			w.Builder(func() {
+			w.Updater(func() {
 				w.SetText(tv.Label())
 			})
 		})

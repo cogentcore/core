@@ -95,7 +95,7 @@ func (tv *TableView) OnInit() {
 		}
 		tv.UpdateStartIndex()
 
-		tv.Builder(func() {
+		tv.Updater(func() {
 			tv.UpdateStartIndex()
 			svi.UpdateMaxWidths()
 		})
@@ -243,7 +243,7 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 					w.OnClick(func(e events.Event) {
 						tv.SortSliceAction(fli)
 					})
-					w.Builder(func() {
+					w.Updater(func() {
 						htxt := ""
 						if lbl, ok := field.Tag.Lookup("label"); ok {
 							htxt = lbl
@@ -326,7 +326,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 				})
 				wb.OnInput(tv.HandleEvent)
 			}
-			wb.Builder(func() {
+			wb.Updater(func() {
 				si, vi, invis := svi.SliceIndex(i)
 				val := tv.SliceElementValue(vi)
 				fval := reflectx.OnePointerValue(val.FieldByIndex(field.Index))

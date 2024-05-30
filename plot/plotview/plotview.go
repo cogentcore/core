@@ -103,7 +103,7 @@ func (pl *PlotView) OnInit() {
 		pl.UpdatePlot()
 	})
 
-	pl.Builder(func() {
+	pl.Updater(func() {
 		pl.Params.FromMeta(pl.Table.Table)
 	})
 	core.AddChildAt(pl, "cols", func(w *core.Frame) {
@@ -507,7 +507,7 @@ func (pl *PlotView) makeColumns(p *core.Plan) {
 					cp.On = w.StateIs(states.Checked)
 					pl.UpdatePlot()
 				})
-				w.Builder(func() {
+				w.Updater(func() {
 					w.SetState(cp.On, states.Checked)
 				})
 			})

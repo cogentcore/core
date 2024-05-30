@@ -134,7 +134,7 @@ func (sw *Switch) OnInit() {
 				s.Display = styles.Stacked
 				s.Gap.Zero()
 			})
-			w.Builder(func() {
+			w.Updater(func() {
 				sw.UpdateStackTop() // need to update here
 			})
 			w.Maker(func(p *Plan) {
@@ -152,7 +152,7 @@ func (sw *Switch) OnInit() {
 							s.Min.Set(units.Em(1.5))
 						}
 					})
-					w.Builder(func() {
+					w.Updater(func() {
 						w.SetIcon(sw.IconOn)
 					})
 				})
@@ -171,13 +171,13 @@ func (sw *Switch) OnInit() {
 				}
 				AddAt(p, "icon-off", func(w *Icon) {
 					w.Style(iconStyle)
-					w.Builder(func() {
+					w.Updater(func() {
 						w.SetIcon(sw.IconOff)
 					})
 				})
 				AddAt(p, "icon-indeterminate", func(w *Icon) {
 					w.Style(iconStyle)
-					w.Builder(func() {
+					w.Updater(func() {
 						w.SetIcon(sw.IconIndeterminate)
 					})
 				})
@@ -196,7 +196,7 @@ func (sw *Switch) OnInit() {
 					s.SetTextWrap(false)
 					s.FillMargin = false
 				})
-				w.Builder(func() {
+				w.Updater(func() {
 					w.SetText(sw.Text)
 				})
 			})

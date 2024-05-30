@@ -73,7 +73,7 @@ func (sv *SliceViewInline) OnInit() {
 						sv.ContextMenu(m, i)
 					})
 				}
-				wb.Builder(func() {
+				wb.Updater(func() {
 					core.Bind(val.Interface(), w)
 					wb.SetReadOnly(sv.IsReadOnly())
 				})

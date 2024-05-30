@@ -91,7 +91,7 @@ func (tv *TableView) OnInit() {
 		tv.UpdateStartIndex()
 		tv.UpdateMaxWidths()
 
-		tv.Builder(func() {
+		tv.Updater(func() {
 			tv.UpdateStartIndex()
 			tv.UpdateMaxWidths()
 		})
@@ -238,7 +238,7 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 					w.OnClick(func(e events.Event) {
 						tv.SortSliceAction(fli)
 					})
-					w.Builder(func() {
+					w.Updater(func() {
 						field := tv.Table.Table.ColumnNames[fli]
 						w.SetText(field).SetTooltip(field + " (tap to sort by)")
 						tv.headerWidths[fli] = len(field)
@@ -282,7 +282,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 		tv.MakeGridIndex(p, i, si, itxt, invis)
 	}
 
-	vpath := tv.ViewPath + "[" + sitxt + "]" // todo: needs to be in builder
+	vpath := tv.ViewPath + "[" + sitxt + "]" // todo: needs to be in Updater
 	if si < tv.SliceSize {
 		if lblr, ok := tv.Slice.(labels.SliceLabeler); ok {
 			slbl := lblr.ElemLabel(si)
@@ -325,7 +325,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 						tv.SendChange()
 					})
 				}
-				wb.Builder(func() {
+				wb.Updater(func() {
 					si, vi, invis := svi.SliceIndex(i)
 					if !invis {
 						if isstr {
@@ -363,7 +363,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 				w.Style(func(s *styles.Style) {
 					s.Grow.Set(0, 0)
 				})
-				wb.Builder(func() {
+				wb.Updater(func() {
 					_, vi, invis := svi.SliceIndex(i)
 					var cell tensor.Tensor
 					if invis {

@@ -97,7 +97,7 @@ func (mv *MapView) OnInit() {
 						mv.ContextMenu(m, key)
 					})
 				}
-				wb.Builder(func() {
+				wb.Updater(func() {
 					BindMapKey(mapv, key, w)
 					wb.SetReadOnly(mv.IsReadOnly())
 				})
@@ -120,7 +120,7 @@ func (mv *MapView) OnInit() {
 						mv.ContextMenu(m, key)
 					})
 				}
-				wb.Builder(func() {
+				wb.Updater(func() {
 					BindMapValue(mapv, key, w)
 					wb.SetReadOnly(mv.IsReadOnly())
 				})
@@ -139,7 +139,7 @@ func (mv *MapView) OnInit() {
 						mv.DeleteChildByName(valnm) // force it to be updated
 						mv.Update()
 					})
-					w.Builder(func() {
+					w.Updater(func() {
 						w.SetReadOnly(mv.IsReadOnly())
 						vtyp := types.TypeByValue(mapv.MapIndex(key).Interface())
 						if vtyp == nil {

@@ -303,7 +303,7 @@ func (sr *Slider) OnInit() {
 				s.Font.Size.Dp(24)
 				s.Color = sr.ThumbColor
 			})
-			w.Builder(func() {
+			w.Updater(func() {
 				w.SetIcon(sr.Icon)
 			})
 		})

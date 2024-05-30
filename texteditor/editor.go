@@ -251,7 +251,7 @@ func (ed *Editor) OnInit() {
 		ed.EditDone()
 	})
 
-	ed.Builder(ed.NeedsLayout)
+	ed.Updater(ed.NeedsLayout)
 }
 
 // EditorFlags extend WidgetFlags to hold [Editor] state

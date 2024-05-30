@@ -537,7 +537,7 @@ func (tb *Tab) OnInit() {
 				w.Style(func(s *styles.Style) {
 					s.Font.Size.Dp(18)
 				})
-				w.Builder(func() {
+				w.Updater(func() {
 					w.SetIcon(tb.Icon)
 				})
 			})
@@ -551,7 +551,7 @@ func (tb *Tab) OnInit() {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
 				})
-				w.Builder(func() {
+				w.Updater(func() {
 					if tb.Type.Effective(tb) == FunctionalTabs {
 						w.SetType(TextBodyMedium)
 					} else {
@@ -579,7 +579,7 @@ func (tb *Tab) OnInit() {
 						ts.DeleteTabIndex(idx)
 					}
 				})
-				w.Builder(func() {
+				w.Updater(func() {
 					w.SetIcon(tb.CloseIcon)
 				})
 			})

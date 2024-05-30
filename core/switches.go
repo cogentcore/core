@@ -149,7 +149,7 @@ func (sw *Switches) OnInit() {
 						s.Border.Radius.Zero()
 					}
 				})
-				w.Builder(func() {
+				w.Updater(func() {
 					w.SetType(sw.Type).SetText(item.Text).SetTooltip(item.Tooltip)
 				})
 			})

@@ -10,10 +10,10 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Builder adds a new function to [WidgetBase.Updaters], which are called in sequential
-// descending (reverse) order in [Widget.Build].
-func (wb *WidgetBase) Builder(builder func()) {
-	wb.Updaters = append(wb.Updaters, builder)
+// Updater adds a new function to [WidgetBase.Updaters], which are called in sequential
+// descending (reverse) order in [WidgetBase.UpdateWidget] to update the widget.
+func (wb *WidgetBase) Updater(updater func()) {
+	wb.Updaters = append(wb.Updaters, updater)
 }
 
 // Maker adds a new function to [WidgetBase.Makers], which are called in sequential

@@ -274,7 +274,7 @@ func (ch *Chooser) OnInit() {
 		// editable handles through TextField
 		if ch.Icon.IsSet() && !ch.Editable {
 			AddAt(p, "icon", func(w *Icon) {
-				w.Builder(func() {
+				w.Updater(func() {
 					w.SetIcon(ch.Icon)
 				})
 			})
@@ -314,7 +314,7 @@ func (ch *Chooser) OnInit() {
 						}
 					}
 				})
-				w.Builder(func() {
+				w.Updater(func() {
 					w.SetText(ch.CurrentItem.GetLabel()).SetLeadingIcon(ch.Icon).
 						SetTrailingIcon(ch.Indicator, func(e events.Event) {
 							ch.OpenMenu(e)
@@ -345,7 +345,7 @@ func (ch *Chooser) OnInit() {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
 				})
-				w.Builder(func() {
+				w.Updater(func() {
 					w.SetText(ch.CurrentItem.GetLabel())
 				})
 			})
@@ -359,7 +359,7 @@ func (ch *Chooser) OnInit() {
 				w.Style(func(s *styles.Style) {
 					s.Justify.Self = styles.End
 				})
-				w.Builder(func() {
+				w.Updater(func() {
 					w.SetIcon(ch.Indicator)
 				})
 			})

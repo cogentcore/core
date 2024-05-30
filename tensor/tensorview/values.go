@@ -62,7 +62,7 @@ func (tb *TensorButton) OnInit() {
 	tb.Button.OnInit()
 	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	views.InitValueButton(tb, true)
-	tb.Builder(func() {
+	tb.Updater(func() {
 		text := "None"
 		if tb.Tensor != nil {
 			text = "Tensor"
@@ -91,7 +91,7 @@ func (tb *TableButton) OnInit() {
 	tb.Button.OnInit()
 	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	views.InitValueButton(tb, true)
-	tb.Builder(func() {
+	tb.Updater(func() {
 		text := "None"
 		if tb.Table != nil {
 			if nm, has := tb.Table.MetaData["name"]; has {
@@ -124,7 +124,7 @@ func (tb *SimMatButton) OnInit() {
 	tb.Button.OnInit()
 	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	views.InitValueButton(tb, true)
-	tb.Builder(func() {
+	tb.Updater(func() {
 		text := "None"
 		if tb.SimMat != nil && tb.SimMat.Mat != nil {
 			if nm, has := tb.SimMat.Mat.MetaData("name"); has {

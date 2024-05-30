@@ -57,7 +57,7 @@ func (is *Inspector) OnInit() {
 			s.Grow.Set(1, 0)
 			s.Align.Self = styles.Center
 		})
-		w.Builder(func() {
+		w.Updater(func() {
 			w.SetText(fmt.Sprintf("Inspector of %s (%s)", is.Root.Name(), labels.FriendlyTypeName(reflect.TypeOf(is.Root))))
 		})
 	})
@@ -128,7 +128,7 @@ func (is *Inspector) OnInit() {
 					pselw.AsWidget().NeedsRender()
 				}
 			})
-			w.Builder(func() {
+			w.Updater(func() {
 				w.SetStruct(is.CurrentNode)
 			})
 		})
@@ -261,7 +261,7 @@ func (is *Inspector) TreeView() *TreeView {
 func (is *Inspector) MakeToolbar(p *core.Plan) {
 	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool)
-		w.Builder(func() {
+		w.Updater(func() {
 			_, ok := is.Root.(*core.Scene)
 			w.SetEnabled(ok)
 		})
@@ -273,7 +273,7 @@ func (is *Inspector) MakeToolbar(p *core.Plan) {
 	})
 	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.Save).SetKey(keymap.Save)
-		w.Builder(func() {
+		w.Updater(func() {
 			w.SetEnabled(is.Filename != "")
 		})
 	})

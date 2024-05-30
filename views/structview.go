@@ -185,7 +185,7 @@ func (sv *StructView) OnInit() {
 						}
 					})
 				}
-				w.Builder(func() {
+				w.Updater(func() {
 					w.SetText(label)
 				})
 			})
@@ -221,7 +221,7 @@ func (sv *StructView) OnInit() {
 						}
 					})
 				}
-				wb.Builder(func() {
+				wb.Updater(func() {
 					wb.SetReadOnly(sv.IsReadOnly() || readOnlyTag)
 					if i < len(sv.structFields) {
 						core.Bind(reflectx.UnderlyingPointer(sv.structFields[i].value).Interface(), w)

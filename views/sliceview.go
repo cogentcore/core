@@ -400,7 +400,7 @@ func (sv *SliceViewBase) OnInit() {
 			sv.ScrollToIndex(scrollTo)
 		}
 
-		sv.Builder(func() {
+		sv.Updater(func() {
 			sv.UpdateStartIndex()
 			svi.UpdateMaxWidths()
 		})
@@ -594,7 +594,7 @@ func (sv *SliceViewBase) MakeGrid(p *core.Plan, maker func(p *core.Plan)) {
 			oc(e)
 			sv.HandleEvent(e)
 		})
-		w.Builder(func() {
+		w.Updater(func() {
 			nWidgPerRow, _ := sv.This().(SliceViewer).RowWidgetNs()
 			w.Styles.Columns = nWidgPerRow
 		})
@@ -653,7 +653,7 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i int) {
 				sv.SendChange(e)
 			})
 		}
-		wb.Builder(func() {
+		wb.Updater(func() {
 			wb := w.AsWidget()
 			si, vi, invis := svi.SliceIndex(i)
 			val := sv.SliceElementValue(vi)
@@ -714,7 +714,7 @@ func (sv *SliceViewBase) MakeGridIndex(p *core.Plan, i, si int, itxt string, inv
 				svi.DropDeleteSource(e)
 			})
 		}
-		w.Builder(func() {
+		w.Updater(func() {
 			si, _, invis := svi.SliceIndex(i)
 			sitxt := strconv.Itoa(si)
 			w.SetText(sitxt)

@@ -211,7 +211,7 @@ func (bt *Button) OnInit() {
 				w.Style(func(s *styles.Style) {
 					s.Font.Size.Dp(18)
 				})
-				w.Builder(func() {
+				w.Updater(func() {
 					w.SetIcon(bt.Icon)
 				})
 			})
@@ -226,7 +226,7 @@ func (bt *Button) OnInit() {
 					s.SetTextWrap(false)
 					s.FillMargin = false
 				})
-				w.Builder(func() {
+				w.Updater(func() {
 					if bt.Type == ButtonMenu {
 						w.SetType(TextBodyMedium)
 					} else {
@@ -254,7 +254,7 @@ func (bt *Button) OnInit() {
 					s.Margin.Zero()
 					s.Padding.Zero()
 				})
-				w.Builder(func() {
+				w.Updater(func() {
 					w.SetIcon(bt.Indicator)
 				})
 			})
@@ -268,7 +268,7 @@ func (bt *Button) OnInit() {
 						s.SetTextWrap(false)
 						s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 					})
-					w.Builder(func() {
+					w.Updater(func() {
 						if bt.Type == ButtonMenu {
 							w.SetType(TextBodyMedium)
 						} else {
