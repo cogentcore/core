@@ -198,7 +198,7 @@ func (tg *TensorGrid) OnInit() {
 	})
 }
 
-// SetTensor sets the tensor and triggers a display update
+// SetTensor sets the tensor.  Must call Update after this.
 func (tg *TensorGrid) SetTensor(tsr tensor.Tensor) *TensorGrid {
 	if _, ok := tsr.(*tensor.String); ok {
 		log.Printf("TensorGrid: String tensors cannot be displayed using TensorGrid\n")
@@ -208,7 +208,6 @@ func (tg *TensorGrid) SetTensor(tsr tensor.Tensor) *TensorGrid {
 	if tg.Tensor != nil {
 		tg.Disp.FromMeta(tg.Tensor)
 	}
-	tg.Update()
 	return tg
 }
 

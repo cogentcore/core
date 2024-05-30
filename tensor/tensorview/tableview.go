@@ -352,46 +352,28 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 					}
 				})
 			})
-		} else { // TODO(config)
-			/*
-					core.Configure(c, "grid/"+valnm, func() core.Value {
-						var w core.Value
-						// tdsp := tv.ColTensorDisp(fli)
-						cell := tv.ColTensorBlank(fli, col)
-						tvv := &TensorGridValue{}
-						vv = tvv
-						tvv.ViewPath = vpath
-						vv.SetSoloValue(reflect.ValueOf(cell))
-				tv.Values[vvi] = vv
-				vv.SetReadOnly(tv.IsReadOnly())
-				vtyp := vv.WidgetType()
-				valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
-				cidx := ridx + idxOff + fli
-				w := tree.NewOfType(vtyp).(core.Widget)
-				w.SetName(valnm)
-				sg.SetChild(w, cidx)
-				views.Config(vv, w)
+		} else {
+			core.AddAt(p, valnm, func(w *TensorGrid) {
+				w.SetReadOnly(tv.IsReadOnly())
+				wb := w.AsWidget()
 				w.SetProperty(views.SliceViewRowProperty, i)
 				w.SetProperty(views.SliceViewColProperty, fli)
-				if col.NumDims() > 1 {
-					tgw := w.This().(*TensorGrid)
-					tgw.Style(func(s *styles.Style) {
-						s.Grow.Set(0, 0)
-					})
-				}
-
-				// update:
-						tdsp := tv.GetColumnTensorDisplay(fli)
-						var cell tensor.Tensor
+				w.Style(func(s *styles.Style) {
+					s.Grow.Set(0, 0)
+				})
+				wb.Builder(func() {
+					_, vi, invis := svi.SliceIndex(i)
+					var cell tensor.Tensor
+					if invis {
 						cell = tv.ColTensorBlank(fli, col)
-						if ixi >= 0 {
-							cell = tv.Table.Table.TensorIndex(fli, ixi)
-						}
-						vv.SetSoloValue(reflect.ValueOf(cell))
-						tgw := w.This().(*TensorGrid)
-						tgw.Disp = *tdsp
-
-			*/
+					} else {
+						cell = tv.Table.Table.TensorIndex(fli, vi)
+					}
+					w.SetState(invis, states.Invisible)
+					w.SetTensor(cell)
+					w.Disp = *tv.GetColumnTensorDisplay(fli)
+				})
+			})
 		}
 	}
 }
