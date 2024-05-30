@@ -75,6 +75,13 @@ type Tree struct {
 	UpdateMu sync.Mutex `copier:"-" set:"-" view:"-"`
 }
 
+func (ft *Tree) OnInit() {
+	ft.Node.OnInit()
+	ft.FRoot = ft
+	ft.FileNodeType = NodeType
+	ft.OpenDepth = 4
+}
+
 func (fv *Tree) Destroy() {
 	if fv.Watcher != nil {
 		fv.Watcher.Close()

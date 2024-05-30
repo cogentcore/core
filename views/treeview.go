@@ -244,16 +244,6 @@ func (tv *TreeView) OnInit() {
 		s.StateLayer = 0
 	})
 
-	tv.OnWidgetAdded(func(w core.Widget) {
-		// TODO(config)
-		switch w.PathFrom(tv) {
-		case "parts/branch/stack/icon-on", "parts/branch/stack/icon-off", "parts/branch/stack/icon-indeterminate":
-			w.Style(func(s *styles.Style) {
-				s.Min.Set(units.Em(0.8))
-			})
-		}
-	})
-
 	// We let the parts handle our state
 	// so that we only get it when we are doing
 	// something with this treeview specifically,
@@ -359,7 +349,7 @@ func (tv *TreeView) OnInit() {
 			s.Cursor = cursors.Pointer
 			s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
 			s.SetAbilities(!tv.IsReadOnly() && !tv.RootIsReadOnly(), abilities.Draggable, abilities.Droppable)
-			s.Gap.X.Ch(0.1)
+			s.Gap.X.Em(0.1)
 			s.Padding.Zero()
 
 			// we manually inherit our state layer from the treeview state

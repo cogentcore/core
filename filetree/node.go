@@ -16,12 +16,18 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/vcs"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/tree"
@@ -77,6 +83,106 @@ const (
 	// File info is all for the target of the symlink.
 	NodeSymLink
 )
+
+func (fn *Node) OnInit() {
+	fn.TreeView.OnInit()
+	fn.ContextMenus = nil // do not include treeview
+	fn.AddContextMenu(fn.ContextMenu)
+	fn.Style(func(s *styles.Style) {
+		status := fn.Info.VCS
+		s.Font.Weight = styles.WeightNormal
+		s.Font.Style = styles.FontNormal
+		if fn.IsExec() && !fn.IsDir() {
+			s.Font.Weight = styles.WeightBold // todo: somehow not working
+		}
+		if fn.Buffer != nil {
+			s.Font.Style = styles.Italic
+		}
+		switch {
+		case status == vcs.Untracked:
+			s.Color = errors.Must1(gradient.FromString("#808080"))
+		case status == vcs.Modified:
+			s.Color = errors.Must1(gradient.FromString("#4b7fd1"))
+		case status == vcs.Added:
+			s.Color = errors.Must1(gradient.FromString("#008800"))
+		case status == vcs.Deleted:
+			s.Color = errors.Must1(gradient.FromString("#ff4252"))
+		case status == vcs.Conflicted:
+			s.Color = errors.Must1(gradient.FromString("#ce8020"))
+		case status == vcs.Updated:
+			s.Color = errors.Must1(gradient.FromString("#008060"))
+		case status == vcs.Stored:
+			s.Color = colors.C(colors.Scheme.OnSurface)
+		}
+	})
+	fn.On(events.KeyChord, func(e events.Event) {
+		if core.DebugSettings.KeyEventTrace {
+			fmt.Printf("TreeView KeyInput: %v\n", fn.Path())
+		}
+		kf := keymap.Of(e.KeyChord())
+		selMode := events.SelectModeBits(e.Modifiers())
+
+		if selMode == events.SelectOne {
+			if fn.SelectMode() {
+				selMode = events.ExtendContinuous
+			}
+		}
+
+		// first all the keys that work for ReadOnly and active
+		if !fn.IsReadOnly() && !e.IsHandled() {
+			switch kf {
+			case keymap.Delete:
+				fn.DeleteFiles()
+				e.SetHandled()
+			case keymap.Backspace:
+				fn.DeleteFiles()
+				e.SetHandled()
+			case keymap.Duplicate:
+				fn.DuplicateFiles()
+				e.SetHandled()
+			case keymap.Insert: // New File
+				views.CallFunc(fn, fn.NewFile)
+				e.SetHandled()
+			case keymap.InsertAfter: // New Folder
+				views.CallFunc(fn, fn.NewFolder)
+				e.SetHandled()
+			}
+		}
+	})
+	core.AddChildInit(fn, "parts", func(w *core.Frame) {
+		w.Style(func(s *styles.Style) {
+			s.Gap.X.Em(0.4)
+		})
+		w.OnClick(func(e events.Event) {
+			fn.OpenEmptyDir()
+		})
+		w.OnDoubleClick(func(e events.Event) {
+			if fn.FRoot != nil && fn.FRoot.DoubleClickFun != nil {
+				fn.FRoot.DoubleClickFun(e)
+			} else {
+				if fn.IsDir() && fn.OpenEmptyDir() {
+					e.SetHandled()
+				}
+			}
+		})
+		core.AddChildInit(w, "branch", func(w *core.Switch) {
+			w.SetType(core.SwitchCheckbox)
+			w.SetIcons(icons.FolderOpen, icons.Folder, icons.Blank)
+			core.AddChildInit(w, "stack", func(w *core.Frame) {
+				f := func(name string) {
+					core.AddChildInit(w, name, func(w *core.Icon) {
+						w.Style(func(s *styles.Style) {
+							s.Min.Set(units.Em(1))
+						})
+					})
+				}
+				f("icon-on")
+				f("icon-off")
+				f("icon-indeterminate")
+			})
+		})
+	})
+}
 
 func (fn *Node) BaseType() *types.Type {
 	return fn.NodeType()
