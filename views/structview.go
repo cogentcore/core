@@ -195,6 +195,11 @@ func (sv *StructView) OnInit() {
 			}, func(w core.Value) {
 				valueWidget = w
 				wb := w.AsWidget()
+				doc, _ := types.GetDoc(f.value, f.parent, f.field, label)
+				wb.SetTooltip(doc)
+				if hasDef {
+					wb.SetTooltip("(Default: " + def + ") " + wb.Tooltip)
+				}
 				wb.OnInput(func(e events.Event) {
 					sv.Send(events.Input, e)
 					if f.field.Tag.Get("immediate") == "+" {

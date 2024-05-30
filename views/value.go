@@ -43,11 +43,11 @@ type OpenDialoger interface {
 	OpenDialog(ctx core.Widget, fun func())
 }
 
-// ConfigDialogValue configures the core.Value to open the dialog
+// InitValueButton configures the core.Value to open the dialog
 // for the given value when clicked and have the appropriate tooltip for that.
 // If allowReadOnly is false, the dialog will not be opened if the value
 // is read only.
-func ConfigDialogValue(v core.Value, allowReadOnly bool) {
+func InitValueButton(v core.Value, allowReadOnly bool) {
 	doc := "" // v.Doc()
 	tip := ""
 	// windows are never new on mobile

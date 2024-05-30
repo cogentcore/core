@@ -24,7 +24,7 @@ func (sb *SliceButton) WidgetValue() any { return &sb.Slice }
 func (sb *SliceButton) OnInit() {
 	sb.Button.OnInit()
 	sb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	ConfigDialogValue(sb, true)
+	InitValueButton(sb, true)
 	sb.Builder(func() {
 		sb.SetText(labels.FriendlySliceLabel(reflect.ValueOf(sb.Slice)))
 	})
@@ -59,7 +59,7 @@ func (sb *StructButton) WidgetValue() any { return &sb.Struct }
 func (sb *StructButton) OnInit() {
 	sb.Button.OnInit()
 	sb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	ConfigDialogValue(sb, true)
+	InitValueButton(sb, true)
 	sb.Builder(func() {
 		sb.SetText(labels.FriendlyStructLabel(reflect.ValueOf(sb.Struct)))
 	})
@@ -90,7 +90,7 @@ func (mb *MapButton) WidgetValue() any { return &mb.Map }
 func (mb *MapButton) OnInit() {
 	mb.Button.OnInit()
 	mb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	ConfigDialogValue(mb, true)
+	InitValueButton(mb, true)
 	mb.Builder(func() {
 		mb.SetText(labels.FriendlyMapLabel(reflect.ValueOf(mb.Map)))
 	})

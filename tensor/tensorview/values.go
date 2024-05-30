@@ -61,7 +61,7 @@ func (tb *TensorButton) WidgetValue() any { return &tb.Tensor }
 func (tb *TensorButton) OnInit() {
 	tb.Button.OnInit()
 	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	views.ConfigDialogValue(tb, true)
+	views.InitValueButton(tb, true)
 	tb.Builder(func() {
 		text := "None"
 		if tb.Tensor != nil {
@@ -90,7 +90,7 @@ func (tb *TableButton) WidgetValue() any { return &tb.Table }
 func (tb *TableButton) OnInit() {
 	tb.Button.OnInit()
 	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	views.ConfigDialogValue(tb, true)
+	views.InitValueButton(tb, true)
 	tb.Builder(func() {
 		text := "None"
 		if tb.Table != nil {
@@ -123,7 +123,7 @@ func (tb *SimMatButton) WidgetValue() any { return &tb.SimMat }
 func (tb *SimMatButton) OnInit() {
 	tb.Button.OnInit()
 	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	views.ConfigDialogValue(tb, true)
+	views.InitValueButton(tb, true)
 	tb.Builder(func() {
 		text := "None"
 		if tb.SimMat != nil && tb.SimMat.Mat != nil {
