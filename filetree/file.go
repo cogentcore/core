@@ -99,14 +99,9 @@ var _ Filer = (*Node)(nil)
 // OpenFilesDefault opens selected files with default app for that file type (os defined).
 // runs open on Mac, xdg-open on Linux, and start on Windows
 func (fn *Node) OpenFilesDefault() { //types:add
-	sels := fn.SelectedViews()
-	for i := len(sels) - 1; i >= 0; i-- {
-		sn := AsNode(sels[i].This())
-		if sn == nil {
-			continue
-		}
+	fn.SelectedFunc(func(sn *Node) {
 		sn.This().(Filer).OpenFileDefault()
-	}
+	})
 }
 
 // OpenFileDefault opens file with default app for that file type (os defined)
@@ -121,14 +116,9 @@ func (fn *Node) OpenFileDefault() error {
 
 // OpenFilesWith opens selected files with user-specified command.
 func (fn *Node) OpenFilesWith() {
-	sels := fn.SelectedViews()
-	for i := len(sels) - 1; i >= 0; i-- {
-		sn := AsNode(sels[i].This())
-		if sn == nil {
-			continue
-		}
+	fn.SelectedFunc(func(sn *Node) {
 		views.CallFunc(sn, sn.OpenFileWith) // todo: not using interface?
-	}
+	})
 }
 
 // OpenFileWith opens file with given command.
@@ -148,14 +138,9 @@ func (fn *Node) OpenFileWith(command string) error {
 // DuplicateFiles makes a copy of selected files
 func (fn *Node) DuplicateFiles() { //types:add
 	fn.FRoot.NeedsLayout()
-	sels := fn.SelectedViews()
-	for i := len(sels) - 1; i >= 0; i-- {
-		sn := AsNode(sels[i].This())
-		if sn == nil {
-			continue
-		}
+	fn.SelectedFunc(func(sn *Node) {
 		sn.This().(Filer).DuplicateFile()
-	}
+	})
 }
 
 // DuplicateFile creates a copy of given file -- only works for regular files, not
@@ -186,34 +171,25 @@ func (fn *Node) DeleteFiles() { //types:add
 // DeleteFilesImpl does the actual deletion, no prompts
 func (fn *Node) DeleteFilesImpl() {
 	fn.FRoot.NeedsLayout()
-	sels := fn.SelectedViews()
-	for i := len(sels) - 1; i >= 0; i-- {
-		fn := AsNode(sels[i].This())
-		if !fn.Info.IsDir() {
-			fn.DeleteFile()
-			continue
+	fn.SelectedFunc(func(sn *Node) {
+		if !sn.Info.IsDir() {
+			sn.DeleteFile()
+			return
 		}
-		openList := []string{}
 		var fns []string
-		fn.Info.Filenames(&fns)
-		ft := fn.FRoot
+		sn.Info.Filenames(&fns)
+		ft := sn.FRoot
 		for _, filename := range fns {
-			fn, ok := ft.FindFile(filename)
+			sn, ok := ft.FindFile(filename)
 			if !ok {
-				return
+				continue
 			}
-			if fn.Buffer != nil {
-				openList = append(openList, filename)
-			}
-		}
-		if len(openList) > 0 {
-			for _, filename := range openList {
-				fn, _ := ft.FindFile(filename)
-				fn.CloseBuf()
+			if sn.Buffer != nil {
+				sn.CloseBuf()
 			}
 		}
-		fn.This().(Filer).DeleteFile()
-	}
+		sn.This().(Filer).DeleteFile()
+	})
 }
 
 // DeleteFile deletes this file
@@ -247,16 +223,12 @@ func (fn *Node) DeleteFile() error {
 
 // renames any selected files
 func (fn *Node) RenameFiles() { //types:add
-	fn.FRoot.NeedsRender()
-	sels := fn.SelectedViews()
-	for i := len(sels) - 1; i >= 0; i-- {
-		sn := AsNode(sels[i].This())
-		if sn == nil || sn.IsExternal() {
-			continue
-		}
-		// views.NewSoloFuncButton(sn, sn.Rename).SetAfterFunc(fv.UpdateFilesAction).CallFunc()
-		views.CallFunc(sn, sn.RenameFile) // todo: not using interface?
-	}
+	fn.FRoot.NeedsLayout()
+	fn.SelectedFunc(func(sn *Node) {
+		fb := views.NewSoloFuncButton(sn, sn.RenameFile)
+		fb.Args[0].SetValue(sn.Name())
+		fb.CallFunc()
+	})
 }
 
 // RenameFile renames file to new name
@@ -308,16 +280,13 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 
 // NewFiles makes a new file in selected directory
 func (fn *Node) NewFiles(filename string, addToVCS bool) { //types:add
-	sels := fn.SelectedViews()
-	sz := len(sels)
-	if sz == 0 { // shouldn't happen
-		return
-	}
-	sn := AsNode(sels[sz-1])
-	if sn == nil {
-		return
-	}
-	sn.This().(Filer).NewFile(filename, addToVCS)
+	done := false
+	fn.SelectedFunc(func(sn *Node) {
+		if !done {
+			sn.This().(Filer).NewFile(filename, addToVCS)
+			done = true
+		}
+	})
 }
 
 // NewFile makes a new file in this directory node
@@ -337,8 +306,9 @@ func (fn *Node) NewFile(filename string, addToVCS bool) { //types:add
 	}
 	if addToVCS {
 		nfn, ok := fn.FRoot.FindFile(np)
-		if ok && nfn.This() != fn.FRoot.This() {
+		if ok && nfn.This() != fn.FRoot.This() && string(nfn.FPath) == np {
 			// todo: this is where it is erroneously adding too many files to vcs!
+			fmt.Println("adding new file to VCS:", nfn.FPath)
 			nfn.AddToVCS()
 		}
 	}
@@ -347,16 +317,13 @@ func (fn *Node) NewFile(filename string, addToVCS bool) { //types:add
 
 // makes a new folder in the given selected directory
 func (fn *Node) NewFolders(foldername string) { //types:add
-	sels := fn.SelectedViews()
-	sz := len(sels)
-	if sz == 0 { // shouldn't happen
-		return
-	}
-	sn := AsNode(sels[sz-1])
-	if sn == nil {
-		return
-	}
-	sn.This().(Filer).NewFolder(foldername)
+	done := false
+	fn.SelectedFunc(func(sn *Node) {
+		if !done {
+			sn.This().(Filer).NewFolder(foldername)
+			done = true
+		}
+	})
 }
 
 // NewFolder makes a new folder (directory) in this directory node
@@ -404,11 +371,9 @@ func (fn *Node) CopyFileToDir(filename string, perm os.FileMode) {
 
 // Shows file information about selected file(s)
 func (fn *Node) ShowFileInfo() { //types:add
-	sels := fn.SelectedViews()
-	for i := len(sels) - 1; i >= 0; i-- {
-		fn := AsNode(sels[i].This())
+	fn.SelectedFunc(func(sn *Node) {
 		d := core.NewBody().AddTitle("File info")
-		views.NewStructView(d).SetStruct(&fn.Info).SetReadOnly(true)
-		d.AddOKOnly().RunFullDialog(fn)
-	}
+		views.NewStructView(d).SetStruct(&sn.Info).SetReadOnly(true)
+		d.AddOKOnly().RunFullDialog(sn)
+	})
 }

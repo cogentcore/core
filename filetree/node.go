@@ -448,8 +448,6 @@ func (fn *Node) InitFileInfo() error {
 }
 
 // UpdateNode updates information in node based on its associated file in FPath.
-// This is intended to be called ad-hoc for individual nodes that might need
-// updating -- use SetPath for mass updates as it is more efficient.
 func (fn *Node) UpdateNode() error {
 	err := fn.InitFileInfo()
 	if err != nil {
@@ -482,17 +480,23 @@ func (fn *Node) UpdateNode() error {
 	return nil
 }
 
-// func (fn *Node) UpdateBranchIcons() {
-// 	fn.SetFileIcon()
-// }
+// SelectedFunc runs given function on selected nodes, in reverse order.
+func (fn *Node) SelectedFunc(fun func(sn *Node)) {
+	sels := fn.SelectedViews()
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := AsNode(sels[i].This())
+		if sn == nil {
+			continue
+		}
+		fun(sn)
+	}
+}
 
 // OpenDirs opens directories for selected views
 func (fn *Node) OpenDirs() {
-	sels := fn.SelectedViews()
-	for i := len(sels) - 1; i >= 0; i-- {
-		fn := AsNode(sels[i].This())
-		fn.OpenDir()
-	}
+	fn.SelectedFunc(func(sn *Node) {
+		sn.OpenDir()
+	})
 }
 
 func (fn *Node) OnOpen() {
@@ -535,11 +539,9 @@ func (fn *Node) OpenEmptyDir() bool {
 // SortBys determines how to sort the selected files in the directory.
 // Default is alpha by name, optionally can be sorted by modification time.
 func (fn *Node) SortBys(modTime bool) { //types:add
-	sels := fn.SelectedViews()
-	for i := len(sels) - 1; i >= 0; i-- {
-		sn := AsNode(sels[i].This())
+	fn.SelectedFunc(func(sn *Node) {
 		sn.SortBy(modTime)
-	}
+	})
 }
 
 // SortBy determines how to sort the files in the directory -- default is alpha by name,
@@ -596,15 +598,14 @@ func (fn *Node) OpenBuf() (bool, error) {
 
 // RemoveFromExterns removes file from list of external files
 func (fn *Node) RemoveFromExterns() { //types:add
-	sels := fn.SelectedViews()
-	for i := len(sels) - 1; i >= 0; i-- {
-		sn := AsNode(sels[i].This())
-		if sn != nil && sn.IsExternal() {
-			sn.FRoot.RemoveExtFile(string(sn.FPath))
-			sn.CloseBuf()
-			sn.Delete()
+	fn.SelectedFunc(func(sn *Node) {
+		if !sn.IsExternal() {
+			return
 		}
-	}
+		sn.FRoot.RemoveExtFile(string(sn.FPath))
+		sn.CloseBuf()
+		sn.Delete()
+	})
 }
 
 // CloseBuf closes the file in its buffer if it is open.
