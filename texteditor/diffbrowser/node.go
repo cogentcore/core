@@ -10,21 +10,68 @@ import (
 	"path/filepath"
 
 	"cogentcore.org/core/base/dirs"
-	"cogentcore.org/core/tree"
+	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/views"
 )
 
-// Node an element in the diff tree
+// Node is an element in the diff tree
 type Node struct {
-	tree.NodeBase
+	views.TreeView
 
-	// file names being compared
+	// file names (full path) being compared. Name of node is just the filename.
 	FileA, FileB string
 
-	// revisions for files, if applicable
+	// VCS revisions for files, if applicable
 	RevA, RevB string
 
-	// Contents of the files
-	ContentsA, ContentsB string
+	// Text of the files
+	TextA, TextB string
+}
+
+func (tn *Node) OnInit() {
+	tn.TreeView.OnInit()
+	tn.ContextMenus = nil
+	tn.AddContextMenu(tn.ContextMenu)
+}
+
+func (tn *Node) OnDoubleClick(e events.Event) {
+	e.SetHandled()
+	br := tn.Browser()
+	if br == nil {
+		return
+	}
+	sels := tn.SelectedViews()
+	if sels != nil {
+		br.ViewDiff(tn)
+	}
+}
+
+// Browser returns the parent browser
+func (tn *Node) Browser() *Browser {
+	bri := tn.ParentByType(BrowserType, false)
+	if bri != nil {
+		return bri.(*Browser)
+	}
+	return nil
+}
+
+func (tn *Node) ContextMenu(m *core.Scene) {
+	core.NewButton(m).SetText("View Diffs").SetIcon(icons.Add).
+		Style(func(s *styles.Style) {
+			s.SetState(!tn.HasSelection(), states.Disabled)
+		}).OnClick(func(e events.Event) {
+		br := tn.Browser()
+		if br == nil {
+			return
+		}
+		sels := tn.SelectedViews()
+		sn := sels[len(sels)-1].(*Node)
+		br.ViewDiff(sn)
+	})
 }
 
 // DiffDirs creates a tree of files within the two paths,
@@ -34,9 +81,9 @@ type Node struct {
 func (br *Browser) DiffDirs(pathA, pathB string, excludeFile func(fname string) bool) {
 	br.PathA = pathA
 	br.PathB = pathB
-	br.Files = NewNode()
-	br.Files.SetName(pathA)
-	br.diffDirsAt(pathA, pathB, br.Files, excludeFile)
+	tv := br.Tree()
+	tv.SetText(dirs.DirAndFile(pathA))
+	br.diffDirsAt(pathA, pathB, tv, excludeFile)
 }
 
 // diffDirsAt creates a tree of files with the same names
@@ -54,7 +101,7 @@ func (br *Browser) diffDirsAt(pathA, pathB string, node *Node, excludeFile func(
 		for _, pb := range db {
 			if pa == pb {
 				nn := NewNode(node)
-				nn.SetName(pa)
+				nn.SetText(pa)
 				br.diffDirsAt(filepath.Join(pathA, pa), filepath.Join(pathB, pb), nn, excludeFile)
 			}
 		}
@@ -100,8 +147,8 @@ func (br *Browser) diffDirsAt(pathA, pathB string, node *Node, excludeFile func(
 				continue
 			}
 			nn := NewNode(node)
-			nn.SetName(fa)
-			nn.SetFileA(pfa).SetFileB(pfb).SetContentsA(sa).SetContentsB(sb)
+			nn.SetText(fa)
+			nn.SetFileA(pfa).SetFileB(pfb).SetTextA(sa).SetTextB(sb)
 		}
 	}
 }

@@ -12,12 +12,13 @@ import (
 
 	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/stringsx"
 )
 
 // SplitLines returns a slice of given string split by lines
-// with any extra whitespace trimmed.
+// with any extra whitespace trimmed for each line entry.
 func SplitLines(str string) []string {
-	sl := strings.Split(str, "\n")
+	sl := stringsx.SplitLines(str)
 	for i, s := range sl {
 		sl[i] = strings.TrimSpace(s)
 	}

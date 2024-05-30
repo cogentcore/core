@@ -95,10 +95,16 @@ func (lv *VCSLogView) ConfigRepo(repo vcs.Repo, lg vcs.Log, file, since string) 
 				lv.SetRevB(cmt.Rev)
 			})
 		core.NewButton(m).SetText("Copy Revision ID").
-			SetTooltip("Copies the revision number / hash for this ").
+			SetTooltip("Copies the revision number / hash for this").
 			OnClick(func(e events.Event) {
 				cmt := lv.Log[tv.SelectedIndex]
 				tv.Clipboard().Write(mimedata.NewText(cmt.Rev))
+			})
+		core.NewButton(m).SetText("View Revision").
+			SetTooltip("Views the file at this revision").
+			OnClick(func(e events.Event) {
+				cmt := lv.Log[tv.SelectedIndex]
+				FileAtRevDialog(lv, lv.Repo, lv.File, cmt.Rev)
 			})
 		core.NewButton(m).SetText("Checkout Revision").
 			SetTooltip("Checks out this revision").
