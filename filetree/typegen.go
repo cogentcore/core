@@ -35,11 +35,8 @@ type NodeEmbedder interface {
 
 // AsNode returns the given value as a value of type Node if the type
 // of the given value embeds Node, or nil otherwise
-func AsNode(k tree.Node) *Node {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(NodeEmbedder); ok {
+func AsNode(n tree.Node) *Node {
+	if t, ok := n.(NodeEmbedder); ok {
 		return t.AsNode()
 	}
 	return nil

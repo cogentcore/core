@@ -368,20 +368,18 @@ func (fb *FuncButton) CallFunc() {
 
 	d.OnShow(func(e events.Event) {
 		// go directly to the dialog if there is one
-		if len(fb.Args) == 1 {
-			bt := core.AsButton(sv.Child(1))
-			if bt != nil {
-				bt.Send(events.Click)
-			}
+		if len(fb.Args) != 1 {
+			return
 		}
+		bt := core.AsButton(sv.Child(1))
+		if bt == nil {
+			return
+		}
+		bt.OnFinal(events.Change, func(e events.Event) {
+			d.Scene.SendKey(keymap.Accept, e) // trigger OK button
+		})
+		bt.Send(events.Click)
 	})
-	// 	OpenDialog(fb.Args[0], ctx, func() {
-	// 	fb.callFuncShowReturns()
-	// }, func() {
-	// 	makeTmpWidget(fb.Args[0])
-	// }) {
-	// 	return
-	// }
 
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)

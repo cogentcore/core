@@ -69,11 +69,8 @@ type ButtonEmbedder interface {
 
 // AsButton returns the given value as a value of type Button if the type
 // of the given value embeds Button, or nil otherwise
-func AsButton(k tree.Node) *Button {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(ButtonEmbedder); ok {
+func AsButton(n tree.Node) *Button {
+	if t, ok := n.(ButtonEmbedder); ok {
 		return t.AsButton()
 	}
 	return nil
@@ -1061,11 +1058,8 @@ type TextFieldEmbedder interface {
 
 // AsTextField returns the given value as a value of type TextField if the type
 // of the given value embeds TextField, or nil otherwise
-func AsTextField(k tree.Node) *TextField {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(TextFieldEmbedder); ok {
+func AsTextField(n tree.Node) *TextField {
+	if t, ok := n.(TextFieldEmbedder); ok {
 		return t.AsTextField()
 	}
 	return nil

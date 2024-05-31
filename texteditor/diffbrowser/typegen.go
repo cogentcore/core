@@ -3,6 +3,7 @@
 package diffbrowser
 
 import (
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/units"
@@ -38,7 +39,7 @@ func (t *Browser) SetPathB(v string) *Browser { t.PathB = v; return t }
 func (t *Browser) SetTooltip(v string) *Browser { t.Tooltip = v; return t }
 
 // NodeType is the [types.Type] for [Node]
-var NodeType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor/diffbrowser.Node", IDName: "node", Doc: "Node is an element in the diff tree", Embeds: []types.Field{{Name: "TreeView"}}, Fields: []types.Field{{Name: "FileA", Doc: "file names (full path) being compared. Name of node is just the filename."}, {Name: "FileB", Doc: "file names (full path) being compared. Name of node is just the filename."}, {Name: "RevA", Doc: "VCS revisions for files, if applicable"}, {Name: "RevB", Doc: "VCS revisions for files, if applicable"}, {Name: "TextA", Doc: "Text of the files"}, {Name: "TextB", Doc: "Text of the files"}}, Instance: &Node{}})
+var NodeType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor/diffbrowser.Node", IDName: "node", Doc: "Node is an element in the diff tree", Embeds: []types.Field{{Name: "TreeView"}}, Fields: []types.Field{{Name: "FileA", Doc: "file names (full path) being compared. Name of node is just the filename."}, {Name: "FileB", Doc: "file names (full path) being compared. Name of node is just the filename."}, {Name: "RevA", Doc: "VCS revisions for files, if applicable"}, {Name: "RevB", Doc: "VCS revisions for files, if applicable"}, {Name: "TextA", Doc: "Text of the files"}, {Name: "TextB", Doc: "Text of the files"}, {Name: "Info", Doc: "Info about the A file"}}, Instance: &Node{}})
 
 // NewNode returns a new [Node] with the given optional parent:
 // Node is an element in the diff tree
@@ -73,6 +74,10 @@ func (t *Node) SetTextA(v string) *Node { t.TextA = v; return t }
 // SetTextB sets the [Node.TextB]:
 // Text of the files
 func (t *Node) SetTextB(v string) *Node { t.TextB = v; return t }
+
+// SetInfo sets the [Node.Info]:
+// Info about the A file
+func (t *Node) SetInfo(v fileinfo.FileInfo) *Node { t.Info = v; return t }
 
 // SetTooltip sets the [Node.Tooltip]
 func (t *Node) SetTooltip(v string) *Node { t.Tooltip = v; return t }

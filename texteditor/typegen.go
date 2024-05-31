@@ -147,11 +147,8 @@ type EditorEmbedder interface {
 
 // AsEditor returns the given value as a value of type Editor if the type
 // of the given value embeds Editor, or nil otherwise
-func AsEditor(k tree.Node) *Editor {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(EditorEmbedder); ok {
+func AsEditor(n tree.Node) *Editor {
+	if t, ok := n.(EditorEmbedder); ok {
 		return t.AsEditor()
 	}
 	return nil
@@ -193,7 +190,7 @@ func (t *Editor) SetLinkHandler(v func(tl *paint.TextLink)) *Editor { t.LinkHand
 func (t *Editor) SetTooltip(v string) *Editor { t.Tooltip = v; return t }
 
 // TwinEditorsType is the [types.Type] for [TwinEditors]
-var TwinEditorsType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor.TwinEditors", IDName: "twin-editors", Doc: "TwinEditors presents two side-by-side [Editor]s in [core.Splits]\nthat scroll in sync with each other.", Embeds: []types.Field{{Name: "Splits"}}, Fields: []types.Field{{Name: "BufferA", Doc: "[Buffer] for A"}, {Name: "BufferB", Doc: "[Buffer] for B"}}, Instance: &TwinEditors{}})
+var TwinEditorsType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor.TwinEditors", IDName: "twin-editors", Doc: "TwinEditors presents two side-by-side [Editor]s in [core.Splits]\nthat scroll in sync with each other.", Embeds: []types.Field{{Name: "Splits"}}, Fields: []types.Field{{Name: "BufferA", Doc: "[Buffer] for A"}, {Name: "BufferB", Doc: "[Buffer] for B"}, {Name: "inInputEvent"}}, Instance: &TwinEditors{}})
 
 // NewTwinEditors returns a new [TwinEditors] with the given optional parent:
 // TwinEditors presents two side-by-side [Editor]s in [core.Splits]
