@@ -39,17 +39,7 @@ type Widget interface {
 	// Style sets the styling properties of the widget by adding a styler function.
 	Style(s func(s *styles.Style)) *WidgetBase
 
-	// Update does a general purpose update of the widget and everything
-	// below it by building it, applying its styles, and indicating
-	// that it needs a new layout pass. It is the main way that end users
-	// should update widgets, and it should be called after making any
-	// changes to the core properties of a widget (for example, the text
-	// of [Text], the icon of a [Button], or the slice of a table view).
-	//
-	// If you are calling this in a separate goroutine outside of the main
-	// configuration, rendering, and event handling structure, you need to
-	// call [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and
-	// after this, respectively.
+	// See [WidgetBase.Update].
 	Update()
 
 	// StateIs returns whether the widget has the given [states.States] flag set
