@@ -264,7 +264,9 @@ func (pl *PlotView) XLabel() string {
 }
 
 // GoUpdatePlot updates the display based on current IndexView into table.
-// this version can be called from go routines.
+// this version can be called from go routines. It does Sequential() on
+// the [table.IndexView], under the assumption that it is used for tracking a
+// the latest updates of a running process.
 func (pl *PlotView) GoUpdatePlot() {
 	if pl == nil || pl.This() == nil {
 		return
@@ -282,6 +284,8 @@ func (pl *PlotView) GoUpdatePlot() {
 // UpdatePlot updates the display based on current IndexView into table.
 // This version can only be called within main goroutine for
 // window eventloop -- use GoUpdateUplot for other-goroutine updates.
+// It does not automatically update the [table.IndexView] unless it is
+// nil or out date.
 func (pl *PlotView) UpdatePlot() {
 	if pl == nil || pl.This() == nil {
 		return
@@ -292,7 +296,9 @@ func (pl *PlotView) UpdatePlot() {
 	if len(pl.Kids) != 2 || len(pl.Columns) != pl.Table.Table.NumColumns() {
 		pl.Update()
 	}
-	pl.Table.Sequential()
+	if pl.Table.Len() == 0 {
+		pl.Table.Sequential()
+	}
 	pl.GenPlot()
 }
 
@@ -608,10 +614,12 @@ func (pl *PlotView) MakeToolbar(p *core.Plan) {
 	})
 	core.Add(p, func(w *core.Separator) {})
 	core.Add(p, func(w *views.FuncButton) {
-		w.SetFunc(pl.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
+		w.SetFunc(pl.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt).
+			SetAfterFunc(func() { pl.UpdatePlot() })
 	})
 	core.Add(p, func(w *views.FuncButton) {
-		w.SetFunc(pl.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
+		w.SetFunc(pl.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff).
+			SetAfterFunc(func() { pl.UpdatePlot() })
 	})
 }
 
