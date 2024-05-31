@@ -96,6 +96,41 @@ func (t *FileView) SetFiles(v ...*fileinfo.FileInfo) *FileView { t.Files = v; re
 // SetTooltip sets the [FileView.Tooltip]
 func (t *FileView) SetTooltip(v string) *FileView { t.Tooltip = v; return t }
 
+// FileButtonType is the [types.Type] for [FileButton]
+var FileButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FileButton", IDName: "file-button", Doc: "FileButton represents a filename value with a button\nthat opens a [FileView].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Filename"}}, Instance: &FileButton{}})
+
+// NewFileButton returns a new [FileButton] with the given optional parent:
+// FileButton represents a filename value with a button
+// that opens a [FileView].
+func NewFileButton(parent ...tree.Node) *FileButton { return tree.New[*FileButton](parent...) }
+
+// NodeType returns the [*types.Type] of [FileButton]
+func (t *FileButton) NodeType() *types.Type { return FileButtonType }
+
+// New returns a new [*FileButton] value
+func (t *FileButton) New() tree.Node { return &FileButton{} }
+
+// SetFilename sets the [FileButton.Filename]
+func (t *FileButton) SetFilename(v string) *FileButton { t.Filename = v; return t }
+
+// SetTooltip sets the [FileButton.Tooltip]
+func (t *FileButton) SetTooltip(v string) *FileButton { t.Tooltip = v; return t }
+
+// SetType sets the [FileButton.Type]
+func (t *FileButton) SetType(v core.ButtonTypes) *FileButton { t.Type = v; return t }
+
+// SetIcon sets the [FileButton.Icon]
+func (t *FileButton) SetIcon(v icons.Icon) *FileButton { t.Icon = v; return t }
+
+// SetIndicator sets the [FileButton.Indicator]
+func (t *FileButton) SetIndicator(v icons.Icon) *FileButton { t.Indicator = v; return t }
+
+// SetShortcut sets the [FileButton.Shortcut]
+func (t *FileButton) SetShortcut(v key.Chord) *FileButton { t.Shortcut = v; return t }
+
+// SetMenu sets the [FileButton.Menu]
+func (t *FileButton) SetMenu(v func(m *core.Scene)) *FileButton { t.Menu = v; return t }
+
 // FuncButtonType is the [types.Type] for [FuncButton]
 var FuncButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FuncButton", IDName: "func-button", Doc: "FuncButton is a button that is set up to call a function when it\nis pressed, using a dialog to prompt the user for any arguments.\nAlso, it automatically sets various properties of the button like\nthe name, text, tooltip, and icon based on the properties of the\nfunction, using [reflect] and [types]. The function must be registered\nwith [types] to get documentation information, but that is not\nrequired; add a `//types:add` comment directive and run `core generate`\nif you want tooltips. If the function is a method, both the method and\nits receiver type must be added to [types] to get documentation.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Func", Doc: "Func is the [types.Func] associated with this button.\nThis function can also be a method, but it must be\nconverted to a [types.Func] first. It should typically\nbe set using [FuncButton.SetFunc]."}, {Name: "ReflectFunc", Doc: "ReflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc]."}, {Name: "Args", Doc: "Args are the [FuncArg] objects associated with the\narguments of the function. They are automatically set in\n[SetFunc], but they can be customized to configure\ndefault values and other options."}, {Name: "Returns", Doc: "Returns are the [FuncArg] objects associated with the\nreturn values of the function. They are automatically\nset in [SetFunc], but they can be customized to configure\noptions. The [FuncArg.Value]s are not set until the\nfunction is called, and are thus not typically applicable\nto access."}, {Name: "Confirm", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function."}, {Name: "ShowReturn", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. Non-nil error return values will\nalways be shown, even if ShowReturn is set to false."}, {Name: "ShowReturnAsDialog", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there are multiple return values from the function, or if\none of them is a complex type (pointer, struct, slice,\narray, map), then ShowReturnAsDialog will\nautomatically be set to true."}, {Name: "NewWindow", Doc: "NewWindow makes the ReturnDialog a NewWindow dialog\n(if supported by platform)."}, {Name: "WarnUnadded", Doc: "WarnUnadded is whether to log warnings when a function that\nhas not been added to [types] is used. It is on by default and\nmust be set before [FuncButton.SetFunc] is called for it to\nhave any effect."}, {Name: "Context", Doc: "Context is used for opening Dialogs if non-nil."}, {Name: "AfterFunc", Doc: "AfterFunc is an optional function called after the func button\nfunction is executed"}}, Instance: &FuncButton{}})
 

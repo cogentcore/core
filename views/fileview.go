@@ -798,3 +798,36 @@ func (fv *FileView) EditRecentPaths() {
 	})
 	d.RunDialog(fv)
 }
+
+// FileButton represents a filename value with a button
+// that opens a [FileView].
+type FileButton struct {
+	core.Button
+	Filename string
+}
+
+func (fb *FileButton) WidgetValue() any { return &fb.Filename }
+
+func (fb *FileButton) OnInit() {
+	fb.Button.OnInit()
+	fb.SetType(core.ButtonTonal).SetIcon(icons.File)
+	fb.Updater(func() {
+		if fb.Filename == "" {
+			fb.SetText("Select file")
+		} else {
+			fb.SetText(fb.Filename)
+		}
+	})
+	InitValueButton(fb, false, func(d *core.Body) {
+		fb.SetFlag(true, ValueDialogNewWindow) // default to new window on supported platforms
+		// ext, _ := v.Tag("ext")
+		// fv := NewFileView(d).SetFilename(cur, ext)
+		fv := NewFileView(d).SetFilename(fb.Filename, "")
+		d.AddAppBar(fv.MakeToolbar)
+		// return true, func() {
+		// 	cur = fv.SelectedFile()
+		// 	v.SetValue(cur)
+		// 	v.Update()
+		// }
+	})
+}

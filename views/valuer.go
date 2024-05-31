@@ -19,6 +19,7 @@ func init() {
 	core.SettingsWindow = SettingsWindow
 	core.InspectorWindow = InspectorWindow
 
+	core.AddValueType[core.Filename, *FileButton]()
 	core.AddValueConverter(func(value any, tags reflect.StructTag) core.Value {
 		if _, ok := value.(color.Color); ok {
 			return NewColorButton()
