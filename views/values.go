@@ -28,21 +28,16 @@ func (sb *SliceButton) OnInit() {
 		sb.SetText(labels.FriendlySliceLabel(reflect.ValueOf(sb.Slice)))
 	})
 	InitValueButton(sb, true, func(d *core.Body) {
-		up := reflectx.UnderlyingPointer(reflect.ValueOf(sb.Slice))
-		if !up.IsValid() || up.IsZero() {
-			return
-		}
-		upi := up.Interface()
-		if up.Elem().Type().Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(sb.Slice)).Kind() == reflect.Struct {
-			tv := NewTableView(d).SetSlice(upi).SetViewPath(sb.ValueContext)
+		up := reflectx.Underlying(reflect.ValueOf(sb.Slice))
+		if up.Type().Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(sb.Slice)).Kind() == reflect.Struct {
+			tv := NewTableView(d).SetSlice(sb.Slice).SetViewPath(sb.ValueContext)
 			tv.SetReadOnly(sb.IsReadOnly())
 			d.AddAppBar(tv.MakeToolbar)
 		} else {
-			sv := NewSliceView(d).SetSlice(upi).SetViewPath(sb.ValueContext)
+			sv := NewSliceView(d).SetSlice(sb.Slice).SetViewPath(sb.ValueContext)
 			sv.SetReadOnly(sb.IsReadOnly())
 			d.AddAppBar(sv.MakeToolbar)
 		}
-		return
 	})
 }
 
@@ -61,17 +56,10 @@ func (sb *StructButton) OnInit() {
 		sb.SetText(labels.FriendlyStructLabel(reflect.ValueOf(sb.Struct)))
 	})
 	InitValueButton(sb, true, func(d *core.Body) {
-		if reflectx.AnyIsNil(sb.Struct) {
-			return
-		}
-		opv := reflectx.UnderlyingPointer(reflect.ValueOf(sb.Struct))
-		str := opv.Interface()
-		NewStructView(d).SetStruct(str).SetViewPath(sb.ValueContext).
-			SetReadOnly(sb.IsReadOnly())
-		if tb, ok := str.(core.ToolbarMaker); ok {
+		NewStructView(d).SetStruct(sb.Struct).SetViewPath(sb.ValueContext).SetReadOnly(sb.IsReadOnly())
+		if tb, ok := sb.Struct.(core.ToolbarMaker); ok {
 			d.AddAppBar(tb.MakeToolbar)
 		}
-		return
 	})
 }
 
@@ -90,13 +78,8 @@ func (mb *MapButton) OnInit() {
 		mb.SetText(labels.FriendlyMapLabel(reflect.ValueOf(mb.Map)))
 	})
 	InitValueButton(mb, true, func(d *core.Body) {
-		if reflectx.AnyIsNil(mb.Map) || reflectx.NonPointerValue(reflect.ValueOf(mb.Map)).IsZero() {
-			return
-		}
-		mpi := mb.Map
-		mv := NewMapView(d).SetMap(mpi)
+		mv := NewMapView(d).SetMap(mb.Map)
 		mv.SetViewPath(mb.ValueContext).SetReadOnly(mb.IsReadOnly())
 		d.AddAppBar(mv.MakeToolbar)
-		return
 	})
 }
