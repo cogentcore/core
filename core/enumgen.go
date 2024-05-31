@@ -136,16 +136,16 @@ func (i *CompleteSignals) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "CompleteSignals")
 }
 
-var _WidgetFlagsValues = []WidgetFlags{1}
+var _WidgetFlagsValues = []WidgetFlags{1, 2}
 
 // WidgetFlagsN is the highest valid value for type WidgetFlags, plus one.
-const WidgetFlagsN WidgetFlags = 2
+const WidgetFlagsN WidgetFlags = 3
 
-var _WidgetFlagsValueMap = map[string]WidgetFlags{`NeedsRender`: 1}
+var _WidgetFlagsValueMap = map[string]WidgetFlags{`NeedsRender`: 1, `ValueDialogNewWindow`: 2}
 
-var _WidgetFlagsDescMap = map[WidgetFlags]string{1: `NeedsRender needs to be rendered on next render iteration`}
+var _WidgetFlagsDescMap = map[WidgetFlags]string{1: `NeedsRender needs to be rendered on next render iteration`, 2: `ValueDialogNewWindow indicates that the dialog of a [Value] should be opened as a new window, instead of a typical full window in the same current window. This is set by [InitValueButton] and handled by [OpenValuedDialog]. This is triggered by holding down the Shift key while clicking on a [Value] button.`}
 
-var _WidgetFlagsMap = map[WidgetFlags]string{1: `NeedsRender`}
+var _WidgetFlagsMap = map[WidgetFlags]string{1: `NeedsRender`, 2: `ValueDialogNewWindow`}
 
 // String returns the string representation of this WidgetFlags value.
 func (i WidgetFlags) String() string {

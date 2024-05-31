@@ -820,7 +820,7 @@ func (fb *FileButton) OnInit() {
 	})
 	var fv *FileView
 	InitValueButton(fb, false, func(d *core.Body) {
-		fb.SetFlag(true, ValueDialogNewWindow) // default to new window on supported platforms
+		fb.SetFlag(true, core.ValueDialogNewWindow) // default to new window on supported platforms
 		// ext, _ := v.Tag("ext") // TODO(config)
 		fv = NewFileView(d).SetFilename(fb.Filename, "")
 		d.AddAppBar(fv.MakeToolbar)

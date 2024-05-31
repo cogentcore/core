@@ -11,13 +11,19 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// WidgetFlags define Widget node bitflags for tracking common high-frequency GUI
-// state, mostly having to do with event processing. Extends [tree.Flags].
+// WidgetFlags are bit flags that represent widget state.
 type WidgetFlags tree.Flags //enums:bitflag
 
 const (
 	// NeedsRender needs to be rendered on next render iteration
 	NeedsRender WidgetFlags = WidgetFlags(tree.FlagsN) + iota
+
+	// ValueDialogNewWindow indicates that the dialog of a [Value] should be opened
+	// as a new window, instead of a typical full window in the same current window.
+	// This is set by [InitValueButton] and handled by [OpenValuedDialog].
+	// This is triggered by holding down the Shift key while clicking on a
+	// [Value] button.
+	ValueDialogNewWindow
 )
 
 // StateIs returns whether the widget has the given [states.States] flag set
