@@ -294,7 +294,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 		tv.MakeGridIndex(p, i, si, itxt, invis)
 	}
 
-	vpath := tv.ViewPath + "[" + sitxt + "]" // todo: should be in builder, sitxt will change
+	vpath := tv.ViewPath + "[" + sitxt + "]" // todo: should be in Updater, sitxt will change
 	if !invis {
 		if lblr, ok := tv.Slice.(labels.SliceLabeler); ok {
 			slbl := lblr.ElemLabel(si)
