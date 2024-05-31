@@ -192,9 +192,12 @@ func (sv *StructView) OnInit() {
 				valueWidget = w
 				wb := w.AsWidget()
 				doc, _ := types.GetDoc(f.value, f.parent, f.field, label)
-				if wb.Tooltip == "" || doc == "" {
+				// InitValueButton may set starting wb.Tooltip in OnInit
+				if wb.Tooltip == "" {
 					wb.SetTooltip(doc)
-				} else { // InitValueButton may set starting tooltip in OnInit
+				} else if doc == "" {
+					wb.SetTooltip(wb.Tooltip)
+				} else {
 					wb.SetTooltip(wb.Tooltip + " " + doc)
 				}
 				if hasDef {
