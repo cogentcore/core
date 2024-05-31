@@ -5,6 +5,9 @@
 package core
 
 import (
+	"reflect"
+
+	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
 )
 
@@ -48,6 +51,7 @@ func Bind[T Value](value any, vw T) T {
 	wb.ValueOnChange = func() {
 		ErrorSnackbar(vw, reflectx.SetRobust(value, vw.WidgetValue()))
 	}
+	wb.ValueContext = labels.FriendlyTypeName(reflectx.NonPointerType(reflect.TypeOf(value)))
 	if ob, ok := any(vw).(OnBinder); ok {
 		ob.OnBind(value)
 	}
