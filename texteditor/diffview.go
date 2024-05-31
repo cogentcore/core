@@ -363,8 +363,8 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 			ad.J2 = absln + di
 			dv.AlignD[i] = ad
 			for i := 0; i < di; i++ {
-				dv.BufA.SetLineColor(absln+i, del)
-				dv.BufB.SetLineColor(absln+i, ins)
+				dv.BufA.SetLineColor(absln+i, ins)
+				dv.BufB.SetLineColor(absln+i, del)
 				aln := []byte(astr[df.I1+i])
 				alen := len(aln)
 				ab = append(ab, aln)
@@ -380,8 +380,8 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 			ad.J2 = absln + dj
 			dv.AlignD[i] = ad
 			for i := 0; i < dj; i++ {
-				dv.BufA.SetLineColor(absln+i, ins)
-				dv.BufB.SetLineColor(absln+i, del)
+				dv.BufA.SetLineColor(absln+i, del)
+				dv.BufB.SetLineColor(absln+i, ins)
 				bln := []byte(bstr[df.J1+i])
 				blen := len(bln)
 				bb = append(bb, bln)

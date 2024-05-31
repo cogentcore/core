@@ -10,11 +10,13 @@ import (
 	"path/filepath"
 
 	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/views"
 )
 
@@ -30,12 +32,36 @@ type Node struct {
 
 	// Text of the files
 	TextA, TextB string
+
+	// Info about the A file
+	Info fileinfo.FileInfo
 }
 
 func (tn *Node) OnInit() {
 	tn.TreeView.OnInit()
+	tn.IconOpen = icons.FolderOpen
+	tn.IconClosed = icons.Folder
 	tn.ContextMenus = nil
 	tn.AddContextMenu(tn.ContextMenu)
+	core.AddChildInit(tn, "parts", func(w *core.Frame) {
+		w.Style(func(s *styles.Style) {
+			s.Gap.X.Em(0.4)
+		})
+		core.AddChildInit(w, "branch", func(w *core.Switch) {
+			core.AddChildInit(w, "stack", func(w *core.Frame) {
+				f := func(name string) {
+					core.AddChildInit(w, name, func(w *core.Icon) {
+						w.Style(func(s *styles.Style) {
+							s.Min.Set(units.Em(1))
+						})
+					})
+				}
+				f("icon-on")
+				f("icon-off")
+				f("icon-indeterminate")
+			})
+		})
+	})
 }
 
 func (tn *Node) OnDoubleClick(e events.Event) {
@@ -149,6 +175,8 @@ func (br *Browser) diffDirsAt(pathA, pathB string, node *Node, excludeFile func(
 			nn := NewNode(node)
 			nn.SetText(fa)
 			nn.SetFileA(pfa).SetFileB(pfb).SetTextA(sa).SetTextB(sb)
+			nn.Info.InitFile(pfa)
+			nn.IconLeaf = nn.Info.Ic
 		}
 	}
 }
