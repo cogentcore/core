@@ -307,7 +307,7 @@ func (sc *Scene) ConfigSceneWidgets() {
 	sc.SetFlag(true, ScUpdating) // prevent rendering
 	defer sc.SetFlag(false, ScUpdating)
 
-	sc.BuildTree()
+	sc.UpdateTree()
 }
 
 // ApplyStyleScene calls ApplyStyle on all widgets in the Scene,

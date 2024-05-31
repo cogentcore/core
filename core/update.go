@@ -52,18 +52,13 @@ func (wb *WidgetBase) Make(p *Plan) {
 	}
 }
 
-// BuildTree calls [WidgetBase.Build] on every widget in the tree starting
-// with this one and going down.
-func (wb *WidgetBase) BuildTree() {
-	if wb.This() == nil {
-		return
-	}
-	// pr := profile.Start(wb.This().NodeType().ShortName())
+// UpdateTree calls [WidgetBase.UpdateWidget] on every widget in the tree
+// starting with this one and going down.
+func (wb *WidgetBase) UpdateTree() {
 	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		wb.Build()
 		return tree.Continue
 	})
-	// pr.End()
 }
 
 // Update does a general purpose update of the widget and everything
