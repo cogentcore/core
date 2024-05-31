@@ -53,11 +53,8 @@ var TreeMethodsTmpl = template.Must(template.New("TreeMethods").
 	
 	// As{{.LocalName}} returns the given value as a value of type {{.LocalName}} if the type
 	// of the given value embeds {{.LocalName}}, or nil otherwise
-	func As{{.LocalName}}(k {{TreePkg .}}Node) *{{.LocalName}} {
-		if k == nil || k.This() == nil {
-			return nil
-		}
-		if t, ok := k.({{.LocalName}}Embedder); ok {
+	func As{{.LocalName}}(n {{TreePkg .}}Node) *{{.LocalName}} {
+		if t, ok := n.({{.LocalName}}Embedder); ok {
 			return t.As{{.LocalName}}()
 		}
 		return nil
