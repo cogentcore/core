@@ -377,11 +377,15 @@ func values(ts *core.Tabs) {
 		fmt.Println("The state is now", state)
 	})
 
+	color := colors.Orange
+	core.Bind(&color, views.NewColorButton(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The color is now", color)
+	})
+
 	core.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
 		views.InspectorWindow(ts.Scene)
 	})
 
-	views.NewValue(tab, colors.Orange)
 	views.NewValue(tab, time.Now())
 	views.NewValue(tab, 5*time.Minute)
 	views.NewValue(tab, 500*time.Millisecond)
