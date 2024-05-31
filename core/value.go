@@ -55,6 +55,16 @@ func Bind[T Value](value any, vw T) T {
 	return vw
 }
 
+// Note: SetValueContext must be defined manually so that it is not generated
+// for all embedding widget types.
+
+// SetValueContext sets the [WidgetBase.ValueContext] of the widget,
+// which is a record of parent value names that have led up to this [Value].
+func (wb *WidgetBase) SetValueContext(context string) *WidgetBase {
+	wb.ValueContext = context
+	return wb
+}
+
 // JoinValueContext returns a [WidgetBase.ValueContext] string composed
 // of two elements, with a • separator, handling the cases where
 // either or both can be empty.

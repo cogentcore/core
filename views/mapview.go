@@ -30,10 +30,6 @@ type MapView struct {
 	// SortValue is whether to sort by values instead of keys.
 	SortValues bool
 
-	// ViewPath is a record of parent view names that have led up to this view.
-	// It is displayed as extra contextual information in view dialogs.
-	ViewPath string
-
 	// ncols is the number of columns to display if the map view is not inline.
 	ncols int
 }

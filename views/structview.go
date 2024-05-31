@@ -57,10 +57,6 @@ type StructView struct {
 	// Inline is whether to display the struct in one line.
 	Inline bool
 
-	// ViewPath is a record of parent view names that have led up to this view.
-	// It is displayed as extra contextual information in view dialogs.
-	ViewPath string
-
 	// structFields are the fields of the current struct.
 	structFields []*structField
 

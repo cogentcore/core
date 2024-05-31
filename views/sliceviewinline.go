@@ -28,10 +28,6 @@ type SliceViewInline struct {
 	// Otherwise, it is nil.
 	SliceValue Value `set:"-"`
 
-	// ViewPath is a record of parent view names that have led up to this view.
-	// It is displayed as extra contextual information in view dialogs.
-	ViewPath string
-
 	// isArray is whether the slice is actually an array.
 	isArray bool
 
@@ -54,7 +50,7 @@ func (sv *SliceViewInline) OnInit() {
 				return core.NewValue(val.Interface(), "")
 			}, func(w core.Value) {
 				wb := w.AsWidget()
-				// vv.SetSliceValue(val, sv.Slice, i, sv.ViewPath)
+				// vv.SetSliceValue(val, sv.Slice, i, sv.ValueContext)
 				wb.OnChange(func(e events.Event) { sv.SendChange() })
 				// if sv.SliceValue != nil {
 				// 	vv.SetTags(sv.SliceValue.AllTags())
@@ -92,7 +88,7 @@ func (sv *SliceViewInline) OnInit() {
 			w.SetIcon(icons.Edit).SetType(core.ButtonTonal)
 			w.Tooltip = "Edit list in a dialog"
 			w.OnClick(func(e events.Event) {
-				vpath := sv.ViewPath
+				vc := sv.ValueContext
 				title := ""
 				if sv.SliceValue != nil {
 					newPath := ""
@@ -101,12 +97,12 @@ func (sv *SliceViewInline) OnInit() {
 					if isZero {
 						return
 					}
-					vpath = JoinViewPath(sv.ViewPath, newPath)
+					vc = core.JoinValueContext(sv.ValueContext, newPath)
 				} else {
 					title = labels.FriendlySliceLabel(reflect.ValueOf(sv.Slice))
 				}
 				d := core.NewBody().AddTitle(title)
-				NewSliceView(d).SetViewPath(vpath).SetSlice(sv.Slice)
+				NewSliceView(d).SetSlice(sv.Slice).SetValueContext(vc)
 				d.OnClose(func(e events.Event) {
 					sv.Update()
 					sv.SendChange()

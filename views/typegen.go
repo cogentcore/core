@@ -207,7 +207,7 @@ func (t *Inspector) SetRoot(v tree.Node) *Inspector { t.Root = v; return t }
 func (t *Inspector) SetTooltip(v string) *Inspector { t.Tooltip = v; return t }
 
 // MapViewType is the [types.Type] for [MapView]
-var MapViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapView", IDName: "map-view", Doc: "MapView represents a map using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the map in one line."}, {Name: "SortValues", Doc: "SortValue is whether to sort by values instead of keys."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "ncols", Doc: "ncols is the number of columns to display if the map view is not inline."}}, Instance: &MapView{}})
+var MapViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapView", IDName: "map-view", Doc: "MapView represents a map using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the map in one line."}, {Name: "SortValues", Doc: "SortValue is whether to sort by values instead of keys."}, {Name: "ncols", Doc: "ncols is the number of columns to display if the map view is not inline."}}, Instance: &MapView{}})
 
 // NewMapView returns a new [MapView] with the given optional parent:
 // MapView represents a map using two columns of editable key and value widgets.
@@ -230,11 +230,6 @@ func (t *MapView) SetInline(v bool) *MapView { t.Inline = v; return t }
 // SetSortValues sets the [MapView.SortValues]:
 // SortValue is whether to sort by values instead of keys.
 func (t *MapView) SetSortValues(v bool) *MapView { t.SortValues = v; return t }
-
-// SetViewPath sets the [MapView.ViewPath]:
-// ViewPath is a record of parent view names that have led up to this view.
-// It is displayed as extra contextual information in view dialogs.
-func (t *MapView) SetViewPath(v string) *MapView { t.ViewPath = v; return t }
 
 // SetTooltip sets the [MapView.Tooltip]
 func (t *MapView) SetTooltip(v string) *MapView { t.Tooltip = v; return t }
@@ -263,9 +258,6 @@ func (t *SliceView) SetTooltip(v string) *SliceView { t.Tooltip = v; return t }
 // SetMinRows sets the [SliceView.MinRows]
 func (t *SliceView) SetMinRows(v int) *SliceView { t.MinRows = v; return t }
 
-// SetViewPath sets the [SliceView.ViewPath]
-func (t *SliceView) SetViewPath(v string) *SliceView { t.ViewPath = v; return t }
-
 // SetSelectedValue sets the [SliceView.SelectedValue]
 func (t *SliceView) SetSelectedValue(v any) *SliceView { t.SelectedValue = v; return t }
 
@@ -276,7 +268,7 @@ func (t *SliceView) SetSelectedIndex(v int) *SliceView { t.SelectedIndex = v; re
 func (t *SliceView) SetInitSelectedIndex(v int) *SliceView { t.InitSelectedIndex = v; return t }
 
 // SliceViewBaseType is the [types.Type] for [SliceViewBase]
-var SliceViewBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewBase", IDName: "slice-view-base", Doc: "SliceViewBase is the base for [SliceView] and [TableView] and any other viewers\nof array-like data. It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nUse [SliceViewBase.BindSelect] to make the slice view designed for item selection.", Methods: []types.Method{{Name: "CopyIndexes", Doc: "CopyIndexes copies selected idxs to system.Clipboard, optionally resetting the selection", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"reset"}}, {Name: "DeleteIndexes", Doc: "DeleteIndexes deletes all selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "CutIndexes", Doc: "CutIndexes copies selected indexes to system.Clipboard and deletes selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "PasteIndex", Doc: "PasteIndex pastes clipboard at given idx", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"idx"}}, {Name: "Duplicate", Doc: "Duplicate copies selected items and inserts them after current selection --\nreturn idx of start of duplicates if successful, else -1", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"int"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the pointer to the slice that we are viewing."}, {Name: "MinRows", Doc: "MinRows specifies the minimum number of rows to display, to ensure\nat least this amount is displayed."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "ViewMu", Doc: "ViewMu is an optional mutex that, if non-nil, will be used around any updates that\nread / modify the underlying Slice data.\nCan be used to protect against random updating if your code has specific\nupdate points that can be likewise protected with this same mutex."}, {Name: "SelectedValue", Doc: "SelectedValue is the current selection value; initially select this value if set."}, {Name: "SelectedIndex", Doc: "index of currently selected item"}, {Name: "InitSelectedIndex", Doc: "index of row to select at start"}, {Name: "SelectedIndexes", Doc: "list of currently selected slice indexes"}, {Name: "LastClick", Doc: "LastClick is the last row that has been clicked on.\nThis is used to prevent erroneous double click events\nfrom being sent when the user clicks on multiple different\nrows in quick succession."}, {Name: "NormalCursor", Doc: "NormalCursor is the cached cursor to display when there\nis no row being hovered."}, {Name: "CurrentCursor", Doc: "CurrentCursor is the cached cursor that should currently be\ndisplayed."}, {Name: "SliceUnderlying", Doc: "SliceUnderlying is the underlying slice value."}, {Name: "SliceValue", Doc: "SliceValue is the [Value] associated with this slice view, if any."}, {Name: "Values", Doc: "Value representations of the slice values"}, {Name: "HoverRow", Doc: "currently hovered row"}, {Name: "DraggedIndexes", Doc: "list of currently dragged indexes"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "StartIndex", Doc: "starting slice index of visible rows"}, {Name: "SliceSize", Doc: "size of slice"}, {Name: "MakeIter", Doc: "iteration through the configuration process, reset when a new slice type is set"}, {Name: "TmpIndex", Doc: "temp idx state for e.g., dnd"}, {Name: "ElementValue", Doc: "ElementValue is a [reflect.Value] representation of the underlying element type\nwhich is used whenever there are no slice elements available"}, {Name: "MaxWidth", Doc: "maximum width of value column in chars, if string"}}, Instance: &SliceViewBase{}})
+var SliceViewBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewBase", IDName: "slice-view-base", Doc: "SliceViewBase is the base for [SliceView] and [TableView] and any other viewers\nof array-like data. It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nUse [SliceViewBase.BindSelect] to make the slice view designed for item selection.", Methods: []types.Method{{Name: "CopyIndexes", Doc: "CopyIndexes copies selected idxs to system.Clipboard, optionally resetting the selection", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"reset"}}, {Name: "DeleteIndexes", Doc: "DeleteIndexes deletes all selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "CutIndexes", Doc: "CutIndexes copies selected indexes to system.Clipboard and deletes selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "PasteIndex", Doc: "PasteIndex pastes clipboard at given idx", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"idx"}}, {Name: "Duplicate", Doc: "Duplicate copies selected items and inserts them after current selection --\nreturn idx of start of duplicates if successful, else -1", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"int"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the pointer to the slice that we are viewing."}, {Name: "MinRows", Doc: "MinRows specifies the minimum number of rows to display, to ensure\nat least this amount is displayed."}, {Name: "ViewMu", Doc: "ViewMu is an optional mutex that, if non-nil, will be used around any updates that\nread / modify the underlying Slice data.\nCan be used to protect against random updating if your code has specific\nupdate points that can be likewise protected with this same mutex."}, {Name: "SelectedValue", Doc: "SelectedValue is the current selection value; initially select this value if set."}, {Name: "SelectedIndex", Doc: "index of currently selected item"}, {Name: "InitSelectedIndex", Doc: "index of row to select at start"}, {Name: "SelectedIndexes", Doc: "list of currently selected slice indexes"}, {Name: "LastClick", Doc: "LastClick is the last row that has been clicked on.\nThis is used to prevent erroneous double click events\nfrom being sent when the user clicks on multiple different\nrows in quick succession."}, {Name: "NormalCursor", Doc: "NormalCursor is the cached cursor to display when there\nis no row being hovered."}, {Name: "CurrentCursor", Doc: "CurrentCursor is the cached cursor that should currently be\ndisplayed."}, {Name: "SliceUnderlying", Doc: "SliceUnderlying is the underlying slice value."}, {Name: "SliceValue", Doc: "SliceValue is the [Value] associated with this slice view, if any."}, {Name: "Values", Doc: "Value representations of the slice values"}, {Name: "HoverRow", Doc: "currently hovered row"}, {Name: "DraggedIndexes", Doc: "list of currently dragged indexes"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "StartIndex", Doc: "starting slice index of visible rows"}, {Name: "SliceSize", Doc: "size of slice"}, {Name: "MakeIter", Doc: "iteration through the configuration process, reset when a new slice type is set"}, {Name: "TmpIndex", Doc: "temp idx state for e.g., dnd"}, {Name: "ElementValue", Doc: "ElementValue is a [reflect.Value] representation of the underlying element type\nwhich is used whenever there are no slice elements available"}, {Name: "MaxWidth", Doc: "maximum width of value column in chars, if string"}}, Instance: &SliceViewBase{}})
 
 // NewSliceViewBase returns a new [SliceViewBase] with the given optional parent:
 // SliceViewBase is the base for [SliceView] and [TableView] and any other viewers
@@ -296,11 +288,6 @@ func (t *SliceViewBase) New() tree.Node { return &SliceViewBase{} }
 // MinRows specifies the minimum number of rows to display, to ensure
 // at least this amount is displayed.
 func (t *SliceViewBase) SetMinRows(v int) *SliceViewBase { t.MinRows = v; return t }
-
-// SetViewPath sets the [SliceViewBase.ViewPath]:
-// ViewPath is a record of parent view names that have led up to this view.
-// It is displayed as extra contextual information in view dialogs.
-func (t *SliceViewBase) SetViewPath(v string) *SliceViewBase { t.ViewPath = v; return t }
 
 // SetSelectedValue sets the [SliceViewBase.SelectedValue]:
 // SelectedValue is the current selection value; initially select this value if set.
@@ -342,7 +329,7 @@ func (t *SliceViewGrid) SetLastBackground(v image.Image) *SliceViewGrid {
 func (t *SliceViewGrid) SetTooltip(v string) *SliceViewGrid { t.Tooltip = v; return t }
 
 // SliceViewInlineType is the [types.Type] for [SliceViewInline]
-var SliceViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewInline", IDName: "slice-view-inline", Doc: "SliceViewInline represents a slice within a single line of value widgets.\nThis is typically used for smaller slices.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the slice that we are viewing."}, {Name: "SliceValue", Doc: "SliceValue is the Value for the slice itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}, {Name: "isFixedLength", Doc: "isFixedLength is whether the slice has a fixed-length flag on it."}}, Instance: &SliceViewInline{}})
+var SliceViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewInline", IDName: "slice-view-inline", Doc: "SliceViewInline represents a slice within a single line of value widgets.\nThis is typically used for smaller slices.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the slice that we are viewing."}, {Name: "SliceValue", Doc: "SliceValue is the Value for the slice itself\nif this was created within the Value framework.\nOtherwise, it is nil."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}, {Name: "isFixedLength", Doc: "isFixedLength is whether the slice has a fixed-length flag on it."}}, Instance: &SliceViewInline{}})
 
 // NewSliceViewInline returns a new [SliceViewInline] with the given optional parent:
 // SliceViewInline represents a slice within a single line of value widgets.
@@ -357,16 +344,11 @@ func (t *SliceViewInline) NodeType() *types.Type { return SliceViewInlineType }
 // New returns a new [*SliceViewInline] value
 func (t *SliceViewInline) New() tree.Node { return &SliceViewInline{} }
 
-// SetViewPath sets the [SliceViewInline.ViewPath]:
-// ViewPath is a record of parent view names that have led up to this view.
-// It is displayed as extra contextual information in view dialogs.
-func (t *SliceViewInline) SetViewPath(v string) *SliceViewInline { t.ViewPath = v; return t }
-
 // SetTooltip sets the [SliceViewInline.Tooltip]
 func (t *SliceViewInline) SetTooltip(v string) *SliceViewInline { t.Tooltip = v; return t }
 
 // StructViewType is the [types.Type] for [StructView]
-var StructViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructView", IDName: "struct-view", Doc: "StructView represents a struct with rows of field names and editable values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the struct in one line."}, {Name: "ViewPath", Doc: "ViewPath is a record of parent view names that have led up to this view.\nIt is displayed as extra contextual information in view dialogs."}, {Name: "structFields", Doc: "structFields are the fields of the current struct."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [core.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructView{}})
+var StructViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructView", IDName: "struct-view", Doc: "StructView represents a struct with rows of field names and editable values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the struct in one line."}, {Name: "structFields", Doc: "structFields are the fields of the current struct."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [core.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructView{}})
 
 // NewStructView returns a new [StructView] with the given optional parent:
 // StructView represents a struct with rows of field names and editable values.
@@ -385,11 +367,6 @@ func (t *StructView) SetStruct(v any) *StructView { t.Struct = v; return t }
 // SetInline sets the [StructView.Inline]:
 // Inline is whether to display the struct in one line.
 func (t *StructView) SetInline(v bool) *StructView { t.Inline = v; return t }
-
-// SetViewPath sets the [StructView.ViewPath]:
-// ViewPath is a record of parent view names that have led up to this view.
-// It is displayed as extra contextual information in view dialogs.
-func (t *StructView) SetViewPath(v string) *StructView { t.ViewPath = v; return t }
 
 // SetTooltip sets the [StructView.Tooltip]
 func (t *StructView) SetTooltip(v string) *StructView { t.Tooltip = v; return t }
@@ -431,9 +408,6 @@ func (t *TableView) SetTooltip(v string) *TableView { t.Tooltip = v; return t }
 
 // SetMinRows sets the [TableView.MinRows]
 func (t *TableView) SetMinRows(v int) *TableView { t.MinRows = v; return t }
-
-// SetViewPath sets the [TableView.ViewPath]
-func (t *TableView) SetViewPath(v string) *TableView { t.ViewPath = v; return t }
 
 // SetSelectedValue sets the [TableView.SelectedValue]
 func (t *TableView) SetSelectedValue(v any) *TableView { t.SelectedValue = v; return t }

@@ -195,10 +195,6 @@ type SliceViewBase struct {
 	// at least this amount is displayed.
 	MinRows int `default:"4"`
 
-	// ViewPath is a record of parent view names that have led up to this view.
-	// It is displayed as extra contextual information in view dialogs.
-	ViewPath string
-
 	// ViewMu is an optional mutex that, if non-nil, will be used around any updates that
 	// read / modify the underlying Slice data.
 	// Can be used to protect against random updating if your code has specific
@@ -657,7 +653,7 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i int) {
 			wb := w.AsWidget()
 			si, vi, invis := svi.SliceIndex(i)
 			val := sv.SliceElementValue(vi)
-			// w.SetSliceValue(val, sv.Slice, si, sv.ViewPath)
+			// w.SetSliceValue(val, sv.Slice, si, sv.ValueContext)
 			core.Bind(val.Addr().Interface(), w)
 			wb.SetReadOnly(sv.IsReadOnly())
 			w.SetState(invis, states.Invisible)

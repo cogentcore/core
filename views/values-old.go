@@ -188,8 +188,8 @@ func (v *StructValue) ConfigDialog(d *core.Body) (bool, func()) {
 	}
 	opv := reflectx.UnderlyingPointer(v.Value)
 	str := opv.Interface()
-	NewStructView(d).SetStruct(str).SetViewPath(v.ViewPath).
-		SetReadOnly(v.IsReadOnly())
+	// NewStructView(d).SetStruct(str).SetViewPath(v.ViewPath).
+	// 	SetReadOnly(v.IsReadOnly())
 	if tb, ok := str.(core.ToolbarMaker); ok {
 		d.AddAppBar(tb.MakeToolbar)
 	}
@@ -203,7 +203,7 @@ type StructInlineValue struct {
 
 func (v *StructInlineValue) Config() {
 	// v.Widget.StructValue = v
-	v.Widget.ViewPath = v.ViewPath
+	// v.Widget.ViewPath = v.ViewPath
 	v.Widget.SetStruct(v.Value.Interface())
 	v.Widget.OnChange(func(e events.Event) {
 		v.SendChange(e)
@@ -239,15 +239,15 @@ func (v *SliceValue) ConfigDialog(d *core.Body) (bool, func()) {
 		slog.Error("views.SliceValue: Cannot view unadressable (non-pointer) slices", "type", v.Value.Type())
 		return false, nil
 	}
-	slci := vvp.Interface()
+	// slci := vvp.Interface()
 	if npv.Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(v.Value.Interface())).Kind() == reflect.Struct {
-		tv := NewTableView(d).SetSlice(slci).SetViewPath(v.ViewPath)
-		tv.SetReadOnly(v.IsReadOnly())
-		d.AddAppBar(tv.MakeToolbar)
+		// tv := NewTableView(d).SetSlice(slci).SetViewPath(v.ViewPath)
+		// tv.SetReadOnly(v.IsReadOnly())
+		// d.AddAppBar(tv.MakeToolbar)
 	} else {
-		sv := NewSliceView(d).SetSlice(slci).SetViewPath(v.ViewPath)
-		sv.SetReadOnly(v.IsReadOnly())
-		d.AddAppBar(sv.MakeToolbar)
+		// sv := NewSliceView(d).SetSlice(slci).SetViewPath(v.ViewPath)
+		// sv.SetReadOnly(v.IsReadOnly())
+		// d.AddAppBar(sv.MakeToolbar)
 	}
 	return true, nil
 }
@@ -258,8 +258,8 @@ type SliceInlineValue struct {
 }
 
 func (v *SliceInlineValue) Config() {
-	v.Widget.SliceValue = v
-	v.Widget.ViewPath = v.ViewPath
+	// v.Widget.SliceValue = v
+	// v.Widget.ViewPath = v.ViewPath
 	v.Widget.SetSlice(v.Value.Interface())
 	v.Widget.OnChange(func(e events.Event) {
 		v.SendChange(e)
@@ -302,7 +302,7 @@ func (v *MapValue) ConfigDialog(d *core.Body) (bool, func()) {
 	}
 	mpi := v.Value.Interface()
 	mv := NewMapView(d).SetMap(mpi)
-	mv.SetViewPath(v.ViewPath).SetReadOnly(v.IsReadOnly())
+	// mv.SetViewPath(v.ViewPath).SetReadOnly(v.IsReadOnly())
 	d.AddAppBar(mv.MakeToolbar)
 	return true, nil
 }
@@ -314,7 +314,7 @@ type MapInlineValue struct {
 
 func (v *MapInlineValue) Config() {
 	// v.Widget.MapValue = v
-	v.Widget.ViewPath = v.ViewPath
+	// v.Widget.ViewPath = v.ViewPath
 	v.Widget.SetMap(v.Value.Interface())
 	v.Widget.OnChange(func(e events.Event) {
 		v.SendChange(e)
