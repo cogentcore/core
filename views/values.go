@@ -24,28 +24,26 @@ func (sb *SliceButton) WidgetValue() any { return &sb.Slice }
 func (sb *SliceButton) OnInit() {
 	sb.Button.OnInit()
 	sb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	InitValueButton(sb, true)
 	sb.Updater(func() {
 		sb.SetText(labels.FriendlySliceLabel(reflect.ValueOf(sb.Slice)))
 	})
-}
-
-func (sb *SliceButton) ConfigDialog(d *core.Body) (bool, func()) {
-	up := reflectx.UnderlyingPointer(reflect.ValueOf(sb.Slice))
-	if !up.IsValid() || up.IsZero() {
-		return false, nil
-	}
-	upi := up.Interface()
-	if up.Elem().Type().Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(sb.Slice)).Kind() == reflect.Struct {
-		tv := NewTableView(d).SetSlice(upi).SetViewPath(sb.ValueContext)
-		tv.SetReadOnly(sb.IsReadOnly())
-		d.AddAppBar(tv.MakeToolbar)
-	} else {
-		sv := NewSliceView(d).SetSlice(upi).SetViewPath(sb.ValueContext)
-		sv.SetReadOnly(sb.IsReadOnly())
-		d.AddAppBar(sv.MakeToolbar)
-	}
-	return true, nil
+	InitValueButton(sb, true, func(d *core.Body) {
+		up := reflectx.UnderlyingPointer(reflect.ValueOf(sb.Slice))
+		if !up.IsValid() || up.IsZero() {
+			return
+		}
+		upi := up.Interface()
+		if up.Elem().Type().Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(sb.Slice)).Kind() == reflect.Struct {
+			tv := NewTableView(d).SetSlice(upi).SetViewPath(sb.ValueContext)
+			tv.SetReadOnly(sb.IsReadOnly())
+			d.AddAppBar(tv.MakeToolbar)
+		} else {
+			sv := NewSliceView(d).SetSlice(upi).SetViewPath(sb.ValueContext)
+			sv.SetReadOnly(sb.IsReadOnly())
+			d.AddAppBar(sv.MakeToolbar)
+		}
+		return
+	})
 }
 
 // StructButton represents a slice or array value with a button.
@@ -59,24 +57,22 @@ func (sb *StructButton) WidgetValue() any { return &sb.Struct }
 func (sb *StructButton) OnInit() {
 	sb.Button.OnInit()
 	sb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	InitValueButton(sb, true)
 	sb.Updater(func() {
 		sb.SetText(labels.FriendlyStructLabel(reflect.ValueOf(sb.Struct)))
 	})
-}
-
-func (sb *StructButton) ConfigDialog(d *core.Body) (bool, func()) {
-	if reflectx.AnyIsNil(sb.Struct) {
-		return false, nil
-	}
-	opv := reflectx.UnderlyingPointer(reflect.ValueOf(sb.Struct))
-	str := opv.Interface()
-	NewStructView(d).SetStruct(str).SetViewPath(sb.ValueContext).
-		SetReadOnly(sb.IsReadOnly())
-	if tb, ok := str.(core.ToolbarMaker); ok {
-		d.AddAppBar(tb.MakeToolbar)
-	}
-	return true, nil
+	InitValueButton(sb, true, func(d *core.Body) {
+		if reflectx.AnyIsNil(sb.Struct) {
+			return
+		}
+		opv := reflectx.UnderlyingPointer(reflect.ValueOf(sb.Struct))
+		str := opv.Interface()
+		NewStructView(d).SetStruct(str).SetViewPath(sb.ValueContext).
+			SetReadOnly(sb.IsReadOnly())
+		if tb, ok := str.(core.ToolbarMaker); ok {
+			d.AddAppBar(tb.MakeToolbar)
+		}
+		return
+	})
 }
 
 // MapButton represents a slice or array value with a button.
@@ -90,19 +86,17 @@ func (mb *MapButton) WidgetValue() any { return &mb.Map }
 func (mb *MapButton) OnInit() {
 	mb.Button.OnInit()
 	mb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	InitValueButton(mb, true)
 	mb.Updater(func() {
 		mb.SetText(labels.FriendlyMapLabel(reflect.ValueOf(mb.Map)))
 	})
-}
-
-func (mb *MapButton) ConfigDialog(d *core.Body) (bool, func()) {
-	if reflectx.AnyIsNil(mb.Map) || reflectx.NonPointerValue(reflect.ValueOf(mb.Map)).IsZero() {
-		return false, nil
-	}
-	mpi := mb.Map
-	mv := NewMapView(d).SetMap(mpi)
-	mv.SetViewPath(mb.ValueContext).SetReadOnly(mb.IsReadOnly())
-	d.AddAppBar(mv.MakeToolbar)
-	return true, nil
+	InitValueButton(mb, true, func(d *core.Body) {
+		if reflectx.AnyIsNil(mb.Map) || reflectx.NonPointerValue(reflect.ValueOf(mb.Map)).IsZero() {
+			return
+		}
+		mpi := mb.Map
+		mv := NewMapView(d).SetMap(mpi)
+		mv.SetViewPath(mb.ValueContext).SetReadOnly(mb.IsReadOnly())
+		d.AddAppBar(mv.MakeToolbar)
+		return
+	})
 }

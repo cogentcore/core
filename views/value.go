@@ -20,7 +20,7 @@ import (
 // It also sets the tooltip of the widget appropriately. If allowReadOnly is false,
 // the dialog will not be opened if the widget is read only. It also takes an optional
 // function to call after the dialog is accepted.
-func InitValueButton(v core.Value, allowReadOnly bool, make func(b *core.Body), after ...func()) {
+func InitValueButton(v core.Value, allowReadOnly bool, make func(d *core.Body), after ...func()) {
 	wb := v.AsWidget()
 	// windows are never new on mobile
 	if !core.TheApp.Platform().IsMobile() {
@@ -37,7 +37,7 @@ func InitValueButton(v core.Value, allowReadOnly bool, make func(b *core.Body), 
 // OpenValueDialog opens a new value dialog for the given [core.Value] using the
 // given context widget, the given function for constructing the dialog, and the
 // optional given function to call after the dialog is accepted.
-func OpenValueDialog(v core.Value, ctx core.Widget, make func(b *core.Body), after ...func()) {
+func OpenValueDialog(v core.Value, ctx core.Widget, make func(d *core.Body), after ...func()) {
 	opv := reflectx.UnderlyingPointer(reflect.ValueOf(v.WidgetValue()))
 	if !opv.IsValid() {
 		return

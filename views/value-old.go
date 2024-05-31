@@ -269,6 +269,7 @@ func ConfigBase(v Value, w core.Widget) {
 	})
 }
 
+/*
 // OpenDialog opens any applicable dialog for the given value in the
 // context of the given widget. It first tries [OpenDialoger], then
 // [ConfigDialoger] with [OpenDialogBase]. If both of those fail, it
@@ -342,6 +343,7 @@ func OpenDialogBase(v Value, cd ConfigDialoger, ctx core.Widget, fun func()) {
 	}
 	ds.Run()
 }
+*/
 
 // SetValue updates the underlying value representation of the Value to the given value.
 // It also sends a change event. It does nothing if the value is read-only. It returns
@@ -862,7 +864,7 @@ func ConfigDialogWidget(v Value, allowReadOnly bool) {
 	v.AsWidget().OnClick(func(e events.Event) {
 		if allowReadOnly || !v.IsReadOnly() {
 			v.SetFlag(e.HasAnyModifier(key.Shift), ValueDialogNewWindow)
-			OpenDialog(v, v.AsWidget(), nil, nil)
+			// OpenDialog(v, v.AsWidget(), nil, nil)
 		}
 	})
 }
