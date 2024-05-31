@@ -27,7 +27,7 @@ func (sb *SliceButton) OnInit() {
 	sb.Updater(func() {
 		sb.SetText(labels.FriendlySliceLabel(reflect.ValueOf(sb.Slice)))
 	})
-	InitValueButton(sb, true, func(d *core.Body) {
+	core.InitValueButton(sb, true, func(d *core.Body) {
 		up := reflectx.Underlying(reflect.ValueOf(sb.Slice))
 		if up.Type().Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(sb.Slice)).Kind() == reflect.Struct {
 			tv := NewTableView(d).SetSlice(sb.Slice)
@@ -55,7 +55,7 @@ func (sb *StructButton) OnInit() {
 	sb.Updater(func() {
 		sb.SetText(labels.FriendlyStructLabel(reflect.ValueOf(sb.Struct)))
 	})
-	InitValueButton(sb, true, func(d *core.Body) {
+	core.InitValueButton(sb, true, func(d *core.Body) {
 		sv := NewStructView(d).SetStruct(sb.Struct)
 		sv.SetValueContext(sb.ValueContext).SetReadOnly(sb.IsReadOnly())
 		if tb, ok := sb.Struct.(core.ToolbarMaker); ok {
@@ -78,7 +78,7 @@ func (mb *MapButton) OnInit() {
 	mb.Updater(func() {
 		mb.SetText(labels.FriendlyMapLabel(reflect.ValueOf(mb.Map)))
 	})
-	InitValueButton(mb, true, func(d *core.Body) {
+	core.InitValueButton(mb, true, func(d *core.Body) {
 		mv := NewMapView(d).SetMap(mb.Map)
 		mv.SetValueContext(mb.ValueContext).SetReadOnly(mb.IsReadOnly())
 		d.AddAppBar(mv.MakeToolbar)

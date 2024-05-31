@@ -505,7 +505,7 @@ func (cb *ColorButton) OnInit() {
 		s.Color = colors.C(hct.ContrastColor(dclr, hct.ContrastAAA))
 	})
 	var cv *ColorView
-	InitValueButton(cb, false, func(d *core.Body) {
+	core.InitValueButton(cb, false, func(d *core.Body) {
 		d.SetTitle("Edit color")
 		cv = NewColorView(d).SetColor(cb.Color)
 	}, func() {

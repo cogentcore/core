@@ -4,6 +4,8 @@
 
 package views
 
+//go:generate core generate
+
 import (
 	"image/color"
 	"reflect"

@@ -10,7 +10,6 @@ import (
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/stats/simat"
 	"cogentcore.org/core/tensor/table"
-	"cogentcore.org/core/views"
 )
 
 func init() {
@@ -44,7 +43,7 @@ func (tb *TensorButton) OnInit() {
 		}
 		tb.SetText(text)
 	})
-	views.InitValueButton(tb, true, func(d *core.Body) {
+	core.InitValueButton(tb, true, func(d *core.Body) {
 		NewTensorGrid(d).SetTensor(tb.Tensor)
 	})
 }
@@ -71,7 +70,7 @@ func (tb *TableButton) OnInit() {
 		}
 		tb.SetText(text)
 	})
-	views.InitValueButton(tb, true, func(d *core.Body) {
+	core.InitValueButton(tb, true, func(d *core.Body) {
 		NewTableView(d).SetTable(tb.Table)
 	})
 }
@@ -98,7 +97,7 @@ func (tb *SimMatButton) OnInit() {
 		}
 		tb.SetText(text)
 	})
-	views.InitValueButton(tb, true, func(d *core.Body) {
+	core.InitValueButton(tb, true, func(d *core.Body) {
 		NewSimMatGrid(d).SetSimMat(tb.SimMat)
 	})
 }
