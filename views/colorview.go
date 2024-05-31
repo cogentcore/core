@@ -44,6 +44,9 @@ func (cv *ColorView) SetHCT(hct hct.HCT) *ColorView {
 
 func (cv *ColorView) OnInit() {
 	cv.Frame.OnInit()
+	cv.Style(func(s *styles.Style) {
+		s.Grow.Set(1, 1)
+	})
 	cv.Maker(func(p *core.Plan) {
 		if cv.HasChildren() { // TODO(config)
 			return
