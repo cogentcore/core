@@ -8,12 +8,15 @@ package views
 
 import (
 	"reflect"
+	"strings"
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 )
+
+const shiftNewWindow = "[Shift: new window]"
 
 // InitValueButton configures the given [core.Value] to open a dialog representing
 // its value in accordance with the given dialog construction function when clicked.
@@ -24,7 +27,7 @@ func InitValueButton(v core.Value, allowReadOnly bool, make func(d *core.Body), 
 	wb := v.AsWidget()
 	// windows are never new on mobile
 	if !core.TheApp.Platform().IsMobile() {
-		wb.SetTooltip("[Shift: new window]")
+		wb.SetTooltip(shiftNewWindow)
 	}
 	v.OnClick(func(e events.Event) {
 		if allowReadOnly || !wb.IsReadOnly() {
@@ -47,7 +50,10 @@ func OpenValueDialog(v core.Value, ctx core.Widget, make func(d *core.Body), aft
 		return
 	}
 	wb := v.AsWidget()
-	d := core.NewBody().AddTitle(wb.ValueContext).AddText(wb.Tooltip)
+	d := core.NewBody().AddTitle(wb.ValueContext)
+	if text := strings.TrimPrefix(wb.Tooltip, shiftNewWindow); text != "" {
+		d.AddText(text)
+	}
 	make(d)
 
 	// if we don't have anything specific for ok events,
