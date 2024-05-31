@@ -362,18 +362,27 @@ func (fb *FuncButton) CallFunc() {
 		fb.confirmDialog()
 		return
 	}
-	// TODO(config)
-	// // go directly to the dialog if there is one
-	// if len(fb.Args) == 1 && OpenDialog(fb.Args[0], ctx, func() {
+	d := core.NewBody().AddTitle(fb.Text).AddText(fb.Tooltip)
+	str := FuncArgsToStruct(fb.Args)
+	sv := NewStructView(d).SetStruct(str.Addr().Interface())
+
+	d.OnShow(func(e events.Event) {
+		// go directly to the dialog if there is one
+		if len(fb.Args) == 1 {
+			bt := core.AsButton(sv.Child(1))
+			if bt != nil {
+				bt.Send(events.Click)
+			}
+		}
+	})
+	// 	OpenDialog(fb.Args[0], ctx, func() {
 	// 	fb.callFuncShowReturns()
 	// }, func() {
 	// 	makeTmpWidget(fb.Args[0])
 	// }) {
 	// 	return
 	// }
-	d := core.NewBody().AddTitle(fb.Text).AddText(fb.Tooltip)
-	str := FuncArgsToStruct(fb.Args)
-	NewStructView(d).SetStruct(str.Addr().Interface())
+
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText(fb.Text).OnClick(func(e events.Event) {
