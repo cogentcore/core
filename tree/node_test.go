@@ -211,7 +211,7 @@ func TestNodeConfig(t *testing.T) {
 		{Type: testdata.NodeEmbedType, Name: "child1"},
 	}
 
-	Build(parent, plan1)
+	Update(parent, plan1)
 
 	cf1 := fmt.Sprintf("plan1:\n%v\n", parent.Kids)
 
@@ -223,7 +223,7 @@ func TestNodeConfig(t *testing.T) {
 		{testdata.NodeEmbedType, "child6"},
 	}
 
-	Build(parent, plan2)
+	Update(parent, plan2)
 
 	cf2 := fmt.Sprintf("plan2:\n%v\n", parent.Kids)
 

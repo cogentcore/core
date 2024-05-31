@@ -125,7 +125,7 @@ func (sl *Slice) UnmarshalJSON(b []byte) error {
 		p[i].Name = nm
 	}
 
-	BuildSlice(sl, nil, p)
+	UpdateSlice(sl, nil, p)
 
 	nwk := make([]Node, n) // allocate new slice containing *pointers* to kids
 	copy(nwk, *sl)

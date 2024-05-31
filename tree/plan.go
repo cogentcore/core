@@ -11,8 +11,8 @@ import (
 
 // TypePlan is a plan for the organization of a list of tree nodes,
 // specified by the Type of element at a given index, with a given name.
-// Used in Build and BuildSlice to actually build the items according
-// to the plan.
+// It is used in [Update] and [UpdateSlice] to actually update the items
+// according to the plan.
 type TypePlan []TypePlanItem
 
 // TypePlanItem holds a type and a name, for specifying the [TypePlan].
@@ -21,17 +21,16 @@ type TypePlanItem struct {
 	Name string
 }
 
-// Add adds a new TypePlan element with the given type and name.
+// Add adds a new [TypePlanItem] with the given type and name.
 func (t *TypePlan) Add(typ *types.Type, name string) {
 	*t = append(*t, TypePlanItem{typ, name})
 }
 
-// BuildSlice ensures that the given Slice contains the elements
-// according to the TypePlan, specified by unique element names,
-// with n = total number of items in the target slice.
+// UpdateSlice ensures that the given [Slice] contains the elements
+// according to the [TypePlan], specified by unique element names.
 // The given Node is set as the parent of the created nodes.
-// Returns true if any changes were made.
-func BuildSlice(sl *Slice, parent Node, p TypePlan) bool {
+// It returns true if any changes were made.
+func UpdateSlice(sl *Slice, parent Node, p TypePlan) bool {
 	mods := false
 	*sl, mods = plan.Update(*sl, len(p),
 		func(i int) string { return p[i].Name },
@@ -47,10 +46,9 @@ func BuildSlice(sl *Slice, parent Node, p TypePlan) bool {
 	return mods
 }
 
-// Build ensures that the Children of given Node contains the elements
-// according to the TypePlan, specified by unique element names.
-// Returns true if any changes were made.
-func Build(n Node, p TypePlan) bool {
-	nb := n.AsTreeNode()
-	return BuildSlice(&nb.Kids, n, p)
+// Update ensures that the children of the given [Node] contain the elements
+// according to the [TypePlan], specified by unique element names.
+// It returns true if any changes were made.
+func Update(n Node, p TypePlan) bool {
+	return UpdateSlice(n.Children(), n, p)
 }

@@ -79,7 +79,7 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 	for _, skid := range skids {
 		p.Add(typ, "tv_"+skid.Name())
 	}
-	tree.Build(tv, p)
+	tree.Update(tv, p)
 	idx := 0
 	for _, skid := range *sk.Children() {
 		if len(tv.Kids) <= idx {

@@ -265,7 +265,7 @@ func (fb *FileBrowse) StandardFramePlan() tree.TypePlan {
 // It returns whether any modifications were made.
 func (fb *FileBrowse) StandardPlan() bool {
 	plan := fb.StandardFramePlan()
-	return tree.Build(fb, plan)
+	return tree.Update(fb, plan)
 }
 
 // SetTitle sets the optional title and updates the title text
@@ -352,7 +352,7 @@ func (fb *FileBrowse) ConfigSplits() {
 	split.SetSplits(.2, .4, .4)
 
 	plan := fb.SplitsPlan()
-	if tree.Build(split, plan) {
+	if tree.Update(split, plan) {
 		ftfr := split.Child(0).(*core.Frame)
 		fb.Files = filetree.NewTree(ftfr)
 		fb.Files.OnSelect(func(e events.Event) {

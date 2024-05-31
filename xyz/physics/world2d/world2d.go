@@ -275,7 +275,7 @@ func (vw *View) SyncNode(wn physics.Node, vn svg.Node) bool {
 	for _, skid := range skids {
 		p.Add(svg.GroupType, skid.Name())
 	}
-	mod := tree.Build(vn, p)
+	mod := tree.Update(vn, p)
 	modall := mod
 	for idx := range skids {
 		wk := wn.Child(idx).(physics.Node)

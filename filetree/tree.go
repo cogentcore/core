@@ -374,7 +374,7 @@ func (ft *Tree) SyncExtFiles(efn *Node) {
 	for _, f := range ft.ExtFiles {
 		plan.Add(typ, dirs.DirAndFile(f))
 	}
-	tree.Build(efn, plan) // NOT unique names
+	tree.Update(efn, plan) // NOT unique names
 	// always go through kids, regardless of mods
 	for i, sfk := range efn.Kids {
 		sf := AsNode(sfk)

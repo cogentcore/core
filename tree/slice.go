@@ -175,7 +175,7 @@ func (sl *Slice) ConfigCopy(n Node, frm Slice) {
 			p[i].Type = kid.NodeType()
 			p[i].Name = kid.Name()
 		}
-		BuildSlice(sl, n, p)
+		UpdateSlice(sl, n, p)
 	} else {
 		n.DeleteChildren()
 	}

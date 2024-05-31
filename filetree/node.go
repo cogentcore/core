@@ -307,7 +307,7 @@ func (fn *Node) SyncDir() {
 			hasExtFiles = true
 		}
 	}
-	mods := tree.Build(fn, plan)
+	mods := tree.Update(fn, plan)
 	// always go through kids, regardless of mods
 	for _, sfk := range fn.Kids {
 		sf := AsNode(sfk)
