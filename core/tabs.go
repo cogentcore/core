@@ -387,7 +387,7 @@ func (ts *Tabs) RecycleTabWidget(name string, sel bool, typ *types.Type) Widget 
 		return fr.Child(0).(Widget)
 	}
 	wi := fr.NewChild(typ).(Widget)
-	wi.AsWidget().Build()
+	wi.AsWidget().UpdateWidget()
 	return wi
 }
 
@@ -430,7 +430,7 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 // It configures the Tabs if necessary.
 func (ts *Tabs) Tabs() *Frame {
 	if ts.ChildByName("tabs", 0) == nil {
-		ts.Build()
+		ts.UpdateWidget()
 	}
 	return ts.ChildByName("tabs", 0).(*Frame)
 }
@@ -439,7 +439,7 @@ func (ts *Tabs) Tabs() *Frame {
 // It configures the Tabs if necessary.
 func (ts *Tabs) FrameWidget() *Frame {
 	if ts.ChildByName("frame", 1) == nil {
-		ts.Build()
+		ts.UpdateWidget()
 	}
 	return ts.ChildByName("frame", 1).(*Frame)
 }

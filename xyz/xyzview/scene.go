@@ -116,7 +116,7 @@ func (sw *Scene) SceneXYZ() *xyz.Scene {
 }
 
 func (sw *Scene) Render() {
-	sw.Build() // Note: this is indeed essential here -- doesn't work without it.
+	sw.UpdateWidget() // Note: this is indeed essential here -- doesn't work without it.
 	if sw.XYZ.Frame == nil {
 		return
 	}

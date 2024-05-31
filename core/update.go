@@ -31,7 +31,7 @@ func (wb *WidgetBase) Maker(maker func(p *Plan)) {
 // itself and not any of its children. Also, it does not restyle the widget or trigger
 // a new layout pass, while [WidgetBase.Update] does. End-user code should typically
 // call [WidgetBase.Update], not UpdateWidget.
-func (wb *WidgetBase) Build() {
+func (wb *WidgetBase) UpdateWidget() {
 	if wb.ValueUpdate != nil {
 		wb.ValueUpdate()
 	}
@@ -62,7 +62,7 @@ func (wb *WidgetBase) Make(p *Plan) {
 // starting with this one and going down.
 func (wb *WidgetBase) UpdateTree() {
 	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		wb.Build()
+		wb.UpdateWidget()
 		return tree.Continue
 	})
 }
@@ -90,7 +90,7 @@ func (wb *WidgetBase) Update() { //types:add
 		fmt.Println("\tDebugSettings.UpdateTrace Update:", wb)
 	}
 	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		wb.Build()
+		wb.UpdateWidget()
 		wi.ApplyStyle()
 		return tree.Continue
 	})

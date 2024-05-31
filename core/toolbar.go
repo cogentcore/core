@@ -177,7 +177,7 @@ func (tb *Toolbar) OverflowMenu(m *Scene) {
 			}
 			cl := k.This().Clone()
 			m.AddChild(cl)
-			cl.(Widget).AsWidget().Build()
+			cl.(Widget).AsWidget().UpdateWidget()
 		}
 		if nm > 1 { // default includes sep
 			NewSeparator(m)

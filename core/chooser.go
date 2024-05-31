@@ -520,7 +520,7 @@ func (ch *Chooser) ShowCurrentItem() *Chooser {
 	} else {
 		text := ch.TextWidget()
 		if text != nil {
-			text.SetText(ch.CurrentItem.GetLabel()).Build()
+			text.SetText(ch.CurrentItem.GetLabel()).UpdateWidget()
 		}
 	}
 	if ch.CurrentItem.Icon.IsSet() {

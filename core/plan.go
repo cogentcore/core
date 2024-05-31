@@ -19,7 +19,7 @@ import (
 
 // Plan represents a plan for how the children of a widget should be configured.
 // An instance of it is passed to [WidgetBase.Make], which is responsible
-// for making the plan that is then used to configure the widget in [WidgetBase.Build].
+// for making the plan that is then used to configure the widget in [WidgetBase.UpdateWidget].
 // To add a child item to a plan, use [Add], [AddAt], or [AddNew]. To add a child
 // item maker to a widget, use [AddChild] or [AddChildAt]. To extend an existing
 // child item, use [AddInit] or [AddChildInit].

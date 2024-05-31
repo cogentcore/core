@@ -74,7 +74,7 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 	ic.SVG.Config(2, 2)
 	err := ic.SVG.OpenFS(icons.Icons, fnm)
 	if err != nil {
-		ic.Build()
+		ic.UpdateWidget()
 		return false, err
 	}
 	ic.Icon = icon

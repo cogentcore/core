@@ -566,7 +566,7 @@ func (pl *PlotView) MakeToolbar(p *core.Plan) {
 		w.SetText("Update").SetIcon(icons.Update).
 			SetTooltip("update fully redraws display, reflecting any new settings etc").
 			OnClick(func(e events.Event) {
-				pl.Build()
+				pl.UpdateWidget()
 				pl.UpdatePlot()
 			})
 	})
