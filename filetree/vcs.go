@@ -319,7 +319,6 @@ func BlameDialog(ctx core.Widget, fname string, blame, fbytes []byte) *textedito
 	btxt := bytes.Join(blns, []byte("\n")) // makes a copy, so blame is disposable now
 	tv.BufferA.SetText(btxt)
 	tv.BufferB.SetText(fbytes)
-	tv.ConfigTexts()
 
 	tva, tvb := tv.Editors()
 	tva.Style(func(s *styles.Style) {
