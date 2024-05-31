@@ -366,8 +366,9 @@ func (fb *FuncButton) CallFunc() {
 	str := FuncArgsToStruct(fb.Args)
 	sv := NewStructView(d).SetStruct(str.Addr().Interface())
 
+	// If there is a single value button,
+	// automatically open and close its dialog
 	d.OnShow(func(e events.Event) {
-		// go directly to the dialog if there is one
 		if len(fb.Args) != 1 {
 			return
 		}
