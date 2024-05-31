@@ -14,7 +14,10 @@ const (
 	nUpdates = 100
 )
 
-func BenchmarkBuildDeclarative(b *testing.B) {
+// This set of benchmarks highlights the negative performance impacts of an inefficient
+// fully declarative updating approach relative to a [Plan] based updating approach.
+
+func BenchmarkUpdateDeclarative(b *testing.B) {
 	for range b.N {
 		for range nUpdates {
 			b := NewBody()
@@ -32,7 +35,7 @@ func BenchmarkBuildDeclarative(b *testing.B) {
 	}
 }
 
-func BenchmarkBuildPlan(bn *testing.B) {
+func BenchmarkUpdatePlan(bn *testing.B) {
 	b := NewBody()
 	for range bn.N {
 		for range nUpdates {
@@ -45,7 +48,7 @@ func BenchmarkBuildPlan(bn *testing.B) {
 					})
 				})
 			}
-			p.Build(b)
+			p.Update(b)
 		}
 	}
 }

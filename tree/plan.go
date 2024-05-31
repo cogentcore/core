@@ -33,7 +33,7 @@ func (t *TypePlan) Add(typ *types.Type, name string) {
 // Returns true if any changes were made.
 func BuildSlice(sl *Slice, parent Node, p TypePlan) bool {
 	mods := false
-	*sl, mods = plan.Build(*sl, len(p),
+	*sl, mods = plan.Update(*sl, len(p),
 		func(i int) string { return p[i].Name },
 		func(name string, i int) Node {
 			n := NewOfType(p[i].Type)

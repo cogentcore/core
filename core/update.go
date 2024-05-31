@@ -45,7 +45,7 @@ func (wb *WidgetBase) Build() {
 func (wb *WidgetBase) updateFromMake() {
 	p := Plan{}
 	wb.Make(&p)
-	p.Build(wb)
+	p.Update(wb)
 }
 
 // Make makes a plan for how the widget's children should be structured.

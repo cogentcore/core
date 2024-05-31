@@ -143,9 +143,8 @@ func (p *Plan) Add(name string, new func() Widget, init func(w Widget)) {
 	*p = append(*p, &PlanItem{Name: name, New: new, Init: []func(w Widget){init}})
 }
 
-// Build configures the given widget and
-// all of its children in accordance with the [Plan].
-func (p *Plan) Build(w Widget) {
+// Update updates the children of the given widget in accordance with the [Plan].
+func (p *Plan) Update(w Widget) {
 	if len(*p) == 0 { // TODO(config): figure out a better way to handle this?
 		return
 	}
@@ -172,7 +171,7 @@ func (p *Plan) Build(w Widget) {
 	if len(*p) == 0 { // check again after potentially removing parts
 		return
 	}
-	wb.Kids, _ = plan.Build(wb.Kids, len(*p),
+	wb.Kids, _ = plan.Update(wb.Kids, len(*p),
 		func(i int) string {
 			return (*p)[i].Name
 		}, func(name string, i int) tree.Node {

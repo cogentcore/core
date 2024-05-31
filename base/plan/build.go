@@ -19,15 +19,15 @@ import (
 	"cogentcore.org/core/base/namer"
 )
 
-// Build ensures that the elements of the slice contain
+// Update ensures that the elements of the slice contain
 // the elements according to the plan, specified by unique
 // element names, with n = total number of items in the target slice.
 // If a new item is needed then new is called to create it,
 // for given name at given index position.
 // if destroy is not-nil, then it is called on any element
 // that is being deleted from the slice.
-// Returns the updated slice and true if any changes were made.
-func Build[T namer.Namer](s []T, n int, name func(i int) string, new func(name string, i int) T, destroy func(e T)) (r []T, mods bool) {
+// It returns the updated slice and whether any changes were made.
+func Update[T namer.Namer](s []T, n int, name func(i int) string, new func(name string, i int) T, destroy func(e T)) (r []T, mods bool) {
 	// first make a map for looking up the indexes of the target names
 	names := make([]string, n)
 	nmap := make(map[string]int, n)

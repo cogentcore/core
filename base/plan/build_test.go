@@ -34,13 +34,13 @@ func AssertNames(t *testing.T, names []string, items []*nameObj) {
 	}
 }
 
-func TestBuild(t *testing.T) {
+func TestUpdate(t *testing.T) {
 	var s []*nameObj
 
 	names1 := []string{"a", "b", "c"}
 	// fmt.Println("\n#### target", names1)
 
-	r1, mods := Build(s, len(names1),
+	r1, mods := Update(s, len(names1),
 		func(i int) string { return names1[i] },
 		func(name string, i int) *nameObj { return &nameObj{name: name} }, nil)
 
@@ -50,7 +50,7 @@ func TestBuild(t *testing.T) {
 
 	names2 := []string{"a", "aa", "b", "c"}
 	// fmt.Println("\n#### target", names2)
-	r2, mods := Build(r1, len(names2),
+	r2, mods := Update(r1, len(names2),
 		func(i int) string { return names2[i] },
 		func(name string, i int) *nameObj {
 			return &nameObj{name: name}
@@ -61,7 +61,7 @@ func TestBuild(t *testing.T) {
 
 	names3 := []string{"a", "aa", "bb", "c"}
 	// fmt.Println("\n#### target", names3)
-	r3, mods := Build(r2, len(names3),
+	r3, mods := Update(r2, len(names3),
 		func(i int) string { return names3[i] },
 		func(name string, i int) *nameObj {
 			return &nameObj{name: name}
@@ -72,7 +72,7 @@ func TestBuild(t *testing.T) {
 
 	names4 := []string{"aa", "bb", "c"}
 	// fmt.Println("\n#### target", names4)
-	r4, mods := Build(r3, len(names4),
+	r4, mods := Update(r3, len(names4),
 		func(i int) string { return names4[i] },
 		func(name string, i int) *nameObj {
 			return &nameObj{name: name}
@@ -81,7 +81,7 @@ func TestBuild(t *testing.T) {
 	AssertNames(t, names4, r4)
 	assert.Equal(t, true, mods)
 
-	r5, mods := Build(r4, len(names4),
+	r5, mods := Update(r4, len(names4),
 		func(i int) string { return names4[i] },
 		func(name string, i int) *nameObj {
 			return &nameObj{name: name}
