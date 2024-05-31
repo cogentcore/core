@@ -818,16 +818,13 @@ func (fb *FileButton) OnInit() {
 			fb.SetText(fb.Filename)
 		}
 	})
+	var fv *FileView
 	InitValueButton(fb, false, func(d *core.Body) {
 		fb.SetFlag(true, ValueDialogNewWindow) // default to new window on supported platforms
-		// ext, _ := v.Tag("ext")
-		// fv := NewFileView(d).SetFilename(cur, ext)
-		fv := NewFileView(d).SetFilename(fb.Filename, "")
+		// ext, _ := v.Tag("ext") // TODO(config)
+		fv = NewFileView(d).SetFilename(fb.Filename, "")
 		d.AddAppBar(fv.MakeToolbar)
-		// return true, func() {
-		// 	cur = fv.SelectedFile()
-		// 	v.SetValue(cur)
-		// 	v.Update()
-		// }
+	}, func() {
+		fb.Filename = fv.SelectedFile()
 	})
 }
