@@ -282,22 +282,20 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 		tv.MakeGridIndex(p, i, si, itxt, invis)
 	}
 
-	vpath := tv.ViewPath + "[" + sitxt + "]" // todo: needs to be in Updater
+	vc := tv.ValueContext + "[" + sitxt + "]" // todo: needs to be in Updater
 	if si < tv.SliceSize {
 		if lblr, ok := tv.Slice.(labels.SliceLabeler); ok {
 			slbl := lblr.ElemLabel(si)
 			if slbl != "" {
-				vpath = views.JoinViewPath(tv.ViewPath, slbl)
+				vc = views.JoinViewPath(tv.ValueContext, slbl)
 			}
 		}
 	}
-	_ = vpath
-	// vv.AsValueData().ViewPath = vpath
+	_ = vc // TODO(config)
 
 	for fli := 0; fli < tv.NCols; fli++ {
 		col := tv.Table.Table.Columns[fli]
 		valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
-		// _ = tags
 
 		_, isstr := col.(*tensor.String)
 		if col.NumDims() == 1 {
@@ -373,7 +371,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 					}
 					w.SetState(invis, states.Invisible)
 					w.SetTensor(cell)
-					w.Disp = *tv.GetColumnTensorDisplay(fli)
+					w.Display = *tv.GetColumnTensorDisplay(fli)
 				})
 			})
 		}

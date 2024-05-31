@@ -14,39 +14,15 @@ import (
 )
 
 func init() {
-	// new:
 	core.AddValueType[table.Table, *TableButton]()
 	core.AddValueType[tensor.Float32, *TensorButton]()
 	core.AddValueType[tensor.Float64, *TensorButton]()
-	core.AddValueType[tensor.String, *TensorButton]()
 	core.AddValueType[tensor.Int, *TensorButton]()
+	core.AddValueType[tensor.Int32, *TensorButton]()
+	core.AddValueType[tensor.Byte, *TensorButton]()
+	core.AddValueType[tensor.String, *TensorButton]()
+	core.AddValueType[tensor.Bits, *TensorButton]()
 	core.AddValueType[simat.SimMat, *SimMatButton]()
-
-	// old:
-	// views.AddValue(tensor.Float32{}, func() views.Value { return &TensorValue{} })
-	// views.AddValue(tensor.Float64{}, func() views.Value { return &TensorValue{} })
-	// views.AddValue(tensor.Int{}, func() views.Value { return &TensorValue{} })
-	// views.AddValue(tensor.Int32{}, func() views.Value { return &TensorValue{} })
-	// views.AddValue(tensor.Byte{}, func() views.Value { return &TensorValue{} })
-	// views.AddValue(tensor.String{}, func() views.Value { return &TensorValue{} })
-	// views.AddValue(tensor.Bits{}, func() views.Value { return &TensorValue{} })
-	// views.AddValue(table.Table{}, func() views.Value { return &TableValue{} })
-	// views.AddValue(simat.SimMat{}, func() views.Value { return &SimMatValue{} })
-}
-
-// TensorGridValue manages a [TensorGrid] view of an [tensor.Tensor].
-type TensorGridValue struct {
-	views.ValueBase[*TensorGrid]
-}
-
-func (v *TensorGridValue) Config() {
-	tsr := v.Value.Interface().(tensor.Tensor)
-	v.Widget.SetTensor(tsr)
-}
-
-func (v *TensorGridValue) Update() {
-	tsr := v.Value.Interface().(tensor.Tensor)
-	v.Widget.SetTensor(tsr)
 }
 
 // TensorButton represents a Tensor with a button for making a [TensorView]
@@ -61,7 +37,6 @@ func (tb *TensorButton) WidgetValue() any { return &tb.Tensor }
 func (tb *TensorButton) OnInit() {
 	tb.Button.OnInit()
 	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	views.InitValueButton(tb, true)
 	tb.Updater(func() {
 		text := "None"
 		if tb.Tensor != nil {
@@ -69,14 +44,9 @@ func (tb *TensorButton) OnInit() {
 		}
 		tb.SetText(text)
 	})
-}
-
-func (tb *TensorButton) ConfigDialog(d *core.Body) (bool, func()) {
-	if tb.Tensor == nil {
-		return false, nil
-	}
-	NewTensorGrid(d).SetTensor(tb.Tensor)
-	return true, nil
+	views.InitValueButton(tb, true, func(d *core.Body) {
+		NewTensorGrid(d).SetTensor(tb.Tensor)
+	})
 }
 
 // TableButton presents a button that pulls up the [TableView] viewer for a [table.Table].
@@ -90,7 +60,6 @@ func (tb *TableButton) WidgetValue() any { return &tb.Table }
 func (tb *TableButton) OnInit() {
 	tb.Button.OnInit()
 	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	views.InitValueButton(tb, true)
 	tb.Updater(func() {
 		text := "None"
 		if tb.Table != nil {
@@ -102,14 +71,9 @@ func (tb *TableButton) OnInit() {
 		}
 		tb.SetText(text)
 	})
-}
-
-func (tb *TableButton) ConfigDialog(d *core.Body) (bool, func()) {
-	if tb.Table == nil {
-		return false, nil
-	}
-	NewTableView(d).SetTable(tb.Table)
-	return true, nil
+	views.InitValueButton(tb, true, func(d *core.Body) {
+		NewTableView(d).SetTable(tb.Table)
+	})
 }
 
 // SimMatValue presents a button that pulls up the [SimMatGridView] viewer for a [table.Table].
@@ -123,7 +87,6 @@ func (tb *SimMatButton) WidgetValue() any { return &tb.SimMat }
 func (tb *SimMatButton) OnInit() {
 	tb.Button.OnInit()
 	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	views.InitValueButton(tb, true)
 	tb.Updater(func() {
 		text := "None"
 		if tb.SimMat != nil && tb.SimMat.Mat != nil {
@@ -135,12 +98,7 @@ func (tb *SimMatButton) OnInit() {
 		}
 		tb.SetText(text)
 	})
-}
-
-func (tb *SimMatButton) ConfigDialog(d *core.Body) (bool, func()) {
-	if tb.SimMat == nil || tb.SimMat.Mat == nil {
-		return false, nil
-	}
-	NewSimMatGrid(d).SetSimMat(tb.SimMat)
-	return true, nil
+	views.InitValueButton(tb, true, func(d *core.Body) {
+		NewSimMatGrid(d).SetSimMat(tb.SimMat)
+	})
 }
