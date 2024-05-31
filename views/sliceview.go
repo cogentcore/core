@@ -233,9 +233,6 @@ type SliceViewBase struct {
 	// SliceValue is the [Value] associated with this slice view, if any.
 	SliceValue Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
 
-	// Value representations of the slice values
-	Values []Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
-
 	// currently hovered row
 	HoverRow int `set:"-" view:"-" copier:"-" json:"-" xml:"-"`
 

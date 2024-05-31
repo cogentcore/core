@@ -535,8 +535,3 @@ func (fb *FuncButton) setReturns() {
 		fb.ShowReturnAsDialog = true
 	}
 }
-
-// makeTmpWidget makes a temporary widget in a temporary parent for the given value.
-func makeTmpWidget(v Value) {
-	v.SetWidget(core.NewWidgetBase().NewChild(v.WidgetType()).(core.Widget))
-}
