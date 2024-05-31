@@ -23,20 +23,26 @@ func (wb *WidgetBase) Maker(maker func(p *Plan)) {
 	wb.Makers = append(wb.Makers, maker)
 }
 
-// Build updates the widget by running [WidgetBase.Updaters] after
-// [WidgetBase.ValueBuild]. This includes applying the result of
-// [WidgetBase.Make].
+// UpdateWidget updates the widget by running [WidgetBase.Updaters] in
+// sequential descending (reverse) order after calling [WidgetBase.ValueUpdate].
+// This includes applying the result of [WidgetBase.Make].
+//
+// UpdateWidget differs from [WidgetBase.Update] in that it only updates the widget
+// itself and not any of its children. Also, it does not restyle the widget or trigger
+// a new layout pass, while [WidgetBase.Update] does. End-user code should typically
+// call [WidgetBase.Update], not UpdateWidget.
 func (wb *WidgetBase) Build() {
-	if wb.ValueBuild != nil {
-		wb.ValueBuild()
+	if wb.ValueUpdate != nil {
+		wb.ValueUpdate()
 	}
 	for i := len(wb.Updaters) - 1; i >= 0; i-- {
 		wb.Updaters[i]()
 	}
 }
 
-// baseBuild is the base builder added to [WidgetBase.Updaters] in OnInit.
-func (wb *WidgetBase) baseBuild() {
+// updateFromMake updates the widget using [WidgetBase.Make].
+// It is the base Updater added to [WidgetBase.Updaters] in OnInit.
+func (wb *WidgetBase) updateFromMake() {
 	p := Plan{}
 	wb.Make(&p)
 	p.Build(wb)

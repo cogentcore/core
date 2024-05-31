@@ -294,9 +294,9 @@ type WidgetBase struct {
 	// by widgets whenever they are added to another widget parent.
 	Scene *Scene `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// ValueBuild is a function set by [Bind] that is called in
-	// [WidgetBase.Build] to update the widget's value from the bound value.
-	ValueBuild func() `copier:"-" json:"-" xml:"-" set:"-"`
+	// ValueUpdate is a function set by [Bind] that is called in
+	// [WidgetBase.UpdateWidget] to update the widget's value from the bound value.
+	ValueUpdate func() `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// ValueOnChange is a function set by [Bind] that is called when
 	// the widget receives an [event.Change] to update the bound value
@@ -359,7 +359,7 @@ func (wb *WidgetBase) OnInit() {
 	wb.HandleWidgetMagnify()
 	wb.HandleValueOnChange()
 
-	wb.Updater(wb.baseBuild)
+	wb.Updater(wb.updateFromMake)
 }
 
 // OnAdd is called when widgets are added to a parent.

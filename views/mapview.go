@@ -241,7 +241,7 @@ func (mv *MapView) MakeToolbar(p *core.Plan) {
 // BindMapKey is a version of [core.Bind] that works for keys in a map.
 func BindMapKey[T core.Value](mapv reflect.Value, key reflect.Value, vw T) T {
 	wb := vw.AsWidget()
-	wb.ValueBuild = func() {
+	wb.ValueUpdate = func() {
 		if vws, ok := any(vw).(core.ValueSetter); ok {
 			core.ErrorSnackbar(vw, vws.SetWidgetValue(key.Interface()))
 		} else {
@@ -277,7 +277,7 @@ func BindMapKey[T core.Value](mapv reflect.Value, key reflect.Value, vw T) T {
 // BindMapValue is a version of [core.Bind] that works for values in a map.
 func BindMapValue[T core.Value](mapv reflect.Value, key reflect.Value, vw T) T {
 	wb := vw.AsWidget()
-	wb.ValueBuild = func() {
+	wb.ValueUpdate = func() {
 		value := mapv.MapIndex(key).Interface()
 		if vws, ok := any(vw).(core.ValueSetter); ok {
 			core.ErrorSnackbar(vw, vws.SetWidgetValue(value))
