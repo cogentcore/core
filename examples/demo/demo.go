@@ -24,6 +24,7 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/views"
 )
 
@@ -382,8 +383,8 @@ func values(ts *core.Tabs) {
 		fmt.Println("The color is now", color)
 	})
 
-	views.NewFuncButton(tab, hello).SetShowReturn(true)
-	views.NewFuncButton(tab, styles.NewStyle).SetConfirm(true).SetShowReturn(true)
+	core.Bind(hello, tree.New[*views.FuncButton](tab)).SetShowReturn(true) // TODO(config)
+	core.Bind(styles.NewStyle, tree.New[*views.FuncButton](tab)).SetConfirm(true).SetShowReturn(true)
 
 	core.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
 		views.InspectorWindow(ts.Scene)
