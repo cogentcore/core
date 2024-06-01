@@ -50,7 +50,7 @@ func (sv *SliceViewInline) OnInit() {
 				return core.NewValue(val.Interface(), "")
 			}, func(w core.Value) {
 				wb := w.AsWidget()
-				// vv.SetSliceValue(val, sv.Slice, i, sv.ValueContext)
+				// vv.SetSliceValue(val, sv.Slice, i, sv.ValueTitle)
 				wb.OnChange(func(e events.Event) { sv.SendChange() })
 				// if sv.SliceValue != nil {
 				// 	vv.SetTags(sv.SliceValue.AllTags())
@@ -88,7 +88,7 @@ func (sv *SliceViewInline) OnInit() {
 			w.SetIcon(icons.Edit).SetType(core.ButtonTonal)
 			w.Tooltip = "Edit list in a dialog"
 			w.OnClick(func(e events.Event) {
-				vc := sv.ValueContext
+				vc := sv.ValueTitle
 				title := ""
 				if sv.SliceValue != nil {
 					newPath := ""
@@ -97,12 +97,12 @@ func (sv *SliceViewInline) OnInit() {
 					if isZero {
 						return
 					}
-					vc = core.JoinValueContext(sv.ValueContext, newPath)
+					vc = core.JoinValueTitle(sv.ValueTitle, newPath)
 				} else {
 					title = labels.FriendlySliceLabel(reflect.ValueOf(sv.Slice))
 				}
 				d := core.NewBody().AddTitle(title)
-				NewSliceView(d).SetSlice(sv.Slice).SetValueContext(vc)
+				NewSliceView(d).SetSlice(sv.Slice).SetValueTitle(vc)
 				d.OnClose(func(e events.Event) {
 					sv.Update()
 					sv.SendChange()

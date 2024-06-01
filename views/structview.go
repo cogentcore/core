@@ -224,9 +224,9 @@ func (sv *StructView) OnInit() {
 					wb.SetReadOnly(sv.IsReadOnly() || readOnlyTag)
 					if i < len(sv.structFields) {
 						core.Bind(reflectx.UnderlyingPointer(sv.structFields[i].value).Interface(), w)
-						vc := core.JoinValueContext(sv.ValueContext, label)
-						if vc != wb.ValueContext {
-							wb.ValueContext = vc + " (" + wb.ValueContext + ")"
+						vc := core.JoinValueTitle(sv.ValueTitle, label)
+						if vc != wb.ValueTitle {
+							wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
 						}
 					}
 				})

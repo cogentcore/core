@@ -54,7 +54,7 @@ func Bind[T Value](value any, vw T) T {
 	wb.ValueOnChange = func() {
 		ErrorSnackbar(vw, reflectx.SetRobust(value, vw.WidgetValue()))
 	}
-	wb.ValueContext = labels.FriendlyTypeName(reflectx.NonPointerType(reflect.TypeOf(value)))
+	wb.ValueTitle = labels.FriendlyTypeName(reflectx.NonPointerType(reflect.TypeOf(value)))
 	if ob, ok := any(vw).(OnBinder); ok {
 		ob.OnBind(value)
 	}
@@ -62,20 +62,20 @@ func Bind[T Value](value any, vw T) T {
 	return vw
 }
 
-// Note: SetValueContext must be defined manually so that it is not generated
+// Note: SetValueTitle must be defined manually so that it is not generated
 // for all embedding widget types.
 
-// SetValueContext sets the [WidgetBase.ValueContext] of the widget,
+// SetValueTitle sets the [WidgetBase.ValueTitle] of the widget,
 // which is a record of parent value names that have led up to this [Value].
-func (wb *WidgetBase) SetValueContext(context string) *WidgetBase {
-	wb.ValueContext = context
+func (wb *WidgetBase) SetValueTitle(context string) *WidgetBase {
+	wb.ValueTitle = context
 	return wb
 }
 
-// JoinValueContext returns a [WidgetBase.ValueContext] string composed
+// JoinValueTitle returns a [WidgetBase.ValueTitle] string composed
 // of two elements, with a • separator, handling the cases where
 // either or both can be empty.
-func JoinValueContext(a, b string) string {
+func JoinValueTitle(a, b string) string {
 	switch {
 	case a == "":
 		return b
@@ -120,7 +120,7 @@ func OpenValueDialog(v Value, ctx Widget, make func(d *Body), after ...func()) {
 		return
 	}
 	wb := v.AsWidget()
-	d := NewBody().AddTitle(wb.ValueContext)
+	d := NewBody().AddTitle(wb.ValueTitle)
 	if text := strings.TrimPrefix(wb.Tooltip, shiftNewWindow); text != "" {
 		d.AddText(text)
 	}

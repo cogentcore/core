@@ -320,16 +320,16 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 				fval := reflectx.OnePointerValue(val.FieldByIndex(field.Index))
 				core.Bind(fval.Interface(), w)
 
-				vc := tv.ValueContext + "[" + strconv.Itoa(si) + "]"
+				vc := tv.ValueTitle + "[" + strconv.Itoa(si) + "]"
 				if !invis {
 					if lblr, ok := tv.Slice.(labels.SliceLabeler); ok {
 						slbl := lblr.ElemLabel(si)
 						if slbl != "" {
-							vc = core.JoinValueContext(tv.ValueContext, slbl)
+							vc = core.JoinValueTitle(tv.ValueTitle, slbl)
 						}
 					}
 				}
-				wb.ValueContext = vc + " (" + wb.ValueContext + ")"
+				wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
 				wb.SetReadOnly(tv.IsReadOnly())
 				w.SetState(invis, states.Invisible)
 				if svi.HasStyleFunc() {

@@ -282,12 +282,12 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 		tv.MakeGridIndex(p, i, si, itxt, invis)
 	}
 
-	vc := tv.ValueContext + "[" + sitxt + "]" // todo: needs to be in Updater
+	vc := tv.ValueTitle + "[" + sitxt + "]" // todo: needs to be in Updater
 	if si < tv.SliceSize {
 		if lblr, ok := tv.Slice.(labels.SliceLabeler); ok {
 			slbl := lblr.ElemLabel(si)
 			if slbl != "" {
-				vc = views.JoinViewPath(tv.ValueContext, slbl)
+				vc = views.JoinViewPath(tv.ValueTitle, slbl)
 			}
 		}
 	}

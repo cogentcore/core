@@ -303,10 +303,8 @@ type WidgetBase struct {
 	// from the widget's value.
 	ValueOnChange func() `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// ValueContext is a record of parent value names that
-	// have led up to this [Value]. It is displayed as extra
-	// contextual information in dialogs.
-	ValueContext string `copier:"-" json:"-" xml:"-" set:"-"`
+	// ValueTitle is the title to display for a dialog for this [Value].
+	ValueTitle string `copier:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
