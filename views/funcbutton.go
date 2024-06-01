@@ -366,30 +366,34 @@ func (fb *FuncButton) CallFunc() {
 	str := FuncArgsToStruct(fb.Args)
 	sv := NewStructView(d).SetStruct(str.Addr().Interface())
 
-	// If there is a single value button,
-	// automatically open and close its dialog
-	d.OnShow(func(e events.Event) {
-		if len(fb.Args) != 1 {
-			return
+	accept := func() {
+		for i := range fb.Args {
+			fb.Args[i].Value = str.Field(i).Interface()
 		}
+		fb.callFuncShowReturns()
+	}
+
+	// If there is a single value button, automatically
+	// open its dialog instead of this one
+	if len(fb.Args) == 1 {
+		sv.UpdateWidget() // need to update first
 		bt := core.AsButton(sv.Child(1))
-		if bt == nil {
+		if bt != nil {
+			bt.OnFinal(events.Change, func(e events.Event) {
+				// the dialog for the argument has been accepted, so we call the function
+				accept()
+			})
+			bt.Scene = fb.Scene // we must use this scene for context
+			bt.Send(events.Click)
 			return
 		}
-		bt.OnFinal(events.Change, func(e events.Event) {
-			d.Scene.SendKey(keymap.Accept, e) // trigger OK button
-		})
-		bt.Send(events.Click)
-	})
+	}
 
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText(fb.Text).OnClick(func(e events.Event) {
 			d.Close() // note: the other Close event happens too late!
-			for i := range fb.Args {
-				fb.Args[i].Value = str.Field(i).Interface()
-			}
-			fb.callFuncShowReturns()
+			accept()
 		})
 	})
 	d.RunDialog(ctx)
