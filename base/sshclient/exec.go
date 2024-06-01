@@ -66,9 +66,13 @@ func (cl *Client) run(ses *ssh.Session, sio *exec.StdIOState, start, output bool
 	cmds := cmd + " " + strings.Join(args, " ")
 	if cl.Dir != "" {
 		if cmd == "cd" {
-			cdto = args[0]
+			if len(args) > 0 {
+				cdto = args[0]
+			} else {
+				cdto = cl.HomeDir
+			}
 		}
-		cmds = `cd "` + cl.Dir + `"; ` + cmds
+		cmds = `cd '` + cl.Dir + `'; ` + cmds
 	}
 
 	if !cl.PrintOnly {

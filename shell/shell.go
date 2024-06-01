@@ -13,6 +13,7 @@ import (
 	"io/fs"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -153,14 +154,35 @@ func (sh *Shell) ActiveSSH() *sshclient.Client {
 	return sh.SSHClients[sh.SSHActive]
 }
 
-// Host returns the name we're running commands on, for interactive prompt
-// this is empty if localhost (default).
+// Host returns the name we're running commands on,
+// which is empty if localhost (default).
 func (sh *Shell) Host() string {
 	cl := sh.ActiveSSH()
 	if cl == nil {
 		return ""
 	}
 	return "@" + sh.SSHActive + ":" + cl.Host
+}
+
+// HostAndDir returns the name we're running commands on,
+// which is empty if localhost (default),
+// and the current directory on that host.
+func (sh *Shell) HostAndDir() string {
+	host := ""
+	dir := sh.Config.Dir
+	home := errors.Log1(homedir.Dir())
+	cl := sh.ActiveSSH()
+	if cl != nil {
+		host = "@" + sh.SSHActive + ":" + cl.Host + ":"
+		dir = cl.Dir
+		home = cl.HomeDir
+	}
+	rel := errors.Log1(filepath.Rel(home, dir))
+	// if it has to go back, then it is not in home dir, so no ~
+	if strings.Contains(rel, "..") {
+		return host + dir + string(filepath.Separator)
+	}
+	return host + filepath.Join("~", rel) + string(filepath.Separator)
 }
 
 // SSHByHost returns the SSH client for given host name, with err if not found
