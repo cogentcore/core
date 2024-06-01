@@ -648,7 +648,7 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i int) {
 		}
 		wb.Updater(func() {
 			wb := w.AsWidget()
-			si, vi, invis := svi.SliceIndex(i)
+			_, vi, invis := svi.SliceIndex(i)
 			val := sv.SliceElementValue(vi)
 			// w.SetSliceValue(val, sv.Slice, si, sv.ValueContext)
 			core.Bind(val.Addr().Interface(), w)
@@ -659,8 +659,6 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i int) {
 			}
 			if invis {
 				wb.SetSelected(false)
-			} else {
-				wb.SetSelected(sv.IndexIsSelected(si))
 			}
 		})
 	})
@@ -715,8 +713,6 @@ func (sv *SliceViewBase) MakeGridIndex(p *core.Plan, i, si int, itxt string, inv
 			w.SetState(invis, states.Invisible)
 			if invis {
 				w.SetSelected(false)
-			} else {
-				w.SetSelected(sv.IndexIsSelected(si))
 			}
 		})
 	})

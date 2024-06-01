@@ -327,7 +327,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 				wb.OnInput(tv.HandleEvent)
 			}
 			wb.Updater(func() {
-				si, vi, invis := svi.SliceIndex(i)
+				_, vi, invis := svi.SliceIndex(i)
 				val := tv.SliceElementValue(vi)
 				fval := reflectx.OnePointerValue(val.FieldByIndex(field.Index))
 				core.Bind(fval.Interface(), w)
@@ -338,8 +338,6 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 				}
 				if invis {
 					wb.SetSelected(false)
-				} else {
-					wb.SetSelected(tv.IndexIsSelected(si))
 				}
 			})
 		})

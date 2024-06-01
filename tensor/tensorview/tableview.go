@@ -324,7 +324,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 					})
 				}
 				wb.Updater(func() {
-					si, vi, invis := svi.SliceIndex(i)
+					_, vi, invis := svi.SliceIndex(i)
 					if !invis {
 						if isstr {
 							str = tv.Table.Table.StringIndex(fli, vi)
@@ -347,8 +347,6 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 					}
 					if invis {
 						wb.SetSelected(false)
-					} else {
-						wb.SetSelected(tv.IndexIsSelected(si))
 					}
 				})
 			})
