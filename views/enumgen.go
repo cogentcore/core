@@ -7,16 +7,16 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-var _SliceViewFlagsValues = []SliceViewFlags{2, 3, 4, 5, 6, 7, 8}
+var _SliceViewFlagsValues = []SliceViewFlags{3, 4, 5, 6, 7, 8, 9}
 
 // SliceViewFlagsN is the highest valid value for type SliceViewFlags, plus one.
-const SliceViewFlagsN SliceViewFlags = 9
+const SliceViewFlagsN SliceViewFlags = 10
 
-var _SliceViewFlagsValueMap = map[string]SliceViewFlags{`IsArray`: 2, `ShowIndex`: 3, `ReadOnlyKeyNav`: 4, `SelectMode`: 5, `ReadOnlyMultiSelect`: 6, `InFocusGrab`: 7, `InFullRebuild`: 8}
+var _SliceViewFlagsValueMap = map[string]SliceViewFlags{`IsArray`: 3, `ShowIndex`: 4, `ReadOnlyKeyNav`: 5, `SelectMode`: 6, `ReadOnlyMultiSelect`: 7, `InFocusGrab`: 8, `InFullRebuild`: 9}
 
-var _SliceViewFlagsDescMap = map[SliceViewFlags]string{2: `SliceViewIsArray is whether the slice is actually an array -- no modifications -- set by SetSlice`, 3: `SliceViewShowIndex is whether to show index or not`, 4: `SliceViewReadOnlyKeyNav is whether support key navigation when ReadOnly (default true). uses a capture of up / down events to manipulate selection, not focus.`, 5: `SliceViewSelectMode is whether to be in select rows mode or editing mode`, 6: `SliceViewReadOnlyMultiSelect: if view is ReadOnly, default selection mode is to choose one row only. If this is true, standard multiple selection logic with modifier keys is instead supported`, 7: `SliceViewInFocusGrab is a guard for recursive focus grabbing`, 8: `SliceViewInFullRebuild is a guard for recursive rebuild`}
+var _SliceViewFlagsDescMap = map[SliceViewFlags]string{3: `SliceViewIsArray is whether the slice is actually an array -- no modifications -- set by SetSlice`, 4: `SliceViewShowIndex is whether to show index or not`, 5: `SliceViewReadOnlyKeyNav is whether support key navigation when ReadOnly (default true). uses a capture of up / down events to manipulate selection, not focus.`, 6: `SliceViewSelectMode is whether to be in select rows mode or editing mode`, 7: `SliceViewReadOnlyMultiSelect: if view is ReadOnly, default selection mode is to choose one row only. If this is true, standard multiple selection logic with modifier keys is instead supported`, 8: `SliceViewInFocusGrab is a guard for recursive focus grabbing`, 9: `SliceViewInFullRebuild is a guard for recursive rebuild`}
 
-var _SliceViewFlagsMap = map[SliceViewFlags]string{2: `IsArray`, 3: `ShowIndex`, 4: `ReadOnlyKeyNav`, 5: `SelectMode`, 6: `ReadOnlyMultiSelect`, 7: `InFocusGrab`, 8: `InFullRebuild`}
+var _SliceViewFlagsMap = map[SliceViewFlags]string{3: `IsArray`, 4: `ShowIndex`, 5: `ReadOnlyKeyNav`, 6: `SelectMode`, 7: `ReadOnlyMultiSelect`, 8: `InFocusGrab`, 9: `InFullRebuild`}
 
 // String returns the string representation of this SliceViewFlags value.
 func (i SliceViewFlags) String() string {
@@ -76,16 +76,16 @@ func (i *SliceViewFlags) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "SliceViewFlags")
 }
 
-var _TreeViewFlagsValues = []TreeViewFlags{2, 3, 4}
+var _TreeViewFlagsValues = []TreeViewFlags{3, 4, 5}
 
 // TreeViewFlagsN is the highest valid value for type TreeViewFlags, plus one.
-const TreeViewFlagsN TreeViewFlags = 5
+const TreeViewFlagsN TreeViewFlags = 6
 
-var _TreeViewFlagsValueMap = map[string]TreeViewFlags{`Closed`: 2, `SelectMode`: 3, `TreeViewInOpen`: 4}
+var _TreeViewFlagsValueMap = map[string]TreeViewFlags{`Closed`: 3, `SelectMode`: 4, `TreeViewInOpen`: 5}
 
-var _TreeViewFlagsDescMap = map[TreeViewFlags]string{2: `TreeViewFlagClosed means node is toggled closed (children not visible) Otherwise Open.`, 3: `TreeViewFlagSelectMode, when set on the Root node, determines whether keyboard movements update selection or not.`, 4: `TreeViewInOpen is set in the Open method to prevent recursive opening for lazy-open nodes`}
+var _TreeViewFlagsDescMap = map[TreeViewFlags]string{3: `TreeViewFlagClosed means node is toggled closed (children not visible) Otherwise Open.`, 4: `TreeViewFlagSelectMode, when set on the Root node, determines whether keyboard movements update selection or not.`, 5: `TreeViewInOpen is set in the Open method to prevent recursive opening for lazy-open nodes`}
 
-var _TreeViewFlagsMap = map[TreeViewFlags]string{2: `Closed`, 3: `SelectMode`, 4: `TreeViewInOpen`}
+var _TreeViewFlagsMap = map[TreeViewFlags]string{3: `Closed`, 4: `SelectMode`, 5: `TreeViewInOpen`}
 
 // String returns the string representation of this TreeViewFlags value.
 func (i TreeViewFlags) String() string {

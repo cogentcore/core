@@ -9,8 +9,11 @@ import (
 
 	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/styles"
 )
 
 // SliceButton represents a slice or array value with a button.
@@ -82,5 +85,31 @@ func (mb *MapButton) OnInit() {
 		mv := NewMapView(d).SetMap(mb.Map)
 		mv.SetValueTitle(mb.ValueTitle).SetReadOnly(mb.IsReadOnly())
 		d.AddAppBar(mv.MakeToolbar)
+	})
+}
+
+// IconButton represents an [icons.Icon] with a [core.Button] that opens
+// a dialog for selecting the icon.
+type IconButton struct {
+	core.Button
+}
+
+func (ib *IconButton) WidgetValue() any { return &ib.Icon }
+
+func (ib *IconButton) OnInit() {
+	ib.Button.OnInit()
+	ib.SetType(core.ButtonTonal)
+	core.InitValueButton(ib, false, func(d *core.Body) {
+		d.SetTitle("Select an icon")
+		si := 0
+		all := icons.All()
+		sv := NewSliceView(d)
+		sv.SetSlice(&all).SetSelectedValue(ib.Icon).BindSelect(&si)
+		sv.SetStyleFunc(func(w core.Widget, s *styles.Style, row int) {
+			w.(*IconButton).SetText(strcase.ToSentence(string(all[row])))
+		})
+		sv.OnFinal(events.Select, func(e events.Event) {
+			ib.Icon = icons.AllIcons[si]
+		})
 	})
 }

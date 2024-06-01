@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/tree"
 )
 
@@ -22,6 +23,7 @@ func init() {
 	core.InspectorWindow = InspectorWindow
 
 	core.AddValueType[core.Filename, *FileButton]()
+	core.AddValueType[icons.Icon, *IconButton]()
 	core.AddValueConverter(func(value any, tags reflect.StructTag) core.Value {
 		if _, ok := value.(color.Color); ok {
 			return NewColorButton()
