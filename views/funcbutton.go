@@ -468,16 +468,23 @@ func (fb *FuncButton) showReturnsDialog(rets []reflect.Value) {
 		core.MessageSnackbar(ctx, txt)
 		return
 	}
-	// TODO(config)
-	// // go directly to the dialog if there is one
-	// if len(fb.Returns) == 1 && OpenDialog(fb.Returns[0], ctx, nil, func() {
-	// 	makeTmpWidget(fb.Returns[0])
-	// }) {
-	// 	return
-	// }
+
 	d := core.NewBody().AddTitle(main).AddText(fb.Tooltip).AddOKOnly()
 	str := FuncArgsToStruct(fb.Returns)
-	NewStructView(d).SetStruct(str.Addr().Interface()).SetReadOnly(true)
+	sv := NewStructView(d).SetStruct(str.Addr().Interface()).SetReadOnly(true)
+
+	// If there is a single value button, automatically
+	// open its dialog instead of this one
+	if len(fb.Returns) == 1 {
+		sv.UpdateWidget() // need to update first
+		bt := core.AsButton(sv.Child(1))
+		if bt != nil {
+			bt.Scene = fb.Scene // we must use this scene for context
+			bt.Send(events.Click)
+			return
+		}
+	}
+
 	if fb.NewWindow {
 		d.RunWindowDialog(ctx)
 	} else {
