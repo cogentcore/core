@@ -37,7 +37,11 @@ func ShortTypeName(typ reflect.Type) string {
 	nptyp := NonPointerType(typ)
 	nm := nptyp.Name()
 	if nm != "" {
-		return path.Base(nptyp.PkgPath()) + "." + nm
+		p := nptyp.PkgPath()
+		if p != "" {
+			return path.Base(p) + "." + nm
+		}
+		return nm
 	}
 	return typ.String()
 }
