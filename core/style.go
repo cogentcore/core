@@ -8,6 +8,7 @@ import (
 	"image"
 	"reflect"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
@@ -261,53 +262,24 @@ func (wb *WidgetBase) IsOnlyChild() bool {
 	return wb.Par != nil && wb.Par.NumChildren() == 1
 }
 
-// StyleFromTags adds a Styler to style given widget based on standard
-// values in StructTags
+// StyleFromTags adds a [WidgetBase.Styler] to the given widget
+// to set its style properties based on the given [reflect.StructTag].
+// Width, height, and grow properties are supported.
 func StyleFromTags(w Widget, tags reflect.StructTag) {
+	style := func(tag string, set func(v float32)) {
+		if v, ok := tags.Lookup(tag); ok {
+			f, err := reflectx.ToFloat32(v)
+			if errors.Log(err) == nil {
+				set(f)
+			}
+		}
+	}
 	w.Style(func(s *styles.Style) {
-		if tv, ok := tags.Lookup("width"); ok {
-			v, err := reflectx.ToFloat32(tv)
-			if err == nil {
-				s.Min.X.Ch(v)
-			}
-		}
-		if tv, ok := tags.Lookup("max-width"); ok {
-			v, err := reflectx.ToFloat32(tv)
-			if err == nil {
-				if v < 0 {
-					s.Grow.X = 1 // support legacy
-				} else {
-					s.Max.X.Ch(v)
-				}
-			}
-		}
-		if tv, ok := tags.Lookup("height"); ok {
-			v, err := reflectx.ToFloat32(tv)
-			if err == nil {
-				s.Min.Y.Em(v)
-			}
-		}
-		if tv, ok := tags.Lookup("max-height"); ok {
-			v, err := reflectx.ToFloat32(tv)
-			if err == nil {
-				if v < 0 {
-					s.Grow.Y = 1
-				} else {
-					s.Max.Y.Em(v)
-				}
-			}
-		}
-		if tv, ok := tags.Lookup("grow"); ok {
-			v, err := reflectx.ToFloat32(tv)
-			if err == nil {
-				s.Grow.X = v
-			}
-		}
-		if tv, ok := tags.Lookup("grow-y"); ok {
-			v, err := reflectx.ToFloat32(tv)
-			if err == nil {
-				s.Grow.Y = v
-			}
-		}
+		style("width", s.Min.X.Ch)
+		style("max-width", s.Max.X.Ch)
+		style("height", s.Min.Y.Em)
+		style("max-height", s.Max.Y.Em)
+		style("grow", func(v float32) { s.Grow.X = v })
+		style("grow-y", func(v float32) { s.Grow.Y = v })
 	})
 }
