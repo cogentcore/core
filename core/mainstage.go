@@ -75,6 +75,7 @@ func (st *Stage) addDialogParts() *Stage {
 	}).StyleFinal(func(s *styles.Style) {
 		s.Cursor = cursors.Move
 	})
+	mv.SetName("move")
 	mv.OnChange(func(e events.Event) {
 		e.SetHandled()
 		pd := e.PrevDelta()
@@ -97,6 +98,7 @@ func (st *Stage) addDialogParts() *Stage {
 		s.Cursor = cursors.ResizeNWSE
 		s.Min.Set(units.Em(1))
 	})
+	rsz.SetName("resize")
 	rsz.OnChange(func(e events.Event) {
 		e.SetHandled()
 		pd := e.PrevDelta()
