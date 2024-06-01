@@ -286,24 +286,12 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 	svi := tv.This().(SliceViewer)
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
-	sitxt := strconv.Itoa(si)
 	val := tv.SliceElementValue(si)
 	// stru := val.Interface()
 
 	if tv.Is(SliceViewShowIndex) {
 		tv.MakeGridIndex(p, i, si, itxt, invis)
 	}
-
-	vpath := tv.ValueContext + "[" + sitxt + "]" // todo: should be in Updater, sitxt will change
-	if !invis {
-		if lblr, ok := tv.Slice.(labels.SliceLabeler); ok {
-			slbl := lblr.ElemLabel(si)
-			if slbl != "" {
-				vpath = core.JoinValueContext(tv.ValueContext, slbl)
-			}
-		}
-	}
-	_ = vpath
 
 	for fli := 0; fli < tv.numVisibleFields; fli++ {
 		field := tv.visibleFields[fli]
@@ -327,10 +315,21 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 				wb.OnInput(tv.HandleEvent)
 			}
 			wb.Updater(func() {
-				_, vi, invis := svi.SliceIndex(i)
+				si, vi, invis := svi.SliceIndex(i)
 				val := tv.SliceElementValue(vi)
 				fval := reflectx.OnePointerValue(val.FieldByIndex(field.Index))
 				core.Bind(fval.Interface(), w)
+
+				vc := tv.ValueContext + "[" + strconv.Itoa(si) + "]"
+				if !invis {
+					if lblr, ok := tv.Slice.(labels.SliceLabeler); ok {
+						slbl := lblr.ElemLabel(si)
+						if slbl != "" {
+							vc = core.JoinValueContext(tv.ValueContext, slbl)
+						}
+					}
+				}
+				wb.ValueContext = vc + " (" + wb.ValueContext + ")"
 				wb.SetReadOnly(tv.IsReadOnly())
 				w.SetState(invis, states.Invisible)
 				if svi.HasStyleFunc() {

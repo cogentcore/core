@@ -650,7 +650,6 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i int) {
 			wb := w.AsWidget()
 			_, vi, invis := svi.SliceIndex(i)
 			val := sv.SliceElementValue(vi)
-			// w.SetSliceValue(val, sv.Slice, si, sv.ValueContext)
 			core.Bind(val.Addr().Interface(), w)
 			wb.SetReadOnly(sv.IsReadOnly())
 			w.SetState(invis, states.Invisible)
