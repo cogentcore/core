@@ -382,6 +382,9 @@ func values(ts *core.Tabs) {
 		fmt.Println("The color is now", color)
 	})
 
+	views.NewFuncButton(tab, hello).SetShowReturn(true)
+	views.NewFuncButton(tab, styles.NewStyle).SetConfirm(true).SetShowReturn(true)
+
 	core.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
 		views.InspectorWindow(ts.Scene)
 	})
@@ -392,7 +395,6 @@ func values(ts *core.Tabs) {
 	views.NewValue(tab, core.Filename("demo.go"))
 	views.NewValue(tab, core.AppearanceSettings.Font)
 	views.NewValue(tab, views.ColorMapName("ColdHot"))
-	views.NewFuncButton(tab, hello).SetShowReturn(true)
 }
 
 // Hello displays a greeting message and an age in weeks based on the given information.
