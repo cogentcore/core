@@ -51,14 +51,17 @@ func (is *Inspector) OnInit() {
 		}
 	})
 
+	var titleWidget *core.Text
 	core.AddChildAt(is, "title", func(w *core.Text) {
+		titleWidget = w
+		is.CurrentNode = is.Root
 		w.SetType(core.TextHeadlineSmall)
 		w.Style(func(s *styles.Style) {
 			s.Grow.Set(1, 0)
 			s.Align.Self = styles.Center
 		})
 		w.Updater(func() {
-			w.SetText(fmt.Sprintf("Inspector of %s (%s)", is.Root.Name(), labels.FriendlyTypeName(reflect.TypeOf(is.Root))))
+			w.SetText(fmt.Sprintf("Inspector of %s (%s)", is.CurrentNode.Name(), labels.FriendlyTypeName(reflect.TypeOf(is.CurrentNode))))
 		})
 	})
 	renderRebuild := func() {
@@ -78,17 +81,16 @@ func (is *Inspector) OnInit() {
 				s.Gap.Zero()
 			})
 			core.AddChildAt(w, "tree", func(w *TreeView) {
-				is.CurrentNode = is.Root
 				w.OnSelect(func(e events.Event) {
 					if len(w.SelectedNodes) == 0 {
 						return
 					}
 					sn := w.SelectedNodes[0].AsTreeView().SyncNode
 					is.CurrentNode = sn
-					// note: doing Update on entire Inspector undoes all tree expansion
-					// only want to update the struct view.
+					// Note: doing Update on the entire inspector reverts all tree expansion,
+					// so we only want to update the title and struct view
+					titleWidget.Update()
 					structView.SetStruct(sn).Update()
-					// fmt.Println("cur node:", sn)
 
 					sc, ok := is.Root.(*core.Scene)
 					if !ok {
