@@ -541,7 +541,7 @@ type testStruct struct { //types:add
 	Enum core.ButtonTypes
 
 	// a string
-	Name string `default:"Go"`
+	Name string `default:"Go" width:"50"`
 
 	// click to show next
 	ShowNext bool
