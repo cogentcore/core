@@ -868,7 +868,6 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	sv.SendChange()
 	sv.Update()
 	sv.IndexGrabFocus(idx)
-	sv.NeedsLayout()
 }
 
 // SliceDeleteAtRow deletes element at given display row
@@ -1238,9 +1237,8 @@ func (sv *SliceViewBase) UpdateSelectIndex(idx int, sel bool, selMode events.Sel
 			sv.SelectedIndex = idx
 			sv.SelectIndex(idx)
 		}
-		sv.ApplyStyleTree()
-		sv.Update()
 		sv.Send(events.Select)
+		sv.Update()
 	} else {
 		sv.SelectIndexAction(idx, selMode)
 	}

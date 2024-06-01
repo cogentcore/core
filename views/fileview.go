@@ -321,10 +321,12 @@ func (fv *FileView) makeFilesRow(p *core.Plan) {
 	core.AddAt(p, "files", func(w *TableView) {
 		w.SetFlag(false, SliceViewShowIndex)
 		w.SetReadOnly(true)
-		w.Style(func(s *styles.Style) {
-			// s.Grow.Set(1, 1)
-		})
 		w.SetSlice(&fv.Files)
+		w.SelectedField = "Name"
+		w.SelectedValue = fv.CurrentSelectedFile
+		if core.SystemSettings.FileViewSort != "" {
+			w.SetSortFieldName(core.SystemSettings.FileViewSort)
+		}
 		w.StyleFunc = func(w core.Widget, s *styles.Style, row, col int) {
 			if clr, got := FileViewKindColorMap[fv.Files[row].Kind]; got {
 				s.Color = errors.Log1(gradient.FromString(clr))
@@ -337,10 +339,6 @@ func (fv *FileView) makeFilesRow(p *core.Plan) {
 			} else {
 				s.Color = colors.C(colors.Scheme.OnSurface)
 			}
-		}
-
-		if core.SystemSettings.FileViewSort != "" {
-			w.SetSortFieldName(core.SystemSettings.FileViewSort)
 		}
 		w.Style(func(s *styles.Style) {
 			s.Cursor = cursors.Pointer
@@ -400,16 +398,7 @@ func (fv *FileView) makeFilesRow(p *core.Plan) {
 			core.NewSeparator(m)
 			NewFuncButton(m, fv.NewFolder).SetIcon(icons.CreateNewFolder)
 		})
-		w.Updater(func() {
-			w.ResetSelectedIndexes()
-			w.SelectedField = "Name"
-			w.SelectedValue = fv.CurrentSelectedFile
-			fv.SelectedIndex = w.SelectedIndex
-			if w.SelectedIndex >= 0 {
-				w.ScrollToIndex(w.SelectedIndex)
-			}
-			// w.SortSlice()
-		})
+		// w.Updater(func() {})
 	})
 }
 
@@ -530,6 +519,7 @@ func (fv *FileView) UpdatePath() {
 
 // UpdateFilesAction updates the list of files and other views for the current path.
 func (fv *FileView) UpdateFilesAction() { //types:add
+	fv.ReadFiles()
 	fv.Update()
 	// sf := fv.SelectField()
 	// sf.SetFocusEvent()
@@ -610,7 +600,7 @@ func (fv *FileView) AddPathToFavorites() { //types:add
 
 // DirPathUp moves up one directory in the path
 func (fv *FileView) DirPathUp() { //types:add
-	pdr, _ := filepath.Split(fv.DirPath)
+	pdr := filepath.Dir(fv.DirPath)
 	if pdr == "" {
 		return
 	}
@@ -668,7 +658,6 @@ func (fv *FileView) FileSelectAction(idx int) {
 	sf := fv.SelectField()
 	sf.SetText(fv.CurrentSelectedFile)
 	fv.Send(events.Select)
-	// fv.WidgetSig.Emit(fv.This(), int64(core.WidgetSelected), fv.SelectedFile())
 }
 
 // SetExt updates the ext to given (list of, comma separated) extensions

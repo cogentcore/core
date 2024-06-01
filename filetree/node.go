@@ -24,6 +24,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
@@ -154,7 +155,9 @@ func (fn *Node) OnInit() {
 			s.Gap.X.Em(0.4)
 		})
 		w.OnClick(func(e events.Event) {
-			fn.OpenEmptyDir()
+			if !e.HasAnyModifier(key.Control, key.Meta, key.Alt, key.Shift) {
+				fn.OpenEmptyDir()
+			}
 		})
 		w.OnDoubleClick(func(e events.Event) {
 			if fn.FRoot != nil && fn.FRoot.DoubleClickFun != nil {
