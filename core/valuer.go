@@ -66,12 +66,16 @@ func init() {
 
 // NewValue converts the given value into an appropriate [Value]
 // whose associated value is bound to the given value. The given value must
-// be a pointer. It uses the given optional struct tags for additional context.
-// It also adds the resulting [Value] to the given optional parent if it specified.
-// The specifics on how it determines what type of [Value] to make are further
+// be a pointer. It uses the given optional struct tags for additional context
+// and to determine styling properties via [StyleFromTags]. It also adds the
+// resulting [Value] to the given optional parent if it specified. The specifics
+// on how it determines what type of [Value] to make are further
 // documented on [ToValue].
 func NewValue(value any, tags reflect.StructTag, parent ...tree.Node) Value {
 	vw := ToValue(value, tags)
+	if tags != "" {
+		StyleFromTags(vw, tags)
+	}
 	Bind(value, vw)
 	if len(parent) > 0 {
 		parent[0].AddChild(vw)

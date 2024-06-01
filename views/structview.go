@@ -203,7 +203,6 @@ func (sv *StructView) OnInit() {
 				if hasDef {
 					wb.SetTooltip("(Default: " + def + ") " + wb.Tooltip)
 				}
-				core.StyleFromTags(w, f.field.Tag)
 				wb.OnInput(func(e events.Event) {
 					sv.Send(events.Input, e)
 					if f.field.Tag.Get("immediate") == "+" {
