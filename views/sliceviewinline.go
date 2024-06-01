@@ -23,16 +23,8 @@ type SliceViewInline struct {
 	// Slice is the slice that we are viewing.
 	Slice any `set:"-"`
 
-	// SliceValue is the Value for the slice itself
-	// if this was created within the Value framework.
-	// Otherwise, it is nil.
-	SliceValue Value `set:"-"`
-
 	// isArray is whether the slice is actually an array.
 	isArray bool
-
-	// isFixedLength is whether the slice has a fixed-length flag on it.
-	isFixedLength bool
 }
 
 func (sv *SliceViewInline) WidgetValue() any { return &sv.Slice }
@@ -50,16 +42,8 @@ func (sv *SliceViewInline) OnInit() {
 				return core.NewValue(val.Interface(), "")
 			}, func(w core.Value) {
 				wb := w.AsWidget()
-				// vv.SetSliceValue(val, sv.Slice, i, sv.ValueTitle)
 				wb.OnChange(func(e events.Event) { sv.SendChange() })
-				// if sv.SliceValue != nil {
-				// 	vv.SetTags(sv.SliceValue.AllTags())
-				// }
 				wb.OnInput(func(e events.Event) {
-					// if tag, _ := vv.Tag("immediate"); tag == "+" {
-					// 	wb.SendChange(e)
-					// 	sv.SendChange(e)
-					// }
 					sv.Send(events.Input, e)
 				})
 				if sv.IsReadOnly() {
@@ -75,7 +59,7 @@ func (sv *SliceViewInline) OnInit() {
 				})
 			})
 		}
-		if !sv.isArray && !sv.isFixedLength {
+		if !sv.isArray {
 			core.AddAt(p, "add-button", func(w *core.Button) {
 				w.SetIcon(icons.Add).SetType(core.ButtonTonal)
 				w.Tooltip = "Add an element to the list"
@@ -89,17 +73,9 @@ func (sv *SliceViewInline) OnInit() {
 			w.Tooltip = "Edit list in a dialog"
 			w.OnClick(func(e events.Event) {
 				vc := sv.ValueTitle
-				title := ""
-				if sv.SliceValue != nil {
-					newPath := ""
-					isZero := false
-					title, newPath, isZero = sv.SliceValue.AsValueData().GetTitle()
-					if isZero {
-						return
-					}
-					vc = core.JoinValueTitle(sv.ValueTitle, newPath)
-				} else {
-					title = labels.FriendlySliceLabel(reflect.ValueOf(sv.Slice))
+				title := labels.FriendlyTypeName(reflect.TypeOf(sv.Slice))
+				if vc != "" {
+					title = vc + " (" + title + ")"
 				}
 				d := core.NewBody().AddTitle(title)
 				NewSliceView(d).SetSlice(sv.Slice).SetValueTitle(vc)
@@ -128,10 +104,6 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 	if newslc {
 		sv.Slice = sl
 		sv.isArray = reflectx.NonPointerType(reflect.TypeOf(sl)).Kind() == reflect.Array
-		sv.isFixedLength = false
-		if sv.SliceValue != nil {
-			_, sv.isFixedLength = sv.SliceValue.Tag("fixed-len")
-		}
 		sv.Update()
 	}
 	return sv
@@ -140,7 +112,7 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end
 func (sv *SliceViewInline) SliceNewAt(idx int) {
-	if sv.isArray || sv.isFixedLength {
+	if sv.isArray {
 		return
 	}
 	reflectx.SliceNewAt(sv.Slice, idx)
@@ -151,7 +123,7 @@ func (sv *SliceViewInline) SliceNewAt(idx int) {
 
 // SliceDeleteAt deletes element at given index from slice
 func (sv *SliceViewInline) SliceDeleteAt(idx int) {
-	if sv.isArray || sv.isFixedLength {
+	if sv.isArray {
 		return
 	}
 	reflectx.SliceDeleteAt(sv.Slice, idx)
@@ -161,7 +133,7 @@ func (sv *SliceViewInline) SliceDeleteAt(idx int) {
 }
 
 func (sv *SliceViewInline) ContextMenu(m *core.Scene, idx int) {
-	if sv.IsReadOnly() || sv.isArray || sv.isFixedLength {
+	if sv.IsReadOnly() || sv.isArray {
 		return
 	}
 	core.NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {

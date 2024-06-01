@@ -33,7 +33,6 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/types"
 )
 
 // SliceView represents a slice value with index and value widgets.
@@ -229,9 +228,6 @@ type SliceViewBase struct {
 
 	// SliceUnderlying is the underlying slice value.
 	SliceUnderlying reflect.Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
-
-	// SliceValue is the [Value] associated with this slice view, if any.
-	SliceValue Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
 
 	// currently hovered row
 	HoverRow int `set:"-" view:"-" copier:"-" json:"-" xml:"-"`
@@ -812,44 +808,20 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	sv.SliceNewAtSelect(idx)
 
 	sltyp := reflectx.SliceElementType(sv.Slice) // has pointer if it is there
-	isNode := tree.IsNode(sltyp)
 	slptr := sltyp.Kind() == reflect.Pointer
 	sz := sv.SliceSize
 	svnp := sv.SliceUnderlying
 
-	if isNode && sv.SliceValue != nil {
-		vd := sv.SliceValue.AsValueData()
-		if vd.Owner != nil {
-			if owntree, ok := vd.Owner.(tree.Node); ok {
-				d := core.NewBody().AddTitle("Add list items").AddText("Number and type of items to insert:")
-				nd := &core.NewItemsData{}
-				w := NewValue(d, nd).AsWidget()
-				tree.ChildByType[*core.Chooser](w, tree.Embeds).SetTypes(types.AllEmbeddersOf(owntree.BaseType())...).SetCurrentIndex(0)
-				d.AddBottomBar(func(parent core.Widget) {
-					d.AddCancel(parent)
-					d.AddOK(parent).OnClick(func(e events.Event) {
-						for i := 0; i < nd.Number; i++ {
-							nm := fmt.Sprintf("New%v%v", nd.Type.Name, idx+1+i)
-							owntree.InsertNewChild(nd.Type, idx+1+i).SetName(nm)
-						}
-						sv.SendChange()
-					})
-				})
-				d.RunDialog(sv)
-			}
-		}
-	} else {
-		nval := reflect.New(reflectx.NonPointerType(sltyp)) // make the concrete el
-		if !slptr {
-			nval = nval.Elem() // use concrete value
-		}
-		svnp = reflect.Append(svnp, nval)
-		if idx >= 0 && idx < sz {
-			reflect.Copy(svnp.Slice(idx+1, sz+1), svnp.Slice(idx, sz))
-			svnp.Index(idx).Set(nval)
-		}
-		svnp.Set(svnp)
+	nval := reflect.New(reflectx.NonPointerType(sltyp)) // make the concrete el
+	if !slptr {
+		nval = nval.Elem() // use concrete value
 	}
+	svnp = reflect.Append(svnp, nval)
+	if idx >= 0 && idx < sz {
+		reflect.Copy(svnp.Slice(idx+1, sz+1), svnp.Slice(idx, sz))
+		svnp.Index(idx).Set(nval)
+	}
+	svnp.Set(svnp)
 	if idx < 0 {
 		idx = sz
 	}
