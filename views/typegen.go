@@ -741,10 +741,10 @@ func (t *FontButton) SetShortcut(v key.Chord) *FontButton { t.Shortcut = v; retu
 func (t *FontButton) SetMenu(v func(m *core.Scene)) *FontButton { t.Menu = v; return t }
 
 // FileTimeTextType is the [types.Type] for [FileTimeText]
-var FileTimeTextType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FileTimeText", IDName: "file-time-text", Doc: "FileTimeText represents [fileinfo.FileTime] with a [core.Text]\nthat displays a standard date and time format.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "Text"}}, Fields: []types.Field{{Name: "Time"}}, Instance: &FileTimeText{}})
+var FileTimeTextType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FileTimeText", IDName: "file-time-text", Doc: "FileTimeText represents a [fileinfo.FileTime] value with text\nthat displays a standard date and time format.", Embeds: []types.Field{{Name: "Text"}}, Fields: []types.Field{{Name: "Time"}}, Instance: &FileTimeText{}})
 
 // NewFileTimeText returns a new [FileTimeText] with the given optional parent:
-// FileTimeText represents [fileinfo.FileTime] with a [core.Text]
+// FileTimeText represents a [fileinfo.FileTime] value with text
 // that displays a standard date and time format.
 func NewFileTimeText(parent ...tree.Node) *FileTimeText { return tree.New[*FileTimeText](parent...) }
 
@@ -760,8 +760,8 @@ func (t *FileTimeText) SetTime(v fileinfo.FileTime) *FileTimeText { t.Time = v; 
 // SetTooltip sets the [FileTimeText.Tooltip]
 func (t *FileTimeText) SetTooltip(v string) *FileTimeText { t.Tooltip = v; return t }
 
-// SetText sets the [FileTimeText.Text]
-// func (t *FileTimeText) SetText(v string) *FileTimeText { t.Text = v; return t }
+// SetText.Text sets the [FileTimeText.Text.Text]
+func (t *FileTimeText) SetText(v string) *FileTimeText { t.Text.Text = v; return t }
 
 // SetType sets the [FileTimeText.Type]
 func (t *FileTimeText) SetType(v core.TextTypes) *FileTimeText { t.Type = v; return t }

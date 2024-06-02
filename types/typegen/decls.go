@@ -56,13 +56,14 @@ var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
 		"SetterFields": SetterFields,
 		"SetterType":   SetterType,
 		"DocToComment": DocToComment,
+		"FuncName":     FuncName,
 	}).Parse(
 	`
 	{{$typ := .}}
 	{{range (SetterFields .)}}
 	// Set{{.Name}} sets the [{{$typ.LocalName}}.{{.Name}}] {{- if ne .Doc ""}}:{{end}}
 	{{DocToComment .Doc}}
-	func (t *{{$typ.LocalName}}) Set{{.Name}}(v {{SetterType . $typ}}) *{{$typ.LocalName}} { t.{{.Name}} = v; return t }
+	func (t *{{$typ.LocalName}}) Set{{FuncName .Name}}(v {{SetterType . $typ}}) *{{$typ.LocalName}} { t.{{.Name}} = v; return t }
 	{{end}}
 `))
 
@@ -75,6 +76,13 @@ func SetterFields(typ *Type) []types.Field {
 			// we do not generate setters for unexported fields
 			if unicode.IsLower([]rune(f.Name)[0]) {
 				continue
+			}
+			// if our name is already taken in the embeds, we must further qualify it
+			for _, e := range typ.Embeds.Fields {
+				if e.Name == f.Name {
+					f.Name = e.Name + "." + f.Name
+					break
+				}
 			}
 			// unspecified indicates to add a set method; only "-" means no set
 			hasSetter := reflect.StructTag(fields.Tags[f.Name]).Get("set") != "-"
@@ -91,9 +99,10 @@ func SetterFields(typ *Type) []types.Field {
 // SetterType returns the setter type name for the given field in the context of the
 // given type. It converts slices to variadic arguments.
 func SetterType(f types.Field, typ *Type) string {
-	lt, ok := typ.Fields.LocalTypes[f.Name]
+	name := FuncName(f.Name) // must get name without dots
+	lt, ok := typ.Fields.LocalTypes[name]
 	if !ok {
-		lt = typ.EmbeddedFields.LocalTypes[f.Name]
+		lt = typ.EmbeddedFields.LocalTypes[name]
 	}
 	if strings.HasPrefix(lt, "[]") {
 		return "..." + strings.TrimPrefix(lt, "[]")
@@ -104,4 +113,10 @@ func SetterType(f types.Field, typ *Type) string {
 // DocToComment converts the given doc string to an appropriate comment string.
 func DocToComment(doc string) string {
 	return "// " + strings.ReplaceAll(doc, "\n", "\n// ")
+}
+
+// FuncName ensures the given name will work as a function name.
+func FuncName(name string) string {
+	res, _, _ := strings.Cut(name, ".")
+	return res
 }
