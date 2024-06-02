@@ -813,6 +813,7 @@ func (fb *FileButton) OnInit() {
 		// ext, _ := v.Tag("ext") // TODO(config)
 		fv = NewFileView(d).SetFilename(fb.Filename, "")
 		d.AddAppBar(fv.MakeToolbar)
+		d.AddAppChooser(fv.ConfigAppChooser)
 	}, func() {
 		fb.Filename = fv.SelectedFile()
 	})

@@ -281,21 +281,18 @@ func ConfigAppChooser(ch *Chooser) {
 		ch.SetPlaceholder(fmt.Sprintf("Search (%s)", keymap.Menu.Label()))
 	}
 
-	ch.OnWidgetAdded(func(w Widget) { // TODO(config)
-		if w.PathFrom(ch) == "text-field" {
-			tf := w.(*TextField)
-			w.Style(func(s *styles.Style) {
-				s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
-				if !s.Is(states.Focused) && tf.Error == nil {
-					s.Border = styles.Border{}
-				}
-				s.Border.Radius = styles.BorderRadiusFull
-				s.Min.X.SetCustom(func(uc *units.Context) float32 {
-					return min(uc.Ch(40), uc.Vw(80)-uc.Ch(20))
-				})
-				s.Max.X = s.Min.X
+	AddChildInit(ch, "text-field", func(w *TextField) {
+		w.Style(func(s *styles.Style) {
+			s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
+			if !s.Is(states.Focused) && w.Error == nil {
+				s.Border = styles.Border{}
+			}
+			s.Border.Radius = styles.BorderRadiusFull
+			s.Min.X.SetCustom(func(uc *units.Context) float32 {
+				return min(uc.Ch(40), uc.Vw(80)-uc.Ch(20))
 			})
-		}
+			s.Max.X = s.Min.X
+		})
 	})
 
 	ch.AddItemsFunc(func() {
@@ -315,10 +312,17 @@ func ConfigAppChooser(ch *Chooser) {
 			}
 		}
 	})
-	// todo: need tb
-	// ch.AddItemsFunc(func() {
-	// 	AddButtonItems(&ch.Items, tb, "")
-	// })
+	tb := ch.ParentByType(ToolbarType, false)
+	if tb != nil {
+		ch.AddItemsFunc(func() {
+			AddButtonItems(&ch.Items, tb, "")
+		})
+	}
+
+	for _, f := range ch.Scene.AppChoosers {
+		f(ch)
+	}
+
 	ch.OnFinal(events.Change, func(e events.Event) {
 		// we must never have a chooser label so that it
 		// always displays the search placeholder
