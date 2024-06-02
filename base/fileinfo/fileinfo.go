@@ -342,7 +342,7 @@ func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 // 	"github.com/djherbis/times"
 
 // FileTime provides a default String format for file modification times, and
-// other useful methods -- will plug into Value with date / time editor.
+// other useful methods; will plug into Value with date / time editor.
 type FileTime time.Time
 
 // Int satisfies the [reflectx.Inter] interface for sorting.

@@ -99,7 +99,7 @@ type IconButton struct {
 
 func (ib *IconButton) WidgetValue() any { return &ib.Icon }
 
-func (ib *IconButton) OnInit() {
+func (ib *IconButton) OnInit() { // TODO(config): view:"show-name"
 	ib.Button.OnInit()
 	ib.SetType(core.ButtonTonal)
 	core.InitValueButton(ib, false, func(d *core.Body) {
@@ -150,13 +150,11 @@ func (fb *FontButton) OnInit() {
 	})
 }
 
-// FileTimeText represents [fileinfo.FileTime] with a [core.Text]
+// FileTimeText represents a [fileinfo.FileTime] value with text
 // that displays a standard date and time format.
-//
-//types:add -setters
 type FileTimeText struct {
-	core.Text `set:"-"`
-	Time      fileinfo.FileTime
+	core.Text
+	Time fileinfo.FileTime
 }
 
 func (ft *FileTimeText) WidgetValue() any { return &ft.Time }
@@ -164,6 +162,6 @@ func (ft *FileTimeText) WidgetValue() any { return &ft.Time }
 func (ft *FileTimeText) OnInit() {
 	ft.Text.OnInit()
 	ft.Updater(func() {
-		ft.Text.Text = time.Time(ft.Time).Format("2006-01-02 15:04:05 MST")
+		ft.SetText(time.Time(ft.Time).Format("1/2/2006 " + core.SystemSettings.TimeFormat()))
 	})
 }
