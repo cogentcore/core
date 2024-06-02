@@ -18,6 +18,44 @@ import (
 	"cogentcore.org/core/types"
 )
 
+// ColorMapButtonType is the [types.Type] for [ColorMapButton]
+var ColorMapButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ColorMapButton", IDName: "color-map-button", Doc: "ColorMapButton displays a color map spectrum and can be clicked on\nto display a dialog for selecting different color map options.\nIt represents a [ColorMapName] value.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "MapName"}}, Instance: &ColorMapButton{}})
+
+// NewColorMapButton returns a new [ColorMapButton] with the given optional parent:
+// ColorMapButton displays a color map spectrum and can be clicked on
+// to display a dialog for selecting different color map options.
+// It represents a [ColorMapName] value.
+func NewColorMapButton(parent ...tree.Node) *ColorMapButton {
+	return tree.New[*ColorMapButton](parent...)
+}
+
+// NodeType returns the [*types.Type] of [ColorMapButton]
+func (t *ColorMapButton) NodeType() *types.Type { return ColorMapButtonType }
+
+// New returns a new [*ColorMapButton] value
+func (t *ColorMapButton) New() tree.Node { return &ColorMapButton{} }
+
+// SetMapName sets the [ColorMapButton.MapName]
+func (t *ColorMapButton) SetMapName(v string) *ColorMapButton { t.MapName = v; return t }
+
+// SetTooltip sets the [ColorMapButton.Tooltip]
+func (t *ColorMapButton) SetTooltip(v string) *ColorMapButton { t.Tooltip = v; return t }
+
+// SetType sets the [ColorMapButton.Type]
+func (t *ColorMapButton) SetType(v core.ButtonTypes) *ColorMapButton { t.Type = v; return t }
+
+// SetIcon sets the [ColorMapButton.Icon]
+func (t *ColorMapButton) SetIcon(v icons.Icon) *ColorMapButton { t.Icon = v; return t }
+
+// SetIndicator sets the [ColorMapButton.Indicator]
+func (t *ColorMapButton) SetIndicator(v icons.Icon) *ColorMapButton { t.Indicator = v; return t }
+
+// SetShortcut sets the [ColorMapButton.Shortcut]
+func (t *ColorMapButton) SetShortcut(v key.Chord) *ColorMapButton { t.Shortcut = v; return t }
+
+// SetMenu sets the [ColorMapButton.Menu]
+func (t *ColorMapButton) SetMenu(v func(m *core.Scene)) *ColorMapButton { t.Menu = v; return t }
+
 // ColorViewType is the [types.Type] for [ColorView]
 var ColorViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ColorView", IDName: "color-view", Doc: "ColorView shows a color, using sliders or numbers to set values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Color", Doc: "the color that we view"}}, Instance: &ColorView{}})
 

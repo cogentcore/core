@@ -7,50 +7,43 @@ package views
 import (
 	"log/slog"
 
-	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/colormap"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/units"
 )
 
-// ColorMapName represents the name of a color map, which can be edited using a [ColorMapValue].
+// ColorMapName represents the name of a color map, which can be edited using a [ColorMapButton].
 type ColorMapName string
 
-func (cmn ColorMapName) Value() Value {
-	return &ColorMapValue{}
-}
+func (cm ColorMapName) Value() core.Value { return NewColorMapButton() }
 
-// ColorMapValue displays a color map spectrum and can be clicked on
+// ColorMapButton displays a color map spectrum and can be clicked on
 // to display a dialog for selecting different color map options.
 // It represents a [ColorMapName] value.
-type ColorMapValue struct {
-	ValueBase[*core.Frame]
+type ColorMapButton struct {
+	core.Button
+	MapName string
 }
 
-func (v *ColorMapValue) Config() {
-	v.Widget.HandleClickOnEnterSpace()
-	ConfigDialogWidget(v, false)
-	v.Widget.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Hoverable, abilities.Clickable, abilities.Focusable)
-		s.Cursor = cursors.Pointer
-		s.Border.Radius = styles.BorderRadiusMedium
+func (cm *ColorMapButton) WidgetValue() any { return &cm.MapName }
 
-		s.Grow.Set(0, 0)
-		s.Min.Set(units.Em(10), units.Em(1.5))
+func (cm *ColorMapButton) OnInit() {
+	cm.Button.OnInit()
+	cm.Style(func(s *styles.Style) {
+		s.Padding.Zero()
+		s.Min.Set(units.Em(10), units.Em(2))
 
-		cmn, ok := reflectx.NonPointerValue(v.Value).Interface().(ColorMapName)
-		if !ok || cmn == "" {
+		if cm.MapName == "" {
 			s.Background = colors.C(colors.Scheme.OutlineVariant)
 			return
 		}
-		cm, ok := colormap.AvailableMaps[string(cmn)]
+		cm, ok := colormap.AvailableMaps[cm.MapName]
 		if !ok {
-			slog.Error("got invalid color map name", "name", cmn)
+			slog.Error("got invalid color map name", "name", cm.Name)
 			s.Background = colors.C(colors.Scheme.OutlineVariant)
 			return
 		}
@@ -61,23 +54,14 @@ func (v *ColorMapValue) Config() {
 		}
 		s.Background = g
 	})
-}
 
-func (v *ColorMapValue) Update() {
-	v.Widget.ApplyStyle()
-	v.Widget.NeedsRender()
-}
-
-func (v *ColorMapValue) ConfigDialog(d *core.Body) (bool, func()) {
-	d.SetTitle("Select a color map")
-	sl := colormap.AvailableMapsList()
-	cur := reflectx.ToString(v.Value.Interface())
-	si := 0
-	NewSliceView(d).SetSlice(&sl).SetSelectedValue(cur).BindSelect(&si)
-	return true, func() {
-		if si >= 0 {
-			v.SetValue(sl[si])
-			v.Update()
-		}
-	}
+	core.InitValueButton(cm, false, func(d *core.Body) {
+		d.SetTitle("Select a color map")
+		sl := colormap.AvailableMapsList()
+		si := 0
+		sv := NewSliceView(d).SetSlice(&sl).SetSelectedValue(cm.MapName).BindSelect(&si)
+		sv.OnFinal(events.Select, func(e events.Event) {
+			cm.MapName = sl[si]
+		})
+	})
 }

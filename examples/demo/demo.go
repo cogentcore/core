@@ -383,6 +383,11 @@ func values(ts *core.Tabs) {
 		fmt.Println("The color is now", color)
 	})
 
+	colorMap := views.ColorMapName("ColdHot")
+	core.Bind(&colorMap, views.NewColorMapButton(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The color map is now", colorMap)
+	})
+
 	core.Bind(hello, tree.New[*views.FuncButton](tab)).SetShowReturn(true) // TODO(config)
 	core.Bind(styles.NewStyle, tree.New[*views.FuncButton](tab)).SetConfirm(true).SetShowReturn(true)
 
@@ -395,7 +400,6 @@ func values(ts *core.Tabs) {
 	views.NewValue(tab, 500*time.Millisecond)
 	views.NewValue(tab, core.Filename("demo.go"))
 	views.NewValue(tab, core.AppearanceSettings.Font)
-	views.NewValue(tab, views.ColorMapName("ColdHot"))
 }
 
 // Hello displays a greeting message and an age in weeks based on the given information.
