@@ -1531,7 +1531,7 @@ func (sv *SliceViewBase) PasteAssign(md mimedata.Mimes, idx int) {
 	ns := sl[0]
 	sv.SliceUnderlying.Index(idx).Set(reflect.ValueOf(ns).Elem())
 	sv.SendChange()
-	sv.NeedsRender()
+	sv.Update()
 }
 
 // PasteAtIndex inserts object(s) from mime data at (before) given slice index

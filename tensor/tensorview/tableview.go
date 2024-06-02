@@ -7,11 +7,16 @@ package tensorview
 //go:generate core generate -add-types
 
 import (
+	"bytes"
+	"encoding/csv"
 	"fmt"
 	"image"
+	"log"
 	"strconv"
 	"strings"
 
+	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -678,13 +683,12 @@ func (tv *TableView) MakeToolbar(p *core.Plan) {
 	})
 }
 
-/*
 func (tv *TableView) MimeDataType() string {
-	return fi.DataCsv
+	return fileinfo.DataCsv
 }
 
-// CopySelToMime copies selected rows to mime data
-func (tv *TableView) CopySelToMime() mimedata.Mimes {
+// CopySelectToMime copies selected rows to mime data
+func (tv *TableView) CopySelectToMime() mimedata.Mimes {
 	nitms := len(tv.SelectedIndexes)
 	if nitms == 0 {
 		return nil
@@ -700,7 +704,7 @@ func (tv *TableView) CopySelToMime() mimedata.Mimes {
 	var b bytes.Buffer
 	ix.WriteCSV(&b, table.Tab, table.Headers)
 	md := mimedata.NewTextBytes(b.Bytes())
-	md[0].Type = fi.DataCsv
+	md[0].Type = fileinfo.DataCsv
 	return md
 }
 
@@ -708,7 +712,7 @@ func (tv *TableView) CopySelToMime() mimedata.Mimes {
 func (tv *TableView) FromMimeData(md mimedata.Mimes) [][]string {
 	var recs [][]string
 	for _, d := range md {
-		if d.Type == fi.DataCsv {
+		if d.Type == fileinfo.DataCsv {
 			b := bytes.NewBuffer(d.Data)
 			cr := csv.NewReader(b)
 			cr.Comma = table.Tab.Rune()
@@ -729,10 +733,9 @@ func (tv *TableView) PasteAssign(md mimedata.Mimes, idx int) {
 	if len(recs) == 0 {
 		return
 	}
-	update := tv.UpdateStart()
 	tv.Table.Table.ReadCSVRow(recs[1], tv.Table.Indexes[idx])
-	tv.This().(views.SliceViewer).UpdateSliceGrid()
-	tv.UpdateEnd(update)
+	tv.SendChange()
+	tv.Update()
 }
 
 // PasteAtIndex inserts object(s) from mime data at (before) given slice index
@@ -743,26 +746,13 @@ func (tv *TableView) PasteAtIndex(md mimedata.Mimes, idx int) {
 	if nr <= 0 {
 		return
 	}
-	wupdate := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdate)
-	update := tv.UpdateStart()
 	tv.Table.InsertRows(idx, nr)
 	for ri := 0; ri < nr; ri++ {
 		rec := recs[1+ri]
 		rw := tv.Table.Indexes[idx+ri]
 		tv.Table.Table.ReadCSVRow(rec, rw)
 	}
-	tv.This().(views.SliceViewer).UpdateSliceGrid()
-	tv.UpdateEnd(update)
+	tv.SendChange()
 	tv.SelectIndexAction(idx, events.SelectOne)
+	tv.Update()
 }
-
-func (tv *TableView) ItemCtxtMenu(idx int) {
-	var men core.Menu
-	tv.StdCtxtMenu(&men, idx)
-	if len(men) > 0 {
-		pos := tv.IndexPos(idx)
-		core.PopupMenu(men, pos.X, pos.Y, tv.ViewportSafe(), tv.Nm+"-menu")
-	}
-}
-*/
