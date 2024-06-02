@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/strcase"
@@ -395,11 +394,12 @@ func values(ts *core.Tabs) {
 		views.InspectorWindow(ts.Scene)
 	})
 
-	views.NewValue(tab, time.Now())
-	views.NewValue(tab, 5*time.Minute)
-	views.NewValue(tab, 500*time.Millisecond)
-	views.NewValue(tab, core.Filename("demo.go"))
-	views.NewValue(tab, core.AppearanceSettings.Font)
+	// TODO(config)
+	// views.NewValue(tab, time.Now())
+	// views.NewValue(tab, 5*time.Minute)
+	// views.NewValue(tab, 500*time.Millisecond)
+	// views.NewValue(tab, core.Filename("demo.go"))
+	// views.NewValue(tab, core.AppearanceSettings.Font)
 }
 
 // Hello displays a greeting message and an age in weeks based on the given information.

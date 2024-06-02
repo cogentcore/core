@@ -8,8 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"cogentcore.org/core/base/fileinfo"
-	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -283,6 +281,7 @@ func (dv *DateView) OnInit() {
 	})
 }
 
+/* TODO(config)
 // TimeValue presents two text fields for editing a date and time,
 // both of which can pull up corresponding picker view dialogs.
 type TimeValue struct {
@@ -441,3 +440,4 @@ var durationUnitsMap = map[string]time.Duration{
 	"months":       30 * 24 * time.Hour,
 	"years":        365 * 24 * time.Hour,
 }
+*/

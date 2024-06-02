@@ -5,10 +5,8 @@
 package views
 
 import (
-	"image"
 	"image/color"
 
-	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/colors/gradient"
@@ -513,6 +511,7 @@ func (cb *ColorButton) OnInit() {
 	})
 }
 
+/* TODO(config)
 // ColorValue represents a color value with a button.
 type ColorValue struct {
 	ValueBase[*core.Button]
@@ -553,3 +552,4 @@ func (v *ColorValue) ColorValue() color.RGBA {
 	c := reflectx.NonPointerValue(v.Value).Interface().(color.Color)
 	return colors.AsRGBA(c)
 }
+*/

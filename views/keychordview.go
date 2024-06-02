@@ -4,6 +4,7 @@
 
 package views
 
+/* TODO(config)
 import (
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
@@ -45,3 +46,4 @@ func (v *KeyChordValue) Update() {
 	txt := reflectx.ToString(v.Value.Interface())
 	v.Widget.SetText(txt)
 }
+*/

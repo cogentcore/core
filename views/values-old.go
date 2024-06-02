@@ -4,6 +4,8 @@
 
 package views
 
+/* TODO(config): remove
+
 import (
 	"log/slog"
 	"reflect"
@@ -629,3 +631,5 @@ func (v *FuncValue) Update() {
 	// (eg: in the inspector), so we do not warn on unadded functions.
 	v.Widget.SetWarnUnadded(false).SetFunc(fun)
 }
+
+*/

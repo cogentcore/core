@@ -4,6 +4,7 @@
 
 package texteditor
 
+/* TODO(config)
 import (
 	"fmt"
 
@@ -30,3 +31,4 @@ func (v *Value) Update() {
 	npv := reflectx.NonPointerValue(v.Value)
 	v.Widget.Buffer.SetText([]byte(npv.String()))
 }
+*/

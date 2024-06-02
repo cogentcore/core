@@ -4,6 +4,8 @@
 
 package views
 
+/* TODO(config): remove
+
 import (
 	"fmt"
 	"image"
@@ -223,3 +225,5 @@ func FieldToValue(str any, field string, val any) Value {
 	}
 	return ToValue(val, "")
 }
+
+*/

@@ -4,6 +4,7 @@
 
 package views
 
+/* TODO(config)
 import (
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
@@ -39,3 +40,4 @@ func (v *KeyMapValue) ConfigDialog(d *core.Body) (bool, func()) {
 		}
 	}
 }
+*/

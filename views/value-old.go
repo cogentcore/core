@@ -5,6 +5,8 @@
 // Package views allows you to view and edit Go data in the GUI using reflection.
 package views
 
+/* TODO(config): remove
+
 import (
 	"fmt"
 	"reflect"
@@ -343,7 +345,7 @@ func OpenDialogBase(v Value, cd ConfigDialoger, ctx core.Widget, fun func()) {
 	}
 	ds.Run()
 }
-*/
+
 
 // SetValue updates the underlying value representation of the Value to the given value.
 // It also sends a change event. It does nothing if the value is read-only. It returns
@@ -868,3 +870,5 @@ func ConfigDialogWidget(v Value, allowReadOnly bool) {
 		}
 	})
 }
+
+*/

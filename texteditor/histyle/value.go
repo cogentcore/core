@@ -4,6 +4,7 @@
 
 package histyle
 
+/* TODO(config)
 import (
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
@@ -72,3 +73,4 @@ func View(st *Styles) {
 	})
 	d.RunWindow() // note: no context here so not dialog
 }
+*/
