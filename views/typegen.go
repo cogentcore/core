@@ -707,3 +707,61 @@ func (t *IconButton) SetShortcut(v key.Chord) *IconButton { t.Shortcut = v; retu
 
 // SetMenu sets the [IconButton.Menu]
 func (t *IconButton) SetMenu(v func(m *core.Scene)) *IconButton { t.Menu = v; return t }
+
+// FontButtonType is the [types.Type] for [FontButton]
+var FontButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FontButton", IDName: "font-button", Doc: "FontButton represents a [core.FontName] with a [core.Button] that opens\na dialog for selecting the font family.", Embeds: []types.Field{{Name: "Button"}}, Instance: &FontButton{}})
+
+// NewFontButton returns a new [FontButton] with the given optional parent:
+// FontButton represents a [core.FontName] with a [core.Button] that opens
+// a dialog for selecting the font family.
+func NewFontButton(parent ...tree.Node) *FontButton { return tree.New[*FontButton](parent...) }
+
+// NodeType returns the [*types.Type] of [FontButton]
+func (t *FontButton) NodeType() *types.Type { return FontButtonType }
+
+// New returns a new [*FontButton] value
+func (t *FontButton) New() tree.Node { return &FontButton{} }
+
+// SetTooltip sets the [FontButton.Tooltip]
+func (t *FontButton) SetTooltip(v string) *FontButton { t.Tooltip = v; return t }
+
+// SetType sets the [FontButton.Type]
+func (t *FontButton) SetType(v core.ButtonTypes) *FontButton { t.Type = v; return t }
+
+// SetIcon sets the [FontButton.Icon]
+func (t *FontButton) SetIcon(v icons.Icon) *FontButton { t.Icon = v; return t }
+
+// SetIndicator sets the [FontButton.Indicator]
+func (t *FontButton) SetIndicator(v icons.Icon) *FontButton { t.Indicator = v; return t }
+
+// SetShortcut sets the [FontButton.Shortcut]
+func (t *FontButton) SetShortcut(v key.Chord) *FontButton { t.Shortcut = v; return t }
+
+// SetMenu sets the [FontButton.Menu]
+func (t *FontButton) SetMenu(v func(m *core.Scene)) *FontButton { t.Menu = v; return t }
+
+// FileTimeTextType is the [types.Type] for [FileTimeText]
+var FileTimeTextType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FileTimeText", IDName: "file-time-text", Doc: "FileTimeText represents [fileinfo.FileTime] with a [core.Text]\nthat displays a standard date and time format.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "Text"}}, Fields: []types.Field{{Name: "Time"}}, Instance: &FileTimeText{}})
+
+// NewFileTimeText returns a new [FileTimeText] with the given optional parent:
+// FileTimeText represents [fileinfo.FileTime] with a [core.Text]
+// that displays a standard date and time format.
+func NewFileTimeText(parent ...tree.Node) *FileTimeText { return tree.New[*FileTimeText](parent...) }
+
+// NodeType returns the [*types.Type] of [FileTimeText]
+func (t *FileTimeText) NodeType() *types.Type { return FileTimeTextType }
+
+// New returns a new [*FileTimeText] value
+func (t *FileTimeText) New() tree.Node { return &FileTimeText{} }
+
+// SetTime sets the [FileTimeText.Time]
+func (t *FileTimeText) SetTime(v fileinfo.FileTime) *FileTimeText { t.Time = v; return t }
+
+// SetTooltip sets the [FileTimeText.Tooltip]
+func (t *FileTimeText) SetTooltip(v string) *FileTimeText { t.Tooltip = v; return t }
+
+// SetText sets the [FileTimeText.Text]
+// func (t *FileTimeText) SetText(v string) *FileTimeText { t.Text = v; return t }
+
+// SetType sets the [FileTimeText.Type]
+func (t *FileTimeText) SetType(v core.TextTypes) *FileTimeText { t.Type = v; return t }

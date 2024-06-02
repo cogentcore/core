@@ -6,13 +6,16 @@ package views
 
 import (
 	"reflect"
+	"time"
 
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 )
 
@@ -111,5 +114,56 @@ func (ib *IconButton) OnInit() {
 		sv.OnFinal(events.Select, func(e events.Event) {
 			ib.Icon = icons.AllIcons[si]
 		})
+	})
+}
+
+// FontButton represents a [core.FontName] with a [core.Button] that opens
+// a dialog for selecting the font family.
+type FontButton struct {
+	core.Button
+}
+
+func (fb *FontButton) WidgetValue() any { return &fb.Text }
+
+func (fb *FontButton) OnInit() {
+	fb.Button.OnInit()
+	fb.SetType(core.ButtonTonal)
+	core.InitValueButton(fb, false, func(d *core.Body) {
+		d.SetTitle("Select a font family")
+		si := 0
+		fi := paint.FontLibrary.FontInfo
+		tv := NewTableView(d)
+		tv.SetSlice(&fi).SetSelectedValue(fb.Text).SetSelectedField("Name").BindSelect(&si)
+		tv.SetStyleFunc(func(w core.Widget, s *styles.Style, row, col int) {
+			if col != 4 {
+				return
+			}
+			s.Font.Family = fi[row].Name
+			s.Font.Stretch = fi[row].Stretch
+			s.Font.Weight = fi[row].Weight
+			s.Font.Style = fi[row].Style
+			s.Font.Size.Pt(18)
+		})
+		tv.OnFinal(events.Select, func(e events.Event) {
+			fb.Text = fi[si].Name
+		})
+	})
+}
+
+// FileTimeText represents [fileinfo.FileTime] with a [core.Text]
+// that displays a standard date and time format.
+//
+//types:add -setters
+type FileTimeText struct {
+	core.Text `set:"-"`
+	Time      fileinfo.FileTime
+}
+
+func (ft *FileTimeText) WidgetValue() any { return &ft.Time }
+
+func (ft *FileTimeText) OnInit() {
+	ft.Text.OnInit()
+	ft.Updater(func() {
+		ft.Text.Text = time.Time(ft.Time).Format("2006-01-02 15:04:05 MST")
 	})
 }

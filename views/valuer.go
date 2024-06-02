@@ -10,6 +10,7 @@ import (
 	"image/color"
 	"reflect"
 
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/icons"
@@ -24,6 +25,11 @@ func init() {
 
 	core.AddValueType[core.Filename, *FileButton]()
 	core.AddValueType[icons.Icon, *IconButton]()
+	core.AddValueType[core.FontName, *FontButton]()
+	core.AddValueType[fileinfo.FileTime, *FileTimeText]()
+	// core.AddValueType[time.Time, *TimeButton]()
+	// AddValue(time.Duration(0), func() Value { return &DurationValue{} })
+
 	core.AddValueConverter(func(value any, tags reflect.StructTag) core.Value {
 		if _, ok := value.(color.Color); ok {
 			return NewColorButton()

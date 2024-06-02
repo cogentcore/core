@@ -198,8 +198,7 @@ func (tv *TableView) UpdateMaxWidths() {
 		tv.colMaxWidths[fli] = 0
 		val := tv.SliceElementValue(0)
 		fval := val.FieldByIndex(field.Index)
-		// _, isicon := vv.(*IconValue)
-		isicon := false
+		_, isicon := fval.Interface().(icons.Icon)
 		isString := fval.Type().Kind() == reflect.String
 		if !isString || isicon {
 			continue
