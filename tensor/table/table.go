@@ -12,6 +12,7 @@ import (
 	"log/slog"
 	"math"
 	"reflect"
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/tensor"
@@ -152,6 +153,16 @@ func AddColumn[T string | bool | float32 | float64 | int | int32 | byte](dt *Tab
 	return tsr
 }
 
+// InsertColumn inserts a new column to the table, of given type and column name
+// (which must be unique), at given index.
+// The cells of this column hold a single scalar value.
+func InsertColumn[T string | bool | float32 | float64 | int | int32 | byte](dt *Table, name string, idx int) tensor.Tensor {
+	rows := max(1, dt.Rows)
+	tsr := tensor.New[T]([]int{rows}, "Row")
+	dt.InsertColumn(tsr, name, idx)
+	return tsr
+}
+
 // AddTensorColumn adds a new n-dimensional column to the table, of given type, column name
 // (which must be unique), and dimensionality of each _cell_.
 // An outer-most Row dimension will be added to this dimensionality to create
@@ -176,6 +187,23 @@ func (dt *Table) AddColumn(tsr tensor.Tensor, name string) error {
 		return err
 	}
 	dt.Columns = append(dt.Columns, tsr)
+	rows := max(1, dt.Rows)
+	tsr.SetNumRows(rows)
+	return nil
+}
+
+// InsertColumn inserts the given tensor as a column to the table at given index,
+// returning an error and not adding if the name is not unique.
+// Automatically adjusts the shape to fit the current number of rows.
+func (dt *Table) InsertColumn(tsr tensor.Tensor, name string, idx int) error {
+	if _, has := dt.ColumnNameMap[name]; has {
+		err := fmt.Errorf("table.Table duplicate column name: %s", name)
+		slog.Warn(err.Error())
+		return err
+	}
+	dt.ColumnNames = slices.Insert(dt.ColumnNames, idx, name)
+	dt.UpdateColumnNameMap()
+	dt.Columns = slices.Insert(dt.Columns, idx, tsr)
 	rows := max(1, dt.Rows)
 	tsr.SetNumRows(rows)
 	return nil
