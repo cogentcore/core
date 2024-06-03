@@ -62,14 +62,6 @@ func SliceDeleteAt(sl any, idx int) {
 	svl.Elem().Set(svnp.Slice(0, sz-1))
 }
 
-// Inter is an interface that requires a method returning the value
-// as an int64. It is used in sorting and implemented by
-// [cogentcore.org/core/base/fileinfo.FileTime].
-type Inter interface {
-	// Int returns the value as an int64.
-	Int() int64
-}
-
 // SliceSort sorts a slice of basic values (see [StructSliceSort] for sorting a
 // slice-of-struct using a specific field), using float, int, string, and [time.Time]
 // conversions.
@@ -84,18 +76,6 @@ func SliceSort(sl any, ascending bool) error {
 	vk := elnptyp.Kind()
 	elval := OnePointerValue(svnp.Index(0))
 	elif := elval.Interface()
-
-	if _, ok := elif.(Inter); ok {
-		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			iv := NonPointerValue(svnp.Index(i)).Interface().(Inter).Int()
-			jv := NonPointerValue(svnp.Index(j)).Interface().(Inter).Int()
-			if ascending {
-				return iv < jv
-			}
-			return jv < iv
-		})
-		return nil
-	}
 
 	// try all the numeric types first!
 	switch {
@@ -188,20 +168,6 @@ func StructSliceSort(structSlice any, fieldIndex []int, ascending bool) error {
 	structVal := OnePointerValue(svnp.Index(0))
 	fieldVal := structVal.Elem().FieldByIndex(fieldIndex)
 	fieldIf := fieldVal.Interface()
-
-	if _, ok := fieldIf.(Inter); ok {
-		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			ival := OnePointerValue(svnp.Index(i))
-			iv := ival.Elem().FieldByIndex(fieldIndex).Interface().(Inter).Int()
-			jval := OnePointerValue(svnp.Index(j))
-			jv := jval.Elem().FieldByIndex(fieldIndex).Interface().(Inter).Int()
-			if ascending {
-				return iv < jv
-			}
-			return jv < iv
-		})
-		return nil
-	}
 
 	// try all the numeric types first!
 	switch {
