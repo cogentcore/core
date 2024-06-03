@@ -181,7 +181,7 @@ func (sw *Switches) Init() {
 
 // SelectItem activates a given item but does NOT send a change event.
 // See SelectItemAction for event emitting version.
-// returns error if index is out of range.
+// It returns an error if the index is out of range.
 func (sw *Switches) SelectItem(index int) error {
 	if index >= sw.NumChildren() || index < 0 {
 		return fmt.Errorf("core.Switches.SelectItem: index out of range: %v", index)
