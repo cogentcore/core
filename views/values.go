@@ -106,6 +106,9 @@ func (ib *IconButton) Init() { // TODO(config): view:"show-name"
 		} else {
 			ib.SetType(core.ButtonTonal)
 		}
+		if ib.Icon.IsNil() {
+			ib.Icon = icons.Blank
+		}
 	})
 	core.InitValueButton(ib, false, func(d *core.Body) {
 		d.SetTitle("Select an icon")
