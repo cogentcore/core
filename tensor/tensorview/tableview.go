@@ -17,7 +17,6 @@ import (
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fileinfo/mimedata"
-	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -281,22 +280,10 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 	svi := tv.This().(views.SliceViewer)
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
-	sitxt := strconv.Itoa(si)
 
 	if tv.Is(views.SliceViewShowIndex) {
 		tv.MakeGridIndex(p, i, si, itxt, invis)
 	}
-
-	vc := tv.ValueTitle + "[" + sitxt + "]" // todo: needs to be in Updater
-	if si < tv.SliceSize {
-		if lblr, ok := tv.Slice.(labels.SliceLabeler); ok {
-			slbl := lblr.ElemLabel(si)
-			if slbl != "" {
-				vc = core.JoinValueTitle(tv.ValueTitle, slbl)
-			}
-		}
-	}
-	_ = vc // TODO(config)
 
 	for fli := 0; fli < tv.NCols; fli++ {
 		col := tv.Table.Table.Columns[fli]
@@ -365,13 +352,14 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 					s.Grow.Set(0, 0)
 				})
 				wb.Updater(func() {
-					_, vi, invis := svi.SliceIndex(i)
+					si, vi, invis := svi.SliceIndex(i)
 					var cell tensor.Tensor
 					if invis {
 						cell = tv.ColTensorBlank(fli, col)
 					} else {
 						cell = tv.Table.Table.TensorIndex(fli, vi)
 					}
+					wb.ValueTitle = tv.ValueTitle + "[" + strconv.Itoa(si) + "]"
 					w.SetState(invis, states.Invisible)
 					w.SetTensor(cell)
 					w.Display = *tv.GetColumnTensorDisplay(fli)

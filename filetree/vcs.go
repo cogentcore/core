@@ -414,20 +414,8 @@ func VersionControlNameProper(vc string) VersionControlName {
 	return ""
 }
 
-// Value registers [VersionControlChooser] as the [core.Value] widget
+// Value registers [core.Chooser] as the [core.Value] widget
 // for [VersionControlName]
-func (kn VersionControlName) Value() *VersionControlChooser {
-	return &VersionControlChooser{}
-}
-
-// VersionControlChooser represents a [VersionControlName] with a Chooser.
-type VersionControlChooser struct {
-	core.Chooser
-}
-
-func (v *VersionControlChooser) WidgetValue() any { return &v.CurrentItem.Value }
-
-func (v *VersionControlChooser) Init() {
-	v.Chooser.Init()
-	v.SetStrings(VersionControlSystems...)
+func (kn VersionControlName) Value() *core.Chooser {
+	return core.NewChooser().SetStrings(VersionControlSystems...)
 }
