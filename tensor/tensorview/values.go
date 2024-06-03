@@ -33,8 +33,8 @@ type TensorButton struct {
 
 func (tb *TensorButton) WidgetValue() any { return &tb.Tensor }
 
-func (tb *TensorButton) OnInit() {
-	tb.Button.OnInit()
+func (tb *TensorButton) Init() {
+	tb.Button.Init()
 	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	tb.Updater(func() {
 		text := "None"
@@ -56,8 +56,8 @@ type TableButton struct {
 
 func (tb *TableButton) WidgetValue() any { return &tb.Table }
 
-func (tb *TableButton) OnInit() {
-	tb.Button.OnInit()
+func (tb *TableButton) Init() {
+	tb.Button.Init()
 	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	tb.Updater(func() {
 		text := "None"
@@ -83,8 +83,8 @@ type SimMatButton struct {
 
 func (tb *SimMatButton) WidgetValue() any { return &tb.SimMat }
 
-func (tb *SimMatButton) OnInit() {
-	tb.Button.OnInit()
+func (tb *SimMatButton) Init() {
+	tb.Button.Init()
 	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	tb.Updater(func() {
 		text := "None"

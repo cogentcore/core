@@ -27,8 +27,8 @@ type Canvas struct {
 	Context *paint.Context `set:"-"`
 }
 
-func (c *Canvas) OnInit() {
-	c.WidgetBase.OnInit()
+func (c *Canvas) Init() {
+	c.WidgetBase.Init()
 	c.Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
 	})

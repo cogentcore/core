@@ -70,8 +70,8 @@ func (sw *Switch) SetWidgetValue(value any) error {
 	return nil
 }
 
-func (sw *Switch) OnInit() {
-	sw.Frame.OnInit()
+func (sw *Switch) Init() {
+	sw.Frame.Init()
 	sw.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Checkable)
 		if !sw.IsReadOnly() {

@@ -97,7 +97,7 @@ type Scene struct {
 	RenderMu sync.Mutex `view:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
-func (sc *Scene) OnInit() {
+func (sc *Scene) Init() {
 	sc.MultiSample = 4
 	sc.Camera.Defaults()
 	sc.BackgroundColor = colors.Scheme.Background

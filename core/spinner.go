@@ -79,8 +79,8 @@ func (sp *Spinner) OnBind(value any) {
 	}
 }
 
-func (sp *Spinner) OnInit() {
-	sp.TextField.OnInit()
+func (sp *Spinner) Init() {
+	sp.TextField.Init()
 	sp.Step = 0.1
 	sp.PageStep = 0.2
 	sp.Max = 1.0

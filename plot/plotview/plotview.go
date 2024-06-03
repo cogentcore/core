@@ -89,8 +89,8 @@ func NewSubPlot(parent ...tree.Node) *PlotView {
 	return pl
 }
 
-func (pl *PlotView) OnInit() {
-	pl.Frame.OnInit()
+func (pl *PlotView) Init() {
+	pl.Frame.Init()
 
 	pl.Params.Plot = pl
 	pl.Params.Defaults()

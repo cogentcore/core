@@ -25,8 +25,8 @@ type Browser struct {
 	PathA, PathB string
 }
 
-func (br *Browser) OnInit() {
-	br.Frame.OnInit()
+func (br *Browser) Init() {
+	br.Frame.Init()
 	br.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})

@@ -32,8 +32,8 @@ type TimeView struct {
 
 func (tv *TimeView) WidgetValue() any { return &tv.Time }
 
-func (tv *TimeView) OnInit() {
-	tv.Frame.OnInit()
+func (tv *TimeView) Init() {
+	tv.Frame.Init()
 	core.AddChild(tv, func(w *core.Spinner) {
 		w.SetStep(1).SetEnforceStep(true)
 		if core.SystemSettings.Clock24 {
@@ -150,8 +150,8 @@ func (dv *DateView) SetTime(tim time.Time) *DateView { // TODO(config)
 	return dv
 }
 
-func (dv *DateView) OnInit() {
-	dv.Frame.OnInit()
+func (dv *DateView) Init() {
+	dv.Frame.Init()
 	dv.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})

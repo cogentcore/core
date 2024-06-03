@@ -32,8 +32,8 @@ type SimMatGrid struct { //types:add
 }
 
 // Defaults sets defaults for values that are at nonsensical initial values
-func (tg *SimMatGrid) OnInit() {
-	tg.TensorGrid.OnInit()
+func (tg *SimMatGrid) Init() {
+	tg.TensorGrid.Init()
 	tg.Display.GridView = &tg.TensorGrid
 	tg.Display.Defaults()
 	tg.Display.TopZero = true

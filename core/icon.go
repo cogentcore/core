@@ -35,8 +35,8 @@ type Icon struct {
 
 func (ic *Icon) WidgetValue() any { return &ic.Icon }
 
-func (ic *Icon) OnInit() {
-	ic.WidgetBase.OnInit()
+func (ic *Icon) Init() {
+	ic.WidgetBase.Init()
 	ic.SVG.Scale = 1
 	ic.Style(func(s *styles.Style) {
 		s.Min.Set(units.Em(1))

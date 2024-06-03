@@ -114,8 +114,8 @@ const (
 	ButtonMenu
 )
 
-func (bt *Button) OnInit() {
-	bt.Frame.OnInit()
+func (bt *Button) Init() {
+	bt.Frame.Init()
 	bt.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.DoubleClickable, abilities.TripleClickable)
 		if !bt.IsDisabled() {

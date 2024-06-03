@@ -41,7 +41,7 @@ func (wb *WidgetBase) UpdateWidget() {
 }
 
 // updateFromMake updates the widget using [WidgetBase.Make].
-// It is the base Updater added to [WidgetBase.Updaters] in OnInit.
+// It is the base Updater added to [WidgetBase.Updaters] in Init.
 func (wb *WidgetBase) updateFromMake() {
 	p := Plan{}
 	wb.Make(&p)

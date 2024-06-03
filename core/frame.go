@@ -71,8 +71,8 @@ func (fr *Frame) FlagType() enums.BitFlagSetter {
 	return (*FrameFlags)(&fr.Flags)
 }
 
-func (fr *Frame) OnInit() {
-	fr.WidgetBase.OnInit()
+func (fr *Frame) Init() {
+	fr.WidgetBase.Init()
 	fr.StyleFinal(func(s *styles.Style) {
 		// we only enable, not disable, since some other widget like Slider may want to enable
 		if s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto {
@@ -395,8 +395,8 @@ type Stretch struct {
 	WidgetBase
 }
 
-func (st *Stretch) OnInit() {
-	st.WidgetBase.OnInit()
+func (st *Stretch) Init() {
+	st.WidgetBase.Init()
 	st.Style(func(s *styles.Style) {
 		s.RenderBox = false
 		s.Min.X.Ch(1)
@@ -413,8 +413,8 @@ type Space struct {
 	WidgetBase
 }
 
-func (sp *Space) OnInit() {
-	sp.WidgetBase.OnInit()
+func (sp *Space) Init() {
+	sp.WidgetBase.Init()
 	sp.Style(func(s *styles.Style) {
 		s.RenderBox = false
 		s.Min.X.Ch(1)

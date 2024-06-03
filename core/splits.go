@@ -33,8 +33,8 @@ type Splits struct {
 	SavedSplits []float32 `set:"-"`
 }
 
-func (sl *Splits) OnInit() {
-	sl.Frame.OnInit()
+func (sl *Splits) Init() {
+	sl.Frame.Init()
 	sl.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		s.Margin.Zero()

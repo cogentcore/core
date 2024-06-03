@@ -23,8 +23,8 @@ type SceneView struct {
 	core.Frame
 }
 
-func (sv *SceneView) OnInit() {
-	sv.Frame.OnInit()
+func (sv *SceneView) Init() {
+	sv.Frame.Init()
 	sv.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)

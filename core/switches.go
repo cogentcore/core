@@ -81,8 +81,8 @@ func (sw *Switches) OnBind(value any) {
 	}
 }
 
-func (sw *Switches) OnInit() {
-	sw.Frame.OnInit()
+func (sw *Switches) Init() {
+	sw.Frame.Init()
 	sw.Style(func(s *styles.Style) {
 		s.Padding.Set(units.Dp(2))
 		s.Margin.Set(units.Dp(2))

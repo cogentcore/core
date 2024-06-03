@@ -43,8 +43,8 @@ type Scene struct {
 	SelectionParams SelectionParams `view:"inline"`
 }
 
-func (sw *Scene) OnInit() {
-	sw.WidgetBase.OnInit()
+func (sw *Scene) Init() {
+	sw.WidgetBase.Init()
 	sw.XYZ = xyz.NewScene()
 	sw.SelectionParams.Defaults()
 	sw.Style(func(s *styles.Style) {

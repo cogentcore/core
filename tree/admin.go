@@ -42,7 +42,7 @@ func initNode(n Node) {
 	nb := n.AsTreeNode()
 	if nb.Ths != n {
 		nb.Ths = n
-		nb.Ths.OnInit()
+		nb.Ths.Init()
 	}
 }
 

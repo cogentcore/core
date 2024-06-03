@@ -477,7 +477,7 @@ type ValueData struct {
 	Index int `set:"-" edit:"-"`
 
 	// Listeners are event listener functions for processing events on this widget.
-	// type specific Listeners are added in OnInit when the widget is initialized.
+	// type specific Listeners are added in Init when the widget is initialized.
 	Listeners events.Listeners `set:"-" view:"-"`
 }
 

@@ -29,8 +29,8 @@ type SliceViewInline struct {
 
 func (sv *SliceViewInline) WidgetValue() any { return &sv.Slice }
 
-func (sv *SliceViewInline) OnInit() {
-	sv.Frame.OnInit()
+func (sv *SliceViewInline) Init() {
+	sv.Frame.Init()
 	sv.Maker(func(p *core.Plan) {
 		sl := reflectx.NonPointerValue(reflectx.UnderlyingPointer(reflect.ValueOf(sv.Slice)))
 

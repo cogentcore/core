@@ -37,8 +37,8 @@ type Node struct {
 	Info fileinfo.FileInfo
 }
 
-func (tn *Node) OnInit() {
-	tn.TreeView.OnInit()
+func (tn *Node) Init() {
+	tn.TreeView.Init()
 	tn.IconOpen = icons.FolderOpen
 	tn.IconClosed = icons.Folder
 	tn.ContextMenus = nil

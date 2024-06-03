@@ -157,8 +157,8 @@ func (ch *Chooser) OnBind(value any) {
 	}
 }
 
-func (ch *Chooser) OnInit() {
-	ch.Frame.OnInit()
+func (ch *Chooser) Init() {
+	ch.Frame.Init()
 	ch.SetIcon(icons.None).SetIndicator(icons.KeyboardArrowDown)
 	ch.CurrentIndex = -1
 	ch.Style(func(s *styles.Style) {

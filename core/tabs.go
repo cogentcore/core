@@ -111,8 +111,8 @@ func (tt TabTypes) IsColumn() bool {
 	return tt == NavigationRail || tt == NavigationDrawer
 }
 
-func (ts *Tabs) OnInit() {
-	ts.Frame.OnInit()
+func (ts *Tabs) Init() {
+	ts.Frame.Init()
 	ts.MaxChars = 16
 	ts.CloseIcon = icons.Close
 	ts.Style(func(s *styles.Style) {
@@ -491,8 +491,8 @@ type Tab struct { //core:no-new
 	MaxChars int
 }
 
-func (tb *Tab) OnInit() {
-	tb.Frame.OnInit()
+func (tb *Tab) Init() {
+	tb.Frame.Init()
 	tb.MaxChars = 16
 	tb.CloseIcon = icons.Close
 	tb.Style(func(s *styles.Style) {

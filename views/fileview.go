@@ -96,8 +96,8 @@ type FileView struct {
 	PrevPath string `set:"-" view:"-"`
 }
 
-func (fv *FileView) OnInit() {
-	fv.Frame.OnInit()
+func (fv *FileView) Init() {
+	fv.Frame.Init()
 	fv.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
@@ -798,8 +798,8 @@ type FileButton struct {
 
 func (fb *FileButton) WidgetValue() any { return &fb.Filename }
 
-func (fb *FileButton) OnInit() {
-	fb.Button.OnInit()
+func (fb *FileButton) Init() {
+	fb.Button.Init()
 	fb.SetType(core.ButtonTonal).SetIcon(icons.File)
 	fb.Updater(func() {
 		if fb.Filename == "" {

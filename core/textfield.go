@@ -183,8 +183,8 @@ const (
 
 func (tf *TextField) WidgetValue() any { return &tf.Txt }
 
-func (tf *TextField) OnInit() {
-	tf.Frame.OnInit()
+func (tf *TextField) Init() {
+	tf.Frame.Init()
 	tf.AddContextMenu(tf.ContextMenu)
 
 	tf.Style(func(s *styles.Style) {

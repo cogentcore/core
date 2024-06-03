@@ -159,8 +159,8 @@ func (fb *FuncButton) OnBind(value any) {
 	fb.SetWarnUnadded(false).SetType(core.ButtonTonal)
 }
 
-func (fb *FuncButton) OnInit() {
-	fb.Button.OnInit()
+func (fb *FuncButton) Init() {
+	fb.Button.Init()
 	fb.WarnUnadded = true
 	fb.Style(func(s *styles.Style) {
 		if fb.IsReadOnly() {

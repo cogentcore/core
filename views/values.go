@@ -26,8 +26,8 @@ type SliceButton struct {
 
 func (sb *SliceButton) WidgetValue() any { return &sb.Slice }
 
-func (sb *SliceButton) OnInit() {
-	sb.Button.OnInit()
+func (sb *SliceButton) Init() {
+	sb.Button.Init()
 	sb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	sb.Updater(func() {
 		sb.SetText(labels.FriendlySliceLabel(reflect.ValueOf(sb.Slice)))
@@ -54,8 +54,8 @@ type StructButton struct {
 
 func (sb *StructButton) WidgetValue() any { return &sb.Struct }
 
-func (sb *StructButton) OnInit() {
-	sb.Button.OnInit()
+func (sb *StructButton) Init() {
+	sb.Button.Init()
 	sb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	sb.Updater(func() {
 		sb.SetText(labels.FriendlyStructLabel(reflect.ValueOf(sb.Struct)))
@@ -77,8 +77,8 @@ type MapButton struct {
 
 func (mb *MapButton) WidgetValue() any { return &mb.Map }
 
-func (mb *MapButton) OnInit() {
-	mb.Button.OnInit()
+func (mb *MapButton) Init() {
+	mb.Button.Init()
 	mb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
 	mb.Updater(func() {
 		mb.SetText(labels.FriendlyMapLabel(reflect.ValueOf(mb.Map)))
@@ -98,8 +98,8 @@ type IconButton struct {
 
 func (ib *IconButton) WidgetValue() any { return &ib.Icon }
 
-func (ib *IconButton) OnInit() { // TODO(config): view:"show-name"
-	ib.Button.OnInit()
+func (ib *IconButton) Init() { // TODO(config): view:"show-name"
+	ib.Button.Init()
 	ib.Updater(func() {
 		if ib.IsReadOnly() {
 			ib.SetType(core.ButtonText)
@@ -130,8 +130,8 @@ type FontButton struct {
 
 func (fb *FontButton) WidgetValue() any { return &fb.Text }
 
-func (fb *FontButton) OnInit() {
-	fb.Button.OnInit()
+func (fb *FontButton) Init() {
+	fb.Button.Init()
 	fb.SetType(core.ButtonTonal)
 	core.InitValueButton(fb, false, func(d *core.Body) {
 		d.SetTitle("Select a font family")
@@ -164,8 +164,8 @@ type TimeText struct {
 
 func (ft *TimeText) WidgetValue() any { return &ft.Time }
 
-func (ft *TimeText) OnInit() {
-	ft.Text.OnInit()
+func (ft *TimeText) Init() {
+	ft.Text.Init()
 	ft.Updater(func() {
 		ft.SetText(time.Time(ft.Time).Format("1/2/2006 " + core.SystemSettings.TimeFormat()))
 	})

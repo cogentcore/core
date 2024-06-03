@@ -32,8 +32,8 @@ type SVG struct {
 	SVG *svg.SVG `set:"-"`
 }
 
-func (sv *SVG) OnInit() {
-	sv.WidgetBase.OnInit()
+func (sv *SVG) Init() {
+	sv.WidgetBase.Init()
 	sv.SVG = svg.NewSVG(10, 10)
 	sv.SetReadOnly(true)
 	sv.Style(func(s *styles.Style) {

@@ -33,8 +33,8 @@ type Toolbar struct {
 	overflowButton *Button
 }
 
-func (tb *Toolbar) OnInit() {
-	tb.Frame.OnInit()
+func (tb *Toolbar) Init() {
+	tb.Frame.Init()
 	ToolbarStyles(tb)
 
 	AddChildAt(tb, "overflow-menu", func(w *Button) {
@@ -233,7 +233,7 @@ type BasicBar struct {
 	Frame
 }
 
-func (tb *BasicBar) OnInit() {
-	tb.Frame.OnInit()
+func (tb *BasicBar) Init() {
+	tb.Frame.Init()
 	ToolbarStyles(tb)
 }

@@ -427,7 +427,7 @@ type VersionControlChooser struct {
 
 func (v *VersionControlChooser) WidgetValue() any { return &v.CurrentItem.Value }
 
-func (v *VersionControlChooser) OnInit() {
-	v.Chooser.OnInit()
+func (v *VersionControlChooser) Init() {
+	v.Chooser.Init()
 	v.SetStrings(VersionControlSystems...)
 }

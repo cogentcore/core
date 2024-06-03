@@ -46,7 +46,7 @@ type VCSLogView struct {
 	SetA bool
 }
 
-func (lv *VCSLogView) OnInit() {
+func (lv *VCSLogView) Init() {
 	lv.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})

@@ -103,8 +103,8 @@ func (sv *StructView) getStructFields() {
 	sv.structFields = fields
 }
 
-func (sv *StructView) OnInit() {
-	sv.Frame.OnInit()
+func (sv *StructView) Init() {
+	sv.Frame.Init()
 	sv.Style(func(s *styles.Style) {
 		s.Align.Items = styles.Center
 		if sv.Inline {
@@ -192,7 +192,7 @@ func (sv *StructView) OnInit() {
 				valueWidget = w
 				wb := w.AsWidget()
 				doc, _ := types.GetDoc(f.value, f.parent, f.field, label)
-				// InitValueButton may set starting wb.Tooltip in OnInit
+				// InitValueButton may set starting wb.Tooltip in Init
 				if wb.Tooltip == "" {
 					wb.SetTooltip(doc)
 				} else if doc == "" {

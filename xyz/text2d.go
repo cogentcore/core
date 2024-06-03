@@ -49,7 +49,7 @@ type Text2D struct {
 	RenderState paint.State `set:"-" copier:"-" json:"-" xml:"-" view:"-"`
 }
 
-func (txt *Text2D) OnInit() {
+func (txt *Text2D) Init() {
 	txt.Defaults()
 }
 

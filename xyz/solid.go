@@ -28,7 +28,7 @@ type Solid struct {
 	MeshPtr Mesh `view:"-" set:"-"`
 }
 
-func (sld *Solid) OnInit() {
+func (sld *Solid) Init() {
 	sld.Defaults()
 }
 
@@ -41,7 +41,7 @@ func (sld *Solid) AsSolid() *Solid {
 }
 
 // Defaults sets default initial settings for solid params.
-// This is called automatically OnInit.
+// This is called automatically Init.
 func (sld *Solid) Defaults() {
 	sld.Pose.Defaults()
 	sld.Mat.Defaults()

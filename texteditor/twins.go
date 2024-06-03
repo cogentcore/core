@@ -25,8 +25,8 @@ type TwinEditors struct {
 	inInputEvent bool
 }
 
-func (te *TwinEditors) OnInit() {
-	te.Splits.OnInit()
+func (te *TwinEditors) Init() {
+	te.Splits.Init()
 	te.BufferA = NewBuffer()
 	te.BufferB = NewBuffer()
 

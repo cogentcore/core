@@ -65,8 +65,8 @@ var getWebURL func() string
 // saveWebURL, if non-nil, saves the given web URL to the user's browser address bar and history.
 var saveWebURL func(u string)
 
-func (pg *Page) OnInit() {
-	pg.Frame.OnInit()
+func (pg *Page) Init() {
+	pg.Frame.Init()
 	pg.Context = htmlview.NewContext()
 	pg.Context.OpenURL = func(url string) {
 		pg.OpenURL(url, true)

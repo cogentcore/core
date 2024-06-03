@@ -143,9 +143,9 @@ func NewScene(name ...string) *Scene {
 	return sc
 }
 
-func (sc *Scene) OnInit() {
+func (sc *Scene) Init() {
 	sc.Scene = sc
-	sc.Frame.OnInit()
+	sc.Frame.Init()
 	sc.Style(func(s *styles.Style) {
 		s.Cursor = cursors.Arrow
 		s.Background = colors.C(colors.Scheme.Background)

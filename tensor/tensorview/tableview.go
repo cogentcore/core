@@ -69,8 +69,8 @@ type TableView struct {
 // check for interface impl
 var _ views.SliceViewer = (*TableView)(nil)
 
-func (tv *TableView) OnInit() {
-	tv.SliceViewBase.OnInit()
+func (tv *TableView) Init() {
+	tv.SliceViewBase.Init()
 	tv.SortIndex = -1
 	tv.TensorDisplay.Defaults()
 	tv.ColumnTensorDisplay = map[int]*TensorDisplay{}

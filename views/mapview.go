@@ -36,8 +36,8 @@ type MapView struct {
 
 func (mv *MapView) WidgetValue() any { return &mv.Map }
 
-func (mv *MapView) OnInit() {
-	mv.Frame.OnInit()
+func (mv *MapView) Init() {
+	mv.Frame.Init()
 	mv.Style(func(s *styles.Style) {
 		if mv.Inline {
 			return

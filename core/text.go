@@ -98,8 +98,8 @@ const (
 
 func (tx *Text) WidgetValue() any { return &tx.Text }
 
-func (tx *Text) OnInit() {
-	tx.WidgetBase.OnInit()
+func (tx *Text) Init() {
+	tx.WidgetBase.Init()
 	tx.SetType(TextBodyLarge)
 	tx.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable)

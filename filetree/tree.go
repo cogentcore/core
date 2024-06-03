@@ -75,8 +75,8 @@ type Tree struct {
 	UpdateMu sync.Mutex `copier:"-" set:"-" view:"-"`
 }
 
-func (ft *Tree) OnInit() {
-	ft.Node.OnInit()
+func (ft *Tree) Init() {
+	ft.Node.Init()
 	ft.FRoot = ft
 	ft.FileNodeType = NodeType
 	ft.OpenDepth = 4

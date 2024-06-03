@@ -40,8 +40,8 @@ func (cv *ColorView) SetHCT(hct hct.HCT) *ColorView {
 	return cv
 }
 
-func (cv *ColorView) OnInit() {
-	cv.Frame.OnInit()
+func (cv *ColorView) Init() {
+	cv.Frame.Init()
 	cv.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
@@ -118,7 +118,7 @@ func (cv *ColorView) OnInit() {
 }
 
 /*
-func (cv *ColorView) OnInit() {
+func (cv *ColorView) Init() {
 	cv.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(cv) {
 		case "value":
@@ -492,8 +492,8 @@ type ColorButton struct {
 
 func (cb *ColorButton) WidgetValue() any { return &cb.Color }
 
-func (cb *ColorButton) OnInit() {
-	cb.Button.OnInit()
+func (cb *ColorButton) Init() {
+	cb.Button.Init()
 	cb.SetType(core.ButtonTonal).SetText("Edit color").SetIcon(icons.Colors)
 	cb.Style(func(s *styles.Style) {
 		// we need to display button as non-transparent

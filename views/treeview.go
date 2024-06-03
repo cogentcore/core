@@ -211,8 +211,8 @@ func (tv *TreeView) RootSetViewIndex() int {
 	return idx
 }
 
-func (tv *TreeView) OnInit() {
-	tv.WidgetBase.OnInit()
+func (tv *TreeView) Init() {
+	tv.WidgetBase.Init()
 	tv.AddContextMenu(tv.ContextMenu)
 	tv.IconOpen = icons.KeyboardArrowDown
 	tv.IconClosed = icons.KeyboardArrowRight

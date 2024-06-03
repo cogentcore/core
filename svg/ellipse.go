@@ -21,7 +21,7 @@ type Ellipse struct {
 
 func (g *Ellipse) SVGName() string { return "ellipse" }
 
-func (g *Ellipse) OnInit() {
+func (g *Ellipse) Init() {
 	g.Radii.Set(1, 1)
 }
 

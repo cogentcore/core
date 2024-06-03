@@ -47,8 +47,8 @@ func NewBody(name ...string) *Body {
 	return bd
 }
 
-func (bd *Body) OnInit() {
-	bd.Frame.OnInit()
+func (bd *Body) Init() {
+	bd.Frame.Init()
 	bd.Style(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 		s.Direction = styles.Column

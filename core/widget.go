@@ -311,10 +311,10 @@ func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
 	return (*WidgetFlags)(&wb.Flags)
 }
 
-// OnInit should be called by every Widget type in its custom
-// OnInit if it has one to establish all the default styling
+// Init should be called by every Widget type in its custom
+// Init if it has one to establish all the default styling
 // and event handling that applies to all widgets.
-func (wb *WidgetBase) OnInit() {
+func (wb *WidgetBase) Init() {
 	wb.Style(func(s *styles.Style) {
 		s.MaxBorder.Style.Set(styles.BorderSolid)
 		s.MaxBorder.Color.Set(colors.C(colors.Scheme.Primary.Base))

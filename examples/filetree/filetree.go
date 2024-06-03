@@ -56,7 +56,7 @@ func (fb *FileBrowse) Defaults() {
 
 // todo: rewrite with direct config, as a better example
 
-func (fb *FileBrowse) OnInit() {
+func (fb *FileBrowse) Init() {
 	fb.Defaults()
 	fb.Style(func(s *styles.Style) {
 		s.Direction = styles.Column

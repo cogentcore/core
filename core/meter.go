@@ -66,8 +66,8 @@ const (
 
 func (m *Meter) WidgetValue() any { return &m.Value }
 
-func (m *Meter) OnInit() {
-	m.WidgetBase.OnInit()
+func (m *Meter) Init() {
+	m.WidgetBase.Init()
 	m.Value = 0.5
 	m.Max = 1
 	m.Style(func(s *styles.Style) {

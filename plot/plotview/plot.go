@@ -64,8 +64,8 @@ func (pt *Plot) UpdatePlot() {
 	pt.NeedsRender()
 }
 
-func (pt *Plot) OnInit() {
-	pt.WidgetBase.OnInit()
+func (pt *Plot) Init() {
+	pt.WidgetBase.Init()
 	pt.Scale = 1
 	pt.Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))

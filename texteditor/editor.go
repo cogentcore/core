@@ -203,8 +203,8 @@ func (ed *Editor) FlagType() enums.BitFlagSetter {
 	return (*EditorFlags)(&ed.Flags)
 }
 
-func (ed *Editor) OnInit() {
-	ed.Frame.OnInit()
+func (ed *Editor) Init() {
+	ed.Frame.Init()
 	ed.AddContextMenu(ed.ContextMenu)
 	ed.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)

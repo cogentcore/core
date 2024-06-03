@@ -264,8 +264,8 @@ func (sv *SliceViewBase) FlagType() enums.BitFlagSetter {
 	return (*SliceViewFlags)(&sv.Flags)
 }
 
-func (sv *SliceViewBase) OnInit() {
-	sv.Frame.OnInit()
+func (sv *SliceViewBase) Init() {
+	sv.Frame.Init()
 	sv.AddContextMenu(sv.ContextMenu)
 	sv.InitSelectedIndex = -1
 	sv.HoverRow = -1
@@ -1889,8 +1889,8 @@ type SliceViewGrid struct {
 	LastBackground image.Image
 }
 
-func (sg *SliceViewGrid) OnInit() {
-	sg.Frame.OnInit()
+func (sg *SliceViewGrid) Init() {
+	sg.Frame.Init()
 	sg.Style(func(s *styles.Style) {
 		s.Display = styles.Grid
 	})

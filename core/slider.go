@@ -152,8 +152,8 @@ func (sr *Slider) OnBind(value any) {
 	}
 }
 
-func (sr *Slider) OnInit() {
-	sr.Frame.OnInit()
+func (sr *Slider) Init() {
+	sr.Frame.Init()
 	sr.Value = 0.5
 	sr.Max = 1
 	sr.VisiblePct = 1

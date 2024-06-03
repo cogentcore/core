@@ -26,7 +26,7 @@ type Rect struct {
 
 func (g *Rect) SVGName() string { return "rect" }
 
-func (g *Rect) OnInit() {
+func (g *Rect) Init() {
 	g.Size.Set(1, 1)
 }
 

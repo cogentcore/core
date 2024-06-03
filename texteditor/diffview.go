@@ -151,8 +151,8 @@ type DiffView struct {
 	inInputEvent bool
 }
 
-func (dv *DiffView) OnInit() {
-	dv.Frame.OnInit()
+func (dv *DiffView) Init() {
+	dv.Frame.Init()
 	dv.BufA = NewBuffer().SetFilename(dv.FileA)
 	dv.BufB = NewBuffer().SetFilename(dv.FileB)
 	dv.BufA.Options.LineNumbers = true
@@ -658,8 +658,8 @@ type DiffTextEditor struct {
 	Editor
 }
 
-func (tv *DiffTextEditor) OnInit() {
-	tv.Editor.OnInit()
+func (tv *DiffTextEditor) Init() {
+	tv.Editor.Init()
 	tv.HandleDoubleClick()
 }
 

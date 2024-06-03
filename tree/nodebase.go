@@ -831,9 +831,9 @@ func (n *NodeBase) CopyFieldsFrom(from Node) {
 
 // Event methods:
 
-// OnInit is a placeholder implementation of
-// [Node.OnInit] that does nothing.
-func (n *NodeBase) OnInit() {}
+// Init is a placeholder implementation of
+// [Node.Init] that does nothing.
+func (n *NodeBase) Init() {}
 
 // OnAdd is a placeholder implementation of
 // [Node.OnAdd] that does nothing.

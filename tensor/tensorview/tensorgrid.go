@@ -187,8 +187,8 @@ func (tg *TensorGrid) SetWidgetValue(value any) error {
 	return nil
 }
 
-func (tg *TensorGrid) OnInit() {
-	tg.WidgetBase.OnInit()
+func (tg *TensorGrid) Init() {
+	tg.WidgetBase.Init()
 	tg.Display.GridView = tg
 	tg.Display.Defaults()
 	tg.Style(func(s *styles.Style) {

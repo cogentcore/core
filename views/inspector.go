@@ -36,8 +36,8 @@ type Inspector struct {
 	Filename core.Filename `set:"-"`
 }
 
-func (is *Inspector) OnInit() {
-	is.Frame.OnInit()
+func (is *Inspector) Init() {
+	is.Frame.Init()
 	is.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		s.Direction = styles.Column

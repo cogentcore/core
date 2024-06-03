@@ -347,14 +347,14 @@ type Node interface {
 
 	// Event methods:
 
-	// OnInit is called when the node is
+	// Init is called when the node is
 	// initialized (ie: through [Node.InitName]).
 	// It is called before the node is added to the tree,
 	// so it will not have any parents or siblings.
 	// It will be called only once in the lifetime of the node.
 	// It does nothing by default, but it can be implemented
 	// by higher-level types that want to do something.
-	OnInit()
+	Init()
 
 	// OnAdd is called when the node is added to a parent.
 	// It will be called only once in the lifetime of the node,

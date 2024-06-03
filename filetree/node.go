@@ -85,8 +85,8 @@ const (
 	NodeSymLink
 )
 
-func (fn *Node) OnInit() {
-	fn.TreeView.OnInit()
+func (fn *Node) Init() {
+	fn.TreeView.Init()
 	fn.ContextMenus = nil // do not include treeview
 	fn.AddContextMenu(fn.ContextMenu)
 	fn.Style(func(s *styles.Style) {

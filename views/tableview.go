@@ -64,8 +64,8 @@ type TableView struct {
 // configuration of elements in the table view.
 type TableViewStyleFunc func(w core.Widget, s *styles.Style, row, col int)
 
-func (tv *TableView) OnInit() {
-	tv.SliceViewBase.OnInit()
+func (tv *TableView) Init() {
+	tv.SliceViewBase.Init()
 	tv.AddContextMenu(tv.ContextMenu)
 	tv.SortIndex = -1
 

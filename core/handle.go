@@ -31,8 +31,8 @@ type Handle struct {
 	Pos float32
 }
 
-func (hl *Handle) OnInit() {
-	hl.WidgetBase.OnInit()
+func (hl *Handle) Init() {
+	hl.WidgetBase.Init()
 	hl.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 
