@@ -225,49 +225,28 @@ func inputs(ts *core.Tabs) {
 	core.NewSwitch(tab).SetText("Toggle")
 
 	core.NewSwitches(tab).SetItems(
-		core.SwitchItem{"Switch 1", "A description for Switch 1"},
-		core.SwitchItem{"Switch 2", "A description for Switch 2"},
-		core.SwitchItem{"Switch 3", "A description for Switch 3"})
+		core.SwitchItem{Value: "Switch 1", Tooltip: "The first switch"},
+		core.SwitchItem{Value: "Switch 2", Tooltip: "The second switch"},
+		core.SwitchItem{Value: "Switch 3", Tooltip: "The third switch"})
 
-	core.NewSwitches(tab).SetType(core.SwitchChip).SetItems(
-		core.SwitchItem{"Chip 1", "A description for Chip 1"},
-		core.SwitchItem{"Chip 2", "A description for Chip 2"},
-		core.SwitchItem{"Chip 3", "A description for Chip 3"})
+	core.NewSwitches(tab).SetType(core.SwitchChip).SetStrings("Chip 1", "Chip 2", "Chip 3")
+	core.NewSwitches(tab).SetType(core.SwitchCheckbox).SetStrings("Checkbox 1", "Checkbox 2", "Checkbox 3")
+	core.NewSwitches(tab).SetType(core.SwitchCheckbox).SetStrings("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
+		OnWidgetAdded(func(w core.Widget) { // TODO(config)
+			if sw, ok := w.(*core.Switch); ok {
+				sw.SetState(true, states.Indeterminate)
+			}
+		})
 
-	core.NewSwitches(tab).SetType(core.SwitchCheckbox).SetItems(
-		core.SwitchItem{"Checkbox 1", "A description for Checkbox 1"},
-		core.SwitchItem{"Checkbox 2", "A description for Checkbox 2"},
-		core.SwitchItem{"Checkbox 3", "A description for Checkbox 3"})
-
-	core.NewSwitches(tab).SetType(core.SwitchCheckbox).SetItems(
-		core.SwitchItem{"Indeterminate 1", "A description for Indeterminate Checkbox 1"},
-		core.SwitchItem{"Indeterminate 2", "A description for Indeterminate Checkbox 2"},
-		core.SwitchItem{"Indeterminate 3", "A description for Indeterminate Checkbox 3"}).
+	core.NewSwitches(tab).SetType(core.SwitchRadioButton).SetMutex(true).SetStrings("Radio Button 1", "Radio Button 2", "Radio Button 3")
+	core.NewSwitches(tab).SetType(core.SwitchRadioButton).SetMutex(true).SetStrings("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
 		OnWidgetAdded(func(w core.Widget) {
 			if sw, ok := w.(*core.Switch); ok {
 				sw.SetState(true, states.Indeterminate)
 			}
 		})
 
-	core.NewSwitches(tab).SetType(core.SwitchRadioButton).SetMutex(true).SetItems(
-		core.SwitchItem{"Radio Button 1", "A description for Radio Button 1"},
-		core.SwitchItem{"Radio Button 2", "A description for Radio Button 2"},
-		core.SwitchItem{"Radio Button 3", "A description for Radio Button 3"})
-
-	core.NewSwitches(tab).SetType(core.SwitchRadioButton).SetMutex(true).SetItems(
-		core.SwitchItem{"Indeterminate 1", "A description for Indeterminate Radio Button 1"},
-		core.SwitchItem{"Indeterminate 2", "A description for Indeterminate Radio Button 2"},
-		core.SwitchItem{"Indeterminate 3", "A description for Indeterminate Radio Button 3"}).
-		OnWidgetAdded(func(w core.Widget) {
-			if sw, ok := w.(*core.Switch); ok {
-				sw.SetState(true, states.Indeterminate)
-			}
-		})
-
-	core.NewSwitches(tab).SetType(core.SwitchSegmentedButton).SetMutex(true).SetItems(
-		core.SwitchItem{"Segmented Button 1", "A description for Segmented Button 1"},
-		core.SwitchItem{"Segmented Button 2", "A description for Segmented Button 2"},
-		core.SwitchItem{"Segmented Button 3", "A description for Segmented Button 3"})
+	core.NewSwitches(tab).SetType(core.SwitchSegmentedButton).SetMutex(true).SetStrings("Segmented Button 1", "Segmented Button 2", "Segmented Button 3")
 }
 
 func sliders(ts *core.Tabs) {

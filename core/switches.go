@@ -6,10 +6,11 @@ package core
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"unicode"
 
-	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
@@ -42,11 +43,29 @@ type Switches struct {
 // SwitchItem contains the properties of one item in a [Switches].
 type SwitchItem struct {
 
+	// Value is the underlying value the switch item represents.
+	Value any
+
 	// Text is the text displayed to the user for this item.
+	// If it is empty, then [labels.ToLabel] of [SwitchItem.Value]
+	// is used instead.
 	Text string
 
 	// Tooltip is the tooltip displayed to the user for this item.
 	Tooltip string
+}
+
+// GetText returns the effective text for this switch item.
+// If [SwitchItem.Text] is set, it returns that. Otherwise,
+// it returns [labels.ToLabel] of [SwitchItem.Value].
+func (si *SwitchItem) GetText() string {
+	if si.Text != "" {
+		return si.Text
+	}
+	if si.Value == nil {
+		return ""
+	}
+	return labels.ToLabel(si.Value)
 }
 
 func (sw *Switches) WidgetValue() any {
@@ -58,7 +77,7 @@ func (sw *Switches) WidgetValue() any {
 	if item == nil {
 		return nil
 	}
-	return item.Text
+	return item.Value
 }
 
 func (sw *Switches) SetWidgetValue(value any) error {
@@ -66,7 +85,7 @@ func (sw *Switches) SetWidgetValue(value any) error {
 		sw.UpdateFromBitFlag(bf)
 		return nil
 	}
-	return sw.SetSelectedItem(reflectx.ToString(value))
+	return sw.SetSelectedItem(value)
 }
 
 func (sw *Switches) OnBind(value any) {
@@ -102,8 +121,8 @@ func (sw *Switches) Init() {
 	})
 
 	sw.Maker(func(p *Plan) {
-		for _, item := range sw.Items {
-			AddAt(p, item.Text, func(w *Switch) {
+		for i, item := range sw.Items {
+			AddAt(p, strconv.Itoa(i), func(w *Switch) {
 				w.OnChange(func(e events.Event) {
 					if sw.Mutex && w.IsChecked() {
 						sw.UnCheckAllBut(w.IndexInParent())
@@ -150,7 +169,7 @@ func (sw *Switches) Init() {
 					}
 				})
 				w.Updater(func() {
-					w.SetType(sw.Type).SetText(item.Text).SetTooltip(item.Tooltip)
+					w.SetType(sw.Type).SetText(item.GetText()).SetTooltip(item.Tooltip)
 				})
 			})
 		}
@@ -198,14 +217,14 @@ func (sw *Switches) SelectedItem() *SwitchItem {
 	return nil
 }
 
-// SetSelectedItem selects the item with the given text.
-func (sw *Switches) SetSelectedItem(text string) error {
+// SetSelectedItem selects the item with the given [SwitchItem.Value].
+func (sw *Switches) SetSelectedItem(value any) error {
 	for i, item := range sw.Items {
-		if item.Text == text {
+		if item.Value == value {
 			return sw.SelectItem(i)
 		}
 	}
-	return fmt.Errorf("core.Switches.SetSelectedItem: item not found: %v", text)
+	return fmt.Errorf("core.Switches.SetSelectedItem: item not found: %v", value)
 }
 
 // SelectedItems returns all of the currently selected (checked) switch items.
@@ -247,7 +266,7 @@ func (sw *Switches) UnCheckAllBut(idx int) {
 func (sw *Switches) SetStrings(ss ...string) *Switches {
 	sw.Items = make([]SwitchItem, len(ss))
 	for i, s := range ss {
-		sw.Items[i] = SwitchItem{Text: s}
+		sw.Items[i] = SwitchItem{Value: s}
 	}
 	return sw
 }
@@ -272,7 +291,7 @@ func (sw *Switches) SetEnums(es ...enums.Enum) *Switches {
 			str, _, _ = strings.Cut(desc, " ")
 		}
 		tip := types.FormatDoc(desc, str, lbl)
-		sw.Items[i] = SwitchItem{Text: lbl, Tooltip: tip}
+		sw.Items[i] = SwitchItem{Value: enum, Text: lbl, Tooltip: tip}
 	}
 	return sw
 }

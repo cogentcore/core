@@ -93,7 +93,7 @@ func (tv *TimeView) Init() {
 	tv.Maker(func(p *core.Plan) {
 		if !core.SystemSettings.Clock24 {
 			core.Add(p, func(w *core.Switches) {
-				w.SetMutex(true).SetType(core.SwitchSegmentedButton).SetItems(core.SwitchItem{Text: "AM"}, core.SwitchItem{Text: "PM"})
+				w.SetMutex(true).SetType(core.SwitchSegmentedButton).SetItems(core.SwitchItem{Value: "AM"}, core.SwitchItem{Value: "PM"})
 				w.Style(func(s *styles.Style) {
 					s.Direction = styles.Column
 				})
@@ -113,7 +113,7 @@ func (tv *TimeView) Init() {
 					if tv.Hour == 12 {
 						tv.Hour = 0
 					}
-					switch si.Text {
+					switch si.Value {
 					case "AM":
 						tv.PM = false
 						tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())

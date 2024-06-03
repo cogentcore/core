@@ -89,14 +89,14 @@ type Chooser struct {
 }
 
 // ChooserItem is an item that can be used in a [Chooser].
-type ChooserItem struct { //types:add
+type ChooserItem struct {
 
-	// Value is the underlying value of the chooser item.
+	// Value is the underlying value the chooser item represents.
 	Value any
 
 	// Text is the text displayed to the user for this item.
-	// If it is empty, then [ToLabel] of [ChooserItem.Value] is
-	// used instead.
+	// If it is empty, then [labels.ToLabel] of [ChooserItem.Value]
+	// is used instead.
 	Text string
 
 	// Icon is the icon displayed to the user for this item.
@@ -114,10 +114,10 @@ type ChooserItem struct { //types:add
 	SeparatorBefore bool
 }
 
-// GetLabel returns the effective label of this chooser item.
-// If [ChooserItem.Label] is set, it returns that. Otherwise,
-// it uses [ToLabel] of [ChooserItem.Value]
-func (ci *ChooserItem) GetLabel() string {
+// GetText returns the effective text for this chooser item.
+// If [ChooserItem.Text] is set, it returns that. Otherwise,
+// it returns [labels.ToLabel] of [ChooserItem.Value].
+func (ci *ChooserItem) GetText() string {
 	if ci.Text != "" {
 		return ci.Text
 	}
@@ -315,7 +315,7 @@ func (ch *Chooser) Init() {
 					}
 				})
 				w.Updater(func() {
-					w.SetText(ch.CurrentItem.GetLabel()).SetLeadingIcon(ch.Icon).
+					w.SetText(ch.CurrentItem.GetText()).SetLeadingIcon(ch.Icon).
 						SetTrailingIcon(ch.Indicator, func(e events.Event) {
 							ch.OpenMenu(e)
 						})
@@ -346,7 +346,7 @@ func (ch *Chooser) Init() {
 					s.SetTextWrap(false)
 				})
 				w.Updater(func() {
-					w.SetText(ch.CurrentItem.GetLabel())
+					w.SetText(ch.CurrentItem.GetText())
 				})
 			})
 		}
@@ -497,7 +497,7 @@ func (ch *Chooser) SetCurrentIndex(index int) *Chooser {
 // It can only be used for editable choosers.
 func (ch *Chooser) SetCurrentText(text string) error {
 	for i, item := range ch.Items {
-		if text == item.GetLabel() {
+		if text == item.GetText() {
 			ch.SetCurrentIndex(i)
 			return nil
 		}
@@ -515,12 +515,12 @@ func (ch *Chooser) ShowCurrentItem() *Chooser {
 	if ch.Editable {
 		tf := ch.TextField()
 		if tf != nil {
-			tf.SetText(ch.CurrentItem.GetLabel())
+			tf.SetText(ch.CurrentItem.GetText())
 		}
 	} else {
 		text := ch.TextWidget()
 		if text != nil {
-			text.SetText(ch.CurrentItem.GetLabel()).UpdateWidget()
+			text.SetText(ch.CurrentItem.GetText()).UpdateWidget()
 		}
 	}
 	if ch.CurrentItem.Icon.IsSet() {
@@ -581,7 +581,7 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 		if it.SeparatorBefore {
 			NewSeparator(m)
 		}
-		bt := NewButton(m).SetText(it.GetLabel()).SetIcon(it.Icon).SetTooltip(it.Tooltip)
+		bt := NewButton(m).SetText(it.GetText()).SetIcon(it.Icon).SetTooltip(it.Tooltip)
 		bt.SetSelected(i == ch.CurrentIndex)
 		bt.OnClick(func(e events.Event) {
 			ch.SelectItemAction(i)
@@ -635,7 +635,7 @@ func (ch *Chooser) CompleteMatch(data any, text string, posLine, posChar int) (m
 	comps := make(complete.Completions, len(ch.Items))
 	for i, item := range ch.Items {
 		comps[i] = complete.Completion{
-			Text: item.GetLabel(),
+			Text: item.GetText(),
 			Desc: item.Tooltip,
 			Icon: item.Icon,
 		}

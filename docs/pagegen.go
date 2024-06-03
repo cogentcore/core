@@ -598,9 +598,9 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/switches-6": func(parent core.Widget) {
 		core.NewSwitches(parent).SetItems(
-			core.SwitchItem{Text: "Go", Tooltip: "Elegant, fast, and easy-to-use"},
-			core.SwitchItem{Text: "Python", Tooltip: "Slow and duck-typed"},
-			core.SwitchItem{Text: "C++", Tooltip: "Hard to use and slow to compile"},
+			core.SwitchItem{Value: "Go", Tooltip: "Elegant, fast, and easy-to-use"},
+			core.SwitchItem{Value: "Python", Tooltip: "Slow and duck-typed"},
+			core.SwitchItem{Value: "C++", Tooltip: "Hard to use and slow to compile"},
 		)
 	},
 	"widgets/switches-7": func(parent core.Widget) {
