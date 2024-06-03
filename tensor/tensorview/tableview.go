@@ -306,7 +306,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 		if col.NumDims() == 1 {
 			str := ""
 			fval := float64(0)
-			core.AddNew(p, valnm, func() core.Value { // TODO(config): path nesting
+			core.AddNew(p, valnm, func() core.Value {
 				if isstr {
 					return core.NewValue(&str, "")
 				} else {
