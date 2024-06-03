@@ -6,11 +6,13 @@ package core
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 	"unicode"
 
 	"cogentcore.org/core/base/labels"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
@@ -81,6 +83,7 @@ func (sw *Switches) WidgetValue() any {
 }
 
 func (sw *Switches) SetWidgetValue(value any) error {
+	value = reflectx.Underlying(reflect.ValueOf(value)).Interface()
 	if bf, ok := value.(enums.BitFlag); ok {
 		sw.UpdateFromBitFlag(bf)
 		return nil
@@ -224,7 +227,7 @@ func (sw *Switches) SetSelectedItem(value any) error {
 			return sw.SelectItem(i)
 		}
 	}
-	return fmt.Errorf("core.Switches.SetSelectedItem: item not found: %v", value)
+	return fmt.Errorf("core.Switches.SetSelectedItem: item not found: (value: %v, items: %v)", value, sw.Items)
 }
 
 // SelectedItems returns all of the currently selected (checked) switch items.

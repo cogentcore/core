@@ -146,7 +146,7 @@ const (
 func (ch *Chooser) WidgetValue() any { return ch.CurrentItem.Value }
 
 func (ch *Chooser) SetWidgetValue(value any) error {
-	value = reflectx.NonPointerValue(reflect.ValueOf(value)).Interface()
+	value = reflectx.Underlying(reflect.ValueOf(value)).Interface()
 	ch.SetCurrentValue(value)
 	return nil
 }
