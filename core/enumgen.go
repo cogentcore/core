@@ -205,16 +205,16 @@ func (i *WidgetFlags) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "WidgetFlags")
 }
 
-var _FrameFlagsValues = []FrameFlags{2}
+var _FrameFlagsValues = []FrameFlags{3}
 
 // FrameFlagsN is the highest valid value for type FrameFlags, plus one.
-const FrameFlagsN FrameFlags = 3
+const FrameFlagsN FrameFlags = 4
 
-var _FrameFlagsValueMap = map[string]FrameFlags{`StackTopOnly`: 2}
+var _FrameFlagsValueMap = map[string]FrameFlags{`StackTopOnly`: 3}
 
-var _FrameFlagsDescMap = map[FrameFlags]string{2: `FrameStackTopOnly is whether to only layout the top widget for a stacked frame layout. This is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don&#39;t.`}
+var _FrameFlagsDescMap = map[FrameFlags]string{3: `FrameStackTopOnly is whether to only layout the top widget for a stacked frame layout. This is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don&#39;t.`}
 
-var _FrameFlagsMap = map[FrameFlags]string{2: `StackTopOnly`}
+var _FrameFlagsMap = map[FrameFlags]string{3: `StackTopOnly`}
 
 // String returns the string representation of this FrameFlags value.
 func (i FrameFlags) String() string {
@@ -480,16 +480,16 @@ func (i *RenderContextFlags) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "RenderContextFlags")
 }
 
-var _ScFlagsValues = []ScFlags{2, 3, 4, 5, 6, 7, 8, 9}
+var _ScFlagsValues = []ScFlags{3, 4, 5, 6, 7, 8, 9, 10}
 
 // ScFlagsN is the highest valid value for type ScFlags, plus one.
-const ScFlagsN ScFlags = 10
+const ScFlagsN ScFlags = 11
 
-var _ScFlagsValueMap = map[string]ScFlags{`ScUpdating`: 2, `ScNeedsRender`: 3, `ScNeedsLayout`: 4, `ScNeedsRebuild`: 5, `ScImageUpdated`: 6, `ScPrefSizing`: 7, `ScPreserve`: 8, `ScRenderBBoxes`: 9}
+var _ScFlagsValueMap = map[string]ScFlags{`ScUpdating`: 3, `ScNeedsRender`: 4, `ScNeedsLayout`: 5, `ScNeedsRebuild`: 6, `ScImageUpdated`: 7, `ScPrefSizing`: 8, `ScPreserve`: 9, `ScRenderBBoxes`: 10}
 
-var _ScFlagsDescMap = map[ScFlags]string{2: `ScUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`, 3: `ScNeedsRender means nodes have flagged that they need a Render update.`, 4: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`, 5: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`, 6: `ScImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global RenderWindow rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`, 7: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`, 8: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`, 9: `ScRenderBBoxes renders the bounding boxes for all objects in scene`}
+var _ScFlagsDescMap = map[ScFlags]string{3: `ScUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`, 4: `ScNeedsRender means nodes have flagged that they need a Render update.`, 5: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`, 6: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`, 7: `ScImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global RenderWindow rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`, 8: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`, 9: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`, 10: `ScRenderBBoxes renders the bounding boxes for all objects in scene`}
 
-var _ScFlagsMap = map[ScFlags]string{2: `ScUpdating`, 3: `ScNeedsRender`, 4: `ScNeedsLayout`, 5: `ScNeedsRebuild`, 6: `ScImageUpdated`, 7: `ScPrefSizing`, 8: `ScPreserve`, 9: `ScRenderBBoxes`}
+var _ScFlagsMap = map[ScFlags]string{3: `ScUpdating`, 4: `ScNeedsRender`, 5: `ScNeedsLayout`, 6: `ScNeedsRebuild`, 7: `ScImageUpdated`, 8: `ScPrefSizing`, 9: `ScPreserve`, 10: `ScRenderBBoxes`}
 
 // String returns the string representation of this ScFlags value.
 func (i ScFlags) String() string {

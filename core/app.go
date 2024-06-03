@@ -122,7 +122,7 @@ func StandardAppBarMaker(p *Plan) {
 // AppBarBackMaker adds a back button
 func AppBarBackMaker(p *Plan) {
 	AddAt(p, "back", func(w *Button) {
-		w.SetIcon(icons.ArrowBack).SetTooltip("Back").SetKey(keymap.HistPrev)
+		w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev).SetTooltip("Back")
 		w.OnClick(func(e events.Event) {
 			if slen := w.Scene.Stage.Mains.Stack.Len(); slen > 1 {
 				if w.Scene.Stage.CloseOnBack {
@@ -203,7 +203,8 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 		})
 	}
 	if InspectorWindow != nil {
-		NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetTooltip("Developer tools for inspecting the content of the app").SetShortcut("Command+Shift+I").
+		NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetShortcut("Command+Shift+I").
+			SetTooltip("Developer tools for inspecting the content of the app").
 			OnClick(func(e events.Event) {
 				InspectorWindow(tb.Scene)
 			})

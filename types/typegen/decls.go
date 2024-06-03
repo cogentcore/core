@@ -92,7 +92,7 @@ func SetterFields(typ *Type) []types.Field {
 		}
 	}
 	do(typ.Fields)
-	do(typ.EmbeddedFields)
+	// do(typ.EmbeddedFields)
 	return res
 }
 
