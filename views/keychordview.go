@@ -20,7 +20,9 @@ type KeyChordButton struct {
 
 func (kc *KeyChordButton) WidgetValue() any { return &kc.Chord }
 
-func (kc *KeyChordButton) Config() {
+func (kc *KeyChordButton) Init() {
+	kc.Button.Init()
+	kc.SetType(core.ButtonTonal)
 	kc.OnKeyChord(func(e events.Event) {
 		if !kc.StateIs(states.Focused) {
 			return

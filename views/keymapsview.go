@@ -21,6 +21,9 @@ func (km *KeyMapButton) WidgetValue() any { return &km.MapName }
 func (km *KeyMapButton) Init() {
 	km.Button.Init()
 	km.SetType(core.ButtonTonal)
+	km.Updater(func() {
+		km.SetText(string(km.MapName))
+	})
 	core.InitValueButton(km, false, func(d *core.Body) {
 		d.SetTitle("Select a key map")
 		si := 0
