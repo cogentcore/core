@@ -533,7 +533,7 @@ func (tb *Buffer) FileModCheck() bool {
 }
 
 // Open loads the given file into the buffer.
-func (tb *Buffer) Open(filename core.Filename) error {
+func (tb *Buffer) Open(filename core.Filename) error { //types:add
 	err := tb.OpenFile(filename)
 	if err != nil {
 		return err
@@ -576,7 +576,7 @@ func (tb *Buffer) OpenFile(filename core.Filename) error {
 // Revert re-opens text from current file, if filename set -- returns false if
 // not -- uses an optimized diff-based update to preserve existing formatting
 // -- very fast if not very different
-func (tb *Buffer) Revert() bool {
+func (tb *Buffer) Revert() bool { //types:add
 	tb.StopDelayedReMarkup()
 	tb.AutoSaveDelete() // justin case
 	if tb.Filename == "" {
@@ -648,7 +648,7 @@ func (tb *Buffer) SaveAsFunc(filename core.Filename, afterFunc func(canceled boo
 
 // SaveAs saves the current text into given file -- does an EditDone first to save edits
 // and checks for an existing file -- if it does exist then prompts to overwrite or not.
-func (tb *Buffer) SaveAs(filename core.Filename) {
+func (tb *Buffer) SaveAs(filename core.Filename) { //types:add
 	tb.SaveAsFunc(filename, nil)
 }
 
@@ -668,7 +668,7 @@ func (tb *Buffer) SaveFile(filename core.Filename) error {
 
 // Save saves the current text into current Filename associated with this
 // buffer
-func (tb *Buffer) Save() error {
+func (tb *Buffer) Save() error { //types:add
 	if tb.Filename == "" {
 		return fmt.Errorf("views.Buf: filename is empty for Save")
 	}

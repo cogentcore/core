@@ -9,11 +9,7 @@ import (
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/events"
-	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/parse/lexer"
-	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/texteditor/textbuf"
 )
 
@@ -488,45 +484,4 @@ func (ed *Editor) ReCaseSelection(c strcase.Cases) string {
 	nstr := strcase.To(string(sel.ToBytes()), c)
 	ed.Buffer.ReplaceText(sel.Reg.Start, sel.Reg.End, sel.Reg.Start, nstr, EditSignal, ReplaceNoMatchCase)
 	return nstr
-}
-
-///////////////////////////////////////////////////////////
-//  Context Menu
-
-// ShowContextMenu displays the context menu with options dependent on situation
-func (ed *Editor) ShowContextMenu(e events.Event) {
-	if ed.Buffer.Spell != nil && !ed.HasSelection() && ed.Buffer.IsSpellEnabled(ed.CursorPos) {
-		if ed.Buffer.Spell != nil {
-			if ed.OfferCorrect() {
-				return
-			}
-		}
-	}
-	ed.WidgetBase.ShowContextMenu(e)
-}
-
-// ContextMenu builds the text editor context menu
-func (ed *Editor) ContextMenu(m *core.Scene) {
-	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).
-		SetKey(keymap.Copy).SetState(!ed.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			ed.Copy(true)
-		})
-	if !ed.IsReadOnly() {
-		core.NewButton(m).SetText("Cut").SetIcon(icons.ContentCopy).
-			SetKey(keymap.Cut).SetState(!ed.HasSelection(), states.Disabled).
-			OnClick(func(e events.Event) {
-				ed.Cut()
-			})
-		core.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).
-			SetKey(keymap.Paste).SetState(ed.Clipboard().IsEmpty(), states.Disabled).
-			OnClick(func(e events.Event) {
-				ed.Paste()
-			})
-	} else {
-		core.NewButton(m).SetText("Clear").SetIcon(icons.ClearAll).
-			OnClick(func(e events.Event) {
-				ed.Clear()
-			})
-	}
 }
