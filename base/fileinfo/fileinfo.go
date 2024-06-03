@@ -68,7 +68,7 @@ type FileInfo struct { //types:add
 	Mode os.FileMode `tableview:"-"`
 
 	// time that contents (only) were last modified
-	ModTime FileTime `label:"Last modified"`
+	ModTime time.Time `label:"Last modified"`
 
 	// version control system status, when enabled
 	VCS vcs.FileStatus `tableview:"-"`
@@ -107,7 +107,7 @@ func (fi *FileInfo) Stat() error {
 	}
 	fi.Size = datasize.Size(info.Size())
 	fi.Mode = info.Mode()
-	fi.ModTime = FileTime(info.ModTime())
+	fi.ModTime = info.ModTime()
 	if info.IsDir() {
 		fi.Kind = "Folder"
 		fi.Cat = Folder
@@ -335,48 +335,8 @@ func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 	return icn, false
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//    FileTime, FileSize
-
 // Note: can get all the detailed birth, access, change times from this package
 // 	"github.com/djherbis/times"
-
-// FileTime provides a default String format for file modification times, and
-// other useful methods; will plug into Value with date / time editor.
-type FileTime time.Time
-
-// Int satisfies the [reflectx.Inter] interface for sorting.
-func (ft FileTime) Int() int64 {
-	return (time.Time(ft)).Unix()
-}
-
-func (ft FileTime) String() string {
-	return (time.Time)(ft).Format("Mon Jan  2 15:04:05 MST 2006")
-}
-
-func (ft FileTime) MarshalBinary() ([]byte, error) {
-	return time.Time(ft).MarshalBinary()
-}
-
-func (ft FileTime) MarshalJSON() ([]byte, error) {
-	return time.Time(ft).MarshalJSON()
-}
-
-func (ft FileTime) MarshalText() ([]byte, error) {
-	return time.Time(ft).MarshalText()
-}
-
-func (ft *FileTime) UnmarshalBinary(data []byte) error {
-	return (*time.Time)(ft).UnmarshalBinary(data)
-}
-
-func (ft *FileTime) UnmarshalJSON(data []byte) error {
-	return (*time.Time)(ft).UnmarshalJSON(data)
-}
-
-func (ft *FileTime) UnmarshalText(data []byte) error {
-	return (*time.Time)(ft).UnmarshalText(data)
-}
 
 //////////////////////////////////////////////////////////////////////////////
 //    CopyFile

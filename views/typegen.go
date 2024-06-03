@@ -571,19 +571,19 @@ func (t *FontButton) NodeType() *types.Type { return FontButtonType }
 // New returns a new [*FontButton] value
 func (t *FontButton) New() tree.Node { return &FontButton{} }
 
-// FileTimeTextType is the [types.Type] for [FileTimeText]
-var FileTimeTextType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FileTimeText", IDName: "file-time-text", Doc: "FileTimeText represents a [fileinfo.FileTime] value with text\nthat displays a standard date and time format.", Embeds: []types.Field{{Name: "Text"}}, Fields: []types.Field{{Name: "Time"}}, Instance: &FileTimeText{}})
+// TimeTextType is the [types.Type] for [TimeText]
+var TimeTextType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TimeText", IDName: "time-text", Doc: "TimeText represents a [time.Time] value with text\nthat displays a standard date and time format.", Embeds: []types.Field{{Name: "Text"}}, Fields: []types.Field{{Name: "Time"}}, Instance: &TimeText{}})
 
-// NewFileTimeText returns a new [FileTimeText] with the given optional parent:
-// FileTimeText represents a [fileinfo.FileTime] value with text
+// NewTimeText returns a new [TimeText] with the given optional parent:
+// TimeText represents a [time.Time] value with text
 // that displays a standard date and time format.
-func NewFileTimeText(parent ...tree.Node) *FileTimeText { return tree.New[*FileTimeText](parent...) }
+func NewTimeText(parent ...tree.Node) *TimeText { return tree.New[*TimeText](parent...) }
 
-// NodeType returns the [*types.Type] of [FileTimeText]
-func (t *FileTimeText) NodeType() *types.Type { return FileTimeTextType }
+// NodeType returns the [*types.Type] of [TimeText]
+func (t *TimeText) NodeType() *types.Type { return TimeTextType }
 
-// New returns a new [*FileTimeText] value
-func (t *FileTimeText) New() tree.Node { return &FileTimeText{} }
+// New returns a new [*TimeText] value
+func (t *TimeText) New() tree.Node { return &TimeText{} }
 
-// SetTime sets the [FileTimeText.Time]
-func (t *FileTimeText) SetTime(v fileinfo.FileTime) *FileTimeText { t.Time = v; return t }
+// SetTime sets the [TimeText.Time]
+func (t *TimeText) SetTime(v time.Time) *TimeText { t.Time = v; return t }

@@ -8,7 +8,6 @@ import (
 	"reflect"
 	"time"
 
-	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
@@ -156,16 +155,16 @@ func (fb *FontButton) OnInit() {
 	})
 }
 
-// FileTimeText represents a [fileinfo.FileTime] value with text
+// TimeText represents a [time.Time] value with text
 // that displays a standard date and time format.
-type FileTimeText struct {
+type TimeText struct {
 	core.Text
-	Time fileinfo.FileTime
+	Time time.Time
 }
 
-func (ft *FileTimeText) WidgetValue() any { return &ft.Time }
+func (ft *TimeText) WidgetValue() any { return &ft.Time }
 
-func (ft *FileTimeText) OnInit() {
+func (ft *TimeText) OnInit() {
 	ft.Text.OnInit()
 	ft.Updater(func() {
 		ft.SetText(time.Time(ft.Time).Format("1/2/2006 " + core.SystemSettings.TimeFormat()))

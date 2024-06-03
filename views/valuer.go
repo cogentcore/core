@@ -9,8 +9,8 @@ package views
 import (
 	"image/color"
 	"reflect"
+	"time"
 
-	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events/key"
@@ -27,7 +27,7 @@ func init() {
 	core.AddValueType[core.Filename, *FileButton]()
 	core.AddValueType[icons.Icon, *IconButton]()
 	core.AddValueType[core.FontName, *FontButton]()
-	core.AddValueType[fileinfo.FileTime, *FileTimeText]()
+	core.AddValueType[time.Time, *TimeText]()
 	core.AddValueType[key.Chord, *KeyChordButton]()
 	// core.AddValueType[time.Time, *TimeButton]()
 	// AddValue(time.Duration(0), func() Value { return &DurationValue{} })
