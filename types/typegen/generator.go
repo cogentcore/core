@@ -221,10 +221,6 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 				return false, err
 			}
 			typ.Fields = fields
-
-			typ.EmbeddedFields = Fields{LocalTypes: map[string]string{}, Tags: map[string]string{}}
-			tp := g.Pkg.TypesInfo.TypeOf(ts.Type)
-			g.GetEmbeddedFields(&typ.EmbeddedFields, tp, tp)
 		}
 		g.Types = append(g.Types, typ)
 	}
@@ -243,34 +239,6 @@ func LocalTypeNameQualifier(pkg *types.Package) types.Qualifier {
 			return "" // same package; unqualified
 		}
 		return other.Name()
-	}
-}
-
-// GetEmbeddedFields recursively adds to the given set of embedded fields all of the embedded
-// fields for the given type. It does not add the fields in the given starting type,
-// as those fields aren't embedded.
-func (g *Generator) GetEmbeddedFields(efields *Fields, typ, startTyp types.Type) {
-	s, ok := typ.Underlying().(*types.Struct)
-	if !ok {
-		return
-	}
-	nf := s.NumFields()
-	for i := 0; i < nf; i++ {
-		f := s.Field(i)
-		if f.Embedded() {
-			g.GetEmbeddedFields(efields, f.Type(), startTyp)
-			continue
-		}
-		// we don't add for start type, as field in that aren't embedded
-		if typ == startTyp {
-			continue
-		}
-		field := types1.Field{
-			Name: f.Name(),
-		}
-		efields.Fields = append(efields.Fields, field)
-		efields.LocalTypes[field.Name] = types.TypeString(f.Type(), LocalTypeNameQualifier(g.Pkg.Types))
-		efields.Tags[field.Name] = s.Tag(i)
 	}
 }
 
