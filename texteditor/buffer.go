@@ -47,6 +47,8 @@ import (
 // explicit Action suffix.
 // Internally, the buffer represents new lines using \n = LF, but saving
 // and loading can deal with Windows/DOS CRLF format.
+//
+//types:add
 type Buffer struct {
 	// Filename is the filename of the file that was last loaded or saved. It is used when highlighting code.
 	Filename core.Filename `json:"-" xml:"-"`
