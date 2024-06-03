@@ -63,6 +63,20 @@ func (lg *Legend) Add(name string, thumbs ...Thumbnailer) {
 	lg.Entries = append(lg.Entries, LegendEntry{Text: name, Thumbs: thumbs})
 }
 
+// LegendForPlotter returns the legend Text for given plotter,
+// if it exists as a Thumbnailer in the legend entries.
+// Otherwise returns empty string.
+func (lg *Legend) LegendForPlotter(plt Plotter) string {
+	for _, e := range lg.Entries {
+		for _, tn := range e.Thumbs {
+			if tp, isp := tn.(Plotter); isp && tp == plt {
+				return e.Text
+			}
+		}
+	}
+	return ""
+}
+
 // Thumbnailer wraps the Thumbnail method, which
 // draws the small image in a legend representing the
 // style of data.
