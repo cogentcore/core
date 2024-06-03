@@ -116,7 +116,7 @@ func (ib *IconButton) Init() { // TODO(config): view:"show-name"
 		sv.SetStyleFunc(func(w core.Widget, s *styles.Style, row int) {
 			w.(*IconButton).SetText(strcase.ToSentence(string(all[row])))
 		})
-		sv.OnFinal(events.Select, func(e events.Event) {
+		sv.OnChange(func(e events.Event) {
 			ib.Icon = icons.AllIcons[si]
 		})
 	})
@@ -149,7 +149,7 @@ func (fb *FontButton) Init() {
 			s.Font.Style = fi[row].Style
 			s.Font.Size.Pt(18)
 		})
-		tv.OnFinal(events.Select, func(e events.Event) {
+		tv.OnChange(func(e events.Event) {
 			fb.Text = fi[si].Name
 		})
 	})

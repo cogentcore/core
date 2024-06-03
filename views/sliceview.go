@@ -509,10 +509,12 @@ func (sv *SliceViewBase) ClickSelectEvent(e events.Event) bool {
 
 // BindSelect makes the slice view a read-only selection slice view and then
 // binds its events to its scene and its current selection index to the given value.
+// It will send an [events.Change] event when the user changes the selection row.
 func (sv *SliceViewBase) BindSelect(val *int) *SliceViewBase {
 	sv.SetReadOnly(true)
 	sv.OnSelect(func(e events.Event) {
 		*val = sv.SelectedIndex
+		sv.SendChange(e)
 	})
 	sv.OnDoubleClick(func(e events.Event) {
 		if sv.ClickSelectEvent(e) {
