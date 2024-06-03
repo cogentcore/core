@@ -61,6 +61,9 @@ func GroupByIndex(ix *table.IndexView, colIndexes []int) *table.Splits {
 			curIx.AddIndex(rw)
 		}
 	}
+	if spl.Len() == 0 { // prevent crashing from subsequent ops: add an empty split
+		spl.New(ix.Table, curValues) // no rows added here
+	}
 	return spl
 }
 
