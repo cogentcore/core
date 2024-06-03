@@ -47,24 +47,6 @@ func (t *Linear) SetStart(v math32.Vector2) *Linear { t.Start = v; return t }
 // the ending point of the gradient (x2 and y2 in SVG)
 func (t *Linear) SetEnd(v math32.Vector2) *Linear { t.End = v; return t }
 
-// SetSpread sets the [Linear.Spread]
-func (t *Linear) SetSpread(v Spreads) *Linear { t.Spread = v; return t }
-
-// SetBlend sets the [Linear.Blend]
-func (t *Linear) SetBlend(v colors.BlendTypes) *Linear { t.Blend = v; return t }
-
-// SetUnits sets the [Linear.Units]
-func (t *Linear) SetUnits(v Units) *Linear { t.Units = v; return t }
-
-// SetBox sets the [Linear.Box]
-func (t *Linear) SetBox(v math32.Box2) *Linear { t.Box = v; return t }
-
-// SetTransform sets the [Linear.Transform]
-func (t *Linear) SetTransform(v math32.Matrix2) *Linear { t.Transform = v; return t }
-
-// SetOpacity sets the [Linear.Opacity]
-func (t *Linear) SetOpacity(v float32) *Linear { t.Opacity = v; return t }
-
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/colors/gradient.Radial", IDName: "radial", Doc: "Radial represents a radial gradient. It implements the [image.Image] interface.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "Base"}}, Fields: []types.Field{{Name: "Center", Doc: "the center point of the gradient (cx and cy in SVG)"}, {Name: "Focal", Doc: "the focal point of the gradient (fx and fy in SVG)"}, {Name: "Radius", Doc: "the radius of the gradient (rx and ry in SVG)"}, {Name: "rCenter", Doc: "current render version -- transformed by object matrix"}, {Name: "rFocal", Doc: "current render version -- transformed by object matrix"}, {Name: "rRadius", Doc: "current render version -- transformed by object matrix"}}})
 
 // SetCenter sets the [Radial.Center]:
@@ -78,21 +60,3 @@ func (t *Radial) SetFocal(v math32.Vector2) *Radial { t.Focal = v; return t }
 // SetRadius sets the [Radial.Radius]:
 // the radius of the gradient (rx and ry in SVG)
 func (t *Radial) SetRadius(v math32.Vector2) *Radial { t.Radius = v; return t }
-
-// SetSpread sets the [Radial.Spread]
-func (t *Radial) SetSpread(v Spreads) *Radial { t.Spread = v; return t }
-
-// SetBlend sets the [Radial.Blend]
-func (t *Radial) SetBlend(v colors.BlendTypes) *Radial { t.Blend = v; return t }
-
-// SetUnits sets the [Radial.Units]
-func (t *Radial) SetUnits(v Units) *Radial { t.Units = v; return t }
-
-// SetBox sets the [Radial.Box]
-func (t *Radial) SetBox(v math32.Box2) *Radial { t.Box = v; return t }
-
-// SetTransform sets the [Radial.Transform]
-func (t *Radial) SetTransform(v math32.Matrix2) *Radial { t.Transform = v; return t }
-
-// SetOpacity sets the [Radial.Opacity]
-func (t *Radial) SetOpacity(v float32) *Radial { t.Opacity = v; return t }

@@ -54,12 +54,6 @@ func (t *NodeField) New() tree.Node { return &NodeField{} }
 // SetField1 sets the [NodeField.Field1]
 func (t *NodeField) SetField1(v NodeEmbed) *NodeField { t.Field1 = v; return t }
 
-// SetMbr1 sets the [NodeField.Mbr1]
-func (t *NodeField) SetMbr1(v string) *NodeField { t.Mbr1 = v; return t }
-
-// SetMbr2 sets the [NodeField.Mbr2]
-func (t *NodeField) SetMbr2(v int) *NodeField { t.Mbr2 = v; return t }
-
 // NodeField2Type is the [types.Type] for [NodeField2]
 var NodeField2Type = types.AddType(&types.Type{Name: "cogentcore.org/core/tree/testdata.NodeField2", IDName: "node-field2", Embeds: []types.Field{{Name: "NodeField"}}, Fields: []types.Field{{Name: "Field2"}}, Instance: &NodeField2{}})
 
@@ -74,12 +68,3 @@ func (t *NodeField2) New() tree.Node { return &NodeField2{} }
 
 // SetField2 sets the [NodeField2.Field2]
 func (t *NodeField2) SetField2(v NodeEmbed) *NodeField2 { t.Field2 = v; return t }
-
-// SetMbr1 sets the [NodeField2.Mbr1]
-func (t *NodeField2) SetMbr1(v string) *NodeField2 { t.Mbr1 = v; return t }
-
-// SetMbr2 sets the [NodeField2.Mbr2]
-func (t *NodeField2) SetMbr2(v int) *NodeField2 { t.Mbr2 = v; return t }
-
-// SetField1 sets the [NodeField2.Field1]
-func (t *NodeField2) SetField1(v NodeEmbed) *NodeField2 { t.Field1 = v; return t }

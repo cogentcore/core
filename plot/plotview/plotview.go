@@ -614,12 +614,12 @@ func (pl *PlotView) MakeToolbar(p *core.Plan) {
 	})
 	core.Add(p, func(w *core.Separator) {})
 	core.Add(p, func(w *views.FuncButton) {
-		w.SetFunc(pl.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt).
-			SetAfterFunc(func() { pl.UpdatePlot() })
+		w.SetFunc(pl.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
+		w.SetAfterFunc(pl.UpdatePlot)
 	})
 	core.Add(p, func(w *views.FuncButton) {
-		w.SetFunc(pl.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff).
-			SetAfterFunc(func() { pl.UpdatePlot() })
+		w.SetFunc(pl.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
+		w.SetAfterFunc(pl.UpdatePlot)
 	})
 }
 

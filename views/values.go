@@ -139,7 +139,7 @@ func (fb *FontButton) OnInit() {
 		si := 0
 		fi := paint.FontLibrary.FontInfo
 		tv := NewTableView(d)
-		tv.SetSlice(&fi).SetSelectedValue(fb.Text).SetSelectedField("Name").BindSelect(&si)
+		tv.SetSlice(&fi).SetSelectedField("Name").SetSelectedValue(fb.Text).BindSelect(&si)
 		tv.SetStyleFunc(func(w core.Widget, s *styles.Style, row, col int) {
 			if col != 4 {
 				return

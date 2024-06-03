@@ -194,15 +194,6 @@ func (t *Plane) SetSegs(v math32.Vector2i) *Plane { t.Segs = v; return t }
 // offset from origin along direction of normal to the plane
 func (t *Plane) SetOffset(v float32) *Plane { t.Offset = v; return t }
 
-// SetColor sets the [Plane.Color]
-func (t *Plane) SetColor(v bool) *Plane { t.Color = v; return t }
-
-// SetDynamic sets the [Plane.Dynamic]
-func (t *Plane) SetDynamic(v bool) *Plane { t.Dynamic = v; return t }
-
-// SetTrans sets the [Plane.Trans]
-func (t *Plane) SetTrans(v bool) *Plane { t.Trans = v; return t }
-
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Box", IDName: "box", Doc: "Box is a rectangular-shaped solid (cuboid)", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Size", Doc: "size along each dimension"}, {Name: "Segs", Doc: "number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"}}})
 
 // SetSize sets the [Box.Size]:
@@ -212,15 +203,6 @@ func (t *Box) SetSize(v math32.Vector3) *Box { t.Size = v; return t }
 // SetSegs sets the [Box.Segs]:
 // number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
 func (t *Box) SetSegs(v math32.Vector3i) *Box { t.Segs = v; return t }
-
-// SetColor sets the [Box.Color]
-func (t *Box) SetColor(v bool) *Box { t.Color = v; return t }
-
-// SetDynamic sets the [Box.Dynamic]
-func (t *Box) SetDynamic(v bool) *Box { t.Dynamic = v; return t }
-
-// SetTrans sets the [Box.Trans]
-func (t *Box) SetTrans(v bool) *Box { t.Trans = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Sphere", IDName: "sphere", Doc: "Sphere is a sphere mesh", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Radius", Doc: "radius of the sphere"}, {Name: "WidthSegs", Doc: "number of segments around the width of the sphere (32 is reasonable default for full circle)"}, {Name: "HeightSegs", Doc: "number of height segments (32 is reasonable default for full height)"}, {Name: "AngStart", Doc: "starting radial angle in degrees, relative to -1,0,0 left side starting point"}, {Name: "AngLen", Doc: "total radial angle to generate in degrees (max = 360)"}, {Name: "ElevStart", Doc: "starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom"}, {Name: "ElevLen", Doc: "total angle to generate in degrees (max = 180)"}}})
 
@@ -251,15 +233,6 @@ func (t *Sphere) SetElevStart(v float32) *Sphere { t.ElevStart = v; return t }
 // SetElevLen sets the [Sphere.ElevLen]:
 // total angle to generate in degrees (max = 180)
 func (t *Sphere) SetElevLen(v float32) *Sphere { t.ElevLen = v; return t }
-
-// SetColor sets the [Sphere.Color]
-func (t *Sphere) SetColor(v bool) *Sphere { t.Color = v; return t }
-
-// SetDynamic sets the [Sphere.Dynamic]
-func (t *Sphere) SetDynamic(v bool) *Sphere { t.Dynamic = v; return t }
-
-// SetTrans sets the [Sphere.Trans]
-func (t *Sphere) SetTrans(v bool) *Sphere { t.Trans = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Cylinder", IDName: "cylinder", Doc: "Cylinder is a generalized cylinder shape, including a cone\nor truncated cone by having different size circles at either end.\nHeight is up along the Y axis.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Height", Doc: "height of the cylinder"}, {Name: "TopRad", Doc: "radius of the top -- set to 0 for a cone"}, {Name: "BotRad", Doc: "radius of the bottom"}, {Name: "RadialSegs", Doc: "number of radial segments (32 is a reasonable default for full circle)"}, {Name: "HeightSegs", Doc: "number of height segments"}, {Name: "Top", Doc: "render the top disc"}, {Name: "Bottom", Doc: "render the bottom disc"}, {Name: "AngStart", Doc: "starting angle in degrees, relative to -1,0,0 left side starting point"}, {Name: "AngLen", Doc: "total angle to generate in degrees (max 360)"}}})
 
@@ -299,15 +272,6 @@ func (t *Cylinder) SetAngStart(v float32) *Cylinder { t.AngStart = v; return t }
 // total angle to generate in degrees (max 360)
 func (t *Cylinder) SetAngLen(v float32) *Cylinder { t.AngLen = v; return t }
 
-// SetColor sets the [Cylinder.Color]
-func (t *Cylinder) SetColor(v bool) *Cylinder { t.Color = v; return t }
-
-// SetDynamic sets the [Cylinder.Dynamic]
-func (t *Cylinder) SetDynamic(v bool) *Cylinder { t.Dynamic = v; return t }
-
-// SetTrans sets the [Cylinder.Trans]
-func (t *Cylinder) SetTrans(v bool) *Cylinder { t.Trans = v; return t }
-
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Capsule", IDName: "capsule", Doc: "Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.\nSupports different radii on each end.\nHeight is along the Y axis -- total height is Height + TopRad + BotRad.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Height", Doc: "height of the cylinder portion"}, {Name: "TopRad", Doc: "radius of the top -- set to 0 for a cone"}, {Name: "BotRad", Doc: "radius of the bottom"}, {Name: "RadialSegs", Doc: "number of radial segments (32 is a reasonable default for full circle)"}, {Name: "HeightSegs", Doc: "number of height segments"}, {Name: "CapSegs", Doc: "number of segments in the hemisphere cap ends (16 is a reasonable default)"}, {Name: "AngStart", Doc: "starting angle in degrees, relative to -1,0,0 left side starting point"}, {Name: "AngLen", Doc: "total angle to generate in degrees (max 360)"}}})
 
 // SetHeight sets the [Capsule.Height]:
@@ -342,15 +306,6 @@ func (t *Capsule) SetAngStart(v float32) *Capsule { t.AngStart = v; return t }
 // total angle to generate in degrees (max 360)
 func (t *Capsule) SetAngLen(v float32) *Capsule { t.AngLen = v; return t }
 
-// SetColor sets the [Capsule.Color]
-func (t *Capsule) SetColor(v bool) *Capsule { t.Color = v; return t }
-
-// SetDynamic sets the [Capsule.Dynamic]
-func (t *Capsule) SetDynamic(v bool) *Capsule { t.Dynamic = v; return t }
-
-// SetTrans sets the [Capsule.Trans]
-func (t *Capsule) SetTrans(v bool) *Capsule { t.Trans = v; return t }
-
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Torus", IDName: "torus", Doc: "Torus is a torus mesh, defined by the radius of the solid tube and the\nlarger radius of the ring.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Radius", Doc: "larger radius of the torus ring"}, {Name: "TubeRadius", Doc: "radius of the solid tube"}, {Name: "RadialSegs", Doc: "number of segments around the radius of the torus (32 is reasonable default for full circle)"}, {Name: "TubeSegs", Doc: "number of segments for the tube itself (32 is reasonable default for full height)"}, {Name: "AngStart", Doc: "starting radial angle in degrees relative to 1,0,0 starting point"}, {Name: "AngLen", Doc: "total radial angle to generate in degrees (max = 360)"}}})
 
 // SetRadius sets the [Torus.Radius]:
@@ -376,15 +331,6 @@ func (t *Torus) SetAngStart(v float32) *Torus { t.AngStart = v; return t }
 // SetAngLen sets the [Torus.AngLen]:
 // total radial angle to generate in degrees (max = 360)
 func (t *Torus) SetAngLen(v float32) *Torus { t.AngLen = v; return t }
-
-// SetColor sets the [Torus.Color]
-func (t *Torus) SetColor(v bool) *Torus { t.Color = v; return t }
-
-// SetDynamic sets the [Torus.Dynamic]
-func (t *Torus) SetDynamic(v bool) *Torus { t.Dynamic = v; return t }
-
-// SetTrans sets the [Torus.Trans]
-func (t *Torus) SetTrans(v bool) *Torus { t.Trans = v; return t }
 
 // SolidType is the [types.Type] for [Solid]
 var SolidType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Solid", IDName: "solid", Doc: "Solid represents an individual 3D solid element.\nIt has its own unique spatial transforms and material properties,\nand points to a mesh structure defining the shape of the solid.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Mesh", Doc: "name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene"}, {Name: "Mat", Doc: "material properties of the surface (color, shininess, texture, etc)"}, {Name: "MeshPtr", Doc: "cached pointer to mesh"}}, Instance: &Solid{}})
@@ -433,9 +379,6 @@ func (t *Text2D) New() tree.Node { return &Text2D{} }
 // SetText sets the [Text2D.Text]:
 // the text string to display
 func (t *Text2D) SetText(v string) *Text2D { t.Text = v; return t }
-
-// SetMat sets the [Text2D.Mat]
-func (t *Text2D) SetMat(v Material) *Text2D { t.Mat = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TexName", IDName: "tex-name", Doc: "TexName provides a GUI interface for choosing textures"})
 

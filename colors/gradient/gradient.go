@@ -132,12 +132,13 @@ const (
 
 // AddStop adds a new stop with the given color, position, and
 // optional opacity to the gradient.
-func (b *Base) AddStop(color color.RGBA, pos float32, opacity ...float32) {
+func (b *Base) AddStop(color color.RGBA, pos float32, opacity ...float32) *Base {
 	op := float32(1)
 	if len(opacity) > 0 {
 		op = opacity[0]
 	}
 	b.Stops = append(b.Stops, Stop{Color: color, Pos: pos, Opacity: op})
+	return b
 }
 
 // AsBase returns the [Base] of the gradient

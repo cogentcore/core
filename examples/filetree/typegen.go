@@ -50,6 +50,3 @@ func (t *FileBrowse) SetActiveTextEditorIndex(v int) *FileBrowse {
 	t.ActiveTextEditorIndex = v
 	return t
 }
-
-// SetTooltip sets the [FileBrowse.Tooltip]
-func (t *FileBrowse) SetTooltip(v string) *FileBrowse { t.Tooltip = v; return t }

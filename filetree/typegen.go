@@ -5,12 +5,8 @@ package filetree
 import (
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/icons"
-	"cogentcore.org/core/math32"
-	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
-	"cogentcore.org/core/views"
 )
 
 // NodeType is the [types.Type] for [Node]
@@ -45,42 +41,6 @@ func AsNode(n tree.Node) *Node {
 // AsNode satisfies the [NodeEmbedder] interface
 func (t *Node) AsNode() *Node { return t }
 
-// SetTooltip sets the [Node.Tooltip]
-func (t *Node) SetTooltip(v string) *Node { t.Tooltip = v; return t }
-
-// SetText sets the [Node.Text]
-func (t *Node) SetText(v string) *Node { t.Text = v; return t }
-
-// SetIcon sets the [Node.Icon]
-func (t *Node) SetIcon(v icons.Icon) *Node { t.Icon = v; return t }
-
-// SetIconOpen sets the [Node.IconOpen]
-func (t *Node) SetIconOpen(v icons.Icon) *Node { t.IconOpen = v; return t }
-
-// SetIconClosed sets the [Node.IconClosed]
-func (t *Node) SetIconClosed(v icons.Icon) *Node { t.IconClosed = v; return t }
-
-// SetIconLeaf sets the [Node.IconLeaf]
-func (t *Node) SetIconLeaf(v icons.Icon) *Node { t.IconLeaf = v; return t }
-
-// SetIndent sets the [Node.Indent]
-func (t *Node) SetIndent(v units.Value) *Node { t.Indent = v; return t }
-
-// SetOpenDepth sets the [Node.OpenDepth]
-func (t *Node) SetOpenDepth(v int) *Node { t.OpenDepth = v; return t }
-
-// SetViewIndex sets the [Node.ViewIndex]
-func (t *Node) SetViewIndex(v int) *Node { t.ViewIndex = v; return t }
-
-// SetWidgetSize sets the [Node.WidgetSize]
-func (t *Node) SetWidgetSize(v math32.Vector2) *Node { t.WidgetSize = v; return t }
-
-// SetRootView sets the [Node.RootView]
-func (t *Node) SetRootView(v *views.TreeView) *Node { t.RootView = v; return t }
-
-// SetSelectedNodes sets the [Node.SelectedNodes]
-func (t *Node) SetSelectedNodes(v ...views.TreeViewer) *Node { t.SelectedNodes = v; return t }
-
 // TreeType is the [types.Type] for [Tree]
 var TreeType = types.AddType(&types.Type{Name: "cogentcore.org/core/filetree.Tree", IDName: "tree", Doc: "Tree is the root of a tree representing files in a given directory\n(and subdirectories thereof), and has some overall management state for how to\nview things.  The Tree can be viewed by a TreeView to provide a GUI\ninterface into it.", Embeds: []types.Field{{Name: "Node"}}, Fields: []types.Field{{Name: "ExtFiles", Doc: "external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update"}, {Name: "Dirs", Doc: "records state of directories within the tree (encoded using paths relative to root),\ne.g., open (have been opened by the user) -- can persist this to restore prior view of a tree"}, {Name: "DirsOnTop", Doc: "if true, then all directories are placed at the top of the tree view\notherwise everything is mixed"}, {Name: "FileNodeType", Doc: "type of node to create -- defaults to filetree.Node but can use custom node types"}, {Name: "DoubleClickFun", Doc: "DoubleClickFun is a function to call when a node receives a DoubleClick event.\nif not set, defaults to OpenEmptyDir() (for folders)"}, {Name: "InOpenAll", Doc: "if true, we are in midst of an OpenAll call -- nodes should open all dirs"}, {Name: "Watcher", Doc: "change notify for all dirs"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "WatchedPaths", Doc: "map of paths that have been added to watcher -- only active if bool = true"}, {Name: "LastWatchUpdate", Doc: "last path updated by watcher"}, {Name: "LastWatchTime", Doc: "timestamp of last update"}, {Name: "UpdateMu", Doc: "Update mutex"}}, Instance: &Tree{}})
 
@@ -111,41 +71,20 @@ func (t *Tree) SetFileNodeType(v *types.Type) *Tree { t.FileNodeType = v; return
 // if not set, defaults to OpenEmptyDir() (for folders)
 func (t *Tree) SetDoubleClickFun(v func(e events.Event)) *Tree { t.DoubleClickFun = v; return t }
 
-// SetTooltip sets the [Tree.Tooltip]
-func (t *Tree) SetTooltip(v string) *Tree { t.Tooltip = v; return t }
+// VersionControlChooserType is the [types.Type] for [VersionControlChooser]
+var VersionControlChooserType = types.AddType(&types.Type{Name: "cogentcore.org/core/filetree.VersionControlChooser", IDName: "version-control-chooser", Doc: "VersionControlChooser represents a [VersionControlName] with a Chooser.", Embeds: []types.Field{{Name: "Chooser"}}, Instance: &VersionControlChooser{}})
 
-// SetText sets the [Tree.Text]
-func (t *Tree) SetText(v string) *Tree { t.Text = v; return t }
+// NewVersionControlChooser returns a new [VersionControlChooser] with the given optional parent:
+// VersionControlChooser represents a [VersionControlName] with a Chooser.
+func NewVersionControlChooser(parent ...tree.Node) *VersionControlChooser {
+	return tree.New[*VersionControlChooser](parent...)
+}
 
-// SetIcon sets the [Tree.Icon]
-func (t *Tree) SetIcon(v icons.Icon) *Tree { t.Icon = v; return t }
+// NodeType returns the [*types.Type] of [VersionControlChooser]
+func (t *VersionControlChooser) NodeType() *types.Type { return VersionControlChooserType }
 
-// SetIconOpen sets the [Tree.IconOpen]
-func (t *Tree) SetIconOpen(v icons.Icon) *Tree { t.IconOpen = v; return t }
-
-// SetIconClosed sets the [Tree.IconClosed]
-func (t *Tree) SetIconClosed(v icons.Icon) *Tree { t.IconClosed = v; return t }
-
-// SetIconLeaf sets the [Tree.IconLeaf]
-func (t *Tree) SetIconLeaf(v icons.Icon) *Tree { t.IconLeaf = v; return t }
-
-// SetIndent sets the [Tree.Indent]
-func (t *Tree) SetIndent(v units.Value) *Tree { t.Indent = v; return t }
-
-// SetOpenDepth sets the [Tree.OpenDepth]
-func (t *Tree) SetOpenDepth(v int) *Tree { t.OpenDepth = v; return t }
-
-// SetViewIndex sets the [Tree.ViewIndex]
-func (t *Tree) SetViewIndex(v int) *Tree { t.ViewIndex = v; return t }
-
-// SetWidgetSize sets the [Tree.WidgetSize]
-func (t *Tree) SetWidgetSize(v math32.Vector2) *Tree { t.WidgetSize = v; return t }
-
-// SetRootView sets the [Tree.RootView]
-func (t *Tree) SetRootView(v *views.TreeView) *Tree { t.RootView = v; return t }
-
-// SetSelectedNodes sets the [Tree.SelectedNodes]
-func (t *Tree) SetSelectedNodes(v ...views.TreeViewer) *Tree { t.SelectedNodes = v; return t }
+// New returns a new [*VersionControlChooser] value
+func (t *VersionControlChooser) New() tree.Node { return &VersionControlChooser{} }
 
 // VCSLogViewType is the [types.Type] for [VCSLogView]
 var VCSLogViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/filetree.VCSLogView", IDName: "vcs-log-view", Doc: "VCSLogView is a view of the VCS log data", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Log", Doc: "current log"}, {Name: "File", Doc: "file that this is a log of -- if blank then it is entire repository"}, {Name: "Since", Doc: "date expression for how long ago to include log entries from"}, {Name: "Repo", Doc: "version control system repository"}, {Name: "RevA", Doc: "revision A -- defaults to HEAD"}, {Name: "RevB", Doc: "revision B -- blank means current working copy"}, {Name: "SetA", Doc: "double-click will set the A revision -- else B"}}, Instance: &VCSLogView{}})
@@ -179,6 +118,3 @@ func (t *VCSLogView) SetRepo(v vcs.Repo) *VCSLogView { t.Repo = v; return t }
 // SetSetA sets the [VCSLogView.SetA]:
 // double-click will set the A revision -- else B
 func (t *VCSLogView) SetSetA(v bool) *VCSLogView { t.SetA = v; return t }
-
-// SetTooltip sets the [VCSLogView.Tooltip]
-func (t *VCSLogView) SetTooltip(v string) *VCSLogView { t.Tooltip = v; return t }

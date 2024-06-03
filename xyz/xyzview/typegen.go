@@ -17,9 +17,6 @@ func (t *ManipPoint) NodeType() *types.Type { return ManipPointType }
 // New returns a new [*ManipPoint] value
 func (t *ManipPoint) New() tree.Node { return &ManipPoint{} }
 
-// SetMat sets the [ManipPoint.Mat]
-func (t *ManipPoint) SetMat(v xyz.Material) *ManipPoint { t.Mat = v; return t }
-
 // SceneType is the [types.Type] for [Scene]
 var SceneType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzview.Scene", IDName: "scene", Doc: "Scene is a core.Widget that manages a xyz.Scene,\nproviding the basic rendering logic for the 3D scene\nin the 2D core GUI context.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "XYZ", Doc: "XYZ is the 3D xyz.Scene"}, {Name: "SelectionMode", Doc: "how to deal with selection / manipulation events"}, {Name: "CurrentSelected", Doc: "currently selected node"}, {Name: "CurrentManipPoint", Doc: "currently selected manipulation control point"}, {Name: "SelectionParams", Doc: "parameters for selection / manipulation box"}}, Instance: &Scene{}})
 
@@ -51,9 +48,6 @@ func (t *Scene) SetCurrentManipPoint(v *ManipPoint) *Scene { t.CurrentManipPoint
 // parameters for selection / manipulation box
 func (t *Scene) SetSelectionParams(v SelectionParams) *Scene { t.SelectionParams = v; return t }
 
-// SetTooltip sets the [Scene.Tooltip]
-func (t *Scene) SetTooltip(v string) *Scene { t.Tooltip = v; return t }
-
 // SceneViewType is the [types.Type] for [SceneView]
 var SceneViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzview.SceneView", IDName: "scene-view", Doc: "SceneView provides a toolbar controller for an [xyz.Scene],\nand manipulation abilities.", Embeds: []types.Field{{Name: "Frame"}}, Instance: &SceneView{}})
 
@@ -67,6 +61,3 @@ func (t *SceneView) NodeType() *types.Type { return SceneViewType }
 
 // New returns a new [*SceneView] value
 func (t *SceneView) New() tree.Node { return &SceneView{} }
-
-// SetTooltip sets the [SceneView.Tooltip]
-func (t *SceneView) SetTooltip(v string) *SceneView { t.Tooltip = v; return t }

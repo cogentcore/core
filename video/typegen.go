@@ -34,6 +34,3 @@ func (t *Video) SetRotation(v float32) *Video { t.Rotation = v; return t }
 // SetStop sets the [Video.Stop]:
 // setting this to true will stop the playing
 func (t *Video) SetStop(v bool) *Video { t.Stop = v; return t }
-
-// SetTooltip sets the [Video.Tooltip]
-func (t *Video) SetTooltip(v string) *Video { t.Tooltip = v; return t }

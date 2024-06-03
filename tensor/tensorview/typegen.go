@@ -4,9 +4,6 @@ package tensorview
 
 import (
 	"cogentcore.org/core/colors/colormap"
-	"cogentcore.org/core/core"
-	"cogentcore.org/core/events/key"
-	"cogentcore.org/core/icons"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/stats/simat"
 	"cogentcore.org/core/tensor/table"
@@ -27,15 +24,6 @@ func (t *SimMatGrid) NodeType() *types.Type { return SimMatGridType }
 
 // New returns a new [*SimMatGrid] value
 func (t *SimMatGrid) New() tree.Node { return &SimMatGrid{} }
-
-// SetTooltip sets the [SimMatGrid.Tooltip]
-func (t *SimMatGrid) SetTooltip(v string) *SimMatGrid { t.Tooltip = v; return t }
-
-// SetDisplay sets the [SimMatGrid.Display]
-func (t *SimMatGrid) SetDisplay(v TensorDisplay) *SimMatGrid { t.Display = v; return t }
-
-// SetColorMap sets the [SimMatGrid.ColorMap]
-func (t *SimMatGrid) SetColorMap(v *colormap.Map) *SimMatGrid { t.ColorMap = v; return t }
 
 // TableViewType is the [types.Type] for [TableView]
 var TableViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TableView", IDName: "table-view", Doc: "TableView provides a GUI view for [table.Table] values.", Embeds: []types.Field{{Name: "SliceViewBase"}}, Fields: []types.Field{{Name: "Table", Doc: "the idx view of the table that we're a view of"}, {Name: "TensorDisplay", Doc: "overall display options for tensor display"}, {Name: "ColumnTensorDisplay", Doc: "per column tensor display params"}, {Name: "ColumnTensorBlank", Doc: "per column blank tensor values"}, {Name: "NCols", Doc: "number of columns in table (as of last update)"}, {Name: "SortIndex", Doc: "current sort index"}, {Name: "SortDescending", Doc: "whether current sort order is descending"}, {Name: "headerWidths", Doc: "headerWidths has number of characters in each header, per visfields"}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields"}, {Name: "BlankString", Doc: "\tblank values for out-of-range rows"}, {Name: "BlankFloat"}}, Instance: &TableView{}})
@@ -70,21 +58,6 @@ func (t *TableView) SetBlankString(v string) *TableView { t.BlankString = v; ret
 // SetBlankFloat sets the [TableView.BlankFloat]
 func (t *TableView) SetBlankFloat(v float64) *TableView { t.BlankFloat = v; return t }
 
-// SetTooltip sets the [TableView.Tooltip]
-func (t *TableView) SetTooltip(v string) *TableView { t.Tooltip = v; return t }
-
-// SetMinRows sets the [TableView.MinRows]
-func (t *TableView) SetMinRows(v int) *TableView { t.MinRows = v; return t }
-
-// SetSelectedValue sets the [TableView.SelectedValue]
-func (t *TableView) SetSelectedValue(v any) *TableView { t.SelectedValue = v; return t }
-
-// SetSelectedIndex sets the [TableView.SelectedIndex]
-func (t *TableView) SetSelectedIndex(v int) *TableView { t.SelectedIndex = v; return t }
-
-// SetInitSelectedIndex sets the [TableView.InitSelectedIndex]
-func (t *TableView) SetInitSelectedIndex(v int) *TableView { t.InitSelectedIndex = v; return t }
-
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TensorLayout", IDName: "tensor-layout", Doc: "TensorLayout are layout options for displaying tensors", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "OddRow", Doc: "even-numbered dimensions are displayed as Y*X rectangles -- this determines along which dimension to display any remaining odd dimension: OddRow = true = organize vertically along row dimension, false = organize horizontally across column dimension"}, {Name: "TopZero", Doc: "if true, then the Y=0 coordinate is displayed from the top-down; otherwise the Y=0 coordinate is displayed from the bottom up, which is typical for emergent network patterns."}, {Name: "Image", Doc: "display the data as a bitmap image.  if a 2D tensor, then it will be a greyscale image.  if a 3D tensor with size of either the first or last dim = either 3 or 4, then it is a RGB(A) color image"}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TensorDisplay", IDName: "tensor-display", Doc: "TensorDisplay are options for displaying tensors", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "TensorLayout"}}, Fields: []types.Field{{Name: "Range", Doc: "range to plot"}, {Name: "MinMax", Doc: "if not using fixed range, this is the actual range of data"}, {Name: "ColorMap", Doc: "the name of the color map to use in translating values to colors"}, {Name: "GridFill", Doc: "what proportion of grid square should be filled by color block -- 1 = all, .5 = half, etc"}, {Name: "DimExtra", Doc: "amount of extra space to add at dimension boundaries, as a proportion of total grid size"}, {Name: "GridMinSize", Doc: "minimum size for grid squares -- they will never be smaller than this"}, {Name: "GridMaxSize", Doc: "maximum size for grid squares -- they will never be larger than this"}, {Name: "TotPrefSize", Doc: "total preferred display size along largest dimension.\ngrid squares will be sized to fit within this size,\nsubject to harder GridMin / Max size constraints"}, {Name: "FontSize", Doc: "font size in standard point units for labels (e.g., SimMat)"}, {Name: "GridView", Doc: "our gridview, for update method"}}})
@@ -110,9 +83,6 @@ func (t *TensorGrid) SetDisplay(v TensorDisplay) *TensorGrid { t.Display = v; re
 // the actual colormap
 func (t *TensorGrid) SetColorMap(v *colormap.Map) *TensorGrid { t.ColorMap = v; return t }
 
-// SetTooltip sets the [TensorGrid.Tooltip]
-func (t *TensorGrid) SetTooltip(v string) *TensorGrid { t.Tooltip = v; return t }
-
 // TensorButtonType is the [types.Type] for [TensorButton]
 var TensorButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TensorButton", IDName: "tensor-button", Doc: "TensorButton represents a Tensor with a button for making a [TensorView]\nviewer for an [tensor.Tensor].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Tensor"}}, Instance: &TensorButton{}})
 
@@ -130,24 +100,6 @@ func (t *TensorButton) New() tree.Node { return &TensorButton{} }
 // SetTensor sets the [TensorButton.Tensor]
 func (t *TensorButton) SetTensor(v tensor.Tensor) *TensorButton { t.Tensor = v; return t }
 
-// SetTooltip sets the [TensorButton.Tooltip]
-func (t *TensorButton) SetTooltip(v string) *TensorButton { t.Tooltip = v; return t }
-
-// SetType sets the [TensorButton.Type]
-func (t *TensorButton) SetType(v core.ButtonTypes) *TensorButton { t.Type = v; return t }
-
-// SetIcon sets the [TensorButton.Icon]
-func (t *TensorButton) SetIcon(v icons.Icon) *TensorButton { t.Icon = v; return t }
-
-// SetIndicator sets the [TensorButton.Indicator]
-func (t *TensorButton) SetIndicator(v icons.Icon) *TensorButton { t.Indicator = v; return t }
-
-// SetShortcut sets the [TensorButton.Shortcut]
-func (t *TensorButton) SetShortcut(v key.Chord) *TensorButton { t.Shortcut = v; return t }
-
-// SetMenu sets the [TensorButton.Menu]
-func (t *TensorButton) SetMenu(v func(m *core.Scene)) *TensorButton { t.Menu = v; return t }
-
 // TableButtonType is the [types.Type] for [TableButton]
 var TableButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TableButton", IDName: "table-button", Doc: "TableButton presents a button that pulls up the [TableView] viewer for a [table.Table].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Table"}}, Instance: &TableButton{}})
 
@@ -164,24 +116,6 @@ func (t *TableButton) New() tree.Node { return &TableButton{} }
 // SetTable sets the [TableButton.Table]
 func (t *TableButton) SetTable(v *table.Table) *TableButton { t.Table = v; return t }
 
-// SetTooltip sets the [TableButton.Tooltip]
-func (t *TableButton) SetTooltip(v string) *TableButton { t.Tooltip = v; return t }
-
-// SetType sets the [TableButton.Type]
-func (t *TableButton) SetType(v core.ButtonTypes) *TableButton { t.Type = v; return t }
-
-// SetIcon sets the [TableButton.Icon]
-func (t *TableButton) SetIcon(v icons.Icon) *TableButton { t.Icon = v; return t }
-
-// SetIndicator sets the [TableButton.Indicator]
-func (t *TableButton) SetIndicator(v icons.Icon) *TableButton { t.Indicator = v; return t }
-
-// SetShortcut sets the [TableButton.Shortcut]
-func (t *TableButton) SetShortcut(v key.Chord) *TableButton { t.Shortcut = v; return t }
-
-// SetMenu sets the [TableButton.Menu]
-func (t *TableButton) SetMenu(v func(m *core.Scene)) *TableButton { t.Menu = v; return t }
-
 // SimMatButtonType is the [types.Type] for [SimMatButton]
 var SimMatButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.SimMatButton", IDName: "sim-mat-button", Doc: "SimMatValue presents a button that pulls up the [SimMatGridView] viewer for a [table.Table].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "SimMat"}}, Instance: &SimMatButton{}})
 
@@ -197,21 +131,3 @@ func (t *SimMatButton) New() tree.Node { return &SimMatButton{} }
 
 // SetSimMat sets the [SimMatButton.SimMat]
 func (t *SimMatButton) SetSimMat(v *simat.SimMat) *SimMatButton { t.SimMat = v; return t }
-
-// SetTooltip sets the [SimMatButton.Tooltip]
-func (t *SimMatButton) SetTooltip(v string) *SimMatButton { t.Tooltip = v; return t }
-
-// SetType sets the [SimMatButton.Type]
-func (t *SimMatButton) SetType(v core.ButtonTypes) *SimMatButton { t.Type = v; return t }
-
-// SetIcon sets the [SimMatButton.Icon]
-func (t *SimMatButton) SetIcon(v icons.Icon) *SimMatButton { t.Icon = v; return t }
-
-// SetIndicator sets the [SimMatButton.Indicator]
-func (t *SimMatButton) SetIndicator(v icons.Icon) *SimMatButton { t.Indicator = v; return t }
-
-// SetShortcut sets the [SimMatButton.Shortcut]
-func (t *SimMatButton) SetShortcut(v key.Chord) *SimMatButton { t.Shortcut = v; return t }
-
-// SetMenu sets the [SimMatButton.Menu]
-func (t *SimMatButton) SetMenu(v func(m *core.Scene)) *SimMatButton { t.Menu = v; return t }

@@ -38,24 +38,6 @@ func (t *ColorMapButton) New() tree.Node { return &ColorMapButton{} }
 // SetMapName sets the [ColorMapButton.MapName]
 func (t *ColorMapButton) SetMapName(v string) *ColorMapButton { t.MapName = v; return t }
 
-// SetTooltip sets the [ColorMapButton.Tooltip]
-func (t *ColorMapButton) SetTooltip(v string) *ColorMapButton { t.Tooltip = v; return t }
-
-// SetType sets the [ColorMapButton.Type]
-func (t *ColorMapButton) SetType(v core.ButtonTypes) *ColorMapButton { t.Type = v; return t }
-
-// SetIcon sets the [ColorMapButton.Icon]
-func (t *ColorMapButton) SetIcon(v icons.Icon) *ColorMapButton { t.Icon = v; return t }
-
-// SetIndicator sets the [ColorMapButton.Indicator]
-func (t *ColorMapButton) SetIndicator(v icons.Icon) *ColorMapButton { t.Indicator = v; return t }
-
-// SetShortcut sets the [ColorMapButton.Shortcut]
-func (t *ColorMapButton) SetShortcut(v key.Chord) *ColorMapButton { t.Shortcut = v; return t }
-
-// SetMenu sets the [ColorMapButton.Menu]
-func (t *ColorMapButton) SetMenu(v func(m *core.Scene)) *ColorMapButton { t.Menu = v; return t }
-
 // ColorViewType is the [types.Type] for [ColorView]
 var ColorViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ColorView", IDName: "color-view", Doc: "ColorView shows a color, using sliders or numbers to set values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Color", Doc: "the color that we view"}}, Instance: &ColorView{}})
 
@@ -68,9 +50,6 @@ func (t *ColorView) NodeType() *types.Type { return ColorViewType }
 
 // New returns a new [*ColorView] value
 func (t *ColorView) New() tree.Node { return &ColorView{} }
-
-// SetTooltip sets the [ColorView.Tooltip]
-func (t *ColorView) SetTooltip(v string) *ColorView { t.Tooltip = v; return t }
 
 // ColorButtonType is the [types.Type] for [ColorButton]
 var ColorButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ColorButton", IDName: "color-button", Doc: "ColorButton represents a color value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Color"}}, Instance: &ColorButton{}})
@@ -87,24 +66,6 @@ func (t *ColorButton) New() tree.Node { return &ColorButton{} }
 
 // SetColor sets the [ColorButton.Color]
 func (t *ColorButton) SetColor(v color.RGBA) *ColorButton { t.Color = v; return t }
-
-// SetTooltip sets the [ColorButton.Tooltip]
-func (t *ColorButton) SetTooltip(v string) *ColorButton { t.Tooltip = v; return t }
-
-// SetType sets the [ColorButton.Type]
-func (t *ColorButton) SetType(v core.ButtonTypes) *ColorButton { t.Type = v; return t }
-
-// SetIcon sets the [ColorButton.Icon]
-func (t *ColorButton) SetIcon(v icons.Icon) *ColorButton { t.Icon = v; return t }
-
-// SetIndicator sets the [ColorButton.Indicator]
-func (t *ColorButton) SetIndicator(v icons.Icon) *ColorButton { t.Indicator = v; return t }
-
-// SetShortcut sets the [ColorButton.Shortcut]
-func (t *ColorButton) SetShortcut(v key.Chord) *ColorButton { t.Shortcut = v; return t }
-
-// SetMenu sets the [ColorButton.Menu]
-func (t *ColorButton) SetMenu(v func(m *core.Scene)) *ColorButton { t.Menu = v; return t }
 
 // FileViewType is the [types.Type] for [FileView]
 var FileViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FileView", IDName: "file-view", Doc: "FileView is a viewer onto files -- core of the file chooser dialog", Methods: []types.Method{{Name: "UpdateFilesAction", Doc: "UpdateFilesAction updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddPathToFavorites", Doc: "AddPathToFavorites adds the current path to favorites", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DirPathUp", Doc: "DirPathUp moves up one directory in the path", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "NewFolder", Doc: "NewFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "DirPath", Doc: "path to directory of files to display"}, {Name: "CurrentSelectedFile", Doc: "currently selected file"}, {Name: "Ext", Doc: "target extension(s) (comma separated if multiple, including initial .), if any"}, {Name: "FilterFunc", Doc: "optional styling function"}, {Name: "ExtMap", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"}, {Name: "Files", Doc: "files for current directory"}, {Name: "SelectedIndex", Doc: "index of currently selected file in Files list (-1 if none)"}, {Name: "Watcher", Doc: "change notify for current dir"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "UpdateMu", Doc: "UpdateFiles mutex"}, {Name: "PrevPath", Doc: "Previous path that was processed via UpdateFiles"}}, Instance: &FileView{}})
@@ -131,9 +92,6 @@ func (t *FileView) SetExtMap(v map[string]string) *FileView { t.ExtMap = v; retu
 // files for current directory
 func (t *FileView) SetFiles(v ...*fileinfo.FileInfo) *FileView { t.Files = v; return t }
 
-// SetTooltip sets the [FileView.Tooltip]
-func (t *FileView) SetTooltip(v string) *FileView { t.Tooltip = v; return t }
-
 // FileButtonType is the [types.Type] for [FileButton]
 var FileButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FileButton", IDName: "file-button", Doc: "FileButton represents a filename value with a button\nthat opens a [FileView].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Filename"}}, Instance: &FileButton{}})
 
@@ -150,24 +108,6 @@ func (t *FileButton) New() tree.Node { return &FileButton{} }
 
 // SetFilename sets the [FileButton.Filename]
 func (t *FileButton) SetFilename(v string) *FileButton { t.Filename = v; return t }
-
-// SetTooltip sets the [FileButton.Tooltip]
-func (t *FileButton) SetTooltip(v string) *FileButton { t.Tooltip = v; return t }
-
-// SetType sets the [FileButton.Type]
-func (t *FileButton) SetType(v core.ButtonTypes) *FileButton { t.Type = v; return t }
-
-// SetIcon sets the [FileButton.Icon]
-func (t *FileButton) SetIcon(v icons.Icon) *FileButton { t.Icon = v; return t }
-
-// SetIndicator sets the [FileButton.Indicator]
-func (t *FileButton) SetIndicator(v icons.Icon) *FileButton { t.Indicator = v; return t }
-
-// SetShortcut sets the [FileButton.Shortcut]
-func (t *FileButton) SetShortcut(v key.Chord) *FileButton { t.Shortcut = v; return t }
-
-// SetMenu sets the [FileButton.Menu]
-func (t *FileButton) SetMenu(v func(m *core.Scene)) *FileButton { t.Menu = v; return t }
 
 // FuncButtonType is the [types.Type] for [FuncButton]
 var FuncButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FuncButton", IDName: "func-button", Doc: "FuncButton is a button that is set up to call a function when it\nis pressed, using a dialog to prompt the user for any arguments.\nAlso, it automatically sets various properties of the button like\nthe name, text, tooltip, and icon based on the properties of the\nfunction, using [reflect] and [types]. The function must be registered\nwith [types] to get documentation information, but that is not\nrequired; add a `//types:add` comment directive and run `core generate`\nif you want tooltips. If the function is a method, both the method and\nits receiver type must be added to [types] to get documentation.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Func", Doc: "Func is the [types.Func] associated with this button.\nThis function can also be a method, but it must be\nconverted to a [types.Func] first. It should typically\nbe set using [FuncButton.SetFunc]."}, {Name: "ReflectFunc", Doc: "ReflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc]."}, {Name: "Args", Doc: "Args are the [FuncArg] objects associated with the\narguments of the function. They are automatically set in\n[SetFunc], but they can be customized to configure\ndefault values and other options."}, {Name: "Returns", Doc: "Returns are the [FuncArg] objects associated with the\nreturn values of the function. They are automatically\nset in [SetFunc], but they can be customized to configure\noptions. The [FuncArg.Value]s are not set until the\nfunction is called, and are thus not typically applicable\nto access."}, {Name: "Confirm", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function."}, {Name: "ShowReturn", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. Non-nil error return values will\nalways be shown, even if ShowReturn is set to false."}, {Name: "ShowReturnAsDialog", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there are multiple return values from the function, or if\none of them is a complex type (pointer, struct, slice,\narray, map), then ShowReturnAsDialog will\nautomatically be set to true."}, {Name: "NewWindow", Doc: "NewWindow makes the ReturnDialog a NewWindow dialog\n(if supported by platform)."}, {Name: "WarnUnadded", Doc: "WarnUnadded is whether to log warnings when a function that\nhas not been added to [types] is used. It is on by default and\nmust be set before [FuncButton.SetFunc] is called for it to\nhave any effect."}, {Name: "Context", Doc: "Context is used for opening Dialogs if non-nil."}, {Name: "AfterFunc", Doc: "AfterFunc is an optional function called after the func button\nfunction is executed"}}, Instance: &FuncButton{}})
@@ -222,24 +162,6 @@ func (t *FuncButton) SetContext(v core.Widget) *FuncButton { t.Context = v; retu
 // function is executed
 func (t *FuncButton) SetAfterFunc(v func()) *FuncButton { t.AfterFunc = v; return t }
 
-// SetTooltip sets the [FuncButton.Tooltip]
-func (t *FuncButton) SetTooltip(v string) *FuncButton { t.Tooltip = v; return t }
-
-// SetType sets the [FuncButton.Type]
-func (t *FuncButton) SetType(v core.ButtonTypes) *FuncButton { t.Type = v; return t }
-
-// SetIcon sets the [FuncButton.Icon]
-func (t *FuncButton) SetIcon(v icons.Icon) *FuncButton { t.Icon = v; return t }
-
-// SetIndicator sets the [FuncButton.Indicator]
-func (t *FuncButton) SetIndicator(v icons.Icon) *FuncButton { t.Indicator = v; return t }
-
-// SetShortcut sets the [FuncButton.Shortcut]
-func (t *FuncButton) SetShortcut(v key.Chord) *FuncButton { t.Shortcut = v; return t }
-
-// SetMenu sets the [FuncButton.Menu]
-func (t *FuncButton) SetMenu(v func(m *core.Scene)) *FuncButton { t.Menu = v; return t }
-
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FuncArg", IDName: "func-arg", Doc: "FuncArg represents one argument or return value of a function\nin the context of a [FuncButton].", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the argument or return value."}, {Name: "Tag", Doc: "Tag contains any tags associated with the argument or return value,\nwhich can be added programmatically to customize [core.Value] behavior."}, {Name: "Value", Doc: "Value is the actual value of the function argument or return value.\nIt can be modified when creating a [FuncButton] to set a default value."}}})
 
 // SetName sets the [FuncArg.Name]:
@@ -276,9 +198,6 @@ func (t *Inspector) New() tree.Node { return &Inspector{} }
 // Root is the root of the tree being edited.
 func (t *Inspector) SetRoot(v tree.Node) *Inspector { t.Root = v; return t }
 
-// SetTooltip sets the [Inspector.Tooltip]
-func (t *Inspector) SetTooltip(v string) *Inspector { t.Tooltip = v; return t }
-
 // KeyChordButtonType is the [types.Type] for [KeyChordButton]
 var KeyChordButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.KeyChordButton", IDName: "key-chord-button", Doc: "KeyChordButton represents a [key.Chord] value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Chord"}}, Instance: &KeyChordButton{}})
 
@@ -296,24 +215,6 @@ func (t *KeyChordButton) New() tree.Node { return &KeyChordButton{} }
 
 // SetChord sets the [KeyChordButton.Chord]
 func (t *KeyChordButton) SetChord(v key.Chord) *KeyChordButton { t.Chord = v; return t }
-
-// SetTooltip sets the [KeyChordButton.Tooltip]
-func (t *KeyChordButton) SetTooltip(v string) *KeyChordButton { t.Tooltip = v; return t }
-
-// SetType sets the [KeyChordButton.Type]
-func (t *KeyChordButton) SetType(v core.ButtonTypes) *KeyChordButton { t.Type = v; return t }
-
-// SetIcon sets the [KeyChordButton.Icon]
-func (t *KeyChordButton) SetIcon(v icons.Icon) *KeyChordButton { t.Icon = v; return t }
-
-// SetIndicator sets the [KeyChordButton.Indicator]
-func (t *KeyChordButton) SetIndicator(v icons.Icon) *KeyChordButton { t.Indicator = v; return t }
-
-// SetShortcut sets the [KeyChordButton.Shortcut]
-func (t *KeyChordButton) SetShortcut(v key.Chord) *KeyChordButton { t.Shortcut = v; return t }
-
-// SetMenu sets the [KeyChordButton.Menu]
-func (t *KeyChordButton) SetMenu(v func(m *core.Scene)) *KeyChordButton { t.Menu = v; return t }
 
 // MapViewType is the [types.Type] for [MapView]
 var MapViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapView", IDName: "map-view", Doc: "MapView represents a map using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the map in one line."}, {Name: "SortValues", Doc: "SortValue is whether to sort by values instead of keys."}, {Name: "ncols", Doc: "ncols is the number of columns to display if the map view is not inline."}}, Instance: &MapView{}})
@@ -340,9 +241,6 @@ func (t *MapView) SetInline(v bool) *MapView { t.Inline = v; return t }
 // SortValue is whether to sort by values instead of keys.
 func (t *MapView) SetSortValues(v bool) *MapView { t.SortValues = v; return t }
 
-// SetTooltip sets the [MapView.Tooltip]
-func (t *MapView) SetTooltip(v string) *MapView { t.Tooltip = v; return t }
-
 // SliceViewType is the [types.Type] for [SliceView]
 var SliceViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceView", IDName: "slice-view", Doc: "SliceView represents a slice value with index and value widgets.\nUse [SliceViewBase.BindSelect] to make the slice view designed for item selection.", Embeds: []types.Field{{Name: "SliceViewBase"}}, Fields: []types.Field{{Name: "StyleFunc", Doc: "StyleFunc is an optional styling function."}}, Instance: &SliceView{}})
 
@@ -360,21 +258,6 @@ func (t *SliceView) New() tree.Node { return &SliceView{} }
 // SetStyleFunc sets the [SliceView.StyleFunc]:
 // StyleFunc is an optional styling function.
 func (t *SliceView) SetStyleFunc(v SliceViewStyleFunc) *SliceView { t.StyleFunc = v; return t }
-
-// SetTooltip sets the [SliceView.Tooltip]
-func (t *SliceView) SetTooltip(v string) *SliceView { t.Tooltip = v; return t }
-
-// SetMinRows sets the [SliceView.MinRows]
-func (t *SliceView) SetMinRows(v int) *SliceView { t.MinRows = v; return t }
-
-// SetSelectedValue sets the [SliceView.SelectedValue]
-func (t *SliceView) SetSelectedValue(v any) *SliceView { t.SelectedValue = v; return t }
-
-// SetSelectedIndex sets the [SliceView.SelectedIndex]
-func (t *SliceView) SetSelectedIndex(v int) *SliceView { t.SelectedIndex = v; return t }
-
-// SetInitSelectedIndex sets the [SliceView.InitSelectedIndex]
-func (t *SliceView) SetInitSelectedIndex(v int) *SliceView { t.InitSelectedIndex = v; return t }
 
 // SliceViewBaseType is the [types.Type] for [SliceViewBase]
 var SliceViewBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewBase", IDName: "slice-view-base", Doc: "SliceViewBase is the base for [SliceView] and [TableView] and any other viewers\nof array-like data. It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nUse [SliceViewBase.BindSelect] to make the slice view designed for item selection.", Methods: []types.Method{{Name: "CopyIndexes", Doc: "CopyIndexes copies selected idxs to system.Clipboard, optionally resetting the selection", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"reset"}}, {Name: "DeleteIndexes", Doc: "DeleteIndexes deletes all selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "CutIndexes", Doc: "CutIndexes copies selected indexes to system.Clipboard and deletes selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "PasteIndex", Doc: "PasteIndex pastes clipboard at given idx", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"idx"}}, {Name: "Duplicate", Doc: "Duplicate copies selected items and inserts them after current selection --\nreturn idx of start of duplicates if successful, else -1", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"int"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the pointer to the slice that we are viewing."}, {Name: "MinRows", Doc: "MinRows specifies the minimum number of rows to display, to ensure\nat least this amount is displayed."}, {Name: "ViewMu", Doc: "ViewMu is an optional mutex that, if non-nil, will be used around any updates that\nread / modify the underlying Slice data.\nCan be used to protect against random updating if your code has specific\nupdate points that can be likewise protected with this same mutex."}, {Name: "SelectedValue", Doc: "SelectedValue is the current selection value; initially select this value if set."}, {Name: "SelectedIndex", Doc: "index of currently selected item"}, {Name: "InitSelectedIndex", Doc: "index of row to select at start"}, {Name: "SelectedIndexes", Doc: "list of currently selected slice indexes"}, {Name: "LastClick", Doc: "LastClick is the last row that has been clicked on.\nThis is used to prevent erroneous double click events\nfrom being sent when the user clicks on multiple different\nrows in quick succession."}, {Name: "NormalCursor", Doc: "NormalCursor is the cached cursor to display when there\nis no row being hovered."}, {Name: "CurrentCursor", Doc: "CurrentCursor is the cached cursor that should currently be\ndisplayed."}, {Name: "SliceUnderlying", Doc: "SliceUnderlying is the underlying slice value."}, {Name: "HoverRow", Doc: "currently hovered row"}, {Name: "DraggedIndexes", Doc: "list of currently dragged indexes"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "StartIndex", Doc: "starting slice index of visible rows"}, {Name: "SliceSize", Doc: "size of slice"}, {Name: "MakeIter", Doc: "iteration through the configuration process, reset when a new slice type is set"}, {Name: "TmpIndex", Doc: "temp idx state for e.g., dnd"}, {Name: "ElementValue", Doc: "ElementValue is a [reflect.Value] representation of the underlying element type\nwhich is used whenever there are no slice elements available"}, {Name: "MaxWidth", Doc: "maximum width of value column in chars, if string"}}, Instance: &SliceViewBase{}})
@@ -410,9 +293,6 @@ func (t *SliceViewBase) SetSelectedIndex(v int) *SliceViewBase { t.SelectedIndex
 // index of row to select at start
 func (t *SliceViewBase) SetInitSelectedIndex(v int) *SliceViewBase { t.InitSelectedIndex = v; return t }
 
-// SetTooltip sets the [SliceViewBase.Tooltip]
-func (t *SliceViewBase) SetTooltip(v string) *SliceViewBase { t.Tooltip = v; return t }
-
 // SliceViewGridType is the [types.Type] for [SliceViewGrid]
 var SliceViewGridType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewGrid", IDName: "slice-view-grid", Doc: "SliceViewGrid handles the resizing logic for SliceView, TableView.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "MinRows", Doc: "MinRows is set from parent SV"}, {Name: "RowHeight", Doc: "height of a single row, computed during layout"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "BgStripe", Doc: "Various computed backgrounds"}, {Name: "BgSelect", Doc: "Various computed backgrounds"}, {Name: "BgSelectStripe", Doc: "Various computed backgrounds"}, {Name: "BgHover", Doc: "Various computed backgrounds"}, {Name: "BgHoverStripe", Doc: "Various computed backgrounds"}, {Name: "BgHoverSelect", Doc: "Various computed backgrounds"}, {Name: "BgHoverSelectStripe", Doc: "Various computed backgrounds"}, {Name: "LastBackground", Doc: "LastBackground is the background for which modified\nbackgrounds were computed -- don't update if same"}}, Instance: &SliceViewGrid{}})
 
@@ -434,9 +314,6 @@ func (t *SliceViewGrid) SetLastBackground(v image.Image) *SliceViewGrid {
 	return t
 }
 
-// SetTooltip sets the [SliceViewGrid.Tooltip]
-func (t *SliceViewGrid) SetTooltip(v string) *SliceViewGrid { t.Tooltip = v; return t }
-
 // SliceViewInlineType is the [types.Type] for [SliceViewInline]
 var SliceViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewInline", IDName: "slice-view-inline", Doc: "SliceViewInline represents a slice within a single line of value widgets.\nThis is typically used for smaller slices.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the slice that we are viewing."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}}, Instance: &SliceViewInline{}})
 
@@ -452,9 +329,6 @@ func (t *SliceViewInline) NodeType() *types.Type { return SliceViewInlineType }
 
 // New returns a new [*SliceViewInline] value
 func (t *SliceViewInline) New() tree.Node { return &SliceViewInline{} }
-
-// SetTooltip sets the [SliceViewInline.Tooltip]
-func (t *SliceViewInline) SetTooltip(v string) *SliceViewInline { t.Tooltip = v; return t }
 
 // StructViewType is the [types.Type] for [StructView]
 var StructViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructView", IDName: "struct-view", Doc: "StructView represents a struct with rows of field names and editable values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the struct in one line."}, {Name: "structFields", Doc: "structFields are the fields of the current struct."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [core.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructView{}})
@@ -476,9 +350,6 @@ func (t *StructView) SetStruct(v any) *StructView { t.Struct = v; return t }
 // SetInline sets the [StructView.Inline]:
 // Inline is whether to display the struct in one line.
 func (t *StructView) SetInline(v bool) *StructView { t.Inline = v; return t }
-
-// SetTooltip sets the [StructView.Tooltip]
-func (t *StructView) SetTooltip(v string) *StructView { t.Tooltip = v; return t }
 
 // TableViewType is the [types.Type] for [TableView]
 var TableViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TableView", IDName: "table-view", Doc: "TableView represents a slice of structs as a table, where the fields are\nthe columns and the elements are the rows. It is a full-featured editor with\nmultiple-selection, cut-and-paste, and drag-and-drop.\nUse [SliceViewBase.BindSelect] to make the table view designed for item selection.", Embeds: []types.Field{{Name: "SliceViewBase"}}, Fields: []types.Field{{Name: "StyleFunc", Doc: "StyleFunc is an optional styling function."}, {Name: "SelectedField", Doc: "SelectedField is the current selection field; initially select value in this field."}, {Name: "SortIndex", Doc: "SortIndex is the current sort index."}, {Name: "SortDescending", Doc: "SortDescending is whether the current sort order is descending."}, {Name: "visibleFields", Doc: "visibleFields are the visible fields."}, {Name: "numVisibleFields", Doc: "numVisibleFields is the number of visible fields."}, {Name: "headerWidths", Doc: "headerWidths has the number of characters in each header, per visibleFields."}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields."}}, Instance: &TableView{}})
@@ -512,21 +383,6 @@ func (t *TableView) SetSortIndex(v int) *TableView { t.SortIndex = v; return t }
 // SortDescending is whether the current sort order is descending.
 func (t *TableView) SetSortDescending(v bool) *TableView { t.SortDescending = v; return t }
 
-// SetTooltip sets the [TableView.Tooltip]
-func (t *TableView) SetTooltip(v string) *TableView { t.Tooltip = v; return t }
-
-// SetMinRows sets the [TableView.MinRows]
-func (t *TableView) SetMinRows(v int) *TableView { t.MinRows = v; return t }
-
-// SetSelectedValue sets the [TableView.SelectedValue]
-func (t *TableView) SetSelectedValue(v any) *TableView { t.SelectedValue = v; return t }
-
-// SetSelectedIndex sets the [TableView.SelectedIndex]
-func (t *TableView) SetSelectedIndex(v int) *TableView { t.SelectedIndex = v; return t }
-
-// SetInitSelectedIndex sets the [TableView.InitSelectedIndex]
-func (t *TableView) SetInitSelectedIndex(v int) *TableView { t.InitSelectedIndex = v; return t }
-
 // TimeViewType is the [types.Type] for [TimeView]
 var TimeViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TimeView", IDName: "time-view", Doc: "TimeView is a view for selecting a time", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "Time is the time that we are viewing"}, {Name: "Hour", Doc: "the raw input hour"}, {Name: "PM", Doc: "whether we are in PM mode (so we have to add 12h to everything)"}}, Instance: &TimeView{}})
 
@@ -544,9 +400,6 @@ func (t *TimeView) New() tree.Node { return &TimeView{} }
 // Time is the time that we are viewing
 func (t *TimeView) SetTime(v time.Time) *TimeView { t.Time = v; return t }
 
-// SetTooltip sets the [TimeView.Tooltip]
-func (t *TimeView) SetTooltip(v string) *TimeView { t.Tooltip = v; return t }
-
 // DateViewType is the [types.Type] for [DateView]
 var DateViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.DateView", IDName: "date-view", Doc: "DateView is a view for selecting a date", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "Time is the time that we are viewing"}}, Instance: &DateView{}})
 
@@ -559,9 +412,6 @@ func (t *DateView) NodeType() *types.Type { return DateViewType }
 
 // New returns a new [*DateView] value
 func (t *DateView) New() tree.Node { return &DateView{} }
-
-// SetTooltip sets the [DateView.Tooltip]
-func (t *DateView) SetTooltip(v string) *DateView { t.Tooltip = v; return t }
 
 // TreeViewType is the [types.Type] for [TreeView]
 var TreeViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TreeView", IDName: "tree-view", Doc: "TreeView provides a graphical representation of a tree structure,\nproviding full navigation and manipulation abilities.\n\nIt does not handle layout by itself, so if you want it to scroll\nseparately from the rest of the surrounding context, use [NewTreeViewFrame].\n\nIf the SyncNode field is non-nil, typically via\nSyncRootNode method, then the TreeView mirrors another\ntree structure, and tree editing functions apply to\nthe source tree first, and then to the TreeView by sync.\n\nOtherwise, data can be directly encoded in a TreeView\nderived type, to represent any kind of tree structure\nand associated data.\n\nStandard events.Event are sent to any listeners, including\nSelect, Change, and DoubleClick.  The selected nodes\nare in the root SelectedNodes list.", Methods: []types.Method{{Name: "InsertAfter", Doc: "InsertAfter inserts a new node in the tree\nafter this node, at the same (sibling) level,\nprompting for the type of node to insert.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InsertBefore", Doc: "InsertBefore inserts a new node in the tree\nbefore this node, at the same (sibling) level,\nprompting for the type of node to insert\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddChildNode", Doc: "AddChildNode adds a new child node to this one in the tree,\nprompting the user for the type of node to add\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DeleteNode", Doc: "DeleteNode deletes the tree node or sync node corresponding\nto this view node in the sync tree.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Duplicate", Doc: "Duplicate duplicates the sync node corresponding to this view node in\nthe tree, and inserts the duplicate after this node (as a new sibling).\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "EditNode", Doc: "EditNode pulls up a StructViewDialog window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InspectNode", Doc: "InspectNode pulls up a new Inspector window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "OpenAll", Doc: "OpenAll opens the given node and all of its sub-nodes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "CloseAll", Doc: "CloseAll closes the given node and all of its sub-nodes.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Copy", Doc: "Copy copies to system.Clipboard, optionally resetting the selection.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"reset"}}, {Name: "Cut", Doc: "Cut copies to system.Clipboard and deletes selected items.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Paste", Doc: "Paste pastes clipboard at given node.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "SyncNode", Doc: "If non-nil, the [tree.Node] that this widget is viewing in the tree (the source)"}, {Name: "Text", Doc: "The text to display for the tree view item label, which automatically\ndefaults to the [tree.Node.Name] of the tree view node. It has no effect\nif [TreeView.SyncNode] is non-nil."}, {Name: "Icon", Doc: "optional icon, displayed to the the left of the text label"}, {Name: "IconOpen", Doc: "icon to use for an open (expanded) branch; defaults to [icons.KeyboardArrowDown]"}, {Name: "IconClosed", Doc: "icon to use for a closed (collapsed) branch; defaults to [icons.KeyboardArrowRight]"}, {Name: "IconLeaf", Doc: "icon to use for a terminal node branch that has no children; defaults to [icons.Blank]"}, {Name: "Indent", Doc: "amount to indent children relative to this node"}, {Name: "OpenDepth", Doc: "depth for nodes be initialized as open (default 4).\nNodes beyond this depth will be initialized as closed."}, {Name: "ViewIndex", Doc: "linear index of this node within the entire tree.\nupdated on full rebuilds and may sometimes be off,\nbut close enough for expected uses"}, {Name: "WidgetSize", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us."}, {Name: "RootView", Doc: "The cached root of the view. It is automatically set and does not need to be\nset by the end user."}, {Name: "SelectedNodes", Doc: "SelectedNodes holds the currently selected nodes, on the\nRootView node only."}, {Name: "actStateLayer", Doc: "actStateLayer is the actual state layer of the tree view, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree view\n(other tree views) do not inherit its stateful background color, as\nthat does not look good."}}, Instance: &TreeView{}})
@@ -645,9 +495,6 @@ func (t *TreeView) SetRootView(v *TreeView) *TreeView { t.RootView = v; return t
 // RootView node only.
 func (t *TreeView) SetSelectedNodes(v ...TreeViewer) *TreeView { t.SelectedNodes = v; return t }
 
-// SetTooltip sets the [TreeView.Tooltip]
-func (t *TreeView) SetTooltip(v string) *TreeView { t.Tooltip = v; return t }
-
 // SliceButtonType is the [types.Type] for [SliceButton]
 var SliceButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceButton", IDName: "slice-button", Doc: "SliceButton represents a slice or array value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Slice"}}, Instance: &SliceButton{}})
 
@@ -663,24 +510,6 @@ func (t *SliceButton) New() tree.Node { return &SliceButton{} }
 
 // SetSlice sets the [SliceButton.Slice]
 func (t *SliceButton) SetSlice(v any) *SliceButton { t.Slice = v; return t }
-
-// SetTooltip sets the [SliceButton.Tooltip]
-func (t *SliceButton) SetTooltip(v string) *SliceButton { t.Tooltip = v; return t }
-
-// SetType sets the [SliceButton.Type]
-func (t *SliceButton) SetType(v core.ButtonTypes) *SliceButton { t.Type = v; return t }
-
-// SetIcon sets the [SliceButton.Icon]
-func (t *SliceButton) SetIcon(v icons.Icon) *SliceButton { t.Icon = v; return t }
-
-// SetIndicator sets the [SliceButton.Indicator]
-func (t *SliceButton) SetIndicator(v icons.Icon) *SliceButton { t.Indicator = v; return t }
-
-// SetShortcut sets the [SliceButton.Shortcut]
-func (t *SliceButton) SetShortcut(v key.Chord) *SliceButton { t.Shortcut = v; return t }
-
-// SetMenu sets the [SliceButton.Menu]
-func (t *SliceButton) SetMenu(v func(m *core.Scene)) *SliceButton { t.Menu = v; return t }
 
 // StructButtonType is the [types.Type] for [StructButton]
 var StructButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructButton", IDName: "struct-button", Doc: "StructButton represents a slice or array value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Struct"}}, Instance: &StructButton{}})
@@ -698,24 +527,6 @@ func (t *StructButton) New() tree.Node { return &StructButton{} }
 // SetStruct sets the [StructButton.Struct]
 func (t *StructButton) SetStruct(v any) *StructButton { t.Struct = v; return t }
 
-// SetTooltip sets the [StructButton.Tooltip]
-func (t *StructButton) SetTooltip(v string) *StructButton { t.Tooltip = v; return t }
-
-// SetType sets the [StructButton.Type]
-func (t *StructButton) SetType(v core.ButtonTypes) *StructButton { t.Type = v; return t }
-
-// SetIcon sets the [StructButton.Icon]
-func (t *StructButton) SetIcon(v icons.Icon) *StructButton { t.Icon = v; return t }
-
-// SetIndicator sets the [StructButton.Indicator]
-func (t *StructButton) SetIndicator(v icons.Icon) *StructButton { t.Indicator = v; return t }
-
-// SetShortcut sets the [StructButton.Shortcut]
-func (t *StructButton) SetShortcut(v key.Chord) *StructButton { t.Shortcut = v; return t }
-
-// SetMenu sets the [StructButton.Menu]
-func (t *StructButton) SetMenu(v func(m *core.Scene)) *StructButton { t.Menu = v; return t }
-
 // MapButtonType is the [types.Type] for [MapButton]
 var MapButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapButton", IDName: "map-button", Doc: "MapButton represents a slice or array value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Map"}}, Instance: &MapButton{}})
 
@@ -732,24 +543,6 @@ func (t *MapButton) New() tree.Node { return &MapButton{} }
 // SetMap sets the [MapButton.Map]
 func (t *MapButton) SetMap(v any) *MapButton { t.Map = v; return t }
 
-// SetTooltip sets the [MapButton.Tooltip]
-func (t *MapButton) SetTooltip(v string) *MapButton { t.Tooltip = v; return t }
-
-// SetType sets the [MapButton.Type]
-func (t *MapButton) SetType(v core.ButtonTypes) *MapButton { t.Type = v; return t }
-
-// SetIcon sets the [MapButton.Icon]
-func (t *MapButton) SetIcon(v icons.Icon) *MapButton { t.Icon = v; return t }
-
-// SetIndicator sets the [MapButton.Indicator]
-func (t *MapButton) SetIndicator(v icons.Icon) *MapButton { t.Indicator = v; return t }
-
-// SetShortcut sets the [MapButton.Shortcut]
-func (t *MapButton) SetShortcut(v key.Chord) *MapButton { t.Shortcut = v; return t }
-
-// SetMenu sets the [MapButton.Menu]
-func (t *MapButton) SetMenu(v func(m *core.Scene)) *MapButton { t.Menu = v; return t }
-
 // IconButtonType is the [types.Type] for [IconButton]
 var IconButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.IconButton", IDName: "icon-button", Doc: "IconButton represents an [icons.Icon] with a [core.Button] that opens\na dialog for selecting the icon.", Embeds: []types.Field{{Name: "Button"}}, Instance: &IconButton{}})
 
@@ -764,24 +557,6 @@ func (t *IconButton) NodeType() *types.Type { return IconButtonType }
 // New returns a new [*IconButton] value
 func (t *IconButton) New() tree.Node { return &IconButton{} }
 
-// SetTooltip sets the [IconButton.Tooltip]
-func (t *IconButton) SetTooltip(v string) *IconButton { t.Tooltip = v; return t }
-
-// SetType sets the [IconButton.Type]
-func (t *IconButton) SetType(v core.ButtonTypes) *IconButton { t.Type = v; return t }
-
-// SetIcon sets the [IconButton.Icon]
-func (t *IconButton) SetIcon(v icons.Icon) *IconButton { t.Icon = v; return t }
-
-// SetIndicator sets the [IconButton.Indicator]
-func (t *IconButton) SetIndicator(v icons.Icon) *IconButton { t.Indicator = v; return t }
-
-// SetShortcut sets the [IconButton.Shortcut]
-func (t *IconButton) SetShortcut(v key.Chord) *IconButton { t.Shortcut = v; return t }
-
-// SetMenu sets the [IconButton.Menu]
-func (t *IconButton) SetMenu(v func(m *core.Scene)) *IconButton { t.Menu = v; return t }
-
 // FontButtonType is the [types.Type] for [FontButton]
 var FontButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FontButton", IDName: "font-button", Doc: "FontButton represents a [core.FontName] with a [core.Button] that opens\na dialog for selecting the font family.", Embeds: []types.Field{{Name: "Button"}}, Instance: &FontButton{}})
 
@@ -795,24 +570,6 @@ func (t *FontButton) NodeType() *types.Type { return FontButtonType }
 
 // New returns a new [*FontButton] value
 func (t *FontButton) New() tree.Node { return &FontButton{} }
-
-// SetTooltip sets the [FontButton.Tooltip]
-func (t *FontButton) SetTooltip(v string) *FontButton { t.Tooltip = v; return t }
-
-// SetType sets the [FontButton.Type]
-func (t *FontButton) SetType(v core.ButtonTypes) *FontButton { t.Type = v; return t }
-
-// SetIcon sets the [FontButton.Icon]
-func (t *FontButton) SetIcon(v icons.Icon) *FontButton { t.Icon = v; return t }
-
-// SetIndicator sets the [FontButton.Indicator]
-func (t *FontButton) SetIndicator(v icons.Icon) *FontButton { t.Indicator = v; return t }
-
-// SetShortcut sets the [FontButton.Shortcut]
-func (t *FontButton) SetShortcut(v key.Chord) *FontButton { t.Shortcut = v; return t }
-
-// SetMenu sets the [FontButton.Menu]
-func (t *FontButton) SetMenu(v func(m *core.Scene)) *FontButton { t.Menu = v; return t }
 
 // FileTimeTextType is the [types.Type] for [FileTimeText]
 var FileTimeTextType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FileTimeText", IDName: "file-time-text", Doc: "FileTimeText represents a [fileinfo.FileTime] value with text\nthat displays a standard date and time format.", Embeds: []types.Field{{Name: "Text"}}, Fields: []types.Field{{Name: "Time"}}, Instance: &FileTimeText{}})
@@ -830,12 +587,3 @@ func (t *FileTimeText) New() tree.Node { return &FileTimeText{} }
 
 // SetTime sets the [FileTimeText.Time]
 func (t *FileTimeText) SetTime(v fileinfo.FileTime) *FileTimeText { t.Time = v; return t }
-
-// SetTooltip sets the [FileTimeText.Tooltip]
-func (t *FileTimeText) SetTooltip(v string) *FileTimeText { t.Tooltip = v; return t }
-
-// SetText.Text sets the [FileTimeText.Text.Text]
-func (t *FileTimeText) SetText(v string) *FileTimeText { t.Text.Text = v; return t }
-
-// SetType sets the [FileTimeText.Type]
-func (t *FileTimeText) SetType(v core.TextTypes) *FileTimeText { t.Type = v; return t }

@@ -64,16 +64,16 @@ func (i DirFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *DirFlags) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "DirFlags") }
 
-var _NodeFlagsValues = []NodeFlags{5, 6}
+var _NodeFlagsValues = []NodeFlags{6, 7}
 
 // NodeFlagsN is the highest valid value for type NodeFlags, plus one.
-const NodeFlagsN NodeFlags = 7
+const NodeFlagsN NodeFlags = 8
 
-var _NodeFlagsValueMap = map[string]NodeFlags{`Open`: 5, `SymLink`: 6}
+var _NodeFlagsValueMap = map[string]NodeFlags{`Open`: 6, `SymLink`: 7}
 
-var _NodeFlagsDescMap = map[NodeFlags]string{5: `NodeOpen means file is open. For directories, this means that sub-files should be / have been loaded. For files, means that they have been opened e.g., for editing.`, 6: `NodeSymLink indicates that file is a symbolic link. File info is all for the target of the symlink.`}
+var _NodeFlagsDescMap = map[NodeFlags]string{6: `NodeOpen means file is open. For directories, this means that sub-files should be / have been loaded. For files, means that they have been opened e.g., for editing.`, 7: `NodeSymLink indicates that file is a symbolic link. File info is all for the target of the symlink.`}
 
-var _NodeFlagsMap = map[NodeFlags]string{5: `Open`, 6: `SymLink`}
+var _NodeFlagsMap = map[NodeFlags]string{6: `Open`, 7: `SymLink`}
 
 // String returns the string representation of this NodeFlags value.
 func (i NodeFlags) String() string {

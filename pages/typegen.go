@@ -26,6 +26,3 @@ func (t *Page) New() tree.Node { return &Page{} }
 // SetSource sets the [Page.Source]:
 // Source is the filesystem in which the content is located.
 func (t *Page) SetSource(v fs.FS) *Page { t.Source = v; return t }
-
-// SetTooltip sets the [Page.Tooltip]
-func (t *Page) SetTooltip(v string) *Page { t.Tooltip = v; return t }

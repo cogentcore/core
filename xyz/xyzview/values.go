@@ -17,6 +17,8 @@ import (
 	"cogentcore.org/core/xyz"
 )
 
+// TODO(config)
+
 func init() {
 	views.AddValue(xyz.MeshName(""), func() views.Value { return &MeshValue{} })
 }

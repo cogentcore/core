@@ -198,8 +198,8 @@ func (lv *VCSLogView) MakeToolbar() {
 	if lv.File != "" {
 		core.NewText(tb).SetText("File: " + dirs.DirAndFile(lv.File))
 		core.NewSeparator(tb)
-		cba := core.NewSwitch(tb).SetText("A Rev: ").
-			SetTooltip("If selected, double-clicking in log will set this A Revision to use for Diff")
+		cba := core.NewSwitch(tb).SetText("A Rev: ")
+		cba.SetTooltip("If selected, double-clicking in log will set this A Revision to use for Diff")
 		cba.SetName("a-rev")
 		cba.SetState(true, states.Checked)
 		tfa := core.NewTextField(tb).SetText(lv.RevA)
@@ -215,8 +215,8 @@ func (lv *VCSLogView) MakeToolbar() {
 
 		core.NewSeparator(tb)
 
-		cbb := core.NewSwitch(tb).SetText("B Rev: ").
-			SetTooltip("If selected, double-clicking in log will set this B Revision to use for Diff")
+		cbb := core.NewSwitch(tb).SetText("B Rev: ")
+		cbb.SetTooltip("If selected, double-clicking in log will set this B Revision to use for Diff")
 		cbb.SetName("b-rev")
 		cbb.OnClick(func(e events.Event) {
 			lv.SetA = !cbb.IsChecked()

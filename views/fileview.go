@@ -378,8 +378,9 @@ func (fv *FileView) makeFilesRow(p *core.Plan) {
 				SetTooltip(tip).
 				OnClick(func(e events.Event) {
 					fn := fv.Files[w.SelectedIndex]
-					NewSoloFuncButton(w, fn.Delete).SetTooltip(tip).SetConfirm(true).
-						SetAfterFunc(fv.UpdateFilesAction).CallFunc()
+					fb := NewSoloFuncButton(w, fn.Delete).SetConfirm(true).SetAfterFunc(fv.UpdateFilesAction)
+					fb.SetTooltip(tip)
+					fb.CallFunc()
 				})
 			core.NewButton(m).SetText("Rename").SetIcon(icons.EditNote).
 				SetTooltip("Rename the selected file").

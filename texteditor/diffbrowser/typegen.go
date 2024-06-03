@@ -4,12 +4,8 @@ package diffbrowser
 
 import (
 	"cogentcore.org/core/base/fileinfo"
-	"cogentcore.org/core/icons"
-	"cogentcore.org/core/math32"
-	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
-	"cogentcore.org/core/views"
 )
 
 // BrowserType is the [types.Type] for [Browser]
@@ -34,9 +30,6 @@ func (t *Browser) SetPathA(v string) *Browser { t.PathA = v; return t }
 // SetPathB sets the [Browser.PathB]:
 // starting paths for the files being compared
 func (t *Browser) SetPathB(v string) *Browser { t.PathB = v; return t }
-
-// SetTooltip sets the [Browser.Tooltip]
-func (t *Browser) SetTooltip(v string) *Browser { t.Tooltip = v; return t }
 
 // NodeType is the [types.Type] for [Node]
 var NodeType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor/diffbrowser.Node", IDName: "node", Doc: "Node is an element in the diff tree", Embeds: []types.Field{{Name: "TreeView"}}, Fields: []types.Field{{Name: "FileA", Doc: "file names (full path) being compared. Name of node is just the filename."}, {Name: "FileB", Doc: "file names (full path) being compared. Name of node is just the filename."}, {Name: "RevA", Doc: "VCS revisions for files, if applicable"}, {Name: "RevB", Doc: "VCS revisions for files, if applicable"}, {Name: "TextA", Doc: "Text of the files"}, {Name: "TextB", Doc: "Text of the files"}, {Name: "Info", Doc: "Info about the A file"}}, Instance: &Node{}})
@@ -78,39 +71,3 @@ func (t *Node) SetTextB(v string) *Node { t.TextB = v; return t }
 // SetInfo sets the [Node.Info]:
 // Info about the A file
 func (t *Node) SetInfo(v fileinfo.FileInfo) *Node { t.Info = v; return t }
-
-// SetTooltip sets the [Node.Tooltip]
-func (t *Node) SetTooltip(v string) *Node { t.Tooltip = v; return t }
-
-// SetText sets the [Node.Text]
-func (t *Node) SetText(v string) *Node { t.Text = v; return t }
-
-// SetIcon sets the [Node.Icon]
-func (t *Node) SetIcon(v icons.Icon) *Node { t.Icon = v; return t }
-
-// SetIconOpen sets the [Node.IconOpen]
-func (t *Node) SetIconOpen(v icons.Icon) *Node { t.IconOpen = v; return t }
-
-// SetIconClosed sets the [Node.IconClosed]
-func (t *Node) SetIconClosed(v icons.Icon) *Node { t.IconClosed = v; return t }
-
-// SetIconLeaf sets the [Node.IconLeaf]
-func (t *Node) SetIconLeaf(v icons.Icon) *Node { t.IconLeaf = v; return t }
-
-// SetIndent sets the [Node.Indent]
-func (t *Node) SetIndent(v units.Value) *Node { t.Indent = v; return t }
-
-// SetOpenDepth sets the [Node.OpenDepth]
-func (t *Node) SetOpenDepth(v int) *Node { t.OpenDepth = v; return t }
-
-// SetViewIndex sets the [Node.ViewIndex]
-func (t *Node) SetViewIndex(v int) *Node { t.ViewIndex = v; return t }
-
-// SetWidgetSize sets the [Node.WidgetSize]
-func (t *Node) SetWidgetSize(v math32.Vector2) *Node { t.WidgetSize = v; return t }
-
-// SetRootView sets the [Node.RootView]
-func (t *Node) SetRootView(v *views.TreeView) *Node { t.RootView = v; return t }
-
-// SetSelectedNodes sets the [Node.SelectedNodes]
-func (t *Node) SetSelectedNodes(v ...views.TreeViewer) *Node { t.SelectedNodes = v; return t }

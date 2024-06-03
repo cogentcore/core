@@ -1,5 +1,7 @@
 # Values
 
+TODO(config)
+
 Cogent Core provides the value views system, which allows you to instantly turn Go values into interactive widgets bound to the original values with just a single simple line of code.
 
 You can create a [[views.Value]] from any value:

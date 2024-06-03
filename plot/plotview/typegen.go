@@ -35,9 +35,6 @@ func (t *Plot) New() tree.Node { return &Plot{} }
 // documents or other cases where the overall plot size will be small.
 func (t *Plot) SetScale(v float32) *Plot { t.Scale = v; return t }
 
-// SetTooltip sets the [Plot.Tooltip]
-func (t *Plot) SetTooltip(v string) *Plot { t.Tooltip = v; return t }
-
 // PlotViewType is the [types.Type] for [PlotView]
 var PlotViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/plot/plotview.PlotView", IDName: "plot-view", Doc: "PlotView is a Cogent Core Widget that provides an interactive 2D plot\nof selected columns of Tabular data, represented by an IndexView into\na table.Table.  Other types of tabular data can be converted into this format.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Methods: []types.Method{{Name: "SaveSVG", Doc: "SaveSVG saves the plot to an svg -- first updates to ensure that plot is current", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}}, {Name: "SavePNG", Doc: "SavePNG saves the current plot to a png, capturing current render", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}}, {Name: "SaveCSV", Doc: "SaveCSV saves the Table data to a csv (comma-separated values) file with headers (any delim)", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname", "delim"}}, {Name: "SaveAll", Doc: "SaveAll saves the current plot to a png, svg, and the data to a tsv -- full save\nAny extension is removed and appropriate extensions are added", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}}, {Name: "OpenCSV", Doc: "OpenCSV opens the Table data from a csv (comma-separated values) file (or any delim)", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename", "delim"}}, {Name: "SetColumnsByName", Doc: "SetColumnsByName turns cols On or Off if their name contains given string", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"nameContains", "on"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Table", Doc: "the table of data being plotted"}, {Name: "Params", Doc: "the overall plot parameters"}, {Name: "Columns", Doc: "the parameters for each column of the table"}, {Name: "Plot", Doc: "the plot object"}, {Name: "ConfigPlotFunc", Doc: "ConfigPlotFunc is a function to call to configure [PlotView.Plot], the plot.Plot that\nactually does the plotting. It is called after [Plot] is generated, and properties\nof [Plot] can be modified in it. Properties of [Plot] should not be modified outside\nof this function, as doing so will have no effect."}, {Name: "SVGFile", Doc: "current svg file"}, {Name: "DataFile", Doc: "current csv data file"}, {Name: "InPlot", Doc: "currently doing a plot"}}, Instance: &PlotView{}})
 
@@ -71,6 +68,3 @@ func (t *PlotView) SetSVGFile(v core.Filename) *PlotView { t.SVGFile = v; return
 // SetDataFile sets the [PlotView.DataFile]:
 // current csv data file
 func (t *PlotView) SetDataFile(v core.Filename) *PlotView { t.DataFile = v; return t }
-
-// SetTooltip sets the [PlotView.Tooltip]
-func (t *PlotView) SetTooltip(v string) *PlotView { t.Tooltip = v; return t }
