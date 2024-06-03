@@ -279,6 +279,42 @@ func (t *Inspector) SetRoot(v tree.Node) *Inspector { t.Root = v; return t }
 // SetTooltip sets the [Inspector.Tooltip]
 func (t *Inspector) SetTooltip(v string) *Inspector { t.Tooltip = v; return t }
 
+// KeyChordButtonType is the [types.Type] for [KeyChordButton]
+var KeyChordButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.KeyChordButton", IDName: "key-chord-button", Doc: "KeyChordButton represents a [key.Chord] value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Chord"}}, Instance: &KeyChordButton{}})
+
+// NewKeyChordButton returns a new [KeyChordButton] with the given optional parent:
+// KeyChordButton represents a [key.Chord] value with a button.
+func NewKeyChordButton(parent ...tree.Node) *KeyChordButton {
+	return tree.New[*KeyChordButton](parent...)
+}
+
+// NodeType returns the [*types.Type] of [KeyChordButton]
+func (t *KeyChordButton) NodeType() *types.Type { return KeyChordButtonType }
+
+// New returns a new [*KeyChordButton] value
+func (t *KeyChordButton) New() tree.Node { return &KeyChordButton{} }
+
+// SetChord sets the [KeyChordButton.Chord]
+func (t *KeyChordButton) SetChord(v key.Chord) *KeyChordButton { t.Chord = v; return t }
+
+// SetTooltip sets the [KeyChordButton.Tooltip]
+func (t *KeyChordButton) SetTooltip(v string) *KeyChordButton { t.Tooltip = v; return t }
+
+// SetType sets the [KeyChordButton.Type]
+func (t *KeyChordButton) SetType(v core.ButtonTypes) *KeyChordButton { t.Type = v; return t }
+
+// SetIcon sets the [KeyChordButton.Icon]
+func (t *KeyChordButton) SetIcon(v icons.Icon) *KeyChordButton { t.Icon = v; return t }
+
+// SetIndicator sets the [KeyChordButton.Indicator]
+func (t *KeyChordButton) SetIndicator(v icons.Icon) *KeyChordButton { t.Indicator = v; return t }
+
+// SetShortcut sets the [KeyChordButton.Shortcut]
+func (t *KeyChordButton) SetShortcut(v key.Chord) *KeyChordButton { t.Shortcut = v; return t }
+
+// SetMenu sets the [KeyChordButton.Menu]
+func (t *KeyChordButton) SetMenu(v func(m *core.Scene)) *KeyChordButton { t.Menu = v; return t }
+
 // MapViewType is the [types.Type] for [MapView]
 var MapViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapView", IDName: "map-view", Doc: "MapView represents a map using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the map in one line."}, {Name: "SortValues", Doc: "SortValue is whether to sort by values instead of keys."}, {Name: "ncols", Doc: "ncols is the number of columns to display if the map view is not inline."}}, Instance: &MapView{}})
 

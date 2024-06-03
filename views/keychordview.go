@@ -4,9 +4,7 @@
 
 package views
 
-/* TODO(config)
 import (
-	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
@@ -14,36 +12,32 @@ import (
 	"cogentcore.org/core/styles/states"
 )
 
-// KeyChordValue represents a [key.Chord] value with a button.
-type KeyChordValue struct {
-	ValueBase[*core.Button]
+// KeyChordButton represents a [key.Chord] value with a button.
+type KeyChordButton struct {
+	core.Button
+	Chord key.Chord
 }
 
-func (v *KeyChordValue) Config() {
-	v.Widget.On(events.KeyChord, func(e events.Event) {
-		if !v.Widget.StateIs(states.Focused) {
+func (kc *KeyChordButton) WidgetValue() any { return &kc.Chord }
+
+func (kc *KeyChordButton) Config() {
+	kc.OnKeyChord(func(e events.Event) {
+		if !kc.StateIs(states.Focused) {
 			return
 		}
-		if !v.SetValue(e.KeyChord()) {
-			return
-		}
+		kc.Chord = e.KeyChord()
 		e.SetHandled()
-		v.Update()
-		v.SendChange()
+		kc.SendChange()
+		kc.Update()
 	})
-	v.Widget.AddContextMenu(func(m *core.Scene) {
+	kc.Updater(func() {
+		kc.SetText(kc.Chord.Label())
+	})
+	kc.AddContextMenu(func(m *core.Scene) {
 		core.NewButton(m).SetText("Clear").SetIcon(icons.ClearAll).OnClick(func(e events.Event) {
-			if !v.SetValue(key.Chord("")) {
-				return
-			}
-			v.Update()
-			v.SendChange()
+			kc.Chord = ""
+			kc.SendChange()
+			kc.Update()
 		})
 	})
 }
-
-func (v *KeyChordValue) Update() {
-	txt := reflectx.ToString(v.Value.Interface())
-	v.Widget.SetText(txt)
-}
-*/

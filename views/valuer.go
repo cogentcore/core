@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/tree"
 )
@@ -27,6 +28,7 @@ func init() {
 	core.AddValueType[icons.Icon, *IconButton]()
 	core.AddValueType[core.FontName, *FontButton]()
 	core.AddValueType[fileinfo.FileTime, *FileTimeText]()
+	core.AddValueType[key.Chord, *KeyChordButton]()
 	// core.AddValueType[time.Time, *TimeButton]()
 	// AddValue(time.Duration(0), func() Value { return &DurationValue{} })
 
