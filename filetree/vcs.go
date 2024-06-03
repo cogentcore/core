@@ -416,6 +416,6 @@ func VersionControlNameProper(vc string) VersionControlName {
 
 // Value registers [core.Chooser] as the [core.Value] widget
 // for [VersionControlName]
-func (kn VersionControlName) Value() *core.Chooser {
+func (kn VersionControlName) Value() core.Value {
 	return core.NewChooser().SetStrings(VersionControlSystems...)
 }
