@@ -12,7 +12,6 @@ import (
 
 	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
@@ -415,34 +414,20 @@ func VersionControlNameProper(vc string) VersionControlName {
 	return ""
 }
 
-// Value registers [VersionControlValue] as the [views.Value] for [VersionControlName]
-func (kn VersionControlName) Value() views.Value {
-	return &VersionControlValue{}
+// Value registers [VersionControlChooser] as the [core.Value] widget
+// for [VersionControlName]
+func (kn VersionControlName) Value() *VersionControlChooser {
+	return &VersionControlChooser{}
 }
 
-// VersionControlValue represents a [VersionControlName] with a button.
-type VersionControlValue struct {
-	views.ValueBase[*core.Button]
+// VersionControlChooser represents a [VersionControlName] with a Chooser.
+type VersionControlChooser struct {
+	core.Chooser
 }
 
-func (v *VersionControlValue) Config() {
-	v.Widget.SetType(core.ButtonTonal)
-	views.ConfigDialogWidget(v, false)
-}
+func (v *VersionControlChooser) WidgetValue() any { return &v.CurrentItem.Value }
 
-func (v *VersionControlValue) Update() {
-	txt := reflectx.ToString(v.Value.Interface())
-	if txt == "" {
-		txt = "(none)"
-	}
-	v.Widget.SetText(txt).Update()
-}
-
-func (v *VersionControlValue) OpenDialog(ctx core.Widget, fun func()) {
-	cur := reflectx.ToString(v.Value.Interface())
-	m := core.NewMenuFromStrings(VersionControlSystems, cur, func(idx int) {
-		v.SetValue(VersionControlSystems[idx])
-		v.Update()
-	})
-	core.NewMenuStage(m, ctx, ctx.ContextMenuPos(nil)).Run()
+func (v *VersionControlChooser) OnInit() {
+	v.Chooser.OnInit()
+	v.SetStrings(VersionControlSystems...)
 }

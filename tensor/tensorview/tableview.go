@@ -292,7 +292,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 		if lblr, ok := tv.Slice.(labels.SliceLabeler); ok {
 			slbl := lblr.ElemLabel(si)
 			if slbl != "" {
-				vc = views.JoinViewPath(tv.ValueTitle, slbl)
+				vc = core.JoinValueTitle(tv.ValueTitle, slbl)
 			}
 		}
 	}

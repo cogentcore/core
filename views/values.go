@@ -101,7 +101,13 @@ func (ib *IconButton) WidgetValue() any { return &ib.Icon }
 
 func (ib *IconButton) OnInit() { // TODO(config): view:"show-name"
 	ib.Button.OnInit()
-	ib.SetType(core.ButtonTonal)
+	ib.Updater(func() {
+		if ib.IsReadOnly() {
+			ib.SetType(core.ButtonText)
+		} else {
+			ib.SetType(core.ButtonTonal)
+		}
+	})
 	core.InitValueButton(ib, false, func(d *core.Body) {
 		d.SetTitle("Select an icon")
 		si := 0
