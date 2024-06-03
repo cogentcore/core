@@ -23,9 +23,7 @@ import (
 
 // Video represents a video playback widget without any controls.
 // See [Player] for a version with controls.
-//
-//types:add
-type Video struct {
+type Video struct { //types:add
 	core.WidgetBase
 
 	// Media is the video media.

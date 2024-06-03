@@ -155,10 +155,8 @@ func (sw *Scene) ManipBox() {
 	sw.NeedsRender()
 }
 
-// ManipPoint is a manipulation control point
-//
-//core:no-new
-type ManipPoint struct {
+// ManipPoint is a manipulation control point.
+type ManipPoint struct { //core:no-new
 	xyz.Solid
 }
 

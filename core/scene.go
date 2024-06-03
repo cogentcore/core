@@ -33,9 +33,7 @@ import (
 // Each [Scene] contains state specific to its particular usage
 // within a given [Stage] and overall rendering context, representing the unit
 // of rendering in the Cogent Core framework.
-//
-//core:no-new
-type Scene struct {
+type Scene struct { //core:no-new
 	Frame
 
 	// Bars contains functions for constructing the control bars for this Scene,
