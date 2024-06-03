@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
@@ -215,6 +216,22 @@ func (t *KeyChordButton) New() tree.Node { return &KeyChordButton{} }
 
 // SetChord sets the [KeyChordButton.Chord]
 func (t *KeyChordButton) SetChord(v key.Chord) *KeyChordButton { t.Chord = v; return t }
+
+// KeyMapButtonType is the [types.Type] for [KeyMapButton]
+var KeyMapButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.KeyMapButton", IDName: "key-map-button", Doc: "KeyMapButton represents a [keymap.MapName] value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "MapName"}}, Instance: &KeyMapButton{}})
+
+// NewKeyMapButton returns a new [KeyMapButton] with the given optional parent:
+// KeyMapButton represents a [keymap.MapName] value with a button.
+func NewKeyMapButton(parent ...tree.Node) *KeyMapButton { return tree.New[*KeyMapButton](parent...) }
+
+// NodeType returns the [*types.Type] of [KeyMapButton]
+func (t *KeyMapButton) NodeType() *types.Type { return KeyMapButtonType }
+
+// New returns a new [*KeyMapButton] value
+func (t *KeyMapButton) New() tree.Node { return &KeyMapButton{} }
+
+// SetMapName sets the [KeyMapButton.MapName]
+func (t *KeyMapButton) SetMapName(v keymap.MapName) *KeyMapButton { t.MapName = v; return t }
 
 // MapViewType is the [types.Type] for [MapView]
 var MapViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapView", IDName: "map-view", Doc: "MapView represents a map using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the map in one line."}, {Name: "SortValues", Doc: "SortValue is whether to sort by values instead of keys."}, {Name: "ncols", Doc: "ncols is the number of columns to display if the map view is not inline."}}, Instance: &MapView{}})

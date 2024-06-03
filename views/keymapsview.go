@@ -4,40 +4,31 @@
 
 package views
 
-/* TODO(config)
 import (
-	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/keymap"
 )
 
-// KeyMapValue represents a [keymap.MapName] value with a button.
-type KeyMapValue struct {
-	ValueBase[*core.Button]
+// KeyMapButton represents a [keymap.MapName] value with a button.
+type KeyMapButton struct {
+	core.Button
+	MapName keymap.MapName
 }
 
-func (v *KeyMapValue) Config() {
-	v.Widget.SetType(core.ButtonTonal)
-	ConfigDialogWidget(v, false)
-}
+func (km *KeyMapButton) WidgetValue() any { return &km.MapName }
 
-func (v *KeyMapValue) Update() {
-	txt := reflectx.ToString(v.Value.Interface())
-	v.Widget.SetText(txt).Update()
+func (km *KeyMapButton) Init() {
+	km.Button.Init()
+	km.SetType(core.ButtonTonal)
+	core.InitValueButton(km, false, func(d *core.Body) {
+		d.SetTitle("Select a key map")
+		si := 0
+		_, curRow, _ := keymap.AvailableMaps.MapByName(km.MapName)
+		tv := NewTableView(d).SetSlice(&keymap.AvailableMaps).SetSelectedIndex(curRow).BindSelect(&si)
+		tv.OnChange(func(e events.Event) {
+			name := keymap.AvailableMaps[si]
+			km.MapName = keymap.MapName(name.Name)
+		})
+	})
 }
-
-func (v *KeyMapValue) ConfigDialog(d *core.Body) (bool, func()) {
-	d.SetTitle("Select a key map")
-	si := 0
-	cur := reflectx.ToString(v.Value.Interface())
-	_, curRow, _ := keymap.AvailableMaps.MapByName(keymap.MapName(cur))
-	NewTableView(d).SetSlice(&keymap.AvailableMaps).SetSelectedIndex(curRow).BindSelect(&si)
-	return true, func() {
-		if si >= 0 {
-			km := keymap.AvailableMaps[si]
-			v.SetValue(keymap.MapName(km.Name))
-			v.Update()
-		}
-	}
-}
-*/

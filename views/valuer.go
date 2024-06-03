@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/tree"
 )
 
@@ -29,6 +30,7 @@ func init() {
 	core.AddValueType[core.FontName, *FontButton]()
 	core.AddValueType[time.Time, *TimeText]()
 	core.AddValueType[key.Chord, *KeyChordButton]()
+	core.AddValueType[keymap.MapName, *KeyMapButton]()
 	// core.AddValueType[time.Time, *TimeButton]()
 	// AddValue(time.Duration(0), func() Value { return &DurationValue{} })
 
