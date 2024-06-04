@@ -203,6 +203,8 @@ func (ed *Editor) FlagType() enums.BitFlagSetter {
 	return (*EditorFlags)(&ed.Flags)
 }
 
+func (ed *Editor) WidgetValue() any { return &ed.Buffer.Txt }
+
 func (ed *Editor) Init() {
 	ed.Frame.Init()
 	ed.AddContextMenu(ed.ContextMenu)
