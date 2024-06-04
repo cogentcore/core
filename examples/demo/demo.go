@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/strcase"
@@ -327,7 +328,7 @@ func values(ts *core.Tabs) {
 	tab := ts.NewTab("Values")
 
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Values")
-	core.NewText(tab).SetText("Cogent Core provides the value views system, which allows you to instantly turn Go values into interactive widgets bound to the original values with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.")
+	core.NewText(tab).SetText("Cogent Core provides the value widget system, which allows you to instantly bind Go values to interactive widgets with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the Inspector button below.")
 
 	name := "Gopher"
 	core.Bind(&name, core.NewTextField(tab)).OnChange(func(e events.Event) {
@@ -344,9 +345,9 @@ func values(ts *core.Tabs) {
 		fmt.Println("The switch is now", on)
 	})
 
-	align := core.ThemeLight
-	core.Bind(&align, core.NewSwitches(tab)).OnChange(func(e events.Event) {
-		fmt.Println("The alignment is now", align)
+	theme := core.ThemeLight
+	core.Bind(&theme, core.NewSwitches(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The theme is now", theme)
 	})
 
 	var state states.States
@@ -366,19 +367,32 @@ func values(ts *core.Tabs) {
 		fmt.Println("The color map is now", colorMap)
 	})
 
+	t := time.Now()
+	core.Bind(&t, views.NewTimeText(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The time is now", t)
+	})
+
+	duration := 5 * time.Minute
+	core.Bind(&duration, views.NewDurationInput(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The duration is now", duration)
+	})
+
+	file := core.Filename("demo.go")
+	core.Bind(&file, views.NewFileButton(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The file is now", file)
+	})
+
+	font := core.AppearanceSettings.Font
+	core.Bind(&font, views.NewFontButton(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The font is now", font)
+	})
+
 	core.Bind(hello, tree.New[*views.FuncButton](tab)).SetShowReturn(true) // TODO(config)
 	core.Bind(styles.NewStyle, tree.New[*views.FuncButton](tab)).SetConfirm(true).SetShowReturn(true)
 
 	core.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
 		views.InspectorWindow(ts.Scene)
 	})
-
-	// TODO(config)
-	// views.NewValue(tab, time.Now())
-	// views.NewValue(tab, 5*time.Minute)
-	// views.NewValue(tab, 500*time.Millisecond)
-	// views.NewValue(tab, core.Filename("demo.go"))
-	// views.NewValue(tab, core.AppearanceSettings.Font)
 }
 
 // Hello displays a greeting message and an age in weeks based on the given information.

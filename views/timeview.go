@@ -376,25 +376,29 @@ func (di *DurationInput) WidgetValue() any { return &di.Duration }
 
 func (di *DurationInput) Init() {
 	di.Frame.Init()
-
-	var ch *core.Chooser // TODO(config)
-
-	sp := core.NewSpinner(di).SetStep(1).SetPageStep(10)
-	sp.SetTooltip("The value of time")
-	sp.OnChange(func(e events.Event) {
-		di.Duration = time.Duration(sp.Value * float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
+	var sp *core.Spinner
+	var ch *core.Chooser
+	core.AddChild(di, func(w *core.Spinner) {
+		sp = w
+		w.SetStep(1).SetPageStep(10)
+		w.SetTooltip("The value of time")
+		w.OnChange(func(e events.Event) {
+			di.Duration = time.Duration(w.Value * float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
+		})
 	})
+	core.AddChild(di, func(w *core.Chooser) {
+		ch = w
+		units := make([]core.ChooserItem, len(durationUnits))
+		for i, u := range durationUnits {
+			units[i] = core.ChooserItem{Value: u}
+		}
 
-	units := make([]core.ChooserItem, len(durationUnits))
-	for i, u := range durationUnits {
-		units[i] = core.ChooserItem{Value: u}
-	}
-
-	ch = core.NewChooser(di).SetItems(units...)
-	ch.SetTooltip("The unit of time")
-	ch.OnChange(func(e events.Event) {
-		// we update the value to fit the unit
-		sp.SetValue(float32(di.Duration) / float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
+		ch = core.NewChooser(di).SetItems(units...)
+		ch.SetTooltip("The unit of time")
+		ch.OnChange(func(e events.Event) {
+			// we update the value to fit the unit
+			sp.SetValue(float32(di.Duration) / float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
+		})
 	})
 }
 
