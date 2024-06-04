@@ -133,6 +133,8 @@ var StandardMaps = Maps{
 		"Meta+Alt+S":           SaveAlt,
 		"Meta+Shift+W":         CloseAlt1,
 		"Meta+Alt+W":           CloseAlt2,
+		"Control+C":            MultiA,
+		"Control+X":            MultiB,
 	}},
 	{"MacEmacs", "Mac with emacs-style navigation -- emacs wins in conflicts", Map{
 		"UpArrow":              MoveUp,
@@ -271,6 +273,8 @@ var StandardMaps = Maps{
 		"Meta+Alt+S":           SaveAlt,
 		"Meta+Shift+W":         CloseAlt1,
 		"Meta+Alt+W":           CloseAlt2,
+		"Control+C":            MultiA,
+		"Control+X":            MultiB,
 	}},
 	{"LinuxEmacs", "Linux with emacs-style navigation -- emacs wins in conflicts", Map{
 		"UpArrow":             MoveUp,
@@ -387,6 +391,8 @@ var StandardMaps = Maps{
 		"Control+Alt+S":       SaveAlt,
 		"Alt+Shift+W":         CloseAlt1,
 		"Control+Alt+W":       CloseAlt2,
+		"Control+C":           MultiA,
+		"Control+X":           MultiB,
 	}},
 	{"LinuxStandard", "Standard Linux KeyMap", Map{
 		"UpArrow":             MoveUp,
@@ -473,6 +479,8 @@ var StandardMaps = Maps{
 		"Control+Alt+S":       SaveAlt,
 		"Control+Shift+W":     CloseAlt1,
 		"Control+Alt+W":       CloseAlt2,
+		"Control+B":           MultiA,
+		"Control+E":           MultiB,
 	}},
 	{"WindowsStandard", "Standard Windows KeyMap", Map{
 		"UpArrow":             MoveUp,
@@ -559,6 +567,8 @@ var StandardMaps = Maps{
 		"Control+Alt+S":       SaveAlt,
 		"Control+Shift+W":     CloseAlt1,
 		"Control+Alt+W":       CloseAlt2,
+		"Control+B":           MultiA,
+		"Control+E":           MultiB,
 	}},
 	{"ChromeStd", "Standard chrome-browser and linux-under-chrome bindings", Map{
 		"UpArrow":             MoveUp,
@@ -645,5 +655,7 @@ var StandardMaps = Maps{
 		"Control+Alt+S":       SaveAlt,
 		"Control+Shift+W":     CloseAlt1,
 		"Control+Alt+W":       CloseAlt2,
+		"Control+B":           MultiA,
+		"Control+E":           MultiB,
 	}},
 }

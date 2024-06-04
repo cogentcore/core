@@ -96,6 +96,8 @@ const (
 	SaveAlt   // another alt (e.g., alt)
 	CloseAlt1 // alternative version (e.g., shift)
 	CloseAlt2 // alternative version (e.g., alt)
+	MultiA    // multi-key sequence A: Emacs Control+C
+	MultiB    // multi-key sequence B: Emacs Control+X
 )
 
 // Map is a map between a key sequence (chord) and a specific key
@@ -287,6 +289,16 @@ func (km *Maps) CopyFrom(cp Maps) {
 	*km = make(Maps, 0, len(cp)) // reset
 	b, _ := json.Marshal(cp)
 	json.Unmarshal(b, km)
+}
+
+// MergeFrom merges keymaps from given other map
+func (km *Maps) MergeFrom(cp Maps) {
+	for nm, mi := range cp {
+		tmi := (*km)[nm]
+		for ch, kf := range mi.Map {
+			tmi.Map[ch] = kf
+		}
+	}
 }
 
 // order is: Shift, Control, Alt, Meta

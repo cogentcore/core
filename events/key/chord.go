@@ -58,6 +58,25 @@ func CodeIsModifier(c Codes) bool {
 	return c >= CodeLeftControl && c <= CodeRightMeta
 }
 
+// IsMulti returns true if the Chord represents a multi-key sequence
+func (ch Chord) IsMulti() bool {
+	return strings.Contains(string(ch), " ")
+}
+
+// Chords returns the multiple keys represented in a multi-key sequence
+func (ch Chord) Chords() []Chord {
+	ss := strings.Fields(string(ch))
+	nc := len(ss)
+	if nc <= 1 {
+		return []Chord{ch}
+	}
+	cc := make([]Chord, nc)
+	for i, s := range ss {
+		cc[i] = Chord(s)
+	}
+	return cc
+}
+
 // Decode decodes a chord string into rune and modifiers (set as bit flags)
 func (ch Chord) Decode() (r rune, code Codes, mods Modifiers, err error) {
 	cs := string(ch.PlatformChord())
