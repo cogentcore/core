@@ -519,7 +519,10 @@ func (sv *SliceViewBase) BindSelect(val *int) *SliceViewBase {
 	sv.OnDoubleClick(func(e events.Event) {
 		if sv.ClickSelectEvent(e) {
 			*val = sv.SelectedIndex
-			sv.Scene.SendKey(keymap.Accept, e) // activates Ok button code
+			sv.Scene.SendKey(keymap.Accept, e) // activate OK button
+			if sv.Scene.Stage.Type == core.DialogStage {
+				sv.Scene.Close() // also directly close dialog for value dialogs without OK button
+			}
 		}
 	})
 	return sv
