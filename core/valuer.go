@@ -119,7 +119,10 @@ func ToValue(value any, tags reflect.StructTag) Value {
 	if _, ok := value.(enums.BitFlag); ok {
 		return NewSwitches()
 	}
-	if _, ok := value.(enums.Enum); ok {
+	if enum, ok := value.(enums.Enum); ok {
+		if len(enum.Values()) < 4 {
+			return NewSwitches()
+		}
 		return NewChooser()
 	}
 
