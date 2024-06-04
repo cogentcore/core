@@ -402,21 +402,25 @@ func (di *DurationInput) Init() {
 		w.SetItems(units...)
 		w.SetTooltip("The unit of time")
 		w.Updater(func() {
-			if di.Unit != "" {
-				return
-			}
-			di.Unit = durationUnits[0]
-			for _, u := range durationUnits {
-				if durationUnitsMap[u] > di.Duration {
-					break
-				}
-				di.Unit = u
+			if di.Unit == "" {
+				di.SetAutoUnit()
 			}
 		})
 		w.OnChange(func(e events.Event) {
 			di.Update()
 		})
 	})
+}
+
+// SetAutoUnit sets the [DurationInput.Unit] automatically based on the current duration.
+func (di *DurationInput) SetAutoUnit() {
+	di.Unit = durationUnits[0]
+	for _, u := range durationUnits {
+		if durationUnitsMap[u] > di.Duration {
+			break
+		}
+		di.Unit = u
+	}
 }
 
 var durationUnits = []string{
