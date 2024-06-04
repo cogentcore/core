@@ -69,6 +69,9 @@ type NodeBase struct {
 
 // String implements the [fmt.Stringer] interface by returning the path of the node.
 func (n *NodeBase) String() string {
+	if n == nil || n.This() == nil {
+		return ""
+	}
 	return elide.Middle(n.This().Path(), 38)
 }
 
