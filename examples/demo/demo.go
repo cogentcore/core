@@ -368,7 +368,7 @@ func values(ts *core.Tabs) {
 	})
 
 	t := time.Now()
-	core.Bind(&t, views.NewTimeText(tab)).OnChange(func(e events.Event) {
+	core.Bind(&t, views.NewTimeInput(tab)).OnChange(func(e events.Event) {
 		fmt.Println("The time is now", t)
 	})
 

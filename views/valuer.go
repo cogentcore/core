@@ -27,7 +27,7 @@ func init() {
 	core.InspectorWindow = InspectorWindow
 
 	core.AddValueType[icons.Icon, *IconButton]()
-	core.AddValueType[time.Time, *TimeText]()
+	core.AddValueType[time.Time, *TimeInput]()
 	core.AddValueType[time.Duration, *DurationInput]()
 	core.AddValueType[types.Type, *TypeChooser]()
 	core.AddValueType[core.Filename, *FileButton]()

@@ -279,92 +279,88 @@ func (dv *DateView) Init() {
 	})
 }
 
-/* TODO(config)
-// TimeValue presents two text fields for editing a date and time,
-// both of which can pull up corresponding picker view dialogs.
-type TimeValue struct {
-	ValueBase[*core.Frame]
+// TimeInput presents two text fields for editing a date and time,
+// both of which can pull up corresponding picker dialogs.
+type TimeInput struct {
+	core.Frame
+	Time time.Time
 }
 
-func (v *TimeValue) Config() {
-	dt := core.NewTextField(v.Widget).SetTooltip("The date")
-	dt.SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
-		d := core.NewBody().AddTitle("Select date")
-		dv := NewDateView(d).SetTime(*v.TimeValue())
-		d.AddBottomBar(func(parent core.Widget) {
-			d.AddCancel(parent)
-			d.AddOK(parent).OnClick(func(e events.Event) {
-				v.SetValue(dv.Time)
-				v.Update()
+func (ti *TimeInput) WidgetValue() any { return &ti.Time }
+
+func (ti *TimeInput) Init() {
+	ti.Frame.Init()
+
+	core.AddChild(ti, func(w *core.TextField) {
+		w.SetTooltip("The date")
+		w.SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
+			d := core.NewBody().AddTitle("Select date")
+			dp := NewDateView(d).SetTime(ti.Time)
+			d.AddBottomBar(func(parent core.Widget) {
+				d.AddCancel(parent)
+				d.AddOK(parent).OnClick(func(e events.Event) {
+					ti.Time = dp.Time
+					ti.SendChange()
+					ti.Update()
+				})
 			})
+			d.RunDialog(w)
 		})
-		d.RunDialog(dt)
-	})
-	dt.Style(func(s *styles.Style) {
-		s.Min.X.Em(8)
-		s.Max.X.Em(10)
-	})
-	dt.SetReadOnly(v.IsReadOnly())
-	dt.SetValidator(func() error {
-		d, err := time.Parse("1/2/2006", dt.Text())
-		if err != nil {
-			return err
-		}
-		tv := v.TimeValue()
-		// new date and old time
-		v.SetValue(time.Date(d.Year(), d.Month(), d.Day(), tv.Hour(), tv.Minute(), tv.Second(), tv.Nanosecond(), tv.Location()))
-		return nil
+		w.Style(func(s *styles.Style) {
+			s.Min.X.Em(8)
+			s.Max.X.Em(10)
+		})
+		w.Updater(func() {
+			w.SetReadOnly(ti.IsReadOnly())
+			w.SetText(ti.Time.Format("1/2/2006"))
+		})
+		w.SetValidator(func() error {
+			d, err := time.Parse("1/2/2006", w.Text())
+			if err != nil {
+				return err
+			}
+			// new date and old time
+			ti.Time = time.Date(d.Year(), d.Month(), d.Day(), ti.Time.Hour(), ti.Time.Minute(), ti.Time.Second(), ti.Time.Nanosecond(), ti.Time.Location())
+			ti.SendChange()
+			return nil
+		})
 	})
 
-	tm := core.NewTextField(v.Widget).SetTooltip("The time")
-	tm.SetLeadingIcon(icons.Schedule, func(e events.Event) {
-		d := core.NewBody().AddTitle("Edit time")
-		tv := NewTimeView(d).SetTime(*v.TimeValue())
-		d.AddBottomBar(func(parent core.Widget) {
-			d.AddCancel(parent)
-			d.AddOK(parent).OnClick(func(e events.Event) {
-				v.SetValue(tv.Time)
-				v.Update()
+	core.AddChild(ti, func(w *core.TextField) {
+		w.SetTooltip("The time")
+		w.SetLeadingIcon(icons.Schedule, func(e events.Event) {
+			d := core.NewBody().AddTitle("Edit time")
+			tp := NewTimeView(d).SetTime(ti.Time)
+			d.AddBottomBar(func(parent core.Widget) {
+				d.AddCancel(parent)
+				d.AddOK(parent).OnClick(func(e events.Event) {
+					ti.Time = tp.Time
+					ti.SendChange()
+					ti.Update()
+				})
 			})
+			d.RunDialog(w)
 		})
-		d.RunDialog(tm)
-	})
-	tm.Style(func(s *styles.Style) {
-		s.Min.X.Em(8)
-		s.Max.X.Em(10)
-	})
-	tm.SetReadOnly(v.IsReadOnly())
-	tm.SetValidator(func() error {
-		t, err := time.Parse(core.SystemSettings.TimeFormat(), tm.Text())
-		if err != nil {
-			return err
-		}
-		tv := v.TimeValue()
-		// old date and new time
-		v.SetValue(time.Date(tv.Year(), tv.Month(), tv.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), tv.Location()))
-		return nil
+		w.Style(func(s *styles.Style) {
+			s.Min.X.Em(8)
+			s.Max.X.Em(10)
+		})
+		w.Updater(func() {
+			w.SetReadOnly(ti.IsReadOnly())
+			w.SetText(ti.Time.Format(core.SystemSettings.TimeFormat()))
+		})
+		w.SetValidator(func() error {
+			t, err := time.Parse(core.SystemSettings.TimeFormat(), w.Text())
+			if err != nil {
+				return err
+			}
+			// old date and new time
+			ti.Time = time.Date(ti.Time.Year(), ti.Time.Month(), ti.Time.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), ti.Time.Location())
+			ti.SendChange()
+			return nil
+		})
 	})
 }
-
-func (v *TimeValue) Update() {
-	tm := v.TimeValue()
-	v.Widget.Child(0).(*core.TextField).SetText(tm.Format("1/2/2006"))
-	v.Widget.Child(1).(*core.TextField).SetText(tm.Format(core.SystemSettings.TimeFormat()))
-}
-
-// TimeValue decodes the value into a *time.Time value, also handling the [fileinfo.FileTime] case.
-func (v *TimeValue) TimeValue() *time.Time {
-	tmi := reflectx.PointerValue(v.Value).Interface()
-	switch v := tmi.(type) {
-	case *time.Time:
-		return v
-	case *fileinfo.FileTime:
-		return (*time.Time)(v)
-	}
-	return nil
-}
-
-*/
 
 // DurationInput represents a [time.Duration] value with a spinner and unit chooser.
 type DurationInput struct {

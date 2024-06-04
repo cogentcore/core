@@ -430,6 +430,23 @@ func (t *DateView) NodeType() *types.Type { return DateViewType }
 // New returns a new [*DateView] value
 func (t *DateView) New() tree.Node { return &DateView{} }
 
+// TimeInputType is the [types.Type] for [TimeInput]
+var TimeInputType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TimeInput", IDName: "time-input", Doc: "TimeInput presents two text fields for editing a date and time,\nboth of which can pull up corresponding picker dialogs.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time"}}, Instance: &TimeInput{}})
+
+// NewTimeInput returns a new [TimeInput] with the given optional parent:
+// TimeInput presents two text fields for editing a date and time,
+// both of which can pull up corresponding picker dialogs.
+func NewTimeInput(parent ...tree.Node) *TimeInput { return tree.New[*TimeInput](parent...) }
+
+// NodeType returns the [*types.Type] of [TimeInput]
+func (t *TimeInput) NodeType() *types.Type { return TimeInputType }
+
+// New returns a new [*TimeInput] value
+func (t *TimeInput) New() tree.Node { return &TimeInput{} }
+
+// SetTime sets the [TimeInput.Time]
+func (t *TimeInput) SetTime(v time.Time) *TimeInput { t.Time = v; return t }
+
 // DurationInputType is the [types.Type] for [DurationInput]
 var DurationInputType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.DurationInput", IDName: "duration-input", Doc: "DurationInput represents a [time.Duration] value with a spinner and unit chooser.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Duration"}, {Name: "Unit", Doc: "Unit is the unit of time."}}, Instance: &DurationInput{}})
 
