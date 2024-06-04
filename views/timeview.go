@@ -30,23 +30,23 @@ type TimePicker struct {
 	PM bool `set:"-"`
 }
 
-func (tv *TimePicker) WidgetValue() any { return &tv.Time }
+func (tp *TimePicker) WidgetValue() any { return &tp.Time }
 
-func (tv *TimePicker) Init() {
-	tv.Frame.Init()
-	core.AddChild(tv, func(w *core.Spinner) {
+func (tp *TimePicker) Init() {
+	tp.Frame.Init()
+	core.AddChild(tp, func(w *core.Spinner) {
 		w.SetStep(1).SetEnforceStep(true)
 		if core.SystemSettings.Clock24 {
-			tv.Hour = tv.Time.Hour()
+			tp.Hour = tp.Time.Hour()
 			w.SetMax(24).SetMin(0)
 		} else {
-			tv.Hour = tv.Time.Hour() % 12
-			if tv.Hour == 0 {
-				tv.Hour = 12
+			tp.Hour = tp.Time.Hour() % 12
+			if tp.Hour == 0 {
+				tp.Hour = 12
 			}
 			w.SetMax(12).SetMin(1)
 		}
-		w.SetValue(float32(tv.Hour))
+		w.SetValue(float32(tp.Hour))
 		w.Style(func(s *styles.Style) {
 			s.Font.Size.Dp(57)
 			s.Min.X.Dp(96)
@@ -56,28 +56,28 @@ func (tv *TimePicker) Init() {
 			if hr == 12 && !core.SystemSettings.Clock24 {
 				hr = 0
 			}
-			tv.Hour = hr
-			if tv.PM {
+			tp.Hour = hr
+			if tp.PM {
 				// only add to local variable
 				hr += 12
 			}
 			// we set our hour and keep everything else
-			tt := tv.Time
-			tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), hr, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
-			tv.SendChange()
+			tt := tp.Time
+			tp.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), hr, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
+			tp.SendChange()
 		})
 	})
-	core.AddChild(tv, func(w *core.Text) {
+	core.AddChild(tp, func(w *core.Text) {
 		w.SetType(core.TextDisplayLarge).SetText(":")
 		w.Style(func(s *styles.Style) {
 			s.SetTextWrap(false)
 			s.Min.X.Ch(1)
 		})
 	})
-	core.AddChild(tv, func(w *core.Spinner) {
+	core.AddChild(tp, func(w *core.Spinner) {
 		w.SetStep(1).SetEnforceStep(true).
 			SetMin(0).SetMax(60).SetFormat("%02d").
-			SetValue(float32(tv.Time.Minute()))
+			SetValue(float32(tp.Time.Minute()))
 		w.Style(func(s *styles.Style) {
 			s.Font.Size.Dp(57)
 			s.Min.X.Dp(96)
@@ -85,21 +85,21 @@ func (tv *TimePicker) Init() {
 		w.OnChange(func(e events.Event) {
 			// we set our minute and keep everything else
 			// TODO(config)
-			// tt := tv.Time
-			// tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), int(minute.Value), tt.Second(), tt.Nanosecond(), tt.Location())
-			tv.SendChange()
+			// tt := tp.Time
+			// tp.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), int(minute.Value), tt.Second(), tt.Nanosecond(), tt.Location())
+			tp.SendChange()
 		})
 	})
-	tv.Maker(func(p *core.Plan) {
+	tp.Maker(func(p *core.Plan) {
 		if !core.SystemSettings.Clock24 {
 			core.Add(p, func(w *core.Switches) {
 				w.SetMutex(true).SetType(core.SwitchSegmentedButton).SetItems(core.SwitchItem{Value: "AM"}, core.SwitchItem{Value: "PM"})
-				tv.PM = tv.Time.Hour() >= 12
+				tp.PM = tp.Time.Hour() >= 12
 				w.Style(func(s *styles.Style) {
 					s.Direction = styles.Column
 				})
 				w.Updater(func() {
-					if tv.PM {
+					if tp.PM {
 						w.SelectValue("PM")
 					} else {
 						w.SelectValue("AM")
@@ -108,21 +108,21 @@ func (tv *TimePicker) Init() {
 
 				w.OnChange(func(e events.Event) {
 					si := w.SelectedItem()
-					tt := tv.Time
-					if tv.Hour == 12 {
-						tv.Hour = 0
+					tt := tp.Time
+					if tp.Hour == 12 {
+						tp.Hour = 0
 					}
 					switch si.Value {
 					case "AM":
-						tv.PM = false
-						tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
+						tp.PM = false
+						tp.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tp.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
 					case "PM":
-						tv.PM = true
-						tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour+12, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
+						tp.PM = true
+						tp.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tp.Hour+12, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
 					default:
 						// must always have something valid selected
-						tv.PM = false
-						tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
+						tp.PM = false
+						tp.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tp.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
 					}
 				})
 			})
@@ -132,7 +132,7 @@ func (tv *TimePicker) Init() {
 
 var shortMonths = []string{"Jan", "Feb", "Apr", "Mar", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
 
-// DatePicker is a view for selecting a date
+// DatePicker is a widget for picking a date.
 type DatePicker struct {
 	core.Frame
 
@@ -141,20 +141,20 @@ type DatePicker struct {
 }
 
 // SetTime sets the source time and updates the view
-func (dv *DatePicker) SetTime(tim time.Time) *DatePicker { // TODO(config)
-	dv.Time = tim
-	dv.SendChange()
-	dv.Update()
-	return dv
+func (dp *DatePicker) SetTime(tim time.Time) *DatePicker { // TODO(config)
+	dp.Time = tim
+	dp.SendChange()
+	dp.Update()
+	return dp
 }
 
-func (dv *DatePicker) Init() {
-	dv.Frame.Init()
-	dv.Style(func(s *styles.Style) {
+func (dp *DatePicker) Init() {
+	dp.Frame.Init()
+	dp.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
 
-	core.AddChild(dv, func(w *core.Frame) {
+	core.AddChild(dp, func(w *core.Frame) {
 		w.Style(func(s *styles.Style) {
 			s.Gap.Zero()
 		})
@@ -165,7 +165,7 @@ func (dv *DatePicker) Init() {
 		core.AddChild(w, func(w *core.Button) {
 			w.SetType(core.ButtonAction).SetIcon(icons.NavigateBefore)
 			w.OnClick(func(e events.Event) {
-				dv.SetTime(dv.Time.AddDate(0, -1, 0))
+				dp.SetTime(dp.Time.AddDate(0, -1, 0))
 			})
 			w.Style(arrowStyle)
 		})
@@ -175,28 +175,28 @@ func (dv *DatePicker) Init() {
 				sms[i] = core.ChooserItem{Value: sm}
 			}
 			w.SetItems(sms...)
-			w.SetCurrentIndex(int(dv.Time.Month() - 1))
+			w.SetCurrentIndex(int(dp.Time.Month() - 1))
 			w.OnChange(func(e events.Event) {
 				// set our month
-				dv.SetTime(dv.Time.AddDate(0, w.CurrentIndex+1-int(dv.Time.Month()), 0))
+				dp.SetTime(dp.Time.AddDate(0, w.CurrentIndex+1-int(dp.Time.Month()), 0))
 			})
 		})
 		core.AddChild(w, func(w *core.Button) {
 			w.SetType(core.ButtonAction).SetIcon(icons.NavigateNext)
 			w.OnClick(func(e events.Event) {
-				dv.SetTime(dv.Time.AddDate(0, 1, 0))
+				dp.SetTime(dp.Time.AddDate(0, 1, 0))
 			})
 			w.Style(arrowStyle)
 		})
 		core.AddChild(w, func(w *core.Button) {
 			w.SetType(core.ButtonAction).SetIcon(icons.NavigateBefore)
 			w.OnClick(func(e events.Event) {
-				dv.SetTime(dv.Time.AddDate(-1, 0, 0))
+				dp.SetTime(dp.Time.AddDate(-1, 0, 0))
 			})
 			w.Style(arrowStyle)
 		})
 		core.AddChild(w, func(w *core.Chooser) {
-			yr := dv.Time.Year()
+			yr := dp.Time.Year()
 			var yrs []core.ChooserItem
 			// we go 100 in each direction from the current year
 			for i := yr - 100; i <= yr+100; i++ {
@@ -208,27 +208,27 @@ func (dv *DatePicker) Init() {
 				// we are centered at current year with 100 in each direction
 				nyr := w.CurrentIndex + yr - 100
 				// set our year
-				dv.SetTime(dv.Time.AddDate(nyr-dv.Time.Year(), 0, 0))
+				dp.SetTime(dp.Time.AddDate(nyr-dp.Time.Year(), 0, 0))
 			})
 		})
 		core.AddChild(w, func(w *core.Button) {
 			w.SetType(core.ButtonAction).SetIcon(icons.NavigateNext)
 			w.OnClick(func(e events.Event) {
-				dv.SetTime(dv.Time.AddDate(1, 0, 0))
+				dp.SetTime(dp.Time.AddDate(1, 0, 0))
 			})
 			w.Style(arrowStyle)
 		})
 	})
-	core.AddChild(dv, func(w *core.Frame) {
+	core.AddChild(dp, func(w *core.Frame) {
 		w.Style(func(s *styles.Style) {
 			s.Display = styles.Grid
 			s.Columns = 7
 		})
 		w.Maker(func(p *core.Plan) {
 			// start of the month
-			som := dv.Time.AddDate(0, 0, -dv.Time.Day()+1)
+			som := dp.Time.AddDate(0, 0, -dp.Time.Day()+1)
 			// end of the month
-			eom := dv.Time.AddDate(0, 1, -dv.Time.Day())
+			eom := dp.Time.AddDate(0, 1, -dp.Time.Day())
 			// start of the week containing the start of the month
 			somw := som.AddDate(0, 0, -int(som.Weekday()))
 			// year day of the start of the week containing the start of the month
@@ -249,7 +249,7 @@ func (dv *DatePicker) Init() {
 					ds := strconv.Itoa(dt.Day())
 					w.SetType(core.ButtonAction).SetText(ds)
 					w.OnClick(func(e events.Event) {
-						dv.SetTime(dt)
+						dp.SetTime(dt)
 					})
 					w.Style(func(s *styles.Style) {
 						s.CenterAll()
@@ -263,7 +263,7 @@ func (dv *DatePicker) Init() {
 							s.Border.Color.Set(colors.C(colors.Scheme.Primary.Base))
 							s.Color = colors.C(colors.Scheme.Primary.Base)
 						}
-						if dt.Year() == dv.Time.Year() && dt.YearDay() == dv.Time.YearDay() {
+						if dt.Year() == dp.Time.Year() && dt.YearDay() == dp.Time.YearDay() {
 							s.Background = colors.C(colors.Scheme.Primary.Base)
 							s.Color = colors.C(colors.Scheme.Primary.On)
 						}
