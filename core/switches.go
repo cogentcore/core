@@ -141,10 +141,10 @@ func (sw *Switches) Init() {
 					} else {
 						sw.SelectedIndexes = slices.DeleteFunc(sw.SelectedIndexes, func(v int) bool { return v == i })
 					}
-					sw.UpdateWidget()
+					sw.SendChange(e)
+					sw.UpdateTree()
 					sw.ApplyStyleTree()
 					sw.NeedsRender()
-					sw.SendChange(e)
 				})
 				w.Style(func(s *styles.Style) {
 					if sw.Type != SwitchSegmentedButton {
