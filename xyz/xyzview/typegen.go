@@ -9,7 +9,7 @@ import (
 )
 
 // ManipPointType is the [types.Type] for [ManipPoint]
-var ManipPointType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzview.ManipPoint", IDName: "manip-point", Doc: "ManipPoint is a manipulation control point", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Solid"}}, Instance: &ManipPoint{}})
+var ManipPointType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzview.ManipPoint", IDName: "manip-point", Doc: "ManipPoint is a manipulation control point.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Solid"}}, Instance: &ManipPoint{}})
 
 // NodeType returns the [*types.Type] of [ManipPoint]
 func (t *ManipPoint) NodeType() *types.Type { return ManipPointType }
@@ -61,3 +61,19 @@ func (t *SceneView) NodeType() *types.Type { return SceneViewType }
 
 // New returns a new [*SceneView] value
 func (t *SceneView) New() tree.Node { return &SceneView{} }
+
+// MeshButtonType is the [types.Type] for [MeshButton]
+var MeshButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzview.MeshButton", IDName: "mesh-button", Doc: "MeshButton represents an [xyz.MeshName] value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "MeshName"}}, Instance: &MeshButton{}})
+
+// NewMeshButton returns a new [MeshButton] with the given optional parent:
+// MeshButton represents an [xyz.MeshName] value with a button.
+func NewMeshButton(parent ...tree.Node) *MeshButton { return tree.New[*MeshButton](parent...) }
+
+// NodeType returns the [*types.Type] of [MeshButton]
+func (t *MeshButton) NodeType() *types.Type { return MeshButtonType }
+
+// New returns a new [*MeshButton] value
+func (t *MeshButton) New() tree.Node { return &MeshButton{} }
+
+// SetMeshName sets the [MeshButton.MeshName]
+func (t *MeshButton) SetMeshName(v string) *MeshButton { t.MeshName = v; return t }
