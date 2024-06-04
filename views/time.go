@@ -291,6 +291,14 @@ func (ti *TimeInput) WidgetValue() any { return &ti.Time }
 func (ti *TimeInput) Init() {
 	ti.Frame.Init()
 
+	style := func(s *styles.Style) {
+		s.Min.X.Em(8)
+		s.Max.X.Em(10)
+		if ti.IsReadOnly() { // must inherit abilities when read only for table view
+			s.Abilities = ti.Styles.Abilities
+		}
+	}
+
 	core.AddChild(ti, func(w *core.TextField) {
 		w.SetTooltip("The date")
 		w.SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
@@ -306,10 +314,7 @@ func (ti *TimeInput) Init() {
 			})
 			d.RunDialog(w)
 		})
-		w.Style(func(s *styles.Style) {
-			s.Min.X.Em(8)
-			s.Max.X.Em(10)
-		})
+		w.Style(style)
 		w.Updater(func() {
 			w.SetReadOnly(ti.IsReadOnly())
 			w.SetText(ti.Time.Format("1/2/2006"))
@@ -341,10 +346,7 @@ func (ti *TimeInput) Init() {
 			})
 			d.RunDialog(w)
 		})
-		w.Style(func(s *styles.Style) {
-			s.Min.X.Em(8)
-			s.Max.X.Em(10)
-		})
+		w.Style(style)
 		w.Updater(func() {
 			w.SetReadOnly(ti.IsReadOnly())
 			w.SetText(ti.Time.Format(core.SystemSettings.TimeFormat()))
