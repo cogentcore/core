@@ -66,6 +66,19 @@ func (tb *Toolbar) AppChooser() *Chooser {
 	return ch
 }
 
+// ParentToolbar returns Toolbar that is the direct parent of given widget,
+// or nil if that is not the case.
+func ParentToolbar(w Widget) *Toolbar {
+	par := w.Parent()
+	if par == nil {
+		return nil
+	}
+	if tb, ok := par.This().(*Toolbar); ok {
+		return tb
+	}
+	return nil
+}
+
 func (tb *Toolbar) SizeUp() {
 	tb.AllItemsToChildren()
 	tb.Frame.SizeUp()
@@ -193,8 +206,9 @@ func (tb *Toolbar) OverflowMenu(m *Scene) {
 // AddOverflowMenu adds the given menu function to the overflow menu list.
 // These functions are called in reverse order such that the last added function
 // is called first when constructing the menu.
-func (tb *Toolbar) AddOverflowMenu(fun func(m *Scene)) {
+func (tb *Toolbar) AddOverflowMenu(fun func(m *Scene)) *Toolbar {
 	tb.OverflowMenus = append(tb.OverflowMenus, fun)
+	return tb
 }
 
 // ToolbarStyles styles the given widget to have standard toolbar styling.

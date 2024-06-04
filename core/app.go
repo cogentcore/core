@@ -156,7 +156,7 @@ func AppBarChooserMaker(p *Plan) {
 
 // StandardOverflowMenu adds the standard overflow menu function.
 func StandardOverflowMenu(tb *Toolbar) {
-	tb.OverflowMenus = append(tb.OverflowMenus, tb.StandardOverflowMenu)
+	tb.AddOverflowMenu(tb.StandardOverflowMenu)
 }
 
 var (
@@ -313,15 +313,10 @@ func ConfigAppChooser(ch *Chooser) {
 			}
 		}
 	})
-	tb := ch.ParentByType(ToolbarType, false)
-	if tb != nil {
+	if tb := ParentToolbar(ch); tb != nil {
 		ch.AddItemsFunc(func() {
 			AddButtonItems(&ch.Items, tb, "")
 		})
-	}
-
-	for _, f := range ch.Scene.AppChoosers {
-		f(ch)
 	}
 
 	ch.OnFinal(events.Change, func(e events.Event) {

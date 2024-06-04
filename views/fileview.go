@@ -39,7 +39,6 @@ func FileViewDialog(ctx core.Widget, filename, exts, title string, fun func(self
 	}
 	fv := NewFileView(d) // .SetFilename(filename, exts)
 	d.AddAppBar(fv.MakeToolbar)
-	d.AddAppChooser(fv.ConfigAppChooser)
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
@@ -252,6 +251,9 @@ var FileViewKindColorMap = map[string]string{
 }
 
 func (fv *FileView) MakeToolbar(p *core.Plan) {
+	core.AddInit(p, "app-chooser", func(w *core.Chooser) {
+		fv.AddChooserPaths(w)
+	})
 	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(fv.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
 	})
@@ -266,8 +268,8 @@ func (fv *FileView) MakeToolbar(p *core.Plan) {
 	})
 }
 
-// ConfigAppChooser configures given app chooser
-func (fv *FileView) ConfigAppChooser(ch *core.Chooser) {
+// AddChooserPaths adds paths to the app chooser
+func (fv *FileView) AddChooserPaths(ch *core.Chooser) {
 	ch.ItemsFuncs = slices.Insert(ch.ItemsFuncs, 0, func() {
 		for _, sp := range core.RecentPaths {
 			ch.Items = append(ch.Items, core.ChooserItem{
@@ -813,7 +815,6 @@ func (fb *FileButton) Init() {
 		// ext, _ := v.Tag("ext") // TODO(config)
 		fv = NewFileView(d).SetFilename(fb.Filename, "")
 		d.AddAppBar(fv.MakeToolbar)
-		d.AddAppChooser(fv.ConfigAppChooser)
 	}, func() {
 		fb.Filename = fv.SelectedFile()
 	})

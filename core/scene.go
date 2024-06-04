@@ -49,9 +49,6 @@ type Scene struct { //core:no-new
 	// AppBars contains functions for making the plan for the top app bar.
 	AppBars []func(p *Plan) `json:"-" xml:"-"`
 
-	// AppChoosers contains functions for configuring the app chooser in the top app bar.
-	AppChoosers []func(ch *Chooser) `json:"-" xml:"-"`
-
 	// Body provides the main contents of scenes that use control Bars
 	// to allow the main window contents to be specified separately
 	// from that dynamic control content.  When constructing scenes using

@@ -198,11 +198,6 @@ func (bd *Body) AddAppBar(m ...func(p *Plan)) {
 	bd.Scene.AppBars = append(bd.Scene.AppBars, m...)
 }
 
-// AddAppChooser adds configuration function(s) for the app chooser in the top app bar.
-func (bd *Body) AddAppChooser(fun ...func(ch *Chooser)) {
-	bd.Scene.AppChoosers = append(bd.Scene.AppChoosers, fun...)
-}
-
 // GetTopAppBar returns the TopAppBar Toolbar if it exists, nil otherwise.
 func (bd *Body) GetTopAppBar() *Toolbar {
 	return bd.Scene.GetTopAppBar()
