@@ -1902,7 +1902,7 @@ func (sg *SliceViewGrid) SizeFromChildren(iter int, pass core.LayoutPasses) math
 	csz := sg.Frame.SizeFromChildren(iter, pass)
 	rht, err := sg.LayImpl.RowHeight(0, 0)
 	if err != nil {
-		fmt.Println("SliceViewGrid Sizing Error:", err)
+		// fmt.Println("SliceViewGrid Sizing Error:", err)
 		sg.RowHeight = 42
 	}
 	if sg.NeedsRebuild() { // rebuilding = reset
@@ -1911,7 +1911,7 @@ func (sg *SliceViewGrid) SizeFromChildren(iter int, pass core.LayoutPasses) math
 		sg.RowHeight = max(sg.RowHeight, rht)
 	}
 	if sg.RowHeight == 0 {
-		fmt.Println("SliceViewGrid Sizing Error: RowHeight should not be 0!", sg)
+		// fmt.Println("SliceViewGrid Sizing Error: RowHeight should not be 0!", sg)
 		sg.RowHeight = 42
 	}
 	allocHt := sg.Geom.Size.Alloc.Content.Y - sg.Geom.Size.InnerSpace.Y
