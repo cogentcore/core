@@ -26,7 +26,7 @@ type Splits struct {
 	// allocated to each element. 0 indicates that an element should
 	// be completely collapsed. By default, each element gets the
 	// same amount of space.
-	Splits []float32 `set:"-"`
+	Splits []float32
 
 	// SavedSplits is a saved version of the splits that can be restored
 	// for dynamic collapse/expand operations.
@@ -104,18 +104,6 @@ func (sl *Splits) Init() {
 			})
 		})
 	})
-}
-
-// SetSplits sets the [Splits.Splits]:
-// Splits is the proportion (0-1 normalized, enforced) of space
-// allocated to each element. 0 indicates that an element should
-// be completely collapsed. By default, each element gets the
-// same amount of space.
-func (t *Splits) SetSplits(v ...float32) *Splits {
-	// NOTE: this must be defined manually to avoid naming conflicts
-	// with embedders of splits downstream
-	t.Splits = v
-	return t
 }
 
 // UpdateSplits normalizes the splits and ensures that there are as

@@ -62,16 +62,6 @@ func Bind[T Value](value any, vw T) T {
 	return vw
 }
 
-// Note: SetValueTitle must be defined manually so that it is not generated
-// for all embedding widget types.
-
-// SetValueTitle sets the [WidgetBase.ValueTitle] of the widget,
-// which is a record of parent value names that have led up to this [Value].
-func (wb *WidgetBase) SetValueTitle(context string) *WidgetBase {
-	wb.ValueTitle = context
-	return wb
-}
-
 // JoinValueTitle returns a [WidgetBase.ValueTitle] string composed
 // of two elements, with a • separator, handling the cases where
 // either or both can be empty.

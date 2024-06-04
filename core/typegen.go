@@ -80,6 +80,11 @@ func (t *Button) AsButton() *Button { return t }
 // Type is the type of button.
 func (t *Button) SetType(v ButtonTypes) *Button { t.Type = v; return t }
 
+// SetText sets the [Button.Text]:
+// Text is the text for the button.
+// If it is blank, no text is shown.
+func (t *Button) SetText(v string) *Button { t.Text = v; return t }
+
 // SetIcon sets the [Button.Icon]:
 // Icon is the icon for the button.
 // If it is "" or [icons.None], no icon is shown.
@@ -652,6 +657,13 @@ func (t *Splits) NodeType() *types.Type { return SplitsType }
 // New returns a new [*Splits] value
 func (t *Splits) New() tree.Node { return &Splits{} }
 
+// SetSplits sets the [Splits.Splits]:
+// Splits is the proportion (0-1 normalized, enforced) of space
+// allocated to each element. 0 indicates that an element should
+// be completely collapsed. By default, each element gets the
+// same amount of space.
+func (t *Splits) SetSplits(v ...float32) *Splits { t.Splits = v; return t }
+
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Stage", IDName: "stage", Doc: "Stage is a container and manager for displaying a Scene\nin different functional ways, defined by StageTypes, in two categories:\nMain types (WindowStage and DialogStage) and Popup types\n(Menu, Tooltip, Snackbar, Chooser).", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Type", Doc: "type of Stage: determines behavior and Styling"}, {Name: "Scene", Doc: "Scene contents of this Stage (what it displays)."}, {Name: "Context", Doc: "widget in another scene that requested this stage to be created\nand provides context (stage)"}, {Name: "Name", Doc: "Name is the name of the Stage, which is generally auto-set\nbased on the Scene Name."}, {Name: "Title", Doc: "Title is the title of the Stage, which is generally auto-set\nbased on the Scene Title. Used for title of WindowStage and\nDialogStage types."}, {Name: "Modal", Doc: "Modal, if true, blocks input to all other stages."}, {Name: "Scrim", Doc: "Scrim, if true, places a darkening scrim over other stages,\nif not a full window."}, {Name: "ClickOff", Doc: "ClickOff, if true, dismisses the Stage if user clicks anywhere\noff the Stage."}, {Name: "IgnoreEvents", Doc: "IgnoreEvents is whether to send no events to the stage and\njust pass them down to lower stages."}, {Name: "NewWindow", Doc: "NewWindow, if true, opens a WindowStage or DialogStage in its own\nseparate operating system window (RenderWindow).  This is true by\ndefault for WindowStage on non-mobile platforms, otherwise false."}, {Name: "FullWindow", Doc: "FullWindow, if NewWindow is false, makes DialogStages and\nWindowStages take up the entire window they are created in."}, {Name: "CloseOnBack", Doc: "CloseOnBack is whether to close the stage when the back button\nis pressed in the app bar. Otherwise, it goes back to the next\nstage but keeps this one open. This is on by default for\nDialogStages and off for WindowStages."}, {Name: "Closeable", Doc: "Closeable, if true, includes a close button for closing dialogs."}, {Name: "Movable", Doc: "Movable, if true, adds a handle titlebar Decor for moving dialogs."}, {Name: "Resizable", Doc: "Resizable, if true, adds a resize handle Decor for resizing dialogs."}, {Name: "Timeout", Doc: "Timeout, if greater than 0, results in a popup stages disappearing\nafter a timeout duration."}, {Name: "Pos", Doc: "Pos is the target position for Scene to be placed within RenderWindow."}, {Name: "Data", Doc: "Data is item represented by this main stage; used for recycling windows"}, {Name: "Main", Doc: "If a popup stage, this is the main stage that owns it (via its Popups).\nIf a main stage, it points to itself."}, {Name: "Popups", Doc: "For main stages, this is the stack of the popups within it\n(created specifically for the main stage).\nFor popups, this is the pointer to the Popups within the\nmain stage managing it."}, {Name: "Mains", Doc: "For all stages, this is the main [Stages] that lives in a [RenderWindow]\nand manages the main stages."}, {Name: "RenderContext", Doc: "rendering context which has info about the RenderWindow onto which we render.\nThis should be used instead of the RenderWindow itself for all relevant\nrendering information.  This is only available once a Stage is Run,\nand must always be checked for nil."}, {Name: "Sprites", Doc: "sprites are named images that are rendered last overlaying everything else."}, {Name: "SpriteDragging", Doc: "name of sprite that is being dragged -- sprite event function is responsible for setting this."}}})
 
 // SetContext sets the [Stage.Context]:
@@ -1079,6 +1091,10 @@ func (t *WidgetBase) New() tree.Node { return &WidgetBase{} }
 // Tooltip is the text for the tooltip for this widget,
 // which can use HTML formatting.
 func (t *WidgetBase) SetTooltip(v string) *WidgetBase { t.Tooltip = v; return t }
+
+// SetValueTitle sets the [WidgetBase.ValueTitle]:
+// ValueTitle is the title to display for a dialog for this [Value].
+func (t *WidgetBase) SetValueTitle(v string) *WidgetBase { t.ValueTitle = v; return t }
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/core.ProfileToggle", Doc: "ProfileToggle turns profiling on or off, which does both\ntargeted and global CPU and Memory profiling.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}})
 

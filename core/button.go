@@ -32,7 +32,7 @@ type Button struct { //core:embedder
 
 	// Text is the text for the button.
 	// If it is blank, no text is shown.
-	Text string `set:"-"`
+	Text string
 
 	// Icon is the icon for the button.
 	// If it is "" or [icons.None], no icon is shown.
@@ -287,17 +287,6 @@ func (bt *Button) Init() {
 // SetKey sets the shortcut of the button from the given [keymap.Functions]
 func (bt *Button) SetKey(kf keymap.Functions) *Button {
 	bt.SetShortcut(kf.Chord())
-	return bt
-}
-
-// NOTE: Button.SetText must be defined manually so that [views.FuncButton]
-// can define its own SetText method that updates the tooltip
-
-// SetText sets the [Button.Text]:
-// Text is the text for the button.
-// If it is blank, no text is shown.
-func (bt *Button) SetText(v string) *Button {
-	bt.Text = v
 	return bt
 }
 

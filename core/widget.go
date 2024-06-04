@@ -304,7 +304,7 @@ type WidgetBase struct {
 	ValueOnChange func() `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// ValueTitle is the title to display for a dialog for this [Value].
-	ValueTitle string `copier:"-" json:"-" xml:"-" set:"-"`
+	ValueTitle string `copier:"-" json:"-" xml:"-"`
 }
 
 func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
