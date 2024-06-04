@@ -38,11 +38,11 @@ views.NewMapView(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Pytho
 When you use [[views.NewValue]] with a map value, it will create an inline map view if the map has two or fewer elements:
 
 ```Go
-views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
+// views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
 ```
 
 Otherwise, it will create a button that opens a dialog with a normal map view:
 
 ```Go
-views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
+// views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
 ```

@@ -12,7 +12,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"time"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
@@ -40,18 +39,8 @@ var ElementHandlers = map[string]func(ctx *Context) bool{}
 func New[T core.Widget](ctx *Context) T {
 	parent := ctx.Parent()
 	w := tree.New[T](parent)
-	ctx.Config(w)
+	ctx.Config(w) // TODO(config): better htmlview structure with new config paradigm?
 	return w
-}
-
-// NewValue adds a new [views.Value] with the given value to the
-// context parent. It automatically calls [Context.Config] on
-// the resulting value widget.
-func NewValue(ctx *Context, val any) views.Value {
-	parent := ctx.Parent()
-	v := views.NewValue(parent, val)
-	ctx.Config(v.AsWidget())
-	return v
 }
 
 // HandleElement calls the handler in [ElementHandlers] associated with the current node
@@ -199,11 +188,11 @@ func HandleElement(ctx *Context) {
 		case "button", "submit":
 			New[*core.Button](ctx).SetText(val)
 		case "color":
-			NewValue(ctx, colors.Black).SetValue(val)
+			core.Bind(val, New[*views.ColorButton](ctx))
 		case "datetime":
-			NewValue(ctx, time.Now()).SetValue(val)
+			core.Bind(val, New[*views.TimeText](ctx))
 		case "file":
-			NewValue(ctx, core.Filename("")).SetValue(val)
+			core.Bind(val, New[*views.FileButton](ctx))
 		default:
 			New[*core.TextField](ctx).SetText(val)
 		}

@@ -119,7 +119,9 @@ func WritePagegen(c *config.Config, examples ordmap.Map[string, []byte]) error {
 var PagesExamples = map[string]func(parent core.Widget){`)
 	for _, kv := range examples.Order {
 		fmt.Fprintf(b, `
-	%q: func(parent core.Widget){%s%s},`, kv.Key, "\n", kv.Value)
+	%q: func(parent core.Widget){
+%s
+},`, kv.Key, kv.Value)
 	}
 	b.WriteString("\n}")
 

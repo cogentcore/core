@@ -50,5 +50,5 @@ n := tree.NewNodeBase()
 tree.NewNodeBase(n)
 c2 := tree.NewNodeBase(n)
 tree.NewNodeBase(c2)
-views.NewValue(parent, n)
+// views.NewValue(parent, n)
 ```

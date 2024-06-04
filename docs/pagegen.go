@@ -8,7 +8,6 @@ import (
 	"image/draw"
 	"maps"
 	"strings"
-	"time"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
@@ -24,6 +23,7 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/views"
 )
 
 func init() {
@@ -746,16 +746,17 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewSlider(parent)
 	},
 	"views/values-0": func(parent core.Widget) {
-		views.NewValue(parent, colors.Orange)
+		// views.NewValue(parent, colors.Orange)
 	},
 	"views/values-1": func(parent core.Widget) {
-		t := time.Now()
-		views.NewValue(parent, &t).OnChange(func(e events.Event) {
-			core.MessageSnackbar(parent, "The time is "+t.Format(time.DateTime))
-		})
+		// t := time.Now()
+		//
+		//	views.NewValue(parent, &t).OnChange(func(e events.Event) {
+		//	    core.MessageSnackbar(parent, "The time is "+t.Format(time.DateTime))
+		//	})
 	},
 	"views/values-2": func(parent core.Widget) {
-		views.NewValue(parent, 70, `view:"slider"`)
+		// views.NewValue(parent, 70, `view:"slider"`)
 	},
 	"views/map-views-0": func(parent core.Widget) {
 		views.NewMapView(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
@@ -776,10 +777,10 @@ var PagesExamples = map[string]func(parent core.Widget){
 		views.NewMapView(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
 	},
 	"views/map-views-5": func(parent core.Widget) {
-		views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
+		// views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
 	},
 	"views/map-views-6": func(parent core.Widget) {
-		views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
+		// views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
 	},
 	"views/slice-views-0": func(parent core.Widget) {
 		views.NewSliceView(parent).SetSlice(&[]int{1, 3, 5})
@@ -797,10 +798,10 @@ var PagesExamples = map[string]func(parent core.Widget){
 		views.NewSliceView(parent).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
 	},
 	"views/slice-views-4": func(parent core.Widget) {
-		views.NewValue(parent, &[]int{1, 3, 5})
+		// views.NewValue(parent, &[]int{1, 3, 5})
 	},
 	"views/slice-views-5": func(parent core.Widget) {
-		views.NewValue(parent, &[]int{1, 3, 5, 7, 9})
+		// views.NewValue(parent, &[]int{1, 3, 5, 7, 9})
 	},
 	"views/struct-views-0": func(parent core.Widget) {
 		type person struct {
@@ -892,7 +893,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Name string
 			Age  int
 		}
-		core.NewValue(&person{Name: "Go", Age: 35}, "", parent)
+		// core.NewValue(&person{Name: "Go", Age: 35}, "", parent)
 	},
 	"views/struct-views-11": func(parent core.Widget) {
 		type person struct {
@@ -902,7 +903,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			LikesGo     bool
 			LikesPython bool
 		}
-		core.NewValue(&person{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true}, "", parent)
+		// core.NewValue(&person{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true}, "", parent)
 	},
 	"views/table-views-0": func(parent core.Widget) {
 		type language struct {
@@ -954,7 +955,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Name   string
 			Rating int
 		}
-		views.NewValue(parent, &[]language{{"Go", 10}, {"Python", 5}})
+		// views.NewValue(parent, &[]language{{"Go", 10}, {"Python", 5}})
 	},
 	"views/text-editors-0": func(parent core.Widget) {
 		texteditor.NewSoloEditor(parent)
@@ -1018,7 +1019,7 @@ func main() {
 		tree.NewNodeBase(n)
 		c2 := tree.NewNodeBase(n)
 		tree.NewNodeBase(c2)
-		views.NewValue(parent, n)
+		// views.NewValue(parent, n)
 	},
 	"advanced/styling-0": func(parent core.Widget) {
 		fr := core.NewFrame(parent)

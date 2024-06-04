@@ -86,5 +86,5 @@ type language struct {
     Name   string
     Rating int
 }
-views.NewValue(parent, &[]language{{"Go", 10}, {"Python", 5}})
+// views.NewValue(parent, &[]language{{"Go", 10}, {"Python", 5}})
 ```

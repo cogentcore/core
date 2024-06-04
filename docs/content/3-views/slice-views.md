@@ -32,11 +32,11 @@ views.NewSliceView(parent).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
 When you use [[views.NewValue]] with a slice value, it will create an inline slice view if the slice has four or fewer elements:
 
 ```Go
-views.NewValue(parent, &[]int{1, 3, 5})
+// views.NewValue(parent, &[]int{1, 3, 5})
 ```
 
 Otherwise, it will create a button that opens a dialog with a normal slice view:
 
 ```Go
-views.NewValue(parent, &[]int{1, 3, 5, 7, 9})
+// views.NewValue(parent, &[]int{1, 3, 5, 7, 9})
 ```

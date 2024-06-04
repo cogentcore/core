@@ -138,7 +138,7 @@ type person struct {
     Name string
     Age  int
 }
-core.NewValue(&person{Name: "Go", Age: 35}, "", parent)
+// core.NewValue(&person{Name: "Go", Age: 35}, "", parent)
 ```
 
 Otherwise, it will create a button that opens a dialog with a normal struct view:
@@ -151,5 +151,5 @@ type person struct {
     LikesGo     bool
     LikesPython bool
 }
-core.NewValue(&person{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true}, "", parent)
+// core.NewValue(&person{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true}, "", parent)
 ```
