@@ -8,7 +8,6 @@ import (
 	"reflect"
 	"strconv"
 
-	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -72,13 +71,8 @@ func (sv *SliceViewInline) Init() {
 			w.SetIcon(icons.Edit).SetType(core.ButtonTonal)
 			w.Tooltip = "Edit list in a dialog"
 			w.OnClick(func(e events.Event) {
-				vc := sv.ValueTitle
-				title := labels.FriendlyTypeName(reflect.TypeOf(sv.Slice))
-				if vc != "" {
-					title = vc + " (" + title + ")"
-				}
-				d := core.NewBody().AddTitle(title)
-				NewSliceView(d).SetSlice(sv.Slice).SetValueTitle(vc)
+				d := core.NewBody().AddTitle(sv.ValueTitle).AddText(sv.Tooltip)
+				NewSliceView(d).SetSlice(sv.Slice).SetValueTitle(sv.ValueTitle)
 				d.OnClose(func(e events.Event) {
 					sv.Update()
 					sv.SendChange()

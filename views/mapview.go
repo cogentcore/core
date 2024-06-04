@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -160,8 +159,8 @@ func (mv *MapView) Init() {
 				w.SetIcon(icons.Edit).SetType(core.ButtonTonal)
 				w.Tooltip = "Edit in a dialog"
 				w.OnClick(func(e events.Event) {
-					d := core.NewBody().AddTitle(labels.FriendlyMapLabel(mapv)).AddText(mv.Tooltip)
-					NewMapView(d).SetMap(mv.Map)
+					d := core.NewBody().AddTitle(mv.ValueTitle).AddText(mv.Tooltip)
+					NewMapView(d).SetMap(mv.Map).SetValueTitle(mv.ValueTitle)
 					d.OnClose(func(e events.Event) {
 						mv.Update()
 						mv.SendChange()
