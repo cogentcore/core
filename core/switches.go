@@ -25,7 +25,9 @@ import (
 
 // Switches is a widget for containing a set of [Switch]es.
 // It can optionally enforce mutual exclusivity (ie: radio buttons)
-// through the [Switches.Mutex] field.
+// through the [Switches.Mutex] field. It supports binding to
+// [enums.Enum] and [enums.BitFlag] values with appropriate properties
+// automatically set.
 type Switches struct {
 	Frame
 
@@ -38,6 +40,10 @@ type Switches struct {
 	// Mutex is whether to make the items mutually exclusive
 	// (checking one turns off all the others).
 	Mutex bool
+
+	// AllowNone is whether to allow the user to deselect all items.
+	// It is on by default.
+	AllowNone bool
 
 	// SelectedIndexes are the indexes in [Switches.Items] of the currently
 	// selected switch items.
@@ -105,11 +111,13 @@ func (sw *Switches) OnBind(value any) {
 		sw.SetType(SwitchChip).SetMutex(false)
 	} else {
 		sw.bitFlagValue = nil
+		sw.AllowNone = false
 	}
 }
 
 func (sw *Switches) Init() {
 	sw.Frame.Init()
+	sw.AllowNone = true
 	sw.Style(func(s *styles.Style) {
 		s.Padding.Set(units.Dp(2))
 		s.Margin.Set(units.Dp(2))
@@ -138,7 +146,7 @@ func (sw *Switches) Init() {
 						} else {
 							sw.SelectedIndexes = append(sw.SelectedIndexes, i)
 						}
-					} else {
+					} else if sw.AllowNone || len(sw.SelectedIndexes) > 1 {
 						sw.SelectedIndexes = slices.DeleteFunc(sw.SelectedIndexes, func(v int) bool { return v == i })
 					}
 					sw.SendChange(e)

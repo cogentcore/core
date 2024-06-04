@@ -797,12 +797,14 @@ func (t *Switch) SetIconOff(v icons.Icon) *Switch { t.IconOff = v; return t }
 func (t *Switch) SetIconIndeterminate(v icons.Icon) *Switch { t.IconIndeterminate = v; return t }
 
 // SwitchesType is the [types.Type] for [Switches]
-var SwitchesType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Switches", IDName: "switches", Doc: "Switches is a widget for containing a set of [Switch]es.\nIt can optionally enforce mutual exclusivity (ie: radio buttons)\nthrough the [Switches.Mutex] field.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of switches that will be made."}, {Name: "Items", Doc: "Items are the items displayed to the user."}, {Name: "Mutex", Doc: "Mutex is whether to make the items mutually exclusive\n(checking one turns off all the others)."}, {Name: "bitFlagValue", Doc: "bitFlagValue is the associated bit flag value if non-nil (for [Value])."}}, Instance: &Switches{}})
+var SwitchesType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Switches", IDName: "switches", Doc: "Switches is a widget for containing a set of [Switch]es.\nIt can optionally enforce mutual exclusivity (ie: radio buttons)\nthrough the [Switches.Mutex] field. It supports binding to\n[enums.Enum] and [enums.BitFlag] values with appropriate properties\nautomatically set.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of switches that will be made."}, {Name: "Items", Doc: "Items are the items displayed to the user."}, {Name: "Mutex", Doc: "Mutex is whether to make the items mutually exclusive\n(checking one turns off all the others)."}, {Name: "AllowNone", Doc: "AllowNone is whether to allow the user to deselect all items.\nIt is on by default."}, {Name: "SelectedIndexes", Doc: "SelectedIndexes are the indexes in [Switches.Items] of the currently\nselected switch items."}, {Name: "bitFlagValue", Doc: "bitFlagValue is the associated bit flag value if non-nil (for [Value])."}}, Instance: &Switches{}})
 
 // NewSwitches returns a new [Switches] with the given optional parent:
 // Switches is a widget for containing a set of [Switch]es.
 // It can optionally enforce mutual exclusivity (ie: radio buttons)
-// through the [Switches.Mutex] field.
+// through the [Switches.Mutex] field. It supports binding to
+// [enums.Enum] and [enums.BitFlag] values with appropriate properties
+// automatically set.
 func NewSwitches(parent ...tree.Node) *Switches { return tree.New[*Switches](parent...) }
 
 // NodeType returns the [*types.Type] of [Switches]
@@ -823,6 +825,11 @@ func (t *Switches) SetItems(v ...SwitchItem) *Switches { t.Items = v; return t }
 // Mutex is whether to make the items mutually exclusive
 // (checking one turns off all the others).
 func (t *Switches) SetMutex(v bool) *Switches { t.Mutex = v; return t }
+
+// SetAllowNone sets the [Switches.AllowNone]:
+// AllowNone is whether to allow the user to deselect all items.
+// It is on by default.
+func (t *Switches) SetAllowNone(v bool) *Switches { t.AllowNone = v; return t }
 
 // TabsType is the [types.Type] for [Tabs]
 var TabsType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tabs", IDName: "tabs", Doc: "Tabs divide widgets into logical groups and give users the ability\nto freely navigate between them using tab buttons.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}, {Name: "NewTabButton", Doc: "NewTabButton is whether to show a new tab button at the end of the list of tabs."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in the tab text.\nIt elides text that are longer than that."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used for tab close buttons.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "PrevEffectiveType", Doc: "PrevEffectiveType is the previous effective type of the tabs\nas computed by [TabTypes.Effective]."}, {Name: "Mu", Doc: "Mu is a mutex protecting updates to tabs. Tabs can be driven\nprogrammatically and via user input so need extra protection."}}, Instance: &Tabs{}})
