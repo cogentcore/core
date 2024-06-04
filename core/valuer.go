@@ -10,7 +10,6 @@ import (
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/icons"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
@@ -57,11 +56,6 @@ var ValueConverters []func(value any, tags reflect.StructTag) Value
 // AddValueConverter adds a converter function to [ValueConverters].
 func AddValueConverter(f func(value any, tags reflect.StructTag) Value) {
 	ValueConverters = append(ValueConverters, f)
-}
-
-func init() {
-	AddValueType[bool, *Switch]()
-	AddValueType[icons.Icon, *Icon]()
 }
 
 // NewValue converts the given value into an appropriate [Value]
@@ -133,6 +127,8 @@ func ToValue(value any, tags reflect.StructTag) Value {
 			return NewTextField()
 		}
 		return NewSpinner()
+	case kind == reflect.Bool:
+		return NewSwitch()
 	}
 
 	return NewTextField()
