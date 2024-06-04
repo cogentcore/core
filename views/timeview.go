@@ -94,19 +94,18 @@ func (tv *TimeView) Init() {
 		if !core.SystemSettings.Clock24 {
 			core.Add(p, func(w *core.Switches) {
 				w.SetMutex(true).SetType(core.SwitchSegmentedButton).SetItems(core.SwitchItem{Value: "AM"}, core.SwitchItem{Value: "PM"})
+				tv.PM = tv.Time.Hour() >= 12
 				w.Style(func(s *styles.Style) {
 					s.Direction = styles.Column
 				})
-				w.OnShow(func(e events.Event) {
-					if tv.Time.Hour() < 12 {
-						tv.PM = false
-						w.SelectItem(0)
+				w.Updater(func() {
+					if tv.PM {
+						w.SelectValue("PM")
 					} else {
-						tv.PM = true
-						w.SelectItem(1)
+						w.SelectValue("AM")
 					}
-					w.Update()
 				})
+
 				w.OnChange(func(e events.Event) {
 					si := w.SelectedItem()
 					tt := tv.Time
@@ -123,7 +122,6 @@ func (tv *TimeView) Init() {
 					default:
 						// must always have something valid selected
 						tv.PM = false
-						w.SelectItem(0)
 						tv.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tv.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
 					}
 				})

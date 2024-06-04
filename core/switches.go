@@ -7,6 +7,7 @@ package core
 import (
 	"fmt"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode"
@@ -37,6 +38,10 @@ type Switches struct {
 	// Mutex is whether to make the items mutually exclusive
 	// (checking one turns off all the others).
 	Mutex bool
+
+	// SelectedIndexes are the indexes in [Switches.Items] of the currently
+	// selected switch items.
+	SelectedIndexes []int `set:"-"`
 
 	// bitFlagValue is the associated bit flag value if non-nil (for [Value]).
 	bitFlagValue enums.BitFlagSetter
@@ -72,7 +77,7 @@ func (si *SwitchItem) GetText() string {
 
 func (sw *Switches) WidgetValue() any {
 	if sw.bitFlagValue != nil {
-		sw.UpdateBitFlag(sw.bitFlagValue)
+		sw.BitFlagFromSelected(sw.bitFlagValue)
 		return sw.bitFlagValue
 	}
 	item := sw.SelectedItem()
@@ -85,10 +90,10 @@ func (sw *Switches) WidgetValue() any {
 func (sw *Switches) SetWidgetValue(value any) error {
 	value = reflectx.Underlying(reflect.ValueOf(value)).Interface()
 	if bf, ok := value.(enums.BitFlag); ok {
-		sw.UpdateFromBitFlag(bf)
+		sw.SelectFromBitFlag(bf)
 		return nil
 	}
-	return sw.SetSelectedItem(value)
+	return sw.SelectValue(value)
 }
 
 func (sw *Switches) OnBind(value any) {
@@ -127,9 +132,18 @@ func (sw *Switches) Init() {
 		for i, item := range sw.Items {
 			AddAt(p, strconv.Itoa(i), func(w *Switch) {
 				w.OnChange(func(e events.Event) {
-					if sw.Mutex && w.IsChecked() {
-						sw.UnCheckAllBut(w.IndexInParent())
+					if w.IsChecked() {
+						if sw.Mutex {
+							sw.SelectedIndexes = []int{i}
+						} else {
+							sw.SelectedIndexes = append(sw.SelectedIndexes, i)
+						}
+					} else {
+						sw.SelectedIndexes = slices.DeleteFunc(sw.SelectedIndexes, func(v int) bool { return v == i })
 					}
+					sw.UpdateWidget()
+					sw.ApplyStyleTree()
+					sw.NeedsRender()
 					sw.SendChange(e)
 				})
 				w.Style(func(s *styles.Style) {
@@ -173,96 +187,43 @@ func (sw *Switches) Init() {
 				})
 				w.Updater(func() {
 					w.SetType(sw.Type).SetText(item.GetText()).SetTooltip(item.Tooltip)
+					w.SetChecked(slices.Contains(sw.SelectedIndexes, i))
 				})
 			})
 		}
 	})
 }
 
-// SelectItem activates a given item but does NOT send a change event.
-// See SelectItemAction for event emitting version.
-// It returns an error if the index is out of range.
-func (sw *Switches) SelectItem(index int) error {
-	if index >= sw.NumChildren() || index < 0 {
-		return fmt.Errorf("core.Switches.SelectItem: index out of range: %v", index)
-	}
-	if sw.Mutex {
-		sw.UnCheckAllBut(index)
-	}
-	cs := sw.Child(index).(*Switch)
-	cs.SetChecked(true)
-	sw.NeedsRender()
-	return nil
-}
-
-// SelectItemAction activates a given item and emits a change event.
-// This is mainly for Mutex use.
-// returns error if index is out of range.
-func (sw *Switches) SelectItemAction(index int) error {
-	err := sw.SelectItem(index)
-	if err != nil {
-		return err
-	}
-	sw.SendChange()
-	return nil
-}
-
 // SelectedItem returns the first selected (checked) switch item. It is only
 // useful when [Switches.Mutex] is true; if it is not, use [Switches.SelectedItems].
 // If no switches are selected, it returns nil.
 func (sw *Switches) SelectedItem() *SwitchItem {
-	for i, kswi := range sw.Kids {
-		ksw := kswi.(*Switch)
-		if ksw.IsChecked() {
-			return &sw.Items[i]
-		}
+	if len(sw.SelectedIndexes) == 0 {
+		return nil
 	}
-	return nil
-}
-
-// SetSelectedItem selects the item with the given [SwitchItem.Value].
-func (sw *Switches) SetSelectedItem(value any) error {
-	for i, item := range sw.Items {
-		if item.Value == value {
-			return sw.SelectItem(i)
-		}
-	}
-	return fmt.Errorf("core.Switches.SetSelectedItem: item not found: (value: %v, items: %v)", value, sw.Items)
+	return &sw.Items[sw.SelectedIndexes[0]]
 }
 
 // SelectedItems returns all of the currently selected (checked) switch items.
 // If [Switches.Mutex] is true, you should use [Switches.SelectedItem] instead.
 func (sw *Switches) SelectedItems() []SwitchItem {
 	res := []SwitchItem{}
-	for i, kswi := range sw.Kids {
-		ksw := kswi.(*Switch)
-		if ksw.IsChecked() {
-			res = append(res, sw.Items[i])
-		}
+	for _, i := range sw.SelectedIndexes {
+		res = append(res, sw.Items[i])
 	}
 	return res
 }
 
-// UnCheckAll unchecks all switches
-func (sw *Switches) UnCheckAll() {
-	for _, cbi := range sw.Kids {
-		cs := cbi.(*Switch)
-		cs.SetChecked(false)
-	}
-	sw.NeedsRender()
-}
-
-// UnCheckAllBut unchecks all switches except given one
-func (sw *Switches) UnCheckAllBut(idx int) {
-	for i, cbi := range sw.Kids {
-		if i == idx {
-			continue
+// SelectValue sets the item with the given [SwitchItem.Value]
+// to be the only selected item.
+func (sw *Switches) SelectValue(value any) error {
+	for i, item := range sw.Items {
+		if item.Value == value {
+			sw.SelectedIndexes = []int{i}
+			return nil
 		}
-		cs := cbi.(*Switch)
-		cs.SetChecked(false)
-		cs.Update()
 	}
-	sw.NeedsRender()
+	return fmt.Errorf("core.Switches.SelectValue: item not found: (value: %v, items: %v)", value, sw.Items)
 }
 
 // SetStrings sets the [Switches.Items] from the given strings.
@@ -304,34 +265,22 @@ func (sw *Switches) SetEnum(enum enums.Enum) *Switches {
 	return sw.SetEnums(enum.Values()...)
 }
 
-// UpdateFromBitFlags sets the checked state of the switches from the
-// given bit flag enum value.
-func (sw *Switches) UpdateFromBitFlag(bitflag enums.BitFlag) {
-	els := bitflag.Values()
-	mn := min(len(els), sw.NumChildren())
-	for i := 0; i < mn; i++ {
-		ev := els[i]
-		swi := sw.Child(i)
-		sw := swi.(*Switch)
-		on := bitflag.HasFlag(ev.(enums.BitFlag))
-		sw.SetChecked(on)
+// SelectFromBitFlag sets which switches are selected based on the given bit flag value.
+func (sw *Switches) SelectFromBitFlag(bitflag enums.BitFlag) {
+	values := bitflag.Values()
+	sw.SelectedIndexes = []int{}
+	for i, value := range values {
+		if bitflag.HasFlag(value.(enums.BitFlag)) {
+			sw.SelectedIndexes = append(sw.SelectedIndexes, i)
+		}
 	}
-	sw.NeedsRender()
 }
 
-// UpdateBitFlag sets the given bitflag value to the value specified
-// by the checked state of the switches.
-func (sw *Switches) UpdateBitFlag(bitflag enums.BitFlagSetter) {
+// BitFlagFromSelected sets the given bit flag value based on which switches are selected.
+func (sw *Switches) BitFlagFromSelected(bitflag enums.BitFlagSetter) {
 	bitflag.SetInt64(0)
-
-	els := bitflag.Values()
-	mn := min(len(els), sw.NumChildren())
-	for i := 0; i < mn; i++ {
-		ev := els[i]
-		swi := sw.Child(i)
-		sw := swi.(*Switch)
-		if sw.IsChecked() {
-			bitflag.SetFlag(true, ev.(enums.BitFlag))
-		}
+	values := bitflag.Values()
+	for _, i := range sw.SelectedIndexes {
+		bitflag.SetFlag(true, values[i].(enums.BitFlag))
 	}
 }
