@@ -121,7 +121,7 @@ func OpenValueDialog(v Value, ctx Widget, make func(d *Body), after ...func()) {
 	}
 	wb := v.AsWidget()
 	d := NewBody().AddTitle(wb.ValueTitle)
-	if text := strings.TrimPrefix(wb.Tooltip, shiftNewWindow); text != "" {
+	if text := strings.ReplaceAll(wb.Tooltip, shiftNewWindow, ""); text != "" {
 		d.AddText(text)
 	}
 	make(d)
