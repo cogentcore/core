@@ -26,16 +26,14 @@ func init() {
 	core.SettingsWindow = SettingsWindow
 	core.InspectorWindow = InspectorWindow
 
-	core.AddValueType[core.Filename, *FileButton]()
 	core.AddValueType[icons.Icon, *IconButton]()
-	core.AddValueType[core.FontName, *FontButton]()
 	core.AddValueType[time.Time, *TimeText]()
-	core.AddValueType[key.Chord, *KeyChordButton]()
-	core.AddValueType[keymap.MapName, *KeyMapButton]()
-	core.AddValueType[types.Type, *TypeChooser]()
-
-	// core.AddValueType[time.Time, *TimeButton]()
 	// AddValue(time.Duration(0), func() Value { return &DurationValue{} })
+	core.AddValueType[types.Type, *TypeChooser]()
+	core.AddValueType[core.Filename, *FileButton]()
+	core.AddValueType[core.FontName, *FontButton]()
+	core.AddValueType[keymap.MapName, *KeyMapButton]()
+	core.AddValueType[key.Chord, *KeyChordButton]()
 
 	core.AddValueConverter(func(value any, tags reflect.StructTag) core.Value {
 		if _, ok := value.(color.Color); ok {
@@ -54,6 +52,15 @@ func init() {
 		typ := uv.Type()
 		kind := typ.Kind()
 		switch kind {
+		case reflect.Struct:
+			num := reflectx.NumAllFields(uv)
+			if !forceNoInline && (forceInline || num <= core.SystemSettings.StructInlineLength) {
+				return NewStructView().SetInline(true)
+			} else {
+				return NewStructButton()
+			}
+		case reflect.Map:
+			return NewMapButton() // TODO(config): inline map value
 		case reflect.Array, reflect.Slice:
 			sz := uv.Len()
 			eltyp := reflectx.SliceElementType(value)
@@ -69,15 +76,6 @@ func init() {
 			} else {
 				return NewSliceButton()
 			}
-		case reflect.Struct:
-			num := reflectx.NumAllFields(uv)
-			if !forceNoInline && (forceInline || num <= core.SystemSettings.StructInlineLength) {
-				return NewStructView().SetInline(true)
-			} else {
-				return NewStructButton()
-			}
-		case reflect.Map:
-			return NewMapButton() // TODO(config): inline map value
 		case reflect.Func:
 			return tree.New[*FuncButton]() // TODO(config): update to NewFuncButton after changing its signature
 		}
