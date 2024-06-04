@@ -60,7 +60,12 @@ func init() {
 				return NewStructButton()
 			}
 		case reflect.Map:
-			return NewMapButton() // TODO(config): inline map value
+			len := uv.Len()
+			if !forceNoInline && (forceInline || len <= core.SystemSettings.MapInlineLength) {
+				return NewMapView().SetInline(true)
+			} else {
+				return NewMapButton()
+			}
 		case reflect.Array, reflect.Slice:
 			sz := uv.Len()
 			elemType := reflectx.SliceElementType(value)
