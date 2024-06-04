@@ -243,7 +243,7 @@ func (dv *DateView) Init() {
 				eomwyd += time.Date(somw.Year(), 13, -1, 0, 0, 0, 0, somw.Location()).YearDay()
 			}
 			for yd := somwyd; yd <= eomwyd; yd++ {
-				core.AddAt(p, strconv.Itoa(yd), func(w *core.Button) {
+				core.AddAt(p, strconv.Itoa(yd), func(w *core.Button) { // TODO(config)
 					// actual time of this date
 					dt := somw.AddDate(0, 0, yd-somwyd)
 					ds := strconv.Itoa(dt.Day())
