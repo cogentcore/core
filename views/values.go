@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 )
 
 // SliceButton represents a slice or array value with a button.
@@ -112,6 +113,25 @@ func (tb *TreeButton) Init() {
 	core.InitValueButton(tb, true, func(d *core.Body) {
 		InspectorView(d, tb.Tree)
 	})
+}
+
+// TypeChooser represents a [types.Type] value with a chooser.
+type TypeChooser struct {
+	core.Chooser
+}
+
+func (tc *TypeChooser) Init() {
+	tc.Chooser.Init()
+	typEmbeds := core.WidgetBaseType
+	// if tetag, ok := tc.Tag("type-embeds"); ok { // TODO(config)
+	// 	typ := types.TypeByName(tetag)
+	// 	if typ != nil {
+	// 		typEmbeds = typ
+	// 	}
+	// }
+
+	tl := types.AllEmbeddersOf(typEmbeds)
+	tc.SetTypes(tl...)
 }
 
 // IconButton represents an [icons.Icon] with a [core.Button] that opens

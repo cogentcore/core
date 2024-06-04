@@ -576,6 +576,19 @@ func (t *TreeButton) New() tree.Node { return &TreeButton{} }
 // SetTree sets the [TreeButton.Tree]
 func (t *TreeButton) SetTree(v tree.Node) *TreeButton { t.Tree = v; return t }
 
+// TypeChooserType is the [types.Type] for [TypeChooser]
+var TypeChooserType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TypeChooser", IDName: "type-chooser", Doc: "TypeChooser represents a [types.Type] value with a chooser.", Embeds: []types.Field{{Name: "Chooser"}}, Instance: &TypeChooser{}})
+
+// NewTypeChooser returns a new [TypeChooser] with the given optional parent:
+// TypeChooser represents a [types.Type] value with a chooser.
+func NewTypeChooser(parent ...tree.Node) *TypeChooser { return tree.New[*TypeChooser](parent...) }
+
+// NodeType returns the [*types.Type] of [TypeChooser]
+func (t *TypeChooser) NodeType() *types.Type { return TypeChooserType }
+
+// New returns a new [*TypeChooser] value
+func (t *TypeChooser) New() tree.Node { return &TypeChooser{} }
+
 // IconButtonType is the [types.Type] for [IconButton]
 var IconButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.IconButton", IDName: "icon-button", Doc: "IconButton represents an [icons.Icon] with a [core.Button] that opens\na dialog for selecting the icon.", Embeds: []types.Field{{Name: "Button"}}, Instance: &IconButton{}})
 

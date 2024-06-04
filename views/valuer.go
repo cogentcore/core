@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 )
 
 // This file handles converting values to [Value]s.
@@ -31,6 +32,8 @@ func init() {
 	core.AddValueType[time.Time, *TimeText]()
 	core.AddValueType[key.Chord, *KeyChordButton]()
 	core.AddValueType[keymap.MapName, *KeyMapButton]()
+	core.AddValueType[types.Type, *TypeChooser]()
+
 	// core.AddValueType[time.Time, *TimeButton]()
 	// AddValue(time.Duration(0), func() Value { return &DurationValue{} })
 
