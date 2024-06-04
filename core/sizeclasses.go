@@ -24,6 +24,12 @@ const (
 // SizeClass returns the size class of the scene in which the widget is contained.
 func (wb *WidgetBase) SizeClass() SizeClasses {
 	dots := float32(wb.Scene.SceneGeom.Size.X)
+	if wb.Scene.Is(ScPrefSizing) {
+		if CurrentRenderWindow != nil {
+			rg := CurrentRenderWindow.SystemWindow.RenderGeom()
+			dots = float32(rg.Size.X)
+		}
+	}
 	dpd := wb.Scene.Styles.UnitContext.Dp(1) // dots per dp
 	dp := dots / dpd                         // dots / (dots / dp) = dots * (dp / dots) = dp
 	switch {

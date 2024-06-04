@@ -1151,14 +1151,17 @@ func (em *Events) ManagerKeyChordEvents(e events.Event) {
 	// TODO(kai): maybe clean up / document this
 	switch cs { // some other random special codes, during dev..
 	case "Control+Alt+R":
+		e.SetHandled()
 		ProfileToggle()
-		e.SetHandled()
 	case "Control+Alt+F":
+		e.SetHandled()
 		sc.BenchmarkFullRender()
-		e.SetHandled()
 	case "Control+Alt+H":
-		sc.BenchmarkReRender()
 		e.SetHandled()
+		sc.BenchmarkReRender()
+	case "Command+Shift+I": // TODO(config):
+		e.SetHandled()
+		InspectorWindow(sc)
 	}
 	if !e.IsHandled() {
 		em.TriggerShortcut(cs)
