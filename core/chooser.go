@@ -469,15 +469,17 @@ func (ch *Chooser) SetPlaceholder(text string) *Chooser {
 }
 
 // SetCurrentValue sets the current item and index to those associated with the given value.
-// If the given item is not found, it adds it to the items list. It also sets the text
-// of the chooser to the label of the item.
-func (ch *Chooser) SetCurrentValue(v any) *Chooser {
-	ch.CurrentIndex = ch.FindItem(v)
-	if ch.CurrentIndex < 0 { // add to list if not found
+// If the given item is not found, it adds it to the items list if it is not "". It also
+// sets the text of the chooser to the label of the item.
+func (ch *Chooser) SetCurrentValue(value any) *Chooser {
+	ch.CurrentIndex = ch.FindItem(value)
+	if value != "" && ch.CurrentIndex < 0 { // add to list if not found
 		ch.CurrentIndex = len(ch.Items)
-		ch.Items = append(ch.Items, ChooserItem{Value: v})
+		ch.Items = append(ch.Items, ChooserItem{Value: value})
 	}
-	ch.CurrentItem = ch.Items[ch.CurrentIndex]
+	if ch.CurrentIndex >= 0 {
+		ch.CurrentItem = ch.Items[ch.CurrentIndex]
+	}
 	ch.ShowCurrentItem()
 	return ch
 }
