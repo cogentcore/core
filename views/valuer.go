@@ -28,7 +28,7 @@ func init() {
 
 	core.AddValueType[icons.Icon, *IconButton]()
 	core.AddValueType[time.Time, *TimeText]()
-	// AddValue(time.Duration(0), func() Value { return &DurationValue{} })
+	core.AddValueType[time.Duration, *DurationInput]()
 	core.AddValueType[types.Type, *TypeChooser]()
 	core.AddValueType[core.Filename, *FileButton]()
 	core.AddValueType[core.FontName, *FontButton]()

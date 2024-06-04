@@ -364,17 +364,25 @@ func (v *TimeValue) TimeValue() *time.Time {
 	return nil
 }
 
-// DurationValue represents a [time.Duration] value with a spinner and unit chooser.
-type DurationValue struct {
-	ValueBase[*core.Frame]
+*/
+
+// DurationInput represents a [time.Duration] value with a spinner and unit chooser.
+type DurationInput struct {
+	core.Frame
+	Duration time.Duration
 }
 
-func (v *DurationValue) Config() {
-	var ch *core.Chooser
+func (di *DurationInput) WidgetValue() any { return &di.Duration }
 
-	sp := core.NewSpinner(v.Widget).SetTooltip("The value of time").SetStep(1).SetPageStep(10)
+func (di *DurationInput) Init() {
+	di.Frame.Init()
+
+	var ch *core.Chooser // TODO(config)
+
+	sp := core.NewSpinner(di).SetStep(1).SetPageStep(10)
+	sp.SetTooltip("The value of time")
 	sp.OnChange(func(e events.Event) {
-		v.SetValue(sp.Value * float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
+		di.Duration = time.Duration(sp.Value * float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
 	})
 
 	units := make([]core.ChooserItem, len(durationUnits))
@@ -382,16 +390,17 @@ func (v *DurationValue) Config() {
 		units[i] = core.ChooserItem{Value: u}
 	}
 
-	ch = core.NewChooser(v.Widget).SetTooltip("The unit of time").SetItems(units...)
+	ch = core.NewChooser(di).SetItems(units...)
+	ch.SetTooltip("The unit of time")
 	ch.OnChange(func(e events.Event) {
 		// we update the value to fit the unit
-		npv := reflectx.NonPointerValue(v.Value)
-		dur := npv.Interface().(time.Duration)
-		sp.SetValue(float32(dur) / float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
+		sp.SetValue(float32(di.Duration) / float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
 	})
 }
 
-func (v *DurationValue) Update() {
+// TODO(config)
+/*
+func (v *DurationInput) Update() {
 	npv := reflectx.NonPointerValue(v.Value)
 	dur := npv.Interface().(time.Duration)
 	un := "seconds"
@@ -412,6 +421,7 @@ func (v *DurationValue) Update() {
 	v.Widget.Child(0).(*core.Spinner).SetValue(adur)
 	v.Widget.Child(1).(*core.Chooser).SetCurrentValue(un)
 }
+*/
 
 var durationUnits = []string{
 	"nanoseconds",
@@ -438,4 +448,3 @@ var durationUnitsMap = map[string]time.Duration{
 	"months":       30 * 24 * time.Hour,
 	"years":        365 * 24 * time.Hour,
 }
-*/
