@@ -46,7 +46,8 @@ func WalkFields(parent reflect.Value, should func(parent reflect.Value, field re
 	}
 }
 
-// NumAllFields returns the number of elemental fields in the given struct type.
+// NumAllFields returns the number of elemental fields in the given struct type
+// using [WalkFields].
 func NumAllFields(parent reflect.Value) int {
 	n := 0
 	WalkFields(parent,

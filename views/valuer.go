@@ -63,15 +63,15 @@ func init() {
 			return NewMapButton() // TODO(config): inline map value
 		case reflect.Array, reflect.Slice:
 			sz := uv.Len()
-			eltyp := reflectx.SliceElementType(value)
+			elemType := reflectx.SliceElementType(value)
 			if _, ok := value.([]byte); ok {
 				return core.NewTextField()
 			}
 			if _, ok := value.([]rune); ok {
 				return core.NewTextField()
 			}
-			isstru := (reflectx.NonPointerType(eltyp).Kind() == reflect.Struct)
-			if !forceNoInline && (forceInline || (!isstru && sz <= core.SystemSettings.SliceInlineLength && !tree.IsNode(eltyp))) {
+			isStruct := (reflectx.NonPointerType(elemType).Kind() == reflect.Struct)
+			if !forceNoInline && (forceInline || (!isStruct && sz <= core.SystemSettings.SliceInlineLength && !tree.IsNode(elemType))) {
 				return NewSliceViewInline()
 			} else {
 				return NewSliceButton()
