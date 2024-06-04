@@ -38,12 +38,10 @@ func NoSentenceCaseForType(tnm string) bool {
 	})
 }
 
-// structField represents the values of one field being viewed
+// structField represents the values of one struct field being viewed.
 type structField struct {
-	path string
-
-	field reflect.StructField
-
+	path          string
+	field         reflect.StructField
 	value, parent reflect.Value
 }
 
