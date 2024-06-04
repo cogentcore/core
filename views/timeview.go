@@ -369,63 +369,55 @@ func (v *TimeValue) TimeValue() *time.Time {
 // DurationInput represents a [time.Duration] value with a spinner and unit chooser.
 type DurationInput struct {
 	core.Frame
+
 	Duration time.Duration
+
+	// Unit is the unit of time.
+	Unit string
 }
 
 func (di *DurationInput) WidgetValue() any { return &di.Duration }
 
 func (di *DurationInput) Init() {
 	di.Frame.Init()
-	var sp *core.Spinner
-	var ch *core.Chooser
 	core.AddChild(di, func(w *core.Spinner) {
-		sp = w
 		w.SetStep(1).SetPageStep(10)
 		w.SetTooltip("The value of time")
+		w.Updater(func() {
+			w.SetValue(float32(di.Duration) / float32(durationUnitsMap[di.Unit]))
+		})
 		w.OnChange(func(e events.Event) {
-			di.Duration = time.Duration(w.Value * float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
+			di.Duration = time.Duration(w.Value * float32(durationUnitsMap[di.Unit]))
+			di.SendChange()
 		})
 	})
 	core.AddChild(di, func(w *core.Chooser) {
-		ch = w
+		core.Bind(&di.Unit, w)
+
 		units := make([]core.ChooserItem, len(durationUnits))
 		for i, u := range durationUnits {
 			units[i] = core.ChooserItem{Value: u}
 		}
 
-		ch = core.NewChooser(di).SetItems(units...)
-		ch.SetTooltip("The unit of time")
-		ch.OnChange(func(e events.Event) {
-			// we update the value to fit the unit
-			sp.SetValue(float32(di.Duration) / float32(durationUnitsMap[ch.CurrentItem.Value.(string)]))
+		w.SetItems(units...)
+		w.SetTooltip("The unit of time")
+		w.Updater(func() {
+			if di.Unit != "" {
+				return
+			}
+			di.Unit = durationUnits[0]
+			for _, u := range durationUnits {
+				if durationUnitsMap[u] > di.Duration {
+					break
+				}
+				di.Unit = u
+			}
+		})
+		w.OnChange(func(e events.Event) {
+			di.Update()
 		})
 	})
 }
-
-// TODO(config)
-/*
-func (v *DurationInput) Update() {
-	npv := reflectx.NonPointerValue(v.Value)
-	dur := npv.Interface().(time.Duration)
-	un := "seconds"
-	undur := time.Duration(0)
-	for _, u := range durationUnits {
-		v := durationUnitsMap[u]
-		if v > dur {
-			break
-		}
-		un = u
-		undur = v
-	}
-	adur := float32(dur)
-	if undur != 0 {
-		adur /= float32(undur)
-	}
-
-	v.Widget.Child(0).(*core.Spinner).SetValue(adur)
-	v.Widget.Child(1).(*core.Chooser).SetCurrentValue(un)
-}
-*/
 
 var durationUnits = []string{
 	"nanoseconds",
