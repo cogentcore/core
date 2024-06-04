@@ -400,35 +400,35 @@ func (t *TableView) SetSortIndex(v int) *TableView { t.SortIndex = v; return t }
 // SortDescending is whether the current sort order is descending.
 func (t *TableView) SetSortDescending(v bool) *TableView { t.SortDescending = v; return t }
 
-// TimeViewType is the [types.Type] for [TimeView]
-var TimeViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TimeView", IDName: "time-view", Doc: "TimeView is a view for selecting a time", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "Time is the time that we are viewing"}, {Name: "Hour", Doc: "the raw input hour"}, {Name: "PM", Doc: "whether we are in PM mode (so we have to add 12h to everything)"}}, Instance: &TimeView{}})
+// TimePickerType is the [types.Type] for [TimePicker]
+var TimePickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TimePicker", IDName: "time-picker", Doc: "TimePicker is a widget for picking a time.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "Time is the time that we are viewing"}, {Name: "Hour", Doc: "the raw input hour"}, {Name: "PM", Doc: "whether we are in PM mode (so we have to add 12h to everything)"}}, Instance: &TimePicker{}})
 
-// NewTimeView returns a new [TimeView] with the given optional parent:
-// TimeView is a view for selecting a time
-func NewTimeView(parent ...tree.Node) *TimeView { return tree.New[*TimeView](parent...) }
+// NewTimePicker returns a new [TimePicker] with the given optional parent:
+// TimePicker is a widget for picking a time.
+func NewTimePicker(parent ...tree.Node) *TimePicker { return tree.New[*TimePicker](parent...) }
 
-// NodeType returns the [*types.Type] of [TimeView]
-func (t *TimeView) NodeType() *types.Type { return TimeViewType }
+// NodeType returns the [*types.Type] of [TimePicker]
+func (t *TimePicker) NodeType() *types.Type { return TimePickerType }
 
-// New returns a new [*TimeView] value
-func (t *TimeView) New() tree.Node { return &TimeView{} }
+// New returns a new [*TimePicker] value
+func (t *TimePicker) New() tree.Node { return &TimePicker{} }
 
-// SetTime sets the [TimeView.Time]:
+// SetTime sets the [TimePicker.Time]:
 // Time is the time that we are viewing
-func (t *TimeView) SetTime(v time.Time) *TimeView { t.Time = v; return t }
+func (t *TimePicker) SetTime(v time.Time) *TimePicker { t.Time = v; return t }
 
-// DateViewType is the [types.Type] for [DateView]
-var DateViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.DateView", IDName: "date-view", Doc: "DateView is a view for selecting a date", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "Time is the time that we are viewing"}}, Instance: &DateView{}})
+// DatePickerType is the [types.Type] for [DatePicker]
+var DatePickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.DatePicker", IDName: "date-picker", Doc: "DatePicker is a view for selecting a date", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "Time is the time that we are viewing"}}, Instance: &DatePicker{}})
 
-// NewDateView returns a new [DateView] with the given optional parent:
-// DateView is a view for selecting a date
-func NewDateView(parent ...tree.Node) *DateView { return tree.New[*DateView](parent...) }
+// NewDatePicker returns a new [DatePicker] with the given optional parent:
+// DatePicker is a view for selecting a date
+func NewDatePicker(parent ...tree.Node) *DatePicker { return tree.New[*DatePicker](parent...) }
 
-// NodeType returns the [*types.Type] of [DateView]
-func (t *DateView) NodeType() *types.Type { return DateViewType }
+// NodeType returns the [*types.Type] of [DatePicker]
+func (t *DatePicker) NodeType() *types.Type { return DatePickerType }
 
-// New returns a new [*DateView] value
-func (t *DateView) New() tree.Node { return &DateView{} }
+// New returns a new [*DatePicker] value
+func (t *DatePicker) New() tree.Node { return &DatePicker{} }
 
 // TimeInputType is the [types.Type] for [TimeInput]
 var TimeInputType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TimeInput", IDName: "time-input", Doc: "TimeInput presents two text fields for editing a date and time,\nboth of which can pull up corresponding picker dialogs.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time"}}, Instance: &TimeInput{}})

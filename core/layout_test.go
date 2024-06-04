@@ -308,7 +308,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 	case "structview": // structview
 		ts := &Test{}
 		views.NewStructView(sc).SetStruct(ts)
-	case "timeview": // time view
+	case "timepicker": // time picker
 		ts := &TestTime{}
 		ts.Date = time.Now()
 		views.NewStructView(sc).SetStruct(ts)

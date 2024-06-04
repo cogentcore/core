@@ -16,8 +16,8 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
-// TimeView is a view for selecting a time
-type TimeView struct {
+// TimePicker is a widget for picking a time.
+type TimePicker struct {
 	core.Frame
 
 	// Time is the time that we are viewing
@@ -30,9 +30,9 @@ type TimeView struct {
 	PM bool `set:"-"`
 }
 
-func (tv *TimeView) WidgetValue() any { return &tv.Time }
+func (tv *TimePicker) WidgetValue() any { return &tv.Time }
 
-func (tv *TimeView) Init() {
+func (tv *TimePicker) Init() {
 	tv.Frame.Init()
 	core.AddChild(tv, func(w *core.Spinner) {
 		w.SetStep(1).SetEnforceStep(true)
@@ -132,8 +132,8 @@ func (tv *TimeView) Init() {
 
 var shortMonths = []string{"Jan", "Feb", "Apr", "Mar", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
 
-// DateView is a view for selecting a date
-type DateView struct {
+// DatePicker is a view for selecting a date
+type DatePicker struct {
 	core.Frame
 
 	// Time is the time that we are viewing
@@ -141,14 +141,14 @@ type DateView struct {
 }
 
 // SetTime sets the source time and updates the view
-func (dv *DateView) SetTime(tim time.Time) *DateView { // TODO(config)
+func (dv *DatePicker) SetTime(tim time.Time) *DatePicker { // TODO(config)
 	dv.Time = tim
 	dv.SendChange()
 	dv.Update()
 	return dv
 }
 
-func (dv *DateView) Init() {
+func (dv *DatePicker) Init() {
 	dv.Frame.Init()
 	dv.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
@@ -295,7 +295,7 @@ func (ti *TimeInput) Init() {
 		w.SetTooltip("The date")
 		w.SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
 			d := core.NewBody().AddTitle("Select date")
-			dp := NewDateView(d).SetTime(ti.Time)
+			dp := NewDatePicker(d).SetTime(ti.Time)
 			d.AddBottomBar(func(parent core.Widget) {
 				d.AddCancel(parent)
 				d.AddOK(parent).OnClick(func(e events.Event) {
@@ -330,7 +330,7 @@ func (ti *TimeInput) Init() {
 		w.SetTooltip("The time")
 		w.SetLeadingIcon(icons.Schedule, func(e events.Event) {
 			d := core.NewBody().AddTitle("Edit time")
-			tp := NewTimeView(d).SetTime(ti.Time)
+			tp := NewTimePicker(d).SetTime(ti.Time)
 			d.AddBottomBar(func(parent core.Widget) {
 				d.AddCancel(parent)
 				d.AddOK(parent).OnClick(func(e events.Event) {
