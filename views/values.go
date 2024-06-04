@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // SliceButton represents a slice or array value with a button.
@@ -87,6 +88,29 @@ func (mb *MapButton) Init() {
 		mv := NewMapView(d).SetMap(mb.Map)
 		mv.SetValueTitle(mb.ValueTitle).SetReadOnly(mb.IsReadOnly())
 		d.AddAppBar(mv.MakeToolbar)
+	})
+}
+
+// TreeButton represents a [tree.Node] value with a button.
+type TreeButton struct {
+	core.Button
+	Tree tree.Node
+}
+
+func (tb *TreeButton) WidgetValue() any { return &tb.Tree }
+
+func (tb *TreeButton) Init() {
+	tb.Button.Init()
+	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	tb.Updater(func() {
+		path := "None"
+		if tb.Tree != nil {
+			path = tb.Tree.AsTreeNode().String()
+		}
+		tb.SetText(path)
+	})
+	core.InitValueButton(tb, true, func(d *core.Body) {
+		InspectorView(d, tb.Tree)
 	})
 }
 

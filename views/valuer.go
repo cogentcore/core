@@ -38,18 +38,21 @@ func init() {
 		if _, ok := value.(color.Color); ok {
 			return NewColorButton()
 		}
+		if _, ok := value.(tree.Node); ok {
+			return NewTreeButton()
+		}
 
 		forceInline := tags.Get("view") == "inline"
 		forceNoInline := tags.Get("view") == "no-inline"
-		rval := reflectx.Underlying(reflect.ValueOf(value))
-		if rval == (reflect.Value{}) {
+		uv := reflectx.Underlying(reflect.ValueOf(value))
+		if !uv.IsValid() {
 			return nil
 		}
-		typ := rval.Type()
+		typ := uv.Type()
 		kind := typ.Kind()
 		switch kind {
 		case reflect.Array, reflect.Slice:
-			sz := rval.Len()
+			sz := uv.Len()
 			eltyp := reflectx.SliceElementType(value)
 			if _, ok := value.([]byte); ok {
 				return core.NewTextField()
@@ -64,7 +67,7 @@ func init() {
 				return NewSliceButton()
 			}
 		case reflect.Struct:
-			num := reflectx.NumAllFields(rval)
+			num := reflectx.NumAllFields(uv)
 			if !forceNoInline && (forceInline || num <= core.SystemSettings.StructInlineLength) {
 				return NewStructView().SetInline(true)
 			} else {

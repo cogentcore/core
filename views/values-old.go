@@ -27,50 +27,6 @@ import (
 
 // This file contains the standard [Value]s built into views.
 
-// TreeValue represents a [tree.Node] value with a button.
-type TreeValue struct {
-	ValueBase[*core.Button]
-}
-
-func (v *TreeValue) Config() {
-	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	ConfigDialogWidget(v, true)
-}
-
-func (v *TreeValue) Update() {
-	path := "None"
-	k := v.TreeValue()
-	if k != nil && k.This() != nil {
-		path = k.AsTreeNode().String()
-	}
-	v.Widget.SetText(path).Update()
-}
-
-func (v *TreeValue) ConfigDialog(d *core.Body) (bool, func()) {
-	k := v.TreeValue()
-	if k == nil {
-		return false, nil
-	}
-	InspectorView(d, k)
-	return true, nil
-}
-
-// TreeValue returns the actual underlying [tree.Node] value, or nil.
-func (vv *TreeValue) TreeValue() tree.Node {
-	if !vv.Value.IsValid() || vv.Value.IsNil() {
-		return nil
-	}
-	npv := reflectx.NonPointerValue(vv.Value)
-	if npv.Kind() == reflect.Interface {
-		return npv.Interface().(tree.Node)
-	}
-	opv := reflectx.OnePointerValue(vv.Value)
-	if opv.IsNil() {
-		return nil
-	}
-	return opv.Interface().(tree.Node)
-}
-
 // TypeValue represents a [types.Type] value with a chooser.
 type TypeValue struct {
 	ValueBase[*core.Chooser]
