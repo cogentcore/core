@@ -61,7 +61,7 @@ func (tb *Toolbar) IsVisible() bool {
 // AppChooser returns the app [Chooser] used for searching for
 // items. It will only be non-nil if this toolbar has been configured
 // with an app chooser, which typically only happens for app bars.
-func (tb *Toolbar) AppChooser() *Chooser {
+func (tb *Toolbar) AppChooser() *Chooser { // TODO(config): remove
 	ch, _ := tb.ChildByName("app-chooser").(*Chooser)
 	return ch
 }
