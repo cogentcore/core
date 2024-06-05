@@ -16,39 +16,27 @@ import (
 // underlying types
 type Slice []Node
 
-// todo: remove the bool?
-
-// IndexByFunc finds index of item based on match function (which must return
-// true for a find match, false for not).  Returns false if not found.
-// startIndex arg allows for optimized bidirectional find if you have an idea
-// where it might be, which can be key speedup for large lists. If no value
-// is specified for startIndex, it starts in the middle, which is a good default.
-func (sl *Slice) IndexByFunc(match func(k Node) bool, startIndex ...int) int {
-	idx := findfast.FindFunc(*sl, match, startIndex...)
-	return idx
-}
-
 // IndexOf returns index of element in list, false if not there.  startIndex arg
 // allows for optimized bidirectional find if you have an idea where it might
 // be, which can be key speedup for large lists. If no value is specified for
 // startIndex, it starts in the middle, which is a good default.
 func (sl *Slice) IndexOf(kid Node, startIndex ...int) int {
-	return sl.IndexByFunc(func(ch Node) bool { return ch == kid }, startIndex...)
+	return findfast.FindFunc(*sl, func(ch Node) bool { return ch == kid }, startIndex...)
 }
 
 // IndexByName returns index of first element that has given name, false if
 // not found. See [Slice.IndexOf] for info on startIndex.
 func (sl *Slice) IndexByName(name string, startIndex ...int) int {
-	return sl.IndexByFunc(func(ch Node) bool { return ch.Name() == name }, startIndex...)
+	return findfast.FindFunc(*sl, func(ch Node) bool { return ch.Name() == name }, startIndex...)
 }
 
 // IndexByType returns index of element that either is that type or embeds
 // that type, false if not found. See [Slice.IndexOf] for info on startIndex.
 func (sl *Slice) IndexByType(t *types.Type, embeds bool, startIndex ...int) int {
 	if embeds {
-		return sl.IndexByFunc(func(ch Node) bool { return ch.NodeType().HasEmbed(t) }, startIndex...)
+		return findfast.FindFunc(*sl, func(ch Node) bool { return ch.NodeType().HasEmbed(t) }, startIndex...)
 	}
-	return sl.IndexByFunc(func(ch Node) bool { return ch.NodeType() == t }, startIndex...)
+	return findfast.FindFunc(*sl, func(ch Node) bool { return ch.NodeType() == t }, startIndex...)
 }
 
 // Move moves the element in the given slice at the given
