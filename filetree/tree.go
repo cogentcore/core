@@ -356,13 +356,10 @@ func (ft *Tree) ExtNodeByPath(fpath string) (*Node, error) {
 	if ekid == nil {
 		return nil, fmt.Errorf("ExtFile not updated -- no ExtFiles node")
 	}
-	ekids := ekid.AsTree().Children
-	err := ekids.IsValidIndex(i)
-	if err == nil {
-		kn := AsNode(ekids[i])
-		return kn, nil
+	if n := ekid.Child(i); n != nil {
+		return AsNode(n), nil
 	}
-	return nil, fmt.Errorf("ExtFile not updated: %v", err)
+	return nil, fmt.Errorf("ExtFile not updated; index invalid")
 }
 
 // SyncExtFiles returns a type-and-name list for configuring nodes

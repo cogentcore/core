@@ -17,15 +17,6 @@ import (
 // underlying types
 type Slice []Node
 
-// IsValidIndex checks whether the given index is a valid index into slice,
-// within range of 0..len-1.  Returns error if not.
-func (sl *Slice) IsValidIndex(idx int) error {
-	if idx >= 0 && idx < len(*sl) {
-		return nil
-	}
-	return fmt.Errorf("tree.Slice: invalid index: %v with len = %v", idx, len(*sl))
-}
-
 // todo: remove the bool?
 
 // IndexByFunc finds index of item based on match function (which must return
@@ -108,66 +99,34 @@ func (sl *Slice) Insert(k Node, i int) {
 }
 
 // DeleteAtIndex deletes item at index; does not do any further management of
-// deleted item. It is an optimized version for avoiding memory leaks. It returns
-// an error if the index is invalid.
-func (sl *Slice) DeleteAtIndex(i int) error {
-	if err := sl.IsValidIndex(i); err != nil {
-		return err
-	}
+// deleted item. It is an optimized version for avoiding memory leaks.
+func (sl *Slice) DeleteAtIndex(i int) {
 	*sl = slices.Delete(*sl, i, i+1)
-	return nil
 }
 
-// Move element from one position to another.  Returns error if either index
-// is invalid.
-func (sl *Slice) Move(frm, to int) error {
-	if err := sl.IsValidIndex(frm); err != nil {
-		return err
+// Move element from one position to another.
+func (sl *Slice) Move(from, to int) {
+	if from == to {
+		return
 	}
-	if err := sl.IsValidIndex(to); err != nil {
-		return err
-	}
-	if frm == to {
-		return nil
-	}
-	tmp := (*sl)[frm]
-	sl.DeleteAtIndex(frm)
+	tmp := (*sl)[from]
+	sl.DeleteAtIndex(from)
 	*sl = slices.Insert(*sl, to, tmp)
-	return nil
+	return
 }
 
-// Swap elements between positions.  Returns error if either index is invalid
-func (sl *Slice) Swap(i, j int) error {
-	if err := sl.IsValidIndex(i); err != nil {
-		return err
-	}
-	if err := sl.IsValidIndex(j); err != nil {
-		return err
-	}
+// Swap elements between positions.
+func (sl *Slice) Swap(i, j int) {
 	if i == j {
-		return nil
+		return
 	}
 	(*sl)[j], (*sl)[i] = (*sl)[i], (*sl)[j]
-	return nil
 }
 
-// CopyFrom another Slice.  It is efficient by using the Config method
-// which attempts to preserve any existing nodes in the destination
-// if they have the same name and type -- so a copy from a source to
-// a target that only differ minimally will be minimally destructive.
-// it is essential that child names are unique.
-func (sl *Slice) CopyFrom(frm Slice) {
-	sl.ConfigCopy(nil, frm)
-	for i, kid := range *sl {
-		fmk := frm[i]
-		kid.CopyFrom(fmk)
-	}
-}
-
-// ConfigCopy uses Config method to copy name / type config of Slice from source
+// CopyFrom uses [TypePlan] to copy name / type config of Slice from source.
 // If n is != nil then Update etc is called properly.
 // it is essential that child names are unique.
-func (sl *Slice) ConfigCopy(n Node, frm Slice) {
+func (sl *Slice) CopyFrom(n Node, frm Slice) {
 	sz := len(frm)
 	if sz > 0 || n == nil {
 		p := make(TypePlan, sz)

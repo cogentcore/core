@@ -293,9 +293,6 @@ func findPathChild(n Node, child string) (int, bool) {
 		if idx < 0 { // from end
 			idx = len(n.AsTree().Children) + idx
 		}
-		if n.AsTree().Children.IsValidIndex(idx) != nil {
-			return idx, false
-		}
 		return idx, true
 	}
 	return n.AsTree().Children.IndexByName(child, 0)
@@ -756,7 +753,7 @@ func (n *NodeBase) CopyFrom(src Node) {
 
 // copyFrom is the implementation of [NodeBase.CopyFrom].
 func copyFrom(dst, src Node) {
-	dst.AsTree().Children.ConfigCopy(dst.This(), src.AsTree().Children)
+	dst.AsTree().Children.CopyFrom(dst.This(), src.AsTree().Children)
 	maps.Copy(dst.AsTree().Properties, src.AsTree().Properties)
 
 	dst.This().CopyFieldsFrom(src)
