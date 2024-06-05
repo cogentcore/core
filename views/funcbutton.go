@@ -136,7 +136,7 @@ func NewFuncButton(parent tree.Node, fun any) *FuncButton {
 	if parent == nil {
 		return tree.New[*FuncButton]().SetFunc(fun)
 	} else {
-		return parent.NewChild(FuncButtonType).(*FuncButton).SetFunc(fun)
+		return tree.New[*FuncButton](parent).SetFunc(fun)
 	}
 }
 

@@ -24,7 +24,7 @@ func New[T Node](parent ...Node) T {
 		return newRoot[T]()
 	}
 	var n T
-	return parent[0].NewChild(n.NodeType()).(T)
+	return parent[0].AsTree().NewChild(n.NodeType()).(T)
 }
 
 // newRoot returns a new initialized node of the given type without a parent.
