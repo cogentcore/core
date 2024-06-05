@@ -149,7 +149,7 @@ func (n *NodeBase) ParentLevel(parent Node) int {
 }
 
 // ParentByName finds first parent recursively up hierarchy that matches
-// given name. Returns nil if not found.
+// the given name. It returns nil if not found.
 func (n *NodeBase) ParentByName(name string) Node {
 	if IsRoot(n) {
 		return nil
@@ -157,7 +157,7 @@ func (n *NodeBase) ParentByName(name string) Node {
 	if n.Par.Name() == name {
 		return n.Par
 	}
-	return n.Par.ParentByName(name)
+	return n.Par.AsTree().ParentByName(name)
 }
 
 // ParentByType finds parent recursively up hierarchy, by type, and

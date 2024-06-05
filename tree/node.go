@@ -85,10 +85,6 @@ type Node interface {
 	// Each Node can only have one parent.
 	Parent() Node
 
-	// ParentByName finds first parent recursively up hierarchy that matches
-	// given name. Returns nil if not found.
-	ParentByName(name string) Node
-
 	// ParentByType finds parent recursively up hierarchy, by type, and
 	// returns nil if not found. If embeds is true, then it looks for any
 	// type that embeds the given type at any level of anonymous embedding.
