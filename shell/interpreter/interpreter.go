@@ -19,10 +19,7 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/shell"
-<<<<<<< HEAD
 	"github.com/ergochat/readline"
-=======
->>>>>>> main
 	"github.com/traefik/yaegi/interp"
 	"github.com/traefik/yaegi/stdlib"
 )
@@ -57,11 +54,7 @@ func NewInterpreter(options interp.Options) *Interpreter {
 	if options.Stderr != nil {
 		in.Shell.Config.StdIO.Err = options.Stderr
 	}
-<<<<<<< HEAD
 	in.Shell.SaveOrigStdIO()
-=======
-	in.Shell.StdIOWrappers.NewWrappers(&in.Shell.Config.StdIO)
->>>>>>> main
 	options.Stdout = in.Shell.StdIOWrappers.Out
 	options.Stderr = in.Shell.StdIOWrappers.Err
 	options.Stdin = in.Shell.StdIOWrappers.In
@@ -120,7 +113,6 @@ func (in *Interpreter) RunCode() (reflect.Value, error) {
 	if len(in.Shell.Errors) > 0 {
 		return reflect.Value{}, errors.Join(in.Shell.Errors...)
 	}
-<<<<<<< HEAD
 	in.Shell.AddChunk()
 	code := in.Shell.Chunks
 	in.Shell.ResetCode()
@@ -140,15 +132,6 @@ func (in *Interpreter) RunCode() (reflect.Value, error) {
 			}
 			break
 		}
-=======
-	cmd := in.Shell.Code()
-	in.Shell.ResetLines()
-	ctx := in.Shell.StartContext()
-	v, err := in.Interp.EvalWithContext(ctx, cmd)
-	in.Shell.EndContext()
-	if err != nil && !errors.Is(err, context.Canceled) {
-		slog.Error(err.Error())
->>>>>>> main
 	}
 	return v, err
 }

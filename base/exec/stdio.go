@@ -62,11 +62,7 @@ func (st *StdIO) SetToOS() *StdIO {
 	return cur
 }
 
-<<<<<<< HEAD
 // Print prints to the [StdIO.Out]
-=======
-// Print prints to the [StdIO.Out] Stdout
->>>>>>> main
 func (st *StdIO) Print(v ...any) {
 	fmt.Fprint(st.Out, v...)
 }
@@ -76,7 +72,6 @@ func (st *StdIO) Println(v ...any) {
 	fmt.Fprintln(st.Out, v...)
 }
 
-<<<<<<< HEAD
 // Printf prints to the [StdIO.Out]
 func (st *StdIO) Printf(f string, v ...any) {
 	fmt.Fprintf(st.Out, f, v...)
@@ -95,11 +90,6 @@ func (st *StdIO) ErrPrintln(v ...any) {
 // ErrPrintf prints to the [StdIO.Err]
 func (st *StdIO) ErrPrintf(f string, v ...any) {
 	fmt.Fprintf(st.Err, f, v...)
-=======
-// Printf prints to the [StdIO.Out] Stdout
-func (st *StdIO) Printf(f string, v ...any) {
-	fmt.Fprintf(st.Out, f, v...)
->>>>>>> main
 }
 
 // IsPipe returns true if the given object is an os.File corresponding to a Pipe,
@@ -315,7 +305,6 @@ func (st *StdIO) SetWrappers(o *StdIO) *StdIO {
 	return cur
 }
 
-<<<<<<< HEAD
 // SetWrappedOut sets the wrapped Out to given writer.
 // The wrappers must have been created using NewWrappers initially.
 func (st *StdIO) SetWrappedOut(w io.Writer) {
@@ -334,8 +323,6 @@ func (st *StdIO) SetWrappedIn(r io.Reader) {
 	st.In.(*ReadWrapper).Reader = r
 }
 
-=======
->>>>>>> main
 // GetWrapped returns the current wrapped values as a StdIO.
 // The wrappers must have been created using NewWrappers initially.
 func (st *StdIO) GetWrapped() *StdIO {

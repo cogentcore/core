@@ -25,11 +25,7 @@ import (
 // Code reports the exit code the command returned if it ran. If err == nil, ran
 // is always true and code is always 0.
 func (cl *Client) Exec(sio *exec.StdIOState, start, output bool, cmd string, args ...string) (string, error) {
-<<<<<<< HEAD
 	ses, err := cl.NewSession(true)
-=======
-	ses, err := cl.NewSession()
->>>>>>> main
 	if err != nil {
 		return "", err
 	}

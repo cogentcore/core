@@ -182,11 +182,7 @@ func (cl *Client) WaitSession(name string, ses *ssh.Session) error {
 // GetHomeDir runs "pwd" on the host to get the users home dir,
 // called right after connecting.
 func (cl *Client) GetHomeDir() error {
-<<<<<<< HEAD
 	ses, err := cl.NewSession(false)
-=======
-	ses, err := cl.NewSession()
->>>>>>> main
 	if err != nil {
 		return err
 	}
