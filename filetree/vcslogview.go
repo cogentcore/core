@@ -50,14 +50,6 @@ func (lv *VCSLogView) Init() {
 	lv.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
-	lv.OnWidgetAdded(func(w core.Widget) {
-		switch w.PathFrom(lv) {
-		case "a-tf", "b-tf":
-			w.Style(func(s *styles.Style) {
-				s.Min.X.Em(12)
-			})
-		}
-	})
 }
 
 // ConfigRepo configures to given repo, log and file (file could be empty)
@@ -72,7 +64,9 @@ func (lv *VCSLogView) ConfigRepo(repo vcs.Repo, lg vcs.Log, file, since string) 
 	lv.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	core.NewToolbar(lv).SetName("toolbar")
+	tb := core.NewToolbar(lv)
+	tb.SetName("toolbar")
+	tb.Maker(lv.MakeToolbar)
 	tv := views.NewTableView(lv)
 	tv.SetName("log")
 	tv.SetReadOnly(true)
@@ -80,7 +74,6 @@ func (lv *VCSLogView) ConfigRepo(repo vcs.Repo, lg vcs.Log, file, since string) 
 	lv.RevA = "HEAD"
 	lv.RevB = ""
 	lv.SetA = true
-	lv.MakeToolbar()
 	tv.AddContextMenu(func(m *core.Scene) {
 		core.NewButton(m).SetText("Set Revision A").
 			SetTooltip("Set Buffer A's revision to this").
@@ -192,63 +185,72 @@ func (lv *VCSLogView) TableView() *views.TableView {
 	return lv.ChildByName("log", 1).(*views.TableView)
 }
 
-// MakeToolbar
-func (lv *VCSLogView) MakeToolbar() {
-	tb := lv.Toolbar()
-	if lv.File != "" {
-		core.NewText(tb).SetText("File: " + dirs.DirAndFile(lv.File))
-		core.NewSeparator(tb)
-		cba := core.NewSwitch(tb).SetText("A Rev: ")
-		cba.SetTooltip("If selected, double-clicking in log will set this A Revision to use for Diff")
-		cba.SetName("a-rev")
-		cba.SetState(true, states.Checked)
-		tfa := core.NewTextField(tb).SetText(lv.RevA)
-		tfa.SetName("a-tf")
-		tfa.OnChange(func(e events.Event) {
-			lv.RevA = tfa.Text()
+func (lv *VCSLogView) MakeToolbar(p *core.Plan) {
+	core.Add(p, func(w *core.Text) {
+		w.SetText("File: " + dirs.DirAndFile(lv.File))
+	})
+
+	core.AddAt(p, "a-rev", func(w *core.Switch) {
+		w.SetText("A Rev: ")
+		w.SetTooltip("If selected, double-clicking in log will set this A Revision to use for Diff")
+		w.SetState(true, states.Checked)
+		w.OnClick(func(e events.Event) {
+			lv.SetA = w.IsChecked()
+			cbb := w.Parent().ChildByName("b-rev", 2).(*core.Switch)
+			cbb.SetState(!lv.SetA, states.Checked)
+			cbb.NeedsRender()
 		})
-		core.NewButton(tb).SetText("View A").SetIcon(icons.Document).
+	})
+	core.AddAt(p, "a-tf", func(w *core.TextField) {
+		w.SetText(lv.RevA)
+		w.OnChange(func(e events.Event) {
+			lv.RevA = w.Text()
+		})
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetText("View A").SetIcon(icons.Document).
 			SetTooltip("View file at revision A").
 			OnClick(func(e events.Event) {
 				FileAtRevDialog(lv, lv.Repo, lv.File, lv.RevA)
 			})
+	})
 
-		core.NewSeparator(tb)
+	core.Add(p, func(w *core.Separator) {})
 
-		cbb := core.NewSwitch(tb).SetText("B Rev: ")
-		cbb.SetTooltip("If selected, double-clicking in log will set this B Revision to use for Diff")
-		cbb.SetName("b-rev")
-		cbb.OnClick(func(e events.Event) {
-			lv.SetA = !cbb.IsChecked()
+	core.AddAt(p, "b-rev", func(w *core.Switch) {
+		w.SetText("B Rev: ")
+		w.SetTooltip("If selected, double-clicking in log will set this B Revision to use for Diff")
+		w.OnClick(func(e events.Event) {
+			lv.SetA = !w.IsChecked()
+			cba := w.Parent().ChildByName("a-rev", 2).(*core.Switch)
 			cba.SetState(lv.SetA, states.Checked)
 			cba.NeedsRender()
 		})
-		cba.OnClick(func(e events.Event) {
-			lv.SetA = cba.IsChecked()
-			cbb.SetState(!lv.SetA, states.Checked)
-			cbb.NeedsRender()
-		})
+	})
 
-		tfb := core.NewTextField(tb).SetText(lv.RevB)
-		tfb.SetName("b-tf")
-		tfb.OnChange(func(e events.Event) {
-			lv.RevB = tfb.Text()
+	core.AddAt(p, "b-tf", func(w *core.TextField) {
+		w.SetText(lv.RevB)
+		w.OnChange(func(e events.Event) {
+			lv.RevB = w.Text()
 		})
-		core.NewButton(tb).SetText("View B").SetIcon(icons.Document).
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetText("View B").SetIcon(icons.Document).
 			SetTooltip("View file at revision B").
 			OnClick(func(e events.Event) {
 				FileAtRevDialog(lv, lv.Repo, lv.File, lv.RevB)
 			})
+	})
 
-		core.NewSeparator(tb)
+	core.Add(p, func(w *core.Separator) {})
 
-		core.NewButton(tb).SetText("Diff").SetIcon(icons.Difference).
+	core.Add(p, func(w *core.Button) {
+		w.SetText("Diff").SetIcon(icons.Difference).
 			SetTooltip("Show the diffs between two revisions; if blank, A is current HEAD, and B is current working copy").
 			OnClick(func(e events.Event) {
 				texteditor.DiffViewDialogFromRevs(lv, lv.Repo, lv.File, nil, lv.RevA, lv.RevB)
 			})
-	}
-
+	})
 }
 
 // VCSLogViewDialog returns a VCS Log View for given repo, log and file (file could be empty)

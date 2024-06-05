@@ -22,6 +22,9 @@ import (
 // Events returns the higher-level core event manager
 // for this [Widget]'s [Scene].
 func (wb *WidgetBase) Events() *Events {
+	if wb.Scene == nil {
+		return nil
+	}
 	return &wb.Scene.Events
 }
 

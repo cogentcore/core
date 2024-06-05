@@ -317,7 +317,7 @@ func (fb *FileBrowse) MakeToolbar(p *core.Plan) { //types:add
 	core.Add(p, func(w *views.FuncButton) {
 		w.SetFunc(fb.OpenPath).SetKey(keymap.Open)
 		w.Args[0].SetValue(fb.ActiveFilename)
-		// w.Args[0].SetTag("ext", ".json")
+		w.Args[0].SetTag(`ext:".json"`)
 	})
 	core.Add(p, func(w *views.FuncButton) {
 		w.SetFunc(fb.SaveActiveView).SetKey(keymap.Save)
@@ -328,7 +328,7 @@ func (fb *FileBrowse) MakeToolbar(p *core.Plan) { //types:add
 	core.Add(p, func(w *views.FuncButton) {
 		w.SetFunc(fb.SaveActiveViewAs).SetKey(keymap.SaveAs)
 		w.Args[0].SetValue(fb.ActiveFilename)
-		// w.Args[0].SetTag("ext", ".json")
+		w.Args[0].SetTag(`ext:".json"`)
 	})
 }
 

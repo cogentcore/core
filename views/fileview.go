@@ -803,6 +803,7 @@ func (fb *FileButton) WidgetValue() any { return &fb.Filename }
 func (fb *FileButton) Init() {
 	fb.Button.Init()
 	fb.SetType(core.ButtonTonal).SetIcon(icons.File)
+	fb.SetFlag(true, core.ValueDialogNewWindow)
 	fb.Updater(func() {
 		if fb.Filename == "" {
 			fb.SetText("Select file")
