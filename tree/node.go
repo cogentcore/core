@@ -182,11 +182,6 @@ type Node interface {
 	// Any error is automatically logged in addition to being returned.
 	InsertChild(kid Node, at int) error
 
-	// InsertNewChild creates a new child of given type and add at position
-	// in children list. The name defaults to the ID (kebab-case) name
-	// of the type, plus the [Node.NumLifetimeChildren] of the parent.
-	InsertNewChild(typ *types.Type, at int) Node
-
 	// Destroy recursively deletes and destroys the node, all of its children,
 	// and all of its children's children, etc. Node types can implement this
 	// to do additional necessary destruction; if they do, they should call

@@ -196,7 +196,7 @@ func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *types.Type, n int) {
 	parent := tv.SyncNode
 	var sn tree.Node
 	for i := 0; i < n; i++ {
-		nn := parent.InsertNewChild(typ, myidx+i)
+		nn := parent.AsTree().InsertNewChild(typ, myidx+i)
 		nn.SetName(fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i))
 		if i == n-1 {
 			sn = nn
