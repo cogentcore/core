@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"slices"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/jsonx"
@@ -20,6 +21,22 @@ import (
 // note: use package iox/jsonx for standard read / write of JSON files
 // for trees.  The Slice Marshal / Unmarshal methods save the type info
 // of each child so that the full tree can be properly reconstructed.
+
+// noMarshalNode is a version of [NodeBase] without a MarshalJSON method
+// (since non-embedded type declarations do not result in method inheritance).
+type noMarshalNode NodeBase
+
+// MarshalJSON marshals the node by injecting the [Node.NodeType] as a nodeType
+// field at the start of the standard JSON encoding.
+func (n *NodeBase) MarshalJSON() ([]byte, error) {
+	nmn := (*noMarshalNode)(n)
+	b, err := json.Marshal(nmn)
+	if err != nil {
+		return b, err
+	}
+	b = slices.Insert(b, 1, []byte(`"nodeType": "`+n.This().NodeType().Name+`", `)...)
+	return b, nil
+}
 
 //////////////////////////////////////////////////////////////////////////
 // Slice
