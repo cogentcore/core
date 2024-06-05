@@ -26,13 +26,13 @@ func (t *TypePlan) Add(typ *types.Type, name string) {
 	*t = append(*t, TypePlanItem{typ, name})
 }
 
-// UpdateSlice ensures that the given [Slice] contains the elements
+// UpdateSlice ensures that the given slice contains the elements
 // according to the [TypePlan], specified by unique element names.
 // The given Node is set as the parent of the created nodes.
 // It returns true if any changes were made.
-func UpdateSlice(sl *Slice, parent Node, p TypePlan) bool {
+func UpdateSlice(slice *[]Node, parent Node, p TypePlan) bool {
 	mods := false
-	*sl, mods = plan.Update(*sl, len(p),
+	*slice, mods = plan.Update(*slice, len(p),
 		func(i int) string { return p[i].Name },
 		func(name string, i int) Node {
 			n := NewOfType(p[i].Type)

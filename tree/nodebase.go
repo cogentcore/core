@@ -40,9 +40,9 @@ type NodeBase struct {
 	Par Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// Children is the list of children of this node. All of them are set to have this node
-	// as their parent. They can be reordered, but you should generally use [Node]
-	// methods when adding and deleting children to ensure everything gets updated.
-	Children Slice `tableview:"-" copier:"-" set:"-"`
+	// as their parent. You can directly modify them or use the various [NodeBase]
+	// child helper functions.
+	Children []Node `tableview:"-" copier:"-" set:"-"`
 
 	// Ths is a pointer to ourselves as a [Node]. It can always be used to extract the
 	// true underlying type of an object when [NodeBase] is embedded in other structs;

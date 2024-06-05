@@ -23,13 +23,15 @@ import (
 type Toolbar struct {
 	Frame
 
-	// OverflowMenus are functions for the overflow menu; use [Toolbar.AddOverflowMenu] to add.
+	// OverflowMenus are functions for configuring the overflow menu of the
+	// toolbar. You can use [Toolbar.AddOverflowMenu] to add them.
 	// These are processed in reverse order (last in, first called)
 	// so that the default items are added last.
 	OverflowMenus []func(m *Scene) `set:"-" json:"-" xml:"-"`
 
-	// overflowItems are items moved from the main toolbar that will be shown in the overflow menu.
-	overflowItems tree.Slice
+	// overflowItems are items moved from the main toolbar that will be
+	// shown in the overflow menu.
+	overflowItems []tree.Node
 
 	// overflowButton is the widget to pull up the overflow menu.
 	overflowButton *Button

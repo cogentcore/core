@@ -131,13 +131,13 @@ func (tv *TreeView) UpdateReadOnly() bool {
 
 // SelectedSyncNodes returns a slice of the currently selected
 // sync source nodes in the entire tree view
-func (tv *TreeView) SelectedSyncNodes() tree.Slice {
-	var sn tree.Slice
+func (tv *TreeView) SelectedSyncNodes() []tree.Node {
+	var res []tree.Node
 	sl := tv.SelectedViews()
 	for _, v := range sl {
-		sn = append(sn, v.AsTreeView().SyncNode)
+		res = append(res, v.AsTreeView().SyncNode)
 	}
-	return sn
+	return res
 }
 
 // FindSyncNode finds TreeView node for given source node,
@@ -395,9 +395,9 @@ func (tv *TreeView) MimeDataSync(md *mimedata.Mimes) {
 // SyncNodesFromMimeData creates a slice of tree node(s)
 // from given mime data and also a corresponding slice
 // of original paths.
-func (tv *TreeView) SyncNodesFromMimeData(md mimedata.Mimes) (tree.Slice, []string) {
+func (tv *TreeView) SyncNodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
 	ni := len(md) / 2
-	sl := make(tree.Slice, 0, ni)
+	sl := make([]tree.Node, 0, ni)
 	pl := make([]string, 0, ni)
 	for _, d := range md {
 		if d.Type == fileinfo.DataJson {

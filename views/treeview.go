@@ -1414,9 +1414,9 @@ func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 
 // NodesFromMimeData returns a slice of tree nodes for
 // the TreeView nodes and paths from mime data.
-func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) (tree.Slice, []string) {
+func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
 	ni := len(md) / 2
-	sl := make(tree.Slice, 0, ni)
+	sl := make([]tree.Node, 0, ni)
 	pl := make([]string, 0, ni)
 	for _, d := range md {
 		if d.Type == fileinfo.DataJson {

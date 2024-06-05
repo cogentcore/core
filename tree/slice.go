@@ -11,11 +11,6 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// Slice is just a slice of tree nodes: []Node, providing methods for accessing
-// elements in the slice, and JSON marshal / unmarshal with encoding of
-// underlying types
-type Slice []Node
-
 // IndexOf returns the index of the given node in the given slice,
 // or -1 if it is not found. The optional startIndex argument
 // allows for optimized bidirectional searching if you have a guess
