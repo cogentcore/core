@@ -5,6 +5,8 @@
 package core
 
 import (
+	"slices"
+
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
@@ -127,7 +129,7 @@ func (tb *Toolbar) AllItemsToChildren() {
 		}
 	}
 	if ovi >= 0 {
-		tb.DeleteChildAt(ovi)
+		tb.Children = slices.Delete(tb.Children, ovi, ovi+1)
 	}
 	tb.Children = append(tb.Children, tb.overflowButton.This())
 	tb.overflowButton.Update()

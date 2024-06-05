@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode"
@@ -273,7 +274,7 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 		rc := k.AsTree().Property(refkey).(int)
 		if rc == 0 {
 			fmt.Printf("Deleting unused item: %s\n", k.Name())
-			sv.Defs.DeleteChildAt(i)
+			sv.Defs.Children = slices.Delete(sv.Defs.Children, i, i+1)
 			del = true
 		} else {
 			k.AsTree().DeleteProperty(refkey)
