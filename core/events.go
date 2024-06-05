@@ -1102,7 +1102,6 @@ func (em *Events) ManagerKeyChordEvents(e events.Event) {
 	sc := em.Scene
 	cs := e.KeyChord()
 	kf := keymap.Of(cs)
-	// fmt.Println(kf, cs)
 	switch kf {
 	case keymap.FocusNext: // tab
 		if em.FocusNext() {

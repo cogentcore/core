@@ -46,8 +46,8 @@ func (bf *BarFuncs) Inherit(obf BarFuncs) {
 	*bf = nbf
 }
 
-// ConfigSceneBars configures the side control bars, for main scenes
-func (sc *Scene) ConfigSceneBars() {
+// MakeSceneBars configures the side control bars, for main scenes
+func (sc *Scene) MakeSceneBars() {
 	// at last possible moment, add app-specific app bar config
 	if TheApp.AppBarConfig != nil && sc.Stage.Type.IsMain() && (sc.Stage.NewWindow || sc.Stage.FullWindow) {
 		if sc.Bars.Top.IsEmpty() {
@@ -55,7 +55,9 @@ func (sc *Scene) ConfigSceneBars() {
 		}
 	}
 	if !sc.Bars.Top.IsEmpty() {
-		head := NewFrame(sc).Style(func(s *styles.Style) {
+		head := NewFrame(sc)
+		head.SetName("top-bar")
+		head.Style(func(s *styles.Style) {
 			s.Align.Items = styles.Center
 			s.Grow.Set(1, 0)
 		})
@@ -63,8 +65,11 @@ func (sc *Scene) ConfigSceneBars() {
 	}
 	if !sc.Bars.Left.IsEmpty() || !sc.Bars.Right.IsEmpty() {
 		mid := NewFrame(sc)
+		mid.SetName("body-area")
 		if !sc.Bars.Left.IsEmpty() {
-			left := NewFrame(mid).Style(func(s *styles.Style) {
+			left := NewFrame(mid)
+			left.SetName("left-bar")
+			left.Style(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Align.Items = styles.Center
 				s.Grow.Set(0, 1)
@@ -75,7 +80,9 @@ func (sc *Scene) ConfigSceneBars() {
 			mid.AddChild(sc.Body)
 		}
 		if !sc.Bars.Right.IsEmpty() {
-			right := NewFrame(mid).Style(func(s *styles.Style) {
+			right := NewFrame(mid)
+			right.SetName("right-bar")
+			right.Style(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Align.Items = styles.Center
 				s.Grow.Set(0, 1)
@@ -88,7 +95,9 @@ func (sc *Scene) ConfigSceneBars() {
 		}
 	}
 	if !sc.Bars.Bottom.IsEmpty() {
-		foot := NewFrame(sc).Style(func(s *styles.Style) {
+		foot := NewFrame(sc)
+		foot.SetName("bottom-bar")
+		foot.Style(func(s *styles.Style) {
 			s.Justify.Content = styles.End
 			s.Align.Items = styles.Center
 			s.Grow.Set(1, 0)

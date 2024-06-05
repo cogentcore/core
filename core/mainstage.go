@@ -139,8 +139,8 @@ func (st *Stage) ConfigMainStage() {
 		st.Scrim = false
 	}
 	sc := st.Scene
-	sc.ConfigSceneBars()
-	sc.ConfigSceneWidgets()
+	sc.MakeSceneBars()
+	sc.MakeSceneWidgets()
 }
 
 // RunWindow runs a Window with current settings.

@@ -299,11 +299,11 @@ func (sc *Scene) DoUpdate() bool {
 	return true
 }
 
-// ConfigSceneWidgets calls Config on all widgets in the Scene,
+// MakeSceneWidgets calls Config on all widgets in the Scene,
 // which will set NeedsLayout to drive subsequent layout and render.
 // This is a top-level call, typically only done when the window
 // is first drawn, once the full sizing information is available.
-func (sc *Scene) ConfigSceneWidgets() {
+func (sc *Scene) MakeSceneWidgets() {
 	sc.SetFlag(true, ScUpdating) // prevent rendering
 	defer sc.SetFlag(false, ScUpdating)
 
@@ -325,7 +325,7 @@ func (sc *Scene) ApplyStyleScene() {
 // should be used by Widgets to rebuild things that are otherwise
 // cached (e.g., Icon, TextCursor).
 func (sc *Scene) DoRebuild() {
-	sc.ConfigSceneWidgets()
+	sc.MakeSceneWidgets()
 	sc.ApplyStyleScene()
 	sc.LayoutRenderScene()
 }
@@ -338,7 +338,7 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 	defer sc.SetFlag(false, ScUpdating)
 
 	sc.SetFlag(true, ScPrefSizing)
-	sc.ConfigSceneWidgets()
+	sc.MakeSceneWidgets()
 	sc.ApplyStyleScene()
 	sc.LayoutScene()
 	sz := &sc.Geom.Size
