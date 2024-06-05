@@ -177,6 +177,6 @@ func (sl *Slice) ConfigCopy(n Node, frm Slice) {
 		}
 		UpdateSlice(sl, n, p)
 	} else {
-		n.DeleteChildren()
+		n.AsTree().DeleteChildren()
 	}
 }

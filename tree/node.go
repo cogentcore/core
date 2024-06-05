@@ -189,9 +189,6 @@ type Node interface {
 
 	// Deleting Children:
 
-	// DeleteChildren deletes all children nodes.
-	DeleteChildren()
-
 	// Destroy recursively deletes and destroys all children and
 	// their children's children, etc.
 	Destroy()
