@@ -58,7 +58,10 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	fmt.Println(typ, numChildren)
+	n.DeleteChildren()
+	for range numChildren {
+		New[*NodeBase](n)
+	}
 	return nil
 }
 
