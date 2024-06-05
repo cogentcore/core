@@ -628,7 +628,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				if itm != nil {
 					cln := itm.Clone().(Node)
 					if cln != nil {
-						curPar.AddChild(cln)
+						curPar.AsTree().AddChild(cln)
 						for _, attr := range se.Attr {
 							if SetStdXMLAttr(cln.AsNodeBase(), attr.Name.Local, attr.Value) {
 								continue

@@ -156,14 +156,6 @@ type Node interface {
 	// by [Node.FindPath]. Returns error if not found.
 	FieldByName(field string) (Node, error)
 
-	// Adding and Inserting Children:
-
-	// AddChild adds given child at end of children list.
-	// The kid node is assumed to not be on another tree (see [MoveToParent])
-	// and the existing name should be unique among children.
-	// Any error is automatically logged in addition to being returned.
-	AddChild(kid Node) error
-
 	// Destroy recursively deletes and destroys the node, all of its children,
 	// and all of its children's children, etc. Node types can implement this
 	// to do additional necessary destruction; if they do, they should call

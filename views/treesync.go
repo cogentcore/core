@@ -472,7 +472,7 @@ func (tv *TreeView) PasteChildrenSync(md mimedata.Mimes, mod events.DropMods) {
 	sl, _ := tv.NodesFromMimeData(md)
 	sk := tv.SyncNode
 	for _, ns := range sl {
-		sk.AddChild(ns)
+		sk.AsTree().AddChild(ns)
 	}
 	tv.SendChangeEventReSync(nil)
 }

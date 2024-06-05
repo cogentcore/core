@@ -82,7 +82,7 @@ func MoveToParent(child Node, parent Node) {
 			oldParent.Children().DeleteAtIndex(idx)
 		}
 	}
-	parent.AddChild(child)
+	parent.AsTree().AddChild(child)
 }
 
 // InsertNewChild is a generic helper function for [NodeBase.InsertNewChild].

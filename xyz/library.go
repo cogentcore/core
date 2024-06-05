@@ -38,7 +38,7 @@ func (sc *Scene) AddFromLibrary(nm string, parent tree.Node) (*Group, error) {
 		return nil, fmt.Errorf("Scene AddFromLibrary: Library item: %s not found", nm)
 	}
 	nwgp := gp.Clone().(*Group)
-	parent.AddChild(nwgp)
+	parent.AsTree().AddChild(nwgp)
 	tree.SetUniqueName(nwgp)
 
 	parent.WalkDown(func(k tree.Node) bool {

@@ -72,7 +72,7 @@ func NewValue(value any, tags reflect.StructTag, parent ...tree.Node) Value {
 	}
 	Bind(value, vw)
 	if len(parent) > 0 {
-		parent[0].AddChild(vw)
+		parent[0].AsTree().AddChild(vw)
 	}
 	return vw
 }
