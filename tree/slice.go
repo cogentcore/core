@@ -85,20 +85,3 @@ func Move[E any](s []E, from, to int) []E {
 func Swap[E any](s []E, i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
-
-// CopyFrom uses [TypePlan] to copy name / type config of Slice from source.
-// If n is != nil then Update etc is called properly.
-// it is essential that child names are unique.
-func (sl *Slice) CopyFrom(n Node, frm Slice) {
-	sz := len(frm)
-	if sz > 0 || n == nil {
-		p := make(TypePlan, sz)
-		for i, kid := range frm {
-			p[i].Type = kid.NodeType()
-			p[i].Name = kid.Name()
-		}
-		UpdateSlice(sl, n, p)
-	} else {
-		n.AsTree().DeleteChildren()
-	}
-}

@@ -744,22 +744,33 @@ func (n *NodeBase) WalkDownBreadth(fun func(n Node) bool) {
 // The struct field tag copier:"-" can be added for any fields that
 // should not be copied. Also, unexported fields are not copied.
 // See [Node.CopyFieldsFrom] for more information on field copying.
-func (n *NodeBase) CopyFrom(src Node) {
-	if src == nil {
+func (n *NodeBase) CopyFrom(from Node) {
+	if from == nil {
 		slog.Error("tree.NodeBase.CopyFrom: nil source", "destinationNode", n)
 		return
 	}
-	copyFrom(n.This(), src)
+	copyFrom(n.This(), from)
 }
 
 // copyFrom is the implementation of [NodeBase.CopyFrom].
-func copyFrom(dst, src Node) {
-	dst.AsTree().Children.CopyFrom(dst.This(), src.AsTree().Children)
-	maps.Copy(dst.AsTree().Properties, src.AsTree().Properties)
+func copyFrom(to, from Node) {
+	fc := from.AsTree().Children
+	if len(fc) == 0 {
+		to.AsTree().DeleteChildren()
+	} else {
+		p := make(TypePlan, len(fc))
+		for i, c := range fc {
+			p[i].Type = c.NodeType()
+			p[i].Name = c.Name()
+		}
+		UpdateSlice(&to.AsTree().Children, to, p)
+	}
 
-	dst.This().CopyFieldsFrom(src)
-	for i, kid := range dst.AsTree().Children {
-		fmk := src.Child(i)
+	maps.Copy(to.AsTree().Properties, from.AsTree().Properties)
+
+	to.This().CopyFieldsFrom(from)
+	for i, kid := range to.AsTree().Children {
+		fmk := from.Child(i)
 		copyFrom(kid, fmk)
 	}
 }
