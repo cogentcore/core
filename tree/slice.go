@@ -102,12 +102,9 @@ func Move[E any](s []E, from, to int) []E {
 	return s
 }
 
-// Swap elements between positions.
-func (sl *Slice) Swap(i, j int) {
-	if i == j {
-		return
-	}
-	(*sl)[j], (*sl)[i] = (*sl)[i], (*sl)[j]
+// Swap swaps the elements at the given two indices in the given slice.
+func Swap[E any](s []E, i, j int) {
+	s[i], s[j] = s[j], s[i]
 }
 
 // CopyFrom uses [TypePlan] to copy name / type config of Slice from source.
