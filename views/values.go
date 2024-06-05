@@ -6,7 +6,6 @@ package views
 
 import (
 	"reflect"
-	"time"
 
 	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
@@ -199,21 +198,5 @@ func (fb *FontButton) Init() {
 		tv.OnChange(func(e events.Event) {
 			fb.Text = fi[si].Name
 		})
-	})
-}
-
-// TimeText represents a [time.Time] value with text
-// that displays a standard date and time format.
-type TimeText struct {
-	core.Text
-	Time time.Time
-}
-
-func (ft *TimeText) WidgetValue() any { return &ft.Time }
-
-func (ft *TimeText) Init() {
-	ft.Text.Init()
-	ft.Updater(func() {
-		ft.SetText(time.Time(ft.Time).Format("1/2/2006 " + core.SystemSettings.TimeFormat()))
 	})
 }

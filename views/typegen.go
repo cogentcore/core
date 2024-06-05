@@ -418,10 +418,10 @@ func (t *TimePicker) New() tree.Node { return &TimePicker{} }
 func (t *TimePicker) SetTime(v time.Time) *TimePicker { t.Time = v; return t }
 
 // DatePickerType is the [types.Type] for [DatePicker]
-var DatePickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.DatePicker", IDName: "date-picker", Doc: "DatePicker is a view for selecting a date", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "Time is the time that we are viewing"}}, Instance: &DatePicker{}})
+var DatePickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.DatePicker", IDName: "date-picker", Doc: "DatePicker is a widget for picking a date.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "Time is the time that we are viewing"}}, Instance: &DatePicker{}})
 
 // NewDatePicker returns a new [DatePicker] with the given optional parent:
-// DatePicker is a view for selecting a date
+// DatePicker is a widget for picking a date.
 func NewDatePicker(parent ...tree.Node) *DatePicker { return tree.New[*DatePicker](parent...) }
 
 // NodeType returns the [*types.Type] of [DatePicker]
@@ -653,20 +653,3 @@ func (t *FontButton) NodeType() *types.Type { return FontButtonType }
 
 // New returns a new [*FontButton] value
 func (t *FontButton) New() tree.Node { return &FontButton{} }
-
-// TimeTextType is the [types.Type] for [TimeText]
-var TimeTextType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TimeText", IDName: "time-text", Doc: "TimeText represents a [time.Time] value with text\nthat displays a standard date and time format.", Embeds: []types.Field{{Name: "Text"}}, Fields: []types.Field{{Name: "Time"}}, Instance: &TimeText{}})
-
-// NewTimeText returns a new [TimeText] with the given optional parent:
-// TimeText represents a [time.Time] value with text
-// that displays a standard date and time format.
-func NewTimeText(parent ...tree.Node) *TimeText { return tree.New[*TimeText](parent...) }
-
-// NodeType returns the [*types.Type] of [TimeText]
-func (t *TimeText) NodeType() *types.Type { return TimeTextType }
-
-// New returns a new [*TimeText] value
-func (t *TimeText) New() tree.Node { return &TimeText{} }
-
-// SetTime sets the [TimeText.Time]
-func (t *TimeText) SetTime(v time.Time) *TimeText { t.Time = v; return t }

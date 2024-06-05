@@ -190,7 +190,7 @@ func HandleElement(ctx *Context) {
 		case "color":
 			core.Bind(val, New[*views.ColorButton](ctx))
 		case "datetime":
-			core.Bind(val, New[*views.TimeText](ctx))
+			core.Bind(val, New[*views.TimeInput](ctx))
 		case "file":
 			core.Bind(val, New[*views.FileButton](ctx))
 		default:
