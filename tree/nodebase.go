@@ -53,16 +53,15 @@ type NodeBase struct {
 	Ths Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// numLifetimeChildren is the number of children that have ever been added to this
-	// node, which is used for automatic unique naming. It is typically accessed
-	// through [Node.NumLifetimeChildren].
+	// node, which is used for automatic unique naming.
 	numLifetimeChildren uint64
 
 	// index is the last value of our index, which is used as a starting point for
 	// finding us in our parent next time. It is not guaranteed to be accurate;
-	// use the [Node.IndexInParent] method.
+	// use the [NodeBase.IndexInParent] method.
 	index int
 
-	// depth is the depth of the node while using [Node.WalkDownBreadth].
+	// depth is the depth of the node while using [NodeBase.WalkDownBreadth].
 	depth int
 }
 
@@ -189,13 +188,6 @@ func (n *NodeBase) HasChildren() bool {
 // NumChildren returns the number of children this node has.
 func (n *NodeBase) NumChildren() int {
 	return len(n.Kids)
-}
-
-// NumLifetimeChildren returns the number of children that this node
-// has ever had added to it (it is not decremented when a child is removed).
-// It is used for unique naming of children.
-func (n *NodeBase) NumLifetimeChildren() uint64 {
-	return n.numLifetimeChildren
 }
 
 // Children returns a pointer to the slice of children of this node.

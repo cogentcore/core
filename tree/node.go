@@ -93,11 +93,6 @@ type Node interface {
 	// NumChildren returns the number of children this node has.
 	NumChildren() int
 
-	// NumLifetimeChildren returns the number of children that this node
-	// has ever had added to it (it is not decremented when a child is removed).
-	// It is used for unique naming of children.
-	NumLifetimeChildren() uint64
-
 	// Children returns a pointer to the slice of children of this node.
 	// The resultant slice can be modified directly (e.g., sort, reorder),
 	// but new children should be added via New/Add/Insert Child methods on
