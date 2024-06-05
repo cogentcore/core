@@ -87,12 +87,12 @@ func TestWidgetPrev(t *testing.T) {
 	b.UpdateTree()
 
 	paths := []string{
-		"/body scene/body/text-field-1.parts/lead-icon.parts/icon",
-		"/body scene/body/text-field-1.parts/lead-icon",
+		"/body scene/body/text-field-1/lead-icon/icon",
+		"/body scene/body/text-field-1/lead-icon",
 		"/body scene/body/text-field-1",
-		"/body scene/body/text-field-0.parts/trail-icon.parts/icon",
-		"/body scene/body/text-field-0.parts/trail-icon",
-		"/body scene/body/text-field-0.parts/trail-icon-stretch",
+		"/body scene/body/text-field-0/trail-icon/icon",
+		"/body scene/body/text-field-0/trail-icon",
+		"/body scene/body/text-field-0/trail-icon-stretch",
 		"/body scene/body/text-field-0",
 		"/body scene/body",
 		"/body scene",
@@ -117,12 +117,12 @@ func TestWidgetNext(t *testing.T) {
 	b.UpdateTree()
 
 	paths := []string{
-		"/body scene/body/text-field-0.parts/trail-icon-stretch",
-		"/body scene/body/text-field-0.parts/trail-icon",
-		"/body scene/body/text-field-0.parts/trail-icon.parts/icon",
+		"/body scene/body/text-field-0/trail-icon-stretch",
+		"/body scene/body/text-field-0/trail-icon",
+		"/body scene/body/text-field-0/trail-icon/icon",
 		"/body scene/body/text-field-1",
-		"/body scene/body/text-field-1.parts/lead-icon",
-		"/body scene/body/text-field-1.parts/lead-icon.parts/icon",
+		"/body scene/body/text-field-1/lead-icon",
+		"/body scene/body/text-field-1/lead-icon/icon",
 		"/body scene/body/text-field-2",
 	}
 	i := 0
