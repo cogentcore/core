@@ -795,7 +795,7 @@ func (n *NodeBase) CopyFrom(src Node) {
 // copyFrom is the implementation of [NodeBase.CopyFrom].
 func copyFrom(dst, src Node) {
 	dst.Children().ConfigCopy(dst.This(), *src.Children())
-	maps.Copy(dst.Properties(), src.Properties())
+	maps.Copy(dst.AsTreeNode().Properties(), src.AsTreeNode().Properties())
 
 	dst.This().CopyFieldsFrom(src)
 	for i, kid := range *dst.Children() {

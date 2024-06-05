@@ -253,21 +253,6 @@ type Node interface {
 	//	}
 	FlagType() enums.BitFlagSetter
 
-	// Property Storage:
-
-	// Properties returns the key-value properties set for this node.
-	Properties() map[string]any
-
-	// SetProperty sets given the given property to the given value.
-	SetProperty(key string, value any)
-
-	// Property returns the property value for the given key.
-	// It returns nil if it doesn't exist.
-	Property(key string) any
-
-	// DeleteProperty deletes the property with the given key.
-	DeleteProperty(key string)
-
 	// Tree Walking:
 
 	// WalkUp calls the given function on the node and all of its parents,

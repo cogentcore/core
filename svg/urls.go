@@ -214,7 +214,7 @@ func (sv *SVG) NodeFindURL(n Node, url string) Node {
 // or empty string if none.  Returned value is just the 'name' part
 // of the url, not the full string.
 func NodePropURL(n Node, prop string) string {
-	fp := n.Property(prop)
+	fp := n.AsTreeNode().Property(prop)
 	fs, iss := fp.(string)
 	if !iss {
 		return ""
@@ -225,9 +225,9 @@ func NodePropURL(n Node, prop string) string {
 const SVGRefCountKey = "SVGRefCount"
 
 func IncRefCount(k tree.Node) {
-	rc := k.Property(SVGRefCountKey).(int)
+	rc := k.AsTreeNode().Property(SVGRefCountKey).(int)
 	rc++
-	k.SetProperty(SVGRefCountKey, rc)
+	k.AsTreeNode().SetProperty(SVGRefCountKey, rc)
 }
 
 // RemoveOrphanedDefs removes any items from Defs that are not actually referred to
@@ -237,10 +237,10 @@ func IncRefCount(k tree.Node) {
 func (sv *SVG) RemoveOrphanedDefs() bool {
 	refkey := SVGRefCountKey
 	for _, k := range sv.Defs.Kids {
-		k.SetProperty(refkey, 0)
+		k.AsTreeNode().SetProperty(refkey, 0)
 	}
 	sv.Root.WalkDown(func(k tree.Node) bool {
-		pr := k.Properties()
+		pr := k.AsTreeNode().Properties()
 		for _, v := range pr {
 			ps := reflectx.ToString(v)
 			if !strings.HasPrefix(ps, "url(#") {
@@ -270,13 +270,13 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 	del := false
 	for i := sz - 1; i >= 0; i-- {
 		k := sv.Defs.Kids[i]
-		rc := k.Property(refkey).(int)
+		rc := k.AsTreeNode().Property(refkey).(int)
 		if rc == 0 {
 			fmt.Printf("Deleting unused item: %s\n", k.Name())
 			sv.Defs.Kids.DeleteAtIndex(i)
 			del = true
 		} else {
-			k.DeleteProperty(refkey)
+			k.AsTreeNode().DeleteProperty(refkey)
 		}
 	}
 	return del

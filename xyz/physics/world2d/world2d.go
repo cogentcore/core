@@ -195,11 +195,11 @@ func (vw *View) ConfigBodyShape(bod physics.Body, shp svg.Node) {
 		sz := vw.Projection2D(bx.Size)
 		shp.(*svg.Rect).SetSize(sz)
 		sb.Paint.Transform = math32.Translate2D(-sz.X/2, -sz.Y/2)
-		shp.SetProperty("transform", sb.Paint.Transform.String())
-		shp.SetProperty("stroke-width", vw.LineWidth)
-		shp.SetProperty("fill", "none")
+		shp.AsTreeNode().SetProperty("transform", sb.Paint.Transform.String())
+		shp.AsTreeNode().SetProperty("stroke-width", vw.LineWidth)
+		shp.AsTreeNode().SetProperty("fill", "none")
 		if bx.Color != "" {
-			shp.SetProperty("stroke", bx.Color)
+			shp.AsTreeNode().SetProperty("stroke", bx.Color)
 		}
 	case "physics.Cylinder":
 		cy := bod.(*physics.Cylinder)
@@ -207,11 +207,11 @@ func (vw *View) ConfigBodyShape(bod physics.Body, shp svg.Node) {
 		sz := vw.Projection2D(sz3)
 		shp.(*svg.Ellipse).SetRadii(sz)
 		sb.Paint.Transform = math32.Translate2D(-sz.X/2, -sz.Y/2)
-		shp.SetProperty("transform", sb.Paint.Transform.String())
-		shp.SetProperty("stroke-width", vw.LineWidth)
-		shp.SetProperty("fill", "none")
+		shp.AsTreeNode().SetProperty("transform", sb.Paint.Transform.String())
+		shp.AsTreeNode().SetProperty("stroke-width", vw.LineWidth)
+		shp.AsTreeNode().SetProperty("fill", "none")
 		if cy.Color != "" {
-			shp.SetProperty("stroke", cy.Color)
+			shp.AsTreeNode().SetProperty("stroke", cy.Color)
 		}
 	case "physics.Capsule":
 		cp := bod.(*physics.Capsule)
@@ -219,11 +219,11 @@ func (vw *View) ConfigBodyShape(bod physics.Body, shp svg.Node) {
 		sz := vw.Projection2D(sz3)
 		shp.(*svg.Ellipse).SetRadii(sz)
 		sb.Paint.Transform = math32.Translate2D(-sz.X/2, -sz.Y/2)
-		shp.SetProperty("transform", sb.Paint.Transform.String())
-		shp.SetProperty("stroke-width", vw.LineWidth)
-		shp.SetProperty("fill", "none")
+		shp.AsTreeNode().SetProperty("transform", sb.Paint.Transform.String())
+		shp.AsTreeNode().SetProperty("stroke-width", vw.LineWidth)
+		shp.AsTreeNode().SetProperty("fill", "none")
 		if cp.Color != "" {
-			shp.SetProperty("stroke", cp.Color)
+			shp.AsTreeNode().SetProperty("stroke", cp.Color)
 		}
 	case "physics.Sphere":
 		sp := bod.(*physics.Sphere)
@@ -231,11 +231,11 @@ func (vw *View) ConfigBodyShape(bod physics.Body, shp svg.Node) {
 		sz := vw.Projection2D(sz3)
 		shp.(*svg.Circle).SetRadius(sz.X) // should be same as Y
 		sb.Paint.Transform = math32.Translate2D(-sz.X/2, -sz.Y/2)
-		shp.SetProperty("transform", sb.Paint.Transform.String())
-		shp.SetProperty("stroke-width", vw.LineWidth)
-		shp.SetProperty("fill", "none")
+		shp.AsTreeNode().SetProperty("transform", sb.Paint.Transform.String())
+		shp.AsTreeNode().SetProperty("stroke-width", vw.LineWidth)
+		shp.AsTreeNode().SetProperty("fill", "none")
 		if sp.Color != "" {
-			shp.SetProperty("stroke", sp.Color)
+			shp.AsTreeNode().SetProperty("stroke", sp.Color)
 		}
 	}
 }

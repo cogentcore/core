@@ -130,7 +130,7 @@ func HandleElement(ctx *Context) {
 		text := HandleText(ctx)
 		start := ""
 		if pw, ok := text.Parent().(core.Widget); ok {
-			switch pw.Property("tag") {
+			switch pw.AsTreeNode().Property("tag") {
 			case "ol":
 				number := 0
 				for _, k := range *pw.Children() {
