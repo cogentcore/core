@@ -63,7 +63,7 @@ func (fb *FileBrowse) Init() {
 		s.Grow.Set(1, 1)
 		s.Margin.Set(units.Dp(8))
 	})
-	fb.OnWidgetAdded(func(w core.Widget) {
+	fb.OnWidgetAdded(func(w core.Widget) { // TODO(config)
 		switch w.PathFrom(fb) {
 		case "title":
 			title := w.(*core.Text)
@@ -73,7 +73,7 @@ func (fb *FileBrowse) Init() {
 			})
 		}
 		if w.Parent().PathFrom(fb) == "splits" {
-			if w.IndexInParent() == 0 {
+			if w.AsTree().IndexInParent() == 0 {
 				w.Style(func(s *styles.Style) {
 					s.Grow.Set(1, 1)
 				})

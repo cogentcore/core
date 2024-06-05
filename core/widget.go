@@ -620,7 +620,7 @@ func WidgetNextSibling(wi Widget) Widget {
 		return nil
 	}
 	parent := wi.Parent().(Widget)
-	myidx := wi.IndexInParent()
+	myidx := wi.AsTree().IndexInParent()
 	if myidx >= 0 && myidx < wi.Parent().NumChildren()-1 {
 		return parent.Child(myidx + 1).(Widget)
 	}
@@ -638,7 +638,7 @@ func WidgetPrev(wi Widget) Widget {
 		return nil
 	}
 	parent := wi.Parent().(Widget)
-	myidx := wi.IndexInParent()
+	myidx := wi.AsTree().IndexInParent()
 	if myidx > 0 {
 		nn := parent.Child(myidx - 1).(Widget)
 		return WidgetLastChildParts(nn) // go to parts

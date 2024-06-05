@@ -329,19 +329,19 @@ func (tv *TreeView) Duplicate() { //types:add
 }
 
 func (tv *TreeView) DuplicateSync() {
-	sk := tv.SyncNode
+	sn := tv.SyncNode
 	tvparent := AsTreeView(tv.Par)
 	parent := tvparent.SyncNode
 	if parent == nil {
 		log.Printf("TreeView %v nil SyncNode in: %v\n", tv, tvparent.Path())
 		return
 	}
-	myidx := sk.IndexInParent()
+	myidx := sn.AsTree().IndexInParent()
 	if myidx < 0 {
 		return
 	}
-	nm := fmt.Sprintf("%v_Copy", sk.Name())
-	nwkid := sk.Clone()
+	nm := fmt.Sprintf("%v_Copy", sn.Name())
+	nwkid := sn.Clone()
 	nwkid.SetName(nm)
 	parent.InsertChild(nwkid, myidx+1)
 	tvparent.SendChangeEventReSync(nil)
@@ -429,11 +429,11 @@ func (tv *TreeView) PasteAssignSync(md mimedata.Mimes) {
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
 func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
-	sk := tv.SyncNode
+	sn := tv.SyncNode
 	sl, pl := tv.NodesFromMimeData(md)
 	tvparent := AsTreeView(tv.Par)
-	parent := sk.Parent()
-	myidx := sk.IndexInParent()
+	parent := sn.Parent()
+	myidx := sn.AsTree().IndexInParent()
 	if myidx < 0 {
 		return
 	}

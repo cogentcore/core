@@ -85,11 +85,6 @@ type Node interface {
 	// Each Node can only have one parent.
 	Parent() Node
 
-	// IndexInParent returns our index within our parent node. It caches the
-	// last value and uses that for an optimized search so subsequent calls
-	// are typically quite fast. Returns -1 if we don't have a parent.
-	IndexInParent() int
-
 	// ParentLevel finds a given potential parent node recursively up the
 	// hierarchy, returning the level above the current node that the parent was
 	// found, and -1 if not found.

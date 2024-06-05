@@ -331,7 +331,7 @@ func (ts *Tabs) TabIndexByName(name string) int {
 	if tab == nil {
 		return -1
 	}
-	return tab.IndexInParent()
+	return tab.AsTree().IndexInParent()
 }
 
 // TabLabel returns tab label at given index
