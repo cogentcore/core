@@ -85,11 +85,6 @@ type Node interface {
 	// Each Node can only have one parent.
 	Parent() Node
 
-	// ParentLevel finds a given potential parent node recursively up the
-	// hierarchy, returning the level above the current node that the parent was
-	// found, and -1 if not found.
-	ParentLevel(parent Node) int
-
 	// ParentByName finds first parent recursively up hierarchy that matches
 	// given name. Returns nil if not found.
 	ParentByName(name string) Node
