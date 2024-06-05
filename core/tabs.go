@@ -415,8 +415,8 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 	if nidx < 0 && ts.NumTabs() > 1 {
 		nidx = max(idx-1, 0)
 	}
-	fr.DeleteChildAtIndex(idx)
-	tb.DeleteChildAtIndex(idx)
+	fr.DeleteChildAt(idx)
+	tb.DeleteChildAt(idx)
 	ts.Mu.Unlock()
 
 	if nidx >= 0 {

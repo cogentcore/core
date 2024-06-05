@@ -92,27 +92,14 @@ func (sl *Slice) ElemByTypeTry(t *types.Type, embeds bool, startIndex ...int) (N
 	return (*sl)[idx], nil
 }
 
-// Insert item at index; does not do any parent updating etc; use
-// the [Node] or [NodeBase] method unless you know what you are doing.
-func (sl *Slice) Insert(k Node, i int) {
-	*sl = slices.Insert(*sl, i, k)
-}
-
-// DeleteAtIndex deletes item at index; does not do any further management of
-// deleted item. It is an optimized version for avoiding memory leaks.
-func (sl *Slice) DeleteAtIndex(i int) {
-	*sl = slices.Delete(*sl, i, i+1)
-}
-
 // Move element from one position to another.
 func (sl *Slice) Move(from, to int) {
 	if from == to {
 		return
 	}
 	tmp := (*sl)[from]
-	sl.DeleteAtIndex(from)
+	*sl = slices.Delete(*sl, from, from+1)
 	*sl = slices.Insert(*sl, to, tmp)
-	return
 }
 
 // Swap elements between positions.

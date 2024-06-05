@@ -8,6 +8,7 @@ import (
 	"errors"
 	"log/slog"
 	"maps"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -380,12 +381,12 @@ func (n *NodeBase) NewChild(typ *types.Type) Node {
 // The kid node is assumed to not be on another tree (see [MoveToParent])
 // and the existing name should be unique among children.
 // Any error is automatically logged in addition to being returned.
-func (n *NodeBase) InsertChild(kid Node, at int) error {
+func (n *NodeBase) InsertChild(kid Node, index int) error {
 	if err := checkThis(n); err != nil {
 		return err
 	}
 	initNode(kid)
-	n.Children.Insert(kid, at)
+	n.Children = slices.Insert(n.Children, index, kid)
 	SetParent(kid, n)
 	return nil
 }
@@ -393,27 +394,27 @@ func (n *NodeBase) InsertChild(kid Node, at int) error {
 // InsertNewChild creates a new child of given type and add at position
 // in children list. The name defaults to the ID (kebab-case) name
 // of the type, plus the [Node.NumLifetimeChildren] of the parent.
-func (n *NodeBase) InsertNewChild(typ *types.Type, at int) Node {
+func (n *NodeBase) InsertNewChild(typ *types.Type, index int) Node {
 	if err := checkThis(n); err != nil {
 		return nil
 	}
 	kid := NewOfType(typ)
 	initNode(kid)
-	n.Children.Insert(kid, at)
+	n.Children = slices.Insert(n.Children, index, kid)
 	SetParent(kid, n)
 	return kid
 }
 
 // Deleting Children:
 
-// DeleteChildAtIndex deletes child at given index. It returns false
+// DeleteChildAt deletes child at the given index. It returns false
 // if there is no child at the given index.
-func (n *NodeBase) DeleteChildAtIndex(idx int) bool {
-	child := n.Child(idx)
+func (n *NodeBase) DeleteChildAt(index int) bool {
+	child := n.Child(index)
 	if child == nil {
 		return false
 	}
-	n.Children.DeleteAtIndex(idx)
+	n.Children = slices.Delete(n.Children, index, index+1)
 	child.Destroy()
 	return true
 }
@@ -428,7 +429,7 @@ func (n *NodeBase) DeleteChild(child Node) bool {
 	if !ok {
 		return false
 	}
-	return n.DeleteChildAtIndex(idx)
+	return n.DeleteChildAt(idx)
 }
 
 // DeleteChildByName deletes child node by name, returning false
@@ -438,7 +439,7 @@ func (n *NodeBase) DeleteChildByName(name string) bool {
 	if !ok {
 		return false
 	}
-	return n.DeleteChildAtIndex(idx)
+	return n.DeleteChildAt(idx)
 }
 
 // DeleteChildren deletes all children nodes.

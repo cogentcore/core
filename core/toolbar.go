@@ -127,7 +127,7 @@ func (tb *Toolbar) AllItemsToChildren() {
 		}
 	}
 	if ovi >= 0 {
-		tb.Children.DeleteAtIndex(ovi)
+		tb.DeleteChildAt(ovi)
 	}
 	tb.Children = append(tb.Children, tb.overflowButton.This())
 	tb.overflowButton.Update()

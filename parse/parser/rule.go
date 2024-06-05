@@ -1476,7 +1476,7 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, parent *Rule, parentAst *Ast, scope 
 		// work for treeview names.. really need an option that supports uniqname AND reg names
 		// https://cogentcore.org/core/ki/issues/2
 		// ourAst.NewChild(AstType, "Dummy")
-		// ourAst.DeleteChildAtIndex(2, true)
+		// ourAst.DeleteChildAt(2, true)
 		// }
 	}
 
