@@ -49,6 +49,16 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 		return fmt.Errorf("tree.NodeBase.UnmarshalJSON: type %q not found", typeName)
 	}
 
+	// if our type does not match, we must replace our This to make it match
+	if n.Ths.NodeType() != typ {
+		parent := n.Par
+		index := n.IndexInParent()
+		if index >= 0 {
+			n.Delete()
+			n.Ths = parent.AsTree().InsertNewChild(typ, index)
+		}
+	}
+
 	remainder := b[typeEnd+2:]
 	numStart := bytes.Index(remainder, []byte(`":`)) + 2
 	numEnd := bytes.Index(remainder, []byte(`,`))
