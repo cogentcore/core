@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/texteditor/diffbrowser"
 	"cogentcore.org/core/views"
 )
 
@@ -47,99 +48,87 @@ type VCSLogView struct {
 }
 
 func (lv *VCSLogView) Init() {
-	lv.Style(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-	})
-}
-
-// ConfigRepo configures to given repo, log and file (file could be empty)
-func (lv *VCSLogView) ConfigRepo(repo vcs.Repo, lg vcs.Log, file, since string) {
-	lv.Repo = repo
-	lv.Log = lg
-	lv.File = file
-	lv.Since = since
-	if lv.HasChildren() {
-		return
-	}
-	lv.Style(func(s *styles.Style) {
-		s.Direction = styles.Column
-	})
-	tb := core.NewToolbar(lv)
-	tb.SetName("toolbar")
-	tb.Maker(lv.MakeToolbar)
-	tv := views.NewTableView(lv)
-	tv.SetName("log")
-	tv.SetReadOnly(true)
-	tv.SetSlice(&lv.Log)
+	lv.Frame.Init()
 	lv.RevA = "HEAD"
 	lv.RevB = ""
 	lv.SetA = true
-	tv.AddContextMenu(func(m *core.Scene) {
-		core.NewButton(m).SetText("Set Revision A").
-			SetTooltip("Set Buffer A's revision to this").
-			OnClick(func(e events.Event) {
-				cmt := lv.Log[tv.SelectedIndex]
-				lv.SetRevA(cmt.Rev)
-			})
-		core.NewButton(m).SetText("Set Revision B").
-			SetTooltip("Set Buffer B's revision to this").
-			OnClick(func(e events.Event) {
-				cmt := lv.Log[tv.SelectedIndex]
-				lv.SetRevB(cmt.Rev)
-			})
-		core.NewButton(m).SetText("Copy Revision ID").
-			SetTooltip("Copies the revision number / hash for this").
-			OnClick(func(e events.Event) {
-				cmt := lv.Log[tv.SelectedIndex]
-				tv.Clipboard().Write(mimedata.NewText(cmt.Rev))
-			})
-		core.NewButton(m).SetText("View Revision").
-			SetTooltip("Views the file at this revision").
-			OnClick(func(e events.Event) {
-				cmt := lv.Log[tv.SelectedIndex]
-				FileAtRevDialog(lv, lv.Repo, lv.File, cmt.Rev)
-			})
-		core.NewButton(m).SetText("Checkout Revision").
-			SetTooltip("Checks out this revision").
-			OnClick(func(e events.Event) {
-				cmt := lv.Log[tv.SelectedIndex]
-				errors.Log(repo.UpdateVersion(cmt.Rev))
-			})
+	lv.Style(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Grow.Set(1, 1)
 	})
-	tv.OnDoubleClick(func(e events.Event) {
-		idx := tv.SelectedIndex
-		if idx < 0 || idx >= len(lv.Log) {
-			return
-		}
-		cmt := lv.Log[idx]
-		if lv.File != "" {
-			if lv.SetA {
-				lv.SetRevA(cmt.Rev)
-			} else {
-				lv.SetRevB(cmt.Rev)
-			}
-			lv.ToggleRev()
-		}
-		cinfo, err := lv.Repo.CommitDesc(cmt.Rev, false)
-		if err != nil {
-			slog.Error(err.Error())
-			return
-		}
-		d := core.NewBody().AddTitle("Commit Info: " + cmt.Rev)
-		buf := texteditor.NewBuffer()
-		buf.Filename = core.Filename(lv.File)
-		buf.Options.LineNumbers = true
-		buf.Stat()
-		texteditor.NewEditor(d).SetBuffer(buf)
-		buf.SetText(cinfo)
-		d.AddBottomBar(func(parent core.Widget) {
-			core.NewButton(parent).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
+	core.AddChildAt(lv, "toolbar", func(w *core.Toolbar) {
+		w.Maker(lv.MakeToolbar)
+	})
+	core.AddChildAt(lv, "log", func(w *views.TableView) {
+		w.SetReadOnly(true)
+		w.SetSlice(&lv.Log)
+		w.AddContextMenu(func(m *core.Scene) {
+			core.NewButton(m).SetText("Set Revision A").
+				SetTooltip("Set Buffer A's revision to this").
 				OnClick(func(e events.Event) {
-					d.Clipboard().Write(mimedata.NewTextBytes(cinfo))
+					cmt := lv.Log[w.SelectedIndex]
+					lv.SetRevA(cmt.Rev)
 				})
-			d.AddOK(parent)
+			core.NewButton(m).SetText("Set Revision B").
+				SetTooltip("Set Buffer B's revision to this").
+				OnClick(func(e events.Event) {
+					cmt := lv.Log[w.SelectedIndex]
+					lv.SetRevB(cmt.Rev)
+				})
+			core.NewButton(m).SetText("Copy Revision ID").
+				SetTooltip("Copies the revision number / hash for this").
+				OnClick(func(e events.Event) {
+					cmt := lv.Log[w.SelectedIndex]
+					w.Clipboard().Write(mimedata.NewText(cmt.Rev))
+				})
+			core.NewButton(m).SetText("View Revision").
+				SetTooltip("Views the file at this revision").
+				OnClick(func(e events.Event) {
+					cmt := lv.Log[w.SelectedIndex]
+					FileAtRevDialog(lv, lv.Repo, lv.File, cmt.Rev)
+				})
+			core.NewButton(m).SetText("Checkout Revision").
+				SetTooltip("Checks out this revision").
+				OnClick(func(e events.Event) {
+					cmt := lv.Log[w.SelectedIndex]
+					errors.Log(lv.Repo.UpdateVersion(cmt.Rev))
+				})
 		})
-		d.RunFullDialog(lv)
+		w.OnDoubleClick(func(e events.Event) {
+			idx := w.SelectedIndex
+			if idx < 0 || idx >= len(lv.Log) {
+				return
+			}
+			cmt := lv.Log[idx]
+			if lv.File != "" {
+				if lv.SetA {
+					lv.SetRevA(cmt.Rev)
+				} else {
+					lv.SetRevB(cmt.Rev)
+				}
+				lv.ToggleRev()
+			}
+			cinfo, err := lv.Repo.CommitDesc(cmt.Rev, false)
+			if err != nil {
+				slog.Error(err.Error())
+				return
+			}
+			d := core.NewBody().AddTitle("Commit Info: " + cmt.Rev)
+			buf := texteditor.NewBuffer()
+			buf.Filename = core.Filename(lv.File)
+			buf.Options.LineNumbers = true
+			buf.Stat()
+			texteditor.NewEditor(d).SetBuffer(buf)
+			buf.SetText(cinfo)
+			d.AddBottomBar(func(parent core.Widget) {
+				core.NewButton(parent).SetText("Copy to clipboard").SetIcon(icons.ContentCopy).
+					OnClick(func(e events.Event) {
+						d.Clipboard().Write(mimedata.NewTextBytes(cinfo))
+					})
+				d.AddOK(parent)
+			})
+			d.RunFullDialog(lv)
+		})
 	})
 }
 
@@ -173,6 +162,8 @@ func (lv *VCSLogView) ToggleRev() {
 	lv.SetA = !lv.SetA
 	cba.SetState(lv.SetA, states.Checked)
 	cbb.SetState(!lv.SetA, states.Checked)
+	cbb.NeedsRender()
+	cba.NeedsRender()
 }
 
 // Toolbar returns the toolbar
@@ -248,7 +239,11 @@ func (lv *VCSLogView) MakeToolbar(p *core.Plan) {
 		w.SetText("Diff").SetIcon(icons.Difference).
 			SetTooltip("Show the diffs between two revisions; if blank, A is current HEAD, and B is current working copy").
 			OnClick(func(e events.Event) {
-				texteditor.DiffViewDialogFromRevs(lv, lv.Repo, lv.File, nil, lv.RevA, lv.RevB)
+				if lv.File == "" {
+					diffbrowser.NewDiffBrowserVCS(lv.Repo, lv.RevA, lv.RevB)
+				} else {
+					texteditor.DiffViewDialogFromRevs(lv, lv.Repo, lv.File, nil, lv.RevA, lv.RevB)
+				}
 			})
 	})
 }
@@ -266,7 +261,7 @@ func VCSLogViewDialog(ctx core.Widget, repo vcs.Repo, lg vcs.Log, file, since st
 	}
 	d := core.NewBody().AddTitle(title)
 	lv := NewVCSLogView(d)
-	lv.ConfigRepo(repo, lg, file, since)
+	lv.SetRepo(repo).SetLog(lg).SetFile(file).SetSince(since)
 	d.RunWindowDialog(ctx)
 	return d
 }

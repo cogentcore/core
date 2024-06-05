@@ -803,7 +803,6 @@ func (fb *FileButton) WidgetValue() any { return &fb.Filename }
 func (fb *FileButton) Init() {
 	fb.Button.Init()
 	fb.SetType(core.ButtonTonal).SetIcon(icons.File)
-	fb.SetFlag(true, core.ValueDialogNewWindow)
 	fb.Updater(func() {
 		if fb.Filename == "" {
 			fb.SetText("Select file")
@@ -815,6 +814,7 @@ func (fb *FileButton) Init() {
 	core.InitValueButton(fb, false, func(d *core.Body) {
 		// ext, _ := v.Tag("ext") // TODO(config)
 		fv = NewFileView(d).SetFilename(fb.Filename, "")
+		fb.SetFlag(true, core.ValueDialogNewWindow)
 		d.AddAppBar(fv.MakeToolbar)
 	}, func() {
 		fb.Filename = fv.SelectedFile()

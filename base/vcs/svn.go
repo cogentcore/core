@@ -257,6 +257,10 @@ func (gr *SvnRepo) CommitDesc(rev string, diffs bool) ([]byte, error) {
 	return out, err
 }
 
+func (gr *SvnRepo) FilesChanged(revA, revB string, diffs bool) ([]byte, error) {
+	return nil, nil // todo:
+}
+
 // Blame returns an annotated report about the file, showing which revision last
 // modified each line.
 func (gr *SvnRepo) Blame(fname string) ([]byte, error) {

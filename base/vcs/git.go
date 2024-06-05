@@ -288,6 +288,42 @@ func (gr *GitRepo) CommitDesc(rev string, diffs bool) ([]byte, error) {
 	return out, nil
 }
 
+// FilesChanged returns the list of files changed and their statuses,
+// between two revisions.
+// If revA is empty, defaults to current HEAD; revB defaults to HEAD-1.
+// -1, -2 etc also work as universal ways of specifying prior revisions.
+// Optionally includes diffs for the changes.
+func (gr *GitRepo) FilesChanged(revA, revB string, diffs bool) ([]byte, error) {
+	if revA == "" {
+		revA = "HEAD"
+	} else if revA[0] == '-' {
+		rsp, err := strconv.Atoi(revA)
+		if err == nil && rsp < 0 {
+			revA = fmt.Sprintf("HEAD~%d", -rsp)
+		}
+	}
+	if revB == "" {
+		revB = "HEAD~1"
+	} else if revB[0] == '-' {
+		rsp, err := strconv.Atoi(revB)
+		if err == nil && rsp < 0 {
+			revB = fmt.Sprintf("HEAD~%d", -rsp)
+		}
+	}
+	var out []byte
+	var err error
+	if diffs {
+		out, err = gr.RunFromDir("git", "diff", "-u", revA, revB)
+	} else {
+		out, err = gr.RunFromDir("git", "diff", "--name-status", revA, revB)
+	}
+	if err != nil {
+		log.Println(string(out))
+		return nil, err
+	}
+	return out, nil
+}
+
 // Blame returns an annotated report about the file, showing which revision last
 // modified each line.
 func (gr *GitRepo) Blame(fname string) ([]byte, error) {

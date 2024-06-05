@@ -77,6 +77,13 @@ type Repo interface {
 	// with modification status).
 	CommitDesc(rev string, diffs bool) ([]byte, error)
 
+	// FilesChanged returns the list of files changed and their statuses,
+	// between two revisions.
+	// If revA is empty, defaults to current HEAD; revB defaults to HEAD-1.
+	// -1, -2 etc also work as universal ways of specifying prior revisions.
+	// Optionally includes diffs for the changes.
+	FilesChanged(revA, revB string, diffs bool) ([]byte, error)
+
 	// Blame returns an annotated report about the file, showing which revision last
 	// modified each line.
 	Blame(fname string) ([]byte, error)
