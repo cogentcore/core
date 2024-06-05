@@ -13,6 +13,7 @@ import (
 	"os"
 	"slices"
 	"strconv"
+	"strings"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/jsonx"
@@ -41,9 +42,11 @@ func (n *NodeBase) MarshalJSON() ([]byte, error) {
 }
 
 func (n *NodeBase) UnmarshalJSON(b []byte) error {
-	typeStart := bytes.Index(b, []byte(`":"`)) + 3
+	typeStart := bytes.Index(b, []byte(`":`)) + 3
 	typeEnd := bytes.Index(b, []byte(`",`))
 	typeName := string(b[typeStart:typeEnd])
+	// we may end up with an extraneous quote / space at the start
+	typeName = strings.TrimPrefix(strings.TrimSpace(typeName), `"`)
 	typ := types.TypeByName(typeName)
 	if typ == nil {
 		return fmt.Errorf("tree.NodeBase.UnmarshalJSON: type %q not found", typeName)
@@ -63,6 +66,8 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 	numStart := bytes.Index(remainder, []byte(`":`)) + 2
 	numEnd := bytes.Index(remainder, []byte(`,`))
 	numString := string(remainder[numStart:numEnd])
+	// we may end up with extraneous space at the start
+	numString = strings.TrimSpace(numString)
 	numChildren, err := strconv.Atoi(numString)
 	if err != nil {
 		return err
