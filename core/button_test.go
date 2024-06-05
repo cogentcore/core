@@ -77,7 +77,8 @@ func TestButtonShortcut(t *testing.T) {
 
 func TestButtonShortcutWithTooltip(t *testing.T) {
 	b := NewBody()
-	bt := NewButton(b).SetShortcut("Command+S").SetTooltip("Test")
+	bt := NewButton(b).SetShortcut("Command+S")
+	bt.SetTooltip("Test")
 	tt, _ := bt.WidgetTooltip(image.Point{})
 	assert.Equal(t, "[Ctrl+S] Test", tt)
 }
