@@ -490,8 +490,8 @@ func (n *NodeBase) Delete() {
 	}
 }
 
-// Destroy recursively deletes and destroys all children and
-// their children's children, etc.
+// Destroy recursively deletes and destroys the node, all of its children,
+// and all of its children's children, etc.
 func (n *NodeBase) Destroy() {
 	if n.This() == nil { // already destroyed
 		return

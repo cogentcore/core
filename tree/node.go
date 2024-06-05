@@ -187,10 +187,10 @@ type Node interface {
 	// of the type, plus the [Node.NumLifetimeChildren] of the parent.
 	InsertNewChild(typ *types.Type, at int) Node
 
-	// Deleting Children:
-
-	// Destroy recursively deletes and destroys all children and
-	// their children's children, etc.
+	// Destroy recursively deletes and destroys the node, all of its children,
+	// and all of its children's children, etc. Node types can implement this
+	// to do additional necessary destruction; if they do, they should call
+	// [NodeBase.Destroy] at the end of their implementation.
 	Destroy()
 
 	// Flags:
