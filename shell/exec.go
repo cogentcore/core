@@ -46,7 +46,10 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 		case start:
 			err = cl.Start(&cmdIO.StdIOState, scmd, sargs...)
 		case output:
+<<<<<<< HEAD
 			cmdIO.PushOut(nil)
+=======
+>>>>>>> main
 			out, err = cl.Output(&cmdIO.StdIOState, scmd, sargs...)
 		default:
 			err = cl.Run(&cmdIO.StdIOState, scmd, sargs...)
@@ -55,9 +58,13 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 			sh.AddError(err)
 		}
 	} else {
+<<<<<<< HEAD
 		ran := false
 		ran, out = sh.RunBuiltinOrCommand(cmdIO, errOk, output, scmd, sargs...)
 		if !ran {
+=======
+		if !sh.RunBuiltinOrCommand(cmdIO, scmd, sargs...) {
+>>>>>>> main
 			sh.isCommand.Push(false)
 			switch {
 			case start:
@@ -72,7 +79,10 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 					sh.DeleteJob(cmdIO)
 				}()
 			case output:
+<<<<<<< HEAD
 				cmdIO.PushOut(nil)
+=======
+>>>>>>> main
 				out, err = sh.Config.OutputIO(cmdIO, scmd, sargs...)
 			default:
 				err = sh.Config.RunIO(cmdIO, scmd, sargs...)
@@ -89,6 +99,7 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 	return out
 }
 
+<<<<<<< HEAD
 // RunBuiltinOrCommand runs a builtin or a command, returning true if it ran,
 // and the output string if running in output mode.
 func (sh *Shell) RunBuiltinOrCommand(cmdIO *exec.CmdIO, errOk, output bool, cmd string, args ...string) (bool, string) {
@@ -135,14 +146,42 @@ func (sh *Shell) RunBuiltinOrCommand(cmdIO *exec.CmdIO, errOk, output bool, cmd 
 	}
 
 	if hasCmd {
+=======
+// RunBuiltinOrCommand runs a builtin or a command
+func (sh *Shell) RunBuiltinOrCommand(cmdIO *exec.CmdIO, cmd string, args ...string) bool {
+	if fun, has := sh.Commands[cmd]; has {
+		sh.commandArgs.Push(args)
+		sh.isCommand.Push(true)
+
+		// note: we need to set both os. and wrapper versions, so it works the same
+		// in compiled vs. interpreted mode
+		oldsh := sh.Config.StdIO.Set(&cmdIO.StdIO)
+		oldwrap := sh.StdIOWrappers.SetWrappers(&cmdIO.StdIO)
+		oldstd := cmdIO.SetToOS()
+		fun(args...)
+		oldstd.SetToOS()
+		sh.StdIOWrappers.SetWrappers(oldwrap)
+		sh.Config.StdIO = *oldsh
+
+>>>>>>> main
 		sh.isCommand.Pop()
 		sh.commandArgs.Pop()
 	}
+<<<<<<< HEAD
 	oldstd.SetToOS()
 	sh.StdIOWrappers.SetWrappers(oldwrap)
 	sh.Config.StdIO = *oldsh
 
 	return true, out
+=======
+	if fun, has := sh.Builtins[cmd]; has {
+		sh.isCommand.Push(false)
+		sh.AddError(fun(cmdIO, args...))
+		sh.isCommand.Pop()
+		return true
+	}
+	return false
+>>>>>>> main
 }
 
 func (sh *Shell) HandleArgErr(errok bool, err error) error {

@@ -34,6 +34,11 @@ type Shell struct {
 	// Config is the [exec.Config] used to run commands.
 	Config exec.Config
 
+	// StdIOWrappers are IO wrappers sent to the interpreter, so we can
+	// control the IO streams used within the interpreter.
+	// Call SetWrappers on this with another StdIO object to update settings.
+	StdIOWrappers exec.StdIO
+
 	// ssh connection, configuration
 	SSH *sshclient.Config
 
@@ -79,11 +84,6 @@ type Shell struct {
 	// We are not able to pass the context around so it is set here,
 	// in the StartContext function. Clear when done with ClearContext.
 	Ctx context.Context
-
-	// StdIOWrappers are IO wrappers sent to the interpreter, so we can
-	// control the IO streams used within the interpreter.
-	// Call SetWrappers on this with another StdIO object to update settings.
-	StdIOWrappers exec.StdIO
 
 	// original standard IO setings, to restore
 	OrigStdIO exec.StdIO
