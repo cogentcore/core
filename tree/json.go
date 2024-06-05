@@ -44,13 +44,21 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 	typeStart := bytes.Index(b, []byte(`":"`)) + 3
 	typeEnd := bytes.Index(b, []byte(`",`))
 	typeName := string(b[typeStart:typeEnd])
+	typ := types.TypeByName(typeName)
+	if typ == nil {
+		return fmt.Errorf("tree.NodeBase.UnmarshalJSON: type %q not found", typeName)
+	}
 
 	remainder := b[typeEnd+2:]
 	numStart := bytes.Index(remainder, []byte(`":`)) + 2
 	numEnd := bytes.Index(remainder, []byte(`,`))
 	numString := string(remainder[numStart:numEnd])
+	numChildren, err := strconv.Atoi(numString)
+	if err != nil {
+		return err
+	}
 
-	fmt.Println(typeName, numString)
+	fmt.Println(typ, numChildren)
 	return nil
 }
 
@@ -240,9 +248,9 @@ func ReadRootTypeJSON(b []byte) (*types.Type, []byte, error) {
 	eidx := bytes.Index(b, JSONTypeSuffix)
 	bodyidx := eidx + len(JSONTypeSuffix)
 	tn := string(bytes.Trim(bytes.TrimSpace(b[stidx:eidx]), "\""))
-	typ, err := types.TypeByNameTry(tn)
+	typ := types.TypeByName(tn)
 	if typ == nil {
-		return nil, b[bodyidx:], fmt.Errorf("tree.ReadRootTypeJSON: %w", err)
+		return nil, b[bodyidx:], fmt.Errorf("tree.ReadRootTypeJSON: type %q not found", tn)
 	}
 	return typ, b[bodyidx:], nil
 }
