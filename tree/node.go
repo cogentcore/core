@@ -169,19 +169,6 @@ type Node interface {
 	// of the type, plus the [Node.NumLifetimeChildren] of the parent.
 	NewChild(typ *types.Type) Node
 
-	// SetChild sets the child at the given index to be the given item.
-	// It just calls Init and SetParent on the child. The name defaults
-	// to the ID (kebab-case) name of the type, plus the
-	// [Node.NumLifetimeChildren] of the parent.
-	// Any error is automatically logged in addition to being returned.
-	SetChild(kid Node, idx int) error
-
-	// InsertChild adds given child at position in children list.
-	// The kid node is assumed to not be on another tree (see [MoveToParent])
-	// and the existing name should be unique among children.
-	// Any error is automatically logged in addition to being returned.
-	InsertChild(kid Node, at int) error
-
 	// Destroy recursively deletes and destroys the node, all of its children,
 	// and all of its children's children, etc. Node types can implement this
 	// to do additional necessary destruction; if they do, they should call

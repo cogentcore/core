@@ -343,7 +343,7 @@ func (tv *TreeView) DuplicateSync() {
 	nm := fmt.Sprintf("%v_Copy", sn.Name())
 	nwkid := sn.Clone()
 	nwkid.SetName(nm)
-	parent.InsertChild(nwkid, myidx+1)
+	parent.AsTree().InsertChild(nwkid, myidx+1)
 	tvparent.SendChangeEventReSync(nil)
 	if tvk := tvparent.ChildByName("tv_"+nm, 0); tvk != nil {
 		stv := AsTreeView(tvk)
@@ -448,7 +448,7 @@ func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int,
 				ns.SetName(ns.Name() + "_Copy")
 			}
 		}
-		parent.InsertChild(ns, myidx+i)
+		parent.AsTree().InsertChild(ns, myidx+i)
 		npath := ns.PathFrom(sroot)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
 			ns.SetName(ns.Name() + TreeViewTempMovedTag) // special keyword :)

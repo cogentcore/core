@@ -388,21 +388,6 @@ func (n *NodeBase) NewChild(typ *types.Type) Node {
 	return kid
 }
 
-// SetChild sets the child at the given index to be the given item.
-// It just calls Init and SetParent on the child. The name defaults
-// to the ID (kebab-case) name of the type, plus the
-// [Node.NumLifetimeChildren] of the parent.
-// Any error is automatically logged in addition to being returned.
-func (n *NodeBase) SetChild(kid Node, idx int) error {
-	if err := n.Kids.IsValidIndex(idx); err != nil {
-		return err
-	}
-	initNode(kid)
-	n.Kids[idx] = kid
-	SetParent(kid, n)
-	return nil
-}
-
 // InsertChild adds given child at position in children list.
 // The kid node is assumed to not be on another tree (see [MoveToParent])
 // and the existing name should be unique among children.
