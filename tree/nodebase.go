@@ -176,7 +176,7 @@ func (n *NodeBase) ParentByType(t *types.Type, embeds bool) Node {
 			return n.Par
 		}
 	}
-	return n.Par.ParentByType(t, embeds)
+	return n.Par.AsTree().ParentByType(t, embeds)
 }
 
 // Children:

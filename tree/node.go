@@ -85,11 +85,6 @@ type Node interface {
 	// Each Node can only have one parent.
 	Parent() Node
 
-	// ParentByType finds parent recursively up hierarchy, by type, and
-	// returns nil if not found. If embeds is true, then it looks for any
-	// type that embeds the given type at any level of anonymous embedding.
-	ParentByType(t *types.Type, embeds bool) Node
-
 	// Children:
 
 	// HasChildren returns whether this node has any children.

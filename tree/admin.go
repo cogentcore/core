@@ -91,10 +91,10 @@ func InsertNewChild[T Node](parent Node, at int) T {
 	return parent.InsertNewChild(n.NodeType(), at).(T)
 }
 
-// ParentByType is a generic helper function for [Node.ParentByType].
-func ParentByType[T Node](k Node, embeds bool) T {
-	var n T
-	v, _ := k.ParentByType(n.NodeType(), embeds).(T)
+// ParentByType is a generic helper function for [NodeBase.ParentByType].
+func ParentByType[T Node](n Node, embeds bool) T {
+	var nt T
+	v, _ := n.AsTree().ParentByType(nt.NodeType(), embeds).(T)
 	return v
 }
 
