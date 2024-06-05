@@ -270,29 +270,20 @@ func (fb *FileBrowse) StandardPlan() bool {
 
 // SetTitle sets the optional title and updates the title text
 func (fb *FileBrowse) SetTitle(title string) {
-	lab, _ := fb.TitleWidget()
-	if lab != nil {
-		lab.Text = title
+	t := fb.TitleWidget()
+	if t != nil {
+		t.Text = title
 	}
 }
 
-// Title returns the title text widget, and its index, within frame; nil,
-// -1 if not found
-func (fb *FileBrowse) TitleWidget() (*core.Text, int) {
-	idx, ok := fb.Children.IndexByName("title", 0)
-	if !ok {
-		return nil, -1
-	}
-	return fb.Child(idx).(*core.Text), idx
+// Title returns the title text widget.
+func (fb *FileBrowse) TitleWidget() *core.Text {
+	return fb.ChildByName("title", 0).(*core.Text)
 }
 
-// Splits returns the main Splits
-func (fb *FileBrowse) Splits() (*core.Splits, int) {
-	idx, ok := fb.Children.IndexByName("splits", 2)
-	if !ok {
-		return nil, -1
-	}
-	return fb.Child(idx).(*core.Splits), idx
+// Splits returns the main Splits widget.
+func (fb *FileBrowse) Splits() *core.Splits {
+	return fb.ChildByName("splits", 2).(*core.Splits)
 }
 
 // TextEditorByIndex returns the TextEditor by index, nil if not found
@@ -301,7 +292,7 @@ func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
 		log.Printf("FileBrowse: text view index out of range: %v\n", idx)
 		return nil
 	}
-	split, _ := fb.Splits()
+	split := fb.Splits()
 	stidx := 1 // 0 = file browser -- could be collapsed but always there.
 	if split != nil {
 		svk := split.Child(stidx + idx)
@@ -345,7 +336,7 @@ func (fb *FileBrowse) SplitsPlan() tree.TypePlan {
 
 // ConfigSplits configures the Splits.
 func (fb *FileBrowse) ConfigSplits() {
-	split, _ := fb.Splits()
+	split := fb.Splits()
 	if split == nil {
 		return
 	}

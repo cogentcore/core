@@ -139,8 +139,8 @@ func (sv *SVG) FindDefByName(defnm string) Node {
 	if !has {
 		idx = len(sv.Defs.Children) / 2
 	}
-	idx, has = sv.Defs.Children.IndexByName(defnm, idx)
-	if has {
+	idx = sv.Defs.Children.IndexByName(defnm, idx)
+	if idx >= 0 {
 		sv.DefIndexes[defnm] = idx
 		return sv.Defs.Children[idx].(Node)
 	}

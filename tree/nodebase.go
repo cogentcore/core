@@ -122,10 +122,7 @@ func (n *NodeBase) IndexInParent() int {
 	if n.Par == nil {
 		return -1
 	}
-	idx, ok := n.Par.AsTree().Children.IndexOf(n.This(), n.index) // very fast if index is close..
-	if !ok {
-		return -1
-	}
+	idx := n.Par.AsTree().Children.IndexOf(n.This(), n.index) // very fast if index is close
 	n.index = idx
 	return idx
 }
@@ -205,7 +202,7 @@ func (n *NodeBase) Child(i int) Node {
 // can be a key speedup for large lists. If no value is specified for
 // startIndex, it starts in the middle, which is a good default.
 func (n *NodeBase) ChildByName(name string, startIndex ...int) Node {
-	return n.Children.ElemByName(name, startIndex...)
+	return n.Child(n.Children.IndexByName(name, startIndex...))
 }
 
 // ChildByType returns the first child that has the given type, and nil
@@ -216,7 +213,7 @@ func (n *NodeBase) ChildByName(name string, startIndex ...int) Node {
 // no value is specified for startIndex, it starts in the middle, which is a
 // good default.
 func (n *NodeBase) ChildByType(t *types.Type, embeds bool, startIndex ...int) Node {
-	return n.Children.ElemByType(t, embeds, startIndex...)
+	return n.Child(n.Children.IndexByType(t, embeds, startIndex...))
 }
 
 // Paths:
@@ -282,19 +279,19 @@ func (n *NodeBase) PathFrom(parent Node) string {
 }
 
 // findPathChild finds the child on the path.
-func findPathChild(n Node, child string) (int, bool) {
+func findPathChild(n Node, child string) int {
 	if len(child) == 0 {
-		return 0, false
+		return -1
 	}
 	if child[0] == '[' && child[len(child)-1] == ']' {
 		idx, err := strconv.Atoi(child[1 : len(child)-1])
 		if err != nil {
-			return idx, false
+			return idx
 		}
 		if idx < 0 { // from end
 			idx = len(n.AsTree().Children) + idx
 		}
-		return idx, true
+		return idx
 	}
 	return n.AsTree().Children.IndexByName(child, 0)
 }
@@ -316,8 +313,8 @@ func (n *NodeBase) FindPath(path string) Node {
 		if strings.Contains(pe, ".") { // has fields
 			fels := strings.Split(pe, ".")
 			// find the child first, then the fields
-			idx, ok := findPathChild(curn, UnescapePathName(fels[0]))
-			if !ok {
+			idx := findPathChild(curn, UnescapePathName(fels[0]))
+			if idx < 0 {
 				return nil
 			}
 			curn = curn.AsTree().Children[idx]
@@ -331,8 +328,8 @@ func (n *NodeBase) FindPath(path string) Node {
 				curn = fk
 			}
 		} else {
-			idx, ok := findPathChild(curn, UnescapePathName(pe))
-			if !ok {
+			idx := findPathChild(curn, UnescapePathName(pe))
+			if idx < 0 {
 				return nil
 			}
 			curn = curn.AsTree().Children[idx]
@@ -425,8 +422,8 @@ func (n *NodeBase) DeleteChild(child Node) bool {
 	if child == nil {
 		return false
 	}
-	idx, ok := n.Children.IndexOf(child)
-	if !ok {
+	idx := n.Children.IndexOf(child)
+	if idx < 0 {
 		return false
 	}
 	return n.DeleteChildAt(idx)
@@ -435,8 +432,8 @@ func (n *NodeBase) DeleteChild(child Node) bool {
 // DeleteChildByName deletes child node by name, returning false
 // if it can not find it.
 func (n *NodeBase) DeleteChildByName(name string) bool {
-	idx, ok := n.Children.IndexByName(name)
-	if !ok {
+	idx := n.Children.IndexByName(name)
+	if idx < 0 {
 		return false
 	}
 	return n.DeleteChildAt(idx)

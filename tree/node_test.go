@@ -122,8 +122,7 @@ func TestNodeFindName(t *testing.T) {
 	assert.Len(t, parent.Children, len(names))
 	for i, nm := range names {
 		for st := range names { // test all starting indexes
-			idx, ok := parent.Children.IndexByName(nm, st)
-			assert.True(t, ok)
+			idx := parent.Children.IndexByName(nm, st)
 			assert.Equal(t, i, idx)
 		}
 	}
@@ -137,20 +136,10 @@ func TestNodeFindType(t *testing.T) {
 	assert.True(t, ne.NodeType().HasEmbed(NodeBaseType))
 	assert.True(t, nb.NodeType().HasEmbed(NodeBaseType))
 
-	idx, ok := parent.Children.IndexByType(testdata.NodeEmbedType, NoEmbeds, 0)
-	if assert.True(t, ok) {
-		assert.Equal(t, 0, idx)
-	}
-	idx, ok = parent.Children.IndexByType(NodeBaseType, NoEmbeds, 0)
-	if assert.True(t, ok) {
-		assert.Equal(t, 1, idx)
-	}
-	et := parent.Children.ElemByType(NodeBaseType, NoEmbeds, 0)
-	assert.NotNil(t, et)
-	idx, ok = parent.Children.IndexByType(NodeBaseType, Embeds, 0)
-	if assert.True(t, ok) {
-		assert.Equal(t, 0, idx)
-	}
+	idx := parent.Children.IndexByType(testdata.NodeEmbedType, NoEmbeds, 0)
+	assert.Equal(t, 0, idx)
+	idx = parent.Children.IndexByType(NodeBaseType, NoEmbeds, 0)
+	assert.Equal(t, 1, idx)
 }
 
 func TestNodeMove(t *testing.T) {
