@@ -37,7 +37,7 @@ func TestNodeJSON(t *testing.T) {
 		var buf2 bytes.Buffer
 		assert.NoError(t, jsonx.Write(tstload, &buf2))
 		tstb := buf2.Bytes()
-		assert.Equal(t, b, tstb)
+		assert.Equal(t, string(b), string(tstb))
 	}
 
 	var bufn bytes.Buffer
@@ -51,7 +51,7 @@ func TestNodeJSON(t *testing.T) {
 			t.Error(err)
 		}
 		tstb := buf2.Bytes()
-		assert.Equal(t, b, tstb)
+		assert.Equal(t, string(b), string(tstb))
 	}
 }
 
@@ -77,6 +77,6 @@ func TestNodeXML(t *testing.T) {
 		var buf2 bytes.Buffer
 		assert.NoError(t, tstload.WriteXML(&buf2, true))
 		tstb := buf2.Bytes()
-		assert.Equal(t, b, tstb)
+		assert.Equal(t, string(b), string(tstb))
 	}
 }
