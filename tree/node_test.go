@@ -351,7 +351,7 @@ func TestProperties(t *testing.T) {
 
 	assert.Equal(t, nil, n.Property("randomprop"))
 
-	assert.Equal(t, map[string]any{"intprop": 42, "stringprop": "test string"}, n.Properties())
+	assert.Equal(t, map[string]any{"intprop": 42, "stringprop": "test string"}, n.Properties)
 }
 
 func TestPropertiesJSON(t *testing.T) {

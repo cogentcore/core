@@ -240,7 +240,7 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 		k.AsTreeNode().SetProperty(refkey, 0)
 	}
 	sv.Root.WalkDown(func(k tree.Node) bool {
-		pr := k.AsTreeNode().Properties()
+		pr := k.AsTreeNode().Properties
 		for _, v := range pr {
 			ps := reflectx.ToString(v)
 			if !strings.HasPrefix(ps, "url(#") {

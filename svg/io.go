@@ -840,7 +840,7 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 		return ""
 	}
 	se := xml.StartElement{}
-	properties := itm.AsTreeNode().Props
+	properties := itm.AsTreeNode().Properties
 	if itm.Name() != "" {
 		XMLAddAttr(&se.Attr, "id", itm.Name())
 	}
@@ -1127,7 +1127,7 @@ func SetStdXMLAttr(ni Node, name, val string) bool {
 		nb.Class = val
 		return true
 	case "style":
-		styles.SetStylePropertiesXML(val, (*map[string]any)(&nb.Props))
+		styles.SetStylePropertiesXML(val, (*map[string]any)(&nb.Properties))
 		return true
 	}
 	return false

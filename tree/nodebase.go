@@ -31,9 +31,8 @@ type NodeBase struct {
 	// the enums package.
 	Flags Flags `tableview:"-" copier:"-" json:"-" xml:"-" set:"-" max-width:"80" height:"3"`
 
-	// Props is a property map for arbitrary key-value properties.
-	// They are typically accessed through the property methods on [Node].
-	Props map[string]any `tableview:"-" xml:"-" copier:"-" set:"-" label:"Properties"`
+	// Properties is a property map for arbitrary key-value properties.
+	Properties map[string]any `tableview:"-" xml:"-" copier:"-" set:"-" label:"Properties"`
 
 	// Par is the parent of this node, which is set automatically when this node is
 	// added as a child of a parent. It is typically accessed through [Node.Parent].
@@ -536,31 +535,26 @@ func (n *NodeBase) FlagType() enums.BitFlagSetter {
 
 // Property Storage:
 
-// Properties returns the key-value properties set for this node.
-func (n *NodeBase) Properties() map[string]any {
-	return n.Props
-}
-
 // SetProperty sets given the given property to the given value.
 func (n *NodeBase) SetProperty(key string, value any) {
-	if n.Props == nil {
-		n.Props = map[string]any{}
+	if n.Properties == nil {
+		n.Properties = map[string]any{}
 	}
-	n.Props[key] = value
+	n.Properties[key] = value
 }
 
 // Property returns the property value for the given key.
 // It returns nil if it doesn't exist.
 func (n *NodeBase) Property(key string) any {
-	return n.Props[key]
+	return n.Properties[key]
 }
 
 // DeleteProperty deletes the property with the given key.
 func (n *NodeBase) DeleteProperty(key string) {
-	if n.Props == nil {
+	if n.Properties == nil {
 		return
 	}
-	delete(n.Props, key)
+	delete(n.Properties, key)
 }
 
 // Tree Walking:
@@ -795,7 +789,7 @@ func (n *NodeBase) CopyFrom(src Node) {
 // copyFrom is the implementation of [NodeBase.CopyFrom].
 func copyFrom(dst, src Node) {
 	dst.Children().ConfigCopy(dst.This(), *src.Children())
-	maps.Copy(dst.AsTreeNode().Properties(), src.AsTreeNode().Properties())
+	maps.Copy(dst.AsTreeNode().Properties, src.AsTreeNode().Properties)
 
 	dst.This().CopyFieldsFrom(src)
 	for i, kid := range *dst.Children() {
