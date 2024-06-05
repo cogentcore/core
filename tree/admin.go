@@ -39,7 +39,7 @@ func newRoot[T Node]() T {
 
 // initNode initializes the node.
 func initNode(n Node) {
-	nb := n.AsTreeNode()
+	nb := n.AsTree()
 	if nb.Ths != n {
 		nb.Ths = n
 		nb.Ths.Init()
@@ -61,7 +61,7 @@ func checkThis(n Node) error {
 // parent's list of children; see [Node.AddChild] for a version that does.
 // It automatically gets the [Node.This] of the parent.
 func SetParent(child Node, parent Node) {
-	n := child.AsTreeNode()
+	n := child.AsTree()
 	n.Par = parent.This()
 	setUniqueName(n, false)
 	child.This().OnAdd()
@@ -150,7 +150,7 @@ func setUniqueName(n Node, addIfSet bool) {
 	if pn == nil {
 		return
 	}
-	c := atomic.AddUint64(&pn.AsTreeNode().numLifetimeChildren, 1)
+	c := atomic.AddUint64(&pn.AsTree().numLifetimeChildren, 1)
 	id := "-" + strconv.FormatUint(c-1, 10) // must subtract 1 so we start at 0
 	if n.Name() == "" {
 		// must get This for accurate NodeType

@@ -302,7 +302,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 			}, func(w core.Value) {
 				wb := w.AsWidget()
 				tv.MakeValue(w, i)
-				w.AsTreeNode().SetProperty(views.SliceViewColProperty, fli)
+				w.AsTree().SetProperty(views.SliceViewColProperty, fli)
 				if !tv.IsReadOnly() {
 					wb.OnChange(func(e events.Event) {
 						if si < len(tv.Table.Indexes) {

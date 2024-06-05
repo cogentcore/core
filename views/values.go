@@ -105,7 +105,7 @@ func (tb *TreeButton) Init() {
 	tb.Updater(func() {
 		path := "None"
 		if tb.Tree != nil {
-			path = tb.Tree.AsTreeNode().String()
+			path = tb.Tree.AsTree().String()
 		}
 		tb.SetText(path)
 	})

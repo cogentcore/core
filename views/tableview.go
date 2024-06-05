@@ -306,7 +306,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 		}, func(w core.Value) {
 			wb := w.AsWidget()
 			tv.MakeValue(w, i)
-			w.AsTreeNode().SetProperty(SliceViewColProperty, fli)
+			w.AsTree().SetProperty(SliceViewColProperty, fli)
 			if !tv.IsReadOnly() {
 				wb.OnChange(func(e events.Event) {
 					tv.SendChange()

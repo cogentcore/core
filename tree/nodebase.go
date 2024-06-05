@@ -84,8 +84,8 @@ func (n *NodeBase) This() Node {
 	return n.Ths
 }
 
-// AsTreeNode returns the [NodeBase] for this Node.
-func (n *NodeBase) AsTreeNode() *NodeBase {
+// AsTree returns the [NodeBase] for this Node.
+func (n *NodeBase) AsTree() *NodeBase {
 	return n
 }
 
@@ -740,7 +740,7 @@ func (n *NodeBase) WalkDownBreadth(fun func(n Node) bool) {
 	start := n.This()
 
 	level := 0
-	start.AsTreeNode().depth = level
+	start.AsTree().depth = level
 	queue := make([]Node, 1)
 	queue[0] = start
 
@@ -749,13 +749,13 @@ func (n *NodeBase) WalkDownBreadth(fun func(n Node) bool) {
 			break
 		}
 		cur := queue[0]
-		depth := cur.AsTreeNode().depth
+		depth := cur.AsTree().depth
 		queue = queue[1:]
 
 		if cur.This() != nil && fun(cur) { // false return means don't proceed
 			for _, cn := range *cur.Children() {
 				if cn != nil && cn.This() != nil {
-					cn.AsTreeNode().depth = depth + 1
+					cn.AsTree().depth = depth + 1
 					queue = append(queue, cn)
 				}
 			}
@@ -789,7 +789,7 @@ func (n *NodeBase) CopyFrom(src Node) {
 // copyFrom is the implementation of [NodeBase.CopyFrom].
 func copyFrom(dst, src Node) {
 	dst.Children().ConfigCopy(dst.This(), *src.Children())
-	maps.Copy(dst.AsTreeNode().Properties, src.AsTreeNode().Properties)
+	maps.Copy(dst.AsTree().Properties, src.AsTree().Properties)
 
 	dst.This().CopyFieldsFrom(src)
 	for i, kid := range *dst.Children() {

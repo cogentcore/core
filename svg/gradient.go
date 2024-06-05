@@ -235,10 +235,10 @@ func (sv *SVG) GradientNew(radial bool) (*Gradient, string) {
 
 // GradientUpdateNodeProp ensures that node has a gradient property of given type
 func (sv *SVG) GradientUpdateNodeProp(n Node, prop string, radial bool, stops string) (*Gradient, string) {
-	ps := n.AsTreeNode().Property(prop)
+	ps := n.AsTree().Property(prop)
 	if ps == nil {
 		gr, url := sv.GradientNewForNode(n, radial, stops)
-		n.AsTreeNode().SetProperty(prop, url)
+		n.AsTree().SetProperty(prop, url)
 		return gr, url
 	}
 	pstr := ps.(string)
@@ -259,13 +259,13 @@ func (sv *SVG) GradientUpdateNodeProp(n Node, prop string, radial bool, stops st
 		sv.GradientDeleteForNode(n, pstr)
 	}
 	gr, url := sv.GradientNewForNode(n, radial, stops)
-	n.AsTreeNode().SetProperty(prop, url)
+	n.AsTree().SetProperty(prop, url)
 	return gr, url
 }
 
 // GradientUpdateNodePoints updates the points for node based on current bbox
 func (sv *SVG) GradientUpdateNodePoints(n Node, prop string) {
-	ps := n.AsTreeNode().Property(prop)
+	ps := n.AsTree().Property(prop)
 	if ps == nil {
 		return
 	}
@@ -287,7 +287,7 @@ func (sv *SVG) GradientUpdateNodePoints(n Node, prop string) {
 // if set for given property key ("fill" or "stroke").
 // returns new gradient.
 func (sv *SVG) GradientCloneNodeProp(n Node, prop string) *Gradient {
-	ps := n.AsTreeNode().Property(prop)
+	ps := n.AsTree().Property(prop)
 	if ps == nil {
 		return nil
 	}
@@ -303,7 +303,7 @@ func (sv *SVG) GradientCloneNodeProp(n Node, prop string) *Gradient {
 		return nil
 	}
 	ngr, url := sv.GradientNewForNode(n, radial, gr.StopsName)
-	n.AsTreeNode().SetProperty(prop, url)
+	n.AsTree().SetProperty(prop, url)
 	gradient.CopyFrom(ngr.Grad, gr.Grad)
 	// TODO(kai): should this return ngr or gr? (used to return gr but ngr seems correct)
 	return ngr
@@ -313,7 +313,7 @@ func (sv *SVG) GradientCloneNodeProp(n Node, prop string) *Gradient {
 // if set for given property key ("fill" or "stroke").
 // Returns true if deleted.
 func (sv *SVG) GradientDeleteNodeProp(n Node, prop string) bool {
-	ps := n.AsTreeNode().Property(prop)
+	ps := n.AsTree().Property(prop)
 	if ps == nil {
 		return false
 	}

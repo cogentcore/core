@@ -599,7 +599,7 @@ func (sv *SliceViewBase) MakeGrid(p *core.Plan, maker func(p *core.Plan)) {
 func (sv *SliceViewBase) MakeValue(w core.Value, i int) {
 	svi := sv.This().(SliceViewer)
 	wb := w.AsWidget()
-	w.AsTreeNode().SetProperty(SliceViewRowProperty, i)
+	w.AsTree().SetProperty(SliceViewRowProperty, i)
 	w.Style(func(s *styles.Style) {
 		if sv.IsReadOnly() {
 			s.SetAbilities(true, abilities.DoubleClickable)
@@ -750,10 +750,10 @@ func (sv *SliceViewBase) UpdateSliceSize() int {
 // WidgetIndex returns the row and column indexes for given widget,
 // from the properties set during construction.
 func (sv *SliceViewBase) WidgetIndex(w core.Widget) (row, col int) {
-	if rwi := w.AsTreeNode().Property(SliceViewRowProperty); rwi != nil {
+	if rwi := w.AsTree().Property(SliceViewRowProperty); rwi != nil {
 		row = rwi.(int)
 	}
-	if cli := w.AsTreeNode().Property(SliceViewColProperty); cli != nil {
+	if cli := w.AsTree().Property(SliceViewColProperty); cli != nil {
 		col = cli.(int)
 	}
 	return

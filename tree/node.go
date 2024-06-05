@@ -54,8 +54,8 @@ type Node interface {
 	// or is improperly constructed.
 	This() Node
 
-	// AsTreeNode returns the [NodeBase] for this Node.
-	AsTreeNode() *NodeBase
+	// AsTree returns the [NodeBase] for this Node.
+	AsTree() *NodeBase
 
 	// Name returns the user-defined name of the Node, which can be
 	// used for finding elements, generating paths, I/O, etc.

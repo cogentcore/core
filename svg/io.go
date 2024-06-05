@@ -176,7 +176,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					case "preserveAspectRatio":
 						curSvg.ViewBox.PreserveAspectRatio.SetString(attr.Value)
 					default:
-						curPar.AsTreeNode().SetProperty(attr.Name.Local, attr.Value)
+						curPar.AsTree().SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
 			case nm == "desc":
@@ -195,7 +195,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					default:
-						curPar.AsTreeNode().SetProperty(attr.Name.Local, attr.Value)
+						curPar.AsTree().SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
 			case nm == "rect":
@@ -635,7 +635,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 							}
 							switch attr.Name.Local {
 							default:
-								cln.AsTreeNode().SetProperty(attr.Name.Local, attr.Value)
+								cln.AsTree().SetProperty(attr.Name.Local, attr.Value)
 							}
 						}
 					}
@@ -666,7 +666,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					default:
-						curPar.AsTreeNode().SetProperty(attr.Name.Local, attr.Value)
+						curPar.AsTree().SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
 			case strings.HasPrefix(nm, "flow"):
@@ -680,7 +680,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					default:
-						curPar.AsTreeNode().SetProperty(attr.Name.Local, attr.Value)
+						curPar.AsTree().SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
 			case strings.HasPrefix(nm, "fe"):
@@ -698,7 +698,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					default:
-						curPar.AsTreeNode().SetProperty(attr.Name.Local, attr.Value)
+						curPar.AsTree().SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
 			default:
@@ -840,7 +840,7 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 		return ""
 	}
 	se := xml.StartElement{}
-	properties := itm.AsTreeNode().Properties
+	properties := itm.AsTree().Properties
 	if itm.Name() != "" {
 		XMLAddAttr(&se.Attr, "id", itm.Name())
 	}
