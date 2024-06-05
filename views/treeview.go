@@ -1466,7 +1466,7 @@ func (tv *TreeView) Cut() { //types:add
 	root := tv.RootView
 	tv.UnselectAll()
 	for _, sn := range sels {
-		sn.Delete()
+		sn.AsTree().Delete()
 	}
 	root.Update()
 	root.TreeViewChanged()
@@ -1714,7 +1714,7 @@ func (tv *TreeView) DropDeleteSource(e events.Event) {
 		path := string(d.Data)
 		sn := root.FindPath(path)
 		if sn != nil {
-			sn.Delete()
+			sn.AsTree().Delete()
 		}
 		sn = root.FindPath(path + TreeViewTempMovedTag)
 		if sn != nil {

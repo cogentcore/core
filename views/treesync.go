@@ -286,7 +286,7 @@ func (tv *TreeView) DeleteNode() { //types:add
 		tv.MoveUp(events.SelectOne)
 	}
 	if tv.SyncNode != nil {
-		tv.SyncNode.Delete()
+		tv.SyncNode.AsTree().Delete()
 		tv.SendChangeEventReSync(nil)
 	} else {
 		parent := AsTreeView(tv.Par)
@@ -483,7 +483,7 @@ func (tv *TreeView) CutSync() {
 	sels := tv.SelectedSyncNodes()
 	tv.UnselectAll()
 	for _, sn := range sels {
-		sn.Delete()
+		sn.AsTree().Delete()
 	}
 	tv.SendChangeEventReSync(nil)
 }
@@ -499,7 +499,7 @@ func (tv *TreeView) DropDeleteSourceSync(de *events.DragDrop) {
 		path := string(d.Data)
 		sn := sroot.FindPath(path)
 		if sn != nil {
-			sn.Delete()
+			sn.AsTree().Delete()
 		}
 		sn = sroot.FindPath(path + TreeViewTempMovedTag)
 		if sn != nil {
