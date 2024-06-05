@@ -10,9 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log/slog"
 	"os"
-	"strconv"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/jsonx"
@@ -26,6 +24,7 @@ import (
 //////////////////////////////////////////////////////////////////////////
 // Slice
 
+/*
 // MarshalJSON saves the length and type, name information for each object in a
 // slice, as a separate struct-like record at the start, followed by the
 // structs for each element in the slice -- this allows the Unmarshal to first
@@ -142,6 +141,7 @@ func (sl *Slice) UnmarshalJSON(b []byte) error {
 	}
 	return nil
 }
+*/
 
 //////////////////////////////////////////////////////
 // 	Save / Open Root Type

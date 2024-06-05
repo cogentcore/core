@@ -6,15 +6,10 @@ package tree
 
 import (
 	"encoding/xml"
-	"fmt"
 	"io"
 	"log"
-	"reflect"
-	"strconv"
-	"strings"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/types"
 )
 
 // WriteXML writes the tree to an XML-encoded byte string over io.Writer
@@ -60,6 +55,7 @@ func (n *NodeBase) ReadXML(reader io.Reader) error {
 
 // todo: save N as an attr instead of a full element
 
+/*
 // MarshalXML saves the length and type information for each object in a
 // slice, as a separate struct-like record at the start, followed by the
 // structs for each element in the slice -- this allows the Unmarshal to first
@@ -259,3 +255,4 @@ func (sl *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	// this is more robust.
 	return DecodeXMLEndEl(d, start) // final end
 }
+*/
