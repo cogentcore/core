@@ -139,12 +139,12 @@ func (sv *SVG) FindDefByName(defnm string) Node {
 	if !has {
 		idx = len(sv.Defs.Children) / 2
 	}
-	idx = sv.Defs.Children.IndexByName(defnm, idx)
-	if idx >= 0 {
-		sv.DefIndexes[defnm] = idx
-		return sv.Defs.Children[idx].(Node)
+	dn := sv.Defs.ChildByName(defnm, idx)
+	if dn != nil {
+		sv.DefIndexes[defnm] = dn.AsTree().IndexInParent()
+		return dn.(Node)
 	}
-	delete(sv.DefIndexes, defnm) // not found -- delete from map
+	delete(sv.DefIndexes, defnm) // not found, so delete from map
 	return nil
 }
 
