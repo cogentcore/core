@@ -22,6 +22,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/views"
 )
 
@@ -94,7 +95,7 @@ func homePage(ctx *htmlview.Context) bool {
 				wrongCompact := sc == core.SizeCompact && block.Child(1).Name() == "text-block"
 				wrongNonCompact := sc != core.SizeCompact && block.Child(0).Name() == "text-block"
 				if wrongCompact || wrongNonCompact {
-					block.Children.Move(0, 1)
+					block.Children = tree.Move(block.Children, 0, 1)
 				}
 			})
 		}

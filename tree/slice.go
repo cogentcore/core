@@ -92,14 +92,14 @@ func (sl *Slice) ElemByTypeTry(t *types.Type, embeds bool, startIndex ...int) (N
 	return (*sl)[idx], nil
 }
 
-// Move element from one position to another.
-func (sl *Slice) Move(from, to int) {
-	if from == to {
-		return
-	}
-	tmp := (*sl)[from]
-	*sl = slices.Delete(*sl, from, from+1)
-	*sl = slices.Insert(*sl, to, tmp)
+// Move moves the element in the given slice at the given
+// old position to the given new position and returns the
+// resulting slice.
+func Move[E any](s []E, from, to int) []E {
+	temp := s[from]
+	s = slices.Delete(s, from, from+1)
+	s = slices.Insert(s, to, temp)
+	return s
 }
 
 // Swap elements between positions.

@@ -169,7 +169,7 @@ func (tb *Toolbar) MoveToOverflow() {
 		return tree.Continue
 	})
 	if ovidx != n-1 {
-		tb.Children.Move(n-1, ovidx)
+		tb.Children = tree.Move(tb.Children, n-1, ovidx)
 		tb.Children = tb.Children[:ovidx+1]
 	}
 	if len(tb.overflowItems) == 0 && len(tb.OverflowMenus) == 0 {
