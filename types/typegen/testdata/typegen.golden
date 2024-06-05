@@ -29,18 +29,6 @@ func (t *Person) SetType(v *types.Type) *Person { t.Type = v; return t }
 // Nicknames are the nicknames of the person
 func (t *Person) SetNicknames(v ...string) *Person { t.Nicknames = v; return t }
 
-// SetR sets the [Person.R]
-func (t *Person) SetR(v uint8) *Person { t.R = v; return t }
-
-// SetG sets the [Person.G]
-func (t *Person) SetG(v uint8) *Person { t.G = v; return t }
-
-// SetB sets the [Person.B]
-func (t *Person) SetB(v uint8) *Person { t.B = v; return t }
-
-// SetA sets the [Person.A]
-func (t *Person) SetA(v uint8) *Person { t.A = v; return t }
-
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/types/typegen/testdata.BlockType", IDName: "block-type", Doc: "BlockType is a type declared in a type block.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/types/typegen/testdata.CommaFieldType", IDName: "comma-field-type", Doc: "CommaFieldType is a type with inline comma fields.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "A"}, {Name: "B"}}})
