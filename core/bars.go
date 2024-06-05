@@ -131,7 +131,7 @@ func (sc *Scene) GetTopAppBar() *Toolbar {
 
 // RecycleToolbar constructs or returns a Toolbar in given parent Widget
 func RecycleToolbar(parent Widget) *Toolbar {
-	tb := parent.ChildByType(ToolbarType, tree.NoEmbeds)
+	tb := parent.AsTree().ChildByType(ToolbarType, tree.NoEmbeds)
 	if tb != nil {
 		return tb.(*Toolbar)
 	}

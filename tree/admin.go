@@ -98,10 +98,10 @@ func ParentByType[T Node](n Node, embeds bool) T {
 	return v
 }
 
-// ChildByType is a generic helper function for [Node.ChildByType].
+// ChildByType is a generic helper function for [NodeBase.ChildByType].
 func ChildByType[T Node](k Node, embeds bool, startIndex ...int) T {
 	var n T
-	v, _ := k.ChildByType(n.NodeType(), embeds, startIndex...).(T)
+	v, _ := k.AsTree().ChildByType(n.NodeType(), embeds, startIndex...).(T)
 	return v
 }
 
