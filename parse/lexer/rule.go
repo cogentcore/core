@@ -138,8 +138,8 @@ func (lr *Rule) Compile(ls *State) bool {
 // CompileNameMap compiles name map -- returns false if there are problems.
 func (lr *Rule) CompileNameMap(ls *State) bool {
 	valid := true
-	lr.NmMap = make(map[string]*Rule, len(lr.Kids))
-	for _, klri := range lr.Kids {
+	lr.NmMap = make(map[string]*Rule, len(lr.Children))
+	for _, klri := range lr.Children {
 		klr := klri.(*Rule)
 		if !klr.Validate(ls) {
 			valid = false
@@ -210,7 +210,7 @@ func (lr *Rule) Validate(ls *State) bool {
 	}
 
 	// now we iterate over our kids
-	for _, klri := range lr.Kids {
+	for _, klri := range lr.Children {
 		klr := klri.(*Rule)
 		if !klr.Validate(ls) {
 			valid = false
@@ -247,7 +247,7 @@ func (lr *Rule) LexStart(ls *State) *Rule {
 	cpos := ls.Pos
 	lxsz := len(ls.Lex)
 	mrule := lr
-	for _, klri := range lr.Kids {
+	for _, klri := range lr.Children {
 		klr := klri.(*Rule)
 		if mrule = klr.Lex(ls); mrule != nil { // first to match takes it -- order matters!
 			break
@@ -304,7 +304,7 @@ func (lr *Rule) Lex(ls *State) *Rule {
 		}
 	} else {
 		// now we iterate over our kids
-		for _, klri := range lr.Kids {
+		for _, klri := range lr.Children {
 			klr := klri.(*Rule)
 			if mrule := klr.Lex(ls); mrule != nil { // first to match takes it -- order matters!
 				return mrule
@@ -506,7 +506,7 @@ func (lr *Rule) Find(find string) []*Rule {
 // it is called recursively
 func (lr *Rule) WriteGrammar(writer io.Writer, depth int) {
 	if tree.IsRoot(lr) {
-		for _, k := range lr.Kids {
+		for _, k := range lr.Children {
 			lri := k.(*Rule)
 			lri.WriteGrammar(writer, depth)
 		}
@@ -546,7 +546,7 @@ func (lr *Rule) WriteGrammar(writer io.Writer, depth int) {
 		}
 		if lr.HasChildren() {
 			w := tabwriter.NewWriter(writer, 4, 4, 2, ' ', 0)
-			for _, k := range lr.Kids {
+			for _, k := range lr.Children {
 				lri := k.(*Rule)
 				lri.WriteGrammar(w, depth+1)
 			}

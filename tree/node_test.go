@@ -22,7 +22,7 @@ func TestNodeAddChild(t *testing.T) {
 	child := &NodeBase{}
 	parent.AddChild(child)
 	child.SetName("child1")
-	assert.Equal(t, 1, len(parent.Kids))
+	assert.Equal(t, 1, len(parent.Children))
 	assert.Equal(t, parent, child.Parent())
 	assert.Equal(t, "/node-base/child1", child.Path())
 }
@@ -32,7 +32,7 @@ func TestNodeEmbedAddChild(t *testing.T) {
 	child := &testdata.NodeEmbed{}
 	parent.AddChild(child)
 	child.SetName("child1")
-	assert.Len(t, parent.Kids, 1)
+	assert.Len(t, parent.Children, 1)
 	assert.Equal(t, parent, child.Parent())
 	assert.Equal(t, "/node-embed/child1", child.Path())
 }
@@ -41,7 +41,7 @@ func TestNodeEmbedNewChild(t *testing.T) {
 	parent := testdata.NewNodeEmbed()
 	child := parent.NewChild(parent.NodeType())
 	child.SetName("child1")
-	assert.Len(t, parent.Kids, 1)
+	assert.Len(t, parent.Children, 1)
 	assert.Equal(t, "/node-embed/child1", child.Path())
 	assert.Equal(t, parent.NodeType(), child.NodeType())
 }
@@ -51,7 +51,7 @@ func TestNodePath(t *testing.T) {
 	child1 := parent.NewChild(parent.NodeType())
 	child2 := parent.NewChild(parent.NodeType())
 	child3 := parent.NewChild(parent.NodeType())
-	assert.Len(t, parent.Kids, 3)
+	assert.Len(t, parent.Children, 3)
 	assert.Equal(t, "/node-embed/node-embed-0", child1.Path())
 	assert.Equal(t, "/node-embed/node-embed-1", child2.Path())
 	assert.Equal(t, "/node-embed/node-embed-2", child3.Path())
@@ -67,7 +67,7 @@ func TestNodeEscapePaths(t *testing.T) {
 	child3.SetName("child1/child1.go")
 	schild2 := NewNodeBase(child2)
 	schild2.SetName("subchild1")
-	assert.Len(t, parent.Kids, 3)
+	assert.Len(t, parent.Children, 3)
 	assert.Equal(t, `/node-base/child1\,go`, child1.Path())
 	assert.Equal(t, `child1\,go`, child1.PathFrom(parent))
 	assert.Equal(t, `/node-base/child1\\child1`, child2.Path())
@@ -98,18 +98,18 @@ func TestNodePathFrom(t *testing.T) {
 func TestNodeDeleteChild(t *testing.T) {
 	parent := NewNodeBase()
 	child := NewNodeBase(parent)
-	assert.Len(t, parent.Kids, 1)
+	assert.Len(t, parent.Children, 1)
 	assert.True(t, parent.DeleteChild(child))
-	assert.Len(t, parent.Kids, 0)
+	assert.Len(t, parent.Children, 0)
 }
 
 func TestNodeDeleteChildByName(t *testing.T) {
 	parent := NewNodeBase()
 	child := NewNodeBase(parent)
 	child.SetName("child1")
-	assert.Len(t, parent.Kids, 1)
+	assert.Len(t, parent.Children, 1)
 	assert.True(t, parent.DeleteChildByName("child1"))
-	assert.Len(t, parent.Kids, 0)
+	assert.Len(t, parent.Children, 0)
 }
 
 func TestNodeFindName(t *testing.T) {
@@ -119,10 +119,10 @@ func TestNodeFindName(t *testing.T) {
 		child := NewNodeBase(parent)
 		child.SetName(name)
 	}
-	assert.Len(t, parent.Kids, len(names))
+	assert.Len(t, parent.Children, len(names))
 	for i, nm := range names {
 		for st := range names { // test all starting indexes
-			idx, ok := parent.Children().IndexByName(nm, st)
+			idx, ok := parent.Children.IndexByName(nm, st)
 			assert.True(t, ok)
 			assert.Equal(t, i, idx)
 		}
@@ -137,17 +137,17 @@ func TestNodeFindType(t *testing.T) {
 	assert.True(t, ne.NodeType().HasEmbed(NodeBaseType))
 	assert.True(t, nb.NodeType().HasEmbed(NodeBaseType))
 
-	idx, ok := parent.Children().IndexByType(testdata.NodeEmbedType, NoEmbeds, 0)
+	idx, ok := parent.Children.IndexByType(testdata.NodeEmbedType, NoEmbeds, 0)
 	if assert.True(t, ok) {
 		assert.Equal(t, 0, idx)
 	}
-	idx, ok = parent.Children().IndexByType(NodeBaseType, NoEmbeds, 0)
+	idx, ok = parent.Children.IndexByType(NodeBaseType, NoEmbeds, 0)
 	if assert.True(t, ok) {
 		assert.Equal(t, 1, idx)
 	}
-	_, err := parent.Children().ElemByTypeTry(NodeBaseType, NoEmbeds, 0)
+	_, err := parent.Children.ElemByTypeTry(NodeBaseType, NoEmbeds, 0)
 	assert.NoError(t, err)
-	idx, ok = parent.Children().IndexByType(NodeBaseType, Embeds, 0)
+	idx, ok = parent.Children.IndexByType(NodeBaseType, Embeds, 0)
 	if assert.True(t, ok) {
 		assert.Equal(t, 0, idx)
 	}
@@ -166,13 +166,13 @@ func TestNodeMove(t *testing.T) {
 	child3 := NewNodeBase(parent)
 	child3.SetName("child3")
 
-	bf := fmt.Sprintf("mv before:\n%v\n", parent.Kids)
-	parent.Children().Move(3, 1)
-	a31 := fmt.Sprintf("mv 3 -> 1:\n%v\n", parent.Kids)
-	parent.Children().Move(0, 3)
-	a03 := fmt.Sprintf("mv 0 -> 3:\n%v\n", parent.Kids)
-	parent.Children().Move(1, 2)
-	a12 := fmt.Sprintf("mv 1 -> 2:\n%v\n", parent.Kids)
+	bf := fmt.Sprintf("mv before:\n%v\n", parent.Children)
+	parent.Children.Move(3, 1)
+	a31 := fmt.Sprintf("mv 3 -> 1:\n%v\n", parent.Children)
+	parent.Children.Move(0, 3)
+	a03 := fmt.Sprintf("mv 0 -> 3:\n%v\n", parent.Children)
+	parent.Children.Move(1, 2)
+	a12 := fmt.Sprintf("mv 1 -> 2:\n%v\n", parent.Children)
 
 	bft := `mv before:
 [/node-embed/child0 /node-embed/child1 /node-embed/child2 /node-embed/child3]
@@ -213,7 +213,7 @@ func TestNodeConfig(t *testing.T) {
 
 	Update(parent, plan1)
 
-	cf1 := fmt.Sprintf("plan1:\n%v\n", parent.Kids)
+	cf1 := fmt.Sprintf("plan1:\n%v\n", parent.Children)
 
 	plan2 := TypePlan{
 		{testdata.NodeEmbedType, "child4"},
@@ -225,7 +225,7 @@ func TestNodeConfig(t *testing.T) {
 
 	Update(parent, plan2)
 
-	cf2 := fmt.Sprintf("plan2:\n%v\n", parent.Kids)
+	cf2 := fmt.Sprintf("plan2:\n%v\n", parent.Children)
 
 	cf1t := `plan1:
 [/node-embed/child2 /node-embed/child3 /node-embed/child1]

@@ -150,7 +150,7 @@ func (vw *View) InitLibraryBody(wn physics.Node) {
 	if bod != nil {
 		vw.InitLibShape(bod)
 	}
-	for idx := range *wn.Children() {
+	for idx := range wn.AsTree().Children {
 		wk := wn.Child(idx).(physics.Node)
 		vw.InitLibraryBody(wk)
 	}
@@ -270,7 +270,7 @@ func (vw *View) ConfigView(wn physics.Node, vn svg.Node) {
 func (vw *View) SyncNode(wn physics.Node, vn svg.Node) bool {
 	nm := wn.Name()
 	vn.SetName(nm) // guaranteed to be unique
-	skids := *wn.Children()
+	skids := wn.AsTree().Children
 	p := make(tree.TypePlan, 0, len(skids))
 	for _, skid := range skids {
 		p.Add(svg.GroupType, skid.Name())
@@ -297,7 +297,7 @@ func (vw *View) SyncNode(wn physics.Node, vn svg.Node) bool {
 // UpdatePoseNode updates the view pose values only from world tree.
 // Essential that both trees are already synchronized.
 func (vw *View) UpdatePoseNode(wn physics.Node, vn svg.Node) {
-	skids := *wn.Children()
+	skids := wn.AsTree().Children
 	for idx := range skids {
 		wk := wn.Child(idx).(physics.Node)
 		vk := vn.Child(idx).(svg.Node).(*svg.Group)
@@ -312,7 +312,7 @@ func (vw *View) UpdatePoseNode(wn physics.Node, vn svg.Node) {
 // UpdateBodyViewNode updates the body view info for given name(s)
 // Essential that both trees are already synchronized.
 func (vw *View) UpdateBodyViewNode(bodyNames []string, wn physics.Node, vn svg.Node) {
-	skids := *wn.Children()
+	skids := wn.AsTree().Children
 	for idx := range skids {
 		wk := wn.Child(idx).(physics.Node)
 		vk := vn.Child(idx).(svg.Node)

@@ -55,7 +55,7 @@ func (tb *Toolbar) Init() {
 
 func (tb *Toolbar) IsVisible() bool {
 	// do not render toolbars with no buttons
-	return tb.WidgetBase.IsVisible() && len(tb.Kids) > 0
+	return tb.WidgetBase.IsVisible() && len(tb.Children) > 0
 }
 
 // AppChooser returns the app [Chooser] used for searching for
@@ -112,11 +112,11 @@ func (tb *Toolbar) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 
 // to the end of the list.
 func (tb *Toolbar) AllItemsToChildren() {
 	if len(tb.overflowItems) > 0 {
-		tb.Kids = append(tb.Kids, tb.overflowItems...)
+		tb.Children = append(tb.Children, tb.overflowItems...)
 		tb.overflowItems = nil
 	}
 	ovi := -1
-	for i, k := range tb.Kids {
+	for i, k := range tb.Children {
 		_, wb := AsWidget(k)
 		if wb == nil {
 			continue
@@ -127,9 +127,9 @@ func (tb *Toolbar) AllItemsToChildren() {
 		}
 	}
 	if ovi >= 0 {
-		tb.Kids.DeleteAtIndex(ovi)
+		tb.Children.DeleteAtIndex(ovi)
 	}
-	tb.Kids = append(tb.Kids, tb.overflowButton.This())
+	tb.Children = append(tb.Children, tb.overflowButton.This())
 	tb.overflowButton.Update()
 }
 
@@ -149,7 +149,7 @@ func (tb *Toolbar) MoveToOverflow() {
 	sz := &tb.Geom.Size
 	sz.Alloc.Total.SetDim(ma, avail)
 	sz.SetContentFromTotal(&sz.Alloc)
-	n := len(tb.Kids)
+	n := len(tb.Children)
 	ovidx := n - 1
 	hasOv := false
 	szsum := float32(0)
@@ -169,8 +169,8 @@ func (tb *Toolbar) MoveToOverflow() {
 		return tree.Continue
 	})
 	if ovidx != n-1 {
-		tb.Kids.Move(n-1, ovidx)
-		tb.Kids = tb.Kids[:ovidx+1]
+		tb.Children.Move(n-1, ovidx)
+		tb.Children = tb.Children[:ovidx+1]
 	}
 	if len(tb.overflowItems) == 0 && len(tb.OverflowMenus) == 0 {
 		tb.overflowButton.SetState(true, states.Invisible)

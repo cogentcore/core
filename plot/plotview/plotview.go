@@ -293,7 +293,7 @@ func (pl *PlotView) UpdatePlot() {
 	if pl.Table == nil || pl.Table.Table == nil || pl.InPlot {
 		return
 	}
-	if len(pl.Kids) != 2 || len(pl.Columns) != pl.Table.Table.NumColumns() {
+	if len(pl.Children) != 2 || len(pl.Columns) != pl.Table.Table.NumColumns() {
 		pl.Update()
 	}
 	if pl.Table.Len() == 0 {
@@ -434,7 +434,7 @@ func (pl *PlotView) ColumnsFromMetaMap(meta map[string]string) {
 // SetAllColumns turns all Columns on or off (except X axis)
 func (pl *PlotView) SetAllColumns(on bool) {
 	fr := pl.ColumnsFrame()
-	for i, cli := range *fr.Children() {
+	for i, cli := range fr.Children {
 		if i < PlotColumnsHeaderN {
 			continue
 		}
@@ -455,7 +455,7 @@ func (pl *PlotView) SetAllColumns(on bool) {
 // SetColumnsByName turns cols On or Off if their name contains given string
 func (pl *PlotView) SetColumnsByName(nameContains string, on bool) { //types:add
 	fr := pl.ColumnsFrame()
-	for i, cli := range *fr.Children() {
+	for i, cli := range fr.Children {
 		if i < PlotColumnsHeaderN {
 			continue
 		}

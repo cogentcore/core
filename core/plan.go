@@ -171,7 +171,7 @@ func (p *Plan) Update(w Widget) {
 	if len(*p) == 0 { // check again after potentially removing parts
 		return
 	}
-	wb.Kids, _ = plan.Update(wb.Kids, len(*p),
+	wb.Children, _ = plan.Update(wb.Children, len(*p),
 		func(i int) string {
 			return (*p)[i].Name
 		}, func(name string, i int) tree.Node {

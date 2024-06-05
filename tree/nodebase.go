@@ -32,17 +32,16 @@ type NodeBase struct {
 	Flags Flags `tableview:"-" copier:"-" json:"-" xml:"-" set:"-" max-width:"80" height:"3"`
 
 	// Properties is a property map for arbitrary key-value properties.
-	Properties map[string]any `tableview:"-" xml:"-" copier:"-" set:"-" label:"Properties"`
+	Properties map[string]any `tableview:"-" xml:"-" copier:"-" set:"-"`
 
 	// Par is the parent of this node, which is set automatically when this node is
 	// added as a child of a parent. It is typically accessed through [Node.Parent].
 	Par Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
-	// Kids is the list of children of this node. All of them are set to have this node
+	// Children is the list of children of this node. All of them are set to have this node
 	// as their parent. They can be reordered, but you should generally use [Node]
 	// methods when adding and deleting children to ensure everything gets updated.
-	// They are typically accessed through [Node.Children].
-	Kids Slice `tableview:"-" copier:"-" set:"-" label:"Children"`
+	Children Slice `tableview:"-" copier:"-" set:"-"`
 
 	// Ths is a pointer to ourselves as a [Node]. It can always be used to extract the
 	// true underlying type of an object when [NodeBase] is embedded in other structs;
@@ -122,7 +121,7 @@ func (n *NodeBase) IndexInParent() int {
 	if n.Par == nil {
 		return -1
 	}
-	idx, ok := n.Par.Children().IndexOf(n.This(), n.index) // very fast if index is close..
+	idx, ok := n.Par.AsTree().Children.IndexOf(n.This(), n.index) // very fast if index is close..
 	if !ok {
 		return -1
 	}
@@ -182,29 +181,21 @@ func (n *NodeBase) ParentByType(t *types.Type, embeds bool) Node {
 
 // HasChildren returns whether this node has any children.
 func (n *NodeBase) HasChildren() bool {
-	return len(n.Kids) > 0
+	return len(n.Children) > 0
 }
 
 // NumChildren returns the number of children this node has.
 func (n *NodeBase) NumChildren() int {
-	return len(n.Kids)
-}
-
-// Children returns a pointer to the slice of children of this node.
-// The resultant slice can be modified directly (e.g., sort, reorder),
-// but new children should be added via New/Add/Insert Child methods on
-// Node to ensure proper initialization.
-func (n *NodeBase) Children() *Slice {
-	return &n.Kids
+	return len(n.Children)
 }
 
 // Child returns the child of this node at the given index and returns nil if
 // the index is out of range.
 func (n *NodeBase) Child(i int) Node {
-	if i >= len(n.Kids) || i < 0 {
+	if i >= len(n.Children) || i < 0 {
 		return nil
 	}
-	return n.Kids[i]
+	return n.Children[i]
 }
 
 // ChildByName returns the first child that has the given name, and nil
@@ -213,7 +204,7 @@ func (n *NodeBase) Child(i int) Node {
 // can be a key speedup for large lists. If no value is specified for
 // startIndex, it starts in the middle, which is a good default.
 func (n *NodeBase) ChildByName(name string, startIndex ...int) Node {
-	return n.Kids.ElemByName(name, startIndex...)
+	return n.Children.ElemByName(name, startIndex...)
 }
 
 // ChildByType returns the first child that has the given type, and nil
@@ -224,7 +215,7 @@ func (n *NodeBase) ChildByName(name string, startIndex ...int) Node {
 // no value is specified for startIndex, it starts in the middle, which is a
 // good default.
 func (n *NodeBase) ChildByType(t *types.Type, embeds bool, startIndex ...int) Node {
-	return n.Kids.ElemByType(t, embeds, startIndex...)
+	return n.Children.ElemByType(t, embeds, startIndex...)
 }
 
 // Paths:
@@ -289,8 +280,8 @@ func (n *NodeBase) PathFrom(parent Node) string {
 
 }
 
-// find the child on the path
-func findPathChild(k Node, child string) (int, bool) {
+// findPathChild finds the child on the path.
+func findPathChild(n Node, child string) (int, bool) {
 	if len(child) == 0 {
 		return 0, false
 	}
@@ -300,14 +291,14 @@ func findPathChild(k Node, child string) (int, bool) {
 			return idx, false
 		}
 		if idx < 0 { // from end
-			idx = len(*k.Children()) + idx
+			idx = len(n.AsTree().Children) + idx
 		}
-		if k.Children().IsValidIndex(idx) != nil {
+		if n.AsTree().Children.IsValidIndex(idx) != nil {
 			return idx, false
 		}
 		return idx, true
 	}
-	return k.Children().IndexByName(child, 0)
+	return n.AsTree().Children.IndexByName(child, 0)
 }
 
 // FindPath returns the node at the given path from this node.
@@ -331,7 +322,7 @@ func (n *NodeBase) FindPath(path string) Node {
 			if !ok {
 				return nil
 			}
-			curn = (*(curn.Children()))[idx]
+			curn = curn.AsTree().Children[idx]
 			for i := 1; i < len(fels); i++ {
 				fe := UnescapePathName(fels[i])
 				fk, err := curn.FieldByName(fe)
@@ -346,7 +337,7 @@ func (n *NodeBase) FindPath(path string) Node {
 			if !ok {
 				return nil
 			}
-			curn = (*(curn.Children()))[idx]
+			curn = curn.AsTree().Children[idx]
 		}
 	}
 	return curn
@@ -369,7 +360,7 @@ func (n *NodeBase) AddChild(kid Node) error {
 		return err
 	}
 	initNode(kid)
-	n.Kids = append(n.Kids, kid)
+	n.Children = append(n.Children, kid)
 	SetParent(kid, n) // key to set new parent before deleting: indicates move instead of delete
 	return nil
 }
@@ -383,7 +374,7 @@ func (n *NodeBase) NewChild(typ *types.Type) Node {
 	}
 	kid := NewOfType(typ)
 	initNode(kid)
-	n.Kids = append(n.Kids, kid)
+	n.Children = append(n.Children, kid)
 	SetParent(kid, n)
 	return kid
 }
@@ -397,7 +388,7 @@ func (n *NodeBase) InsertChild(kid Node, at int) error {
 		return err
 	}
 	initNode(kid)
-	n.Kids.Insert(kid, at)
+	n.Children.Insert(kid, at)
 	SetParent(kid, n)
 	return nil
 }
@@ -411,7 +402,7 @@ func (n *NodeBase) InsertNewChild(typ *types.Type, at int) Node {
 	}
 	kid := NewOfType(typ)
 	initNode(kid)
-	n.Kids.Insert(kid, at)
+	n.Children.Insert(kid, at)
 	SetParent(kid, n)
 	return kid
 }
@@ -425,7 +416,7 @@ func (n *NodeBase) DeleteChildAtIndex(idx int) bool {
 	if child == nil {
 		return false
 	}
-	n.Kids.DeleteAtIndex(idx)
+	n.Children.DeleteAtIndex(idx)
 	child.Destroy()
 	return true
 }
@@ -436,7 +427,7 @@ func (n *NodeBase) DeleteChild(child Node) bool {
 	if child == nil {
 		return false
 	}
-	idx, ok := n.Kids.IndexOf(child)
+	idx, ok := n.Children.IndexOf(child)
 	if !ok {
 		return false
 	}
@@ -446,7 +437,7 @@ func (n *NodeBase) DeleteChild(child Node) bool {
 // DeleteChildByName deletes child node by name, returning false
 // if it can not find it.
 func (n *NodeBase) DeleteChildByName(name string) bool {
-	idx, ok := n.Kids.IndexByName(name)
+	idx, ok := n.Children.IndexByName(name)
 	if !ok {
 		return false
 	}
@@ -455,8 +446,8 @@ func (n *NodeBase) DeleteChildByName(name string) bool {
 
 // DeleteChildren deletes all children nodes.
 func (n *NodeBase) DeleteChildren() {
-	kids := n.Kids
-	n.Kids = n.Kids[:0] // preserves capacity of list
+	kids := n.Children
+	n.Children = n.Children[:0] // preserves capacity of list
 	for _, kid := range kids {
 		if kid == nil {
 			continue
@@ -730,7 +721,7 @@ func (n *NodeBase) WalkDownBreadth(fun func(n Node) bool) {
 		queue = queue[1:]
 
 		if cur.This() != nil && fun(cur) { // false return means don't proceed
-			for _, cn := range *cur.Children() {
+			for _, cn := range cur.AsTree().Children {
 				if cn != nil && cn.This() != nil {
 					cn.AsTree().depth = depth + 1
 					queue = append(queue, cn)
@@ -765,11 +756,11 @@ func (n *NodeBase) CopyFrom(src Node) {
 
 // copyFrom is the implementation of [NodeBase.CopyFrom].
 func copyFrom(dst, src Node) {
-	dst.Children().ConfigCopy(dst.This(), *src.Children())
+	dst.AsTree().Children.ConfigCopy(dst.This(), src.AsTree().Children)
 	maps.Copy(dst.AsTree().Properties, src.AsTree().Properties)
 
 	dst.This().CopyFieldsFrom(src)
-	for i, kid := range *dst.Children() {
+	for i, kid := range dst.AsTree().Children {
 		fmk := src.Child(i)
 		copyFrom(kid, fmk)
 	}

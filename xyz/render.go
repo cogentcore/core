@@ -203,7 +203,7 @@ func (sc *Scene) DepthImage() ([]float32, error) {
 // UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
 // groups aggregate over elements
 func (sc *Scene) UpdateMeshBBox() {
-	for _, kid := range sc.Kids {
+	for _, kid := range sc.Children {
 		kii, _ := AsNode(kid)
 		if kii == nil {
 			continue

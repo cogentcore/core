@@ -93,12 +93,6 @@ type Node interface {
 	// NumChildren returns the number of children this node has.
 	NumChildren() int
 
-	// Children returns a pointer to the slice of children of this node.
-	// The resultant slice can be modified directly (e.g., sort, reorder),
-	// but new children should be added via New/Add/Insert Child methods on
-	// Node to ensure proper initialization.
-	Children() *Slice
-
 	// Child returns the child of this node at the given index and returns nil if
 	// the index is out of range.
 	Child(i int) Node

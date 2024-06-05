@@ -483,7 +483,7 @@ func (g *NodeBase) PushTransform(sv *SVG) (bool, *paint.Context) {
 }
 
 func (g *NodeBase) RenderChildren(sv *SVG) {
-	for _, kid := range g.Kids {
+	for _, kid := range g.Children {
 		ni := kid.(Node)
 		ni.Render(sv)
 	}

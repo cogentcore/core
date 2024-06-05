@@ -133,7 +133,7 @@ func HandleElement(ctx *Context) {
 			switch pw.AsTree().Property("tag") {
 			case "ol":
 				number := 0
-				for _, k := range *pw.Children() {
+				for _, k := range pw.AsTree().Children {
 					// we only consider text for the number (frames may be
 					// added for nested lists, interfering with the number)
 					if _, ok := k.(*core.Text); ok {

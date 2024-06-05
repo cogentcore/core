@@ -468,9 +468,9 @@ func (pr *Rule) OptimizeOrder(ps *State) {
 // CompileTokMap compiles first token map
 func (pr *Rule) CompileTokMap(ps *State) bool {
 	valid := true
-	pr.FiTokenMap = make(map[string]*Rule, len(pr.Kids))
-	pr.FiTokenElseIndex = len(pr.Kids)
-	for i, kpri := range pr.Kids {
+	pr.FiTokenMap = make(map[string]*Rule, len(pr.Children))
+	pr.FiTokenElseIndex = len(pr.Children)
+	for i, kpri := range pr.Children {
 		kpr := kpri.(*Rule)
 		if len(kpr.Rules) == 0 || !kpr.Rules[0].IsToken() {
 			pr.FiTokenElseIndex = i
@@ -611,7 +611,7 @@ func (pr *Rule) Validate(ps *State) bool {
 	}
 
 	// now we iterate over our kids
-	for _, kpri := range pr.Kids {
+	for _, kpri := range pr.Children {
 		kpr := kpri.(*Rule)
 		if !kpr.Validate(ps) {
 			valid = false
@@ -626,7 +626,7 @@ func (pr *Rule) StartParse(ps *State) *Rule {
 		ps.GotoEof()
 		return nil
 	}
-	kpr := pr.Kids[0].(*Rule) // first rule is special set of valid top-level matches
+	kpr := pr.Children[0].(*Rule) // first rule is special set of valid top-level matches
 	var parAst *Ast
 	scope := lexer.Reg{St: ps.Pos}
 	if ps.Ast.HasChildren() {
@@ -700,7 +700,7 @@ func (pr *Rule) Parse(ps *State, parent *Rule, parAst *Ast, scope lexer.Reg, opt
 	}
 
 	// pure group types just iterate over kids
-	for _, kpri := range pr.Kids {
+	for _, kpri := range pr.Children {
 		kpr := kpri.(*Rule)
 		if mrule := kpr.Parse(ps, pr, parAst, scope, optMap, depth+1); mrule != nil {
 			return mrule
@@ -1124,7 +1124,7 @@ func (pr *Rule) MatchGroup(ps *State, parAst *Ast, scope lexer.Reg, depth int, o
 	}
 	// prf.End()
 	sti := 0
-	nk := len(pr.Kids)
+	nk := len(pr.Children)
 	if pr.FirstTokenMap {
 		stlx := ps.Src.LexAt(scope.St)
 		if kpr, has := pr.FiTokenMap[stlx.Token.StringKey()]; has {
@@ -1141,7 +1141,7 @@ func (pr *Rule) MatchGroup(ps *State, parAst *Ast, scope lexer.Reg, depth int, o
 	}
 
 	for i := sti; i < nk; i++ {
-		kpri := pr.Kids[i]
+		kpri := pr.Children[i]
 		kpr := kpri.(*Rule)
 		match, nscope, mpos := kpr.Match(ps, parAst, scope, depth+1, optMap)
 		if match {
@@ -1467,8 +1467,8 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, parent *Rule, parentAst *Ast, scope 
 		}
 	}
 	// our AST is now backwards -- need to swap them
-	if len(ourAst.Kids) == 2 {
-		ourAst.Kids.Swap(0, 1)
+	if len(ourAst.Children) == 2 {
+		ourAst.Children.Swap(0, 1)
 		// if GuiActive {
 		// we have a very strange situation here: the tree view of the Ast will typically
 		// have two children, named identically (e.g., Expr, Expr) and it will not update
@@ -1543,7 +1543,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 				}
 				if findAll {
 					pn := nd.Parent()
-					for _, pk := range *pn.Children() {
+					for _, pk := range pn.AsTree().Children {
 						if pk != nd && pk.Name() == nd.Name() {
 							adnl = append(adnl, pk)
 						}
@@ -1569,7 +1569,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 			if node != nil {
 				if findAll {
 					pn := node.Parent()
-					for _, pk := range *pn.Children() {
+					for _, pk := range pn.AsTree().Children {
 						if pk != node && pk.Name() == node.Name() {
 							adnl = append(adnl, pk)
 						}
@@ -1760,7 +1760,7 @@ func (pr *Rule) Find(find string) []*Rule {
 // it is called recursively
 func (pr *Rule) WriteGrammar(writer io.Writer, depth int) {
 	if tree.IsRoot(pr) {
-		for _, k := range pr.Kids {
+		for _, k := range pr.Children {
 			pri := k.(*Rule)
 			pri.WriteGrammar(writer, depth)
 		}
@@ -1776,7 +1776,7 @@ func (pr *Rule) WriteGrammar(writer io.Writer, depth int) {
 		if pr.IsGroup() {
 			fmt.Fprintf(writer, "%v%v {\n", ind, nmstr)
 			w := tabwriter.NewWriter(writer, 4, 4, 2, ' ', 0)
-			for _, k := range pr.Kids {
+			for _, k := range pr.Children {
 				pri := k.(*Rule)
 				pri.WriteGrammar(w, depth+1)
 			}

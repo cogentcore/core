@@ -329,7 +329,7 @@ func (sv *SVG) GradientDeleteNodeProp(n Node, prop string) bool {
 // Does not remove gradients with StopsName = "" with extant stops -- these
 // should be removed manually, as they are not automatically generated.
 func (sv *SVG) GradientUpdateAllStops() {
-	for _, k := range sv.Defs.Kids {
+	for _, k := range sv.Defs.Children {
 		gr, ok := k.(*Gradient)
 		if ok {
 			sv.GradientUpdateStops(gr)

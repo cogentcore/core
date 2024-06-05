@@ -1000,7 +1000,7 @@ func (tv *TreeView) MoveDownSibling(selMode events.SelectModes) *TreeView {
 		return nil
 	}
 	myidx := tv.IndexInParent()
-	if myidx < len(*tv.Par.Children())-1 {
+	if myidx < len(tv.Par.AsTree().Children)-1 {
 		nn := AsTreeView(tv.Par.Child(myidx + 1))
 		if nn != nil {
 			nn.SelectUpdate(selMode)
@@ -1172,7 +1172,7 @@ func (tv *TreeView) MoveEndAction(selMode events.SelectModes) *TreeView {
 }
 
 func (tv *TreeView) SetKidsVisibility(parentClosed bool) {
-	for _, k := range *tv.Children() {
+	for _, k := range tv.Children {
 		tvn := AsTreeView(k)
 		if tvn != nil {
 			tvn.SetState(parentClosed, states.Invisible)

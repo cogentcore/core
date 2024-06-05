@@ -890,7 +890,7 @@ func (ly *Frame) LaySetInitCellsStacked() {
 }
 
 func (ly *Frame) LaySetInitCellsGrid() {
-	n := len(*ly.Children())
+	n := len(ly.Children)
 	cols := ly.Styles.Columns
 	if cols == 0 {
 		cols = int(math32.Sqrt(float32(n)))

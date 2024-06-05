@@ -954,7 +954,7 @@ func (sv *SliceViewBase) RowFirstWidget(row int) (*core.WidgetBase, bool) {
 	}
 	nWidgPerRow, _ := sv.This().(SliceViewer).RowWidgetNs()
 	sg := sv.This().(SliceViewer).SliceGrid()
-	w := sg.Kids[row*nWidgPerRow].(core.Widget).AsWidget()
+	w := sg.Children[row*nWidgPerRow].(core.Widget).AsWidget()
 	return w, true
 }
 

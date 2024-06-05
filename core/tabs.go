@@ -182,7 +182,7 @@ func (ts *Tabs) NumTabs() int {
 	if fr == nil {
 		return 0
 	}
-	return len(fr.Kids)
+	return len(fr.Children)
 }
 
 // CurrentTab returns currently selected tab and its index; returns nil if none.
@@ -205,7 +205,7 @@ func (ts *Tabs) CurrentTab() (Widget, int) {
 // be passed for the tab button.
 func (ts *Tabs) NewTab(label string, icon ...icons.Icon) *Frame {
 	fr := ts.FrameWidget()
-	idx := len(*fr.Children())
+	idx := len(fr.Children)
 	frame := ts.InsertNewTab(label, idx, icon...)
 	return frame
 }
@@ -229,7 +229,7 @@ func (ts *Tabs) InsertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
 // and returns the index of that tab.
 func (ts *Tabs) AddTab(frame *Frame, label string) int {
 	fr := ts.FrameWidget()
-	idx := len(*fr.Children())
+	idx := len(fr.Children)
 	ts.InsertTab(frame, label, idx)
 	return idx
 }
@@ -249,7 +249,7 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, icon ...ico
 		ts.SelectTabByName(tab.Nm)
 	})
 	fr := ts.FrameWidget()
-	if len(fr.Kids) == 1 {
+	if len(fr.Children) == 1 {
 		fr.StackTop = 0
 		tab.SetSelected(true)
 		// } else {
@@ -277,7 +277,7 @@ func (ts *Tabs) TabAtIndex(idx int) (*Frame, *Tab, bool) {
 
 	fr := ts.FrameWidget()
 	tb := ts.Tabs()
-	sz := len(*fr.Children())
+	sz := len(fr.Children)
 	if idx < 0 || idx >= sz {
 		slog.Error("core.Tabs: index out of range for number of tabs", "index", idx, "numTabs", sz)
 		return nil, nil, false
@@ -400,7 +400,7 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 
 	ts.Mu.Lock()
 	fr := ts.FrameWidget()
-	sz := len(*fr.Children())
+	sz := len(fr.Children)
 	tb := ts.Tabs()
 	nidx := -1
 	if fr.StackTop == idx {

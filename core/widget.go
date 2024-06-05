@@ -554,7 +554,7 @@ func (wb *WidgetBase) NodeWalkDown(fun func(tree.Node) bool) {
 // WidgetKidsIter iterates through the Kids, as widgets, calling the given function.
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
 func (wb *WidgetBase) WidgetKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase) bool) {
-	for i, k := range wb.Kids {
+	for i, k := range wb.Children {
 		kwi, kwb := AsWidget(k)
 		if kwi == nil || kwi.This() == nil {
 			break
@@ -571,7 +571,7 @@ func (wb *WidgetBase) WidgetKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase
 // This is used e.g., for layout functions to exclude non-visible direct children.
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
 func (wb *WidgetBase) VisibleKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase) bool) {
-	for i, k := range wb.Kids {
+	for i, k := range wb.Children {
 		kwi, kwb := AsWidget(k)
 		if kwi == nil || kwi.This() == nil {
 			break

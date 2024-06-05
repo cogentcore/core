@@ -334,7 +334,7 @@ func ConfigAppChooser(ch *Chooser) {
 // about the original button menu. Consumers of this function should
 // typically set path to "".
 func AddButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
-	for _, kid := range *parent.Children() {
+	for _, kid := range parent.AsTree().Children {
 		bt := AsButton(kid)
 		if bt == nil || bt.IsDisabled() {
 			continue

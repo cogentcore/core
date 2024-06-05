@@ -58,7 +58,7 @@ func (gl *GoLang) NamesFromAst(fs *parse.FileState, pkg *syms.Symbol, ast *parse
 	}
 	var sary []string
 	if sast.HasChildren() {
-		for i := range sast.Kids {
+		for i := range sast.Children {
 			sary = append(sary, gl.NamesFromAst(fs, pkg, sast, i)...)
 		}
 	} else {
@@ -88,24 +88,24 @@ func (gl *GoLang) FuncTypeFromAst(fs *parse.FileState, pkg *syms.Symbol, ast *pa
 	}
 	poff := 0
 	isMeth := false
-	if pars.Nm == "MethRecvName" && len(ast.Kids) > 2 {
+	if pars.Nm == "MethRecvName" && len(ast.Children) > 2 {
 		isMeth = true
-		rcv := pars.Kids[0].(*parser.Ast)
-		rtyp := pars.Kids[1].(*parser.Ast)
+		rcv := pars.Children[0].(*parser.Ast)
+		rtyp := pars.Children[1].(*parser.Ast)
 		fty.Els.Add(rcv.Src, rtyp.Src)
 		poff = 2
 		pars = ast.ChildAst(2)
-	} else if pars.Nm == "Name" && len(ast.Kids) > 1 {
+	} else if pars.Nm == "Name" && len(ast.Children) > 1 {
 		poff = 1
 		pars = ast.ChildAst(1)
 	}
-	npars := len(pars.Kids)
+	npars := len(pars.Children)
 	var sigpars *parser.Ast
 	if npars > 0 && (pars.Nm == "SigParams" || pars.Nm == "SigParamsResult") {
 		if ps := pars.ChildAst(0); ps == nil {
 			sigpars = pars
 			pars = ps
-			npars = len(pars.Kids)
+			npars = len(pars.Children)
 		} else {
 			npars = 0 // not really
 		}
@@ -119,11 +119,11 @@ func (gl *GoLang) FuncTypeFromAst(fs *parse.FileState, pkg *syms.Symbol, ast *pa
 		}
 	}
 	nrvals := 0
-	if sigpars != nil && len(sigpars.Kids) >= 2 {
+	if sigpars != nil && len(sigpars.Children) >= 2 {
 		rvals := sigpars.ChildAst(1)
 		gl.RvalsFromAst(fs, pkg, rvals, fty)
 		nrvals = len(fty.Els) - npars // how many we added..
-	} else if poff < 2 && (len(ast.Kids) >= poff+2) {
+	} else if poff < 2 && (len(ast.Children) >= poff+2) {
 		rvals := ast.ChildAst(poff + 1)
 		gl.RvalsFromAst(fs, pkg, rvals, fty)
 		nrvals = len(fty.Els) - npars // how many we added..
@@ -134,13 +134,13 @@ func (gl *GoLang) FuncTypeFromAst(fs *parse.FileState, pkg *syms.Symbol, ast *pa
 
 // ParamsFromAst sets params as Els for given function type (also for return types)
 func (gl *GoLang) ParamsFromAst(fs *parse.FileState, pkg *syms.Symbol, pars *parser.Ast, fty *syms.Type, name string) {
-	npars := len(pars.Kids)
+	npars := len(pars.Children)
 	var pnames []string // param names that all share same type
 	for i := 0; i < npars; i++ {
-		par := pars.Kids[i].(*parser.Ast)
-		psz := len(par.Kids)
+		par := pars.Children[i].(*parser.Ast)
+		psz := len(par.Children)
 		if par.Nm == "ParType" && psz == 1 {
-			ptypa := par.Kids[0].(*parser.Ast)
+			ptypa := par.Children[0].(*parser.Ast)
 			if ptypa.Nm == "TypeNm" { // could be multiple args with same type or a separate type-only arg
 				if ptl, _ := gl.FindTypeName(par.Src, fs, pkg); ptl != nil {
 					fty.Els.Add(fmt.Sprintf("%s_%v", name, i), par.Src)
@@ -162,7 +162,7 @@ func (gl *GoLang) ParamsFromAst(fs *parse.FileState, pkg *syms.Symbol, pars *par
 				pnames = nil
 			}
 		} else if psz == 2 { // ParName
-			pnm := par.Kids[0].(*parser.Ast)
+			pnm := par.Children[0].(*parser.Ast)
 			ptyp, ok := gl.SubTypeFromAst(fs, pkg, par, 1)
 			if ok {
 				pnsz := len(pnames)
@@ -184,7 +184,7 @@ func (gl *GoLang) RvalsFromAst(fs *parse.FileState, pkg *syms.Symbol, rvals *par
 	if rvals.Nm == "Block" { // todo: maybe others
 		return
 	}
-	nrvals := len(rvals.Kids)
+	nrvals := len(rvals.Children)
 	if nrvals == 1 { // single rval, unnamed, has type directly..
 		rval := rvals.ChildAst(0)
 		if rval.Nm != "ParName" {

@@ -108,7 +108,7 @@ func (ast *Ast) SetTokRegEnd(pos lexer.Pos, src *lexer.File) {
 func (ast *Ast) WriteTree(out io.Writer, depth int) {
 	ind := indent.Tabs(depth)
 	fmt.Fprintf(out, "%v%v: %v\n", ind, ast.Nm, ast.Src)
-	for _, k := range ast.Kids {
+	for _, k := range ast.Children {
 		ai := k.(*Ast)
 		ai.WriteTree(out, depth+1)
 	}

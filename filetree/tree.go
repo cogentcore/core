@@ -356,7 +356,7 @@ func (ft *Tree) ExtNodeByPath(fpath string) (*Node, error) {
 	if ekid == nil {
 		return nil, fmt.Errorf("ExtFile not updated -- no ExtFiles node")
 	}
-	ekids := *ekid.Children()
+	ekids := ekid.AsTree().Children
 	err := ekids.IsValidIndex(i)
 	if err == nil {
 		kn := AsNode(ekids[i])
@@ -376,7 +376,7 @@ func (ft *Tree) SyncExtFiles(efn *Node) {
 	}
 	tree.Update(efn, plan) // NOT unique names
 	// always go through kids, regardless of mods
-	for i, sfk := range efn.Kids {
+	for i, sfk := range efn.Children {
 		sf := AsNode(sfk)
 		sf.FRoot = ft
 		fp := ft.ExtFiles[i]

@@ -35,7 +35,7 @@ func (gp *Group) GroupBBox() {
 	hasDyn := false
 	gp.BBox.BBox.SetEmpty()
 	gp.BBox.VelBBox.SetEmpty()
-	for _, kid := range gp.Kids {
+	for _, kid := range gp.Children {
 		nii, ni := AsNode(kid)
 		if nii == nil {
 			continue
@@ -157,7 +157,7 @@ const (
 func (gp *Group) WorldCollide(dynTop bool) []Contacts {
 	var stats []Node
 	var dyns []Node
-	for _, kid := range gp.Kids {
+	for _, kid := range gp.Children {
 		nii, _ := AsNode(kid)
 		if nii == nil {
 			continue
@@ -172,7 +172,7 @@ func (gp *Group) WorldCollide(dynTop bool) []Contacts {
 	var sdyns []Node
 	if !dynTop {
 		for _, d := range dyns {
-			for _, dk := range *d.Children() {
+			for _, dk := range d.AsTree().Children {
 				nii, _ := AsNode(dk)
 				if nii == nil {
 					continue

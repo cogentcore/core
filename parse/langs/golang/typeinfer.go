@@ -75,7 +75,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 				if strings.HasPrefix(ast.Nm, "ForRange") {
 					gl.InferForRangeSymbolType(sy, fs, pkg)
 				} else {
-					astyp = ast.ChildAst(len(ast.Kids) - 1)
+					astyp = ast.ChildAst(len(ast.Children) - 1)
 					vty, ok := gl.TypeFromAst(fs, pkg, nil, astyp)
 					if ok {
 						sy.Type = SymTypeNameForPkg(vty, pkg)
@@ -136,10 +136,10 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 				// 	fmt.Printf("InferSymbolType: NameType: %v\n", sy.Name)
 				// }
 				if ast.HasChildren() {
-					astyp := ast.ChildAst(len(ast.Kids) - 1)
+					astyp := ast.ChildAst(len(ast.Children) - 1)
 					if astyp.Nm == "FieldTag" {
 						// ast.WriteTree(os.Stdout, 1)
-						astyp = ast.ChildAst(len(ast.Kids) - 2)
+						astyp = ast.ChildAst(len(ast.Children) - 2)
 					}
 					vty, ok := gl.TypeFromAst(fs, pkg, nil, astyp)
 					if ok {

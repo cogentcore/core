@@ -550,7 +550,7 @@ func (tv *TableView) RowFirstVisWidget(row int) (*core.WidgetBase, bool) {
 	}
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	sg := tv.SliceGrid()
-	w := sg.Kids[row*nWidgPerRow].(core.Widget).AsWidget()
+	w := sg.Children[row*nWidgPerRow].(core.Widget).AsWidget()
 	if w.Geom.TotalBBox != (image.Rectangle{}) {
 		return w, true
 	}

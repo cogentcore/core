@@ -77,9 +77,9 @@ func SetParent(child Node, parent Node) {
 func MoveToParent(child Node, parent Node) {
 	oldParent := child.Parent()
 	if oldParent != nil {
-		idx, ok := oldParent.Children().IndexOf(child)
+		idx, ok := oldParent.AsTree().Children.IndexOf(child)
 		if ok {
-			oldParent.Children().DeleteAtIndex(idx)
+			oldParent.AsTree().DeleteChildAtIndex(idx)
 		}
 	}
 	parent.AsTree().AddChild(child)

@@ -236,7 +236,7 @@ func (fr *Frame) ChildWithFocus() (Widget, int) {
 // if updn is true, then for Grid layouts, it moves down to next row
 // instead of just the sequentially next item.
 func (fr *Frame) FocusNextChild(updn bool) bool {
-	sz := len(fr.Kids)
+	sz := len(fr.Children)
 	if sz <= 1 {
 		return false
 	}
@@ -273,7 +273,7 @@ func (fr *Frame) FocusNextChild(updn bool) bool {
 // If updn is true, then for Grid layouts, it moves up to next row
 // instead of just the sequentially next item.
 func (fr *Frame) FocusPreviousChild(updn bool) bool {
-	sz := len(fr.Kids)
+	sz := len(fr.Children)
 	if sz <= 1 {
 		return false
 	}

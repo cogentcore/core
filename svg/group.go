@@ -24,7 +24,7 @@ func (g *Group) EnforceSVGName() bool { return false }
 // BBoxFromChildren sets the Group BBox from children
 func BBoxFromChildren(n Node) image.Rectangle {
 	bb := image.Rectangle{}
-	for i, kid := range *n.Children() {
+	for i, kid := range n.AsTree().Children {
 		kn := kid.(Node)
 		knb := kn.AsNodeBase()
 		if i == 0 {

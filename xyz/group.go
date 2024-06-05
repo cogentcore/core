@@ -22,7 +22,7 @@ type Group struct {
 func (gp *Group) UpdateMeshBBox() {
 	// todo: radial, etc
 	gp.MeshBBox.BBox.SetEmpty()
-	for _, kid := range gp.Kids {
+	for _, kid := range gp.Children {
 		nii, ni := AsNode(kid)
 		if nii == nil {
 			continue

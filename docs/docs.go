@@ -94,7 +94,7 @@ func homePage(ctx *htmlview.Context) bool {
 				wrongCompact := sc == core.SizeCompact && block.Child(1).Name() == "text-block"
 				wrongNonCompact := sc != core.SizeCompact && block.Child(0).Name() == "text-block"
 				if wrongCompact || wrongNonCompact {
-					block.Kids.Move(0, 1)
+					block.Children.Move(0, 1)
 				}
 			})
 		}

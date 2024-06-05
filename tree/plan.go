@@ -50,5 +50,5 @@ func UpdateSlice(sl *Slice, parent Node, p TypePlan) bool {
 // according to the [TypePlan], specified by unique element names.
 // It returns true if any changes were made.
 func Update(n Node, p TypePlan) bool {
-	return UpdateSlice(n.Children(), n, p)
+	return UpdateSlice(&n.AsTree().Children, n, p)
 }

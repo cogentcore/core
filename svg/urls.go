@@ -136,12 +136,12 @@ func (sv *SVG) FindDefByName(defnm string) Node {
 	}
 	idx, has := sv.DefIndexes[defnm]
 	if !has {
-		idx = len(sv.Defs.Kids) / 2
+		idx = len(sv.Defs.Children) / 2
 	}
-	idx, has = sv.Defs.Kids.IndexByName(defnm, idx)
+	idx, has = sv.Defs.Children.IndexByName(defnm, idx)
 	if has {
 		sv.DefIndexes[defnm] = idx
-		return sv.Defs.Kids[idx].(Node)
+		return sv.Defs.Children[idx].(Node)
 	}
 	delete(sv.DefIndexes, defnm) // not found -- delete from map
 	return nil
@@ -236,7 +236,7 @@ func IncRefCount(k tree.Node) {
 // should be removed manually, as they are not automatically generated.
 func (sv *SVG) RemoveOrphanedDefs() bool {
 	refkey := SVGRefCountKey
-	for _, k := range sv.Defs.Kids {
+	for _, k := range sv.Defs.Children {
 		k.AsTree().SetProperty(refkey, 0)
 	}
 	sv.Root.WalkDown(func(k tree.Node) bool {
@@ -266,14 +266,14 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 		}
 		return tree.Continue
 	})
-	sz := len(sv.Defs.Kids)
+	sz := len(sv.Defs.Children)
 	del := false
 	for i := sz - 1; i >= 0; i-- {
-		k := sv.Defs.Kids[i]
+		k := sv.Defs.Children[i]
 		rc := k.AsTree().Property(refkey).(int)
 		if rc == 0 {
 			fmt.Printf("Deleting unused item: %s\n", k.Name())
-			sv.Defs.Kids.DeleteAtIndex(i)
+			sv.Defs.Children.DeleteAtIndex(i)
 			del = true
 		} else {
 			k.AsTree().DeleteProperty(refkey)

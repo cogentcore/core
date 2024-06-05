@@ -1070,7 +1070,7 @@ func SVGNodeTreeMarshalXML(itm Node, enc *XMLEncoder, setName string) (string, e
 	if name == "" {
 		return "", nil
 	}
-	for _, k := range *itm.Children() {
+	for _, k := range itm.AsTree().Children {
 		knm, err := SVGNodeTreeMarshalXML(k.(Node), enc, "")
 		if knm != "" {
 			enc.WriteEnd(knm)
@@ -1098,7 +1098,7 @@ func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	dnm, err := SVGNodeTreeMarshalXML(sv.Defs, enc, "defs")
 	enc.WriteEnd(dnm)
 
-	for _, k := range sv.Root.Kids {
+	for _, k := range sv.Root.Children {
 		var knm string
 		knm, err = SVGNodeTreeMarshalXML(k.(Node), enc, "")
 		if knm != "" {

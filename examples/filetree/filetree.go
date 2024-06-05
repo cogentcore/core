@@ -279,7 +279,7 @@ func (fb *FileBrowse) SetTitle(title string) {
 // Title returns the title text widget, and its index, within frame; nil,
 // -1 if not found
 func (fb *FileBrowse) TitleWidget() (*core.Text, int) {
-	idx, ok := fb.Children().IndexByName("title", 0)
+	idx, ok := fb.Children.IndexByName("title", 0)
 	if !ok {
 		return nil, -1
 	}
@@ -288,7 +288,7 @@ func (fb *FileBrowse) TitleWidget() (*core.Text, int) {
 
 // Splits returns the main Splits
 func (fb *FileBrowse) Splits() (*core.Splits, int) {
-	idx, ok := fb.Children().IndexByName("splits", 2)
+	idx, ok := fb.Children.IndexByName("splits", 2)
 	if !ok {
 		return nil, -1
 	}

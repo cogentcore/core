@@ -245,17 +245,17 @@ func OpenNewJSON(filename string) (Node, error) {
 
 // ParentAllChildren walks the tree down from current node and call
 // SetParent on all children -- needed after an Unmarshal.
-func ParentAllChildren(kn Node) {
-	for _, child := range *kn.Children() {
+func ParentAllChildren(n Node) {
+	for _, child := range n.AsTree().Children {
 		if child != nil {
-			child.AsTree().Par = kn
+			child.AsTree().Par = n
 			ParentAllChildren(child)
 		}
 	}
 }
 
-// UnmarshalPost must be called after an Unmarshal -- calls
-// ParentAllChildren.
-func UnmarshalPost(kn Node) {
-	ParentAllChildren(kn)
+// UnmarshalPost must be called after an Unmarshal;
+// calls ParentAllChildren.
+func UnmarshalPost(n Node) {
+	ParentAllChildren(n)
 }
