@@ -486,7 +486,7 @@ func (n *NodeBase) Delete() {
 	if n.Par == nil {
 		n.This().Destroy()
 	} else {
-		n.Par.DeleteChild(n.This())
+		n.Par.AsTree().DeleteChild(n.This())
 	}
 }
 

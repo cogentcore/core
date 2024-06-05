@@ -189,18 +189,6 @@ type Node interface {
 
 	// Deleting Children:
 
-	// DeleteChildAtIndex deletes child at given index. It returns false
-	// if there is no child at the given index.
-	DeleteChildAtIndex(idx int) bool
-
-	// DeleteChild deletes the given child node, returning false if
-	// it can not find it.
-	DeleteChild(child Node) bool
-
-	// DeleteChildByName deletes child node by name, returning false
-	// if it can not find it.
-	DeleteChildByName(name string) bool
-
 	// DeleteChildren deletes all children nodes.
 	DeleteChildren()
 
