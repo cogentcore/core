@@ -202,7 +202,7 @@ func (n *NodeBase) Child(i int) Node {
 // can be a key speedup for large lists. If no value is specified for
 // startIndex, it starts in the middle, which is a good default.
 func (n *NodeBase) ChildByName(name string, startIndex ...int) Node {
-	return n.Child(n.Children.IndexByName(name, startIndex...))
+	return n.Child(IndexByName(n.Children, name, startIndex...))
 }
 
 // ChildByType returns the first child that has the given type, and nil
@@ -293,7 +293,7 @@ func findPathChild(n Node, child string) int {
 		}
 		return idx
 	}
-	return n.AsTree().Children.IndexByName(child, 0)
+	return IndexByName(n.AsTree().Children, child)
 }
 
 // FindPath returns the node at the given path from this node.
@@ -432,7 +432,7 @@ func (n *NodeBase) DeleteChild(child Node) bool {
 // DeleteChildByName deletes child node by name, returning false
 // if it can not find it.
 func (n *NodeBase) DeleteChildByName(name string) bool {
-	idx := n.Children.IndexByName(name)
+	idx := IndexByName(n.Children, name)
 	if idx < 0 {
 		return false
 	}

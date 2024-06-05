@@ -26,10 +26,10 @@ func IndexOf(slice []Node, child Node, startIndex ...int) int {
 	return findfast.FindFunc(slice, func(e Node) bool { return e == child }, startIndex...)
 }
 
-// IndexByName returns index of first element that has given name, false if
-// not found. See [Slice.IndexOf] for info on startIndex.
-func (sl *Slice) IndexByName(name string, startIndex ...int) int {
-	return findfast.FindFunc(*sl, func(ch Node) bool { return ch.Name() == name }, startIndex...)
+// IndexByName returns the index of the first element in the given slice that
+// has the given name, or -1 if none is found. See [IndexOf] for info on startIndex.
+func IndexByName(slice []Node, name string, startIndex ...int) int {
+	return findfast.FindFunc(slice, func(ch Node) bool { return ch.Name() == name }, startIndex...)
 }
 
 // IndexByType returns index of element that either is that type or embeds

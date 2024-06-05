@@ -122,7 +122,7 @@ func TestNodeFindName(t *testing.T) {
 	assert.Len(t, parent.Children, len(names))
 	for i, nm := range names {
 		for st := range names { // test all starting indexes
-			idx := parent.Children.IndexByName(nm, st)
+			idx := IndexByName(parent.Children, nm, st)
 			assert.Equal(t, i, idx)
 		}
 	}
