@@ -6,7 +6,6 @@ package exec
 
 import (
 	"bytes"
-	"io"
 	"os"
 	"testing"
 
@@ -14,7 +13,6 @@ import (
 )
 
 func TestStdIO(t *testing.T) {
-	t.Skip("todo: this does not work on CI; mostly reliable on mac")
 	var st StdIO
 	st.SetFromOS()
 	assert.Equal(t, os.Stdout, st.Out)
@@ -45,22 +43,23 @@ func TestStdIO(t *testing.T) {
 	assert.Equal(t, os.Stderr, ss.Err)
 	assert.Equal(t, os.Stdin, ss.In)
 
-	ss.StackStart()
-	ss.PushOutPipe()
-	assert.Equal(t, true, ss.OutIsPipe())
-	assert.Equal(t, 1, len(ss.PipeIn))
-	pi := ss.PipeIn.Peek()
-	go func() {
-		b, err := io.ReadAll(pi)
-		if err != nil {
-			t.Error(err)
-		}
-		assert.Equal(t, "test", string(b))
-	}()
-	io.WriteString(ss.Out, "test")
+	// todo: this does not work on CI; mostly reliable on mac
+	// ss.StackStart()
+	// ss.PushOutPipe()
+	// assert.Equal(t, true, ss.OutIsPipe())
+	// assert.Equal(t, 1, len(ss.PipeIn))
+	// pi := ss.PipeIn.Peek()
+	// go func() {
+	// 	b, err := io.ReadAll(pi)
+	// 	if err != nil {
+	// 		t.Error(err)
+	// 	}
+	// 	assert.Equal(t, "test", string(b))
+	// }()
+	// io.WriteString(ss.Out, "test")
 
-	// this is just cleanup after test:
-	ss.PopToStart()
-	assert.Equal(t, false, ss.OutIsPipe())
-	assert.Equal(t, 0, len(ss.PipeIn))
+	// // this is just cleanup after test:
+	// ss.PopToStart()
+	// assert.Equal(t, false, ss.OutIsPipe())
+	// assert.Equal(t, 0, len(ss.PipeIn))
 }
