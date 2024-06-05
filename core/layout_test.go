@@ -151,8 +151,7 @@ func TestLayoutFramesJustifySelf(t *testing.T) {
 			s.Justify.Items = align
 		})
 		PlainFrames(b, math32.Vec2(0, 0))
-		_, fr2 := AsWidget(b.ChildByName("fr2"))
-		fr2.Style(func(s *styles.Style) {
+		b.Child(2).(Widget).Style(func(s *styles.Style) {
 			s.Justify.Self = aligns[(ai+1)%len(aligns)]
 		})
 		b.AssertRender(t, tdir+tnm)
@@ -173,8 +172,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 			s.Align.Items = align
 		})
 		PlainFrames(b, math32.Vec2(0, 0))
-		_, fr2 := AsWidget(b.ChildByName("fr2"))
-		fr2.Style(func(s *styles.Style) {
+		b.Child(2).(Widget).Style(func(s *styles.Style) {
 			s.Align.Self = aligns[(ai+1)%len(aligns)]
 		})
 		b.AssertRender(t, tdir+tnm)
@@ -310,7 +308,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 	case "structview": // structview
 		ts := &Test{}
 		views.NewStructView(sc).SetStruct(ts)
-	case "timeview": // time view
+	case "timepicker": // time picker
 		ts := &TestTime{}
 		ts.Date = time.Now()
 		views.NewStructView(sc).SetStruct(ts)
@@ -350,8 +348,8 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 }
 */
 
-func BoxFrame(parent Widget, nm ...string) *Frame {
-	fr := NewFrame(parent, nm...)
+func BoxFrame(parent Widget) *Frame {
+	fr := NewFrame(parent)
 	fr.Style(func(s *styles.Style) {
 		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 		s.Border.Width.Set(units.Dp(2))
@@ -359,8 +357,8 @@ func BoxFrame(parent Widget, nm ...string) *Frame {
 	return fr
 }
 
-func SpaceFrame(parent Widget, nm ...string) (*Frame, *Space) {
-	fr := NewFrame(parent, nm...)
+func SpaceFrame(parent Widget) (*Frame, *Space) {
+	fr := NewFrame(parent)
 	fr.Style(func(s *styles.Style) {
 		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 		s.Border.Width.Set(units.Dp(2))
@@ -369,8 +367,8 @@ func SpaceFrame(parent Widget, nm ...string) (*Frame, *Space) {
 	return fr, sp
 }
 
-func HorizontalRow(parent Widget, nm ...string) *Frame {
-	row := BoxFrame(parent, nm...)
+func HorizontalRow(parent Widget) *Frame {
+	row := BoxFrame(parent)
 	row.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 	})
@@ -398,13 +396,12 @@ func TabFrame(parent Widget) (*Frame, *Frame) {
 }
 
 func WrapText(parent Widget, txt string) *Text {
-	return NewText(parent, "wrap-text").SetText(txt)
+	return NewText(parent).SetText(txt)
 }
 
 func PlainFrames(parent Widget, grow math32.Vector2) {
-	for i, sz := range FrameSizes {
-		nm := fmt.Sprintf("fr%v", i)
-		fr := BoxFrame(parent, nm)
+	for _, sz := range FrameSizes {
+		fr := BoxFrame(parent)
 		fr.Style(func(s *styles.Style) {
 			s.Min.X.Px(sz.X)
 			s.Min.Y.Px(sz.Y)

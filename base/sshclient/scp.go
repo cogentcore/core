@@ -47,7 +47,7 @@ func (cl *Client) CopyLocalToHost(ctx context.Context, r io.Reader, size int64, 
 	if !filepath.IsAbs(hostFilename) {
 		hostFilename = filepath.Join(cl.Dir, hostFilename)
 	}
-	return cl.scpClient.CopyPassThru(ctx, r, hostFilename, "0655", size, nil)
+	return cl.scpClient.CopyPassThru(ctx, r, hostFilename, "0666", size, nil)
 }
 
 // CopyHostToLocalFile copies given filename on the already-connected remote host,

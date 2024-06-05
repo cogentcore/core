@@ -5,6 +5,7 @@
 package shell
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -45,6 +46,7 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 		case start:
 			err = cl.Start(&cmdIO.StdIOState, scmd, sargs...)
 		case output:
+			cmdIO.PushOut(nil)
 			out, err = cl.Output(&cmdIO.StdIOState, scmd, sargs...)
 		default:
 			err = cl.Run(&cmdIO.StdIOState, scmd, sargs...)
@@ -53,7 +55,9 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 			sh.AddError(err)
 		}
 	} else {
-		if !sh.RunBuiltinOrCommand(cmdIO, scmd, sargs...) {
+		ran := false
+		ran, out = sh.RunBuiltinOrCommand(cmdIO, errOk, output, scmd, sargs...)
+		if !ran {
 			sh.isCommand.Push(false)
 			switch {
 			case start:
@@ -68,6 +72,7 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 					sh.DeleteJob(cmdIO)
 				}()
 			case output:
+				cmdIO.PushOut(nil)
 				out, err = sh.Config.OutputIO(cmdIO, scmd, sargs...)
 			default:
 				err = sh.Config.RunIO(cmdIO, scmd, sargs...)
@@ -84,33 +89,60 @@ func (sh *Shell) Exec(errOk, start, output bool, cmd any, args ...any) string {
 	return out
 }
 
-// RunBuiltinOrCommand runs a builtin or a command
-func (sh *Shell) RunBuiltinOrCommand(cmdIO *exec.CmdIO, cmd string, args ...string) bool {
-	if fun, has := sh.Commands[cmd]; has {
+// RunBuiltinOrCommand runs a builtin or a command, returning true if it ran,
+// and the output string if running in output mode.
+func (sh *Shell) RunBuiltinOrCommand(cmdIO *exec.CmdIO, errOk, output bool, cmd string, args ...string) (bool, string) {
+	out := ""
+	cmdFun, hasCmd := sh.Commands[cmd]
+	bltFun, hasBlt := sh.Builtins[cmd]
+
+	if !hasCmd && !hasBlt {
+		ran, out := sh.RunSubShell(cmdIO, errOk, output, cmd, args...)
+		if ran {
+			return true, out
+		}
+		return false, out
+	}
+
+	if hasCmd {
 		sh.commandArgs.Push(args)
 		sh.isCommand.Push(true)
+	}
 
-		// note: we need to set both os. and wrapper versions, so it works the same
-		// in compiled vs. interpreted mode
-		oldsh := sh.Config.StdIO.Set(&cmdIO.StdIO)
-		oldwrap := sh.StdIOWrappers.SetWrappers(&cmdIO.StdIO)
-		oldstd := cmdIO.SetToOS()
-		fun(args...)
-		oldstd.SetToOS()
-		sh.StdIOWrappers.SetWrappers(oldwrap)
-		sh.Config.StdIO = *oldsh
+	// note: we need to set both os. and wrapper versions, so it works the same
+	// in compiled vs. interpreted mode
+	oldsh := sh.Config.StdIO.Set(&cmdIO.StdIO)
+	oldwrap := sh.StdIOWrappers.SetWrappers(&cmdIO.StdIO)
+	oldstd := cmdIO.SetToOS()
+	if output {
+		obuf := &bytes.Buffer{}
+		// os.Stdout = obuf // needs a file
+		sh.Config.StdIO.Out = obuf
+		sh.StdIOWrappers.SetWrappedOut(obuf)
+		cmdIO.PushOut(obuf)
+		if hasCmd {
+			cmdFun(args...)
+		} else {
+			sh.AddError(bltFun(cmdIO, args...))
+		}
+		out = strings.TrimSuffix(obuf.String(), "\n")
+	} else {
+		if hasCmd {
+			cmdFun(args...)
+		} else {
+			sh.AddError(bltFun(cmdIO, args...))
+		}
+	}
 
+	if hasCmd {
 		sh.isCommand.Pop()
 		sh.commandArgs.Pop()
-		return true
 	}
-	if fun, has := sh.Builtins[cmd]; has {
-		sh.isCommand.Push(false)
-		sh.AddError(fun(cmdIO, args...))
-		sh.isCommand.Pop()
-		return true
-	}
-	return false
+	oldstd.SetToOS()
+	sh.StdIOWrappers.SetWrappers(oldwrap)
+	sh.Config.StdIO = *oldsh
+
+	return true, out
 }
 
 func (sh *Shell) HandleArgErr(errok bool, err error) error {
@@ -118,7 +150,7 @@ func (sh *Shell) HandleArgErr(errok bool, err error) error {
 		return err
 	}
 	if errok {
-		fmt.Fprintln(sh.Config.StdIO.Err, err.Error())
+		sh.Config.StdIO.ErrPrintln(err.Error())
 	} else {
 		sh.AddError(err)
 	}

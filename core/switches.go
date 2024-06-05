@@ -6,52 +6,118 @@ package core
 
 import (
 	"fmt"
+	"reflect"
+	"slices"
+	"strconv"
 	"strings"
 	"unicode"
 
+	"cogentcore.org/core/base/labels"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
 
-// Switches is a widget for containing a set of switches.
-// It can optionally enforce mutual exclusivity (i.e., Radio Buttons).
-// The buttons are all in the Parts of the widget and the Parts layout
-// determines how they are displayed.
+// Switches is a widget for containing a set of [Switch]es.
+// It can optionally enforce mutual exclusivity (ie: radio buttons)
+// through the [Switches.Mutex] field. It supports binding to
+// [enums.Enum] and [enums.BitFlag] values with appropriate properties
+// automatically set.
 type Switches struct {
 	Frame
 
-	// the type of switches that will be made
+	// Type is the type of switches that will be made.
 	Type SwitchTypes
 
 	// Items are the items displayed to the user.
 	Items []SwitchItem
 
-	// whether to make the items mutually exclusive (checking one turns off all the others)
+	// Mutex is whether to make the items mutually exclusive
+	// (checking one turns off all the others).
 	Mutex bool
+
+	// AllowNone is whether to allow the user to deselect all items.
+	// It is on by default.
+	AllowNone bool
+
+	// SelectedIndexes are the indexes in [Switches.Items] of the currently
+	// selected switch items.
+	SelectedIndexes []int `set:"-"`
+
+	// bitFlagValue is the associated bit flag value if non-nil (for [Value]).
+	bitFlagValue enums.BitFlagSetter
 }
 
 // SwitchItem contains the properties of one item in a [Switches].
 type SwitchItem struct {
 
+	// Value is the underlying value the switch item represents.
+	Value any
+
 	// Text is the text displayed to the user for this item.
+	// If it is empty, then [labels.ToLabel] of [SwitchItem.Value]
+	// is used instead.
 	Text string
 
 	// Tooltip is the tooltip displayed to the user for this item.
 	Tooltip string
 }
 
-func (sw *Switches) OnInit() {
-	sw.Frame.OnInit()
-	sw.SetStyles()
+// GetText returns the effective text for this switch item.
+// If [SwitchItem.Text] is set, it returns that. Otherwise,
+// it returns [labels.ToLabel] of [SwitchItem.Value].
+func (si *SwitchItem) GetText() string {
+	if si.Text != "" {
+		return si.Text
+	}
+	if si.Value == nil {
+		return ""
+	}
+	return labels.ToLabel(si.Value)
 }
 
-func (sw *Switches) SetStyles() {
+func (sw *Switches) WidgetValue() any {
+	if sw.bitFlagValue != nil {
+		sw.BitFlagFromSelected(sw.bitFlagValue)
+		return sw.bitFlagValue
+	}
+	item := sw.SelectedItem()
+	if item == nil {
+		return nil
+	}
+	return item.Value
+}
+
+func (sw *Switches) SetWidgetValue(value any) error {
+	value = reflectx.Underlying(reflect.ValueOf(value)).Interface()
+	if bf, ok := value.(enums.BitFlag); ok {
+		sw.SelectFromBitFlag(bf)
+		return nil
+	}
+	return sw.SelectValue(value)
+}
+
+func (sw *Switches) OnBind(value any) {
+	if e, ok := value.(enums.Enum); ok {
+		sw.SetEnum(e).SetType(SwitchSegmentedButton).SetMutex(true)
+	}
+	if bf, ok := value.(enums.BitFlagSetter); ok {
+		sw.bitFlagValue = bf
+		sw.SetType(SwitchChip).SetMutex(false)
+	} else {
+		sw.bitFlagValue = nil
+		sw.AllowNone = false
+	}
+}
+
+func (sw *Switches) Init() {
+	sw.Frame.Init()
+	sw.AllowNone = true
 	sw.Style(func(s *styles.Style) {
 		s.Padding.Set(units.Dp(2))
 		s.Margin.Set(units.Dp(2))
@@ -69,134 +135,110 @@ func (sw *Switches) SetStyles() {
 			s.Wrap = false
 		}
 	})
-	sw.OnWidgetAdded(func(w Widget) {
-		if w.Parent() != sw {
-			return
-		}
-		sw.HandleSwitchEvents(w.(*Switch))
-		w.Style(func(s *styles.Style) {
-			if sw.Type != SwitchSegmentedButton {
-				return
-			}
-			ip := w.IndexInParent()
-			brf := styles.BorderRadiusFull.Top
-			ps := &sw.Styles
-			if ip == 0 {
-				if ps.Direction == styles.Row {
-					s.Border.Radius.Set(brf, units.Zero(), units.Zero(), brf)
-				} else {
-					s.Border.Radius.Set(brf, brf, units.Zero(), units.Zero())
-				}
-			} else if ip == sw.NumChildren()-1 {
-				if ps.Direction == styles.Row {
-					if !s.Is(states.Focused) {
-						s.Border.Width.SetLeft(units.Zero())
-						s.MaxBorder.Width = s.Border.Width
+
+	sw.Maker(func(p *Plan) {
+		for i, item := range sw.Items {
+			AddAt(p, strconv.Itoa(i), func(w *Switch) {
+				w.OnChange(func(e events.Event) {
+					if w.IsChecked() {
+						if sw.Mutex {
+							sw.SelectedIndexes = []int{i}
+						} else {
+							sw.SelectedIndexes = append(sw.SelectedIndexes, i)
+						}
+					} else if sw.AllowNone || len(sw.SelectedIndexes) > 1 {
+						sw.SelectedIndexes = slices.DeleteFunc(sw.SelectedIndexes, func(v int) bool { return v == i })
 					}
-					s.Border.Radius.Set(units.Zero(), brf, brf, units.Zero())
-				} else {
-					if !s.Is(states.Focused) {
-						s.Border.Width.SetTop(units.Zero())
-						s.MaxBorder.Width = s.Border.Width
+					sw.SendChange(e)
+					sw.UpdateTree()
+					sw.ApplyStyleTree()
+					sw.NeedsRender()
+				})
+				w.Style(func(s *styles.Style) {
+					if sw.Type != SwitchSegmentedButton {
+						return
 					}
-					s.Border.Radius.Set(units.Zero(), units.Zero(), brf, brf)
-				}
-			} else {
-				if !s.Is(states.Focused) {
-					if ps.Direction == styles.Row {
-						s.Border.Width.SetLeft(units.Zero())
+					ip := w.IndexInParent()
+					brf := styles.BorderRadiusFull.Top
+					ps := &sw.Styles
+					if ip == 0 {
+						if ps.Direction == styles.Row {
+							s.Border.Radius.Set(brf, units.Zero(), units.Zero(), brf)
+						} else {
+							s.Border.Radius.Set(brf, brf, units.Zero(), units.Zero())
+						}
+					} else if ip == sw.NumChildren()-1 {
+						if ps.Direction == styles.Row {
+							if !s.Is(states.Focused) {
+								s.Border.Width.SetLeft(units.Zero())
+								s.MaxBorder.Width = s.Border.Width
+							}
+							s.Border.Radius.Set(units.Zero(), brf, brf, units.Zero())
+						} else {
+							if !s.Is(states.Focused) {
+								s.Border.Width.SetTop(units.Zero())
+								s.MaxBorder.Width = s.Border.Width
+							}
+							s.Border.Radius.Set(units.Zero(), units.Zero(), brf, brf)
+						}
 					} else {
-						s.Border.Width.SetTop(units.Zero())
+						if !s.Is(states.Focused) {
+							if ps.Direction == styles.Row {
+								s.Border.Width.SetLeft(units.Zero())
+							} else {
+								s.Border.Width.SetTop(units.Zero())
+							}
+							s.MaxBorder.Width = s.Border.Width
+						}
+						s.Border.Radius.Zero()
 					}
-					s.MaxBorder.Width = s.Border.Width
-				}
-				s.Border.Radius.Zero()
-			}
-		})
+				})
+				w.Updater(func() {
+					w.SetType(sw.Type).SetText(item.GetText()).SetTooltip(item.Tooltip)
+					w.SetChecked(slices.Contains(sw.SelectedIndexes, i))
+				})
+			})
+		}
 	})
-}
-
-// SelectItem activates a given item but does NOT send a change event.
-// See SelectItemAction for event emitting version.
-// returns error if index is out of range.
-func (sw *Switches) SelectItem(idx int) error {
-	if idx >= sw.NumChildren() || idx < 0 {
-		return fmt.Errorf("core.Switches: SelectItem, index out of range: %v", idx)
-	}
-	if sw.Mutex {
-		sw.UnCheckAllBut(idx)
-	}
-	cs := sw.Child(idx).(*Switch)
-	cs.SetChecked(true)
-	sw.NeedsRender()
-	return nil
-}
-
-// SelectItemAction activates a given item and emits a change event.
-// This is mainly for Mutex use.
-// returns error if index is out of range.
-func (sw *Switches) SelectItemAction(idx int) error {
-	err := sw.SelectItem(idx)
-	if err != nil {
-		return err
-	}
-	sw.SendChange()
-	return nil
 }
 
 // SelectedItem returns the first selected (checked) switch item. It is only
 // useful when [Switches.Mutex] is true; if it is not, use [Switches.SelectedItems].
 // If no switches are selected, it returns nil.
 func (sw *Switches) SelectedItem() *SwitchItem {
-	for i, kswi := range sw.Kids {
-		ksw := kswi.(*Switch)
-		if ksw.IsChecked() {
-			return &sw.Items[i]
-		}
+	if len(sw.SelectedIndexes) == 0 {
+		return nil
 	}
-	return nil
+	return &sw.Items[sw.SelectedIndexes[0]]
 }
 
 // SelectedItems returns all of the currently selected (checked) switch items.
 // If [Switches.Mutex] is true, you should use [Switches.SelectedItem] instead.
 func (sw *Switches) SelectedItems() []SwitchItem {
 	res := []SwitchItem{}
-	for i, kswi := range sw.Kids {
-		ksw := kswi.(*Switch)
-		if ksw.IsChecked() {
-			res = append(res, sw.Items[i])
-		}
+	for _, i := range sw.SelectedIndexes {
+		res = append(res, sw.Items[i])
 	}
 	return res
 }
 
-// UnCheckAll unchecks all switches
-func (sw *Switches) UnCheckAll() {
-	for _, cbi := range sw.Kids {
-		cs := cbi.(*Switch)
-		cs.SetChecked(false)
-	}
-	sw.NeedsRender()
-}
-
-// UnCheckAllBut unchecks all switches except given one
-func (sw *Switches) UnCheckAllBut(idx int) {
-	for i, cbi := range sw.Kids {
-		if i == idx {
-			continue
+// SelectValue sets the item with the given [SwitchItem.Value]
+// to be the only selected item.
+func (sw *Switches) SelectValue(value any) error {
+	for i, item := range sw.Items {
+		if item.Value == value {
+			sw.SelectedIndexes = []int{i}
+			return nil
 		}
-		cs := cbi.(*Switch)
-		cs.SetChecked(false)
-		cs.Update()
 	}
-	sw.NeedsRender()
+	return fmt.Errorf("core.Switches.SelectValue: item not found: (value: %v, items: %v)", value, sw.Items)
 }
 
 // SetStrings sets the [Switches.Items] from the given strings.
 func (sw *Switches) SetStrings(ss ...string) *Switches {
 	sw.Items = make([]SwitchItem, len(ss))
 	for i, s := range ss {
-		sw.Items[i] = SwitchItem{Text: s}
+		sw.Items[i] = SwitchItem{Value: s}
 	}
 	return sw
 }
@@ -221,7 +263,7 @@ func (sw *Switches) SetEnums(es ...enums.Enum) *Switches {
 			str, _, _ = strings.Cut(desc, " ")
 		}
 		tip := types.FormatDoc(desc, str, lbl)
-		sw.Items[i] = SwitchItem{Text: lbl, Tooltip: tip}
+		sw.Items[i] = SwitchItem{Value: enum, Text: lbl, Tooltip: tip}
 	}
 	return sw
 }
@@ -231,59 +273,22 @@ func (sw *Switches) SetEnum(enum enums.Enum) *Switches {
 	return sw.SetEnums(enum.Values()...)
 }
 
-// UpdateFromBitFlags sets the checked state of the switches from the
-// given bit flag enum value.
-func (sw *Switches) UpdateFromBitFlag(bitflag enums.BitFlag) {
-	els := bitflag.Values()
-	mn := min(len(els), sw.NumChildren())
-	for i := 0; i < mn; i++ {
-		ev := els[i]
-		swi := sw.Child(i)
-		sw := swi.(*Switch)
-		on := bitflag.HasFlag(ev.(enums.BitFlag))
-		sw.SetChecked(on)
+// SelectFromBitFlag sets which switches are selected based on the given bit flag value.
+func (sw *Switches) SelectFromBitFlag(bitflag enums.BitFlag) {
+	values := bitflag.Values()
+	sw.SelectedIndexes = []int{}
+	for i, value := range values {
+		if bitflag.HasFlag(value.(enums.BitFlag)) {
+			sw.SelectedIndexes = append(sw.SelectedIndexes, i)
+		}
 	}
-	sw.NeedsRender()
 }
 
-// UpdateBitFlag sets the given bitflag value to the value specified
-// by the checked state of the switches.
-func (sw *Switches) UpdateBitFlag(bitflag enums.BitFlagSetter) {
+// BitFlagFromSelected sets the given bit flag value based on which switches are selected.
+func (sw *Switches) BitFlagFromSelected(bitflag enums.BitFlagSetter) {
 	bitflag.SetInt64(0)
-
-	els := bitflag.Values()
-	mn := min(len(els), sw.NumChildren())
-	for i := 0; i < mn; i++ {
-		ev := els[i]
-		swi := sw.Child(i)
-		sw := swi.(*Switch)
-		if sw.IsChecked() {
-			bitflag.SetFlag(true, ev.(enums.BitFlag))
-		}
-	}
-}
-
-// HandleSwitchEvents handles the events for the given switch.
-func (sw *Switches) HandleSwitchEvents(swi *Switch) {
-	swi.OnChange(func(e events.Event) {
-		if sw.Mutex && swi.IsChecked() {
-			sw.UnCheckAllBut(swi.IndexInParent())
-		}
-		sw.SendChange(e)
-	})
-}
-
-func (sw *Switches) Config() {
-	config := tree.Config{}
-	for _, item := range sw.Items {
-		config.Add(SwitchType, item.Text)
-	}
-	if sw.ConfigChildren(config) || sw.NeedsRebuild() {
-		for i, swi := range sw.Kids {
-			s := swi.(*Switch)
-			item := sw.Items[i]
-			s.SetType(sw.Type).SetText(item.Text).SetTooltip(item.Tooltip)
-		}
-		sw.NeedsLayout()
+	values := bitflag.Values()
+	for _, i := range sw.SelectedIndexes {
+		bitflag.SetFlag(true, values[i].(enums.BitFlag))
 	}
 }

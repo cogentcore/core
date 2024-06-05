@@ -77,7 +77,7 @@ func TestParentUnits(t *testing.T) {
 	b.Style(func(s *styles.Style) {
 		s.Min.Set(units.Em(10), units.Em(20))
 	})
-	NewBox(b).Style(func(s *styles.Style) {
+	NewWidgetBase(b).Style(func(s *styles.Style) {
 		s.Background = colors.C(colors.Scheme.Primary.Base)
 		s.Min.Set(units.Pw(50), units.Ph(75))
 	})

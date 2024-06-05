@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"image"
 	"log/slog"
+	"reflect"
 	"strconv"
 
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
@@ -65,13 +67,20 @@ type Spinner struct {
 	Format string
 }
 
-func (sp *Spinner) OnInit() {
-	sp.WidgetBase.OnInit()
-	sp.HandleEvents()
-	sp.SetStyles()
+func (sp *Spinner) WidgetValue() any { return &sp.Value }
+
+func (sp *Spinner) OnBind(value any) {
+	kind := reflectx.NonPointerType(reflect.TypeOf(value)).Kind()
+	if kind >= reflect.Int && kind <= reflect.Uintptr {
+		sp.SetStep(1).SetEnforceStep(true)
+		if kind >= reflect.Uint {
+			sp.SetMin(0)
+		}
+	}
 }
 
-func (sp *Spinner) SetStyles() {
+func (sp *Spinner) Init() {
+	sp.TextField.Init()
 	sp.Step = 0.1
 	sp.PageStep = 0.2
 	sp.Max = 1.0
@@ -81,7 +90,6 @@ func (sp *Spinner) SetStyles() {
 	}).SetTrailingIcon(icons.Add, func(e events.Event) {
 		sp.IncrementValue(1)
 	})
-	sp.TextField.SetStyles()
 	sp.Style(func(s *styles.Style) {
 		s.VirtualKeyboard = styles.KeyboardNumber
 		if sp.IsReadOnly() {
@@ -95,13 +103,54 @@ func (sp *Spinner) SetStyles() {
 	})
 	sp.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(sp) {
-		case "parts/lead-icon", "parts/trail-icon":
+		case "lead-icon", "trail-icon": // TODO(config)
 			w.Style(func(s *styles.Style) {
 				// icons do not get separate focus, as people can
 				// use the arrow keys to get the same effect
 				s.SetAbilities(false, abilities.Focusable)
 				s.SetAbilities(true, abilities.RepeatClickable)
 			})
+		}
+	})
+
+	sp.On(events.Scroll, func(e events.Event) {
+		if sp.IsReadOnly() || !sp.StateIs(states.Focused) {
+			return
+		}
+		se := e.(*events.MouseScroll)
+		se.SetHandled()
+		sp.IncrementValue(float32(se.Delta.Y))
+	})
+	sp.SetValidator(func() error {
+		text := sp.Text()
+		val, err := sp.StringToValue(text)
+		if err != nil {
+			return err
+		}
+		sp.SetValue(val)
+		return nil
+	})
+	sp.OnKeyChord(func(e events.Event) {
+		if sp.IsReadOnly() {
+			return
+		}
+		kf := keymap.Of(e.KeyChord())
+		if DebugSettings.KeyEventTrace {
+			slog.Info("Spinner KeyChordEvent", "widget", sp, "keyFunction", kf)
+		}
+		switch {
+		case kf == keymap.MoveUp:
+			e.SetHandled()
+			sp.IncrementValue(1)
+		case kf == keymap.MoveDown:
+			e.SetHandled()
+			sp.IncrementValue(-1)
+		case kf == keymap.PageUp:
+			e.SetHandled()
+			sp.PageIncrementValue(1)
+		case kf == keymap.PageDown:
+			e.SetHandled()
+			sp.PageIncrementValue(-1)
 		}
 	})
 }
@@ -115,21 +164,21 @@ func (sp *Spinner) SizeUp() {
 	sp.TextField.SizeUp()
 }
 
-// SetMin sets the min limits on the value
+// SetMin sets the minimum bound on the value.
 func (sp *Spinner) SetMin(min float32) *Spinner {
 	sp.HasMin = true
 	sp.Min = min
 	return sp
 }
 
-// SetMax sets the max limits on the value
+// SetMax sets the maximum bound on the value.
 func (sp *Spinner) SetMax(max float32) *Spinner {
 	sp.HasMax = true
 	sp.Max = max
 	return sp
 }
 
-// SetValue sets the value, enforcing any limits, and updates the display
+// SetValue sets the value, enforcing any limits, and updates the display.
 func (sp *Spinner) SetValue(val float32) *Spinner {
 	sp.Value = val
 	if sp.HasMax && sp.Value > sp.Max {
@@ -147,7 +196,7 @@ func (sp *Spinner) SetValue(val float32) *Spinner {
 	return sp
 }
 
-// SetValueAction calls SetValue and also emits the signal
+// SetValueAction calls SetValue and also sends a change event.
 func (sp *Spinner) SetValueAction(val float32) *Spinner {
 	sp.SetValue(val)
 	sp.SendChange()
@@ -156,7 +205,7 @@ func (sp *Spinner) SetValueAction(val float32) *Spinner {
 
 // IncrementValue increments the value by given number of steps (+ or -),
 // and enforces it to be an even multiple of the step size (snap-to-value),
-// and emits the signal
+// and sends a change event.
 func (sp *Spinner) IncrementValue(steps float32) *Spinner {
 	if sp.IsReadOnly() {
 		return sp
@@ -168,7 +217,7 @@ func (sp *Spinner) IncrementValue(steps float32) *Spinner {
 
 // PageIncrementValue increments the value by given number of page steps (+ or -),
 // and enforces it to be an even multiple of the step size (snap-to-value),
-// and emits the signal
+// and sends a change event.
 func (sp *Spinner) PageIncrementValue(steps float32) *Spinner {
 	if sp.IsReadOnly() {
 		return sp
@@ -277,48 +326,4 @@ func (sp *Spinner) WidgetTooltip(pos image.Point) (string, image.Point) {
 		res += "maximum: " + sp.ValueToString(sp.Max) + ")"
 	}
 	return res, rpos
-}
-
-func (sp *Spinner) HandleEvents() {
-	sp.TextField.HandleEvents()
-	sp.On(events.Scroll, func(e events.Event) {
-		if sp.IsReadOnly() || !sp.StateIs(states.Focused) {
-			return
-		}
-		se := e.(*events.MouseScroll)
-		se.SetHandled()
-		sp.IncrementValue(float32(se.Delta.Y))
-	})
-	sp.SetValidator(func() error {
-		text := sp.Text()
-		val, err := sp.StringToValue(text)
-		if err != nil {
-			return err
-		}
-		sp.SetValue(val)
-		return nil
-	})
-	sp.OnKeyChord(func(e events.Event) {
-		if sp.IsReadOnly() {
-			return
-		}
-		kf := keymap.Of(e.KeyChord())
-		if DebugSettings.KeyEventTrace {
-			slog.Info("Spinner KeyChordEvent", "widget", sp, "keyFunction", kf)
-		}
-		switch {
-		case kf == keymap.MoveUp:
-			e.SetHandled()
-			sp.IncrementValue(1)
-		case kf == keymap.MoveDown:
-			e.SetHandled()
-			sp.IncrementValue(-1)
-		case kf == keymap.PageUp:
-			e.SetHandled()
-			sp.PageIncrementValue(1)
-		case kf == keymap.PageDown:
-			e.SetHandled()
-			sp.PageIncrementValue(-1)
-		}
-	})
 }

@@ -30,8 +30,8 @@ type Contact struct {
 	Dist float32
 }
 
-// UpdtDist updates the distance information for the contact
-func (c *Contact) UpdtDist() {
+// UpdateDist updates the distance information for the contact
+func (c *Contact) UpdateDist() {
 
 }
 

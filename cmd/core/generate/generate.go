@@ -34,11 +34,9 @@ var TreeMethodsTmpl = template.Must(template.New("TreeMethods").
 	}).Parse(
 	`
 	{{if not (HasNoNewDirective .)}}
-	// New{{.LocalName}} adds a new [{{.LocalName}}] with the given name to the given parent:
+	// New{{.LocalName}} returns a new [{{.LocalName}}] with the given optional parent:
 	{{DocToComment .Doc}}
-	func New{{.LocalName}}(parent {{TreePkg .}}Node, name ...string) *{{.LocalName}} {
-		return parent.NewChild({{.LocalName}}Type, name...).(*{{.LocalName}})
-	}
+	func New{{.LocalName}}(parent ...{{TreePkg .}}Node) *{{.LocalName}} { return {{TreePkg .}}New[*{{.LocalName}}](parent...) }
 	{{end}}
 
 	// NodeType returns the [*types.Type] of [{{.LocalName}}]
@@ -55,11 +53,8 @@ var TreeMethodsTmpl = template.Must(template.New("TreeMethods").
 	
 	// As{{.LocalName}} returns the given value as a value of type {{.LocalName}} if the type
 	// of the given value embeds {{.LocalName}}, or nil otherwise
-	func As{{.LocalName}}(k {{TreePkg .}}Node) *{{.LocalName}} {
-		if k == nil || k.This() == nil {
-			return nil
-		}
-		if t, ok := k.({{.LocalName}}Embedder); ok {
+	func As{{.LocalName}}(n {{TreePkg .}}Node) *{{.LocalName}} {
+		if t, ok := n.({{.LocalName}}Embedder); ok {
 			return t.As{{.LocalName}}()
 		}
 		return nil

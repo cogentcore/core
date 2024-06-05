@@ -5,6 +5,7 @@
 package core
 
 import (
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
@@ -13,13 +14,12 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/tree"
 )
 
 // Switch is a widget that can toggle between an on and off state.
 // It can be displayed as a switch, checkbox, or radio button.
 type Switch struct {
-	WidgetBase
+	Frame
 
 	// Type is the styling type of switch.
 	Type SwitchTypes `set:"-"`
@@ -59,65 +59,19 @@ const (
 	SwitchSegmentedButton
 )
 
-func (sw *Switch) OnInit() {
-	sw.WidgetBase.OnInit()
-	sw.HandleEvents()
-	sw.SetStyles()
-}
+func (sw *Switch) WidgetValue() any { return sw.IsChecked() }
 
-// IsChecked tests if this switch is checked
-func (sw *Switch) IsChecked() bool {
-	return sw.StateIs(states.Checked)
-}
-
-// SetChecked sets the checked state and updates the icon accordingly
-func (sw *Switch) SetChecked(on bool) *Switch {
-	sw.SetState(on, states.Checked)
-	sw.SetState(false, states.Indeterminate)
-	sw.SetIconFromState()
-	return sw
-}
-
-// SetIconFromState updates icon state based on checked status
-func (sw *Switch) SetIconFromState() {
-	if sw.Parts == nil {
-		return
+func (sw *Switch) SetWidgetValue(value any) error {
+	b, err := reflectx.ToBool(value)
+	if err != nil {
+		return err
 	}
-	ist := sw.Parts.ChildByName("stack", 0)
-	if ist == nil {
-		return
-	}
-	st := ist.(*Layout)
-	switch {
-	case sw.StateIs(states.Indeterminate):
-		st.StackTop = 2
-	case sw.IsChecked():
-		st.StackTop = 0
-	default:
-		if sw.Type == SwitchChip {
-			// chips render no icon when off
-			st.StackTop = -1
-			return
-		}
-		st.StackTop = 1
-	}
+	sw.SetChecked(b)
+	return nil
 }
 
-func (sw *Switch) HandleEvents() {
-	sw.HandleSelectToggle()
-	sw.HandleClickOnEnterSpace()
-	sw.OnFinal(events.Click, func(e events.Event) {
-		sw.SetChecked(sw.IsChecked())
-		if sw.Type == SwitchChip {
-			sw.NeedsLayout()
-		} else {
-			sw.NeedsRender()
-		}
-		sw.SendChange(e)
-	})
-}
-
-func (sw *Switch) SetStyles() {
+func (sw *Switch) Init() {
+	sw.Frame.Init()
 	sw.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Checkable)
 		if !sw.IsReadOnly() {
@@ -127,6 +81,7 @@ func (sw *Switch) SetStyles() {
 		s.Text.AlignV = styles.Center
 		s.Padding.Set(units.Dp(4))
 		s.Border.Radius = styles.BorderRadiusSmall
+		s.Gap.Zero()
 
 		if sw.Type == SwitchChip {
 			if s.Is(states.Checked) {
@@ -152,84 +107,136 @@ func (sw *Switch) SetStyles() {
 			s.Background = colors.C(colors.Scheme.Select.Container)
 		}
 	})
-	sw.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(sw) {
-		case "parts":
-			w.Style(func(s *styles.Style) {
-				s.Gap.Zero()
-				s.Align.Content = styles.Center
-				s.Align.Items = styles.Center
-				s.Text.AlignV = styles.Center
-			})
-		case "parts/stack":
+
+	sw.HandleSelectToggle()
+	sw.HandleClickOnEnterSpace()
+	sw.OnFinal(events.Click, func(e events.Event) {
+		sw.SetChecked(sw.IsChecked())
+		if sw.Type == SwitchChip {
+			sw.UpdateStackTop() // must update here
+			sw.NeedsLayout()
+		} else {
+			sw.NeedsRender()
+		}
+		sw.SendChange(e)
+	})
+
+	sw.Maker(func(p *Plan) {
+		if sw.IconOn == "" {
+			sw.IconOn = icons.ToggleOn.Fill() // fallback
+		}
+		if sw.IconOff == "" {
+			sw.IconOff = icons.ToggleOff // fallback
+		}
+
+		AddAt(p, "stack", func(w *Frame) {
 			w.Style(func(s *styles.Style) {
 				s.Display = styles.Stacked
-				s.Grow.Set(0, 0)
 				s.Gap.Zero()
 			})
-		case "parts/stack/icon0": // on
-			w.Style(func(s *styles.Style) {
-				if sw.Type == SwitchChip {
-					s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
-				} else {
-					s.Color = colors.C(colors.Scheme.Primary.Base)
-				}
-				// switches need to be bigger
-				if sw.Type == SwitchSwitch {
-					s.Min.X.Em(2)
-					s.Min.Y.Em(1.5)
-				} else {
-					s.Min.X.Em(1.5)
-					s.Min.Y.Em(1.5)
-				}
+			w.Updater(func() {
+				sw.UpdateStackTop() // need to update here
 			})
-		case "parts/stack/icon1": // off
-			w.Style(func(s *styles.Style) {
-				switch sw.Type {
-				case SwitchSwitch:
-					// switches need to be bigger
-					s.Min.X.Em(2)
-					s.Min.Y.Em(1.5)
-				case SwitchChip:
-					// chips render no icon when off
-					s.Min.X.Zero()
-					s.Min.Y.Zero()
-				default:
-					s.Min.X.Em(1.5)
-					s.Min.Y.Em(1.5)
+			w.Maker(func(p *Plan) {
+				AddAt(p, "icon-on", func(w *Icon) {
+					w.Style(func(s *styles.Style) {
+						if sw.Type == SwitchChip {
+							s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+						} else {
+							s.Color = colors.C(colors.Scheme.Primary.Base)
+						}
+						// switches need to be bigger
+						if sw.Type == SwitchSwitch {
+							s.Min.Set(units.Em(2), units.Em(1.5))
+						} else {
+							s.Min.Set(units.Em(1.5))
+						}
+					})
+					w.Updater(func() {
+						w.SetIcon(sw.IconOn)
+					})
+				})
+				// same styles for off and indeterminate
+				iconStyle := func(s *styles.Style) {
+					switch sw.Type {
+					case SwitchSwitch:
+						// switches need to be bigger
+						s.Min.Set(units.Em(2), units.Em(1.5))
+					case SwitchChip:
+						// chips render no icon when off
+						s.Min.Zero()
+					default:
+						s.Min.Set(units.Em(1.5))
+					}
 				}
+				AddAt(p, "icon-off", func(w *Icon) {
+					w.Style(iconStyle)
+					w.Updater(func() {
+						w.SetIcon(sw.IconOff)
+					})
+				})
+				AddAt(p, "icon-indeterminate", func(w *Icon) {
+					w.Style(iconStyle)
+					w.Updater(func() {
+						w.SetIcon(sw.IconIndeterminate)
+					})
+				})
 			})
-		case "parts/stack/icon2": // indeterminate
-			w.Style(func(s *styles.Style) {
-				switch sw.Type {
-				case SwitchSwitch:
-					// switches need to be bigger
-					s.Min.X.Em(2)
-					s.Min.Y.Em(1.5)
-				case SwitchChip:
-					// chips render no icon when off
-					s.Min.X.Zero()
-					s.Min.Y.Zero()
-				default:
-					s.Min.X.Em(1.5)
-					s.Min.Y.Em(1.5)
-				}
+		})
+
+		if sw.Text != "" {
+			AddAt(p, "space", func(w *Space) {
+				w.Style(func(s *styles.Style) {
+					s.Min.X.Ch(0.1)
+				})
 			})
-		case "parts/space":
-			w.Style(func(s *styles.Style) {
-				s.Min.X.Ch(0.1)
-			})
-		case "parts/text":
-			w.Style(func(s *styles.Style) {
-				s.SetNonSelectable()
-				s.SetTextWrap(false)
-				s.Margin.Zero()
-				s.Padding.Zero()
-				s.Text.AlignV = styles.Center
-				s.FillMargin = false
+			AddAt(p, "text", func(w *Text) {
+				w.Style(func(s *styles.Style) {
+					s.SetNonSelectable()
+					s.SetTextWrap(false)
+					s.FillMargin = false
+				})
+				w.Updater(func() {
+					w.SetText(sw.Text)
+				})
 			})
 		}
 	})
+}
+
+// IsChecked returns whether the switch is checked.
+func (sw *Switch) IsChecked() bool {
+	return sw.StateIs(states.Checked)
+}
+
+// SetChecked sets whether the switch it checked.
+func (sw *Switch) SetChecked(on bool) *Switch {
+	sw.SetState(on, states.Checked)
+	sw.SetState(false, states.Indeterminate)
+	return sw
+}
+
+// UpdateStackTop updates the [Frame.StackTop] of the stack in the switch
+// according to the current icon. It is called automatically to keep the
+// switch up-to-date.
+func (sw *Switch) UpdateStackTop() {
+	st, ok := sw.ChildByName("stack", 0).(*Frame)
+	if !ok {
+		return
+	}
+	switch {
+	case sw.StateIs(states.Indeterminate):
+		st.StackTop = 2
+	case sw.IsChecked():
+		st.StackTop = 0
+	default:
+		if sw.Type == SwitchChip {
+			// chips render no icon when off
+			st.StackTop = -1
+			return
+		}
+		st.StackTop = 1
+	}
 }
 
 // SetType sets the styling type of the switch
@@ -261,12 +268,11 @@ func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 }
 
 // SetIcons sets the icons for the on (checked), off (unchecked)
-// and indeterminate (unknown) states.  See [SetIconsUpdate] for
-// a version that updates the icon rendering
-func (sw *Switch) SetIcons(on, off, unk icons.Icon) *Switch {
+// and indeterminate (unknown) states.
+func (sw *Switch) SetIcons(on, off, ind icons.Icon) *Switch {
 	sw.IconOn = on
 	sw.IconOff = off
-	sw.IconIndeterminate = unk
+	sw.IconIndeterminate = ind
 	return sw
 }
 
@@ -278,48 +284,11 @@ func (sw *Switch) ClearIcons() *Switch {
 	return sw
 }
 
-func (sw *Switch) Config() {
-	config := tree.Config{}
-	if sw.IconOn == "" {
-		sw.IconOn = icons.ToggleOn.Fill() // fallback
-	}
-	if sw.IconOff == "" {
-		sw.IconOff = icons.ToggleOff // fallback
-	}
-	ici := 0 // always there
-	lbi := -1
-	config.Add(LayoutType, "stack")
-	if sw.Text != "" {
-		config.Add(SpaceType, "space")
-		lbi = len(config)
-		config.Add(TextType, "text")
-	}
-	sw.ConfigParts(config, func() {
-		ist := sw.Parts.Child(ici).(*Layout)
-		ist.SetNChildren(3, IconType, "icon")
-		icon := ist.Child(0).(*Icon)
-		icon.SetIcon(sw.IconOn)
-		icoff := ist.Child(1).(*Icon)
-		icoff.SetIcon(sw.IconOff)
-		icunk := ist.Child(2).(*Icon)
-		icunk.SetIcon(sw.IconIndeterminate)
-		sw.SetIconFromState()
-		if lbi >= 0 {
-			text := sw.Parts.Child(lbi).(*Text)
-			if text.Text != sw.Text {
-				text.SetText(sw.Text)
-			}
-		}
-	})
-}
-
 func (sw *Switch) Render() {
-	sw.SetIconFromState() // make sure we're always up-to-date on render
-	if sw.Parts != nil {
-		ist := sw.Parts.ChildByName("stack", 0)
-		if ist != nil {
-			ist.(*Layout).UpdateStackedVisibility()
-		}
+	sw.UpdateStackTop() // important: make sure we're always up-to-date on render
+	st, ok := sw.ChildByName("stack", 0).(*Frame)
+	if ok {
+		st.UpdateStackedVisibility()
 	}
 	sw.WidgetBase.Render()
 }

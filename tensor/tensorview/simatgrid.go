@@ -32,11 +32,11 @@ type SimMatGrid struct { //types:add
 }
 
 // Defaults sets defaults for values that are at nonsensical initial values
-func (tg *SimMatGrid) OnInit() {
-	tg.TensorGrid.OnInit()
-	tg.Disp.GridView = &tg.TensorGrid
-	tg.Disp.Defaults()
-	tg.Disp.TopZero = true
+func (tg *SimMatGrid) Init() {
+	tg.TensorGrid.Init()
+	tg.Display.GridView = &tg.TensorGrid
+	tg.Display.Defaults()
+	tg.Display.TopZero = true
 
 }
 
@@ -45,7 +45,7 @@ func (tg *SimMatGrid) SetSimMat(smat *simat.SimMat) *SimMatGrid {
 	tg.SimMat = smat
 	tg.Tensor = smat.Mat
 	if tg.Tensor != nil {
-		tg.Disp.FromMeta(tg.Tensor)
+		tg.Display.FromMeta(tg.Tensor)
 	}
 	tg.Update()
 	return tg
@@ -103,16 +103,16 @@ func (tg *SimMatGrid) MinSize() math32.Vector2 {
 	ctxtsz := tg.colMaxSz.X / float32(tg.colMinBlank+1)
 	txtsz := math32.Max(rtxtsz, ctxtsz)
 
-	rows, cols, _, _ := tensor.Projection2DShape(tg.Tensor.Shape(), tg.Disp.OddRow)
+	rows, cols, _, _ := tensor.Projection2DShape(tg.Tensor.Shape(), tg.Display.OddRow)
 	rowEx := tg.rowNGps
 	colEx := tg.colNGps
-	frw := float32(rows) + float32(rowEx)*tg.Disp.DimExtra // extra spacing
-	fcl := float32(cols) + float32(colEx)*tg.Disp.DimExtra // extra spacing
+	frw := float32(rows) + float32(rowEx)*tg.Display.DimExtra // extra spacing
+	fcl := float32(cols) + float32(colEx)*tg.Display.DimExtra // extra spacing
 	max := float32(math32.Max(frw, fcl))
-	gsz := tg.Disp.TotPrefSize / max
-	gsz = math32.Max(gsz, tg.Disp.GridMinSize)
+	gsz := tg.Display.TotPrefSize / max
+	gsz = math32.Max(gsz, tg.Display.GridMinSize)
 	gsz = math32.Max(gsz, txtsz)
-	gsz = math32.Min(gsz, tg.Disp.GridMaxSize)
+	gsz = math32.Min(gsz, tg.Display.GridMaxSize)
 	return math32.Vec2(tg.rowMaxSz.X+LabelSpace+gsz*float32(cols), tg.colMaxSz.Y+LabelSpace+gsz*float32(rows))
 }
 
@@ -135,11 +135,11 @@ func (tg *SimMatGrid) Render() {
 
 	tsr := tg.SimMat.Mat
 
-	rows, cols, _, _ := tensor.Projection2DShape(tsr.Shape(), tg.Disp.OddRow)
+	rows, cols, _, _ := tensor.Projection2DShape(tsr.Shape(), tg.Display.OddRow)
 	rowEx := tg.rowNGps
 	colEx := tg.colNGps
-	frw := float32(rows) + float32(rowEx)*tg.Disp.DimExtra // extra spacing
-	fcl := float32(cols) + float32(colEx)*tg.Disp.DimExtra // extra spacing
+	frw := float32(rows) + float32(rowEx)*tg.Display.DimExtra // extra spacing
+	fcl := float32(cols) + float32(colEx)*tg.Display.DimExtra // extra spacing
 	tsz := math32.Vec2(fcl, frw)
 	gsz := effsz.Div(tsz)
 
@@ -164,7 +164,7 @@ func (tg *SimMatGrid) Render() {
 			ygp++
 			prvyblk = false
 		}
-		yex := float32(ygp) * tg.Disp.DimExtra
+		yex := float32(ygp) * tg.Display.DimExtra
 		tr.SetString(lb, fr, &tg.Styles.UnitContext, &txsty, true, 0, 0)
 		tr.LayoutStdLR(&txsty, fr, &tg.Styles.UnitContext, tg.rowMaxSz)
 		cr := math32.Vec2(0, float32(y)+yex)
@@ -189,7 +189,7 @@ func (tg *SimMatGrid) Render() {
 			xgp++
 			prvxblk = false
 		}
-		xex := float32(xgp) * tg.Disp.DimExtra
+		xex := float32(xgp) * tg.Display.DimExtra
 		tr.SetStringRot90(lb, fr, &tg.Styles.UnitContext, &tg.Styles.Text, true, 0)
 		cr := math32.Vec2(float32(x)+xex, 0)
 		pr := epos.Add(cr.Mul(gsz))
@@ -198,7 +198,7 @@ func (tg *SimMatGrid) Render() {
 
 	pos.X += tg.rowMaxSz.X + LabelSpace
 	pos.Y += tg.colMaxSz.Y + LabelSpace
-	ssz := gsz.MulScalar(tg.Disp.GridFill) // smaller size with margin
+	ssz := gsz.MulScalar(tg.Display.GridFill) // smaller size with margin
 	prvyblk = false
 	ygp = 0
 	for y := 0; y < rows; y++ {
@@ -207,7 +207,7 @@ func (tg *SimMatGrid) Render() {
 			ygp++
 			prvyblk = false
 		}
-		yex := float32(ygp) * tg.Disp.DimExtra
+		yex := float32(ygp) * tg.Display.DimExtra
 		prvxblk = false
 		xgp = 0
 		for x := 0; x < cols; x++ {
@@ -216,12 +216,12 @@ func (tg *SimMatGrid) Render() {
 				xgp++
 				prvxblk = false
 			}
-			xex := float32(xgp) * tg.Disp.DimExtra
+			xex := float32(xgp) * tg.Display.DimExtra
 			ey := y
-			if !tg.Disp.TopZero {
+			if !tg.Display.TopZero {
 				ey = (rows - 1) - y
 			}
-			val := tensor.Projection2DValue(tsr, tg.Disp.OddRow, ey, x)
+			val := tensor.Projection2DValue(tsr, tg.Display.OddRow, ey, x)
 			cr := math32.Vec2(float32(x)+xex, float32(y)+yex)
 			pr := pos.Add(cr.Mul(gsz))
 			_, clr := tg.Color(val)

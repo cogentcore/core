@@ -8,7 +8,6 @@ import (
 	"image/draw"
 	"maps"
 	"strings"
-	"time"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
@@ -62,7 +61,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		})
 	},
 	"basics/styling-2": func(parent core.Widget) {
-		core.NewBox(parent).Style(func(s *styles.Style) {
+		core.NewFrame(parent).Style(func(s *styles.Style) {
 			s.Min.Set(units.Dp(50))
 			s.Background = colors.C(colors.Scheme.Primary.Base)
 		})
@@ -290,7 +289,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	"widgets/frames-1": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
 		fr.Style(func(s *styles.Style) {
-			s.Background = colors.C(colors.Scheme.Warn.Container)
+			s.Direction = styles.Column
 		})
 		core.NewButton(fr).SetText("First")
 		core.NewButton(fr).SetText("Second")
@@ -299,13 +298,71 @@ var PagesExamples = map[string]func(parent core.Widget){
 	"widgets/frames-2": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
 		fr.Style(func(s *styles.Style) {
-			s.Background = gradient.NewLinear().AddStop(colors.Yellow, 0).AddStop(colors.Orange, 0.5).AddStop(colors.Red, 1)
+			s.Gap.Set(units.Em(2))
 		})
 		core.NewButton(fr).SetText("First")
 		core.NewButton(fr).SetText("Second")
 		core.NewButton(fr).SetText("Third")
 	},
 	"widgets/frames-3": func(parent core.Widget) {
+		fr := core.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Max.X.Em(10)
+		})
+		core.NewButton(fr).SetText("First")
+		core.NewButton(fr).SetText("Second")
+		core.NewButton(fr).SetText("Third")
+	},
+	"widgets/frames-4": func(parent core.Widget) {
+		fr := core.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Overflow.X = styles.OverflowAuto
+			s.Max.X.Em(10)
+		})
+		core.NewButton(fr).SetText("First")
+		core.NewButton(fr).SetText("Second")
+		core.NewButton(fr).SetText("Third")
+	},
+	"widgets/frames-5": func(parent core.Widget) {
+		fr := core.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Wrap = true
+			s.Max.X.Em(10)
+		})
+		core.NewButton(fr).SetText("First")
+		core.NewButton(fr).SetText("Second")
+		core.NewButton(fr).SetText("Third")
+	},
+	"widgets/frames-6": func(parent core.Widget) {
+		fr := core.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Display = styles.Grid
+			s.Columns = 2
+		})
+		core.NewButton(fr).SetText("First")
+		core.NewButton(fr).SetText("Second")
+		core.NewButton(fr).SetText("Third")
+		core.NewButton(fr).SetText("Fourth")
+	},
+	"widgets/frames-7": func(parent core.Widget) {
+		fr := core.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Background = colors.C(colors.Scheme.Warn.Container)
+		})
+		core.NewButton(fr).SetText("First")
+		core.NewButton(fr).SetText("Second")
+		core.NewButton(fr).SetText("Third")
+	},
+	"widgets/frames-8": func(parent core.Widget) {
+		fr := core.NewFrame(parent)
+		fr.Style(func(s *styles.Style) {
+			s.Background = gradient.NewLinear().AddStop(colors.Yellow, 0).AddStop(colors.Orange, 0.5).AddStop(colors.Red, 1)
+		})
+		core.NewButton(fr).SetText("First")
+		core.NewButton(fr).SetText("Second")
+		core.NewButton(fr).SetText("Third")
+	},
+	"widgets/frames-9": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
 		fr.Style(func(s *styles.Style) {
 			s.Border.Width.Set(units.Dp(4))
@@ -315,7 +372,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewButton(fr).SetText("Second")
 		core.NewButton(fr).SetText("Third")
 	},
-	"widgets/frames-4": func(parent core.Widget) {
+	"widgets/frames-10": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
 		fr.Style(func(s *styles.Style) {
 			s.Border.Radius = styles.BorderRadiusLarge
@@ -326,10 +383,10 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewButton(fr).SetText("Second")
 		core.NewButton(fr).SetText("Third")
 	},
-	"widgets/frames-5": func(parent core.Widget) {
+	"widgets/frames-11": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
 		fr.Style(func(s *styles.Style) {
-			s.Grow.Set(0, 0)
+			s.Grow.Set(1, 1)
 			s.Border.Width.Set(units.Dp(4))
 			s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 		})
@@ -362,70 +419,6 @@ var PagesExamples = map[string]func(parent core.Widget){
 		draw.Draw(img, image.Rect(20, 20, 60, 50), colors.C(colors.Scheme.Success.Base), image.Point{}, draw.Src)
 		draw.Draw(img, image.Rect(60, 70, 80, 100), colors.C(colors.Scheme.Error.Base), image.Point{}, draw.Src)
 		core.NewImage(parent).SetImage(img)
-	},
-	"widgets/layouts-0": func(parent core.Widget) {
-		ly := core.NewLayout(parent)
-		core.NewButton(ly).SetText("First")
-		core.NewButton(ly).SetText("Second")
-		core.NewButton(ly).SetText("Third")
-	},
-	"widgets/layouts-1": func(parent core.Widget) {
-		ly := core.NewLayout(parent)
-		ly.Style(func(s *styles.Style) {
-			s.Direction = styles.Column
-		})
-		core.NewButton(ly).SetText("First")
-		core.NewButton(ly).SetText("Second")
-		core.NewButton(ly).SetText("Third")
-	},
-	"widgets/layouts-2": func(parent core.Widget) {
-		ly := core.NewLayout(parent)
-		ly.Style(func(s *styles.Style) {
-			s.Gap.Set(units.Em(2))
-		})
-		core.NewButton(ly).SetText("First")
-		core.NewButton(ly).SetText("Second")
-		core.NewButton(ly).SetText("Third")
-	},
-	"widgets/layouts-3": func(parent core.Widget) {
-		ly := core.NewLayout(parent)
-		ly.Style(func(s *styles.Style) {
-			s.Max.X.Em(10)
-		})
-		core.NewButton(ly).SetText("First")
-		core.NewButton(ly).SetText("Second")
-		core.NewButton(ly).SetText("Third")
-	},
-	"widgets/layouts-4": func(parent core.Widget) {
-		ly := core.NewLayout(parent)
-		ly.Style(func(s *styles.Style) {
-			s.Overflow.X = styles.OverflowAuto
-			s.Max.X.Em(10)
-		})
-		core.NewButton(ly).SetText("First")
-		core.NewButton(ly).SetText("Second")
-		core.NewButton(ly).SetText("Third")
-	},
-	"widgets/layouts-5": func(parent core.Widget) {
-		ly := core.NewLayout(parent)
-		ly.Style(func(s *styles.Style) {
-			s.Wrap = true
-			s.Max.X.Em(10)
-		})
-		core.NewButton(ly).SetText("First")
-		core.NewButton(ly).SetText("Second")
-		core.NewButton(ly).SetText("Third")
-	},
-	"widgets/layouts-6": func(parent core.Widget) {
-		ly := core.NewLayout(parent)
-		ly.Style(func(s *styles.Style) {
-			s.Display = styles.Grid
-			s.Columns = 2
-		})
-		core.NewButton(ly).SetText("First")
-		core.NewButton(ly).SetText("Second")
-		core.NewButton(ly).SetText("Third")
-		core.NewButton(ly).SetText("Fourth")
 	},
 	"widgets/meters-0": func(parent core.Widget) {
 		core.NewMeter(parent)
@@ -605,9 +598,9 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/switches-6": func(parent core.Widget) {
 		core.NewSwitches(parent).SetItems(
-			core.SwitchItem{Text: "Go", Tooltip: "Elegant, fast, and easy-to-use"},
-			core.SwitchItem{Text: "Python", Tooltip: "Slow and duck-typed"},
-			core.SwitchItem{Text: "C++", Tooltip: "Hard to use and slow to compile"},
+			core.SwitchItem{Value: "Go", Tooltip: "Elegant, fast, and easy-to-use"},
+			core.SwitchItem{Value: "Python", Tooltip: "Slow and duck-typed"},
+			core.SwitchItem{Value: "C++", Tooltip: "Hard to use and slow to compile"},
 		)
 	},
 	"widgets/switches-7": func(parent core.Widget) {
@@ -753,58 +746,62 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewSlider(parent)
 	},
 	"views/values-0": func(parent core.Widget) {
-		views.NewValue(parent, colors.Orange)
+		// views.NewValue(parent, colors.Orange)
 	},
 	"views/values-1": func(parent core.Widget) {
-		t := time.Now()
-		views.NewValue(parent, &t).OnChange(func(e events.Event) {
-			core.MessageSnackbar(parent, "The time is "+t.Format(time.DateTime))
-		})
+		// t := time.Now()
+		//
+		//	views.NewValue(parent, &t).OnChange(func(e events.Event) {
+		//	    core.MessageSnackbar(parent, "The time is "+t.Format(time.DateTime))
+		//	})
 	},
 	"views/values-2": func(parent core.Widget) {
-		views.NewValue(parent, 70, `view:"slider"`)
+		// views.NewValue(parent, 70, `view:"slider"`)
 	},
 	"views/map-views-0": func(parent core.Widget) {
 		views.NewMapView(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
 	},
 	"views/map-views-1": func(parent core.Widget) {
+		views.NewMapView(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
+	},
+	"views/map-views-2": func(parent core.Widget) {
 		m := map[string]int{"Go": 1, "C++": 3, "Python": 5}
 		views.NewMapView(parent).SetMap(&m).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, fmt.Sprintf("Map: %v", m))
 		})
 	},
-	"views/map-views-2": func(parent core.Widget) {
+	"views/map-views-3": func(parent core.Widget) {
 		views.NewMapView(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
 	},
-	"views/map-views-3": func(parent core.Widget) {
-		views.NewMapViewInline(parent).SetMap(&map[string]int{"Go": 1, "C++": 3})
-	},
 	"views/map-views-4": func(parent core.Widget) {
-		views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
+		views.NewMapView(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
 	},
 	"views/map-views-5": func(parent core.Widget) {
-		views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
+		// views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
+	},
+	"views/map-views-6": func(parent core.Widget) {
+		// views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
 	},
 	"views/slice-views-0": func(parent core.Widget) {
 		views.NewSliceView(parent).SetSlice(&[]int{1, 3, 5})
 	},
 	"views/slice-views-1": func(parent core.Widget) {
+		views.NewSliceViewInline(parent).SetSlice(&[]int{1, 3, 5})
+	},
+	"views/slice-views-2": func(parent core.Widget) {
 		sl := []int{1, 3, 5}
 		views.NewSliceView(parent).SetSlice(&sl).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, fmt.Sprintf("Slice: %v", sl))
 		})
 	},
-	"views/slice-views-2": func(parent core.Widget) {
+	"views/slice-views-3": func(parent core.Widget) {
 		views.NewSliceView(parent).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
 	},
-	"views/slice-views-3": func(parent core.Widget) {
-		views.NewSliceViewInline(parent).SetSlice(&[]int{1, 3, 5})
-	},
 	"views/slice-views-4": func(parent core.Widget) {
-		views.NewValue(parent, &[]int{1, 3, 5})
+		// views.NewValue(parent, &[]int{1, 3, 5})
 	},
 	"views/slice-views-5": func(parent core.Widget) {
-		views.NewValue(parent, &[]int{1, 3, 5, 7, 9})
+		// views.NewValue(parent, &[]int{1, 3, 5, 7, 9})
 	},
 	"views/struct-views-0": func(parent core.Widget) {
 		type person struct {
@@ -818,14 +815,11 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Name string
 			Age  int
 		}
-		p := person{Name: "Go", Age: 35}
-		views.NewStructView(parent).SetStruct(&p).OnChange(func(e events.Event) {
-			core.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
-		})
+		views.NewStructView(parent).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
 	},
 	"views/struct-views-2": func(parent core.Widget) {
 		type person struct {
-			Name string `immediate:"+"`
+			Name string
 			Age  int
 		}
 		p := person{Name: "Go", Age: 35}
@@ -835,26 +829,36 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"views/struct-views-3": func(parent core.Widget) {
 		type person struct {
+			Name string `immediate:"+"`
+			Age  int
+		}
+		p := person{Name: "Go", Age: 35}
+		views.NewStructView(parent).SetStruct(&p).OnChange(func(e events.Event) {
+			core.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
+		})
+	},
+	"views/struct-views-4": func(parent core.Widget) {
+		type person struct {
 			Name string
 			Age  int `view:"-"`
 		}
 		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35})
 	},
-	"views/struct-views-4": func(parent core.Widget) {
+	"views/struct-views-5": func(parent core.Widget) {
 		type person struct {
 			Name string `edit:"-"`
 			Age  int
 		}
 		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35})
 	},
-	"views/struct-views-5": func(parent core.Widget) {
+	"views/struct-views-6": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
 		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
 	},
-	"views/struct-views-6": func(parent core.Widget) {
+	"views/struct-views-7": func(parent core.Widget) {
 		type Person struct {
 			Name string
 			Age  int
@@ -865,7 +869,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		}
 		views.NewStructView(parent).SetStruct(&employee{Person{Name: "Go", Age: 35}, "Programmer"})
 	},
-	"views/struct-views-7": func(parent core.Widget) {
+	"views/struct-views-8": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
@@ -876,7 +880,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		}
 		views.NewStructView(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
 	},
-	"views/struct-views-8": func(parent core.Widget) {
+	"views/struct-views-9": func(parent core.Widget) {
 		type person struct {
 			Name      string `default:"Gopher"`
 			Age       int    `default:"20:30"`
@@ -884,19 +888,12 @@ var PagesExamples = map[string]func(parent core.Widget){
 		}
 		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 	},
-	"views/struct-views-9": func(parent core.Widget) {
-		type person struct {
-			Name string
-			Age  int
-		}
-		views.NewStructViewInline(parent).SetStruct(&person{Name: "Go", Age: 35})
-	},
 	"views/struct-views-10": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
-		views.NewValue(parent, &person{Name: "Go", Age: 35})
+		// core.NewValue(&person{Name: "Go", Age: 35}, "", parent)
 	},
 	"views/struct-views-11": func(parent core.Widget) {
 		type person struct {
@@ -906,7 +903,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			LikesGo     bool
 			LikesPython bool
 		}
-		views.NewValue(parent, &person{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true})
+		// core.NewValue(&person{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true}, "", parent)
 	},
 	"views/table-views-0": func(parent core.Widget) {
 		type language struct {
@@ -958,7 +955,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Name   string
 			Rating int
 		}
-		views.NewValue(parent, &[]language{{"Go", 10}, {"Python", 5}})
+		// views.NewValue(parent, &[]language{{"Go", 10}, {"Python", 5}})
 	},
 	"views/text-editors-0": func(parent core.Widget) {
 		texteditor.NewSoloEditor(parent)
@@ -990,39 +987,39 @@ func main() {
 	},
 	"views/tree-views-0": func(parent core.Widget) {
 		tv := views.NewTreeView(parent).SetText("Root")
-		views.NewTreeView(tv, "Child 1")
-		c2 := views.NewTreeView(tv, "Child 2")
-		views.NewTreeView(c2, "Nested child")
+		views.NewTreeView(tv)
+		c2 := views.NewTreeView(tv)
+		views.NewTreeView(c2)
 	},
 	"views/tree-views-1": func(parent core.Widget) {
-		n := tree.NewRoot[*tree.NodeBase]("Root")
-		tree.New[*tree.NodeBase](n, "Child 1")
-		c2 := tree.New[*tree.NodeBase](n, "Child 2")
-		tree.New[*tree.NodeBase](c2, "Nested child")
+		n := tree.NewNodeBase()
+		tree.NewNodeBase(n)
+		c2 := tree.NewNodeBase(n)
+		tree.NewNodeBase(c2)
 		views.NewTreeView(parent).SyncTree(n)
 	},
 	"views/tree-views-2": func(parent core.Widget) {
-		n := tree.NewRoot[*tree.NodeBase]("Root")
-		tree.New[*tree.NodeBase](n, "Child 1")
-		c2 := tree.New[*tree.NodeBase](n, "Child 2")
-		tree.New[*tree.NodeBase](c2, "Nested child")
+		n := tree.NewNodeBase()
+		tree.NewNodeBase(n)
+		c2 := tree.NewNodeBase(n)
+		tree.NewNodeBase(c2)
 		views.NewTreeView(parent).SyncTree(n).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, "Tree view changed")
 		})
 	},
 	"views/tree-views-3": func(parent core.Widget) {
-		n := tree.NewRoot[*tree.NodeBase]("Root")
-		tree.New[*tree.NodeBase](n, "Child 1")
-		c2 := tree.New[*tree.NodeBase](n, "Child 2")
-		tree.New[*tree.NodeBase](c2, "Nested child")
+		n := tree.NewNodeBase()
+		tree.NewNodeBase(n)
+		c2 := tree.NewNodeBase(n)
+		tree.NewNodeBase(c2)
 		views.NewTreeView(parent).SyncTree(n).SetReadOnly(true)
 	},
 	"views/tree-views-4": func(parent core.Widget) {
-		n := tree.NewRoot[*tree.NodeBase]("Root")
-		tree.New[*tree.NodeBase](n, "Child 1")
-		c2 := tree.New[*tree.NodeBase](n, "Child 2")
-		tree.New[*tree.NodeBase](c2, "Nested child")
-		views.NewValue(parent, n)
+		n := tree.NewNodeBase()
+		tree.NewNodeBase(n)
+		c2 := tree.NewNodeBase(n)
+		tree.NewNodeBase(c2)
+		// views.NewValue(parent, n)
 	},
 	"advanced/styling-0": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
@@ -1048,8 +1045,5 @@ func main() {
 		core.NewButton(fr).SetText("First")
 		core.NewButton(fr).SetText("Second")
 		core.NewButton(fr).SetText("Third")
-	},
-	"index-0": func(parent core.Widget) {
-		core.NewButton(parent).SetText("Send")
 	},
 }

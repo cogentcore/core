@@ -22,7 +22,7 @@ import (
 
 // VCSLogView is a view of the VCS log data
 type VCSLogView struct {
-	core.Layout
+	core.Frame
 
 	// current log
 	Log vcs.Log
@@ -46,7 +46,7 @@ type VCSLogView struct {
 	SetA bool
 }
 
-func (lv *VCSLogView) OnInit() {
+func (lv *VCSLogView) Init() {
 	lv.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
@@ -72,14 +72,15 @@ func (lv *VCSLogView) ConfigRepo(repo vcs.Repo, lg vcs.Log, file, since string) 
 	lv.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	core.NewToolbar(lv, "toolbar")
-	tv := views.NewTableView(lv, "log")
+	core.NewToolbar(lv).SetName("toolbar")
+	tv := views.NewTableView(lv)
+	tv.SetName("log")
 	tv.SetReadOnly(true)
 	tv.SetSlice(&lv.Log)
 	lv.RevA = "HEAD"
 	lv.RevB = ""
 	lv.SetA = true
-	lv.ConfigToolbar()
+	lv.MakeToolbar()
 	tv.AddContextMenu(func(m *core.Scene) {
 		core.NewButton(m).SetText("Set Revision A").
 			SetTooltip("Set Buffer A's revision to this").
@@ -94,10 +95,16 @@ func (lv *VCSLogView) ConfigRepo(repo vcs.Repo, lg vcs.Log, file, since string) 
 				lv.SetRevB(cmt.Rev)
 			})
 		core.NewButton(m).SetText("Copy Revision ID").
-			SetTooltip("Copies the revision number / hash for this ").
+			SetTooltip("Copies the revision number / hash for this").
 			OnClick(func(e events.Event) {
 				cmt := lv.Log[tv.SelectedIndex]
 				tv.Clipboard().Write(mimedata.NewText(cmt.Rev))
+			})
+		core.NewButton(m).SetText("View Revision").
+			SetTooltip("Views the file at this revision").
+			OnClick(func(e events.Event) {
+				cmt := lv.Log[tv.SelectedIndex]
+				FileAtRevDialog(lv, lv.Repo, lv.File, cmt.Rev)
 			})
 		core.NewButton(m).SetText("Checkout Revision").
 			SetTooltip("Checks out this revision").
@@ -185,29 +192,32 @@ func (lv *VCSLogView) TableView() *views.TableView {
 	return lv.ChildByName("log", 1).(*views.TableView)
 }
 
-// ConfigToolbar
-func (lv *VCSLogView) ConfigToolbar() {
+// MakeToolbar
+func (lv *VCSLogView) MakeToolbar() {
 	tb := lv.Toolbar()
 	if lv.File != "" {
-		core.NewText(tb, "fl", "File: "+dirs.DirAndFile(lv.File))
-		core.NewSeparator(tb, "flsep")
-		cba := core.NewSwitch(tb, "a-rev").SetText("A Rev: ").
-			SetTooltip("If selected, double-clicking in log will set this A Revision to use for Diff")
+		core.NewText(tb).SetText("File: " + dirs.DirAndFile(lv.File))
+		core.NewSeparator(tb)
+		cba := core.NewSwitch(tb).SetText("A Rev: ")
+		cba.SetTooltip("If selected, double-clicking in log will set this A Revision to use for Diff")
+		cba.SetName("a-rev")
 		cba.SetState(true, states.Checked)
-		tfa := core.NewTextField(tb, "a-tf").SetText(lv.RevA)
+		tfa := core.NewTextField(tb).SetText(lv.RevA)
+		tfa.SetName("a-tf")
 		tfa.OnChange(func(e events.Event) {
 			lv.RevA = tfa.Text()
 		})
-		core.NewButton(tb, "view-a").SetText("View A").SetIcon(icons.Document).
+		core.NewButton(tb).SetText("View A").SetIcon(icons.Document).
 			SetTooltip("View file at revision A").
 			OnClick(func(e events.Event) {
 				FileAtRevDialog(lv, lv.Repo, lv.File, lv.RevA)
 			})
 
-		core.NewSeparator(tb, "absep")
+		core.NewSeparator(tb)
 
-		cbb := core.NewSwitch(tb, "b-rev").SetText("B Rev: ").
-			SetTooltip("If selected, double-clicking in log will set this B Revision to use for Diff")
+		cbb := core.NewSwitch(tb).SetText("B Rev: ")
+		cbb.SetTooltip("If selected, double-clicking in log will set this B Revision to use for Diff")
+		cbb.SetName("b-rev")
 		cbb.OnClick(func(e events.Event) {
 			lv.SetA = !cbb.IsChecked()
 			cba.SetState(lv.SetA, states.Checked)
@@ -219,20 +229,21 @@ func (lv *VCSLogView) ConfigToolbar() {
 			cbb.NeedsRender()
 		})
 
-		tfb := core.NewTextField(tb, "b-tf").SetText(lv.RevB)
+		tfb := core.NewTextField(tb).SetText(lv.RevB)
+		tfb.SetName("b-tf")
 		tfb.OnChange(func(e events.Event) {
 			lv.RevB = tfb.Text()
 		})
-		core.NewButton(tb, "view-b").SetText("View B").SetIcon(icons.Document).
+		core.NewButton(tb).SetText("View B").SetIcon(icons.Document).
 			SetTooltip("View file at revision B").
 			OnClick(func(e events.Event) {
 				FileAtRevDialog(lv, lv.Repo, lv.File, lv.RevB)
 			})
 
-		core.NewSeparator(tb, "dsep")
+		core.NewSeparator(tb)
 
-		core.NewButton(tb, "diff").SetText("Diff").SetIcon(icons.Difference).
-			SetTooltip("Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy").
+		core.NewButton(tb).SetText("Diff").SetIcon(icons.Difference).
+			SetTooltip("Show the diffs between two revisions; if blank, A is current HEAD, and B is current working copy").
 			OnClick(func(e events.Event) {
 				texteditor.DiffViewDialogFromRevs(lv, lv.Repo, lv.File, nil, lv.RevA, lv.RevB)
 			})
@@ -252,7 +263,7 @@ func VCSLogViewDialog(ctx core.Widget, repo vcs.Repo, lg vcs.Log, file, since st
 		title += " since: " + since
 	}
 	d := core.NewBody().AddTitle(title)
-	lv := NewVCSLogView(d, "vcslog")
+	lv := NewVCSLogView(d)
 	lv.ConfigRepo(repo, lg, file, since)
 	d.RunWindowDialog(ctx)
 	return d

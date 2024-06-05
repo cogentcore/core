@@ -32,22 +32,22 @@ type FileBrowse struct {
 	core.Frame
 
 	// root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjectFilename
-	ProjectRoot core.Filename `desc:"root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjectFilename"`
+	ProjectRoot core.Filename
 
 	// filename of the currently active texteditor
-	ActiveFilename core.Filename `desc:"filename of the currently active texteditor"`
+	ActiveFilename core.Filename
 
 	// has the root changed?  we receive update signals from root for changes
-	Changed bool `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
+	Changed bool `json:"-"`
 
 	// all the files in the project directory and subdirectories
-	Files *filetree.Tree `desc:"all the files in the project directory and subdirectories"`
+	Files *filetree.Tree
 
 	// number of texteditors available for editing files (default 2) -- configurable with n-text-views property
-	NTextEditors int `xml:"n-text-views" desc:"number of texteditors available for editing files (default 2) -- configurable with n-text-views property"`
+	NTextEditors int `xml:"n-text-views"`
 
 	// index of the currently active texteditor -- new files will be viewed in other views if available
-	ActiveTextEditorIndex int `json:"-" desc:"index of the currently active texteditor -- new files will be viewed in other views if available"`
+	ActiveTextEditorIndex int `json:"-"`
 }
 
 func (fb *FileBrowse) Defaults() {
@@ -56,7 +56,7 @@ func (fb *FileBrowse) Defaults() {
 
 // todo: rewrite with direct config, as a better example
 
-func (fb *FileBrowse) OnInit() {
+func (fb *FileBrowse) Init() {
 	fb.Defaults()
 	fb.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
@@ -135,7 +135,7 @@ func (fb *FileBrowse) OpenPath(path core.Filename) { //types:add
 
 // UpdateProject does full update to current proj
 func (fb *FileBrowse) UpdateProject() {
-	fb.StandardConfig()
+	fb.StandardPlan()
 	fb.SetTitle(fmt.Sprintf("FileBrowse of: %v", fb.ProjectRoot)) // todo: get rid of title
 	fb.UpdateFiles()
 	fb.ConfigSplits()
@@ -250,22 +250,22 @@ func (fb *FileBrowse) ViewFile(fnm string) bool {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
-//   GUI configs
+//   GUI plans
 
-// StandardFrameConfig returns a Config for configuring a standard Frame
-// -- can modify as desired before calling ConfigChildren on Frame using this
-func (fb *FileBrowse) StandardFrameConfig() tree.Config {
-	config := tree.Config{}
-	config.Add(core.TextType, "title")
-	config.Add(core.SplitsType, "splits")
-	return config
+// StandardFramePlan returns a Plan for configuring a standard Frame
+// -- can modify as desired before calling Build on Frame using this
+func (fb *FileBrowse) StandardFramePlan() tree.TypePlan {
+	plan := tree.TypePlan{}
+	plan.Add(core.TextType, "title")
+	plan.Add(core.SplitsType, "splits")
+	return plan
 }
 
-// StandardConfig configures a standard setup of the overall Frame.
+// StandardPlan configures a standard setup of the overall Frame.
 // It returns whether any modifications were made.
-func (fb *FileBrowse) StandardConfig() bool {
-	config := fb.StandardFrameConfig()
-	return fb.ConfigChildren(config)
+func (fb *FileBrowse) StandardPlan() bool {
+	plan := fb.StandardFramePlan()
+	return tree.Update(fb, plan)
 }
 
 // SetTitle sets the optional title and updates the title text
@@ -310,29 +310,37 @@ func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
 	return nil
 }
 
-func (fb *FileBrowse) ConfigToolbar(tb *core.Toolbar) { //types:add
-	views.NewFuncButton(tb, fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
-	op := views.NewFuncButton(tb, fb.OpenPath).SetKey(keymap.Open)
-	op.Args[0].SetValue(fb.ActiveFilename)
-	// op.Args[0].SetTag("ext", ".json")
-	views.NewFuncButton(tb, fb.SaveActiveView).SetKey(keymap.Save)
-	// save.SetUpdateFunc(func() {
-	// 	save.SetEnabledUpdate(fb.Changed && ge.Filename != "")
-	// })
-	sa := views.NewFuncButton(tb, fb.SaveActiveViewAs).SetKey(keymap.SaveAs)
-	sa.Args[0].SetValue(fb.ActiveFilename)
-	// sa.Args[0].SetTag("ext", ".json")
+func (fb *FileBrowse) MakeToolbar(p *core.Plan) { //types:add
+	core.Add(p, func(w *views.FuncButton) {
+		w.SetFunc(fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
+	})
+	core.Add(p, func(w *views.FuncButton) {
+		w.SetFunc(fb.OpenPath).SetKey(keymap.Open)
+		w.Args[0].SetValue(fb.ActiveFilename)
+		// w.Args[0].SetTag("ext", ".json")
+	})
+	core.Add(p, func(w *views.FuncButton) {
+		w.SetFunc(fb.SaveActiveView).SetKey(keymap.Save)
+		w.Style(func(s *styles.Style) {
+			s.SetEnabled(fb.Changed && fb.ActiveFilename != "")
+		})
+	})
+	core.Add(p, func(w *views.FuncButton) {
+		w.SetFunc(fb.SaveActiveViewAs).SetKey(keymap.SaveAs)
+		w.Args[0].SetValue(fb.ActiveFilename)
+		// w.Args[0].SetTag("ext", ".json")
+	})
 }
 
-// SplitsConfig returns a Config for configuring the Splits
-func (fb *FileBrowse) SplitsConfig() tree.Config {
-	config := tree.Config{}
-	config.Add(core.FrameType, "filetree-fr")
+// SplitsPlan returns a Plan for configuring the Splits
+func (fb *FileBrowse) SplitsPlan() tree.TypePlan {
+	plan := tree.TypePlan{}
+	plan.Add(core.FrameType, "filetree-fr")
 	for i := 0; i < fb.NTextEditors; i++ {
-		config.Add(texteditor.EditorType, fmt.Sprintf("texteditor-%v", i))
+		plan.Add(texteditor.EditorType, fmt.Sprintf("texteditor-%v", i))
 	}
 	// todo: tab view
-	return config
+	return plan
 }
 
 // ConfigSplits configures the Splits.
@@ -343,10 +351,10 @@ func (fb *FileBrowse) ConfigSplits() {
 	}
 	split.SetSplits(.2, .4, .4)
 
-	config := fb.SplitsConfig()
-	if split.ConfigChildren(config) {
+	plan := fb.SplitsPlan()
+	if tree.Update(split, plan) {
 		ftfr := split.Child(0).(*core.Frame)
-		fb.Files = filetree.NewTree(ftfr, "filetree")
+		fb.Files = filetree.NewTree(ftfr)
 		fb.Files.OnSelect(func(e events.Event) {
 			e.SetHandled()
 			if len(fb.Files.SelectedNodes) > 0 {
@@ -394,8 +402,8 @@ func NewFileBrowser(path string) (*FileBrowse, *core.Stage) {
 	_, projnm, _, _ := ProjectPathParse(path)
 
 	b := core.NewBody("Browser: " + projnm)
-	fb := NewFileBrowse(b, "browser")
-	b.AddAppBar(fb.ConfigToolbar)
+	fb := NewFileBrowse(b)
+	b.AddAppBar(fb.MakeToolbar)
 	fb.OpenPath(core.Filename(path))
 	return fb, b.RunWindow()
 }

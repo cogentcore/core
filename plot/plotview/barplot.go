@@ -42,7 +42,7 @@ func (pl *PlotView) GenPlotBar() {
 			log.Println("plot.LegendColumn: " + err.Error())
 		} else {
 			xview.SortColumnNames([]string{pl.Params.LegendColumn, xp.Column}, table.Ascending) // make it fit!
-			lsplit = split.GroupBy(xview, []string{pl.Params.LegendColumn})
+			lsplit = split.GroupBy(xview, pl.Params.LegendColumn)
 			nleg = max(lsplit.Len(), 1)
 		}
 	}

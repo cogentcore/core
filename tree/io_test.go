@@ -11,81 +11,72 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"cogentcore.org/core/base/iox/jsonx"
-	"cogentcore.org/core/tree"
+	. "cogentcore.org/core/tree"
 	"cogentcore.org/core/tree/testdata"
 )
 
 func TestNodeJSON(t *testing.T) {
-	parent := testdata.NodeEmbed{}
-	parent.InitName(&parent, "par1")
-	typ := parent.NodeType()
+	parent := testdata.NewNodeEmbed()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
-	// child1 :=
-	parent.NewChild(typ, "child1")
-	var child2 = parent.NewChild(typ, "child2").(*testdata.NodeEmbed)
-	// child3 :=
-	parent.NewChild(typ, "child3")
-	child2.NewChild(typ, "subchild1")
+	child1 := testdata.NewNodeEmbed(parent)
+	child1.SetName("child1")
+	child2 := testdata.NewNodeEmbed(parent)
+	child2.SetName("child2")
+	child3 := testdata.NewNodeEmbed(parent)
+	child3.SetName("child3")
+	schild1 := testdata.NewNodeEmbed(child2)
+	schild1.SetName("subchild1")
 
 	var buf bytes.Buffer
 	assert.NoError(t, jsonx.Write(&parent, &buf))
 	b := buf.Bytes()
 
-	tstload := testdata.NodeEmbed{}
-	tstload.InitName(&tstload, "")
+	tstload := testdata.NewNodeEmbed()
 	if assert.NoError(t, jsonx.Read(&tstload, bytes.NewReader(b))) {
 		var buf2 bytes.Buffer
 		assert.NoError(t, jsonx.Write(tstload, &buf2))
 		tstb := buf2.Bytes()
-		if !bytes.Equal(tstb, b) {
-			t.Error("original and unmarshal'd json rep are not equivalent")
-		}
+		assert.Equal(t, b, tstb)
 	}
 
 	var bufn bytes.Buffer
-	assert.NoError(t, tree.WriteNewJSON(parent.This(), &bufn))
+	assert.NoError(t, WriteNewJSON(parent.This(), &bufn))
 	b = bufn.Bytes()
-	nwnd, err := tree.ReadNewJSON(bytes.NewReader(b))
+	nwnd, err := ReadNewJSON(bytes.NewReader(b))
 	if assert.NoError(t, err) {
 		var buf2 bytes.Buffer
-		err = tree.WriteNewJSON(nwnd, &buf2)
+		err = WriteNewJSON(nwnd, &buf2)
 		if err != nil {
 			t.Error(err)
 		}
 		tstb := buf2.Bytes()
-		// fmt.Printf("test loaded json output: %v\n", string(tstb))
-		if !bytes.Equal(tstb, b) {
-			t.Error("original and unmarshal'd json rep are not equivalent")
-		}
+		assert.Equal(t, b, tstb)
 	}
 }
 
 func TestNodeXML(t *testing.T) {
-	parent := testdata.NodeEmbed{}
-	parent.InitName(&parent, "par1")
-	typ := parent.NodeType()
+	parent := testdata.NewNodeEmbed()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
-	// child1 :=
-	parent.NewChild(typ, "child1")
-	var child2 = parent.NewChild(typ, "child1").(*testdata.NodeEmbed)
-	// child3 :=
-	parent.NewChild(typ, "child1")
-	child2.NewChild(typ, "subchild1")
+	child1 := testdata.NewNodeEmbed(parent)
+	child1.SetName("child1")
+	child2 := testdata.NewNodeEmbed(parent)
+	child2.SetName("child2")
+	child3 := testdata.NewNodeEmbed(parent)
+	child3.SetName("child3")
+	schild1 := testdata.NewNodeEmbed(child2)
+	schild1.SetName("subchild1")
 
 	var buf bytes.Buffer
 	assert.NoError(t, parent.WriteXML(&buf, true))
 	b := buf.Bytes()
 
-	tstload := testdata.NodeEmbed{}
-	tstload.InitName(&tstload, "")
+	tstload := testdata.NewNodeEmbed()
 	if assert.NoError(t, tstload.ReadXML(bytes.NewReader(b))) {
 		var buf2 bytes.Buffer
 		assert.NoError(t, tstload.WriteXML(&buf2, true))
 		tstb := buf2.Bytes()
-		if !bytes.Equal(tstb, b) {
-			t.Error("original and unmarshal'd XML rep are not equivalent")
-		}
+		assert.Equal(t, b, tstb)
 	}
 }

@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fileinfo/mimedata"
+	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -32,7 +33,7 @@ func (tv *TreeView) SyncTree(n tree.Node) *TreeView {
 	}
 	tvIndex := 0
 	tv.SyncToSrc(&tvIndex, true, 0)
-	tv.NeedsLayout()
+	tv.Update()
 	return tv
 }
 
@@ -53,6 +54,7 @@ func (tv *TreeView) SetSyncNode(sn tree.Node, tvIndex *int, init bool, depth int
 func (tv *TreeView) ReSync() {
 	tvIndex := tv.ViewIndex
 	tv.SyncToSrc(&tvIndex, false, 0)
+	tv.Update()
 }
 
 // SyncToSrc updates the view tree to match the sync tree, using
@@ -61,20 +63,23 @@ func (tv *TreeView) ReSync() {
 // (only during init).
 func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 	sk := tv.SyncNode
-	nm := "tv_" + sk.Name()
-	tv.SetName(nm)
+	// root must keep the same name for continuity with surrounding context
+	if tv != tv.RootView {
+		nm := "tv_" + sk.Name()
+		tv.SetName(nm)
+	}
 	tv.ViewIndex = *tvIndex
 	*tvIndex++
 	if init && depth >= tv.RootView.OpenDepth {
 		tv.SetClosed(true)
 	}
 	skids := *sk.Children()
-	tnl := make(tree.Config, 0, len(skids))
+	p := make(tree.TypePlan, 0, len(skids))
 	typ := tv.This().NodeType()
 	for _, skid := range skids {
-		tnl.Add(typ, "tv_"+skid.Name())
+		p.Add(typ, "tv_"+skid.Name())
 	}
-	mods := tv.ConfigChildren(tnl)
+	tree.Update(tv, p)
 	idx := 0
 	for _, skid := range *sk.Children() {
 		if len(tv.Kids) <= idx {
@@ -87,18 +92,14 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 	if !sk.HasChildren() {
 		tv.SetClosed(true)
 	}
-	if mods {
-		tv.Update()
-		tv.TreeViewChanged(nil)
-	}
-	tv.NeedsLayout()
 }
 
 // Label returns the display label for this node,
 // satisfying the Labeler interface
 func (tv *TreeView) Label() string {
 	if tv.SyncNode != nil {
-		if lbl, has := core.ToLabeler(tv.SyncNode); has {
+		// TODO: make this an option?
+		if lbl, has := labels.ToLabeler(tv.SyncNode); has {
 			return lbl
 		}
 		return tv.SyncNode.Name()
@@ -143,7 +144,7 @@ func (tv *TreeView) SelectedSyncNodes() tree.Slice {
 // or nil if not found
 func (tv *TreeView) FindSyncNode(kn tree.Node) *TreeView {
 	var ttv *TreeView
-	tv.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
+	tv.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
 		tvn := AsTreeView(wi)
 		if tvn != nil {
 			if tvn.SyncNode == kn {
@@ -175,8 +176,8 @@ func (tv *TreeView) InsertBefore() { //types:add
 func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *types.Type, n int) {
 	var stv *TreeView
 	for i := 0; i < n; i++ {
-		nm := fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i)
-		nn := tv.InsertNewChild(typ, myidx+i, nm)
+		nn := tv.InsertNewChild(typ, myidx+i)
+		nn.SetName(fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i))
 		ntv := AsTreeView(nn)
 		ntv.Update()
 		if i == n-1 {
@@ -195,8 +196,8 @@ func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *types.Type, n int) {
 	parent := tv.SyncNode
 	var sn tree.Node
 	for i := 0; i < n; i++ {
-		nm := fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i)
-		nn := parent.InsertNewChild(typ, myidx+i, nm)
+		nn := parent.InsertNewChild(typ, myidx+i)
+		nn.SetName(fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i))
 		if i == n-1 {
 			sn = nn
 		}
@@ -230,8 +231,8 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	}
 	d := core.NewBody().AddTitle(actNm).AddText("Number and type of items to insert:")
 	nd := &core.NewItemsData{Number: 1, Type: typ}
-	sg := NewStructView(d).SetStruct(nd).StructGrid()
-	tree.ChildByType[*core.Chooser](sg, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
+	sv := NewStructView(d).SetStruct(nd) // TODO(config)
+	tree.ChildByType[*core.Chooser](sv, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
@@ -257,8 +258,8 @@ func (tv *TreeView) AddChildNode() { //types:add
 	}
 	d := core.NewBody().AddTitle(ttl).AddText("Number and type of items to insert:")
 	nd := &core.NewItemsData{Number: 1, Type: typ}
-	sg := NewStructView(d).SetStruct(nd).StructGrid()
-	tree.ChildByType[*core.Chooser](sg, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
+	sv := NewStructView(d).SetStruct(nd)
+	tree.ChildByType[*TypeChooser](sv, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0) // TODO(config)
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {

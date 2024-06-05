@@ -13,7 +13,7 @@ import (
 )
 
 func TestPermuted(t *testing.T) {
-	dt := table.NewTable(25)
+	dt := table.NewTable().SetNumRows(25)
 	dt.AddStringColumn("Name")
 	dt.AddFloat32TensorColumn("Input", []int{5, 5}, "Y", "X")
 	dt.AddFloat32TensorColumn("Output", []int{5, 5}, "Y", "X")

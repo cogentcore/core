@@ -147,7 +147,7 @@ func main() {
 	})
 
 	sv := xyzview.NewSceneView(b)
-	sv.Config()
+	sv.UpdateWidget()
 	sw := sv.SceneWidget()
 	sc := sv.SceneXYZ()
 	sw.SelectionMode = xyzview.Manipulable
@@ -181,22 +181,22 @@ func main() {
 	cbm := xyz.NewBox(sc, "cube1", 1, 1, 1)
 	cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 
-	rbgp := xyz.NewGroup(sc, "r-b-group")
+	rbgp := xyz.NewGroup(sc)
 
-	xyz.NewSolid(rbgp, "red-cube").SetMesh(cbm).
+	xyz.NewSolid(rbgp).SetMesh(cbm).
 		SetColor(colors.Red).SetShiny(500).SetPos(-1, 0, 0)
 
-	bcb := xyz.NewSolid(rbgp, "blue-cube").SetMesh(cbm).
+	bcb := xyz.NewSolid(rbgp).SetMesh(cbm).
 		SetColor(colors.Blue).SetShiny(10).SetReflective(0.2).
 		SetPos(1, 1, 0)
 	bcb.Pose.Scale.X = 2
 
 	// alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
-	xyz.NewSolid(rbgp, "green-trans-cube").SetMesh(cbm).
+	xyz.NewSolid(rbgp).SetMesh(cbm).
 		SetColor(color.RGBA{0, 255, 0, 128}).SetShiny(20).SetPos(0, 0, 1)
 
 	floorp := xyz.NewPlane(sc, "floor-plane", 100, 100)
-	floor := xyz.NewSolid(sc, "floor").SetMesh(floorp).
+	floor := xyz.NewSolid(sc).SetMesh(floorp).
 		SetColor(colors.Tan).SetTexture(grtx).SetPos(0, -5, 0)
 	floor.Mat.Tiling.Repeat.Set(40, 40)
 
@@ -205,7 +205,7 @@ func main() {
 	// floor.SetDisabled() // not selectable
 
 	lnsm := xyz.NewLines(sc, "Lines", []math32.Vector3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, math32.Vec2(.2, .1), xyz.CloseLines)
-	lns := xyz.NewSolid(sc, "hi-line").SetMesh(lnsm).SetColor(color.RGBA{255, 255, 0, 128})
+	lns := xyz.NewSolid(sc).SetMesh(lnsm).SetColor(color.RGBA{255, 255, 0, 128})
 	lns.Pose.Pos.Set(0, 0, 1)
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
@@ -217,14 +217,14 @@ func main() {
 	// xyz.NewLineBox(sc, sc, "bbox", "bbox", math32.Box3{Min: math32.Vec3(-2, -2, -1), Max: math32.Vec3(-1, -1, .5)}, .01, bbclr, xyz.Active)
 
 	cylm := xyz.NewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
-	xyz.NewSolid(sc, "cylinder").SetMesh(cylm).SetPos(-2.25, 0, 0)
+	xyz.NewSolid(sc).SetMesh(cylm).SetPos(-2.25, 0, 0)
 
 	capm := xyz.NewCapsule(sc, "capsule", 1.5, .5, 32, 1)
-	xyz.NewSolid(sc, "capsule").SetMesh(capm).SetColor(colors.Tan).
+	xyz.NewSolid(sc).SetMesh(capm).SetColor(colors.Tan).
 		SetPos(3.25, 0, 0)
 
 	sphm := xyz.NewSphere(sc, "sphere", .75, 32)
-	sph := xyz.NewSolid(sc, "sphere").SetMesh(sphm).SetColor(colors.Orange)
+	sph := xyz.NewSolid(sc).SetMesh(sphm).SetColor(colors.Orange)
 	sph.Mat.Color.A = 200
 	sph.Pose.Pos.Set(0, -2, 0)
 
@@ -236,7 +236,8 @@ func main() {
 	}
 	lgo.Pose.SetAxisRotation(0, 1, 0, -90) // for all cases
 
-	gogp := xyz.NewGroup(sc, "go-group")
+	gogp := xyz.NewGroup(sc)
+	gogp.SetName("go-group")
 
 	bgo, _ := sc.AddFromLibrary("gopher", gogp)
 	bgo.SetScale(.5, .5, .5).SetPos(1.4, -2.5, 0).SetAxisRotation(0, 1, 0, -160)
@@ -245,17 +246,19 @@ func main() {
 	sgo.SetPos(-1.5, -2, 0).SetScale(.2, .2, .2)
 
 	trsm := xyz.NewTorus(sc, "torus", .75, .1, 32)
-	trs := xyz.NewSolid(sc, "torus").SetMesh(trsm).SetColor(colors.White).
+	trs := xyz.NewSolid(sc).SetMesh(trsm).SetColor(colors.White).
 		SetPos(-1.6, -1.6, -.2).SetAxisRotation(1, 0, 0, 90)
+	trs.SetName("torus")
 	trs.Mat.Color.A = 200
 
-	txt := xyz.NewText2D(sc, "text").SetText("Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
+	txt := xyz.NewText2D(sc).SetText("Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
 	txt.Styles.Text.Align = styles.Center
 	txt.Pose.Scale.SetScalar(0.2)
 	txt.SetPos(0, 2.2, 0)
 
-	tcg := xyz.NewGroup(sc, xyz.TrackCameraName) // automatically tracks camera -- FPS effect
-	xyz.NewSolid(tcg, "first-person-gun").SetMesh(cbm).
+	tcg := xyz.NewGroup(sc) // automatically tracks camera -- FPS effect
+	tcg.SetName(xyz.TrackCameraName)
+	xyz.NewSolid(tcg).SetMesh(cbm).
 		SetScale(.1, .1, 1).SetPos(.5, -.5, -2.5). // in front of camera
 		SetColor(color.RGBA{255, 0, 255, 128})
 
@@ -297,7 +300,7 @@ func main() {
 				views.StructViewDialog(vp, anim, views.DlgOpts{Title: "Animation Parameters"}, nil, nil)
 			})
 
-		sprw := core.NewLayout(evlay, "speed-lay", core.LayoutHoriz)
+		sprw := core.NewFrame(evlay, "speed-lay", core.LayoutHoriz)
 		core.NewText(sprw, "speed-text", "Speed: ")
 		sb := core.NewSpinBox(sprw, "anim-speed")
 		sb.SetMin(0.01)

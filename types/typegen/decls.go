@@ -70,31 +70,24 @@ var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
 // that don't have a `set:"-"` struct tag.
 func SetterFields(typ *Type) []types.Field {
 	res := []types.Field{}
-	do := func(fields Fields) {
-		for _, f := range fields.Fields {
-			// we do not generate setters for unexported fields
-			if unicode.IsLower([]rune(f.Name)[0]) {
-				continue
-			}
-			// unspecified indicates to add a set method; only "-" means no set
-			hasSetter := reflect.StructTag(fields.Tags[f.Name]).Get("set") != "-"
-			if hasSetter {
-				res = append(res, f)
-			}
+	for _, f := range typ.Fields.Fields {
+		// we do not generate setters for unexported fields
+		if unicode.IsLower([]rune(f.Name)[0]) {
+			continue
+		}
+		// unspecified indicates to add a set method; only "-" means no set
+		hasSetter := reflect.StructTag(typ.Fields.Tags[f.Name]).Get("set") != "-"
+		if hasSetter {
+			res = append(res, f)
 		}
 	}
-	do(typ.Fields)
-	do(typ.EmbeddedFields)
 	return res
 }
 
 // SetterType returns the setter type name for the given field in the context of the
 // given type. It converts slices to variadic arguments.
 func SetterType(f types.Field, typ *Type) string {
-	lt, ok := typ.Fields.LocalTypes[f.Name]
-	if !ok {
-		lt = typ.EmbeddedFields.LocalTypes[f.Name]
-	}
+	lt := typ.Fields.LocalTypes[f.Name]
 	if strings.HasPrefix(lt, "[]") {
 		return "..." + strings.TrimPrefix(lt, "[]")
 	}

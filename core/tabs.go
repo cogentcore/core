@@ -24,7 +24,7 @@ import (
 // Tabs divide widgets into logical groups and give users the ability
 // to freely navigate between them using tab buttons.
 type Tabs struct {
-	Layout
+	Frame
 
 	// Type is the styling type of the tabs. If it is changed after
 	// the tabs are first configured, Update needs to be called on
@@ -111,13 +111,8 @@ func (tt TabTypes) IsColumn() bool {
 	return tt == NavigationRail || tt == NavigationDrawer
 }
 
-func (ts *Tabs) OnInit() {
-	ts.WidgetBase.OnInit()
-	ts.Layout.HandleEvents()
-	ts.SetStyles()
-}
-
-func (ts *Tabs) SetStyles() {
+func (ts *Tabs) Init() {
+	ts.Frame.Init()
 	ts.MaxChars = 16
 	ts.CloseIcon = icons.Close
 	ts.Style(func(s *styles.Style) {
@@ -130,12 +125,19 @@ func (ts *Tabs) SetStyles() {
 		}
 	})
 	ts.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(ts) {
-		case "tabs":
+		if w.Parent() == ts.ChildByName("frame") { // TODO(config): figure out how to get this to work with new config paradigm
+			w.Style(func(s *styles.Style) {
+				// tab frames must scroll independently and grow
+				s.Overflow.Set(styles.OverflowAuto)
+				s.Grow.Set(1, 1)
+			})
+		}
+	})
+
+	ts.Maker(func(p *Plan) {
+		AddAt(p, "tabs", func(w *Frame) {
 			w.Style(func(s *styles.Style) {
 				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
-				s.Margin.Zero()
-				s.Padding.Zero()
 				s.Gap.Set(units.Dp(4))
 
 				if ts.Type.Effective(ts).IsColumn() {
@@ -146,60 +148,63 @@ func (ts *Tabs) SetStyles() {
 					s.Grow.Set(1, 0)
 					s.Wrap = true
 				}
-
-				// s.Border.Style.Set(styles.BorderNone)
-				// s.Border.Style.Bottom = styles.BorderSolid
-				// s.Border.Width.Bottom.SetDp(1)
-				// s.Border.Color.Bottom = colors.Scheme.OutlineVariant
 			})
-		case "frame":
-			frame := w.(*Frame)
+			w.Maker(func(p *Plan) {
+				if ts.NewTabButton {
+					AddAt(p, "new-tab", func(w *Button) { // TODO(config)
+						w.SetIcon(icons.Add).SetType(ButtonAction)
+						w.OnClick(func(e events.Event) {
+							ts.NewTab("New tab")
+							ts.SelectTabIndex(ts.NumTabs() - 1)
+						})
+					})
+				}
+			})
+		})
+		AddAt(p, "frame", func(w *Frame) {
 			w.Style(func(s *styles.Style) {
 				s.Display = styles.Stacked
-				frame.SetFlag(true, LayoutStackTopOnly) // key for allowing each tab to have its own size
-				s.Min.X.Dp(160)
-				s.Min.Y.Dp(96)
+				w.SetFlag(true, FrameStackTopOnly) // key for allowing each tab to have its own size
+				s.Min.Set(units.Dp(160), units.Dp(96))
 				s.Grow.Set(1, 1)
 			})
-		}
-		if w.Parent() == ts.ChildByName("frame") {
-			// tab frames must scroll independently
-			w.Style(func(s *styles.Style) {
-				s.Overflow.Set(styles.OverflowAuto)
-			})
+		})
+		// frame comes before tabs in bottom navigation bar
+		if ts.Type.Effective(ts) == NavigationBar {
+			(*p)[0], (*p)[1] = (*p)[1], (*p)[0]
 		}
 	})
 }
 
-// NTabs returns number of tabs
-func (ts *Tabs) NTabs() int {
-	fr := ts.Frame()
+// NumTabs returns the number of tabs.
+func (ts *Tabs) NumTabs() int {
+	fr := ts.FrameWidget()
 	if fr == nil {
 		return 0
 	}
 	return len(fr.Kids)
 }
 
-// CurTab returns currently selected tab, and its index -- returns false none
-func (ts *Tabs) CurTab() (Widget, int, bool) {
-	if ts.NTabs() == 0 {
-		return nil, -1, false
+// CurrentTab returns currently selected tab and its index; returns nil if none.
+func (ts *Tabs) CurrentTab() (Widget, int) {
+	if ts.NumTabs() == 0 {
+		return nil, -1
 	}
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	if fr.StackTop < 0 {
-		return nil, -1, false
+		return nil, -1
 	}
 	w := fr.Child(fr.StackTop).(Widget)
-	return w, fr.StackTop, true
+	return w, fr.StackTop
 }
 
 // NewTab adds a new tab with the given label and returns the resulting tab frame.
 // It is the main end-user API for creating new tabs. An optional icon can also
 // be passed for the tab button.
 func (ts *Tabs) NewTab(label string, icon ...icons.Icon) *Frame {
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	idx := len(*fr.Children())
 	frame := ts.InsertNewTab(label, idx, icon...)
 	return frame
@@ -209,8 +214,9 @@ func (ts *Tabs) NewTab(label string, icon ...icons.Icon) *Frame {
 // within the list of tabs and returns the resulting tab frame. An optional icon
 // can also be passed for the tab button.
 func (ts *Tabs) InsertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
-	fr := ts.Frame()
-	frame := fr.InsertNewChild(FrameType, idx, label).(*Frame)
+	tfr := ts.FrameWidget()
+	frame := tree.InsertNewChild[*Frame](tfr, idx)
+	frame.SetName(label)
 	frame.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
@@ -222,7 +228,7 @@ func (ts *Tabs) InsertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
 // AddTab adds an already existing frame as a new tab with the given tab label
 // and returns the index of that tab.
 func (ts *Tabs) AddTab(frame *Frame, label string) int {
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	idx := len(*fr.Children())
 	ts.InsertTab(frame, label, idx)
 	return idx
@@ -233,19 +239,16 @@ func (ts *Tabs) AddTab(frame *Frame, label string) int {
 // for internal use only. An optional icon can also be passed for the tab button.
 func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, icon ...icons.Icon) {
 	tb := ts.Tabs()
-	tab := tb.InsertNewChild(TabType, idx, label).(*Tab)
-	tab.Tooltip = label
-	tab.Type = ts.Type
-	tab.CloseIcon = ts.CloseIcon
-	tab.MaxChars = ts.MaxChars
-	tab.SetText(label)
+	tab := tree.InsertNewChild[*Tab](tb, idx)
+	tab.SetName(label)
+	tab.SetText(label).SetType(ts.Type).SetCloseIcon(ts.CloseIcon).SetMaxChars(ts.MaxChars).SetTooltip(label)
 	if len(icon) > 0 {
 		tab.SetIcon(icon[0])
 	}
 	tab.OnClick(func(e events.Event) {
 		ts.SelectTabByName(tab.Nm)
 	})
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	if len(fr.Kids) == 1 {
 		fr.StackTop = 0
 		tab.SetSelected(true)
@@ -260,7 +263,7 @@ func (ts *Tabs) InsertTab(frame *Frame, label string, idx int, icon ...icons.Ico
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
 
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	fr.InsertChild(frame, idx)
 	ts.InsertTabOnlyAt(frame, label, idx, icon...)
 	ts.NeedsLayout()
@@ -272,7 +275,7 @@ func (ts *Tabs) TabAtIndex(idx int) (*Frame, *Tab, bool) {
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
 
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	tb := ts.Tabs()
 	sz := len(*fr.Children())
 	if idx < 0 || idx >= sz {
@@ -292,7 +295,7 @@ func (ts *Tabs) SelectTabIndex(idx int) (*Frame, bool) {
 	if !ok {
 		return nil, false
 	}
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	if fr.StackTop == idx {
 		return frame, true
 	}
@@ -311,7 +314,7 @@ func (ts *Tabs) SelectTabIndex(idx int) (*Frame, bool) {
 func (ts *Tabs) TabByName(name string) *Frame {
 	ts.Mu.Lock()
 	defer ts.Mu.Unlock()
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	frame, _ := fr.ChildByName(name).(*Frame)
 	return frame
 }
@@ -352,7 +355,7 @@ func (ts *Tabs) SelectTabByName(name string) *Frame {
 		return nil
 	}
 	ts.SelectTabIndex(idx)
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	return fr.Child(idx).(*Frame)
 }
 
@@ -381,11 +384,10 @@ func (ts *Tabs) RecycleTab(name string, sel bool) *Frame {
 func (ts *Tabs) RecycleTabWidget(name string, sel bool, typ *types.Type) Widget {
 	fr := ts.RecycleTab(name, sel)
 	if fr.HasChildren() {
-		wi, _ := AsWidget(fr.Child(0))
-		return wi
+		return fr.Child(0).(Widget)
 	}
-	wi, _ := AsWidget(fr.NewChild(typ, fr.Nm))
-	wi.Config()
+	wi := fr.NewChild(typ).(Widget)
+	wi.AsWidget().UpdateWidget()
 	return wi
 }
 
@@ -397,7 +399,7 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 	}
 
 	ts.Mu.Lock()
-	fr := ts.Frame()
+	fr := ts.FrameWidget()
 	sz := len(*fr.Children())
 	tb := ts.Tabs()
 	nidx := -1
@@ -410,7 +412,7 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 	}
 	// if we didn't delete the current tab and have at least one
 	// other tab, we go to the next tab over
-	if nidx < 0 && ts.NTabs() > 1 {
+	if nidx < 0 && ts.NumTabs() > 1 {
 		nidx = max(idx-1, 0)
 	}
 	fr.DeleteChildAtIndex(idx)
@@ -424,72 +426,27 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 	return true
 }
 
-// ConfigNewTabButton configures the new tab button at the end of the list of tabs, if applicable.
-func (ts *Tabs) ConfigNewTabButton() bool {
-	sz := ts.NTabs()
-	tb := ts.Tabs()
-	ntb := len(tb.Kids)
-	if ts.NewTabButton {
-		if ntb == sz+1 {
-			return false
-		}
-		tab := tb.InsertNewChild(ButtonType, ntb, "new-tab").(*Button)
-		tab.SetIcon(icons.Add).SetType(ButtonAction)
-		tab.OnClick(func(e events.Event) {
-			ts.NewTab("New tab")
-			ts.SelectTabIndex(len(*ts.Frame().Children()) - 1)
-		})
-		return true
-	} else {
-		if ntb == sz {
-			return false
-		}
-		tb.DeleteChildAtIndex(ntb - 1)
-		return true
-	}
-}
-
-// Config configures the tabs widget children if necessary.
-// Only the 2 primary children (Frames) need to be configured.
-// Re-config is needed when the type of tabs changes, but not
-// when a new tab is added, which only requires a new layout pass.
-func (ts *Tabs) Config() {
-	config := tree.Config{}
-	// frame only comes before tabs in bottom nav bar
-	if ts.Type.Effective(ts) == NavigationBar {
-		config.Add(FrameType, "frame")
-		config.Add(FrameType, "tabs")
-	} else {
-		config.Add(FrameType, "tabs")
-		config.Add(FrameType, "frame")
-	}
-	if ts.ConfigChildren(config) {
-		ts.NeedsLayout()
-	}
-	ts.ConfigNewTabButton()
-}
-
 // Tabs returns the layout containing the tabs (the first element within us).
 // It configures the Tabs if necessary.
 func (ts *Tabs) Tabs() *Frame {
 	if ts.ChildByName("tabs", 0) == nil {
-		ts.Config()
+		ts.UpdateWidget()
 	}
 	return ts.ChildByName("tabs", 0).(*Frame)
 }
 
 // Frame returns the stacked frame layout (the second element within us).
 // It configures the Tabs if necessary.
-func (ts *Tabs) Frame() *Frame {
+func (ts *Tabs) FrameWidget() *Frame {
 	if ts.ChildByName("frame", 1) == nil {
-		ts.Config()
+		ts.UpdateWidget()
 	}
 	return ts.ChildByName("frame", 1).(*Frame)
 }
 
 // UnselectOtherTabs turns off all the tabs except given one
 func (ts *Tabs) UnselectOtherTabs(idx int) {
-	sz := ts.NTabs()
+	sz := ts.NumTabs()
 	tbs := ts.Tabs()
 	for i := 0; i < sz; i++ {
 		if i == idx {
@@ -502,13 +459,10 @@ func (ts *Tabs) UnselectOtherTabs(idx int) {
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// Tab
-
 // Tab is a tab button that contains any, all, or none of a label, an icon,
 // and a close icon. Tabs should be made using the [Tabs.NewTab] function.
 type Tab struct { //core:no-new
-	WidgetBase
+	Frame
 
 	// Type is the styling type of the tab. This property
 	// must be set on the parent [Tabs] for it to work correctly.
@@ -537,13 +491,8 @@ type Tab struct { //core:no-new
 	MaxChars int
 }
 
-func (tb *Tab) OnInit() {
-	tb.WidgetBase.OnInit()
-	tb.HandleClickOnEnterSpace()
-	tb.SetStyles()
-}
-
-func (tb *Tab) SetStyles() {
+func (tb *Tab) Init() {
+	tb.Frame.Init()
 	tb.MaxChars = 16
 	tb.CloseIcon = icons.Close
 	tb.Style(func(s *styles.Style) {
@@ -562,6 +511,10 @@ func (tb *Tab) SetStyles() {
 			s.Padding.Set(units.Dp(10))
 		}
 
+		s.Gap.Zero()
+		s.Align.Content = styles.Center
+		s.Align.Items = styles.Center
+
 		if tb.StateIs(states.Selected) {
 			s.Color = colors.C(colors.Scheme.Select.OnContainer)
 		} else {
@@ -571,54 +524,64 @@ func (tb *Tab) SetStyles() {
 			}
 		}
 	})
-	tb.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(tb) {
-		case "parts":
-			w.Style(func(s *styles.Style) {
-				s.Gap.Zero()
-				s.Align.Content = styles.Center
-				s.Align.Items = styles.Center
+
+	tb.HandleClickOnEnterSpace()
+
+	tb.Maker(func(p *Plan) {
+		if tb.MaxChars > 0 { // TODO(config): find a better time to do this?
+			tb.Text = elide.Middle(tb.Text, tb.MaxChars)
+		}
+
+		if tb.Icon.IsSet() {
+			AddAt(p, "icon", func(w *Icon) {
+				w.Style(func(s *styles.Style) {
+					s.Font.Size.Dp(18)
+				})
+				w.Updater(func() {
+					w.SetIcon(tb.Icon)
+				})
 			})
-		case "parts/icon":
-			w.Style(func(s *styles.Style) {
-				s.Font.Size.Dp(18)
-				s.Margin.Zero()
-				s.Padding.Zero()
-			})
-		case "parts/text":
-			text := w.(*Text)
-			if tb.Type.Effective(tb) == FunctionalTabs {
-				text.Type = TextBodyMedium
-			} else {
-				text.Type = TextLabelLarge
+			if tb.Text != "" {
+				AddAt(p, "space", func(w *Space) {})
 			}
-			w.Style(func(s *styles.Style) {
-				s.SetNonSelectable()
-				s.SetTextWrap(false)
-				s.Margin.Zero()
-				s.Padding.Zero()
+		}
+		if tb.Text != "" {
+			AddAt(p, "text", func(w *Text) {
+				w.Style(func(s *styles.Style) {
+					s.SetNonSelectable()
+					s.SetTextWrap(false)
+				})
+				w.Updater(func() {
+					if tb.Type.Effective(tb) == FunctionalTabs {
+						w.SetType(TextBodyMedium)
+					} else {
+						w.SetType(TextLabelLarge)
+					}
+					w.SetText(tb.Text)
+				})
 			})
-		case "parts/close.parts/icon":
-			w.Style(func(s *styles.Style) {
-				s.Font.Size.Dp(16)
-			})
-		case "parts/close":
-			w.Style(func(s *styles.Style) {
-				s.Padding.Zero()
-				s.Border.Radius = styles.BorderRadiusFull
-			})
-			w.OnClick(func(e events.Event) {
-				ts := tb.Tabs()
-				if ts == nil {
-					return
-				}
-				idx := ts.TabIndexByName(tb.Nm)
-				// if OnlyCloseActiveTab is on, only process delete when already selected
-				if SystemSettings.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
-					ts.SelectTabIndex(idx)
-				} else {
-					ts.DeleteTabIndex(idx)
-				}
+		}
+		if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
+			AddAt(p, "close-space", func(w *Space) {})
+			AddAt(p, "close", func(w *Button) {
+				w.SetType(ButtonAction)
+				w.Style(func(s *styles.Style) {
+					s.Padding.Zero()
+					s.Border.Radius = styles.BorderRadiusFull
+				})
+				w.OnClick(func(e events.Event) {
+					ts := tb.Tabs()
+					idx := ts.TabIndexByName(tb.Nm)
+					// if OnlyCloseActiveTab is on, only process delete when already selected
+					if SystemSettings.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
+						ts.SelectTabIndex(idx)
+					} else {
+						ts.DeleteTabIndex(idx)
+					}
+				})
+				w.Updater(func() {
+					w.SetIcon(tb.CloseIcon)
+				})
 			})
 		}
 	})
@@ -627,46 +590,4 @@ func (tb *Tab) SetStyles() {
 // Tabs returns the parent [Tabs] of this [Tab].
 func (tb *Tab) Tabs() *Tabs {
 	return tb.Parent().Parent().(*Tabs)
-}
-
-func (tb *Tab) Config() {
-	config := tree.Config{}
-	if tb.MaxChars > 0 {
-		tb.Text = elide.Middle(tb.Text, tb.MaxChars)
-	}
-
-	ici := -1
-	lbi := -1
-	clsi := -1
-	if tb.Icon.IsSet() {
-		ici = len(config)
-		config.Add(IconType, "icon")
-		if tb.Text != "" {
-			config.Add(SpaceType, "space")
-		}
-	}
-	if tb.Text != "" {
-		lbi = len(config)
-		config.Add(TextType, "text")
-	}
-	if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
-		config.Add(SpaceType, "close-space")
-		clsi = len(config)
-		config.Add(ButtonType, "close")
-	}
-
-	tb.ConfigParts(config, func() {
-		if ici >= 0 {
-			ic := tb.Parts.Child(ici).(*Icon)
-			ic.SetIcon(tb.Icon)
-		}
-		if lbi >= 0 {
-			text := tb.Parts.Child(lbi).(*Text)
-			text.SetText(tb.Text)
-		}
-		if clsi >= 0 {
-			cls := tb.Parts.Child(clsi).(*Button)
-			cls.SetType(ButtonAction).SetIcon(tb.CloseIcon)
-		}
-	})
 }

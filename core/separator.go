@@ -16,12 +16,8 @@ type Separator struct {
 	WidgetBase
 }
 
-func (sp *Separator) OnInit() {
-	sp.WidgetBase.OnInit()
-	sp.SetStyles()
-}
-
-func (sp *Separator) SetStyles() {
+func (sp *Separator) Init() {
+	sp.WidgetBase.Init()
 	sp.Style(func(s *styles.Style) {
 		s.Align.Self = styles.Center
 		s.Justify.Self = styles.Center

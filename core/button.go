@@ -19,21 +19,20 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
-	"cogentcore.org/core/tree"
 )
 
 // Button is an interactive button with text, an icon, an indicator, a shortcut,
 // and/or a menu. The standard behavior is to register a click event handler with
 // OnClick.
 type Button struct { //core:embedder
-	WidgetBase
+	Frame
 
 	// Type is the type of button.
 	Type ButtonTypes
 
 	// Text is the text for the button.
 	// If it is blank, no text is shown.
-	Text string `set:"-"`
+	Text string
 
 	// Icon is the icon for the button.
 	// If it is "" or [icons.None], no icon is shown.
@@ -115,13 +114,8 @@ const (
 	ButtonMenu
 )
 
-func (bt *Button) OnInit() {
-	bt.WidgetBase.OnInit()
-	bt.HandleEvents()
-	bt.SetStyles()
-}
-
-func (bt *Button) SetStyles() {
+func (bt *Button) Init() {
+	bt.Frame.Init()
 	bt.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.DoubleClickable, abilities.TripleClickable)
 		if !bt.IsDisabled() {
@@ -135,7 +129,9 @@ func (bt *Button) SetStyles() {
 		if bt.Text == "" {
 			s.Padding.Right.Dp(16)
 		}
-		s.Justify.Content = styles.Center
+		s.Gap.Zero()
+		// s.CenterAll() // TODO(kai): fix button layout
+
 		s.MaxBoxShadow = styles.BoxShadow1()
 		switch bt.Type {
 		case ButtonFilled:
@@ -178,58 +174,112 @@ func (bt *Button) SetStyles() {
 			s.BoxShadow = s.MaxBoxShadow
 		}
 	})
-	bt.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(bt) {
-		case "parts":
-			w.Style(func(s *styles.Style) {
-				s.Gap.Zero()
-				s.Align.Content = styles.Center
-				s.Align.Items = styles.Center
-			})
-		case "parts/icon":
-			w.Style(func(s *styles.Style) {
-				s.Font.Size.Dp(18)
-				s.Margin.Zero()
-				s.Padding.Zero()
-			})
-		case "parts/text":
-			text := w.(*Text)
+
+	bt.HandleClickOnEnterSpace()
+	bt.OnClick(func(e events.Event) {
+		if bt.OpenMenu(e) {
+			e.SetHandled()
+		}
+	})
+	bt.OnDoubleClick(func(e events.Event) {
+		bt.Send(events.Click, e)
+	})
+	bt.On(events.TripleClick, func(e events.Event) {
+		bt.Send(events.Click, e)
+	})
+
+	bt.Maker(func(p *Plan) {
+		// we check if the icons are unset, not if they are nil, so
+		// that people can manually set it to [icons.None]
+		if bt.HasMenu() {
 			if bt.Type == ButtonMenu {
-				text.Type = TextBodyMedium
+				if bt.Indicator == "" {
+					bt.Indicator = icons.KeyboardArrowRight
+				}
+			} else if bt.Text != "" {
+				if bt.Indicator == "" {
+					bt.Indicator = icons.KeyboardArrowDown
+				}
 			} else {
-				text.Type = TextLabelLarge
+				if bt.Icon == "" {
+					bt.Icon = icons.Menu
+				}
 			}
-			w.Style(func(s *styles.Style) {
-				s.SetNonSelectable()
-				s.SetTextWrap(false)
-				s.Margin.Zero()
-				s.Padding.Zero()
-				s.Max.X.Zero()
-				s.FillMargin = false
+		}
+		if bt.Icon.IsSet() {
+			AddAt(p, "icon", func(w *Icon) {
+				w.Style(func(s *styles.Style) {
+					s.Font.Size.Dp(18)
+				})
+				w.Updater(func() {
+					w.SetIcon(bt.Icon)
+				})
 			})
-		case "parts/ind-stretch":
-			w.Style(func(s *styles.Style) {
-				s.Min.X.Em(0.2)
-			})
-		case "parts/indicator":
-			w.Style(func(s *styles.Style) {
-				s.Min.X.Dp(18)
-				s.Min.Y.Dp(18)
-				s.Margin.Zero()
-				s.Padding.Zero()
-			})
-		case "parts/shortcut":
-			sc := w.(*Text)
-			if bt.Type == ButtonMenu {
-				sc.Type = TextBodyMedium
-			} else {
-				sc.Type = TextLabelLarge
+			if bt.Text != "" {
+				AddAt(p, "space", func(w *Space) {})
 			}
-			w.Style(func(s *styles.Style) {
-				s.SetNonSelectable()
-				s.SetTextWrap(false)
-				s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+		}
+		if bt.Text != "" {
+			AddAt(p, "text", func(w *Text) {
+				w.Style(func(s *styles.Style) {
+					s.SetNonSelectable()
+					s.SetTextWrap(false)
+					s.FillMargin = false
+				})
+				w.Updater(func() {
+					if bt.Type == ButtonMenu {
+						w.SetType(TextBodyMedium)
+					} else {
+						w.SetType(TextLabelLarge)
+					}
+					w.SetText(bt.Text)
+				})
 			})
+		}
+		if bt.Indicator.IsSet() {
+			AddAt(p, "indicator-stretch", func(w *Stretch) {
+				w.Style(func(s *styles.Style) {
+					s.Min.Set(units.Em(0.2))
+					if bt.Type == ButtonMenu {
+						s.Grow.Set(1, 0)
+					} else {
+						s.Grow.Set(0, 0)
+					}
+				})
+			})
+			AddAt(p, "indicator", func(w *Icon) {
+				w.Style(func(s *styles.Style) {
+					s.Min.X.Dp(18)
+					s.Min.Y.Dp(18)
+					s.Margin.Zero()
+					s.Padding.Zero()
+				})
+				w.Updater(func() {
+					w.SetIcon(bt.Indicator)
+				})
+			})
+		}
+		if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
+			if !bt.Indicator.IsSet() && bt.Shortcut != "" {
+				AddAt(p, "shortcut-stretch", func(w *Stretch) {})
+				AddAt(p, "shortcut", func(w *Text) {
+					w.Style(func(s *styles.Style) {
+						s.SetNonSelectable()
+						s.SetTextWrap(false)
+						s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+					})
+					w.Updater(func() {
+						if bt.Type == ButtonMenu {
+							w.SetType(TextBodyMedium)
+						} else {
+							w.SetType(TextLabelLarge)
+						}
+						w.SetText(bt.Shortcut.Label())
+					})
+				})
+			} else if bt.Shortcut != "" {
+				slog.Error("programmer error: core.Button: shortcut cannot be used on a sub-menu for", "button", bt)
+			}
 		}
 	})
 }
@@ -237,17 +287,6 @@ func (bt *Button) SetStyles() {
 // SetKey sets the shortcut of the button from the given [keymap.Functions]
 func (bt *Button) SetKey(kf keymap.Functions) *Button {
 	bt.SetShortcut(kf.Chord())
-	return bt
-}
-
-// NOTE: Button.SetText must be defined manually so that [views.FuncButton]
-// can define its own SetText method that updates the tooltip
-
-// SetText sets the [Button.Text]:
-// Text is the text for the button.
-// If it is blank, no text is shown.
-func (bt *Button) SetText(v string) *Button {
-	bt.Text = v
 	return bt
 }
 
@@ -271,7 +310,7 @@ func (bt *Button) OpenMenu(e events.Event) bool {
 		return false
 	}
 	pos := bt.ContextMenuPos(e)
-	if indic := bt.Parts.ChildByName("indicator", 3); indic != nil {
+	if indic := bt.ChildByName("indicator", 3); indic != nil {
 		pos = indic.(Widget).ContextMenuPos(nil) // use the pos
 	}
 	m := NewMenu(bt.Menu, bt.This().(Widget), pos)
@@ -282,10 +321,7 @@ func (bt *Button) OpenMenu(e events.Event) bool {
 	return true
 }
 
-//////////////////////////////////////////////////////////////////
-//		Events
-
-func (bt *Button) HandleClickDismissMenu() {
+func (bt *Button) handleClickDismissMenu() {
 	// note: must be called last so widgets aren't deleted when the click arrives
 	bt.OnFinal(events.Click, func(e events.Event) {
 		bt.Scene.Stage.ClosePopupAndBelow()
@@ -301,106 +337,4 @@ func (bt *Button) WidgetTooltip(pos image.Point) (string, image.Point) {
 		}
 	}
 	return res, bt.DefaultTooltipPos()
-}
-
-func (bt *Button) HandleEvents() {
-	bt.HandleClickOnEnterSpace()
-	bt.OnClick(func(e events.Event) {
-		if bt.OpenMenu(e) {
-			e.SetHandled()
-		}
-	})
-	bt.OnDoubleClick(func(e events.Event) {
-		bt.Send(events.Click, e)
-	})
-	bt.On(events.TripleClick, func(e events.Event) {
-		bt.Send(events.Click, e)
-	})
-}
-
-func (bt *Button) Config() {
-	config := tree.Config{}
-	// config := update.Config{}
-
-	// we check if the icons are unset, not if they are nil, so
-	// that people can manually set it to [icons.None]
-	if bt.HasMenu() {
-		if bt.Type == ButtonMenu {
-			if bt.Indicator == "" {
-				bt.Indicator = icons.KeyboardArrowRight
-			}
-		} else if bt.Text != "" {
-			if bt.Indicator == "" {
-				bt.Indicator = icons.KeyboardArrowDown
-			}
-		} else {
-			if bt.Icon == "" {
-				bt.Icon = icons.Menu
-			}
-		}
-	}
-
-	ici := -1
-	lbi := -1
-	if bt.Icon.IsSet() {
-		ici = len(config)
-		config.Add(IconType, "icon")
-		if bt.Text != "" {
-			config.Add(SpaceType, "space")
-		}
-		// config.Add("icon", func() Widget {
-		// 	return NewIcon().SetIcon(bt.Icon)
-		// }
-		// if bt.Text != "" {
-		// 	config.Add("space", func() Widget {
-		// 		return NewSpace()
-		// 	}
-		// }
-	}
-	if bt.Text != "" {
-		lbi = len(config)
-		config.Add(TextType, "text")
-		// config.Add("text", func() {
-		//  	NewText().SetText(bt.Text)
-		// }
-	}
-
-	indi := -1
-	if bt.Indicator.IsSet() {
-		config.Add(StretchType, "ind-stretch")
-		indi = len(config)
-		config.Add(IconType, "indicator")
-	}
-
-	sci := -1
-	if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
-		if indi < 0 && bt.Shortcut != "" {
-			config.Add(StretchType, "sc-stretch")
-			sci = len(config)
-			config.Add(TextType, "shortcut")
-		} else if bt.Shortcut != "" {
-			slog.Error("programmer error: core.Button: shortcut cannot be used on a sub-menu for", "button", bt)
-		}
-	}
-
-	bt.ConfigParts(config, func() {
-		if ici >= 0 {
-			ic := bt.Parts.Child(ici).(*Icon)
-			ic.SetIcon(bt.Icon)
-		}
-		if lbi >= 0 {
-			text := bt.Parts.Child(lbi).(*Text)
-			text.SetText(bt.Text)
-		}
-
-		if indi >= 0 {
-			ic := bt.Parts.Child(indi).(*Icon)
-			ic.SetIcon(bt.Indicator)
-		}
-
-		if sci >= 0 {
-			sc := bt.Parts.Child(sci).(*Text)
-			sc.SetText(bt.Shortcut.Label())
-		}
-	})
 }

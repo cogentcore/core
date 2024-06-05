@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
+	"cogentcore.org/core/tree"
 )
 
 // Stages manages a stack of [Stages].
@@ -302,8 +303,15 @@ func (sm *Stages) SendShowEvents() {
 			sc.ShowIter++
 			if !sc.hasShown {
 				sc.hasShown = true
+				// profile.Profiling = true
+				// pr := profile.Start("send show")
 				sc.Events.GetShortcuts()
-				sc.Send(events.Show)
+				sc.WidgetWalkDown(func(kwi Widget, kwb *WidgetBase) bool {
+					kwi.Send(events.Show)
+					return tree.Continue
+				})
+				// pr.End()
+				// profile.Report(time.Millisecond)
 			}
 		}
 	}

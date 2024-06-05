@@ -41,8 +41,7 @@ import (
 // via [Node.InitName], which is called automatically when adding children
 // and using [NewRoot].
 //
-// Nodes support children configuration through [Node.ConfigChildren].
-// They also support full JSON I/O.
+// Nodes support full JSON I/O.
 //
 // All types that implement the Node interface will automatically
 // be added to the Cogent Core type registry (types)
@@ -57,16 +56,6 @@ type Node interface {
 
 	// AsTreeNode returns the [NodeBase] for this Node.
 	AsTreeNode() *NodeBase
-
-	// InitName initializes this node to the given actual object as a Node interface
-	// and sets its name. The names should be unique among children of a node.
-	// This is called automatically when adding child nodes and using [NewRoot].
-	// If the name is unspecified, it defaults to the ID (kebab-case) name of the type.
-	// Even though this is a method and gets the method receiver, it needs
-	// an "external" version of itself passed as the first arg, from which
-	// the proper Node interface pointer will be obtained. This is the only
-	// way to get virtual functional calling to work within the Go language.
-	InitName(this Node, name ...string)
 
 	// Name returns the user-defined name of the Node, which can be
 	// used for finding elements, generating paths, I/O, etc.
@@ -176,9 +165,7 @@ type Node interface {
 	// so a base type can be passed in without manually calling [Node.This].
 	PathFrom(parent Node) string
 
-	// FindPath returns the node at the given path, starting from this node.
-	// If this node is not the root, then the path to this node is subtracted
-	// from the start of the path if present there.
+	// FindPath returns the node at the given path from this node.
 	// FindPath only works correctly when names are unique.
 	// Path has [Node.Name]s separated by / and fields by .
 	// Node names escape any existing / and . characters to \\ and \,
@@ -198,51 +185,31 @@ type Node interface {
 	// AddChild adds given child at end of children list.
 	// The kid node is assumed to not be on another tree (see [MoveToParent])
 	// and the existing name should be unique among children.
+	// Any error is automatically logged in addition to being returned.
 	AddChild(kid Node) error
 
-	// NewChild creates a new child of the given type and adds it at end
-	// of children list. The name should be unique among children. If the
-	// name is unspecified, it defaults to the ID (kebab-case) name of the
-	// type, plus the [Ki.NumLifetimeChildren] of its parent.
-	NewChild(typ *types.Type, name ...string) Node
+	// NewChild creates a new child of the given type and adds it at the end
+	// of the list of children. The name defaults to the ID (kebab-case) name
+	// of the type, plus the [Node.NumLifetimeChildren] of the parent.
+	NewChild(typ *types.Type) Node
 
-	// SetChild sets child at given index to be the given item; if it is passed
-	// a name, then it sets the name of the child as well; just calls Init
-	// (or InitName) on the child, and SetParent. Names should be unique
-	// among children.
-	SetChild(kid Node, idx int, name ...string) error
+	// SetChild sets the child at the given index to be the given item.
+	// It just calls Init and SetParent on the child. The name defaults
+	// to the ID (kebab-case) name of the type, plus the
+	// [Node.NumLifetimeChildren] of the parent.
+	// Any error is automatically logged in addition to being returned.
+	SetChild(kid Node, idx int) error
 
 	// InsertChild adds given child at position in children list.
 	// The kid node is assumed to not be on another tree (see [MoveToParent])
 	// and the existing name should be unique among children.
+	// Any error is automatically logged in addition to being returned.
 	InsertChild(kid Node, at int) error
 
 	// InsertNewChild creates a new child of given type and add at position
-	// in children list. The name should be unique among children. If the
-	// name is unspecified, it defaults to the ID (kebab-case) name of the
-	// type, plus the [Ki.NumLifetimeChildren] of its parent.
-	InsertNewChild(typ *types.Type, at int, name ...string) Node
-
-	// SetNChildren ensures that there are exactly n children, deleting any
-	// extra, and creating any new ones, using NewChild with given type and
-	// naming according to nameStubX where X is the index of the child.
-	// If nameStub is not specified, it defaults to the ID (kebab-case)
-	// name of the type. It returns whether any changes were made to the
-	// children.
-	//
-	// Note that this does not ensure existing children are of given type, or
-	// change their names, or call UniquifyNames; use ConfigChildren for
-	// those cases; this function is for simpler cases where a parent uses
-	// this function consistently to manage children all of the same type.
-	SetNChildren(n int, typ *types.Type, nameStub ...string) bool
-
-	// ConfigChildren configures children according to the given list of
-	// [TypeAndName]s; it attempts to have minimal impact relative to existing
-	// items that fit the type and name constraints (they are moved into the
-	// corresponding positions), and any extra children are removed, and new
-	// ones added, to match the specified config. It is important that names
-	// are unique. It returns whether any changes were made to the children.
-	ConfigChildren(config Config) bool
+	// in children list. The name defaults to the ID (kebab-case) name
+	// of the type, plus the [Node.NumLifetimeChildren] of the parent.
+	InsertNewChild(typ *types.Type, at int) Node
 
 	// Deleting Children:
 
@@ -380,14 +347,14 @@ type Node interface {
 
 	// Event methods:
 
-	// OnInit is called when the node is
+	// Init is called when the node is
 	// initialized (ie: through [Node.InitName]).
 	// It is called before the node is added to the tree,
 	// so it will not have any parents or siblings.
 	// It will be called only once in the lifetime of the node.
 	// It does nothing by default, but it can be implemented
 	// by higher-level types that want to do something.
-	OnInit()
+	Init()
 
 	// OnAdd is called when the node is added to a parent.
 	// It will be called only once in the lifetime of the node,

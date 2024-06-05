@@ -14,15 +14,35 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// admin.go has infrastructure code outside of the Node interface.
+// admin.go has infrastructure code outside of the [Node] interface.
 
-// initNode initializes the node. See [Node.InitName] for more information
-// on what it does.
-func initNode(this Node) {
-	n := this.AsTreeNode()
-	if n.Ths != this {
-		n.Ths = this
-		n.Ths.OnInit()
+// New returns a new node of the given the type with the given optional parent.
+// If the name is unspecified, it defaults to the ID (kebab-case) name of
+// the type, plus the [Node.NumLifetimeChildren] of the parent.
+func New[T Node](parent ...Node) T {
+	if len(parent) == 0 {
+		return newRoot[T]()
+	}
+	var n T
+	return parent[0].NewChild(n.NodeType()).(T)
+}
+
+// newRoot returns a new initialized node of the given type without a parent.
+func newRoot[T Node]() T {
+	var n T
+	typ := n.NodeType()
+	n = NewOfType(typ).(T)
+	initNode(n)
+	n.SetName(n.NodeType().IDName)
+	return n
+}
+
+// initNode initializes the node.
+func initNode(n Node) {
+	nb := n.AsTreeNode()
+	if nb.Ths != n {
+		nb.Ths = n
+		nb.Ths.Init()
 	}
 }
 
@@ -39,16 +59,11 @@ func checkThis(n Node) error {
 // This is only for nodes with no existing parent; see [MoveToParent] to
 // move nodes that already have a parent. It does not add the node to the
 // parent's list of children; see [Node.AddChild] for a version that does.
+// It automatically gets the [Node.This] of the parent.
 func SetParent(child Node, parent Node) {
 	n := child.AsTreeNode()
-	n.Par = parent
-	if parent != nil {
-		pn := parent.AsTreeNode()
-		c := atomic.AddUint64(&pn.numLifetimeChildren, 1)
-		if child.Name() == "" {
-			child.SetName(child.NodeType().IDName + "-" + strconv.FormatUint(c-1, 10)) // must subtract 1 so we start at 0
-		}
-	}
+	n.Par = parent.This()
+	setUniqueName(n, false)
 	child.This().OnAdd()
 	n.WalkUpParent(func(k Node) bool {
 		k.This().OnChildAdded(child)
@@ -70,32 +85,10 @@ func MoveToParent(child Node, parent Node) {
 	parent.AddChild(child)
 }
 
-// New adds a new child of the given the type
-// with the given name to the given parent.
-// If the name is unspecified, it defaults to the
-// ID (kebab-case) name of the type, plus the
-// [Node.NumLifetimeChildren] of its parent.
-// It is a generic helper function that calls [Node.NewChild].
-func New[T Node](parent Node, name ...string) T {
-	var n T
-	return parent.NewChild(n.NodeType(), name...).(T)
-}
-
-// NewRoot returns a new root node of the given the type
-// with the given name. If the name is unspecified, it
-// defaults to the ID (kebab-case) name of the type.
-// It is a generic helper function that calls [Node.InitName].
-func NewRoot[T Node](name ...string) T {
-	var n T
-	n = n.New().(T)
-	n.InitName(n, name...)
-	return n
-}
-
 // InsertNewChild is a generic helper function for [Node.InsertNewChild].
-func InsertNewChild[T Node](parent Node, at int, name ...string) T {
+func InsertNewChild[T Node](parent Node, at int) T {
 	var n T
-	return parent.InsertNewChild(n.NodeType(), at, name...).(T)
+	return parent.InsertNewChild(n.NodeType(), at).(T)
 }
 
 // ParentByType is a generic helper function for [Node.ParentByType].
@@ -144,18 +137,25 @@ func NewOfType(typ *types.Type) Node {
 
 // SetUniqueName sets the name of the node to be unique, using
 // the number of lifetime children of the parent node as a unique
-// identifier.  If the node already has a name, it adds this, otherwise
-// it uses the type name of the node plus the unique id.
+// identifier. If the node already has a name, it adds the unique id
+// to it. Otherwise, it uses the type name of the node plus the unique id.
 func SetUniqueName(n Node) {
+	setUniqueName(n, true)
+}
+
+// setUniqueName is the implementation of [SetUniqueName] that takes whether
+// to add the unique id to the name even if it is already set.
+func setUniqueName(n Node, addIfSet bool) {
 	pn := n.Parent()
 	if pn == nil {
 		return
 	}
-	c := pn.AsTreeNode().numLifetimeChildren
+	c := atomic.AddUint64(&pn.AsTreeNode().numLifetimeChildren, 1)
 	id := "-" + strconv.FormatUint(c-1, 10) // must subtract 1 so we start at 0
 	if n.Name() == "" {
-		n.SetName(n.NodeType().IDName + id)
-	} else {
+		// must get This for accurate NodeType
+		n.SetName(n.This().NodeType().IDName + id)
+	} else if addIfSet {
 		n.SetName(n.Name() + id)
 	}
 }

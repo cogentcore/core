@@ -43,12 +43,60 @@ type Scene struct {
 	SelectionParams SelectionParams `view:"inline"`
 }
 
-func (sw *Scene) OnInit() {
-	sw.XYZ = xyz.NewScene("Scene")
+func (sw *Scene) Init() {
+	sw.WidgetBase.Init()
+	sw.XYZ = xyz.NewScene()
 	sw.SelectionParams.Defaults()
-	sw.WidgetBase.OnInit()
-	sw.HandleEvents()
-	sw.SetStyles()
+	sw.Style(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Activatable, abilities.Slideable, abilities.LongHoverable, abilities.DoubleClickable)
+		s.Grow.Set(1, 1)
+		s.Min.Set(units.Em(20))
+	})
+
+	sw.On(events.Scroll, func(e events.Event) {
+		// pos := sw.Geom.ContentBBox.Min
+		// fmt.Println("loc off:", e.LocalOff(), "pos:", pos, "e pos:", e.WindowPos())
+		// e.SetLocalOff(e.LocalOff().Add(pos))
+		sw.XYZ.MouseScrollEvent(e.(*events.MouseScroll))
+		sw.NeedsRender()
+	})
+	sw.On(events.KeyChord, func(e events.Event) {
+		sw.XYZ.KeyChordEvent(e)
+		sw.NeedsRender()
+	})
+	sw.handleSlideEvents()
+	sw.handleSelectEvents()
+
+	sw.Updater(func() {
+		sz := sw.Geom.Size.Actual.Content.ToPointFloor()
+		if sz == (image.Point{}) {
+			return
+		}
+		sw.XYZ.Geom.Size = sz
+
+		doConfig := false
+		if sw.XYZ.Frame != nil {
+			cursz := sw.XYZ.Frame.Format.Size
+			if cursz == sz {
+				return
+			}
+		} else {
+			doConfig = true
+		}
+
+		win := sw.WidgetBase.Scene.Events.RenderWindow()
+		if win == nil {
+			return
+		}
+		drw := win.SystemWindow.Drawer()
+		system.TheApp.RunOnMain(func() {
+			sw.XYZ.ConfigFrameFromSurface(drw.Surface().(*vgpu.Surface))
+			if doConfig {
+				sw.XYZ.Config()
+			}
+		})
+		sw.XYZ.SetFlag(true, xyz.ScNeedsRender)
+	})
 }
 
 func (sw *Scene) OnAdd() {
@@ -67,70 +115,8 @@ func (sw *Scene) SceneXYZ() *xyz.Scene {
 	return sw.XYZ
 }
 
-func (sw *Scene) SetStyles() {
-	sw.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Activatable, abilities.Slideable, abilities.LongHoverable, abilities.DoubleClickable)
-		s.Grow.Set(1, 1)
-		s.Min.Set(units.Em(20))
-	})
-}
-
-func (sw *Scene) HandleEvents() {
-	sw.On(events.Scroll, func(e events.Event) {
-		// pos := sw.Geom.ContentBBox.Min
-		// fmt.Println("loc off:", e.LocalOff(), "pos:", pos, "e pos:", e.WindowPos())
-		// e.SetLocalOff(e.LocalOff().Add(pos))
-		sw.XYZ.MouseScrollEvent(e.(*events.MouseScroll))
-		sw.NeedsRender()
-	})
-	sw.On(events.KeyChord, func(e events.Event) {
-		sw.XYZ.KeyChordEvent(e)
-		sw.NeedsRender()
-	})
-	sw.HandleSlideEvents()
-	sw.HandleSelectEvents()
-}
-
-func (sw *Scene) Config() {
-	sw.ConfigFrame()
-}
-
-// ConfigFrame configures the framebuffer for GPU rendering,
-// using the RenderWindow GPU and Device.
-func (sw *Scene) ConfigFrame() {
-	sz := sw.Geom.Size.Actual.Content.ToPointFloor()
-	if sz == (image.Point{}) {
-		return
-	}
-	sw.XYZ.Geom.Size = sz
-
-	doConfig := false
-	if sw.XYZ.Frame != nil {
-		cursz := sw.XYZ.Frame.Format.Size
-		if cursz == sz {
-			return
-		}
-	} else {
-		doConfig = true
-	}
-
-	win := sw.WidgetBase.Scene.Events.RenderWindow()
-	if win == nil {
-		return
-	}
-	drw := win.SystemWindow.Drawer()
-	system.TheApp.RunOnMain(func() {
-		sw.XYZ.ConfigFrameFromSurface(drw.Surface().(*vgpu.Surface))
-		if doConfig {
-			sw.XYZ.Config()
-		}
-	})
-	sw.XYZ.SetFlag(true, xyz.ScNeedsRender)
-	sw.NeedsRender()
-}
-
 func (sw *Scene) Render() {
-	sw.ConfigFrame() // no-op if all good
+	sw.UpdateWidget() // Note: this is indeed essential here -- doesn't work without it.
 	if sw.XYZ.Frame == nil {
 		return
 	}

@@ -16,12 +16,19 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/vcs"
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
+	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/tree"
@@ -55,7 +62,7 @@ type Node struct { //core:embedder
 	// only non-nil if this is the highest-level directory in the tree under vcs control
 	DirRepo vcs.Repo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
-	// version control system repository file status -- only valid during ReadDir
+	// version control system repository file status -- only valid during SetPath
 	RepoFiles vcs.Files `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 }
 
@@ -77,6 +84,108 @@ const (
 	// File info is all for the target of the symlink.
 	NodeSymLink
 )
+
+func (fn *Node) Init() {
+	fn.TreeView.Init()
+	fn.ContextMenus = nil // do not include treeview
+	fn.AddContextMenu(fn.ContextMenu)
+	fn.Style(func(s *styles.Style) {
+		status := fn.Info.VCS
+		s.Font.Weight = styles.WeightNormal
+		s.Font.Style = styles.FontNormal
+		if fn.IsExec() && !fn.IsDir() {
+			s.Font.Weight = styles.WeightBold // todo: somehow not working
+		}
+		if fn.Buffer != nil {
+			s.Font.Style = styles.Italic
+		}
+		switch {
+		case status == vcs.Untracked:
+			s.Color = errors.Must1(gradient.FromString("#808080"))
+		case status == vcs.Modified:
+			s.Color = errors.Must1(gradient.FromString("#4b7fd1"))
+		case status == vcs.Added:
+			s.Color = errors.Must1(gradient.FromString("#008800"))
+		case status == vcs.Deleted:
+			s.Color = errors.Must1(gradient.FromString("#ff4252"))
+		case status == vcs.Conflicted:
+			s.Color = errors.Must1(gradient.FromString("#ce8020"))
+		case status == vcs.Updated:
+			s.Color = errors.Must1(gradient.FromString("#008060"))
+		case status == vcs.Stored:
+			s.Color = colors.C(colors.Scheme.OnSurface)
+		}
+	})
+	fn.On(events.KeyChord, func(e events.Event) {
+		if core.DebugSettings.KeyEventTrace {
+			fmt.Printf("TreeView KeyInput: %v\n", fn.Path())
+		}
+		kf := keymap.Of(e.KeyChord())
+		selMode := events.SelectModeBits(e.Modifiers())
+
+		if selMode == events.SelectOne {
+			if fn.SelectMode() {
+				selMode = events.ExtendContinuous
+			}
+		}
+
+		// first all the keys that work for ReadOnly and active
+		if !fn.IsReadOnly() && !e.IsHandled() {
+			switch kf {
+			case keymap.Delete:
+				fn.DeleteFiles()
+				e.SetHandled()
+			case keymap.Backspace:
+				fn.DeleteFiles()
+				e.SetHandled()
+			case keymap.Duplicate:
+				fn.DuplicateFiles()
+				e.SetHandled()
+			case keymap.Insert: // New File
+				views.CallFunc(fn, fn.NewFile)
+				e.SetHandled()
+			case keymap.InsertAfter: // New Folder
+				views.CallFunc(fn, fn.NewFolder)
+				e.SetHandled()
+			}
+		}
+	})
+	core.AddChildInit(fn, "parts", func(w *core.Frame) {
+		w.Style(func(s *styles.Style) {
+			s.Gap.X.Em(0.4)
+		})
+		w.OnClick(func(e events.Event) {
+			if !e.HasAnyModifier(key.Control, key.Meta, key.Alt, key.Shift) {
+				fn.OpenEmptyDir()
+			}
+		})
+		w.OnDoubleClick(func(e events.Event) {
+			if fn.FRoot != nil && fn.FRoot.DoubleClickFun != nil {
+				fn.FRoot.DoubleClickFun(e)
+			} else {
+				if fn.IsDir() && fn.OpenEmptyDir() {
+					e.SetHandled()
+				}
+			}
+		})
+		core.AddChildInit(w, "branch", func(w *core.Switch) {
+			w.SetType(core.SwitchCheckbox)
+			w.SetIcons(icons.FolderOpen, icons.Folder, icons.Blank)
+			core.AddChildInit(w, "stack", func(w *core.Frame) {
+				f := func(name string) {
+					core.AddChildInit(w, name, func(w *core.Icon) {
+						w.Style(func(s *styles.Style) {
+							s.Min.Set(units.Em(1))
+						})
+					})
+				}
+				f("icon-on")
+				f("icon-off")
+				f("icon-indeterminate")
+			})
+		})
+	})
+}
 
 func (fn *Node) BaseType() *types.Type {
 	return fn.NodeType()
@@ -164,11 +273,10 @@ func (fn *Node) MyRelPath() string {
 	return dirs.RelFilePath(string(fn.FPath), string(fn.FRoot.FPath))
 }
 
-// ReadDir reads all the files at given directory into this directory node --
-// uses config children to preserve extra info already stored about files.
-// The root node represents the directory at the given path.
-// Returns os.Stat error if path cannot be accessed.
-func (fn *Node) ReadDir(path string) error {
+// SetPath sets the current node to represent the given path.
+// This then calls [SyncDir] to synchronize the tree with the file
+// system tree at this path.
+func (fn *Node) SetPath(path string) error {
 	_, fnm := filepath.Split(path)
 	fn.SetText(fnm)
 	pth, err := filepath.Abs(path)
@@ -182,32 +290,33 @@ func (fn *Node) ReadDir(path string) error {
 		return err
 	}
 
-	fn.UpdateDir()
+	fn.SyncDir()
 	return nil
 }
 
-// UpdateDir updates the directory and all the nodes under it
-func (fn *Node) UpdateDir() {
+// SyncDir synchronizes the current directory node with all the files
+// contained within the directory on the filesystem, using the efficient
+// Plan-based diff-driven updating of only what is different.
+func (fn *Node) SyncDir() {
 	fn.DetectVCSRepo(true) // update files
 	path := string(fn.FPath)
-	// fmt.Printf("path: %v  node: %v\n", path, fn.Path())
 	repo, rnode := fn.Repo()
 	fn.Open() // ensure
-	config := fn.ConfigOfFiles(path)
+	plan := fn.PlanOfFiles(path)
 	hasExtFiles := false
 	if fn.This() == fn.FRoot.This() {
 		if len(fn.FRoot.ExtFiles) > 0 {
-			config = append(tree.Config{{Type: fn.FRoot.FileNodeType, Name: ExternalFilesName}}, config...)
+			plan = append(tree.TypePlan{{Type: fn.FRoot.FileNodeType, Name: ExternalFilesName}}, plan...)
 			hasExtFiles = true
 		}
 	}
-	mods := fn.ConfigChildren(config) // NOT unique names
+	mods := tree.Update(fn, plan)
 	// always go through kids, regardless of mods
 	for _, sfk := range fn.Kids {
 		sf := AsNode(sfk)
 		sf.FRoot = fn.FRoot
 		if hasExtFiles && sf.Nm == ExternalFilesName {
-			fn.FRoot.UpdateExtFiles(sf)
+			fn.FRoot.SyncExtFiles(sf)
 			continue
 		}
 		fp := filepath.Join(path, sf.Nm)
@@ -233,15 +342,15 @@ func (fn *Node) UpdateDir() {
 	}
 }
 
-// ConfigOfFiles returns a type-and-name list for configuring nodes based on
-// files immediately within given path
-func (fn *Node) ConfigOfFiles(path string) tree.Config {
-	config1 := tree.Config{}
-	config2 := tree.Config{}
+// PlanOfFiles returns a tree.TypePlan for building nodes based on
+// files immediately within given path.
+func (fn *Node) PlanOfFiles(path string) tree.TypePlan {
+	plan1 := tree.TypePlan{}
+	plan2 := tree.TypePlan{}
 	typ := fn.FRoot.FileNodeType
 	filepath.Walk(path, func(pth string, info os.FileInfo, err error) error {
 		if err != nil {
-			emsg := fmt.Sprintf("filetree.Node ConfigFilesIn Path %q: Error: %v", path, err)
+			emsg := fmt.Sprintf("filetree.Node PlanFilesIn Path %q: Error: %v", path, err)
 			log.Println(emsg)
 			return nil // ignore
 		}
@@ -251,12 +360,12 @@ func (fn *Node) ConfigOfFiles(path string) tree.Config {
 		_, fnm := filepath.Split(pth)
 		if fn.FRoot.DirsOnTop {
 			if info.IsDir() {
-				config1.Add(typ, fnm)
+				plan1.Add(typ, fnm)
 			} else {
-				config2.Add(typ, fnm)
+				plan2.Add(typ, fnm)
 			}
 		} else {
-			config1.Add(typ, fnm)
+			plan1.Add(typ, fnm)
 		}
 		if info.IsDir() {
 			return filepath.SkipDir
@@ -266,19 +375,19 @@ func (fn *Node) ConfigOfFiles(path string) tree.Config {
 	modSort := fn.FRoot.DirSortByModTime(core.Filename(path))
 	if fn.FRoot.DirsOnTop {
 		if modSort {
-			fn.SortConfigByModTime(config2) // just sort files, not dirs
+			fn.SortPlanByModTime(plan2) // just sort files, not dirs
 		}
-		config1 = append(config1, config2...)
+		plan1 = append(plan1, plan2...)
 	} else {
 		if modSort {
-			fn.SortConfigByModTime(config1) // all
+			fn.SortPlanByModTime(plan1) // all
 		}
 	}
-	return config1
+	return plan1
 }
 
-// SortConfigByModTime sorts given config list by mod time
-func (fn *Node) SortConfigByModTime(confg tree.Config) {
+// SortPlanByModTime sorts given plan list by mod time
+func (fn *Node) SortPlanByModTime(confg tree.TypePlan) {
 	sort.Slice(confg, func(i, j int) bool {
 		ifn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[i].Name))
 		jfn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[j].Name))
@@ -316,7 +425,7 @@ func (fn *Node) SetNodePath(path string) error {
 	if fn.IsDir() && !fn.IsIrregular() {
 		openAll := fn.FRoot.InOpenAll && !fn.Info.IsHidden()
 		if openAll || fn.FRoot.IsDirOpen(fn.FPath) {
-			fn.ReadDir(string(fn.FPath)) // keep going down..
+			fn.SetPath(string(fn.FPath)) // keep going down..
 		}
 	}
 	fn.SetFileIcon()
@@ -342,8 +451,6 @@ func (fn *Node) InitFileInfo() error {
 }
 
 // UpdateNode updates information in node based on its associated file in FPath.
-// This is intended to be called ad-hoc for individual nodes that might need
-// updating -- use ReadDir for mass updates as it is more efficient.
 func (fn *Node) UpdateNode() error {
 	err := fn.InitFileInfo()
 	if err != nil {
@@ -352,7 +459,7 @@ func (fn *Node) UpdateNode() error {
 	if fn.IsIrregular() {
 		return nil
 	}
-	// fmt.Println(fn, "updt node start")
+	// fmt.Println(fn, "update node start")
 	if fn.IsDir() {
 		openAll := fn.FRoot.InOpenAll && !fn.Info.IsHidden()
 		if openAll || fn.FRoot.IsDirOpen(fn.FPath) {
@@ -362,7 +469,7 @@ func (fn *Node) UpdateNode() error {
 			if repo != nil {
 				rnode.UpdateRepoFiles()
 			}
-			fn.UpdateDir()
+			fn.SyncDir()
 		}
 	} else {
 		repo, _ := fn.Repo()
@@ -372,21 +479,27 @@ func (fn *Node) UpdateNode() error {
 		fn.Update()
 		fn.SetFileIcon()
 	}
-	// fmt.Println(fn, "updt node end")
+	// fmt.Println(fn, "update node end")
 	return nil
 }
 
-// func (fn *Node) UpdateBranchIcons() {
-// 	fn.SetFileIcon()
-// }
+// SelectedFunc runs given function on selected nodes, in reverse order.
+func (fn *Node) SelectedFunc(fun func(sn *Node)) {
+	sels := fn.SelectedViews()
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := AsNode(sels[i].This())
+		if sn == nil {
+			continue
+		}
+		fun(sn)
+	}
+}
 
 // OpenDirs opens directories for selected views
 func (fn *Node) OpenDirs() {
-	sels := fn.SelectedViews()
-	for i := len(sels) - 1; i >= 0; i-- {
-		fn := AsNode(sels[i].This())
-		fn.OpenDir()
-	}
+	fn.SelectedFunc(func(sn *Node) {
+		sn.OpenDir()
+	})
 }
 
 func (fn *Node) OnOpen() {
@@ -429,11 +542,9 @@ func (fn *Node) OpenEmptyDir() bool {
 // SortBys determines how to sort the selected files in the directory.
 // Default is alpha by name, optionally can be sorted by modification time.
 func (fn *Node) SortBys(modTime bool) { //types:add
-	sels := fn.SelectedViews()
-	for i := len(sels) - 1; i >= 0; i-- {
-		sn := AsNode(sels[i].This())
+	fn.SelectedFunc(func(sn *Node) {
 		sn.SortBy(modTime)
-	}
+	})
 }
 
 // SortBy determines how to sort the files in the directory -- default is alpha by name,
@@ -452,7 +563,7 @@ func (fn *Node) OpenAll() { //types:add
 
 // CloseAll closes all directories under this one, this included
 func (fn *Node) CloseAll() { //types:add
-	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
+	fn.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
 			return tree.Continue
@@ -490,15 +601,14 @@ func (fn *Node) OpenBuf() (bool, error) {
 
 // RemoveFromExterns removes file from list of external files
 func (fn *Node) RemoveFromExterns() { //types:add
-	sels := fn.SelectedViews()
-	for i := len(sels) - 1; i >= 0; i-- {
-		sn := AsNode(sels[i].This())
-		if sn != nil && sn.IsExternal() {
-			sn.FRoot.RemoveExtFile(string(sn.FPath))
-			sn.CloseBuf()
-			sn.Delete()
+	fn.SelectedFunc(func(sn *Node) {
+		if !sn.IsExternal() {
+			return
 		}
-	}
+		sn.FRoot.RemoveExtFile(string(sn.FPath))
+		sn.CloseBuf()
+		sn.Delete()
+	})
 }
 
 // CloseBuf closes the file in its buffer if it is open.

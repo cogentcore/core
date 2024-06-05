@@ -9,14 +9,12 @@ import (
 	"reflect"
 
 	"cogentcore.org/core/base/iox/jsonx"
-	"cogentcore.org/core/base/reflectx"
-	"cogentcore.org/core/colors"
+	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
@@ -28,74 +26,142 @@ import (
 type Inspector struct {
 	core.Frame
 
-	// root of tree being edited
-	KiRoot tree.Node
+	// Root is the root of the tree being edited.
+	Root tree.Node
 
-	// has the root changed via gui actions?  updated from treeview and structview for changes
-	Changed bool `set:"-"`
+	// CurrentNode is the currently selected node in the tree.
+	CurrentNode tree.Node `set:"-"`
 
-	// current filename for saving / loading
-	Filename core.Filename
+	// Filename is the current filename for saving / loading
+	Filename core.Filename `set:"-"`
 }
 
-func (is *Inspector) OnInit() {
-	is.Frame.OnInit()
-	is.SetStyles()
-}
-
-func (is *Inspector) SetStyles() {
+func (is *Inspector) Init() {
+	is.Frame.Init()
 	is.Style(func(s *styles.Style) {
-		s.Color = colors.C(colors.Scheme.OnBackground)
 		s.Grow.Set(1, 1)
-		s.Margin.Set(units.Dp(8))
+		s.Direction = styles.Column
 	})
 	is.OnWidgetAdded(func(w core.Widget) {
+		// TODO(config)
 		if tw, ok := w.(*TreeView); ok {
 			tw.Style(func(s *styles.Style) {
 				s.Max.X.Em(20)
 			})
+		}
+	})
+
+	var titleWidget *core.Text
+	core.AddChildAt(is, "title", func(w *core.Text) {
+		titleWidget = w
+		is.CurrentNode = is.Root
+		w.SetType(core.TextHeadlineSmall)
+		w.Style(func(s *styles.Style) {
+			s.Grow.Set(1, 0)
+			s.Align.Self = styles.Center
+		})
+		w.Updater(func() {
+			w.SetText(fmt.Sprintf("Inspector of %s (%s)", is.CurrentNode.Name(), labels.FriendlyTypeName(reflect.TypeOf(is.CurrentNode))))
+		})
+	})
+	renderRebuild := func() {
+		sc, ok := is.Root.(*core.Scene)
+		if !ok {
 			return
 		}
-		path := w.PathFrom(is)
-		switch path {
-		case "title":
-			title := w.(*core.Text)
-			title.Type = core.TextHeadlineSmall
-			title.Style(func(s *styles.Style) {
-				s.Grow.Set(1, 0)
-				s.Align.Self = styles.Center
+		sc.RenderContext().SetFlag(true, core.RenderRebuild) // trigger full rebuild
+	}
+	core.AddChildAt(is, "splits", func(w *core.Splits) {
+		w.SetSplits(.3, .7)
+		var structView *StructView
+		core.AddChildAt(w, "tree-frame", func(w *core.Frame) {
+			w.Style(func(s *styles.Style) {
+				s.Direction = styles.Column
+				s.Overflow.Set(styles.OverflowAuto)
+				s.Gap.Zero()
 			})
-		}
+			core.AddChildAt(w, "tree", func(w *TreeView) {
+				w.OnSelect(func(e events.Event) {
+					if len(w.SelectedNodes) == 0 {
+						return
+					}
+					sn := w.SelectedNodes[0].AsTreeView().SyncNode
+					is.CurrentNode = sn
+					// Note: doing Update on the entire inspector reverts all tree expansion,
+					// so we only want to update the title and struct view
+					titleWidget.Update()
+					structView.SetStruct(sn).Update()
+
+					sc, ok := is.Root.(*core.Scene)
+					if !ok {
+						return
+					}
+					if w, wb := core.AsWidget(sn); w != nil {
+						pselw := sc.SelectedWidget
+						sc.SelectedWidget = w
+						wb.NeedsRender()
+						if pselw != nil {
+							pselw.AsWidget().NeedsRender()
+						}
+					}
+				})
+				w.OnChange(func(e events.Event) {
+					renderRebuild()
+				})
+				w.SyncTree(is.Root)
+			})
+		})
+		core.AddChildAt(w, "struct", func(w *StructView) {
+			structView = w
+			w.OnChange(func(e events.Event) {
+				renderRebuild()
+			})
+			w.OnClose(func(e events.Event) {
+				sc, ok := is.Root.(*core.Scene)
+				if !ok {
+					return
+				}
+				if sc.Is(core.ScRenderBBoxes) {
+					is.ToggleSelectionMode()
+				}
+				pselw := sc.SelectedWidget
+				sc.SelectedWidget = nil
+				if pselw != nil {
+					pselw.AsWidget().NeedsRender()
+				}
+			})
+			w.Updater(func() {
+				w.SetStruct(is.CurrentNode)
+			})
+		})
 	})
 }
 
 // Save saves tree to current filename, in a standard JSON-formatted file
 func (is *Inspector) Save() error { //types:add
-	if is.KiRoot == nil {
+	if is.Root == nil {
 		return nil
 	}
 	if is.Filename == "" {
 		return nil
 	}
 
-	err := jsonx.Save(is.KiRoot, string(is.Filename))
+	err := jsonx.Save(is.Root, string(is.Filename))
 	if err != nil {
 		return err
 	}
-	is.Changed = false
 	return nil
 }
 
 // SaveAs saves tree to given filename, in a standard JSON-formatted file
 func (is *Inspector) SaveAs(filename core.Filename) error { //types:add
-	if is.KiRoot == nil {
+	if is.Root == nil {
 		return nil
 	}
-	err := jsonx.Save(is.KiRoot, string(filename))
+	err := jsonx.Save(is.Root, string(filename))
 	if err != nil {
 		return err
 	}
-	is.Changed = false
 	is.Filename = filename
 	is.NeedsRender() // notify our editor
 	return nil
@@ -103,10 +169,10 @@ func (is *Inspector) SaveAs(filename core.Filename) error { //types:add
 
 // Open opens tree from given filename, in a standard JSON-formatted file
 func (is *Inspector) Open(filename core.Filename) error { //types:add
-	if is.KiRoot == nil {
+	if is.Root == nil {
 		return nil
 	}
-	err := jsonx.Open(is.KiRoot, string(filename))
+	err := jsonx.Open(is.Root, string(filename))
 	if err != nil {
 		return err
 	}
@@ -119,7 +185,7 @@ func (is *Inspector) Open(filename core.Filename) error { //types:add
 // In selection mode, bounding boxes are rendered around each Widget,
 // and clicking on a Widget pulls it up in the inspector.
 func (is *Inspector) ToggleSelectionMode() { //types:add
-	sc, ok := is.KiRoot.(*core.Scene)
+	sc, ok := is.Root.(*core.Scene)
 	if !ok {
 		return
 	}
@@ -138,7 +204,7 @@ func (is *Inspector) ToggleSelectionMode() { //types:add
 
 // SelectionMonitor monitors for the selected widget
 func (is *Inspector) SelectionMonitor() {
-	sc, ok := is.KiRoot.(*core.Scene)
+	sc, ok := is.Root.(*core.Scene)
 	if !ok {
 		return
 	}
@@ -189,167 +255,60 @@ func (is *Inspector) InspectApp() { //types:add
 	d.RunFullDialog(is)
 }
 
-// SetRoot sets the source root and ensures everything is configured
-func (is *Inspector) SetRoot(root tree.Node) {
-	if is.KiRoot != root {
-		is.KiRoot = root
-		// ge.GetAllUpdates(root)
-	}
-	is.Config()
-}
-
-// Config configures the widget
-func (is *Inspector) Config() {
-	if is.KiRoot == nil {
-		return
-	}
-	is.Style(func(s *styles.Style) {
-		s.Direction = styles.Column
-	})
-	config := tree.Config{}
-	config.Add(core.TextType, "title")
-	config.Add(core.SplitsType, "splits")
-	is.ConfigChildren(config)
-	is.SetTitle(is.KiRoot)
-	is.ConfigSplits()
-}
-
-// SetTitle sets the title to correspond to the given node.
-func (is *Inspector) SetTitle(k tree.Node) {
-	is.TitleWidget().SetText(fmt.Sprintf("Inspector of %s (%s)", k.Name(), reflectx.FriendlyTypeName(reflect.TypeOf(k))))
-}
-
-// TitleWidget returns the title label widget
-func (is *Inspector) TitleWidget() *core.Text {
-	return is.ChildByName("title", 0).(*core.Text)
-}
-
-// Splits returns the main Splits
-func (is *Inspector) Splits() *core.Splits {
-	return is.ChildByName("splits", 2).(*core.Splits)
-}
-
-// TreeView returns the main TreeSyncView
+// TreeView returns the tree view widget.
 func (is *Inspector) TreeView() *TreeView {
-	return is.Splits().Child(0).Child(0).(*TreeView)
+	return is.FindPath("splits/tree-frame/tree").(*TreeView)
 }
 
-// StructView returns the main StructView
-func (is *Inspector) StructView() *StructView {
-	return is.Splits().Child(1).(*StructView)
-}
-
-// ConfigSplits configures the Splits.
-func (is *Inspector) ConfigSplits() {
-	if is.KiRoot == nil {
-		return
-	}
-	split := is.Splits().SetSplits(.3, .7)
-
-	if len(split.Kids) == 0 {
-		tvfr := core.NewFrame(split, "tvfr")
-		tvfr.Style(func(s *styles.Style) {
-			s.Direction = styles.Column
-			s.Overflow.Set(styles.OverflowAuto)
-			s.Gap.Zero()
+func (is *Inspector) MakeToolbar(p *core.Plan) {
+	core.Add(p, func(w *FuncButton) {
+		w.SetFunc(is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool)
+		w.Updater(func() {
+			_, ok := is.Root.(*core.Scene)
+			w.SetEnabled(ok)
 		})
-		tv := NewTreeView(tvfr, "tv")
-		sv := NewStructView(split, "sv")
-		tv.OnSelect(func(e events.Event) {
-			if len(tv.SelectedNodes) == 0 {
-				return
-			}
-			sn := tv.SelectedNodes[0].AsTreeView().SyncNode
-			sv.SetStruct(sn)
-
-			is.SetTitle(sn)
-
-			sc, ok := is.KiRoot.(*core.Scene)
-			if !ok {
-				return
-			}
-			if w, wb := core.AsWidget(sn); w != nil {
-				pselw := sc.SelectedWidget
-				sc.SelectedWidget = w
-				wb.NeedsRender()
-				if pselw != nil {
-					pselw.AsWidget().NeedsRender()
-				}
-			}
+	})
+	core.Add(p, func(w *core.Separator) {})
+	core.Add(p, func(w *FuncButton) {
+		w.SetFunc(is.Open).SetKey(keymap.Open)
+		w.Args[0].SetValue(is.Filename).SetTag(`ext:".json"`)
+	})
+	core.Add(p, func(w *FuncButton) {
+		w.SetFunc(is.Save).SetKey(keymap.Save)
+		w.Updater(func() {
+			w.SetEnabled(is.Filename != "")
 		})
-		renderRebuild := func() {
-			sc, ok := is.KiRoot.(*core.Scene)
-			if !ok {
-				return
-			}
-			sc.RenderContext().SetFlag(true, core.RenderRebuild) // trigger full rebuild
-		}
-		tv.OnChange(func(e events.Event) {
-			renderRebuild()
-		})
-		sv.OnChange(func(e events.Event) {
-			renderRebuild()
-		})
-		sv.OnClose(func(e events.Event) {
-			sc, ok := is.KiRoot.(*core.Scene)
-			if !ok {
-				return
-			}
-			if sc.Is(core.ScRenderBBoxes) {
-				is.ToggleSelectionMode()
-			}
-			pselw := sc.SelectedWidget
-			sc.SelectedWidget = nil
-			if pselw != nil {
-				pselw.AsWidget().NeedsRender()
-			}
-		})
-	}
-	tv := is.TreeView()
-	tv.SyncTree(is.KiRoot)
-	sv := is.StructView()
-	sv.SetStruct(is.KiRoot)
-}
-
-func (is *Inspector) ConfigToolbar(tb *core.Toolbar) {
-	NewFuncButton(tb, is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool).
-		StyleFirst(func(s *styles.Style) {
-			_, ok := is.KiRoot.(*core.Scene)
-			s.SetEnabled(ok)
-		})
-	core.NewSeparator(tb)
-	op := NewFuncButton(tb, is.Open).SetKey(keymap.Open)
-	op.Args[0].SetValue(is.Filename)
-	op.Args[0].SetTag("ext", ".json")
-	NewFuncButton(tb, is.Save).SetKey(keymap.Save).
-		StyleFirst(func(s *styles.Style) { s.SetEnabled(is.Changed && is.Filename != "") })
-	sa := NewFuncButton(tb, is.SaveAs).SetKey(keymap.SaveAs)
-	sa.Args[0].SetValue(is.Filename)
-	sa.Args[0].SetTag("ext", ".json")
-	core.NewSeparator(tb)
-	NewFuncButton(tb, is.InspectApp).SetIcon(icons.Devices)
+	})
+	core.Add(p, func(w *FuncButton) {
+		w.SetFunc(is.SaveAs).SetKey(keymap.SaveAs)
+		w.Args[0].SetValue(is.Filename).SetTag(`ext:".json"`)
+	})
+	core.Add(p, func(w *core.Separator) {})
+	core.Add(p, func(w *FuncButton) {
+		w.SetFunc(is.InspectApp).SetIcon(icons.Devices)
+	})
 }
 
 // InspectorWindow opens an interactive editor of the given tree
 // in a new window.
-func InspectorWindow(k tree.Node) {
-	if core.RecycleMainWindow(k) {
+func InspectorWindow(n tree.Node) {
+	if core.RecycleMainWindow(n) {
 		return
 	}
-	d := core.NewBody("inspector")
-	InspectorView(d, k)
+	d := core.NewBody("Inspector")
+	InspectorView(d, n)
 	d.NewWindow().SetCloseOnBack(true).Run()
 }
 
 // InspectorView configures the given body to have an interactive inspector
 // of the given tree.
-func InspectorView(b *core.Body, k tree.Node) {
-	b.SetTitle("Inspector").SetData(k).SetName("inspector")
-	if k != nil {
-		b.Nm += "-" + k.Name()
-		b.Title += ": " + k.Name()
+func InspectorView(b *core.Body, n tree.Node) {
+	b.SetTitle("Inspector").SetData(n)
+	if n != nil {
+		b.Nm += "-" + n.Name()
+		b.Title += ": " + n.Name()
 	}
-	is := NewInspector(b, "inspector")
-	is.SetRoot(k)
-	b.AddAppBar(is.ConfigToolbar)
+	is := NewInspector(b)
+	is.SetRoot(n)
+	b.AddAppBar(is.MakeToolbar)
 }

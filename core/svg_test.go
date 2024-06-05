@@ -48,6 +48,6 @@ func TestSVGZoom(t *testing.T) {
 	})
 	sv.SVG.Root.ViewBox.Size.SetScalar(1000)
 	sv.SVG.Scale = 100
-	svg.NewText(&sv.SVG.Root).SetText("Hello, world!").SetPos(math32.Vec2(0, 10))
+	svg.NewText(sv.SVG.Root).SetText("Hello, world!").SetPos(math32.Vec2(0, 10))
 	b.AssertRender(t, "svg/zoom")
 }

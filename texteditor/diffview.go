@@ -14,11 +14,13 @@ import (
 	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo/mimedata"
+	"cogentcore.org/core/base/stringsx"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/token"
 	"cogentcore.org/core/styles"
@@ -41,8 +43,8 @@ func DiffFiles(ctx core.Widget, afile, bfile string) (*DiffView, error) {
 		slog.Error(err.Error())
 		return nil, err
 	}
-	astr := strings.Split(strings.Replace(string(ab), "\r\n", "\n", -1), "\n") // windows safe
-	bstr := strings.Split(strings.Replace(string(bb), "\r\n", "\n", -1), "\n")
+	astr := stringsx.SplitLines(string(ab))
+	bstr := stringsx.SplitLines(string(bb))
 	dlg := DiffViewDialog(ctx, "Diff File View", astr, bstr, afile, bfile, "", "")
 	return dlg, nil
 }
@@ -86,17 +88,13 @@ func DiffViewDialogFromRevs(ctx core.Widget, repo vcs.Repo, file string, fbuf *B
 
 // DiffViewDialog opens a dialog for displaying diff between two files as line-strings
 func DiffViewDialog(ctx core.Widget, title string, astr, bstr []string, afile, bfile, arev, brev string) *DiffView {
-	d := core.NewBody("diffview")
+	d := core.NewBody("Diffview")
 	d.SetTitle(title)
 
-	dv := NewDiffView(d, "diff-view")
-	dv.FileA = afile
-	dv.FileB = bfile
-	dv.RevA = arev
-	dv.RevB = brev
-	dv.ConfigDiffView()
+	dv := NewDiffView(d)
+	dv.SetFileA(afile).SetFileB(bfile).SetRevA(arev).SetRevB(brev)
 	dv.DiffStrings(astr, bstr)
-	d.AddAppBar(dv.ConfigToolbar)
+	d.AddAppBar(dv.MakeToolbar)
 	d.NewWindow().SetContext(ctx).SetNewWindow(true).Run()
 	return dv
 }
@@ -149,26 +147,62 @@ type DiffView struct {
 
 	// Diffs applied
 	Diffs textbuf.DiffSelected
+
+	inInputEvent bool
 }
 
-func (dv *DiffView) OnInit() {
-	dv.Frame.OnInit()
-	dv.SetStyles()
-}
+func (dv *DiffView) Init() {
+	dv.Frame.Init()
+	dv.BufA = NewBuffer().SetFilename(dv.FileA)
+	dv.BufB = NewBuffer().SetFilename(dv.FileB)
+	dv.BufA.Options.LineNumbers = true
+	dv.BufA.Stat() // update markup
+	dv.BufB.Options.LineNumbers = true
+	dv.BufB.Stat() // update markup
 
-func (dv *DiffView) SetStyles() {
 	dv.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
-	dv.OnWidgetAdded(func(w core.Widget) {
-		switch w.PathFrom(dv) {
-		case "text-a", "text-b":
+
+	f := func(name string, buf *Buffer) {
+		core.AddChildAt(dv, name, func(w *DiffTextEditor) {
+			w.SetBuffer(buf)
+			w.SetReadOnly(true)
 			w.Style(func(s *styles.Style) {
 				s.Min.X.Ch(80)
 				s.Min.Y.Em(40)
 			})
+			w.On(events.Scroll, func(e events.Event) {
+				dv.SyncViews(events.Scroll, e, name)
+			})
+			w.On(events.Input, func(e events.Event) {
+				dv.SyncViews(events.Input, e, name)
+			})
+		})
+	}
+	f("text-a", dv.BufA)
+	f("text-b", dv.BufB)
+}
+
+// SyncViews synchronizes the text view scrolling and cursor positions
+func (dv *DiffView) SyncViews(typ events.Types, e events.Event, name string) {
+	tva, tvb := dv.TextEditors()
+	me, other := tva, tvb
+	if name == "text-b" {
+		me, other = tvb, tva
+	}
+	switch typ {
+	case events.Scroll:
+		other.Geom.Scroll.Y = me.Geom.Scroll.Y
+		other.ScrollUpdateFromGeom(math32.Y)
+	case events.Input:
+		if dv.inInputEvent {
+			return
 		}
-	})
+		dv.inInputEvent = true
+		other.SetCursorShow(me.CursorPos)
+		dv.inInputEvent = false
+	}
 }
 
 // NextDiff moves to next diff region
@@ -273,8 +307,6 @@ func (dv *DiffView) SaveFileB(fname core.Filename) { //types:add
 // DiffStrings computes differences between two lines-of-strings and displays in
 // DiffView.
 func (dv *DiffView) DiffStrings(astr, bstr []string) {
-	av, bv := dv.TextEditors()
-
 	dv.Diffs.SetStringLines(astr, bstr)
 
 	dv.BufA.LineColors = nil
@@ -331,8 +363,8 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 			ad.J2 = absln + di
 			dv.AlignD[i] = ad
 			for i := 0; i < di; i++ {
-				dv.BufA.SetLineColor(absln+i, del)
-				dv.BufB.SetLineColor(absln+i, ins)
+				dv.BufA.SetLineColor(absln+i, ins)
+				dv.BufB.SetLineColor(absln+i, del)
 				aln := []byte(astr[df.I1+i])
 				alen := len(aln)
 				ab = append(ab, aln)
@@ -348,8 +380,8 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 			ad.J2 = absln + dj
 			dv.AlignD[i] = ad
 			for i := 0; i < dj; i++ {
-				dv.BufA.SetLineColor(absln+i, ins)
-				dv.BufB.SetLineColor(absln+i, del)
+				dv.BufA.SetLineColor(absln+i, del)
+				dv.BufB.SetLineColor(absln+i, ins)
 				bln := []byte(bstr[df.J1+i])
 				blen := len(bln)
 				bb = append(bb, bln)
@@ -376,8 +408,6 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 	dv.TagWordDiffs()
 	dv.BufA.ReMarkup()
 	dv.BufB.ReMarkup()
-	av.NeedsRender()
-	bv.NeedsRender()
 }
 
 // TagWordDiffs goes through replace diffs and tags differences at the
@@ -487,152 +517,129 @@ func (dv *DiffView) UndoDiff(ab int) error {
 	return nil
 }
 
-func (dv *DiffView) Config() {
-	dv.ConfigDiffView()
-}
-
-func (dv *DiffView) ConfigDiffView() {
-	if dv.HasChildren() {
-		return
-	}
-	dv.BufA = NewBuffer().SetFilename(dv.FileA)
-	dv.BufB = NewBuffer().SetFilename(dv.FileB)
-	dv.BufA.Options.LineNumbers = true
-	dv.BufA.Stat() // update markup
-	dv.BufB.Options.LineNumbers = true
-	dv.BufB.Stat() // update markup
-	av := NewDiffTextEditor(dv, "text-a").SetBuffer(dv.BufA)
-	av.SetReadOnly(true)
-	bv := NewDiffTextEditor(dv, "text-b").SetBuffer(dv.BufB)
-	bv.SetReadOnly(true)
-
-	av.On(events.Scroll, func(e events.Event) {
-		// bv.ScrollDelta(e)
-		bv.Geom.Scroll.Y = av.Geom.Scroll.Y
-		bv.NeedsRender()
-	})
-	bv.On(events.Scroll, func(e events.Event) {
-		// av.ScrollDelta(e)
-		av.Geom.Scroll.Y = bv.Geom.Scroll.Y
-		av.NeedsRender()
-	})
-	inInputEvent := false
-	av.On(events.Input, func(e events.Event) {
-		if inInputEvent {
-			return
-		}
-		inInputEvent = true
-		bv.SetCursorShow(av.CursorPos)
-		inInputEvent = false
-	})
-	bv.On(events.Input, func(e events.Event) {
-		if inInputEvent {
-			return
-		}
-		inInputEvent = true
-		av.SetCursorShow(bv.CursorPos)
-		inInputEvent = false
-	})
-}
-
-// ConfigToolbar configures a [core.Toolbar] for this view
-func (dv *DiffView) ConfigToolbar(tb *core.Toolbar) {
+func (dv *DiffView) MakeToolbar(p *core.Plan) {
 	txta := "A: " + dirs.DirAndFile(dv.FileA)
 	if dv.RevA != "" {
 		txta += ": " + dv.RevA
 	}
-	core.NewText(tb, "label-a").SetText(txta)
-	core.NewButton(tb).SetText("Next").SetIcon(icons.KeyboardArrowDown).
-		SetTooltip("move down to next diff region").
-		OnClick(func(e events.Event) {
-			dv.NextDiff(0)
-		}).
-		Style(func(s *styles.Style) {
-			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
-		})
-	core.NewButton(tb).SetText("Prev").SetIcon(icons.KeyboardArrowUp).
-		SetTooltip("move up to previous diff region").
-		OnClick(func(e events.Event) {
-			dv.PrevDiff(0)
-		}).
-		Style(func(s *styles.Style) {
-			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
-		})
-	core.NewButton(tb).SetText("A &lt;- B").SetIcon(icons.ContentCopy).
-		SetTooltip("for current diff region, apply change from corresponding version in B, and move to next diff").
-		OnClick(func(e events.Event) {
-			dv.ApplyDiff(0, -1)
-			dv.NextDiff(0)
-		}).
-		Style(func(s *styles.Style) {
-			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
-		})
-	core.NewButton(tb).SetText("Undo").SetIcon(icons.Undo).
-		SetTooltip("undo last diff apply action (A &lt;- B)").
-		OnClick(func(e events.Event) {
-			dv.UndoDiff(0)
-		}).
-		Style(func(s *styles.Style) {
-			s.SetState(!dv.BufA.IsChanged(), states.Disabled)
-		})
-	sa := core.NewButton(tb).SetText("Save").SetIcon(icons.Save).
-		SetTooltip("save edited version of file with the given -- prompts for filename")
-	sa.OnClick(func(e events.Event) {
-		fb := views.NewSoloFuncButton(sa, dv.SaveFileA)
-		fb.Args[0].SetValue(dv.FileA)
-		fb.CallFunc()
-	}).Style(func(s *styles.Style) {
-		s.SetState(!dv.BufA.IsChanged(), states.Disabled)
+	core.Add(p, func(w *core.Text) {
+		w.SetText(txta)
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetText("Next").SetIcon(icons.KeyboardArrowDown).
+			SetTooltip("move down to next diff region").
+			OnClick(func(e events.Event) {
+				dv.NextDiff(0)
+			}).
+			Style(func(s *styles.Style) {
+				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
+			})
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetText("Prev").SetIcon(icons.KeyboardArrowUp).
+			SetTooltip("move up to previous diff region").
+			OnClick(func(e events.Event) {
+				dv.PrevDiff(0)
+			}).
+			Style(func(s *styles.Style) {
+				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
+			})
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetText("A &lt;- B").SetIcon(icons.ContentCopy).
+			SetTooltip("for current diff region, apply change from corresponding version in B, and move to next diff").
+			OnClick(func(e events.Event) {
+				dv.ApplyDiff(0, -1)
+				dv.NextDiff(0)
+			}).
+			Style(func(s *styles.Style) {
+				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
+			})
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetText("Undo").SetIcon(icons.Undo).
+			SetTooltip("undo last diff apply action (A &lt;- B)").
+			OnClick(func(e events.Event) {
+				dv.UndoDiff(0)
+			}).
+			Style(func(s *styles.Style) {
+				s.SetState(!dv.BufA.IsChanged(), states.Disabled)
+			})
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetText("Save").SetIcon(icons.Save).
+			SetTooltip("save edited version of file with the given -- prompts for filename").
+			OnClick(func(e events.Event) {
+				fb := views.NewSoloFuncButton(w, dv.SaveFileA)
+				fb.Args[0].SetValue(dv.FileA)
+				fb.CallFunc()
+			}).
+			Style(func(s *styles.Style) {
+				s.SetState(!dv.BufA.IsChanged(), states.Disabled)
+			})
 	})
 
-	core.NewSeparator(tb)
+	core.Add(p, func(w *core.Separator) {})
 
 	txtb := "B: " + dirs.DirAndFile(dv.FileB)
 	if dv.RevB != "" {
 		txtb += ": " + dv.RevB
 	}
-	core.NewText(tb, "label-b").SetText(txtb)
-	core.NewButton(tb).SetText("Next").SetIcon(icons.KeyboardArrowDown).
-		SetTooltip("move down to next diff region").
-		OnClick(func(e events.Event) {
-			dv.NextDiff(1)
-		}).
-		Style(func(s *styles.Style) {
-			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
-		})
-	core.NewButton(tb).SetText("Prev").SetIcon(icons.KeyboardArrowUp).
-		SetTooltip("move up to previous diff region").
-		OnClick(func(e events.Event) {
-			dv.PrevDiff(1)
-		}).
-		Style(func(s *styles.Style) {
-			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
-		})
-	core.NewButton(tb).SetText("A -&gt; B").SetIcon(icons.ContentCopy).
-		SetTooltip("for current diff region, apply change from corresponding version in A, and move to next diff").
-		OnClick(func(e events.Event) {
-			dv.ApplyDiff(1, -1)
-			dv.NextDiff(1)
-		}).
-		Style(func(s *styles.Style) {
-			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
-		})
-	core.NewButton(tb).SetText("Undo").SetIcon(icons.Undo).
-		SetTooltip("undo last diff apply action (A -&gt; B)").
-		OnClick(func(e events.Event) {
-			dv.UndoDiff(1)
-		}).
-		Style(func(s *styles.Style) {
-			s.SetState(!dv.BufB.IsChanged(), states.Disabled)
-		})
-	sb := core.NewButton(tb).SetText("Save").SetIcon(icons.Save).
-		SetTooltip("save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function")
-	sb.OnClick(func(e events.Event) {
-		fb := views.NewSoloFuncButton(sb, dv.SaveFileB)
-		fb.Args[0].SetValue(dv.FileB)
-		fb.CallFunc()
-	}).Style(func(s *styles.Style) {
-		s.SetState(!dv.BufB.IsChanged(), states.Disabled)
+	core.Add(p, func(w *core.Text) {
+		w.SetText(txtb)
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetText("Next").SetIcon(icons.KeyboardArrowDown).
+			SetTooltip("move down to next diff region").
+			OnClick(func(e events.Event) {
+				dv.NextDiff(1)
+			}).
+			Style(func(s *styles.Style) {
+				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
+			})
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetText("Prev").SetIcon(icons.KeyboardArrowUp).
+			SetTooltip("move up to previous diff region").
+			OnClick(func(e events.Event) {
+				dv.PrevDiff(1)
+			}).
+			Style(func(s *styles.Style) {
+				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
+			})
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetText("A -&gt; B").SetIcon(icons.ContentCopy).
+			SetTooltip("for current diff region, apply change from corresponding version in A, and move to next diff").
+			OnClick(func(e events.Event) {
+				dv.ApplyDiff(1, -1)
+				dv.NextDiff(1)
+			}).
+			Style(func(s *styles.Style) {
+				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
+			})
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetText("Undo").SetIcon(icons.Undo).
+			SetTooltip("undo last diff apply action (A -&gt; B)").
+			OnClick(func(e events.Event) {
+				dv.UndoDiff(1)
+			}).
+			Style(func(s *styles.Style) {
+				s.SetState(!dv.BufB.IsChanged(), states.Disabled)
+			})
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetText("Save").SetIcon(icons.Save).
+			SetTooltip("save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function").
+			OnClick(func(e events.Event) {
+				fb := views.NewSoloFuncButton(w, dv.SaveFileB)
+				fb.Args[0].SetValue(dv.FileB)
+				fb.CallFunc()
+			}).
+			Style(func(s *styles.Style) {
+				s.SetState(!dv.BufB.IsChanged(), states.Disabled)
+			})
 	})
 }
 
@@ -651,8 +658,8 @@ type DiffTextEditor struct {
 	Editor
 }
 
-func (tv *DiffTextEditor) OnInit() {
-	tv.Editor.OnInit()
+func (tv *DiffTextEditor) Init() {
+	tv.Editor.Init()
 	tv.HandleDoubleClick()
 }
 

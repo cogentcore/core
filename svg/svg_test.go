@@ -22,7 +22,7 @@ func TestSVG(t *testing.T) {
 	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
 
 	dir := filepath.Join("testdata", "svg")
-	files := dirs.ExtFilenames(dir, []string{".svg"})
+	files := dirs.ExtFilenames(dir, ".svg")
 
 	for _, fn := range files {
 		// if fn != "test2.svg" {
@@ -91,7 +91,7 @@ func TestCoreLogo(t *testing.T) {
 	x := float32(0.53)
 	sw := float32(0.27)
 
-	o := NewPath(&sv.Root, "outer")
+	o := NewPath(sv.Root)
 	o.SetProperty("stroke", colors.AsHex(outer))
 	o.SetProperty("stroke-width", sw)
 	o.SetProperty("fill", "none")
@@ -99,7 +99,7 @@ func TestCoreLogo(t *testing.T) {
 	o.AddPathArc(0.35, 30, 330)
 	o.UpdatePathString()
 
-	c := NewCircle(&sv.Root, "core")
+	c := NewCircle(sv.Root)
 	c.Pos.Set(x, 0.5)
 	c.Radius = 0.23
 	c.SetProperty("fill", colors.AsHex(core))

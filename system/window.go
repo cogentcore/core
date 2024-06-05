@@ -20,7 +20,7 @@ import (
 // Window is a double-buffered OS-specific hardware window.
 //
 // It provides basic GPU support functions, and is currently implemented
-// via Vulkan on top of glfw cross-platform window mgmt toolkit (see driver/vkos).
+// via Vulkan on top of glfw cross-platform window mgmt toolkit (see driver/desktop).
 // using the vgpu framework.
 //
 // The Window maintains its own vdraw.Drawer drawing system for rendering

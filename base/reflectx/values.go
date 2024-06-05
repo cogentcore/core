@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/bools"
+	"cogentcore.org/core/base/elide"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/enums"
 )
@@ -173,7 +174,7 @@ func ToBool(v any) (bool, error) {
 	if AnyIsNil(v) {
 		return false, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := NonPointerValue(reflect.ValueOf(v))
+	npv := Underlying(reflect.ValueOf(v))
 	vk := npv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
@@ -330,7 +331,7 @@ func ToInt(v any) (int64, error) {
 	if AnyIsNil(v) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := NonPointerValue(reflect.ValueOf(v))
+	npv := Underlying(reflect.ValueOf(v))
 	vk := npv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
@@ -487,7 +488,7 @@ func ToFloat(v any) (float64, error) {
 	if AnyIsNil(v) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := NonPointerValue(reflect.ValueOf(v))
+	npv := Underlying(reflect.ValueOf(v))
 	vk := npv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
@@ -644,7 +645,7 @@ func ToFloat32(v any) (float32, error) {
 	if AnyIsNil(v) {
 		return 0, fmt.Errorf("got nil value of type %T", v)
 	}
-	npv := NonPointerValue(reflect.ValueOf(v))
+	npv := Underlying(reflect.ValueOf(v))
 	vk := npv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
@@ -681,6 +682,9 @@ func ToFloat32(v any) (float32, error) {
 // pointers, and byte is converted as string(byte), not the decimal representation.
 func ToString(v any) string {
 	nilstr := "nil"
+	if AnyIsNil(v) {
+		return nilstr
+	}
 	switch vt := v.(type) {
 	case string:
 		return vt
@@ -828,7 +832,7 @@ func ToString(v any) string {
 	if AnyIsNil(v) {
 		return nilstr
 	}
-	npv := NonPointerValue(reflect.ValueOf(v))
+	npv := Underlying(reflect.ValueOf(v))
 	vk := npv.Kind()
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
@@ -988,51 +992,62 @@ func SetRobust(to, from any) error {
 		return fmt.Errorf("got nil destination value")
 	}
 	v := reflect.ValueOf(to)
-	vnp := NonPointerValue(v)
-	if !vnp.IsValid() {
-		return fmt.Errorf("got invalid destination value %v of type %T", to, to)
+	pointer := UnderlyingPointer(v)
+	typ := pointer.Elem().Type()
+	kind := typ.Kind()
+	if !pointer.Elem().CanSet() {
+		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", pointer, pointer)
 	}
-	typ := vnp.Type()
-	vp := OnePointerValue(vnp)
-	vk := vnp.Kind()
-	if !vp.Elem().CanSet() {
-		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", vp, vp)
+
+	if v.Kind() == reflect.Pointer {
+		fv := reflect.ValueOf(from)
+		if fv.IsValid() {
+			if fv.Type().AssignableTo(typ) {
+				pointer.Elem().Set(fv)
+				return nil
+			}
+			ufv := Underlying(fv)
+			if ufv.IsValid() && ufv.Type().AssignableTo(typ) {
+				pointer.Elem().Set(ufv)
+				return nil
+			}
+		}
 	}
 
 	switch {
-	case vk >= reflect.Int && vk <= reflect.Int64:
+	case kind >= reflect.Int && kind <= reflect.Int64:
 		fm, err := ToInt(from)
 		if err != nil {
 			return err
 		}
-		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return nil
-	case vk >= reflect.Uint && vk <= reflect.Uint64:
+	case kind >= reflect.Uint && kind <= reflect.Uint64:
 		fm, err := ToInt(from)
 		if err != nil {
 			return err
 		}
-		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return nil
-	case vk == reflect.Bool:
+	case kind == reflect.Bool:
 		fm, err := ToBool(from)
 		if err != nil {
 			return err
 		}
-		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return nil
-	case vk >= reflect.Float32 && vk <= reflect.Float64:
+	case kind >= reflect.Float32 && kind <= reflect.Float64:
 		fm, err := ToFloat(from)
 		if err != nil {
 			return err
 		}
-		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return nil
-	case vk == reflect.String:
+	case kind == reflect.String:
 		fm := ToString(from)
-		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		pointer.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return nil
-	case vk == reflect.Struct:
+	case kind == reflect.Struct:
 		if NonPointerType(reflect.TypeOf(from)).Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to) // todo: this is not working -- see what marshal says, etc
 			if err != nil {
@@ -1041,7 +1056,7 @@ func SetRobust(to, from any) error {
 			}
 			return nil
 		}
-	case vk == reflect.Slice:
+	case kind == reflect.Slice:
 		if NonPointerType(reflect.TypeOf(from)).Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to)
 			if err != nil {
@@ -1051,7 +1066,7 @@ func SetRobust(to, from any) error {
 			return nil
 		}
 		return CopySliceRobust(to, from)
-	case vk == reflect.Map:
+	case kind == reflect.Map:
 		if NonPointerType(reflect.TypeOf(from)).Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(from)), to)
 			if err != nil {
@@ -1063,11 +1078,7 @@ func SetRobust(to, from any) error {
 		return CopyMapRobust(to, from)
 	}
 
-	fv := NonPointerValue(reflect.ValueOf(from))
-	// just set it if possible to assign
-	if fv.Type().AssignableTo(typ) {
-		vp.Elem().Set(fv)
-		return nil
-	}
-	return fmt.Errorf("unable to set value %v of type %T from value %v of type %T (not a supported type pair and direct assigning is not possible)", to, to, from, from)
+	tos := elide.End(fmt.Sprintf("%v", to), 40)
+	fms := elide.End(fmt.Sprintf("%v", from), 40)
+	return fmt.Errorf("unable to set value %s of type %T (using underlying type: %s) from value %s of type %T (using underlying type: %s): not a supported type pair and direct assigning is not possible", tos, to, typ.String(), fms, from, LongTypeName(reflect.TypeOf(from)))
 }

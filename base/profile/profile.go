@@ -45,6 +45,9 @@ import (
 // passed to Start, which will be added at the end of the name in a dash-delimited
 // format. See [StartName] for a version that supports a custom name.
 func Start(info ...string) *Profile {
+	if !Profiling {
+		return nil
+	}
 	name := ""
 	pc, _, _, ok := runtime.Caller(1)
 	if ok {

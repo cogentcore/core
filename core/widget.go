@@ -12,11 +12,14 @@ import (
 	"image"
 	"log/slog"
 
+	"cogentcore.org/core/colors"
+	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
@@ -26,41 +29,18 @@ import (
 type Widget interface {
 	tree.Node
 
-	// AsWidget returns the WidgetBase embedded field for any Widget node.
-	// The Widget interface defines only methods that can be overridden
-	// or need to be called on other nodes. Everything else that is common
-	// to all Widgets is in the WidgetBase.
+	// AsWidget returns the [WidgetBase] embedded field.
 	AsWidget() *WidgetBase
 
 	// OnWidgetAdded adds a function to call when a widget is added
 	// as a child to the widget or any of its children.
 	OnWidgetAdded(f func(w Widget)) *WidgetBase
 
-	// Style sets the styling of the widget by adding a Styler function.
+	// Style sets the styling properties of the widget by adding a styler function.
 	Style(s func(s *styles.Style)) *WidgetBase
 
-	// Update does a general purpose update of the widget and everything
-	// below it by reconfiguring it, applying its styles, and indicating
-	// that it needs a new layout pass. It is the main way that end users
-	// should update widgets, and it should be called after making any
-	// changes to the core properties of a widget (for example, the text
-	// of [Text], the icon of a button, or the slice of a table view).
-	//
-	// If you are calling this in a separate goroutine outside of the main
-	// configuration, rendering, and event handling structure, you need to
-	// call [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and
-	// after this, respectively.
+	// See [WidgetBase.Update].
 	Update()
-
-	// Config configures the widget, typically primarily configuring its Parts.
-	// it does not call Config on its children, just on itself.
-	// ApplyStyle must generally be called after Config; it is called
-	// automatically when the Scene is first shown, but must be called
-	// manually thereafter as needed after configuration changes.
-	// See Update for a convenience function that does both and also
-	// triggers a new layout pass. ConfigScene on Scene handles the full
-	// tree configuration.
-	Config()
 
 	// StateIs returns whether the widget has the given [states.States] flag set
 	StateIs(flag states.States) bool
@@ -76,6 +56,9 @@ type Widget interface {
 
 	// ApplyStyle applies style functions to the widget based on current state.
 	// It is typically not overridden; instead, call Style to apply custom styling.
+	// If you do need to override it (for example, to convert a custom unit value
+	// to dots), then you should call [WidgetBase.ApplyStyleWidget] at the start
+	// of your method.
 	ApplyStyle()
 
 	// SizeUp (bottom-up) gathers Actual sizes from our Children & Parts,
@@ -117,7 +100,7 @@ type Widget interface {
 	ScenePos()
 
 	// Render is the method that widgets should implement to define their
-	// custom rendering steps. It should not be called outside of
+	// custom rendering steps. It should not typically be called outside of
 	// [Widget.RenderWidget], which also does other steps applicable
 	// for all widgets. The base [WidgetBase.Render] implementation
 	// renders the standard box model.
@@ -212,28 +195,38 @@ type Widget interface {
 	DirectRenderDraw(drw system.Drawer, idx int, flipY bool)
 }
 
-// WidgetBase is the base type for all Widget Widget elements, which are
-// managed by a containing Layout, and use all 5 rendering passes.  All
-// elemental widgets must support the ReadOnly and Selected states in a
-// reasonable way (Selected only essential when also ReadOnly), so they can
-// function appropriately in a chooser (e.g., SliceView or TableView) -- this
-// includes toggling selection on left mouse press.
-type WidgetBase struct { //core:no-new
+// WidgetBase is the base type for all [Widget]s. It renders the
+// standard box model, but does not layout or render any children.
+type WidgetBase struct {
 	tree.NodeBase
 
 	// Tooltip is the text for the tooltip for this widget,
 	// which can use HTML formatting.
 	Tooltip string
 
-	// Parts are a separate tree of sub-widgets that implement discrete parts
-	// of a widget.  Positions are relative to the parent widget.
-	// These are fully managed by the parent widget
-	Parts *Layout `copier:"-" json:"-" xml:"-" set:"-"`
+	// Parts are a separate tree of sub-widgets that can be used to store
+	// orthogonal parts of a widget when necessary to separate them from children.
+	// For example, tree views use parts to separate their internal parts from
+	// the other child tree view nodes. Composite widgets like buttons should
+	// NOT use parts to store their components; parts should only be used when
+	// absolutely necessary.
+	Parts *Frame `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Geom has the full layout geometry for size and position of this Widget
 	Geom GeomState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
-	// If true, Override the computed styles and allow directly editing Style
+	// Updaters are a slice of functions called in sequential descending (reverse) order
+	// in [WidgetBase.UpdateWidget] to update the widget. You can use
+	// [WidgetBase.Updater] to add one. By default, this slice contains a function
+	// that updates the widget's children using [WidgetBase.Make].
+	Updaters []func() `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
+
+	// Makers are a slice of functions called in sequential ascending order
+	// in [WidgetBase.Make] to make the plan for how the widget's children should
+	// be configured. You can use [WidgetBase.Maker] to add one.
+	Makers []func(p *Plan) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
+
+	// If true, override the computed styles and allow directly editing Styles.
 	OverrideStyle bool `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Styles are styling settings for this widget.
@@ -300,18 +293,71 @@ type WidgetBase struct { //core:no-new
 	// Scene is the overall Scene to which we belong. It is automatically
 	// by widgets whenever they are added to another widget parent.
 	Scene *Scene `copier:"-" json:"-" xml:"-" set:"-"`
+
+	// ValueUpdate is a function set by [Bind] that is called in
+	// [WidgetBase.UpdateWidget] to update the widget's value from the bound value.
+	ValueUpdate func() `copier:"-" json:"-" xml:"-" set:"-"`
+
+	// ValueOnChange is a function set by [Bind] that is called when
+	// the widget receives an [event.Change] to update the bound value
+	// from the widget's value.
+	ValueOnChange func() `copier:"-" json:"-" xml:"-" set:"-"`
+
+	// ValueTitle is the title to display for a dialog for this [Value].
+	ValueTitle string `copier:"-" json:"-" xml:"-"`
 }
 
 func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
 	return (*WidgetFlags)(&wb.Flags)
 }
 
-// OnInit should be called by every Widget type in its custom
-// OnInit if it has one to establish all the default styling
+// Init should be called by every Widget type in its custom
+// Init if it has one to establish all the default styling
 // and event handling that applies to all widgets.
-func (wb *WidgetBase) OnInit() {
-	wb.SetStyles()
-	wb.HandleEvents()
+func (wb *WidgetBase) Init() {
+	wb.Style(func(s *styles.Style) {
+		s.MaxBorder.Style.Set(styles.BorderSolid)
+		s.MaxBorder.Color.Set(colors.C(colors.Scheme.Primary.Base))
+		s.MaxBorder.Width.Set(units.Dp(1))
+
+		// if we are disabled, we do not react to any state changes,
+		// and instead always have the same gray colors
+		if s.Is(states.Disabled) {
+			s.Cursor = cursors.NotAllowed
+			s.Opacity = 0.38
+			return
+		}
+		// TODO(kai): what about context menus on mobile?
+		tt, _ := wb.This().(Widget).WidgetTooltip(image.Pt(-1, -1))
+		s.SetAbilities(tt != "", abilities.LongHoverable, abilities.LongPressable)
+
+		if s.Is(states.Selected) {
+			s.Background = colors.C(colors.Scheme.Select.Container)
+			s.Color = colors.C(colors.Scheme.Select.OnContainer)
+		}
+	})
+	wb.StyleFinal(func(s *styles.Style) {
+		if s.Is(states.Focused) {
+			s.Border.Style = s.MaxBorder.Style
+			s.Border.Color = s.MaxBorder.Color
+			s.Border.Width = s.MaxBorder.Width
+		}
+		if !s.AbilityIs(abilities.Focusable) {
+			// never need bigger border if not focusable
+			s.MaxBorder = s.Border
+		}
+	})
+
+	// TODO(kai): maybe move all of these event handling functions into one function
+	wb.HandleWidgetClick()
+	wb.HandleWidgetStateFromMouse()
+	wb.HandleLongHoverTooltip()
+	wb.HandleWidgetStateFromFocus()
+	wb.HandleWidgetContextMenu()
+	wb.HandleWidgetMagnify()
+	wb.HandleValueOnChange()
+
+	wb.Updater(wb.updateFromMake)
 }
 
 // OnAdd is called when widgets are added to a parent.
@@ -328,7 +374,7 @@ func (wb *WidgetBase) OnAdd() {
 // This can be necessary when creating widgets outside the usual "NewWidget" paradigm,
 // e.g., when reading from a JSON file.
 func (wb *WidgetBase) SetScene(sc *Scene) {
-	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(kwi Widget, kwb *WidgetBase) bool {
 		kwb.Scene = sc
 		return tree.Continue
 	})
@@ -397,9 +443,10 @@ func (wb *WidgetBase) Destroy() {
 	wb.NodeBase.Destroy()
 }
 
+// DeleteParts deletes the widget's parts (and the children of the parts).
 func (wb *WidgetBase) DeleteParts() {
 	if wb.Parts != nil {
-		wb.Parts.DeleteChildren() // first delete all my children
+		wb.Parts.Destroy()
 	}
 	wb.Parts = nil
 }
@@ -409,18 +456,19 @@ func (wb *WidgetBase) BaseType() *types.Type {
 }
 
 // NewParts makes the Parts layout if not already there.
-func (wb *WidgetBase) NewParts() *Layout {
+func (wb *WidgetBase) NewParts() *Frame {
 	if wb.Parts != nil {
 		return wb.Parts
 	}
-	parts := tree.NewRoot[*Layout]("parts")
-	tree.SetParent(parts, wb.This())
-	parts.SetFlag(true, tree.Field)
-	parts.Style(func(s *styles.Style) {
+	wb.Parts = NewFrame()
+	wb.Parts.SetName("parts")
+	tree.SetParent(wb.Parts, wb) // don't add to children list
+	wb.Parts.SetFlag(true, tree.Field)
+	wb.Parts.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
+		s.RenderBox = false
 	})
-	wb.Parts = parts
-	return parts
+	return wb.Parts
 }
 
 // ParentWidget returns the parent as a [WidgetBase] or nil
@@ -493,7 +541,9 @@ func (wb *WidgetBase) FieldByName(field string) (tree.Node, error) {
 	return nil, fmt.Errorf("no field %q for %v; only parts", field, wb)
 }
 
-// NodeWalkDown extends WalkPre to Parts, which is key for getting full Update protection.
+// NodeWalkDown extends [tree.Node.WalkDown] to [WidgetBase.Parts],
+// which is key for getting full tree traversal to work when updating,
+// configuring, and styling. This implements [tree.Node.NodeWalkDown].
 func (wb *WidgetBase) NodeWalkDown(fun func(tree.Node) bool) {
 	if wb.Parts == nil {
 		return
@@ -536,15 +586,12 @@ func (wb *WidgetBase) VisibleKidsIter(fun func(i int, kwi Widget, kwb *WidgetBas
 	}
 }
 
-// WidgetWalkPre is a version of the ki WalkPre iterator that automatically filters
-// nil or deleted items and operates on Widget types.
-// Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
-func (wb *WidgetBase) WidgetWalkPre(fun func(kwi Widget, kwb *WidgetBase) bool) {
+// WidgetWalkDown is a version of [tree.Node.WalkDown] that automatically filters
+// nil or deleted items and operates on [Widget] types.
+// Return [tree.Continue] to continue and [tree.Break] to terminate.
+func (wb *WidgetBase) WidgetWalkDown(fun func(kwi Widget, kwb *WidgetBase) bool) {
 	wb.WalkDown(func(k tree.Node) bool {
 		kwi, kwb := AsWidget(k)
-		if kwi == nil || kwi.This() == nil {
-			return tree.Break
-		}
 		return fun(kwi, kwb)
 	})
 }
@@ -608,17 +655,11 @@ func WidgetPrev(wi Widget) Widget {
 // or node itself if no children.  Starts with Parts,
 func WidgetLastChildParts(wi Widget) Widget {
 	wb := wi.AsWidget()
-	if wb.Parts != nil {
-		ew, err := wb.Parts.Children().ElemFromEndTry(0)
-		if err == nil {
-			return WidgetLastChildParts(ew.(Widget))
-		}
+	if wb.Parts != nil && wb.Parts.HasChildren() {
+		return WidgetLastChildParts(wb.Parts.Child(wb.Parts.NumChildren() - 1).(Widget))
 	}
 	if wi.HasChildren() {
-		ew, err := wi.Children().ElemFromEndTry(0)
-		if err == nil {
-			return WidgetLastChildParts(ew.(Widget))
-		}
+		return WidgetLastChildParts(wi.Child(wi.NumChildren() - 1).(Widget))
 	}
 	return wi
 }
@@ -627,10 +668,7 @@ func WidgetLastChildParts(wi Widget) Widget {
 // or node itself if no children. Starts with Children, not Parts
 func WidgetLastChild(wi Widget) Widget {
 	if wi.HasChildren() {
-		ew, err := wi.Children().ElemFromEndTry(0)
-		if err == nil {
-			return WidgetLastChildParts(ew.(Widget))
-		}
+		return WidgetLastChildParts(wi.Child(wi.NumChildren() - 1).(Widget))
 	}
 	return wi
 }

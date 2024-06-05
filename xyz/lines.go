@@ -101,7 +101,8 @@ func UnitConeMesh(sc *Scene, segs int) *Cylinder {
 // mesh unit line, which is rotated and positioned to go between the designated points.
 func NewLine(sc *Scene, parent tree.Node, name string, st, ed math32.Vector3, width float32, clr color.RGBA) *Solid {
 	lm := UnitLineMesh(sc)
-	ln := NewSolid(parent, name).SetMesh(lm)
+	ln := NewSolid(parent).SetMesh(lm)
+	ln.SetName(name)
 	ln.Pose.Scale.Set(1, width, width)
 	SetLineStartEnd(ln, st, ed)
 	ln.Mat.Color = clr
@@ -141,8 +142,8 @@ const (
 // arrowSegs determines how many faces there are on the arrowhead -- 4 = a 4-sided pyramid, etc.
 func NewArrow(sc *Scene, parent tree.Node, name string, st, ed math32.Vector3, width float32, clr color.RGBA, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) *Group {
 	cm := UnitConeMesh(sc, arrowSegs)
-	gp := NewGroup(parent, name)
-
+	gp := NewGroup(parent)
+	gp.SetName(name)
 	asz := arrowSize * width
 	awd := arrowWidth * asz
 	d := ed.Sub(st)
@@ -159,7 +160,8 @@ func NewArrow(sc *Scene, parent tree.Node, name string, st, ed math32.Vector3, w
 	ln := NewLine(sc, gp, name+"-line", lst, led, width, clr)
 
 	if startArrow {
-		ar := NewSolid(gp, name+"-start-arrow").SetMesh(cm)
+		ar := NewSolid(gp).SetMesh(cm)
+		ar.SetName(name + "-start-arrow")
 		ar.Pose.Scale.Set(awd, asz, awd)                               // Y is up
 		ar.Pose.Quat.SetFromAxisAngle(math32.Vec3(0, 0, 1), math.Pi/2) // rotate from XY up to -X
 		ar.Pose.Quat.SetMul(ln.Pose.Quat)
@@ -167,7 +169,8 @@ func NewArrow(sc *Scene, parent tree.Node, name string, st, ed math32.Vector3, w
 		ar.Mat.Color = clr
 	}
 	if endArrow {
-		ar := NewSolid(gp, name+"-end-arrow").SetMesh(cm)
+		ar := NewSolid(gp).SetMesh(cm)
+		ar.SetName(name + "-end-arrow")
 		ar.Pose.Scale.Set(awd, asz, awd)
 		ar.Pose.Quat.SetFromAxisAngle(math32.Vec3(0, 0, 1), -math.Pi/2) // rotate from XY up to +X
 		ar.Pose.Quat.SetMul(ln.Pose.Quat)
@@ -223,21 +226,27 @@ func NewLineBox(sc *Scene, parent tree.Node, meshNm, boxNm string, bbox math32.B
 	front, side := NewLineBoxMeshes(sc, meshNm, bbox, width)
 
 	ctr := bbox.Min.Add(hSz)
-	bgp := NewGroup(parent, boxNm)
+	bgp := NewGroup(parent)
+	bgp.SetName(boxNm)
 	bgp.Pose.Pos = ctr
 
-	bs := NewSolid(bgp, boxNm+"-back").SetMesh(front).SetColor(clr)
+	bs := NewSolid(bgp).SetMesh(front).SetColor(clr)
+	bs.SetName(boxNm + "-back")
 	bs.Pose.Pos.Set(0, 0, -hSz.Z)
 
-	ls := NewSolid(bgp, boxNm+"-left").SetMesh(side).SetColor(clr)
+	ls := NewSolid(bgp).SetMesh(side).SetColor(clr)
+	ls.SetName(boxNm + "-left")
 	ls.Pose.Pos.Set(-hSz.X, 0, 0)
 	ls.Pose.SetAxisRotation(0, 1, 0, 90)
 
-	rs := NewSolid(bgp, boxNm+"-right").SetMesh(side).SetColor(clr)
+	rs := NewSolid(bgp).SetMesh(side).SetColor(clr)
+	rs.SetName(boxNm + "-right")
 	rs.Pose.Pos.Set(hSz.X, 0, 0)
 	rs.Pose.SetAxisRotation(0, 1, 0, -90)
 
-	fs := NewSolid(bgp, boxNm+"-front").SetMesh(front).SetColor(clr)
+	fs := NewSolid(bgp).SetMesh(front).SetColor(clr)
+	fs.SetName(boxNm + "-front")
+
 	fs.Pose.Pos.Set(0, 0, hSz.Z)
 
 	// todo:

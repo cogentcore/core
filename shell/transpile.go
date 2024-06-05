@@ -23,6 +23,12 @@ func (sh *Shell) TranspileLine(ln string) string {
 	sh.ParenDepth += paren
 	sh.BraceDepth += brace
 	sh.BrackDepth += brack
+	if sh.TypeDepth > 0 && sh.BraceDepth == 0 {
+		sh.TypeDepth = 0
+	}
+	if sh.DeclDepth > 0 && sh.ParenDepth == 0 {
+		sh.DeclDepth = 0
+	}
 	// logx.PrintlnDebug("depths: ", sh.ParenDepth, sh.BraceDepth, sh.BrackDepth)
 	return toks.Code()
 }
@@ -34,11 +40,26 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	}
 	toks := sh.Tokens(ln)
 	n := len(toks)
+	if n == 0 {
+		return toks
+	}
 	ewords, err := ExecWords(ln)
 	if err != nil {
 		sh.AddError(err)
 	}
 	logx.PrintlnDebug("\n########## line:\n", ln, "\nTokens:\n", toks.String(), "\nWords:\n", ewords)
+
+	if toks[0].Tok == token.TYPE {
+		sh.TypeDepth++
+	}
+	if toks[0].Tok == token.IMPORT || toks[0].Tok == token.VAR || toks[0].Tok == token.CONST {
+		sh.DeclDepth++
+	}
+
+	if sh.TypeDepth > 0 || sh.DeclDepth > 0 {
+		logx.PrintlnDebug("go:   type / decl defn")
+		return sh.TranspileGo(toks)
+	}
 
 	t0 := toks[0]
 	_, t0pn := toks.Path(true) // true = first position
@@ -86,6 +107,8 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 		}
 		logx.PrintlnDebug("go    keyword")
 		return sh.TranspileGo(toks)
+	case toks[n-1].Tok == token.INC:
+		return sh.TranspileGo(toks)
 	case t0pn > 0: // path expr
 		logx.PrintlnDebug("exec: path...")
 		return sh.TranspileExec(ewords, false)
@@ -98,7 +121,7 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 	case !f0exec: // exec must be IDENT
 		logx.PrintlnDebug("go:   not ident")
 		return sh.TranspileGo(toks)
-	case f0exec && en > 1 && (ewords[1][0] == '=' || ewords[1][0] == ':'):
+	case f0exec && en > 1 && (ewords[1][0] == '=' || ewords[1][0] == ':' || ewords[1][0] == '+' || toks[1].Tok == token.COMMA):
 		logx.PrintlnDebug("go:   assignment or defn")
 		return sh.TranspileGo(toks)
 	case f0exec: // now any ident
@@ -114,9 +137,20 @@ func (sh *Shell) TranspileLineTokens(ln string) Tokens {
 // TranspileGo returns transpiled tokens assuming Go code.
 // Unpacks any backtick encapsulated shell commands.
 func (sh *Shell) TranspileGo(toks Tokens) Tokens {
+	n := len(toks)
+	if n == 0 {
+		return toks
+	}
+	if toks[0].Tok == token.FUNC { // reorder as an assignment
+		if len(toks) > 1 && toks[1].Tok == token.IDENT {
+			toks[0] = toks[1]
+			toks.Insert(1, token.DEFINE)
+			toks[2] = &Token{Tok: token.FUNC}
+		}
+	}
 	gtoks := make(Tokens, 0, len(toks)) // return tokens
 	for _, tok := range toks {
-		if tok.IsBacktickString() {
+		if sh.TypeDepth == 0 && tok.IsBacktickString() {
 			gtoks = append(gtoks, sh.TranspileExecString(tok.Str, true)...)
 		} else {
 			gtoks = append(gtoks, tok)

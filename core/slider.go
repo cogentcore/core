@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"image"
 	"log/slog"
+	"reflect"
 
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
@@ -32,7 +34,7 @@ import (
 // the rendered area.
 // The [styles.Style.Direction] determines the direction in which the slider slides.
 type Slider struct {
-	WidgetBase
+	Frame
 
 	// Type is the type of the slider, which determines its visual
 	// and functional properties. The default type, [SliderSlider],
@@ -141,13 +143,17 @@ const (
 	SliderScrollbar
 )
 
-func (sr *Slider) OnInit() {
-	sr.WidgetBase.OnInit()
-	sr.HandleEvents()
-	sr.SetStyles()
+func (sr *Slider) WidgetValue() any { return &sr.Value }
+
+func (sr *Slider) OnBind(value any) {
+	kind := reflectx.NonPointerType(reflect.TypeOf(value)).Kind()
+	if kind >= reflect.Int && kind <= reflect.Uintptr {
+		sr.SetStep(1).SetEnforceStep(true).SetMax(100)
+	}
 }
 
-func (sr *Slider) SetStyles() {
+func (sr *Slider) Init() {
+	sr.Frame.Init()
 	sr.Value = 0.5
 	sr.Max = 1
 	sr.VisiblePct = 1
@@ -206,16 +212,101 @@ func (sr *Slider) SetStyles() {
 			}
 		}
 	})
-	sr.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(sr) {
-		case "parts/icon":
+
+	sr.On(events.MouseDown, func(e events.Event) {
+		pos := sr.PointToRelPos(e.Pos())
+		sr.SetSliderPosAction(pos)
+		sr.SlideStartPos = sr.Pos
+	})
+	// note: not doing anything in particular on SlideStart
+	sr.On(events.SlideMove, func(e events.Event) {
+		del := e.StartDelta()
+		if sr.Styles.Direction == styles.Row {
+			sr.SetSliderPosAction(sr.SlideStartPos + float32(del.X))
+		} else {
+			sr.SetSliderPosAction(sr.SlideStartPos + float32(del.Y))
+		}
+	})
+	// we need to send change events for both SlideStop and Click
+	// to handle the no-slide click case
+	change := func(e events.Event) {
+		pos := sr.PointToRelPos(e.Pos())
+		sr.SetSliderPosAction(pos)
+		sr.SendChanged()
+	}
+	sr.On(events.SlideStop, change)
+	sr.On(events.Click, change)
+	sr.On(events.Scroll, func(e events.Event) {
+		se := e.(*events.MouseScroll)
+		se.SetHandled()
+		var del float32
+		// if we are scrolling in the y direction on an x slider,
+		// we still count it
+		if sr.Styles.Direction == styles.Row && se.Delta.X != 0 {
+			del = se.Delta.X
+		} else {
+			del = se.Delta.Y
+		}
+		if sr.Type == SliderScrollbar {
+			del = -del // invert for "natural" scroll
+		}
+		edel := sr.ScrollScale(del)
+		sr.SetValueAction(sr.Value + edel)
+		sr.SendChanged()
+	})
+	sr.OnKeyChord(func(e events.Event) {
+		kf := keymap.Of(e.KeyChord())
+		if DebugSettings.KeyEventTrace {
+			slog.Info("SliderBase KeyInput", "widget", sr, "keyFunction", kf)
+		}
+		switch kf {
+		case keymap.MoveUp:
+			sr.SetValueAction(sr.Value - sr.Step)
+			e.SetHandled()
+		case keymap.MoveLeft:
+			sr.SetValueAction(sr.Value - sr.Step)
+			e.SetHandled()
+		case keymap.MoveDown:
+			sr.SetValueAction(sr.Value + sr.Step)
+			e.SetHandled()
+		case keymap.MoveRight:
+			sr.SetValueAction(sr.Value + sr.Step)
+			e.SetHandled()
+		case keymap.PageUp:
+			if sr.PageStep < sr.Step {
+				sr.PageStep = 2 * sr.Step
+			}
+			sr.SetValueAction(sr.Value - sr.PageStep)
+			e.SetHandled()
+		case keymap.PageDown:
+			if sr.PageStep < sr.Step {
+				sr.PageStep = 2 * sr.Step
+			}
+			sr.SetValueAction(sr.Value + sr.PageStep)
+			e.SetHandled()
+		case keymap.Home:
+			sr.SetValueAction(sr.Min)
+			e.SetHandled()
+		case keymap.End:
+			sr.SetValueAction(sr.Max)
+			e.SetHandled()
+		}
+	})
+
+	sr.Maker(func(p *Plan) {
+		if sr.Icon.IsNil() {
+			sr.DeleteChildren()
+			return
+		}
+		AddAt(p, "icon", func(w *Icon) {
 			w.Style(func(s *styles.Style) {
 				s.Font.Size.Dp(24)
-				s.Margin.Zero()
-				s.Padding.Zero()
 				s.Color = sr.ThumbColor
 			})
-		}
+			w.Updater(func() {
+				w.SetIcon(sr.Icon)
+			})
+		})
 	})
 }
 
@@ -380,14 +471,6 @@ func (sr *Slider) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return res, sr.DefaultTooltipPos()
 }
 
-///////////////////////////////////////////////////////////
-// 	Events
-
-func (sr *Slider) HandleEvents() {
-	sr.HandleMouse()
-	sr.HandleKeys()
-}
-
 // PointToRelPos translates a point in scene local pixel coords into relative
 // position within the slider content range
 func (sr *Slider) PointToRelPos(pt image.Point) float32 {
@@ -399,112 +482,6 @@ func (sr *Slider) PointToRelPos(pt image.Point) float32 {
 // as a function of the step size.
 func (sr *Slider) ScrollScale(del float32) float32 {
 	return del * sr.Step
-}
-
-func (sr *Slider) HandleMouse() {
-	sr.On(events.MouseDown, func(e events.Event) {
-		pos := sr.PointToRelPos(e.Pos())
-		sr.SetSliderPosAction(pos)
-		sr.SlideStartPos = sr.Pos
-	})
-	// note: not doing anything in particular on SlideStart
-	sr.On(events.SlideMove, func(e events.Event) {
-		del := e.StartDelta()
-		if sr.Styles.Direction == styles.Row {
-			sr.SetSliderPosAction(sr.SlideStartPos + float32(del.X))
-		} else {
-			sr.SetSliderPosAction(sr.SlideStartPos + float32(del.Y))
-		}
-	})
-
-	// we need to send change events for both SlideStop and Click
-	// to handle the no-slide click case
-	change := func(e events.Event) {
-		pos := sr.PointToRelPos(e.Pos())
-		sr.SetSliderPosAction(pos)
-		sr.SendChanged()
-	}
-	sr.On(events.SlideStop, change)
-	sr.On(events.Click, change)
-
-	sr.On(events.Scroll, func(e events.Event) {
-		se := e.(*events.MouseScroll)
-		se.SetHandled()
-		var del float32
-		// if we are scrolling in the y direction on an x slider,
-		// we still count it
-		if sr.Styles.Direction == styles.Row && se.Delta.X != 0 {
-			del = se.Delta.X
-		} else {
-			del = se.Delta.Y
-		}
-		if sr.Type == SliderScrollbar {
-			del = -del // invert for "natural" scroll
-		}
-		edel := sr.ScrollScale(del)
-		sr.SetValueAction(sr.Value + edel)
-		sr.SendChanged()
-	})
-}
-
-func (sr *Slider) HandleKeys() {
-	sr.OnKeyChord(func(e events.Event) {
-		kf := keymap.Of(e.KeyChord())
-		if DebugSettings.KeyEventTrace {
-			slog.Info("SliderBase KeyInput", "widget", sr, "keyFunction", kf)
-		}
-		switch kf {
-		case keymap.MoveUp:
-			sr.SetValueAction(sr.Value - sr.Step)
-			e.SetHandled()
-		case keymap.MoveLeft:
-			sr.SetValueAction(sr.Value - sr.Step)
-			e.SetHandled()
-		case keymap.MoveDown:
-			sr.SetValueAction(sr.Value + sr.Step)
-			e.SetHandled()
-		case keymap.MoveRight:
-			sr.SetValueAction(sr.Value + sr.Step)
-			e.SetHandled()
-		case keymap.PageUp:
-			if sr.PageStep < sr.Step {
-				sr.PageStep = 2 * sr.Step
-			}
-			sr.SetValueAction(sr.Value - sr.PageStep)
-			e.SetHandled()
-		case keymap.PageDown:
-			if sr.PageStep < sr.Step {
-				sr.PageStep = 2 * sr.Step
-			}
-			sr.SetValueAction(sr.Value + sr.PageStep)
-			e.SetHandled()
-		case keymap.Home:
-			sr.SetValueAction(sr.Min)
-			e.SetHandled()
-		case keymap.End:
-			sr.SetValueAction(sr.Max)
-			e.SetHandled()
-		}
-	})
-}
-
-///////////////////////////////////////////////////////////
-// 	Config
-
-func (sr *Slider) Config() {
-	if sr.Icon.IsNil() {
-		if sr.Parts != nil {
-			sr.DeleteParts()
-		}
-		return
-	}
-	parts := sr.NewParts()
-	if !parts.HasChildren() {
-		NewIcon(parts, "icon")
-	}
-	ic := sr.Parts.Child(0).(*Icon)
-	ic.SetIcon(sr.Icon)
-	ic.Update()
 }
 
 func (sr *Slider) Render() {
@@ -571,13 +548,12 @@ func (sr *Slider) Render() {
 		tpos = tpos.AddDim(od, 0.5*sz.Dim(od)) // ctr
 
 		// render thumb as icon or box
-		if sr.Icon.IsSet() && sr.Parts.HasChildren() {
-			ic := sr.Parts.Child(0).(*Icon)
+		if sr.Icon.IsSet() && sr.HasChildren() {
+			ic := sr.Child(0).(*Icon)
 			tpos.SetSub(thsz.MulScalar(.5))
 			ic.Geom.Pos.Total = tpos
 			ic.SetContentPosFromPos()
 			ic.SetBBoxes()
-			sr.Parts.RenderWidget()
 		} else {
 			tabg := sr.Styles.ComputeActualBackgroundFor(sr.ThumbColor, pabg)
 			pc.FillStyle.Color = tabg

@@ -105,7 +105,7 @@ func (sl *Slice) UnmarshalJSON(b []byte) error {
 	}
 	// fmt.Printf("n parsed: %d from %v\n", n, string(bn))
 
-	tnl := make(Config, n)
+	p := make(TypePlan, n)
 
 	for i := 0; i < n; i++ {
 		fld := flds[2*i+1]
@@ -121,11 +121,11 @@ func (sl *Slice) UnmarshalJSON(b []byte) error {
 			err = fmt.Errorf("tree.Slice UnmarshalJSON: %w", err)
 			slog.Error(err.Error())
 		}
-		tnl[i].Type = typ
-		tnl[i].Name = nm
+		p[i].Type = typ
+		p[i].Name = nm
 	}
 
-	sl.Config(nil, tnl)
+	UpdateSlice(sl, nil, p)
 
 	nwk := make([]Node, n) // allocate new slice containing *pointers* to kids
 	copy(nwk, *sl)

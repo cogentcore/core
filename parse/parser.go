@@ -24,13 +24,13 @@ import (
 type Parser struct {
 
 	// lexer rules for first pass of lexing file
-	Lexer lexer.Rule
+	Lexer *lexer.Rule
 
 	// second pass after lexing -- computes nesting depth and EOS finding
 	PassTwo lexer.PassTwo
 
 	// parser rules for parsing lexed tokens
-	Parser parser.Rule
+	Parser *parser.Rule
 
 	// file name for overall parser (not file being parsed!)
 	Filename string
@@ -44,8 +44,8 @@ type Parser struct {
 
 // Init initializes the parser -- must be called after creation
 func (pr *Parser) Init() {
-	pr.Lexer.InitName(&pr.Lexer, "Lexer")
-	pr.Parser.InitName(&pr.Parser, "Parser")
+	pr.Lexer = lexer.NewRule()
+	pr.Parser = parser.NewRule()
 }
 
 // NewParser returns a new initialized parser
@@ -189,7 +189,7 @@ func (pr *Parser) LexAll(fs *FileState) {
 // ParserInit initializes the parser prior to running
 func (pr *Parser) ParserInit(fs *FileState) bool {
 	fs.AnonCtr = 0
-	fs.ParseState.Init(&fs.Src, &fs.Ast)
+	fs.ParseState.Init(&fs.Src, fs.Ast)
 	return true
 }
 
@@ -236,7 +236,7 @@ func (pr *Parser) ParseLine(fs *FileState, ln int) *FileState {
 	lfs := NewFileState()
 	lfs.Src.InitFromLine(&fs.Src, ln)
 	lfs.Src.EnsureFinalEos(0)
-	lfs.ParseState.Init(&lfs.Src, &lfs.Ast)
+	lfs.ParseState.Init(&lfs.Src, lfs.Ast)
 	pr.ParseRun(lfs)
 	return lfs
 }
@@ -253,7 +253,7 @@ func (pr *Parser) ParseString(str string, fname string, sup fileinfo.Known) *Fil
 	lfs.Src.InitFromString(str, fname, sup)
 	// lfs.ParseState.Trace.FullOn()
 	// lfs.ParseSTate.Trace.StdOut()
-	lfs.ParseState.Init(&lfs.Src, &lfs.Ast)
+	lfs.ParseState.Init(&lfs.Src, lfs.Ast)
 	pr.LexAll(lfs)
 	lxs := lfs.Src.Lexs[0]
 	if len(lxs) == 0 {

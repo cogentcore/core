@@ -71,10 +71,10 @@ type SVG struct {
 	Pixels *image.RGBA `copier:"-" json:"-" xml:"-" edit:"-"`
 
 	// all defs defined elements go here (gradients, symbols, etc)
-	Defs Group
+	Defs *Group
 
-	// root of the svg tree.  top-level viewbox and paint style here
-	Root SVGNode
+	// Root is the root of the svg tree, which has the top-level viewbox and styles.
+	Root *SVGNode
 
 	// map of def names to index. uses starting index to find element.
 	// always updated after each search.
@@ -107,8 +107,10 @@ func (sv *SVG) Config(width, height int) {
 	sv.Scale = 1
 	sv.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
 	sv.RenderState.Init(width, height, sv.Pixels)
-	sv.Root.InitName(&sv.Root, "svg")
-	sv.Defs.InitName(&sv.Defs, "defs")
+	sv.Root = NewSVGNode()
+	sv.Root.SetName("svg")
+	sv.Defs = NewGroup()
+	sv.Defs.SetName("defs")
 }
 
 // Resize resizes the viewport, creating a new image -- updates Geom Size
@@ -116,7 +118,7 @@ func (sv *SVG) Resize(nwsz image.Point) {
 	if nwsz.X == 0 || nwsz.Y == 0 {
 		return
 	}
-	if sv.Root.This() == nil {
+	if sv.Root == nil || sv.Root.This() == nil {
 		sv.Config(nwsz.X, nwsz.Y)
 		return
 	}
@@ -134,7 +136,7 @@ func (sv *SVG) Resize(nwsz image.Point) {
 
 // DeleteAll deletes any existing elements in this svg
 func (sv *SVG) DeleteAll() {
-	if sv.Root.This() == nil {
+	if sv.Root == nil || sv.Root.This() == nil {
 		return
 	}
 	sv.Root.Paint.Defaults()

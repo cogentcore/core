@@ -15,7 +15,6 @@ import (
 	"log/slog"
 	"net/url"
 	"path"
-	"slices"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
@@ -66,19 +65,17 @@ var getWebURL func() string
 // saveWebURL, if non-nil, saves the given web URL to the user's browser address bar and history.
 var saveWebURL func(u string)
 
-func (pg *Page) OnInit() {
-	pg.Frame.OnInit()
+func (pg *Page) Init() {
+	pg.Frame.Init()
 	pg.Context = htmlview.NewContext()
 	pg.Context.OpenURL = func(url string) {
 		pg.OpenURL(url, true)
 	}
 	pg.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
+		s.Grow.Set(1, 1)
 	})
-}
 
-func (pg *Page) OnAdd() {
-	pg.WidgetBase.OnAdd()
 	pg.OnShow(func(e events.Event) {
 		if pg.PagePath == "" {
 			if getWebURL != nil {
@@ -89,8 +86,81 @@ func (pg *Page) OnAdd() {
 		}
 	})
 	// must be done after the default title is set elsewhere in normal OnShow
-	pg.Scene.OnFinal(events.Show, func(e events.Event) {
+	pg.OnFinal(events.Show, func(e events.Event) {
 		pg.setStageTitle()
+	})
+
+	pg.Maker(func(p *core.Plan) {
+		if pg.HasChildren() { // TODO(config)
+			return
+		}
+		sp := core.NewSplits(pg).SetSplits(0.2, 0.8)
+		sp.SetName("splits")
+
+		nav := views.NewTreeViewFrame(sp).SetText(core.TheApp.Name())
+		nav.Parent().SetName("nav-frame")
+		nav.SetName("nav")
+		nav.SetReadOnly(true)
+		nav.ParentWidget().Style(func(s *styles.Style) {
+			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+		})
+		nav.OnSelect(func(e events.Event) {
+			if len(nav.SelectedNodes) == 0 {
+				return
+			}
+			sn := nav.SelectedNodes[0]
+			url := "/"
+			if sn != nav {
+				// we need a slash so that it doesn't think it's a relative URL
+				url = "/" + sn.PathFrom(nav)
+			}
+			pg.OpenURL(url, true)
+		})
+
+		pg.URLToPagePath = map[string]string{"": "index.md"}
+
+		errors.Log(fs.WalkDir(pg.Source, ".", func(fpath string, d fs.DirEntry, err error) error {
+			// already handled
+			if fpath == "" || fpath == "." {
+				return nil
+			}
+
+			p := wpath.Format(fpath)
+
+			pdir := path.Dir(p)
+			base := path.Base(p)
+
+			// already handled
+			if base == "index.md" {
+				return nil
+			}
+
+			ext := path.Ext(base)
+			if ext != "" && ext != ".md" {
+				return nil
+			}
+
+			parent := nav
+			if pdir != "" && pdir != "." {
+				parent = nav.FindPath(pdir).(*views.TreeView)
+			}
+
+			nm := strings.TrimSuffix(base, ext)
+			txt := strcase.ToSentence(nm)
+			tv := views.NewTreeView(parent).SetText(txt)
+			tv.SetName(nm)
+
+			// need index.md for page path
+			if d.IsDir() {
+				fpath += "/index.md"
+			}
+			pg.URLToPagePath[tv.PathFrom(nav)] = fpath
+			return nil
+		}))
+
+		core.NewFrame(sp).Style(func(s *styles.Style) {
+			s.Direction = styles.Column
+		}).SetName("body")
 	})
 }
 
@@ -212,104 +282,38 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	fr.Update()
 }
 
-func (pg *Page) Config() {
-	if pg.HasChildren() {
-		return
-	}
-	sp := core.NewSplits(pg, "splits").SetSplits(0.2, 0.8)
-
-	nav := views.NewTreeViewFrame(sp, "nav").SetText(core.TheApp.Name())
-	nav.SetReadOnly(true)
-	nav.ParentWidget().Style(func(s *styles.Style) {
-		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
-	})
-	nav.OnSelect(func(e events.Event) {
-		if len(nav.SelectedNodes) == 0 {
-			return
-		}
-		sn := nav.SelectedNodes[0]
-		url := "/"
-		if sn != nav {
-			// we need a slash so that it doesn't think it's a relative URL
-			url = "/" + sn.PathFrom(nav)
-		}
-		pg.OpenURL(url, true)
-	})
-
-	pg.URLToPagePath = map[string]string{"": "index.md"}
-
-	errors.Log(fs.WalkDir(pg.Source, ".", func(fpath string, d fs.DirEntry, err error) error {
-		// already handled
-		if fpath == "" || fpath == "." {
-			return nil
-		}
-
-		p := wpath.Format(fpath)
-
-		pdir := path.Dir(p)
-		base := path.Base(p)
-
-		// already handled
-		if base == "index.md" {
-			return nil
-		}
-
-		ext := path.Ext(base)
-		if ext != "" && ext != ".md" {
-			return nil
-		}
-
-		parent := nav
-		if pdir != "" && pdir != "." {
-			parent = nav.FindPath(pdir).(*views.TreeView)
-		}
-
-		nm := strings.TrimSuffix(base, ext)
-		txt := strcase.ToSentence(nm)
-		tv := views.NewTreeView(parent, nm).SetText(txt)
-
-		// need index.md for page path
-		if d.IsDir() {
-			fpath += "/index.md"
-		}
-		pg.URLToPagePath[tv.PathFrom(nav)] = fpath
-		return nil
-	}))
-
-	core.NewFrame(sp, "body").Style(func(s *styles.Style) {
-		s.Direction = styles.Column
-	})
-}
-
 // AppBar is the default app bar for a [Page]
-func (pg *Page) AppBar(tb *core.Toolbar) {
-	ch := tb.AppChooser()
+func (pg *Page) AppBar(p *core.Plan) {
+	// TODO(config): needs a different config
+	/*
+		ch := tb.AppChooser()
 
-	back := tb.ChildByName("back").(*core.Button)
-	back.OnClick(func(e events.Event) {
-		if pg.HistoryIndex > 0 {
-			pg.HistoryIndex--
-			// we reverse the order
-			// ch.SelectItem(len(pg.History) - pg.HistoryIndex - 1)
-			// we need a slash so that it doesn't think it's a relative URL
-			pg.OpenURL("/"+pg.History[pg.HistoryIndex], false)
-		}
-	})
+		back := tb.ChildByName("back").(*core.Button)
+		back.OnClick(func(e events.Event) {
+			if pg.HistoryIndex > 0 {
+				pg.HistoryIndex--
+				// we reverse the order
+				// ch.SelectItem(len(pg.History) - pg.HistoryIndex - 1)
+				// we need a slash so that it doesn't think it's a relative URL
+				pg.OpenURL("/"+pg.History[pg.HistoryIndex], false)
+			}
+		})
 
-	ch.AddItemsFunc(func() {
-		urls := []string{}
-		for u := range pg.URLToPagePath {
-			urls = append(urls, u)
-		}
-		slices.Sort(urls)
-		for _, u := range urls {
-			ch.Items = append(ch.Items, core.ChooserItem{
-				Value: u,
-				Text:  wpath.Label(u, core.TheApp.Name()),
-				Func: func() {
-					pg.OpenURL("/"+u, true)
-				},
-			})
-		}
-	})
+		ch.AddItemsFunc(func() {
+			urls := []string{}
+			for u := range pg.URLToPagePath {
+				urls = append(urls, u)
+			}
+			slices.Sort(urls)
+			for _, u := range urls {
+				ch.Items = append(ch.Items, core.ChooserItem{
+					Value: u,
+					Text:  wpath.Label(u, core.TheApp.Name()),
+					Func: func() {
+						pg.OpenURL("/"+u, true)
+					},
+				})
+			}
+		})
+	*/
 }

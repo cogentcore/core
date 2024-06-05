@@ -36,8 +36,8 @@ type Image struct {
 	prevSize math32.Vector2 `xml:"-" json:"-" set:"-"`
 }
 
-func (im *Image) OnInit() {
-	im.WidgetBase.OnInit()
+func (im *Image) Init() {
+	im.WidgetBase.Init()
 	im.Style(func(s *styles.Style) {
 		if im.Image != nil {
 			sz := im.Image.Bounds().Size()

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package update
+package plan
 
 import (
 	"testing"
@@ -42,7 +42,7 @@ func TestUpdate(t *testing.T) {
 
 	r1, mods := Update(s, len(names1),
 		func(i int) string { return names1[i] },
-		func(name string, i int) *nameObj { return &nameObj{name: name} })
+		func(name string, i int) *nameObj { return &nameObj{name: name} }, nil)
 
 	// fmt.Println(mods, r1)
 	AssertNames(t, names1, r1)
@@ -54,7 +54,7 @@ func TestUpdate(t *testing.T) {
 		func(i int) string { return names2[i] },
 		func(name string, i int) *nameObj {
 			return &nameObj{name: name}
-		})
+		}, nil)
 	// fmt.Println(mods, r2)
 	AssertNames(t, names2, r2)
 	assert.Equal(t, true, mods)
@@ -65,7 +65,7 @@ func TestUpdate(t *testing.T) {
 		func(i int) string { return names3[i] },
 		func(name string, i int) *nameObj {
 			return &nameObj{name: name}
-		})
+		}, nil)
 	// fmt.Println(mods, r3)
 	AssertNames(t, names3, r3)
 	assert.Equal(t, true, mods)
@@ -76,7 +76,7 @@ func TestUpdate(t *testing.T) {
 		func(i int) string { return names4[i] },
 		func(name string, i int) *nameObj {
 			return &nameObj{name: name}
-		})
+		}, nil)
 	// fmt.Println(mods, r4)
 	AssertNames(t, names4, r4)
 	assert.Equal(t, true, mods)
@@ -85,7 +85,7 @@ func TestUpdate(t *testing.T) {
 		func(i int) string { return names4[i] },
 		func(name string, i int) *nameObj {
 			return &nameObj{name: name}
-		})
+		}, nil)
 	// fmt.Println(mods, r5)
 	AssertNames(t, names4, r5)
 	assert.Equal(t, false, mods)

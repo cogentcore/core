@@ -47,7 +47,7 @@ var csv embed.FS
 //
 //	https://jakevdp.github.io/PythonDataScienceHandbook/03.08-aggregation-and-grouping.html
 func AnalyzePlanets() {
-	Planets = table.NewTable(0, "planets")
+	Planets = table.NewTable("planets")
 	Planets.OpenFS(csv, "planets.csv", table.Comma)
 
 	PlanetsAll := table.NewIndexView(Planets) // full original data
@@ -55,7 +55,7 @@ func AnalyzePlanets() {
 	PlanetsDesc = stats.DescAll(PlanetsAll)   // individually excludes Null values in each col, but not row-wise
 	PlanetsNNDesc = stats.DescAll(PlanetsAll) // standard descriptive stats for row-wise non-nulls
 
-	byMethod := split.GroupBy(PlanetsAll, []string{"method"})
+	byMethod := split.GroupBy(PlanetsAll, "method")
 	split.AggColumn(byMethod, "orbital_period", stats.Median)
 	GpMethodOrbit = byMethod.AggsToTable(table.AddAggName)
 
@@ -106,11 +106,13 @@ func main() {
 
 	nt := tv.NewTab("Planets Data")
 	tbv := tensorview.NewTableView(nt).SetTable(Planets)
-	b.AddAppBar(tbv.ConfigToolbar)
-	b.AddAppBar(func(tb *core.Toolbar) {
-		core.NewButton(tb).SetText("README").SetIcon(icons.FileMarkdown).
-			SetTooltip("open README help file").OnClick(func(e events.Event) {
-			core.TheApp.OpenURL("https://github.com/emer/table/blob/master/examples/dataproc/README.md")
+	b.AddAppBar(tbv.MakeToolbar)
+	b.AddAppBar(func(p *core.Plan) {
+		core.Add(p, func(w *core.Button) {
+			w.SetText("README").SetIcon(icons.FileMarkdown).
+				SetTooltip("open README help file").OnClick(func(e events.Event) {
+				core.TheApp.OpenURL("https://github.com/cogentcore/core/blob/main/tensor/examples/dataproc/README.md")
+			})
 		})
 	})
 

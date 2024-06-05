@@ -220,7 +220,7 @@ func (pt *Plot) PY(v float32) float32 {
 
 // ClosestDataToPixel returns the Plotter data point closest to given pixel point,
 // in the Pixels image.
-func (pt *Plot) ClosestDataToPixel(px, py int) (plt Plotter, idx int, dist float32, data, pixel math32.Vector2) {
+func (pt *Plot) ClosestDataToPixel(px, py int) (plt Plotter, idx int, dist float32, data, pixel math32.Vector2, legend string) {
 	tp := math32.Vec2(float32(px), float32(py))
 	dist = float32(math32.MaxFloat32)
 	for _, p := range pt.Plotters {
@@ -236,6 +236,7 @@ func (pt *Plot) ClosestDataToPixel(px, py int) (plt Plotter, idx int, dist float
 				idx = i
 				dx, dy := dts.XY(i)
 				data = math32.Vec2(dx, dy)
+				legend = pt.Legend.LegendForPlotter(p)
 			}
 		}
 	}

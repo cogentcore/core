@@ -146,84 +146,18 @@ func (wb *WidgetBase) NeedsRebuild() bool {
 	return rc.HasFlag(RenderRebuild)
 }
 
-///////////////////////////////////////////////////////////////
-// 	Config
-
-// Config is the interface method called by Config that
-// should be defined for each Widget type, which actually does
-// the configuration work.
-func (wb *WidgetBase) Config() {
-	// this must be defined for each widget type
-}
-
-// ConfigParts initializes the parts of the widget if they
-// are not already through [WidgetBase.NewParts], calls
-// [tree.NodeBase.ConfigChildren] on those parts with the given config,
-// calls the given after function if it is specified,
-// and then handles necessary updating logic.
-func (wb *WidgetBase) ConfigParts(config tree.Config, after ...func()) {
-	parts := wb.NewParts()
-	mods := parts.ConfigChildren(config)
-	if len(after) > 0 {
-		after[0]()
-	}
-	if !mods && !wb.NeedsRebuild() {
-		return
-	}
-	parts.Update()
-}
-
-// ConfigTree calls Config on every Widget in the tree from me.
-func (wb *WidgetBase) ConfigTree() {
-	if wb.This() == nil {
-		return
-	}
-	pr := profile.Start(wb.This().NodeType().ShortName())
-	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		wi.Config()
-		return tree.Continue
-	})
-	pr.End()
-}
-
-// Update does a general purpose update of the widget and everything
-// below it by reconfiguring it, applying its styles, and indicating
-// that it needs a new layout pass. It is the main way that end users
-// should update widgets, and it should be called after making any
-// changes to the core properties of a widget (for example, the text
-// of [Text], the icon of a button, or the slice of a table view).
-//
-// If you are calling this in a separate goroutine outside of the main
-// configuration, rendering, and event handling structure, you need to
-// call [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and
-// after this, respectively.
-func (wb *WidgetBase) Update() { //types:add
-	if wb == nil || wb.This() == nil {
-		return
-	}
-	if DebugSettings.UpdateTrace {
-		fmt.Println("\tDebugSettings.UpdateTrace Update:", wb)
-	}
-	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
-		wi.Config()
-		wi.ApplyStyle()
-		return tree.Continue
-	})
-	wb.NeedsLayout()
-}
-
 // ApplyStyleTree calls ApplyStyle on every Widget in the tree from me.
 // Called during FullRender
 func (wb *WidgetBase) ApplyStyleTree() {
 	if wb.This() == nil {
 		return
 	}
-	pr := profile.Start(wb.This().NodeType().ShortName())
-	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+	// pr := profile.Start(wb.This().NodeType().ShortName())
+	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		wi.ApplyStyle()
 		return tree.Continue
 	})
-	pr.End()
+	// pr.End()
 }
 
 // LayoutScene does a layout of the scene: Size, Position
@@ -277,22 +211,22 @@ func (wb *WidgetBase) DoNeedsRender() {
 	if wb.This() == nil {
 		return
 	}
-	pr := profile.Start(wb.This().NodeType().ShortName())
-	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
+	// pr := profile.Start(wb.This().NodeType().ShortName())
+	wb.WidgetWalkDown(func(kwi Widget, kwb *WidgetBase) bool {
 		if kwi.Is(NeedsRender) {
 			kwi.RenderWidget()
 			return tree.Break // done
 		}
-		if ly := AsLayout(kwi); ly != nil {
+		if ly := AsFrame(kwi); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
-				if ly.HasScroll[d] {
+				if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 					ly.Scrolls[d].DoNeedsRender()
 				}
 			}
 		}
 		return tree.Continue
 	})
-	pr.End()
+	// pr.End()
 }
 
 //////////////////////////////////////////////////////////////////
@@ -305,7 +239,7 @@ var SceneShowIters = 2
 // This is the main update call made by the RenderWindow at FPS frequency.
 func (sc *Scene) DoUpdate() bool {
 	if sc.Is(ScUpdating) {
-		// fmt.Println("scene bail on updt")
+		// fmt.Println("scene bail on update")
 		return false
 	}
 	sc.SetFlag(true, ScUpdating) // prevent rendering
@@ -373,7 +307,7 @@ func (sc *Scene) ConfigSceneWidgets() {
 	sc.SetFlag(true, ScUpdating) // prevent rendering
 	defer sc.SetFlag(false, ScUpdating)
 
-	sc.ConfigTree()
+	sc.UpdateTree()
 }
 
 // ApplyStyleScene calls ApplyStyle on all widgets in the Scene,
@@ -439,6 +373,9 @@ func (wb *WidgetBase) PushBounds() bool {
 	}
 	wb.Styles.ComputeActualBackground(wb.ParentActualBackground())
 	pc := &wb.Scene.PaintContext
+	if pc.State == nil {
+		return false
+	}
 	pc.PushBounds(wb.Geom.TotalBBox)
 	pc.Defaults() // start with default values
 	if DebugSettings.RenderTrace {
@@ -491,7 +428,7 @@ func (wb *WidgetBase) PopBounds() {
 }
 
 // Render is the method that widgets should implement to define their
-// custom rendering steps. It should not be called outside of
+// custom rendering steps. It should not typically be called outside of
 // [Widget.RenderWidget], which also does other steps applicable
 // for all widgets. The base [WidgetBase.Render] implementation
 // renders the standard box model.

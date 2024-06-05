@@ -54,8 +54,8 @@ type ButtonsConfig struct {
 // buttons for major platforms, using the given configuration options. See
 // [ButtonsConfig] for more information on the configuration options. The
 // configuration options can be nil, in which case default values will be used.
-func Buttons(par core.Widget, c *ButtonsConfig) *core.Layout {
-	ly := core.NewLayout(par, "auth-buttons")
+func Buttons(par core.Widget, c *ButtonsConfig) *core.Frame {
+	ly := core.NewFrame(par)
 	ly.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})

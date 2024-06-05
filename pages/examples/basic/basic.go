@@ -19,6 +19,7 @@ var content embed.FS
 func main() {
 	b := core.NewBody("Pages Example")
 	pg := pages.NewPage(b).SetSource(errors.Log1(fs.Sub(content, "content")))
-	b.AddAppBar(pg.AppBar)
+	_ = pg // TODO: needs different config
+	// b.AddAppBar(pg.AppBar)
 	b.RunMainWindow()
 }

@@ -294,7 +294,7 @@ func (st *Stage) Run() *Stage {
 
 // RunImpl is the implementation of [Stage.Run]; it should not typically be called by end-users.
 func (st *Stage) RunImpl() *Stage {
-	defer func() { system.HandleRecover(recover()) }()
+	// defer func() { system.HandleRecover(recover()) }()
 	switch st.Type {
 	case WindowStage:
 		return st.RunWindow()

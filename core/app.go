@@ -99,69 +99,64 @@ func AppIconImages() []image.Image {
 
 // StandardAppBarConfig is the standard impl for a [App.AppBarConfig].
 // It adds a Back navigation buttons and the AppChooser,
-// followed by the [Widget.ConfigToolbar] for the current FullWindow
+// followed by the [Widget.MakeToolbar] for the current FullWindow
 // Scene being viewed, along with [StandardOverflowMenu] items.
 // and calls AddDefaultOverflowMenu to provide default menu items,
 // which will appear below any other OverflowMenu items added.
 func StandardAppBarConfig(parent Widget) {
 	tb := RecycleToolbar(parent)
-	StandardAppBarStart(tb)
-	StandardOverflowMenu(tb)
-	CurrentWindowAppBar(tb)
+	tb.Maker(StandardAppBarMaker)
+	if len(tb.Scene.AppBars) > 0 {
+		tb.Makers = append(tb.Makers, tb.Scene.AppBars...)
+	}
+	StandardOverflowMenu(tb) // todo -- need a config option for this
 }
 
-// StandardAppBarStart adds standard items to start of an AppBar:
-// [StandardAppBarBack] and [StandardAppBarChooser]
-func StandardAppBarStart(tb *Toolbar) {
-	StandardAppBarBack(tb)
-	StandardAppBarChooser(tb)
+// StandardAppBarMaker adds standard items to start of an AppBar:
+// [AppBarBackMaker] and [AppBarChooserMaker]
+func StandardAppBarMaker(p *Plan) {
+	AppBarBackMaker(p)
+	AppBarChooserMaker(p)
 }
 
-// StandardAppBarBack adds a back button
-func StandardAppBarBack(tb *Toolbar) *Button {
-	bt := NewButton(tb, "back").SetIcon(icons.ArrowBack).SetTooltip("Back").SetKey(keymap.HistPrev)
-	// TODO(kai/abc): app bar back button disabling
-	// bt.StyleFirst(func(s *styles.Style) {
-	// 	if tb.Scene.Stage.Mains == nil {
-	// 		return
-	// 	}
-	// 	s.SetState(tb.Scene.Stage.Mains.Stack.Len() <= 1 && len(AllRenderWins) <= 1, states.Disabled)
-	// })
-	bt.OnClick(func(e events.Event) {
-		if slen := tb.Scene.Stage.Mains.Stack.Len(); slen > 1 {
-			if tb.Scene.Stage.CloseOnBack {
-				tb.Scene.Close()
-			} else {
-				tb.Scene.Stage.Mains.Stack.ValueByIndex(slen - 2).Raise()
+// AppBarBackMaker adds a back button
+func AppBarBackMaker(p *Plan) {
+	AddAt(p, "back", func(w *Button) {
+		w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev).SetTooltip("Back")
+		w.OnClick(func(e events.Event) {
+			if slen := w.Scene.Stage.Mains.Stack.Len(); slen > 1 {
+				if w.Scene.Stage.CloseOnBack {
+					w.Scene.Close()
+				} else {
+					w.Scene.Stage.Mains.Stack.ValueByIndex(slen - 2).Raise()
+				}
+				return
 			}
-			return
-		}
-		if wlen := len(AllRenderWindows); wlen > 1 {
-			if tb.Scene.Stage.CloseOnBack {
-				CurrentRenderWindow.CloseReq()
+			if wlen := len(AllRenderWindows); wlen > 1 {
+				if w.Scene.Stage.CloseOnBack {
+					CurrentRenderWindow.CloseReq()
+				}
+				AllRenderWindows[wlen-2].Raise()
 			}
-			AllRenderWindows[wlen-2].Raise()
-		}
+		})
+		// TODO(kai/abc): app bar back button disabling
+		// bt.StyleFirst(func(s *styles.Style) {
+		// 	if tb.Scene.Stage.Mains == nil {
+		// 		return
+		// 	}
+		// 	s.SetState(tb.Scene.Stage.Mains.Stack.Len() <= 1 && len(AllRenderWins) <= 1, states.Disabled)
+		// })
 	})
-	return bt
 }
 
-// StandardAppBarChooser adds a standard app chooser using [ConfigAppChooser].
-func StandardAppBarChooser(tb *Toolbar) *Chooser {
-	return ConfigAppChooser(NewChooser(tb, "app-chooser"), tb)
-}
-
-// todo: use CurrentMainScene instead?
-
-// CurrentWindowAppBar calls ConfigToolbar functions registered on
-// the Scene to which the given toolbar belongs.
-func CurrentWindowAppBar(tb *Toolbar) {
-	tb.Scene.AppBars.Call(tb)
+// AppBarChooserMaker adds a standard app chooser using [ConfigAppChooser].
+func AppBarChooserMaker(p *Plan) {
+	AddAt(p, "app-chooser", ConfigAppChooser)
 }
 
 // StandardOverflowMenu adds the standard overflow menu function.
 func StandardOverflowMenu(tb *Toolbar) {
-	tb.OverflowMenus = append(tb.OverflowMenus, tb.StandardOverflowMenu)
+	tb.AddOverflowMenu(tb.StandardOverflowMenu)
 }
 
 var (
@@ -208,7 +203,8 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 		})
 	}
 	if InspectorWindow != nil {
-		NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetTooltip("Developer tools for inspecting the content of the app").SetShortcut("Command+Shift+I").
+		NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetShortcut("Command+Shift+I").
+			SetTooltip("Developer tools for inspecting the content of the app").
 			OnClick(func(e events.Event) {
 				InspectorWindow(tb.Scene)
 			})
@@ -244,10 +240,11 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 					win.CloseReq()
 				}
 			})
-		NewButton(m, "quit-app").SetText("Quit").SetIcon(icons.Close).SetShortcut("Command+Q").
+		quit := NewButton(m).SetText("Quit").SetIcon(icons.Close).SetShortcut("Command+Q").
 			OnClick(func(e events.Event) {
 				go TheApp.QuitReq()
 			})
+		quit.SetName("quit-app")
 		NewSeparator(m)
 		for _, w := range MainRenderWindows {
 			if w != nil {
@@ -277,7 +274,7 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 // given toolbar. This chooser is typically placed at the start
 // of the AppBar. You can extend the resources available for access
 // in the app chooser using [Chooser.AddItemsFunc] and [ChooserItem.Func].
-func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
+func ConfigAppChooser(ch *Chooser) {
 	ch.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
 	if TheApp.SystemPlatform().IsMobile() {
 		ch.SetPlaceholder("Search")
@@ -285,21 +282,18 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 		ch.SetPlaceholder(fmt.Sprintf("Search (%s)", keymap.Menu.Label()))
 	}
 
-	ch.OnWidgetAdded(func(w Widget) {
-		if w.PathFrom(ch) == "parts/text-field" {
-			tf := w.(*TextField)
-			w.Style(func(s *styles.Style) {
-				s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
-				if !s.Is(states.Focused) && tf.Error == nil {
-					s.Border = styles.Border{}
-				}
-				s.Border.Radius = styles.BorderRadiusFull
-				s.Min.X.SetCustom(func(uc *units.Context) float32 {
-					return min(uc.Ch(40), uc.Vw(80)-uc.Ch(20))
-				})
-				s.Max.X = s.Min.X
+	AddChildInit(ch, "text-field", func(w *TextField) {
+		w.Style(func(s *styles.Style) {
+			s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
+			if !s.Is(states.Focused) && w.Error == nil {
+				s.Border = styles.Border{}
+			}
+			s.Border.Radius = styles.BorderRadiusFull
+			s.Min.X.SetCustom(func(uc *units.Context) float32 {
+				return min(uc.Ch(40), uc.Vw(80)-uc.Ch(20))
 			})
-		}
+			s.Max.X = s.Min.X
+		})
 	})
 
 	ch.AddItemsFunc(func() {
@@ -307,7 +301,7 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 			for _, kv := range rw.Mains.Stack.Order {
 				st := kv.Value
 				// we do not include ourself
-				if st == tb.Scene.Stage {
+				if st == ch.Scene.Stage {
 					continue
 				}
 				ch.Items = append(ch.Items, ChooserItem{
@@ -319,9 +313,12 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 			}
 		}
 	})
-	ch.AddItemsFunc(func() {
-		AddButtonItems(&ch.Items, tb, "")
-	})
+	if tb := ParentToolbar(ch); tb != nil {
+		ch.AddItemsFunc(func() {
+			AddButtonItems(&ch.Items, tb, "")
+		})
+	}
+
 	ch.OnFinal(events.Change, func(e events.Event) {
 		// we must never have a chooser label so that it
 		// always displays the search placeholder
@@ -329,7 +326,6 @@ func ConfigAppChooser(ch *Chooser, tb *Toolbar) *Chooser {
 		ch.CurrentItem = ChooserItem{}
 		ch.ShowCurrentItem()
 	})
-	return ch
 }
 
 // AddButtonItems adds to the given items all of the buttons under

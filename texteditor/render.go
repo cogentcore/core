@@ -33,7 +33,7 @@ func (ed *Editor) RenderLayout() {
 	ed.LayoutAllLines()
 	ed.ConfigScrolls()
 	if chg {
-		ed.Layout.NeedsLayout() // required to actually update scrollbar vs not
+		ed.Frame.NeedsLayout() // required to actually update scrollbar vs not
 	}
 }
 

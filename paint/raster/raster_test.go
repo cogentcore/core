@@ -453,14 +453,15 @@ func TestGradient(t *testing.T) {
 		scanner = scan.NewScanner(scan.NewImgSpanner(img), wx, wy)
 	)
 
-	linear := gradient.NewLinear().
-		SetBox(math32.B2(50, 50, 150, 150)).
+	linear := gradient.NewLinear()
+	linear.SetBox(math32.B2(50, 50, 150, 150)).
 		AddStop(colors.Aquamarine, 0.3).
 		AddStop(colors.Skyblue, 0.6).
 		AddStop(colors.ApplyOpacity(colors.Darksalmon, 0.75), 1)
 
-	radial := gradient.NewRadial().
-		SetBox(math32.B2(230, 230, 330, 330)).SetSpread(gradient.Reflect).
+	radial := gradient.NewRadial()
+	radial.SetBox(math32.B2(230, 230, 330, 330)).
+		SetSpread(gradient.Reflect).
 		AddStop(colors.Orchid, 0.3).
 		AddStop(colors.Bisque, 0.6).
 		AddStop(colors.ApplyOpacity(colors.Chartreuse, 0.4), 1)
@@ -520,15 +521,15 @@ func TestGradient(t *testing.T) {
 	f.Draw()
 	f.Clear()
 
-	radial.SetUnits(gradient.ObjectBoundingBox).
-		SetFocal(math32.Vector2{}).SetRadius(math32.Vector2Scalar(0.2)) // move focus away from
+	radial.SetUnits(gradient.ObjectBoundingBox)
+	radial.SetFocal(math32.Vector2{}).SetRadius(math32.Vector2Scalar(0.2)) // move focus away from
 	scanner.SetColor(radial)
 	AddRect(300, 210, 450, 300, 0, f)
 	f.Draw()
 	f.Clear()
 
-	radial.SetUnits(gradient.UserSpaceOnUse).SetSpread(gradient.Pad).
-		SetFocal(math32.Vec2(0.1, 0.1)).SetRadius(math32.Vector2Scalar(0.5)) // move focus away from center
+	radial.SetUnits(gradient.UserSpaceOnUse).SetSpread(gradient.Pad)
+	radial.SetFocal(math32.Vec2(0.1, 0.1)).SetRadius(math32.Vector2Scalar(0.5)) // move focus away from center
 	scanner.SetColor(radial)
 	AddRect(20, 160, 150, 310, 0, f)
 	f.Draw()

@@ -60,7 +60,7 @@ func NewTooltipScene(w Widget, tooltip string, pos, sz image.Point) *Scene {
 		s.Color = colors.C(colors.Scheme.InverseOnSurface)
 		s.BoxShadow = styles.BoxShadow1()
 	})
-	NewText(sc, "text").SetType(TextBodyMedium).SetText(tooltip).
+	NewText(sc).SetType(TextBodyMedium).SetText(tooltip).
 		Style(func(s *styles.Style) {
 			s.SetTextWrap(true)
 			s.Max.X.Em(20)

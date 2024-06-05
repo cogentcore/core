@@ -11,185 +11,41 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"cogentcore.org/core/base/errors"
 )
 
 // This file contains helpful functions for dealing with maps
 // in the reflect system
 
 // MapValueType returns the type of the value for the given map (which can be
-// a pointer to a map or a direct map) -- just Elem() of map type, but using
+// a pointer to a map or a direct map); just Elem() of map type, but using
 // this function makes it more explicit what is going on.
 func MapValueType(mp any) reflect.Type {
 	return NonPointerType(reflect.TypeOf(mp)).Elem()
 }
 
 // MapKeyType returns the type of the key for the given map (which can be a
-// pointer to a map or a direct map) -- just Key() of map type, but using
+// pointer to a map or a direct map); just Key() of map type, but using
 // this function makes it more explicit what is going on.
 func MapKeyType(mp any) reflect.Type {
 	return NonPointerType(reflect.TypeOf(mp)).Key()
 }
 
-// WalkMapElements calls a function on all the "basic" elements of
-// the given map; it iterates over maps within maps (but not structs
-// and slices within maps).
-func WalkMapElements(mp any, fun func(mp any, typ reflect.Type, key, val reflect.Value) bool) bool {
-	vv := reflect.ValueOf(mp)
-	if mp == nil {
-		log.Printf("reflectx.MapElsValueFun: must pass a non-nil pointer to the map: %v\n", mp)
-		return false
-	}
-	v := NonPointerValue(vv)
-	if !v.IsValid() {
-		return true
-	}
-	typ := v.Type()
-	if typ.Kind() != reflect.Map {
-		log.Printf("reflectx.MapElsValueFun: non-pointer type is not a map: %v\n", typ.String())
-		return false
-	}
-	rval := true
-	keys := v.MapKeys()
-	for _, key := range keys {
-		val := v.MapIndex(key)
-		vali := val.Interface()
-		// vt := val.Type()
-		vt := reflect.TypeOf(vali)
-		// fmt.Printf("key %v val %v kind: %v\n", key, val, vt.Kind())
-		if vt.Kind() == reflect.Map {
-			rval = WalkMapElements(vali, fun)
-			if !rval {
-				break
-			}
-			// } else if vt.Kind() == reflect.Struct { // todo
-			// 	rval = MapElsValueFun(vali, fun)
-			// 	if !rval {
-			// 		break
-			// 	}
-		} else {
-			rval = fun(vali, typ, key, val)
-			if !rval {
-				break
-			}
-		}
-	}
-	return rval
-}
-
-// WalkMapStructElements calls a function on all the "basic" elements
-// of the given map or struct; it iterates over maps within maps and
-// fields within structs.
-func WalkMapStructElements(mp any, fun func(mp any, typ reflect.Type, val reflect.Value) bool) bool {
-	vv := reflect.ValueOf(mp)
-	if mp == nil {
-		log.Printf("reflectx.MapElsValueFun: must pass a non-nil pointer to the map: %v\n", mp)
-		return false
-	}
-	v := NonPointerValue(vv)
-	if !v.IsValid() {
-		return true
-	}
-	typ := v.Type()
-	vk := typ.Kind()
-	rval := true
-	switch vk {
-	case reflect.Map:
-		keys := v.MapKeys()
-		for _, key := range keys {
-			val := v.MapIndex(key)
-			vali := val.Interface()
-			if AnyIsNil(vali) {
-				continue
-			}
-			vt := reflect.TypeOf(vali)
-			if vt == nil {
-				continue
-			}
-			vtk := vt.Kind()
-			switch vtk {
-			case reflect.Map:
-				rval = WalkMapStructElements(vali, fun)
-				if !rval {
-					break
-				}
-			case reflect.Struct:
-				rval = WalkMapStructElements(vali, fun)
-				if !rval {
-					break
-				}
-			default:
-				rval = fun(vali, typ, val)
-				if !rval {
-					break
-				}
-			}
-		}
-	case reflect.Struct:
-		for i := 0; i < typ.NumField(); i++ {
-			f := typ.Field(i)
-			vf := v.Field(i)
-			if !vf.CanInterface() {
-				continue
-			}
-			vfi := vf.Interface()
-			if vfi == mp {
-				continue
-			}
-			vtk := f.Type.Kind()
-			switch vtk {
-			case reflect.Map:
-				rval = WalkMapStructElements(vfi, fun)
-				if !rval {
-					break
-				}
-			case reflect.Struct:
-				rval = WalkMapStructElements(vfi, fun)
-				if !rval {
-					break
-				}
-			default:
-				rval = fun(vfi, typ, vf)
-				if !rval {
-					break
-				}
-			}
-		}
-	default:
-		log.Printf("reflectx.MapStructElsValueFun: non-pointer type is not a map or struct: %v\n", typ.String())
-		return false
-	}
-	return rval
-}
-
-// NumMapStructElements returns the number of elemental fields
-// in the given map / struct, using [WalkMapStructElements].
-func NumMapStructElements(mp any) int {
-	n := 0
-	falseErr := WalkMapStructElements(mp, func(mp any, typ reflect.Type, val reflect.Value) bool {
-		n++
-		return true
-	})
-	if !falseErr {
-		return 0
-	}
-	return n
-}
-
 // MapAdd adds a new blank entry to the map.
 func MapAdd(mv any) {
 	mpv := reflect.ValueOf(mv)
-	mpvnp := NonPointerValue(mpv)
+	mpvnp := Underlying(mpv)
 	mvtyp := mpvnp.Type()
 	valtyp := MapValueType(mv)
 	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
-		str := ""
-		valtyp = reflect.TypeOf(str)
+		valtyp = reflect.TypeOf("")
 	}
 	nkey := reflect.New(MapKeyType(mv))
 	nval := reflect.New(valtyp)
 	if mpvnp.IsNil() { // make a new map
 		mpv.Elem().Set(reflect.MakeMap(mvtyp))
-		mpvnp = NonPointerValue(mpv)
+		mpvnp = Underlying(mpv)
 	}
 	mpvnp.SetMapIndex(nkey.Elem(), nval.Elem())
 }
@@ -197,14 +53,14 @@ func MapAdd(mv any) {
 // MapDelete deletes the given key from the given map.
 func MapDelete(mv any, key reflect.Value) {
 	mpv := reflect.ValueOf(mv)
-	mpvnp := NonPointerValue(mpv)
+	mpvnp := Underlying(mpv)
 	mpvnp.SetMapIndex(key, reflect.Value{}) // delete
 }
 
 // MapDeleteAll deletes everything from the given map.
 func MapDeleteAll(mv any) {
 	mpv := reflect.ValueOf(mv)
-	mpvnp := NonPointerValue(mpv)
+	mpvnp := Underlying(mpv)
 	if mpvnp.Len() == 0 {
 		return
 	}
@@ -218,7 +74,7 @@ func MapDeleteAll(mv any) {
 // and returns those keys as a slice of [reflect.Value]s.
 func MapSort(mp any, byKey, ascending bool) []reflect.Value {
 	mpv := reflect.ValueOf(mp)
-	mpvnp := NonPointerValue(mpv)
+	mpvnp := Underlying(mpv)
 	keys := mpvnp.MapKeys() // note: this is a slice of reflect.Value!
 	if byKey {
 		ValueSliceSort(keys, ascending)
@@ -246,8 +102,8 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
 		sort.Slice(keys, func(i, j int) bool {
-			iv := NonPointerValue(mpvnp.MapIndex(keys[i])).Int()
-			jv := NonPointerValue(mpvnp.MapIndex(keys[j])).Int()
+			iv := Underlying(mpvnp.MapIndex(keys[i])).Int()
+			jv := Underlying(mpvnp.MapIndex(keys[j])).Int()
 			if ascending {
 				return iv < jv
 			}
@@ -256,8 +112,8 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 		return nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
 		sort.Slice(keys, func(i, j int) bool {
-			iv := NonPointerValue(mpvnp.MapIndex(keys[i])).Uint()
-			jv := NonPointerValue(mpvnp.MapIndex(keys[j])).Uint()
+			iv := Underlying(mpvnp.MapIndex(keys[i])).Uint()
+			jv := Underlying(mpvnp.MapIndex(keys[j])).Uint()
 			if ascending {
 				return iv < jv
 			}
@@ -266,8 +122,8 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 		return nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
 		sort.Slice(keys, func(i, j int) bool {
-			iv := NonPointerValue(mpvnp.MapIndex(keys[i])).Float()
-			jv := NonPointerValue(mpvnp.MapIndex(keys[j])).Float()
+			iv := Underlying(mpvnp.MapIndex(keys[i])).Float()
+			jv := Underlying(mpvnp.MapIndex(keys[j])).Float()
 			if ascending {
 				return iv < jv
 			}
@@ -276,8 +132,8 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 		return nil
 	case vk == reflect.Struct && ShortTypeName(elnptyp) == "time.Time":
 		sort.Slice(keys, func(i, j int) bool {
-			iv := NonPointerValue(mpvnp.MapIndex(keys[i])).Interface().(time.Time)
-			jv := NonPointerValue(mpvnp.MapIndex(keys[j])).Interface().(time.Time)
+			iv := Underlying(mpvnp.MapIndex(keys[i])).Interface().(time.Time)
+			jv := Underlying(mpvnp.MapIndex(keys[j])).Interface().(time.Time)
 			if ascending {
 				return iv.Before(jv)
 			}
@@ -289,8 +145,8 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 	switch elif.(type) {
 	case fmt.Stringer:
 		sort.Slice(keys, func(i, j int) bool {
-			iv := NonPointerValue(mpvnp.MapIndex(keys[i])).Interface().(fmt.Stringer).String()
-			jv := NonPointerValue(mpvnp.MapIndex(keys[j])).Interface().(fmt.Stringer).String()
+			iv := Underlying(mpvnp.MapIndex(keys[i])).Interface().(fmt.Stringer).String()
+			jv := Underlying(mpvnp.MapIndex(keys[j])).Interface().(fmt.Stringer).String()
 			if ascending {
 				return iv < jv
 			}
@@ -303,8 +159,8 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 	switch {
 	case vk == reflect.String:
 		sort.Slice(keys, func(i, j int) bool {
-			iv := NonPointerValue(mpvnp.MapIndex(keys[i])).String()
-			jv := NonPointerValue(mpvnp.MapIndex(keys[j])).String()
+			iv := Underlying(mpvnp.MapIndex(keys[i])).String()
+			jv := Underlying(mpvnp.MapIndex(keys[j])).String()
 			if ascending {
 				return strings.ToLower(iv) < strings.ToLower(jv)
 			}
@@ -354,19 +210,17 @@ func SetMapRobust(mp, ky, val reflect.Value) bool {
 func CopyMapRobust(to, from any) error {
 	tov := reflect.ValueOf(to)
 	fmv := reflect.ValueOf(from)
-	tonp := NonPointerValue(tov)
-	fmnp := NonPointerValue(fmv)
+	tonp := Underlying(tov)
+	fmnp := Underlying(fmv)
 	totyp := tonp.Type()
 	if totyp.Kind() != reflect.Map {
-		err := fmt.Errorf("reflectx.CopyMapRobust: 'to' is not map, is: %v", totyp.String())
-		log.Println(err)
-		return err
+		err := fmt.Errorf("reflectx.CopyMapRobust: 'to' is not map, is: %v", totyp)
+		return errors.Log(err)
 	}
 	fmtyp := fmnp.Type()
 	if fmtyp.Kind() != reflect.Map {
-		err := fmt.Errorf("reflectx.CopyMapRobust: 'from' is not map, is: %v", fmtyp.String())
-		log.Println(err)
-		return err
+		err := fmt.Errorf("reflectx.CopyMapRobust: 'from' is not map, is: %v", fmtyp)
+		return errors.Log(err)
 	}
 	if tonp.IsNil() {
 		OnePointerValue(tov).Elem().Set(reflect.MakeMap(totyp))

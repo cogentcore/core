@@ -40,8 +40,8 @@ func NoDisplayGPU(nm string) (*vgpu.GPU, *vgpu.Device, error) {
 // in NoGUI offscreen rendering mode, using given GPU and device.
 // Must manually call Init3D and Style3D on the Scene prior to
 // a RenderOffNode call to grab the image from a specific camera.
-func NoDisplayScene(nm string, gp *vgpu.GPU, dev *vgpu.Device) *xyz.Scene {
-	sc := xyz.NewScene("scene")
+func NoDisplayScene(gp *vgpu.GPU, dev *vgpu.Device) *xyz.Scene {
+	sc := xyz.NewScene()
 	sc.MultiSample = 4
 	sc.Geom.Size = image.Point{1024, 768}
 	sc.ConfigFrame(gp, dev)

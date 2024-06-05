@@ -632,7 +632,8 @@ func (pr *Rule) StartParse(ps *State) *Rule {
 	if ps.Ast.HasChildren() {
 		parAst = ps.Ast.ChildAst(0)
 	} else {
-		parAst = ps.Ast.NewChild(AstType, kpr.Name()).(*Ast)
+		parAst = NewAst(ps.Ast)
+		parAst.SetName(kpr.Name())
 		ok := false
 		scope.St, ok = ps.Src.ValidTokenPos(scope.St)
 		if !ok {

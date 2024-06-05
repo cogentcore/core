@@ -21,7 +21,7 @@ type Data struct {
 func TestTablePlotView(t *testing.T) {
 	b := core.NewBody("Plot View")
 
-	epc := table.NewTable(0, "epc")
+	epc := table.NewTable("epc")
 	epc.OpenCSV("testdata/ra25epoch.tsv", table.Tab)
 
 	pl := NewPlotView(b)
@@ -31,7 +31,7 @@ func TestTablePlotView(t *testing.T) {
 	pl.Params.Points = true
 	pl.SetTable(epc)
 	pl.ColumnParams("UnitErr").On = true
-	b.AddAppBar(pl.ConfigToolbar)
+	b.AddAppBar(pl.MakeToolbar)
 	b.AssertRender(t, "plotview_table")
 }
 
@@ -53,7 +53,7 @@ func TestSlicePlotView(t *testing.T) {
 	pl.Params.Points = true
 	pl.SetTable(dt)
 	pl.ColumnParams("Population").On = true
-	b.AddAppBar(pl.ConfigToolbar)
+	b.AddAppBar(pl.MakeToolbar)
 
 	b.AssertRender(t, "plotview_slice")
 }

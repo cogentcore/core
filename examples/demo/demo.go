@@ -9,7 +9,7 @@ package main
 import (
 	"embed"
 	"fmt"
-	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,6 +24,7 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/views"
 )
 
@@ -74,7 +75,7 @@ func text(ts *core.Tabs) {
 
 	for _, typ := range core.TextTypesValues() {
 		s := strcase.ToSentence(typ.String())
-		core.NewText(tab, "text"+typ.String()).SetType(typ).SetText(s)
+		core.NewText(tab).SetType(typ).SetText(s)
 	}
 }
 
@@ -86,7 +87,7 @@ func buttons(ts *core.Tabs) {
 	core.NewText(tab).SetText("Cogent Core provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of text, an icon, and an indicator.")
 
 	makeRow := func() core.Widget {
-		return core.NewLayout(tab).Style(func(s *styles.Style) {
+		return core.NewFrame(tab).Style(func(s *styles.Style) {
 			s.Wrap = true
 			s.Align.Items = styles.Center
 		})
@@ -103,14 +104,14 @@ func buttons(ts *core.Tabs) {
 	mbrowi := makeRow()
 
 	menu := func(m *core.Scene) {
-		m1 := core.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Control+Shift+1").
-			SetTooltip("A standard menu item with an icon")
+		m1 := core.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Control+Shift+1")
+		m1.SetTooltip("A standard menu item with an icon")
 		m1.OnClick(func(e events.Event) {
 			fmt.Println("Clicked on menu item 1")
 		})
 
-		m2 := core.NewButton(m).SetText("Menu Item 2").SetIcon(icons.Open).
-			SetTooltip("A menu item with an icon and a sub menu")
+		m2 := core.NewButton(m).SetText("Menu Item 2").SetIcon(icons.Open)
+		m2.SetTooltip("A menu item with an icon and a sub menu")
 
 		m2.Menu = func(m *core.Scene) {
 			sm2 := core.NewButton(m).SetText("Sub Menu Item 2").SetIcon(icons.InstallDesktop).
@@ -149,31 +150,31 @@ func buttons(ts *core.Tabs) {
 			art = "An "
 		}
 
-		b := core.NewButton(brow, "button"+s).SetType(typ).SetText(s).SetIcon(ics[typ]).
+		b := core.NewButton(brow).SetType(typ).SetText(s).SetIcon(ics[typ]).
 			SetTooltip("A standard " + sl + " button with text and an icon")
 		b.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", b.Nm)
 		})
 
-		bt := core.NewButton(browt, "buttonText"+s).SetType(typ).SetText(s).
+		bt := core.NewButton(browt).SetType(typ).SetText(s).
 			SetTooltip("A standard " + sl + " button with text")
 		bt.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", bt.Nm)
 		})
 
-		bi := core.NewButton(browi, "buttonIcon"+s).SetType(typ).SetIcon(ics[typ+5]).
+		bi := core.NewButton(browi).SetType(typ).SetIcon(ics[typ+5]).
 			SetTooltip("A standard " + sl + " button with an icon")
 		bi.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", bi.Nm)
 		})
 
-		core.NewButton(mbrow, "menuButton"+s).SetType(typ).SetText(s).SetIcon(ics[typ+10]).SetMenu(menu).
+		core.NewButton(mbrow).SetType(typ).SetText(s).SetIcon(ics[typ+10]).SetMenu(menu).
 			SetTooltip(art + sl + " menu button with text and an icon")
 
-		core.NewButton(mbrowt, "menuButtonText"+s).SetType(typ).SetText(s).SetMenu(menu).
+		core.NewButton(mbrowt).SetType(typ).SetText(s).SetMenu(menu).
 			SetTooltip(art + sl + " menu button with text")
 
-		core.NewButton(mbrowi, "menuButtonIcon"+s).SetType(typ).SetIcon(ics[typ+15]).SetMenu(menu).
+		core.NewButton(mbrowi).SetType(typ).SetIcon(ics[typ+15]).SetMenu(menu).
 			SetTooltip(art + sl + " menu button with an icon")
 	}
 }
@@ -201,12 +202,12 @@ func inputs(ts *core.Tabs) {
 			s.SetTextWrap(true)
 		})
 
-	spinners := core.NewLayout(tab, "spinners")
+	spinners := core.NewFrame(tab)
 
 	core.NewSpinner(spinners).SetStep(5).SetMin(-50).SetMax(100).SetValue(15)
 	core.NewSpinner(spinners).SetFormat("%X").SetStep(1).SetMax(255).SetValue(44)
 
-	choosers := core.NewLayout(tab, "choosers")
+	choosers := core.NewFrame(tab)
 
 	fruits := []core.ChooserItem{
 		{Value: "Apple", Tooltip: "A round, edible fruit that typically has red skin"},
@@ -225,49 +226,28 @@ func inputs(ts *core.Tabs) {
 	core.NewSwitch(tab).SetText("Toggle")
 
 	core.NewSwitches(tab).SetItems(
-		core.SwitchItem{"Switch 1", "A description for Switch 1"},
-		core.SwitchItem{"Switch 2", "A description for Switch 2"},
-		core.SwitchItem{"Switch 3", "A description for Switch 3"})
+		core.SwitchItem{Value: "Switch 1", Tooltip: "The first switch"},
+		core.SwitchItem{Value: "Switch 2", Tooltip: "The second switch"},
+		core.SwitchItem{Value: "Switch 3", Tooltip: "The third switch"})
 
-	core.NewSwitches(tab).SetType(core.SwitchChip).SetItems(
-		core.SwitchItem{"Chip 1", "A description for Chip 1"},
-		core.SwitchItem{"Chip 2", "A description for Chip 2"},
-		core.SwitchItem{"Chip 3", "A description for Chip 3"})
+	core.NewSwitches(tab).SetType(core.SwitchChip).SetStrings("Chip 1", "Chip 2", "Chip 3")
+	core.NewSwitches(tab).SetType(core.SwitchCheckbox).SetStrings("Checkbox 1", "Checkbox 2", "Checkbox 3")
+	core.NewSwitches(tab).SetType(core.SwitchCheckbox).SetStrings("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
+		OnWidgetAdded(func(w core.Widget) { // TODO(config)
+			if sw, ok := w.(*core.Switch); ok {
+				sw.SetState(true, states.Indeterminate)
+			}
+		})
 
-	core.NewSwitches(tab).SetType(core.SwitchCheckbox).SetItems(
-		core.SwitchItem{"Checkbox 1", "A description for Checkbox 1"},
-		core.SwitchItem{"Checkbox 2", "A description for Checkbox 2"},
-		core.SwitchItem{"Checkbox 3", "A description for Checkbox 3"})
-
-	core.NewSwitches(tab).SetType(core.SwitchCheckbox).SetItems(
-		core.SwitchItem{"Indeterminate 1", "A description for Indeterminate Checkbox 1"},
-		core.SwitchItem{"Indeterminate 2", "A description for Indeterminate Checkbox 2"},
-		core.SwitchItem{"Indeterminate 3", "A description for Indeterminate Checkbox 3"}).
+	core.NewSwitches(tab).SetType(core.SwitchRadioButton).SetMutex(true).SetStrings("Radio Button 1", "Radio Button 2", "Radio Button 3")
+	core.NewSwitches(tab).SetType(core.SwitchRadioButton).SetMutex(true).SetStrings("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
 		OnWidgetAdded(func(w core.Widget) {
 			if sw, ok := w.(*core.Switch); ok {
 				sw.SetState(true, states.Indeterminate)
 			}
 		})
 
-	core.NewSwitches(tab).SetType(core.SwitchRadioButton).SetMutex(true).SetItems(
-		core.SwitchItem{"Radio Button 1", "A description for Radio Button 1"},
-		core.SwitchItem{"Radio Button 2", "A description for Radio Button 2"},
-		core.SwitchItem{"Radio Button 3", "A description for Radio Button 3"})
-
-	core.NewSwitches(tab).SetType(core.SwitchRadioButton).SetMutex(true).SetItems(
-		core.SwitchItem{"Indeterminate 1", "A description for Indeterminate Radio Button 1"},
-		core.SwitchItem{"Indeterminate 2", "A description for Indeterminate Radio Button 2"},
-		core.SwitchItem{"Indeterminate 3", "A description for Indeterminate Radio Button 3"}).
-		OnWidgetAdded(func(w core.Widget) {
-			if sw, ok := w.(*core.Switch); ok {
-				sw.SetState(true, states.Indeterminate)
-			}
-		})
-
-	core.NewSwitches(tab).SetType(core.SwitchSegmentedButton).SetMutex(true).SetItems(
-		core.SwitchItem{"Segmented Button 1", "A description for Segmented Button 1"},
-		core.SwitchItem{"Segmented Button 2", "A description for Segmented Button 2"},
-		core.SwitchItem{"Segmented Button 3", "A description for Segmented Button 3"})
+	core.NewSwitches(tab).SetType(core.SwitchSegmentedButton).SetMutex(true).SetStrings("Segmented Button 1", "Segmented Button 2", "Segmented Button 3")
 }
 
 func sliders(ts *core.Tabs) {
@@ -279,7 +259,7 @@ func sliders(ts *core.Tabs) {
 	core.NewSlider(tab)
 	core.NewSlider(tab).SetValue(0.7).SetState(true, states.Disabled)
 
-	csliders := core.NewLayout(tab)
+	csliders := core.NewFrame(tab)
 
 	core.NewSlider(csliders).SetValue(0.3).Style(func(s *styles.Style) {
 		s.Direction = styles.Column
@@ -322,21 +302,21 @@ func makeIcons(ts *core.Tabs) {
 			s.Overflow.Y = styles.OverflowAuto
 		})
 
-		icnms := icons.All()
-		for _, ic := range icnms {
-			icnm := string(ic)
-			if strings.HasSuffix(icnm, "-fill") {
+		ics := icons.All()
+		for _, ic := range ics {
+			sic := string(ic)
+			if strings.HasSuffix(sic, "-fill") {
 				continue
 			}
-			vb := core.NewLayout(grid, icnm).Style(func(s *styles.Style) {
+			vb := core.NewFrame(grid).Style(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Max.X.Em(15) // constraining width exactly gives nice grid-like appearance
 				s.Min.X.Em(15)
 			})
-			core.NewIcon(vb, icnm).SetIcon(icons.Icon(icnm)).Style(func(s *styles.Style) {
+			core.NewIcon(vb).SetIcon(ic).Style(func(s *styles.Style) {
 				s.Min.Set(units.Em(4))
 			})
-			core.NewText(vb, icnm).SetText(strcase.ToSentence(icnm)).Style(func(s *styles.Style) {
+			core.NewText(vb).SetText(strcase.ToSentence(sic)).Style(func(s *styles.Style) {
 				s.SetTextWrap(false)
 			})
 		}
@@ -348,20 +328,71 @@ func values(ts *core.Tabs) {
 	tab := ts.NewTab("Values")
 
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Values")
-	core.NewText(tab).SetText("Cogent Core provides the value views system, which allows you to instantly turn Go values into interactive widgets bound to the original values with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the first button below.")
+	core.NewText(tab).SetText("Cogent Core provides the value widget system, which allows you to instantly bind Go values to interactive widgets with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the Inspector button below.")
+
+	name := "Gopher"
+	core.Bind(&name, core.NewTextField(tab)).OnChange(func(e events.Event) {
+		fmt.Println("Your name is now", name)
+	})
+
+	age := 35
+	core.Bind(&age, core.NewSpinner(tab)).OnChange(func(e events.Event) {
+		fmt.Println("Your age is now", age)
+	})
+
+	on := true
+	core.Bind(&on, core.NewSwitch(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The switch is now", on)
+	})
+
+	theme := core.ThemeLight
+	core.Bind(&theme, core.NewSwitches(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The theme is now", theme)
+	})
+
+	var state states.States
+	state.SetFlag(true, states.Hovered)
+	state.SetFlag(true, states.Dragging)
+	core.Bind(&state, core.NewSwitches(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The state is now", state)
+	})
+
+	color := colors.Orange
+	core.Bind(&color, views.NewColorButton(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The color is now", color)
+	})
+
+	colorMap := views.ColorMapName("ColdHot")
+	core.Bind(&colorMap, views.NewColorMapButton(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The color map is now", colorMap)
+	})
+
+	t := time.Now()
+	core.Bind(&t, views.NewTimeInput(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The time is now", t)
+	})
+
+	duration := 5 * time.Minute
+	core.Bind(&duration, views.NewDurationInput(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The duration is now", duration)
+	})
+
+	file := core.Filename("demo.go")
+	core.Bind(&file, views.NewFileButton(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The file is now", file)
+	})
+
+	font := core.AppearanceSettings.Font
+	core.Bind(&font, views.NewFontButton(tab)).OnChange(func(e events.Event) {
+		fmt.Println("The font is now", font)
+	})
+
+	core.Bind(hello, tree.New[*views.FuncButton](tab)).SetShowReturn(true) // TODO(config)
+	core.Bind(styles.NewStyle, tree.New[*views.FuncButton](tab)).SetConfirm(true).SetShowReturn(true)
 
 	core.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
 		views.InspectorWindow(ts.Scene)
 	})
-
-	views.NewValue(tab, colors.Orange)
-	views.NewValue(tab, time.Now())
-	views.NewValue(tab, 5*time.Minute)
-	views.NewValue(tab, 500*time.Millisecond)
-	views.NewValue(tab, core.Filename("demo.go"))
-	views.NewValue(tab, core.AppearanceSettings.Font)
-	views.NewValue(tab, views.ColorMapName("ColdHot"))
-	views.NewFuncButton(tab, hello).SetShowReturn(true)
 }
 
 // Hello displays a greeting message and an age in weeks based on the given information.
@@ -385,7 +416,7 @@ func makeViews(ts *core.Tabs) {
 	vts := core.NewTabs(tab)
 
 	str := testStruct{
-		Name:   "happy",
+		Name:   "Go",
 		Cond:   2,
 		Value:  3.1415,
 		Vec:    math32.Vec2(5, 7),
@@ -397,72 +428,59 @@ func makeViews(ts *core.Tabs) {
 			File:       "views.go",
 		},
 		Things: make([]tableStruct, 2),
-		Stuff:  make([]float32, 3),
+		Stuff:  []float32{0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7},
 	}
 
 	views.NewStructView(vts.NewTab("Struct view")).SetStruct(&str)
 
-	mp := map[string]string{}
+	mp := map[string]any{}
 
 	mp["Go"] = "Elegant, fast, and easy-to-use"
-	mp["Python"] = "Slow and duck-typed"
-	mp["C++"] = "Hard to use and slow to compile"
+	mp["Python"] = true
+	mp["C++"] = 4
 
 	views.NewMapView(vts.NewTab("Map view")).SetMap(&mp)
 
-	sl := make([]string, 20)
-
+	sl := make([]string, 50)
 	for i := 0; i < len(sl); i++ {
 		sl[i] = fmt.Sprintf("el: %v", i)
 	}
 	sl[10] = "this is a particularly long slice value"
-
 	views.NewSliceView(vts.NewTab("Slice view")).SetSlice(&sl)
 
-	tbl := make([]*tableStruct, 100)
-
+	tbl := make([]*tableStruct, 50)
 	for i := range tbl {
 		ts := &tableStruct{IntField: i, FloatField: float32(i) / 10}
 		tbl[i] = ts
 	}
-
 	tbl[0].StrField = "this is a particularly long field"
-
 	views.NewTableView(vts.NewTab("Table view")).SetSlice(&tbl)
 
 	sp := core.NewSplits(vts.NewTab("Tree view")).SetSplits(0.3, 0.7)
-
 	tv := views.NewTreeViewFrame(sp).SetText("Root")
-	makeTree(tv, 0, 3, 5)
+	makeTree(tv, 0)
+	tv.RootSetViewIndex()
 
-	sv := views.NewStructView(sp)
-	sv.Style(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-	})
-	sv.SetStruct(tv)
+	sv := views.NewStructView(sp).SetStruct(tv)
 
 	tv.OnSelect(func(e events.Event) {
+		fmt.Println("sel")
 		if len(tv.SelectedNodes) > 0 {
-			sv.SetStruct(tv.SelectedNodes[0])
+			fmt.Println("sel", tv.SelectedNodes)
+			sv.SetStruct(tv.SelectedNodes[0]).Update()
 		}
 	})
 
 	textEditors(vts)
 }
 
-func makeTree(tv *views.TreeView, iter, maxIter, maxKids int) {
-	if iter > maxIter {
+func makeTree(tv *views.TreeView, round int) {
+	if round > 2 {
 		return
 	}
-	n := rand.Intn(maxKids)
-	if iter == 0 {
-		n = maxKids
-	}
-	iter++
-	tv.SetNChildren(n, views.TreeViewType, "Child ")
-	for j := 0; j < n; j++ {
-		kt := tv.Child(j).(*views.TreeView)
-		makeTree(kt, iter, maxIter, maxKids)
+	for i := range 3 {
+		n := views.NewTreeView(tv).SetText("Child " + strconv.Itoa(i))
+		makeTree(n, round+1)
 	}
 }
 
@@ -523,7 +541,7 @@ type testStruct struct { //types:add
 	Enum core.ButtonTypes
 
 	// a string
-	Name string
+	Name string `default:"Go" width:"50"`
 
 	// click to show next
 	ShowNext bool
@@ -577,7 +595,7 @@ func dialogs(ts *core.Tabs) {
 	core.NewText(tab).SetText("Cogent Core provides completely customizable dialogs, snackbars, and windows that allow you to easily display, obtain, and organize information.")
 
 	makeRow := func() core.Widget {
-		return core.NewLayout(tab).Style(func(s *styles.Style) {
+		return core.NewFrame(tab).Style(func(s *styles.Style) {
 			s.Wrap = true
 			s.Align.Items = styles.Center
 		})

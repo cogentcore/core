@@ -144,6 +144,8 @@ func (tk Tokens) Code() string {
 		case tok.IsOp():
 			if tok.Tok == token.INC || tok.Tok == token.DEC {
 				str += tok.String() + " "
+			} else if tok.Tok == token.MUL {
+				str += " " + tok.String()
 			} else {
 				str += " " + tok.String() + " "
 			}
@@ -164,15 +166,22 @@ func (tk Tokens) Code() string {
 		case tok.Tok == token.COMMA || tok.Tok == token.COLON || tok.Tok == token.SEMICOLON:
 			str += tok.String() + " "
 			prvIdent = false
+		case tok.Tok == token.STRUCT:
+			str += " " + tok.String() + " "
+		case tok.Tok == token.FUNC:
+			if prvIdent {
+				str += " "
+			}
+			str += tok.String()
+			prvIdent = false
 		case tok.IsGo():
 			str += tok.String() + " "
 			prvIdent = false
-		case tok.Tok == token.IDENT:
+		case tok.Tok == token.IDENT || tok.Tok == token.STRING:
 			if prvIdent {
-				str += " " + tok.String()
-			} else {
-				str += tok.String()
+				str += " "
 			}
+			str += tok.String()
 			prvIdent = true
 		default:
 			str += tok.String()

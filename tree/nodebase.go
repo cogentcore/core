@@ -6,7 +6,6 @@ package tree
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"maps"
 	"strconv"
@@ -68,8 +67,11 @@ type NodeBase struct {
 	depth int
 }
 
-// String implements the fmt.Stringer interface by returning the path of the node.
+// String implements the [fmt.Stringer] interface by returning the path of the node.
 func (n *NodeBase) String() string {
+	if n == nil || n.This() == nil {
+		return "nil"
+	}
 	return elide.Middle(n.This().Path(), 38)
 }
 
@@ -86,21 +88,6 @@ func (n *NodeBase) This() Node {
 // AsTreeNode returns the [NodeBase] for this Node.
 func (n *NodeBase) AsTreeNode() *NodeBase {
 	return n
-}
-
-// InitName initializes this node to the given actual object as a Node interface
-// and sets its name. The names should be unique among children of a node.
-// This is called automatically when adding child nodes and using [NewRoot].
-// If the name is unspecified, it defaults to the ID (kebab-case) name of the type.
-// Even though this is a method and gets the method receiver, it needs
-// an "external" version of itself passed as the first arg, from which
-// the proper Node interface pointer will be obtained. This is the only
-// way to get virtual functional calling to work within the Go language.
-func (n *NodeBase) InitName(k Node, name ...string) {
-	initNode(k)
-	if len(name) > 0 {
-		n.SetName(name[0])
-	}
 }
 
 // Name returns the user-defined name of the Node, which can be
@@ -296,7 +283,7 @@ func (n *NodeBase) PathFrom(parent Node) string {
 	parent = parent.This()
 	// we bail a level below the parent so it isn't in the path
 	if n.Par == nil || n.Par == parent {
-		return n.Nm
+		return EscapePathName(n.Nm)
 	}
 	ppath := ""
 	if n.Par == parent {
@@ -332,9 +319,7 @@ func findPathChild(k Node, child string) (int, bool) {
 	return k.Children().IndexByName(child, 0)
 }
 
-// FindPath returns the node at the given path, starting from this node.
-// If this node is not the root, then the path to this node is subtracted
-// from the start of the path if present there.
+// FindPath returns the node at the given path from this node.
 // FindPath only works correctly when names are unique.
 // Path has [Node.Name]s separated by / and fields by .
 // Node names escape any existing / and . characters to \\ and \,
@@ -342,17 +327,10 @@ func findPathChild(k Node, child string) (int, bool) {
 // element, for cases when indexes are more useful than names.
 // Returns nil if not found.
 func (n *NodeBase) FindPath(path string) Node {
-	if n.Par != nil { // we are not root..
-		myp := n.Path()
-		path = strings.TrimPrefix(path, myp)
-	}
 	curn := n.This()
 	pels := strings.Split(strings.Trim(strings.TrimSpace(path), "\""), "/")
-	for i, pe := range pels {
+	for _, pe := range pels {
 		if len(pe) == 0 {
-			continue
-		}
-		if i <= 1 && curn.Name() == UnescapePathName(pe) {
 			continue
 		}
 		if strings.Contains(pe, ".") { // has fields
@@ -394,126 +372,72 @@ func (n *NodeBase) FieldByName(field string) (Node, error) {
 // AddChild adds given child at end of children list.
 // The kid node is assumed to not be on another tree (see [MoveToParent])
 // and the existing name should be unique among children.
+// Any error is automatically logged in addition to being returned.
 func (n *NodeBase) AddChild(kid Node) error {
 	if err := checkThis(n); err != nil {
 		return err
 	}
 	initNode(kid)
 	n.Kids = append(n.Kids, kid)
-	SetParent(kid, n.This()) // key to set new parent before deleting: indicates move instead of delete
+	SetParent(kid, n) // key to set new parent before deleting: indicates move instead of delete
 	return nil
 }
 
-// NewChild creates a new child of the given type and adds it at end
-// of children list. The name should be unique among children. If the
-// name is unspecified, it defaults to the ID (kebab-case) name of the
-// type, plus the [Ki.NumLifetimeChildren] of its parent.
-func (n *NodeBase) NewChild(typ *types.Type, name ...string) Node {
+// NewChild creates a new child of the given type and adds it at the end
+// of the list of children. The name defaults to the ID (kebab-case) name
+// of the type, plus the [Node.NumLifetimeChildren] of the parent.
+func (n *NodeBase) NewChild(typ *types.Type) Node {
 	if err := checkThis(n); err != nil {
 		return nil
 	}
 	kid := NewOfType(typ)
 	initNode(kid)
 	n.Kids = append(n.Kids, kid)
-	if len(name) > 0 {
-		kid.SetName(name[0])
-	}
-	SetParent(kid, n.This())
+	SetParent(kid, n)
 	return kid
 }
 
-// SetChild sets child at given index to be the given item; if it is passed
-// a name, then it sets the name of the child as well; just calls Init
-// (or InitName) on the child, and SetParent. Names should be unique
-// among children.
-func (n *NodeBase) SetChild(kid Node, idx int, name ...string) error {
+// SetChild sets the child at the given index to be the given item.
+// It just calls Init and SetParent on the child. The name defaults
+// to the ID (kebab-case) name of the type, plus the
+// [Node.NumLifetimeChildren] of the parent.
+// Any error is automatically logged in addition to being returned.
+func (n *NodeBase) SetChild(kid Node, idx int) error {
 	if err := n.Kids.IsValidIndex(idx); err != nil {
 		return err
 	}
-	if len(name) > 0 {
-		kid.InitName(kid, name[0])
-	} else {
-		initNode(kid)
-	}
+	initNode(kid)
 	n.Kids[idx] = kid
-	SetParent(kid, n.This())
+	SetParent(kid, n)
 	return nil
 }
 
 // InsertChild adds given child at position in children list.
 // The kid node is assumed to not be on another tree (see [MoveToParent])
 // and the existing name should be unique among children.
+// Any error is automatically logged in addition to being returned.
 func (n *NodeBase) InsertChild(kid Node, at int) error {
 	if err := checkThis(n); err != nil {
 		return err
 	}
 	initNode(kid)
 	n.Kids.Insert(kid, at)
-	SetParent(kid, n.This())
+	SetParent(kid, n)
 	return nil
 }
 
 // InsertNewChild creates a new child of given type and add at position
-// in children list. The name should be unique among children. If the
-// name is unspecified, it defaults to the ID (kebab-case) name of the
-// type, plus the [Ki.NumLifetimeChildren] of its parent.
-func (n *NodeBase) InsertNewChild(typ *types.Type, at int, name ...string) Node {
+// in children list. The name defaults to the ID (kebab-case) name
+// of the type, plus the [Node.NumLifetimeChildren] of the parent.
+func (n *NodeBase) InsertNewChild(typ *types.Type, at int) Node {
 	if err := checkThis(n); err != nil {
 		return nil
 	}
 	kid := NewOfType(typ)
 	initNode(kid)
 	n.Kids.Insert(kid, at)
-	if len(name) > 0 {
-		kid.SetName(name[0])
-	}
-	SetParent(kid, n.This())
+	SetParent(kid, n)
 	return kid
-}
-
-// SetNChildren ensures that there are exactly n children, deleting any
-// extra, and creating any new ones, using NewChild with given type and
-// naming according to nameStubX where X is the index of the child.
-// If nameStub is not specified, it defaults to the ID (kebab-case)
-// name of the type. It returns whether any changes were made to the
-// children.
-//
-// Note that this does not ensure existing children are of given type, or
-// change their names, or call UniquifyNames; use ConfigChildren for
-// those cases; this function is for simpler cases where a parent uses
-// this function consistently to manage children all of the same type.
-func (n *NodeBase) SetNChildren(trgn int, typ *types.Type, nameStub ...string) bool {
-	sz := len(n.Kids)
-	if trgn == sz {
-		return false
-	}
-	mods := false
-	for sz > trgn {
-		mods = true
-		sz--
-		n.DeleteChildAtIndex(sz)
-	}
-	ns := typ.IDName
-	if len(nameStub) > 0 {
-		ns = nameStub[0]
-	}
-	for sz < trgn {
-		mods = true
-		nm := fmt.Sprintf("%s%d", ns, sz)
-		n.InsertNewChild(typ, sz, nm)
-		sz++
-	}
-	return mods
-}
-
-// ConfigChildren configures children according to the given list of
-// [TypeAndName]s; it attempts to have minimal impact relative to existing
-// items that fit the type and name constraints (they are moved into the
-// corresponding positions), and any extra children are removed, and new
-// ones added, to match the specified config. It is important that names
-// are unique. It returns whether any changes were made to the children.
-func (n *NodeBase) ConfigChildren(config Config) bool {
-	return n.Kids.Config(n.This(), config)
 }
 
 // Deleting Children:
@@ -702,7 +626,7 @@ func (n *NodeBase) WalkDown(fun func(n Node) bool) {
 outer:
 	for {
 		if cur.This() != nil && fun(cur) { // false return means stop
-			n.This().NodeWalkDown(fun)
+			cur.This().NodeWalkDown(fun)
 			if cur.HasChildren() {
 				tm[cur] = 0 // 0 for no fields
 				nxt := cur.Child(0)
@@ -885,7 +809,8 @@ func copyFrom(dst, src Node) {
 // cloned tree (see [Node.CopyFrom] for more information).
 func (n *NodeBase) Clone() Node {
 	nc := NewOfType(n.This().NodeType())
-	nc.InitName(nc, n.Nm)
+	initNode(nc)
+	nc.SetName(n.Nm)
 	nc.CopyFrom(n.This())
 	return nc
 }
@@ -909,9 +834,9 @@ func (n *NodeBase) CopyFieldsFrom(from Node) {
 
 // Event methods:
 
-// OnInit is a placeholder implementation of
-// [Node.OnInit] that does nothing.
-func (n *NodeBase) OnInit() {}
+// Init is a placeholder implementation of
+// [Node.Init] that does nothing.
+func (n *NodeBase) Init() {}
 
 // OnAdd is a placeholder implementation of
 // [Node.OnAdd] that does nothing.

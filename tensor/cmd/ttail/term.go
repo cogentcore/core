@@ -282,9 +282,9 @@ func (tm *Term) TailCheck() bool {
 		return false
 	}
 	tm.Mu.Lock()
-	updt := TheFiles.CheckUpdates()
+	update := TheFiles.CheckUpdates()
 	tm.Mu.Unlock()
-	if !updt {
+	if !update {
 		return false
 	}
 	tm.Draw()

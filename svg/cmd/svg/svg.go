@@ -76,7 +76,7 @@ func EmbedImage(c *Config) error {
 	if err != nil {
 		return err
 	}
-	img := svg.NewImage(&sv.Root)
+	img := svg.NewImage(sv.Root)
 	err = img.OpenImage(c.Input, 0, 0)
 	if err != nil {
 		return err

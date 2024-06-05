@@ -177,9 +177,10 @@ func (sc *Scene) OpenNewObjFS(fsys fs.FS, fname string, parent tree.Node) (*Grou
 		return nil, err
 	}
 	_, fn := filepath.Split(fname)
-	gp := NewGroup(parent, fn)
+	gp := NewGroup(parent)
+	gp.SetName(fn)
 	dec.SetGroup(sc, gp)
-	if sc.IsConfiged() { // has already been configed
+	if sc.Frame != nil { // has already been configured
 		sc.Config()
 	}
 	return gp, nil

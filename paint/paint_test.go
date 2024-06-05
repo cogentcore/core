@@ -37,12 +37,12 @@ func TestRender(t *testing.T) {
 	RunTest(t, "render", 300, 300, func(pc *Context) {
 		testimg, _, err := imagex.Open("test.png")
 		assert.NoError(t, err)
-		imgs := []image.Image{
-			colors.C(colors.Blue),
-			gradient.NewLinear().AddStop(colors.Orange, 0).AddStop(colors.Red, 1).SetTransform(math32.Rotate2D(90)),
-			gradient.NewRadial().AddStop(colors.Green, 0).AddStop(colors.Blue, 0.6, 0.4).AddStop(colors.Purple, 0.9, 0.8),
-			testimg,
-		}
+		linear := gradient.NewLinear()
+		linear.AddStop(colors.Orange, 0).AddStop(colors.Red, 1).SetTransform(math32.Rotate2D(90))
+		radial := gradient.NewRadial()
+		radial.AddStop(colors.Green, 0).AddStop(colors.Blue, 0.6, 0.4).AddStop(colors.Purple, 0.9, 0.8)
+
+		imgs := []image.Image{colors.C(colors.Blue), linear, radial, testimg}
 
 		bs := styles.Border{}
 		bs.Color.Set(imgs...)

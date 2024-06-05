@@ -17,7 +17,7 @@ func TestPCAIris(t *testing.T) {
 	// note: these results are verified against this example:
 	// https://plot.ly/ipython-notebooks/principal-component-analysis/
 
-	dt := table.NewTable(0)
+	dt := table.NewTable()
 	dt.AddFloat64TensorColumn("data", []int{4})
 	dt.AddStringColumn("class")
 	err := dt.OpenCSV("testdata/iris.data", table.Comma)

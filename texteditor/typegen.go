@@ -31,15 +31,15 @@ func (t *Spell) SetSuggest(v ...string) *Spell { t.Suggest = v; return t }
 // Stage is the [PopupStage] associated with the [Spell]
 func (t *Spell) SetStage(v *core.Stage) *Spell { t.Stage = v; return t }
 
-// DiffViewType is the [types.Type] for [DiffView]
-var DiffViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor.DiffView", IDName: "diff-view", Doc: "DiffView presents two side-by-side TextEditor windows showing the differences\nbetween two files (represented as lines of strings).", Methods: []types.Method{{Name: "SaveFileA", Doc: "SaveFileA saves the current state of file A to given filename", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}}, {Name: "SaveFileB", Doc: "SaveFileB saves the current state of file B to given filename", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "FileA", Doc: "first file name being compared"}, {Name: "FileB", Doc: "second file name being compared"}, {Name: "RevA", Doc: "revision for first file, if relevant"}, {Name: "RevB", Doc: "revision for second file, if relevant"}, {Name: "BufA", Doc: "textbuf for A showing the aligned edit view"}, {Name: "BufB", Doc: "textbuf for B showing the aligned edit view"}, {Name: "AlignD", Doc: "aligned diffs records diff for aligned lines"}, {Name: "Diffs", Doc: "Diffs applied"}}, Instance: &DiffView{}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor.Buffer", IDName: "buffer", Doc: "Buffer is a buffer of text, which can be viewed by [Editor](s).\nIt holds the raw text lines (in original string and rune formats,\nand marked-up from syntax highlighting), and sends signals for making\nedits to the text and coordinating those edits across multiple views.\nViews always only view a single buffer, so they directly call methods\non the buffer to drive updates, which are then broadcast.\nIt also has methods for loading and saving buffers to files.\nUnlike GUI Widgets, its methods generally send events, without an\nexplicit Action suffix.\nInternally, the buffer represents new lines using \\n = LF, but saving\nand loading can deal with Windows/DOS CRLF format.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Methods: []types.Method{{Name: "Open", Doc: "Open loads the given file into the buffer.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "Revert", Doc: "Revert re-opens text from current file, if filename set -- returns false if\nnot -- uses an optimized diff-based update to preserve existing formatting\n-- very fast if not very different", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"bool"}}, {Name: "SaveAs", Doc: "SaveAs saves the current text into given file -- does an EditDone first to save edits\nand checks for an existing file -- if it does exist then prompts to overwrite or not.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}}, {Name: "Save", Doc: "Save saves the current text into current Filename associated with this\nbuffer", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"error"}}}, Fields: []types.Field{{Name: "Filename", Doc: "Filename is the filename of the file that was last loaded or saved. It is used when highlighting code."}, {Name: "Flags", Doc: "Flags are the key state flags for the buffer."}, {Name: "Txt", Doc: "Txt is the current value of the entire text being edited, represented as a byte slice for efficiency."}, {Name: "Autosave", Doc: "Autosave specifies whether the file should be automatically saved after changes are made."}, {Name: "Options", Doc: "Options are the options for how text editing and viewing works."}, {Name: "Info", Doc: "Info is the full information about the file."}, {Name: "ParseState", Doc: "ParseState is the parsing state information for the file."}, {Name: "Hi", Doc: "Hi is the syntax highlighting markup parameters, such as the language and style."}, {Name: "NLines", Doc: "NLines is the number of lines in the buffer."}, {Name: "LineColors", Doc: "LineColors are the colors to use for rendering circles next to the line numbers of certain lines."}, {Name: "Lines", Doc: "Lines are the live lines of text being edited, with the latest modifications. They are encoded as runes per line, which is necessary for one-to-one rune/glyph rendering correspondence. All TextPos positions are in rune indexes, not byte indexes."}, {Name: "LineBytes", Doc: "LineBytes are the live lines of text being edited, with the latest modifications. They are encoded in bytes per line, translated from Lines, and used for input to markup. It is essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes."}, {Name: "Tags", Doc: "Tags are the extra custom tagged regions for each line."}, {Name: "HiTags", Doc: "HiTags are the syntax highlighting tags, which are auto-generated."}, {Name: "Markup", Doc: "Markup is the marked-up version of the edited text lines, after being run through the syntax highlighting process. This is what is actually rendered."}, {Name: "MarkupEdits", Doc: "MarkupEdits are the edits that have been made since the last full markup."}, {Name: "ByteOffs", Doc: "ByteOffs are the offsets for the start of each line in the Txt byte slice. This is not updated with edits. Call SetByteOffs to set it when needed. It is used for re-generating the Txt in LinesToBytes and set on initial open in BytesToLines."}, {Name: "TotalBytes", Doc: "TotalBytes is the total number of bytes in the document. See ByteOffs for when it is updated."}, {Name: "LinesMu", Doc: "LinesMu is the mutex for updating lines."}, {Name: "MarkupMu", Doc: "MarkupMu is the mutex for updating markup."}, {Name: "MarkupDelayTimer", Doc: "MarkupDelayTimer is the markup delay timer."}, {Name: "MarkupDelayMu", Doc: "MarkupDelayMu is the mutex for updating the markup delay timer."}, {Name: "Editors", Doc: "Editors are the editors that are currently viewing this buffer."}, {Name: "Undos", Doc: "Undos is the undo manager."}, {Name: "PosHistory", Doc: "PosHistory is the history of cursor positions. It can be used to move back through them."}, {Name: "Complete", Doc: "Complete is the functions and data for text completion."}, {Name: "Spell", Doc: "Spell is the functions and data for spelling correction."}, {Name: "CurrentEditor", Doc: "CurrentEditor is the current text editor, such as the one that initiated the Complete or Correct process. The cursor position in this view is updated, and it is reset to nil after usage."}, {Name: "Listeners", Doc: "Listeners is used for sending standard system events. Change is sent for BufDone, BufInsert, and BufDelete."}}})
 
-// NewDiffView adds a new [DiffView] with the given name to the given parent:
+// DiffViewType is the [types.Type] for [DiffView]
+var DiffViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor.DiffView", IDName: "diff-view", Doc: "DiffView presents two side-by-side TextEditor windows showing the differences\nbetween two files (represented as lines of strings).", Methods: []types.Method{{Name: "SaveFileA", Doc: "SaveFileA saves the current state of file A to given filename", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}}, {Name: "SaveFileB", Doc: "SaveFileB saves the current state of file B to given filename", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "FileA", Doc: "first file name being compared"}, {Name: "FileB", Doc: "second file name being compared"}, {Name: "RevA", Doc: "revision for first file, if relevant"}, {Name: "RevB", Doc: "revision for second file, if relevant"}, {Name: "BufA", Doc: "textbuf for A showing the aligned edit view"}, {Name: "BufB", Doc: "textbuf for B showing the aligned edit view"}, {Name: "AlignD", Doc: "aligned diffs records diff for aligned lines"}, {Name: "Diffs", Doc: "Diffs applied"}, {Name: "inInputEvent"}}, Instance: &DiffView{}})
+
+// NewDiffView returns a new [DiffView] with the given optional parent:
 // DiffView presents two side-by-side TextEditor windows showing the differences
 // between two files (represented as lines of strings).
-func NewDiffView(parent tree.Node, name ...string) *DiffView {
-	return parent.NewChild(DiffViewType, name...).(*DiffView)
-}
+func NewDiffView(parent ...tree.Node) *DiffView { return tree.New[*DiffView](parent...) }
 
 // NodeType returns the [*types.Type] of [DiffView]
 func (t *DiffView) NodeType() *types.Type { return DiffViewType }
@@ -67,17 +67,14 @@ func (t *DiffView) SetRevB(v string) *DiffView { t.RevB = v; return t }
 // Diffs applied
 func (t *DiffView) SetDiffs(v textbuf.DiffSelected) *DiffView { t.Diffs = v; return t }
 
-// SetTooltip sets the [DiffView.Tooltip]
-func (t *DiffView) SetTooltip(v string) *DiffView { t.Tooltip = v; return t }
-
 // DiffTextEditorType is the [types.Type] for [DiffTextEditor]
 var DiffTextEditorType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor.DiffTextEditor", IDName: "diff-text-editor", Doc: "DiffTextEditor supports double-click based application of edits from one\nbuffer to the other.", Embeds: []types.Field{{Name: "Editor"}}, Instance: &DiffTextEditor{}})
 
-// NewDiffTextEditor adds a new [DiffTextEditor] with the given name to the given parent:
+// NewDiffTextEditor returns a new [DiffTextEditor] with the given optional parent:
 // DiffTextEditor supports double-click based application of edits from one
 // buffer to the other.
-func NewDiffTextEditor(parent tree.Node, name ...string) *DiffTextEditor {
-	return parent.NewChild(DiffTextEditorType, name...).(*DiffTextEditor)
+func NewDiffTextEditor(parent ...tree.Node) *DiffTextEditor {
+	return tree.New[*DiffTextEditor](parent...)
 }
 
 // NodeType returns the [*types.Type] of [DiffTextEditor]
@@ -86,40 +83,10 @@ func (t *DiffTextEditor) NodeType() *types.Type { return DiffTextEditorType }
 // New returns a new [*DiffTextEditor] value
 func (t *DiffTextEditor) New() tree.Node { return &DiffTextEditor{} }
 
-// SetTooltip sets the [DiffTextEditor.Tooltip]
-func (t *DiffTextEditor) SetTooltip(v string) *DiffTextEditor { t.Tooltip = v; return t }
-
-// SetCursorWidth sets the [DiffTextEditor.CursorWidth]
-func (t *DiffTextEditor) SetCursorWidth(v units.Value) *DiffTextEditor { t.CursorWidth = v; return t }
-
-// SetLineNumberColor sets the [DiffTextEditor.LineNumberColor]
-func (t *DiffTextEditor) SetLineNumberColor(v image.Image) *DiffTextEditor {
-	t.LineNumberColor = v
-	return t
-}
-
-// SetSelectColor sets the [DiffTextEditor.SelectColor]
-func (t *DiffTextEditor) SetSelectColor(v image.Image) *DiffTextEditor { t.SelectColor = v; return t }
-
-// SetHighlightColor sets the [DiffTextEditor.HighlightColor]
-func (t *DiffTextEditor) SetHighlightColor(v image.Image) *DiffTextEditor {
-	t.HighlightColor = v
-	return t
-}
-
-// SetCursorColor sets the [DiffTextEditor.CursorColor]
-func (t *DiffTextEditor) SetCursorColor(v image.Image) *DiffTextEditor { t.CursorColor = v; return t }
-
-// SetLinkHandler sets the [DiffTextEditor.LinkHandler]
-func (t *DiffTextEditor) SetLinkHandler(v func(tl *paint.TextLink)) *DiffTextEditor {
-	t.LinkHandler = v
-	return t
-}
-
 // EditorType is the [types.Type] for [Editor]
-var EditorType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor.Editor", IDName: "editor", Doc: "Editor is a widget for editing multiple lines of complicated text (as compared to\n[core.TextField] for a single line of simple text).  The Editor is driven by a [Buffer]\nbuffer which contains all the text, and manages all the edits,\nsending update events out to the editors.\n\nUse NeedsRender to drive an render update for any change that does\nnot change the line-level layout of the text.\nUse NeedsLayout whenever there are changes across lines that require\nre-layout of the text.  This sets the Widget NeedsRender flag and triggers\nlayout during that render.\n\nMultiple editors can be attached to a given buffer.  All updating in the\nEditor should be within a single goroutine, as it would require\nextensive protections throughout code otherwise.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Methods: []types.Method{{Name: "Lookup", Doc: "Lookup attempts to lookup symbol at current location, popping up a window\nif something is found.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Layout"}}, Fields: []types.Field{{Name: "Buffer", Doc: "Buffer is the text buffer being edited."}, {Name: "CursorWidth", Doc: "width of cursor -- set from cursor-width property (inherited)"}, {Name: "LineNumberColor", Doc: "the color used for the side bar containing the line numbers; this should be set in Stylers like all other style properties"}, {Name: "SelectColor", Doc: "the color used for the user text selection background color; this should be set in Stylers like all other style properties"}, {Name: "HighlightColor", Doc: "the color used for the text highlight background color (like in find); this should be set in Stylers like all other style properties"}, {Name: "CursorColor", Doc: "the color used for the text field cursor (caret); this should be set in Stylers like all other style properties"}, {Name: "NLines", Doc: "number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"}, {Name: "Renders", Doc: "renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"}, {Name: "Offs", Doc: "starting render offsets for top of each line"}, {Name: "LineNoDigs", Doc: "number of line number digits needed"}, {Name: "LineNoOff", Doc: "horizontal offset for start of text after line numbers"}, {Name: "LineNoRender", Doc: "render for line numbers"}, {Name: "CursorPos", Doc: "current cursor position"}, {Name: "CursorTarg", Doc: "target cursor position for externally set targets: ensures that it is visible"}, {Name: "CursorCol", Doc: "desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"}, {Name: "PosHistIndex", Doc: "current index within PosHistory"}, {Name: "SelectStart", Doc: "starting point for selection -- will either be the start or end of selected region depending on subsequent selection."}, {Name: "SelectRegion", Doc: "current selection region"}, {Name: "PreviousSelectRegion", Doc: "previous selection region, that was actually rendered -- needed to update render"}, {Name: "Highlights", Doc: "highlighted regions, e.g., for search results"}, {Name: "Scopelights", Doc: "highlighted regions, specific to scope markers"}, {Name: "SelectMode", Doc: "if true, select text as cursor moves"}, {Name: "ISearch", Doc: "interactive search data"}, {Name: "QReplace", Doc: "query replace data"}, {Name: "FontHeight", Doc: "font height, cached during styling"}, {Name: "LineHeight", Doc: "line height, cached during styling"}, {Name: "FontAscent", Doc: "font ascent, cached during styling"}, {Name: "FontDescent", Doc: "font descent, cached during styling"}, {Name: "NLinesChars", Doc: "height in lines and width in chars of the visible area"}, {Name: "LinesSize", Doc: "total size of all lines as rendered"}, {Name: "TotalSize", Doc: "the LinesSize plus extra space and line numbers etc"}, {Name: "LineLayoutSize", Doc: "the Geom.Size.Actual.Total subtracting\nextra space and line numbers -- this is what\nLayoutStdLR sees for laying out each line"}, {Name: "lastlineLayoutSize", Doc: "the last LineLayoutSize used in laying out lines.\nUsed to trigger a new layout only when needed."}, {Name: "BlinkOn", Doc: "oscillates between on and off for blinking"}, {Name: "CursorMu", Doc: "mutex protecting cursor rendering -- shared between blink and main code"}, {Name: "HasLinks", Doc: "at least one of the renders has links -- determines if we set the cursor for hand movements"}, {Name: "LinkHandler", Doc: "handles link clicks -- if nil, they are sent to the standard web URL handler"}, {Name: "lastRecenter"}, {Name: "lastAutoInsert"}, {Name: "lastFilename"}}, Instance: &Editor{}})
+var EditorType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor.Editor", IDName: "editor", Doc: "Editor is a widget for editing multiple lines of complicated text (as compared to\n[core.TextField] for a single line of simple text).  The Editor is driven by a [Buffer]\nbuffer which contains all the text, and manages all the edits,\nsending update events out to the editors.\n\nUse NeedsRender to drive an render update for any change that does\nnot change the line-level layout of the text.\nUse NeedsLayout whenever there are changes across lines that require\nre-layout of the text.  This sets the Widget NeedsRender flag and triggers\nlayout during that render.\n\nMultiple editors can be attached to a given buffer.  All updating in the\nEditor should be within a single goroutine, as it would require\nextensive protections throughout code otherwise.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Methods: []types.Method{{Name: "Lookup", Doc: "Lookup attempts to lookup symbol at current location, popping up a window\nif something is found.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Buffer", Doc: "Buffer is the text buffer being edited."}, {Name: "CursorWidth", Doc: "CursorWidth is the width of the cursor."}, {Name: "LineNumberColor", Doc: "LineNumberColor is the color used for the side bar containing the line numbers.\nThis should be set in Stylers like all other style properties."}, {Name: "SelectColor", Doc: "SelectColor is the color used for the user text selection background color.\nThis should be set in Stylers like all other style properties."}, {Name: "HighlightColor", Doc: "HighlightColor is the color used for the text highlight background color (like in find).\nThis should be set in Stylers like all other style properties."}, {Name: "CursorColor", Doc: "CursorColor is the color used for the text editor cursor bar.\nThis should be set in Stylers like all other style properties."}, {Name: "NLines", Doc: "NLines is the number of lines in the view, synced with the Buf after edits,\nbut always reflects the storage size of Renders etc."}, {Name: "Renders", Doc: "Renders is a slice of paint.Text representing the renders of the text lines,\nwith one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)."}, {Name: "Offsets", Doc: "Offsets is a slice of float32 representing the starting render offsets for the top of each line."}, {Name: "LineNumberDigits", Doc: "LineNumberDigits is the number of line number digits needed."}, {Name: "LineNumberOffset", Doc: "LineNumberOffset is the horizontal offset for the start of text after line numbers."}, {Name: "LineNumberRender", Doc: "LineNumberRender is the render for line numbers."}, {Name: "CursorPos", Doc: "CursorPos is the current cursor position."}, {Name: "CursorTarget", Doc: "CursorTarget is the target cursor position for externally set targets.\nIt ensures that the target position is visible."}, {Name: "CursorCol", Doc: "CursorCol is the desired cursor column, where the cursor was last when moved using left / right arrows.\nIt is used when doing up / down to not always go to short line columns."}, {Name: "PosHistIndex", Doc: "PosHistIndex is the current index within PosHistory."}, {Name: "SelectStart", Doc: "SelectStart is the starting point for selection, which will either be the start or end of selected region\ndepending on subsequent selection."}, {Name: "SelectRegion", Doc: "SelectRegion is the current selection region."}, {Name: "PreviousSelectRegion", Doc: "PreviousSelectRegion is the previous selection region that was actually rendered.\nIt is needed to update the render."}, {Name: "Highlights", Doc: "Highlights is a slice of regions representing the highlighted regions, e.g., for search results."}, {Name: "Scopelights", Doc: "Scopelights is a slice of regions representing the highlighted regions specific to scope markers."}, {Name: "SelectMode", Doc: "SelectMode is a boolean indicating whether to select text as the cursor moves."}, {Name: "ISearch", Doc: "ISearch is the interactive search data."}, {Name: "QReplace", Doc: "QReplace is the query replace data."}, {Name: "FontHeight", Doc: "FontHeight is the font height, cached during styling."}, {Name: "LineHeight", Doc: "LineHeight is the line height, cached during styling."}, {Name: "FontAscent", Doc: "FontAscent is the font ascent, cached during styling."}, {Name: "FontDescent", Doc: "FontDescent is the font descent, cached during styling."}, {Name: "NLinesChars", Doc: "NLinesChars is the height in lines and width in chars of the visible area."}, {Name: "LinesSize", Doc: "LinesSize is the total size of all lines as rendered."}, {Name: "TotalSize", Doc: "TotalSize is the LinesSize plus extra space and line numbers etc."}, {Name: "LineLayoutSize", Doc: "LineLayoutSize is the Geom.Size.Actual.Total subtracting extra space and line numbers.\nThis is what LayoutStdLR sees for laying out each line."}, {Name: "lastlineLayoutSize", Doc: "lastlineLayoutSize is the last LineLayoutSize used in laying out lines.\nIt is used to trigger a new layout only when needed."}, {Name: "BlinkOn", Doc: "BlinkOn oscillates between on and off for blinking."}, {Name: "CursorMu", Doc: "CursorMu is a mutex protecting cursor rendering, shared between blink and main code."}, {Name: "HasLinks", Doc: "HasLinks is a boolean indicating if at least one of the renders has links.\nIt determines if we set the cursor for hand movements."}, {Name: "LinkHandler", Doc: "LinkHandler handles link clicks.\nIf it is nil, they are sent to the standard web URL handler."}, {Name: "lastRecenter"}, {Name: "lastAutoInsert"}, {Name: "lastFilename"}}, Instance: &Editor{}})
 
-// NewEditor adds a new [Editor] with the given name to the given parent:
+// NewEditor returns a new [Editor] with the given optional parent:
 // Editor is a widget for editing multiple lines of complicated text (as compared to
 // [core.TextField] for a single line of simple text).  The Editor is driven by a [Buffer]
 // buffer which contains all the text, and manages all the edits,
@@ -134,9 +101,7 @@ var EditorType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor
 // Multiple editors can be attached to a given buffer.  All updating in the
 // Editor should be within a single goroutine, as it would require
 // extensive protections throughout code otherwise.
-func NewEditor(parent tree.Node, name ...string) *Editor {
-	return parent.NewChild(EditorType, name...).(*Editor)
-}
+func NewEditor(parent ...tree.Node) *Editor { return tree.New[*Editor](parent...) }
 
 // NodeType returns the [*types.Type] of [Editor]
 func (t *Editor) NodeType() *types.Type { return EditorType }
@@ -151,11 +116,8 @@ type EditorEmbedder interface {
 
 // AsEditor returns the given value as a value of type Editor if the type
 // of the given value embeds Editor, or nil otherwise
-func AsEditor(k tree.Node) *Editor {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(EditorEmbedder); ok {
+func AsEditor(n tree.Node) *Editor {
+	if t, ok := n.(EditorEmbedder); ok {
 		return t.AsEditor()
 	}
 	return nil
@@ -165,41 +127,41 @@ func AsEditor(k tree.Node) *Editor {
 func (t *Editor) AsEditor() *Editor { return t }
 
 // SetCursorWidth sets the [Editor.CursorWidth]:
-// width of cursor -- set from cursor-width property (inherited)
+// CursorWidth is the width of the cursor.
 func (t *Editor) SetCursorWidth(v units.Value) *Editor { t.CursorWidth = v; return t }
 
 // SetLineNumberColor sets the [Editor.LineNumberColor]:
-// the color used for the side bar containing the line numbers; this should be set in Stylers like all other style properties
+// LineNumberColor is the color used for the side bar containing the line numbers.
+// This should be set in Stylers like all other style properties.
 func (t *Editor) SetLineNumberColor(v image.Image) *Editor { t.LineNumberColor = v; return t }
 
 // SetSelectColor sets the [Editor.SelectColor]:
-// the color used for the user text selection background color; this should be set in Stylers like all other style properties
+// SelectColor is the color used for the user text selection background color.
+// This should be set in Stylers like all other style properties.
 func (t *Editor) SetSelectColor(v image.Image) *Editor { t.SelectColor = v; return t }
 
 // SetHighlightColor sets the [Editor.HighlightColor]:
-// the color used for the text highlight background color (like in find); this should be set in Stylers like all other style properties
+// HighlightColor is the color used for the text highlight background color (like in find).
+// This should be set in Stylers like all other style properties.
 func (t *Editor) SetHighlightColor(v image.Image) *Editor { t.HighlightColor = v; return t }
 
 // SetCursorColor sets the [Editor.CursorColor]:
-// the color used for the text field cursor (caret); this should be set in Stylers like all other style properties
+// CursorColor is the color used for the text editor cursor bar.
+// This should be set in Stylers like all other style properties.
 func (t *Editor) SetCursorColor(v image.Image) *Editor { t.CursorColor = v; return t }
 
 // SetLinkHandler sets the [Editor.LinkHandler]:
-// handles link clicks -- if nil, they are sent to the standard web URL handler
+// LinkHandler handles link clicks.
+// If it is nil, they are sent to the standard web URL handler.
 func (t *Editor) SetLinkHandler(v func(tl *paint.TextLink)) *Editor { t.LinkHandler = v; return t }
 
-// SetTooltip sets the [Editor.Tooltip]
-func (t *Editor) SetTooltip(v string) *Editor { t.Tooltip = v; return t }
-
 // TwinEditorsType is the [types.Type] for [TwinEditors]
-var TwinEditorsType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor.TwinEditors", IDName: "twin-editors", Doc: "TwinEditors presents two side-by-side [Editor]s in [core.Splits]\nthat scroll in sync with each other.", Embeds: []types.Field{{Name: "Splits"}}, Fields: []types.Field{{Name: "BufA", Doc: "textbuf for A"}, {Name: "BufB", Doc: "textbuf for B"}}, Instance: &TwinEditors{}})
+var TwinEditorsType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor.TwinEditors", IDName: "twin-editors", Doc: "TwinEditors presents two side-by-side [Editor]s in [core.Splits]\nthat scroll in sync with each other.", Embeds: []types.Field{{Name: "Splits"}}, Fields: []types.Field{{Name: "BufferA", Doc: "[Buffer] for A"}, {Name: "BufferB", Doc: "[Buffer] for B"}, {Name: "inInputEvent"}}, Instance: &TwinEditors{}})
 
-// NewTwinEditors adds a new [TwinEditors] with the given name to the given parent:
+// NewTwinEditors returns a new [TwinEditors] with the given optional parent:
 // TwinEditors presents two side-by-side [Editor]s in [core.Splits]
 // that scroll in sync with each other.
-func NewTwinEditors(parent tree.Node, name ...string) *TwinEditors {
-	return parent.NewChild(TwinEditorsType, name...).(*TwinEditors)
-}
+func NewTwinEditors(parent ...tree.Node) *TwinEditors { return tree.New[*TwinEditors](parent...) }
 
 // NodeType returns the [*types.Type] of [TwinEditors]
 func (t *TwinEditors) NodeType() *types.Type { return TwinEditorsType }
@@ -207,13 +169,10 @@ func (t *TwinEditors) NodeType() *types.Type { return TwinEditorsType }
 // New returns a new [*TwinEditors] value
 func (t *TwinEditors) New() tree.Node { return &TwinEditors{} }
 
-// SetBufA sets the [TwinEditors.BufA]:
-// textbuf for A
-func (t *TwinEditors) SetBufA(v *Buffer) *TwinEditors { t.BufferA = v; return t }
+// SetBufferA sets the [TwinEditors.BufferA]:
+// [Buffer] for A
+func (t *TwinEditors) SetBufferA(v *Buffer) *TwinEditors { t.BufferA = v; return t }
 
-// SetBufB sets the [TwinEditors.BufB]:
-// textbuf for B
-func (t *TwinEditors) SetBufB(v *Buffer) *TwinEditors { t.BufferB = v; return t }
-
-// SetTooltip sets the [TwinEditors.Tooltip]
-func (t *TwinEditors) SetTooltip(v string) *TwinEditors { t.Tooltip = v; return t }
+// SetBufferB sets the [TwinEditors.BufferB]:
+// [Buffer] for B
+func (t *TwinEditors) SetBufferB(v *Buffer) *TwinEditors { t.BufferB = v; return t }

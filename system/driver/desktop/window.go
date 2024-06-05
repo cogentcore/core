@@ -121,18 +121,18 @@ func (w *Window) Screen() *system.Screen {
 	// that is super useless it seems. only works for fullscreen
 	if mon != nil {
 		if MonitorDebug {
-			log.Printf("MonitorDebug: vkos window: %v getScreen() -- got screen: %v\n", w.Nm, mon.GetName())
+			log.Printf("MonitorDebug: desktop.Window.Screen: %v: got screen: %v\n", w.Nm, mon.GetName())
 		}
 		sc = TheApp.ScreenByName(mon.GetName())
 		if sc == nil {
-			log.Printf("MonitorDebug: vkos getScreen: could not find screen of name: %v\n", mon.GetName())
+			log.Printf("MonitorDebug: desktop.Window.Screen: could not find screen of name: %v\n", mon.GetName())
 			sc = TheApp.Screens[0]
 		}
 		goto setScreen
 	}
 	sc = w.GetScreenOverlap()
 	// if monitorDebug {
-	// 	log.Printf("MonitorDebug: vkos window: %v getScreenOvlp() -- got screen: %v\n", w.Nm, sc.Name)
+	// 	log.Printf("MonitorDebug: desktop.Window.GetScreenOverlap: %v: got screen: %v\n", w.Nm, sc.Name)
 	// }
 setScreen:
 	w.ScreenWindow = sc.Name
@@ -382,7 +382,7 @@ func (w *Window) UpdateGeom() {
 	// }
 	if cursc != w.ScreenWindow {
 		if MonitorDebug {
-			log.Printf("vkos window: %v updtGeom() -- got new screen: %v (was: %v)\n", w.Nm, w.ScreenWindow, cursc)
+			log.Printf("desktop.Window.UpdateGeom: %v: got new screen: %v (was: %v)\n", w.Nm, w.ScreenWindow, cursc)
 		}
 	}
 	w.Event.WindowResize()

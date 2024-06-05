@@ -4,7 +4,7 @@
 
 package tree
 
-// Named constants for bool args
+// Named constants for bool arguments:
 const (
 	// Continue = true can be returned from tree iteration functions to continue
 	// processing down the tree, as compared to Break = false which stops this branch.

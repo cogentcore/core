@@ -21,6 +21,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
+	"cogentcore.org/core/base/num"
 	"cogentcore.org/core/base/sshclient"
 	"cogentcore.org/core/base/stack"
 	"github.com/mitchellh/go-homedir"
@@ -47,16 +48,16 @@ type Shell struct {
 	// SSHActive is the name of the active SSH client
 	SSHActive string
 
-	// depth of parens at the end of the current line. if 0, was complete.
-	ParenDepth int
+	// depth of delim at the end of the current line. if 0, was complete.
+	ParenDepth, BraceDepth, BrackDepth, TypeDepth, DeclDepth int
 
-	// depth of braces at the end of the current line. if 0, was complete.
-	BraceDepth int
+	// Chunks of code lines that are accumulated during Transpile,
+	// each of which should be evaluated separately, to avoid
+	// issues with contextual effects from import, package etc.
+	Chunks []string
 
-	// depth of brackets at the end of the current line. if 0, was complete.
-	BrackDepth int
-
-	// stack of transpiled lines, that are accumulated in TranspileCode
+	// current stack of transpiled lines, that are accumulated into
+	// code Chunks
 	Lines []string
 
 	// stack of runtime errors
@@ -84,6 +85,14 @@ type Shell struct {
 	// in the StartContext function. Clear when done with ClearContext.
 	Ctx context.Context
 
+	// original standard IO setings, to restore
+	OrigStdIO exec.StdIO
+
+	// Hist is the accumulated list of command-line input,
+	// which is displayed with the history builtin command,
+	// and saved / restored from ~/.coshhist file
+	Hist []string
+
 	// commandArgs is a stack of args passed to a command, used for simplified
 	// processing of args expressions.
 	commandArgs stack.Stack[[]string]
@@ -95,6 +104,12 @@ type Shell struct {
 	// if this is non-empty, it is the name of the last command defined.
 	// triggers insertion of the AddCommand call to add to list of defined commands.
 	lastCommand string
+
+	// script files in current working directory: have .cosh suffix
+	cwdScriptFiles []string
+
+	// Dir directory for cwdScriptFiles
+	cwdScriptFilesDir string
 }
 
 // NewShell returns a new [Shell] with default options.
@@ -127,6 +142,20 @@ func (sh *Shell) StartContext() context.Context {
 func (sh *Shell) EndContext() {
 	sh.Ctx = nil
 	sh.Cancel = nil
+}
+
+// SaveOrigStdIO saves the current Config.StdIO as the original to revert to
+// after an error, and sets the StdIOWrappers to use them.
+func (sh *Shell) SaveOrigStdIO() {
+	sh.OrigStdIO = sh.Config.StdIO
+	sh.StdIOWrappers.NewWrappers(&sh.OrigStdIO)
+}
+
+// RestoreOrigStdIO reverts to using the saved OrigStdIO
+func (sh *Shell) RestoreOrigStdIO() {
+	sh.Config.StdIO = sh.OrigStdIO
+	sh.OrigStdIO.SetToOS()
+	sh.StdIOWrappers.SetWrappers(&sh.OrigStdIO)
 }
 
 // Close closes any resources associated with the shell,
@@ -195,12 +224,41 @@ func (sh *Shell) SSHByHost(host string) (*sshclient.Client, error) {
 
 // TotalDepth returns the sum of any unresolved paren, brace, or bracket depths.
 func (sh *Shell) TotalDepth() int {
-	return sh.ParenDepth + sh.BraceDepth + sh.BrackDepth
+	return num.Abs(sh.ParenDepth) + num.Abs(sh.BraceDepth) + num.Abs(sh.BrackDepth)
 }
 
-// ResetLines resets the stack of transpiled lines
-func (sh *Shell) ResetLines() {
+// ResetCode resets the stack of transpiled code
+func (sh *Shell) ResetCode() {
+	sh.Chunks = nil
 	sh.Lines = nil
+}
+
+// ResetDepth resets the current depths to 0
+func (sh *Shell) ResetDepth() {
+	sh.ParenDepth, sh.BraceDepth, sh.BrackDepth, sh.TypeDepth, sh.DeclDepth = 0, 0, 0, 0, 0
+}
+
+// DepthError reports an error if any of the parsing depths are not zero,
+// to be called at the end of transpiling a complete block of code.
+func (sh *Shell) DepthError() error {
+	if sh.TotalDepth() == 0 {
+		return nil
+	}
+	str := ""
+	if sh.ParenDepth != 0 {
+		str += fmt.Sprintf("Incomplete parentheses (), remaining depth: %d\n", sh.ParenDepth)
+	}
+	if sh.BraceDepth != 0 {
+		str += fmt.Sprintf("Incomplete braces [], remaining depth: %d\n", sh.BraceDepth)
+	}
+	if sh.BrackDepth != 0 {
+		str += fmt.Sprintf("Incomplete brackets {}, remaining depth: %d\n", sh.BrackDepth)
+	}
+	if str != "" {
+		slog.Error(str)
+		return errors.New(str)
+	}
+	return nil
 }
 
 // AddLine adds line on the stack
@@ -208,19 +266,36 @@ func (sh *Shell) AddLine(ln string) {
 	sh.Lines = append(sh.Lines, ln)
 }
 
-// Code returns the current transpiled lines
+// Code returns the current transpiled lines,
+// split into chunks that should be compiled separately.
 func (sh *Shell) Code() string {
-	if len(sh.Lines) == 0 {
+	sh.AddChunk()
+	if len(sh.Chunks) == 0 {
 		return ""
 	}
-	return strings.Join(sh.Lines, "\n")
+	return strings.Join(sh.Chunks, "\n")
+}
+
+// AddChunk adds current lines into a chunk of code
+// that should be compiled separately.
+func (sh *Shell) AddChunk() {
+	if len(sh.Lines) == 0 {
+		return
+	}
+	sh.Chunks = append(sh.Chunks, strings.Join(sh.Lines, "\n"))
+	sh.Lines = nil
 }
 
 // TranspileCode processes each line of given code,
 // adding the results to the LineStack
 func (sh *Shell) TranspileCode(code string) {
 	lns := strings.Split(code, "\n")
+	n := len(lns)
+	if n == 0 {
+		return
+	}
 	for _, ln := range lns {
+		hasDecl := sh.DeclDepth > 0
 		tl := sh.TranspileLine(ln)
 		sh.AddLine(tl)
 		if sh.BraceDepth == 0 && sh.BrackDepth == 0 && sh.ParenDepth == 1 && sh.lastCommand != "" {
@@ -229,27 +304,42 @@ func (sh *Shell) TranspileCode(code string) {
 			sh.Lines[nl-1] = sh.Lines[nl-1] + ")"
 			sh.ParenDepth--
 		}
+		if hasDecl && sh.DeclDepth == 0 { // break at decl
+			sh.AddChunk()
+		}
 	}
+}
+
+// TranspileCodeFromFile transpiles the code in given file
+func (sh *Shell) TranspileCodeFromFile(file string) error {
+	b, err := os.ReadFile(file)
+	if err != nil {
+		return err
+	}
+	sh.TranspileCode(string(b))
+	return nil
 }
 
 // TranspileFile transpiles the given input cosh file to the given output Go file,
 // adding package main and func main declarations.
 func (sh *Shell) TranspileFile(in string, out string) error {
-	b, err := os.ReadFile(in)
+	err := sh.TranspileCodeFromFile(in)
 	if err != nil {
 		return err
 	}
-	sh.TranspileCode(string(b))
 	sh.Lines = slices.Insert(sh.Lines, 0, "package main", "", "func main() {", "shell := shell.NewShell()")
 	sh.Lines = append(sh.Lines, "}")
 	src := []byte(sh.Code())
-	fmt.Println(string(src))
+	// fmt.Println(string(src))
 	res, err := imports.Process(out, src, nil)
 	if err != nil {
 		res = src
 		slog.Error(err.Error())
+	} else {
+		err = sh.DepthError()
 	}
-	return os.WriteFile(out, res, 0666)
+	werr := os.WriteFile(out, res, 0666)
+	return errors.Join(err, werr)
 }
 
 // AddError adds the given error to the error stack if it is non-nil,
@@ -281,6 +371,47 @@ func (sh *Shell) TranspileConfig() error {
 		return err
 	}
 	sh.TranspileCode(string(b))
+	return nil
+}
+
+// AddHistory adds given line to the Hist record of commands
+func (sh *Shell) AddHistory(line string) {
+	sh.Hist = append(sh.Hist, line)
+}
+
+// SaveHistory saves up to the given number of lines of current history
+// to given file, e.g., ~/.coshhist for the default cosh program.
+// If n is <= 0 all lines are saved.  n is typically 500 by default.
+func (sh *Shell) SaveHistory(n int, file string) error {
+	path, err := homedir.Expand(file)
+	if err != nil {
+		return err
+	}
+	hn := len(sh.Hist)
+	sn := hn
+	if n > 0 {
+		sn = min(n, hn)
+	}
+	lh := strings.Join(sh.Hist[hn-sn:hn], "\n")
+	err = os.WriteFile(path, []byte(lh), 0666)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// OpenHistory opens Hist history lines from given file,
+// e.g., ~/.coshhist
+func (sh *Shell) OpenHistory(file string) error {
+	path, err := homedir.Expand(file)
+	if err != nil {
+		return err
+	}
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	sh.Hist = strings.Split(string(b), "\n")
 	return nil
 }
 

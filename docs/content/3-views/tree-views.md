@@ -6,28 +6,28 @@ You can make a tree view and add tree view child nodes directly to it:
 
 ```Go
 tv := views.NewTreeView(parent).SetText("Root")
-views.NewTreeView(tv, "Child 1")
-c2 := views.NewTreeView(tv, "Child 2")
-views.NewTreeView(c2, "Nested child")
+views.NewTreeView(tv)
+c2 := views.NewTreeView(tv)
+views.NewTreeView(c2)
 ```
 
 You can make a tree view represent another [[tree.Node]] tree:
 
 ```Go
-n := tree.NewRoot[*tree.NodeBase]("Root")
-tree.New[*tree.NodeBase](n, "Child 1")
-c2 := tree.New[*tree.NodeBase](n, "Child 2")
-tree.New[*tree.NodeBase](c2, "Nested child")
+n := tree.NewNodeBase()
+tree.NewNodeBase(n)
+c2 := tree.NewNodeBase(n)
+tree.NewNodeBase(c2)
 views.NewTreeView(parent).SyncTree(n)
 ```
 
 You can detect when the user changes the value of the tree value:
 
 ```Go
-n := tree.NewRoot[*tree.NodeBase]("Root")
-tree.New[*tree.NodeBase](n, "Child 1")
-c2 := tree.New[*tree.NodeBase](n, "Child 2")
-tree.New[*tree.NodeBase](c2, "Nested child")
+n := tree.NewNodeBase()
+tree.NewNodeBase(n)
+c2 := tree.NewNodeBase(n)
+tree.NewNodeBase(c2)
 views.NewTreeView(parent).SyncTree(n).OnChange(func(e events.Event) {
     core.MessageSnackbar(parent, "Tree view changed")
 })
@@ -36,19 +36,19 @@ views.NewTreeView(parent).SyncTree(n).OnChange(func(e events.Event) {
 You can prevent the user from changing the tree:
 
 ```Go
-n := tree.NewRoot[*tree.NodeBase]("Root")
-tree.New[*tree.NodeBase](n, "Child 1")
-c2 := tree.New[*tree.NodeBase](n, "Child 2")
-tree.New[*tree.NodeBase](c2, "Nested child")
+n := tree.NewNodeBase()
+tree.NewNodeBase(n)
+c2 := tree.NewNodeBase(n)
+tree.NewNodeBase(c2)
 views.NewTreeView(parent).SyncTree(n).SetReadOnly(true)
 ```
 
 When you use [[views.NewValue]] with a [[tree.Node]] tree node value, it will create a button that opens an interactive inspector of that node:
 
 ```Go
-n := tree.NewRoot[*tree.NodeBase]("Root")
-tree.New[*tree.NodeBase](n, "Child 1")
-c2 := tree.New[*tree.NodeBase](n, "Child 2")
-tree.New[*tree.NodeBase](c2, "Nested child")
-views.NewValue(parent, n)
+n := tree.NewNodeBase()
+tree.NewNodeBase(n)
+c2 := tree.NewNodeBase(n)
+tree.NewNodeBase(c2)
+// views.NewValue(parent, n)
 ```

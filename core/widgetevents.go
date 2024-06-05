@@ -67,62 +67,56 @@ func (wb *WidgetBase) OnFinal(etype events.Types, fun func(e events.Event)) Widg
 	return wb.This().(Widget)
 }
 
-// Helper functions for common event types
+// Helper functions for common event types:
 
-// OnClick adds an event listener function for [events.Click] events
+// OnClick adds an event listener function for [events.Click] events.
 func (wb *WidgetBase) OnClick(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.Click, fun)
 }
 
-// OnDoubleClick adds an event listener function for [events.DoubleClick] events
+// OnDoubleClick adds an event listener function for [events.DoubleClick] events.
 func (wb *WidgetBase) OnDoubleClick(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.DoubleClick, fun)
 }
 
-// OnChange adds an event listener function for [events.Change] events
+// OnChange adds an event listener function for [events.Change] events.
 func (wb *WidgetBase) OnChange(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.Change, fun)
 }
 
-// OnInput adds an event listener function for [events.Input] events
+// OnInput adds an event listener function for [events.Input] events.
 func (wb *WidgetBase) OnInput(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.Input, fun)
 }
 
-// OnKeyChord adds an event listener function for [events.KeyChord] events
+// OnKeyChord adds an event listener function for [events.KeyChord] events.
 func (wb *WidgetBase) OnKeyChord(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.KeyChord, fun)
 }
 
-// OnFocus adds an event listener function for [events.Focus] events
+// OnFocus adds an event listener function for [events.Focus] events.
 func (wb *WidgetBase) OnFocus(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.Focus, fun)
 }
 
-// OnFocusLost adds an event listener function for [events.FocusLost] events
+// OnFocusLost adds an event listener function for [events.FocusLost] events.
 func (wb *WidgetBase) OnFocusLost(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.FocusLost, fun)
 }
 
-// OnSelect adds an event listener function for [events.Select] events
+// OnSelect adds an event listener function for [events.Select] events.
 func (wb *WidgetBase) OnSelect(fun func(e events.Event)) *WidgetBase {
 	return wb.On(events.Select, fun)
 }
 
-// OnShow adds an event listener function for [events.Show] events on
-// the widget's Scene. Directly listening to Show events for non-scene
-// widgets does not work, so it must go through the Scene.
-// This must typically be called in OnAdd() or later, and
-// definitely NOT in OnInit, because only then will the Scene be set.
+// OnShow adds an event listener function for [events.Show] events.
 func (wb *WidgetBase) OnShow(fun func(e events.Event)) *WidgetBase {
-	return wb.Scene.On(events.Show, fun)
+	return wb.On(events.Show, fun)
 }
 
-// OnClose adds an event listener function for [events.Close] events on
-// the widget's Scene. Directly listening to Close events for non-scene
-// widgets does not work, so it must go through the Scene.
+// OnClose adds an event listener function for [events.Close] events.
 func (wb *WidgetBase) OnClose(fun func(e events.Event)) *WidgetBase {
-	return wb.Scene.On(events.Close, fun)
+	return wb.On(events.Close, fun)
 }
 
 // AddCloseDialog adds a dialog that confirms that the user wants to close the Scene
@@ -172,13 +166,13 @@ func (wb *WidgetBase) AddCloseDialog(config func(d *Body) bool) *WidgetBase {
 // Do NOT send an existing event using this method if you
 // want the Handled state to persist throughout the call chain;
 // call HandleEvent directly for any existing events.
-func (wb *WidgetBase) Send(typ events.Types, orig ...events.Event) {
+func (wb *WidgetBase) Send(typ events.Types, original ...events.Event) {
 	if wb.This() == nil {
 		return
 	}
 	var e events.Event
-	if len(orig) > 0 && orig[0] != nil {
-		e = orig[0].NewFromClone(typ)
+	if len(original) > 0 && original[0] != nil {
+		e = original[0].NewFromClone(typ)
 	} else {
 		e = &events.Base{Typ: typ}
 		e.Init()
@@ -193,31 +187,31 @@ func (wb *WidgetBase) Send(typ events.Types, orig ...events.Event) {
 // SendChange sends the [events.Change] event, which is widely used to signal
 // updating for most widgets. It takes the event that the new change event
 // is derived from, if any.
-func (wb *WidgetBase) SendChange(orig ...events.Event) {
-	wb.Send(events.Change, orig...)
+func (wb *WidgetBase) SendChange(original ...events.Event) {
+	wb.Send(events.Change, original...)
 }
 
-func (wb *WidgetBase) SendKey(kf keymap.Functions, orig ...events.Event) {
+func (wb *WidgetBase) SendKey(kf keymap.Functions, original ...events.Event) {
 	if wb.This() == nil {
 		return
 	}
 	kc := kf.Chord()
-	wb.SendKeyChord(kc, orig...)
+	wb.SendKeyChord(kc, original...)
 }
 
-func (wb *WidgetBase) SendKeyChord(kc key.Chord, orig ...events.Event) {
+func (wb *WidgetBase) SendKeyChord(kc key.Chord, original ...events.Event) {
 	r, code, mods, err := kc.Decode()
 	if err != nil {
 		fmt.Println("SendKeyChord: Decode error:", err)
 		return
 	}
-	wb.SendKeyChordRune(r, code, mods, orig...)
+	wb.SendKeyChordRune(r, code, mods, original...)
 }
 
-func (wb *WidgetBase) SendKeyChordRune(r rune, code key.Codes, mods key.Modifiers, orig ...events.Event) {
+func (wb *WidgetBase) SendKeyChordRune(r rune, code key.Codes, mods key.Modifiers, original ...events.Event) {
 	ke := events.NewKey(events.KeyChord, r, code, mods)
-	if len(orig) > 0 && orig[0] != nil {
-		kb := *orig[0].AsBase()
+	if len(original) > 0 && original[0] != nil {
+		kb := *original[0].AsBase()
 		ke.GenTime = kb.GenTime
 		ke.ClearHandled()
 	} else {
@@ -283,16 +277,6 @@ func (wb *WidgetBase) FinalHandleEvent(e events.Event) {
 	wb.FinalListeners.Call(e, func() bool {
 		return wb.This() != nil
 	})
-}
-
-// HandleEvents sets the default WidgetBase event handlers
-func (wb *WidgetBase) HandleEvents() {
-	wb.HandleWidgetClick()
-	wb.HandleWidgetStateFromMouse()
-	wb.HandleLongHoverTooltip()
-	wb.HandleWidgetStateFromFocus()
-	wb.HandleWidgetContextMenu()
-	wb.HandleWidgetMagnify()
 }
 
 // PosInScBBox returns true if given position is within
@@ -471,6 +455,16 @@ func (wb *WidgetBase) HandleWidgetMagnify() {
 	})
 }
 
+// HandleValueOnChange adds a handler that calls [WidgetBase.ValueOnChange].
+func (wb *WidgetBase) HandleValueOnChange() {
+	// need to go before end-user OnChange handlers
+	wb.OnFirst(events.Change, func(e events.Event) {
+		if wb.ValueOnChange != nil {
+			wb.ValueOnChange()
+		}
+	})
+}
+
 // HandleClickOnEnterSpace adds key event handler for Enter or Space
 // to generate a Click action.  This is not added by default,
 // but is added in Button and Switch Widgets for example.
@@ -533,7 +527,7 @@ func (wb *WidgetBase) SetFocusEvent() {
 // FocusableInMe returns the first Focusable element within this widget
 func (wb *WidgetBase) FocusableInMe() Widget {
 	var foc Widget
-	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		if !wb.AbilityIs(abilities.Focusable) {
 			return tree.Continue
 		}

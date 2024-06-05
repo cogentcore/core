@@ -29,10 +29,6 @@ type Type struct {
 	// The embeds of the struct type; nil if not a struct
 	Embeds Fields
 
-	// The fields contained within the embeds of the struct type;
-	// nil if not a struct, and used for generating setters only
-	EmbeddedFields Fields
-
 	// Configuration information set in the comment directive for the type;
 	// is initialized to generator config info first
 	Config *Config

@@ -17,12 +17,10 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Camera", IDName
 // GroupType is the [types.Type] for [Group]
 var GroupType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Group", IDName: "group", Doc: "Group collects individual elements in a scene but does not have a Mesh or Material of\nits own.  It does have a transform that applies to all nodes under it.", Embeds: []types.Field{{Name: "NodeBase"}}, Instance: &Group{}})
 
-// NewGroup adds a new [Group] with the given name to the given parent:
+// NewGroup returns a new [Group] with the given optional parent:
 // Group collects individual elements in a scene but does not have a Mesh or Material of
 // its own.  It does have a transform that applies to all nodes under it.
-func NewGroup(parent tree.Node, name ...string) *Group {
-	return parent.NewChild(GroupType, name...).(*Group)
-}
+func NewGroup(parent ...tree.Node) *Group { return tree.New[*Group](parent...) }
 
 // NodeType returns the [*types.Type] of [Group]
 func (t *Group) NodeType() *types.Type { return GroupType }
@@ -109,15 +107,13 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.GenMesh", IDNam
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Node", IDName: "node", Doc: "Node is the common interface for all xyz scenegraph nodes"})
 
 // NodeBaseType is the [types.Type] for [NodeBase]
-var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.NodeBase", IDName: "node-base", Doc: "NodeBase is the basic 3D scenegraph node, which has the full transform information\nrelative to parent, and computed bounding boxes, etc.\nThere are only two different kinds of Nodes: Group and Solid", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pose", Doc: "complete specification of position and orientation"}, {Name: "Sc", Doc: "Sc is the cached Scene"}, {Name: "PoseMu", Doc: "mutex on pose access -- needed for parallel updating"}, {Name: "MeshBBox", Doc: "mesh-based local bounding box (aggregated for groups)"}, {Name: "WorldBBox", Doc: "world coordinates bounding box"}, {Name: "NDCBBox", Doc: "normalized display coordinates bounding box, used for frustrum clipping"}, {Name: "BBox", Doc: "raw original bounding box for the widget within its parent Scene.\nThis is prior to intersecting with Frame bounds."}, {Name: "ScBBox", Doc: "2D bounding box for region occupied within Scene Frame that we render onto.\nThis is BBox intersected with Frame bounds."}}, Instance: &NodeBase{}})
+var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.NodeBase", IDName: "node-base", Doc: "NodeBase is the basic 3D scenegraph node, which has the full transform information\nrelative to parent, and computed bounding boxes, etc.\nThere are only two different kinds of Nodes: Group and Solid", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pose", Doc: "complete specification of position and orientation"}, {Name: "Scene", Doc: "Scene is the cached Scene"}, {Name: "PoseMu", Doc: "mutex on pose access -- needed for parallel updating"}, {Name: "MeshBBox", Doc: "mesh-based local bounding box (aggregated for groups)"}, {Name: "WorldBBox", Doc: "world coordinates bounding box"}, {Name: "NDCBBox", Doc: "normalized display coordinates bounding box, used for frustrum clipping"}, {Name: "BBox", Doc: "raw original bounding box for the widget within its parent Scene.\nThis is prior to intersecting with Frame bounds."}, {Name: "SceneBBox", Doc: "2D bounding box for region occupied within Scene Frame that we render onto.\nThis is BBox intersected with Frame bounds."}}, Instance: &NodeBase{}})
 
-// NewNodeBase adds a new [NodeBase] with the given name to the given parent:
+// NewNodeBase returns a new [NodeBase] with the given optional parent:
 // NodeBase is the basic 3D scenegraph node, which has the full transform information
 // relative to parent, and computed bounding boxes, etc.
 // There are only two different kinds of Nodes: Group and Solid
-func NewNodeBase(parent tree.Node, name ...string) *NodeBase {
-	return parent.NewChild(NodeBaseType, name...).(*NodeBase)
-}
+func NewNodeBase(parent ...tree.Node) *NodeBase { return tree.New[*NodeBase](parent...) }
 
 // NodeType returns the [*types.Type] of [NodeBase]
 func (t *NodeBase) NodeType() *types.Type { return NodeBaseType }
@@ -132,7 +128,25 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Pose", IDName: 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.RenderClasses", IDName: "render-classes", Doc: "RenderClasses define the different classes of rendering"})
 
 // SceneType is the [types.Type] for [Scene]
-var SceneType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Scene", IDName: "scene", Doc: "Scene is the overall scenegraph containing nodes as children.\nIt renders to its own vgpu.RenderFrame.\nThe Image of this Frame is usable directly or, via xyzview.Scene,\nwhere it is copied into an overall core.Scene image.\n\nThere is default navigation event processing (disabled by setting NoNav)\nwhere mouse drag events Orbit the camera (Shift = Pan, Alt = PanTarget)\nand arrow keys do Orbit, Pan, PanTarget with same key modifiers.\nSpacebar restores original \"default\" camera, and numbers save (1st time)\nor restore (subsequently) camera views (Control = always save)\n\nA Group at the top-level named \"TrackCamera\" will automatically track\nthe camera (i.e., its Pose is copied) -- Solids in that group can\nset their relative Pos etc to display relative to the camera, to achieve\n\"first person\" effects.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Geom", Doc: "Viewport-level viewbox within any parent Viewport2D"}, {Name: "MultiSample", Doc: "number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame"}, {Name: "Wireframe", Doc: "render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)"}, {Name: "Camera", Doc: "camera determines view onto scene"}, {Name: "BackgroundColor", Doc: "background color, which is used directly as an RGB color in vulkan"}, {Name: "Lights", Doc: "all lights used in the scene"}, {Name: "Meshes", Doc: "meshes -- holds all the mesh data -- must be configured prior to rendering"}, {Name: "Textures", Doc: "textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability"}, {Name: "Library", Doc: "library of objects that can be used in the scene"}, {Name: "NoNav", Doc: "don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"}, {Name: "SavedCams", Doc: "saved cameras -- can Save and Set these to view the scene from different angles"}, {Name: "SetDragCursor", Doc: "has dragging cursor been set yet?"}, {Name: "Phong", Doc: "the vphong rendering system"}, {Name: "Frame", Doc: "the vgpu render frame holding the rendered scene"}, {Name: "ImgCopy", Doc: "image used to hold a copy of the Frame image, for ImageCopy() call.\nThis is re-used across calls to avoid large memory allocations,\nso it will automatically update after every ImageCopy call.\nIf a persistent image is required, call [iox/imagex.CloneAsRGBA]."}, {Name: "DirUpIndex", Doc: "index in list of window direct uploading images"}, {Name: "RenderMu", Doc: "mutex on rendering"}}, Instance: &Scene{}})
+var SceneType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Scene", IDName: "scene", Doc: "Scene is the overall scenegraph containing nodes as children.\nIt renders to its own vgpu.RenderFrame.\nThe Image of this Frame is usable directly or, via xyzview.Scene,\nwhere it is copied into an overall core.Scene image.\n\nThere is default navigation event processing (disabled by setting NoNav)\nwhere mouse drag events Orbit the camera (Shift = Pan, Alt = PanTarget)\nand arrow keys do Orbit, Pan, PanTarget with same key modifiers.\nSpacebar restores original \"default\" camera, and numbers save (1st time)\nor restore (subsequently) camera views (Control = always save)\n\nA Group at the top-level named \"TrackCamera\" will automatically track\nthe camera (i.e., its Pose is copied) -- Solids in that group can\nset their relative Pos etc to display relative to the camera, to achieve\n\"first person\" effects.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Geom", Doc: "Viewport-level viewbox within any parent Viewport2D"}, {Name: "MultiSample", Doc: "number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame"}, {Name: "Wireframe", Doc: "render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)"}, {Name: "Camera", Doc: "camera determines view onto scene"}, {Name: "BackgroundColor", Doc: "background color, which is used directly as an RGB color in vulkan"}, {Name: "Lights", Doc: "all lights used in the scene"}, {Name: "Meshes", Doc: "meshes -- holds all the mesh data -- must be configured prior to rendering"}, {Name: "Textures", Doc: "textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability"}, {Name: "Library", Doc: "library of objects that can be used in the scene"}, {Name: "NoNav", Doc: "don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"}, {Name: "SavedCams", Doc: "saved cameras -- can Save and Set these to view the scene from different angles"}, {Name: "SetDragCursor", Doc: "has dragging cursor been set yet?"}, {Name: "Phong", Doc: "the vphong rendering system"}, {Name: "Frame", Doc: "the vgpu render frame holding the rendered scene"}, {Name: "ImgCopy", Doc: "image used to hold a copy of the Frame image, for ImageCopy() call.\nThis is re-used across calls to avoid large memory allocations,\nso it will automatically update after every ImageCopy call.\nIf a persistent image is required, call [iox/imagex.CloneAsRGBA]."}, {Name: "DirUpIndex", Doc: "index in list of window direct uploading images"}, {Name: "RenderMu", Doc: "mutex on rendering"}}, Instance: &Scene{}})
+
+// NewScene returns a new [Scene] with the given optional parent:
+// Scene is the overall scenegraph containing nodes as children.
+// It renders to its own vgpu.RenderFrame.
+// The Image of this Frame is usable directly or, via xyzview.Scene,
+// where it is copied into an overall core.Scene image.
+//
+// There is default navigation event processing (disabled by setting NoNav)
+// where mouse drag events Orbit the camera (Shift = Pan, Alt = PanTarget)
+// and arrow keys do Orbit, Pan, PanTarget with same key modifiers.
+// Spacebar restores original "default" camera, and numbers save (1st time)
+// or restore (subsequently) camera views (Control = always save)
+//
+// A Group at the top-level named "TrackCamera" will automatically track
+// the camera (i.e., its Pose is copied) -- Solids in that group can
+// set their relative Pos etc to display relative to the camera, to achieve
+// "first person" effects.
+func NewScene(parent ...tree.Node) *Scene { return tree.New[*Scene](parent...) }
 
 // NodeType returns the [*types.Type] of [Scene]
 func (t *Scene) NodeType() *types.Type { return SceneType }
@@ -180,15 +194,6 @@ func (t *Plane) SetSegs(v math32.Vector2i) *Plane { t.Segs = v; return t }
 // offset from origin along direction of normal to the plane
 func (t *Plane) SetOffset(v float32) *Plane { t.Offset = v; return t }
 
-// SetColor sets the [Plane.Color]
-func (t *Plane) SetColor(v bool) *Plane { t.Color = v; return t }
-
-// SetDynamic sets the [Plane.Dynamic]
-func (t *Plane) SetDynamic(v bool) *Plane { t.Dynamic = v; return t }
-
-// SetTrans sets the [Plane.Trans]
-func (t *Plane) SetTrans(v bool) *Plane { t.Trans = v; return t }
-
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Box", IDName: "box", Doc: "Box is a rectangular-shaped solid (cuboid)", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Size", Doc: "size along each dimension"}, {Name: "Segs", Doc: "number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"}}})
 
 // SetSize sets the [Box.Size]:
@@ -198,15 +203,6 @@ func (t *Box) SetSize(v math32.Vector3) *Box { t.Size = v; return t }
 // SetSegs sets the [Box.Segs]:
 // number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
 func (t *Box) SetSegs(v math32.Vector3i) *Box { t.Segs = v; return t }
-
-// SetColor sets the [Box.Color]
-func (t *Box) SetColor(v bool) *Box { t.Color = v; return t }
-
-// SetDynamic sets the [Box.Dynamic]
-func (t *Box) SetDynamic(v bool) *Box { t.Dynamic = v; return t }
-
-// SetTrans sets the [Box.Trans]
-func (t *Box) SetTrans(v bool) *Box { t.Trans = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Sphere", IDName: "sphere", Doc: "Sphere is a sphere mesh", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Radius", Doc: "radius of the sphere"}, {Name: "WidthSegs", Doc: "number of segments around the width of the sphere (32 is reasonable default for full circle)"}, {Name: "HeightSegs", Doc: "number of height segments (32 is reasonable default for full height)"}, {Name: "AngStart", Doc: "starting radial angle in degrees, relative to -1,0,0 left side starting point"}, {Name: "AngLen", Doc: "total radial angle to generate in degrees (max = 360)"}, {Name: "ElevStart", Doc: "starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom"}, {Name: "ElevLen", Doc: "total angle to generate in degrees (max = 180)"}}})
 
@@ -237,15 +233,6 @@ func (t *Sphere) SetElevStart(v float32) *Sphere { t.ElevStart = v; return t }
 // SetElevLen sets the [Sphere.ElevLen]:
 // total angle to generate in degrees (max = 180)
 func (t *Sphere) SetElevLen(v float32) *Sphere { t.ElevLen = v; return t }
-
-// SetColor sets the [Sphere.Color]
-func (t *Sphere) SetColor(v bool) *Sphere { t.Color = v; return t }
-
-// SetDynamic sets the [Sphere.Dynamic]
-func (t *Sphere) SetDynamic(v bool) *Sphere { t.Dynamic = v; return t }
-
-// SetTrans sets the [Sphere.Trans]
-func (t *Sphere) SetTrans(v bool) *Sphere { t.Trans = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Cylinder", IDName: "cylinder", Doc: "Cylinder is a generalized cylinder shape, including a cone\nor truncated cone by having different size circles at either end.\nHeight is up along the Y axis.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Height", Doc: "height of the cylinder"}, {Name: "TopRad", Doc: "radius of the top -- set to 0 for a cone"}, {Name: "BotRad", Doc: "radius of the bottom"}, {Name: "RadialSegs", Doc: "number of radial segments (32 is a reasonable default for full circle)"}, {Name: "HeightSegs", Doc: "number of height segments"}, {Name: "Top", Doc: "render the top disc"}, {Name: "Bottom", Doc: "render the bottom disc"}, {Name: "AngStart", Doc: "starting angle in degrees, relative to -1,0,0 left side starting point"}, {Name: "AngLen", Doc: "total angle to generate in degrees (max 360)"}}})
 
@@ -285,15 +272,6 @@ func (t *Cylinder) SetAngStart(v float32) *Cylinder { t.AngStart = v; return t }
 // total angle to generate in degrees (max 360)
 func (t *Cylinder) SetAngLen(v float32) *Cylinder { t.AngLen = v; return t }
 
-// SetColor sets the [Cylinder.Color]
-func (t *Cylinder) SetColor(v bool) *Cylinder { t.Color = v; return t }
-
-// SetDynamic sets the [Cylinder.Dynamic]
-func (t *Cylinder) SetDynamic(v bool) *Cylinder { t.Dynamic = v; return t }
-
-// SetTrans sets the [Cylinder.Trans]
-func (t *Cylinder) SetTrans(v bool) *Cylinder { t.Trans = v; return t }
-
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Capsule", IDName: "capsule", Doc: "Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.\nSupports different radii on each end.\nHeight is along the Y axis -- total height is Height + TopRad + BotRad.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Height", Doc: "height of the cylinder portion"}, {Name: "TopRad", Doc: "radius of the top -- set to 0 for a cone"}, {Name: "BotRad", Doc: "radius of the bottom"}, {Name: "RadialSegs", Doc: "number of radial segments (32 is a reasonable default for full circle)"}, {Name: "HeightSegs", Doc: "number of height segments"}, {Name: "CapSegs", Doc: "number of segments in the hemisphere cap ends (16 is a reasonable default)"}, {Name: "AngStart", Doc: "starting angle in degrees, relative to -1,0,0 left side starting point"}, {Name: "AngLen", Doc: "total angle to generate in degrees (max 360)"}}})
 
 // SetHeight sets the [Capsule.Height]:
@@ -328,15 +306,6 @@ func (t *Capsule) SetAngStart(v float32) *Capsule { t.AngStart = v; return t }
 // total angle to generate in degrees (max 360)
 func (t *Capsule) SetAngLen(v float32) *Capsule { t.AngLen = v; return t }
 
-// SetColor sets the [Capsule.Color]
-func (t *Capsule) SetColor(v bool) *Capsule { t.Color = v; return t }
-
-// SetDynamic sets the [Capsule.Dynamic]
-func (t *Capsule) SetDynamic(v bool) *Capsule { t.Dynamic = v; return t }
-
-// SetTrans sets the [Capsule.Trans]
-func (t *Capsule) SetTrans(v bool) *Capsule { t.Trans = v; return t }
-
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Torus", IDName: "torus", Doc: "Torus is a torus mesh, defined by the radius of the solid tube and the\nlarger radius of the ring.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Radius", Doc: "larger radius of the torus ring"}, {Name: "TubeRadius", Doc: "radius of the solid tube"}, {Name: "RadialSegs", Doc: "number of segments around the radius of the torus (32 is reasonable default for full circle)"}, {Name: "TubeSegs", Doc: "number of segments for the tube itself (32 is reasonable default for full height)"}, {Name: "AngStart", Doc: "starting radial angle in degrees relative to 1,0,0 starting point"}, {Name: "AngLen", Doc: "total radial angle to generate in degrees (max = 360)"}}})
 
 // SetRadius sets the [Torus.Radius]:
@@ -363,25 +332,14 @@ func (t *Torus) SetAngStart(v float32) *Torus { t.AngStart = v; return t }
 // total radial angle to generate in degrees (max = 360)
 func (t *Torus) SetAngLen(v float32) *Torus { t.AngLen = v; return t }
 
-// SetColor sets the [Torus.Color]
-func (t *Torus) SetColor(v bool) *Torus { t.Color = v; return t }
-
-// SetDynamic sets the [Torus.Dynamic]
-func (t *Torus) SetDynamic(v bool) *Torus { t.Dynamic = v; return t }
-
-// SetTrans sets the [Torus.Trans]
-func (t *Torus) SetTrans(v bool) *Torus { t.Trans = v; return t }
-
 // SolidType is the [types.Type] for [Solid]
 var SolidType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Solid", IDName: "solid", Doc: "Solid represents an individual 3D solid element.\nIt has its own unique spatial transforms and material properties,\nand points to a mesh structure defining the shape of the solid.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Mesh", Doc: "name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene"}, {Name: "Mat", Doc: "material properties of the surface (color, shininess, texture, etc)"}, {Name: "MeshPtr", Doc: "cached pointer to mesh"}}, Instance: &Solid{}})
 
-// NewSolid adds a new [Solid] with the given name to the given parent:
+// NewSolid returns a new [Solid] with the given optional parent:
 // Solid represents an individual 3D solid element.
 // It has its own unique spatial transforms and material properties,
 // and points to a mesh structure defining the shape of the solid.
-func NewSolid(parent tree.Node, name ...string) *Solid {
-	return parent.NewChild(SolidType, name...).(*Solid)
-}
+func NewSolid(parent ...tree.Node) *Solid { return tree.New[*Solid](parent...) }
 
 // NodeType returns the [*types.Type] of [Solid]
 func (t *Solid) NodeType() *types.Type { return SolidType }
@@ -396,7 +354,7 @@ func (t *Solid) SetMat(v Material) *Solid { t.Mat = v; return t }
 // Text2DType is the [types.Type] for [Text2D]
 var Text2DType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Text2D", IDName: "text2-d", Doc: "Text2D presents 2D rendered text on a vertically oriented plane, using a texture.\nCall SetText() which calls RenderText to update fortext changes (re-renders texture).\nThe native scale is such that a unit height value is the height of the default font\nset by the font-size property, and the X axis is scaled proportionally based on the\nrendered text size to maintain the aspect ratio.  Further scaling can be applied on\ntop of that by setting the Pose.Scale values as usual.\nStandard styling properties can be set on the node to set font size, family,\nand text alignment relative to the Pose.Pos position (e.g., Left, Top puts the\nupper-left corner of text at Pos).\nNote that higher quality is achieved by using a larger font size (36 default).\nThe margin property creates blank margin of the background color around the text\n(2 px default) and the background-color defaults to transparent\nbut can be set to any color.", Embeds: []types.Field{{Name: "Solid"}}, Fields: []types.Field{{Name: "Text", Doc: "the text string to display"}, {Name: "Styles", Doc: "styling settings for the text"}, {Name: "TextPos", Doc: "position offset of start of text rendering relative to upper-left corner"}, {Name: "TextRender", Doc: "render data for text label"}, {Name: "RenderState", Doc: "render state for rendering text"}}, Instance: &Text2D{}})
 
-// NewText2D adds a new [Text2D] with the given name to the given parent:
+// NewText2D returns a new [Text2D] with the given optional parent:
 // Text2D presents 2D rendered text on a vertically oriented plane, using a texture.
 // Call SetText() which calls RenderText to update fortext changes (re-renders texture).
 // The native scale is such that a unit height value is the height of the default font
@@ -410,9 +368,7 @@ var Text2DType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Text2D
 // The margin property creates blank margin of the background color around the text
 // (2 px default) and the background-color defaults to transparent
 // but can be set to any color.
-func NewText2D(parent tree.Node, name ...string) *Text2D {
-	return parent.NewChild(Text2DType, name...).(*Text2D)
-}
+func NewText2D(parent ...tree.Node) *Text2D { return tree.New[*Text2D](parent...) }
 
 // NodeType returns the [*types.Type] of [Text2D]
 func (t *Text2D) NodeType() *types.Type { return Text2DType }
@@ -423,9 +379,6 @@ func (t *Text2D) New() tree.Node { return &Text2D{} }
 // SetText sets the [Text2D.Text]:
 // the text string to display
 func (t *Text2D) SetText(v string) *Text2D { t.Text = v; return t }
-
-// SetMat sets the [Text2D.Mat]
-func (t *Text2D) SetMat(v Material) *Text2D { t.Mat = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TexName", IDName: "tex-name", Doc: "TexName provides a GUI interface for choosing textures"})
 

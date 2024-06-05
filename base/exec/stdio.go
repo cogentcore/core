@@ -62,7 +62,7 @@ func (st *StdIO) SetToOS() *StdIO {
 	return cur
 }
 
-// Print prints to the [StdIO.Out] Stdout
+// Print prints to the [StdIO.Out]
 func (st *StdIO) Print(v ...any) {
 	fmt.Fprint(st.Out, v...)
 }
@@ -72,9 +72,24 @@ func (st *StdIO) Println(v ...any) {
 	fmt.Fprintln(st.Out, v...)
 }
 
-// Printf prints to the [StdIO.Out] Stdout
+// Printf prints to the [StdIO.Out]
 func (st *StdIO) Printf(f string, v ...any) {
 	fmt.Fprintf(st.Out, f, v...)
+}
+
+// ErrPrint prints to the [StdIO.Err]
+func (st *StdIO) ErrPrint(v ...any) {
+	fmt.Fprint(st.Err, v...)
+}
+
+// ErrPrintln prints to the [StdIO.Err]
+func (st *StdIO) ErrPrintln(v ...any) {
+	fmt.Fprintln(st.Err, v...)
+}
+
+// ErrPrintf prints to the [StdIO.Err]
+func (st *StdIO) ErrPrintf(f string, v ...any) {
+	fmt.Fprintf(st.Err, f, v...)
 }
 
 // IsPipe returns true if the given object is an os.File corresponding to a Pipe,
@@ -288,6 +303,24 @@ func (st *StdIO) SetWrappers(o *StdIO) *StdIO {
 	st.Err.(*WriteWrapper).Writer = o.Err
 	st.In.(*ReadWrapper).Reader = o.In
 	return cur
+}
+
+// SetWrappedOut sets the wrapped Out to given writer.
+// The wrappers must have been created using NewWrappers initially.
+func (st *StdIO) SetWrappedOut(w io.Writer) {
+	st.Out.(*WriteWrapper).Writer = w
+}
+
+// SetWrappedErr sets the wrapped Err to given writer.
+// The wrappers must have been created using NewWrappers initially.
+func (st *StdIO) SetWrappedErr(w io.Writer) {
+	st.Err.(*WriteWrapper).Writer = w
+}
+
+// SetWrappedIn sets the wrapped In to given reader.
+// The wrappers must have been created using NewWrappers initially.
+func (st *StdIO) SetWrappedIn(r io.Reader) {
+	st.In.(*ReadWrapper).Reader = r
 }
 
 // GetWrapped returns the current wrapped values as a StdIO.

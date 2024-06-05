@@ -9,7 +9,7 @@ import (
 )
 
 // ManipPointType is the [types.Type] for [ManipPoint]
-var ManipPointType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzview.ManipPoint", IDName: "manip-point", Doc: "ManipPoint is a manipulation control point", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Solid"}}, Instance: &ManipPoint{}})
+var ManipPointType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzview.ManipPoint", IDName: "manip-point", Doc: "ManipPoint is a manipulation control point.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Solid"}}, Instance: &ManipPoint{}})
 
 // NodeType returns the [*types.Type] of [ManipPoint]
 func (t *ManipPoint) NodeType() *types.Type { return ManipPointType }
@@ -17,19 +17,14 @@ func (t *ManipPoint) NodeType() *types.Type { return ManipPointType }
 // New returns a new [*ManipPoint] value
 func (t *ManipPoint) New() tree.Node { return &ManipPoint{} }
 
-// SetMat sets the [ManipPoint.Mat]
-func (t *ManipPoint) SetMat(v xyz.Material) *ManipPoint { t.Mat = v; return t }
-
 // SceneType is the [types.Type] for [Scene]
 var SceneType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzview.Scene", IDName: "scene", Doc: "Scene is a core.Widget that manages a xyz.Scene,\nproviding the basic rendering logic for the 3D scene\nin the 2D core GUI context.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "XYZ", Doc: "XYZ is the 3D xyz.Scene"}, {Name: "SelectionMode", Doc: "how to deal with selection / manipulation events"}, {Name: "CurrentSelected", Doc: "currently selected node"}, {Name: "CurrentManipPoint", Doc: "currently selected manipulation control point"}, {Name: "SelectionParams", Doc: "parameters for selection / manipulation box"}}, Instance: &Scene{}})
 
-// NewScene adds a new [Scene] with the given name to the given parent:
+// NewScene returns a new [Scene] with the given optional parent:
 // Scene is a core.Widget that manages a xyz.Scene,
 // providing the basic rendering logic for the 3D scene
 // in the 2D core GUI context.
-func NewScene(parent tree.Node, name ...string) *Scene {
-	return parent.NewChild(SceneType, name...).(*Scene)
-}
+func NewScene(parent ...tree.Node) *Scene { return tree.New[*Scene](parent...) }
 
 // NodeType returns the [*types.Type] of [Scene]
 func (t *Scene) NodeType() *types.Type { return SceneType }
@@ -53,18 +48,13 @@ func (t *Scene) SetCurrentManipPoint(v *ManipPoint) *Scene { t.CurrentManipPoint
 // parameters for selection / manipulation box
 func (t *Scene) SetSelectionParams(v SelectionParams) *Scene { t.SelectionParams = v; return t }
 
-// SetTooltip sets the [Scene.Tooltip]
-func (t *Scene) SetTooltip(v string) *Scene { t.Tooltip = v; return t }
-
 // SceneViewType is the [types.Type] for [SceneView]
-var SceneViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzview.SceneView", IDName: "scene-view", Doc: "SceneView provides a toolbar controller for an xyz.Scene,\nand manipulation abilities.", Embeds: []types.Field{{Name: "Layout"}}, Instance: &SceneView{}})
+var SceneViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzview.SceneView", IDName: "scene-view", Doc: "SceneView provides a toolbar controller for an [xyz.Scene],\nand manipulation abilities.", Embeds: []types.Field{{Name: "Frame"}}, Instance: &SceneView{}})
 
-// NewSceneView adds a new [SceneView] with the given name to the given parent:
-// SceneView provides a toolbar controller for an xyz.Scene,
+// NewSceneView returns a new [SceneView] with the given optional parent:
+// SceneView provides a toolbar controller for an [xyz.Scene],
 // and manipulation abilities.
-func NewSceneView(parent tree.Node, name ...string) *SceneView {
-	return parent.NewChild(SceneViewType, name...).(*SceneView)
-}
+func NewSceneView(parent ...tree.Node) *SceneView { return tree.New[*SceneView](parent...) }
 
 // NodeType returns the [*types.Type] of [SceneView]
 func (t *SceneView) NodeType() *types.Type { return SceneViewType }
@@ -72,5 +62,18 @@ func (t *SceneView) NodeType() *types.Type { return SceneViewType }
 // New returns a new [*SceneView] value
 func (t *SceneView) New() tree.Node { return &SceneView{} }
 
-// SetTooltip sets the [SceneView.Tooltip]
-func (t *SceneView) SetTooltip(v string) *SceneView { t.Tooltip = v; return t }
+// MeshButtonType is the [types.Type] for [MeshButton]
+var MeshButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzview.MeshButton", IDName: "mesh-button", Doc: "MeshButton represents an [xyz.MeshName] value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "MeshName"}}, Instance: &MeshButton{}})
+
+// NewMeshButton returns a new [MeshButton] with the given optional parent:
+// MeshButton represents an [xyz.MeshName] value with a button.
+func NewMeshButton(parent ...tree.Node) *MeshButton { return tree.New[*MeshButton](parent...) }
+
+// NodeType returns the [*types.Type] of [MeshButton]
+func (t *MeshButton) NodeType() *types.Type { return MeshButtonType }
+
+// New returns a new [*MeshButton] value
+func (t *MeshButton) New() tree.Node { return &MeshButton{} }
+
+// SetMeshName sets the [MeshButton.MeshName]
+func (t *MeshButton) SetMeshName(v string) *MeshButton { t.MeshName = v; return t }

@@ -136,16 +136,16 @@ func (i *CompleteSignals) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "CompleteSignals")
 }
 
-var _WidgetFlagsValues = []WidgetFlags{1}
+var _WidgetFlagsValues = []WidgetFlags{1, 2}
 
 // WidgetFlagsN is the highest valid value for type WidgetFlags, plus one.
-const WidgetFlagsN WidgetFlags = 2
+const WidgetFlagsN WidgetFlags = 3
 
-var _WidgetFlagsValueMap = map[string]WidgetFlags{`NeedsRender`: 1}
+var _WidgetFlagsValueMap = map[string]WidgetFlags{`NeedsRender`: 1, `ValueDialogNewWindow`: 2}
 
-var _WidgetFlagsDescMap = map[WidgetFlags]string{1: `NeedsRender needs to be rendered on next render iteration`}
+var _WidgetFlagsDescMap = map[WidgetFlags]string{1: `NeedsRender needs to be rendered on next render iteration`, 2: `ValueDialogNewWindow indicates that the dialog of a [Value] should be opened as a new window, instead of a typical full window in the same current window. This is set by [InitValueButton] and handled by [OpenValuedDialog]. This is triggered by holding down the Shift key while clicking on a [Value] button.`}
 
-var _WidgetFlagsMap = map[WidgetFlags]string{1: `NeedsRender`}
+var _WidgetFlagsMap = map[WidgetFlags]string{1: `NeedsRender`, 2: `ValueDialogNewWindow`}
 
 // String returns the string representation of this WidgetFlags value.
 func (i WidgetFlags) String() string {
@@ -205,73 +205,73 @@ func (i *WidgetFlags) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "WidgetFlags")
 }
 
-var _LayoutFlagsValues = []LayoutFlags{2, 3, 4}
+var _FrameFlagsValues = []FrameFlags{3}
 
-// LayoutFlagsN is the highest valid value for type LayoutFlags, plus one.
-const LayoutFlagsN LayoutFlags = 5
+// FrameFlagsN is the highest valid value for type FrameFlags, plus one.
+const FrameFlagsN FrameFlags = 4
 
-var _LayoutFlagsValueMap = map[string]LayoutFlags{`StackTopOnly`: 2, `NeedsRedo`: 3, `NoKeys`: 4}
+var _FrameFlagsValueMap = map[string]FrameFlags{`StackTopOnly`: 3}
 
-var _LayoutFlagsDescMap = map[LayoutFlags]string{2: `for stacked layout, only layout the top widget. this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don&#39;t`, 3: `true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration`, 4: `LayoutNoKeys prevents processing of keyboard events for this layout. By default, Layout handles focus navigation events, but if an outer Widget handles these instead, then this should be set.`}
+var _FrameFlagsDescMap = map[FrameFlags]string{3: `FrameStackTopOnly is whether to only layout the top widget for a stacked frame layout. This is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don&#39;t.`}
 
-var _LayoutFlagsMap = map[LayoutFlags]string{2: `StackTopOnly`, 3: `NeedsRedo`, 4: `NoKeys`}
+var _FrameFlagsMap = map[FrameFlags]string{3: `StackTopOnly`}
 
-// String returns the string representation of this LayoutFlags value.
-func (i LayoutFlags) String() string {
-	return enums.BitFlagStringExtended(i, _LayoutFlagsValues, WidgetFlagsValues())
+// String returns the string representation of this FrameFlags value.
+func (i FrameFlags) String() string {
+	return enums.BitFlagStringExtended(i, _FrameFlagsValues, WidgetFlagsValues())
 }
 
-// BitIndexString returns the string representation of this LayoutFlags value
+// BitIndexString returns the string representation of this FrameFlags value
 // if it is a bit index value (typically an enum constant), and
 // not an actual bit flag value.
-func (i LayoutFlags) BitIndexString() string {
-	return enums.BitIndexStringExtended[LayoutFlags, WidgetFlags](i, _LayoutFlagsMap)
+func (i FrameFlags) BitIndexString() string {
+	return enums.BitIndexStringExtended[FrameFlags, WidgetFlags](i, _FrameFlagsMap)
 }
 
-// SetString sets the LayoutFlags value from its string representation,
+// SetString sets the FrameFlags value from its string representation,
 // and returns an error if the string is invalid.
-func (i *LayoutFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
+func (i *FrameFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
 
-// SetStringOr sets the LayoutFlags value from its string representation
+// SetStringOr sets the FrameFlags value from its string representation
 // while preserving any bit flags already set, and returns an
 // error if the string is invalid.
-func (i *LayoutFlags) SetStringOr(s string) error {
-	return enums.SetStringOrExtended(i, (*WidgetFlags)(i), s, _LayoutFlagsValueMap)
+func (i *FrameFlags) SetStringOr(s string) error {
+	return enums.SetStringOrExtended(i, (*WidgetFlags)(i), s, _FrameFlagsValueMap)
 }
 
-// Int64 returns the LayoutFlags value as an int64.
-func (i LayoutFlags) Int64() int64 { return int64(i) }
+// Int64 returns the FrameFlags value as an int64.
+func (i FrameFlags) Int64() int64 { return int64(i) }
 
-// SetInt64 sets the LayoutFlags value from an int64.
-func (i *LayoutFlags) SetInt64(in int64) { *i = LayoutFlags(in) }
+// SetInt64 sets the FrameFlags value from an int64.
+func (i *FrameFlags) SetInt64(in int64) { *i = FrameFlags(in) }
 
-// Desc returns the description of the LayoutFlags value.
-func (i LayoutFlags) Desc() string {
-	return enums.DescExtended[LayoutFlags, WidgetFlags](i, _LayoutFlagsDescMap)
+// Desc returns the description of the FrameFlags value.
+func (i FrameFlags) Desc() string {
+	return enums.DescExtended[FrameFlags, WidgetFlags](i, _FrameFlagsDescMap)
 }
 
-// LayoutFlagsValues returns all possible values for the type LayoutFlags.
-func LayoutFlagsValues() []LayoutFlags {
-	return enums.ValuesGlobalExtended(_LayoutFlagsValues, WidgetFlagsValues())
+// FrameFlagsValues returns all possible values for the type FrameFlags.
+func FrameFlagsValues() []FrameFlags {
+	return enums.ValuesGlobalExtended(_FrameFlagsValues, WidgetFlagsValues())
 }
 
-// Values returns all possible values for the type LayoutFlags.
-func (i LayoutFlags) Values() []enums.Enum {
-	return enums.ValuesExtended(_LayoutFlagsValues, WidgetFlagsValues())
+// Values returns all possible values for the type FrameFlags.
+func (i FrameFlags) Values() []enums.Enum {
+	return enums.ValuesExtended(_FrameFlagsValues, WidgetFlagsValues())
 }
 
 // HasFlag returns whether these bit flags have the given bit flag set.
-func (i LayoutFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
+func (i FrameFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
 
 // SetFlag sets the value of the given flags in these flags to the given value.
-func (i *LayoutFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
+func (i *FrameFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i LayoutFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
+func (i FrameFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *LayoutFlags) UnmarshalText(text []byte) error {
-	return enums.UnmarshalText(i, text, "LayoutFlags")
+func (i *FrameFlags) UnmarshalText(text []byte) error {
+	return enums.UnmarshalText(i, text, "FrameFlags")
 }
 
 var _LayoutPassesValues = []LayoutPasses{0, 1, 2}
@@ -480,16 +480,16 @@ func (i *RenderContextFlags) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "RenderContextFlags")
 }
 
-var _ScFlagsValues = []ScFlags{2, 3, 4, 5, 6, 7, 8, 9}
+var _ScFlagsValues = []ScFlags{3, 4, 5, 6, 7, 8, 9, 10}
 
 // ScFlagsN is the highest valid value for type ScFlags, plus one.
-const ScFlagsN ScFlags = 10
+const ScFlagsN ScFlags = 11
 
-var _ScFlagsValueMap = map[string]ScFlags{`ScUpdating`: 2, `ScNeedsRender`: 3, `ScNeedsLayout`: 4, `ScNeedsRebuild`: 5, `ScImageUpdated`: 6, `ScPrefSizing`: 7, `ScPreserve`: 8, `ScRenderBBoxes`: 9}
+var _ScFlagsValueMap = map[string]ScFlags{`ScUpdating`: 3, `ScNeedsRender`: 4, `ScNeedsLayout`: 5, `ScNeedsRebuild`: 6, `ScImageUpdated`: 7, `ScPrefSizing`: 8, `ScPreserve`: 9, `ScRenderBBoxes`: 10}
 
-var _ScFlagsDescMap = map[ScFlags]string{2: `ScUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`, 3: `ScNeedsRender means nodes have flagged that they need a Render update.`, 4: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`, 5: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`, 6: `ScImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global RenderWindow rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`, 7: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`, 8: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`, 9: `ScRenderBBoxes renders the bounding boxes for all objects in scene`}
+var _ScFlagsDescMap = map[ScFlags]string{3: `ScUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`, 4: `ScNeedsRender means nodes have flagged that they need a Render update.`, 5: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`, 6: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`, 7: `ScImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global RenderWindow rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`, 8: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`, 9: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`, 10: `ScRenderBBoxes renders the bounding boxes for all objects in scene`}
 
-var _ScFlagsMap = map[ScFlags]string{2: `ScUpdating`, 3: `ScNeedsRender`, 4: `ScNeedsLayout`, 5: `ScNeedsRebuild`, 6: `ScImageUpdated`, 7: `ScPrefSizing`, 8: `ScPreserve`, 9: `ScRenderBBoxes`}
+var _ScFlagsMap = map[ScFlags]string{3: `ScUpdating`, 4: `ScNeedsRender`, 5: `ScNeedsLayout`, 6: `ScNeedsRebuild`, 7: `ScImageUpdated`, 8: `ScPrefSizing`, 9: `ScPreserve`, 10: `ScRenderBBoxes`}
 
 // String returns the string representation of this ScFlags value.
 func (i ScFlags) String() string {

@@ -21,7 +21,7 @@ import (
 // a pointer to a slice or a direct slice); just [reflect.Type.Elem] of slice type, but
 // using this function bypasses any pointer issues and makes it more explicit what is going on.
 func SliceElementType(sl any) reflect.Type {
-	return NonPointerValue(OnePointerUnderlyingValue(reflect.ValueOf(sl))).Type().Elem()
+	return Underlying(reflect.ValueOf(sl)).Type().Elem()
 }
 
 // SliceElementValue returns a new [reflect.Value] of the [SliceElementType].
@@ -38,7 +38,7 @@ func SliceElementValue(sl any) reflect.Value {
 // SliceNewAt inserts a new blank element at the given index in the given slice.
 // -1 means the end.
 func SliceNewAt(sl any, idx int) {
-	svl := OnePointerValue(reflect.ValueOf(sl))
+	svl := UnderlyingPointer(reflect.ValueOf(sl))
 	svnp := NonPointerValue(svl)
 	val := SliceElementValue(sl)
 	sz := svnp.Len()
@@ -62,14 +62,6 @@ func SliceDeleteAt(sl any, idx int) {
 	svl.Elem().Set(svnp.Slice(0, sz-1))
 }
 
-// Inter is an interface that requires a method returning the value
-// as an int64. It is used in sorting and implemented by
-// [cogentcore.org/core/base/fileinfo.FileTime].
-type Inter interface {
-	// Int returns the value as an int64.
-	Int() int64
-}
-
 // SliceSort sorts a slice of basic values (see [StructSliceSort] for sorting a
 // slice-of-struct using a specific field), using float, int, string, and [time.Time]
 // conversions.
@@ -84,18 +76,6 @@ func SliceSort(sl any, ascending bool) error {
 	vk := elnptyp.Kind()
 	elval := OnePointerValue(svnp.Index(0))
 	elif := elval.Interface()
-
-	if _, ok := elif.(Inter); ok {
-		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			iv := NonPointerValue(svnp.Index(i)).Interface().(Inter).Int()
-			jv := NonPointerValue(svnp.Index(j)).Interface().(Inter).Int()
-			if ascending {
-				return iv < jv
-			}
-			return jv < iv
-		})
-		return nil
-	}
 
 	// try all the numeric types first!
 	switch {
@@ -188,20 +168,6 @@ func StructSliceSort(structSlice any, fieldIndex []int, ascending bool) error {
 	structVal := OnePointerValue(svnp.Index(0))
 	fieldVal := structVal.Elem().FieldByIndex(fieldIndex)
 	fieldIf := fieldVal.Interface()
-
-	if _, ok := fieldIf.(Inter); ok {
-		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			ival := OnePointerValue(svnp.Index(i))
-			iv := ival.Elem().FieldByIndex(fieldIndex).Interface().(Inter).Int()
-			jval := OnePointerValue(svnp.Index(j))
-			jv := jval.Elem().FieldByIndex(fieldIndex).Interface().(Inter).Int()
-			if ascending {
-				return iv < jv
-			}
-			return jv < iv
-		})
-		return nil
-	}
 
 	// try all the numeric types first!
 	switch {
@@ -381,10 +347,9 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 func CopySliceRobust(to, from any) error {
 	tov := reflect.ValueOf(to)
 	fmv := reflect.ValueOf(from)
-	tonp := NonPointerValue(tov)
-	fmnp := NonPointerValue(fmv)
+	tonp := Underlying(tov)
+	fmnp := Underlying(fmv)
 	totyp := tonp.Type()
-	// eltyp := SliceElType(tonp)
 	if totyp.Kind() != reflect.Slice {
 		err := fmt.Errorf("reflectx.CopySliceRobust: 'to' is not slice, is: %v", totyp.String())
 		return errors.Log(err)
@@ -396,7 +361,7 @@ func CopySliceRobust(to, from any) error {
 	}
 	fmlen := fmnp.Len()
 	if tonp.IsNil() {
-		OnePointerValue(tonp).Elem().Set(reflect.MakeSlice(totyp, fmlen, fmlen))
+		tonp.Set(reflect.MakeSlice(totyp, fmlen, fmlen))
 	} else {
 		if tonp.Len() > fmlen {
 			tonp.SetLen(fmlen)

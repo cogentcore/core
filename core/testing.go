@@ -57,7 +57,7 @@ func (b *Body) AssertRenderScreen(t imagex.TestingT, filename string, fun ...fun
 // runAndShowNewWindow runs a new window and waits for it to be shown.
 func (b *Body) runAndShowNewWindow() {
 	showed := make(chan struct{})
-	b.Scene.OnFinal(events.Show, func(e events.Event) {
+	b.OnFinal(events.Show, func(e events.Event) {
 		showed <- struct{}{}
 	})
 	b.RunWindow()

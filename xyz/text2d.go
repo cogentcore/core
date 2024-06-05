@@ -49,7 +49,7 @@ type Text2D struct {
 	RenderState paint.State `set:"-" copier:"-" json:"-" xml:"-" view:"-"`
 }
 
-func (txt *Text2D) OnInit() {
+func (txt *Text2D) Init() {
 	txt.Defaults()
 }
 
@@ -81,7 +81,7 @@ func (txt *Text2D) TextSize() (math32.Vector2, bool) {
 }
 
 func (txt *Text2D) Config() {
-	tm := txt.Sc.PlaneMesh2D()
+	tm := txt.Scene.PlaneMesh2D()
 	txt.SetMesh(tm)
 	txt.Solid.Config()
 	txt.RenderText()
@@ -120,10 +120,10 @@ func (txt *Text2D) RenderText() {
 	var err error
 	if txt.Mat.TexPtr == nil {
 		txname := "__Text2D: " + txt.Nm
-		tx, err = txt.Sc.TextureByNameTry(txname)
+		tx, err = txt.Scene.TextureByNameTry(txname)
 		if err != nil {
 			tx = &TextureBase{Nm: txname}
-			txt.Sc.AddTexture(tx)
+			txt.Scene.AddTexture(tx)
 			img = image.NewRGBA(bounds)
 			tx.SetImage(img)
 			txt.Mat.SetTexture(tx)
@@ -141,7 +141,7 @@ func (txt *Text2D) RenderText() {
 			img = image.NewRGBA(bounds)
 		}
 		tx.SetImage(img)
-		txt.Sc.Phong.UpdateTextureName(tx.Name())
+		txt.Scene.Phong.UpdateTextureName(tx.Name())
 	}
 	rs := &txt.RenderState
 	if rs.Image != img || rs.Image.Bounds() != img.Bounds() {

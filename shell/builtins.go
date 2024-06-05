@@ -7,12 +7,14 @@ package shell
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 
 	"cogentcore.org/core/base/exec"
+	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/base/sshclient"
 	"github.com/mitchellh/go-homedir"
 )
@@ -26,8 +28,12 @@ func (sh *Shell) InstallBuiltins() {
 	sh.Builtins["kill"] = sh.Kill
 	sh.Builtins["set"] = sh.Set
 	sh.Builtins["add-path"] = sh.AddPath
+	sh.Builtins["which"] = sh.Which
+	sh.Builtins["source"] = sh.Source
 	sh.Builtins["cossh"] = sh.CoSSH
 	sh.Builtins["scp"] = sh.Scp
+	sh.Builtins["debug"] = sh.Debug
+	sh.Builtins["history"] = sh.History
 }
 
 // Cd changes the current directory.
@@ -58,6 +64,7 @@ func (sh *Shell) Cd(cmdIO *exec.CmdIO, args ...string) error {
 		return err
 	}
 	sh.Config.Dir = dir
+	sh.cwdScriptFilesDir = ""
 	return nil
 }
 
@@ -106,7 +113,7 @@ func (sh *Shell) Fg(cmdIO *exec.CmdIO, args ...string) error {
 	}
 	jno, _ := strconv.Atoi(jid[1:]) // guaranteed good
 	job := sh.Jobs[jno]
-	fmt.Printf("foregrounding job [%d]\n", jno)
+	cmdIO.Printf("foregrounding job [%d]\n", jno)
 	_ = job
 	// todo: the problem here is we need to change the stdio for running job
 	// job.Cmd.Wait() // wait
@@ -130,6 +137,38 @@ func (sh *Shell) AddPath(cmdIO *exec.CmdIO, args ...string) error {
 		path = path + ":" + arg
 	}
 	return os.Setenv("PATH", path)
+}
+
+// Which reports the executable associated with the given command.
+// Processes builtins and commands, and if not found, then passes on
+// to exec which.
+func (sh *Shell) Which(cmdIO *exec.CmdIO, args ...string) error {
+	if len(args) != 1 {
+		return fmt.Errorf("cosh which: requires one argument")
+	}
+	cmd := args[0]
+	if _, hasCmd := sh.Commands[cmd]; hasCmd {
+		cmdIO.Println(cmd, "is a user-defined command")
+		return nil
+	}
+	if _, hasBlt := sh.Builtins[cmd]; hasBlt {
+		cmdIO.Println(cmd, "is a cosh builtin command")
+		return nil
+	}
+	sh.Config.RunIO(cmdIO, "which", args...)
+	return nil
+}
+
+// Source loads and evaluates the given file(s)
+func (sh *Shell) Source(cmdIO *exec.CmdIO, args ...string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("cosh source: requires at least one argument")
+	}
+	for _, fn := range args {
+		sh.TranspileCodeFromFile(fn)
+	}
+	// note that we do not execute the file -- just loads it in
+	return nil
 }
 
 // CoSSH manages SSH connections, which are referenced by the @name
@@ -228,4 +267,43 @@ func (sh *Shell) Scp(cmdIO *exec.CmdIO, args ...string) error {
 		err = cl.CopyHostToLocalFile(ctx, hfn, lfn)
 	}
 	return err
+}
+
+// Debug changes log level
+func (sh *Shell) Debug(cmdIO *exec.CmdIO, args ...string) error {
+	if len(args) == 0 {
+		if logx.UserLevel == slog.LevelDebug {
+			logx.UserLevel = slog.LevelInfo
+		} else {
+			logx.UserLevel = slog.LevelDebug
+		}
+	}
+	if len(args) == 1 {
+		lev := args[0]
+		if lev == "on" || lev == "true" || lev == "1" {
+			logx.UserLevel = slog.LevelDebug
+		} else {
+			logx.UserLevel = slog.LevelInfo
+		}
+	}
+	return nil
+}
+
+// History shows history
+func (sh *Shell) History(cmdIO *exec.CmdIO, args ...string) error {
+	n := len(sh.Hist)
+	nh := n
+	if len(args) == 1 {
+		an, err := strconv.Atoi(args[0])
+		if err != nil {
+			return fmt.Errorf("history: error parsing number of history items: %q, error: %s", args[0], err.Error())
+		}
+		nh = min(n, an)
+	} else if len(args) > 1 {
+		return fmt.Errorf("history: uses at most one argument")
+	}
+	for i := n - nh; i < n; i++ {
+		cmdIO.Printf("%d:\t%s\n", i, sh.Hist[i])
+	}
+	return nil
 }

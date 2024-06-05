@@ -75,6 +75,13 @@ type Tree struct {
 	UpdateMu sync.Mutex `copier:"-" set:"-" view:"-"`
 }
 
+func (ft *Tree) Init() {
+	ft.Node.Init()
+	ft.FRoot = ft
+	ft.FileNodeType = NodeType
+	ft.OpenDepth = 4
+}
+
 func (fv *Tree) Destroy() {
 	if fv.Watcher != nil {
 		fv.Watcher.Close()
@@ -93,7 +100,6 @@ func (fv *Tree) Destroy() {
 // already stored about files. Only paths listed in Dirs will be opened.
 func (ft *Tree) OpenPath(path string) {
 	ft.FRoot = ft // we are our own root..
-	ft.Nm = "/"
 	if ft.FileNodeType == nil {
 		ft.FileNodeType = NodeType
 	}
@@ -112,18 +118,18 @@ func (ft *Tree) OpenPath(path string) {
 	ft.UpdateAll()
 }
 
-// UpdateAll does a full update of the tree -- calls ReadDir on current path
+// UpdateAll does a full update of the tree -- calls SetPath on current path
 func (ft *Tree) UpdateAll() {
-	// updt := ft.AsyncLock() // note: safe for async updating
+	// update := ft.AsyncLock() // note: safe for async updating
 	ft.UpdateMu.Lock()
 	ft.Dirs.ClearMarks()
-	ft.ReadDir(string(ft.FPath))
+	ft.SetPath(string(ft.FPath))
 	// the problem here is that closed dirs are not visited but we want to keep their settings:
 	// ft.Dirs.DeleteStale()
 	ft.Update()
 	ft.TreeViewChanged(nil)
 	ft.UpdateMu.Unlock()
-	// ft.AsyncUnlock(updt) // todo:
+	// ft.AsyncUnlock(update) // todo:
 }
 
 // UpdatePath updates the tree at the directory level for given path
@@ -313,7 +319,7 @@ func (ft *Tree) AddExtFile(fpath string) (*Node, error) {
 		return ft.ExtNodeByPath(pth)
 	}
 	ft.ExtFiles = append(ft.ExtFiles, pth)
-	ft.UpdateDir()
+	ft.SyncDir()
 	return ft.ExtNodeByPath(pth)
 }
 
@@ -353,22 +359,22 @@ func (ft *Tree) ExtNodeByPath(fpath string) (*Node, error) {
 	ekids := *ekid.Children()
 	err := ekids.IsValidIndex(i)
 	if err == nil {
-		kn := AsNode(ekids.Elem(i))
+		kn := AsNode(ekids[i])
 		return kn, nil
 	}
 	return nil, fmt.Errorf("ExtFile not updated: %v", err)
 }
 
-// UpdateExtFiles returns a type-and-name list for configuring nodes
+// SyncExtFiles returns a type-and-name list for configuring nodes
 // for ExtFiles
-func (ft *Tree) UpdateExtFiles(efn *Node) {
+func (ft *Tree) SyncExtFiles(efn *Node) {
 	efn.Info.Mode = os.ModeDir | os.ModeIrregular // mark as dir, irregular
-	config := tree.Config{}
+	plan := tree.TypePlan{}
 	typ := ft.FileNodeType
 	for _, f := range ft.ExtFiles {
-		config.Add(typ, dirs.DirAndFile(f))
+		plan.Add(typ, dirs.DirAndFile(f))
 	}
-	efn.ConfigChildren(config) // NOT unique names
+	tree.Update(efn, plan) // NOT unique names
 	// always go through kids, regardless of mods
 	for i, sfk := range efn.Kids {
 		sf := AsNode(sfk)

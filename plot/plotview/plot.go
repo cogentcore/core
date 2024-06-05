@@ -64,14 +64,9 @@ func (pt *Plot) UpdatePlot() {
 	pt.NeedsRender()
 }
 
-func (pt *Plot) OnInit() {
-	pt.WidgetBase.OnInit()
+func (pt *Plot) Init() {
+	pt.WidgetBase.Init()
 	pt.Scale = 1
-	pt.SetStyles()
-	pt.HandleEvents()
-}
-
-func (pt *Plot) SetStyles() {
 	pt.Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
 		ro := pt.IsReadOnly()
@@ -85,9 +80,7 @@ func (pt *Plot) SetStyles() {
 			}
 		}
 	})
-}
 
-func (pt *Plot) HandleEvents() {
 	pt.On(events.SlideMove, func(e events.Event) {
 		e.SetHandled()
 		if pt.Plot == nil {
@@ -128,9 +121,9 @@ func (pt *Plot) WidgetTooltip(pos image.Point) (string, image.Point) {
 		return pt.Tooltip, pt.DefaultTooltipPos()
 	}
 	wpos := pos.Sub(pt.Geom.ContentBBox.Min)
-	_, idx, dist, data, _ := pt.Plot.ClosestDataToPixel(wpos.X, wpos.Y)
+	_, idx, dist, data, _, legend := pt.Plot.ClosestDataToPixel(wpos.X, wpos.Y)
 	if dist <= 10 {
-		return fmt.Sprintf("[%d]: (%g, %g)", idx, data.X, data.Y), pos
+		return fmt.Sprintf("%s[%d]: (%g, %g)", legend, idx, data.X, data.Y), pos
 	}
 	return pt.Tooltip, pt.DefaultTooltipPos()
 }

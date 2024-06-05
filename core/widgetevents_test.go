@@ -18,7 +18,7 @@ import (
 
 func TestHandleWidgetState(t *testing.T) {
 	b := NewBody()
-	w := NewBox(b)
+	w := NewWidgetBase(b)
 
 	test := func(ability abilities.Abilities, state states.States, event events.Types, endEvent events.Types) {
 		expect := states.States(0)
@@ -56,7 +56,7 @@ func TestHandleWidgetState(t *testing.T) {
 
 func TestWidgetEventManager(t *testing.T) {
 	b := NewBody()
-	w := NewBox(b)
+	w := NewWidgetBase(b)
 
 	assert.Equal(t, &w.Scene.Events, w.Events())
 
@@ -81,19 +81,19 @@ func TestSystemEvents(t *testing.T) {
 
 func TestWidgetPrev(t *testing.T) {
 	b := NewBody()
-	NewTextField(b, "tf1").AddClearButton()
-	NewTextField(b, "tf2").SetLeadingIcon(icons.Search)
-	lt := NewTextField(b, "tf3")
-	b.ConfigTree()
+	NewTextField(b).AddClearButton()
+	NewTextField(b).SetLeadingIcon(icons.Search)
+	lt := NewTextField(b)
+	b.UpdateTree()
 
 	paths := []string{
-		"/body scene/body/tf2.parts/lead-icon.parts/icon",
-		"/body scene/body/tf2.parts/lead-icon",
-		"/body scene/body/tf2",
-		"/body scene/body/tf1.parts/trail-icon.parts/icon",
-		"/body scene/body/tf1.parts/trail-icon",
-		"/body scene/body/tf1.parts/trail-icon-str",
-		"/body scene/body/tf1",
+		"/body scene/body/text-field-1/lead-icon/icon",
+		"/body scene/body/text-field-1/lead-icon",
+		"/body scene/body/text-field-1",
+		"/body scene/body/text-field-0/trail-icon/icon",
+		"/body scene/body/text-field-0/trail-icon",
+		"/body scene/body/text-field-0/trail-icon-stretch",
+		"/body scene/body/text-field-0",
 		"/body scene/body",
 		"/body scene",
 	}
@@ -111,19 +111,19 @@ func TestWidgetPrev(t *testing.T) {
 
 func TestWidgetNext(t *testing.T) {
 	b := NewBody()
-	ft := NewTextField(b, "tf1").AddClearButton()
-	NewTextField(b, "tf2").SetLeadingIcon(icons.Search)
-	NewTextField(b, "tf3")
-	b.ConfigTree()
+	ft := NewTextField(b).AddClearButton()
+	NewTextField(b).SetLeadingIcon(icons.Search)
+	NewTextField(b)
+	b.UpdateTree()
 
 	paths := []string{
-		"/body scene/body/tf1.parts/trail-icon-str",
-		"/body scene/body/tf1.parts/trail-icon",
-		"/body scene/body/tf1.parts/trail-icon.parts/icon",
-		"/body scene/body/tf2",
-		"/body scene/body/tf2.parts/lead-icon",
-		"/body scene/body/tf2.parts/lead-icon.parts/icon",
-		"/body scene/body/tf3",
+		"/body scene/body/text-field-0/trail-icon-stretch",
+		"/body scene/body/text-field-0/trail-icon",
+		"/body scene/body/text-field-0/trail-icon/icon",
+		"/body scene/body/text-field-1",
+		"/body scene/body/text-field-1/lead-icon",
+		"/body scene/body/text-field-1/lead-icon/icon",
+		"/body scene/body/text-field-2",
 	}
 	i := 0
 	WidgetNextFunc(ft, func(w Widget) bool {

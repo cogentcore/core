@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
@@ -23,27 +24,8 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/texteditor/textbuf"
+	"cogentcore.org/core/views"
 )
-
-func (ed *Editor) HandleEvents() {
-	ed.Layout.HandleEvents()
-	ed.HandleKeyChord()
-	ed.HandleMouse()
-	ed.HandleLinkCursor()
-	ed.HandleFocus()
-	ed.AddContextMenu(ed.ContextMenu)
-}
-
-func (ed *Editor) OnAdd() {
-	ed.Layout.OnAdd()
-	ed.HandleClose()
-}
-
-func (ed *Editor) HandleClose() {
-	ed.OnClose(func(e events.Event) {
-		ed.EditDone()
-	})
-}
 
 func (ed *Editor) HandleFocus() {
 	ed.OnFocusLost(func(e events.Event) {
@@ -704,5 +686,51 @@ func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lexer.Pos, selMode e
 		if ln != ed.SelectRegion.Start.Ln || ch < ed.SelectRegion.Start.Ch || ch > ed.SelectRegion.End.Ch {
 			ed.SelectReset()
 		}
+	}
+}
+
+///////////////////////////////////////////////////////////
+//  Context Menu
+
+// ShowContextMenu displays the context menu with options dependent on situation
+func (ed *Editor) ShowContextMenu(e events.Event) {
+	if ed.Buffer.Spell != nil && !ed.HasSelection() && ed.Buffer.IsSpellEnabled(ed.CursorPos) {
+		if ed.Buffer.Spell != nil {
+			if ed.OfferCorrect() {
+				return
+			}
+		}
+	}
+	ed.WidgetBase.ShowContextMenu(e)
+}
+
+// ContextMenu builds the text editor context menu
+func (ed *Editor) ContextMenu(m *core.Scene) {
+	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).
+		SetKey(keymap.Copy).SetState(!ed.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			ed.Copy(true)
+		})
+	if !ed.IsReadOnly() {
+		core.NewButton(m).SetText("Cut").SetIcon(icons.ContentCopy).
+			SetKey(keymap.Cut).SetState(!ed.HasSelection(), states.Disabled).
+			OnClick(func(e events.Event) {
+				ed.Cut()
+			})
+		core.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).
+			SetKey(keymap.Paste).SetState(ed.Clipboard().IsEmpty(), states.Disabled).
+			OnClick(func(e events.Event) {
+				ed.Paste()
+			})
+		core.NewSeparator(m)
+		views.NewFuncButton(m, ed.Buffer.Save).SetIcon(icons.Save)
+		views.NewFuncButton(m, ed.Buffer.SaveAs).SetIcon(icons.SaveAs)
+		views.NewFuncButton(m, ed.Buffer.Open).SetIcon(icons.Open)
+		views.NewFuncButton(m, ed.Buffer.Revert).SetIcon(icons.Reset)
+	} else {
+		core.NewButton(m).SetText("Clear").SetIcon(icons.ClearAll).
+			OnClick(func(e events.Event) {
+				ed.Clear()
+			})
 	}
 }

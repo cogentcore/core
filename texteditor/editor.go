@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/enums"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/parse/lexer"
@@ -59,7 +60,7 @@ var (
 // Editor should be within a single goroutine, as it would require
 // extensive protections throughout code otherwise.
 type Editor struct { //core:embedder
-	core.Layout
+	core.Frame
 
 	// Buffer is the text buffer being edited.
 	Buffer *Buffer `set:"-" json:"-" xml:"-"`
@@ -194,21 +195,19 @@ type Editor struct { //core:embedder
 // NewSoloEditor returns a new [Editor] with an associated [Buffer].
 // This is appropriate for making a standalone editor in which there
 // is there is one editor per buffer.
-func NewSoloEditor(parent tree.Node, name ...string) *Editor {
-	return NewEditor(parent, name...).SetBuffer(NewBuffer())
+func NewSoloEditor(parent ...tree.Node) *Editor {
+	return NewEditor(parent...).SetBuffer(NewBuffer())
 }
 
 func (ed *Editor) FlagType() enums.BitFlagSetter {
 	return (*EditorFlags)(&ed.Flags)
 }
 
-func (ed *Editor) OnInit() {
-	ed.WidgetBase.OnInit()
-	ed.HandleEvents()
-	ed.SetStyles()
-}
+func (ed *Editor) WidgetValue() any { return &ed.Buffer.Txt }
 
-func (ed *Editor) SetStyles() {
+func (ed *Editor) Init() {
+	ed.Frame.Init()
+	ed.AddContextMenu(ed.ContextMenu)
 	ed.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		ed.CursorWidth.Dp(2)
@@ -245,6 +244,16 @@ func (ed *Editor) SetStyles() {
 			s.Border.Width.Set(units.Dp(2))
 		}
 	})
+
+	ed.HandleKeyChord()
+	ed.HandleMouse()
+	ed.HandleLinkCursor()
+	ed.HandleFocus()
+	ed.OnClose(func(e events.Event) {
+		ed.EditDone()
+	})
+
+	ed.Updater(ed.NeedsLayout)
 }
 
 // EditorFlags extend WidgetFlags to hold [Editor] state
@@ -273,7 +282,7 @@ const (
 
 func (ed *Editor) Destroy() {
 	ed.StopCursor()
-	ed.Layout.Destroy()
+	ed.Frame.Destroy()
 }
 
 // EditDone completes editing and copies the active edited text to the text --
@@ -493,13 +502,6 @@ func (ed *Editor) Redo() {
 	}
 	ed.SavePosHistory(ed.CursorPos)
 	ed.NeedsRender()
-}
-
-////////////////////////////////////////////////////
-//  Widget Interface
-
-func (ed *Editor) Config() {
-	ed.NeedsLayout()
 }
 
 // StyleView sets the style of widget

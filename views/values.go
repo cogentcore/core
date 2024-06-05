@@ -5,16 +5,12 @@
 package views
 
 import (
-	"fmt"
-	"log/slog"
 	"reflect"
-	"strings"
 
-	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/paint"
@@ -23,646 +19,184 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// This file contains the standard [Value]s built into views.
-
-// StringValue represents any value with a text field.
-type StringValue struct {
-	ValueBase[*core.TextField]
+// SliceButton represents a slice or array value with a button.
+type SliceButton struct {
+	core.Button
+	Slice any
 }
 
-func (v *StringValue) Config() {
-	if vtag, _ := v.Tag("view"); vtag == "password" {
-		v.Widget.SetTypePassword()
-	}
-	if vl, ok := v.Value.Interface().(core.Validator); ok {
-		v.Widget.SetValidator(vl.Validate)
-	}
-	if fv, ok := v.Owner.(core.FieldValidator); ok {
-		v.Widget.SetValidator(func() error {
-			return fv.ValidateField(v.Field.Name)
-		})
-	}
+func (sb *SliceButton) WidgetValue() any { return &sb.Slice }
 
-	v.Widget.OnFinal(events.Change, func(e events.Event) {
-		if v.SetValue(v.Widget.Text()) {
-			v.Update()
-		}
+func (sb *SliceButton) Init() {
+	sb.Button.Init()
+	sb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	sb.Updater(func() {
+		sb.SetText(labels.FriendlySliceLabel(reflect.ValueOf(sb.Slice)))
 	})
-}
-
-func (v *StringValue) Update() {
-	npv := reflectx.NonPointerValue(v.Value)
-	if npv.Kind() == reflect.Interface && npv.IsZero() {
-		v.Widget.SetText("None")
-	} else {
-		txt := reflectx.ToString(v.Value.Interface())
-		v.Widget.SetText(txt)
-	}
-}
-
-// BoolValue represents a bool value with a switch.
-type BoolValue struct {
-	ValueBase[*core.Switch]
-}
-
-func (v *BoolValue) Config() {
-	v.Widget.OnChange(func(e events.Event) {
-		v.SetValue(v.Widget.IsChecked())
-	})
-}
-
-func (v *BoolValue) Update() {
-	npv := reflectx.NonPointerValue(v.Value)
-	bv, err := reflectx.ToBool(npv.Interface())
-	if errors.Log(err) == nil {
-		v.Widget.SetChecked(bv)
-	}
-}
-
-// NumberValue represents an integer or float value with a spinner.
-type NumberValue struct {
-	ValueBase[*core.Spinner]
-}
-
-func (v *NumberValue) Config() {
-	vk := reflectx.NonPointerType(v.Value.Type()).Kind()
-	if vk >= reflect.Int && vk <= reflect.Uintptr {
-		v.Widget.SetStep(1).SetEnforceStep(true)
-	}
-	if vk >= reflect.Uint && vk <= reflect.Uintptr {
-		v.Widget.SetMin(0)
-	}
-	if min, ok := v.Tag("min"); ok {
-		minv, err := reflectx.ToFloat32(min)
-		if errors.Log(err) == nil {
-			v.Widget.SetMin(minv)
-		}
-	}
-	if max, ok := v.Tag("max"); ok {
-		maxv, err := reflectx.ToFloat32(max)
-		if errors.Log(err) == nil {
-			v.Widget.SetMax(maxv)
-		}
-	}
-	if step, ok := v.Tag("step"); ok {
-		step, err := reflectx.ToFloat32(step)
-		if errors.Log(err) == nil {
-			v.Widget.SetStep(step)
-		}
-	}
-	if format, ok := v.Tag("format"); ok {
-		v.Widget.SetFormat(format)
-	}
-	v.Widget.OnChange(func(e events.Event) {
-		v.SetValue(v.Widget.Value)
-	})
-}
-
-func (v *NumberValue) Update() {
-	npv := reflectx.NonPointerValue(v.Value)
-	fv, err := reflectx.ToFloat32(npv.Interface())
-	if errors.Log(err) == nil {
-		v.Widget.SetValue(fv)
-	}
-}
-
-// SliderValue represents an integer or float value with a slider.
-type SliderValue struct {
-	ValueBase[*core.Slider]
-}
-
-func (v *SliderValue) Config() {
-	vk := reflectx.NonPointerType(v.Value.Type()).Kind()
-	if vk >= reflect.Int && vk <= reflect.Uintptr {
-		v.Widget.SetStep(1).SetEnforceStep(true).SetMax(100)
-	}
-	if min, ok := v.Tag("min"); ok {
-		minv, err := reflectx.ToFloat32(min)
-		if errors.Log(err) == nil {
-			v.Widget.SetMin(minv)
-		}
-	}
-	if max, ok := v.Tag("max"); ok {
-		maxv, err := reflectx.ToFloat32(max)
-		if errors.Log(err) == nil {
-			v.Widget.SetMax(maxv)
-		}
-	}
-	if step, ok := v.Tag("step"); ok {
-		stepv, err := reflectx.ToFloat32(step)
-		if errors.Log(err) == nil {
-			v.Widget.SetStep(stepv)
-		}
-	}
-	v.Widget.OnChange(func(e events.Event) {
-		v.SetValue(v.Widget.Value)
-	})
-}
-
-func (v *SliderValue) Update() {
-	npv := reflectx.NonPointerValue(v.Value)
-	fv, err := reflectx.ToFloat32(npv.Interface())
-	if errors.Log(err) == nil {
-		v.Widget.SetValue(fv)
-	}
-}
-
-// StructValue represents a struct value with a button.
-type StructValue struct {
-	ValueBase[*core.Button]
-}
-
-func (v *StructValue) Config() {
-	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	ConfigDialogWidget(v, true)
-}
-
-func (v *StructValue) Update() {
-	npv := reflectx.NonPointerValue(v.Value)
-	if v.Value.IsZero() {
-		v.Widget.SetText("None")
-	} else {
-		opv := reflectx.OnePointerUnderlyingValue(v.Value)
-		if lbler, ok := opv.Interface().(core.Labeler); ok {
-			v.Widget.SetText(lbler.Label())
+	core.InitValueButton(sb, true, func(d *core.Body) {
+		up := reflectx.Underlying(reflect.ValueOf(sb.Slice))
+		if up.Type().Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(sb.Slice)).Kind() == reflect.Struct {
+			tv := NewTableView(d).SetSlice(sb.Slice)
+			tv.SetValueTitle(sb.ValueTitle).SetReadOnly(sb.IsReadOnly())
+			d.AddAppBar(tv.MakeToolbar)
 		} else {
-			v.Widget.SetText(reflectx.FriendlyTypeName(npv.Type()))
+			sv := NewSliceView(d).SetSlice(sb.Slice)
+			sv.SetValueTitle(sb.ValueTitle).SetReadOnly(sb.IsReadOnly())
+			d.AddAppBar(sv.MakeToolbar)
 		}
-	}
-	v.Widget.Update()
-}
-
-func (v *StructValue) ConfigDialog(d *core.Body) (bool, func()) {
-	if v.Value.IsZero() {
-		return false, nil
-	}
-	opv := reflectx.OnePointerUnderlyingValue(v.Value)
-	str := opv.Interface()
-	NewStructView(d).SetStruct(str).SetViewPath(v.ViewPath).
-		SetReadOnly(v.IsReadOnly())
-	if tb, ok := str.(core.Toolbarer); ok {
-		d.AddAppBar(tb.ConfigToolbar)
-	}
-	return true, nil
-}
-
-// StructInlineValue represents a struct value with a [StructViewInline].
-type StructInlineValue struct {
-	ValueBase[*StructViewInline]
-}
-
-func (v *StructInlineValue) Config() {
-	v.Widget.StructValue = v
-	v.Widget.ViewPath = v.ViewPath
-	v.Widget.SetStruct(v.Value.Interface())
-	v.Widget.OnChange(func(e events.Event) {
-		v.SendChange(e)
 	})
 }
 
-func (v *StructInlineValue) Update() {
-	v.Widget.SetStruct(v.Value.Interface())
+// StructButton represents a slice or array value with a button.
+type StructButton struct {
+	core.Button
+	Struct any
 }
 
-// SliceValue represents a slice or array value with a button.
-type SliceValue struct {
-	ValueBase[*core.Button]
-}
+func (sb *StructButton) WidgetValue() any { return &sb.Struct }
 
-func (v *SliceValue) Config() {
-	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	ConfigDialogWidget(v, true)
-}
-
-func (v *SliceValue) Update() {
-	npv := reflectx.OnePointerUnderlyingValue(v.Value).Elem()
-	txt := ""
-	if !npv.IsValid() {
-		txt = "None"
-	} else {
-		if npv.Kind() == reflect.Array || !npv.IsNil() {
-			bnm := reflectx.FriendlyTypeName(reflectx.SliceElementType(v.Value.Interface()))
-			if strings.HasSuffix(bnm, "s") {
-				txt = strcase.ToSentence(fmt.Sprintf("%d lists of %s", npv.Len(), bnm))
-			} else {
-				txt = strcase.ToSentence(fmt.Sprintf("%d %ss", npv.Len(), bnm))
-			}
-		} else {
-			txt = "None"
+func (sb *StructButton) Init() {
+	sb.Button.Init()
+	sb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	sb.Updater(func() {
+		sb.SetText(labels.FriendlyStructLabel(reflect.ValueOf(sb.Struct)))
+	})
+	core.InitValueButton(sb, true, func(d *core.Body) {
+		sv := NewStructView(d).SetStruct(sb.Struct)
+		sv.SetValueTitle(sb.ValueTitle).SetReadOnly(sb.IsReadOnly())
+		if tb, ok := sb.Struct.(core.ToolbarMaker); ok {
+			d.AddAppBar(tb.MakeToolbar)
 		}
-	}
-	v.Widget.SetText(txt).Update()
-}
-
-func (v *SliceValue) ConfigDialog(d *core.Body) (bool, func()) {
-	npv := reflectx.NonPointerValue(v.Value)
-	if v.Value.IsZero() || npv.IsZero() {
-		return false, nil
-	}
-	vvp := reflectx.OnePointerValue(v.Value)
-	if vvp.Kind() != reflect.Pointer {
-		slog.Error("views.SliceValue: Cannot view unadressable (non-pointer) slices", "type", v.Value.Type())
-		return false, nil
-	}
-	slci := vvp.Interface()
-	if npv.Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(v.Value.Interface())).Kind() == reflect.Struct {
-		tv := NewTableView(d).SetSlice(slci).SetViewPath(v.ViewPath)
-		tv.SetReadOnly(v.IsReadOnly())
-		d.AddAppBar(tv.ConfigToolbar)
-	} else {
-		sv := NewSliceView(d).SetSlice(slci).SetViewPath(v.ViewPath)
-		sv.SetReadOnly(v.IsReadOnly())
-		d.AddAppBar(sv.ConfigToolbar)
-	}
-	return true, nil
-}
-
-// SliceInlineValue represents a slice or array value with a [SliceViewInline].
-type SliceInlineValue struct {
-	ValueBase[*SliceViewInline]
-}
-
-func (v *SliceInlineValue) Config() {
-	v.Widget.SliceValue = v
-	v.Widget.ViewPath = v.ViewPath
-	v.Widget.SetSlice(v.Value.Interface())
-	v.Widget.OnChange(func(e events.Event) {
-		v.SendChange(e)
 	})
 }
 
-func (v *SliceInlineValue) Update() {
-	csl := v.Value.Interface()
-	newslc := false
-	if reflect.TypeOf(v.Value).Kind() != reflect.Pointer { // prevent crash on non-comparable
-		newslc = true
-	} else {
-		newslc = v.Widget.Slice != csl
-	}
-	if newslc {
-		v.Widget.SetSlice(csl)
-	} else {
-		v.Widget.Update()
-	}
+// MapButton represents a slice or array value with a button.
+type MapButton struct {
+	core.Button
+	Map any
 }
 
-// MapValue represents a map value with a button.
-type MapValue struct {
-	ValueBase[*core.Button]
+func (mb *MapButton) WidgetValue() any { return &mb.Map }
+
+func (mb *MapButton) Init() {
+	mb.Button.Init()
+	mb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	mb.Updater(func() {
+		mb.SetText(labels.FriendlyMapLabel(reflect.ValueOf(mb.Map)))
+	})
+	core.InitValueButton(mb, true, func(d *core.Body) {
+		mv := NewMapView(d).SetMap(mb.Map)
+		mv.SetValueTitle(mb.ValueTitle).SetReadOnly(mb.IsReadOnly())
+		d.AddAppBar(mv.MakeToolbar)
+	})
 }
 
-func (v *MapValue) Config() {
-	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	ConfigDialogWidget(v, true)
+// TreeButton represents a [tree.Node] value with a button.
+type TreeButton struct {
+	core.Button
+	Tree tree.Node
 }
 
-func (v *MapValue) Update() {
-	npv := reflectx.NonPointerValue(v.Value)
-	mpi := v.Value.Interface()
-	txt := ""
-	if !npv.IsValid() || npv.IsNil() {
-		txt = "None"
-	} else {
-		bnm := reflectx.FriendlyTypeName(reflectx.MapValueType(mpi))
-		if strings.HasSuffix(bnm, "s") {
-			txt = strcase.ToSentence(fmt.Sprintf("%d lists of %s", npv.Len(), bnm))
-		} else {
-			txt = strcase.ToSentence(fmt.Sprintf("%d %ss", npv.Len(), bnm))
+func (tb *TreeButton) WidgetValue() any { return &tb.Tree }
+
+func (tb *TreeButton) Init() {
+	tb.Button.Init()
+	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	tb.Updater(func() {
+		path := "None"
+		if tb.Tree != nil {
+			path = tb.Tree.AsTreeNode().String()
 		}
-	}
-	v.Widget.SetText(txt).Update()
-}
-
-func (v *MapValue) ConfigDialog(d *core.Body) (bool, func()) {
-	if v.Value.IsZero() || reflectx.NonPointerValue(v.Value).IsZero() {
-		return false, nil
-	}
-	mpi := v.Value.Interface()
-	mv := NewMapView(d).SetMap(mpi)
-	mv.SetViewPath(v.ViewPath).SetReadOnly(v.IsReadOnly())
-	d.AddAppBar(mv.ConfigToolbar)
-	return true, nil
-}
-
-// MapInlineValue represents a map value with a [MapViewInline].
-type MapInlineValue struct {
-	ValueBase[*MapViewInline]
-}
-
-func (v *MapInlineValue) Config() {
-	v.Widget.MapValue = v
-	v.Widget.ViewPath = v.ViewPath
-	v.Widget.SetMap(v.Value.Interface())
-	v.Widget.OnChange(func(e events.Event) {
-		v.SendChange(e)
+		tb.SetText(path)
+	})
+	core.InitValueButton(tb, true, func(d *core.Body) {
+		InspectorView(d, tb.Tree)
 	})
 }
 
-func (v *MapInlineValue) Update() {
-	cmp := v.Value.Interface()
-	if v.Widget.Map != cmp {
-		v.Widget.SetMap(cmp)
-	} else {
-		v.Widget.UpdateValues()
-	}
+// TypeChooser represents a [types.Type] value with a chooser.
+type TypeChooser struct {
+	core.Chooser
 }
 
-// TreeValue represents a [tree.Node] value with a button.
-type TreeValue struct {
-	ValueBase[*core.Button]
-}
-
-func (v *TreeValue) Config() {
-	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	ConfigDialogWidget(v, true)
-}
-
-func (v *TreeValue) Update() {
-	path := "None"
-	k := v.TreeValue()
-	if k != nil && k.This() != nil {
-		path = k.AsTreeNode().String()
-	}
-	v.Widget.SetText(path).Update()
-}
-
-func (v *TreeValue) ConfigDialog(d *core.Body) (bool, func()) {
-	k := v.TreeValue()
-	if k == nil {
-		return false, nil
-	}
-	InspectorView(d, k)
-	return true, nil
-}
-
-// TreeValue returns the actual underlying [tree.Node] value, or nil.
-func (vv *TreeValue) TreeValue() tree.Node {
-	if !vv.Value.IsValid() || vv.Value.IsNil() {
-		return nil
-	}
-	npv := reflectx.NonPointerValue(vv.Value)
-	if npv.Kind() == reflect.Interface {
-		return npv.Interface().(tree.Node)
-	}
-	opv := reflectx.OnePointerValue(vv.Value)
-	if opv.IsNil() {
-		return nil
-	}
-	return opv.Interface().(tree.Node)
-}
-
-// EnumValue represents an [enums.Enum] value with a chooser.
-type EnumValue struct {
-	ValueBase[*core.Chooser]
-}
-
-func (v *EnumValue) Config() {
-	e := reflectx.OnePointerUnderlyingValue(v.Value).Interface().(enums.Enum)
-	v.Widget.SetEnum(e)
-	v.Widget.OnChange(func(e events.Event) {
-		v.SetValue(v.Widget.CurrentItem.Value)
-	})
-}
-
-func (v *EnumValue) Update() {
-	npv := reflectx.NonPointerValue(v.Value)
-	v.Widget.SetCurrentValue(npv.Interface())
-}
-
-// BitFlagValue represents an [enums.BitFlag] value with chip switches.
-type BitFlagValue struct {
-	ValueBase[*core.Switches]
-}
-
-func (v *BitFlagValue) Config() {
-	v.Widget.SetType(core.SwitchChip).SetEnum(v.EnumValue())
-	v.Widget.OnChange(func(e events.Event) {
-		v.Widget.UpdateBitFlag(v.EnumValue())
-	})
-}
-
-func (v *BitFlagValue) Update() {
-	v.Widget.UpdateFromBitFlag(v.EnumValue())
-}
-
-// EnumValue returns the underlying [enums.BitFlagSetter] value.
-func (v *BitFlagValue) EnumValue() enums.BitFlagSetter {
-	// special case to use [tree.Node.FlagType] if we are the Flags field
-	if v.Field != nil && v.Field.Name == "Flags" {
-		if k, ok := v.Owner.(tree.Node); ok {
-			return k.FlagType()
-		}
-	}
-	e := v.Value.Interface().(enums.BitFlagSetter)
-	return e
-}
-
-// TypeValue represents a [types.Type] value with a chooser.
-type TypeValue struct {
-	ValueBase[*core.Chooser]
-}
-
-func (v *TypeValue) Config() {
+func (tc *TypeChooser) Init() {
+	tc.Chooser.Init()
 	typEmbeds := core.WidgetBaseType
-	if tetag, ok := v.Tag("type-embeds"); ok {
-		typ := types.TypeByName(tetag)
-		if typ != nil {
-			typEmbeds = typ
-		}
-	}
+	// if tetag, ok := tc.Tag("type-embeds"); ok { // TODO(config)
+	// 	typ := types.TypeByName(tetag)
+	// 	if typ != nil {
+	// 		typEmbeds = typ
+	// 	}
+	// }
 
 	tl := types.AllEmbeddersOf(typEmbeds)
-	v.Widget.SetTypes(tl...)
-	v.Widget.OnChange(func(e events.Event) {
-		tval := v.Widget.CurrentItem.Value.(*types.Type)
-		v.SetValue(tval)
+	tc.SetTypes(tl...)
+}
+
+// IconButton represents an [icons.Icon] with a [core.Button] that opens
+// a dialog for selecting the icon.
+type IconButton struct {
+	core.Button
+}
+
+func (ib *IconButton) WidgetValue() any { return &ib.Icon }
+
+func (ib *IconButton) Init() { // TODO(config): view:"show-name"
+	ib.Button.Init()
+	ib.Updater(func() {
+		if ib.IsReadOnly() {
+			ib.SetType(core.ButtonText)
+		} else {
+			ib.SetType(core.ButtonTonal)
+		}
+		if ib.Icon.IsNil() {
+			ib.Icon = icons.Blank
+		}
+	})
+	core.InitValueButton(ib, false, func(d *core.Body) {
+		d.SetTitle("Select an icon")
+		si := 0
+		all := icons.All()
+		sv := NewSliceView(d)
+		sv.SetSlice(&all).SetSelectedValue(ib.Icon).BindSelect(&si)
+		sv.SetStyleFunc(func(w core.Widget, s *styles.Style, row int) {
+			w.(*IconButton).SetText(strcase.ToSentence(string(all[row])))
+		})
+		sv.OnChange(func(e events.Event) {
+			ib.Icon = icons.AllIcons[si]
+		})
 	})
 }
 
-func (v *TypeValue) Update() {
-	opv := reflectx.OnePointerValue(v.Value)
-	typ := opv.Interface().(*types.Type)
-	v.Widget.SetCurrentValue(typ)
+// FontButton represents a [core.FontName] with a [core.Button] that opens
+// a dialog for selecting the font family.
+type FontButton struct {
+	core.Button
 }
 
-// ByteSliceValue represents a slice of bytes with a text field.
-type ByteSliceValue struct {
-	ValueBase[*core.TextField]
-}
+func (fb *FontButton) WidgetValue() any { return &fb.Text }
 
-func (v *ByteSliceValue) Config() {
-	v.Widget.OnChange(func(e events.Event) {
-		v.SetValue(v.Widget.Text())
-	})
-}
-
-func (v *ByteSliceValue) Update() {
-	npv := reflectx.NonPointerValue(v.Value)
-	bv := npv.Interface().([]byte)
-	v.Widget.SetText(string(bv))
-}
-
-// RuneSliceValue represents a slice of runes with a text field.
-type RuneSliceValue struct {
-	ValueBase[*core.TextField]
-}
-
-func (v *RuneSliceValue) Config() {
-	v.Widget.OnChange(func(e events.Event) {
-		v.SetValue(v.Widget.Text())
-	})
-}
-
-func (v *RuneSliceValue) Update() {
-	npv := reflectx.NonPointerValue(v.Value)
-	rv := npv.Interface().([]rune)
-	v.Widget.SetText(string(rv))
-}
-
-// NilValue represents a nil value with a label that has text "None".
-type NilValue struct {
-	ValueBase[*core.Text]
-}
-
-func (v *NilValue) Config() {
-	v.Widget.SetText("None")
-}
-
-func (vv *NilValue) Update() {}
-
-// IconValue represents an [icons.Icon] value with a button.
-type IconValue struct {
-	ValueBase[*core.Button]
-}
-
-func (v *IconValue) Config() {
-	v.Widget.SetType(core.ButtonTonal)
-	ConfigDialogWidget(v, false)
-}
-
-func (v *IconValue) Update() {
-	txt := reflectx.ToString(v.Value.Interface())
-	if icons.Icon(txt).IsNil() {
-		v.Widget.SetIcon(icons.Blank)
-	} else {
-		v.Widget.SetIcon(icons.Icon(txt))
-	}
-	if view, ok := v.Tag("view"); ok {
-		if strings.Contains(view, "show-name") {
-			if txt == "" {
-				txt = "None"
+func (fb *FontButton) Init() {
+	fb.Button.Init()
+	fb.SetType(core.ButtonTonal)
+	core.InitValueButton(fb, false, func(d *core.Body) {
+		d.SetTitle("Select a font family")
+		si := 0
+		fi := paint.FontLibrary.FontInfo
+		tv := NewTableView(d)
+		tv.SetSlice(&fi).SetSelectedField("Name").SetSelectedValue(fb.Text).BindSelect(&si)
+		tv.SetStyleFunc(func(w core.Widget, s *styles.Style, row, col int) {
+			if col != 4 {
+				return
 			}
-			v.Widget.SetText(strcase.ToSentence(txt))
-		}
-	}
-	v.Widget.Update()
-}
-
-func (v *IconValue) ConfigDialog(d *core.Body) (bool, func()) {
-	d.SetTitle("Select an icon")
-	si := 0
-	ics := icons.All()
-	cur := icons.Icon(reflectx.ToString(v.Value.Interface()))
-	NewSliceView(d).SetStyleFunc(func(w core.Widget, s *styles.Style, row int) {
-		w.(*core.Button).SetText(strcase.ToSentence(string(ics[row])))
-	}).SetSlice(&ics).SetSelectedValue(cur).BindSelect(&si)
-	return true, func() {
-		if si >= 0 {
-			ic := icons.AllIcons[si]
-			v.SetValue(ic)
-			v.Update()
-		}
-	}
-}
-
-// FontValue represents a [core.FontName] value with a button.
-type FontValue struct {
-	ValueBase[*core.Button]
-}
-
-func (v *FontValue) Config() {
-	v.Widget.SetType(core.ButtonTonal)
-	v.Widget.Style(func(s *styles.Style) {
-		// TODO(kai): fix this not working (probably due to medium font weight)
-		s.Font.Family = reflectx.ToString(v.Value.Interface())
+			s.Font.Family = fi[row].Name
+			s.Font.Stretch = fi[row].Stretch
+			s.Font.Weight = fi[row].Weight
+			s.Font.Style = fi[row].Style
+			s.Font.Size.Pt(18)
+		})
+		tv.OnChange(func(e events.Event) {
+			fb.Text = fi[si].Name
+		})
 	})
-	ConfigDialogWidget(v, false)
-}
-
-func (v *FontValue) Update() {
-	txt := reflectx.ToString(v.Value.Interface())
-	v.Widget.SetText(txt).Update()
-}
-
-func (v *FontValue) ConfigDialog(d *core.Body) (bool, func()) {
-	d.SetTitle("Select a font")
-	si := 0
-	fi := paint.FontLibrary.FontInfo
-	cur := core.FontName(reflectx.ToString(v.Value.Interface()))
-	NewTableView(d).SetStyleFunc(func(w core.Widget, s *styles.Style, row, col int) {
-		if col != 4 {
-			return
-		}
-		s.Font.Family = fi[row].Name
-		s.Font.Stretch = fi[row].Stretch
-		s.Font.Weight = fi[row].Weight
-		s.Font.Style = fi[row].Style
-		s.Font.Size.Pt(18)
-	}).SetSlice(&fi).SetSelectedValue(cur).SetSelectedField("Name").BindSelect(&si)
-
-	return true, func() {
-		if si >= 0 {
-			fi := paint.FontLibrary.FontInfo[si]
-			v.SetValue(fi.Name)
-			v.Update()
-		}
-	}
-}
-
-// FileValue represents a [core.Filename] value with a button.
-type FileValue struct {
-	ValueBase[*core.Button]
-}
-
-func (v *FileValue) Config() {
-	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.File)
-	ConfigDialogWidget(v, false)
-}
-
-func (v *FileValue) Update() {
-	txt := reflectx.ToString(v.Value.Interface())
-	if txt == "" {
-		txt = "(click to open file chooser)"
-	}
-	v.Widget.SetText(txt).Update()
-}
-
-func (v *FileValue) ConfigDialog(d *core.Body) (bool, func()) {
-	v.SetFlag(true, ValueDialogNewWindow) // default to new window on supported platforms
-	cur := reflectx.ToString(v.Value.Interface())
-	ext, _ := v.Tag("ext")
-	fv := NewFileView(d).SetFilename(cur, ext)
-	d.AddAppBar(fv.ConfigToolbar)
-	return true, func() {
-		cur = fv.SelectedFile()
-		v.SetValue(cur)
-		v.Update()
-	}
-}
-
-// FuncValue represents a function value with a [FuncButton].
-type FuncValue struct {
-	ValueBase[*FuncButton]
-}
-
-func (v *FuncValue) Config() {
-	v.Widget.SetType(core.ButtonTonal)
-}
-
-func (v *FuncValue) Update() {
-	fun := reflectx.NonPointerValue(v.Value).Interface()
-	// if someone is viewing an arbitrary function, there is a good chance
-	// that it is not added to types (and that is out of their control)
-	// (eg: in the inspector), so we do not warn on unadded functions.
-	v.Widget.SetWarnUnadded(false).SetFunc(fun)
 }

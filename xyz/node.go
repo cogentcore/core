@@ -117,8 +117,8 @@ type NodeBase struct {
 	// complete specification of position and orientation
 	Pose Pose `set:"-"`
 
-	// Sc is the cached Scene
-	Sc *Scene `copier:"-" set:"-"`
+	// Scene is the cached Scene
+	Scene *Scene `copier:"-" set:"-"`
 
 	// mutex on pose access -- needed for parallel updating
 	PoseMu sync.RWMutex `view:"-" copier:"-" json:"-" xml:"-"  set:"-"`
@@ -138,7 +138,7 @@ type NodeBase struct {
 
 	// 2D bounding box for region occupied within Scene Frame that we render onto.
 	// This is BBox intersected with Frame bounds.
-	ScBBox image.Rectangle `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
+	SceneBBox image.Rectangle `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
 // NodeFlags extend [tree.Flags] to hold 3D node state.
@@ -189,11 +189,11 @@ func (nb *NodeBase) OnAdd() {
 		return
 	}
 	if sc, ok := nb.Par.(*Scene); ok {
-		nb.Sc = sc
+		nb.Scene = sc
 		return
 	}
 	if _, pnb := AsNode(nb.Par); pnb != nil {
-		nb.Sc = pnb.Sc
+		nb.Scene = pnb.Scene
 		return
 	}
 	fmt.Println(nb, "not set from parent")
@@ -260,18 +260,18 @@ func (nb *NodeBase) UpdateBBox2D(size math32.Vector2) {
 	// BBox is always relative to scene
 	nb.BBox = image.Rectangle{Min: image.Point{int(Wmin.X), int(Wmax.Y)}, Max: image.Point{int(Wmax.X), int(Wmin.Y)}}
 	// note: BBox is inaccurate for objects extending behind camera
-	if nb.Sc == nil {
+	if nb.Scene == nil {
 		fmt.Println(nb, "Error: scene is nil")
 		return
 	}
-	isvis := nb.Sc.Camera.Frustum.IntersectsBox(nb.WorldBBox.BBox)
+	isvis := nb.Scene.Camera.Frustum.IntersectsBox(nb.WorldBBox.BBox)
 	if isvis { // filter out invisible at objbbox level
-		scbounds := image.Rectangle{Max: nb.Sc.Geom.Size}
+		scbounds := image.Rectangle{Max: nb.Scene.Geom.Size}
 		bbvis := nb.BBox.Intersect(scbounds)
-		nb.ScBBox = bbvis
+		nb.SceneBBox = bbvis
 	} else {
 		// fmt.Printf("not vis: %v  wbb: %v\n", nb.Name(), nb.WorldBBox.BBox)
-		nb.ScBBox = image.Rectangle{}
+		nb.SceneBBox = image.Rectangle{}
 	}
 }
 
@@ -285,18 +285,18 @@ func (nb *NodeBase) UpdateBBox2D(size math32.Vector2) {
 func (nb *NodeBase) RayPick(pos image.Point) math32.Ray {
 	// nb.PoseMu.RLock()
 	// nb.Sc.Camera.CamMu.RLock()
-	sz := nb.Sc.Geom.Size
+	sz := nb.Scene.Geom.Size
 	size := math32.Vec2(float32(sz.X), float32(sz.Y))
 	fpos := math32.Vec2(float32(pos.X), float32(pos.Y))
 	ndc := fpos.WindowToNDC(size, math32.Vector2{}, true) // flipY
 	var err error
 	ndc.Z = -1 // at closest point
-	cdir := math32.Vector4FromVector3(ndc, 1).MulMatrix4(&nb.Sc.Camera.InvProjectionMatrix)
+	cdir := math32.Vector4FromVector3(ndc, 1).MulMatrix4(&nb.Scene.Camera.InvProjectionMatrix)
 	cdir.Z = -1
 	cdir.W = 0 // vec
 	// get world position / transform of camera: matrix is inverse of ViewMatrix
-	wdir := cdir.MulMatrix4(&nb.Sc.Camera.Pose.Matrix)
-	wpos := nb.Sc.Camera.Pose.Matrix.Pos()
+	wdir := cdir.MulMatrix4(&nb.Scene.Camera.Pose.Matrix)
+	wpos := nb.Scene.Camera.Pose.Matrix.Pos()
 	// nb.Sc.Camera.CamMu.RUnlock()
 	invM, err := nb.Pose.WorldMatrix.Inverse()
 	// nb.PoseMu.RUnlock()
@@ -358,9 +358,9 @@ func (nb *NodeBase) SetPoseQuat(quat math32.Quat) {
 // TrackCamera moves this node to pose of camera
 func (nb *NodeBase) TrackCamera() {
 	nb.PoseMu.Lock()
-	nb.Sc.Camera.CamMu.RLock()
-	nb.Pose.CopyFrom(&nb.Sc.Camera.Pose)
-	nb.Sc.Camera.CamMu.RUnlock()
+	nb.Scene.Camera.CamMu.RLock()
+	nb.Pose.CopyFrom(&nb.Scene.Camera.Pose)
+	nb.Scene.Camera.CamMu.RUnlock()
 	nb.PoseMu.Unlock()
 
 	UpdateWorldMatrix(nb.This())
@@ -372,7 +372,7 @@ func (nb *NodeBase) TrackCamera() {
 func (nb *NodeBase) TrackLight(lightName string) error {
 	nb.PoseMu.Lock()
 	defer nb.PoseMu.Unlock()
-	lt, ok := nb.Sc.Lights.ValueByKeyTry(lightName)
+	lt, ok := nb.Scene.Lights.ValueByKeyTry(lightName)
 	if !ok {
 		return fmt.Errorf("xyz Node: %v TrackLight named: %v not found", nb.Path(), lightName)
 	}

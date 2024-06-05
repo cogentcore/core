@@ -28,7 +28,7 @@ type Solid struct {
 	MeshPtr Mesh `view:"-" set:"-"`
 }
 
-func (sld *Solid) OnInit() {
+func (sld *Solid) Init() {
 	sld.Defaults()
 }
 
@@ -41,7 +41,7 @@ func (sld *Solid) AsSolid() *Solid {
 }
 
 // Defaults sets default initial settings for solid params.
-// This is called automatically OnInit.
+// This is called automatically Init.
 func (sld *Solid) Defaults() {
 	sld.Pose.Defaults()
 	sld.Mat.Defaults()
@@ -52,7 +52,7 @@ func (sld *Solid) SetMeshName(meshName string) error {
 	if meshName == "" {
 		return nil
 	}
-	ms, err := sld.Sc.MeshByNameTry(meshName)
+	ms, err := sld.Scene.MeshByNameTry(meshName)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -112,7 +112,7 @@ func (sld *Solid) SetBright(v float32) *Solid {
 // (textures are accessed by name on Scene).
 // If name is empty, then texture is reset
 func (sld *Solid) SetTextureName(texName string) *Solid {
-	sld.Mat.SetTextureName(sld.Sc, texName)
+	sld.Mat.SetTextureName(sld.Scene, texName)
 	return sld
 }
 
@@ -178,7 +178,7 @@ func (sld *Solid) Validate() error {
 			return err
 		}
 	}
-	return sld.Mat.Validate(sld.Sc)
+	return sld.Mat.Validate(sld.Scene)
 }
 
 func (sld *Solid) IsVisible() bool {
@@ -231,10 +231,10 @@ func (sld *Solid) RenderClass() RenderClasses {
 
 // Render activates this solid for rendering
 func (sld *Solid) Render() {
-	sld.Sc.Phong.UseMeshName(string(sld.Mesh))
+	sld.Scene.Phong.UseMeshName(string(sld.Mesh))
 	sld.PoseMu.RLock()
-	sld.Sc.Phong.SetModelMtx(&sld.Pose.WorldMatrix)
+	sld.Scene.Phong.SetModelMtx(&sld.Pose.WorldMatrix)
 	sld.PoseMu.RUnlock()
-	sld.Mat.Render(sld.Sc)
-	sld.Sc.Phong.Render()
+	sld.Mat.Render(sld.Scene)
+	sld.Scene.Phong.Render()
 }

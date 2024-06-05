@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/views"
 )
@@ -173,30 +174,38 @@ type TensorGrid struct {
 	Tensor tensor.Tensor `set:"-"`
 
 	// display options
-	Disp TensorDisplay
+	Display TensorDisplay
 
 	// the actual colormap
 	ColorMap *colormap.Map
 }
 
-func (tg *TensorGrid) OnInit() {
-	tg.WidgetBase.OnInit()
-	tg.Disp.GridView = tg
-	tg.Disp.Defaults()
-	tg.HandleEvents()
-	tg.SetStyles()
+func (tg *TensorGrid) WidgetValue() any { return &tg.Tensor }
+
+func (tg *TensorGrid) SetWidgetValue(value any) error {
+	tg.SetTensor(value.(tensor.Tensor))
+	return nil
 }
 
-func (tg *TensorGrid) SetStyles() {
+func (tg *TensorGrid) Init() {
+	tg.WidgetBase.Init()
+	tg.Display.GridView = tg
+	tg.Display.Defaults()
 	tg.Style(func(s *styles.Style) {
 		ms := tg.MinSize()
-		s.Min.X.Dot(ms.X)
-		s.Min.Y.Dot(ms.Y)
+		s.Min.Set(units.Dot(ms.X), units.Dot(ms.Y))
 		s.Grow.Set(1, 1)
+	})
+
+	tg.OnDoubleClick(func(e events.Event) {
+		tg.OpenTensorView()
+	})
+	tg.AddContextMenu(func(m *core.Scene) { // todo: still not getting the context menu event at all
+		views.NewFuncButton(m, tg.EditSettings).SetIcon(icons.Edit)
 	})
 }
 
-// SetTensor sets the tensor and triggers a display update
+// SetTensor sets the tensor.  Must call Update after this.
 func (tg *TensorGrid) SetTensor(tsr tensor.Tensor) *TensorGrid {
 	if _, ok := tsr.(*tensor.String); ok {
 		log.Printf("TensorGrid: String tensors cannot be displayed using TensorGrid\n")
@@ -204,9 +213,8 @@ func (tg *TensorGrid) SetTensor(tsr tensor.Tensor) *TensorGrid {
 	}
 	tg.Tensor = tsr
 	if tg.Tensor != nil {
-		tg.Disp.FromMeta(tg.Tensor)
+		tg.Display.FromMeta(tg.Tensor)
 	}
-	tg.Update()
 	return tg
 }
 
@@ -227,18 +235,9 @@ func (tg *TensorGrid) OpenTensorView() {
 	*/
 }
 
-func (tg *TensorGrid) HandleEvents() {
-	tg.OnDoubleClick(func(e events.Event) {
-		tg.OpenTensorView()
-	})
-	tg.AddContextMenu(func(m *core.Scene) { // todo: still not getting the context menu event at all
-		views.NewFuncButton(m, tg.EditSettings).SetIcon(icons.Edit)
-	})
-}
-
 func (tg *TensorGrid) EditSettings() { //types:add
 	d := core.NewBody().AddTitle("Tensor Grid Display Options")
-	views.NewStructView(d).SetStruct(&tg.Disp).
+	views.NewStructView(d).SetStruct(&tg.Display).
 		OnChange(func(e events.Event) {
 			tg.NeedsRender()
 		})
@@ -250,33 +249,33 @@ func (tg *TensorGrid) MinSize() math32.Vector2 {
 	if tg.Tensor == nil || tg.Tensor.Len() == 0 {
 		return math32.Vector2{}
 	}
-	if tg.Disp.Image {
+	if tg.Display.Image {
 		return math32.Vec2(float32(tg.Tensor.DimSize(1)), float32(tg.Tensor.DimSize(0)))
 	}
-	rows, cols, rowEx, colEx := tensor.Projection2DShape(tg.Tensor.Shape(), tg.Disp.OddRow)
-	frw := float32(rows) + float32(rowEx)*tg.Disp.DimExtra // extra spacing
-	fcl := float32(cols) + float32(colEx)*tg.Disp.DimExtra // extra spacing
+	rows, cols, rowEx, colEx := tensor.Projection2DShape(tg.Tensor.Shape(), tg.Display.OddRow)
+	frw := float32(rows) + float32(rowEx)*tg.Display.DimExtra // extra spacing
+	fcl := float32(cols) + float32(colEx)*tg.Display.DimExtra // extra spacing
 	mx := float32(max(frw, fcl))
-	gsz := tg.Disp.TotPrefSize / mx
-	gsz = max(gsz, tg.Disp.GridMinSize)
-	gsz = min(gsz, tg.Disp.GridMaxSize)
+	gsz := tg.Display.TotPrefSize / mx
+	gsz = max(gsz, tg.Display.GridMinSize)
+	gsz = min(gsz, tg.Display.GridMaxSize)
 	gsz = max(gsz, 2)
 	return math32.Vec2(gsz*float32(fcl), gsz*float32(frw))
 }
 
 // EnsureColorMap makes sure there is a valid color map that matches specified name
 func (tg *TensorGrid) EnsureColorMap() {
-	if tg.ColorMap != nil && tg.ColorMap.Name != string(tg.Disp.ColorMap) {
+	if tg.ColorMap != nil && tg.ColorMap.Name != string(tg.Display.ColorMap) {
 		tg.ColorMap = nil
 	}
 	if tg.ColorMap == nil {
 		ok := false
-		tg.ColorMap, ok = colormap.AvailableMaps[string(tg.Disp.ColorMap)]
+		tg.ColorMap, ok = colormap.AvailableMaps[string(tg.Display.ColorMap)]
 		if !ok {
-			tg.Disp.ColorMap = ""
-			tg.Disp.Defaults()
+			tg.Display.ColorMap = ""
+			tg.Display.Defaults()
 		}
-		tg.ColorMap = colormap.AvailableMaps[string(tg.Disp.ColorMap)]
+		tg.ColorMap = colormap.AvailableMaps[string(tg.Display.ColorMap)]
 	}
 }
 
@@ -284,22 +283,22 @@ func (tg *TensorGrid) Color(val float64) (norm float64, clr color.Color) {
 	if tg.ColorMap.Indexed {
 		clr = tg.ColorMap.MapIndex(int(val))
 	} else {
-		norm = tg.Disp.Range.ClipNormValue(val)
+		norm = tg.Display.Range.ClipNormValue(val)
 		clr = tg.ColorMap.Map(float32(norm))
 	}
 	return
 }
 
 func (tg *TensorGrid) UpdateRange() {
-	if !tg.Disp.Range.FixMin || !tg.Disp.Range.FixMax {
+	if !tg.Display.Range.FixMin || !tg.Display.Range.FixMax {
 		min, max, _, _ := tg.Tensor.Range()
-		if !tg.Disp.Range.FixMin {
+		if !tg.Display.Range.FixMin {
 			nmin := minmax.NiceRoundNumber(min, true) // true = below #
-			tg.Disp.Range.Min = nmin
+			tg.Display.Range.Min = nmin
 		}
-		if !tg.Disp.Range.FixMax {
+		if !tg.Display.Range.FixMax {
 			nmax := minmax.NiceRoundNumber(max, false) // false = above #
-			tg.Disp.Range.Max = nmax
+			tg.Display.Range.Max = nmax
 		}
 	}
 }
@@ -321,7 +320,7 @@ func (tg *TensorGrid) Render() {
 
 	tsr := tg.Tensor
 
-	if tg.Disp.Image {
+	if tg.Display.Image {
 		ysz := tsr.DimSize(0)
 		xsz := tsr.DimSize(1)
 		nclr := 1
@@ -341,18 +340,18 @@ func (tg *TensorGrid) Render() {
 		for y := 0; y < ysz; y++ {
 			for x := 0; x < xsz; x++ {
 				ey := y
-				if !tg.Disp.TopZero {
+				if !tg.Display.TopZero {
 					ey = (ysz - 1) - y
 				}
 				switch {
 				case outclr:
 					var r, g, b, a float64
 					a = 1
-					r = tg.Disp.Range.ClipNormValue(tsr.Float([]int{0, y, x}))
-					g = tg.Disp.Range.ClipNormValue(tsr.Float([]int{1, y, x}))
-					b = tg.Disp.Range.ClipNormValue(tsr.Float([]int{2, y, x}))
+					r = tg.Display.Range.ClipNormValue(tsr.Float([]int{0, y, x}))
+					g = tg.Display.Range.ClipNormValue(tsr.Float([]int{1, y, x}))
+					b = tg.Display.Range.ClipNormValue(tsr.Float([]int{2, y, x}))
 					if nclr > 3 {
-						a = tg.Disp.Range.ClipNormValue(tsr.Float([]int{3, y, x}))
+						a = tg.Display.Range.ClipNormValue(tsr.Float([]int{3, y, x}))
 					}
 					cr := math32.Vec2(float32(x), float32(ey))
 					pr := pos.Add(cr.Mul(gsz))
@@ -361,18 +360,18 @@ func (tg *TensorGrid) Render() {
 				case nclr > 1:
 					var r, g, b, a float64
 					a = 1
-					r = tg.Disp.Range.ClipNormValue(tsr.Float([]int{y, x, 0}))
-					g = tg.Disp.Range.ClipNormValue(tsr.Float([]int{y, x, 1}))
-					b = tg.Disp.Range.ClipNormValue(tsr.Float([]int{y, x, 2}))
+					r = tg.Display.Range.ClipNormValue(tsr.Float([]int{y, x, 0}))
+					g = tg.Display.Range.ClipNormValue(tsr.Float([]int{y, x, 1}))
+					b = tg.Display.Range.ClipNormValue(tsr.Float([]int{y, x, 2}))
 					if nclr > 3 {
-						a = tg.Disp.Range.ClipNormValue(tsr.Float([]int{y, x, 3}))
+						a = tg.Display.Range.ClipNormValue(tsr.Float([]int{y, x, 3}))
 					}
 					cr := math32.Vec2(float32(x), float32(ey))
 					pr := pos.Add(cr.Mul(gsz))
 					pc.StrokeStyle.Color = colors.C(colors.FromFloat64(r, g, b, a))
 					pc.FillBox(pr, gsz, pc.StrokeStyle.Color)
 				default:
-					val := tg.Disp.Range.ClipNormValue(tsr.Float([]int{y, x}))
+					val := tg.Display.Range.ClipNormValue(tsr.Float([]int{y, x}))
 					cr := math32.Vec2(float32(x), float32(ey))
 					pr := pos.Add(cr.Mul(gsz))
 					pc.StrokeStyle.Color = colors.C(colors.FromFloat64(val, val, val, 1))
@@ -382,9 +381,9 @@ func (tg *TensorGrid) Render() {
 		}
 		return
 	}
-	rows, cols, rowEx, colEx := tensor.Projection2DShape(tsr.Shape(), tg.Disp.OddRow)
-	frw := float32(rows) + float32(rowEx)*tg.Disp.DimExtra // extra spacing
-	fcl := float32(cols) + float32(colEx)*tg.Disp.DimExtra // extra spacing
+	rows, cols, rowEx, colEx := tensor.Projection2DShape(tsr.Shape(), tg.Display.OddRow)
+	frw := float32(rows) + float32(rowEx)*tg.Display.DimExtra // extra spacing
+	fcl := float32(cols) + float32(colEx)*tg.Display.DimExtra // extra spacing
 	rowsInner := rows
 	colsInner := cols
 	if rowEx > 0 {
@@ -396,16 +395,16 @@ func (tg *TensorGrid) Render() {
 	tsz := math32.Vec2(fcl, frw)
 	gsz := sz.Div(tsz)
 
-	ssz := gsz.MulScalar(tg.Disp.GridFill) // smaller size with margin
+	ssz := gsz.MulScalar(tg.Display.GridFill) // smaller size with margin
 	for y := 0; y < rows; y++ {
-		yex := float32(int(y/rowsInner)) * tg.Disp.DimExtra
+		yex := float32(int(y/rowsInner)) * tg.Display.DimExtra
 		for x := 0; x < cols; x++ {
-			xex := float32(int(x/colsInner)) * tg.Disp.DimExtra
+			xex := float32(int(x/colsInner)) * tg.Display.DimExtra
 			ey := y
-			if !tg.Disp.TopZero {
+			if !tg.Display.TopZero {
 				ey = (rows - 1) - y
 			}
-			val := tensor.Projection2DValue(tsr, tg.Disp.OddRow, ey, x)
+			val := tensor.Projection2DValue(tsr, tg.Display.OddRow, ey, x)
 			cr := math32.Vec2(float32(x)+xex, float32(y)+yex)
 			pr := pos.Add(cr.Mul(gsz))
 			_, clr := tg.Color(val)

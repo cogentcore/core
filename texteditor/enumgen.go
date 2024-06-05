@@ -93,16 +93,16 @@ func (i *BufferSignals) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "BufferSignals")
 }
 
-var _BufferFlagsValues = []BufferFlags{2, 3, 4, 5, 6}
+var _BufferFlagsValues = []BufferFlags{3, 4, 5, 6, 7}
 
 // BufferFlagsN is the highest valid value for type BufferFlags, plus one.
-const BufferFlagsN BufferFlags = 7
+const BufferFlagsN BufferFlags = 8
 
-var _BufferFlagsValueMap = map[string]BufferFlags{`AutoSaving`: 2, `MarkingUp`: 3, `Changed`: 4, `NotSaved`: 5, `FileModOK`: 6}
+var _BufferFlagsValueMap = map[string]BufferFlags{`AutoSaving`: 3, `MarkingUp`: 4, `Changed`: 5, `NotSaved`: 6, `FileModOK`: 7}
 
-var _BufferFlagsDescMap = map[BufferFlags]string{2: `BufferAutoSaving is used in atomically safe way to protect autosaving`, 3: `BufferMarkingUp indicates current markup operation in progress -- don&#39;t redo`, 4: `BufferChanged indicates if the text has been changed (edited) relative to the original, since last EditDone`, 5: `BufferNotSaved indicates if the text has been changed (edited) relative to the original, since last Save`, 6: `BufferFileModOK have already asked about fact that file has changed since being opened, user is ok`}
+var _BufferFlagsDescMap = map[BufferFlags]string{3: `BufferAutoSaving is used in atomically safe way to protect autosaving`, 4: `BufferMarkingUp indicates current markup operation in progress -- don&#39;t redo`, 5: `BufferChanged indicates if the text has been changed (edited) relative to the original, since last EditDone`, 6: `BufferNotSaved indicates if the text has been changed (edited) relative to the original, since last Save`, 7: `BufferFileModOK have already asked about fact that file has changed since being opened, user is ok`}
 
-var _BufferFlagsMap = map[BufferFlags]string{2: `AutoSaving`, 3: `MarkingUp`, 4: `Changed`, 5: `NotSaved`, 6: `FileModOK`}
+var _BufferFlagsMap = map[BufferFlags]string{3: `AutoSaving`, 4: `MarkingUp`, 5: `Changed`, 6: `NotSaved`, 7: `FileModOK`}
 
 // String returns the string representation of this BufferFlags value.
 func (i BufferFlags) String() string {
@@ -162,16 +162,16 @@ func (i *BufferFlags) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "BufferFlags")
 }
 
-var _EditorFlagsValues = []EditorFlags{2, 3, 4, 5, 6}
+var _EditorFlagsValues = []EditorFlags{3, 4, 5, 6, 7}
 
 // EditorFlagsN is the highest valid value for type EditorFlags, plus one.
-const EditorFlagsN EditorFlags = 7
+const EditorFlagsN EditorFlags = 8
 
-var _EditorFlagsValueMap = map[string]EditorFlags{`EditorHasLineNumbers`: 2, `EditorNeedsLayout`: 3, `EditorLastWasTabAI`: 4, `EditorLastWasUndo`: 5, `EditorTargetSet`: 6}
+var _EditorFlagsValueMap = map[string]EditorFlags{`EditorHasLineNumbers`: 3, `EditorNeedsLayout`: 4, `EditorLastWasTabAI`: 5, `EditorLastWasUndo`: 6, `EditorTargetSet`: 7}
 
-var _EditorFlagsDescMap = map[EditorFlags]string{2: `EditorHasLineNumbers indicates that this editor has line numbers (per Buf option)`, 3: `EditorNeedsLayout is set by NeedsLayout: Editor does significant internal layout in LayoutAllLines, and its layout is simply based on what it gets allocated, so it does not affect the rest of the Scene.`, 4: `EditorLastWasTabAI indicates that last key was a Tab auto-indent`, 5: `EditorLastWasUndo indicates that last key was an undo`, 6: `EditorTargetSet indicates that the CursorTarget is set`}
+var _EditorFlagsDescMap = map[EditorFlags]string{3: `EditorHasLineNumbers indicates that this editor has line numbers (per [Buffer] option)`, 4: `EditorNeedsLayout is set by NeedsLayout: Editor does significant internal layout in LayoutAllLines, and its layout is simply based on what it gets allocated, so it does not affect the rest of the Scene.`, 5: `EditorLastWasTabAI indicates that last key was a Tab auto-indent`, 6: `EditorLastWasUndo indicates that last key was an undo`, 7: `EditorTargetSet indicates that the CursorTarget is set`}
 
-var _EditorFlagsMap = map[EditorFlags]string{2: `EditorHasLineNumbers`, 3: `EditorNeedsLayout`, 4: `EditorLastWasTabAI`, 5: `EditorLastWasUndo`, 6: `EditorTargetSet`}
+var _EditorFlagsMap = map[EditorFlags]string{3: `EditorHasLineNumbers`, 4: `EditorNeedsLayout`, 5: `EditorLastWasTabAI`, 6: `EditorLastWasUndo`, 7: `EditorTargetSet`}
 
 // String returns the string representation of this EditorFlags value.
 func (i EditorFlags) String() string {

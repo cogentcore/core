@@ -282,7 +282,6 @@ var StandardMimes = []MimeType{
 	{"text/x-asp", []string{".aspx", ".asax", ".ascx", ".ashx", ".asmx", ".axd"}, Code, Unknown},
 
 	{"text/x-sh", []string{".bash", ".sh"}, Code, Bash},
-	{"text/x-sh", []string{".cosh"}, Code, Cosh},
 	{"application/x-sh", nil, Code, Bash},
 
 	{"text/x-csrc", []string{".c", ".C", ".c++", ".cpp", ".cxx", ".cc", ".h", ".h++", ".hpp", ".hxx", ".hh", ".hlsl", ".gsl", ".frag", ".vert", ".mm"}, Code, C}, // this is apparently the main one now
@@ -304,7 +303,7 @@ var StandardMimes = []MimeType{
 	{"text/x-forth", []string{".frt"}, Code, Forth},                       // note: ".fs" conflicts with fsharp
 	{"text/x-fortran", []string{".f", ".F"}, Code, Fortran},
 	{"text/x-fsharp", []string{".fs", ".fsi"}, Code, FSharp},
-	{"text/x-gosrc", []string{".go", ".mod", ".work"}, Code, Go},
+	{"text/x-gosrc", []string{".go", ".mod", ".work", ".cosh"}, Code, Go},
 	{"text/x-haskell", []string{".hs", ".lhs"}, Code, Haskell},
 	{"text/x-literate-haskell", nil, Code, Haskell}, // todo: not sure if same or not
 

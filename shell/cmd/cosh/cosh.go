@@ -6,18 +6,16 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/cli"
 	"cogentcore.org/core/shell"
 	"cogentcore.org/core/shell/interpreter"
-	"github.com/ergochat/readline"
 	"github.com/traefik/yaegi/interp"
 )
 
@@ -26,12 +24,28 @@ import (
 // Config is the configuration information for the cosh cli.
 type Config struct {
 
-	// Input is the name of the input file to run/compile.
+	// The input file to run/compile.
+	// If this is provided as the first argument,
+	// then the program will exit after running,
+	// unless the Interactive mode is flagged.
 	Input string `posarg:"0" required:"-"`
 
-	// Output is the name of the Go file to output to.
+	// the Go file to output the transpiled Input file to,
+	// as an optional second argument in build mode.
 	// It defaults to the input file with .cosh changed to .go.
 	Output string `cmd:"build" posarg:"1" required:"-"`
+
+	// an optional expression to evaluate, which can be used
+	// in addition to the Input file to run, to execute commands
+	// defined within that file for example, or as a command to run
+	// prior to starting interactive mode if no Input is specified.
+	Expr string `flag:"e,expr"`
+
+	// runs the interactive command line after processing an Input file.
+	// Interactive mode is the default for all cases except when
+	// an Input file is specified, and is not available
+	// if an Output file is specified for transpiling.
+	Interactive bool `flag:"i,interactive"`
 }
 
 func main() { //types:skip
@@ -45,43 +59,41 @@ func Run(c *Config) error { //cli:cmd -root
 	if c.Input == "" {
 		return Interactive(c)
 	}
-	b, err := os.ReadFile(c.Input)
-	if err != nil {
-		return err
+	code := ""
+	if errors.Log1(dirs.FileExists(c.Input)) {
+		b, err := os.ReadFile(c.Input)
+		if err != nil && c.Expr == "" {
+			return err
+		}
+		code = string(b)
+	}
+	if c.Expr != "" {
+		if code != "" {
+			code += "\n"
+		}
+		code += c.Expr + "\n"
 	}
 	in := interpreter.NewInterpreter(interp.Options{})
-	err = in.Eval(string(b))
+	in.Config()
+	_, _, err := in.Eval(code)
+	if err == nil {
+		err = in.Shell.DepthError()
+	}
+	if c.Interactive {
+		return Interactive(c)
+	}
 	return err
 }
 
 // Interactive runs an interactive shell that allows the user to input cosh.
 func Interactive(c *Config) error {
 	in := interpreter.NewInterpreter(interp.Options{})
-
-	rl, err := readline.NewFromConfig(&readline.Config{
-		AutoComplete: &shell.ReadlineCompleter{Shell: in.Shell},
-		Undo:         true,
-	})
-	if err != nil {
-		return err
+	in.Config()
+	if c.Expr != "" {
+		in.Eval(c.Expr)
 	}
-	defer rl.Close()
-	log.SetOutput(rl.Stderr()) // redraw the prompt correctly after log output
-
-	for {
-		rl.SetPrompt(in.Prompt())
-		line, err := rl.ReadLine()
-		if errors.Is(err, readline.ErrInterrupt) {
-			continue
-		}
-		if errors.Is(err, io.EOF) {
-			os.Exit(0)
-		}
-		if err != nil {
-			return err
-		}
-		in.Eval(line)
-	}
+	in.Interactive()
+	return nil
 }
 
 // Build builds the specified input cosh file to the specified output Go file.

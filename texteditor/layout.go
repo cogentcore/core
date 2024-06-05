@@ -158,23 +158,23 @@ func (ed *Editor) SizeDown(iter int) bool {
 	} else {
 		ed.ReLayoutAllLines()
 	}
-	redo := ed.Layout.SizeDown(iter)
+	redo := ed.Frame.SizeDown(iter)
 	chg := ed.ManageOverflow(iter, true) // this must go first.
 	return redo || chg
 }
 
 func (ed *Editor) SizeFinal() {
-	ed.Layout.SizeFinal()
+	ed.Frame.SizeFinal()
 	ed.ReLayoutAllLines()
 }
 
 func (ed *Editor) Position() {
-	ed.Layout.Position()
+	ed.Frame.Position()
 	ed.ConfigScrolls()
 }
 
 func (ed *Editor) ScenePos() {
-	ed.Layout.ScenePos()
+	ed.Frame.ScenePos()
 	ed.PositionScrolls()
 }
 

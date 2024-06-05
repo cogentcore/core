@@ -72,13 +72,13 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 	}
 
 	hasSelected := false
-	msc.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+	msc.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		if wi.This() == msc.This() {
 			return tree.Continue
 		}
 		if bt := AsButton(wi); bt != nil {
 			if bt.Menu == nil {
-				bt.HandleClickDismissMenu()
+				bt.handleClickDismissMenu()
 			}
 		}
 		if !hasSelected && wb.StateIs(states.Selected) {

@@ -8,9 +8,6 @@ import (
 	"reflect"
 )
 
-// These are a set of consistently named functions for navigating pointer
-// types and values within the reflect system.
-
 // NonPointerType returns a non-pointer version of the given type.
 func NonPointerType(typ reflect.Type) reflect.Type {
 	if typ == nil {
@@ -18,34 +15,6 @@ func NonPointerType(typ reflect.Type) reflect.Type {
 	}
 	for typ.Kind() == reflect.Pointer {
 		typ = typ.Elem()
-	}
-	return typ
-}
-
-// PointerType returns the pointer version of the given type
-// if it is not already a pointer type.
-func PointerType(typ reflect.Type) reflect.Type {
-	if typ == nil {
-		return typ
-	}
-	if typ.Kind() != reflect.Pointer {
-		typ = reflect.PointerTo(typ)
-	}
-	return typ
-}
-
-// OnePointerType returns a type that is exactly one pointer away
-// from a non-pointer type.
-func OnePointerType(typ reflect.Type) reflect.Type {
-	if typ == nil {
-		return typ
-	}
-	if typ.Kind() != reflect.Pointer {
-		typ = reflect.PointerTo(typ)
-	} else {
-		for typ.Elem().Kind() == reflect.Pointer {
-			typ = typ.Elem()
-		}
 	}
 	return typ
 }
@@ -79,6 +48,7 @@ func OnePointerValue(v reflect.Value) reflect.Value {
 		if v.CanAddr() {
 			return v.Addr()
 		}
+		// slog.Error("reflectx.OnePointerValue: cannot take address of value", "value", v)
 		pv := reflect.New(v.Type())
 		pv.Elem().Set(v)
 		return pv
@@ -90,10 +60,15 @@ func OnePointerValue(v reflect.Value) reflect.Value {
 	return v
 }
 
-// OnePointerUnderlyingValue returns a value that is exactly one pointer
-// away from a non-pointer value. It also goes through any interfaces to
-// find the actual underlying value.
-func OnePointerUnderlyingValue(v reflect.Value) reflect.Value {
+// Underlying returns the actual underlying version of the given value,
+// going through any pointers and interfaces.
+func Underlying(v reflect.Value) reflect.Value {
+	return UnderlyingPointer(v).Elem()
+}
+
+// UnderlyingPointer returns a pointer to the actual underlying version of the
+// given value, going through any pointers and interfaces.
+func UnderlyingPointer(v reflect.Value) reflect.Value {
 	npv := NonPointerValue(v)
 	if !npv.IsValid() {
 		return v
@@ -105,4 +80,18 @@ func OnePointerUnderlyingValue(v reflect.Value) reflect.Value {
 		npv = npv.Elem()
 	}
 	return OnePointerValue(npv)
+}
+
+// NewFrom returns a value that is guaranteed to be a pointer to the [Underlying] version of
+// the given value. If that value is not addressable, it makes a new fake pointer that points
+// to a copy of the value, not the actual value. This should only be used you do not need the
+// pointer to actually point to the original value.
+func NewFrom(v reflect.Value) reflect.Value {
+	u := Underlying(v)
+	if u.CanAddr() {
+		return u.Addr()
+	}
+	p := reflect.New(u.Type())
+	p.Elem().Set(u)
+	return p
 }

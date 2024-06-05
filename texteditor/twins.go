@@ -7,6 +7,7 @@ package texteditor
 import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 )
 
@@ -20,41 +21,36 @@ type TwinEditors struct {
 
 	// [Buffer] for B
 	BufferB *Buffer `json:"-" xml:"-"`
+
+	inInputEvent bool
 }
 
-func (te *TwinEditors) OnInit() {
-	te.Splits.OnInit()
-	te.SetStyles()
-}
+func (te *TwinEditors) Init() {
+	te.Splits.Init()
+	te.BufferA = NewBuffer()
+	te.BufferB = NewBuffer()
 
-func (te *TwinEditors) SetStyles() {
-	te.Style(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-	})
-	te.OnWidgetAdded(func(w core.Widget) {
-		switch w.PathFrom(te) {
-		case "text-a", "text-b":
+	f := func(name string, buf *Buffer) {
+		core.AddChildAt(te, name, func(w *Editor) {
+			w.SetBuffer(buf)
 			w.Style(func(s *styles.Style) {
-				s.Grow.Set(1, 1)
 				s.Min.X.Ch(80)
 				s.Min.Y.Em(40)
 			})
-		}
-	})
-}
-
-// MakeBuffers ensures that the [Buffer]s are made, if nil.
-func (te *TwinEditors) MakeBuffers() {
-	if te.BufferA != nil {
-		return
+			w.On(events.Scroll, func(e events.Event) {
+				te.SyncViews(events.Scroll, e, name)
+			})
+			w.On(events.Input, func(e events.Event) {
+				te.SyncViews(events.Input, e, name)
+			})
+		})
 	}
-	te.BufferA = NewBuffer()
-	te.BufferB = NewBuffer()
+	f("text-a", te.BufferA)
+	f("text-b", te.BufferB)
 }
 
 // SetFiles sets files for each text [Buffer].
 func (te *TwinEditors) SetFiles(fileA, fileB string, lineNumbers bool) {
-	te.MakeBuffers()
 	te.BufferA.Filename = core.Filename(fileA)
 	te.BufferA.Options.LineNumbers = lineNumbers
 	te.BufferA.Stat() // update markup
@@ -63,43 +59,25 @@ func (te *TwinEditors) SetFiles(fileA, fileB string, lineNumbers bool) {
 	te.BufferB.Stat() // update markup
 }
 
-func (te *TwinEditors) ConfigTexts() {
-	if te.HasChildren() {
-		return
+// SyncViews synchronizes the text view scrolling and cursor positions
+func (te *TwinEditors) SyncViews(typ events.Types, e events.Event, name string) {
+	tva, tvb := te.Editors()
+	me, other := tva, tvb
+	if name == "text-b" {
+		me, other = tvb, tva
 	}
-	te.MakeBuffers()
-	av := NewEditor(te, "text-a")
-	bv := NewEditor(te, "text-b")
-	av.SetBuffer(te.BufferA)
-	bv.SetBuffer(te.BufferB)
-
-	av.On(events.Scroll, func(e events.Event) {
-		// bv.ScrollDelta(e)
-		bv.Geom.Scroll.Y = av.Geom.Scroll.Y
-		bv.NeedsRender()
-	})
-	bv.On(events.Scroll, func(e events.Event) {
-		// av.ScrollDelta(e)
-		av.Geom.Scroll.Y = bv.Geom.Scroll.Y
-		av.NeedsRender()
-	})
-	inInputEvent := false
-	av.On(events.Input, func(e events.Event) {
-		if inInputEvent {
+	switch typ {
+	case events.Scroll:
+		other.Geom.Scroll.Y = me.Geom.Scroll.Y
+		other.ScrollUpdateFromGeom(math32.Y)
+	case events.Input:
+		if te.inInputEvent {
 			return
 		}
-		inInputEvent = true
-		bv.SetCursorShow(av.CursorPos)
-		inInputEvent = false
-	})
-	bv.On(events.Input, func(e events.Event) {
-		if inInputEvent {
-			return
-		}
-		inInputEvent = true
-		av.SetCursorShow(bv.CursorPos)
-		inInputEvent = false
-	})
+		te.inInputEvent = true
+		other.SetCursorShow(me.CursorPos)
+		te.inInputEvent = false
+	}
 }
 
 // Editors returns the two text [Editor]s.

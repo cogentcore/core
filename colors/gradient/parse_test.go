@@ -55,18 +55,20 @@ func TestFromString(t *testing.T) {
 
 // used in multiple tests
 var (
-	linearTransformTest = NewLinear().
-				SetTransform(math32.Rotate2D(math32.Pi/2)).
-				SetStart(math32.Vec2(0, 0)).SetEnd(math32.Vec2(1, 0)).
-				AddStop(colors.Gold, 0.05).
-				AddStop(colors.Red, 0.95)
-
-	radialTransformTest = NewRadial().
-				SetTransform(math32.Translate2D(0.1, 0.1).Scale(0.5, 1.75)).
-				AddStop(colors.Red, 0.3).
-				AddStop(colors.Blue, 0.6).
-				AddStop(colors.Orange, 0.95)
+	linearTransformTest = NewLinear()
+	radialTransformTest = NewRadial()
 )
+
+func init() {
+	linearTransformTest.SetStart(math32.Vec2(0, 0)).SetEnd(math32.Vec2(1, 0)).
+		SetTransform(math32.Rotate2D(math32.Pi/2)).
+		AddStop(colors.Gold, 0.05).
+		AddStop(colors.Red, 0.95)
+	radialTransformTest.SetTransform(math32.Translate2D(0.1, 0.1).Scale(0.5, 1.75)).
+		AddStop(colors.Red, 0.3).
+		AddStop(colors.Blue, 0.6).
+		AddStop(colors.Orange, 0.95)
+}
 
 func TestReadXML(t *testing.T) {
 	type test struct {

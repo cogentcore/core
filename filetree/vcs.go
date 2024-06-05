@@ -12,7 +12,6 @@ import (
 
 	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
@@ -27,7 +26,7 @@ import (
 func (fn *Node) FirstVCS() (vcs.Repo, *Node) {
 	var repo vcs.Repo
 	var rnode *Node
-	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
+	fn.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
 			return tree.Continue
@@ -113,12 +112,9 @@ func (fn *Node) UpdateRepoFiles() {
 
 // AddToVCSSel adds selected files to version control system
 func (fn *Node) AddToVCSSel() { //types:add
-	sels := fn.SelectedViews()
-	n := len(sels)
-	for i := n - 1; i >= 0; i-- {
-		sn := AsNode(sels[i].This())
+	fn.SelectedFunc(func(sn *Node) {
 		sn.AddToVCS()
-	}
+	})
 }
 
 // AddToVCS adds file to version control
@@ -137,12 +133,9 @@ func (fn *Node) AddToVCS() {
 
 // DeleteFromVCSSel removes selected files from version control system
 func (fn *Node) DeleteFromVCSSel() { //types:add
-	sels := fn.SelectedViews()
-	n := len(sels)
-	for i := n - 1; i >= 0; i-- {
-		sn := AsNode(sels[i].This())
+	fn.SelectedFunc(func(sn *Node) {
 		sn.DeleteFromVCS()
-	}
+	})
 }
 
 // DeleteFromVCS removes file from version control
@@ -161,13 +154,13 @@ func (fn *Node) DeleteFromVCS() {
 
 // CommitToVCSSel commits to version control system based on last selected file
 func (fn *Node) CommitToVCSSel() { //types:add
-	sels := fn.SelectedViews()
-	n := len(sels)
-	if n == 0 { // shouldn't happen
-		return
-	}
-	sn := AsNode(sels[n-1])
-	views.CallFunc(sn, fn.CommitToVCS)
+	done := false
+	fn.SelectedFunc(func(sn *Node) {
+		if !done {
+			views.CallFunc(sn, fn.CommitToVCS)
+			done = true
+		}
+	})
 }
 
 // CommitToVCS commits file changes to version control system
@@ -190,12 +183,9 @@ func (fn *Node) CommitToVCS(message string) (err error) {
 
 // RevertVCSSel removes selected files from version control system
 func (fn *Node) RevertVCSSel() { //types:add
-	sels := fn.SelectedViews()
-	n := len(sels)
-	for i := n - 1; i >= 0; i-- {
-		sn := AsNode(sels[i].This())
+	fn.SelectedFunc(func(sn *Node) {
 		sn.RevertVCS()
-	}
+	})
 }
 
 // RevertVCS reverts file changes since last commit
@@ -228,12 +218,9 @@ func (fn *Node) RevertVCS() (err error) {
 // -1, -2 etc also work as universal ways of specifying prior revisions.
 // Diffs are shown in a DiffViewDialog.
 func (fn *Node) DiffVCSSel(rev_a string, rev_b string) { //types:add
-	sels := fn.SelectedViews()
-	n := len(sels)
-	for i := n - 1; i >= 0; i-- {
-		sn := AsNode(sels[i].This())
+	fn.SelectedFunc(func(sn *Node) {
 		sn.DiffVCS(rev_a, rev_b)
-	}
+	})
 }
 
 // DiffVCS shows the diffs between two versions of this file, given by the
@@ -261,12 +248,9 @@ func (fn *Node) DiffVCS(rev_a, rev_b string) error {
 // this one.
 // Returns the Log and also shows it in a VCSLogView which supports further actions.
 func (fn *Node) LogVCSSel(allFiles bool, since string) { //types:add
-	sels := fn.SelectedViews()
-	n := len(sels)
-	for i := n - 1; i >= 0; i-- {
-		sn := AsNode(sels[i].This())
+	fn.SelectedFunc(func(sn *Node) {
 		sn.LogVCS(allFiles, since)
-	}
+	})
 }
 
 // LogVCS shows the VCS log of commits for this file, optionally with a
@@ -300,12 +284,9 @@ func (fn *Node) LogVCS(allFiles bool, since string) (vcs.Log, error) {
 // BlameVCSSel shows the VCS blame report for this file, reporting for each line
 // the revision and author of the last change.
 func (fn *Node) BlameVCSSel() { //types:add
-	sels := fn.SelectedViews()
-	n := len(sels)
-	for i := n - 1; i >= 0; i-- {
-		sn := AsNode(sels[i].This())
+	fn.SelectedFunc(func(sn *Node) {
 		sn.BlameVCS()
-	}
+	})
 }
 
 // BlameDialog opens a dialog for displaying VCS blame data using textview.TwinViews.
@@ -314,7 +295,7 @@ func BlameDialog(ctx core.Widget, fname string, blame, fbytes []byte) *textedito
 	title := "VCS Blame: " + dirs.DirAndFile(fname)
 
 	d := core.NewBody().AddTitle(title)
-	tv := texteditor.NewTwinEditors(d, "twin-view")
+	tv := texteditor.NewTwinEditors(d)
 	tv.SetSplits(.3, .7)
 	tv.SetFiles(fname, fname, true)
 	flns := bytes.Split(fbytes, []byte("\n"))
@@ -337,7 +318,6 @@ func BlameDialog(ctx core.Widget, fname string, blame, fbytes []byte) *textedito
 	btxt := bytes.Join(blns, []byte("\n")) // makes a copy, so blame is disposable now
 	tv.BufferA.SetText(btxt)
 	tv.BufferB.SetText(fbytes)
-	tv.ConfigTexts()
 
 	tva, tvb := tv.Editors()
 	tva.Style(func(s *styles.Style) {
@@ -380,7 +360,7 @@ func (fn *Node) BlameVCS() ([]byte, error) {
 
 // UpdateAllVCS does an update on any repositories below this one in file tree
 func (fn *Node) UpdateAllVCS() {
-	fn.WidgetWalkPre(func(wi core.Widget, wb *core.WidgetBase) bool {
+	fn.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
 		sfn := AsNode(wi)
 		if sfn == nil {
 			return tree.Continue
@@ -434,34 +414,8 @@ func VersionControlNameProper(vc string) VersionControlName {
 	return ""
 }
 
-// Value registers [VersionControlValue] as the [views.Value] for [VersionControlName]
-func (kn VersionControlName) Value() views.Value {
-	return &VersionControlValue{}
-}
-
-// VersionControlValue represents a [VersionControlName] with a button.
-type VersionControlValue struct {
-	views.ValueBase[*core.Button]
-}
-
-func (v *VersionControlValue) Config() {
-	v.Widget.SetType(core.ButtonTonal)
-	views.ConfigDialogWidget(v, false)
-}
-
-func (v *VersionControlValue) Update() {
-	txt := reflectx.ToString(v.Value.Interface())
-	if txt == "" {
-		txt = "(none)"
-	}
-	v.Widget.SetText(txt).Update()
-}
-
-func (v *VersionControlValue) OpenDialog(ctx core.Widget, fun func()) {
-	cur := reflectx.ToString(v.Value.Interface())
-	m := core.NewMenuFromStrings(VersionControlSystems, cur, func(idx int) {
-		v.SetValue(VersionControlSystems[idx])
-		v.Update()
-	})
-	core.NewMenuStage(m, ctx, ctx.ContextMenuPos(nil)).Run()
+// Value registers [core.Chooser] as the [core.Value] widget
+// for [VersionControlName]
+func (kn VersionControlName) Value() core.Value {
+	return core.NewChooser().SetStrings(VersionControlSystems...)
 }

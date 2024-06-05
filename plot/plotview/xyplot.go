@@ -36,7 +36,7 @@ func (pl *PlotView) GenPlotXY() {
 			slog.Error("plot.LegendColumn", "err", err.Error())
 		} else {
 			errors.Log(xview.SortStableColumnNames([]string{pl.Params.LegendColumn, xp.Column}, table.Ascending))
-			lsplit = split.GroupBy(xview, []string{pl.Params.LegendColumn})
+			lsplit = split.GroupBy(xview, pl.Params.LegendColumn)
 			nleg = max(lsplit.Len(), 1)
 		}
 	}

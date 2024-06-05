@@ -291,7 +291,7 @@ func (ed *Editor) QReplacePrompt() {
 	}
 	d := core.NewBody().AddTitle("Query-Replace").
 		AddText("Enter strings for find and replace, then select Query-Replace -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining")
-	fc := core.NewChooser(d, "find").SetEditable(true).SetDefaultNew(true)
+	fc := core.NewChooser(d).SetEditable(true).SetDefaultNew(true)
 	fc.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 		s.Min.X.Ch(80)
@@ -301,7 +301,7 @@ func (ed *Editor) QReplacePrompt() {
 		fc.SetCurrentValue(find)
 	}
 
-	rc := core.NewChooser(d, "repl").SetEditable(true).SetDefaultNew(true)
+	rc := core.NewChooser(d).SetEditable(true).SetDefaultNew(true)
 	rc.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 		s.Min.X.Ch(80)
@@ -309,7 +309,7 @@ func (ed *Editor) QReplacePrompt() {
 	rc.SetStrings(PrevQReplaceRepls...).SetCurrentIndex(0)
 
 	lexitems := ed.QReplace.LexItems
-	lxi := core.NewSwitch(d, "lexb").SetText("Lexical Items").SetChecked(lexitems)
+	lxi := core.NewSwitch(d).SetText("Lexical Items").SetChecked(lexitems)
 	lxi.SetTooltip("search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything")
 
 	d.AddBottomBar(func(parent core.Widget) {

@@ -8,6 +8,12 @@ You can make a slice view from any slice pointer:
 views.NewSliceView(parent).SetSlice(&[]int{1, 3, 5})
 ```
 
+You can make a slice view that fits in one line:
+
+```Go
+views.NewSliceViewInline(parent).SetSlice(&[]int{1, 3, 5})
+```
+
 You can detect when the user changes the value of the slice:
 
 ```Go
@@ -23,22 +29,14 @@ You can prevent the user from editing the slice:
 views.NewSliceView(parent).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
 ```
 
-You can make a slice view that fits in one line:
-
-```Go
-views.NewSliceViewInline(parent).SetSlice(&[]int{1, 3, 5})
-```
-
-Inline slice views support everything that normal slice views do, including everything documented above.
-
 When you use [[views.NewValue]] with a slice value, it will create an inline slice view if the slice has four or fewer elements:
 
 ```Go
-views.NewValue(parent, &[]int{1, 3, 5})
+// views.NewValue(parent, &[]int{1, 3, 5})
 ```
 
 Otherwise, it will create a button that opens a dialog with a normal slice view:
 
 ```Go
-views.NewValue(parent, &[]int{1, 3, 5, 7, 9})
+// views.NewValue(parent, &[]int{1, 3, 5, 7, 9})
 ```

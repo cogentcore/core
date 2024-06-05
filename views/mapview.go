@@ -5,6 +5,7 @@
 package views
 
 import (
+	"fmt"
 	"reflect"
 
 	"cogentcore.org/core/base/reflectx"
@@ -12,7 +13,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
 
@@ -23,58 +23,153 @@ type MapView struct {
 	// Map is the pointer to the map that we are viewing.
 	Map any
 
-	// Keys are [Value] representations of the map keys.
-	Keys []Value `json:"-" xml:"-" set:"-"`
+	// Inline is whether to display the map in one line.
+	Inline bool
 
-	// Values are [Value] representations of the map values.
-	Values []Value `json:"-" xml:"-" set:"-"`
-
-	// SortValue is whether to sort by values instead of keys
+	// SortValue is whether to sort by values instead of keys.
 	SortValues bool
 
-	// ViewPath is a record of parent view names that have led up to this view.
-	// It is displayed as extra contextual information in view dialogs.
-	ViewPath string
-
-	// ncols is the number of columns in the map
+	// ncols is the number of columns to display if the map view is not inline.
 	ncols int
 }
 
-func (mv *MapView) OnInit() {
-	mv.Frame.OnInit()
-	mv.SetStyles()
-}
+func (mv *MapView) WidgetValue() any { return &mv.Map }
 
-func (mv *MapView) SetStyles() {
+func (mv *MapView) Init() {
+	mv.Frame.Init()
 	mv.Style(func(s *styles.Style) {
-		s.Direction = styles.Column
+		if mv.Inline {
+			return
+		}
+		s.Display = styles.Grid
+		s.Columns = mv.ncols
+		s.Overflow.Set(styles.OverflowAuto)
 		s.Grow.Set(1, 1)
+		s.Min.X.Em(20)
+		s.Min.Y.Em(10)
 	})
-	mv.OnWidgetAdded(func(w core.Widget) {
-		switch w.PathFrom(mv) {
-		case "map-grid":
-			w.Style(func(s *styles.Style) {
-				s.Display = styles.Grid
-				s.Columns = mv.ncols
-				s.Overflow.Set(styles.OverflowAuto)
-				s.Grow.Set(1, 1)
-				s.Min.X.Em(20)
-				s.Min.Y.Em(10)
+
+	mv.Maker(func(p *core.Plan) {
+		if reflectx.AnyIsNil(mv.Map) {
+			return
+		}
+		mapv := reflectx.Underlying(reflect.ValueOf(mv.Map))
+
+		mv.ncols = 2
+		typeAny := false
+		valueType := mapv.Type().Elem()
+		if valueType.String() == "interface {}" {
+			mv.ncols = 3
+			typeAny = true
+		}
+
+		builtinTypes := types.BuiltinTypes()
+
+		keys := reflectx.MapSort(mv.Map, !mv.SortValues, true)
+		for _, key := range keys {
+			keytxt := reflectx.ToString(key.Interface())
+			keynm := "key-" + keytxt
+			valnm := "value-" + keytxt
+
+			core.AddNew(p, keynm, func() core.Value {
+				return core.ToValue(key.Interface(), "")
+			}, func(w core.Value) {
+				BindMapKey(mapv, key, w)
+				wb := w.AsWidget()
+				wb.SetReadOnly(mv.IsReadOnly())
+				w.Style(func(s *styles.Style) {
+					s.SetReadOnly(mv.IsReadOnly())
+					s.SetTextWrap(false)
+				})
+				wb.OnChange(func(e events.Event) {
+					mv.SendChange(e)
+					mv.Update()
+				})
+				wb.SetReadOnly(mv.IsReadOnly())
+				wb.OnInput(mv.HandleEvent)
+				if !mv.IsReadOnly() {
+					w.AddContextMenu(func(m *core.Scene) {
+						mv.ContextMenu(m, key)
+					})
+				}
+				wb.Updater(func() {
+					BindMapKey(mapv, key, w)
+					wb.SetReadOnly(mv.IsReadOnly())
+				})
+			})
+			core.AddNew(p, valnm, func() core.Value {
+				val := mapv.MapIndex(key).Interface()
+				w := core.ToValue(val, "")
+				return BindMapValue(mapv, key, w)
+			}, func(w core.Value) {
+				wb := w.AsWidget()
+				wb.SetReadOnly(mv.IsReadOnly())
+				wb.OnChange(func(e events.Event) { mv.SendChange(e) })
+				wb.OnInput(mv.HandleEvent)
+				w.Style(func(s *styles.Style) {
+					s.SetReadOnly(mv.IsReadOnly())
+					s.SetTextWrap(false)
+				})
+				if !mv.IsReadOnly() {
+					w.AddContextMenu(func(m *core.Scene) {
+						mv.ContextMenu(m, key)
+					})
+				}
+				wb.Updater(func() {
+					BindMapValue(mapv, key, w)
+					wb.SetReadOnly(mv.IsReadOnly())
+				})
+			})
+
+			if typeAny {
+				typnm := "type-" + keytxt
+				core.AddAt(p, typnm, func(w *core.Chooser) {
+					w.SetTypes(builtinTypes...)
+					w.OnChange(func(e events.Event) {
+						typ := reflect.TypeOf(w.CurrentItem.Value.(*types.Type).Instance)
+						newVal := reflect.New(typ)
+						// try our best to convert the existing value to the new type
+						reflectx.SetRobust(newVal.Interface(), mapv.MapIndex(key).Interface())
+						mapv.SetMapIndex(key, newVal.Elem())
+						mv.DeleteChildByName(valnm) // force it to be updated
+						mv.Update()
+					})
+					w.Updater(func() {
+						w.SetReadOnly(mv.IsReadOnly())
+						vtyp := types.TypeByValue(mapv.MapIndex(key).Interface())
+						if vtyp == nil {
+							vtyp = types.TypeByName("string") // default to string
+						}
+						w.SetCurrentValue(vtyp)
+					})
+				})
+			}
+		}
+		if mv.Inline {
+			if !mv.IsReadOnly() {
+				core.AddAt(p, "add-button", func(w *core.Button) {
+					w.SetIcon(icons.Add).SetType(core.ButtonTonal)
+					w.Tooltip = "Add an element"
+					w.OnClick(func(e events.Event) {
+						mv.MapAdd()
+					})
+				})
+			}
+			core.AddAt(p, "edit-button", func(w *core.Button) {
+				w.SetIcon(icons.Edit).SetType(core.ButtonTonal)
+				w.Tooltip = "Edit in a dialog"
+				w.OnClick(func(e events.Event) {
+					d := core.NewBody().AddTitle(mv.ValueTitle).AddText(mv.Tooltip)
+					NewMapView(d).SetMap(mv.Map).SetValueTitle(mv.ValueTitle)
+					d.OnClose(func(e events.Event) {
+						mv.Update()
+						mv.SendChange()
+					})
+					d.RunFullDialog(mv)
+				})
 			})
 		}
 	})
-}
-
-func (mv *MapView) Config() {
-	if !mv.HasChildren() {
-		core.NewFrame(mv, "map-grid")
-	}
-	mv.ConfigMapGrid()
-}
-
-// MapGrid returns the map grid frame widget, which contains all the fields and values.
-func (mv *MapView) MapGrid() *core.Frame {
-	return mv.ChildByName("map-grid", 0).(*core.Frame)
 }
 
 func (mv *MapView) ContextMenu(m *core.Scene, keyv reflect.Value) {
@@ -89,118 +184,10 @@ func (mv *MapView) ContextMenu(m *core.Scene, keyv reflect.Value) {
 	})
 }
 
-// ConfigMapGrid configures the MapGrid for the current map
-func (mv *MapView) ConfigMapGrid() {
-	if reflectx.AnyIsNil(mv.Map) {
-		return
-	}
-	sg := mv.MapGrid()
-	config := tree.Config{}
-	// always start fresh!
-	mv.Keys = make([]Value, 0)
-	mv.Values = make([]Value, 0)
-	sg.DeleteChildren()
-
-	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := reflectx.NonPointerValue(mpv)
-
-	valtyp := reflectx.NonPointerType(reflect.TypeOf(mv.Map)).Elem()
-	ncol := 2
-	ifaceType := false
-	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
-		ifaceType = true
-		ncol = 3
-		// todo: need some way of setting & getting
-		// this for given domain mapview could have a structview parent and
-		// the source node of that struct, if a tree, could have a property --
-		// unlike inline case, plain mapview is not a child of struct view
-		// directly -- but field on struct view does create the mapview
-		// dialog.. a bit hacky and indirect..
-	}
-
-	// valtypes := append(kit.Types.AllTagged(typeTag), kit.Enums.AllTagged(typeTag)...)
-	// valtypes = append(valtypes, kit.Types.AllTagged("basic-type")...)
-	// valtypes = append(valtypes, kit.TypeFor[reflect.Type]())
-	valtypes := types.AllEmbeddersOf(tree.NodeBaseType) // todo: this is not right
-
-	mv.ncols = ncol
-
-	keys := reflectx.MapSort(mv.Map, !mv.SortValues, true) // note: this is a slice of reflect.Value!
-	for _, key := range keys {
-		kv := ToValue(key.Interface(), "")
-		if kv == nil { // shouldn't happen
-			continue
-		}
-		kv.SetMapKey(key, mv.Map)
-
-		val := reflectx.OnePointerUnderlyingValue(mpvnp.MapIndex(key))
-		vv := ToValue(val.Interface(), "")
-		if vv == nil { // shouldn't happen
-			continue
-		}
-		vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.ViewPath) // needs key value value to track updates
-
-		keytxt := reflectx.ToString(key.Interface())
-		keynm := "key-" + keytxt
-		valnm := "value-" + keytxt
-
-		config.Add(kv.WidgetType(), keynm)
-		config.Add(vv.WidgetType(), valnm)
-		if ifaceType {
-			typnm := "type-" + keytxt
-			config.Add(core.ChooserType, typnm)
-		}
-		mv.Keys = append(mv.Keys, kv)
-		mv.Values = append(mv.Values, vv)
-	}
-	if sg.ConfigChildren(config) {
-		sg.NeedsLayout()
-	}
-	for i, vv := range mv.Values {
-		kv := mv.Keys[i]
-		vv.OnChange(func(e events.Event) { mv.SendChange(e) })
-		kv.OnChange(func(e events.Event) {
-			mv.SendChange(e)
-			mv.Update()
-		})
-		keyw := sg.Child(i * ncol).(core.Widget)
-		w := sg.Child(i*ncol + 1).(core.Widget)
-		keyw.AsWidget().SetReadOnly(mv.IsReadOnly())
-		w.AsWidget().SetReadOnly(mv.IsReadOnly())
-		Config(kv, keyw)
-		Config(vv, w)
-		vv.AsWidgetBase().OnInput(mv.HandleEvent)
-		kv.AsWidgetBase().OnInput(mv.HandleEvent)
-		w.Style(func(s *styles.Style) {
-			s.SetReadOnly(mv.IsReadOnly())
-			s.SetTextWrap(false)
-		})
-		keyw.Style(func(s *styles.Style) {
-			s.SetReadOnly(mv.IsReadOnly())
-			s.SetTextWrap(false)
-		})
-		w.AddContextMenu(func(m *core.Scene) {
-			mv.ContextMenu(m, kv.Val())
-		})
-		keyw.AddContextMenu(func(m *core.Scene) {
-			mv.ContextMenu(m, kv.Val())
-		})
-		if ifaceType {
-			typw := sg.Child(i*ncol + 2).(*core.Chooser)
-			typw.SetTypes(valtypes...)
-			vtyp := reflectx.NonPointerType(reflect.TypeOf(vv.Val().Interface()))
-			if vtyp == nil {
-				vtyp = reflect.TypeOf("") // default to string
-			}
-			typw.SetCurrentValue(vtyp)
-		}
-	}
-}
-
 // ToggleSort toggles sorting by values vs. keys
 func (mv *MapView) ToggleSort() {
 	mv.SortValues = !mv.SortValues
-	mv.ConfigMapGrid()
+	mv.Update()
 }
 
 // MapAdd adds a new entry to the map
@@ -225,19 +212,82 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	mv.Update()
 }
 
-// ConfigToolbar configures a [core.Toolbar] for this view
-func (mv *MapView) ConfigToolbar(tb *core.Toolbar) {
+// MakeToolbar configures a [core.Toolbar] for this view
+func (mv *MapView) MakeToolbar(p *core.Plan) {
 	if reflectx.AnyIsNil(mv.Map) {
 		return
 	}
-	core.NewButton(tb, "sort").SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys vs. the values").
-		OnClick(func(e events.Event) {
-			mv.ToggleSort()
-		})
-	if !mv.IsReadOnly() {
-		core.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
+	core.Add(p, func(w *core.Button) {
+		w.SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys and the values").
 			OnClick(func(e events.Event) {
-				mv.MapAdd()
+				mv.ToggleSort()
 			})
+	})
+	if !mv.IsReadOnly() {
+		core.Add(p, func(w *core.Button) {
+			w.SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
+				OnClick(func(e events.Event) {
+					mv.MapAdd()
+				})
+		})
 	}
+}
+
+// BindMapKey is a version of [core.Bind] that works for keys in a map.
+func BindMapKey[T core.Value](mapv reflect.Value, key reflect.Value, vw T) T {
+	wb := vw.AsWidget()
+	wb.ValueUpdate = func() {
+		if vws, ok := any(vw).(core.ValueSetter); ok {
+			core.ErrorSnackbar(vw, vws.SetWidgetValue(key.Interface()))
+		} else {
+			core.ErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), key.Interface()))
+		}
+	}
+	wb.ValueOnChange = func() {
+		newKey := reflect.New(key.Type())
+		core.ErrorSnackbar(vw, reflectx.SetRobust(newKey.Interface(), vw.WidgetValue()))
+		newKey = newKey.Elem()
+		if !mapv.MapIndex(newKey).IsValid() { // not already taken
+			mapv.SetMapIndex(newKey, mapv.MapIndex(key))
+			mapv.SetMapIndex(key, reflect.Value{})
+			return
+		}
+		d := core.NewBody().AddTitle("Key already exists").AddText(fmt.Sprintf("The key %q already exists", reflectx.ToString(newKey.Interface())))
+		d.AddBottomBar(func(parent core.Widget) {
+			d.AddCancel(parent)
+			d.AddOK(parent).SetText("Overwrite").OnClick(func(e events.Event) {
+				mapv.SetMapIndex(newKey, mapv.MapIndex(key))
+				mapv.SetMapIndex(key, reflect.Value{})
+				wb.SendChange()
+			})
+		})
+		d.RunDialog(vw)
+	}
+	if ob, ok := any(vw).(core.OnBinder); ok {
+		ob.OnBind(key.Interface())
+	}
+	return vw
+}
+
+// BindMapValue is a version of [core.Bind] that works for values in a map.
+func BindMapValue[T core.Value](mapv reflect.Value, key reflect.Value, vw T) T {
+	wb := vw.AsWidget()
+	wb.ValueUpdate = func() {
+		value := mapv.MapIndex(key).Interface()
+		if vws, ok := any(vw).(core.ValueSetter); ok {
+			core.ErrorSnackbar(vw, vws.SetWidgetValue(value))
+		} else {
+			core.ErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))
+		}
+	}
+	wb.ValueOnChange = func() {
+		value := reflect.New(mapv.Type().Elem())
+		core.ErrorSnackbar(vw, reflectx.SetRobust(value.Interface(), vw.WidgetValue()))
+		mapv.SetMapIndex(key, value.Elem())
+	}
+	if ob, ok := any(vw).(core.OnBinder); ok {
+		value := mapv.MapIndex(key).Interface()
+		ob.OnBind(value)
+	}
+	return vw
 }

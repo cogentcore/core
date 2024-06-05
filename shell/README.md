@@ -10,11 +10,12 @@ The simple idea is that each line is either Go or shell commands, determined in 
 Examples:
 
 ```go
-for i, f := range strings.Split(`ls -la`, "/n") {   // `ls` executes returns string
+for i, f := range shell.SplitLines(`ls -la`) {   // `ls` executes returns string
     echo {i} {strings.ToLower(f)}           // {} surrounds go within shell
 }
 ```
 
+`splitLines` is a function that runs `strings.Split(arg, "\n")`, defined in the cosh standard library of such frequently-used helper functions.
 
 # Special syntax
 
@@ -61,6 +62,26 @@ list *.tsv
 The `command` is transpiled into a Go function that takes `args ...string`.  In the command function body, you can use the `args...` expression to pass all of the args, or `args[1]` etc to refer to specific positional indexes, as usual.
 
 The command function name is registered so that the standard shell execution code can run the function, passing the args.  You can also call it directly from Go code using the standard parentheses expression.
+
+# Makefile-like functionality
+
+A few simple features of `cosh` enable powerful `make` functionality to be easily supported.  See [make.cosh](cmd/cosh/testdata/make.cosh) for an example, in `cmd/cosh/testdata/make.cosh`.
+
+* Any line starting with a name that corresponds to a filename in the current directory with ".cosh" appended to it (e.g., `make` and `make.cosh`) is automatically recognized to run the `cosh` command on that file, with any args after the name appended as an `-e` argument to cosh.  Thus, the script line:
+
+```sh
+make build
+```
+
+is translated into `cosh make.cosh -e "build"` and run.  The resulting code that is run is just the contents of the `make.cosh` file with the additional contents of the `-e` expression appended at the end, such that any `command`s that are defined within `make.cosh` would be run by the `-e` expression.
+
+Note that there is nothing special about the name `make` here, so this can be done with any file.
+
+The `make` package defines a number of useful utility functions that accomplish the standard dependency and file timestamp checking functionality from the standard `make` command, as in the [magefile](https://magefile.org/dependencies/) system.  Note that the cosh direct exec command syntax makes the resulting make files much closer to a standard bash-like Makefile, while still having all the benefits of Go control and expressions, compared to magefile.
+
+TODO: implement and document.
+
+**NOTE:** for now, if it doesn't find a new file in the current directory, type `cd .` and it will refresh the cache of files in current directory.  TODO: fix this with time-stamp of some sort!
 
 # SSH connections to remote hosts
 
@@ -145,7 +166,6 @@ The critical extension from standard Go syntax is for lines that are processed b
 
 # TODO:
 
-* probably need to have wrapper StdIO for every exec so we can flexibly redirect for fg, bg commands.
 * likewise, need to run everything effectively as a bg job with our own explicit Wait, which we can then communicate with to move from fg to bg.
 
 

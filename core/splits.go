@@ -16,33 +16,25 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Config notes: only needs config when number of kids changes
-// otherwise just needs new layout
-
 // Splits allocates a certain proportion of its space to each of its children
 // along [styles.Style.Direction]. It adds [Handle] widgets to its parts that
 // allow the user to customize the amount of space allocated to each child.
 type Splits struct {
-	Layout
+	Frame
 
 	// Splits is the proportion (0-1 normalized, enforced) of space
 	// allocated to each element. 0 indicates that an element should
 	// be completely collapsed. By default, each element gets the
 	// same amount of space.
-	Splits []float32 `set:"-"`
+	Splits []float32
 
 	// SavedSplits is a saved version of the splits that can be restored
 	// for dynamic collapse/expand operations.
 	SavedSplits []float32 `set:"-"`
 }
 
-func (sl *Splits) OnInit() {
-	sl.WidgetBase.OnInit()
-	sl.HandleEvents()
-	sl.SetStyles()
-}
-
-func (sl *Splits) SetStyles() {
+func (sl *Splits) Init() {
+	sl.Frame.Init()
 	sl.Style(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		s.Margin.Zero()
@@ -56,33 +48,62 @@ func (sl *Splits) SetStyles() {
 		}
 	})
 	sl.OnWidgetAdded(func(w Widget) {
-		if hl, ok := w.(*Handle); ok && w.Parent() == sl.Parts {
-			hl.OnChange(func(e events.Event) {
-				sl.SetSplitAction(hl.IndexInParent(), hl.Value())
-			})
+		if w.Parent() == sl.This() { // TODO(config): need some way to do this with the new config paradigm
 			w.Style(func(s *styles.Style) {
-				s.Direction = sl.Styles.Direction
-			})
-		} else if w.Parent() == sl.This() {
-			// splits elements must scroll independently and grow
-			w.Style(func(s *styles.Style) {
+				// splits elements must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)
 			})
 		}
 	})
-}
 
-// SetSplits sets the [Splits.Splits]:
-// Splits is the proportion (0-1 normalized, enforced) of space
-// allocated to each element. 0 indicates that an element should
-// be completely collapsed. By default, each element gets the
-// same amount of space.
-func (t *Splits) SetSplits(v ...float32) *Splits {
-	// NOTE: this must be defined manually to avoid naming conflicts
-	// with embedders of splits downstream
-	t.Splits = v
-	return t
+	sl.OnKeyChord(func(e events.Event) {
+		kc := string(e.KeyChord())
+		mod := "Control+"
+		if TheApp.Platform() == system.MacOS {
+			mod = "Meta+"
+		}
+		if !strings.HasPrefix(kc, mod) {
+			return
+		}
+		kns := kc[len(mod):]
+
+		knc, err := strconv.Atoi(kns)
+		if err != nil {
+			return
+		}
+		kn := int(knc)
+		if kn == 0 {
+			e.SetHandled()
+			sl.EvenSplits()
+		} else if kn <= len(sl.Kids) {
+			e.SetHandled()
+			if sl.Splits[kn-1] <= 0.01 {
+				sl.RestoreChild(kn - 1)
+			} else {
+				sl.CollapseChild(true, kn-1)
+			}
+		}
+	})
+
+	sl.Maker(func(p *Plan) {
+		sl.UpdateSplits()
+		AddAt(p, "parts", func(w *Frame) {
+			InitParts(w)
+			w.Maker(func(p *Plan) {
+				for i := range len(sl.Kids) - 1 { // one less handle than children
+					AddAt(p, "handle-"+strconv.Itoa(i), func(w *Handle) {
+						w.OnChange(func(e events.Event) {
+							sl.SetSplitAction(w.IndexInParent(), w.Value())
+						})
+						w.Style(func(s *styles.Style) {
+							s.Direction = sl.Styles.Direction
+						})
+					})
+				}
+			})
+		})
+	})
 }
 
 // UpdateSplits normalizes the splits and ensures that there are as
@@ -223,56 +244,6 @@ func (sl *Splits) SetSplitAction(idx int, nwval float32) {
 	sl.NeedsLayout()
 }
 
-func (sl *Splits) Config() {
-	sl.UpdateSplits()
-	sl.ConfigSplitters()
-}
-
-func (sl *Splits) ConfigSplitters() {
-	parts := sl.NewParts()
-	sz := len(sl.Kids)
-	if parts.SetNChildren(sz-1, HandleType, "handle-") {
-		parts.Update()
-	}
-}
-
-func (sl *Splits) HandleEvents() {
-	sl.OnKeyChord(func(e events.Event) {
-		kc := string(e.KeyChord())
-		mod := "Control+"
-		if TheApp.Platform() == system.MacOS {
-			mod = "Meta+"
-		}
-		if !strings.HasPrefix(kc, mod) {
-			return
-		}
-		kns := kc[len(mod):]
-
-		knc, err := strconv.Atoi(kns)
-		if err != nil {
-			return
-		}
-		kn := int(knc)
-		if kn == 0 {
-			e.SetHandled()
-			sl.EvenSplits()
-		} else if kn <= len(sl.Kids) {
-			e.SetHandled()
-			if sl.Splits[kn-1] <= 0.01 {
-				sl.RestoreChild(kn - 1)
-			} else {
-				sl.CollapseChild(true, kn-1)
-			}
-		}
-	})
-}
-
-func (sl *Splits) ApplyStyle() {
-	sl.UpdateSplits()
-	sl.ApplyStyleWidget()
-	sl.ConfigSplitters()
-}
-
 func (sl *Splits) SizeDownSetAllocs(iter int) {
 	sz := &sl.Geom.Size
 	csz := sz.Alloc.Content
@@ -293,7 +264,7 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 
 func (sl *Splits) Position() {
 	if !sl.HasChildren() {
-		sl.Layout.Position()
+		sl.Frame.Position()
 		return
 	}
 	sl.UpdateSplits()

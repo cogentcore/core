@@ -5,69 +5,64 @@
 package xyzview
 
 import (
-	"log/slog"
-	"reflect"
-	"sort"
-
-	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/tree"
-	"cogentcore.org/core/views"
 	"cogentcore.org/core/xyz"
 )
 
 func init() {
-	views.AddValue(xyz.MeshName(""), func() views.Value { return &MeshValue{} })
+	core.AddValueType[xyz.MeshName, *MeshButton]()
 }
 
-// MeshValue represents an [xyz.MeshName] with a button.
-type MeshValue struct {
-	views.ValueBase[*core.Button]
+// MeshButton represents an [xyz.MeshName] value with a button.
+type MeshButton struct {
+	core.Button
+	MeshName string
 }
 
-func (v *MeshValue) Config() {
-	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.DeployedCode)
-	views.ConfigDialogWidget(v, false)
-}
+func (mb *MeshButton) WidgetValue() any { return &mb.MeshName }
 
-func (v *MeshValue) Update() {
-	txt := reflectx.ToString(v.Value.Interface())
-	if txt == "" {
-		txt = "(none, click to select)"
-	}
-	v.Widget.SetText(txt).Update()
-}
-
-func (v *MeshValue) ConfigDialog(d *core.Body) (bool, func()) {
-	d.SetTitle("Select a mesh")
-	if v.OwnKind != reflect.Struct {
-		return false, nil
-	}
-	ndi, ok := v.Owner.(xyz.Node)
-	if !ok {
-		return false, nil
-	}
-	sci := ndi.ParentByType(xyz.SceneType, tree.Embeds)
-	if sci == nil {
-		slog.Error("missing parent scene for node", "node", ndi)
-		return false, nil
-	}
-	sc := sci.(*xyz.Scene)
-	sl := sc.MeshList()
-	sort.Strings(sl)
-
-	si := 0
-	cur := reflectx.ToString(v.Value.Interface())
-	views.NewSliceView(d).SetSlice(&sl).SetSelectedValue(cur).BindSelect(&si)
-
-	return true, func() {
-		if si >= 0 {
-			ms := sl[si]
-			v.SetValue(ms)
-			v.Update()
+func (mb *MeshButton) Init() {
+	mb.Button.Init()
+	mb.SetType(core.ButtonTonal).SetIcon(icons.DeployedCode)
+	mb.Updater(func() {
+		if mb.MeshName == "" {
+			mb.SetText("Select mesh")
+		} else {
+			mb.SetText(mb.MeshName)
 		}
-	}
+	})
+	core.InitValueButton(mb, false, func(d *core.Body) {
+		d.SetTitle("Select a mesh")
+		// TODO(config)
+		// if v.OwnKind != reflect.Struct {
+		// 	return false, nil
+		// }
+		// ndi, ok := v.Owner.(xyz.Node)
+		// if !ok {
+		// 	return false, nil
+		// }
+		// sci := ndi.ParentByType(xyz.SceneType, tree.Embeds)
+		// if sci == nil {
+		// 	slog.Error("missing parent scene for node", "node", ndi)
+		// 	return false, nil
+		// }
+		// sc := sci.(*xyz.Scene)
+		// sl := sc.MeshList()
+		// sort.Strings(sl)
+
+		// si := 0
+		// cur := reflectx.ToString(v.Value.Interface())
+		// views.NewSliceView(d).SetSlice(&sl).SetSelectedValue(cur).BindSelect(&si)
+
+		// return true, func() {
+		// 	if si >= 0 {
+		// 		ms := sl[si]
+		// 		v.SetValue(ms)
+		// 		v.Update()
+		// 	}
+		// }
+	})
 }
 
 /*

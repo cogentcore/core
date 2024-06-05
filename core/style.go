@@ -6,15 +6,14 @@ package core
 
 import (
 	"image"
+	"reflect"
 
-	"cogentcore.org/core/colors"
-	"cogentcore.org/core/cursors"
+	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
-	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
-	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 )
 
@@ -133,41 +132,6 @@ func (wb *WidgetBase) ResetStyleWidget() {
 	s.StateLayer = s.State.StateLayer()
 
 	s.SetMono(false)
-}
-
-// SetStyles sets the base, widget-universal default
-// style function that applies to all widgets.
-// It is added and called first in the styling order.
-// Because it handles default styling in response to
-// State flags such as Disabled and Selected, these state
-// flags must be set prior to calling this.
-// Use [StyleFirst] to add a function that is called prior to
-// this, to update state flags.
-func (wb *WidgetBase) SetStyles() {
-	wb.Style(func(s *styles.Style) {
-		s.MaxBorder.Style.Set(styles.BorderSolid)
-		s.MaxBorder.Color.Set(colors.C(colors.Scheme.Primary.Base))
-		s.MaxBorder.Width.Set(units.Dp(1))
-
-		// if we are disabled, we do not react to any state changes,
-		// and instead always have the same gray colors
-		if s.Is(states.Disabled) {
-			s.Cursor = cursors.NotAllowed
-			s.Opacity = 0.38
-			return
-		}
-		// TODO(kai): what about context menus on mobile?
-		tt, _ := wb.This().(Widget).WidgetTooltip(image.Pt(-1, -1))
-		s.SetAbilities(tt != "", abilities.LongHoverable, abilities.LongPressable)
-
-		if s.Is(states.Focused) {
-			s.Border = s.MaxBorder
-		}
-		if s.Is(states.Selected) {
-			s.Background = colors.C(colors.Scheme.Select.Container)
-			s.Color = colors.C(colors.Scheme.Select.OnContainer)
-		}
-	})
 }
 
 // RunStylers runs the stylers specified in the widget's FirstStylers,
@@ -296,4 +260,26 @@ func (wb *WidgetBase) IsLastChild() bool {
 // IsOnlyChild returns whether the node is the only child of its parent
 func (wb *WidgetBase) IsOnlyChild() bool {
 	return wb.Par != nil && wb.Par.NumChildren() == 1
+}
+
+// StyleFromTags adds a [WidgetBase.Styler] to the given widget
+// to set its style properties based on the given [reflect.StructTag].
+// Width, height, and grow properties are supported.
+func StyleFromTags(w Widget, tags reflect.StructTag) {
+	style := func(tag string, set func(v float32)) {
+		if v, ok := tags.Lookup(tag); ok {
+			f, err := reflectx.ToFloat32(v)
+			if errors.Log(err) == nil {
+				set(f)
+			}
+		}
+	}
+	w.Style(func(s *styles.Style) {
+		style("width", s.Min.X.Ch)
+		style("max-width", s.Max.X.Ch)
+		style("height", s.Min.Y.Em)
+		style("max-height", s.Max.Y.Em)
+		style("grow", func(v float32) { s.Grow.X = v })
+		style("grow-y", func(v float32) { s.Grow.Y = v })
+	})
 }

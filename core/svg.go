@@ -32,14 +32,9 @@ type SVG struct {
 	SVG *svg.SVG `set:"-"`
 }
 
-func (sv *SVG) OnInit() {
+func (sv *SVG) Init() {
+	sv.WidgetBase.Init()
 	sv.SVG = svg.NewSVG(10, 10)
-	sv.WidgetBase.OnInit()
-	sv.SetStyles()
-	sv.HandleEvents()
-}
-
-func (sv *SVG) SetStyles() {
 	sv.SetReadOnly(true)
 	sv.Style(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
@@ -58,9 +53,7 @@ func (sv *SVG) SetStyles() {
 	sv.StyleFinal(func(s *styles.Style) {
 		sv.SVG.Root.ViewBox.PreserveAspectRatio.SetFromStyle(s)
 	})
-}
 
-func (sv *SVG) HandleEvents() {
 	sv.On(events.SlideMove, func(e events.Event) {
 		if sv.IsReadOnly() {
 			return

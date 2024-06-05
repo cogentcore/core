@@ -11,13 +11,19 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// WidgetFlags define Widget node bitflags for tracking common high-frequency GUI
-// state, mostly having to do with event processing. Extends [tree.Flags].
+// WidgetFlags are bit flags that represent widget state.
 type WidgetFlags tree.Flags //enums:bitflag
 
 const (
 	// NeedsRender needs to be rendered on next render iteration
 	NeedsRender WidgetFlags = WidgetFlags(tree.FlagsN) + iota
+
+	// ValueDialogNewWindow indicates that the dialog of a [Value] should be opened
+	// as a new window, instead of a typical full window in the same current window.
+	// This is set by [InitValueButton] and handled by [OpenValuedDialog].
+	// This is triggered by holding down the Shift key while clicking on a
+	// [Value] button.
+	ValueDialogNewWindow
 )
 
 // StateIs returns whether the widget has the given [states.States] flag set
@@ -52,10 +58,11 @@ func (wb *WidgetBase) SetAbilities(on bool, able ...abilities.Abilities) *Widget
 
 // SetSelected sets the Selected flag to given value for the entire Widget
 // and calls ApplyStyleTree to apply any style changes.
-func (wb *WidgetBase) SetSelected(sel bool) {
+func (wb *WidgetBase) SetSelected(sel bool) *WidgetBase {
 	wb.SetState(sel, states.Selected)
 	wb.ApplyStyleTree()
 	wb.NeedsRender()
+	return wb
 }
 
 // CanFocus checks if this node can receive keyboard focus
@@ -90,7 +97,7 @@ func (wb *WidgetBase) SetReadOnly(ro bool) *WidgetBase {
 // of its children have the given flag.
 func (wb *WidgetBase) HasFlagWithin(flag enums.BitFlag) bool {
 	got := false
-	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		if wb.Is(flag) {
 			got = true
 			return tree.Break
@@ -104,7 +111,7 @@ func (wb *WidgetBase) HasFlagWithin(flag enums.BitFlag) bool {
 // of its children have the given state flag.
 func (wb *WidgetBase) HasStateWithin(state states.States) bool {
 	got := false
-	wb.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		if wb.StateIs(state) {
 			got = true
 			return tree.Break

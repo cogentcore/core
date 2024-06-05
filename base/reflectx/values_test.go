@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/base/reflectx/testdata"
+	"github.com/stretchr/testify/assert"
 )
 
 type A struct {
@@ -139,6 +140,18 @@ func TestSetRobustFomString(t *testing.T) {
 	if ToString(fruit) != "Strawberry" {
 		t.Errorf("ToString: failed to use Stringer on enum")
 	}
+}
+
+func TestPointerSetRobust(t *testing.T) {
+	a := A{}
+	aptr := &a
+	b := A{}
+	bptr := &b
+	err := SetRobust(&aptr, bptr)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	assert.Equal(t, aptr, bptr)
 }
 
 func BenchmarkFloatToFloat(b *testing.B) {

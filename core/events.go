@@ -674,7 +674,7 @@ func (em *Events) HandleLong(e events.Event, deep Widget, w *Widget, pos *image.
 
 func (em *Events) GetMouseInBBox(w Widget, pos image.Point) {
 	wb := w.AsWidget()
-	wb.WidgetWalkPre(func(kwi Widget, kwb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(kwi Widget, kwb *WidgetBase) bool {
 		// we do not handle disabled here so that
 		// we correctly process cursors for disabled elements.
 		// it needs to be handled downstream by anyone who needs it.
@@ -688,7 +688,7 @@ func (em *Events) GetMouseInBBox(w Widget, pos image.Point) {
 		if kwb.Parts != nil {
 			em.GetMouseInBBox(kwb.Parts, pos)
 		}
-		if ly := AsLayout(kwi); ly != nil {
+		if ly := AsFrame(kwi); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
 				if ly.HasScroll[d] {
 					sb := ly.Scrolls[d]
@@ -1042,7 +1042,7 @@ func (em *Events) FocusLastFrom(from Widget) bool {
 func (em *Events) ClearNonFocus(foc Widget) {
 	focRoot := em.Scene
 
-	focRoot.WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+	focRoot.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		if wi == focRoot { // skip top-level
 			return tree.Continue
 		}
@@ -1151,14 +1151,17 @@ func (em *Events) ManagerKeyChordEvents(e events.Event) {
 	// TODO(kai): maybe clean up / document this
 	switch cs { // some other random special codes, during dev..
 	case "Control+Alt+R":
+		e.SetHandled()
 		ProfileToggle()
-		e.SetHandled()
 	case "Control+Alt+F":
+		e.SetHandled()
 		sc.BenchmarkFullRender()
-		e.SetHandled()
 	case "Control+Alt+H":
-		sc.BenchmarkReRender()
 		e.SetHandled()
+		sc.BenchmarkReRender()
+	case "Command+Shift+I": // TODO(config):
+		e.SetHandled()
+		InspectorWindow(sc)
 	}
 	if !e.IsHandled() {
 		em.TriggerShortcut(cs)
@@ -1178,7 +1181,7 @@ func (em *Events) GetShortcuts() {
 // GetShortcutsIn gathers all [Button]s in the given parent widget with
 // a shortcut specified. It recursively navigates [Button.Menu]s.
 func (em *Events) GetShortcutsIn(parent Widget) {
-	parent.AsWidget().WidgetWalkPre(func(wi Widget, wb *WidgetBase) bool {
+	parent.AsWidget().WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		bt := AsButton(wi.This())
 		if bt == nil {
 			return tree.Continue
@@ -1298,6 +1301,7 @@ func (em *Events) GetSpriteInBBox(sc *Scene, pos image.Point) {
 // returns true if event was handled
 func (em *Events) HandleSpriteEvent(e events.Event) bool {
 	et := e.Type()
+loop:
 	for _, sp := range em.SpriteInBBox {
 		if e.IsHandled() {
 			break
@@ -1313,7 +1317,7 @@ func (em *Events) HandleSpriteEvent(e events.Event) bool {
 			if sp.Listeners.HandlesEventType(events.Click) {
 				em.SpritePress = sp
 			}
-			break
+			break loop
 		case events.MouseUp:
 			sp.HandleEvent(e)
 			if em.SpriteSlide == sp {

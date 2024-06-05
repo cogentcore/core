@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -134,7 +135,7 @@ func (cl *Client) Connect(host string) error {
 
 // NewSession creates a new session, sets its input / outputs based on
 // config.  Only works if Client already connected.
-func (cl *Client) NewSession() (*ssh.Session, error) {
+func (cl *Client) NewSession(interact bool) (*ssh.Session, error) {
 	if cl.Client == nil {
 		return nil, fmt.Errorf("ssh: no client, must Connect first")
 	}
@@ -142,9 +143,22 @@ func (cl *Client) NewSession() (*ssh.Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	ses.Stdin = nil // cl.StdIO.In // todo: cannot set this like this!
 	ses.Stdout = cl.StdIO.Out
 	ses.Stderr = cl.StdIO.Err
+	// ses.Stdin = nil // cl.StdIO.In // todo: cannot set this like this!
+
+	if interact {
+		modes := ssh.TerminalModes{
+			ssh.ECHO:          0,     // disable echoing
+			ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
+			ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
+		}
+		err := ses.RequestPty("xterm", 40, 80, modes)
+		if err != nil {
+			slog.Error(err.Error())
+		}
+	}
+
 	return ses, nil
 }
 
@@ -168,7 +182,7 @@ func (cl *Client) WaitSession(name string, ses *ssh.Session) error {
 // GetHomeDir runs "pwd" on the host to get the users home dir,
 // called right after connecting.
 func (cl *Client) GetHomeDir() error {
-	ses, err := cl.NewSession()
+	ses, err := cl.NewSession(false)
 	if err != nil {
 		return err
 	}

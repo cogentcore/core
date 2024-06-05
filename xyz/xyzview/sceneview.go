@@ -17,32 +17,23 @@ import (
 	"cogentcore.org/core/xyz"
 )
 
-// SceneView provides a toolbar controller for an xyz.Scene,
+// SceneView provides a toolbar controller for an [xyz.Scene],
 // and manipulation abilities.
 type SceneView struct {
-	core.Layout
+	core.Frame
 }
 
-func (sv *SceneView) OnInit() {
-	sv.Layout.OnInit()
+func (sv *SceneView) Init() {
+	sv.Frame.Init()
 	sv.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
-}
 
-func (sv *SceneView) Config() {
-	sv.ConfigSceneView()
-}
-
-func (sv *SceneView) ConfigSceneView() {
-	if sv.HasChildren() {
-		sv.UpdateToolbar()
-		return
-	}
-	NewScene(sv, "scene")
-	tb := core.NewToolbar(sv, "tb")
-	sv.ConfigToolbar(tb)
+	core.AddChildAt(sv, "scene", func(w *Scene) {})
+	core.AddChildAt(sv, "tb", func(w *core.Toolbar) {
+		w.Maker(sv.MakeToolbar)
+	})
 }
 
 // SceneWidget returns the core.Widget Scene (xyzv.Scene)
@@ -76,156 +67,193 @@ func (sv *SceneView) UpdateToolbar() {
 	}
 }
 
-func (sv *SceneView) ConfigToolbar(tb *core.Toolbar) {
+func (sv *SceneView) MakeToolbar(p *core.Plan) {
 	sw := sv.SceneWidget()
 	sc := sv.SceneXYZ()
-	core.NewButton(tb).SetIcon(icons.Update).SetTooltip("reset to default initial display").
-		OnClick(func(e events.Event) {
-			sc.SetCamera("default")
-			sc.NeedsUpdate()
-			sv.NeedsRender()
-		})
-	core.NewButton(tb).SetIcon(icons.ZoomIn).SetTooltip("zoom in").
-		Style(func(s *styles.Style) {
-			s.SetAbilities(true, abilities.RepeatClickable)
-		}).
-		OnClick(func(e events.Event) {
-			sc.Camera.Zoom(-.05)
-			sc.NeedsUpdate()
-			sv.NeedsRender()
-		})
-	core.NewButton(tb).SetIcon(icons.ZoomOut).SetTooltip("zoom out").
-		Style(func(s *styles.Style) {
-			s.SetAbilities(true, abilities.RepeatClickable)
-		}).
-		OnClick(func(e events.Event) {
+	core.Add(p, func(w *core.Button) {
+		w.SetIcon(icons.Update).SetTooltip("reset to default initial display").
+			OnClick(func(e events.Event) {
+				sc.SetCamera("default")
+				sc.NeedsUpdate()
+				sv.NeedsRender()
+			})
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetIcon(icons.ZoomIn).SetTooltip("zoom in").
+			Style(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			}).
+			OnClick(func(e events.Event) {
+				sc.Camera.Zoom(-.05)
+				sc.NeedsUpdate()
+				sv.NeedsRender()
+			})
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetIcon(icons.ZoomOut).SetTooltip("zoom out").
+			Style(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			}).OnClick(func(e events.Event) {
 			sc.Camera.Zoom(.05)
 			sc.NeedsUpdate()
 			sv.NeedsRender()
 		})
-	core.NewSeparator(tb)
-	core.NewText(tb).SetText("Rot:").SetTooltip("rotate display")
-	core.NewButton(tb).SetIcon(icons.KeyboardArrowLeft).
-		Style(func(s *styles.Style) {
-			s.SetAbilities(true, abilities.RepeatClickable)
-		}).
-		OnClick(func(e events.Event) {
-			sc.Camera.Orbit(5, 0)
-			sc.NeedsUpdate()
-			sv.NeedsRender()
-		})
-	core.NewButton(tb).SetIcon(icons.KeyboardArrowUp).
-		Style(func(s *styles.Style) {
-			s.SetAbilities(true, abilities.RepeatClickable)
-		}).
-		OnClick(func(e events.Event) {
-			sc.Camera.Orbit(0, 5)
-			sc.NeedsUpdate()
-			sv.NeedsRender()
-		})
-	core.NewButton(tb).SetIcon(icons.KeyboardArrowDown).
-		Style(func(s *styles.Style) {
-			s.SetAbilities(true, abilities.RepeatClickable)
-		}).
-		OnClick(func(e events.Event) {
-			sc.Camera.Orbit(0, -5)
-			sc.NeedsUpdate()
-			sv.NeedsRender()
-		})
-	core.NewButton(tb).SetIcon(icons.KeyboardArrowRight).
-		Style(func(s *styles.Style) {
-			s.SetAbilities(true, abilities.RepeatClickable)
-		}).
-		OnClick(func(e events.Event) {
-			sc.Camera.Orbit(-5, 0)
-			sc.NeedsUpdate()
-			sv.NeedsRender()
-		})
-	core.NewSeparator(tb)
+	})
+	core.Add(p, func(w *core.Separator) {})
 
-	core.NewText(tb).SetText("Pan:").SetTooltip("pan display")
-	core.NewButton(tb).SetIcon(icons.KeyboardArrowLeft).
-		Style(func(s *styles.Style) {
-			s.SetAbilities(true, abilities.RepeatClickable)
-		}).
-		OnClick(func(e events.Event) {
-			sc.Camera.Pan(-.2, 0)
-			sc.NeedsUpdate()
-			sv.NeedsRender()
-		})
-	core.NewButton(tb).SetIcon(icons.KeyboardArrowUp).
-		Style(func(s *styles.Style) {
-			s.SetAbilities(true, abilities.RepeatClickable)
-		}).
-		OnClick(func(e events.Event) {
-			sc.Camera.Pan(0, .2)
-			sc.NeedsUpdate()
-			sv.NeedsRender()
-		})
-	core.NewButton(tb).SetIcon(icons.KeyboardArrowDown).
-		Style(func(s *styles.Style) {
-			s.SetAbilities(true, abilities.RepeatClickable)
-		}).
-		OnClick(func(e events.Event) {
-			sc.Camera.Pan(0, -.2)
-			sc.NeedsUpdate()
-			sv.NeedsRender()
-		})
-	core.NewButton(tb).SetIcon(icons.KeyboardArrowRight).
-		Style(func(s *styles.Style) {
-			s.SetAbilities(true, abilities.RepeatClickable)
-		}).
-		OnClick(func(e events.Event) {
-			sc.Camera.Pan(.2, 0)
-			sc.NeedsUpdate()
-			sv.NeedsRender()
-		})
-	core.NewSeparator(tb)
-
-	core.NewText(tb).SetText("Save:")
-	for i := 1; i <= 4; i++ {
-		nm := fmt.Sprintf("%d", i)
-		core.NewButton(tb).SetText(nm).
-			SetTooltip("first click (or + Shift) saves current view, second click restores to saved state").
+	core.Add(p, func(w *core.Text) {
+		w.SetText("Rot:").SetTooltip("rotate display")
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetIcon(icons.KeyboardArrowLeft).
+			Style(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			}).
 			OnClick(func(e events.Event) {
-				cam := nm
-				if e.HasAllModifiers(e.Modifiers(), key.Shift) {
-					sc.SaveCamera(cam)
-				} else {
-					err := sc.SetCamera(cam)
-					if err != nil {
-						sc.SaveCamera(cam)
-					}
-				}
-				fmt.Printf("Camera %s: %v\n", cam, sc.Camera.GenGoSet(""))
+				sc.Camera.Orbit(5, 0)
 				sc.NeedsUpdate()
 				sv.NeedsRender()
 			})
-	}
-	core.NewSeparator(tb)
-
-	sm := core.NewChooser(tb, "selmode").SetEnum(sw.SelectionMode)
-	sm.OnChange(func(e events.Event) {
-		sw.SelectionMode = sm.CurrentItem.Value.(SelectionModes)
 	})
-	sm.SetCurrentValue(sw.SelectionMode)
+	core.Add(p, func(w *core.Button) {
+		w.SetIcon(icons.KeyboardArrowUp).
+			Style(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			}).
+			OnClick(func(e events.Event) {
+				sc.Camera.Orbit(0, 5)
+				sc.NeedsUpdate()
+				sv.NeedsRender()
+			})
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetIcon(icons.KeyboardArrowDown).
+			Style(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			}).
+			OnClick(func(e events.Event) {
+				sc.Camera.Orbit(0, -5)
+				sc.NeedsUpdate()
+				sv.NeedsRender()
+			})
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetIcon(icons.KeyboardArrowRight).
+			Style(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			}).
+			OnClick(func(e events.Event) {
+				sc.Camera.Orbit(-5, 0)
+				sc.NeedsUpdate()
+				sv.NeedsRender()
+			})
+	})
+	core.Add(p, func(w *core.Separator) {})
 
-	core.NewButton(tb).SetText("Edit").SetIcon(icons.Edit).
-		SetTooltip("edit the currently selected object").
-		OnClick(func(e events.Event) {
-			if sw.CurrentSelected == nil {
-				return
-			}
-			d := core.NewBody().AddTitle("Selected Node")
-			views.NewStructView(d).SetStruct(sw.CurrentSelected)
-			d.RunWindowDialog(sv)
-		})
+	core.Add(p, func(w *core.Text) {
+		w.SetText("Pan:").SetTooltip("pan display")
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetIcon(icons.KeyboardArrowLeft).
+			Style(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			}).
+			OnClick(func(e events.Event) {
+				sc.Camera.Pan(-.2, 0)
+				sc.NeedsUpdate()
+				sv.NeedsRender()
+			})
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetIcon(icons.KeyboardArrowUp).
+			Style(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			}).
+			OnClick(func(e events.Event) {
+				sc.Camera.Pan(0, .2)
+				sc.NeedsUpdate()
+				sv.NeedsRender()
+			})
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetIcon(icons.KeyboardArrowDown).
+			Style(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			}).
+			OnClick(func(e events.Event) {
+				sc.Camera.Pan(0, -.2)
+				sc.NeedsUpdate()
+				sv.NeedsRender()
+			})
+	})
+	core.Add(p, func(w *core.Button) {
+		w.SetIcon(icons.KeyboardArrowRight).
+			Style(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.RepeatClickable)
+			}).
+			OnClick(func(e events.Event) {
+				sc.Camera.Pan(.2, 0)
+				sc.NeedsUpdate()
+				sv.NeedsRender()
+			})
+	})
+	core.Add(p, func(w *core.Separator) {})
 
-	core.NewButton(tb).SetText("Edit Scene").SetIcon(icons.Edit).
-		SetTooltip("edit the 3D Scene object (for access to meshes, textures etc)").
-		OnClick(func(e events.Event) {
-			d := core.NewBody().AddTitle("xyz.Scene")
-			views.NewStructView(d).SetStruct(sv.SceneXYZ())
-			d.RunWindowDialog(sv)
+	core.Add(p, func(w *core.Text) {
+		w.SetText("Save:")
+	})
+
+	for i := 1; i <= 4; i++ {
+		nm := fmt.Sprintf("%d", i)
+		core.AddAt(p, "save_"+nm, func(w *core.Button) {
+			w.SetText(nm).
+				SetTooltip("first click (or + Shift) saves current view, second click restores to saved state").
+				OnClick(func(e events.Event) {
+					cam := nm
+					if e.HasAllModifiers(e.Modifiers(), key.Shift) {
+						sc.SaveCamera(cam)
+					} else {
+						err := sc.SetCamera(cam)
+						if err != nil {
+							sc.SaveCamera(cam)
+						}
+					}
+					fmt.Printf("Camera %s: %v\n", cam, sc.Camera.GenGoSet(""))
+					sc.NeedsUpdate()
+					sv.NeedsRender()
+				})
 		})
+	}
+	core.Add(p, func(w *core.Separator) {})
+
+	core.AddAt(p, "selmode", func(w *core.Chooser) {
+		w.SetEnum(sw.SelectionMode)
+		w.OnChange(func(e events.Event) {
+			sw.SelectionMode = w.CurrentItem.Value.(SelectionModes)
+		})
+		w.SetCurrentValue(sw.SelectionMode)
+	})
+
+	core.Add(p, func(w *core.Button) {
+		w.SetText("Edit").SetIcon(icons.Edit).
+			SetTooltip("edit the currently selected object").
+			OnClick(func(e events.Event) {
+				if sw.CurrentSelected == nil {
+					return
+				}
+				d := core.NewBody().AddTitle("Selected Node")
+				views.NewStructView(d).SetStruct(sw.CurrentSelected)
+				d.RunWindowDialog(sv)
+			})
+	})
+
+	core.Add(p, func(w *core.Button) {
+		w.SetText("Edit Scene").SetIcon(icons.Edit).
+			SetTooltip("edit the 3D Scene object (for access to meshes, textures etc)").
+			OnClick(func(e events.Event) {
+				d := core.NewBody().AddTitle("xyz.Scene")
+				views.NewStructView(d).SetStruct(sv.SceneXYZ())
+				d.RunWindowDialog(sv)
+			})
+	})
 }

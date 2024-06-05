@@ -47,7 +47,7 @@ import (
 // explicit Action suffix.
 // Internally, the buffer represents new lines using \n = LF, but saving
 // and loading can deal with Windows/DOS CRLF format.
-type Buffer struct {
+type Buffer struct { //types:add
 	// Filename is the filename of the file that was last loaded or saved. It is used when highlighting code.
 	Filename core.Filename `json:"-" xml:"-"`
 
@@ -533,7 +533,7 @@ func (tb *Buffer) FileModCheck() bool {
 }
 
 // Open loads the given file into the buffer.
-func (tb *Buffer) Open(filename core.Filename) error {
+func (tb *Buffer) Open(filename core.Filename) error { //types:add
 	err := tb.OpenFile(filename)
 	if err != nil {
 		return err
@@ -576,7 +576,7 @@ func (tb *Buffer) OpenFile(filename core.Filename) error {
 // Revert re-opens text from current file, if filename set -- returns false if
 // not -- uses an optimized diff-based update to preserve existing formatting
 // -- very fast if not very different
-func (tb *Buffer) Revert() bool {
+func (tb *Buffer) Revert() bool { //types:add
 	tb.StopDelayedReMarkup()
 	tb.AutoSaveDelete() // justin case
 	if tb.Filename == "" {
@@ -648,7 +648,7 @@ func (tb *Buffer) SaveAsFunc(filename core.Filename, afterFunc func(canceled boo
 
 // SaveAs saves the current text into given file -- does an EditDone first to save edits
 // and checks for an existing file -- if it does exist then prompts to overwrite or not.
-func (tb *Buffer) SaveAs(filename core.Filename) {
+func (tb *Buffer) SaveAs(filename core.Filename) { //types:add
 	tb.SaveAsFunc(filename, nil)
 }
 
@@ -668,7 +668,7 @@ func (tb *Buffer) SaveFile(filename core.Filename) error {
 
 // Save saves the current text into current Filename associated with this
 // buffer
-func (tb *Buffer) Save() error {
+func (tb *Buffer) Save() error { //types:add
 	if tb.Filename == "" {
 		return fmt.Errorf("views.Buf: filename is empty for Save")
 	}
@@ -1618,7 +1618,7 @@ func (tb *Buffer) LinesInserted(tbe *textbuf.Edit) {
 	copy(nht[stln:], tmpht)
 	tb.HiTags = nht
 
-	// ByteOffs -- maintain mem updt
+	// ByteOffs -- maintain mem update
 	tmpof := make([]int, nsz)
 	nof := append(tb.ByteOffs, tmpof...)
 	copy(nof[stln+nsz:], nof[stln:])

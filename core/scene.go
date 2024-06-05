@@ -33,9 +33,7 @@ import (
 // Each [Scene] contains state specific to its particular usage
 // within a given [Stage] and overall rendering context, representing the unit
 // of rendering in the Cogent Core framework.
-//
-//core:no-new
-type Scene struct {
+type Scene struct { //core:no-new
 	Frame
 
 	// Bars contains functions for constructing the control bars for this Scene,
@@ -48,11 +46,8 @@ type Scene struct {
 	// from the context widget, for FullWindow Dialogs
 	BarsInherit styles.Sides[bool]
 
-	// AppBars contains functions for configuring a top-level App toolbar,
-	// (e.g., TopAppBar) for elements contained within this Scene,
-	// that should be represented in any app-level toolbar constructed
-	// for this Scene.
-	AppBars ToolbarFuncs `json:"-" xml:"-"`
+	// AppBars contains functions for making the plan for the top app bar.
+	AppBars []func(p *Plan) `json:"-" xml:"-"`
 
 	// Body provides the main contents of scenes that use control Bars
 	// to allow the main window contents to be specified separately
@@ -122,14 +117,8 @@ func (sc *Scene) FlagType() enums.BitFlagSetter {
 // contains the main content of the Scene (e.g., a Window, Dialog, etc).
 // It will be constructed from the Bars-configured control bars on each
 // side, with the given Body as the central content.
-func NewBodyScene(body *Body, name ...string) *Scene {
-	sc := &Scene{}
-	nm := body.Nm + " scene"
-	if len(name) > 0 {
-		nm = name[0]
-	}
-	sc.InitName(sc, nm)
-	sc.Events.Scene = sc
+func NewBodyScene(body *Body) *Scene {
+	sc := NewScene(body.Name() + " scene")
 	sc.Body = body
 	// need to set parent immediately so that SceneConfig works,
 	// but can not add it yet because it may go elsewhere due
@@ -141,23 +130,17 @@ func NewBodyScene(body *Body, name ...string) *Scene {
 // NewScene creates a new Scene object without a Body, e.g., for use
 // in a Menu, Tooltip or other such simple popups or non-control-bar Scenes.
 func NewScene(name ...string) *Scene {
-	sc := &Scene{}
-	sc.InitName(sc, name...)
+	sc := tree.New[*Scene]()
+	if len(name) > 0 {
+		sc.SetName(name[0])
+	}
 	sc.Events.Scene = sc
 	return sc
 }
 
-func (sc *Scene) OnInit() {
+func (sc *Scene) Init() {
 	sc.Scene = sc
-	sc.WidgetBase.OnInit()
-	sc.SetStyles()
-	sc.HandleEvents()
-	if TheApp.SceneConfig != nil {
-		TheApp.SceneConfig(sc)
-	}
-}
-
-func (sc *Scene) SetStyles() {
+	sc.Frame.Init()
 	sc.Style(func(s *styles.Style) {
 		s.Cursor = cursors.Arrow
 		s.Background = colors.C(colors.Scheme.Background)
@@ -177,10 +160,6 @@ func (sc *Scene) SetStyles() {
 
 		s.Padding.Set(units.Dp(8))
 	})
-}
-
-func (sc *Scene) HandleEvents() {
-	sc.Frame.HandleEvents()
 	sc.OnShow(func(e events.Event) {
 		CurrentRenderWindow.SetStageTitle(sc.Stage.Title)
 	})
@@ -199,6 +178,9 @@ func (sc *Scene) HandleEvents() {
 		st := sm.Stack.ValueByIndex(sm.Stack.Len() - 2)
 		CurrentRenderWindow.SetStageTitle(st.Title)
 	})
+	if TheApp.SceneConfig != nil {
+		TheApp.SceneConfig(sc)
+	}
 }
 
 // RenderContext returns the current render context.
@@ -287,7 +269,10 @@ func (sc *Scene) Close() bool {
 	}
 	e := &events.Base{Typ: events.Close}
 	e.Init()
-	sc.HandleEvent(e)
+	sc.WidgetWalkDown(func(kwi Widget, kwb *WidgetBase) bool {
+		kwi.HandleEvent(e)
+		return tree.Continue
+	})
 	// if they set the event as handled, we do not close the scene
 	if e.IsHandled() {
 		return false

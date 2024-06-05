@@ -68,7 +68,7 @@ func (vw *View) UpdatePose() {
 
 // UpdateBodyView updates the display properties of given body name
 // recurses the tree until this body name is found.
-func (vw *View) UpdateBodyView(bodyNames []string) {
+func (vw *View) UpdateBodyView(bodyNames ...string) {
 	vw.UpdateBodyViewNode(bodyNames, vw.World, vw.Root)
 }
 
@@ -127,8 +127,8 @@ func (vw *View) NewInLibrary(nm string) *svg.Group {
 	if vw.Library == nil {
 		vw.Library = make(map[string]*svg.Group)
 	}
-	gp := &svg.Group{}
-	gp.InitName(gp, nm)
+	gp := svg.NewGroup()
+	gp.SetName(nm)
 	vw.Library[nm] = gp
 	return gp
 }
@@ -171,16 +171,16 @@ func (vw *View) InitLibShape(bod physics.Body) {
 	switch wt {
 	case "physics.Box":
 		mnm := "eveBox"
-		svg.NewRect(lgp, mnm).SetPos(math32.Vec2(0, 0)).SetSize(math32.Vec2(1, 1))
+		svg.NewRect(lgp).SetPos(math32.Vec2(0, 0)).SetSize(math32.Vec2(1, 1)).SetName(mnm)
 	case "physics.Cylinder":
 		mnm := "eveCylinder"
-		svg.NewEllipse(lgp, mnm).SetPos(math32.Vec2(0, 0)).SetRadii(math32.Vec2(.1, .1))
+		svg.NewEllipse(lgp).SetPos(math32.Vec2(0, 0)).SetRadii(math32.Vec2(.1, .1)).SetName(mnm)
 	case "physics.Capsule":
 		mnm := "eveCapsule"
-		svg.NewEllipse(lgp, mnm).SetPos(math32.Vec2(0, 0)).SetRadii(math32.Vec2(.1, .1))
+		svg.NewEllipse(lgp).SetPos(math32.Vec2(0, 0)).SetRadii(math32.Vec2(.1, .1)).SetName(mnm)
 	case "physics.Sphere":
 		mnm := "eveSphere"
-		svg.NewCircle(lgp, mnm).SetPos(math32.Vec2(0, 0)).SetRadius(.1)
+		svg.NewCircle(lgp).SetPos(math32.Vec2(0, 0)).SetRadius(.1).SetName(mnm)
 	}
 }
 
@@ -271,11 +271,11 @@ func (vw *View) SyncNode(wn physics.Node, vn svg.Node) bool {
 	nm := wn.Name()
 	vn.SetName(nm) // guaranteed to be unique
 	skids := *wn.Children()
-	tnl := make(tree.Config, 0, len(skids))
+	p := make(tree.TypePlan, 0, len(skids))
 	for _, skid := range skids {
-		tnl.Add(svg.GroupType, skid.Name())
+		p.Add(svg.GroupType, skid.Name())
 	}
-	mod := vn.ConfigChildren(tnl)
+	mod := tree.Update(vn, p)
 	modall := mod
 	for idx := range skids {
 		wk := wn.Child(idx).(physics.Node)

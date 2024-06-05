@@ -17,7 +17,7 @@ import (
 var tsv embed.FS
 
 func main() {
-	pats := table.NewTable(0, "pats")
+	pats := table.NewTable("pats")
 	pats.SetMetaData("name", "TrainPats")
 	pats.SetMetaData("desc", "Training patterns")
 	// todo: meta data for grid size
@@ -30,7 +30,7 @@ func main() {
 	// nt := tv.NewTab("First")
 	nt := tv.NewTab("Patterns")
 	etv := tensorview.NewTableView(nt).SetTable(pats)
-	b.AddAppBar(etv.ConfigToolbar)
+	b.AddAppBar(etv.MakeToolbar)
 
 	b.RunMainWindow()
 }

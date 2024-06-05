@@ -46,11 +46,6 @@ func (bf *BarFuncs) Inherit(obf BarFuncs) {
 	*bf = nbf
 }
 
-// AddAppBar adds an AppBar function for an element within the scene
-func (sc *Scene) AddAppBar(fun func(tb *Toolbar)) {
-	sc.AppBars.Add(fun)
-}
-
 // ConfigSceneBars configures the side control bars, for main scenes
 func (sc *Scene) ConfigSceneBars() {
 	// at last possible moment, add app-specific app bar config
@@ -60,17 +55,19 @@ func (sc *Scene) ConfigSceneBars() {
 		}
 	}
 	if !sc.Bars.Top.IsEmpty() {
-		head := NewLayout(sc, "top-bar").Style(func(s *styles.Style) {
+		head := NewFrame(sc).Style(func(s *styles.Style) {
 			s.Align.Items = styles.Center
+			s.Grow.Set(1, 0)
 		})
 		sc.Bars.Top.Call(head)
 	}
 	if !sc.Bars.Left.IsEmpty() || !sc.Bars.Right.IsEmpty() {
-		mid := NewLayout(sc, "body-area")
+		mid := NewFrame(sc)
 		if !sc.Bars.Left.IsEmpty() {
-			left := NewLayout(mid, "left-bar").Style(func(s *styles.Style) {
+			left := NewFrame(mid).Style(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Align.Items = styles.Center
+				s.Grow.Set(0, 1)
 			})
 			sc.Bars.Left.Call(left)
 		}
@@ -78,9 +75,10 @@ func (sc *Scene) ConfigSceneBars() {
 			mid.AddChild(sc.Body)
 		}
 		if !sc.Bars.Right.IsEmpty() {
-			right := NewLayout(mid, "right-bar").Style(func(s *styles.Style) {
+			right := NewFrame(mid).Style(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Align.Items = styles.Center
+				s.Grow.Set(0, 1)
 			})
 			sc.Bars.Right.Call(right)
 		}
@@ -90,20 +88,21 @@ func (sc *Scene) ConfigSceneBars() {
 		}
 	}
 	if !sc.Bars.Bottom.IsEmpty() {
-		foot := NewLayout(sc, "bottom-bar").Style(func(s *styles.Style) {
+		foot := NewFrame(sc).Style(func(s *styles.Style) {
 			s.Justify.Content = styles.End
 			s.Align.Items = styles.Center
+			s.Grow.Set(1, 0)
 		})
 		sc.Bars.Bottom.Call(foot)
 	}
 }
 
 // GetBar returns Bar layout widget at given side, nil if not there.
-func (sc *Scene) GetBar(side styles.SideIndexes) *Layout {
+func (sc *Scene) GetBar(side styles.SideIndexes) *Frame {
 	nm := strings.ToLower(side.String()) + "-bar"
 	bar := sc.ChildByName(nm)
 	if bar != nil {
-		return bar.(*Layout)
+		return bar.(*Frame)
 	}
 	return nil
 }
@@ -194,9 +193,9 @@ func (bd *Body) AddBottomBar(fun func(parent Widget)) {
 	bd.Scene.Bars.Bottom.Add(fun)
 }
 
-// AddAppBar adds an AppBar function for an element within the scene
-func (bd *Body) AddAppBar(fun func(tb *Toolbar)) {
-	bd.Scene.AddAppBar(fun)
+// AddAppBar adds plan maker function(s) for the top app bar, which can be used to add items to it.
+func (bd *Body) AddAppBar(m ...func(p *Plan)) {
+	bd.Scene.AppBars = append(bd.Scene.AppBars, m...)
 }
 
 // GetTopAppBar returns the TopAppBar Toolbar if it exists, nil otherwise.

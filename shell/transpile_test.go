@@ -97,6 +97,8 @@ func TestTranspile(t *testing.T) {
 		{`echo {name}`, `shell.Run("echo", name)`},
 		{`echo "testing"`, `shell.Run("echo", "testing")`},
 		{`number := 1.23`, `number := 1.23`},
+		{`res1, res2 := FunTwoRet()`, `res1, res2 := FunTwoRet()`},
+		{`res1, res2, res3 := FunThreeRet()`, `res1, res2, res3 := FunThreeRet()`},
 		{`println("hi")`, `println("hi")`},
 		{`fmt.Println("hi")`, `fmt.Println("hi")`},
 		{`for i := 0; i < 3; i++ { fmt.Println(i, "\n")`, `for i := 0; i < 3; i++ { fmt.Println(i, "\n")`},
@@ -156,6 +158,15 @@ func TestTranspile(t *testing.T) {
 		{"cd ../another/dir/to/go_to", `shell.Run("cd", "../another/dir/to/go_to")`},
 		{"cd ../an-other/dir/", `shell.Run("cd", "../an-other/dir/")`},
 		{"curl https://google.com/search?q=hello%20world#body", `shell.Run("curl", "https://google.com/search?q=hello%20world#body")`},
+		{"func splitLines(str string) []string {", `splitLines := func(str string)[]string {`},
+		{"type Result struct {", `type Result struct {`},
+		{"var Jobs *table.Table", `var Jobs *table.Table`},
+		{"type Result struct { JobID string", `type Result struct { JobID string`},
+		{"type Result struct { JobID string `width:\"60\"`", "type Result struct { JobID string `width:\"60\"`"},
+		{"func RunInExamples(fun func()) {", "RunInExamples := func(fun func()) {"},
+		{"ctr++", "ctr++"},
+		{"stru.ctr++", "stru.ctr++"},
+		{"meta += ln", "meta += ln"},
 	}
 
 	sh := NewShell()
@@ -173,7 +184,7 @@ func TestCommand(t *testing.T) {
 			`command list {
 ls -la args... 
 }`,
-			`shell.AddCommand("list", func (args ...string) {
+			`shell.AddCommand("list", func(args ...string) {
 shell.Run("ls", "-la", "args...")
 })`},
 	}

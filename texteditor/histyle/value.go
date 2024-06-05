@@ -4,6 +4,7 @@
 
 package histyle
 
+/* TODO(config)
 import (
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
@@ -58,13 +59,18 @@ func View(st *Styles) {
 	mv.OnChange(func(e events.Event) {
 		StylesChanged = true
 	})
-	d.AddAppBar(func(tb *core.Toolbar) {
-		oj := views.NewFuncButton(tb, st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
-		oj.Args[0].SetTag(".ext", ".histy")
-		sj := views.NewFuncButton(tb, st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
-		sj.Args[0].SetTag(".ext", ".histy")
-		core.NewSeparator(tb)
-		mv.ConfigToolbar(tb)
+	d.AddAppBar(func(p *core.Plan) {
+		core.Add(p, func(w *views.FuncButton) {
+			w.SetFunc(st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
+			w.Args[0].SetTag(`ext:".histy"`)
+		})
+		core.Add(p, func(w *views.FuncButton) {
+			w.SetFunc(st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
+			w.Args[0].SetTag(`ext:".histy"`)
+		})
+		core.Add(p, func(w *core.Separator) {})
+		mv.MakeToolbar(p)
 	})
 	d.RunWindow() // note: no context here so not dialog
 }
+*/

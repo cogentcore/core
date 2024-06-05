@@ -473,7 +473,7 @@ var _ArgDataFlags_index = [...]uint8{0, 13, 26, 39}
 var FileInfoProperties = tree.Properties{
 	"CtxtMenu": tree.Propertieslice{
 		{"Duplicate", tree.Properties{
-			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *core.Button) {
+			"updatefunc": ActionUpdateFunc(func(fii interface{}, act *core.Button) {
 				fi := fii.(*FileInfo)
 				act.SetInactiveState(fi.IsDir())
 			}),
@@ -481,7 +481,7 @@ var FileInfoProperties = tree.Properties{
 		{"Delete", tree.Properties{
 			"desc":    "Ok to delete this file?  This is not undoable and is not moving to trash / recycle bin",
 			"confirm": true,
-			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *core.Button) {
+			"updatefunc": ActionUpdateFunc(func(fii interface{}, act *core.Button) {
 				fi := fii.(*FileInfo)
 				act.SetInactiveState(fi.IsDir())
 			}),
@@ -613,7 +613,7 @@ func tst() {
 
 var PiViewProperties = tree.Properties{
 	"MainMenu": tree.Propertieslice{
-		"updtfunc": views.ActionUpdateFunc(func(pvi interface{}, act *core.Button) {
+		"updatefunc": views.ActionUpdateFunc(func(pvi interface{}, act *core.Button) {
 			pv := pvi.(*PiView)
 			act.SetActiveState(pv.Settings.ProjectFile != "")
 		}),
@@ -919,7 +919,7 @@ func main() {
 	}
 
 	fmt.Printf("starting test")
-	defer my.Widget.UpdateEnd(updt)
+	defer my.Widget.UpdateEnd(update)
 	goto bypass
 
 	if a == b {

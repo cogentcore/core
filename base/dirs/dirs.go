@@ -35,7 +35,7 @@ func GoSrcDir(dir string) (absDir string, err error) {
 // ExtFiles returns all the FileInfo's for files with given extension(s) in directory
 // in sorted order (if exts is empty then all files are returned).
 // In case of error, returns nil.
-func ExtFiles(path string, exts []string) []fs.DirEntry {
+func ExtFiles(path string, exts ...string) []fs.DirEntry {
 	files, err := os.ReadDir(path)
 	if err != nil {
 		return nil
@@ -66,7 +66,7 @@ func ExtFiles(path string, exts []string) []fs.DirEntry {
 
 // ExtFilenames returns all the file names with given extension(s) in directory
 // in sorted order (if exts is empty then all files are returned)
-func ExtFilenames(path string, exts []string) []string {
+func ExtFilenames(path string, exts ...string) []string {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil
@@ -121,9 +121,9 @@ func Dirs(path string) []string {
 // LatestMod returns the latest (most recent) modification time for any of the
 // files in the directory (optionally filtered by extension(s) if exts != nil)
 // if no files or error, returns zero time value
-func LatestMod(path string, exts []string) time.Time {
+func LatestMod(path string, exts ...string) time.Time {
 	tm := time.Time{}
-	files := ExtFiles(path, exts)
+	files := ExtFiles(path, exts...)
 	if len(files) == 0 {
 		return tm
 	}
@@ -148,6 +148,27 @@ func AllFiles(path string) ([]string, error) {
 			return err
 		}
 		fnms = append(fnms, path)
+		return nil
+	})
+	return fnms, er
+}
+
+// AllFilesGlob returns a slice of all the files, recursively
+// within a given directory, that match given pattern expression
+// for the individual filename.
+func AllFilesGlob(path, pattern string) ([]string, error) {
+	_, err := filepath.Match("test", pattern)
+	if err != nil {
+		return nil, err
+	}
+	var fnms []string
+	er := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if match, _ := filepath.Match(path, pattern); match {
+			fnms = append(fnms, path)
+		}
 		return nil
 	})
 	return fnms, er

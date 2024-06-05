@@ -16,7 +16,7 @@ import (
 	"golang.org/x/image/draw"
 )
 
-// Icon contains a svg.SVG element.
+// Icon renders an [svg.SVG] icon.
 // The rendered version is cached for a given size.
 // Icons do not render a background or border independent of their SVG object.
 // The size of on Icon is determined by the [styles.Font.Size] property.
@@ -33,23 +33,23 @@ type Icon struct {
 	SVG svg.SVG `set:"-" copier:"-"`
 }
 
-func (ic *Icon) OnInit() {
-	ic.WidgetBase.OnInit()
-	ic.SetStyles()
-}
+func (ic *Icon) WidgetValue() any { return &ic.Icon }
 
-func (ic *Icon) SetStyles() {
+func (ic *Icon) Init() {
+	ic.WidgetBase.Init()
 	ic.SVG.Scale = 1
 	ic.Style(func(s *styles.Style) {
 		s.Min.Set(units.Em(1))
 	})
 	ic.StyleFinal(func(s *styles.Style) {
-		ic.SVG.Root.ViewBox.PreserveAspectRatio.SetFromStyle(s)
+		if ic.SVG.Root != nil {
+			ic.SVG.Root.ViewBox.PreserveAspectRatio.SetFromStyle(s)
+		}
 	})
 }
 
 // SetIcon sets the icon, logging error if not found.
-// Does nothing if Icon is already == icon name.
+// Does nothing if Icon is already equal to the given icon.
 func (ic *Icon) SetIcon(icon icons.Icon) *Icon {
 	_, err := ic.SetIconTry(icon)
 	if err != nil {
@@ -58,16 +58,15 @@ func (ic *Icon) SetIcon(icon icons.Icon) *Icon {
 	return ic
 }
 
-// SetIconTry sets the icon, returning error
-// message if not found etc, and returning true if a new icon was actually set.
-// Does nothing and returns false if Icon is already == icon name.
+// SetIconTry sets the icon, returning error message if not found etc,
+// and returning true if a new icon was actually set.
+// Does nothing and returns false if Icon is already equal to the given icon.
 func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 	if icon.IsNil() {
 		ic.SVG.DeleteAll()
-		ic.Config()
 		return false, nil
 	}
-	if ic.SVG.Root.HasChildren() && ic.Icon == icon {
+	if ic.SVG.Root != nil && ic.SVG.Root.HasChildren() && ic.Icon == icon {
 		// fmt.Println("icon already set:", icon)
 		return false, nil
 	}
@@ -75,7 +74,7 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 	ic.SVG.Config(2, 2)
 	err := ic.SVG.OpenFS(icons.Icons, fnm)
 	if err != nil {
-		ic.Config()
+		ic.UpdateWidget()
 		return false, err
 	}
 	ic.Icon = icon

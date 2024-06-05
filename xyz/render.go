@@ -77,11 +77,6 @@ func (sc *Scene) UpdateNodesIfNeeded() {
 	}
 }
 
-// IsConfiged Returns true if the scene has already been configured
-func (sc *Scene) IsConfiged() bool {
-	return sc.Frame != nil
-}
-
 // ConfigFrameFromSurface configures framebuffer for GPU rendering
 // Using GPU and Device from given vgpu.Surface
 func (sc *Scene) ConfigFrameFromSurface(surf *vgpu.Surface) {

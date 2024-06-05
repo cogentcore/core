@@ -7,10 +7,10 @@
 package types
 
 import (
+	"cmp"
 	"fmt"
-	"log/slog"
 	"reflect"
-	"sort"
+	"slices"
 	"strings"
 	"sync/atomic"
 
@@ -18,43 +18,66 @@ import (
 )
 
 var (
-	// Types records all types (i.e., a type registry)
-	// key is long type name: package_url.Type, e.g., cogentcore.org/core/core.Button
+	// Types is a type registry, initialized to contain all builtin types. New types
+	// can be added with [AddType]. The key is the long type name: package/path.Type,
+	// e.g., cogentcore.org/core/core.Button.
 	Types = map[string]*Type{}
 
-	// TypeIDCounter is an atomically incremented uint64 used
-	// for assigning new [Type.ID] numbers
-	TypeIDCounter uint64
+	// typeIDCounter is an atomically incremented uint64 used
+	// for assigning new [Type.ID] numbers.
+	typeIDCounter uint64
 )
 
+func init() {
+	addBuiltin[bool]("bool")
+	addBuiltin[complex64]("complex64")
+	addBuiltin[complex128]("complex128")
+	addBuiltin[float32]("float32")
+	addBuiltin[float64]("float64")
+	addBuiltin[int]("int")
+	addBuiltin[int64]("int8")
+	addBuiltin[int16]("int16")
+	addBuiltin[int32]("int32")
+	addBuiltin[int64]("int64")
+	addBuiltin[string]("string")
+	addBuiltin[uint]("uint")
+	addBuiltin[uint8]("uint8")
+	addBuiltin[uint16]("uint16")
+	addBuiltin[uint32]("uint32")
+	addBuiltin[uint64]("uint64")
+	addBuiltin[uint64]("uintptr")
+}
+
+// addBuiltin adds the given builtin type with the given name to the type registry.
+func addBuiltin[T any](name string) {
+	var v T
+	AddType(&Type{Name: name, IDName: name, Instance: v})
+}
+
 // TypeByName returns a Type by name (package_url.Type, e.g., cogentcore.org/core/core.Button),
-func TypeByName(nm string) *Type {
-	tp, ok := Types[nm]
-	if !ok {
-		return nil
-	}
-	return tp
+func TypeByName(name string) *Type {
+	return Types[name]
 }
 
 // TypeByNameTry returns a Type by name (package_url.Type, e.g., cogentcore.org/core/core.Button),
 // or error if not found
-func TypeByNameTry(nm string) (*Type, error) {
-	tp, ok := Types[nm]
+func TypeByNameTry(name string) (*Type, error) {
+	tp, ok := Types[name]
 	if !ok {
-		return nil, fmt.Errorf("type %q not found", nm)
+		return nil, fmt.Errorf("type %q not found", name)
 	}
 	return tp, nil
 }
 
 // TypeByValue returns the [Type] of the given value
-func TypeByValue(val any) *Type {
-	return TypeByName(TypeNameObj(val))
+func TypeByValue(v any) *Type {
+	return TypeByName(TypeNameValue(v))
 }
 
 // TypeByValueTry returns the [Type] of the given value,
 // or an error if it is not found
-func TypeByValueTry(val any) (*Type, error) {
-	return TypeByNameTry(TypeNameObj(val))
+func TypeByValueTry(v any) (*Type, error) {
+	return TypeByNameTry(TypeNameValue(v))
 }
 
 // TypeByReflectType returns the [Type] of the given reflect type
@@ -71,11 +94,7 @@ func TypeByReflectTypeTry(typ reflect.Type) (*Type, error) {
 // AddType adds a constructed [Type] to the registry
 // and returns it. This sets the ID.
 func AddType(typ *Type) *Type {
-	if _, has := Types[typ.Name]; has {
-		slog.Debug("types.AddType: Type already exists", "Type.Name", typ.Name)
-		return typ
-	}
-	typ.ID = atomic.AddUint64(&TypeIDCounter, 1)
+	typ.ID = atomic.AddUint64(&typeIDCounter, 1)
 	Types[typ.Name] = typ
 	return typ
 }
@@ -86,41 +105,53 @@ func TypeName(typ reflect.Type) string {
 	return reflectx.LongTypeName(typ)
 }
 
-// TypeNameObj returns the long, full package-path qualified type name
-// from given object.  Automatically finds the non-pointer base type.
+// TypeNameValue returns the long, full package-path qualified type name
+// of the given Go value. Automatically finds the non-pointer base type.
 // This is guaranteed to be unique and used for the Types registry.
-func TypeNameObj(v any) string {
-	typ := reflectx.NonPointerType(reflect.TypeOf(v))
+func TypeNameValue(v any) string {
+	typ := reflectx.Underlying(reflect.ValueOf(v)).Type()
 	return TypeName(typ)
+}
+
+// BuiltinTypes returns all of the builtin types in the type registry.
+func BuiltinTypes() []*Type {
+	res := []*Type{}
+	for _, t := range Types {
+		if !strings.Contains(t.Name, ".") {
+			res = append(res, t)
+		}
+	}
+	slices.SortFunc(res, func(a, b *Type) int {
+		return cmp.Compare(a.Name, b.Name)
+	})
+	return res
 }
 
 // AllEmbeddersOf returns all registered types that embed the given type.
 // List is sorted in alpha order by fully package-path-qualified Name.
 func AllEmbeddersOf(typ *Type) []*Type {
-	var typs []*Type
+	var res []*Type
 	for _, t := range Types {
 		if t.HasEmbed(typ) {
-			typs = append(typs, t)
+			res = append(res, t)
 		}
 	}
-	sort.Slice(typs, func(i, j int) bool {
-		return typs[i].Name < typs[j].Name
+	slices.SortFunc(res, func(a, b *Type) int {
+		return cmp.Compare(a.Name, b.Name)
 	})
-	return typs
+	return res
 }
 
-// GetDoc gets the documentation for the given value with the given owner value, field, and label.
-// The value, owner value, and field may be nil/invalid. The owner value, if valid, is the value that
-// contains the value (the parent struct, map, slice, or array). The field, if non-nil,
-// is the struct field that the value represents. GetDoc uses the given label to format
+// GetDoc gets the documentation for the given value with the given parent struct, field, and label.
+// The value, parent value, and field may be nil/invalid. GetDoc uses the given label to format
 // the documentation with [FormatDoc] before returning it.
-func GetDoc(val, owner reflect.Value, field *reflect.StructField, label string) (string, bool) {
+func GetDoc(value, parent reflect.Value, field reflect.StructField, label string) (string, bool) {
 	// if we are not part of a struct, we just get the documentation for our type
-	if field == nil || !owner.IsValid() {
-		if !val.IsValid() {
+	if !parent.IsValid() {
+		if !value.IsValid() {
 			return "", false
 		}
-		rtyp := reflectx.NonPointerType(val.Type())
+		rtyp := reflectx.NonPointerType(value.Type())
 		typ := TypeByName(TypeName(rtyp))
 		if typ == nil {
 			return "", false
@@ -129,16 +160,16 @@ func GetDoc(val, owner reflect.Value, field *reflect.StructField, label string) 
 	}
 
 	// otherwise, we get our field documentation in our parent
-	f := GetField(owner, field.Name)
+	f := GetField(parent, field.Name)
 	if f != nil {
 		return FormatDoc(f.Doc, field.Name, label), true
 	}
 	// if we aren't in the type registry, we fall back on struct tag
-	desc, ok := field.Tag.Lookup("desc")
+	doc, ok := field.Tag.Lookup("doc")
 	if !ok {
 		return "", false
 	}
-	return FormatDoc(desc, field.Name, label), true
+	return FormatDoc(doc, field.Name, label), true
 }
 
 // FormatDoc formats the given Go documentation string for an identifier with the given

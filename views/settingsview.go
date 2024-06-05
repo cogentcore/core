@@ -11,21 +11,25 @@ import (
 )
 
 // SettingsViewToolbarBase is the base toolbar configuration function used in [SettingsView].
-func SettingsViewToolbarBase(tb *core.Toolbar) {
-	NewFuncButton(tb, core.AppearanceSettings.SaveScreenZoom).SetIcon(icons.ZoomIn).
-		SetAfterFunc(func() {
-			core.AppearanceSettings.Apply()
-			core.UpdateAll()
-		})
-		// todo: doesn't work to update..
-
-	tb.AddOverflowMenu(func(m *core.Scene) {
-		NewFuncButton(m, core.ResetAllSettings).SetText("Reset settings").SetIcon(icons.Delete).SetConfirm(true)
-
-		NewFuncButton(m, core.AppearanceSettings.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
-		NewFuncButton(m, core.ProfileToggle).SetText("Profile performance").SetIcon(icons.Analytics)
-		core.NewSeparator(m)
+func SettingsViewToolbarBase(p *core.Plan) {
+	core.Add(p, func(w *FuncButton) {
+		w.SetFunc(core.AppearanceSettings.SaveScreenZoom).
+			SetAfterFunc(func() {
+				core.AppearanceSettings.Apply()
+				core.UpdateAll()
+			}).SetIcon(icons.ZoomIn)
+		// todo: update..
 	})
+
+	/*
+		tb.AddOverflowMenu(func(m *core.Scene) {
+			NewFuncButton(m, core.ResetAllSettings).SetText("Reset settings").SetIcon(icons.Delete).SetConfirm(true)
+
+			NewFuncButton(m, core.AppearanceSettings.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
+			NewFuncButton(m, core.ProfileToggle).SetText("Profile performance").SetIcon(icons.Analytics)
+			core.NewSeparator(m)
+		})
+	*/
 }
 
 // SettingsWindow makes and runs a new window for viewing user settings.
@@ -40,10 +44,10 @@ func SettingsWindow() {
 
 // SettingsView adds to the given body a view of user settings
 func SettingsView(b *core.Body) {
-	b.AddAppBar(func(tb *core.Toolbar) {
-		SettingsViewToolbarBase(tb)
+	b.AddAppBar(func(p *core.Plan) {
+		SettingsViewToolbarBase(p)
 		for _, se := range core.AllSettings {
-			se.ConfigToolbar(tb)
+			se.MakeToolbar(p)
 		}
 	})
 
@@ -53,9 +57,6 @@ func SettingsView(b *core.Body) {
 		fr := tabs.NewTab(se.Label())
 
 		NewStructView(fr).SetStruct(se).OnChange(func(e events.Event) {
-			if tab := b.GetTopAppBar(); tab != nil {
-				tab.ApplyStyleUpdate()
-			}
 			core.UpdateSettings(fr, se)
 		})
 	}

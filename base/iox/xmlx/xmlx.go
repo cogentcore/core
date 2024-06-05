@@ -18,7 +18,7 @@ func Open(v any, filename string) error {
 }
 
 // OpenFiles reads the given object from the given filenames using XML encoding
-func OpenFiles(v any, filenames []string) error {
+func OpenFiles(v any, filenames ...string) error {
 	return iox.OpenFiles(v, filenames, iox.NewDecoderFunc(xml.NewDecoder))
 }
 
@@ -30,7 +30,7 @@ func OpenFS(v any, fsys fs.FS, filename string) error {
 
 // OpenFilesFS reads the given object from the given filenames using XML encoding,
 // using the given [fs.FS] filesystem (e.g., for embed files)
-func OpenFilesFS(v any, fsys fs.FS, filenames []string) error {
+func OpenFilesFS(v any, fsys fs.FS, filenames ...string) error {
 	return iox.OpenFilesFS(v, fsys, filenames, iox.NewDecoderFunc(xml.NewDecoder))
 }
 
