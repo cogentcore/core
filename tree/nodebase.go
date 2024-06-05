@@ -213,7 +213,7 @@ func (n *NodeBase) ChildByName(name string, startIndex ...int) Node {
 // no value is specified for startIndex, it starts in the middle, which is a
 // good default.
 func (n *NodeBase) ChildByType(t *types.Type, embeds bool, startIndex ...int) Node {
-	return n.Child(n.Children.IndexByType(t, embeds, startIndex...))
+	return n.Child(IndexByType(n.Children, t, embeds, startIndex...))
 }
 
 // Paths:

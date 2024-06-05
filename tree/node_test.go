@@ -136,9 +136,9 @@ func TestNodeFindType(t *testing.T) {
 	assert.True(t, ne.NodeType().HasEmbed(NodeBaseType))
 	assert.True(t, nb.NodeType().HasEmbed(NodeBaseType))
 
-	idx := parent.Children.IndexByType(testdata.NodeEmbedType, NoEmbeds, 0)
+	idx := IndexByType(parent.Children, testdata.NodeEmbedType, NoEmbeds, 0)
 	assert.Equal(t, 0, idx)
-	idx = parent.Children.IndexByType(NodeBaseType, NoEmbeds, 0)
+	idx = IndexByType(parent.Children, NodeBaseType, NoEmbeds, 0)
 	assert.Equal(t, 1, idx)
 }
 

@@ -32,13 +32,14 @@ func IndexByName(slice []Node, name string, startIndex ...int) int {
 	return findfast.FindFunc(slice, func(ch Node) bool { return ch.Name() == name }, startIndex...)
 }
 
-// IndexByType returns index of element that either is that type or embeds
-// that type, false if not found. See [Slice.IndexOf] for info on startIndex.
-func (sl *Slice) IndexByType(t *types.Type, embeds bool, startIndex ...int) int {
+// IndexByType returns the index of the first element that either is the given type
+// or embeds it if embeds it true. It returns -1 if no such node is found.
+// See [IndexOf] for info on startIndex.
+func IndexByType(slice []Node, t *types.Type, embeds bool, startIndex ...int) int {
 	if embeds {
-		return findfast.FindFunc(*sl, func(ch Node) bool { return ch.NodeType().HasEmbed(t) }, startIndex...)
+		return findfast.FindFunc(slice, func(ch Node) bool { return ch.NodeType().HasEmbed(t) }, startIndex...)
 	}
-	return findfast.FindFunc(*sl, func(ch Node) bool { return ch.NodeType() == t }, startIndex...)
+	return findfast.FindFunc(slice, func(ch Node) bool { return ch.NodeType() == t }, startIndex...)
 }
 
 // Move moves the element in the given slice at the given
