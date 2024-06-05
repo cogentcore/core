@@ -202,6 +202,9 @@ func FileViewExtOnlyFilter(fv *FileView, fi *fileinfo.FileInfo) bool {
 // initializes the view
 func (fv *FileView) SetFilename(filename, ext string) *FileView {
 	fv.DirPath, fv.CurrentSelectedFile = filepath.Split(filename)
+	if ap, err := filepath.Abs(fv.DirPath); err == nil {
+		fv.DirPath = ap
+	}
 	return fv.SetExt(ext)
 }
 
