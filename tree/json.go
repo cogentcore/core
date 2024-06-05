@@ -23,8 +23,8 @@ import (
 // for trees.  The Slice Marshal / Unmarshal methods save the type info
 // of each child so that the full tree can be properly reconstructed.
 
-// noMarshalNode is a version of [NodeBase] without a MarshalJSON method
-// (since non-embedded type declarations do not result in method inheritance).
+// noMarshalNode is a version of [NodeBase] without a MarshalJSON or UnmarshalJSON
+// method (since non-embedded type declarations do not result in method inheritance).
 type noMarshalNode NodeBase
 
 // MarshalJSON marshals the node by injecting the [Node.NodeType] as a nodeType
@@ -62,7 +62,9 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 	for range numChildren {
 		New[*NodeBase](n)
 	}
-	return nil
+
+	nmn := (*noMarshalNode)(n)
+	return json.Unmarshal(b, nmn)
 }
 
 //////////////////////////////////////////////////////////////////////////
