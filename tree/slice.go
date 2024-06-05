@@ -5,7 +5,6 @@
 package tree
 
 import (
-	"fmt"
 	"slices"
 
 	"cogentcore.org/core/base/findfast"
@@ -62,16 +61,6 @@ func (sl *Slice) ElemByName(name string, startIndex ...int) Node {
 	return (*sl)[idx]
 }
 
-// ElemByNameTry returns first element that has given name, error if not found.
-// See [Slice.IndexOf] for info on startIndex.
-func (sl *Slice) ElemByNameTry(name string, startIndex ...int) (Node, error) {
-	idx, ok := sl.IndexByName(name, startIndex...)
-	if !ok {
-		return nil, fmt.Errorf("tree.Slice: element named: %v not found", name)
-	}
-	return (*sl)[idx], nil
-}
-
 // ElemByType returns index of element that either is that type or embeds
 // that type, nil if not found. See [Slice.IndexOf] for info on startIndex.
 func (sl *Slice) ElemByType(t *types.Type, embeds bool, startIndex ...int) Node {
@@ -80,16 +69,6 @@ func (sl *Slice) ElemByType(t *types.Type, embeds bool, startIndex ...int) Node 
 		return nil
 	}
 	return (*sl)[idx]
-}
-
-// ElemByTypeTry returns index of element that either is that type or embeds
-// that type, error if not found. See [Slice.IndexOf] for info on startIndex.
-func (sl *Slice) ElemByTypeTry(t *types.Type, embeds bool, startIndex ...int) (Node, error) {
-	idx, ok := sl.IndexByType(t, embeds, startIndex...)
-	if !ok {
-		return nil, fmt.Errorf("tree.Slice: element of type: %v not found", t)
-	}
-	return (*sl)[idx], nil
 }
 
 // Move moves the element in the given slice at the given

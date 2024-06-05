@@ -145,8 +145,8 @@ func TestNodeFindType(t *testing.T) {
 	if assert.True(t, ok) {
 		assert.Equal(t, 1, idx)
 	}
-	_, err := parent.Children.ElemByTypeTry(NodeBaseType, NoEmbeds, 0)
-	assert.NoError(t, err)
+	et := parent.Children.ElemByType(NodeBaseType, NoEmbeds, 0)
+	assert.NotNil(t, et)
 	idx, ok = parent.Children.IndexByType(NodeBaseType, Embeds, 0)
 	if assert.True(t, ok) {
 		assert.Equal(t, 0, idx)
