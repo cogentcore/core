@@ -16,12 +16,14 @@ import (
 // underlying types
 type Slice []Node
 
-// IndexOf returns index of element in list, false if not there.  startIndex arg
-// allows for optimized bidirectional find if you have an idea where it might
-// be, which can be key speedup for large lists. If no value is specified for
-// startIndex, it starts in the middle, which is a good default.
-func (sl *Slice) IndexOf(kid Node, startIndex ...int) int {
-	return findfast.FindFunc(*sl, func(ch Node) bool { return ch == kid }, startIndex...)
+// IndexOf returns the index of the given node in the given slice,
+// or -1 if it is not found. The optional startIndex argument
+// allows for optimized bidirectional searching if you have a guess
+// at where the node might be, which can be a key speedup for large
+// slices. If no value is specified for startIndex, it starts in the
+// middle, which is a good default.
+func IndexOf(slice []Node, child Node, startIndex ...int) int {
+	return findfast.FindFunc(slice, func(e Node) bool { return e == child }, startIndex...)
 }
 
 // IndexByName returns index of first element that has given name, false if

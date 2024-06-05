@@ -7,6 +7,7 @@ package tree
 import (
 	"fmt"
 	"reflect"
+	"slices"
 	"strconv"
 	"sync/atomic"
 
@@ -77,9 +78,9 @@ func SetParent(child Node, parent Node) {
 func MoveToParent(child Node, parent Node) {
 	oldParent := child.Parent()
 	if oldParent != nil {
-		idx := oldParent.AsTree().Children.IndexOf(child)
+		idx := IndexOf(oldParent.AsTree().Children, child)
 		if idx >= 0 {
-			oldParent.AsTree().DeleteChildAt(idx)
+			oldParent.AsTree().Children = slices.Delete(oldParent.AsTree().Children, idx, idx+1)
 		}
 	}
 	parent.AsTree().AddChild(child)

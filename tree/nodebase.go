@@ -122,7 +122,7 @@ func (n *NodeBase) IndexInParent() int {
 	if n.Par == nil {
 		return -1
 	}
-	idx := n.Par.AsTree().Children.IndexOf(n.This(), n.index) // very fast if index is close
+	idx := IndexOf(n.Par.AsTree().Children, n.This(), n.index) // very fast if index is close
 	n.index = idx
 	return idx
 }
@@ -422,7 +422,7 @@ func (n *NodeBase) DeleteChild(child Node) bool {
 	if child == nil {
 		return false
 	}
-	idx := n.Children.IndexOf(child)
+	idx := IndexOf(n.Children, child)
 	if idx < 0 {
 		return false
 	}
