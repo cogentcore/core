@@ -296,10 +296,16 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 		field := tv.visibleFields[fli]
 		fval := reflectx.OnePointerValue(val.FieldByIndex(field.Index))
 		valnm := fmt.Sprintf("value-%d-%s-%s", fli, itxt, reflectx.ShortTypeName(field.Type))
-		tags := reflect.StructTag("")
+		tags := field.Tag
 		if fval.Kind() == reflect.Slice || fval.Kind() == reflect.Map {
-			tags = `view:"no-inline"`
+			ni := reflect.StructTag(`view:"no-inline"`)
+			if tags == "" {
+				tags += " " + ni
+			} else {
+				tags = ni
+			}
 		}
+		readOnlyTag := tags.Get("edit") == "-"
 
 		core.AddNew(p, valnm, func() core.Value {
 			return core.NewValue(fval.Interface(), tags)
@@ -307,7 +313,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 			wb := w.AsWidget()
 			tv.MakeValue(w, i)
 			w.SetProperty(SliceViewColProperty, fli)
-			if !tv.IsReadOnly() {
+			if !tv.IsReadOnly() && !readOnlyTag {
 				wb.OnChange(func(e events.Event) {
 					tv.SendChange()
 				})
@@ -329,7 +335,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 					}
 				}
 				wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
-				wb.SetReadOnly(tv.IsReadOnly())
+				wb.SetReadOnly(tv.IsReadOnly() || readOnlyTag)
 				w.SetState(invis, states.Invisible)
 				if svi.HasStyleFunc() {
 					w.ApplyStyle()

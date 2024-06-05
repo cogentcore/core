@@ -5,7 +5,6 @@
 package core
 
 import (
-	"fmt"
 	"log/slog"
 	"time"
 	"unicode"
@@ -242,7 +241,7 @@ func (fr *Frame) FocusNextChild(updn bool) bool {
 	}
 	foc, idx := fr.ChildWithFocus()
 	if foc == nil {
-		fmt.Println("no child foc")
+		// fmt.Println("no child foc")
 		return false
 	}
 	em := fr.Events()
