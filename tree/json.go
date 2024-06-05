@@ -12,6 +12,7 @@ import (
 	"io"
 	"os"
 	"slices"
+	"strconv"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/jsonx"
@@ -34,8 +35,23 @@ func (n *NodeBase) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return b, err
 	}
-	b = slices.Insert(b, 1, []byte(`"nodeType": "`+n.This().NodeType().Name+`", `)...)
+	data := `"nodeType":"` + n.This().NodeType().Name + `","numChildren":` + strconv.Itoa(n.NumChildren()) + ","
+	b = slices.Insert(b, 1, []byte(data)...)
 	return b, nil
+}
+
+func (n *NodeBase) UnmarshalJSON(b []byte) error {
+	typeStart := bytes.Index(b, []byte(`":"`)) + 3
+	typeEnd := bytes.Index(b, []byte(`",`))
+	typeName := string(b[typeStart:typeEnd])
+
+	remainder := b[typeEnd+2:]
+	numStart := bytes.Index(remainder, []byte(`":`)) + 2
+	numEnd := bytes.Index(remainder, []byte(`,`))
+	numString := string(remainder[numStart:numEnd])
+
+	fmt.Println(typeName, numString)
+	return nil
 }
 
 //////////////////////////////////////////////////////////////////////////
