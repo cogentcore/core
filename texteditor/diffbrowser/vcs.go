@@ -43,8 +43,17 @@ func (br *Browser) DiffVCS(repo vcs.Repo, revA, revB string) {
 		if len(fd) < 2 {
 			continue
 		}
-		fpa := strings.TrimSpace(fd[1])
-		dir, fn := filepath.Split(fpa)
+		status := fd[0]
+		if len(status) > 1 {
+			status = status[:1]
+		}
+		fpa := fd[1]
+		fpb := fpa
+		if len(fd) == 3 {
+			fpb = fd[2]
+		}
+		fp := fpb
+		dir, fn := filepath.Split(fp)
 		dir = filepath.Dir(dir)
 		if dir != cdir {
 			dirs := strings.Split(dir, "/")
@@ -81,17 +90,29 @@ func (br *Browser) DiffVCS(repo vcs.Repo, revA, revB string) {
 		} else {
 			nn = NewNode(cnodes[nd-1])
 		}
-		dp := filepath.Join(br.PathA, filepath.Join(cdir), fn)
-		nn.SetFileA(dp).SetFileB(dp).SetRevA(revA).SetRevB(revB)
-		nn.SetText(fn)
-		fbA, err := repo.FileContents(dp, revA)
-		if err != nil {
-			slog.Error(err.Error())
+		dpa := filepath.Join(br.PathA, fpa)
+		dpb := filepath.Join(br.PathA, fpb)
+		nn.SetFileA(dpa).SetFileB(dpb).SetRevA(revA).SetRevB(revB).SetStatus(status)
+		nn.SetText(fn + " [" + status + "]")
+		if status != "D" {
+			fbB, err := repo.FileContents(dpb, revB)
+			if err != nil {
+				slog.Error(err.Error())
+			}
+			nn.SetTextB(string(fbB))
+			nn.Info.InitFile(dpb)
+			nn.IconLeaf = nn.Info.Ic
 		}
-		fbB, err := repo.FileContents(dp, revB)
-		if err != nil {
-			slog.Error(err.Error())
+		if status != "A" {
+			fbA, err := repo.FileContents(dpa, revA)
+			if err != nil {
+				slog.Error(err.Error())
+			}
+			nn.SetTextA(string(fbA))
+			if status == "D" {
+				nn.Info.InitFile(dpa)
+				nn.IconLeaf = nn.Info.Ic
+			}
 		}
-		nn.SetTextA(string(fbA)).SetTextB(string(fbB))
 	}
 }

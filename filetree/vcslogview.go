@@ -94,6 +94,19 @@ func (lv *VCSLogView) Init() {
 					errors.Log(lv.Repo.UpdateVersion(cmt.Rev))
 				})
 		})
+		w.OnSelect(func(e events.Event) {
+			idx := w.SelectedIndex
+			if idx < 0 || idx >= len(lv.Log) {
+				return
+			}
+			cmt := lv.Log[idx]
+			if lv.SetA {
+				lv.SetRevA(cmt.Rev)
+			} else {
+				lv.SetRevB(cmt.Rev)
+			}
+			lv.ToggleRev()
+		})
 		w.OnDoubleClick(func(e events.Event) {
 			idx := w.SelectedIndex
 			if idx < 0 || idx >= len(lv.Log) {
@@ -183,7 +196,7 @@ func (lv *VCSLogView) MakeToolbar(p *core.Plan) {
 
 	core.AddAt(p, "a-rev", func(w *core.Switch) {
 		w.SetText("A Rev: ")
-		w.SetTooltip("If selected, double-clicking in log will set this A Revision to use for Diff")
+		w.SetTooltip("If selected, clicking in log will set this A Revision to use for Diff")
 		w.SetState(true, states.Checked)
 		w.OnClick(func(e events.Event) {
 			lv.SetA = w.IsChecked()
@@ -194,6 +207,7 @@ func (lv *VCSLogView) MakeToolbar(p *core.Plan) {
 	})
 	core.AddAt(p, "a-tf", func(w *core.TextField) {
 		w.SetText(lv.RevA)
+		w.SetTooltip("A revision: typically this is the older, base revision to compare")
 		w.OnChange(func(e events.Event) {
 			lv.RevA = w.Text()
 		})
@@ -210,7 +224,7 @@ func (lv *VCSLogView) MakeToolbar(p *core.Plan) {
 
 	core.AddAt(p, "b-rev", func(w *core.Switch) {
 		w.SetText("B Rev: ")
-		w.SetTooltip("If selected, double-clicking in log will set this B Revision to use for Diff")
+		w.SetTooltip("If selected, clicking in log will set this B Revision to use for Diff")
 		w.OnClick(func(e events.Event) {
 			lv.SetA = !w.IsChecked()
 			cba := w.Parent().ChildByName("a-rev", 2).(*core.Switch)
@@ -221,6 +235,7 @@ func (lv *VCSLogView) MakeToolbar(p *core.Plan) {
 
 	core.AddAt(p, "b-tf", func(w *core.TextField) {
 		w.SetText(lv.RevB)
+		w.SetTooltip("B revision: typically this is the newer revision to compare.  Leave blank for the current working directory.")
 		w.OnChange(func(e events.Event) {
 			lv.RevB = w.Text()
 		})

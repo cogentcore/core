@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -188,11 +189,15 @@ func (gr *GitRepo) RevertFile(fname string) error {
 }
 
 // FileContents returns the contents of given file, as a []byte array
-// at given revision specifier (if empty, defaults to current HEAD).
-// -1, -2 etc also work as universal ways of specifying prior revisions.
+// at given revision specifier.  -1, -2 etc also work as universal
+// ways of specifying prior revisions.
 func (gr *GitRepo) FileContents(fname string, rev string) ([]byte, error) {
 	if rev == "" {
-		rev = "HEAD:"
+		out, err := os.ReadFile(fname)
+		if err != nil {
+			log.Println(err.Error())
+		}
+		return out, err
 	} else if rev[0] == '-' {
 		rsp, err := strconv.Atoi(rev)
 		if err == nil && rsp < 0 {
@@ -302,9 +307,7 @@ func (gr *GitRepo) FilesChanged(revA, revB string, diffs bool) ([]byte, error) {
 			revA = fmt.Sprintf("HEAD~%d", -rsp)
 		}
 	}
-	if revB == "" {
-		revB = "HEAD~1"
-	} else if revB[0] == '-' {
+	if revB != "" && revB[0] == '-' {
 		rsp, err := strconv.Atoi(revB)
 		if err == nil && rsp < 0 {
 			revB = fmt.Sprintf("HEAD~%d", -rsp)
@@ -315,7 +318,11 @@ func (gr *GitRepo) FilesChanged(revA, revB string, diffs bool) ([]byte, error) {
 	if diffs {
 		out, err = gr.RunFromDir("git", "diff", "-u", revA, revB)
 	} else {
-		out, err = gr.RunFromDir("git", "diff", "--name-status", revA, revB)
+		if revB == "" {
+			out, err = gr.RunFromDir("git", "diff", "--name-status", revA)
+		} else {
+			out, err = gr.RunFromDir("git", "diff", "--name-status", revA, revB)
+		}
 	}
 	if err != nil {
 		log.Println(string(out))
