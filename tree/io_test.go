@@ -34,6 +34,8 @@ func TestNodeJSON(t *testing.T) {
 
 	tstload := testdata.NewNodeEmbed()
 	if assert.NoError(t, jsonx.Read(&tstload, bytes.NewReader(b))) {
+		assert.Equal(t, parent.Mbr1, tstload.Mbr1)
+		assert.Equal(t, parent.Mbr2, tstload.Mbr2)
 		var buf2 bytes.Buffer
 		assert.NoError(t, jsonx.Write(tstload, &buf2))
 		tstb := buf2.Bytes()
