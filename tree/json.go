@@ -90,16 +90,11 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 		fields[i] = uvt.Field(i)
 	}
 	nt := reflect.StructOf(fields)
-	nv := reflect.New(nt)
-	nve := nv.Elem()
-	for i := range fields {
-		nve.Field(i).Set(uv.Field(i))
-	}
-	err = json.Unmarshal(b, nv.Interface())
+	uvi := uv.Addr().Convert(reflect.PointerTo(nt)).Interface()
+	err = json.Unmarshal(b, uvi)
 	if err != nil {
 		return err
 	}
-	uv.Set(nve)
 	return nil
 }
 
