@@ -29,7 +29,8 @@ import (
 type noMarshalNode NodeBase
 
 // MarshalJSON marshals the node by injecting the [Node.NodeType] as a nodeType
-// field at the start of the standard JSON encoding.
+// field and the [NodeBase.NumChildren] as a numChildren field at the start of
+// the standard JSON encoding output.
 func (n *NodeBase) MarshalJSON() ([]byte, error) {
 	nmn := (*noMarshalNode)(n)
 	b, err := json.Marshal(nmn)
@@ -41,6 +42,9 @@ func (n *NodeBase) MarshalJSON() ([]byte, error) {
 	return b, nil
 }
 
+// UnmarshalJSON unmarshals the node by extracting the nodeType and numChildren fields
+// added by [NodeBase.MarshalJSON] and then updating the node to the correct type and
+// creating the correct number of children.
 func (n *NodeBase) UnmarshalJSON(b []byte) error {
 	typeStart := bytes.Index(b, []byte(`":`)) + 3
 	typeEnd := bytes.Index(b, []byte(`",`))
@@ -74,6 +78,8 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
+	// We delete any existing children and then make placeholder NodeBase children
+	// that will be replaced with children of the correct type during their UnmarshalJSON.
 	n.DeleteChildren()
 	for range numChildren {
 		New[*NodeBase](n)
