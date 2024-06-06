@@ -83,9 +83,14 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 		New[*NodeBase](n)
 	}
 
+	uv := reflectx.Underlying(reflect.ValueOf(n.Ths))
+	uvi := uv.Interface()
+	err = json.Unmarshal(b, &uvi)
+	if err != nil {
+		return err
+	}
+	uv.Set(reflect.ValueOf(uvi))
 	return nil
-	// nmn := noMarshalNode(&n.Ths)
-	// return json.Unmarshal(b, &nmn)
 }
 
 //////////////////////////////////////////////////////////////////////////
