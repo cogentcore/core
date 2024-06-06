@@ -11,12 +11,14 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"reflect"
 	"slices"
 	"strconv"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/jsonx"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/types"
 )
 
@@ -24,16 +26,12 @@ import (
 // for trees.  The Slice Marshal / Unmarshal methods save the type info
 // of each child so that the full tree can be properly reconstructed.
 
-// noMarshalNode is a version of [NodeBase] without a MarshalJSON or UnmarshalJSON
-// method (since non-embedded type declarations do not result in method inheritance).
-type noMarshalNode NodeBase
-
 // MarshalJSON marshals the node by injecting the [Node.NodeType] as a nodeType
 // field and the [NodeBase.NumChildren] as a numChildren field at the start of
 // the standard JSON encoding output.
 func (n *NodeBase) MarshalJSON() ([]byte, error) {
-	nmn := (*noMarshalNode)(n)
-	b, err := json.Marshal(nmn)
+	// the non pointer value does not implement MarshalJSON, so it will not result in infinite recursion
+	b, err := json.Marshal(reflectx.Underlying(reflect.ValueOf(n.Ths)).Interface())
 	if err != nil {
 		return b, err
 	}
@@ -85,8 +83,9 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 		New[*NodeBase](n)
 	}
 
-	nmn := (*noMarshalNode)(n)
-	return json.Unmarshal(b, nmn)
+	return nil
+	// nmn := noMarshalNode(&n.Ths)
+	// return json.Unmarshal(b, &nmn)
 }
 
 //////////////////////////////////////////////////////////////////////////
