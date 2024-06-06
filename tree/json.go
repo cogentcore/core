@@ -84,12 +84,22 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 	}
 
 	uv := reflectx.Underlying(reflect.ValueOf(n.Ths))
-	uvi := uv.Interface()
-	err = json.Unmarshal(b, &uvi)
+	uvt := uv.Type()
+	fields := make([]reflect.StructField, uvt.NumField())
+	for i := range fields {
+		fields[i] = uvt.Field(i)
+	}
+	nt := reflect.StructOf(fields)
+	nv := reflect.New(nt)
+	nve := nv.Elem()
+	for i := range fields {
+		nve.Field(i).Set(uv.Field(i))
+	}
+	err = json.Unmarshal(b, nv.Interface())
 	if err != nil {
 		return err
 	}
-	uv.Set(reflect.ValueOf(uvi))
+	uv.Set(nve)
 	return nil
 }
 
