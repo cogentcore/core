@@ -402,9 +402,9 @@ func (tv *TreeView) SyncNodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []str
 	pl := make([]string, 0, ni)
 	for _, d := range md {
 		if d.Type == fileinfo.DataJson {
-			nki, err := tree.ReadNewJSON(bytes.NewReader(d.Data))
+			nn, err := tree.UnmarshalRootJSON(d.Data)
 			if err == nil {
-				sl = append(sl, nki)
+				sl = append(sl, nn)
 			} else {
 				core.ErrorSnackbar(tv, err, "Error loading node")
 			}

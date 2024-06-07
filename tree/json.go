@@ -8,13 +8,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"reflect"
 	"slices"
 	"strconv"
 	"strings"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/types"
 )
@@ -131,59 +129,6 @@ func UnmarshalRootJSON(b []byte) (Node, error) {
 	parent.Children = nil
 	parent.Destroy()
 	return n, nil
-}
-
-//////////////////////////////////////////////////////
-// 	Save / Open Root Type
-
-// The following are special versions for saving the type of
-// the root node, which should generally be relatively rare.
-
-// JSONTypePrefix is the first thing output in a tree JSON output file,
-// specifying the type of the root node of the tree -- this info appears
-// all on one { } bracketed line at the start of the file, and can also be
-// used to identify the file as a tree JSON file
-var JSONTypePrefix = []byte("{\"tree.RootType\": ")
-
-// JSONTypeSuffix is just the } and \n at the end of the prefix line
-var JSONTypeSuffix = []byte("}\n")
-
-// ReadRootTypeJSON reads the type of the root node
-// as encoded by WriteRootTypeJSON, returning the
-// types.Type for the saved type name (error if not found),
-// the remaining bytes to be decoded using a standard
-// unmarshal, and an error.
-func ReadRootTypeJSON(b []byte) (*types.Type, []byte, error) {
-	if !bytes.HasPrefix(b, JSONTypePrefix) {
-		return nil, b, fmt.Errorf("tree.ReadRootTypeJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree")
-	}
-	stidx := len(JSONTypePrefix) + 1
-	eidx := bytes.Index(b, JSONTypeSuffix)
-	bodyidx := eidx + len(JSONTypeSuffix)
-	tn := string(bytes.Trim(bytes.TrimSpace(b[stidx:eidx]), "\""))
-	typ := types.TypeByName(tn)
-	if typ == nil {
-		return nil, b[bodyidx:], fmt.Errorf("tree.ReadRootTypeJSON: type %q not found", tn)
-	}
-	return typ, b[bodyidx:], nil
-}
-
-// ReadNewJSON reads a new tree from a JSON-encoded byte string,
-// using type information at start of file to create an object of the proper type
-func ReadNewJSON(reader io.Reader) (Node, error) {
-	b, err := io.ReadAll(reader)
-	if err != nil {
-		return nil, errors.Log(err)
-	}
-	typ, rb, err := ReadRootTypeJSON(b)
-	if err != nil {
-		return nil, errors.Log(err)
-	}
-	root := NewOfType(typ)
-	initNode(root)
-	err = json.Unmarshal(rb, root)
-	UnmarshalPost(root)
-	return root, errors.Log(err)
 }
 
 // ParentAllChildren walks the tree down from current node and call
