@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fileinfo/mimedata"
+	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/core"
@@ -384,7 +385,7 @@ func (tv *TreeView) MimeDataSync(md *mimedata.Mimes) {
 	src := tv.SyncNode
 	*md = append(*md, mimedata.NewTextData(src.PathFrom(sroot)))
 	var buf bytes.Buffer
-	err := tree.WriteNewJSON(src, &buf)
+	err := jsonx.Write(src, &buf)
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: fileinfo.DataJson, Data: buf.Bytes()})
 	} else {

@@ -15,7 +15,6 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/types"
 )
@@ -148,25 +147,6 @@ var JSONTypePrefix = []byte("{\"tree.RootType\": ")
 
 // JSONTypeSuffix is just the } and \n at the end of the prefix line
 var JSONTypeSuffix = []byte("}\n")
-
-// RootTypeJSON returns the JSON encoding of the type of the
-// root node (this node) which is written first using our custom
-// JSONEncoder type, to enable a file to be loaded de-novo
-// and recreate the proper root type for the tree.
-func RootTypeJSON(k Node) []byte {
-	knm := k.NodeType().Name
-	tstr := string(JSONTypePrefix) + fmt.Sprintf("\"%v\"}\n", knm)
-	return []byte(tstr)
-}
-
-// WriteNewJSON writes JSON-encoded bytes to given writer
-// including key type information at start of file
-// so ReadNewJSON can create an object of the proper type.
-func WriteNewJSON(k Node, writer io.Writer) error {
-	tb := RootTypeJSON(k)
-	writer.Write(tb)
-	return jsonx.WriteIndent(k, writer)
-}
 
 // ReadRootTypeJSON reads the type of the root node
 // as encoded by WriteRootTypeJSON, returning the
