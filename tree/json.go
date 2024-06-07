@@ -5,12 +5,10 @@
 package tree
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"reflect"
 	"slices"
 	"strconv"
@@ -170,23 +168,6 @@ func WriteNewJSON(k Node, writer io.Writer) error {
 	return jsonx.WriteIndent(k, writer)
 }
 
-// SaveNewJSON writes JSON-encoded bytes to given writer
-// including key type information at start of file
-// so ReadNewJSON can create an object of the proper type.
-func SaveNewJSON(k Node, filename string) error {
-	fp, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer fp.Close()
-	bw := bufio.NewWriter(fp)
-	err = WriteNewJSON(k, bw)
-	if err != nil {
-		return err
-	}
-	return bw.Flush()
-}
-
 // ReadRootTypeJSON reads the type of the root node
 // as encoded by WriteRootTypeJSON, returning the
 // types.Type for the saved type name (error if not found),
@@ -223,17 +204,6 @@ func ReadNewJSON(reader io.Reader) (Node, error) {
 	err = json.Unmarshal(rb, root)
 	UnmarshalPost(root)
 	return root, errors.Log(err)
-}
-
-// OpenNewJSON opens a new tree from a JSON-encoded file, using type
-// information at start of file to create an object of the proper type
-func OpenNewJSON(filename string) (Node, error) {
-	fp, err := os.Open(filename)
-	if err != nil {
-		return nil, errors.Log(err)
-	}
-	defer fp.Close()
-	return ReadNewJSON(bufio.NewReader(fp))
 }
 
 // ParentAllChildren walks the tree down from current node and call
