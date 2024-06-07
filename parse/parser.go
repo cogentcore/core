@@ -9,15 +9,14 @@ package parse
 import (
 	"encoding/json"
 	"fmt"
-	"log"
-	"log/slog"
 	"os"
 	"time"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/parser"
-	"cogentcore.org/core/tree"
 )
 
 // Parser is the overall parser for managing the parsing
@@ -267,43 +266,26 @@ func (pr *Parser) ParseString(str string, fname string, sup fileinfo.Known) *Fil
 // ReadJSON opens lexer and parser rules from Bytes, in a standard JSON-formatted file
 func (pr *Parser) ReadJSON(b []byte) error {
 	err := json.Unmarshal(b, pr)
-	tree.UnmarshalPost(pr.Lexer.This())
-	tree.UnmarshalPost(pr.Parser.This())
-	if err != nil {
-		slog.Error(err.Error())
-	}
-	return err
+	return errors.Log(err)
 }
 
-// OpenJSON opens lexer and parser rules to current filename, in a standard JSON-formatted file
+// OpenJSON opens lexer and parser rules from the given filename, in a standard JSON-formatted file
 func (pr *Parser) OpenJSON(filename string) error {
-	b, err := os.ReadFile(filename)
-	if err != nil {
-		return err
-	}
-	return pr.ReadJSON(b)
+	err := jsonx.Open(pr, filename)
+	return errors.Log(err)
 }
 
 // SaveJSON saves lexer and parser rules, in a standard JSON-formatted file
 func (pr *Parser) SaveJSON(filename string) error {
-	b, err := json.MarshalIndent(pr, "", "  ")
-	if err != nil {
-		log.Println(err) // unlikely
-		return err
-	}
-	err = os.WriteFile(filename, b, 0644)
-	if err != nil {
-		log.Println(err)
-	}
-	return err
+	err := jsonx.Save(pr, filename)
+	return errors.Log(err)
 }
 
 // SaveGrammar saves lexer and parser grammar rules to BNF-like .parsegrammar file
 func (pr *Parser) SaveGrammar(filename string) error {
 	ofl, err := os.Create(filename)
 	if err != nil {
-		log.Println(err)
-		return err
+		return errors.Log(err)
 	}
 	fmt.Fprintf(ofl, "// %v Lexer\n\n", filename)
 	pr.Lexer.WriteGrammar(ofl, 0)
