@@ -1,7 +1,6 @@
 {
   "Lexer": {
     "Nm": "Lexer",
-    "UniqueNm": "Lexer",
     "Properties": null,
     "Kids": [
       {
@@ -75,7 +74,6 @@
       },
       {
         "Nm": "InCommentMulti",
-        "UniqueNm": "InCommentMulti",
         "Properties": null,
         "Kids": [
           {
@@ -89,7 +87,6 @@
           },
           {
             "Nm": "EndMulti",
-            "UniqueNm": "EndMulti",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -110,7 +107,6 @@
           },
           {
             "Nm": "StartEmbededMulti",
-            "UniqueNm": "StartEmbededMulti",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -131,7 +127,6 @@
           },
           {
             "Nm": "Comment",
-            "UniqueNm": "Comment",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -165,7 +160,6 @@
       },
       {
         "Nm": "InStrBacktick",
-        "UniqueNm": "InStrBacktick",
         "Properties": null,
         "Kids": [
           {
@@ -179,7 +173,6 @@
           },
           {
             "Nm": "QuotedStrBacktick",
-            "UniqueNm": "QuotedStrBacktick",
             "Properties": {
               "inactive": true
             },
@@ -201,7 +194,6 @@
           },
           {
             "Nm": "EndStrBacktick",
-            "UniqueNm": "EndStrBacktick",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -222,7 +214,6 @@
           },
           {
             "Nm": "StrBacktick",
-            "UniqueNm": "StrBacktick",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -256,7 +247,6 @@
       },
       {
         "Nm": "StartCommentMulti",
-        "UniqueNm": "StartCommentMulti",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -277,7 +267,6 @@
       },
       {
         "Nm": "LitStrBacktick",
-        "UniqueNm": "LitStrBacktick",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -298,7 +287,6 @@
       },
       {
         "Nm": "CommentLine",
-        "UniqueNm": "CommentLine",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -318,7 +306,6 @@
       },
       {
         "Nm": "SkipWhite",
-        "UniqueNm": "SkipWhite",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -338,7 +325,6 @@
       },
       {
         "Nm": "Letter",
-        "UniqueNm": "Letter",
         "Properties": null,
         "Kids": [
           {
@@ -354,7 +340,6 @@
           },
           {
             "Nm": "Keyword",
-            "UniqueNm": "Keyword",
             "Properties": null,
             "Kids": [
               {
@@ -416,7 +401,6 @@
               },
               {
                 "Nm": "break",
-                "UniqueNm": "break",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -436,7 +420,6 @@
               },
               {
                 "Nm": "case",
-                "UniqueNm": "case",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -456,7 +439,6 @@
               },
               {
                 "Nm": "chan",
-                "UniqueNm": "chan",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -476,7 +458,6 @@
               },
               {
                 "Nm": "const",
-                "UniqueNm": "const",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -496,7 +477,6 @@
               },
               {
                 "Nm": "continue",
-                "UniqueNm": "continue",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -516,7 +496,6 @@
               },
               {
                 "Nm": "default",
-                "UniqueNm": "default",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -536,7 +515,6 @@
               },
               {
                 "Nm": "defer",
-                "UniqueNm": "defer",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -556,7 +534,6 @@
               },
               {
                 "Nm": "else",
-                "UniqueNm": "else",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -576,7 +553,6 @@
               },
               {
                 "Nm": "fallthrough",
-                "UniqueNm": "fallthrough",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -596,7 +572,6 @@
               },
               {
                 "Nm": "for",
-                "UniqueNm": "for",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -616,7 +591,6 @@
               },
               {
                 "Nm": "func",
-                "UniqueNm": "func",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -636,7 +610,6 @@
               },
               {
                 "Nm": "go",
-                "UniqueNm": "go",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -656,7 +629,6 @@
               },
               {
                 "Nm": "goto",
-                "UniqueNm": "goto",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -676,7 +648,6 @@
               },
               {
                 "Nm": "if",
-                "UniqueNm": "if",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -696,7 +667,6 @@
               },
               {
                 "Nm": "import",
-                "UniqueNm": "import",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -716,7 +686,6 @@
               },
               {
                 "Nm": "interface",
-                "UniqueNm": "interface",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -736,7 +705,6 @@
               },
               {
                 "Nm": "map",
-                "UniqueNm": "map",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -756,7 +724,6 @@
               },
               {
                 "Nm": "make",
-                "UniqueNm": "make",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -776,7 +743,6 @@
               },
               {
                 "Nm": "new",
-                "UniqueNm": "new",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -796,7 +762,6 @@
               },
               {
                 "Nm": "package",
-                "UniqueNm": "package",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -816,7 +781,6 @@
               },
               {
                 "Nm": "range",
-                "UniqueNm": "range",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -836,7 +800,6 @@
               },
               {
                 "Nm": "return",
-                "UniqueNm": "return",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -856,7 +819,6 @@
               },
               {
                 "Nm": "select",
-                "UniqueNm": "select",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -876,7 +838,6 @@
               },
               {
                 "Nm": "struct",
-                "UniqueNm": "struct",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -896,7 +857,6 @@
               },
               {
                 "Nm": "switch",
-                "UniqueNm": "switch",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -916,7 +876,6 @@
               },
               {
                 "Nm": "type",
-                "UniqueNm": "type",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -936,7 +895,6 @@
               },
               {
                 "Nm": "var",
-                "UniqueNm": "var",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -970,7 +928,6 @@
           },
           {
             "Nm": "Type",
-            "UniqueNm": "Type",
             "Properties": null,
             "Kids": [
               {
@@ -1016,7 +973,6 @@
               },
               {
                 "Nm": "bool",
-                "UniqueNm": "bool",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1036,7 +992,6 @@
               },
               {
                 "Nm": "byte",
-                "UniqueNm": "byte",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1056,7 +1011,6 @@
               },
               {
                 "Nm": "complex64",
-                "UniqueNm": "complex64",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1076,7 +1030,6 @@
               },
               {
                 "Nm": "complex128",
-                "UniqueNm": "complex128",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1096,7 +1049,6 @@
               },
               {
                 "Nm": "float32",
-                "UniqueNm": "float32",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1116,7 +1068,6 @@
               },
               {
                 "Nm": "float64",
-                "UniqueNm": "float64",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1136,7 +1087,6 @@
               },
               {
                 "Nm": "int",
-                "UniqueNm": "int",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1156,7 +1106,6 @@
               },
               {
                 "Nm": "int8",
-                "UniqueNm": "int8",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1176,7 +1125,6 @@
               },
               {
                 "Nm": "int16",
-                "UniqueNm": "int16",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1196,7 +1144,6 @@
               },
               {
                 "Nm": "int32",
-                "UniqueNm": "int32",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1216,7 +1163,6 @@
               },
               {
                 "Nm": "int64",
-                "UniqueNm": "int64",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1236,7 +1182,6 @@
               },
               {
                 "Nm": "rune",
-                "UniqueNm": "rune",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1256,7 +1201,6 @@
               },
               {
                 "Nm": "string",
-                "UniqueNm": "string",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1276,7 +1220,6 @@
               },
               {
                 "Nm": "uint",
-                "UniqueNm": "uint",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1296,7 +1239,6 @@
               },
               {
                 "Nm": "uint8",
-                "UniqueNm": "uint8",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1316,7 +1258,6 @@
               },
               {
                 "Nm": "uint16",
-                "UniqueNm": "uint16",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1336,7 +1277,6 @@
               },
               {
                 "Nm": "uint32",
-                "UniqueNm": "uint32",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1356,7 +1296,6 @@
               },
               {
                 "Nm": "uint64",
-                "UniqueNm": "uint64",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1376,7 +1315,6 @@
               },
               {
                 "Nm": "uintptr",
-                "UniqueNm": "uintptr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1410,7 +1348,6 @@
           },
           {
             "Nm": "Builtins",
-            "UniqueNm": "Builtins",
             "Properties": null,
             "Kids": [
               {
@@ -1454,7 +1391,6 @@
               },
               {
                 "Nm": "append",
-                "UniqueNm": "append",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1474,7 +1410,6 @@
               },
               {
                 "Nm": "cap",
-                "UniqueNm": "cap",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1494,7 +1429,6 @@
               },
               {
                 "Nm": "close",
-                "UniqueNm": "close",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1514,7 +1448,6 @@
               },
               {
                 "Nm": "complex",
-                "UniqueNm": "complex",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1534,7 +1467,6 @@
               },
               {
                 "Nm": "copy",
-                "UniqueNm": "copy",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1554,7 +1486,6 @@
               },
               {
                 "Nm": "delete",
-                "UniqueNm": "delete",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1574,7 +1505,6 @@
               },
               {
                 "Nm": "error",
-                "UniqueNm": "error",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1594,7 +1524,6 @@
               },
               {
                 "Nm": "imag",
-                "UniqueNm": "imag",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1614,7 +1543,6 @@
               },
               {
                 "Nm": "len",
-                "UniqueNm": "len",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1634,7 +1562,6 @@
               },
               {
                 "Nm": "panic",
-                "UniqueNm": "panic",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1654,7 +1581,6 @@
               },
               {
                 "Nm": "print",
-                "UniqueNm": "print",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1674,7 +1600,6 @@
               },
               {
                 "Nm": "println",
-                "UniqueNm": "println",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1694,7 +1619,6 @@
               },
               {
                 "Nm": "real",
-                "UniqueNm": "real",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1714,7 +1638,6 @@
               },
               {
                 "Nm": "recover",
-                "UniqueNm": "recover",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1734,7 +1657,6 @@
               },
               {
                 "Nm": "true",
-                "UniqueNm": "true",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1754,7 +1676,6 @@
               },
               {
                 "Nm": "false",
-                "UniqueNm": "false",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1774,7 +1695,6 @@
               },
               {
                 "Nm": "iota",
-                "UniqueNm": "iota",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1794,7 +1714,6 @@
               },
               {
                 "Nm": "nil",
-                "UniqueNm": "nil",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1828,7 +1747,6 @@
           },
           {
             "Nm": "Name",
-            "UniqueNm": "Name",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -1862,7 +1780,6 @@
       },
       {
         "Nm": "Number",
-        "UniqueNm": "Number",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -1882,7 +1799,6 @@
       },
       {
         "Nm": "Dot",
-        "UniqueNm": "Dot",
         "Properties": null,
         "Kids": [
           {
@@ -1896,7 +1812,6 @@
           },
           {
             "Nm": "NextNum",
-            "UniqueNm": "NextNum",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -1916,7 +1831,6 @@
           },
           {
             "Nm": "NextDot",
-            "UniqueNm": "NextDot",
             "Properties": null,
             "Kids": [
               {
@@ -1926,7 +1840,6 @@
               },
               {
                 "Nm": "Ellipsis",
-                "UniqueNm": "Ellipsis",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -1960,7 +1873,6 @@
           },
           {
             "Nm": "Period",
-            "UniqueNm": "Period",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -1994,7 +1906,6 @@
       },
       {
         "Nm": "LitStrSingle",
-        "UniqueNm": "LitStrSingle",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -2014,7 +1925,6 @@
       },
       {
         "Nm": "LitStrDouble",
-        "UniqueNm": "LitStrDouble",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -2034,7 +1944,6 @@
       },
       {
         "Nm": "LParen",
-        "UniqueNm": "LParen",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -2054,7 +1963,6 @@
       },
       {
         "Nm": "RParen",
-        "UniqueNm": "RParen",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -2074,7 +1982,6 @@
       },
       {
         "Nm": "LBrack",
-        "UniqueNm": "LBrack",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -2094,7 +2001,6 @@
       },
       {
         "Nm": "RBrack",
-        "UniqueNm": "RBrack",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -2114,7 +2020,6 @@
       },
       {
         "Nm": "LBrace",
-        "UniqueNm": "LBrace",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -2134,7 +2039,6 @@
       },
       {
         "Nm": "RBrace",
-        "UniqueNm": "RBrace",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -2154,7 +2058,6 @@
       },
       {
         "Nm": "Comma",
-        "UniqueNm": "Comma",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -2174,7 +2077,6 @@
       },
       {
         "Nm": "Semi",
-        "UniqueNm": "Semi",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -2194,7 +2096,6 @@
       },
       {
         "Nm": "Colon",
-        "UniqueNm": "Colon",
         "Properties": null,
         "Kids": [
           {
@@ -2206,7 +2107,6 @@
           },
           {
             "Nm": "Define",
-            "UniqueNm": "Define",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2226,7 +2126,6 @@
           },
           {
             "Nm": "Colon",
-            "UniqueNm": "Colon",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2260,7 +2159,6 @@
       },
       {
         "Nm": "Plus",
-        "UniqueNm": "Plus",
         "Properties": null,
         "Kids": [
           {
@@ -2274,7 +2172,6 @@
           },
           {
             "Nm": "AsgnAdd",
-            "UniqueNm": "AsgnAdd",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2294,7 +2191,6 @@
           },
           {
             "Nm": "AsgnInc",
-            "UniqueNm": "AsgnInc",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2314,7 +2210,6 @@
           },
           {
             "Nm": "Add",
-            "UniqueNm": "Add",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2348,7 +2243,6 @@
       },
       {
         "Nm": "Minus",
-        "UniqueNm": "Minus",
         "Properties": null,
         "Kids": [
           {
@@ -2362,7 +2256,6 @@
           },
           {
             "Nm": "AsgnSub",
-            "UniqueNm": "AsgnSub",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2382,7 +2275,6 @@
           },
           {
             "Nm": "AsgnDec",
-            "UniqueNm": "AsgnDec",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2402,7 +2294,6 @@
           },
           {
             "Nm": "Sub",
-            "UniqueNm": "Sub",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2436,7 +2327,6 @@
       },
       {
         "Nm": "Mult",
-        "UniqueNm": "Mult",
         "Properties": null,
         "Kids": [
           {
@@ -2448,7 +2338,6 @@
           },
           {
             "Nm": "AsgnMul",
-            "UniqueNm": "AsgnMul",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2468,7 +2357,6 @@
           },
           {
             "Nm": "Mult",
-            "UniqueNm": "Mult",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2502,7 +2390,6 @@
       },
       {
         "Nm": "Div",
-        "UniqueNm": "Div",
         "Properties": null,
         "Kids": [
           {
@@ -2514,7 +2401,6 @@
           },
           {
             "Nm": "AsgnDiv",
-            "UniqueNm": "AsgnDiv",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2534,7 +2420,6 @@
           },
           {
             "Nm": "Div",
-            "UniqueNm": "Div",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2568,7 +2453,6 @@
       },
       {
         "Nm": "Rem",
-        "UniqueNm": "Rem",
         "Properties": null,
         "Kids": [
           {
@@ -2580,7 +2464,6 @@
           },
           {
             "Nm": "AsgnRem",
-            "UniqueNm": "AsgnRem",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2600,7 +2483,6 @@
           },
           {
             "Nm": "Rem",
-            "UniqueNm": "Rem",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2634,7 +2516,6 @@
       },
       {
         "Nm": "Xor",
-        "UniqueNm": "Xor",
         "Properties": null,
         "Kids": [
           {
@@ -2646,7 +2527,6 @@
           },
           {
             "Nm": "AsgnXor",
-            "UniqueNm": "AsgnXor",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2666,7 +2546,6 @@
           },
           {
             "Nm": "Xor",
-            "UniqueNm": "Xor",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2700,7 +2579,6 @@
       },
       {
         "Nm": "Rangle",
-        "UniqueNm": "Rangle",
         "Properties": null,
         "Kids": [
           {
@@ -2714,7 +2592,6 @@
           },
           {
             "Nm": "GtEq",
-            "UniqueNm": "GtEq",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2734,7 +2611,6 @@
           },
           {
             "Nm": "ShiftRight",
-            "UniqueNm": "ShiftRight",
             "Properties": null,
             "Kids": [
               {
@@ -2746,7 +2622,6 @@
               },
               {
                 "Nm": "AsgnShiftRight",
-                "UniqueNm": "AsgnShiftRight",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -2766,7 +2641,6 @@
               },
               {
                 "Nm": "ShiftRight",
-                "UniqueNm": "ShiftRight",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -2800,7 +2674,6 @@
           },
           {
             "Nm": "Greater",
-            "UniqueNm": "Greater",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2834,7 +2707,6 @@
       },
       {
         "Nm": "Langle",
-        "UniqueNm": "Langle",
         "Properties": null,
         "Kids": [
           {
@@ -2850,7 +2722,6 @@
           },
           {
             "Nm": "LtEq",
-            "UniqueNm": "LtEq",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2870,7 +2741,6 @@
           },
           {
             "Nm": "AsgnArrow",
-            "UniqueNm": "AsgnArrow",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2890,7 +2760,6 @@
           },
           {
             "Nm": "ShiftLeft",
-            "UniqueNm": "ShiftLeft",
             "Properties": null,
             "Kids": [
               {
@@ -2902,7 +2771,6 @@
               },
               {
                 "Nm": "AsgnShiftLeft",
-                "UniqueNm": "AsgnShiftLeft",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -2922,7 +2790,6 @@
               },
               {
                 "Nm": "ShiftLeft",
-                "UniqueNm": "ShiftLeft",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -2956,7 +2823,6 @@
           },
           {
             "Nm": "Less",
-            "UniqueNm": "Less",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -2990,7 +2856,6 @@
       },
       {
         "Nm": "Equals",
-        "UniqueNm": "Equals",
         "Properties": null,
         "Kids": [
           {
@@ -3002,7 +2867,6 @@
           },
           {
             "Nm": "Equality",
-            "UniqueNm": "Equality",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -3022,7 +2886,6 @@
           },
           {
             "Nm": "Asgn",
-            "UniqueNm": "Asgn",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -3056,7 +2919,6 @@
       },
       {
         "Nm": "Not",
-        "UniqueNm": "Not",
         "Properties": null,
         "Kids": [
           {
@@ -3068,7 +2930,6 @@
           },
           {
             "Nm": "NotEqual",
-            "UniqueNm": "NotEqual",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -3088,7 +2949,6 @@
           },
           {
             "Nm": "Not",
-            "UniqueNm": "Not",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -3122,7 +2982,6 @@
       },
       {
         "Nm": "And",
-        "UniqueNm": "And",
         "Properties": null,
         "Kids": [
           {
@@ -3138,7 +2997,6 @@
           },
           {
             "Nm": "AsgnAnd",
-            "UniqueNm": "AsgnAnd",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -3158,7 +3016,6 @@
           },
           {
             "Nm": "AndNot",
-            "UniqueNm": "AndNot",
             "Properties": null,
             "Kids": [
               {
@@ -3170,7 +3027,6 @@
               },
               {
                 "Nm": "AsgnAndNot",
-                "UniqueNm": "AsgnAndNot",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -3190,7 +3046,6 @@
               },
               {
                 "Nm": "AndNot",
-                "UniqueNm": "AndNot",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -3224,7 +3079,6 @@
           },
           {
             "Nm": "LogAnd",
-            "UniqueNm": "LogAnd",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -3244,7 +3098,6 @@
           },
           {
             "Nm": "BitAnd",
-            "UniqueNm": "BitAnd",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -3278,7 +3131,6 @@
       },
       {
         "Nm": "Or",
-        "UniqueNm": "Or",
         "Properties": null,
         "Kids": [
           {
@@ -3292,7 +3144,6 @@
           },
           {
             "Nm": "AsgnOr",
-            "UniqueNm": "AsgnOr",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -3312,7 +3163,6 @@
           },
           {
             "Nm": "LogOr",
-            "UniqueNm": "LogOr",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -3332,7 +3182,6 @@
           },
           {
             "Nm": "BitOr",
-            "UniqueNm": "BitOr",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -3366,7 +3215,6 @@
       },
       {
         "Nm": "AnyText",
-        "UniqueNm": "AnyText",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -3469,7 +3317,6 @@
   },
   "Parser": {
     "Nm": "Parser",
-    "UniqueNm": "Parser",
     "Properties": null,
     "Kids": [
       {
@@ -3491,7 +3338,6 @@
       },
       {
         "Nm": "File",
-        "UniqueNm": "File",
         "Properties": null,
         "Kids": [
           {
@@ -3513,7 +3359,6 @@
           },
           {
             "Nm": "PackageSpec",
-            "UniqueNm": "PackageSpec",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -3542,7 +3387,6 @@
           },
           {
             "Nm": "Imports",
-            "UniqueNm": "Imports",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -3556,7 +3400,6 @@
           },
           {
             "Nm": "Consts",
-            "UniqueNm": "Consts",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -3570,7 +3413,6 @@
           },
           {
             "Nm": "Types",
-            "UniqueNm": "Types",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -3584,7 +3426,6 @@
           },
           {
             "Nm": "Vars",
-            "UniqueNm": "Vars",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -3598,7 +3439,6 @@
           },
           {
             "Nm": "Funcs",
-            "UniqueNm": "Funcs",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -3612,7 +3452,6 @@
           },
           {
             "Nm": "Stmts",
-            "UniqueNm": "Stmts",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -3636,7 +3475,6 @@
       },
       {
         "Nm": "ExprRules",
-        "UniqueNm": "ExprRules",
         "Properties": null,
         "Kids": [
           {
@@ -3676,7 +3514,6 @@
           },
           {
             "Nm": "FullName",
-            "UniqueNm": "FullName",
             "Properties": null,
             "Kids": [
               {
@@ -3688,7 +3525,6 @@
               },
               {
                 "Nm": "QualName",
-                "UniqueNm": "QualName",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -3702,7 +3538,6 @@
               },
               {
                 "Nm": "Name",
-                "UniqueNm": "Name",
                 "Properties": null,
                 "Kids": [
                   {
@@ -3714,7 +3549,6 @@
                   },
                   {
                     "Nm": "NameLit",
-                    "UniqueNm": "NameLit",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -3728,7 +3562,6 @@
                   },
                   {
                     "Nm": "KeyName",
-                    "UniqueNm": "KeyName",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -3762,7 +3595,6 @@
           },
           {
             "Nm": "NameList",
-            "UniqueNm": "NameList",
             "Properties": null,
             "Kids": [
               {
@@ -3774,7 +3606,6 @@
               },
               {
                 "Nm": "NameListEls",
-                "UniqueNm": "NameListEls",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -3788,7 +3619,6 @@
               },
               {
                 "Nm": "NameListEl",
-                "UniqueNm": "NameListEl",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -3812,7 +3642,6 @@
           },
           {
             "Nm": "ExprList",
-            "UniqueNm": "ExprList",
             "Properties": null,
             "Kids": [
               {
@@ -3824,7 +3653,6 @@
               },
               {
                 "Nm": "ExprListEls",
-                "UniqueNm": "ExprListEls",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -3838,7 +3666,6 @@
               },
               {
                 "Nm": "ExprListEl",
-                "UniqueNm": "ExprListEl",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -3862,7 +3689,6 @@
           },
           {
             "Nm": "Expr",
-            "UniqueNm": "Expr",
             "Properties": null,
             "Kids": [
               {
@@ -3880,7 +3706,6 @@
               },
               {
                 "Nm": "CompLit",
-                "UniqueNm": "CompLit",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -3894,7 +3719,6 @@
               },
               {
                 "Nm": "FunLitCall",
-                "UniqueNm": "FunLitCall",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -3908,7 +3732,6 @@
               },
               {
                 "Nm": "FunLit",
-                "UniqueNm": "FunLit",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -3922,7 +3745,6 @@
               },
               {
                 "Nm": "BinExpr",
-                "UniqueNm": "BinExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -3936,7 +3758,6 @@
               },
               {
                 "Nm": "UnryExpr",
-                "UniqueNm": "UnryExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -3960,7 +3781,6 @@
           },
           {
             "Nm": "UnaryExpr",
-            "UniqueNm": "UnaryExpr",
             "Properties": null,
             "Kids": [
               {
@@ -3984,7 +3804,6 @@
               },
               {
                 "Nm": "PosExpr",
-                "UniqueNm": "PosExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -3998,7 +3817,6 @@
               },
               {
                 "Nm": "NegExpr",
-                "UniqueNm": "NegExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4012,7 +3830,6 @@
               },
               {
                 "Nm": "UnaryXorExpr",
-                "UniqueNm": "UnaryXorExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4026,7 +3843,6 @@
               },
               {
                 "Nm": "NotExpr",
-                "UniqueNm": "NotExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4040,7 +3856,6 @@
               },
               {
                 "Nm": "DePtrExpr",
-                "UniqueNm": "DePtrExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4054,7 +3869,6 @@
               },
               {
                 "Nm": "AddrExpr",
-                "UniqueNm": "AddrExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4068,7 +3882,6 @@
               },
               {
                 "Nm": "SendExpr",
-                "UniqueNm": "SendExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4082,7 +3895,6 @@
               },
               {
                 "Nm": "PrimExpr",
-                "UniqueNm": "PrimExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4106,7 +3918,6 @@
           },
           {
             "Nm": "BinaryExpr",
-            "UniqueNm": "BinaryExpr",
             "Properties": null,
             "Kids": [
               {
@@ -4152,7 +3963,6 @@
               },
               {
                 "Nm": "NotEqExpr",
-                "UniqueNm": "NotEqExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4166,7 +3976,6 @@
               },
               {
                 "Nm": "EqExpr",
-                "UniqueNm": "EqExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4180,7 +3989,6 @@
               },
               {
                 "Nm": "LogOrExpr",
-                "UniqueNm": "LogOrExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4194,7 +4002,6 @@
               },
               {
                 "Nm": "LogAndExpr",
-                "UniqueNm": "LogAndExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4208,7 +4015,6 @@
               },
               {
                 "Nm": "GtEqExpr",
-                "UniqueNm": "GtEqExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4222,7 +4028,6 @@
               },
               {
                 "Nm": "GreaterExpr",
-                "UniqueNm": "GreaterExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4236,7 +4041,6 @@
               },
               {
                 "Nm": "LtEqExpr",
-                "UniqueNm": "LtEqExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4250,7 +4054,6 @@
               },
               {
                 "Nm": "LessExpr",
-                "UniqueNm": "LessExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4264,7 +4067,6 @@
               },
               {
                 "Nm": "BitOrExpr",
-                "UniqueNm": "BitOrExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4278,7 +4080,6 @@
               },
               {
                 "Nm": "BitAndExpr",
-                "UniqueNm": "BitAndExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4292,7 +4093,6 @@
               },
               {
                 "Nm": "BitXorExpr",
-                "UniqueNm": "BitXorExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4306,7 +4106,6 @@
               },
               {
                 "Nm": "BitAndNotExpr",
-                "UniqueNm": "BitAndNotExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4320,7 +4119,6 @@
               },
               {
                 "Nm": "ShiftRightExpr",
-                "UniqueNm": "ShiftRightExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4334,7 +4132,6 @@
               },
               {
                 "Nm": "ShiftLeftExpr",
-                "UniqueNm": "ShiftLeftExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4348,7 +4145,6 @@
               },
               {
                 "Nm": "SubExpr",
-                "UniqueNm": "SubExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4362,7 +4158,6 @@
               },
               {
                 "Nm": "AddExpr",
-                "UniqueNm": "AddExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4376,7 +4171,6 @@
               },
               {
                 "Nm": "RemExpr",
-                "UniqueNm": "RemExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4390,7 +4184,6 @@
               },
               {
                 "Nm": "DivExpr",
-                "UniqueNm": "DivExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4404,7 +4197,6 @@
               },
               {
                 "Nm": "MultExpr",
-                "UniqueNm": "MultExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4428,7 +4220,6 @@
           },
           {
             "Nm": "PrimaryExpr",
-            "UniqueNm": "PrimaryExpr",
             "Properties": null,
             "Kids": [
               {
@@ -4468,7 +4259,6 @@
               },
               {
                 "Nm": "Lits",
-                "UniqueNm": "Lits",
                 "Properties": null,
                 "Kids": [
                   {
@@ -4490,7 +4280,6 @@
                   },
                   {
                     "Nm": "LitRune",
-                    "UniqueNm": "LitRune",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -4504,7 +4293,6 @@
                   },
                   {
                     "Nm": "LitNumInteger",
-                    "UniqueNm": "LitNumInteger",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -4518,7 +4306,6 @@
                   },
                   {
                     "Nm": "LitNumFloat",
-                    "UniqueNm": "LitNumFloat",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -4532,7 +4319,6 @@
                   },
                   {
                     "Nm": "LitNumImag",
-                    "UniqueNm": "LitNumImag",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -4546,7 +4332,6 @@
                   },
                   {
                     "Nm": "LitStringDbl",
-                    "UniqueNm": "LitStringDbl",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -4560,7 +4345,6 @@
                   },
                   {
                     "Nm": "LitStringTicks",
-                    "UniqueNm": "LitStringTicks",
                     "Properties": null,
                     "Kids": [
                       {
@@ -4570,7 +4354,6 @@
                       },
                       {
                         "Nm": "LitStringTickGp",
-                        "UniqueNm": "LitStringTickGp",
                         "Properties": null,
                         "Kids": [
                           {
@@ -4582,7 +4365,6 @@
                           },
                           {
                             "Nm": "LitStringTickList",
-                            "UniqueNm": "LitStringTickList",
                             "Properties": null,
                             "Kids": null,
                             "Off": false,
@@ -4596,7 +4378,6 @@
                           },
                           {
                             "Nm": "LitStringTick",
-                            "UniqueNm": "LitStringTick",
                             "Properties": null,
                             "Kids": null,
                             "Off": false,
@@ -4630,7 +4411,6 @@
                   },
                   {
                     "Nm": "LitString",
-                    "UniqueNm": "LitString",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -4654,7 +4434,6 @@
               },
               {
                 "Nm": "FuncExpr",
-                "UniqueNm": "FuncExpr",
                 "Properties": null,
                 "Kids": [
                   {
@@ -4666,7 +4445,6 @@
                   },
                   {
                     "Nm": "FuncLitCall",
-                    "UniqueNm": "FuncLitCall",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -4680,7 +4458,6 @@
                   },
                   {
                     "Nm": "FuncLit",
-                    "UniqueNm": "FuncLit",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -4704,7 +4481,6 @@
               },
               {
                 "Nm": "MakeCall",
-                "UniqueNm": "MakeCall",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4718,7 +4494,6 @@
               },
               {
                 "Nm": "NewCall",
-                "UniqueNm": "NewCall",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4732,7 +4507,6 @@
               },
               {
                 "Nm": "Paren",
-                "UniqueNm": "Paren",
                 "Properties": null,
                 "Kids": [
                   {
@@ -4748,7 +4522,6 @@
                   },
                   {
                     "Nm": "ConvertParensSel",
-                    "UniqueNm": "ConvertParensSel",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -4762,7 +4535,6 @@
                   },
                   {
                     "Nm": "ConvertParens",
-                    "UniqueNm": "ConvertParens",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -4776,7 +4548,6 @@
                   },
                   {
                     "Nm": "ParenSelector",
-                    "UniqueNm": "ParenSelector",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -4790,7 +4561,6 @@
                   },
                   {
                     "Nm": "ParenExpr",
-                    "UniqueNm": "ParenExpr",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -4814,7 +4584,6 @@
               },
               {
                 "Nm": "Convert",
-                "UniqueNm": "Convert",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4828,7 +4597,6 @@
               },
               {
                 "Nm": "TypeAssertSel",
-                "UniqueNm": "TypeAssertSel",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4842,7 +4610,6 @@
               },
               {
                 "Nm": "TypeAssert",
-                "UniqueNm": "TypeAssert",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4856,7 +4623,6 @@
               },
               {
                 "Nm": "Selector",
-                "UniqueNm": "Selector",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4878,7 +4644,6 @@
               },
               {
                 "Nm": "CompositeLit",
-                "UniqueNm": "CompositeLit",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4892,7 +4657,6 @@
               },
               {
                 "Nm": "SliceCall",
-                "UniqueNm": "SliceCall",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4906,7 +4670,6 @@
               },
               {
                 "Nm": "Slice",
-                "UniqueNm": "Slice",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4920,7 +4683,6 @@
               },
               {
                 "Nm": "MethCall",
-                "UniqueNm": "MethCall",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4942,7 +4704,6 @@
               },
               {
                 "Nm": "FuncCallFun",
-                "UniqueNm": "FuncCallFun",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4964,7 +4725,6 @@
               },
               {
                 "Nm": "FuncCall",
-                "UniqueNm": "FuncCall",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -4986,7 +4746,6 @@
               },
               {
                 "Nm": "OpName",
-                "UniqueNm": "OpName",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5010,7 +4769,6 @@
           },
           {
             "Nm": "LiteralType",
-            "UniqueNm": "LiteralType",
             "Properties": null,
             "Kids": [
               {
@@ -5028,7 +4786,6 @@
               },
               {
                 "Nm": "LitStructType",
-                "UniqueNm": "LitStructType",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5064,7 +4821,6 @@
               },
               {
                 "Nm": "LitIFaceType",
-                "UniqueNm": "LitIFaceType",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5078,7 +4834,6 @@
               },
               {
                 "Nm": "LitSliceOrArray",
-                "UniqueNm": "LitSliceOrArray",
                 "Properties": null,
                 "Kids": [
                   {
@@ -5092,7 +4847,6 @@
                   },
                   {
                     "Nm": "LitSliceType",
-                    "UniqueNm": "LitSliceType",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -5121,7 +4875,6 @@
                   },
                   {
                     "Nm": "LitArrayAutoType",
-                    "UniqueNm": "LitArrayAutoType",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -5150,7 +4903,6 @@
                   },
                   {
                     "Nm": "LitArrayType",
-                    "UniqueNm": "LitArrayType",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -5189,7 +4941,6 @@
               },
               {
                 "Nm": "LitMapType",
-                "UniqueNm": "LitMapType",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5218,7 +4969,6 @@
               },
               {
                 "Nm": "LitTypeName",
-                "UniqueNm": "LitTypeName",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5242,7 +4992,6 @@
           },
           {
             "Nm": "LiteralValue",
-            "UniqueNm": "LiteralValue",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -5256,7 +5005,6 @@
           },
           {
             "Nm": "ElementList",
-            "UniqueNm": "ElementList",
             "Properties": null,
             "Kids": [
               {
@@ -5268,7 +5016,6 @@
               },
               {
                 "Nm": "ElementListEls",
-                "UniqueNm": "ElementListEls",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5282,7 +5029,6 @@
               },
               {
                 "Nm": "KeyedEl",
-                "UniqueNm": "KeyedEl",
                 "Properties": null,
                 "Kids": [
                   {
@@ -5294,7 +5040,6 @@
                   },
                   {
                     "Nm": "KeyEl",
-                    "UniqueNm": "KeyEl",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -5308,7 +5053,6 @@
                   },
                   {
                     "Nm": "Element",
-                    "UniqueNm": "Element",
                     "Properties": null,
                     "Kids": [
                       {
@@ -5322,7 +5066,6 @@
                       },
                       {
                         "Nm": "EmptyEl",
-                        "UniqueNm": "EmptyEl",
                         "Properties": null,
                         "Kids": null,
                         "Off": false,
@@ -5336,7 +5079,6 @@
                       },
                       {
                         "Nm": "ElExpr",
-                        "UniqueNm": "ElExpr",
                         "Properties": null,
                         "Kids": null,
                         "Off": false,
@@ -5350,7 +5092,6 @@
                       },
                       {
                         "Nm": "ElLitVal",
-                        "UniqueNm": "ElLitVal",
                         "Properties": null,
                         "Kids": null,
                         "Off": false,
@@ -5394,7 +5135,6 @@
           },
           {
             "Nm": "Key",
-            "UniqueNm": "Key",
             "Properties": null,
             "Kids": [
               {
@@ -5406,7 +5146,6 @@
               },
               {
                 "Nm": "KeyLitVal",
-                "UniqueNm": "KeyLitVal",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5420,7 +5159,6 @@
               },
               {
                 "Nm": "KeyExpr",
-                "UniqueNm": "KeyExpr",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5444,7 +5182,6 @@
           },
           {
             "Nm": "RecvType",
-            "UniqueNm": "RecvType",
             "Properties": null,
             "Kids": [
               {
@@ -5458,7 +5195,6 @@
               },
               {
                 "Nm": "RecvPtrType",
-                "UniqueNm": "RecvPtrType",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5472,7 +5208,6 @@
               },
               {
                 "Nm": "ParenRecvType",
-                "UniqueNm": "ParenRecvType",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5486,7 +5221,6 @@
               },
               {
                 "Nm": "RecvTp",
-                "UniqueNm": "RecvTp",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5510,7 +5244,6 @@
           },
           {
             "Nm": "SliceExpr",
-            "UniqueNm": "SliceExpr",
             "Properties": null,
             "Kids": [
               {
@@ -5524,7 +5257,6 @@
               },
               {
                 "Nm": "SliceThree",
-                "UniqueNm": "SliceThree",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5538,7 +5270,6 @@
               },
               {
                 "Nm": "SliceTwo",
-                "UniqueNm": "SliceTwo",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5552,7 +5283,6 @@
               },
               {
                 "Nm": "SliceOne",
-                "UniqueNm": "SliceOne",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5576,7 +5306,6 @@
           },
           {
             "Nm": "SliceIndexes",
-            "UniqueNm": "SliceIndexes",
             "Properties": null,
             "Kids": [
               {
@@ -5590,7 +5319,6 @@
               },
               {
                 "Nm": "SliceIndex1",
-                "UniqueNm": "SliceIndex1",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5604,7 +5332,6 @@
               },
               {
                 "Nm": "SliceIndex2",
-                "UniqueNm": "SliceIndex2",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5618,7 +5345,6 @@
               },
               {
                 "Nm": "SliceIndex3",
-                "UniqueNm": "SliceIndex3",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5642,7 +5368,6 @@
           },
           {
             "Nm": "ArgsExpr",
-            "UniqueNm": "ArgsExpr",
             "Properties": null,
             "Kids": [
               {
@@ -5654,7 +5379,6 @@
               },
               {
                 "Nm": "ArgsEllipsis",
-                "UniqueNm": "ArgsEllipsis",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5668,7 +5392,6 @@
               },
               {
                 "Nm": "Args",
-                "UniqueNm": "Args",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5692,7 +5415,6 @@
           },
           {
             "Nm": "ArgsList",
-            "UniqueNm": "ArgsList",
             "Properties": null,
             "Kids": [
               {
@@ -5704,7 +5426,6 @@
               },
               {
                 "Nm": "ArgsListEls",
-                "UniqueNm": "ArgsListEls",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5718,7 +5439,6 @@
               },
               {
                 "Nm": "ArgsListEl",
-                "UniqueNm": "ArgsListEl",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5752,7 +5472,6 @@
       },
       {
         "Nm": "TypeRules",
-        "UniqueNm": "TypeRules",
         "Properties": null,
         "Kids": [
           {
@@ -5776,7 +5495,6 @@
           },
           {
             "Nm": "Type",
-            "UniqueNm": "Type",
             "Properties": null,
             "Kids": [
               {
@@ -5790,7 +5508,6 @@
               },
               {
                 "Nm": "ParenType",
-                "UniqueNm": "ParenType",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5804,7 +5521,6 @@
               },
               {
                 "Nm": "TypeLit",
-                "UniqueNm": "TypeLit",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -5818,7 +5534,6 @@
               },
               {
                 "Nm": "TypeName",
-                "UniqueNm": "TypeName",
                 "Properties": null,
                 "Kids": [
                   {
@@ -5834,7 +5549,6 @@
                   },
                   {
                     "Nm": "BasicType",
-                    "UniqueNm": "BasicType",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -5848,7 +5562,6 @@
                   },
                   {
                     "Nm": "QualType",
-                    "UniqueNm": "QualType",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -5870,7 +5583,6 @@
                   },
                   {
                     "Nm": "QualBasicType",
-                    "UniqueNm": "QualBasicType",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -5892,7 +5604,6 @@
                   },
                   {
                     "Nm": "TypeNm",
-                    "UniqueNm": "TypeNm",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -5934,7 +5645,6 @@
           },
           {
             "Nm": "TypeLiteral",
-            "UniqueNm": "TypeLiteral",
             "Properties": null,
             "Kids": [
               {
@@ -5958,7 +5668,6 @@
               },
               {
                 "Nm": "SliceOrArray",
-                "UniqueNm": "SliceOrArray",
                 "Properties": null,
                 "Kids": [
                   {
@@ -5972,7 +5681,6 @@
                   },
                   {
                     "Nm": "SliceType",
-                    "UniqueNm": "SliceType",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -6001,7 +5709,6 @@
                   },
                   {
                     "Nm": "ArrayAutoType",
-                    "UniqueNm": "ArrayAutoType",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -6030,7 +5737,6 @@
                   },
                   {
                     "Nm": "ArrayType",
-                    "UniqueNm": "ArrayType",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -6069,7 +5775,6 @@
               },
               {
                 "Nm": "StructType",
-                "UniqueNm": "StructType",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6105,7 +5810,6 @@
               },
               {
                 "Nm": "PointerType",
-                "UniqueNm": "PointerType",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6119,7 +5823,6 @@
               },
               {
                 "Nm": "FuncType",
-                "UniqueNm": "FuncType",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6133,7 +5836,6 @@
               },
               {
                 "Nm": "InterfaceType",
-                "UniqueNm": "InterfaceType",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6169,7 +5871,6 @@
               },
               {
                 "Nm": "MapType",
-                "UniqueNm": "MapType",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6198,7 +5899,6 @@
               },
               {
                 "Nm": "SendChanType",
-                "UniqueNm": "SendChanType",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6212,7 +5912,6 @@
               },
               {
                 "Nm": "ChannelType",
-                "UniqueNm": "ChannelType",
                 "Properties": null,
                 "Kids": [
                   {
@@ -6224,7 +5923,6 @@
                   },
                   {
                     "Nm": "RecvChanType",
-                    "UniqueNm": "RecvChanType",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -6238,7 +5936,6 @@
                   },
                   {
                     "Nm": "SRChanType",
-                    "UniqueNm": "SRChanType",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -6272,7 +5969,6 @@
           },
           {
             "Nm": "FieldDecls",
-            "UniqueNm": "FieldDecls",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -6286,7 +5982,6 @@
           },
           {
             "Nm": "FieldDecl",
-            "UniqueNm": "FieldDecl",
             "Properties": null,
             "Kids": [
               {
@@ -6300,7 +5995,6 @@
               },
               {
                 "Nm": "AnonQualField",
-                "UniqueNm": "AnonQualField",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6329,7 +6023,6 @@
               },
               {
                 "Nm": "AnonPtrField",
-                "UniqueNm": "AnonPtrField",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6358,7 +6051,6 @@
               },
               {
                 "Nm": "NamedField",
-                "UniqueNm": "NamedField",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6397,7 +6089,6 @@
           },
           {
             "Nm": "FieldTag",
-            "UniqueNm": "FieldTag",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -6411,7 +6102,6 @@
           },
           {
             "Nm": "TypeDeclN",
-            "UniqueNm": "TypeDeclN",
             "Properties": null,
             "Kids": [
               {
@@ -6423,7 +6113,6 @@
               },
               {
                 "Nm": "TypeDeclGroup",
-                "UniqueNm": "TypeDeclGroup",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6437,7 +6126,6 @@
               },
               {
                 "Nm": "TypeDeclEl",
-                "UniqueNm": "TypeDeclEl",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6490,7 +6178,6 @@
           },
           {
             "Nm": "TypeDecls",
-            "UniqueNm": "TypeDecls",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -6504,7 +6191,6 @@
           },
           {
             "Nm": "TypeList",
-            "UniqueNm": "TypeList",
             "Properties": null,
             "Kids": [
               {
@@ -6516,7 +6202,6 @@
               },
               {
                 "Nm": "TypeListEls",
-                "UniqueNm": "TypeListEls",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6530,7 +6215,6 @@
               },
               {
                 "Nm": "TypeListEl",
-                "UniqueNm": "TypeListEl",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6564,7 +6248,6 @@
       },
       {
         "Nm": "FuncRules",
-        "UniqueNm": "FuncRules",
         "Properties": null,
         "Kids": [
           {
@@ -6588,7 +6271,6 @@
           },
           {
             "Nm": "FunDecl",
-            "UniqueNm": "FunDecl",
             "Properties": null,
             "Kids": [
               {
@@ -6600,7 +6282,6 @@
               },
               {
                 "Nm": "MethDecl",
-                "UniqueNm": "MethDecl",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6664,7 +6345,6 @@
               },
               {
                 "Nm": "FuncDecl",
-                "UniqueNm": "FuncDecl",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6717,7 +6397,6 @@
           },
           {
             "Nm": "MethRecv",
-            "UniqueNm": "MethRecv",
             "Properties": null,
             "Kids": [
               {
@@ -6729,7 +6408,6 @@
               },
               {
                 "Nm": "MethRecvName",
-                "UniqueNm": "MethRecvName",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6758,7 +6436,6 @@
               },
               {
                 "Nm": "MethRecvNoNm",
-                "UniqueNm": "MethRecvNoNm",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6790,7 +6467,6 @@
           },
           {
             "Nm": "Signature",
-            "UniqueNm": "Signature",
             "Properties": null,
             "Kids": [
               {
@@ -6802,7 +6478,6 @@
               },
               {
                 "Nm": "SigParamsResult",
-                "UniqueNm": "SigParamsResult",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6816,7 +6491,6 @@
               },
               {
                 "Nm": "SigParams",
-                "UniqueNm": "SigParams",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6840,7 +6514,6 @@
           },
           {
             "Nm": "MethodSpec",
-            "UniqueNm": "MethodSpec",
             "Properties": null,
             "Kids": [
               {
@@ -6856,7 +6529,6 @@
               },
               {
                 "Nm": "MethSpecAnonQual",
-                "UniqueNm": "MethSpecAnonQual",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6885,7 +6557,6 @@
               },
               {
                 "Nm": "MethSpecName",
-                "UniqueNm": "MethSpecName",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6914,7 +6585,6 @@
               },
               {
                 "Nm": "MethSpecAnonLocal",
-                "UniqueNm": "MethSpecAnonLocal",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6943,7 +6613,6 @@
               },
               {
                 "Nm": "MethSpecNone",
-                "UniqueNm": "MethSpecNone",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -6967,7 +6636,6 @@
           },
           {
             "Nm": "MethodSpecs",
-            "UniqueNm": "MethodSpecs",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -6981,7 +6649,6 @@
           },
           {
             "Nm": "Result",
-            "UniqueNm": "Result",
             "Properties": null,
             "Kids": [
               {
@@ -6993,7 +6660,6 @@
               },
               {
                 "Nm": "Results",
-                "UniqueNm": "Results",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7007,7 +6673,6 @@
               },
               {
                 "Nm": "ResultOne",
-                "UniqueNm": "ResultOne",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7031,7 +6696,6 @@
           },
           {
             "Nm": "ParamsList",
-            "UniqueNm": "ParamsList",
             "Properties": null,
             "Kids": [
               {
@@ -7045,7 +6709,6 @@
               },
               {
                 "Nm": "ParNameEllipsis",
-                "UniqueNm": "ParNameEllipsis",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7059,7 +6722,6 @@
               },
               {
                 "Nm": "ParName",
-                "UniqueNm": "ParName",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7095,7 +6757,6 @@
               },
               {
                 "Nm": "ParType",
-                "UniqueNm": "ParType",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7119,7 +6780,6 @@
           },
           {
             "Nm": "Params",
-            "UniqueNm": "Params",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -7143,7 +6803,6 @@
       },
       {
         "Nm": "StmtRules",
-        "UniqueNm": "StmtRules",
         "Properties": null,
         "Kids": [
           {
@@ -7165,7 +6824,6 @@
           },
           {
             "Nm": "StmtList",
-            "UniqueNm": "StmtList",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -7179,7 +6837,6 @@
           },
           {
             "Nm": "BlockList",
-            "UniqueNm": "BlockList",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -7193,7 +6850,6 @@
           },
           {
             "Nm": "Stmt",
-            "UniqueNm": "Stmt",
             "Properties": null,
             "Kids": [
               {
@@ -7239,7 +6895,6 @@
               },
               {
                 "Nm": "ConstDeclStmt",
-                "UniqueNm": "ConstDeclStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7253,7 +6908,6 @@
               },
               {
                 "Nm": "TypeDeclStmt",
-                "UniqueNm": "TypeDeclStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7267,7 +6921,6 @@
               },
               {
                 "Nm": "VarDeclStmt",
-                "UniqueNm": "VarDeclStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7281,7 +6934,6 @@
               },
               {
                 "Nm": "ReturnStmt",
-                "UniqueNm": "ReturnStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7295,7 +6947,6 @@
               },
               {
                 "Nm": "BreakStmt",
-                "UniqueNm": "BreakStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7309,7 +6960,6 @@
               },
               {
                 "Nm": "ContStmt",
-                "UniqueNm": "ContStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7323,7 +6973,6 @@
               },
               {
                 "Nm": "GotoStmt",
-                "UniqueNm": "GotoStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7337,7 +6986,6 @@
               },
               {
                 "Nm": "GoStmt",
-                "UniqueNm": "GoStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7351,7 +6999,6 @@
               },
               {
                 "Nm": "FallthroughStmt",
-                "UniqueNm": "FallthroughStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7365,7 +7012,6 @@
               },
               {
                 "Nm": "DeferStmt",
-                "UniqueNm": "DeferStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7379,7 +7025,6 @@
               },
               {
                 "Nm": "IfStmt",
-                "UniqueNm": "IfStmt",
                 "Properties": null,
                 "Kids": [
                   {
@@ -7391,7 +7036,6 @@
                   },
                   {
                     "Nm": "IfStmtExpr",
-                    "UniqueNm": "IfStmtExpr",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7405,7 +7049,6 @@
                   },
                   {
                     "Nm": "IfStmtInit",
-                    "UniqueNm": "IfStmtInit",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7429,7 +7072,6 @@
               },
               {
                 "Nm": "ForStmt",
-                "UniqueNm": "ForStmt",
                 "Properties": null,
                 "Kids": [
                   {
@@ -7449,7 +7091,6 @@
                   },
                   {
                     "Nm": "ForRangeExisting",
-                    "UniqueNm": "ForRangeExisting",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7463,7 +7104,6 @@
                   },
                   {
                     "Nm": "ForRangeNewLit",
-                    "UniqueNm": "ForRangeNewLit",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7492,7 +7132,6 @@
                   },
                   {
                     "Nm": "ForRangeNew",
-                    "UniqueNm": "ForRangeNew",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7521,7 +7160,6 @@
                   },
                   {
                     "Nm": "ForRangeOnly",
-                    "UniqueNm": "ForRangeOnly",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7543,7 +7181,6 @@
                   },
                   {
                     "Nm": "ForExpr",
-                    "UniqueNm": "ForExpr",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7557,7 +7194,6 @@
                   },
                   {
                     "Nm": "ForClauseStmt",
-                    "UniqueNm": "ForClauseStmt",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7581,7 +7217,6 @@
               },
               {
                 "Nm": "SwitchStmt",
-                "UniqueNm": "SwitchStmt",
                 "Properties": null,
                 "Kids": [
                   {
@@ -7601,7 +7236,6 @@
                   },
                   {
                     "Nm": "SwitchTypeName",
-                    "UniqueNm": "SwitchTypeName",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7630,7 +7264,6 @@
                   },
                   {
                     "Nm": "SwitchTypeAnon",
-                    "UniqueNm": "SwitchTypeAnon",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7659,7 +7292,6 @@
                   },
                   {
                     "Nm": "SwitchExpr",
-                    "UniqueNm": "SwitchExpr",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7673,7 +7305,6 @@
                   },
                   {
                     "Nm": "SwitchTypeNameInit",
-                    "UniqueNm": "SwitchTypeNameInit",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7702,7 +7333,6 @@
                   },
                   {
                     "Nm": "SwitchTypeAnonInit",
-                    "UniqueNm": "SwitchTypeAnonInit",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7731,7 +7361,6 @@
                   },
                   {
                     "Nm": "SwitchInit",
-                    "UniqueNm": "SwitchInit",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7755,7 +7384,6 @@
               },
               {
                 "Nm": "SelectStmt",
-                "UniqueNm": "SelectStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7769,7 +7397,6 @@
               },
               {
                 "Nm": "CaseStmt",
-                "UniqueNm": "CaseStmt",
                 "Properties": null,
                 "Kids": [
                   {
@@ -7791,7 +7418,6 @@
                   },
                   {
                     "Nm": "TypeCaseEmptyStmt",
-                    "UniqueNm": "TypeCaseEmptyStmt",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7805,7 +7431,6 @@
                   },
                   {
                     "Nm": "TypeCaseStmt",
-                    "UniqueNm": "TypeCaseStmt",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7819,7 +7444,6 @@
                   },
                   {
                     "Nm": "SelCaseRecvExistStmt",
-                    "UniqueNm": "SelCaseRecvExistStmt",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7833,7 +7457,6 @@
                   },
                   {
                     "Nm": "SelCaseRecvNewStmt",
-                    "UniqueNm": "SelCaseRecvNewStmt",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7847,7 +7470,6 @@
                   },
                   {
                     "Nm": "SelCaseSendStmt",
-                    "UniqueNm": "SelCaseSendStmt",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7861,7 +7483,6 @@
                   },
                   {
                     "Nm": "CaseEmptyStmt",
-                    "UniqueNm": "CaseEmptyStmt",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7875,7 +7496,6 @@
                   },
                   {
                     "Nm": "CaseExprStmt",
-                    "UniqueNm": "CaseExprStmt",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -7899,7 +7519,6 @@
               },
               {
                 "Nm": "DefaultStmt",
-                "UniqueNm": "DefaultStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7913,7 +7532,6 @@
               },
               {
                 "Nm": "LabeledStmt",
-                "UniqueNm": "LabeledStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7935,7 +7553,6 @@
               },
               {
                 "Nm": "Block",
-                "UniqueNm": "Block",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7949,7 +7566,6 @@
               },
               {
                 "Nm": "SimpleSt",
-                "UniqueNm": "SimpleSt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -7973,7 +7589,6 @@
           },
           {
             "Nm": "SimpleStmt",
-            "UniqueNm": "SimpleStmt",
             "Properties": null,
             "Kids": [
               {
@@ -7991,7 +7606,6 @@
               },
               {
                 "Nm": "IncrStmt",
-                "UniqueNm": "IncrStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8005,7 +7619,6 @@
               },
               {
                 "Nm": "DecrStmt",
-                "UniqueNm": "DecrStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8019,7 +7632,6 @@
               },
               {
                 "Nm": "AsgnStmt",
-                "UniqueNm": "AsgnStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8033,7 +7645,6 @@
               },
               {
                 "Nm": "SendStmt",
-                "UniqueNm": "SendStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8047,7 +7658,6 @@
               },
               {
                 "Nm": "ExprStmt",
-                "UniqueNm": "ExprStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8071,7 +7681,6 @@
           },
           {
             "Nm": "PostStmt",
-            "UniqueNm": "PostStmt",
             "Properties": null,
             "Kids": [
               {
@@ -8095,7 +7704,6 @@
               },
               {
                 "Nm": "PostSendStmt",
-                "UniqueNm": "PostSendStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8109,7 +7717,6 @@
               },
               {
                 "Nm": "PostIncrStmt",
-                "UniqueNm": "PostIncrStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8123,7 +7730,6 @@
               },
               {
                 "Nm": "PostDecrStmt",
-                "UniqueNm": "PostDecrStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8137,7 +7743,6 @@
               },
               {
                 "Nm": "PostAsgnExisting",
-                "UniqueNm": "PostAsgnExisting",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8151,7 +7756,6 @@
               },
               {
                 "Nm": "PostAsgnBit",
-                "UniqueNm": "PostAsgnBit",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8165,7 +7769,6 @@
               },
               {
                 "Nm": "PostAsgnMath",
-                "UniqueNm": "PostAsgnMath",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8179,7 +7782,6 @@
               },
               {
                 "Nm": "PostAsgnNew",
-                "UniqueNm": "PostAsgnNew",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8215,7 +7817,6 @@
               },
               {
                 "Nm": "PostExprStmt",
-                "UniqueNm": "PostExprStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8239,7 +7840,6 @@
           },
           {
             "Nm": "Asgn",
-            "UniqueNm": "Asgn",
             "Properties": null,
             "Kids": [
               {
@@ -8255,7 +7855,6 @@
               },
               {
                 "Nm": "AsgnExisting",
-                "UniqueNm": "AsgnExisting",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8269,7 +7868,6 @@
               },
               {
                 "Nm": "AsgnNew",
-                "UniqueNm": "AsgnNew",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8305,7 +7903,6 @@
               },
               {
                 "Nm": "AsgnMath",
-                "UniqueNm": "AsgnMath",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8319,7 +7916,6 @@
               },
               {
                 "Nm": "AsgnBit",
-                "UniqueNm": "AsgnBit",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8343,7 +7939,6 @@
           },
           {
             "Nm": "Elses",
-            "UniqueNm": "Elses",
             "Properties": null,
             "Kids": [
               {
@@ -8357,7 +7952,6 @@
               },
               {
                 "Nm": "ElseIfStmt",
-                "UniqueNm": "ElseIfStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8371,7 +7965,6 @@
               },
               {
                 "Nm": "ElseStmt",
-                "UniqueNm": "ElseStmt",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8385,7 +7978,6 @@
               },
               {
                 "Nm": "ElseIfStmtInit",
-                "UniqueNm": "ElseIfStmtInit",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8419,7 +8011,6 @@
       },
       {
         "Nm": "ImportRules",
-        "UniqueNm": "ImportRules",
         "Properties": null,
         "Kids": [
           {
@@ -8431,7 +8022,6 @@
           },
           {
             "Nm": "ImportN",
-            "UniqueNm": "ImportN",
             "Properties": null,
             "Kids": [
               {
@@ -8443,7 +8033,6 @@
               },
               {
                 "Nm": "ImportGroup",
-                "UniqueNm": "ImportGroup",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8457,7 +8046,6 @@
               },
               {
                 "Nm": "ImportOne",
-                "UniqueNm": "ImportOne",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8481,7 +8069,6 @@
           },
           {
             "Nm": "ImportList",
-            "UniqueNm": "ImportList",
             "Properties": null,
             "Kids": [
               {
@@ -8493,7 +8080,6 @@
               },
               {
                 "Nm": "ImportAlias",
-                "UniqueNm": "ImportAlias",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8522,7 +8108,6 @@
               },
               {
                 "Nm": "Import",
-                "UniqueNm": "Import",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8571,7 +8156,6 @@
       },
       {
         "Nm": "DeclRules",
-        "UniqueNm": "DeclRules",
         "Properties": null,
         "Kids": [
           {
@@ -8593,7 +8177,6 @@
           },
           {
             "Nm": "TypeDecl",
-            "UniqueNm": "TypeDecl",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -8607,7 +8190,6 @@
           },
           {
             "Nm": "ConstDecl",
-            "UniqueNm": "ConstDecl",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -8621,7 +8203,6 @@
           },
           {
             "Nm": "VarDecl",
-            "UniqueNm": "VarDecl",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -8635,7 +8216,6 @@
           },
           {
             "Nm": "ConstDeclN",
-            "UniqueNm": "ConstDeclN",
             "Properties": null,
             "Kids": [
               {
@@ -8647,7 +8227,6 @@
               },
               {
                 "Nm": "ConstGroup",
-                "UniqueNm": "ConstGroup",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8661,7 +8240,6 @@
               },
               {
                 "Nm": "ConstOpts",
-                "UniqueNm": "ConstOpts",
                 "Properties": null,
                 "Kids": [
                   {
@@ -8673,7 +8251,6 @@
                   },
                   {
                     "Nm": "ConstSpec",
-                    "UniqueNm": "ConstSpec",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -8709,7 +8286,6 @@
                   },
                   {
                     "Nm": "ConstSpecName",
-                    "UniqueNm": "ConstSpecName",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -8758,7 +8334,6 @@
           },
           {
             "Nm": "ConstList",
-            "UniqueNm": "ConstList",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -8772,7 +8347,6 @@
           },
           {
             "Nm": "VarDeclN",
-            "UniqueNm": "VarDeclN",
             "Properties": null,
             "Kids": [
               {
@@ -8784,7 +8358,6 @@
               },
               {
                 "Nm": "VarGroup",
-                "UniqueNm": "VarGroup",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -8798,7 +8371,6 @@
               },
               {
                 "Nm": "VarOpts",
-                "UniqueNm": "VarOpts",
                 "Properties": null,
                 "Kids": [
                   {
@@ -8810,7 +8382,6 @@
                   },
                   {
                     "Nm": "VarSpecExpr",
-                    "UniqueNm": "VarSpecExpr",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -8846,7 +8417,6 @@
                   },
                   {
                     "Nm": "VarSpec",
-                    "UniqueNm": "VarSpec",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -8902,7 +8472,6 @@
           },
           {
             "Nm": "VarList",
-            "UniqueNm": "VarList",
             "Properties": null,
             "Kids": null,
             "Off": false,

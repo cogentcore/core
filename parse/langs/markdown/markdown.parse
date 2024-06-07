@@ -1,7 +1,6 @@
 {
   "Lexer": {
     "Nm": "Lexer",
-    "UniqueNm": "Lexer",
     "Properties": null,
     "Kids": [
       {
@@ -61,7 +60,6 @@
       },
       {
         "Nm": "InCode",
-        "UniqueNm": "InCode",
         "Properties": null,
         "Kids": [
           {
@@ -73,7 +71,6 @@
           },
           {
             "Nm": "CodeEnd",
-            "UniqueNm": "CodeEnd",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -95,7 +92,6 @@
           },
           {
             "Nm": "AnyCode",
-            "UniqueNm": "AnyCode",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -129,7 +125,6 @@
       },
       {
         "Nm": "InLinkAttr",
-        "UniqueNm": "InLinkAttr",
         "Properties": null,
         "Kids": [
           {
@@ -141,7 +136,6 @@
           },
           {
             "Nm": "EndLinkAttr",
-            "UniqueNm": "EndLinkAttr",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -162,7 +156,6 @@
           },
           {
             "Nm": "AnyLinkAttr",
-            "UniqueNm": "AnyLinkAttr",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -196,7 +189,6 @@
       },
       {
         "Nm": "InLinkAddr",
-        "UniqueNm": "InLinkAddr",
         "Properties": null,
         "Kids": [
           {
@@ -210,7 +202,6 @@
           },
           {
             "Nm": "LinkAttr",
-            "UniqueNm": "LinkAttr",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -232,7 +223,6 @@
           },
           {
             "Nm": "EndLinkAddr",
-            "UniqueNm": "EndLinkAddr",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -253,7 +243,6 @@
           },
           {
             "Nm": "AnyLinkAddr",
-            "UniqueNm": "AnyLinkAddr",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -287,7 +276,6 @@
       },
       {
         "Nm": "InLinkTag",
-        "UniqueNm": "InLinkTag",
         "Properties": null,
         "Kids": [
           {
@@ -301,7 +289,6 @@
           },
           {
             "Nm": "LinkAddr",
-            "UniqueNm": "LinkAddr",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -323,7 +310,6 @@
           },
           {
             "Nm": "EndLinkTag",
-            "UniqueNm": "EndLinkTag",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -344,7 +330,6 @@
           },
           {
             "Nm": "AnyLinkTag",
-            "UniqueNm": "AnyLinkTag",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -378,7 +363,6 @@
       },
       {
         "Nm": "LetterText",
-        "UniqueNm": "LetterText",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -398,7 +382,6 @@
       },
       {
         "Nm": "CodeStart",
-        "UniqueNm": "CodeStart",
         "Properties": null,
         "Kids": [
           {
@@ -410,7 +393,6 @@
           },
           {
             "Nm": "CodeLang",
-            "UniqueNm": "CodeLang",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -431,7 +413,6 @@
           },
           {
             "Nm": "CodePlain",
-            "UniqueNm": "CodePlain",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -468,7 +449,6 @@
       },
       {
         "Nm": "HeadPound",
-        "UniqueNm": "HeadPound",
         "Properties": null,
         "Kids": [
           {
@@ -480,7 +460,6 @@
           },
           {
             "Nm": "HeadPound2",
-            "UniqueNm": "HeadPound2",
             "Properties": null,
             "Kids": [
               {
@@ -492,7 +471,6 @@
               },
               {
                 "Nm": "HeadPound3",
-                "UniqueNm": "HeadPound3",
                 "Properties": null,
                 "Kids": [
                   {
@@ -502,7 +480,6 @@
                   },
                   {
                     "Nm": "SubSubHeading",
-                    "UniqueNm": "SubSubHeading",
                     "Properties": null,
                     "Kids": null,
                     "Off": false,
@@ -536,7 +513,6 @@
               },
               {
                 "Nm": "SubHeading",
-                "UniqueNm": "SubHeading",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -570,7 +546,6 @@
           },
           {
             "Nm": "Heading",
-            "UniqueNm": "Heading",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -604,7 +579,6 @@
       },
       {
         "Nm": "ItemCheck",
-        "UniqueNm": "ItemCheck",
         "Properties": null,
         "Kids": [
           {
@@ -616,7 +590,6 @@
           },
           {
             "Nm": "ItemCheckDone",
-            "UniqueNm": "ItemCheckDone",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -636,7 +609,6 @@
           },
           {
             "Nm": "ItemCheckTodo",
-            "UniqueNm": "ItemCheckTodo",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -670,7 +642,6 @@
       },
       {
         "Nm": "ItemStar",
-        "UniqueNm": "ItemStar",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -690,7 +661,6 @@
       },
       {
         "Nm": "ItemPlus",
-        "UniqueNm": "ItemPlus",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -710,7 +680,6 @@
       },
       {
         "Nm": "ItemMinus",
-        "UniqueNm": "ItemMinus",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -730,7 +699,6 @@
       },
       {
         "Nm": "NumList",
-        "UniqueNm": "NumList",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -750,7 +718,6 @@
       },
       {
         "Nm": "CommentStart",
-        "UniqueNm": "CommentStart",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -770,7 +737,6 @@
       },
       {
         "Nm": "QuotePara",
-        "UniqueNm": "QuotePara",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -790,7 +756,6 @@
       },
       {
         "Nm": "BoldStars",
-        "UniqueNm": "BoldStars",
         "Properties": null,
         "Kids": [
           {
@@ -800,7 +765,6 @@
           },
           {
             "Nm": "BoldText",
-            "UniqueNm": "BoldText",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -836,7 +800,6 @@
       },
       {
         "Nm": "BoldUnders",
-        "UniqueNm": "BoldUnders",
         "Properties": null,
         "Kids": [
           {
@@ -846,7 +809,6 @@
           },
           {
             "Nm": "BoldText",
-            "UniqueNm": "BoldText",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -882,7 +844,6 @@
       },
       {
         "Nm": "ItemStarSub",
-        "UniqueNm": "ItemStarSub",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -902,7 +863,6 @@
       },
       {
         "Nm": "ItemPlusSub",
-        "UniqueNm": "ItemPlusSub",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -922,7 +882,6 @@
       },
       {
         "Nm": "ItemMinusSub",
-        "UniqueNm": "ItemMinusSub",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -942,7 +901,6 @@
       },
       {
         "Nm": "LinkTag",
-        "UniqueNm": "LinkTag",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -963,7 +921,6 @@
       },
       {
         "Nm": "BacktickCode",
-        "UniqueNm": "BacktickCode",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -983,7 +940,6 @@
       },
       {
         "Nm": "Quote",
-        "UniqueNm": "Quote_021",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -1003,7 +959,6 @@
       },
       {
         "Nm": "Apostrophe",
-        "UniqueNm": "Apostrophe",
         "Properties": null,
         "Kids": [
           {
@@ -1015,7 +970,6 @@
           },
           {
             "Nm": "QuoteSingle",
-            "UniqueNm": "QuoteSingle",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -1035,7 +989,6 @@
           },
           {
             "Nm": "Apost",
-            "UniqueNm": "Apost",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -1069,7 +1022,6 @@
       },
       {
         "Nm": "EmphStar",
-        "UniqueNm": "EmphStar",
         "Properties": null,
         "Kids": [
           {
@@ -1079,7 +1031,6 @@
           },
           {
             "Nm": "EmphText",
-            "UniqueNm": "EmphText",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -1115,7 +1066,6 @@
       },
       {
         "Nm": "EmphUnder",
-        "UniqueNm": "EmphUnder",
         "Properties": null,
         "Kids": [
           {
@@ -1125,7 +1075,6 @@
           },
           {
             "Nm": "EmphUnder",
-            "UniqueNm": "EmphUnder",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -1161,7 +1110,6 @@
       },
       {
         "Nm": "AnyText",
-        "UniqueNm": "AnyText",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -1203,7 +1151,6 @@
   },
   "Parser": {
     "Nm": "Parser",
-    "UniqueNm": "Parser",
     "Properties": null,
     "Kids": null,
     "Off": false,

@@ -1,7 +1,6 @@
 {
   "Lexer": {
     "Nm": "Lexer",
-    "UniqueNm": "Lexer",
     "Properties": null,
     "Kids": [
       {
@@ -35,7 +34,6 @@
       },
       {
         "Nm": "Comment",
-        "UniqueNm": "Comment",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -55,7 +53,6 @@
       },
       {
         "Nm": "LetterText",
-        "UniqueNm": "LetterText",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -75,7 +72,6 @@
       },
       {
         "Nm": "Backslash",
-        "UniqueNm": "Backslash",
         "Properties": null,
         "Kids": [
           {
@@ -111,7 +107,6 @@
           },
           {
             "Nm": "Section",
-            "UniqueNm": "Section",
             "Properties": null,
             "Kids": [
               {
@@ -121,7 +116,6 @@
               },
               {
                 "Nm": "SectText",
-                "UniqueNm": "SectText",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -157,7 +151,6 @@
           },
           {
             "Nm": "Subsection",
-            "UniqueNm": "Subsection",
             "Properties": null,
             "Kids": [
               {
@@ -167,7 +160,6 @@
               },
               {
                 "Nm": "SubSectText",
-                "UniqueNm": "SubSectText",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -203,7 +195,6 @@
           },
           {
             "Nm": "Subsubsection",
-            "UniqueNm": "Subsubsection",
             "Properties": null,
             "Kids": [
               {
@@ -213,7 +204,6 @@
               },
               {
                 "Nm": "SubSubSectText",
-                "UniqueNm": "SubSubSectText",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -249,7 +239,6 @@
           },
           {
             "Nm": "Bold",
-            "UniqueNm": "Bold",
             "Properties": null,
             "Kids": [
               {
@@ -259,7 +248,6 @@
               },
               {
                 "Nm": "BoldText",
-                "UniqueNm": "BoldText",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -295,7 +283,6 @@
           },
           {
             "Nm": "Emph",
-            "UniqueNm": "Emph",
             "Properties": null,
             "Kids": [
               {
@@ -305,7 +292,6 @@
               },
               {
                 "Nm": "EmpText",
-                "UniqueNm": "EmpText",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -341,7 +327,6 @@
           },
           {
             "Nm": "TT",
-            "UniqueNm": "TT",
             "Properties": null,
             "Kids": [
               {
@@ -351,7 +336,6 @@
               },
               {
                 "Nm": "TTText",
-                "UniqueNm": "TTText",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -387,7 +371,6 @@
           },
           {
             "Nm": "VerbSlash",
-            "UniqueNm": "VerbSlash",
             "Properties": null,
             "Kids": [
               {
@@ -397,7 +380,6 @@
               },
               {
                 "Nm": "VerbText",
-                "UniqueNm": "VerbText",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -433,7 +415,6 @@
           },
           {
             "Nm": "VerbPipe",
-            "UniqueNm": "VerbPipe",
             "Properties": null,
             "Kids": [
               {
@@ -443,7 +424,6 @@
               },
               {
                 "Nm": "VerbText",
-                "UniqueNm": "VerbText",
                 "Properties": null,
                 "Kids": null,
                 "Off": false,
@@ -479,7 +459,6 @@
           },
           {
             "Nm": "Percent",
-            "UniqueNm": "Percent",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -499,7 +478,6 @@
           },
           {
             "Nm": "DollarSign",
-            "UniqueNm": "DollarSign",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -519,7 +497,6 @@
           },
           {
             "Nm": "Ampersand",
-            "UniqueNm": "Ampersand",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -539,7 +516,6 @@
           },
           {
             "Nm": "LBrace",
-            "UniqueNm": "LBrace",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -559,7 +535,6 @@
           },
           {
             "Nm": "RBrace",
-            "UniqueNm": "RBrace",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -579,7 +554,6 @@
           },
           {
             "Nm": "AnyCmd",
-            "UniqueNm": "AnyCmd",
             "Properties": null,
             "Kids": null,
             "Off": false,
@@ -615,7 +589,6 @@
       },
       {
         "Nm": "LBraceBf",
-        "UniqueNm": "LBraceBf",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -635,7 +608,6 @@
       },
       {
         "Nm": "LBraceEm",
-        "UniqueNm": "LBraceEm",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -655,7 +627,6 @@
       },
       {
         "Nm": "LBrace",
-        "UniqueNm": "LBrace",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -675,7 +646,6 @@
       },
       {
         "Nm": "LBrack",
-        "UniqueNm": "LBrack",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -695,7 +665,6 @@
       },
       {
         "Nm": "RBrace",
-        "UniqueNm": "RBrace",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -715,7 +684,6 @@
       },
       {
         "Nm": "DollarSign",
-        "UniqueNm": "DollarSign",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -735,7 +703,6 @@
       },
       {
         "Nm": "Ampersand",
-        "UniqueNm": "Ampersand",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -755,7 +722,6 @@
       },
       {
         "Nm": "Number",
-        "UniqueNm": "Number",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -775,7 +741,6 @@
       },
       {
         "Nm": "Quotes",
-        "UniqueNm": "Quotes",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -795,7 +760,6 @@
       },
       {
         "Nm": "AnyText",
-        "UniqueNm": "AnyText",
         "Properties": null,
         "Kids": null,
         "Off": false,
@@ -837,7 +801,6 @@
   },
   "Parser": {
     "Nm": "Parser",
-    "UniqueNm": "Parser",
     "Properties": null,
     "Kids": null,
     "Off": false,
