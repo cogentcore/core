@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/tree/testdata"
 )
 
-func TestNodeJSON(t *testing.T) {
+func testNodeTree() *testdata.NodeEmbed {
 	parent := testdata.NewNodeEmbed()
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
@@ -27,6 +27,11 @@ func TestNodeJSON(t *testing.T) {
 	child3.SetName("child3")
 	schild1 := testdata.NewNodeEmbed(child2)
 	schild1.SetName("subchild1")
+	return parent
+}
+
+func TestNodeJSON(t *testing.T) {
+	parent := testNodeTree()
 
 	var buf bytes.Buffer
 	assert.NoError(t, jsonx.Write(&parent, &buf))
@@ -57,19 +62,17 @@ func TestNodeJSON(t *testing.T) {
 	}
 }
 
+func BenchmarkNodeMarshalJSON(b *testing.B) {
+	parent := testNodeTree()
+	for range b.N {
+		var buf bytes.Buffer
+		assert.NoError(b, jsonx.Write(&parent, &buf))
+	}
+}
+
 /* TODO(config): add back tree xml support
 func TestNodeXML(t *testing.T) {
-	parent := testdata.NewNodeEmbed()
-	parent.Mbr1 = "bloop"
-	parent.Mbr2 = 32
-	child1 := testdata.NewNodeEmbed(parent)
-	child1.SetName("child1")
-	child2 := testdata.NewNodeEmbed(parent)
-	child2.SetName("child2")
-	child3 := testdata.NewNodeEmbed(parent)
-	child3.SetName("child3")
-	schild1 := testdata.NewNodeEmbed(child2)
-	schild1.SetName("subchild1")
+	parent := testNodeTree()
 
 	var buf bytes.Buffer
 	assert.NoError(t, parent.WriteXML(&buf, true))
