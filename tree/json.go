@@ -22,10 +22,6 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// note: use package iox/jsonx for standard read / write of JSON files
-// for trees.  The Slice Marshal / Unmarshal methods save the type info
-// of each child so that the full tree can be properly reconstructed.
-
 // MarshalJSON marshals the node by injecting the [Node.NodeType] as a nodeType
 // field and the [NodeBase.NumChildren] as a numChildren field at the start of
 // the standard JSON encoding output.
@@ -115,128 +111,6 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 	}
 	return nil
 }
-
-//////////////////////////////////////////////////////////////////////////
-// Slice
-
-/*
-// MarshalJSON saves the length and type, name information for each object in a
-// slice, as a separate struct-like record at the start, followed by the
-// structs for each element in the slice -- this allows the Unmarshal to first
-// create all the elements and then load them
-func (sl Slice) MarshalJSON() ([]byte, error) {
-	nk := len(sl)
-	b := make([]byte, 0, nk*100+20)
-	if nk == 0 {
-		b = append(b, []byte("null")...)
-		return b, nil
-	}
-	nstr := fmt.Sprintf("[{\"n\":%d,", nk)
-	b = append(b, []byte(nstr)...)
-	for i, kid := range sl {
-		// fmt.Printf("json out of %v\n", kid.Path())
-		knm := kid.NodeType().Name
-		tstr := fmt.Sprintf("\"type\":\"%v\", \"name\": \"%v\"", knm, kid.Name()) // todo: escape names!
-		b = append(b, []byte(tstr)...)
-		if i < nk-1 {
-			b = append(b, []byte(",")...)
-		}
-	}
-	b = append(b, []byte("},")...)
-	for i, kid := range sl {
-		var err error
-		var kb []byte
-		kb, err = json.Marshal(kid)
-		if err == nil {
-			b = append(b, []byte("{")...)
-			b = append(b, kb[1:len(kb)-1]...)
-			b = append(b, []byte("}")...)
-			if i < nk-1 {
-				b = append(b, []byte(",")...)
-			}
-		} else {
-			fmt.Println("tree.Slice.MarshalJSON: error doing json.Marshal from kid:", kid)
-			errors.Log(err)
-			fmt.Println("tree.Slice.MarshalJSON: output to point of error:", string(b))
-		}
-	}
-	b = append(b, []byte("]")...)
-	// fmt.Printf("json out: %v\n", string(b))
-	return b, nil
-}
-
-// UnmarshalJSON parses the length and type information for each object in the
-// slice, creates the new slice with those elements, and then loads based on
-// the remaining bytes which represent each element
-func (sl *Slice) UnmarshalJSON(b []byte) error {
-	// fmt.Printf("json in: %v\n", string(b))
-	if bytes.Equal(b, []byte("null")) {
-		// fmt.Println("\n\n null")
-		*sl = nil
-		return nil
-	}
-	lb := bytes.IndexRune(b, '{')
-	rb := bytes.IndexRune(b, '}')
-	if lb < 0 || rb < 0 { // probably null
-		return nil
-	}
-	// todo: if name contains "," this won't work..
-	flds := bytes.Split(b[lb+1:rb], []byte(","))
-	if len(flds) == 0 {
-		return errors.New("Slice UnmarshalJSON: no child data found")
-	}
-	// fmt.Printf("flds[0]:\n%v\n", string(flds[0]))
-	ns := bytes.Index(flds[0], []byte("\"n\":"))
-	bn := bytes.TrimSpace(flds[0][ns+4:])
-
-	n64, err := strconv.ParseInt(string(bn), 10, 64)
-	if err != nil {
-		return err
-	}
-	n := int(n64)
-	if n == 0 {
-		return nil
-	}
-	// fmt.Printf("n parsed: %d from %v\n", n, string(bn))
-
-	p := make(TypePlan, n)
-
-	for i := 0; i < n; i++ {
-		fld := flds[2*i+1]
-		// fmt.Printf("fld:\n%v\n", string(fld))
-		ti := bytes.Index(fld, []byte("\"type\":"))
-		tn := string(bytes.Trim(bytes.TrimSpace(fld[ti+7:]), "\""))
-		fld = flds[2*i+2]
-		ni := bytes.Index(fld, []byte("\"name\":"))
-		nm := string(bytes.Trim(bytes.TrimSpace(fld[ni+7:]), "\""))
-		// fmt.Printf("making type: %v\n", tn)
-		typ, err := types.TypeByNameTry(tn)
-		if err != nil {
-			err = fmt.Errorf("tree.Slice UnmarshalJSON: %w", err)
-			slog.Error(err.Error())
-		}
-		p[i].Type = typ
-		p[i].Name = nm
-	}
-
-	UpdateSlice(sl, nil, p)
-
-	nwk := make([]Node, n) // allocate new slice containing *pointers* to kids
-	copy(nwk, *sl)
-
-	cb := make([]byte, 0, 1+len(b)-rb)
-	cb = append(cb, []byte("[")...)
-	cb = append(cb, b[rb+2:]...)
-
-	// fmt.Printf("loading:\n%v", string(cb))
-
-	err = json.Unmarshal(cb, &nwk)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-*/
 
 //////////////////////////////////////////////////////
 // 	Save / Open Root Type
