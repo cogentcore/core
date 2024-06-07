@@ -40,6 +40,11 @@ func (n *NodeBase) MarshalJSON() ([]byte, error) {
 	return b, nil
 }
 
+// unmarshalTypeCache is a cache of [reflect.Type] values used
+// for unmarshalling in [NodeBase.UnmarshalJSON]. This cache has
+// a noticeable performance benefit of around 1.2x in
+// [BenchmarkNodeUnmarshalJSON], a benefit that should only increase
+// for larger trees.
 var unmarshalTypeCache = map[string]reflect.Type{}
 
 // UnmarshalJSON unmarshals the node by extracting the nodeType and numChildren fields
@@ -85,10 +90,15 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 		New[*NodeBase](n)
 	}
 
-	uv := reflectx.Underlying(reflect.ValueOf(n.Ths))
+	uv := reflectx.UnderlyingPointer(reflect.ValueOf(n.Ths))
 	rtyp := unmarshalTypeCache[typeName]
 	if rtyp == nil {
-		uvt := uv.Type()
+		// We must create a new type that has the exact same fields as the original type
+		// so that we can unmarshal into it without having infinite recursion on the
+		// UnmarshalJSON method. This works because [reflect.StructOf] does not promote
+		// methods on embedded fields, meaning that the UnmarshalJSON method on the NodeBase
+		// is not carried over and thus is not called, avoiding infinite recursion.
+		uvt := uv.Type().Elem()
 		fields := make([]reflect.StructField, uvt.NumField())
 		for i := range fields {
 			fields[i] = uvt.Field(i)
@@ -97,7 +107,8 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 		rtyp = reflect.PointerTo(nt)
 		unmarshalTypeCache[typeName] = rtyp
 	}
-	uvi := uv.Addr().Convert(rtyp).Interface()
+	// We can directly convert because our new struct type has the exact same fields.
+	uvi := uv.Convert(rtyp).Interface()
 	err = json.Unmarshal(b, uvi)
 	if err != nil {
 		return err
