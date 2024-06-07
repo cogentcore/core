@@ -46,17 +46,24 @@ func TestNodeJSON(t *testing.T) {
 		tstb := buf2.Bytes()
 		assert.Equal(t, string(b), string(tstb))
 	}
+}
 
-	var bufn bytes.Buffer
-	assert.NoError(t, WriteNewJSON(parent.This(), &bufn))
-	b = bufn.Bytes()
-	nwnd, err := ReadNewJSON(bytes.NewReader(b))
+func TestNodeRootJSON(t *testing.T) {
+	parent := testNodeTree()
+
+	var buf bytes.Buffer
+	assert.NoError(t, jsonx.Write(&parent, &buf))
+	b := buf.Bytes()
+
+	new, err := UnmarshalRootJSON(b)
 	if assert.NoError(t, err) {
-		var buf2 bytes.Buffer
-		err = WriteNewJSON(nwnd, &buf2)
-		if err != nil {
-			t.Error(err)
+		if assert.IsType(t, &testdata.NodeEmbed{}, new) {
+			ne := new.(*testdata.NodeEmbed)
+			assert.Equal(t, parent.Mbr1, ne.Mbr1)
+			assert.Equal(t, parent.Mbr2, ne.Mbr2)
 		}
+		var buf2 bytes.Buffer
+		assert.NoError(t, jsonx.Write(new, &buf2))
 		tstb := buf2.Bytes()
 		assert.Equal(t, string(b), string(tstb))
 	}
