@@ -40,6 +40,8 @@ func (n *NodeBase) MarshalJSON() ([]byte, error) {
 	return b, nil
 }
 
+var unmarshalTypeCache = map[string]reflect.Type{}
+
 // UnmarshalJSON unmarshals the node by extracting the nodeType and numChildren fields
 // added by [NodeBase.MarshalJSON] and then updating the node to the correct type and
 // creating the correct number of children.
@@ -84,13 +86,18 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 	}
 
 	uv := reflectx.Underlying(reflect.ValueOf(n.Ths))
-	uvt := uv.Type()
-	fields := make([]reflect.StructField, uvt.NumField())
-	for i := range fields {
-		fields[i] = uvt.Field(i)
+	rtyp := unmarshalTypeCache[typeName]
+	if rtyp == nil {
+		uvt := uv.Type()
+		fields := make([]reflect.StructField, uvt.NumField())
+		for i := range fields {
+			fields[i] = uvt.Field(i)
+		}
+		nt := reflect.StructOf(fields)
+		rtyp = reflect.PointerTo(nt)
+		unmarshalTypeCache[typeName] = rtyp
 	}
-	nt := reflect.StructOf(fields)
-	uvi := uv.Addr().Convert(reflect.PointerTo(nt)).Interface()
+	uvi := uv.Addr().Convert(rtyp).Interface()
 	err = json.Unmarshal(b, uvi)
 	if err != nil {
 		return err
