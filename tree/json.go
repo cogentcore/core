@@ -45,7 +45,9 @@ var unmarshalTypeCache = map[string]reflect.Type{}
 
 // UnmarshalJSON unmarshals the node by extracting the nodeType and numChildren fields
 // added by [NodeBase.MarshalJSON] and then updating the node to the correct type and
-// creating the correct number of children.
+// creating the correct number of children. Note that this method can not update the type
+// of the node if it has no parent; to load a root node from JSON and have it be of the
+// correct type, see the [UnmarshalRootJSON] function.
 func (n *NodeBase) UnmarshalJSON(b []byte) error {
 	typeStart := bytes.Index(b, []byte(`":`)) + 3
 	typeEnd := bytes.Index(b, []byte(`",`))
@@ -110,6 +112,24 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 		return err
 	}
 	return nil
+}
+
+// UnmarshalRootJSON loads the given JSON to produce a new root node of
+// the correct type with all properties and children loaded.
+func UnmarshalRootJSON(b []byte) (Node, error) {
+	// we must make a temporary parent so that the type of the node can be updated
+	parent := New[*NodeBase]()
+	// this NodeBase type is just temporary and will be fixed by [NodeBase.UnmarshalJSON]
+	node := New[*NodeBase](parent)
+	err := node.UnmarshalJSON(b)
+	if err != nil {
+		return nil, err
+	}
+	// we must safely remove the node from its temporary parent
+	node.Par = nil
+	parent.Children = nil
+	parent.Destroy()
+	return node, nil
 }
 
 //////////////////////////////////////////////////////

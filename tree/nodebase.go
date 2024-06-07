@@ -452,7 +452,8 @@ func (n *NodeBase) DeleteChildren() {
 	}
 }
 
-// Delete deletes this node from its parent's children list.
+// Delete deletes this node from its parent's children list
+// and then destroys itself.
 func (n *NodeBase) Delete() {
 	if n.Par == nil {
 		n.This().Destroy()
