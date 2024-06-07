@@ -12,6 +12,8 @@ import (
 	"cogentcore.org/core/base/errors"
 )
 
+// TODO: fix xml io; should save fields as attributes, not elements
+
 // WriteXML writes the tree to an XML-encoded byte string over io.Writer
 // using MarshalXML.
 func (n *NodeBase) WriteXML(writer io.Writer, indent bool) error {
@@ -49,7 +51,6 @@ func (n *NodeBase) ReadXML(reader io.Reader) error {
 		return err
 	}
 	err = xml.Unmarshal(b, n.This()) // key use of this!
-	UnmarshalPost(n.This())
 	return err
 }
 

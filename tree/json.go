@@ -130,20 +130,3 @@ func UnmarshalRootJSON(b []byte) (Node, error) {
 	parent.Destroy()
 	return n, nil
 }
-
-// ParentAllChildren walks the tree down from current node and call
-// SetParent on all children -- needed after an Unmarshal.
-func ParentAllChildren(n Node) {
-	for _, child := range n.AsTree().Children {
-		if child != nil {
-			child.AsTree().Par = n
-			ParentAllChildren(child)
-		}
-	}
-}
-
-// UnmarshalPost must be called after an Unmarshal;
-// calls ParentAllChildren.
-func UnmarshalPost(n Node) {
-	ParentAllChildren(n)
-}
