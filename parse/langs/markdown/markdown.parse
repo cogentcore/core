@@ -4,17 +4,13 @@
     "Nm": "Lexer",
     "Properties": null,
     "Children": [
-      {
-        "n": 26,
-      },
+      "numChildren": 26,
       {
         "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "InCode",
         "Properties": null,
         "Children": [
-          {
-            "n": 2,
-          },
+          "numChildren": 2,
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "CodeEnd",
@@ -76,9 +72,7 @@
         "Nm": "InLinkAttr",
         "Properties": null,
         "Children": [
-          {
-            "n": 2,
-          },
+          "numChildren": 2,
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "EndLinkAttr",
@@ -139,9 +133,7 @@
         "Nm": "InLinkAddr",
         "Properties": null,
         "Children": [
-          {
-            "n": 3,
-          },
+          "numChildren": 3,
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "LinkAttr",
@@ -224,9 +216,7 @@
         "Nm": "InLinkTag",
         "Properties": null,
         "Children": [
-          {
-            "n": 3,
-          },
+          "numChildren": 3,
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "LinkAddr",
@@ -329,9 +319,7 @@
         "Nm": "CodeStart",
         "Properties": null,
         "Children": [
-          {
-            "n": 2,
-          },
+          "numChildren": 2,
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "CodeLang",
@@ -395,25 +383,19 @@
         "Nm": "HeadPound",
         "Properties": null,
         "Children": [
-          {
-            "n": 2,
-          },
+          "numChildren": 2,
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "HeadPound2",
             "Properties": null,
             "Children": [
-              {
-                "n": 2,
-              },
+              "numChildren": 2,
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "HeadPound3",
                 "Properties": null,
                 "Children": [
-                  {
-                    "n": 1,
-                  },
+                  "numChildren": 1,
                   {
                     "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                     "Nm": "SubSubHeading",
@@ -521,9 +503,7 @@
         "Nm": "ItemCheck",
         "Properties": null,
         "Children": [
-          {
-            "n": 2,
-          },
+          "numChildren": 2,
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "ItemCheckDone",
@@ -703,9 +683,7 @@
         "Nm": "BoldStars",
         "Properties": null,
         "Children": [
-          {
-            "n": 1,
-          },
+          "numChildren": 1,
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "BoldText",
@@ -747,9 +725,7 @@
         "Nm": "BoldUnders",
         "Properties": null,
         "Children": [
-          {
-            "n": 1,
-          },
+          "numChildren": 1,
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "BoldText",
@@ -912,9 +888,7 @@
         "Nm": "Apostrophe",
         "Properties": null,
         "Children": [
-          {
-            "n": 2,
-          },
+          "numChildren": 2,
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "QuoteSingle",
@@ -974,9 +948,7 @@
         "Nm": "EmphStar",
         "Properties": null,
         "Children": [
-          {
-            "n": 1,
-          },
+          "numChildren": 1,
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "EmphText",
@@ -1018,9 +990,7 @@
         "Nm": "EmphUnder",
         "Properties": null,
         "Children": [
-          {
-            "n": 1,
-          },
+          "numChildren": 1,
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "EmphUnder",

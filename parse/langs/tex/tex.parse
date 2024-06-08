@@ -4,9 +4,7 @@
     "Nm": "Lexer",
     "Properties": null,
     "Children": [
-      {
-        "n": 13,
-      },
+      "numChildren": 13,
       {
         "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "Comment",
@@ -52,17 +50,13 @@
         "Nm": "Backslash",
         "Properties": null,
         "Children": [
-          {
-            "n": 14,
-          },
+          "numChildren": 14,
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "Section",
             "Properties": null,
             "Children": [
-              {
-                "n": 1,
-              },
+              "numChildren": 1,
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "SectText",
@@ -104,9 +98,7 @@
             "Nm": "Subsection",
             "Properties": null,
             "Children": [
-              {
-                "n": 1,
-              },
+              "numChildren": 1,
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "SubSectText",
@@ -148,9 +140,7 @@
             "Nm": "Subsubsection",
             "Properties": null,
             "Children": [
-              {
-                "n": 1,
-              },
+              "numChildren": 1,
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "SubSubSectText",
@@ -192,9 +182,7 @@
             "Nm": "Bold",
             "Properties": null,
             "Children": [
-              {
-                "n": 1,
-              },
+              "numChildren": 1,
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "BoldText",
@@ -236,9 +224,7 @@
             "Nm": "Emph",
             "Properties": null,
             "Children": [
-              {
-                "n": 1,
-              },
+              "numChildren": 1,
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "EmpText",
@@ -280,9 +266,7 @@
             "Nm": "TT",
             "Properties": null,
             "Children": [
-              {
-                "n": 1,
-              },
+              "numChildren": 1,
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "TTText",
@@ -324,9 +308,7 @@
             "Nm": "VerbSlash",
             "Properties": null,
             "Children": [
-              {
-                "n": 1,
-              },
+              "numChildren": 1,
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "VerbText",
@@ -368,9 +350,7 @@
             "Nm": "VerbPipe",
             "Properties": null,
             "Children": [
-              {
-                "n": 1,
-              },
+              "numChildren": 1,
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "VerbText",
