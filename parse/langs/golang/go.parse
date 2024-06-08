@@ -12,12 +12,6 @@
         "Children": [
           {
             "n": 3,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "EndMulti",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "StartEmbededMulti",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Comment"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -102,12 +96,6 @@
         "Children": [
           {
             "n": 3,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "QuotedStrBacktick",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "EndStrBacktick",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "StrBacktick"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -275,14 +263,6 @@
         "Children": [
           {
             "n": 4,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Keyword",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Type",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Builtins",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Name"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -291,60 +271,6 @@
             "Children": [
               {
                 "n": 27,
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "break",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "case",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "chan",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "const",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "continue",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "default",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "defer",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "else",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "fallthrough",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "for",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "func",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "go",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "goto",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "if",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "import",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "interface",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "map",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "make",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "new",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "package",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "range",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "return",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "select",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "struct",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "switch",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "type",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "var"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -907,44 +833,6 @@
             "Children": [
               {
                 "n": 19,
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "bool",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "byte",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "complex64",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "complex128",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "float32",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "float64",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "int",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "int8",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "int16",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "int32",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "int64",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "rune",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "string",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "uint",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "uint8",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "uint16",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "uint32",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "uint64",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "uintptr"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -1347,42 +1235,6 @@
             "Children": [
               {
                 "n": 18,
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "append",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "cap",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "close",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "complex",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "copy",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "delete",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "error",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "imag",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "len",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "panic",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "print",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "println",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "real",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "recover",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "true",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "false",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "iota",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "nil"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -1819,12 +1671,6 @@
         "Children": [
           {
             "n": 3,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "NextNum",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "NextDot",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Period"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -1853,8 +1699,6 @@
             "Children": [
               {
                 "n": 1,
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "Ellipsis"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -2131,10 +1975,6 @@
         "Children": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Define",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Colon"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -2197,12 +2037,6 @@
         "Children": [
           {
             "n": 3,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "AsgnAdd",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "AsgnInc",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Add"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -2285,12 +2119,6 @@
         "Children": [
           {
             "n": 3,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "AsgnSub",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "AsgnDec",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Sub"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -2373,10 +2201,6 @@
         "Children": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "AsgnMul",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Mult"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -2439,10 +2263,6 @@
         "Children": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "AsgnDiv",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Div"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -2505,10 +2325,6 @@
         "Children": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "AsgnRem",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Rem"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -2571,10 +2387,6 @@
         "Children": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "AsgnXor",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Xor"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -2637,12 +2449,6 @@
         "Children": [
           {
             "n": 3,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "GtEq",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "ShiftRight",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Greater"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -2671,10 +2477,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "AsgnShiftRight",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "ShiftRight"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -2771,14 +2573,6 @@
         "Children": [
           {
             "n": 4,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "LtEq",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "AsgnArrow",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "ShiftLeft",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Less"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -2827,10 +2621,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "AsgnShiftLeft",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "ShiftLeft"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -2927,10 +2717,6 @@
         "Children": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Equality",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Asgn"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -2993,10 +2779,6 @@
         "Children": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "NotEqual",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Not"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -3059,14 +2841,6 @@
         "Children": [
           {
             "n": 4,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "AsgnAnd",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "AndNot",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "LogAnd",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "BitAnd"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -3095,10 +2869,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "AsgnAndNot",
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "AndNot"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -3215,12 +2985,6 @@
         "Children": [
           {
             "n": 3,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "AsgnOr",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "LogOr",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "BitOr"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -3406,20 +3170,6 @@
     "Children": [
       {
         "n": 7,
-        "type": "cogentcore.org/core/parse/parser.Rule",
-        "name": "File",
-        "type": "cogentcore.org/core/parse/parser.Rule",
-        "name": "ExprRules",
-        "type": "cogentcore.org/core/parse/parser.Rule",
-        "name": "TypeRules",
-        "type": "cogentcore.org/core/parse/parser.Rule",
-        "name": "FuncRules",
-        "type": "cogentcore.org/core/parse/parser.Rule",
-        "name": "StmtRules",
-        "type": "cogentcore.org/core/parse/parser.Rule",
-        "name": "ImportRules",
-        "type": "cogentcore.org/core/parse/parser.Rule",
-        "name": "DeclRules"
       },
       {
         "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -3428,20 +3178,6 @@
         "Children": [
           {
             "n": 7,
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "PackageSpec",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "Imports",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "Consts",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "Types",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "Vars",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "Funcs",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "Stmts"
           },
           {
             "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -3573,38 +3309,6 @@
         "Children": [
           {
             "n": 16,
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "FullName",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "NameList",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "ExprList",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "Expr",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "UnaryExpr",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "BinaryExpr",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "PrimaryExpr",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "LiteralType",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "LiteralValue",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "ElementList",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "Key",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "RecvType",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "SliceExpr",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "SliceIndexes",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "ArgsExpr",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "ArgsList"
           },
           {
             "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -3613,10 +3317,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "QualName",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "Name"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -3639,10 +3339,6 @@
                 "Children": [
                   {
                     "n": 2,
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "NameLit",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "KeyName"
                   },
                   {
                     "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -3699,10 +3395,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "NameListEls",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "NameListEl"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -3749,10 +3441,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ExprListEls",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ExprListEl"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -3799,16 +3487,6 @@
             "Children": [
               {
                 "n": 5,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "CompLit",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "FunLitCall",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "FunLit",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "BinExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "UnryExpr"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -3897,22 +3575,6 @@
             "Children": [
               {
                 "n": 8,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "PosExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "NegExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "UnaryXorExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "NotExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "DePtrExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "AddrExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "SendExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "PrimExpr"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -4043,44 +3705,6 @@
             "Children": [
               {
                 "n": 19,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "NotEqExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "EqExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "LogOrExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "LogAndExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "GtEqExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "GreaterExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "LtEqExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "LessExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "BitOrExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "BitAndExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "BitXorExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "BitAndNotExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ShiftRightExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ShiftLeftExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "SubExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "AddExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "RemExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "DivExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "MultExpr"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -4365,38 +3989,6 @@
             "Children": [
               {
                 "n": 16,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "Lits",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "FuncExpr",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "MakeCall",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "NewCall",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "Paren",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "Convert",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "TypeAssertSel",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "TypeAssert",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "Selector",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "CompositeLit",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "SliceCall",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "Slice",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "MethCall",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "FuncCallFun",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "FuncCall",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "OpName"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -4405,20 +3997,6 @@
                 "Children": [
                   {
                     "n": 7,
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "LitRune",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "LitNumInteger",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "LitNumFloat",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "LitNumImag",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "LitStringDbl",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "LitStringTicks",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "LitString"
                   },
                   {
                     "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -4497,8 +4075,6 @@
                     "Children": [
                       {
                         "n": 1,
-                        "type": "cogentcore.org/core/parse/parser.Rule",
-                        "name": "LitStringTickGp"
                       },
                       {
                         "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -4507,10 +4083,6 @@
                         "Children": [
                           {
                             "n": 2,
-                            "type": "cogentcore.org/core/parse/parser.Rule",
-                            "name": "LitStringTickList",
-                            "type": "cogentcore.org/core/parse/parser.Rule",
-                            "name": "LitStringTick"
                           },
                           {
                             "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -4591,10 +4163,6 @@
                 "Children": [
                   {
                     "n": 2,
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "FuncLitCall",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "FuncLit"
                   },
                   {
                     "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -4669,14 +4237,6 @@
                 "Children": [
                   {
                     "n": 4,
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "ConvertParensSel",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "ConvertParens",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "ParenSelector",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "ParenExpr"
                   },
                   {
                     "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -4947,16 +4507,6 @@
             "Children": [
               {
                 "n": 5,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "LitStructType",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "LitIFaceType",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "LitSliceOrArray",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "LitMapType",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "LitTypeName"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -5015,12 +4565,6 @@
                 "Children": [
                   {
                     "n": 3,
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "LitSliceType",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "LitArrayAutoType",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "LitArrayType"
                   },
                   {
                     "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -5193,10 +4737,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ElementListEls",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "KeyedEl"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -5219,10 +4759,6 @@
                 "Children": [
                   {
                     "n": 2,
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "KeyEl",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "Element"
                   },
                   {
                     "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -5245,12 +4781,6 @@
                     "Children": [
                       {
                         "n": 3,
-                        "type": "cogentcore.org/core/parse/parser.Rule",
-                        "name": "EmptyEl",
-                        "type": "cogentcore.org/core/parse/parser.Rule",
-                        "name": "ElExpr",
-                        "type": "cogentcore.org/core/parse/parser.Rule",
-                        "name": "ElLitVal"
                       },
                       {
                         "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -5331,10 +4861,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "KeyLitVal",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "KeyExpr"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -5381,12 +4907,6 @@
             "Children": [
               {
                 "n": 3,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "RecvPtrType",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ParenRecvType",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "RecvTp"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -5447,12 +4967,6 @@
             "Children": [
               {
                 "n": 3,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "SliceThree",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "SliceTwo",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "SliceOne"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -5513,12 +5027,6 @@
             "Children": [
               {
                 "n": 3,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "SliceIndex1",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "SliceIndex2",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "SliceIndex3"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -5579,10 +5087,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ArgsEllipsis",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "Args"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -5629,10 +5133,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ArgsListEls",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ArgsListEl"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -5689,22 +5189,6 @@
         "Children": [
           {
             "n": 8,
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "Type",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "TypeLiteral",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "FieldDecls",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "FieldDecl",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "FieldTag",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "TypeDeclN",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "TypeDecls",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "TypeList"
           },
           {
             "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -5713,12 +5197,6 @@
             "Children": [
               {
                 "n": 3,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ParenType",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "TypeLit",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "TypeName"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -5755,14 +5233,6 @@
                 "Children": [
                   {
                     "n": 4,
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "BasicType",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "QualType",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "QualBasicType",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "TypeNm"
                   },
                   {
                     "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -5871,22 +5341,6 @@
             "Children": [
               {
                 "n": 8,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "SliceOrArray",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "StructType",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "PointerType",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "FuncType",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "InterfaceType",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "MapType",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "SendChanType",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ChannelType"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -5895,12 +5349,6 @@
                 "Children": [
                   {
                     "n": 3,
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "SliceType",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "ArrayAutoType",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "ArrayType"
                   },
                   {
                     "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -6149,10 +5597,6 @@
                 "Children": [
                   {
                     "n": 2,
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "RecvChanType",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "SRChanType"
                   },
                   {
                     "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -6223,12 +5667,6 @@
             "Children": [
               {
                 "n": 3,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "AnonQualField",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "AnonPtrField",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "NamedField"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -6348,10 +5786,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "TypeDeclGroup",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "TypeDeclEl"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -6441,10 +5875,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "TypeListEls",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "TypeListEl"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -6501,22 +5931,6 @@
         "Children": [
           {
             "n": 8,
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "FunDecl",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "MethRecv",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "Signature",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "MethodSpec",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "MethodSpecs",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "Result",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "ParamsList",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "Params"
           },
           {
             "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -6525,10 +5939,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "MethDecl",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "FuncDecl"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -6654,10 +6064,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "MethRecvName",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "MethRecvNoNm"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -6727,10 +6133,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "SigParamsResult",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "SigParams"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -6777,14 +6179,6 @@
             "Children": [
               {
                 "n": 4,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "MethSpecAnonQual",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "MethSpecName",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "MethSpecAnonLocal",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "MethSpecNone"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -6918,10 +6312,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "Results",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ResultOne"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -6968,12 +6358,6 @@
             "Children": [
               {
                 "n": 3,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ParNameEllipsis",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ParName",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ParType"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -7080,20 +6464,6 @@
         "Children": [
           {
             "n": 7,
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "StmtList",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "BlockList",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "Stmt",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "SimpleStmt",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "PostStmt",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "Asgn",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "Elses"
           },
           {
             "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -7130,44 +6500,6 @@
             "Children": [
               {
                 "n": 19,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ConstDeclStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "TypeDeclStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "VarDeclStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ReturnStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "BreakStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ContStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "GotoStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "GoStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "FallthroughStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "DeferStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "IfStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ForStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "SwitchStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "SelectStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "CaseStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "DefaultStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "LabeledStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "Block",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "SimpleSt"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -7316,10 +6648,6 @@
                 "Children": [
                   {
                     "n": 2,
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "IfStmtExpr",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "IfStmtInit"
                   },
                   {
                     "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -7366,18 +6694,6 @@
                 "Children": [
                   {
                     "n": 6,
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "ForRangeExisting",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "ForRangeNewLit",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "ForRangeNew",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "ForRangeOnly",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "ForExpr",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "ForClauseStmt"
                   },
                   {
                     "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -7518,18 +6834,6 @@
                 "Children": [
                   {
                     "n": 6,
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "SwitchTypeName",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "SwitchTypeAnon",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "SwitchExpr",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "SwitchTypeNameInit",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "SwitchTypeAnonInit",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "SwitchInit"
                   },
                   {
                     "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -7706,20 +7010,6 @@
                 "Children": [
                   {
                     "n": 7,
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "TypeCaseEmptyStmt",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "TypeCaseStmt",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "SelCaseRecvExistStmt",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "SelCaseRecvNewStmt",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "SelCaseSendStmt",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "CaseEmptyStmt",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "CaseExprStmt"
                   },
                   {
                     "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -7910,16 +7200,6 @@
             "Children": [
               {
                 "n": 5,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "IncrStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "DecrStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "AsgnStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "SendStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ExprStmt"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -8008,22 +7288,6 @@
             "Children": [
               {
                 "n": 8,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "PostSendStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "PostIncrStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "PostDecrStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "PostAsgnExisting",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "PostAsgnBit",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "PostAsgnMath",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "PostAsgnNew",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "PostExprStmt"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -8176,14 +7440,6 @@
             "Children": [
               {
                 "n": 4,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "AsgnExisting",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "AsgnNew",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "AsgnMath",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "AsgnBit"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -8280,12 +7536,6 @@
             "Children": [
               {
                 "n": 3,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ElseIfStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ElseStmt",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ElseIfStmtInit"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -8356,10 +7606,6 @@
         "Children": [
           {
             "n": 2,
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "ImportN",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "ImportList"
           },
           {
             "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -8368,10 +7614,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ImportGroup",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ImportOne"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -8418,10 +7660,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ImportAlias",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "Import"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -8508,20 +7746,6 @@
         "Children": [
           {
             "n": 7,
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "TypeDecl",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "ConstDecl",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "VarDecl",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "ConstDeclN",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "ConstList",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "VarDeclN",
-            "type": "cogentcore.org/core/parse/parser.Rule",
-            "name": "VarList"
           },
           {
             "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -8572,10 +7796,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ConstGroup",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "ConstOpts"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -8598,10 +7818,6 @@
                 "Children": [
                   {
                     "n": 2,
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "ConstSpec",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "ConstSpecName"
                   },
                   {
                     "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -8709,10 +7925,6 @@
             "Children": [
               {
                 "n": 2,
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "VarGroup",
-                "type": "cogentcore.org/core/parse/parser.Rule",
-                "name": "VarOpts"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/parser.Rule",
@@ -8735,10 +7947,6 @@
                 "Children": [
                   {
                     "n": 2,
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "VarSpecExpr",
-                    "type": "cogentcore.org/core/parse/parser.Rule",
-                    "name": "VarSpec"
                   },
                   {
                     "nodeType": "cogentcore.org/core/parse/parser.Rule",

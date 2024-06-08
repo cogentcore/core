@@ -6,32 +6,6 @@
     "Children": [
       {
         "n": 13,
-        "type": "cogentcore.org/core/parse/lexer.Rule",
-        "name": "Comment",
-        "type": "cogentcore.org/core/parse/lexer.Rule",
-        "name": "LetterText",
-        "type": "cogentcore.org/core/parse/lexer.Rule",
-        "name": "Backslash",
-        "type": "cogentcore.org/core/parse/lexer.Rule",
-        "name": "LBraceBf",
-        "type": "cogentcore.org/core/parse/lexer.Rule",
-        "name": "LBraceEm",
-        "type": "cogentcore.org/core/parse/lexer.Rule",
-        "name": "LBrace",
-        "type": "cogentcore.org/core/parse/lexer.Rule",
-        "name": "LBrack",
-        "type": "cogentcore.org/core/parse/lexer.Rule",
-        "name": "RBrace",
-        "type": "cogentcore.org/core/parse/lexer.Rule",
-        "name": "DollarSign",
-        "type": "cogentcore.org/core/parse/lexer.Rule",
-        "name": "Ampersand",
-        "type": "cogentcore.org/core/parse/lexer.Rule",
-        "name": "Number",
-        "type": "cogentcore.org/core/parse/lexer.Rule",
-        "name": "Quotes",
-        "type": "cogentcore.org/core/parse/lexer.Rule",
-        "name": "AnyText"
       },
       {
         "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -80,34 +54,6 @@
         "Children": [
           {
             "n": 14,
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Section",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Subsection",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Subsubsection",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Bold",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Emph",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "TT",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "VerbSlash",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "VerbPipe",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Percent",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "DollarSign",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "Ampersand",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "LBrace",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "RBrace",
-            "type": "cogentcore.org/core/parse/lexer.Rule",
-            "name": "AnyCmd"
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -116,8 +62,6 @@
             "Children": [
               {
                 "n": 1,
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "SectText"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -162,8 +106,6 @@
             "Children": [
               {
                 "n": 1,
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "SubSectText"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -208,8 +150,6 @@
             "Children": [
               {
                 "n": 1,
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "SubSubSectText"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -254,8 +194,6 @@
             "Children": [
               {
                 "n": 1,
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "BoldText"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -300,8 +238,6 @@
             "Children": [
               {
                 "n": 1,
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "EmpText"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -346,8 +282,6 @@
             "Children": [
               {
                 "n": 1,
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "TTText"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -392,8 +326,6 @@
             "Children": [
               {
                 "n": 1,
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "VerbText"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
@@ -438,8 +370,6 @@
             "Children": [
               {
                 "n": 1,
-                "type": "cogentcore.org/core/parse/lexer.Rule",
-                "name": "VerbText"
               },
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
