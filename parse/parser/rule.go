@@ -62,28 +62,28 @@ type Rule struct {
 	tree.NodeBase
 
 	// disable this rule -- useful for testing and exploration
-	Off bool
+	Off bool `json:",omitempty"`
 
 	// description / comments about this rule
-	Desc string
+	Desc string `json:",omitempty"`
 
 	// the rule as a space-separated list of rule names and token(s) -- use single quotes around 'tokens' (using token.Tokens names or symbols). For keywords use 'key:keyword'.  All tokens are matched at the same nesting depth as the start of the scope of this rule, unless they have a +D relative depth value differential before the token.  Use @ prefix for a sub-rule to require that rule to match -- by default explicit tokens are used if available, and then only the first sub-rule failing that.  Use ! by itself to define start of an exclusionary rule -- doesn't match when those rule elements DO match.  Use : prefix for a special group node that matches a single token at start of scope, and then defers to the child rules to perform full match -- this is used for FirstTokenMap when there are multiple versions of a given keyword rule.  Use - prefix for tokens anchored by the end (next token) instead of the previous one -- typically just for token prior to 'EOS' but also a block of tokens that need to go backward in the middle of a sequence to avoid ambiguity can be marked with -
 	Rule string
 
 	// if present, this rule only fires if stack has this on it
-	StackMatch string
+	StackMatch string `json:",omitempty"`
 
 	// what action should be take for this node when it matches
 	Ast AstActs
 
 	// actions to perform based on parsed Ast tree data, when this rule is done executing
-	Acts Acts
+	Acts Acts `json:",omitempty"`
 
 	// for group-level rules having lots of children and lots of recursiveness, and also of high-frequency, when we first encounter such a rule, make a map of all the tokens in the entire scope, and use that for a first-pass rejection on matching tokens
-	OptTokenMap bool
+	OptTokenMap bool `json:",omitempty"`
 
 	// for group-level rules with a number of rules that match based on first tokens / keywords, build map to directly go to that rule -- must also organize all of these rules sequentially from the start -- if no match, goes directly to first non-lookup case
-	FirstTokenMap bool
+	FirstTokenMap bool `json:",omitempty"`
 
 	// rule elements compiled from Rule string
 	Rules RuleList `json:"-" xml:"-"`
