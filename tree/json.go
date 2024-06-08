@@ -70,22 +70,26 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 		}
 	}
 
-	remainder := b[typeEnd+2:]
-	numStart := bytes.Index(remainder, []byte(`":`)) + 2
-	numEnd := bytes.Index(remainder, []byte(`,`))
-	numString := string(remainder[numStart:numEnd])
-	// we may end up with extraneous space at the start
-	numString = strings.TrimSpace(numString)
-	numChildren, err := strconv.Atoi(numString)
-	if err != nil {
-		return err
-	}
-
-	// We delete any existing children and then make placeholder NodeBase children
-	// that will be replaced with children of the correct type during their UnmarshalJSON.
+	// We must delete any existing children first.
 	n.DeleteChildren()
-	for range numChildren {
-		New[*NodeBase](n)
+
+	remainder := b[typeEnd+2:]
+	numStart := bytes.Index(remainder, []byte(`"numChildren":`))
+	if numStart >= 0 { // numChildren may not be specified if it is 0
+		numStart += 14 // start of actual number bytes
+		numEnd := bytes.Index(remainder, []byte(`,`))
+		numString := string(remainder[numStart:numEnd])
+		// we may end up with extraneous space at the start
+		numString = strings.TrimSpace(numString)
+		numChildren, err := strconv.Atoi(numString)
+		if err != nil {
+			return err
+		}
+		// We make placeholder NodeBase children that will be replaced
+		// with children of the correct type during their UnmarshalJSON.
+		for range numChildren {
+			New[*NodeBase](n)
+		}
 	}
 
 	uv := reflectx.UnderlyingPointer(reflect.ValueOf(n.Ths))
@@ -107,7 +111,7 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 	}
 	// We can directly convert because our new struct type has the exact same fields.
 	uvi := uv.Convert(rtyp).Interface()
-	err = json.Unmarshal(b, uvi)
+	err := json.Unmarshal(b, uvi)
 	if err != nil {
 		return err
 	}
