@@ -2,7 +2,7 @@
   "Lexer": {
     "Nm": "Lexer",
     "Properties": null,
-    "Kids": [
+    "Children": [
       {
         "n": 13,
         "type": "cogentcore.org/core/parse/lexer.Rule",
@@ -35,7 +35,7 @@
       {
         "Nm": "Comment",
         "Properties": null,
-        "Kids": null,
+        "Children": null,
         "Off": false,
         "Desc": "",
         "Token": "Comment",
@@ -54,7 +54,7 @@
       {
         "Nm": "LetterText",
         "Properties": null,
-        "Kids": null,
+        "Children": null,
         "Off": false,
         "Desc": "optimization for plain letters which are always text",
         "Token": "Text",
@@ -73,7 +73,7 @@
       {
         "Nm": "Backslash",
         "Properties": null,
-        "Kids": [
+        "Children": [
           {
             "n": 14,
             "type": "cogentcore.org/core/parse/lexer.Rule",
@@ -108,7 +108,7 @@
           {
             "Nm": "Section",
             "Properties": null,
-            "Kids": [
+            "Children": [
               {
                 "n": 1,
                 "type": "cogentcore.org/core/parse/lexer.Rule",
@@ -117,7 +117,7 @@
               {
                 "Nm": "SectText",
                 "Properties": null,
-                "Kids": null,
+                "Children": null,
                 "Off": false,
                 "Desc": "",
                 "Token": "TextStyleHeading",
@@ -152,7 +152,7 @@
           {
             "Nm": "Subsection",
             "Properties": null,
-            "Kids": [
+            "Children": [
               {
                 "n": 1,
                 "type": "cogentcore.org/core/parse/lexer.Rule",
@@ -161,7 +161,7 @@
               {
                 "Nm": "SubSectText",
                 "Properties": null,
-                "Kids": null,
+                "Children": null,
                 "Off": false,
                 "Desc": "",
                 "Token": "TextStyleSubheading",
@@ -196,7 +196,7 @@
           {
             "Nm": "Subsubsection",
             "Properties": null,
-            "Kids": [
+            "Children": [
               {
                 "n": 1,
                 "type": "cogentcore.org/core/parse/lexer.Rule",
@@ -205,7 +205,7 @@
               {
                 "Nm": "SubSubSectText",
                 "Properties": null,
-                "Kids": null,
+                "Children": null,
                 "Off": false,
                 "Desc": "",
                 "Token": "TextStyleSubheading",
@@ -240,7 +240,7 @@
           {
             "Nm": "Bold",
             "Properties": null,
-            "Kids": [
+            "Children": [
               {
                 "n": 1,
                 "type": "cogentcore.org/core/parse/lexer.Rule",
@@ -249,7 +249,7 @@
               {
                 "Nm": "BoldText",
                 "Properties": null,
-                "Kids": null,
+                "Children": null,
                 "Off": false,
                 "Desc": "",
                 "Token": "TextStyleStrong",
@@ -284,7 +284,7 @@
           {
             "Nm": "Emph",
             "Properties": null,
-            "Kids": [
+            "Children": [
               {
                 "n": 1,
                 "type": "cogentcore.org/core/parse/lexer.Rule",
@@ -293,7 +293,7 @@
               {
                 "Nm": "EmpText",
                 "Properties": null,
-                "Kids": null,
+                "Children": null,
                 "Off": false,
                 "Desc": "",
                 "Token": "TextStyleEmph",
@@ -328,7 +328,7 @@
           {
             "Nm": "TT",
             "Properties": null,
-            "Kids": [
+            "Children": [
               {
                 "n": 1,
                 "type": "cogentcore.org/core/parse/lexer.Rule",
@@ -337,7 +337,7 @@
               {
                 "Nm": "TTText",
                 "Properties": null,
-                "Kids": null,
+                "Children": null,
                 "Off": false,
                 "Desc": "",
                 "Token": "TextStyleOutput",
@@ -372,7 +372,7 @@
           {
             "Nm": "VerbSlash",
             "Properties": null,
-            "Kids": [
+            "Children": [
               {
                 "n": 1,
                 "type": "cogentcore.org/core/parse/lexer.Rule",
@@ -381,7 +381,7 @@
               {
                 "Nm": "VerbText",
                 "Properties": null,
-                "Kids": null,
+                "Children": null,
                 "Off": false,
                 "Desc": "",
                 "Token": "TextStyleOutput",
@@ -416,7 +416,7 @@
           {
             "Nm": "VerbPipe",
             "Properties": null,
-            "Kids": [
+            "Children": [
               {
                 "n": 1,
                 "type": "cogentcore.org/core/parse/lexer.Rule",
@@ -425,7 +425,7 @@
               {
                 "Nm": "VerbText",
                 "Properties": null,
-                "Kids": null,
+                "Children": null,
                 "Off": false,
                 "Desc": "",
                 "Token": "TextStyleOutput",
@@ -460,7 +460,7 @@
           {
             "Nm": "Percent",
             "Properties": null,
-            "Kids": null,
+            "Children": null,
             "Off": false,
             "Desc": "",
             "Token": "LitNum",
@@ -479,7 +479,7 @@
           {
             "Nm": "DollarSign",
             "Properties": null,
-            "Kids": null,
+            "Children": null,
             "Off": false,
             "Desc": "",
             "Token": "LitNum",
@@ -498,7 +498,7 @@
           {
             "Nm": "Ampersand",
             "Properties": null,
-            "Kids": null,
+            "Children": null,
             "Off": false,
             "Desc": "",
             "Token": "None",
@@ -517,7 +517,7 @@
           {
             "Nm": "LBrace",
             "Properties": null,
-            "Kids": null,
+            "Children": null,
             "Off": false,
             "Desc": "",
             "Token": "None",
@@ -536,7 +536,7 @@
           {
             "Nm": "RBrace",
             "Properties": null,
-            "Kids": null,
+            "Children": null,
             "Off": false,
             "Desc": "",
             "Token": "None",
@@ -555,7 +555,7 @@
           {
             "Nm": "AnyCmd",
             "Properties": null,
-            "Kids": null,
+            "Children": null,
             "Off": false,
             "Desc": "",
             "Token": "NameBuiltin",
@@ -590,7 +590,7 @@
       {
         "Nm": "LBraceBf",
         "Properties": null,
-        "Kids": null,
+        "Children": null,
         "Off": false,
         "Desc": "old school..",
         "Token": "TextStyleStrong",
@@ -609,7 +609,7 @@
       {
         "Nm": "LBraceEm",
         "Properties": null,
-        "Kids": null,
+        "Children": null,
         "Off": false,
         "Desc": "old school..",
         "Token": "TextStyleEmph",
@@ -628,7 +628,7 @@
       {
         "Nm": "LBrace",
         "Properties": null,
-        "Kids": null,
+        "Children": null,
         "Off": false,
         "Desc": "",
         "Token": "NameVar",
@@ -647,7 +647,7 @@
       {
         "Nm": "LBrack",
         "Properties": null,
-        "Kids": null,
+        "Children": null,
         "Off": false,
         "Desc": "",
         "Token": "NameAttribute",
@@ -666,7 +666,7 @@
       {
         "Nm": "RBrace",
         "Properties": null,
-        "Kids": null,
+        "Children": null,
         "Off": false,
         "Desc": "straggler from prior special case",
         "Token": "NameBuiltin",
@@ -685,7 +685,7 @@
       {
         "Nm": "DollarSign",
         "Properties": null,
-        "Kids": null,
+        "Children": null,
         "Off": false,
         "Desc": "",
         "Token": "LitStr",
@@ -704,7 +704,7 @@
       {
         "Nm": "Ampersand",
         "Properties": null,
-        "Kids": null,
+        "Children": null,
         "Off": false,
         "Desc": "",
         "Token": "PunctSep",
@@ -723,7 +723,7 @@
       {
         "Nm": "Number",
         "Properties": null,
-        "Kids": null,
+        "Children": null,
         "Off": false,
         "Desc": "",
         "Token": "LitNum",
@@ -742,7 +742,7 @@
       {
         "Nm": "Quotes",
         "Properties": null,
-        "Kids": null,
+        "Children": null,
         "Off": false,
         "Desc": "",
         "Token": "LitStrDouble",
@@ -761,7 +761,7 @@
       {
         "Nm": "AnyText",
         "Properties": null,
-        "Kids": null,
+        "Children": null,
         "Off": false,
         "Desc": "",
         "Token": "Text",
@@ -802,7 +802,7 @@
   "Parser": {
     "Nm": "Parser",
     "Properties": null,
-    "Kids": null,
+    "Children": null,
     "Off": false,
     "Desc": "",
     "Rule": "",
