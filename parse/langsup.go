@@ -57,7 +57,7 @@ type LangProperties struct {
 	// Lang interface for this language
 	Lang Lang `json:"-" xml:"-"`
 
-	// parser for this language -- initialized in OpenStd
+	// parser for this language -- initialized in OpenStandard
 	Parser *Parser `json:"-" xml:"-"`
 }
 
