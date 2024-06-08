@@ -26,7 +26,10 @@ func (n *NodeBase) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return b, err
 	}
-	data := `"nodeType":"` + n.This().NodeType().Name + `","numChildren":` + strconv.Itoa(n.NumChildren()) + ","
+	data := `"nodeType":"` + n.This().NodeType().Name + `",`
+	if n.NumChildren() > 0 {
+		data += `"numChildren":` + strconv.Itoa(n.NumChildren()) + ","
+	}
 	b = slices.Insert(b, 1, []byte(data)...)
 	return b, nil
 }
