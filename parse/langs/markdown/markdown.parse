@@ -1,5 +1,6 @@
 {
   "Lexer": {
+    "nodeType": "cogentcore.org/core/parse/lexer.Rule",
     "Nm": "Lexer",
     "Properties": null,
     "Children": [
@@ -59,6 +60,7 @@
         "name": "AnyText"
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "InCode",
         "Properties": null,
         "Children": [
@@ -70,6 +72,7 @@
             "name": "AnyCode"
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "CodeEnd",
             "Properties": null,
             "Children": null,
@@ -91,6 +94,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "AnyCode",
             "Properties": null,
             "Children": null,
@@ -124,6 +128,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "InLinkAttr",
         "Properties": null,
         "Children": [
@@ -135,6 +140,7 @@
             "name": "AnyLinkAttr"
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "EndLinkAttr",
             "Properties": null,
             "Children": null,
@@ -155,6 +161,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "AnyLinkAttr",
             "Properties": null,
             "Children": null,
@@ -188,6 +195,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "InLinkAddr",
         "Properties": null,
         "Children": [
@@ -201,6 +209,7 @@
             "name": "AnyLinkAddr"
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "LinkAttr",
             "Properties": null,
             "Children": null,
@@ -222,6 +231,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "EndLinkAddr",
             "Properties": null,
             "Children": null,
@@ -242,6 +252,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "AnyLinkAddr",
             "Properties": null,
             "Children": null,
@@ -275,6 +286,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "InLinkTag",
         "Properties": null,
         "Children": [
@@ -288,6 +300,7 @@
             "name": "AnyLinkTag"
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "LinkAddr",
             "Properties": null,
             "Children": null,
@@ -309,6 +322,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "EndLinkTag",
             "Properties": null,
             "Children": null,
@@ -329,6 +343,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "AnyLinkTag",
             "Properties": null,
             "Children": null,
@@ -362,6 +377,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "LetterText",
         "Properties": null,
         "Children": null,
@@ -381,6 +397,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "CodeStart",
         "Properties": null,
         "Children": [
@@ -392,6 +409,7 @@
             "name": "CodePlain"
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "CodeLang",
             "Properties": null,
             "Children": null,
@@ -412,6 +430,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "CodePlain",
             "Properties": null,
             "Children": null,
@@ -448,6 +467,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "HeadPound",
         "Properties": null,
         "Children": [
@@ -459,6 +479,7 @@
             "name": "Heading"
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "HeadPound2",
             "Properties": null,
             "Children": [
@@ -470,6 +491,7 @@
                 "name": "SubHeading"
               },
               {
+                "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "HeadPound3",
                 "Properties": null,
                 "Children": [
@@ -479,6 +501,7 @@
                     "name": "SubSubHeading"
                   },
                   {
+                    "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                     "Nm": "SubSubHeading",
                     "Properties": null,
                     "Children": null,
@@ -512,6 +535,7 @@
                 "NameMap": false
               },
               {
+                "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "SubHeading",
                 "Properties": null,
                 "Children": null,
@@ -545,6 +569,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "Heading",
             "Properties": null,
             "Children": null,
@@ -578,6 +603,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "ItemCheck",
         "Properties": null,
         "Children": [
@@ -589,6 +615,7 @@
             "name": "ItemCheckTodo"
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "ItemCheckDone",
             "Properties": null,
             "Children": null,
@@ -608,6 +635,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "ItemCheckTodo",
             "Properties": null,
             "Children": null,
@@ -641,6 +669,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "ItemStar",
         "Properties": null,
         "Children": null,
@@ -660,6 +689,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "ItemPlus",
         "Properties": null,
         "Children": null,
@@ -679,6 +709,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "ItemMinus",
         "Properties": null,
         "Children": null,
@@ -698,6 +729,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "NumList",
         "Properties": null,
         "Children": null,
@@ -717,6 +749,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "CommentStart",
         "Properties": null,
         "Children": null,
@@ -736,6 +769,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "QuotePara",
         "Properties": null,
         "Children": null,
@@ -755,6 +789,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "BoldStars",
         "Properties": null,
         "Children": [
@@ -764,6 +799,7 @@
             "name": "BoldText"
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "BoldText",
             "Properties": null,
             "Children": null,
@@ -799,6 +835,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "BoldUnders",
         "Properties": null,
         "Children": [
@@ -808,6 +845,7 @@
             "name": "BoldText"
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "BoldText",
             "Properties": null,
             "Children": null,
@@ -843,6 +881,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "ItemStarSub",
         "Properties": null,
         "Children": null,
@@ -862,6 +901,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "ItemPlusSub",
         "Properties": null,
         "Children": null,
@@ -881,6 +921,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "ItemMinusSub",
         "Properties": null,
         "Children": null,
@@ -900,6 +941,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "LinkTag",
         "Properties": null,
         "Children": null,
@@ -920,6 +962,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "BacktickCode",
         "Properties": null,
         "Children": null,
@@ -939,6 +982,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "Quote",
         "Properties": null,
         "Children": null,
@@ -958,6 +1002,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "Apostrophe",
         "Properties": null,
         "Children": [
@@ -969,6 +1014,7 @@
             "name": "Apost"
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "QuoteSingle",
             "Properties": null,
             "Children": null,
@@ -988,6 +1034,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "Apost",
             "Properties": null,
             "Children": null,
@@ -1021,6 +1068,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "EmphStar",
         "Properties": null,
         "Children": [
@@ -1030,6 +1078,7 @@
             "name": "EmphText"
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "EmphText",
             "Properties": null,
             "Children": null,
@@ -1065,6 +1114,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "EmphUnder",
         "Properties": null,
         "Children": [
@@ -1074,6 +1124,7 @@
             "name": "EmphUnder"
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "EmphUnder",
             "Properties": null,
             "Children": null,
@@ -1109,6 +1160,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "AnyText",
         "Properties": null,
         "Children": null,
@@ -1150,6 +1202,7 @@
     "EolToks": null
   },
   "Parser": {
+    "nodeType": "cogentcore.org/core/parse/parser.Rule",
     "Nm": "Parser",
     "Properties": null,
     "Children": null,
