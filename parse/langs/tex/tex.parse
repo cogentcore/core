@@ -1,5 +1,6 @@
 {
   "Lexer": {
+    "nodeType": "cogentcore.org/core/parse/lexer.Rule",
     "Nm": "Lexer",
     "Properties": null,
     "Children": [
@@ -33,6 +34,7 @@
         "name": "AnyText"
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "Comment",
         "Properties": null,
         "Children": null,
@@ -52,6 +54,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "LetterText",
         "Properties": null,
         "Children": null,
@@ -71,6 +74,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "Backslash",
         "Properties": null,
         "Children": [
@@ -106,6 +110,7 @@
             "name": "AnyCmd"
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "Section",
             "Properties": null,
             "Children": [
@@ -115,6 +120,7 @@
                 "name": "SectText"
               },
               {
+                "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "SectText",
                 "Properties": null,
                 "Children": null,
@@ -150,6 +156,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "Subsection",
             "Properties": null,
             "Children": [
@@ -159,6 +166,7 @@
                 "name": "SubSectText"
               },
               {
+                "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "SubSectText",
                 "Properties": null,
                 "Children": null,
@@ -194,6 +202,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "Subsubsection",
             "Properties": null,
             "Children": [
@@ -203,6 +212,7 @@
                 "name": "SubSubSectText"
               },
               {
+                "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "SubSubSectText",
                 "Properties": null,
                 "Children": null,
@@ -238,6 +248,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "Bold",
             "Properties": null,
             "Children": [
@@ -247,6 +258,7 @@
                 "name": "BoldText"
               },
               {
+                "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "BoldText",
                 "Properties": null,
                 "Children": null,
@@ -282,6 +294,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "Emph",
             "Properties": null,
             "Children": [
@@ -291,6 +304,7 @@
                 "name": "EmpText"
               },
               {
+                "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "EmpText",
                 "Properties": null,
                 "Children": null,
@@ -326,6 +340,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "TT",
             "Properties": null,
             "Children": [
@@ -335,6 +350,7 @@
                 "name": "TTText"
               },
               {
+                "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "TTText",
                 "Properties": null,
                 "Children": null,
@@ -370,6 +386,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "VerbSlash",
             "Properties": null,
             "Children": [
@@ -379,6 +396,7 @@
                 "name": "VerbText"
               },
               {
+                "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "VerbText",
                 "Properties": null,
                 "Children": null,
@@ -414,6 +432,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "VerbPipe",
             "Properties": null,
             "Children": [
@@ -423,6 +442,7 @@
                 "name": "VerbText"
               },
               {
+                "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "VerbText",
                 "Properties": null,
                 "Children": null,
@@ -458,6 +478,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "Percent",
             "Properties": null,
             "Children": null,
@@ -477,6 +498,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "DollarSign",
             "Properties": null,
             "Children": null,
@@ -496,6 +518,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "Ampersand",
             "Properties": null,
             "Children": null,
@@ -515,6 +538,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "LBrace",
             "Properties": null,
             "Children": null,
@@ -534,6 +558,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "RBrace",
             "Properties": null,
             "Children": null,
@@ -553,6 +578,7 @@
             "NameMap": false
           },
           {
+            "nodeType": "cogentcore.org/core/parse/lexer.Rule",
             "Nm": "AnyCmd",
             "Properties": null,
             "Children": null,
@@ -588,6 +614,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "LBraceBf",
         "Properties": null,
         "Children": null,
@@ -607,6 +634,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "LBraceEm",
         "Properties": null,
         "Children": null,
@@ -626,6 +654,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "LBrace",
         "Properties": null,
         "Children": null,
@@ -645,6 +674,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "LBrack",
         "Properties": null,
         "Children": null,
@@ -664,6 +694,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "RBrace",
         "Properties": null,
         "Children": null,
@@ -683,6 +714,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "DollarSign",
         "Properties": null,
         "Children": null,
@@ -702,6 +734,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "Ampersand",
         "Properties": null,
         "Children": null,
@@ -721,6 +754,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "Number",
         "Properties": null,
         "Children": null,
@@ -740,6 +774,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "Quotes",
         "Properties": null,
         "Children": null,
@@ -759,6 +794,7 @@
         "NameMap": false
       },
       {
+        "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "AnyText",
         "Properties": null,
         "Children": null,
@@ -800,6 +836,7 @@
     "EolToks": null
   },
   "Parser": {
+    "nodeType": "cogentcore.org/core/parse/parser.Rule",
     "Nm": "Parser",
     "Properties": null,
     "Children": null,
