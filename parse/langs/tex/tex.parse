@@ -1,10 +1,10 @@
 {
   "Lexer": {
     "nodeType": "cogentcore.org/core/parse/lexer.Rule",
+    "numChildren": 13,
     "Nm": "Lexer",
     "Properties": null,
     "Children": [
-      "numChildren": 13,
       {
         "nodeType": "cogentcore.org/core/parse/lexer.Rule",
         "Nm": "Comment",
@@ -47,16 +47,16 @@
       },
       {
         "nodeType": "cogentcore.org/core/parse/lexer.Rule",
+        "numChildren": 14,
         "Nm": "Backslash",
         "Properties": null,
         "Children": [
-          "numChildren": 14,
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
+            "numChildren": 1,
             "Nm": "Section",
             "Properties": null,
             "Children": [
-              "numChildren": 1,
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "SectText",
@@ -95,10 +95,10 @@
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
+            "numChildren": 1,
             "Nm": "Subsection",
             "Properties": null,
             "Children": [
-              "numChildren": 1,
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "SubSectText",
@@ -137,10 +137,10 @@
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
+            "numChildren": 1,
             "Nm": "Subsubsection",
             "Properties": null,
             "Children": [
-              "numChildren": 1,
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "SubSubSectText",
@@ -179,10 +179,10 @@
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
+            "numChildren": 1,
             "Nm": "Bold",
             "Properties": null,
             "Children": [
-              "numChildren": 1,
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "BoldText",
@@ -221,10 +221,10 @@
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
+            "numChildren": 1,
             "Nm": "Emph",
             "Properties": null,
             "Children": [
-              "numChildren": 1,
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "EmpText",
@@ -263,10 +263,10 @@
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
+            "numChildren": 1,
             "Nm": "TT",
             "Properties": null,
             "Children": [
-              "numChildren": 1,
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "TTText",
@@ -305,10 +305,10 @@
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
+            "numChildren": 1,
             "Nm": "VerbSlash",
             "Properties": null,
             "Children": [
-              "numChildren": 1,
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "VerbText",
@@ -347,10 +347,10 @@
           },
           {
             "nodeType": "cogentcore.org/core/parse/lexer.Rule",
+            "numChildren": 1,
             "Nm": "VerbPipe",
             "Properties": null,
             "Children": [
-              "numChildren": 1,
               {
                 "nodeType": "cogentcore.org/core/parse/lexer.Rule",
                 "Nm": "VerbText",
