@@ -202,7 +202,7 @@ type WidgetBase struct {
 
 	// Tooltip is the text for the tooltip for this widget,
 	// which can use HTML formatting.
-	Tooltip string
+	Tooltip string `json:",omitempty"`
 
 	// Parts are a separate tree of sub-widgets that can be used to store
 	// orthogonal parts of a widget when necessary to separate them from children.

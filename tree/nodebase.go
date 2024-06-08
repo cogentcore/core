@@ -33,7 +33,7 @@ type NodeBase struct {
 	Flags Flags `tableview:"-" copier:"-" json:"-" xml:"-" set:"-" max-width:"80" height:"3"`
 
 	// Properties is a property map for arbitrary key-value properties.
-	Properties map[string]any `tableview:"-" xml:"-" copier:"-" set:"-"`
+	Properties map[string]any `tableview:"-" xml:"-" copier:"-" set:"-" json:",omitempty"`
 
 	// Par is the parent of this node, which is set automatically when this node is
 	// added as a child of a parent. It is typically accessed through [Node.Parent].
@@ -42,7 +42,7 @@ type NodeBase struct {
 	// Children is the list of children of this node. All of them are set to have this node
 	// as their parent. You can directly modify them or use the various [NodeBase]
 	// child helper functions.
-	Children []Node `tableview:"-" copier:"-" set:"-"`
+	Children []Node `tableview:"-" copier:"-" set:"-" json:",omitempty"`
 
 	// Ths is a pointer to ourselves as a [Node]. It can always be used to extract the
 	// true underlying type of an object when [NodeBase] is embedded in other structs;
