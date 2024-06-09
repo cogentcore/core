@@ -25,15 +25,19 @@ type Node struct {
 	views.TreeView
 
 	// file names (full path) being compared. Name of node is just the filename.
+	// Typically A is the older, base version and B is the newer one being compared.
 	FileA, FileB string
 
-	// VCS revisions for files, if applicable
+	// VCS revisions for files if applicable
 	RevA, RevB string
 
-	// Text of the files
+	// Status of the change from A to B: A=Added, D=Deleted, M=Modified, R=Renamed
+	Status string
+
+	// Text content of the files
 	TextA, TextB string
 
-	// Info about the A file
+	// Info about the B file, for getting icons etc
 	Info fileinfo.FileInfo
 }
 
@@ -175,7 +179,7 @@ func (br *Browser) diffDirsAt(pathA, pathB string, node *Node, excludeFile func(
 			nn := NewNode(node)
 			nn.SetText(fa)
 			nn.SetFileA(pfa).SetFileB(pfb).SetTextA(sa).SetTextB(sb)
-			nn.Info.InitFile(pfa)
+			nn.Info.InitFile(pfb)
 			nn.IconLeaf = nn.Info.Ic
 		}
 	}

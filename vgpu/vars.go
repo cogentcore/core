@@ -56,7 +56,7 @@ type Vars struct {
 	VkWriteValues []vk.WriteDescriptorSet `view:"-"`
 
 	// current descriptor collection index, set in BindValuesStart
-	BindDescIndex int `inactive:"-"`
+	BindDescIndex int `edit:"-"`
 
 	// dynamic offsets for Uniform and Storage variables, -- outer index is Vars.NDescs for different groups of descriptor sets, one of which can be bound to a pipeline at any given time, inner index is DynOffIndex on Var -- offsets are set when Value is bound via BindDynValue*.
 	DynOffs [][]uint32

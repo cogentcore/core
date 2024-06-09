@@ -31,7 +31,7 @@ type Type struct {
 	Desc string
 
 	// set to true after type has been initialized during post-parse processing
-	Initialized bool `inactive:"-"`
+	Initialized bool `edit:"-"`
 
 	// elements of this type -- ordering and meaning varies depending on the Kind of type -- for Primitive types this is the parent type, for Composite types it describes the key elements of the type: Tuple = each element's type; Array = type of elements; Struct = each field, etc (see docs for each in Kinds)
 	Els TypeEls

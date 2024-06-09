@@ -127,7 +127,9 @@ func (fv *FileView) Init() {
 		if len(core.RecentPaths) == 0 {
 			core.OpenRecentPaths()
 		}
-		fv.Scene.UpdateTitle("Files: " + fv.DirPath)
+		if !fv.Scene.Is(core.ScPrefSizing) {
+			fv.Scene.UpdateTitle("Files: " + fv.DirPath)
+		}
 		core.RecentPaths.AddPath(fv.DirPath, core.SystemSettings.SavedPathsMax)
 		core.SaveRecentPaths()
 		fv.ReadFiles()
@@ -200,6 +202,9 @@ func FileViewExtOnlyFilter(fv *FileView, fi *fileinfo.FileInfo) bool {
 // initializes the view
 func (fv *FileView) SetFilename(filename, ext string) *FileView {
 	fv.DirPath, fv.CurrentSelectedFile = filepath.Split(filename)
+	if ap, err := filepath.Abs(fv.DirPath); err == nil {
+		fv.DirPath = ap
+	}
 	return fv.SetExt(ext)
 }
 
