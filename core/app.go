@@ -173,7 +173,7 @@ var (
 func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 	NewButton(m).SetText("About").SetIcon(icons.Info).OnClick(func(e events.Event) {
 		d := NewBody(TheApp.Name())
-		d.Style(func(s *styles.Style) {
+		d.Styler(func(s *styles.Style) {
 			s.CenterAll()
 		})
 		NewText(d).SetType(TextHeadlineLarge).SetText(TheApp.Name())
@@ -283,7 +283,7 @@ func ConfigAppChooser(ch *Chooser) {
 	}
 
 	AddChildInit(ch, "text-field", func(w *TextField) {
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
 			if !s.Is(states.Focused) && w.Error == nil {
 				s.Border = styles.Border{}

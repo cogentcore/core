@@ -52,7 +52,7 @@ func (lv *VCSLogView) Init() {
 	lv.RevA = "HEAD"
 	lv.RevB = ""
 	lv.SetA = true
-	lv.Style(func(s *styles.Style) {
+	lv.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})

@@ -101,7 +101,7 @@ func (tx *Text) WidgetValue() any { return &tx.Text }
 func (tx *Text) Init() {
 	tx.WidgetBase.Init()
 	tx.SetType(TextBodyLarge)
-	tx.Style(func(s *styles.Style) {
+	tx.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable)
 		if len(tx.paintText.Links) > 0 {
 			s.SetAbilities(true, abilities.Clickable, abilities.LongHoverable, abilities.LongPressable)

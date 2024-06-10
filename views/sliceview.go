@@ -275,7 +275,7 @@ func (sv *SliceViewBase) Init() {
 	sv.SetFlag(true, SliceViewReadOnlyKeyNav)
 	svi := sv.This().(SliceViewer)
 
-	sv.Style(func(s *styles.Style) {
+	sv.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Clickable, abilities.DoubleClickable, abilities.TripleClickable)
 		s.SetAbilities(!sv.IsReadOnly(), abilities.Draggable, abilities.Droppable)
 		s.Cursor = sv.CurrentCursor
@@ -560,7 +560,7 @@ func (sv *SliceViewBase) SliceElementValue(si int) reflect.Value {
 
 func (sv *SliceViewBase) MakeGrid(p *core.Plan, maker func(p *core.Plan)) {
 	core.AddAt(p, "grid", func(w *SliceViewGrid) {
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			nWidgPerRow, _ := sv.This().(SliceViewer).RowWidgetNs()
 			w.MinRows = sv.MinRows
 			s.Display = styles.Grid
@@ -600,7 +600,7 @@ func (sv *SliceViewBase) MakeValue(w core.Value, i int) {
 	svi := sv.This().(SliceViewer)
 	wb := w.AsWidget()
 	w.AsTree().SetProperty(SliceViewRowProperty, i)
-	w.Style(func(s *styles.Style) {
+	w.Styler(func(s *styles.Style) {
 		if sv.IsReadOnly() {
 			s.SetAbilities(true, abilities.DoubleClickable)
 			s.SetAbilities(false, abilities.Hoverable, abilities.Focusable, abilities.Activatable, abilities.TripleClickable)
@@ -669,7 +669,7 @@ func (sv *SliceViewBase) MakeGridIndex(p *core.Plan, i, si int, itxt string, inv
 	svi := sv.This().(SliceViewer)
 	core.AddAt(p, "index-"+itxt, func(w *core.Text) {
 		w.SetProperty(SliceViewRowProperty, i)
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.DoubleClickable)
 			s.SetAbilities(!sv.IsReadOnly(), abilities.Draggable, abilities.Droppable)
 			s.Cursor = cursors.None
@@ -1896,7 +1896,7 @@ type SliceViewGrid struct {
 
 func (sg *SliceViewGrid) Init() {
 	sg.Frame.Init()
-	sg.Style(func(s *styles.Style) {
+	sg.Styler(func(s *styles.Style) {
 		s.Display = styles.Grid
 	})
 }

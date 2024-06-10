@@ -115,7 +115,7 @@ func (ts *Tabs) Init() {
 	ts.Frame.Init()
 	ts.MaxChars = 16
 	ts.CloseIcon = icons.Close
-	ts.Style(func(s *styles.Style) {
+	ts.Styler(func(s *styles.Style) {
 		s.Color = colors.C(colors.Scheme.OnBackground)
 		s.Grow.Set(1, 1)
 		if ts.Type.Effective(ts).IsColumn() {
@@ -126,7 +126,7 @@ func (ts *Tabs) Init() {
 	})
 	ts.OnWidgetAdded(func(w Widget) {
 		if w.Parent() == ts.ChildByName("frame") { // TODO(config): figure out how to get this to work with new config paradigm
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				// tab frames must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)
@@ -136,7 +136,7 @@ func (ts *Tabs) Init() {
 
 	ts.Maker(func(p *Plan) {
 		AddAt(p, "tabs", func(w *Frame) {
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 				s.Gap.Set(units.Dp(4))
 
@@ -162,7 +162,7 @@ func (ts *Tabs) Init() {
 			})
 		})
 		AddAt(p, "frame", func(w *Frame) {
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Display = styles.Stacked
 				w.SetFlag(true, FrameStackTopOnly) // key for allowing each tab to have its own size
 				s.Min.Set(units.Dp(160), units.Dp(96))
@@ -217,7 +217,7 @@ func (ts *Tabs) InsertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
 	tfr := ts.FrameWidget()
 	frame := tree.InsertNewChild[*Frame](tfr, idx)
 	frame.SetName(label)
-	frame.Style(func(s *styles.Style) {
+	frame.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
 	ts.InsertTabOnlyAt(frame, label, idx, icon...)
@@ -495,7 +495,7 @@ func (tb *Tab) Init() {
 	tb.Frame.Init()
 	tb.MaxChars = 16
 	tb.CloseIcon = icons.Close
-	tb.Style(func(s *styles.Style) {
+	tb.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
 
 		if !tb.IsReadOnly() {
@@ -534,7 +534,7 @@ func (tb *Tab) Init() {
 
 		if tb.Icon.IsSet() {
 			AddAt(p, "icon", func(w *Icon) {
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Font.Size.Dp(18)
 				})
 				w.Updater(func() {
@@ -547,7 +547,7 @@ func (tb *Tab) Init() {
 		}
 		if tb.Text != "" {
 			AddAt(p, "text", func(w *Text) {
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
 				})
@@ -565,7 +565,7 @@ func (tb *Tab) Init() {
 			AddAt(p, "close-space", func(w *Space) {})
 			AddAt(p, "close", func(w *Button) {
 				w.SetType(ButtonAction)
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Padding.Zero()
 					s.Border.Radius = styles.BorderRadiusFull
 				})

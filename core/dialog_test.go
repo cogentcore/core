@@ -13,7 +13,7 @@ import (
 
 func TestDialogMessage(t *testing.T) {
 	b := NewBody()
-	b.Style(func(s *styles.Style) {
+	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(10))
 	})
 	b.AssertRenderScreen(t, "dialog/message", func() {

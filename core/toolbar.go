@@ -217,7 +217,7 @@ func (tb *Toolbar) AddOverflowMenu(fun func(m *Scene)) *Toolbar {
 
 // ToolbarStyles styles the given widget to have standard toolbar styling.
 func ToolbarStyles(w Widget) {
-	w.Style(func(s *styles.Style) {
+	w.Styler(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Background = colors.C(colors.Scheme.SurfaceContainer)
 		s.Gap.Zero()
@@ -238,7 +238,7 @@ func ToolbarStyles(w Widget) {
 			return
 		}
 		if sp, ok := w.(*Separator); ok {
-			sp.Style(func(s *styles.Style) {
+			sp.Styler(func(s *styles.Style) {
 				s.Direction = w.AsWidget().Styles.Direction.Other()
 			})
 		}

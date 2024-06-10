@@ -28,47 +28,47 @@ func VCSLabelFunc(fn *Node, label string) string {
 
 func (fn *Node) VCSContextMenu(m *core.Scene) {
 	views.NewFuncButton(m, fn.AddToVCSSel).SetText(VCSLabelFunc(fn, "Add to VCS")).SetIcon(icons.Add).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS != vcs.Untracked, states.Disabled)
 		})
 	views.NewFuncButton(m, fn.DeleteFromVCSSel).SetText(VCSLabelFunc(fn, "Delete from VCS")).SetIcon(icons.Delete).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
 	views.NewFuncButton(m, fn.CommitToVCSSel).SetText(VCSLabelFunc(fn, "Commit to VCS")).SetIcon(icons.Star).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
 	views.NewFuncButton(m, fn.RevertVCSSel).SetText(VCSLabelFunc(fn, "Revert from VCS")).SetIcon(icons.Undo).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
 	core.NewSeparator(m)
 
 	views.NewFuncButton(m, fn.DiffVCSSel).SetText(VCSLabelFunc(fn, "Diff VCS")).SetIcon(icons.Add).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
 	views.NewFuncButton(m, fn.LogVCSSel).SetText(VCSLabelFunc(fn, "Log VCS")).SetIcon(icons.List).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
 	views.NewFuncButton(m, fn.BlameVCSSel).SetText(VCSLabelFunc(fn, "Blame VC S")).SetIcon(icons.CreditScore).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
 }
 
 func (fn *Node) ContextMenu(m *core.Scene) {
 	core.NewButton(m).SetText("Info").SetIcon(icons.Info).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).OnClick(func(e events.Event) {
 		fn.This().(Filer).ShowFileInfo()
 	})
 
 	core.NewButton(m).SetText("Open").SetIcon(icons.Open).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).OnClick(func(e events.Event) {
 		fn.This().(Filer).OpenFilesDefault()
@@ -76,19 +76,19 @@ func (fn *Node) ContextMenu(m *core.Scene) {
 	core.NewSeparator(m)
 
 	core.NewButton(m).SetText("Duplicate").SetIcon(icons.Copy).
-		SetKey(keymap.Duplicate).Style(func(s *styles.Style) {
+		SetKey(keymap.Duplicate).Styler(func(s *styles.Style) {
 		s.SetState(!fn.HasSelection(), states.Disabled)
 	}).OnClick(func(e events.Event) {
 		fn.This().(Filer).DuplicateFiles()
 	})
 	core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
-		SetKey(keymap.Delete).Style(func(s *styles.Style) {
+		SetKey(keymap.Delete).Styler(func(s *styles.Style) {
 		s.SetState(!fn.HasSelection(), states.Disabled)
 	}).OnClick(func(e events.Event) {
 		fn.This().(Filer).DeleteFiles()
 	})
 	core.NewButton(m).SetText("Rename").SetIcon(icons.NewLabel).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).OnClick(func(e events.Event) {
 		fn.This().(Filer).RenameFiles()
@@ -96,25 +96,25 @@ func (fn *Node) ContextMenu(m *core.Scene) {
 	core.NewSeparator(m)
 
 	views.NewFuncButton(m, fn.OpenAll).SetText("Open all").SetIcon(icons.KeyboardArrowDown).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || !fn.IsDir(), states.Disabled)
 		})
 	views.NewFuncButton(m, fn.CloseAll).SetIcon(icons.KeyboardArrowRight).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || !fn.IsDir(), states.Disabled)
 		})
 	views.NewFuncButton(m, fn.SortBys).SetText("Sort by").SetIcon(icons.Sort).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || !fn.IsDir(), states.Disabled)
 		})
 	core.NewSeparator(m)
 
 	views.NewFuncButton(m, fn.NewFiles).SetText("New file").SetIcon(icons.OpenInNew).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		})
 	views.NewFuncButton(m, fn.NewFolders).SetText("New folder").SetIcon(icons.CreateNewFolder).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		})
 	core.NewSeparator(m)
@@ -123,27 +123,27 @@ func (fn *Node) ContextMenu(m *core.Scene) {
 	core.NewSeparator(m)
 
 	views.NewFuncButton(m, fn.RemoveFromExterns).SetIcon(icons.Delete).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		})
 
 	core.NewSeparator(m)
 	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keymap.Copy).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).
 		OnClick(func(e events.Event) {
 			fn.Copy(true)
 		})
 	core.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keymap.Cut).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).
 		OnClick(func(e events.Event) {
 			fn.Cut()
 		})
 	pbt := core.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keymap.Paste).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).
 		OnClick(func(e events.Event) {

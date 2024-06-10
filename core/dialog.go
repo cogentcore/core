@@ -187,7 +187,7 @@ func (bd *Body) Close() {
 // It is automatically called in [Body.NewDialog].
 func (bd *Body) DialogStyles() {
 	bd.Scene.BarsInherit.Top = true
-	bd.Scene.Style(func(s *styles.Style) {
+	bd.Scene.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Color = colors.C(colors.Scheme.OnSurface)
 		if !bd.Scene.Stage.NewWindow && !bd.Scene.Stage.FullWindow {

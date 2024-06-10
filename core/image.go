@@ -38,7 +38,7 @@ type Image struct {
 
 func (im *Image) Init() {
 	im.WidgetBase.Init()
-	im.Style(func(s *styles.Style) {
+	im.Styler(func(s *styles.Style) {
 		if im.Image != nil {
 			sz := im.Image.Bounds().Size()
 			s.Min.X.Dp(float32(sz.X))

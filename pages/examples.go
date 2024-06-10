@@ -34,7 +34,7 @@ func ExampleHandler(ctx *htmlview.Context) bool {
 	// the node we actually care about is our first child, the <pre> element
 	ctx.Node = ctx.Node.FirstChild
 
-	core.NewText(ctx.Parent()).SetText(htmlview.ExtractText(ctx)).Style(func(s *styles.Style) {
+	core.NewText(ctx.Parent()).SetText(htmlview.ExtractText(ctx)).Styler(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 		s.Background = colors.C(colors.Scheme.SurfaceContainer)
 		s.Border.Radius = styles.BorderRadiusMedium

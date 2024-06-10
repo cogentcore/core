@@ -791,7 +791,7 @@ func (em *Events) DragMenuAddModText(m *Scene, mod events.DropMods) {
 	case events.DropMove:
 		text = "Move:"
 	}
-	NewText(m).SetType(TextLabelLarge).SetText(text).Style(func(s *styles.Style) {
+	NewText(m).SetType(TextLabelLarge).SetText(text).Styler(func(s *styles.Style) {
 		s.Margin.Set(units.Em(0.5))
 	})
 }

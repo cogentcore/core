@@ -20,7 +20,7 @@ import (
 // for the given pop-up menu frame with the given parent.
 // It should be called on menu frames when they are created.
 func MenuSceneConfigStyles(msc *Scene) {
-	msc.Style(func(s *styles.Style) {
+	msc.Styler(func(s *styles.Style) {
 		s.Grow.Set(0, 0)
 		s.Padding.Set(units.Dp(2))
 		s.Border.Radius = styles.BorderRadiusExtraSmall
@@ -49,7 +49,7 @@ func MenuSceneConfigStyles(msc *Scene) {
 			return
 		}
 		if sp, ok := w.(*Separator); ok {
-			sp.Style(func(s *styles.Style) {
+			sp.Styler(func(s *styles.Style) {
 				s.Direction = styles.Row
 			})
 		}

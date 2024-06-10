@@ -41,7 +41,7 @@ func TestMeterBounds(t *testing.T) {
 
 func TestMeterColumn(t *testing.T) {
 	b := NewBody()
-	NewMeter(b).Style(func(s *styles.Style) {
+	NewMeter(b).Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
 	b.AssertRender(t, "meter/column")

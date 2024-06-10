@@ -97,7 +97,7 @@ type FileView struct {
 
 func (fv *FileView) Init() {
 	fv.Frame.Init()
-	fv.Style(func(s *styles.Style) {
+	fv.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
@@ -151,13 +151,13 @@ func (fv *FileView) Init() {
 		}
 
 		core.AddAt(p, "files", func(w *core.Frame) {
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 1)
 			})
 			w.Maker(fv.makeFilesRow)
 		})
 		core.AddAt(p, "sel", func(w *core.Frame) {
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
 				s.Gap.X.Dp(4)
 			})
@@ -312,7 +312,7 @@ func (fv *FileView) makeFilesRow(p *core.Plan) {
 		w.SetReadOnly(true)
 		w.SetFlag(false, SliceViewShowIndex)
 		w.SetFlag(false, SliceViewReadOnlyKeyNav) // can only have one active -- files..
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(0, 1)
 			s.Min.X.Ch(25)
 			s.Overflow.X = styles.OverflowHidden
@@ -347,7 +347,7 @@ func (fv *FileView) makeFilesRow(p *core.Plan) {
 				s.Color = colors.C(colors.Scheme.OnSurface)
 			}
 		}
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Cursor = cursors.Pointer
 		})
 		w.OnSelect(func(e events.Event) {
@@ -414,7 +414,7 @@ func (fv *FileView) makeSelRow(sel *core.Plan) {
 	core.AddAt(sel, "file-text", func(w *core.Text) {
 		w.SetText("File: ")
 		w.SetTooltip("Enter file name here (or select from list above)")
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.SetTextWrap(false)
 		})
 	})
@@ -423,7 +423,7 @@ func (fv *FileView) makeSelRow(sel *core.Plan) {
 		w.SetText(fv.CurrentSelectedFile)
 		w.SetTooltip(fmt.Sprintf("Enter the file name. Special keys: up/down to move selection; %s or %s to go up to parent folder; %s or %s or %s or %s to select current file (if directory, goes into it, if file, selects and closes); %s or %s for prev / next history item; %s return to this field", keymap.WordLeft.Label(), keymap.Jump.Label(), keymap.SelectMode.Label(), keymap.Insert.Label(), keymap.InsertAfter.Label(), keymap.Open.Label(), keymap.HistPrev.Label(), keymap.HistNext.Label(), keymap.Search.Label()))
 		w.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Min.X.Ch(60)
 			s.Max.X.Zero()
 			s.Grow.Set(1, 0)
@@ -445,7 +445,7 @@ func (fv *FileView) makeSelRow(sel *core.Plan) {
 
 	core.AddAt(sel, "ext-text", func(w *core.Text) {
 		w.SetText("Extension(s):").SetTooltip("target extension(s) to highlight; if multiple, separate with commas, and include the . at the start")
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.SetTextWrap(false)
 		})
 	})

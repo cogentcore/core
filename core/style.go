@@ -30,12 +30,12 @@ var CustomConfigStyles func(w Widget)
 ////////////////////////////////////////////////////////////////////
 // 	Widget Styling functions
 
-// Style adds the given styler to the widget's Stylers.
+// Styler adds the given styler to the widget's Stylers.
 // It is one of the main ways for both end-user and internal code
 // to set the styles of a widget, in addition to StyleFirst
 // and StyleFinal, which add stylers that are called before
 // and after the stylers added by this function, respectively.
-func (wb *WidgetBase) Style(s func(s *styles.Style)) *WidgetBase {
+func (wb *WidgetBase) Styler(s func(s *styles.Style)) *WidgetBase {
 	wb.Stylers = append(wb.Stylers, s)
 	return wb
 }
@@ -274,7 +274,7 @@ func StyleFromTags(w Widget, tags reflect.StructTag) {
 			}
 		}
 	}
-	w.Style(func(s *styles.Style) {
+	w.Styler(func(s *styles.Style) {
 		style("width", s.Min.X.Ch)
 		style("max-width", s.Max.X.Ch)
 		style("height", s.Min.Y.Em)

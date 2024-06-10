@@ -36,8 +36,8 @@ type Widget interface {
 	// as a child to the widget or any of its children.
 	OnWidgetAdded(f func(w Widget)) *WidgetBase
 
-	// Style sets the styling properties of the widget by adding a styler function.
-	Style(s func(s *styles.Style)) *WidgetBase
+	// Styler sets the styling properties of the widget by adding a styler function.
+	Styler(s func(s *styles.Style)) *WidgetBase
 
 	// See [WidgetBase.Update].
 	Update()
@@ -315,7 +315,7 @@ func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
 // Init if it has one to establish all the default styling
 // and event handling that applies to all widgets.
 func (wb *WidgetBase) Init() {
-	wb.Style(func(s *styles.Style) {
+	wb.Styler(func(s *styles.Style) {
 		s.MaxBorder.Style.Set(styles.BorderSolid)
 		s.MaxBorder.Color.Set(colors.C(colors.Scheme.Primary.Base))
 		s.MaxBorder.Width.Set(units.Dp(1))
@@ -464,7 +464,7 @@ func (wb *WidgetBase) NewParts() *Frame {
 	wb.Parts.SetName("parts")
 	tree.SetParent(wb.Parts, wb) // don't add to children list
 	wb.Parts.SetFlag(true, tree.Field)
-	wb.Parts.Style(func(s *styles.Style) {
+	wb.Parts.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		s.RenderBox = false
 	})

@@ -15,7 +15,7 @@ func TestSceneConfig(t *testing.T) {
 		sc.OnWidgetAdded(func(w Widget) {
 			switch w := w.(type) {
 			case *Button:
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Border.Radius = styles.BorderRadiusSmall
 				})
 			}
@@ -31,7 +31,7 @@ func TestSceneConfig(t *testing.T) {
 
 func TestStdAppBarConfig(t *testing.T) {
 	b := NewBody()
-	b.Style(func(s *styles.Style) {
+	b.Styler(func(s *styles.Style) {
 		s.Min.X.Dp(500)
 	})
 	StandardAppBarConfig(b)

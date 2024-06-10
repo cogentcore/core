@@ -90,7 +90,7 @@ func (sp *Spinner) Init() {
 	}).SetTrailingIcon(icons.Add, func(e events.Event) {
 		sp.IncrementValue(1)
 	})
-	sp.Style(func(s *styles.Style) {
+	sp.Styler(func(s *styles.Style) {
 		s.VirtualKeyboard = styles.KeyboardNumber
 		if sp.IsReadOnly() {
 			s.Min.X.Ch(4)
@@ -104,7 +104,7 @@ func (sp *Spinner) Init() {
 	sp.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(sp) {
 		case "lead-icon", "trail-icon": // TODO(config)
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				// icons do not get separate focus, as people can
 				// use the arrow keys to get the same effect
 				s.SetAbilities(false, abilities.Focusable)

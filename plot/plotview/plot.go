@@ -67,7 +67,7 @@ func (pt *Plot) UpdatePlot() {
 func (pt *Plot) Init() {
 	pt.WidgetBase.Init()
 	pt.Scale = 1
-	pt.Style(func(s *styles.Style) {
+	pt.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
 		ro := pt.IsReadOnly()
 		s.SetAbilities(!ro, abilities.Slideable, abilities.Activatable, abilities.Scrollable)

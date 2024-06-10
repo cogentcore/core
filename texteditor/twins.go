@@ -33,7 +33,7 @@ func (te *TwinEditors) Init() {
 	f := func(name string, buf *Buffer) {
 		core.AddChildAt(te, name, func(w *Editor) {
 			w.SetBuffer(buf)
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Min.X.Ch(80)
 				s.Min.Y.Em(40)
 			})

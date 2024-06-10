@@ -81,7 +81,7 @@ func NewSubPlot(parent ...tree.Node) *PlotView {
 	fr := core.NewFrame(parent...)
 	tb := core.NewToolbar(fr)
 	pl := NewPlotView(fr)
-	fr.Style(func(s *styles.Style) {
+	fr.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
@@ -94,7 +94,7 @@ func (pl *PlotView) Init() {
 
 	pl.Params.Plot = pl
 	pl.Params.Defaults()
-	pl.Style(func(s *styles.Style) {
+	pl.Styler(func(s *styles.Style) {
 		s.Direction = styles.Row
 		s.Grow.Set(1, 1)
 	})
@@ -107,7 +107,7 @@ func (pl *PlotView) Init() {
 		pl.Params.FromMeta(pl.Table.Table)
 	})
 	core.AddChildAt(pl, "cols", func(w *core.Frame) {
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Grow.Set(0, 1)
 			s.Overflow.Y = styles.OverflowAuto
@@ -117,7 +117,7 @@ func (pl *PlotView) Init() {
 	})
 	core.AddChildAt(pl, "plot", func(w *Plot) {
 		w.Plot = pl.Plot
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
 		})
 	})
@@ -480,7 +480,7 @@ func (pl *PlotView) SetColumnsByName(nameContains string, on bool) { //types:add
 func (pl *PlotView) makeColumns(p *core.Plan) {
 	pl.ColumnsListUpdate()
 	core.Add(p, func(w *core.Frame) {
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Direction = styles.Row
 			s.Grow.Set(0, 0)
 		})
@@ -503,7 +503,7 @@ func (pl *PlotView) makeColumns(p *core.Plan) {
 	for _, cp := range pl.Columns {
 		cp.Plot = pl
 		core.AddAt(p, cp.Column, func(w *core.Frame) {
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Direction = styles.Row
 				s.Grow.Set(0, 0)
 			})

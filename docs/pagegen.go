@@ -50,18 +50,18 @@ var PagesExamples = map[string]func(parent core.Widget){
 		})
 	},
 	"basics/styling-0": func(parent core.Widget) {
-		core.NewText(parent).SetText("Bold text").Style(func(s *styles.Style) {
+		core.NewText(parent).SetText("Bold text").Styler(func(s *styles.Style) {
 			s.Font.Weight = styles.WeightBold
 		})
 	},
 	"basics/styling-1": func(parent core.Widget) {
-		core.NewButton(parent).SetText("Success button").Style(func(s *styles.Style) {
+		core.NewButton(parent).SetText("Success button").Styler(func(s *styles.Style) {
 			s.Background = colors.C(colors.Scheme.Success.Base)
 			s.Color = colors.C(colors.Scheme.Success.On)
 		})
 	},
 	"basics/styling-2": func(parent core.Widget) {
-		core.NewFrame(parent).Style(func(s *styles.Style) {
+		core.NewFrame(parent).Styler(func(s *styles.Style) {
 			s.Min.Set(units.Dp(50))
 			s.Background = colors.C(colors.Scheme.Primary.Base)
 		})
@@ -185,7 +185,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		c := core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
 			pc.FillBox(math32.Vector2{}, math32.Vec2(1, 1), colors.C(colors.Scheme.Warn.Base))
 		})
-		c.Style(func(s *styles.Style) {
+		c.Styler(func(s *styles.Style) {
 			s.Min.Set(units.Dp(128))
 		})
 	},
@@ -288,7 +288,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/frames-1": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
-		fr.Style(func(s *styles.Style) {
+		fr.Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
 		})
 		core.NewButton(fr).SetText("First")
@@ -297,7 +297,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/frames-2": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
-		fr.Style(func(s *styles.Style) {
+		fr.Styler(func(s *styles.Style) {
 			s.Gap.Set(units.Em(2))
 		})
 		core.NewButton(fr).SetText("First")
@@ -306,7 +306,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/frames-3": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
-		fr.Style(func(s *styles.Style) {
+		fr.Styler(func(s *styles.Style) {
 			s.Max.X.Em(10)
 		})
 		core.NewButton(fr).SetText("First")
@@ -315,7 +315,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/frames-4": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
-		fr.Style(func(s *styles.Style) {
+		fr.Styler(func(s *styles.Style) {
 			s.Overflow.X = styles.OverflowAuto
 			s.Max.X.Em(10)
 		})
@@ -325,7 +325,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/frames-5": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
-		fr.Style(func(s *styles.Style) {
+		fr.Styler(func(s *styles.Style) {
 			s.Wrap = true
 			s.Max.X.Em(10)
 		})
@@ -335,7 +335,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/frames-6": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
-		fr.Style(func(s *styles.Style) {
+		fr.Styler(func(s *styles.Style) {
 			s.Display = styles.Grid
 			s.Columns = 2
 		})
@@ -346,7 +346,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/frames-7": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
-		fr.Style(func(s *styles.Style) {
+		fr.Styler(func(s *styles.Style) {
 			s.Background = colors.C(colors.Scheme.Warn.Container)
 		})
 		core.NewButton(fr).SetText("First")
@@ -355,7 +355,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/frames-8": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
-		fr.Style(func(s *styles.Style) {
+		fr.Styler(func(s *styles.Style) {
 			s.Background = gradient.NewLinear().AddStop(colors.Yellow, 0).AddStop(colors.Orange, 0.5).AddStop(colors.Red, 1)
 		})
 		core.NewButton(fr).SetText("First")
@@ -364,7 +364,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/frames-9": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
-		fr.Style(func(s *styles.Style) {
+		fr.Styler(func(s *styles.Style) {
 			s.Border.Width.Set(units.Dp(4))
 			s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 		})
@@ -374,7 +374,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/frames-10": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
-		fr.Style(func(s *styles.Style) {
+		fr.Styler(func(s *styles.Style) {
 			s.Border.Radius = styles.BorderRadiusLarge
 			s.Border.Width.Set(units.Dp(4))
 			s.Border.Color.Set(colors.C(colors.Scheme.Outline))
@@ -385,7 +385,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/frames-11": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
-		fr.Style(func(s *styles.Style) {
+		fr.Styler(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
 			s.Border.Width.Set(units.Dp(4))
 			s.Border.Color.Set(colors.C(colors.Scheme.Outline))
@@ -409,7 +409,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	"widgets/images-1": func(parent core.Widget) {
 		img := core.NewImage(parent)
 		errors.Log(img.OpenFS(myImage, "image.png"))
-		img.Style(func(s *styles.Style) {
+		img.Styler(func(s *styles.Style) {
 			s.Min.Set(units.Dp(256))
 		})
 	},
@@ -430,7 +430,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewMeter(parent).SetMin(5.7).SetMax(18).SetValue(10.2)
 	},
 	"widgets/meters-3": func(parent core.Widget) {
-		core.NewMeter(parent).Style(func(s *styles.Style) {
+		core.NewMeter(parent).Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
 		})
 	},
@@ -543,7 +543,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/splits-3": func(parent core.Widget) {
 		sp := core.NewSplits(parent)
-		sp.Style(func(s *styles.Style) {
+		sp.Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
 		})
 		core.NewText(sp).SetText("First")
@@ -551,7 +551,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"widgets/splits-4": func(parent core.Widget) {
 		sp := core.NewSplits(parent)
-		sp.Style(func(s *styles.Style) {
+		sp.Styler(func(s *styles.Style) {
 			s.Direction = styles.Row
 		})
 		core.NewText(sp).SetText("First")
@@ -563,7 +563,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	"widgets/svgs-1": func(parent core.Widget) {
 		svg := core.NewSVG(parent)
 		errors.Log(svg.OpenFS(mySVG, "icon.svg"))
-		svg.Style(func(s *styles.Style) {
+		svg.Styler(func(s *styles.Style) {
 			s.Min.Set(units.Dp(128))
 		})
 	},
@@ -619,7 +619,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewSwitches(parent).SetType(core.SwitchSegmentedButton).SetStrings("Go", "Python", "C++")
 	},
 	"widgets/switches-12": func(parent core.Widget) {
-		core.NewSwitches(parent).SetStrings("Go", "Python", "C++").Style(func(s *styles.Style) {
+		core.NewSwitches(parent).SetStrings("Go", "Python", "C++").Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
 		})
 	},
@@ -731,7 +731,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewText(parent).SetType(core.TextHeadlineMedium).SetText("Hello, world!")
 	},
 	"widgets/text-4": func(parent core.Widget) {
-		core.NewText(parent).SetText("Hello,\n\tworld!").Style(func(s *styles.Style) {
+		core.NewText(parent).SetText("Hello,\n\tworld!").Styler(func(s *styles.Style) {
 			s.Font.Size.Dp(21)
 			s.Font.Style = styles.Italic
 			s.Text.WhiteSpace = styles.WhiteSpacePre
@@ -1024,7 +1024,7 @@ func main() {
 	"advanced/styling-0": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
 		fr.OnWidgetAdded(func(w core.Widget) {
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Color = colors.C(colors.Scheme.Error.Base)
 			})
 		})
@@ -1037,7 +1037,7 @@ func main() {
 		fr.OnWidgetAdded(func(w core.Widget) {
 			switch w := w.(type) {
 			case *core.Button:
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Border.Radius = styles.BorderRadiusSmall
 				})
 			}

@@ -292,7 +292,7 @@ func (ed *Editor) QReplacePrompt() {
 	d := core.NewBody().AddTitle("Query-Replace").
 		AddText("Enter strings for find and replace, then select Query-Replace -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining")
 	fc := core.NewChooser(d).SetEditable(true).SetDefaultNew(true)
-	fc.Style(func(s *styles.Style) {
+	fc.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 		s.Min.X.Ch(80)
 	})
@@ -302,7 +302,7 @@ func (ed *Editor) QReplacePrompt() {
 	}
 
 	rc := core.NewChooser(d).SetEditable(true).SetDefaultNew(true)
-	rc.Style(func(s *styles.Style) {
+	rc.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 		s.Min.X.Ch(80)
 	})

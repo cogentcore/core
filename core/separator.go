@@ -18,7 +18,7 @@ type Separator struct {
 
 func (sp *Separator) Init() {
 	sp.WidgetBase.Init()
-	sp.Style(func(s *styles.Style) {
+	sp.Styler(func(s *styles.Style) {
 		s.Align.Self = styles.Center
 		s.Justify.Self = styles.Center
 		s.Background = colors.C(colors.Scheme.OutlineVariant)

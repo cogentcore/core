@@ -162,7 +162,7 @@ func (sr *Slider) Init() {
 	sr.Prec = 9
 	sr.ThumbSize.Set(1, 1)
 	sr.TrackSize = 0.5
-	sr.Style(func(s *styles.Style) {
+	sr.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 
 		// we use a different color for the thumb and value color
@@ -299,7 +299,7 @@ func (sr *Slider) Init() {
 			return
 		}
 		AddAt(p, "icon", func(w *Icon) {
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Font.Size.Dp(24)
 				s.Color = sr.ThumbColor
 			})

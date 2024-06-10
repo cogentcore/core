@@ -89,7 +89,7 @@ func (fn *Node) Init() {
 	fn.TreeView.Init()
 	fn.ContextMenus = nil // do not include treeview
 	fn.AddContextMenu(fn.ContextMenu)
-	fn.Style(func(s *styles.Style) {
+	fn.Styler(func(s *styles.Style) {
 		status := fn.Info.VCS
 		s.Font.Weight = styles.WeightNormal
 		s.Font.Style = styles.FontNormal
@@ -151,7 +151,7 @@ func (fn *Node) Init() {
 		}
 	})
 	core.AddChildInit(fn, "parts", func(w *core.Frame) {
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Gap.X.Em(0.4)
 		})
 		w.OnClick(func(e events.Event) {
@@ -174,7 +174,7 @@ func (fn *Node) Init() {
 			core.AddChildInit(w, "stack", func(w *core.Frame) {
 				f := func(name string) {
 					core.AddChildInit(w, name, func(w *core.Icon) {
-						w.Style(func(s *styles.Style) {
+						w.Styler(func(s *styles.Style) {
 							s.Min.Set(units.Em(1))
 						})
 					})

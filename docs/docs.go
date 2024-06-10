@@ -53,7 +53,7 @@ func main() {
 }
 
 func homePage(ctx *htmlview.Context) bool {
-	frame := core.NewFrame(ctx.BlockParent).Style(func(s *styles.Style) {
+	frame := core.NewFrame(ctx.BlockParent).Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 		s.CenterAll()
@@ -62,7 +62,7 @@ func homePage(ctx *htmlview.Context) bool {
 	errors.Log(core.NewSVG(frame).ReadString(core.AppIcon))
 	img := core.NewImage(frame)
 	errors.Log(img.OpenFS(resources, "name.png"))
-	img.Style(func(s *styles.Style) {
+	img.Styler(func(s *styles.Style) {
 		x := func(uc *units.Context) float32 {
 			return min(uc.Dp(612), uc.Pw(90))
 		}
@@ -77,7 +77,7 @@ func homePage(ctx *htmlview.Context) bool {
 	})
 
 	makeBlock := func(title, text string, graphic func(parent core.Widget)) {
-		block := core.NewFrame(frame).Style(func(s *styles.Style) {
+		block := core.NewFrame(frame).Styler(func(s *styles.Style) {
 			s.Gap.Set(units.Em(1))
 			s.Grow.Set(1, 0)
 			if frame.SizeClass() == core.SizeCompact {
@@ -88,7 +88,7 @@ func homePage(ctx *htmlview.Context) bool {
 		graphicFirst := frame.NumChildren()%2 == 0
 		if graphicFirst {
 			graphic(block)
-			block.Style(func(s *styles.Style) {
+			block.Styler(func(s *styles.Style) {
 				// we dynamically swap the graphic and text block so that they
 				// are ordered correctly based on our size class
 				sc := block.SizeClass()
@@ -100,13 +100,13 @@ func homePage(ctx *htmlview.Context) bool {
 			})
 		}
 
-		textBlock := core.NewFrame(block).Style(func(s *styles.Style) {
+		textBlock := core.NewFrame(block).Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Text.Align = styles.Start
 			s.Grow.Set(1, 1)
 		})
 		textBlock.SetName("text-block")
-		core.NewText(textBlock).SetType(core.TextHeadlineLarge).SetText(title).Style(func(s *styles.Style) {
+		core.NewText(textBlock).SetType(core.TextHeadlineLarge).SetText(title).Styler(func(s *styles.Style) {
 			s.Font.Weight = styles.WeightBold
 			s.Color = colors.C(colors.Scheme.Primary.Base)
 		})
@@ -119,7 +119,7 @@ func homePage(ctx *htmlview.Context) bool {
 
 	makeIcon := func(parent core.Widget) *core.Icon {
 		icon := core.NewIcon(parent)
-		icon.Style(func(s *styles.Style) {
+		icon.Styler(func(s *styles.Style) {
 			s.Min.Set(units.Dp(256))
 			s.Color = colors.C(colors.Scheme.Primary.Base)
 		})
@@ -137,7 +137,7 @@ func homePage(ctx *htmlview.Context) bool {
 			core.NewButton(b).SetText("Hello, World!")
 			b.RunMainWindow()
 		}`)
-		te.Style(func(s *styles.Style) {
+		te.Styler(func(s *styles.Style) {
 			s.Min.X.Pw(50)
 		})
 	})
@@ -194,7 +194,7 @@ func homePage(ctx *htmlview.Context) bool {
 	makeBlock(`<a href="https://github.com/WaveELD/WELDBook/blob/main/textmd/ch01_intro.md">WELD</a>`, "WELD is a set of 3D computational models of a new approach to quantum physics based on the de Broglie-Bohm pilot wave theory.", func(parent core.Widget) {
 		img := core.NewImage(parent)
 		errors.Log(img.OpenFS(resources, "weld-icon.png"))
-		img.Style(func(s *styles.Style) {
+		img.Styler(func(s *styles.Style) {
 			s.Min.Set(units.Dp(256))
 		})
 	})

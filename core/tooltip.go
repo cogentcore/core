@@ -51,7 +51,7 @@ func NewTooltipScene(w Widget, tooltip string, pos, sz image.Point) *Scene {
 	// tooltip positioning uses the original scene geom as the context values
 	sc.SceneGeom.Pos = pos
 	sc.SceneGeom.Size = sz // used for positioning if needed
-	sc.Style(func(s *styles.Style) {
+	sc.Styler(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Grow.Set(1, 1)
 		s.Overflow.Set(styles.OverflowVisible) // key for avoiding sizing errors when re-rendering with small pref size
@@ -61,7 +61,7 @@ func NewTooltipScene(w Widget, tooltip string, pos, sz image.Point) *Scene {
 		s.BoxShadow = styles.BoxShadow1()
 	})
 	NewText(sc).SetType(TextBodyMedium).SetText(tooltip).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetTextWrap(true)
 			s.Max.X.Em(20)
 		})

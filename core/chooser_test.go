@@ -23,7 +23,7 @@ func TestChooser(t *testing.T) {
 
 func TestChooserClick(t *testing.T) {
 	b := NewBody()
-	b.Style(func(s *styles.Style) {
+	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetStrings("macOS", "Windows", "Linux")
@@ -79,7 +79,7 @@ func TestChooserEditable(t *testing.T) {
 
 func TestChooserEditableClick(t *testing.T) {
 	b := NewBody()
-	b.Style(func(s *styles.Style) {
+	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetEditable(true).SetStrings("Newest", "Oldest", "Popular")
@@ -90,7 +90,7 @@ func TestChooserEditableClick(t *testing.T) {
 
 func TestChooserEditableTextFieldClick(t *testing.T) {
 	b := NewBody()
-	b.Style(func(s *styles.Style) {
+	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetEditable(true).SetStrings("Newest", "Oldest", "Popular")
@@ -101,7 +101,7 @@ func TestChooserEditableTextFieldClick(t *testing.T) {
 
 func TestChooserAllowNewClick(t *testing.T) {
 	b := NewBody()
-	b.Style(func(s *styles.Style) {
+	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetAllowNew(true).SetStrings("Newest", "Oldest", "Popular")
@@ -112,7 +112,7 @@ func TestChooserAllowNewClick(t *testing.T) {
 
 func TestChooserEditableAllowNewClick(t *testing.T) {
 	b := NewBody()
-	b.Style(func(s *styles.Style) {
+	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetEditable(true).SetAllowNew(true).SetStrings("Newest", "Oldest", "Popular")
@@ -123,7 +123,7 @@ func TestChooserEditableAllowNewClick(t *testing.T) {
 
 func TestChooserEditableAllowNewTextFieldClick(t *testing.T) {
 	b := NewBody()
-	b.Style(func(s *styles.Style) {
+	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	ch := NewChooser(b).SetEditable(true).SetAllowNew(true).SetStrings("Newest", "Oldest", "Popular")

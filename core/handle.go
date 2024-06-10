@@ -33,7 +33,7 @@ type Handle struct {
 
 func (hl *Handle) Init() {
 	hl.WidgetBase.Init()
-	hl.Style(func(s *styles.Style) {
+	hl.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 
 		s.Border.Radius = styles.BorderRadiusFull

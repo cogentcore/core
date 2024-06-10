@@ -25,7 +25,7 @@ type SceneView struct {
 
 func (sv *SceneView) Init() {
 	sv.Frame.Init()
-	sv.Style(func(s *styles.Style) {
+	sv.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
@@ -80,7 +80,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 	})
 	core.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.ZoomIn).SetTooltip("zoom in").
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
 			}).
 			OnClick(func(e events.Event) {
@@ -91,7 +91,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 	})
 	core.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.ZoomOut).SetTooltip("zoom out").
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
 			}).OnClick(func(e events.Event) {
 			sc.Camera.Zoom(.05)
@@ -106,7 +106,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 	})
 	core.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowLeft).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
 			}).
 			OnClick(func(e events.Event) {
@@ -117,7 +117,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 	})
 	core.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowUp).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
 			}).
 			OnClick(func(e events.Event) {
@@ -128,7 +128,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 	})
 	core.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowDown).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
 			}).
 			OnClick(func(e events.Event) {
@@ -139,7 +139,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 	})
 	core.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowRight).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
 			}).
 			OnClick(func(e events.Event) {
@@ -155,7 +155,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 	})
 	core.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowLeft).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
 			}).
 			OnClick(func(e events.Event) {
@@ -166,7 +166,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 	})
 	core.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowUp).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
 			}).
 			OnClick(func(e events.Event) {
@@ -177,7 +177,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 	})
 	core.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowDown).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
 			}).
 			OnClick(func(e events.Event) {
@@ -188,7 +188,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 	})
 	core.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowRight).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
 			}).
 			OnClick(func(e events.Event) {

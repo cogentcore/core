@@ -220,7 +220,7 @@ func (tv *TableView) UpdateMaxWidths() {
 func (tv *TableView) MakeHeader(p *core.Plan) {
 	core.AddAt(p, "header", func(w *core.Frame) {
 		core.ToolbarStyles(w)
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(0, 0)
 			s.Gap.Set(units.Em(0.5)) // matches grid default
 		})
@@ -228,7 +228,7 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 			if tv.Is(views.SliceViewShowIndex) {
 				core.AddAt(p, "head-index", func(w *core.Text) { // TODO: is not working
 					w.SetType(core.TextBodyMedium)
-					w.Style(func(s *styles.Style) {
+					w.Styler(func(s *styles.Style) {
 						s.Align.Self = styles.Center
 					})
 					w.SetText("Index")
@@ -348,7 +348,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 				wb := w.AsWidget()
 				w.SetProperty(views.SliceViewRowProperty, i)
 				w.SetProperty(views.SliceViewColProperty, fli)
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Grow.Set(0, 0)
 				})
 				wb.Updater(func() {

@@ -29,7 +29,7 @@ func TestFrame(t *testing.T) {
 func TestFrameBackground(t *testing.T) {
 	b := NewBody()
 	fr := NewFrame(b)
-	fr.Style(func(s *styles.Style) {
+	fr.Styler(func(s *styles.Style) {
 		s.Background = colors.C(colors.Scheme.Warn.Container)
 	})
 	frameTestButtons(fr)
@@ -39,7 +39,7 @@ func TestFrameBackground(t *testing.T) {
 func TestFrameGradient(t *testing.T) {
 	b := NewBody()
 	fr := NewFrame(b)
-	fr.Style(func(s *styles.Style) {
+	fr.Styler(func(s *styles.Style) {
 		s.Background = gradient.NewLinear().AddStop(colors.Yellow, 0).AddStop(colors.Orange, 0.5).AddStop(colors.Red, 1)
 	})
 	frameTestButtons(fr)
@@ -49,7 +49,7 @@ func TestFrameGradient(t *testing.T) {
 func TestFrameBorder(t *testing.T) {
 	b := NewBody()
 	fr := NewFrame(b)
-	fr.Style(func(s *styles.Style) {
+	fr.Styler(func(s *styles.Style) {
 		s.Border.Width.Set(units.Dp(4))
 		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 	})
@@ -59,7 +59,7 @@ func TestFrameBorder(t *testing.T) {
 func TestFrameBorderRadius(t *testing.T) {
 	b := NewBody()
 	fr := NewFrame(b)
-	fr.Style(func(s *styles.Style) {
+	fr.Styler(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusLarge
 		s.Border.Width.Set(units.Dp(4))
 		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
@@ -71,7 +71,7 @@ func TestFrameBorderRadius(t *testing.T) {
 func TestFrameNoGrow(t *testing.T) {
 	b := NewBody()
 	fr := NewFrame(b)
-	fr.Style(func(s *styles.Style) {
+	fr.Styler(func(s *styles.Style) {
 		s.Grow.Set(0, 0)
 		s.Border.Width.Set(units.Dp(4))
 		s.Border.Color.Set(colors.C(colors.Scheme.Outline))

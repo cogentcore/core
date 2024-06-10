@@ -161,7 +161,7 @@ func (ch *Chooser) Init() {
 	ch.Frame.Init()
 	ch.SetIcon(icons.None).SetIndicator(icons.KeyboardArrowDown)
 	ch.CurrentIndex = -1
-	ch.Style(func(s *styles.Style) {
+	ch.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Hoverable, abilities.LongHoverable)
 		if !ch.Editable {
 			s.SetAbilities(true, abilities.Focusable)
@@ -282,7 +282,7 @@ func (ch *Chooser) Init() {
 		if ch.Editable {
 			AddAt(p, "text-field", func(w *TextField) {
 				w.SetPlaceholder(ch.Placeholder)
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Grow = ch.Styles.Grow // we grow like our parent
 					s.Max.X.Zero()          // constrained by parent
 					s.SetTextWrap(false)
@@ -332,7 +332,7 @@ func (ch *Chooser) Init() {
 				})
 				w.Maker(func(p *Plan) {
 					AddInit(p, "trail-icon", func(w *Button) {
-						w.Style(func(s *styles.Style) {
+						w.Styler(func(s *styles.Style) {
 							// indicator does not need to be focused
 							s.SetAbilities(false, abilities.Focusable)
 						})
@@ -341,7 +341,7 @@ func (ch *Chooser) Init() {
 			})
 		} else {
 			AddAt(p, "text", func(w *Text) {
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
 				})
@@ -356,7 +356,7 @@ func (ch *Chooser) Init() {
 		// editable handles through TextField
 		if !ch.Editable {
 			AddAt(p, "indicator", func(w *Icon) {
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Justify.Self = styles.End
 				})
 				w.Updater(func() {

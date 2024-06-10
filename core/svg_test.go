@@ -27,7 +27,7 @@ func TestSVGSize(t *testing.T) {
 	b := NewBody()
 	svg := NewSVG(b)
 	errors.Log(svg.Open(testSVGPath))
-	svg.Style(func(s *styles.Style) {
+	svg.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(128))
 	})
 	b.AssertRender(t, "svg/size")
@@ -43,7 +43,7 @@ func TestSVGString(t *testing.T) {
 func TestSVGZoom(t *testing.T) {
 	b := NewBody()
 	sv := NewSVG(b)
-	sv.Style(func(s *styles.Style) {
+	sv.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(1024))
 	})
 	sv.SVG.Root.ViewBox.Size.SetScalar(1000)

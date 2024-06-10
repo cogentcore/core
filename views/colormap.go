@@ -33,7 +33,7 @@ func (cm *ColorMapButton) WidgetValue() any { return &cm.MapName }
 
 func (cm *ColorMapButton) Init() {
 	cm.Button.Init()
-	cm.Style(func(s *styles.Style) {
+	cm.Styler(func(s *styles.Style) {
 		s.Padding.Zero()
 		s.Min.Set(units.Em(10), units.Em(2))
 

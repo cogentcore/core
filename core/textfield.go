@@ -187,7 +187,7 @@ func (tf *TextField) Init() {
 	tf.Frame.Init()
 	tf.AddContextMenu(tf.ContextMenu)
 
-	tf.Style(func(s *styles.Style) {
+	tf.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		tf.CursorWidth.Dp(1)
 		tf.SelectColor = colors.C(colors.Scheme.Select.Container)
@@ -332,7 +332,7 @@ func (tf *TextField) Init() {
 			if tf.LeadingIcon.IsSet() {
 				AddAt(p, "lead-icon", func(w *Button) {
 					w.SetType(ButtonAction)
-					w.Style(func(s *styles.Style) {
+					w.Styler(func(s *styles.Style) {
 						s.Padding.Zero()
 						s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 						s.Margin.SetRight(units.Dp(8))
@@ -367,7 +367,7 @@ func (tf *TextField) Init() {
 				AddAt(p, "trail-icon-stretch", func(w *Stretch) {})
 				AddAt(p, "trail-icon", func(w *Button) {
 					w.SetType(ButtonAction)
-					w.Style(func(s *styles.Style) {
+					w.Styler(func(s *styles.Style) {
 						s.Padding.Zero()
 						s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 						if tf.Error != nil {
@@ -472,7 +472,7 @@ func (tf *TextField) SetTypePassword() *TextField {
 		if icon := tf.TrailingIconButton(); icon != nil {
 			icon.SetIcon(tf.TrailingIcon).Update()
 		}
-	}).Style(func(s *styles.Style) {
+	}).Styler(func(s *styles.Style) {
 		s.VirtualKeyboard = styles.KeyboardPassword
 	})
 	return tf

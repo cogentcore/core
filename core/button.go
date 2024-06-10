@@ -116,7 +116,7 @@ const (
 
 func (bt *Button) Init() {
 	bt.Frame.Init()
-	bt.Style(func(s *styles.Style) {
+	bt.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.DoubleClickable, abilities.TripleClickable)
 		if !bt.IsDisabled() {
 			s.Cursor = cursors.Pointer
@@ -208,7 +208,7 @@ func (bt *Button) Init() {
 		}
 		if bt.Icon.IsSet() {
 			AddAt(p, "icon", func(w *Icon) {
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Font.Size.Dp(18)
 				})
 				w.Updater(func() {
@@ -221,7 +221,7 @@ func (bt *Button) Init() {
 		}
 		if bt.Text != "" {
 			AddAt(p, "text", func(w *Text) {
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
 					s.FillMargin = false
@@ -238,7 +238,7 @@ func (bt *Button) Init() {
 		}
 		if bt.Indicator.IsSet() {
 			AddAt(p, "indicator-stretch", func(w *Stretch) {
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Min.Set(units.Em(0.2))
 					if bt.Type == ButtonMenu {
 						s.Grow.Set(1, 0)
@@ -248,7 +248,7 @@ func (bt *Button) Init() {
 				})
 			})
 			AddAt(p, "indicator", func(w *Icon) {
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Min.X.Dp(18)
 					s.Min.Y.Dp(18)
 					s.Margin.Zero()
@@ -263,7 +263,7 @@ func (bt *Button) Init() {
 			if !bt.Indicator.IsSet() && bt.Shortcut != "" {
 				AddAt(p, "shortcut-stretch", func(w *Stretch) {})
 				AddAt(p, "shortcut", func(w *Text) {
-					w.Style(func(s *styles.Style) {
+					w.Styler(func(s *styles.Style) {
 						s.SetNonSelectable()
 						s.SetTextWrap(false)
 						s.Color = colors.C(colors.Scheme.OnSurfaceVariant)

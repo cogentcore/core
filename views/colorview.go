@@ -42,7 +42,7 @@ func (cv *ColorView) SetHCT(hct hct.HCT) *ColorView {
 
 func (cv *ColorView) Init() {
 	cv.Frame.Init()
-	cv.Style(func(s *styles.Style) {
+	cv.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
 	cv.Maker(func(p *core.Plan) {
@@ -50,7 +50,7 @@ func (cv *ColorView) Init() {
 			return
 		}
 
-		cv.Style(func(s *styles.Style) {
+		cv.Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
 		})
 
@@ -67,7 +67,7 @@ func (cv *ColorView) Init() {
 			cv.Color.SetHue(hue.Value)
 			cv.SetHCT(cv.Color)
 		})
-		hue.Style(func(s *styles.Style) {
+		hue.Styler(func(s *styles.Style) {
 			hue.ValueColor = nil
 			hue.ThumbColor = colors.C(cv.Color)
 			g := gradient.NewLinear()
@@ -85,7 +85,7 @@ func (cv *ColorView) Init() {
 			cv.Color.SetChroma(chroma.Value)
 			cv.SetHCT(cv.Color)
 		})
-		chroma.Style(func(s *styles.Style) {
+		chroma.Styler(func(s *styles.Style) {
 			chroma.ValueColor = nil
 			chroma.ThumbColor = colors.C(cv.Color)
 			g := gradient.NewLinear()
@@ -103,7 +103,7 @@ func (cv *ColorView) Init() {
 			cv.Color.SetTone(tone.Value)
 			cv.SetHCT(cv.Color)
 		})
-		tone.Style(func(s *styles.Style) {
+		tone.Styler(func(s *styles.Style) {
 			tone.ValueColor = nil
 			tone.ThumbColor = colors.C(cv.Color)
 			g := gradient.NewLinear()
@@ -495,7 +495,7 @@ func (cb *ColorButton) WidgetValue() any { return &cb.Color }
 func (cb *ColorButton) Init() {
 	cb.Button.Init()
 	cb.SetType(core.ButtonTonal).SetText("Edit color").SetIcon(icons.Colors)
-	cb.Style(func(s *styles.Style) {
+	cb.Styler(func(s *styles.Style) {
 		// we need to display button as non-transparent
 		// so that it can be seen
 		dclr := colors.WithAF32(cb.Color, 1)

@@ -70,7 +70,7 @@ func (m *Meter) Init() {
 	m.WidgetBase.Init()
 	m.Value = 0.5
 	m.Max = 1
-	m.Style(func(s *styles.Style) {
+	m.Styler(func(s *styles.Style) {
 		m.ValueColor = colors.C(colors.Scheme.Primary.Base)
 		s.Background = colors.C(colors.Scheme.SurfaceVariant)
 		s.Border.Radius = styles.BorderRadiusFull

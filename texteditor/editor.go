@@ -208,7 +208,7 @@ func (ed *Editor) WidgetValue() any { return &ed.Buffer.Txt }
 func (ed *Editor) Init() {
 	ed.Frame.Init()
 	ed.AddContextMenu(ed.ContextMenu)
-	ed.Style(func(s *styles.Style) {
+	ed.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		ed.CursorWidth.Dp(2)
 		ed.LineNumberColor = colors.C(colors.Transparent)

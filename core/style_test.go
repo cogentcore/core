@@ -18,7 +18,7 @@ func TestParentActualBackground(t *testing.T) {
 	make := func() (b *Body, fr *Frame) {
 		b = NewBody()
 		fr = NewFrame(b)
-		fr.Style(func(s *styles.Style) {
+		fr.Styler(func(s *styles.Style) {
 			s.Min.Set(units.Em(5))
 			s.CenterAll()
 		})
@@ -30,14 +30,14 @@ func TestParentActualBackground(t *testing.T) {
 	sc.AssertRender(t, "style/parent-background-color/white")
 
 	sc, fr := make()
-	fr.Style(func(s *styles.Style) {
+	fr.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Hoverable)
 	})
 	fr.SetState(true, states.Hovered)
 	sc.AssertRender(t, "style/parent-background-color/white-hovered-pre")
 
 	sc, fr = make()
-	fr.Style(func(s *styles.Style) {
+	fr.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Hoverable)
 	})
 	sc.AssertRender(t, "style/parent-background-color/white-hovered-post", func() {
@@ -47,13 +47,13 @@ func TestParentActualBackground(t *testing.T) {
 	})
 
 	sc, fr = make()
-	fr.Style(func(s *styles.Style) {
+	fr.Styler(func(s *styles.Style) {
 		s.Background = colors.C(colors.Scheme.OutlineVariant)
 	})
 	sc.AssertRender(t, "style/parent-background-color/gray")
 
 	sc, fr = make()
-	fr.Style(func(s *styles.Style) {
+	fr.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Hoverable)
 		s.Background = colors.C(colors.Scheme.OutlineVariant)
 	})
@@ -61,7 +61,7 @@ func TestParentActualBackground(t *testing.T) {
 	sc.AssertRender(t, "style/parent-background-color/gray-hovered-pre")
 
 	sc, fr = make()
-	fr.Style(func(s *styles.Style) {
+	fr.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Hoverable)
 		s.Background = colors.C(colors.Scheme.OutlineVariant)
 	})
@@ -74,10 +74,10 @@ func TestParentActualBackground(t *testing.T) {
 
 func TestParentUnits(t *testing.T) {
 	b := NewBody()
-	b.Style(func(s *styles.Style) {
+	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(10), units.Em(20))
 	})
-	NewWidgetBase(b).Style(func(s *styles.Style) {
+	NewWidgetBase(b).Styler(func(s *styles.Style) {
 		s.Background = colors.C(colors.Scheme.Primary.Base)
 		s.Min.Set(units.Pw(50), units.Ph(75))
 	})

@@ -38,14 +38,14 @@ type Inspector struct {
 
 func (is *Inspector) Init() {
 	is.Frame.Init()
-	is.Style(func(s *styles.Style) {
+	is.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		s.Direction = styles.Column
 	})
 	is.OnWidgetAdded(func(w core.Widget) {
 		// TODO(config)
 		if tw, ok := w.(*TreeView); ok {
-			tw.Style(func(s *styles.Style) {
+			tw.Styler(func(s *styles.Style) {
 				s.Max.X.Em(20)
 			})
 		}
@@ -56,7 +56,7 @@ func (is *Inspector) Init() {
 		titleWidget = w
 		is.CurrentNode = is.Root
 		w.SetType(core.TextHeadlineSmall)
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(1, 0)
 			s.Align.Self = styles.Center
 		})
@@ -75,7 +75,7 @@ func (is *Inspector) Init() {
 		w.SetSplits(.3, .7)
 		var structView *StructView
 		core.AddChildAt(w, "tree-frame", func(w *core.Frame) {
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Gap.Zero()

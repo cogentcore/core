@@ -27,7 +27,7 @@ type Browser struct {
 
 func (br *Browser) Init() {
 	br.Frame.Init()
-	br.Style(func(s *styles.Style) {
+	br.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
 	br.OnShow(func(e events.Event) {
@@ -37,7 +37,7 @@ func (br *Browser) Init() {
 	core.AddChildAt(br, "splits", func(w *core.Splits) {
 		w.SetSplits(.15, .85)
 		core.AddChildAt(w, "treeframe", func(w *core.Frame) {
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)

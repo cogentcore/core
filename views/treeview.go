@@ -174,7 +174,7 @@ type TreeView struct {
 // optional parent that ensures that the tree view scrolls
 // separately from the surrounding context.
 func NewTreeViewFrame(parent ...tree.Node) *TreeView {
-	fr := core.NewFrame(parent...).Style(func(s *styles.Style) {
+	fr := core.NewFrame(parent...).Styler(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	return NewTreeView(fr)
@@ -219,7 +219,7 @@ func (tv *TreeView) Init() {
 	tv.IconClosed = icons.KeyboardArrowRight
 	tv.IconLeaf = icons.Blank
 	tv.OpenDepth = 4
-	tv.Style(func(s *styles.Style) {
+	tv.Styler(func(s *styles.Style) {
 		// our parts are draggable and droppable, not us ourself
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
 		tv.Indent.Em(1)
@@ -346,7 +346,7 @@ func (tv *TreeView) Init() {
 	core.AddChildAt(tv, "parts", func(w *core.Frame) {
 		core.InitParts(w)
 		tvi := tv.This().(TreeViewer)
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Cursor = cursors.Pointer
 			s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
 			s.SetAbilities(!tv.IsReadOnly() && !tv.RootIsReadOnly(), abilities.Draggable, abilities.Droppable)
@@ -428,7 +428,7 @@ func (tv *TreeView) Init() {
 		core.AddChildAt(w, "branch", func(w *core.Switch) {
 			w.SetType(core.SwitchCheckbox)
 			w.SetIcons(tv.IconOpen, tv.IconClosed, tv.IconLeaf)
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Focusable)
 				// parent will handle our cursor
 				s.Cursor = cursors.None
@@ -464,7 +464,7 @@ func (tv *TreeView) Init() {
 		w.Maker(func(p *core.Plan) {
 			if tv.Icon.IsSet() {
 				core.AddAt(p, "icon", func(w *core.Icon) {
-					w.Style(func(s *styles.Style) {
+					w.Styler(func(s *styles.Style) {
 						s.Font.Size.Dp(16)
 					})
 					w.Updater(func() {
@@ -474,7 +474,7 @@ func (tv *TreeView) Init() {
 			}
 		})
 		core.AddChildAt(w, "text", func(w *core.Text) {
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.SetNonSelectable()
 				s.SetTextWrap(false)
 				s.Min.X.Ch(16)

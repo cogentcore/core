@@ -56,7 +56,7 @@ type ButtonsConfig struct {
 // configuration options can be nil, in which case default values will be used.
 func Buttons(par core.Widget, c *ButtonsConfig) *core.Frame {
 	ly := core.NewFrame(par)
-	ly.Style(func(s *styles.Style) {
+	ly.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
 
@@ -138,7 +138,7 @@ func Button(par core.Widget, c *ButtonsConfig, provider string, authFunc func(c 
 func GoogleButton(par core.Widget, c *ButtonsConfig) *core.Button {
 	bt := Button(par, c, "google", Google).SetType(core.ButtonOutlined).
 		SetText("Sign in with Google").SetIcon("sign-in-with-google")
-	bt.Style(func(s *styles.Style) {
+	bt.Styler(func(s *styles.Style) {
 		s.Color = colors.C(colors.Scheme.OnSurface)
 	})
 	return bt

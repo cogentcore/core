@@ -35,7 +35,7 @@ type Splits struct {
 
 func (sl *Splits) Init() {
 	sl.Frame.Init()
-	sl.Style(func(s *styles.Style) {
+	sl.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		s.Margin.Zero()
 		s.Padding.Zero()
@@ -49,7 +49,7 @@ func (sl *Splits) Init() {
 	})
 	sl.OnWidgetAdded(func(w Widget) {
 		if w.Parent() == sl.This() { // TODO(config): need some way to do this with the new config paradigm
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				// splits elements must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)
@@ -96,7 +96,7 @@ func (sl *Splits) Init() {
 						w.OnChange(func(e events.Event) {
 							sl.SetSplitAction(w.IndexInParent(), w.Value())
 						})
-						w.Style(func(s *styles.Style) {
+						w.Styler(func(s *styles.Style) {
 							s.Direction = sl.Styles.Direction
 						})
 					})

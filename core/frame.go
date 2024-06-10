@@ -396,7 +396,7 @@ type Stretch struct {
 
 func (st *Stretch) Init() {
 	st.WidgetBase.Init()
-	st.Style(func(s *styles.Style) {
+	st.Styler(func(s *styles.Style) {
 		s.RenderBox = false
 		s.Min.X.Ch(1)
 		s.Min.Y.Em(1)
@@ -414,7 +414,7 @@ type Space struct {
 
 func (sp *Space) Init() {
 	sp.WidgetBase.Init()
-	sp.Style(func(s *styles.Style) {
+	sp.Styler(func(s *styles.Style) {
 		s.RenderBox = false
 		s.Min.X.Ch(1)
 		s.Min.Y.Em(1)

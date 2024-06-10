@@ -46,7 +46,7 @@ func TestLayoutFramesAlignItems(t *testing.T) {
 			for _, align := range aligns {
 				tnm := fmt.Sprintf("wrap_%v_dir_%v_align_%v", wrap, dir, align)
 				b := NewBody()
-				b.Style(func(s *styles.Style) {
+				b.Styler(func(s *styles.Style) {
 					s.Overflow.Set(styles.OverflowVisible)
 					s.Direction = dir
 					s.Wrap = wrap
@@ -69,7 +69,7 @@ func TestLayoutFramesAlignContent(t *testing.T) {
 			for _, align := range aligns {
 				tnm := fmt.Sprintf("wrap-%v-dir-%v-align-%v", wrap, dir, align)
 				b := NewBody()
-				b.Style(func(s *styles.Style) {
+				b.Styler(func(s *styles.Style) {
 					if dir == styles.Row {
 						s.Min.Y.Px(300)
 					} else {
@@ -101,7 +101,7 @@ func TestLayoutFramesJustifyContent(t *testing.T) {
 			for _, align := range aligns {
 				tnm := fmt.Sprintf("wrap_%v_dir_%v_align_%v", wrap, dir, align)
 				b := NewBody()
-				b.Style(func(s *styles.Style) {
+				b.Styler(func(s *styles.Style) {
 					if dir == styles.Row {
 						s.Min.X.Px(dsz)
 					} else {
@@ -126,7 +126,7 @@ func TestLayoutFramesJustifyItems(t *testing.T) {
 	for _, align := range aligns {
 		tnm := fmt.Sprintf("align_%v", align)
 		b := NewBody()
-		b.Style(func(s *styles.Style) {
+		b.Styler(func(s *styles.Style) {
 			s.Overflow.Set(styles.OverflowVisible)
 			s.Display = styles.Grid
 			s.Columns = 2
@@ -144,14 +144,14 @@ func TestLayoutFramesJustifySelf(t *testing.T) {
 	for ai, align := range aligns {
 		tnm := fmt.Sprintf("align_%v", align)
 		b := NewBody()
-		b.Style(func(s *styles.Style) {
+		b.Styler(func(s *styles.Style) {
 			s.Overflow.Set(styles.OverflowVisible)
 			s.Display = styles.Grid
 			s.Columns = 2
 			s.Justify.Items = align
 		})
 		PlainFrames(b, math32.Vec2(0, 0))
-		b.Child(2).(Widget).Style(func(s *styles.Style) {
+		b.Child(2).(Widget).Styler(func(s *styles.Style) {
 			s.Justify.Self = aligns[(ai+1)%len(aligns)]
 		})
 		b.AssertRender(t, tdir+tnm)
@@ -165,14 +165,14 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 	for ai, align := range aligns {
 		tnm := fmt.Sprintf("align_%v", align)
 		b := NewBody()
-		b.Style(func(s *styles.Style) {
+		b.Styler(func(s *styles.Style) {
 			s.Overflow.Set(styles.OverflowVisible)
 			s.Display = styles.Grid
 			s.Columns = 2
 			s.Align.Items = align
 		})
 		PlainFrames(b, math32.Vec2(0, 0))
-		b.Child(2).(Widget).Style(func(s *styles.Style) {
+		b.Child(2).(Widget).Styler(func(s *styles.Style) {
 			s.Align.Self = aligns[(ai+1)%len(aligns)]
 		})
 		b.AssertRender(t, tdir+tnm)
@@ -350,7 +350,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 
 func BoxFrame(parent Widget) *Frame {
 	fr := NewFrame(parent)
-	fr.Style(func(s *styles.Style) {
+	fr.Styler(func(s *styles.Style) {
 		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 		s.Border.Width.Set(units.Dp(2))
 	})
@@ -359,7 +359,7 @@ func BoxFrame(parent Widget) *Frame {
 
 func SpaceFrame(parent Widget) (*Frame, *Space) {
 	fr := NewFrame(parent)
-	fr.Style(func(s *styles.Style) {
+	fr.Styler(func(s *styles.Style) {
 		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 		s.Border.Width.Set(units.Dp(2))
 	})
@@ -369,7 +369,7 @@ func SpaceFrame(parent Widget) (*Frame, *Space) {
 
 func HorizontalRow(parent Widget) *Frame {
 	row := BoxFrame(parent)
-	row.Style(func(s *styles.Style) {
+	row.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 	})
 	return row
@@ -384,12 +384,12 @@ func Splits2(parent Widget) (*Splits, *Frame, *Frame) {
 
 func TabFrame(parent Widget) (*Frame, *Frame) {
 	tab := BoxFrame(parent)
-	tab.Style(func(s *styles.Style) {
+	tab.Styler(func(s *styles.Style) {
 		s.Display = styles.Stacked
 		tab.StackTop = 0
 	})
 	tfr := BoxFrame(tab)
-	tfr.Style(func(s *styles.Style) {
+	tfr.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
 	return tab, tfr
@@ -402,7 +402,7 @@ func WrapText(parent Widget, txt string) *Text {
 func PlainFrames(parent Widget, grow math32.Vector2) {
 	for _, sz := range FrameSizes {
 		fr := BoxFrame(parent)
-		fr.Style(func(s *styles.Style) {
+		fr.Styler(func(s *styles.Style) {
 			s.Min.X.Px(sz.X)
 			s.Min.Y.Px(sz.Y)
 			s.Grow = grow
@@ -447,10 +447,10 @@ var (
 func TestLayoutScrollLabel(t *testing.T) {
 	// TODO(#808)
 	b := NewBody()
-	b.Style(func(s *styles.Style) {
+	b.Styler(func(s *styles.Style) {
 		s.Max.Set(units.Dp(50))
 	})
-	fr := NewFrame(b).Style(func(s *styles.Style) {
+	fr := NewFrame(b).Styler(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	NewText(fr).SetText(LongText)

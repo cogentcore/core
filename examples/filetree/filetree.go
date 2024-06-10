@@ -58,7 +58,7 @@ func (fb *FileBrowse) Defaults() {
 
 func (fb *FileBrowse) Init() {
 	fb.Defaults()
-	fb.Style(func(s *styles.Style) {
+	fb.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 		s.Margin.Set(units.Dp(8))
@@ -68,17 +68,17 @@ func (fb *FileBrowse) Init() {
 		case "title":
 			title := w.(*core.Text)
 			title.Type = core.TextHeadlineSmall
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Justify.Content = styles.Center
 			})
 		}
 		if w.Parent().PathFrom(fb) == "splits" {
 			if w.AsTree().IndexInParent() == 0 {
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Grow.Set(1, 1)
 				})
 			} else {
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Grow.Set(1, 1)
 					s.Min.X.Ch(20)
 					s.Min.Y.Ch(10)
@@ -312,7 +312,7 @@ func (fb *FileBrowse) MakeToolbar(p *core.Plan) { //types:add
 	})
 	core.Add(p, func(w *views.FuncButton) {
 		w.SetFunc(fb.SaveActiveView).SetKey(keymap.Save)
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.SetEnabled(fb.Changed && fb.ActiveFilename != "")
 		})
 	})

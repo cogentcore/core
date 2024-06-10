@@ -22,7 +22,7 @@ func TestTextTypes(t *testing.T) {
 
 func TestTextRem(t *testing.T) {
 	b := NewBody()
-	NewText(b).SetText("Hello, world!").Style(func(s *styles.Style) {
+	NewText(b).SetText("Hello, world!").Styler(func(s *styles.Style) {
 		s.Font.Size = units.Rem(2)
 	})
 	b.AssertRender(t, "text/rem")
@@ -32,7 +32,7 @@ func TestTextDecoration(t *testing.T) {
 	for d := styles.Underline; d <= styles.LineThrough; d++ {
 		for st := styles.FontNormal; st <= styles.Italic; st++ {
 			b := NewBody()
-			NewText(b).SetText("Test").Style(func(s *styles.Style) {
+			NewText(b).SetText("Test").Styler(func(s *styles.Style) {
 				s.Font.SetDecoration(d)
 				s.Font.Style = st
 			})

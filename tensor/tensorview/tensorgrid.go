@@ -191,7 +191,7 @@ func (tg *TensorGrid) Init() {
 	tg.WidgetBase.Init()
 	tg.Display.GridView = tg
 	tg.Display.Defaults()
-	tg.Style(func(s *styles.Style) {
+	tg.Styler(func(s *styles.Style) {
 		ms := tg.MinSize()
 		s.Min.Set(units.Dot(ms.X), units.Dot(ms.Y))
 		s.Grow.Set(1, 1)

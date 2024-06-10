@@ -103,7 +103,7 @@ func (sv *StructView) getStructFields() {
 
 func (sv *StructView) Init() {
 	sv.Frame.Init()
-	sv.Style(func(s *styles.Style) {
+	sv.Styler(func(s *styles.Style) {
 		s.Align.Items = styles.Center
 		if sv.Inline {
 			return
@@ -143,7 +143,7 @@ func (sv *StructView) Init() {
 
 			core.AddAt(p, labnm, func(w *core.Text) {
 				labelWidget = w
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.SetTextWrap(false)
 				})
 				doc, _ := types.GetDoc(f.value, f.parent, f.field, label)
@@ -151,7 +151,7 @@ func (sv *StructView) Init() {
 				if hasDef {
 					w.SetTooltip("(Default: " + def + ") " + w.Tooltip)
 					var isDef bool
-					w.Style(func(s *styles.Style) {
+					w.Styler(func(s *styles.Style) {
 						isDef = reflectx.ValueIsDefault(f.value, def)
 						dcr := "(Double click to reset to default) "
 						if !isDef {

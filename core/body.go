@@ -49,7 +49,7 @@ func NewBody(name ...string) *Body {
 
 func (bd *Body) Init() {
 	bd.Frame.Init()
-	bd.Style(func(s *styles.Style) {
+	bd.Styler(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
@@ -88,7 +88,7 @@ func (bd *Body) AddTitle(title string) *Body {
 // after a title.
 func (bd *Body) AddText(text string) *Body {
 	NewText(bd).SetText(text).
-		SetType(TextBodyMedium).Style(func(s *styles.Style) {
+		SetType(TextBodyMedium).Styler(func(s *styles.Style) {
 		s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 	})
 	return bd

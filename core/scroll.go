@@ -69,7 +69,7 @@ func (ly *Frame) ConfigScroll(d math32.Dims) {
 	sb.SetType(SliderScrollbar)
 	sb.InputThreshold = 1
 	sb.Min = 0.0
-	sb.Style(func(s *styles.Style) {
+	sb.Styler(func(s *styles.Style) {
 		s.Direction = styles.Directions(d)
 		s.Padding.Zero()
 		s.Margin.Zero()
