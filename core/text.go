@@ -190,7 +190,7 @@ func (tx *Text) Init() {
 			s.Font.Weight = styles.WeightNormal
 		}
 	})
-	tx.StyleFinal(func(s *styles.Style) {
+	tx.FinalStyler(func(s *styles.Style) {
 		tx.normalCursor = s.Cursor
 	})
 

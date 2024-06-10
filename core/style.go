@@ -32,30 +32,30 @@ var CustomConfigStyles func(w Widget)
 
 // Styler adds the given styler to the widget's Stylers.
 // It is one of the main ways for both end-user and internal code
-// to set the styles of a widget, in addition to StyleFirst
-// and StyleFinal, which add stylers that are called before
+// to set the styles of a widget, in addition to FirstStyler
+// and FinalStyler, which add stylers that are called before
 // and after the stylers added by this function, respectively.
 func (wb *WidgetBase) Styler(s func(s *styles.Style)) *WidgetBase {
 	wb.Stylers = append(wb.Stylers, s)
 	return wb
 }
 
-// StyleFirst adds the given styler to the widget's FirstStylers.
+// FirstStyler adds the given styler to the widget's FirstStylers.
 // It is one of the main ways for both end-user and internal code
 // to set the styles of a widget, in addition to Style
-// and StyleFinal, which add stylers that are called after
+// and FinalStyler, which add stylers that are called after
 // the stylers added by this function.
-func (wb *WidgetBase) StyleFirst(s func(s *styles.Style)) *WidgetBase {
+func (wb *WidgetBase) FirstStyler(s func(s *styles.Style)) *WidgetBase {
 	wb.FirstStylers = append(wb.FirstStylers, s)
 	return wb
 }
 
-// StyleFinal adds the given styler to the widget's FinalStylers.
+// FinalStyler adds the given styler to the widget's FinalStylers.
 // It is one of the main ways for both end-user and internal code
-// to set the styles of a widget, in addition to StyleFirst
+// to set the styles of a widget, in addition to FirstStyler
 // and Style, which add stylers that are called before
 // the stylers added by this function.
-func (wb *WidgetBase) StyleFinal(s func(s *styles.Style)) *WidgetBase {
+func (wb *WidgetBase) FinalStyler(s func(s *styles.Style)) *WidgetBase {
 	wb.FinalStylers = append(wb.FinalStylers, s)
 	return wb
 }

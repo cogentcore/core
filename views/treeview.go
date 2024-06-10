@@ -240,7 +240,7 @@ func (tv *TreeView) Init() {
 			s.Color = colors.C(colors.Scheme.OnSurface)
 		}
 	})
-	tv.StyleFinal(func(s *styles.Style) {
+	tv.FinalStyler(func(s *styles.Style) {
 		tv.actStateLayer = s.StateLayer
 		s.StateLayer = 0
 	})
@@ -357,7 +357,7 @@ func (tv *TreeView) Init() {
 			// layer so that the parts get it but not the other tree views
 			s.StateLayer = tv.actStateLayer
 		})
-		w.AsWidget().StyleFinal(func(s *styles.Style) {
+		w.AsWidget().FinalStyler(func(s *styles.Style) {
 			s.Grow.Set(1, 0)
 		})
 		// we let the parts handle our state

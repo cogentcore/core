@@ -223,7 +223,7 @@ func ToolbarStyles(w Widget) {
 		s.Gap.Zero()
 		s.Align.Items = styles.Center
 	})
-	w.AsWidget().StyleFinal(func(s *styles.Style) {
+	w.AsWidget().FinalStyler(func(s *styles.Style) {
 		if s.Direction == styles.Row {
 			s.Grow.Set(1, 0)
 			s.Padding.SetHorizontal(units.Dp(16))

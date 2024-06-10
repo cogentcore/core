@@ -4,7 +4,7 @@
 
 Stylers are called in the order that they are added (first added, first called), which means that the stylers added last get the final say on the styles. This means that the base stylers set during initial widget configuration will be overridden by special end-user stylers.
 
-As with event handlers, there are three levels of stylers: `First`, regular, and `Final`, which are called in that order. For example, this allows you to set properties that affect stylers before they are called using [[core.WidgetBase.StyleFirst]], like [[styles.Style.State]], and set style properties based on other style properties using [[core.WidgetBase.StyleFinal]], like [[styles.Style.Min]] based on [[styles.Style.Direction]].
+As with event handlers, there are three levels of stylers: `First`, regular, and `Final`, which are called in that order. For example, this allows you to set properties that affect stylers before they are called using [[core.WidgetBase.FirstStyler]], like [[styles.Style.State]], and set style properties based on other style properties using [[core.WidgetBase.FinalStyler]], like [[styles.Style.Min]] based on [[styles.Style.Direction]].
 
 ## Styling multiple widgets
 

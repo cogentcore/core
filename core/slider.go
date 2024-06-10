@@ -196,7 +196,7 @@ func (sr *Slider) Init() {
 			}
 		}
 	})
-	sr.StyleFinal(func(s *styles.Style) {
+	sr.FinalStyler(func(s *styles.Style) {
 		if s.Direction == styles.Row {
 			s.Min.X.Em(20)
 			s.Min.Y.Em(1)

@@ -50,7 +50,7 @@ func (sv *SVG) Init() {
 			}
 		}
 	})
-	sv.StyleFinal(func(s *styles.Style) {
+	sv.FinalStyler(func(s *styles.Style) {
 		sv.SVG.Root.ViewBox.PreserveAspectRatio.SetFromStyle(s)
 	})
 

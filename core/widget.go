@@ -246,14 +246,14 @@ type WidgetBase struct {
 	// FirstStylers are a slice of functions that are called in sequential
 	// ascending order (so the last added styler is called last and
 	// thus overrides all other functions) to style the element.
-	// These should be set using StyleFirst function. These stylers
+	// These should be set using FirstStyler function. These stylers
 	// are called before Stylers and FinalStylers.
 	FirstStylers []func(s *styles.Style) `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// FinalStylers are a slice of functions that are called in sequential
 	// ascending order (so the last added styler is called last and
 	// thus overrides all other functions) to style the element.
-	// These should be set using StyleFinal function. These stylers
+	// These should be set using FinalStyler function. These stylers
 	// are called after FirstStylers and Stylers.
 	FinalStylers []func(s *styles.Style) `copier:"-" json:"-" xml:"-" set:"-"`
 
@@ -336,7 +336,7 @@ func (wb *WidgetBase) Init() {
 			s.Color = colors.C(colors.Scheme.Select.OnContainer)
 		}
 	})
-	wb.StyleFinal(func(s *styles.Style) {
+	wb.FinalStyler(func(s *styles.Style) {
 		if s.Is(states.Focused) {
 			s.Border.Style = s.MaxBorder.Style
 			s.Border.Color = s.MaxBorder.Color

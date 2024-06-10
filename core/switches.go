@@ -127,7 +127,7 @@ func (sw *Switches) Init() {
 			s.Wrap = true
 		}
 	})
-	sw.StyleFinal(func(s *styles.Style) {
+	sw.FinalStyler(func(s *styles.Style) {
 		if s.Direction == styles.Row {
 			s.Grow.Set(1, 0)
 		} else {

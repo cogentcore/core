@@ -75,7 +75,7 @@ func (m *Meter) Init() {
 		s.Background = colors.C(colors.Scheme.SurfaceVariant)
 		s.Border.Radius = styles.BorderRadiusFull
 	})
-	m.StyleFinal(func(s *styles.Style) {
+	m.FinalStyler(func(s *styles.Style) {
 		switch m.Type {
 		case MeterLinear:
 			if s.Direction == styles.Row {

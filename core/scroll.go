@@ -77,7 +77,7 @@ func (ly *Frame) ConfigScroll(d math32.Dims) {
 		s.Border.Width.Zero()
 		s.FillMargin = false
 	})
-	sb.StyleFinal(func(s *styles.Style) {
+	sb.FinalStyler(func(s *styles.Style) {
 		od := d.Other()
 		_, sz := ly.This().(Layouter).ScrollGeom(d)
 		if sz.X > 0 && sz.Y > 0 {

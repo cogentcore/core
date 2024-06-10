@@ -255,7 +255,7 @@ func (tf *TextField) Init() {
 			s.Background = colors.C(colors.Scheme.Select.Container)
 		}
 	})
-	tf.StyleFinal(func(s *styles.Style) {
+	tf.FinalStyler(func(s *styles.Style) {
 		tf.SetAbilities(!tf.IsReadOnly(), abilities.Focusable)
 	})
 

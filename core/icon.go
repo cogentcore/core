@@ -41,7 +41,7 @@ func (ic *Icon) Init() {
 	ic.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(1))
 	})
-	ic.StyleFinal(func(s *styles.Style) {
+	ic.FinalStyler(func(s *styles.Style) {
 		if ic.SVG.Root != nil {
 			ic.SVG.Root.ViewBox.PreserveAspectRatio.SetFromStyle(s)
 		}

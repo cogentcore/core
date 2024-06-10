@@ -72,7 +72,7 @@ func (st *Stage) addDialogParts() *Stage {
 	})
 	mv := NewHandle(parts).Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
-	}).StyleFinal(func(s *styles.Style) {
+	}).FinalStyler(func(s *styles.Style) {
 		s.Cursor = cursors.Move
 	})
 	mv.SetName("move")
@@ -94,7 +94,7 @@ func (st *Stage) addDialogParts() *Stage {
 	rsz := NewHandle(parts).Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.FillMargin = false
-	}).StyleFinal(func(s *styles.Style) {
+	}).FinalStyler(func(s *styles.Style) {
 		s.Cursor = cursors.ResizeNWSE
 		s.Min.Set(units.Em(1))
 	})

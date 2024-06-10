@@ -77,7 +77,7 @@ func (cv *ColorView) Init() {
 			}
 			s.Background = g
 		})
-		hue.StyleFinal(sf)
+		hue.FinalStyler(sf)
 
 		chroma := core.NewSlider(cv).SetMin(0).SetMax(150).SetValue(cv.Color.Chroma)
 		chroma.SetTooltip("The chroma, which is the colorfulness/saturation of the color")
@@ -95,7 +95,7 @@ func (cv *ColorView) Init() {
 			}
 			s.Background = g
 		})
-		chroma.StyleFinal(sf)
+		chroma.FinalStyler(sf)
 
 		tone := core.NewSlider(cv).SetMin(0).SetMax(100).SetValue(cv.Color.Tone)
 		tone.SetTooltip("The tone, which is the lightness of the color")
@@ -113,7 +113,7 @@ func (cv *ColorView) Init() {
 			}
 			s.Background = g
 		})
-		tone.StyleFinal(sf)
+		tone.FinalStyler(sf)
 	})
 }
 

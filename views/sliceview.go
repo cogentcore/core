@@ -301,7 +301,7 @@ func (sv *SliceViewBase) Init() {
 			svi.DropDeleteSource(e)
 		})
 	}
-	sv.StyleFinal(func(s *styles.Style) {
+	sv.FinalStyler(func(s *styles.Style) {
 		sv.NormalCursor = s.Cursor
 	})
 

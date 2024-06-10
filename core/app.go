@@ -140,7 +140,7 @@ func AppBarBackMaker(p *Plan) {
 			}
 		})
 		// TODO(kai/abc): app bar back button disabling
-		// bt.StyleFirst(func(s *styles.Style) {
+		// bt.FirstStyler(func(s *styles.Style) {
 		// 	if tb.Scene.Stage.Mains == nil {
 		// 		return
 		// 	}
