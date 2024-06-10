@@ -36,7 +36,7 @@ type Widget interface {
 	// as a child to the widget or any of its children.
 	OnWidgetAdded(f func(w Widget)) *WidgetBase
 
-	// Styler sets the styling properties of the widget by adding a styler function.
+	// See [WidgetBase.Styler].
 	Styler(s func(s *styles.Style)) *WidgetBase
 
 	// See [WidgetBase.Update].

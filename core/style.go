@@ -17,19 +17,6 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Styling logic; see render.go for rendering logic
-
-// CustomConfigStyles is the custom, global style configuration function
-// that is called on all widgets to configure their style functions.
-// By default, it is nil. If you set it, you should mostly call
-// AddStyleFunc within it. For reference on
-// how you should structure your CustomStyleFunc, you
-// should look at https://cogentcore.org/core/docs/gi/styling.
-var CustomConfigStyles func(w Widget)
-
-////////////////////////////////////////////////////////////////////
-// 	Widget Styling functions
-
 // Styler adds the given styler to the widget's Stylers.
 // It is one of the main ways for both end-user and internal code
 // to set the styles of a widget, in addition to FirstStyler
