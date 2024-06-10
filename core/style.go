@@ -17,7 +17,8 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Styler adds the given styler to the widget's Stylers.
+// Styler adds the given function for setting the style properties of the widget.
+// It is added to the widget's Stylers.
 // It is one of the main ways for both end-user and internal code
 // to set the styles of a widget, in addition to FirstStyler
 // and FinalStyler, which add stylers that are called before
