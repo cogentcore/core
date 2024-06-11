@@ -83,7 +83,7 @@ func (mrk *Marker) RenderMarker(sv *SVG, vertexPos math32.Vector2, vertexAng, st
 
 	mrk.Paint.Transform = mrk.Transform
 
-	// fmt.Println("render marker:", mrk.Name(), strokeWidth)
+	// fmt.Println("render marker:", mrk.Name, strokeWidth)
 	mrk.Render(sv)
 }
 

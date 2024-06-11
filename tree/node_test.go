@@ -243,7 +243,7 @@ func TestNodeWalk(t *testing.T) {
 	res := []string{}
 
 	schild1.WalkUp(func(n Node) bool {
-		res = append(res, n.AsTree().Name())
+		res = append(res, n.AsTree().Name)
 		return Continue
 	})
 
@@ -255,7 +255,7 @@ func TestNodeWalk(t *testing.T) {
 		return Continue
 	},
 		func(n Node) bool {
-			res = append(res, fmt.Sprintf("[%s]", n.AsTree().Name()))
+			res = append(res, fmt.Sprintf("[%s]", n.AsTree().Name))
 			return Continue
 		})
 	trg = []string{"[child0]", "[subchild1]", "[child1]", "[child2]", "[child3]", "[node-base]"}
@@ -264,16 +264,16 @@ func TestNodeWalk(t *testing.T) {
 
 	// test for Break working
 	parent.WalkDownPost(func(n Node) bool {
-		if n.AsTree().Name() == "child1" {
+		if n.AsTree().Name == "child1" {
 			return Break
 		}
 		return Continue
 	},
 		func(n Node) bool {
-			if n.AsTree().Name() == "child1" {
+			if n.AsTree().Name == "child1" {
 				return Break
 			}
-			res = append(res, fmt.Sprintf("[%s]", n.AsTree().Name()))
+			res = append(res, fmt.Sprintf("[%s]", n.AsTree().Name))
 			return Continue
 		})
 	trg = []string{"[child0]", "[child2]", "[child3]", "[node-base]"}
@@ -281,7 +281,7 @@ func TestNodeWalk(t *testing.T) {
 	res = res[:0]
 
 	parent.WalkDownBreadth(func(n Node) bool {
-		res = append(res, fmt.Sprintf("[%v]", n.AsTree().Name()))
+		res = append(res, fmt.Sprintf("[%v]", n.AsTree().Name))
 		return Continue
 	})
 	trg = []string{"[node-base]", "[child0]", "[child1]", "[child2]", "[child3]", "[subchild1]"}
@@ -290,10 +290,10 @@ func TestNodeWalk(t *testing.T) {
 
 	// test for return false
 	parent.WalkDownBreadth(func(n Node) bool {
-		if n.AsTree().Name() == "child1" {
+		if n.AsTree().Name == "child1" {
 			return Break
 		}
-		res = append(res, fmt.Sprintf("[%v]", n.AsTree().Name()))
+		res = append(res, fmt.Sprintf("[%v]", n.AsTree().Name))
 		return Continue
 	})
 	trg = []string{"[node-base]", "[child0]", "[child2]", "[child3]"}
@@ -374,23 +374,23 @@ func TestDirectives(t *testing.T) {
 
 func TestSetUniqueName(t *testing.T) {
 	root := NewNodeBase()
-	assert.Equal(t, "node-base", root.Name())
+	assert.Equal(t, "node-base", root.Name)
 	child := NewNodeBase(root)
-	assert.Equal(t, "node-base-0", child.Name())
+	assert.Equal(t, "node-base-0", child.Name)
 	child.SetName("my-name")
-	assert.Equal(t, "my-name", child.Name())
+	assert.Equal(t, "my-name", child.Name)
 
 	// does not change with SetParent when there is already a name
 	SetParent(child, root)
-	assert.Equal(t, "my-name", child.Name())
+	assert.Equal(t, "my-name", child.Name)
 
 	// but does change with SetUniqueName when there is already a name
 	SetUniqueName(child)
-	assert.Equal(t, "my-name-2", child.Name())
+	assert.Equal(t, "my-name-2", child.Name)
 
 	// ensure SetUniqueName works with different types
 	newChild := testdata.NewNodeEmbed(root)
-	assert.Equal(t, "node-embed-3", newChild.Name())
+	assert.Equal(t, "node-embed-3", newChild.Name)
 }
 
 func TestTreeMod(t *testing.T) {

@@ -820,17 +820,17 @@ func (rs *RenderScenes) SetImages(drw system.Drawer) {
 		if isSc && (sc.Is(ScUpdating) || !sc.Is(ScImageUpdated)) {
 			if DebugSettings.WinRenderTrace {
 				if sc.Is(ScUpdating) {
-					fmt.Println("RenderScenes.SetImages: sc IsUpdating", sc.Name())
+					fmt.Println("RenderScenes.SetImages: sc IsUpdating", sc.Name)
 				}
 				if !sc.Is(ScImageUpdated) {
-					fmt.Println("RenderScenes.SetImages: sc Image NotUpdated", sc.Name())
+					fmt.Println("RenderScenes.SetImages: sc Image NotUpdated", sc.Name)
 				}
 			}
 			skipScene = sc
 			continue
 		}
 		if DebugSettings.WinRenderTrace {
-			fmt.Println("RenderScenes.SetImages:", sc.Name())
+			fmt.Println("RenderScenes.SetImages:", sc.Name)
 		}
 		if isSc || sc != skipScene {
 			w.DirectRenderImage(drw, i)

@@ -350,7 +350,7 @@ func AddButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 			if npath != "" {
 				npath += " > "
 			}
-			if bt.Name() != "overflow-menu" {
+			if bt.Name != "overflow-menu" {
 				npath += label
 			}
 			AddButtonItems(items, tmps, npath)
@@ -370,7 +370,7 @@ func AddButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 		// after the quit button, there are the render wins,
 		// which we do not want to show here as we are already
 		// showing the stages
-		if bt.Name() == "quit-app" {
+		if bt.Name == "quit-app" {
 			break
 		}
 	}

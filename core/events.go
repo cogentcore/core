@@ -578,7 +578,7 @@ func (em *Events) HandleLong(e events.Event, deep Widget, w *Widget, pos *image.
 	em.TimerMu.Lock()
 	defer em.TimerMu.Unlock()
 
-	// fmt.Println("em:", em.Scene.Name())
+	// fmt.Println("em:", em.Scene.Name)
 
 	clearLong := func() {
 		if *t != nil {
@@ -1122,7 +1122,7 @@ func (em *Events) ManagerKeyChordEvents(e events.Event) {
 		}
 	case keymap.WinSnapshot:
 		dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
-		fnm, _ := filepath.Abs("./GrabOf_" + sc.Name() + "_" + dstr + ".png")
+		fnm, _ := filepath.Abs("./GrabOf_" + sc.Name + "_" + dstr + ".png")
 		imagex.Save(sc.Pixels, fnm)
 		fmt.Printf("Saved RenderWindow Image to: %s\n", fnm)
 		e.SetHandled()

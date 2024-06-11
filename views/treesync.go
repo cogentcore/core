@@ -66,7 +66,7 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 	sn := tv.SyncNode
 	// root must keep the same name for continuity with surrounding context
 	if tv != tv.RootView {
-		nm := "tv_" + sn.AsTree().Name()
+		nm := "tv_" + sn.AsTree().Name
 		tv.SetName(nm)
 	}
 	tv.ViewIndex = *tvIndex
@@ -78,7 +78,7 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 	p := make(tree.TypePlan, 0, len(skids))
 	typ := tv.This().NodeType()
 	for _, skid := range skids {
-		p.Add(typ, "tv_"+skid.AsTree().Name())
+		p.Add(typ, "tv_"+skid.AsTree().Name)
 	}
 	tree.Update(tv, p)
 	idx := 0
@@ -103,12 +103,12 @@ func (tv *TreeView) Label() string {
 		if lbl, has := labels.ToLabeler(tv.SyncNode); has {
 			return lbl
 		}
-		return tv.SyncNode.AsTree().Name()
+		return tv.SyncNode.AsTree().Name
 	}
 	if tv.Text != "" {
 		return tv.Text
 	}
-	return tv.Nm
+	return tv.Name
 }
 
 // UpdateReadOnly updates the ReadOnly state based on SyncNode.
@@ -205,7 +205,7 @@ func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *types.Type, n int) {
 	}
 	tv.SendChangeEventReSync(nil)
 	if sn != nil {
-		if tvk := tv.ChildByName("tv_"+sn.AsTree().Name(), 0); tvk != nil {
+		if tvk := tv.ChildByName("tv_"+sn.AsTree().Name, 0); tvk != nil {
 			stv := AsTreeView(tvk)
 			stv.SelectAction(events.SelectOne)
 		}
@@ -317,7 +317,7 @@ func (tv *TreeView) Duplicate() { //types:add
 	if myidx < 0 {
 		return
 	}
-	nm := fmt.Sprintf("%v_Copy", tv.Name())
+	nm := fmt.Sprintf("%v_Copy", tv.Name)
 	tv.Unselect()
 	nwkid := tv.Clone()
 	nwkid.AsTree().SetName(nm)
@@ -341,7 +341,7 @@ func (tv *TreeView) DuplicateSync() {
 	if myidx < 0 {
 		return
 	}
-	nm := fmt.Sprintf("%v_Copy", sn.AsTree().Name())
+	nm := fmt.Sprintf("%v_Copy", sn.AsTree().Name)
 	nwkid := sn.AsTree().Clone()
 	nwkid.AsTree().SetName(nm)
 	parent.AsTree().InsertChild(nwkid, myidx+1)
@@ -445,14 +445,14 @@ func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int,
 	for i, ns := range sl {
 		orgpath := pl[i]
 		if mod != events.DropMove {
-			if cn := parent.AsTree().ChildByName(ns.AsTree().Name(), 0); cn != nil {
-				ns.AsTree().SetName(ns.AsTree().Name() + "_Copy")
+			if cn := parent.AsTree().ChildByName(ns.AsTree().Name, 0); cn != nil {
+				ns.AsTree().SetName(ns.AsTree().Name + "_Copy")
 			}
 		}
 		parent.AsTree().InsertChild(ns, myidx+i)
 		npath := ns.AsTree().PathFrom(sroot)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
-			ns.AsTree().SetName(ns.AsTree().Name() + TreeViewTempMovedTag) // special keyword :)
+			ns.AsTree().SetName(ns.AsTree().Name + TreeViewTempMovedTag) // special keyword :)
 		}
 		if i == sz-1 {
 			seln = ns
@@ -460,7 +460,7 @@ func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int,
 	}
 	tvparent.SendChangeEventReSync(nil)
 	if seln != nil {
-		if tvk := tvparent.ChildByName("tv_"+seln.AsTree().Name(), myidx); tvk != nil {
+		if tvk := tvparent.ChildByName("tv_"+seln.AsTree().Name, myidx); tvk != nil {
 			stv := AsTreeView(tvk)
 			stv.SelectAction(events.SelectOne)
 		}

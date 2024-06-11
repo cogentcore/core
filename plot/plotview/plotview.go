@@ -151,7 +151,7 @@ func (pl *PlotView) ColParamsTry(colNm string) (*ColumnParams, error) {
 			return cp, nil
 		}
 	}
-	return nil, fmt.Errorf("plot: %v column named: %v not found", pl.Nm, colNm)
+	return nil, fmt.Errorf("plot: %v column named: %v not found", pl.Name, colNm)
 }
 
 // ColParams returns the current column parameters by name (to access by index, just use Columns directly)
@@ -580,7 +580,7 @@ func (pl *PlotView) MakeToolbar(p *core.Plan) {
 		w.SetText("Config").SetIcon(icons.Settings).
 			SetTooltip("set parameters that control display (font size etc)").
 			OnClick(func(e events.Event) {
-				d := core.NewBody().AddTitle(pl.Nm + " Params")
+				d := core.NewBody().AddTitle(pl.Name + " Params")
 				views.NewStructView(d).SetStruct(&pl.Params).
 					OnChange(func(e events.Event) {
 						pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
@@ -592,7 +592,7 @@ func (pl *PlotView) MakeToolbar(p *core.Plan) {
 		w.SetText("Table").SetIcon(icons.Edit).
 			SetTooltip("open a TableView window of the data").
 			OnClick(func(e events.Event) {
-				d := core.NewBody().AddTitle(pl.Nm + " Data")
+				d := core.NewBody().AddTitle(pl.Name + " Data")
 				tv := tensorview.NewTableView(d).SetTable(pl.Table.Table)
 				d.AddAppBar(tv.MakeToolbar)
 				d.NewFullDialog(pl).SetNewWindow(true).Run()

@@ -170,7 +170,7 @@ func (sc *Scene) TextureByNameTry(nm string) (Texture, error) {
 	if ok {
 		return tx, nil
 	}
-	return nil, fmt.Errorf("Texture named: %v not found in Scene: %v", nm, sc.Nm)
+	return nil, fmt.Errorf("Texture named: %v not found in Scene: %v", nm, sc.Name)
 }
 
 // TextureList returns a list of available textures (e.g., for chooser)

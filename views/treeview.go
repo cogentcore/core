@@ -486,7 +486,7 @@ func (tv *TreeView) Init() {
 
 func (tv *TreeView) OnAdd() {
 	tv.WidgetBase.OnAdd()
-	tv.Text = tv.Nm
+	tv.Text = tv.Name
 	if ptv := AsTreeView(tv.Parent()); ptv != nil {
 		tv.RootView = ptv.RootView
 		tv.IconOpen = ptv.IconOpen
@@ -1587,8 +1587,8 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 	for i, ns := range sl {
 		orgpath := pl[i]
 		if mod != events.DropMove {
-			if cn := parent.ChildByName(ns.AsTree().Name(), 0); cn != nil {
-				ns.AsTree().SetName(ns.AsTree().Name() + "_Copy")
+			if cn := parent.ChildByName(ns.AsTree().Name, 0); cn != nil {
+				ns.AsTree().SetName(ns.AsTree().Name + "_Copy")
 			}
 		}
 		parent.InsertChild(ns, myidx+i)
@@ -1599,7 +1599,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 		nwb.Update() // incl children
 		npath := ns.AsTree().PathFrom(tv.RootView)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
-			ns.AsTree().SetName(ns.AsTree().Name() + TreeViewTempMovedTag) // special keyword :)
+			ns.AsTree().SetName(ns.AsTree().Name + TreeViewTempMovedTag) // special keyword :)
 		}
 		if i == sz-1 {
 			selTv = ntv

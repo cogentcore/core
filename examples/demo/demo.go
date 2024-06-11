@@ -153,19 +153,19 @@ func buttons(ts *core.Tabs) {
 		b := core.NewButton(brow).SetType(typ).SetText(s).SetIcon(ics[typ]).
 			SetTooltip("A standard " + sl + " button with text and an icon")
 		b.OnClick(func(e events.Event) {
-			fmt.Println("Got click event on", b.Nm)
+			fmt.Println("Got click event on", b.Name)
 		})
 
 		bt := core.NewButton(browt).SetType(typ).SetText(s).
 			SetTooltip("A standard " + sl + " button with text")
 		bt.OnClick(func(e events.Event) {
-			fmt.Println("Got click event on", bt.Nm)
+			fmt.Println("Got click event on", bt.Name)
 		})
 
 		bi := core.NewButton(browi).SetType(typ).SetIcon(ics[typ+5]).
 			SetTooltip("A standard " + sl + " button with an icon")
 		bi.OnClick(func(e events.Event) {
-			fmt.Println("Got click event on", bi.Nm)
+			fmt.Println("Got click event on", bi.Name)
 		})
 
 		core.NewButton(mbrow).SetType(typ).SetText(s).SetIcon(ics[typ+10]).SetMenu(menu).

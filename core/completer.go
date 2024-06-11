@@ -155,7 +155,7 @@ func (c *Complete) ShowNowImpl(ctx Widget, pos image.Point, text string) bool {
 		c.Completions = c.Completions[0:SystemSettings.CompleteMaxItems]
 	}
 
-	sc := NewScene(ctx.AsTree().Name() + "-complete")
+	sc := NewScene(ctx.AsTree().Name + "-complete")
 	MenuSceneConfigStyles(sc)
 	c.Stage = NewPopupStage(CompleterStage, sc, ctx).SetPos(pos)
 	// we forward our key events to the context object

@@ -16,7 +16,7 @@ func (sc *Scene) AddToLibrary(gp *Group) {
 	if sc.Library == nil {
 		sc.Library = make(map[string]*Group)
 	}
-	sc.Library[gp.Name()] = gp
+	sc.Library[gp.Name] = gp
 	gp.Scene = sc
 }
 

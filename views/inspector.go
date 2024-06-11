@@ -61,7 +61,7 @@ func (is *Inspector) Init() {
 			s.Align.Self = styles.Center
 		})
 		w.Updater(func() {
-			w.SetText(fmt.Sprintf("Inspector of %s (%s)", is.CurrentNode.AsTree().Name(), labels.FriendlyTypeName(reflect.TypeOf(is.CurrentNode))))
+			w.SetText(fmt.Sprintf("Inspector of %s (%s)", is.CurrentNode.AsTree().Name, labels.FriendlyTypeName(reflect.TypeOf(is.CurrentNode))))
 		})
 	})
 	renderRebuild := func() {
@@ -305,8 +305,8 @@ func InspectorWindow(n tree.Node) {
 func InspectorView(b *core.Body, n tree.Node) {
 	b.SetTitle("Inspector").SetData(n)
 	if n != nil {
-		b.Nm += "-" + n.AsTree().Name()
-		b.Title += ": " + n.AsTree().Name()
+		b.Name += "-" + n.AsTree().Name
+		b.Title += ": " + n.AsTree().Name
 	}
 	is := NewInspector(b)
 	is.SetRoot(n)

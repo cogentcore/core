@@ -120,7 +120,7 @@ func (vw *View) InitLibraryBody(wn physics.Node, sc *xyz.Scene) {
 
 // InitLibSolid initializes Scene library with Solid for given body
 func (vw *View) InitLibSolid(bod physics.Body, sc *xyz.Scene) {
-	nm := bod.AsTree().Name()
+	nm := bod.AsTree().Name
 	bb := bod.AsBodyBase()
 	if bb.Vis == "" {
 		bb.Vis = nm
@@ -221,12 +221,12 @@ func (vw *View) ConfigView(wn physics.Node, vn xyz.Node, sc *xyz.Scene) {
 // efficient plan-based Build to maximally preserve existing tree elements
 // returns true if view tree was modified (elements added / removed etc)
 func (vw *View) SyncNode(wn physics.Node, vn xyz.Node, sc *xyz.Scene) bool {
-	nm := wn.AsTree().Name()
+	nm := wn.AsTree().Name
 	vn.AsTree().SetName(nm) // guaranteed to be unique
 	skids := wn.AsTree().Children
 	p := make(tree.TypePlan, 0, len(skids))
 	for _, skid := range skids {
-		p.Add(xyz.GroupType, skid.AsTree().Name())
+		p.Add(xyz.GroupType, skid.AsTree().Name)
 	}
 	mod := tree.Update(vn, p)
 	modall := mod
@@ -275,7 +275,7 @@ func (vw *View) UpdateBodyViewNode(bodyNames []string, wn physics.Node, vn xyz.N
 		match := false
 		if _, isBod := wk.(physics.Body); isBod {
 			for _, nm := range bodyNames {
-				if wk.AsTree().Name() == nm {
+				if wk.AsTree().Name == nm {
 					match = true
 					break
 				}

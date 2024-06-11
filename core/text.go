@@ -284,7 +284,7 @@ func (tx *Text) Label() string {
 	if tx.Text != "" {
 		return tx.Text
 	}
-	return tx.Nm
+	return tx.Name
 }
 
 // configTextSize does the HTML and Layout in paintText for text,

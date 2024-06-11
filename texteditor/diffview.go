@@ -679,7 +679,7 @@ func (tv *DiffTextEditor) HandleDoubleClick() {
 			ln := newPos.Ln
 			dv := tv.DiffView()
 			if dv != nil && tv.Buffer != nil {
-				if tv.Nm == "text-a" {
+				if tv.Name == "text-a" {
 					dv.ApplyDiff(0, ln)
 				} else {
 					dv.ApplyDiff(1, ln)

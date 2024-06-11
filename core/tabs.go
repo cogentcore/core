@@ -246,7 +246,7 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, icon ...ico
 		tab.SetIcon(icon[0])
 	}
 	tab.OnClick(func(e events.Event) {
-		ts.SelectTabByName(tab.Nm)
+		ts.SelectTabByName(tab.Name)
 	})
 	fr := ts.FrameWidget()
 	if len(fr.Children) == 1 {
@@ -558,7 +558,7 @@ func (tb *Tab) Init() {
 				})
 				w.OnClick(func(e events.Event) {
 					ts := tb.Tabs()
-					idx := ts.TabIndexByName(tb.Nm)
+					idx := ts.TabIndexByName(tb.Name)
 					// if OnlyCloseActiveTab is on, only process delete when already selected
 					if SystemSettings.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
 						ts.SelectTabIndex(idx)

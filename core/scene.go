@@ -118,7 +118,7 @@ func (sc *Scene) FlagType() enums.BitFlagSetter {
 // It will be constructed from the Bars-configured control bars on each
 // side, with the given Body as the central content.
 func NewBodyScene(body *Body) *Scene {
-	sc := NewScene(body.Name() + " scene")
+	sc := NewScene(body.Name + " scene")
 	sc.Body = body
 	// need to set parent immediately so that SceneConfig works,
 	// but can not add it yet because it may go elsewhere due

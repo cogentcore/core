@@ -92,8 +92,8 @@ func homePage(ctx *htmlview.Context) bool {
 				// we dynamically swap the graphic and text block so that they
 				// are ordered correctly based on our size class
 				sc := block.SizeClass()
-				wrongCompact := sc == core.SizeCompact && block.Child(1).AsTree().Name() == "text-block"
-				wrongNonCompact := sc != core.SizeCompact && block.Child(0).AsTree().Name() == "text-block"
+				wrongCompact := sc == core.SizeCompact && block.Child(1).AsTree().Name == "text-block"
+				wrongNonCompact := sc != core.SizeCompact && block.Child(0).AsTree().Name == "text-block"
 				if wrongCompact || wrongNonCompact {
 					block.Children = tree.Move(block.Children, 0, 1)
 				}

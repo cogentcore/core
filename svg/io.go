@@ -841,8 +841,8 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 	}
 	se := xml.StartElement{}
 	properties := itm.AsTree().Properties
-	if itm.AsTree().Name() != "" {
-		XMLAddAttr(&se.Attr, "id", itm.AsTree().Name())
+	if itm.AsTree().Name != "" {
+		XMLAddAttr(&se.Attr, "id", itm.AsTree().Name)
 	}
 	text := "" // if non-empty, contains text to render
 	_, issvg := itm.(Node)
@@ -879,7 +879,7 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "d", nd.DataStr)
 	case *Group:
 		nm = "g"
-		if strings.HasPrefix(strings.ToLower(itm.AsTree().Name()), "layer") {
+		if strings.HasPrefix(strings.ToLower(itm.AsTree().Name), "layer") {
 		}
 		for k, v := range properties {
 			sv := reflectx.ToString(v)
@@ -956,13 +956,13 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 		ib, fmt := imagex.ToBase64PNG(nd.Pixels)
 		XMLAddAttr(&se.Attr, "href", "data:"+fmt+";base64,"+string(imagex.Base64SplitLines(ib)))
 	case *MetaData:
-		if strings.HasPrefix(nd.Nm, "namedview") {
+		if strings.HasPrefix(nd.Name, "namedview") {
 			nm = "sodipodi:namedview"
-		} else if strings.HasPrefix(nd.Nm, "grid") {
+		} else if strings.HasPrefix(nd.Name, "grid") {
 			nm = "inkscape:grid"
 		}
 	case *Gradient:
-		SVGNodeXMLGrad(nd, nd.Nm, enc)
+		SVGNodeXMLGrad(nd, nd.Name, enc)
 		return "" // exclude -- already written
 	case *Marker:
 		nm = "marker"

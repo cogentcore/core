@@ -268,7 +268,7 @@ func (fn *Node) IsAutoSave() bool {
 // MyRelPath returns the relative path from root for this node
 func (fn *Node) MyRelPath() string {
 	if fn.IsIrregular() || fn.FRoot == nil {
-		return fn.Nm
+		return fn.Name
 	}
 	return dirs.RelFilePath(string(fn.FPath), string(fn.FRoot.FPath))
 }
@@ -315,11 +315,11 @@ func (fn *Node) SyncDir() {
 	for _, sfk := range fn.Children {
 		sf := AsNode(sfk)
 		sf.FRoot = fn.FRoot
-		if hasExtFiles && sf.Nm == ExternalFilesName {
+		if hasExtFiles && sf.Name == ExternalFilesName {
 			fn.FRoot.SyncExtFiles(sf)
 			continue
 		}
-		fp := filepath.Join(path, sf.Nm)
+		fp := filepath.Join(path, sf.Name)
 		// if sf.Buf != nil {
 		// 	fmt.Printf("fp: %v  nm: %v\n", fp, sf.Nm)
 		// }

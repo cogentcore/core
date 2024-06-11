@@ -305,7 +305,7 @@ func (rs MatchState) String() string {
 	if rs.Rule == nil {
 		return ""
 	}
-	return fmt.Sprintf("%v%v", rs.Rule.Name(), rs.Scope)
+	return fmt.Sprintf("%v%v", rs.Rule.Name, rs.Scope)
 }
 
 // MatchStack is the stack of rules that matched or ran for each token point

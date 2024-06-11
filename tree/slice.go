@@ -24,7 +24,7 @@ func IndexOf(slice []Node, child Node, startIndex ...int) int {
 // IndexByName returns the index of the first element in the given slice that
 // has the given name, or -1 if none is found. See [IndexOf] for info on startIndex.
 func IndexByName(slice []Node, name string, startIndex ...int) int {
-	return findfast.FindFunc(slice, func(ch Node) bool { return ch.AsTree().Name() == name }, startIndex...)
+	return findfast.FindFunc(slice, func(ch Node) bool { return ch.AsTree().Name == name }, startIndex...)
 }
 
 // IndexByType returns the index of the first element that either is the given type

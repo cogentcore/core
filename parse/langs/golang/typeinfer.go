@@ -72,7 +72,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 		case sy.Kind.SubCat() == token.NameVar:
 			var astyp *parser.Ast
 			if ast.HasChildren() {
-				if strings.HasPrefix(ast.Nm, "ForRange") {
+				if strings.HasPrefix(ast.Name, "ForRange") {
 					gl.InferForRangeSymbolType(sy, fs, pkg)
 				} else {
 					astyp = ast.ChildAst(len(ast.Children) - 1)
@@ -97,9 +97,9 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 				}
 			}
 		case sy.Kind == token.NameConstant:
-			if !strings.HasPrefix(ast.Nm, "ConstSpec") {
+			if !strings.HasPrefix(ast.Name, "ConstSpec") {
 				if TraceTypes {
-					fmt.Printf("InferSymbolType: NameConstant: %v not a const: %v\n", sy.Name, ast.Nm)
+					fmt.Printf("InferSymbolType: NameConstant: %v not a const: %v\n", sy.Name, ast.Name)
 				}
 				return
 			}
@@ -108,7 +108,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 				fc := parent.ChildAst(0)
 				if fc.HasChildren() {
 					ffc := fc.ChildAst(0)
-					if ffc.Nm == "Name" {
+					if ffc.Name == "Name" {
 						ffc = ffc.NextAst()
 					}
 					vty, ok := gl.TypeFromAst(fs, pkg, nil, ffc)
@@ -137,7 +137,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *parse.FileState, pkg *sym
 				// }
 				if ast.HasChildren() {
 					astyp := ast.ChildAst(len(ast.Children) - 1)
-					if astyp.Nm == "FieldTag" {
+					if astyp.Name == "FieldTag" {
 						// ast.WriteTree(os.Stdout, 1)
 						astyp = ast.ChildAst(len(ast.Children) - 2)
 					}

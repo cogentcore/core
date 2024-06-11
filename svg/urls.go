@@ -83,16 +83,16 @@ func (sv *SVG) NodeEnsureUniqueID(n Node) {
 		return
 	}
 	nb := n.AsNodeBase()
-	elpfx, id := SplitNameID(elnm, nb.Name())
+	elpfx, id := SplitNameID(elnm, nb.Name)
 	if !elpfx {
 		if !n.EnforceSVGName() { // if we end in a number, just register it anyway
-			_, id = SplitNameIDDig(nb.Name())
+			_, id = SplitNameIDDig(nb.Name)
 			if id > 0 {
 				sv.UniqueIDs[id] = struct{}{}
 			}
 			return
 		}
-		_, id = SplitNameIDDig(nb.Name())
+		_, id = SplitNameIDDig(nb.Name)
 		if id > 0 {
 			nb.SetName(NameID(elnm, id))
 		}
@@ -156,7 +156,7 @@ func (sv *SVG) FindNamedElement(name string) Node {
 		return def
 	}
 	sv.Root.WalkDown(func(n tree.Node) bool {
-		if n.AsTree().Name() == name {
+		if n.AsTree().Name == name {
 			def = n.(Node)
 			return tree.Break
 		}
@@ -274,7 +274,7 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 		n := sv.Defs.Children[i]
 		rc := n.AsTree().Property(refkey).(int)
 		if rc == 0 {
-			fmt.Printf("Deleting unused item: %s\n", n.AsTree().Name())
+			fmt.Printf("Deleting unused item: %s\n", n.AsTree().Name)
 			sv.Defs.Children = slices.Delete(sv.Defs.Children, i, i+1)
 			del = true
 		} else {

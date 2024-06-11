@@ -24,9 +24,8 @@ import (
 // in higher-level tree types.
 type NodeBase struct {
 
-	// Nm is the user-supplied name of this node, which can be empty and/or non-unique.
-	// It is typically accessed through [Node.Name].
-	Nm string `copier:"-" set:"-" label:"Name"`
+	// Name is the user-supplied name of this node, which can be empty and/or non-unique.
+	Name string `copier:"-" set:"-"`
 
 	// Flags are bit flags for internal node state, which can be extended using
 	// the enums package.
@@ -88,22 +87,16 @@ func (n *NodeBase) AsTree() *NodeBase {
 	return n
 }
 
-// Name returns the user-defined name of the Node, which can be
-// used for finding elements, generating paths, I/O, etc.
-func (n *NodeBase) Name() string {
-	return n.Nm
-}
-
 // PlanName implements [plan.Namer].
 func (n *NodeBase) PlanName() string {
-	return n.Nm
+	return n.Name
 }
 
 // SetName sets the name of this node. Names should generally be unique
 // across children of each node. If the node requires some non-unique name,
 // add a separate Label field.
 func (n *NodeBase) SetName(name string) {
-	n.Nm = name
+	n.Name = name
 }
 
 // BaseType returns the base node type for all elements within this tree.
@@ -155,7 +148,7 @@ func (n *NodeBase) ParentByName(name string) Node {
 	if IsRoot(n) {
 		return nil
 	}
-	if n.Par.AsTree().Name() == name {
+	if n.Par.AsTree().Name == name {
 		return n.Par
 	}
 	return n.Par.AsTree().ParentByName(name)
@@ -245,11 +238,11 @@ func UnescapePathName(name string) string {
 func (n *NodeBase) Path() string {
 	if n.Par != nil {
 		if n.Is(Field) {
-			return n.Par.AsTree().Path() + "." + EscapePathName(n.Nm)
+			return n.Par.AsTree().Path() + "." + EscapePathName(n.Name)
 		}
-		return n.Par.AsTree().Path() + "/" + EscapePathName(n.Nm)
+		return n.Par.AsTree().Path() + "/" + EscapePathName(n.Name)
 	}
-	return "/" + EscapePathName(n.Nm)
+	return "/" + EscapePathName(n.Name)
 }
 
 // PathFrom returns path to this node from the given parent node, using
@@ -268,18 +261,18 @@ func (n *NodeBase) PathFrom(parent Node) string {
 	parent = parent.AsTree().This()
 	// we bail a level below the parent so it isn't in the path
 	if n.Par == nil || n.Par == parent {
-		return EscapePathName(n.Nm)
+		return EscapePathName(n.Name)
 	}
 	ppath := ""
 	if n.Par == parent {
-		ppath = "/" + EscapePathName(parent.AsTree().Name())
+		ppath = "/" + EscapePathName(parent.AsTree().Name)
 	} else {
 		ppath = n.Par.AsTree().PathFrom(parent)
 	}
 	if n.Is(Field) {
-		return ppath + "." + EscapePathName(n.Nm)
+		return ppath + "." + EscapePathName(n.Name)
 	}
-	return ppath + "/" + EscapePathName(n.Nm)
+	return ppath + "/" + EscapePathName(n.Name)
 
 }
 
@@ -767,7 +760,7 @@ func copyFrom(to, from Node) {
 		p := make(TypePlan, len(fc))
 		for i, c := range fc {
 			p[i].Type = c.NodeType()
-			p[i].Name = c.AsTree().Name()
+			p[i].Name = c.AsTree().Name
 		}
 		UpdateSlice(&to.AsTree().Children, to, p)
 	}
@@ -787,7 +780,7 @@ func copyFrom(to, from Node) {
 func (n *NodeBase) Clone() Node {
 	nc := NewOfType(n.This().NodeType())
 	initNode(nc)
-	nc.AsTree().SetName(n.Nm)
+	nc.AsTree().SetName(n.Name)
 	nc.AsTree().CopyFrom(n.This())
 	return nc
 }

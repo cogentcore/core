@@ -1066,7 +1066,7 @@ func (wb *WidgetBase) SizeDownChildren(iter int) bool {
 	wb.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		re := kwi.SizeDown(iter)
 		if re && DebugSettings.LayoutTrace {
-			fmt.Println(wb, "SizeDownChildren child:", kwb.Nm, "triggered redo")
+			fmt.Println(wb, "SizeDownChildren child:", kwb.Name, "triggered redo")
 		}
 		redo = redo || re
 		return tree.Continue

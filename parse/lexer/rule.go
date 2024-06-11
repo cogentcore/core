@@ -494,7 +494,7 @@ func (lr *Rule) Find(find string) []*Rule {
 	var res []*Rule
 	lr.WalkDown(func(k tree.Node) bool {
 		lri := k.(*Rule)
-		if strings.Contains(lri.String, find) || strings.Contains(lri.Nm, find) {
+		if strings.Contains(lri.String, find) || strings.Contains(lri.Name, find) {
 			res = append(res, lri)
 		}
 		return true
@@ -537,12 +537,12 @@ func (lr *Rule) WriteGrammar(writer io.Writer, depth int) {
 			}
 		}
 		if lr.Desc != "" {
-			fmt.Fprintf(writer, "%v// %v %v \n", ind, lr.Nm, lr.Desc)
+			fmt.Fprintf(writer, "%v// %v %v \n", ind, lr.Name, lr.Desc)
 		}
 		if (lr.Match >= Letter && lr.Match <= WhiteSpace) || lr.Match == AnyRune {
-			fmt.Fprintf(writer, "%v%v:\t\t %v\t\t if %v%v%v%v\n", ind, lr.Nm, lr.Token, offstr, lr.Match, actstr, gpstr)
+			fmt.Fprintf(writer, "%v%v:\t\t %v\t\t if %v%v%v%v\n", ind, lr.Name, lr.Token, offstr, lr.Match, actstr, gpstr)
 		} else {
-			fmt.Fprintf(writer, "%v%v:\t\t %v\t\t if %v%v == \"%v\"%v%v\n", ind, lr.Nm, lr.Token, offstr, lr.Match, lr.String, actstr, gpstr)
+			fmt.Fprintf(writer, "%v%v:\t\t %v\t\t if %v%v == \"%v\"%v%v\n", ind, lr.Name, lr.Token, offstr, lr.Match, lr.String, actstr, gpstr)
 		}
 		if lr.HasChildren() {
 			w := tabwriter.NewWriter(writer, 4, 4, 2, ' ', 0)

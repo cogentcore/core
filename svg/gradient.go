@@ -253,7 +253,7 @@ func (sv *SVG) GradientUpdateNodeProp(n Node, prop string, radial bool, stops st
 		gr := sv.GradientByName(n, pstr)
 		gr.StopsName = stops
 		sv.GradientUpdateStops(gr)
-		return gr, NameToURL(gr.Nm)
+		return gr, NameToURL(gr.Name)
 	}
 	if strings.HasPrefix(pstr, "url(#") { // wrong kind
 		sv.GradientDeleteForNode(n, pstr)

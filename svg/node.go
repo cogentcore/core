@@ -394,7 +394,7 @@ func (g *NodeBase) StyleCSS(sv *SVG, css map[string]any) {
 	g.ApplyCSS(sv, tyn, css)
 	cln := "." + strings.ToLower(g.Class) // then class
 	g.ApplyCSS(sv, cln, css)
-	idnm := "#" + strings.ToLower(g.Name()) // then name
+	idnm := "#" + strings.ToLower(g.Name) // then name
 	g.ApplyCSS(sv, idnm, css)
 }
 

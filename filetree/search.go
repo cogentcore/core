@@ -84,7 +84,7 @@ func Search(start *Node, find string, ignoreCase, regExp bool, loc FindLoc, acti
 		if int(sfn.Info.Size) > core.SystemSettings.BigFileSize {
 			return tree.Continue
 		}
-		if strings.HasSuffix(sfn.Nm, ".code") { // exclude self
+		if strings.HasSuffix(sfn.Name, ".code") { // exclude self
 			return tree.Continue
 		}
 		if !fileinfo.IsMatchList(langs, sfn.Info.Known) {

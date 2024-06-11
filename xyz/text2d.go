@@ -119,7 +119,7 @@ func (txt *Text2D) RenderText() {
 	var tx Texture
 	var err error
 	if txt.Mat.TexPtr == nil {
-		txname := "__Text2D: " + txt.Nm
+		txname := "__Text2D: " + txt.Name
 		tx, err = txt.Scene.TextureByNameTry(txname)
 		if err != nil {
 			tx = &TextureBase{Nm: txname}

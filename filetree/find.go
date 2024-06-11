@@ -104,12 +104,12 @@ func (fn *Node) FilesMatching(match string, ignoreCase bool) []*Node {
 			return tree.Continue
 		}
 		if ignoreCase {
-			nm := strings.ToLower(sfn.Nm)
+			nm := strings.ToLower(sfn.Name)
 			if strings.Contains(nm, match) {
 				mls = append(mls, sfn)
 			}
 		} else {
-			if strings.Contains(sfn.Nm, match) {
+			if strings.Contains(sfn.Name, match) {
 				mls = append(mls, sfn)
 			}
 		}
@@ -147,7 +147,7 @@ func (fn *Node) FileExtCounts(cat fileinfo.Categories) []NodeNameCount {
 				return tree.Continue
 			}
 		}
-		ext := strings.ToLower(filepath.Ext(sfn.Nm))
+		ext := strings.ToLower(filepath.Ext(sfn.Name))
 		if ec, has := cmap[ext]; has {
 			cmap[ext] = ec + 1
 		} else {

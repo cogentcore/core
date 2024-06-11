@@ -82,7 +82,7 @@ func (sl Slice) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 		return err
 	}
 	for _, kid := range sl {
-		knm := reflect.TypeOf(kid).Elem().Name()
+		knm := reflect.TypeOf(kid).Elem().Name
 		ct := xml.StartElement{Name: xml.Name{Space: "", Local: knm}}
 		err := e.EncodeElement(kid, ct)
 		if err != nil {

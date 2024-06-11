@@ -121,7 +121,7 @@ func NewMenuStage(sc *Scene, ctx Widget, pos image.Point) *Stage {
 // can be chained directly after the New call.
 // Use Run call at the end to start the Stage running.
 func NewMenu(menu func(m *Scene), ctx Widget, pos image.Point) *Stage {
-	return NewMenuStage(NewMenuScene(menu, ctx.AsTree().Name()), ctx, pos)
+	return NewMenuStage(NewMenuScene(menu, ctx.AsTree().Name), ctx, pos)
 }
 
 // AddContextMenu adds the given context menu to [WidgetBase.ContextMenus].

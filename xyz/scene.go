@@ -141,7 +141,7 @@ func (sc *Scene) SaveCamera(name string) {
 func (sc *Scene) SetCamera(name string) error {
 	cam, ok := sc.SavedCams[name]
 	if !ok {
-		return fmt.Errorf("xyz.Scene: %v saved camera of name: %v not found", sc.Nm, name)
+		return fmt.Errorf("xyz.Scene: %v saved camera of name: %v not found", sc.Name, name)
 	}
 	sc.Camera = cam
 	return nil

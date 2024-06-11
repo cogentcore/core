@@ -22,7 +22,7 @@ import (
 
 func LayoutTestFile(t *testing.T) string {
 	p := filepath.Join("testdata", "layout")
-	tnm := strcase.ToSnake(strings.TrimPrefix(t.Name(), "TestLayout"))
+	tnm := strcase.ToSnake(strings.TrimPrefix(t.Name, "TestLayout"))
 	n := filepath.Join("layout", tnm)
 	errors.Log(os.MkdirAll(p, 0750))
 	return n

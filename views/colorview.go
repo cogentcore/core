@@ -152,10 +152,10 @@ func (cv *ColorView) Init() {
 				s.Margin.Set(units.Dp(6))
 			})
 		}
-		if w.Parent().Name() == "palette" {
+		if w.Parent().Name == "palette" {
 			if cbt, ok := w.(*core.Button); ok {
 				cbt.Style(func(s *styles.Style) {
-					c := colornames.Map[cbt.Name()]
+					c := colornames.Map[cbt.Name]
 
 					s.BackgroundColor.SetSolid(c)
 					s.Max.Set(units.Em(1.3))
@@ -432,7 +432,7 @@ func (cv *ColorView) ConfigPalette() {
 		cbt.Tooltip = cn
 		cbt.SetText("  ")
 		cbt.OnChange(func(e events.Event) {
-			cv.SetColor(errors.Log(colors.FromName(cbt.Name())))
+			cv.SetColor(errors.Log(colors.FromName(cbt.Name)))
 		})
 	}
 }

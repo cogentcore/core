@@ -41,7 +41,7 @@ func (gl *GoLang) TypeFromAstExpr(fs *parse.FileState, origPkg, pkg *syms.Symbol
 	// 	tyast.WriteTree(os.Stdout, 0)
 	// }
 
-	tnm := tyast.Nm
+	tnm := tyast.Name
 
 	switch {
 	case tnm == "FuncCall":
@@ -92,9 +92,9 @@ func (gl *GoLang) TypeFromAstExpr(fs *parse.FileState, origPkg, pkg *syms.Symbol
 			return nil, nil, false
 		}
 		tnmA := tyast.ChildAst(0)
-		if tnmA.Nm != "Name" {
+		if tnmA.Name != "Name" {
 			if TraceTypes {
-				fmt.Printf("TExpr: selector start node kid is not a Name: %v, src: %v\n", tnmA.Nm, tnmA.Src)
+				fmt.Printf("TExpr: selector start node kid is not a Name: %v, src: %v\n", tnmA.Name, tnmA.Src)
 				tnmA.WriteTree(os.Stdout, 0)
 			}
 			return nil, tnmA, false
@@ -105,9 +105,9 @@ func (gl *GoLang) TypeFromAstExpr(fs *parse.FileState, origPkg, pkg *syms.Symbol
 			return nil, nil, false
 		}
 		tnmA := tyast.ChildAst(0)
-		if tnmA.Nm != "Name" {
+		if tnmA.Name != "Name" {
 			if TraceTypes {
-				fmt.Printf("TExpr: slice start node kid is not a Name: %v, src: %v\n", tnmA.Nm, tnmA.Src)
+				fmt.Printf("TExpr: slice start node kid is not a Name: %v, src: %v\n", tnmA.Name, tnmA.Src)
 			}
 			return nil, tnmA, false
 		}
@@ -138,7 +138,7 @@ func (gl *GoLang) TypeFromAstExpr(fs *parse.FileState, origPkg, pkg *syms.Symbol
 		ch := tyast.ChildAst(0)
 		snm := tyast.Src[1:] // after &
 		var sty *syms.Type
-		switch ch.Nm {
+		switch ch.Name {
 		case "CompositeLit":
 			sty, _ = gl.SubTypeFromAst(fs, pkg, ch, 0)
 		case "Selector":
@@ -187,7 +187,7 @@ func (gl *GoLang) TypeFromAstExpr(fs *parse.FileState, origPkg, pkg *syms.Symbol
 		return sty, nil, got
 	default:
 		if TraceTypes {
-			fmt.Printf("TExpr: cannot start with: %v\n", tyast.Nm)
+			fmt.Printf("TExpr: cannot start with: %v\n", tyast.Name)
 			tyast.WriteTree(os.Stdout, 0)
 		}
 		return nil, tyast, false
@@ -257,7 +257,7 @@ func (gl *GoLang) TypeFromAstType(fs *parse.FileState, origPkg, pkg *syms.Symbol
 		return ttp, tyast, true
 	}
 
-	if tyast.Nm == "QualType" && tnm != tyast.Src {
+	if tyast.Name == "QualType" && tnm != tyast.Src {
 		// tyast.Src is new type name
 		return gl.TypeFromAstType(fs, origPkg, pkg, tyast, last, tyast.Src)
 	}
@@ -273,17 +273,17 @@ func (gl *GoLang) TypeFromAstType(fs *parse.FileState, origPkg, pkg *syms.Symbol
 		}
 		brk := false
 		switch {
-		case nxt.Nm == "Name":
+		case nxt.Name == "Name":
 			brk = true
-		case strings.HasPrefix(nxt.Nm, "Lit"):
+		case strings.HasPrefix(nxt.Name, "Lit"):
 			sty, got := gl.TypeFromAstLit(fs, pkg, nil, nxt)
 			return sty, nil, got
-		case nxt.Nm == "TypeAssert":
+		case nxt.Name == "TypeAssert":
 			sty, got := gl.SubTypeFromAst(fs, origPkg, nxt, 1) // type is second child, switch back to orig pkg
 			return sty, nil, got
-		case nxt.Nm == "Slice":
+		case nxt.Name == "Slice":
 			continue
-		case strings.HasPrefix(nxt.Nm, "Slice"):
+		case strings.HasPrefix(nxt.Name, "Slice"):
 			eltyp := ttp.Els.ByName("val")
 			if eltyp != nil {
 				elnm := QualifyType(pkgnm, eltyp.Type)
@@ -299,7 +299,7 @@ func (gl *GoLang) TypeFromAstType(fs *parse.FileState, origPkg, pkg *syms.Symbol
 				fmt.Printf("TExpr: slice operator not on slice: %v\n", ttp.Name)
 				tyast.WriteTree(os.Stdout, 0)
 			}
-		case nxt.Nm == "FuncCall":
+		case nxt.Name == "FuncCall":
 			// ttp is the function type name
 			fun := nxt.NextAst()
 			if fun == nil || fun == last {
@@ -360,8 +360,8 @@ func (gl *GoLang) TypeFromFuncCall(fs *parse.FileState, origPkg, pkg *syms.Symbo
 		}
 		return nil, nxt, false // no return -- shouldn't happen
 	}
-	rtyp := ftyp.Els[npars]             // first return
-	if nxt != nil && nxt.Nm == "Name" { // direct de-ref on function return value -- AstType assumes nxt is type el
+	rtyp := ftyp.Els[npars]               // first return
+	if nxt != nil && nxt.Name == "Name" { // direct de-ref on function return value -- AstType assumes nxt is type el
 		prv := nxt.PrevAst()
 		if prv != tyast {
 			nxt = prv
@@ -398,7 +398,7 @@ func (gl *GoLang) TypeFromAstName(fs *parse.FileState, origPkg, pkg *syms.Symbol
 		// }
 		nxt := tyast.NextAst()
 		if nxt != nil {
-			if nxt.Nm == "Selector" {
+			if nxt.Name == "Selector" {
 				nxt = nxt.NextAst()
 			}
 			return gl.TypeFromAstExpr(fs, origPkg, psym, nxt, last)

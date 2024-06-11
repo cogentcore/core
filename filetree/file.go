@@ -227,7 +227,7 @@ func (fn *Node) RenameFiles() { //types:add
 	fn.FRoot.NeedsLayout()
 	fn.SelectedFunc(func(sn *Node) {
 		fb := views.NewSoloFuncButton(sn, sn.RenameFile)
-		fb.Args[0].SetValue(sn.Name())
+		fb.Args[0].SetValue(sn.Name)
 		fb.CallFunc()
 	})
 }

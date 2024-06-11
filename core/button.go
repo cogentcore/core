@@ -294,7 +294,7 @@ func (bt *Button) Label() string {
 	if bt.Text != "" {
 		return bt.Text
 	}
-	return bt.Nm
+	return bt.Name
 }
 
 // HasMenu returns true if the button has a menu that pops up when it is clicked

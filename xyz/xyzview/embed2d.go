@@ -142,7 +142,7 @@ func (em *Embed2D) UploadViewTex(sc *Scene) {
 	} else {
 		tx = em.Mat.TexPtr
 		tx.SetImage(img)
-		sc.Phong.UpdateTextureName(tx.Name())
+		sc.Phong.UpdateTextureName(tx.Name)
 	}
 }
 

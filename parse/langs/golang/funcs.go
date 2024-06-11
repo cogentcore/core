@@ -88,20 +88,20 @@ func (gl *GoLang) FuncTypeFromAst(fs *parse.FileState, pkg *syms.Symbol, ast *pa
 	}
 	poff := 0
 	isMeth := false
-	if pars.Nm == "MethRecvName" && len(ast.Children) > 2 {
+	if pars.Name == "MethRecvName" && len(ast.Children) > 2 {
 		isMeth = true
 		rcv := pars.Children[0].(*parser.Ast)
 		rtyp := pars.Children[1].(*parser.Ast)
 		fty.Els.Add(rcv.Src, rtyp.Src)
 		poff = 2
 		pars = ast.ChildAst(2)
-	} else if pars.Nm == "Name" && len(ast.Children) > 1 {
+	} else if pars.Name == "Name" && len(ast.Children) > 1 {
 		poff = 1
 		pars = ast.ChildAst(1)
 	}
 	npars := len(pars.Children)
 	var sigpars *parser.Ast
-	if npars > 0 && (pars.Nm == "SigParams" || pars.Nm == "SigParamsResult") {
+	if npars > 0 && (pars.Name == "SigParams" || pars.Name == "SigParamsResult") {
 		if ps := pars.ChildAst(0); ps == nil {
 			sigpars = pars
 			pars = ps
@@ -139,9 +139,9 @@ func (gl *GoLang) ParamsFromAst(fs *parse.FileState, pkg *syms.Symbol, pars *par
 	for i := 0; i < npars; i++ {
 		par := pars.Children[i].(*parser.Ast)
 		psz := len(par.Children)
-		if par.Nm == "ParType" && psz == 1 {
+		if par.Name == "ParType" && psz == 1 {
 			ptypa := par.Children[0].(*parser.Ast)
-			if ptypa.Nm == "TypeNm" { // could be multiple args with same type or a separate type-only arg
+			if ptypa.Name == "TypeNm" { // could be multiple args with same type or a separate type-only arg
 				if ptl, _ := gl.FindTypeName(par.Src, fs, pkg); ptl != nil {
 					fty.Els.Add(fmt.Sprintf("%s_%v", name, i), par.Src)
 					continue
@@ -181,13 +181,13 @@ func (gl *GoLang) ParamsFromAst(fs *parse.FileState, pkg *syms.Symbol, pars *par
 
 // RvalsFromAst sets return value(s) as Els for given function type
 func (gl *GoLang) RvalsFromAst(fs *parse.FileState, pkg *syms.Symbol, rvals *parser.Ast, fty *syms.Type) {
-	if rvals.Nm == "Block" { // todo: maybe others
+	if rvals.Name == "Block" { // todo: maybe others
 		return
 	}
 	nrvals := len(rvals.Children)
 	if nrvals == 1 { // single rval, unnamed, has type directly..
 		rval := rvals.ChildAst(0)
-		if rval.Nm != "ParName" {
+		if rval.Name != "ParName" {
 			nrvals = 1
 			rtyp, ok := gl.SubTypeFromAst(fs, pkg, rvals, 0)
 			if ok {

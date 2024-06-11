@@ -232,7 +232,7 @@ func (sw *Scene) handleSlideEvents() {
 		del := e.PrevDelta()
 		dx := float32(del.X)
 		dy := float32(del.Y)
-		mpos := mpt.Nm[len(ManipBoxName)+1:] // has ull etc for where positioned
+		mpos := mpt.Name[len(ManipBoxName)+1:] // has ull etc for where positioned
 		camd, sgn := xy.Camera.ViewMainAxis()
 		var dm math32.Vector3 // delta multiplier
 		if mpos[math32.X] == 'u' {

@@ -187,7 +187,7 @@ var TypeToKindMap = map[string]syms.Kinds{
 // AstTypeName returns the effective type name from ast node
 // dropping the "Lit" for example.
 func (gl *GoLang) AstTypeName(tyast *parser.Ast) string {
-	tnm := tyast.Nm
+	tnm := tyast.Name
 	if strings.HasPrefix(tnm, "Lit") {
 		tnm = tnm[3:]
 	}
@@ -348,7 +348,7 @@ func (gl *GoLang) TypeFromAstComp(fs *parse.FileState, pkg *syms.Symbol, ty *sym
 		for i := 0; i < nfld; i++ {
 			fld := tyast.Children[i].(*parser.Ast)
 			fsrc := fld.Src
-			switch fld.Nm {
+			switch fld.Name {
 			case "NamedField":
 				if len(fld.Children) <= 1 { // anonymous, non-qualified
 					ty.Els.Add(fsrc, fsrc)
@@ -384,7 +384,7 @@ func (gl *GoLang) TypeFromAstComp(fs *parse.FileState, pkg *syms.Symbol, ty *sym
 		for i := 0; i < nmth; i++ {
 			fld := tyast.Children[i].(*parser.Ast)
 			fsrc := fld.Src
-			switch fld.Nm {
+			switch fld.Name {
 			case "MethSpecAnonLocal":
 				fallthrough
 			case "MethSpecAnonQual":
@@ -431,7 +431,7 @@ func (gl *GoLang) TypeFromAstComp(fs *parse.FileState, pkg *syms.Symbol, ty *sym
 
 // TypeFromAstLit gets type from literals
 func (gl *GoLang) TypeFromAstLit(fs *parse.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parser.Ast) (*syms.Type, bool) {
-	tnm := tyast.Nm
+	tnm := tyast.Name
 	var bty *syms.Type
 	switch tnm {
 	case "LitStringDbl":

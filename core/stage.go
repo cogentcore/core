@@ -176,7 +176,7 @@ type Stage struct { //types:add -setters
 func (st *Stage) String() string {
 	str := fmt.Sprintf("%s Type: %s", st.Name, st.Type)
 	if st.Scene != nil {
-		str += "  Scene: " + st.Scene.Name()
+		str += "  Scene: " + st.Scene.Name
 	}
 	rc := st.RenderContext
 	if rc != nil {
@@ -195,7 +195,7 @@ func (st *Stage) SetNameFromScene() *Stage {
 		return nil
 	}
 	sc := st.Scene
-	st.Name = sc.Name() + "-" + strings.ToLower(st.Type.String())
+	st.Name = sc.Name + "-" + strings.ToLower(st.Type.String())
 	if sc.Body != nil {
 		st.Title = sc.Body.Title
 	}
@@ -324,7 +324,7 @@ func (st *Stage) DoUpdate() (stageMods, sceneMods bool) {
 	scMods := st.Scene.DoUpdate()
 	sceneMods = sceneMods || scMods
 	// if scMods {
-	// 	fmt.Println("scene mod", st.Scene.Name())
+	// 	fmt.Println("scene mod", st.Scene.Name)
 	// }
 	return
 }

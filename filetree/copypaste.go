@@ -210,9 +210,9 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 		mode = sfn.Info.Mode
 	}
 	switch {
-	case len(existing) == 1 && fname == fn.Nm:
+	case len(existing) == 1 && fname == fn.Name:
 		d := core.NewBody().AddTitle("Overwrite?").
-			AddText(fmt.Sprintf("Overwrite target file: %s with source file of same name?, or diff (compare) two files?", fn.Nm))
+			AddText(fmt.Sprintf("Overwrite target file: %s with source file of same name?, or diff (compare) two files?", fn.Name))
 		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent)
 			d.AddOK(parent).SetText("Diff (compare)").OnClick(func(e events.Event) {
@@ -228,7 +228,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 		d.RunDialog(fn)
 	case len(existing) > 0:
 		d := core.NewBody().AddTitle("Overwrite?").
-			AddText(fmt.Sprintf("Overwrite target file: %s with source file: %s, or overwrite existing file with same name as source file (%s), or diff (compare) files?", fn.Nm, fname, fname))
+			AddText(fmt.Sprintf("Overwrite target file: %s with source file: %s, or overwrite existing file with same name as source file (%s), or diff (compare) files?", fn.Name, fname, fname))
 		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent)
 			d.AddOK(parent).SetText("Diff to target").OnClick(func(e events.Event) {
@@ -255,7 +255,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 		d.RunDialog(fn)
 	default:
 		d := core.NewBody().AddTitle("Overwrite?").
-			AddText(fmt.Sprintf("Overwrite target file: %s with source file: %s, or copy to: %s in current folder (which doesn't yet exist), or diff (compare) the two files?", fn.Nm, fname, fname))
+			AddText(fmt.Sprintf("Overwrite target file: %s with source file: %s, or copy to: %s in current folder (which doesn't yet exist), or diff (compare) the two files?", fn.Name, fname, fname))
 		d.AddBottomBar(func(parent core.Widget) {
 			d.AddCancel(parent)
 			d.AddOK(parent).SetText("Diff (compare)").OnClick(func(e events.Event) {
