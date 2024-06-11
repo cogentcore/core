@@ -102,7 +102,7 @@ func (sp *Spinner) Init() {
 		// s.Text.Align = styles.End // this doesn't work
 	})
 	sp.OnWidgetAdded(func(w Widget) {
-		switch w.PathFrom(sp) {
+		switch w.AsTree().PathFrom(sp) {
 		case "lead-icon", "trail-icon": // TODO(config)
 			w.Styler(func(s *styles.Style) {
 				// icons do not get separate focus, as people can

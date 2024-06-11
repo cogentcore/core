@@ -72,11 +72,11 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 	}
 
 	hasSelected := false
-	msc.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		if wi.This() == msc.This() {
+	msc.WidgetWalkDown(func(w Widget, wb *WidgetBase) bool {
+		if w == msc {
 			return tree.Continue
 		}
-		if bt := AsButton(wi); bt != nil {
+		if bt := AsButton(w); bt != nil {
 			if bt.Menu == nil {
 				bt.handleClickDismissMenu()
 			}
@@ -121,7 +121,7 @@ func NewMenuStage(sc *Scene, ctx Widget, pos image.Point) *Stage {
 // can be chained directly after the New call.
 // Use Run call at the end to start the Stage running.
 func NewMenu(menu func(m *Scene), ctx Widget, pos image.Point) *Stage {
-	return NewMenuStage(NewMenuScene(menu, ctx.Name()), ctx, pos)
+	return NewMenuStage(NewMenuScene(menu, ctx.AsTree().Name()), ctx, pos)
 }
 
 // AddContextMenu adds the given context menu to [WidgetBase.ContextMenus].

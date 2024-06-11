@@ -230,7 +230,7 @@ func (st *Stage) RunWindow() *Stage {
 // If CurrentRenderWindow is nil (should not happen), then it returns false and
 // the calling function must bail.
 func (st *Stage) GetValidContext() bool {
-	if st.Context == nil || st.Context.This() == nil || st.Context.AsWidget().Scene == nil {
+	if st.Context == nil || st.Context.AsTree().This() == nil || st.Context.AsWidget().Scene == nil {
 		if CurrentRenderWindow == nil {
 			slog.Error("Stage.Run: Context is nil and CurrentRenderWindow is nil, so cannot Run", "Name", st.Name, "Title", st.Title)
 			return false

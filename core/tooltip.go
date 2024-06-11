@@ -47,7 +47,7 @@ func NewTooltipTextSize(w Widget, tooltip string, pos, sz image.Point) *Stage {
 // NewTooltipScene returns a new tooltip scene for the given widget with the
 // given tooltip based on the given context position and context size.
 func NewTooltipScene(w Widget, tooltip string, pos, sz image.Point) *Scene {
-	sc := NewScene(w.Name() + "-tooltip")
+	sc := NewScene(w.AsTree().Name() + "-tooltip")
 	// tooltip positioning uses the original scene geom as the context values
 	sc.SceneGeom.Pos = pos
 	sc.SceneGeom.Size = sz // used for positioning if needed

@@ -125,7 +125,7 @@ func (ts *Tabs) Init() {
 		}
 	})
 	ts.OnWidgetAdded(func(w Widget) {
-		if w.Parent() == ts.ChildByName("frame") { // TODO(config): figure out how to get this to work with new config paradigm
+		if w.AsTree().Parent() == ts.ChildByName("frame") { // TODO(config): figure out how to get this to work with new config paradigm
 			w.Styler(func(s *styles.Style) {
 				// tab frames must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)
@@ -332,19 +332,6 @@ func (ts *Tabs) TabIndexByName(name string) int {
 		return -1
 	}
 	return tab.AsTree().IndexInParent()
-}
-
-// TabLabel returns tab label at given index
-func (ts *Tabs) TabLabel(idx int) string {
-	ts.Mu.Lock()
-	defer ts.Mu.Unlock()
-
-	tb := ts.Tabs()
-	tbut := tb.Child(idx)
-	if tbut == nil {
-		return ""
-	}
-	return tbut.Name()
 }
 
 // SelectTabByName selects tab by widget name, returning it.
@@ -589,5 +576,5 @@ func (tb *Tab) Init() {
 
 // Tabs returns the parent [Tabs] of this [Tab].
 func (tb *Tab) Tabs() *Tabs {
-	return tb.Parent().Parent().(*Tabs)
+	return tb.Parent().AsTree().Parent().(*Tabs)
 }

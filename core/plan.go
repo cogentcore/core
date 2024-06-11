@@ -151,7 +151,7 @@ func (p *Plan) Update(w Widget) {
 	wb := w.AsWidget()
 	makeNew := func(item *PlanItem) Widget {
 		child := item.New()
-		child.SetName(item.Name)
+		child.AsTree().SetName(item.Name)
 		tree.SetParent(child, wb)
 		for _, f := range item.Init {
 			f(child)

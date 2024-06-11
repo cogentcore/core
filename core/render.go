@@ -106,13 +106,6 @@ func (wb *WidgetBase) NeedsRender() {
 	if wb.Scene != nil {
 		wb.Scene.SetFlag(true, ScNeedsRender)
 	}
-	// parent of Parts needs to render if parent
-	fi := wb.ParentWidgetIf(func(p *WidgetBase) bool {
-		return p.Is(tree.Field)
-	})
-	if fi != nil && fi.Parent() != nil && fi.Parent().This() != nil {
-		fi.Parent().(Widget).AsWidget().NeedsRender()
-	}
 }
 
 // NeedsLayout specifies that the widget's scene needs to do a layout.
@@ -198,12 +191,12 @@ func (wb *WidgetBase) DoNeedsRender() {
 		return
 	}
 	// pr := profile.Start(wb.This().NodeType().ShortName())
-	wb.WidgetWalkDown(func(kwi Widget, kwb *WidgetBase) bool {
-		if kwi.Is(NeedsRender) {
-			kwi.RenderWidget()
+	wb.WidgetWalkDown(func(w Widget, cwb *WidgetBase) bool {
+		if cwb.Is(NeedsRender) {
+			w.RenderWidget()
 			return tree.Break // done
 		}
-		if ly := AsFrame(kwi); ly != nil {
+		if ly := AsFrame(w); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
 				if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 					ly.Scrolls[d].DoNeedsRender()
@@ -263,7 +256,7 @@ func (sc *Scene) DoUpdate() bool {
 	case len(sc.ReRender) > 0:
 		// fmt.Println("re-render")
 		for _, w := range sc.ReRender {
-			w.SetFlag(true, ScNeedsRender)
+			w.AsTree().SetFlag(true, ScNeedsRender)
 			// fmt.Println("rerender:", w)
 		}
 		sc.ReRender = nil
