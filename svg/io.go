@@ -509,7 +509,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					case "href":
 						nm := attr.Value
 						nm = strings.TrimPrefix(nm, "#")
-						hr := curPar.ChildByName(nm, 0)
+						hr := curPar.AsTree().ChildByName(nm, 0)
 						if hr != nil {
 							if hrg, ok := hr.(*Gradient); ok {
 								grad.StopsName = nm
@@ -537,7 +537,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					case "href":
 						nm := attr.Value
 						nm = strings.TrimPrefix(nm, "#")
-						hr := curPar.ChildByName(nm, 0)
+						hr := curPar.AsTree().ChildByName(nm, 0)
 						if hr != nil {
 							if hrg, ok := hr.(*Gradient); ok {
 								grad.StopsName = nm
@@ -626,7 +626,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				link := gradient.XMLAttr("href", se.Attr)
 				itm := sv.FindNamedElement(link)
 				if itm != nil {
-					cln := itm.Clone().(Node)
+					cln := itm.AsTree().Clone().(Node)
 					if cln != nil {
 						curPar.AsTree().AddChild(cln)
 						for _, attr := range se.Attr {
@@ -740,10 +740,10 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				if curPar == sv.Root.This() {
 					break
 				}
-				if curPar.Parent() == nil {
+				if curPar.AsTree().Parent() == nil {
 					break
 				}
-				curPar = curPar.Parent().(Node)
+				curPar = curPar.AsTree().Parent().(Node)
 				if curPar == sv.Root.This() {
 					break
 				}
@@ -836,13 +836,13 @@ var InkscapeProperties = map[string]bool{
 // returns name of node, for end tag -- if empty, then children will not be
 // output.
 func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
-	if itm == nil || itm.This() == nil {
+	if itm == nil || itm.AsTree().This() == nil {
 		return ""
 	}
 	se := xml.StartElement{}
 	properties := itm.AsTree().Properties
-	if itm.Name() != "" {
-		XMLAddAttr(&se.Attr, "id", itm.Name())
+	if itm.AsTree().Name() != "" {
+		XMLAddAttr(&se.Attr, "id", itm.AsTree().Name())
 	}
 	text := "" // if non-empty, contains text to render
 	_, issvg := itm.(Node)
@@ -879,7 +879,7 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "d", nd.DataStr)
 	case *Group:
 		nm = "g"
-		if strings.HasPrefix(strings.ToLower(itm.Name()), "layer") {
+		if strings.HasPrefix(strings.ToLower(itm.AsTree().Name()), "layer") {
 		}
 		for k, v := range properties {
 			sv := reflectx.ToString(v)
