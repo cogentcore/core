@@ -182,7 +182,7 @@ func (sp *Spell) ShowNow(word string, ctx core.Widget, pos image.Point) {
 	sp.ShowMu.Lock()
 	defer sp.ShowMu.Unlock()
 
-	sc := core.NewScene(ctx.Name() + "-spell")
+	sc := core.NewScene(ctx.AsTree().Name() + "-spell")
 	core.MenuSceneConfigStyles(sc)
 	sp.Stage = core.NewPopupStage(core.CompleterStage, sc, ctx).SetPos(pos)
 

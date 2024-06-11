@@ -65,7 +65,7 @@ func (br *Browser) Splits() *core.Splits {
 
 func (br *Browser) Tree() *Node {
 	sp := br.Splits()
-	return sp.Child(0).Child(0).(*Node)
+	return sp.Child(0).AsTree().Child(0).(*Node)
 }
 
 func (br *Browser) Tabs() *core.Tabs {
