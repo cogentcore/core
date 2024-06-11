@@ -146,20 +146,6 @@ func (wb *WidgetBase) NeedsRebuild() bool {
 	return rc.HasFlag(RenderRebuild)
 }
 
-// ApplyStyleTree calls ApplyStyle on every Widget in the tree from me.
-// Called during FullRender
-func (wb *WidgetBase) ApplyStyleTree() {
-	if wb.This() == nil {
-		return
-	}
-	// pr := profile.Start(wb.This().NodeType().ShortName())
-	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		wi.Style()
-		return tree.Continue
-	})
-	// pr.End()
-}
-
 // LayoutScene does a layout of the scene: Size, Position
 func (sc *Scene) LayoutScene() {
 	if DebugSettings.LayoutTrace {
@@ -317,7 +303,7 @@ func (sc *Scene) ApplyStyleScene() {
 	sc.SetFlag(true, ScUpdating) // prevent rendering
 	defer sc.SetFlag(false, ScUpdating)
 
-	sc.ApplyStyleTree()
+	sc.StyleTree()
 	sc.SetFlag(true, ScNeedsLayout)
 }
 

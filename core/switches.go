@@ -151,7 +151,7 @@ func (sw *Switches) Init() {
 					}
 					sw.SendChange(e)
 					sw.UpdateTree()
-					sw.ApplyStyleTree()
+					sw.StyleTree()
 					sw.NeedsRender()
 				})
 				w.Styler(func(s *styles.Style) {

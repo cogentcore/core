@@ -60,7 +60,7 @@ func (wb *WidgetBase) SetAbilities(on bool, able ...abilities.Abilities) *Widget
 // and calls ApplyStyleTree to apply any style changes.
 func (wb *WidgetBase) SetSelected(sel bool) *WidgetBase {
 	wb.SetState(sel, states.Selected)
-	wb.ApplyStyleTree()
+	wb.StyleTree()
 	wb.NeedsRender()
 	return wb
 }

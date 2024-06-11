@@ -1861,7 +1861,7 @@ func (sv *SliceViewBase) SizeFinal() {
 			sv.VisRows = sg.VisRows
 			sv.Update()
 		} else {
-			sg.ApplyStyleTree()
+			sg.StyleTree()
 		}
 		sg.SizeFinalUpdateChildrenSizes()
 		sv.MakeIter++

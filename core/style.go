@@ -151,11 +151,20 @@ func (wb *WidgetBase) styleSettings() {
 	s.Text.LineHeight.Value *= fsz
 }
 
+// StyleTree calls [WidgetBase.Style] on every widget in tree
+// underneath and including this widget.
+func (wb *WidgetBase) StyleTree() {
+	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
+		wi.Style()
+		return tree.Continue
+	})
+}
+
 // ApplyStyleUpdate calls ApplyStyleTree and NeedsRender.
 // This is the main call needed to ensure that state-sensitive styling
 // is updated, when the state changes.
 func (wb *WidgetBase) ApplyStyleUpdate() {
-	wb.ApplyStyleTree()
+	wb.StyleTree()
 	wb.NeedsRender()
 }
 
