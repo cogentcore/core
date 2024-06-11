@@ -235,12 +235,9 @@ func (sc *Scene) Destroy() {
 // SolidsIntersectingPoint finds all the solids that contain given 2D window coordinate
 func (sc *Scene) SolidsIntersectingPoint(pos image.Point) []Node {
 	var objs []Node
-	for _, kid := range sc.Children {
-		kii, _ := AsNode(kid)
-		if kii == nil {
-			continue
-		}
-		kii.WalkDown(func(k tree.Node) bool {
+	for _, c := range sc.Children {
+		cn, _ := AsNode(c)
+		cn.AsTree().WalkDown(func(k tree.Node) bool {
 			ni, _ := AsNode(k)
 			if ni == nil {
 				return tree.Break // going into a different type of thing, bail

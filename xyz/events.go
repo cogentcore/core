@@ -26,11 +26,11 @@ var (
 // event handling based on 2D mouse events.
 func NodesUnderPoint(n tree.Node, pt image.Point) []Node {
 	var ns []Node
-	n.WalkDown(func(k tree.Node) bool {
-		if k == n.This() {
+	n.AsTree().WalkDown(func(cn tree.Node) bool {
+		if cn == n {
 			return tree.Continue
 		}
-		ni, nb := AsNode(k)
+		ni, nb := AsNode(cn)
 		if !ni.IsVisible() {
 			return tree.Break
 		}

@@ -41,7 +41,7 @@ func (sc *Scene) AddFromLibrary(nm string, parent tree.Node) (*Group, error) {
 	parent.AsTree().AddChild(nwgp)
 	tree.SetUniqueName(nwgp)
 
-	parent.WalkDown(func(k tree.Node) bool {
+	parent.AsTree().WalkDown(func(k tree.Node) bool {
 		ni, nb := AsNode(k)
 		if ni == nil {
 			return tree.Break

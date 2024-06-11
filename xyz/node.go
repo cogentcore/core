@@ -158,20 +158,11 @@ const (
 // AsNode converts the given tree node to a [Node] and [NodeBase],
 // returning nil if that is not possible.
 func AsNode(n tree.Node) (Node, *NodeBase) {
-	if n == nil || n.This() == nil { // this also checks for destroyed
-		return nil, nil
-	}
 	ni, ok := n.(Node)
 	if ok {
 		return ni, ni.AsNode()
 	}
 	return nil, nil
-}
-
-// AsNodeBase converts the given tree node to a [NodeBase].
-// Only call this if you know that the given node is a non-nil [Node].
-func AsNodeBase(n tree.Node) *NodeBase {
-	return n.(Node).AsNode()
 }
 
 // AsNode returns a generic NodeBase for our node, giving generic

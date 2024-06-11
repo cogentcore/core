@@ -203,38 +203,37 @@ func (sc *Scene) DepthImage() ([]float32, error) {
 // UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
 // groups aggregate over elements
 func (sc *Scene) UpdateMeshBBox() {
-	for _, kid := range sc.Children {
-		kii, _ := AsNode(kid)
-		if kii == nil {
+	for _, c := range sc.Children {
+		cn, _ := AsNode(c)
+		if cn == nil {
 			continue
 		}
-		kii.WalkDownPost(func(k tree.Node) bool {
+		cn.AsTree().WalkDownPost(func(k tree.Node) bool {
 			ni, _ := AsNode(k)
 			if ni == nil {
 				return tree.Break
 			}
 			return tree.Continue
-		},
-			func(k tree.Node) bool {
-				ni, _ := AsNode(k)
-				if ni == nil {
-					return tree.Break
-				}
-				ni.UpdateMeshBBox()
-				return tree.Continue
-			})
+		}, func(k tree.Node) bool {
+			ni, _ := AsNode(k)
+			if ni == nil {
+				return tree.Break
+			}
+			ni.UpdateMeshBBox()
+			return tree.Continue
+		})
 	}
 }
 
 // UpdateWorldMatrix updates the world matrix for node and everything inside it
 func UpdateWorldMatrix(n tree.Node) {
 	idmtx := math32.Identity4()
-	n.WalkDown(func(k tree.Node) bool {
-		ni, _ := AsNode(k)
+	n.AsTree().WalkDown(func(cn tree.Node) bool {
+		ni, _ := AsNode(cn)
 		if ni == nil {
 			return tree.Continue
 		}
-		_, pd := AsNode(k.Parent())
+		_, pd := AsNode(cn.AsTree().Parent())
 		if pd == nil {
 			ni.UpdateWorldMatrix(idmtx)
 		} else {
@@ -256,11 +255,11 @@ func (sc *Scene) UpdateMVPMatrix() {
 	sz := sc.Geom.Size
 	size := math32.Vec2(float32(sz.X), float32(sz.Y))
 
-	sc.WalkDown(func(k tree.Node) bool {
-		if k.This() == sc.This() {
+	sc.WalkDown(func(cn tree.Node) bool {
+		if cn == sc.This() {
 			return tree.Continue
 		}
-		ni, _ := AsNode(k)
+		ni, _ := AsNode(cn)
 		if ni == nil {
 			return tree.Break // going into a different type of thing, bail
 		}

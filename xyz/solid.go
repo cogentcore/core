@@ -155,7 +155,7 @@ func (sld *Solid) Config() {
 
 // ParentMaterial returns parent's material or nil if not avail
 func (sld *Solid) ParentMaterial() *Material {
-	if sld.Par == nil || sld.Par.This() != nil {
+	if sld.Par == nil {
 		return nil
 	}
 	psi := sld.Par.(Node).AsSolid()
