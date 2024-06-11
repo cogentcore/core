@@ -334,7 +334,6 @@ func (fr *Frame) FocusOnName(e events.Event) bool {
 	// fmt.Printf("searching for: %v  last: %v\n", ly.FocusName, ly.FocusNameLast)
 	focel := ChildByLabelCanFocus(fr, fr.FocusName, fr.FocusNameLast)
 	if focel != nil {
-		focel = focel.This()
 		em := fr.Events()
 		if em != nil {
 			em.SetFocusEvent(focel.(Widget)) // this will also scroll by default!
@@ -357,23 +356,23 @@ func (fr *Frame) FocusOnName(e events.Event) bool {
 func ChildByLabelCanFocus(fr *Frame, name string, after tree.Node) tree.Node {
 	gotAfter := false
 	completions := []complete.Completion{}
-	fr.WalkDownBreadth(func(k tree.Node) bool {
-		if k == fr.This() { // skip us
+	fr.WalkDownBreadth(func(n tree.Node) bool {
+		if n == fr.This() { // skip us
 			return tree.Continue
 		}
-		_, ni := AsWidget(k)
-		if ni == nil || !ni.CanFocus() { // don't go any further
+		_, wb := AsWidget(n)
+		if wb == nil || !wb.CanFocus() { // don't go any further
 			return tree.Continue
 		}
 		if after != nil && !gotAfter {
-			if k == after {
+			if n == after {
 				gotAfter = true
 			}
 			return tree.Continue // skip to next
 		}
 		completions = append(completions, complete.Completion{
-			Text: labels.ToLabel(k),
-			Desc: k.PathFrom(fr),
+			Text: labels.ToLabel(n),
+			Desc: n.AsTree().PathFrom(fr),
 		})
 		return tree.Continue
 	})

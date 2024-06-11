@@ -142,19 +142,16 @@ type Layouter interface {
 	SetScrollParams(d math32.Dims, sb *Slider)
 }
 
-// AsFrame returns the given value as a value of type Layout if the type
-// of the given value embeds Layout, or nil otherwise
+// AsFrame returns the given value as a value of type [Frame] if the type
+// of the given value embeds [Frame], or nil otherwise.
 func AsFrame(k tree.Node) *Frame {
-	if k == nil || k.This() == nil {
-		return nil
-	}
 	if t, ok := k.(Layouter); ok {
 		return t.AsFrame()
 	}
 	return nil
 }
 
-// AsFrame satisfies the [LayoutEmbedder] interface
+// AsFrame satisfies the [Layouter] interface.
 func (t *Frame) AsFrame() *Frame {
 	return t
 }
@@ -480,8 +477,8 @@ func (ls *LayImplState) InitCells() {
 }
 
 func (ls *LayImplState) ShapeCheck(w Widget, phase string) bool {
-	if w.HasChildren() && (ls.Shape == (image.Point{}) || len(ls.Cells) == 0) {
-		// fmt.Println(w, "Shape is nil in:", phase)
+	if w.AsTree().HasChildren() && (ls.Shape == (image.Point{}) || len(ls.Cells) == 0) {
+		// fmt.Println(w, "Shape is nil in:", phase) // TODO: plan for this?
 		return false
 	}
 	return true

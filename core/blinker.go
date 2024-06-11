@@ -68,7 +68,7 @@ func (bl *Blinker) BlinkLoop() {
 			return
 		}
 		bl.Mu.Lock()
-		if bl.Widget == nil || bl.Widget.This() == nil {
+		if bl.Widget == nil {
 			bl.Mu.Unlock()
 			continue
 		}

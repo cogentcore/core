@@ -140,11 +140,11 @@ func RecycleToolbar(parent Widget) *Toolbar {
 
 // InheritBarsWidget inherits Bar functions based on a source widget
 // (e.g., Context of dialog)
-func (sc *Scene) InheritBarsWidget(wi Widget) {
-	if wi == nil || wi.This() == nil {
+func (sc *Scene) InheritBarsWidget(w Widget) {
+	if w == nil {
 		return
 	}
-	wb := wi.AsWidget()
+	wb := w.AsWidget()
 	if wb.Scene == nil {
 		return
 	}
