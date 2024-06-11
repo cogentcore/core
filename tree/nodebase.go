@@ -20,8 +20,23 @@ import (
 )
 
 // NodeBase implements the [Node] interface and provides the core functionality
-// for the Cogent Core tree system. You should use NodeBase as an embedded struct
-// in higher-level tree types.
+// for the Cogent Core tree system. You must use NodeBase as an embedded struct
+// in all higher level tree types.
+//
+// All nodes must be properly initialized by using one of [New], [NodeBase.NewChild],
+// [NodeBase.AddChild], [NodeBase.InsertChild], [NodeBase.InsertNewChild],
+// [NodeBase.Clone], [Update], or [cogentcore.org/core/core.Plan]. This ensures
+// that the [Node.This] field is set correctly and that the [Node.Init] method is
+// called.
+//
+// All nodes support JSON marshalling and unmarshalling through the standard [encoding/json]
+// interfaces, so you can use the standard functions for loading and saving trees. However,
+// if you want to load a root node of the correct type from JSON, you need to use the
+// [UnmarshalRootJSON] function.
+//
+// All node types must be added to the Cogent Core type registry via typegen,
+// so you must add a go:generate line that runs `core generate` to any packages
+// you write that have new node types defined.
 type NodeBase struct {
 
 	// Name is the name of this node, which is typically unique relative to other children of

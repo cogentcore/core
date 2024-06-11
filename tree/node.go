@@ -15,39 +15,11 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// Node is an interface that describes the core functionality of a tree node.
-// Each Node is a node in a tree and can have child nodes, and no cycles
-// are allowed (i.e., each node can only appear once in the tree).
-// All the usual methods are included for accessing and managing Children,
-// and efficiently traversing the tree and calling functions on the nodes.
-//
-// When adding a new node, if you do not specify its name, it will automatically
-// be assigned a unique name of the ID (kebab-case) name of the type, plus the
-// [Node.NumLifetimeChildren] of the parent. In general, the names of the children
-// of a given node should all be unique.
-//
-// Use the [MoveToParent] function to move a node between trees or within a tree;
-// otherwise, nodes are typically created and deleted but not moved.
-//
-// Most Node functions are only implemented once, by the [tree.NodeBase] type.
-// Other Node types extend [tree.NodeBase] and provide their own functionality,
-// which can override methods defined by embedded types through a system of virtual
-// method calling, as described below.
-//
-// Each Node stores the Node interface version of itself, as [Node.This],
-// which enables full virtual function calling by calling the method
-// on that interface instead of directly on the receiver Node itself.
-// This allows, for example, a WidgetBase type to call methods defined
-// by higher-level Widgets. This requires proper initialization of nodes
-// via [Node.InitName], which is called automatically when adding children
-// and using [NewRoot].
-//
-// Nodes support full JSON I/O.
-//
-// All types that implement the Node interface will automatically
-// be added to the Cogent Core type registry (types)
-// in `core generate`, which is required for various
-// pieces of core functionality.
+// Node is an interface that all tree nodes satisfy. The core functionality
+// of a tree node is defined on [NodeBase], and all higher level tree types
+// must embed it. This interface only contains the tree functionality that
+// higher level tree types may need to override. You can call [Node.AsTree]
+// to extract the [NodeBase] from a Node and access the core tree functionality.
 type Node interface {
 
 	// AsTree returns the [NodeBase] of this Node. Most core
