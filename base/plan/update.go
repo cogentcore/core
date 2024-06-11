@@ -16,8 +16,14 @@ import (
 	"slices"
 
 	"cogentcore.org/core/base/findfast"
-	"cogentcore.org/core/base/namer"
 )
+
+// Namer is an interface that types can implement to specify their name in a plan context.
+type Namer interface {
+
+	// PlanName returns the name of the object in a plan context.
+	PlanName() string
+}
 
 // Update ensures that the elements of the slice contain
 // the elements according to the plan, specified by unique
@@ -27,7 +33,7 @@ import (
 // if destroy is not-nil, then it is called on any element
 // that is being deleted from the slice.
 // It returns the updated slice and whether any changes were made.
-func Update[T namer.Namer](s []T, n int, name func(i int) string, new func(name string, i int) T, destroy func(e T)) (r []T, mods bool) {
+func Update[T Namer](s []T, n int, name func(i int) string, new func(name string, i int) T, destroy func(e T)) (r []T, mods bool) {
 	// first make a map for looking up the indexes of the target names
 	names := make([]string, n)
 	nmap := make(map[string]int, n)
@@ -44,7 +50,7 @@ func Update[T namer.Namer](s []T, n int, name func(i int) string, new func(name 
 	r = s
 	rn := len(r)
 	for i := rn - 1; i >= 0; i-- {
-		nm := r[i].Name()
+		nm := r[i].PlanName()
 		if _, ok := nmap[nm]; !ok {
 			mods = true
 			if destroy != nil {
@@ -56,7 +62,7 @@ func Update[T namer.Namer](s []T, n int, name func(i int) string, new func(name 
 	}
 	// next add and move items as needed; in order so guaranteed
 	for i, tn := range names {
-		ci := findfast.FindFunc(r, func(e T) bool { return e.Name() == tn }, smap[tn])
+		ci := findfast.FindFunc(r, func(e T) bool { return e.PlanName() == tn }, smap[tn])
 		if ci < 0 { // item not currently on the list
 			mods = true
 			ne := new(tn, i)
