@@ -5,7 +5,7 @@ Cogent Core provides a versatile styling system that allows you to easily custom
 You can change any style properties of a widget:
 
 ```Go
-core.NewText(parent).SetText("Bold text").Style(func(s *styles.Style) {
+core.NewText(parent).SetText("Bold text").Styler(func(s *styles.Style) {
     s.Font.Weight = styles.WeightBold
 })
 ```
@@ -13,7 +13,7 @@ core.NewText(parent).SetText("Bold text").Style(func(s *styles.Style) {
 You can change the colors of a widget using Cogent Core's dynamic color scheme system:
 
 ```Go
-core.NewButton(parent).SetText("Success button").Style(func(s *styles.Style) {
+core.NewButton(parent).SetText("Success button").Styler(func(s *styles.Style) {
     s.Background = colors.C(colors.Scheme.Success.Base)
     s.Color = colors.C(colors.Scheme.Success.On)
 })
@@ -22,7 +22,7 @@ core.NewButton(parent).SetText("Success button").Style(func(s *styles.Style) {
 You can change the size of a widget using Cogent Core's flexible unit system:
 
 ```Go
-core.NewFrame(parent).Style(func(s *styles.Style) {
+core.NewFrame(parent).Styler(func(s *styles.Style) {
     s.Min.Set(units.Dp(50))
     s.Background = colors.C(colors.Scheme.Primary.Base)
 })

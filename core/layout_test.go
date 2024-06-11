@@ -22,7 +22,7 @@ import (
 
 func LayoutTestFile(t *testing.T) string {
 	p := filepath.Join("testdata", "layout")
-	tnm := strcase.ToSnake(strings.TrimPrefix(t.Name, "TestLayout"))
+	tnm := strcase.ToSnake(strings.TrimPrefix(t.Name(), "TestLayout"))
 	n := filepath.Join("layout", tnm)
 	errors.Log(os.MkdirAll(p, 0750))
 	return n
@@ -183,22 +183,22 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 
 	case "frames-horiz":
 		row := HorizRow(sc)
-		row.Style(func(s *styles.Style) {
+		row.Styler(func(s *styles.Style) {
 			// s.Align.X = styles.End
 			s.Wrap = true
 		})
 		PlainFrames(row, math32.Vec2(0, 0))
-		// NewText(sc).SetText(ShortText).Style(func(s *styles.Style) {
+		// NewText(sc).SetText(ShortText).Styler(func(s *styles.Style) {
 		// })
-		HorizRow(sc).Style(func(s *styles.Style) {
+		HorizRow(sc).Styler(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
 		})
 	case "text-align":
 		// 	row := HorizRow(sc)
-		sc.Style(func(s *styles.Style) {
+		sc.Styler(func(s *styles.Style) {
 			s.Align.X = styles.Center
 		})
-		NewText(sc).SetText(AlignText).Style(func(s *styles.Style) {
+		NewText(sc).SetText(AlignText).Styler(func(s *styles.Style) {
 			s.Align.X = styles.Center
 			s.Text.Align = styles.Center
 		})
@@ -207,10 +207,10 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 	case "long-text-wrap-box": // text in box -- failing to adjust to full height
 		row := HorizRow(sc)
 		text := WrapText(row, VeryLongText)
-		row.Style(func(s *styles.Style) {
+		row.Styler(func(s *styles.Style) {
 			// s.Align.X = styles.End
 		})
-		text.Style(func(s *styles.Style) {
+		text.Styler(func(s *styles.Style) {
 			s.Align.X = styles.Center
 		})
 		fr := BoxFrame(sc) // this takes up slack
@@ -219,12 +219,12 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 	case "long-text-wrap-max-box": // text in constrained box
 		row := HorizRow(sc)
 		text := WrapText(row, VeryLongText) // VeryLongText)
-		row.Style(func(s *styles.Style) {
+		row.Styler(func(s *styles.Style) {
 			// s.Align.X = styles.End
 			s.Max.X.Ch(100) // todo: this is *sometimes* failing to constrain..
 			// s.Overflow.X = styles.OverflowAuto
 		})
-		text.Style(func(s *styles.Style) {
+		text.Styler(func(s *styles.Style) {
 			s.Text.Align = styles.Center
 		})
 		// fr := BoxFrame(sc) // this takes up slack
@@ -233,30 +233,30 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 	case "scroll-absorb": // Auto scroll should absorb extra size
 		row := HorizRow(sc, "row")
 		f1, sp := SpaceFrame(row)
-		f1.Style(func(s *styles.Style) {
+		f1.Styler(func(s *styles.Style) {
 			s.Overflow.Y = styles.OverflowAuto // this should absorb the size
 		})
-		sp.Style(func(s *styles.Style) {
+		sp.Styler(func(s *styles.Style) {
 			s.Min.Y.Em(100)
 		})
-		BoxFrame(row).Style(func(s *styles.Style) {
+		BoxFrame(row).Styler(func(s *styles.Style) {
 			s.Min.Y.Em(20) // fix size
 			s.Max.Y.Em(20) // fix size
 		})
 	case "scroll-absorb-splits": // Auto scroll should absorb extra size
 		sp, f1, f2 := Splits2(sc)
 		_ = sp
-		f1.Style(func(s *styles.Style) {
+		f1.Styler(func(s *styles.Style) {
 			s.Overflow.Y = styles.OverflowAuto // this should absorb the size
 		})
-		NewSpace(f1).Style(func(s *styles.Style) {
+		NewSpace(f1).Styler(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
 			s.Min.Y.Em(100)
 		})
-		f2.Style(func(s *styles.Style) {
+		f2.Styler(func(s *styles.Style) {
 			s.Grow.Set(0, 0)
 		})
-		NewSpace(f2).Style(func(s *styles.Style) {
+		NewSpace(f2).Styler(func(s *styles.Style) {
 			s.Min.X.Ch(20)
 			s.Min.Y.Em(20)
 		})
@@ -273,7 +273,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 		fr, sp2 := SpaceFrame(par)
 		_ = fr
 		_ = sp2
-		fr.Style(func(s *styles.Style) {
+		fr.Styler(func(s *styles.Style) {
 			s.Grow.Set(0, 1)
 			s.Min.X.Em(20)
 			s.Min.Y.Em(10)
@@ -290,7 +290,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 	case "button":
 		NewButton(sc).SetText("Test")
 	case "small-round-button":
-		bt := NewButton(sc).SetType(ButtonAction).SetText("22").Style(func(s *styles.Style) {
+		bt := NewButton(sc).SetType(ButtonAction).SetText("22").Styler(func(s *styles.Style) {
 			s.Min.X.Dp(40)
 			s.Min.Y.Dp(40)
 			s.Padding.Zero()
@@ -298,7 +298,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 			s.Color = colors.C(colors.Scheme.Primary.On)
 		})
 		bt.Config(sc)
-		bt.Parts.Style(func(s *styles.Style) {
+		bt.Parts.Styler(func(s *styles.Style) {
 			s.Text.Align = styles.Center
 			s.Text.AlignV = styles.Center
 			s.Align.Set(styles.Center)
@@ -314,11 +314,11 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 		views.NewStructView(sc).SetStruct(ts)
 	case "center-dialog":
 		d := NewBody(sc).FullWindow(true)
-		d.Style(func(s *styles.Style) {
+		d.Styler(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
 			s.Align.Set(styles.Center)
 		})
-		fr := NewFrame(d).Style(func(s *styles.Style) { // note: this is critical for separating from topbar
+		fr := NewFrame(d).Styler(func(s *styles.Style) { // note: this is critical for separating from topbar
 			s.Direction = styles.Column
 			s.Grow.Set(1, 1)
 			s.Align.Set(styles.Center)

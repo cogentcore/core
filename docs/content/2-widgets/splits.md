@@ -32,7 +32,7 @@ You can arrange widgets in a column (by default, split widgets are arranged in a
 
 ```Go
 sp := core.NewSplits(parent)
-sp.Style(func(s *styles.Style) {
+sp.Styler(func(s *styles.Style) {
     s.Direction = styles.Column
 })
 core.NewText(sp).SetText("First")
@@ -43,7 +43,7 @@ You can arrange widgets in a row:
 
 ```Go
 sp := core.NewSplits(parent)
-sp.Style(func(s *styles.Style) {
+sp.Styler(func(s *styles.Style) {
     s.Direction = styles.Row
 })
 core.NewText(sp).SetText("First")

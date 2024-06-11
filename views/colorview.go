@@ -122,31 +122,31 @@ func (cv *ColorView) Init() {
 	cv.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(cv) {
 		case "value":
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Min.X.Em(6)
 				s.Min.Y.Em(6)
 				s.Border.Radius = styles.BorderRadiusFull
 				s.BackgroundColor.SetSolid(cv.Color)
 			})
 		case "slider-grid":
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Columns = 4
 			})
 		case "hexlbl":
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Align.Y = styles.Center
 			})
 		case "palette":
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Columns = 25
 			})
 		case "nums-hex":
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Min.X.Ch(20)
 			})
 		}
 		if sl, ok := w.(*core.Slider); ok {
-			sl.Style(func(s *styles.Style) {
+			sl.Styler(func(s *styles.Style) {
 				s.Min.X.Ch(20)
 				s.Min.Y.Em(1)
 				s.Margin.Set(units.Dp(6))
@@ -154,7 +154,7 @@ func (cv *ColorView) Init() {
 		}
 		if w.Parent.Name == "palette" {
 			if cbt, ok := w.(*core.Button); ok {
-				cbt.Style(func(s *styles.Style) {
+				cbt.Styler(func(s *styles.Style) {
 					c := colornames.Map[cbt.Name]
 
 					s.BackgroundColor.SetSolid(c)

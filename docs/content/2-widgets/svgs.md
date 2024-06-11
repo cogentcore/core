@@ -20,7 +20,7 @@ You can change the size of an SVG:
 ```Go
 svg := core.NewSVG(parent)
 errors.Log(svg.OpenFS(mySVG, "icon.svg"))
-svg.Style(func(s *styles.Style) {
+svg.Styler(func(s *styles.Style) {
     s.Min.Set(units.Dp(128))
 })
 ```

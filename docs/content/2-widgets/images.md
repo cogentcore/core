@@ -20,7 +20,7 @@ You can change the size of an image:
 ```Go
 img := core.NewImage(parent)
 errors.Log(img.OpenFS(myImage, "image.png"))
-img.Style(func(s *styles.Style) {
+img.Styler(func(s *styles.Style) {
     s.Min.Set(units.Dp(256))
 })
 ```

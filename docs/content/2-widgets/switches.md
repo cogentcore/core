@@ -84,7 +84,7 @@ core.NewSwitches(parent).SetType(core.SwitchSegmentedButton).SetStrings("Go", "P
 You can make switches render vertically:
 
 ```Go
-core.NewSwitches(parent).SetStrings("Go", "Python", "C++").Style(func(s *styles.Style) {
+core.NewSwitches(parent).SetStrings("Go", "Python", "C++").Styler(func(s *styles.Style) {
     s.Direction = styles.Column
 })
 ```

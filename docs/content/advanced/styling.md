@@ -13,7 +13,7 @@ You can style all widgets within a certain container at once using [[core.Widget
 ```Go
 fr := core.NewFrame(parent)
 fr.OnWidgetAdded(func(w core.Widget) {
-    w.Style(func(s *styles.Style) {
+    w.Styler(func(s *styles.Style) {
         s.Color = colors.C(colors.Scheme.Error.Base)
     })
 })
@@ -29,7 +29,7 @@ fr := core.NewFrame(parent)
 fr.OnWidgetAdded(func(w core.Widget) {
     switch w := w.(type) {
     case *core.Button:
-        w.Style(func(s *styles.Style) {
+        w.Styler(func(s *styles.Style) {
             s.Border.Radius = styles.BorderRadiusSmall
         })
     }
@@ -46,7 +46,7 @@ core.TheApp.SetSceneConfig(func(sc *core.Scene) {
     sc.OnWidgetAdded(func(w core.Widget) {
         switch w := w.(type) {
         case *core.Button:
-            w.Style(func(s *styles.Style) {
+            w.Styler(func(s *styles.Style) {
                 s.Border.Radius = styles.BorderRadiusSmall
             })
         }

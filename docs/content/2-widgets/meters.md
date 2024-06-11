@@ -23,7 +23,7 @@ core.NewMeter(parent).SetMin(5.7).SetMax(18).SetValue(10.2)
 You can make a meter render vertically:
 
 ```Go
-core.NewMeter(parent).Style(func(s *styles.Style) {
+core.NewMeter(parent).Styler(func(s *styles.Style) {
     s.Direction = styles.Column
 })
 ```

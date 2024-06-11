@@ -29,7 +29,7 @@ core.NewText(parent).SetType(core.TextHeadlineMedium).SetText("Hello, world!")
 You can also use a styler to further customize the appearance of text:
 
 ```Go
-core.NewText(parent).SetText("Hello,\n\tworld!").Style(func(s *styles.Style) {
+core.NewText(parent).SetText("Hello,\n\tworld!").Styler(func(s *styles.Style) {
     s.Font.Size.Dp(21)
     s.Font.Style = styles.Italic
     s.Text.WhiteSpace = styles.WhiteSpacePre
