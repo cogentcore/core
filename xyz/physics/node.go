@@ -154,12 +154,10 @@ func (nb *NodeBase) StepBase(step float32) {
 	nb.Abs.StepByLinVel(step)
 }
 
-// AsNode converts Ki to a Node interface and a Node3DBase obj -- nil if not.
-func AsNode(k tree.Node) (Node, *NodeBase) {
-	if k == nil || k.This() == nil { // this also checks for destroyed
-		return nil, nil
-	}
-	nii, ok := k.(Node)
+// AsNode converts a [tree.Node] to a [Node] interface and a [Node3DBase] object,
+// or nil if not possible.
+func AsNode(n tree.Node) (Node, *NodeBase) {
+	nii, ok := n.(Node)
 	if ok {
 		return nii, nii.AsNodeBase()
 	}
