@@ -70,7 +70,7 @@ func (n *NodeBase) String() string {
 	if n == nil || n.This() == nil {
 		return "nil"
 	}
-	return elide.Middle(n.This().Path(), 38)
+	return elide.Middle(n.Path(), 38)
 }
 
 // This returns the Node as its true underlying type.
@@ -91,6 +91,11 @@ func (n *NodeBase) AsTree() *NodeBase {
 // Name returns the user-defined name of the Node, which can be
 // used for finding elements, generating paths, I/O, etc.
 func (n *NodeBase) Name() string {
+	return n.Nm
+}
+
+// PlanName implements [plan.Namer].
+func (n *NodeBase) PlanName() string {
 	return n.Nm
 }
 
@@ -150,7 +155,7 @@ func (n *NodeBase) ParentByName(name string) Node {
 	if IsRoot(n) {
 		return nil
 	}
-	if n.Par.Name() == name {
+	if n.Par.AsTree().Name() == name {
 		return n.Par
 	}
 	return n.Par.AsTree().ParentByName(name)
@@ -240,9 +245,9 @@ func UnescapePathName(name string) string {
 func (n *NodeBase) Path() string {
 	if n.Par != nil {
 		if n.Is(Field) {
-			return n.Par.Path() + "." + EscapePathName(n.Nm)
+			return n.Par.AsTree().Path() + "." + EscapePathName(n.Nm)
 		}
-		return n.Par.Path() + "/" + EscapePathName(n.Nm)
+		return n.Par.AsTree().Path() + "/" + EscapePathName(n.Nm)
 	}
 	return "/" + EscapePathName(n.Nm)
 }
@@ -260,16 +265,16 @@ func (n *NodeBase) Path() string {
 // so a base type can be passed in without manually calling [Node.This].
 func (n *NodeBase) PathFrom(parent Node) string {
 	// critical to get "This"
-	parent = parent.This()
+	parent = parent.AsTree().This()
 	// we bail a level below the parent so it isn't in the path
 	if n.Par == nil || n.Par == parent {
 		return EscapePathName(n.Nm)
 	}
 	ppath := ""
 	if n.Par == parent {
-		ppath = "/" + EscapePathName(parent.Name())
+		ppath = "/" + EscapePathName(parent.AsTree().Name())
 	} else {
-		ppath = n.Par.PathFrom(parent)
+		ppath = n.Par.AsTree().PathFrom(parent)
 	}
 	if n.Is(Field) {
 		return ppath + "." + EscapePathName(n.Nm)
@@ -447,7 +452,6 @@ func (n *NodeBase) DeleteChildren() {
 		if kid == nil {
 			continue
 		}
-		kid.SetFlag(true)
 		kid.Destroy()
 	}
 }
@@ -534,7 +538,7 @@ func (n *NodeBase) WalkUp(fun func(n Node) bool) bool {
 		if !fun(cur) { // false return means stop
 			return false
 		}
-		parent := cur.Parent()
+		parent := cur.AsTree().Parent()
 		if parent == nil || parent == cur { // prevent loops
 			return true
 		}
@@ -556,7 +560,7 @@ func (n *NodeBase) WalkUpParent(fun func(n Node) bool) bool {
 		if !fun(cur) { // false return means stop
 			return false
 		}
-		parent := cur.Parent()
+		parent := cur.AsTree().Parent()
 		if parent == nil || parent == cur { // prevent loops
 			return true
 		}
@@ -583,29 +587,30 @@ func (n *NodeBase) WalkDown(fun func(n Node) bool) {
 	tm[cur] = -1
 outer:
 	for {
-		if cur.This() != nil && fun(cur) { // false return means stop
-			cur.This().NodeWalkDown(fun)
-			if cur.HasChildren() {
+		cb := cur.AsTree()
+		if cb.This() != nil && fun(cur) { // false return means stop
+			cb.This().NodeWalkDown(fun)
+			if cb.HasChildren() {
 				tm[cur] = 0 // 0 for no fields
-				nxt := cur.Child(0)
-				if nxt != nil && nxt.This() != nil {
-					cur = nxt.This()
+				nxt := cb.Child(0)
+				if nxt != nil && nxt.AsTree().This() != nil {
+					cur = nxt.AsTree().This()
 					tm[cur] = -1
 					continue
 				}
 			}
 		} else {
-			tm[cur] = cur.NumChildren()
+			tm[cur] = cb.NumChildren()
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
 			curChild := tm[cur]
-			if (curChild + 1) < cur.NumChildren() {
+			if (curChild + 1) < cb.NumChildren() {
 				curChild++
 				tm[cur] = curChild
-				nxt := cur.Child(curChild)
-				if nxt != nil && nxt.This() != nil {
-					cur = nxt.This()
+				nxt := cb.Child(curChild)
+				if nxt != nil && nxt.AsTree().This() != nil {
+					cur = nxt.AsTree().This()
 					tm[cur] = -1
 					continue outer
 				}
@@ -616,7 +621,7 @@ outer:
 			if cur == start {
 				break outer // done!
 			}
-			parent := cur.Parent()
+			parent := cb.Parent()
 			if parent == nil || parent == cur { // shouldn't happen, but does..
 				// fmt.Printf("nil / cur parent %v\n", par)
 				break outer
@@ -649,28 +654,29 @@ func (n *NodeBase) WalkDownPost(shouldContinue func(n Node) bool, fun func(n Nod
 	tm[cur] = -1
 outer:
 	for {
-		if cur.This() != nil && shouldContinue(cur) { // false return means stop
-			if cur.HasChildren() {
+		cb := cur.AsTree()
+		if cb.This() != nil && shouldContinue(cur) { // false return means stop
+			if cb.HasChildren() {
 				tm[cur] = 0 // 0 for no fields
-				nxt := cur.Child(0)
-				if nxt != nil && nxt.This() != nil {
-					cur = nxt.This()
+				nxt := cb.Child(0)
+				if nxt != nil && nxt.AsTree().This() != nil {
+					cur = nxt.AsTree().This()
 					tm[cur] = -1
 					continue
 				}
 			}
 		} else {
-			tm[cur] = cur.NumChildren()
+			tm[cur] = cb.NumChildren()
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
 			curChild := tm[cur]
-			if (curChild + 1) < cur.NumChildren() {
+			if (curChild + 1) < cb.NumChildren() {
 				curChild++
 				tm[cur] = curChild
-				nxt := cur.Child(curChild)
-				if nxt != nil && nxt.This() != nil {
-					cur = nxt.This()
+				nxt := cb.Child(curChild)
+				if nxt != nil && nxt.AsTree().This() != nil {
+					cur = nxt.AsTree().This()
 					tm[cur] = -1
 					continue outer
 				}
@@ -682,7 +688,7 @@ outer:
 			if cur == start {
 				break outer // done!
 			}
-			parent := cur.Parent()
+			parent := cb.Parent()
 			if parent == nil || parent == cur { // shouldn't happen
 				break outer
 			}
@@ -716,9 +722,9 @@ func (n *NodeBase) WalkDownBreadth(fun func(n Node) bool) {
 		depth := cur.AsTree().depth
 		queue = queue[1:]
 
-		if cur.This() != nil && fun(cur) { // false return means don't proceed
+		if cur.AsTree().This() != nil && fun(cur) { // false return means don't proceed
 			for _, cn := range cur.AsTree().Children {
-				if cn != nil && cn.This() != nil {
+				if cn != nil && cn.AsTree().This() != nil {
 					cn.AsTree().depth = depth + 1
 					queue = append(queue, cn)
 				}
@@ -759,16 +765,16 @@ func copyFrom(to, from Node) {
 		p := make(TypePlan, len(fc))
 		for i, c := range fc {
 			p[i].Type = c.NodeType()
-			p[i].Name = c.Name()
+			p[i].Name = c.AsTree().Name()
 		}
 		UpdateSlice(&to.AsTree().Children, to, p)
 	}
 
 	maps.Copy(to.AsTree().Properties, from.AsTree().Properties)
 
-	to.This().CopyFieldsFrom(from)
+	to.AsTree().This().CopyFieldsFrom(from)
 	for i, kid := range to.AsTree().Children {
-		fmk := from.Child(i)
+		fmk := from.AsTree().Child(i)
 		copyFrom(kid, fmk)
 	}
 }
@@ -779,8 +785,8 @@ func copyFrom(to, from Node) {
 func (n *NodeBase) Clone() Node {
 	nc := NewOfType(n.This().NodeType())
 	initNode(nc)
-	nc.SetName(n.Nm)
-	nc.CopyFrom(n.This())
+	nc.AsTree().SetName(n.Nm)
+	nc.AsTree().CopyFrom(n.This())
 	return nc
 }
 
@@ -795,7 +801,7 @@ func (n *NodeBase) Clone() Node {
 // [cogentcore.org/core/core.WidgetBase.CopyFieldsFrom] for an example of a
 // custom CopyFieldsFrom method.
 func (n *NodeBase) CopyFieldsFrom(from Node) {
-	err := copier.CopyWithOption(n.This(), from.This(), copier.Option{CaseSensitive: true, DeepCopy: true})
+	err := copier.CopyWithOption(n.This(), from.AsTree().This(), copier.Option{CaseSensitive: true, DeepCopy: true})
 	if err != nil {
 		slog.Error("tree.NodeBase.CopyFieldsFrom", "err", err)
 	}
