@@ -146,7 +146,7 @@ func (ev *Env) MakeWorld() {
 
 	MakeRoom(ev.World, "room1", ev.Width, ev.Depth, ev.Height, ev.Thick)
 	ev.Emer = MakeEmer(ev.World, ev.EmerHt)
-	ev.EyeR = ev.Emer.ChildByName("head", 1).ChildByName("eye-r", 2).(physics.Body)
+	ev.EyeR = ev.Emer.ChildByName("head", 1).AsTree().ChildByName("eye-r", 2).(physics.Body)
 
 	ev.World.WorldInit()
 }
@@ -252,10 +252,10 @@ func (ev *Env) WorldStep() {
 	for _, cl := range cts {
 		if len(cl) > 1 {
 			for _, c := range cl {
-				if c.A.Name() == "body" {
+				if c.A.AsTree().Name() == "body" {
 					ev.Contacts = cl
 				}
-				fmt.Printf("A: %v  B: %v\n", c.A.Name(), c.B.Name())
+				fmt.Printf("A: %v  B: %v\n", c.A.AsTree().Name(), c.B.AsTree().Name())
 			}
 		}
 	}
