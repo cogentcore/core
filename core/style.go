@@ -44,15 +44,6 @@ func (wb *WidgetBase) FinalStyler(s func(s *styles.Style)) *WidgetBase {
 	return wb
 }
 
-// ApplyStyleParts styles the parts.
-// Automatically called by the default ApplyStyleWidget function.
-func (wb *WidgetBase) ApplyStyleParts() {
-	if wb.Parts == nil {
-		return
-	}
-	wb.Parts.ApplyStyleTree()
-}
-
 // ApplyStyleWidget is the primary styling function for all Widgets.
 // Handles inheritance and runs the Styler functions.
 func (wb *WidgetBase) ApplyStyleWidget() {
@@ -74,7 +65,6 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 			psz = pw.Geom.Size.Alloc.Content
 		}
 		SetUnitContext(&wb.Styles, wb.Scene, wb.Geom.Size.Alloc.Content, psz)
-		wb.ApplyStyleParts()
 	}()
 
 	if wb.OverrideStyle {
@@ -215,29 +205,6 @@ func (wb *WidgetBase) ParentActualBackground() image.Image {
 		return nil
 	}
 	return pwb.This().(Widget).ChildBackground(wb.This().(Widget))
-}
-
-// IsNthChild returns whether the node is nth-child of its parent
-func (wb *WidgetBase) IsNthChild(n int) bool {
-	idx := wb.IndexInParent()
-	return idx == n
-}
-
-// IsFirstChild returns whether the node is the first child of its parent
-func (wb *WidgetBase) IsFirstChild() bool {
-	idx := wb.IndexInParent()
-	return idx == 0
-}
-
-// IsLastChild returns whether the node is the last child of its parent
-func (wb *WidgetBase) IsLastChild() bool {
-	idx := wb.IndexInParent()
-	return idx == wb.Par.NumChildren()-1
-}
-
-// IsOnlyChild returns whether the node is the only child of its parent
-func (wb *WidgetBase) IsOnlyChild() bool {
-	return wb.Par != nil && wb.Par.NumChildren() == 1
 }
 
 // StyleFromTags adds a [WidgetBase.Styler] to the given widget
