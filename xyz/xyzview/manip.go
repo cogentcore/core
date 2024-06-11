@@ -162,7 +162,7 @@ type ManipPoint struct { //core:no-new
 
 // NewManipPoint adds a new manipulation point
 func NewManipPoint(parent tree.Node, name string, meshName string, clr color.RGBA, pos math32.Vector3) *ManipPoint {
-	mpt := parent.NewChild(ManipPointType).(*ManipPoint)
+	mpt := parent.AsTree().NewChild(ManipPointType).(*ManipPoint)
 	mpt.SetName(name)
 	mpt.SetMeshName(meshName)
 	mpt.Defaults()
