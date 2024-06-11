@@ -24,7 +24,10 @@ import (
 // in higher-level tree types.
 type NodeBase struct {
 
-	// Name is the user-supplied name of this node, which can be empty and/or non-unique.
+	// Name is the name of this node, which is typically unique relative to other children of
+	// the same parent. It can be used for finding and serializing nodes. If not otherwise set,
+	// it defaults to the ID (kebab-case) name of the node type combined with the total number
+	// of children that have ever been added to the node's parent.
 	Name string `copier:"-" set:"-"`
 
 	// Flags are bit flags for internal node state, which can be extended using
