@@ -728,7 +728,7 @@ func (pr *Rule) ParseRules(ps *State, parent *Rule, parAst *Ast, scope lexer.Reg
 		return nil
 	}
 
-	rparent := parent.Par.(*Rule)
+	rparent := parent.Parent.(*Rule)
 
 	if parent.Ast != NoAst && parent.IsGroup() {
 		if parAst.Name != parent.Name {
@@ -1542,7 +1542,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 					node = nd
 				}
 				if findAll {
-					pn := nd.AsTree().Parent()
+					pn := nd.AsTree().Parent
 					for _, pk := range pn.AsTree().Children {
 						if pk != nd && pk.AsTree().Name == nd.AsTree().Name {
 							adnl = append(adnl, pk)
@@ -1568,7 +1568,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 			}
 			if node != nil {
 				if findAll {
-					pn := node.AsTree().Parent()
+					pn := node.AsTree().Parent
 					for _, pk := range pn.AsTree().Children {
 						if pk != node && pk.AsTree().Name == node.AsTree().Name {
 							adnl = append(adnl, pk)

@@ -23,7 +23,7 @@ func TestNodeAddChild(t *testing.T) {
 	parent.AddChild(child)
 	child.SetName("child1")
 	assert.Equal(t, 1, len(parent.Children))
-	assert.Equal(t, parent, child.Parent())
+	assert.Equal(t, parent, child.Parent)
 	assert.Equal(t, "/node-base/child1", child.Path())
 }
 
@@ -33,7 +33,7 @@ func TestNodeEmbedAddChild(t *testing.T) {
 	parent.AddChild(child)
 	child.SetName("child1")
 	assert.Len(t, parent.Children, 1)
-	assert.Equal(t, parent, child.Parent())
+	assert.Equal(t, parent, child.Parent)
 	assert.Equal(t, "/node-embed/child1", child.Path())
 }
 

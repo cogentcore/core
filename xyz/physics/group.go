@@ -80,7 +80,7 @@ func (gp *Group) WorldInit() {
 		if pn == nil {
 			return false
 		}
-		_, pi := AsNode(n.AsTree().Parent())
+		_, pi := AsNode(n.AsTree().Parent)
 		pn.InitAbs(pi)
 		return true
 	})
@@ -113,7 +113,7 @@ func (gp *Group) WorldRelToAbs() {
 		if !pn.IsDynamic() {
 			return false
 		}
-		_, pi := AsNode(n.AsTree().Parent())
+		_, pi := AsNode(n.AsTree().Parent)
 		pn.RelToAbs(pi)
 		return true
 	})

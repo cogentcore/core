@@ -63,7 +63,7 @@ func checkThis(n Node) error {
 // It automatically gets the [Node.This] of the parent.
 func SetParent(child Node, parent Node) {
 	n := child.AsTree()
-	n.Par = parent.AsTree().This()
+	n.Parent = parent.AsTree().This()
 	setUniqueName(n, false)
 	child.AsTree().This().OnAdd()
 	n.WalkUpParent(func(pn Node) bool {
@@ -76,7 +76,7 @@ func SetParent(child Node, parent Node) {
 // and adds it as a child of the given new parent.
 // The old and new parents can be in different trees (or not).
 func MoveToParent(child Node, parent Node) {
-	oldParent := child.AsTree().Parent()
+	oldParent := child.AsTree().Parent
 	if oldParent != nil {
 		idx := IndexOf(oldParent.AsTree().Children, child)
 		if idx >= 0 {
@@ -108,7 +108,7 @@ func ChildByType[T Node](k Node, embeds bool, startIndex ...int) T {
 
 // IsRoot returns whether the given node is the root node in its tree.
 func IsRoot(n Node) bool {
-	return n.AsTree().Parent() == nil
+	return n.AsTree().Parent == nil
 }
 
 // Root returns the root node of the given node's tree.
@@ -116,7 +116,7 @@ func Root(n Node) Node {
 	if IsRoot(n) {
 		return n
 	}
-	return Root(n.AsTree().Parent())
+	return Root(n.AsTree().Parent)
 }
 
 // nodeType is the [reflect.Type] of [Node].
@@ -148,7 +148,7 @@ func SetUniqueName(n Node) {
 // to add the unique id to the name even if it is already set.
 func setUniqueName(n Node, addIfSet bool) {
 	nb := n.AsTree()
-	pn := nb.Parent()
+	pn := nb.Parent
 	if pn == nil {
 		return
 	}

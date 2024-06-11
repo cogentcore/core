@@ -233,7 +233,7 @@ func UpdateWorldMatrix(n tree.Node) {
 		if ni == nil {
 			return tree.Continue
 		}
-		_, pd := AsNode(cn.AsTree().Parent())
+		_, pd := AsNode(cn.AsTree().Parent)
 		if pd == nil {
 			ni.UpdateWorldMatrix(idmtx)
 		} else {

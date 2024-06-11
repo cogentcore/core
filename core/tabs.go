@@ -125,7 +125,7 @@ func (ts *Tabs) Init() {
 		}
 	})
 	ts.OnWidgetAdded(func(w Widget) {
-		if w.AsTree().Parent() == ts.ChildByName("frame") { // TODO(config): figure out how to get this to work with new config paradigm
+		if w.AsTree().Parent == ts.ChildByName("frame") { // TODO(config): figure out how to get this to work with new config paradigm
 			w.Styler(func(s *styles.Style) {
 				// tab frames must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)
@@ -576,5 +576,5 @@ func (tb *Tab) Init() {
 
 // Tabs returns the parent [Tabs] of this [Tab].
 func (tb *Tab) Tabs() *Tabs {
-	return tb.Parent().AsTree().Parent().(*Tabs)
+	return tb.Parent.AsTree().Parent.(*Tabs)
 }

@@ -35,15 +35,15 @@ func LastChild(n Node) Node {
 // or nil if this is the root node.
 func Previous(n Node) Node {
 	nb := n.AsTree()
-	if nb.Parent() == nil {
+	if nb.Parent == nil {
 		return nil
 	}
 	myidx := n.AsTree().IndexInParent()
 	if myidx > 0 {
-		nn := nb.Parent().AsTree().Child(myidx - 1)
+		nn := nb.Parent.AsTree().Child(myidx - 1)
 		return LastChild(nn)
 	}
-	return nb.Parent()
+	return nb.Parent
 }
 
 // Next returns next node in the tree,
@@ -59,12 +59,12 @@ func Next(n Node) Node {
 // or nil if it has none.
 func NextSibling(n Node) Node {
 	nb := n.AsTree()
-	if nb.Parent() == nil {
+	if nb.Parent == nil {
 		return nil
 	}
 	myidx := n.AsTree().IndexInParent()
-	if myidx >= 0 && myidx < nb.Parent().AsTree().NumChildren()-1 {
-		return nb.Parent().AsTree().Child(myidx + 1)
+	if myidx >= 0 && myidx < nb.Parent.AsTree().NumChildren()-1 {
+		return nb.Parent.AsTree().Child(myidx + 1)
 	}
-	return NextSibling(nb.Parent())
+	return NextSibling(nb.Parent)
 }

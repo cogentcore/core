@@ -740,10 +740,10 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				if curPar == sv.Root.This() {
 					break
 				}
-				if curPar.AsTree().Parent() == nil {
+				if curPar.AsTree().Parent == nil {
 					break
 				}
-				curPar = curPar.AsTree().Parent().(Node)
+				curPar = curPar.AsTree().Parent.(Node)
 				if curPar == sv.Root.This() {
 					break
 				}

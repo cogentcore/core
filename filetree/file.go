@@ -148,8 +148,8 @@ func (fn *Node) DuplicateFiles() { //types:add
 // directories
 func (fn *Node) DuplicateFile() error {
 	_, err := fn.Info.Duplicate()
-	if err == nil && fn.Par != nil {
-		fnp := AsNode(fn.Par)
+	if err == nil && fn.Parent != nil {
+		fnp := AsNode(fn.Parent)
 		fnp.UpdateNode()
 	}
 	return err
@@ -198,7 +198,7 @@ func (fn *Node) DeleteFile() error {
 	if fn.IsExternal() {
 		return nil
 	}
-	pari := fn.Par
+	pari := fn.Parent
 	var parent *Node
 	if pari != nil {
 		parent = AsNode(pari)

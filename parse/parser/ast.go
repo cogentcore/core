@@ -51,10 +51,10 @@ func (ast *Ast) ChildAst(idx int) *Ast {
 
 // ParentAst returns the Parent as an Ast.
 func (ast *Ast) ParentAst() *Ast {
-	if ast.Par == nil {
+	if ast.Parent == nil {
 		return nil
 	}
-	pn := ast.Par.AsTree().This()
+	pn := ast.Parent.AsTree().This()
 	if pn == nil {
 		return nil
 	}

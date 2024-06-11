@@ -176,14 +176,14 @@ func (nb *NodeBase) AsNode() *NodeBase {
 // It sets the scene of the node to that of its parent.
 // It should be called by all other OnAdd functions defined by node types.
 func (nb *NodeBase) OnAdd() {
-	if nb.Par == nil {
+	if nb.Parent == nil {
 		return
 	}
-	if sc, ok := nb.Par.(*Scene); ok {
+	if sc, ok := nb.Parent.(*Scene); ok {
 		nb.Scene = sc
 		return
 	}
-	if _, pnb := AsNode(nb.Par); pnb != nil {
+	if _, pnb := AsNode(nb.Parent); pnb != nil {
 		nb.Scene = pnb.Scene
 		return
 	}

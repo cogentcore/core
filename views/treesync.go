@@ -237,7 +237,7 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
-			parent := AsTreeView(tv.Par)
+			parent := AsTreeView(tv.Parent)
 			if tv.SyncNode != nil {
 				parent.AddSyncNodes(rel, myidx, nd.Type, nd.Number)
 			} else {
@@ -290,7 +290,7 @@ func (tv *TreeView) DeleteNode() { //types:add
 		tv.SyncNode.AsTree().Delete()
 		tv.SendChangeEventReSync(nil)
 	} else {
-		parent := AsTreeView(tv.Par)
+		parent := AsTreeView(tv.Parent)
 		tv.Delete()
 		parent.Update()
 		parent.TreeViewChanged(nil)
@@ -305,14 +305,14 @@ func (tv *TreeView) Duplicate() { //types:add
 	if tv.IsRoot(ttl) {
 		return
 	}
-	if tv.Par == nil {
+	if tv.Parent == nil {
 		return
 	}
 	if tv.SyncNode != nil {
 		tv.DuplicateSync()
 		return
 	}
-	parent := AsTreeView(tv.Par)
+	parent := AsTreeView(tv.Parent)
 	myidx := tv.IndexInParent()
 	if myidx < 0 {
 		return
@@ -331,7 +331,7 @@ func (tv *TreeView) Duplicate() { //types:add
 
 func (tv *TreeView) DuplicateSync() {
 	sn := tv.SyncNode
-	tvparent := AsTreeView(tv.Par)
+	tvparent := AsTreeView(tv.Parent)
 	parent := tvparent.SyncNode
 	if parent == nil {
 		log.Printf("TreeView %v nil SyncNode in: %v\n", tv, tvparent.Path())
@@ -432,8 +432,8 @@ func (tv *TreeView) PasteAssignSync(md mimedata.Mimes) {
 func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
 	sn := tv.SyncNode
 	sl, pl := tv.NodesFromMimeData(md)
-	tvparent := AsTreeView(tv.Par)
-	parent := sn.AsTree().Parent()
+	tvparent := AsTreeView(tv.Parent)
+	parent := sn.AsTree().Parent
 	myidx := sn.AsTree().IndexInParent()
 	if myidx < 0 {
 		return

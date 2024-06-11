@@ -129,7 +129,7 @@ func HandleElement(ctx *Context) {
 
 		text := HandleText(ctx)
 		start := ""
-		if pw, ok := text.Parent().(core.Widget); ok {
+		if pw, ok := text.Parent.(core.Widget); ok {
 			switch pw.AsTree().Property("tag") {
 			case "ol":
 				number := 0

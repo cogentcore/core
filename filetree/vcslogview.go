@@ -200,7 +200,7 @@ func (lv *VCSLogView) MakeToolbar(p *core.Plan) {
 		w.SetState(true, states.Checked)
 		w.OnClick(func(e events.Event) {
 			lv.SetA = w.IsChecked()
-			cbb := w.Parent().AsTree().ChildByName("b-rev", 2).(*core.Switch)
+			cbb := w.Parent.AsTree().ChildByName("b-rev", 2).(*core.Switch)
 			cbb.SetState(!lv.SetA, states.Checked)
 			cbb.NeedsRender()
 		})
@@ -227,7 +227,7 @@ func (lv *VCSLogView) MakeToolbar(p *core.Plan) {
 		w.SetTooltip("If selected, clicking in log will set this B Revision to use for Diff")
 		w.OnClick(func(e events.Event) {
 			lv.SetA = !w.IsChecked()
-			cba := w.Parent().AsTree().ChildByName("a-rev", 2).(*core.Switch)
+			cba := w.Parent.AsTree().ChildByName("a-rev", 2).(*core.Switch)
 			cba.SetState(lv.SetA, states.Checked)
 			cba.NeedsRender()
 		})

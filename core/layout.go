@@ -648,7 +648,7 @@ func (ly *Frame) LaySetContentFitOverflow(nsz math32.Vector2, pass LayoutPasses)
 	oflow := &ly.Styles.Overflow
 	nosz := pass == SizeUpPass && ly.Styles.IsFlexWrap()
 	for d := math32.X; d <= math32.Y; d++ {
-		if (nosz || (!(ly.Scene != nil && ly.Scene.Is(ScPrefSizing)) && oflow.Dim(d) >= styles.OverflowAuto)) && ly.Par != nil {
+		if (nosz || (!(ly.Scene != nil && ly.Scene.Is(ScPrefSizing)) && oflow.Dim(d) >= styles.OverflowAuto)) && ly.Parent != nil {
 			continue
 		}
 		asz.SetDim(d, styles.ClampMin(asz.Dim(d), nsz.Dim(d)))
@@ -1654,7 +1654,7 @@ func (ly *Frame) PositionLay() {
 		ly.PositionWidget() // behave like a widget
 		return
 	}
-	if ly.Par == nil {
+	if ly.Parent == nil {
 		ly.PositionWithinAllocMainY(math32.Vector2{}, ly.Styles.Justify.Items, ly.Styles.Align.Items)
 	}
 	ly.ConfigScrolls() // and configure the scrolls

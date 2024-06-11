@@ -487,7 +487,7 @@ func (tv *TreeView) Init() {
 func (tv *TreeView) OnAdd() {
 	tv.WidgetBase.OnAdd()
 	tv.Text = tv.Name
-	if ptv := AsTreeView(tv.Parent()); ptv != nil {
+	if ptv := AsTreeView(tv.Parent); ptv != nil {
 		tv.RootView = ptv.RootView
 		tv.IconOpen = ptv.IconOpen
 		tv.IconClosed = ptv.IconClosed
@@ -958,7 +958,7 @@ func (tv *TreeView) UnselectAction() {
 // using given select mode (from keyboard modifiers).
 // Returns newly selected node.
 func (tv *TreeView) MoveDown(selMode events.SelectModes) *TreeView {
-	if tv.Par == nil {
+	if tv.Parent == nil {
 		return nil
 	}
 	if tv.IsClosed() || !tv.HasChildren() { // next sibling
@@ -991,21 +991,21 @@ func (tv *TreeView) MoveDownAction(selMode events.SelectModes) *TreeView {
 // MoveDownSibling moves down only to siblings, not down into children,
 // using given select mode (from keyboard modifiers)
 func (tv *TreeView) MoveDownSibling(selMode events.SelectModes) *TreeView {
-	if tv.Par == nil {
+	if tv.Parent == nil {
 		return nil
 	}
 	if tv == tv.RootView {
 		return nil
 	}
 	myidx := tv.IndexInParent()
-	if myidx < len(tv.Par.AsTree().Children)-1 {
-		nn := AsTreeView(tv.Par.AsTree().Child(myidx + 1))
+	if myidx < len(tv.Parent.AsTree().Children)-1 {
+		nn := AsTreeView(tv.Parent.AsTree().Child(myidx + 1))
 		if nn != nil {
 			nn.SelectUpdate(selMode)
 			return nn
 		}
 	} else {
-		return AsTreeView(tv.Par).MoveDownSibling(selMode) // try up
+		return AsTreeView(tv.Parent).MoveDownSibling(selMode) // try up
 	}
 	return nil
 }
@@ -1014,18 +1014,18 @@ func (tv *TreeView) MoveDownSibling(selMode events.SelectModes) *TreeView {
 // using given select mode (from keyboard modifiers).
 // Returns newly selected node
 func (tv *TreeView) MoveUp(selMode events.SelectModes) *TreeView {
-	if tv.Par == nil || tv == tv.RootView {
+	if tv.Parent == nil || tv == tv.RootView {
 		return nil
 	}
 	myidx := tv.IndexInParent()
 	if myidx > 0 {
-		nn := AsTreeView(tv.Par.AsTree().Child(myidx - 1))
+		nn := AsTreeView(tv.Parent.AsTree().Child(myidx - 1))
 		if nn != nil {
 			return nn.MoveToLastChild(selMode)
 		}
 	} else {
-		if tv.Par != nil {
-			nn := AsTreeView(tv.Par)
+		if tv.Parent != nil {
+			nn := AsTreeView(tv.Parent)
 			if nn != nil {
 				nn.SelectUpdate(selMode)
 				return nn
@@ -1116,7 +1116,7 @@ func (tv *TreeView) MovePageDownAction(selMode events.SelectModes) *TreeView {
 // MoveToLastChild moves to the last child under me, using given select mode
 // (from keyboard modifiers)
 func (tv *TreeView) MoveToLastChild(selMode events.SelectModes) *TreeView {
-	if tv.Par == nil || tv == tv.RootView {
+	if tv.Parent == nil || tv == tv.RootView {
 		return nil
 	}
 	if !tv.IsClosed() && tv.HasChildren() {
@@ -1563,10 +1563,10 @@ const TreeViewTempMovedTag = `_\&MOVED\&`
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
 func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
-	if tv.Par == nil {
+	if tv.Parent == nil {
 		return
 	}
-	parent := AsTreeView(tv.Par)
+	parent := AsTreeView(tv.Parent)
 	if parent == nil {
 		core.MessageSnackbar(tv, "Error: cannot insert after the root of the tree")
 		return

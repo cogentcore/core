@@ -152,7 +152,7 @@ func (cv *ColorView) Init() {
 				s.Margin.Set(units.Dp(6))
 			})
 		}
-		if w.Parent().Name == "palette" {
+		if w.Parent.Name == "palette" {
 			if cbt, ok := w.(*core.Button); ok {
 				cbt.Style(func(s *styles.Style) {
 					c := colornames.Map[cbt.Name]

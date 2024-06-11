@@ -191,7 +191,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 		return
 	}
 	if len(md) > 3 { // multiple files -- automatically goes into parent dir
-		tdir := AsNode(fn.Parent())
+		tdir := AsNode(fn.Parent)
 		fn.PasteCopyFilesCheck(tdir, md, externalDrop, dropFinal)
 		return
 	}
@@ -203,7 +203,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 		srcpath = string(md[1].Data) // 1 has file path, 0 = tree path, 2 = file data
 	}
 	fname := filepath.Base(srcpath)
-	tdir := AsNode(fn.Parent())
+	tdir := AsNode(fn.Parent)
 	existing, sfn := fn.PasteCheckExisting(tdir, md, externalDrop)
 	mode := os.FileMode(0664)
 	if sfn != nil {

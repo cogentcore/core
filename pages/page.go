@@ -98,7 +98,7 @@ func (pg *Page) Init() {
 		sp.SetName("splits")
 
 		nav := views.NewTreeViewFrame(sp).SetText(core.TheApp.Name())
-		nav.Parent().AsTree().SetName("nav-frame")
+		nav.Parent.AsTree().SetName("nav-frame")
 		nav.SetName("nav")
 		nav.SetReadOnly(true)
 		nav.ParentWidget().Styler(func(s *styles.Style) {

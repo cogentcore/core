@@ -228,7 +228,7 @@ func (sw *Scene) handleSlideEvents() {
 		}
 		sn := sw.CurrentSelected.AsNode()
 		mpt := sw.CurrentManipPoint
-		mb := mpt.Par.(*xyz.Group)
+		mb := mpt.Parent.(*xyz.Group)
 		del := e.PrevDelta()
 		dx := float32(del.X)
 		dy := float32(del.Y)

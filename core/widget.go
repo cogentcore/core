@@ -459,10 +459,10 @@ func (wb *WidgetBase) NewParts() *Frame {
 // ParentWidget returns the parent as a [WidgetBase] or nil
 // if this is the root and has no parent.
 func (wb *WidgetBase) ParentWidget() *WidgetBase {
-	if wb.Par == nil {
+	if wb.Parent == nil {
 		return nil
 	}
-	return wb.Par.(Widget).AsWidget()
+	return wb.Parent.(Widget).AsWidget()
 }
 
 // ParentWidgetIf returns the nearest widget parent
@@ -471,7 +471,7 @@ func (wb *WidgetBase) ParentWidget() *WidgetBase {
 func (wb *WidgetBase) ParentWidgetIf(fun func(p *WidgetBase) bool) *WidgetBase {
 	cur := wb
 	for {
-		parent := cur.Par
+		parent := cur.Parent
 		if parent == nil {
 			return nil
 		}
@@ -499,10 +499,10 @@ func (wb *WidgetBase) IsVisible() bool {
 	if wb == nil || wb.This() == nil || wb.StateIs(states.Invisible) || wb.Scene == nil {
 		return false
 	}
-	if wb.Par == nil {
+	if wb.Parent == nil {
 		return true
 	}
-	return wb.Par.(Widget).IsVisible()
+	return wb.Parent.(Widget).IsVisible()
 }
 
 // DirectRenderImage uploads image directly into given system.Drawer at given index
@@ -596,16 +596,16 @@ func WidgetNext(w Widget) Widget {
 // including Parts, which are considered to come after Children.
 func WidgetNextSibling(w Widget) Widget {
 	wb := w.AsWidget()
-	if wb.Parent() == nil {
+	if wb.Parent == nil {
 		return nil
 	}
-	parent := wb.Parent().(Widget)
+	parent := wb.Parent.(Widget)
 	myidx := wb.IndexInParent()
-	if myidx >= 0 && myidx < wb.Parent().AsTree().NumChildren()-1 {
+	if myidx >= 0 && myidx < wb.Parent.AsTree().NumChildren()-1 {
 		return parent.AsTree().Child(myidx + 1).(Widget)
 	}
 	if parent.AsTree().Is(tree.Field) { // we are parts, go up
-		return WidgetNextSibling(parent.AsTree().Parent().(Widget))
+		return WidgetNextSibling(parent.AsTree().Parent.(Widget))
 	}
 	return WidgetNextSibling(parent)
 }
@@ -615,17 +615,17 @@ func WidgetNextSibling(w Widget) Widget {
 // nil if no more.
 func WidgetPrev(w Widget) Widget {
 	wb := w.AsWidget()
-	if wb.Parent() == nil {
+	if wb.Parent == nil {
 		return nil
 	}
-	parent := wb.Parent().(Widget)
+	parent := wb.Parent.(Widget)
 	myidx := wb.IndexInParent()
 	if myidx > 0 {
 		nn := parent.AsTree().Child(myidx - 1).(Widget)
 		return WidgetLastChildParts(nn) // go to parts
 	}
 	if parent.AsTree().Is(tree.Field) { // we are parts, go into children
-		parent = parent.AsTree().Parent().(Widget)
+		parent = parent.AsTree().Parent.(Widget)
 		return WidgetLastChild(parent) // go to children
 	}
 	// we were children, done

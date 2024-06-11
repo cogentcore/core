@@ -49,7 +49,7 @@ func (tb *Toolbar) Init() {
 		}
 		w.SetIcon(ic).SetTooltip("Additional menu items")
 		w.Updater(func() {
-			tb, ok := w.Parent().(*Toolbar)
+			tb, ok := w.Parent.(*Toolbar)
 			if ok {
 				w.Menu = tb.OverflowMenu
 			}
@@ -73,7 +73,7 @@ func (tb *Toolbar) AppChooser() *Chooser { // TODO(config): remove
 // ParentToolbar returns Toolbar that is the direct parent of given widget,
 // or nil if that is not the case.
 func ParentToolbar(w Widget) *Toolbar {
-	par := w.AsTree().Parent()
+	par := w.AsTree().Parent
 	if par == nil {
 		return nil
 	}

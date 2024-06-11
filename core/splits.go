@@ -48,7 +48,7 @@ func (sl *Splits) Init() {
 		}
 	})
 	sl.OnWidgetAdded(func(w Widget) {
-		if w.AsTree().Parent() == sl.This() { // TODO(config): need some way to do this with the new config paradigm
+		if w.AsTree().Parent == sl.This() { // TODO(config): need some way to do this with the new config paradigm
 			w.Styler(func(s *styles.Style) {
 				// splits elements must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)

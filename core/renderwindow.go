@@ -1076,6 +1076,6 @@ func (sr *Scrim) DirectRenderImage(drw system.Drawer, idx int) {
 }
 
 func (sr *Scrim) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
-	sc := sr.Par.(*Scene)
+	sc := sr.Parent.(*Scene)
 	drw.Fill(colors.ApplyOpacity(colors.Scheme.Scrim, .5), math32.Identity3(), sc.Geom.TotalBBox, draw.Over)
 }

@@ -161,10 +161,10 @@ func (g *NodeBase) ParTransform(self bool) math32.Matrix2 {
 	xf := math32.Identity2()
 	n := g.This().(Node)
 	for {
-		if n.AsTree().Parent() == nil {
+		if n.AsTree().Parent == nil {
 			break
 		}
-		n = n.AsTree().Parent().(Node)
+		n = n.AsTree().Parent.(Node)
 		pars = append(pars, n)
 	}
 	np := len(pars)
@@ -332,8 +332,8 @@ func (g *NodeBase) Style(sv *SVG) {
 	pc.StyleSet = false // this is always first call, restart
 
 	var parCSSAgg map[string]any
-	if g.Par != nil { // && g.Par != sv.Root.This()
-		pn := g.Par.(Node)
+	if g.Parent != nil { // && g.Par != sv.Root.This()
+		pn := g.Parent.(Node)
 		parCSSAgg = pn.AsNodeBase().CSSAgg
 		pp := pn.PaintStyle()
 		pc.CopyStyleFrom(pp)
@@ -378,8 +378,8 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css map[string]any) bool {
 	}
 	pc := &g.Paint
 	ctxt := colors.Context(sv)
-	if g.Par != sv.Root.This() {
-		pp := g.Par.(Node).PaintStyle()
+	if g.Parent != sv.Root.This() {
+		pp := g.Parent.(Node).PaintStyle()
 		pc.SetStyleProperties(pp, pmap, ctxt)
 	} else {
 		pc.SetStyleProperties(nil, pmap, ctxt)

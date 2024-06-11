@@ -61,7 +61,7 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 
 	// if our type does not match, we must replace our This to make it match
 	if n.Ths.NodeType() != typ {
-		parent := n.Par
+		parent := n.Parent
 		index := n.IndexInParent()
 		if index >= 0 {
 			n.Delete()
@@ -132,7 +132,7 @@ func UnmarshalRootJSON(b []byte) (Node, error) {
 	// the node must be fetched from the parent's children since the pointer may have changed
 	n := parent.Child(0)
 	// we must safely remove the node from its temporary parent
-	n.AsTree().Par = nil
+	n.AsTree().Parent = nil
 	parent.Children = nil
 	parent.Destroy()
 	return n, nil

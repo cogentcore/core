@@ -72,7 +72,7 @@ func (fb *FileBrowse) Init() {
 				s.Justify.Content = styles.Center
 			})
 		}
-		if w.AsTree().Parent().AsTree().PathFrom(fb) == "splits" {
+		if w.AsTree().Parent.AsTree().PathFrom(fb) == "splits" {
 			if w.AsTree().IndexInParent() == 0 {
 				w.Styler(func(s *styles.Style) {
 					s.Grow.Set(1, 1)

@@ -381,8 +381,8 @@ func (gl *GoLang) CompleteAstStart(ast *parser.Ast, scope token.Tokens) (start, 
 	prv := cur
 	for {
 		var parent *parser.Ast
-		if cur.Par != nil {
-			parent = cur.Par.(*parser.Ast)
+		if cur.Parent != nil {
+			parent = cur.Parent.(*parser.Ast)
 		}
 		switch {
 		case cur.Name == "TypeNm":

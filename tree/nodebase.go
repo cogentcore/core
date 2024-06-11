@@ -37,9 +37,11 @@ type NodeBase struct {
 	// Properties is a property map for arbitrary key-value properties.
 	Properties map[string]any `tableview:"-" xml:"-" copier:"-" set:"-" json:",omitempty"`
 
-	// Par is the parent of this node, which is set automatically when this node is
-	// added as a child of a parent. It is typically accessed through [Node.Parent].
-	Par Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	// Parent is the parent of this node, which is set automatically when this node is
+	// added as a child of a parent. To change the parent of a node, use [MoveToParent];
+	// you should typically not set this field directly. Nodes can only have one parent
+	// at a time.
+	Parent Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// Children is the list of children of this node. All of them are set to have this node
 	// as their parent. You can directly modify them or use the various [NodeBase]
@@ -110,20 +112,14 @@ func (n *NodeBase) BaseType() *types.Type {
 
 // Parents:
 
-// Parent returns the parent of this Node.
-// Each Node can only have one parent.
-func (n *NodeBase) Parent() Node {
-	return n.Par
-}
-
 // IndexInParent returns our index within our parent node. It caches the
 // last value and uses that for an optimized search so subsequent calls
 // are typically quite fast. Returns -1 if we don't have a parent.
 func (n *NodeBase) IndexInParent() int {
-	if n.Par == nil {
+	if n.Parent == nil {
 		return -1
 	}
-	idx := IndexOf(n.Par.AsTree().Children, n.This(), n.index) // very fast if index is close
+	idx := IndexOf(n.Parent.AsTree().Children, n.This(), n.index) // very fast if index is close
 	n.index = idx
 	return idx
 }
@@ -151,10 +147,10 @@ func (n *NodeBase) ParentByName(name string) Node {
 	if IsRoot(n) {
 		return nil
 	}
-	if n.Par.AsTree().Name == name {
-		return n.Par
+	if n.Parent.AsTree().Name == name {
+		return n.Parent
 	}
-	return n.Par.AsTree().ParentByName(name)
+	return n.Parent.AsTree().ParentByName(name)
 }
 
 // ParentByType finds parent recursively up hierarchy, by type, and
@@ -165,15 +161,15 @@ func (n *NodeBase) ParentByType(t *types.Type, embeds bool) Node {
 		return nil
 	}
 	if embeds {
-		if n.Par.NodeType().HasEmbed(t) {
-			return n.Par
+		if n.Parent.NodeType().HasEmbed(t) {
+			return n.Parent
 		}
 	} else {
-		if n.Par.NodeType() == t {
-			return n.Par
+		if n.Parent.NodeType() == t {
+			return n.Parent
 		}
 	}
-	return n.Par.AsTree().ParentByType(t, embeds)
+	return n.Parent.AsTree().ParentByType(t, embeds)
 }
 
 // Children:
@@ -239,11 +235,11 @@ func UnescapePathName(name string) string {
 // are unique. Any existing / and . characters in names
 // are escaped to \\ and \,
 func (n *NodeBase) Path() string {
-	if n.Par != nil {
+	if n.Parent != nil {
 		if n.Is(Field) {
-			return n.Par.AsTree().Path() + "." + EscapePathName(n.Name)
+			return n.Parent.AsTree().Path() + "." + EscapePathName(n.Name)
 		}
-		return n.Par.AsTree().Path() + "/" + EscapePathName(n.Name)
+		return n.Parent.AsTree().Path() + "/" + EscapePathName(n.Name)
 	}
 	return "/" + EscapePathName(n.Name)
 }
@@ -263,14 +259,14 @@ func (n *NodeBase) PathFrom(parent Node) string {
 	// critical to get "This"
 	parent = parent.AsTree().This()
 	// we bail a level below the parent so it isn't in the path
-	if n.Par == nil || n.Par == parent {
+	if n.Parent == nil || n.Parent == parent {
 		return EscapePathName(n.Name)
 	}
 	ppath := ""
-	if n.Par == parent {
+	if n.Parent == parent {
 		ppath = "/" + EscapePathName(parent.AsTree().Name)
 	} else {
-		ppath = n.Par.AsTree().PathFrom(parent)
+		ppath = n.Parent.AsTree().PathFrom(parent)
 	}
 	if n.Is(Field) {
 		return ppath + "." + EscapePathName(n.Name)
@@ -455,10 +451,10 @@ func (n *NodeBase) DeleteChildren() {
 // Delete deletes this node from its parent's children list
 // and then destroys itself.
 func (n *NodeBase) Delete() {
-	if n.Par == nil {
+	if n.Parent == nil {
 		n.This().Destroy()
 	} else {
-		n.Par.AsTree().DeleteChild(n.This())
+		n.Parent.AsTree().DeleteChild(n.This())
 	}
 }
 
@@ -534,7 +530,7 @@ func (n *NodeBase) WalkUp(fun func(n Node) bool) bool {
 		if !fun(cur) { // false return means stop
 			return false
 		}
-		parent := cur.AsTree().Parent()
+		parent := cur.AsTree().Parent
 		if parent == nil || parent == cur { // prevent loops
 			return true
 		}
@@ -551,12 +547,12 @@ func (n *NodeBase) WalkUpParent(fun func(n Node) bool) bool {
 	if IsRoot(n) {
 		return true
 	}
-	cur := n.Parent()
+	cur := n.Parent
 	for {
 		if !fun(cur) { // false return means stop
 			return false
 		}
-		parent := cur.AsTree().Parent()
+		parent := cur.AsTree().Parent
 		if parent == nil || parent == cur { // prevent loops
 			return true
 		}
@@ -618,7 +614,7 @@ outer:
 			if cur == start {
 				break outer // done!
 			}
-			parent := cb.Parent()
+			parent := cb.Parent
 			if parent == nil || parent == cur { // shouldn't happen, but does..
 				// fmt.Printf("nil / cur parent %v\n", par)
 				break outer
@@ -686,7 +682,7 @@ outer:
 			if cur == start {
 				break outer // done!
 			}
-			parent := cb.Parent()
+			parent := cb.Parent
 			if parent == nil || parent == cur { // shouldn't happen
 				break outer
 			}
