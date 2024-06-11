@@ -1542,9 +1542,9 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 					node = nd
 				}
 				if findAll {
-					pn := nd.Parent()
+					pn := nd.AsTree().Parent()
 					for _, pk := range pn.AsTree().Children {
-						if pk != nd && pk.Name() == nd.Name() {
+						if pk != nd && pk.AsTree().Name() == nd.AsTree().Name() {
 							adnl = append(adnl, pk)
 						}
 					}
@@ -1568,9 +1568,9 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 			}
 			if node != nil {
 				if findAll {
-					pn := node.Parent()
+					pn := node.AsTree().Parent()
 					for _, pk := range pn.AsTree().Children {
-						if pk != node && pk.Name() == node.Name() {
+						if pk != node && pk.AsTree().Name() == node.AsTree().Name() {
 							adnl = append(adnl, pk)
 						}
 					}

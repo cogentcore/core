@@ -54,7 +54,7 @@ func (ast *Ast) ParentAst() *Ast {
 	if ast.Par == nil {
 		return nil
 	}
-	pn := ast.Par.This()
+	pn := ast.Par.AsTree().This()
 	if pn == nil {
 		return nil
 	}
