@@ -14,7 +14,7 @@ package tree
 func Last(n Node) Node {
 	n = LastChild(n)
 	last := n
-	n.WalkDown(func(k Node) bool {
+	n.AsTree().WalkDown(func(k Node) bool {
 		last = k
 		return Continue
 	})
@@ -24,8 +24,9 @@ func Last(n Node) Node {
 // LastChild returns the last child under the given node,
 // or the node itself if it has no children.
 func LastChild(n Node) Node {
-	if n.HasChildren() {
-		return LastChild(n.Child(n.NumChildren() - 1))
+	nb := n.AsTree()
+	if nb.HasChildren() {
+		return LastChild(nb.Child(nb.NumChildren() - 1))
 	}
 	return n
 }
@@ -33,35 +34,37 @@ func LastChild(n Node) Node {
 // Previous returns the previous node in the tree,
 // or nil if this is the root node.
 func Previous(n Node) Node {
-	if n.Parent() == nil {
+	nb := n.AsTree()
+	if nb.Parent() == nil {
 		return nil
 	}
 	myidx := n.AsTree().IndexInParent()
 	if myidx > 0 {
-		nn := n.Parent().Child(myidx - 1)
+		nn := nb.Parent().AsTree().Child(myidx - 1)
 		return LastChild(nn)
 	}
-	return n.Parent()
+	return nb.Parent()
 }
 
 // Next returns next node in the tree,
 // or nil if this is the last node.
 func Next(n Node) Node {
-	if !n.HasChildren() {
+	if !n.AsTree().HasChildren() {
 		return NextSibling(n)
 	}
-	return n.Child(0)
+	return n.AsTree().Child(0)
 }
 
 // NextSibling returns the next sibling of this node,
 // or nil if it has none.
 func NextSibling(n Node) Node {
-	if n.Parent() == nil {
+	nb := n.AsTree()
+	if nb.Parent() == nil {
 		return nil
 	}
 	myidx := n.AsTree().IndexInParent()
-	if myidx >= 0 && myidx < n.Parent().NumChildren()-1 {
-		return n.Parent().Child(myidx + 1)
+	if myidx >= 0 && myidx < nb.Parent().AsTree().NumChildren()-1 {
+		return nb.Parent().AsTree().Child(myidx + 1)
 	}
-	return NextSibling(n.Parent())
+	return NextSibling(nb.Parent())
 }
