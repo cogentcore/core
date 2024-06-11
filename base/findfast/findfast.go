@@ -7,8 +7,6 @@
 // as to where an item might be.
 package findfast
 
-import "cogentcore.org/core/base/namer"
-
 // FindFunc returns index of item in slice that matches target
 // according to given match function, using the given optional
 // starting index to optimize the search by searching bidirectionally
@@ -60,13 +58,4 @@ func FindFunc[T any](s []T, match func(e T) bool, startIndex ...int) int {
 		}
 	}
 	return -1
-}
-
-// FindName returns index of item in slice with given name
-// using the given optional starting index to optimize the
-// search by searching bidirectionally outward from given index.
-// This is much faster when you have some idea about where it might be.
-// Returns -1 if not found.
-func FindName[T namer.Namer](s []T, name string, startIndex ...int) int {
-	return FindFunc(s, func(e T) bool { return e.Name() == name }, startIndex...)
 }

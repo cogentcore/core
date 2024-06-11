@@ -10,10 +10,3 @@ package namer
 type Namer interface {
 	Name() string
 }
-
-// SetNamer is an interface for anything that returns a Name() string.
-// and has a SetName(name string) method to set the name.
-type SetNamer interface {
-	Namer
-	SetName(name string)
-}

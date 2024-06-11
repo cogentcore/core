@@ -56,7 +56,7 @@ func Update[T namer.Namer](s []T, n int, name func(i int) string, new func(name 
 	}
 	// next add and move items as needed; in order so guaranteed
 	for i, tn := range names {
-		ci := findfast.FindName(r, tn, smap[tn])
+		ci := findfast.FindFunc(r, func(e T) bool { return e.Name() == tn }, smap[tn])
 		if ci < 0 { // item not currently on the list
 			mods = true
 			ne := new(tn, i)
