@@ -604,6 +604,7 @@ outer:
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
+			cb := cur.AsTree() // may have changed, so must get again
 			curChild := tm[cur]
 			if (curChild + 1) < cb.NumChildren() {
 				curChild++
@@ -670,6 +671,7 @@ outer:
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
+			cb := cur.AsTree() // may have changed, so must get again
 			curChild := tm[cur]
 			if (curChild + 1) < cb.NumChildren() {
 				curChild++
