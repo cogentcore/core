@@ -138,7 +138,7 @@ func (c *Context) InlineParent() core.Widget {
 		return c.InlinePw
 	}
 	c.InlinePw = core.NewFrame(c.BlockParent)
-	c.InlinePw.SetName("inline-container")
+	c.InlinePw.AsTree().SetName("inline-container")
 	tree.SetUniqueName(c.InlinePw)
 	c.InlinePw.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 0)

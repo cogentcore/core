@@ -98,7 +98,7 @@ func (pg *Page) Init() {
 		sp.SetName("splits")
 
 		nav := views.NewTreeViewFrame(sp).SetText(core.TheApp.Name())
-		nav.Parent().SetName("nav-frame")
+		nav.Parent().AsTree().SetName("nav-frame")
 		nav.SetName("nav")
 		nav.SetReadOnly(true)
 		nav.ParentWidget().Styler(func(s *styles.Style) {
@@ -112,7 +112,7 @@ func (pg *Page) Init() {
 			url := "/"
 			if sn != nav {
 				// we need a slash so that it doesn't think it's a relative URL
-				url = "/" + sn.PathFrom(nav)
+				url = "/" + sn.AsTree().PathFrom(nav)
 			}
 			pg.OpenURL(url, true)
 		})
