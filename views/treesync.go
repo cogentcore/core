@@ -66,7 +66,7 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 	sn := tv.SyncNode
 	// root must keep the same name for continuity with surrounding context
 	if tv != tv.RootView {
-		nm := "tv_" + sn.Name()
+		nm := "tv_" + sn.AsTree().Name()
 		tv.SetName(nm)
 	}
 	tv.ViewIndex = *tvIndex
@@ -78,7 +78,7 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 	p := make(tree.TypePlan, 0, len(skids))
 	typ := tv.This().NodeType()
 	for _, skid := range skids {
-		p.Add(typ, "tv_"+skid.Name())
+		p.Add(typ, "tv_"+skid.AsTree().Name())
 	}
 	tree.Update(tv, p)
 	idx := 0
@@ -90,7 +90,7 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 		vk.SetSyncNode(skid, tvIndex, init, depth+1)
 		idx++
 	}
-	if !sn.HasChildren() {
+	if !sn.AsTree().HasChildren() {
 		tv.SetClosed(true)
 	}
 }
@@ -103,7 +103,7 @@ func (tv *TreeView) Label() string {
 		if lbl, has := labels.ToLabeler(tv.SyncNode); has {
 			return lbl
 		}
-		return tv.SyncNode.Name()
+		return tv.SyncNode.AsTree().Name()
 	}
 	if tv.Text != "" {
 		return tv.Text
@@ -178,7 +178,7 @@ func (tv *TreeView) AddTreeNodes(rel, myidx int, typ *types.Type, n int) {
 	var stv *TreeView
 	for i := 0; i < n; i++ {
 		nn := tv.InsertNewChild(typ, myidx+i)
-		nn.SetName(fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i))
+		nn.AsTree().SetName(fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i))
 		ntv := AsTreeView(nn)
 		ntv.Update()
 		if i == n-1 {
@@ -198,14 +198,14 @@ func (tv *TreeView) AddSyncNodes(rel, myidx int, typ *types.Type, n int) {
 	var sn tree.Node
 	for i := 0; i < n; i++ {
 		nn := parent.AsTree().InsertNewChild(typ, myidx+i)
-		nn.SetName(fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i))
+		nn.AsTree().SetName(fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i))
 		if i == n-1 {
 			sn = nn
 		}
 	}
 	tv.SendChangeEventReSync(nil)
 	if sn != nil {
-		if tvk := tv.ChildByName("tv_"+sn.Name(), 0); tvk != nil {
+		if tvk := tv.ChildByName("tv_"+sn.AsTree().Name(), 0); tvk != nil {
 			stv := AsTreeView(tvk)
 			stv.SelectAction(events.SelectOne)
 		}
@@ -228,7 +228,7 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	myidx += rel
 	typ := tv.This().BaseType()
 	if tv.SyncNode != nil {
-		typ = tv.SyncNode.This().BaseType()
+		typ = tv.SyncNode.BaseType()
 	}
 	d := core.NewBody().AddTitle(actNm).AddText("Number and type of items to insert:")
 	nd := &core.NewItemsData{Number: 1, Type: typ}
@@ -255,7 +255,7 @@ func (tv *TreeView) AddChildNode() { //types:add
 	ttl := "Add child"
 	typ := tv.This().BaseType()
 	if tv.SyncNode != nil {
-		typ = tv.SyncNode.This().BaseType()
+		typ = tv.SyncNode.BaseType()
 	}
 	d := core.NewBody().AddTitle(ttl).AddText("Number and type of items to insert:")
 	nd := &core.NewItemsData{Number: 1, Type: typ}
@@ -320,7 +320,7 @@ func (tv *TreeView) Duplicate() { //types:add
 	nm := fmt.Sprintf("%v_Copy", tv.Name())
 	tv.Unselect()
 	nwkid := tv.Clone()
-	nwkid.SetName(nm)
+	nwkid.AsTree().SetName(nm)
 	ntv := AsTreeView(nwkid)
 	parent.InsertChild(nwkid, myidx+1)
 	ntv.Update()
@@ -341,9 +341,9 @@ func (tv *TreeView) DuplicateSync() {
 	if myidx < 0 {
 		return
 	}
-	nm := fmt.Sprintf("%v_Copy", sn.Name())
-	nwkid := sn.Clone()
-	nwkid.SetName(nm)
+	nm := fmt.Sprintf("%v_Copy", sn.AsTree().Name())
+	nwkid := sn.AsTree().Clone()
+	nwkid.AsTree().SetName(nm)
 	parent.AsTree().InsertChild(nwkid, myidx+1)
 	tvparent.SendChangeEventReSync(nil)
 	if tvk := tvparent.ChildByName("tv_"+nm, 0); tvk != nil {
@@ -383,7 +383,7 @@ func (tv *TreeView) InspectNode() { //types:add
 func (tv *TreeView) MimeDataSync(md *mimedata.Mimes) {
 	sroot := tv.RootView.SyncNode
 	src := tv.SyncNode
-	*md = append(*md, mimedata.NewTextData(src.PathFrom(sroot)))
+	*md = append(*md, mimedata.NewTextData(src.AsTree().PathFrom(sroot)))
 	var buf bytes.Buffer
 	err := jsonx.Write(src, &buf)
 	if err == nil {
@@ -421,7 +421,7 @@ func (tv *TreeView) PasteAssignSync(md mimedata.Mimes) {
 	if len(sl) == 0 {
 		return
 	}
-	tv.SyncNode.CopyFrom(sl[0])
+	tv.SyncNode.AsTree().CopyFrom(sl[0])
 	tv.NeedsLayout()
 	tv.SendChangeEvent(nil)
 }
@@ -433,7 +433,7 @@ func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int,
 	sn := tv.SyncNode
 	sl, pl := tv.NodesFromMimeData(md)
 	tvparent := AsTreeView(tv.Par)
-	parent := sn.Parent()
+	parent := sn.AsTree().Parent()
 	myidx := sn.AsTree().IndexInParent()
 	if myidx < 0 {
 		return
@@ -445,14 +445,14 @@ func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int,
 	for i, ns := range sl {
 		orgpath := pl[i]
 		if mod != events.DropMove {
-			if cn := parent.ChildByName(ns.Name(), 0); cn != nil {
-				ns.SetName(ns.Name() + "_Copy")
+			if cn := parent.AsTree().ChildByName(ns.AsTree().Name(), 0); cn != nil {
+				ns.AsTree().SetName(ns.AsTree().Name() + "_Copy")
 			}
 		}
 		parent.AsTree().InsertChild(ns, myidx+i)
-		npath := ns.PathFrom(sroot)
+		npath := ns.AsTree().PathFrom(sroot)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
-			ns.SetName(ns.Name() + TreeViewTempMovedTag) // special keyword :)
+			ns.AsTree().SetName(ns.AsTree().Name() + TreeViewTempMovedTag) // special keyword :)
 		}
 		if i == sz-1 {
 			seln = ns
@@ -460,7 +460,7 @@ func (tv *TreeView) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int,
 	}
 	tvparent.SendChangeEventReSync(nil)
 	if seln != nil {
-		if tvk := tvparent.ChildByName("tv_"+seln.Name(), myidx); tvk != nil {
+		if tvk := tvparent.ChildByName("tv_"+seln.AsTree().Name(), myidx); tvk != nil {
 			stv := AsTreeView(tvk)
 			stv.SelectAction(events.SelectOne)
 		}
@@ -498,15 +498,15 @@ func (tv *TreeView) DropDeleteSourceSync(de *events.DragDrop) {
 			continue
 		}
 		path := string(d.Data)
-		sn := sroot.FindPath(path)
+		sn := sroot.AsTree().FindPath(path)
 		if sn != nil {
 			sn.AsTree().Delete()
 		}
-		sn = sroot.FindPath(path + TreeViewTempMovedTag)
+		sn = sroot.AsTree().FindPath(path + TreeViewTempMovedTag)
 		if sn != nil {
 			psplt := strings.Split(path, "/")
 			orgnm := psplt[len(psplt)-1]
-			sn.SetName(orgnm)
+			sn.AsTree().SetName(orgnm)
 			_, swb := core.AsWidget(sn)
 			swb.NeedsRender()
 		}
