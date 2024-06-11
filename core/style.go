@@ -44,9 +44,9 @@ func (wb *WidgetBase) FinalStyler(s func(s *styles.Style)) *WidgetBase {
 	return wb
 }
 
-// ApplyStyleWidget is the primary styling function for all Widgets.
-// Handles inheritance and runs the Styler functions.
-func (wb *WidgetBase) ApplyStyleWidget() {
+// Style updates the style properties of the widget based on [WidgetBase.Stylers].
+// To specify the style properties of a widget, use [WidgetBase.Styler].
+func (wb *WidgetBase) Style() {
 	if wb.This() == nil {
 		return
 	}
@@ -70,22 +70,20 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 	if wb.OverrideStyle {
 		return
 	}
-	wb.ResetStyleWidget()
+	wb.resetStyleWidget()
 
 	if pw != nil {
 		wb.Styles.InheritFields(&pw.Styles)
 	}
 
-	wb.ResetStyleSettings()
-	wb.RunStylers()
-	wb.ApplyStyleSettings()
+	wb.resetStyleSettings()
+	wb.runStylers()
+	wb.styleSettings()
 }
 
-// ResetStyleWidget resets the widget styles and applies the basic
-// default styles specified in [styles.Style.Defaults]. It is called
-// automatically in [ApplyStyleWidget]
-// and should not need to be called by end-user code.
-func (wb *WidgetBase) ResetStyleWidget() {
+// resetStyleWidget resets the widget styles and applies the basic
+// default styles specified in [styles.Style.Defaults].
+func (wb *WidgetBase) resetStyleWidget() {
 	s := &wb.Styles
 
 	// need to persist state
@@ -102,9 +100,9 @@ func (wb *WidgetBase) ResetStyleWidget() {
 	s.SetMono(false)
 }
 
-// RunStylers runs the stylers specified in the widget's FirstStylers,
+// runStylers runs the stylers specified in the widget's FirstStylers,
 // Stylers, and FinalStylers in that order in a sequential ascending order.
-func (wb *WidgetBase) RunStylers() {
+func (wb *WidgetBase) runStylers() {
 	for _, s := range wb.FirstStylers {
 		s(&wb.Styles)
 	}
@@ -116,13 +114,13 @@ func (wb *WidgetBase) RunStylers() {
 	}
 }
 
-// ResetStyleSettings reverses the effects of [ApplyStyleSettings]
+// resetStyleSettings reverses the effects of [ApplyStyleSettings]
 // for the widget's font size so that it does not create cascading
 // inhereted font size values. It only does this for non-root elements,
 // as the root element must receive the larger font size so that
 // all other widgets inherit it. It must be called before
-// [WidgetBase.RunStylers] and [WidgetBase.ApplyStyleSettings].
-func (wb *WidgetBase) ResetStyleSettings() {
+// [WidgetBase.runStylers] and [WidgetBase.styleSettings].
+func (wb *WidgetBase) resetStyleSettings() {
 	if tree.IsRoot(wb) {
 		return
 	}
@@ -131,9 +129,9 @@ func (wb *WidgetBase) ResetStyleSettings() {
 	wb.Styles.Text.LineHeight.Value /= fsz
 }
 
-// ApplyStyleSettings applies [AppearanceSettingsData.Spacing]
+// styleSettings applies [AppearanceSettingsData.Spacing]
 // and [AppearanceSettings.FontSize] to the style values for the widget.
-func (wb *WidgetBase) ApplyStyleSettings() {
+func (wb *WidgetBase) styleSettings() {
 	s := &wb.Styles
 
 	spc := AppearanceSettings.Spacing / 100
@@ -159,12 +157,6 @@ func (wb *WidgetBase) ApplyStyleSettings() {
 func (wb *WidgetBase) ApplyStyleUpdate() {
 	wb.ApplyStyleTree()
 	wb.NeedsRender()
-}
-
-// Style updates the style properties of the widget based on [WidgetBase.Stylers].
-// To specify the style properties of a widget, use [WidgetBase.Styler].
-func (wb *WidgetBase) Style() {
-	wb.ApplyStyleWidget()
 }
 
 // SetUnitContext sets the unit context based on size of scene, element, and parent

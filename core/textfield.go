@@ -1799,7 +1799,7 @@ func (tf *TextField) HandleKeyEvents() {
 //  Widget Interface
 
 func (tf *TextField) Style() {
-	tf.ApplyStyleWidget()
+	tf.WidgetBase.Style()
 	tf.CursorWidth.ToDots(&tf.Styles.UnitContext)
 }
 

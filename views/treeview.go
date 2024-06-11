@@ -579,7 +579,7 @@ func (tv *TreeView) Style() {
 		tv.SetClosed(true)
 	}
 	tv.Indent.ToDots(&tv.Styles.UnitContext)
-	tv.ApplyStyleWidget()
+	tv.WidgetBase.Style()
 }
 
 func (tv *TreeView) UpdateBranchIcons() {

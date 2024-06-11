@@ -160,7 +160,7 @@ func (fr *Frame) Init() {
 }
 
 func (fr *Frame) Style() {
-	fr.ApplyStyleWidget()
+	fr.WidgetBase.Style()
 	for d := math32.X; d <= math32.Y; d++ {
 		if fr.HasScroll[d] && fr.Scrolls[d] != nil {
 			fr.Scrolls[d].Style()

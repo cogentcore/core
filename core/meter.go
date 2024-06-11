@@ -102,7 +102,7 @@ func (m *Meter) Init() {
 }
 
 func (m *Meter) Style() {
-	m.ApplyStyleWidget()
+	m.WidgetBase.Style()
 	m.Width.ToDots(&m.Styles.UnitContext)
 }
 

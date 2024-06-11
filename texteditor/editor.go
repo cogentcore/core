@@ -511,7 +511,7 @@ func (ed *Editor) StyleView() {
 			ed.Buffer.SetHiStyle(histyle.StyleDefault)
 		}
 	}
-	ed.ApplyStyleWidget()
+	ed.WidgetBase.Style()
 	ed.CursorWidth.ToDots(&ed.Styles.UnitContext)
 }
 
