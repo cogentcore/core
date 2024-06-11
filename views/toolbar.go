@@ -23,7 +23,7 @@ func ConfigSVGToolbar(tb *core.Toolbar, sv *core.SVG) {
 	core.NewButton(tb).SetIcon(icons.PanTool).
 		SetTooltip("toggle the ability to zoom and pan the view").OnClick(func(e events.Event) {
 		sv.SetReadOnly(!sv.IsReadOnly())
-		sv.ApplyStyleUpdate()
+		sv.Restyle()
 	})
 	core.NewButton(tb).SetIcon(icons.ArrowForward).
 		SetTooltip("turn on select mode for selecting SVG elements").

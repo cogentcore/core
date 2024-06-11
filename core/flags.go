@@ -57,11 +57,10 @@ func (wb *WidgetBase) SetAbilities(on bool, able ...abilities.Abilities) *Widget
 }
 
 // SetSelected sets the Selected flag to given value for the entire Widget
-// and calls ApplyStyleTree to apply any style changes.
+// and calls [WidgetBase.Restyle] to apply any style changes.
 func (wb *WidgetBase) SetSelected(sel bool) *WidgetBase {
 	wb.SetState(sel, states.Selected)
-	wb.StyleTree()
-	wb.NeedsRender()
+	wb.Restyle()
 	return wb
 }
 

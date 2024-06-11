@@ -160,10 +160,11 @@ func (wb *WidgetBase) StyleTree() {
 	})
 }
 
-// ApplyStyleUpdate calls ApplyStyleTree and NeedsRender.
-// This is the main call needed to ensure that state-sensitive styling
-// is updated, when the state changes.
-func (wb *WidgetBase) ApplyStyleUpdate() {
+// Restyle ensures that the styling of the widget and all of its children
+// is updated and rendered by calling [WidgetBase.StyleTree] and
+// [WidgetBase.NeedsRender]. It does not trigger a new update or layout
+// pass, so it should only be used for non-structural styling changes.
+func (wb *WidgetBase) Restyle() {
 	wb.StyleTree()
 	wb.NeedsRender()
 }

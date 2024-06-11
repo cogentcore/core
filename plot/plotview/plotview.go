@@ -556,7 +556,7 @@ func (pl *PlotView) MakeToolbar(p *core.Plan) {
 			SetTooltip("toggle the ability to zoom and pan the view").OnClick(func(e events.Event) {
 			pc := pl.PlotChild()
 			pc.SetReadOnly(!pc.IsReadOnly())
-			pc.ApplyStyleUpdate()
+			pc.Restyle()
 		})
 	})
 	core.Add(p, func(w *core.Button) {

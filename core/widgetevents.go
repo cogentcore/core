@@ -252,7 +252,7 @@ func (wb *WidgetBase) HandleEvent(e events.Event) {
 	wb.FinalListeners.Call(e, shouldContinue)
 
 	if s.State != state {
-		wb.ApplyStyleUpdate()
+		wb.Restyle()
 	}
 }
 

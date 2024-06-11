@@ -1210,7 +1210,7 @@ func (sv *SliceViewBase) UpdateSelectIndex(idx int, sel bool, selMode events.Sel
 			sv.SelectIndex(idx)
 		}
 		sv.Send(events.Select)
-		sv.ApplyStyleUpdate()
+		sv.Restyle()
 	} else {
 		sv.SelectIndexAction(idx, selMode)
 	}
@@ -1369,7 +1369,7 @@ func (sv *SliceViewBase) SelectIndexAction(idx int, mode events.SelectModes) {
 		sv.SelectedIndex = idx
 		sv.UnselectIndex(idx)
 	}
-	sv.ApplyStyleUpdate()
+	sv.Restyle()
 }
 
 // UnselectIndexAction unselects this idx (if selected) -- and emits a signal
