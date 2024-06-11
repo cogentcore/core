@@ -631,7 +631,7 @@ outer:
 func (n *NodeBase) NodeWalkDown(fun func(n Node) bool) {}
 
 // WalkDownPost iterates in a depth-first manner over the children, calling
-// doChildTest on each node to test if processing should proceed (if it returns
+// shouldContinue on each node to test if processing should proceed (if it returns
 // [Break] then that branch of the tree is not further processed),
 // and then calls the given function after all of a node's children
 // have been iterated over. In effect, this means that the given function
@@ -639,7 +639,7 @@ func (n *NodeBase) NodeWalkDown(fun func(n Node) bool) {}
 // the traversal and is very fast, but can only be called by one goroutine at a
 // time, so you should use a Mutex if there is a chance of multiple threads
 // running at the same time. The nodes are processed in the current goroutine.
-func (n *NodeBase) WalkDownPost(doChildTestFunc func(n Node) bool, fun func(n Node) bool) {
+func (n *NodeBase) WalkDownPost(shouldContinue func(n Node) bool, fun func(n Node) bool) {
 	if n.This() == nil {
 		return
 	}
@@ -649,7 +649,7 @@ func (n *NodeBase) WalkDownPost(doChildTestFunc func(n Node) bool, fun func(n No
 	tm[cur] = -1
 outer:
 	for {
-		if cur.This() != nil && doChildTestFunc(cur) { // false return means stop
+		if cur.This() != nil && shouldContinue(cur) { // false return means stop
 			if cur.HasChildren() {
 				tm[cur] = 0 // 0 for no fields
 				nxt := cur.Child(0)
