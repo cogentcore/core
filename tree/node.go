@@ -10,6 +10,7 @@ package tree
 //go:generate core generate ./testdata
 
 import (
+	"cogentcore.org/core/base/plan"
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/types"
 )
@@ -129,4 +130,7 @@ type Node interface {
 	// [cogentcore.org/core/core.WidgetBase.CopyFieldsFrom] for an example of a
 	// custom CopyFieldsFrom method.
 	CopyFieldsFrom(from Node)
+
+	// This is necessary for tree planning to work.
+	plan.Namer
 }
