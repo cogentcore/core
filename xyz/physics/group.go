@@ -113,7 +113,7 @@ func (gp *Group) WorldRelToAbs() {
 		if !pn.IsDynamic() {
 			return false
 		}
-		_, pi := AsNode(n.Parent())
+		_, pi := AsNode(n.AsTree().Parent())
 		pn.RelToAbs(pi)
 		return true
 	})
