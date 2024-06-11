@@ -662,6 +662,9 @@ func WidgetLastChild(w Widget) Widget {
 func WidgetNextFunc(w Widget, fun func(w Widget) bool) Widget {
 	for {
 		nw := WidgetNext(w)
+		if nw == nil {
+			return nil
+		}
 		if fun(nw) {
 			return nw
 		}
@@ -680,6 +683,9 @@ func WidgetNextFunc(w Widget, fun func(w Widget) bool) Widget {
 func WidgetPrevFunc(w Widget, fun func(w Widget) bool) Widget {
 	for {
 		pw := WidgetPrev(w)
+		if pw == nil {
+			return nil
+		}
 		if fun(pw) {
 			return pw
 		}
