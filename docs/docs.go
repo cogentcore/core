@@ -13,6 +13,7 @@ import (
 	"io/fs"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -22,7 +23,6 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/tree"
 	"cogentcore.org/core/views"
 )
 
@@ -95,7 +95,7 @@ func homePage(ctx *htmlview.Context) bool {
 				wrongCompact := sc == core.SizeCompact && block.Child(1).AsTree().Name == "text-block"
 				wrongNonCompact := sc != core.SizeCompact && block.Child(0).AsTree().Name == "text-block"
 				if wrongCompact || wrongNonCompact {
-					block.Children = tree.Move(block.Children, 0, 1)
+					block.Children = slicesx.Move(block.Children, 0, 1)
 				}
 			})
 		}

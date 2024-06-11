@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"cogentcore.org/core/base/slicesx"
 	. "cogentcore.org/core/tree"
 	"cogentcore.org/core/tree/testdata"
 	"cogentcore.org/core/types"
@@ -156,11 +157,11 @@ func TestNodeMove(t *testing.T) {
 	child3.SetName("child3")
 
 	bf := fmt.Sprintf("mv before:\n%v\n", parent.Children)
-	parent.Children = Move(parent.Children, 3, 1)
+	parent.Children = slicesx.Move(parent.Children, 3, 1)
 	a31 := fmt.Sprintf("mv 3 -> 1:\n%v\n", parent.Children)
-	parent.Children = Move(parent.Children, 0, 3)
+	parent.Children = slicesx.Move(parent.Children, 0, 3)
 	a03 := fmt.Sprintf("mv 0 -> 3:\n%v\n", parent.Children)
-	parent.Children = Move(parent.Children, 1, 2)
+	parent.Children = slicesx.Move(parent.Children, 1, 2)
 	a12 := fmt.Sprintf("mv 1 -> 2:\n%v\n", parent.Children)
 
 	bft := `mv before:

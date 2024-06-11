@@ -18,6 +18,7 @@ import (
 	"text/tabwriter"
 
 	"cogentcore.org/core/base/indent"
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/syms"
 	"cogentcore.org/core/parse/token"
@@ -1468,7 +1469,7 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, parent *Rule, parentAst *Ast, scope 
 	}
 	// our AST is now backwards -- need to swap them
 	if len(ourAst.Children) == 2 {
-		tree.Swap(ourAst.Children, 0, 1)
+		slicesx.Swap(ourAst.Children, 0, 1)
 		// if GuiActive {
 		// we have a very strange situation here: the tree view of the Ast will typically
 		// have two children, named identically (e.g., Expr, Expr) and it will not update

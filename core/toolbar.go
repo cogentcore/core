@@ -7,6 +7,7 @@ package core
 import (
 	"slices"
 
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
@@ -173,7 +174,7 @@ func (tb *Toolbar) MoveToOverflow() {
 		return tree.Continue
 	})
 	if ovidx != n-1 {
-		tb.Children = tree.Move(tb.Children, n-1, ovidx)
+		tb.Children = slicesx.Move(tb.Children, n-1, ovidx)
 		tb.Children = tb.Children[:ovidx+1]
 	}
 	if len(tb.overflowItems) == 0 && len(tb.OverflowMenus) == 0 {
