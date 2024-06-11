@@ -30,7 +30,7 @@ func TestHandleWidgetState(t *testing.T) {
 		w.Styler(func(s *styles.Style) {
 			w.SetAbilities(true, ability)
 		})
-		w.ApplyStyle()
+		w.Style()
 
 		w.Send(event)
 		expect.SetFlag(true, state)

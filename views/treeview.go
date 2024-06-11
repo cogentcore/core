@@ -366,25 +366,25 @@ func (tv *TreeView) Init() {
 		// not with any of our children (see HandleTreeViewMouse)
 		w.On(events.MouseEnter, func(e events.Event) {
 			tv.SetState(true, states.Hovered)
-			tv.ApplyStyle()
+			tv.Style()
 			tv.NeedsRender()
 			e.SetHandled()
 		})
 		w.On(events.MouseLeave, func(e events.Event) {
 			tv.SetState(false, states.Hovered)
-			tv.ApplyStyle()
+			tv.Style()
 			tv.NeedsRender()
 			e.SetHandled()
 		})
 		w.On(events.MouseDown, func(e events.Event) {
 			tv.SetState(true, states.Active)
-			tv.ApplyStyle()
+			tv.Style()
 			tv.NeedsRender()
 			e.SetHandled()
 		})
 		w.On(events.MouseUp, func(e events.Event) {
 			tv.SetState(false, states.Active)
-			tv.ApplyStyle()
+			tv.Style()
 			tv.NeedsRender()
 			e.SetHandled()
 		})
@@ -400,13 +400,13 @@ func (tv *TreeView) Init() {
 		})
 		w.On(events.DragEnter, func(e events.Event) {
 			tv.SetState(true, states.DragHovered)
-			tv.ApplyStyle()
+			tv.Style()
 			tv.NeedsRender()
 			e.SetHandled()
 		})
 		w.On(events.DragLeave, func(e events.Event) {
 			tv.SetState(false, states.DragHovered)
-			tv.ApplyStyle()
+			tv.Style()
 			tv.NeedsRender()
 			e.SetHandled()
 		})
@@ -574,7 +574,7 @@ func (tv *TreeView) LabelPart() (*core.Text, bool) {
 	return nil, false
 }
 
-func (tv *TreeView) ApplyStyle() {
+func (tv *TreeView) Style() {
 	if !tv.HasChildren() {
 		tv.SetClosed(true)
 	}
@@ -769,7 +769,7 @@ func (tv *TreeView) HasSelection() bool {
 func (tv *TreeView) Select() {
 	if !tv.StateIs(states.Selected) {
 		tv.SetSelected(true)
-		tv.ApplyStyle()
+		tv.Style()
 		sl := tv.SelectedViews()
 		sl = append(sl, tv.This().(TreeViewer))
 		tv.SetSelectedViews(sl)
@@ -782,7 +782,7 @@ func (tv *TreeView) Select() {
 func (tv *TreeView) Unselect() {
 	if tv.StateIs(states.Selected) {
 		tv.SetSelected(false)
-		tv.ApplyStyle()
+		tv.Style()
 		sl := tv.SelectedViews()
 		sz := len(sl)
 		for i := 0; i < sz; i++ {
@@ -809,7 +809,7 @@ func (tv *TreeView) UnselectAll() {
 			continue
 		}
 		vt.SetSelected(false)
-		v.ApplyStyle()
+		v.Style()
 		vt.NeedsRender()
 	}
 	tv.NeedsRender()
@@ -1665,7 +1665,7 @@ func (tv *TreeView) DropExternal(md mimedata.Mimes, mod events.DropMods) {
 func (tv *TreeView) DragClearStates() {
 	tv.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
 	tv.Parts.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
-	tv.ApplyStyle()
+	tv.Style()
 	tv.NeedsRender()
 }
 

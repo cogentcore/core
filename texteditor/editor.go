@@ -515,8 +515,8 @@ func (ed *Editor) StyleView() {
 	ed.CursorWidth.ToDots(&ed.Styles.UnitContext)
 }
 
-// ApplyStyle calls StyleView and sets the style
-func (ed *Editor) ApplyStyle() {
+// Style calls StyleView and sets the style
+func (ed *Editor) Style() {
 	ed.StyleView()
 	ed.StyleSizes()
 }

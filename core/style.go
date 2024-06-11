@@ -161,7 +161,9 @@ func (wb *WidgetBase) ApplyStyleUpdate() {
 	wb.NeedsRender()
 }
 
-func (wb *WidgetBase) ApplyStyle() {
+// Style updates the style properties of the widget based on [WidgetBase.Stylers].
+// To specify the style properties of a widget, use [WidgetBase.Styler].
+func (wb *WidgetBase) Style() {
 	wb.ApplyStyleWidget()
 }
 

@@ -655,7 +655,7 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i int) {
 			wb.SetReadOnly(sv.IsReadOnly())
 			w.SetState(invis, states.Invisible)
 			if sv.This().(SliceViewer).HasStyleFunc() {
-				w.ApplyStyle()
+				w.Style()
 			}
 			if invis {
 				wb.SetSelected(false)

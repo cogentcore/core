@@ -101,7 +101,7 @@ func (m *Meter) Init() {
 	})
 }
 
-func (m *Meter) ApplyStyle() {
+func (m *Meter) Style() {
 	m.ApplyStyleWidget()
 	m.Width.ToDots(&m.Styles.UnitContext)
 }

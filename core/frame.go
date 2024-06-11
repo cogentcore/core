@@ -159,11 +159,11 @@ func (fr *Frame) Init() {
 	})
 }
 
-func (fr *Frame) ApplyStyle() {
+func (fr *Frame) Style() {
 	fr.ApplyStyleWidget()
 	for d := math32.X; d <= math32.Y; d++ {
 		if fr.HasScroll[d] && fr.Scrolls[d] != nil {
-			fr.Scrolls[d].ApplyStyle()
+			fr.Scrolls[d].Style()
 		}
 	}
 }

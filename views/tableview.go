@@ -338,7 +338,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 				wb.SetReadOnly(tv.IsReadOnly() || readOnlyTag)
 				w.SetState(invis, states.Invisible)
 				if svi.HasStyleFunc() {
-					w.ApplyStyle()
+					w.Style()
 				}
 				if invis {
 					wb.SetSelected(false)

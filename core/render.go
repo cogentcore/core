@@ -154,7 +154,7 @@ func (wb *WidgetBase) ApplyStyleTree() {
 	}
 	// pr := profile.Start(wb.This().NodeType().ShortName())
 	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		wi.ApplyStyle()
+		wi.Style()
 		return tree.Continue
 	})
 	// pr.End()

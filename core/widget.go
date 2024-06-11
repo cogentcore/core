@@ -54,12 +54,8 @@ type Widget interface {
 	// SetAbilities sets the given [abilities.Abilities] flags to the given value
 	SetAbilities(on bool, able ...abilities.Abilities) *WidgetBase
 
-	// ApplyStyle applies style functions to the widget based on current state.
-	// It is typically not overridden; instead, call Style to apply custom styling.
-	// If you do need to override it (for example, to convert a custom unit value
-	// to dots), then you should call [WidgetBase.ApplyStyleWidget] at the start
-	// of your method.
-	ApplyStyle()
+	// See [WidgetBase.Style].
+	Style()
 
 	// SizeUp (bottom-up) gathers Actual sizes from our Children & Parts,
 	// based on Styles.Min / Max sizes and actual content sizing
