@@ -30,12 +30,11 @@ type NodeBase struct {
 	// of children that have ever been added to the node's parent.
 	Name string `copier:"-" set:"-"`
 
-	// Flags are bit flags for internal node state, which can be extended using
-	// the enums package.
-	Flags Flags `tableview:"-" copier:"-" json:"-" xml:"-" set:"-" max-width:"80" height:"3"`
-
-	// Properties is a property map for arbitrary key-value properties.
-	Properties map[string]any `tableview:"-" xml:"-" copier:"-" set:"-" json:",omitempty"`
+	// This is the value of this Node as its true underlying type. This allows methods
+	// defined on base types to call methods defined on higher-level types, which
+	// is necessary for various parts of tree and widget functionality. This is set
+	// to nil when the node is deleted.
+	This Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// Parent is the parent of this node, which is set automatically when this node is
 	// added as a child of a parent. To change the parent of a node, use [MoveToParent];
@@ -44,15 +43,18 @@ type NodeBase struct {
 	Parent Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// Children is the list of children of this node. All of them are set to have this node
-	// as their parent. You can directly modify them or use the various [NodeBase]
-	// child helper functions.
+	// as their parent. You can directly modify this list, but you should typically use the
+	// various NodeBase child helper functions when applicable so that everything is updated
+	// properly, such as when deleting children.
 	Children []Node `tableview:"-" copier:"-" set:"-" json:",omitempty"`
 
-	// This is the value of this Node in its true underlying type. This allows methods
-	// defined on base types to call functions defined on higher-level types, which
-	// is necessary for various parts of tree and widget functionality. This is set
-	// to nil when the node is deleted.
-	This Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	// Flags are bit flags for internal node state, which can be extended using
+	// the enums package.
+	Flags Flags `tableview:"-" copier:"-" json:"-" xml:"-" set:"-" max-width:"80" height:"3"`
+
+	// Properties is a property map for arbitrary key-value properties.
+	// When possible, use typed fields on a new type embedding NodeBase instead of this.
+	Properties map[string]any `tableview:"-" xml:"-" copier:"-" set:"-" json:",omitempty"`
 
 	// numLifetimeChildren is the number of children that have ever been added to this
 	// node, which is used for automatic unique naming.
