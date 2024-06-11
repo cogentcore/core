@@ -34,7 +34,7 @@ func newRoot[T Node]() T {
 	typ := n.NodeType()
 	n = NewOfType(typ).(T)
 	initNode(n)
-	n.SetName(n.NodeType().IDName)
+	n.AsTree().SetName(n.NodeType().IDName)
 	return n
 }
 
@@ -50,10 +50,10 @@ func initNode(n Node) {
 // checkThis checks that [Node.This] is non-nil.
 // It returns and logs an error otherwise.
 func checkThis(n Node) error {
-	if n.This() != nil {
+	if n.AsTree().This() != nil {
 		return nil
 	}
-	return errors.Log(fmt.Errorf("tree.Node %q has nil Node.This; you must use NewRoot or call Node.InitName on root nodes", n.Path()))
+	return errors.Log(fmt.Errorf("tree.Node %q has nil tree.NodeBase.This; you must use tree.New or New* so that the node is initialized", n.AsTree().Path()))
 }
 
 // SetParent sets the parent of the given node to the given parent node.
@@ -63,11 +63,11 @@ func checkThis(n Node) error {
 // It automatically gets the [Node.This] of the parent.
 func SetParent(child Node, parent Node) {
 	n := child.AsTree()
-	n.Par = parent.This()
+	n.Par = parent.AsTree().This()
 	setUniqueName(n, false)
-	child.This().OnAdd()
-	n.WalkUpParent(func(k Node) bool {
-		k.This().OnChildAdded(child)
+	child.AsTree().This().OnAdd()
+	n.WalkUpParent(func(pn Node) bool {
+		pn.AsTree().This().OnChildAdded(child)
 		return Continue
 	})
 }
@@ -76,7 +76,7 @@ func SetParent(child Node, parent Node) {
 // and adds it as a child of the given new parent.
 // The old and new parents can be in different trees (or not).
 func MoveToParent(child Node, parent Node) {
-	oldParent := child.Parent()
+	oldParent := child.AsTree().Parent()
 	if oldParent != nil {
 		idx := IndexOf(oldParent.AsTree().Children, child)
 		if idx >= 0 {
@@ -106,17 +106,17 @@ func ChildByType[T Node](k Node, embeds bool, startIndex ...int) T {
 	return v
 }
 
-// IsRoot tests whether the given node is the root node in its tree.
+// IsRoot returns whether the given node is the root node in its tree.
 func IsRoot(n Node) bool {
-	return n.This() == nil || n.Parent() == nil || n.Parent().This() == nil
+	return n.AsTree().Parent() == nil
 }
 
 // Root returns the root node of the given node's tree.
 func Root(n Node) Node {
 	if IsRoot(n) {
-		return n.This()
+		return n
 	}
-	return Root(n.Parent())
+	return Root(n.AsTree().Parent())
 }
 
 // nodeType is the [reflect.Type] of [Node].
@@ -147,16 +147,17 @@ func SetUniqueName(n Node) {
 // setUniqueName is the implementation of [SetUniqueName] that takes whether
 // to add the unique id to the name even if it is already set.
 func setUniqueName(n Node, addIfSet bool) {
-	pn := n.Parent()
+	nb := n.AsTree()
+	pn := nb.Parent()
 	if pn == nil {
 		return
 	}
 	c := atomic.AddUint64(&pn.AsTree().numLifetimeChildren, 1)
 	id := "-" + strconv.FormatUint(c-1, 10) // must subtract 1 so we start at 0
-	if n.Name() == "" {
+	if nb.Name() == "" {
 		// must get This for accurate NodeType
-		n.SetName(n.This().NodeType().IDName + id)
+		nb.SetName(nb.This().NodeType().IDName + id)
 	} else if addIfSet {
-		n.SetName(n.Name() + id)
+		nb.SetName(nb.Name() + id)
 	}
 }
