@@ -116,7 +116,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 
 	sv.DeleteAll()
 
-	curPar := sv.Root.This().(Node) // current parent node into which elements are created
+	curPar := sv.Root.This.(Node) // current parent node into which elements are created
 	curSvg := sv.Root
 	inTitle := false
 	inDesc := false
@@ -150,7 +150,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			nm := se.Name.Local
 			switch {
 			case nm == "svg":
-				// if curPar != sv.This() {
+				// if curPar != sv.This {
 				// 	curPar = curPar.NewChild(TypeSVG, "svg").(Node)
 				// }
 				for _, attr := range se.Attr {
@@ -737,14 +737,14 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case "linearGradient":
 			case "radialGradient":
 			default:
-				if curPar == sv.Root.This() {
+				if curPar == sv.Root.This {
 					break
 				}
 				if curPar.AsTree().Parent == nil {
 					break
 				}
 				curPar = curPar.AsTree().Parent.(Node)
-				if curPar == sv.Root.This() {
+				if curPar == sv.Root.This {
 					break
 				}
 				curSvgk := curPar.AsTree().ParentByType(SVGNodeType, tree.NoEmbeds)
@@ -836,7 +836,7 @@ var InkscapeProperties = map[string]bool{
 // returns name of node, for end tag -- if empty, then children will not be
 // output.
 func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
-	if itm == nil || itm.AsTree().This() == nil {
+	if itm == nil || itm.AsTree().This == nil {
 		return ""
 	}
 	se := xml.StartElement{}

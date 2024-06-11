@@ -162,14 +162,14 @@ func (wb *WidgetBase) ContextMenuPos(e events.Event) image.Point {
 
 func (wb *WidgetBase) HandleWidgetContextMenu() {
 	wb.On(events.ContextMenu, func(e events.Event) {
-		wi := wb.This().(Widget)
+		wi := wb.This.(Widget)
 		wi.ShowContextMenu(e)
 	})
 }
 
 func (wb *WidgetBase) ShowContextMenu(e events.Event) {
 	e.SetHandled() // always
-	wi := wb.This().(Widget)
+	wi := wb.This.(Widget)
 	nm := NewMenu(wi.ApplyContextMenus, wi, wi.ContextMenuPos(e))
 	if nm == nil { // no items
 		return

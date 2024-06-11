@@ -324,7 +324,7 @@ func (wb *WidgetBase) Init() {
 			return
 		}
 		// TODO(kai): what about context menus on mobile?
-		tt, _ := wb.This().(Widget).WidgetTooltip(image.Pt(-1, -1))
+		tt, _ := wb.This.(Widget).WidgetTooltip(image.Pt(-1, -1))
 		s.SetAbilities(tt != "", abilities.LongHoverable, abilities.LongPressable)
 
 		if s.Is(states.Selected) {
@@ -496,7 +496,7 @@ func (wb *WidgetBase) ParentWidgetIf(fun func(p *WidgetBase) bool) *WidgetBase {
 // window events.
 // This call recursively calls the parent, which is typically a short path.
 func (wb *WidgetBase) IsVisible() bool {
-	if wb == nil || wb.This() == nil || wb.StateIs(states.Invisible) || wb.Scene == nil {
+	if wb == nil || wb.This == nil || wb.StateIs(states.Invisible) || wb.Scene == nil {
 		return false
 	}
 	if wb.Parent == nil {
@@ -587,7 +587,7 @@ func WidgetNext(w Widget) Widget {
 		return wb.Child(0).(Widget)
 	}
 	if wb.Parts != nil {
-		return WidgetNext(wb.Parts.This().(Widget))
+		return WidgetNext(wb.Parts.This.(Widget))
 	}
 	return nil
 }

@@ -256,7 +256,7 @@ func (sc *Scene) UpdateMVPMatrix() {
 	size := math32.Vec2(float32(sz.X), float32(sz.Y))
 
 	sc.WalkDown(func(cn tree.Node) bool {
-		if cn == sc.This() {
+		if cn == sc.This {
 			return tree.Continue
 		}
 		ni, _ := AsNode(cn)
@@ -272,7 +272,7 @@ func (sc *Scene) UpdateMVPMatrix() {
 // ConfigNodes runs Config on all nodes
 func (sc *Scene) ConfigNodes() {
 	sc.WalkDown(func(k tree.Node) bool {
-		if k == sc.This() {
+		if k == sc.This {
 			return tree.Continue
 		}
 		ni, _ := AsNode(k)
@@ -299,7 +299,7 @@ func (sc *Scene) Config() {
 	sc.Frame.Render.SetClearColor(clr.X, clr.Y, clr.Z, 1)
 	// gpu.Draw.Wireframe(sc.Wireframe)
 	sc.ConfigNodes()
-	UpdateWorldMatrix(sc.This())
+	UpdateWorldMatrix(sc.This)
 	sc.ConfigLights()
 	sc.ConfigMeshesTextures()
 	sc.SetFlag(false, ScNeedsConfig)
@@ -319,7 +319,7 @@ func (sc *Scene) ConfigMeshesTextures() {
 }
 
 func (sc *Scene) UpdateNodes() {
-	UpdateWorldMatrix(sc.This())
+	UpdateWorldMatrix(sc.This)
 	sc.UpdateMeshBBox()
 }
 
@@ -387,7 +387,7 @@ func (sc *Scene) RenderImpl() {
 
 	var rcs [RenderClassesN][]Node
 	sc.WalkDown(func(k tree.Node) bool {
-		if k == sc.This() {
+		if k == sc.This {
 			return tree.Continue
 		}
 		ni, _ := AsNode(k)

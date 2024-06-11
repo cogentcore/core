@@ -118,7 +118,7 @@ func (sv *SVG) Resize(nwsz image.Point) {
 	if nwsz.X == 0 || nwsz.Y == 0 {
 		return
 	}
-	if sv.Root == nil || sv.Root.This() == nil {
+	if sv.Root == nil || sv.Root.This == nil {
 		sv.Config(nwsz.X, nwsz.Y)
 		return
 	}
@@ -136,7 +136,7 @@ func (sv *SVG) Resize(nwsz image.Point) {
 
 // DeleteAll deletes any existing elements in this svg
 func (sv *SVG) DeleteAll() {
-	if sv.Root == nil || sv.Root.This() == nil {
+	if sv.Root == nil || sv.Root.This == nil {
 		return
 	}
 	sv.Root.Paint.Defaults()

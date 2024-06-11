@@ -207,7 +207,7 @@ func (nb *NodeBase) Validate() error {
 }
 
 func (nb *NodeBase) IsVisible() bool {
-	if nb == nil || nb.This() == nil || nb.Is(Invisible) {
+	if nb == nil || nb.This == nil || nb.Is(Invisible) {
 		return false
 	}
 	return true
@@ -354,7 +354,7 @@ func (nb *NodeBase) TrackCamera() {
 	nb.Scene.Camera.CamMu.RUnlock()
 	nb.PoseMu.Unlock()
 
-	UpdateWorldMatrix(nb.This())
+	UpdateWorldMatrix(nb.This)
 }
 
 // TrackLight moves node to position of light of given name.

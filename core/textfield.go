@@ -486,7 +486,7 @@ func (tf *TextField) EditDone() {
 		tf.Txt = string(tf.EditTxt)
 		tf.SendChange()
 		// widget can be killed after SendChange
-		if tf.This() == nil {
+		if tf.This == nil {
 			return
 		}
 	}
@@ -1299,10 +1299,10 @@ func init() {
 
 // StartCursor starts the cursor blinking and renders it
 func (tf *TextField) StartCursor() {
-	if tf == nil || tf.This() == nil {
+	if tf == nil || tf.This == nil {
 		return
 	}
-	if !tf.This().(Widget).IsVisible() {
+	if !tf.This.(Widget).IsVisible() {
 		return
 	}
 	tf.BlinkOn = true
@@ -1310,7 +1310,7 @@ func (tf *TextField) StartCursor() {
 	if SystemSettings.CursorBlinkTime == 0 {
 		return
 	}
-	TextFieldBlinker.SetWidget(tf.This().(Widget))
+	TextFieldBlinker.SetWidget(tf.This.(Widget))
 	TextFieldBlinker.Blink(SystemSettings.CursorBlinkTime)
 }
 
@@ -1325,15 +1325,15 @@ func (tf *TextField) ClearCursor() {
 
 // StopCursor stops the cursor from blinking
 func (tf *TextField) StopCursor() {
-	if tf == nil || tf.This() == nil {
+	if tf == nil || tf.This == nil {
 		return
 	}
-	TextFieldBlinker.ResetWidget(tf.This().(Widget))
+	TextFieldBlinker.ResetWidget(tf.This.(Widget))
 }
 
 // RenderCursor renders the cursor on or off, as a sprite that is either on or off
 func (tf *TextField) RenderCursor(on bool) {
-	if tf == nil || tf.This() == nil {
+	if tf == nil || tf.This == nil {
 		return
 	}
 	if !on {
@@ -1348,7 +1348,7 @@ func (tf *TextField) RenderCursor(on bool) {
 		ms.Sprites.InactivateSprite(spnm)
 		return
 	}
-	if !tf.This().(Widget).IsVisible() {
+	if !tf.This.(Widget).IsVisible() {
 		return
 	}
 

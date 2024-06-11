@@ -22,11 +22,11 @@ import (
 // the standard JSON encoding output.
 func (n *NodeBase) MarshalJSON() ([]byte, error) {
 	// the non pointer value does not implement MarshalJSON, so it will not result in infinite recursion
-	b, err := json.Marshal(reflectx.Underlying(reflect.ValueOf(n.Ths)).Interface())
+	b, err := json.Marshal(reflectx.Underlying(reflect.ValueOf(n.This)).Interface())
 	if err != nil {
 		return b, err
 	}
-	data := `"nodeType":"` + n.This().NodeType().Name + `",`
+	data := `"nodeType":"` + n.This.NodeType().Name + `",`
 	if n.NumChildren() > 0 {
 		data += `"numChildren":` + strconv.Itoa(n.NumChildren()) + ","
 	}
@@ -60,13 +60,13 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 	}
 
 	// if our type does not match, we must replace our This to make it match
-	if n.Ths.NodeType() != typ {
+	if n.This.NodeType() != typ {
 		parent := n.Parent
 		index := n.IndexInParent()
 		if index >= 0 {
 			n.Delete()
-			n.Ths = parent.AsTree().InsertNewChild(typ, index)
-			n = n.Ths.AsTree() // our NodeBase pointer is now different
+			n.This = parent.AsTree().InsertNewChild(typ, index)
+			n = n.This.AsTree() // our NodeBase pointer is now different
 		}
 	}
 
@@ -92,7 +92,7 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 		}
 	}
 
-	uv := reflectx.UnderlyingPointer(reflect.ValueOf(n.Ths))
+	uv := reflectx.UnderlyingPointer(reflect.ValueOf(n.This))
 	rtyp := unmarshalTypeCache[typeName]
 	if rtyp == nil {
 		// We must create a new type that has the exact same fields as the original type

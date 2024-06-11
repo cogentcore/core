@@ -313,7 +313,7 @@ func (bt *Button) OpenMenu(e events.Event) bool {
 	if indic := bt.ChildByName("indicator", 3); indic != nil {
 		pos = indic.(Widget).ContextMenuPos(nil) // use the pos
 	}
-	m := NewMenu(bt.Menu, bt.This().(Widget), pos)
+	m := NewMenu(bt.Menu, bt.This.(Widget), pos)
 	if m == nil {
 		return false
 	}

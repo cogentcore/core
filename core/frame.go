@@ -181,7 +181,7 @@ func (fr *Frame) DeleteScroll(d math32.Dims) {
 		return
 	}
 	sb := fr.Scrolls[d]
-	sb.This().Destroy()
+	sb.This.Destroy()
 	fr.Scrolls[d] = nil
 }
 
@@ -201,7 +201,7 @@ func (fr *Frame) RenderChildren() {
 
 func (fr *Frame) RenderWidget() {
 	if fr.PushBounds() {
-		fr.This().(Widget).Render()
+		fr.This.(Widget).Render()
 		fr.RenderParts()
 		fr.RenderChildren()
 		fr.RenderScrolls()
@@ -357,7 +357,7 @@ func ChildByLabelCanFocus(fr *Frame, name string, after tree.Node) tree.Node {
 	gotAfter := false
 	completions := []complete.Completion{}
 	fr.WalkDownBreadth(func(n tree.Node) bool {
-		if n == fr.This() { // skip us
+		if n == fr.This { // skip us
 			return tree.Continue
 		}
 		_, wb := AsWidget(n)

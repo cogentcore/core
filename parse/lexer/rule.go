@@ -99,7 +99,7 @@ func (lr *Rule) BaseInterface() reflect.Type {
 }
 
 func (lr *Rule) AsLexRule() *Rule {
-	return lr.This().(*Rule)
+	return lr.This.(*Rule)
 }
 
 // CompileAll is called on the top-level Rule to compile all nodes.

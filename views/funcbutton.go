@@ -309,10 +309,10 @@ func (fb *FuncButton) setFuncImpl(gfun *types.Func, rfun reflect.Value) *FuncBut
 func (fb *FuncButton) goodContext() core.Widget {
 	ctx := fb.Context
 	if fb.Context == nil {
-		if fb.This() == nil {
+		if fb.This == nil {
 			return nil
 		}
-		ctx = fb.This().(core.Widget)
+		ctx = fb.This.(core.Widget)
 	}
 	return ctx
 }

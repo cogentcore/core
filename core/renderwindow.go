@@ -165,7 +165,7 @@ func NewRenderWindow(name, title string, opts *system.NewWindowOptions) *RenderW
 		w.SetFlag(true, WindowClosing)
 		// ensure that everyone is closed first
 		for _, kv := range w.Mains.Stack.Order {
-			if kv.Value == nil || kv.Value.Scene == nil || kv.Value.Scene.This() == nil {
+			if kv.Value == nil || kv.Value.Scene == nil || kv.Value.Scene.This == nil {
 				continue
 			}
 			if !kv.Value.Scene.Close() {

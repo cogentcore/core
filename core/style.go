@@ -47,7 +47,7 @@ func (wb *WidgetBase) FinalStyler(s func(s *styles.Style)) *WidgetBase {
 // Style updates the style properties of the widget based on [WidgetBase.Stylers].
 // To specify the style properties of a widget, use [WidgetBase.Styler].
 func (wb *WidgetBase) Style() {
-	if wb.This() == nil {
+	if wb.This == nil {
 		return
 	}
 
@@ -208,7 +208,7 @@ func (wb *WidgetBase) ParentActualBackground() image.Image {
 	if pwb == nil {
 		return nil
 	}
-	return pwb.This().(Widget).ChildBackground(wb.This().(Widget))
+	return pwb.This.(Widget).ChildBackground(wb.This.(Widget))
 }
 
 // StyleFromTags adds a [WidgetBase.Styler] to the given widget

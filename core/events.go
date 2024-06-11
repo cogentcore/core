@@ -525,7 +525,7 @@ func (em *Events) UpdateHovers(hov, prev []Widget, e events.Event, enter, leave 
 				break
 			}
 		}
-		if !stillIn && prv.AsTree().This() != nil {
+		if !stillIn && prv.AsTree().This != nil {
 			prv.Send(leave, e)
 		}
 	}
@@ -1020,7 +1020,7 @@ func (em *Events) FocusPrevFrom(from Widget) bool {
 // FocusFirst sets the focus on the first focusable item in the tree.
 // returns true if a focusable item was found.
 func (em *Events) FocusFirst() bool {
-	return em.FocusNextFrom(em.Scene.This().(Widget))
+	return em.FocusNextFrom(em.Scene.This.(Widget))
 }
 
 // FocusLast sets the focus on the last focusable item in the tree.
@@ -1256,7 +1256,7 @@ func (em *Events) TriggerShortcut(chord key.Chord) bool {
 	if !exists {
 		return false
 	}
-	if sa == nil || sa.This() == nil {
+	if sa == nil || sa.This == nil {
 		delete(em.Shortcuts, chord)
 		return false
 	}

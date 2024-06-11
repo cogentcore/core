@@ -76,7 +76,7 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 	}
 	skids := sn.AsTree().Children
 	p := make(tree.TypePlan, 0, len(skids))
-	typ := tv.This().NodeType()
+	typ := tv.This.NodeType()
 	for _, skid := range skids {
 		p.Add(typ, "tv_"+skid.AsTree().Name)
 	}
@@ -226,7 +226,7 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 		return
 	}
 	myidx += rel
-	typ := tv.This().BaseType()
+	typ := tv.This.BaseType()
 	if tv.SyncNode != nil {
 		typ = tv.SyncNode.BaseType()
 	}
@@ -253,7 +253,7 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 // If SyncNode is set, operates on Sync Tree.
 func (tv *TreeView) AddChildNode() { //types:add
 	ttl := "Add child"
-	typ := tv.This().BaseType()
+	typ := tv.This.BaseType()
 	if tv.SyncNode != nil {
 		typ = tv.SyncNode.BaseType()
 	}
@@ -363,7 +363,7 @@ func (tv *TreeView) EditNode() { //types:add
 	} else {
 		tynm := tv.NodeType().Name
 		d := core.NewBody().AddTitle(tynm)
-		NewStructView(d).SetStruct(tv.This()).SetReadOnly(tv.IsReadOnly())
+		NewStructView(d).SetStruct(tv.This).SetReadOnly(tv.IsReadOnly())
 		d.RunFullDialog(tv)
 	}
 }

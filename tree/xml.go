@@ -23,9 +23,9 @@ func (n *NodeBase) WriteXML(writer io.Writer, indent bool) error {
 	}
 	var b []byte
 	if indent {
-		b, err = xml.MarshalIndent(n.This(), "", "  ")
+		b, err = xml.MarshalIndent(n.This, "", "  ")
 	} else {
-		b, err = xml.Marshal(n.This())
+		b, err = xml.Marshal(n.This)
 	}
 	if err != nil {
 		return errors.Log(err)
@@ -50,7 +50,7 @@ func (n *NodeBase) ReadXML(reader io.Reader) error {
 		log.Println(err)
 		return err
 	}
-	err = xml.Unmarshal(b, n.This()) // key use of this!
+	err = xml.Unmarshal(b, n.This) // key use of this!
 	return err
 }
 

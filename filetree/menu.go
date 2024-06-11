@@ -64,14 +64,14 @@ func (fn *Node) ContextMenu(m *core.Scene) {
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).OnClick(func(e events.Event) {
-		fn.This().(Filer).ShowFileInfo()
+		fn.This.(Filer).ShowFileInfo()
 	})
 
 	core.NewButton(m).SetText("Open").SetIcon(icons.Open).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).OnClick(func(e events.Event) {
-		fn.This().(Filer).OpenFilesDefault()
+		fn.This.(Filer).OpenFilesDefault()
 	})
 	core.NewSeparator(m)
 
@@ -79,19 +79,19 @@ func (fn *Node) ContextMenu(m *core.Scene) {
 		SetKey(keymap.Duplicate).Styler(func(s *styles.Style) {
 		s.SetState(!fn.HasSelection(), states.Disabled)
 	}).OnClick(func(e events.Event) {
-		fn.This().(Filer).DuplicateFiles()
+		fn.This.(Filer).DuplicateFiles()
 	})
 	core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
 		SetKey(keymap.Delete).Styler(func(s *styles.Style) {
 		s.SetState(!fn.HasSelection(), states.Disabled)
 	}).OnClick(func(e events.Event) {
-		fn.This().(Filer).DeleteFiles()
+		fn.This.(Filer).DeleteFiles()
 	})
 	core.NewButton(m).SetText("Rename").SetIcon(icons.NewLabel).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		}).OnClick(func(e events.Event) {
-		fn.This().(Filer).RenameFiles()
+		fn.This.(Filer).RenameFiles()
 	})
 	core.NewSeparator(m)
 

@@ -420,7 +420,7 @@ func TestTreeMod(t *testing.T) {
 		// fmt.Printf("#################################\n")
 
 		// fmt.Printf("Trees before:\n%v%v", tree1, tree2)
-		MoveToParent(child12.This(), tree2.This())
+		MoveToParent(child12.This, tree2.This)
 
 		// fmt.Printf("#################################\n")
 		// fmt.Printf("Trees after add child12 move:\n%v%v", tree1, tree2)

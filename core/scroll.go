@@ -31,7 +31,7 @@ func (ly *Frame) ScrollGeom(d math32.Dims) (pos, sz math32.Vector2) {
 	od := d.Other()
 	bbmin := math32.Vector2FromPoint(ly.Geom.ContentBBox.Min)
 	bbmax := math32.Vector2FromPoint(ly.Geom.ContentBBox.Max)
-	if ly.This() != ly.Scene.This() { // if not the scene, keep inside the scene
+	if ly.This != ly.Scene.This { // if not the scene, keep inside the scene
 		bbmin.SetMax(math32.Vector2FromPoint(ly.Scene.Geom.ContentBBox.Min))
 		bbmax.SetMin(math32.Vector2FromPoint(ly.Scene.Geom.ContentBBox.Max).SubScalar(sbw))
 	}
@@ -79,7 +79,7 @@ func (ly *Frame) ConfigScroll(d math32.Dims) {
 	})
 	sb.FinalStyler(func(s *styles.Style) {
 		od := d.Other()
-		_, sz := ly.This().(Layouter).ScrollGeom(d)
+		_, sz := ly.This.(Layouter).ScrollGeom(d)
 		if sz.X > 0 && sz.Y > 0 {
 			s.SetState(false, states.Invisible)
 			s.Min.SetDim(d, units.Dot(sz.Dim(d)))
@@ -91,7 +91,7 @@ func (ly *Frame) ConfigScroll(d math32.Dims) {
 	})
 	sb.OnInput(func(e events.Event) {
 		e.SetHandled()
-		ly.This().(Layouter).ScrollChanged(d, sb)
+		ly.This.(Layouter).ScrollChanged(d, sb)
 	})
 	sb.Update()
 }
@@ -101,7 +101,7 @@ func (ly *Frame) ConfigScroll(d math32.Dims) {
 // This is part of the Layouter interface.
 func (ly *Frame) ScrollChanged(d math32.Dims, sb *Slider) {
 	ly.Geom.Scroll.SetDim(d, -sb.Value)
-	ly.This().(Layouter).ScenePos() // computes updated positions
+	ly.This.(Layouter).ScenePos() // computes updated positions
 	ly.NeedsRender()
 }
 
@@ -115,7 +115,7 @@ func (ly *Frame) ScrollUpdateFromGeom(d math32.Dims) {
 	sb := ly.Scrolls[d]
 	cv := ly.Geom.Scroll.Dim(d)
 	sb.SetValueAction(-cv)
-	ly.This().(Layouter).ScenePos() // computes updated positions
+	ly.This.(Layouter).ScenePos() // computes updated positions
 	ly.NeedsRender()
 }
 
@@ -153,8 +153,8 @@ func (ly *Frame) PositionScrolls() {
 
 func (ly *Frame) PositionScroll(d math32.Dims) {
 	sb := ly.Scrolls[d]
-	pos, ssz := ly.This().(Layouter).ScrollGeom(d)
-	maxSize, _, visPct := ly.This().(Layouter).ScrollValues(d)
+	pos, ssz := ly.This.(Layouter).ScrollGeom(d)
+	maxSize, _, visPct := ly.This.(Layouter).ScrollValues(d)
 	if sb.Geom.Pos.Total == pos && sb.Geom.Size.Actual.Content == ssz && sb.VisiblePct == visPct {
 		return
 	}
@@ -167,7 +167,7 @@ func (ly *Frame) PositionScroll(d math32.Dims) {
 	sb.SetVisiblePct(visPct)
 	// fmt.Println(ly, d, "vis pct:", asz/csz)
 	sb.SetValue(sb.Value) // keep in range
-	ly.This().(Layouter).SetScrollParams(d, sb)
+	ly.This.(Layouter).SetScrollParams(d, sb)
 
 	sb.Update() // applies style
 	sb.SizeUp()
@@ -292,7 +292,7 @@ func (wb *WidgetBase) ScrollToMe() bool {
 	if ly == nil {
 		return false
 	}
-	return ly.ScrollToItem(wb.This().(Widget))
+	return ly.ScrollToItem(wb.This.(Widget))
 }
 
 // ScrollToItem scrolls the layout to ensure that given item is in view.
@@ -366,7 +366,7 @@ func (ly *Frame) ScrollToBoxDim(d math32.Dims, tmini, tmaxi int) bool {
 		return false
 	}
 	sb := ly.Scrolls[d]
-	if sb == nil || sb.This() == nil {
+	if sb == nil || sb.This == nil {
 		return false
 	}
 	tmin, tmax := float32(tmini), float32(tmaxi)

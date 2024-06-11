@@ -76,7 +76,7 @@ func (tv *TableView) Init() {
 	tv.ColumnTensorBlank = map[int]*tensor.Float64{}
 
 	tv.Makers[0] = func(p *core.Plan) { // TODO: reduce redundancy with SliceViewBase Maker
-		svi := tv.This().(views.SliceViewer)
+		svi := tv.This.(views.SliceViewer)
 		svi.UpdateSliceSize()
 
 		tv.ViewMuLock()
@@ -142,7 +142,7 @@ func (tv *TableView) SetTable(et *table.Table) *TableView {
 
 	tv.SetSliceBase()
 	tv.Table = table.NewIndexView(et)
-	tv.This().(views.SliceViewer).UpdateSliceSize()
+	tv.This.(views.SliceViewer).UpdateSliceSize()
 	tv.Update()
 	return tv
 }
@@ -166,7 +166,7 @@ func (tv *TableView) SetTableView(ix *table.IndexView) *TableView {
 
 	tv.Table = ix.Clone() // always copy
 
-	tv.This().(views.SliceViewer).UpdateSliceSize()
+	tv.This.(views.SliceViewer).UpdateSliceSize()
 	tv.StartIndex = 0
 	tv.VisRows = tv.MinRows
 	if !tv.IsReadOnly() {
@@ -277,7 +277,7 @@ func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 }
 
 func (tv *TableView) MakeRow(p *core.Plan, i int) {
-	svi := tv.This().(views.SliceViewer)
+	svi := tv.This.(views.SliceViewer)
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
 
@@ -598,7 +598,7 @@ func (tv *TableView) RowGrabFocus(row int) *core.WidgetBase {
 
 func (tv *TableView) SizeFinal() {
 	tv.SliceViewBase.SizeFinal()
-	sg := tv.This().(views.SliceViewer).SliceGrid()
+	sg := tv.This.(views.SliceViewer).SliceGrid()
 	sh := tv.SliceHeader()
 	sh.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
 		_, sgb := core.AsWidget(sg.Child(i))

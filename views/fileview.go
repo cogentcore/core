@@ -602,7 +602,7 @@ func (fv *FileView) AddPathToFavorites() { //types:add
 	fi := core.FavPathItem{"folder", fnm, dp}
 	core.SystemSettings.FavPaths = append(core.SystemSettings.FavPaths, fi)
 	core.ErrorSnackbar(fv, core.SaveSettings(core.SystemSettings), "Error saving settings")
-	// fv.FileSig.Emit(fv.This(), int64(FileViewFavAdded), fi)
+	// fv.FileSig.Emit(fv.This, int64(FileViewFavAdded), fi)
 	fv.UpdateFavorites()
 }
 

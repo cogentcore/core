@@ -125,7 +125,7 @@ func (tb *Toolbar) AllItemsToChildren() {
 		if wb == nil {
 			continue
 		}
-		if wb.This() == tb.overflowButton.This() {
+		if wb.This == tb.overflowButton.This {
 			ovi = i
 			break
 		}
@@ -133,7 +133,7 @@ func (tb *Toolbar) AllItemsToChildren() {
 	if ovi >= 0 {
 		tb.Children = slices.Delete(tb.Children, ovi, ovi+1)
 	}
-	tb.Children = append(tb.Children, tb.overflowButton.This())
+	tb.Children = append(tb.Children, tb.overflowButton.This)
 	tb.overflowButton.Update()
 }
 

@@ -240,7 +240,7 @@ func (pr *Rule) BaseInterface() reflect.Type {
 }
 
 func (pr *Rule) AsParseRule() *Rule {
-	return pr.This().(*Rule)
+	return pr.This.(*Rule)
 }
 
 // IsGroup returns true if this node is a group, else it should have rules
@@ -1649,7 +1649,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 				}
 			}
 			useAst.Syms.Push(sy)
-			sy.Ast = useAst.This()
+			sy.Ast = useAst.This
 			if ps.Trace.On {
 				ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Added sym: %v from path: %v = %v in node: %v", sy.String(), act.Path, n, apath))
 			}
@@ -1684,7 +1684,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 		}
 		ps.Scopes.Push(sy) // key diff from add..
 		useAst.Syms.Push(sy)
-		sy.Ast = useAst.This()
+		sy.Ast = useAst.This
 		if ps.Trace.On {
 			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Pushed New Sym: %v from path: %v = %v in node: %v", sy.String(), act.Path, nm, apath))
 		}
@@ -1729,7 +1729,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, parent *Rule, ourAst, parAst *Ast) bo
 			ty := syms.NewType(n, syms.Unknown)
 			ty.Filename = ps.Src.Filename
 			ty.Region = ast.SrcReg
-			ty.Ast = useAst.This()
+			ty.Ast = useAst.This
 			ty.AddScopesStack(ps.Scopes)
 			scp.Types.Add(ty)
 			if ps.Trace.On {

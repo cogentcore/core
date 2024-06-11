@@ -57,7 +57,7 @@ func (wb *WidgetBase) On(etype events.Types, fun func(e events.Event)) *WidgetBa
 // which add event handlers that are called after those added by this function.
 func (wb *WidgetBase) OnFirst(etype events.Types, fun func(e events.Event)) Widget {
 	wb.FirstListeners.Add(etype, fun)
-	return wb.This().(Widget)
+	return wb.This.(Widget)
 }
 
 // OnFinal adds the given event handler to the widget's FinalListeners for the given event type.
@@ -67,7 +67,7 @@ func (wb *WidgetBase) OnFirst(etype events.Types, fun func(e events.Event)) Widg
 // which add event handlers that are called before those added by this function.
 func (wb *WidgetBase) OnFinal(etype events.Types, fun func(e events.Event)) Widget {
 	wb.FinalListeners.Add(etype, fun)
-	return wb.This().(Widget)
+	return wb.This.(Widget)
 }
 
 // Helper functions for common event types:
@@ -170,7 +170,7 @@ func (wb *WidgetBase) AddCloseDialog(config func(d *Body) bool) *WidgetBase {
 // want the Handled state to persist throughout the call chain;
 // call HandleEvent directly for any existing events.
 func (wb *WidgetBase) Send(typ events.Types, original ...events.Event) {
-	if wb.This() == nil {
+	if wb.This == nil {
 		return
 	}
 	var e events.Event
@@ -180,7 +180,7 @@ func (wb *WidgetBase) Send(typ events.Types, original ...events.Event) {
 		e = &events.Base{Typ: typ}
 		e.Init()
 	}
-	w, ok := wb.This().(Widget)
+	w, ok := wb.This.(Widget)
 	if !ok {
 		return
 	}
@@ -195,7 +195,7 @@ func (wb *WidgetBase) SendChange(original ...events.Event) {
 }
 
 func (wb *WidgetBase) SendKey(kf keymap.Functions, original ...events.Event) {
-	if wb.This() == nil {
+	if wb.This == nil {
 		return
 	}
 	kc := kf.Chord()
@@ -221,7 +221,7 @@ func (wb *WidgetBase) SendKeyChordRune(r rune, code key.Codes, mods key.Modifier
 		ke.Init()
 	}
 	ke.Typ = events.KeyChord
-	w, ok := wb.This().(Widget)
+	w, ok := wb.This.(Widget)
 	if !ok {
 		return
 	}
@@ -238,14 +238,14 @@ func (wb *WidgetBase) HandleEvent(e events.Event) {
 			fmt.Println(e, "to", wb)
 		}
 	}
-	if wb == nil || wb.This() == nil {
+	if wb == nil || wb.This == nil {
 		return
 	}
 	s := &wb.Styles
 	state := s.State
 
 	shouldContinue := func() bool {
-		return wb.This() != nil
+		return wb.This != nil
 	}
 	wb.FirstListeners.Call(e, shouldContinue)
 	wb.Listeners.Call(e, shouldContinue)
@@ -265,7 +265,7 @@ func (wb *WidgetBase) FirstHandleEvent(e events.Event) {
 		}
 	}
 	wb.FirstListeners.Call(e, func() bool {
-		return wb.This() != nil
+		return wb.This != nil
 	})
 }
 
@@ -278,7 +278,7 @@ func (wb *WidgetBase) FinalHandleEvent(e events.Event) {
 		}
 	}
 	wb.FinalListeners.Call(e, func() bool {
-		return wb.This() != nil
+		return wb.This != nil
 	})
 }
 
@@ -398,7 +398,7 @@ func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 // this as part of their event handler methods.
 func (wb *WidgetBase) HandleLongHoverTooltip() {
 	wb.On(events.LongHoverStart, func(e events.Event) {
-		wi := wb.This().(Widget)
+		wi := wb.This.(Widget)
 		tt, pos := wi.WidgetTooltip(e.Pos())
 		if tt == "" {
 			return
@@ -414,7 +414,7 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 
 	wb.On(events.LongPressStart, func(e events.Event) {
 		wb.Send(events.ContextMenu, e)
-		wi := wb.This().(Widget)
+		wi := wb.This.(Widget)
 		tt, pos := wi.WidgetTooltip(e.Pos())
 		if tt == "" {
 			return
@@ -494,11 +494,11 @@ func (wb *WidgetBase) HandleClickOnEnterSpace() {
 // This does NOT send an [events.Focus] event, which typically results in
 // the widget being styled as focused.  See [SetFocusEvent] for one that does.
 func (wb *WidgetBase) SetFocus() {
-	foc := wb.This().(Widget)
+	foc := wb.This.(Widget)
 	if !foc.AbilityIs(abilities.Focusable) {
 		foc = wb.FocusableInMe()
 		if foc == nil {
-			foc = wb.This().(Widget)
+			foc = wb.This.(Widget)
 		}
 	}
 	em := wb.Events()
@@ -513,11 +513,11 @@ func (wb *WidgetBase) SetFocus() {
 // This sends an [events.Focus] event, which typically results in
 // the widget being styled as focused.  See [SetFocus] for one that does not.
 func (wb *WidgetBase) SetFocusEvent() {
-	foc := wb.This().(Widget)
+	foc := wb.This.(Widget)
 	if !foc.AbilityIs(abilities.Focusable) {
 		foc = wb.FocusableInMe()
 		if foc == nil {
-			foc = wb.This().(Widget)
+			foc = wb.This.(Widget)
 		}
 	}
 	em := wb.Events()
@@ -568,7 +568,7 @@ func (wb *WidgetBase) FocusClear() {
 func (wb *WidgetBase) StartFocus() {
 	em := wb.Events()
 	if em != nil {
-		em.SetStartFocus(wb.This().(Widget))
+		em.SetStartFocus(wb.This.(Widget))
 	}
 }
 
@@ -583,9 +583,9 @@ func (wb *WidgetBase) ContainsFocus() bool {
 	if cur == nil {
 		return false
 	}
-	if cur == wb.This() {
+	if cur == wb.This {
 		return true
 	}
-	plev := cur.AsTree().ParentLevel(wb.This())
+	plev := cur.AsTree().ParentLevel(wb.This)
 	return plev >= 0
 }

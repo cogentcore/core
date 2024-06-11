@@ -41,16 +41,16 @@ func newRoot[T Node]() T {
 // initNode initializes the node.
 func initNode(n Node) {
 	nb := n.AsTree()
-	if nb.Ths != n {
-		nb.Ths = n
-		nb.Ths.Init()
+	if nb.This != n {
+		nb.This = n
+		nb.This.Init()
 	}
 }
 
 // checkThis checks that [Node.This] is non-nil.
 // It returns and logs an error otherwise.
 func checkThis(n Node) error {
-	if n.AsTree().This() != nil {
+	if n.AsTree().This != nil {
 		return nil
 	}
 	return errors.Log(fmt.Errorf("tree.Node %q has nil tree.NodeBase.This; you must use tree.New or New* so that the node is initialized", n.AsTree().Path()))
@@ -63,11 +63,11 @@ func checkThis(n Node) error {
 // It automatically gets the [Node.This] of the parent.
 func SetParent(child Node, parent Node) {
 	n := child.AsTree()
-	n.Parent = parent.AsTree().This()
+	n.Parent = parent.AsTree().This
 	setUniqueName(n, false)
-	child.AsTree().This().OnAdd()
+	child.AsTree().This.OnAdd()
 	n.WalkUpParent(func(pn Node) bool {
-		pn.AsTree().This().OnChildAdded(child)
+		pn.AsTree().This.OnChildAdded(child)
 		return Continue
 	})
 }
@@ -156,7 +156,7 @@ func setUniqueName(n Node, addIfSet bool) {
 	id := "-" + strconv.FormatUint(c-1, 10) // must subtract 1 so we start at 0
 	if nb.Name == "" {
 		// must get This for accurate NodeType
-		nb.SetName(nb.This().NodeType().IDName + id)
+		nb.SetName(nb.This.NodeType().IDName + id)
 	} else if addIfSet {
 		nb.SetName(nb.Name + id)
 	}

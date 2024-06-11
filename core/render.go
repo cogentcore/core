@@ -75,7 +75,7 @@ func (wb *WidgetBase) AsyncLock() {
 		select {}
 	}
 	rc.Lock()
-	if wb.This() == nil {
+	if wb.This == nil {
 		rc.Unlock()
 		select {}
 	}
@@ -129,7 +129,7 @@ func (sc *Scene) AddReRender(w Widget) {
 // NeedsRebuild returns true if the RenderContext indicates
 // a full rebuild is needed.
 func (wb *WidgetBase) NeedsRebuild() bool {
-	if wb.This() == nil || wb.Scene == nil || wb.Scene.Stage == nil {
+	if wb.This == nil || wb.Scene == nil || wb.Scene.Stage == nil {
 		return false
 	}
 	rc := wb.Scene.RenderContext()
@@ -187,10 +187,10 @@ func (sc *Scene) LayoutRenderScene() {
 // DoNeedsRender calls Render on tree from me for nodes
 // with NeedsRender flags set
 func (wb *WidgetBase) DoNeedsRender() {
-	if wb.This() == nil {
+	if wb.This == nil {
 		return
 	}
-	// pr := profile.Start(wb.This().NodeType().ShortName())
+	// pr := profile.Start(wb.This.NodeType().ShortName())
 	wb.WidgetWalkDown(func(w Widget, cwb *WidgetBase) bool {
 		if cwb.Is(NeedsRender) {
 			w.RenderWidget()
@@ -337,11 +337,11 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 // Render implementations. It returns whether the new bounds are
 // empty or not; if they are empty, then don't render.
 func (wb *WidgetBase) PushBounds() bool {
-	if wb == nil || wb.This() == nil {
+	if wb == nil || wb.This == nil {
 		return false
 	}
-	wb.SetFlag(false, NeedsRender)       // done!
-	if !wb.This().(Widget).IsVisible() { // checks deleted etc
+	wb.SetFlag(false, NeedsRender)     // done!
+	if !wb.This.(Widget).IsVisible() { // checks deleted etc
 		return false
 	}
 	if wb.Geom.TotalBBox.Empty() {
@@ -366,12 +366,12 @@ func (wb *WidgetBase) PushBounds() bool {
 // PopBounds pops our bounding box bounds. This is the last step
 // in Render implementations after rendering children.
 func (wb *WidgetBase) PopBounds() {
-	if wb == nil || wb.This() == nil {
+	if wb == nil || wb.This == nil {
 		return
 	}
 	pc := &wb.Scene.PaintContext
 
-	isSelw := wb.Scene.SelectedWidget == wb.This()
+	isSelw := wb.Scene.SelectedWidget == wb.This
 	if wb.Scene.Is(ScRenderBBoxes) || isSelw {
 		pos := math32.Vector2FromPoint(wb.Geom.TotalBBox.Min)
 		sz := math32.Vector2FromPoint(wb.Geom.TotalBBox.Size())
@@ -420,7 +420,7 @@ func (wb *WidgetBase) Render() {
 // for widget-specific rendering.
 func (wb *WidgetBase) RenderWidget() {
 	if wb.PushBounds() {
-		wb.This().(Widget).Render()
+		wb.This.(Widget).Render()
 		wb.RenderParts()
 		wb.RenderChildren()
 		wb.PopBounds()

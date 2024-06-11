@@ -304,7 +304,7 @@ func (fn *Node) SyncDir() {
 	fn.Open() // ensure
 	plan := fn.PlanOfFiles(path)
 	hasExtFiles := false
-	if fn.This() == fn.FRoot.This() {
+	if fn.This == fn.FRoot.This {
 		if len(fn.FRoot.ExtFiles) > 0 {
 			plan = append(tree.TypePlan{{Type: fn.FRoot.FileNodeType, Name: ExternalFilesName}}, plan...)
 			hasExtFiles = true

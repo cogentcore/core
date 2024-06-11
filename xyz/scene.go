@@ -162,7 +162,7 @@ func (sc *Scene) Validate() error {
 	// }
 	hasError := false
 	sc.WalkDown(func(k tree.Node) bool {
-		if k == sc.This() {
+		if k == sc.This {
 			return tree.Continue
 		}
 		ni, _ := AsNode(k)

@@ -538,7 +538,7 @@ func (ch *Chooser) ShowCurrentItem() *Chooser {
 
 // SelectItem selects the item at the given index and updates the chooser to display it.
 func (ch *Chooser) SelectItem(index int) *Chooser {
-	if ch.This() == nil {
+	if ch.This == nil {
 		return ch
 	}
 	ch.SetCurrentIndex(index)
@@ -549,7 +549,7 @@ func (ch *Chooser) SelectItem(index int) *Chooser {
 // SelectItemAction selects the item at the given index and updates the chooser to display it.
 // It also sends an [events.Change] event to indicate that the value has changed.
 func (ch *Chooser) SelectItemAction(index int) *Chooser {
-	if ch.This() == nil {
+	if ch.This == nil {
 		return ch
 	}
 	ch.SelectItem(index)
@@ -615,7 +615,7 @@ func (ch *Chooser) OpenMenu(e events.Event) bool {
 	if indicator, ok := ch.ChildByName("indicator").(Widget); ok {
 		pos = indicator.ContextMenuPos(nil) // use the pos
 	}
-	m := NewMenu(ch.MakeItemsMenu, ch.This().(Widget), pos)
+	m := NewMenu(ch.MakeItemsMenu, ch.This.(Widget), pos)
 	if m == nil {
 		return false
 	}

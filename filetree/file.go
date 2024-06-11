@@ -101,7 +101,7 @@ var _ Filer = (*Node)(nil)
 // runs open on Mac, xdg-open on Linux, and start on Windows
 func (fn *Node) OpenFilesDefault() { //types:add
 	fn.SelectedFunc(func(sn *Node) {
-		sn.This().(Filer).OpenFileDefault()
+		sn.This.(Filer).OpenFileDefault()
 	})
 }
 
@@ -140,7 +140,7 @@ func (fn *Node) OpenFileWith(command string) error {
 func (fn *Node) DuplicateFiles() { //types:add
 	fn.FRoot.NeedsLayout()
 	fn.SelectedFunc(func(sn *Node) {
-		sn.This().(Filer).DuplicateFile()
+		sn.This.(Filer).DuplicateFile()
 	})
 }
 
@@ -163,7 +163,7 @@ func (fn *Node) DeleteFiles() { //types:add
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText("Delete Files").OnClick(func(e events.Event) {
-			fn.This().(Filer).DeleteFilesImpl()
+			fn.This.(Filer).DeleteFilesImpl()
 		})
 	})
 	d.RunDialog(fn)
@@ -189,7 +189,7 @@ func (fn *Node) DeleteFilesImpl() {
 				sn.CloseBuf()
 			}
 		}
-		sn.This().(Filer).DeleteFile()
+		sn.This.(Filer).DeleteFile()
 	})
 }
 
@@ -284,7 +284,7 @@ func (fn *Node) NewFiles(filename string, addToVCS bool) { //types:add
 	done := false
 	fn.SelectedFunc(func(sn *Node) {
 		if !done {
-			sn.This().(Filer).NewFile(filename, addToVCS)
+			sn.This.(Filer).NewFile(filename, addToVCS)
 			done = true
 		}
 	})
@@ -307,7 +307,7 @@ func (fn *Node) NewFile(filename string, addToVCS bool) { //types:add
 	}
 	if addToVCS {
 		nfn, ok := fn.FRoot.FindFile(np)
-		if ok && nfn.This() != fn.FRoot.This() && string(nfn.FPath) == np {
+		if ok && nfn.This != fn.FRoot.This && string(nfn.FPath) == np {
 			// todo: this is where it is erroneously adding too many files to vcs!
 			fmt.Println("Adding new file to VCS:", nfn.FPath)
 			core.MessageSnackbar(fn, "Adding new file to VCS: "+dirs.DirAndFile(string(nfn.FPath)))
@@ -322,7 +322,7 @@ func (fn *Node) NewFolders(foldername string) { //types:add
 	done := false
 	fn.SelectedFunc(func(sn *Node) {
 		if !done {
-			sn.This().(Filer).NewFolder(foldername)
+			sn.This.(Filer).NewFolder(foldername)
 			done = true
 		}
 	})
@@ -360,7 +360,7 @@ func (fn *Node) CopyFileToDir(filename string, perm os.FileMode) {
 	ofn, ok := fn.FRoot.FindFile(filename)
 	if ok && ofn.Info.VCS >= vcs.Stored {
 		nfn, ok := fn.FRoot.FindFile(tpath)
-		if ok && nfn.This() != fn.FRoot.This() {
+		if ok && nfn.This != fn.FRoot.This {
 			if string(nfn.FPath) != tpath {
 				fmt.Printf("error: nfn.FPath != tpath; %q != %q, see bug #453\n", nfn.FPath, tpath)
 			} else {

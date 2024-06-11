@@ -103,7 +103,7 @@ func (vv *TexValue) Config(widg core.Node2D) {
 	vv.Widget = widg
 	ac := vv.Widget.(*core.Button)
 	ac.SetProp("border-radius", units.NewPx(4))
-	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send tree.Node, sig int64, data any) {
+	ac.ActionSig.ConnectOnly(vv.This, func(recv, send tree.Node, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeTexValue).(*TexValue)
 		ac := vvv.Widget.(*core.Button)
 		vvv.Activate(ac.ViewportSafe(), nil, nil)
@@ -138,7 +138,7 @@ func (vv *TexValue) Activate(vp *core.Viewport2D, dlgRecv tree.Node, dlgFunc tre
 	cur := reflectx.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
 	views.SliceViewSelectDialog(vp, &sl, cur, views.DlgOpts{Title: "Select a Texture", Prompt: desc}, nil,
-		vv.This(), func(recv, send tree.Node, sig int64, data any) {
+		vv.This, func(recv, send tree.Node, sig int64, data any) {
 			if sig == int64(core.DialogAccepted) {
 				ddlg := send.Embed(core.TypeDialog).(*core.Dialog)
 				si := views.SliceViewSelectDialogValue(ddlg)

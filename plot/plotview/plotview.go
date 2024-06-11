@@ -268,7 +268,7 @@ func (pl *PlotView) XLabel() string {
 // the [table.IndexView], under the assumption that it is used for tracking a
 // the latest updates of a running process.
 func (pl *PlotView) GoUpdatePlot() {
-	if pl == nil || pl.This() == nil {
+	if pl == nil || pl.This == nil {
 		return
 	}
 	if !pl.IsVisible() || pl.Table == nil || pl.Table.Table == nil || pl.InPlot {
@@ -287,7 +287,7 @@ func (pl *PlotView) GoUpdatePlot() {
 // It does not automatically update the [table.IndexView] unless it is
 // nil or out date.
 func (pl *PlotView) UpdatePlot() {
-	if pl == nil || pl.This() == nil {
+	if pl == nil || pl.This == nil {
 		return
 	}
 	if pl.Table == nil || pl.Table.Table == nil || pl.InPlot {

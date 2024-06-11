@@ -227,7 +227,7 @@ func (tg *TensorGrid) OpenTensorView() {
 			tv := tvk.(*TensorView)
 			tv.TsrLay = tg.Disp.TensorLayout
 			tv.SetInactiveState(tg.IsInactive())
-			tv.ViewSig.Connect(tg.This(), func(recv, send tree.Node, sig int64, data interface{}) {
+			tv.ViewSig.Connect(tg.This, func(recv, send tree.Node, sig int64, data interface{}) {
 				tgg, _ := recv.Embed(KiT_TensorGrid).(*TensorGrid)
 				tgg.UpdateSig()
 			})

@@ -847,10 +847,10 @@ func (ed *Editor) ScrollInView(bbox image.Rectangle) bool {
 // ScrollCursorInView tells any parent scroll layout to scroll to get cursor
 // in view -- returns true if scrolled
 func (ed *Editor) ScrollCursorInView() bool {
-	if ed == nil || ed.This() == nil {
+	if ed == nil || ed.This == nil {
 		return false
 	}
-	if ed.This().(core.Widget).IsVisible() {
+	if ed.This.(core.Widget).IsVisible() {
 		curBBox := ed.CursorBBox(ed.CursorPos)
 		return ed.ScrollInView(curBBox)
 	}

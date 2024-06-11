@@ -159,7 +159,7 @@ func (g *NodeBase) SetColorProperties(prop, color string) {
 func (g *NodeBase) ParTransform(self bool) math32.Matrix2 {
 	pars := []Node{}
 	xf := math32.Identity2()
-	n := g.This().(Node)
+	n := g.This.(Node)
 	for {
 		if n.AsTree().Parent == nil {
 			break
@@ -332,7 +332,7 @@ func (g *NodeBase) Style(sv *SVG) {
 	pc.StyleSet = false // this is always first call, restart
 
 	var parCSSAgg map[string]any
-	if g.Parent != nil { // && g.Par != sv.Root.This()
+	if g.Parent != nil { // && g.Par != sv.Root.This
 		pn := g.Parent.(Node)
 		parCSSAgg = pn.AsNodeBase().CSSAgg
 		pp := pn.PaintStyle()
@@ -378,7 +378,7 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css map[string]any) bool {
 	}
 	pc := &g.Paint
 	ctxt := colors.Context(sv)
-	if g.Parent != sv.Root.This() {
+	if g.Parent != sv.Root.This {
 		pp := g.Parent.(Node).PaintStyle()
 		pc.SetStyleProperties(pp, pmap, ctxt)
 	} else {
@@ -435,10 +435,10 @@ func (g *NodeBase) LocalLineWidth() float32 {
 // gui interaction -- can only be done in rendering because that is when all
 // the proper transforms are all in place -- VpBBox is intersected with parent SVG
 func (g *NodeBase) BBoxes(sv *SVG) {
-	if g.This() == nil {
+	if g.This == nil {
 		return
 	}
-	ni := g.This().(Node)
+	ni := g.This.(Node)
 	g.BBox = ni.NodeBBox(sv)
 	g.BBox.Canon()
 	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
@@ -449,10 +449,10 @@ func (g *NodeBase) BBoxes(sv *SVG) {
 // Must be called as first step in Render.
 func (g *NodeBase) PushTransform(sv *SVG) (bool, *paint.Context) {
 	g.BBox = image.Rectangle{}
-	if g.Paint.Off || g == nil || g.This() == nil {
+	if g.Paint.Off || g == nil || g.This == nil {
 		return false, nil
 	}
-	ni := g.This().(Node)
+	ni := g.This.(Node)
 	// if g.IsInvisible() { // just the Invisible flag
 	// 	return false, nil
 	// }

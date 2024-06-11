@@ -70,7 +70,7 @@ func (tv *TableView) Init() {
 	tv.SortIndex = -1
 
 	tv.Makers[0] = func(p *core.Plan) { // TODO: reduce redundancy with SliceViewBase Maker
-		svi := tv.This().(SliceViewer)
+		svi := tv.This.(SliceViewer)
 		svi.UpdateSliceSize()
 
 		tv.ViewMuLock()
@@ -282,7 +282,7 @@ func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 }
 
 func (tv *TableView) MakeRow(p *core.Plan, i int) {
-	svi := tv.This().(SliceViewer)
+	svi := tv.This.(SliceViewer)
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
 	val := tv.SliceElementValue(si)
@@ -369,7 +369,7 @@ func (tv *TableView) SliceNewAt(idx int) {
 		idx = tv.SliceSize
 	}
 
-	tv.This().(SliceViewer).UpdateSliceSize()
+	tv.This.(SliceViewer).UpdateSliceSize()
 	tv.SelectIndexAction(idx, events.SelectOne)
 	tv.ViewMuUnlock()
 	tv.SendChange()
@@ -388,7 +388,7 @@ func (tv *TableView) SliceDeleteAt(idx int) {
 
 	reflectx.SliceDeleteAt(tv.Slice, idx)
 
-	tv.This().(SliceViewer).UpdateSliceSize()
+	tv.This.(SliceViewer).UpdateSliceSize()
 	tv.ViewMuUnlock()
 	tv.SendChange()
 	tv.Update()
@@ -607,7 +607,7 @@ func (tv *TableView) ContextMenu(m *core.Scene) {
 
 func (tv *TableView) SizeFinal() {
 	tv.SliceViewBase.SizeFinal()
-	sg := tv.This().(SliceViewer).SliceGrid()
+	sg := tv.This.(SliceViewer).SliceGrid()
 	if sg == nil {
 		return
 	}

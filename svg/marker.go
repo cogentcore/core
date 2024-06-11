@@ -99,10 +99,10 @@ func (g *Marker) Render(sv *SVG) {
 }
 
 func (g *Marker) BBoxes(sv *SVG) {
-	if g.This() == nil {
+	if g.This == nil {
 		return
 	}
-	ni := g.This().(Node)
+	ni := g.This.(Node)
 	g.BBox = ni.NodeBBox(sv)
 	g.BBox.Canon()
 	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)

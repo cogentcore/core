@@ -725,7 +725,7 @@ func (ly *Frame) SizeUpLay() {
 	ly.SizeFromStyle()
 	ly.LayImpl.ScrollSize.SetZero() // we don't know yet
 	ly.LaySetInitCells()
-	ly.This().(Layouter).LayoutSpace()
+	ly.This.(Layouter).LayoutSpace()
 	ly.SizeUpChildren() // kids do their own thing
 	ly.SizeFromChildrenFit(0, SizeUpPass)
 	if ly.Parts != nil {
@@ -923,7 +923,7 @@ func (ly *Frame) LaySetInitCellsGrid() {
 // SizeFromChildrenFit gathers Actual size from kids, and calls LaySetContentFitOverflow
 // to update Actual and Internal size based on this.
 func (ly *Frame) SizeFromChildrenFit(iter int, pass LayoutPasses) {
-	ksz := ly.This().(Layouter).SizeFromChildren(iter, SizeDownPass)
+	ksz := ly.This.(Layouter).SizeFromChildren(iter, SizeDownPass)
 	ly.LaySetContentFitOverflow(ksz, pass)
 	if DebugSettings.LayoutTrace {
 		sz := &ly.Geom.Size
@@ -1140,7 +1140,7 @@ func (ly *Frame) SizeDownLay(iter int) bool {
 	if DebugSettings.LayoutTrace {
 		fmt.Println(ly, "Managing Alloc:", sz.Alloc.Content)
 	}
-	chg := ly.This().(Layouter).ManageOverflow(iter, true) // this must go first.
+	chg := ly.This.(Layouter).ManageOverflow(iter, true) // this must go first.
 	wrapped := false
 	if iter <= 1 && ly.Styles.IsFlexWrap() {
 		wrapped = ly.SizeDownWrap(iter) // first recompute wrap
@@ -1148,7 +1148,7 @@ func (ly *Frame) SizeDownLay(iter int) bool {
 			wrapped = true // always update
 		}
 	}
-	ly.This().(Layouter).SizeDownSetAllocs(iter)
+	ly.This.(Layouter).SizeDownSetAllocs(iter)
 	redo := ly.SizeDownChildren(iter)
 	if redo || wrapped {
 		ly.SizeFromChildrenFit(iter, SizeDownPass)
@@ -1197,7 +1197,7 @@ func (ly *Frame) ManageOverflow(iter int, updateSize bool) bool {
 		}
 	}
 	for d := math32.X; d <= math32.Y; d++ {
-		maxSize, visSize, _ := ly.This().(Layouter).ScrollValues(d)
+		maxSize, visSize, _ := ly.This.(Layouter).ScrollValues(d)
 		ofd := maxSize - visSize
 		switch ly.Styles.Overflow.Dim(d) {
 		// case styles.OverflowVisible:
@@ -1225,7 +1225,7 @@ func (ly *Frame) ManageOverflow(iter int, updateSize bool) bool {
 			}
 		}
 	}
-	ly.This().(Layouter).LayoutSpace() // adds the scroll space
+	ly.This.(Layouter).LayoutSpace() // adds the scroll space
 	if updateSize {
 		sz.SetTotalFromContent(&sz.Actual)
 		sz.SetContentFromTotal(&sz.Alloc) // alloc is *decreased* from any increase in space
@@ -1467,7 +1467,7 @@ func (ly *Frame) SizeDownAllocActualStacked(iter int) {
 func (ly *Frame) SizeFinalUpdateChildrenSizes() {
 	ly.SizeUpLay()
 	iter := 3 // late stage..
-	ly.This().(Layouter).SizeDownSetAllocs(iter)
+	ly.This.(Layouter).SizeDownSetAllocs(iter)
 	ly.SizeDownChildren(iter)
 	ly.SizeDownParts(iter) // no std role, just get sizes
 }
@@ -1632,7 +1632,7 @@ func (wb *WidgetBase) PositionParts() {
 	if DebugSettings.LayoutTrace {
 		fmt.Println(wb.Parts, "parts align pos:", pgm.RelPos)
 	}
-	wb.Parts.This().(Widget).Position()
+	wb.Parts.This.(Widget).Position()
 }
 
 // PositionChildren runs Position on the children

@@ -48,13 +48,11 @@ type NodeBase struct {
 	// child helper functions.
 	Children []Node `tableview:"-" copier:"-" set:"-" json:",omitempty"`
 
-	// Ths is a pointer to ourselves as a [Node]. It can always be used to extract the
-	// true underlying type of an object when [NodeBase] is embedded in other structs;
-	// function receivers do not have this ability, so this is necessary. This is set
-	// to nil when the node is deleted. It is typically accessed through [Node.This].
-	// It needs to be exported so that it can be interacted with through reflection
-	// during field copying.
-	Ths Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	// This is the value of this Node in its true underlying type. This allows methods
+	// defined on base types to call functions defined on higher-level types, which
+	// is necessary for various parts of tree and widget functionality. This is set
+	// to nil when the node is deleted.
+	This Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// numLifetimeChildren is the number of children that have ever been added to this
 	// node, which is used for automatic unique naming.
@@ -71,20 +69,10 @@ type NodeBase struct {
 
 // String implements the [fmt.Stringer] interface by returning the path of the node.
 func (n *NodeBase) String() string {
-	if n == nil || n.This() == nil {
+	if n == nil || n.This == nil {
 		return "nil"
 	}
 	return elide.Middle(n.Path(), 38)
-}
-
-// This returns the Node as its true underlying type.
-// It returns nil if the node is nil, has been destroyed,
-// or is improperly constructed.
-func (n *NodeBase) This() Node {
-	if n == nil {
-		return nil
-	}
-	return n.Ths
 }
 
 // AsTree returns the [NodeBase] for this Node.
@@ -119,7 +107,7 @@ func (n *NodeBase) IndexInParent() int {
 	if n.Parent == nil {
 		return -1
 	}
-	idx := IndexOf(n.Parent.AsTree().Children, n.This(), n.index) // very fast if index is close
+	idx := IndexOf(n.Parent.AsTree().Children, n.This, n.index) // very fast if index is close
 	n.index = idx
 	return idx
 }
@@ -257,7 +245,7 @@ func (n *NodeBase) Path() string {
 // so a base type can be passed in without manually calling [Node.This].
 func (n *NodeBase) PathFrom(parent Node) string {
 	// critical to get "This"
-	parent = parent.AsTree().This()
+	parent = parent.AsTree().This
 	// we bail a level below the parent so it isn't in the path
 	if n.Parent == nil || n.Parent == parent {
 		return EscapePathName(n.Name)
@@ -301,7 +289,7 @@ func findPathChild(n Node, child string) int {
 // element, for cases when indexes are more useful than names.
 // Returns nil if not found.
 func (n *NodeBase) FindPath(path string) Node {
-	curn := n.This()
+	curn := n.This
 	pels := strings.Split(strings.Trim(strings.TrimSpace(path), "\""), "/")
 	for _, pe := range pels {
 		if len(pe) == 0 {
@@ -452,20 +440,20 @@ func (n *NodeBase) DeleteChildren() {
 // and then destroys itself.
 func (n *NodeBase) Delete() {
 	if n.Parent == nil {
-		n.This().Destroy()
+		n.This.Destroy()
 	} else {
-		n.Parent.AsTree().DeleteChild(n.This())
+		n.Parent.AsTree().DeleteChild(n.This)
 	}
 }
 
 // Destroy recursively deletes and destroys the node, all of its children,
 // and all of its children's children, etc.
 func (n *NodeBase) Destroy() {
-	if n.This() == nil { // already destroyed
+	if n.This == nil { // already destroyed
 		return
 	}
 	n.DeleteChildren()
-	n.Ths = nil
+	n.This = nil
 }
 
 // Flags:
@@ -525,7 +513,7 @@ func (n *NodeBase) DeleteProperty(key string) {
 // returns [Break] and keeps walking if it returns [Continue]. It returns
 // whether walking was finished (false if it was aborted with [Break]).
 func (n *NodeBase) WalkUp(fun func(n Node) bool) bool {
-	cur := n.This()
+	cur := n.This
 	for {
 		if !fun(cur) { // false return means stop
 			return false
@@ -570,23 +558,23 @@ func (n *NodeBase) WalkUpParent(fun func(n Node) bool) bool {
 // method is called for every node after the given function, which enables nodes
 // to also traverse additional nodes, like widget parts.
 func (n *NodeBase) WalkDown(fun func(n Node) bool) {
-	if n.This() == nil {
+	if n.This == nil {
 		return
 	}
 	tm := map[Node]int{} // traversal map
-	start := n.This()
+	start := n.This
 	cur := start
 	tm[cur] = -1
 outer:
 	for {
 		cb := cur.AsTree()
-		if cb.This() != nil && fun(cur) { // false return means stop
-			cb.This().NodeWalkDown(fun)
+		if cb.This != nil && fun(cur) { // false return means stop
+			cb.This.NodeWalkDown(fun)
 			if cb.HasChildren() {
 				tm[cur] = 0 // 0 for no fields
 				nxt := cb.Child(0)
-				if nxt != nil && nxt.AsTree().This() != nil {
-					cur = nxt.AsTree().This()
+				if nxt != nil && nxt.AsTree().This != nil {
+					cur = nxt.AsTree().This
 					tm[cur] = -1
 					continue
 				}
@@ -602,8 +590,8 @@ outer:
 				curChild++
 				tm[cur] = curChild
 				nxt := cb.Child(curChild)
-				if nxt != nil && nxt.AsTree().This() != nil {
-					cur = nxt.AsTree().This()
+				if nxt != nil && nxt.AsTree().This != nil {
+					cur = nxt.AsTree().This
 					tm[cur] = -1
 					continue outer
 				}
@@ -638,22 +626,22 @@ func (n *NodeBase) NodeWalkDown(fun func(n Node) bool) {}
 // time, so you should use a Mutex if there is a chance of multiple threads
 // running at the same time. The nodes are processed in the current goroutine.
 func (n *NodeBase) WalkDownPost(shouldContinue func(n Node) bool, fun func(n Node) bool) {
-	if n.This() == nil {
+	if n.This == nil {
 		return
 	}
 	tm := map[Node]int{} // traversal map
-	start := n.This()
+	start := n.This
 	cur := start
 	tm[cur] = -1
 outer:
 	for {
 		cb := cur.AsTree()
-		if cb.This() != nil && shouldContinue(cur) { // false return means stop
+		if cb.This != nil && shouldContinue(cur) { // false return means stop
 			if cb.HasChildren() {
 				tm[cur] = 0 // 0 for no fields
 				nxt := cb.Child(0)
-				if nxt != nil && nxt.AsTree().This() != nil {
-					cur = nxt.AsTree().This()
+				if nxt != nil && nxt.AsTree().This != nil {
+					cur = nxt.AsTree().This
 					tm[cur] = -1
 					continue
 				}
@@ -669,8 +657,8 @@ outer:
 				curChild++
 				tm[cur] = curChild
 				nxt := cb.Child(curChild)
-				if nxt != nil && nxt.AsTree().This() != nil {
-					cur = nxt.AsTree().This()
+				if nxt != nil && nxt.AsTree().This != nil {
+					cur = nxt.AsTree().This
 					tm[cur] = -1
 					continue outer
 				}
@@ -701,7 +689,7 @@ outer:
 // function returns [Break] and keeps walking if it returns [Continue]. It is
 // non-recursive, but not safe for concurrent calling.
 func (n *NodeBase) WalkDownBreadth(fun func(n Node) bool) {
-	start := n.This()
+	start := n.This
 
 	level := 0
 	start.AsTree().depth = level
@@ -716,9 +704,9 @@ func (n *NodeBase) WalkDownBreadth(fun func(n Node) bool) {
 		depth := cur.AsTree().depth
 		queue = queue[1:]
 
-		if cur.AsTree().This() != nil && fun(cur) { // false return means don't proceed
+		if cur.AsTree().This != nil && fun(cur) { // false return means don't proceed
 			for _, cn := range cur.AsTree().Children {
-				if cn != nil && cn.AsTree().This() != nil {
+				if cn != nil && cn.AsTree().This != nil {
 					cn.AsTree().depth = depth + 1
 					queue = append(queue, cn)
 				}
@@ -747,7 +735,7 @@ func (n *NodeBase) CopyFrom(from Node) {
 		slog.Error("tree.NodeBase.CopyFrom: nil source", "destinationNode", n)
 		return
 	}
-	copyFrom(n.This(), from)
+	copyFrom(n.This, from)
 }
 
 // copyFrom is the implementation of [NodeBase.CopyFrom].
@@ -766,7 +754,7 @@ func copyFrom(to, from Node) {
 
 	maps.Copy(to.AsTree().Properties, from.AsTree().Properties)
 
-	to.AsTree().This().CopyFieldsFrom(from)
+	to.AsTree().This.CopyFieldsFrom(from)
 	for i, kid := range to.AsTree().Children {
 		fmk := from.AsTree().Child(i)
 		copyFrom(kid, fmk)
@@ -777,10 +765,10 @@ func copyFrom(to, from Node) {
 // Any pointers within the cloned tree will correctly point within the new
 // cloned tree (see [Node.CopyFrom] for more information).
 func (n *NodeBase) Clone() Node {
-	nc := NewOfType(n.This().NodeType())
+	nc := NewOfType(n.This.NodeType())
 	initNode(nc)
 	nc.AsTree().SetName(n.Name)
-	nc.AsTree().CopyFrom(n.This())
+	nc.AsTree().CopyFrom(n.This)
 	return nc
 }
 
@@ -795,7 +783,7 @@ func (n *NodeBase) Clone() Node {
 // [cogentcore.org/core/core.WidgetBase.CopyFieldsFrom] for an example of a
 // custom CopyFieldsFrom method.
 func (n *NodeBase) CopyFieldsFrom(from Node) {
-	err := copier.CopyWithOption(n.This(), from.AsTree().This(), copier.Option{CaseSensitive: true, DeepCopy: true})
+	err := copier.CopyWithOption(n.This, from.AsTree().This, copier.Option{CaseSensitive: true, DeepCopy: true})
 	if err != nil {
 		slog.Error("tree.NodeBase.CopyFieldsFrom", "err", err)
 	}
