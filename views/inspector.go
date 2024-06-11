@@ -61,7 +61,7 @@ func (is *Inspector) Init() {
 			s.Align.Self = styles.Center
 		})
 		w.Updater(func() {
-			w.SetText(fmt.Sprintf("Inspector of %s (%s)", is.CurrentNode.Name(), labels.FriendlyTypeName(reflect.TypeOf(is.CurrentNode))))
+			w.SetText(fmt.Sprintf("Inspector of %s (%s)", is.CurrentNode.AsTree().Name(), labels.FriendlyTypeName(reflect.TypeOf(is.CurrentNode))))
 		})
 	})
 	renderRebuild := func() {
@@ -213,12 +213,12 @@ func (is *Inspector) SelectionMonitor() {
 	if !ok || sw == nil {
 		return
 	}
-	tv := is.TreeView().FindSyncNode(sw.This())
+	tv := is.TreeView().FindSyncNode(sw)
 	if tv == nil {
 		// if we can't be found, we are probably a part,
 		// so we keep going up until we find somebody in
 		// the tree
-		sw.WalkUpParent(func(k tree.Node) bool {
+		sw.AsTree().WalkUpParent(func(k tree.Node) bool {
 			tv = is.TreeView().FindSyncNode(k)
 			if tv != nil {
 				return tree.Break
@@ -305,8 +305,8 @@ func InspectorWindow(n tree.Node) {
 func InspectorView(b *core.Body, n tree.Node) {
 	b.SetTitle("Inspector").SetData(n)
 	if n != nil {
-		b.Nm += "-" + n.Name()
-		b.Title += ": " + n.Name()
+		b.Nm += "-" + n.AsTree().Name()
+		b.Title += ": " + n.AsTree().Name()
 	}
 	is := NewInspector(b)
 	is.SetRoot(n)
