@@ -583,7 +583,7 @@ func (wb *WidgetBase) ContainsFocus() bool {
 	if cur == nil {
 		return false
 	}
-	if cur.This() == wb.This() {
+	if cur == wb.This() {
 		return true
 	}
 	plev := cur.AsTree().ParentLevel(wb.This())

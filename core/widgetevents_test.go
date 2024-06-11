@@ -99,7 +99,7 @@ func TestWidgetPrev(t *testing.T) {
 	}
 	i := 0
 	WidgetPrevFunc(lt, func(w Widget) bool {
-		have := w.Path()
+		have := w.AsTree().Path()
 		want := paths[i]
 		if have != want {
 			t.Errorf("expected\n%s\n\tbut got\n%s", want, have)
@@ -127,7 +127,7 @@ func TestWidgetNext(t *testing.T) {
 	}
 	i := 0
 	WidgetNextFunc(ft, func(w Widget) bool {
-		have := w.Path()
+		have := w.AsTree().Path()
 		want := paths[i]
 		if have != want {
 			t.Errorf("expected\n%s\n\tbut got\n%s", want, have)
