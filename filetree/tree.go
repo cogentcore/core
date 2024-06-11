@@ -356,7 +356,7 @@ func (ft *Tree) ExtNodeByPath(fpath string) (*Node, error) {
 	if ekid == nil {
 		return nil, fmt.Errorf("ExtFile not updated -- no ExtFiles node")
 	}
-	if n := ekid.Child(i); n != nil {
+	if n := ekid.AsTree().Child(i); n != nil {
 		return AsNode(n), nil
 	}
 	return nil, fmt.Errorf("ExtFile not updated; index invalid")

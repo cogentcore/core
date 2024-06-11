@@ -83,9 +83,6 @@ func (fn *Node) Repo() (vcs.Repo, *Node) {
 	var repo vcs.Repo
 	var rnode *Node
 	fn.WalkUpParent(func(k tree.Node) bool {
-		if k == nil || k.This() == nil {
-			return tree.Break
-		}
 		sfn := AsNode(k)
 		if sfn == nil {
 			return tree.Break

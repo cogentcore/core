@@ -487,7 +487,7 @@ func (fn *Node) UpdateNode() error {
 func (fn *Node) SelectedFunc(fun func(sn *Node)) {
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
-		sn := AsNode(sels[i].This())
+		sn := AsNode(sels[i])
 		if sn == nil {
 			continue
 		}
