@@ -5,7 +5,7 @@
 package tree
 
 import (
-	"cogentcore.org/core/base/findfast"
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/types"
 )
 
@@ -16,13 +16,13 @@ import (
 // slices. If no value is specified for startIndex, it starts in the
 // middle, which is a good default.
 func IndexOf(slice []Node, child Node, startIndex ...int) int {
-	return findfast.FindFunc(slice, func(e Node) bool { return e == child }, startIndex...)
+	return slicesx.Search(slice, func(e Node) bool { return e == child }, startIndex...)
 }
 
 // IndexByName returns the index of the first element in the given slice that
 // has the given name, or -1 if none is found. See [IndexOf] for info on startIndex.
 func IndexByName(slice []Node, name string, startIndex ...int) int {
-	return findfast.FindFunc(slice, func(ch Node) bool { return ch.AsTree().Name == name }, startIndex...)
+	return slicesx.Search(slice, func(ch Node) bool { return ch.AsTree().Name == name }, startIndex...)
 }
 
 // IndexByType returns the index of the first element that either is the given type
@@ -30,7 +30,7 @@ func IndexByName(slice []Node, name string, startIndex ...int) int {
 // See [IndexOf] for info on startIndex.
 func IndexByType(slice []Node, t *types.Type, embeds bool, startIndex ...int) int {
 	if embeds {
-		return findfast.FindFunc(slice, func(ch Node) bool { return ch.NodeType().HasEmbed(t) }, startIndex...)
+		return slicesx.Search(slice, func(ch Node) bool { return ch.NodeType().HasEmbed(t) }, startIndex...)
 	}
-	return findfast.FindFunc(slice, func(ch Node) bool { return ch.NodeType() == t }, startIndex...)
+	return slicesx.Search(slice, func(ch Node) bool { return ch.NodeType() == t }, startIndex...)
 }

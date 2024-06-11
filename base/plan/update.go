@@ -15,7 +15,7 @@ import (
 	"log/slog"
 	"slices"
 
-	"cogentcore.org/core/base/findfast"
+	"cogentcore.org/core/base/slicesx"
 )
 
 // Namer is an interface that types can implement to specify their name in a plan context.
@@ -62,7 +62,7 @@ func Update[T Namer](s []T, n int, name func(i int) string, new func(name string
 	}
 	// next add and move items as needed; in order so guaranteed
 	for i, tn := range names {
-		ci := findfast.FindFunc(r, func(e T) bool { return e.PlanName() == tn }, smap[tn])
+		ci := slicesx.Search(r, func(e T) bool { return e.PlanName() == tn }, smap[tn])
 		if ci < 0 { // item not currently on the list
 			mods = true
 			ne := new(tn, i)
