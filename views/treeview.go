@@ -80,11 +80,8 @@ type TreeViewer interface {
 }
 
 // AsTreeView returns the given value as a value of type TreeView if the type
-// of the given value embeds TreeView, or nil otherwise
+// of the given value embeds TreeView, or nil otherwise.
 func AsTreeView(k tree.Node) *TreeView {
-	if k == nil || k.This() == nil {
-		return nil
-	}
 	if t, ok := k.(TreeViewer); ok {
 		return t.AsTreeView()
 	}
@@ -184,7 +181,7 @@ func (tv *TreeView) FlagType() enums.BitFlagSetter {
 	return (*TreeViewFlags)(&tv.Flags)
 }
 
-// AsTreeView satisfies the [TreeViewEmbedder] interface
+// AsTreeView satisfies the [TreeViewer] interface.
 func (tv *TreeView) AsTreeView() *TreeView {
 	return tv
 }
@@ -1002,7 +999,7 @@ func (tv *TreeView) MoveDownSibling(selMode events.SelectModes) *TreeView {
 	}
 	myidx := tv.IndexInParent()
 	if myidx < len(tv.Par.AsTree().Children)-1 {
-		nn := AsTreeView(tv.Par.Child(myidx + 1))
+		nn := AsTreeView(tv.Par.AsTree().Child(myidx + 1))
 		if nn != nil {
 			nn.SelectUpdate(selMode)
 			return nn
@@ -1022,7 +1019,7 @@ func (tv *TreeView) MoveUp(selMode events.SelectModes) *TreeView {
 	}
 	myidx := tv.IndexInParent()
 	if myidx > 0 {
-		nn := AsTreeView(tv.Par.Child(myidx - 1))
+		nn := AsTreeView(tv.Par.AsTree().Child(myidx - 1))
 		if nn != nil {
 			return nn.MoveToLastChild(selMode)
 		}
@@ -1442,7 +1439,7 @@ func (tv *TreeView) Copy(reset bool) { //types:add
 	tv.This().(TreeViewer).MimeData(&md) // source is always first..
 	if nitms > 1 {
 		for _, sn := range sels {
-			if sn.This() != tv.This() {
+			if sn != tv.This() {
 				sn.MimeData(&md)
 			}
 		}
@@ -1535,9 +1532,9 @@ func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
 	if len(sl) == 0 {
 		return
 	}
-	tv.This().CopyFrom(sl[0]) // nodes with data copy here
-	tv.SetScene(tv.Scene)     // ensure children have scene
-	tv.Update()               // could have children
+	tv.CopyFrom(sl[0])    // nodes with data copy here
+	tv.SetScene(tv.Scene) // ensure children have scene
+	tv.Update()           // could have children
 	tv.Open()
 	tv.TreeViewChanged()
 }
@@ -1590,19 +1587,19 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 	for i, ns := range sl {
 		orgpath := pl[i]
 		if mod != events.DropMove {
-			if cn := parent.ChildByName(ns.Name(), 0); cn != nil {
-				ns.SetName(ns.Name() + "_Copy")
+			if cn := parent.ChildByName(ns.AsTree().Name(), 0); cn != nil {
+				ns.AsTree().SetName(ns.AsTree().Name() + "_Copy")
 			}
 		}
 		parent.InsertChild(ns, myidx+i)
-		_, nwb := core.AsWidget(ns.This())
-		ntv := AsTreeView(ns.This())
+		_, nwb := core.AsWidget(ns)
+		ntv := AsTreeView(ns)
 		ntv.RootView = tv.RootView
 		nwb.SetScene(tv.Scene)
 		nwb.Update() // incl children
-		npath := ns.PathFrom(tv.RootView)
+		npath := ns.AsTree().PathFrom(tv.RootView)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
-			ns.SetName(ns.Name() + TreeViewTempMovedTag) // special keyword :)
+			ns.AsTree().SetName(ns.AsTree().Name() + TreeViewTempMovedTag) // special keyword :)
 		}
 		if i == sz-1 {
 			selTv = ntv
@@ -1626,8 +1623,8 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 
 	for _, ns := range sl {
 		tv.AddChild(ns)
-		_, nwb := core.AsWidget(ns.This())
-		ntv := AsTreeView(ns.This())
+		_, nwb := core.AsWidget(ns)
+		ntv := AsTreeView(ns)
 		ntv.RootView = tv.RootView
 		nwb.SetScene(tv.Scene)
 	}
@@ -1648,7 +1645,7 @@ func (tv *TreeView) DragStart(e events.Event) {
 	tv.This().(TreeViewer).MimeData(&md) // source is always first..
 	if nitms > 1 {
 		for _, sn := range sels {
-			if sn.This() != tv.This() {
+			if sn != tv.This() {
 				sn.MimeData(&md)
 			}
 		}
@@ -1721,7 +1718,7 @@ func (tv *TreeView) DropDeleteSource(e events.Event) {
 		if sn != nil {
 			psplt := strings.Split(path, "/")
 			orgnm := psplt[len(psplt)-1]
-			sn.SetName(orgnm)
+			sn.AsTree().SetName(orgnm)
 			_, swb := core.AsWidget(sn)
 			swb.NeedsRender()
 		}
