@@ -86,7 +86,7 @@ func (an *Anim) GetObjs() {
 	if ggp == nil {
 		return
 	}
-	gophi := ggp.Child(1)
+	gophi := ggp.AsTree().Child(1)
 	if gophi == nil {
 		return
 	}

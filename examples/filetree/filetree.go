@@ -64,7 +64,7 @@ func (fb *FileBrowse) Init() {
 		s.Margin.Set(units.Dp(8))
 	})
 	fb.OnWidgetAdded(func(w core.Widget) { // TODO(config)
-		switch w.PathFrom(fb) {
+		switch w.AsTree().PathFrom(fb) {
 		case "title":
 			title := w.(*core.Text)
 			title.Type = core.TextHeadlineSmall
@@ -72,7 +72,7 @@ func (fb *FileBrowse) Init() {
 				s.Justify.Content = styles.Center
 			})
 		}
-		if w.Parent().PathFrom(fb) == "splits" {
+		if w.AsTree().Parent().AsTree().PathFrom(fb) == "splits" {
 			if w.AsTree().IndexInParent() == 0 {
 				w.Styler(func(s *styles.Style) {
 					s.Grow.Set(1, 1)
@@ -349,7 +349,7 @@ func (fb *FileBrowse) ConfigSplits() {
 		fb.Files.OnSelect(func(e events.Event) {
 			e.SetHandled()
 			if len(fb.Files.SelectedNodes) > 0 {
-				sn, ok := fb.Files.SelectedNodes[0].This().(*filetree.Node)
+				sn, ok := fb.Files.SelectedNodes[0].(*filetree.Node)
 				if ok {
 					fb.FileNodeSelected(sn)
 				}
@@ -358,7 +358,7 @@ func (fb *FileBrowse) ConfigSplits() {
 		fb.Files.DoubleClickFun = func(e events.Event) {
 			e.SetHandled()
 			if len(fb.Files.SelectedNodes) > 0 {
-				sn, ok := fb.Files.SelectedNodes[0].This().(*filetree.Node)
+				sn, ok := fb.Files.SelectedNodes[0].(*filetree.Node)
 				if ok {
 					fb.FileNodeOpened(sn)
 				}
