@@ -17,41 +17,31 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Styler adds the given function for setting the style properties of the widget.
-// It is added to the widget's Stylers.
-// It is one of the main ways for both end-user and internal code
-// to set the styles of a widget, in addition to FirstStyler
-// and FinalStyler, which add stylers that are called before
-// and after the stylers added by this function, respectively.
+// Styler adds the given function for setting the style properties of the widget
+// to [WidgetBase.Stylers]. It is one of the main ways to specify the styles of
+// a widget, in addition to FirstStyler and FinalStyler, which add stylers that
+// are called before and after the stylers added by this function, respectively.
 func (wb *WidgetBase) Styler(s func(s *styles.Style)) *WidgetBase {
 	wb.Stylers = append(wb.Stylers, s)
 	return wb
 }
 
-// FirstStyler adds the given styler to the widget's FirstStylers.
-// It is one of the main ways for both end-user and internal code
-// to set the styles of a widget, in addition to Style
-// and FinalStyler, which add stylers that are called after
-// the stylers added by this function.
+// FirstStyler adds the given function for setting the style properties of the widget
+// to [WidgetBase.FirstStylers]. It is one of the main ways to specify the styles of
+// a widget, in addition to Styler and FinalStyler, which add stylers that are called
+// after the stylers added by this function.
 func (wb *WidgetBase) FirstStyler(s func(s *styles.Style)) *WidgetBase {
 	wb.FirstStylers = append(wb.FirstStylers, s)
 	return wb
 }
 
-// FinalStyler adds the given styler to the widget's FinalStylers.
-// It is one of the main ways for both end-user and internal code
-// to set the styles of a widget, in addition to FirstStyler
-// and Style, which add stylers that are called before
-// the stylers added by this function.
+// FinalStyler adds the given function for setting the style properties of the widget
+// to [WidgetBase.FinalStylers]. It is one of the main ways to specify the styles of
+// a widget, in addition to FirstStyler and Styler, which add stylers that are called
+// before the stylers added by this function.
 func (wb *WidgetBase) FinalStyler(s func(s *styles.Style)) *WidgetBase {
 	wb.FinalStylers = append(wb.FinalStylers, s)
 	return wb
-}
-
-// BoxSpace returns the style BoxSpace value under read lock
-func (wb *WidgetBase) BoxSpace() styles.SideFloats {
-	bs := wb.Styles.BoxSpace()
-	return bs
 }
 
 // ApplyStyleParts styles the parts.

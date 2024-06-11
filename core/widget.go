@@ -239,7 +239,7 @@ type WidgetBase struct {
 	// Stylers are a slice of functions that are called in sequential
 	// ascending order (so the last added styler is called last and
 	// thus overrides all other functions) to style the element.
-	// These should be set using Style function. FirstStylers and
+	// These should be set using Styler function. FirstStylers and
 	// FinalStylers are called before and after these stylers, respectively.
 	Stylers []func(s *styles.Style) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
