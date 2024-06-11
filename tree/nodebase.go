@@ -21,7 +21,7 @@ import (
 
 // NodeBase implements the [Node] interface and provides the core functionality
 // for the Cogent Core tree system. You must use NodeBase as an embedded struct
-// in all higher level tree types.
+// in all higher-level tree types.
 //
 // All nodes must be properly initialized by using one of [New], [NodeBase.NewChild],
 // [NodeBase.AddChild], [NodeBase.InsertChild], [NodeBase.InsertNewChild],
