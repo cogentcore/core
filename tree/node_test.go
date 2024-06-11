@@ -40,9 +40,9 @@ func TestNodeEmbedAddChild(t *testing.T) {
 func TestNodeEmbedNewChild(t *testing.T) {
 	parent := testdata.NewNodeEmbed()
 	child := parent.NewChild(parent.NodeType())
-	child.SetName("child1")
+	child.AsTree().SetName("child1")
 	assert.Len(t, parent.Children, 1)
-	assert.Equal(t, "/node-embed/child1", child.Path())
+	assert.Equal(t, "/node-embed/child1", child.AsTree().Path())
 	assert.Equal(t, parent.NodeType(), child.NodeType())
 }
 
@@ -52,9 +52,9 @@ func TestNodePath(t *testing.T) {
 	child2 := parent.NewChild(parent.NodeType())
 	child3 := parent.NewChild(parent.NodeType())
 	assert.Len(t, parent.Children, 3)
-	assert.Equal(t, "/node-embed/node-embed-0", child1.Path())
-	assert.Equal(t, "/node-embed/node-embed-1", child2.Path())
-	assert.Equal(t, "/node-embed/node-embed-2", child3.Path())
+	assert.Equal(t, "/node-embed/node-embed-0", child1.AsTree().Path())
+	assert.Equal(t, "/node-embed/node-embed-1", child2.AsTree().Path())
+	assert.Equal(t, "/node-embed/node-embed-2", child3.AsTree().Path())
 }
 
 func TestNodeEscapePaths(t *testing.T) {
@@ -242,8 +242,8 @@ func TestNodeWalk(t *testing.T) {
 
 	res := []string{}
 
-	schild1.WalkUp(func(k Node) bool {
-		res = append(res, fmt.Sprintf("%v", k.Name()))
+	schild1.WalkUp(func(n Node) bool {
+		res = append(res, n.AsTree().Name())
 		return Continue
 	})
 
@@ -251,11 +251,11 @@ func TestNodeWalk(t *testing.T) {
 	assert.Equal(t, trg, res)
 	res = res[:0]
 
-	parent.WalkDownPost(func(k Node) bool {
+	parent.WalkDownPost(func(n Node) bool {
 		return Continue
 	},
-		func(k Node) bool {
-			res = append(res, fmt.Sprintf("[%v]", k.Name()))
+		func(n Node) bool {
+			res = append(res, fmt.Sprintf("[%s]", n.AsTree().Name()))
 			return Continue
 		})
 	trg = []string{"[child0]", "[subchild1]", "[child1]", "[child2]", "[child3]", "[node-base]"}
@@ -263,25 +263,25 @@ func TestNodeWalk(t *testing.T) {
 	res = res[:0]
 
 	// test for Break working
-	parent.WalkDownPost(func(k Node) bool {
-		if k.Name() == "child1" {
+	parent.WalkDownPost(func(n Node) bool {
+		if n.AsTree().Name() == "child1" {
 			return Break
 		}
 		return Continue
 	},
-		func(k Node) bool {
-			if k.Name() == "child1" {
+		func(n Node) bool {
+			if n.AsTree().Name() == "child1" {
 				return Break
 			}
-			res = append(res, fmt.Sprintf("[%v]", k.Name()))
+			res = append(res, fmt.Sprintf("[%s]", n.AsTree().Name()))
 			return Continue
 		})
 	trg = []string{"[child0]", "[child2]", "[child3]", "[node-base]"}
 	assert.Equal(t, trg, res)
 	res = res[:0]
 
-	parent.WalkDownBreadth(func(k Node) bool {
-		res = append(res, fmt.Sprintf("[%v]", k.Name()))
+	parent.WalkDownBreadth(func(n Node) bool {
+		res = append(res, fmt.Sprintf("[%v]", n.AsTree().Name()))
 		return Continue
 	})
 	trg = []string{"[node-base]", "[child0]", "[child1]", "[child2]", "[child3]", "[subchild1]"}
@@ -289,11 +289,11 @@ func TestNodeWalk(t *testing.T) {
 	res = res[:0]
 
 	// test for return false
-	parent.WalkDownBreadth(func(k Node) bool {
-		if k.Name() == "child1" {
+	parent.WalkDownBreadth(func(n Node) bool {
+		if n.AsTree().Name() == "child1" {
 			return Break
 		}
-		res = append(res, fmt.Sprintf("[%v]", k.Name()))
+		res = append(res, fmt.Sprintf("[%v]", n.AsTree().Name()))
 		return Continue
 	})
 	trg = []string{"[node-base]", "[child0]", "[child2]", "[child3]"}
@@ -317,7 +317,7 @@ func TestNodeWalkPath(t *testing.T) {
 	res := []string{}
 
 	parent.WalkDown(func(n Node) bool {
-		res = append(res, n.Path())
+		res = append(res, n.AsTree().Path())
 		return Continue
 	})
 	assert.Equal(t, []string{"/node-base", "/node-base/child0", "/node-base/child1", "/node-base/child1/subchild1", "/node-base/child2", "/node-base/child3"}, res)
