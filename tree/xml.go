@@ -6,16 +6,13 @@ package tree
 
 import (
 	"encoding/xml"
-	"fmt"
 	"io"
 	"log"
-	"reflect"
-	"strconv"
-	"strings"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/types"
 )
+
+// TODO: fix xml io; should save fields as attributes, not elements
 
 // WriteXML writes the tree to an XML-encoded byte string over io.Writer
 // using MarshalXML.
@@ -26,9 +23,9 @@ func (n *NodeBase) WriteXML(writer io.Writer, indent bool) error {
 	}
 	var b []byte
 	if indent {
-		b, err = xml.MarshalIndent(n.This(), "", "  ")
+		b, err = xml.MarshalIndent(n.This, "", "  ")
 	} else {
-		b, err = xml.Marshal(n.This())
+		b, err = xml.Marshal(n.This)
 	}
 	if err != nil {
 		return errors.Log(err)
@@ -53,13 +50,13 @@ func (n *NodeBase) ReadXML(reader io.Reader) error {
 		log.Println(err)
 		return err
 	}
-	err = xml.Unmarshal(b, n.This()) // key use of this!
-	UnmarshalPost(n.This())
+	err = xml.Unmarshal(b, n.This) // key use of this!
 	return err
 }
 
 // todo: save N as an attr instead of a full element
 
+/*
 // MarshalXML saves the length and type information for each object in a
 // slice, as a separate struct-like record at the start, followed by the
 // structs for each element in the slice -- this allows the Unmarshal to first
@@ -85,7 +82,7 @@ func (sl Slice) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 		return err
 	}
 	for _, kid := range sl {
-		knm := reflect.TypeOf(kid).Elem().Name()
+		knm := reflect.TypeOf(kid).Elem().Name
 		ct := xml.StartElement{Name: xml.Name{Space: "", Local: knm}}
 		err := e.EncodeElement(kid, ct)
 		if err != nil {
@@ -259,3 +256,4 @@ func (sl *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	// this is more robust.
 	return DecodeXMLEndEl(d, start) // final end
 }
+*/

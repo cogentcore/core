@@ -142,7 +142,7 @@ func (em *Embed2D) UploadViewTex(sc *Scene) {
 	} else {
 		tx = em.Mat.TexPtr
 		tx.SetImage(img)
-		sc.Phong.UpdateTextureName(tx.Name())
+		sc.Phong.UpdateTextureName(tx.Name)
 	}
 }
 
@@ -175,8 +175,8 @@ func (em *Embed2D) UpdateBBox2D(size math32.Vector2, sc *Scene) {
 	em.Viewport.WinBBox.Max = em.WinBBox.Min.Add(em.Viewport.Geom.Size)
 	em.BBoxMu.Unlock()
 	em.Viewport.BBoxMu.Unlock()
-	em.Viewport.FuncDownMeFirst(0, em.Viewport.This(), func(k tree.Node, level int, d any) bool {
-		if k == em.Viewport.This() {
+	em.Viewport.FuncDownMeFirst(0, em.Viewport.This, func(k tree.Node, level int, d any) bool {
+		if k == em.Viewport.This {
 			return tree.Continue
 		}
 		_, ni := core.KiToNode2D(k)
@@ -260,7 +260,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		emm.Viewport.Events.SendEventSignal(md, false)
 		emm.Viewport.Events.MouseEventReset(md)
 		if !md.IsProcessed() {
-			ni := em.This().(Node)
+			ni := em.This.(Node)
 			if ssc.CurSel != ni {
 				ssc.SetSel(ni)
 			}
@@ -378,11 +378,11 @@ func NewEmbedViewport(sc *Scene, em *Embed2D, name string, width, height int) *E
 }
 
 func (vp *EmbedViewport) VpTop() core.Viewport {
-	return vp.This().(core.Viewport)
+	return vp.This.(core.Viewport)
 }
 
 func (vp *EmbedViewport) VpTopNode() core.Node {
-	return vp.This().(core.Node)
+	return vp.This.(core.Node)
 }
 
 func (vp *EmbedViewport) VpTopUpdateStart() bool {
@@ -413,7 +413,7 @@ func (vp *EmbedViewport) VpIsVisible() bool {
 }
 
 func (vp *EmbedViewport) VpUploadAll() {
-	if !vp.This().(core.Viewport).VpIsVisible() {
+	if !vp.This.(core.Viewport).VpIsVisible() {
 		return
 	}
 	// fmt.Printf("embed vp upload all\n")

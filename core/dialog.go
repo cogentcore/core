@@ -91,7 +91,7 @@ func RecycleDialog(data any) bool {
 // MessageDialog opens a new Dialog displaying the given message
 // in the context of the given widget. An optional title can be provided.
 func MessageDialog(ctx Widget, message string, title ...string) {
-	b := NewBody(ctx.Name() + "-message-dialog")
+	b := NewBody(ctx.AsTree().Name + "-message-dialog")
 	if len(title) > 0 {
 		b.AddTitle(title[0])
 	}
@@ -112,7 +112,7 @@ func ErrorDialog(ctx Widget, err error, title ...string) {
 	if len(title) > 0 {
 		ttl = title[0]
 	}
-	NewBody(ctx.Name() + "-error-dialog").AddTitle(ttl).AddText(err.Error()).
+	NewBody(ctx.AsTree().Name + "-error-dialog").AddTitle(ttl).AddText(err.Error()).
 		AddOKOnly().RunDialog(ctx)
 }
 
@@ -187,7 +187,7 @@ func (bd *Body) Close() {
 // It is automatically called in [Body.NewDialog].
 func (bd *Body) DialogStyles() {
 	bd.Scene.BarsInherit.Top = true
-	bd.Scene.Style(func(s *styles.Style) {
+	bd.Scene.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Color = colors.C(colors.Scheme.OnSurface)
 		if !bd.Scene.Stage.NewWindow && !bd.Scene.Stage.FullWindow {

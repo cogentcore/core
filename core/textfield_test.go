@@ -103,7 +103,7 @@ func TestTextFieldValidatorValid(t *testing.T) {
 
 func TestTextFieldValidatorInvalid(t *testing.T) {
 	b := NewBody()
-	b.Style(func(s *styles.Style) {
+	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(15), units.Em(10))
 	})
 	tf := NewTextField(b).SetText("my password")

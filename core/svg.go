@@ -36,7 +36,7 @@ func (sv *SVG) Init() {
 	sv.WidgetBase.Init()
 	sv.SVG = svg.NewSVG(10, 10)
 	sv.SetReadOnly(true)
-	sv.Style(func(s *styles.Style) {
+	sv.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
 
 		ro := sv.IsReadOnly()
@@ -50,7 +50,7 @@ func (sv *SVG) Init() {
 			}
 		}
 	})
-	sv.StyleFinal(func(s *styles.Style) {
+	sv.FinalStyler(func(s *styles.Style) {
 		sv.SVG.Root.ViewBox.PreserveAspectRatio.SetFromStyle(s)
 	})
 

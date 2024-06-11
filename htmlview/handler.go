@@ -88,7 +88,7 @@ func HandleElement(ctx *Context) {
 	case "body", "main", "div", "section", "nav", "footer", "header", "ol", "ul":
 		ctx.NewParent = New[*core.Frame](ctx)
 		if tag == "body" {
-			ctx.NewParent.Style(func(s *styles.Style) {
+			ctx.NewParent.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 1)
 			})
 		}
@@ -110,7 +110,7 @@ func HandleElement(ctx *Context) {
 		HandleText(ctx)
 	case "pre":
 		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
-		HandleText(ctx).Style(func(s *styles.Style) {
+		HandleText(ctx).Styler(func(s *styles.Style) {
 			s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 			if hasCode {
 				s.Background = colors.C(colors.Scheme.SurfaceContainer)
@@ -129,11 +129,11 @@ func HandleElement(ctx *Context) {
 
 		text := HandleText(ctx)
 		start := ""
-		if pw, ok := text.Parent().(core.Widget); ok {
-			switch pw.Property("tag") {
+		if pw, ok := text.Parent.(core.Widget); ok {
+			switch pw.AsTree().Property("tag") {
 			case "ol":
 				number := 0
-				for _, k := range *pw.Children() {
+				for _, k := range pw.AsTree().Children {
 					// we only consider text for the number (frames may be
 					// added for nested lists, interfering with the number)
 					if _, ok := k.(*core.Text); ok {

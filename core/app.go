@@ -140,7 +140,7 @@ func AppBarBackMaker(p *Plan) {
 			}
 		})
 		// TODO(kai/abc): app bar back button disabling
-		// bt.StyleFirst(func(s *styles.Style) {
+		// bt.FirstStyler(func(s *styles.Style) {
 		// 	if tb.Scene.Stage.Mains == nil {
 		// 		return
 		// 	}
@@ -173,7 +173,7 @@ var (
 func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 	NewButton(m).SetText("About").SetIcon(icons.Info).OnClick(func(e events.Event) {
 		d := NewBody(TheApp.Name())
-		d.Style(func(s *styles.Style) {
+		d.Styler(func(s *styles.Style) {
 			s.CenterAll()
 		})
 		NewText(d).SetType(TextHeadlineLarge).SetText(TheApp.Name())
@@ -283,7 +283,7 @@ func ConfigAppChooser(ch *Chooser) {
 	}
 
 	AddChildInit(ch, "text-field", func(w *TextField) {
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
 			if !s.Is(states.Focused) && w.Error == nil {
 				s.Border = styles.Border{}
@@ -334,7 +334,7 @@ func ConfigAppChooser(ch *Chooser) {
 // about the original button menu. Consumers of this function should
 // typically set path to "".
 func AddButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
-	for _, kid := range *parent.Children() {
+	for _, kid := range parent.AsTree().Children {
 		bt := AsButton(kid)
 		if bt == nil || bt.IsDisabled() {
 			continue
@@ -350,7 +350,7 @@ func AddButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 			if npath != "" {
 				npath += " > "
 			}
-			if bt.Name() != "overflow-menu" {
+			if bt.Name != "overflow-menu" {
 				npath += label
 			}
 			AddButtonItems(items, tmps, npath)
@@ -370,7 +370,7 @@ func AddButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 		// after the quit button, there are the render wins,
 		// which we do not want to show here as we are already
 		// showing the stages
-		if bt.Name() == "quit-app" {
+		if bt.Name == "quit-app" {
 			break
 		}
 	}

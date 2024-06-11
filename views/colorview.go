@@ -42,7 +42,7 @@ func (cv *ColorView) SetHCT(hct hct.HCT) *ColorView {
 
 func (cv *ColorView) Init() {
 	cv.Frame.Init()
-	cv.Style(func(s *styles.Style) {
+	cv.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
 	cv.Maker(func(p *core.Plan) {
@@ -50,7 +50,7 @@ func (cv *ColorView) Init() {
 			return
 		}
 
-		cv.Style(func(s *styles.Style) {
+		cv.Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
 		})
 
@@ -67,7 +67,7 @@ func (cv *ColorView) Init() {
 			cv.Color.SetHue(hue.Value)
 			cv.SetHCT(cv.Color)
 		})
-		hue.Style(func(s *styles.Style) {
+		hue.Styler(func(s *styles.Style) {
 			hue.ValueColor = nil
 			hue.ThumbColor = colors.C(cv.Color)
 			g := gradient.NewLinear()
@@ -77,7 +77,7 @@ func (cv *ColorView) Init() {
 			}
 			s.Background = g
 		})
-		hue.StyleFinal(sf)
+		hue.FinalStyler(sf)
 
 		chroma := core.NewSlider(cv).SetMin(0).SetMax(150).SetValue(cv.Color.Chroma)
 		chroma.SetTooltip("The chroma, which is the colorfulness/saturation of the color")
@@ -85,7 +85,7 @@ func (cv *ColorView) Init() {
 			cv.Color.SetChroma(chroma.Value)
 			cv.SetHCT(cv.Color)
 		})
-		chroma.Style(func(s *styles.Style) {
+		chroma.Styler(func(s *styles.Style) {
 			chroma.ValueColor = nil
 			chroma.ThumbColor = colors.C(cv.Color)
 			g := gradient.NewLinear()
@@ -95,7 +95,7 @@ func (cv *ColorView) Init() {
 			}
 			s.Background = g
 		})
-		chroma.StyleFinal(sf)
+		chroma.FinalStyler(sf)
 
 		tone := core.NewSlider(cv).SetMin(0).SetMax(100).SetValue(cv.Color.Tone)
 		tone.SetTooltip("The tone, which is the lightness of the color")
@@ -103,7 +103,7 @@ func (cv *ColorView) Init() {
 			cv.Color.SetTone(tone.Value)
 			cv.SetHCT(cv.Color)
 		})
-		tone.Style(func(s *styles.Style) {
+		tone.Styler(func(s *styles.Style) {
 			tone.ValueColor = nil
 			tone.ThumbColor = colors.C(cv.Color)
 			g := gradient.NewLinear()
@@ -113,7 +113,7 @@ func (cv *ColorView) Init() {
 			}
 			s.Background = g
 		})
-		tone.StyleFinal(sf)
+		tone.FinalStyler(sf)
 	})
 }
 
@@ -122,40 +122,40 @@ func (cv *ColorView) Init() {
 	cv.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(cv) {
 		case "value":
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Min.X.Em(6)
 				s.Min.Y.Em(6)
 				s.Border.Radius = styles.BorderRadiusFull
 				s.BackgroundColor.SetSolid(cv.Color)
 			})
 		case "slider-grid":
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Columns = 4
 			})
 		case "hexlbl":
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Align.Y = styles.Center
 			})
 		case "palette":
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Columns = 25
 			})
 		case "nums-hex":
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Min.X.Ch(20)
 			})
 		}
 		if sl, ok := w.(*core.Slider); ok {
-			sl.Style(func(s *styles.Style) {
+			sl.Styler(func(s *styles.Style) {
 				s.Min.X.Ch(20)
 				s.Min.Y.Em(1)
 				s.Margin.Set(units.Dp(6))
 			})
 		}
-		if w.Parent().Name() == "palette" {
+		if w.Parent.Name == "palette" {
 			if cbt, ok := w.(*core.Button); ok {
-				cbt.Style(func(s *styles.Style) {
-					c := colornames.Map[cbt.Name()]
+				cbt.Styler(func(s *styles.Style) {
+					c := colornames.Map[cbt.Name]
 
 					s.BackgroundColor.SetSolid(c)
 					s.Max.Set(units.Em(1.3))
@@ -432,7 +432,7 @@ func (cv *ColorView) ConfigPalette() {
 		cbt.Tooltip = cn
 		cbt.SetText("  ")
 		cbt.OnChange(func(e events.Event) {
-			cv.SetColor(errors.Log(colors.FromName(cbt.Name())))
+			cv.SetColor(errors.Log(colors.FromName(cbt.Name)))
 		})
 	}
 }
@@ -495,7 +495,7 @@ func (cb *ColorButton) WidgetValue() any { return &cb.Color }
 func (cb *ColorButton) Init() {
 	cb.Button.Init()
 	cb.SetType(core.ButtonTonal).SetText("Edit color").SetIcon(icons.Colors)
-	cb.Style(func(s *styles.Style) {
+	cb.Styler(func(s *styles.Style) {
 		// we need to display button as non-transparent
 		// so that it can be seen
 		dclr := colors.WithAF32(cb.Color, 1)

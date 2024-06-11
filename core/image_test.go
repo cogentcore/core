@@ -30,7 +30,7 @@ func TestImageSize(t *testing.T) {
 	b := NewBody()
 	img := NewImage(b)
 	assert.NoError(t, img.Open(testImagePath))
-	img.Style(func(s *styles.Style) {
+	img.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(256))
 	})
 	b.AssertRender(t, "image/size")
@@ -48,7 +48,7 @@ func TestImageDirect(t *testing.T) {
 
 func TestImageCropped(t *testing.T) {
 	b := NewBody()
-	b.Style(func(s *styles.Style) {
+	b.Styler(func(s *styles.Style) {
 		s.Max.Set(units.Dp(75))
 		s.Overflow.Set(styles.OverflowAuto)
 	})
@@ -59,7 +59,7 @@ func TestImageCropped(t *testing.T) {
 
 func TestImageScrolled(t *testing.T) {
 	b := NewBody()
-	b.Style(func(s *styles.Style) {
+	b.Styler(func(s *styles.Style) {
 		s.Max.Set(units.Dp(75))
 		s.Overflow.Set(styles.OverflowAuto)
 	})

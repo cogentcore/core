@@ -151,7 +151,7 @@ func (p *Plan) Update(w Widget) {
 	wb := w.AsWidget()
 	makeNew := func(item *PlanItem) Widget {
 		child := item.New()
-		child.SetName(item.Name)
+		child.AsTree().SetName(item.Name)
 		tree.SetParent(child, wb)
 		for _, f := range item.Init {
 			f(child)
@@ -171,7 +171,7 @@ func (p *Plan) Update(w Widget) {
 	if len(*p) == 0 { // check again after potentially removing parts
 		return
 	}
-	wb.Kids, _ = plan.Update(wb.Kids, len(*p),
+	wb.Children, _ = plan.Update(wb.Children, len(*p),
 		func(i int) string {
 			return (*p)[i].Name
 		}, func(name string, i int) tree.Node {
@@ -185,7 +185,7 @@ func (p *Plan) Update(w Widget) {
 // to serve as [WidgetBase.Parts] in a [Add] context.
 func InitParts(w *Frame) {
 	w.SetFlag(true, tree.Field)
-	w.Style(func(s *styles.Style) {
+	w.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		s.RenderBox = false
 	})

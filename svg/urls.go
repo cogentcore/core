@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode"
@@ -67,49 +68,50 @@ func NameID(nm string, id int) string {
 // GatherIDs gathers all the numeric id suffixes currently in use.
 // It automatically renames any that are not unique or empty.
 func (sv *SVG) GatherIDs() {
-	sv.UniqueIds = make(map[int]struct{})
-	sv.Root.WalkDown(func(k tree.Node) bool {
-		sv.NodeEnsureUniqueId(k.(Node))
+	sv.UniqueIDs = make(map[int]struct{})
+	sv.Root.WalkDown(func(n tree.Node) bool {
+		sv.NodeEnsureUniqueID(n.(Node))
 		return tree.Continue
 	})
 }
 
-// NodeEnsureUniqueId ensures that the given node has a unique Id
+// NodeEnsureUniqueID ensures that the given node has a unique ID.
 // Call this on any newly created nodes.
-func (sv *SVG) NodeEnsureUniqueId(ni Node) {
-	elnm := ni.SVGName()
+func (sv *SVG) NodeEnsureUniqueID(n Node) {
+	elnm := n.SVGName()
 	if elnm == "" {
 		return
 	}
-	elpfx, id := SplitNameID(elnm, ni.Name())
+	nb := n.AsNodeBase()
+	elpfx, id := SplitNameID(elnm, nb.Name)
 	if !elpfx {
-		if !ni.EnforceSVGName() { // if we end in a number, just register it anyway
-			_, id = SplitNameIDDig(ni.Name())
+		if !n.EnforceSVGName() { // if we end in a number, just register it anyway
+			_, id = SplitNameIDDig(nb.Name)
 			if id > 0 {
-				sv.UniqueIds[id] = struct{}{}
+				sv.UniqueIDs[id] = struct{}{}
 			}
 			return
 		}
-		_, id = SplitNameIDDig(ni.Name())
+		_, id = SplitNameIDDig(nb.Name)
 		if id > 0 {
-			ni.SetName(NameID(elnm, id))
+			nb.SetName(NameID(elnm, id))
 		}
 	}
-	_, exists := sv.UniqueIds[id]
+	_, exists := sv.UniqueIDs[id]
 	if id <= 0 || exists {
 		id = sv.NewUniqueID() // automatically registers it
-		ni.SetName(NameID(elnm, id))
+		nb.SetName(NameID(elnm, id))
 	} else {
-		sv.UniqueIds[id] = struct{}{}
+		sv.UniqueIDs[id] = struct{}{}
 	}
 }
 
 // NewUniqueID returns a new unique numerical id number, for naming an object
 func (sv *SVG) NewUniqueID() int {
-	if sv.UniqueIds == nil {
+	if sv.UniqueIDs == nil {
 		sv.GatherIDs()
 	}
-	sz := len(sv.UniqueIds)
+	sz := len(sv.UniqueIDs)
 	var nid int
 	for {
 		switch {
@@ -120,12 +122,12 @@ func (sv *SVG) NewUniqueID() int {
 		default:
 			nid = rand.Intn(1000)
 		}
-		if _, has := sv.UniqueIds[nid]; has {
+		if _, has := sv.UniqueIDs[nid]; has {
 			continue
 		}
 		break
 	}
-	sv.UniqueIds[nid] = struct{}{}
+	sv.UniqueIDs[nid] = struct{}{}
 	return nid
 }
 
@@ -136,14 +138,14 @@ func (sv *SVG) FindDefByName(defnm string) Node {
 	}
 	idx, has := sv.DefIndexes[defnm]
 	if !has {
-		idx = len(sv.Defs.Kids) / 2
+		idx = len(sv.Defs.Children) / 2
 	}
-	idx, has = sv.Defs.Kids.IndexByName(defnm, idx)
-	if has {
-		sv.DefIndexes[defnm] = idx
-		return sv.Defs.Kids[idx].(Node)
+	dn := sv.Defs.ChildByName(defnm, idx)
+	if dn != nil {
+		sv.DefIndexes[defnm] = dn.AsTree().IndexInParent()
+		return dn.(Node)
 	}
-	delete(sv.DefIndexes, defnm) // not found -- delete from map
+	delete(sv.DefIndexes, defnm) // not found, so delete from map
 	return nil
 }
 
@@ -153,9 +155,9 @@ func (sv *SVG) FindNamedElement(name string) Node {
 	if def != nil {
 		return def
 	}
-	sv.Root.WalkDown(func(k tree.Node) bool {
-		if k.Name() == name {
-			def = k.This().(Node)
+	sv.Root.WalkDown(func(n tree.Node) bool {
+		if n.AsTree().Name == name {
+			def = n.(Node)
 			return tree.Break
 		}
 		return tree.Continue
@@ -205,7 +207,7 @@ func (sv *SVG) NodeFindURL(n Node, url string) Node {
 	}
 	rv := sv.FindNamedElement(ref)
 	if rv == nil {
-		log.Printf("svg.NodeFindURL could not find element named: %s for element: %s\n", url, n.Path())
+		log.Printf("svg.NodeFindURL could not find element named: %s for element: %s\n", url, n.AsTree().Path())
 	}
 	return rv
 }
@@ -214,7 +216,7 @@ func (sv *SVG) NodeFindURL(n Node, url string) Node {
 // or empty string if none.  Returned value is just the 'name' part
 // of the url, not the full string.
 func NodePropURL(n Node, prop string) string {
-	fp := n.Property(prop)
+	fp := n.AsTree().Property(prop)
 	fs, iss := fp.(string)
 	if !iss {
 		return ""
@@ -225,9 +227,9 @@ func NodePropURL(n Node, prop string) string {
 const SVGRefCountKey = "SVGRefCount"
 
 func IncRefCount(k tree.Node) {
-	rc := k.Property(SVGRefCountKey).(int)
+	rc := k.AsTree().Property(SVGRefCountKey).(int)
 	rc++
-	k.SetProperty(SVGRefCountKey, rc)
+	k.AsTree().SetProperty(SVGRefCountKey, rc)
 }
 
 // RemoveOrphanedDefs removes any items from Defs that are not actually referred to
@@ -236,11 +238,11 @@ func IncRefCount(k tree.Node) {
 // should be removed manually, as they are not automatically generated.
 func (sv *SVG) RemoveOrphanedDefs() bool {
 	refkey := SVGRefCountKey
-	for _, k := range sv.Defs.Kids {
-		k.SetProperty(refkey, 0)
+	for _, k := range sv.Defs.Children {
+		k.AsTree().SetProperty(refkey, 0)
 	}
 	sv.Root.WalkDown(func(k tree.Node) bool {
-		pr := k.Properties()
+		pr := k.AsTree().Properties
 		for _, v := range pr {
 			ps := reflectx.ToString(v)
 			if !strings.HasPrefix(ps, "url(#") {
@@ -266,17 +268,17 @@ func (sv *SVG) RemoveOrphanedDefs() bool {
 		}
 		return tree.Continue
 	})
-	sz := len(sv.Defs.Kids)
+	sz := len(sv.Defs.Children)
 	del := false
 	for i := sz - 1; i >= 0; i-- {
-		k := sv.Defs.Kids[i]
-		rc := k.Property(refkey).(int)
+		n := sv.Defs.Children[i]
+		rc := n.AsTree().Property(refkey).(int)
 		if rc == 0 {
-			fmt.Printf("Deleting unused item: %s\n", k.Name())
-			sv.Defs.Kids.DeleteAtIndex(i)
+			fmt.Printf("Deleting unused item: %s\n", n.AsTree().Name)
+			sv.Defs.Children = slices.Delete(sv.Defs.Children, i, i+1)
 			del = true
 		} else {
-			k.DeleteProperty(refkey)
+			n.AsTree().DeleteProperty(refkey)
 		}
 	}
 	return del

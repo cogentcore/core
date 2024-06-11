@@ -73,7 +73,7 @@ func (g *Text) IsParText() bool {
 
 func (g *Text) SetNodePos(pos math32.Vector2) {
 	g.Pos = pos
-	for _, kii := range g.Kids {
+	for _, kii := range g.Children {
 		kt := kii.(*Text)
 		kt.Pos = g.Paint.Transform.MulVector2AsPoint(pos)
 	}
@@ -82,7 +82,7 @@ func (g *Text) SetNodePos(pos math32.Vector2) {
 func (g *Text) SetNodeSize(sz math32.Vector2) {
 	g.Width = sz.X
 	scx, _ := g.Paint.Transform.ExtractScale()
-	for _, kii := range g.Kids {
+	for _, kii := range g.Children {
 		kt := kii.(*Text)
 		kt.Width = g.Width * scx
 	}
@@ -221,7 +221,7 @@ func (g *Text) ApplyTransform(sv *SVG, xf math32.Matrix2) {
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
 		if g.IsParText() {
-			for _, kii := range g.Kids {
+			for _, kii := range g.Children {
 				kt := kii.(*Text)
 				kt.ApplyTransform(sv, xf)
 			}
@@ -259,7 +259,7 @@ func (g *Text) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.V
 			g.Pos = xft.MulVector2AsPointCenter(g.Pos, lptt)
 			scx, _ := xft.ExtractScale()
 			g.Width *= scx
-			for _, kii := range g.Kids {
+			for _, kii := range g.Children {
 				kt := kii.(*Text)
 				kt.Pos = xft.MulVector2AsPointCenter(kt.Pos, lptt)
 				kt.Width *= scx
@@ -284,7 +284,7 @@ func (g *Text) WriteGeom(sv *SVG, dat *[]float32) {
 		(*dat)[1] = g.Pos.Y
 		(*dat)[2] = g.Width
 		g.WriteTransform(*dat, 3)
-		for i, kii := range g.Kids {
+		for i, kii := range g.Children {
 			kt := kii.(*Text)
 			off := 9 + i*3
 			(*dat)[off+0] = kt.Pos.X
@@ -308,7 +308,7 @@ func (g *Text) ReadGeom(sv *SVG, dat []float32) {
 	g.Width = dat[2]
 	g.ReadTransform(dat, 3)
 	if g.IsParText() {
-		for i, kii := range g.Kids {
+		for i, kii := range g.Children {
 			kt := kii.(*Text)
 			off := 9 + i*3
 			kt.Pos.X = dat[off+0]

@@ -195,7 +195,7 @@ func (gl *GoLang) CompleteLine(fss *parse.FileStates, str string, pos lexer.Pos)
 			fmt.Printf("start == last: %v\n", seed)
 		}
 		md.Seed = seed
-		if start.Nm == "TypeNm" {
+		if start.Name == "TypeNm" {
 			gl.CompleteTypeName(fs, pkg, seed, &md)
 			return
 		}
@@ -381,23 +381,23 @@ func (gl *GoLang) CompleteAstStart(ast *parser.Ast, scope token.Tokens) (start, 
 	prv := cur
 	for {
 		var parent *parser.Ast
-		if cur.Par != nil {
-			parent = cur.Par.(*parser.Ast)
+		if cur.Parent != nil {
+			parent = cur.Parent.(*parser.Ast)
 		}
 		switch {
-		case cur.Nm == "TypeNm":
+		case cur.Name == "TypeNm":
 			return cur, last
-		case cur.Nm == "File":
+		case cur.Name == "File":
 			if prv != last && prv.Src == last.Src {
 				return last, last // triggers single-item completion
 			}
 			return prv, last
-		case cur.Nm == "Selector":
+		case cur.Name == "Selector":
 			if parent != nil {
-				if parent.Nm[:4] == "Asgn" {
+				if parent.Name[:4] == "Asgn" {
 					return cur, last
 				}
-				if strings.HasSuffix(parent.Nm, "Expr") {
+				if strings.HasSuffix(parent.Name, "Expr") {
 					return cur, last
 				}
 			} else {
@@ -405,7 +405,7 @@ func (gl *GoLang) CompleteAstStart(ast *parser.Ast, scope token.Tokens) (start, 
 				cur.Src = flds[len(flds)-1] // skip any spaces
 				return cur, last
 			}
-		case cur.Nm == "Name":
+		case cur.Name == "Name":
 			if cur.Src == "if" { // weird parsing if incomplete
 				if prv != last && prv.Src == last.Src {
 					return last, last // triggers single-item completion
@@ -413,14 +413,14 @@ func (gl *GoLang) CompleteAstStart(ast *parser.Ast, scope token.Tokens) (start, 
 				return prv, last
 			}
 			if parent != nil {
-				if parent.Nm[:4] == "Asgn" {
+				if parent.Name[:4] == "Asgn" {
 					return prv, last
 				}
-				if strings.HasSuffix(parent.Nm, "Expr") {
+				if strings.HasSuffix(parent.Name, "Expr") {
 					return cur, last
 				}
 			}
-		case cur.Nm == "ExprStmt":
+		case cur.Name == "ExprStmt":
 			if scope == token.None {
 				return prv, last
 			}
@@ -430,9 +430,9 @@ func (gl *GoLang) CompleteAstStart(ast *parser.Ast, scope token.Tokens) (start, 
 			if cur.Src != "(" && prv != last {
 				return prv, last
 			}
-		case strings.HasSuffix(cur.Nm, "Stmt"):
+		case strings.HasSuffix(cur.Name, "Stmt"):
 			return prv, last
-		case cur.Nm == "Args":
+		case cur.Name == "Args":
 			return prv, last
 		}
 		nxt := cur.PrevAst()

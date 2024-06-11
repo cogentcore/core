@@ -47,7 +47,7 @@ func (sw *Scene) Init() {
 	sw.WidgetBase.Init()
 	sw.XYZ = xyz.NewScene()
 	sw.SelectionParams.Defaults()
-	sw.Style(func(s *styles.Style) {
+	sw.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Activatable, abilities.Slideable, abilities.LongHoverable, abilities.DoubleClickable)
 		s.Grow.Set(1, 1)
 		s.Min.Set(units.Em(20))

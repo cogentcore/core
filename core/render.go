@@ -75,7 +75,7 @@ func (wb *WidgetBase) AsyncLock() {
 		select {}
 	}
 	rc.Lock()
-	if wb.This() == nil {
+	if wb.This == nil {
 		rc.Unlock()
 		select {}
 	}
@@ -106,13 +106,6 @@ func (wb *WidgetBase) NeedsRender() {
 	if wb.Scene != nil {
 		wb.Scene.SetFlag(true, ScNeedsRender)
 	}
-	// parent of Parts needs to render if parent
-	fi := wb.ParentWidgetIf(func(p *WidgetBase) bool {
-		return p.Is(tree.Field)
-	})
-	if fi != nil && fi.Parent() != nil && fi.Parent().This() != nil {
-		fi.Parent().(Widget).AsWidget().NeedsRender()
-	}
 }
 
 // NeedsLayout specifies that the widget's scene needs to do a layout.
@@ -136,7 +129,7 @@ func (sc *Scene) AddReRender(w Widget) {
 // NeedsRebuild returns true if the RenderContext indicates
 // a full rebuild is needed.
 func (wb *WidgetBase) NeedsRebuild() bool {
-	if wb.This() == nil || wb.Scene == nil || wb.Scene.Stage == nil {
+	if wb.This == nil || wb.Scene == nil || wb.Scene.Stage == nil {
 		return false
 	}
 	rc := wb.Scene.RenderContext()
@@ -144,20 +137,6 @@ func (wb *WidgetBase) NeedsRebuild() bool {
 		return false
 	}
 	return rc.HasFlag(RenderRebuild)
-}
-
-// ApplyStyleTree calls ApplyStyle on every Widget in the tree from me.
-// Called during FullRender
-func (wb *WidgetBase) ApplyStyleTree() {
-	if wb.This() == nil {
-		return
-	}
-	// pr := profile.Start(wb.This().NodeType().ShortName())
-	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		wi.ApplyStyle()
-		return tree.Continue
-	})
-	// pr.End()
 }
 
 // LayoutScene does a layout of the scene: Size, Position
@@ -208,16 +187,16 @@ func (sc *Scene) LayoutRenderScene() {
 // DoNeedsRender calls Render on tree from me for nodes
 // with NeedsRender flags set
 func (wb *WidgetBase) DoNeedsRender() {
-	if wb.This() == nil {
+	if wb.This == nil {
 		return
 	}
-	// pr := profile.Start(wb.This().NodeType().ShortName())
-	wb.WidgetWalkDown(func(kwi Widget, kwb *WidgetBase) bool {
-		if kwi.Is(NeedsRender) {
-			kwi.RenderWidget()
+	// pr := profile.Start(wb.This.NodeType().ShortName())
+	wb.WidgetWalkDown(func(w Widget, cwb *WidgetBase) bool {
+		if cwb.Is(NeedsRender) {
+			w.RenderWidget()
 			return tree.Break // done
 		}
-		if ly := AsFrame(kwi); ly != nil {
+		if ly := AsFrame(w); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
 				if ly.HasScroll[d] && ly.Scrolls[d] != nil {
 					ly.Scrolls[d].DoNeedsRender()
@@ -277,7 +256,7 @@ func (sc *Scene) DoUpdate() bool {
 	case len(sc.ReRender) > 0:
 		// fmt.Println("re-render")
 		for _, w := range sc.ReRender {
-			w.SetFlag(true, ScNeedsRender)
+			w.AsTree().SetFlag(true, ScNeedsRender)
 			// fmt.Println("rerender:", w)
 		}
 		sc.ReRender = nil
@@ -317,7 +296,7 @@ func (sc *Scene) ApplyStyleScene() {
 	sc.SetFlag(true, ScUpdating) // prevent rendering
 	defer sc.SetFlag(false, ScUpdating)
 
-	sc.ApplyStyleTree()
+	sc.StyleTree()
 	sc.SetFlag(true, ScNeedsLayout)
 }
 
@@ -358,11 +337,11 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 // Render implementations. It returns whether the new bounds are
 // empty or not; if they are empty, then don't render.
 func (wb *WidgetBase) PushBounds() bool {
-	if wb == nil || wb.This() == nil {
+	if wb == nil || wb.This == nil {
 		return false
 	}
-	wb.SetFlag(false, NeedsRender)       // done!
-	if !wb.This().(Widget).IsVisible() { // checks deleted etc
+	wb.SetFlag(false, NeedsRender)     // done!
+	if !wb.This.(Widget).IsVisible() { // checks deleted etc
 		return false
 	}
 	if wb.Geom.TotalBBox.Empty() {
@@ -387,12 +366,12 @@ func (wb *WidgetBase) PushBounds() bool {
 // PopBounds pops our bounding box bounds. This is the last step
 // in Render implementations after rendering children.
 func (wb *WidgetBase) PopBounds() {
-	if wb == nil || wb.This() == nil {
+	if wb == nil || wb.This == nil {
 		return
 	}
 	pc := &wb.Scene.PaintContext
 
-	isSelw := wb.Scene.SelectedWidget == wb.This()
+	isSelw := wb.Scene.SelectedWidget == wb.This
 	if wb.Scene.Is(ScRenderBBoxes) || isSelw {
 		pos := math32.Vector2FromPoint(wb.Geom.TotalBBox.Min)
 		sz := math32.Vector2FromPoint(wb.Geom.TotalBBox.Size())
@@ -441,7 +420,7 @@ func (wb *WidgetBase) Render() {
 // for widget-specific rendering.
 func (wb *WidgetBase) RenderWidget() {
 	if wb.PushBounds() {
-		wb.This().(Widget).Render()
+		wb.This.(Widget).Render()
 		wb.RenderParts()
 		wb.RenderChildren()
 		wb.PopBounds()

@@ -51,7 +51,7 @@ func (cs *Contacts) New(a, b Body) *Contact {
 // This is the broad first-pass filtering.
 func BodyVelBBoxIntersects(a, b Node) Contacts {
 	var cts Contacts
-	a.WalkDown(func(k tree.Node) bool {
+	a.AsTree().WalkDown(func(k tree.Node) bool {
 		aii, ai := AsNode(k)
 		if aii == nil {
 			return false // going into a different type of thing, bail
@@ -61,7 +61,7 @@ func BodyVelBBoxIntersects(a, b Node) Contacts {
 			return true
 		}
 
-		b.WalkDown(func(k tree.Node) bool {
+		b.AsTree().WalkDown(func(k tree.Node) bool {
 			bii, bi := AsNode(k)
 			if bii == nil {
 				return false // going into a different type of thing, bail

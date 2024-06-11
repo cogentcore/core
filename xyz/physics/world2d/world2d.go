@@ -150,15 +150,15 @@ func (vw *View) InitLibraryBody(wn physics.Node) {
 	if bod != nil {
 		vw.InitLibShape(bod)
 	}
-	for idx := range *wn.Children() {
-		wk := wn.Child(idx).(physics.Node)
+	for idx := range wn.AsTree().Children {
+		wk := wn.AsTree().Child(idx).(physics.Node)
 		vw.InitLibraryBody(wk)
 	}
 }
 
 // InitLibShape initializes Scene library with basic shape for given body
 func (vw *View) InitLibShape(bod physics.Body) {
-	nm := bod.Name()
+	nm := bod.AsTree().Name
 	bb := bod.AsBodyBase()
 	if bb.Vis == "" {
 		bb.Vis = nm
@@ -188,18 +188,18 @@ func (vw *View) InitLibShape(bod physics.Body) {
 func (vw *View) ConfigBodyShape(bod physics.Body, shp svg.Node) {
 	wt := bod.NodeType().ShortName()
 	sb := shp.AsNodeBase()
-	sb.Nm = bod.Name()
+	sb.Name = bod.AsTree().Name
 	switch wt {
 	case "physics.Box":
 		bx := bod.(*physics.Box)
 		sz := vw.Projection2D(bx.Size)
 		shp.(*svg.Rect).SetSize(sz)
 		sb.Paint.Transform = math32.Translate2D(-sz.X/2, -sz.Y/2)
-		shp.SetProperty("transform", sb.Paint.Transform.String())
-		shp.SetProperty("stroke-width", vw.LineWidth)
-		shp.SetProperty("fill", "none")
+		shp.AsTree().SetProperty("transform", sb.Paint.Transform.String())
+		shp.AsTree().SetProperty("stroke-width", vw.LineWidth)
+		shp.AsTree().SetProperty("fill", "none")
 		if bx.Color != "" {
-			shp.SetProperty("stroke", bx.Color)
+			shp.AsTree().SetProperty("stroke", bx.Color)
 		}
 	case "physics.Cylinder":
 		cy := bod.(*physics.Cylinder)
@@ -207,11 +207,11 @@ func (vw *View) ConfigBodyShape(bod physics.Body, shp svg.Node) {
 		sz := vw.Projection2D(sz3)
 		shp.(*svg.Ellipse).SetRadii(sz)
 		sb.Paint.Transform = math32.Translate2D(-sz.X/2, -sz.Y/2)
-		shp.SetProperty("transform", sb.Paint.Transform.String())
-		shp.SetProperty("stroke-width", vw.LineWidth)
-		shp.SetProperty("fill", "none")
+		shp.AsTree().SetProperty("transform", sb.Paint.Transform.String())
+		shp.AsTree().SetProperty("stroke-width", vw.LineWidth)
+		shp.AsTree().SetProperty("fill", "none")
 		if cy.Color != "" {
-			shp.SetProperty("stroke", cy.Color)
+			shp.AsTree().SetProperty("stroke", cy.Color)
 		}
 	case "physics.Capsule":
 		cp := bod.(*physics.Capsule)
@@ -219,11 +219,11 @@ func (vw *View) ConfigBodyShape(bod physics.Body, shp svg.Node) {
 		sz := vw.Projection2D(sz3)
 		shp.(*svg.Ellipse).SetRadii(sz)
 		sb.Paint.Transform = math32.Translate2D(-sz.X/2, -sz.Y/2)
-		shp.SetProperty("transform", sb.Paint.Transform.String())
-		shp.SetProperty("stroke-width", vw.LineWidth)
-		shp.SetProperty("fill", "none")
+		shp.AsTree().SetProperty("transform", sb.Paint.Transform.String())
+		shp.AsTree().SetProperty("stroke-width", vw.LineWidth)
+		shp.AsTree().SetProperty("fill", "none")
 		if cp.Color != "" {
-			shp.SetProperty("stroke", cp.Color)
+			shp.AsTree().SetProperty("stroke", cp.Color)
 		}
 	case "physics.Sphere":
 		sp := bod.(*physics.Sphere)
@@ -231,11 +231,11 @@ func (vw *View) ConfigBodyShape(bod physics.Body, shp svg.Node) {
 		sz := vw.Projection2D(sz3)
 		shp.(*svg.Circle).SetRadius(sz.X) // should be same as Y
 		sb.Paint.Transform = math32.Translate2D(-sz.X/2, -sz.Y/2)
-		shp.SetProperty("transform", sb.Paint.Transform.String())
-		shp.SetProperty("stroke-width", vw.LineWidth)
-		shp.SetProperty("fill", "none")
+		shp.AsTree().SetProperty("transform", sb.Paint.Transform.String())
+		shp.AsTree().SetProperty("stroke-width", vw.LineWidth)
+		shp.AsTree().SetProperty("fill", "none")
 		if sp.Color != "" {
-			shp.SetProperty("stroke", sp.Color)
+			shp.AsTree().SetProperty("stroke", sp.Color)
 		}
 	}
 }
@@ -254,8 +254,8 @@ func (vw *View) ConfigView(wn physics.Node, vn svg.Node) {
 		vw.AddFromLibrary(bod.AsBodyBase().Vis, vb)
 	}
 	bgp := vb.Child(0)
-	if bgp.HasChildren() {
-		shp, has := bgp.Child(0).(svg.Node)
+	if bgp.AsTree().HasChildren() {
+		shp, has := bgp.AsTree().Child(0).(svg.Node)
 		if has {
 			vw.ConfigBodyShape(bod, shp)
 		}
@@ -268,20 +268,20 @@ func (vw *View) ConfigView(wn physics.Node, vn svg.Node) {
 // ConfigChildren to maximally preserve existing tree elements
 // returns true if view tree was modified (elements added / removed etc)
 func (vw *View) SyncNode(wn physics.Node, vn svg.Node) bool {
-	nm := wn.Name()
-	vn.SetName(nm) // guaranteed to be unique
-	skids := *wn.Children()
+	nm := wn.AsTree().Name
+	vn.AsTree().SetName(nm) // guaranteed to be unique
+	skids := wn.AsTree().Children
 	p := make(tree.TypePlan, 0, len(skids))
 	for _, skid := range skids {
-		p.Add(svg.GroupType, skid.Name())
+		p.Add(svg.GroupType, skid.AsTree().Name)
 	}
 	mod := tree.Update(vn, p)
 	modall := mod
 	for idx := range skids {
-		wk := wn.Child(idx).(physics.Node)
-		vk := vn.Child(idx).(svg.Node)
+		wk := wn.AsTree().Child(idx).(physics.Node)
+		vk := vn.AsTree().Child(idx).(svg.Node)
 		vw.ConfigView(wk, vk)
-		if wk.HasChildren() {
+		if wk.AsTree().HasChildren() {
 			kmod := vw.SyncNode(wk, vk)
 			if kmod {
 				modall = true
@@ -297,14 +297,14 @@ func (vw *View) SyncNode(wn physics.Node, vn svg.Node) bool {
 // UpdatePoseNode updates the view pose values only from world tree.
 // Essential that both trees are already synchronized.
 func (vw *View) UpdatePoseNode(wn physics.Node, vn svg.Node) {
-	skids := *wn.Children()
+	skids := wn.AsTree().Children
 	for idx := range skids {
-		wk := wn.Child(idx).(physics.Node)
-		vk := vn.Child(idx).(svg.Node).(*svg.Group)
+		wk := wn.AsTree().Child(idx).(physics.Node)
+		vk := vn.AsTree().Child(idx).(svg.Node).(*svg.Group)
 		wb := wk.AsNodeBase()
 		vk.Paint.Transform = vw.Transform2D(&wb.Rel)
 		vk.SetProperty("transform", vk.Paint.Transform.String())
-		// fmt.Printf("wk: %s  pos: %v  vk: %s\n", wk.Name(), ps, vk.Child(0).Name())
+		// fmt.Printf("wk: %s  pos: %v  vk: %s\n", wk.Name, ps, vk.Child(0).Name)
 		vw.UpdatePoseNode(wk, vk)
 	}
 }
@@ -312,23 +312,23 @@ func (vw *View) UpdatePoseNode(wn physics.Node, vn svg.Node) {
 // UpdateBodyViewNode updates the body view info for given name(s)
 // Essential that both trees are already synchronized.
 func (vw *View) UpdateBodyViewNode(bodyNames []string, wn physics.Node, vn svg.Node) {
-	skids := *wn.Children()
+	skids := wn.AsTree().Children
 	for idx := range skids {
-		wk := wn.Child(idx).(physics.Node)
-		vk := vn.Child(idx).(svg.Node)
+		wk := wn.AsTree().Child(idx).(physics.Node)
+		vk := vn.AsTree().Child(idx).(svg.Node)
 		match := false
 		if _, isBod := wk.(physics.Body); isBod {
 			for _, nm := range bodyNames {
-				if wk.Name() == nm {
+				if wk.AsTree().Name == nm {
 					match = true
 					break
 				}
 			}
 		}
 		if match {
-			bgp := vk.Child(0)
-			if bgp.HasChildren() {
-				shp, has := bgp.Child(0).(svg.Node)
+			bgp := vk.AsTree().Child(0)
+			if bgp.AsTree().HasChildren() {
+				shp, has := bgp.AsTree().Child(0).(svg.Node)
 				if has {
 					vw.ConfigBodyShape(wk.AsBody(), shp)
 				}

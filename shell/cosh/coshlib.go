@@ -17,8 +17,8 @@ import (
 
 // SplitLines returns a slice of given string split by lines
 // with any extra whitespace trimmed for each line entry.
-func SplitLines(str string) []string {
-	sl := stringsx.SplitLines(str)
+func SplitLines(s string) []string {
+	sl := stringsx.SplitLines(s)
 	for i, s := range sl {
 		sl[i] = strings.TrimSpace(s)
 	}

@@ -8,6 +8,7 @@ import (
 	"errors"
 	"log/slog"
 	"maps"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -19,88 +20,93 @@ import (
 )
 
 // NodeBase implements the [Node] interface and provides the core functionality
-// for the Cogent Core tree system. You should use NodeBase as an embedded struct
-// in higher-level tree types.
+// for the Cogent Core tree system. You must use NodeBase as an embedded struct
+// in all higher-level tree types.
+//
+// All nodes must be properly initialized by using one of [New], [NodeBase.NewChild],
+// [NodeBase.AddChild], [NodeBase.InsertChild], [NodeBase.InsertNewChild],
+// [NodeBase.Clone], [Update], or [cogentcore.org/core/core.Plan]. This ensures
+// that the [Node.This] field is set correctly and that the [Node.Init] method is
+// called.
+//
+// All nodes support JSON marshalling and unmarshalling through the standard [encoding/json]
+// interfaces, so you can use the standard functions for loading and saving trees. However,
+// if you want to load a root node of the correct type from JSON, you need to use the
+// [UnmarshalRootJSON] function.
+//
+// All node types must be added to the Cogent Core type registry via typegen,
+// so you must add a go:generate line that runs `core generate` to any packages
+// you write that have new node types defined.
 type NodeBase struct {
 
-	// Nm is the user-supplied name of this node, which can be empty and/or non-unique.
-	// It is typically accessed through [Node.Name].
-	Nm string `copier:"-" set:"-" label:"Name"`
+	// Name is the name of this node, which is typically unique relative to other children of
+	// the same parent. It can be used for finding and serializing nodes. If not otherwise set,
+	// it defaults to the ID (kebab-case) name of the node type combined with the total number
+	// of children that have ever been added to the node's parent.
+	Name string `copier:"-" set:"-"`
+
+	// This is the value of this Node as its true underlying type. This allows methods
+	// defined on base types to call methods defined on higher-level types, which
+	// is necessary for various parts of tree and widget functionality. This is set
+	// to nil when the node is deleted.
+	This Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+
+	// Parent is the parent of this node, which is set automatically when this node is
+	// added as a child of a parent. To change the parent of a node, use [MoveToParent];
+	// you should typically not set this field directly. Nodes can only have one parent
+	// at a time.
+	Parent Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+
+	// Children is the list of children of this node. All of them are set to have this node
+	// as their parent. You can directly modify this list, but you should typically use the
+	// various NodeBase child helper functions when applicable so that everything is updated
+	// properly, such as when deleting children.
+	Children []Node `tableview:"-" copier:"-" set:"-" json:",omitempty"`
 
 	// Flags are bit flags for internal node state, which can be extended using
 	// the enums package.
 	Flags Flags `tableview:"-" copier:"-" json:"-" xml:"-" set:"-" max-width:"80" height:"3"`
 
-	// Props is a property map for arbitrary key-value properties.
-	// They are typically accessed through the property methods on [Node].
-	Props map[string]any `tableview:"-" xml:"-" copier:"-" set:"-" label:"Properties"`
-
-	// Par is the parent of this node, which is set automatically when this node is
-	// added as a child of a parent. It is typically accessed through [Node.Parent].
-	Par Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
-
-	// Kids is the list of children of this node. All of them are set to have this node
-	// as their parent. They can be reordered, but you should generally use [Node]
-	// methods when adding and deleting children to ensure everything gets updated.
-	// They are typically accessed through [Node.Children].
-	Kids Slice `tableview:"-" copier:"-" set:"-" label:"Children"`
-
-	// Ths is a pointer to ourselves as a [Node]. It can always be used to extract the
-	// true underlying type of an object when [NodeBase] is embedded in other structs;
-	// function receivers do not have this ability, so this is necessary. This is set
-	// to nil when the node is deleted. It is typically accessed through [Node.This].
-	// It needs to be exported so that it can be interacted with through reflection
-	// during field copying.
-	Ths Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	// Properties is a property map for arbitrary key-value properties.
+	// When possible, use typed fields on a new type embedding NodeBase instead of this.
+	Properties map[string]any `tableview:"-" xml:"-" copier:"-" set:"-" json:",omitempty"`
 
 	// numLifetimeChildren is the number of children that have ever been added to this
-	// node, which is used for automatic unique naming. It is typically accessed
-	// through [Node.NumLifetimeChildren].
+	// node, which is used for automatic unique naming.
 	numLifetimeChildren uint64
 
 	// index is the last value of our index, which is used as a starting point for
 	// finding us in our parent next time. It is not guaranteed to be accurate;
-	// use the [Node.IndexInParent] method.
+	// use the [NodeBase.IndexInParent] method.
 	index int
 
-	// depth is the depth of the node while using [Node.WalkDownBreadth].
+	// depth is the depth of the node while using [NodeBase.WalkDownBreadth].
 	depth int
 }
 
 // String implements the [fmt.Stringer] interface by returning the path of the node.
 func (n *NodeBase) String() string {
-	if n == nil || n.This() == nil {
+	if n == nil || n.This == nil {
 		return "nil"
 	}
-	return elide.Middle(n.This().Path(), 38)
+	return elide.Middle(n.Path(), 38)
 }
 
-// This returns the Node as its true underlying type.
-// It returns nil if the node is nil, has been destroyed,
-// or is improperly constructed.
-func (n *NodeBase) This() Node {
-	if n == nil {
-		return nil
-	}
-	return n.Ths
-}
-
-// AsTreeNode returns the [NodeBase] for this Node.
-func (n *NodeBase) AsTreeNode() *NodeBase {
+// AsTree returns the [NodeBase] for this Node.
+func (n *NodeBase) AsTree() *NodeBase {
 	return n
 }
 
-// Name returns the user-defined name of the Node, which can be
-// used for finding elements, generating paths, I/O, etc.
-func (n *NodeBase) Name() string {
-	return n.Nm
+// PlanName implements [plan.Namer].
+func (n *NodeBase) PlanName() string {
+	return n.Name
 }
 
 // SetName sets the name of this node. Names should generally be unique
 // across children of each node. If the node requires some non-unique name,
 // add a separate Label field.
 func (n *NodeBase) SetName(name string) {
-	n.Nm = name
+	n.Name = name
 }
 
 // BaseType returns the base node type for all elements within this tree.
@@ -111,23 +117,14 @@ func (n *NodeBase) BaseType() *types.Type {
 
 // Parents:
 
-// Parent returns the parent of this Node.
-// Each Node can only have one parent.
-func (n *NodeBase) Parent() Node {
-	return n.Par
-}
-
 // IndexInParent returns our index within our parent node. It caches the
 // last value and uses that for an optimized search so subsequent calls
 // are typically quite fast. Returns -1 if we don't have a parent.
 func (n *NodeBase) IndexInParent() int {
-	if n.Par == nil {
+	if n.Parent == nil {
 		return -1
 	}
-	idx, ok := n.Par.Children().IndexOf(n.This(), n.index) // very fast if index is close..
-	if !ok {
-		return -1
-	}
+	idx := IndexOf(n.Parent.AsTree().Children, n.This, n.index) // very fast if index is close
 	n.index = idx
 	return idx
 }
@@ -150,15 +147,15 @@ func (n *NodeBase) ParentLevel(parent Node) int {
 }
 
 // ParentByName finds first parent recursively up hierarchy that matches
-// given name. Returns nil if not found.
+// the given name. It returns nil if not found.
 func (n *NodeBase) ParentByName(name string) Node {
 	if IsRoot(n) {
 		return nil
 	}
-	if n.Par.Name() == name {
-		return n.Par
+	if n.Parent.AsTree().Name == name {
+		return n.Parent
 	}
-	return n.Par.ParentByName(name)
+	return n.Parent.AsTree().ParentByName(name)
 }
 
 // ParentByType finds parent recursively up hierarchy, by type, and
@@ -169,51 +166,36 @@ func (n *NodeBase) ParentByType(t *types.Type, embeds bool) Node {
 		return nil
 	}
 	if embeds {
-		if n.Par.NodeType().HasEmbed(t) {
-			return n.Par
+		if n.Parent.NodeType().HasEmbed(t) {
+			return n.Parent
 		}
 	} else {
-		if n.Par.NodeType() == t {
-			return n.Par
+		if n.Parent.NodeType() == t {
+			return n.Parent
 		}
 	}
-	return n.Par.ParentByType(t, embeds)
+	return n.Parent.AsTree().ParentByType(t, embeds)
 }
 
 // Children:
 
 // HasChildren returns whether this node has any children.
 func (n *NodeBase) HasChildren() bool {
-	return len(n.Kids) > 0
+	return len(n.Children) > 0
 }
 
 // NumChildren returns the number of children this node has.
 func (n *NodeBase) NumChildren() int {
-	return len(n.Kids)
-}
-
-// NumLifetimeChildren returns the number of children that this node
-// has ever had added to it (it is not decremented when a child is removed).
-// It is used for unique naming of children.
-func (n *NodeBase) NumLifetimeChildren() uint64 {
-	return n.numLifetimeChildren
-}
-
-// Children returns a pointer to the slice of children of this node.
-// The resultant slice can be modified directly (e.g., sort, reorder),
-// but new children should be added via New/Add/Insert Child methods on
-// Node to ensure proper initialization.
-func (n *NodeBase) Children() *Slice {
-	return &n.Kids
+	return len(n.Children)
 }
 
 // Child returns the child of this node at the given index and returns nil if
 // the index is out of range.
 func (n *NodeBase) Child(i int) Node {
-	if i >= len(n.Kids) || i < 0 {
+	if i >= len(n.Children) || i < 0 {
 		return nil
 	}
-	return n.Kids[i]
+	return n.Children[i]
 }
 
 // ChildByName returns the first child that has the given name, and nil
@@ -222,7 +204,7 @@ func (n *NodeBase) Child(i int) Node {
 // can be a key speedup for large lists. If no value is specified for
 // startIndex, it starts in the middle, which is a good default.
 func (n *NodeBase) ChildByName(name string, startIndex ...int) Node {
-	return n.Kids.ElemByName(name, startIndex...)
+	return n.Child(IndexByName(n.Children, name, startIndex...))
 }
 
 // ChildByType returns the first child that has the given type, and nil
@@ -233,7 +215,7 @@ func (n *NodeBase) ChildByName(name string, startIndex ...int) Node {
 // no value is specified for startIndex, it starts in the middle, which is a
 // good default.
 func (n *NodeBase) ChildByType(t *types.Type, embeds bool, startIndex ...int) Node {
-	return n.Kids.ElemByType(t, embeds, startIndex...)
+	return n.Child(IndexByType(n.Children, t, embeds, startIndex...))
 }
 
 // Paths:
@@ -258,13 +240,13 @@ func UnescapePathName(name string) string {
 // are unique. Any existing / and . characters in names
 // are escaped to \\ and \,
 func (n *NodeBase) Path() string {
-	if n.Par != nil {
+	if n.Parent != nil {
 		if n.Is(Field) {
-			return n.Par.Path() + "." + EscapePathName(n.Nm)
+			return n.Parent.AsTree().Path() + "." + EscapePathName(n.Name)
 		}
-		return n.Par.Path() + "/" + EscapePathName(n.Nm)
+		return n.Parent.AsTree().Path() + "/" + EscapePathName(n.Name)
 	}
-	return "/" + EscapePathName(n.Nm)
+	return "/" + EscapePathName(n.Name)
 }
 
 // PathFrom returns path to this node from the given parent node, using
@@ -280,43 +262,40 @@ func (n *NodeBase) Path() string {
 // so a base type can be passed in without manually calling [Node.This].
 func (n *NodeBase) PathFrom(parent Node) string {
 	// critical to get "This"
-	parent = parent.This()
+	parent = parent.AsTree().This
 	// we bail a level below the parent so it isn't in the path
-	if n.Par == nil || n.Par == parent {
-		return EscapePathName(n.Nm)
+	if n.Parent == nil || n.Parent == parent {
+		return EscapePathName(n.Name)
 	}
 	ppath := ""
-	if n.Par == parent {
-		ppath = "/" + EscapePathName(parent.Name())
+	if n.Parent == parent {
+		ppath = "/" + EscapePathName(parent.AsTree().Name)
 	} else {
-		ppath = n.Par.PathFrom(parent)
+		ppath = n.Parent.AsTree().PathFrom(parent)
 	}
 	if n.Is(Field) {
-		return ppath + "." + EscapePathName(n.Nm)
+		return ppath + "." + EscapePathName(n.Name)
 	}
-	return ppath + "/" + EscapePathName(n.Nm)
+	return ppath + "/" + EscapePathName(n.Name)
 
 }
 
-// find the child on the path
-func findPathChild(k Node, child string) (int, bool) {
+// findPathChild finds the child on the path.
+func findPathChild(n Node, child string) int {
 	if len(child) == 0 {
-		return 0, false
+		return -1
 	}
 	if child[0] == '[' && child[len(child)-1] == ']' {
 		idx, err := strconv.Atoi(child[1 : len(child)-1])
 		if err != nil {
-			return idx, false
+			return idx
 		}
 		if idx < 0 { // from end
-			idx = len(*k.Children()) + idx
+			idx = len(n.AsTree().Children) + idx
 		}
-		if k.Children().IsValidIndex(idx) != nil {
-			return idx, false
-		}
-		return idx, true
+		return idx
 	}
-	return k.Children().IndexByName(child, 0)
+	return IndexByName(n.AsTree().Children, child)
 }
 
 // FindPath returns the node at the given path from this node.
@@ -327,7 +306,7 @@ func findPathChild(k Node, child string) (int, bool) {
 // element, for cases when indexes are more useful than names.
 // Returns nil if not found.
 func (n *NodeBase) FindPath(path string) Node {
-	curn := n.This()
+	curn := n.This
 	pels := strings.Split(strings.Trim(strings.TrimSpace(path), "\""), "/")
 	for _, pe := range pels {
 		if len(pe) == 0 {
@@ -336,11 +315,11 @@ func (n *NodeBase) FindPath(path string) Node {
 		if strings.Contains(pe, ".") { // has fields
 			fels := strings.Split(pe, ".")
 			// find the child first, then the fields
-			idx, ok := findPathChild(curn, UnescapePathName(fels[0]))
-			if !ok {
+			idx := findPathChild(curn, UnescapePathName(fels[0]))
+			if idx < 0 {
 				return nil
 			}
-			curn = (*(curn.Children()))[idx]
+			curn = curn.AsTree().Children[idx]
 			for i := 1; i < len(fels); i++ {
 				fe := UnescapePathName(fels[i])
 				fk, err := curn.FieldByName(fe)
@@ -351,11 +330,11 @@ func (n *NodeBase) FindPath(path string) Node {
 				curn = fk
 			}
 		} else {
-			idx, ok := findPathChild(curn, UnescapePathName(pe))
-			if !ok {
+			idx := findPathChild(curn, UnescapePathName(pe))
+			if idx < 0 {
 				return nil
 			}
-			curn = (*(curn.Children()))[idx]
+			curn = curn.AsTree().Children[idx]
 		}
 	}
 	return curn
@@ -378,7 +357,7 @@ func (n *NodeBase) AddChild(kid Node) error {
 		return err
 	}
 	initNode(kid)
-	n.Kids = append(n.Kids, kid)
+	n.Children = append(n.Children, kid)
 	SetParent(kid, n) // key to set new parent before deleting: indicates move instead of delete
 	return nil
 }
@@ -392,36 +371,21 @@ func (n *NodeBase) NewChild(typ *types.Type) Node {
 	}
 	kid := NewOfType(typ)
 	initNode(kid)
-	n.Kids = append(n.Kids, kid)
+	n.Children = append(n.Children, kid)
 	SetParent(kid, n)
 	return kid
-}
-
-// SetChild sets the child at the given index to be the given item.
-// It just calls Init and SetParent on the child. The name defaults
-// to the ID (kebab-case) name of the type, plus the
-// [Node.NumLifetimeChildren] of the parent.
-// Any error is automatically logged in addition to being returned.
-func (n *NodeBase) SetChild(kid Node, idx int) error {
-	if err := n.Kids.IsValidIndex(idx); err != nil {
-		return err
-	}
-	initNode(kid)
-	n.Kids[idx] = kid
-	SetParent(kid, n)
-	return nil
 }
 
 // InsertChild adds given child at position in children list.
 // The kid node is assumed to not be on another tree (see [MoveToParent])
 // and the existing name should be unique among children.
 // Any error is automatically logged in addition to being returned.
-func (n *NodeBase) InsertChild(kid Node, at int) error {
+func (n *NodeBase) InsertChild(kid Node, index int) error {
 	if err := checkThis(n); err != nil {
 		return err
 	}
 	initNode(kid)
-	n.Kids.Insert(kid, at)
+	n.Children = slices.Insert(n.Children, index, kid)
 	SetParent(kid, n)
 	return nil
 }
@@ -429,27 +393,27 @@ func (n *NodeBase) InsertChild(kid Node, at int) error {
 // InsertNewChild creates a new child of given type and add at position
 // in children list. The name defaults to the ID (kebab-case) name
 // of the type, plus the [Node.NumLifetimeChildren] of the parent.
-func (n *NodeBase) InsertNewChild(typ *types.Type, at int) Node {
+func (n *NodeBase) InsertNewChild(typ *types.Type, index int) Node {
 	if err := checkThis(n); err != nil {
 		return nil
 	}
 	kid := NewOfType(typ)
 	initNode(kid)
-	n.Kids.Insert(kid, at)
+	n.Children = slices.Insert(n.Children, index, kid)
 	SetParent(kid, n)
 	return kid
 }
 
 // Deleting Children:
 
-// DeleteChildAtIndex deletes child at given index. It returns false
+// DeleteChildAt deletes child at the given index. It returns false
 // if there is no child at the given index.
-func (n *NodeBase) DeleteChildAtIndex(idx int) bool {
-	child := n.Child(idx)
+func (n *NodeBase) DeleteChildAt(index int) bool {
+	child := n.Child(index)
 	if child == nil {
 		return false
 	}
-	n.Kids.DeleteAtIndex(idx)
+	n.Children = slices.Delete(n.Children, index, index+1)
 	child.Destroy()
 	return true
 }
@@ -460,53 +424,53 @@ func (n *NodeBase) DeleteChild(child Node) bool {
 	if child == nil {
 		return false
 	}
-	idx, ok := n.Kids.IndexOf(child)
-	if !ok {
+	idx := IndexOf(n.Children, child)
+	if idx < 0 {
 		return false
 	}
-	return n.DeleteChildAtIndex(idx)
+	return n.DeleteChildAt(idx)
 }
 
 // DeleteChildByName deletes child node by name, returning false
 // if it can not find it.
 func (n *NodeBase) DeleteChildByName(name string) bool {
-	idx, ok := n.Kids.IndexByName(name)
-	if !ok {
+	idx := IndexByName(n.Children, name)
+	if idx < 0 {
 		return false
 	}
-	return n.DeleteChildAtIndex(idx)
+	return n.DeleteChildAt(idx)
 }
 
 // DeleteChildren deletes all children nodes.
 func (n *NodeBase) DeleteChildren() {
-	kids := n.Kids
-	n.Kids = n.Kids[:0] // preserves capacity of list
+	kids := n.Children
+	n.Children = n.Children[:0] // preserves capacity of list
 	for _, kid := range kids {
 		if kid == nil {
 			continue
 		}
-		kid.SetFlag(true)
 		kid.Destroy()
 	}
 }
 
-// Delete deletes this node from its parent's children list.
+// Delete deletes this node from its parent's children list
+// and then destroys itself.
 func (n *NodeBase) Delete() {
-	if n.Par == nil {
-		n.This().Destroy()
+	if n.Parent == nil {
+		n.This.Destroy()
 	} else {
-		n.Par.DeleteChild(n.This())
+		n.Parent.AsTree().DeleteChild(n.This)
 	}
 }
 
-// Destroy recursively deletes and destroys all children and
-// their children's children, etc.
+// Destroy recursively deletes and destroys the node, all of its children,
+// and all of its children's children, etc.
 func (n *NodeBase) Destroy() {
-	if n.This() == nil { // already destroyed
+	if n.This == nil { // already destroyed
 		return
 	}
 	n.DeleteChildren()
-	n.Ths = nil
+	n.This = nil
 }
 
 // Flags:
@@ -536,31 +500,26 @@ func (n *NodeBase) FlagType() enums.BitFlagSetter {
 
 // Property Storage:
 
-// Properties returns the key-value properties set for this node.
-func (n *NodeBase) Properties() map[string]any {
-	return n.Props
-}
-
 // SetProperty sets given the given property to the given value.
 func (n *NodeBase) SetProperty(key string, value any) {
-	if n.Props == nil {
-		n.Props = map[string]any{}
+	if n.Properties == nil {
+		n.Properties = map[string]any{}
 	}
-	n.Props[key] = value
+	n.Properties[key] = value
 }
 
 // Property returns the property value for the given key.
 // It returns nil if it doesn't exist.
 func (n *NodeBase) Property(key string) any {
-	return n.Props[key]
+	return n.Properties[key]
 }
 
 // DeleteProperty deletes the property with the given key.
 func (n *NodeBase) DeleteProperty(key string) {
-	if n.Props == nil {
+	if n.Properties == nil {
 		return
 	}
-	delete(n.Props, key)
+	delete(n.Properties, key)
 }
 
 // Tree Walking:
@@ -571,12 +530,12 @@ func (n *NodeBase) DeleteProperty(key string) {
 // returns [Break] and keeps walking if it returns [Continue]. It returns
 // whether walking was finished (false if it was aborted with [Break]).
 func (n *NodeBase) WalkUp(fun func(n Node) bool) bool {
-	cur := n.This()
+	cur := n.This
 	for {
 		if !fun(cur) { // false return means stop
 			return false
 		}
-		parent := cur.Parent()
+		parent := cur.AsTree().Parent
 		if parent == nil || parent == cur { // prevent loops
 			return true
 		}
@@ -593,12 +552,12 @@ func (n *NodeBase) WalkUpParent(fun func(n Node) bool) bool {
 	if IsRoot(n) {
 		return true
 	}
-	cur := n.Parent()
+	cur := n.Parent
 	for {
 		if !fun(cur) { // false return means stop
 			return false
 		}
-		parent := cur.Parent()
+		parent := cur.AsTree().Parent
 		if parent == nil || parent == cur { // prevent loops
 			return true
 		}
@@ -616,38 +575,40 @@ func (n *NodeBase) WalkUpParent(fun func(n Node) bool) bool {
 // method is called for every node after the given function, which enables nodes
 // to also traverse additional nodes, like widget parts.
 func (n *NodeBase) WalkDown(fun func(n Node) bool) {
-	if n.This() == nil {
+	if n.This == nil {
 		return
 	}
 	tm := map[Node]int{} // traversal map
-	start := n.This()
+	start := n.This
 	cur := start
 	tm[cur] = -1
 outer:
 	for {
-		if cur.This() != nil && fun(cur) { // false return means stop
-			cur.This().NodeWalkDown(fun)
-			if cur.HasChildren() {
+		cb := cur.AsTree()
+		if cb.This != nil && fun(cur) { // false return means stop
+			cb.This.NodeWalkDown(fun)
+			if cb.HasChildren() {
 				tm[cur] = 0 // 0 for no fields
-				nxt := cur.Child(0)
-				if nxt != nil && nxt.This() != nil {
-					cur = nxt.This()
+				nxt := cb.Child(0)
+				if nxt != nil && nxt.AsTree().This != nil {
+					cur = nxt.AsTree().This
 					tm[cur] = -1
 					continue
 				}
 			}
 		} else {
-			tm[cur] = cur.NumChildren()
+			tm[cur] = cb.NumChildren()
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
+			cb := cur.AsTree() // may have changed, so must get again
 			curChild := tm[cur]
-			if (curChild + 1) < cur.NumChildren() {
+			if (curChild + 1) < cb.NumChildren() {
 				curChild++
 				tm[cur] = curChild
-				nxt := cur.Child(curChild)
-				if nxt != nil && nxt.This() != nil {
-					cur = nxt.This()
+				nxt := cb.Child(curChild)
+				if nxt != nil && nxt.AsTree().This != nil {
+					cur = nxt.AsTree().This
 					tm[cur] = -1
 					continue outer
 				}
@@ -658,7 +619,7 @@ outer:
 			if cur == start {
 				break outer // done!
 			}
-			parent := cur.Parent()
+			parent := cb.Parent
 			if parent == nil || parent == cur { // shouldn't happen, but does..
 				// fmt.Printf("nil / cur parent %v\n", par)
 				break outer
@@ -673,7 +634,7 @@ outer:
 func (n *NodeBase) NodeWalkDown(fun func(n Node) bool) {}
 
 // WalkDownPost iterates in a depth-first manner over the children, calling
-// doChildTest on each node to test if processing should proceed (if it returns
+// shouldContinue on each node to test if processing should proceed (if it returns
 // [Break] then that branch of the tree is not further processed),
 // and then calls the given function after all of a node's children
 // have been iterated over. In effect, this means that the given function
@@ -681,38 +642,40 @@ func (n *NodeBase) NodeWalkDown(fun func(n Node) bool) {}
 // the traversal and is very fast, but can only be called by one goroutine at a
 // time, so you should use a Mutex if there is a chance of multiple threads
 // running at the same time. The nodes are processed in the current goroutine.
-func (n *NodeBase) WalkDownPost(doChildTestFunc func(n Node) bool, fun func(n Node) bool) {
-	if n.This() == nil {
+func (n *NodeBase) WalkDownPost(shouldContinue func(n Node) bool, fun func(n Node) bool) {
+	if n.This == nil {
 		return
 	}
 	tm := map[Node]int{} // traversal map
-	start := n.This()
+	start := n.This
 	cur := start
 	tm[cur] = -1
 outer:
 	for {
-		if cur.This() != nil && doChildTestFunc(cur) { // false return means stop
-			if cur.HasChildren() {
+		cb := cur.AsTree()
+		if cb.This != nil && shouldContinue(cur) { // false return means stop
+			if cb.HasChildren() {
 				tm[cur] = 0 // 0 for no fields
-				nxt := cur.Child(0)
-				if nxt != nil && nxt.This() != nil {
-					cur = nxt.This()
+				nxt := cb.Child(0)
+				if nxt != nil && nxt.AsTree().This != nil {
+					cur = nxt.AsTree().This
 					tm[cur] = -1
 					continue
 				}
 			}
 		} else {
-			tm[cur] = cur.NumChildren()
+			tm[cur] = cb.NumChildren()
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
+			cb := cur.AsTree() // may have changed, so must get again
 			curChild := tm[cur]
-			if (curChild + 1) < cur.NumChildren() {
+			if (curChild + 1) < cb.NumChildren() {
 				curChild++
 				tm[cur] = curChild
-				nxt := cur.Child(curChild)
-				if nxt != nil && nxt.This() != nil {
-					cur = nxt.This()
+				nxt := cb.Child(curChild)
+				if nxt != nil && nxt.AsTree().This != nil {
+					cur = nxt.AsTree().This
 					tm[cur] = -1
 					continue outer
 				}
@@ -724,7 +687,7 @@ outer:
 			if cur == start {
 				break outer // done!
 			}
-			parent := cur.Parent()
+			parent := cb.Parent
 			if parent == nil || parent == cur { // shouldn't happen
 				break outer
 			}
@@ -743,10 +706,10 @@ outer:
 // function returns [Break] and keeps walking if it returns [Continue]. It is
 // non-recursive, but not safe for concurrent calling.
 func (n *NodeBase) WalkDownBreadth(fun func(n Node) bool) {
-	start := n.This()
+	start := n.This
 
 	level := 0
-	start.AsTreeNode().depth = level
+	start.AsTree().depth = level
 	queue := make([]Node, 1)
 	queue[0] = start
 
@@ -755,13 +718,13 @@ func (n *NodeBase) WalkDownBreadth(fun func(n Node) bool) {
 			break
 		}
 		cur := queue[0]
-		depth := cur.AsTreeNode().depth
+		depth := cur.AsTree().depth
 		queue = queue[1:]
 
-		if cur.This() != nil && fun(cur) { // false return means don't proceed
-			for _, cn := range *cur.Children() {
-				if cn != nil && cn.This() != nil {
-					cn.AsTreeNode().depth = depth + 1
+		if cur.AsTree().This != nil && fun(cur) { // false return means don't proceed
+			for _, cn := range cur.AsTree().Children {
+				if cn != nil && cn.AsTree().This != nil {
+					cn.AsTree().depth = depth + 1
 					queue = append(queue, cn)
 				}
 			}
@@ -784,22 +747,33 @@ func (n *NodeBase) WalkDownBreadth(fun func(n Node) bool) {
 // The struct field tag copier:"-" can be added for any fields that
 // should not be copied. Also, unexported fields are not copied.
 // See [Node.CopyFieldsFrom] for more information on field copying.
-func (n *NodeBase) CopyFrom(src Node) {
-	if src == nil {
+func (n *NodeBase) CopyFrom(from Node) {
+	if from == nil {
 		slog.Error("tree.NodeBase.CopyFrom: nil source", "destinationNode", n)
 		return
 	}
-	copyFrom(n.This(), src)
+	copyFrom(n.This, from)
 }
 
 // copyFrom is the implementation of [NodeBase.CopyFrom].
-func copyFrom(dst, src Node) {
-	dst.Children().ConfigCopy(dst.This(), *src.Children())
-	maps.Copy(dst.Properties(), src.Properties())
+func copyFrom(to, from Node) {
+	fc := from.AsTree().Children
+	if len(fc) == 0 {
+		to.AsTree().DeleteChildren()
+	} else {
+		p := make(TypePlan, len(fc))
+		for i, c := range fc {
+			p[i].Type = c.NodeType()
+			p[i].Name = c.AsTree().Name
+		}
+		UpdateSlice(&to.AsTree().Children, to, p)
+	}
 
-	dst.This().CopyFieldsFrom(src)
-	for i, kid := range *dst.Children() {
-		fmk := src.Child(i)
+	maps.Copy(to.AsTree().Properties, from.AsTree().Properties)
+
+	to.AsTree().This.CopyFieldsFrom(from)
+	for i, kid := range to.AsTree().Children {
+		fmk := from.AsTree().Child(i)
 		copyFrom(kid, fmk)
 	}
 }
@@ -808,10 +782,10 @@ func copyFrom(dst, src Node) {
 // Any pointers within the cloned tree will correctly point within the new
 // cloned tree (see [Node.CopyFrom] for more information).
 func (n *NodeBase) Clone() Node {
-	nc := NewOfType(n.This().NodeType())
+	nc := NewOfType(n.This.NodeType())
 	initNode(nc)
-	nc.SetName(n.Nm)
-	nc.CopyFrom(n.This())
+	nc.AsTree().SetName(n.Name)
+	nc.AsTree().CopyFrom(n.This)
 	return nc
 }
 
@@ -826,7 +800,7 @@ func (n *NodeBase) Clone() Node {
 // [cogentcore.org/core/core.WidgetBase.CopyFieldsFrom] for an example of a
 // custom CopyFieldsFrom method.
 func (n *NodeBase) CopyFieldsFrom(from Node) {
-	err := copier.CopyWithOption(n.This(), from.This(), copier.Option{CaseSensitive: true, DeepCopy: true})
+	err := copier.CopyWithOption(n.This, from.AsTree().This, copier.Option{CaseSensitive: true, DeepCopy: true})
 	if err != nil {
 		slog.Error("tree.NodeBase.CopyFieldsFrom", "err", err)
 	}

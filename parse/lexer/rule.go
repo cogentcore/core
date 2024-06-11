@@ -52,10 +52,10 @@ type Rule struct {
 	tree.NodeBase
 
 	// disable this rule -- useful for testing and exploration
-	Off bool
+	Off bool `json:",omitempty"`
 
 	// description / comments about this rule
-	Desc string
+	Desc string `json:",omitempty"`
 
 	// the token value that this rule generates -- use None for non-terminals
 	Token token.Tokens
@@ -70,22 +70,22 @@ type Rule struct {
 	String string
 
 	// offset into the input to look for a match: 0 = current char, 1 = next one, etc
-	Offset int
+	Offset int `json:",omitempty"`
 
 	// adjusts the size of the region (plus or minus) that is processed for the Next action -- allows broader and narrower matching relative to tagging
-	SizeAdj int
+	SizeAdj int `json:",omitempty"`
 
 	// the action(s) to perform, in order, if there is a match -- these are performed prior to iterating over child nodes
 	Acts []Actions
 
 	// string(s) for ReadUntil action -- will read until any of these strings are found -- separate different options with | -- if you need to read until a literal | just put two || in a row and that will show up as a blank, which is interpreted as a literal |
-	Until string
+	Until string `json:",omitempty"`
 
 	// the state to push if our action is PushState -- note that State matching is on String, not this value
-	PushState string
+	PushState string `json:",omitempty"`
 
 	// create an optimization map for this rule, which must be a parent with children that all match against a Name string -- this reads the Name and directly activates the associated rule with that String, without having to iterate through them -- use this for keywords etc -- produces a SIGNIFICANT speedup for long lists of keywords.
-	NameMap bool
+	NameMap bool `json:",omitempty"`
 
 	// length of source that matched -- if Next is called, this is what will be skipped to
 	MatchLen int `view:"-" json:"-" xml:"-"`
@@ -99,7 +99,7 @@ func (lr *Rule) BaseInterface() reflect.Type {
 }
 
 func (lr *Rule) AsLexRule() *Rule {
-	return lr.This().(*Rule)
+	return lr.This.(*Rule)
 }
 
 // CompileAll is called on the top-level Rule to compile all nodes.
@@ -138,8 +138,8 @@ func (lr *Rule) Compile(ls *State) bool {
 // CompileNameMap compiles name map -- returns false if there are problems.
 func (lr *Rule) CompileNameMap(ls *State) bool {
 	valid := true
-	lr.NmMap = make(map[string]*Rule, len(lr.Kids))
-	for _, klri := range lr.Kids {
+	lr.NmMap = make(map[string]*Rule, len(lr.Children))
+	for _, klri := range lr.Children {
 		klr := klri.(*Rule)
 		if !klr.Validate(ls) {
 			valid = false
@@ -210,7 +210,7 @@ func (lr *Rule) Validate(ls *State) bool {
 	}
 
 	// now we iterate over our kids
-	for _, klri := range lr.Kids {
+	for _, klri := range lr.Children {
 		klr := klri.(*Rule)
 		if !klr.Validate(ls) {
 			valid = false
@@ -247,7 +247,7 @@ func (lr *Rule) LexStart(ls *State) *Rule {
 	cpos := ls.Pos
 	lxsz := len(ls.Lex)
 	mrule := lr
-	for _, klri := range lr.Kids {
+	for _, klri := range lr.Children {
 		klr := klri.(*Rule)
 		if mrule = klr.Lex(ls); mrule != nil { // first to match takes it -- order matters!
 			break
@@ -304,7 +304,7 @@ func (lr *Rule) Lex(ls *State) *Rule {
 		}
 	} else {
 		// now we iterate over our kids
-		for _, klri := range lr.Kids {
+		for _, klri := range lr.Children {
 			klr := klri.(*Rule)
 			if mrule := klr.Lex(ls); mrule != nil { // first to match takes it -- order matters!
 				return mrule
@@ -494,7 +494,7 @@ func (lr *Rule) Find(find string) []*Rule {
 	var res []*Rule
 	lr.WalkDown(func(k tree.Node) bool {
 		lri := k.(*Rule)
-		if strings.Contains(lri.String, find) || strings.Contains(lri.Nm, find) {
+		if strings.Contains(lri.String, find) || strings.Contains(lri.Name, find) {
 			res = append(res, lri)
 		}
 		return true
@@ -506,7 +506,7 @@ func (lr *Rule) Find(find string) []*Rule {
 // it is called recursively
 func (lr *Rule) WriteGrammar(writer io.Writer, depth int) {
 	if tree.IsRoot(lr) {
-		for _, k := range lr.Kids {
+		for _, k := range lr.Children {
 			lri := k.(*Rule)
 			lri.WriteGrammar(writer, depth)
 		}
@@ -537,16 +537,16 @@ func (lr *Rule) WriteGrammar(writer io.Writer, depth int) {
 			}
 		}
 		if lr.Desc != "" {
-			fmt.Fprintf(writer, "%v// %v %v \n", ind, lr.Nm, lr.Desc)
+			fmt.Fprintf(writer, "%v// %v %v \n", ind, lr.Name, lr.Desc)
 		}
 		if (lr.Match >= Letter && lr.Match <= WhiteSpace) || lr.Match == AnyRune {
-			fmt.Fprintf(writer, "%v%v:\t\t %v\t\t if %v%v%v%v\n", ind, lr.Nm, lr.Token, offstr, lr.Match, actstr, gpstr)
+			fmt.Fprintf(writer, "%v%v:\t\t %v\t\t if %v%v%v%v\n", ind, lr.Name, lr.Token, offstr, lr.Match, actstr, gpstr)
 		} else {
-			fmt.Fprintf(writer, "%v%v:\t\t %v\t\t if %v%v == \"%v\"%v%v\n", ind, lr.Nm, lr.Token, offstr, lr.Match, lr.String, actstr, gpstr)
+			fmt.Fprintf(writer, "%v%v:\t\t %v\t\t if %v%v == \"%v\"%v%v\n", ind, lr.Name, lr.Token, offstr, lr.Match, lr.String, actstr, gpstr)
 		}
 		if lr.HasChildren() {
 			w := tabwriter.NewWriter(writer, 4, 4, 2, ' ', 0)
-			for _, k := range lr.Kids {
+			for _, k := range lr.Children {
 				lri := k.(*Rule)
 				lri.WriteGrammar(w, depth+1)
 			}

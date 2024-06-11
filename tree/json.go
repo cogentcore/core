@@ -5,257 +5,135 @@
 package tree
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"log/slog"
-	"os"
+	"reflect"
+	"slices"
 	"strconv"
+	"strings"
 
-	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/iox/jsonx"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/types"
 )
 
-// note: use package iox/jsonx for standard read / write of JSON files
-// for trees.  The Slice Marshal / Unmarshal methods save the type info
-// of each child so that the full tree can be properly reconstructed.
-
-//////////////////////////////////////////////////////////////////////////
-// Slice
-
-// MarshalJSON saves the length and type, name information for each object in a
-// slice, as a separate struct-like record at the start, followed by the
-// structs for each element in the slice -- this allows the Unmarshal to first
-// create all the elements and then load them
-func (sl Slice) MarshalJSON() ([]byte, error) {
-	nk := len(sl)
-	b := make([]byte, 0, nk*100+20)
-	if nk == 0 {
-		b = append(b, []byte("null")...)
-		return b, nil
+// MarshalJSON marshals the node by injecting the [Node.NodeType] as a nodeType
+// field and the [NodeBase.NumChildren] as a numChildren field at the start of
+// the standard JSON encoding output.
+func (n *NodeBase) MarshalJSON() ([]byte, error) {
+	// the non pointer value does not implement MarshalJSON, so it will not result in infinite recursion
+	b, err := json.Marshal(reflectx.Underlying(reflect.ValueOf(n.This)).Interface())
+	if err != nil {
+		return b, err
 	}
-	nstr := fmt.Sprintf("[{\"n\":%d,", nk)
-	b = append(b, []byte(nstr)...)
-	for i, kid := range sl {
-		// fmt.Printf("json out of %v\n", kid.Path())
-		knm := kid.NodeType().Name
-		tstr := fmt.Sprintf("\"type\":\"%v\", \"name\": \"%v\"", knm, kid.Name()) // todo: escape names!
-		b = append(b, []byte(tstr)...)
-		if i < nk-1 {
-			b = append(b, []byte(",")...)
-		}
+	data := `"nodeType":"` + n.This.NodeType().Name + `",`
+	if n.NumChildren() > 0 {
+		data += `"numChildren":` + strconv.Itoa(n.NumChildren()) + ","
 	}
-	b = append(b, []byte("},")...)
-	for i, kid := range sl {
-		var err error
-		var kb []byte
-		kb, err = json.Marshal(kid)
-		if err == nil {
-			b = append(b, []byte("{")...)
-			b = append(b, kb[1:len(kb)-1]...)
-			b = append(b, []byte("}")...)
-			if i < nk-1 {
-				b = append(b, []byte(",")...)
-			}
-		} else {
-			fmt.Println("tree.Slice.MarshalJSON: error doing json.Marshal from kid:", kid)
-			errors.Log(err)
-			fmt.Println("tree.Slice.MarshalJSON: output to point of error:", string(b))
-		}
-	}
-	b = append(b, []byte("]")...)
-	// fmt.Printf("json out: %v\n", string(b))
+	b = slices.Insert(b, 1, []byte(data)...)
 	return b, nil
 }
 
-// UnmarshalJSON parses the length and type information for each object in the
-// slice, creates the new slice with those elements, and then loads based on
-// the remaining bytes which represent each element
-func (sl *Slice) UnmarshalJSON(b []byte) error {
-	// fmt.Printf("json in: %v\n", string(b))
-	if bytes.Equal(b, []byte("null")) {
-		// fmt.Println("\n\n null")
-		*sl = nil
-		return nil
-	}
-	lb := bytes.IndexRune(b, '{')
-	rb := bytes.IndexRune(b, '}')
-	if lb < 0 || rb < 0 { // probably null
-		return nil
-	}
-	// todo: if name contains "," this won't work..
-	flds := bytes.Split(b[lb+1:rb], []byte(","))
-	if len(flds) == 0 {
-		return errors.New("Slice UnmarshalJSON: no child data found")
-	}
-	// fmt.Printf("flds[0]:\n%v\n", string(flds[0]))
-	ns := bytes.Index(flds[0], []byte("\"n\":"))
-	bn := bytes.TrimSpace(flds[0][ns+4:])
+// unmarshalTypeCache is a cache of [reflect.Type] values used
+// for unmarshalling in [NodeBase.UnmarshalJSON]. This cache has
+// a noticeable performance benefit of around 1.2x in
+// [BenchmarkNodeUnmarshalJSON], a benefit that should only increase
+// for larger trees.
+var unmarshalTypeCache = map[string]reflect.Type{}
 
-	n64, err := strconv.ParseInt(string(bn), 10, 64)
-	if err != nil {
-		return err
+// UnmarshalJSON unmarshals the node by extracting the nodeType and numChildren fields
+// added by [NodeBase.MarshalJSON] and then updating the node to the correct type and
+// creating the correct number of children. Note that this method can not update the type
+// of the node if it has no parent; to load a root node from JSON and have it be of the
+// correct type, see the [UnmarshalRootJSON] function. If the type of the node is changed
+// by this function, the node pointer will no longer be valid, and the node must be fetched
+// again through the children of its parent.
+func (n *NodeBase) UnmarshalJSON(b []byte) error {
+	typeStart := bytes.Index(b, []byte(`":`)) + 3
+	typeEnd := bytes.Index(b, []byte(`",`))
+	typeName := string(b[typeStart:typeEnd])
+	// we may end up with an extraneous quote / space at the start
+	typeName = strings.TrimPrefix(strings.TrimSpace(typeName), `"`)
+	typ := types.TypeByName(typeName)
+	if typ == nil {
+		return fmt.Errorf("tree.NodeBase.UnmarshalJSON: type %q not found", typeName)
 	}
-	n := int(n64)
-	if n == 0 {
-		return nil
-	}
-	// fmt.Printf("n parsed: %d from %v\n", n, string(bn))
 
-	p := make(TypePlan, n)
-
-	for i := 0; i < n; i++ {
-		fld := flds[2*i+1]
-		// fmt.Printf("fld:\n%v\n", string(fld))
-		ti := bytes.Index(fld, []byte("\"type\":"))
-		tn := string(bytes.Trim(bytes.TrimSpace(fld[ti+7:]), "\""))
-		fld = flds[2*i+2]
-		ni := bytes.Index(fld, []byte("\"name\":"))
-		nm := string(bytes.Trim(bytes.TrimSpace(fld[ni+7:]), "\""))
-		// fmt.Printf("making type: %v\n", tn)
-		typ, err := types.TypeByNameTry(tn)
-		if err != nil {
-			err = fmt.Errorf("tree.Slice UnmarshalJSON: %w", err)
-			slog.Error(err.Error())
+	// if our type does not match, we must replace our This to make it match
+	if n.This.NodeType() != typ {
+		parent := n.Parent
+		index := n.IndexInParent()
+		if index >= 0 {
+			n.Delete()
+			n.This = parent.AsTree().InsertNewChild(typ, index)
+			n = n.This.AsTree() // our NodeBase pointer is now different
 		}
-		p[i].Type = typ
-		p[i].Name = nm
 	}
 
-	UpdateSlice(sl, nil, p)
+	// We must delete any existing children first.
+	n.DeleteChildren()
 
-	nwk := make([]Node, n) // allocate new slice containing *pointers* to kids
-	copy(nwk, *sl)
+	remainder := b[typeEnd+2:]
+	numStart := bytes.Index(remainder, []byte(`"numChildren":`))
+	if numStart >= 0 { // numChildren may not be specified if it is 0
+		numStart += 14 // start of actual number bytes
+		numEnd := bytes.Index(remainder, []byte(`,`))
+		numString := string(remainder[numStart:numEnd])
+		// we may end up with extraneous space at the start
+		numString = strings.TrimSpace(numString)
+		numChildren, err := strconv.Atoi(numString)
+		if err != nil {
+			return err
+		}
+		// We make placeholder NodeBase children that will be replaced
+		// with children of the correct type during their UnmarshalJSON.
+		for range numChildren {
+			New[*NodeBase](n)
+		}
+	}
 
-	cb := make([]byte, 0, 1+len(b)-rb)
-	cb = append(cb, []byte("[")...)
-	cb = append(cb, b[rb+2:]...)
-
-	// fmt.Printf("loading:\n%v", string(cb))
-
-	err = json.Unmarshal(cb, &nwk)
+	uv := reflectx.UnderlyingPointer(reflect.ValueOf(n.This))
+	rtyp := unmarshalTypeCache[typeName]
+	if rtyp == nil {
+		// We must create a new type that has the exact same fields as the original type
+		// so that we can unmarshal into it without having infinite recursion on the
+		// UnmarshalJSON method. This works because [reflect.StructOf] does not promote
+		// methods on embedded fields, meaning that the UnmarshalJSON method on the NodeBase
+		// is not carried over and thus is not called, avoiding infinite recursion.
+		uvt := uv.Type().Elem()
+		fields := make([]reflect.StructField, uvt.NumField())
+		for i := range fields {
+			fields[i] = uvt.Field(i)
+		}
+		nt := reflect.StructOf(fields)
+		rtyp = reflect.PointerTo(nt)
+		unmarshalTypeCache[typeName] = rtyp
+	}
+	// We can directly convert because our new struct type has the exact same fields.
+	uvi := uv.Convert(rtyp).Interface()
+	err := json.Unmarshal(b, uvi)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-//////////////////////////////////////////////////////
-// 	Save / Open Root Type
-
-// The following are special versions for saving the type of
-// the root node, which should generally be relatively rare.
-
-// JSONTypePrefix is the first thing output in a tree JSON output file,
-// specifying the type of the root node of the tree -- this info appears
-// all on one { } bracketed line at the start of the file, and can also be
-// used to identify the file as a tree JSON file
-var JSONTypePrefix = []byte("{\"tree.RootType\": ")
-
-// JSONTypeSuffix is just the } and \n at the end of the prefix line
-var JSONTypeSuffix = []byte("}\n")
-
-// RootTypeJSON returns the JSON encoding of the type of the
-// root node (this node) which is written first using our custom
-// JSONEncoder type, to enable a file to be loaded de-novo
-// and recreate the proper root type for the tree.
-func RootTypeJSON(k Node) []byte {
-	knm := k.NodeType().Name
-	tstr := string(JSONTypePrefix) + fmt.Sprintf("\"%v\"}\n", knm)
-	return []byte(tstr)
-}
-
-// WriteNewJSON writes JSON-encoded bytes to given writer
-// including key type information at start of file
-// so ReadNewJSON can create an object of the proper type.
-func WriteNewJSON(k Node, writer io.Writer) error {
-	tb := RootTypeJSON(k)
-	writer.Write(tb)
-	return jsonx.WriteIndent(k, writer)
-}
-
-// SaveNewJSON writes JSON-encoded bytes to given writer
-// including key type information at start of file
-// so ReadNewJSON can create an object of the proper type.
-func SaveNewJSON(k Node, filename string) error {
-	fp, err := os.Create(filename)
+// UnmarshalRootJSON loads the given JSON to produce a new root node of
+// the correct type with all properties and children loaded.
+func UnmarshalRootJSON(b []byte) (Node, error) {
+	// we must make a temporary parent so that the type of the node can be updated
+	parent := New[*NodeBase]()
+	// this NodeBase type is just temporary and will be fixed by [NodeBase.UnmarshalJSON]
+	nb := New[*NodeBase](parent)
+	err := nb.UnmarshalJSON(b)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	defer fp.Close()
-	bw := bufio.NewWriter(fp)
-	err = WriteNewJSON(k, bw)
-	if err != nil {
-		return err
-	}
-	return bw.Flush()
-}
-
-// ReadRootTypeJSON reads the type of the root node
-// as encoded by WriteRootTypeJSON, returning the
-// types.Type for the saved type name (error if not found),
-// the remaining bytes to be decoded using a standard
-// unmarshal, and an error.
-func ReadRootTypeJSON(b []byte) (*types.Type, []byte, error) {
-	if !bytes.HasPrefix(b, JSONTypePrefix) {
-		return nil, b, fmt.Errorf("tree.ReadRootTypeJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree")
-	}
-	stidx := len(JSONTypePrefix) + 1
-	eidx := bytes.Index(b, JSONTypeSuffix)
-	bodyidx := eidx + len(JSONTypeSuffix)
-	tn := string(bytes.Trim(bytes.TrimSpace(b[stidx:eidx]), "\""))
-	typ, err := types.TypeByNameTry(tn)
-	if typ == nil {
-		return nil, b[bodyidx:], fmt.Errorf("tree.ReadRootTypeJSON: %w", err)
-	}
-	return typ, b[bodyidx:], nil
-}
-
-// ReadNewJSON reads a new tree from a JSON-encoded byte string,
-// using type information at start of file to create an object of the proper type
-func ReadNewJSON(reader io.Reader) (Node, error) {
-	b, err := io.ReadAll(reader)
-	if err != nil {
-		return nil, errors.Log(err)
-	}
-	typ, rb, err := ReadRootTypeJSON(b)
-	if err != nil {
-		return nil, errors.Log(err)
-	}
-	root := NewOfType(typ)
-	initNode(root)
-	err = json.Unmarshal(rb, root)
-	UnmarshalPost(root)
-	return root, errors.Log(err)
-}
-
-// OpenNewJSON opens a new tree from a JSON-encoded file, using type
-// information at start of file to create an object of the proper type
-func OpenNewJSON(filename string) (Node, error) {
-	fp, err := os.Open(filename)
-	if err != nil {
-		return nil, errors.Log(err)
-	}
-	defer fp.Close()
-	return ReadNewJSON(bufio.NewReader(fp))
-}
-
-// ParentAllChildren walks the tree down from current node and call
-// SetParent on all children -- needed after an Unmarshal.
-func ParentAllChildren(kn Node) {
-	for _, child := range *kn.Children() {
-		if child != nil {
-			child.AsTreeNode().Par = kn
-			ParentAllChildren(child)
-		}
-	}
-}
-
-// UnmarshalPost must be called after an Unmarshal -- calls
-// ParentAllChildren.
-func UnmarshalPost(kn Node) {
-	ParentAllChildren(kn)
+	// the node must be fetched from the parent's children since the pointer may have changed
+	n := parent.Child(0)
+	// we must safely remove the node from its temporary parent
+	n.AsTree().Parent = nil
+	parent.Children = nil
+	parent.Destroy()
+	return n, nil
 }

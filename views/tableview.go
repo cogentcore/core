@@ -70,7 +70,7 @@ func (tv *TableView) Init() {
 	tv.SortIndex = -1
 
 	tv.Makers[0] = func(p *core.Plan) { // TODO: reduce redundancy with SliceViewBase Maker
-		svi := tv.This().(SliceViewer)
+		svi := tv.This.(SliceViewer)
 		svi.UpdateSliceSize()
 
 		tv.ViewMuLock()
@@ -221,7 +221,7 @@ func (tv *TableView) SliceHeader() *core.Frame {
 func (tv *TableView) MakeHeader(p *core.Plan) {
 	core.AddAt(p, "header", func(w *core.Frame) {
 		core.ToolbarStyles(w)
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(0, 0)
 			s.Gap.Set(units.Em(0.5)) // matches grid default
 		})
@@ -229,7 +229,7 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 			if tv.Is(SliceViewShowIndex) {
 				core.AddAt(p, "head-index", func(w *core.Text) {
 					w.SetType(core.TextBodyMedium)
-					w.Style(func(s *styles.Style) {
+					w.Styler(func(s *styles.Style) {
 						s.Align.Self = styles.Center
 					})
 					w.SetText("Index")
@@ -282,7 +282,7 @@ func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 }
 
 func (tv *TableView) MakeRow(p *core.Plan, i int) {
-	svi := tv.This().(SliceViewer)
+	svi := tv.This.(SliceViewer)
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
 	val := tv.SliceElementValue(si)
@@ -312,7 +312,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 		}, func(w core.Value) {
 			wb := w.AsWidget()
 			tv.MakeValue(w, i)
-			w.SetProperty(SliceViewColProperty, fli)
+			w.AsTree().SetProperty(SliceViewColProperty, fli)
 			if !tv.IsReadOnly() && !readOnlyTag {
 				wb.OnChange(func(e events.Event) {
 					tv.SendChange()
@@ -338,7 +338,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 				wb.SetReadOnly(tv.IsReadOnly() || readOnlyTag)
 				w.SetState(invis, states.Invisible)
 				if svi.HasStyleFunc() {
-					w.ApplyStyle()
+					w.Style()
 				}
 				if invis {
 					wb.SetSelected(false)
@@ -369,7 +369,7 @@ func (tv *TableView) SliceNewAt(idx int) {
 		idx = tv.SliceSize
 	}
 
-	tv.This().(SliceViewer).UpdateSliceSize()
+	tv.This.(SliceViewer).UpdateSliceSize()
 	tv.SelectIndexAction(idx, events.SelectOne)
 	tv.ViewMuUnlock()
 	tv.SendChange()
@@ -388,7 +388,7 @@ func (tv *TableView) SliceDeleteAt(idx int) {
 
 	reflectx.SliceDeleteAt(tv.Slice, idx)
 
-	tv.This().(SliceViewer).UpdateSliceSize()
+	tv.This.(SliceViewer).UpdateSliceSize()
 	tv.ViewMuUnlock()
 	tv.SendChange()
 	tv.Update()
@@ -487,7 +487,7 @@ func (tv *TableView) RowFirstVisWidget(row int) (*core.WidgetBase, bool) {
 	}
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	sg := tv.SliceGrid()
-	w := sg.Kids[row*nWidgPerRow].(core.Widget).AsWidget()
+	w := sg.Children[row*nWidgPerRow].(core.Widget).AsWidget()
 	if w.Geom.TotalBBox != (image.Rectangle{}) {
 		return w, true
 	}
@@ -607,7 +607,7 @@ func (tv *TableView) ContextMenu(m *core.Scene) {
 
 func (tv *TableView) SizeFinal() {
 	tv.SliceViewBase.SizeFinal()
-	sg := tv.This().(SliceViewer).SliceGrid()
+	sg := tv.This.(SliceViewer).SliceGrid()
 	if sg == nil {
 		return
 	}

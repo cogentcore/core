@@ -201,7 +201,7 @@ func (em *Events) HandleFocusEvent(e events.Event) {
 		}
 	}
 	if em.Focus != nil {
-		em.Focus.WalkUpParent(func(k tree.Node) bool {
+		em.Focus.AsTree().WalkUpParent(func(k tree.Node) bool {
 			_, wb := AsWidget(k)
 			if !wb.IsVisible() {
 				return tree.Break
@@ -213,7 +213,7 @@ func (em *Events) HandleFocusEvent(e events.Event) {
 			em.Focus.HandleEvent(e)
 		}
 		if !e.IsHandled() {
-			em.Focus.WalkUpParent(func(k tree.Node) bool {
+			em.Focus.AsTree().WalkUpParent(func(k tree.Node) bool {
 				_, wb := AsWidget(k)
 				if !wb.IsVisible() {
 					return tree.Break
@@ -525,7 +525,7 @@ func (em *Events) UpdateHovers(hov, prev []Widget, e events.Event, enter, leave 
 				break
 			}
 		}
-		if !stillIn && prv.This() != nil {
+		if !stillIn && prv.AsTree().This != nil {
 			prv.Send(leave, e)
 		}
 	}
@@ -578,7 +578,7 @@ func (em *Events) HandleLong(e events.Event, deep Widget, w *Widget, pos *image.
 	em.TimerMu.Lock()
 	defer em.TimerMu.Unlock()
 
-	// fmt.Println("em:", em.Scene.Name())
+	// fmt.Println("em:", em.Scene.Name)
 
 	clearLong := func() {
 		if *t != nil {
@@ -791,7 +791,7 @@ func (em *Events) DragMenuAddModText(m *Scene, mod events.DropMods) {
 	case events.DropMove:
 		text = "Move:"
 	}
-	NewText(m).SetType(TextLabelLarge).SetText(text).Style(func(s *styles.Style) {
+	NewText(m).SetType(TextLabelLarge).SetText(text).Styler(func(s *styles.Style) {
 		s.Margin.Set(units.Em(0.5))
 	})
 }
@@ -915,12 +915,11 @@ func (em *Events) SetFocusEvent(w Widget) bool {
 // sendEvent determines whether the events.Focus event is sent to the focused item.
 func (em *Events) SetFocusImpl(w Widget, sendEvent bool) bool {
 	cfoc := em.Focus
-	if cfoc == nil || cfoc.This() == nil {
+	if cfoc == nil {
 		em.Focus = nil
-		// fmt.Println("nil foc impl")
 		cfoc = nil
 	}
-	if cfoc != nil && w != nil && cfoc.This() == w.This() {
+	if cfoc != nil && w != nil && cfoc == w {
 		if DebugSettings.FocusTrace {
 			fmt.Println(em.Scene, "Already Focus:", cfoc)
 		}
@@ -1021,7 +1020,7 @@ func (em *Events) FocusPrevFrom(from Widget) bool {
 // FocusFirst sets the focus on the first focusable item in the tree.
 // returns true if a focusable item was found.
 func (em *Events) FocusFirst() bool {
-	return em.FocusNextFrom(em.Scene.This().(Widget))
+	return em.FocusNextFrom(em.Scene.This.(Widget))
 }
 
 // FocusLast sets the focus on the last focusable item in the tree.
@@ -1033,8 +1032,7 @@ func (em *Events) FocusLast() bool {
 // FocusLastFrom sets the focus on the last focusable item in the given tree.
 // returns true if a focusable item was found.
 func (em *Events) FocusLastFrom(from Widget) bool {
-	last := tree.Last(from.This()).(Widget)
-	// fmt.Println("last:", last, "from:", from)
+	last := tree.Last(from).(Widget)
 	return em.FocusOnOrPrev(last)
 }
 
@@ -1124,7 +1122,7 @@ func (em *Events) ManagerKeyChordEvents(e events.Event) {
 		}
 	case keymap.WinSnapshot:
 		dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
-		fnm, _ := filepath.Abs("./GrabOf_" + sc.Name() + "_" + dstr + ".png")
+		fnm, _ := filepath.Abs("./GrabOf_" + sc.Name + "_" + dstr + ".png")
 		imagex.Save(sc.Pixels, fnm)
 		fmt.Printf("Saved RenderWindow Image to: %s\n", fnm)
 		e.SetHandled()
@@ -1180,8 +1178,8 @@ func (em *Events) GetShortcuts() {
 // GetShortcutsIn gathers all [Button]s in the given parent widget with
 // a shortcut specified. It recursively navigates [Button.Menu]s.
 func (em *Events) GetShortcutsIn(parent Widget) {
-	parent.AsWidget().WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		bt := AsButton(wi.This())
+	parent.AsWidget().WidgetWalkDown(func(w Widget, wb *WidgetBase) bool {
+		bt := AsButton(w)
 		if bt == nil {
 			return tree.Continue
 		}
@@ -1258,7 +1256,7 @@ func (em *Events) TriggerShortcut(chord key.Chord) bool {
 	if !exists {
 		return false
 	}
-	if sa == nil || sa.This() == nil {
+	if sa == nil || sa.This == nil {
 		delete(em.Shortcuts, chord)
 		return false
 	}

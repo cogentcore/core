@@ -51,10 +51,10 @@ func (ast *Ast) ChildAst(idx int) *Ast {
 
 // ParentAst returns the Parent as an Ast.
 func (ast *Ast) ParentAst() *Ast {
-	if ast.Par == nil {
+	if ast.Parent == nil {
 		return nil
 	}
-	pn := ast.Par.This()
+	pn := ast.Parent.AsTree().This
 	if pn == nil {
 		return nil
 	}
@@ -107,8 +107,8 @@ func (ast *Ast) SetTokRegEnd(pos lexer.Pos, src *lexer.File) {
 // source code -- just for debugging etc
 func (ast *Ast) WriteTree(out io.Writer, depth int) {
 	ind := indent.Tabs(depth)
-	fmt.Fprintf(out, "%v%v: %v\n", ind, ast.Nm, ast.Src)
-	for _, k := range ast.Kids {
+	fmt.Fprintf(out, "%v%v: %v\n", ind, ast.Name, ast.Src)
+	for _, k := range ast.Children {
 		ai := k.(*Ast)
 		ai.WriteTree(out, depth+1)
 	}

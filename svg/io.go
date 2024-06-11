@@ -116,7 +116,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 
 	sv.DeleteAll()
 
-	curPar := sv.Root.This().(Node) // current parent node into which elements are created
+	curPar := sv.Root.This.(Node) // current parent node into which elements are created
 	curSvg := sv.Root
 	inTitle := false
 	inDesc := false
@@ -150,7 +150,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			nm := se.Name.Local
 			switch {
 			case nm == "svg":
-				// if curPar != sv.This() {
+				// if curPar != sv.This {
 				// 	curPar = curPar.NewChild(TypeSVG, "svg").(Node)
 				// }
 				for _, attr := range se.Attr {
@@ -176,7 +176,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					case "preserveAspectRatio":
 						curSvg.ViewBox.PreserveAspectRatio.SetString(attr.Value)
 					default:
-						curPar.SetProperty(attr.Name.Local, attr.Value)
+						curPar.AsTree().SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
 			case nm == "desc":
@@ -195,7 +195,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					default:
-						curPar.SetProperty(attr.Name.Local, attr.Value)
+						curPar.AsTree().SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
 			case nm == "rect":
@@ -509,7 +509,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					case "href":
 						nm := attr.Value
 						nm = strings.TrimPrefix(nm, "#")
-						hr := curPar.ChildByName(nm, 0)
+						hr := curPar.AsTree().ChildByName(nm, 0)
 						if hr != nil {
 							if hrg, ok := hr.(*Gradient); ok {
 								grad.StopsName = nm
@@ -537,7 +537,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					case "href":
 						nm := attr.Value
 						nm = strings.TrimPrefix(nm, "#")
-						hr := curPar.ChildByName(nm, 0)
+						hr := curPar.AsTree().ChildByName(nm, 0)
 						if hr != nil {
 							if hrg, ok := hr.(*Gradient); ok {
 								grad.StopsName = nm
@@ -626,16 +626,16 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				link := gradient.XMLAttr("href", se.Attr)
 				itm := sv.FindNamedElement(link)
 				if itm != nil {
-					cln := itm.Clone().(Node)
+					cln := itm.AsTree().Clone().(Node)
 					if cln != nil {
-						curPar.AddChild(cln)
+						curPar.AsTree().AddChild(cln)
 						for _, attr := range se.Attr {
 							if SetStdXMLAttr(cln.AsNodeBase(), attr.Name.Local, attr.Value) {
 								continue
 							}
 							switch attr.Name.Local {
 							default:
-								cln.SetProperty(attr.Name.Local, attr.Value)
+								cln.AsTree().SetProperty(attr.Name.Local, attr.Value)
 							}
 						}
 					}
@@ -666,7 +666,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					default:
-						curPar.SetProperty(attr.Name.Local, attr.Value)
+						curPar.AsTree().SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
 			case strings.HasPrefix(nm, "flow"):
@@ -680,7 +680,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					default:
-						curPar.SetProperty(attr.Name.Local, attr.Value)
+						curPar.AsTree().SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
 			case strings.HasPrefix(nm, "fe"):
@@ -698,7 +698,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					default:
-						curPar.SetProperty(attr.Name.Local, attr.Value)
+						curPar.AsTree().SetProperty(attr.Name.Local, attr.Value)
 					}
 				}
 			default:
@@ -737,17 +737,17 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case "linearGradient":
 			case "radialGradient":
 			default:
-				if curPar == sv.Root.This() {
+				if curPar == sv.Root.This {
 					break
 				}
-				if curPar.Parent() == nil {
+				if curPar.AsTree().Parent == nil {
 					break
 				}
-				curPar = curPar.Parent().(Node)
-				if curPar == sv.Root.This() {
+				curPar = curPar.AsTree().Parent.(Node)
+				if curPar == sv.Root.This {
 					break
 				}
-				curSvgk := curPar.ParentByType(SVGNodeType, tree.NoEmbeds)
+				curSvgk := curPar.AsTree().ParentByType(SVGNodeType, tree.NoEmbeds)
 				if curSvgk != nil {
 					curSvg = curSvgk.(*SVGNode)
 				}
@@ -836,13 +836,13 @@ var InkscapeProperties = map[string]bool{
 // returns name of node, for end tag -- if empty, then children will not be
 // output.
 func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
-	if itm == nil || itm.This() == nil {
+	if itm == nil || itm.AsTree().This == nil {
 		return ""
 	}
 	se := xml.StartElement{}
-	properties := itm.Properties()
-	if itm.Name() != "" {
-		XMLAddAttr(&se.Attr, "id", itm.Name())
+	properties := itm.AsTree().Properties
+	if itm.AsTree().Name != "" {
+		XMLAddAttr(&se.Attr, "id", itm.AsTree().Name)
 	}
 	text := "" // if non-empty, contains text to render
 	_, issvg := itm.(Node)
@@ -879,7 +879,7 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "d", nd.DataStr)
 	case *Group:
 		nm = "g"
-		if strings.HasPrefix(strings.ToLower(itm.Name()), "layer") {
+		if strings.HasPrefix(strings.ToLower(itm.AsTree().Name), "layer") {
 		}
 		for k, v := range properties {
 			sv := reflectx.ToString(v)
@@ -956,13 +956,13 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 		ib, fmt := imagex.ToBase64PNG(nd.Pixels)
 		XMLAddAttr(&se.Attr, "href", "data:"+fmt+";base64,"+string(imagex.Base64SplitLines(ib)))
 	case *MetaData:
-		if strings.HasPrefix(nd.Nm, "namedview") {
+		if strings.HasPrefix(nd.Name, "namedview") {
 			nm = "sodipodi:namedview"
-		} else if strings.HasPrefix(nd.Nm, "grid") {
+		} else if strings.HasPrefix(nd.Name, "grid") {
 			nm = "inkscape:grid"
 		}
 	case *Gradient:
-		SVGNodeXMLGrad(nd, nd.Nm, enc)
+		SVGNodeXMLGrad(nd, nd.Name, enc)
 		return "" // exclude -- already written
 	case *Marker:
 		nm = "marker"
@@ -1070,7 +1070,7 @@ func SVGNodeTreeMarshalXML(itm Node, enc *XMLEncoder, setName string) (string, e
 	if name == "" {
 		return "", nil
 	}
-	for _, k := range *itm.Children() {
+	for _, k := range itm.AsTree().Children {
 		knm, err := SVGNodeTreeMarshalXML(k.(Node), enc, "")
 		if knm != "" {
 			enc.WriteEnd(knm)
@@ -1098,7 +1098,7 @@ func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	dnm, err := SVGNodeTreeMarshalXML(sv.Defs, enc, "defs")
 	enc.WriteEnd(dnm)
 
-	for _, k := range sv.Root.Kids {
+	for _, k := range sv.Root.Children {
 		var knm string
 		knm, err = SVGNodeTreeMarshalXML(k.(Node), enc, "")
 		if knm != "" {
@@ -1127,7 +1127,7 @@ func SetStdXMLAttr(ni Node, name, val string) bool {
 		nb.Class = val
 		return true
 	case "style":
-		styles.SetStylePropertiesXML(val, (*map[string]any)(&nb.Props))
+		styles.SetStylePropertiesXML(val, (*map[string]any)(&nb.Properties))
 		return true
 	}
 	return false

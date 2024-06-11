@@ -22,7 +22,7 @@ func BenchmarkUpdateDeclarative(b *testing.B) {
 		for range nUpdates {
 			b := NewBody()
 			for i := range nButtons {
-				NewButton(b).SetText(strconv.Itoa(i)).SetIcon(icons.Download).Style(func(s *styles.Style) {
+				NewButton(b).SetText(strconv.Itoa(i)).SetIcon(icons.Download).Styler(func(s *styles.Style) {
 					s.Min.Set(units.Em(5))
 					s.CenterAll()
 				})
@@ -42,7 +42,7 @@ func BenchmarkUpdatePlan(bn *testing.B) {
 			p := &Plan{}
 			for i := range nButtons {
 				AddAt(p, strconv.Itoa(i), func(w *Button) {
-					w.SetText(strconv.Itoa(i)).SetIcon(icons.Download).Style(func(s *styles.Style) {
+					w.SetText(strconv.Itoa(i)).SetIcon(icons.Download).Styler(func(s *styles.Style) {
 						s.Min.Set(units.Em(5))
 						s.CenterAll()
 					})

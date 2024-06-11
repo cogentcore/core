@@ -33,13 +33,13 @@ type Handle struct {
 
 func (hl *Handle) Init() {
 	hl.WidgetBase.Init()
-	hl.Style(func(s *styles.Style) {
+	hl.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Background = colors.C(colors.Scheme.OutlineVariant)
 	})
-	hl.StyleFinal(func(s *styles.Style) {
+	hl.FinalStyler(func(s *styles.Style) {
 		if s.Direction == styles.Row {
 			s.Min.X.Dp(6)
 			s.Min.Y.Em(2)

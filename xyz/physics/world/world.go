@@ -112,15 +112,15 @@ func (vw *View) InitLibraryBody(wn physics.Node, sc *xyz.Scene) {
 	if bod != nil {
 		vw.InitLibSolid(bod, sc)
 	}
-	for idx := range *wn.Children() {
-		wk := wn.Child(idx).(physics.Node)
+	for idx := range wn.AsTree().Children {
+		wk := wn.AsTree().Child(idx).(physics.Node)
 		vw.InitLibraryBody(wk, sc)
 	}
 }
 
 // InitLibSolid initializes Scene library with Solid for given body
 func (vw *View) InitLibSolid(bod physics.Body, sc *xyz.Scene) {
-	nm := bod.Name()
+	nm := bod.AsTree().Name
 	bb := bod.AsBodyBase()
 	if bb.Vis == "" {
 		bb.Vis = nm
@@ -209,8 +209,8 @@ func (vw *View) ConfigView(wn physics.Node, vn xyz.Node, sc *xyz.Scene) {
 		sc.AddFromLibrary(bod.AsBodyBase().Vis, vb)
 	}
 	bgp := vb.Child(0)
-	if bgp.HasChildren() {
-		sld, has := bgp.Child(0).(*xyz.Solid)
+	if bgp.AsTree().HasChildren() {
+		sld, has := bgp.AsTree().Child(0).(*xyz.Solid)
 		if has {
 			vw.ConfigBodySolid(bod, sld)
 		}
@@ -221,20 +221,20 @@ func (vw *View) ConfigView(wn physics.Node, vn xyz.Node, sc *xyz.Scene) {
 // efficient plan-based Build to maximally preserve existing tree elements
 // returns true if view tree was modified (elements added / removed etc)
 func (vw *View) SyncNode(wn physics.Node, vn xyz.Node, sc *xyz.Scene) bool {
-	nm := wn.Name()
-	vn.SetName(nm) // guaranteed to be unique
-	skids := *wn.Children()
+	nm := wn.AsTree().Name
+	vn.AsTree().SetName(nm) // guaranteed to be unique
+	skids := wn.AsTree().Children
 	p := make(tree.TypePlan, 0, len(skids))
 	for _, skid := range skids {
-		p.Add(xyz.GroupType, skid.Name())
+		p.Add(xyz.GroupType, skid.AsTree().Name)
 	}
 	mod := tree.Update(vn, p)
 	modall := mod
 	for idx := range skids {
-		wk := wn.Child(idx).(physics.Node)
-		vk := vn.Child(idx).(xyz.Node)
+		wk := wn.AsTree().Child(idx).(physics.Node)
+		vk := vn.AsTree().Child(idx).(xyz.Node)
 		vw.ConfigView(wk, vk, sc)
-		if wk.HasChildren() {
+		if wk.AsTree().HasChildren() {
 			kmod := vw.SyncNode(wk, vk, sc)
 			if kmod {
 				modall = true
@@ -253,10 +253,10 @@ func (vw *View) SyncNode(wn physics.Node, vn xyz.Node, sc *xyz.Scene) bool {
 // UpdatePoseNode updates the view pose values only from world tree.
 // Essential that both trees are already synchronized.
 func (vw *View) UpdatePoseNode(wn physics.Node, vn xyz.Node) {
-	skids := *wn.Children()
+	skids := wn.AsTree().Children
 	for idx := range skids {
-		wk := wn.Child(idx).(physics.Node)
-		vk := vn.Child(idx).(xyz.Node)
+		wk := wn.AsTree().Child(idx).(physics.Node)
+		vk := vn.AsTree().Child(idx).(xyz.Node)
 		wb := wk.AsNodeBase()
 		vb := vk.AsNode()
 		vb.Pose.Pos = wb.Rel.Pos
@@ -268,14 +268,14 @@ func (vw *View) UpdatePoseNode(wn physics.Node, vn xyz.Node) {
 // UpdateBodyViewNode updates the body view info for given name(s)
 // Essential that both trees are already synchronized.
 func (vw *View) UpdateBodyViewNode(bodyNames []string, wn physics.Node, vn xyz.Node) {
-	skids := *wn.Children()
+	skids := wn.AsTree().Children
 	for idx := range skids {
-		wk := wn.Child(idx).(physics.Node)
-		vk := vn.Child(idx).(xyz.Node)
+		wk := wn.AsTree().Child(idx).(physics.Node)
+		vk := vn.AsTree().Child(idx).(xyz.Node)
 		match := false
 		if _, isBod := wk.(physics.Body); isBod {
 			for _, nm := range bodyNames {
-				if wk.Name() == nm {
+				if wk.AsTree().Name == nm {
 					match = true
 					break
 				}
@@ -283,9 +283,9 @@ func (vw *View) UpdateBodyViewNode(bodyNames []string, wn physics.Node, vn xyz.N
 		}
 		if match {
 			wb := wk.(physics.Body)
-			bgp := vk.Child(0)
-			if bgp.HasChildren() {
-				sld, has := bgp.Child(0).(*xyz.Solid)
+			bgp := vk.AsTree().Child(0)
+			if bgp.AsTree().HasChildren() {
+				sld, has := bgp.AsTree().Child(0).(*xyz.Solid)
 				if has {
 					vw.ConfigBodySolid(wb, sld)
 				}

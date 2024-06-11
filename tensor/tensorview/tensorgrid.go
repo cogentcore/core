@@ -191,7 +191,7 @@ func (tg *TensorGrid) Init() {
 	tg.WidgetBase.Init()
 	tg.Display.GridView = tg
 	tg.Display.Defaults()
-	tg.Style(func(s *styles.Style) {
+	tg.Styler(func(s *styles.Style) {
 		ms := tg.MinSize()
 		s.Min.Set(units.Dot(ms.X), units.Dot(ms.Y))
 		s.Grow.Set(1, 1)
@@ -227,7 +227,7 @@ func (tg *TensorGrid) OpenTensorView() {
 			tv := tvk.(*TensorView)
 			tv.TsrLay = tg.Disp.TensorLayout
 			tv.SetInactiveState(tg.IsInactive())
-			tv.ViewSig.Connect(tg.This(), func(recv, send tree.Node, sig int64, data interface{}) {
+			tv.ViewSig.Connect(tg.This, func(recv, send tree.Node, sig int64, data interface{}) {
 				tgg, _ := recv.Embed(KiT_TensorGrid).(*TensorGrid)
 				tgg.UpdateSig()
 			})

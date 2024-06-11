@@ -162,7 +162,7 @@ type ManipPoint struct { //core:no-new
 
 // NewManipPoint adds a new manipulation point
 func NewManipPoint(parent tree.Node, name string, meshName string, clr color.RGBA, pos math32.Vector3) *ManipPoint {
-	mpt := parent.NewChild(ManipPointType).(*ManipPoint)
+	mpt := parent.AsTree().NewChild(ManipPointType).(*ManipPoint)
 	mpt.SetName(name)
 	mpt.SetMeshName(meshName)
 	mpt.Defaults()
@@ -228,11 +228,11 @@ func (sw *Scene) handleSlideEvents() {
 		}
 		sn := sw.CurrentSelected.AsNode()
 		mpt := sw.CurrentManipPoint
-		mb := mpt.Par.(*xyz.Group)
+		mb := mpt.Parent.(*xyz.Group)
 		del := e.PrevDelta()
 		dx := float32(del.X)
 		dy := float32(del.Y)
-		mpos := mpt.Nm[len(ManipBoxName)+1:] // has ull etc for where positioned
+		mpos := mpt.Name[len(ManipBoxName)+1:] // has ull etc for where positioned
 		camd, sgn := xy.Camera.ViewMainAxis()
 		var dm math32.Vector3 // delta multiplier
 		if mpos[math32.X] == 'u' {

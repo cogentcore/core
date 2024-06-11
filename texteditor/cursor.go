@@ -30,7 +30,7 @@ func init() {
 		if w == nil {
 			return
 		}
-		ed := AsEditor(w.This())
+		ed := AsEditor(w)
 		if !w.StateIs(states.Focused) || !w.IsVisible() {
 			ed.BlinkOn = false
 			ed.RenderCursor(false)
@@ -43,10 +43,10 @@ func init() {
 
 // StartCursor starts the cursor blinking and renders it
 func (ed *Editor) StartCursor() {
-	if ed == nil || ed.This() == nil {
+	if ed == nil || ed.This == nil {
 		return
 	}
-	if !ed.This().(core.Widget).IsVisible() {
+	if !ed.This.(core.Widget).IsVisible() {
 		return
 	}
 	ed.BlinkOn = true
@@ -54,7 +54,7 @@ func (ed *Editor) StartCursor() {
 	if core.SystemSettings.CursorBlinkTime == 0 {
 		return
 	}
-	EditorBlinker.SetWidget(ed.This().(core.Widget))
+	EditorBlinker.SetWidget(ed.This.(core.Widget))
 	EditorBlinker.Blink(core.SystemSettings.CursorBlinkTime)
 }
 
@@ -66,10 +66,10 @@ func (ed *Editor) ClearCursor() {
 
 // StopCursor stops the cursor from blinking
 func (ed *Editor) StopCursor() {
-	if ed == nil || ed.This() == nil {
+	if ed == nil || ed.This == nil {
 		return
 	}
-	EditorBlinker.ResetWidget(ed.This().(core.Widget))
+	EditorBlinker.ResetWidget(ed.This.(core.Widget))
 }
 
 // CursorBBox returns a bounding-box for a cursor at given position
@@ -84,7 +84,7 @@ func (ed *Editor) CursorBBox(pos lexer.Pos) image.Rectangle {
 
 // RenderCursor renders the cursor on or off, as a sprite that is either on or off
 func (ed *Editor) RenderCursor(on bool) {
-	if ed == nil || ed.This() == nil {
+	if ed == nil || ed.This == nil {
 		return
 	}
 	if !on {
@@ -99,7 +99,7 @@ func (ed *Editor) RenderCursor(on bool) {
 		ms.Sprites.InactivateSprite(spnm)
 		return
 	}
-	if !ed.This().(core.Widget).IsVisible() {
+	if !ed.This.(core.Widget).IsVisible() {
 		return
 	}
 	if ed.Renders == nil {

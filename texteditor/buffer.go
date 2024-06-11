@@ -925,7 +925,7 @@ func (tb *Buffer) AppendTextLineMarkup(text []byte, markup []byte, signal bool) 
 // AddView adds a viewer of this buffer -- connects our signals to the viewer
 func (tb *Buffer) AddView(vw *Editor) {
 	tb.Editors = append(tb.Editors, vw)
-	// tb.BufSig.Connect(vw.This(), ViewBufSigRecv)
+	// tb.BufSig.Connect(vw.This, ViewBufSigRecv)
 }
 
 // DeleteView removes given viewer from our buffer
@@ -956,7 +956,7 @@ func (tb *Buffer) SceneFromView() *core.Scene {
 // AutoscrollViews ensures that views are always viewing the end of the buffer
 func (tb *Buffer) AutoScrollViews() {
 	for _, ed := range tb.Editors {
-		if ed != nil && ed.This() != nil {
+		if ed != nil && ed.This != nil {
 			ed.RenderLayout()
 			ed.SetCursorTarget(tb.EndPos())
 		}

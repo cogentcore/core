@@ -109,7 +109,7 @@ func (pt *TraceOptions) Out(ps *State, pr *Rule, step Steps, pos lexer.Pos, scop
 	if !pt.On {
 		return false
 	}
-	if !pt.CheckRule(pr.Nm) {
+	if !pt.CheckRule(pr.Name) {
 		return false
 	}
 	switch step {
@@ -140,7 +140,7 @@ func (pt *TraceOptions) Out(ps *State, pr *Rule, step Steps, pos lexer.Pos, scop
 	for i := 0; i < plev; i++ {
 		ind += "\t"
 	}
-	fmt.Fprintf(pt.OutWrite, "%v%v:\t %v\t %v\t tok: %v\t scope: %v\t ast: %v\n", ind, pr.Name(), step, msg, tokSrc, scope, ast.Path())
+	fmt.Fprintf(pt.OutWrite, "%v%v:\t %v\t %v\t tok: %v\t scope: %v\t ast: %v\n", ind, pr.Name, step, msg, tokSrc, scope, ast.Path())
 	if pt.ScopeSrc {
 		scopeSrc := ps.Src.TokenRegSrc(scope)
 		fmt.Fprintf(pt.OutWrite, "%v\t%v\n", ind, scopeSrc)

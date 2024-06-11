@@ -115,7 +115,7 @@ func (ts *Tabs) Init() {
 	ts.Frame.Init()
 	ts.MaxChars = 16
 	ts.CloseIcon = icons.Close
-	ts.Style(func(s *styles.Style) {
+	ts.Styler(func(s *styles.Style) {
 		s.Color = colors.C(colors.Scheme.OnBackground)
 		s.Grow.Set(1, 1)
 		if ts.Type.Effective(ts).IsColumn() {
@@ -125,8 +125,8 @@ func (ts *Tabs) Init() {
 		}
 	})
 	ts.OnWidgetAdded(func(w Widget) {
-		if w.Parent() == ts.ChildByName("frame") { // TODO(config): figure out how to get this to work with new config paradigm
-			w.Style(func(s *styles.Style) {
+		if w.AsTree().Parent == ts.ChildByName("frame") { // TODO(config): figure out how to get this to work with new config paradigm
+			w.Styler(func(s *styles.Style) {
 				// tab frames must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)
@@ -136,7 +136,7 @@ func (ts *Tabs) Init() {
 
 	ts.Maker(func(p *Plan) {
 		AddAt(p, "tabs", func(w *Frame) {
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 				s.Gap.Set(units.Dp(4))
 
@@ -162,7 +162,7 @@ func (ts *Tabs) Init() {
 			})
 		})
 		AddAt(p, "frame", func(w *Frame) {
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Display = styles.Stacked
 				w.SetFlag(true, FrameStackTopOnly) // key for allowing each tab to have its own size
 				s.Min.Set(units.Dp(160), units.Dp(96))
@@ -182,7 +182,7 @@ func (ts *Tabs) NumTabs() int {
 	if fr == nil {
 		return 0
 	}
-	return len(fr.Kids)
+	return len(fr.Children)
 }
 
 // CurrentTab returns currently selected tab and its index; returns nil if none.
@@ -205,7 +205,7 @@ func (ts *Tabs) CurrentTab() (Widget, int) {
 // be passed for the tab button.
 func (ts *Tabs) NewTab(label string, icon ...icons.Icon) *Frame {
 	fr := ts.FrameWidget()
-	idx := len(*fr.Children())
+	idx := len(fr.Children)
 	frame := ts.InsertNewTab(label, idx, icon...)
 	return frame
 }
@@ -217,7 +217,7 @@ func (ts *Tabs) InsertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
 	tfr := ts.FrameWidget()
 	frame := tree.InsertNewChild[*Frame](tfr, idx)
 	frame.SetName(label)
-	frame.Style(func(s *styles.Style) {
+	frame.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
 	ts.InsertTabOnlyAt(frame, label, idx, icon...)
@@ -229,7 +229,7 @@ func (ts *Tabs) InsertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
 // and returns the index of that tab.
 func (ts *Tabs) AddTab(frame *Frame, label string) int {
 	fr := ts.FrameWidget()
-	idx := len(*fr.Children())
+	idx := len(fr.Children)
 	ts.InsertTab(frame, label, idx)
 	return idx
 }
@@ -246,10 +246,10 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, icon ...ico
 		tab.SetIcon(icon[0])
 	}
 	tab.OnClick(func(e events.Event) {
-		ts.SelectTabByName(tab.Nm)
+		ts.SelectTabByName(tab.Name)
 	})
 	fr := ts.FrameWidget()
-	if len(fr.Kids) == 1 {
+	if len(fr.Children) == 1 {
 		fr.StackTop = 0
 		tab.SetSelected(true)
 		// } else {
@@ -277,7 +277,7 @@ func (ts *Tabs) TabAtIndex(idx int) (*Frame, *Tab, bool) {
 
 	fr := ts.FrameWidget()
 	tb := ts.Tabs()
-	sz := len(*fr.Children())
+	sz := len(fr.Children)
 	if idx < 0 || idx >= sz {
 		slog.Error("core.Tabs: index out of range for number of tabs", "index", idx, "numTabs", sz)
 		return nil, nil, false
@@ -331,20 +331,7 @@ func (ts *Tabs) TabIndexByName(name string) int {
 	if tab == nil {
 		return -1
 	}
-	return tab.IndexInParent()
-}
-
-// TabLabel returns tab label at given index
-func (ts *Tabs) TabLabel(idx int) string {
-	ts.Mu.Lock()
-	defer ts.Mu.Unlock()
-
-	tb := ts.Tabs()
-	tbut := tb.Child(idx)
-	if tbut == nil {
-		return ""
-	}
-	return tbut.Name()
+	return tab.AsTree().IndexInParent()
 }
 
 // SelectTabByName selects tab by widget name, returning it.
@@ -400,7 +387,7 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 
 	ts.Mu.Lock()
 	fr := ts.FrameWidget()
-	sz := len(*fr.Children())
+	sz := len(fr.Children)
 	tb := ts.Tabs()
 	nidx := -1
 	if fr.StackTop == idx {
@@ -415,8 +402,8 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 	if nidx < 0 && ts.NumTabs() > 1 {
 		nidx = max(idx-1, 0)
 	}
-	fr.DeleteChildAtIndex(idx)
-	tb.DeleteChildAtIndex(idx)
+	fr.DeleteChildAt(idx)
+	tb.DeleteChildAt(idx)
 	ts.Mu.Unlock()
 
 	if nidx >= 0 {
@@ -495,7 +482,7 @@ func (tb *Tab) Init() {
 	tb.Frame.Init()
 	tb.MaxChars = 16
 	tb.CloseIcon = icons.Close
-	tb.Style(func(s *styles.Style) {
+	tb.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
 
 		if !tb.IsReadOnly() {
@@ -534,7 +521,7 @@ func (tb *Tab) Init() {
 
 		if tb.Icon.IsSet() {
 			AddAt(p, "icon", func(w *Icon) {
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Font.Size.Dp(18)
 				})
 				w.Updater(func() {
@@ -547,7 +534,7 @@ func (tb *Tab) Init() {
 		}
 		if tb.Text != "" {
 			AddAt(p, "text", func(w *Text) {
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
 				})
@@ -565,13 +552,13 @@ func (tb *Tab) Init() {
 			AddAt(p, "close-space", func(w *Space) {})
 			AddAt(p, "close", func(w *Button) {
 				w.SetType(ButtonAction)
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Padding.Zero()
 					s.Border.Radius = styles.BorderRadiusFull
 				})
 				w.OnClick(func(e events.Event) {
 					ts := tb.Tabs()
-					idx := ts.TabIndexByName(tb.Nm)
+					idx := ts.TabIndexByName(tb.Name)
 					// if OnlyCloseActiveTab is on, only process delete when already selected
 					if SystemSettings.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
 						ts.SelectTabIndex(idx)
@@ -589,5 +576,5 @@ func (tb *Tab) Init() {
 
 // Tabs returns the parent [Tabs] of this [Tab].
 func (tb *Tab) Tabs() *Tabs {
-	return tb.Parent().Parent().(*Tabs)
+	return tb.Parent.AsTree().Parent.(*Tabs)
 }

@@ -81,7 +81,7 @@ func NewSubPlot(parent ...tree.Node) *PlotView {
 	fr := core.NewFrame(parent...)
 	tb := core.NewToolbar(fr)
 	pl := NewPlotView(fr)
-	fr.Style(func(s *styles.Style) {
+	fr.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
@@ -94,7 +94,7 @@ func (pl *PlotView) Init() {
 
 	pl.Params.Plot = pl
 	pl.Params.Defaults()
-	pl.Style(func(s *styles.Style) {
+	pl.Styler(func(s *styles.Style) {
 		s.Direction = styles.Row
 		s.Grow.Set(1, 1)
 	})
@@ -107,7 +107,7 @@ func (pl *PlotView) Init() {
 		pl.Params.FromMeta(pl.Table.Table)
 	})
 	core.AddChildAt(pl, "cols", func(w *core.Frame) {
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Grow.Set(0, 1)
 			s.Overflow.Y = styles.OverflowAuto
@@ -117,7 +117,7 @@ func (pl *PlotView) Init() {
 	})
 	core.AddChildAt(pl, "plot", func(w *Plot) {
 		w.Plot = pl.Plot
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
 		})
 	})
@@ -151,7 +151,7 @@ func (pl *PlotView) ColParamsTry(colNm string) (*ColumnParams, error) {
 			return cp, nil
 		}
 	}
-	return nil, fmt.Errorf("plot: %v column named: %v not found", pl.Nm, colNm)
+	return nil, fmt.Errorf("plot: %v column named: %v not found", pl.Name, colNm)
 }
 
 // ColParams returns the current column parameters by name (to access by index, just use Columns directly)
@@ -268,7 +268,7 @@ func (pl *PlotView) XLabel() string {
 // the [table.IndexView], under the assumption that it is used for tracking a
 // the latest updates of a running process.
 func (pl *PlotView) GoUpdatePlot() {
-	if pl == nil || pl.This() == nil {
+	if pl == nil || pl.This == nil {
 		return
 	}
 	if !pl.IsVisible() || pl.Table == nil || pl.Table.Table == nil || pl.InPlot {
@@ -287,13 +287,13 @@ func (pl *PlotView) GoUpdatePlot() {
 // It does not automatically update the [table.IndexView] unless it is
 // nil or out date.
 func (pl *PlotView) UpdatePlot() {
-	if pl == nil || pl.This() == nil {
+	if pl == nil || pl.This == nil {
 		return
 	}
 	if pl.Table == nil || pl.Table.Table == nil || pl.InPlot {
 		return
 	}
-	if len(pl.Kids) != 2 || len(pl.Columns) != pl.Table.Table.NumColumns() {
+	if len(pl.Children) != 2 || len(pl.Columns) != pl.Table.Table.NumColumns() {
 		pl.Update()
 	}
 	if pl.Table.Len() == 0 {
@@ -434,7 +434,7 @@ func (pl *PlotView) ColumnsFromMetaMap(meta map[string]string) {
 // SetAllColumns turns all Columns on or off (except X axis)
 func (pl *PlotView) SetAllColumns(on bool) {
 	fr := pl.ColumnsFrame()
-	for i, cli := range *fr.Children() {
+	for i, cli := range fr.Children {
 		if i < PlotColumnsHeaderN {
 			continue
 		}
@@ -455,7 +455,7 @@ func (pl *PlotView) SetAllColumns(on bool) {
 // SetColumnsByName turns cols On or Off if their name contains given string
 func (pl *PlotView) SetColumnsByName(nameContains string, on bool) { //types:add
 	fr := pl.ColumnsFrame()
-	for i, cli := range *fr.Children() {
+	for i, cli := range fr.Children {
 		if i < PlotColumnsHeaderN {
 			continue
 		}
@@ -480,7 +480,7 @@ func (pl *PlotView) SetColumnsByName(nameContains string, on bool) { //types:add
 func (pl *PlotView) makeColumns(p *core.Plan) {
 	pl.ColumnsListUpdate()
 	core.Add(p, func(w *core.Frame) {
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Direction = styles.Row
 			s.Grow.Set(0, 0)
 		})
@@ -503,7 +503,7 @@ func (pl *PlotView) makeColumns(p *core.Plan) {
 	for _, cp := range pl.Columns {
 		cp.Plot = pl
 		core.AddAt(p, cp.Column, func(w *core.Frame) {
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Direction = styles.Row
 				s.Grow.Set(0, 0)
 			})
@@ -556,7 +556,7 @@ func (pl *PlotView) MakeToolbar(p *core.Plan) {
 			SetTooltip("toggle the ability to zoom and pan the view").OnClick(func(e events.Event) {
 			pc := pl.PlotChild()
 			pc.SetReadOnly(!pc.IsReadOnly())
-			pc.ApplyStyleUpdate()
+			pc.Restyle()
 		})
 	})
 	core.Add(p, func(w *core.Button) {
@@ -580,7 +580,7 @@ func (pl *PlotView) MakeToolbar(p *core.Plan) {
 		w.SetText("Config").SetIcon(icons.Settings).
 			SetTooltip("set parameters that control display (font size etc)").
 			OnClick(func(e events.Event) {
-				d := core.NewBody().AddTitle(pl.Nm + " Params")
+				d := core.NewBody().AddTitle(pl.Name + " Params")
 				views.NewStructView(d).SetStruct(&pl.Params).
 					OnChange(func(e events.Event) {
 						pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
@@ -592,7 +592,7 @@ func (pl *PlotView) MakeToolbar(p *core.Plan) {
 		w.SetText("Table").SetIcon(icons.Edit).
 			SetTooltip("open a TableView window of the data").
 			OnClick(func(e events.Event) {
-				d := core.NewBody().AddTitle(pl.Nm + " Data")
+				d := core.NewBody().AddTitle(pl.Name + " Data")
 				tv := tensorview.NewTableView(d).SetTable(pl.Table.Table)
 				d.AddAppBar(tv.MakeToolbar)
 				d.NewFullDialog(pl).SetNewWindow(true).Run()

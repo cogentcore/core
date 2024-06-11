@@ -83,7 +83,7 @@ type SVG struct {
 	// map of unique numeric ids for all elements.
 	// Used for allocating new unique id numbers, appended to end of elements.
 	// See NewUniqueID, GatherIDs
-	UniqueIds map[int]struct{} `view:"-" json:"-" xml:"-"`
+	UniqueIDs map[int]struct{} `view:"-" json:"-" xml:"-"`
 
 	// flag is set when the SVG is rendering
 	IsRendering bool
@@ -118,7 +118,7 @@ func (sv *SVG) Resize(nwsz image.Point) {
 	if nwsz.X == 0 || nwsz.Y == 0 {
 		return
 	}
-	if sv.Root == nil || sv.Root.This() == nil {
+	if sv.Root == nil || sv.Root.This == nil {
 		sv.Config(nwsz.X, nwsz.Y)
 		return
 	}
@@ -136,7 +136,7 @@ func (sv *SVG) Resize(nwsz image.Point) {
 
 // DeleteAll deletes any existing elements in this svg
 func (sv *SVG) DeleteAll() {
-	if sv.Root == nil || sv.Root.This() == nil {
+	if sv.Root == nil || sv.Root.This == nil {
 		return
 	}
 	sv.Root.Paint.Defaults()
@@ -176,13 +176,10 @@ func (sv *SVG) ImageByURL(url string) image.Image {
 
 func (sv *SVG) Style() {
 	// set the Defs flags
-	sv.Defs.WalkDown(func(k tree.Node) bool {
-		ni := k.(Node)
-		if ni == nil || ni.This() == nil {
-			return tree.Break
-		}
-		ni.SetFlag(true, IsDef)
-		ni.Style(sv)
+	sv.Defs.WalkDown(func(n tree.Node) bool {
+		sn := n.(Node)
+		sn.AsTree().SetFlag(true, IsDef)
+		sn.Style(sv)
 		return tree.Continue
 	})
 
@@ -196,11 +193,8 @@ func (sv *SVG) Style() {
 	sv.SetUnitContext(&sv.Root.Paint, math32.Vector2{}, math32.Vector2{})
 
 	sv.Root.WalkDown(func(k tree.Node) bool {
-		ni := k.(Node)
-		if ni == nil || ni.This() == nil {
-			return tree.Break
-		}
-		ni.Style(sv)
+		sn := k.(Node)
+		sn.Style(sv)
 		return tree.Continue
 	})
 }

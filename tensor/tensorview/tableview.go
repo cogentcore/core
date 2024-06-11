@@ -76,7 +76,7 @@ func (tv *TableView) Init() {
 	tv.ColumnTensorBlank = map[int]*tensor.Float64{}
 
 	tv.Makers[0] = func(p *core.Plan) { // TODO: reduce redundancy with SliceViewBase Maker
-		svi := tv.This().(views.SliceViewer)
+		svi := tv.This.(views.SliceViewer)
 		svi.UpdateSliceSize()
 
 		tv.ViewMuLock()
@@ -142,7 +142,7 @@ func (tv *TableView) SetTable(et *table.Table) *TableView {
 
 	tv.SetSliceBase()
 	tv.Table = table.NewIndexView(et)
-	tv.This().(views.SliceViewer).UpdateSliceSize()
+	tv.This.(views.SliceViewer).UpdateSliceSize()
 	tv.Update()
 	return tv
 }
@@ -166,7 +166,7 @@ func (tv *TableView) SetTableView(ix *table.IndexView) *TableView {
 
 	tv.Table = ix.Clone() // always copy
 
-	tv.This().(views.SliceViewer).UpdateSliceSize()
+	tv.This.(views.SliceViewer).UpdateSliceSize()
 	tv.StartIndex = 0
 	tv.VisRows = tv.MinRows
 	if !tv.IsReadOnly() {
@@ -220,7 +220,7 @@ func (tv *TableView) UpdateMaxWidths() {
 func (tv *TableView) MakeHeader(p *core.Plan) {
 	core.AddAt(p, "header", func(w *core.Frame) {
 		core.ToolbarStyles(w)
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(0, 0)
 			s.Gap.Set(units.Em(0.5)) // matches grid default
 		})
@@ -228,7 +228,7 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 			if tv.Is(views.SliceViewShowIndex) {
 				core.AddAt(p, "head-index", func(w *core.Text) { // TODO: is not working
 					w.SetType(core.TextBodyMedium)
-					w.Style(func(s *styles.Style) {
+					w.Styler(func(s *styles.Style) {
 						s.Align.Self = styles.Center
 					})
 					w.SetText("Index")
@@ -277,7 +277,7 @@ func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 }
 
 func (tv *TableView) MakeRow(p *core.Plan, i int) {
-	svi := tv.This().(views.SliceViewer)
+	svi := tv.This.(views.SliceViewer)
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
 
@@ -302,7 +302,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 			}, func(w core.Value) {
 				wb := w.AsWidget()
 				tv.MakeValue(w, i)
-				w.SetProperty(views.SliceViewColProperty, fli)
+				w.AsTree().SetProperty(views.SliceViewColProperty, fli)
 				if !tv.IsReadOnly() {
 					wb.OnChange(func(e events.Event) {
 						if si < len(tv.Table.Indexes) {
@@ -335,7 +335,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 					wb.SetReadOnly(tv.IsReadOnly())
 					w.SetState(invis, states.Invisible)
 					if svi.HasStyleFunc() {
-						w.ApplyStyle()
+						w.Style()
 					}
 					if invis {
 						wb.SetSelected(false)
@@ -348,7 +348,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 				wb := w.AsWidget()
 				w.SetProperty(views.SliceViewRowProperty, i)
 				w.SetProperty(views.SliceViewColProperty, fli)
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Grow.Set(0, 0)
 				})
 				wb.Updater(func() {
@@ -550,7 +550,7 @@ func (tv *TableView) RowFirstVisWidget(row int) (*core.WidgetBase, bool) {
 	}
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	sg := tv.SliceGrid()
-	w := sg.Kids[row*nWidgPerRow].(core.Widget).AsWidget()
+	w := sg.Children[row*nWidgPerRow].(core.Widget).AsWidget()
 	if w.Geom.TotalBBox != (image.Rectangle{}) {
 		return w, true
 	}
@@ -598,7 +598,7 @@ func (tv *TableView) RowGrabFocus(row int) *core.WidgetBase {
 
 func (tv *TableView) SizeFinal() {
 	tv.SliceViewBase.SizeFinal()
-	sg := tv.This().(views.SliceViewer).SliceGrid()
+	sg := tv.This.(views.SliceViewer).SliceGrid()
 	sh := tv.SliceHeader()
 	sh.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
 		_, sgb := core.AsWidget(sg.Child(i))

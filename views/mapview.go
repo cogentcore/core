@@ -37,7 +37,7 @@ func (mv *MapView) WidgetValue() any { return &mv.Map }
 
 func (mv *MapView) Init() {
 	mv.Frame.Init()
-	mv.Style(func(s *styles.Style) {
+	mv.Styler(func(s *styles.Style) {
 		if mv.Inline {
 			return
 		}
@@ -77,7 +77,7 @@ func (mv *MapView) Init() {
 				BindMapKey(mapv, key, w)
 				wb := w.AsWidget()
 				wb.SetReadOnly(mv.IsReadOnly())
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.SetReadOnly(mv.IsReadOnly())
 					s.SetTextWrap(false)
 				})
@@ -106,7 +106,7 @@ func (mv *MapView) Init() {
 				wb.SetReadOnly(mv.IsReadOnly())
 				wb.OnChange(func(e events.Event) { mv.SendChange(e) })
 				wb.OnInput(mv.HandleEvent)
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.SetReadOnly(mv.IsReadOnly())
 					s.SetTextWrap(false)
 				})

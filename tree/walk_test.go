@@ -35,7 +35,7 @@ func TestDown(t *testing.T) {
 	var cur Node = testTree
 	res := []string{}
 	for {
-		res = append(res, cur.Path())
+		res = append(res, cur.AsTree().Path())
 		curi := Next(cur)
 		if curi == nil {
 			break
@@ -49,7 +49,7 @@ func TestUp(t *testing.T) {
 	cur := Last(testTree)
 	res := []string{}
 	for {
-		res = append(res, cur.Path())
+		res = append(res, cur.AsTree().Path())
 		curi := Previous(cur)
 		if curi == nil {
 			break

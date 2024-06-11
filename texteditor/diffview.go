@@ -160,7 +160,7 @@ func (dv *DiffView) Init() {
 	dv.BufB.Options.LineNumbers = true
 	dv.BufB.Stat() // update markup
 
-	dv.Style(func(s *styles.Style) {
+	dv.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
 
@@ -168,7 +168,7 @@ func (dv *DiffView) Init() {
 		core.AddChildAt(dv, name, func(w *DiffTextEditor) {
 			w.SetBuffer(buf)
 			w.SetReadOnly(true)
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Min.X.Ch(80)
 				s.Min.Y.Em(40)
 			})
@@ -531,7 +531,7 @@ func (dv *DiffView) MakeToolbar(p *core.Plan) {
 			OnClick(func(e events.Event) {
 				dv.NextDiff(0)
 			}).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
 			})
 	})
@@ -541,7 +541,7 @@ func (dv *DiffView) MakeToolbar(p *core.Plan) {
 			OnClick(func(e events.Event) {
 				dv.PrevDiff(0)
 			}).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
 			})
 	})
@@ -552,7 +552,7 @@ func (dv *DiffView) MakeToolbar(p *core.Plan) {
 				dv.ApplyDiff(0, -1)
 				dv.NextDiff(0)
 			}).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
 			})
 	})
@@ -562,7 +562,7 @@ func (dv *DiffView) MakeToolbar(p *core.Plan) {
 			OnClick(func(e events.Event) {
 				dv.UndoDiff(0)
 			}).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetState(!dv.BufA.IsChanged(), states.Disabled)
 			})
 	})
@@ -574,7 +574,7 @@ func (dv *DiffView) MakeToolbar(p *core.Plan) {
 				fb.Args[0].SetValue(dv.FileA)
 				fb.CallFunc()
 			}).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetState(!dv.BufA.IsChanged(), states.Disabled)
 			})
 	})
@@ -594,7 +594,7 @@ func (dv *DiffView) MakeToolbar(p *core.Plan) {
 			OnClick(func(e events.Event) {
 				dv.NextDiff(1)
 			}).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
 			})
 	})
@@ -604,7 +604,7 @@ func (dv *DiffView) MakeToolbar(p *core.Plan) {
 			OnClick(func(e events.Event) {
 				dv.PrevDiff(1)
 			}).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
 			})
 	})
@@ -615,7 +615,7 @@ func (dv *DiffView) MakeToolbar(p *core.Plan) {
 				dv.ApplyDiff(1, -1)
 				dv.NextDiff(1)
 			}).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
 			})
 	})
@@ -625,7 +625,7 @@ func (dv *DiffView) MakeToolbar(p *core.Plan) {
 			OnClick(func(e events.Event) {
 				dv.UndoDiff(1)
 			}).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetState(!dv.BufB.IsChanged(), states.Disabled)
 			})
 	})
@@ -637,7 +637,7 @@ func (dv *DiffView) MakeToolbar(p *core.Plan) {
 				fb.Args[0].SetValue(dv.FileB)
 				fb.CallFunc()
 			}).
-			Style(func(s *styles.Style) {
+			Styler(func(s *styles.Style) {
 				s.SetState(!dv.BufB.IsChanged(), states.Disabled)
 			})
 	})
@@ -679,7 +679,7 @@ func (tv *DiffTextEditor) HandleDoubleClick() {
 			ln := newPos.Ln
 			dv := tv.DiffView()
 			if dv != nil && tv.Buffer != nil {
-				if tv.Nm == "text-a" {
+				if tv.Name == "text-a" {
 					dv.ApplyDiff(0, ln)
 				} else {
 					dv.ApplyDiff(1, ln)

@@ -71,7 +71,7 @@ func (pg *Page) Init() {
 	pg.Context.OpenURL = func(url string) {
 		pg.OpenURL(url, true)
 	}
-	pg.Style(func(s *styles.Style) {
+	pg.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
@@ -98,10 +98,10 @@ func (pg *Page) Init() {
 		sp.SetName("splits")
 
 		nav := views.NewTreeViewFrame(sp).SetText(core.TheApp.Name())
-		nav.Parent().SetName("nav-frame")
+		nav.Parent.AsTree().SetName("nav-frame")
 		nav.SetName("nav")
 		nav.SetReadOnly(true)
-		nav.ParentWidget().Style(func(s *styles.Style) {
+		nav.ParentWidget().Styler(func(s *styles.Style) {
 			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
 		})
 		nav.OnSelect(func(e events.Event) {
@@ -112,7 +112,7 @@ func (pg *Page) Init() {
 			url := "/"
 			if sn != nav {
 				// we need a slash so that it doesn't think it's a relative URL
-				url = "/" + sn.PathFrom(nav)
+				url = "/" + sn.AsTree().PathFrom(nav)
 			}
 			pg.OpenURL(url, true)
 		})
@@ -158,7 +158,7 @@ func (pg *Page) Init() {
 			return nil
 		}))
 
-		core.NewFrame(sp).Style(func(s *styles.Style) {
+		core.NewFrame(sp).Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
 		}).SetName("body")
 	})

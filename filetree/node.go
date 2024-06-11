@@ -89,7 +89,7 @@ func (fn *Node) Init() {
 	fn.TreeView.Init()
 	fn.ContextMenus = nil // do not include treeview
 	fn.AddContextMenu(fn.ContextMenu)
-	fn.Style(func(s *styles.Style) {
+	fn.Styler(func(s *styles.Style) {
 		status := fn.Info.VCS
 		s.Font.Weight = styles.WeightNormal
 		s.Font.Style = styles.FontNormal
@@ -151,7 +151,7 @@ func (fn *Node) Init() {
 		}
 	})
 	core.AddChildInit(fn, "parts", func(w *core.Frame) {
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Gap.X.Em(0.4)
 		})
 		w.OnClick(func(e events.Event) {
@@ -174,7 +174,7 @@ func (fn *Node) Init() {
 			core.AddChildInit(w, "stack", func(w *core.Frame) {
 				f := func(name string) {
 					core.AddChildInit(w, name, func(w *core.Icon) {
-						w.Style(func(s *styles.Style) {
+						w.Styler(func(s *styles.Style) {
 							s.Min.Set(units.Em(1))
 						})
 					})
@@ -268,7 +268,7 @@ func (fn *Node) IsAutoSave() bool {
 // MyRelPath returns the relative path from root for this node
 func (fn *Node) MyRelPath() string {
 	if fn.IsIrregular() || fn.FRoot == nil {
-		return fn.Nm
+		return fn.Name
 	}
 	return dirs.RelFilePath(string(fn.FPath), string(fn.FRoot.FPath))
 }
@@ -304,7 +304,7 @@ func (fn *Node) SyncDir() {
 	fn.Open() // ensure
 	plan := fn.PlanOfFiles(path)
 	hasExtFiles := false
-	if fn.This() == fn.FRoot.This() {
+	if fn.This == fn.FRoot.This {
 		if len(fn.FRoot.ExtFiles) > 0 {
 			plan = append(tree.TypePlan{{Type: fn.FRoot.FileNodeType, Name: ExternalFilesName}}, plan...)
 			hasExtFiles = true
@@ -312,14 +312,14 @@ func (fn *Node) SyncDir() {
 	}
 	mods := tree.Update(fn, plan)
 	// always go through kids, regardless of mods
-	for _, sfk := range fn.Kids {
+	for _, sfk := range fn.Children {
 		sf := AsNode(sfk)
 		sf.FRoot = fn.FRoot
-		if hasExtFiles && sf.Nm == ExternalFilesName {
+		if hasExtFiles && sf.Name == ExternalFilesName {
 			fn.FRoot.SyncExtFiles(sf)
 			continue
 		}
-		fp := filepath.Join(path, sf.Nm)
+		fp := filepath.Join(path, sf.Name)
 		// if sf.Buf != nil {
 		// 	fmt.Printf("fp: %v  nm: %v\n", fp, sf.Nm)
 		// }
@@ -487,7 +487,7 @@ func (fn *Node) UpdateNode() error {
 func (fn *Node) SelectedFunc(fun func(sn *Node)) {
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
-		sn := AsNode(sels[i].This())
+		sn := AsNode(sels[i])
 		if sn == nil {
 			continue
 		}

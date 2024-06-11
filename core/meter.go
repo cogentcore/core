@@ -70,12 +70,12 @@ func (m *Meter) Init() {
 	m.WidgetBase.Init()
 	m.Value = 0.5
 	m.Max = 1
-	m.Style(func(s *styles.Style) {
+	m.Styler(func(s *styles.Style) {
 		m.ValueColor = colors.C(colors.Scheme.Primary.Base)
 		s.Background = colors.C(colors.Scheme.SurfaceVariant)
 		s.Border.Radius = styles.BorderRadiusFull
 	})
-	m.StyleFinal(func(s *styles.Style) {
+	m.FinalStyler(func(s *styles.Style) {
 		switch m.Type {
 		case MeterLinear:
 			if s.Direction == styles.Row {
@@ -101,8 +101,8 @@ func (m *Meter) Init() {
 	})
 }
 
-func (m *Meter) ApplyStyle() {
-	m.ApplyStyleWidget()
+func (m *Meter) Style() {
+	m.WidgetBase.Style()
 	m.Width.ToDots(&m.Styles.UnitContext)
 }
 

@@ -72,7 +72,7 @@ func (sw *Switch) SetWidgetValue(value any) error {
 
 func (sw *Switch) Init() {
 	sw.Frame.Init()
-	sw.Style(func(s *styles.Style) {
+	sw.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Checkable)
 		if !sw.IsReadOnly() {
 			s.Cursor = cursors.Pointer
@@ -130,7 +130,7 @@ func (sw *Switch) Init() {
 		}
 
 		AddAt(p, "stack", func(w *Frame) {
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Display = styles.Stacked
 				s.Gap.Zero()
 			})
@@ -139,7 +139,7 @@ func (sw *Switch) Init() {
 			})
 			w.Maker(func(p *Plan) {
 				AddAt(p, "icon-on", func(w *Icon) {
-					w.Style(func(s *styles.Style) {
+					w.Styler(func(s *styles.Style) {
 						if sw.Type == SwitchChip {
 							s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 						} else {
@@ -170,13 +170,13 @@ func (sw *Switch) Init() {
 					}
 				}
 				AddAt(p, "icon-off", func(w *Icon) {
-					w.Style(iconStyle)
+					w.Styler(iconStyle)
 					w.Updater(func() {
 						w.SetIcon(sw.IconOff)
 					})
 				})
 				AddAt(p, "icon-indeterminate", func(w *Icon) {
-					w.Style(iconStyle)
+					w.Styler(iconStyle)
 					w.Updater(func() {
 						w.SetIcon(sw.IconIndeterminate)
 					})
@@ -186,12 +186,12 @@ func (sw *Switch) Init() {
 
 		if sw.Text != "" {
 			AddAt(p, "space", func(w *Space) {
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Min.X.Ch(0.1)
 				})
 			})
 			AddAt(p, "text", func(w *Text) {
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
 					s.FillMargin = false

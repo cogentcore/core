@@ -16,7 +16,7 @@ func (sc *Scene) AddToLibrary(gp *Group) {
 	if sc.Library == nil {
 		sc.Library = make(map[string]*Group)
 	}
-	sc.Library[gp.Name()] = gp
+	sc.Library[gp.Name] = gp
 	gp.Scene = sc
 }
 
@@ -38,10 +38,10 @@ func (sc *Scene) AddFromLibrary(nm string, parent tree.Node) (*Group, error) {
 		return nil, fmt.Errorf("Scene AddFromLibrary: Library item: %s not found", nm)
 	}
 	nwgp := gp.Clone().(*Group)
-	parent.AddChild(nwgp)
+	parent.AsTree().AddChild(nwgp)
 	tree.SetUniqueName(nwgp)
 
-	parent.WalkDown(func(k tree.Node) bool {
+	parent.AsTree().WalkDown(func(k tree.Node) bool {
 		ni, nb := AsNode(k)
 		if ni == nil {
 			return tree.Break

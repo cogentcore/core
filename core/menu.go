@@ -20,7 +20,7 @@ import (
 // for the given pop-up menu frame with the given parent.
 // It should be called on menu frames when they are created.
 func MenuSceneConfigStyles(msc *Scene) {
-	msc.Style(func(s *styles.Style) {
+	msc.Styler(func(s *styles.Style) {
 		s.Grow.Set(0, 0)
 		s.Padding.Set(units.Dp(2))
 		s.Border.Radius = styles.BorderRadiusExtraSmall
@@ -49,7 +49,7 @@ func MenuSceneConfigStyles(msc *Scene) {
 			return
 		}
 		if sp, ok := w.(*Separator); ok {
-			sp.Style(func(s *styles.Style) {
+			sp.Styler(func(s *styles.Style) {
 				s.Direction = styles.Row
 			})
 		}
@@ -72,11 +72,11 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 	}
 
 	hasSelected := false
-	msc.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		if wi.This() == msc.This() {
+	msc.WidgetWalkDown(func(w Widget, wb *WidgetBase) bool {
+		if w == msc {
 			return tree.Continue
 		}
-		if bt := AsButton(wi); bt != nil {
+		if bt := AsButton(w); bt != nil {
 			if bt.Menu == nil {
 				bt.handleClickDismissMenu()
 			}
@@ -121,7 +121,7 @@ func NewMenuStage(sc *Scene, ctx Widget, pos image.Point) *Stage {
 // can be chained directly after the New call.
 // Use Run call at the end to start the Stage running.
 func NewMenu(menu func(m *Scene), ctx Widget, pos image.Point) *Stage {
-	return NewMenuStage(NewMenuScene(menu, ctx.Name()), ctx, pos)
+	return NewMenuStage(NewMenuScene(menu, ctx.AsTree().Name), ctx, pos)
 }
 
 // AddContextMenu adds the given context menu to [WidgetBase.ContextMenus].
@@ -142,7 +142,7 @@ func (wb *WidgetBase) ApplyContextMenus(m *Scene) {
 		nc := m.NumChildren()
 		// we delete any extra separator
 		if nc > 0 && m.Child(nc-1).NodeType() == SeparatorType {
-			m.DeleteChildAtIndex(nc - 1)
+			m.DeleteChildAt(nc - 1)
 		}
 		if i != 0 {
 			NewSeparator(m)
@@ -162,14 +162,14 @@ func (wb *WidgetBase) ContextMenuPos(e events.Event) image.Point {
 
 func (wb *WidgetBase) HandleWidgetContextMenu() {
 	wb.On(events.ContextMenu, func(e events.Event) {
-		wi := wb.This().(Widget)
+		wi := wb.This.(Widget)
 		wi.ShowContextMenu(e)
 	})
 }
 
 func (wb *WidgetBase) ShowContextMenu(e events.Event) {
 	e.SetHandled() // always
-	wi := wb.This().(Widget)
+	wi := wb.This.(Widget)
 	nm := NewMenu(wi.ApplyContextMenus, wi, wi.ContextMenuPos(e))
 	if nm == nil { // no items
 		return

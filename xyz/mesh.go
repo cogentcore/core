@@ -158,7 +158,7 @@ func (sc *Scene) MeshByNameTry(nm string) (Mesh, error) {
 	if ok {
 		return ms, nil
 	}
-	return nil, fmt.Errorf("Mesh named: %v not found in Scene: %v", nm, sc.Nm)
+	return nil, fmt.Errorf("Mesh named: %v not found in Scene: %v", nm, sc.Name)
 }
 
 // MeshList returns a list of available meshes (e.g., for chooser)

@@ -47,7 +47,7 @@ func (tp *TimePicker) Init() {
 			w.SetMax(12).SetMin(1)
 		}
 		w.SetValue(float32(tp.Hour))
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Font.Size.Dp(57)
 			s.Min.X.Dp(96)
 		})
@@ -69,7 +69,7 @@ func (tp *TimePicker) Init() {
 	})
 	core.AddChild(tp, func(w *core.Text) {
 		w.SetType(core.TextDisplayLarge).SetText(":")
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.SetTextWrap(false)
 			s.Min.X.Ch(1)
 		})
@@ -78,7 +78,7 @@ func (tp *TimePicker) Init() {
 		w.SetStep(1).SetEnforceStep(true).
 			SetMin(0).SetMax(60).SetFormat("%02d").
 			SetValue(float32(tp.Time.Minute()))
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Font.Size.Dp(57)
 			s.Min.X.Dp(96)
 		})
@@ -95,7 +95,7 @@ func (tp *TimePicker) Init() {
 			core.Add(p, func(w *core.Switches) {
 				w.SetMutex(true).SetType(core.SwitchSegmentedButton).SetItems(core.SwitchItem{Value: "AM"}, core.SwitchItem{Value: "PM"})
 				tp.PM = tp.Time.Hour() >= 12
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Direction = styles.Column
 				})
 				w.Updater(func() {
@@ -150,12 +150,12 @@ func (dp *DatePicker) SetTime(tim time.Time) *DatePicker { // TODO(config)
 
 func (dp *DatePicker) Init() {
 	dp.Frame.Init()
-	dp.Style(func(s *styles.Style) {
+	dp.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
 
 	core.AddChild(dp, func(w *core.Frame) {
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Gap.Zero()
 		})
 		arrowStyle := func(s *styles.Style) {
@@ -167,7 +167,7 @@ func (dp *DatePicker) Init() {
 			w.OnClick(func(e events.Event) {
 				dp.SetTime(dp.Time.AddDate(0, -1, 0))
 			})
-			w.Style(arrowStyle)
+			w.Styler(arrowStyle)
 		})
 		core.AddChild(w, func(w *core.Chooser) {
 			sms := make([]core.ChooserItem, len(shortMonths))
@@ -186,14 +186,14 @@ func (dp *DatePicker) Init() {
 			w.OnClick(func(e events.Event) {
 				dp.SetTime(dp.Time.AddDate(0, 1, 0))
 			})
-			w.Style(arrowStyle)
+			w.Styler(arrowStyle)
 		})
 		core.AddChild(w, func(w *core.Button) {
 			w.SetType(core.ButtonAction).SetIcon(icons.NavigateBefore)
 			w.OnClick(func(e events.Event) {
 				dp.SetTime(dp.Time.AddDate(-1, 0, 0))
 			})
-			w.Style(arrowStyle)
+			w.Styler(arrowStyle)
 		})
 		core.AddChild(w, func(w *core.Chooser) {
 			yr := dp.Time.Year()
@@ -216,11 +216,11 @@ func (dp *DatePicker) Init() {
 			w.OnClick(func(e events.Event) {
 				dp.SetTime(dp.Time.AddDate(1, 0, 0))
 			})
-			w.Style(arrowStyle)
+			w.Styler(arrowStyle)
 		})
 	})
 	core.AddChild(dp, func(w *core.Frame) {
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Display = styles.Grid
 			s.Columns = 7
 		})
@@ -251,7 +251,7 @@ func (dp *DatePicker) Init() {
 					w.OnClick(func(e events.Event) {
 						dp.SetTime(dt)
 					})
-					w.Style(func(s *styles.Style) {
+					w.Styler(func(s *styles.Style) {
 						s.CenterAll()
 						s.Min.Set(units.Dp(32))
 						s.Padding.Set(units.Dp(6))
@@ -314,7 +314,7 @@ func (ti *TimeInput) Init() {
 			})
 			d.RunDialog(w)
 		})
-		w.Style(style)
+		w.Styler(style)
 		w.Updater(func() {
 			w.SetReadOnly(ti.IsReadOnly())
 			w.SetText(ti.Time.Format("1/2/2006"))
@@ -346,7 +346,7 @@ func (ti *TimeInput) Init() {
 			})
 			d.RunDialog(w)
 		})
-		w.Style(style)
+		w.Styler(style)
 		w.Updater(func() {
 			w.SetReadOnly(ti.IsReadOnly())
 			w.SetText(ti.Time.Format(core.SystemSettings.TimeFormat()))

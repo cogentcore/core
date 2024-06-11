@@ -58,27 +58,27 @@ func (fb *FileBrowse) Defaults() {
 
 func (fb *FileBrowse) Init() {
 	fb.Defaults()
-	fb.Style(func(s *styles.Style) {
+	fb.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 		s.Margin.Set(units.Dp(8))
 	})
-	fb.OnWidgetAdded(func(w core.Widget) {
-		switch w.PathFrom(fb) {
+	fb.OnWidgetAdded(func(w core.Widget) { // TODO(config)
+		switch w.AsTree().PathFrom(fb) {
 		case "title":
 			title := w.(*core.Text)
 			title.Type = core.TextHeadlineSmall
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Justify.Content = styles.Center
 			})
 		}
-		if w.Parent().PathFrom(fb) == "splits" {
-			if w.IndexInParent() == 0 {
-				w.Style(func(s *styles.Style) {
+		if w.AsTree().Parent.AsTree().PathFrom(fb) == "splits" {
+			if w.AsTree().IndexInParent() == 0 {
+				w.Styler(func(s *styles.Style) {
 					s.Grow.Set(1, 1)
 				})
 			} else {
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					s.Grow.Set(1, 1)
 					s.Min.X.Ch(20)
 					s.Min.Y.Ch(10)
@@ -270,29 +270,20 @@ func (fb *FileBrowse) StandardPlan() bool {
 
 // SetTitle sets the optional title and updates the title text
 func (fb *FileBrowse) SetTitle(title string) {
-	lab, _ := fb.TitleWidget()
-	if lab != nil {
-		lab.Text = title
+	t := fb.TitleWidget()
+	if t != nil {
+		t.Text = title
 	}
 }
 
-// Title returns the title text widget, and its index, within frame; nil,
-// -1 if not found
-func (fb *FileBrowse) TitleWidget() (*core.Text, int) {
-	idx, ok := fb.Children().IndexByName("title", 0)
-	if !ok {
-		return nil, -1
-	}
-	return fb.Child(idx).(*core.Text), idx
+// Title returns the title text widget.
+func (fb *FileBrowse) TitleWidget() *core.Text {
+	return fb.ChildByName("title", 0).(*core.Text)
 }
 
-// Splits returns the main Splits
-func (fb *FileBrowse) Splits() (*core.Splits, int) {
-	idx, ok := fb.Children().IndexByName("splits", 2)
-	if !ok {
-		return nil, -1
-	}
-	return fb.Child(idx).(*core.Splits), idx
+// Splits returns the main Splits widget.
+func (fb *FileBrowse) Splits() *core.Splits {
+	return fb.ChildByName("splits", 2).(*core.Splits)
 }
 
 // TextEditorByIndex returns the TextEditor by index, nil if not found
@@ -301,7 +292,7 @@ func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
 		log.Printf("FileBrowse: text view index out of range: %v\n", idx)
 		return nil
 	}
-	split, _ := fb.Splits()
+	split := fb.Splits()
 	stidx := 1 // 0 = file browser -- could be collapsed but always there.
 	if split != nil {
 		svk := split.Child(stidx + idx)
@@ -321,7 +312,7 @@ func (fb *FileBrowse) MakeToolbar(p *core.Plan) { //types:add
 	})
 	core.Add(p, func(w *views.FuncButton) {
 		w.SetFunc(fb.SaveActiveView).SetKey(keymap.Save)
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.SetEnabled(fb.Changed && fb.ActiveFilename != "")
 		})
 	})
@@ -345,7 +336,7 @@ func (fb *FileBrowse) SplitsPlan() tree.TypePlan {
 
 // ConfigSplits configures the Splits.
 func (fb *FileBrowse) ConfigSplits() {
-	split, _ := fb.Splits()
+	split := fb.Splits()
 	if split == nil {
 		return
 	}
@@ -358,7 +349,7 @@ func (fb *FileBrowse) ConfigSplits() {
 		fb.Files.OnSelect(func(e events.Event) {
 			e.SetHandled()
 			if len(fb.Files.SelectedNodes) > 0 {
-				sn, ok := fb.Files.SelectedNodes[0].This().(*filetree.Node)
+				sn, ok := fb.Files.SelectedNodes[0].(*filetree.Node)
 				if ok {
 					fb.FileNodeSelected(sn)
 				}
@@ -367,7 +358,7 @@ func (fb *FileBrowse) ConfigSplits() {
 		fb.Files.DoubleClickFun = func(e events.Event) {
 			e.SetHandled()
 			if len(fb.Files.SelectedNodes) > 0 {
-				sn, ok := fb.Files.SelectedNodes[0].This().(*filetree.Node)
+				sn, ok := fb.Files.SelectedNodes[0].(*filetree.Node)
 				if ok {
 					fb.FileNodeOpened(sn)
 				}

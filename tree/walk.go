@@ -11,10 +11,10 @@ these are for more dynamic, piecemeal processing.
 package tree
 
 // Last returns the last node in the tree.
-func Last(nd Node) Node {
-	nd = LastChild(nd)
-	last := nd
-	nd.WalkDown(func(k Node) bool {
+func Last(n Node) Node {
+	n = LastChild(n)
+	last := n
+	n.AsTree().WalkDown(func(k Node) bool {
 		last = k
 		return Continue
 	})
@@ -23,45 +23,48 @@ func Last(nd Node) Node {
 
 // LastChild returns the last child under the given node,
 // or the node itself if it has no children.
-func LastChild(nd Node) Node {
-	if nd.HasChildren() {
-		return LastChild(nd.Child(nd.NumChildren() - 1))
+func LastChild(n Node) Node {
+	nb := n.AsTree()
+	if nb.HasChildren() {
+		return LastChild(nb.Child(nb.NumChildren() - 1))
 	}
-	return nd
+	return n
 }
 
 // Previous returns the previous node in the tree,
 // or nil if this is the root node.
-func Previous(nd Node) Node {
-	if nd.Parent() == nil {
+func Previous(n Node) Node {
+	nb := n.AsTree()
+	if nb.Parent == nil {
 		return nil
 	}
-	myidx := nd.IndexInParent()
+	myidx := n.AsTree().IndexInParent()
 	if myidx > 0 {
-		nn := nd.Parent().Child(myidx - 1)
+		nn := nb.Parent.AsTree().Child(myidx - 1)
 		return LastChild(nn)
 	}
-	return nd.Parent()
+	return nb.Parent
 }
 
 // Next returns next node in the tree,
 // or nil if this is the last node.
-func Next(nd Node) Node {
-	if !nd.HasChildren() {
-		return NextSibling(nd)
+func Next(n Node) Node {
+	if !n.AsTree().HasChildren() {
+		return NextSibling(n)
 	}
-	return nd.Child(0)
+	return n.AsTree().Child(0)
 }
 
 // NextSibling returns the next sibling of this node,
 // or nil if it has none.
-func NextSibling(nd Node) Node {
-	if nd.Parent() == nil {
+func NextSibling(n Node) Node {
+	nb := n.AsTree()
+	if nb.Parent == nil {
 		return nil
 	}
-	myidx := nd.IndexInParent()
-	if myidx >= 0 && myidx < nd.Parent().NumChildren()-1 {
-		return nd.Parent().Child(myidx + 1)
+	myidx := n.AsTree().IndexInParent()
+	if myidx >= 0 && myidx < nb.Parent.AsTree().NumChildren()-1 {
+		return nb.Parent.AsTree().Child(myidx + 1)
 	}
-	return NextSibling(nd.Parent())
+	return NextSibling(nb.Parent)
 }

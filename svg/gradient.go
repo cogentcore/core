@@ -55,7 +55,7 @@ func (sv *SVG) GradientByName(n Node, grnm string) *Gradient {
 // GradientApplyTransform applies the given transform to any gradients for this node,
 // that are using specific coordinates (not bounding box which is automatic)
 func (g *NodeBase) GradientApplyTransform(sv *SVG, xf math32.Matrix2) {
-	gi := g.This().(Node)
+	gi := g.This.(Node)
 	gnm := NodePropURL(gi, "fill")
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
@@ -76,7 +76,7 @@ func (g *NodeBase) GradientApplyTransform(sv *SVG, xf math32.Matrix2) {
 // to any gradients for this node, that are using specific coordinates
 // (not bounding box which is automatic)
 func (g *NodeBase) GradientApplyTransformPt(sv *SVG, xf math32.Matrix2, pt math32.Vector2) {
-	gi := g.This().(Node)
+	gi := g.This.(Node)
 	gnm := NodePropURL(gi, "fill")
 	if gnm != "" {
 		gr := sv.GradientByName(gi, gnm)
@@ -235,10 +235,10 @@ func (sv *SVG) GradientNew(radial bool) (*Gradient, string) {
 
 // GradientUpdateNodeProp ensures that node has a gradient property of given type
 func (sv *SVG) GradientUpdateNodeProp(n Node, prop string, radial bool, stops string) (*Gradient, string) {
-	ps := n.Property(prop)
+	ps := n.AsTree().Property(prop)
 	if ps == nil {
 		gr, url := sv.GradientNewForNode(n, radial, stops)
-		n.SetProperty(prop, url)
+		n.AsTree().SetProperty(prop, url)
 		return gr, url
 	}
 	pstr := ps.(string)
@@ -253,19 +253,19 @@ func (sv *SVG) GradientUpdateNodeProp(n Node, prop string, radial bool, stops st
 		gr := sv.GradientByName(n, pstr)
 		gr.StopsName = stops
 		sv.GradientUpdateStops(gr)
-		return gr, NameToURL(gr.Nm)
+		return gr, NameToURL(gr.Name)
 	}
 	if strings.HasPrefix(pstr, "url(#") { // wrong kind
 		sv.GradientDeleteForNode(n, pstr)
 	}
 	gr, url := sv.GradientNewForNode(n, radial, stops)
-	n.SetProperty(prop, url)
+	n.AsTree().SetProperty(prop, url)
 	return gr, url
 }
 
 // GradientUpdateNodePoints updates the points for node based on current bbox
 func (sv *SVG) GradientUpdateNodePoints(n Node, prop string) {
-	ps := n.Property(prop)
+	ps := n.AsTree().Property(prop)
 	if ps == nil {
 		return
 	}
@@ -287,7 +287,7 @@ func (sv *SVG) GradientUpdateNodePoints(n Node, prop string) {
 // if set for given property key ("fill" or "stroke").
 // returns new gradient.
 func (sv *SVG) GradientCloneNodeProp(n Node, prop string) *Gradient {
-	ps := n.Property(prop)
+	ps := n.AsTree().Property(prop)
 	if ps == nil {
 		return nil
 	}
@@ -303,7 +303,7 @@ func (sv *SVG) GradientCloneNodeProp(n Node, prop string) *Gradient {
 		return nil
 	}
 	ngr, url := sv.GradientNewForNode(n, radial, gr.StopsName)
-	n.SetProperty(prop, url)
+	n.AsTree().SetProperty(prop, url)
 	gradient.CopyFrom(ngr.Grad, gr.Grad)
 	// TODO(kai): should this return ngr or gr? (used to return gr but ngr seems correct)
 	return ngr
@@ -313,7 +313,7 @@ func (sv *SVG) GradientCloneNodeProp(n Node, prop string) *Gradient {
 // if set for given property key ("fill" or "stroke").
 // Returns true if deleted.
 func (sv *SVG) GradientDeleteNodeProp(n Node, prop string) bool {
-	ps := n.Property(prop)
+	ps := n.AsTree().Property(prop)
 	if ps == nil {
 		return false
 	}
@@ -329,7 +329,7 @@ func (sv *SVG) GradientDeleteNodeProp(n Node, prop string) bool {
 // Does not remove gradients with StopsName = "" with extant stops -- these
 // should be removed manually, as they are not automatically generated.
 func (sv *SVG) GradientUpdateAllStops() {
-	for _, k := range sv.Defs.Kids {
+	for _, k := range sv.Defs.Children {
 		gr, ok := k.(*Gradient)
 		if ok {
 			sv.GradientUpdateStops(gr)

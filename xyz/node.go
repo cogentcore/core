@@ -158,20 +158,11 @@ const (
 // AsNode converts the given tree node to a [Node] and [NodeBase],
 // returning nil if that is not possible.
 func AsNode(n tree.Node) (Node, *NodeBase) {
-	if n == nil || n.This() == nil { // this also checks for destroyed
-		return nil, nil
-	}
 	ni, ok := n.(Node)
 	if ok {
 		return ni, ni.AsNode()
 	}
 	return nil, nil
-}
-
-// AsNodeBase converts the given tree node to a [NodeBase].
-// Only call this if you know that the given node is a non-nil [Node].
-func AsNodeBase(n tree.Node) *NodeBase {
-	return n.(Node).AsNode()
 }
 
 // AsNode returns a generic NodeBase for our node, giving generic
@@ -185,14 +176,14 @@ func (nb *NodeBase) AsNode() *NodeBase {
 // It sets the scene of the node to that of its parent.
 // It should be called by all other OnAdd functions defined by node types.
 func (nb *NodeBase) OnAdd() {
-	if nb.Par == nil {
+	if nb.Parent == nil {
 		return
 	}
-	if sc, ok := nb.Par.(*Scene); ok {
+	if sc, ok := nb.Parent.(*Scene); ok {
 		nb.Scene = sc
 		return
 	}
-	if _, pnb := AsNode(nb.Par); pnb != nil {
+	if _, pnb := AsNode(nb.Parent); pnb != nil {
 		nb.Scene = pnb.Scene
 		return
 	}
@@ -216,7 +207,7 @@ func (nb *NodeBase) Validate() error {
 }
 
 func (nb *NodeBase) IsVisible() bool {
-	if nb == nil || nb.This() == nil || nb.Is(Invisible) {
+	if nb == nil || nb.This == nil || nb.Is(Invisible) {
 		return false
 	}
 	return true
@@ -363,7 +354,7 @@ func (nb *NodeBase) TrackCamera() {
 	nb.Scene.Camera.CamMu.RUnlock()
 	nb.PoseMu.Unlock()
 
-	UpdateWorldMatrix(nb.This())
+	UpdateWorldMatrix(nb.This)
 }
 
 // TrackLight moves node to position of light of given name.

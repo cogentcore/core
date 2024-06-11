@@ -187,7 +187,7 @@ func (tf *TextField) Init() {
 	tf.Frame.Init()
 	tf.AddContextMenu(tf.ContextMenu)
 
-	tf.Style(func(s *styles.Style) {
+	tf.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		tf.CursorWidth.Dp(1)
 		tf.SelectColor = colors.C(colors.Scheme.Select.Container)
@@ -255,7 +255,7 @@ func (tf *TextField) Init() {
 			s.Background = colors.C(colors.Scheme.Select.Container)
 		}
 	})
-	tf.StyleFinal(func(s *styles.Style) {
+	tf.FinalStyler(func(s *styles.Style) {
 		tf.SetAbilities(!tf.IsReadOnly(), abilities.Focusable)
 	})
 
@@ -332,7 +332,7 @@ func (tf *TextField) Init() {
 			if tf.LeadingIcon.IsSet() {
 				AddAt(p, "lead-icon", func(w *Button) {
 					w.SetType(ButtonAction)
-					w.Style(func(s *styles.Style) {
+					w.Styler(func(s *styles.Style) {
 						s.Padding.Zero()
 						s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 						s.Margin.SetRight(units.Dp(8))
@@ -367,7 +367,7 @@ func (tf *TextField) Init() {
 				AddAt(p, "trail-icon-stretch", func(w *Stretch) {})
 				AddAt(p, "trail-icon", func(w *Button) {
 					w.SetType(ButtonAction)
-					w.Style(func(s *styles.Style) {
+					w.Styler(func(s *styles.Style) {
 						s.Padding.Zero()
 						s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 						if tf.Error != nil {
@@ -472,7 +472,7 @@ func (tf *TextField) SetTypePassword() *TextField {
 		if icon := tf.TrailingIconButton(); icon != nil {
 			icon.SetIcon(tf.TrailingIcon).Update()
 		}
-	}).Style(func(s *styles.Style) {
+	}).Styler(func(s *styles.Style) {
 		s.VirtualKeyboard = styles.KeyboardPassword
 	})
 	return tf
@@ -486,7 +486,7 @@ func (tf *TextField) EditDone() {
 		tf.Txt = string(tf.EditTxt)
 		tf.SendChange()
 		// widget can be killed after SendChange
-		if tf.This() == nil {
+		if tf.This == nil {
 			return
 		}
 	}
@@ -1299,10 +1299,10 @@ func init() {
 
 // StartCursor starts the cursor blinking and renders it
 func (tf *TextField) StartCursor() {
-	if tf == nil || tf.This() == nil {
+	if tf == nil || tf.This == nil {
 		return
 	}
-	if !tf.This().(Widget).IsVisible() {
+	if !tf.This.(Widget).IsVisible() {
 		return
 	}
 	tf.BlinkOn = true
@@ -1310,7 +1310,7 @@ func (tf *TextField) StartCursor() {
 	if SystemSettings.CursorBlinkTime == 0 {
 		return
 	}
-	TextFieldBlinker.SetWidget(tf.This().(Widget))
+	TextFieldBlinker.SetWidget(tf.This.(Widget))
 	TextFieldBlinker.Blink(SystemSettings.CursorBlinkTime)
 }
 
@@ -1325,15 +1325,15 @@ func (tf *TextField) ClearCursor() {
 
 // StopCursor stops the cursor from blinking
 func (tf *TextField) StopCursor() {
-	if tf == nil || tf.This() == nil {
+	if tf == nil || tf.This == nil {
 		return
 	}
-	TextFieldBlinker.ResetWidget(tf.This().(Widget))
+	TextFieldBlinker.ResetWidget(tf.This.(Widget))
 }
 
 // RenderCursor renders the cursor on or off, as a sprite that is either on or off
 func (tf *TextField) RenderCursor(on bool) {
-	if tf == nil || tf.This() == nil {
+	if tf == nil || tf.This == nil {
 		return
 	}
 	if !on {
@@ -1348,7 +1348,7 @@ func (tf *TextField) RenderCursor(on bool) {
 		ms.Sprites.InactivateSprite(spnm)
 		return
 	}
-	if !tf.This().(Widget).IsVisible() {
+	if !tf.This.(Widget).IsVisible() {
 		return
 	}
 
@@ -1798,8 +1798,8 @@ func (tf *TextField) HandleKeyEvents() {
 ////////////////////////////////////////////////////
 //  Widget Interface
 
-func (tf *TextField) ApplyStyle() {
-	tf.ApplyStyleWidget()
+func (tf *TextField) Style() {
+	tf.WidgetBase.Style()
 	tf.CursorWidth.ToDots(&tf.Styles.UnitContext)
 }
 

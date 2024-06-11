@@ -38,14 +38,14 @@ type Inspector struct {
 
 func (is *Inspector) Init() {
 	is.Frame.Init()
-	is.Style(func(s *styles.Style) {
+	is.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		s.Direction = styles.Column
 	})
 	is.OnWidgetAdded(func(w core.Widget) {
 		// TODO(config)
 		if tw, ok := w.(*TreeView); ok {
-			tw.Style(func(s *styles.Style) {
+			tw.Styler(func(s *styles.Style) {
 				s.Max.X.Em(20)
 			})
 		}
@@ -56,12 +56,12 @@ func (is *Inspector) Init() {
 		titleWidget = w
 		is.CurrentNode = is.Root
 		w.SetType(core.TextHeadlineSmall)
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(1, 0)
 			s.Align.Self = styles.Center
 		})
 		w.Updater(func() {
-			w.SetText(fmt.Sprintf("Inspector of %s (%s)", is.CurrentNode.Name(), labels.FriendlyTypeName(reflect.TypeOf(is.CurrentNode))))
+			w.SetText(fmt.Sprintf("Inspector of %s (%s)", is.CurrentNode.AsTree().Name, labels.FriendlyTypeName(reflect.TypeOf(is.CurrentNode))))
 		})
 	})
 	renderRebuild := func() {
@@ -75,7 +75,7 @@ func (is *Inspector) Init() {
 		w.SetSplits(.3, .7)
 		var structView *StructView
 		core.AddChildAt(w, "tree-frame", func(w *core.Frame) {
-			w.Style(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Gap.Zero()
@@ -213,12 +213,12 @@ func (is *Inspector) SelectionMonitor() {
 	if !ok || sw == nil {
 		return
 	}
-	tv := is.TreeView().FindSyncNode(sw.This())
+	tv := is.TreeView().FindSyncNode(sw)
 	if tv == nil {
 		// if we can't be found, we are probably a part,
 		// so we keep going up until we find somebody in
 		// the tree
-		sw.WalkUpParent(func(k tree.Node) bool {
+		sw.AsTree().WalkUpParent(func(k tree.Node) bool {
 			tv = is.TreeView().FindSyncNode(k)
 			if tv != nil {
 				return tree.Break
@@ -305,8 +305,8 @@ func InspectorWindow(n tree.Node) {
 func InspectorView(b *core.Body, n tree.Node) {
 	b.SetTitle("Inspector").SetData(n)
 	if n != nil {
-		b.Nm += "-" + n.Name()
-		b.Title += ": " + n.Name()
+		b.Name += "-" + n.AsTree().Name
+		b.Title += ": " + n.AsTree().Name
 	}
 	is := NewInspector(b)
 	is.SetRoot(n)

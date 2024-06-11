@@ -208,7 +208,7 @@ func (ed *Editor) WidgetValue() any { return &ed.Buffer.Txt }
 func (ed *Editor) Init() {
 	ed.Frame.Init()
 	ed.AddContextMenu(ed.ContextMenu)
-	ed.Style(func(s *styles.Style) {
+	ed.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		ed.CursorWidth.Dp(2)
 		ed.LineNumberColor = colors.C(colors.Transparent)
@@ -434,7 +434,7 @@ func (ed *Editor) BufferSignal(sig BufferSignals, tbe *textbuf.Edit) {
 	case BufferMods:
 		ed.NeedsLayout()
 	case BufferInsert:
-		if ed == nil || ed.This() == nil || !ed.This().(core.Widget).IsVisible() {
+		if ed == nil || ed.This == nil || !ed.This.(core.Widget).IsVisible() {
 			return
 		}
 		ndup := ed.Renders == nil
@@ -449,7 +449,7 @@ func (ed *Editor) BufferSignal(sig BufferSignals, tbe *textbuf.Edit) {
 			ed.Update()
 		}
 	case BufferDelete:
-		if ed == nil || ed.This() == nil || !ed.This().(core.Widget).IsVisible() {
+		if ed == nil || ed.This == nil || !ed.This.(core.Widget).IsVisible() {
 			return
 		}
 		ndup := ed.Renders == nil
@@ -511,12 +511,12 @@ func (ed *Editor) StyleView() {
 			ed.Buffer.SetHiStyle(histyle.StyleDefault)
 		}
 	}
-	ed.ApplyStyleWidget()
+	ed.WidgetBase.Style()
 	ed.CursorWidth.ToDots(&ed.Styles.UnitContext)
 }
 
-// ApplyStyle calls StyleView and sets the style
-func (ed *Editor) ApplyStyle() {
+// Style calls StyleView and sets the style
+func (ed *Editor) Style() {
 	ed.StyleView()
 	ed.StyleSizes()
 }

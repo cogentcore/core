@@ -8,7 +8,6 @@ package types
 
 import (
 	"cmp"
-	"fmt"
 	"reflect"
 	"slices"
 	"strings"
@@ -54,19 +53,9 @@ func addBuiltin[T any](name string) {
 	AddType(&Type{Name: name, IDName: name, Instance: v})
 }
 
-// TypeByName returns a Type by name (package_url.Type, e.g., cogentcore.org/core/core.Button),
+// TypeByName returns a Type by name (package/path.Type, e.g., cogentcore.org/core/core.Button),
 func TypeByName(name string) *Type {
 	return Types[name]
-}
-
-// TypeByNameTry returns a Type by name (package_url.Type, e.g., cogentcore.org/core/core.Button),
-// or error if not found
-func TypeByNameTry(name string) (*Type, error) {
-	tp, ok := Types[name]
-	if !ok {
-		return nil, fmt.Errorf("type %q not found", name)
-	}
-	return tp, nil
 }
 
 // TypeByValue returns the [Type] of the given value
@@ -74,21 +63,9 @@ func TypeByValue(v any) *Type {
 	return TypeByName(TypeNameValue(v))
 }
 
-// TypeByValueTry returns the [Type] of the given value,
-// or an error if it is not found
-func TypeByValueTry(v any) (*Type, error) {
-	return TypeByNameTry(TypeNameValue(v))
-}
-
 // TypeByReflectType returns the [Type] of the given reflect type
 func TypeByReflectType(typ reflect.Type) *Type {
 	return TypeByName(TypeName(typ))
-}
-
-// TypeByReflectTypeTry returns the [Type] of the given reflect type,
-// or an error if it is not found
-func TypeByReflectTypeTry(typ reflect.Type) (*Type, error) {
-	return TypeByNameTry(TypeName(typ))
 }
 
 // AddType adds a constructed [Type] to the registry

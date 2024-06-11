@@ -25,7 +25,7 @@ import (
 // functionality.
 //
 // The Lang is responsible for accessing the appropriate [Parser] for this
-// language (initialized and managed via LangSupport.OpenStd() etc)
+// language (initialized and managed via LangSupport.OpenStandard() etc)
 // and the [FileState] structure contains all the input and output
 // state information for a given file.
 //

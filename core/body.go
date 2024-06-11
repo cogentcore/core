@@ -49,7 +49,7 @@ func NewBody(name ...string) *Body {
 
 func (bd *Body) Init() {
 	bd.Frame.Init()
-	bd.Style(func(s *styles.Style) {
+	bd.Styler(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
@@ -59,9 +59,9 @@ func (bd *Body) Init() {
 // SetTitle sets the title in the Body, Scene, and Stage, RenderWindow, and title widget.
 // This is the one place to change the title for everything.
 func (bd *Body) SetTitle(title string) *Body {
-	bd.Nm = title
+	bd.Name = title
 	bd.Title = title
-	bd.Scene.Nm = title
+	bd.Scene.Name = title
 	if bd.Scene.Stage != nil {
 		bd.Scene.Stage.Title = title
 		win := bd.Scene.RenderWindow()
@@ -88,7 +88,7 @@ func (bd *Body) AddTitle(title string) *Body {
 // after a title.
 func (bd *Body) AddText(text string) *Body {
 	NewText(bd).SetText(text).
-		SetType(TextBodyMedium).Style(func(s *styles.Style) {
+		SetType(TextBodyMedium).Styler(func(s *styles.Style) {
 		s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 	})
 	return bd

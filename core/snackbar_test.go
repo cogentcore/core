@@ -17,7 +17,7 @@ import (
 
 func newBodyForSnackbar() *Body {
 	b := NewBody()
-	b.Style(func(s *styles.Style) {
+	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(300))
 	})
 	return b
@@ -78,7 +78,7 @@ func TestSnackbarTime(t *testing.T) {
 	times := []time.Duration{0, 25 * time.Millisecond, 75 * time.Millisecond}
 	for _, tm := range times {
 		b := NewBody()
-		b.Style(func(s *styles.Style) {
+		b.Styler(func(s *styles.Style) {
 			s.Min.Set(units.Dp(300))
 		})
 		NewText(b).SetText(tm.String())

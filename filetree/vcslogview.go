@@ -52,7 +52,7 @@ func (lv *VCSLogView) Init() {
 	lv.RevA = "HEAD"
 	lv.RevB = ""
 	lv.SetA = true
-	lv.Style(func(s *styles.Style) {
+	lv.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
@@ -200,7 +200,7 @@ func (lv *VCSLogView) MakeToolbar(p *core.Plan) {
 		w.SetState(true, states.Checked)
 		w.OnClick(func(e events.Event) {
 			lv.SetA = w.IsChecked()
-			cbb := w.Parent().ChildByName("b-rev", 2).(*core.Switch)
+			cbb := w.Parent.AsTree().ChildByName("b-rev", 2).(*core.Switch)
 			cbb.SetState(!lv.SetA, states.Checked)
 			cbb.NeedsRender()
 		})
@@ -227,7 +227,7 @@ func (lv *VCSLogView) MakeToolbar(p *core.Plan) {
 		w.SetTooltip("If selected, clicking in log will set this B Revision to use for Diff")
 		w.OnClick(func(e events.Event) {
 			lv.SetA = !w.IsChecked()
-			cba := w.Parent().ChildByName("a-rev", 2).(*core.Switch)
+			cba := w.Parent.AsTree().ChildByName("a-rev", 2).(*core.Switch)
 			cba.SetState(lv.SetA, states.Checked)
 			cba.NeedsRender()
 		})

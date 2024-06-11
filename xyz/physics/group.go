@@ -35,7 +35,7 @@ func (gp *Group) GroupBBox() {
 	hasDyn := false
 	gp.BBox.BBox.SetEmpty()
 	gp.BBox.VelBBox.SetEmpty()
-	for _, kid := range gp.Kids {
+	for _, kid := range gp.Children {
 		nii, ni := AsNode(kid)
 		if nii == nil {
 			continue
@@ -75,28 +75,28 @@ func (gp *Group) WorldDynGroupBBox() {
 
 // WorldInit does the full tree InitAbs and GroupBBox updates
 func (gp *Group) WorldInit() {
-	gp.WalkDown(func(k tree.Node) bool {
-		nii, _ := AsNode(k)
-		if nii == nil {
+	gp.WalkDown(func(n tree.Node) bool {
+		pn, _ := AsNode(n)
+		if pn == nil {
 			return false
 		}
-		_, pi := AsNode(k.Parent())
-		nii.InitAbs(pi)
+		_, pi := AsNode(n.AsTree().Parent)
+		pn.InitAbs(pi)
 		return true
 	})
 
-	gp.WalkDownPost(func(k tree.Node) bool {
-		nii, _ := AsNode(k)
-		if nii == nil {
+	gp.WalkDownPost(func(n tree.Node) bool {
+		pn, _ := AsNode(n)
+		if pn == nil {
 			return false
 		}
 		return true
-	}, func(k tree.Node) bool {
-		nii, _ := AsNode(k)
-		if nii == nil {
+	}, func(n tree.Node) bool {
+		pn, _ := AsNode(n)
+		if pn == nil {
 			return false
 		}
-		nii.GroupBBox()
+		pn.GroupBBox()
 		return true
 	})
 
@@ -105,16 +105,16 @@ func (gp *Group) WorldInit() {
 // WorldRelToAbs does a full RelToAbs update for all Dynamic groups, for
 // Scripted mode updates with manual updating of Rel values.
 func (gp *Group) WorldRelToAbs() {
-	gp.WalkDown(func(k tree.Node) bool {
-		nii, _ := AsNode(k)
-		if nii == nil {
+	gp.WalkDown(func(n tree.Node) bool {
+		pn, _ := AsNode(n)
+		if pn == nil {
 			return false // going into a different type of thing, bail
 		}
-		if !nii.IsDynamic() {
+		if !pn.IsDynamic() {
 			return false
 		}
-		_, pi := AsNode(k.Parent())
-		nii.RelToAbs(pi)
+		_, pi := AsNode(n.AsTree().Parent)
+		pn.RelToAbs(pi)
 		return true
 	})
 
@@ -157,7 +157,7 @@ const (
 func (gp *Group) WorldCollide(dynTop bool) []Contacts {
 	var stats []Node
 	var dyns []Node
-	for _, kid := range gp.Kids {
+	for _, kid := range gp.Children {
 		nii, _ := AsNode(kid)
 		if nii == nil {
 			continue
@@ -172,7 +172,7 @@ func (gp *Group) WorldCollide(dynTop bool) []Contacts {
 	var sdyns []Node
 	if !dynTop {
 		for _, d := range dyns {
-			for _, dk := range *d.Children() {
+			for _, dk := range d.AsTree().Children {
 				nii, _ := AsNode(dk)
 				if nii == nil {
 					continue

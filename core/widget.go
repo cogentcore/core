@@ -36,8 +36,8 @@ type Widget interface {
 	// as a child to the widget or any of its children.
 	OnWidgetAdded(f func(w Widget)) *WidgetBase
 
-	// Style sets the styling properties of the widget by adding a styler function.
-	Style(s func(s *styles.Style)) *WidgetBase
+	// See [WidgetBase.Styler].
+	Styler(s func(s *styles.Style)) *WidgetBase
 
 	// See [WidgetBase.Update].
 	Update()
@@ -54,12 +54,8 @@ type Widget interface {
 	// SetAbilities sets the given [abilities.Abilities] flags to the given value
 	SetAbilities(on bool, able ...abilities.Abilities) *WidgetBase
 
-	// ApplyStyle applies style functions to the widget based on current state.
-	// It is typically not overridden; instead, call Style to apply custom styling.
-	// If you do need to override it (for example, to convert a custom unit value
-	// to dots), then you should call [WidgetBase.ApplyStyleWidget] at the start
-	// of your method.
-	ApplyStyle()
+	// See [WidgetBase.Style].
+	Style()
 
 	// SizeUp (bottom-up) gathers Actual sizes from our Children & Parts,
 	// based on Styles.Min / Max sizes and actual content sizing
@@ -202,7 +198,7 @@ type WidgetBase struct {
 
 	// Tooltip is the text for the tooltip for this widget,
 	// which can use HTML formatting.
-	Tooltip string
+	Tooltip string `json:",omitempty"`
 
 	// Parts are a separate tree of sub-widgets that can be used to store
 	// orthogonal parts of a widget when necessary to separate them from children.
@@ -239,21 +235,21 @@ type WidgetBase struct {
 	// Stylers are a slice of functions that are called in sequential
 	// ascending order (so the last added styler is called last and
 	// thus overrides all other functions) to style the element.
-	// These should be set using Style function. FirstStylers and
+	// These should be set using Styler function. FirstStylers and
 	// FinalStylers are called before and after these stylers, respectively.
 	Stylers []func(s *styles.Style) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// FirstStylers are a slice of functions that are called in sequential
 	// ascending order (so the last added styler is called last and
 	// thus overrides all other functions) to style the element.
-	// These should be set using StyleFirst function. These stylers
+	// These should be set using FirstStyler function. These stylers
 	// are called before Stylers and FinalStylers.
 	FirstStylers []func(s *styles.Style) `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// FinalStylers are a slice of functions that are called in sequential
 	// ascending order (so the last added styler is called last and
 	// thus overrides all other functions) to style the element.
-	// These should be set using StyleFinal function. These stylers
+	// These should be set using FinalStyler function. These stylers
 	// are called after FirstStylers and Stylers.
 	FinalStylers []func(s *styles.Style) `copier:"-" json:"-" xml:"-" set:"-"`
 
@@ -315,7 +311,7 @@ func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
 // Init if it has one to establish all the default styling
 // and event handling that applies to all widgets.
 func (wb *WidgetBase) Init() {
-	wb.Style(func(s *styles.Style) {
+	wb.Styler(func(s *styles.Style) {
 		s.MaxBorder.Style.Set(styles.BorderSolid)
 		s.MaxBorder.Color.Set(colors.C(colors.Scheme.Primary.Base))
 		s.MaxBorder.Width.Set(units.Dp(1))
@@ -328,7 +324,7 @@ func (wb *WidgetBase) Init() {
 			return
 		}
 		// TODO(kai): what about context menus on mobile?
-		tt, _ := wb.This().(Widget).WidgetTooltip(image.Pt(-1, -1))
+		tt, _ := wb.This.(Widget).WidgetTooltip(image.Pt(-1, -1))
 		s.SetAbilities(tt != "", abilities.LongHoverable, abilities.LongPressable)
 
 		if s.Is(states.Selected) {
@@ -336,7 +332,7 @@ func (wb *WidgetBase) Init() {
 			s.Color = colors.C(colors.Scheme.Select.OnContainer)
 		}
 	})
-	wb.StyleFinal(func(s *styles.Style) {
+	wb.FinalStyler(func(s *styles.Style) {
 		if s.Is(states.Focused) {
 			s.Border.Style = s.MaxBorder.Style
 			s.Border.Color = s.MaxBorder.Color
@@ -397,27 +393,16 @@ func (wb *WidgetBase) OnWidgetAdded(fun func(w Widget)) *WidgetBase {
 	return wb
 }
 
-// AsWidget returns the given tree node
-// as a Widget interface and a WidgetBase.
+// AsWidget returns the given [tree.Node]
+// as a [Widget] interface and a [WidgetBase].
 func AsWidget(n tree.Node) (Widget, *WidgetBase) {
-	if n == nil || n.This() == nil {
-		return nil, nil
-	}
-	if w, ok := n.This().(Widget); ok {
+	if w, ok := n.(Widget); ok {
 		return w, w.AsWidget()
 	}
 	return nil, nil
 }
 
 func (wb *WidgetBase) AsWidget() *WidgetBase {
-	return wb
-}
-
-// AsWidgetBase returns the given tree node object as a WidgetBase,
-// or nil, for direct use of the return value in cases where that
-// is needed.
-func AsWidgetBase(n tree.Node) *WidgetBase {
-	_, wb := AsWidget(n)
 	return wb
 }
 
@@ -464,7 +449,7 @@ func (wb *WidgetBase) NewParts() *Frame {
 	wb.Parts.SetName("parts")
 	tree.SetParent(wb.Parts, wb) // don't add to children list
 	wb.Parts.SetFlag(true, tree.Field)
-	wb.Parts.Style(func(s *styles.Style) {
+	wb.Parts.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		s.RenderBox = false
 	})
@@ -474,10 +459,10 @@ func (wb *WidgetBase) NewParts() *Frame {
 // ParentWidget returns the parent as a [WidgetBase] or nil
 // if this is the root and has no parent.
 func (wb *WidgetBase) ParentWidget() *WidgetBase {
-	if wb.Par == nil {
+	if wb.Parent == nil {
 		return nil
 	}
-	return wb.Par.(Widget).AsWidget()
+	return wb.Parent.(Widget).AsWidget()
 }
 
 // ParentWidgetIf returns the nearest widget parent
@@ -486,7 +471,7 @@ func (wb *WidgetBase) ParentWidget() *WidgetBase {
 func (wb *WidgetBase) ParentWidgetIf(fun func(p *WidgetBase) bool) *WidgetBase {
 	cur := wb
 	for {
-		parent := cur.Par
+		parent := cur.Parent
 		if parent == nil {
 			return nil
 		}
@@ -511,13 +496,13 @@ func (wb *WidgetBase) ParentWidgetIf(fun func(p *WidgetBase) bool) *WidgetBase {
 // window events.
 // This call recursively calls the parent, which is typically a short path.
 func (wb *WidgetBase) IsVisible() bool {
-	if wb == nil || wb.This() == nil || wb.StateIs(states.Invisible) || wb.Scene == nil {
+	if wb == nil || wb.This == nil || wb.StateIs(states.Invisible) || wb.Scene == nil {
 		return false
 	}
-	if wb.Par == nil || wb.Par.This() == nil {
+	if wb.Parent == nil {
 		return true
 	}
-	return wb.Par.This().(Widget).IsVisible()
+	return wb.Parent.(Widget).IsVisible()
 }
 
 // DirectRenderImage uploads image directly into given system.Drawer at given index
@@ -553,13 +538,10 @@ func (wb *WidgetBase) NodeWalkDown(fun func(tree.Node) bool) {
 
 // WidgetKidsIter iterates through the Kids, as widgets, calling the given function.
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
-func (wb *WidgetBase) WidgetKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase) bool) {
-	for i, k := range wb.Kids {
-		kwi, kwb := AsWidget(k)
-		if kwi == nil || kwi.This() == nil {
-			break
-		}
-		cont := fun(i, kwi, kwb)
+func (wb *WidgetBase) WidgetKidsIter(fun func(i int, w Widget, cwb *WidgetBase) bool) {
+	for i, k := range wb.Children {
+		w, cwb := AsWidget(k)
+		cont := fun(i, w, cwb)
 		if !cont {
 			break
 		}
@@ -570,16 +552,13 @@ func (wb *WidgetBase) WidgetKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase
 // excluding any with the *local* states.Invisible flag set (does not check parents).
 // This is used e.g., for layout functions to exclude non-visible direct children.
 // Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
-func (wb *WidgetBase) VisibleKidsIter(fun func(i int, kwi Widget, kwb *WidgetBase) bool) {
-	for i, k := range wb.Kids {
-		kwi, kwb := AsWidget(k)
-		if kwi == nil || kwi.This() == nil {
-			break
-		}
-		if kwb.StateIs(states.Invisible) {
+func (wb *WidgetBase) VisibleKidsIter(fun func(i int, w Widget, cwb *WidgetBase) bool) {
+	for i, k := range wb.Children {
+		w, cwb := AsWidget(k)
+		if cwb.StateIs(states.Invisible) {
 			continue
 		}
-		cont := fun(i, kwi, kwb)
+		cont := fun(i, w, cwb)
 		if !cont {
 			break
 		}
@@ -599,33 +578,34 @@ func (wb *WidgetBase) WidgetWalkDown(fun func(kwi Widget, kwb *WidgetBase) bool)
 // WidgetNext returns the next widget in the tree,
 // including Parts, which are considered to come after Children.
 // returns nil if no more.
-func WidgetNext(wi Widget) Widget {
-	wb := wi.AsWidget()
-	if !wi.HasChildren() && wb.Parts == nil {
-		return WidgetNextSibling(wi)
+func WidgetNext(w Widget) Widget {
+	wb := w.AsWidget()
+	if !wb.HasChildren() && wb.Parts == nil {
+		return WidgetNextSibling(w)
 	}
-	if wi.HasChildren() {
-		return wi.Child(0).(Widget)
+	if wb.HasChildren() {
+		return wb.Child(0).(Widget)
 	}
 	if wb.Parts != nil {
-		return WidgetNext(wb.Parts.This().(Widget))
+		return WidgetNext(wb.Parts.This.(Widget))
 	}
 	return nil
 }
 
 // WidgetNextSibling returns next sibling or nil if none,
 // including Parts, which are considered to come after Children.
-func WidgetNextSibling(wi Widget) Widget {
-	if wi.Parent() == nil {
+func WidgetNextSibling(w Widget) Widget {
+	wb := w.AsWidget()
+	if wb.Parent == nil {
 		return nil
 	}
-	parent := wi.Parent().(Widget)
-	myidx := wi.IndexInParent()
-	if myidx >= 0 && myidx < wi.Parent().NumChildren()-1 {
-		return parent.Child(myidx + 1).(Widget)
+	parent := wb.Parent.(Widget)
+	myidx := wb.IndexInParent()
+	if myidx >= 0 && myidx < wb.Parent.AsTree().NumChildren()-1 {
+		return parent.AsTree().Child(myidx + 1).(Widget)
 	}
-	if parent.Is(tree.Field) { // we are parts, go up
-		return WidgetNextSibling(parent.Parent().(Widget))
+	if parent.AsTree().Is(tree.Field) { // we are parts, go up
+		return WidgetNextSibling(parent.AsTree().Parent.(Widget))
 	}
 	return WidgetNextSibling(parent)
 }
@@ -633,18 +613,19 @@ func WidgetNextSibling(wi Widget) Widget {
 // WidgetPrev returns the previous widget in the tree,
 // including Parts, which are considered to come after Children.
 // nil if no more.
-func WidgetPrev(wi Widget) Widget {
-	if wi.Parent() == nil {
+func WidgetPrev(w Widget) Widget {
+	wb := w.AsWidget()
+	if wb.Parent == nil {
 		return nil
 	}
-	parent := wi.Parent().(Widget)
-	myidx := wi.IndexInParent()
+	parent := wb.Parent.(Widget)
+	myidx := wb.IndexInParent()
 	if myidx > 0 {
-		nn := parent.Child(myidx - 1).(Widget)
+		nn := parent.AsTree().Child(myidx - 1).(Widget)
 		return WidgetLastChildParts(nn) // go to parts
 	}
-	if parent.Is(tree.Field) { // we are parts, go into children
-		parent = parent.Parent().(Widget)
+	if parent.AsTree().Is(tree.Field) { // we are parts, go into children
+		parent = parent.AsTree().Parent.(Widget)
 		return WidgetLastChild(parent) // go to children
 	}
 	// we were children, done
@@ -653,44 +634,45 @@ func WidgetPrev(wi Widget) Widget {
 
 // WidgetLastChildParts returns the last child under given node,
 // or node itself if no children.  Starts with Parts,
-func WidgetLastChildParts(wi Widget) Widget {
-	wb := wi.AsWidget()
+func WidgetLastChildParts(w Widget) Widget {
+	wb := w.AsWidget()
 	if wb.Parts != nil && wb.Parts.HasChildren() {
 		return WidgetLastChildParts(wb.Parts.Child(wb.Parts.NumChildren() - 1).(Widget))
 	}
-	if wi.HasChildren() {
-		return WidgetLastChildParts(wi.Child(wi.NumChildren() - 1).(Widget))
+	if wb.HasChildren() {
+		return WidgetLastChildParts(wb.Child(wb.NumChildren() - 1).(Widget))
 	}
-	return wi
+	return w
 }
 
 // WidgetLastChild returns the last child under given node,
 // or node itself if no children. Starts with Children, not Parts
-func WidgetLastChild(wi Widget) Widget {
-	if wi.HasChildren() {
-		return WidgetLastChildParts(wi.Child(wi.NumChildren() - 1).(Widget))
+func WidgetLastChild(w Widget) Widget {
+	wb := w.AsWidget()
+	if wb.HasChildren() {
+		return WidgetLastChildParts(wb.Child(wb.NumChildren() - 1).(Widget))
 	}
-	return wi
+	return w
 }
 
 // WidgetNextFunc returns the next widget in the tree,
 // including Parts, which are considered to come after children,
 // continuing until the given function returns true.
 // nil if no more.
-func WidgetNextFunc(wi Widget, fun func(w Widget) bool) Widget {
+func WidgetNextFunc(w Widget, fun func(w Widget) bool) Widget {
 	for {
-		nw := WidgetNext(wi)
-		if nw == nil || nw.This() == nil {
+		nw := WidgetNext(w)
+		if nw == nil {
 			return nil
 		}
 		if fun(nw) {
 			return nw
 		}
-		if nw == wi {
-			slog.Error("WidgetNextFunc", "start", wi, "nw == wi", nw)
+		if nw == w {
+			slog.Error("WidgetNextFunc", "start", w, "nw == wi", nw)
 			return nil
 		}
-		wi = nw
+		w = nw
 	}
 }
 
@@ -698,20 +680,20 @@ func WidgetNextFunc(wi Widget, fun func(w Widget) bool) Widget {
 // including Parts, which are considered to come after children,
 // continuing until the given function returns true.
 // nil if no more.
-func WidgetPrevFunc(wi Widget, fun func(w Widget) bool) Widget {
+func WidgetPrevFunc(w Widget, fun func(w Widget) bool) Widget {
 	for {
-		pw := WidgetPrev(wi)
-		if pw == nil || pw.This() == nil {
+		pw := WidgetPrev(w)
+		if pw == nil {
 			return nil
 		}
 		if fun(pw) {
 			return pw
 		}
-		if pw == wi {
-			slog.Error("WidgetPrevFunc", "start", wi, "pw == wi", pw)
+		if pw == w {
+			slog.Error("WidgetPrevFunc", "start", w, "pw == wi", pw)
 			return nil
 		}
-		wi = pw
+		w = pw
 	}
 }
 

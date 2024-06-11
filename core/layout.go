@@ -142,19 +142,16 @@ type Layouter interface {
 	SetScrollParams(d math32.Dims, sb *Slider)
 }
 
-// AsFrame returns the given value as a value of type Layout if the type
-// of the given value embeds Layout, or nil otherwise
+// AsFrame returns the given value as a value of type [Frame] if the type
+// of the given value embeds [Frame], or nil otherwise.
 func AsFrame(k tree.Node) *Frame {
-	if k == nil || k.This() == nil {
-		return nil
-	}
 	if t, ok := k.(Layouter); ok {
 		return t.AsFrame()
 	}
 	return nil
 }
 
-// AsFrame satisfies the [LayoutEmbedder] interface
+// AsFrame satisfies the [Layouter] interface.
 func (t *Frame) AsFrame() *Frame {
 	return t
 }
@@ -480,8 +477,8 @@ func (ls *LayImplState) InitCells() {
 }
 
 func (ls *LayImplState) ShapeCheck(w Widget, phase string) bool {
-	if w.HasChildren() && (ls.Shape == (image.Point{}) || len(ls.Cells) == 0) {
-		// fmt.Println(w, "Shape is nil in:", phase)
+	if w.AsTree().HasChildren() && (ls.Shape == (image.Point{}) || len(ls.Cells) == 0) {
+		// fmt.Println(w, "Shape is nil in:", phase) // TODO: plan for this?
 		return false
 	}
 	return true
@@ -651,7 +648,7 @@ func (ly *Frame) LaySetContentFitOverflow(nsz math32.Vector2, pass LayoutPasses)
 	oflow := &ly.Styles.Overflow
 	nosz := pass == SizeUpPass && ly.Styles.IsFlexWrap()
 	for d := math32.X; d <= math32.Y; d++ {
-		if (nosz || (!(ly.Scene != nil && ly.Scene.Is(ScPrefSizing)) && oflow.Dim(d) >= styles.OverflowAuto)) && ly.Par != nil {
+		if (nosz || (!(ly.Scene != nil && ly.Scene.Is(ScPrefSizing)) && oflow.Dim(d) >= styles.OverflowAuto)) && ly.Parent != nil {
 			continue
 		}
 		asz.SetDim(d, styles.ClampMin(asz.Dim(d), nsz.Dim(d)))
@@ -728,7 +725,7 @@ func (ly *Frame) SizeUpLay() {
 	ly.SizeFromStyle()
 	ly.LayImpl.ScrollSize.SetZero() // we don't know yet
 	ly.LaySetInitCells()
-	ly.This().(Layouter).LayoutSpace()
+	ly.This.(Layouter).LayoutSpace()
 	ly.SizeUpChildren() // kids do their own thing
 	ly.SizeFromChildrenFit(0, SizeUpPass)
 	if ly.Parts != nil {
@@ -890,7 +887,7 @@ func (ly *Frame) LaySetInitCellsStacked() {
 }
 
 func (ly *Frame) LaySetInitCellsGrid() {
-	n := len(*ly.Children())
+	n := len(ly.Children)
 	cols := ly.Styles.Columns
 	if cols == 0 {
 		cols = int(math32.Sqrt(float32(n)))
@@ -926,7 +923,7 @@ func (ly *Frame) LaySetInitCellsGrid() {
 // SizeFromChildrenFit gathers Actual size from kids, and calls LaySetContentFitOverflow
 // to update Actual and Internal size based on this.
 func (ly *Frame) SizeFromChildrenFit(iter int, pass LayoutPasses) {
-	ksz := ly.This().(Layouter).SizeFromChildren(iter, SizeDownPass)
+	ksz := ly.This.(Layouter).SizeFromChildren(iter, SizeDownPass)
 	ly.LaySetContentFitOverflow(ksz, pass)
 	if DebugSettings.LayoutTrace {
 		sz := &ly.Geom.Size
@@ -1069,7 +1066,7 @@ func (wb *WidgetBase) SizeDownChildren(iter int) bool {
 	wb.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		re := kwi.SizeDown(iter)
 		if re && DebugSettings.LayoutTrace {
-			fmt.Println(wb, "SizeDownChildren child:", kwb.Nm, "triggered redo")
+			fmt.Println(wb, "SizeDownChildren child:", kwb.Name, "triggered redo")
 		}
 		redo = redo || re
 		return tree.Continue
@@ -1143,7 +1140,7 @@ func (ly *Frame) SizeDownLay(iter int) bool {
 	if DebugSettings.LayoutTrace {
 		fmt.Println(ly, "Managing Alloc:", sz.Alloc.Content)
 	}
-	chg := ly.This().(Layouter).ManageOverflow(iter, true) // this must go first.
+	chg := ly.This.(Layouter).ManageOverflow(iter, true) // this must go first.
 	wrapped := false
 	if iter <= 1 && ly.Styles.IsFlexWrap() {
 		wrapped = ly.SizeDownWrap(iter) // first recompute wrap
@@ -1151,7 +1148,7 @@ func (ly *Frame) SizeDownLay(iter int) bool {
 			wrapped = true // always update
 		}
 	}
-	ly.This().(Layouter).SizeDownSetAllocs(iter)
+	ly.This.(Layouter).SizeDownSetAllocs(iter)
 	redo := ly.SizeDownChildren(iter)
 	if redo || wrapped {
 		ly.SizeFromChildrenFit(iter, SizeDownPass)
@@ -1200,7 +1197,7 @@ func (ly *Frame) ManageOverflow(iter int, updateSize bool) bool {
 		}
 	}
 	for d := math32.X; d <= math32.Y; d++ {
-		maxSize, visSize, _ := ly.This().(Layouter).ScrollValues(d)
+		maxSize, visSize, _ := ly.This.(Layouter).ScrollValues(d)
 		ofd := maxSize - visSize
 		switch ly.Styles.Overflow.Dim(d) {
 		// case styles.OverflowVisible:
@@ -1228,7 +1225,7 @@ func (ly *Frame) ManageOverflow(iter int, updateSize bool) bool {
 			}
 		}
 	}
-	ly.This().(Layouter).LayoutSpace() // adds the scroll space
+	ly.This.(Layouter).LayoutSpace() // adds the scroll space
 	if updateSize {
 		sz.SetTotalFromContent(&sz.Actual)
 		sz.SetContentFromTotal(&sz.Alloc) // alloc is *decreased* from any increase in space
@@ -1470,7 +1467,7 @@ func (ly *Frame) SizeDownAllocActualStacked(iter int) {
 func (ly *Frame) SizeFinalUpdateChildrenSizes() {
 	ly.SizeUpLay()
 	iter := 3 // late stage..
-	ly.This().(Layouter).SizeDownSetAllocs(iter)
+	ly.This.(Layouter).SizeDownSetAllocs(iter)
 	ly.SizeDownChildren(iter)
 	ly.SizeDownParts(iter) // no std role, just get sizes
 }
@@ -1635,7 +1632,7 @@ func (wb *WidgetBase) PositionParts() {
 	if DebugSettings.LayoutTrace {
 		fmt.Println(wb.Parts, "parts align pos:", pgm.RelPos)
 	}
-	wb.Parts.This().(Widget).Position()
+	wb.Parts.This.(Widget).Position()
 }
 
 // PositionChildren runs Position on the children
@@ -1657,7 +1654,7 @@ func (ly *Frame) PositionLay() {
 		ly.PositionWidget() // behave like a widget
 		return
 	}
-	if ly.Par == nil {
+	if ly.Parent == nil {
 		ly.PositionWithinAllocMainY(math32.Vector2{}, ly.Styles.Justify.Items, ly.Styles.Align.Items)
 	}
 	ly.ConfigScrolls() // and configure the scrolls

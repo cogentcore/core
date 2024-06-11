@@ -68,7 +68,7 @@ func (wb *WidgetBase) UpdateTree() {
 }
 
 // Update updates the widget and all of its children by running [WidgetBase.UpdateWidget]
-// and [WidgetBase.ApplyStyle] on each one, and triggering a new layout pass with
+// and [WidgetBase.Style] on each one, and triggering a new layout pass with
 // [WidgetBase.NeedsLayout]. It is the main way that end users should trigger widget
 // updates, and it is guaranteed to fully update a widget to the current state.
 // For example, it should be called after making any changes to the core properties
@@ -77,7 +77,7 @@ func (wb *WidgetBase) UpdateTree() {
 //
 // Update differs from [WidgetBase.UpdateWidget] in that it updates the widget and all
 // of its children down the tree, whereas [WidgetBase.UpdateWidget] only updates the widget
-// itself. Also, Update also calls [WidgetBase.ApplyStyle] and [WidgetBase.NeedsLayout],
+// itself. Also, Update also calls [WidgetBase.Style] and [WidgetBase.NeedsLayout],
 // whereas [WidgetBase.UpdateWidget] does not. End-user code should typically call Update,
 // not [WidgetBase.UpdateWidget].
 //
@@ -91,7 +91,7 @@ func (wb *WidgetBase) Update() { //types:add
 	}
 	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		wb.UpdateWidget()
-		wi.ApplyStyle()
+		wi.Style()
 		return tree.Continue
 	})
 	wb.NeedsLayout()

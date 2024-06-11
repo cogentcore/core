@@ -32,7 +32,7 @@ type BodyBase struct {
 }
 
 func (bb *BodyBase) AsBody() Body {
-	return bb.This().(Body)
+	return bb.This.(Body)
 }
 
 func (bb *BodyBase) AsBodyBase() *BodyBase {

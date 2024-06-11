@@ -5,6 +5,9 @@
 package core
 
 import (
+	"slices"
+
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
@@ -21,13 +24,15 @@ import (
 type Toolbar struct {
 	Frame
 
-	// OverflowMenus are functions for the overflow menu; use [Toolbar.AddOverflowMenu] to add.
+	// OverflowMenus are functions for configuring the overflow menu of the
+	// toolbar. You can use [Toolbar.AddOverflowMenu] to add them.
 	// These are processed in reverse order (last in, first called)
 	// so that the default items are added last.
 	OverflowMenus []func(m *Scene) `set:"-" json:"-" xml:"-"`
 
-	// overflowItems are items moved from the main toolbar that will be shown in the overflow menu.
-	overflowItems tree.Slice
+	// overflowItems are items moved from the main toolbar that will be
+	// shown in the overflow menu.
+	overflowItems []tree.Node
 
 	// overflowButton is the widget to pull up the overflow menu.
 	overflowButton *Button
@@ -45,7 +50,7 @@ func (tb *Toolbar) Init() {
 		}
 		w.SetIcon(ic).SetTooltip("Additional menu items")
 		w.Updater(func() {
-			tb, ok := w.Parent().(*Toolbar)
+			tb, ok := w.Parent.(*Toolbar)
 			if ok {
 				w.Menu = tb.OverflowMenu
 			}
@@ -55,7 +60,7 @@ func (tb *Toolbar) Init() {
 
 func (tb *Toolbar) IsVisible() bool {
 	// do not render toolbars with no buttons
-	return tb.WidgetBase.IsVisible() && len(tb.Kids) > 0
+	return tb.WidgetBase.IsVisible() && len(tb.Children) > 0
 }
 
 // AppChooser returns the app [Chooser] used for searching for
@@ -69,11 +74,11 @@ func (tb *Toolbar) AppChooser() *Chooser { // TODO(config): remove
 // ParentToolbar returns Toolbar that is the direct parent of given widget,
 // or nil if that is not the case.
 func ParentToolbar(w Widget) *Toolbar {
-	par := w.Parent()
+	par := w.AsTree().Parent
 	if par == nil {
 		return nil
 	}
-	if tb, ok := par.This().(*Toolbar); ok {
+	if tb, ok := par.(*Toolbar); ok {
 		return tb
 	}
 	return nil
@@ -112,24 +117,24 @@ func (tb *Toolbar) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 
 // to the end of the list.
 func (tb *Toolbar) AllItemsToChildren() {
 	if len(tb.overflowItems) > 0 {
-		tb.Kids = append(tb.Kids, tb.overflowItems...)
+		tb.Children = append(tb.Children, tb.overflowItems...)
 		tb.overflowItems = nil
 	}
 	ovi := -1
-	for i, k := range tb.Kids {
+	for i, k := range tb.Children {
 		_, wb := AsWidget(k)
 		if wb == nil {
 			continue
 		}
-		if wb.This() == tb.overflowButton.This() {
+		if wb.This == tb.overflowButton.This {
 			ovi = i
 			break
 		}
 	}
 	if ovi >= 0 {
-		tb.Kids.DeleteAtIndex(ovi)
+		tb.Children = slices.Delete(tb.Children, ovi, ovi+1)
 	}
-	tb.Kids = append(tb.Kids, tb.overflowButton.This())
+	tb.Children = append(tb.Children, tb.overflowButton.This)
 	tb.overflowButton.Update()
 }
 
@@ -149,7 +154,7 @@ func (tb *Toolbar) MoveToOverflow() {
 	sz := &tb.Geom.Size
 	sz.Alloc.Total.SetDim(ma, avail)
 	sz.SetContentFromTotal(&sz.Alloc)
-	n := len(tb.Kids)
+	n := len(tb.Children)
 	ovidx := n - 1
 	hasOv := false
 	szsum := float32(0)
@@ -169,8 +174,8 @@ func (tb *Toolbar) MoveToOverflow() {
 		return tree.Continue
 	})
 	if ovidx != n-1 {
-		tb.Kids.Move(n-1, ovidx)
-		tb.Kids = tb.Kids[:ovidx+1]
+		tb.Children = slicesx.Move(tb.Children, n-1, ovidx)
+		tb.Children = tb.Children[:ovidx+1]
 	}
 	if len(tb.overflowItems) == 0 && len(tb.OverflowMenus) == 0 {
 		tb.overflowButton.SetState(true, states.Invisible)
@@ -184,11 +189,11 @@ func (tb *Toolbar) MoveToOverflow() {
 func (tb *Toolbar) OverflowMenu(m *Scene) {
 	nm := len(tb.OverflowMenus)
 	if len(tb.overflowItems) > 0 {
-		for _, k := range tb.overflowItems {
-			if k.This() == tb.overflowButton.This() {
+		for _, n := range tb.overflowItems {
+			if n == tb.overflowButton {
 				continue
 			}
-			cl := k.This().Clone()
+			cl := n.AsTree().Clone()
 			m.AddChild(cl)
 			cl.(Widget).AsWidget().UpdateWidget()
 		}
@@ -213,13 +218,13 @@ func (tb *Toolbar) AddOverflowMenu(fun func(m *Scene)) *Toolbar {
 
 // ToolbarStyles styles the given widget to have standard toolbar styling.
 func ToolbarStyles(w Widget) {
-	w.Style(func(s *styles.Style) {
+	w.Styler(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Background = colors.C(colors.Scheme.SurfaceContainer)
 		s.Gap.Zero()
 		s.Align.Items = styles.Center
 	})
-	w.AsWidget().StyleFinal(func(s *styles.Style) {
+	w.AsWidget().FinalStyler(func(s *styles.Style) {
 		if s.Direction == styles.Row {
 			s.Grow.Set(1, 0)
 			s.Padding.SetHorizontal(units.Dp(16))
@@ -234,7 +239,7 @@ func ToolbarStyles(w Widget) {
 			return
 		}
 		if sp, ok := w.(*Separator); ok {
-			sp.Style(func(s *styles.Style) {
+			sp.Styler(func(s *styles.Style) {
 				s.Direction = w.AsWidget().Styles.Direction.Other()
 			})
 		}

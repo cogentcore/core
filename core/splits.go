@@ -35,7 +35,7 @@ type Splits struct {
 
 func (sl *Splits) Init() {
 	sl.Frame.Init()
-	sl.Style(func(s *styles.Style) {
+	sl.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		s.Margin.Zero()
 		s.Padding.Zero()
@@ -48,8 +48,8 @@ func (sl *Splits) Init() {
 		}
 	})
 	sl.OnWidgetAdded(func(w Widget) {
-		if w.Parent() == sl.This() { // TODO(config): need some way to do this with the new config paradigm
-			w.Style(func(s *styles.Style) {
+		if w.AsTree().Parent == sl.This { // TODO(config): need some way to do this with the new config paradigm
+			w.Styler(func(s *styles.Style) {
 				// splits elements must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)
@@ -76,7 +76,7 @@ func (sl *Splits) Init() {
 		if kn == 0 {
 			e.SetHandled()
 			sl.EvenSplits()
-		} else if kn <= len(sl.Kids) {
+		} else if kn <= len(sl.Children) {
 			e.SetHandled()
 			if sl.Splits[kn-1] <= 0.01 {
 				sl.RestoreChild(kn - 1)
@@ -91,12 +91,12 @@ func (sl *Splits) Init() {
 		AddAt(p, "parts", func(w *Frame) {
 			InitParts(w)
 			w.Maker(func(p *Plan) {
-				for i := range len(sl.Kids) - 1 { // one less handle than children
+				for i := range len(sl.Children) - 1 { // one less handle than children
 					AddAt(p, "handle-"+strconv.Itoa(i), func(w *Handle) {
 						w.OnChange(func(e events.Event) {
 							sl.SetSplitAction(w.IndexInParent(), w.Value())
 						})
-						w.Style(func(s *styles.Style) {
+						w.Styler(func(s *styles.Style) {
 							s.Direction = sl.Styles.Direction
 						})
 					})
@@ -109,7 +109,7 @@ func (sl *Splits) Init() {
 // UpdateSplits normalizes the splits and ensures that there are as
 // many split proportions as children.
 func (sl *Splits) UpdateSplits() *Splits {
-	sz := len(sl.Kids)
+	sz := len(sl.Children)
 	if sz == 0 {
 		return sl
 	}
@@ -134,7 +134,7 @@ func (sl *Splits) UpdateSplits() *Splits {
 
 // EvenSplits splits space evenly across all panels
 func (sl *Splits) EvenSplits() {
-	sz := len(sl.Kids)
+	sz := len(sl.Children)
 	if sz == 0 {
 		return
 	}
@@ -172,7 +172,7 @@ func (sl *Splits) CollapseChild(save bool, idxs ...int) {
 	if save {
 		sl.SaveSplits()
 	}
-	sz := len(sl.Kids)
+	sz := len(sl.Children)
 	for _, idx := range idxs {
 		if idx >= 0 && idx < sz {
 			sl.Splits[idx] = 0
@@ -184,7 +184,7 @@ func (sl *Splits) CollapseChild(save bool, idxs ...int) {
 
 // RestoreChild restores given child(ren) -- does an Update
 func (sl *Splits) RestoreChild(idxs ...int) {
-	sz := len(sl.Kids)
+	sz := len(sl.Children)
 	for _, idx := range idxs {
 		if idx >= 0 && idx < sz {
 			sl.Splits[idx] = 1.0 / float32(sz)
@@ -196,7 +196,7 @@ func (sl *Splits) RestoreChild(idxs ...int) {
 
 // IsCollapsed returns true if given split number is collapsed
 func (sl *Splits) IsCollapsed(idx int) bool {
-	sz := len(sl.Kids)
+	sz := len(sl.Children)
 	if idx >= 0 && idx < sz {
 		return sl.Splits[idx] < 0.01
 	}

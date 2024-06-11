@@ -86,7 +86,7 @@ func (an *Anim) GetObjs() {
 	if ggp == nil {
 		return
 	}
-	gophi := ggp.Child(1)
+	gophi := ggp.AsTree().Child(1)
 	if gophi == nil {
 		return
 	}
@@ -97,11 +97,11 @@ func (an *Anim) GetObjs() {
 // Animate
 func (an *Anim) Animate() {
 	for {
-		if an.Ticker == nil || an.SceneView.This() == nil {
+		if an.Ticker == nil || an.SceneView.This == nil {
 			return
 		}
 		<-an.Ticker.C // wait for tick
-		if !an.On || an.SceneView.This() == nil || an.Torus == nil || an.Gopher == nil {
+		if !an.On || an.SceneView.This == nil || an.Torus == nil || an.Gopher == nil {
 			continue
 		}
 		sc := an.SceneView.SceneXYZ()
@@ -137,7 +137,7 @@ func main() {
 
 	core.NewText(b).SetText(`This is a demonstration of <b>XYZ</b>, the <a href="https://cogentcore.org/core">Cogent Core</a> <i>3D</i> Framework.`).
 		SetType(core.TextHeadlineSmall).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.Text.Align = styles.Center
 			s.Text.AlignV = styles.Center
 		})
@@ -278,7 +278,7 @@ func main() {
 		eabut := core.NewCheckBox(evlay, "anim-but")
 		eabut.SetText("Animate")
 		eabut.Tooltip = "toggle animation on and off"
-		eabut.ButtonSig.Connect(win.This(), func(recv, send tree.Node, sig int64, data any) {
+		eabut.ButtonSig.Connect(win.This, func(recv, send tree.Node, sig int64, data any) {
 			if sig == int64(core.ButtonToggled) {
 				anim.On = eabut.IsChecked()
 			}
@@ -288,15 +288,15 @@ func main() {
 		cmb.SetText("Anim Ctrl")
 		cmb.Tooltip = "options for what is animated (note: menu only works when not animating -- checkboxes would be more useful here but wanted to test menu function)"
 		cmb.Menu.AddAction(core.ActOpts{Label: "Toggle Torus"},
-			win.This(), func(recv, send tree.Node, sig int64, data any) {
+			win.This, func(recv, send tree.Node, sig int64, data any) {
 				anim.DoTorus = !anim.DoTorus
 			})
 		cmb.Menu.AddAction(core.ActOpts{Label: "Toggle Gopher"},
-			win.This(), func(recv, send tree.Node, sig int64, data any) {
+			win.This, func(recv, send tree.Node, sig int64, data any) {
 				anim.DoGopher = !anim.DoGopher
 			})
 		cmb.Menu.AddAction(core.ActOpts{Label: "Edit Anim"},
-			win.This(), func(recv, send tree.Node, sig int64, data any) {
+			win.This, func(recv, send tree.Node, sig int64, data any) {
 				views.StructViewDialog(vp, anim, views.DlgOpts{Title: "Animation Parameters"}, nil, nil)
 			})
 
@@ -320,11 +320,11 @@ func main() {
 		// spsld.Tracking = true
 		spsld.Icon = icons.RadioButtonUnchecked
 
-		sb.SpinBoxSig.Connect(rec.This(), func(recv, send tree.Node, sig int64, data any) {
+		sb.SpinBoxSig.Connect(rec.This, func(recv, send tree.Node, sig int64, data any) {
 			anim.Speed = sb.Value
 			spsld.SetValue(anim.Speed)
 		})
-		spsld.SliderSig.Connect(rec.This(), func(recv, send tree.Node, sig int64, data any) {
+		spsld.SliderSig.Connect(rec.This, func(recv, send tree.Node, sig int64, data any) {
 			if core.SliderSignals(sig) == core.SliderValueChanged {
 				anim.Speed = data.(float32)
 				sb.SetValue(anim.Speed)

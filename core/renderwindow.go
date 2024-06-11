@@ -165,7 +165,7 @@ func NewRenderWindow(name, title string, opts *system.NewWindowOptions) *RenderW
 		w.SetFlag(true, WindowClosing)
 		// ensure that everyone is closed first
 		for _, kv := range w.Mains.Stack.Order {
-			if kv.Value == nil || kv.Value.Scene == nil || kv.Value.Scene.This() == nil {
+			if kv.Value == nil || kv.Value.Scene == nil || kv.Value.Scene.This == nil {
 				continue
 			}
 			if !kv.Value.Scene.Close() {
@@ -820,17 +820,17 @@ func (rs *RenderScenes) SetImages(drw system.Drawer) {
 		if isSc && (sc.Is(ScUpdating) || !sc.Is(ScImageUpdated)) {
 			if DebugSettings.WinRenderTrace {
 				if sc.Is(ScUpdating) {
-					fmt.Println("RenderScenes.SetImages: sc IsUpdating", sc.Name())
+					fmt.Println("RenderScenes.SetImages: sc IsUpdating", sc.Name)
 				}
 				if !sc.Is(ScImageUpdated) {
-					fmt.Println("RenderScenes.SetImages: sc Image NotUpdated", sc.Name())
+					fmt.Println("RenderScenes.SetImages: sc Image NotUpdated", sc.Name)
 				}
 			}
 			skipScene = sc
 			continue
 		}
 		if DebugSettings.WinRenderTrace {
-			fmt.Println("RenderScenes.SetImages:", sc.Name())
+			fmt.Println("RenderScenes.SetImages:", sc.Name)
 		}
 		if isSc || sc != skipScene {
 			w.DirectRenderImage(drw, i)
@@ -1076,6 +1076,6 @@ func (sr *Scrim) DirectRenderImage(drw system.Drawer, idx int) {
 }
 
 func (sr *Scrim) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
-	sc := sr.Par.(*Scene)
+	sc := sr.Parent.(*Scene)
 	drw.Fill(colors.ApplyOpacity(colors.Scheme.Scrim, .5), math32.Identity3(), sc.Geom.TotalBBox, draw.Over)
 }

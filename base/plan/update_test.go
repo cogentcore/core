@@ -14,12 +14,8 @@ type nameObj struct {
 	name string
 }
 
-func (n *nameObj) Name() string {
+func (n *nameObj) PlanName() string {
 	return n.name
-}
-
-func (n *nameObj) SetName(name string) {
-	n.name = name
 }
 
 func AssertNames(t *testing.T, names []string, items []*nameObj) {
@@ -27,7 +23,7 @@ func AssertNames(t *testing.T, names []string, items []*nameObj) {
 		t.Error("lengths of lists are not the same:", len(names), len(items))
 	}
 	for i, nm := range names {
-		inm := items[i].Name()
+		inm := items[i].PlanName()
 		if nm != inm {
 			t.Error("item at index:", i, "name mismatch, should be:", nm, "was:", inm)
 		}

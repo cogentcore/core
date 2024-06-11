@@ -6,9 +6,9 @@ package parse
 
 import (
 	"fmt"
-	"log"
 	"time"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/parse/langs"
 	"cogentcore.org/core/parse/lexer"
@@ -57,7 +57,7 @@ type LangProperties struct {
 	// Lang interface for this language
 	Lang Lang `json:"-" xml:"-"`
 
-	// parser for this language -- initialized in OpenStd
+	// parser for this language -- initialized in OpenStandard
 	Parser *Parser `json:"-" xml:"-"`
 }
 
@@ -108,8 +108,7 @@ var StandardLangProperties = map[fileinfo.Known]*LangProperties{
 // e.g., looking up lexers and parsers by name.
 // Also implements the lexer.LangLexer interface to provide access to other
 // Guest Lexers
-type LangSupporter struct {
-}
+type LangSupporter struct{}
 
 // LangSupport is the main language support hub for accessing parse
 // support interfaces for each supported language
@@ -127,8 +126,7 @@ func (ll *LangSupporter) OpenStandard() error {
 		pr := NewParser()
 		err = pr.ReadJSON(pib)
 		if err != nil {
-			log.Println(err)
-			return nil
+			return errors.Log(err)
 		}
 		pr.ModTime = time.Date(2023, 02, 10, 00, 00, 00, 0, time.UTC)
 		pr.InitAll()

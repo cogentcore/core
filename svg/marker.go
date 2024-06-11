@@ -83,7 +83,7 @@ func (mrk *Marker) RenderMarker(sv *SVG, vertexPos math32.Vector2, vertexAng, st
 
 	mrk.Paint.Transform = mrk.Transform
 
-	// fmt.Println("render marker:", mrk.Name(), strokeWidth)
+	// fmt.Println("render marker:", mrk.Name, strokeWidth)
 	mrk.Render(sv)
 }
 
@@ -99,10 +99,10 @@ func (g *Marker) Render(sv *SVG) {
 }
 
 func (g *Marker) BBoxes(sv *SVG) {
-	if g.This() == nil {
+	if g.This == nil {
 		return
 	}
-	ni := g.This().(Node)
+	ni := g.This.(Node)
 	g.BBox = ni.NodeBBox(sv)
 	g.BBox.Canon()
 	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)

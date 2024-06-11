@@ -146,7 +146,7 @@ func (ev *Env) MakeWorld() {
 
 	MakeRoom(ev.World, "room1", ev.Width, ev.Depth, ev.Height, ev.Thick)
 	ev.Emer = MakeEmer(ev.World, ev.EmerHt)
-	ev.EyeR = ev.Emer.ChildByName("head", 1).ChildByName("eye-r", 2).(physics.Body)
+	ev.EyeR = ev.Emer.ChildByName("head", 1).AsTree().ChildByName("eye-r", 2).(physics.Body)
 
 	ev.World.WorldInit()
 }
@@ -252,10 +252,10 @@ func (ev *Env) WorldStep() {
 	for _, cl := range cts {
 		if len(cl) > 1 {
 			for _, c := range cl {
-				if c.A.Name() == "body" {
+				if c.A.AsTree().Name == "body" {
 					ev.Contacts = cl
 				}
-				fmt.Printf("A: %v  B: %v\n", c.A.Name(), c.B.Name())
+				fmt.Printf("A: %v  B: %v\n", c.A.AsTree().Name, c.B.AsTree().Name)
 			}
 		}
 	}
@@ -409,7 +409,7 @@ func (ev *Env) ConfigGUI() *core.Body {
 	//////////////////////////////////////////
 	//    Image
 
-	imfr.Style(func(s *styles.Style) {
+	imfr.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
 	core.NewText(imfr).SetText("Right Eye Image:")
@@ -427,7 +427,7 @@ func (ev *Env) ConfigGUI() *core.Body {
 
 	twov := core.NewSVG(twofr)
 	ev.Scene2D = twov
-	twov.Style(func(s *styles.Style) {
+	twov.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		twov.SVG.Root.ViewBox.Size.Set(ev.Width+4, ev.Depth+4)
 		twov.SVG.Root.ViewBox.Min.Set(-0.5*(ev.Width+4), -0.5*(ev.Depth+4))
@@ -460,37 +460,37 @@ func (ev *Env) ConfigGUI() *core.Body {
 
 		core.Add(p, func(w *views.FuncButton) {
 			w.SetFunc(ev.StepForward).SetText("Fwd").SetIcon(icons.SkipNext).
-				Style(func(s *styles.Style) {
+				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
 		core.Add(p, func(w *views.FuncButton) {
 			w.SetFunc(ev.StepBackward).SetText("Bkw").SetIcon(icons.SkipPrevious).
-				Style(func(s *styles.Style) {
+				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
 		core.Add(p, func(w *views.FuncButton) {
 			w.SetFunc(ev.RotBodyLeft).SetText("Body Left").SetIcon(icons.KeyboardArrowLeft).
-				Style(func(s *styles.Style) {
+				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
 		core.Add(p, func(w *views.FuncButton) {
 			w.SetFunc(ev.RotBodyRight).SetText("Body Right").SetIcon(icons.KeyboardArrowRight).
-				Style(func(s *styles.Style) {
+				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
 		core.Add(p, func(w *views.FuncButton) {
 			w.SetFunc(ev.RotHeadLeft).SetText("Head Left").SetIcon(icons.KeyboardArrowLeft).
-				Style(func(s *styles.Style) {
+				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
 		core.Add(p, func(w *views.FuncButton) {
 			w.SetFunc(ev.RotHeadRight).SetText("Head Right").SetIcon(icons.KeyboardArrowRight).
-				Style(func(s *styles.Style) {
+				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})

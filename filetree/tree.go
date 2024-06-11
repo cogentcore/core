@@ -356,13 +356,10 @@ func (ft *Tree) ExtNodeByPath(fpath string) (*Node, error) {
 	if ekid == nil {
 		return nil, fmt.Errorf("ExtFile not updated -- no ExtFiles node")
 	}
-	ekids := *ekid.Children()
-	err := ekids.IsValidIndex(i)
-	if err == nil {
-		kn := AsNode(ekids[i])
-		return kn, nil
+	if n := ekid.AsTree().Child(i); n != nil {
+		return AsNode(n), nil
 	}
-	return nil, fmt.Errorf("ExtFile not updated: %v", err)
+	return nil, fmt.Errorf("ExtFile not updated; index invalid")
 }
 
 // SyncExtFiles returns a type-and-name list for configuring nodes
@@ -376,7 +373,7 @@ func (ft *Tree) SyncExtFiles(efn *Node) {
 	}
 	tree.Update(efn, plan) // NOT unique names
 	// always go through kids, regardless of mods
-	for i, sfk := range efn.Kids {
+	for i, sfk := range efn.Children {
 		sf := AsNode(sfk)
 		sf.FRoot = ft
 		fp := ft.ExtFiles[i]

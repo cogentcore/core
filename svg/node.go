@@ -159,12 +159,12 @@ func (g *NodeBase) SetColorProperties(prop, color string) {
 func (g *NodeBase) ParTransform(self bool) math32.Matrix2 {
 	pars := []Node{}
 	xf := math32.Identity2()
-	n := g.This().(Node)
+	n := g.This.(Node)
 	for {
-		if n.Parent() == nil {
+		if n.AsTree().Parent == nil {
 			break
 		}
-		n = n.Parent().(Node)
+		n = n.AsTree().Parent.(Node)
 		pars = append(pars, n)
 	}
 	np := len(pars)
@@ -261,35 +261,26 @@ func (g *NodeBase) ReadGeom(sv *SVG, dat []float32) {
 	g.ReadTransform(dat, 0)
 }
 
-// SVGWalkDown does [tree.Node.WalkDown] on given node using given walk function
-// with SVG Node parameters.  Automatically filters
-// nil or deleted items.  Return [tree.Continue] (true) to continue,
-// and [tree.Break] (false) to terminate.
-func SVGWalkDown(n Node, fun func(kni Node, knb *NodeBase) bool) {
-	n.WalkDown(func(k tree.Node) bool {
-		kni := k.(Node)
-		if kni == nil || kni.This() == nil {
-			return tree.Break
-		}
-		return fun(kni, kni.AsNodeBase())
+// SVGWalkDown does [tree.NodeBase.WalkDown] on given node using given walk function
+// with SVG Node parameters.
+func SVGWalkDown(n Node, fun func(sn Node, snb *NodeBase) bool) {
+	n.AsTree().WalkDown(func(n tree.Node) bool {
+		sn := n.(Node)
+		return fun(sn, sn.AsNodeBase())
 	})
 }
 
 // SVGWalkDownNoDefs does [tree.Node.WalkDown] on given node using given walk function
-// with SVG Node parameters.  Automatically filters
-// nil or deleted items, and Defs nodes (IsDef) and MetaData,
+// with SVG Node parameters.  Automatically filters Defs nodes (IsDef) and MetaData,
 // i.e., it only processes concrete graphical nodes.
-// Return [tree.Continue] (true) to continue, and [tree.Break] (false) to terminate.
-func SVGWalkDownNoDefs(n Node, fun func(kni Node, knb *NodeBase) bool) {
-	n.WalkDown(func(k tree.Node) bool {
-		kni := k.(Node)
-		if kni == nil || kni.This() == nil {
+func SVGWalkDownNoDefs(n Node, fun func(sn Node, snb *NodeBase) bool) {
+	n.AsTree().WalkDown(func(k tree.Node) bool {
+		sn := k.(Node)
+		snb := sn.AsNodeBase()
+		if snb.Is(IsDef) || sn.NodeType() == MetaDataType {
 			return tree.Break
 		}
-		if kni.Is(IsDef) || kni.NodeType() == MetaDataType {
-			return tree.Break
-		}
-		return fun(kni, kni.AsNodeBase())
+		return fun(sn, snb)
 	})
 }
 
@@ -297,11 +288,11 @@ func SVGWalkDownNoDefs(n Node, fun func(kni Node, knb *NodeBase) bool) {
 // recursing into groups until a non-group item is found.
 func FirstNonGroupNode(n Node) Node {
 	var ngn Node
-	SVGWalkDownNoDefs(n, func(kni Node, knb *NodeBase) bool {
-		if _, isgp := kni.This().(*Group); isgp {
+	SVGWalkDownNoDefs(n, func(sn Node, snb *NodeBase) bool {
+		if _, isgp := sn.(*Group); isgp {
 			return tree.Continue
 		}
-		ngn = kni
+		ngn = sn
 		return tree.Break
 	})
 	return ngn
@@ -312,18 +303,18 @@ func FirstNonGroupNode(n Node) Node {
 // Excludes the starting node.
 func NodesContainingPoint(n Node, pt image.Point, leavesOnly bool) []Node {
 	var cn []Node
-	SVGWalkDown(n, func(kni Node, knb *NodeBase) bool {
-		if kni.This() == n.This() {
+	SVGWalkDown(n, func(sn Node, snb *NodeBase) bool {
+		if sn == n {
 			return tree.Continue
 		}
-		if leavesOnly && kni.HasChildren() {
+		if leavesOnly && snb.HasChildren() {
 			return tree.Continue
 		}
-		if knb.Paint.Off {
+		if snb.Paint.Off {
 			return tree.Break
 		}
-		if pt.In(knb.BBox) {
-			cn = append(cn, kni)
+		if pt.In(snb.BBox) {
+			cn = append(cn, sn)
 		}
 		return tree.Continue
 	})
@@ -341,14 +332,14 @@ func (g *NodeBase) Style(sv *SVG) {
 	pc.StyleSet = false // this is always first call, restart
 
 	var parCSSAgg map[string]any
-	if g.Par != nil { // && g.Par != sv.Root.This()
-		pn := g.Par.(Node)
+	if g.Parent != nil { // && g.Par != sv.Root.This
+		pn := g.Parent.(Node)
 		parCSSAgg = pn.AsNodeBase().CSSAgg
 		pp := pn.PaintStyle()
 		pc.CopyStyleFrom(pp)
-		pc.SetStyleProperties(pp, g.Properties(), ctxt)
+		pc.SetStyleProperties(pp, g.Properties, ctxt)
 	} else {
-		pc.SetStyleProperties(nil, g.Properties(), ctxt)
+		pc.SetStyleProperties(nil, g.Properties, ctxt)
 	}
 	pc.ToDotsImpl(&pc.UnitContext) // we always inherit parent's unit context -- SVG sets it once-and-for-all
 
@@ -387,8 +378,8 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css map[string]any) bool {
 	}
 	pc := &g.Paint
 	ctxt := colors.Context(sv)
-	if g.Par != sv.Root.This() {
-		pp := g.Par.(Node).PaintStyle()
+	if g.Parent != sv.Root.This {
+		pp := g.Parent.(Node).PaintStyle()
 		pc.SetStyleProperties(pp, pmap, ctxt)
 	} else {
 		pc.SetStyleProperties(nil, pmap, ctxt)
@@ -403,7 +394,7 @@ func (g *NodeBase) StyleCSS(sv *SVG, css map[string]any) {
 	g.ApplyCSS(sv, tyn, css)
 	cln := "." + strings.ToLower(g.Class) // then class
 	g.ApplyCSS(sv, cln, css)
-	idnm := "#" + strings.ToLower(g.Name()) // then name
+	idnm := "#" + strings.ToLower(g.Name) // then name
 	g.ApplyCSS(sv, idnm, css)
 }
 
@@ -444,10 +435,10 @@ func (g *NodeBase) LocalLineWidth() float32 {
 // gui interaction -- can only be done in rendering because that is when all
 // the proper transforms are all in place -- VpBBox is intersected with parent SVG
 func (g *NodeBase) BBoxes(sv *SVG) {
-	if g.This() == nil {
+	if g.This == nil {
 		return
 	}
-	ni := g.This().(Node)
+	ni := g.This.(Node)
 	g.BBox = ni.NodeBBox(sv)
 	g.BBox.Canon()
 	g.VisBBox = sv.Geom.SizeRect().Intersect(g.BBox)
@@ -458,10 +449,10 @@ func (g *NodeBase) BBoxes(sv *SVG) {
 // Must be called as first step in Render.
 func (g *NodeBase) PushTransform(sv *SVG) (bool, *paint.Context) {
 	g.BBox = image.Rectangle{}
-	if g.Paint.Off || g == nil || g.This() == nil {
+	if g.Paint.Off || g == nil || g.This == nil {
 		return false, nil
 	}
-	ni := g.This().(Node)
+	ni := g.This.(Node)
 	// if g.IsInvisible() { // just the Invisible flag
 	// 	return false, nil
 	// }
@@ -483,7 +474,7 @@ func (g *NodeBase) PushTransform(sv *SVG) (bool, *paint.Context) {
 }
 
 func (g *NodeBase) RenderChildren(sv *SVG) {
-	for _, kid := range g.Kids {
+	for _, kid := range g.Children {
 		ni := kid.(Node)
 		ni.Render(sv)
 	}

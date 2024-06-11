@@ -48,14 +48,14 @@ func (tn *Node) Init() {
 	tn.ContextMenus = nil
 	tn.AddContextMenu(tn.ContextMenu)
 	core.AddChildInit(tn, "parts", func(w *core.Frame) {
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			s.Gap.X.Em(0.4)
 		})
 		core.AddChildInit(w, "branch", func(w *core.Switch) {
 			core.AddChildInit(w, "stack", func(w *core.Frame) {
 				f := func(name string) {
 					core.AddChildInit(w, name, func(w *core.Icon) {
-						w.Style(func(s *styles.Style) {
+						w.Styler(func(s *styles.Style) {
 							s.Min.Set(units.Em(1))
 						})
 					})
@@ -91,7 +91,7 @@ func (tn *Node) Browser() *Browser {
 
 func (tn *Node) ContextMenu(m *core.Scene) {
 	core.NewButton(m).SetText("View Diffs").SetIcon(icons.Add).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetState(!tn.HasSelection(), states.Disabled)
 		}).OnClick(func(e events.Event) {
 		br := tn.Browser()

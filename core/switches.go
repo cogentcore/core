@@ -118,7 +118,7 @@ func (sw *Switches) OnBind(value any) {
 func (sw *Switches) Init() {
 	sw.Frame.Init()
 	sw.AllowNone = true
-	sw.Style(func(s *styles.Style) {
+	sw.Styler(func(s *styles.Style) {
 		s.Padding.Set(units.Dp(2))
 		s.Margin.Set(units.Dp(2))
 		if sw.Type == SwitchSegmentedButton {
@@ -127,7 +127,7 @@ func (sw *Switches) Init() {
 			s.Wrap = true
 		}
 	})
-	sw.StyleFinal(func(s *styles.Style) {
+	sw.FinalStyler(func(s *styles.Style) {
 		if s.Direction == styles.Row {
 			s.Grow.Set(1, 0)
 		} else {
@@ -151,10 +151,10 @@ func (sw *Switches) Init() {
 					}
 					sw.SendChange(e)
 					sw.UpdateTree()
-					sw.ApplyStyleTree()
+					sw.StyleTree()
 					sw.NeedsRender()
 				})
-				w.Style(func(s *styles.Style) {
+				w.Styler(func(s *styles.Style) {
 					if sw.Type != SwitchSegmentedButton {
 						return
 					}

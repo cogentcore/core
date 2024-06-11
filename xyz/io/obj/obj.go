@@ -318,7 +318,7 @@ func (dec *Decoder) SetMat(sc *xyz.Scene, sld *xyz.Solid, matnm string) {
 	if mat == nil {
 		mat = defaultMat
 		// log warning
-		msg := fmt.Sprintf("could not find material: %s for object %s. using default material.", matnm, sld.Name())
+		msg := fmt.Sprintf("could not find material: %s for object %s. using default material.", matnm, sld.Name)
 		dec.appendWarn(objType, msg)
 	}
 	sld.Mat.Defaults()

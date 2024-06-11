@@ -83,9 +83,6 @@ func (fn *Node) Repo() (vcs.Repo, *Node) {
 	var repo vcs.Repo
 	var rnode *Node
 	fn.WalkUpParent(func(k tree.Node) bool {
-		if k == nil || k.This() == nil {
-			return tree.Break
-		}
 		sfn := AsNode(k)
 		if sfn == nil {
 			return tree.Break
@@ -320,12 +317,12 @@ func BlameDialog(ctx core.Widget, fname string, blame, fbytes []byte) *textedito
 	tv.BufferB.SetText(fbytes)
 
 	tva, tvb := tv.Editors()
-	tva.Style(func(s *styles.Style) {
+	tva.Styler(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePre
 		s.Min.X.Ch(30)
 		s.Min.Y.Em(40)
 	})
-	tvb.Style(func(s *styles.Style) {
+	tvb.Styler(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePre
 		s.Min.X.Ch(80)
 		s.Min.Y.Em(40)

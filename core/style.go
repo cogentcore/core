@@ -17,68 +17,37 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Styling logic; see render.go for rendering logic
-
-// CustomConfigStyles is the custom, global style configuration function
-// that is called on all widgets to configure their style functions.
-// By default, it is nil. If you set it, you should mostly call
-// AddStyleFunc within it. For reference on
-// how you should structure your CustomStyleFunc, you
-// should look at https://cogentcore.org/core/docs/gi/styling.
-var CustomConfigStyles func(w Widget)
-
-////////////////////////////////////////////////////////////////////
-// 	Widget Styling functions
-
-// Style adds the given styler to the widget's Stylers.
-// It is one of the main ways for both end-user and internal code
-// to set the styles of a widget, in addition to StyleFirst
-// and StyleFinal, which add stylers that are called before
-// and after the stylers added by this function, respectively.
-func (wb *WidgetBase) Style(s func(s *styles.Style)) *WidgetBase {
+// Styler adds the given function for setting the style properties of the widget
+// to [WidgetBase.Stylers]. It is one of the main ways to specify the styles of
+// a widget, in addition to FirstStyler and FinalStyler, which add stylers that
+// are called before and after the stylers added by this function, respectively.
+func (wb *WidgetBase) Styler(s func(s *styles.Style)) *WidgetBase {
 	wb.Stylers = append(wb.Stylers, s)
 	return wb
 }
 
-// StyleFirst adds the given styler to the widget's FirstStylers.
-// It is one of the main ways for both end-user and internal code
-// to set the styles of a widget, in addition to Style
-// and StyleFinal, which add stylers that are called after
-// the stylers added by this function.
-func (wb *WidgetBase) StyleFirst(s func(s *styles.Style)) *WidgetBase {
+// FirstStyler adds the given function for setting the style properties of the widget
+// to [WidgetBase.FirstStylers]. It is one of the main ways to specify the styles of
+// a widget, in addition to Styler and FinalStyler, which add stylers that are called
+// after the stylers added by this function.
+func (wb *WidgetBase) FirstStyler(s func(s *styles.Style)) *WidgetBase {
 	wb.FirstStylers = append(wb.FirstStylers, s)
 	return wb
 }
 
-// StyleFinal adds the given styler to the widget's FinalStylers.
-// It is one of the main ways for both end-user and internal code
-// to set the styles of a widget, in addition to StyleFirst
-// and Style, which add stylers that are called before
-// the stylers added by this function.
-func (wb *WidgetBase) StyleFinal(s func(s *styles.Style)) *WidgetBase {
+// FinalStyler adds the given function for setting the style properties of the widget
+// to [WidgetBase.FinalStylers]. It is one of the main ways to specify the styles of
+// a widget, in addition to FirstStyler and Styler, which add stylers that are called
+// before the stylers added by this function.
+func (wb *WidgetBase) FinalStyler(s func(s *styles.Style)) *WidgetBase {
 	wb.FinalStylers = append(wb.FinalStylers, s)
 	return wb
 }
 
-// BoxSpace returns the style BoxSpace value under read lock
-func (wb *WidgetBase) BoxSpace() styles.SideFloats {
-	bs := wb.Styles.BoxSpace()
-	return bs
-}
-
-// ApplyStyleParts styles the parts.
-// Automatically called by the default ApplyStyleWidget function.
-func (wb *WidgetBase) ApplyStyleParts() {
-	if wb.Parts == nil {
-		return
-	}
-	wb.Parts.ApplyStyleTree()
-}
-
-// ApplyStyleWidget is the primary styling function for all Widgets.
-// Handles inheritance and runs the Styler functions.
-func (wb *WidgetBase) ApplyStyleWidget() {
-	if wb.This() == nil {
+// Style updates the style properties of the widget based on [WidgetBase.Stylers].
+// To specify the style properties of a widget, use [WidgetBase.Styler].
+func (wb *WidgetBase) Style() {
+	if wb.This == nil {
 		return
 	}
 
@@ -95,29 +64,26 @@ func (wb *WidgetBase) ApplyStyleWidget() {
 		if pw != nil {
 			psz = pw.Geom.Size.Alloc.Content
 		}
-		SetUnitContext(&wb.Styles, wb.Scene, wb.Geom.Size.Alloc.Content, psz)
-		wb.ApplyStyleParts()
+		setUnitContext(&wb.Styles, wb.Scene, wb.Geom.Size.Alloc.Content, psz)
 	}()
 
 	if wb.OverrideStyle {
 		return
 	}
-	wb.ResetStyleWidget()
+	wb.resetStyleWidget()
 
 	if pw != nil {
 		wb.Styles.InheritFields(&pw.Styles)
 	}
 
-	wb.ResetStyleSettings()
-	wb.RunStylers()
-	wb.ApplyStyleSettings()
+	wb.resetStyleSettings()
+	wb.runStylers()
+	wb.styleSettings()
 }
 
-// ResetStyleWidget resets the widget styles and applies the basic
-// default styles specified in [styles.Style.Defaults]. It is called
-// automatically in [ApplyStyleWidget]
-// and should not need to be called by end-user code.
-func (wb *WidgetBase) ResetStyleWidget() {
+// resetStyleWidget resets the widget styles and applies the basic
+// default styles specified in [styles.Style.Defaults].
+func (wb *WidgetBase) resetStyleWidget() {
 	s := &wb.Styles
 
 	// need to persist state
@@ -134,9 +100,9 @@ func (wb *WidgetBase) ResetStyleWidget() {
 	s.SetMono(false)
 }
 
-// RunStylers runs the stylers specified in the widget's FirstStylers,
+// runStylers runs the stylers specified in the widget's FirstStylers,
 // Stylers, and FinalStylers in that order in a sequential ascending order.
-func (wb *WidgetBase) RunStylers() {
+func (wb *WidgetBase) runStylers() {
 	for _, s := range wb.FirstStylers {
 		s(&wb.Styles)
 	}
@@ -148,13 +114,13 @@ func (wb *WidgetBase) RunStylers() {
 	}
 }
 
-// ResetStyleSettings reverses the effects of [ApplyStyleSettings]
+// resetStyleSettings reverses the effects of [ApplyStyleSettings]
 // for the widget's font size so that it does not create cascading
 // inhereted font size values. It only does this for non-root elements,
 // as the root element must receive the larger font size so that
 // all other widgets inherit it. It must be called before
-// [WidgetBase.RunStylers] and [WidgetBase.ApplyStyleSettings].
-func (wb *WidgetBase) ResetStyleSettings() {
+// [WidgetBase.runStylers] and [WidgetBase.styleSettings].
+func (wb *WidgetBase) resetStyleSettings() {
 	if tree.IsRoot(wb) {
 		return
 	}
@@ -163,9 +129,9 @@ func (wb *WidgetBase) ResetStyleSettings() {
 	wb.Styles.Text.LineHeight.Value /= fsz
 }
 
-// ApplyStyleSettings applies [AppearanceSettingsData.Spacing]
+// styleSettings applies [AppearanceSettingsData.Spacing]
 // and [AppearanceSettings.FontSize] to the style values for the widget.
-func (wb *WidgetBase) ApplyStyleSettings() {
+func (wb *WidgetBase) styleSettings() {
 	s := &wb.Styles
 
 	spc := AppearanceSettings.Spacing / 100
@@ -185,23 +151,29 @@ func (wb *WidgetBase) ApplyStyleSettings() {
 	s.Text.LineHeight.Value *= fsz
 }
 
-// ApplyStyleUpdate calls ApplyStyleTree and NeedsRender.
-// This is the main call needed to ensure that state-sensitive styling
-// is updated, when the state changes.
-func (wb *WidgetBase) ApplyStyleUpdate() {
-	wb.ApplyStyleTree()
+// StyleTree calls [WidgetBase.Style] on every widget in tree
+// underneath and including this widget.
+func (wb *WidgetBase) StyleTree() {
+	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
+		wi.Style()
+		return tree.Continue
+	})
+}
+
+// Restyle ensures that the styling of the widget and all of its children
+// is updated and rendered by calling [WidgetBase.StyleTree] and
+// [WidgetBase.NeedsRender]. It does not trigger a new update or layout
+// pass, so it should only be used for non-structural styling changes.
+func (wb *WidgetBase) Restyle() {
+	wb.StyleTree()
 	wb.NeedsRender()
 }
 
-func (wb *WidgetBase) ApplyStyle() {
-	wb.ApplyStyleWidget()
-}
-
-// SetUnitContext sets the unit context based on size of scene, element, and parent
+// setUnitContext sets the unit context based on size of scene, element, and parent
 // element (from bbox) and then caches everything out in terms of raw pixel
 // dots for rendering.
 // Zero values for element and parent size are ignored.
-func SetUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
+func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
 	rebuild := false
 	var rc *RenderContext
 	sz := image.Point{1920, 1280}
@@ -236,30 +208,7 @@ func (wb *WidgetBase) ParentActualBackground() image.Image {
 	if pwb == nil {
 		return nil
 	}
-	return pwb.This().(Widget).ChildBackground(wb.This().(Widget))
-}
-
-// IsNthChild returns whether the node is nth-child of its parent
-func (wb *WidgetBase) IsNthChild(n int) bool {
-	idx := wb.IndexInParent()
-	return idx == n
-}
-
-// IsFirstChild returns whether the node is the first child of its parent
-func (wb *WidgetBase) IsFirstChild() bool {
-	idx := wb.IndexInParent()
-	return idx == 0
-}
-
-// IsLastChild returns whether the node is the last child of its parent
-func (wb *WidgetBase) IsLastChild() bool {
-	idx := wb.IndexInParent()
-	return idx == wb.Par.NumChildren()-1
-}
-
-// IsOnlyChild returns whether the node is the only child of its parent
-func (wb *WidgetBase) IsOnlyChild() bool {
-	return wb.Par != nil && wb.Par.NumChildren() == 1
+	return pwb.This.(Widget).ChildBackground(wb.This.(Widget))
 }
 
 // StyleFromTags adds a [WidgetBase.Styler] to the given widget
@@ -274,7 +223,7 @@ func StyleFromTags(w Widget, tags reflect.StructTag) {
 			}
 		}
 	}
-	w.Style(func(s *styles.Style) {
+	w.Styler(func(s *styles.Style) {
 		style("width", s.Min.X.Ch)
 		style("max-width", s.Max.X.Ch)
 		style("height", s.Min.Y.Em)

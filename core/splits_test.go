@@ -39,7 +39,7 @@ func TestSplitsSet(t *testing.T) {
 func TestSplitsColumn(t *testing.T) {
 	b := NewBody()
 	sp := NewSplits(b)
-	sp.Style(func(s *styles.Style) {
+	sp.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
 	NewText(sp).SetText("First")
@@ -50,7 +50,7 @@ func TestSplitsColumn(t *testing.T) {
 func TestSplitsRow(t *testing.T) {
 	b := NewBody()
 	sp := NewSplits(b)
-	sp.Style(func(s *styles.Style) {
+	sp.Styler(func(s *styles.Style) {
 		s.Direction = styles.Row
 	})
 	NewText(sp).SetText("First")
@@ -64,7 +64,7 @@ func TestMixedVerticalSplits(t *testing.T) {
 	txt := "This is a long sentence that I wrote for the purpose of testing vertical splits behavior"
 	NewText(b).SetText(txt)
 	sp := NewSplits(b)
-	sp.Style(func(s *styles.Style) {
+	sp.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
 	NewText(sp).SetText(txt)

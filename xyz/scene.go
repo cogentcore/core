@@ -141,7 +141,7 @@ func (sc *Scene) SaveCamera(name string) {
 func (sc *Scene) SetCamera(name string) error {
 	cam, ok := sc.SavedCams[name]
 	if !ok {
-		return fmt.Errorf("xyz.Scene: %v saved camera of name: %v not found", sc.Nm, name)
+		return fmt.Errorf("xyz.Scene: %v saved camera of name: %v not found", sc.Name, name)
 	}
 	sc.Camera = cam
 	return nil
@@ -162,7 +162,7 @@ func (sc *Scene) Validate() error {
 	// }
 	hasError := false
 	sc.WalkDown(func(k tree.Node) bool {
-		if k == sc.This() {
+		if k == sc.This {
 			return tree.Continue
 		}
 		ni, _ := AsNode(k)
@@ -235,12 +235,9 @@ func (sc *Scene) Destroy() {
 // SolidsIntersectingPoint finds all the solids that contain given 2D window coordinate
 func (sc *Scene) SolidsIntersectingPoint(pos image.Point) []Node {
 	var objs []Node
-	for _, kid := range sc.Kids {
-		kii, _ := AsNode(kid)
-		if kii == nil {
-			continue
-		}
-		kii.WalkDown(func(k tree.Node) bool {
+	for _, c := range sc.Children {
+		cn, _ := AsNode(c)
+		cn.AsTree().WalkDown(func(k tree.Node) bool {
 			ni, _ := AsNode(k)
 			if ni == nil {
 				return tree.Break // going into a different type of thing, bail

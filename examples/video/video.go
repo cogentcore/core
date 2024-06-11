@@ -11,18 +11,18 @@ import (
 
 func main() {
 	b := core.NewBody("Basic Video Example")
-	bx := core.NewFrame(b).Style(func(s *styles.Style) {
+	bx := core.NewFrame(b).Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
-	core.NewText(bx).SetText("video:").Style(func(s *styles.Style) {
+	core.NewText(bx).SetText("video:").Styler(func(s *styles.Style) {
 		s.SetTextWrap(false)
 	})
 	v := video.NewVideo(bx)
-	v.Style(func(s *styles.Style) {
+	v.Styler(func(s *styles.Style) {
 		s.Min.X.Px(200)
 		s.Grow.Set(1, 1)
 	})
-	core.NewText(bx).SetText("filler:").Style(func(s *styles.Style) {
+	core.NewText(bx).SetText("filler:").Styler(func(s *styles.Style) {
 		s.SetTextWrap(false)
 	})
 	core.NewText(b).SetText("footer:")

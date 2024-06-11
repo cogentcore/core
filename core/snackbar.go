@@ -56,7 +56,7 @@ func ErrorSnackbar(ctx Widget, err error, label ...string) {
 // SnackbarStyles sets default stylers for snackbar bodies.
 // It is automatically called in [Body.NewSnackbar].
 func (bd *Body) SnackbarStyles() {
-	bd.Style(func(s *styles.Style) {
+	bd.Styler(func(s *styles.Style) {
 		s.Direction = styles.Row
 		s.Overflow.Set(styles.OverflowVisible) // key for avoiding sizing errors when re-rendering with small pref size
 		s.Border.Radius = styles.BorderRadiusExtraSmall
@@ -74,7 +74,7 @@ func (bd *Body) SnackbarStyles() {
 			return min(uc.Em(20), uc.Vw(70))
 		})
 	})
-	bd.Scene.Style(func(s *styles.Style) {
+	bd.Scene.Styler(func(s *styles.Style) {
 		s.Background = nil
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.BoxShadow = styles.BoxShadow3()
@@ -84,7 +84,7 @@ func (bd *Body) SnackbarStyles() {
 // AddSnackbarText adds a snackbar [Text] with the given text.
 func (bd *Body) AddSnackbarText(text string) *Body {
 	NewText(bd).SetText(text).SetType(TextBodyMedium).
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetTextWrap(false)
 			if s.Is(states.Selected) {
 				s.Color = colors.C(colors.Scheme.Select.OnContainer)
@@ -100,7 +100,7 @@ func (bd *Body) AddSnackbarText(text string) *Body {
 func (bd *Body) AddSnackbarButton(text string, onClick ...func(e events.Event)) *Body {
 	NewStretch(bd)
 	bt := NewButton(bd).SetType(ButtonText).SetText(text)
-	bt.Style(func(s *styles.Style) {
+	bt.Styler(func(s *styles.Style) {
 		s.Color = colors.C(colors.Scheme.InversePrimary)
 	})
 	bt.OnClick(func(e events.Event) {
@@ -118,7 +118,7 @@ func (bd *Body) AddSnackbarButton(text string, onClick ...func(e events.Event)) 
 // there is an event handler passed.
 func (bd *Body) AddSnackbarIcon(icon icons.Icon, onClick ...func(e events.Event)) *Body {
 	ic := NewButton(bd).SetType(ButtonAction).SetIcon(icon)
-	ic.Style(func(s *styles.Style) {
+	ic.Styler(func(s *styles.Style) {
 		s.Color = colors.C(colors.Scheme.InverseOnSurface)
 	})
 	ic.OnClick(func(e events.Event) {

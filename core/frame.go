@@ -72,7 +72,7 @@ func (fr *Frame) FlagType() enums.BitFlagSetter {
 
 func (fr *Frame) Init() {
 	fr.WidgetBase.Init()
-	fr.StyleFinal(func(s *styles.Style) {
+	fr.FinalStyler(func(s *styles.Style) {
 		// we only enable, not disable, since some other widget like Slider may want to enable
 		if s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto {
 			s.SetAbilities(true, abilities.Scrollable, abilities.Slideable)
@@ -159,11 +159,11 @@ func (fr *Frame) Init() {
 	})
 }
 
-func (fr *Frame) ApplyStyle() {
-	fr.ApplyStyleWidget()
+func (fr *Frame) Style() {
+	fr.WidgetBase.Style()
 	for d := math32.X; d <= math32.Y; d++ {
 		if fr.HasScroll[d] && fr.Scrolls[d] != nil {
-			fr.Scrolls[d].ApplyStyle()
+			fr.Scrolls[d].Style()
 		}
 	}
 }
@@ -181,7 +181,7 @@ func (fr *Frame) DeleteScroll(d math32.Dims) {
 		return
 	}
 	sb := fr.Scrolls[d]
-	sb.This().Destroy()
+	sb.This.Destroy()
 	fr.Scrolls[d] = nil
 }
 
@@ -201,7 +201,7 @@ func (fr *Frame) RenderChildren() {
 
 func (fr *Frame) RenderWidget() {
 	if fr.PushBounds() {
-		fr.This().(Widget).Render()
+		fr.This.(Widget).Render()
 		fr.RenderParts()
 		fr.RenderChildren()
 		fr.RenderScrolls()
@@ -235,7 +235,7 @@ func (fr *Frame) ChildWithFocus() (Widget, int) {
 // if updn is true, then for Grid layouts, it moves down to next row
 // instead of just the sequentially next item.
 func (fr *Frame) FocusNextChild(updn bool) bool {
-	sz := len(fr.Kids)
+	sz := len(fr.Children)
 	if sz <= 1 {
 		return false
 	}
@@ -272,7 +272,7 @@ func (fr *Frame) FocusNextChild(updn bool) bool {
 // If updn is true, then for Grid layouts, it moves up to next row
 // instead of just the sequentially next item.
 func (fr *Frame) FocusPreviousChild(updn bool) bool {
-	sz := len(fr.Kids)
+	sz := len(fr.Children)
 	if sz <= 1 {
 		return false
 	}
@@ -334,7 +334,6 @@ func (fr *Frame) FocusOnName(e events.Event) bool {
 	// fmt.Printf("searching for: %v  last: %v\n", ly.FocusName, ly.FocusNameLast)
 	focel := ChildByLabelCanFocus(fr, fr.FocusName, fr.FocusNameLast)
 	if focel != nil {
-		focel = focel.This()
 		em := fr.Events()
 		if em != nil {
 			em.SetFocusEvent(focel.(Widget)) // this will also scroll by default!
@@ -357,23 +356,23 @@ func (fr *Frame) FocusOnName(e events.Event) bool {
 func ChildByLabelCanFocus(fr *Frame, name string, after tree.Node) tree.Node {
 	gotAfter := false
 	completions := []complete.Completion{}
-	fr.WalkDownBreadth(func(k tree.Node) bool {
-		if k == fr.This() { // skip us
+	fr.WalkDownBreadth(func(n tree.Node) bool {
+		if n == fr.This { // skip us
 			return tree.Continue
 		}
-		_, ni := AsWidget(k)
-		if ni == nil || !ni.CanFocus() { // don't go any further
+		_, wb := AsWidget(n)
+		if wb == nil || !wb.CanFocus() { // don't go any further
 			return tree.Continue
 		}
 		if after != nil && !gotAfter {
-			if k == after {
+			if n == after {
 				gotAfter = true
 			}
 			return tree.Continue // skip to next
 		}
 		completions = append(completions, complete.Completion{
-			Text: labels.ToLabel(k),
-			Desc: k.PathFrom(fr),
+			Text: labels.ToLabel(n),
+			Desc: n.AsTree().PathFrom(fr),
 		})
 		return tree.Continue
 	})
@@ -396,7 +395,7 @@ type Stretch struct {
 
 func (st *Stretch) Init() {
 	st.WidgetBase.Init()
-	st.Style(func(s *styles.Style) {
+	st.Styler(func(s *styles.Style) {
 		s.RenderBox = false
 		s.Min.X.Ch(1)
 		s.Min.Y.Em(1)
@@ -414,7 +413,7 @@ type Space struct {
 
 func (sp *Space) Init() {
 	sp.WidgetBase.Init()
-	sp.Style(func(s *styles.Style) {
+	sp.Styler(func(s *styles.Style) {
 		s.RenderBox = false
 		s.Min.X.Ch(1)
 		s.Min.Y.Em(1)

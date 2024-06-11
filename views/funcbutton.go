@@ -136,7 +136,7 @@ func NewFuncButton(parent tree.Node, fun any) *FuncButton {
 	if parent == nil {
 		return tree.New[*FuncButton]().SetFunc(fun)
 	} else {
-		return parent.NewChild(FuncButtonType).(*FuncButton).SetFunc(fun)
+		return tree.New[*FuncButton](parent).SetFunc(fun)
 	}
 }
 
@@ -162,7 +162,7 @@ func (fb *FuncButton) OnBind(value any) {
 func (fb *FuncButton) Init() {
 	fb.Button.Init()
 	fb.WarnUnadded = true
-	fb.Style(func(s *styles.Style) {
+	fb.Styler(func(s *styles.Style) {
 		if fb.IsReadOnly() {
 			s.SetAbilities(false, abilities.Hoverable, abilities.Clickable, abilities.Activatable)
 			s.Cursor = cursors.None
@@ -309,10 +309,10 @@ func (fb *FuncButton) setFuncImpl(gfun *types.Func, rfun reflect.Value) *FuncBut
 func (fb *FuncButton) goodContext() core.Widget {
 	ctx := fb.Context
 	if fb.Context == nil {
-		if fb.This() == nil {
+		if fb.This == nil {
 			return nil
 		}
-		ctx = fb.This().(core.Widget)
+		ctx = fb.This.(core.Widget)
 	}
 	return ctx
 }

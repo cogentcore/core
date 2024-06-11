@@ -65,14 +65,14 @@ func (st *Stage) addDialogParts() *Stage {
 	}
 	sc := st.Scene
 	parts := sc.NewParts()
-	parts.Style(func(s *styles.Style) {
+	parts.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(0, 1)
 		s.Gap.Zero()
 	})
-	mv := NewHandle(parts).Style(func(s *styles.Style) {
+	mv := NewHandle(parts).Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
-	}).StyleFinal(func(s *styles.Style) {
+	}).FinalStyler(func(s *styles.Style) {
 		s.Cursor = cursors.Move
 	})
 	mv.SetName("move")
@@ -91,10 +91,10 @@ func (st *Stage) addDialogParts() *Stage {
 		sc.SceneGeom.Pos = np
 		sc.NeedsRender()
 	})
-	rsz := NewHandle(parts).Style(func(s *styles.Style) {
+	rsz := NewHandle(parts).Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.FillMargin = false
-	}).StyleFinal(func(s *styles.Style) {
+	}).FinalStyler(func(s *styles.Style) {
 		s.Cursor = cursors.ResizeNWSE
 		s.Min.Set(units.Em(1))
 	})
@@ -230,7 +230,7 @@ func (st *Stage) RunWindow() *Stage {
 // If CurrentRenderWindow is nil (should not happen), then it returns false and
 // the calling function must bail.
 func (st *Stage) GetValidContext() bool {
-	if st.Context == nil || st.Context.This() == nil || st.Context.AsWidget().Scene == nil {
+	if st.Context == nil || st.Context.AsTree().This == nil || st.Context.AsWidget().Scene == nil {
 		if CurrentRenderWindow == nil {
 			slog.Error("Stage.Run: Context is nil and CurrentRenderWindow is nil, so cannot Run", "Name", st.Name, "Title", st.Title)
 			return false

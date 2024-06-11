@@ -27,10 +27,10 @@ func TestHandleWidgetState(t *testing.T) {
 		w.Send(event)
 		assert.Equal(t, expect, w.Styles.State)
 
-		w.Style(func(s *styles.Style) {
+		w.Styler(func(s *styles.Style) {
 			w.SetAbilities(true, ability)
 		})
-		w.ApplyStyle()
+		w.Style()
 
 		w.Send(event)
 		expect.SetFlag(true, state)
@@ -99,7 +99,7 @@ func TestWidgetPrev(t *testing.T) {
 	}
 	i := 0
 	WidgetPrevFunc(lt, func(w Widget) bool {
-		have := w.Path()
+		have := w.AsTree().Path()
 		want := paths[i]
 		if have != want {
 			t.Errorf("expected\n%s\n\tbut got\n%s", want, have)
@@ -127,7 +127,7 @@ func TestWidgetNext(t *testing.T) {
 	}
 	i := 0
 	WidgetNextFunc(ft, func(w Widget) bool {
-		have := w.Path()
+		have := w.AsTree().Path()
 		want := paths[i]
 		if have != want {
 			t.Errorf("expected\n%s\n\tbut got\n%s", want, have)

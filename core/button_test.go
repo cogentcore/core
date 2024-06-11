@@ -56,7 +56,7 @@ func TestButtonMenu(t *testing.T) {
 
 func TestButtonMenuClick(t *testing.T) {
 	b := NewBody()
-	b.Style(func(s *styles.Style) {
+	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(20), units.Em(10))
 	})
 	bt := NewButton(b).SetText("Share").SetIcon(icons.Share).SetMenu(func(m *Scene) {

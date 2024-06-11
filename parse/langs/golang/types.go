@@ -121,7 +121,7 @@ func (gl *GoLang) TypesFromAst(fs *parse.FileState, pkg *syms.Symbol) {
 
 // InitTypeFromAst initializes given type from ast
 func (gl *GoLang) InitTypeFromAst(fs *parse.FileState, pkg *syms.Symbol, ty *syms.Type) {
-	if ty.Ast == nil || len(*ty.Ast.Children()) < 2 {
+	if ty.Ast == nil || len(ty.Ast.AsTree().Children) < 2 {
 		// if TraceTypes {
 		// 	fmt.Printf("TypesFromAst: Type has nil Ast! %v\n", ty.String())
 		// }
@@ -187,7 +187,7 @@ var TypeToKindMap = map[string]syms.Kinds{
 // AstTypeName returns the effective type name from ast node
 // dropping the "Lit" for example.
 func (gl *GoLang) AstTypeName(tyast *parser.Ast) string {
-	tnm := tyast.Nm
+	tnm := tyast.Name
 	if strings.HasPrefix(tnm, "Lit") {
 		tnm = tnm[3:]
 	}
@@ -340,17 +340,17 @@ func (gl *GoLang) TypeFromAstComp(fs *parse.FileState, pkg *syms.Symbol, ty *sym
 		}
 	case "StructType":
 		ty.Kind = syms.Struct
-		nfld := len(tyast.Kids)
+		nfld := len(tyast.Children)
 		if nfld == 0 {
 			return BuiltinTypes["struct{}"], true
 		}
 		ty.Size = []int{nfld}
 		for i := 0; i < nfld; i++ {
-			fld := tyast.Kids[i].(*parser.Ast)
+			fld := tyast.Children[i].(*parser.Ast)
 			fsrc := fld.Src
-			switch fld.Nm {
+			switch fld.Name {
 			case "NamedField":
-				if len(fld.Kids) <= 1 { // anonymous, non-qualified
+				if len(fld.Children) <= 1 { // anonymous, non-qualified
 					ty.Els.Add(fsrc, fsrc)
 					gl.StructInheritEls(fs, pkg, ty, fsrc)
 					continue
@@ -376,15 +376,15 @@ func (gl *GoLang) TypeFromAstComp(fs *parse.FileState, pkg *syms.Symbol, ty *sym
 		// }
 	case "InterfaceType":
 		ty.Kind = syms.Interface
-		nmth := len(tyast.Kids)
+		nmth := len(tyast.Children)
 		if nmth == 0 {
 			return BuiltinTypes["interface{}"], true
 		}
 		ty.Size = []int{nmth}
 		for i := 0; i < nmth; i++ {
-			fld := tyast.Kids[i].(*parser.Ast)
+			fld := tyast.Children[i].(*parser.Ast)
 			fsrc := fld.Src
-			switch fld.Nm {
+			switch fld.Name {
 			case "MethSpecAnonLocal":
 				fallthrough
 			case "MethSpecAnonQual":
@@ -431,7 +431,7 @@ func (gl *GoLang) TypeFromAstComp(fs *parse.FileState, pkg *syms.Symbol, ty *sym
 
 // TypeFromAstLit gets type from literals
 func (gl *GoLang) TypeFromAstLit(fs *parse.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parser.Ast) (*syms.Type, bool) {
-	tnm := tyast.Nm
+	tnm := tyast.Name
 	var bty *syms.Type
 	switch tnm {
 	case "LitStringDbl":

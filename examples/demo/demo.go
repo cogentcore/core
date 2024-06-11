@@ -46,7 +46,7 @@ func main() {
 
 func home(ts *core.Tabs) {
 	tab := ts.NewTab("Home")
-	tab.Style(func(s *styles.Style) {
+	tab.Styler(func(s *styles.Style) {
 		s.CenterAll()
 	})
 
@@ -87,7 +87,7 @@ func buttons(ts *core.Tabs) {
 	core.NewText(tab).SetText("Cogent Core provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of text, an icon, and an indicator.")
 
 	makeRow := func() core.Widget {
-		return core.NewFrame(tab).Style(func(s *styles.Style) {
+		return core.NewFrame(tab).Styler(func(s *styles.Style) {
 			s.Wrap = true
 			s.Align.Items = styles.Center
 		})
@@ -153,19 +153,19 @@ func buttons(ts *core.Tabs) {
 		b := core.NewButton(brow).SetType(typ).SetText(s).SetIcon(ics[typ]).
 			SetTooltip("A standard " + sl + " button with text and an icon")
 		b.OnClick(func(e events.Event) {
-			fmt.Println("Got click event on", b.Nm)
+			fmt.Println("Got click event on", b.Name)
 		})
 
 		bt := core.NewButton(browt).SetType(typ).SetText(s).
 			SetTooltip("A standard " + sl + " button with text")
 		bt.OnClick(func(e events.Event) {
-			fmt.Println("Got click event on", bt.Nm)
+			fmt.Println("Got click event on", bt.Name)
 		})
 
 		bi := core.NewButton(browi).SetType(typ).SetIcon(ics[typ+5]).
 			SetTooltip("A standard " + sl + " button with an icon")
 		bi.OnClick(func(e events.Event) {
-			fmt.Println("Got click event on", bi.Nm)
+			fmt.Println("Got click event on", bi.Name)
 		})
 
 		core.NewButton(mbrow).SetType(typ).SetText(s).SetIcon(ics[typ+10]).SetMenu(menu).
@@ -186,19 +186,19 @@ func inputs(ts *core.Tabs) {
 	core.NewText(tab).SetText("Cogent Core provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.")
 
 	core.NewTextField(tab).SetPlaceholder("Text field")
-	core.NewTextField(tab).SetPlaceholder("Email").SetType(core.TextFieldOutlined).Style(func(s *styles.Style) {
+	core.NewTextField(tab).SetPlaceholder("Email").SetType(core.TextFieldOutlined).Styler(func(s *styles.Style) {
 		s.VirtualKeyboard = styles.KeyboardEmail
 	})
-	core.NewTextField(tab).SetPlaceholder("Phone number").AddClearButton().Style(func(s *styles.Style) {
+	core.NewTextField(tab).SetPlaceholder("Phone number").AddClearButton().Styler(func(s *styles.Style) {
 		s.VirtualKeyboard = styles.KeyboardPhone
 	})
-	core.NewTextField(tab).SetPlaceholder("URL").SetType(core.TextFieldOutlined).AddClearButton().Style(func(s *styles.Style) {
+	core.NewTextField(tab).SetPlaceholder("URL").SetType(core.TextFieldOutlined).AddClearButton().Styler(func(s *styles.Style) {
 		s.VirtualKeyboard = styles.KeyboardURL
 	})
 	core.NewTextField(tab).AddClearButton().SetLeadingIcon(icons.Search)
 	core.NewTextField(tab).SetType(core.TextFieldOutlined).SetTypePassword().SetPlaceholder("Password")
 	core.NewTextField(tab).SetText("Multiline textfield with a relatively long initial text").
-		Style(func(s *styles.Style) {
+		Styler(func(s *styles.Style) {
 			s.SetTextWrap(true)
 		})
 
@@ -261,17 +261,17 @@ func sliders(ts *core.Tabs) {
 
 	csliders := core.NewFrame(tab)
 
-	core.NewSlider(csliders).SetValue(0.3).Style(func(s *styles.Style) {
+	core.NewSlider(csliders).SetValue(0.3).Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	core.NewSlider(csliders).SetValue(0.2).SetState(true, states.Disabled).Style(func(s *styles.Style) {
+	core.NewSlider(csliders).SetValue(0.2).SetState(true, states.Disabled).Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
 
 	core.NewMeter(tab).SetType(core.MeterCircle).SetValue(0.7).SetText("70%")
 	core.NewMeter(tab).SetType(core.MeterSemicircle).SetValue(0.7).SetText("70%")
 	core.NewMeter(tab).SetValue(0.7)
-	core.NewMeter(tab).SetValue(0.7).Style(func(s *styles.Style) {
+	core.NewMeter(tab).SetValue(0.7).Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
 }
@@ -297,7 +297,7 @@ func makeIcons(ts *core.Tabs) {
 	core.NewButton(tab).SetText("View icons").OnClick(func(e events.Event) {
 		d := core.NewBody().AddTitle("Cogent Core Icons")
 		grid := core.NewFrame(d)
-		grid.Style(func(s *styles.Style) {
+		grid.Styler(func(s *styles.Style) {
 			s.Wrap = true
 			s.Overflow.Y = styles.OverflowAuto
 		})
@@ -308,15 +308,15 @@ func makeIcons(ts *core.Tabs) {
 			if strings.HasSuffix(sic, "-fill") {
 				continue
 			}
-			vb := core.NewFrame(grid).Style(func(s *styles.Style) {
+			vb := core.NewFrame(grid).Styler(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Max.X.Em(15) // constraining width exactly gives nice grid-like appearance
 				s.Min.X.Em(15)
 			})
-			core.NewIcon(vb).SetIcon(ic).Style(func(s *styles.Style) {
+			core.NewIcon(vb).SetIcon(ic).Styler(func(s *styles.Style) {
 				s.Min.Set(units.Em(4))
 			})
-			core.NewText(vb).SetText(strcase.ToSentence(sic)).Style(func(s *styles.Style) {
+			core.NewText(vb).SetText(strcase.ToSentence(sic)).Styler(func(s *styles.Style) {
 				s.SetTextWrap(false)
 			})
 		}
@@ -595,7 +595,7 @@ func dialogs(ts *core.Tabs) {
 	core.NewText(tab).SetText("Cogent Core provides completely customizable dialogs, snackbars, and windows that allow you to easily display, obtain, and organize information.")
 
 	makeRow := func() core.Widget {
-		return core.NewFrame(tab).Style(func(s *styles.Style) {
+		return core.NewFrame(tab).Styler(func(s *styles.Style) {
 			s.Wrap = true
 			s.Align.Items = styles.Center
 		})
@@ -707,7 +707,7 @@ func makeStyles(ts *core.Tabs) {
 	fr := core.NewFrame(core.NewFrame(sp)) // can not control layout when directly in splits
 	sv.SetStruct(&fr.Styles)
 
-	fr.Style(func(s *styles.Style) {
+	fr.Styler(func(s *styles.Style) {
 		s.Background = colors.C(colors.Scheme.Select.Container)
 	})
 
@@ -728,7 +728,7 @@ func makeStyles(ts *core.Tabs) {
 	}
 
 	for _, sz := range frameSizes {
-		core.NewFrame(fr).Style(func(s *styles.Style) {
+		core.NewFrame(fr).Styler(func(s *styles.Style) {
 			s.Min.Set(units.Px(sz.X), units.Px(sz.Y))
 			s.Grow.Set(0, 0)
 			s.Background = colors.C(colors.Scheme.Primary.Base)

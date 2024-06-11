@@ -57,7 +57,7 @@ func (sc *Scene) MakeSceneBars() {
 	if !sc.Bars.Top.IsEmpty() {
 		head := NewFrame(sc)
 		head.SetName("top-bar")
-		head.Style(func(s *styles.Style) {
+		head.Styler(func(s *styles.Style) {
 			s.Align.Items = styles.Center
 			s.Grow.Set(1, 0)
 		})
@@ -69,7 +69,7 @@ func (sc *Scene) MakeSceneBars() {
 		if !sc.Bars.Left.IsEmpty() {
 			left := NewFrame(mid)
 			left.SetName("left-bar")
-			left.Style(func(s *styles.Style) {
+			left.Styler(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Align.Items = styles.Center
 				s.Grow.Set(0, 1)
@@ -82,7 +82,7 @@ func (sc *Scene) MakeSceneBars() {
 		if !sc.Bars.Right.IsEmpty() {
 			right := NewFrame(mid)
 			right.SetName("right-bar")
-			right.Style(func(s *styles.Style) {
+			right.Styler(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Align.Items = styles.Center
 				s.Grow.Set(0, 1)
@@ -97,7 +97,7 @@ func (sc *Scene) MakeSceneBars() {
 	if !sc.Bars.Bottom.IsEmpty() {
 		foot := NewFrame(sc)
 		foot.SetName("bottom-bar")
-		foot.Style(func(s *styles.Style) {
+		foot.Styler(func(s *styles.Style) {
 			s.Justify.Content = styles.End
 			s.Align.Items = styles.Center
 			s.Grow.Set(1, 0)
@@ -131,7 +131,7 @@ func (sc *Scene) GetTopAppBar() *Toolbar {
 
 // RecycleToolbar constructs or returns a Toolbar in given parent Widget
 func RecycleToolbar(parent Widget) *Toolbar {
-	tb := parent.ChildByType(ToolbarType, tree.NoEmbeds)
+	tb := parent.AsTree().ChildByType(ToolbarType, tree.NoEmbeds)
 	if tb != nil {
 		return tb.(*Toolbar)
 	}
@@ -140,11 +140,11 @@ func RecycleToolbar(parent Widget) *Toolbar {
 
 // InheritBarsWidget inherits Bar functions based on a source widget
 // (e.g., Context of dialog)
-func (sc *Scene) InheritBarsWidget(wi Widget) {
-	if wi == nil || wi.This() == nil {
+func (sc *Scene) InheritBarsWidget(w Widget) {
+	if w == nil {
 		return
 	}
-	wb := wi.AsWidget()
+	wb := w.AsWidget()
 	if wb.Scene == nil {
 		return
 	}

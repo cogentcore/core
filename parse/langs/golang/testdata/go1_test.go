@@ -652,7 +652,7 @@ func tst() {
 				core.ChoiceDialog(vp, core.DlgOpts{Title: "Close Without Saving?",
 					Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
 					[]string{"Close Without Saving", "Cancel"},
-					win.This(), func(recv, send tree.Node, sig int64, data interface{}) {
+					win.This, func(recv, send tree.Node, sig int64, data interface{}) {
 						switch sig {
 						case 0:
 							w.Close()
@@ -767,7 +767,7 @@ func (pr *Rule) BaseInterface() reflect.Type {
 
 
 func (pr *Rule) AsParseRule() *Rule {
-	return pr.This().Embed(KiT_Rule).(*Rule)
+	return pr.This.Embed(KiT_Rule).(*Rule)
 }
 
 
@@ -779,7 +779,7 @@ func test() {
 func (pr *Rule) CompileAll(ps *State) bool {
 	pr.SetRuleMap(ps)
 	allok := true
-	pr.FuncDownMeFirst(0, pr.This(), func(k tree.Node, level int, d interface{}) bool {
+	pr.FuncDownMeFirst(0, pr.This, func(k tree.Node, level int, d interface{}) bool {
 		pri := k.Embed(KiT_Rule).(*Rule)
 		ok := pri.Compile(ps)
 		if !ok {

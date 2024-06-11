@@ -56,12 +56,12 @@ func (ps *State) Init(src *lexer.File, ast *Ast) {
 	// 	fmt.Println("new:", src.Filename)
 	// }
 	ps.Src = src
-	if ps.Ast != nil && ps.Ast.This() != nil {
+	if ps.Ast != nil && ps.Ast.This != nil {
 		// fmt.Println("deleting old ast")
 		ps.Ast.DeleteChildren()
 	}
 	ps.Ast = ast
-	if ps.Ast != nil && ps.Ast.This() != nil {
+	if ps.Ast != nil && ps.Ast.This != nil {
 		// fmt.Println("deleting new ast")
 		ps.Ast.DeleteChildren()
 	}
@@ -83,7 +83,7 @@ func (ps *State) ClearAst() {
 }
 
 func (ps *State) Destroy() {
-	if ps.Ast != nil && ps.Ast.This() != nil {
+	if ps.Ast != nil && ps.Ast.This != nil {
 		ps.Ast.DeleteChildren()
 	}
 	ps.Ast = nil
@@ -305,7 +305,7 @@ func (rs MatchState) String() string {
 	if rs.Rule == nil {
 		return ""
 	}
-	return fmt.Sprintf("%v%v", rs.Rule.Name(), rs.Scope)
+	return fmt.Sprintf("%v%v", rs.Rule.Name, rs.Scope)
 }
 
 // MatchStack is the stack of rules that matched or ran for each token point

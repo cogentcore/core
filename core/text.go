@@ -101,7 +101,7 @@ func (tx *Text) WidgetValue() any { return &tx.Text }
 func (tx *Text) Init() {
 	tx.WidgetBase.Init()
 	tx.SetType(TextBodyLarge)
-	tx.Style(func(s *styles.Style) {
+	tx.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable)
 		if len(tx.paintText.Links) > 0 {
 			s.SetAbilities(true, abilities.Clickable, abilities.LongHoverable, abilities.LongPressable)
@@ -190,7 +190,7 @@ func (tx *Text) Init() {
 			s.Font.Weight = styles.WeightNormal
 		}
 	})
-	tx.StyleFinal(func(s *styles.Style) {
+	tx.FinalStyler(func(s *styles.Style) {
 		tx.normalCursor = s.Cursor
 	})
 
@@ -284,7 +284,7 @@ func (tx *Text) Label() string {
 	if tx.Text != "" {
 		return tx.Text
 	}
-	return tx.Nm
+	return tx.Name
 }
 
 // configTextSize does the HTML and Layout in paintText for text,
