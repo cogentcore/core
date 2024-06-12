@@ -648,7 +648,7 @@ func (ly *Frame) LaySetContentFitOverflow(nsz math32.Vector2, pass LayoutPasses)
 	oflow := &ly.Styles.Overflow
 	nosz := pass == SizeUpPass && ly.Styles.IsFlexWrap()
 	for d := math32.X; d <= math32.Y; d++ {
-		if (nosz || (!(ly.Scene != nil && ly.Scene.Is(ScPrefSizing)) && oflow.Dim(d) >= styles.OverflowAuto)) && ly.Parent != nil {
+		if (nosz || (!(ly.Scene != nil && ly.Scene.prefSizing) && oflow.Dim(d) >= styles.OverflowAuto)) && ly.Parent != nil {
 			continue
 		}
 		asz.SetDim(d, styles.ClampMin(asz.Dim(d), nsz.Dim(d)))
@@ -1499,7 +1499,7 @@ func (wb *WidgetBase) SizeFinalWidget() {
 // any factor > 1 produces a full fill along that dimension.
 // Returns true if this resulted in a change in our Total size.
 func (wb *WidgetBase) GrowToAlloc() bool {
-	if (wb.Scene != nil && wb.Scene.Is(ScPrefSizing)) || wb.Styles.GrowWrap {
+	if (wb.Scene != nil && wb.Scene.prefSizing) || wb.Styles.GrowWrap {
 		return false
 	}
 	sz := &wb.Geom.Size

@@ -817,12 +817,12 @@ func (rs *RenderScenes) SetImages(drw system.Drawer) {
 	for i, w := range rs.Scenes {
 		sc := w.AsWidget().Scene
 		_, isSc := w.(*Scene)
-		if isSc && (sc.Is(ScUpdating) || !sc.Is(ScImageUpdated)) {
+		if isSc && (sc.updating || !sc.imageUpdated) {
 			if DebugSettings.WinRenderTrace {
-				if sc.Is(ScUpdating) {
+				if sc.updating {
 					fmt.Println("RenderScenes.SetImages: sc IsUpdating", sc.Name)
 				}
-				if !sc.Is(ScImageUpdated) {
+				if !sc.imageUpdated {
 					fmt.Println("RenderScenes.SetImages: sc Image NotUpdated", sc.Name)
 				}
 			}

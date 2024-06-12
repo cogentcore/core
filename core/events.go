@@ -306,7 +306,7 @@ func (em *Events) HandlePosEvent(e events.Event) {
 		// we need to handle this here and not in [Events.GetMouseInBBox] so that
 		// we correctly process cursors for disabled elements.
 		// in ScRenderBBoxes, everyone is effectively enabled
-		if wb.StateIs(states.Disabled) && !sc.Is(ScRenderBBoxes) {
+		if wb.StateIs(states.Disabled) && !sc.RenderBBoxes {
 			continue
 		}
 
@@ -318,7 +318,7 @@ func (em *Events) HandlePosEvent(e events.Event) {
 			}
 		case events.MouseDown:
 			// in ScRenderBBoxes, everyone is effectively pressable
-			if press == nil && (wb.Styles.Abilities.IsPressable() || sc.Is(ScRenderBBoxes)) {
+			if press == nil && (wb.Styles.Abilities.IsPressable() || sc.RenderBBoxes) {
 				press = w
 			}
 			if dragPress == nil && wb.Styles.Abilities.Is(abilities.Draggable) {
@@ -332,7 +332,7 @@ func (em *Events) HandlePosEvent(e events.Event) {
 			}
 		case events.MouseUp:
 			// in ScRenderBBoxes, everyone is effectively pressable
-			if up == nil && (wb.Styles.Abilities.IsPressable() || sc.Is(ScRenderBBoxes)) {
+			if up == nil && (wb.Styles.Abilities.IsPressable() || sc.RenderBBoxes) {
 				up = w
 			}
 		}
@@ -358,11 +358,11 @@ func (em *Events) HandlePosEvent(e events.Event) {
 		for _, w := range em.MouseInBBox { // requires forward iter through em.MouseInBBox
 			wb := w.AsWidget()
 			// in ScRenderBBoxes, everyone is effectively hoverable
-			if wb.Styles.Abilities.IsHoverable() || sc.Is(ScRenderBBoxes) {
+			if wb.Styles.Abilities.IsHoverable() || sc.RenderBBoxes {
 				hovs = append(hovs, w)
 			}
 		}
-		if sc.Is(ScRenderBBoxes) {
+		if sc.RenderBBoxes {
 			pselw := sc.SelectedWidget
 			if len(em.Hovers) > 0 {
 				sc.SelectedWidget = em.Hovers[len(em.Hovers)-1]

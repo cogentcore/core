@@ -345,7 +345,7 @@ func (st *Stage) Delete() {
 		st.Sprites.Reset()
 	}
 	if st.Scene != nil {
-		st.Scene.Delete()
+		st.Scene.DeleteChildren()
 	}
 	st.Scene = nil
 	st.Main = nil

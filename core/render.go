@@ -217,7 +217,7 @@ var SceneShowIters = 2
 // returns false if already updating.
 // This is the main update call made by the RenderWindow at FPS frequency.
 func (sc *Scene) DoUpdate() bool {
-	if sc.Is(ScUpdating) {
+	if sc.updating {
 		// fmt.Println("scene bail on update")
 		return false
 	}
@@ -243,12 +243,12 @@ func (sc *Scene) DoUpdate() bool {
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 		sc.lastRender.SaveRender(rc)
-	case sc.Is(ScNeedsLayout):
+	case sc.needsLayout:
 		// fmt.Println("layout")
 		sc.LayoutRenderScene()
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
-	case sc.Is(ScNeedsRender):
+	case sc.needsRender:
 		// fmt.Println("render")
 		sc.DoNeedsRender()
 		sc.SetFlag(false, ScNeedsRender)
@@ -270,7 +270,7 @@ func (sc *Scene) DoUpdate() bool {
 
 	if sc.showIter == SceneShowIters { // end of first pass
 		sc.showIter++
-		if !sc.Is(ScPrefSizing) {
+		if !sc.prefSizing {
 			sc.Events.ActivateStartFocus()
 		}
 	}

@@ -19,11 +19,6 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// see:
-//	- render.go for scene-based rendering code
-//	- layimpl.go for layout
-//	- style.go for style
-
 // Scene contains a [Widget] tree, rooted in an embedded [Frame] layout,
 // which renders into its [Scene.Pixels] image. The [Scene] is set in a
 // [Stage], which the [Scene] has a pointer to.
@@ -303,20 +298,6 @@ func (sc *Scene) Close() bool {
 		mm.RenderWindow.CloseReq()
 	}
 	return true
-}
-
-// Delete this Scene if not Flagged for preservation.
-// Removes Decor and Frame Widgets
-func (sc *Scene) Delete() {
-	if sc.Flags.HasFlag(ScPreserve) {
-		return
-	}
-	sc.DeleteImpl()
-}
-
-// DeleteImpl does the deletion, removing Decor and Frame Widgets.
-func (sc *Scene) DeleteImpl() {
-	sc.DeleteChildren()
 }
 
 // UpdateTitle updates the title of the Scene's associated [Stage],
