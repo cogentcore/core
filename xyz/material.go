@@ -100,7 +100,7 @@ func (mt Material) String() string {
 // IsTransparent returns true if texture says it is, or if color has alpha < 255
 func (mt *Material) IsTransparent() bool {
 	if mt.TexPtr != nil {
-		return mt.TexPtr.AsTextureBase().IsTransparent()
+		return mt.TexPtr.AsTextureBase().Transparent
 	}
 	return mt.Color.A < 255
 }

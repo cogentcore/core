@@ -71,10 +71,10 @@ type MeshBase struct { //types:add -setters
 	// otherwise considered to be static.
 	Dynamic bool
 
-	// IsTransparent is whether the color has transparency;
+	// Transparent is whether the color has transparency;
 	// not worth checking manually. This is only valid if
 	// [MeshBase.HasColor] is true.
-	IsTransparent bool
+	Transparent bool
 
 	// BBox has the computed bounding-box and other gross solid properties.
 	BBox BBox `set:"-"`

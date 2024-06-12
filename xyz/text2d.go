@@ -125,7 +125,7 @@ func (txt *Text2D) RenderText() {
 			tx = &TextureBase{Name: txname}
 			txt.Scene.AddTexture(tx)
 			img = image.NewRGBA(bounds)
-			tx.AsTextureBase().Img = img
+			tx.AsTextureBase().RGBA = img
 			txt.Mat.SetTexture(tx)
 		} else {
 			if vgpu.Debug {
@@ -140,7 +140,7 @@ func (txt *Text2D) RenderText() {
 		if img.Bounds() != bounds {
 			img = image.NewRGBA(bounds)
 		}
-		tx.AsTextureBase().Img = img
+		tx.AsTextureBase().RGBA = img
 		txt.Scene.Phong.UpdateTextureName(tx.AsTextureBase().Name)
 	}
 	rs := &txt.RenderState

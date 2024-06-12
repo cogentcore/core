@@ -3,6 +3,7 @@
 package xyz
 
 import (
+	"image"
 	"image/color"
 
 	"cogentcore.org/core/math32"
@@ -88,7 +89,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshName", IDNa
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Mesh", IDName: "mesh", Doc: "Mesh parametrizes the mesh-based shape used for rendering a [Solid].\nOnly indexed triangle meshes are supported.\nAll Meshes must know in advance the number of vertex and index points\nthey require, and the SetVertices method operates on data from the\nvgpu staging buffer to set the relevant data post-allocation.\nThe vgpu vshape library is used for all basic shapes, and it follows\nthis same logic.\nPer-vertex Color is optional, as is the ability to update the data\nafter initial SetVertices call (default is to do nothing)."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshBase", IDName: "mesh-base", Doc: "MeshBase provides the core implementation of the [Mesh] interface.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the mesh. [Mesh]es are linked to [Solid]s\nby name so this matters."}, {Name: "NumVertex", Doc: "NumVertex is the number of [math32.Vector3] vertex points. This always\nincludes [math32.Vector3] normals and [math32.Vector2] texture coordinates.\nThis is only valid after [Mesh.Sizes] has been called."}, {Name: "NumIndex", Doc: "NumIndex is the number of [math32.ArrayU32] indexes.\nThis is only valid after [Mesh.Sizes] has been called."}, {Name: "HasColor", Doc: "HasColor is whether the mesh has per-vertex colors\nas [math32.Vector4] per vertex."}, {Name: "Dynamic", Doc: "Dynamic is whether this mesh changes frequently;\notherwise considered to be static."}, {Name: "IsTransparent", Doc: "IsTransparent is whether the color has transparency;\nnot worth checking manually. This is only valid if\n[MeshBase.HasColor] is true."}, {Name: "BBox", Doc: "BBox has the computed bounding-box and other gross solid properties."}, {Name: "BBoxMu", Doc: "BBoxMu is a mutex on BBox access."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshBase", IDName: "mesh-base", Doc: "MeshBase provides the core implementation of the [Mesh] interface.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the mesh. [Mesh]es are linked to [Solid]s\nby name so this matters."}, {Name: "NumVertex", Doc: "NumVertex is the number of [math32.Vector3] vertex points. This always\nincludes [math32.Vector3] normals and [math32.Vector2] texture coordinates.\nThis is only valid after [Mesh.Sizes] has been called."}, {Name: "NumIndex", Doc: "NumIndex is the number of [math32.ArrayU32] indexes.\nThis is only valid after [Mesh.Sizes] has been called."}, {Name: "HasColor", Doc: "HasColor is whether the mesh has per-vertex colors\nas [math32.Vector4] per vertex."}, {Name: "Dynamic", Doc: "Dynamic is whether this mesh changes frequently;\notherwise considered to be static."}, {Name: "Transparent", Doc: "Transparent is whether the color has transparency;\nnot worth checking manually. This is only valid if\n[MeshBase.HasColor] is true."}, {Name: "BBox", Doc: "BBox has the computed bounding-box and other gross solid properties."}, {Name: "BBoxMu", Doc: "BBoxMu is a mutex on BBox access."}}})
 
 // SetName sets the [MeshBase.Name]:
 // Name is the name of the mesh. [Mesh]es are linked to [Solid]s
@@ -105,11 +106,11 @@ func (t *MeshBase) SetHasColor(v bool) *MeshBase { t.HasColor = v; return t }
 // otherwise considered to be static.
 func (t *MeshBase) SetDynamic(v bool) *MeshBase { t.Dynamic = v; return t }
 
-// SetIsTransparent sets the [MeshBase.IsTransparent]:
-// IsTransparent is whether the color has transparency;
+// SetTransparent sets the [MeshBase.Transparent]:
+// Transparent is whether the color has transparency;
 // not worth checking manually. This is only valid if
 // [MeshBase.HasColor] is true.
-func (t *MeshBase) SetIsTransparent(v bool) *MeshBase { t.IsTransparent = v; return t }
+func (t *MeshBase) SetTransparent(v bool) *MeshBase { t.Transparent = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.GenMesh", IDName: "gen-mesh", Doc: "GenMesh is a generic, arbitrary Mesh, storing its values", Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Vtx"}, {Name: "Norm"}, {Name: "Tex"}, {Name: "Clr"}, {Name: "Index"}}})
 
@@ -390,12 +391,25 @@ func (t *Text2D) New() tree.Node { return &Text2D{} }
 // the text string to display
 func (t *Text2D) SetText(v string) *Text2D { t.Text = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TexName", IDName: "tex-name", Doc: "TexName provides a GUI interface for choosing textures"})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TextureName", IDName: "texture-name", Doc: "TextureName provides a GUI interface for choosing textures."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Texture", IDName: "texture", Doc: "Texture is the interface for all textures"})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Texture", IDName: "texture", Doc: "Texture is the interface for all textures."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TextureBase", IDName: "texture-base", Doc: "TextureBase is the base texture implementation\nit uses an image.RGBA as underlying image storage to facilitate interface with GPU", Fields: []types.Field{{Name: "Nm", Doc: "name of the texture -- textures are connected to material by name"}, {Name: "Trans", Doc: "set to true if texture has transparency"}, {Name: "Img", Doc: "cached image"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TextureBase", IDName: "texture-base", Doc: "TextureBase is the base texture implementation.\nIt uses an [image.RGBA] as the underlying image storage\nto facilitate interface with GPU.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"--setters"}}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the texture;\ntextures are connected to [Material]s by name."}, {Name: "Transparent", Doc: "Transprent is whether the texture has transparency."}, {Name: "RGBA", Doc: "RGBA is the cached internal representation of the image."}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TextureFile", IDName: "texture-file", Doc: "TextureFile is a texture loaded from a file", Embeds: []types.Field{{Name: "TextureBase"}}, Fields: []types.Field{{Name: "FSys", Doc: "filesystem for embedded etc"}, {Name: "File", Doc: "filename for the texture"}}})
+// SetName sets the [TextureBase.Name]:
+// Name is the name of the texture;
+// textures are connected to [Material]s by name.
+func (t *TextureBase) SetName(v string) *TextureBase { t.Name = v; return t }
+
+// SetTransparent sets the [TextureBase.Transparent]:
+// Transprent is whether the texture has transparency.
+func (t *TextureBase) SetTransparent(v bool) *TextureBase { t.Transparent = v; return t }
+
+// SetRGBA sets the [TextureBase.RGBA]:
+// RGBA is the cached internal representation of the image.
+func (t *TextureBase) SetRGBA(v *image.RGBA) *TextureBase { t.RGBA = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TextureFile", IDName: "texture-file", Doc: "TextureFile is a texture loaded from a file", Embeds: []types.Field{{Name: "TextureBase"}}, Fields: []types.Field{{Name: "FS", Doc: "filesystem for embedded etc"}, {Name: "File", Doc: "filename for the texture"}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TextureGi2D", IDName: "texture-gi2-d", Doc: "TextureGi2D is a dynamic texture material driven by a core.Viewport2D viewport\nanything rendered to the viewport will be projected onto the surface of any\nsolid using this texture.", Embeds: []types.Field{{Name: "TextureBase"}}})

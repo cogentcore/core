@@ -37,33 +37,25 @@ type Texture interface {
 // TextureBase is the base texture implementation.
 // It uses an [image.RGBA] as the underlying image storage
 // to facilitate interface with GPU.
-type TextureBase struct {
+type TextureBase struct { //types:add --setters
 
 	// Name is the name of the texture;
 	// textures are connected to [Material]s by name.
 	Name string
 
-	// set to true if texture has transparency
-	Trans bool
+	// Transprent is whether the texture has transparency.
+	Transparent bool
 
-	// cached image
-	Img *image.RGBA
+	// RGBA is the cached internal representation of the image.
+	RGBA *image.RGBA
 }
 
 func (tx *TextureBase) AsTextureBase() *TextureBase {
 	return tx
 }
 
-func (tx *TextureBase) IsTransparent() bool {
-	return tx.Trans
-}
-
-func (tx *TextureBase) SetTransparent(trans bool) {
-	tx.Trans = trans
-}
-
 func (tx *TextureBase) Image() *image.RGBA {
-	return tx.Img
+	return tx.RGBA
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -106,8 +98,8 @@ func NewTextureFileFS(fsys fs.FS, sc *Scene, name string, filename string) *Text
 }
 
 func (tx *TextureFile) Image() *image.RGBA {
-	if tx.Img != nil {
-		return tx.Img
+	if tx.RGBA != nil {
+		return tx.RGBA
 	}
 	if tx.File == "" {
 		err := fmt.Errorf("xyz.Texture: %v File must be set to a filename to load texture from", tx.Name)
@@ -119,8 +111,8 @@ func (tx *TextureFile) Image() *image.RGBA {
 		slog.Error("xyz.TextureFile: Image load error", "file:", tx.File, "error", err)
 		return nil
 	}
-	tx.Img = vgpu.ImageToRGBA(img)
-	return tx.Img
+	tx.RGBA = vgpu.ImageToRGBA(img)
+	return tx.RGBA
 }
 
 // TextureGi2D is a dynamic texture material driven by a core.Viewport2D viewport
