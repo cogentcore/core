@@ -170,7 +170,7 @@ func (tv *TableView) SetTableView(ix *table.IndexView) *TableView {
 		tv.SelectedIndex = -1
 	}
 	tv.ResetSelectedIndexes()
-	tv.SetFlag(false, views.SliceViewSelectMode)
+	tv.SelectMode = false
 	tv.MakeIter = 0
 	tv.Update()
 	return tv
@@ -222,7 +222,7 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 			s.Gap.Set(units.Em(0.5)) // matches grid default
 		})
 		w.Maker(func(p *core.Plan) {
-			if tv.Is(views.SliceViewShowIndex) {
+			if tv.ShowIndexes {
 				core.AddAt(p, "head-index", func(w *core.Text) { // TODO: is not working
 					w.SetType(core.TextBodyMedium)
 					w.Styler(func(s *styles.Style) {
@@ -266,7 +266,7 @@ func (tv *TableView) SliceHeader() *core.Frame {
 func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	nWidgPerRow = 1 + tv.NCols
 	idxOff = 1
-	if !tv.Is(views.SliceViewShowIndex) {
+	if !tv.ShowIndexes {
 		nWidgPerRow -= 1
 		idxOff = 0
 	}
@@ -278,7 +278,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
 
-	if tv.Is(views.SliceViewShowIndex) {
+	if tv.ShowIndexes {
 		tv.MakeGridIndex(p, i, si, itxt, invis)
 	}
 
@@ -557,7 +557,7 @@ func (tv *TableView) RowFirstVisWidget(row int) (*core.WidgetBase, bool) {
 // returns that element or nil if not successful -- note: grid must have
 // already rendered for focus to be grabbed!
 func (tv *TableView) RowGrabFocus(row int) *core.WidgetBase {
-	if !tv.IsRowInBounds(row) || tv.Is(views.SliceViewInFocusGrab) { // range check
+	if !tv.IsRowInBounds(row) || tv.InFocusGrab { // range check
 		return nil
 	}
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
@@ -570,8 +570,8 @@ func (tv *TableView) RowGrabFocus(row int) *core.WidgetBase {
 			return w
 		}
 	}
-	tv.SetFlag(true, views.SliceViewInFocusGrab)
-	defer func() { tv.SetFlag(false, views.SliceViewInFocusGrab) }()
+	tv.InFocusGrab = true
+	defer func() { tv.InFocusGrab = false }()
 	for fli := 0; fli < tv.NCols; fli++ {
 		w := sg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.CanFocus() {
