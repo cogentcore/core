@@ -204,7 +204,7 @@ func (sl *SpotLight) LookAtOrigin() {
 // AddLight adds given light to lights
 // see NewX for convenience methods to add specific lights
 func (sc *Scene) AddLight(lt Light) {
-	sc.Lights.Add(lt.Name(), lt)
+	sc.Lights.Add(lt.AsLightBase().Nm, lt)
 }
 
 // ConfigLights configures 3D rendering for current lights
@@ -212,7 +212,7 @@ func (sc *Scene) ConfigLights() {
 	sc.Phong.ResetNLights()
 	for _, ltkv := range sc.Lights.Order {
 		lt := ltkv.Value
-		clr := math32.NewVector3Color(lt.Color()).MulScalar(lt.Lumens()).SRGBToLinear()
+		clr := math32.NewVector3Color(lt.AsLightBase().Color()).MulScalar(lt.AsLightBase().Lumens()).SRGBToLinear()
 		switch l := lt.(type) {
 		case *AmbientLight:
 			sc.Phong.AddAmbientLight(clr)
