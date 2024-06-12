@@ -88,7 +88,7 @@ func HandleElement(ctx *Context) {
 	case "body", "main", "div", "section", "nav", "footer", "header", "ol", "ul":
 		ctx.NewParent = New[*core.Frame](ctx)
 		if tag == "body" {
-			ctx.NewParent.Styler(func(s *styles.Style) {
+			ctx.NewParent.AsWidget().Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 1)
 			})
 		}
