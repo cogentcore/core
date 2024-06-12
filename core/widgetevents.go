@@ -180,11 +180,7 @@ func (wb *WidgetBase) Send(typ events.Types, original ...events.Event) {
 		e = &events.Base{Typ: typ}
 		e.Init()
 	}
-	w, ok := wb.This.(Widget)
-	if !ok {
-		return
-	}
-	w.HandleEvent(e)
+	wb.HandleEvent(e)
 }
 
 // SendChange sends the [events.Change] event, which is widely used to signal
@@ -221,11 +217,7 @@ func (wb *WidgetBase) SendKeyChordRune(r rune, code key.Codes, mods key.Modifier
 		ke.Init()
 	}
 	ke.Typ = events.KeyChord
-	w, ok := wb.This.(Widget)
-	if !ok {
-		return
-	}
-	w.HandleEvent(ke)
+	wb.HandleEvent(ke)
 }
 
 // HandleEvent sends the given event to all Listeners for that event type.
@@ -495,7 +487,7 @@ func (wb *WidgetBase) HandleClickOnEnterSpace() {
 // the widget being styled as focused.  See [SetFocusEvent] for one that does.
 func (wb *WidgetBase) SetFocus() {
 	foc := wb.This.(Widget)
-	if !foc.AbilityIs(abilities.Focusable) {
+	if !wb.AbilityIs(abilities.Focusable) {
 		foc = wb.FocusableInMe()
 		if foc == nil {
 			foc = wb.This.(Widget)
@@ -514,7 +506,7 @@ func (wb *WidgetBase) SetFocus() {
 // the widget being styled as focused.  See [SetFocus] for one that does not.
 func (wb *WidgetBase) SetFocusEvent() {
 	foc := wb.This.(Widget)
-	if !foc.AbilityIs(abilities.Focusable) {
+	if !wb.AbilityIs(abilities.Focusable) {
 		foc = wb.FocusableInMe()
 		if foc == nil {
 			foc = wb.This.(Widget)

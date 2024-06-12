@@ -1287,7 +1287,7 @@ func init() {
 			return
 		}
 		tf := AsTextField(w)
-		if !w.StateIs(states.Focused) || !w.IsVisible() {
+		if !w.AsWidget().StateIs(states.Focused) || !w.IsVisible() {
 			tf.BlinkOn = false
 			tf.RenderCursor(false)
 		} else {

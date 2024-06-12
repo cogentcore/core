@@ -33,8 +33,8 @@ func TestSwitchesMutex(t *testing.T) {
 	b := NewBody()
 	sw := NewSwitches(b).SetMutex(true).SetStrings("Go", "Python", "C++")
 	b.AssertRender(t, "switches/mutex", func() {
-		sw.Child(0).(Widget).Send(events.Click)
-		sw.Child(1).(Widget).Send(events.Click)
+		sw.Child(0).(Widget).AsWidget().Send(events.Click)
+		sw.Child(1).(Widget).AsWidget().Send(events.Click)
 		assert.Equal(t, "Python", sw.SelectedItem().Value)
 		assert.Equal(t, "Python", sw.SelectedItem().GetText())
 		assert.Equal(t, []SwitchItem{{Value: "Python"}}, sw.SelectedItems())
@@ -73,8 +73,8 @@ func TestSwitchesChange(t *testing.T) {
 		selected = sw.SelectedItems()
 	})
 	b.AssertRender(t, "switches/change", func() {
-		sw.Child(0).(Widget).Send(events.Click)
-		sw.Child(2).(Widget).Send(events.Click)
+		sw.Child(0).(Widget).AsWidget().Send(events.Click)
+		sw.Child(2).(Widget).AsWidget().Send(events.Click)
 		assert.Equal(t, []SwitchItem{{Value: "Go"}, {Value: "C++"}}, selected)
 	})
 }

@@ -223,7 +223,7 @@ func StyleFromTags(w Widget, tags reflect.StructTag) {
 			}
 		}
 	}
-	w.Styler(func(s *styles.Style) {
+	w.AsWidget().Styler(func(s *styles.Style) {
 		style("width", s.Min.X.Ch)
 		style("max-width", s.Max.X.Ch)
 		style("height", s.Min.Y.Em)

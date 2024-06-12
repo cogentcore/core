@@ -151,7 +151,7 @@ func TestLayoutFramesJustifySelf(t *testing.T) {
 			s.Justify.Items = align
 		})
 		PlainFrames(b, math32.Vec2(0, 0))
-		b.Child(2).(Widget).Styler(func(s *styles.Style) {
+		b.Child(2).(Widget).AsWidget().Styler(func(s *styles.Style) {
 			s.Justify.Self = aligns[(ai+1)%len(aligns)]
 		})
 		b.AssertRender(t, tdir+tnm)
@@ -172,7 +172,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 			s.Align.Items = align
 		})
 		PlainFrames(b, math32.Vec2(0, 0))
-		b.Child(2).(Widget).Styler(func(s *styles.Style) {
+		b.Child(2).(Widget).AsWidget().Styler(func(s *styles.Style) {
 			s.Align.Self = aligns[(ai+1)%len(aligns)]
 		})
 		b.AssertRender(t, tdir+tnm)

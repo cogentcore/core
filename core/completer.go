@@ -176,7 +176,7 @@ func (c *Complete) ShowNowImpl(ctx Widget, pos image.Point, text string) bool {
 			OnKeyChord(func(e events.Event) {
 				kf := keymap.Of(e.KeyChord())
 				if e.KeyRune() == ' ' {
-					ctx.HandleEvent(e) // bypass button handler!
+					ctx.AsWidget().HandleEvent(e) // bypass button handler!
 				}
 				if kf == keymap.Enter {
 					e.SetHandled()
