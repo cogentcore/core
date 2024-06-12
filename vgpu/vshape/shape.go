@@ -9,7 +9,7 @@ import "cogentcore.org/core/math32"
 // Shape is an interface for all shape-constructing elements
 type Shape interface {
 	// N returns number of vertex, index points in this shape element
-	N() (nVtx, nIndex int)
+	N() (numVertex, nIndex int)
 
 	// Offs returns starting offset for vertices, indexes in full shape array,
 	// in terms of points, not floats
@@ -20,7 +20,7 @@ type Shape interface {
 	SetOffs(vtxOff, idxOff int)
 
 	// Set sets points in given allocated arrays
-	Set(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32)
+	Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32)
 
 	// BBox returns the bounding box for the shape, typically centered around 0
 	// This is only valid after Set has been called.
@@ -62,20 +62,20 @@ func (sb *ShapeBase) BBox() math32.Box3 {
 }
 
 // SetColor sets color for given range of vertex indexes
-func SetColor(clrAry math32.ArrayF32, vtxOff int, nvtxs int, clr math32.Vector4) {
+func SetColor(colorArray math32.ArrayF32, vtxOff int, numVertex int, clr math32.Vector4) {
 	cidx := vtxOff * 4
-	for vi := 0; vi < nvtxs; vi++ {
-		clr.ToSlice(clrAry, cidx+vi*4)
+	for vi := 0; vi < numVertex; vi++ {
+		clr.ToSlice(colorArray, cidx+vi*4)
 	}
 }
 
 // BBoxFromVtxs returns the bounding box updated from the range of vertex points
-func BBoxFromVtxs(vtxAry math32.ArrayF32, vtxOff int, nvtxs int) math32.Box3 {
+func BBoxFromVtxs(vertexArray math32.ArrayF32, vtxOff int, numVertex int) math32.Box3 {
 	bb := math32.B3Empty()
 	vidx := vtxOff * 3
 	var vtx math32.Vector3
-	for vi := 0; vi < nvtxs; vi++ {
-		vtx.FromSlice(vtxAry, vidx+vi*3)
+	for vi := 0; vi < numVertex; vi++ {
+		vtx.FromSlice(vertexArray, vidx+vi*3)
 		bb.ExpandByPoint(vtx)
 	}
 	return bb

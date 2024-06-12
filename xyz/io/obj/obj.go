@@ -258,17 +258,17 @@ func (dec *Decoder) SetObject(sc *xyz.Scene, objgp *xyz.Group, ob *Object) {
 }
 
 func (dec *Decoder) addNorms(ms *xyz.GenMesh, ai, bi, ci int, idxs []int) {
-	if ms.Norm.Size() >= ms.Vtx.Size() {
+	if ms.Norm.Size() >= ms.Vertex.Size() {
 		return
 	}
 	var a, b, c math32.Vector3
-	ms.Vtx.GetVector3(3*idxs[ai], &a)
-	ms.Vtx.GetVector3(3*idxs[bi], &b)
-	ms.Vtx.GetVector3(3*idxs[ci], &c)
+	ms.Vertex.GetVector3(3*idxs[ai], &a)
+	ms.Vertex.GetVector3(3*idxs[bi], &b)
+	ms.Vertex.GetVector3(3*idxs[ci], &c)
 	nrm := math32.Normal(a, b, c)
 	for {
 		ms.Norm.AppendVector3(nrm)
-		if ms.Norm.Size() >= ms.Vtx.Size() {
+		if ms.Norm.Size() >= ms.Vertex.Size() {
 			break
 		}
 	}
@@ -286,10 +286,10 @@ func (dec *Decoder) copyVertex(ms *xyz.GenMesh, face *Face, idx int) int {
 	var vector3 math32.Vector3
 	var vector2 math32.Vector2
 
-	vidx := ms.Vtx.Size() / 3
+	vidx := ms.Vertex.Size() / 3
 	// Copy vertex position and append to geometry
 	dec.Vertices.GetVector3(3*face.Vertices[idx], &vector3)
-	ms.Vtx.AppendVector3(vector3)
+	ms.Vertex.AppendVector3(vector3)
 
 	// Copy vertex normal and append to geometry
 	if face.Normals[idx] != invINDEX {
@@ -306,7 +306,7 @@ func (dec *Decoder) copyVertex(ms *xyz.GenMesh, face *Face, idx int) int {
 		if dec.Uvs.Size() > i {
 			dec.Uvs.GetVector2(i, &vector2)
 		}
-		ms.Tex.AppendVector2(vector2)
+		ms.Texture.AppendVector2(vector2)
 	}
 	ms.Index.Append(uint32(vidx))
 	return vidx

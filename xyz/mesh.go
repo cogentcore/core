@@ -33,18 +33,18 @@ type Mesh interface {
 
 	// Sizes returns the number of vertex and index elements required for this mesh
 	// including a bool representing whether it has per-vertex color.
-	Sizes() (nVtx, nIndex int, hasColor bool)
+	Sizes() (numVertex, numIndex int, hasColor bool)
 
 	// Set sets the mesh points into given arrays, which have been allocated
 	// according to the Sizes() returned by this Mesh.
 	// The mesh is automatically marked with SetMod so that does not need to be done here.
-	Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32)
+	Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32)
 
 	// Update updates the mesh points into given arrays, which have previously
 	// been set with SetVertices; this can optimize by only updating whatever might
 	// need to be updated for dynamically changing meshes.
 	// You must call SetMod if the mesh was actually updated at this point.
-	Update(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32)
+	Update(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32)
 }
 
 // MeshBase provides the core implementation of the [Mesh] interface.
@@ -91,7 +91,7 @@ func (ms *MeshBase) Sizes() (numVertex, numIndex int, hasColor bool) {
 	return ms.NumVertex, ms.NumIndex, ms.HasColor
 }
 
-func (ms *MeshBase) Update(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
+func (ms *MeshBase) Update(sc *Scene, vertextureArray, normArray, texArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
 	// nop: default mesh is static, not dynamic
 }
 
@@ -185,8 +185,8 @@ func (sc *Scene) ConfigMeshes() {
 	ph.ResetMeshes()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Value
-		nVtx, nIndex, hasColor := ms.Sizes()
-		ph.AddMesh(kv.Key, nVtx, nIndex, hasColor)
+		numVertex, nIndex, hasColor := ms.Sizes()
+		ph.AddMesh(kv.Key, numVertex, nIndex, hasColor)
 	}
 	ph.ConfigMeshes()
 	ph.UpdateMu.Unlock()
@@ -198,8 +198,8 @@ func (sc *Scene) SetMeshes() {
 	ph.UpdateMu.Lock()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Value
-		vtxAry, normAry, texAry, clrAry, idxAry := ph.MeshFloatsByName(kv.Key)
-		ms.Set(sc, vtxAry, normAry, texAry, clrAry, idxAry)
+		vertexArray, normArray, textureArray, colorArray, indexArray := ph.MeshFloatsByName(kv.Key)
+		ms.Set(sc, vertexArray, normArray, textureArray, colorArray, indexArray)
 		ph.ModMeshByName(kv.Key)
 	}
 	ph.UpdateMu.Unlock()
@@ -213,8 +213,8 @@ func (sc *Scene) UpdateMeshes() {
 	ph.UpdateMu.Lock()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Value
-		vtxAry, normAry, texAry, clrAry, idxAry := ph.MeshFloatsByName(kv.Key)
-		ms.Update(sc, vtxAry, normAry, texAry, clrAry, idxAry)
+		vertexArray, normArray, textureArray, colorArray, indexArray := ph.MeshFloatsByName(kv.Key)
+		ms.Update(sc, vertexArray, normArray, textureArray, colorArray, indexArray)
 	}
 	ph.UpdateMu.Unlock()
 	ph.Sync()
@@ -237,29 +237,29 @@ func (sc *Scene) ReconfigMeshes() {
 // GenMesh is a generic, arbitrary Mesh, storing its values
 type GenMesh struct {
 	MeshBase
-	Vtx   math32.ArrayF32
-	Norm  math32.ArrayF32
-	Tex   math32.ArrayF32
-	Clr   math32.ArrayF32
-	Index math32.ArrayU32
+	Vertex  math32.ArrayF32
+	Norm    math32.ArrayF32
+	Texture math32.ArrayF32
+	Color   math32.ArrayF32
+	Index   math32.ArrayU32
 }
 
-func (ms *GenMesh) Sizes() (nVtx, nIndex int, hasColor bool) {
-	ms.NumVertex = len(ms.Vtx) / 3
+func (ms *GenMesh) Sizes() (numVertex, nIndex int, hasColor bool) {
+	ms.NumVertex = len(ms.Vertex) / 3
 	ms.NumIndex = len(ms.Index)
-	ms.HasColor = len(ms.Clr) > 0
+	ms.HasColor = len(ms.Color) > 0
 	return ms.NumVertex, ms.NumIndex, ms.HasColor
 }
 
-func (ms *GenMesh) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
-	copy(vtxAry, ms.Vtx)
-	copy(normAry, ms.Norm)
-	copy(texAry, ms.Tex)
+func (ms *GenMesh) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
+	copy(vertexArray, ms.Vertex)
+	copy(normArray, ms.Norm)
+	copy(textureArray, ms.Texture)
 	if ms.HasColor {
-		copy(clrAry, ms.Clr)
+		copy(colorArray, ms.Color)
 	}
-	copy(idxAry, ms.Index)
-	bb := vshape.BBoxFromVtxs(ms.Vtx, 0, ms.NumVertex)
+	copy(indexArray, ms.Index)
+	bb := vshape.BBoxFromVtxs(ms.Vertex, 0, ms.NumVertex)
 	ms.BBoxMu.Lock()
 	ms.BBox.SetBounds(bb.Min, bb.Max)
 	ms.BBoxMu.Unlock()

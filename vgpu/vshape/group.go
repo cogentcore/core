@@ -15,25 +15,25 @@ type ShapeGroup struct {
 }
 
 // N returns number of vertex, index points in this shape element.
-func (sb *ShapeGroup) N() (nVtx, nIndex int) {
-	nVtx = 0
+func (sb *ShapeGroup) N() (numVertex, nIndex int) {
+	numVertex = 0
 	nIndex = 0
 	for _, sh := range sb.Shapes {
 		nv, ni := sh.N()
-		nVtx += nv
+		numVertex += nv
 		nIndex += ni
 	}
 	return
 }
 
 // Set sets points in given allocated arrays, also updates offsets
-func (sb *ShapeGroup) Set(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32) {
+func (sb *ShapeGroup) Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
 	vo := sb.VtxOff
 	io := sb.IndexOff
 	sb.CBBox.SetEmpty()
 	for _, sh := range sb.Shapes {
 		sh.SetOffs(vo, io)
-		sh.Set(vtxAry, normAry, texAry, idxAry)
+		sh.Set(vertexArray, normArray, textureArray, indexArray)
 		sb.CBBox.ExpandByBox(sh.BBox())
 		nv, ni := sh.N()
 		vo += nv

@@ -106,38 +106,38 @@ func main() {
 
 	floor := vshape.NewPlane(math32.Y, 100, 100)
 	floor.Segs.Set(100, 100) // won't show lighting without
-	nVtx, nIndex := floor.N()
-	ph.AddMesh("floor", nVtx, nIndex, false)
+	numVertex, nIndex := floor.N()
+	ph.AddMesh("floor", numVertex, nIndex, false)
 
 	cube := vshape.NewBox(1, 1, 1)
 	cube.Segs.Set(100, 100, 100) // key for showing lights
-	nVtx, nIndex = cube.N()
-	ph.AddMesh("cube", nVtx, nIndex, false)
+	numVertex, nIndex = cube.N()
+	ph.AddMesh("cube", numVertex, nIndex, false)
 
 	sphere := vshape.NewSphere(.5, 64)
-	nVtx, nIndex = sphere.N()
-	ph.AddMesh("sphere", nVtx, nIndex, false)
+	numVertex, nIndex = sphere.N()
+	ph.AddMesh("sphere", numVertex, nIndex, false)
 
 	cylinder := vshape.NewCylinder(1, .5, 64, 64, true, true)
-	nVtx, nIndex = cylinder.N()
-	ph.AddMesh("cylinder", nVtx, nIndex, false)
+	numVertex, nIndex = cylinder.N()
+	ph.AddMesh("cylinder", numVertex, nIndex, false)
 
 	cone := vshape.NewCone(1, .5, 64, 64, true)
-	nVtx, nIndex = cone.N()
-	ph.AddMesh("cone", nVtx, nIndex, false)
+	numVertex, nIndex = cone.N()
+	ph.AddMesh("cone", numVertex, nIndex, false)
 
 	capsule := vshape.NewCapsule(1, .5, 64, 64)
 	// capsule.BotRad = 0
-	nVtx, nIndex = capsule.N()
-	ph.AddMesh("capsule", nVtx, nIndex, false)
+	numVertex, nIndex = capsule.N()
+	ph.AddMesh("capsule", numVertex, nIndex, false)
 
 	torus := vshape.NewTorus(2, .2, 64)
-	nVtx, nIndex = torus.N()
-	ph.AddMesh("torus", nVtx, nIndex, false)
+	numVertex, nIndex = torus.N()
+	ph.AddMesh("torus", numVertex, nIndex, false)
 
 	lines := vshape.NewLines([]math32.Vector3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, math32.Vec2(.2, .1), false)
-	nVtx, nIndex = lines.N()
-	ph.AddMesh("lines", nVtx, nIndex, false)
+	numVertex, nIndex = lines.N()
+	ph.AddMesh("lines", numVertex, nIndex, false)
 
 	/////////////////////////////
 	// Textures
@@ -208,36 +208,36 @@ func main() {
 	/////////////////////////////
 	//  Set Mesh values
 
-	vtxAry, normAry, texAry, _, idxAry := ph.MeshFloatsByName("floor")
-	floor.Set(vtxAry, normAry, texAry, idxAry)
+	vertexArray, normArray, textureArray, _, indexArray := ph.MeshFloatsByName("floor")
+	floor.Set(vertexArray, normArray, textureArray, indexArray)
 	ph.ModMeshByName("floor")
 
-	vtxAry, normAry, texAry, _, idxAry = ph.MeshFloatsByName("cube")
-	cube.Set(vtxAry, normAry, texAry, idxAry)
+	vertexArray, normArray, textureArray, _, indexArray = ph.MeshFloatsByName("cube")
+	cube.Set(vertexArray, normArray, textureArray, indexArray)
 	ph.ModMeshByName("cube")
 
-	vtxAry, normAry, texAry, _, idxAry = ph.MeshFloatsByName("sphere")
-	sphere.Set(vtxAry, normAry, texAry, idxAry)
+	vertexArray, normArray, textureArray, _, indexArray = ph.MeshFloatsByName("sphere")
+	sphere.Set(vertexArray, normArray, textureArray, indexArray)
 	ph.ModMeshByName("sphere")
 
-	vtxAry, normAry, texAry, _, idxAry = ph.MeshFloatsByName("cylinder")
-	cylinder.Set(vtxAry, normAry, texAry, idxAry)
+	vertexArray, normArray, textureArray, _, indexArray = ph.MeshFloatsByName("cylinder")
+	cylinder.Set(vertexArray, normArray, textureArray, indexArray)
 	ph.ModMeshByName("cylinder")
 
-	vtxAry, normAry, texAry, _, idxAry = ph.MeshFloatsByName("cone")
-	cone.Set(vtxAry, normAry, texAry, idxAry)
+	vertexArray, normArray, textureArray, _, indexArray = ph.MeshFloatsByName("cone")
+	cone.Set(vertexArray, normArray, textureArray, indexArray)
 	ph.ModMeshByName("cone")
 
-	vtxAry, normAry, texAry, _, idxAry = ph.MeshFloatsByName("capsule")
-	capsule.Set(vtxAry, normAry, texAry, idxAry)
+	vertexArray, normArray, textureArray, _, indexArray = ph.MeshFloatsByName("capsule")
+	capsule.Set(vertexArray, normArray, textureArray, indexArray)
 	ph.ModMeshByName("capsule")
 
-	vtxAry, normAry, texAry, _, idxAry = ph.MeshFloatsByName("torus")
-	torus.Set(vtxAry, normAry, texAry, idxAry)
+	vertexArray, normArray, textureArray, _, indexArray = ph.MeshFloatsByName("torus")
+	torus.Set(vertexArray, normArray, textureArray, indexArray)
 	ph.ModMeshByName("torus")
 
-	vtxAry, normAry, texAry, _, idxAry = ph.MeshFloatsByName("lines")
-	lines.Set(vtxAry, normAry, texAry, idxAry)
+	vertexArray, normArray, textureArray, _, indexArray = ph.MeshFloatsByName("lines")
+	lines.Set(vertexArray, normArray, textureArray, indexArray)
 	ph.ModMeshByName("lines")
 
 	ph.Sync()

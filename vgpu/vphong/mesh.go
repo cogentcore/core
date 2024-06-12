@@ -61,8 +61,8 @@ func (ph *Phong) ResetMeshes() {
 
 // AddMesh adds a Mesh with name and given number of vertices, indexes,
 // and optional per-vertex color
-func (ph *Phong) AddMesh(name string, nVtx, nIndex int, hasColor bool) {
-	ph.Meshes.Add(name, &Mesh{NVtx: nVtx, NIndex: nIndex, HasColor: hasColor})
+func (ph *Phong) AddMesh(name string, numVertex, nIndex int, hasColor bool) {
+	ph.Meshes.Add(name, &Mesh{NVtx: numVertex, NIndex: nIndex, HasColor: hasColor})
 }
 
 // DeleteMesh deletes Mesh with name

@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"sync"
 
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/colors"
@@ -92,9 +91,6 @@ type Scene struct {
 
 	// index in list of window direct uploading images
 	DirUpIndex int `set:"-"`
-
-	// mutex on rendering
-	RenderMu sync.Mutex `view:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (sc *Scene) Init() {
