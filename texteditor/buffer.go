@@ -139,13 +139,13 @@ type Buffer struct { //types:add
 	// markingUp indicates current markup operation in progress -- don't redo
 	markingUp bool
 
-	// changed indicates if the text has been changed (edited) relative to the
+	// Changed indicates if the text has been Changed (edited) relative to the
 	// original, since last EditDone
-	changed bool
+	Changed bool
 
-	// notSaved indicates if the text has been changed (edited) relative to the
+	// NotSaved indicates if the text has been changed (edited) relative to the
 	// original, since last Save
-	notSaved bool
+	NotSaved bool
 
 	// fileModOK have already asked about fact that file has changed since being
 	// opened, user is ok
@@ -224,33 +224,16 @@ func (tb *Buffer) OnInput(fun func(e events.Event)) {
 	tb.Listeners.Add(events.Input, fun)
 }
 
-// ClearChanged marks buffer as un-changed
-func (tb *Buffer) ClearChanged() {
-	tb.changed = false
+// clearNotSaved sets Changed and NotSaved to false.
+func (tb *Buffer) clearNotSaved() {
+	tb.Changed = false
+	tb.NotSaved = false
 }
 
-// ClearNotSaved resets the notSaved flag, and also calls ClearChanged
-func (tb *Buffer) ClearNotSaved() {
-	tb.ClearChanged()
-	tb.notSaved = false
-}
-
-// IsChanged indicates if the text has been changed (edited) relative to
-// the original, since last EditDone
-func (tb *Buffer) IsChanged() bool {
-	return tb.changed
-}
-
-// IsNotSaved indicates if the text has been changed (edited) relative to
-// the original, since last Save
-func (tb *Buffer) IsNotSaved() bool {
-	return tb.notSaved
-}
-
-// SetChanged marks buffer as changed
-func (tb *Buffer) SetChanged() {
-	tb.changed = true
-	tb.notSaved = true
+// setChanged sets Changed and NotSaved to true.
+func (tb *Buffer) setChanged() {
+	tb.Changed = true
+	tb.NotSaved = true
 }
 
 // SetText sets the text to the given bytes.
@@ -304,7 +287,7 @@ func (tb *Buffer) SetTextLines(lns [][]byte, cpy bool) {
 // EditDone finalizes any current editing, sends signal
 func (tb *Buffer) EditDone() {
 	tb.AutoSaveDelete()
-	tb.ClearChanged()
+	tb.Changed = false
 	tb.LinesToBytes()
 	tb.SignalEditors(BufferDone, nil)
 }
@@ -488,7 +471,7 @@ func (tb *Buffer) FileModCheck() bool {
 		return false
 	}
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
-		if !tb.changed { // we haven't edited: just revert
+		if !tb.Changed { // we haven't edited: just revert
 			tb.Revert()
 			return true
 		}
@@ -589,7 +572,7 @@ func (tb *Buffer) Revert() bool { //types:add
 	if !didDiff {
 		tb.OpenFile(tb.Filename)
 	}
-	tb.ClearNotSaved()
+	tb.clearNotSaved()
 	tb.AutoSaveDelete()
 	tb.SignalEditors(BufferNew, nil)
 	tb.ReMarkup()
@@ -642,7 +625,7 @@ func (tb *Buffer) SaveFile(filename core.Filename) error {
 		core.ErrorSnackbar(tb.SceneFromView(), err)
 		slog.Error(err.Error())
 	} else {
-		tb.ClearNotSaved()
+		tb.clearNotSaved()
 		tb.Filename = filename
 		tb.Stat()
 	}
@@ -683,7 +666,7 @@ func (tb *Buffer) Save() error { //types:add
 // Close closes the buffer -- prompts to save if changes, and disconnects from views
 // if afterFun is non-nil, then it is called with the status of the user action
 func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
-	if tb.IsChanged() {
+	if tb.Changed {
 		tb.StopDelayedReMarkup()
 		sc := tb.SceneFromView()
 		if tb.Filename != "" {
@@ -698,7 +681,7 @@ func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
 				})
 				core.NewButton(parent).SetText("Close without saving").OnClick(func(e events.Event) {
 					d.Close()
-					tb.ClearNotSaved()
+					tb.clearNotSaved()
 					tb.AutoSaveDelete()
 					tb.Close(afterFun)
 				})
@@ -718,7 +701,7 @@ func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
 					}
 				})
 				d.AddOK(parent).SetText("Close without saving").OnClick(func(e events.Event) {
-					tb.ClearNotSaved()
+					tb.clearNotSaved()
 					tb.AutoSaveDelete()
 					tb.Close(afterFun)
 				})
@@ -730,7 +713,7 @@ func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
 	tb.SignalEditors(BufferClosed, nil)
 	tb.NewBuffer(1)
 	tb.Filename = ""
-	tb.ClearNotSaved()
+	tb.clearNotSaved()
 	if afterFun != nil {
 		afterFun(false)
 	}
@@ -1141,7 +1124,7 @@ func (tb *Buffer) DeleteText(st, ed lexer.Pos, signal bool) *textbuf.Edit {
 		return nil
 	}
 	tb.FileModCheck()
-	tb.SetChanged()
+	tb.setChanged()
 	tb.LinesMu.Lock()
 	tbe := tb.DeleteTextImpl(st, ed)
 	tb.SaveUndo(tbe)
@@ -1203,7 +1186,7 @@ func (tb *Buffer) DeleteTextRect(st, ed lexer.Pos, signal bool) *textbuf.Edit {
 		return nil
 	}
 	tb.FileModCheck()
-	tb.SetChanged()
+	tb.setChanged()
 	tb.LinesMu.Lock()
 	tbe := tb.DeleteTextRectImpl(st, ed)
 	tb.SaveUndo(tbe)
@@ -1251,7 +1234,7 @@ func (tb *Buffer) InsertText(st lexer.Pos, text []byte, signal bool) *textbuf.Ed
 	}
 	st = tb.ValidPos(st)
 	tb.FileModCheck() // will just revert changes if shouldn't have changed
-	tb.SetChanged()
+	tb.setChanged()
 	if len(tb.Lines) == 0 {
 		tb.NewBuffer(1)
 	}
@@ -1329,7 +1312,7 @@ func (tb *Buffer) InsertTextRect(tbe *textbuf.Edit, signal bool) *textbuf.Edit {
 		return nil
 	}
 	tb.FileModCheck() // will just revert changes if shouldn't have changed
-	tb.SetChanged()
+	tb.setChanged()
 	tb.LinesMu.Lock()
 	nln := tb.NLines
 	re := tb.InsertTextRectImpl(tbe)
@@ -1924,7 +1907,7 @@ func (tb *Buffer) Undo() *textbuf.Edit {
 	tbe := tb.Undos.UndoPop()
 	if tbe == nil {
 		tb.LinesMu.Unlock()
-		tb.ClearChanged()
+		tb.Changed = false
 		tb.AutoSaveDelete()
 		return nil
 	}
@@ -1979,7 +1962,7 @@ func (tb *Buffer) Undo() *textbuf.Edit {
 	}
 	tb.LinesMu.Unlock()
 	if tb.Undos.Pos == 0 {
-		tb.ClearChanged()
+		tb.Changed = false
 		tb.AutoSaveDelete()
 	}
 	return last

@@ -563,7 +563,7 @@ func (dv *DiffView) MakeToolbar(p *core.Plan) {
 				dv.UndoDiff(0)
 			}).
 			Styler(func(s *styles.Style) {
-				s.SetState(!dv.BufA.IsChanged(), states.Disabled)
+				s.SetState(!dv.BufA.Changed, states.Disabled)
 			})
 	})
 	core.Add(p, func(w *core.Button) {
@@ -575,7 +575,7 @@ func (dv *DiffView) MakeToolbar(p *core.Plan) {
 				fb.CallFunc()
 			}).
 			Styler(func(s *styles.Style) {
-				s.SetState(!dv.BufA.IsChanged(), states.Disabled)
+				s.SetState(!dv.BufA.Changed, states.Disabled)
 			})
 	})
 
@@ -626,7 +626,7 @@ func (dv *DiffView) MakeToolbar(p *core.Plan) {
 				dv.UndoDiff(1)
 			}).
 			Styler(func(s *styles.Style) {
-				s.SetState(!dv.BufB.IsChanged(), states.Disabled)
+				s.SetState(!dv.BufB.Changed, states.Disabled)
 			})
 	})
 	core.Add(p, func(w *core.Button) {
@@ -638,7 +638,7 @@ func (dv *DiffView) MakeToolbar(p *core.Plan) {
 				fb.CallFunc()
 			}).
 			Styler(func(s *styles.Style) {
-				s.SetState(!dv.BufB.IsChanged(), states.Disabled)
+				s.SetState(!dv.BufB.Changed, states.Disabled)
 			})
 	})
 }

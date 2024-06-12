@@ -297,12 +297,12 @@ func (ed *Editor) ReMarkup() {
 
 // IsChanged returns true if buffer was changed (edited) since last EditDone
 func (ed *Editor) IsChanged() bool {
-	return ed.Buffer != nil && ed.Buffer.IsChanged()
+	return ed.Buffer != nil && ed.Buffer.Changed
 }
 
 // IsNotSaved returns true if buffer was changed (edited) since last Save
 func (ed *Editor) IsNotSaved() bool {
-	return ed.Buffer != nil && ed.Buffer.IsNotSaved()
+	return ed.Buffer != nil && ed.Buffer.NotSaved
 }
 
 // Clear resets all the text in the buffer for this view
