@@ -38,26 +38,8 @@ type Widget interface {
 	// core widget functionality is implemented on [WidgetBase].
 	AsWidget() *WidgetBase
 
-	// See [WidgetBase.Styler].
-	Styler(s func(s *styles.Style)) *WidgetBase
-
-	// See [WidgetBase.Update].
-	Update()
-
-	// StateIs returns whether the widget has the given [states.States] flag set
-	StateIs(flag states.States) bool
-
-	// AbilityIs returns whether the widget has the given [abilities.Abilities] flag set
-	AbilityIs(flag abilities.Abilities) bool
-
-	// SetState sets the given [states.State] flags to the given value
-	SetState(on bool, state ...states.States) *WidgetBase
-
-	// SetAbilities sets the given [abilities.Abilities] flags to the given value
-	SetAbilities(on bool, able ...abilities.Abilities) *WidgetBase
-
 	// See [WidgetBase.Style].
-	Style()
+	Style() // TODO(config): remove
 
 	// SizeUp (bottom-up) gathers Actual sizes from our Children & Parts,
 	// based on Styles.Min / Max sizes and actual content sizing
@@ -109,26 +91,6 @@ type Widget interface {
 	// for widget-specific rendering.
 	RenderWidget()
 
-	// On adds an event listener function for the given event type
-	On(etype events.Types, fun func(e events.Event)) *WidgetBase
-
-	// OnClick adds an event listener function for [events.Click] events
-	OnClick(fun func(e events.Event)) *WidgetBase
-
-	// HandleEvent sends the given event to all Listeners for that event type.
-	// It also checks if the State has changed and calls ApplyStyle if so.
-	// If more significant Config level changes are needed due to an event,
-	// the event handler must do this itself.
-	HandleEvent(e events.Event)
-
-	// Send sends an NEW event of given type to this widget,
-	// optionally starting from values in the given original event
-	// (recommended to include where possible).
-	// Do NOT send an existing event using this method if you
-	// want the Handled state to persist throughout the call chain;
-	// call HandleEvent directly for any existing events.
-	Send(e events.Types, orig ...events.Event)
-
 	// WidgetTooltip returns the tooltip text that should be used for this
 	// widget, and the window-relative position to use for the upper-left corner
 	// of the tooltip. The current mouse position in scene-local coordinates
@@ -143,15 +105,6 @@ type Widget interface {
 	// it to do different things. For example, buttons add their
 	// shortcut to the tooltip here.
 	WidgetTooltip(pos image.Point) (string, image.Point)
-
-	// AddContextMenu adds the given context menu to [WidgetBase.ContextMenus].
-	// It is the main way that code should modify a widget's context menus.
-	// Context menu functions are run in reverse order.
-	AddContextMenu(menu func(m *Scene)) *WidgetBase
-
-	// ApplyContextMenus adds the [Widget.ContextMenus] to the given menu scene
-	// in reverse order.
-	ApplyContextMenus(m *Scene)
 
 	// ContextMenuPos returns the default position for popup menus;
 	// by default in the middle its Bounding Box, but can be adapted as
