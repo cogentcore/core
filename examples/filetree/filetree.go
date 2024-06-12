@@ -68,17 +68,17 @@ func (fb *FileBrowse) Init() {
 		case "title":
 			title := w.(*core.Text)
 			title.Type = core.TextHeadlineSmall
-			w.Styler(func(s *styles.Style) {
+			w.AsWidget().Styler(func(s *styles.Style) {
 				s.Justify.Content = styles.Center
 			})
 		}
 		if w.AsTree().Parent.AsTree().PathFrom(fb) == "splits" {
 			if w.AsTree().IndexInParent() == 0 {
-				w.Styler(func(s *styles.Style) {
+				w.AsWidget().Styler(func(s *styles.Style) {
 					s.Grow.Set(1, 1)
 				})
 			} else {
-				w.Styler(func(s *styles.Style) {
+				w.AsWidget().Styler(func(s *styles.Style) {
 					s.Grow.Set(1, 1)
 					s.Min.X.Ch(20)
 					s.Min.Y.Ch(10)
