@@ -79,9 +79,6 @@ func (tv *TableView) Init() {
 		svi := tv.This.(views.SliceViewer)
 		svi.UpdateSliceSize()
 
-		tv.ViewMuLock()
-		defer tv.ViewMuUnlock()
-
 		scrollTo := -1
 		if tv.InitSelectedIndex >= 0 {
 			tv.SelectedIndex = tv.InitSelectedIndex
@@ -413,14 +410,11 @@ func (tv *TableView) SetColumnTensorDisplay(col int) *TensorDisplay {
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end
 func (tv *TableView) SliceNewAt(idx int) {
-	tv.ViewMuLock()
-
 	tv.SliceNewAtSelect(idx)
 
 	tv.Table.InsertRows(idx, 1)
 
 	tv.SelectIndexAction(idx, events.SelectOne)
-	tv.ViewMuUnlock()
 	tv.Update()
 	tv.IndexGrabFocus(idx)
 }
@@ -430,13 +424,8 @@ func (tv *TableView) SliceDeleteAt(idx int) {
 	if idx < 0 || idx >= tv.SliceSize {
 		return
 	}
-	tv.ViewMuLock()
-
 	tv.SliceDeleteAtSelect(idx)
-
 	tv.Table.DeleteRows(idx, 1)
-
-	tv.ViewMuUnlock()
 	tv.Update()
 }
 

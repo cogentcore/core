@@ -73,9 +73,6 @@ func (tv *TableView) Init() {
 		svi := tv.This.(SliceViewer)
 		svi.UpdateSliceSize()
 
-		tv.ViewMuLock()
-		defer tv.ViewMuUnlock()
-
 		tv.SortSlice()
 
 		scrollTo := -1
@@ -361,8 +358,6 @@ func (tv *TableView) StyleRow(w core.Widget, idx, fidx int) {
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end
 func (tv *TableView) SliceNewAt(idx int) {
-	tv.ViewMuLock()
-
 	tv.SliceNewAtSelect(idx)
 	reflectx.SliceNewAt(tv.Slice, idx)
 	if idx < 0 {
@@ -371,7 +366,6 @@ func (tv *TableView) SliceNewAt(idx int) {
 
 	tv.This.(SliceViewer).UpdateSliceSize()
 	tv.SelectIndexAction(idx, events.SelectOne)
-	tv.ViewMuUnlock()
 	tv.SendChange()
 	tv.Update()
 	tv.IndexGrabFocus(idx)
@@ -382,14 +376,12 @@ func (tv *TableView) SliceDeleteAt(idx int) {
 	if idx < 0 || idx >= tv.SliceSize {
 		return
 	}
-	tv.ViewMuLock()
 
 	tv.SliceDeleteAtSelect(idx)
 
 	reflectx.SliceDeleteAt(tv.Slice, idx)
 
 	tv.This.(SliceViewer).UpdateSliceSize()
-	tv.ViewMuUnlock()
 	tv.SendChange()
 	tv.Update()
 }
