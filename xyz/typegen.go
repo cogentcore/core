@@ -51,38 +51,38 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Lines", IDName:
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Tiling", IDName: "tiling", Doc: "Tiling are the texture tiling parameters", Fields: []types.Field{{Name: "Repeat", Doc: "how often to repeat the texture in each direction"}, {Name: "Off", Doc: "offset for when to start the texure in each direction"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Material", IDName: "material", Doc: "Material describes the material properties of a surface (colors, shininess, texture)\ni.e., phong lighting parameters.\nMain color is used for both ambient and diffuse color, and alpha component\nis used for opacity.  The Emissive color is only for glowing objects.\nThe Specular color is always white (multiplied by light color).\nTextures are stored on the Scene and accessed by name", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Color", Doc: "prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"}, {Name: "Emissive", Doc: "prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"}, {Name: "Shiny", Doc: "prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect."}, {Name: "Reflective", Doc: "prop: reflective = specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light."}, {Name: "Bright", Doc: "prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters"}, {Name: "Texture", Doc: "prop: texture = texture to provide color for the surface"}, {Name: "Tiling", Doc: "texture tiling parameters -- repeat and offset"}, {Name: "CullBack", Doc: "prop: cull-back = cull the back-facing surfaces"}, {Name: "CullFront", Doc: "prop: cull-front = cull the front-facing surfaces"}, {Name: "TexPtr", Doc: "pointer to texture"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Material", IDName: "material", Doc: "Material describes the material properties of a surface (colors, shininess, texture)\ni.e., phong lighting parameters.\nMain color is used for both ambient and diffuse color, and alpha component\nis used for opacity.  The Emissive color is only for glowing objects.\nThe Specular color is always white (multiplied by light color).\nTextures are stored on the Scene and accessed by name", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Color", Doc: "Color is the main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"}, {Name: "Emissive", Doc: "Emissive is the color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"}, {Name: "Shiny", Doc: "Shiny is the specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect."}, {Name: "Reflective", Doc: "Reflective is the specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light."}, {Name: "Bright", Doc: "Bright is an overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters"}, {Name: "TextureName", Doc: "TextureName is the name of the texture to provide color for the surface."}, {Name: "Tiling", Doc: "Tiling is the texture tiling parameters: repeat and offset."}, {Name: "CullBack", Doc: "CullBack indicates to cull the back-facing surfaces."}, {Name: "CullFront", Doc: "CullFront indicates to cull the front-facing surfaces."}, {Name: "Texture", Doc: "Texture is the cached [Texture] object set based on [Material.TextureName]."}}})
 
 // SetColor sets the [Material.Color]:
-// prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering
+// Color is the main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering
 func (t *Material) SetColor(v color.RGBA) *Material { t.Color = v; return t }
 
 // SetEmissive sets the [Material.Emissive]:
-// prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object
+// Emissive is the color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object
 func (t *Material) SetEmissive(v color.RGBA) *Material { t.Emissive = v; return t }
 
 // SetShiny sets the [Material.Shiny]:
-// prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect.
+// Shiny is the specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect.
 func (t *Material) SetShiny(v float32) *Material { t.Shiny = v; return t }
 
 // SetReflective sets the [Material.Reflective]:
-// prop: reflective = specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light.
+// Reflective is the specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light.
 func (t *Material) SetReflective(v float32) *Material { t.Reflective = v; return t }
 
 // SetBright sets the [Material.Bright]:
-// prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters
+// Bright is an overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters
 func (t *Material) SetBright(v float32) *Material { t.Bright = v; return t }
 
 // SetTiling sets the [Material.Tiling]:
-// texture tiling parameters -- repeat and offset
+// Tiling is the texture tiling parameters: repeat and offset.
 func (t *Material) SetTiling(v Tiling) *Material { t.Tiling = v; return t }
 
 // SetCullBack sets the [Material.CullBack]:
-// prop: cull-back = cull the back-facing surfaces
+// CullBack indicates to cull the back-facing surfaces.
 func (t *Material) SetCullBack(v bool) *Material { t.CullBack = v; return t }
 
 // SetCullFront sets the [Material.CullFront]:
-// prop: cull-front = cull the front-facing surfaces
+// CullFront indicates to cull the front-facing surfaces.
 func (t *Material) SetCullFront(v bool) *Material { t.CullFront = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshName", IDName: "mesh-name", Doc: "MeshName is a [Mesh] name. This type provides an automatic GUI chooser for meshes.\nIt is used on [Solid] to link to meshes by name."})
@@ -344,7 +344,7 @@ func (t *Torus) SetAngStart(v float32) *Torus { t.AngStart = v; return t }
 func (t *Torus) SetAngLen(v float32) *Torus { t.AngLen = v; return t }
 
 // SolidType is the [types.Type] for [Solid]
-var SolidType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Solid", IDName: "solid", Doc: "Solid represents an individual 3D solid element.\nIt has its own unique spatial transforms and material properties,\nand points to a mesh structure defining the shape of the solid.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Mesh", Doc: "name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene"}, {Name: "Mat", Doc: "material properties of the surface (color, shininess, texture, etc)"}, {Name: "MeshPtr", Doc: "cached pointer to mesh"}}, Instance: &Solid{}})
+var SolidType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Solid", IDName: "solid", Doc: "Solid represents an individual 3D solid element.\nIt has its own unique spatial transforms and material properties,\nand points to a mesh structure defining the shape of the solid.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "MeshName", Doc: "MeshName is the name of the mesh shape information used for rendering\nthis solid; all meshes are collected on the Scene."}, {Name: "Mat", Doc: "material properties of the surface (color, shininess, texture, etc)"}, {Name: "Mesh", Doc: "Mesh is the cached [Mesh] object set from [Solid.MeshName]."}}, Instance: &Solid{}})
 
 // NewSolid returns a new [Solid] with the given optional parent:
 // Solid represents an individual 3D solid element.

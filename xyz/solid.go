@@ -18,14 +18,15 @@ import (
 type Solid struct {
 	NodeBase
 
-	// name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene
-	Mesh MeshName `set:"-"`
+	// MeshName is the name of the mesh shape information used for rendering
+	// this solid; all meshes are collected on the Scene.
+	MeshName MeshName `set:"-"`
 
 	// material properties of the surface (color, shininess, texture, etc)
 	Mat Material `view:"add-fields"`
 
-	// cached pointer to mesh
-	MeshPtr Mesh `view:"-" set:"-"`
+	// Mesh is the cached [Mesh] object set from [Solid.MeshName].
+	Mesh Mesh `view:"-" set:"-"`
 }
 
 func (sld *Solid) Init() {
@@ -57,18 +58,18 @@ func (sld *Solid) SetMeshName(meshName string) error {
 		log.Println(err)
 		return err
 	}
-	sld.Mesh = MeshName(meshName)
-	sld.MeshPtr = ms
+	sld.MeshName = MeshName(meshName)
+	sld.Mesh = ms
 	return nil
 }
 
 // SetMesh sets mesh
 func (sld *Solid) SetMesh(ms Mesh) *Solid {
-	sld.MeshPtr = ms
-	if sld.MeshPtr != nil {
-		sld.Mesh = MeshName(sld.MeshPtr.AsMeshBase().Name)
+	sld.Mesh = ms
+	if sld.Mesh != nil {
+		sld.MeshName = MeshName(sld.Mesh.AsMeshBase().Name)
 	} else {
-		sld.Mesh = ""
+		sld.MeshName = ""
 	}
 	return sld
 }
@@ -167,13 +168,13 @@ func (sld *Solid) ParentMaterial() *Material {
 
 // Validate checks that solid has valid mesh and texture settings, etc
 func (sld *Solid) Validate() error {
-	if sld.Mesh == "" {
+	if sld.MeshName == "" {
 		err := fmt.Errorf("xyz.Solid: %s Mesh name is empty", sld.Path())
 		log.Println(err)
 		return err
 	}
-	if sld.MeshPtr == nil || sld.MeshPtr.AsMeshBase().Name != string(sld.Mesh) {
-		err := sld.SetMeshName(string(sld.Mesh))
+	if sld.Mesh == nil || sld.Mesh.AsMeshBase().Name != string(sld.MeshName) {
+		err := sld.SetMeshName(string(sld.MeshName))
 		if err != nil {
 			return err
 		}
@@ -182,18 +183,18 @@ func (sld *Solid) Validate() error {
 }
 
 func (sld *Solid) IsVisible() bool {
-	if sld.MeshPtr == nil {
+	if sld.Mesh == nil {
 		return false
 	}
 	return sld.NodeBase.IsVisible()
 }
 
 func (sld *Solid) IsTransparent() bool {
-	if sld.MeshPtr == nil {
+	if sld.Mesh == nil {
 		return false
 	}
-	if sld.MeshPtr.AsMeshBase().HasColor {
-		return sld.MeshPtr.AsMeshBase().Transparent
+	if sld.Mesh.AsMeshBase().HasColor {
+		return sld.Mesh.AsMeshBase().Transparent
 	}
 	return sld.Mat.IsTransparent()
 }
@@ -201,8 +202,8 @@ func (sld *Solid) IsTransparent() bool {
 // UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
 // groups aggregate over elements
 func (sld *Solid) UpdateMeshBBox() {
-	if sld.MeshPtr != nil {
-		mesh := sld.MeshPtr.AsMeshBase()
+	if sld.Mesh != nil {
+		mesh := sld.Mesh.AsMeshBase()
 		sld.MeshBBox = mesh.BBox
 	}
 }
@@ -214,10 +215,10 @@ func (sld *Solid) UpdateMeshBBox() {
 // used for organizing the ordering of rendering
 func (sld *Solid) RenderClass() RenderClasses {
 	switch {
-	case sld.Mat.TexPtr != nil:
+	case sld.Mat.Texture != nil:
 		return RClassOpaqueTexture
-	case sld.MeshPtr.AsMeshBase().HasColor:
-		if sld.MeshPtr.AsMeshBase().Transparent {
+	case sld.Mesh.AsMeshBase().HasColor:
+		if sld.Mesh.AsMeshBase().Transparent {
 			return RClassTransVertex
 		}
 		return RClassOpaqueVertex
@@ -231,7 +232,7 @@ func (sld *Solid) RenderClass() RenderClasses {
 
 // Render activates this solid for rendering
 func (sld *Solid) Render() {
-	sld.Scene.Phong.UseMeshName(string(sld.Mesh))
+	sld.Scene.Phong.UseMeshName(string(sld.MeshName))
 	sld.PoseMu.RLock()
 	sld.Scene.Phong.SetModelMtx(&sld.Pose.WorldMatrix)
 	sld.PoseMu.RUnlock()

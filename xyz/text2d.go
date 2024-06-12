@@ -67,7 +67,7 @@ func (txt *Text2D) Defaults() {
 func (txt *Text2D) TextSize() (math32.Vector2, bool) {
 	txt.Pose.Defaults() // only if nil
 	sz := math32.Vector2{}
-	tx := txt.Mat.TexPtr
+	tx := txt.Mat.Texture
 	if tx == nil {
 		return sz, false
 	}
@@ -118,7 +118,7 @@ func (txt *Text2D) RenderText() {
 	var img *image.RGBA
 	var tx Texture
 	var err error
-	if txt.Mat.TexPtr == nil {
+	if txt.Mat.Texture == nil {
 		txname := "__Text2D: " + txt.Name
 		tx, err = txt.Scene.TextureByNameTry(txname)
 		if err != nil {
@@ -135,7 +135,7 @@ func (txt *Text2D) RenderText() {
 			img = tx.Image()
 		}
 	} else {
-		tx = txt.Mat.TexPtr
+		tx = txt.Mat.Texture
 		img = tx.Image()
 		if img.Bounds() != bounds {
 			img = image.NewRGBA(bounds)
