@@ -90,8 +90,8 @@ const (
 ///////////////////////////////////////////////////////////////////
 // Layouter
 
-// Layouter is the interface for layout functions, called by Layout
-// widget type during the various Layout passes.
+// Layouter is the interface for layout functions, called by [Frame]
+// during the various layout passes.
 type Layouter interface {
 	Widget
 
