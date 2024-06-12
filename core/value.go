@@ -92,15 +92,15 @@ func InitValueButton(v Value, allowReadOnly bool, make func(d *Body), after ...f
 	wb.OnClick(func(e events.Event) {
 		if allowReadOnly || !wb.IsReadOnly() {
 			wb.ValueNewWindow = e.HasAnyModifier(key.Shift)
-			OpenValueDialog(v, v, make, after...)
+			OpenValueDialog(v, make, after...)
 		}
 	})
 }
 
 // OpenValueDialog opens a new value dialog for the given [Value] using the
-// given context widget, the given function for constructing the dialog, and the
-// optional given function to call after the dialog is accepted.
-func OpenValueDialog(v Value, ctx Widget, make func(d *Body), after ...func()) {
+// given function for constructing the dialog and the optional given function
+// to call after the dialog is accepted.
+func OpenValueDialog(v Value, make func(d *Body), after ...func()) {
 	opv := reflectx.UnderlyingPointer(reflect.ValueOf(v.WidgetValue()))
 	if !opv.IsValid() {
 		return
@@ -137,8 +137,8 @@ func OpenValueDialog(v Value, ctx Widget, make func(d *Body), after ...func()) {
 	}
 
 	if wb.ValueNewWindow {
-		d.RunWindowDialog(ctx)
+		d.RunWindowDialog(v)
 	} else {
-		d.RunFullDialog(ctx)
+		d.RunFullDialog(v)
 	}
 }
