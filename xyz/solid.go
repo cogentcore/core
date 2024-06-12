@@ -233,9 +233,7 @@ func (sld *Solid) RenderClass() RenderClasses {
 // Render activates this solid for rendering
 func (sld *Solid) Render() {
 	sld.Scene.Phong.UseMeshName(string(sld.MeshName))
-	sld.PoseMu.RLock()
 	sld.Scene.Phong.SetModelMtx(&sld.Pose.WorldMatrix)
-	sld.PoseMu.RUnlock()
 	sld.Material.Render(sld.Scene)
 	sld.Scene.Phong.Render()
 }

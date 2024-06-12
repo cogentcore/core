@@ -237,9 +237,7 @@ func UpdateWorldMatrix(n tree.Node) {
 		if pd == nil {
 			ni.UpdateWorldMatrix(idmtx)
 		} else {
-			pd.PoseMu.RLock()
 			ni.UpdateWorldMatrix(&pd.Pose.WorldMatrix)
-			pd.PoseMu.RUnlock()
 		}
 		return tree.Continue
 	})

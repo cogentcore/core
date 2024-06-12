@@ -9,7 +9,6 @@ import (
 	"image"
 	"log"
 	"reflect"
-	"sync"
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
@@ -86,9 +85,6 @@ type NodeBase struct {
 
 	// Scene is the cached [Scene].
 	Scene *Scene `copier:"-" set:"-"`
-
-	// mutex on pose access -- needed for parallel updating
-	PoseMu sync.RWMutex `view:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// mesh-based local bounding box (aggregated for groups)
 	MeshBBox BBox `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
@@ -189,8 +185,6 @@ func (nb *NodeBase) IsTransparent() bool {
 // This sets the WorldMatrixUpdated flag but does not check that flag -- calling
 // routine can optionally do so.
 func (nb *NodeBase) UpdateWorldMatrix(parWorld *math32.Matrix4) {
-	nb.PoseMu.Lock()
-	defer nb.PoseMu.Unlock()
 	nb.Pose.UpdateMatrix() // note: can do this in special ways to bake in other
 	// automatic transforms as needed
 	nb.Pose.UpdateWorldMatrix(parWorld)
@@ -200,19 +194,15 @@ func (nb *NodeBase) UpdateWorldMatrix(parWorld *math32.Matrix4) {
 // UpdateMVPMatrix updates this node's MVP matrix based on given view, projection matricies from camera.
 // Called during rendering.
 func (nb *NodeBase) UpdateMVPMatrix(viewMat, projectionMat *math32.Matrix4) {
-	nb.PoseMu.Lock()
 	nb.Pose.UpdateMVPMatrix(viewMat, projectionMat)
-	nb.PoseMu.Unlock()
 }
 
 // UpdateBBox2D updates this node's 2D bounding-box information based on scene
 // size and min offset position.
 func (nb *NodeBase) UpdateBBox2D(size math32.Vector2) {
 	off := math32.Vector2{}
-	nb.PoseMu.RLock()
 	nb.WorldBBox.BBox = nb.MeshBBox.BBox.MulMatrix4(&nb.Pose.WorldMatrix)
 	nb.NDCBBox = nb.MeshBBox.BBox.MVProjToNDC(&nb.Pose.MVPMatrix)
-	nb.PoseMu.RUnlock()
 	Wmin := nb.NDCBBox.Min.NDCToWindow(size, off, 0, 1, true) // true = flipY
 	Wmax := nb.NDCBBox.Max.NDCToWindow(size, off, 0, 1, true) // true = filpY
 	// BBox is always relative to scene
@@ -268,15 +258,13 @@ func (nb *NodeBase) RayPick(pos image.Point) math32.Ray {
 	return *ray
 }
 
-// WorldMatrix returns the world matrix for this node, under read lock protection
+// WorldMatrix returns the world matrix for this node
 func (nb *NodeBase) WorldMatrix() *math32.Matrix4 {
-	nb.PoseMu.RLock()
-	defer nb.PoseMu.RUnlock()
 	return &nb.Pose.WorldMatrix
 }
 
 // NormDCBBox returns the normalized display coordinates bounding box
-// which is used for clipping.  This is read-lock protected.
+// which is used for clipping.
 func (nb *NodeBase) NormDCBBox() math32.Box3 {
 	return nb.NDCBBox
 }
@@ -289,32 +277,24 @@ func (nb *NodeBase) Render() {
 	// nop
 }
 
-// SetPosePos sets Pose.Pos position to given value, under write lock protection
+// SetPosePos sets Pose.Pos position to given value
 func (nb *NodeBase) SetPosePos(pos math32.Vector3) {
-	nb.PoseMu.Lock()
 	nb.Pose.Pos = pos
-	nb.PoseMu.Unlock()
 }
 
-// SetPoseScale sets Pose.Scale scale to given value, under write lock protection
+// SetPoseScale sets Pose.Scale scale to given value
 func (nb *NodeBase) SetPoseScale(scale math32.Vector3) {
-	nb.PoseMu.Lock()
 	nb.Pose.Scale = scale
-	nb.PoseMu.Unlock()
 }
 
-// SetPoseQuat sets Pose.Quat to given value, under write lock protection
+// SetPoseQuat sets Pose.Quat to given value
 func (nb *NodeBase) SetPoseQuat(quat math32.Quat) {
-	nb.PoseMu.Lock()
 	nb.Pose.Quat = quat
-	nb.PoseMu.Unlock()
 }
 
 // TrackCamera moves this node to pose of camera
 func (nb *NodeBase) TrackCamera() {
-	nb.PoseMu.Lock()
 	nb.Pose.CopyFrom(&nb.Scene.Camera.Pose)
-	nb.PoseMu.Unlock()
 
 	UpdateWorldMatrix(nb.This)
 }
@@ -323,8 +303,6 @@ func (nb *NodeBase) TrackCamera() {
 // For SpotLight, copies entire Pose. Does not work for Ambient light
 // which has no position information.
 func (nb *NodeBase) TrackLight(lightName string) error {
-	nb.PoseMu.Lock()
-	defer nb.PoseMu.Unlock()
 	lt, ok := nb.Scene.Lights.ValueByKeyTry(lightName)
 	if !ok {
 		return fmt.Errorf("xyz Node: %v TrackLight named: %v not found", nb.Path(), lightName)
