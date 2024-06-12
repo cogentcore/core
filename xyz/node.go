@@ -313,9 +313,7 @@ func (nb *NodeBase) SetPoseQuat(quat math32.Quat) {
 // TrackCamera moves this node to pose of camera
 func (nb *NodeBase) TrackCamera() {
 	nb.PoseMu.Lock()
-	nb.Scene.Camera.CamMu.RLock()
 	nb.Pose.CopyFrom(&nb.Scene.Camera.Pose)
-	nb.Scene.Camera.CamMu.RUnlock()
 	nb.PoseMu.Unlock()
 
 	UpdateWorldMatrix(nb.This)

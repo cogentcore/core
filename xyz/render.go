@@ -248,9 +248,6 @@ func UpdateWorldMatrix(n tree.Node) {
 // UpdateMVPMatrix updates the Model-View-Projection matrix for all scene elements
 // and BBox2D
 func (sc *Scene) UpdateMVPMatrix() {
-	sc.Camera.CamMu.Lock()
-	defer sc.Camera.CamMu.Unlock()
-
 	sc.Camera.Pose.UpdateMatrix()
 	sz := sc.Geom.Size
 	size := math32.Vec2(float32(sz.X), float32(sz.Y))
@@ -292,9 +289,7 @@ func (sc *Scene) ConfigNodes() {
 // changes to the nodes that require Config updates.
 // This must be called on the main thread.
 func (sc *Scene) Config() {
-	sc.Camera.CamMu.Lock()
 	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
-	sc.Camera.CamMu.Unlock()
 	clr := math32.NewVector3Color(sc.BackgroundColor).SRGBToLinear()
 	sc.Frame.Render.SetClearColor(clr.X, clr.Y, clr.Z, 1)
 	// gpu.Draw.Wireframe(sc.Wireframe)

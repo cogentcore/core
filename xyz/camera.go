@@ -6,7 +6,6 @@ package xyz
 
 import (
 	"image"
-	"sync"
 
 	"cogentcore.org/core/math32"
 )
@@ -16,9 +15,6 @@ type Camera struct {
 
 	// overall orientation and direction of the camera, relative to pointing at negative Z axis with up (positive Y) direction
 	Pose Pose
-
-	// mutex protecting camera data
-	CamMu sync.RWMutex
 
 	// target location for the camera -- where it is pointing at -- defaults to the origin, but moves with panning movements, and is reset by a call to LookAt method
 	Target math32.Vector3
@@ -80,9 +76,6 @@ func (cm *Camera) GenGoSet(path string) string {
 
 // UpdateMatrix updates the view and projection matricies
 func (cm *Camera) UpdateMatrix() {
-	cm.CamMu.Lock()
-	defer cm.CamMu.Unlock()
-
 	cm.Pose.UpdateMatrix()
 	cm.ViewMatrix.SetInverse(&cm.Pose.Matrix)
 	if cm.Ortho {
@@ -102,14 +95,12 @@ func (cm *Camera) UpdateMatrix() {
 // LookAt points the camera at given target location, using given up direction,
 // and sets the Target, UpDir fields for future camera movements.
 func (cm *Camera) LookAt(target, upDir math32.Vector3) {
-	cm.CamMu.Lock()
 	cm.Target = target
 	if upDir == (math32.Vector3{}) {
 		upDir = math32.Vec3(0, 1, 0)
 	}
 	cm.UpDir = upDir
 	cm.Pose.LookAt(target, upDir)
-	cm.CamMu.Unlock()
 	cm.UpdateMatrix()
 }
 
@@ -125,15 +116,11 @@ func (cm *Camera) LookAtTarget() {
 
 // ViewVector is the vector between the camera position and target
 func (cm *Camera) ViewVector() math32.Vector3 {
-	cm.CamMu.RLock()
-	defer cm.CamMu.RUnlock()
 	return cm.Pose.Pos.Sub(cm.Target)
 }
 
 // DistanceTo is the distance from camera to given point
 func (cm *Camera) DistanceTo(pt math32.Vector3) float32 {
-	cm.CamMu.RLock()
-	defer cm.CamMu.RUnlock()
 	dv := cm.Pose.Pos.Sub(pt)
 	return dv.Length()
 }
@@ -166,7 +153,6 @@ func (cm *Camera) Orbit(delX, delY float32) {
 	}
 	dir := ctdir.Normal()
 
-	cm.CamMu.Lock()
 	up := cm.UpDir
 	right := cm.UpDir.Cross(dir).Normal()
 	// up := dir.Cross(right).Normal() // ensure ortho -- not needed
@@ -180,7 +166,6 @@ func (cm *Camera) Orbit(delX, delY float32) {
 
 	cm.Pose.Pos = cm.Pose.Pos.Add(dx).Add(dy)
 	cm.UpDir = cm.UpDir.MulQuat(dyq) // this is only one that affects up
-	cm.CamMu.Unlock()
 
 	cm.LookAtTarget()
 }
@@ -190,22 +175,18 @@ func (cm *Camera) Orbit(delX, delY float32) {
 // current window view)
 // and it moves the target by the same increment, changing the target position.
 func (cm *Camera) Pan(delX, delY float32) {
-	cm.CamMu.Lock()
 	dx := math32.Vec3(-delX, 0, 0).MulQuat(cm.Pose.Quat)
 	dy := math32.Vec3(0, -delY, 0).MulQuat(cm.Pose.Quat)
 	td := dx.Add(dy)
 	cm.Pose.Pos.SetAdd(td)
 	cm.Target.SetAdd(td)
-	cm.CamMu.Unlock()
 }
 
 // PanAxis moves the camera and target along world X,Y axes
 func (cm *Camera) PanAxis(delX, delY float32) {
-	cm.CamMu.Lock()
 	td := math32.Vec3(-delX, -delY, 0)
 	cm.Pose.Pos.SetAdd(td)
 	cm.Target.SetAdd(td)
-	cm.CamMu.Unlock()
 }
 
 // PanTarget moves the target along world X,Y,Z axes and does LookAt
@@ -215,11 +196,9 @@ func (cm *Camera) PanTarget(delX, delY, delZ float32) {
 	td := math32.Vec3(-delX, -delY, delZ)
 	cm.Target.SetAdd(td)
 	dist := cm.ViewVector().Length()
-	cm.CamMu.Lock()
 	if dist == 0 {
 		cm.Target.SetAdd(td)
 	}
-	cm.CamMu.Unlock()
 	cm.LookAtTarget()
 }
 
@@ -227,18 +206,15 @@ func (cm *Camera) PanTarget(delX, delY, delZ float32) {
 // by projecting the current target distance along the current camera
 // view matrix.
 func (cm *Camera) TargetFromView() {
-	cm.CamMu.Lock()
 	trgdist := cm.Pose.Pos.Sub(cm.Target).Length() // distance to existing target
 	tpos := math32.Vec4(0, 0, -trgdist, 1)         // target is that distance along -Z axis in front of me
 	cm.Target = math32.Vector3FromVector4(tpos.MulMatrix4(&cm.Pose.Matrix))
-	cm.CamMu.Unlock()
 }
 
 // Zoom moves along axis given pct closer or further from the target
 // it always moves the target back also if it distance is < 1
 func (cm *Camera) Zoom(zoomPct float32) {
 	ctaxis := cm.ViewVector()
-	cm.CamMu.Lock()
 	if ctaxis == (math32.Vector3{}) {
 		ctaxis.Set(0, 0, 1)
 	}
@@ -248,7 +224,6 @@ func (cm *Camera) Zoom(zoomPct float32) {
 	if zoomPct < 0 && dist < 1 {
 		cm.Target.SetAdd(del)
 	}
-	cm.CamMu.Unlock()
 }
 
 // ZoomTo moves along axis in vector pointing through the given 2D point as
@@ -257,7 +232,6 @@ func (cm *Camera) Zoom(zoomPct float32) {
 // passed as size argument.
 // ZoomPct is proportion closer (positive) or further (negative) from the target.
 func (cm *Camera) ZoomTo(pt, size image.Point, zoomPct float32) {
-	cm.CamMu.Lock()
 	fsize := math32.Vec2(float32(size.X), float32(size.Y))
 	fpt := math32.Vec2(float32(pt.X), float32(pt.Y))
 	ndc := fpt.WindowToNDC(fsize, math32.Vector2{}, true) // flipY
@@ -269,7 +243,6 @@ func (cm *Camera) ZoomTo(pt, size image.Point, zoomPct float32) {
 	wdir := math32.Vector3FromVector4(cdir.MulMatrix4(&cm.Pose.Matrix))
 	del := wdir.MulScalar(zoomPct)
 	cm.Pose.Pos.SetAdd(del)
-	cm.CamMu.Unlock()
 	cm.UpdateMatrix()
 	cm.TargetFromView()
 }
