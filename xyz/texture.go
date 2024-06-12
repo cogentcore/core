@@ -39,8 +39,9 @@ type Texture interface {
 // to facilitate interface with GPU.
 type TextureBase struct {
 
-	// name of the texture -- textures are connected to material by name
-	Nm string
+	// Name is the name of the texture;
+	// textures are connected to [Material]s by name.
+	Name string
 
 	// set to true if texture has transparency
 	Trans bool
@@ -51,10 +52,6 @@ type TextureBase struct {
 
 func (tx *TextureBase) AsTextureBase() *TextureBase {
 	return tx
-}
-
-func (tx *TextureBase) Name() string {
-	return tx.Nm
 }
 
 func (tx *TextureBase) IsTransparent() bool {
@@ -86,7 +83,7 @@ type TextureFile struct {
 // NewTextureFile adds a new texture from file of given name and filename
 func NewTextureFile(sc *Scene, name string, filename string) *TextureFile {
 	tx := &TextureFile{}
-	tx.Nm = name
+	tx.Name = name
 	dfs, fnm, err := dirs.DirFS(filename)
 	if err != nil {
 		slog.Error("xyz.NewTextureFile: Image not found error", "file:", filename, "error", err)
@@ -101,7 +98,7 @@ func NewTextureFile(sc *Scene, name string, filename string) *TextureFile {
 // NewTextureFileFS adds a new texture from file of given name and filename
 func NewTextureFileFS(fsys fs.FS, sc *Scene, name string, filename string) *TextureFile {
 	tx := &TextureFile{}
-	tx.Nm = name
+	tx.Name = name
 	tx.FS = fsys
 	tx.File = filename
 	sc.AddTexture(tx)
@@ -113,7 +110,7 @@ func (tx *TextureFile) Image() *image.RGBA {
 		return tx.Img
 	}
 	if tx.File == "" {
-		err := fmt.Errorf("xyz.Texture: %v File must be set to a filename to load texture from", tx.Nm)
+		err := fmt.Errorf("xyz.Texture: %v File must be set to a filename to load texture from", tx.Name)
 		log.Println(err)
 		return nil
 	}
@@ -140,7 +137,7 @@ type TextureGi2D struct {
 // AddTexture adds given texture to texture collection
 // see NewTextureFile to add a texture that loads from file
 func (sc *Scene) AddTexture(tx Texture) {
-	sc.Textures.Add(tx.AsTextureBase().Nm(), tx)
+	sc.Textures.Add(tx.AsTextureBase().Name, tx)
 }
 
 // TextureByName looks for texture by name -- returns nil if not found

@@ -122,7 +122,7 @@ func (txt *Text2D) RenderText() {
 		txname := "__Text2D: " + txt.Name
 		tx, err = txt.Scene.TextureByNameTry(txname)
 		if err != nil {
-			tx = &TextureBase{Nm: txname}
+			tx = &TextureBase{Name: txname}
 			txt.Scene.AddTexture(tx)
 			img = image.NewRGBA(bounds)
 			tx.AsTextureBase().Img = img
@@ -141,7 +141,7 @@ func (txt *Text2D) RenderText() {
 			img = image.NewRGBA(bounds)
 		}
 		tx.AsTextureBase().Img = img
-		txt.Scene.Phong.UpdateTextureName(tx.AsTextureBase().Name())
+		txt.Scene.Phong.UpdateTextureName(tx.AsTextureBase().Name)
 	}
 	rs := &txt.RenderState
 	if rs.Image != img || rs.Image.Bounds() != img.Bounds() {

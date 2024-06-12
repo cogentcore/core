@@ -133,7 +133,7 @@ func (mt *Material) SetTextureName(sc *Scene, texName string) error {
 func (mt *Material) SetTexture(tex Texture) *Material {
 	mt.TexPtr = tex
 	if mt.TexPtr != nil {
-		mt.Texture = TextureName(mt.TexPtr.AsTextureBase().Name())
+		mt.Texture = TextureName(mt.TexPtr.AsTextureBase().Name)
 	} else {
 		mt.Texture = ""
 	}
@@ -149,7 +149,7 @@ func (mt *Material) Validate(sc *Scene) error {
 	mt.Tiling.Defaults()
 	if mt.Texture == "" {
 		mt.TexPtr = nil
-	} else if mt.TexPtr == nil || mt.TexPtr.AsTextureBase().Name() != string(mt.Texture) {
+	} else if mt.TexPtr == nil || mt.TexPtr.AsTextureBase().Name != string(mt.Texture) {
 		err := mt.SetTextureName(sc, string(mt.Texture))
 		if err != nil {
 			return err
