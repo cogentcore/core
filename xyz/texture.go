@@ -140,7 +140,7 @@ type TextureGi2D struct {
 // AddTexture adds given texture to texture collection
 // see NewTextureFile to add a texture that loads from file
 func (sc *Scene) AddTexture(tx Texture) {
-	sc.Textures.Add(tx.Name(), tx)
+	sc.Textures.Add(tx.AsTextureBase().Nm(), tx)
 }
 
 // TextureByName looks for texture by name -- returns nil if not found

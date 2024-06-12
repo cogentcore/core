@@ -100,7 +100,7 @@ func (mt Material) String() string {
 // IsTransparent returns true if texture says it is, or if color has alpha < 255
 func (mt *Material) IsTransparent() bool {
 	if mt.TexPtr != nil {
-		return mt.TexPtr.IsTransparent()
+		return mt.TexPtr.AsTextureBase().IsTransparent()
 	}
 	return mt.Color.A < 255
 }
@@ -133,7 +133,7 @@ func (mt *Material) SetTextureName(sc *Scene, texName string) error {
 func (mt *Material) SetTexture(tex Texture) *Material {
 	mt.TexPtr = tex
 	if mt.TexPtr != nil {
-		mt.Texture = TextureName(mt.TexPtr.Name())
+		mt.Texture = TextureName(mt.TexPtr.AsTextureBase().Name())
 	} else {
 		mt.Texture = ""
 	}
@@ -149,7 +149,7 @@ func (mt *Material) Validate(sc *Scene) error {
 	mt.Tiling.Defaults()
 	if mt.Texture == "" {
 		mt.TexPtr = nil
-	} else if mt.TexPtr == nil || mt.TexPtr.Name() != string(mt.Texture) {
+	} else if mt.TexPtr == nil || mt.TexPtr.AsTextureBase().Name() != string(mt.Texture) {
 		err := mt.SetTextureName(sc, string(mt.Texture))
 		if err != nil {
 			return err
