@@ -223,7 +223,7 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 			s.Gap.Set(units.Em(0.5)) // matches grid default
 		})
 		w.Maker(func(p *core.Plan) {
-			if tv.Is(SliceViewShowIndex) {
+			if tv.ShowIndexes {
 				core.AddAt(p, "head-index", func(w *core.Text) {
 					w.SetType(core.TextBodyMedium)
 					w.Styler(func(s *styles.Style) {
@@ -271,7 +271,7 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	nWidgPerRow = 1 + tv.numVisibleFields
 	idxOff = 1
-	if !tv.Is(SliceViewShowIndex) {
+	if !tv.ShowIndexes {
 		nWidgPerRow -= 1
 		idxOff = 0
 	}
@@ -285,7 +285,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 	val := tv.SliceElementValue(si)
 	// stru := val.Interface()
 
-	if tv.Is(SliceViewShowIndex) {
+	if tv.ShowIndexes {
 		tv.MakeGridIndex(p, i, si, itxt, invis)
 	}
 
@@ -497,7 +497,7 @@ func (tv *TableView) RowFirstVisWidget(row int) (*core.WidgetBase, bool) {
 // returns that element or nil if not successful -- note: grid must have
 // already rendered for focus to be grabbed!
 func (tv *TableView) RowGrabFocus(row int) *core.WidgetBase {
-	if !tv.IsRowInBounds(row) || tv.Is(SliceViewInFocusGrab) { // range check
+	if !tv.IsRowInBounds(row) || tv.InFocusGrab { // range check
 		return nil
 	}
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
@@ -510,8 +510,8 @@ func (tv *TableView) RowGrabFocus(row int) *core.WidgetBase {
 			return w
 		}
 	}
-	tv.SetFlag(true, SliceViewInFocusGrab)
-	defer func() { tv.SetFlag(false, SliceViewInFocusGrab) }()
+	tv.InFocusGrab = true
+	defer func() { tv.InFocusGrab = false }()
 	for fli := 0; fli < tv.numVisibleFields; fli++ {
 		w := sg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.CanFocus() {
@@ -586,7 +586,7 @@ func (tv *TableView) EditIndex(idx int) {
 }
 
 func (tv *TableView) ContextMenu(m *core.Scene) {
-	if !tv.Is(SliceViewIsArray) {
+	if !tv.isArray {
 		core.NewButton(m).SetText("Edit").SetIcon(icons.Edit).
 			OnClick(func(e events.Event) {
 				tv.EditIndex(tv.SelectedIndex)
