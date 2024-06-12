@@ -228,7 +228,7 @@ func (nb *NodeBase) UpdateBBox2D(size math32.Vector2) {
 		bbvis := nb.BBox.Intersect(scbounds)
 		nb.SceneBBox = bbvis
 	} else {
-		// fmt.Printf("not vis: %v  wbb: %v\n", nb.Name(), nb.WorldBBox.BBox)
+		// fmt.Printf("not vis: %v  wbb: %v\n", nb.Name, nb.WorldBBox.BBox)
 		nb.SceneBBox = image.Rectangle{}
 	}
 }

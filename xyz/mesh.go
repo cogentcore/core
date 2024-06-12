@@ -50,8 +50,9 @@ type Mesh interface {
 // MeshBase provides the core implementation of the [Mesh] interface.
 type MeshBase struct { //types:add -setters
 
-	// name of mesh -- meshes are linked to Solids by name so this matters
-	Nm string `set:"-"`
+	// Name is the name of the mesh. [Mesh]es are linked to [Solid]s
+	// by name so this matters.
+	Name string
 
 	// number of vertex points, as math32.Vector3 -- always includes math32.Vector3 normals and math32.Vector2 texture coordinates -- only valid after Sizes() has been called
 	NVtx int `set:"-"`
@@ -75,8 +76,6 @@ type MeshBase struct { //types:add -setters
 	BBoxMu sync.RWMutex `view:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
-func (ms *MeshBase) Name() string                             { return ms.Nm }
-func (ms *MeshBase) SetName(nm string)                        { ms.Nm = nm }
 func (ms *MeshBase) AsMeshBase() *MeshBase                    { return ms }
 func (ms *MeshBase) HasColor() bool                           { return ms.Color }
 func (ms *MeshBase) Sizes() (nVtx, nIndex int, hasColor bool) { return ms.NVtx, ms.NIndex, ms.Color }
@@ -93,7 +92,7 @@ func (ms *MeshBase) Update(sc *Scene, vtxAry, normAry, texAry, clrAry math32.Arr
 }
 
 func (ms *MeshBase) SetMod(sc *Scene) {
-	sc.Phong.ModMeshByName(ms.Nm)
+	sc.Phong.ModMeshByName(ms.Name)
 }
 
 // todo!!
@@ -108,20 +107,20 @@ func (ms *MeshBase) ComputeNorms(pos, norm math32.ArrayF32) {
 // same name is deleted.
 // see NewX for convenience methods to add specific shapes
 func (sc *Scene) AddMesh(ms Mesh) {
-	sc.Meshes.Add(ms.AsMeshBase().Name(), ms)
+	sc.Meshes.Add(ms.AsMeshBase().Name, ms)
 	sc.SetFlag(true, ScNeedsConfig)
 }
 
 // AddMeshUniqe adds given mesh to mesh collection, ensuring that it has
 // a unique name if one already exists.
 func (sc *Scene) AddMeshUnique(ms Mesh) {
-	nm := ms.AsMeshBase().Name()
+	nm := ms.AsMeshBase().Name
 	_, err := sc.MeshByNameTry(nm)
 	if err == nil {
 		nm += fmt.Sprintf("_%d", sc.Meshes.Len())
 		ms.AsMeshBase().SetName(nm)
 	}
-	sc.Meshes.Add(ms.AsMeshBase().Name(), ms)
+	sc.Meshes.Add(ms.AsMeshBase().Name, ms)
 	sc.SetFlag(true, ScNeedsConfig)
 }
 

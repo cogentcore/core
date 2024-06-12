@@ -230,7 +230,7 @@ func (dec *Decoder) SetObject(sc *xyz.Scene, objgp *xyz.Group, ob *Object) {
 		if face.Material != matName || sld == nil {
 			sldnm := fmt.Sprintf("%s_%d", ob.Name, sldidx)
 			ms = &xyz.GenMesh{}
-			ms.Nm = sldnm
+			ms.Name = sldnm
 			sc.AddMeshUnique(ms)
 			sld = xyz.NewSolid(objgp).SetMesh(ms)
 			sld.SetName(sldnm)

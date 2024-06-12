@@ -54,7 +54,7 @@ const (
 // NewLines adds Lines mesh to given scene, with given start, end, and width
 func NewLines(sc *Scene, name string, points []math32.Vector3, width math32.Vector2, closed bool) *Lines {
 	ln := &Lines{}
-	ln.Nm = name
+	ln.Name = name
 	ln.Points = points
 	ln.Width = width
 	ln.Closed = closed

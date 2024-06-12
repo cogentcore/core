@@ -431,7 +431,7 @@ func (sc *Scene) RenderImpl() {
 		}
 		// fmt.Printf("\nRender class: %v\n", rc)
 		// for i := range objs {
-		// 	fmt.Printf("obj: %s  max z: %g   min z: %g\n", objs[i].Name(), objs[i].AsNode().NDCBBox.Max.Z, objs[i].AsNode().NDCBBox.Min.Z)
+		// 	fmt.Printf("obj: %s  max z: %g   min z: %g\n", objs[i].Name, objs[i].AsNode().NDCBBox.Max.Z, objs[i].AsNode().NDCBBox.Min.Z)
 		// }
 
 		lastrc := RClassOpaqueVertex

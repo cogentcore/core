@@ -56,7 +56,7 @@ type Plane struct { //types:add -setters
 // Offset is 0.
 func NewPlane(sc *Scene, name string, width, height float32) *Plane {
 	pl := &Plane{}
-	pl.Nm = name
+	pl.Name = name
 	pl.NormAxis = math32.Y
 	pl.NormNeg = false
 	pl.Size.Set(width, height)
@@ -99,7 +99,7 @@ type Box struct { //types:add -setters
 // NewBox adds Box mesh to given scene, with given name and size
 func NewBox(sc *Scene, name string, width, height, depth float32) *Box {
 	bx := &Box{}
-	bx.Nm = name
+	bx.Name = name
 	bx.Size.Set(width, height, depth)
 	bx.Segs.Set(1, 1, 1)
 	sc.AddMesh(bx)
@@ -155,7 +155,7 @@ type Sphere struct { //types:add -setters
 // number of segments (resolution).
 func NewSphere(sc *Scene, name string, radius float32, segs int) *Sphere {
 	sp := &Sphere{}
-	sp.Nm = name
+	sp.Name = name
 	sp.Radius = radius
 	sp.WidthSegs = segs
 	sp.HeightSegs = segs
@@ -250,7 +250,7 @@ func NewCylinder(sc *Scene, name string, height, radius float32, radialSegs, hei
 // Height is along the Y axis.
 func NewCylinderSector(sc *Scene, name string, height, topRad, botRad float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool) *Cylinder {
 	cy := &Cylinder{}
-	cy.Nm = name
+	cy.Name = name
 	cy.Height = height
 	cy.TopRad = topRad
 	cy.BotRad = botRad
@@ -330,7 +330,7 @@ type Capsule struct { //types:add -setters
 // Height is along the Y axis.
 func NewCapsule(sc *Scene, name string, height, radius float32, segs, heightSegs int) *Capsule {
 	cp := &Capsule{}
-	cp.Nm = name
+	cp.Name = name
 	cp.Height = height
 	cp.TopRad = radius
 	cp.BotRad = radius
@@ -429,7 +429,7 @@ type Torus struct { //types:add -setters
 // solid tube radius, and number of segments (resolution).
 func NewTorus(sc *Scene, name string, radius, tubeRadius float32, segs int) *Torus {
 	sp := &Torus{}
-	sp.Nm = name
+	sp.Name = name
 	sp.Radius = radius
 	sp.TubeRadius = tubeRadius
 	sp.RadialSegs = segs

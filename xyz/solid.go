@@ -66,7 +66,7 @@ func (sld *Solid) SetMeshName(meshName string) error {
 func (sld *Solid) SetMesh(ms Mesh) *Solid {
 	sld.MeshPtr = ms
 	if sld.MeshPtr != nil {
-		sld.Mesh = MeshName(sld.MeshPtr.AsMeshBase().Name())
+		sld.Mesh = MeshName(sld.MeshPtr.AsMeshBase().Name)
 	} else {
 		sld.Mesh = ""
 	}
@@ -172,7 +172,7 @@ func (sld *Solid) Validate() error {
 		log.Println(err)
 		return err
 	}
-	if sld.MeshPtr == nil || sld.MeshPtr.AsMeshBase().Name() != string(sld.Mesh) {
+	if sld.MeshPtr == nil || sld.MeshPtr.AsMeshBase().Name != string(sld.Mesh) {
 		err := sld.SetMeshName(string(sld.Mesh))
 		if err != nil {
 			return err
