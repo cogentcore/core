@@ -54,7 +54,7 @@ type Material struct { //types:add -setters
 	Bright float32
 
 	// prop: texture = texture to provide color for the surface
-	Texture TexName `set:"-"`
+	Texture TextureName `set:"-"`
 
 	// texture tiling parameters -- repeat and offset
 	Tiling Tiling `view:"inline"`
@@ -124,7 +124,7 @@ func (mt *Material) SetTextureName(sc *Scene, texName string) error {
 		log.Println(err)
 		return err
 	}
-	mt.Texture = TexName(texName)
+	mt.Texture = TextureName(texName)
 	mt.TexPtr = tx
 	return nil
 }
@@ -133,7 +133,7 @@ func (mt *Material) SetTextureName(sc *Scene, texName string) error {
 func (mt *Material) SetTexture(tex Texture) *Material {
 	mt.TexPtr = tex
 	if mt.TexPtr != nil {
-		mt.Texture = TexName(mt.TexPtr.Name())
+		mt.Texture = TextureName(mt.TexPtr.Name())
 	} else {
 		mt.Texture = ""
 	}

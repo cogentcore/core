@@ -17,8 +17,8 @@ import (
 	"cogentcore.org/core/vgpu/vphong"
 )
 
-// TexName provides a GUI interface for choosing textures
-type TexName string
+// TextureName provides a GUI interface for choosing textures.
+type TextureName string
 
 // Texture is the interface for all textures
 type Texture interface {
