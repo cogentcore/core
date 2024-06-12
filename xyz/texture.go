@@ -27,29 +27,16 @@ type Texture interface {
 	// which contains the core data and functionality.
 	AsTextureBase() *TextureBase
 
-	// Name returns name of the texture
-	Name() string
-
-	// IsTransparent returns true if there is any transparency present in the texture
-	// This is not auto-detected but rather must be set manually.
-	// It affects the rendering order -- transparent items are rendered last.
-	IsTransparent() bool
-
-	// SetTransparent sets the transparency flag for this texture.
-	SetTransparent(trans bool)
-
-	// Image returns image for the texture, in image.RGBA format used internally
+	// Image returns the image for the texture in the [image.RGBA] format used internally.
 	Image() *image.RGBA
-
-	// SetImage sets image for the texture
-	SetImage(img image.Image)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
 // TextureBase
 
-// TextureBase is the base texture implementation
-// it uses an image.RGBA as underlying image storage to facilitate interface with GPU
+// TextureBase is the base texture implementation.
+// It uses an [image.RGBA] as the underlying image storage
+// to facilitate interface with GPU.
 type TextureBase struct {
 
 	// name of the texture -- textures are connected to material by name
@@ -80,14 +67,6 @@ func (tx *TextureBase) SetTransparent(trans bool) {
 
 func (tx *TextureBase) Image() *image.RGBA {
 	return tx.Img
-}
-
-func (tx *TextureBase) SetImage(img image.Image) {
-	if img == nil {
-		tx.Img = nil
-	} else {
-		tx.Img = vgpu.ImageToRGBA(img)
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
