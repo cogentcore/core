@@ -164,11 +164,11 @@ func (g *NodeBase) ParTransform(self bool) math32.Matrix2 {
 	}
 	np := len(pars)
 	if np > 0 {
-		xf = pars[np-1].PaintStyle().Transform
+		xf = pars[np-1].AsNodeBase().PaintStyle().Transform
 	}
 	for i := np - 2; i >= 0; i-- {
 		n := pars[i]
-		xf.SetMul(n.PaintStyle().Transform)
+		xf.SetMul(n.AsNodeBase().PaintStyle().Transform)
 	}
 	if self {
 		xf.SetMul(g.Paint.Transform)
@@ -330,7 +330,7 @@ func (g *NodeBase) Style(sv *SVG) {
 	if g.Parent != nil { // && g.Par != sv.Root.This
 		pn := g.Parent.(Node)
 		parCSSAgg = pn.AsNodeBase().CSSAgg
-		pp := pn.PaintStyle()
+		pp := pn.AsNodeBase().PaintStyle()
 		pc.CopyStyleFrom(pp)
 		pc.SetStyleProperties(pp, g.Properties, ctxt)
 	} else {
@@ -374,7 +374,7 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css map[string]any) bool {
 	pc := &g.Paint
 	ctxt := colors.Context(sv)
 	if g.Parent != sv.Root.This {
-		pp := g.Parent.(Node).PaintStyle()
+		pp := g.Parent.(Node).AsNodeBase().PaintStyle()
 		pc.SetStyleProperties(pp, pmap, ctxt)
 	} else {
 		pc.SetStyleProperties(nil, pmap, ctxt)
