@@ -10,7 +10,6 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
-	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
@@ -74,15 +73,19 @@ type Scene struct { //core:no-new
 	// current stage in which this Scene is set
 	Stage *Stage `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// renderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode
-	renderBBoxHue float32 `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	// RenderBBoxes indicates to render colored bounding boxes for all of the widgets
+	// in the scene. This is enabled by the [Inspector] in select element mode.
+	RenderBBoxes bool
 
-	// the currently selected/hovered widget through the inspect editor selection mode
-	// that should be highlighted with a background color
+	// renderBBoxHue is current hue for rendering bounding box in [Scene.RenderBBoxes] mode.
+	renderBBoxHue float32
+
+	// SelectedWidget is the currently selected/hovered widget through the [Inspector] selection mode
+	// that should be highlighted with a background color.
 	SelectedWidget Widget
 
-	// the channel on which the selected widget through the inspect editor
-	// selection mode is transmitted to the inspect editor after the user is done selecting
+	// SelectedWidgetChan is the channel on which the selected widget through the inspect editor
+	// selection mode is transmitted to the inspect editor after the user is done selecting.
 	SelectedWidgetChan chan Widget `json:"-" xml:"-"`
 
 	// lastRender captures key params from last render.
@@ -96,17 +99,35 @@ type Scene struct { //core:no-new
 	// reRender items are re-rendered after the current pass
 	reRender []Widget
 
+	// directRenders are widgets that render directly to the RenderWin
+	// instead of rendering into the Scene Pixels image.
+	directRenders []Widget
+
+	// State bool values:
+
 	// hasShown is whether this scene has already been shown.
 	// This is used to ensure that [events.Show] is only sent once.
 	hasShown bool
 
-	// directRenders are widgets that render directly to the RenderWin
-	// instead of rendering into the Scene Pixels image.
-	directRenders []Widget
-}
+	// updating means the Scene is in the process of updating.
+	// It is set for any kind of tree-level update.
+	// Skip any further update passes until it goes off.
+	updating bool
 
-func (sc *Scene) FlagType() enums.BitFlagSetter {
-	return (*ScFlags)(&sc.Flags)
+	// needsLayout is whether the Scene needs a new layout pass.
+	needsLayout bool
+
+	// imageUpdated indicates that the Scene's image has been updated
+	// e.g., due to a render or a resize. This is reset by the
+	// global [RenderWindow] rendering pass, so it knows whether it needs to
+	// copy the image up to the GPU or not.
+	imageUpdated bool
+
+	// prefSizing means that this scene is currently doing a
+	// PrefSize computation to compute the size of the scene
+	// (for sizing window for example); affects layout size computation
+	// only for Over
+	prefSizing bool
 }
 
 // NewBodyScene creates a new Scene for use with an associated Body that
@@ -361,47 +382,3 @@ func (sc *Scene) DeleteDirectRender(w Widget) {
 		sc.directRenders = slices.Delete(sc.directRenders, idx, idx+1)
 	}
 }
-
-// ScFlags has critical state information signaling when rendering,
-// styling etc need to be done
-type ScFlags WidgetFlags //enums:bitflag
-
-const (
-	// ScUpdating means scene is in the process of updating:
-	// set for any kind of tree-level update.
-	// skip any further update passes until it goes off.
-	ScUpdating ScFlags = ScFlags(WidgetFlagsN) + iota
-
-	// ScNeedsRender means nodes have flagged that they need a Render
-	// update.
-	ScNeedsRender
-
-	// ScNeedsLayout means that this scene needs DoLayout stack:
-	// GetSize, DoLayout, then Render.  This is true after any Config.
-	ScNeedsLayout
-
-	// ScNeedsRebuild means that this scene needs full Rebuild:
-	// Config, Layout, Render with DoRebuild flag set
-	// (e.g., after global style changes, zooming, etc)
-	ScNeedsRebuild
-
-	// ScImageUpdated indicates that the Scene's image has been updated
-	// e.g., due to a render or a resize.  This is reset by the
-	// global RenderWindow rendering pass, so it knows whether it needs to
-	// copy the image up to the GPU or not.
-	ScImageUpdated
-
-	// ScPrefSizing means that this scene is currently doing a
-	// PrefSize computation to compute the size of the scene
-	// (for sizing window for example) -- affects layout size computation
-	// only for Over
-	ScPrefSizing
-
-	// ScPreserve keeps this scene around instead of deleting
-	// when it is no longer needed.
-	// Set if added to SceneLibrary for example.
-	ScPreserve
-
-	// ScRenderBBoxes renders the bounding boxes for all objects in scene
-	ScRenderBBoxes
-)
