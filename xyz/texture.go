@@ -89,7 +89,7 @@ type TextureFile struct {
 	TextureBase
 
 	// filesystem for embedded etc
-	FSys fs.FS
+	FS fs.FS
 
 	// filename for the texture
 	File string
@@ -104,7 +104,7 @@ func NewTextureFile(sc *Scene, name string, filename string) *TextureFile {
 		slog.Error("xyz.NewTextureFile: Image not found error", "file:", filename, "error", err)
 		return nil
 	}
-	tx.FSys = dfs
+	tx.FS = dfs
 	tx.File = fnm
 	sc.AddTexture(tx)
 	return tx
@@ -114,7 +114,7 @@ func NewTextureFile(sc *Scene, name string, filename string) *TextureFile {
 func NewTextureFileFS(fsys fs.FS, sc *Scene, name string, filename string) *TextureFile {
 	tx := &TextureFile{}
 	tx.Nm = name
-	tx.FSys = fsys
+	tx.FS = fsys
 	tx.File = filename
 	sc.AddTexture(tx)
 	return tx
@@ -129,7 +129,7 @@ func (tx *TextureFile) Image() *image.RGBA {
 		log.Println(err)
 		return nil
 	}
-	img, _, err := imagex.OpenFS(tx.FSys, tx.File)
+	img, _, err := imagex.OpenFS(tx.FS, tx.File)
 	if err != nil {
 		slog.Error("xyz.TextureFile: Image load error", "file:", tx.File, "error", err)
 		return nil
