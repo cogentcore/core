@@ -442,14 +442,6 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 	sv.SliceUnderlying = reflectx.Underlying(reflect.ValueOf(sv.Slice))
 	isArray := reflectx.NonPointerType(reflect.TypeOf(sl)).Kind() == reflect.Array
 	sv.SetFlag(isArray, SliceViewIsArray)
-	// make sure elements aren't nil to prevent later panics
-	// for i := 0; i < sv.SliceUnderlying.Len(); i++ {
-	// 	val := sv.SliceUnderlying.Index(i)
-	// 	k := val.Kind()
-	// 	if (k == reflect.Chan || k == reflect.Func || k == reflect.Interface || k == reflect.Map || k == reflect.Pointer || k == reflect.Slice) && val.IsNil() {
-	// 		val.Set(reflect.New(reflectx.NonPointerType(val.Type())))
-	// 	}
-	// }
 	sv.ElementValue = reflectx.SliceElementValue(sl)
 	return sv
 }
@@ -2109,12 +2101,7 @@ func (sg *SliceViewGrid) IndexFromPixel(pt image.Point) (row, col int, isValid b
 	return
 }
 
-func (sg *SliceViewGrid) RenderWidget() {
-	if sg.PushBounds() {
-		sg.Frame.Render()
-		sg.RenderStripes()
-		sg.RenderChildren()
-		sg.RenderScrolls()
-		sg.PopBounds()
-	}
+func (sg *SliceViewGrid) Render() {
+	sg.WidgetBase.Render()
+	sg.RenderStripes()
 }
