@@ -184,7 +184,6 @@ func (p *Plan) Update(w Widget) {
 // InitParts configures the given [Frame] to be ready
 // to serve as [WidgetBase.Parts] in a [Add] context.
 func InitParts(w *Frame) {
-	w.SetFlag(true, tree.Field)
 	w.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		s.RenderBox = false

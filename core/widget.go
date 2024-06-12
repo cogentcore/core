@@ -405,7 +405,6 @@ func (wb *WidgetBase) NewParts() *Frame {
 	wb.Parts = NewFrame()
 	wb.Parts.SetName("parts")
 	tree.SetParent(wb.Parts, wb) // don't add to children list
-	wb.Parts.SetFlag(true, tree.Field)
 	wb.Parts.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		s.RenderBox = false
@@ -551,9 +550,6 @@ func WidgetNextSibling(w Widget) Widget {
 	if myidx >= 0 && myidx < wb.Parent.AsTree().NumChildren()-1 {
 		return parent.AsTree().Child(myidx + 1).(Widget)
 	}
-	if parent.AsTree().Is(tree.Field) { // we are parts, go up
-		return WidgetNextSibling(parent.AsTree().Parent.(Widget))
-	}
 	return WidgetNextSibling(parent)
 }
 
@@ -570,10 +566,6 @@ func WidgetPrev(w Widget) Widget {
 	if myidx > 0 {
 		nn := parent.AsTree().Child(myidx - 1).(Widget)
 		return WidgetLastChildParts(nn) // go to parts
-	}
-	if parent.AsTree().Is(tree.Field) { // we are parts, go into children
-		parent = parent.AsTree().Parent.(Widget)
-		return WidgetLastChild(parent) // go to children
 	}
 	// we were children, done
 	return parent
