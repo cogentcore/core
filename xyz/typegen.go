@@ -33,11 +33,28 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.SolidPoint", ID
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Decoder", IDName: "decoder", Doc: "Decoder parses 3D object / scene file(s) and imports into a Group or Scene.\nThis interface is implemented by the different format-specific decoders."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Light", IDName: "light", Doc: "Light represents a light that illuminates a scene\nthese are stored on the Scene object and not within the graph"})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Light", IDName: "light", Doc: "Light represents a light that illuminates a scene.\nThese are stored on the [Scene] object and not within the tree."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.LightBase", IDName: "light-base", Doc: "LightBase provides the base implementation for Light interface", Fields: []types.Field{{Name: "Nm", Doc: "name of light -- lights accessed by name so it matters"}, {Name: "On", Doc: "whether light is on or off"}, {Name: "Lumns", Doc: "brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness"}, {Name: "Clr", Doc: "color of light a full intensity"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.LightBase", IDName: "light-base", Doc: "LightBase provides the core implementation of the [Light] interface.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"--setters"}}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the light, which matters since lights are accessed by name."}, {Name: "On", Doc: "On is whether the light is turned on."}, {Name: "Lumens", Doc: "Lumens is the brightness/intensity/strength of the light in normalized 0-1 units.\nIt is just multiplied by the color, and is convenient for easily modulating overall brightness."}, {Name: "Color", Doc: "Color is the color of the light at full intensity."}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.AmbientLight", IDName: "ambient-light", Doc: "AmbientLight provides diffuse uniform lighting -- typically only one of these", Embeds: []types.Field{{Name: "LightBase"}}})
+// SetName sets the [LightBase.Name]:
+// Name is the name of the light, which matters since lights are accessed by name.
+func (t *LightBase) SetName(v string) *LightBase { t.Name = v; return t }
+
+// SetOn sets the [LightBase.On]:
+// On is whether the light is turned on.
+func (t *LightBase) SetOn(v bool) *LightBase { t.On = v; return t }
+
+// SetLumens sets the [LightBase.Lumens]:
+// Lumens is the brightness/intensity/strength of the light in normalized 0-1 units.
+// It is just multiplied by the color, and is convenient for easily modulating overall brightness.
+func (t *LightBase) SetLumens(v float32) *LightBase { t.Lumens = v; return t }
+
+// SetColor sets the [LightBase.Color]:
+// Color is the color of the light at full intensity.
+func (t *LightBase) SetColor(v color.RGBA) *LightBase { t.Color = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.AmbientLight", IDName: "ambient-light", Doc: "AmbientLight provides diffuse uniform lighting; typically only one of these in a [Scene].", Embeds: []types.Field{{Name: "LightBase"}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.DirLight", IDName: "dir-light", Doc: "DirLight is directional light, which is assumed to project light toward\nthe origin based on its position, with no attenuation, like the Sun.\nFor rendering, the position is negated and normalized to get the direction\nvector (i.e., absolute distance doesn't matter)", Embeds: []types.Field{{Name: "LightBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of direct light -- assumed to point at the origin so this determines direction"}}})
 
@@ -117,7 +134,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.GenMesh", IDNam
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Node", IDName: "node", Doc: "Node is the common interface for all xyz 3D tree nodes.\n[Solid] and [Group] are the two main types of nodes,\nwhich both extend [NodeBase] for the core functionality."})
 
 // NodeBaseType is the [types.Type] for [NodeBase]
-var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.NodeBase", IDName: "node-base", Doc: "NodeBase is the basic 3D tree node, which has the full transform information\nrelative to parent, and computed bounding boxes, etc.\nIt implements the [Node] interface and contains the core functionality\ncommon to all 3D nodes.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pose", Doc: "complete specification of position and orientation"}, {Name: "Scene", Doc: "Scene is the cached Scene"}, {Name: "PoseMu", Doc: "mutex on pose access -- needed for parallel updating"}, {Name: "MeshBBox", Doc: "mesh-based local bounding box (aggregated for groups)"}, {Name: "WorldBBox", Doc: "world coordinates bounding box"}, {Name: "NDCBBox", Doc: "normalized display coordinates bounding box, used for frustrum clipping"}, {Name: "BBox", Doc: "raw original bounding box for the widget within its parent Scene.\nThis is prior to intersecting with Frame bounds."}, {Name: "SceneBBox", Doc: "2D bounding box for region occupied within Scene Frame that we render onto.\nThis is BBox intersected with Frame bounds."}}, Instance: &NodeBase{}})
+var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.NodeBase", IDName: "node-base", Doc: "NodeBase is the basic 3D tree node, which has the full transform information\nrelative to parent, and computed bounding boxes, etc.\nIt implements the [Node] interface and contains the core functionality\ncommon to all 3D nodes.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pose", Doc: "Pose is the complete specification of position and orientation."}, {Name: "Scene", Doc: "Scene is the cached [Scene]."}, {Name: "PoseMu", Doc: "mutex on pose access -- needed for parallel updating"}, {Name: "MeshBBox", Doc: "mesh-based local bounding box (aggregated for groups)"}, {Name: "WorldBBox", Doc: "world coordinates bounding box"}, {Name: "NDCBBox", Doc: "normalized display coordinates bounding box, used for frustrum clipping"}, {Name: "BBox", Doc: "raw original bounding box for the widget within its parent Scene.\nThis is prior to intersecting with Frame bounds."}, {Name: "SceneBBox", Doc: "2D bounding box for region occupied within Scene Frame that we render onto.\nThis is BBox intersected with Frame bounds."}}, Instance: &NodeBase{}})
 
 // NewNodeBase returns a new [NodeBase] with the given optional parent:
 // NodeBase is the basic 3D tree node, which has the full transform information
@@ -344,7 +361,7 @@ func (t *Torus) SetAngStart(v float32) *Torus { t.AngStart = v; return t }
 func (t *Torus) SetAngLen(v float32) *Torus { t.AngLen = v; return t }
 
 // SolidType is the [types.Type] for [Solid]
-var SolidType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Solid", IDName: "solid", Doc: "Solid represents an individual 3D solid element.\nIt has its own unique spatial transforms and material properties,\nand points to a mesh structure defining the shape of the solid.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "MeshName", Doc: "MeshName is the name of the mesh shape information used for rendering\nthis solid; all meshes are collected on the Scene."}, {Name: "Mat", Doc: "material properties of the surface (color, shininess, texture, etc)"}, {Name: "Mesh", Doc: "Mesh is the cached [Mesh] object set from [Solid.MeshName]."}}, Instance: &Solid{}})
+var SolidType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Solid", IDName: "solid", Doc: "Solid represents an individual 3D solid element.\nIt has its own unique spatial transforms and material properties,\nand points to a mesh structure defining the shape of the solid.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "MeshName", Doc: "MeshName is the name of the mesh shape information used for rendering\nthis solid; all meshes are collected on the Scene."}, {Name: "Material", Doc: "Material contains the material properties of the surface (color, shininess, texture, etc)."}, {Name: "Mesh", Doc: "Mesh is the cached [Mesh] object set from [Solid.MeshName]."}}, Instance: &Solid{}})
 
 // NewSolid returns a new [Solid] with the given optional parent:
 // Solid represents an individual 3D solid element.
@@ -358,9 +375,9 @@ func (t *Solid) NodeType() *types.Type { return SolidType }
 // New returns a new [*Solid] value
 func (t *Solid) New() tree.Node { return &Solid{} }
 
-// SetMat sets the [Solid.Mat]:
-// material properties of the surface (color, shininess, texture, etc)
-func (t *Solid) SetMat(v Material) *Solid { t.Material = v; return t }
+// SetMaterial sets the [Solid.Material]:
+// Material contains the material properties of the surface (color, shininess, texture, etc).
+func (t *Solid) SetMaterial(v Material) *Solid { t.Material = v; return t }
 
 // Text2DType is the [types.Type] for [Text2D]
 var Text2DType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Text2D", IDName: "text2-d", Doc: "Text2D presents 2D rendered text on a vertically oriented plane, using a texture.\nCall SetText() which calls RenderText to update fortext changes (re-renders texture).\nThe native scale is such that a unit height value is the height of the default font\nset by the font-size property, and the X axis is scaled proportionally based on the\nrendered text size to maintain the aspect ratio.  Further scaling can be applied on\ntop of that by setting the Pose.Scale values as usual.\nStandard styling properties can be set on the node to set font size, family,\nand text alignment relative to the Pose.Pos position (e.g., Left, Top puts the\nupper-left corner of text at Pos).\nNote that higher quality is achieved by using a larger font size (36 default).\nThe margin property creates blank margin of the background color around the text\n(2 px default) and the background-color defaults to transparent\nbut can be set to any color.", Embeds: []types.Field{{Name: "Solid"}}, Fields: []types.Field{{Name: "Text", Doc: "the text string to display"}, {Name: "Styles", Doc: "styling settings for the text"}, {Name: "TextPos", Doc: "position offset of start of text rendering relative to upper-left corner"}, {Name: "TextRender", Doc: "render data for text label"}, {Name: "RenderState", Doc: "render state for rendering text"}}, Instance: &Text2D{}})
