@@ -110,7 +110,7 @@ func (sw *Scene) SelectBox() {
 	}
 	xy := sw.XYZ
 
-	nb := sw.CurrentSelected.AsNode()
+	nb := sw.CurrentSelected.AsNodeBase()
 	xy.DeleteChildByName(SelectedBoxName) // get rid of existing
 	clr := sw.SelectionParams.Color
 	xyz.NewLineBox(xy, xy, SelectedBoxName, SelectedBoxName, nb.WorldBBox.BBox, sw.SelectionParams.Width, clr, xyz.Inactive)
@@ -129,7 +129,7 @@ func (sw *Scene) ManipBox() {
 
 	nm := ManipBoxName
 
-	nb := sw.CurrentSelected.AsNode()
+	nb := sw.CurrentSelected.AsNodeBase()
 	xy.DeleteChildByName(nm) // get rid of existing
 	clr := sw.SelectionParams.Color
 
@@ -226,7 +226,7 @@ func (sw *Scene) handleSlideEvents() {
 			sw.NeedsRender()
 			return
 		}
-		sn := sw.CurrentSelected.AsNode()
+		sn := sw.CurrentSelected.AsNodeBase()
 		mpt := sw.CurrentManipPoint
 		mb := mpt.Parent.(*xyz.Group)
 		del := e.PrevDelta()

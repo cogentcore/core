@@ -15,55 +15,34 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Node is the common interface for all xyz scenegraph nodes
+// Node is the common interface for all xyz 3D tree nodes.
+// [Solid] and [Group] are the two main types of nodes,
+// which both extend [NodeBase] for the core functionality.
 type Node interface {
 	tree.Node
 
-	// IsSolid returns true if this is an Solid node (else a Group)
+	// AsNodeBase returns the [NodeBase] for our node, which gives
+	// access to all the base-level data structures and methods
+	// without requiring interface methods.
+	AsNodeBase() *NodeBase
+
+	// IsSolid returns true if this is an [Solid] node (otherwise a [Group]).
 	IsSolid() bool
 
-	// AsNode3D returns a generic NodeBase for our node -- gives generic
-	// access to all the base-level data structures without requiring
-	// interface methods.
-	AsNode() *NodeBase
-
-	// AsSolid returns a node as Solid (nil if not)
+	// AsSolid returns the node as a [Solid] (nil if not).
 	AsSolid() *Solid
 
-	// Validate checks that scene element is valid
+	// Validate checks that scene element is valid.
 	Validate() error
 
 	// UpdateWorldMatrix updates this node's local and world matrix based on parent's world matrix
-	// This sets the WorldMatrixUpdated flag but does not check that flag -- calling
+	// This sets the WorldMatrixUpdated flag but does not check that flag; calling
 	// routine can optionally do so.
 	UpdateWorldMatrix(parWorld *math32.Matrix4)
 
-	// UpdateMVPMatrix updates this node's MVP matrix based on
-	// given view and projection matrix from camera.
-	// Called during rendering.
-	UpdateMVPMatrix(viewMat, projectionMat *math32.Matrix4)
-
 	// UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
-	// groups aggregate over elements.  called from WalkPost traversal
+	// groups aggregate over elements. It is called from WalkPost traversal.
 	UpdateMeshBBox()
-
-	// UpdateBBox2D updates this node's 2D bounding-box information based on scene
-	// size and other scene bbox info from scene
-	UpdateBBox2D(size math32.Vector2)
-
-	// RayPick converts a given 2D point in scene image coordinates
-	// into a ray from the camera position pointing through line of sight of camera
-	// into *local* coordinates of the solid.
-	// This can be used to find point of intersection in local coordinates relative
-	// to a given plane of interest, for example (see Ray methods for intersections).
-	RayPick(pos image.Point) math32.Ray
-
-	// WorldMatrix returns the world matrix for this node, under read-lock protection.
-	WorldMatrix() *math32.Matrix4
-
-	// NormDCBBox returns the normalized display coordinates bounding box
-	// which is used for clipping.  This is read-lock protected.
-	NormDCBBox() math32.Box3
 
 	// IsVisible provides the definitive answer as to whether a given node
 	// is currently visible.  It is only entirely valid after a render pass
@@ -71,46 +50,34 @@ type Node interface {
 	// for their visibility status as well, which is available always.
 	// Non-visible nodes are automatically not rendered and not connected to
 	// window events.  The Invisible flag is one key element of the IsVisible
-	// calculus -- it is set by e.g., TabView for invisible tabs, and is also
+	// calculus; it is set by e.g., TabView for invisible tabs, and is also
 	// set if a widget is entirely out of render range.  But again, use
 	// IsVisible as the main end-user method.
-	// For robustness, it recursively calls the parent -- this is typically
-	// a short path -- propagating the Invisible flag properly can be
+	// For robustness, it recursively calls the parent; this is typically
+	// a short path; propagating the Invisible flag properly can be
 	// very challenging without mistakenly overwriting invisibility at various
 	// levels.
 	IsVisible() bool
 
-	// IsTransparent returns true if solid has transparent color
+	// IsTransparent returns true if solid has transparent color.
 	IsTransparent() bool
 
+	// Config configures the node.
 	Config()
 
-	// UpdateNode does arbitrary node updating during render process
-	UpdateNode()
-
 	// RenderClass returns the class of rendering for this solid.
-	// used for organizing the ordering of rendering
+	// It is used for organizing the ordering of rendering.
 	RenderClass() RenderClasses
 
-	// Render is called by Scene Render on main thread,
-	// everything ready to go..
+	// Render is called by Scene Render on main thread
+	// when everything is ready to go.
 	Render()
-
-	// Convenience methods for external setting of Pose values with appropriate locking
-
-	// SetPosePos sets Pose.Pos position to given value, under write lock protection
-	SetPosePos(pos math32.Vector3)
-
-	// SetPoseScale sets Pose.Scale scale to given value, under write lock protection
-	SetPoseScale(scale math32.Vector3)
-
-	// SetPoseQuat sets Pose.Quat to given value, under write lock protection
-	SetPoseQuat(quat math32.Quat)
 }
 
-// NodeBase is the basic 3D scenegraph node, which has the full transform information
+// NodeBase is the basic 3D tree node, which has the full transform information
 // relative to parent, and computed bounding boxes, etc.
-// There are only two different kinds of Nodes: Group and Solid
+// It implements the [Node] interface and contains the core functionality
+// common to all 3D nodes.
 type NodeBase struct {
 	tree.NodeBase
 
@@ -160,15 +127,15 @@ const (
 func AsNode(n tree.Node) (Node, *NodeBase) {
 	ni, ok := n.(Node)
 	if ok {
-		return ni, ni.AsNode()
+		return ni, ni.AsNodeBase()
 	}
 	return nil, nil
 }
 
-// AsNode returns a generic NodeBase for our node, giving generic
+// AsNodeBase returns a generic NodeBase for our node, giving generic
 // access to all the base-level data structures without requiring
 // interface methods.
-func (nb *NodeBase) AsNode() *NodeBase {
+func (nb *NodeBase) AsNodeBase() *NodeBase {
 	return nb
 }
 
@@ -315,10 +282,7 @@ func (nb *NodeBase) NormDCBBox() math32.Box3 {
 }
 
 func (nb *NodeBase) Config() {
-	// nop by default -- could connect to scene for update signals or something
-}
-
-func (nb *NodeBase) UpdateNode() {
+	// nop by default; could connect to scene for update signals or something
 }
 
 func (nb *NodeBase) Render() {
