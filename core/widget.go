@@ -13,7 +13,6 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
-	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
@@ -257,11 +256,18 @@ type WidgetBase struct {
 	ValueOnChange func() `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// ValueTitle is the title to display for a dialog for this [Value].
-	ValueTitle string `copier:"-" json:"-" xml:"-"`
-}
+	ValueTitle string
 
-func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
-	return (*WidgetFlags)(&wb.Flags)
+	// ValueNewWindow indicates that the dialog of a [Value] should be opened
+	// as a new window, instead of a typical full window in the same current window.
+	// This is set by [InitValueButton] and handled by [OpenValueDialog].
+	// This is triggered by holding down the Shift key while clicking on a
+	// [Value] button. Certain values such as [FileButton] may set this to true
+	// in their [InitValueButton] function.
+	ValueNewWindow bool `copier:"-" json:"-" xml:"-"`
+
+	// needsRender is whether the widget needs to be rendered on the next render iteration.
+	needsRender bool
 }
 
 // Init should be called by every Widget type in its custom
