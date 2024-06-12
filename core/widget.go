@@ -24,11 +24,18 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// Widget is the interface for all Cogent Core widgets.
+// Widget is the interface that all Cogent Core satisfy.
+// The core widget functionality is defined on [WidgetBase],
+// and all higher-level widget types must embed it. This
+// interface only contains the methods that higher-level
+// widget types may need to override. You can call
+// [Widget.AsWidget] to get the [WidgetBase] of a Widget
+// and access the core widget functionality.
 type Widget interface {
 	tree.Node
 
-	// AsWidget returns the [WidgetBase] embedded field.
+	// AsWidget returns the [WidgetBase] of this Widget. Most
+	// core widget functionality is implemented on [WidgetBase].
 	AsWidget() *WidgetBase
 
 	// OnWidgetAdded adds a function to call when a widget is added
@@ -190,8 +197,10 @@ type Widget interface {
 	DirectRenderDraw(drw system.Drawer, idx int, flipY bool)
 }
 
-// WidgetBase is the base type for all [Widget]s. It renders the
-// standard box model, but does not layout or render any children.
+// WidgetBase implements the [Widget] interface and provides the core functionality
+// of a widget. You must use WidgetBase as an embedded struct in all higher-level
+// widget types. It renders the standard box model, but does not layout or render
+// any children; see [Frame] for that.
 type WidgetBase struct {
 	tree.NodeBase
 
