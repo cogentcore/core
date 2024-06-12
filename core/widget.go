@@ -38,10 +38,6 @@ type Widget interface {
 	// core widget functionality is implemented on [WidgetBase].
 	AsWidget() *WidgetBase
 
-	// OnWidgetAdded adds a function to call when a widget is added
-	// as a child to the widget or any of its children.
-	OnWidgetAdded(f func(w Widget)) *WidgetBase
-
 	// See [WidgetBase.Styler].
 	Styler(s func(s *styles.Style)) *WidgetBase
 
