@@ -11,11 +11,11 @@ type Shape interface {
 	// N returns number of vertex, index points in this shape element
 	N() (nVtx, nIndex int)
 
-	// Offs returns starting offset for verticies, indexes in full shape array,
+	// Offs returns starting offset for vertices, indexes in full shape array,
 	// in terms of points, not floats
 	Offs() (vtxOff, idxOff int)
 
-	// SetOffs sets starting offset for verticies, indexes in full shape array,
+	// SetOffs sets starting offset for vertices, indexes in full shape array,
 	// in terms of points, not floats
 	SetOffs(vtxOff, idxOff int)
 
@@ -43,14 +43,14 @@ type ShapeBase struct {
 	Pos math32.Vector3
 }
 
-// Offs returns starting offset for verticies, indexes in full shape array,
+// Offs returns starting offset for vertices, indexes in full shape array,
 // in terms of points, not floats
 func (sb *ShapeBase) Offs() (vtxOff, idxOff int) {
 	vtxOff, idxOff = sb.VtxOff, sb.IndexOff
 	return
 }
 
-// SetOffs sets starting offsets for verticies, indexes in full shape array
+// SetOffs sets starting offsets for vertices, indexes in full shape array
 func (sb *ShapeBase) SetOffs(vtxOff, idxOff int) {
 	sb.VtxOff, sb.IndexOff = vtxOff, idxOff
 }

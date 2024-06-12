@@ -168,7 +168,7 @@ func (sc *Scene) DeleteTextures() {
 }
 
 // must be called after adding or deleting any meshes or altering
-// the number of verticies.
+// the number of vertices.
 func (sc *Scene) ConfigTextures() {
 	ph := &sc.Phong
 	ph.ResetTextures()

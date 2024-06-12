@@ -178,7 +178,7 @@ func (sc *Scene) PlaneMesh2D() Mesh {
 
 // ConfigMeshes configures meshes for rendering
 // must be called after adding or deleting any meshes or altering
-// the number of verticies.
+// the number of vertices.
 func (sc *Scene) ConfigMeshes() {
 	ph := &sc.Phong
 	ph.UpdateMu.Lock()
