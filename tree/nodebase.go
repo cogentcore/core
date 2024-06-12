@@ -8,7 +8,6 @@ import (
 	"log/slog"
 	"maps"
 	"slices"
-	"strconv"
 	"strings"
 
 	"github.com/jinzhu/copier"
@@ -267,31 +266,11 @@ func (n *NodeBase) PathFrom(parent Node) string {
 
 }
 
-// findPathChild finds the child on the path.
-func findPathChild(n Node, child string) int {
-	if len(child) == 0 {
-		return -1
-	}
-	if child[0] == '[' && child[len(child)-1] == ']' {
-		idx, err := strconv.Atoi(child[1 : len(child)-1])
-		if err != nil {
-			return idx
-		}
-		if idx < 0 { // from end
-			idx = len(n.AsTree().Children) + idx
-		}
-		return idx
-	}
-	return IndexByName(n.AsTree().Children, child)
-}
-
 // FindPath returns the node at the given path from this node.
 // FindPath only works correctly when names are unique.
-// Path has [Node.Name]s separated by / and fields by .
-// Node names escape any existing / and . characters to \\ and \,
-// There is also support for [idx] index-based access for any given path
-// element, for cases when indexes are more useful than names.
-// Returns nil if not found.
+// The given path must be consistent with the format produced
+// by [NodeBase.PathFrom]. It returns nil if no node is found
+// at the given path.
 func (n *NodeBase) FindPath(path string) Node {
 	curn := n.This
 	pels := strings.Split(strings.Trim(strings.TrimSpace(path), "\""), "/")
@@ -299,7 +278,7 @@ func (n *NodeBase) FindPath(path string) Node {
 		if len(pe) == 0 {
 			continue
 		}
-		idx := findPathChild(curn, UnescapePathName(pe))
+		idx := IndexByName(curn.AsTree().Children, UnescapePathName(pe))
 		if idx < 0 {
 			return nil
 		}
