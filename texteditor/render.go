@@ -25,7 +25,7 @@ import (
 
 func (ed *Editor) NeedsLayout() {
 	ed.NeedsRender()
-	ed.SetFlag(true, EditorNeedsLayout)
+	ed.needsLayout = true
 }
 
 func (ed *Editor) RenderLayout() {
@@ -39,11 +39,11 @@ func (ed *Editor) RenderLayout() {
 
 func (ed *Editor) RenderWidget() {
 	if ed.PushBounds() {
-		if ed.Is(EditorNeedsLayout) {
+		if ed.needsLayout {
 			ed.RenderLayout()
-			ed.SetFlag(false, EditorNeedsLayout)
+			ed.needsLayout = false
 		}
-		if ed.Is(EditorTargetSet) {
+		if ed.targetSet {
 			ed.ScrollCursorToTarget()
 		}
 		ed.PositionScrolls()
@@ -380,7 +380,7 @@ func (ed *Editor) RenderAllLines() {
 	}
 	pc.PushBounds(bb)
 
-	if ed.HasLineNumbers() {
+	if ed.hasLineNumbers {
 		ed.RenderLineNumbersBoxAll()
 		for ln := stln; ln <= edln; ln++ {
 			ed.RenderLineNumber(ln, false) // don't re-render std fill boxes
@@ -391,7 +391,7 @@ func (ed *Editor) RenderAllLines() {
 	ed.RenderHighlights(stln, edln)
 	ed.RenderScopelights(stln, edln)
 	ed.RenderSelect()
-	if ed.HasLineNumbers() {
+	if ed.hasLineNumbers {
 		tbb := bb
 		tbb.Min.X += int(ed.LineNumberOffset)
 		pc.PushBounds(tbb)
@@ -406,7 +406,7 @@ func (ed *Editor) RenderAllLines() {
 		}
 		ed.Renders[ln].Render(pc, lp) // not top pos; already has baseline offset
 	}
-	if ed.HasLineNumbers() {
+	if ed.hasLineNumbers {
 		pc.PopBounds()
 	}
 	pc.PopBounds()
@@ -414,7 +414,7 @@ func (ed *Editor) RenderAllLines() {
 
 // RenderLineNumbersBoxAll renders the background for the line numbers in the LineNumberColor
 func (ed *Editor) RenderLineNumbersBoxAll() {
-	if !ed.HasLineNumbers() {
+	if !ed.hasLineNumbers {
 		return
 	}
 	pc := &ed.Scene.PaintContext
@@ -433,7 +433,7 @@ func (ed *Editor) RenderLineNumbersBoxAll() {
 // if defFill is true, it fills box color for default background color (use false for
 // batch mode).
 func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
-	if !ed.HasLineNumbers() || ed.Buffer == nil {
+	if !ed.hasLineNumbers || ed.Buffer == nil {
 		return
 	}
 	bb := ed.RenderBBox()
