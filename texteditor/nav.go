@@ -86,7 +86,7 @@ func (ed *Editor) SetCursorShow(pos lexer.Pos) {
 
 // SetCursorTarget sets a new cursor target position, ensures that it is visible
 func (ed *Editor) SetCursorTarget(pos lexer.Pos) {
-	ed.SetFlag(true, EditorTargetSet)
+	ed.targetSet = true
 	ed.CursorTarget = pos
 	ed.SetCursorShow(pos)
 	ed.NeedsRender()
@@ -939,7 +939,7 @@ func (ed *Editor) ScrollCursorToTarget() {
 	// fmt.Println(ed, "to target:", ed.CursorTarg)
 	ed.CursorPos = ed.CursorTarget
 	ed.ScrollCursorToVertCenter()
-	ed.SetFlag(false, EditorTargetSet)
+	ed.targetSet = false
 }
 
 ///////////////////////////////////////////////////////////////////////////////

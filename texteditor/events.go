@@ -98,9 +98,9 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		ed.lastRecenter = 0
 	}
 
-	if kf != keymap.Undo && ed.Is(EditorLastWasUndo) {
+	if kf != keymap.Undo && ed.lastWasUndo {
 		ed.Buffer.EmacsUndoSave()
-		ed.SetFlag(false, EditorLastWasUndo)
+		ed.lastWasUndo = false
 	}
 
 	gotTabAI := false // got auto-indent tab this time
@@ -250,7 +250,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		return
 	}
 	if kt.IsHandled() {
-		ed.SetFlag(gotTabAI, EditorLastWasTabAI)
+		ed.lastWasTabAI = gotTabAI
 		return
 	}
 	switch kf {
@@ -314,7 +314,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		cancelAll()
 		kt.SetHandled()
 		ed.Undo()
-		ed.SetFlag(true, EditorLastWasUndo)
+		ed.lastWasUndo = true
 	case keymap.Redo:
 		cancelAll()
 		kt.SetHandled()
@@ -357,7 +357,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
-			lasttab := ed.Is(EditorLastWasTabAI)
+			lasttab := ed.lastWasTabAI
 			if !lasttab && ed.CursorPos.Ch == 0 && ed.Buffer.Options.AutoIndent {
 				_, _, cpos := ed.Buffer.AutoIndent(ed.CursorPos.Ln)
 				ed.CursorPos.Ch = cpos
@@ -392,7 +392,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		}
 		ed.ISpellKeyInput(kt)
 	}
-	ed.SetFlag(gotTabAI, EditorLastWasTabAI)
+	ed.lastWasTabAI = gotTabAI
 }
 
 // KeyInputInsertBra handle input of opening bracket-like entity (paren, brace, bracket)
