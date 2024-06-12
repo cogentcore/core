@@ -250,9 +250,7 @@ func (sv *SliceViewBase) Init() {
 	sv.InitSelectedIndex = -1
 	sv.hoverRow = -1
 	sv.MinRows = 4
-	sv.SetFlag(false, SliceViewSelectMode)
-	sv.SetFlag(true, SliceViewShowIndex)
-	sv.SetFlag(true, SliceViewReadOnlyKeyNav)
+	sv.ReadOnlyKeyNav = true
 	svi := sv.This.(SliceViewer)
 
 	sv.Styler(func(s *styles.Style) {
@@ -287,7 +285,7 @@ func (sv *SliceViewBase) Init() {
 
 	sv.OnFinal(events.KeyChord, func(e events.Event) {
 		if sv.IsReadOnly() {
-			if sv.Is(SliceViewReadOnlyKeyNav) {
+			if sv.ReadOnlyKeyNav {
 				sv.KeyInputReadOnly(e)
 			}
 		} else {
@@ -400,7 +398,7 @@ func (sv *SliceViewBase) AsSliceViewBase() *SliceViewBase {
 }
 
 func (sv *SliceViewBase) SetSliceBase() {
-	sv.SetFlag(false, SliceViewSelectMode)
+	sv.SelectMode = false
 	sv.MakeIter = 0
 	sv.StartIndex = 0
 	sv.VisRows = sv.MinRows
@@ -435,8 +433,7 @@ func (sv *SliceViewBase) SetSlice(sl any) *SliceViewBase {
 	sv.SetSliceBase()
 	sv.Slice = sl
 	sv.SliceUnderlying = reflectx.Underlying(reflect.ValueOf(sv.Slice))
-	isArray := reflectx.NonPointerType(reflect.TypeOf(sl)).Kind() == reflect.Array
-	sv.SetFlag(isArray, SliceViewIsArray)
+	sv.isArray = reflectx.NonPointerType(reflect.TypeOf(sl)).Kind() == reflect.Array
 	sv.ElementValue = reflectx.SliceElementValue(sl)
 	return sv
 }
@@ -601,7 +598,7 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i int) {
 	itxt := strconv.Itoa(i)
 	val := sv.SliceElementValue(vi)
 
-	if sv.Is(SliceViewShowIndex) {
+	if sv.ShowIndexes {
 		sv.MakeGridIndex(p, i, si, itxt, invis)
 	}
 
@@ -701,7 +698,7 @@ func (sv *SliceViewBase) SliceGrid() *SliceViewGrid {
 func (sv *SliceViewBase) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	nWidgPerRow = 2
 	idxOff = 1
-	if !sv.Is(SliceViewShowIndex) {
+	if !sv.ShowIndexes {
 		nWidgPerRow -= 1
 		idxOff = 0
 	}
@@ -757,7 +754,7 @@ func (sv *SliceViewBase) SliceNewAtRow(row int) {
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end
 func (sv *SliceViewBase) SliceNewAt(idx int) {
-	if sv.Is(SliceViewIsArray) {
+	if sv.isArray {
 		return
 	}
 
@@ -831,7 +828,7 @@ func (sv *SliceViewBase) SliceDeleteAtSelect(i int) {
 
 // SliceDeleteAt deletes element at given index from slice
 func (sv *SliceViewBase) SliceDeleteAt(i int) {
-	if sv.Is(SliceViewIsArray) {
+	if sv.isArray {
 		return
 	}
 	if i < 0 || i >= sv.SliceSize {
@@ -853,7 +850,7 @@ func (sv *SliceViewBase) MakeToolbar(p *core.Plan) {
 	if reflectx.AnyIsNil(sv.Slice) {
 		return
 	}
-	if sv.Is(SliceViewIsArray) || sv.IsReadOnly() {
+	if sv.isArray || sv.IsReadOnly() {
 		return
 	}
 	core.Add(p, func(w *core.Button) {
@@ -893,7 +890,7 @@ func (sv *SliceViewBase) IsIndexVisible(idx int) bool {
 // RowFirstWidget returns the first widget for given row (could be index or
 // not) -- false if out of range
 func (sv *SliceViewBase) RowFirstWidget(row int) (*core.WidgetBase, bool) {
-	if !sv.Is(SliceViewShowIndex) {
+	if !sv.ShowIndexes {
 		return nil, false
 	}
 	if !sv.IsRowInBounds(row) {
@@ -909,7 +906,7 @@ func (sv *SliceViewBase) RowFirstWidget(row int) (*core.WidgetBase, bool) {
 // in given row.  returns that element or nil if not successful
 // note: grid must have already rendered for focus to be grabbed!
 func (sv *SliceViewBase) RowGrabFocus(row int) *core.WidgetBase {
-	if !sv.IsRowInBounds(row) || sv.Is(SliceViewInFocusGrab) { // range check
+	if !sv.IsRowInBounds(row) || sv.InFocusGrab { // range check
 		return nil
 	}
 	nWidgPerRow, idxOff := sv.This.(SliceViewer).RowWidgetNs()
@@ -919,9 +916,9 @@ func (sv *SliceViewBase) RowGrabFocus(row int) *core.WidgetBase {
 	if w.StateIs(states.Focused) {
 		return w
 	}
-	sv.SetFlag(true, SliceViewInFocusGrab)
+	sv.InFocusGrab = true
 	w.SetFocusEvent()
-	sv.SetFlag(false, SliceViewInFocusGrab)
+	sv.InFocusGrab = false
 	return w
 }
 
@@ -1148,7 +1145,7 @@ func (sv *SliceViewBase) UpdateSelectRow(row int, selMode events.SelectModes) {
 
 // UpdateSelectIndex updates the selection for the given index
 func (sv *SliceViewBase) UpdateSelectIndex(idx int, sel bool, selMode events.SelectModes) {
-	if sv.IsReadOnly() && !sv.Is(SliceViewReadOnlyMultiSelect) {
+	if sv.IsReadOnly() && !sv.ReadOnlyMultiSelect {
 		sv.UnselectAllIndexes()
 		if sel || sv.SelectedIndex == idx {
 			sv.SelectedIndex = idx
@@ -1163,7 +1160,7 @@ func (sv *SliceViewBase) UpdateSelectIndex(idx int, sel bool, selMode events.Sel
 
 // IndexIsSelected returns the selected status of given slice index
 func (sv *SliceViewBase) IndexIsSelected(idx int) bool {
-	if sv.IsReadOnly() && !sv.Is(SliceViewReadOnlyMultiSelect) {
+	if sv.IsReadOnly() && !sv.ReadOnlyMultiSelect {
 		return idx == sv.SelectedIndex
 	}
 	_, ok := sv.SelectedIndexes[idx]
@@ -1634,7 +1631,7 @@ func (sv *SliceViewBase) SaveDraggedIndexes(idx int) {
 //    Events
 
 func (sv *SliceViewBase) ContextMenu(m *core.Scene) {
-	if sv.IsReadOnly() || sv.Is(SliceViewIsArray) {
+	if sv.IsReadOnly() || sv.isArray {
 		return
 	}
 	core.NewButton(m).SetText("Add row").SetIcon(icons.Add).OnClick(func(e events.Event) {
@@ -1663,14 +1660,14 @@ func (sv *SliceViewBase) KeyInputNav(kt events.Event) {
 	kf := keymap.Of(kt.KeyChord())
 	selMode := events.SelectModeBits(kt.Modifiers())
 	if selMode == events.SelectOne {
-		if sv.Is(SliceViewSelectMode) {
+		if sv.SelectMode {
 			selMode = events.ExtendContinuous
 		}
 	}
 	switch kf {
 	case keymap.CancelSelect:
 		sv.UnselectAllIndexes()
-		sv.SetFlag(false, SliceViewSelectMode)
+		sv.SelectMode = false
 		kt.SetHandled()
 	case keymap.MoveDown:
 		sv.MoveDownAction(selMode)
@@ -1685,11 +1682,11 @@ func (sv *SliceViewBase) KeyInputNav(kt events.Event) {
 		sv.MovePageUpAction(selMode)
 		kt.SetHandled()
 	case keymap.SelectMode:
-		sv.SetFlag(!sv.Is(SliceViewSelectMode), SliceViewSelectMode)
+		sv.SelectMode = !sv.SelectMode
 		kt.SetHandled()
 	case keymap.SelectAll:
 		sv.SelectAllIndexes()
-		sv.SetFlag(false, SliceViewSelectMode)
+		sv.SelectMode = false
 		kt.SetHandled()
 	}
 }
@@ -1712,46 +1709,46 @@ func (sv *SliceViewBase) KeyInputEditable(kt events.Event) {
 	// 	kt.SetHandled()
 	case keymap.Duplicate:
 		nidx := sv.Duplicate()
-		sv.SetFlag(false, SliceViewSelectMode)
+		sv.SelectMode = false
 		if nidx >= 0 {
 			sv.SelectIndexAction(nidx, events.SelectOne)
 		}
 		kt.SetHandled()
 	case keymap.Insert:
 		sv.This.(SliceViewer).SliceNewAt(idx)
-		sv.SetFlag(false, SliceViewSelectMode)
+		sv.SelectMode = false
 		sv.SelectIndexAction(idx+1, events.SelectOne) // todo: somehow nidx not working
 		kt.SetHandled()
 	case keymap.InsertAfter:
 		sv.This.(SliceViewer).SliceNewAt(idx + 1)
-		sv.SetFlag(false, SliceViewSelectMode)
+		sv.SelectMode = false
 		sv.SelectIndexAction(idx+1, events.SelectOne)
 		kt.SetHandled()
 	case keymap.Copy:
 		sv.CopyIndexes(true)
-		sv.SetFlag(false, SliceViewSelectMode)
+		sv.SelectMode = false
 		sv.SelectIndexAction(idx, events.SelectOne)
 		kt.SetHandled()
 	case keymap.Cut:
 		sv.CutIndexes()
-		sv.SetFlag(false, SliceViewSelectMode)
+		sv.SelectMode = false
 		kt.SetHandled()
 	case keymap.Paste:
 		sv.PasteIndex(sv.SelectedIndex)
-		sv.SetFlag(false, SliceViewSelectMode)
+		sv.SelectMode = false
 		kt.SetHandled()
 	}
 }
 
 func (sv *SliceViewBase) KeyInputReadOnly(kt events.Event) {
-	if sv.Is(SliceViewReadOnlyMultiSelect) {
+	if sv.ReadOnlyMultiSelect {
 		sv.KeyInputNav(kt)
 		if kt.IsHandled() {
 			return
 		}
 	}
 	selMode := kt.SelectMode()
-	if sv.Is(SliceViewSelectMode) {
+	if sv.SelectMode {
 		selMode = events.ExtendOne
 	}
 	kf := keymap.Of(kt.KeyChord())
