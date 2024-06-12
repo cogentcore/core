@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// This package is based extensively on https://github.com/g3n/engine :
+// This package is based extensively on https://github.com/g3n/engine
 // Copyright 2016 The G3N Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.

@@ -54,11 +54,14 @@ type MeshBase struct { //types:add -setters
 	// by name so this matters.
 	Name string
 
-	// number of vertex points, as math32.Vector3 -- always includes math32.Vector3 normals and math32.Vector2 texture coordinates -- only valid after Sizes() has been called
-	NVtx int `set:"-"`
+	// NumVertex is the number of [math32.Vector3] vertex points. This always
+	// includes [math32.Vector3] normals and [math32.Vector2] texture coordinates.
+	// This is only valid after [Mesh.Sizes] has been called.
+	NumVertex int `set:"-"`
 
-	// number of indexes, as math32.ArrayU32 -- only valid after Sizes() has been called
-	NIndex int `set:"-"`
+	// NumIndex is the number of [math32.ArrayU32] indexes.
+	// This is only valid after [Mesh.Sizes] has been called.
+	NumIndex int `set:"-"`
 
 	// has per-vertex colors, as math32.Vector4 per vertex
 	Color bool
@@ -76,9 +79,15 @@ type MeshBase struct { //types:add -setters
 	BBoxMu sync.RWMutex `view:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
-func (ms *MeshBase) AsMeshBase() *MeshBase                    { return ms }
-func (ms *MeshBase) HasColor() bool                           { return ms.Color }
-func (ms *MeshBase) Sizes() (nVtx, nIndex int, hasColor bool) { return ms.NVtx, ms.NIndex, ms.Color }
+func (ms *MeshBase) AsMeshBase() *MeshBase {
+	return ms
+}
+
+func (ms *MeshBase) HasColor() bool { return ms.Color }
+
+func (ms *MeshBase) Sizes() (numVertex, numIndex int, hasColor bool) {
+	return ms.NumVertex, ms.NumIndex, ms.Color
+}
 
 func (ms *MeshBase) IsTransparent() bool {
 	if !ms.HasColor() {
@@ -241,10 +250,10 @@ type GenMesh struct {
 }
 
 func (ms *GenMesh) Sizes() (nVtx, nIndex int, hasColor bool) {
-	ms.NVtx = len(ms.Vtx) / 3
-	ms.NIndex = len(ms.Index)
+	ms.NumVertex = len(ms.Vtx) / 3
+	ms.NumIndex = len(ms.Index)
 	ms.Color = len(ms.Clr) > 0
-	return ms.NVtx, ms.NIndex, ms.Color
+	return ms.NumVertex, ms.NumIndex, ms.Color
 }
 
 func (ms *GenMesh) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
@@ -255,7 +264,7 @@ func (ms *GenMesh) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF3
 		copy(clrAry, ms.Clr)
 	}
 	copy(idxAry, ms.Index)
-	bb := vshape.BBoxFromVtxs(ms.Vtx, 0, ms.NVtx)
+	bb := vshape.BBoxFromVtxs(ms.Vtx, 0, ms.NumVertex)
 	ms.BBoxMu.Lock()
 	ms.BBox.SetBounds(bb.Min, bb.Max)
 	ms.BBoxMu.Unlock()

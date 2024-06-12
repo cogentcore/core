@@ -67,9 +67,9 @@ func NewPlane(sc *Scene, name string, width, height float32) *Plane {
 }
 
 func (pl *Plane) Sizes() (nVtx, nIndex int, hasColor bool) {
-	pl.NVtx, pl.NIndex = vshape.PlaneN(int(pl.Segs.X), int(pl.Segs.Y))
+	pl.NumVertex, pl.NumIndex = vshape.PlaneN(int(pl.Segs.X), int(pl.Segs.Y))
 	pl.Color = false
-	return pl.NVtx, pl.NIndex, pl.Color
+	return pl.NumVertex, pl.NumIndex, pl.Color
 }
 
 func (pl *Plane) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
@@ -107,9 +107,9 @@ func NewBox(sc *Scene, name string, width, height, depth float32) *Box {
 }
 
 func (bx *Box) Sizes() (nVtx, nIndex int, hasColor bool) {
-	bx.NVtx, bx.NIndex = vshape.BoxN(bx.Segs)
+	bx.NumVertex, bx.NumIndex = vshape.BoxN(bx.Segs)
 	bx.Color = false
-	return bx.NVtx, bx.NIndex, bx.Color
+	return bx.NumVertex, bx.NumIndex, bx.Color
 }
 
 func (bx *Box) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
@@ -178,9 +178,9 @@ func (sp *Sphere) Defaults() {
 }
 
 func (sp *Sphere) Sizes() (nVtx, nIndex int, hasColor bool) {
-	sp.NVtx, sp.NIndex = vshape.SphereSectorN(sp.WidthSegs, sp.HeightSegs, sp.ElevStart, sp.ElevLen)
+	sp.NumVertex, sp.NumIndex = vshape.SphereSectorN(sp.WidthSegs, sp.HeightSegs, sp.ElevStart, sp.ElevLen)
 	sp.Color = false
-	return sp.NVtx, sp.NIndex, sp.Color
+	return sp.NumVertex, sp.NumIndex, sp.Color
 }
 
 func (sp *Sphere) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
@@ -277,9 +277,9 @@ func (cy *Cylinder) Defaults() {
 }
 
 func (cy *Cylinder) Sizes() (nVtx, nIndex int, hasColor bool) {
-	cy.NVtx, cy.NIndex = vshape.CylinderSectorN(cy.RadialSegs, cy.HeightSegs, cy.Top, cy.Bottom)
+	cy.NumVertex, cy.NumIndex = vshape.CylinderSectorN(cy.RadialSegs, cy.HeightSegs, cy.Top, cy.Bottom)
 	cy.Color = false
-	return cy.NVtx, cy.NIndex, cy.Color
+	return cy.NumVertex, cy.NumIndex, cy.Color
 }
 
 func (cy *Cylinder) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
