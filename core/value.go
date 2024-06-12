@@ -89,7 +89,7 @@ func InitValueButton(v Value, allowReadOnly bool, make func(d *Body), after ...f
 	if !TheApp.Platform().IsMobile() {
 		wb.SetTooltip(shiftNewWindow)
 	}
-	v.OnClick(func(e events.Event) {
+	wb.OnClick(func(e events.Event) {
 		if allowReadOnly || !wb.IsReadOnly() {
 			v.AsTree().SetFlag(e.HasAnyModifier(key.Shift), ValueDialogNewWindow)
 			OpenValueDialog(v, v.AsWidget(), make, after...)
@@ -122,7 +122,7 @@ func OpenValueDialog(v Value, ctx Widget, make func(d *Body), after ...func()) {
 	if len(after) == 0 {
 		d.OnClose(func(e events.Event) {
 			wb.SendChange()
-			v.Update()
+			wb.Update()
 		})
 	} else {
 		// otherwise, we have to make the bottom bar
@@ -131,7 +131,7 @@ func OpenValueDialog(v Value, ctx Widget, make func(d *Body), after ...func()) {
 			d.AddOK(parent).OnClick(func(e events.Event) {
 				after[0]()
 				wb.SendChange()
-				v.Update()
+				wb.Update()
 			})
 		})
 	}

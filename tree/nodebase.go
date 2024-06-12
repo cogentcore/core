@@ -5,11 +5,9 @@
 package tree
 
 import (
-	"errors"
 	"log/slog"
 	"maps"
 	"slices"
-	"strconv"
 	"strings"
 
 	"github.com/jinzhu/copier"
@@ -222,46 +220,37 @@ func (n *NodeBase) ChildByType(t *types.Type, embeds bool, startIndex ...int) No
 
 // TODO: is this the best way to escape paths?
 
-// EscapePathName returns a name that replaces any path delimiter symbols
-// . or / with \, and \\ escaped versions.
+// EscapePathName returns a name that replaces any / with \\
 func EscapePathName(name string) string {
-	return strings.ReplaceAll(strings.ReplaceAll(name, ".", `\,`), "/", `\\`)
+	return strings.ReplaceAll(name, "/", `\\`)
 }
 
-// UnescapePathName returns a name that replaces any escaped path delimiter symbols
-// \, or \\ with . and / unescaped versions.
+// UnescapePathName returns a name that replaces any \\ with /
 func UnescapePathName(name string) string {
-	return strings.ReplaceAll(strings.ReplaceAll(name, `\,`, "."), `\\`, "/")
+	return strings.ReplaceAll(name, `\\`, "/")
 }
 
 // Path returns the path to this node from the tree root,
-// using [Node.Name]s separated by / and fields by .
-// Path is only valid for finding items when child names
-// are unique. Any existing / and . characters in names
-// are escaped to \\ and \,
+// using [Node.Name]s separated by / delimeters. Any
+// existing / characters in names are escaped to \\
 func (n *NodeBase) Path() string {
 	if n.Parent != nil {
-		if n.Is(Field) {
-			return n.Parent.AsTree().Path() + "." + EscapePathName(n.Name)
-		}
 		return n.Parent.AsTree().Path() + "/" + EscapePathName(n.Name)
 	}
 	return "/" + EscapePathName(n.Name)
 }
 
-// PathFrom returns path to this node from the given parent node, using
-// [Node.Name]s separated by / and fields by .
-// Path is only valid for finding items when child names
-// are unique. Any existing / and . characters in names
-// are escaped to \\ and \,
+// PathFrom returns the path to this node from the given parent node,
+// using [Node.Name]s separated by / delimeters. Any
+// existing / characters in names are escaped to \\
 //
 // The paths that it returns exclude the
 // name of the parent and the leading slash; for example, in the tree
 // a/b/c/d/e, the result of d.PathFrom(b) would be c/d. PathFrom
-// automatically gets the [Node.This] version of the given parent,
-// so a base type can be passed in without manually calling [Node.This].
+// automatically gets the [NodeBase.This] version of the given parent,
+// so a base type can be passed in without manually accessing [NodeBase.This].
 func (n *NodeBase) PathFrom(parent Node) string {
-	// critical to get "This"
+	// critical to get `This`
 	parent = parent.AsTree().This
 	// we bail a level below the parent so it isn't in the path
 	if n.Parent == nil || n.Parent == parent {
@@ -273,38 +262,15 @@ func (n *NodeBase) PathFrom(parent Node) string {
 	} else {
 		ppath = n.Parent.AsTree().PathFrom(parent)
 	}
-	if n.Is(Field) {
-		return ppath + "." + EscapePathName(n.Name)
-	}
 	return ppath + "/" + EscapePathName(n.Name)
 
 }
 
-// findPathChild finds the child on the path.
-func findPathChild(n Node, child string) int {
-	if len(child) == 0 {
-		return -1
-	}
-	if child[0] == '[' && child[len(child)-1] == ']' {
-		idx, err := strconv.Atoi(child[1 : len(child)-1])
-		if err != nil {
-			return idx
-		}
-		if idx < 0 { // from end
-			idx = len(n.AsTree().Children) + idx
-		}
-		return idx
-	}
-	return IndexByName(n.AsTree().Children, child)
-}
-
 // FindPath returns the node at the given path from this node.
 // FindPath only works correctly when names are unique.
-// Path has [Node.Name]s separated by / and fields by .
-// Node names escape any existing / and . characters to \\ and \,
-// There is also support for [idx] index-based access for any given path
-// element, for cases when indexes are more useful than names.
-// Returns nil if not found.
+// The given path must be consistent with the format produced
+// by [NodeBase.PathFrom]. It returns nil if no node is found
+// at the given path.
 func (n *NodeBase) FindPath(path string) Node {
 	curn := n.This
 	pels := strings.Split(strings.Trim(strings.TrimSpace(path), "\""), "/")
@@ -312,38 +278,13 @@ func (n *NodeBase) FindPath(path string) Node {
 		if len(pe) == 0 {
 			continue
 		}
-		if strings.Contains(pe, ".") { // has fields
-			fels := strings.Split(pe, ".")
-			// find the child first, then the fields
-			idx := findPathChild(curn, UnescapePathName(fels[0]))
-			if idx < 0 {
-				return nil
-			}
-			curn = curn.AsTree().Children[idx]
-			for i := 1; i < len(fels); i++ {
-				fe := UnescapePathName(fels[i])
-				fk, err := curn.FieldByName(fe)
-				if err != nil {
-					slog.Debug("tree.FindPath: %v", err)
-					return nil
-				}
-				curn = fk
-			}
-		} else {
-			idx := findPathChild(curn, UnescapePathName(pe))
-			if idx < 0 {
-				return nil
-			}
-			curn = curn.AsTree().Children[idx]
+		idx := IndexByName(curn.AsTree().Children, UnescapePathName(pe))
+		if idx < 0 {
+			return nil
 		}
+		curn = curn.AsTree().Children[idx]
 	}
 	return curn
-}
-
-// FieldByName is a placeholder implementation of [Node.FieldByName]
-// that returns an error.
-func (n *NodeBase) FieldByName(field string) (Node, error) {
-	return nil, errors.New("tree.NodeBase.FieldByName: no tree fields defined for this node")
 }
 
 // Adding and Inserting Children:

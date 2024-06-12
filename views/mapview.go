@@ -77,7 +77,7 @@ func (mv *MapView) Init() {
 				BindMapKey(mapv, key, w)
 				wb := w.AsWidget()
 				wb.SetReadOnly(mv.IsReadOnly())
-				w.Styler(func(s *styles.Style) {
+				wb.Styler(func(s *styles.Style) {
 					s.SetReadOnly(mv.IsReadOnly())
 					s.SetTextWrap(false)
 				})
@@ -88,7 +88,7 @@ func (mv *MapView) Init() {
 				wb.SetReadOnly(mv.IsReadOnly())
 				wb.OnInput(mv.HandleEvent)
 				if !mv.IsReadOnly() {
-					w.AddContextMenu(func(m *core.Scene) {
+					wb.AddContextMenu(func(m *core.Scene) {
 						mv.ContextMenu(m, key)
 					})
 				}
@@ -106,12 +106,12 @@ func (mv *MapView) Init() {
 				wb.SetReadOnly(mv.IsReadOnly())
 				wb.OnChange(func(e events.Event) { mv.SendChange(e) })
 				wb.OnInput(mv.HandleEvent)
-				w.Styler(func(s *styles.Style) {
+				wb.Styler(func(s *styles.Style) {
 					s.SetReadOnly(mv.IsReadOnly())
 					s.SetTextWrap(false)
 				})
 				if !mv.IsReadOnly() {
-					w.AddContextMenu(func(m *core.Scene) {
+					wb.AddContextMenu(func(m *core.Scene) {
 						mv.ContextMenu(m, key)
 					})
 				}

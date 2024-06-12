@@ -31,7 +31,7 @@ func init() {
 			return
 		}
 		ed := AsEditor(w)
-		if !w.StateIs(states.Focused) || !w.IsVisible() {
+		if !w.AsWidget().StateIs(states.Focused) || !w.IsVisible() {
 			ed.BlinkOn = false
 			ed.RenderCursor(false)
 		} else {

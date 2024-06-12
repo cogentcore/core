@@ -67,12 +67,6 @@ type Node interface {
 	// This is used in the GUI for determining what types of children can be created.
 	BaseType() *types.Type
 
-	// FieldByName returns the node that is a direct field with the given name.
-	// This must be implemented for any types that have Node fields that
-	// are processed as part of the overall Node tree. This is only used
-	// by [Node.FindPath]. Returns error if not found.
-	FieldByName(field string) (Node, error)
-
 	// Destroy recursively deletes and destroys the node, all of its children,
 	// and all of its children's children, etc. Node types can implement this
 	// to do additional necessary destruction; if they do, they should call

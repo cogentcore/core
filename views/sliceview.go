@@ -599,8 +599,8 @@ func (sv *SliceViewBase) MakeGrid(p *core.Plan, maker func(p *core.Plan)) {
 func (sv *SliceViewBase) MakeValue(w core.Value, i int) {
 	svi := sv.This.(SliceViewer)
 	wb := w.AsWidget()
-	w.AsTree().SetProperty(SliceViewRowProperty, i)
-	w.Styler(func(s *styles.Style) {
+	wb.SetProperty(SliceViewRowProperty, i)
+	wb.Styler(func(s *styles.Style) {
 		if sv.IsReadOnly() {
 			s.SetAbilities(true, abilities.DoubleClickable)
 			s.SetAbilities(false, abilities.Hoverable, abilities.Focusable, abilities.Activatable, abilities.TripleClickable)
@@ -620,7 +620,7 @@ func (sv *SliceViewBase) MakeValue(w core.Value, i int) {
 		sv.LastClick = row + sv.StartIndex
 	})
 	wb.OnDoubleClick(sv.HandleEvent)
-	w.On(events.ContextMenu, sv.HandleEvent)
+	wb.On(events.ContextMenu, sv.HandleEvent)
 	if !sv.IsReadOnly() {
 		wb.OnInput(sv.HandleEvent)
 	}
@@ -653,7 +653,7 @@ func (sv *SliceViewBase) MakeRow(p *core.Plan, i int) {
 			val := sv.SliceElementValue(vi)
 			core.Bind(val.Addr().Interface(), w)
 			wb.SetReadOnly(sv.IsReadOnly())
-			w.SetState(invis, states.Invisible)
+			wb.SetState(invis, states.Invisible)
 			if sv.This.(SliceViewer).HasStyleFunc() {
 				w.Style()
 			}

@@ -126,7 +126,7 @@ func (ts *Tabs) Init() {
 	})
 	ts.OnWidgetAdded(func(w Widget) {
 		if w.AsTree().Parent == ts.ChildByName("frame") { // TODO(config): figure out how to get this to work with new config paradigm
-			w.Styler(func(s *styles.Style) {
+			w.AsWidget().Styler(func(s *styles.Style) {
 				// tab frames must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)

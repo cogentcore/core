@@ -8,7 +8,6 @@ package core
 //go:generate core generate
 
 import (
-	"fmt"
 	"image"
 	"log/slog"
 
@@ -25,37 +24,22 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// Widget is the interface for all Cogent Core widgets.
+// Widget is the interface that all Cogent Core satisfy.
+// The core widget functionality is defined on [WidgetBase],
+// and all higher-level widget types must embed it. This
+// interface only contains the methods that higher-level
+// widget types may need to override. You can call
+// [Widget.AsWidget] to get the [WidgetBase] of a Widget
+// and access the core widget functionality.
 type Widget interface {
 	tree.Node
 
-	// AsWidget returns the [WidgetBase] embedded field.
+	// AsWidget returns the [WidgetBase] of this Widget. Most
+	// core widget functionality is implemented on [WidgetBase].
 	AsWidget() *WidgetBase
 
-	// OnWidgetAdded adds a function to call when a widget is added
-	// as a child to the widget or any of its children.
-	OnWidgetAdded(f func(w Widget)) *WidgetBase
-
-	// See [WidgetBase.Styler].
-	Styler(s func(s *styles.Style)) *WidgetBase
-
-	// See [WidgetBase.Update].
-	Update()
-
-	// StateIs returns whether the widget has the given [states.States] flag set
-	StateIs(flag states.States) bool
-
-	// AbilityIs returns whether the widget has the given [abilities.Abilities] flag set
-	AbilityIs(flag abilities.Abilities) bool
-
-	// SetState sets the given [states.State] flags to the given value
-	SetState(on bool, state ...states.States) *WidgetBase
-
-	// SetAbilities sets the given [abilities.Abilities] flags to the given value
-	SetAbilities(on bool, able ...abilities.Abilities) *WidgetBase
-
 	// See [WidgetBase.Style].
-	Style()
+	Style() // TODO(config): remove
 
 	// SizeUp (bottom-up) gathers Actual sizes from our Children & Parts,
 	// based on Styles.Min / Max sizes and actual content sizing
@@ -107,26 +91,6 @@ type Widget interface {
 	// for widget-specific rendering.
 	RenderWidget()
 
-	// On adds an event listener function for the given event type
-	On(etype events.Types, fun func(e events.Event)) *WidgetBase
-
-	// OnClick adds an event listener function for [events.Click] events
-	OnClick(fun func(e events.Event)) *WidgetBase
-
-	// HandleEvent sends the given event to all Listeners for that event type.
-	// It also checks if the State has changed and calls ApplyStyle if so.
-	// If more significant Config level changes are needed due to an event,
-	// the event handler must do this itself.
-	HandleEvent(e events.Event)
-
-	// Send sends an NEW event of given type to this widget,
-	// optionally starting from values in the given original event
-	// (recommended to include where possible).
-	// Do NOT send an existing event using this method if you
-	// want the Handled state to persist throughout the call chain;
-	// call HandleEvent directly for any existing events.
-	Send(e events.Types, orig ...events.Event)
-
 	// WidgetTooltip returns the tooltip text that should be used for this
 	// widget, and the window-relative position to use for the upper-left corner
 	// of the tooltip. The current mouse position in scene-local coordinates
@@ -141,15 +105,6 @@ type Widget interface {
 	// it to do different things. For example, buttons add their
 	// shortcut to the tooltip here.
 	WidgetTooltip(pos image.Point) (string, image.Point)
-
-	// AddContextMenu adds the given context menu to [WidgetBase.ContextMenus].
-	// It is the main way that code should modify a widget's context menus.
-	// Context menu functions are run in reverse order.
-	AddContextMenu(menu func(m *Scene)) *WidgetBase
-
-	// ApplyContextMenus adds the [Widget.ContextMenus] to the given menu scene
-	// in reverse order.
-	ApplyContextMenus(m *Scene)
 
 	// ContextMenuPos returns the default position for popup menus;
 	// by default in the middle its Bounding Box, but can be adapted as
@@ -191,8 +146,10 @@ type Widget interface {
 	DirectRenderDraw(drw system.Drawer, idx int, flipY bool)
 }
 
-// WidgetBase is the base type for all [Widget]s. It renders the
-// standard box model, but does not layout or render any children.
+// WidgetBase implements the [Widget] interface and provides the core functionality
+// of a widget. You must use WidgetBase as an embedded struct in all higher-level
+// widget types. It renders the standard box model, but does not layout or render
+// any children; see [Frame] for that.
 type WidgetBase struct {
 	tree.NodeBase
 
@@ -272,7 +229,7 @@ type WidgetBase struct {
 	FinalListeners events.Listeners `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// A slice of functions to call on all widgets that are added as children
-	// to this widget or its children.  These functions are called in sequential
+	// to this widget or its children. These functions are called in sequential
 	// ascending order, so the last added one is called last and thus can
 	// override anything set by the other ones. These should be set using
 	// OnWidgetAdded, which can be called by both end-user and internal code.
@@ -282,7 +239,7 @@ type WidgetBase struct {
 	// the widget's context menu on an [events.ContextMenu]. The
 	// functions are called in reverse order such that the elements
 	// added in the last function are the first in the menu.
-	// Context menus should be added through [Widget.AddContextMenu].
+	// Context menus should be added through [WidgetBase.AddContextMenu].
 	// Separators will be added between each context menu function.
 	ContextMenus []func(m *Scene) `copier:"-" json:"-" xml:"-" set:"-"`
 
@@ -295,7 +252,7 @@ type WidgetBase struct {
 	ValueUpdate func() `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// ValueOnChange is a function set by [Bind] that is called when
-	// the widget receives an [event.Change] to update the bound value
+	// the widget receives an [events.Change] event to update the bound value
 	// from the widget's value.
 	ValueOnChange func() `copier:"-" json:"-" xml:"-" set:"-"`
 
@@ -508,23 +465,13 @@ func (wb *WidgetBase) IsVisible() bool {
 // DirectRenderImage uploads image directly into given system.Drawer at given index
 // Typically this is a drw.SetGoImage call with an [image.RGBA], or
 // drw.SetFrameImage with a [vgpu.FrameBuffer]
-func (wb *WidgetBase) DirectRenderImage(drw system.Drawer, idx int) {
-}
+func (wb *WidgetBase) DirectRenderImage(drw system.Drawer, idx int) {}
 
 // DirectRenderDraw draws the current image at index onto the RenderWindow window,
 // typically using drw.Copy, drw.Scale, or drw.Fill.
 // flipY is the default setting for whether the Y axis needs to be flipped during drawing,
 // which is typically passed along to the Copy or Scale methods.
-func (wb *WidgetBase) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
-}
-
-// FieldByName allows [tree.Node.FindPath] to go through parts.
-func (wb *WidgetBase) FieldByName(field string) (tree.Node, error) {
-	if field == "parts" {
-		return wb.Parts, nil
-	}
-	return nil, fmt.Errorf("no field %q for %v; only parts", field, wb)
-}
+func (wb *WidgetBase) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {}
 
 // NodeWalkDown extends [tree.Node.WalkDown] to [WidgetBase.Parts],
 // which is key for getting full tree traversal to work when updating,

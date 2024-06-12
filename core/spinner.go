@@ -104,7 +104,7 @@ func (sp *Spinner) Init() {
 	sp.OnWidgetAdded(func(w Widget) {
 		switch w.AsTree().PathFrom(sp) {
 		case "lead-icon", "trail-icon": // TODO(config)
-			w.Styler(func(s *styles.Style) {
+			w.AsWidget().Styler(func(s *styles.Style) {
 				// icons do not get separate focus, as people can
 				// use the arrow keys to get the same effect
 				s.SetAbilities(false, abilities.Focusable)

@@ -121,7 +121,7 @@ func (c *Context) Config(w core.Widget) {
 	}
 	wb.SetProperty("tag", c.Node.Data)
 	rules := c.Styles[c.Node]
-	w.Styler(func(s *styles.Style) {
+	wb.Styler(func(s *styles.Style) {
 		for _, rule := range rules {
 			for _, decl := range rule.Declarations {
 				// TODO(kai/styproperties): parent style and context
@@ -140,7 +140,7 @@ func (c *Context) InlineParent() core.Widget {
 	c.InlinePw = core.NewFrame(c.BlockParent)
 	c.InlinePw.AsTree().SetName("inline-container")
 	tree.SetUniqueName(c.InlinePw)
-	c.InlinePw.Styler(func(s *styles.Style) {
+	c.InlinePw.AsWidget().Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 	})
 	return c.InlinePw

@@ -170,7 +170,7 @@ func (wb *WidgetBase) HandleWidgetContextMenu() {
 func (wb *WidgetBase) ShowContextMenu(e events.Event) {
 	e.SetHandled() // always
 	wi := wb.This.(Widget)
-	nm := NewMenu(wi.ApplyContextMenus, wi, wi.ContextMenuPos(e))
+	nm := NewMenu(wi.AsWidget().ApplyContextMenus, wi, wi.ContextMenuPos(e))
 	if nm == nil { // no items
 		return
 	}

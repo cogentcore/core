@@ -210,7 +210,7 @@ func (em *Events) HandleFocusEvent(e events.Event) {
 			return !e.IsHandled()
 		})
 		if !e.IsHandled() {
-			em.Focus.HandleEvent(e)
+			em.Focus.AsWidget().HandleEvent(e)
 		}
 		if !e.IsHandled() {
 			em.Focus.AsTree().WalkUpParent(func(k tree.Node) bool {
@@ -240,7 +240,7 @@ func (em *Events) ResetOnMouseDown() {
 	// if we have sent a long hover start event, we send an end
 	// event (non-nil widget plus nil timer means we already sent)
 	if em.LongHoverWidget != nil && em.LongHoverTimer == nil {
-		em.LongHoverWidget.Send(events.LongHoverEnd)
+		em.LongHoverWidget.AsWidget().Send(events.LongHoverEnd)
 	}
 	em.LongHoverWidget = nil
 	em.LongHoverPos = image.Point{}
@@ -265,13 +265,13 @@ func (em *Events) HandlePosEvent(e events.Event) {
 			return
 		}
 		if em.Slide != nil {
-			em.Slide.HandleEvent(e)
-			em.Slide.Send(events.SlideMove, e)
+			em.Slide.AsWidget().HandleEvent(e)
+			em.Slide.AsWidget().Send(events.SlideMove, e)
 			return
 		}
 	case events.Scroll:
 		if em.Scroll != nil {
-			em.Scroll.HandleEvent(e)
+			em.Scroll.AsWidget().HandleEvent(e)
 			return
 		}
 	}
@@ -310,7 +310,7 @@ func (em *Events) HandlePosEvent(e events.Event) {
 			continue
 		}
 
-		w.HandleEvent(e) // everyone gets the primary event who is in scope, deepest first
+		w.AsWidget().HandleEvent(e) // everyone gets the primary event who is in scope, deepest first
 		switch et {
 		case events.MouseMove:
 			if move == nil && wb.Styles.Abilities.IsHoverable() {
@@ -390,19 +390,19 @@ func (em *Events) HandlePosEvent(e events.Event) {
 				}
 			}
 			em.DragHovers = em.UpdateHovers(hovs, em.DragHovers, e, events.DragEnter, events.DragLeave)
-			em.DragMove(e)                   // updates sprite position
-			em.Drag.HandleEvent(e)           // raw drag
-			em.Drag.Send(events.DragMove, e) // usually ignored
+			em.DragMove(e)                              // updates sprite position
+			em.Drag.AsWidget().HandleEvent(e)           // raw drag
+			em.Drag.AsWidget().Send(events.DragMove, e) // usually ignored
 		} else {
 			if em.DragPress != nil && em.DragStartCheck(e, DeviceSettings.DragStartTime, DeviceSettings.DragStartDistance) {
 				em.CancelRepeatClick()
 				em.CancelLongPress()
-				em.DragPress.Send(events.DragStart, e)
+				em.DragPress.AsWidget().Send(events.DragStart, e)
 			} else if em.SlidePress != nil && em.DragStartCheck(e, DeviceSettings.SlideStartTime, DeviceSettings.DragStartDistance) {
 				em.CancelRepeatClick()
 				em.CancelLongPress()
 				em.Slide = em.SlidePress
-				em.Slide.Send(events.SlideStart, e)
+				em.Slide.AsWidget().Send(events.SlideStart, e)
 			}
 		}
 		// if we already have a long press widget, we update it based on our dragging movement
@@ -412,7 +412,7 @@ func (em *Events) HandlePosEvent(e events.Event) {
 	case events.MouseUp:
 		em.CancelRepeatClick()
 		if em.Slide != nil {
-			em.Slide.Send(events.SlideStop, e)
+			em.Slide.AsWidget().Send(events.SlideStop, e)
 			em.Slide = nil
 			em.Press = nil
 		}
@@ -441,7 +441,7 @@ func (em *Events) HandlePosEvent(e events.Event) {
 						wb := w.AsWidget()
 						if !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.TripleClickable) {
 							sentMulti = true
-							w.HandleEvent(tce)
+							w.AsWidget().HandleEvent(tce)
 							break
 						}
 					}
@@ -453,7 +453,7 @@ func (em *Events) HandlePosEvent(e events.Event) {
 						if !wb.StateIs(states.Disabled) && wb.AbilityIs(abilities.DoubleClickable) {
 							em.LastDoubleClickWidget = up // not actually who gets the event
 							sentMulti = true
-							w.HandleEvent(dce)
+							w.AsWidget().HandleEvent(dce)
 							break
 						}
 					}
@@ -461,40 +461,40 @@ func (em *Events) HandlePosEvent(e events.Event) {
 				if !sentMulti {
 					em.LastDoubleClickWidget = nil
 					em.LastClickWidget = up
-					up.Send(events.Click, e)
+					up.AsWidget().Send(events.Click, e)
 				}
 			case events.Right: // note: automatically gets Control+Left
-				up.Send(events.ContextMenu, e)
+				up.AsWidget().Send(events.ContextMenu, e)
 			}
 		}
 		// if our original pressed widget is different from the one we are
 		// going up on, then it has not gotten a mouse up event yet, so
 		// we need to send it one
 		if em.Press != up && em.Press != nil {
-			em.Press.HandleEvent(e)
+			em.Press.AsWidget().HandleEvent(e)
 		}
 		em.Press = nil
 
 		// if we have sent a long press start event, we send an end
 		// event (non-nil widget plus nil timer means we already sent)
 		if em.LongPressWidget != nil && em.LongPressTimer == nil {
-			em.LongPressWidget.Send(events.LongPressEnd, e)
+			em.LongPressWidget.AsWidget().Send(events.LongPressEnd, e)
 		}
 		em.CancelLongPress()
 		// a mouse up event acts also acts as a mouse leave
 		// event on mobile, as that is needed to clear any
 		// hovered state
 		if up != nil && TheApp.Platform().IsMobile() {
-			up.Send(events.MouseLeave, e)
+			up.AsWidget().Send(events.MouseLeave, e)
 		}
 	case events.Scroll:
 		switch {
 		case em.Slide != nil:
-			em.Slide.HandleEvent(e)
+			em.Slide.AsWidget().HandleEvent(e)
 		case em.Drag != nil:
-			em.Drag.HandleEvent(e)
+			em.Drag.AsWidget().HandleEvent(e)
 		case em.Press != nil:
-			em.Press.HandleEvent(e)
+			em.Press.AsWidget().HandleEvent(e)
 		default:
 			em.Scene.HandleEvent(e)
 		}
@@ -526,7 +526,7 @@ func (em *Events) UpdateHovers(hov, prev []Widget, e events.Event, enter, leave 
 			}
 		}
 		if !stillIn && prv.AsTree().This != nil {
-			prv.Send(leave, e)
+			prv.AsWidget().Send(leave, e)
 		}
 	}
 
@@ -539,7 +539,7 @@ func (em *Events) UpdateHovers(hov, prev []Widget, e events.Event, enter, leave 
 			}
 		}
 		if !wasIn {
-			cur.Send(enter, e)
+			cur.AsWidget().Send(enter, e)
 		}
 	}
 	// todo: detect change in top one, use to update cursor
@@ -551,7 +551,7 @@ func (em *Events) TopLongHover() Widget {
 	var deep Widget
 	for i := len(em.Hovers) - 1; i >= 0; i-- {
 		h := em.Hovers[i]
-		if h.AbilityIs(abilities.LongHoverable) {
+		if h.AsWidget().AbilityIs(abilities.LongHoverable) {
 			deep = h
 			break
 		}
@@ -604,7 +604,7 @@ func (em *Events) HandleLong(e events.Event, deep Widget, w *Widget, pos *image.
 		// if we have already finished the timer, then we have already
 		// sent the start event, so we have to send the end one
 		if *t == nil {
-			(*w).Send(etyp, e)
+			(*w).AsWidget().Send(etyp, e)
 		}
 		clearLong()
 		// fmt.Println("cleared")
@@ -625,7 +625,7 @@ func (em *Events) HandleLong(e events.Event, deep Widget, w *Widget, pos *image.
 		// up not getting another mouse move event, so we will be on the
 		// element with no tooltip, which is a bug. Not returning here is
 		// the solution to https://github.com/cogentcore/core/issues/553
-		(*w).Send(etyp, e)
+		(*w).AsWidget().Send(etyp, e)
 		clearLong()
 		// fmt.Println("fallthrough after clear")
 	}
@@ -641,7 +641,7 @@ func (em *Events) HandleLong(e events.Event, deep Widget, w *Widget, pos *image.
 	// we now know we don't have the timer and thus sent the start
 	// event already, so we need to send a end event
 	if *w != nil {
-		(*w).Send(etyp, e)
+		(*w).AsWidget().Send(etyp, e)
 		clearLong()
 		// fmt.Println("lhw, send end, cleared")
 		return
@@ -665,7 +665,7 @@ func (em *Events) HandleLong(e events.Event, deep Widget, w *Widget, pos *image.
 		if *w == nil {
 			return
 		}
-		(*w).Send(styp, e)
+		(*w).AsWidget().Send(styp, e)
 		// we are done with the timer, and this indicates that
 		// we have sent a start event
 		*t = nil
@@ -729,7 +729,7 @@ func (em *Events) StartRepeatClickTimer() {
 		if em.RepeatClick == nil || !em.RepeatClick.IsVisible() {
 			return
 		}
-		em.RepeatClick.Send(events.Click)
+		em.RepeatClick.AsWidget().Send(events.Click)
 		em.StartRepeatClickTimer()
 	})
 }
@@ -810,7 +810,7 @@ func (em *Events) DragDrop(drag Widget, e events.Event) {
 		return
 	}
 	for _, dwi := range em.DragHovers {
-		dwi.SetState(false, states.DragHovered)
+		dwi.AsWidget().SetState(false, states.DragHovered)
 	}
 	targ := em.DragHovers[len(em.DragHovers)-1]
 	de := events.NewDragDrop(events.Drop, e.(*events.Mouse)) // gets the actual mod at this point
@@ -820,7 +820,7 @@ func (em *Events) DragDrop(drag Widget, e events.Event) {
 	if DebugSettings.EventTrace {
 		fmt.Println(targ, "Drop with mod:", de.DropMod, "source:", de.Source)
 	}
-	targ.HandleEvent(de)
+	targ.AsWidget().HandleEvent(de)
 }
 
 // DropFinalize should be called as the last step in the Drop event processing,
@@ -832,7 +832,7 @@ func (em *Events) DropFinalize(de *events.DragDrop) {
 	}
 	de.Typ = events.DropDeleteSource
 	de.ClearHandled()
-	de.Source.(Widget).HandleEvent(de)
+	de.Source.(Widget).AsWidget().HandleEvent(de)
 }
 
 // Clipboard returns the system system.Clipboard, supplying the window context
@@ -932,11 +932,11 @@ func (em *Events) SetFocusImpl(w Widget, sendEvent bool) bool {
 		if DebugSettings.FocusTrace {
 			fmt.Println(em.Scene, "Losing focus:", cfoc)
 		}
-		cfoc.Send(events.FocusLost)
+		cfoc.AsWidget().Send(events.FocusLost)
 	}
 	em.Focus = w
 	if sendEvent && w != nil {
-		w.Send(events.Focus)
+		w.AsWidget().Send(events.Focus)
 	}
 	return true
 }
@@ -956,7 +956,7 @@ func (em *Events) FocusNext() bool {
 // returns true if a focus item found.
 func (em *Events) FocusNextFrom(from Widget) bool {
 	next := WidgetNextFunc(from, func(w Widget) bool {
-		return w.IsVisible() && !w.StateIs(states.Disabled) && w.AbilityIs(abilities.Focusable)
+		return w.IsVisible() && !w.AsWidget().StateIs(states.Disabled) && w.AsWidget().AbilityIs(abilities.Focusable)
 	})
 	em.SetFocusEvent(next)
 	return next != nil
@@ -1011,7 +1011,7 @@ func (em *Events) FocusPrev() bool {
 // (can be nil).
 func (em *Events) FocusPrevFrom(from Widget) bool {
 	prev := WidgetPrevFunc(from, func(w Widget) bool {
-		return w.IsVisible() && !w.StateIs(states.Disabled) && w.AbilityIs(abilities.Focusable)
+		return w.IsVisible() && !w.AsWidget().StateIs(states.Disabled) && w.AsWidget().AbilityIs(abilities.Focusable)
 	})
 	em.SetFocusEvent(prev)
 	return prev != nil
@@ -1054,7 +1054,7 @@ func (em *Events) ClearNonFocus(foc Widget) {
 			if DebugSettings.EventTrace {
 				fmt.Printf("ClearNonFocus: had focus: %v\n", wb.Path())
 			}
-			wi.Send(events.FocusLost)
+			wi.AsWidget().Send(events.FocusLost)
 		}
 		return tree.Continue
 	})

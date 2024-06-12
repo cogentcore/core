@@ -38,7 +38,7 @@ func TestTabsClick(t *testing.T) {
 	second := ts.NewTab("Second")
 	NewText(second).SetText("I am second!")
 	b.AssertRender(t, "tabs/click", func() {
-		ts.Tabs().Child(1).(Widget).Send(events.Click)
+		ts.Tabs().Child(1).(Widget).AsWidget().Send(events.Click)
 	})
 }
 
@@ -93,7 +93,7 @@ func TestTabsNewClick(t *testing.T) {
 	ts.NewTab("First")
 	ts.NewTab("Second")
 	b.AssertRender(t, "tabs/new-click", func() {
-		ts.Tabs().ChildByName("new-tab").(Widget).Send(events.Click)
+		ts.Tabs().ChildByName("new-tab").(Widget).AsWidget().Send(events.Click)
 		assert.Equal(t, ts.NumTabs(), 3)
 	})
 }

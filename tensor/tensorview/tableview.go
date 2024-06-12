@@ -333,7 +333,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 						}
 					}
 					wb.SetReadOnly(tv.IsReadOnly())
-					w.SetState(invis, states.Invisible)
+					wb.SetState(invis, states.Invisible)
 					if svi.HasStyleFunc() {
 						w.Style()
 					}
