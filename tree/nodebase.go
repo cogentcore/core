@@ -13,7 +13,6 @@ import (
 	"github.com/jinzhu/copier"
 
 	"cogentcore.org/core/base/elide"
-	"cogentcore.org/core/enums"
 	"cogentcore.org/core/types"
 )
 
@@ -60,10 +59,6 @@ type NodeBase struct {
 	// various NodeBase child helper functions when applicable so that everything is updated
 	// properly, such as when deleting children.
 	Children []Node `tableview:"-" copier:"-" set:"-" json:",omitempty"`
-
-	// Flags are bit flags for internal node state, which can be extended using
-	// the enums package.
-	Flags Flags `tableview:"-" copier:"-" json:"-" xml:"-" set:"-" max-width:"80" height:"3"`
 
 	// Properties is a property map for arbitrary key-value properties.
 	// When possible, use typed fields on a new type embedding NodeBase instead of this.
@@ -407,31 +402,6 @@ func (n *NodeBase) Destroy() {
 	}
 	n.DeleteChildren()
 	n.This = nil
-}
-
-// Flags:
-
-// Is checks if the given flag is set, using atomic,
-// which is safe for concurrent access.
-func (n *NodeBase) Is(f enums.BitFlag) bool {
-	return n.Flags.HasFlag(f)
-}
-
-// SetFlag sets the given flag(s) to the given state
-// using atomic, which is safe for concurrent access.
-func (n *NodeBase) SetFlag(on bool, f ...enums.BitFlag) {
-	n.Flags.SetFlag(on, f...)
-}
-
-// FlagType returns the flags of the node as the true flag type of the node,
-// which may be a type that extends the standard [Flags]. Each node type
-// that extends the flag type should define this method; for example:
-//
-//	func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
-//		return (*WidgetFlags)(&wb.Flags)
-//	}
-func (n *NodeBase) FlagType() enums.BitFlagSetter {
-	return &n.Flags
 }
 
 // Property Storage:
