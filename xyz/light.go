@@ -25,7 +25,7 @@ type LightBase struct { //types:add --setters
 	// Name is the name of the light, which matters since lights are accessed by name.
 	Name string
 
-	// On is whether the light is turned on.
+	// On is whether the light is turned on. TODO: support this being false.
 	On bool
 
 	// Lumens is the brightness/intensity/strength of the light in normalized 0-1 units.
