@@ -123,7 +123,7 @@ func (wb *WidgetBase) NeedsLayout() {
 
 // AddReRender adds given widget to be re-rendered next pass
 func (sc *Scene) AddReRender(w Widget) {
-	sc.ReRender = append(sc.ReRender, w)
+	sc.reRender = append(sc.reRender, w)
 }
 
 // NeedsRebuild returns true if the RenderContext indicates
@@ -226,9 +226,9 @@ func (sc *Scene) DoUpdate() bool {
 
 	rc := sc.RenderContext()
 
-	if sc.ShowIter < SceneShowIters {
+	if sc.showIter < SceneShowIters {
 		sc.SetFlag(true, ScNeedsLayout)
-		sc.ShowIter++
+		sc.showIter++
 	}
 
 	switch {
@@ -236,13 +236,13 @@ func (sc *Scene) DoUpdate() bool {
 		sc.DoRebuild()
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
-	case sc.LastRender.NeedsRestyle(rc):
+	case sc.lastRender.NeedsRestyle(rc):
 		// fmt.Println("restyle")
 		sc.ApplyStyleScene()
 		sc.LayoutRenderScene()
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
-		sc.LastRender.SaveRender(rc)
+		sc.lastRender.SaveRender(rc)
 	case sc.Is(ScNeedsLayout):
 		// fmt.Println("layout")
 		sc.LayoutRenderScene()
@@ -253,13 +253,13 @@ func (sc *Scene) DoUpdate() bool {
 		sc.DoNeedsRender()
 		sc.SetFlag(false, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
-	case len(sc.ReRender) > 0:
+	case len(sc.reRender) > 0:
 		// fmt.Println("re-render")
-		for _, w := range sc.ReRender {
+		for _, w := range sc.reRender {
 			w.AsTree().SetFlag(true, ScNeedsRender)
 			// fmt.Println("rerender:", w)
 		}
-		sc.ReRender = nil
+		sc.reRender = nil
 		sc.DoNeedsRender()
 		sc.SetFlag(false, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
@@ -268,8 +268,8 @@ func (sc *Scene) DoUpdate() bool {
 		return false
 	}
 
-	if sc.ShowIter == SceneShowIters { // end of first pass
-		sc.ShowIter++
+	if sc.showIter == SceneShowIters { // end of first pass
+		sc.showIter++
 		if !sc.Is(ScPrefSizing) {
 			sc.Events.ActivateStartFocus()
 		}
@@ -324,7 +324,7 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 	psz := sz.Actual.Total
 	// fmt.Println("\npref size:", psz, "csz:", sz.Actual.Content, "internal:", sz.Internal, "space:", sc.Geom.Size.Space)
 	sc.SetFlag(false, ScPrefSizing)
-	sc.ShowIter = 0
+	sc.showIter = 0
 	return psz.ToPointFloor()
 }
 
@@ -381,7 +381,7 @@ func (wb *WidgetBase) PopBounds() {
 		pcfc := pc.FillStyle.Color
 		pcop := pc.FillStyle.Opacity
 		pc.StrokeStyle.Width.Dot(1)
-		pc.StrokeStyle.Color = colors.C(hct.New(wb.Scene.RenderBBoxHue, 100, 50))
+		pc.StrokeStyle.Color = colors.C(hct.New(wb.Scene.renderBBoxHue, 100, 50))
 		pc.FillStyle.Color = nil
 		if isSelw {
 			fc := pc.StrokeStyle.Color
@@ -396,10 +396,10 @@ func (wb *WidgetBase) PopBounds() {
 		pc.StrokeStyle.Width = pcsw
 		pc.StrokeStyle.Color = pcsc
 
-		wb.Scene.RenderBBoxHue += 10
-		if wb.Scene.RenderBBoxHue > 360 {
-			rmdr := (int(wb.Scene.RenderBBoxHue-360) + 1) % 9
-			wb.Scene.RenderBBoxHue = float32(rmdr)
+		wb.Scene.renderBBoxHue += 10
+		if wb.Scene.renderBBoxHue > 360 {
+			rmdr := (int(wb.Scene.renderBBoxHue-360) + 1) % 9
+			wb.Scene.renderBBoxHue = float32(rmdr)
 		}
 	}
 

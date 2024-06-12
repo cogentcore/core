@@ -456,12 +456,12 @@ func (t *Scene) SetSelectedWidgetChan(v chan Widget) *Scene { t.SelectedWidgetCh
 
 // SetReRender sets the [Scene.ReRender]:
 // ReRender items are re-rendered after the current pass
-func (t *Scene) SetReRender(v ...Widget) *Scene { t.ReRender = v; return t }
+func (t *Scene) SetReRender(v ...Widget) *Scene { t.reRender = v; return t }
 
 // SetDirectRenders sets the [Scene.DirectRenders]:
 // DirectRenders are widgets that render directly to the RenderWin
 // instead of rendering into the Scene Pixels image.
-func (t *Scene) SetDirectRenders(v ...Widget) *Scene { t.DirectRenders = v; return t }
+func (t *Scene) SetDirectRenders(v ...Widget) *Scene { t.directRenders = v; return t }
 
 // SeparatorType is the [types.Type] for [Separator]
 var SeparatorType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Separator", IDName: "separator", Doc: "Separator draws a separator line. It goes in the direction\nspecified by [style.Style.Direction].", Embeds: []types.Field{{Name: "WidgetBase"}}, Instance: &Separator{}})

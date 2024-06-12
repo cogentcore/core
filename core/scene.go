@@ -7,7 +7,6 @@ package core
 import (
 	"image"
 	"slices"
-	"sync"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
@@ -75,8 +74,8 @@ type Scene struct { //core:no-new
 	// current stage in which this Scene is set
 	Stage *Stage `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// RenderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode
-	RenderBBoxHue float32 `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	// renderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode
+	renderBBoxHue float32 `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// the currently selected/hovered widget through the inspect editor selection mode
 	// that should be highlighted with a background color
@@ -86,27 +85,24 @@ type Scene struct { //core:no-new
 	// selection mode is transmitted to the inspect editor after the user is done selecting
 	SelectedWidgetChan chan Widget `json:"-" xml:"-"`
 
-	// LastRender captures key params from last render.
+	// lastRender captures key params from last render.
 	// If different then a new ApplyStyleScene is needed.
-	LastRender RenderParams `edit:"-" set:"-"`
+	lastRender RenderParams
 
-	// StyleMu is RW mutex protecting access to Style-related global vars
-	StyleMu sync.RWMutex `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
-
-	// ShowIter counts up at start of showing a Scene
+	// showIter counts up at start of showing a Scene
 	// to trigger Show event and other steps at start of first show
-	ShowIter int `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	showIter int
 
-	// ReRender items are re-rendered after the current pass
-	ReRender []Widget
+	// reRender items are re-rendered after the current pass
+	reRender []Widget
 
 	// hasShown is whether this scene has already been shown.
 	// This is used to ensure that [events.Show] is only sent once.
-	hasShown bool `set:"-"`
+	hasShown bool
 
-	// DirectRenders are widgets that render directly to the RenderWin
+	// directRenders are widgets that render directly to the RenderWin
 	// instead of rendering into the Scene Pixels image.
-	DirectRenders []Widget
+	directRenders []Widget
 }
 
 func (sc *Scene) FlagType() enums.BitFlagSetter {
@@ -249,7 +245,7 @@ func (sc *Scene) Resize(geom math32.Geom2DInt) {
 	// and to get FillInsets to overwrite mysterious black bars that otherwise are rendered on both iOS
 	// and Android in different contexts.
 	// TODO(kai): is there a more efficient way to do this, and do we need to do this on all platforms?
-	sc.ShowIter = 0
+	sc.showIter = 0
 	sc.NeedsLayout()
 }
 
@@ -356,13 +352,13 @@ func (sc *Scene) ScenePos() {
 }
 
 func (sc *Scene) AddDirectRender(w Widget) {
-	sc.DirectRenders = append(sc.DirectRenders, w)
+	sc.directRenders = append(sc.directRenders, w)
 }
 
 func (sc *Scene) DeleteDirectRender(w Widget) {
-	idx := slices.Index(sc.DirectRenders, w)
+	idx := slices.Index(sc.directRenders, w)
 	if idx >= 0 {
-		sc.DirectRenders = slices.Delete(sc.DirectRenders, idx, idx+1)
+		sc.directRenders = slices.Delete(sc.directRenders, idx, idx+1)
 	}
 }
 

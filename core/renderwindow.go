@@ -1018,7 +1018,7 @@ func (w *RenderWindow) GatherScenes() bool {
 			}
 			winScene = st.Scene
 			rs.Add(st.Scene, scIndex)
-			for _, w := range st.Scene.DirectRenders {
+			for _, w := range st.Scene.directRenders {
 				rs.Add(w, scIndex)
 			}
 			winIndex = i

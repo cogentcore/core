@@ -299,8 +299,8 @@ func (sm *Stages) SendShowEvents() {
 			continue
 		}
 		sc := st.Scene
-		if sc.ShowIter == SceneShowIters+1 {
-			sc.ShowIter++
+		if sc.showIter == SceneShowIters+1 {
+			sc.showIter++
 			if !sc.hasShown {
 				sc.hasShown = true
 				// profile.Profiling = true
