@@ -17,15 +17,6 @@ type Light interface {
 	// AsLightBase returns the [LightBase] for this Light,
 	// which provides the core functionality of a light.
 	AsLightBase() *LightBase
-
-	// Name returns name of the light -- lights are accessed by name
-	Name() string
-
-	// Color returns color of light
-	Color() color.RGBA
-
-	// Lumens returns brightness of light
-	Lumens() float32
 }
 
 // LightBase provides the core implementation of the [Light] interface.
