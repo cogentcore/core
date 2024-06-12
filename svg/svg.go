@@ -175,10 +175,10 @@ func (sv *SVG) ImageByURL(url string) image.Image {
 }
 
 func (sv *SVG) Style() {
-	// set the Defs flags
+	// set isDef
 	sv.Defs.WalkDown(func(n tree.Node) bool {
 		sn := n.(Node)
-		sn.AsTree().SetFlag(true, IsDef)
+		sn.AsNodeBase().isDef = true
 		sn.AsNodeBase().Style(sv)
 		return tree.Continue
 	})

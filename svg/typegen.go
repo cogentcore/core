@@ -279,10 +279,11 @@ func (t *Marker) SetTransform(v math32.Matrix2) *Marker { t.Transform = v; retur
 func (t *Marker) SetEffSize(v math32.Vector2) *Marker { t.EffSize = v; return t }
 
 // NodeBaseType is the [types.Type] for [NodeBase]
-var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.NodeBase", IDName: "node-base", Doc: "svg.NodeBase is the base type for elements within the SVG scenegraph", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Class", Doc: "user-defined class name(s) used primarily for attaching\nCSS styles to different display elements.\nMultiple class names can be used to combine properties:\nuse spaces to separate per css standard."}, {Name: "CSS", Doc: "CSS is the cascading style sheet at this level.\nThese styles apply here and to everything below, until superceded.\nUse .class and #name Properties elements to apply entire styles\nto given elements, and type for element type."}, {Name: "CSSAgg", Doc: "CSSAgg is the aggregated css properties from all higher nodes down to this node."}, {Name: "BBox", Doc: "bounding box for the node within the SVG Pixels image.\nThis one can be outside the visible range of the SVG image.\nVisBBox is intersected and only shows visible portion."}, {Name: "VisBBox", Doc: "visible bounding box for the node intersected with the SVG image geometry"}, {Name: "Paint", Doc: "paint style information for this node"}}, Instance: &NodeBase{}})
+var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.NodeBase", IDName: "node-base", Doc: "NodeBase is the base type for all elements within an SVG tree.\nIt implements the [Node] interface and contains the core functionality.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Class", Doc: "Class contains user-defined class name(s) used primarily for attaching\nCSS styles to different display elements.\nMultiple class names can be used to combine properties;\nuse spaces to separate per css standard."}, {Name: "CSS", Doc: "CSS is the cascading style sheet at this level.\nThese styles apply here and to everything below, until superceded.\nUse .class and #name Properties elements to apply entire styles\nto given elements, and type for element type."}, {Name: "CSSAgg", Doc: "CSSAgg is the aggregated css properties from all higher nodes down to this node."}, {Name: "BBox", Doc: "BBox is the bounding box for the node within the SVG Pixels image.\nThis one can be outside the visible range of the SVG image.\nVisBBox is intersected and only shows visible portion."}, {Name: "VisBBox", Doc: "VisBBox is the visible bounding box for the node intersected with the SVG image geometry."}, {Name: "Paint", Doc: "Paint is the paint style information for this node."}, {Name: "isDef", Doc: "isDef is whether this is in [SVG.Defs]."}}, Instance: &NodeBase{}})
 
 // NewNodeBase returns a new [NodeBase] with the given optional parent:
-// svg.NodeBase is the base type for elements within the SVG scenegraph
+// NodeBase is the base type for all elements within an SVG tree.
+// It implements the [Node] interface and contains the core functionality.
 func NewNodeBase(parent ...tree.Node) *NodeBase { return tree.New[*NodeBase](parent...) }
 
 // NodeType returns the [*types.Type] of [NodeBase]
@@ -292,9 +293,9 @@ func (t *NodeBase) NodeType() *types.Type { return NodeBaseType }
 func (t *NodeBase) New() tree.Node { return &NodeBase{} }
 
 // SetClass sets the [NodeBase.Class]:
-// user-defined class name(s) used primarily for attaching
+// Class contains user-defined class name(s) used primarily for attaching
 // CSS styles to different display elements.
-// Multiple class names can be used to combine properties:
+// Multiple class names can be used to combine properties;
 // use spaces to separate per css standard.
 func (t *NodeBase) SetClass(v string) *NodeBase { t.Class = v; return t }
 
