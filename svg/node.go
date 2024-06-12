@@ -19,37 +19,31 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Node is the interface for all SVG nodes
+// Node is the interface for all SVG nodes.
 type Node interface {
 	tree.Node
 
-	// AsNodeBase returns a generic svg.NodeBase for our node -- gives generic
-	// access to all the base-level data structures without requiring
-	// interface methods.
+	// AsNodeBase returns the [NodeBase] for our node, which gives
+	// access to all the base-level data structures and methods
+	// without requiring interface methods.
 	AsNodeBase() *NodeBase
 
-	// PaintStyle returns the SVG Paint style object for this node
-	PaintStyle() *styles.Paint
-
-	// Style updates the Paint style for this node
-	Style(sv *SVG)
-
-	// Render draws the node to the svg image
+	// Render draws the node to the svg image.
 	Render(sv *SVG)
 
-	// BBoxes computes BBox and VisBBox during Render
+	// BBoxes computes BBox and VisBBox during Render.
 	BBoxes(sv *SVG)
 
-	// LocalBBox returns the bounding box of node in local dimensions
+	// LocalBBox returns the bounding box of node in local dimensions.
 	LocalBBox() math32.Box2
 
-	// NodeBBox returns the bounding box in image coordinates for this node
+	// NodeBBox returns the bounding box in image coordinates for this node.
 	NodeBBox(sv *SVG) image.Rectangle
 
-	// SetNodePos sets the upper left effective position of this element, in local dimensions
+	// SetNodePos sets the upper left effective position of this element, in local dimensions.
 	SetNodePos(pos math32.Vector2)
 
-	// SetNodeSize sets the overall effective size of this element, in local dimensions
+	// SetNodeSize sets the overall effective size of this element, in local dimensions.
 	SetNodeSize(sz math32.Vector2)
 
 	// ApplyTransform applies the given 2D transform to the geometry of this node
@@ -60,7 +54,7 @@ type Node interface {
 	// relative to given point.  Trans translation and point are in top-level coordinates,
 	// so must be transformed into local coords first.
 	// Point is upper left corner of selection box that anchors the translation and scaling,
-	// and for rotation it is the center point around which to rotate
+	// and for rotation it is the center point around which to rotate.
 	ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.Vector2, rot float32, pt math32.Vector2)
 
 	// WriteGeom writes the geometry of the node to a slice of floating point numbers
@@ -72,7 +66,7 @@ type Node interface {
 	// the length and ordering of which is specific to each node type.
 	ReadGeom(sv *SVG, dat []float32)
 
-	// SVGName returns the SVG element name (e.g., "rect", "path" etc)
+	// SVGName returns the SVG element name (e.g., "rect", "path" etc).
 	SVGName() string
 
 	// EnforceSVGName returns true if in general this element should
@@ -81,13 +75,14 @@ type Node interface {
 	EnforceSVGName() bool
 }
 
-// svg.NodeBase is the base type for elements within the SVG scenegraph
+// NodeBase is the base type for all elements within an SVG tree.
+// It implements the [Node] interface and contains the core functionality.
 type NodeBase struct {
 	tree.NodeBase
 
-	// user-defined class name(s) used primarily for attaching
+	// Class contains user-defined class name(s) used primarily for attaching
 	// CSS styles to different display elements.
-	// Multiple class names can be used to combine properties:
+	// Multiple class names can be used to combine properties;
 	// use spaces to separate per css standard.
 	Class string
 
@@ -100,15 +95,15 @@ type NodeBase struct {
 	// CSSAgg is the aggregated css properties from all higher nodes down to this node.
 	CSSAgg map[string]any `copier:"-" json:"-" xml:"-" set:"-" view:"no-inline"`
 
-	// bounding box for the node within the SVG Pixels image.
+	// BBox is the bounding box for the node within the SVG Pixels image.
 	// This one can be outside the visible range of the SVG image.
 	// VisBBox is intersected and only shows visible portion.
 	BBox image.Rectangle `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// visible bounding box for the node intersected with the SVG image geometry
+	// VisBBox is the visible bounding box for the node intersected with the SVG image geometry.
 	VisBBox image.Rectangle `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// paint style information for this node
+	// Paint is the paint style information for this node.
 	Paint styles.Paint `json:"-" xml:"-" set:"-"`
 }
 
@@ -169,11 +164,11 @@ func (g *NodeBase) ParTransform(self bool) math32.Matrix2 {
 	}
 	np := len(pars)
 	if np > 0 {
-		xf = pars[np-1].PaintStyle().Transform
+		xf = pars[np-1].AsNodeBase().PaintStyle().Transform
 	}
 	for i := np - 2; i >= 0; i-- {
 		n := pars[i]
-		xf.SetMul(n.PaintStyle().Transform)
+		xf.SetMul(n.AsNodeBase().PaintStyle().Transform)
 	}
 	if self {
 		xf.SetMul(g.Paint.Transform)
@@ -335,7 +330,7 @@ func (g *NodeBase) Style(sv *SVG) {
 	if g.Parent != nil { // && g.Par != sv.Root.This
 		pn := g.Parent.(Node)
 		parCSSAgg = pn.AsNodeBase().CSSAgg
-		pp := pn.PaintStyle()
+		pp := pn.AsNodeBase().PaintStyle()
 		pc.CopyStyleFrom(pp)
 		pc.SetStyleProperties(pp, g.Properties, ctxt)
 	} else {
@@ -379,7 +374,7 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css map[string]any) bool {
 	pc := &g.Paint
 	ctxt := colors.Context(sv)
 	if g.Parent != sv.Root.This {
-		pp := g.Parent.(Node).PaintStyle()
+		pp := g.Parent.(Node).AsNodeBase().PaintStyle()
 		pc.SetStyleProperties(pp, pmap, ctxt)
 	} else {
 		pc.SetStyleProperties(nil, pmap, ctxt)

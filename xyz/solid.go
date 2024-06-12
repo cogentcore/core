@@ -18,14 +18,15 @@ import (
 type Solid struct {
 	NodeBase
 
-	// name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene
-	Mesh MeshName `set:"-"`
+	// MeshName is the name of the mesh shape information used for rendering
+	// this solid; all meshes are collected on the Scene.
+	MeshName MeshName `set:"-"`
 
-	// material properties of the surface (color, shininess, texture, etc)
-	Mat Material `view:"add-fields"`
+	// Material contains the material properties of the surface (color, shininess, texture, etc).
+	Material Material `view:"add-fields"`
 
-	// cached pointer to mesh
-	MeshPtr Mesh `view:"-" set:"-"`
+	// Mesh is the cached [Mesh] object set from [Solid.MeshName].
+	Mesh Mesh `view:"-" set:"-"`
 }
 
 func (sld *Solid) Init() {
@@ -44,7 +45,7 @@ func (sld *Solid) AsSolid() *Solid {
 // This is called automatically Init.
 func (sld *Solid) Defaults() {
 	sld.Pose.Defaults()
-	sld.Mat.Defaults()
+	sld.Material.Defaults()
 }
 
 // SetMeshName sets mesh to given mesh name.
@@ -57,18 +58,18 @@ func (sld *Solid) SetMeshName(meshName string) error {
 		log.Println(err)
 		return err
 	}
-	sld.Mesh = MeshName(meshName)
-	sld.MeshPtr = ms
+	sld.MeshName = MeshName(meshName)
+	sld.Mesh = ms
 	return nil
 }
 
 // SetMesh sets mesh
 func (sld *Solid) SetMesh(ms Mesh) *Solid {
-	sld.MeshPtr = ms
-	if sld.MeshPtr != nil {
-		sld.Mesh = MeshName(sld.MeshPtr.Name())
+	sld.Mesh = ms
+	if sld.Mesh != nil {
+		sld.MeshName = MeshName(sld.Mesh.AsMeshBase().Name)
 	} else {
-		sld.Mesh = ""
+		sld.MeshName = ""
 	}
 	return sld
 }
@@ -76,35 +77,35 @@ func (sld *Solid) SetMesh(ms Mesh) *Solid {
 // SetColor sets the [Material.Color]:
 // prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering
 func (sld *Solid) SetColor(v color.RGBA) *Solid {
-	sld.Mat.Color = v
+	sld.Material.Color = v
 	return sld
 }
 
 // SetEmissive sets the [Material.Emissive]:
 // prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object
 func (sld *Solid) SetEmissive(v color.RGBA) *Solid {
-	sld.Mat.Emissive = v
+	sld.Material.Emissive = v
 	return sld
 }
 
 // SetShiny sets the [Material.Shiny]:
 // prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect.
 func (sld *Solid) SetShiny(v float32) *Solid {
-	sld.Mat.Shiny = v
+	sld.Material.Shiny = v
 	return sld
 }
 
 // SetReflective sets the [Material.Reflective]:
 // prop: reflective = specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light.
 func (sld *Solid) SetReflective(v float32) *Solid {
-	sld.Mat.Reflective = v
+	sld.Material.Reflective = v
 	return sld
 }
 
 // SetBright sets the [Material.Bright]:
 // prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters
 func (sld *Solid) SetBright(v float32) *Solid {
-	sld.Mat.Bright = v
+	sld.Material.Bright = v
 	return sld
 }
 
@@ -112,13 +113,13 @@ func (sld *Solid) SetBright(v float32) *Solid {
 // (textures are accessed by name on Scene).
 // If name is empty, then texture is reset
 func (sld *Solid) SetTextureName(texName string) *Solid {
-	sld.Mat.SetTextureName(sld.Scene, texName)
+	sld.Material.SetTextureName(sld.Scene, texName)
 	return sld
 }
 
 // SetTexture sets material to use given texture
 func (sld *Solid) SetTexture(tex Texture) *Solid {
-	sld.Mat.SetTexture(tex)
+	sld.Material.SetTexture(tex)
 	return sld
 }
 
@@ -162,47 +163,47 @@ func (sld *Solid) ParentMaterial() *Material {
 	if psi == nil {
 		return nil
 	}
-	return &(psi.Mat)
+	return &(psi.Material)
 }
 
 // Validate checks that solid has valid mesh and texture settings, etc
 func (sld *Solid) Validate() error {
-	if sld.Mesh == "" {
+	if sld.MeshName == "" {
 		err := fmt.Errorf("xyz.Solid: %s Mesh name is empty", sld.Path())
 		log.Println(err)
 		return err
 	}
-	if sld.MeshPtr == nil || sld.MeshPtr.Name() != string(sld.Mesh) {
-		err := sld.SetMeshName(string(sld.Mesh))
+	if sld.Mesh == nil || sld.Mesh.AsMeshBase().Name != string(sld.MeshName) {
+		err := sld.SetMeshName(string(sld.MeshName))
 		if err != nil {
 			return err
 		}
 	}
-	return sld.Mat.Validate(sld.Scene)
+	return sld.Material.Validate(sld.Scene)
 }
 
 func (sld *Solid) IsVisible() bool {
-	if sld.MeshPtr == nil {
+	if sld.Mesh == nil {
 		return false
 	}
 	return sld.NodeBase.IsVisible()
 }
 
 func (sld *Solid) IsTransparent() bool {
-	if sld.MeshPtr == nil {
+	if sld.Mesh == nil {
 		return false
 	}
-	if sld.MeshPtr.HasColor() {
-		return sld.MeshPtr.IsTransparent()
+	if sld.Mesh.AsMeshBase().HasColor {
+		return sld.Mesh.AsMeshBase().Transparent
 	}
-	return sld.Mat.IsTransparent()
+	return sld.Material.IsTransparent()
 }
 
 // UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
 // groups aggregate over elements
 func (sld *Solid) UpdateMeshBBox() {
-	if sld.MeshPtr != nil {
-		mesh := sld.MeshPtr.AsMeshBase()
+	if sld.Mesh != nil {
+		mesh := sld.Mesh.AsMeshBase()
 		sld.MeshBBox = mesh.BBox
 	}
 }
@@ -214,15 +215,15 @@ func (sld *Solid) UpdateMeshBBox() {
 // used for organizing the ordering of rendering
 func (sld *Solid) RenderClass() RenderClasses {
 	switch {
-	case sld.Mat.TexPtr != nil:
+	case sld.Material.Texture != nil:
 		return RClassOpaqueTexture
-	case sld.MeshPtr.HasColor():
-		if sld.MeshPtr.IsTransparent() {
+	case sld.Mesh.AsMeshBase().HasColor:
+		if sld.Mesh.AsMeshBase().Transparent {
 			return RClassTransVertex
 		}
 		return RClassOpaqueVertex
 	default:
-		if sld.Mat.IsTransparent() {
+		if sld.Material.IsTransparent() {
 			return RClassTransUniform
 		}
 		return RClassOpaqueUniform
@@ -231,10 +232,8 @@ func (sld *Solid) RenderClass() RenderClasses {
 
 // Render activates this solid for rendering
 func (sld *Solid) Render() {
-	sld.Scene.Phong.UseMeshName(string(sld.Mesh))
-	sld.PoseMu.RLock()
+	sld.Scene.Phong.UseMeshName(string(sld.MeshName))
 	sld.Scene.Phong.SetModelMtx(&sld.Pose.WorldMatrix)
-	sld.PoseMu.RUnlock()
-	sld.Mat.Render(sld.Scene)
+	sld.Material.Render(sld.Scene)
 	sld.Scene.Phong.Render()
 }

@@ -6,112 +6,93 @@ package xyz
 
 import (
 	"fmt"
-	"sync"
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/vgpu/vshape"
 )
 
-// MeshName is a mesh name -- provides an automatic gui chooser for meshes.
-// Used on Solid to link to meshes by name.
+// MeshName is a [Mesh] name. This type provides an automatic GUI chooser for meshes.
+// It is used on [Solid] to link to meshes by name.
 type MeshName string
 
-// Mesh parameterizes the mesh-based shape used for rendering a Solid.
+// Mesh parametrizes the mesh-based shape used for rendering a [Solid].
 // Only indexed triangle meshes are supported.
-// All Mesh's must know in advance the number of vertex and index points
-// they require, and the SetVerticies method operates on data from the
+// All Meshes must know in advance the number of vertex and index points
+// they require, and the SetVertices method operates on data from the
 // vgpu staging buffer to set the relevant data post-allocation.
 // The vgpu vshape library is used for all basic shapes, and it follows
 // this same logic.
 // Per-vertex Color is optional, as is the ability to update the data
-// after initial SetVerticies call (default is to do nothing).
+// after initial SetVertices call (default is to do nothing).
 type Mesh interface {
-	// Name returns name of the mesh
-	Name() string
 
-	// SetName sets the name of the mesh
-	SetName(nm string)
-
-	// AsMeshBase returns the MeshBase for this Mesh
+	// AsMeshBase returns the [MeshBase] for this Mesh,
+	// which provides the core functionality of a mesh.
 	AsMeshBase() *MeshBase
 
 	// Sizes returns the number of vertex and index elements required for this mesh
 	// including a bool representing whether it has per-vertex color.
-	Sizes() (nVtx, nIndex int, hasColor bool)
+	Sizes() (numVertex, numIndex int, hasColor bool)
 
 	// Set sets the mesh points into given arrays, which have been allocated
 	// according to the Sizes() returned by this Mesh.
 	// The mesh is automatically marked with SetMod so that does not need to be done here.
-	Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32)
+	Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32)
 
 	// Update updates the mesh points into given arrays, which have previously
-	// been set with SetVerticies -- this can optimize by only updating whatever might
+	// been set with SetVertices; this can optimize by only updating whatever might
 	// need to be updated for dynamically changing meshes.
 	// You must call SetMod if the mesh was actually updated at this point.
-	Update(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32)
-
-	// SetMod flags that the mesh data has been modified and will be sync'd
-	// at next sync of the Scene.Phong render system.
-	SetMod(sc *Scene)
-
-	// ComputeNorms automatically computes the normals from existing vertex data
-	ComputeNorms(pos, norm math32.ArrayF32)
-
-	// HasColor returns true if this mesh has vertex-specific colors available
-	HasColor() bool
-
-	// IsTransparent returns true if this mesh has vertex-specific colors available
-	// and at least some are transparent.
-	IsTransparent() bool
+	Update(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32)
 }
 
-// MeshBase provides the core implementation of Mesh interface
+// MeshBase provides the core implementation of the [Mesh] interface.
 type MeshBase struct { //types:add -setters
 
-	// name of mesh -- meshes are linked to Solids by name so this matters
-	Nm string `set:"-"`
+	// Name is the name of the mesh. [Mesh]es are linked to [Solid]s
+	// by name so this matters.
+	Name string
 
-	// number of vertex points, as math32.Vector3 -- always includes math32.Vector3 normals and math32.Vector2 texture coordinates -- only valid after Sizes() has been called
-	NVtx int `set:"-"`
+	// NumVertex is the number of [math32.Vector3] vertex points. This always
+	// includes [math32.Vector3] normals and [math32.Vector2] texture coordinates.
+	// This is only valid after [Mesh.Sizes] has been called.
+	NumVertex int `set:"-"`
 
-	// number of indexes, as math32.ArrayU32 -- only valid after Sizes() has been called
-	NIndex int `set:"-"`
+	// NumIndex is the number of [math32.ArrayU32] indexes.
+	// This is only valid after [Mesh.Sizes] has been called.
+	NumIndex int `set:"-"`
 
-	// has per-vertex colors, as math32.Vector4 per vertex
-	Color bool
+	// HasColor is whether the mesh has per-vertex colors
+	// as [math32.Vector4] per vertex.
+	HasColor bool
 
-	// if true, this mesh changes frequently -- otherwise considered to be static
+	// Dynamic is whether this mesh changes frequently;
+	// otherwise considered to be static.
 	Dynamic bool
 
-	// set to true if color has transparency -- not worth checking manually
-	Trans bool
+	// Transparent is whether the color has transparency;
+	// not worth checking manually. This is only valid if
+	// [MeshBase.HasColor] is true.
+	Transparent bool
 
-	// computed bounding-box and other gross solid properties
+	// BBox has the computed bounding-box and other gross solid properties.
 	BBox BBox `set:"-"`
-
-	// mutex on bbox access
-	BBoxMu sync.RWMutex `view:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
-func (ms *MeshBase) Name() string                             { return ms.Nm }
-func (ms *MeshBase) SetName(nm string)                        { ms.Nm = nm }
-func (ms *MeshBase) AsMeshBase() *MeshBase                    { return ms }
-func (ms *MeshBase) HasColor() bool                           { return ms.Color }
-func (ms *MeshBase) Sizes() (nVtx, nIndex int, hasColor bool) { return ms.NVtx, ms.NIndex, ms.Color }
-
-func (ms *MeshBase) IsTransparent() bool {
-	if !ms.HasColor() {
-		return false
-	}
-	return ms.Trans
+func (ms *MeshBase) AsMeshBase() *MeshBase {
+	return ms
 }
 
-func (ms *MeshBase) Update(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
+func (ms *MeshBase) Sizes() (numVertex, numIndex int, hasColor bool) {
+	return ms.NumVertex, ms.NumIndex, ms.HasColor
+}
+
+func (ms *MeshBase) Update(sc *Scene, vertextureArray, normArray, texArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
 	// nop: default mesh is static, not dynamic
 }
 
 func (ms *MeshBase) SetMod(sc *Scene) {
-	sc.Phong.ModMeshByName(ms.Nm)
+	sc.Phong.ModMeshByName(ms.Name)
 }
 
 // todo!!
@@ -126,20 +107,20 @@ func (ms *MeshBase) ComputeNorms(pos, norm math32.ArrayF32) {
 // same name is deleted.
 // see NewX for convenience methods to add specific shapes
 func (sc *Scene) AddMesh(ms Mesh) {
-	sc.Meshes.Add(ms.Name(), ms)
+	sc.Meshes.Add(ms.AsMeshBase().Name, ms)
 	sc.SetFlag(true, ScNeedsConfig)
 }
 
 // AddMeshUniqe adds given mesh to mesh collection, ensuring that it has
 // a unique name if one already exists.
 func (sc *Scene) AddMeshUnique(ms Mesh) {
-	nm := ms.Name()
+	nm := ms.AsMeshBase().Name
 	_, err := sc.MeshByNameTry(nm)
 	if err == nil {
 		nm += fmt.Sprintf("_%d", sc.Meshes.Len())
-		ms.SetName(nm)
+		ms.AsMeshBase().SetName(nm)
 	}
-	sc.Meshes.Add(ms.Name(), ms)
+	sc.Meshes.Add(ms.AsMeshBase().Name, ms)
 	sc.SetFlag(true, ScNeedsConfig)
 }
 
@@ -193,15 +174,15 @@ func (sc *Scene) PlaneMesh2D() Mesh {
 
 // ConfigMeshes configures meshes for rendering
 // must be called after adding or deleting any meshes or altering
-// the number of verticies.
+// the number of vertices.
 func (sc *Scene) ConfigMeshes() {
 	ph := &sc.Phong
 	ph.UpdateMu.Lock()
 	ph.ResetMeshes()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Value
-		nVtx, nIndex, hasColor := ms.Sizes()
-		ph.AddMesh(kv.Key, nVtx, nIndex, hasColor)
+		numVertex, nIndex, hasColor := ms.Sizes()
+		ph.AddMesh(kv.Key, numVertex, nIndex, hasColor)
 	}
 	ph.ConfigMeshes()
 	ph.UpdateMu.Unlock()
@@ -213,8 +194,8 @@ func (sc *Scene) SetMeshes() {
 	ph.UpdateMu.Lock()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Value
-		vtxAry, normAry, texAry, clrAry, idxAry := ph.MeshFloatsByName(kv.Key)
-		ms.Set(sc, vtxAry, normAry, texAry, clrAry, idxAry)
+		vertexArray, normArray, textureArray, colorArray, indexArray := ph.MeshFloatsByName(kv.Key)
+		ms.Set(sc, vertexArray, normArray, textureArray, colorArray, indexArray)
 		ph.ModMeshByName(kv.Key)
 	}
 	ph.UpdateMu.Unlock()
@@ -228,8 +209,8 @@ func (sc *Scene) UpdateMeshes() {
 	ph.UpdateMu.Lock()
 	for _, kv := range sc.Meshes.Order {
 		ms := kv.Value
-		vtxAry, normAry, texAry, clrAry, idxAry := ph.MeshFloatsByName(kv.Key)
-		ms.Update(sc, vtxAry, normAry, texAry, clrAry, idxAry)
+		vertexArray, normArray, textureArray, colorArray, indexArray := ph.MeshFloatsByName(kv.Key)
+		ms.Update(sc, vertexArray, normArray, textureArray, colorArray, indexArray)
 	}
 	ph.UpdateMu.Unlock()
 	ph.Sync()
@@ -252,30 +233,28 @@ func (sc *Scene) ReconfigMeshes() {
 // GenMesh is a generic, arbitrary Mesh, storing its values
 type GenMesh struct {
 	MeshBase
-	Vtx   math32.ArrayF32
-	Norm  math32.ArrayF32
-	Tex   math32.ArrayF32
-	Clr   math32.ArrayF32
-	Index math32.ArrayU32
+	Vertex  math32.ArrayF32
+	Norm    math32.ArrayF32
+	Texture math32.ArrayF32
+	Color   math32.ArrayF32
+	Index   math32.ArrayU32
 }
 
-func (ms *GenMesh) Sizes() (nVtx, nIndex int, hasColor bool) {
-	ms.NVtx = len(ms.Vtx) / 3
-	ms.NIndex = len(ms.Index)
-	ms.Color = len(ms.Clr) > 0
-	return ms.NVtx, ms.NIndex, ms.Color
+func (ms *GenMesh) Sizes() (numVertex, nIndex int, hasColor bool) {
+	ms.NumVertex = len(ms.Vertex) / 3
+	ms.NumIndex = len(ms.Index)
+	ms.HasColor = len(ms.Color) > 0
+	return ms.NumVertex, ms.NumIndex, ms.HasColor
 }
 
-func (ms *GenMesh) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
-	copy(vtxAry, ms.Vtx)
-	copy(normAry, ms.Norm)
-	copy(texAry, ms.Tex)
-	if ms.Color {
-		copy(clrAry, ms.Clr)
+func (ms *GenMesh) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
+	copy(vertexArray, ms.Vertex)
+	copy(normArray, ms.Norm)
+	copy(textureArray, ms.Texture)
+	if ms.HasColor {
+		copy(colorArray, ms.Color)
 	}
-	copy(idxAry, ms.Index)
-	bb := vshape.BBoxFromVtxs(ms.Vtx, 0, ms.NVtx)
-	ms.BBoxMu.Lock()
+	copy(indexArray, ms.Index)
+	bb := vshape.BBoxFromVtxs(ms.Vertex, 0, ms.NumVertex)
 	ms.BBox.SetBounds(bb.Min, bb.Max)
-	ms.BBoxMu.Unlock()
 }

@@ -12,7 +12,7 @@ import (
 //   Triangle
 
 // TriangleN returns 3, 3
-func TriangleN() (nVtx, nIndex int) {
+func TriangleN() (numVertex, nIndex int) {
 	return 3, 3
 }
 
@@ -22,26 +22,26 @@ func TriangleN() (nVtx, nIndex int) {
 // Norm is auto-computed, and bounds expanded.
 // pos is a 3D position offset. returns 3D size of plane.
 // returns bounding box.
-func SetTriangle(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, a, b, c math32.Vector3, texs []math32.Vector2, pos math32.Vector3) math32.Box3 {
+func SetTriangle(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, a, b, c math32.Vector3, texs []math32.Vector2, pos math32.Vector3) math32.Box3 {
 	hasTex := texs != nil
 	vidx := vtxOff * 3
 	tidx := vtxOff * 2
 
 	norm := math32.Normal(a, b, c)
 
-	a.Add(pos).ToSlice(vtxAry, vidx)
-	norm.ToSlice(normAry, vidx)
-	b.Add(pos).ToSlice(vtxAry, vidx+3)
-	norm.ToSlice(normAry, vidx+3)
-	c.Add(pos).ToSlice(vtxAry, vidx+6)
-	norm.ToSlice(normAry, vidx+6)
+	a.Add(pos).ToSlice(vertexArray, vidx)
+	norm.ToSlice(normArray, vidx)
+	b.Add(pos).ToSlice(vertexArray, vidx+3)
+	norm.ToSlice(normArray, vidx+3)
+	c.Add(pos).ToSlice(vertexArray, vidx+6)
+	norm.ToSlice(normArray, vidx+6)
 	if hasTex {
-		texs[0].ToSlice(texAry, tidx)
-		texs[1].ToSlice(texAry, tidx+2)
-		texs[2].ToSlice(texAry, tidx+4)
+		texs[0].ToSlice(textureArray, tidx)
+		texs[1].ToSlice(textureArray, tidx+2)
+		texs[2].ToSlice(textureArray, tidx+4)
 	}
 
-	idxAry.Set(idxOff, uint32(vtxOff), uint32(vtxOff+1), uint32(vtxOff+2))
+	indexArray.Set(idxOff, uint32(vtxOff), uint32(vtxOff+1), uint32(vtxOff+2))
 
 	bb := math32.B3Empty()
 	bb.ExpandByPoints([]math32.Vector3{a, b, c})
@@ -52,7 +52,7 @@ func SetTriangle(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32
 //   Quad
 
 // QuadN returns 4, 6
-func QuadN() (nVtx, nIndex int) {
+func QuadN() (numVertex, nIndex int) {
 	return 4, 6
 }
 
@@ -62,7 +62,7 @@ func QuadN() (nVtx, nIndex int) {
 // Norm is auto-computed, and bbox expanded by points.
 // pos is a 3D position offset. returns 3D size of plane.
 // returns bounding box.
-func SetQuad(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, vtxs []math32.Vector3, texs []math32.Vector2, pos math32.Vector3) math32.Box3 {
+func SetQuad(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, vtxs []math32.Vector3, texs []math32.Vector2, pos math32.Vector3) math32.Box3 {
 	hasTex := texs != nil
 	vidx := vtxOff * 3
 	tidx := vtxOff * 2
@@ -70,16 +70,16 @@ func SetQuad(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vt
 	norm := math32.Normal(vtxs[0], vtxs[1], vtxs[2])
 
 	for vi := range vtxs {
-		vtxs[vi].Add(pos).ToSlice(vtxAry, vidx)
-		norm.ToSlice(normAry, vidx)
+		vtxs[vi].Add(pos).ToSlice(vertexArray, vidx)
+		norm.ToSlice(normArray, vidx)
 		vidx += 3
 		if hasTex {
-			texs[vi].ToSlice(texAry, tidx)
+			texs[vi].ToSlice(textureArray, tidx)
 			tidx += 2
 		}
 	}
 
-	idxAry.Set(idxOff, uint32(vtxOff), uint32(vtxOff+1), uint32(vtxOff+2),
+	indexArray.Set(idxOff, uint32(vtxOff), uint32(vtxOff+1), uint32(vtxOff+2),
 		uint32(vtxOff), uint32(vtxOff+2), uint32(vtxOff+3))
 
 	bb := math32.B3Empty()

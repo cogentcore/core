@@ -29,7 +29,7 @@ type Tensor interface {
 	fmt.Stringer
 	mat.Matrix
 
-	// Shape returns a pointer to the shape that fully parameterizes the tensor shape
+	// Shape returns a pointer to the shape that fully parametrizes the tensor shape
 	Shape() *Shape
 
 	// Len returns the number of elements in the tensor (product of shape dimensions).

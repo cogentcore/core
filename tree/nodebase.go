@@ -41,7 +41,7 @@ type NodeBase struct {
 	// the same parent. It can be used for finding and serializing nodes. If not otherwise set,
 	// it defaults to the ID (kebab-case) name of the node type combined with the total number
 	// of children that have ever been added to the node's parent.
-	Name string `copier:"-" set:"-"`
+	Name string `copier:"-"`
 
 	// This is the value of this Node as its true underlying type. This allows methods
 	// defined on base types to call methods defined on higher-level types, which
@@ -67,6 +67,8 @@ type NodeBase struct {
 
 	// Properties is a property map for arbitrary key-value properties.
 	// When possible, use typed fields on a new type embedding NodeBase instead of this.
+	// You should typically use the [NodeBase.SetProperty], [NodeBase.Property], and
+	// [NodeBase.DeleteProperty] methods for modifying and accessing properties.
 	Properties map[string]any `tableview:"-" xml:"-" copier:"-" set:"-" json:",omitempty"`
 
 	// numLifetimeChildren is the number of children that have ever been added to this
@@ -98,13 +100,6 @@ func (n *NodeBase) AsTree() *NodeBase {
 // PlanName implements [plan.Namer].
 func (n *NodeBase) PlanName() string {
 	return n.Name
-}
-
-// SetName sets the name of this node. Names should generally be unique
-// across children of each node. If the node requires some non-unique name,
-// add a separate Label field.
-func (n *NodeBase) SetName(name string) {
-	n.Name = name
 }
 
 // BaseType returns the base node type for all elements within this tree.

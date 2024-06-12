@@ -9,61 +9,39 @@ import (
 	"image"
 	"log"
 	"reflect"
-	"sync"
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
 )
 
-// Node is the common interface for all xyz scenegraph nodes
+// Node is the common interface for all xyz 3D tree nodes.
+// [Solid] and [Group] are the two main types of nodes,
+// which both extend [NodeBase] for the core functionality.
 type Node interface {
 	tree.Node
 
-	// IsSolid returns true if this is an Solid node (else a Group)
+	// AsNodeBase returns the [NodeBase] for our node, which gives
+	// access to all the base-level data structures and methods
+	// without requiring interface methods.
+	AsNodeBase() *NodeBase
+
+	// IsSolid returns true if this is an [Solid] node (otherwise a [Group]).
 	IsSolid() bool
 
-	// AsNode3D returns a generic NodeBase for our node -- gives generic
-	// access to all the base-level data structures without requiring
-	// interface methods.
-	AsNode() *NodeBase
-
-	// AsSolid returns a node as Solid (nil if not)
+	// AsSolid returns the node as a [Solid] (nil if not).
 	AsSolid() *Solid
 
-	// Validate checks that scene element is valid
+	// Validate checks that scene element is valid.
 	Validate() error
 
 	// UpdateWorldMatrix updates this node's local and world matrix based on parent's world matrix
-	// This sets the WorldMatrixUpdated flag but does not check that flag -- calling
+	// This sets the WorldMatrixUpdated flag but does not check that flag; calling
 	// routine can optionally do so.
 	UpdateWorldMatrix(parWorld *math32.Matrix4)
 
-	// UpdateMVPMatrix updates this node's MVP matrix based on
-	// given view and projection matrix from camera.
-	// Called during rendering.
-	UpdateMVPMatrix(viewMat, projectionMat *math32.Matrix4)
-
 	// UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
-	// groups aggregate over elements.  called from WalkPost traversal
+	// groups aggregate over elements. It is called from WalkPost traversal.
 	UpdateMeshBBox()
-
-	// UpdateBBox2D updates this node's 2D bounding-box information based on scene
-	// size and other scene bbox info from scene
-	UpdateBBox2D(size math32.Vector2)
-
-	// RayPick converts a given 2D point in scene image coordinates
-	// into a ray from the camera position pointing through line of sight of camera
-	// into *local* coordinates of the solid.
-	// This can be used to find point of intersection in local coordinates relative
-	// to a given plane of interest, for example (see Ray methods for intersections).
-	RayPick(pos image.Point) math32.Ray
-
-	// WorldMatrix returns the world matrix for this node, under read-lock protection.
-	WorldMatrix() *math32.Matrix4
-
-	// NormDCBBox returns the normalized display coordinates bounding box
-	// which is used for clipping.  This is read-lock protected.
-	NormDCBBox() math32.Box3
 
 	// IsVisible provides the definitive answer as to whether a given node
 	// is currently visible.  It is only entirely valid after a render pass
@@ -71,57 +49,42 @@ type Node interface {
 	// for their visibility status as well, which is available always.
 	// Non-visible nodes are automatically not rendered and not connected to
 	// window events.  The Invisible flag is one key element of the IsVisible
-	// calculus -- it is set by e.g., TabView for invisible tabs, and is also
+	// calculus; it is set by e.g., TabView for invisible tabs, and is also
 	// set if a widget is entirely out of render range.  But again, use
 	// IsVisible as the main end-user method.
-	// For robustness, it recursively calls the parent -- this is typically
-	// a short path -- propagating the Invisible flag properly can be
+	// For robustness, it recursively calls the parent; this is typically
+	// a short path; propagating the Invisible flag properly can be
 	// very challenging without mistakenly overwriting invisibility at various
 	// levels.
 	IsVisible() bool
 
-	// IsTransparent returns true if solid has transparent color
+	// IsTransparent returns true if solid has transparent color.
 	IsTransparent() bool
 
+	// Config configures the node.
 	Config()
 
-	// UpdateNode does arbitrary node updating during render process
-	UpdateNode()
-
 	// RenderClass returns the class of rendering for this solid.
-	// used for organizing the ordering of rendering
+	// It is used for organizing the ordering of rendering.
 	RenderClass() RenderClasses
 
-	// Render is called by Scene Render on main thread,
-	// everything ready to go..
+	// Render is called by Scene Render on main thread
+	// when everything is ready to go.
 	Render()
-
-	// Convenience methods for external setting of Pose values with appropriate locking
-
-	// SetPosePos sets Pose.Pos position to given value, under write lock protection
-	SetPosePos(pos math32.Vector3)
-
-	// SetPoseScale sets Pose.Scale scale to given value, under write lock protection
-	SetPoseScale(scale math32.Vector3)
-
-	// SetPoseQuat sets Pose.Quat to given value, under write lock protection
-	SetPoseQuat(quat math32.Quat)
 }
 
-// NodeBase is the basic 3D scenegraph node, which has the full transform information
+// NodeBase is the basic 3D tree node, which has the full transform information
 // relative to parent, and computed bounding boxes, etc.
-// There are only two different kinds of Nodes: Group and Solid
+// It implements the [Node] interface and contains the core functionality
+// common to all 3D nodes.
 type NodeBase struct {
 	tree.NodeBase
 
-	// complete specification of position and orientation
+	// Pose is the complete specification of position and orientation.
 	Pose Pose `set:"-"`
 
-	// Scene is the cached Scene
+	// Scene is the cached [Scene].
 	Scene *Scene `copier:"-" set:"-"`
-
-	// mutex on pose access -- needed for parallel updating
-	PoseMu sync.RWMutex `view:"-" copier:"-" json:"-" xml:"-"  set:"-"`
 
 	// mesh-based local bounding box (aggregated for groups)
 	MeshBBox BBox `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
@@ -160,15 +123,15 @@ const (
 func AsNode(n tree.Node) (Node, *NodeBase) {
 	ni, ok := n.(Node)
 	if ok {
-		return ni, ni.AsNode()
+		return ni, ni.AsNodeBase()
 	}
 	return nil, nil
 }
 
-// AsNode returns a generic NodeBase for our node, giving generic
+// AsNodeBase returns a generic NodeBase for our node, giving generic
 // access to all the base-level data structures without requiring
 // interface methods.
-func (nb *NodeBase) AsNode() *NodeBase {
+func (nb *NodeBase) AsNodeBase() *NodeBase {
 	return nb
 }
 
@@ -222,8 +185,6 @@ func (nb *NodeBase) IsTransparent() bool {
 // This sets the WorldMatrixUpdated flag but does not check that flag -- calling
 // routine can optionally do so.
 func (nb *NodeBase) UpdateWorldMatrix(parWorld *math32.Matrix4) {
-	nb.PoseMu.Lock()
-	defer nb.PoseMu.Unlock()
 	nb.Pose.UpdateMatrix() // note: can do this in special ways to bake in other
 	// automatic transforms as needed
 	nb.Pose.UpdateWorldMatrix(parWorld)
@@ -233,19 +194,15 @@ func (nb *NodeBase) UpdateWorldMatrix(parWorld *math32.Matrix4) {
 // UpdateMVPMatrix updates this node's MVP matrix based on given view, projection matricies from camera.
 // Called during rendering.
 func (nb *NodeBase) UpdateMVPMatrix(viewMat, projectionMat *math32.Matrix4) {
-	nb.PoseMu.Lock()
 	nb.Pose.UpdateMVPMatrix(viewMat, projectionMat)
-	nb.PoseMu.Unlock()
 }
 
 // UpdateBBox2D updates this node's 2D bounding-box information based on scene
 // size and min offset position.
 func (nb *NodeBase) UpdateBBox2D(size math32.Vector2) {
 	off := math32.Vector2{}
-	nb.PoseMu.RLock()
 	nb.WorldBBox.BBox = nb.MeshBBox.BBox.MulMatrix4(&nb.Pose.WorldMatrix)
 	nb.NDCBBox = nb.MeshBBox.BBox.MVProjToNDC(&nb.Pose.MVPMatrix)
-	nb.PoseMu.RUnlock()
 	Wmin := nb.NDCBBox.Min.NDCToWindow(size, off, 0, 1, true) // true = flipY
 	Wmax := nb.NDCBBox.Max.NDCToWindow(size, off, 0, 1, true) // true = filpY
 	// BBox is always relative to scene
@@ -261,7 +218,7 @@ func (nb *NodeBase) UpdateBBox2D(size math32.Vector2) {
 		bbvis := nb.BBox.Intersect(scbounds)
 		nb.SceneBBox = bbvis
 	} else {
-		// fmt.Printf("not vis: %v  wbb: %v\n", nb.Name(), nb.WorldBBox.BBox)
+		// fmt.Printf("not vis: %v  wbb: %v\n", nb.Name, nb.WorldBBox.BBox)
 		nb.SceneBBox = image.Rectangle{}
 	}
 }
@@ -301,58 +258,43 @@ func (nb *NodeBase) RayPick(pos image.Point) math32.Ray {
 	return *ray
 }
 
-// WorldMatrix returns the world matrix for this node, under read lock protection
+// WorldMatrix returns the world matrix for this node
 func (nb *NodeBase) WorldMatrix() *math32.Matrix4 {
-	nb.PoseMu.RLock()
-	defer nb.PoseMu.RUnlock()
 	return &nb.Pose.WorldMatrix
 }
 
 // NormDCBBox returns the normalized display coordinates bounding box
-// which is used for clipping.  This is read-lock protected.
+// which is used for clipping.
 func (nb *NodeBase) NormDCBBox() math32.Box3 {
 	return nb.NDCBBox
 }
 
 func (nb *NodeBase) Config() {
-	// nop by default -- could connect to scene for update signals or something
-}
-
-func (nb *NodeBase) UpdateNode() {
+	// nop by default; could connect to scene for update signals or something
 }
 
 func (nb *NodeBase) Render() {
 	// nop
 }
 
-// SetPosePos sets Pose.Pos position to given value, under write lock protection
+// SetPosePos sets Pose.Pos position to given value
 func (nb *NodeBase) SetPosePos(pos math32.Vector3) {
-	nb.PoseMu.Lock()
 	nb.Pose.Pos = pos
-	nb.PoseMu.Unlock()
 }
 
-// SetPoseScale sets Pose.Scale scale to given value, under write lock protection
+// SetPoseScale sets Pose.Scale scale to given value
 func (nb *NodeBase) SetPoseScale(scale math32.Vector3) {
-	nb.PoseMu.Lock()
 	nb.Pose.Scale = scale
-	nb.PoseMu.Unlock()
 }
 
-// SetPoseQuat sets Pose.Quat to given value, under write lock protection
+// SetPoseQuat sets Pose.Quat to given value
 func (nb *NodeBase) SetPoseQuat(quat math32.Quat) {
-	nb.PoseMu.Lock()
 	nb.Pose.Quat = quat
-	nb.PoseMu.Unlock()
 }
 
 // TrackCamera moves this node to pose of camera
 func (nb *NodeBase) TrackCamera() {
-	nb.PoseMu.Lock()
-	nb.Scene.Camera.CamMu.RLock()
 	nb.Pose.CopyFrom(&nb.Scene.Camera.Pose)
-	nb.Scene.Camera.CamMu.RUnlock()
-	nb.PoseMu.Unlock()
 
 	UpdateWorldMatrix(nb.This)
 }
@@ -361,8 +303,6 @@ func (nb *NodeBase) TrackCamera() {
 // For SpotLight, copies entire Pose. Does not work for Ambient light
 // which has no position information.
 func (nb *NodeBase) TrackLight(lightName string) error {
-	nb.PoseMu.Lock()
-	defer nb.PoseMu.Unlock()
 	lt, ok := nb.Scene.Lights.ValueByKeyTry(lightName)
 	if !ok {
 		return fmt.Errorf("xyz Node: %v TrackLight named: %v not found", nb.Path(), lightName)

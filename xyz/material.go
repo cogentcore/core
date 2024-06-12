@@ -38,35 +38,35 @@ func (tl *Tiling) Defaults() {
 // Textures are stored on the Scene and accessed by name
 type Material struct { //types:add -setters
 
-	// prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering
+	// Color is the main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering
 	Color color.RGBA
 
-	// prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object
+	// Emissive is the color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object
 	Emissive color.RGBA
 
-	// prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect.
+	// Shiny is the specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect.
 	Shiny float32
 
-	// prop: reflective = specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light.
+	// Reflective is the specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light.
 	Reflective float32
 
-	// prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters
+	// Bright is an overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters
 	Bright float32
 
-	// prop: texture = texture to provide color for the surface
-	Texture TexName `set:"-"`
+	// TextureName is the name of the texture to provide color for the surface.
+	TextureName TextureName `set:"-"`
 
-	// texture tiling parameters -- repeat and offset
+	// Tiling is the texture tiling parameters: repeat and offset.
 	Tiling Tiling `view:"inline"`
 
-	// prop: cull-back = cull the back-facing surfaces
+	// CullBack indicates to cull the back-facing surfaces.
 	CullBack bool
 
-	// prop: cull-front = cull the front-facing surfaces
+	// CullFront indicates to cull the front-facing surfaces.
 	CullFront bool
 
-	// pointer to texture
-	TexPtr Texture `set:"-" view:"-"`
+	// Texture is the cached [Texture] object set based on [Material.TextureName].
+	Texture Texture `set:"-" view:"-"`
 }
 
 // Defaults sets default surface parameters
@@ -83,14 +83,14 @@ func (mt *Material) Defaults() {
 func (mt *Material) ShowShow(field string) bool {
 	switch field {
 	case "Tiling":
-		return mt.Texture != ""
+		return mt.TextureName != ""
 	}
 	return true
 }
 
 // Disconnect resets pointers etc
 func (mt *Material) Disconnect() {
-	mt.TexPtr = nil
+	mt.Texture = nil
 }
 
 func (mt Material) String() string {
@@ -99,16 +99,16 @@ func (mt Material) String() string {
 
 // IsTransparent returns true if texture says it is, or if color has alpha < 255
 func (mt *Material) IsTransparent() bool {
-	if mt.TexPtr != nil {
-		return mt.TexPtr.IsTransparent()
+	if mt.Texture != nil {
+		return mt.Texture.AsTextureBase().Transparent
 	}
 	return mt.Color.A < 255
 }
 
 // NoTexture resets any texture setting that might have been set
 func (mt *Material) NoTexture() {
-	mt.Texture = ""
-	mt.TexPtr = nil
+	mt.TextureName = ""
+	mt.Texture = nil
 }
 
 // SetTextureName sets material to use given texture name
@@ -124,18 +124,18 @@ func (mt *Material) SetTextureName(sc *Scene, texName string) error {
 		log.Println(err)
 		return err
 	}
-	mt.Texture = TexName(texName)
-	mt.TexPtr = tx
+	mt.TextureName = TextureName(texName)
+	mt.Texture = tx
 	return nil
 }
 
 // SetTexture sets material to use given texture
 func (mt *Material) SetTexture(tex Texture) *Material {
-	mt.TexPtr = tex
-	if mt.TexPtr != nil {
-		mt.Texture = TexName(mt.TexPtr.Name())
+	mt.Texture = tex
+	if mt.Texture != nil {
+		mt.TextureName = TextureName(mt.Texture.AsTextureBase().Name)
 	} else {
-		mt.Texture = ""
+		mt.TextureName = ""
 	}
 	return mt
 }
@@ -147,10 +147,10 @@ func (mt *Material) Validate(sc *Scene) error {
 		mt.Bright = 1
 	}
 	mt.Tiling.Defaults()
-	if mt.Texture == "" {
-		mt.TexPtr = nil
-	} else if mt.TexPtr == nil || mt.TexPtr.Name() != string(mt.Texture) {
-		err := mt.SetTextureName(sc, string(mt.Texture))
+	if mt.TextureName == "" {
+		mt.Texture = nil
+	} else if mt.Texture == nil || mt.Texture.AsTextureBase().Name != string(mt.TextureName) {
+		err := mt.SetTextureName(sc, string(mt.TextureName))
 		if err != nil {
 			return err
 		}
@@ -161,8 +161,8 @@ func (mt *Material) Validate(sc *Scene) error {
 func (mt *Material) Render(sc *Scene) {
 	sc.Phong.UseColor(mt.Color, mt.Emissive, mt.Shiny, mt.Reflective, mt.Bright)
 	sc.Phong.UseTexturePars(mt.Tiling.Repeat, mt.Tiling.Off)
-	if mt.Texture != "" {
-		sc.Phong.UseTextureName(string(mt.Texture))
+	if mt.TextureName != "" {
+		sc.Phong.UseTextureName(string(mt.TextureName))
 	} else {
 		sc.Phong.UseNoTexture()
 	}

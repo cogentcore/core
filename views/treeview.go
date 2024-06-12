@@ -31,14 +31,14 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// TreeViewer is an interface for TreeView types
-// providing access to the base TreeView and
-// overridable method hooks for actions taken on the TreeView,
+// TreeViewer is an interface for [TreeView] types
+// providing access to the base [TreeView] and
+// overridable method hooks for actions taken on the [TreeView],
 // including OnOpen, OnClose, etc.
 type TreeViewer interface {
 	core.Widget
 
-	// AsTreeView returns the base *TreeView for this node
+	// AsTreeView returns the base [TreeView] for this node.
 	AsTreeView() *TreeView
 
 	// CanOpen returns true if the node is able to open.
@@ -81,8 +81,8 @@ type TreeViewer interface {
 
 // AsTreeView returns the given value as a value of type TreeView if the type
 // of the given value embeds TreeView, or nil otherwise.
-func AsTreeView(k tree.Node) *TreeView {
-	if t, ok := k.(TreeViewer); ok {
+func AsTreeView(n tree.Node) *TreeView {
+	if t, ok := n.(TreeViewer); ok {
 		return t.AsTreeView()
 	}
 	return nil

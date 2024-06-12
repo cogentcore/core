@@ -60,14 +60,10 @@ func TestNodePath(t *testing.T) {
 
 func TestNodeEscapePaths(t *testing.T) {
 	parent := NewNodeBase()
-	child1 := NewNodeBase(parent)
-	child1.SetName("child1.go")
-	child2 := NewNodeBase(parent)
-	child2.SetName("child1/child1")
-	child3 := NewNodeBase(parent)
-	child3.SetName("child1/child1.go")
-	schild2 := NewNodeBase(child2)
-	schild2.SetName("subchild1")
+	child1 := NewNodeBase(parent).SetName("child1.go")
+	child2 := NewNodeBase(parent).SetName("child1/child1")
+	child3 := NewNodeBase(parent).SetName("child1/child1.go")
+	schild2 := NewNodeBase(child2).SetName("subchild1")
 	assert.Len(t, parent.Children, 3)
 	assert.Equal(t, `/node-base/child1.go`, child1.Path())
 	assert.Equal(t, `child1.go`, child1.PathFrom(parent))
@@ -82,16 +78,11 @@ func TestNodeEscapePaths(t *testing.T) {
 }
 
 func TestNodePathFrom(t *testing.T) {
-	a := NewNodeBase()
-	a.SetName("a")
-	b := NewNodeBase(a)
-	b.SetName("b")
-	c := NewNodeBase(b)
-	c.SetName("c")
-	d := NewNodeBase(c)
-	d.SetName("d")
-	e := NewNodeBase(d)
-	e.SetName("e")
+	a := NewNodeBase().SetName("a")
+	b := NewNodeBase(a).SetName("b")
+	c := NewNodeBase(b).SetName("c")
+	d := NewNodeBase(c).SetName("d")
+	NewNodeBase(d).SetName("e")
 
 	assert.Equal(t, "c/d", d.PathFrom(b))
 }
@@ -145,16 +136,11 @@ func TestNodeFindType(t *testing.T) {
 
 func TestNodeMove(t *testing.T) {
 	parent := testdata.NewNodeEmbed()
-	child0 := testdata.NewNodeEmbed(parent)
-	child0.SetName("child0")
-	child1 := NewNodeBase(parent)
-	child1.SetName("child1")
-	child2 := testdata.NewNodeEmbed(parent)
-	child2.SetName("child2")
-	schild1 := testdata.NewNodeEmbed(child1)
-	schild1.SetName("subchild1")
-	child3 := NewNodeBase(parent)
-	child3.SetName("child3")
+	testdata.NewNodeEmbed(parent).SetName("child0")
+	child1 := NewNodeBase(parent).SetName("child1")
+	testdata.NewNodeEmbed(parent).SetName("child2")
+	testdata.NewNodeEmbed(child1).SetName("subchild1")
+	NewNodeBase(parent).SetName("child3")
 
 	bf := fmt.Sprintf("mv before:\n%v\n", parent.Children)
 	parent.Children = slicesx.Move(parent.Children, 3, 1)
@@ -182,18 +168,13 @@ func TestNodeMove(t *testing.T) {
 	assert.Equal(t, a12t, a12)
 }
 
-func TestNodeConfig(t *testing.T) {
+func TestNodeUpdate(t *testing.T) {
 	parent := testdata.NewNodeEmbed()
-	child0 := testdata.NewNodeEmbed(parent)
-	child0.SetName("child0")
-	child1 := testdata.NewNodeEmbed(parent)
-	child1.SetName("child1")
-	child2 := testdata.NewNodeEmbed(parent)
-	child2.SetName("child2")
-	schild1 := testdata.NewNodeEmbed(child1)
-	schild1.SetName("subchild1")
-	child3 := NewNodeBase(parent)
-	child3.SetName("child3")
+	testdata.NewNodeEmbed(parent).SetName("child0")
+	child1 := NewNodeBase(parent).SetName("child1")
+	testdata.NewNodeEmbed(parent).SetName("child2")
+	testdata.NewNodeEmbed(child1).SetName("subchild1")
+	NewNodeBase(parent).SetName("child3")
 
 	plan1 := TypePlan{
 		{Type: testdata.NodeEmbedType, Name: "child2"},
@@ -230,16 +211,11 @@ func TestNodeConfig(t *testing.T) {
 
 func TestNodeWalk(t *testing.T) {
 	parent := NewNodeBase()
-	child0 := testdata.NewNodeEmbed(parent)
-	child0.SetName("child0")
-	child1 := testdata.NewNodeEmbed(parent)
-	child1.SetName("child1")
-	child2 := testdata.NewNodeEmbed(parent)
-	child2.SetName("child2")
-	schild1 := testdata.NewNodeEmbed(child1)
-	schild1.SetName("subchild1")
-	child3 := NewNodeBase(parent)
-	child3.SetName("child3")
+	testdata.NewNodeEmbed(parent).SetName("child0")
+	child1 := NewNodeBase(parent).SetName("child1")
+	testdata.NewNodeEmbed(parent).SetName("child2")
+	schild1 := testdata.NewNodeEmbed(child1).SetName("subchild1")
+	NewNodeBase(parent).SetName("child3")
 
 	res := []string{}
 
@@ -304,16 +280,11 @@ func TestNodeWalk(t *testing.T) {
 
 func TestNodeWalkPath(t *testing.T) {
 	parent := NewNodeBase()
-	child0 := testdata.NewNodeEmbed(parent)
-	child0.SetName("child0")
-	child1 := testdata.NewNodeEmbed(parent)
-	child1.SetName("child1")
-	child2 := testdata.NewNodeEmbed(parent)
-	child2.SetName("child2")
-	schild1 := testdata.NewNodeEmbed(child1)
-	schild1.SetName("subchild1")
-	child3 := NewNodeBase(parent)
-	child3.SetName("child3")
+	testdata.NewNodeEmbed(parent).SetName("child0")
+	child1 := NewNodeBase(parent).SetName("child1")
+	testdata.NewNodeEmbed(parent).SetName("child2")
+	testdata.NewNodeEmbed(child1).SetName("subchild1")
+	NewNodeBase(parent).SetName("child3")
 
 	res := []string{}
 

@@ -54,7 +54,7 @@ const (
 // NewLines adds Lines mesh to given scene, with given start, end, and width
 func NewLines(sc *Scene, name string, points []math32.Vector3, width math32.Vector2, closed bool) *Lines {
 	ln := &Lines{}
-	ln.Nm = name
+	ln.Name = name
 	ln.Points = points
 	ln.Width = width
 	ln.Closed = closed
@@ -62,15 +62,15 @@ func NewLines(sc *Scene, name string, points []math32.Vector3, width math32.Vect
 	return ln
 }
 
-func (ln *Lines) Sizes() (nVtx, nIndex int, hasColor bool) {
-	ln.NVtx, ln.NIndex = vshape.LinesN(len(ln.Points), ln.Closed)
-	ln.Color = len(ln.Colors) > 0
-	return ln.NVtx, ln.NIndex, ln.Color
+func (ln *Lines) Sizes() (numVertex, nIndex int, hasColor bool) {
+	ln.NumVertex, ln.NumIndex = vshape.LinesN(len(ln.Points), ln.Closed)
+	ln.HasColor = len(ln.Colors) > 0
+	return ln.NumVertex, ln.NumIndex, ln.HasColor
 }
 
-func (ln *Lines) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
+func (ln *Lines) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
 	pos := math32.Vector3{}
-	bb := vshape.SetLines(vtxAry, normAry, texAry, idxAry, 0, 0, ln.Points, ln.Width, ln.Closed, pos)
+	bb := vshape.SetLines(vertexArray, normArray, textureArray, indexArray, 0, 0, ln.Points, ln.Width, ln.Closed, pos)
 	ln.BBox.SetBounds(bb.Min, bb.Max)
 	// todo: colors!
 	ln.SetMod(sc)
@@ -105,7 +105,7 @@ func NewLine(sc *Scene, parent tree.Node, name string, st, ed math32.Vector3, wi
 	ln.SetName(name)
 	ln.Pose.Scale.Set(1, width, width)
 	SetLineStartEnd(ln, st, ed)
-	ln.Mat.Color = clr
+	ln.Material.Color = clr
 	return ln
 }
 
@@ -166,7 +166,7 @@ func NewArrow(sc *Scene, parent tree.Node, name string, st, ed math32.Vector3, w
 		ar.Pose.Quat.SetFromAxisAngle(math32.Vec3(0, 0, 1), math.Pi/2) // rotate from XY up to -X
 		ar.Pose.Quat.SetMul(ln.Pose.Quat)
 		ar.Pose.Pos = st.Add(dn.MulScalar(.5 * asz))
-		ar.Mat.Color = clr
+		ar.Material.Color = clr
 	}
 	if endArrow {
 		ar := NewSolid(gp).SetMesh(cm)
@@ -175,7 +175,7 @@ func NewArrow(sc *Scene, parent tree.Node, name string, st, ed math32.Vector3, w
 		ar.Pose.Quat.SetFromAxisAngle(math32.Vec3(0, 0, 1), -math.Pi/2) // rotate from XY up to +X
 		ar.Pose.Quat.SetMul(ln.Pose.Quat)
 		ar.Pose.Pos = ed.Add(dn.MulScalar(-.5 * asz))
-		ar.Mat.Color = clr
+		ar.Material.Color = clr
 	}
 	return gp
 }

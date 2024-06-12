@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// This package is based extensively on https://github.com/g3n/engine :
+// This package is based extensively on https://github.com/g3n/engine
 // Copyright 2016 The G3N Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -230,7 +230,7 @@ func (dec *Decoder) SetObject(sc *xyz.Scene, objgp *xyz.Group, ob *Object) {
 		if face.Material != matName || sld == nil {
 			sldnm := fmt.Sprintf("%s_%d", ob.Name, sldidx)
 			ms = &xyz.GenMesh{}
-			ms.Nm = sldnm
+			ms.Name = sldnm
 			sc.AddMeshUnique(ms)
 			sld = xyz.NewSolid(objgp).SetMesh(ms)
 			sld.SetName(sldnm)
@@ -258,17 +258,17 @@ func (dec *Decoder) SetObject(sc *xyz.Scene, objgp *xyz.Group, ob *Object) {
 }
 
 func (dec *Decoder) addNorms(ms *xyz.GenMesh, ai, bi, ci int, idxs []int) {
-	if ms.Norm.Size() >= ms.Vtx.Size() {
+	if ms.Norm.Size() >= ms.Vertex.Size() {
 		return
 	}
 	var a, b, c math32.Vector3
-	ms.Vtx.GetVector3(3*idxs[ai], &a)
-	ms.Vtx.GetVector3(3*idxs[bi], &b)
-	ms.Vtx.GetVector3(3*idxs[ci], &c)
+	ms.Vertex.GetVector3(3*idxs[ai], &a)
+	ms.Vertex.GetVector3(3*idxs[bi], &b)
+	ms.Vertex.GetVector3(3*idxs[ci], &c)
 	nrm := math32.Normal(a, b, c)
 	for {
 		ms.Norm.AppendVector3(nrm)
-		if ms.Norm.Size() >= ms.Vtx.Size() {
+		if ms.Norm.Size() >= ms.Vertex.Size() {
 			break
 		}
 	}
@@ -286,10 +286,10 @@ func (dec *Decoder) copyVertex(ms *xyz.GenMesh, face *Face, idx int) int {
 	var vector3 math32.Vector3
 	var vector2 math32.Vector2
 
-	vidx := ms.Vtx.Size() / 3
+	vidx := ms.Vertex.Size() / 3
 	// Copy vertex position and append to geometry
 	dec.Vertices.GetVector3(3*face.Vertices[idx], &vector3)
-	ms.Vtx.AppendVector3(vector3)
+	ms.Vertex.AppendVector3(vector3)
 
 	// Copy vertex normal and append to geometry
 	if face.Normals[idx] != invINDEX {
@@ -306,7 +306,7 @@ func (dec *Decoder) copyVertex(ms *xyz.GenMesh, face *Face, idx int) int {
 		if dec.Uvs.Size() > i {
 			dec.Uvs.GetVector2(i, &vector2)
 		}
-		ms.Tex.AppendVector2(vector2)
+		ms.Texture.AppendVector2(vector2)
 	}
 	ms.Index.Append(uint32(vidx))
 	return vidx
@@ -321,15 +321,15 @@ func (dec *Decoder) SetMat(sc *xyz.Scene, sld *xyz.Solid, matnm string) {
 		msg := fmt.Sprintf("could not find material: %s for object %s. using default material.", matnm, sld.Name)
 		dec.appendWarn(objType, msg)
 	}
-	sld.Mat.Defaults()
-	sld.Mat.CullBack = false // obj files do not reliably work with this on!
-	sld.Mat.Color = mat.Diffuse
+	sld.Material.Defaults()
+	sld.Material.CullBack = false // obj files do not reliably work with this on!
+	sld.Material.Color = mat.Diffuse
 	if mat.Opacity > 0 {
-		sld.Mat.Color.A = uint8(mat.Opacity * float32(0xFF))
+		sld.Material.Color.A = uint8(mat.Opacity * float32(0xFF))
 	}
 	// sld.Mat.Specular = mat.Specular
 	if mat.Shininess != 0 {
-		sld.Mat.Shiny = mat.Shininess
+		sld.Material.Shiny = mat.Shininess
 	}
 	// Loads material textures if specified
 	dec.loadTex(sc, sld, mat.MapKd, mat)
@@ -345,11 +345,11 @@ func (dec *Decoder) loadTex(sc *xyz.Scene, sld *xyz.Solid, texfn string, mat *Ma
 	if err != nil {
 		tf = xyz.NewTextureFileFS(dec.FSys, sc, tfn, texfn)
 	}
-	sld.Mat.SetTexture(tf)
+	sld.Material.SetTexture(tf)
 	if mat.Tiling.Repeat.X > 0 {
-		sld.Mat.Tiling.Repeat = mat.Tiling.Repeat
+		sld.Material.Tiling.Repeat = mat.Tiling.Repeat
 	}
-	sld.Mat.Tiling.Off = mat.Tiling.Off
+	sld.Material.Tiling.Off = mat.Tiling.Off
 }
 
 // parse reads the lines from the specified reader and dispatch them

@@ -172,25 +172,25 @@ func (vw *View) ConfigBodySolid(bod physics.Body, sld *xyz.Solid) {
 		bx := bod.(*physics.Box)
 		sld.Pose.Scale = bx.Size
 		if bx.Color != "" {
-			sld.Mat.Color = errors.Log1(colors.FromString(bx.Color))
+			sld.Material.Color = errors.Log1(colors.FromString(bx.Color))
 		}
 	case "physics.Cylinder":
 		cy := bod.(*physics.Cylinder)
 		sld.Pose.Scale.Set(cy.BotRad, cy.Height, cy.BotRad)
 		if cy.Color != "" {
-			sld.Mat.Color = errors.Log1(colors.FromString(cy.Color))
+			sld.Material.Color = errors.Log1(colors.FromString(cy.Color))
 		}
 	case "physics.Capsule":
 		cp := bod.(*physics.Capsule)
 		sld.Pose.Scale.Set(cp.BotRad/.2, cp.Height/1.4, cp.BotRad/.2)
 		if cp.Color != "" {
-			sld.Mat.Color = errors.Log1(colors.FromString(cp.Color))
+			sld.Material.Color = errors.Log1(colors.FromString(cp.Color))
 		}
 	case "physics.Sphere":
 		sp := bod.(*physics.Sphere)
 		sld.Pose.Scale.SetScalar(sp.Radius)
 		if sp.Color != "" {
-			sld.Mat.Color = errors.Log1(colors.FromString(sp.Color))
+			sld.Material.Color = errors.Log1(colors.FromString(sp.Color))
 		}
 	}
 }
@@ -258,7 +258,7 @@ func (vw *View) UpdatePoseNode(wn physics.Node, vn xyz.Node) {
 		wk := wn.AsTree().Child(idx).(physics.Node)
 		vk := vn.AsTree().Child(idx).(xyz.Node)
 		wb := wk.AsNodeBase()
-		vb := vk.AsNode()
+		vb := vk.AsNodeBase()
 		vb.Pose.Pos = wb.Rel.Pos
 		vb.Pose.Quat = wb.Rel.Quat
 		vw.UpdatePoseNode(wk, vk)

@@ -17,68 +17,45 @@ import (
 	"cogentcore.org/core/vgpu/vphong"
 )
 
-// TexName provides a GUI interface for choosing textures
-type TexName string
+// TextureName provides a GUI interface for choosing textures.
+type TextureName string
 
-// Texture is the interface for all textures
+// Texture is the interface for all textures.
 type Texture interface {
-	// Name returns name of the texture
-	Name() string
 
-	// IsTransparent returns true if there is any transparency present in the texture
-	// This is not auto-detected but rather must be set manually.
-	// It affects the rendering order -- transparent items are rendered last.
-	IsTransparent() bool
+	// AsTextureBase returns the [TextureBase] for this texture,
+	// which contains the core data and functionality.
+	AsTextureBase() *TextureBase
 
-	// SetTransparent sets the transparency flag for this texture.
-	SetTransparent(trans bool)
-
-	// Image returns image for the texture, in image.RGBA format used internally
+	// Image returns the image for the texture in the [image.RGBA] format used internally.
 	Image() *image.RGBA
-
-	// SetImage sets image for the texture
-	SetImage(img image.Image)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
 // TextureBase
 
-// TextureBase is the base texture implementation
-// it uses an image.RGBA as underlying image storage to facilitate interface with GPU
-type TextureBase struct {
+// TextureBase is the base texture implementation.
+// It uses an [image.RGBA] as the underlying image storage
+// to facilitate interface with GPU.
+type TextureBase struct { //types:add --setters
 
-	// name of the texture -- textures are connected to material by name
-	Nm string
+	// Name is the name of the texture;
+	// textures are connected to [Material]s by name.
+	Name string
 
-	// set to true if texture has transparency
-	Trans bool
+	// Transprent is whether the texture has transparency.
+	Transparent bool
 
-	// cached image
-	Img *image.RGBA
+	// RGBA is the cached internal representation of the image.
+	RGBA *image.RGBA
 }
 
-func (tx *TextureBase) Name() string {
-	return tx.Nm
-}
-
-func (tx *TextureBase) IsTransparent() bool {
-	return tx.Trans
-}
-
-func (tx *TextureBase) SetTransparent(trans bool) {
-	tx.Trans = trans
+func (tx *TextureBase) AsTextureBase() *TextureBase {
+	return tx
 }
 
 func (tx *TextureBase) Image() *image.RGBA {
-	return tx.Img
-}
-
-func (tx *TextureBase) SetImage(img image.Image) {
-	if img == nil {
-		tx.Img = nil
-	} else {
-		tx.Img = vgpu.ImageToRGBA(img)
-	}
+	return tx.RGBA
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -89,7 +66,7 @@ type TextureFile struct {
 	TextureBase
 
 	// filesystem for embedded etc
-	FSys fs.FS
+	FS fs.FS
 
 	// filename for the texture
 	File string
@@ -98,13 +75,13 @@ type TextureFile struct {
 // NewTextureFile adds a new texture from file of given name and filename
 func NewTextureFile(sc *Scene, name string, filename string) *TextureFile {
 	tx := &TextureFile{}
-	tx.Nm = name
+	tx.Name = name
 	dfs, fnm, err := dirs.DirFS(filename)
 	if err != nil {
 		slog.Error("xyz.NewTextureFile: Image not found error", "file:", filename, "error", err)
 		return nil
 	}
-	tx.FSys = dfs
+	tx.FS = dfs
 	tx.File = fnm
 	sc.AddTexture(tx)
 	return tx
@@ -113,35 +90,35 @@ func NewTextureFile(sc *Scene, name string, filename string) *TextureFile {
 // NewTextureFileFS adds a new texture from file of given name and filename
 func NewTextureFileFS(fsys fs.FS, sc *Scene, name string, filename string) *TextureFile {
 	tx := &TextureFile{}
-	tx.Nm = name
-	tx.FSys = fsys
+	tx.Name = name
+	tx.FS = fsys
 	tx.File = filename
 	sc.AddTexture(tx)
 	return tx
 }
 
 func (tx *TextureFile) Image() *image.RGBA {
-	if tx.Img != nil {
-		return tx.Img
+	if tx.RGBA != nil {
+		return tx.RGBA
 	}
 	if tx.File == "" {
-		err := fmt.Errorf("xyz.Texture: %v File must be set to a filename to load texture from", tx.Nm)
+		err := fmt.Errorf("xyz.Texture: %v File must be set to a filename to load texture from", tx.Name)
 		log.Println(err)
 		return nil
 	}
-	img, _, err := imagex.OpenFS(tx.FSys, tx.File)
+	img, _, err := imagex.OpenFS(tx.FS, tx.File)
 	if err != nil {
 		slog.Error("xyz.TextureFile: Image load error", "file:", tx.File, "error", err)
 		return nil
 	}
-	tx.Img = vgpu.ImageToRGBA(img)
-	return tx.Img
+	tx.RGBA = vgpu.ImageToRGBA(img)
+	return tx.RGBA
 }
 
-// TextureGi2D is a dynamic texture material driven by a core.Viewport2D viewport
-// anything rendered to the viewport will be projected onto the surface of any
-// solid using this texture.
-type TextureGi2D struct {
+// TextureCore is a dynamic texture material driven by a core.Scene.
+// Anything rendered to the scene will be projected onto the surface of any
+// solid using this texture. TODO: update this along with embed2d
+type TextureCore struct {
 	TextureBase
 	// Scene2D *core.Scene
 }
@@ -152,7 +129,7 @@ type TextureGi2D struct {
 // AddTexture adds given texture to texture collection
 // see NewTextureFile to add a texture that loads from file
 func (sc *Scene) AddTexture(tx Texture) {
-	sc.Textures.Add(tx.Name(), tx)
+	sc.Textures.Add(tx.AsTextureBase().Name, tx)
 }
 
 // TextureByName looks for texture by name -- returns nil if not found
@@ -191,7 +168,7 @@ func (sc *Scene) DeleteTextures() {
 }
 
 // must be called after adding or deleting any meshes or altering
-// the number of verticies.
+// the number of vertices.
 func (sc *Scene) ConfigTextures() {
 	ph := &sc.Phong
 	ph.ResetTextures()

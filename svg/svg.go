@@ -179,7 +179,7 @@ func (sv *SVG) Style() {
 	sv.Defs.WalkDown(func(n tree.Node) bool {
 		sn := n.(Node)
 		sn.AsTree().SetFlag(true, IsDef)
-		sn.Style(sv)
+		sn.AsNodeBase().Style(sv)
 		return tree.Continue
 	})
 
@@ -194,7 +194,7 @@ func (sv *SVG) Style() {
 
 	sv.Root.WalkDown(func(k tree.Node) bool {
 		sn := k.(Node)
-		sn.Style(sv)
+		sn.AsNodeBase().Style(sv)
 		return tree.Continue
 	})
 }

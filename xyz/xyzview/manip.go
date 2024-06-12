@@ -110,7 +110,7 @@ func (sw *Scene) SelectBox() {
 	}
 	xy := sw.XYZ
 
-	nb := sw.CurrentSelected.AsNode()
+	nb := sw.CurrentSelected.AsNodeBase()
 	xy.DeleteChildByName(SelectedBoxName) // get rid of existing
 	clr := sw.SelectionParams.Color
 	xyz.NewLineBox(xy, xy, SelectedBoxName, SelectedBoxName, nb.WorldBBox.BBox, sw.SelectionParams.Width, clr, xyz.Inactive)
@@ -129,7 +129,7 @@ func (sw *Scene) ManipBox() {
 
 	nm := ManipBoxName
 
-	nb := sw.CurrentSelected.AsNode()
+	nb := sw.CurrentSelected.AsNodeBase()
 	xy.DeleteChildByName(nm) // get rid of existing
 	clr := sw.SelectionParams.Color
 
@@ -142,14 +142,14 @@ func (sw *Scene) ManipBox() {
 
 	bbox.Min.SetSub(mb.Pose.Pos)
 	bbox.Max.SetSub(mb.Pose.Pos)
-	NewManipPoint(mb, nm+"-lll", mbspm.Name(), clr, bbox.Min)
-	NewManipPoint(mb, nm+"-llu", mbspm.Name(), clr, math32.Vec3(bbox.Min.X, bbox.Min.Y, bbox.Max.Z))
-	NewManipPoint(mb, nm+"-lul", mbspm.Name(), clr, math32.Vec3(bbox.Min.X, bbox.Max.Y, bbox.Min.Z))
-	NewManipPoint(mb, nm+"-ull", mbspm.Name(), clr, math32.Vec3(bbox.Max.X, bbox.Min.Y, bbox.Min.Z))
-	NewManipPoint(mb, nm+"-luu", mbspm.Name(), clr, math32.Vec3(bbox.Min.X, bbox.Max.Y, bbox.Max.Z))
-	NewManipPoint(mb, nm+"-ulu", mbspm.Name(), clr, math32.Vec3(bbox.Max.X, bbox.Min.Y, bbox.Max.Z))
-	NewManipPoint(mb, nm+"-uul", mbspm.Name(), clr, math32.Vec3(bbox.Max.X, bbox.Max.Y, bbox.Min.Z))
-	NewManipPoint(mb, nm+"-uuu", mbspm.Name(), clr, bbox.Max)
+	NewManipPoint(mb, nm+"-lll", mbspm.Name, clr, bbox.Min)
+	NewManipPoint(mb, nm+"-llu", mbspm.Name, clr, math32.Vec3(bbox.Min.X, bbox.Min.Y, bbox.Max.Z))
+	NewManipPoint(mb, nm+"-lul", mbspm.Name, clr, math32.Vec3(bbox.Min.X, bbox.Max.Y, bbox.Min.Z))
+	NewManipPoint(mb, nm+"-ull", mbspm.Name, clr, math32.Vec3(bbox.Max.X, bbox.Min.Y, bbox.Min.Z))
+	NewManipPoint(mb, nm+"-luu", mbspm.Name, clr, math32.Vec3(bbox.Min.X, bbox.Max.Y, bbox.Max.Z))
+	NewManipPoint(mb, nm+"-ulu", mbspm.Name, clr, math32.Vec3(bbox.Max.X, bbox.Min.Y, bbox.Max.Z))
+	NewManipPoint(mb, nm+"-uul", mbspm.Name, clr, math32.Vec3(bbox.Max.X, bbox.Max.Y, bbox.Min.Z))
+	NewManipPoint(mb, nm+"-uuu", mbspm.Name, clr, bbox.Max)
 
 	xy.NeedsConfig()
 	sw.NeedsRender()
@@ -167,7 +167,7 @@ func NewManipPoint(parent tree.Node, name string, meshName string, clr color.RGB
 	mpt.SetMeshName(meshName)
 	mpt.Defaults()
 	mpt.Pose.Pos = pos
-	mpt.Mat.Color = clr
+	mpt.Material.Color = clr
 	return mpt
 }
 
@@ -226,7 +226,7 @@ func (sw *Scene) handleSlideEvents() {
 			sw.NeedsRender()
 			return
 		}
-		sn := sw.CurrentSelected.AsNode()
+		sn := sw.CurrentSelected.AsNodeBase()
 		mpt := sw.CurrentManipPoint
 		mb := mpt.Parent.(*xyz.Group)
 		del := e.PrevDelta()

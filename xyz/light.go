@@ -10,52 +10,40 @@ import (
 	"cogentcore.org/core/math32"
 )
 
-// Light represents a light that illuminates a scene
-// these are stored on the Scene object and not within the graph
+// Light represents a light that illuminates a scene.
+// These are stored on the [Scene] object and not within the tree.
 type Light interface {
-	// Name returns name of the light -- lights are accessed by name
-	Name() string
 
-	// Color returns color of light
-	Color() color.RGBA
-
-	// Lumens returns brightness of light
-	Lumens() float32
+	// AsLightBase returns the [LightBase] for this Light,
+	// which provides the core functionality of a light.
+	AsLightBase() *LightBase
 }
 
-// LightBase provides the base implementation for Light interface
-type LightBase struct {
+// LightBase provides the core implementation of the [Light] interface.
+type LightBase struct { //types:add --setters
 
-	// name of light -- lights accessed by name so it matters
-	Nm string
+	// Name is the name of the light, which matters since lights are accessed by name.
+	Name string
 
-	// whether light is on or off
+	// On is whether the light is turned on.
 	On bool
 
-	// brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness
-	Lumns float32 `min:"0" step:"0.1"`
+	// Lumens is the brightness/intensity/strength of the light in normalized 0-1 units.
+	// It is just multiplied by the color, and is convenient for easily modulating overall brightness.
+	Lumens float32 `min:"0" step:"0.1"`
 
-	// color of light a full intensity
-	Clr color.RGBA
+	// Color is the color of the light at full intensity.
+	Color color.RGBA
 }
 
-// Name returns name of the light -- lights are accessed by name
-func (lb *LightBase) Name() string {
-	return lb.Nm
-}
-
-func (lb *LightBase) Color() color.RGBA {
-	return lb.Clr
-}
-
-func (lb *LightBase) Lumens() float32 {
-	return lb.Lumns
+func (lb *LightBase) AsLightBase() *LightBase {
+	return lb
 }
 
 /////////////////////////////////////////////////////////////////////////////
 //  Light types
 
-// AmbientLight provides diffuse uniform lighting -- typically only one of these
+// AmbientLight provides diffuse uniform lighting; typically only one of these in a [Scene].
 type AmbientLight struct {
 	LightBase
 }
@@ -63,10 +51,10 @@ type AmbientLight struct {
 // NewAmbientLight adds Ambient to given scene, with given name, standard color, and lumens (0-1 normalized)
 func NewAmbientLight(sc *Scene, name string, lumens float32, color LightColors) *AmbientLight {
 	lt := &AmbientLight{}
-	lt.Nm = name
+	lt.Name = name
 	lt.On = true
-	lt.Clr = LightColorMap[color]
-	lt.Lumns = lumens
+	lt.Color = LightColorMap[color]
+	lt.Lumens = lumens
 	sc.AddLight(lt)
 	return lt
 }
@@ -86,10 +74,10 @@ type DirLight struct {
 // By default it is located overhead and toward the default camera (0, 1, 1) -- change Pos otherwise
 func NewDirLight(sc *Scene, name string, lumens float32, color LightColors) *DirLight {
 	lt := &DirLight{}
-	lt.Nm = name
+	lt.Name = name
 	lt.On = true
-	lt.Clr = LightColorMap[color]
-	lt.Lumns = lumens
+	lt.Color = LightColorMap[color]
+	lt.Lumens = lumens
 	lt.Pos.Set(0, 1, 1)
 	sc.AddLight(lt)
 	return lt
@@ -121,10 +109,10 @@ type PointLight struct {
 // By default it is located at 0,5,5 (up and between default camera and origin) -- set Pos to change.
 func NewPointLight(sc *Scene, name string, lumens float32, color LightColors) *PointLight {
 	lt := &PointLight{}
-	lt.Nm = name
+	lt.Name = name
 	lt.On = true
-	lt.Clr = LightColorMap[color]
-	lt.Lumns = lumens
+	lt.Color = LightColorMap[color]
+	lt.Lumens = lumens
 	lt.LinDecay = .1
 	lt.QuadDecay = .01
 	lt.Pos.Set(0, 5, 5)
@@ -163,10 +151,10 @@ type SpotLight struct {
 // In its unrotated state, it points down the -Z axis (i.e., into the scene using default view parameters)
 func NewSpotLight(sc *Scene, name string, lumens float32, color LightColors) *SpotLight {
 	lt := &SpotLight{}
-	lt.Nm = name
+	lt.Name = name
 	lt.On = true
-	lt.Clr = LightColorMap[color]
-	lt.Lumns = lumens
+	lt.Color = LightColorMap[color]
+	lt.Lumens = lumens
 	lt.AngDecay = 15
 	lt.CutoffAngle = 45
 	lt.LinDecay = .01
@@ -204,7 +192,7 @@ func (sl *SpotLight) LookAtOrigin() {
 // AddLight adds given light to lights
 // see NewX for convenience methods to add specific lights
 func (sc *Scene) AddLight(lt Light) {
-	sc.Lights.Add(lt.Name(), lt)
+	sc.Lights.Add(lt.AsLightBase().Name, lt)
 }
 
 // ConfigLights configures 3D rendering for current lights
@@ -212,7 +200,7 @@ func (sc *Scene) ConfigLights() {
 	sc.Phong.ResetNLights()
 	for _, ltkv := range sc.Lights.Order {
 		lt := ltkv.Value
-		clr := math32.NewVector3Color(lt.Color()).MulScalar(lt.Lumens()).SRGBToLinear()
+		clr := math32.NewVector3Color(lt.AsLightBase().Color).MulScalar(lt.AsLightBase().Lumens).SRGBToLinear()
 		switch l := lt.(type) {
 		case *AmbientLight:
 			sc.Phong.AddAmbientLight(clr)

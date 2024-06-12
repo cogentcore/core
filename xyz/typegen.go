@@ -3,6 +3,7 @@
 package xyz
 
 import (
+	"image"
 	"image/color"
 
 	"cogentcore.org/core/math32"
@@ -12,7 +13,7 @@ import (
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.BBox", IDName: "b-box", Doc: "BBox contains bounding box and other gross solid properties", Fields: []types.Field{{Name: "BBox", Doc: "bounding box in local coords"}, {Name: "BSphere", Doc: "bounding sphere in local coords"}, {Name: "Area", Doc: "area"}, {Name: "Volume", Doc: "volume"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Camera", IDName: "camera", Doc: "Camera defines the properties of the camera", Fields: []types.Field{{Name: "Pose", Doc: "overall orientation and direction of the camera, relative to pointing at negative Z axis with up (positive Y) direction"}, {Name: "CamMu", Doc: "mutex protecting camera data"}, {Name: "Target", Doc: "target location for the camera -- where it is pointing at -- defaults to the origin, but moves with panning movements, and is reset by a call to LookAt method"}, {Name: "UpDir", Doc: "up direction for camera -- which way is up -- defaults to positive Y axis, and is reset by call to LookAt method"}, {Name: "Ortho", Doc: "default is a Perspective camera -- set this to make it Orthographic instead, in which case the view includes the volume specified by the Near - Far distance (i.e., you probably want to decrease Far)."}, {Name: "FOV", Doc: "field of view in degrees"}, {Name: "Aspect", Doc: "aspect ratio (width/height)"}, {Name: "Near", Doc: "near plane z coordinate"}, {Name: "Far", Doc: "far plane z coordinate"}, {Name: "ViewMatrix", Doc: "view matrix (inverse of the Pose.Matrix)"}, {Name: "ProjectionMatrix", Doc: "projection matrix, defining the camera perspective / ortho transform"}, {Name: "VkProjectionMatrix", Doc: "vulkan projection matrix -- required for vgpu -- produces same effect as ProjectionMatrix, which should be used for all other math"}, {Name: "InvProjectionMatrix", Doc: "inverse of the projection matrix"}, {Name: "Frustum", Doc: "frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Camera", IDName: "camera", Doc: "Camera defines the properties of the camera", Fields: []types.Field{{Name: "Pose", Doc: "overall orientation and direction of the camera, relative to pointing at negative Z axis with up (positive Y) direction"}, {Name: "Target", Doc: "target location for the camera -- where it is pointing at -- defaults to the origin, but moves with panning movements, and is reset by a call to LookAt method"}, {Name: "UpDir", Doc: "up direction for camera -- which way is up -- defaults to positive Y axis, and is reset by call to LookAt method"}, {Name: "Ortho", Doc: "default is a Perspective camera -- set this to make it Orthographic instead, in which case the view includes the volume specified by the Near - Far distance (i.e., you probably want to decrease Far)."}, {Name: "FOV", Doc: "field of view in degrees"}, {Name: "Aspect", Doc: "aspect ratio (width/height)"}, {Name: "Near", Doc: "near plane z coordinate"}, {Name: "Far", Doc: "far plane z coordinate"}, {Name: "ViewMatrix", Doc: "view matrix (inverse of the Pose.Matrix)"}, {Name: "ProjectionMatrix", Doc: "projection matrix, defining the camera perspective / ortho transform"}, {Name: "VkProjectionMatrix", Doc: "vulkan projection matrix -- required for vgpu -- produces same effect as ProjectionMatrix, which should be used for all other math"}, {Name: "InvProjectionMatrix", Doc: "inverse of the projection matrix"}, {Name: "Frustum", Doc: "frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape"}}})
 
 // GroupType is the [types.Type] for [Group]
 var GroupType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Group", IDName: "group", Doc: "Group collects individual elements in a scene but does not have a Mesh or Material of\nits own.  It does have a transform that applies to all nodes under it.", Embeds: []types.Field{{Name: "NodeBase"}}, Instance: &Group{}})
@@ -32,11 +33,28 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.SolidPoint", ID
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Decoder", IDName: "decoder", Doc: "Decoder parses 3D object / scene file(s) and imports into a Group or Scene.\nThis interface is implemented by the different format-specific decoders."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Light", IDName: "light", Doc: "Light represents a light that illuminates a scene\nthese are stored on the Scene object and not within the graph"})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Light", IDName: "light", Doc: "Light represents a light that illuminates a scene.\nThese are stored on the [Scene] object and not within the tree."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.LightBase", IDName: "light-base", Doc: "LightBase provides the base implementation for Light interface", Fields: []types.Field{{Name: "Nm", Doc: "name of light -- lights accessed by name so it matters"}, {Name: "On", Doc: "whether light is on or off"}, {Name: "Lumns", Doc: "brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness"}, {Name: "Clr", Doc: "color of light a full intensity"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.LightBase", IDName: "light-base", Doc: "LightBase provides the core implementation of the [Light] interface.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"--setters"}}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the light, which matters since lights are accessed by name."}, {Name: "On", Doc: "On is whether the light is turned on."}, {Name: "Lumens", Doc: "Lumens is the brightness/intensity/strength of the light in normalized 0-1 units.\nIt is just multiplied by the color, and is convenient for easily modulating overall brightness."}, {Name: "Color", Doc: "Color is the color of the light at full intensity."}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.AmbientLight", IDName: "ambient-light", Doc: "AmbientLight provides diffuse uniform lighting -- typically only one of these", Embeds: []types.Field{{Name: "LightBase"}}})
+// SetName sets the [LightBase.Name]:
+// Name is the name of the light, which matters since lights are accessed by name.
+func (t *LightBase) SetName(v string) *LightBase { t.Name = v; return t }
+
+// SetOn sets the [LightBase.On]:
+// On is whether the light is turned on.
+func (t *LightBase) SetOn(v bool) *LightBase { t.On = v; return t }
+
+// SetLumens sets the [LightBase.Lumens]:
+// Lumens is the brightness/intensity/strength of the light in normalized 0-1 units.
+// It is just multiplied by the color, and is convenient for easily modulating overall brightness.
+func (t *LightBase) SetLumens(v float32) *LightBase { t.Lumens = v; return t }
+
+// SetColor sets the [LightBase.Color]:
+// Color is the color of the light at full intensity.
+func (t *LightBase) SetColor(v color.RGBA) *LightBase { t.Color = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.AmbientLight", IDName: "ambient-light", Doc: "AmbientLight provides diffuse uniform lighting; typically only one of these in a [Scene].", Embeds: []types.Field{{Name: "LightBase"}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.DirLight", IDName: "dir-light", Doc: "DirLight is directional light, which is assumed to project light toward\nthe origin based on its position, with no attenuation, like the Sun.\nFor rendering, the position is negated and normalized to get the direction\nvector (i.e., absolute distance doesn't matter)", Embeds: []types.Field{{Name: "LightBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of direct light -- assumed to point at the origin so this determines direction"}}})
 
@@ -50,69 +68,79 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Lines", IDName:
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Tiling", IDName: "tiling", Doc: "Tiling are the texture tiling parameters", Fields: []types.Field{{Name: "Repeat", Doc: "how often to repeat the texture in each direction"}, {Name: "Off", Doc: "offset for when to start the texure in each direction"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Material", IDName: "material", Doc: "Material describes the material properties of a surface (colors, shininess, texture)\ni.e., phong lighting parameters.\nMain color is used for both ambient and diffuse color, and alpha component\nis used for opacity.  The Emissive color is only for glowing objects.\nThe Specular color is always white (multiplied by light color).\nTextures are stored on the Scene and accessed by name", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Color", Doc: "prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"}, {Name: "Emissive", Doc: "prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"}, {Name: "Shiny", Doc: "prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect."}, {Name: "Reflective", Doc: "prop: reflective = specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light."}, {Name: "Bright", Doc: "prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters"}, {Name: "Texture", Doc: "prop: texture = texture to provide color for the surface"}, {Name: "Tiling", Doc: "texture tiling parameters -- repeat and offset"}, {Name: "CullBack", Doc: "prop: cull-back = cull the back-facing surfaces"}, {Name: "CullFront", Doc: "prop: cull-front = cull the front-facing surfaces"}, {Name: "TexPtr", Doc: "pointer to texture"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Material", IDName: "material", Doc: "Material describes the material properties of a surface (colors, shininess, texture)\ni.e., phong lighting parameters.\nMain color is used for both ambient and diffuse color, and alpha component\nis used for opacity.  The Emissive color is only for glowing objects.\nThe Specular color is always white (multiplied by light color).\nTextures are stored on the Scene and accessed by name", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Color", Doc: "Color is the main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"}, {Name: "Emissive", Doc: "Emissive is the color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"}, {Name: "Shiny", Doc: "Shiny is the specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect."}, {Name: "Reflective", Doc: "Reflective is the specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light."}, {Name: "Bright", Doc: "Bright is an overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters"}, {Name: "TextureName", Doc: "TextureName is the name of the texture to provide color for the surface."}, {Name: "Tiling", Doc: "Tiling is the texture tiling parameters: repeat and offset."}, {Name: "CullBack", Doc: "CullBack indicates to cull the back-facing surfaces."}, {Name: "CullFront", Doc: "CullFront indicates to cull the front-facing surfaces."}, {Name: "Texture", Doc: "Texture is the cached [Texture] object set based on [Material.TextureName]."}}})
 
 // SetColor sets the [Material.Color]:
-// prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering
+// Color is the main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering
 func (t *Material) SetColor(v color.RGBA) *Material { t.Color = v; return t }
 
 // SetEmissive sets the [Material.Emissive]:
-// prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object
+// Emissive is the color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object
 func (t *Material) SetEmissive(v color.RGBA) *Material { t.Emissive = v; return t }
 
 // SetShiny sets the [Material.Shiny]:
-// prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect.
+// Shiny is the specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect.
 func (t *Material) SetShiny(v float32) *Material { t.Shiny = v; return t }
 
 // SetReflective sets the [Material.Reflective]:
-// prop: reflective = specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light.
+// Reflective is the specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light.
 func (t *Material) SetReflective(v float32) *Material { t.Reflective = v; return t }
 
 // SetBright sets the [Material.Bright]:
-// prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters
+// Bright is an overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters
 func (t *Material) SetBright(v float32) *Material { t.Bright = v; return t }
 
 // SetTiling sets the [Material.Tiling]:
-// texture tiling parameters -- repeat and offset
+// Tiling is the texture tiling parameters: repeat and offset.
 func (t *Material) SetTiling(v Tiling) *Material { t.Tiling = v; return t }
 
 // SetCullBack sets the [Material.CullBack]:
-// prop: cull-back = cull the back-facing surfaces
+// CullBack indicates to cull the back-facing surfaces.
 func (t *Material) SetCullBack(v bool) *Material { t.CullBack = v; return t }
 
 // SetCullFront sets the [Material.CullFront]:
-// prop: cull-front = cull the front-facing surfaces
+// CullFront indicates to cull the front-facing surfaces.
 func (t *Material) SetCullFront(v bool) *Material { t.CullFront = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshName", IDName: "mesh-name", Doc: "MeshName is a mesh name -- provides an automatic gui chooser for meshes.\nUsed on Solid to link to meshes by name."})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshName", IDName: "mesh-name", Doc: "MeshName is a [Mesh] name. This type provides an automatic GUI chooser for meshes.\nIt is used on [Solid] to link to meshes by name."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Mesh", IDName: "mesh", Doc: "Mesh parameterizes the mesh-based shape used for rendering a Solid.\nOnly indexed triangle meshes are supported.\nAll Mesh's must know in advance the number of vertex and index points\nthey require, and the SetVerticies method operates on data from the\nvgpu staging buffer to set the relevant data post-allocation.\nThe vgpu vshape library is used for all basic shapes, and it follows\nthis same logic.\nPer-vertex Color is optional, as is the ability to update the data\nafter initial SetVerticies call (default is to do nothing)."})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Mesh", IDName: "mesh", Doc: "Mesh parametrizes the mesh-based shape used for rendering a [Solid].\nOnly indexed triangle meshes are supported.\nAll Meshes must know in advance the number of vertex and index points\nthey require, and the SetVertices method operates on data from the\nvgpu staging buffer to set the relevant data post-allocation.\nThe vgpu vshape library is used for all basic shapes, and it follows\nthis same logic.\nPer-vertex Color is optional, as is the ability to update the data\nafter initial SetVertices call (default is to do nothing)."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshBase", IDName: "mesh-base", Doc: "MeshBase provides the core implementation of Mesh interface", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Nm", Doc: "name of mesh -- meshes are linked to Solids by name so this matters"}, {Name: "NVtx", Doc: "number of vertex points, as math32.Vector3 -- always includes math32.Vector3 normals and math32.Vector2 texture coordinates -- only valid after Sizes() has been called"}, {Name: "NIndex", Doc: "number of indexes, as math32.ArrayU32 -- only valid after Sizes() has been called"}, {Name: "Color", Doc: "has per-vertex colors, as math32.Vector4 per vertex"}, {Name: "Dynamic", Doc: "if true, this mesh changes frequently -- otherwise considered to be static"}, {Name: "Trans", Doc: "set to true if color has transparency -- not worth checking manually"}, {Name: "BBox", Doc: "computed bounding-box and other gross solid properties"}, {Name: "BBoxMu", Doc: "mutex on bbox access"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshBase", IDName: "mesh-base", Doc: "MeshBase provides the core implementation of the [Mesh] interface.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the mesh. [Mesh]es are linked to [Solid]s\nby name so this matters."}, {Name: "NumVertex", Doc: "NumVertex is the number of [math32.Vector3] vertex points. This always\nincludes [math32.Vector3] normals and [math32.Vector2] texture coordinates.\nThis is only valid after [Mesh.Sizes] has been called."}, {Name: "NumIndex", Doc: "NumIndex is the number of [math32.ArrayU32] indexes.\nThis is only valid after [Mesh.Sizes] has been called."}, {Name: "HasColor", Doc: "HasColor is whether the mesh has per-vertex colors\nas [math32.Vector4] per vertex."}, {Name: "Dynamic", Doc: "Dynamic is whether this mesh changes frequently;\notherwise considered to be static."}, {Name: "Transparent", Doc: "Transparent is whether the color has transparency;\nnot worth checking manually. This is only valid if\n[MeshBase.HasColor] is true."}, {Name: "BBox", Doc: "BBox has the computed bounding-box and other gross solid properties."}}})
 
-// SetColor sets the [MeshBase.Color]:
-// has per-vertex colors, as math32.Vector4 per vertex
-func (t *MeshBase) SetColor(v bool) *MeshBase { t.Color = v; return t }
+// SetName sets the [MeshBase.Name]:
+// Name is the name of the mesh. [Mesh]es are linked to [Solid]s
+// by name so this matters.
+func (t *MeshBase) SetName(v string) *MeshBase { t.Name = v; return t }
+
+// SetHasColor sets the [MeshBase.HasColor]:
+// HasColor is whether the mesh has per-vertex colors
+// as [math32.Vector4] per vertex.
+func (t *MeshBase) SetHasColor(v bool) *MeshBase { t.HasColor = v; return t }
 
 // SetDynamic sets the [MeshBase.Dynamic]:
-// if true, this mesh changes frequently -- otherwise considered to be static
+// Dynamic is whether this mesh changes frequently;
+// otherwise considered to be static.
 func (t *MeshBase) SetDynamic(v bool) *MeshBase { t.Dynamic = v; return t }
 
-// SetTrans sets the [MeshBase.Trans]:
-// set to true if color has transparency -- not worth checking manually
-func (t *MeshBase) SetTrans(v bool) *MeshBase { t.Trans = v; return t }
+// SetTransparent sets the [MeshBase.Transparent]:
+// Transparent is whether the color has transparency;
+// not worth checking manually. This is only valid if
+// [MeshBase.HasColor] is true.
+func (t *MeshBase) SetTransparent(v bool) *MeshBase { t.Transparent = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.GenMesh", IDName: "gen-mesh", Doc: "GenMesh is a generic, arbitrary Mesh, storing its values", Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Vtx"}, {Name: "Norm"}, {Name: "Tex"}, {Name: "Clr"}, {Name: "Index"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.GenMesh", IDName: "gen-mesh", Doc: "GenMesh is a generic, arbitrary Mesh, storing its values", Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Vertex"}, {Name: "Norm"}, {Name: "Texture"}, {Name: "Color"}, {Name: "Index"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Node", IDName: "node", Doc: "Node is the common interface for all xyz scenegraph nodes"})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Node", IDName: "node", Doc: "Node is the common interface for all xyz 3D tree nodes.\n[Solid] and [Group] are the two main types of nodes,\nwhich both extend [NodeBase] for the core functionality."})
 
 // NodeBaseType is the [types.Type] for [NodeBase]
-var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.NodeBase", IDName: "node-base", Doc: "NodeBase is the basic 3D scenegraph node, which has the full transform information\nrelative to parent, and computed bounding boxes, etc.\nThere are only two different kinds of Nodes: Group and Solid", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pose", Doc: "complete specification of position and orientation"}, {Name: "Scene", Doc: "Scene is the cached Scene"}, {Name: "PoseMu", Doc: "mutex on pose access -- needed for parallel updating"}, {Name: "MeshBBox", Doc: "mesh-based local bounding box (aggregated for groups)"}, {Name: "WorldBBox", Doc: "world coordinates bounding box"}, {Name: "NDCBBox", Doc: "normalized display coordinates bounding box, used for frustrum clipping"}, {Name: "BBox", Doc: "raw original bounding box for the widget within its parent Scene.\nThis is prior to intersecting with Frame bounds."}, {Name: "SceneBBox", Doc: "2D bounding box for region occupied within Scene Frame that we render onto.\nThis is BBox intersected with Frame bounds."}}, Instance: &NodeBase{}})
+var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.NodeBase", IDName: "node-base", Doc: "NodeBase is the basic 3D tree node, which has the full transform information\nrelative to parent, and computed bounding boxes, etc.\nIt implements the [Node] interface and contains the core functionality\ncommon to all 3D nodes.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pose", Doc: "Pose is the complete specification of position and orientation."}, {Name: "Scene", Doc: "Scene is the cached [Scene]."}, {Name: "MeshBBox", Doc: "mesh-based local bounding box (aggregated for groups)"}, {Name: "WorldBBox", Doc: "world coordinates bounding box"}, {Name: "NDCBBox", Doc: "normalized display coordinates bounding box, used for frustrum clipping"}, {Name: "BBox", Doc: "raw original bounding box for the widget within its parent Scene.\nThis is prior to intersecting with Frame bounds."}, {Name: "SceneBBox", Doc: "2D bounding box for region occupied within Scene Frame that we render onto.\nThis is BBox intersected with Frame bounds."}}, Instance: &NodeBase{}})
 
 // NewNodeBase returns a new [NodeBase] with the given optional parent:
-// NodeBase is the basic 3D scenegraph node, which has the full transform information
+// NodeBase is the basic 3D tree node, which has the full transform information
 // relative to parent, and computed bounding boxes, etc.
-// There are only two different kinds of Nodes: Group and Solid
+// It implements the [Node] interface and contains the core functionality
+// common to all 3D nodes.
 func NewNodeBase(parent ...tree.Node) *NodeBase { return tree.New[*NodeBase](parent...) }
 
 // NodeType returns the [*types.Type] of [NodeBase]
@@ -128,7 +156,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Pose", IDName: 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.RenderClasses", IDName: "render-classes", Doc: "RenderClasses define the different classes of rendering"})
 
 // SceneType is the [types.Type] for [Scene]
-var SceneType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Scene", IDName: "scene", Doc: "Scene is the overall scenegraph containing nodes as children.\nIt renders to its own vgpu.RenderFrame.\nThe Image of this Frame is usable directly or, via xyzview.Scene,\nwhere it is copied into an overall core.Scene image.\n\nThere is default navigation event processing (disabled by setting NoNav)\nwhere mouse drag events Orbit the camera (Shift = Pan, Alt = PanTarget)\nand arrow keys do Orbit, Pan, PanTarget with same key modifiers.\nSpacebar restores original \"default\" camera, and numbers save (1st time)\nor restore (subsequently) camera views (Control = always save)\n\nA Group at the top-level named \"TrackCamera\" will automatically track\nthe camera (i.e., its Pose is copied) -- Solids in that group can\nset their relative Pos etc to display relative to the camera, to achieve\n\"first person\" effects.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Geom", Doc: "Viewport-level viewbox within any parent Viewport2D"}, {Name: "MultiSample", Doc: "number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame"}, {Name: "Wireframe", Doc: "render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)"}, {Name: "Camera", Doc: "camera determines view onto scene"}, {Name: "BackgroundColor", Doc: "background color, which is used directly as an RGB color in vulkan"}, {Name: "Lights", Doc: "all lights used in the scene"}, {Name: "Meshes", Doc: "meshes -- holds all the mesh data -- must be configured prior to rendering"}, {Name: "Textures", Doc: "textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability"}, {Name: "Library", Doc: "library of objects that can be used in the scene"}, {Name: "NoNav", Doc: "don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"}, {Name: "SavedCams", Doc: "saved cameras -- can Save and Set these to view the scene from different angles"}, {Name: "SetDragCursor", Doc: "has dragging cursor been set yet?"}, {Name: "Phong", Doc: "the vphong rendering system"}, {Name: "Frame", Doc: "the vgpu render frame holding the rendered scene"}, {Name: "ImgCopy", Doc: "image used to hold a copy of the Frame image, for ImageCopy() call.\nThis is re-used across calls to avoid large memory allocations,\nso it will automatically update after every ImageCopy call.\nIf a persistent image is required, call [iox/imagex.CloneAsRGBA]."}, {Name: "DirUpIndex", Doc: "index in list of window direct uploading images"}, {Name: "RenderMu", Doc: "mutex on rendering"}}, Instance: &Scene{}})
+var SceneType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Scene", IDName: "scene", Doc: "Scene is the overall scenegraph containing nodes as children.\nIt renders to its own vgpu.RenderFrame.\nThe Image of this Frame is usable directly or, via xyzview.Scene,\nwhere it is copied into an overall core.Scene image.\n\nThere is default navigation event processing (disabled by setting NoNav)\nwhere mouse drag events Orbit the camera (Shift = Pan, Alt = PanTarget)\nand arrow keys do Orbit, Pan, PanTarget with same key modifiers.\nSpacebar restores original \"default\" camera, and numbers save (1st time)\nor restore (subsequently) camera views (Control = always save)\n\nA Group at the top-level named \"TrackCamera\" will automatically track\nthe camera (i.e., its Pose is copied) -- Solids in that group can\nset their relative Pos etc to display relative to the camera, to achieve\n\"first person\" effects.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Geom", Doc: "Viewport-level viewbox within any parent Viewport2D"}, {Name: "MultiSample", Doc: "number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame"}, {Name: "Wireframe", Doc: "render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system (i.e., just after Scene is made)"}, {Name: "Camera", Doc: "camera determines view onto scene"}, {Name: "BackgroundColor", Doc: "background color, which is used directly as an RGB color in vulkan"}, {Name: "Lights", Doc: "all lights used in the scene"}, {Name: "Meshes", Doc: "meshes -- holds all the mesh data -- must be configured prior to rendering"}, {Name: "Textures", Doc: "textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability"}, {Name: "Library", Doc: "library of objects that can be used in the scene"}, {Name: "NoNav", Doc: "don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"}, {Name: "SavedCams", Doc: "saved cameras -- can Save and Set these to view the scene from different angles"}, {Name: "SetDragCursor", Doc: "has dragging cursor been set yet?"}, {Name: "Phong", Doc: "the vphong rendering system"}, {Name: "Frame", Doc: "the vgpu render frame holding the rendered scene"}, {Name: "ImgCopy", Doc: "image used to hold a copy of the Frame image, for ImageCopy() call.\nThis is re-used across calls to avoid large memory allocations,\nso it will automatically update after every ImageCopy call.\nIf a persistent image is required, call [iox/imagex.CloneAsRGBA]."}, {Name: "DirUpIndex", Doc: "index in list of window direct uploading images"}}, Instance: &Scene{}})
 
 // NewScene returns a new [Scene] with the given optional parent:
 // Scene is the overall scenegraph containing nodes as children.
@@ -333,7 +361,7 @@ func (t *Torus) SetAngStart(v float32) *Torus { t.AngStart = v; return t }
 func (t *Torus) SetAngLen(v float32) *Torus { t.AngLen = v; return t }
 
 // SolidType is the [types.Type] for [Solid]
-var SolidType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Solid", IDName: "solid", Doc: "Solid represents an individual 3D solid element.\nIt has its own unique spatial transforms and material properties,\nand points to a mesh structure defining the shape of the solid.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Mesh", Doc: "name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene"}, {Name: "Mat", Doc: "material properties of the surface (color, shininess, texture, etc)"}, {Name: "MeshPtr", Doc: "cached pointer to mesh"}}, Instance: &Solid{}})
+var SolidType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Solid", IDName: "solid", Doc: "Solid represents an individual 3D solid element.\nIt has its own unique spatial transforms and material properties,\nand points to a mesh structure defining the shape of the solid.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "MeshName", Doc: "MeshName is the name of the mesh shape information used for rendering\nthis solid; all meshes are collected on the Scene."}, {Name: "Material", Doc: "Material contains the material properties of the surface (color, shininess, texture, etc)."}, {Name: "Mesh", Doc: "Mesh is the cached [Mesh] object set from [Solid.MeshName]."}}, Instance: &Solid{}})
 
 // NewSolid returns a new [Solid] with the given optional parent:
 // Solid represents an individual 3D solid element.
@@ -347,9 +375,9 @@ func (t *Solid) NodeType() *types.Type { return SolidType }
 // New returns a new [*Solid] value
 func (t *Solid) New() tree.Node { return &Solid{} }
 
-// SetMat sets the [Solid.Mat]:
-// material properties of the surface (color, shininess, texture, etc)
-func (t *Solid) SetMat(v Material) *Solid { t.Mat = v; return t }
+// SetMaterial sets the [Solid.Material]:
+// Material contains the material properties of the surface (color, shininess, texture, etc).
+func (t *Solid) SetMaterial(v Material) *Solid { t.Material = v; return t }
 
 // Text2DType is the [types.Type] for [Text2D]
 var Text2DType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Text2D", IDName: "text2-d", Doc: "Text2D presents 2D rendered text on a vertically oriented plane, using a texture.\nCall SetText() which calls RenderText to update fortext changes (re-renders texture).\nThe native scale is such that a unit height value is the height of the default font\nset by the font-size property, and the X axis is scaled proportionally based on the\nrendered text size to maintain the aspect ratio.  Further scaling can be applied on\ntop of that by setting the Pose.Scale values as usual.\nStandard styling properties can be set on the node to set font size, family,\nand text alignment relative to the Pose.Pos position (e.g., Left, Top puts the\nupper-left corner of text at Pos).\nNote that higher quality is achieved by using a larger font size (36 default).\nThe margin property creates blank margin of the background color around the text\n(2 px default) and the background-color defaults to transparent\nbut can be set to any color.", Embeds: []types.Field{{Name: "Solid"}}, Fields: []types.Field{{Name: "Text", Doc: "the text string to display"}, {Name: "Styles", Doc: "styling settings for the text"}, {Name: "TextPos", Doc: "position offset of start of text rendering relative to upper-left corner"}, {Name: "TextRender", Doc: "render data for text label"}, {Name: "RenderState", Doc: "render state for rendering text"}}, Instance: &Text2D{}})
@@ -380,12 +408,25 @@ func (t *Text2D) New() tree.Node { return &Text2D{} }
 // the text string to display
 func (t *Text2D) SetText(v string) *Text2D { t.Text = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TexName", IDName: "tex-name", Doc: "TexName provides a GUI interface for choosing textures"})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TextureName", IDName: "texture-name", Doc: "TextureName provides a GUI interface for choosing textures."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Texture", IDName: "texture", Doc: "Texture is the interface for all textures"})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Texture", IDName: "texture", Doc: "Texture is the interface for all textures."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TextureBase", IDName: "texture-base", Doc: "TextureBase is the base texture implementation\nit uses an image.RGBA as underlying image storage to facilitate interface with GPU", Fields: []types.Field{{Name: "Nm", Doc: "name of the texture -- textures are connected to material by name"}, {Name: "Trans", Doc: "set to true if texture has transparency"}, {Name: "Img", Doc: "cached image"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TextureBase", IDName: "texture-base", Doc: "TextureBase is the base texture implementation.\nIt uses an [image.RGBA] as the underlying image storage\nto facilitate interface with GPU.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"--setters"}}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the texture;\ntextures are connected to [Material]s by name."}, {Name: "Transparent", Doc: "Transprent is whether the texture has transparency."}, {Name: "RGBA", Doc: "RGBA is the cached internal representation of the image."}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TextureFile", IDName: "texture-file", Doc: "TextureFile is a texture loaded from a file", Embeds: []types.Field{{Name: "TextureBase"}}, Fields: []types.Field{{Name: "FSys", Doc: "filesystem for embedded etc"}, {Name: "File", Doc: "filename for the texture"}}})
+// SetName sets the [TextureBase.Name]:
+// Name is the name of the texture;
+// textures are connected to [Material]s by name.
+func (t *TextureBase) SetName(v string) *TextureBase { t.Name = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TextureGi2D", IDName: "texture-gi2-d", Doc: "TextureGi2D is a dynamic texture material driven by a core.Viewport2D viewport\nanything rendered to the viewport will be projected onto the surface of any\nsolid using this texture.", Embeds: []types.Field{{Name: "TextureBase"}}})
+// SetTransparent sets the [TextureBase.Transparent]:
+// Transprent is whether the texture has transparency.
+func (t *TextureBase) SetTransparent(v bool) *TextureBase { t.Transparent = v; return t }
+
+// SetRGBA sets the [TextureBase.RGBA]:
+// RGBA is the cached internal representation of the image.
+func (t *TextureBase) SetRGBA(v *image.RGBA) *TextureBase { t.RGBA = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TextureFile", IDName: "texture-file", Doc: "TextureFile is a texture loaded from a file", Embeds: []types.Field{{Name: "TextureBase"}}, Fields: []types.Field{{Name: "FS", Doc: "filesystem for embedded etc"}, {Name: "File", Doc: "filename for the texture"}}})
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TextureCore", IDName: "texture-core", Doc: "TextureCore is a dynamic texture material driven by a core.Scene.\nAnything rendered to the scene will be projected onto the surface of any\nsolid using this texture. TODO: update this along with embed2d", Embeds: []types.Field{{Name: "TextureBase"}}})

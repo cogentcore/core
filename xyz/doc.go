@@ -33,7 +33,7 @@ Node bounding boxes are in both local and World reference frames, and are
 used for visibility and event selection.
 
 All Meshes are stored directly on the Scene, and must have unique names, as they
-are referenced from Solids by name.  The Mesh contains all the verticies, etc
+are referenced from Solids by name.  The Mesh contains all the vertices, etc
 that define a shape, and are the major memory-consuming elements of the scene
 (along with textures).  Thus, the Solid is very lightweight and just points to
 the Mesh, so Meshes can be reused across multiple Solids for efficiency.

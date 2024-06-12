@@ -30,14 +30,14 @@ func (bx *Box) Defaults() {
 	bx.Segs.Set(1, 1, 1)
 }
 
-func (bx *Box) N() (nVtx, nIndex int) {
-	nVtx, nIndex = BoxN(bx.Segs)
+func (bx *Box) N() (numVertex, nIndex int) {
+	numVertex, nIndex = BoxN(bx.Segs)
 	return
 }
 
 // SetBox sets points in given allocated arrays
-func (bx *Box) Set(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32) {
-	hSz := SetBox(vtxAry, normAry, texAry, idxAry, bx.VtxOff, bx.IndexOff, bx.Size, bx.Segs, bx.Pos)
+func (bx *Box) Set(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32) {
+	hSz := SetBox(vertexArray, normArray, textureArray, indexArray, bx.VtxOff, bx.IndexOff, bx.Size, bx.Segs, bx.Pos)
 
 	mn := bx.Pos.Sub(hSz)
 	mx := bx.Pos.Add(hSz)
@@ -48,15 +48,15 @@ func (bx *Box) Set(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU
 // vertex and index data with given number of segments.
 // Note: In *vertex* units, not float units (i.e., x3 to get
 // actual float offset in Vtx array).
-func BoxN(segs math32.Vector3i) (nVtx, nIndex int) {
+func BoxN(segs math32.Vector3i) (numVertex, nIndex int) {
 	nv, ni := PlaneN(int(segs.X), int(segs.Y))
-	nVtx += 2 * nv
+	numVertex += 2 * nv
 	nIndex += 2 * ni
 	nv, ni = PlaneN(int(segs.X), int(segs.Z))
-	nVtx += 2 * nv
+	numVertex += 2 * nv
 	nIndex += 2 * ni
 	nv, ni = PlaneN(int(segs.Z), int(segs.Y))
-	nVtx += 2 * nv
+	numVertex += 2 * nv
 	nIndex += 2 * ni
 	return
 }
@@ -68,30 +68,30 @@ func BoxN(segs math32.Vector3i) (nVtx, nIndex int) {
 // finely subdividing a plane allows for higher-quality lighting
 // and texture rendering (minimum of 1 will be enforced).
 // pos is a 3D position offset. returns 3D size of plane.
-func SetBox(vtxAry, normAry, texAry math32.ArrayF32, idxAry math32.ArrayU32, vtxOff, idxOff int, size math32.Vector3, segs math32.Vector3i, pos math32.Vector3) math32.Vector3 {
+func SetBox(vertexArray, normArray, textureArray math32.ArrayF32, indexArray math32.ArrayU32, vtxOff, idxOff int, size math32.Vector3, segs math32.Vector3i, pos math32.Vector3) math32.Vector3 {
 	hSz := size.DivScalar(2)
 
-	nVtx, nIndex := PlaneN(int(segs.X), int(segs.Y))
+	numVertex, nIndex := PlaneN(int(segs.X), int(segs.Y))
 
 	voff := vtxOff
 	ioff := idxOff
 
 	// start with neg z as typically back
-	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, math32.X, math32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -hSz.Z, int(segs.X), int(segs.Y), pos) // nz
-	voff += nVtx
+	SetPlane(vertexArray, normArray, textureArray, indexArray, voff, ioff, math32.X, math32.Y, -1, -1, size.X, size.Y, -hSz.X, -hSz.Y, -hSz.Z, int(segs.X), int(segs.Y), pos) // nz
+	voff += numVertex
 	ioff += nIndex
-	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, math32.X, math32.Z, 1, -1, size.X, size.Z, -hSz.X, -hSz.Z, -hSz.Y, int(segs.X), int(segs.Z), pos) // ny
-	voff += nVtx
+	SetPlane(vertexArray, normArray, textureArray, indexArray, voff, ioff, math32.X, math32.Z, 1, -1, size.X, size.Z, -hSz.X, -hSz.Z, -hSz.Y, int(segs.X), int(segs.Z), pos) // ny
+	voff += numVertex
 	ioff += nIndex
-	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, math32.Z, math32.Y, -1, -1, size.Z, size.Y, -hSz.Z, -hSz.Y, hSz.X, int(segs.Z), int(segs.Y), pos) // px
-	voff += nVtx
+	SetPlane(vertexArray, normArray, textureArray, indexArray, voff, ioff, math32.Z, math32.Y, -1, -1, size.Z, size.Y, -hSz.Z, -hSz.Y, hSz.X, int(segs.Z), int(segs.Y), pos) // px
+	voff += numVertex
 	ioff += nIndex
-	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, math32.Z, math32.Y, 1, -1, size.Z, size.Y, -hSz.Z, -hSz.Y, -hSz.X, int(segs.Z), int(segs.Y), pos) // nx
-	voff += nVtx
+	SetPlane(vertexArray, normArray, textureArray, indexArray, voff, ioff, math32.Z, math32.Y, 1, -1, size.Z, size.Y, -hSz.Z, -hSz.Y, -hSz.X, int(segs.Z), int(segs.Y), pos) // nx
+	voff += numVertex
 	ioff += nIndex
-	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, math32.X, math32.Z, 1, 1, size.X, size.Z, -hSz.X, -hSz.Z, hSz.Y, int(segs.X), int(segs.Z), pos) // py
-	voff += nVtx
+	SetPlane(vertexArray, normArray, textureArray, indexArray, voff, ioff, math32.X, math32.Z, 1, 1, size.X, size.Z, -hSz.X, -hSz.Z, hSz.Y, int(segs.X), int(segs.Z), pos) // py
+	voff += numVertex
 	ioff += nIndex
-	SetPlane(vtxAry, normAry, texAry, idxAry, voff, ioff, math32.X, math32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, hSz.Z, int(segs.X), int(segs.Y), pos) // pz
+	SetPlane(vertexArray, normArray, textureArray, indexArray, voff, ioff, math32.X, math32.Y, 1, -1, size.X, size.Y, -hSz.X, -hSz.Y, hSz.Z, int(segs.X), int(segs.Y), pos) // pz
 	return hSz
 }
