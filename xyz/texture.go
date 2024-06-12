@@ -20,8 +20,13 @@ import (
 // TextureName provides a GUI interface for choosing textures.
 type TextureName string
 
-// Texture is the interface for all textures
+// Texture is the interface for all textures.
 type Texture interface {
+
+	// AsTextureBase returns the [TextureBase] for this texture,
+	// which contains the core data and functionality.
+	AsTextureBase() *TextureBase
+
 	// Name returns name of the texture
 	Name() string
 
@@ -55,6 +60,10 @@ type TextureBase struct {
 
 	// cached image
 	Img *image.RGBA
+}
+
+func (tx *TextureBase) AsTextureBase() *TextureBase {
+	return tx
 }
 
 func (tx *TextureBase) Name() string {
