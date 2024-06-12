@@ -8,7 +8,6 @@ package core
 //go:generate core generate
 
 import (
-	"fmt"
 	"image"
 	"log/slog"
 
@@ -508,23 +507,13 @@ func (wb *WidgetBase) IsVisible() bool {
 // DirectRenderImage uploads image directly into given system.Drawer at given index
 // Typically this is a drw.SetGoImage call with an [image.RGBA], or
 // drw.SetFrameImage with a [vgpu.FrameBuffer]
-func (wb *WidgetBase) DirectRenderImage(drw system.Drawer, idx int) {
-}
+func (wb *WidgetBase) DirectRenderImage(drw system.Drawer, idx int) {}
 
 // DirectRenderDraw draws the current image at index onto the RenderWindow window,
 // typically using drw.Copy, drw.Scale, or drw.Fill.
 // flipY is the default setting for whether the Y axis needs to be flipped during drawing,
 // which is typically passed along to the Copy or Scale methods.
-func (wb *WidgetBase) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
-}
-
-// FieldByName allows [tree.Node.FindPath] to go through parts.
-func (wb *WidgetBase) FieldByName(field string) (tree.Node, error) {
-	if field == "parts" {
-		return wb.Parts, nil
-	}
-	return nil, fmt.Errorf("no field %q for %v; only parts", field, wb)
-}
+func (wb *WidgetBase) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {}
 
 // NodeWalkDown extends [tree.Node.WalkDown] to [WidgetBase.Parts],
 // which is key for getting full tree traversal to work when updating,

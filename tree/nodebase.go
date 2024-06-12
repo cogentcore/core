@@ -5,7 +5,6 @@
 package tree
 
 import (
-	"errors"
 	"log/slog"
 	"maps"
 	"slices"
@@ -312,38 +311,13 @@ func (n *NodeBase) FindPath(path string) Node {
 		if len(pe) == 0 {
 			continue
 		}
-		if strings.Contains(pe, ".") { // has fields
-			fels := strings.Split(pe, ".")
-			// find the child first, then the fields
-			idx := findPathChild(curn, UnescapePathName(fels[0]))
-			if idx < 0 {
-				return nil
-			}
-			curn = curn.AsTree().Children[idx]
-			for i := 1; i < len(fels); i++ {
-				fe := UnescapePathName(fels[i])
-				fk, err := curn.FieldByName(fe)
-				if err != nil {
-					slog.Debug("tree.FindPath: %v", err)
-					return nil
-				}
-				curn = fk
-			}
-		} else {
-			idx := findPathChild(curn, UnescapePathName(pe))
-			if idx < 0 {
-				return nil
-			}
-			curn = curn.AsTree().Children[idx]
+		idx := findPathChild(curn, UnescapePathName(pe))
+		if idx < 0 {
+			return nil
 		}
+		curn = curn.AsTree().Children[idx]
 	}
 	return curn
-}
-
-// FieldByName is a placeholder implementation of [Node.FieldByName]
-// that returns an error.
-func (n *NodeBase) FieldByName(field string) (Node, error) {
-	return nil, errors.New("tree.NodeBase.FieldByName: no tree fields defined for this node")
 }
 
 // Adding and Inserting Children:
