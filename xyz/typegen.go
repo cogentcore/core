@@ -88,16 +88,17 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshName", IDNa
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Mesh", IDName: "mesh", Doc: "Mesh parametrizes the mesh-based shape used for rendering a [Solid].\nOnly indexed triangle meshes are supported.\nAll Meshes must know in advance the number of vertex and index points\nthey require, and the SetVertices method operates on data from the\nvgpu staging buffer to set the relevant data post-allocation.\nThe vgpu vshape library is used for all basic shapes, and it follows\nthis same logic.\nPer-vertex Color is optional, as is the ability to update the data\nafter initial SetVertices call (default is to do nothing)."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshBase", IDName: "mesh-base", Doc: "MeshBase provides the core implementation of the [Mesh] interface.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the mesh. [Mesh]es are linked to [Solid]s\nby name so this matters."}, {Name: "NVtx", Doc: "number of vertex points, as math32.Vector3 -- always includes math32.Vector3 normals and math32.Vector2 texture coordinates -- only valid after Sizes() has been called"}, {Name: "NIndex", Doc: "number of indexes, as math32.ArrayU32 -- only valid after Sizes() has been called"}, {Name: "Color", Doc: "has per-vertex colors, as math32.Vector4 per vertex"}, {Name: "Dynamic", Doc: "if true, this mesh changes frequently -- otherwise considered to be static"}, {Name: "Trans", Doc: "set to true if color has transparency -- not worth checking manually"}, {Name: "BBox", Doc: "computed bounding-box and other gross solid properties"}, {Name: "BBoxMu", Doc: "mutex on bbox access"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshBase", IDName: "mesh-base", Doc: "MeshBase provides the core implementation of the [Mesh] interface.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the mesh. [Mesh]es are linked to [Solid]s\nby name so this matters."}, {Name: "NumVertex", Doc: "NumVertex is the number of [math32.Vector3] vertex points. This always\nincludes [math32.Vector3] normals and [math32.Vector2] texture coordinates.\nThis is only valid after [Mesh.Sizes] has been called."}, {Name: "NumIndex", Doc: "NumIndex is the number of [math32.ArrayU32] indexes.\nThis is only valid after [Mesh.Sizes] has been called."}, {Name: "HasColor", Doc: "HasColor is whether the mesh has per-vertex colors\nas [math32.Vector4] per vertex."}, {Name: "Dynamic", Doc: "if true, this mesh changes frequently -- otherwise considered to be static"}, {Name: "Trans", Doc: "set to true if color has transparency -- not worth checking manually"}, {Name: "BBox", Doc: "computed bounding-box and other gross solid properties"}, {Name: "BBoxMu", Doc: "mutex on bbox access"}}})
 
 // SetName sets the [MeshBase.Name]:
 // Name is the name of the mesh. [Mesh]es are linked to [Solid]s
 // by name so this matters.
 func (t *MeshBase) SetName(v string) *MeshBase { t.Name = v; return t }
 
-// SetColor sets the [MeshBase.Color]:
-// has per-vertex colors, as math32.Vector4 per vertex
-func (t *MeshBase) SetColor(v bool) *MeshBase { t.Color = v; return t }
+// SetHasColor sets the [MeshBase.HasColor]:
+// HasColor is whether the mesh has per-vertex colors
+// as [math32.Vector4] per vertex.
+func (t *MeshBase) SetHasColor(v bool) *MeshBase { t.HasColor = v; return t }
 
 // SetDynamic sets the [MeshBase.Dynamic]:
 // if true, this mesh changes frequently -- otherwise considered to be static

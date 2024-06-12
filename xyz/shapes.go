@@ -68,8 +68,8 @@ func NewPlane(sc *Scene, name string, width, height float32) *Plane {
 
 func (pl *Plane) Sizes() (nVtx, nIndex int, hasColor bool) {
 	pl.NumVertex, pl.NumIndex = vshape.PlaneN(int(pl.Segs.X), int(pl.Segs.Y))
-	pl.Color = false
-	return pl.NumVertex, pl.NumIndex, pl.Color
+	pl.HasColor = false
+	return pl.NumVertex, pl.NumIndex, pl.HasColor
 }
 
 func (pl *Plane) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
@@ -108,8 +108,8 @@ func NewBox(sc *Scene, name string, width, height, depth float32) *Box {
 
 func (bx *Box) Sizes() (nVtx, nIndex int, hasColor bool) {
 	bx.NumVertex, bx.NumIndex = vshape.BoxN(bx.Segs)
-	bx.Color = false
-	return bx.NumVertex, bx.NumIndex, bx.Color
+	bx.HasColor = false
+	return bx.NumVertex, bx.NumIndex, bx.HasColor
 }
 
 func (bx *Box) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
@@ -179,8 +179,8 @@ func (sp *Sphere) Defaults() {
 
 func (sp *Sphere) Sizes() (nVtx, nIndex int, hasColor bool) {
 	sp.NumVertex, sp.NumIndex = vshape.SphereSectorN(sp.WidthSegs, sp.HeightSegs, sp.ElevStart, sp.ElevLen)
-	sp.Color = false
-	return sp.NumVertex, sp.NumIndex, sp.Color
+	sp.HasColor = false
+	return sp.NumVertex, sp.NumIndex, sp.HasColor
 }
 
 func (sp *Sphere) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
@@ -278,8 +278,8 @@ func (cy *Cylinder) Defaults() {
 
 func (cy *Cylinder) Sizes() (nVtx, nIndex int, hasColor bool) {
 	cy.NumVertex, cy.NumIndex = vshape.CylinderSectorN(cy.RadialSegs, cy.HeightSegs, cy.Top, cy.Bottom)
-	cy.Color = false
-	return cy.NumVertex, cy.NumIndex, cy.Color
+	cy.HasColor = false
+	return cy.NumVertex, cy.NumIndex, cy.HasColor
 }
 
 func (cy *Cylinder) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {

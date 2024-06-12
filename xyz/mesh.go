@@ -63,8 +63,9 @@ type MeshBase struct { //types:add -setters
 	// This is only valid after [Mesh.Sizes] has been called.
 	NumIndex int `set:"-"`
 
-	// has per-vertex colors, as math32.Vector4 per vertex
-	Color bool
+	// HasColor is whether the mesh has per-vertex colors
+	// as [math32.Vector4] per vertex.
+	HasColor bool
 
 	// if true, this mesh changes frequently -- otherwise considered to be static
 	Dynamic bool
@@ -83,14 +84,12 @@ func (ms *MeshBase) AsMeshBase() *MeshBase {
 	return ms
 }
 
-func (ms *MeshBase) HasColor() bool { return ms.Color }
-
 func (ms *MeshBase) Sizes() (numVertex, numIndex int, hasColor bool) {
-	return ms.NumVertex, ms.NumIndex, ms.Color
+	return ms.NumVertex, ms.NumIndex, ms.HasColor
 }
 
 func (ms *MeshBase) IsTransparent() bool {
-	if !ms.HasColor() {
+	if !ms.HasColor {
 		return false
 	}
 	return ms.Trans
@@ -252,15 +251,15 @@ type GenMesh struct {
 func (ms *GenMesh) Sizes() (nVtx, nIndex int, hasColor bool) {
 	ms.NumVertex = len(ms.Vtx) / 3
 	ms.NumIndex = len(ms.Index)
-	ms.Color = len(ms.Clr) > 0
-	return ms.NumVertex, ms.NumIndex, ms.Color
+	ms.HasColor = len(ms.Clr) > 0
+	return ms.NumVertex, ms.NumIndex, ms.HasColor
 }
 
 func (ms *GenMesh) Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
 	copy(vtxAry, ms.Vtx)
 	copy(normAry, ms.Norm)
 	copy(texAry, ms.Tex)
-	if ms.Color {
+	if ms.HasColor {
 		copy(clrAry, ms.Clr)
 	}
 	copy(idxAry, ms.Index)

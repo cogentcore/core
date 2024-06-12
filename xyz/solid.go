@@ -192,7 +192,7 @@ func (sld *Solid) IsTransparent() bool {
 	if sld.MeshPtr == nil {
 		return false
 	}
-	if sld.MeshPtr.AsMeshBase().HasColor() {
+	if sld.MeshPtr.AsMeshBase().HasColor {
 		return sld.MeshPtr.AsMeshBase().IsTransparent()
 	}
 	return sld.Mat.IsTransparent()
@@ -216,7 +216,7 @@ func (sld *Solid) RenderClass() RenderClasses {
 	switch {
 	case sld.Mat.TexPtr != nil:
 		return RClassOpaqueTexture
-	case sld.MeshPtr.AsMeshBase().HasColor():
+	case sld.MeshPtr.AsMeshBase().HasColor:
 		if sld.MeshPtr.AsMeshBase().IsTransparent() {
 			return RClassTransVertex
 		}
