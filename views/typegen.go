@@ -532,12 +532,12 @@ func (t *TreeView) SetOpenDepth(v int) *TreeView { t.OpenDepth = v; return t }
 // linear index of this node within the entire tree.
 // updated on full rebuilds and may sometimes be off,
 // but close enough for expected uses
-func (t *TreeView) SetViewIndex(v int) *TreeView { t.ViewIndex = v; return t }
+func (t *TreeView) SetViewIndex(v int) *TreeView { t.viewIndex = v; return t }
 
 // SetWidgetSize sets the [TreeView.WidgetSize]:
 // size of just this node widget.
 // our alloc includes all of our children, but we only draw us.
-func (t *TreeView) SetWidgetSize(v math32.Vector2) *TreeView { t.WidgetSize = v; return t }
+func (t *TreeView) SetWidgetSize(v math32.Vector2) *TreeView { t.widgetSize = v; return t }
 
 // SetRootView sets the [TreeView.RootView]:
 // The cached root of the view. It is automatically set and does not need to be

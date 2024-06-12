@@ -18,7 +18,6 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
-	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
@@ -139,17 +138,16 @@ type TreeView struct {
 	// Nodes beyond this depth will be initialized as closed.
 	OpenDepth int `copier:"-" json:"-" xml:"-"`
 
-	/////////////////////////////////////////
-	// All fields below are computed
+	// Computed fields:
 
 	// linear index of this node within the entire tree.
 	// updated on full rebuilds and may sometimes be off,
 	// but close enough for expected uses
-	ViewIndex int `copier:"-" json:"-" xml:"-" edit:"-"`
+	viewIndex int
 
 	// size of just this node widget.
 	// our alloc includes all of our children, but we only draw us.
-	WidgetSize math32.Vector2 `copier:"-" json:"-" xml:"-" edit:"-"`
+	widgetSize math32.Vector2
 
 	// The cached root of the view. It is automatically set and does not need to be
 	// set by the end user.
@@ -164,7 +162,7 @@ type TreeView struct {
 	// the reason that it exists is so that the children of the tree view
 	// (other tree views) do not inherit its stateful background color, as
 	// that does not look good.
-	actStateLayer float32 `set:"-"`
+	actStateLayer float32
 }
 
 // NewTreeViewFrame adds a new [TreeView] to a new frame with the given
@@ -175,10 +173,6 @@ func NewTreeViewFrame(parent ...tree.Node) *TreeView {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	return NewTreeView(fr)
-}
-
-func (tv *TreeView) FlagType() enums.BitFlagSetter {
-	return (*TreeViewFlags)(&tv.Flags)
 }
 
 // AsTreeView satisfies the [TreeViewer] interface.
@@ -199,7 +193,7 @@ func (tv *TreeView) RootSetViewIndex() int {
 	tv.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
 		tvn := AsTreeView(wi)
 		if tvn != nil {
-			tvn.ViewIndex = idx
+			tvn.viewIndex = idx
 			tvn.RootView = tv
 			// fmt.Println(idx, tvn, "root:", tv, &tv)
 			idx++
@@ -606,9 +600,9 @@ func (tv *TreeView) SetBranchState() {
 
 func (tv *TreeView) SizeUp() {
 	tv.WidgetBase.SizeUp()
-	tv.WidgetSize = tv.Geom.Size.Actual.Total
-	h := tv.WidgetSize.Y
-	w := tv.WidgetSize.X
+	tv.widgetSize = tv.Geom.Size.Actual.Total
+	h := tv.widgetSize.Y
+	w := tv.widgetSize.X
 
 	if !tv.IsClosed() {
 		// we layout children under us
@@ -629,7 +623,7 @@ func (tv *TreeView) SizeUp() {
 	sz.Actual.Content = math32.Vec2(w, h)
 	sz.SetTotalFromContent(&sz.Actual)
 	sz.Alloc = sz.Actual // need allocation to match!
-	tv.WidgetSize.X = w  // stretch
+	tv.widgetSize.X = w  // stretch
 }
 
 func (tv *TreeView) SizeDown(iter int) bool {
@@ -649,12 +643,12 @@ func (tv *TreeView) Position() {
 	tv.This.(TreeViewer).UpdateBranchIcons()
 
 	tv.Geom.Size.Actual.Total.X = rn.Geom.Size.Actual.Total.X - (tv.Geom.Pos.Total.X - rn.Geom.Pos.Total.X)
-	tv.WidgetSize.X = tv.Geom.Size.Actual.Total.X
+	tv.widgetSize.X = tv.Geom.Size.Actual.Total.X
 
 	tv.WidgetBase.Position()
 
 	if !tv.IsClosed() {
-		h := tv.WidgetSize.Y
+		h := tv.widgetSize.Y
 		tv.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
 			kwb.Geom.RelPos.Y = h
 			kwb.Geom.RelPos.X = tv.Indent.Dots
@@ -667,12 +661,12 @@ func (tv *TreeView) Position() {
 
 func (tv *TreeView) ScenePos() {
 	sz := &tv.Geom.Size
-	if sz.Actual.Total == tv.WidgetSize {
+	if sz.Actual.Total == tv.widgetSize {
 		sz.SetTotalFromContent(&sz.Actual) // restore after scrolling
 	}
 	tv.WidgetBase.ScenePos()
 	tv.ScenePosChildren()
-	tv.Geom.Size.Actual.Total = tv.WidgetSize // key: we revert to just ourselves
+	tv.Geom.Size.Actual.Total = tv.widgetSize // key: we revert to just ourselves
 }
 
 func (tv *TreeView) Render() {
@@ -862,24 +856,24 @@ func (tv *TreeView) SelectUpdate(mode events.SelectModes) bool {
 			for _, v := range sl {
 				vn := v.AsTreeView()
 				if minIndex < 0 {
-					minIndex = vn.ViewIndex
+					minIndex = vn.viewIndex
 				} else {
-					minIndex = min(minIndex, vn.ViewIndex)
+					minIndex = min(minIndex, vn.viewIndex)
 				}
-				maxIndex = max(maxIndex, vn.ViewIndex)
+				maxIndex = max(maxIndex, vn.viewIndex)
 			}
-			cidx := tv.ViewIndex
+			cidx := tv.viewIndex
 			nn := tv
 			tv.Select()
-			if tv.ViewIndex < minIndex {
+			if tv.viewIndex < minIndex {
 				for cidx < minIndex {
 					nn = nn.MoveDown(events.SelectQuiet) // just select
-					cidx = nn.ViewIndex
+					cidx = nn.viewIndex
 				}
-			} else if tv.ViewIndex > maxIndex {
+			} else if tv.viewIndex > maxIndex {
 				for cidx > maxIndex {
 					nn = nn.MoveUp(events.SelectQuiet) // just select
-					cidx = nn.ViewIndex
+					cidx = nn.viewIndex
 				}
 			}
 		}
