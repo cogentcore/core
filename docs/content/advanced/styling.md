@@ -12,8 +12,8 @@ You can style all widgets within a certain container at once using [[core.Widget
 
 ```Go
 fr := core.NewFrame(parent)
-fr.OnWidgetAdded(func(w core.Widget) {
-    w.Styler(func(s *styles.Style) {
+fr.OnWidgetAdded(func(w core.Widget) { // TODO(config)
+    w.AsWidget().Styler(func(s *styles.Style) {
         s.Color = colors.C(colors.Scheme.Error.Base)
     })
 })
