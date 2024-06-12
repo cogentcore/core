@@ -198,7 +198,7 @@ func main() {
 	floorp := xyz.NewPlane(sc, "floor-plane", 100, 100)
 	floor := xyz.NewSolid(sc).SetMesh(floorp).
 		SetColor(colors.Tan).SetTexture(grtx).SetPos(0, -5, 0)
-	floor.Mat.Tiling.Repeat.Set(40, 40)
+	floor.Material.Tiling.Repeat.Set(40, 40)
 
 	// floor.Mat.Emissive.SetName("brown")
 	// floor.Mat.Bright = 2 // .5 for wood / brown
@@ -225,7 +225,7 @@ func main() {
 
 	sphm := xyz.NewSphere(sc, "sphere", .75, 32)
 	sph := xyz.NewSolid(sc).SetMesh(sphm).SetColor(colors.Orange)
-	sph.Mat.Color.A = 200
+	sph.Material.Color.A = 200
 	sph.Pose.Pos.Set(0, -2, 0)
 
 	// Good strategy for objects if used in multiple places is to load
@@ -249,7 +249,7 @@ func main() {
 	trs := xyz.NewSolid(sc).SetMesh(trsm).SetColor(colors.White).
 		SetPos(-1.6, -1.6, -.2).SetAxisRotation(1, 0, 0, 90)
 	trs.SetName("torus")
-	trs.Mat.Color.A = 200
+	trs.Material.Color.A = 200
 
 	txt := xyz.NewText2D(sc).SetText("Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
 	txt.Styles.Text.Align = styles.Center

@@ -59,7 +59,7 @@ func (txt *Text2D) Defaults() {
 	txt.Styles.Defaults()
 	txt.Styles.Font.Size.Pt(36)
 	txt.Styles.Margin.Set(units.Px(2))
-	txt.Mat.Bright = 4 // this is key for making e.g., a white background show up as white..
+	txt.Material.Bright = 4 // this is key for making e.g., a white background show up as white..
 }
 
 // TextSize returns the size of the text plane, applying all *local* scaling factors
@@ -67,7 +67,7 @@ func (txt *Text2D) Defaults() {
 func (txt *Text2D) TextSize() (math32.Vector2, bool) {
 	txt.Pose.Defaults() // only if nil
 	sz := math32.Vector2{}
-	tx := txt.Mat.Texture
+	tx := txt.Material.Texture
 	if tx == nil {
 		return sz, false
 	}
@@ -118,7 +118,7 @@ func (txt *Text2D) RenderText() {
 	var img *image.RGBA
 	var tx Texture
 	var err error
-	if txt.Mat.Texture == nil {
+	if txt.Material.Texture == nil {
 		txname := "__Text2D: " + txt.Name
 		tx, err = txt.Scene.TextureByNameTry(txname)
 		if err != nil {
@@ -126,16 +126,16 @@ func (txt *Text2D) RenderText() {
 			txt.Scene.AddTexture(tx)
 			img = image.NewRGBA(bounds)
 			tx.AsTextureBase().RGBA = img
-			txt.Mat.SetTexture(tx)
+			txt.Material.SetTexture(tx)
 		} else {
 			if vgpu.Debug {
 				fmt.Printf("xyz.Text2D: error: texture name conflict: %s\n", txname)
 			}
-			txt.Mat.SetTexture(tx)
+			txt.Material.SetTexture(tx)
 			img = tx.Image()
 		}
 	} else {
-		tx = txt.Mat.Texture
+		tx = txt.Material.Texture
 		img = tx.Image()
 		if img.Bounds() != bounds {
 			img = image.NewRGBA(bounds)

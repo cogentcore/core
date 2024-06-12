@@ -167,7 +167,7 @@ func NewManipPoint(parent tree.Node, name string, meshName string, clr color.RGB
 	mpt.SetMeshName(meshName)
 	mpt.Defaults()
 	mpt.Pose.Pos = pos
-	mpt.Mat.Color = clr
+	mpt.Material.Color = clr
 	return mpt
 }
 

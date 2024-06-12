@@ -321,15 +321,15 @@ func (dec *Decoder) SetMat(sc *xyz.Scene, sld *xyz.Solid, matnm string) {
 		msg := fmt.Sprintf("could not find material: %s for object %s. using default material.", matnm, sld.Name)
 		dec.appendWarn(objType, msg)
 	}
-	sld.Mat.Defaults()
-	sld.Mat.CullBack = false // obj files do not reliably work with this on!
-	sld.Mat.Color = mat.Diffuse
+	sld.Material.Defaults()
+	sld.Material.CullBack = false // obj files do not reliably work with this on!
+	sld.Material.Color = mat.Diffuse
 	if mat.Opacity > 0 {
-		sld.Mat.Color.A = uint8(mat.Opacity * float32(0xFF))
+		sld.Material.Color.A = uint8(mat.Opacity * float32(0xFF))
 	}
 	// sld.Mat.Specular = mat.Specular
 	if mat.Shininess != 0 {
-		sld.Mat.Shiny = mat.Shininess
+		sld.Material.Shiny = mat.Shininess
 	}
 	// Loads material textures if specified
 	dec.loadTex(sc, sld, mat.MapKd, mat)
@@ -345,11 +345,11 @@ func (dec *Decoder) loadTex(sc *xyz.Scene, sld *xyz.Solid, texfn string, mat *Ma
 	if err != nil {
 		tf = xyz.NewTextureFileFS(dec.FSys, sc, tfn, texfn)
 	}
-	sld.Mat.SetTexture(tf)
+	sld.Material.SetTexture(tf)
 	if mat.Tiling.Repeat.X > 0 {
-		sld.Mat.Tiling.Repeat = mat.Tiling.Repeat
+		sld.Material.Tiling.Repeat = mat.Tiling.Repeat
 	}
-	sld.Mat.Tiling.Off = mat.Tiling.Off
+	sld.Material.Tiling.Off = mat.Tiling.Off
 }
 
 // parse reads the lines from the specified reader and dispatch them

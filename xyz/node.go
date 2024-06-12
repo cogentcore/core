@@ -81,14 +81,14 @@ type Node interface {
 type NodeBase struct {
 	tree.NodeBase
 
-	// complete specification of position and orientation
+	// Pose is the complete specification of position and orientation.
 	Pose Pose `set:"-"`
 
-	// Scene is the cached Scene
+	// Scene is the cached [Scene].
 	Scene *Scene `copier:"-" set:"-"`
 
 	// mutex on pose access -- needed for parallel updating
-	PoseMu sync.RWMutex `view:"-" copier:"-" json:"-" xml:"-"  set:"-"`
+	PoseMu sync.RWMutex `view:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// mesh-based local bounding box (aggregated for groups)
 	MeshBBox BBox `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
