@@ -63,37 +63,12 @@ func (sv *SliceView) StyleRow(w core.Widget, idx, fidx int) {
 // * SliceViewGrid handles all the layout logic to start with a minimum number of
 //   rows and then computes the total number visible based on allocated size.
 
-// SliceViewFlags extend WidgetFlags to hold SliceView state
-type SliceViewFlags core.WidgetFlags //enums:bitflag -trim-prefix SliceView
-
-const (
-	// SliceViewIsArray is whether the slice is actually an array -- no modifications -- set by SetSlice
-	SliceViewIsArray SliceViewFlags = SliceViewFlags(core.WidgetFlagsN) + iota
-
-	// SliceViewShowIndex is whether to show index or not
-	SliceViewShowIndex
-
-	// SliceViewReadOnlyKeyNav is whether support key navigation when ReadOnly (default true).
-	// uses a capture of up / down events to manipulate selection, not focus.
-	SliceViewReadOnlyKeyNav
-
-	// SliceViewSelectMode is whether to be in select rows mode or editing mode
-	SliceViewSelectMode
-
-	// SliceViewReadOnlyMultiSelect: if view is ReadOnly, default selection mode is to choose one row only.
-	// If this is true, standard multiple selection logic with modifier keys is instead supported
-	SliceViewReadOnlyMultiSelect
-
-	// SliceViewInFocusGrab is a guard for recursive focus grabbing
-	SliceViewInFocusGrab
-)
-
 const (
 	SliceViewRowProperty = "sv-row"
 	SliceViewColProperty = "sv-col"
 )
 
-// SliceViewer is the interface used by SliceViewBase to
+// SliceViewer is the interface used by [SliceViewBase] to
 // support any abstractions needed for different types of slice views.
 type SliceViewer interface {
 	// AsSliceViewBase returns the base for direct access to relevant fields etc
@@ -183,7 +158,10 @@ type SliceViewBase struct {
 	core.Frame
 
 	// Slice is the pointer to the slice that we are viewing.
-	Slice any `set:"-" json:"-" xml:"-"`
+	Slice any `set:"-"`
+
+	// ShowIndexes is whether to show the indexes of rows or not (default false).
+	ShowIndexes bool
 
 	// MinRows specifies the minimum number of rows to display, to ensure
 	// at least this amount is displayed.
@@ -245,6 +223,23 @@ type SliceViewBase struct {
 
 	// maximum width of value column in chars, if string
 	maxWidth int
+
+	// ReadOnlyKeyNav is whether support key navigation when ReadOnly (default true).
+	// It uses a capture of up / down events to manipulate selection, not focus.
+	ReadOnlyKeyNav bool
+
+	// SelectMode is whether to be in select rows mode or editing mode.
+	SelectMode bool `set:"-" copier:"-" json:"-" xml:"-"`
+
+	// ReadOnlyMultiSelect: if view is ReadOnly, default selection mode is to choose one row only.
+	// If this is true, standard multiple selection logic with modifier keys is instead supported.
+	ReadOnlyMultiSelect bool
+
+	// InFocusGrab is a guard for recursive focus grabbing.
+	InFocusGrab bool `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
+
+	// isArray is whether the slice is actually an array.
+	isArray bool
 }
 
 func (sv *SliceViewBase) WidgetValue() any { return &sv.Slice }
