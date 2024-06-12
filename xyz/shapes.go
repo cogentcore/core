@@ -77,9 +77,7 @@ func (pl *Plane) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray
 	sz := vshape.SetPlaneAxisSize(vertexArray, normArray, textureArray, indexArray, 0, 0, pl.NormAxis, pl.NormNeg, pl.Size, pl.Segs, pl.Offset, pos)
 	mn := pos.Sub(sz)
 	mx := pos.Add(sz)
-	pl.BBoxMu.Lock()
 	pl.BBox.SetBounds(mn, mx)
-	pl.BBoxMu.Unlock()
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -117,9 +115,7 @@ func (bx *Box) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray m
 	hSz := vshape.SetBox(vertexArray, normArray, textureArray, indexArray, 0, 0, bx.Size, bx.Segs, pos)
 	mn := pos.Sub(hSz)
 	mx := pos.Add(hSz)
-	bx.BBoxMu.Lock()
 	bx.BBox.SetBounds(mn, mx)
-	bx.BBoxMu.Unlock()
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -186,9 +182,7 @@ func (sp *Sphere) Sizes() (numVertex, nIndex int, hasColor bool) {
 func (sp *Sphere) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
 	pos := math32.Vector3{}
 	bb := vshape.SetSphereSector(vertexArray, normArray, textureArray, indexArray, 0, 0, sp.Radius, sp.WidthSegs, sp.HeightSegs, sp.AngStart, sp.AngLen, sp.ElevStart, sp.ElevLen, pos)
-	sp.BBoxMu.Lock()
 	sp.BBox.SetBounds(bb.Min, bb.Max)
-	sp.BBoxMu.Unlock()
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -285,9 +279,7 @@ func (cy *Cylinder) Sizes() (numVertex, nIndex int, hasColor bool) {
 func (cy *Cylinder) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
 	pos := math32.Vector3{}
 	bb := vshape.SetCylinderSector(vertexArray, normArray, textureArray, indexArray, 0, 0, cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, pos)
-	cy.BBoxMu.Lock()
 	cy.BBox.SetBounds(bb.Min, bb.Max)
-	cy.BBoxMu.Unlock()
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -393,9 +385,7 @@ func (cp *Capsule) Set(sc *Scene, vertexArray, normArray, textureArray, colorArr
 		cbb := vshape.SetSphereSector(vertexArray, normArray, textureArray, indexArray, voff, ioff, cp.TopRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, 0, 90, ps)
 		bb.ExpandByBox(cbb)
 	}
-	cp.BBoxMu.Lock()
 	cp.BBox.SetBounds(bb.Min, bb.Max)
-	cp.BBoxMu.Unlock()
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -458,7 +448,5 @@ func (tr *Torus) Sizes() (numVertex, nIndex int, hasColor bool) {
 func (tr *Torus) Set(sc *Scene, vertexArray, normArray, textureArray, colorArray math32.ArrayF32, indexArray math32.ArrayU32) {
 	pos := math32.Vector3{}
 	bb := vshape.SetTorusSector(vertexArray, normArray, textureArray, indexArray, 0, 0, tr.Radius, tr.TubeRadius, tr.RadialSegs, tr.TubeSegs, tr.AngStart, tr.AngLen, pos)
-	tr.BBoxMu.Lock()
 	tr.BBox.SetBounds(bb.Min, bb.Max)
-	tr.BBoxMu.Unlock()
 }

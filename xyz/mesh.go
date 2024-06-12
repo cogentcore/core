@@ -6,7 +6,6 @@ package xyz
 
 import (
 	"fmt"
-	"sync"
 
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/vgpu/vshape"
@@ -78,9 +77,6 @@ type MeshBase struct { //types:add -setters
 
 	// BBox has the computed bounding-box and other gross solid properties.
 	BBox BBox `set:"-"`
-
-	// BBoxMu is a mutex on BBox access.
-	BBoxMu sync.RWMutex `view:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (ms *MeshBase) AsMeshBase() *MeshBase {
@@ -260,7 +256,5 @@ func (ms *GenMesh) Set(sc *Scene, vertexArray, normArray, textureArray, colorArr
 	}
 	copy(indexArray, ms.Index)
 	bb := vshape.BBoxFromVtxs(ms.Vertex, 0, ms.NumVertex)
-	ms.BBoxMu.Lock()
 	ms.BBox.SetBounds(bb.Min, bb.Max)
-	ms.BBoxMu.Unlock()
 }
