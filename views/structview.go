@@ -174,7 +174,7 @@ func (sv *StructView) Init() {
 							core.ErrorSnackbar(w, err, "Error setting default value")
 						} else {
 							w.Update()
-							valueWidget.Update()
+							valueWidget.AsWidget().Update()
 							valueWidget.AsWidget().SendChange(e)
 						}
 					})

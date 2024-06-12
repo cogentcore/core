@@ -336,7 +336,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 				}
 				wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
 				wb.SetReadOnly(tv.IsReadOnly() || readOnlyTag)
-				w.SetState(invis, states.Invisible)
+				wb.SetState(invis, states.Invisible)
 				if svi.HasStyleFunc() {
 					w.Style()
 				}
