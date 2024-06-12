@@ -162,9 +162,9 @@ func (ts *Tabs) Init() {
 			})
 		})
 		AddAt(p, "frame", func(w *Frame) {
+			w.LayoutStackTopOnly = true // key for allowing each tab to have its own size
 			w.Styler(func(s *styles.Style) {
 				s.Display = styles.Stacked
-				w.SetFlag(true, FrameStackTopOnly) // key for allowing each tab to have its own size
 				s.Min.Set(units.Dp(160), units.Dp(96))
 				s.Grow.Set(1, 1)
 			})

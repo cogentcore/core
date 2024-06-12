@@ -796,10 +796,10 @@ func (rs *RenderScenes) Add(w Widget, scIndex map[Widget]int) int {
 	}
 	if prvIndex, has := rs.SceneIndex[w]; has {
 		if prvIndex != idx {
-			sc.SetFlag(true, ScImageUpdated) // need to copy b/c cur has diff image
+			sc.imageUpdated = true // need to copy b/c cur has diff image
 		}
 	} else {
-		sc.SetFlag(true, ScImageUpdated) // need to copy b/c new
+		sc.imageUpdated = true // need to copy b/c new
 	}
 	scIndex[w] = idx
 	rs.Scenes = append(rs.Scenes, w)
@@ -856,7 +856,7 @@ func (rs *RenderScenes) DrawAll(drw system.Drawer) {
 
 func (sc *Scene) DirectRenderImage(drw system.Drawer, idx int) {
 	drw.SetGoImage(idx, 0, sc.Pixels, system.NoFlipY)
-	sc.SetFlag(false, ScImageUpdated)
+	sc.imageUpdated = false
 }
 
 func (sc *Scene) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {

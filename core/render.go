@@ -79,7 +79,7 @@ func (wb *WidgetBase) AsyncLock() {
 		rc.Unlock()
 		select {}
 	}
-	wb.Scene.SetFlag(true, ScUpdating)
+	wb.Scene.updating = true
 }
 
 // AsyncUnlock must be called after making any updates in a separate goroutine
@@ -91,39 +91,26 @@ func (wb *WidgetBase) AsyncUnlock() {
 		return
 	}
 	rc.Unlock()
-	wb.Scene.SetFlag(false, ScUpdating)
+	wb.Scene.updating = false
 }
 
 // NeedsRender specifies that the widget needs to be rendered.
 func (wb *WidgetBase) NeedsRender() {
-	if wb.Scene == nil {
-		return
-	}
 	if DebugSettings.UpdateTrace {
 		fmt.Println("\tDebugSettings.UpdateTrace: NeedsRender:", wb)
 	}
-	wb.SetFlag(true, NeedsRender)
-	if wb.Scene != nil {
-		wb.Scene.SetFlag(true, ScNeedsRender)
-	}
+	wb.needsRender = true
+	wb.Scene.sceneNeedsRender = true
 }
 
 // NeedsLayout specifies that the widget's scene needs to do a layout.
 // This needs to be called after any changes that affect the structure
 // and/or size of elements.
 func (wb *WidgetBase) NeedsLayout() {
-	if wb.Scene == nil {
-		return
-	}
 	if DebugSettings.UpdateTrace {
 		fmt.Println("\tDebugSettings.UpdateTrace: NeedsLayout:", wb)
 	}
-	wb.Scene.SetFlag(true, ScNeedsLayout)
-}
-
-// AddReRender adds given widget to be re-rendered next pass
-func (sc *Scene) AddReRender(w Widget) {
-	sc.reRender = append(sc.reRender, w)
+	wb.Scene.needsLayout = true
 }
 
 // NeedsRebuild returns true if the RenderContext indicates
@@ -190,9 +177,8 @@ func (wb *WidgetBase) DoNeedsRender() {
 	if wb.This == nil {
 		return
 	}
-	// pr := profile.Start(wb.This.NodeType().ShortName())
 	wb.WidgetWalkDown(func(w Widget, cwb *WidgetBase) bool {
-		if cwb.Is(NeedsRender) {
+		if cwb.needsRender {
 			w.RenderWidget()
 			return tree.Break // done
 		}
@@ -205,7 +191,6 @@ func (wb *WidgetBase) DoNeedsRender() {
 		}
 		return tree.Continue
 	})
-	// pr.End()
 }
 
 //////////////////////////////////////////////////////////////////
@@ -221,49 +206,38 @@ func (sc *Scene) DoUpdate() bool {
 		// fmt.Println("scene bail on update")
 		return false
 	}
-	sc.SetFlag(true, ScUpdating) // prevent rendering
-	defer sc.SetFlag(false, ScUpdating)
+	sc.updating = true // prevent rendering
+	defer func() { sc.updating = false }()
 
 	rc := sc.RenderContext()
 
 	if sc.showIter < SceneShowIters {
-		sc.SetFlag(true, ScNeedsLayout)
+		sc.needsLayout = true
 		sc.showIter++
 	}
 
 	switch {
 	case rc.HasFlag(RenderRebuild):
 		sc.DoRebuild()
-		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
-		sc.SetFlag(true, ScImageUpdated)
+		sc.needsLayout = false
+		sc.sceneNeedsRender = false
+		sc.imageUpdated = true
 	case sc.lastRender.NeedsRestyle(rc):
-		// fmt.Println("restyle")
 		sc.ApplyStyleScene()
 		sc.LayoutRenderScene()
-		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
-		sc.SetFlag(true, ScImageUpdated)
+		sc.needsLayout = false
+		sc.sceneNeedsRender = false
+		sc.imageUpdated = true
 		sc.lastRender.SaveRender(rc)
 	case sc.needsLayout:
-		// fmt.Println("layout")
 		sc.LayoutRenderScene()
-		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
-		sc.SetFlag(true, ScImageUpdated)
-	case sc.needsRender:
-		// fmt.Println("render")
+		sc.needsLayout = false
+		sc.sceneNeedsRender = false
+		sc.imageUpdated = true
+	case sc.sceneNeedsRender:
 		sc.DoNeedsRender()
-		sc.SetFlag(false, ScNeedsRender)
-		sc.SetFlag(true, ScImageUpdated)
-	case len(sc.reRender) > 0:
-		// fmt.Println("re-render")
-		for _, w := range sc.reRender {
-			w.AsTree().SetFlag(true, ScNeedsRender)
-			// fmt.Println("rerender:", w)
-		}
-		sc.reRender = nil
-		sc.DoNeedsRender()
-		sc.SetFlag(false, ScNeedsRender)
-		sc.SetFlag(true, ScImageUpdated)
-
+		sc.sceneNeedsRender = false
+		sc.imageUpdated = true
 	default:
 		return false
 	}

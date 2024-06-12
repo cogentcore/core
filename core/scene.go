@@ -91,9 +91,6 @@ type Scene struct { //core:no-new
 	// to trigger Show event and other steps at start of first show
 	showIter int
 
-	// reRender items are re-rendered after the current pass
-	reRender []Widget
-
 	// directRenders are widgets that render directly to the RenderWin
 	// instead of rendering into the Scene Pixels image.
 	directRenders []Widget
@@ -108,6 +105,10 @@ type Scene struct { //core:no-new
 	// It is set for any kind of tree-level update.
 	// Skip any further update passes until it goes off.
 	updating bool
+
+	// sceneNeedsRender is whether anything in the Scene needs to be re-rendered
+	// (but not necessarily the whole scene itself).
+	sceneNeedsRender bool
 
 	// needsLayout is whether the Scene needs a new layout pass.
 	needsLayout bool
