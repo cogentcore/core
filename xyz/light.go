@@ -10,9 +10,14 @@ import (
 	"cogentcore.org/core/math32"
 )
 
-// Light represents a light that illuminates a scene
-// these are stored on the Scene object and not within the graph
+// Light represents a light that illuminates a scene.
+// These are stored on the [Scene] object and not within the tree.
 type Light interface {
+
+	// AsLightBase returns the [LightBase] for this Light,
+	// which provides the core functionality of a light.
+	AsLightBase() *LightBase
+
 	// Name returns name of the light -- lights are accessed by name
 	Name() string
 
@@ -23,7 +28,7 @@ type Light interface {
 	Lumens() float32
 }
 
-// LightBase provides the base implementation for Light interface
+// LightBase provides the core implementation of the [Light] interface.
 type LightBase struct {
 
 	// name of light -- lights accessed by name so it matters
@@ -37,6 +42,10 @@ type LightBase struct {
 
 	// color of light a full intensity
 	Clr color.RGBA
+}
+
+func (lb *LightBase) AsLightBase() *LightBase {
+	return lb
 }
 
 // Name returns name of the light -- lights are accessed by name
