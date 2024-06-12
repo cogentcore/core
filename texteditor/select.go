@@ -68,10 +68,10 @@ func (ed *Editor) Selection() *textbuf.Edit {
 
 // SelectModeToggle toggles the SelectMode, updating selection with cursor movement
 func (ed *Editor) SelectModeToggle() {
-	if ed.SelectMode {
-		ed.SelectMode = false
+	if ed.selectMode {
+		ed.selectMode = false
 	} else {
-		ed.SelectMode = true
+		ed.selectMode = true
 		ed.SelectStart = ed.CursorPos
 		ed.SelectRegUpdate(ed.CursorPos)
 	}
@@ -256,7 +256,7 @@ func (ed *Editor) WordAt() (reg textbuf.Region) {
 
 // SelectReset resets the selection
 func (ed *Editor) SelectReset() {
-	ed.SelectMode = false
+	ed.selectMode = false
 	if !ed.HasSelection() {
 		return
 	}

@@ -135,8 +135,9 @@ type Editor struct { //core:embedder
 	// Scopelights is a slice of regions representing the highlighted regions specific to scope markers.
 	Scopelights []textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// SelectMode is a boolean indicating whether to select text as the cursor moves.
-	SelectMode bool `set:"-" edit:"-" json:"-" xml:"-"`
+	// LinkHandler handles link clicks.
+	// If it is nil, they are sent to the standard web URL handler.
+	LinkHandler func(tl *paint.TextLink)
 
 	// ISearch is the interactive search data.
 	ISearch ISearch `set:"-" edit:"-" json:"-" xml:"-"`
@@ -144,52 +145,51 @@ type Editor struct { //core:embedder
 	// QReplace is the query replace data.
 	QReplace QReplace `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// FontHeight is the font height, cached during styling.
-	FontHeight float32 `set:"-" edit:"-" json:"-" xml:"-"`
+	// selectMode is a boolean indicating whether to select text as the cursor moves.
+	selectMode bool
 
-	// LineHeight is the line height, cached during styling.
-	LineHeight float32 `set:"-" edit:"-" json:"-" xml:"-"`
+	// fontHeight is the font height, cached during styling.
+	fontHeight float32
 
-	// FontAscent is the font ascent, cached during styling.
-	FontAscent float32 `set:"-" edit:"-" json:"-" xml:"-"`
+	// lineHeight is the line height, cached during styling.
+	lineHeight float32
 
-	// FontDescent is the font descent, cached during styling.
-	FontDescent float32 `set:"-" edit:"-" json:"-" xml:"-"`
+	// fontAscent is the font ascent, cached during styling.
+	fontAscent float32
 
-	// NLinesChars is the height in lines and width in chars of the visible area.
-	NLinesChars image.Point `set:"-" edit:"-" json:"-" xml:"-"`
+	// fontDescent is the font descent, cached during styling.
+	fontDescent float32
 
-	// LinesSize is the total size of all lines as rendered.
-	LinesSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
+	// nLinesChars is the height in lines and width in chars of the visible area.
+	nLinesChars image.Point
 
-	// TotalSize is the LinesSize plus extra space and line numbers etc.
-	TotalSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
+	// linesSize is the total size of all lines as rendered.
+	linesSize math32.Vector2
 
-	// LineLayoutSize is the Geom.Size.Actual.Total subtracting extra space and line numbers.
+	// totalSize is the LinesSize plus extra space and line numbers etc.
+	totalSize math32.Vector2
+
+	// lineLayoutSize is the Geom.Size.Actual.Total subtracting extra space and line numbers.
 	// This is what LayoutStdLR sees for laying out each line.
-	LineLayoutSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
+	lineLayoutSize math32.Vector2
 
 	// lastlineLayoutSize is the last LineLayoutSize used in laying out lines.
 	// It is used to trigger a new layout only when needed.
-	lastlineLayoutSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
+	lastlineLayoutSize math32.Vector2
 
-	// BlinkOn oscillates between on and off for blinking.
-	BlinkOn bool `set:"-" edit:"-" json:"-" xml:"-"`
+	// blinkOn oscillates between on and off for blinking.
+	blinkOn bool
 
-	// CursorMu is a mutex protecting cursor rendering, shared between blink and main code.
-	CursorMu sync.Mutex `set:"-" json:"-" xml:"-" view:"-"`
+	// cursorMu is a mutex protecting cursor rendering, shared between blink and main code.
+	cursorMu sync.Mutex
 
-	// HasLinks is a boolean indicating if at least one of the renders has links.
+	// hasLinks is a boolean indicating if at least one of the renders has links.
 	// It determines if we set the cursor for hand movements.
-	HasLinks bool `set:"-" edit:"-" json:"-" xml:"-"`
+	hasLinks bool
 
-	// LinkHandler handles link clicks.
-	// If it is nil, they are sent to the standard web URL handler.
-	LinkHandler func(tl *paint.TextLink)
-
-	lastRecenter   int           `set:"-"`
-	lastAutoInsert rune          `set:"-"`
-	lastFilename   core.Filename `set:"-"`
+	lastRecenter   int
+	lastAutoInsert rune
+	lastFilename   core.Filename
 }
 
 // NewSoloEditor returns a new [Editor] with an associated [Buffer].
@@ -295,7 +295,7 @@ func (ed *Editor) EditDone() {
 	ed.ClearCursor()
 }
 
-// Remarkup triggers a complete re-markup of the entire text --
+// ReMarkup triggers a complete re-markup of the entire text --
 // can do this when needed if the markup gets off due to multi-line
 // formatting issues -- via Recenter key
 func (ed *Editor) ReMarkup() {

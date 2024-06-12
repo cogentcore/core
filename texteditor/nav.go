@@ -181,7 +181,7 @@ func (ed *Editor) SelectRegUpdate(pos lexer.Pos) {
 // CursorSelect updates selection based on cursor movements, given starting
 // cursor position and ed.CursorPos is current
 func (ed *Editor) CursorSelect(org lexer.Pos) {
-	if !ed.SelectMode {
+	if !ed.selectMode {
 		return
 	}
 	ed.SelectRegUpdate(ed.CursorPos)
@@ -862,7 +862,7 @@ func (ed *Editor) ScrollCursorInView() bool {
 func (ed *Editor) ScrollCursorToCenterIfHidden() bool {
 	curBBox := ed.CursorBBox(ed.CursorPos)
 	did := false
-	lht := int(ed.LineHeight)
+	lht := int(ed.lineHeight)
 	bb := ed.RenderBBox()
 	if bb.Size().Y <= lht {
 		return false

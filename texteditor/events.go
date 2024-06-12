@@ -600,7 +600,7 @@ func (ed *Editor) HandleMouse() {
 	})
 	ed.On(events.SlideMove, func(e events.Event) {
 		e.SetHandled()
-		if !ed.SelectMode {
+		if !ed.selectMode {
 			ed.SelectModeToggle()
 		}
 		pt := ed.PointToRelPos(e.Pos())
@@ -611,7 +611,7 @@ func (ed *Editor) HandleMouse() {
 
 func (ed *Editor) HandleLinkCursor() {
 	ed.On(events.MouseMove, func(e events.Event) {
-		if !ed.HasLinks {
+		if !ed.hasLinks {
 
 		}
 		pt := ed.PointToRelPos(e.Pos())
@@ -649,7 +649,7 @@ func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lexer.Pos, selMode e
 	//	fmt.Printf("set cursor fm mouse: %v\n", newPos)
 	defer ed.NeedsRender()
 
-	if !ed.SelectMode && selMode == events.ExtendContinuous {
+	if !ed.selectMode && selMode == events.ExtendContinuous {
 		if ed.SelectRegion == textbuf.RegionNil {
 			ed.SelectStart = ed.CursorPos
 		}
@@ -660,9 +660,9 @@ func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lexer.Pos, selMode e
 	}
 
 	ed.SetCursor(newPos)
-	if ed.SelectMode || selMode != events.SelectOne {
-		if !ed.SelectMode && selMode != events.SelectOne {
-			ed.SelectMode = true
+	if ed.selectMode || selMode != events.SelectOne {
+		if !ed.selectMode && selMode != events.SelectOne {
+			ed.selectMode = true
 			ed.SelectStart = newPos
 			ed.SelectRegUpdate(ed.CursorPos)
 		}

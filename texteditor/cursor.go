@@ -32,11 +32,11 @@ func init() {
 		}
 		ed := AsEditor(w)
 		if !w.AsWidget().StateIs(states.Focused) || !w.IsVisible() {
-			ed.BlinkOn = false
+			ed.blinkOn = false
 			ed.RenderCursor(false)
 		} else {
-			ed.BlinkOn = !ed.BlinkOn
-			ed.RenderCursor(ed.BlinkOn)
+			ed.blinkOn = !ed.blinkOn
+			ed.RenderCursor(ed.blinkOn)
 		}
 	}
 }
@@ -49,7 +49,7 @@ func (ed *Editor) StartCursor() {
 	if !ed.This.(core.Widget).IsVisible() {
 		return
 	}
-	ed.BlinkOn = true
+	ed.blinkOn = true
 	ed.RenderCursor(true)
 	if core.SystemSettings.CursorBlinkTime == 0 {
 		return
@@ -77,7 +77,7 @@ func (ed *Editor) CursorBBox(pos lexer.Pos) image.Rectangle {
 	cpos := ed.CharStartPos(pos)
 	cbmin := cpos.SubScalar(ed.CursorWidth.Dots)
 	cbmax := cpos.AddScalar(ed.CursorWidth.Dots)
-	cbmax.Y += ed.FontHeight
+	cbmax.Y += ed.fontHeight
 	curBBox := image.Rectangle{cbmin.ToPointFloor(), cbmax.ToPointCeil()}
 	return curBBox
 }
@@ -105,8 +105,8 @@ func (ed *Editor) RenderCursor(on bool) {
 	if ed.Renders == nil {
 		return
 	}
-	ed.CursorMu.Lock()
-	defer ed.CursorMu.Unlock()
+	ed.cursorMu.Lock()
+	defer ed.cursorMu.Unlock()
 
 	sp := ed.CursorSprite(on)
 	if sp == nil {
@@ -117,7 +117,7 @@ func (ed *Editor) RenderCursor(on bool) {
 
 // CursorSpriteName returns the name of the cursor sprite
 func (ed *Editor) CursorSpriteName() string {
-	spnm := fmt.Sprintf("%v-%v", EditorSpriteName, ed.FontHeight)
+	spnm := fmt.Sprintf("%v-%v", EditorSpriteName, ed.fontHeight)
 	return spnm
 }
 
@@ -136,7 +136,7 @@ func (ed *Editor) CursorSprite(on bool) *core.Sprite {
 	spnm := ed.CursorSpriteName()
 	sp, ok := ms.Sprites.SpriteByName(spnm)
 	if !ok {
-		bbsz := image.Point{int(math32.Ceil(ed.CursorWidth.Dots)), int(math32.Ceil(ed.FontHeight))}
+		bbsz := image.Point{int(math32.Ceil(ed.CursorWidth.Dots)), int(math32.Ceil(ed.fontHeight))}
 		if bbsz.X < 2 { // at least 2
 			bbsz.X = 2
 		}

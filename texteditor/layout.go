@@ -14,10 +14,10 @@ func (ed *Editor) StyleSizes() {
 	sty := &ed.Styles
 	spc := sty.BoxSpace()
 	sty.Font = paint.OpenFont(sty.FontRender(), &sty.UnitContext)
-	ed.FontHeight = sty.Font.Face.Metrics.Height
-	ed.LineHeight = sty.Text.EffLineHeight(ed.FontHeight)
-	ed.FontDescent = math32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Descent)
-	ed.FontAscent = math32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Ascent)
+	ed.fontHeight = sty.Font.Face.Metrics.Height
+	ed.lineHeight = sty.Text.EffLineHeight(ed.fontHeight)
+	ed.fontDescent = math32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Descent)
+	ed.fontAscent = math32.FromFixed(ed.Styles.Font.Face.Face.Metrics().Ascent)
 	ed.LineNumberDigits = max(1+int(math32.Log10(float32(ed.NLines))), 3)
 	lno := true
 	if ed.Buffer != nil {
@@ -46,27 +46,27 @@ func (ed *Editor) UpdateFromAlloc() {
 	if ed.HasScroll[math32.X] {
 		asz.Y -= sbw
 	}
-	ed.LineLayoutSize = asz
+	ed.lineLayoutSize = asz
 
 	if asz == (math32.Vector2{}) {
-		ed.NLinesChars.Y = 20
-		ed.NLinesChars.X = 80
+		ed.nLinesChars.Y = 20
+		ed.nLinesChars.X = 80
 	} else {
-		ed.NLinesChars.Y = int(math32.Floor(float32(asz.Y) / ed.LineHeight))
+		ed.nLinesChars.Y = int(math32.Floor(float32(asz.Y) / ed.lineHeight))
 		if sty.Font.Face != nil {
-			ed.NLinesChars.X = int(math32.Floor(float32(asz.X) / sty.Font.Face.Metrics.Ch))
+			ed.nLinesChars.X = int(math32.Floor(float32(asz.X) / sty.Font.Face.Metrics.Ch))
 		}
 	}
-	ed.LineLayoutSize.X -= ed.LineNumberOffset
+	ed.lineLayoutSize.X -= ed.LineNumberOffset
 }
 
 func (ed *Editor) InternalSizeFromLines() {
 	// sty := &ed.Styles
 	// spc := sty.BoxSpace()
-	ed.TotalSize = ed.LinesSize // .Add(spc.Size())
-	ed.TotalSize.X += ed.LineNumberOffset
-	ed.Geom.Size.Internal = ed.TotalSize
-	ed.Geom.Size.Internal.Y += ed.LineHeight
+	ed.totalSize = ed.linesSize // .Add(spc.Size())
+	ed.totalSize.X += ed.LineNumberOffset
+	ed.Geom.Size.Internal = ed.totalSize
+	ed.Geom.Size.Internal.Y += ed.lineHeight
 	// fmt.Println(ed, "total:", ed.TotalSize)
 }
 
@@ -75,7 +75,7 @@ func (ed *Editor) InternalSizeFromLines() {
 // It computes the total LinesSize and TotalSize.
 func (ed *Editor) LayoutAllLines() {
 	ed.UpdateFromAlloc()
-	if ed.LineLayoutSize.Y == 0 || ed.Styles.Font.Size.Value == 0 {
+	if ed.lineLayoutSize.Y == 0 || ed.Styles.Font.Size.Value == 0 {
 		return
 	}
 	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 {
@@ -104,7 +104,7 @@ func (ed *Editor) LayoutAllLines() {
 		ed.Offsets = make([]float32, nln)
 	}
 
-	sz := ed.LineLayoutSize
+	sz := ed.lineLayoutSize
 
 	sty := &ed.Styles
 	fst := sty.FontRender()
@@ -112,7 +112,7 @@ func (ed *Editor) LayoutAllLines() {
 	off := float32(0)
 	mxwd := sz.X // always start with our render size
 
-	ed.HasLinks = false
+	ed.hasLinks = false
 	for ln := 0; ln < nln; ln++ {
 		if ln >= len(ed.Renders) || ln >= len(buf.Markup) {
 			break
@@ -120,30 +120,30 @@ func (ed *Editor) LayoutAllLines() {
 		rn := &ed.Renders[ln]
 		rn.SetHTMLPre(buf.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProperties())
 		rn.Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, sz)
-		if !ed.HasLinks && len(rn.Links) > 0 {
-			ed.HasLinks = true
+		if !ed.hasLinks && len(rn.Links) > 0 {
+			ed.hasLinks = true
 		}
 		ed.Offsets[ln] = off
-		lsz := math32.Ceil(math32.Max(rn.BBox.Size().Y, ed.LineHeight))
+		lsz := math32.Ceil(math32.Max(rn.BBox.Size().Y, ed.lineHeight))
 		off += lsz
 		mxwd = math32.Max(mxwd, rn.BBox.Size().X)
 	}
 	buf.MarkupMu.RUnlock()
-	ed.LinesSize = math32.Vec2(mxwd, off)
-	ed.lastlineLayoutSize = ed.LineLayoutSize
+	ed.linesSize = math32.Vec2(mxwd, off)
+	ed.lastlineLayoutSize = ed.lineLayoutSize
 	ed.InternalSizeFromLines()
 }
 
 // ReLayoutAllLines updates the Renders Layout given current size, if changed
 func (ed *Editor) ReLayoutAllLines() {
 	ed.UpdateFromAlloc()
-	if ed.LineLayoutSize.Y == 0 || ed.Styles.Font.Size.Value == 0 {
+	if ed.lineLayoutSize.Y == 0 || ed.Styles.Font.Size.Value == 0 {
 		return
 	}
 	if ed.Buffer == nil || ed.Buffer.NumLines() == 0 {
 		return
 	}
-	if ed.lastlineLayoutSize == ed.LineLayoutSize {
+	if ed.lastlineLayoutSize == ed.lineLayoutSize {
 		ed.InternalSizeFromLines()
 		return
 	}
@@ -189,16 +189,16 @@ func (ed *Editor) LayoutLine(ln int) bool {
 	sty := &ed.Styles
 	fst := sty.FontRender()
 	fst.Background = nil
-	mxwd := float32(ed.LinesSize.X)
+	mxwd := float32(ed.linesSize.X)
 	needLay := false
 
 	ed.Buffer.MarkupMu.RLock()
 	rn := &ed.Renders[ln]
 	curspans := len(rn.Spans)
 	rn.SetHTMLPre(ed.Buffer.Markup[ln], fst, &sty.Text, &sty.UnitContext, ed.TextStyleProperties())
-	rn.Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, ed.LineLayoutSize)
-	if !ed.HasLinks && len(rn.Links) > 0 {
-		ed.HasLinks = true
+	rn.Layout(&sty.Text, sty.FontRender(), &sty.UnitContext, ed.lineLayoutSize)
+	if !ed.hasLinks && len(rn.Links) > 0 {
+		ed.hasLinks = true
 	}
 	nwspans := len(rn.Spans)
 	if nwspans != curspans && (nwspans > 1 || curspans > 1) {
