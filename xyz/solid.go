@@ -66,7 +66,7 @@ func (sld *Solid) SetMeshName(meshName string) error {
 func (sld *Solid) SetMesh(ms Mesh) *Solid {
 	sld.MeshPtr = ms
 	if sld.MeshPtr != nil {
-		sld.Mesh = MeshName(sld.MeshPtr.Name())
+		sld.Mesh = MeshName(sld.MeshPtr.AsMeshBase().Name())
 	} else {
 		sld.Mesh = ""
 	}
@@ -172,7 +172,7 @@ func (sld *Solid) Validate() error {
 		log.Println(err)
 		return err
 	}
-	if sld.MeshPtr == nil || sld.MeshPtr.Name() != string(sld.Mesh) {
+	if sld.MeshPtr == nil || sld.MeshPtr.AsMeshBase().Name() != string(sld.Mesh) {
 		err := sld.SetMeshName(string(sld.Mesh))
 		if err != nil {
 			return err
@@ -192,8 +192,8 @@ func (sld *Solid) IsTransparent() bool {
 	if sld.MeshPtr == nil {
 		return false
 	}
-	if sld.MeshPtr.HasColor() {
-		return sld.MeshPtr.IsTransparent()
+	if sld.MeshPtr.AsMeshBase().HasColor() {
+		return sld.MeshPtr.AsMeshBase().IsTransparent()
 	}
 	return sld.Mat.IsTransparent()
 }
@@ -216,8 +216,8 @@ func (sld *Solid) RenderClass() RenderClasses {
 	switch {
 	case sld.Mat.TexPtr != nil:
 		return RClassOpaqueTexture
-	case sld.MeshPtr.HasColor():
-		if sld.MeshPtr.IsTransparent() {
+	case sld.MeshPtr.AsMeshBase().HasColor():
+		if sld.MeshPtr.AsMeshBase().IsTransparent() {
 			return RClassTransVertex
 		}
 		return RClassOpaqueVertex

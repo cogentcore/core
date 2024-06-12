@@ -108,20 +108,20 @@ func (ms *MeshBase) ComputeNorms(pos, norm math32.ArrayF32) {
 // same name is deleted.
 // see NewX for convenience methods to add specific shapes
 func (sc *Scene) AddMesh(ms Mesh) {
-	sc.Meshes.Add(ms.Name(), ms)
+	sc.Meshes.Add(ms.AsMeshBase().Name(), ms)
 	sc.SetFlag(true, ScNeedsConfig)
 }
 
 // AddMeshUniqe adds given mesh to mesh collection, ensuring that it has
 // a unique name if one already exists.
 func (sc *Scene) AddMeshUnique(ms Mesh) {
-	nm := ms.Name()
+	nm := ms.AsMeshBase().Name()
 	_, err := sc.MeshByNameTry(nm)
 	if err == nil {
 		nm += fmt.Sprintf("_%d", sc.Meshes.Len())
-		ms.SetName(nm)
+		ms.AsMeshBase().SetName(nm)
 	}
-	sc.Meshes.Add(ms.Name(), ms)
+	sc.Meshes.Add(ms.AsMeshBase().Name(), ms)
 	sc.SetFlag(true, ScNeedsConfig)
 }
 
