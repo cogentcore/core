@@ -26,13 +26,9 @@ type MeshName string
 // Per-vertex Color is optional, as is the ability to update the data
 // after initial SetVertices call (default is to do nothing).
 type Mesh interface {
-	// Name returns name of the mesh
-	Name() string
 
-	// SetName sets the name of the mesh
-	SetName(nm string)
-
-	// AsMeshBase returns the MeshBase for this Mesh
+	// AsMeshBase returns the [MeshBase] for this Mesh,
+	// which provides the core functionality of a mesh.
 	AsMeshBase() *MeshBase
 
 	// Sizes returns the number of vertex and index elements required for this mesh
@@ -49,20 +45,6 @@ type Mesh interface {
 	// need to be updated for dynamically changing meshes.
 	// You must call SetMod if the mesh was actually updated at this point.
 	Update(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32)
-
-	// SetMod flags that the mesh data has been modified and will be sync'd
-	// at next sync of the [Scene.Phong] render system.
-	SetMod(sc *Scene)
-
-	// ComputeNorms automatically computes the normals from existing vertex data
-	ComputeNorms(pos, norm math32.ArrayF32)
-
-	// HasColor returns true if this mesh has vertex-specific colors available
-	HasColor() bool
-
-	// IsTransparent returns true if this mesh has vertex-specific colors available
-	// and at least some are transparent.
-	IsTransparent() bool
 }
 
 // MeshBase provides the core implementation of the [Mesh] interface.
