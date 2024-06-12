@@ -12,19 +12,19 @@ import (
 	"cogentcore.org/core/vgpu/vshape"
 )
 
-// MeshName is a mesh name -- provides an automatic gui chooser for meshes.
-// Used on Solid to link to meshes by name.
+// MeshName is a [Mesh] name. This type provides an automatic GUI chooser for meshes.
+// It is used on [Solid] to link to meshes by name.
 type MeshName string
 
-// Mesh parameterizes the mesh-based shape used for rendering a Solid.
+// Mesh parametrizes the mesh-based shape used for rendering a [Solid].
 // Only indexed triangle meshes are supported.
-// All Mesh's must know in advance the number of vertex and index points
-// they require, and the SetVerticies method operates on data from the
+// All Meshes must know in advance the number of vertex and index points
+// they require, and the SetVertices method operates on data from the
 // vgpu staging buffer to set the relevant data post-allocation.
 // The vgpu vshape library is used for all basic shapes, and it follows
 // this same logic.
 // Per-vertex Color is optional, as is the ability to update the data
-// after initial SetVerticies call (default is to do nothing).
+// after initial SetVertices call (default is to do nothing).
 type Mesh interface {
 	// Name returns name of the mesh
 	Name() string
@@ -45,13 +45,13 @@ type Mesh interface {
 	Set(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32)
 
 	// Update updates the mesh points into given arrays, which have previously
-	// been set with SetVerticies -- this can optimize by only updating whatever might
+	// been set with SetVertices; this can optimize by only updating whatever might
 	// need to be updated for dynamically changing meshes.
 	// You must call SetMod if the mesh was actually updated at this point.
 	Update(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32)
 
 	// SetMod flags that the mesh data has been modified and will be sync'd
-	// at next sync of the Scene.Phong render system.
+	// at next sync of the [Scene.Phong] render system.
 	SetMod(sc *Scene)
 
 	// ComputeNorms automatically computes the normals from existing vertex data
@@ -65,7 +65,7 @@ type Mesh interface {
 	IsTransparent() bool
 }
 
-// MeshBase provides the core implementation of Mesh interface
+// MeshBase provides the core implementation of the [Mesh] interface.
 type MeshBase struct { //types:add -setters
 
 	// name of mesh -- meshes are linked to Solids by name so this matters

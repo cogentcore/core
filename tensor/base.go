@@ -19,7 +19,7 @@ type Base[T any] struct {
 	Meta   map[string]string
 }
 
-// Shape returns a pointer to the shape that fully parameterizes the tensor shape
+// Shape returns a pointer to the shape that fully parametrizes the tensor shape
 func (tsr *Base[T]) Shape() *Shape { return &tsr.Shp }
 
 // Len returns the number of elements in the tensor (product of shape dimensions).

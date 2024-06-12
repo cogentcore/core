@@ -67,7 +67,7 @@ func (tsr *Bits) DataType() reflect.Kind {
 	return reflect.Bool
 }
 
-// Shape returns a pointer to the shape that fully parameterizes the tensor shape
+// Shape returns a pointer to the shape that fully parametrizes the tensor shape
 func (tsr *Bits) Shape() *Shape { return &tsr.Shp }
 
 // Len returns the number of elements in the tensor (product of shape dimensions).
