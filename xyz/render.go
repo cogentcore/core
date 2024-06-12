@@ -259,12 +259,12 @@ func (sc *Scene) UpdateMVPMatrix() {
 		if cn == sc.This {
 			return tree.Continue
 		}
-		ni, _ := AsNode(cn)
-		if ni == nil {
+		n, nb := AsNode(cn)
+		if n == nil {
 			return tree.Break // going into a different type of thing, bail
 		}
-		ni.UpdateMVPMatrix(&sc.Camera.ViewMatrix, &sc.Camera.ProjectionMatrix)
-		ni.UpdateBBox2D(size)
+		nb.UpdateMVPMatrix(&sc.Camera.ViewMatrix, &sc.Camera.ProjectionMatrix)
+		nb.UpdateBBox2D(size)
 		return tree.Continue
 	})
 }
@@ -421,12 +421,12 @@ func (sc *Scene) RenderImpl() {
 			continue
 		}
 		if rc >= RClassTransTexture { // sort back-to-front for transparent
-			sort.Slice(objs, func(i, j int) bool {
-				return objs[i].NormDCBBox().Min.Z > objs[j].NormDCBBox().Min.Z
+			sort.Slice(objs, func(i, j int) bool { // TODO: use slices.SortFunc here and everywhere else we use sort.Slice
+				return objs[i].AsNodeBase().NormDCBBox().Min.Z > objs[j].AsNodeBase().NormDCBBox().Min.Z
 			})
 		} else { // sort front-to-back for opaque to allow "early z rejection"
 			sort.Slice(objs, func(i, j int) bool {
-				return objs[i].NormDCBBox().Min.Z < objs[j].NormDCBBox().Min.Z
+				return objs[i].AsNodeBase().NormDCBBox().Min.Z < objs[j].AsNodeBase().NormDCBBox().Min.Z
 			})
 		}
 		// fmt.Printf("\nRender class: %v\n", rc)
