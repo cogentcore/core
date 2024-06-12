@@ -257,8 +257,8 @@ func (sc *Scene) DoUpdate() bool {
 // This is a top-level call, typically only done when the window
 // is first drawn, once the full sizing information is available.
 func (sc *Scene) MakeSceneWidgets() {
-	sc.SetFlag(true, ScUpdating) // prevent rendering
-	defer sc.SetFlag(false, ScUpdating)
+	sc.updating = true // prevent rendering
+	defer func() { sc.updating = false }()
 
 	sc.UpdateTree()
 }
@@ -267,11 +267,11 @@ func (sc *Scene) MakeSceneWidgets() {
 // This is needed whenever the window geometry, DPI,
 // etc is updated, which affects styling.
 func (sc *Scene) ApplyStyleScene() {
-	sc.SetFlag(true, ScUpdating) // prevent rendering
-	defer sc.SetFlag(false, ScUpdating)
+	sc.updating = true // prevent rendering
+	defer func() { sc.updating = false }()
 
 	sc.StyleTree()
-	sc.SetFlag(true, ScNeedsLayout)
+	sc.needsLayout = true
 }
 
 // DoRebuild does the full re-render and RenderContext Rebuild flag
@@ -287,17 +287,16 @@ func (sc *Scene) DoRebuild() {
 // initSz is the initial size -- e.g., size of screen.
 // Used for auto-sizing windows.
 func (sc *Scene) PrefSize(initSz image.Point) image.Point {
-	sc.SetFlag(true, ScUpdating) // prevent rendering
-	defer sc.SetFlag(false, ScUpdating)
+	sc.updating = true // prevent rendering
+	defer func() { sc.updating = false }()
 
-	sc.SetFlag(true, ScPrefSizing)
+	sc.prefSizing = true
 	sc.MakeSceneWidgets()
 	sc.ApplyStyleScene()
 	sc.LayoutScene()
 	sz := &sc.Geom.Size
 	psz := sz.Actual.Total
-	// fmt.Println("\npref size:", psz, "csz:", sz.Actual.Content, "internal:", sz.Internal, "space:", sc.Geom.Size.Space)
-	sc.SetFlag(false, ScPrefSizing)
+	sc.prefSizing = false
 	sc.showIter = 0
 	return psz.ToPointFloor()
 }
@@ -314,7 +313,7 @@ func (wb *WidgetBase) PushBounds() bool {
 	if wb == nil || wb.This == nil {
 		return false
 	}
-	wb.SetFlag(false, NeedsRender)     // done!
+	wb.needsRender = false             // done!
 	if !wb.This.(Widget).IsVisible() { // checks deleted etc
 		return false
 	}
@@ -346,7 +345,7 @@ func (wb *WidgetBase) PopBounds() {
 	pc := &wb.Scene.PaintContext
 
 	isSelw := wb.Scene.SelectedWidget == wb.This
-	if wb.Scene.Is(ScRenderBBoxes) || isSelw {
+	if wb.Scene.RenderBBoxes || isSelw {
 		pos := math32.Vector2FromPoint(wb.Geom.TotalBBox.Min)
 		sz := math32.Vector2FromPoint(wb.Geom.TotalBBox.Size())
 		// node: we won't necc. get a push prior to next update, so saving these.
