@@ -67,16 +67,19 @@ type MeshBase struct { //types:add -setters
 	// as [math32.Vector4] per vertex.
 	HasColor bool
 
-	// if true, this mesh changes frequently -- otherwise considered to be static
+	// Dynamic is whether this mesh changes frequently;
+	// otherwise considered to be static.
 	Dynamic bool
 
-	// set to true if color has transparency -- not worth checking manually
-	Trans bool
+	// IsTransparent is whether the color has transparency;
+	// not worth checking manually. This is only valid if
+	// [MeshBase.HasColor] is true.
+	IsTransparent bool
 
-	// computed bounding-box and other gross solid properties
+	// BBox has the computed bounding-box and other gross solid properties.
 	BBox BBox `set:"-"`
 
-	// mutex on bbox access
+	// BBoxMu is a mutex on BBox access.
 	BBoxMu sync.RWMutex `view:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
 
@@ -86,13 +89,6 @@ func (ms *MeshBase) AsMeshBase() *MeshBase {
 
 func (ms *MeshBase) Sizes() (numVertex, numIndex int, hasColor bool) {
 	return ms.NumVertex, ms.NumIndex, ms.HasColor
-}
-
-func (ms *MeshBase) IsTransparent() bool {
-	if !ms.HasColor {
-		return false
-	}
-	return ms.Trans
 }
 
 func (ms *MeshBase) Update(sc *Scene, vtxAry, normAry, texAry, clrAry math32.ArrayF32, idxAry math32.ArrayU32) {
