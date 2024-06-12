@@ -134,6 +134,26 @@ type Buffer struct { //types:add
 
 	// Listeners is used for sending standard system events. Change is sent for BufDone, BufInsert, and BufDelete.
 	Listeners events.Listeners
+
+	// Bool flags:
+
+	// bufferAutoSaving is used in atomically safe way to protect autosaving
+	bufferAutoSaving bool
+
+	// bufferMarkingUp indicates current markup operation in progress -- don't redo
+	bufferMarkingUp bool
+
+	// bufferChanged indicates if the text has been changed (edited) relative to the
+	// original, since last EditDone
+	bufferChanged bool
+
+	// bufferNotSaved indicates if the text has been changed (edited) relative to the
+	// original, since last Save
+	bufferNotSaved bool
+
+	// bufferFileModOK have already asked about fact that file has changed since being
+	// opened, user is ok
+	bufferFileModOK bool
 }
 
 // NewBuffer makes a new [Buffer] with default settings
@@ -146,7 +166,7 @@ func NewBuffer() *Buffer {
 	return tb
 }
 
-// BufferSignals are signals that text buffer can send to View
+// BufferSignals are signals that [Buffer] can send to [Editor].
 type BufferSignals int32 //enums:enum -trim-prefix Buffer
 
 const (
@@ -207,29 +227,6 @@ func (tb *Buffer) OnChange(fun func(e events.Event)) {
 func (tb *Buffer) OnInput(fun func(e events.Event)) {
 	tb.Listeners.Add(events.Input, fun)
 }
-
-// BufferFlags hold key Buf state
-type BufferFlags core.WidgetFlags //enums:bitflag -trim-prefix Buffer
-
-const (
-	// BufferAutoSaving is used in atomically safe way to protect autosaving
-	BufferAutoSaving BufferFlags = BufferFlags(core.WidgetFlagsN) + iota
-
-	// BufferMarkingUp indicates current markup operation in progress -- don't redo
-	BufferMarkingUp
-
-	// BufferChanged indicates if the text has been changed (edited) relative to the
-	// original, since last EditDone
-	BufferChanged
-
-	// BufferNotSaved indicates if the text has been changed (edited) relative to the
-	// original, since last Save
-	BufferNotSaved
-
-	// BufferFileModOK have already asked about fact that file has changed since being
-	// opened, user is ok
-	BufferFileModOK
-)
 
 // Is returns true if given flag is set
 func (tb *Buffer) Is(flag enums.BitFlag) bool {
