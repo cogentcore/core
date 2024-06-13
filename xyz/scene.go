@@ -41,6 +41,23 @@ var Update3DTrace = false
 type Scene struct {
 	tree.NodeBase
 
+	// BackgroundColor is the background color of the scene,
+	// which is used directly as an RGB color in Vulkan.
+	BackgroundColor color.RGBA
+
+	// needsConfig means that a GPU resource (Lights, Texture, Meshes,
+	// or more complex Nodes that require ConfigNodes) has been changed
+	// and a Config call is required.
+	needsConfig bool
+
+	// needsUpdate means that Node Pose has changed and an update pass
+	// is required to update matrix and bounding boxes.
+	needsUpdate bool
+
+	// needsRender means that something has been updated (minimally the
+	// Camera pose) and a new Render is required.
+	needsRender bool
+
 	// Viewport-level viewbox within any parent Viewport2D
 	Geom math32.Geom2DInt `set:"-"`
 
@@ -52,9 +69,6 @@ type Scene struct {
 
 	// camera determines view onto scene
 	Camera Camera `set:"-"`
-
-	// background color, which is used directly as an RGB color in vulkan
-	BackgroundColor color.RGBA
 
 	// all lights used in the scene
 	Lights ordmap.Map[string, Light] `set:"-"`
@@ -74,9 +88,6 @@ type Scene struct {
 	// saved cameras -- can Save and Set these to view the scene from different angles
 	SavedCams map[string]Camera `set:"-"`
 
-	// has dragging cursor been set yet?
-	SetDragCursor bool `view:"-" set:"-"`
-
 	// the vphong rendering system
 	Phong vphong.Phong `set:"-"`
 
@@ -87,10 +98,7 @@ type Scene struct {
 	// This is re-used across calls to avoid large memory allocations,
 	// so it will automatically update after every ImageCopy call.
 	// If a persistent image is required, call [iox/imagex.CloneAsRGBA].
-	ImgCopy image.RGBA `set:"-"`
-
-	// index in list of window direct uploading images
-	DirUpIndex int `set:"-"`
+	imgCopy image.RGBA `set:"-"`
 }
 
 func (sc *Scene) Init() {
@@ -176,28 +184,6 @@ func (sc *Scene) Validate() error {
 	}
 	return nil
 }
-
-//////////////////////////////////////////////////////////////////
-//  Flags
-
-// ScFlags has critical state information signaling when rendering,
-// updating, or config needs to be done
-type ScFlags tree.Flags //enums:bitflag
-
-const (
-	// ScNeedsConfig means that a GPU resource (Lights, Texture, Meshes,
-	// or more complex Nodes that require ConfigNodes) has been changed
-	// and a Config call is required.
-	ScNeedsConfig ScFlags = ScFlags(tree.FlagsN) + iota
-
-	// ScNeedsUpdate means that Node Pose has changed and an update pass
-	// is required to update matrix and bounding boxes.
-	ScNeedsUpdate
-
-	// ScNeedsRender means that something has been updated (minimally the
-	// Camera pose) and a new Render is required.
-	ScNeedsRender
-)
 
 // SetSize sets the size of the [Scene.Frame].
 func (sc *Scene) SetSize(sz image.Point) *Scene {
