@@ -270,7 +270,7 @@ func (sc *Scene) ScIsVisible() bool {
 	if sc.RenderContext() == nil || sc.Pixels == nil {
 		return false
 	}
-	return sc.RenderContext().HasFlag(RenderVisible)
+	return sc.RenderContext().Visible
 }
 
 // Close closes the Stage associated with this Scene.

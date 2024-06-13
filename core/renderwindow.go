@@ -325,7 +325,7 @@ func (w *RenderWindow) SetSize(sz image.Point) {
 func (w *RenderWindow) Resized() {
 	rc := w.RenderContext()
 	if !w.IsVisible() {
-		rc.SetFlag(false, RenderVisible)
+		rc.Visible = false
 		return
 	}
 
@@ -351,7 +351,7 @@ func (w *RenderWindow) Resized() {
 	// w.FocusInactivate()
 	// w.InactivateAllSprites()
 	if !w.IsVisible() {
-		rc.SetFlag(false, RenderVisible)
+		rc.Visible = false
 		if DebugSettings.WinEventTrace {
 			fmt.Printf("Win: %v Resized already closed\n", w.Name)
 		}
@@ -361,7 +361,7 @@ func (w *RenderWindow) Resized() {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Name, curRg, rg)
 	}
 	rc.Geom = rg
-	rc.SetFlag(true, RenderVisible)
+	rc.Visible = true
 	rc.LogicalDPI = w.LogicalDPI()
 	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
 	w.Mains.Resize(rg)
@@ -664,24 +664,11 @@ func (rp *RenderParams) SaveRender(rc *RenderContext) {
 	rp.Geom = rc.Geom
 }
 
-// RenderContextFlags represent RenderContext state
-type RenderContextFlags int64 //enums:bitflag -trim-prefix Render
-
-const (
-	// the window is visible and should be rendered to
-	RenderVisible RenderContextFlags = iota
-
-	// forces a rebuild of all scene elements
-	RenderRebuild
-)
-
-// RenderContext provides rendering context from outer RenderWin
+// RenderContext provides rendering context from outer RenderWindow
 // window to Stage and Scene elements to inform styling, layout
-// and rendering.  It also has the master Mutex for any updates
-// to the window contents: use Read lock for anything updating.
+// and rendering. It also has the main Mutex for any updates
+// to the window contents: use Lock for anything updating.
 type RenderContext struct {
-	// Flags hold binary context state
-	Flags RenderContextFlags
 
 	// LogicalDPI is the current logical dots-per-inch resolution of the
 	// window, which should be used for most conversion of standard units.
@@ -696,6 +683,12 @@ type RenderContext struct {
 	// Use AsyncLock from any outside routine to grab the lock before
 	// doing modifications.
 	Mu sync.Mutex
+
+	// Visible is whether the window is visible and should be rendered to.
+	Visible bool
+
+	// Rebuild is whether to force a rebuild of all Scene elements.
+	Rebuild bool
 }
 
 // NewRenderContext returns a new RenderContext initialized according to
@@ -712,7 +705,7 @@ func NewRenderContext() *RenderContext {
 		rc.Geom = math32.Geom2DInt{Size: image.Pt(1080, 720)}
 		rc.LogicalDPI = 160
 	}
-	rc.SetFlag(true, RenderVisible)
+	rc.Visible = true
 	return rc
 }
 
@@ -729,18 +722,8 @@ func (rc *RenderContext) Unlock() {
 	rc.Mu.Unlock()
 }
 
-// HasFlag returns true if given flag is set
-func (rc *RenderContext) HasFlag(flag enums.BitFlag) bool {
-	return rc.Flags.HasFlag(flag)
-}
-
-// SetFlag sets given flag(s) on or off
-func (rc *RenderContext) SetFlag(on bool, flag ...enums.BitFlag) {
-	rc.Flags.SetFlag(on, flag...)
-}
-
 func (rc *RenderContext) String() string {
-	str := fmt.Sprintf("Geom: %s  Visible: %v", rc.Geom, rc.HasFlag(RenderVisible))
+	str := fmt.Sprintf("Geom: %s  Visible: %v", rc.Geom, rc.Visible)
 	return str
 }
 
@@ -883,10 +866,10 @@ func (w *RenderWindow) RenderWindow() {
 	rc := w.RenderContext()
 	rc.Lock()
 	defer func() {
-		rc.SetFlag(false, RenderRebuild)
+		rc.Rebuild = false
 		rc.Unlock()
 	}()
-	rebuild := rc.HasFlag(RenderRebuild)
+	rebuild := rc.Rebuild
 
 	stageMods, sceneMods := w.Mains.UpdateAll() // handles all Scene / Widget updates!
 	top := w.Mains.Top()

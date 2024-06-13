@@ -216,9 +216,9 @@ func UpdateSettings(ctx Widget, se Settings) {
 func UpdateAll() { //types:add
 	gradient.Cache = nil // the cache is invalid now
 	for _, w := range AllRenderWindows {
-		rctx := w.Mains.RenderContext
-		rctx.LogicalDPI = w.LogicalDPI()
-		rctx.SetFlag(true, RenderRebuild) // trigger full rebuild
+		rc := w.Mains.RenderContext
+		rc.LogicalDPI = w.LogicalDPI()
+		rc.Rebuild = true // trigger full rebuild
 	}
 }
 

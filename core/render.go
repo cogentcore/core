@@ -129,7 +129,7 @@ func (wb *WidgetBase) NeedsRebuild() bool {
 	if rc == nil {
 		return false
 	}
-	return rc.HasFlag(RenderRebuild)
+	return rc.Rebuild
 }
 
 // LayoutScene does a layout of the scene: Size, Position
@@ -223,7 +223,7 @@ func (sc *Scene) DoUpdate() bool {
 	}
 
 	switch {
-	case rc.HasFlag(RenderRebuild):
+	case rc.Rebuild:
 		sc.DoRebuild()
 		sc.needsLayout = false
 		sc.sceneNeedsRender = false

@@ -280,67 +280,6 @@ func (i *WindowFlags) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "WindowFlags")
 }
 
-var _RenderContextFlagsValues = []RenderContextFlags{0, 1}
-
-// RenderContextFlagsN is the highest valid value for type RenderContextFlags, plus one.
-const RenderContextFlagsN RenderContextFlags = 2
-
-var _RenderContextFlagsValueMap = map[string]RenderContextFlags{`Visible`: 0, `Rebuild`: 1}
-
-var _RenderContextFlagsDescMap = map[RenderContextFlags]string{0: `the window is visible and should be rendered to`, 1: `forces a rebuild of all scene elements`}
-
-var _RenderContextFlagsMap = map[RenderContextFlags]string{0: `Visible`, 1: `Rebuild`}
-
-// String returns the string representation of this RenderContextFlags value.
-func (i RenderContextFlags) String() string { return enums.BitFlagString(i, _RenderContextFlagsValues) }
-
-// BitIndexString returns the string representation of this RenderContextFlags value
-// if it is a bit index value (typically an enum constant), and
-// not an actual bit flag value.
-func (i RenderContextFlags) BitIndexString() string { return enums.String(i, _RenderContextFlagsMap) }
-
-// SetString sets the RenderContextFlags value from its string representation,
-// and returns an error if the string is invalid.
-func (i *RenderContextFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
-
-// SetStringOr sets the RenderContextFlags value from its string representation
-// while preserving any bit flags already set, and returns an
-// error if the string is invalid.
-func (i *RenderContextFlags) SetStringOr(s string) error {
-	return enums.SetStringOr(i, s, _RenderContextFlagsValueMap, "RenderContextFlags")
-}
-
-// Int64 returns the RenderContextFlags value as an int64.
-func (i RenderContextFlags) Int64() int64 { return int64(i) }
-
-// SetInt64 sets the RenderContextFlags value from an int64.
-func (i *RenderContextFlags) SetInt64(in int64) { *i = RenderContextFlags(in) }
-
-// Desc returns the description of the RenderContextFlags value.
-func (i RenderContextFlags) Desc() string { return enums.Desc(i, _RenderContextFlagsDescMap) }
-
-// RenderContextFlagsValues returns all possible values for the type RenderContextFlags.
-func RenderContextFlagsValues() []RenderContextFlags { return _RenderContextFlagsValues }
-
-// Values returns all possible values for the type RenderContextFlags.
-func (i RenderContextFlags) Values() []enums.Enum { return enums.Values(_RenderContextFlagsValues) }
-
-// HasFlag returns whether these bit flags have the given bit flag set.
-func (i RenderContextFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
-
-// SetFlag sets the value of the given flags in these flags to the given value.
-func (i *RenderContextFlags) SetFlag(on bool, f ...enums.BitFlag) {
-	enums.SetFlag((*int64)(i), on, f...)
-}
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i RenderContextFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *RenderContextFlags) UnmarshalText(text []byte) error {
-	return enums.UnmarshalText(i, text, "RenderContextFlags")
-}
-
 var _ThemesValues = []Themes{0, 1, 2}
 
 // ThemesN is the highest valid value for type Themes, plus one.
