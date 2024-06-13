@@ -25,10 +25,10 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Set GuiActive to true if the gui (piview) is active -- ensures that the
+// Set GUIActive to true if the gui (parseview) is active -- ensures that the
 // Ast tree is updated when nodes are swapped in reverse mode, and maybe
 // other things
-var GuiActive = false
+var GUIActive = false
 
 // DepthLimit is the infinite recursion prevention cutoff
 var DepthLimit = 10000
@@ -699,7 +699,7 @@ func (pr *Rule) ParseRules(ps *State, parent *Rule, parAst *Ast, scope lexer.Reg
 		if !ok {
 			return nil
 		}
-	} else if GuiActive {
+	} else if GUIActive {
 		if scope == lexer.RegZero {
 			ps.Error(scope.St, "scope is empty and no EOS in rule -- invalid rules -- starting rules must all have EOS", pr)
 			return nil
