@@ -505,6 +505,6 @@ const (
 	ValuePaddedArray
 
 	// ValueTextureOwns val owns and manages the host staging memory for texture.
-	// based on Var TextureOwns -- for dynamically changings images.
+	// based on Var TextureOwns -- for dynamically changing images.
 	ValueTextureOwns
 )

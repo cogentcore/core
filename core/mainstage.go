@@ -321,9 +321,6 @@ func (st *Stage) NewRenderWindow() *RenderWindow {
 	if win == nil {
 		return nil
 	}
-	if wgp != nil {
-		win.SetFlag(true, WindowHasSavedGeom)
-	}
 	AllRenderWindows.Add(win)
 	// initialize Mains
 	win.Mains.RenderWindow = win

@@ -105,27 +105,14 @@ type RenderWindow struct {
 type WindowFlags int64 //enums:bitflag -trim-prefix Window
 
 const (
-	// WindowHasSavedGeom indicates if this window has WindowGeometry setting that
-	// sized it -- affects whether other default geom should be applied.
-	WindowHasSavedGeom WindowFlags = iota
-
 	// WindowClosing is atomic flag indicating window is closing
-	WindowClosing
-
-	// WindowResizing is atomic flag indicating window is resizing
-	WindowResizing
+	WindowClosing WindowFlags = iota
 
 	// WindowGotFocus indicates that have we received RenderWindow focus
 	WindowGotFocus
 
-	// WindowSentShow have we sent the show event yet?  Only ever sent ONCE
-	WindowSentShow
-
 	// WindowStopEventLoop is set when event loop stop is requested
 	WindowStopEventLoop
-
-	// WindowSelectionMode indicates that the window is in Cogent Core inspect editor edit mode
-	WindowSelectionMode
 )
 
 // HasFlag returns true if given flag is set
