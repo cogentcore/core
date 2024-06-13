@@ -64,7 +64,7 @@ func init() {
 			if !forceNoInline && (forceInline || len <= core.SystemSettings.MapInlineLength) {
 				return NewKeyedList().SetInline(true)
 			} else {
-				return NewMapButton()
+				return NewKeyedListButton()
 			}
 		case reflect.Array, reflect.Slice:
 			sz := uv.Len()
