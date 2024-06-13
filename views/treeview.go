@@ -269,7 +269,7 @@ func (tv *TreeView) Init() {
 		}
 
 		if selMode == events.SelectOne {
-			if tv.SelectMode() {
+			if tv.SelectMode {
 				selMode = events.ExtendContinuous
 			}
 		}
@@ -307,7 +307,7 @@ func (tv *TreeView) Init() {
 			tv.MoveEndAction(selMode)
 			e.SetHandled()
 		case keymap.SelectMode:
-			tv.SelectModeToggle()
+			tv.SelectMode = !tv.SelectMode
 			e.SetHandled()
 		case keymap.SelectAll:
 			tv.SelectAll()
@@ -446,11 +446,11 @@ func (tv *TreeView) Init() {
 			})
 			w.OnClick(func(e events.Event) {
 				if w.IsChecked() && !w.StateIs(states.Indeterminate) {
-					if !tv.IsClosed() {
+					if !tv.Closed {
 						tv.Close()
 					}
 				} else {
-					if tv.IsClosed() {
+					if tv.Closed {
 						tv.Open()
 					}
 				}
@@ -566,7 +566,7 @@ func (tv *TreeView) SetBranchState() {
 	switch {
 	case !tv.This.(TreeViewer).CanOpen():
 		br.SetState(true, states.Indeterminate)
-	case tv.IsClosed():
+	case tv.Closed:
 		br.SetState(false, states.Indeterminate)
 		br.SetState(false, states.Checked)
 		br.NeedsRender()
@@ -586,7 +586,7 @@ func (tv *TreeView) SizeUp() {
 	h := tv.widgetSize.Y
 	w := tv.widgetSize.X
 
-	if !tv.IsClosed() {
+	if !tv.Closed {
 		// we layout children under us
 		tv.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
 			kwi.SizeUp()
@@ -629,7 +629,7 @@ func (tv *TreeView) Position() {
 
 	tv.WidgetBase.Position()
 
-	if !tv.IsClosed() {
+	if !tv.Closed {
 		h := tv.widgetSize.Y
 		tv.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
 			kwb.Geom.RelPos.Y = h
@@ -687,7 +687,7 @@ func (tv *TreeView) RenderWidget() {
 	}
 	// we always have to render our kids b/c
 	// we could be out of scope but they could be in!
-	if !tv.IsClosed() {
+	if !tv.Closed {
 		tv.RenderChildren()
 	}
 }
@@ -921,7 +921,7 @@ func (tv *TreeView) MoveDown(selMode events.SelectModes) *TreeView {
 	if tv.Parent == nil {
 		return nil
 	}
-	if tv.IsClosed() || !tv.HasChildren() { // next sibling
+	if tv.Closed || !tv.HasChildren() { // next sibling
 		return tv.MoveDownSibling(selMode)
 	} else {
 		if tv.HasChildren() {
@@ -1079,7 +1079,7 @@ func (tv *TreeView) MoveToLastChild(selMode events.SelectModes) *TreeView {
 	if tv.Parent == nil || tv == tv.RootView {
 		return nil
 	}
-	if !tv.IsClosed() && tv.HasChildren() {
+	if !tv.Closed && tv.HasChildren() {
 		nn := AsTreeView(tv.Child(tv.NumChildren() - 1))
 		return nn.MoveToLastChild(selMode)
 	} else {
@@ -1147,7 +1147,7 @@ func (tv *TreeView) OnClose() {
 // (if it is not already closed).
 // Calls OnClose in TreeViewer interface for extensible actions.
 func (tv *TreeView) Close() {
-	if tv.IsClosed() {
+	if tv.Closed {
 		return
 	}
 	tv.SetClosed(true)
@@ -1176,29 +1176,26 @@ func (tv *TreeView) CanOpen() bool {
 }
 
 // Open opens the given node and updates the view accordingly
-// (if it is not already opened)
+// (if it is not already opened).
 // Calls OnOpen in TreeViewer interface for extensible actions.
 func (tv *TreeView) Open() {
-	if !tv.IsClosed() {
+	if !tv.Closed || tv.inOpen {
 		return
 	}
-	if tv.Is(TreeViewInOpen) {
-		return
-	}
-	tv.SetFlag(true, TreeViewInOpen)
+	tv.inOpen = true
 	if tv.This.(TreeViewer).CanOpen() {
 		tv.SetClosed(false)
 		tv.SetBranchState()
 		tv.SetKidsVisibility(false)
 		tv.This.(TreeViewer).OnOpen()
 	}
-	tv.SetFlag(false, TreeViewInOpen)
+	tv.inOpen = false
 	tv.NeedsLayout()
 }
 
 // ToggleClose toggles the close / open status: if closed, opens, and vice-versa
 func (tv *TreeView) ToggleClose() {
-	if tv.IsClosed() {
+	if tv.Closed {
 		tv.Open()
 	} else {
 		tv.Close()

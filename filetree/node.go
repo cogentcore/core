@@ -247,7 +247,7 @@ func (fn *Node) IsExec() bool {
 
 // IsOpen returns true if file is flagged as open
 func (fn *Node) IsOpen() bool {
-	return !fn.IsClosed()
+	return !fn.Closed
 }
 
 // IsChanged returns true if the file is open and has been changed (edited) since last EditDone
