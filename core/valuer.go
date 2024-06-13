@@ -139,3 +139,68 @@ func ToValue(value any, tags reflect.StructTag) Value {
 
 	return NewTextField()
 }
+
+/* TODO(config)
+func init() {
+	AddValueType[icons.Icon, *IconButton]()
+	AddValueType[time.Time, *TimeInput]()
+	AddValueType[time.Duration, *DurationInput]()
+	AddValueType[types.Type, *TypeChooser]()
+	AddValueType[Filename, *FileButton]()
+	AddValueType[FontName, *FontButton]()
+	AddValueType[keymap.MapName, *KeyMapButton]()
+	AddValueType[key.Chord, *KeyChordButton]()
+
+	AddValueConverter(func(value any, tags reflect.StructTag) Value {
+		if _, ok := value.(color.Color); ok {
+			return NewColorButton()
+		}
+		if _, ok := value.(tree.Node); ok {
+			return NewTreeButton()
+		}
+
+		forceInline := tags.Get("view") == "inline"
+		forceNoInline := tags.Get("view") == "no-inline"
+		uv := reflectx.Underlying(reflect.ValueOf(value))
+		if !uv.IsValid() {
+			return nil
+		}
+		typ := uv.Type()
+		kind := typ.Kind()
+		switch kind {
+		case reflect.Struct:
+			num := reflectx.NumAllFields(uv)
+			if !forceNoInline && (forceInline || num <= SystemSettings.StructInlineLength) {
+				return NewForm().SetInline(true)
+			} else {
+				return NewFormButton()
+			}
+		case reflect.Map:
+			len := uv.Len()
+			if !forceNoInline && (forceInline || len <= SystemSettings.MapInlineLength) {
+				return NewKeyedList().SetInline(true)
+			} else {
+				return NewKeyedListButton()
+			}
+		case reflect.Array, reflect.Slice:
+			sz := uv.Len()
+			elemType := reflectx.SliceElementType(value)
+			if _, ok := value.([]byte); ok {
+				return NewTextField()
+			}
+			if _, ok := value.([]rune); ok {
+				return NewTextField()
+			}
+			isStruct := (reflectx.NonPointerType(elemType).Kind() == reflect.Struct)
+			if !forceNoInline && (forceInline || (!isStruct && sz <= SystemSettings.SliceInlineLength && !tree.IsNode(elemType))) {
+				return NewInlineList()
+			} else {
+				return NewListButton()
+			}
+		case reflect.Func:
+			return tree.New[*FuncButton]() // TODO(config): update to NewFuncButton after changing its signature
+		}
+		return nil
+	})
+}
+*/

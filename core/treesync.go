@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 import (
 	"bytes"
@@ -15,7 +15,6 @@ import (
 	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/tree"
@@ -145,7 +144,7 @@ func (tr *Tree) SelectedSyncNodes() []tree.Node {
 // or nil if not found
 func (tr *Tree) FindSyncNode(kn tree.Node) *Tree {
 	var ttv *Tree
-	tr.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
+	tr.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		tvn := AsTree(wi)
 		if tvn != nil {
 			if tvn.SyncNode == kn {
@@ -230,11 +229,11 @@ func (tr *Tree) InsertAt(rel int, actNm string) {
 	if tr.SyncNode != nil {
 		typ = tr.SyncNode.BaseType()
 	}
-	d := core.NewBody().AddTitle(actNm).AddText("Number and type of items to insert:")
-	nd := &core.NewItemsData{Number: 1, Type: typ}
+	d := NewBody().AddTitle(actNm).AddText("Number and type of items to insert:")
+	nd := &NewItemsData{Number: 1, Type: typ}
 	sv := NewForm(d).SetStruct(nd) // TODO(config)
-	tree.ChildByType[*core.Chooser](sv, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
-	d.AddBottomBar(func(parent core.Widget) {
+	tree.ChildByType[*Chooser](sv, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
+	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
 			parent := AsTree(tr.Parent)
@@ -257,11 +256,11 @@ func (tr *Tree) AddChildNode() { //types:add
 	if tr.SyncNode != nil {
 		typ = tr.SyncNode.BaseType()
 	}
-	d := core.NewBody().AddTitle(ttl).AddText("Number and type of items to insert:")
-	nd := &core.NewItemsData{Number: 1, Type: typ}
+	d := NewBody().AddTitle(ttl).AddText("Number and type of items to insert:")
+	nd := &NewItemsData{Number: 1, Type: typ}
 	sv := NewForm(d).SetStruct(nd)
 	tree.ChildByType[*TypeChooser](sv, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0) // TODO(config)
-	d.AddBottomBar(func(parent core.Widget) {
+	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
 			if tr.SyncNode != nil {
@@ -357,12 +356,12 @@ func (tr *Tree) DuplicateSync() {
 func (tr *Tree) EditNode() { //types:add
 	if tr.SyncNode != nil {
 		tynm := tr.SyncNode.NodeType().Name
-		d := core.NewBody().AddTitle(tynm)
+		d := NewBody().AddTitle(tynm)
 		NewForm(d).SetStruct(tr.SyncNode).SetReadOnly(tr.IsReadOnly())
 		d.RunFullDialog(tr)
 	} else {
 		tynm := tr.NodeType().Name
-		d := core.NewBody().AddTitle(tynm)
+		d := NewBody().AddTitle(tynm)
 		NewForm(d).SetStruct(tr.This).SetReadOnly(tr.IsReadOnly())
 		d.RunFullDialog(tr)
 	}
@@ -389,7 +388,7 @@ func (tr *Tree) MimeDataSync(md *mimedata.Mimes) {
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: fileinfo.DataJson, Data: buf.Bytes()})
 	} else {
-		core.ErrorSnackbar(tr, err, "Error encoding node")
+		ErrorSnackbar(tr, err, "Error encoding node")
 	}
 }
 
@@ -406,7 +405,7 @@ func (tr *Tree) SyncNodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string)
 			if err == nil {
 				sl = append(sl, nn)
 			} else {
-				core.ErrorSnackbar(tr, err, "Error loading node")
+				ErrorSnackbar(tr, err, "Error loading node")
 			}
 		} else if d.Type == fileinfo.TextPlain { // paths
 			pl = append(pl, string(d.Data))
@@ -507,7 +506,7 @@ func (tr *Tree) DropDeleteSourceSync(de *events.DragDrop) {
 			psplt := strings.Split(path, "/")
 			orgnm := psplt[len(psplt)-1]
 			sn.AsTree().SetName(orgnm)
-			_, swb := core.AsWidget(sn)
+			_, swb := AsWidget(sn)
 			swb.NeedsRender()
 		}
 	}

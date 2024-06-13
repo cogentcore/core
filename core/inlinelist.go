@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 import (
 	"reflect"
 	"strconv"
 
 	"cogentcore.org/core/base/reflectx"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 )
@@ -17,7 +16,7 @@ import (
 // InlineList represents a slice within a single line of value widgets.
 // This is typically used for smaller slices.
 type InlineList struct {
-	core.Frame
+	Frame
 
 	// Slice is the slice that we are viewing.
 	Slice any `set:"-"`
@@ -30,16 +29,16 @@ func (il *InlineList) WidgetValue() any { return &il.Slice }
 
 func (il *InlineList) Init() {
 	il.Frame.Init()
-	il.Maker(func(p *core.Plan) {
+	il.Maker(func(p *Plan) {
 		sl := reflectx.NonPointerValue(reflectx.UnderlyingPointer(reflect.ValueOf(il.Slice)))
 
-		sz := min(sl.Len(), core.SystemSettings.SliceInlineLength)
+		sz := min(sl.Len(), SystemSettings.SliceInlineLength)
 		for i := 0; i < sz; i++ {
 			itxt := strconv.Itoa(i)
 			val := reflectx.UnderlyingPointer(sl.Index(i)) // deal with pointer lists
-			core.AddNew(p, "value-"+itxt, func() core.Value {
-				return core.NewValue(val.Interface(), "")
-			}, func(w core.Value) {
+			AddNew(p, "value-"+itxt, func() Value {
+				return NewValue(val.Interface(), "")
+			}, func(w Value) {
 				wb := w.AsWidget()
 				wb.OnChange(func(e events.Event) { il.SendChange() })
 				wb.OnInput(func(e events.Event) {
@@ -48,30 +47,30 @@ func (il *InlineList) Init() {
 				if il.IsReadOnly() {
 					wb.SetReadOnly(true)
 				} else {
-					wb.AddContextMenu(func(m *core.Scene) {
+					wb.AddContextMenu(func(m *Scene) {
 						il.ContextMenu(m, i)
 					})
 				}
 				wb.Updater(func() {
-					core.Bind(val.Interface(), w)
+					Bind(val.Interface(), w)
 					wb.SetReadOnly(il.IsReadOnly())
 				})
 			})
 		}
 		if !il.isArray {
-			core.AddAt(p, "add-button", func(w *core.Button) {
-				w.SetIcon(icons.Add).SetType(core.ButtonTonal)
+			AddAt(p, "add-button", func(w *Button) {
+				w.SetIcon(icons.Add).SetType(ButtonTonal)
 				w.Tooltip = "Add an element to the list"
 				w.OnClick(func(e events.Event) {
 					il.SliceNewAt(-1)
 				})
 			})
 		}
-		core.AddAt(p, "edit-button", func(w *core.Button) {
-			w.SetIcon(icons.Edit).SetType(core.ButtonTonal)
+		AddAt(p, "edit-button", func(w *Button) {
+			w.SetIcon(icons.Edit).SetType(ButtonTonal)
 			w.Tooltip = "Edit list in a dialog"
 			w.OnClick(func(e events.Event) {
-				d := core.NewBody().AddTitle(il.ValueTitle).AddText(il.Tooltip)
+				d := NewBody().AddTitle(il.ValueTitle).AddText(il.Tooltip)
 				NewList(d).SetSlice(il.Slice).SetValueTitle(il.ValueTitle)
 				d.OnClose(func(e events.Event) {
 					il.Update()
@@ -126,14 +125,14 @@ func (il *InlineList) SliceDeleteAt(idx int) {
 	il.Update()
 }
 
-func (il *InlineList) ContextMenu(m *core.Scene, idx int) {
+func (il *InlineList) ContextMenu(m *Scene, idx int) {
 	if il.IsReadOnly() || il.isArray {
 		return
 	}
-	core.NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
+	NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
 		il.SliceNewAt(idx)
 	})
-	core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
+	NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
 		il.SliceDeleteAt(idx)
 	})
 }

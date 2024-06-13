@@ -307,11 +307,11 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 		})
 	case "form": // form
 		ts := &Test{}
-		views.NewForm(sc).SetStruct(ts)
+		NewForm(sc).SetStruct(ts)
 	case "timepicker": // time picker
 		ts := &TestTime{}
 		ts.Date = time.Now()
-		views.NewForm(sc).SetStruct(ts)
+		NewForm(sc).SetStruct(ts)
 	case "center-dialog":
 		d := NewBody(sc).FullWindow(true)
 		d.Styler(func(s *styles.Style) {

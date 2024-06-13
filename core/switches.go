@@ -231,7 +231,7 @@ func (sw *Switches) SelectValue(value any) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("core.Switches.SelectValue: item not found: (value: %v, items: %v)", value, sw.Items)
+	return fmt.Errorf("Switches.SelectValue: item not found: (value: %v, items: %v)", value, sw.Items)
 }
 
 // SetStrings sets the [Switches.Items] from the given strings.

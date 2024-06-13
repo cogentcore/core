@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 /* TODO(config)
 import (
@@ -27,23 +27,23 @@ func TestValues(t *testing.T) {
 		{"int", 3, ""},
 		{"float", 6.7, ""},
 		{"slider", 0.4, `view:"slider"`},
-		{"enum", core.ButtonElevated, ""},
-		{"bitflag", core.WidgetFlags(0), ""},
-		{"type", core.ButtonType, ""},
+		{"enum", ButtonElevated, ""},
+		{"bitflag", WidgetFlags(0), ""},
+		{"type", ButtonType, ""},
 		{"byte-slice", []byte("hello"), ""},
 		{"rune-slice", []rune("hello"), ""},
 		{"nil", (*int)(nil), ""},
 		{"icon", icons.Add, ""},
 		{"icon-show-name", icons.Add, `view:"show-name"`},
-		{"font", core.AppearanceSettings.Font, ""},
-		{"file", core.Filename("README.md"), ""},
+		{"font", AppearanceSettings.Font, ""},
+		{"file", Filename("README.md"), ""},
 		{"func", SettingsWindow, ""},
 		{"option", option.New("an option"), ""},
 		{"colormap", ColorMapName("ColdHot"), ""},
 		{"color", colors.Orange, ""},
 		{"keychord", key.CodeReturnEnter, ""},
 		{"keymap", keymap.AvailableMaps[0], ""},
-		{"tree", core.NewButton(core.NewFrame()), ""},
+		{"tree", NewButton(NewFrame()), ""},
 
 		{"map", map[string]int{"Go": 1, "C++": 3, "Python": 5}, ""},
 		{"map-inline", map[string]int{"Go": 1, "C++": 3}, ""},
@@ -54,7 +54,7 @@ func TestValues(t *testing.T) {
 		{"table", &[]language{{"Go", 10}, {"Python", 5}}, ""},
 	}
 	for _, value := range values {
-		b := core.NewBody()
+		b := NewBody()
 		NewValue(b, value.Value, value.Tags)
 		b.AssertRender(t, "values/"+value.Name)
 	}

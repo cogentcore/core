@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 import (
 	"fmt"
@@ -15,7 +15,6 @@ import (
 	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
@@ -62,14 +61,14 @@ type Table struct {
 
 // TableStyleFunc is a styling function for custom styling and
 // configuration of elements in the table.
-type TableStyleFunc func(w core.Widget, s *styles.Style, row, col int)
+type TableStyleFunc func(w Widget, s *styles.Style, row, col int)
 
 func (tb *Table) Init() {
 	tb.ListBase.Init()
 	tb.AddContextMenu(tb.ContextMenu)
 	tb.SortIndex = -1
 
-	tb.Makers[0] = func(p *core.Plan) { // TODO: reduce redundancy with ListBase Maker
+	tb.Makers[0] = func(p *Plan) { // TODO: reduce redundancy with ListBase Maker
 		svi := tb.This.(Lister)
 		svi.UpdateSliceSize()
 
@@ -98,7 +97,7 @@ func (tb *Table) Init() {
 		})
 
 		tb.MakeHeader(p)
-		tb.MakeGrid(p, func(p *core.Plan) {
+		tb.MakeGrid(p, func(p *Plan) {
 			for i := 0; i < tb.VisRows; i++ {
 				svi.MakeRow(p, i)
 			}
@@ -107,7 +106,7 @@ func (tb *Table) Init() {
 }
 
 // StyleValue performs additional value widget styling
-func (tb *Table) StyleValue(w core.Widget, s *styles.Style, row, col int) {
+func (tb *Table) StyleValue(w Widget, s *styles.Style, row, col int) {
 	hw := float32(tb.headerWidths[col])
 	if col == tb.SortIndex {
 		hw += 6
@@ -211,21 +210,21 @@ func (tb *Table) UpdateMaxWidths() {
 }
 
 // SliceHeader returns the Frame header for slice grid
-func (tb *Table) SliceHeader() *core.Frame {
-	return tb.Child(0).(*core.Frame)
+func (tb *Table) SliceHeader() *Frame {
+	return tb.Child(0).(*Frame)
 }
 
-func (tb *Table) MakeHeader(p *core.Plan) {
-	core.AddAt(p, "header", func(w *core.Frame) {
-		core.ToolbarStyles(w)
+func (tb *Table) MakeHeader(p *Plan) {
+	AddAt(p, "header", func(w *Frame) {
+		ToolbarStyles(w)
 		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(0, 0)
 			s.Gap.Set(units.Em(0.5)) // matches grid default
 		})
-		w.Maker(func(p *core.Plan) {
+		w.Maker(func(p *Plan) {
 			if tb.ShowIndexes {
-				core.AddAt(p, "head-index", func(w *core.Text) {
-					w.SetType(core.TextBodyMedium)
+				AddAt(p, "head-index", func(w *Text) {
+					w.SetType(TextBodyMedium)
 					w.Styler(func(s *styles.Style) {
 						s.Align.Self = styles.Center
 					})
@@ -234,8 +233,8 @@ func (tb *Table) MakeHeader(p *core.Plan) {
 			}
 			for fli := 0; fli < tb.numVisibleFields; fli++ {
 				field := tb.visibleFields[fli]
-				core.AddAt(p, "head-"+field.Name, func(w *core.Button) {
-					w.SetType(core.ButtonMenu)
+				AddAt(p, "head-"+field.Name, func(w *Button) {
+					w.SetType(ButtonMenu)
 					w.OnClick(func(e events.Event) {
 						tb.SortSliceAction(fli)
 					})
@@ -278,7 +277,7 @@ func (tb *Table) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	return
 }
 
-func (tb *Table) MakeRow(p *core.Plan, i int) {
+func (tb *Table) MakeRow(p *Plan, i int) {
 	svi := tb.This.(Lister)
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
@@ -304,9 +303,9 @@ func (tb *Table) MakeRow(p *core.Plan, i int) {
 		}
 		readOnlyTag := tags.Get("edit") == "-"
 
-		core.AddNew(p, valnm, func() core.Value {
-			return core.NewValue(fval.Interface(), tags)
-		}, func(w core.Value) {
+		AddNew(p, valnm, func() Value {
+			return NewValue(fval.Interface(), tags)
+		}, func(w Value) {
 			wb := w.AsWidget()
 			tb.MakeValue(w, i)
 			w.AsTree().SetProperty(ListColProperty, fli)
@@ -320,14 +319,14 @@ func (tb *Table) MakeRow(p *core.Plan, i int) {
 				si, vi, invis := svi.SliceIndex(i)
 				val := tb.SliceElementValue(vi)
 				fval := reflectx.OnePointerValue(val.FieldByIndex(field.Index))
-				core.Bind(fval.Interface(), w)
+				Bind(fval.Interface(), w)
 
 				vc := tb.ValueTitle + "[" + strconv.Itoa(si) + "]"
 				if !invis {
 					if lblr, ok := tb.Slice.(labels.SliceLabeler); ok {
 						slbl := lblr.ElemLabel(si)
 						if slbl != "" {
-							vc = core.JoinValueTitle(tb.ValueTitle, slbl)
+							vc = JoinValueTitle(tb.ValueTitle, slbl)
 						}
 					}
 				}
@@ -349,7 +348,7 @@ func (tb *Table) HasStyleFunc() bool {
 	return tb.StyleFunc != nil
 }
 
-func (tb *Table) StyleRow(w core.Widget, idx, fidx int) {
+func (tb *Table) StyleRow(w Widget, idx, fidx int) {
 	if tb.StyleFunc != nil {
 		tb.StyleFunc(w, &w.AsWidget().Styles, idx, fidx)
 	}
@@ -404,8 +403,8 @@ func (tb *Table) SortSliceAction(fldIndex int) {
 	ascending := true
 
 	for fli := 0; fli < tb.numVisibleFields; fli++ {
-		hdr := sgh.Child(idxOff + fli).(*core.Button)
-		hdr.SetType(core.ButtonAction)
+		hdr := sgh.Child(idxOff + fli).(*Button)
+		hdr.SetType(ButtonAction)
 		if fli == fldIndex {
 			if tb.SortIndex == fli {
 				tb.SortDescending = !tb.SortDescending
@@ -473,19 +472,19 @@ func (tb *Table) SetSortFieldName(nm string) {
 
 // RowFirstVisWidget returns the first visible widget for given row (could be
 // index or not) -- false if out of range
-func (tb *Table) RowFirstVisWidget(row int) (*core.WidgetBase, bool) {
+func (tb *Table) RowFirstVisWidget(row int) (*WidgetBase, bool) {
 	if !tb.IsRowInBounds(row) {
 		return nil, false
 	}
 	nWidgPerRow, idxOff := tb.RowWidgetNs()
 	sg := tb.SliceGrid()
-	w := sg.Children[row*nWidgPerRow].(core.Widget).AsWidget()
+	w := sg.Children[row*nWidgPerRow].(Widget).AsWidget()
 	if w.Geom.TotalBBox != (image.Rectangle{}) {
 		return w, true
 	}
 	ridx := nWidgPerRow * row
 	for fli := 0; fli < tb.numVisibleFields; fli++ {
-		w := sg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
+		w := sg.Child(ridx + idxOff + fli).(Widget).AsWidget()
 		if w.Geom.TotalBBox != (image.Rectangle{}) {
 			return w, true
 		}
@@ -496,7 +495,7 @@ func (tb *Table) RowFirstVisWidget(row int) (*core.WidgetBase, bool) {
 // RowGrabFocus grabs the focus for the first focusable widget in given row --
 // returns that element or nil if not successful -- note: grid must have
 // already rendered for focus to be grabbed!
-func (tb *Table) RowGrabFocus(row int) *core.WidgetBase {
+func (tb *Table) RowGrabFocus(row int) *WidgetBase {
 	if !tb.IsRowInBounds(row) || tb.InFocusGrab { // range check
 		return nil
 	}
@@ -505,7 +504,7 @@ func (tb *Table) RowGrabFocus(row int) *core.WidgetBase {
 	sg := tb.SliceGrid()
 	// first check if we already have focus
 	for fli := 0; fli < tb.numVisibleFields; fli++ {
-		w := sg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
+		w := sg.Child(ridx + idxOff + fli).(Widget).AsWidget()
 		if w.StateIs(states.Focused) || w.ContainsFocus() {
 			return w
 		}
@@ -513,7 +512,7 @@ func (tb *Table) RowGrabFocus(row int) *core.WidgetBase {
 	tb.InFocusGrab = true
 	defer func() { tb.InFocusGrab = false }()
 	for fli := 0; fli < tb.numVisibleFields; fli++ {
-		w := sg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
+		w := sg.Child(ridx + idxOff + fli).(Widget).AsWidget()
 		if w.CanFocus() {
 			w.SetFocusEvent()
 			return w
@@ -547,7 +546,7 @@ func StructSliceIndexByValue(structSlice any, fieldName string, fieldValue any) 
 	struTyp := reflectx.NonPointerType(reflect.TypeOf(structSlice).Elem().Elem())
 	fld, ok := struTyp.FieldByName(fieldName)
 	if !ok {
-		err := fmt.Errorf("core.StructSliceRowByValue: field name: %v not found", fieldName)
+		err := fmt.Errorf("StructSliceRowByValue: field name: %v not found", fieldName)
 		slog.Error(err.Error())
 		return -1, err
 	}
@@ -576,18 +575,18 @@ func (tb *Table) EditIndex(idx int) {
 	if lbl != "" {
 		tynm += ": " + lbl
 	}
-	d := core.NewBody().AddTitle(tynm)
+	d := NewBody().AddTitle(tynm)
 	NewForm(d).SetStruct(stru).SetReadOnly(tb.IsReadOnly())
-	d.AddBottomBar(func(parent core.Widget) {
+	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent)
 	})
 	d.RunFullDialog(tb)
 }
 
-func (tb *Table) ContextMenu(m *core.Scene) {
+func (tb *Table) ContextMenu(m *Scene) {
 	if !tb.isArray {
-		core.NewButton(m).SetText("Edit").SetIcon(icons.Edit).
+		NewButton(m).SetText("Edit").SetIcon(icons.Edit).
 			OnClick(func(e events.Event) {
 				tb.EditIndex(tb.SelectedIndex)
 			})
@@ -604,8 +603,8 @@ func (tb *Table) SizeFinal() {
 		return
 	}
 	sh := tb.SliceHeader()
-	sh.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
-		_, sgb := core.AsWidget(sg.Child(i))
+	sh.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
+		_, sgb := AsWidget(sg.Child(i))
 		gsz := &sgb.Geom.Size
 		ksz := &kwb.Geom.Size
 		ksz.Actual.Total.X = gsz.Actual.Total.X

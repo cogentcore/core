@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 import (
 	"testing"
-
-	"cogentcore.org/core/core"
 )
 
 type language struct {
@@ -16,13 +14,13 @@ type language struct {
 }
 
 func TestTable(t *testing.T) {
-	b := core.NewBody()
+	b := NewBody()
 	NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	b.AssertRender(t, "table/basic")
 }
 
 func TestTableReadOnly(t *testing.T) {
-	b := core.NewBody()
+	b := NewBody()
 	NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
 	b.AssertRender(t, "table/read-only")
 }

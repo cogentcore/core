@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 import (
 	"fmt"
@@ -13,7 +13,6 @@ import (
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
@@ -47,7 +46,7 @@ type structField struct {
 
 // Form represents a struct with rows of field names and editable values.
 type Form struct {
-	core.Frame
+	Frame
 
 	// Struct is the pointer to the struct that we are viewing.
 	Struct any
@@ -58,7 +57,7 @@ type Form struct {
 	// structFields are the fields of the current struct.
 	structFields []*structField
 
-	// isShouldShower is whether the struct implements [core.ShouldShower], which results
+	// isShouldShower is whether the struct implements [ShouldShower], which results
 	// in additional updating being done at certain points.
 	isShouldShower bool
 }
@@ -72,7 +71,7 @@ func (fm *Form) getStructFields() {
 		if field.Tag.Get("view") == "-" {
 			return false
 		}
-		if ss, ok := reflectx.UnderlyingPointer(parent).Interface().(core.ShouldShower); ok {
+		if ss, ok := reflectx.UnderlyingPointer(parent).Interface().(ShouldShower); ok {
 			fm.isShouldShower = true
 			if !ss.ShouldShow(field.Name) {
 				return false
@@ -109,14 +108,14 @@ func (fm *Form) Init() {
 			return
 		}
 		s.Display = styles.Grid
-		if fm.SizeClass() == core.SizeCompact {
+		if fm.SizeClass() == SizeCompact {
 			s.Columns = 1
 		} else {
 			s.Columns = 2
 		}
 	})
 
-	fm.Maker(func(p *core.Plan) {
+	fm.Maker(func(p *Plan) {
 		if reflectx.AnyIsNil(fm.Struct) {
 			return
 		}
@@ -138,10 +137,10 @@ func (fm *Form) Init() {
 			readOnlyTag := f.field.Tag.Get("edit") == "-"
 			def, hasDef := f.field.Tag.Lookup("default")
 
-			var labelWidget *core.Text
-			var valueWidget core.Value
+			var labelWidget *Text
+			var valueWidget Value
 
-			core.AddAt(p, labnm, func(w *core.Text) {
+			AddAt(p, labnm, func(w *Text) {
 				labelWidget = w
 				w.Styler(func(s *styles.Style) {
 					s.SetTextWrap(false)
@@ -171,7 +170,7 @@ func (fm *Form) Init() {
 						e.SetHandled()
 						err := reflectx.SetFromDefaultTag(f.value, def)
 						if err != nil {
-							core.ErrorSnackbar(w, err, "Error setting default value")
+							ErrorSnackbar(w, err, "Error setting default value")
 						} else {
 							w.Update()
 							valueWidget.AsWidget().Update()
@@ -184,9 +183,9 @@ func (fm *Form) Init() {
 				})
 			})
 
-			core.AddNew(p, valnm, func() core.Value {
-				return core.NewValue(reflectx.UnderlyingPointer(f.value).Interface(), f.field.Tag)
-			}, func(w core.Value) {
+			AddNew(p, valnm, func() Value {
+				return NewValue(reflectx.UnderlyingPointer(f.value).Interface(), f.field.Tag)
+			}, func(w Value) {
 				valueWidget = w
 				wb := w.AsWidget()
 				doc, _ := types.GetDoc(f.value, f.parent, f.field, label)
@@ -221,8 +220,8 @@ func (fm *Form) Init() {
 				wb.Updater(func() {
 					wb.SetReadOnly(fm.IsReadOnly() || readOnlyTag)
 					if i < len(fm.structFields) {
-						core.Bind(reflectx.UnderlyingPointer(fm.structFields[i].value).Interface(), w)
-						vc := core.JoinValueTitle(fm.ValueTitle, label)
+						Bind(reflectx.UnderlyingPointer(fm.structFields[i].value).Interface(), w)
+						vc := JoinValueTitle(fm.ValueTitle, label)
 						if vc != wb.ValueTitle {
 							wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
 						}

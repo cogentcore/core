@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 import (
 	"testing"
 
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/core"
 )
 
 func TestColorPicker(t *testing.T) {
-	b := core.NewBody()
+	b := NewBody()
 	NewColorPicker(b).SetColor(colors.Orange)
 	b.AssertRender(t, "color-picker/basic")
 }

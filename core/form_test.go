@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 import (
 	"testing"
 
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"github.com/stretchr/testify/assert"
 )
@@ -26,25 +25,25 @@ type morePerson struct {
 }
 
 func TestForm(t *testing.T) {
-	b := core.NewBody()
+	b := NewBody()
 	NewForm(b).SetStruct(&person{Name: "Go", Age: 35})
 	b.AssertRender(t, "form/basic")
 }
 
 func TestFormInline(t *testing.T) {
-	b := core.NewBody()
+	b := NewBody()
 	NewForm(b).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
 	b.AssertRender(t, "form/inline")
 }
 
 func TestFormReadOnly(t *testing.T) {
-	b := core.NewBody()
+	b := NewBody()
 	NewForm(b).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
 	b.AssertRender(t, "form/read-only")
 }
 
 func TestFormChange(t *testing.T) {
-	b := core.NewBody()
+	b := NewBody()
 	p := person{Name: "Go", Age: 35}
 
 	n := 0
@@ -56,7 +55,7 @@ func TestFormChange(t *testing.T) {
 	})
 	b.AssertRender(t, "form/change", func() {
 		// [3] is value of second row, which is Age
-		sv.Child(3).(*core.Spinner).LeadingIconButton().Send(events.Click)
+		sv.Child(3).(*Spinner).LeadingIconButton().Send(events.Click)
 		assert.Equal(t, 1, n)
 		assert.Equal(t, p, value)
 		assert.Equal(t, person{Name: "Go", Age: 34}, p)

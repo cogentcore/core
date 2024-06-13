@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 import (
 	"testing"
 
-	"cogentcore.org/core/core"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,7 +20,7 @@ func TestCallFunc(t *testing.T) {
 }
 
 func TestCallFuncArgs(t *testing.T) {
-	b := core.NewBody()
+	b := NewBody()
 	myFunc := func(a int, b string) {}
 	CallFunc(b, myFunc)
 	b.AssertRenderScreen(t, "func-button/args")

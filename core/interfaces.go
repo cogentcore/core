@@ -29,7 +29,7 @@ type FieldValidator interface {
 
 // ShouldShower is an interface determining when you should take a shower.
 // Actually, it determines whether a named field should be displayed
-// (in [views.Form]).
+// (in [Form]).
 type ShouldShower interface {
 	// ShouldShow returns whether the given named field should be displayed.
 	ShouldShow(field string) bool

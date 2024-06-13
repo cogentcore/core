@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 import (
 	"fmt"
 	"reflect"
 
 	"cogentcore.org/core/base/reflectx"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
@@ -18,7 +17,7 @@ import (
 
 // KeyedList represents a map value using two columns of editable key and value widgets.
 type KeyedList struct {
-	core.Frame
+	Frame
 
 	// Map is the pointer to the map that we are viewing.
 	Map any
@@ -49,7 +48,7 @@ func (kl *KeyedList) Init() {
 		s.Min.Y.Em(10)
 	})
 
-	kl.Maker(func(p *core.Plan) {
+	kl.Maker(func(p *Plan) {
 		if reflectx.AnyIsNil(kl.Map) {
 			return
 		}
@@ -71,9 +70,9 @@ func (kl *KeyedList) Init() {
 			keynm := "key-" + keytxt
 			valnm := "value-" + keytxt
 
-			core.AddNew(p, keynm, func() core.Value {
-				return core.ToValue(key.Interface(), "")
-			}, func(w core.Value) {
+			AddNew(p, keynm, func() Value {
+				return ToValue(key.Interface(), "")
+			}, func(w Value) {
 				BindMapKey(mapv, key, w)
 				wb := w.AsWidget()
 				wb.SetReadOnly(kl.IsReadOnly())
@@ -88,7 +87,7 @@ func (kl *KeyedList) Init() {
 				wb.SetReadOnly(kl.IsReadOnly())
 				wb.OnInput(kl.HandleEvent)
 				if !kl.IsReadOnly() {
-					wb.AddContextMenu(func(m *core.Scene) {
+					wb.AddContextMenu(func(m *Scene) {
 						kl.ContextMenu(m, key)
 					})
 				}
@@ -97,11 +96,11 @@ func (kl *KeyedList) Init() {
 					wb.SetReadOnly(kl.IsReadOnly())
 				})
 			})
-			core.AddNew(p, valnm, func() core.Value {
+			AddNew(p, valnm, func() Value {
 				val := mapv.MapIndex(key).Interface()
-				w := core.ToValue(val, "")
+				w := ToValue(val, "")
 				return BindMapValue(mapv, key, w)
-			}, func(w core.Value) {
+			}, func(w Value) {
 				wb := w.AsWidget()
 				wb.SetReadOnly(kl.IsReadOnly())
 				wb.OnChange(func(e events.Event) { kl.SendChange(e) })
@@ -111,7 +110,7 @@ func (kl *KeyedList) Init() {
 					s.SetTextWrap(false)
 				})
 				if !kl.IsReadOnly() {
-					wb.AddContextMenu(func(m *core.Scene) {
+					wb.AddContextMenu(func(m *Scene) {
 						kl.ContextMenu(m, key)
 					})
 				}
@@ -123,7 +122,7 @@ func (kl *KeyedList) Init() {
 
 			if typeAny {
 				typnm := "type-" + keytxt
-				core.AddAt(p, typnm, func(w *core.Chooser) {
+				AddAt(p, typnm, func(w *Chooser) {
 					w.SetTypes(builtinTypes...)
 					w.OnChange(func(e events.Event) {
 						typ := reflect.TypeOf(w.CurrentItem.Value.(*types.Type).Instance)
@@ -147,19 +146,19 @@ func (kl *KeyedList) Init() {
 		}
 		if kl.Inline {
 			if !kl.IsReadOnly() {
-				core.AddAt(p, "add-button", func(w *core.Button) {
-					w.SetIcon(icons.Add).SetType(core.ButtonTonal)
+				AddAt(p, "add-button", func(w *Button) {
+					w.SetIcon(icons.Add).SetType(ButtonTonal)
 					w.Tooltip = "Add an element"
 					w.OnClick(func(e events.Event) {
 						kl.MapAdd()
 					})
 				})
 			}
-			core.AddAt(p, "edit-button", func(w *core.Button) {
-				w.SetIcon(icons.Edit).SetType(core.ButtonTonal)
+			AddAt(p, "edit-button", func(w *Button) {
+				w.SetIcon(icons.Edit).SetType(ButtonTonal)
 				w.Tooltip = "Edit in a dialog"
 				w.OnClick(func(e events.Event) {
-					d := core.NewBody().AddTitle(kl.ValueTitle).AddText(kl.Tooltip)
+					d := NewBody().AddTitle(kl.ValueTitle).AddText(kl.Tooltip)
 					NewKeyedList(d).SetMap(kl.Map).SetValueTitle(kl.ValueTitle)
 					d.OnClose(func(e events.Event) {
 						kl.Update()
@@ -172,14 +171,14 @@ func (kl *KeyedList) Init() {
 	})
 }
 
-func (kl *KeyedList) ContextMenu(m *core.Scene, keyv reflect.Value) {
+func (kl *KeyedList) ContextMenu(m *Scene, keyv reflect.Value) {
 	if kl.IsReadOnly() {
 		return
 	}
-	core.NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
+	NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
 		kl.MapAdd()
 	})
-	core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
+	NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
 		kl.MapDelete(keyv)
 	})
 }
@@ -212,19 +211,19 @@ func (kl *KeyedList) MapDelete(key reflect.Value) {
 	kl.Update()
 }
 
-// MakeToolbar configures a [core.Toolbar] for this view
-func (kl *KeyedList) MakeToolbar(p *core.Plan) {
+// MakeToolbar configures a [Toolbar] for this view
+func (kl *KeyedList) MakeToolbar(p *Plan) {
 	if reflectx.AnyIsNil(kl.Map) {
 		return
 	}
-	core.Add(p, func(w *core.Button) {
+	Add(p, func(w *Button) {
 		w.SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys and the values").
 			OnClick(func(e events.Event) {
 				kl.ToggleSort()
 			})
 	})
 	if !kl.IsReadOnly() {
-		core.Add(p, func(w *core.Button) {
+		Add(p, func(w *Button) {
 			w.SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
 				OnClick(func(e events.Event) {
 					kl.MapAdd()
@@ -233,27 +232,27 @@ func (kl *KeyedList) MakeToolbar(p *core.Plan) {
 	}
 }
 
-// BindMapKey is a version of [core.Bind] that works for keys in a map.
-func BindMapKey[T core.Value](mapv reflect.Value, key reflect.Value, vw T) T {
+// BindMapKey is a version of [Bind] that works for keys in a map.
+func BindMapKey[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 	wb := vw.AsWidget()
 	wb.ValueUpdate = func() {
-		if vws, ok := any(vw).(core.ValueSetter); ok {
-			core.ErrorSnackbar(vw, vws.SetWidgetValue(key.Interface()))
+		if vws, ok := any(vw).(ValueSetter); ok {
+			ErrorSnackbar(vw, vws.SetWidgetValue(key.Interface()))
 		} else {
-			core.ErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), key.Interface()))
+			ErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), key.Interface()))
 		}
 	}
 	wb.ValueOnChange = func() {
 		newKey := reflect.New(key.Type())
-		core.ErrorSnackbar(vw, reflectx.SetRobust(newKey.Interface(), vw.WidgetValue()))
+		ErrorSnackbar(vw, reflectx.SetRobust(newKey.Interface(), vw.WidgetValue()))
 		newKey = newKey.Elem()
 		if !mapv.MapIndex(newKey).IsValid() { // not already taken
 			mapv.SetMapIndex(newKey, mapv.MapIndex(key))
 			mapv.SetMapIndex(key, reflect.Value{})
 			return
 		}
-		d := core.NewBody().AddTitle("Key already exists").AddText(fmt.Sprintf("The key %q already exists", reflectx.ToString(newKey.Interface())))
-		d.AddBottomBar(func(parent core.Widget) {
+		d := NewBody().AddTitle("Key already exists").AddText(fmt.Sprintf("The key %q already exists", reflectx.ToString(newKey.Interface())))
+		d.AddBottomBar(func(parent Widget) {
 			d.AddCancel(parent)
 			d.AddOK(parent).SetText("Overwrite").OnClick(func(e events.Event) {
 				mapv.SetMapIndex(newKey, mapv.MapIndex(key))
@@ -263,29 +262,29 @@ func BindMapKey[T core.Value](mapv reflect.Value, key reflect.Value, vw T) T {
 		})
 		d.RunDialog(vw)
 	}
-	if ob, ok := any(vw).(core.OnBinder); ok {
+	if ob, ok := any(vw).(OnBinder); ok {
 		ob.OnBind(key.Interface())
 	}
 	return vw
 }
 
-// BindMapValue is a version of [core.Bind] that works for values in a map.
-func BindMapValue[T core.Value](mapv reflect.Value, key reflect.Value, vw T) T {
+// BindMapValue is a version of [Bind] that works for values in a map.
+func BindMapValue[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 	wb := vw.AsWidget()
 	wb.ValueUpdate = func() {
 		value := mapv.MapIndex(key).Interface()
-		if vws, ok := any(vw).(core.ValueSetter); ok {
-			core.ErrorSnackbar(vw, vws.SetWidgetValue(value))
+		if vws, ok := any(vw).(ValueSetter); ok {
+			ErrorSnackbar(vw, vws.SetWidgetValue(value))
 		} else {
-			core.ErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))
+			ErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))
 		}
 	}
 	wb.ValueOnChange = func() {
 		value := reflect.New(mapv.Type().Elem())
-		core.ErrorSnackbar(vw, reflectx.SetRobust(value.Interface(), vw.WidgetValue()))
+		ErrorSnackbar(vw, reflectx.SetRobust(value.Interface(), vw.WidgetValue()))
 		mapv.SetMapIndex(key, value.Elem())
 	}
-	if ob, ok := any(vw).(core.OnBinder); ok {
+	if ob, ok := any(vw).(OnBinder); ok {
 		value := mapv.MapIndex(key).Interface()
 		ob.OnBind(value)
 	}

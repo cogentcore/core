@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 import (
 	"fmt"
@@ -10,7 +10,6 @@ import (
 
 	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/base/labels"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
@@ -24,7 +23,7 @@ import (
 // each field, within an overall frame with an optional title, and a button
 // box at the bottom where methods can be invoked
 type Inspector struct {
-	core.Frame
+	Frame
 
 	// Root is the root of the tree being edited.
 	Root tree.Node
@@ -33,7 +32,7 @@ type Inspector struct {
 	CurrentNode tree.Node `set:"-"`
 
 	// Filename is the current filename for saving / loading
-	Filename core.Filename `set:"-"`
+	Filename Filename `set:"-"`
 }
 
 func (is *Inspector) Init() {
@@ -42,7 +41,7 @@ func (is *Inspector) Init() {
 		s.Grow.Set(1, 1)
 		s.Direction = styles.Column
 	})
-	is.OnWidgetAdded(func(w core.Widget) {
+	is.OnWidgetAdded(func(w Widget) {
 		// TODO(config)
 		if tw, ok := w.(*Tree); ok {
 			tw.Styler(func(s *styles.Style) {
@@ -51,11 +50,11 @@ func (is *Inspector) Init() {
 		}
 	})
 
-	var titleWidget *core.Text
-	core.AddChildAt(is, "title", func(w *core.Text) {
+	var titleWidget *Text
+	AddChildAt(is, "title", func(w *Text) {
 		titleWidget = w
 		is.CurrentNode = is.Root
-		w.SetType(core.TextHeadlineSmall)
+		w.SetType(TextHeadlineSmall)
 		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(1, 0)
 			s.Align.Self = styles.Center
@@ -65,22 +64,22 @@ func (is *Inspector) Init() {
 		})
 	})
 	renderRebuild := func() {
-		sc, ok := is.Root.(*core.Scene)
+		sc, ok := is.Root.(*Scene)
 		if !ok {
 			return
 		}
 		sc.RenderContext().Rebuild = true // trigger full rebuild
 	}
-	core.AddChildAt(is, "splits", func(w *core.Splits) {
+	AddChildAt(is, "splits", func(w *Splits) {
 		w.SetSplits(.3, .7)
 		var form *Form
-		core.AddChildAt(w, "tree-frame", func(w *core.Frame) {
+		AddChildAt(w, "tree-frame", func(w *Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Gap.Zero()
 			})
-			core.AddChildAt(w, "tree", func(w *Tree) {
+			AddChildAt(w, "tree", func(w *Tree) {
 				w.OnSelect(func(e events.Event) {
 					if len(w.SelectedNodes) == 0 {
 						return
@@ -92,11 +91,11 @@ func (is *Inspector) Init() {
 					titleWidget.Update()
 					form.SetStruct(sn).Update()
 
-					sc, ok := is.Root.(*core.Scene)
+					sc, ok := is.Root.(*Scene)
 					if !ok {
 						return
 					}
-					if w, wb := core.AsWidget(sn); w != nil {
+					if w, wb := AsWidget(sn); w != nil {
 						pselw := sc.SelectedWidget
 						sc.SelectedWidget = w
 						wb.NeedsRender()
@@ -111,13 +110,13 @@ func (is *Inspector) Init() {
 				w.SyncTree(is.Root)
 			})
 		})
-		core.AddChildAt(w, "struct", func(w *Form) {
+		AddChildAt(w, "struct", func(w *Form) {
 			form = w
 			w.OnChange(func(e events.Event) {
 				renderRebuild()
 			})
 			w.OnClose(func(e events.Event) {
-				sc, ok := is.Root.(*core.Scene)
+				sc, ok := is.Root.(*Scene)
 				if !ok {
 					return
 				}
@@ -154,7 +153,7 @@ func (is *Inspector) Save() error { //types:add
 }
 
 // SaveAs saves tree to given filename, in a standard JSON-formatted file
-func (is *Inspector) SaveAs(filename core.Filename) error { //types:add
+func (is *Inspector) SaveAs(filename Filename) error { //types:add
 	if is.Root == nil {
 		return nil
 	}
@@ -168,7 +167,7 @@ func (is *Inspector) SaveAs(filename core.Filename) error { //types:add
 }
 
 // Open opens tree from given filename, in a standard JSON-formatted file
-func (is *Inspector) Open(filename core.Filename) error { //types:add
+func (is *Inspector) Open(filename Filename) error { //types:add
 	if is.Root == nil {
 		return nil
 	}
@@ -185,13 +184,13 @@ func (is *Inspector) Open(filename core.Filename) error { //types:add
 // In selection mode, bounding boxes are rendered around each Widget,
 // and clicking on a Widget pulls it up in the inspector.
 func (is *Inspector) ToggleSelectionMode() { //types:add
-	sc, ok := is.Root.(*core.Scene)
+	sc, ok := is.Root.(*Scene)
 	if !ok {
 		return
 	}
 	sc.RenderBBoxes = !sc.RenderBBoxes
 	if sc.RenderBBoxes {
-		sc.SelectedWidgetChan = make(chan core.Widget)
+		sc.SelectedWidgetChan = make(chan Widget)
 		go is.SelectionMonitor()
 	} else {
 		if sc.SelectedWidgetChan != nil {
@@ -204,7 +203,7 @@ func (is *Inspector) ToggleSelectionMode() { //types:add
 
 // SelectionMonitor monitors for the selected widget
 func (is *Inspector) SelectionMonitor() {
-	sc, ok := is.Root.(*core.Scene)
+	sc, ok := is.Root.(*Scene)
 	if !ok {
 		return
 	}
@@ -226,7 +225,7 @@ func (is *Inspector) SelectionMonitor() {
 			return tree.Continue
 		})
 		if tv == nil {
-			core.MessageSnackbar(is, fmt.Sprintf("Inspector: tree node missing: %v", sw))
+			MessageSnackbar(is, fmt.Sprintf("Inspector: tree node missing: %v", sw))
 			return
 		}
 	}
@@ -250,7 +249,7 @@ func (is *Inspector) SelectionMonitor() {
 
 // InspectApp displays the underlying operating system app
 func (is *Inspector) InspectApp() { //types:add
-	d := core.NewBody().AddTitle("Inspect app")
+	d := NewBody().AddTitle("Inspect app")
 	NewForm(d).SetStruct(system.TheApp).SetReadOnly(true)
 	d.RunFullDialog(is)
 }
@@ -260,31 +259,31 @@ func (is *Inspector) Tree() *Tree {
 	return is.FindPath("splits/tree-frame/tree").(*Tree)
 }
 
-func (is *Inspector) MakeToolbar(p *core.Plan) {
-	core.Add(p, func(w *FuncButton) {
+func (is *Inspector) MakeToolbar(p *Plan) {
+	Add(p, func(w *FuncButton) {
 		w.SetFunc(is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool)
 		w.Updater(func() {
-			_, ok := is.Root.(*core.Scene)
+			_, ok := is.Root.(*Scene)
 			w.SetEnabled(ok)
 		})
 	})
-	core.Add(p, func(w *core.Separator) {})
-	core.Add(p, func(w *FuncButton) {
+	Add(p, func(w *Separator) {})
+	Add(p, func(w *FuncButton) {
 		w.SetFunc(is.Open).SetKey(keymap.Open)
 		w.Args[0].SetValue(is.Filename).SetTag(`ext:".json"`)
 	})
-	core.Add(p, func(w *FuncButton) {
+	Add(p, func(w *FuncButton) {
 		w.SetFunc(is.Save).SetKey(keymap.Save)
 		w.Updater(func() {
 			w.SetEnabled(is.Filename != "")
 		})
 	})
-	core.Add(p, func(w *FuncButton) {
+	Add(p, func(w *FuncButton) {
 		w.SetFunc(is.SaveAs).SetKey(keymap.SaveAs)
 		w.Args[0].SetValue(is.Filename).SetTag(`ext:".json"`)
 	})
-	core.Add(p, func(w *core.Separator) {})
-	core.Add(p, func(w *FuncButton) {
+	Add(p, func(w *Separator) {})
+	Add(p, func(w *FuncButton) {
 		w.SetFunc(is.InspectApp).SetIcon(icons.Devices)
 	})
 }
@@ -292,17 +291,17 @@ func (is *Inspector) MakeToolbar(p *core.Plan) {
 // InspectorWindow opens an interactive editor of the given tree
 // in a new window.
 func InspectorWindow(n tree.Node) {
-	if core.RecycleMainWindow(n) {
+	if RecycleMainWindow(n) {
 		return
 	}
-	d := core.NewBody("Inspector")
+	d := NewBody("Inspector")
 	InspectorView(d, n)
 	d.NewWindow().SetCloseOnBack(true).Run()
 }
 
 // InspectorView configures the given body to have an interactive inspector
 // of the given tree.
-func InspectorView(b *core.Body, n tree.Node) {
+func InspectorView(b *Body, n tree.Node) {
 	b.SetTitle("Inspector").SetData(n)
 	if n != nil {
 		b.Name += "-" + n.AsTree().Name

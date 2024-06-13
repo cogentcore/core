@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 import (
 	"bytes"
@@ -16,7 +16,6 @@ import (
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/base/iox/jsonx"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -35,7 +34,7 @@ import (
 // overridable method hooks for actions taken on the [Tree],
 // including OnOpen, OnClose, etc.
 type Treer interface {
-	core.Widget
+	Widget
 
 	// AsTree returns the base [Tree] for this node.
 	AsCoreTree() *Tree
@@ -75,7 +74,7 @@ type Treer interface {
 	DragDrop(e events.Event)
 	DropFinalize(de *events.DragDrop)
 	DropDeleteSource(e events.Event)
-	MakePasteMenu(m *core.Scene, md mimedata.Mimes, fun func())
+	MakePasteMenu(m *Scene, md mimedata.Mimes, fun func())
 }
 
 // AsTree returns the given value as a value of type Tree if the type
@@ -109,7 +108,7 @@ func AsTree(n tree.Node) *Tree {
 // Select, Change, and DoubleClick. The selected nodes
 // are in the root SelectedNodes list.
 type Tree struct {
-	core.WidgetBase
+	WidgetBase
 
 	// If non-nil, the [tree.Node] that this widget is viewing in the tree (the source)
 	SyncNode tree.Node `set:"-" copier:"-" json:"-" xml:"-"`
@@ -178,7 +177,7 @@ type Tree struct {
 // optional parent that ensures that the tree scrolls
 // separately from the surrounding context.
 func NewTreeFrame(parent ...tree.Node) *Tree {
-	fr := core.NewFrame(parent...).Styler(func(s *styles.Style) {
+	fr := NewFrame(parent...).Styler(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	return NewTree(fr)
@@ -199,7 +198,7 @@ func (tr *Tree) BaseType() *types.Type {
 // Returns the total number of leaves in the tree.
 func (tr *Tree) RootSetViewIndex() int {
 	idx := 0
-	tr.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
+	tr.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		tvn := AsTree(wi)
 		if tvn != nil {
 			tvn.viewIndex = idx
@@ -264,7 +263,7 @@ func (tr *Tree) Init() {
 	tr.On(events.KeyChord, func(e events.Event) {
 		kf := keymap.Of(e.KeyChord())
 		selMode := events.SelectModeBits(e.Modifiers())
-		if core.DebugSettings.KeyEventTrace {
+		if DebugSettings.KeyEventTrace {
 			slog.Info("Tree KeyInput", "widget", tr, "keyFunction", kf, "selMode", selMode)
 		}
 
@@ -343,8 +342,8 @@ func (tr *Tree) Init() {
 		}
 	})
 
-	core.AddChildAt(tr, "parts", func(w *core.Frame) {
-		core.InitParts(w)
+	AddChildAt(tr, "parts", func(w *Frame) {
+		InitParts(w)
 		tvi := tr.This.(Treer)
 		w.Styler(func(s *styles.Style) {
 			s.Cursor = cursors.Pointer
@@ -425,8 +424,8 @@ func (tr *Tree) Init() {
 			}
 			tr.ShowContextMenu(e)
 		})
-		core.AddChildAt(w, "branch", func(w *core.Switch) {
-			w.SetType(core.SwitchCheckbox)
+		AddChildAt(w, "branch", func(w *Switch) {
+			w.SetType(SwitchCheckbox)
 			w.SetIcons(tr.IconOpen, tr.IconClosed, tr.IconLeaf)
 			w.Styler(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Focusable)
@@ -461,9 +460,9 @@ func (tr *Tree) Init() {
 				}
 			})
 		})
-		w.Maker(func(p *core.Plan) {
+		w.Maker(func(p *Plan) {
 			if tr.Icon.IsSet() {
-				core.AddAt(p, "icon", func(w *core.Icon) {
+				AddAt(p, "icon", func(w *Icon) {
 					w.Styler(func(s *styles.Style) {
 						s.Font.Size.Dp(16)
 					})
@@ -473,7 +472,7 @@ func (tr *Tree) Init() {
 				})
 			}
 		})
-		core.AddChildAt(w, "text", func(w *core.Text) {
+		AddChildAt(w, "text", func(w *Text) {
 			w.Styler(func(s *styles.Style) {
 				s.SetNonSelectable()
 				s.SetTextWrap(false)
@@ -515,12 +514,12 @@ func (tr *Tree) RootIsReadOnly() bool {
 // http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtree
 
 // Branch returns the branch widget in parts, if it exists
-func (tr *Tree) Branch() (*core.Switch, bool) {
+func (tr *Tree) Branch() (*Switch, bool) {
 	if tr.Parts == nil {
 		return nil, false
 	}
 	if icc := tr.Parts.ChildByName("branch", 0); icc != nil {
-		return icc.(*core.Switch), true
+		return icc.(*Switch), true
 	}
 	return nil, false
 }
@@ -565,7 +564,7 @@ func (tr *Tree) SizeUp() {
 
 	if !tr.Closed {
 		// we layout children under us
-		tr.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
+		tr.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.SizeUp()
 			h += kwb.Geom.Size.Actual.Total.Y
 			kw := kwb.Geom.Size.Actual.Total.X
@@ -595,7 +594,7 @@ func (tr *Tree) SizeDown(iter int) bool {
 func (tr *Tree) Position() {
 	rn := tr.RootView
 	if rn == nil {
-		slog.Error("views.Tree: RootView is nil", "in node:", tr)
+		slog.Error("core.Tree: RootView is nil", "in node:", tr)
 		return
 	}
 	tr.SetBranchState()
@@ -608,7 +607,7 @@ func (tr *Tree) Position() {
 
 	if !tr.Closed {
 		h := tr.widgetSize.Y
-		tr.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
+		tr.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwb.Geom.RelPos.Y = h
 			kwb.Geom.RelPos.X = tr.Indent.Dots
 			h += kwb.Geom.Size.Actual.Total.Y
@@ -1178,7 +1177,7 @@ func (tr *Tree) ToggleClose() {
 
 // OpenAll opens the given node and all of its sub-nodes
 func (tr *Tree) OpenAll() { //types:add
-	tr.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
+	tr.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		tvn := AsTree(wi)
 		if tvn != nil {
 			tvn.Open()
@@ -1191,7 +1190,7 @@ func (tr *Tree) OpenAll() { //types:add
 
 // CloseAll closes the given node and all of its sub-nodes.
 func (tr *Tree) CloseAll() { //types:add
-	tr.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
+	tr.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
 		tvn := AsTree(wi)
 		if tvn != nil {
 			tvn.Close()
@@ -1229,18 +1228,18 @@ func (tr *Tree) ContextMenuPos(e events.Event) (pos image.Point) {
 	return
 }
 
-func (tr *Tree) ContextMenuReadOnly(m *core.Scene) {
-	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keymap.Copy).
+func (tr *Tree) ContextMenuReadOnly(m *Scene) {
+	NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keymap.Copy).
 		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
 			tr.Copy(true)
 		})
-	core.NewButton(m).SetText("View").SetIcon(icons.Visibility).
+	NewButton(m).SetText("View").SetIcon(icons.Visibility).
 		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
 			tr.EditNode()
 		})
-	core.NewSeparator(m)
+	NewSeparator(m)
 
 	NewFuncButton(m, tr.OpenAll).SetIcon(icons.KeyboardArrowDown).
 		SetEnabled(tr.HasSelection())
@@ -1248,49 +1247,49 @@ func (tr *Tree) ContextMenuReadOnly(m *core.Scene) {
 		SetEnabled(tr.HasSelection())
 }
 
-func (tr *Tree) ContextMenu(m *core.Scene) {
+func (tr *Tree) ContextMenu(m *Scene) {
 	if tr.IsReadOnly() || tr.RootIsReadOnly() {
 		tr.ContextMenuReadOnly(m)
 		return
 	}
 	tvi := tr.This.(Treer)
-	core.NewButton(m).SetText("Add child").SetIcon(icons.Add).
+	NewButton(m).SetText("Add child").SetIcon(icons.Add).
 		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.AddChildNode()
 		})
-	core.NewButton(m).SetText("Insert before").SetIcon(icons.Add).
+	NewButton(m).SetText("Insert before").SetIcon(icons.Add).
 		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.InsertBefore()
 		})
-	core.NewButton(m).SetText("Insert after").SetIcon(icons.Add).
+	NewButton(m).SetText("Insert after").SetIcon(icons.Add).
 		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.InsertAfter()
 		})
-	core.NewButton(m).SetText("Duplicate").SetIcon(icons.ContentCopy).
+	NewButton(m).SetText("Duplicate").SetIcon(icons.ContentCopy).
 		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.Duplicate()
 		})
-	core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
+	NewButton(m).SetText("Delete").SetIcon(icons.Delete).
 		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.DeleteNode()
 		})
-	core.NewSeparator(m)
-	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keymap.Copy).
+	NewSeparator(m)
+	NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keymap.Copy).
 		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.Copy(true)
 		})
-	core.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keymap.Cut).
+	NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keymap.Cut).
 		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.Cut()
 		})
-	pbt := core.NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keymap.Paste).
+	pbt := NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keymap.Paste).
 		OnClick(func(e events.Event) {
 			tvi.Paste()
 		})
@@ -1298,12 +1297,12 @@ func (tr *Tree) ContextMenu(m *core.Scene) {
 	if cb != nil {
 		pbt.SetState(cb.IsEmpty(), states.Disabled)
 	}
-	core.NewSeparator(m)
+	NewSeparator(m)
 	NewFuncButton(m, tr.EditNode).SetText("Edit").SetIcon(icons.Edit).
 		SetEnabled(tr.HasSelection())
 	NewFuncButton(m, tr.InspectNode).SetText("Inspect").SetIcon(icons.EditDocument).
 		SetEnabled(tr.HasSelection())
-	core.NewSeparator(m)
+	NewSeparator(m)
 
 	NewFuncButton(m, tr.OpenAll).SetIcon(icons.KeyboardArrowDown).
 		SetEnabled(tr.HasSelection())
@@ -1315,7 +1314,7 @@ func (tr *Tree) ContextMenu(m *core.Scene) {
 func (tr *Tree) IsRoot(op string) bool {
 	if tr.This == tr.RootView.This {
 		if op != "" {
-			core.MessageSnackbar(tr, fmt.Sprintf("Cannot %v the root of the tree", op))
+			MessageSnackbar(tr, fmt.Sprintf("Cannot %v the root of the tree", op))
 		}
 		return true
 	}
@@ -1337,7 +1336,7 @@ func (tr *Tree) MimeData(md *mimedata.Mimes) {
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: fileinfo.DataJson, Data: buf.Bytes()})
 	} else {
-		core.ErrorSnackbar(tr, err, "Error encoding node")
+		ErrorSnackbar(tr, err, "Error encoding node")
 	}
 }
 
@@ -1353,7 +1352,7 @@ func (tr *Tree) NodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
 			if err == nil {
 				sl = append(sl, nn)
 			} else {
-				core.ErrorSnackbar(tr, err, "Error loading node")
+				ErrorSnackbar(tr, err, "Error loading node")
 			}
 		} else if d.Type == fileinfo.TextPlain { // paths
 			pl = append(pl, string(d.Data))
@@ -1413,44 +1412,44 @@ func (tr *Tree) Paste() { //types:add
 // by popping up a menu to determine what specifically to do.
 func (tr *Tree) PasteMenu(md mimedata.Mimes) {
 	tr.UnselectAll()
-	mf := func(m *core.Scene) {
+	mf := func(m *Scene) {
 		tr.This.(Treer).MakePasteMenu(m, md, nil)
 	}
 	pos := tr.ContextMenuPos(nil)
-	core.NewMenu(mf, tr.This.(core.Widget), pos).Run()
+	NewMenu(mf, tr.This.(Widget), pos).Run()
 }
 
 // MakePasteMenu makes the menu of options for paste events
 // optional function is typically the DropFinalize but could also be other actions
 // to take after each optional action.
-func (tr *Tree) MakePasteMenu(m *core.Scene, md mimedata.Mimes, fun func()) {
-	core.NewButton(m).SetText("Assign To").OnClick(func(e events.Event) {
+func (tr *Tree) MakePasteMenu(m *Scene, md mimedata.Mimes, fun func()) {
+	NewButton(m).SetText("Assign To").OnClick(func(e events.Event) {
 		tr.PasteAssign(md)
 		if fun != nil {
 			fun()
 		}
 	})
-	core.NewButton(m).SetText("Add to Children").OnClick(func(e events.Event) {
+	NewButton(m).SetText("Add to Children").OnClick(func(e events.Event) {
 		tr.PasteChildren(md, events.DropCopy)
 		if fun != nil {
 			fun()
 		}
 	})
 	if !tr.IsRoot("") && tr.RootView.This != tr.This {
-		core.NewButton(m).SetText("Insert Before").OnClick(func(e events.Event) {
+		NewButton(m).SetText("Insert Before").OnClick(func(e events.Event) {
 			tr.PasteBefore(md, events.DropCopy)
 			if fun != nil {
 				fun()
 			}
 		})
-		core.NewButton(m).SetText("Insert After").OnClick(func(e events.Event) {
+		NewButton(m).SetText("Insert After").OnClick(func(e events.Event) {
 			tr.PasteAfter(md, events.DropCopy)
 			if fun != nil {
 				fun()
 			}
 		})
 	}
-	core.NewButton(m).SetText("Cancel")
+	NewButton(m).SetText("Cancel")
 }
 
 // PasteAssign assigns mime data (only the first one!) to this node
@@ -1499,7 +1498,7 @@ func (tr *Tree) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 	}
 	parent := AsTree(tr.Parent)
 	if parent == nil {
-		core.MessageSnackbar(tr, "Error: cannot insert after the root of the tree")
+		MessageSnackbar(tr, "Error: cannot insert after the root of the tree")
 		return
 	}
 	if tr.SyncNode != nil {
@@ -1523,7 +1522,7 @@ func (tr *Tree) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 			}
 		}
 		parent.InsertChild(ns, myidx+i)
-		_, nwb := core.AsWidget(ns)
+		_, nwb := AsWidget(ns)
 		ntv := AsTree(ns)
 		ntv.RootView = tr.RootView
 		nwb.SetScene(tr.Scene)
@@ -1554,7 +1553,7 @@ func (tr *Tree) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 
 	for _, ns := range sl {
 		tr.AddChild(ns)
-		_, nwb := core.AsWidget(ns)
+		_, nwb := AsWidget(ns)
 		ntv := AsTree(ns)
 		ntv.RootView = tr.RootView
 		nwb.SetScene(tr.Scene)
@@ -1581,7 +1580,7 @@ func (tr *Tree) DragStart(e events.Event) {
 			}
 		}
 	}
-	tr.Scene.Events.DragStart(tr.This.(core.Widget), md, e)
+	tr.Scene.Events.DragStart(tr.This.(Widget), md, e)
 }
 
 // DropExternal is not handled by base case but could be in derived
@@ -1603,19 +1602,19 @@ func (tr *Tree) DragDrop(e events.Event) {
 	tvi := tr.This.(Treer)
 	tr.UnselectAll()
 	de := e.(*events.DragDrop)
-	stv := AsTree(de.Source.(core.Widget))
+	stv := AsTree(de.Source.(Widget))
 	if stv != nil {
 		stv.DragClearStates()
 	}
 	md := de.Data.(mimedata.Mimes)
-	mf := func(m *core.Scene) {
+	mf := func(m *Scene) {
 		tr.Scene.Events.DragMenuAddModText(m, de.DropMod)
 		tvi.MakePasteMenu(m, md, func() {
 			tvi.DropFinalize(de)
 		})
 	}
 	pos := tr.ContextMenuPos(nil)
-	core.NewMenu(mf, tr.This.(core.Widget), pos).Run()
+	NewMenu(mf, tr.This.(Widget), pos).Run()
 }
 
 // DropFinalize is called to finalize Drop actions on the Source node.
@@ -1650,7 +1649,7 @@ func (tr *Tree) DropDeleteSource(e events.Event) {
 			psplt := strings.Split(path, "/")
 			orgnm := psplt[len(psplt)-1]
 			sn.AsTree().SetName(orgnm)
-			_, swb := core.AsWidget(sn)
+			_, swb := AsWidget(sn)
 			swb.NeedsRender()
 		}
 	}

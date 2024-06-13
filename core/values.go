@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 import (
 	"reflect"
@@ -10,7 +10,6 @@ import (
 	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/paint"
@@ -21,7 +20,7 @@ import (
 
 // ListButton represents a slice or array value with a button that opens a [List].
 type ListButton struct {
-	core.Button
+	Button
 	Slice any
 }
 
@@ -29,11 +28,11 @@ func (lb *ListButton) WidgetValue() any { return &lb.Slice }
 
 func (lb *ListButton) Init() {
 	lb.Button.Init()
-	lb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	lb.SetType(ButtonTonal).SetIcon(icons.Edit)
 	lb.Updater(func() {
 		lb.SetText(labels.FriendlySliceLabel(reflect.ValueOf(lb.Slice)))
 	})
-	core.InitValueButton(lb, true, func(d *core.Body) {
+	InitValueButton(lb, true, func(d *Body) {
 		up := reflectx.Underlying(reflect.ValueOf(lb.Slice))
 		if up.Type().Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(lb.Slice)).Kind() == reflect.Struct {
 			tb := NewTable(d).SetSlice(lb.Slice)
@@ -49,7 +48,7 @@ func (lb *ListButton) Init() {
 
 // FormButton represents a struct value with a button that opens a [Form].
 type FormButton struct {
-	core.Button
+	Button
 	Struct any
 }
 
@@ -57,14 +56,14 @@ func (fb *FormButton) WidgetValue() any { return &fb.Struct }
 
 func (fb *FormButton) Init() {
 	fb.Button.Init()
-	fb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	fb.SetType(ButtonTonal).SetIcon(icons.Edit)
 	fb.Updater(func() {
 		fb.SetText(labels.FriendlyStructLabel(reflect.ValueOf(fb.Struct)))
 	})
-	core.InitValueButton(fb, true, func(d *core.Body) {
+	InitValueButton(fb, true, func(d *Body) {
 		fm := NewForm(d).SetStruct(fb.Struct)
 		fm.SetValueTitle(fb.ValueTitle).SetReadOnly(fb.IsReadOnly())
-		if tb, ok := fb.Struct.(core.ToolbarMaker); ok {
+		if tb, ok := fb.Struct.(ToolbarMaker); ok {
 			d.AddAppBar(tb.MakeToolbar)
 		}
 	})
@@ -72,7 +71,7 @@ func (fb *FormButton) Init() {
 
 // KeyedListButton represents a map value with a button that opens a [KeyedList].
 type KeyedListButton struct {
-	core.Button
+	Button
 	Map any
 }
 
@@ -80,11 +79,11 @@ func (kb *KeyedListButton) WidgetValue() any { return &kb.Map }
 
 func (kb *KeyedListButton) Init() {
 	kb.Button.Init()
-	kb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	kb.SetType(ButtonTonal).SetIcon(icons.Edit)
 	kb.Updater(func() {
 		kb.SetText(labels.FriendlyMapLabel(reflect.ValueOf(kb.Map)))
 	})
-	core.InitValueButton(kb, true, func(d *core.Body) {
+	InitValueButton(kb, true, func(d *Body) {
 		kl := NewKeyedList(d).SetMap(kb.Map)
 		kl.SetValueTitle(kb.ValueTitle).SetReadOnly(kb.IsReadOnly())
 		d.AddAppBar(kl.MakeToolbar)
@@ -93,7 +92,7 @@ func (kb *KeyedListButton) Init() {
 
 // TreeButton represents a [tree.Node] value with a button.
 type TreeButton struct {
-	core.Button
+	Button
 	Tree tree.Node
 }
 
@@ -101,7 +100,7 @@ func (tb *TreeButton) WidgetValue() any { return &tb.Tree }
 
 func (tb *TreeButton) Init() {
 	tb.Button.Init()
-	tb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	tb.SetType(ButtonTonal).SetIcon(icons.Edit)
 	tb.Updater(func() {
 		path := "None"
 		if tb.Tree != nil {
@@ -109,19 +108,19 @@ func (tb *TreeButton) Init() {
 		}
 		tb.SetText(path)
 	})
-	core.InitValueButton(tb, true, func(d *core.Body) {
+	InitValueButton(tb, true, func(d *Body) {
 		InspectorView(d, tb.Tree)
 	})
 }
 
 // TypeChooser represents a [types.Type] value with a chooser.
 type TypeChooser struct {
-	core.Chooser
+	Chooser
 }
 
 func (tc *TypeChooser) Init() {
 	tc.Chooser.Init()
-	typEmbeds := core.WidgetBaseType
+	typEmbeds := WidgetBaseType
 	// if tetag, ok := tc.Tag("type-embeds"); ok { // TODO(config)
 	// 	typ := types.TypeByName(tetag)
 	// 	if typ != nil {
@@ -133,10 +132,10 @@ func (tc *TypeChooser) Init() {
 	tc.SetTypes(tl...)
 }
 
-// IconButton represents an [icons.Icon] with a [core.Button] that opens
+// IconButton represents an [icons.Icon] with a [Button] that opens
 // a dialog for selecting the icon.
 type IconButton struct {
-	core.Button
+	Button
 }
 
 func (ib *IconButton) WidgetValue() any { return &ib.Icon }
@@ -145,21 +144,21 @@ func (ib *IconButton) Init() { // TODO(config): view:"show-name"
 	ib.Button.Init()
 	ib.Updater(func() {
 		if ib.IsReadOnly() {
-			ib.SetType(core.ButtonText)
+			ib.SetType(ButtonText)
 		} else {
-			ib.SetType(core.ButtonTonal)
+			ib.SetType(ButtonTonal)
 		}
 		if ib.Icon.IsNil() {
 			ib.Icon = icons.Blank
 		}
 	})
-	core.InitValueButton(ib, false, func(d *core.Body) {
+	InitValueButton(ib, false, func(d *Body) {
 		d.SetTitle("Select an icon")
 		si := 0
 		all := icons.All()
 		sv := NewList(d)
 		sv.SetSlice(&all).SetSelectedValue(ib.Icon).BindSelect(&si)
-		sv.SetStyleFunc(func(w core.Widget, s *styles.Style, row int) {
+		sv.SetStyleFunc(func(w Widget, s *styles.Style, row int) {
 			w.(*IconButton).SetText(strcase.ToSentence(string(all[row])))
 		})
 		sv.OnChange(func(e events.Event) {
@@ -168,24 +167,24 @@ func (ib *IconButton) Init() { // TODO(config): view:"show-name"
 	})
 }
 
-// FontButton represents a [core.FontName] with a [core.Button] that opens
+// FontButton represents a [FontName] with a [Button] that opens
 // a dialog for selecting the font family.
 type FontButton struct {
-	core.Button
+	Button
 }
 
 func (fb *FontButton) WidgetValue() any { return &fb.Text }
 
 func (fb *FontButton) Init() {
 	fb.Button.Init()
-	fb.SetType(core.ButtonTonal)
-	core.InitValueButton(fb, false, func(d *core.Body) {
+	fb.SetType(ButtonTonal)
+	InitValueButton(fb, false, func(d *Body) {
 		d.SetTitle("Select a font family")
 		si := 0
 		fi := paint.FontLibrary.FontInfo
 		tb := NewTable(d)
 		tb.SetSlice(&fi).SetSelectedField("Name").SetSelectedValue(fb.Text).BindSelect(&si)
-		tb.SetStyleFunc(func(w core.Widget, s *styles.Style, row, col int) {
+		tb.SetStyleFunc(func(w Widget, s *styles.Style, row, col int) {
 			if col != 4 {
 				return
 			}

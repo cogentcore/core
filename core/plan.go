@@ -101,7 +101,7 @@ func AddInit[T Widget](p *Plan, name string, init func(w T)) {
 			return
 		}
 	}
-	slog.Error("core.AddInit: child not found", "name", name)
+	slog.Error("AddInit: child not found", "name", name)
 }
 
 // AddChild adds a new [WidgetBase.Maker] to the the given parent widget that

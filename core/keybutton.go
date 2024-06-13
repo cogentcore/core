@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 import (
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
@@ -15,7 +14,7 @@ import (
 
 // KeyMapButton represents a [keymap.MapName] value with a button.
 type KeyMapButton struct {
-	core.Button
+	Button
 	MapName keymap.MapName
 }
 
@@ -23,11 +22,11 @@ func (km *KeyMapButton) WidgetValue() any { return &km.MapName }
 
 func (km *KeyMapButton) Init() {
 	km.Button.Init()
-	km.SetType(core.ButtonTonal)
+	km.SetType(ButtonTonal)
 	km.Updater(func() {
 		km.SetText(string(km.MapName))
 	})
-	core.InitValueButton(km, false, func(d *core.Body) {
+	InitValueButton(km, false, func(d *Body) {
 		d.SetTitle("Select a key map")
 		si := 0
 		_, curRow, _ := keymap.AvailableMaps.MapByName(km.MapName)
@@ -41,7 +40,7 @@ func (km *KeyMapButton) Init() {
 
 // KeyChordButton represents a [key.Chord] value with a button.
 type KeyChordButton struct {
-	core.Button
+	Button
 	Chord key.Chord
 }
 
@@ -49,7 +48,7 @@ func (kc *KeyChordButton) WidgetValue() any { return &kc.Chord }
 
 func (kc *KeyChordButton) Init() {
 	kc.Button.Init()
-	kc.SetType(core.ButtonTonal)
+	kc.SetType(ButtonTonal)
 	kc.OnKeyChord(func(e events.Event) {
 		if !kc.StateIs(states.Focused) {
 			return
@@ -62,8 +61,8 @@ func (kc *KeyChordButton) Init() {
 	kc.Updater(func() {
 		kc.SetText(kc.Chord.Label())
 	})
-	kc.AddContextMenu(func(m *core.Scene) {
-		core.NewButton(m).SetText("Clear").SetIcon(icons.ClearAll).OnClick(func(e events.Event) {
+	kc.AddContextMenu(func(m *Scene) {
+		NewButton(m).SetText("Clear").SetIcon(icons.ClearAll).OnClick(func(e events.Event) {
 			kc.Chord = ""
 			kc.SendChange()
 			kc.Update()

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 import (
 	"fmt"
@@ -21,7 +21,6 @@ import (
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -32,14 +31,14 @@ import (
 )
 
 // FilePickerDialog opens a dialog for selecting a file.
-func FilePickerDialog(ctx core.Widget, filename, exts, title string, fun func(selfile string)) {
-	d := core.NewBody()
+func FilePickerDialog(ctx Widget, filename, exts, title string, fun func(selfile string)) {
+	d := NewBody()
 	if title != "" {
 		d.SetTitle(title)
 	}
 	fv := NewFilePicker(d) // .SetFilename(filename, exts)
 	d.AddAppBar(fv.MakeToolbar)
-	d.AddBottomBar(func(parent core.Widget) {
+	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
 			fun(fv.SelectedFile())
@@ -56,7 +55,7 @@ func FilePickerDialog(ctx core.Widget, filename, exts, title string, fun func(se
 
 // FilePicker is a widget for selecting files.
 type FilePicker struct {
-	core.Frame
+	Frame
 
 	// path to directory of files to display
 	DirPath string `set:"-"`
@@ -101,7 +100,7 @@ func (fp *FilePicker) Init() {
 
 	fp.OnKeyChord(func(e events.Event) {
 		kf := keymap.Of(e.KeyChord())
-		if core.DebugSettings.KeyEventTrace {
+		if DebugSettings.KeyEventTrace {
 			slog.Info("FilePicker KeyInput", "widget", fp, "keyFunction", kf)
 		}
 		switch kf {
@@ -120,21 +119,21 @@ func (fp *FilePicker) Init() {
 		}
 	})
 
-	fp.Maker(func(p *core.Plan) {
-		if len(core.RecentPaths) == 0 {
-			core.OpenRecentPaths()
+	fp.Maker(func(p *Plan) {
+		if len(RecentPaths) == 0 {
+			OpenRecentPaths()
 		}
 		// if we update the title before the scene is shown, it may incorrectly
 		// override the title of the window of the context widget
 		if fp.Scene.HasShown {
 			fp.Scene.UpdateTitle("Files: " + fp.DirPath)
 		}
-		core.RecentPaths.AddPath(fp.DirPath, core.SystemSettings.SavedPathsMax)
-		core.SaveRecentPaths()
+		RecentPaths.AddPath(fp.DirPath, SystemSettings.SavedPathsMax)
+		SaveRecentPaths()
 		fp.ReadFiles()
 
 		if fp.PrevPath != fp.DirPath {
-			if core.TheApp.Platform() != system.MacOS {
+			if TheApp.Platform() != system.MacOS {
 				// mac is not supported in a high-capacity fashion at this point
 				if fp.PrevPath == "" {
 					fp.ConfigWatcher()
@@ -149,13 +148,13 @@ func (fp *FilePicker) Init() {
 			fp.PrevPath = fp.DirPath
 		}
 
-		core.AddAt(p, "files", func(w *core.Frame) {
+		AddAt(p, "files", func(w *Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 1)
 			})
 			w.Maker(fp.makeFilesRow)
 		})
-		core.AddAt(p, "sel", func(w *core.Frame) {
+		AddAt(p, "sel", func(w *Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
 				s.Gap.X.Dp(4)
@@ -254,29 +253,29 @@ var FilePickerKindColorMap = map[string]string{
 	"folder": "pref(link)",
 }
 
-func (fp *FilePicker) MakeToolbar(p *core.Plan) {
-	core.AddInit(p, "app-chooser", func(w *core.Chooser) {
+func (fp *FilePicker) MakeToolbar(p *Plan) {
+	AddInit(p, "app-chooser", func(w *Chooser) {
 		fp.AddChooserPaths(w)
 	})
-	core.Add(p, func(w *FuncButton) {
+	Add(p, func(w *FuncButton) {
 		w.SetFunc(fp.DirPathUp).SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
 	})
-	core.Add(p, func(w *FuncButton) {
+	Add(p, func(w *FuncButton) {
 		w.SetFunc(fp.AddPathToFavorites).SetIcon(icons.Favorite).SetText("Favorite")
 	})
-	core.Add(p, func(w *FuncButton) {
+	Add(p, func(w *FuncButton) {
 		w.SetFunc(fp.UpdateFilesAction).SetIcon(icons.Refresh).SetText("Update")
 	})
-	core.Add(p, func(w *FuncButton) {
+	Add(p, func(w *FuncButton) {
 		w.SetFunc(fp.NewFolder).SetIcon(icons.CreateNewFolder)
 	})
 }
 
 // AddChooserPaths adds paths to the app chooser
-func (fp *FilePicker) AddChooserPaths(ch *core.Chooser) {
+func (fp *FilePicker) AddChooserPaths(ch *Chooser) {
 	ch.ItemsFuncs = slices.Insert(ch.ItemsFuncs, 0, func() {
-		for _, sp := range core.RecentPaths {
-			ch.Items = append(ch.Items, core.ChooserItem{
+		for _, sp := range RecentPaths {
+			ch.Items = append(ch.Items, ChooserItem{
 				Value: sp,
 				Icon:  icons.Folder,
 				Func: func() {
@@ -285,17 +284,17 @@ func (fp *FilePicker) AddChooserPaths(ch *core.Chooser) {
 				},
 			})
 		}
-		ch.Items = append(ch.Items, core.ChooserItem{
+		ch.Items = append(ch.Items, ChooserItem{
 			Value:           "Reset recent paths",
 			Icon:            icons.Refresh,
 			SeparatorBefore: true,
 			Func: func() {
-				core.RecentPaths = make(core.FilePaths, 1, core.SystemSettings.SavedPathsMax)
-				core.RecentPaths[0] = fp.DirPath
+				RecentPaths = make(FilePaths, 1, SystemSettings.SavedPathsMax)
+				RecentPaths[0] = fp.DirPath
 				fp.Update()
 			},
 		})
-		ch.Items = append(ch.Items, core.ChooserItem{
+		ch.Items = append(ch.Items, ChooserItem{
 			Value: "Edit recent paths",
 			Icon:  icons.Edit,
 			Func: func() {
@@ -305,8 +304,8 @@ func (fp *FilePicker) AddChooserPaths(ch *core.Chooser) {
 	})
 }
 
-func (fp *FilePicker) makeFilesRow(p *core.Plan) {
-	core.AddAt(p, "favorites", func(w *Table) {
+func (fp *FilePicker) makeFilesRow(p *Plan) {
+	AddAt(p, "favorites", func(w *Table) {
 		w.SelectedIndex = -1
 		w.SetReadOnly(true)
 		w.ReadOnlyKeyNav = false // keys must go to files, not favorites
@@ -315,7 +314,7 @@ func (fp *FilePicker) makeFilesRow(p *core.Plan) {
 			s.Min.X.Ch(25)
 			s.Overflow.X = styles.OverflowHidden
 		})
-		w.SetSlice(&core.SystemSettings.FavPaths)
+		w.SetSlice(&SystemSettings.FavPaths)
 		w.OnSelect(func(e events.Event) {
 			fp.FavoritesSelect(w.SelectedIndex)
 		})
@@ -323,15 +322,15 @@ func (fp *FilePicker) makeFilesRow(p *core.Plan) {
 			w.ResetSelectedIndexes()
 		})
 	})
-	core.AddAt(p, "files", func(w *Table) {
+	AddAt(p, "files", func(w *Table) {
 		w.SetReadOnly(true)
 		w.SetSlice(&fp.Files)
 		w.SelectedField = "Name"
 		w.SelectedValue = fp.CurrentSelectedFile
-		if core.SystemSettings.FilePickerSort != "" {
-			w.SetSortFieldName(core.SystemSettings.FilePickerSort)
+		if SystemSettings.FilePickerSort != "" {
+			w.SetSortFieldName(SystemSettings.FilePickerSort)
 		}
-		w.StyleFunc = func(w core.Widget, s *styles.Style, row, col int) {
+		w.StyleFunc = func(w Widget, s *styles.Style, row, col int) {
 			if clr, got := FilePickerKindColorMap[fp.Files[row].Kind]; got {
 				s.Color = errors.Log1(gradient.FromString(clr))
 				return
@@ -360,14 +359,14 @@ func (fp *FilePicker) makeFilesRow(p *core.Plan) {
 			}
 		})
 		w.ContextMenus = nil
-		w.AddContextMenu(func(m *core.Scene) {
-			core.NewButton(m).SetText("Open").SetIcon(icons.Open).
+		w.AddContextMenu(func(m *Scene) {
+			NewButton(m).SetText("Open").SetIcon(icons.Open).
 				SetTooltip("Open the selected file using the default app").
 				OnClick(func(e events.Event) {
-					core.TheApp.OpenURL(fp.SelectedFile())
+					TheApp.OpenURL(fp.SelectedFile())
 				})
-			core.NewSeparator(m)
-			core.NewButton(m).SetText("Duplicate").SetIcon(icons.FileCopy).
+			NewSeparator(m)
+			NewButton(m).SetText("Duplicate").SetIcon(icons.FileCopy).
 				SetTooltip("Make a copy of the selected file").
 				OnClick(func(e events.Event) {
 					fn := fp.Files[w.SelectedIndex]
@@ -375,10 +374,10 @@ func (fp *FilePicker) makeFilesRow(p *core.Plan) {
 					fp.UpdateFilesAction()
 				})
 			tip := "Delete moves the selected file to the trash / recycling bin"
-			if core.TheApp.Platform().IsMobile() {
+			if TheApp.Platform().IsMobile() {
 				tip = "Delete deletes the selected file"
 			}
-			core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
+			NewButton(m).SetText("Delete").SetIcon(icons.Delete).
 				SetTooltip(tip).
 				OnClick(func(e events.Event) {
 					fn := fp.Files[w.SelectedIndex]
@@ -386,29 +385,29 @@ func (fp *FilePicker) makeFilesRow(p *core.Plan) {
 					fb.SetTooltip(tip)
 					fb.CallFunc()
 				})
-			core.NewButton(m).SetText("Rename").SetIcon(icons.EditNote).
+			NewButton(m).SetText("Rename").SetIcon(icons.EditNote).
 				SetTooltip("Rename the selected file").
 				OnClick(func(e events.Event) {
 					fn := fp.Files[w.SelectedIndex]
 					NewSoloFuncButton(w, fn.Rename).SetAfterFunc(fp.UpdateFilesAction).CallFunc()
 				})
-			core.NewButton(m).SetText("Info").SetIcon(icons.Info).
+			NewButton(m).SetText("Info").SetIcon(icons.Info).
 				SetTooltip("View information about the selected file").
 				OnClick(func(e events.Event) {
 					fn := fp.Files[w.SelectedIndex]
-					d := core.NewBody().AddTitle("Info: " + fn.Name)
+					d := NewBody().AddTitle("Info: " + fn.Name)
 					NewForm(d).SetStruct(&fn).SetReadOnly(true)
 					d.AddOKOnly().RunFullDialog(w)
 				})
-			core.NewSeparator(m)
+			NewSeparator(m)
 			NewFuncButton(m, fp.NewFolder).SetIcon(icons.CreateNewFolder)
 		})
 		// w.Updater(func() {})
 	})
 }
 
-func (fp *FilePicker) makeSelRow(sel *core.Plan) {
-	core.AddAt(sel, "file-text", func(w *core.Text) {
+func (fp *FilePicker) makeSelRow(sel *Plan) {
+	AddAt(sel, "file-text", func(w *Text) {
 		w.SetText("File: ")
 		w.SetTooltip("Enter file name here (or select from list above)")
 		w.Styler(func(s *styles.Style) {
@@ -416,7 +415,7 @@ func (fp *FilePicker) makeSelRow(sel *core.Plan) {
 		})
 	})
 
-	core.AddAt(sel, "file", func(w *core.TextField) {
+	AddAt(sel, "file", func(w *TextField) {
 		w.SetText(fp.CurrentSelectedFile)
 		w.SetTooltip(fmt.Sprintf("Enter the file name. Special keys: up/down to move selection; %s or %s to go up to parent folder; %s or %s or %s or %s to select current file (if directory, goes into it, if file, selects and closes); %s or %s for prev / next history item; %s return to this field", keymap.WordLeft.Label(), keymap.Jump.Label(), keymap.SelectMode.Label(), keymap.Insert.Label(), keymap.InsertAfter.Label(), keymap.Open.Label(), keymap.HistPrev.Label(), keymap.HistNext.Label(), keymap.Search.Label()))
 		w.SetCompleter(fp, fp.FileComplete, fp.FileCompleteEdit)
@@ -440,14 +439,14 @@ func (fp *FilePicker) makeSelRow(sel *core.Plan) {
 		})
 	})
 
-	core.AddAt(sel, "ext-text", func(w *core.Text) {
+	AddAt(sel, "ext-text", func(w *Text) {
 		w.SetText("Extension(s):").SetTooltip("target extension(s) to highlight; if multiple, separate with commas, and include the . at the start")
 		w.Styler(func(s *styles.Style) {
 			s.SetTextWrap(false)
 		})
 	})
 
-	core.AddAt(sel, "ext", func(w *core.TextField) {
+	AddAt(sel, "ext", func(w *TextField) {
 		w.SetText(fp.Ext)
 		w.OnChange(func(e events.Event) {
 			fp.SetExtAction(w.Text())
@@ -504,13 +503,13 @@ func (fp *FilePicker) FilesView() *Table {
 }
 
 // SelectField returns the TextField of the select file
-func (fp *FilePicker) SelectField() *core.TextField {
-	return fp.FindPath("sel/file").(*core.TextField)
+func (fp *FilePicker) SelectField() *TextField {
+	return fp.FindPath("sel/file").(*TextField)
 }
 
 // ExtField returns the TextField of the extension
-func (fp *FilePicker) ExtField() *core.TextField {
-	return fp.FindPath("sel/ext").(*core.TextField)
+func (fp *FilePicker) ExtField() *TextField {
+	return fp.FindPath("sel/ext").(*TextField)
 }
 
 // UpdatePath ensures that path is in abs form and ready to be used..
@@ -533,12 +532,12 @@ func (fp *FilePicker) UpdateFilesAction() { //types:add
 func (fp *FilePicker) ReadFiles() {
 	effpath, err := filepath.EvalSymlinks(fp.DirPath)
 	if err != nil {
-		log.Printf("core.FilePicker Path: %v could not be opened -- error: %v\n", effpath, err)
+		log.Printf("FilePicker Path: %v could not be opened -- error: %v\n", effpath, err)
 		return
 	}
 	_, err = os.Lstat(effpath)
 	if err != nil {
-		log.Printf("core.FilePicker Path: %v could not be opened -- error: %v\n", effpath, err)
+		log.Printf("FilePicker Path: %v could not be opened -- error: %v\n", effpath, err)
 		return
 	}
 
@@ -547,9 +546,9 @@ func (fp *FilePicker) ReadFiles() {
 		if err != nil {
 			emsg := fmt.Sprintf("Path %q: Error: %v", effpath, err)
 			// if fv.Scene != nil {
-			// 	core.PromptDialog(fv, core.DlgOpts{Title: "FilePicker UpdateFiles", emsg, Ok: true, Cancel: false}, nil)
+			// 	PromptDialog(fv, DlgOpts{Title: "FilePicker UpdateFiles", emsg, Ok: true, Cancel: false}, nil)
 			// } else {
-			log.Printf("core.FilePicker error: %v\n", emsg)
+			log.Printf("FilePicker error: %v\n", emsg)
 			// }
 			return nil // ignore
 		}
@@ -592,13 +591,13 @@ func (fp *FilePicker) AddPathToFavorites() { //types:add
 	if fnm == "" {
 		fnm = dp
 	}
-	if _, found := core.SystemSettings.FavPaths.FindPath(dp); found {
-		core.MessageSnackbar(fp, "Error: path is already on the favorites list")
+	if _, found := SystemSettings.FavPaths.FindPath(dp); found {
+		MessageSnackbar(fp, "Error: path is already on the favorites list")
 		return
 	}
-	fi := core.FavPathItem{"folder", fnm, dp}
-	core.SystemSettings.FavPaths = append(core.SystemSettings.FavPaths, fi)
-	core.ErrorSnackbar(fp, core.SaveSettings(core.SystemSettings), "Error saving settings")
+	fi := FavPathItem{"folder", fnm, dp}
+	SystemSettings.FavPaths = append(SystemSettings.FavPaths, fi)
+	ErrorSnackbar(fp, SaveSettings(SystemSettings), "Error saving settings")
 	// fv.FileSig.Emit(fv.This, int64(FilePickerFavAdded), fi)
 	fp.UpdateFavorites()
 }
@@ -697,10 +696,10 @@ func (fp *FilePicker) SetExtAction(ext string) *FilePicker {
 
 // FavoritesSelect selects a favorite path and goes there
 func (fp *FilePicker) FavoritesSelect(idx int) {
-	if idx < 0 || idx >= len(core.SystemSettings.FavPaths) {
+	if idx < 0 || idx >= len(SystemSettings.FavPaths) {
 		return
 	}
-	fi := core.SystemSettings.FavPaths[idx]
+	fi := SystemSettings.FavPaths[idx]
 	fp.DirPath, _ = homedir.Expand(fi.Path)
 	fp.UpdateFilesAction()
 }
@@ -711,9 +710,9 @@ func (fp *FilePicker) SaveSortSettings() {
 	if sv == nil {
 		return
 	}
-	core.SystemSettings.FilePickerSort = sv.SortFieldName()
-	// fmt.Printf("sort: %v\n", core.Settings.FilePickerSort)
-	core.ErrorSnackbar(fp, core.SaveSettings(core.SystemSettings), "Error saving settings")
+	SystemSettings.FilePickerSort = sv.SortFieldName()
+	// fmt.Printf("sort: %v\n", Settings.FilePickerSort)
+	ErrorSnackbar(fp, SaveSettings(SystemSettings), "Error saving settings")
 }
 
 // FileComplete finds the possible completions for the file field
@@ -781,12 +780,12 @@ func (fp *FilePicker) FileCompleteEdit(data any, text string, cursorPos int, c c
 // EditRecentPaths displays a dialog allowing the user to
 // edit the recent paths list.
 func (fp *FilePicker) EditRecentPaths() {
-	d := core.NewBody().AddTitle("Recent file paths").AddText("You can delete paths you no longer use")
-	NewList(d).SetSlice(&core.RecentPaths)
-	d.AddBottomBar(func(parent core.Widget) {
+	d := NewBody().AddTitle("Recent file paths").AddText("You can delete paths you no longer use")
+	NewList(d).SetSlice(&RecentPaths)
+	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
-			core.SaveRecentPaths()
+			SaveRecentPaths()
 			fp.Update()
 		})
 	})
@@ -796,7 +795,7 @@ func (fp *FilePicker) EditRecentPaths() {
 // FileButton represents a filename value with a button
 // that opens a [FilePicker].
 type FileButton struct {
-	core.Button
+	Button
 	Filename string
 }
 
@@ -804,7 +803,7 @@ func (fb *FileButton) WidgetValue() any { return &fb.Filename }
 
 func (fb *FileButton) Init() {
 	fb.Button.Init()
-	fb.SetType(core.ButtonTonal).SetIcon(icons.File)
+	fb.SetType(ButtonTonal).SetIcon(icons.File)
 	fb.Updater(func() {
 		if fb.Filename == "" {
 			fb.SetText("Select file")
@@ -813,7 +812,7 @@ func (fb *FileButton) Init() {
 		}
 	})
 	var fp *FilePicker
-	core.InitValueButton(fb, false, func(d *core.Body) {
+	InitValueButton(fb, false, func(d *Body) {
 		// ext, _ := v.Tag("ext") // TODO(config)
 		fp = NewFilePicker(d).SetFilename(fb.Filename, "")
 		fb.ValueNewWindow = true

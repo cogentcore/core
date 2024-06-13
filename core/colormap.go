@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 import (
 	"log/slog"
@@ -10,7 +10,6 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/colormap"
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
@@ -19,13 +18,13 @@ import (
 // ColorMapName represents the name of a color map, which can be edited using a [ColorMapButton].
 type ColorMapName string
 
-func (cm ColorMapName) Value() core.Value { return NewColorMapButton() }
+func (cm ColorMapName) Value() Value { return NewColorMapButton() }
 
 // ColorMapButton displays a color map spectrum and can be clicked on
 // to display a dialog for selecting different color map options.
 // It represents a [ColorMapName] value.
 type ColorMapButton struct {
-	core.Button
+	Button
 	MapName string
 }
 
@@ -55,7 +54,7 @@ func (cm *ColorMapButton) Init() {
 		s.Background = g
 	})
 
-	core.InitValueButton(cm, false, func(d *core.Body) {
+	InitValueButton(cm, false, func(d *Body) {
 		d.SetTitle("Select a color map")
 		sl := colormap.AvailableMapsList()
 		si := 0

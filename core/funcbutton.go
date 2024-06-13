@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 import (
 	"log/slog"
@@ -12,7 +12,6 @@ import (
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/strcase"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -27,14 +26,14 @@ import (
 // popping up a dialog to prompt for any arguments and show the return
 // values of the function. It is a helper function that uses [NewSoloFuncButton]
 // under the hood.
-func CallFunc(ctx core.Widget, fun any) {
+func CallFunc(ctx Widget, fun any) {
 	NewSoloFuncButton(ctx, fun).CallFunc()
 }
 
 // NewSoloFuncButton returns a standalone FuncButton with the given context
 // for popping up any dialog elements.
-func NewSoloFuncButton(ctx core.Widget, fun any) *FuncButton {
-	fb := NewFuncButton(core.NewWidgetBase(), fun)
+func NewSoloFuncButton(ctx Widget, fun any) *FuncButton {
+	fb := NewFuncButton(NewWidgetBase(), fun)
 	fb.SetContext(ctx)
 	return fb
 }
@@ -49,7 +48,7 @@ func NewSoloFuncButton(ctx core.Widget, fun any) *FuncButton {
 // if you want tooltips. If the function is a method, both the method and
 // its receiver type must be added to [types] to get documentation.
 type FuncButton struct { //core:no-new
-	core.Button
+	Button
 
 	// Func is the [types.Func] associated with this button.
 	// This function can also be a method, but it must be
@@ -107,7 +106,7 @@ type FuncButton struct { //core:no-new
 	WarnUnadded bool `default:"true"`
 
 	// Context is used for opening Dialogs if non-nil.
-	Context core.Widget
+	Context Widget
 
 	// AfterFunc is an optional function called after the func button
 	// function is executed
@@ -122,7 +121,7 @@ type FuncArg struct { //types:add -setters
 	Name string
 
 	// Tag contains any tags associated with the argument or return value,
-	// which can be added programmatically to customize [core.Value] behavior.
+	// which can be added programmatically to customize [Value] behavior.
 	Tag reflect.StructTag
 
 	// Value is the actual value of the function argument or return value.
@@ -156,7 +155,7 @@ func (fb *FuncButton) OnBind(value any) {
 	// If someone is viewing a function value, there is a good chance
 	// that it is not added to types (and that is out of their control)
 	// (eg: in the inspector), so we do not warn on unadded functions.
-	fb.SetWarnUnadded(false).SetType(core.ButtonTonal)
+	fb.SetWarnUnadded(false).SetType(ButtonTonal)
 }
 
 func (fb *FuncButton) Init() {
@@ -216,7 +215,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 		var met *types.Method
 		if gtyp == nil {
 			if fb.WarnUnadded {
-				slog.Warn("views.FuncButton.SetFunc called with a method whose receiver type has not been added to types", "function", fnm)
+				slog.Warn("core.FuncButton.SetFunc called with a method whose receiver type has not been added to types", "function", fnm)
 			}
 			met = &types.Method{Name: metnm}
 		} else {
@@ -228,7 +227,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 			}
 			if met == nil {
 				if fb.WarnUnadded {
-					slog.Warn("views.FuncButton.SetFunc called with a method that has not been added to types (even though the receiver type was, you still need to add the method itself)", "function", fnm)
+					slog.Warn("core.FuncButton.SetFunc called with a method that has not been added to types (even though the receiver type was, you still need to add the method itself)", "function", fnm)
 				}
 				met = &types.Method{Name: metnm}
 			}
@@ -244,7 +243,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	f := types.FuncByName(fnm)
 	if f == nil {
 		if fb.WarnUnadded {
-			slog.Warn("views.FuncButton.SetFunc called with a function that has not been added to types", "function", fnm)
+			slog.Warn("core.FuncButton.SetFunc called with a function that has not been added to types", "function", fnm)
 		}
 		f = &types.Func{Name: fnm}
 	}
@@ -306,13 +305,13 @@ func (fb *FuncButton) setFuncImpl(gfun *types.Func, rfun reflect.Value) *FuncBut
 	return fb
 }
 
-func (fb *FuncButton) goodContext() core.Widget {
+func (fb *FuncButton) goodContext() Widget {
 	ctx := fb.Context
 	if fb.Context == nil {
 		if fb.This == nil {
 			return nil
 		}
-		ctx = fb.This.(core.Widget)
+		ctx = fb.This.(Widget)
 	}
 	return ctx
 }
@@ -337,8 +336,8 @@ func (fb *FuncButton) callFuncShowReturns() {
 // confirmDialog runs the confirm dialog.
 func (fb *FuncButton) confirmDialog() {
 	ctx := fb.goodContext()
-	d := core.NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip)
-	d.AddBottomBar(func(parent core.Widget) {
+	d := NewBody().AddTitle(fb.Text + "?").AddText("Are you sure you want to run " + fb.Text + "? " + fb.Tooltip)
+	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText(fb.Text).OnClick(func(e events.Event) {
 			fb.callFuncShowReturns()
@@ -362,7 +361,7 @@ func (fb *FuncButton) CallFunc() {
 		fb.confirmDialog()
 		return
 	}
-	d := core.NewBody().AddTitle(fb.Text).AddText(fb.Tooltip)
+	d := NewBody().AddTitle(fb.Text).AddText(fb.Tooltip)
 	str := FuncArgsToStruct(fb.Args)
 	sv := NewForm(d).SetStruct(str.Addr().Interface())
 
@@ -377,7 +376,7 @@ func (fb *FuncButton) CallFunc() {
 	// open its dialog instead of this one
 	if len(fb.Args) == 1 {
 		sv.UpdateWidget() // need to update first
-		bt := core.AsButton(sv.Child(1))
+		bt := AsButton(sv.Child(1))
 		if bt != nil {
 			bt.OnFinal(events.Change, func(e events.Event) {
 				// the dialog for the argument has been accepted, so we call the function
@@ -389,7 +388,7 @@ func (fb *FuncButton) CallFunc() {
 		}
 	}
 
-	d.AddBottomBar(func(parent core.Widget) {
+	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).SetText(fb.Text).OnClick(func(e events.Event) {
 			d.Close() // note: the other Close event happens too late!
@@ -437,7 +436,7 @@ func (fb *FuncButton) showReturnsDialog(rets []reflect.Value) {
 	if !fb.ShowReturn {
 		for _, ret := range rets {
 			if err, ok := ret.Interface().(error); ok && err != nil {
-				core.ErrorSnackbar(fb, err, fb.Text+" failed")
+				ErrorSnackbar(fb, err, fb.Text+" failed")
 				return
 			}
 		}
@@ -465,11 +464,11 @@ func (fb *FuncButton) showReturnsDialog(rets []reflect.Value) {
 				}
 			}
 		}
-		core.MessageSnackbar(ctx, txt)
+		MessageSnackbar(ctx, txt)
 		return
 	}
 
-	d := core.NewBody().AddTitle(main).AddText(fb.Tooltip).AddOKOnly()
+	d := NewBody().AddTitle(main).AddText(fb.Tooltip).AddOKOnly()
 	str := FuncArgsToStruct(fb.Returns)
 	sv := NewForm(d).SetStruct(str.Addr().Interface()).SetReadOnly(true)
 
@@ -477,7 +476,7 @@ func (fb *FuncButton) showReturnsDialog(rets []reflect.Value) {
 	// open its dialog instead of this one
 	if len(fb.Returns) == 1 {
 		sv.UpdateWidget() // need to update first
-		bt := core.AsButton(sv.Child(1))
+		bt := AsButton(sv.Child(1))
 		if bt != nil {
 			bt.Scene = fb.Scene // we must use this scene for context
 			bt.Send(events.Click)

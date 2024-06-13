@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package views
+package core
 
 import (
 	"encoding/json"
@@ -20,7 +20,6 @@ import (
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -44,13 +43,13 @@ type List struct {
 
 // ListStyleFunc is a styling function for custom styling and
 // configuration of elements in the list.
-type ListStyleFunc func(w core.Widget, s *styles.Style, row int)
+type ListStyleFunc func(w Widget, s *styles.Style, row int)
 
 func (ls *List) HasStyleFunc() bool {
 	return ls.StyleFunc != nil
 }
 
-func (ls *List) StyleRow(w core.Widget, idx, fidx int) {
+func (ls *List) StyleRow(w Widget, idx, fidx int) {
 	if ls.StyleFunc != nil {
 		ls.StyleFunc(w, &w.AsWidget().Styles, idx)
 	}
@@ -100,26 +99,26 @@ type Lister interface {
 
 	// MakeRow adds config for one row at given widget row index.
 	// Plan must be the StructGrid Plan.
-	MakeRow(p *core.Plan, i int)
+	MakeRow(p *Plan, i int)
 
 	// StyleValue performs additional value widget styling
-	StyleValue(w core.Widget, s *styles.Style, row, col int)
+	StyleValue(w Widget, s *styles.Style, row, col int)
 
 	// HasStyleFunc returns whether there is a custom style function.
 	HasStyleFunc() bool
 
 	// StyleRow calls a custom style function on given row (and field)
-	StyleRow(w core.Widget, idx, fidx int)
+	StyleRow(w Widget, idx, fidx int)
 
 	// RowFirstWidget returns the first widget for given row
 	// (could be index or not) -- false if out of range
-	RowFirstWidget(row int) (*core.WidgetBase, bool)
+	RowFirstWidget(row int) (*WidgetBase, bool)
 
 	// RowGrabFocus grabs the focus for the first focusable
 	// widget in given row.
 	// returns that element or nil if not successful
 	// note: grid must have already rendered for focus to be grabbed!
-	RowGrabFocus(row int) *core.WidgetBase
+	RowGrabFocus(row int) *WidgetBase
 
 	// SliceNewAt inserts a new blank element at given
 	// index in the slice. -1 means the end.
@@ -142,7 +141,7 @@ type Lister interface {
 	// (before) given slice index
 	PasteAtIndex(md mimedata.Mimes, idx int)
 
-	MakePasteMenu(m *core.Scene, md mimedata.Mimes, idx int, mod events.DropMods, fun func())
+	MakePasteMenu(m *Scene, md mimedata.Mimes, idx int, mod events.DropMods, fun func())
 	DragStart(e events.Event)
 	DragDrop(e events.Event)
 	DropFinalize(de *events.DragDrop)
@@ -155,7 +154,7 @@ type Lister interface {
 // list of items, and supports row selection, copy / paste, Drag-n-Drop, etc.
 // Use [ListBase.BindSelect] to make the list designed for item selection.
 type ListBase struct {
-	core.Frame
+	Frame
 
 	// Slice is the pointer to the slice that we are viewing.
 	Slice any `set:"-"`
@@ -342,7 +341,7 @@ func (lb *ListBase) Init() {
 		lb.Send(events.DoubleClick, e)
 	})
 
-	lb.Maker(func(p *core.Plan) {
+	lb.Maker(func(p *Plan) {
 		svi := lb.This.(Lister)
 		svi.UpdateSliceSize()
 
@@ -369,7 +368,7 @@ func (lb *ListBase) Init() {
 			svi.UpdateMaxWidths()
 		})
 
-		lb.MakeGrid(p, func(p *core.Plan) {
+		lb.MakeGrid(p, func(p *Plan) {
 			for i := 0; i < lb.VisRows; i++ {
 				svi.MakeRow(p, i)
 			}
@@ -385,7 +384,7 @@ func (lb *ListBase) SliceIndex(i int) (si, vi int, invis bool) {
 }
 
 // StyleValue performs additional value widget styling
-func (lb *ListBase) StyleValue(w core.Widget, s *styles.Style, row, col int) {
+func (lb *ListBase) StyleValue(w Widget, s *styles.Style, row, col int) {
 	if lb.maxWidth > 0 {
 		hv := units.Ch(float32(lb.maxWidth))
 		s.Min.X.Value = max(s.Min.X.Value, hv.Convert(s.Min.X.Unit, &s.UnitContext).Value)
@@ -486,7 +485,7 @@ func (lb *ListBase) BindSelect(val *int) *ListBase {
 		if lb.ClickSelectEvent(e) {
 			*val = lb.SelectedIndex
 			lb.Scene.SendKey(keymap.Accept, e) // activate OK button
-			if lb.Scene.Stage.Type == core.DialogStage {
+			if lb.Scene.Stage.Type == DialogStage {
 				lb.Scene.Close() // also directly close dialog for value dialogs without OK button
 			}
 		}
@@ -524,8 +523,8 @@ func (lb *ListBase) SliceElementValue(si int) reflect.Value {
 	return val
 }
 
-func (lb *ListBase) MakeGrid(p *core.Plan, maker func(p *core.Plan)) {
-	core.AddAt(p, "grid", func(w *ListGrid) {
+func (lb *ListBase) MakeGrid(p *Plan, maker func(p *Plan)) {
+	AddAt(p, "grid", func(w *ListGrid) {
 		w.Styler(func(s *styles.Style) {
 			nWidgPerRow, _ := lb.This.(Lister).RowWidgetNs()
 			w.MinRows = lb.MinRows
@@ -562,7 +561,7 @@ func (lb *ListBase) MakeGrid(p *core.Plan, maker func(p *core.Plan)) {
 	})
 }
 
-func (lb *ListBase) MakeValue(w core.Value, i int) {
+func (lb *ListBase) MakeValue(w Value, i int) {
 	svi := lb.This.(Lister)
 	wb := w.AsWidget()
 	wb.SetProperty(ListRowProperty, i)
@@ -592,7 +591,7 @@ func (lb *ListBase) MakeValue(w core.Value, i int) {
 	}
 }
 
-func (lb *ListBase) MakeRow(p *core.Plan, i int) {
+func (lb *ListBase) MakeRow(p *Plan, i int) {
 	svi := lb.This.(Lister)
 	si, vi, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
@@ -603,9 +602,9 @@ func (lb *ListBase) MakeRow(p *core.Plan, i int) {
 	}
 
 	valnm := fmt.Sprintf("value-%s-%s", itxt, reflectx.ShortTypeName(lb.ElementValue.Type()))
-	core.AddNew(p, valnm, func() core.Value {
-		return core.NewValue(val.Addr().Interface(), "")
-	}, func(w core.Value) {
+	AddNew(p, valnm, func() Value {
+		return NewValue(val.Addr().Interface(), "")
+	}, func(w Value) {
 		wb := w.AsWidget()
 		lb.MakeValue(w, i)
 		if !lb.IsReadOnly() {
@@ -617,7 +616,7 @@ func (lb *ListBase) MakeRow(p *core.Plan, i int) {
 			wb := w.AsWidget()
 			_, vi, invis := svi.SliceIndex(i)
 			val := lb.SliceElementValue(vi)
-			core.Bind(val.Addr().Interface(), w)
+			Bind(val.Addr().Interface(), w)
 			wb.SetReadOnly(lb.IsReadOnly())
 			wb.SetState(invis, states.Invisible)
 			if lb.This.(Lister).HasStyleFunc() {
@@ -631,9 +630,9 @@ func (lb *ListBase) MakeRow(p *core.Plan, i int) {
 
 }
 
-func (lb *ListBase) MakeGridIndex(p *core.Plan, i, si int, itxt string, invis bool) {
+func (lb *ListBase) MakeGridIndex(p *Plan, i, si int, itxt string, invis bool) {
 	svi := lb.This.(Lister)
-	core.AddAt(p, "index-"+itxt, func(w *core.Text) {
+	AddAt(p, "index-"+itxt, func(w *Text) {
 		w.SetProperty(ListRowProperty, i)
 		w.Styler(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.DoubleClickable)
@@ -715,7 +714,7 @@ func (lb *ListBase) UpdateSliceSize() int {
 
 // WidgetIndex returns the row and column indexes for given widget,
 // from the properties set during construction.
-func (lb *ListBase) WidgetIndex(w core.Widget) (row, col int) {
+func (lb *ListBase) WidgetIndex(w Widget) (row, col int) {
 	if rwi := w.AsTree().Property(ListRowProperty); rwi != nil {
 		row = rwi.(int)
 	}
@@ -845,15 +844,15 @@ func (lb *ListBase) SliceDeleteAt(i int) {
 	lb.Update()
 }
 
-// MakeToolbar configures a [core.Toolbar] for this view
-func (lb *ListBase) MakeToolbar(p *core.Plan) {
+// MakeToolbar configures a [Toolbar] for this view
+func (lb *ListBase) MakeToolbar(p *Plan) {
 	if reflectx.AnyIsNil(lb.Slice) {
 		return
 	}
 	if lb.isArray || lb.IsReadOnly() {
 		return
 	}
-	core.Add(p, func(w *core.Button) {
+	Add(p, func(w *Button) {
 		w.SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the slice").
 			OnClick(func(e events.Event) {
 				lb.This.(Lister).SliceNewAt(-1)
@@ -869,7 +868,7 @@ func (lb *ListBase) MakeToolbar(p *core.Plan) {
 // SliceValue returns value interface at given slice index.
 func (lb *ListBase) SliceValue(idx int) any {
 	if idx < 0 || idx >= lb.SliceSize {
-		fmt.Printf("views.ListBase: slice index out of range: %v\n", idx)
+		fmt.Printf("core.ListBase: slice index out of range: %v\n", idx)
 		return nil
 	}
 	val := reflectx.UnderlyingPointer(lb.SliceUnderlying.Index(idx)) // deal with pointer lists
@@ -889,7 +888,7 @@ func (lb *ListBase) IsIndexVisible(idx int) bool {
 
 // RowFirstWidget returns the first widget for given row (could be index or
 // not) -- false if out of range
-func (lb *ListBase) RowFirstWidget(row int) (*core.WidgetBase, bool) {
+func (lb *ListBase) RowFirstWidget(row int) (*WidgetBase, bool) {
 	if !lb.ShowIndexes {
 		return nil, false
 	}
@@ -898,21 +897,21 @@ func (lb *ListBase) RowFirstWidget(row int) (*core.WidgetBase, bool) {
 	}
 	nWidgPerRow, _ := lb.This.(Lister).RowWidgetNs()
 	sg := lb.This.(Lister).SliceGrid()
-	w := sg.Children[row*nWidgPerRow].(core.Widget).AsWidget()
+	w := sg.Children[row*nWidgPerRow].(Widget).AsWidget()
 	return w, true
 }
 
 // RowGrabFocus grabs the focus for the first focusable widget
 // in given row.  returns that element or nil if not successful
 // note: grid must have already rendered for focus to be grabbed!
-func (lb *ListBase) RowGrabFocus(row int) *core.WidgetBase {
+func (lb *ListBase) RowGrabFocus(row int) *WidgetBase {
 	if !lb.IsRowInBounds(row) || lb.InFocusGrab { // range check
 		return nil
 	}
 	nWidgPerRow, idxOff := lb.This.(Lister).RowWidgetNs()
 	ridx := nWidgPerRow * row
 	sg := lb.This.(Lister).SliceGrid()
-	w := sg.Child(ridx + idxOff).(core.Widget).AsWidget()
+	w := sg.Child(ridx + idxOff).(Widget).AsWidget()
 	if w.StateIs(states.Focused) {
 		return w
 	}
@@ -924,7 +923,7 @@ func (lb *ListBase) RowGrabFocus(row int) *core.WidgetBase {
 
 // IndexGrabFocus grabs the focus for the first focusable widget
 // in given idx.  returns that element or nil if not successful.
-func (lb *ListBase) IndexGrabFocus(idx int) *core.WidgetBase {
+func (lb *ListBase) IndexGrabFocus(idx int) *WidgetBase {
 	lb.ScrollToIndex(idx)
 	return lb.This.(Lister).RowGrabFocus(idx - lb.StartIndex)
 }
@@ -1329,7 +1328,7 @@ func (lb *ListBase) MimeDataIndex(md *mimedata.Mimes, idx int) {
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: fileinfo.DataJson, Data: b})
 	} else {
-		log.Printf("core.ListBase MimeData JSON Marshall error: %v\n", err)
+		log.Printf("ListBase MimeData JSON Marshall error: %v\n", err)
 	}
 }
 
@@ -1344,7 +1343,7 @@ func (lb *ListBase) FromMimeData(md mimedata.Mimes) []any {
 			if err == nil {
 				sl = append(sl, nval)
 			} else {
-				log.Printf("core.ListBase FromMimeData: JSON load error: %v\n", err)
+				log.Printf("ListBase FromMimeData: JSON load error: %v\n", err)
 			}
 		}
 	}
@@ -1429,40 +1428,40 @@ func (lb *ListBase) PasteIndex(idx int) { //types:add
 }
 
 // MakePasteMenu makes the menu of options for paste events
-func (lb *ListBase) MakePasteMenu(m *core.Scene, md mimedata.Mimes, idx int, mod events.DropMods, fun func()) {
+func (lb *ListBase) MakePasteMenu(m *Scene, md mimedata.Mimes, idx int, mod events.DropMods, fun func()) {
 	svi := lb.This.(Lister)
 	if mod == events.DropCopy {
-		core.NewButton(m).SetText("Assign to").OnClick(func(e events.Event) {
+		NewButton(m).SetText("Assign to").OnClick(func(e events.Event) {
 			svi.PasteAssign(md, idx)
 			if fun != nil {
 				fun()
 			}
 		})
 	}
-	core.NewButton(m).SetText("Insert before").OnClick(func(e events.Event) {
+	NewButton(m).SetText("Insert before").OnClick(func(e events.Event) {
 		svi.PasteAtIndex(md, idx)
 		if fun != nil {
 			fun()
 		}
 	})
-	core.NewButton(m).SetText("Insert after").OnClick(func(e events.Event) {
+	NewButton(m).SetText("Insert after").OnClick(func(e events.Event) {
 		svi.PasteAtIndex(md, idx+1)
 		if fun != nil {
 			fun()
 		}
 	})
-	core.NewButton(m).SetText("Cancel")
+	NewButton(m).SetText("Cancel")
 }
 
 // PasteMenu performs a paste from the clipboard using given data -- pops up
 // a menu to determine what specifically to do
 func (lb *ListBase) PasteMenu(md mimedata.Mimes, idx int) {
 	lb.UnselectAllIndexes()
-	mf := func(m *core.Scene) {
+	mf := func(m *Scene) {
 		lb.MakePasteMenu(m, md, idx, events.DropCopy, nil)
 	}
 	pos := lb.IndexPos(idx)
-	core.NewMenu(mf, lb.This.(core.Widget), pos).Run()
+	NewMenu(mf, lb.This.(Widget), pos).Run()
 }
 
 // PasteAssign assigns mime data (only the first one!) to this idx
@@ -1576,14 +1575,14 @@ func (lb *ListBase) DragDrop(e events.Event) {
 		lb.tmpIndex = idx
 		lb.SaveDraggedIndexes(idx)
 		md := de.Data.(mimedata.Mimes)
-		mf := func(m *core.Scene) {
+		mf := func(m *Scene) {
 			lb.Scene.Events.DragMenuAddModText(m, de.DropMod)
 			svi.MakePasteMenu(m, md, idx, de.DropMod, func() {
 				svi.DropFinalize(de)
 			})
 		}
 		pos := lb.IndexPos(lb.tmpIndex)
-		core.NewMenu(mf, lb.This.(core.Widget), pos).Run()
+		NewMenu(mf, lb.This.(Widget), pos).Run()
 	}
 }
 
@@ -1630,27 +1629,27 @@ func (lb *ListBase) SaveDraggedIndexes(idx int) {
 //////////////////////////////////////////////////////////////////////////////
 //    Events
 
-func (lb *ListBase) ContextMenu(m *core.Scene) {
+func (lb *ListBase) ContextMenu(m *Scene) {
 	if lb.IsReadOnly() || lb.isArray {
 		return
 	}
-	core.NewButton(m).SetText("Add row").SetIcon(icons.Add).OnClick(func(e events.Event) {
+	NewButton(m).SetText("Add row").SetIcon(icons.Add).OnClick(func(e events.Event) {
 		lb.SliceNewAtRow((lb.SelectedIndex - lb.StartIndex) + 1)
 	})
-	core.NewButton(m).SetText("Delete row").SetIcon(icons.Delete).OnClick(func(e events.Event) {
+	NewButton(m).SetText("Delete row").SetIcon(icons.Delete).OnClick(func(e events.Event) {
 		lb.SliceDeleteAtRow(lb.SelectedIndex - lb.StartIndex)
 	})
-	core.NewSeparator(m)
-	core.NewButton(m).SetText("Copy").SetIcon(icons.Copy).OnClick(func(e events.Event) {
+	NewSeparator(m)
+	NewButton(m).SetText("Copy").SetIcon(icons.Copy).OnClick(func(e events.Event) {
 		lb.CopyIndexes(true)
 	})
-	core.NewButton(m).SetText("Cut").SetIcon(icons.Cut).OnClick(func(e events.Event) {
+	NewButton(m).SetText("Cut").SetIcon(icons.Cut).OnClick(func(e events.Event) {
 		lb.CutIndexes()
 	})
-	core.NewButton(m).SetText("Paste").SetIcon(icons.Paste).OnClick(func(e events.Event) {
+	NewButton(m).SetText("Paste").SetIcon(icons.Paste).OnClick(func(e events.Event) {
 		lb.PasteIndex(lb.SelectedIndex)
 	})
-	core.NewButton(m).SetText("Duplicate").SetIcon(icons.Copy).OnClick(func(e events.Event) {
+	NewButton(m).SetText("Duplicate").SetIcon(icons.Copy).OnClick(func(e events.Event) {
 		lb.Duplicate()
 	})
 }
@@ -1698,7 +1697,7 @@ func (lb *ListBase) KeyInputEditable(kt events.Event) {
 	}
 	idx := lb.SelectedIndex
 	kf := keymap.Of(kt.KeyChord())
-	if core.DebugSettings.KeyEventTrace {
+	if DebugSettings.KeyEventTrace {
 		slog.Info("ListBase KeyInput", "widget", lb, "keyFunction", kf)
 	}
 	switch kf {
@@ -1752,7 +1751,7 @@ func (lb *ListBase) KeyInputReadOnly(kt events.Event) {
 		selMode = events.ExtendOne
 	}
 	kf := keymap.Of(kt.KeyChord())
-	if core.DebugSettings.KeyEventTrace {
+	if DebugSettings.KeyEventTrace {
 		slog.Info("ListBase ReadOnly KeyInput", "widget", lb, "keyFunction", kf)
 	}
 	idx := lb.SelectedIndex
@@ -1813,7 +1812,7 @@ func (lb *ListBase) SizeFinal() {
 
 // ListGrid handles the resizing logic for [List], [Table].
 type ListGrid struct {
-	core.Frame
+	Frame
 
 	// MinRows is set from parent SV
 	MinRows int `set:"-" edit:"-"`
@@ -1839,7 +1838,7 @@ func (lg *ListGrid) Init() {
 	})
 }
 
-func (lg *ListGrid) SizeFromChildren(iter int, pass core.LayoutPasses) math32.Vector2 {
+func (lg *ListGrid) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 {
 	csz := lg.Frame.SizeFromChildren(iter, pass)
 	rht, err := lg.LayImpl.RowHeight(0, 0)
 	if err != nil {
@@ -1867,7 +1866,7 @@ func (lg *ListGrid) SizeFromChildren(iter int, pass core.LayoutPasses) math32.Ve
 	return csz
 }
 
-func (lg *ListGrid) SetScrollParams(d math32.Dims, sb *core.Slider) {
+func (lg *ListGrid) SetScrollParams(d math32.Dims, sb *Slider) {
 	if d == math32.X {
 		lg.Frame.SetScrollParams(d, sb)
 		return
@@ -1891,7 +1890,7 @@ func (lg *ListGrid) List() (Lister, *ListBase) {
 	return sv, sv.AsListBase()
 }
 
-func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *core.Slider) {
+func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {
 	if d == math32.X {
 		lg.Frame.ScrollChanged(d, sb)
 		return
@@ -1935,7 +1934,7 @@ func (lg *ListGrid) UpdateBackgrounds() {
 
 	// we take our zebra intensity applied foreground color and then overlay it onto our background color
 
-	zclr := colors.WithAF32(colors.ToUniform(lg.Styles.Color), core.AppearanceSettings.ZebraStripesWeight())
+	zclr := colors.WithAF32(colors.ToUniform(lg.Styles.Color), AppearanceSettings.ZebraStripesWeight())
 	lg.BgStripe = gradient.Apply(bg, func(c color.Color) color.Color {
 		return colors.AlphaBlend(c, zclr)
 	})
@@ -1945,7 +1944,7 @@ func (lg *ListGrid) UpdateBackgrounds() {
 		return colors.AlphaBlend(c, hclr)
 	})
 
-	zhclr := colors.WithAF32(colors.ToUniform(lg.Styles.Color), core.AppearanceSettings.ZebraStripesWeight()+0.08)
+	zhclr := colors.WithAF32(colors.ToUniform(lg.Styles.Color), AppearanceSettings.ZebraStripesWeight()+0.08)
 	lg.BgHoverStripe = gradient.Apply(bg, func(c color.Color) color.Color {
 		return colors.AlphaBlend(c, zhclr)
 	})
@@ -1981,7 +1980,7 @@ func (lg *ListGrid) RowBackground(sel, stripe, hover bool) image.Image {
 	}
 }
 
-func (lg *ListGrid) ChildBackground(child core.Widget) image.Image {
+func (lg *ListGrid) ChildBackground(child Widget) image.Image {
 	bg := lg.Styles.ActualBackground
 	_, sv := lg.List()
 	if sv == nil {
@@ -2019,7 +2018,7 @@ func (lg *ListGrid) RenderStripes() {
 		for c := 0; c < cols; c++ {
 			ki := r*cols + c
 			if ki < lg.NumChildren() {
-				kw := lg.Child(ki).(core.Widget).AsWidget()
+				kw := lg.Child(ki).(Widget).AsWidget()
 				pyi := math32.Floor(kw.Geom.Pos.Total.Y)
 				if pyi < miny {
 					miny = pyi
@@ -2069,7 +2068,7 @@ func (lg *ListGrid) IndexFromPixel(pt image.Point) (row, col int, isValid bool) 
 		miny := st.Y
 		if r > 0 {
 			for c := 0; c < cols; c++ {
-				kw := lg.Child(r*cols + c).(core.Widget).AsWidget()
+				kw := lg.Child(r*cols + c).(Widget).AsWidget()
 				pyi := math32.Floor(kw.Geom.Pos.Total.Y)
 				if pyi < miny {
 					miny = pyi
