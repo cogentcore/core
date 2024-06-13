@@ -15,14 +15,14 @@ type language struct {
 	Rating int
 }
 
-func TestTableView(t *testing.T) {
+func TestTable(t *testing.T) {
 	b := core.NewBody()
-	NewTableView(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
-	b.AssertRender(t, "table-view/basic")
+	NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+	b.AssertRender(t, "table/basic")
 }
 
-func TestTableViewReadOnly(t *testing.T) {
+func TestTableReadOnly(t *testing.T) {
 	b := core.NewBody()
-	NewTableView(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
-	b.AssertRender(t, "table-view/read-only")
+	NewTable(b).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
+	b.AssertRender(t, "table/read-only")
 }

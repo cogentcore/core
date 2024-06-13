@@ -294,7 +294,7 @@ func (ti *TimeInput) Init() {
 	style := func(s *styles.Style) {
 		s.Min.X.Em(8)
 		s.Max.X.Em(10)
-		if ti.IsReadOnly() { // must inherit abilities when read only for table view
+		if ti.IsReadOnly() { // must inherit abilities when read only for table
 			s.Abilities = ti.Styles.Abilities
 		}
 	}

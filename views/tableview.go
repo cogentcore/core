@@ -28,15 +28,15 @@ import (
 // todo:
 // * search option, both as a search field and as simple type-to-search
 
-// TableView represents a slice of structs as a table, where the fields are
+// Table represents a slice of structs as a table, where the fields are
 // the columns and the elements are the rows. It is a full-featured editor with
 // multiple-selection, cut-and-paste, and drag-and-drop.
-// Use [ListBase.BindSelect] to make the table view designed for item selection.
-type TableView struct {
+// Use [ListBase.BindSelect] to make the table designed for item selection.
+type Table struct {
 	ListBase
 
 	// StyleFunc is an optional styling function.
-	StyleFunc TableViewStyleFunc `copier:"-" view:"-" json:"-" xml:"-"`
+	StyleFunc TableStyleFunc `copier:"-" view:"-" json:"-" xml:"-"`
 
 	// SelectedField is the current selection field; initially select value in this field.
 	SelectedField string `copier:"-" view:"-" json:"-" xml:"-"`
@@ -60,46 +60,46 @@ type TableView struct {
 	colMaxWidths []int
 }
 
-// TableViewStyleFunc is a styling function for custom styling and
-// configuration of elements in the table view.
-type TableViewStyleFunc func(w core.Widget, s *styles.Style, row, col int)
+// TableStyleFunc is a styling function for custom styling and
+// configuration of elements in the table.
+type TableStyleFunc func(w core.Widget, s *styles.Style, row, col int)
 
-func (tv *TableView) Init() {
-	tv.ListBase.Init()
-	tv.AddContextMenu(tv.ContextMenu)
-	tv.SortIndex = -1
+func (tb *Table) Init() {
+	tb.ListBase.Init()
+	tb.AddContextMenu(tb.ContextMenu)
+	tb.SortIndex = -1
 
-	tv.Makers[0] = func(p *core.Plan) { // TODO: reduce redundancy with ListBase Maker
-		svi := tv.This.(Lister)
+	tb.Makers[0] = func(p *core.Plan) { // TODO: reduce redundancy with ListBase Maker
+		svi := tb.This.(Lister)
 		svi.UpdateSliceSize()
 
-		tv.SortSlice()
+		tb.SortSlice()
 
 		scrollTo := -1
-		if tv.SelectedField != "" && tv.SelectedValue != nil {
-			tv.SelectedIndex, _ = StructSliceIndexByValue(tv.Slice, tv.SelectedField, tv.SelectedValue)
-			tv.SelectedField = ""
-			tv.SelectedValue = nil
-			tv.InitSelectedIndex = -1
-			scrollTo = tv.SelectedIndex
-		} else if tv.InitSelectedIndex >= 0 {
-			tv.SelectedIndex = tv.InitSelectedIndex
-			tv.InitSelectedIndex = -1
-			scrollTo = tv.SelectedIndex
+		if tb.SelectedField != "" && tb.SelectedValue != nil {
+			tb.SelectedIndex, _ = StructSliceIndexByValue(tb.Slice, tb.SelectedField, tb.SelectedValue)
+			tb.SelectedField = ""
+			tb.SelectedValue = nil
+			tb.InitSelectedIndex = -1
+			scrollTo = tb.SelectedIndex
+		} else if tb.InitSelectedIndex >= 0 {
+			tb.SelectedIndex = tb.InitSelectedIndex
+			tb.InitSelectedIndex = -1
+			scrollTo = tb.SelectedIndex
 		}
 		if scrollTo >= 0 {
-			tv.ScrollToIndex(scrollTo)
+			tb.ScrollToIndex(scrollTo)
 		}
-		tv.UpdateStartIndex()
+		tb.UpdateStartIndex()
 
-		tv.Updater(func() {
-			tv.UpdateStartIndex()
+		tb.Updater(func() {
+			tb.UpdateStartIndex()
 			svi.UpdateMaxWidths()
 		})
 
-		tv.MakeHeader(p)
-		tv.MakeGrid(p, func(p *core.Plan) {
-			for i := 0; i < tv.VisRows; i++ {
+		tb.MakeHeader(p)
+		tb.MakeGrid(p, func(p *core.Plan) {
+			for i := 0; i < tb.VisRows; i++ {
 				svi.MakeRow(p, i)
 			}
 		})
@@ -107,13 +107,13 @@ func (tv *TableView) Init() {
 }
 
 // StyleValue performs additional value widget styling
-func (tv *TableView) StyleValue(w core.Widget, s *styles.Style, row, col int) {
-	hw := float32(tv.headerWidths[col])
-	if col == tv.SortIndex {
+func (tb *Table) StyleValue(w core.Widget, s *styles.Style, row, col int) {
+	hw := float32(tb.headerWidths[col])
+	if col == tb.SortIndex {
 		hw += 6
 	}
-	if len(tv.colMaxWidths) > col {
-		hw = max(float32(tv.colMaxWidths[col]), hw)
+	if len(tb.colMaxWidths) > col {
+		hw = max(float32(tb.colMaxWidths[col]), hw)
 	}
 	hv := units.Ch(hw)
 	s.Min.X.Value = max(s.Min.X.Value, hv.Convert(s.Min.X.Unit, &s.UnitContext).Value)
@@ -122,78 +122,78 @@ func (tv *TableView) StyleValue(w core.Widget, s *styles.Style, row, col int) {
 
 // SetSlice sets the source slice that we are viewing.
 // Must call Update if already open.
-func (tv *TableView) SetSlice(sl any) *TableView {
+func (tb *Table) SetSlice(sl any) *Table {
 	if reflectx.AnyIsNil(sl) {
-		tv.Slice = nil
-		return tv
+		tb.Slice = nil
+		return tb
 	}
-	if tv.Slice == sl {
-		tv.MakeIter = 0
-		return tv
+	if tb.Slice == sl {
+		tb.MakeIter = 0
+		return tb
 	}
 
 	slpTyp := reflect.TypeOf(sl)
 	if slpTyp.Kind() != reflect.Pointer {
-		slog.Error("TableView requires that you pass a pointer to a slice of struct elements, but type is not a Ptr", "type", slpTyp)
-		return tv
+		slog.Error("Table requires that you pass a pointer to a slice of struct elements, but type is not a Ptr", "type", slpTyp)
+		return tb
 	}
 	if slpTyp.Elem().Kind() != reflect.Slice {
-		slog.Error("TableView requires that you pass a pointer to a slice of struct elements, but ptr doesn't point to a slice", "type", slpTyp.Elem())
-		return tv
+		slog.Error("Table requires that you pass a pointer to a slice of struct elements, but ptr doesn't point to a slice", "type", slpTyp.Elem())
+		return tb
 	}
 	eltyp := reflectx.NonPointerType(reflectx.SliceElementType(sl))
 	if eltyp.Kind() != reflect.Struct {
-		slog.Error("TableView requires that you pass a slice of struct elements, but type is not a Struct", "type", eltyp.String())
-		return tv
+		slog.Error("Table requires that you pass a slice of struct elements, but type is not a Struct", "type", eltyp.String())
+		return tb
 	}
 
-	tv.SetSliceBase()
-	tv.Slice = sl
-	tv.SliceUnderlying = reflectx.Underlying(reflect.ValueOf(tv.Slice))
-	tv.ElementValue = reflectx.Underlying(reflectx.SliceElementValue(sl))
-	tv.cacheVisibleFields()
-	return tv
+	tb.SetSliceBase()
+	tb.Slice = sl
+	tb.SliceUnderlying = reflectx.Underlying(reflect.ValueOf(tb.Slice))
+	tb.ElementValue = reflectx.Underlying(reflectx.SliceElementValue(sl))
+	tb.cacheVisibleFields()
+	return tb
 }
 
 // cacheVisibleFields caches the visible struct fields.
-func (tv *TableView) cacheVisibleFields() {
-	tv.visibleFields = make([]reflect.StructField, 0)
+func (tb *Table) cacheVisibleFields() {
+	tb.visibleFields = make([]reflect.StructField, 0)
 	shouldShow := func(field reflect.StructField) bool {
-		tvtag := field.Tag.Get("tableview")
+		tvtag := field.Tag.Get("table")
 		switch {
 		case tvtag == "+":
 			return true
 		case tvtag == "-":
 			return false
-		case tvtag == "-select" && tv.IsReadOnly():
+		case tvtag == "-select" && tb.IsReadOnly():
 			return false
-		case tvtag == "-edit" && !tv.IsReadOnly():
+		case tvtag == "-edit" && !tb.IsReadOnly():
 			return false
 		default:
 			return field.Tag.Get("view") != "-"
 		}
 	}
 
-	reflectx.WalkFields(tv.ElementValue,
+	reflectx.WalkFields(tb.ElementValue,
 		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
 			return shouldShow(field)
 		},
 		func(parent reflect.Value, field reflect.StructField, value reflect.Value) {
-			tv.visibleFields = append(tv.visibleFields, field)
+			tb.visibleFields = append(tb.visibleFields, field)
 		})
-	tv.numVisibleFields = len(tv.visibleFields)
-	tv.headerWidths = make([]int, tv.numVisibleFields)
-	tv.colMaxWidths = make([]int, tv.numVisibleFields)
+	tb.numVisibleFields = len(tb.visibleFields)
+	tb.headerWidths = make([]int, tb.numVisibleFields)
+	tb.colMaxWidths = make([]int, tb.numVisibleFields)
 }
 
-func (tv *TableView) UpdateMaxWidths() {
-	if tv.SliceSize == 0 {
+func (tb *Table) UpdateMaxWidths() {
+	if tb.SliceSize == 0 {
 		return
 	}
-	for fli := 0; fli < tv.numVisibleFields; fli++ {
-		field := tv.visibleFields[fli]
-		tv.colMaxWidths[fli] = 0
-		val := tv.SliceElementValue(0)
+	for fli := 0; fli < tb.numVisibleFields; fli++ {
+		field := tb.visibleFields[fli]
+		tb.colMaxWidths[fli] = 0
+		val := tb.SliceElementValue(0)
 		fval := val.FieldByIndex(field.Index)
 		_, isicon := fval.Interface().(icons.Icon)
 		isString := fval.Type().Kind() == reflect.String
@@ -201,21 +201,21 @@ func (tv *TableView) UpdateMaxWidths() {
 			continue
 		}
 		mxw := 0
-		for rw := 0; rw < tv.SliceSize; rw++ {
-			val := tv.SliceElementValue(rw)
+		for rw := 0; rw < tb.SliceSize; rw++ {
+			val := tb.SliceElementValue(rw)
 			str := reflectx.ToString(val.FieldByIndex(field.Index).Interface())
 			mxw = max(mxw, len(str))
 		}
-		tv.colMaxWidths[fli] = mxw
+		tb.colMaxWidths[fli] = mxw
 	}
 }
 
 // SliceHeader returns the Frame header for slice grid
-func (tv *TableView) SliceHeader() *core.Frame {
-	return tv.Child(0).(*core.Frame)
+func (tb *Table) SliceHeader() *core.Frame {
+	return tb.Child(0).(*core.Frame)
 }
 
-func (tv *TableView) MakeHeader(p *core.Plan) {
+func (tb *Table) MakeHeader(p *core.Plan) {
 	core.AddAt(p, "header", func(w *core.Frame) {
 		core.ToolbarStyles(w)
 		w.Styler(func(s *styles.Style) {
@@ -223,7 +223,7 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 			s.Gap.Set(units.Em(0.5)) // matches grid default
 		})
 		w.Maker(func(p *core.Plan) {
-			if tv.ShowIndexes {
+			if tb.ShowIndexes {
 				core.AddAt(p, "head-index", func(w *core.Text) {
 					w.SetType(core.TextBodyMedium)
 					w.Styler(func(s *styles.Style) {
@@ -232,12 +232,12 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 					w.SetText("Index")
 				})
 			}
-			for fli := 0; fli < tv.numVisibleFields; fli++ {
-				field := tv.visibleFields[fli]
+			for fli := 0; fli < tb.numVisibleFields; fli++ {
+				field := tb.visibleFields[fli]
 				core.AddAt(p, "head-"+field.Name, func(w *core.Button) {
 					w.SetType(core.ButtonMenu)
 					w.OnClick(func(e events.Event) {
-						tv.SortSliceAction(fli)
+						tb.SortSliceAction(fli)
 					})
 					w.Updater(func() {
 						htxt := ""
@@ -248,13 +248,13 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 						}
 						w.SetText(htxt)
 						w.Tooltip = htxt + " (click to sort by)"
-						doc, ok := types.GetDoc(reflect.Value{}, tv.ElementValue, field, htxt)
+						doc, ok := types.GetDoc(reflect.Value{}, tb.ElementValue, field, htxt)
 						if ok && doc != "" {
 							w.Tooltip += ": " + doc
 						}
-						tv.headerWidths[fli] = len(htxt)
-						if fli == tv.SortIndex {
-							if tv.SortDescending {
+						tb.headerWidths[fli] = len(htxt)
+						if fli == tb.SortIndex {
+							if tb.SortDescending {
 								w.SetIcon(icons.KeyboardArrowDown)
 							} else {
 								w.SetIcon(icons.KeyboardArrowUp)
@@ -268,29 +268,29 @@ func (tv *TableView) MakeHeader(p *core.Plan) {
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label
-func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
-	nWidgPerRow = 1 + tv.numVisibleFields
+func (tb *Table) RowWidgetNs() (nWidgPerRow, idxOff int) {
+	nWidgPerRow = 1 + tb.numVisibleFields
 	idxOff = 1
-	if !tv.ShowIndexes {
+	if !tb.ShowIndexes {
 		nWidgPerRow -= 1
 		idxOff = 0
 	}
 	return
 }
 
-func (tv *TableView) MakeRow(p *core.Plan, i int) {
-	svi := tv.This.(Lister)
+func (tb *Table) MakeRow(p *core.Plan, i int) {
+	svi := tb.This.(Lister)
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
-	val := tv.SliceElementValue(si)
+	val := tb.SliceElementValue(si)
 	// stru := val.Interface()
 
-	if tv.ShowIndexes {
-		tv.MakeGridIndex(p, i, si, itxt, invis)
+	if tb.ShowIndexes {
+		tb.MakeGridIndex(p, i, si, itxt, invis)
 	}
 
-	for fli := 0; fli < tv.numVisibleFields; fli++ {
-		field := tv.visibleFields[fli]
+	for fli := 0; fli < tb.numVisibleFields; fli++ {
+		field := tb.visibleFields[fli]
 		fval := reflectx.OnePointerValue(val.FieldByIndex(field.Index))
 		valnm := fmt.Sprintf("value-%d-%s-%s", fli, itxt, reflectx.ShortTypeName(field.Type))
 		tags := field.Tag
@@ -308,31 +308,31 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 			return core.NewValue(fval.Interface(), tags)
 		}, func(w core.Value) {
 			wb := w.AsWidget()
-			tv.MakeValue(w, i)
+			tb.MakeValue(w, i)
 			w.AsTree().SetProperty(ListColProperty, fli)
-			if !tv.IsReadOnly() && !readOnlyTag {
+			if !tb.IsReadOnly() && !readOnlyTag {
 				wb.OnChange(func(e events.Event) {
-					tv.SendChange()
+					tb.SendChange()
 				})
-				wb.OnInput(tv.HandleEvent)
+				wb.OnInput(tb.HandleEvent)
 			}
 			wb.Updater(func() {
 				si, vi, invis := svi.SliceIndex(i)
-				val := tv.SliceElementValue(vi)
+				val := tb.SliceElementValue(vi)
 				fval := reflectx.OnePointerValue(val.FieldByIndex(field.Index))
 				core.Bind(fval.Interface(), w)
 
-				vc := tv.ValueTitle + "[" + strconv.Itoa(si) + "]"
+				vc := tb.ValueTitle + "[" + strconv.Itoa(si) + "]"
 				if !invis {
-					if lblr, ok := tv.Slice.(labels.SliceLabeler); ok {
+					if lblr, ok := tb.Slice.(labels.SliceLabeler); ok {
 						slbl := lblr.ElemLabel(si)
 						if slbl != "" {
-							vc = core.JoinValueTitle(tv.ValueTitle, slbl)
+							vc = core.JoinValueTitle(tb.ValueTitle, slbl)
 						}
 					}
 				}
 				wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
-				wb.SetReadOnly(tv.IsReadOnly() || readOnlyTag)
+				wb.SetReadOnly(tb.IsReadOnly() || readOnlyTag)
 				wb.SetState(invis, states.Invisible)
 				if svi.HasStyleFunc() {
 					w.Style()
@@ -345,73 +345,73 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 	}
 }
 
-func (tv *TableView) HasStyleFunc() bool {
-	return tv.StyleFunc != nil
+func (tb *Table) HasStyleFunc() bool {
+	return tb.StyleFunc != nil
 }
 
-func (tv *TableView) StyleRow(w core.Widget, idx, fidx int) {
-	if tv.StyleFunc != nil {
-		tv.StyleFunc(w, &w.AsWidget().Styles, idx, fidx)
+func (tb *Table) StyleRow(w core.Widget, idx, fidx int) {
+	if tb.StyleFunc != nil {
+		tb.StyleFunc(w, &w.AsWidget().Styles, idx, fidx)
 	}
 }
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end
-func (tv *TableView) SliceNewAt(idx int) {
-	tv.SliceNewAtSelect(idx)
-	reflectx.SliceNewAt(tv.Slice, idx)
+func (tb *Table) SliceNewAt(idx int) {
+	tb.SliceNewAtSelect(idx)
+	reflectx.SliceNewAt(tb.Slice, idx)
 	if idx < 0 {
-		idx = tv.SliceSize
+		idx = tb.SliceSize
 	}
 
-	tv.This.(Lister).UpdateSliceSize()
-	tv.SelectIndexAction(idx, events.SelectOne)
-	tv.SendChange()
-	tv.Update()
-	tv.IndexGrabFocus(idx)
+	tb.This.(Lister).UpdateSliceSize()
+	tb.SelectIndexAction(idx, events.SelectOne)
+	tb.SendChange()
+	tb.Update()
+	tb.IndexGrabFocus(idx)
 }
 
 // SliceDeleteAt deletes element at given index from slice
-func (tv *TableView) SliceDeleteAt(idx int) {
-	if idx < 0 || idx >= tv.SliceSize {
+func (tb *Table) SliceDeleteAt(idx int) {
+	if idx < 0 || idx >= tb.SliceSize {
 		return
 	}
 
-	tv.SliceDeleteAtSelect(idx)
+	tb.SliceDeleteAtSelect(idx)
 
-	reflectx.SliceDeleteAt(tv.Slice, idx)
+	reflectx.SliceDeleteAt(tb.Slice, idx)
 
-	tv.This.(Lister).UpdateSliceSize()
-	tv.SendChange()
-	tv.Update()
+	tb.This.(Lister).UpdateSliceSize()
+	tb.SendChange()
+	tb.Update()
 }
 
 // SortSlice sorts the slice according to current settings
-func (tv *TableView) SortSlice() {
-	if tv.SortIndex < 0 || tv.SortIndex >= len(tv.visibleFields) {
+func (tb *Table) SortSlice() {
+	if tb.SortIndex < 0 || tb.SortIndex >= len(tb.visibleFields) {
 		return
 	}
-	rawIndex := tv.visibleFields[tv.SortIndex].Index
-	reflectx.StructSliceSort(tv.Slice, rawIndex, !tv.SortDescending)
+	rawIndex := tb.visibleFields[tb.SortIndex].Index
+	reflectx.StructSliceSort(tb.Slice, rawIndex, !tb.SortDescending)
 }
 
 // SortSliceAction sorts the slice for given field index -- toggles ascending
 // vs. descending if already sorting on this dimension
-func (tv *TableView) SortSliceAction(fldIndex int) {
-	sgh := tv.SliceHeader()
-	_, idxOff := tv.RowWidgetNs()
+func (tb *Table) SortSliceAction(fldIndex int) {
+	sgh := tb.SliceHeader()
+	_, idxOff := tb.RowWidgetNs()
 
 	ascending := true
 
-	for fli := 0; fli < tv.numVisibleFields; fli++ {
+	for fli := 0; fli < tb.numVisibleFields; fli++ {
 		hdr := sgh.Child(idxOff + fli).(*core.Button)
 		hdr.SetType(core.ButtonAction)
 		if fli == fldIndex {
-			if tv.SortIndex == fli {
-				tv.SortDescending = !tv.SortDescending
-				ascending = !tv.SortDescending
+			if tb.SortIndex == fli {
+				tb.SortDescending = !tb.SortDescending
+				ascending = !tb.SortDescending
 			} else {
-				tv.SortDescending = false
+				tb.SortDescending = false
 			}
 			if ascending {
 				hdr.SetIcon(icons.KeyboardArrowUp)
@@ -423,17 +423,17 @@ func (tv *TableView) SortSliceAction(fldIndex int) {
 		}
 	}
 
-	tv.SortIndex = fldIndex
-	tv.SortSlice()
-	tv.Update()
+	tb.SortIndex = fldIndex
+	tb.SortSlice()
+	tb.Update()
 }
 
 // SortFieldName returns the name of the field being sorted, along with :up or
 // :down depending on descending
-func (tv *TableView) SortFieldName() string {
-	if tv.SortIndex >= 0 && tv.SortIndex < tv.numVisibleFields {
-		nm := tv.visibleFields[tv.SortIndex].Name
-		if tv.SortDescending {
+func (tb *Table) SortFieldName() string {
+	if tb.SortIndex >= 0 && tb.SortIndex < tb.numVisibleFields {
+		nm := tb.visibleFields[tb.SortIndex].Name
+		if tb.SortDescending {
 			nm += ":down"
 		} else {
 			nm += ":up"
@@ -445,46 +445,46 @@ func (tv *TableView) SortFieldName() string {
 
 // SetSortFieldName sets sorting to happen on given field and direction -- see
 // SortFieldName for details
-func (tv *TableView) SetSortFieldName(nm string) {
+func (tb *Table) SetSortFieldName(nm string) {
 	if nm == "" {
 		return
 	}
 	spnm := strings.Split(nm, ":")
 	got := false
-	for fli := 0; fli < tv.numVisibleFields; fli++ {
-		fld := tv.visibleFields[fli]
+	for fli := 0; fli < tb.numVisibleFields; fli++ {
+		fld := tb.visibleFields[fli]
 		if fld.Name == spnm[0] {
 			got = true
 			// fmt.Println("sorting on:", fld.Name, fli, "from:", nm)
-			tv.SortIndex = fli
+			tb.SortIndex = fli
 		}
 	}
 	if len(spnm) == 2 {
 		if spnm[1] == "down" {
-			tv.SortDescending = true
+			tb.SortDescending = true
 		} else {
-			tv.SortDescending = false
+			tb.SortDescending = false
 		}
 	}
 	if got {
-		tv.SortSlice()
+		tb.SortSlice()
 	}
 }
 
 // RowFirstVisWidget returns the first visible widget for given row (could be
 // index or not) -- false if out of range
-func (tv *TableView) RowFirstVisWidget(row int) (*core.WidgetBase, bool) {
-	if !tv.IsRowInBounds(row) {
+func (tb *Table) RowFirstVisWidget(row int) (*core.WidgetBase, bool) {
+	if !tb.IsRowInBounds(row) {
 		return nil, false
 	}
-	nWidgPerRow, idxOff := tv.RowWidgetNs()
-	sg := tv.SliceGrid()
+	nWidgPerRow, idxOff := tb.RowWidgetNs()
+	sg := tb.SliceGrid()
 	w := sg.Children[row*nWidgPerRow].(core.Widget).AsWidget()
 	if w.Geom.TotalBBox != (image.Rectangle{}) {
 		return w, true
 	}
 	ridx := nWidgPerRow * row
-	for fli := 0; fli < tv.numVisibleFields; fli++ {
+	for fli := 0; fli < tb.numVisibleFields; fli++ {
 		w := sg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.Geom.TotalBBox != (image.Rectangle{}) {
 			return w, true
@@ -496,23 +496,23 @@ func (tv *TableView) RowFirstVisWidget(row int) (*core.WidgetBase, bool) {
 // RowGrabFocus grabs the focus for the first focusable widget in given row --
 // returns that element or nil if not successful -- note: grid must have
 // already rendered for focus to be grabbed!
-func (tv *TableView) RowGrabFocus(row int) *core.WidgetBase {
-	if !tv.IsRowInBounds(row) || tv.InFocusGrab { // range check
+func (tb *Table) RowGrabFocus(row int) *core.WidgetBase {
+	if !tb.IsRowInBounds(row) || tb.InFocusGrab { // range check
 		return nil
 	}
-	nWidgPerRow, idxOff := tv.RowWidgetNs()
+	nWidgPerRow, idxOff := tb.RowWidgetNs()
 	ridx := nWidgPerRow * row
-	sg := tv.SliceGrid()
+	sg := tb.SliceGrid()
 	// first check if we already have focus
-	for fli := 0; fli < tv.numVisibleFields; fli++ {
+	for fli := 0; fli < tb.numVisibleFields; fli++ {
 		w := sg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.StateIs(states.Focused) || w.ContainsFocus() {
 			return w
 		}
 	}
-	tv.InFocusGrab = true
-	defer func() { tv.InFocusGrab = false }()
-	for fli := 0; fli < tv.numVisibleFields; fli++ {
+	tb.InFocusGrab = true
+	defer func() { tb.InFocusGrab = false }()
+	for fli := 0; fli < tb.numVisibleFields; fli++ {
 		w := sg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.CanFocus() {
 			w.SetFocusEvent()
@@ -525,14 +525,14 @@ func (tv *TableView) RowGrabFocus(row int) *core.WidgetBase {
 // SelectFieldVal sets SelField and SelVal and attempts to find corresponding
 // row, setting SelectedIndex and selecting row if found -- returns true if
 // found, false otherwise
-func (tv *TableView) SelectFieldVal(fld, val string) bool {
-	tv.SelectedField = fld
-	tv.SelectedValue = val
-	if tv.SelectedField != "" && tv.SelectedValue != nil {
-		idx, _ := StructSliceIndexByValue(tv.Slice, tv.SelectedField, tv.SelectedValue)
+func (tb *Table) SelectFieldVal(fld, val string) bool {
+	tb.SelectedField = fld
+	tb.SelectedValue = val
+	if tb.SelectedField != "" && tb.SelectedValue != nil {
+		idx, _ := StructSliceIndexByValue(tb.Slice, tb.SelectedField, tb.SelectedValue)
 		if idx >= 0 {
-			tv.ScrollToIndex(idx)
-			tv.UpdateSelectIndex(idx, true, events.SelectOne)
+			tb.ScrollToIndex(idx)
+			tb.UpdateSelectIndex(idx, true, events.SelectOne)
 			return true
 		}
 	}
@@ -541,13 +541,13 @@ func (tv *TableView) SelectFieldVal(fld, val string) bool {
 
 // StructSliceIndexByValue searches for first index that contains given value in field of
 // given name.
-func StructSliceIndexByValue(struSlice any, fldName string, fldVal any) (int, error) {
-	svnp := reflectx.NonPointerValue(reflect.ValueOf(struSlice))
+func StructSliceIndexByValue(structSlice any, fieldName string, fieldValue any) (int, error) {
+	svnp := reflectx.NonPointerValue(reflect.ValueOf(structSlice))
 	sz := svnp.Len()
-	struTyp := reflectx.NonPointerType(reflect.TypeOf(struSlice).Elem().Elem())
-	fld, ok := struTyp.FieldByName(fldName)
+	struTyp := reflectx.NonPointerType(reflect.TypeOf(structSlice).Elem().Elem())
+	fld, ok := struTyp.FieldByName(fieldName)
 	if !ok {
-		err := fmt.Errorf("core.StructSliceRowByValue: field name: %v not found", fldName)
+		err := fmt.Errorf("core.StructSliceRowByValue: field name: %v not found", fieldName)
 		slog.Error(err.Error())
 		return -1, err
 	}
@@ -558,18 +558,18 @@ func StructSliceIndexByValue(struSlice any, fldName string, fldVal any) (int, er
 		if !fval.IsValid() {
 			continue
 		}
-		if fval.Interface() == fldVal {
+		if fval.Interface() == fieldValue {
 			return idx, nil
 		}
 	}
 	return -1, nil
 }
 
-func (tv *TableView) EditIndex(idx int) {
-	if idx < 0 || idx >= tv.SliceUnderlying.Len() {
+func (tb *Table) EditIndex(idx int) {
+	if idx < 0 || idx >= tb.SliceUnderlying.Len() {
 		return
 	}
-	val := reflectx.UnderlyingPointer(tv.SliceUnderlying.Index(idx))
+	val := reflectx.UnderlyingPointer(tb.SliceUnderlying.Index(idx))
 	stru := val.Interface()
 	tynm := reflectx.NonPointerType(val.Type()).Name()
 	lbl := labels.ToLabel(stru)
@@ -577,19 +577,19 @@ func (tv *TableView) EditIndex(idx int) {
 		tynm += ": " + lbl
 	}
 	d := core.NewBody().AddTitle(tynm)
-	NewForm(d).SetStruct(stru).SetReadOnly(tv.IsReadOnly())
+	NewForm(d).SetStruct(stru).SetReadOnly(tb.IsReadOnly())
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent)
 	})
-	d.RunFullDialog(tv)
+	d.RunFullDialog(tb)
 }
 
-func (tv *TableView) ContextMenu(m *core.Scene) {
-	if !tv.isArray {
+func (tb *Table) ContextMenu(m *core.Scene) {
+	if !tb.isArray {
 		core.NewButton(m).SetText("Edit").SetIcon(icons.Edit).
 			OnClick(func(e events.Event) {
-				tv.EditIndex(tv.SelectedIndex)
+				tb.EditIndex(tb.SelectedIndex)
 			})
 	}
 }
@@ -597,13 +597,13 @@ func (tv *TableView) ContextMenu(m *core.Scene) {
 //////////////////////////////////////////////////////
 // 	Header layout
 
-func (tv *TableView) SizeFinal() {
-	tv.ListBase.SizeFinal()
-	sg := tv.This.(Lister).SliceGrid()
+func (tb *Table) SizeFinal() {
+	tb.ListBase.SizeFinal()
+	sg := tb.This.(Lister).SliceGrid()
 	if sg == nil {
 		return
 	}
-	sh := tv.SliceHeader()
+	sh := tb.SliceHeader()
 	sh.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
 		_, sgb := core.AsWidget(sg.Child(i))
 		gsz := &sgb.Geom.Size

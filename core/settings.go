@@ -648,7 +648,7 @@ type FavPathItem struct { //types:add
 	Name string `width:"20"`
 
 	// the path of the favorite item
-	Path string `tableview:"-select"`
+	Path string `table:"-select"`
 }
 
 // Label satisfies the Labeler interface

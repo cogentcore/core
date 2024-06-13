@@ -68,7 +68,7 @@ func (pl *PlotView) CopyFieldsFrom(frm tree.Node) {
 	fr := frm.(*PlotView)
 	pl.Frame.CopyFieldsFrom(&fr.Frame)
 	pl.Params.CopyFrom(&fr.Params)
-	pl.SetTableView(fr.Table)
+	pl.SetIndexView(fr.Table)
 	mx := min(len(pl.Columns), len(fr.Columns))
 	for i := 0; i < mx; i++ {
 		pl.Columns[i].CopyFrom(fr.Columns[i])
@@ -123,11 +123,11 @@ func (pl *PlotView) Init() {
 	})
 }
 
-// SetTableView sets the table to view and does Update
+// SetIndexView sets the table to view and does Update
 // to update the Column list, which will also trigger a Layout
 // and updating of the plot on next render pass.
 // This is safe to call from a different goroutine.
-func (pl *PlotView) SetTableView(tab *table.IndexView) *PlotView {
+func (pl *PlotView) SetIndexView(tab *table.IndexView) *PlotView {
 	pl.Table = tab
 	pl.Update()
 	return pl
@@ -590,10 +590,10 @@ func (pl *PlotView) MakeToolbar(p *core.Plan) {
 	})
 	core.Add(p, func(w *core.Button) {
 		w.SetText("Table").SetIcon(icons.Edit).
-			SetTooltip("open a TableView window of the data").
+			SetTooltip("open a Table window of the data").
 			OnClick(func(e events.Event) {
 				d := core.NewBody().AddTitle(pl.Name + " Data")
-				tv := tensorview.NewTableView(d).SetTable(pl.Table.Table)
+				tv := tensorview.NewTable(d).SetTable(pl.Table.Table)
 				d.AddAppBar(tv.MakeToolbar)
 				d.NewFullDialog(pl).SetNewWindow(true).Run()
 			})

@@ -454,7 +454,7 @@ func makeViews(ts *core.Tabs) {
 		tbl[i] = ts
 	}
 	tbl[0].StrField = "this is a particularly long field"
-	views.NewTableView(vts.NewTab("Table view")).SetSlice(&tbl)
+	views.NewTable(vts.NewTab("Table")).SetSlice(&tbl)
 
 	sp := core.NewSplits(vts.NewTab("Tree view")).SetSplits(0.3, 0.7)
 	tv := views.NewTreeViewFrame(sp).SetText("Root")

@@ -51,7 +51,7 @@ type Window[A system.App] struct {
 	Titl string `label:"Title"`
 
 	// Flgs contains the flags associated with the window
-	Flgs system.WindowFlags `label:"Flags" tableview:"-"`
+	Flgs system.WindowFlags `label:"Flags" table:"-"`
 
 	// FPS is the FPS (frames per second) for rendering the window
 	FPS int

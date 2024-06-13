@@ -31,7 +31,7 @@ func (km *KeyMapButton) Init() {
 		d.SetTitle("Select a key map")
 		si := 0
 		_, curRow, _ := keymap.AvailableMaps.MapByName(km.MapName)
-		tv := NewTableView(d).SetSlice(&keymap.AvailableMaps).SetSelectedIndex(curRow).BindSelect(&si)
+		tv := NewTable(d).SetSlice(&keymap.AvailableMaps).SetSelectedIndex(curRow).BindSelect(&si)
 		tv.OnChange(func(e events.Event) {
 			name := keymap.AvailableMaps[si]
 			km.MapName = keymap.MapName(name.Name)

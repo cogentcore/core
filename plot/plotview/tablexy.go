@@ -121,7 +121,7 @@ func (txy *TableXY) Len() int {
 	return txy.Table.Len()
 }
 
-// TRowValue returns the y value at given true table row in table view
+// TRowValue returns the y value at given true table row in table
 func (txy *TableXY) TRowValue(row int) float32 {
 	yc := txy.Table.Table.Columns[txy.YColumn]
 	y := float32(0.0)
@@ -139,7 +139,7 @@ func (txy *TableXY) TRowValue(row int) float32 {
 	return y
 }
 
-// Value returns the y value at given row in table view
+// Value returns the y value at given row in table
 func (txy *TableXY) Value(row int) float32 {
 	if txy.Table == nil || txy.Table.Table == nil || row >= txy.Table.Len() {
 		return 0
@@ -182,7 +182,7 @@ func (txy *TableXY) TRowXValue(row int) float32 {
 	return x
 }
 
-// XValue returns an x value at given row in table view
+// XValue returns an x value at given row in table
 func (txy *TableXY) XValue(row int) float32 {
 	if txy.Table == nil || txy.Table.Table == nil || row >= txy.Table.Len() {
 		return 0

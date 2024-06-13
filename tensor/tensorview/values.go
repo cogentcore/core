@@ -48,7 +48,7 @@ func (tb *TensorButton) Init() {
 	})
 }
 
-// TableButton presents a button that pulls up the [TableView] viewer for a [table.Table].
+// TableButton presents a button that pulls up the [Table] viewer for a [table.Table].
 type TableButton struct {
 	core.Button
 	Table *table.Table
@@ -71,7 +71,7 @@ func (tb *TableButton) Init() {
 		tb.SetText(text)
 	})
 	core.InitValueButton(tb, true, func(d *core.Body) {
-		NewTableView(d).SetTable(tb.Table)
+		NewTable(d).SetTable(tb.Table)
 	})
 }
 

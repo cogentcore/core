@@ -905,52 +905,52 @@ var PagesExamples = map[string]func(parent core.Widget){
 		}
 		// core.NewValue(&person{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true}, "", parent)
 	},
-	"views/table-views-0": func(parent core.Widget) {
+	"views/tables-0": func(parent core.Widget) {
 		type language struct {
 			Name   string
 			Rating int
 		}
-		views.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+		views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	},
-	"views/table-views-1": func(parent core.Widget) {
+	"views/tables-1": func(parent core.Widget) {
 		type language struct {
 			Name   string
 			Rating int
 		}
 		sl := []language{{"Go", 10}, {"Python", 5}}
-		views.NewTableView(parent).SetSlice(&sl).OnChange(func(e events.Event) {
+		views.NewTable(parent).SetSlice(&sl).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, fmt.Sprintf("Languages: %v", sl))
 		})
 	},
-	"views/table-views-2": func(parent core.Widget) {
+	"views/tables-2": func(parent core.Widget) {
 		type language struct {
 			Name   string
 			Rating int `view:"-"`
 		}
-		views.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+		views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	},
-	"views/table-views-3": func(parent core.Widget) {
+	"views/tables-3": func(parent core.Widget) {
 		type language struct {
 			Name   string
-			Rating int `view:"-" tableview:"+"`
+			Rating int `view:"-" table:"+"`
 		}
-		views.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+		views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	},
-	"views/table-views-4": func(parent core.Widget) {
+	"views/tables-4": func(parent core.Widget) {
 		type language struct {
 			Name   string `edit:"-"`
 			Rating int
 		}
-		views.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+		views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	},
-	"views/table-views-5": func(parent core.Widget) {
+	"views/tables-5": func(parent core.Widget) {
 		type language struct {
 			Name   string
 			Rating int
 		}
-		views.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
+		views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
 	},
-	"views/table-views-6": func(parent core.Widget) {
+	"views/tables-6": func(parent core.Widget) {
 		type language struct {
 			Name   string
 			Rating int

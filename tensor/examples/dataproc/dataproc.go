@@ -105,7 +105,7 @@ func main() {
 	tv := core.NewTabs(b)
 
 	nt := tv.NewTab("Planets Data")
-	tbv := tensorview.NewTableView(nt).SetTable(Planets)
+	tbv := tensorview.NewTable(nt).SetTable(Planets)
 	b.AddAppBar(tbv.MakeToolbar)
 	b.AddAppBar(func(p *core.Plan) {
 		core.Add(p, func(w *core.Button) {
@@ -117,17 +117,17 @@ func main() {
 	})
 
 	nt = tv.NewTab("Non-Null Rows Desc")
-	tensorview.NewTableView(nt).SetTable(PlanetsNNDesc)
+	tensorview.NewTable(nt).SetTable(PlanetsNNDesc)
 	nt = tv.NewTab("All Desc")
-	tensorview.NewTableView(nt).SetTable(PlanetsDesc)
+	tensorview.NewTable(nt).SetTable(PlanetsDesc)
 	nt = tv.NewTab("By Method Orbit")
-	tensorview.NewTableView(nt).SetTable(GpMethodOrbit)
+	tensorview.NewTable(nt).SetTable(GpMethodOrbit)
 	nt = tv.NewTab("By Method Year")
-	tensorview.NewTableView(nt).SetTable(GpMethodYear)
+	tensorview.NewTable(nt).SetTable(GpMethodYear)
 	nt = tv.NewTab("By Method Decade")
-	tensorview.NewTableView(nt).SetTable(GpMethodDecade)
+	tensorview.NewTable(nt).SetTable(GpMethodDecade)
 	nt = tv.NewTab("By Decade")
-	tensorview.NewTableView(nt).SetTable(GpDecade)
+	tensorview.NewTable(nt).SetTable(GpDecade)
 
 	tv.SelectTabIndex(0)
 

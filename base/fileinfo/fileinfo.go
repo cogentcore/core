@@ -43,7 +43,7 @@ import (
 type FileInfo struct { //types:add
 
 	// icon for file
-	Ic icons.Icon `tableview:"no-header"`
+	Ic icons.Icon `table:"no-header"`
 
 	// name of the file, without any path
 	Name string `width:"40"`
@@ -56,25 +56,25 @@ type FileInfo struct { //types:add
 	Kind string `width:"20" max-width:"20"`
 
 	// full official mime type of the contents
-	Mime string `tableview:"-"`
+	Mime string `table:"-"`
 
 	// functional category of the file, based on mime data etc
-	Cat Categories `tableview:"-"`
+	Cat Categories `table:"-"`
 
 	// known file type
-	Known Known `tableview:"-"`
+	Known Known `table:"-"`
 
 	// file mode bits
-	Mode os.FileMode `tableview:"-"`
+	Mode os.FileMode `table:"-"`
 
 	// time that contents (only) were last modified
 	ModTime time.Time `label:"Last modified"`
 
 	// version control system status, when enabled
-	VCS vcs.FileStatus `tableview:"-"`
+	VCS vcs.FileStatus `table:"-"`
 
 	// full path to file, including name; for file functions
-	Path string `tableview:"-"`
+	Path string `table:"-"`
 }
 
 func NewFileInfo(fname string) (*FileInfo, error) {

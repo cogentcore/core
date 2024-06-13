@@ -36,7 +36,7 @@ func (sb *SliceButton) Init() {
 	core.InitValueButton(sb, true, func(d *core.Body) {
 		up := reflectx.Underlying(reflect.ValueOf(sb.Slice))
 		if up.Type().Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(sb.Slice)).Kind() == reflect.Struct {
-			tv := NewTableView(d).SetSlice(sb.Slice)
+			tv := NewTable(d).SetSlice(sb.Slice)
 			tv.SetValueTitle(sb.ValueTitle).SetReadOnly(sb.IsReadOnly())
 			d.AddAppBar(tv.MakeToolbar)
 		} else {
@@ -183,7 +183,7 @@ func (fb *FontButton) Init() {
 		d.SetTitle("Select a font family")
 		si := 0
 		fi := paint.FontLibrary.FontInfo
-		tv := NewTableView(d)
+		tv := NewTable(d)
 		tv.SetSlice(&fi).SetSelectedField("Name").SetSelectedValue(fb.Text).BindSelect(&si)
 		tv.SetStyleFunc(func(w core.Widget, s *styles.Style, row, col int) {
 			if col != 4 {

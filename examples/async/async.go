@@ -23,7 +23,7 @@ const rows = 100000
 func main() {
 	table := make([]*tableStruct, 0, rows)
 	b := core.NewBody("Async Updating")
-	tv := views.NewTableView(b)
+	tv := views.NewTable(b)
 	tv.SetReadOnly(true)
 	tv.SetSlice(&table)
 

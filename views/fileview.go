@@ -306,7 +306,7 @@ func (fp *FilePicker) AddChooserPaths(ch *core.Chooser) {
 }
 
 func (fp *FilePicker) makeFilesRow(p *core.Plan) {
-	core.AddAt(p, "favorites", func(w *TableView) {
+	core.AddAt(p, "favorites", func(w *Table) {
 		w.SelectedIndex = -1
 		w.SetReadOnly(true)
 		w.ReadOnlyKeyNav = false // keys must go to files, not favorites
@@ -323,7 +323,7 @@ func (fp *FilePicker) makeFilesRow(p *core.Plan) {
 			w.ResetSelectedIndexes()
 		})
 	})
-	core.AddAt(p, "files", func(w *TableView) {
+	core.AddAt(p, "files", func(w *Table) {
 		w.SetReadOnly(true)
 		w.SetSlice(&fp.Files)
 		w.SelectedField = "Name"
@@ -493,14 +493,14 @@ func (fp *FilePicker) WatchWatcher() {
 	}()
 }
 
-// FavoritesView returns the TableView of the favorites
-func (fp *FilePicker) FavoritesView() *TableView {
-	return fp.FindPath("files/favorites").(*TableView)
+// FavoritesView returns the Table of the favorites
+func (fp *FilePicker) FavoritesView() *Table {
+	return fp.FindPath("files/favorites").(*Table)
 }
 
-// FilesView returns the TableView of the files
-func (fp *FilePicker) FilesView() *TableView {
-	return fp.FindPath("files/files").(*TableView)
+// FilesView returns the Table of the files
+func (fp *FilePicker) FilesView() *Table {
+	return fp.FindPath("files/files").(*Table)
 }
 
 // SelectField returns the TextField of the select file
@@ -630,7 +630,7 @@ func (fp *FilePicker) NewFolder(name string) error { //types:add
 
 // SetSelFileAction sets the currently selected file to given name, and sends
 // selection action with current full file name, and updates selection in
-// table view
+// table
 func (fp *FilePicker) SetSelFileAction(sel string) {
 	fp.CurrentSelectedFile = sel
 	sv := fp.FilesView()

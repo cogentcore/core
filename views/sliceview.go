@@ -149,7 +149,7 @@ type Lister interface {
 	DropDeleteSource(e events.Event)
 }
 
-// ListBase is the base for [List] and [TableView] and any other displays
+// ListBase is the base for [List] and [Table] and any other displays
 // of array-like data. It automatically computes the number of rows that fit
 // within its allocated space, and manages the offset view window into the full
 // list of items, and supports row selection, copy / paste, Drag-n-Drop, etc.
@@ -1811,7 +1811,7 @@ func (lb *ListBase) SizeFinal() {
 //////////////////////////////////////////////////////
 // 	ListGrid and Layout
 
-// ListGrid handles the resizing logic for [List], [TableView].
+// ListGrid handles the resizing logic for [List], [Table].
 type ListGrid struct {
 	core.Frame
 

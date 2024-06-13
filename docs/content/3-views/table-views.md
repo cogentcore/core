@@ -1,15 +1,15 @@
-# Table views
+# Tables
 
-Cogent Core provides interactive table views that allow you to display a slice of structs to users as a table and have them edit it. Users can use context menus and drag-and-drop to add, remove, and move rows. Also, users can sort the table by clicking on columns.
+Cogent Core provides interactive tables that allow you to display a slice of structs to users as a table and have them edit it. Users can use context menus and drag-and-drop to add, remove, and move rows. Also, users can sort the table by clicking on columns.
 
-You can make a table view from any pointer to a slice of structs:
+You can make a table from any pointer to a slice of structs:
 
 ```Go
 type language struct {
     Name   string
     Rating int
 }
-views.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```
 
 You can detect when the user changes the value of the table:
@@ -20,7 +20,7 @@ type language struct {
     Rating int
 }
 sl := []language{{"Go", 10}, {"Python", 5}}
-views.NewTableView(parent).SetSlice(&sl).OnChange(func(e events.Event) {
+views.NewTable(parent).SetSlice(&sl).OnChange(func(e events.Event) {
     core.MessageSnackbar(parent, fmt.Sprintf("Languages: %v", sl))
 })
 ```
@@ -32,17 +32,17 @@ type language struct {
     Name   string
     Rating int `view:"-"`
 }
-views.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```
 
-You can also use the `tableview` struct tag, which overrides the `view` struct tag. This allows you to have a struct field displayed in a form but not a table view, or vise versa:
+You can also use the `table` struct tag, which overrides the `view` struct tag. This allows you to have a struct field displayed in a form but not a table, or vise versa:
 
 ```Go
 type language struct {
     Name   string
-    Rating int `view:"-" tableview:"+"`
+    Rating int `view:"-" table:"+"`
 }
-views.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```
 
 You can prevent the user from editing certain columns:
@@ -52,7 +52,7 @@ type language struct {
     Name   string `edit:"-"`
     Rating int
 }
-views.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```
 
 You can prevent the user from editing the entire table:
@@ -62,7 +62,7 @@ type language struct {
     Name   string
     Rating int
 }
-views.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
+views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
 ```
 
 You can make it so that the documentation comments for struct fields are used as tooltips for the column headers and value widgets by adding the type to [[types]] and running `core generate`:
@@ -79,7 +79,7 @@ type language struct { //types:add
 }
 ```
 
-When you use [[views.NewValue]] with a slice of structs, it will create a button that opens a dialog with a table view:
+When you use [[views.NewValue]] with a slice of structs, it will create a button that opens a dialog with a table:
 
 ```Go
 type language struct {

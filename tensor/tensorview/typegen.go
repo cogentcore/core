@@ -25,38 +25,38 @@ func (t *SimMatGrid) NodeType() *types.Type { return SimMatGridType }
 // New returns a new [*SimMatGrid] value
 func (t *SimMatGrid) New() tree.Node { return &SimMatGrid{} }
 
-// TableViewType is the [types.Type] for [TableView]
-var TableViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TableView", IDName: "table-view", Doc: "TableView provides a GUI view for [table.Table] values.", Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "Table", Doc: "the idx view of the table that we're a view of"}, {Name: "TensorDisplay", Doc: "overall display options for tensor display"}, {Name: "ColumnTensorDisplay", Doc: "per column tensor display params"}, {Name: "ColumnTensorBlank", Doc: "per column blank tensor values"}, {Name: "NCols", Doc: "number of columns in table (as of last update)"}, {Name: "SortIndex", Doc: "current sort index"}, {Name: "SortDescending", Doc: "whether current sort order is descending"}, {Name: "headerWidths", Doc: "headerWidths has number of characters in each header, per visfields"}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields"}, {Name: "BlankString", Doc: "\tblank values for out-of-range rows"}, {Name: "BlankFloat"}}, Instance: &TableView{}})
+// TableType is the [types.Type] for [Table]
+var TableType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.Table", IDName: "table", Doc: "Table provides a GUI view for [table.Table] values.", Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "Table", Doc: "the idx view of the table that we're a view of"}, {Name: "TensorDisplay", Doc: "overall display options for tensor display"}, {Name: "ColumnTensorDisplay", Doc: "per column tensor display params"}, {Name: "ColumnTensorBlank", Doc: "per column blank tensor values"}, {Name: "NCols", Doc: "number of columns in table (as of last update)"}, {Name: "SortIndex", Doc: "current sort index"}, {Name: "SortDescending", Doc: "whether current sort order is descending"}, {Name: "headerWidths", Doc: "headerWidths has number of characters in each header, per visfields"}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields"}, {Name: "BlankString", Doc: "\tblank values for out-of-range rows"}, {Name: "BlankFloat"}}, Instance: &Table{}})
 
-// NewTableView returns a new [TableView] with the given optional parent:
-// TableView provides a GUI view for [table.Table] values.
-func NewTableView(parent ...tree.Node) *TableView { return tree.New[*TableView](parent...) }
+// NewTable returns a new [Table] with the given optional parent:
+// Table provides a GUI view for [table.Table] values.
+func NewTable(parent ...tree.Node) *Table { return tree.New[*Table](parent...) }
 
-// NodeType returns the [*types.Type] of [TableView]
-func (t *TableView) NodeType() *types.Type { return TableViewType }
+// NodeType returns the [*types.Type] of [Table]
+func (t *Table) NodeType() *types.Type { return TableType }
 
-// New returns a new [*TableView] value
-func (t *TableView) New() tree.Node { return &TableView{} }
+// New returns a new [*Table] value
+func (t *Table) New() tree.Node { return &Table{} }
 
-// SetNCols sets the [TableView.NCols]:
+// SetNCols sets the [Table.NCols]:
 // number of columns in table (as of last update)
-func (t *TableView) SetNCols(v int) *TableView { t.NCols = v; return t }
+func (t *Table) SetNCols(v int) *Table { t.NCols = v; return t }
 
-// SetSortIndex sets the [TableView.SortIndex]:
+// SetSortIndex sets the [Table.SortIndex]:
 // current sort index
-func (t *TableView) SetSortIndex(v int) *TableView { t.SortIndex = v; return t }
+func (t *Table) SetSortIndex(v int) *Table { t.SortIndex = v; return t }
 
-// SetSortDescending sets the [TableView.SortDescending]:
+// SetSortDescending sets the [Table.SortDescending]:
 // whether current sort order is descending
-func (t *TableView) SetSortDescending(v bool) *TableView { t.SortDescending = v; return t }
+func (t *Table) SetSortDescending(v bool) *Table { t.SortDescending = v; return t }
 
-// SetBlankString sets the [TableView.BlankString]:
+// SetBlankString sets the [Table.BlankString]:
 //
 //	blank values for out-of-range rows
-func (t *TableView) SetBlankString(v string) *TableView { t.BlankString = v; return t }
+func (t *Table) SetBlankString(v string) *Table { t.BlankString = v; return t }
 
-// SetBlankFloat sets the [TableView.BlankFloat]
-func (t *TableView) SetBlankFloat(v float64) *TableView { t.BlankFloat = v; return t }
+// SetBlankFloat sets the [Table.BlankFloat]
+func (t *Table) SetBlankFloat(v float64) *Table { t.BlankFloat = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TensorLayout", IDName: "tensor-layout", Doc: "TensorLayout are layout options for displaying tensors", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "OddRow", Doc: "even-numbered dimensions are displayed as Y*X rectangles -- this determines along which dimension to display any remaining odd dimension: OddRow = true = organize vertically along row dimension, false = organize horizontally across column dimension"}, {Name: "TopZero", Doc: "if true, then the Y=0 coordinate is displayed from the top-down; otherwise the Y=0 coordinate is displayed from the bottom up, which is typical for emergent network patterns."}, {Name: "Image", Doc: "display the data as a bitmap image.  if a 2D tensor, then it will be a greyscale image.  if a 3D tensor with size of either the first or last dim = either 3 or 4, then it is a RGB(A) color image"}}})
 
@@ -101,10 +101,10 @@ func (t *TensorButton) New() tree.Node { return &TensorButton{} }
 func (t *TensorButton) SetTensor(v tensor.Tensor) *TensorButton { t.Tensor = v; return t }
 
 // TableButtonType is the [types.Type] for [TableButton]
-var TableButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TableButton", IDName: "table-button", Doc: "TableButton presents a button that pulls up the [TableView] viewer for a [table.Table].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Table"}}, Instance: &TableButton{}})
+var TableButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorview.TableButton", IDName: "table-button", Doc: "TableButton presents a button that pulls up the [Table] viewer for a [table.Table].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Table"}}, Instance: &TableButton{}})
 
 // NewTableButton returns a new [TableButton] with the given optional parent:
-// TableButton presents a button that pulls up the [TableView] viewer for a [table.Table].
+// TableButton presents a button that pulls up the [Table] viewer for a [table.Table].
 func NewTableButton(parent ...tree.Node) *TableButton { return tree.New[*TableButton](parent...) }
 
 // NodeType returns the [*types.Type] of [TableButton]

@@ -516,7 +516,7 @@ func bbb() {
 	a := struct{}{}
 }
 
-func (tv *TableView) RowGrabFocus(row int) *core.WidgetBase {
+func (tv *Table) RowGrabFocus(row int) *core.WidgetBase {
 	
 	tv.inFocusGrab = slice{}
 
