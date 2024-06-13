@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package plotview
+package plotcore
 
 import (
 	"log/slog"
@@ -32,7 +32,7 @@ func TestTablePlotView(t *testing.T) {
 	pl.SetTable(epc)
 	pl.ColumnParams("UnitErr").On = true
 	b.AddAppBar(pl.MakeToolbar)
-	b.AssertRender(t, "plotview_table")
+	b.AssertRender(t, "plotcore_table")
 }
 
 func TestSlicePlotView(t *testing.T) {
@@ -55,5 +55,5 @@ func TestSlicePlotView(t *testing.T) {
 	pl.ColumnParams("Population").On = true
 	b.AddAppBar(pl.MakeToolbar)
 
-	b.AssertRender(t, "plotview_slice")
+	b.AssertRender(t, "plotcore_slice")
 }

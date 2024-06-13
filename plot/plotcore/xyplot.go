@@ -2,30 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package plotview
+package plotcore
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/math32"
-	"cogentcore.org/core/math32/minmax"
 	"cogentcore.org/core/plot"
 	"cogentcore.org/core/plot/plots"
+	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/stats/split"
 	"cogentcore.org/core/tensor/table"
 )
 
-// bar plot is on integer positions, with different Y values and / or
-// legend values interleaved
-
-// GenPlotBar generates a Bar plot, setting GPlot variable
-func (pl *PlotView) GenPlotBar() {
-	plt := plot.New() // note: not clear how to re-use, due to newtablexynames
-	if pl.Params.BarWidth > 1 {
-		pl.Params.BarWidth = .8
-	}
+// GenPlotXY generates an XY (lines, points) plot, setting Plot variable
+func (pl *PlotView) GenPlotXY() {
+	plt := plot.New()
 
 	// process xaxis first
 	xi, xview, err := pl.PlotXAxis(plt, pl.Table)
@@ -39,9 +33,9 @@ func (pl *PlotView) GenPlotBar() {
 	if pl.Params.LegendColumn != "" {
 		_, err = pl.Table.Table.ColumnIndexTry(pl.Params.LegendColumn)
 		if err != nil {
-			log.Println("plot.LegendColumn: " + err.Error())
+			slog.Error("plot.LegendColumn", "err", err.Error())
 		} else {
-			xview.SortColumnNames([]string{pl.Params.LegendColumn, xp.Column}, table.Ascending) // make it fit!
+			errors.Log(xview.SortStableColumnNames([]string{pl.Params.LegendColumn, xp.Column}, table.Ascending))
 			lsplit = split.GroupBy(xview, pl.Params.LegendColumn)
 			nleg = max(lsplit.Len(), 1)
 		}
@@ -71,14 +65,8 @@ func (pl *PlotView) GenPlotBar() {
 		return
 	}
 
-	stride := nys * nleg
-	if stride > 1 {
-		stride += 1 // extra gap
-	}
-
-	yoff := 0
+	firstXY = nil
 	yidx := 0
-	maxx := 0 // max number of x values
 	for _, cp := range pl.Columns {
 		if !cp.On || cp == xp {
 			continue
@@ -86,7 +74,6 @@ func (pl *PlotView) GenPlotBar() {
 		if cp.IsString {
 			continue
 		}
-		start := yoff
 		for li := 0; li < nleg; li++ {
 			lview := xview
 			leg := ""
@@ -104,14 +91,16 @@ func (pl *PlotView) GenPlotBar() {
 			}
 			for ii := 0; ii < nidx; ii++ {
 				idx := stidx + ii
-				xy, _ := NewTableXYName(lview, xi, xp.TensorIndex, cp.Column, idx, cp.Range)
+				tix := lview.Clone()
+				xy, _ := NewTableXYName(tix, xi, xp.TensorIndex, cp.Column, idx, cp.Range)
 				if xy == nil {
 					continue
 				}
-				maxx = max(maxx, lview.Len())
 				if firstXY == nil {
 					firstXY = xy
 				}
+				var pts *plots.Scatter
+				var lns *plots.Line
 				lbl := cp.Label()
 				clr := cp.Color
 				if leg != "" {
@@ -125,77 +114,70 @@ func (pl *PlotView) GenPlotBar() {
 					clr = colors.Spaced(idx)
 					lbl = fmt.Sprintf("%s_%02d", lbl, idx)
 				}
-				ec := -1
-				if cp.ErrColumn != "" {
-					ec = pl.Table.Table.ColumnIndex(cp.ErrColumn)
-				}
-				var bar *plots.BarChart
-				if ec >= 0 {
-					exy, _ := NewTableXY(lview, ec, 0, ec, 0, minmax.Range32{})
-					bar, err = plots.NewBarChart(xy, exy)
-					if err != nil {
-						log.Println(err)
-						continue
-					}
+				if cp.Lines.Or(pl.Params.Lines) && cp.Points.Or(pl.Params.Points) {
+					lns, pts, _ = plots.NewLinePoints(xy)
+				} else if cp.Points.Or(pl.Params.Points) {
+					pts, _ = plots.NewScatter(xy)
 				} else {
-					bar, err = plots.NewBarChart(xy, nil)
-					if err != nil {
-						log.Println(err)
-						continue
+					lns, _ = plots.NewLine(xy)
+				}
+				if lns != nil {
+					lns.LineStyle.Width.Pt(float32(cp.LineWidth.Or(pl.Params.LineWidth)))
+					lns.LineStyle.Color = colors.C(clr)
+					lns.NegativeXDraw = pl.Params.NegativeXDraw
+					plt.Add(lns)
+					if pts != nil {
+						plt.Legend.Add(lbl, lns, pts)
+					} else {
+						plt.Legend.Add(lbl, lns)
 					}
 				}
-				bar.Color = clr
-				bar.Stride = float32(stride)
-				bar.Offset = float32(start)
-				bar.Width = pl.Params.BarWidth
-				plt.Add(bar)
-				plt.Legend.Add(lbl, bar)
-				start++
+				if pts != nil {
+					pts.LineStyle.Color = colors.C(clr)
+					pts.LineStyle.Width.Pt(float32(cp.LineWidth.Or(pl.Params.LineWidth)))
+					pts.PointSize.Pt(float32(cp.PointSize.Or(pl.Params.PointSize)))
+					pts.PointShape = cp.PointShape.Or(pl.Params.PointShape)
+					plt.Add(pts)
+					if lns == nil {
+						plt.Legend.Add(lbl, pts)
+					}
+				}
+				if cp.ErrColumn != "" {
+					ec := pl.Table.Table.ColumnIndex(cp.ErrColumn)
+					if ec >= 0 {
+						xy.ErrColumn = ec
+						eb, _ := plots.NewYErrorBars(xy)
+						eb.LineStyle.Color = colors.C(clr)
+						plt.Add(eb)
+					}
+				}
 			}
 		}
 		yidx++
-		yoff += nleg
-	}
-	mid := (stride - 1) / 2
-	if stride > 1 {
-		mid = (stride - 2) / 2
 	}
 	if firstXY != nil && len(strCols) > 0 {
-		firstXY.Table = xview
-		n := xview.Len()
 		for _, cp := range strCols {
 			xy, _ := NewTableXYName(xview, xi, xp.TensorIndex, cp.Column, cp.TensorIndex, firstXY.YRange)
 			xy.LabelColumn = xy.YColumn
 			xy.YColumn = firstXY.YColumn
 			xy.YIndex = firstXY.YIndex
-
-			xyl := plots.XYLabels{}
-			xyl.XYs = make(plot.XYs, n)
-			xyl.Labels = make([]string, n)
-
-			for i := range xview.Indexes {
-				y := firstXY.Value(i)
-				x := float32(mid + (i%maxx)*stride)
-				xyl.XYs[i] = math32.Vec2(x, y)
-				xyl.Labels[i] = xy.Label(i)
-			}
-			lbls, _ := plots.NewLabels(xyl)
+			lbls, _ := plots.NewLabels(xy)
 			if lbls != nil {
 				plt.Add(lbls)
 			}
 		}
 	}
 
-	netn := pl.Table.Len() * stride
+	// Use string labels for X axis if X is a string
 	xc := pl.Table.Table.Columns[xi]
-	vals := make([]string, netn)
-	for i, dx := range pl.Table.Indexes {
-		pi := mid + i*stride
-		if pi < netn && dx < xc.Len() {
-			vals[pi] = xc.String1D(dx)
+	if xc.IsString() {
+		xcs := xc.(*tensor.String)
+		vals := make([]string, pl.Table.Len())
+		for i, dx := range pl.Table.Indexes {
+			vals[i] = xcs.Values[dx]
 		}
+		plt.NominalX(vals...)
 	}
-	plt.NominalX(vals...)
 
 	pl.ConfigPlot(plt)
 	pl.Plot = plt

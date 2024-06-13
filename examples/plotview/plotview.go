@@ -9,7 +9,7 @@ import (
 	"log/slog"
 
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/plot/plotview"
+	"cogentcore.org/core/plot/plotcore"
 	"cogentcore.org/core/tensor/table"
 )
 
@@ -29,7 +29,7 @@ func main() {
 		epc := table.NewTable("epc")
 		epc.OpenFS(tsv, "ra25epoch.tsv", table.Tab)
 
-		pl := plotview.NewPlotView(b)
+		pl := plotcore.NewPlotView(b)
 		pl.Params.Title = "RA25 Epoch Train"
 		pl.Params.XAxisColumn = "Epoch"
 		// pl.Params.Scale = 2
@@ -48,7 +48,7 @@ func main() {
 			slog.Error(err.Error())
 		}
 
-		pl := plotview.NewPlotView(b)
+		pl := plotcore.NewPlotView(b)
 		pl.Params.Title = "Slice Data"
 		pl.Params.XAxisColumn = "City"
 		pl.Params.Points = true
