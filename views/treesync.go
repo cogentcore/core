@@ -28,14 +28,14 @@ import (
 // SyncTree sets the root view to the root of the sync source tree node
 // for this Tree, and syncs the rest of the tree to match.
 // The source tree must have unique names for each child within a given parent.
-func (tv *Tree) SyncTree(n tree.Node) *Tree {
-	if tv.SyncNode != n {
-		tv.SyncNode = n
+func (tr *Tree) SyncTree(n tree.Node) *Tree {
+	if tr.SyncNode != n {
+		tr.SyncNode = n
 	}
 	tvIndex := 0
-	tv.SyncToSrc(&tvIndex, true, 0)
-	tv.Update()
-	return tv
+	tr.SyncToSrc(&tvIndex, true, 0)
+	tr.Update()
+	return tr
 }
 
 // SetSyncNode sets the sync source node that we are viewing,
@@ -43,72 +43,72 @@ func (tv *Tree) SyncTree(n tree.Node) *Tree {
 // via SyncToSrc during tree updating.
 // It uses tree Config mechanism to perform minimal updates to
 // remain in sync.
-func (tv *Tree) SetSyncNode(sn tree.Node, tvIndex *int, init bool, depth int) {
-	if tv.SyncNode != sn {
-		tv.SyncNode = sn
+func (tr *Tree) SetSyncNode(sn tree.Node, tvIndex *int, init bool, depth int) {
+	if tr.SyncNode != sn {
+		tr.SyncNode = sn
 	}
-	tv.SyncToSrc(tvIndex, init, depth)
+	tr.SyncToSrc(tvIndex, init, depth)
 }
 
 // ReSync resynchronizes the view relative to the underlying nodes
 // and forces a full rerender
-func (tv *Tree) ReSync() {
-	tvIndex := tv.viewIndex
-	tv.SyncToSrc(&tvIndex, false, 0)
-	tv.Update()
+func (tr *Tree) ReSync() {
+	tvIndex := tr.viewIndex
+	tr.SyncToSrc(&tvIndex, false, 0)
+	tr.Update()
 }
 
 // SyncToSrc updates the view tree to match the sync tree, using
 // ConfigChildren to maximally preserve existing tree elements.
 // init means we are doing initial build, and depth tracks depth
 // (only during init).
-func (tv *Tree) SyncToSrc(tvIndex *int, init bool, depth int) {
-	sn := tv.SyncNode
+func (tr *Tree) SyncToSrc(tvIndex *int, init bool, depth int) {
+	sn := tr.SyncNode
 	// root must keep the same name for continuity with surrounding context
-	if tv != tv.RootView {
+	if tr != tr.RootView {
 		nm := "tv_" + sn.AsTree().Name
-		tv.SetName(nm)
+		tr.SetName(nm)
 	}
-	tv.viewIndex = *tvIndex
+	tr.viewIndex = *tvIndex
 	*tvIndex++
-	if init && depth >= tv.RootView.OpenDepth {
-		tv.SetClosed(true)
+	if init && depth >= tr.RootView.OpenDepth {
+		tr.SetClosed(true)
 	}
 	skids := sn.AsTree().Children
 	p := make(tree.TypePlan, 0, len(skids))
-	typ := tv.This.NodeType()
+	typ := tr.This.NodeType()
 	for _, skid := range skids {
 		p.Add(typ, "tv_"+skid.AsTree().Name)
 	}
-	tree.Update(tv, p)
+	tree.Update(tr, p)
 	idx := 0
 	for _, skid := range sn.AsTree().Children {
-		if len(tv.Children) <= idx {
+		if len(tr.Children) <= idx {
 			break
 		}
-		vk := AsTree(tv.Children[idx])
+		vk := AsTree(tr.Children[idx])
 		vk.SetSyncNode(skid, tvIndex, init, depth+1)
 		idx++
 	}
 	if !sn.AsTree().HasChildren() {
-		tv.SetClosed(true)
+		tr.SetClosed(true)
 	}
 }
 
 // Label returns the display label for this node,
 // satisfying the Labeler interface
-func (tv *Tree) Label() string {
-	if tv.SyncNode != nil {
+func (tr *Tree) Label() string {
+	if tr.SyncNode != nil {
 		// TODO: make this an option?
-		if lbl, has := labels.ToLabeler(tv.SyncNode); has {
+		if lbl, has := labels.ToLabeler(tr.SyncNode); has {
 			return lbl
 		}
-		return tv.SyncNode.AsTree().Name
+		return tr.SyncNode.AsTree().Name
 	}
-	if tv.Text != "" {
-		return tv.Text
+	if tr.Text != "" {
+		return tr.Text
 	}
-	return tv.Name
+	return tr.Name
 }
 
 // UpdateReadOnly updates the ReadOnly state based on SyncNode.
@@ -117,24 +117,24 @@ func (tv *Tree) Label() string {
 // typically, and not overall functional behavior, which is controlled by
 // inactivity of the root node (i.e, make the root ReadOnly
 // to make entire tree read-only and non-modifiable)
-func (tv *Tree) UpdateReadOnly() bool {
-	if tv.SyncNode == nil {
+func (tr *Tree) UpdateReadOnly() bool {
+	if tr.SyncNode == nil {
 		return false
 	}
-	tv.SetState(false, states.Disabled)
-	if inact := tv.SyncNode.AsTree().Property("ReadOnly"); inact != nil {
+	tr.SetState(false, states.Disabled)
+	if inact := tr.SyncNode.AsTree().Property("ReadOnly"); inact != nil {
 		if bo, err := reflectx.ToBool(inact); bo && err == nil {
-			tv.SetReadOnly(true)
+			tr.SetReadOnly(true)
 		}
 	}
-	return tv.IsReadOnly()
+	return tr.IsReadOnly()
 }
 
 // SelectedSyncNodes returns a slice of the currently selected
 // sync source nodes in the entire tree
-func (tv *Tree) SelectedSyncNodes() []tree.Node {
+func (tr *Tree) SelectedSyncNodes() []tree.Node {
 	var res []tree.Node
-	sl := tv.SelectedViews()
+	sl := tr.SelectedViews()
 	for _, v := range sl {
 		res = append(res, v.AsCoreTree().SyncNode)
 	}
@@ -143,9 +143,9 @@ func (tv *Tree) SelectedSyncNodes() []tree.Node {
 
 // FindSyncNode finds Tree node for given source node,
 // or nil if not found
-func (tv *Tree) FindSyncNode(kn tree.Node) *Tree {
+func (tr *Tree) FindSyncNode(kn tree.Node) *Tree {
 	var ttv *Tree
-	tv.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
+	tr.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
 		tvn := AsTree(wi)
 		if tvn != nil {
 			if tvn.SyncNode == kn {
@@ -162,22 +162,22 @@ func (tv *Tree) FindSyncNode(kn tree.Node) *Tree {
 // after this node, at the same (sibling) level,
 // prompting for the type of node to insert.
 // If SyncNode is set, operates on Sync Tree.
-func (tv *Tree) InsertAfter() { //types:add
-	tv.InsertAt(1, "Insert After")
+func (tr *Tree) InsertAfter() { //types:add
+	tr.InsertAt(1, "Insert After")
 }
 
 // InsertBefore inserts a new node in the tree
 // before this node, at the same (sibling) level,
 // prompting for the type of node to insert
 // If SyncNode is set, operates on Sync Tree.
-func (tv *Tree) InsertBefore() { //types:add
-	tv.InsertAt(0, "Insert Before")
+func (tr *Tree) InsertBefore() { //types:add
+	tr.InsertAt(0, "Insert Before")
 }
 
-func (tv *Tree) AddTreeNodes(rel, myidx int, typ *types.Type, n int) {
+func (tr *Tree) AddTreeNodes(rel, myidx int, typ *types.Type, n int) {
 	var stv *Tree
 	for i := 0; i < n; i++ {
-		nn := tv.InsertNewChild(typ, myidx+i)
+		nn := tr.InsertNewChild(typ, myidx+i)
 		nn.AsTree().SetName(fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i))
 		ntv := AsTree(nn)
 		ntv.Update()
@@ -185,16 +185,16 @@ func (tv *Tree) AddTreeNodes(rel, myidx int, typ *types.Type, n int) {
 			stv = ntv
 		}
 	}
-	tv.Update()
-	tv.Open()
-	tv.TreeChanged(nil)
+	tr.Update()
+	tr.Open()
+	tr.TreeChanged(nil)
 	if stv != nil {
 		stv.SelectAction(events.SelectOne)
 	}
 }
 
-func (tv *Tree) AddSyncNodes(rel, myidx int, typ *types.Type, n int) {
-	parent := tv.SyncNode
+func (tr *Tree) AddSyncNodes(rel, myidx int, typ *types.Type, n int) {
+	parent := tr.SyncNode
 	var sn tree.Node
 	for i := 0; i < n; i++ {
 		nn := parent.AsTree().InsertNewChild(typ, myidx+i)
@@ -203,9 +203,9 @@ func (tv *Tree) AddSyncNodes(rel, myidx int, typ *types.Type, n int) {
 			sn = nn
 		}
 	}
-	tv.SendChangeEventReSync(nil)
+	tr.SendChangeEventReSync(nil)
 	if sn != nil {
-		if tvk := tv.ChildByName("tv_"+sn.AsTree().Name, 0); tvk != nil {
+		if tvk := tr.ChildByName("tv_"+sn.AsTree().Name, 0); tvk != nil {
 			stv := AsTree(tvk)
 			stv.SelectAction(events.SelectOne)
 		}
@@ -217,18 +217,18 @@ func (tv *Tree) AddSyncNodes(rel, myidx int, typ *types.Type, n int) {
 // at the same (sibling) level,
 // prompting for the type of node to insert
 // If SyncNode is set, operates on Sync Tree.
-func (tv *Tree) InsertAt(rel int, actNm string) {
-	if tv.IsRoot(actNm) {
+func (tr *Tree) InsertAt(rel int, actNm string) {
+	if tr.IsRoot(actNm) {
 		return
 	}
-	myidx := tv.IndexInParent()
+	myidx := tr.IndexInParent()
 	if myidx < 0 {
 		return
 	}
 	myidx += rel
-	typ := tv.This.BaseType()
-	if tv.SyncNode != nil {
-		typ = tv.SyncNode.BaseType()
+	typ := tr.This.BaseType()
+	if tr.SyncNode != nil {
+		typ = tr.SyncNode.BaseType()
 	}
 	d := core.NewBody().AddTitle(actNm).AddText("Number and type of items to insert:")
 	nd := &core.NewItemsData{Number: 1, Type: typ}
@@ -237,25 +237,25 @@ func (tv *Tree) InsertAt(rel int, actNm string) {
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
-			parent := AsTree(tv.Parent)
-			if tv.SyncNode != nil {
+			parent := AsTree(tr.Parent)
+			if tr.SyncNode != nil {
 				parent.AddSyncNodes(rel, myidx, nd.Type, nd.Number)
 			} else {
 				parent.AddTreeNodes(rel, myidx, nd.Type, nd.Number)
 			}
 		})
 	})
-	d.RunDialog(tv)
+	d.RunDialog(tr)
 }
 
 // AddChildNode adds a new child node to this one in the tree,
 // prompting the user for the type of node to add
 // If SyncNode is set, operates on Sync Tree.
-func (tv *Tree) AddChildNode() { //types:add
+func (tr *Tree) AddChildNode() { //types:add
 	ttl := "Add child"
-	typ := tv.This.BaseType()
-	if tv.SyncNode != nil {
-		typ = tv.SyncNode.BaseType()
+	typ := tr.This.BaseType()
+	if tr.SyncNode != nil {
+		typ = tr.SyncNode.BaseType()
 	}
 	d := core.NewBody().AddTitle(ttl).AddText("Number and type of items to insert:")
 	nd := &core.NewItemsData{Number: 1, Type: typ}
@@ -264,34 +264,34 @@ func (tv *Tree) AddChildNode() { //types:add
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
-			if tv.SyncNode != nil {
-				tv.AddSyncNodes(0, 0, nd.Type, nd.Number)
+			if tr.SyncNode != nil {
+				tr.AddSyncNodes(0, 0, nd.Type, nd.Number)
 			} else {
-				tv.AddTreeNodes(0, 0, nd.Type, nd.Number)
+				tr.AddTreeNodes(0, 0, nd.Type, nd.Number)
 			}
 		})
 	})
-	d.RunDialog(tv)
+	d.RunDialog(tr)
 }
 
 // DeleteNode deletes the tree node or sync node corresponding
 // to this view node in the sync tree.
 // If SyncNode is set, operates on Sync Tree.
-func (tv *Tree) DeleteNode() { //types:add
+func (tr *Tree) DeleteNode() { //types:add
 	ttl := "Delete"
-	if tv.IsRoot(ttl) {
+	if tr.IsRoot(ttl) {
 		return
 	}
-	tv.Close()
-	if tv.MoveDown(events.SelectOne) == nil {
-		tv.MoveUp(events.SelectOne)
+	tr.Close()
+	if tr.MoveDown(events.SelectOne) == nil {
+		tr.MoveUp(events.SelectOne)
 	}
-	if tv.SyncNode != nil {
-		tv.SyncNode.AsTree().Delete()
-		tv.SendChangeEventReSync(nil)
+	if tr.SyncNode != nil {
+		tr.SyncNode.AsTree().Delete()
+		tr.SendChangeEventReSync(nil)
 	} else {
-		parent := AsTree(tv.Parent)
-		tv.Delete()
+		parent := AsTree(tr.Parent)
+		tr.Delete()
 		parent.Update()
 		parent.TreeChanged(nil)
 	}
@@ -300,26 +300,26 @@ func (tv *Tree) DeleteNode() { //types:add
 // Duplicate duplicates the sync node corresponding to this view node in
 // the tree, and inserts the duplicate after this node (as a new sibling).
 // If SyncNode is set, operates on Sync Tree.
-func (tv *Tree) Duplicate() { //types:add
+func (tr *Tree) Duplicate() { //types:add
 	ttl := "Tree Duplicate"
-	if tv.IsRoot(ttl) {
+	if tr.IsRoot(ttl) {
 		return
 	}
-	if tv.Parent == nil {
+	if tr.Parent == nil {
 		return
 	}
-	if tv.SyncNode != nil {
-		tv.DuplicateSync()
+	if tr.SyncNode != nil {
+		tr.DuplicateSync()
 		return
 	}
-	parent := AsTree(tv.Parent)
-	myidx := tv.IndexInParent()
+	parent := AsTree(tr.Parent)
+	myidx := tr.IndexInParent()
 	if myidx < 0 {
 		return
 	}
-	nm := fmt.Sprintf("%v_Copy", tv.Name)
-	tv.Unselect()
-	nwkid := tv.Clone()
+	nm := fmt.Sprintf("%v_Copy", tr.Name)
+	tr.Unselect()
+	nwkid := tr.Clone()
 	nwkid.AsTree().SetName(nm)
 	ntv := AsTree(nwkid)
 	parent.InsertChild(nwkid, myidx+1)
@@ -329,12 +329,12 @@ func (tv *Tree) Duplicate() { //types:add
 	// ntv.SelectAction(events.SelectOne)
 }
 
-func (tv *Tree) DuplicateSync() {
-	sn := tv.SyncNode
-	tvparent := AsTree(tv.Parent)
+func (tr *Tree) DuplicateSync() {
+	sn := tr.SyncNode
+	tvparent := AsTree(tr.Parent)
 	parent := tvparent.SyncNode
 	if parent == nil {
-		log.Printf("Tree %v nil SyncNode in: %v\n", tv, tvparent.Path())
+		log.Printf("Tree %v nil SyncNode in: %v\n", tr, tvparent.Path())
 		return
 	}
 	myidx := sn.AsTree().IndexInParent()
@@ -354,49 +354,49 @@ func (tv *Tree) DuplicateSync() {
 
 // EditNode pulls up a FormDialog window on the node.
 // If SyncNode is set, operates on Sync Tree.
-func (tv *Tree) EditNode() { //types:add
-	if tv.SyncNode != nil {
-		tynm := tv.SyncNode.NodeType().Name
+func (tr *Tree) EditNode() { //types:add
+	if tr.SyncNode != nil {
+		tynm := tr.SyncNode.NodeType().Name
 		d := core.NewBody().AddTitle(tynm)
-		NewForm(d).SetStruct(tv.SyncNode).SetReadOnly(tv.IsReadOnly())
-		d.RunFullDialog(tv)
+		NewForm(d).SetStruct(tr.SyncNode).SetReadOnly(tr.IsReadOnly())
+		d.RunFullDialog(tr)
 	} else {
-		tynm := tv.NodeType().Name
+		tynm := tr.NodeType().Name
 		d := core.NewBody().AddTitle(tynm)
-		NewForm(d).SetStruct(tv.This).SetReadOnly(tv.IsReadOnly())
-		d.RunFullDialog(tv)
+		NewForm(d).SetStruct(tr.This).SetReadOnly(tr.IsReadOnly())
+		d.RunFullDialog(tr)
 	}
 }
 
 // InspectNode pulls up a new Inspector window on the node.
 // If SyncNode is set, operates on Sync Tree.
-func (tv *Tree) InspectNode() { //types:add
-	if tv.SyncNode != nil {
-		InspectorWindow(tv.SyncNode)
+func (tr *Tree) InspectNode() { //types:add
+	if tr.SyncNode != nil {
+		InspectorWindow(tr.SyncNode)
 	} else {
-		InspectorWindow(tv)
+		InspectorWindow(tr)
 	}
 }
 
 // MimeDataSync adds mimedata for this node: a text/plain of the Path,
 // and an application/json of the sync node.
-func (tv *Tree) MimeDataSync(md *mimedata.Mimes) {
-	sroot := tv.RootView.SyncNode
-	src := tv.SyncNode
+func (tr *Tree) MimeDataSync(md *mimedata.Mimes) {
+	sroot := tr.RootView.SyncNode
+	src := tr.SyncNode
 	*md = append(*md, mimedata.NewTextData(src.AsTree().PathFrom(sroot)))
 	var buf bytes.Buffer
 	err := jsonx.Write(src, &buf)
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: fileinfo.DataJson, Data: buf.Bytes()})
 	} else {
-		core.ErrorSnackbar(tv, err, "Error encoding node")
+		core.ErrorSnackbar(tr, err, "Error encoding node")
 	}
 }
 
 // SyncNodesFromMimeData creates a slice of tree node(s)
 // from given mime data and also a corresponding slice
 // of original paths.
-func (tv *Tree) SyncNodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
+func (tr *Tree) SyncNodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
 	ni := len(md) / 2
 	sl := make([]tree.Node, 0, ni)
 	pl := make([]string, 0, ni)
@@ -406,7 +406,7 @@ func (tv *Tree) SyncNodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string)
 			if err == nil {
 				sl = append(sl, nn)
 			} else {
-				core.ErrorSnackbar(tv, err, "Error loading node")
+				core.ErrorSnackbar(tr, err, "Error loading node")
 			}
 		} else if d.Type == fileinfo.TextPlain { // paths
 			pl = append(pl, string(d.Data))
@@ -416,30 +416,30 @@ func (tv *Tree) SyncNodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string)
 }
 
 // PasteAssignSync assigns mime data (only the first one!) to this node
-func (tv *Tree) PasteAssignSync(md mimedata.Mimes) {
-	sl, _ := tv.SyncNodesFromMimeData(md)
+func (tr *Tree) PasteAssignSync(md mimedata.Mimes) {
+	sl, _ := tr.SyncNodesFromMimeData(md)
 	if len(sl) == 0 {
 		return
 	}
-	tv.SyncNode.AsTree().CopyFrom(sl[0])
-	tv.NeedsLayout()
-	tv.SendChangeEvent(nil)
+	tr.SyncNode.AsTree().CopyFrom(sl[0])
+	tr.NeedsLayout()
+	tr.SendChangeEvent(nil)
 }
 
 // PasteAtSync inserts object(s) from mime data at rel position to this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
-func (tv *Tree) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
-	sn := tv.SyncNode
-	sl, pl := tv.NodesFromMimeData(md)
-	tvparent := AsTree(tv.Parent)
+func (tr *Tree) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
+	sn := tr.SyncNode
+	sl, pl := tr.NodesFromMimeData(md)
+	tvparent := AsTree(tr.Parent)
 	parent := sn.AsTree().Parent
 	myidx := sn.AsTree().IndexInParent()
 	if myidx < 0 {
 		return
 	}
 	myidx += rel
-	sroot := tv.RootView.SyncNode
+	sroot := tr.RootView.SyncNode
 	sz := len(sl)
 	var seln tree.Node
 	for i, ns := range sl {
@@ -469,30 +469,30 @@ func (tv *Tree) PasteAtSync(md mimedata.Mimes, mod events.DropMods, rel int, act
 
 // PasteChildrenSync inserts object(s) from mime data at
 // end of children of this node
-func (tv *Tree) PasteChildrenSync(md mimedata.Mimes, mod events.DropMods) {
-	sl, _ := tv.NodesFromMimeData(md)
-	sk := tv.SyncNode
+func (tr *Tree) PasteChildrenSync(md mimedata.Mimes, mod events.DropMods) {
+	sl, _ := tr.NodesFromMimeData(md)
+	sk := tr.SyncNode
 	for _, ns := range sl {
 		sk.AsTree().AddChild(ns)
 	}
-	tv.SendChangeEventReSync(nil)
+	tr.SendChangeEventReSync(nil)
 }
 
 // CutSync copies to system.Clipboard and deletes selected items.
-func (tv *Tree) CutSync() {
-	tv.Copy(false)
-	sels := tv.SelectedSyncNodes()
-	tv.UnselectAll()
+func (tr *Tree) CutSync() {
+	tr.Copy(false)
+	sels := tr.SelectedSyncNodes()
+	tr.UnselectAll()
 	for _, sn := range sels {
 		sn.AsTree().Delete()
 	}
-	tv.SendChangeEventReSync(nil)
+	tr.SendChangeEventReSync(nil)
 }
 
 // DropDeleteSourceSync handles delete source event for DropMove case, for Sync
-func (tv *Tree) DropDeleteSourceSync(de *events.DragDrop) {
+func (tr *Tree) DropDeleteSourceSync(de *events.DragDrop) {
 	md := de.Data.(mimedata.Mimes)
-	sroot := tv.RootView.SyncNode
+	sroot := tr.RootView.SyncNode
 	for _, d := range md {
 		if d.Type != fileinfo.TextPlain { // link
 			continue
@@ -511,5 +511,5 @@ func (tv *Tree) DropDeleteSourceSync(de *events.DragDrop) {
 			swb.NeedsRender()
 		}
 	}
-	tv.SendChangeEventReSync(nil)
+	tr.SendChangeEventReSync(nil)
 }

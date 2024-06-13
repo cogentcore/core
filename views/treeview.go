@@ -185,25 +185,25 @@ func NewTreeFrame(parent ...tree.Node) *Tree {
 }
 
 // AsCoreTree satisfies the [Treer] interface.
-func (tv *Tree) AsCoreTree() *Tree {
-	return tv
+func (tr *Tree) AsCoreTree() *Tree {
+	return tr
 }
 
-func (tv *Tree) BaseType() *types.Type {
-	return tv.NodeType()
+func (tr *Tree) BaseType() *types.Type {
+	return tr.NodeType()
 }
 
 // RootSetViewIndex sets the RootView and ViewIndex for all nodes.
 // This must be called from the root node after
 // construction or any modification to the tree.
 // Returns the total number of leaves in the tree.
-func (tv *Tree) RootSetViewIndex() int {
+func (tr *Tree) RootSetViewIndex() int {
 	idx := 0
-	tv.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
+	tr.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
 		tvn := AsTree(wi)
 		if tvn != nil {
 			tvn.viewIndex = idx
-			tvn.RootView = tv
+			tvn.RootView = tr
 			// fmt.Println(idx, tvn, "root:", tv, &tv)
 			idx++
 		}
@@ -212,17 +212,17 @@ func (tv *Tree) RootSetViewIndex() int {
 	return idx
 }
 
-func (tv *Tree) Init() {
-	tv.WidgetBase.Init()
-	tv.AddContextMenu(tv.ContextMenu)
-	tv.IconOpen = icons.KeyboardArrowDown
-	tv.IconClosed = icons.KeyboardArrowRight
-	tv.IconLeaf = icons.Blank
-	tv.OpenDepth = 4
-	tv.Styler(func(s *styles.Style) {
+func (tr *Tree) Init() {
+	tr.WidgetBase.Init()
+	tr.AddContextMenu(tr.ContextMenu)
+	tr.IconOpen = icons.KeyboardArrowDown
+	tr.IconClosed = icons.KeyboardArrowRight
+	tr.IconLeaf = icons.Blank
+	tr.OpenDepth = 4
+	tr.Styler(func(s *styles.Style) {
 		// our parts are draggable and droppable, not us ourself
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
-		tv.Indent.Em(1)
+		tr.Indent.Em(1)
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
 		s.MaxBorder = s.Border
@@ -240,8 +240,8 @@ func (tv *Tree) Init() {
 			s.Color = colors.C(colors.Scheme.OnSurface)
 		}
 	})
-	tv.FinalStyler(func(s *styles.Style) {
-		tv.actStateLayer = s.StateLayer
+	tr.FinalStyler(func(s *styles.Style) {
+		tr.actStateLayer = s.StateLayer
 		s.StateLayer = 0
 	})
 
@@ -252,74 +252,74 @@ func (tv *Tree) Init() {
 	// we only need to handle the starting ones here,
 	// as the other ones will just set the state to
 	// false, which it already is.
-	tv.On(events.MouseEnter, func(e events.Event) { e.SetHandled() })
-	tv.On(events.MouseLeave, func(e events.Event) { e.SetHandled() })
-	tv.On(events.MouseDown, func(e events.Event) { e.SetHandled() })
-	tv.OnClick(func(e events.Event) { e.SetHandled() })
-	tv.On(events.DragStart, func(e events.Event) { e.SetHandled() })
-	tv.On(events.DragEnter, func(e events.Event) { e.SetHandled() })
-	tv.On(events.DragLeave, func(e events.Event) { e.SetHandled() })
-	tv.On(events.Drop, func(e events.Event) { e.SetHandled() })
-	tv.On(events.DropDeleteSource, func(e events.Event) { e.SetHandled() })
-	tv.On(events.KeyChord, func(e events.Event) {
+	tr.On(events.MouseEnter, func(e events.Event) { e.SetHandled() })
+	tr.On(events.MouseLeave, func(e events.Event) { e.SetHandled() })
+	tr.On(events.MouseDown, func(e events.Event) { e.SetHandled() })
+	tr.OnClick(func(e events.Event) { e.SetHandled() })
+	tr.On(events.DragStart, func(e events.Event) { e.SetHandled() })
+	tr.On(events.DragEnter, func(e events.Event) { e.SetHandled() })
+	tr.On(events.DragLeave, func(e events.Event) { e.SetHandled() })
+	tr.On(events.Drop, func(e events.Event) { e.SetHandled() })
+	tr.On(events.DropDeleteSource, func(e events.Event) { e.SetHandled() })
+	tr.On(events.KeyChord, func(e events.Event) {
 		kf := keymap.Of(e.KeyChord())
 		selMode := events.SelectModeBits(e.Modifiers())
 		if core.DebugSettings.KeyEventTrace {
-			slog.Info("Tree KeyInput", "widget", tv, "keyFunction", kf, "selMode", selMode)
+			slog.Info("Tree KeyInput", "widget", tr, "keyFunction", kf, "selMode", selMode)
 		}
 
 		if selMode == events.SelectOne {
-			if tv.SelectMode {
+			if tr.SelectMode {
 				selMode = events.ExtendContinuous
 			}
 		}
 
-		tvi := tv.This.(Treer)
+		tvi := tr.This.(Treer)
 
 		// first all the keys that work for ReadOnly and active
 		switch kf {
 		case keymap.CancelSelect:
-			tv.UnselectAll()
-			tv.SetSelectMode(false)
+			tr.UnselectAll()
+			tr.SetSelectMode(false)
 			e.SetHandled()
 		case keymap.MoveRight:
-			tv.Open()
+			tr.Open()
 			e.SetHandled()
 		case keymap.MoveLeft:
-			tv.Close()
+			tr.Close()
 			e.SetHandled()
 		case keymap.MoveDown:
-			tv.MoveDownAction(selMode)
+			tr.MoveDownAction(selMode)
 			e.SetHandled()
 		case keymap.MoveUp:
-			tv.MoveUpAction(selMode)
+			tr.MoveUpAction(selMode)
 			e.SetHandled()
 		case keymap.PageUp:
-			tv.MovePageUpAction(selMode)
+			tr.MovePageUpAction(selMode)
 			e.SetHandled()
 		case keymap.PageDown:
-			tv.MovePageDownAction(selMode)
+			tr.MovePageDownAction(selMode)
 			e.SetHandled()
 		case keymap.Home:
-			tv.MoveHomeAction(selMode)
+			tr.MoveHomeAction(selMode)
 			e.SetHandled()
 		case keymap.End:
-			tv.MoveEndAction(selMode)
+			tr.MoveEndAction(selMode)
 			e.SetHandled()
 		case keymap.SelectMode:
-			tv.SelectMode = !tv.SelectMode
+			tr.SelectMode = !tr.SelectMode
 			e.SetHandled()
 		case keymap.SelectAll:
-			tv.SelectAll()
+			tr.SelectAll()
 			e.SetHandled()
 		case keymap.Enter:
-			tv.ToggleClose()
+			tr.ToggleClose()
 			e.SetHandled()
 		case keymap.Copy:
 			tvi.Copy(true)
 			e.SetHandled()
 		}
-		if !tv.RootIsReadOnly() && !e.IsHandled() {
+		if !tr.RootIsReadOnly() && !e.IsHandled() {
 			switch kf {
 			case keymap.Delete:
 				tvi.DeleteNode()
@@ -343,19 +343,19 @@ func (tv *Tree) Init() {
 		}
 	})
 
-	core.AddChildAt(tv, "parts", func(w *core.Frame) {
+	core.AddChildAt(tr, "parts", func(w *core.Frame) {
 		core.InitParts(w)
-		tvi := tv.This.(Treer)
+		tvi := tr.This.(Treer)
 		w.Styler(func(s *styles.Style) {
 			s.Cursor = cursors.Pointer
 			s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
-			s.SetAbilities(!tv.IsReadOnly() && !tv.RootIsReadOnly(), abilities.Draggable, abilities.Droppable)
+			s.SetAbilities(!tr.IsReadOnly() && !tr.RootIsReadOnly(), abilities.Draggable, abilities.Droppable)
 			s.Gap.X.Em(0.1)
 			s.Padding.Zero()
 
 			// we manually inherit our state layer from the tree state
 			// layer so that the parts get it but not the other trees
-			s.StateLayer = tv.actStateLayer
+			s.StateLayer = tr.actStateLayer
 		})
 		w.AsWidget().FinalStyler(func(s *styles.Style) {
 			s.Grow.Set(1, 0)
@@ -365,49 +365,49 @@ func (tv *Tree) Init() {
 		// something with this tree specifically,
 		// not with any of our children (see HandleTreeMouse)
 		w.On(events.MouseEnter, func(e events.Event) {
-			tv.SetState(true, states.Hovered)
-			tv.Style()
-			tv.NeedsRender()
+			tr.SetState(true, states.Hovered)
+			tr.Style()
+			tr.NeedsRender()
 			e.SetHandled()
 		})
 		w.On(events.MouseLeave, func(e events.Event) {
-			tv.SetState(false, states.Hovered)
-			tv.Style()
-			tv.NeedsRender()
+			tr.SetState(false, states.Hovered)
+			tr.Style()
+			tr.NeedsRender()
 			e.SetHandled()
 		})
 		w.On(events.MouseDown, func(e events.Event) {
-			tv.SetState(true, states.Active)
-			tv.Style()
-			tv.NeedsRender()
+			tr.SetState(true, states.Active)
+			tr.Style()
+			tr.NeedsRender()
 			e.SetHandled()
 		})
 		w.On(events.MouseUp, func(e events.Event) {
-			tv.SetState(false, states.Active)
-			tv.Style()
-			tv.NeedsRender()
+			tr.SetState(false, states.Active)
+			tr.Style()
+			tr.NeedsRender()
 			e.SetHandled()
 		})
 		w.OnClick(func(e events.Event) {
-			tv.SelectAction(e.SelectMode())
+			tr.SelectAction(e.SelectMode())
 			e.SetHandled()
 		})
 		w.AsWidget().OnDoubleClick(func(e events.Event) {
-			tv.This.(Treer).OnDoubleClick(e)
+			tr.This.(Treer).OnDoubleClick(e)
 		})
 		w.On(events.DragStart, func(e events.Event) {
 			tvi.DragStart(e)
 		})
 		w.On(events.DragEnter, func(e events.Event) {
-			tv.SetState(true, states.DragHovered)
-			tv.Style()
-			tv.NeedsRender()
+			tr.SetState(true, states.DragHovered)
+			tr.Style()
+			tr.NeedsRender()
 			e.SetHandled()
 		})
 		w.On(events.DragLeave, func(e events.Event) {
-			tv.SetState(false, states.DragHovered)
-			tv.Style()
-			tv.NeedsRender()
+			tr.SetState(false, states.DragHovered)
+			tr.Style()
+			tr.NeedsRender()
 			e.SetHandled()
 		})
 		w.On(events.Drop, func(e events.Event) {
@@ -419,15 +419,15 @@ func (tv *Tree) Init() {
 		// the context menu events will get sent to the parts, so it
 		// needs to intercept them and send them up
 		w.On(events.ContextMenu, func(e events.Event) {
-			sels := tv.SelectedViews()
+			sels := tr.SelectedViews()
 			if len(sels) == 0 {
-				tv.SelectAction(e.SelectMode())
+				tr.SelectAction(e.SelectMode())
 			}
-			tv.ShowContextMenu(e)
+			tr.ShowContextMenu(e)
 		})
 		core.AddChildAt(w, "branch", func(w *core.Switch) {
 			w.SetType(core.SwitchCheckbox)
-			w.SetIcons(tv.IconOpen, tv.IconClosed, tv.IconLeaf)
+			w.SetIcons(tr.IconOpen, tr.IconClosed, tr.IconLeaf)
 			w.Styler(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Focusable)
 				// parent will handle our cursor
@@ -446,29 +446,29 @@ func (tv *Tree) Init() {
 			})
 			w.OnClick(func(e events.Event) {
 				if w.IsChecked() && !w.StateIs(states.Indeterminate) {
-					if !tv.Closed {
-						tv.Close()
+					if !tr.Closed {
+						tr.Close()
 					}
 				} else {
-					if tv.Closed {
-						tv.Open()
+					if tr.Closed {
+						tr.Open()
 					}
 				}
 			})
 			w.Updater(func() {
-				if tv.This.(Treer).CanOpen() {
-					tv.SetBranchState()
+				if tr.This.(Treer).CanOpen() {
+					tr.SetBranchState()
 				}
 			})
 		})
 		w.Maker(func(p *core.Plan) {
-			if tv.Icon.IsSet() {
+			if tr.Icon.IsSet() {
 				core.AddAt(p, "icon", func(w *core.Icon) {
 					w.Styler(func(s *styles.Style) {
 						s.Font.Size.Dp(16)
 					})
 					w.Updater(func() {
-						w.SetIcon(tv.Icon)
+						w.SetIcon(tr.Icon)
 					})
 				})
 			}
@@ -481,92 +481,69 @@ func (tv *Tree) Init() {
 				s.Min.Y.Em(1.2)
 			})
 			w.Updater(func() {
-				w.SetText(tv.Label())
+				w.SetText(tr.Label())
 			})
 		})
 	})
 }
 
-func (tv *Tree) OnAdd() {
-	tv.WidgetBase.OnAdd()
-	tv.Text = tv.Name
-	if ptv := AsTree(tv.Parent); ptv != nil {
-		tv.RootView = ptv.RootView
-		tv.IconOpen = ptv.IconOpen
-		tv.IconClosed = ptv.IconClosed
-		tv.IconLeaf = ptv.IconLeaf
+func (tr *Tree) OnAdd() {
+	tr.WidgetBase.OnAdd()
+	tr.Text = tr.Name
+	if ptv := AsTree(tr.Parent); ptv != nil {
+		tr.RootView = ptv.RootView
+		tr.IconOpen = ptv.IconOpen
+		tr.IconClosed = ptv.IconClosed
+		tr.IconLeaf = ptv.IconLeaf
 	} else {
 		// fmt.Println("set root to:", tv, &tv)
-		tv.RootView = tv
+		tr.RootView = tr
 	}
 }
 
 // RootIsReadOnly returns the ReadOnly status of the root node,
 // which is what controls the functional inactivity of the tree
 // if individual nodes are ReadOnly that only affects display typically.
-func (tv *Tree) RootIsReadOnly() bool {
-	if tv.RootView == nil {
+func (tr *Tree) RootIsReadOnly() bool {
+	if tr.RootView == nil {
 		return true
 	}
-	return tv.RootView.IsReadOnly()
+	return tr.RootView.IsReadOnly()
 }
 
 // qt calls the open / close thing a "branch"
 // http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtree
 
-// BranchPart returns the branch in parts, if it exists
-func (tv *Tree) BranchPart() (*core.Switch, bool) {
-	if tv.Parts == nil {
+// Branch returns the branch widget in parts, if it exists
+func (tr *Tree) Branch() (*core.Switch, bool) {
+	if tr.Parts == nil {
 		return nil, false
 	}
-	if icc := tv.Parts.ChildByName("branch", 0); icc != nil {
+	if icc := tr.Parts.ChildByName("branch", 0); icc != nil {
 		return icc.(*core.Switch), true
 	}
 	return nil, false
 }
 
-// IconPart returns the icon in parts, if it exists
-func (tv *Tree) IconPart() (*core.Icon, bool) {
-	if tv.Parts == nil {
-		return nil, false
+func (tr *Tree) Style() {
+	if !tr.HasChildren() {
+		tr.SetClosed(true)
 	}
-	if icc := tv.Parts.ChildByName("icon", 1); icc != nil {
-		return icc.(*core.Icon), true
-	}
-	return nil, false
+	tr.Indent.ToDots(&tr.Styles.UnitContext)
+	tr.WidgetBase.Style()
 }
 
-// LabelPart returns the label in parts, if it exists
-func (tv *Tree) LabelPart() (*core.Text, bool) {
-	if tv.Parts == nil {
-		return nil, false
-	}
-	if lbl := tv.Parts.ChildByName("label", 1); lbl != nil {
-		return lbl.(*core.Text), true
-	}
-	return nil, false
-}
+func (tr *Tree) UpdateBranchIcons() {}
 
-func (tv *Tree) Style() {
-	if !tv.HasChildren() {
-		tv.SetClosed(true)
-	}
-	tv.Indent.ToDots(&tv.Styles.UnitContext)
-	tv.WidgetBase.Style()
-}
-
-func (tv *Tree) UpdateBranchIcons() {
-}
-
-func (tv *Tree) SetBranchState() {
-	br, ok := tv.BranchPart()
+func (tr *Tree) SetBranchState() {
+	br, ok := tr.Branch()
 	if !ok {
 		return
 	}
 	switch {
-	case !tv.This.(Treer).CanOpen():
+	case !tr.This.(Treer).CanOpen():
 		br.SetState(true, states.Indeterminate)
-	case tv.Closed:
+	case tr.Closed:
 		br.SetState(false, states.Indeterminate)
 		br.SetState(false, states.Checked)
 		br.NeedsRender()
@@ -580,60 +557,60 @@ func (tv *Tree) SetBranchState() {
 // Tree is tricky for alloc because it is both a layout
 // of its children but has to maintain its own bbox for its own widget.
 
-func (tv *Tree) SizeUp() {
-	tv.WidgetBase.SizeUp()
-	tv.widgetSize = tv.Geom.Size.Actual.Total
-	h := tv.widgetSize.Y
-	w := tv.widgetSize.X
+func (tr *Tree) SizeUp() {
+	tr.WidgetBase.SizeUp()
+	tr.widgetSize = tr.Geom.Size.Actual.Total
+	h := tr.widgetSize.Y
+	w := tr.widgetSize.X
 
-	if !tv.Closed {
+	if !tr.Closed {
 		// we layout children under us
-		tv.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
+		tr.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
 			kwi.SizeUp()
 			h += kwb.Geom.Size.Actual.Total.Y
 			kw := kwb.Geom.Size.Actual.Total.X
 			if math32.IsNaN(kw) { // somehow getting a nan
 				slog.Error("Tree, node width is NaN", "node:", kwb)
 			} else {
-				w = max(w, tv.Indent.Dots+kw)
+				w = max(w, tr.Indent.Dots+kw)
 			}
 			// fmt.Println(kwb, w, h)
 			return tree.Continue
 		})
 	}
-	sz := &tv.Geom.Size
+	sz := &tr.Geom.Size
 	sz.Actual.Content = math32.Vec2(w, h)
 	sz.SetTotalFromContent(&sz.Actual)
 	sz.Alloc = sz.Actual // need allocation to match!
-	tv.widgetSize.X = w  // stretch
+	tr.widgetSize.X = w  // stretch
 }
 
-func (tv *Tree) SizeDown(iter int) bool {
+func (tr *Tree) SizeDown(iter int) bool {
 	// note: key to not grab the whole allocation, as widget default does
-	redo := tv.SizeDownParts(iter) // give our content to parts
-	re := tv.SizeDownChildren(iter)
+	redo := tr.SizeDownParts(iter) // give our content to parts
+	re := tr.SizeDownChildren(iter)
 	return redo || re
 }
 
-func (tv *Tree) Position() {
-	rn := tv.RootView
+func (tr *Tree) Position() {
+	rn := tr.RootView
 	if rn == nil {
-		slog.Error("views.Tree: RootView is nil", "in node:", tv)
+		slog.Error("views.Tree: RootView is nil", "in node:", tr)
 		return
 	}
-	tv.SetBranchState()
-	tv.This.(Treer).UpdateBranchIcons()
+	tr.SetBranchState()
+	tr.This.(Treer).UpdateBranchIcons()
 
-	tv.Geom.Size.Actual.Total.X = rn.Geom.Size.Actual.Total.X - (tv.Geom.Pos.Total.X - rn.Geom.Pos.Total.X)
-	tv.widgetSize.X = tv.Geom.Size.Actual.Total.X
+	tr.Geom.Size.Actual.Total.X = rn.Geom.Size.Actual.Total.X - (tr.Geom.Pos.Total.X - rn.Geom.Pos.Total.X)
+	tr.widgetSize.X = tr.Geom.Size.Actual.Total.X
 
-	tv.WidgetBase.Position()
+	tr.WidgetBase.Position()
 
-	if !tv.Closed {
-		h := tv.widgetSize.Y
-		tv.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
+	if !tr.Closed {
+		h := tr.widgetSize.Y
+		tr.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
 			kwb.Geom.RelPos.Y = h
-			kwb.Geom.RelPos.X = tv.Indent.Dots
+			kwb.Geom.RelPos.X = tr.Indent.Dots
 			h += kwb.Geom.Size.Actual.Total.Y
 			kwi.Position()
 			return tree.Continue
@@ -641,54 +618,54 @@ func (tv *Tree) Position() {
 	}
 }
 
-func (tv *Tree) ScenePos() {
-	sz := &tv.Geom.Size
-	if sz.Actual.Total == tv.widgetSize {
+func (tr *Tree) ScenePos() {
+	sz := &tr.Geom.Size
+	if sz.Actual.Total == tr.widgetSize {
 		sz.SetTotalFromContent(&sz.Actual) // restore after scrolling
 	}
-	tv.WidgetBase.ScenePos()
-	tv.ScenePosChildren()
-	tv.Geom.Size.Actual.Total = tv.widgetSize // key: we revert to just ourselves
+	tr.WidgetBase.ScenePos()
+	tr.ScenePosChildren()
+	tr.Geom.Size.Actual.Total = tr.widgetSize // key: we revert to just ourselves
 }
 
-func (tv *Tree) Render() {
-	pc := &tv.Scene.PaintContext
-	st := &tv.Styles
+func (tr *Tree) Render() {
+	pc := &tr.Scene.PaintContext
+	st := &tr.Styles
 
-	pabg := tv.ParentActualBackground()
+	pabg := tr.ParentActualBackground()
 
 	// must use workaround act values
-	st.StateLayer = tv.actStateLayer
+	st.StateLayer = tr.actStateLayer
 	if st.Is(states.Selected) {
 		st.Background = colors.C(colors.Scheme.Select.Container)
 	}
-	tv.Styles.ComputeActualBackground(pabg)
+	tr.Styles.ComputeActualBackground(pabg)
 
-	pc.DrawStandardBox(st, tv.Geom.Pos.Total, tv.Geom.Size.Actual.Total, pabg)
+	pc.DrawStandardBox(st, tr.Geom.Pos.Total, tr.Geom.Size.Actual.Total, pabg)
 
 	// after we are done rendering, we clear the values so they aren't inherited
 	st.StateLayer = 0
 	st.Background = nil
-	tv.Styles.ComputeActualBackground(pabg)
+	tr.Styles.ComputeActualBackground(pabg)
 }
 
-func (tv *Tree) RenderWidget() {
-	if tv.PushBounds() {
-		tv.Render()
-		if tv.Parts != nil {
+func (tr *Tree) RenderWidget() {
+	if tr.PushBounds() {
+		tr.Render()
+		if tr.Parts != nil {
 			// we must copy from actual values in parent
-			tv.Parts.Styles.StateLayer = tv.actStateLayer
-			if tv.StateIs(states.Selected) {
-				tv.Parts.Styles.Background = colors.C(colors.Scheme.Select.Container)
+			tr.Parts.Styles.StateLayer = tr.actStateLayer
+			if tr.StateIs(states.Selected) {
+				tr.Parts.Styles.Background = colors.C(colors.Scheme.Select.Container)
 			}
-			tv.RenderParts()
+			tr.RenderParts()
 		}
-		tv.PopBounds()
+		tr.PopBounds()
 	}
 	// we always have to render our kids b/c
 	// we could be out of scope but they could be in!
-	if !tv.Closed {
-		tv.RenderChildren()
+	if !tr.Closed {
+		tr.RenderChildren()
 	}
 }
 
@@ -698,68 +675,68 @@ func (tv *Tree) RenderWidget() {
 // SelectedViews returns a slice of the currently selected
 // Trees within the entire tree, using a list maintained
 // by the root node
-func (tv *Tree) SelectedViews() []Treer {
-	if tv.RootView == nil {
+func (tr *Tree) SelectedViews() []Treer {
+	if tr.RootView == nil {
 		return nil
 	}
-	if len(tv.RootView.SelectedNodes) == 0 {
-		return tv.RootView.SelectedNodes
+	if len(tr.RootView.SelectedNodes) == 0 {
+		return tr.RootView.SelectedNodes
 	}
-	sels := tv.RootView.SelectedNodes
+	sels := tr.RootView.SelectedNodes
 	return slices.Clone(sels)
 }
 
 // SetSelectedViews updates the selected views to given list
-func (tv *Tree) SetSelectedViews(sl []Treer) {
-	if tv.RootView != nil {
-		tv.RootView.SelectedNodes = sl
+func (tr *Tree) SetSelectedViews(sl []Treer) {
+	if tr.RootView != nil {
+		tr.RootView.SelectedNodes = sl
 	}
 }
 
 // HasSelection returns true if there are currently selected items
-func (tv *Tree) HasSelection() bool {
-	return len(tv.SelectedViews()) > 0
+func (tr *Tree) HasSelection() bool {
+	return len(tr.SelectedViews()) > 0
 }
 
 // Select selects this node (if not already selected).
 // Must use this method to update global selection list
-func (tv *Tree) Select() {
-	if !tv.StateIs(states.Selected) {
-		tv.SetSelected(true)
-		tv.Style()
-		sl := tv.SelectedViews()
-		sl = append(sl, tv.This.(Treer))
-		tv.SetSelectedViews(sl)
-		tv.NeedsRender()
+func (tr *Tree) Select() {
+	if !tr.StateIs(states.Selected) {
+		tr.SetSelected(true)
+		tr.Style()
+		sl := tr.SelectedViews()
+		sl = append(sl, tr.This.(Treer))
+		tr.SetSelectedViews(sl)
+		tr.NeedsRender()
 	}
 }
 
 // Unselect unselects this node (if selected).
 // Must use this method to update global selection list.
-func (tv *Tree) Unselect() {
-	if tv.StateIs(states.Selected) {
-		tv.SetSelected(false)
-		tv.Style()
-		sl := tv.SelectedViews()
+func (tr *Tree) Unselect() {
+	if tr.StateIs(states.Selected) {
+		tr.SetSelected(false)
+		tr.Style()
+		sl := tr.SelectedViews()
 		sz := len(sl)
 		for i := 0; i < sz; i++ {
-			if sl[i] == tv {
+			if sl[i] == tr {
 				sl = append(sl[:i], sl[i+1:]...)
 				break
 			}
 		}
-		tv.SetSelectedViews(sl)
-		tv.NeedsRender()
+		tr.SetSelectedViews(sl)
+		tr.NeedsRender()
 	}
 }
 
 // UnselectAll unselects all selected items in the view
-func (tv *Tree) UnselectAll() {
-	if tv.Scene == nil {
+func (tr *Tree) UnselectAll() {
+	if tr.Scene == nil {
 		return
 	}
-	sl := tv.SelectedViews()
-	tv.SetSelectedViews(nil) // clear in advance
+	sl := tr.SelectedViews()
+	tr.SetSelectedViews(nil) // clear in advance
 	for _, v := range sl {
 		vt := v.AsCoreTree()
 		if vt == nil || vt.This == nil {
@@ -769,52 +746,52 @@ func (tv *Tree) UnselectAll() {
 		v.Style()
 		vt.NeedsRender()
 	}
-	tv.NeedsRender()
+	tr.NeedsRender()
 }
 
 // SelectAll all items in view
-func (tv *Tree) SelectAll() {
-	if tv.Scene == nil {
+func (tr *Tree) SelectAll() {
+	if tr.Scene == nil {
 		return
 	}
-	tv.UnselectAll()
-	nn := tv.RootView
+	tr.UnselectAll()
+	nn := tr.RootView
 	nn.Select()
 	for nn != nil {
 		nn = nn.MoveDown(events.SelectQuiet)
 	}
-	tv.NeedsRender()
+	tr.NeedsRender()
 }
 
 // SelectUpdate updates selection to include this node,
 // using selectmode from mouse event (ExtendContinuous, ExtendOne).
 // Returns true if this node selected
-func (tv *Tree) SelectUpdate(mode events.SelectModes) bool {
+func (tr *Tree) SelectUpdate(mode events.SelectModes) bool {
 	if mode == events.NoSelect {
 		return false
 	}
 	sel := false
 	switch mode {
 	case events.SelectOne:
-		if tv.StateIs(states.Selected) {
-			sl := tv.SelectedViews()
+		if tr.StateIs(states.Selected) {
+			sl := tr.SelectedViews()
 			if len(sl) > 1 {
-				tv.UnselectAll()
-				tv.Select()
-				tv.SetFocus()
+				tr.UnselectAll()
+				tr.Select()
+				tr.SetFocus()
 				sel = true
 			}
 		} else {
-			tv.UnselectAll()
-			tv.Select()
-			tv.SetFocus()
+			tr.UnselectAll()
+			tr.Select()
+			tr.SetFocus()
 			sel = true
 		}
 	case events.ExtendContinuous:
-		sl := tv.SelectedViews()
+		sl := tr.SelectedViews()
 		if len(sl) == 0 {
-			tv.Select()
-			tv.SetFocus()
+			tr.Select()
+			tr.SetFocus()
 			sel = true
 		} else {
 			minIndex := -1
@@ -828,15 +805,15 @@ func (tv *Tree) SelectUpdate(mode events.SelectModes) bool {
 				}
 				maxIndex = max(maxIndex, vn.viewIndex)
 			}
-			cidx := tv.viewIndex
-			nn := tv
-			tv.Select()
-			if tv.viewIndex < minIndex {
+			cidx := tr.viewIndex
+			nn := tr
+			tr.Select()
+			if tr.viewIndex < minIndex {
 				for cidx < minIndex {
 					nn = nn.MoveDown(events.SelectQuiet) // just select
 					cidx = nn.viewIndex
 				}
-			} else if tv.viewIndex > maxIndex {
+			} else if tr.viewIndex > maxIndex {
 				for cidx > maxIndex {
 					nn = nn.MoveUp(events.SelectQuiet) // just select
 					cidx = nn.viewIndex
@@ -844,70 +821,70 @@ func (tv *Tree) SelectUpdate(mode events.SelectModes) bool {
 			}
 		}
 	case events.ExtendOne:
-		if tv.StateIs(states.Selected) {
-			tv.UnselectAction()
+		if tr.StateIs(states.Selected) {
+			tr.UnselectAction()
 		} else {
-			tv.Select()
-			tv.SetFocus()
+			tr.Select()
+			tr.SetFocus()
 			sel = true
 		}
 	case events.SelectQuiet:
-		tv.Select()
+		tr.Select()
 		// not sel -- no signal..
 	case events.UnselectQuiet:
-		tv.Unselect()
+		tr.Unselect()
 		// not sel -- no signal..
 	}
-	tv.NeedsRender()
+	tr.NeedsRender()
 	return sel
 }
 
 // SendSelectEvent sends an [events.Select] event on the RootView node.
-func (tv *Tree) SendSelectEvent(original ...events.Event) {
+func (tr *Tree) SendSelectEvent(original ...events.Event) {
 	// fmt.Println("root:", &tv.RootView, tv.RootView.Listeners)
-	tv.RootView.Send(events.Select, original...)
+	tr.RootView.Send(events.Select, original...)
 }
 
 // SendChangeEvent sends an [events.Change] event on the RootView node.
-func (tv *Tree) SendChangeEvent(original ...events.Event) {
-	tv.RootView.SendChange(original...)
+func (tr *Tree) SendChangeEvent(original ...events.Event) {
+	tr.RootView.SendChange(original...)
 }
 
 // TreeChanged must be called after any structural
 // change to the Tree (adding or deleting nodes).
 // It calls RootSetViewIndex to update indexes and
 // SendChangeEvent to notify of changes.
-func (tv *Tree) TreeChanged(original ...events.Event) {
-	tv.RootView.RootSetViewIndex()
-	tv.SendChangeEvent(original...)
+func (tr *Tree) TreeChanged(original ...events.Event) {
+	tr.RootView.RootSetViewIndex()
+	tr.SendChangeEvent(original...)
 }
 
 // SendChangeEventReSync sends an [events.Change] event on the RootView node.
 // If SyncNode != nil, it also does a re-sync from root.
-func (tv *Tree) SendChangeEventReSync(original ...events.Event) {
-	tv.RootView.SendChange(original...)
-	if tv.RootView.SyncNode != nil {
-		tv.RootView.ReSync()
+func (tr *Tree) SendChangeEventReSync(original ...events.Event) {
+	tr.RootView.SendChange(original...)
+	if tr.RootView.SyncNode != nil {
+		tr.RootView.ReSync()
 	}
 }
 
 // SelectAction updates selection to include this node,
 // using selectmode from mouse event (ExtendContinuous, ExtendOne),
 // and Root sends selection event.  Returns true if signal emitted.
-func (tv *Tree) SelectAction(mode events.SelectModes) bool {
-	sel := tv.SelectUpdate(mode)
+func (tr *Tree) SelectAction(mode events.SelectModes) bool {
+	sel := tr.SelectUpdate(mode)
 	if sel {
-		tv.SendSelectEvent()
+		tr.SendSelectEvent()
 	}
 	return sel
 }
 
 // UnselectAction unselects this node (if selected),
 // and Root sends a selection event.
-func (tv *Tree) UnselectAction() {
-	if tv.StateIs(states.Selected) {
-		tv.Unselect()
-		tv.SendSelectEvent()
+func (tr *Tree) UnselectAction() {
+	if tr.StateIs(states.Selected) {
+		tr.Unselect()
+		tr.SendSelectEvent()
 	}
 }
 
@@ -917,15 +894,15 @@ func (tv *Tree) UnselectAction() {
 // MoveDown moves the selection down to next element in the tree,
 // using given select mode (from keyboard modifiers).
 // Returns newly selected node.
-func (tv *Tree) MoveDown(selMode events.SelectModes) *Tree {
-	if tv.Parent == nil {
+func (tr *Tree) MoveDown(selMode events.SelectModes) *Tree {
+	if tr.Parent == nil {
 		return nil
 	}
-	if tv.Closed || !tv.HasChildren() { // next sibling
-		return tv.MoveDownSibling(selMode)
+	if tr.Closed || !tr.HasChildren() { // next sibling
+		return tr.MoveDownSibling(selMode)
 	} else {
-		if tv.HasChildren() {
-			nn := AsTree(tv.Child(0))
+		if tr.HasChildren() {
+			nn := AsTree(tr.Child(0))
 			if nn != nil {
 				nn.SelectUpdate(selMode)
 				return nn
@@ -938,34 +915,34 @@ func (tv *Tree) MoveDown(selMode events.SelectModes) *Tree {
 // MoveDownAction moves the selection down to next element in the tree,
 // using given select mode (from keyboard modifiers).
 // Sends select event for newly selected item.
-func (tv *Tree) MoveDownAction(selMode events.SelectModes) *Tree {
-	nn := tv.MoveDown(selMode)
-	if nn != nil && nn != tv {
+func (tr *Tree) MoveDownAction(selMode events.SelectModes) *Tree {
+	nn := tr.MoveDown(selMode)
+	if nn != nil && nn != tr {
 		nn.SetFocus()
 		nn.ScrollToMe()
-		tv.SendSelectEvent()
+		tr.SendSelectEvent()
 	}
 	return nn
 }
 
 // MoveDownSibling moves down only to siblings, not down into children,
 // using given select mode (from keyboard modifiers)
-func (tv *Tree) MoveDownSibling(selMode events.SelectModes) *Tree {
-	if tv.Parent == nil {
+func (tr *Tree) MoveDownSibling(selMode events.SelectModes) *Tree {
+	if tr.Parent == nil {
 		return nil
 	}
-	if tv == tv.RootView {
+	if tr == tr.RootView {
 		return nil
 	}
-	myidx := tv.IndexInParent()
-	if myidx < len(tv.Parent.AsTree().Children)-1 {
-		nn := AsTree(tv.Parent.AsTree().Child(myidx + 1))
+	myidx := tr.IndexInParent()
+	if myidx < len(tr.Parent.AsTree().Children)-1 {
+		nn := AsTree(tr.Parent.AsTree().Child(myidx + 1))
 		if nn != nil {
 			nn.SelectUpdate(selMode)
 			return nn
 		}
 	} else {
-		return AsTree(tv.Parent).MoveDownSibling(selMode) // try up
+		return AsTree(tr.Parent).MoveDownSibling(selMode) // try up
 	}
 	return nil
 }
@@ -973,19 +950,19 @@ func (tv *Tree) MoveDownSibling(selMode events.SelectModes) *Tree {
 // MoveUp moves selection up to previous element in the tree,
 // using given select mode (from keyboard modifiers).
 // Returns newly selected node
-func (tv *Tree) MoveUp(selMode events.SelectModes) *Tree {
-	if tv.Parent == nil || tv == tv.RootView {
+func (tr *Tree) MoveUp(selMode events.SelectModes) *Tree {
+	if tr.Parent == nil || tr == tr.RootView {
 		return nil
 	}
-	myidx := tv.IndexInParent()
+	myidx := tr.IndexInParent()
 	if myidx > 0 {
-		nn := AsTree(tv.Parent.AsTree().Child(myidx - 1))
+		nn := AsTree(tr.Parent.AsTree().Child(myidx - 1))
 		if nn != nil {
 			return nn.MoveToLastChild(selMode)
 		}
 	} else {
-		if tv.Parent != nil {
-			nn := AsTree(tv.Parent)
+		if tr.Parent != nil {
+			nn := AsTree(tr.Parent)
 			if nn != nil {
 				nn.SelectUpdate(selMode)
 				return nn
@@ -998,12 +975,12 @@ func (tv *Tree) MoveUp(selMode events.SelectModes) *Tree {
 // MoveUpAction moves the selection up to previous element in the tree,
 // using given select mode (from keyboard modifiers).
 // Sends select event for newly selected item.
-func (tv *Tree) MoveUpAction(selMode events.SelectModes) *Tree {
-	nn := tv.MoveUp(selMode)
-	if nn != nil && nn != tv {
+func (tr *Tree) MoveUpAction(selMode events.SelectModes) *Tree {
+	nn := tr.MoveUp(selMode)
+	if nn != nil && nn != tr {
 		nn.SetFocus()
 		nn.ScrollToMe()
-		tv.SendSelectEvent()
+		tr.SendSelectEvent()
 	}
 	return nn
 }
@@ -1015,15 +992,15 @@ var TreePageSteps = 10
 // TreePageSteps elements in the tree,
 // using given select mode (from keyboard modifiers).
 // Sends select event for newly selected item.
-func (tv *Tree) MovePageUpAction(selMode events.SelectModes) *Tree {
+func (tr *Tree) MovePageUpAction(selMode events.SelectModes) *Tree {
 	mvMode := selMode
 	if selMode == events.SelectOne {
 		mvMode = events.NoSelect
 	} else if selMode == events.ExtendContinuous || selMode == events.ExtendOne {
 		mvMode = events.SelectQuiet
 	}
-	fnn := tv.MoveUp(mvMode)
-	if fnn != nil && fnn != tv {
+	fnn := tr.MoveUp(mvMode)
+	if fnn != nil && fnn != tr {
 		for i := 1; i < TreePageSteps; i++ {
 			nn := fnn.MoveUp(mvMode)
 			if nn == nil || nn == fnn {
@@ -1036,9 +1013,9 @@ func (tv *Tree) MovePageUpAction(selMode events.SelectModes) *Tree {
 		}
 		fnn.SetFocus()
 		fnn.ScrollToMe()
-		tv.SendSelectEvent()
+		tr.SendSelectEvent()
 	}
-	tv.NeedsRender()
+	tr.NeedsRender()
 	return fnn
 }
 
@@ -1046,15 +1023,15 @@ func (tv *Tree) MovePageUpAction(selMode events.SelectModes) *Tree {
 // previous TreePageSteps elements in the tree,
 // using given select mode (from keyboard modifiers).
 // Sends select event for newly selected item.
-func (tv *Tree) MovePageDownAction(selMode events.SelectModes) *Tree {
+func (tr *Tree) MovePageDownAction(selMode events.SelectModes) *Tree {
 	mvMode := selMode
 	if selMode == events.SelectOne {
 		mvMode = events.NoSelect
 	} else if selMode == events.ExtendContinuous || selMode == events.ExtendOne {
 		mvMode = events.SelectQuiet
 	}
-	fnn := tv.MoveDown(mvMode)
-	if fnn != nil && fnn != tv {
+	fnn := tr.MoveDown(mvMode)
+	if fnn != nil && fnn != tr {
 		for i := 1; i < TreePageSteps; i++ {
 			nn := fnn.MoveDown(mvMode)
 			if nn == nil || nn == fnn {
@@ -1067,50 +1044,50 @@ func (tv *Tree) MovePageDownAction(selMode events.SelectModes) *Tree {
 		}
 		fnn.SetFocus()
 		fnn.ScrollToMe()
-		tv.SendSelectEvent()
+		tr.SendSelectEvent()
 	}
-	tv.NeedsRender()
+	tr.NeedsRender()
 	return fnn
 }
 
 // MoveToLastChild moves to the last child under me, using given select mode
 // (from keyboard modifiers)
-func (tv *Tree) MoveToLastChild(selMode events.SelectModes) *Tree {
-	if tv.Parent == nil || tv == tv.RootView {
+func (tr *Tree) MoveToLastChild(selMode events.SelectModes) *Tree {
+	if tr.Parent == nil || tr == tr.RootView {
 		return nil
 	}
-	if !tv.Closed && tv.HasChildren() {
-		nn := AsTree(tv.Child(tv.NumChildren() - 1))
+	if !tr.Closed && tr.HasChildren() {
+		nn := AsTree(tr.Child(tr.NumChildren() - 1))
 		return nn.MoveToLastChild(selMode)
 	} else {
-		tv.SelectUpdate(selMode)
-		return tv
+		tr.SelectUpdate(selMode)
+		return tr
 	}
 }
 
 // MoveHomeAction moves the selection up to top of the tree,
 // using given select mode (from keyboard modifiers)
 // and emits select event for newly selected item
-func (tv *Tree) MoveHomeAction(selMode events.SelectModes) *Tree {
-	tv.RootView.SelectUpdate(selMode)
-	tv.RootView.SetFocus()
-	tv.RootView.ScrollToMe()
+func (tr *Tree) MoveHomeAction(selMode events.SelectModes) *Tree {
+	tr.RootView.SelectUpdate(selMode)
+	tr.RootView.SetFocus()
+	tr.RootView.ScrollToMe()
 	// tv.RootView.TreeSig.Emit(tv.RootView.This, int64(TreeSelected), tv.RootView.This)
-	return tv.RootView
+	return tr.RootView
 }
 
 // MoveEndAction moves the selection to the very last node in the tree,
 // using given select mode (from keyboard modifiers)
 // Sends select event for newly selected item.
-func (tv *Tree) MoveEndAction(selMode events.SelectModes) *Tree {
+func (tr *Tree) MoveEndAction(selMode events.SelectModes) *Tree {
 	mvMode := selMode
 	if selMode == events.SelectOne {
 		mvMode = events.NoSelect
 	} else if selMode == events.ExtendContinuous || selMode == events.ExtendOne {
 		mvMode = events.SelectQuiet
 	}
-	fnn := tv.MoveDown(mvMode)
-	if fnn != nil && fnn != tv {
+	fnn := tr.MoveDown(mvMode)
+	if fnn != nil && fnn != tr {
 		for {
 			nn := fnn.MoveDown(mvMode)
 			if nn == nil || nn == fnn {
@@ -1123,13 +1100,13 @@ func (tv *Tree) MoveEndAction(selMode events.SelectModes) *Tree {
 		}
 		fnn.SetFocus()
 		fnn.ScrollToMe()
-		tv.SendSelectEvent()
+		tr.SendSelectEvent()
 	}
 	return fnn
 }
 
-func (tv *Tree) SetKidsVisibility(parentClosed bool) {
-	for _, k := range tv.Children {
+func (tr *Tree) SetKidsVisibility(parentClosed bool) {
+	for _, k := range tr.Children {
 		tvn := AsTree(k)
 		if tvn != nil {
 			tvn.SetState(parentClosed, states.Invisible)
@@ -1139,71 +1116,69 @@ func (tv *Tree) SetKidsVisibility(parentClosed bool) {
 
 // OnClose is called when a node is closed.
 // The base version does nothing.
-func (tv *Tree) OnClose() {
-}
+func (tr *Tree) OnClose() {}
 
 // Close closes the given node and updates the view accordingly
 // (if it is not already closed).
 // Calls OnClose in Treer interface for extensible actions.
-func (tv *Tree) Close() {
-	if tv.Closed {
+func (tr *Tree) Close() {
+	if tr.Closed {
 		return
 	}
-	tv.SetClosed(true)
-	tv.SetBranchState()
-	tv.This.(Treer).OnClose()
-	tv.SetKidsVisibility(true) // parent closed
-	tv.NeedsLayout()
+	tr.SetClosed(true)
+	tr.SetBranchState()
+	tr.This.(Treer).OnClose()
+	tr.SetKidsVisibility(true) // parent closed
+	tr.NeedsLayout()
 }
 
 // OnOpen is called when a node is opened.
 // The base version does nothing.
-func (tv *Tree) OnOpen() {
-}
+func (tr *Tree) OnOpen() {}
 
-func (tv *Tree) OnDoubleClick(e events.Event) {
-	if tv.HasChildren() {
-		tv.ToggleClose()
+func (tr *Tree) OnDoubleClick(e events.Event) {
+	if tr.HasChildren() {
+		tr.ToggleClose()
 	}
 }
 
 // CanOpen returns true if the node is able to open.
 // By default it checks HasChildren(), but could check other properties
 // to perform lazy building of the tree.
-func (tv *Tree) CanOpen() bool {
-	return tv.HasChildren()
+func (tr *Tree) CanOpen() bool {
+	return tr.HasChildren()
 }
 
 // Open opens the given node and updates the view accordingly
 // (if it is not already opened).
 // Calls OnOpen in Treer interface for extensible actions.
-func (tv *Tree) Open() {
-	if !tv.Closed || tv.inOpen {
+func (tr *Tree) Open() {
+	if !tr.Closed || tr.inOpen {
 		return
 	}
-	tv.inOpen = true
-	if tv.This.(Treer).CanOpen() {
-		tv.SetClosed(false)
-		tv.SetBranchState()
-		tv.SetKidsVisibility(false)
-		tv.This.(Treer).OnOpen()
+	tr.inOpen = true
+	if tr.This.(Treer).CanOpen() {
+		tr.SetClosed(false)
+		tr.SetBranchState()
+		tr.SetKidsVisibility(false)
+		tr.This.(Treer).OnOpen()
 	}
-	tv.inOpen = false
-	tv.NeedsLayout()
+	tr.inOpen = false
+	tr.NeedsLayout()
 }
 
 // ToggleClose toggles the close / open status: if closed, opens, and vice-versa
-func (tv *Tree) ToggleClose() {
-	if tv.Closed {
-		tv.Open()
+func (tr *Tree) ToggleClose() {
+	if tr.Closed {
+		tr.Open()
 	} else {
-		tv.Close()
+		tr.Close()
 	}
 }
 
 // OpenAll opens the given node and all of its sub-nodes
-func (tv *Tree) OpenAll() { //types:add
-	tv.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
+func (tr *Tree) OpenAll() { //types:add
+	tr.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
 		tvn := AsTree(wi)
 		if tvn != nil {
 			tvn.Open()
@@ -1211,12 +1186,12 @@ func (tv *Tree) OpenAll() { //types:add
 		}
 		return tree.Break
 	})
-	tv.NeedsLayout()
+	tr.NeedsLayout()
 }
 
 // CloseAll closes the given node and all of its sub-nodes.
-func (tv *Tree) CloseAll() { //types:add
-	tv.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
+func (tr *Tree) CloseAll() { //types:add
+	tr.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
 		tvn := AsTree(wi)
 		if tvn != nil {
 			tvn.Close()
@@ -1224,13 +1199,13 @@ func (tv *Tree) CloseAll() { //types:add
 		}
 		return tree.Break
 	})
-	tv.NeedsLayout()
+	tr.NeedsLayout()
 }
 
 // OpenParents opens all the parents of this node,
 // so that it will be visible.
-func (tv *Tree) OpenParents() {
-	tv.WalkUpParent(func(k tree.Node) bool {
+func (tr *Tree) OpenParents() {
+	tr.WalkUpParent(func(k tree.Node) bool {
 		tvn := AsTree(k)
 		if tvn != nil {
 			tvn.Open()
@@ -1238,80 +1213,80 @@ func (tv *Tree) OpenParents() {
 		}
 		return tree.Break
 	})
-	tv.NeedsLayout()
+	tr.NeedsLayout()
 }
 
 /////////////////////////////////////////////////////////////
 //    Modifying Source Tree
 
-func (tv *Tree) ContextMenuPos(e events.Event) (pos image.Point) {
+func (tr *Tree) ContextMenuPos(e events.Event) (pos image.Point) {
 	if e != nil {
 		pos = e.WindowPos()
 		return
 	}
-	pos.X = tv.Geom.TotalBBox.Min.X + int(tv.Indent.Dots)
-	pos.Y = (tv.Geom.TotalBBox.Min.Y + tv.Geom.TotalBBox.Max.Y) / 2
+	pos.X = tr.Geom.TotalBBox.Min.X + int(tr.Indent.Dots)
+	pos.Y = (tr.Geom.TotalBBox.Min.Y + tr.Geom.TotalBBox.Max.Y) / 2
 	return
 }
 
-func (tv *Tree) ContextMenuReadOnly(m *core.Scene) {
+func (tr *Tree) ContextMenuReadOnly(m *core.Scene) {
 	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keymap.Copy).
-		SetEnabled(tv.HasSelection()).
+		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
-			tv.Copy(true)
+			tr.Copy(true)
 		})
 	core.NewButton(m).SetText("View").SetIcon(icons.Visibility).
-		SetEnabled(tv.HasSelection()).
+		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
-			tv.EditNode()
+			tr.EditNode()
 		})
 	core.NewSeparator(m)
 
-	NewFuncButton(m, tv.OpenAll).SetIcon(icons.KeyboardArrowDown).
-		SetEnabled(tv.HasSelection())
-	NewFuncButton(m, tv.CloseAll).SetIcon(icons.KeyboardArrowRight).
-		SetEnabled(tv.HasSelection())
+	NewFuncButton(m, tr.OpenAll).SetIcon(icons.KeyboardArrowDown).
+		SetEnabled(tr.HasSelection())
+	NewFuncButton(m, tr.CloseAll).SetIcon(icons.KeyboardArrowRight).
+		SetEnabled(tr.HasSelection())
 }
 
-func (tv *Tree) ContextMenu(m *core.Scene) {
-	if tv.IsReadOnly() || tv.RootIsReadOnly() {
-		tv.ContextMenuReadOnly(m)
+func (tr *Tree) ContextMenu(m *core.Scene) {
+	if tr.IsReadOnly() || tr.RootIsReadOnly() {
+		tr.ContextMenuReadOnly(m)
 		return
 	}
-	tvi := tv.This.(Treer)
+	tvi := tr.This.(Treer)
 	core.NewButton(m).SetText("Add child").SetIcon(icons.Add).
-		SetEnabled(tv.HasSelection()).
+		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.AddChildNode()
 		})
 	core.NewButton(m).SetText("Insert before").SetIcon(icons.Add).
-		SetEnabled(tv.HasSelection()).
+		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.InsertBefore()
 		})
 	core.NewButton(m).SetText("Insert after").SetIcon(icons.Add).
-		SetEnabled(tv.HasSelection()).
+		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.InsertAfter()
 		})
 	core.NewButton(m).SetText("Duplicate").SetIcon(icons.ContentCopy).
-		SetEnabled(tv.HasSelection()).
+		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.Duplicate()
 		})
 	core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).
-		SetEnabled(tv.HasSelection()).
+		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.DeleteNode()
 		})
 	core.NewSeparator(m)
 	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keymap.Copy).
-		SetEnabled(tv.HasSelection()).
+		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.Copy(true)
 		})
 	core.NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keymap.Cut).
-		SetEnabled(tv.HasSelection()).
+		SetEnabled(tr.HasSelection()).
 		OnClick(func(e events.Event) {
 			tvi.Cut()
 		})
@@ -1319,28 +1294,28 @@ func (tv *Tree) ContextMenu(m *core.Scene) {
 		OnClick(func(e events.Event) {
 			tvi.Paste()
 		})
-	cb := tv.Scene.Events.Clipboard()
+	cb := tr.Scene.Events.Clipboard()
 	if cb != nil {
 		pbt.SetState(cb.IsEmpty(), states.Disabled)
 	}
 	core.NewSeparator(m)
-	NewFuncButton(m, tv.EditNode).SetText("Edit").SetIcon(icons.Edit).
-		SetEnabled(tv.HasSelection())
-	NewFuncButton(m, tv.InspectNode).SetText("Inspect").SetIcon(icons.EditDocument).
-		SetEnabled(tv.HasSelection())
+	NewFuncButton(m, tr.EditNode).SetText("Edit").SetIcon(icons.Edit).
+		SetEnabled(tr.HasSelection())
+	NewFuncButton(m, tr.InspectNode).SetText("Inspect").SetIcon(icons.EditDocument).
+		SetEnabled(tr.HasSelection())
 	core.NewSeparator(m)
 
-	NewFuncButton(m, tv.OpenAll).SetIcon(icons.KeyboardArrowDown).
-		SetEnabled(tv.HasSelection())
-	NewFuncButton(m, tv.CloseAll).SetIcon(icons.KeyboardArrowRight).
-		SetEnabled(tv.HasSelection())
+	NewFuncButton(m, tr.OpenAll).SetIcon(icons.KeyboardArrowDown).
+		SetEnabled(tr.HasSelection())
+	NewFuncButton(m, tr.CloseAll).SetIcon(icons.KeyboardArrowRight).
+		SetEnabled(tr.HasSelection())
 }
 
 // IsRoot returns true if given node is the root of the tree.
-func (tv *Tree) IsRoot(op string) bool {
-	if tv.This == tv.RootView.This {
+func (tr *Tree) IsRoot(op string) bool {
+	if tr.This == tr.RootView.This {
 		if op != "" {
-			core.MessageSnackbar(tv, fmt.Sprintf("Cannot %v the root of the tree", op))
+			core.MessageSnackbar(tr, fmt.Sprintf("Cannot %v the root of the tree", op))
 		}
 		return true
 	}
@@ -1351,24 +1326,24 @@ func (tv *Tree) IsRoot(op string) bool {
 //    Copy / Cut / Paste
 
 // MimeData adds mimedata for this node: a text/plain of the Path.
-func (tv *Tree) MimeData(md *mimedata.Mimes) {
-	if tv.SyncNode != nil {
-		tv.MimeDataSync(md)
+func (tr *Tree) MimeData(md *mimedata.Mimes) {
+	if tr.SyncNode != nil {
+		tr.MimeDataSync(md)
 		return
 	}
-	*md = append(*md, mimedata.NewTextData(tv.PathFrom(tv.RootView)))
+	*md = append(*md, mimedata.NewTextData(tr.PathFrom(tr.RootView)))
 	var buf bytes.Buffer
-	err := jsonx.Write(tv.This, &buf)
+	err := jsonx.Write(tr.This, &buf)
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: fileinfo.DataJson, Data: buf.Bytes()})
 	} else {
-		core.ErrorSnackbar(tv, err, "Error encoding node")
+		core.ErrorSnackbar(tr, err, "Error encoding node")
 	}
 }
 
 // NodesFromMimeData returns a slice of tree nodes for
 // the Tree nodes and paths from mime data.
-func (tv *Tree) NodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
+func (tr *Tree) NodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
 	ni := len(md) / 2
 	sl := make([]tree.Node, 0, ni)
 	pl := make([]string, 0, ni)
@@ -1378,7 +1353,7 @@ func (tv *Tree) NodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
 			if err == nil {
 				sl = append(sl, nn)
 			} else {
-				core.ErrorSnackbar(tv, err, "Error loading node")
+				core.ErrorSnackbar(tr, err, "Error loading node")
 			}
 		} else if d.Type == fileinfo.TextPlain { // paths
 			pl = append(pl, string(d.Data))
@@ -1388,37 +1363,37 @@ func (tv *Tree) NodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
 }
 
 // Copy copies to system.Clipboard, optionally resetting the selection.
-func (tv *Tree) Copy(reset bool) { //types:add
-	sels := tv.SelectedViews()
+func (tr *Tree) Copy(reset bool) { //types:add
+	sels := tr.SelectedViews()
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
-	tv.This.(Treer).MimeData(&md) // source is always first..
+	tr.This.(Treer).MimeData(&md) // source is always first..
 	if nitms > 1 {
 		for _, sn := range sels {
-			if sn != tv.This {
+			if sn != tr.This {
 				sn.MimeData(&md)
 			}
 		}
 	}
-	tv.Clipboard().Write(md)
+	tr.Clipboard().Write(md)
 	if reset {
-		tv.UnselectAll()
+		tr.UnselectAll()
 	}
 }
 
 // Cut copies to system.Clipboard and deletes selected items.
-func (tv *Tree) Cut() { //types:add
-	if tv.IsRoot("Cut") {
+func (tr *Tree) Cut() { //types:add
+	if tr.IsRoot("Cut") {
 		return
 	}
-	if tv.SyncNode != nil {
-		tv.CutSync()
+	if tr.SyncNode != nil {
+		tr.CutSync()
 		return
 	}
-	tv.Copy(false)
-	sels := tv.SelectedViews()
-	root := tv.RootView
-	tv.UnselectAll()
+	tr.Copy(false)
+	sels := tr.SelectedViews()
+	root := tr.RootView
+	tr.UnselectAll()
 	for _, sn := range sels {
 		sn.AsTree().Delete()
 	}
@@ -1427,49 +1402,49 @@ func (tv *Tree) Cut() { //types:add
 }
 
 // Paste pastes clipboard at given node.
-func (tv *Tree) Paste() { //types:add
-	md := tv.Clipboard().Read([]string{fileinfo.DataJson})
+func (tr *Tree) Paste() { //types:add
+	md := tr.Clipboard().Read([]string{fileinfo.DataJson})
 	if md != nil {
-		tv.PasteMenu(md)
+		tr.PasteMenu(md)
 	}
 }
 
 // PasteMenu performs a paste from the clipboard using given data,
 // by popping up a menu to determine what specifically to do.
-func (tv *Tree) PasteMenu(md mimedata.Mimes) {
-	tv.UnselectAll()
+func (tr *Tree) PasteMenu(md mimedata.Mimes) {
+	tr.UnselectAll()
 	mf := func(m *core.Scene) {
-		tv.This.(Treer).MakePasteMenu(m, md, nil)
+		tr.This.(Treer).MakePasteMenu(m, md, nil)
 	}
-	pos := tv.ContextMenuPos(nil)
-	core.NewMenu(mf, tv.This.(core.Widget), pos).Run()
+	pos := tr.ContextMenuPos(nil)
+	core.NewMenu(mf, tr.This.(core.Widget), pos).Run()
 }
 
 // MakePasteMenu makes the menu of options for paste events
 // optional function is typically the DropFinalize but could also be other actions
 // to take after each optional action.
-func (tv *Tree) MakePasteMenu(m *core.Scene, md mimedata.Mimes, fun func()) {
+func (tr *Tree) MakePasteMenu(m *core.Scene, md mimedata.Mimes, fun func()) {
 	core.NewButton(m).SetText("Assign To").OnClick(func(e events.Event) {
-		tv.PasteAssign(md)
+		tr.PasteAssign(md)
 		if fun != nil {
 			fun()
 		}
 	})
 	core.NewButton(m).SetText("Add to Children").OnClick(func(e events.Event) {
-		tv.PasteChildren(md, events.DropCopy)
+		tr.PasteChildren(md, events.DropCopy)
 		if fun != nil {
 			fun()
 		}
 	})
-	if !tv.IsRoot("") && tv.RootView.This != tv.This {
+	if !tr.IsRoot("") && tr.RootView.This != tr.This {
 		core.NewButton(m).SetText("Insert Before").OnClick(func(e events.Event) {
-			tv.PasteBefore(md, events.DropCopy)
+			tr.PasteBefore(md, events.DropCopy)
 			if fun != nil {
 				fun()
 			}
 		})
 		core.NewButton(m).SetText("Insert After").OnClick(func(e events.Event) {
-			tv.PasteAfter(md, events.DropCopy)
+			tr.PasteAfter(md, events.DropCopy)
 			if fun != nil {
 				fun()
 			}
@@ -1479,34 +1454,34 @@ func (tv *Tree) MakePasteMenu(m *core.Scene, md mimedata.Mimes, fun func()) {
 }
 
 // PasteAssign assigns mime data (only the first one!) to this node
-func (tv *Tree) PasteAssign(md mimedata.Mimes) {
-	if tv.SyncNode != nil {
-		tv.PasteAssignSync(md)
+func (tr *Tree) PasteAssign(md mimedata.Mimes) {
+	if tr.SyncNode != nil {
+		tr.PasteAssignSync(md)
 		return
 	}
-	sl, _ := tv.NodesFromMimeData(md)
+	sl, _ := tr.NodesFromMimeData(md)
 	if len(sl) == 0 {
 		return
 	}
-	tv.CopyFrom(sl[0])    // nodes with data copy here
-	tv.SetScene(tv.Scene) // ensure children have scene
-	tv.Update()           // could have children
-	tv.Open()
-	tv.TreeChanged()
+	tr.CopyFrom(sl[0])    // nodes with data copy here
+	tr.SetScene(tr.Scene) // ensure children have scene
+	tr.Update()           // could have children
+	tr.Open()
+	tr.TreeChanged()
 }
 
 // PasteBefore inserts object(s) from mime data before this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
-func (tv *Tree) PasteBefore(md mimedata.Mimes, mod events.DropMods) {
-	tv.PasteAt(md, mod, 0, "Paste Before")
+func (tr *Tree) PasteBefore(md mimedata.Mimes, mod events.DropMods) {
+	tr.PasteAt(md, mod, 0, "Paste Before")
 }
 
 // PasteAfter inserts object(s) from mime data after this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
-func (tv *Tree) PasteAfter(md mimedata.Mimes, mod events.DropMods) {
-	tv.PasteAt(md, mod, 1, "Paste After")
+func (tr *Tree) PasteAfter(md mimedata.Mimes, mod events.DropMods) {
+	tr.PasteAt(md, mod, 1, "Paste After")
 }
 
 // TreeTempMovedTag is a kind of hack to prevent moved items from being deleted, using DND
@@ -1518,22 +1493,22 @@ const TreeTempMovedTag = `_\&MOVED\&`
 // PasteAt inserts object(s) from mime data at rel position to this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
-func (tv *Tree) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
-	if tv.Parent == nil {
+func (tr *Tree) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
+	if tr.Parent == nil {
 		return
 	}
-	parent := AsTree(tv.Parent)
+	parent := AsTree(tr.Parent)
 	if parent == nil {
-		core.MessageSnackbar(tv, "Error: cannot insert after the root of the tree")
+		core.MessageSnackbar(tr, "Error: cannot insert after the root of the tree")
 		return
 	}
-	if tv.SyncNode != nil {
-		tv.PasteAtSync(md, mod, rel, actNm)
+	if tr.SyncNode != nil {
+		tr.PasteAtSync(md, mod, rel, actNm)
 		return
 	}
-	sl, pl := tv.NodesFromMimeData(md)
+	sl, pl := tr.NodesFromMimeData(md)
 
-	myidx := tv.IndexInParent()
+	myidx := tr.IndexInParent()
 	if myidx < 0 {
 		return
 	}
@@ -1550,10 +1525,10 @@ func (tv *Tree) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 		parent.InsertChild(ns, myidx+i)
 		_, nwb := core.AsWidget(ns)
 		ntv := AsTree(ns)
-		ntv.RootView = tv.RootView
-		nwb.SetScene(tv.Scene)
+		ntv.RootView = tr.RootView
+		nwb.SetScene(tr.Scene)
 		nwb.Update() // incl children
-		npath := ns.AsTree().PathFrom(tv.RootView)
+		npath := ns.AsTree().PathFrom(tr.RootView)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
 			ns.AsTree().SetName(ns.AsTree().Name + TreeTempMovedTag) // special keyword :)
 		}
@@ -1561,7 +1536,7 @@ func (tv *Tree) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 			selTv = ntv
 		}
 	}
-	tv.TreeChanged()
+	tr.TreeChanged()
 	parent.NeedsLayout()
 	if selTv != nil {
 		selTv.SelectAction(events.SelectOne)
@@ -1570,23 +1545,23 @@ func (tv *Tree) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 
 // PasteChildren inserts object(s) from mime data
 // at end of children of this node
-func (tv *Tree) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
-	if tv.SyncNode != nil {
-		tv.PasteChildrenSync(md, mod)
+func (tr *Tree) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
+	if tr.SyncNode != nil {
+		tr.PasteChildrenSync(md, mod)
 		return
 	}
-	sl, _ := tv.NodesFromMimeData(md)
+	sl, _ := tr.NodesFromMimeData(md)
 
 	for _, ns := range sl {
-		tv.AddChild(ns)
+		tr.AddChild(ns)
 		_, nwb := core.AsWidget(ns)
 		ntv := AsTree(ns)
-		ntv.RootView = tv.RootView
-		nwb.SetScene(tv.Scene)
+		ntv.RootView = tr.RootView
+		nwb.SetScene(tr.Scene)
 	}
-	tv.Update()
-	tv.Open()
-	tv.TreeChanged()
+	tr.Update()
+	tr.Open()
+	tr.TreeChanged()
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1594,39 +1569,39 @@ func (tv *Tree) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 
 // DragStart starts a drag-n-drop on this node -- it includes any other
 // selected nodes as well, each as additional records in mimedata.
-func (tv *Tree) DragStart(e events.Event) {
-	sels := tv.SelectedViews()
+func (tr *Tree) DragStart(e events.Event) {
+	sels := tr.SelectedViews()
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
-	tv.This.(Treer).MimeData(&md) // source is always first..
+	tr.This.(Treer).MimeData(&md) // source is always first..
 	if nitms > 1 {
 		for _, sn := range sels {
-			if sn != tv.This {
+			if sn != tr.This {
 				sn.MimeData(&md)
 			}
 		}
 	}
-	tv.Scene.Events.DragStart(tv.This.(core.Widget), md, e)
+	tr.Scene.Events.DragStart(tr.This.(core.Widget), md, e)
 }
 
 // DropExternal is not handled by base case but could be in derived
-func (tv *Tree) DropExternal(md mimedata.Mimes, mod events.DropMods) {
+func (tr *Tree) DropExternal(md mimedata.Mimes, mod events.DropMods) {
 	// todo: not yet implemented
 }
 
 // DragClearStates clears the drag-drop related states for this widget
-func (tv *Tree) DragClearStates() {
-	tv.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
-	tv.Parts.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
-	tv.Style()
-	tv.NeedsRender()
+func (tr *Tree) DragClearStates() {
+	tr.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
+	tr.Parts.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
+	tr.Style()
+	tr.NeedsRender()
 }
 
 // DragDrop handles drag drop event
-func (tv *Tree) DragDrop(e events.Event) {
+func (tr *Tree) DragDrop(e events.Event) {
 	// todo: some kind of validation for source
-	tvi := tv.This.(Treer)
-	tv.UnselectAll()
+	tvi := tr.This.(Treer)
+	tr.UnselectAll()
 	de := e.(*events.DragDrop)
 	stv := AsTree(de.Source.(core.Widget))
 	if stv != nil {
@@ -1634,33 +1609,33 @@ func (tv *Tree) DragDrop(e events.Event) {
 	}
 	md := de.Data.(mimedata.Mimes)
 	mf := func(m *core.Scene) {
-		tv.Scene.Events.DragMenuAddModText(m, de.DropMod)
+		tr.Scene.Events.DragMenuAddModText(m, de.DropMod)
 		tvi.MakePasteMenu(m, md, func() {
 			tvi.DropFinalize(de)
 		})
 	}
-	pos := tv.ContextMenuPos(nil)
-	core.NewMenu(mf, tv.This.(core.Widget), pos).Run()
+	pos := tr.ContextMenuPos(nil)
+	core.NewMenu(mf, tr.This.(core.Widget), pos).Run()
 }
 
 // DropFinalize is called to finalize Drop actions on the Source node.
 // Only relevant for DropMod == DropMove.
-func (tv *Tree) DropFinalize(de *events.DragDrop) {
-	tv.UnselectAll()
-	tv.DragClearStates()
-	tv.Scene.Events.DropFinalize(de) // sends DropDeleteSource to Source
+func (tr *Tree) DropFinalize(de *events.DragDrop) {
+	tr.UnselectAll()
+	tr.DragClearStates()
+	tr.Scene.Events.DropFinalize(de) // sends DropDeleteSource to Source
 }
 
 // DropDeleteSource handles delete source event for DropMove case
-func (tv *Tree) DropDeleteSource(e events.Event) {
+func (tr *Tree) DropDeleteSource(e events.Event) {
 	de := e.(*events.DragDrop)
-	tv.UnselectAll()
-	if tv.SyncNode != nil {
-		tv.DropDeleteSourceSync(de)
+	tr.UnselectAll()
+	if tr.SyncNode != nil {
+		tr.DropDeleteSourceSync(de)
 		return
 	}
 	md := de.Data.(mimedata.Mimes)
-	root := tv.RootView
+	root := tr.RootView
 	for _, d := range md {
 		if d.Type != fileinfo.TextPlain { // link
 			continue

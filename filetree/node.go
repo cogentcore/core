@@ -375,10 +375,10 @@ func (fn *Node) SetFileIcon() {
 	if !hasic {
 		ic = icons.Blank
 	}
-	if _, ok := fn.BranchPart(); !ok {
+	if _, ok := fn.Branch(); !ok {
 		fn.Update()
 	}
-	if bp, ok := fn.BranchPart(); ok {
+	if bp, ok := fn.Branch(); ok {
 		if bp.IconIndeterminate != ic {
 			bp.SetIcons(icons.FolderOpen, icons.Folder, ic)
 			fn.Update()
