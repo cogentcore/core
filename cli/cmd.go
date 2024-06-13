@@ -27,13 +27,13 @@ type Cmd[T any] struct {
 	// (what is called when no subcommands are passed)
 	Root bool
 	// Icon is the icon of the command in the tool bar
-	// when running in the GUI via cliview
+	// when running in the GUI via clicore
 	Icon string
 	// SepBefore is whether to add a separator before the
-	// command in the tool bar when running in the GUI via cliview
+	// command in the tool bar when running in the GUI via clicore
 	SepBefore bool
 	// SepAfter is whether to add a separator after the
-	// command in the tool bar when running in the GUI via cliview
+	// command in the tool bar when running in the GUI via clicore
 	SepAfter bool
 }
 

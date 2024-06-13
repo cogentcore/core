@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package cliview extends package cli by generating GUIs.
-package cliview
+// Package clicore extends package cli by generating Cogent Core GUIs.
+package clicore
 
 import (
 	"fmt"

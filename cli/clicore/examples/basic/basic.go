@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"cogentcore.org/core/cli"
-	"cogentcore.org/core/cli/cliview"
+	"cogentcore.org/core/cli/clicore"
 )
 
 //go:generate core generate -add-types -add-methods
@@ -41,6 +41,6 @@ func Run(c *Config) error {
 }
 
 func main() { //types:skip
-	opts := cli.DefaultOptions("Basic", "Basic is a basic example application made with cliview.")
-	cliview.Run(opts, &Config{}, Build, Run)
+	opts := cli.DefaultOptions("Basic", "Basic is a basic example application made with clicore.")
+	clicore.Run(opts, &Config{}, Build, Run)
 }

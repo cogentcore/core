@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package cli generates powerful CLIs from Go struct types and functions.
-// See package cliview to create a GUI representation of a CLI.
+// See package clicore to create a GUI representation of a CLI.
 package cli
 
 //go:generate core generate
@@ -19,7 +19,7 @@ import (
 )
 
 // Run runs an app with the given options, configuration struct,
-// and commands. It does not run the GUI; see [cogentcore.org/core/cli/cliview.Run]
+// and commands. It does not run the GUI; see [cogentcore.org/core/cli/clicore.Run]
 // for that. The configuration struct should be passed as a pointer, and
 // configuration options should be defined as fields on the configuration
 // struct. The commands can be specified as either functions or struct

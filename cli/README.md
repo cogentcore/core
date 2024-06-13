@@ -1,6 +1,6 @@
 # cli
 
-Package cli generates powerful CLIs from Go struct types and functions. See package [cliview](cliview) to create a GUI representation of a CLI.
+Package cli generates powerful CLIs from Go struct types and functions. See package [clicore](clicore) to create a GUI representation of a CLI.
 
 `cli` provides methods to set values on a `Config` struct through a (TOML) config file or command-line args (`flags` in Go terminology), with support for setting Network params and values on any other struct as well (e.g., an Env to be constructed later in a ConfigEnv method).
 
