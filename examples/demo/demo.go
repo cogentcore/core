@@ -277,7 +277,7 @@ func sliders(ts *core.Tabs) {
 }
 
 func textEditors(ts *core.Tabs) {
-	tab := ts.NewTab("Text editors")
+	tab := ts.NewTab("Text editor")
 
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Text editors")
 	core.NewText(tab).SetText("Cogent Core provides powerful text editors that support advanced code editing features, like syntax highlighting, completion, undo and redo, copy and paste, rectangular selection, and word, line, and page based navigation, selection, and deletion.")

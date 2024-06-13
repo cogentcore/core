@@ -594,21 +594,21 @@ func (t *FormButton) New() tree.Node { return &FormButton{} }
 // SetStruct sets the [FormButton.Struct]
 func (t *FormButton) SetStruct(v any) *FormButton { t.Struct = v; return t }
 
-// MapButtonType is the [types.Type] for [MapButton]
-var MapButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapButton", IDName: "map-button", Doc: "MapButton represents a slice or array value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Map"}}, Instance: &MapButton{}})
+// MapButtonType is the [types.Type] for [KeyedListButton]
+var MapButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapButton", IDName: "map-button", Doc: "MapButton represents a slice or array value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Map"}}, Instance: &KeyedListButton{}})
 
-// NewMapButton returns a new [MapButton] with the given optional parent:
+// NewMapButton returns a new [KeyedListButton] with the given optional parent:
 // MapButton represents a slice or array value with a button.
-func NewMapButton(parent ...tree.Node) *MapButton { return tree.New[*MapButton](parent...) }
+func NewMapButton(parent ...tree.Node) *KeyedListButton { return tree.New[*KeyedListButton](parent...) }
 
-// NodeType returns the [*types.Type] of [MapButton]
-func (t *MapButton) NodeType() *types.Type { return MapButtonType }
+// NodeType returns the [*types.Type] of [KeyedListButton]
+func (t *KeyedListButton) NodeType() *types.Type { return MapButtonType }
 
-// New returns a new [*MapButton] value
-func (t *MapButton) New() tree.Node { return &MapButton{} }
+// New returns a new [*KeyedListButton] value
+func (t *KeyedListButton) New() tree.Node { return &KeyedListButton{} }
 
-// SetMap sets the [MapButton.Map]
-func (t *MapButton) SetMap(v any) *MapButton { t.Map = v; return t }
+// SetMap sets the [KeyedListButton.Map]
+func (t *KeyedListButton) SetMap(v any) *KeyedListButton { t.Map = v; return t }
 
 // TreeButtonType is the [types.Type] for [TreeButton]
 var TreeButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TreeButton", IDName: "tree-button", Doc: "TreeButton represents a [tree.Node] value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Tree"}}, Instance: &TreeButton{}})

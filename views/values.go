@@ -70,24 +70,24 @@ func (fb *FormButton) Init() {
 	})
 }
 
-// MapButton represents a slice or array value with a button.
-type MapButton struct {
+// KeyedListButton represents a map value with a button that opens a [KeyedList].
+type KeyedListButton struct {
 	core.Button
 	Map any
 }
 
-func (mb *MapButton) WidgetValue() any { return &mb.Map }
+func (kb *KeyedListButton) WidgetValue() any { return &kb.Map }
 
-func (mb *MapButton) Init() {
-	mb.Button.Init()
-	mb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	mb.Updater(func() {
-		mb.SetText(labels.FriendlyMapLabel(reflect.ValueOf(mb.Map)))
+func (kb *KeyedListButton) Init() {
+	kb.Button.Init()
+	kb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	kb.Updater(func() {
+		kb.SetText(labels.FriendlyMapLabel(reflect.ValueOf(kb.Map)))
 	})
-	core.InitValueButton(mb, true, func(d *core.Body) {
-		kv := NewKeyedList(d).SetMap(mb.Map)
-		kv.SetValueTitle(mb.ValueTitle).SetReadOnly(mb.IsReadOnly())
-		d.AddAppBar(kv.MakeToolbar)
+	core.InitValueButton(kb, true, func(d *core.Body) {
+		kl := NewKeyedList(d).SetMap(kb.Map)
+		kl.SetValueTitle(kb.ValueTitle).SetReadOnly(kb.IsReadOnly())
+		d.AddAppBar(kl.MakeToolbar)
 	})
 }
 
