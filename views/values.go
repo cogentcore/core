@@ -85,7 +85,7 @@ func (mb *MapButton) Init() {
 		mb.SetText(labels.FriendlyMapLabel(reflect.ValueOf(mb.Map)))
 	})
 	core.InitValueButton(mb, true, func(d *core.Body) {
-		mv := NewMapView(d).SetMap(mb.Map)
+		mv := NewKeyValueTable(d).SetMap(mb.Map)
 		mv.SetValueTitle(mb.ValueTitle).SetReadOnly(mb.IsReadOnly())
 		d.AddAppBar(mv.MakeToolbar)
 	})

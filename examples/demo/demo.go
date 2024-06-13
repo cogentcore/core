@@ -439,7 +439,7 @@ func makeViews(ts *core.Tabs) {
 	mp["Python"] = true
 	mp["C++"] = 4
 
-	views.NewMapView(vts.NewTab("Map view")).SetMap(&mp)
+	views.NewKeyValueTable(vts.NewTab("Key value table")).SetMap(&mp)
 
 	sl := make([]string, 50)
 	for i := 0; i < len(sl); i++ {

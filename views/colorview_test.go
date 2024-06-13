@@ -14,5 +14,5 @@ import (
 func TestColorPicker(t *testing.T) {
 	b := core.NewBody()
 	NewColorPicker(b).SetColor(colors.Orange)
-	b.AssertRender(t, "color-view/basic")
+	b.AssertRender(t, "color-picker/basic")
 }

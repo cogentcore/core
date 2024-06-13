@@ -453,14 +453,14 @@ func (cv *ColorPicker) UpdateImpl() {
 	// v.Style.BackgroundColor.Solid = cv.Color // direct copy
 }
 
-// UpdateValueFrame updates the value frame of the color view
+// UpdateValueFrame updates the value frame of the color picker
 // that displays the color.
 func (cv *ColorPicker) UpdateValueFrame() {
 	cv.SliderLay().ChildByName("value", 0).(*core.Frame).Styles.BackgroundColor.Solid = cv.Color // direct copy
 }
 
 // UpdateNums updates the values of the number inputs
-// in the color view to reflect the latest values
+// in the color picker to reflect the latest values
 func (cv *ColorPicker) UpdateNums() {
 	cv.NumLay().ChildByName("nums-rgba-lay", 0).ChildByName("nums-rgba", 0).(*StructViewInline).UpdateFields()
 	cv.NumLay().ChildByName("nums-hsla-lay", 1).ChildByName("nums-hsla", 0).(*StructViewInline).UpdateFields()

@@ -13,5 +13,5 @@ import (
 func TestFilePicker(t *testing.T) {
 	b := core.NewBody()
 	NewFilePicker(b)
-	b.AssertRender(t, "file-view/basic")
+	b.AssertRender(t, "file-picker/basic")
 }

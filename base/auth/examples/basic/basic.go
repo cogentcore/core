@@ -22,7 +22,7 @@ func main() {
 		core.NewText(d).SetType(core.TextHeadlineMedium).SetText("Detailed info")
 		claims := map[string]any{}
 		errors.Log(userInfo.Claims(&claims))
-		views.NewMapView(d).SetMap(&claims)
+		views.NewKeyValueTable(d).SetMap(&claims)
 		d.AddOKOnly().RunFullDialog(b)
 	}
 	auth.Buttons(b, &auth.ButtonsConfig{SuccessFunc: fun})

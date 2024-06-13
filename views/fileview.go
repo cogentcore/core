@@ -249,7 +249,7 @@ func (fp *FilePicker) SelectFile() bool {
 }
 
 // STYTODO: get rid of this or make it use actual color values
-// FilePickerKindColorMap translates file Kinds into different colors for the file viewer
+// FilePickerKindColorMap translates file Kinds into different colors for the file picker
 var FilePickerKindColorMap = map[string]string{
 	"folder": "pref(link)",
 }

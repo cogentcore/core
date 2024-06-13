@@ -13,42 +13,42 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMapView(t *testing.T) {
+func TestKeyValueTable(t *testing.T) {
 	b := core.NewBody()
-	NewMapView(b).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
-	b.AssertRender(t, "map-view/basic")
+	NewKeyValueTable(b).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
+	b.AssertRender(t, "key-value-table/basic")
 }
 
-func TestMapViewInline(t *testing.T) {
+func TestKeyValueTableInline(t *testing.T) {
 	b := core.NewBody()
-	NewMapView(b).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
-	b.AssertRender(t, "map-view/inline")
+	NewKeyValueTable(b).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
+	b.AssertRender(t, "key-value-table/inline")
 }
 
-func TestMapViewReadOnly(t *testing.T) {
+func TestKeyValueTableReadOnly(t *testing.T) {
 	b := core.NewBody()
-	NewMapView(b).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
-	b.AssertRender(t, "map-view/read-only")
+	NewKeyValueTable(b).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
+	b.AssertRender(t, "key-value-table/read-only")
 }
 
-func TestMapViewAny(t *testing.T) {
+func TestKeyValueTableAny(t *testing.T) {
 	b := core.NewBody()
-	NewMapView(b).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
-	b.AssertRender(t, "map-view/any")
+	NewKeyValueTable(b).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
+	b.AssertRender(t, "key-value-table/any")
 }
 
-func TestMapViewChange(t *testing.T) {
+func TestKeyValueTableChange(t *testing.T) {
 	b := core.NewBody()
 	m := map[string]int{"Go": 1, "C++": 3, "Python": 5}
 
 	n := 0
 	value := map[string]int{}
-	mv := NewMapView(b).SetMap(&m)
+	mv := NewKeyValueTable(b).SetMap(&m)
 	mv.OnChange(func(e events.Event) {
 		n++
 		maps.Copy(value, m)
 	})
-	b.AssertRender(t, "map-view/change", func() {
+	b.AssertRender(t, "key-value-table/change", func() {
 		// [3] is value of second row, which is "Go" since it is sorted alphabetically
 		mv.Child(3).(*core.Spinner).TrailingIconButton().Send(events.Click)
 		assert.Equal(t, 1, n)
@@ -57,18 +57,18 @@ func TestMapViewChange(t *testing.T) {
 	})
 }
 
-func TestMapViewChangeKey(t *testing.T) {
+func TestKeyValueTableChangeKey(t *testing.T) {
 	b := core.NewBody()
 	m := map[string]int{"Go": 1, "C++": 3, "Python": 5}
 
 	n := 0
 	value := map[string]int{}
-	mv := NewMapView(b).SetMap(&m)
+	mv := NewKeyValueTable(b).SetMap(&m)
 	mv.OnChange(func(e events.Event) {
 		n++
 		maps.Copy(value, m)
 	})
-	b.AssertRender(t, "map-view/change-key", func() {
+	b.AssertRender(t, "key-value-table/change-key", func() {
 		// [4] is key of third row, which is "Python" since it is sorted alphabetically
 		mv.Child(4).(*core.TextField).SetText("JavaScript").SendChange()
 		assert.Equal(t, 1, n)

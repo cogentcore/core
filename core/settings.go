@@ -690,7 +690,7 @@ var DefaultPaths = FavPaths{
 // FilePaths represents a set of file paths.
 type FilePaths []string
 
-// RecentPaths are the recently opened paths in the file view.
+// RecentPaths are the recently opened paths in the file picker.
 var RecentPaths FilePaths
 
 // Open file paths from a json-formatted file.

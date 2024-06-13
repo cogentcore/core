@@ -758,28 +758,28 @@ var PagesExamples = map[string]func(parent core.Widget){
 	"views/values-2": func(parent core.Widget) {
 		// views.NewValue(parent, 70, `view:"slider"`)
 	},
-	"views/map-views-0": func(parent core.Widget) {
-		views.NewMapView(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
+	"views/key-value-tables-0": func(parent core.Widget) {
+		views.NewKeyValueTable(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
 	},
-	"views/map-views-1": func(parent core.Widget) {
-		views.NewMapView(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
+	"views/key-value-tables-1": func(parent core.Widget) {
+		views.NewKeyValueTable(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
 	},
-	"views/map-views-2": func(parent core.Widget) {
+	"views/key-value-tables-2": func(parent core.Widget) {
 		m := map[string]int{"Go": 1, "C++": 3, "Python": 5}
-		views.NewMapView(parent).SetMap(&m).OnChange(func(e events.Event) {
+		views.NewKeyValueTable(parent).SetMap(&m).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, fmt.Sprintf("Map: %v", m))
 		})
 	},
-	"views/map-views-3": func(parent core.Widget) {
-		views.NewMapView(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
+	"views/key-value-tables-3": func(parent core.Widget) {
+		views.NewKeyValueTable(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
 	},
-	"views/map-views-4": func(parent core.Widget) {
-		views.NewMapView(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
+	"views/key-value-tables-4": func(parent core.Widget) {
+		views.NewKeyValueTable(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
 	},
-	"views/map-views-5": func(parent core.Widget) {
+	"views/key-value-tables-5": func(parent core.Widget) {
 		// views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
 	},
-	"views/map-views-6": func(parent core.Widget) {
+	"views/key-value-tables-6": func(parent core.Widget) {
 		// views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
 	},
 	"views/slice-views-0": func(parent core.Widget) {

@@ -39,7 +39,7 @@ func (t *ColorMapButton) New() tree.Node { return &ColorMapButton{} }
 func (t *ColorMapButton) SetMapName(v string) *ColorMapButton { t.MapName = v; return t }
 
 // ColorPickerType is the [types.Type] for [ColorPicker]
-var ColorPickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ColorPicker", IDName: "color-view", Doc: "ColorPicker shows a color, using sliders or numbers to set values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Color", Doc: "the color that we view"}}, Instance: &ColorPicker{}})
+var ColorPickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ColorPicker", IDName: "color-picker", Doc: "ColorPicker shows a color, using sliders or numbers to set values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Color", Doc: "the color that we view"}}, Instance: &ColorPicker{}})
 
 // NewColorPicker returns a new [ColorPicker] with the given optional parent:
 // ColorPicker shows a color, using sliders or numbers to set values.
@@ -68,7 +68,7 @@ func (t *ColorButton) New() tree.Node { return &ColorButton{} }
 func (t *ColorButton) SetColor(v color.RGBA) *ColorButton { t.Color = v; return t }
 
 // FilePickerType is the [types.Type] for [FilePicker]
-var FilePickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FilePicker", IDName: "file-view", Doc: "FilePicker is a viewer onto files -- core of the file chooser dialog", Methods: []types.Method{{Name: "UpdateFilesAction", Doc: "UpdateFilesAction updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddPathToFavorites", Doc: "AddPathToFavorites adds the current path to favorites", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DirPathUp", Doc: "DirPathUp moves up one directory in the path", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "NewFolder", Doc: "NewFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "DirPath", Doc: "path to directory of files to display"}, {Name: "CurrentSelectedFile", Doc: "currently selected file"}, {Name: "Ext", Doc: "target extension(s) (comma separated if multiple, including initial .), if any"}, {Name: "FilterFunc", Doc: "optional styling function"}, {Name: "ExtMap", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"}, {Name: "Files", Doc: "files for current directory"}, {Name: "SelectedIndex", Doc: "index of currently selected file in Files list (-1 if none)"}, {Name: "Watcher", Doc: "change notify for current dir"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "UpdateMu", Doc: "UpdateFiles mutex"}, {Name: "PrevPath", Doc: "Previous path that was processed via UpdateFiles"}}, Instance: &FilePicker{}})
+var FilePickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FilePicker", IDName: "file-picker", Doc: "FilePicker is a viewer onto files -- core of the file chooser dialog", Methods: []types.Method{{Name: "UpdateFilesAction", Doc: "UpdateFilesAction updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddPathToFavorites", Doc: "AddPathToFavorites adds the current path to favorites", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DirPathUp", Doc: "DirPathUp moves up one directory in the path", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "NewFolder", Doc: "NewFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "DirPath", Doc: "path to directory of files to display"}, {Name: "CurrentSelectedFile", Doc: "currently selected file"}, {Name: "Ext", Doc: "target extension(s) (comma separated if multiple, including initial .), if any"}, {Name: "FilterFunc", Doc: "optional styling function"}, {Name: "ExtMap", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"}, {Name: "Files", Doc: "files for current directory"}, {Name: "SelectedIndex", Doc: "index of currently selected file in Files list (-1 if none)"}, {Name: "Watcher", Doc: "change notify for current dir"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "UpdateMu", Doc: "UpdateFiles mutex"}, {Name: "PrevPath", Doc: "Previous path that was processed via UpdateFiles"}}, Instance: &FilePicker{}})
 
 // NewFilePicker returns a new [FilePicker] with the given optional parent:
 // FilePicker is a viewer onto files -- core of the file chooser dialog
@@ -232,30 +232,30 @@ func (t *KeyChordButton) New() tree.Node { return &KeyChordButton{} }
 // SetChord sets the [KeyChordButton.Chord]
 func (t *KeyChordButton) SetChord(v key.Chord) *KeyChordButton { t.Chord = v; return t }
 
-// MapViewType is the [types.Type] for [MapView]
-var MapViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapView", IDName: "map-view", Doc: "MapView represents a map using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the map in one line."}, {Name: "SortValues", Doc: "SortValue is whether to sort by values instead of keys."}, {Name: "ncols", Doc: "ncols is the number of columns to display if the map view is not inline."}}, Instance: &MapView{}})
+// KeyValueTableType is the [types.Type] for [KeyValueTable]
+var KeyValueTableType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.KeyValueTable", IDName: "key-value-table", Doc: "KeyValueTable represents a map using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the map in one line."}, {Name: "SortValues", Doc: "SortValue is whether to sort by values instead of keys."}, {Name: "ncols", Doc: "ncols is the number of columns to display if the key value table is not inline."}}, Instance: &KeyValueTable{}})
 
-// NewMapView returns a new [MapView] with the given optional parent:
-// MapView represents a map using two columns of editable key and value widgets.
-func NewMapView(parent ...tree.Node) *MapView { return tree.New[*MapView](parent...) }
+// NewKeyValueTable returns a new [KeyValueTable] with the given optional parent:
+// KeyValueTable represents a map using two columns of editable key and value widgets.
+func NewKeyValueTable(parent ...tree.Node) *KeyValueTable { return tree.New[*KeyValueTable](parent...) }
 
-// NodeType returns the [*types.Type] of [MapView]
-func (t *MapView) NodeType() *types.Type { return MapViewType }
+// NodeType returns the [*types.Type] of [KeyValueTable]
+func (t *KeyValueTable) NodeType() *types.Type { return KeyValueTableType }
 
-// New returns a new [*MapView] value
-func (t *MapView) New() tree.Node { return &MapView{} }
+// New returns a new [*KeyValueTable] value
+func (t *KeyValueTable) New() tree.Node { return &KeyValueTable{} }
 
-// SetMap sets the [MapView.Map]:
+// SetMap sets the [KeyValueTable.Map]:
 // Map is the pointer to the map that we are viewing.
-func (t *MapView) SetMap(v any) *MapView { t.Map = v; return t }
+func (t *KeyValueTable) SetMap(v any) *KeyValueTable { t.Map = v; return t }
 
-// SetInline sets the [MapView.Inline]:
+// SetInline sets the [KeyValueTable.Inline]:
 // Inline is whether to display the map in one line.
-func (t *MapView) SetInline(v bool) *MapView { t.Inline = v; return t }
+func (t *KeyValueTable) SetInline(v bool) *KeyValueTable { t.Inline = v; return t }
 
-// SetSortValues sets the [MapView.SortValues]:
+// SetSortValues sets the [KeyValueTable.SortValues]:
 // SortValue is whether to sort by values instead of keys.
-func (t *MapView) SetSortValues(v bool) *MapView { t.SortValues = v; return t }
+func (t *KeyValueTable) SetSortValues(v bool) *KeyValueTable { t.SortValues = v; return t }
 
 // SliceViewType is the [types.Type] for [SliceView]
 var SliceViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceView", IDName: "slice-view", Doc: "SliceView represents a slice value with index and value widgets.\nUse [SliceViewBase.BindSelect] to make the slice view designed for item selection.", Embeds: []types.Field{{Name: "SliceViewBase"}}, Fields: []types.Field{{Name: "StyleFunc", Doc: "StyleFunc is an optional styling function."}}, Instance: &SliceView{}})
