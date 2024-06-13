@@ -26,7 +26,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/tensor/table"
-	"cogentcore.org/core/tensor/tensorview"
+	"cogentcore.org/core/tensor/tensorcore"
 	"cogentcore.org/core/tree"
 )
 
@@ -594,7 +594,7 @@ func (pl *PlotEditor) MakeToolbar(p *core.Plan) {
 			SetTooltip("open a Table window of the data").
 			OnClick(func(e events.Event) {
 				d := core.NewBody().AddTitle(pl.Name + " Data")
-				tv := tensorview.NewTable(d).SetTable(pl.Table.Table)
+				tv := tensorcore.NewTable(d).SetTable(pl.Table.Table)
 				d.AddAppBar(tv.MakeToolbar)
 				d.NewFullDialog(pl).SetNewWindow(true).Run()
 			})

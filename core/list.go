@@ -92,7 +92,7 @@ type Lister interface {
 	// SliceIndex returns the logical slice index: si = i + StartIndex,
 	// the actual value index vi into the slice value (typically = si),
 	// which can be different if there is an index indirection as in
-	// tensorview table.IndexView), and a bool that is true if the
+	// tensorcore table.IndexView), and a bool that is true if the
 	// index is beyond the available data and is thus invisible,
 	// given the row index provided.
 	SliceIndex(i int) (si, vi int, invis bool)

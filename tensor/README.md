@@ -6,7 +6,7 @@ Tensor and related sub-packages provide a simple yet powerful framework for repr
 
     Data that is encoded as a slice of `struct`s can be bidirectionally converted to / from a Table, which then provides more powerful sorting, filtering and other functionality, including the plotcore.
 
-* [tensorview](tensorview) provides Core views of the `Tensor` and `Table` data.
+* [tensorcore](tensorcore) provides core widgets for the `Tensor` and `Table` data.
 
 * [stats](stats) implements a number of different ways of analyzing tensor and table data.
 

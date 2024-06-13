@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/tensor/table"
-	"cogentcore.org/core/tensor/tensorview"
+	"cogentcore.org/core/tensor/tensorcore"
 )
 
 //go:embed *.tsv
@@ -29,7 +29,7 @@ func main() {
 
 	// nt := tv.NewTab("First")
 	nt := tv.NewTab("Patterns")
-	etv := tensorview.NewTable(nt).SetTable(pats)
+	etv := tensorcore.NewTable(nt).SetTable(pats)
 	b.AddAppBar(etv.MakeToolbar)
 
 	b.RunMainWindow()

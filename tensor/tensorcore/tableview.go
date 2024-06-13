@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package tensorview
+// Package tensorcore provides GUI Cogent Core widgets for tensor types.
+package tensorcore
 
-//go:generate core generate -add-types
+//go:generate core generate
 
 import (
 	"bytes"
