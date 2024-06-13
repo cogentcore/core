@@ -221,65 +221,6 @@ func (i *MeterTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "MeterTypes")
 }
 
-var _WindowFlagsValues = []WindowFlags{0, 1, 2, 3, 4, 5, 6}
-
-// WindowFlagsN is the highest valid value for type WindowFlags, plus one.
-const WindowFlagsN WindowFlags = 7
-
-var _WindowFlagsValueMap = map[string]WindowFlags{`HasSavedGeom`: 0, `Closing`: 1, `Resizing`: 2, `GotFocus`: 3, `SentShow`: 4, `StopEventLoop`: 5, `SelectionMode`: 6}
-
-var _WindowFlagsDescMap = map[WindowFlags]string{0: `WindowHasSavedGeom indicates if this window has WindowGeometry setting that sized it -- affects whether other default geom should be applied.`, 1: `WindowClosing is atomic flag indicating window is closing`, 2: `WindowResizing is atomic flag indicating window is resizing`, 3: `WindowGotFocus indicates that have we received RenderWindow focus`, 4: `WindowSentShow have we sent the show event yet? Only ever sent ONCE`, 5: `WindowStopEventLoop is set when event loop stop is requested`, 6: `WindowSelectionMode indicates that the window is in Cogent Core inspect editor edit mode`}
-
-var _WindowFlagsMap = map[WindowFlags]string{0: `HasSavedGeom`, 1: `Closing`, 2: `Resizing`, 3: `GotFocus`, 4: `SentShow`, 5: `StopEventLoop`, 6: `SelectionMode`}
-
-// String returns the string representation of this WindowFlags value.
-func (i WindowFlags) String() string { return enums.BitFlagString(i, _WindowFlagsValues) }
-
-// BitIndexString returns the string representation of this WindowFlags value
-// if it is a bit index value (typically an enum constant), and
-// not an actual bit flag value.
-func (i WindowFlags) BitIndexString() string { return enums.String(i, _WindowFlagsMap) }
-
-// SetString sets the WindowFlags value from its string representation,
-// and returns an error if the string is invalid.
-func (i *WindowFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
-
-// SetStringOr sets the WindowFlags value from its string representation
-// while preserving any bit flags already set, and returns an
-// error if the string is invalid.
-func (i *WindowFlags) SetStringOr(s string) error {
-	return enums.SetStringOr(i, s, _WindowFlagsValueMap, "WindowFlags")
-}
-
-// Int64 returns the WindowFlags value as an int64.
-func (i WindowFlags) Int64() int64 { return int64(i) }
-
-// SetInt64 sets the WindowFlags value from an int64.
-func (i *WindowFlags) SetInt64(in int64) { *i = WindowFlags(in) }
-
-// Desc returns the description of the WindowFlags value.
-func (i WindowFlags) Desc() string { return enums.Desc(i, _WindowFlagsDescMap) }
-
-// WindowFlagsValues returns all possible values for the type WindowFlags.
-func WindowFlagsValues() []WindowFlags { return _WindowFlagsValues }
-
-// Values returns all possible values for the type WindowFlags.
-func (i WindowFlags) Values() []enums.Enum { return enums.Values(_WindowFlagsValues) }
-
-// HasFlag returns whether these bit flags have the given bit flag set.
-func (i WindowFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
-
-// SetFlag sets the value of the given flags in these flags to the given value.
-func (i *WindowFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i WindowFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *WindowFlags) UnmarshalText(text []byte) error {
-	return enums.UnmarshalText(i, text, "WindowFlags")
-}
-
 var _ThemesValues = []Themes{0, 1, 2}
 
 // ThemesN is the highest valid value for type Themes, plus one.

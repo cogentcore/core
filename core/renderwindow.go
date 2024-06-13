@@ -116,14 +116,14 @@ func NewRenderWindow(name, title string, opts *system.NewWindowOptions) *RenderW
 		rc := w.RenderContext()
 		rc.Lock()
 		defer rc.Unlock()
-		w.SetFlag(true, WindowClosing)
+		w.closing = true
 		// ensure that everyone is closed first
 		for _, kv := range w.Mains.Stack.Order {
 			if kv.Value == nil || kv.Value.Scene == nil || kv.Value.Scene.This == nil {
 				continue
 			}
 			if !kv.Value.Scene.Close() {
-				w.SetFlag(false, WindowClosing)
+				w.closing = false
 				return
 			}
 		}
@@ -398,7 +398,7 @@ func (w *RenderWindow) SetCloseCleanFunc(fun func(win *RenderWindow)) {
 
 // IsVisible is the main visibility check -- don't do any window updates if not visible!
 func (w *RenderWindow) IsVisible() bool {
-	if w == nil || w.SystemWindow == nil || w.IsClosed() || w.Is(WindowClosing) || !w.SystemWindow.IsVisible() {
+	if w == nil || w.SystemWindow == nil || w.IsClosed() || w.closing || !w.SystemWindow.IsVisible() {
 		return false
 	}
 	return true
@@ -413,11 +413,6 @@ func (w *RenderWindow) IsVisible() bool {
 func (w *RenderWindow) GoStartEventLoop() {
 	WindowWait.Add(1)
 	go w.EventLoop()
-}
-
-// StopEventLoop tells the event loop to stop running when the next event arrives.
-func (w *RenderWindow) StopEventLoop() {
-	w.SetFlag(true, WindowStopEventLoop)
 }
 
 // SendCustomEvent sends a custom event with given data to this window -- widgets can connect
@@ -449,13 +444,13 @@ func (w *RenderWindow) EventLoop() {
 	d := &w.SystemWindow.Events().Deque
 
 	for {
-		if w.HasFlag(WindowStopEventLoop) {
-			w.SetFlag(false, WindowStopEventLoop)
+		if w.stopEventLoop {
+			w.stopEventLoop = false
 			break
 		}
 		e := d.NextEvent()
-		if w.HasFlag(WindowStopEventLoop) {
-			w.SetFlag(false, WindowStopEventLoop)
+		if w.stopEventLoop {
+			w.stopEventLoop = false
 			break
 		}
 		w.HandleEvent(e)
@@ -520,7 +515,7 @@ func (w *RenderWindow) HandleWindowEvents(e events.Event) {
 		case events.WinClose:
 			// fmt.Printf("got close event for window %v \n", w.Name)
 			e.SetHandled()
-			w.StopEventLoop()
+			w.stopEventLoop = true
 			w.Closed()
 		case events.WinMinimize:
 			e.SetHandled()
@@ -549,8 +544,8 @@ func (w *RenderWindow) HandleWindowEvents(e events.Event) {
 				AllRenderWindows.Delete(w)
 				AllRenderWindows.Add(w)
 			}
-			if !w.HasFlag(WindowGotFocus) {
-				w.SetFlag(true, WindowGotFocus)
+			if !w.gotFocus {
+				w.gotFocus = true
 				w.SendWinFocusEvent(events.WinFocus)
 				if DebugSettings.WinEventTrace {
 					fmt.Printf("Win: %v got focus\n", w.Name)
@@ -565,7 +560,7 @@ func (w *RenderWindow) HandleWindowEvents(e events.Event) {
 			if DebugSettings.WinEventTrace {
 				fmt.Printf("Win: %v lost focus\n", w.Name)
 			}
-			w.SetFlag(false, WindowGotFocus)
+			w.gotFocus = false
 			w.SendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
 			w.Resized()

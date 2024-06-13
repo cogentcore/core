@@ -295,7 +295,7 @@ func (sc *Scene) Close() bool {
 		return false // todo: needed, but not sure why
 	}
 	mm.DeleteStage(sc.Stage)
-	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() && !mm.RenderWindow.Is(WindowClosing) && !mm.RenderWindow.Is(WindowStopEventLoop) && !TheApp.IsQuitting() {
+	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() && !mm.RenderWindow.closing && !mm.RenderWindow.stopEventLoop && !TheApp.IsQuitting() {
 		mm.RenderWindow.CloseReq()
 	}
 	return true
