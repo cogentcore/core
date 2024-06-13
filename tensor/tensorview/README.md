@@ -1,6 +1,6 @@
 # tensorview
 
-`tensorview` provides GUI Views of `table.Table` and `tensor.Tensor` structures using the [Core views framework](https://cogentcore.org/core/views), as Cogent Core Widgets.
+`tensorview` provides GUI Views of `table.Table` and `tensor.Tensor` structures as Cogent Core Widgets.
 
 Add this to `import` to get these views to be registered with the Cogent Core Value system:
 

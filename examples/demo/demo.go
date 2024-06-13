@@ -36,7 +36,7 @@ func main() {
 
 	home(ts)
 	widgets(ts)
-	makeViews(ts)
+	views(ts)
 	values(ts)
 	makeStyles(ts)
 
@@ -406,7 +406,7 @@ func hello(firstName string, lastName string, age int, likesGo bool) (greeting s
 	return
 }
 
-func makeViews(ts *core.Tabs) {
+func views(ts *core.Tabs) {
 	tab := ts.NewTab("Views")
 
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Views")
