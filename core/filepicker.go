@@ -792,7 +792,11 @@ func (fp *FilePicker) EditRecentPaths() {
 	d.RunDialog(fp)
 }
 
-// FileButton represents a filename value with a button
+// Filename is used to specify an file path.
+// It results in a [FileButton] [Value].
+type Filename string
+
+// FileButton represents a [Filename] value with a button
 // that opens a [FilePicker].
 type FileButton struct {
 	Button

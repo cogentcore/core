@@ -167,6 +167,10 @@ func (ib *IconButton) Init() { // TODO(config): view:"show-name"
 	})
 }
 
+// FontName is used to specify a font family name.
+// It results in a [FontButton] [Value].
+type FontName string
+
 // FontButton represents a [FontName] with a [Button] that opens
 // a dialog for selecting the font family.
 type FontButton struct {
@@ -199,3 +203,7 @@ func (fb *FontButton) Init() {
 		})
 	})
 }
+
+// HiStyleName is a highlighting style name.
+// TODO(config): figure out a better location for this.
+type HiStyleName string
