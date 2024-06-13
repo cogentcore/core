@@ -40,7 +40,7 @@ func (sb *SliceButton) Init() {
 			tv.SetValueTitle(sb.ValueTitle).SetReadOnly(sb.IsReadOnly())
 			d.AddAppBar(tv.MakeToolbar)
 		} else {
-			sv := NewSliceView(d).SetSlice(sb.Slice)
+			sv := NewList(d).SetSlice(sb.Slice)
 			sv.SetValueTitle(sb.ValueTitle).SetReadOnly(sb.IsReadOnly())
 			d.AddAppBar(sv.MakeToolbar)
 		}
@@ -157,7 +157,7 @@ func (ib *IconButton) Init() { // TODO(config): view:"show-name"
 		d.SetTitle("Select an icon")
 		si := 0
 		all := icons.All()
-		sv := NewSliceView(d)
+		sv := NewList(d)
 		sv.SetSlice(&all).SetSelectedValue(ib.Icon).BindSelect(&si)
 		sv.SetStyleFunc(func(w core.Widget, s *styles.Style, row int) {
 			w.(*IconButton).SetText(strcase.ToSentence(string(all[row])))

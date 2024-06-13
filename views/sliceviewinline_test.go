@@ -10,8 +10,8 @@ import (
 	"cogentcore.org/core/core"
 )
 
-func TestSliceViewInline(t *testing.T) {
+func TestListInline(t *testing.T) {
 	b := core.NewBody()
-	NewSliceViewInline(b).SetSlice(&[]int{1, 3, 5})
-	b.AssertRender(t, "slice-view-inline/basic")
+	NewListInline(b).SetSlice(&[]int{1, 3, 5})
+	b.AssertRender(t, "list-inline/basic")
 }

@@ -31,7 +31,7 @@ import (
 
 // TableView provides a GUI view for [table.Table] values.
 type TableView struct {
-	views.SliceViewBase
+	views.ListBase
 
 	// the idx view of the table that we're a view of
 	Table *table.IndexView `set:"-"`
@@ -66,17 +66,17 @@ type TableView struct {
 }
 
 // check for interface impl
-var _ views.SliceViewer = (*TableView)(nil)
+var _ views.Lister = (*TableView)(nil)
 
 func (tv *TableView) Init() {
-	tv.SliceViewBase.Init()
+	tv.ListBase.Init()
 	tv.SortIndex = -1
 	tv.TensorDisplay.Defaults()
 	tv.ColumnTensorDisplay = map[int]*TensorDisplay{}
 	tv.ColumnTensorBlank = map[int]*tensor.Float64{}
 
-	tv.Makers[0] = func(p *core.Plan) { // TODO: reduce redundancy with SliceViewBase Maker
-		svi := tv.This.(views.SliceViewer)
+	tv.Makers[0] = func(p *core.Plan) { // TODO: reduce redundancy with ListBase Maker
+		svi := tv.This.(views.Lister)
 		svi.UpdateSliceSize()
 
 		scrollTo := -1
@@ -139,7 +139,7 @@ func (tv *TableView) SetTable(et *table.Table) *TableView {
 
 	tv.SetSliceBase()
 	tv.Table = table.NewIndexView(et)
-	tv.This.(views.SliceViewer).UpdateSliceSize()
+	tv.This.(views.Lister).UpdateSliceSize()
 	tv.Update()
 	return tv
 }
@@ -163,7 +163,7 @@ func (tv *TableView) SetTableView(ix *table.IndexView) *TableView {
 
 	tv.Table = ix.Clone() // always copy
 
-	tv.This.(views.SliceViewer).UpdateSliceSize()
+	tv.This.(views.Lister).UpdateSliceSize()
 	tv.StartIndex = 0
 	tv.VisRows = tv.MinRows
 	if !tv.IsReadOnly() {
@@ -274,7 +274,7 @@ func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 }
 
 func (tv *TableView) MakeRow(p *core.Plan, i int) {
-	svi := tv.This.(views.SliceViewer)
+	svi := tv.This.(views.Lister)
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
 
@@ -299,7 +299,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 			}, func(w core.Value) {
 				wb := w.AsWidget()
 				tv.MakeValue(w, i)
-				w.AsTree().SetProperty(views.SliceViewColProperty, fli)
+				w.AsTree().SetProperty(views.ListColProperty, fli)
 				if !tv.IsReadOnly() {
 					wb.OnChange(func(e events.Event) {
 						if si < len(tv.Table.Indexes) {
@@ -343,8 +343,8 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 			core.AddAt(p, valnm, func(w *TensorGrid) {
 				w.SetReadOnly(tv.IsReadOnly())
 				wb := w.AsWidget()
-				w.SetProperty(views.SliceViewRowProperty, i)
-				w.SetProperty(views.SliceViewColProperty, fli)
+				w.SetProperty(views.ListRowProperty, i)
+				w.SetProperty(views.ListColProperty, fli)
 				w.Styler(func(s *styles.Style) {
 					s.Grow.Set(0, 0)
 				})
@@ -586,8 +586,8 @@ func (tv *TableView) RowGrabFocus(row int) *core.WidgetBase {
 // 	Header layout
 
 func (tv *TableView) SizeFinal() {
-	tv.SliceViewBase.SizeFinal()
-	sg := tv.This.(views.SliceViewer).SliceGrid()
+	tv.ListBase.SizeFinal()
+	sg := tv.This.(views.Lister).SliceGrid()
 	sh := tv.SliceHeader()
 	sh.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
 		_, sgb := core.AsWidget(sg.Child(i))

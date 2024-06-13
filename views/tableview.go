@@ -31,9 +31,9 @@ import (
 // TableView represents a slice of structs as a table, where the fields are
 // the columns and the elements are the rows. It is a full-featured editor with
 // multiple-selection, cut-and-paste, and drag-and-drop.
-// Use [SliceViewBase.BindSelect] to make the table view designed for item selection.
+// Use [ListBase.BindSelect] to make the table view designed for item selection.
 type TableView struct {
-	SliceViewBase
+	ListBase
 
 	// StyleFunc is an optional styling function.
 	StyleFunc TableViewStyleFunc `copier:"-" view:"-" json:"-" xml:"-"`
@@ -65,12 +65,12 @@ type TableView struct {
 type TableViewStyleFunc func(w core.Widget, s *styles.Style, row, col int)
 
 func (tv *TableView) Init() {
-	tv.SliceViewBase.Init()
+	tv.ListBase.Init()
 	tv.AddContextMenu(tv.ContextMenu)
 	tv.SortIndex = -1
 
-	tv.Makers[0] = func(p *core.Plan) { // TODO: reduce redundancy with SliceViewBase Maker
-		svi := tv.This.(SliceViewer)
+	tv.Makers[0] = func(p *core.Plan) { // TODO: reduce redundancy with ListBase Maker
+		svi := tv.This.(Lister)
 		svi.UpdateSliceSize()
 
 		tv.SortSlice()
@@ -279,7 +279,7 @@ func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 }
 
 func (tv *TableView) MakeRow(p *core.Plan, i int) {
-	svi := tv.This.(SliceViewer)
+	svi := tv.This.(Lister)
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
 	val := tv.SliceElementValue(si)
@@ -309,7 +309,7 @@ func (tv *TableView) MakeRow(p *core.Plan, i int) {
 		}, func(w core.Value) {
 			wb := w.AsWidget()
 			tv.MakeValue(w, i)
-			w.AsTree().SetProperty(SliceViewColProperty, fli)
+			w.AsTree().SetProperty(ListColProperty, fli)
 			if !tv.IsReadOnly() && !readOnlyTag {
 				wb.OnChange(func(e events.Event) {
 					tv.SendChange()
@@ -364,7 +364,7 @@ func (tv *TableView) SliceNewAt(idx int) {
 		idx = tv.SliceSize
 	}
 
-	tv.This.(SliceViewer).UpdateSliceSize()
+	tv.This.(Lister).UpdateSliceSize()
 	tv.SelectIndexAction(idx, events.SelectOne)
 	tv.SendChange()
 	tv.Update()
@@ -381,7 +381,7 @@ func (tv *TableView) SliceDeleteAt(idx int) {
 
 	reflectx.SliceDeleteAt(tv.Slice, idx)
 
-	tv.This.(SliceViewer).UpdateSliceSize()
+	tv.This.(Lister).UpdateSliceSize()
 	tv.SendChange()
 	tv.Update()
 }
@@ -598,8 +598,8 @@ func (tv *TableView) ContextMenu(m *core.Scene) {
 // 	Header layout
 
 func (tv *TableView) SizeFinal() {
-	tv.SliceViewBase.SizeFinal()
-	sg := tv.This.(SliceViewer).SliceGrid()
+	tv.ListBase.SizeFinal()
+	sg := tv.This.(Lister).SliceGrid()
 	if sg == nil {
 		return
 	}

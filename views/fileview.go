@@ -782,7 +782,7 @@ func (fp *FilePicker) FileCompleteEdit(data any, text string, cursorPos int, c c
 // edit the recent paths list.
 func (fp *FilePicker) EditRecentPaths() {
 	d := core.NewBody().AddTitle("Recent file paths").AddText("You can delete paths you no longer use")
-	NewSliceView(d).SetSlice(&core.RecentPaths)
+	NewList(d).SetSlice(&core.RecentPaths)
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {

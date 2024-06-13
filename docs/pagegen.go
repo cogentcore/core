@@ -782,25 +782,25 @@ var PagesExamples = map[string]func(parent core.Widget){
 	"views/key-value-tables-6": func(parent core.Widget) {
 		// views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
 	},
-	"views/slice-views-0": func(parent core.Widget) {
-		views.NewSliceView(parent).SetSlice(&[]int{1, 3, 5})
+	"views/lists-0": func(parent core.Widget) {
+		views.NewList(parent).SetSlice(&[]int{1, 3, 5})
 	},
-	"views/slice-views-1": func(parent core.Widget) {
-		views.NewSliceViewInline(parent).SetSlice(&[]int{1, 3, 5})
+	"views/lists-1": func(parent core.Widget) {
+		views.NewListInline(parent).SetSlice(&[]int{1, 3, 5})
 	},
-	"views/slice-views-2": func(parent core.Widget) {
+	"views/lists-2": func(parent core.Widget) {
 		sl := []int{1, 3, 5}
-		views.NewSliceView(parent).SetSlice(&sl).OnChange(func(e events.Event) {
+		views.NewList(parent).SetSlice(&sl).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, fmt.Sprintf("Slice: %v", sl))
 		})
 	},
-	"views/slice-views-3": func(parent core.Widget) {
-		views.NewSliceView(parent).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
+	"views/lists-3": func(parent core.Widget) {
+		views.NewList(parent).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
 	},
-	"views/slice-views-4": func(parent core.Widget) {
+	"views/lists-4": func(parent core.Widget) {
 		// views.NewValue(parent, &[]int{1, 3, 5})
 	},
-	"views/slice-views-5": func(parent core.Widget) {
+	"views/lists-5": func(parent core.Widget) {
 		// views.NewValue(parent, &[]int{1, 3, 5, 7, 9})
 	},
 	"views/struct-views-0": func(parent core.Widget) {

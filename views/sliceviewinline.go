@@ -14,9 +14,9 @@ import (
 	"cogentcore.org/core/icons"
 )
 
-// SliceViewInline represents a slice within a single line of value widgets.
+// ListInline represents a slice within a single line of value widgets.
 // This is typically used for smaller slices.
-type SliceViewInline struct {
+type ListInline struct {
 	core.Frame
 
 	// Slice is the slice that we are viewing.
@@ -26,9 +26,9 @@ type SliceViewInline struct {
 	isArray bool
 }
 
-func (sv *SliceViewInline) WidgetValue() any { return &sv.Slice }
+func (sv *ListInline) WidgetValue() any { return &sv.Slice }
 
-func (sv *SliceViewInline) Init() {
+func (sv *ListInline) Init() {
 	sv.Frame.Init()
 	sv.Maker(func(p *core.Plan) {
 		sl := reflectx.NonPointerValue(reflectx.UnderlyingPointer(reflect.ValueOf(sv.Slice)))
@@ -72,7 +72,7 @@ func (sv *SliceViewInline) Init() {
 			w.Tooltip = "Edit list in a dialog"
 			w.OnClick(func(e events.Event) {
 				d := core.NewBody().AddTitle(sv.ValueTitle).AddText(sv.Tooltip)
-				NewSliceView(d).SetSlice(sv.Slice).SetValueTitle(sv.ValueTitle)
+				NewList(d).SetSlice(sv.Slice).SetValueTitle(sv.ValueTitle)
 				d.OnClose(func(e events.Event) {
 					sv.Update()
 					sv.SendChange()
@@ -84,7 +84,7 @@ func (sv *SliceViewInline) Init() {
 }
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice
-func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
+func (sv *ListInline) SetSlice(sl any) *ListInline {
 	if reflectx.AnyIsNil(sl) {
 		sv.Slice = nil
 		return sv
@@ -105,7 +105,7 @@ func (sv *SliceViewInline) SetSlice(sl any) *SliceViewInline {
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end
-func (sv *SliceViewInline) SliceNewAt(idx int) {
+func (sv *ListInline) SliceNewAt(idx int) {
 	if sv.isArray {
 		return
 	}
@@ -116,7 +116,7 @@ func (sv *SliceViewInline) SliceNewAt(idx int) {
 }
 
 // SliceDeleteAt deletes element at given index from slice
-func (sv *SliceViewInline) SliceDeleteAt(idx int) {
+func (sv *ListInline) SliceDeleteAt(idx int) {
 	if sv.isArray {
 		return
 	}
@@ -126,7 +126,7 @@ func (sv *SliceViewInline) SliceDeleteAt(idx int) {
 	sv.Update()
 }
 
-func (sv *SliceViewInline) ContextMenu(m *core.Scene, idx int) {
+func (sv *ListInline) ContextMenu(m *core.Scene, idx int) {
 	if sv.IsReadOnly() || sv.isArray {
 		return
 	}

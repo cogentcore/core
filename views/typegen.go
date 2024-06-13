@@ -257,111 +257,111 @@ func (t *KeyValueTable) SetInline(v bool) *KeyValueTable { t.Inline = v; return 
 // SortValue is whether to sort by values instead of keys.
 func (t *KeyValueTable) SetSortValues(v bool) *KeyValueTable { t.SortValues = v; return t }
 
-// SliceViewType is the [types.Type] for [SliceView]
-var SliceViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceView", IDName: "slice-view", Doc: "SliceView represents a slice value with index and value widgets.\nUse [SliceViewBase.BindSelect] to make the slice view designed for item selection.", Embeds: []types.Field{{Name: "SliceViewBase"}}, Fields: []types.Field{{Name: "StyleFunc", Doc: "StyleFunc is an optional styling function."}}, Instance: &SliceView{}})
+// ListType is the [types.Type] for [List]
+var ListType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.List", IDName: "list", Doc: "List represents a slice value with index and value widgets.\nUse [ListBase.BindSelect] to make the list designed for item selection.", Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "StyleFunc", Doc: "StyleFunc is an optional styling function."}}, Instance: &List{}})
 
-// NewSliceView returns a new [SliceView] with the given optional parent:
-// SliceView represents a slice value with index and value widgets.
-// Use [SliceViewBase.BindSelect] to make the slice view designed for item selection.
-func NewSliceView(parent ...tree.Node) *SliceView { return tree.New[*SliceView](parent...) }
+// NewList returns a new [List] with the given optional parent:
+// List represents a slice value with index and value widgets.
+// Use [ListBase.BindSelect] to make the list designed for item selection.
+func NewList(parent ...tree.Node) *List { return tree.New[*List](parent...) }
 
-// NodeType returns the [*types.Type] of [SliceView]
-func (t *SliceView) NodeType() *types.Type { return SliceViewType }
+// NodeType returns the [*types.Type] of [List]
+func (t *List) NodeType() *types.Type { return ListType }
 
-// New returns a new [*SliceView] value
-func (t *SliceView) New() tree.Node { return &SliceView{} }
+// New returns a new [*List] value
+func (t *List) New() tree.Node { return &List{} }
 
-// SetStyleFunc sets the [SliceView.StyleFunc]:
+// SetStyleFunc sets the [List.StyleFunc]:
 // StyleFunc is an optional styling function.
-func (t *SliceView) SetStyleFunc(v SliceViewStyleFunc) *SliceView { t.StyleFunc = v; return t }
+func (t *List) SetStyleFunc(v ListStyleFunc) *List { t.StyleFunc = v; return t }
 
-// SliceViewBaseType is the [types.Type] for [SliceViewBase]
-var SliceViewBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewBase", IDName: "slice-view-base", Doc: "SliceViewBase is the base for [SliceView] and [TableView] and any other viewers\nof array-like data. It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nUse [SliceViewBase.BindSelect] to make the slice view designed for item selection.", Methods: []types.Method{{Name: "CopyIndexes", Doc: "CopyIndexes copies selected idxs to system.Clipboard, optionally resetting the selection", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"reset"}}, {Name: "DeleteIndexes", Doc: "DeleteIndexes deletes all selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "CutIndexes", Doc: "CutIndexes copies selected indexes to system.Clipboard and deletes selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "PasteIndex", Doc: "PasteIndex pastes clipboard at given idx", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"idx"}}, {Name: "Duplicate", Doc: "Duplicate copies selected items and inserts them after current selection --\nreturn idx of start of duplicates if successful, else -1", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"int"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the pointer to the slice that we are viewing."}, {Name: "ShowIndexes", Doc: "ShowIndexes is whether to show the indexes of rows or not (default false)."}, {Name: "MinRows", Doc: "MinRows specifies the minimum number of rows to display, to ensure\nat least this amount is displayed."}, {Name: "SelectedValue", Doc: "SelectedValue is the current selection value; initially select this value if set."}, {Name: "SelectedIndex", Doc: "index of currently selected item"}, {Name: "InitSelectedIndex", Doc: "index of row to select at start"}, {Name: "SelectedIndexes", Doc: "list of currently selected slice indexes"}, {Name: "lastClick", Doc: "lastClick is the last row that has been clicked on.\nThis is used to prevent erroneous double click events\nfrom being sent when the user clicks on multiple different\nrows in quick succession."}, {Name: "NormalCursor", Doc: "NormalCursor is the cached cursor to display when there\nis no row being hovered."}, {Name: "CurrentCursor", Doc: "CurrentCursor is the cached cursor that should currently be\ndisplayed."}, {Name: "SliceUnderlying", Doc: "SliceUnderlying is the underlying slice value."}, {Name: "hoverRow", Doc: "currently hovered row"}, {Name: "DraggedIndexes", Doc: "list of currently dragged indexes"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "StartIndex", Doc: "starting slice index of visible rows"}, {Name: "SliceSize", Doc: "size of slice"}, {Name: "MakeIter", Doc: "iteration through the configuration process, reset when a new slice type is set"}, {Name: "tmpIndex", Doc: "temp idx state for e.g., dnd"}, {Name: "ElementValue", Doc: "ElementValue is a [reflect.Value] representation of the underlying element type\nwhich is used whenever there are no slice elements available"}, {Name: "maxWidth", Doc: "maximum width of value column in chars, if string"}, {Name: "ReadOnlyKeyNav", Doc: "ReadOnlyKeyNav is whether support key navigation when ReadOnly (default true).\nIt uses a capture of up / down events to manipulate selection, not focus."}, {Name: "SelectMode", Doc: "SelectMode is whether to be in select rows mode or editing mode."}, {Name: "ReadOnlyMultiSelect", Doc: "ReadOnlyMultiSelect: if view is ReadOnly, default selection mode is to choose one row only.\nIf this is true, standard multiple selection logic with modifier keys is instead supported."}, {Name: "InFocusGrab", Doc: "InFocusGrab is a guard for recursive focus grabbing."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}}, Instance: &SliceViewBase{}})
+// ListBaseType is the [types.Type] for [ListBase]
+var ListBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ListBase", IDName: "list-base", Doc: "ListBase is the base for [List] and [TableView] and any other viewers\nof array-like data. It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nUse [ListBase.BindSelect] to make the list designed for item selection.", Methods: []types.Method{{Name: "CopyIndexes", Doc: "CopyIndexes copies selected idxs to system.Clipboard, optionally resetting the selection", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"reset"}}, {Name: "DeleteIndexes", Doc: "DeleteIndexes deletes all selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "CutIndexes", Doc: "CutIndexes copies selected indexes to system.Clipboard and deletes selected indexes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "PasteIndex", Doc: "PasteIndex pastes clipboard at given idx", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"idx"}}, {Name: "Duplicate", Doc: "Duplicate copies selected items and inserts them after current selection --\nreturn idx of start of duplicates if successful, else -1", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"int"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the pointer to the slice that we are viewing."}, {Name: "ShowIndexes", Doc: "ShowIndexes is whether to show the indexes of rows or not (default false)."}, {Name: "MinRows", Doc: "MinRows specifies the minimum number of rows to display, to ensure\nat least this amount is displayed."}, {Name: "SelectedValue", Doc: "SelectedValue is the current selection value; initially select this value if set."}, {Name: "SelectedIndex", Doc: "index of currently selected item"}, {Name: "InitSelectedIndex", Doc: "index of row to select at start"}, {Name: "SelectedIndexes", Doc: "list of currently selected slice indexes"}, {Name: "lastClick", Doc: "lastClick is the last row that has been clicked on.\nThis is used to prevent erroneous double click events\nfrom being sent when the user clicks on multiple different\nrows in quick succession."}, {Name: "NormalCursor", Doc: "NormalCursor is the cached cursor to display when there\nis no row being hovered."}, {Name: "CurrentCursor", Doc: "CurrentCursor is the cached cursor that should currently be\ndisplayed."}, {Name: "SliceUnderlying", Doc: "SliceUnderlying is the underlying slice value."}, {Name: "hoverRow", Doc: "currently hovered row"}, {Name: "DraggedIndexes", Doc: "list of currently dragged indexes"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "StartIndex", Doc: "starting slice index of visible rows"}, {Name: "SliceSize", Doc: "size of slice"}, {Name: "MakeIter", Doc: "iteration through the configuration process, reset when a new slice type is set"}, {Name: "tmpIndex", Doc: "temp idx state for e.g., dnd"}, {Name: "ElementValue", Doc: "ElementValue is a [reflect.Value] representation of the underlying element type\nwhich is used whenever there are no slice elements available"}, {Name: "maxWidth", Doc: "maximum width of value column in chars, if string"}, {Name: "ReadOnlyKeyNav", Doc: "ReadOnlyKeyNav is whether support key navigation when ReadOnly (default true).\nIt uses a capture of up / down events to manipulate selection, not focus."}, {Name: "SelectMode", Doc: "SelectMode is whether to be in select rows mode or editing mode."}, {Name: "ReadOnlyMultiSelect", Doc: "ReadOnlyMultiSelect: if view is ReadOnly, default selection mode is to choose one row only.\nIf this is true, standard multiple selection logic with modifier keys is instead supported."}, {Name: "InFocusGrab", Doc: "InFocusGrab is a guard for recursive focus grabbing."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}}, Instance: &ListBase{}})
 
-// NewSliceViewBase returns a new [SliceViewBase] with the given optional parent:
-// SliceViewBase is the base for [SliceView] and [TableView] and any other viewers
+// NewListBase returns a new [ListBase] with the given optional parent:
+// ListBase is the base for [List] and [TableView] and any other viewers
 // of array-like data. It automatically computes the number of rows that fit
 // within its allocated space, and manages the offset view window into the full
 // list of items, and supports row selection, copy / paste, Drag-n-Drop, etc.
-// Use [SliceViewBase.BindSelect] to make the slice view designed for item selection.
-func NewSliceViewBase(parent ...tree.Node) *SliceViewBase { return tree.New[*SliceViewBase](parent...) }
+// Use [ListBase.BindSelect] to make the list designed for item selection.
+func NewListBase(parent ...tree.Node) *ListBase { return tree.New[*ListBase](parent...) }
 
-// NodeType returns the [*types.Type] of [SliceViewBase]
-func (t *SliceViewBase) NodeType() *types.Type { return SliceViewBaseType }
+// NodeType returns the [*types.Type] of [ListBase]
+func (t *ListBase) NodeType() *types.Type { return ListBaseType }
 
-// New returns a new [*SliceViewBase] value
-func (t *SliceViewBase) New() tree.Node { return &SliceViewBase{} }
+// New returns a new [*ListBase] value
+func (t *ListBase) New() tree.Node { return &ListBase{} }
 
-// SetShowIndexes sets the [SliceViewBase.ShowIndexes]:
+// SetShowIndexes sets the [ListBase.ShowIndexes]:
 // ShowIndexes is whether to show the indexes of rows or not (default false).
-func (t *SliceViewBase) SetShowIndexes(v bool) *SliceViewBase { t.ShowIndexes = v; return t }
+func (t *ListBase) SetShowIndexes(v bool) *ListBase { t.ShowIndexes = v; return t }
 
-// SetMinRows sets the [SliceViewBase.MinRows]:
+// SetMinRows sets the [ListBase.MinRows]:
 // MinRows specifies the minimum number of rows to display, to ensure
 // at least this amount is displayed.
-func (t *SliceViewBase) SetMinRows(v int) *SliceViewBase { t.MinRows = v; return t }
+func (t *ListBase) SetMinRows(v int) *ListBase { t.MinRows = v; return t }
 
-// SetSelectedValue sets the [SliceViewBase.SelectedValue]:
+// SetSelectedValue sets the [ListBase.SelectedValue]:
 // SelectedValue is the current selection value; initially select this value if set.
-func (t *SliceViewBase) SetSelectedValue(v any) *SliceViewBase { t.SelectedValue = v; return t }
+func (t *ListBase) SetSelectedValue(v any) *ListBase { t.SelectedValue = v; return t }
 
-// SetSelectedIndex sets the [SliceViewBase.SelectedIndex]:
+// SetSelectedIndex sets the [ListBase.SelectedIndex]:
 // index of currently selected item
-func (t *SliceViewBase) SetSelectedIndex(v int) *SliceViewBase { t.SelectedIndex = v; return t }
+func (t *ListBase) SetSelectedIndex(v int) *ListBase { t.SelectedIndex = v; return t }
 
-// SetInitSelectedIndex sets the [SliceViewBase.InitSelectedIndex]:
+// SetInitSelectedIndex sets the [ListBase.InitSelectedIndex]:
 // index of row to select at start
-func (t *SliceViewBase) SetInitSelectedIndex(v int) *SliceViewBase { t.InitSelectedIndex = v; return t }
+func (t *ListBase) SetInitSelectedIndex(v int) *ListBase { t.InitSelectedIndex = v; return t }
 
-// SetReadOnlyKeyNav sets the [SliceViewBase.ReadOnlyKeyNav]:
+// SetReadOnlyKeyNav sets the [ListBase.ReadOnlyKeyNav]:
 // ReadOnlyKeyNav is whether support key navigation when ReadOnly (default true).
 // It uses a capture of up / down events to manipulate selection, not focus.
-func (t *SliceViewBase) SetReadOnlyKeyNav(v bool) *SliceViewBase { t.ReadOnlyKeyNav = v; return t }
+func (t *ListBase) SetReadOnlyKeyNav(v bool) *ListBase { t.ReadOnlyKeyNav = v; return t }
 
-// SetReadOnlyMultiSelect sets the [SliceViewBase.ReadOnlyMultiSelect]:
+// SetReadOnlyMultiSelect sets the [ListBase.ReadOnlyMultiSelect]:
 // ReadOnlyMultiSelect: if view is ReadOnly, default selection mode is to choose one row only.
 // If this is true, standard multiple selection logic with modifier keys is instead supported.
-func (t *SliceViewBase) SetReadOnlyMultiSelect(v bool) *SliceViewBase {
+func (t *ListBase) SetReadOnlyMultiSelect(v bool) *ListBase {
 	t.ReadOnlyMultiSelect = v
 	return t
 }
 
-// SliceViewGridType is the [types.Type] for [SliceViewGrid]
-var SliceViewGridType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewGrid", IDName: "slice-view-grid", Doc: "SliceViewGrid handles the resizing logic for SliceView, TableView.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "MinRows", Doc: "MinRows is set from parent SV"}, {Name: "RowHeight", Doc: "height of a single row, computed during layout"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "BgStripe", Doc: "Various computed backgrounds"}, {Name: "BgSelect", Doc: "Various computed backgrounds"}, {Name: "BgSelectStripe", Doc: "Various computed backgrounds"}, {Name: "BgHover", Doc: "Various computed backgrounds"}, {Name: "BgHoverStripe", Doc: "Various computed backgrounds"}, {Name: "BgHoverSelect", Doc: "Various computed backgrounds"}, {Name: "BgHoverSelectStripe", Doc: "Various computed backgrounds"}, {Name: "LastBackground", Doc: "LastBackground is the background for which modified\nbackgrounds were computed -- don't update if same"}}, Instance: &SliceViewGrid{}})
+// ListGridType is the [types.Type] for [ListGrid]
+var ListGridType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ListGrid", IDName: "list-grid", Doc: "ListGrid handles the resizing logic for List, TableView.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "MinRows", Doc: "MinRows is set from parent SV"}, {Name: "RowHeight", Doc: "height of a single row, computed during layout"}, {Name: "VisRows", Doc: "total number of rows visible in allocated display size"}, {Name: "BgStripe", Doc: "Various computed backgrounds"}, {Name: "BgSelect", Doc: "Various computed backgrounds"}, {Name: "BgSelectStripe", Doc: "Various computed backgrounds"}, {Name: "BgHover", Doc: "Various computed backgrounds"}, {Name: "BgHoverStripe", Doc: "Various computed backgrounds"}, {Name: "BgHoverSelect", Doc: "Various computed backgrounds"}, {Name: "BgHoverSelectStripe", Doc: "Various computed backgrounds"}, {Name: "LastBackground", Doc: "LastBackground is the background for which modified\nbackgrounds were computed -- don't update if same"}}, Instance: &ListGrid{}})
 
-// NewSliceViewGrid returns a new [SliceViewGrid] with the given optional parent:
-// SliceViewGrid handles the resizing logic for SliceView, TableView.
-func NewSliceViewGrid(parent ...tree.Node) *SliceViewGrid { return tree.New[*SliceViewGrid](parent...) }
+// NewListGrid returns a new [ListGrid] with the given optional parent:
+// ListGrid handles the resizing logic for List, TableView.
+func NewListGrid(parent ...tree.Node) *ListGrid { return tree.New[*ListGrid](parent...) }
 
-// NodeType returns the [*types.Type] of [SliceViewGrid]
-func (t *SliceViewGrid) NodeType() *types.Type { return SliceViewGridType }
+// NodeType returns the [*types.Type] of [ListGrid]
+func (t *ListGrid) NodeType() *types.Type { return ListGridType }
 
-// New returns a new [*SliceViewGrid] value
-func (t *SliceViewGrid) New() tree.Node { return &SliceViewGrid{} }
+// New returns a new [*ListGrid] value
+func (t *ListGrid) New() tree.Node { return &ListGrid{} }
 
-// SetLastBackground sets the [SliceViewGrid.LastBackground]:
+// SetLastBackground sets the [ListGrid.LastBackground]:
 // LastBackground is the background for which modified
 // backgrounds were computed -- don't update if same
-func (t *SliceViewGrid) SetLastBackground(v image.Image) *SliceViewGrid {
+func (t *ListGrid) SetLastBackground(v image.Image) *ListGrid {
 	t.LastBackground = v
 	return t
 }
 
-// SliceViewInlineType is the [types.Type] for [SliceViewInline]
-var SliceViewInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceViewInline", IDName: "slice-view-inline", Doc: "SliceViewInline represents a slice within a single line of value widgets.\nThis is typically used for smaller slices.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the slice that we are viewing."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}}, Instance: &SliceViewInline{}})
+// ListInlineType is the [types.Type] for [ListInline]
+var ListInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ListInline", IDName: "list-inline", Doc: "ListInline represents a slice within a single line of value widgets.\nThis is typically used for smaller slices.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the slice that we are viewing."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}}, Instance: &ListInline{}})
 
-// NewSliceViewInline returns a new [SliceViewInline] with the given optional parent:
-// SliceViewInline represents a slice within a single line of value widgets.
+// NewListInline returns a new [ListInline] with the given optional parent:
+// ListInline represents a slice within a single line of value widgets.
 // This is typically used for smaller slices.
-func NewSliceViewInline(parent ...tree.Node) *SliceViewInline {
-	return tree.New[*SliceViewInline](parent...)
+func NewListInline(parent ...tree.Node) *ListInline {
+	return tree.New[*ListInline](parent...)
 }
 
-// NodeType returns the [*types.Type] of [SliceViewInline]
-func (t *SliceViewInline) NodeType() *types.Type { return SliceViewInlineType }
+// NodeType returns the [*types.Type] of [ListInline]
+func (t *ListInline) NodeType() *types.Type { return ListInlineType }
 
-// New returns a new [*SliceViewInline] value
-func (t *SliceViewInline) New() tree.Node { return &SliceViewInline{} }
+// New returns a new [*ListInline] value
+func (t *ListInline) New() tree.Node { return &ListInline{} }
 
 // StructViewType is the [types.Type] for [StructView]
 var StructViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructView", IDName: "struct-view", Doc: "StructView represents a struct with rows of field names and editable values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the struct in one line."}, {Name: "structFields", Doc: "structFields are the fields of the current struct."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [core.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructView{}})
@@ -385,13 +385,13 @@ func (t *StructView) SetStruct(v any) *StructView { t.Struct = v; return t }
 func (t *StructView) SetInline(v bool) *StructView { t.Inline = v; return t }
 
 // TableViewType is the [types.Type] for [TableView]
-var TableViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TableView", IDName: "table-view", Doc: "TableView represents a slice of structs as a table, where the fields are\nthe columns and the elements are the rows. It is a full-featured editor with\nmultiple-selection, cut-and-paste, and drag-and-drop.\nUse [SliceViewBase.BindSelect] to make the table view designed for item selection.", Embeds: []types.Field{{Name: "SliceViewBase"}}, Fields: []types.Field{{Name: "StyleFunc", Doc: "StyleFunc is an optional styling function."}, {Name: "SelectedField", Doc: "SelectedField is the current selection field; initially select value in this field."}, {Name: "SortIndex", Doc: "SortIndex is the current sort index."}, {Name: "SortDescending", Doc: "SortDescending is whether the current sort order is descending."}, {Name: "visibleFields", Doc: "visibleFields are the visible fields."}, {Name: "numVisibleFields", Doc: "numVisibleFields is the number of visible fields."}, {Name: "headerWidths", Doc: "headerWidths has the number of characters in each header, per visibleFields."}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields."}}, Instance: &TableView{}})
+var TableViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TableView", IDName: "table-view", Doc: "TableView represents a slice of structs as a table, where the fields are\nthe columns and the elements are the rows. It is a full-featured editor with\nmultiple-selection, cut-and-paste, and drag-and-drop.\nUse [ListBase.BindSelect] to make the table view designed for item selection.", Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "StyleFunc", Doc: "StyleFunc is an optional styling function."}, {Name: "SelectedField", Doc: "SelectedField is the current selection field; initially select value in this field."}, {Name: "SortIndex", Doc: "SortIndex is the current sort index."}, {Name: "SortDescending", Doc: "SortDescending is whether the current sort order is descending."}, {Name: "visibleFields", Doc: "visibleFields are the visible fields."}, {Name: "numVisibleFields", Doc: "numVisibleFields is the number of visible fields."}, {Name: "headerWidths", Doc: "headerWidths has the number of characters in each header, per visibleFields."}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields."}}, Instance: &TableView{}})
 
 // NewTableView returns a new [TableView] with the given optional parent:
 // TableView represents a slice of structs as a table, where the fields are
 // the columns and the elements are the rows. It is a full-featured editor with
 // multiple-selection, cut-and-paste, and drag-and-drop.
-// Use [SliceViewBase.BindSelect] to make the table view designed for item selection.
+// Use [ListBase.BindSelect] to make the table view designed for item selection.
 func NewTableView(parent ...tree.Node) *TableView { return tree.New[*TableView](parent...) }
 
 // NodeType returns the [*types.Type] of [TableView]

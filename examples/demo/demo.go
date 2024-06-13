@@ -446,7 +446,7 @@ func makeViews(ts *core.Tabs) {
 		sl[i] = fmt.Sprintf("el: %v", i)
 	}
 	sl[10] = "this is a particularly long slice value"
-	views.NewSliceView(vts.NewTab("Slice view")).SetSlice(&sl)
+	views.NewList(vts.NewTab("List")).SetSlice(&sl)
 
 	tbl := make([]*tableStruct, 50)
 	for i := range tbl {

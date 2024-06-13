@@ -36,7 +36,7 @@ func (v *Value) ConfigDialog(d *core.Body) (bool, func()) {
 	d.SetTitle("Select a syntax highlighting style")
 	si := 0
 	cur := reflectx.ToString(v.Value.Interface())
-	views.NewSliceView(d).SetSlice(&StyleNames).SetSelectedValue(cur).BindSelect(&si)
+	views.NewList(d).SetSlice(&StyleNames).SetSelectedValue(cur).BindSelect(&si)
 	return true, func() {
 		if si >= 0 {
 			hs := StyleNames[si]

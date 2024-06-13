@@ -53,7 +53,7 @@ func (mb *MeshButton) Init() {
 
 		// si := 0
 		// cur := reflectx.ToString(v.Value.Interface())
-		// views.NewSliceView(d).SetSlice(&sl).SetSelectedValue(cur).BindSelect(&si)
+		// views.NewList(d).SetSlice(&sl).SetSelectedValue(cur).BindSelect(&si)
 
 		// return true, func() {
 		// 	if si >= 0 {
@@ -137,11 +137,11 @@ func (vv *TexValue) Activate(vp *core.Viewport2D, dlgRecv tree.Node, dlgFunc tre
 
 	cur := reflectx.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
-	views.SliceViewSelectDialog(vp, &sl, cur, views.DlgOpts{Title: "Select a Texture", Prompt: desc}, nil,
+	views.ListSelectDialog(vp, &sl, cur, views.DlgOpts{Title: "Select a Texture", Prompt: desc}, nil,
 		vv.This, func(recv, send tree.Node, sig int64, data any) {
 			if sig == int64(core.DialogAccepted) {
 				ddlg := send.Embed(core.TypeDialog).(*core.Dialog)
-				si := views.SliceViewSelectDialogValue(ddlg)
+				si := views.ListSelectDialogValue(ddlg)
 				if si >= 0 {
 					vv.SetValue(sl[si])
 					vv.UpdateWidget()

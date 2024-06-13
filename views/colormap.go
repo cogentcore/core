@@ -59,7 +59,7 @@ func (cm *ColorMapButton) Init() {
 		d.SetTitle("Select a color map")
 		sl := colormap.AvailableMapsList()
 		si := 0
-		sv := NewSliceView(d).SetSlice(&sl).SetSelectedValue(cm.MapName).BindSelect(&si)
+		sv := NewList(d).SetSlice(&sl).SetSelectedValue(cm.MapName).BindSelect(&si)
 		sv.OnChange(func(e events.Event) {
 			cm.MapName = sl[si]
 		})

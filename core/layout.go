@@ -105,7 +105,7 @@ type Layouter interface {
 	// SizeFromChildren gathers Actual size from kids into our Actual.Content size.
 	// Different Layout types can alter this to present different Content
 	// sizes for the layout process, e.g., if Content is sized to fit allocation,
-	// as in the TopAppBar and Sliceview types.
+	// as in the TopAppBar and List types.
 	SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2
 
 	// SizeDownSetAllocs is the key SizeDown step that sets the allocations
@@ -934,7 +934,7 @@ func (ly *Frame) SizeFromChildrenFit(iter int, pass LayoutPasses) {
 // SizeFromChildren gathers Actual size from kids.
 // Different Layout types can alter this to present different Content
 // sizes for the layout process, e.g., if Content is sized to fit allocation,
-// as in the TopAppBar and Sliceview types.
+// as in the TopAppBar and List types.
 func (ly *Frame) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 {
 	var ksz math32.Vector2
 	if ly.Styles.Display == styles.Stacked {
