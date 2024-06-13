@@ -128,7 +128,7 @@ func (t *Group) New() tree.Node { return &Group{} }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.BodyPoint", IDName: "body-point", Doc: "BodyPoint contains a Body and a Point on that body", Fields: []types.Field{{Name: "Body"}, {Name: "Point"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Node", IDName: "node", Doc: "Node is the common interface for all nodes"})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Node", IDName: "node", Doc: "Node is the common interface for all nodes."})
 
 // NodeBaseType is the [types.Type] for [NodeBase]
 var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.NodeBase", IDName: "node-base", Doc: "NodeBase is the basic node, which has position, rotation, velocity\nand computed bounding boxes, etc.\nThere are only three different kinds of Nodes: Group, Body, and Joint", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Dynamic", Doc: "Dynamic is whether this node can move. If it is false, then this is a Static node.\nAny top-level group that is not Dynamic is immediately pruned from further consideration,\nso top-level groups should be separated into Dynamic and Static nodes at the start."}, {Name: "Initial", Doc: "initial position, orientation, velocity in *local* coordinates (relative to parent)"}, {Name: "Rel", Doc: "current relative (local) position, orientation, velocity -- only change these values, as abs values are computed therefrom"}, {Name: "Abs", Doc: "current absolute (world) position, orientation, velocity"}, {Name: "BBox", Doc: "bounding box in world coordinates (aggregated for groups)"}}, Instance: &NodeBase{}})

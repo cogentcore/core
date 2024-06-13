@@ -367,7 +367,7 @@ const ValueFlagsN ValueFlags = 3
 
 var _ValueFlagsValueMap = map[string]ValueFlags{`Mod`: 0, `PaddedArray`: 1, `TextureOwns`: 2}
 
-var _ValueFlagsDescMap = map[ValueFlags]string{0: `ValueMod the value has been modified`, 1: `ValuePaddedArray array had to be padded -- cannot access elements continuously`, 2: `ValueTextureOwns val owns and manages the host staging memory for texture. based on Var TextureOwns -- for dynamically changings images.`}
+var _ValueFlagsDescMap = map[ValueFlags]string{0: `ValueMod the value has been modified`, 1: `ValuePaddedArray array had to be padded -- cannot access elements continuously`, 2: `ValueTextureOwns val owns and manages the host staging memory for texture. based on Var TextureOwns -- for dynamically changing images.`}
 
 var _ValueFlagsMap = map[ValueFlags]string{0: `Mod`, 1: `PaddedArray`, 2: `TextureOwns`}
 

@@ -48,15 +48,15 @@ type Scene struct {
 	// NeedsConfig means that a GPU resource (Lights, Texture, Meshes,
 	// or more complex Nodes that require ConfigNodes) has been changed
 	// and a Config call is required.
-	NeedsConfig bool
+	NeedsConfig bool `set:"-"`
 
 	// NeedsUpdate means that Node Pose has changed and an update pass
 	// is required to update matrix and bounding boxes.
-	NeedsUpdate bool
+	NeedsUpdate bool `set:"-"`
 
 	// NeedsRender means that something has been updated (minimally the
 	// Camera pose) and a new Render is required.
-	NeedsRender bool
+	NeedsRender bool `set:"-"`
 
 	// Viewport-level viewbox within any parent Viewport2D
 	Geom math32.Geom2DInt `set:"-"`
