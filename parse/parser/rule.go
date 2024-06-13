@@ -106,34 +106,31 @@ type Rule struct {
 
 	// exclusionary reverse-search rule elements compiled from Rule string
 	ExclRev RuleList `edit:"-" json:"-" xml:"-" set:"-"`
-}
 
-// RuleFlags define bitflags for rule options compiled from rule syntax
-type RuleFlags tree.Flags //enums:bitflag
+	// Bool flags:
 
-const (
-	// SetsScope means that this rule sets its own scope, because it ends with EOS
-	SetsScope RuleFlags = RuleFlags(tree.FlagsN) + iota
+	// setsScope means that this rule sets its own scope, because it ends with EOS
+	setsScope bool
 
-	// Reverse means that this rule runs in reverse (starts with - sign) -- for arithmetic
+	// reverse means that this rule runs in reverse (starts with - sign) -- for arithmetic
 	// binary expressions only: this is needed to produce proper associativity result for
 	// mathematical expressions in the recursive descent parser.
 	// Only for rules of form: Expr '+' Expr -- two sub-rules with a token operator
 	// in the middle.
-	Reverse
+	reverse bool
 
-	// NoTokens means that this rule doesn't have any explicit tokens -- only refers to
+	// noTokens means that this rule doesn't have any explicit tokens -- only refers to
 	// other rules
-	NoTokens
+	noTokens bool
 
-	// OnlyTokens means that this rule only has explicit tokens for matching -- can be
+	// onlyTokens means that this rule only has explicit tokens for matching -- can be
 	// optimized
-	OnlyTokens
+	onlyTokens bool
 
-	// TokenMatchGroup is a group node that also has a single token match, so it can
+	// tokenMatchGroup is a group node that also has a single token match, so it can
 	// be used in a FirstTokenMap to optimize lookup of rules
-	TokenMatchGroup
-)
+	tokenMatchGroup bool
+}
 
 // Parser is the interface type for parsers -- likely not necessary except is essential
 // for defining the BaseInterface for gui in making new nodes
