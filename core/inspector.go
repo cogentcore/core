@@ -96,8 +96,8 @@ func (is *Inspector) Init() {
 						return
 					}
 					if w, wb := AsWidget(sn); w != nil {
-						pselw := sc.SelectedWidget
-						sc.SelectedWidget = w
+						pselw := sc.selectedWidget
+						sc.selectedWidget = w
 						wb.NeedsRender()
 						if pselw != nil {
 							pselw.AsWidget().NeedsRender()
@@ -120,11 +120,11 @@ func (is *Inspector) Init() {
 				if !ok {
 					return
 				}
-				if sc.RenderBBoxes {
+				if sc.renderBBoxes {
 					is.ToggleSelectionMode()
 				}
-				pselw := sc.SelectedWidget
-				sc.SelectedWidget = nil
+				pselw := sc.selectedWidget
+				sc.selectedWidget = nil
 				if pselw != nil {
 					pselw.AsWidget().NeedsRender()
 				}
@@ -188,15 +188,15 @@ func (is *Inspector) ToggleSelectionMode() { //types:add
 	if !ok {
 		return
 	}
-	sc.RenderBBoxes = !sc.RenderBBoxes
-	if sc.RenderBBoxes {
-		sc.SelectedWidgetChan = make(chan Widget)
+	sc.renderBBoxes = !sc.renderBBoxes
+	if sc.renderBBoxes {
+		sc.selectedWidgetChan = make(chan Widget)
 		go is.SelectionMonitor()
 	} else {
-		if sc.SelectedWidgetChan != nil {
-			close(sc.SelectedWidgetChan)
+		if sc.selectedWidgetChan != nil {
+			close(sc.selectedWidgetChan)
 		}
-		sc.SelectedWidgetChan = nil
+		sc.selectedWidgetChan = nil
 	}
 	sc.NeedsLayout()
 }
@@ -208,7 +208,7 @@ func (is *Inspector) SelectionMonitor() {
 		return
 	}
 	sc.Stage.Raise()
-	sw, ok := <-sc.SelectedWidgetChan
+	sw, ok := <-sc.selectedWidgetChan
 	if !ok || sw == nil {
 		return
 	}
@@ -238,11 +238,11 @@ func (is *Inspector) SelectionMonitor() {
 	is.Scene.Stage.Raise()
 
 	sc.AsyncLock()
-	sc.RenderBBoxes = false
-	if sc.SelectedWidgetChan != nil {
-		close(sc.SelectedWidgetChan)
+	sc.renderBBoxes = false
+	if sc.selectedWidgetChan != nil {
+		close(sc.selectedWidgetChan)
 	}
-	sc.SelectedWidgetChan = nil
+	sc.selectedWidgetChan = nil
 	sc.NeedsRender()
 	sc.AsyncUnlock()
 }

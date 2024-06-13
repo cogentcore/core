@@ -68,20 +68,20 @@ type Scene struct { //core:no-new
 	// current stage in which this Scene is set
 	Stage *Stage `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// RenderBBoxes indicates to render colored bounding boxes for all of the widgets
+	// renderBBoxes indicates to render colored bounding boxes for all of the widgets
 	// in the scene. This is enabled by the [Inspector] in select element mode.
-	RenderBBoxes bool
+	renderBBoxes bool
 
 	// renderBBoxHue is current hue for rendering bounding box in [Scene.RenderBBoxes] mode.
 	renderBBoxHue float32
 
-	// SelectedWidget is the currently selected/hovered widget through the [Inspector] selection mode
+	// selectedWidget is the currently selected/hovered widget through the [Inspector] selection mode
 	// that should be highlighted with a background color.
-	SelectedWidget Widget
+	selectedWidget Widget
 
-	// SelectedWidgetChan is the channel on which the selected widget through the inspect editor
+	// selectedWidgetChan is the channel on which the selected widget through the inspect editor
 	// selection mode is transmitted to the inspect editor after the user is done selecting.
-	SelectedWidgetChan chan Widget `json:"-" xml:"-"`
+	selectedWidgetChan chan Widget `json:"-" xml:"-"`
 
 	// lastRender captures key params from last render.
 	// If different then a new ApplyStyleScene is needed.

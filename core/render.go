@@ -350,8 +350,8 @@ func (wb *WidgetBase) PopBounds() {
 	}
 	pc := &wb.Scene.PaintContext
 
-	isSelw := wb.Scene.SelectedWidget == wb.This
-	if wb.Scene.RenderBBoxes || isSelw {
+	isSelw := wb.Scene.selectedWidget == wb.This
+	if wb.Scene.renderBBoxes || isSelw {
 		pos := math32.Vector2FromPoint(wb.Geom.TotalBBox.Min)
 		sz := math32.Vector2FromPoint(wb.Geom.TotalBBox.Size())
 		// node: we won't necc. get a push prior to next update, so saving these.

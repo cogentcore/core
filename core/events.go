@@ -306,7 +306,7 @@ func (em *Events) HandlePosEvent(e events.Event) {
 		// we need to handle this here and not in [Events.GetMouseInBBox] so that
 		// we correctly process cursors for disabled elements.
 		// in ScRenderBBoxes, everyone is effectively enabled
-		if wb.StateIs(states.Disabled) && !sc.RenderBBoxes {
+		if wb.StateIs(states.Disabled) && !sc.renderBBoxes {
 			continue
 		}
 
@@ -318,7 +318,7 @@ func (em *Events) HandlePosEvent(e events.Event) {
 			}
 		case events.MouseDown:
 			// in ScRenderBBoxes, everyone is effectively pressable
-			if press == nil && (wb.Styles.Abilities.IsPressable() || sc.RenderBBoxes) {
+			if press == nil && (wb.Styles.Abilities.IsPressable() || sc.renderBBoxes) {
 				press = w
 			}
 			if dragPress == nil && wb.Styles.Abilities.Is(abilities.Draggable) {
@@ -332,7 +332,7 @@ func (em *Events) HandlePosEvent(e events.Event) {
 			}
 		case events.MouseUp:
 			// in ScRenderBBoxes, everyone is effectively pressable
-			if up == nil && (wb.Styles.Abilities.IsPressable() || sc.RenderBBoxes) {
+			if up == nil && (wb.Styles.Abilities.IsPressable() || sc.renderBBoxes) {
 				up = w
 			}
 		}
@@ -358,23 +358,23 @@ func (em *Events) HandlePosEvent(e events.Event) {
 		for _, w := range em.MouseInBBox { // requires forward iter through em.MouseInBBox
 			wb := w.AsWidget()
 			// in ScRenderBBoxes, everyone is effectively hoverable
-			if wb.Styles.Abilities.IsHoverable() || sc.RenderBBoxes {
+			if wb.Styles.Abilities.IsHoverable() || sc.renderBBoxes {
 				hovs = append(hovs, w)
 			}
 		}
-		if sc.RenderBBoxes {
-			pselw := sc.SelectedWidget
+		if sc.renderBBoxes {
+			pselw := sc.selectedWidget
 			if len(em.Hovers) > 0 {
-				sc.SelectedWidget = em.Hovers[len(em.Hovers)-1]
+				sc.selectedWidget = em.Hovers[len(em.Hovers)-1]
 			} else {
-				sc.SelectedWidget = nil
+				sc.selectedWidget = nil
 			}
-			if sc.SelectedWidget != pselw {
+			if sc.selectedWidget != pselw {
 				if pselw != nil {
 					pselw.AsWidget().NeedsRender()
 				}
-				if sc.SelectedWidget != nil {
-					sc.SelectedWidget.AsWidget().NeedsRender()
+				if sc.selectedWidget != nil {
+					sc.selectedWidget.AsWidget().NeedsRender()
 				}
 			}
 		}
@@ -426,8 +426,8 @@ func (em *Events) HandlePosEvent(e events.Event) {
 			em.CancelLongPress()
 			switch e.MouseButton() {
 			case events.Left:
-				if sc.SelectedWidgetChan != nil {
-					sc.SelectedWidgetChan <- up
+				if sc.selectedWidgetChan != nil {
+					sc.selectedWidgetChan <- up
 					return
 				}
 				dcInTime := time.Since(em.LastClickTime) < DeviceSettings.DoubleClickInterval
