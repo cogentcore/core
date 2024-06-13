@@ -127,9 +127,11 @@ func (fv *FileView) Init() {
 		if len(core.RecentPaths) == 0 {
 			core.OpenRecentPaths()
 		}
-		// if !fv.Scene.Is(core.ScPrefSizing) { // TODO(config)
-		// 	fv.Scene.UpdateTitle("Files: " + fv.DirPath)
-		// }
+		// if we update the title before the scene is shown, it may incorrectly
+		// override the title of the window of the context widget
+		if fv.Scene.HasShown {
+			fv.Scene.UpdateTitle("Files: " + fv.DirPath)
+		}
 		core.RecentPaths.AddPath(fv.DirPath, core.SystemSettings.SavedPathsMax)
 		core.SaveRecentPaths()
 		fv.ReadFiles()
