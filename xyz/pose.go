@@ -212,7 +212,7 @@ func (ps *Pose) WorldScale() math32.Vector3 {
 
 /*
 
-// PoseProperties define the Toolbar and MenuBar for StructView
+// PoseProperties define the Toolbar and MenuBar for Form
 var PoseProperties = tree.Properties{
 	"Toolbar": tree.Propertieslice{
 		{"GenGoSet", tree.Properties{

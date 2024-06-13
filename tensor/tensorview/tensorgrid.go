@@ -237,7 +237,7 @@ func (tg *TensorGrid) OpenTensorView() {
 
 func (tg *TensorGrid) EditSettings() { //types:add
 	d := core.NewBody().AddTitle("Tensor Grid Display Options")
-	views.NewStructView(d).SetStruct(&tg.Display).
+	views.NewForm(d).SetStruct(&tg.Display).
 		OnChange(func(e events.Event) {
 			tg.NeedsRender()
 		})

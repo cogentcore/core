@@ -375,7 +375,7 @@ func (fn *Node) CopyFileToDir(filename string, perm os.FileMode) {
 func (fn *Node) ShowFileInfo() { //types:add
 	fn.SelectedFunc(func(sn *Node) {
 		d := core.NewBody().AddTitle("File info")
-		views.NewStructView(d).SetStruct(&sn.Info).SetReadOnly(true)
+		views.NewForm(d).SetStruct(&sn.Info).SetReadOnly(true)
 		d.AddOKOnly().RunFullDialog(sn)
 	})
 }

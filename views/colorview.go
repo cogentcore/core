@@ -187,7 +187,7 @@ func (cv *ColorPicker) Config(sc *core.Scene) {
 
 	rgbalay := core.NewFrame(nl, "nums-rgba-lay")
 
-	nrgba := NewStructViewInline(rgbalay, "nums-rgba")
+	nrgba := NewFormInline(rgbalay, "nums-rgba")
 	nrgba.SetStruct(&cv.Color)
 	nrgba.OnChange(func(e events.Event) {
 		cv.SetColor(cv.Color)
@@ -217,7 +217,7 @@ func (cv *ColorPicker) Config(sc *core.Scene) {
 
 	hslalay := core.NewFrame(nl, "nums-hsla-lay")
 
-	nhsla := NewStructViewInline(hslalay, "nums-hsla")
+	nhsla := NewFormInline(hslalay, "nums-hsla")
 	nhsla.SetStruct(&cv.ColorHSLA)
 	nhsla.OnChange(func(e events.Event) {
 		cv.SetColor(cv.ColorHSLA)
@@ -462,8 +462,8 @@ func (cv *ColorPicker) UpdateValueFrame() {
 // UpdateNums updates the values of the number inputs
 // in the color picker to reflect the latest values
 func (cv *ColorPicker) UpdateNums() {
-	cv.NumLay().ChildByName("nums-rgba-lay", 0).ChildByName("nums-rgba", 0).(*StructViewInline).UpdateFields()
-	cv.NumLay().ChildByName("nums-hsla-lay", 1).ChildByName("nums-hsla", 0).(*StructViewInline).UpdateFields()
+	cv.NumLay().ChildByName("nums-rgba-lay", 0).ChildByName("nums-rgba", 0).(*FormInline).UpdateFields()
+	cv.NumLay().ChildByName("nums-hsla-lay", 1).ChildByName("nums-hsla", 0).(*FormInline).UpdateFields()
 	hs := colors.AsHex(cv.Color)
 	// if we are fully opaque, which is typical,
 	// then we can skip displaying transparency in hex

@@ -159,7 +159,7 @@ func (ps *State) RotateEulerRad(x, y, z, angle float32) {
 
 /*
 
-// StateProps define the ToolBar and MenuBar for StructView
+// StateProps define the ToolBar and MenuBar for Form
 var StateProps = tree.Props{
 	"ToolBar": tree.PropSlice{
 		{"SetEulerRotation", tree.Props{

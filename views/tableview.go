@@ -577,7 +577,7 @@ func (tv *TableView) EditIndex(idx int) {
 		tynm += ": " + lbl
 	}
 	d := core.NewBody().AddTitle(tynm)
-	NewStructView(d).SetStruct(stru).SetReadOnly(tv.IsReadOnly())
+	NewForm(d).SetStruct(stru).SetReadOnly(tv.IsReadOnly())
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent)

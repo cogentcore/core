@@ -242,7 +242,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 					return
 				}
 				d := core.NewBody().AddTitle("Selected Node")
-				views.NewStructView(d).SetStruct(sw.CurrentSelected)
+				views.NewForm(d).SetStruct(sw.CurrentSelected)
 				d.RunWindowDialog(sv)
 			})
 	})
@@ -252,7 +252,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 			SetTooltip("edit the 3D Scene object (for access to meshes, textures etc)").
 			OnClick(func(e events.Event) {
 				d := core.NewBody().AddTitle("xyz.Scene")
-				views.NewStructView(d).SetStruct(sv.SceneXYZ())
+				views.NewForm(d).SetStruct(sv.SceneXYZ())
 				d.RunWindowDialog(sv)
 			})
 	})

@@ -397,7 +397,7 @@ func (fp *FilePicker) makeFilesRow(p *core.Plan) {
 				OnClick(func(e events.Event) {
 					fn := fp.Files[w.SelectedIndex]
 					d := core.NewBody().AddTitle("Info: " + fn.Name)
-					NewStructView(d).SetStruct(&fn).SetReadOnly(true)
+					NewForm(d).SetStruct(&fn).SetReadOnly(true)
 					d.AddOKOnly().RunFullDialog(w)
 				})
 			core.NewSeparator(m)

@@ -121,7 +121,7 @@ func (ss *Sim) ConfigGUI() *core.Body {
 
 	split := core.NewSplits(b)
 
-	sv := views.NewStructView(split)
+	sv := views.NewForm(split)
 	sv.SetStruct(ss)
 
 	tv := core.NewTabs(split)

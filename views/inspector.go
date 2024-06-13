@@ -73,7 +73,7 @@ func (is *Inspector) Init() {
 	}
 	core.AddChildAt(is, "splits", func(w *core.Splits) {
 		w.SetSplits(.3, .7)
-		var structView *StructView
+		var form *Form
 		core.AddChildAt(w, "tree-frame", func(w *core.Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Direction = styles.Column
@@ -88,9 +88,9 @@ func (is *Inspector) Init() {
 					sn := w.SelectedNodes[0].AsTreeView().SyncNode
 					is.CurrentNode = sn
 					// Note: doing Update on the entire inspector reverts all tree expansion,
-					// so we only want to update the title and struct view
+					// so we only want to update the title and form
 					titleWidget.Update()
-					structView.SetStruct(sn).Update()
+					form.SetStruct(sn).Update()
 
 					sc, ok := is.Root.(*core.Scene)
 					if !ok {
@@ -111,8 +111,8 @@ func (is *Inspector) Init() {
 				w.SyncTree(is.Root)
 			})
 		})
-		core.AddChildAt(w, "struct", func(w *StructView) {
-			structView = w
+		core.AddChildAt(w, "struct", func(w *Form) {
+			form = w
 			w.OnChange(func(e events.Event) {
 				renderRebuild()
 			})
@@ -251,7 +251,7 @@ func (is *Inspector) SelectionMonitor() {
 // InspectApp displays the underlying operating system app
 func (is *Inspector) InspectApp() { //types:add
 	d := core.NewBody().AddTitle("Inspect app")
-	NewStructView(d).SetStruct(system.TheApp).SetReadOnly(true)
+	NewForm(d).SetStruct(system.TheApp).SetReadOnly(true)
 	d.RunFullDialog(is)
 }
 

@@ -21,7 +21,7 @@ import (
 )
 
 // NoSentenceCaseFor indicates to not transform field names in
-// [StructView]s into "Sentence case" for types whose full,
+// [Form]s into "Sentence case" for types whose full,
 // package-path-qualified name contains any of these strings.
 // For example, this can be used to disable sentence casing
 // for types with scientific abbreviations in field names,
@@ -45,14 +45,14 @@ type structField struct {
 	value, parent reflect.Value
 }
 
-// StructView represents a struct with rows of field names and editable values.
-type StructView struct {
+// Form represents a struct with rows of field names and editable values.
+type Form struct {
 	core.Frame
 
 	// Struct is the pointer to the struct that we are viewing.
 	Struct any
 
-	// Inline is whether to display the struct in one line.
+	// Inline is whether to display the form in one line.
 	Inline bool
 
 	// structFields are the fields of the current struct.
@@ -63,9 +63,9 @@ type StructView struct {
 	isShouldShower bool
 }
 
-func (sv *StructView) WidgetValue() any { return &sv.Struct }
+func (fm *Form) WidgetValue() any { return &fm.Struct }
 
-func (sv *StructView) getStructFields() {
+func (fm *Form) getStructFields() {
 	var fields []*structField
 
 	shouldShow := func(parent reflect.Value, field reflect.StructField) bool {
@@ -73,7 +73,7 @@ func (sv *StructView) getStructFields() {
 			return false
 		}
 		if ss, ok := reflectx.UnderlyingPointer(parent).Interface().(core.ShouldShower); ok {
-			sv.isShouldShower = true
+			fm.isShouldShower = true
 			if !ss.ShouldShow(field.Name) {
 				return false
 			}
@@ -81,7 +81,7 @@ func (sv *StructView) getStructFields() {
 		return true
 	}
 
-	reflectx.WalkFields(reflectx.Underlying(reflect.ValueOf(sv.Struct)),
+	reflectx.WalkFields(reflectx.Underlying(reflect.ValueOf(fm.Struct)),
 		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
 			return shouldShow(parent, field)
 		},
@@ -98,37 +98,37 @@ func (sv *StructView) getStructFields() {
 				fields = append(fields, &structField{path: field.Name, field: field, value: value, parent: parent})
 			}
 		})
-	sv.structFields = fields
+	fm.structFields = fields
 }
 
-func (sv *StructView) Init() {
-	sv.Frame.Init()
-	sv.Styler(func(s *styles.Style) {
+func (fm *Form) Init() {
+	fm.Frame.Init()
+	fm.Styler(func(s *styles.Style) {
 		s.Align.Items = styles.Center
-		if sv.Inline {
+		if fm.Inline {
 			return
 		}
 		s.Display = styles.Grid
-		if sv.SizeClass() == core.SizeCompact {
+		if fm.SizeClass() == core.SizeCompact {
 			s.Columns = 1
 		} else {
 			s.Columns = 2
 		}
 	})
 
-	sv.Maker(func(p *core.Plan) {
-		if reflectx.AnyIsNil(sv.Struct) {
+	fm.Maker(func(p *core.Plan) {
+		if reflectx.AnyIsNil(fm.Struct) {
 			return
 		}
 
-		sv.getStructFields()
+		fm.getStructFields()
 
 		sc := true
 		if len(NoSentenceCaseFor) > 0 {
-			sc = !NoSentenceCaseForType(types.TypeNameValue(sv.Struct))
+			sc = !NoSentenceCaseForType(types.TypeNameValue(fm.Struct))
 		}
 
-		for i, f := range sv.structFields {
+		for i, f := range fm.structFields {
 			label := f.path
 			if sc {
 				label = strcase.ToSentence(label)
@@ -202,27 +202,27 @@ func (sv *StructView) Init() {
 					wb.SetTooltip("(Default: " + def + ") " + wb.Tooltip)
 				}
 				wb.OnInput(func(e events.Event) {
-					sv.Send(events.Input, e)
+					fm.Send(events.Input, e)
 					if f.field.Tag.Get("immediate") == "+" {
 						wb.SendChange(e)
 					}
 				})
-				if !sv.IsReadOnly() && !readOnlyTag {
+				if !fm.IsReadOnly() && !readOnlyTag {
 					wb.OnChange(func(e events.Event) {
-						sv.SendChange(e)
+						fm.SendChange(e)
 						if hasDef {
 							labelWidget.Update()
 						}
-						if sv.isShouldShower {
-							sv.Update()
+						if fm.isShouldShower {
+							fm.Update()
 						}
 					})
 				}
 				wb.Updater(func() {
-					wb.SetReadOnly(sv.IsReadOnly() || readOnlyTag)
-					if i < len(sv.structFields) {
-						core.Bind(reflectx.UnderlyingPointer(sv.structFields[i].value).Interface(), w)
-						vc := core.JoinValueTitle(sv.ValueTitle, label)
+					wb.SetReadOnly(fm.IsReadOnly() || readOnlyTag)
+					if i < len(fm.structFields) {
+						core.Bind(reflectx.UnderlyingPointer(fm.structFields[i].value).Interface(), w)
+						vc := core.JoinValueTitle(fm.ValueTitle, label)
 						if vc != wb.ValueTitle {
 							wb.ValueTitle = vc + " (" + wb.ValueTitle + ")"
 						}

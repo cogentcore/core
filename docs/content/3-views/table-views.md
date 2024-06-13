@@ -35,7 +35,7 @@ type language struct {
 views.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```
 
-You can also use the `tableview` struct tag, which overrides the `view` struct tag. This allows you to have a struct field displayed in a struct view but not a table view, or vise versa:
+You can also use the `tableview` struct tag, which overrides the `view` struct tag. This allows you to have a struct field displayed in a form but not a table view, or vise versa:
 
 ```Go
 type language struct {

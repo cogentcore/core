@@ -431,7 +431,7 @@ func makeViews(ts *core.Tabs) {
 		Stuff:  []float32{0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7},
 	}
 
-	views.NewStructView(vts.NewTab("Struct view")).SetStruct(&str)
+	views.NewForm(vts.NewTab("Form")).SetStruct(&str)
 
 	mp := map[string]any{}
 
@@ -461,7 +461,7 @@ func makeViews(ts *core.Tabs) {
 	makeTree(tv, 0)
 	tv.RootSetViewIndex()
 
-	sv := views.NewStructView(sp).SetStruct(tv)
+	sv := views.NewForm(sp).SetStruct(tv)
 
 	tv.OnSelect(func(e events.Event) {
 		fmt.Println("sel")
@@ -645,7 +645,7 @@ func dialogs(ts *core.Tabs) {
 	u := &core.User{}
 	fd.OnClick(func(e events.Event) {
 		d := core.NewBody().AddTitle("Full window dialog").AddText("Edit your information")
-		views.NewStructView(d).SetStruct(u).OnInput(func(e events.Event) {
+		views.NewForm(d).SetStruct(u).OnInput(func(e events.Event) {
 			fmt.Println("Got input event")
 		})
 		d.OnClose(func(e events.Event) {
@@ -702,7 +702,7 @@ func makeStyles(ts *core.Tabs) {
 
 	sp := core.NewSplits(tab)
 
-	sv := views.NewStructView(sp)
+	sv := views.NewForm(sp)
 
 	fr := core.NewFrame(core.NewFrame(sp)) // can not control layout when directly in splits
 	sv.SetStruct(&fr.Styles)

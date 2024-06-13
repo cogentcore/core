@@ -25,36 +25,36 @@ type morePerson struct {
 	LikesPython bool
 }
 
-func TestStructView(t *testing.T) {
+func TestForm(t *testing.T) {
 	b := core.NewBody()
-	NewStructView(b).SetStruct(&person{Name: "Go", Age: 35})
-	b.AssertRender(t, "struct-view/basic")
+	NewForm(b).SetStruct(&person{Name: "Go", Age: 35})
+	b.AssertRender(t, "form/basic")
 }
 
-func TestStructViewInline(t *testing.T) {
+func TestFormInline(t *testing.T) {
 	b := core.NewBody()
-	NewStructView(b).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
-	b.AssertRender(t, "struct-view/inline")
+	NewForm(b).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
+	b.AssertRender(t, "form/inline")
 }
 
-func TestStructViewReadOnly(t *testing.T) {
+func TestFormReadOnly(t *testing.T) {
 	b := core.NewBody()
-	NewStructView(b).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
-	b.AssertRender(t, "struct-view/read-only")
+	NewForm(b).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
+	b.AssertRender(t, "form/read-only")
 }
 
-func TestStructViewChange(t *testing.T) {
+func TestFormChange(t *testing.T) {
 	b := core.NewBody()
 	p := person{Name: "Go", Age: 35}
 
 	n := 0
 	value := person{}
-	sv := NewStructView(b).SetStruct(&p)
+	sv := NewForm(b).SetStruct(&p)
 	sv.OnChange(func(e events.Event) {
 		n++
 		value = p
 	})
-	b.AssertRender(t, "struct-view/change", func() {
+	b.AssertRender(t, "form/change", func() {
 		// [3] is value of second row, which is Age
 		sv.Child(3).(*core.Spinner).LeadingIconButton().Send(events.Click)
 		assert.Equal(t, 1, n)

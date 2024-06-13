@@ -76,7 +76,7 @@ func GUI[T any](opts *cli.Options, cfg T, cmds ...*cli.Cmd[T]) {
 		}
 	})
 
-	sv := views.NewStructView(b)
+	sv := views.NewForm(b)
 	sv.SetStruct(cfg)
 
 	b.RunMainWindow()

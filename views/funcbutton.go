@@ -364,7 +364,7 @@ func (fb *FuncButton) CallFunc() {
 	}
 	d := core.NewBody().AddTitle(fb.Text).AddText(fb.Tooltip)
 	str := FuncArgsToStruct(fb.Args)
-	sv := NewStructView(d).SetStruct(str.Addr().Interface())
+	sv := NewForm(d).SetStruct(str.Addr().Interface())
 
 	accept := func() {
 		for i := range fb.Args {
@@ -471,7 +471,7 @@ func (fb *FuncButton) showReturnsDialog(rets []reflect.Value) {
 
 	d := core.NewBody().AddTitle(main).AddText(fb.Tooltip).AddOKOnly()
 	str := FuncArgsToStruct(fb.Returns)
-	sv := NewStructView(d).SetStruct(str.Addr().Interface()).SetReadOnly(true)
+	sv := NewForm(d).SetStruct(str.Addr().Interface()).SetReadOnly(true)
 
 	// If there is a single value button, automatically
 	// open its dialog instead of this one

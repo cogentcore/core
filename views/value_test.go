@@ -60,7 +60,7 @@ func (v *fieldValidator) ValidateField(field string) error {
 
 func TestFieldValidatorValid(t *testing.T) {
 	b := core.NewBody()
-	v := NewStructView(b).SetStruct(&fieldValidator{Name: "Go Gopher", Email: "me@example.com"})
+	v := NewForm(b).SetStruct(&fieldValidator{Name: "Go Gopher", Email: "me@example.com"})
 	b.AssertRender(t, "text/field-validator-valid", func() {
 		v.WidgetWalkDown(func(kwi core.Widget, kwb *core.WidgetBase) bool {
 			kwb.SendChange() // trigger validation
@@ -71,7 +71,7 @@ func TestFieldValidatorValid(t *testing.T) {
 
 func TestFieldValidatorInvalid(t *testing.T) {
 	b := core.NewBody()
-	v := NewStructView(b).SetStruct(&fieldValidator{Name: "Go Gopher", Email: "me@example"})
+	v := NewForm(b).SetStruct(&fieldValidator{Name: "Go Gopher", Email: "me@example"})
 	b.AssertRender(t, "text/field-validator-invalid", func() {
 		v.WidgetWalkDown(func(kwi core.Widget, kwb *core.WidgetBase) bool {
 			kwb.SendChange() // trigger validation

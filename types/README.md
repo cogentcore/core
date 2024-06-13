@@ -4,7 +4,7 @@ Package types provides type information for Go types, methods, and functions.
 
 # Key functionality
 
-* Generate tooltips for fields in struct views
+* Generate tooltips for fields in forms
 
 * Generate tooltips for functions in func buttons
 

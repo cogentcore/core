@@ -803,62 +803,62 @@ var PagesExamples = map[string]func(parent core.Widget){
 	"views/lists-5": func(parent core.Widget) {
 		// views.NewValue(parent, &[]int{1, 3, 5, 7, 9})
 	},
-	"views/struct-views-0": func(parent core.Widget) {
+	"views/forms-0": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
-		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35})
+		views.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
 	},
-	"views/struct-views-1": func(parent core.Widget) {
+	"views/forms-1": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
-		views.NewStructView(parent).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
+		views.NewForm(parent).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
 	},
-	"views/struct-views-2": func(parent core.Widget) {
+	"views/forms-2": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
 		p := person{Name: "Go", Age: 35}
-		views.NewStructView(parent).SetStruct(&p).OnChange(func(e events.Event) {
+		views.NewForm(parent).SetStruct(&p).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
 		})
 	},
-	"views/struct-views-3": func(parent core.Widget) {
+	"views/forms-3": func(parent core.Widget) {
 		type person struct {
 			Name string `immediate:"+"`
 			Age  int
 		}
 		p := person{Name: "Go", Age: 35}
-		views.NewStructView(parent).SetStruct(&p).OnChange(func(e events.Event) {
+		views.NewForm(parent).SetStruct(&p).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
 		})
 	},
-	"views/struct-views-4": func(parent core.Widget) {
+	"views/forms-4": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int `view:"-"`
 		}
-		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35})
+		views.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
 	},
-	"views/struct-views-5": func(parent core.Widget) {
+	"views/forms-5": func(parent core.Widget) {
 		type person struct {
 			Name string `edit:"-"`
 			Age  int
 		}
-		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35})
+		views.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
 	},
-	"views/struct-views-6": func(parent core.Widget) {
+	"views/forms-6": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
-		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
+		views.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
 	},
-	"views/struct-views-7": func(parent core.Widget) {
+	"views/forms-7": func(parent core.Widget) {
 		type Person struct {
 			Name string
 			Age  int
@@ -867,9 +867,9 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Person
 			Role string
 		}
-		views.NewStructView(parent).SetStruct(&employee{Person{Name: "Go", Age: 35}, "Programmer"})
+		views.NewForm(parent).SetStruct(&employee{Person{Name: "Go", Age: 35}, "Programmer"})
 	},
-	"views/struct-views-8": func(parent core.Widget) {
+	"views/forms-8": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
@@ -878,24 +878,24 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Role    string
 			Manager person `view:"add-fields"`
 		}
-		views.NewStructView(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
+		views.NewForm(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
 	},
-	"views/struct-views-9": func(parent core.Widget) {
+	"views/forms-9": func(parent core.Widget) {
 		type person struct {
 			Name      string `default:"Gopher"`
 			Age       int    `default:"20:30"`
 			Precision int    `default:"64,32"`
 		}
-		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
+		views.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 	},
-	"views/struct-views-10": func(parent core.Widget) {
+	"views/forms-10": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
 		// core.NewValue(&person{Name: "Go", Age: 35}, "", parent)
 	},
-	"views/struct-views-11": func(parent core.Widget) {
+	"views/forms-11": func(parent core.Widget) {
 		type person struct {
 			Name        string
 			Age         int

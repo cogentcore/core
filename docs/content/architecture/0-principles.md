@@ -46,14 +46,14 @@ However, using a `struct` with appropriately named fields has the following adva
 * Compile time name-safety: the compiler ensures you didn't mistype the key name.
 * Compile time type-safety: the type of the property is not `any` but the actual type needed.
 * Tab completion and full lookup in IDEs -- much easier when _using_ config values in an app, and also when setting styling in GUI.
-* GUI editor of config opts as a StructView has full access to field tag GUI hints, etc.
+* GUI editor of config opts as a Form has full access to field tag GUI hints, etc.
 * [[types]] can provide access to field comments for full docs for each option, whereas the map implementation requires separate maps of docs and values.
 
 This is why the [[cli]] configuration and app command management system is based structs, and v2 of core uses "direct styling" functions that directly set values on the `styles.Style` style structs.
 
 # Generate instead of `reflect`
 
-Generated code is faster and cleaner and can be targeted to just what is needed.  `reflect` should be reserved for things like `views.StructView` and other such views which need to be truly generic and operate on any kind of type from any package, etc.
+Generated code is faster and cleaner and can be targeted to just what is needed.  `reflect` should be reserved for things like `views.Form` and other such views which need to be truly generic and operate on any kind of type from any package, etc.
 
 # Interfaces instead of `reflect`
 

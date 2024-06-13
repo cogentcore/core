@@ -105,10 +105,10 @@ type Env struct { //types:add
 	// contacts from last step, for body
 	Contacts physics.Contacts `view:"-"`
 
-	// snapshot bitmap view
+	// snapshot image
 	EyeRImg *core.Image `view:"-"`
 
-	// depth map bitmap view
+	// depth map image
 	DepthImage *core.Image `view:"-"`
 }
 
@@ -369,7 +369,7 @@ func (ev *Env) ConfigGUI() *core.Body {
 	split := core.NewSplits(b)
 
 	tv := views.NewTreeView(core.NewFrame(split)).SyncTree(ev.World)
-	sv := views.NewStructView(split).SetStruct(ev)
+	sv := views.NewForm(split).SetStruct(ev)
 	imfr := core.NewFrame(split)
 	tbvw := core.NewTabs(split)
 

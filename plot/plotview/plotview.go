@@ -522,7 +522,7 @@ func (pl *PlotView) makeColumns(p *core.Plan) {
 					SetTooltip("edit column settings including setting as XAxis or Legend")
 				w.OnClick(func(e events.Event) {
 					d := core.NewBody().AddTitle("Column Params")
-					views.NewStructView(d).SetStruct(cp).
+					views.NewForm(d).SetStruct(cp).
 						OnChange(func(e events.Event) {
 							pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
 						})
@@ -581,7 +581,7 @@ func (pl *PlotView) MakeToolbar(p *core.Plan) {
 			SetTooltip("set parameters that control display (font size etc)").
 			OnClick(func(e events.Event) {
 				d := core.NewBody().AddTitle(pl.Name + " Params")
-				views.NewStructView(d).SetStruct(&pl.Params).
+				views.NewForm(d).SetStruct(&pl.Params).
 					OnChange(func(e events.Event) {
 						pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
 					})

@@ -232,7 +232,7 @@ func (tv *TreeView) InsertAt(rel int, actNm string) {
 	}
 	d := core.NewBody().AddTitle(actNm).AddText("Number and type of items to insert:")
 	nd := &core.NewItemsData{Number: 1, Type: typ}
-	sv := NewStructView(d).SetStruct(nd) // TODO(config)
+	sv := NewForm(d).SetStruct(nd) // TODO(config)
 	tree.ChildByType[*core.Chooser](sv, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
@@ -259,7 +259,7 @@ func (tv *TreeView) AddChildNode() { //types:add
 	}
 	d := core.NewBody().AddTitle(ttl).AddText("Number and type of items to insert:")
 	nd := &core.NewItemsData{Number: 1, Type: typ}
-	sv := NewStructView(d).SetStruct(nd)
+	sv := NewForm(d).SetStruct(nd)
 	tree.ChildByType[*TypeChooser](sv, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0) // TODO(config)
 	d.AddBottomBar(func(parent core.Widget) {
 		d.AddCancel(parent)
@@ -352,18 +352,18 @@ func (tv *TreeView) DuplicateSync() {
 	}
 }
 
-// EditNode pulls up a StructViewDialog window on the node.
+// EditNode pulls up a FormDialog window on the node.
 // If SyncNode is set, operates on Sync Tree.
 func (tv *TreeView) EditNode() { //types:add
 	if tv.SyncNode != nil {
 		tynm := tv.SyncNode.NodeType().Name
 		d := core.NewBody().AddTitle(tynm)
-		NewStructView(d).SetStruct(tv.SyncNode).SetReadOnly(tv.IsReadOnly())
+		NewForm(d).SetStruct(tv.SyncNode).SetReadOnly(tv.IsReadOnly())
 		d.RunFullDialog(tv)
 	} else {
 		tynm := tv.NodeType().Name
 		d := core.NewBody().AddTitle(tynm)
-		NewStructView(d).SetStruct(tv.This).SetReadOnly(tv.IsReadOnly())
+		NewForm(d).SetStruct(tv.This).SetReadOnly(tv.IsReadOnly())
 		d.RunFullDialog(tv)
 	}
 }

@@ -474,7 +474,7 @@ func (tv *TableView) TensorDisplayAction(fldIndex int) {
 		ctd = tv.SetColumnTensorDisplay(fldIndex)
 	}
 	d := core.NewBody().AddTitle("Tensor grid display options")
-	views.NewStructView(d).SetStruct(ctd)
+	views.NewForm(d).SetStruct(ctd)
 	d.RunFullDialog(tv)
 	// tv.UpdateSliceGrid()
 	tv.NeedsRender()

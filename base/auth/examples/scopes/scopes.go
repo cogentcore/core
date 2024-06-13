@@ -20,7 +20,7 @@ func main() {
 	fun := func(token *oauth2.Token, userInfo *oidc.UserInfo) {
 		d := core.NewBody()
 		core.NewText(d).SetType(core.TextHeadlineMedium).SetText("Basic info")
-		views.NewStructView(d).SetStruct(userInfo)
+		views.NewForm(d).SetStruct(userInfo)
 		core.NewText(d).SetType(core.TextHeadlineMedium).SetText("Detailed info")
 		claims := map[string]any{}
 		errors.Log(userInfo.Claims(&claims))

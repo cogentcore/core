@@ -56,7 +56,7 @@ func SettingsEditor(b *core.Body) {
 	for _, se := range core.AllSettings {
 		fr := tabs.NewTab(se.Label())
 
-		NewStructView(fr).SetStruct(se).OnChange(func(e events.Event) {
+		NewForm(fr).SetStruct(se).OnChange(func(e events.Event) {
 			core.UpdateSettings(fr, se)
 		})
 	}

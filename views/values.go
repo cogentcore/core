@@ -62,7 +62,7 @@ func (sb *StructButton) Init() {
 		sb.SetText(labels.FriendlyStructLabel(reflect.ValueOf(sb.Struct)))
 	})
 	core.InitValueButton(sb, true, func(d *core.Body) {
-		sv := NewStructView(d).SetStruct(sb.Struct)
+		sv := NewForm(d).SetStruct(sb.Struct)
 		sv.SetValueTitle(sb.ValueTitle).SetReadOnly(sb.IsReadOnly())
 		if tb, ok := sb.Struct.(core.ToolbarMaker); ok {
 			d.AddAppBar(tb.MakeToolbar)

@@ -201,7 +201,7 @@ func (bd *Body) DialogStyles() {
 
 // NewItemsData contains the data necessary to make a certain
 // number of items of a certain type, which can be used with a
-// StructView in new item dialogs.
+// Form in new item dialogs.
 type NewItemsData struct {
 	// Number is the number of elements to create
 	Number int
