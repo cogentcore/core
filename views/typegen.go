@@ -483,84 +483,84 @@ func (t *DurationInput) SetDuration(v time.Duration) *DurationInput { t.Duration
 // Unit is the unit of time.
 func (t *DurationInput) SetUnit(v string) *DurationInput { t.Unit = v; return t }
 
-// TreeViewType is the [types.Type] for [TreeView]
-var TreeViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.TreeView", IDName: "tree-view", Doc: "TreeView provides a graphical representation of a tree structure,\nproviding full navigation and manipulation abilities.\n\nIt does not handle layout by itself, so if you want it to scroll\nseparately from the rest of the surrounding context, use [NewTreeViewFrame].\n\nIf the SyncNode field is non-nil, typically via\nSyncRootNode method, then the TreeView mirrors another\ntree structure, and tree editing functions apply to\nthe source tree first, and then to the TreeView by sync.\n\nOtherwise, data can be directly encoded in a TreeView\nderived type, to represent any kind of tree structure\nand associated data.\n\nStandard events.Event are sent to any listeners, including\nSelect, Change, and DoubleClick.  The selected nodes\nare in the root SelectedNodes list.", Methods: []types.Method{{Name: "InsertAfter", Doc: "InsertAfter inserts a new node in the tree\nafter this node, at the same (sibling) level,\nprompting for the type of node to insert.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InsertBefore", Doc: "InsertBefore inserts a new node in the tree\nbefore this node, at the same (sibling) level,\nprompting for the type of node to insert\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddChildNode", Doc: "AddChildNode adds a new child node to this one in the tree,\nprompting the user for the type of node to add\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DeleteNode", Doc: "DeleteNode deletes the tree node or sync node corresponding\nto this view node in the sync tree.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Duplicate", Doc: "Duplicate duplicates the sync node corresponding to this view node in\nthe tree, and inserts the duplicate after this node (as a new sibling).\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "EditNode", Doc: "EditNode pulls up a FormDialog window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InspectNode", Doc: "InspectNode pulls up a new Inspector window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "OpenAll", Doc: "OpenAll opens the given node and all of its sub-nodes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "CloseAll", Doc: "CloseAll closes the given node and all of its sub-nodes.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Copy", Doc: "Copy copies to system.Clipboard, optionally resetting the selection.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"reset"}}, {Name: "Cut", Doc: "Cut copies to system.Clipboard and deletes selected items.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Paste", Doc: "Paste pastes clipboard at given node.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "SyncNode", Doc: "If non-nil, the [tree.Node] that this widget is viewing in the tree (the source)"}, {Name: "Text", Doc: "The text to display for the tree view item label, which automatically\ndefaults to the [tree.Node.Name] of the tree view node. It has no effect\nif [TreeView.SyncNode] is non-nil."}, {Name: "Icon", Doc: "optional icon, displayed to the the left of the text label"}, {Name: "IconOpen", Doc: "icon to use for an open (expanded) branch; defaults to [icons.KeyboardArrowDown]"}, {Name: "IconClosed", Doc: "icon to use for a closed (collapsed) branch; defaults to [icons.KeyboardArrowRight]"}, {Name: "IconLeaf", Doc: "icon to use for a terminal node branch that has no children; defaults to [icons.Blank]"}, {Name: "Indent", Doc: "amount to indent children relative to this node"}, {Name: "OpenDepth", Doc: "OpenDepth is the depth for nodes be initialized as open (default 4).\nNodes beyond this depth will be initialized as closed."}, {Name: "Closed", Doc: "Closed is whether this tree view node is currently toggled closed (children not visible)."}, {Name: "SelectMode", Doc: "SelectMode, when set on the root node, determines whether keyboard movements should update selection."}, {Name: "viewIndex", Doc: "linear index of this node within the entire tree.\nupdated on full rebuilds and may sometimes be off,\nbut close enough for expected uses"}, {Name: "widgetSize", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us."}, {Name: "RootView", Doc: "The cached root of the view. It is automatically set and does not need to be\nset by the end user."}, {Name: "SelectedNodes", Doc: "SelectedNodes holds the currently selected nodes, on the\nRootView node only."}, {Name: "actStateLayer", Doc: "actStateLayer is the actual state layer of the tree view, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree view\n(other tree views) do not inherit its stateful background color, as\nthat does not look good."}, {Name: "inOpen", Doc: "inOpen is set in the Open method to prevent recursive opening for lazy-open nodes."}}, Instance: &TreeView{}})
+// TreeType is the [types.Type] for [Tree]
+var TreeType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.Tree", IDName: "tree", Doc: "Tree provides a graphical representation of a tree structure,\nproviding full navigation and manipulation abilities.\n\nIt does not handle layout by itself, so if you want it to scroll\nseparately from the rest of the surrounding context, use [NewTreeFrame].\n\nIf the SyncNode field is non-nil, typically via\nSyncRootNode method, then the Tree mirrors another\ntree structure, and tree editing functions apply to\nthe source tree first, and then to the Tree by sync.\n\nOtherwise, data can be directly encoded in a Tree\nderived type, to represent any kind of tree structure\nand associated data.\n\nStandard events.Event are sent to any listeners, including\nSelect, Change, and DoubleClick.  The selected nodes\nare in the root SelectedNodes list.", Methods: []types.Method{{Name: "InsertAfter", Doc: "InsertAfter inserts a new node in the tree\nafter this node, at the same (sibling) level,\nprompting for the type of node to insert.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InsertBefore", Doc: "InsertBefore inserts a new node in the tree\nbefore this node, at the same (sibling) level,\nprompting for the type of node to insert\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddChildNode", Doc: "AddChildNode adds a new child node to this one in the tree,\nprompting the user for the type of node to add\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DeleteNode", Doc: "DeleteNode deletes the tree node or sync node corresponding\nto this view node in the sync tree.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Duplicate", Doc: "Duplicate duplicates the sync node corresponding to this view node in\nthe tree, and inserts the duplicate after this node (as a new sibling).\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "EditNode", Doc: "EditNode pulls up a FormDialog window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InspectNode", Doc: "InspectNode pulls up a new Inspector window on the node.\nIf SyncNode is set, operates on Sync Tree.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "OpenAll", Doc: "OpenAll opens the given node and all of its sub-nodes", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "CloseAll", Doc: "CloseAll closes the given node and all of its sub-nodes.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Copy", Doc: "Copy copies to system.Clipboard, optionally resetting the selection.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"reset"}}, {Name: "Cut", Doc: "Cut copies to system.Clipboard and deletes selected items.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "Paste", Doc: "Paste pastes clipboard at given node.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "SyncNode", Doc: "If non-nil, the [tree.Node] that this widget is viewing in the tree (the source)"}, {Name: "Text", Doc: "The text to display for the tree item label, which automatically\ndefaults to the [tree.Node.Name] of the tree node. It has no effect\nif [Tree.SyncNode] is non-nil."}, {Name: "Icon", Doc: "optional icon, displayed to the the left of the text label"}, {Name: "IconOpen", Doc: "icon to use for an open (expanded) branch; defaults to [icons.KeyboardArrowDown]"}, {Name: "IconClosed", Doc: "icon to use for a closed (collapsed) branch; defaults to [icons.KeyboardArrowRight]"}, {Name: "IconLeaf", Doc: "icon to use for a terminal node branch that has no children; defaults to [icons.Blank]"}, {Name: "Indent", Doc: "amount to indent children relative to this node"}, {Name: "OpenDepth", Doc: "OpenDepth is the depth for nodes be initialized as open (default 4).\nNodes beyond this depth will be initialized as closed."}, {Name: "Closed", Doc: "Closed is whether this tree node is currently toggled closed (children not visible)."}, {Name: "SelectMode", Doc: "SelectMode, when set on the root node, determines whether keyboard movements should update selection."}, {Name: "viewIndex", Doc: "linear index of this node within the entire tree.\nupdated on full rebuilds and may sometimes be off,\nbut close enough for expected uses"}, {Name: "widgetSize", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us."}, {Name: "RootView", Doc: "The cached root of the view. It is automatically set and does not need to be\nset by the end user."}, {Name: "SelectedNodes", Doc: "SelectedNodes holds the currently selected nodes, on the\nRootView node only."}, {Name: "actStateLayer", Doc: "actStateLayer is the actual state layer of the tree, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree\n(other trees) do not inherit its stateful background color, as\nthat does not look good."}, {Name: "inOpen", Doc: "inOpen is set in the Open method to prevent recursive opening for lazy-open nodes."}}, Instance: &Tree{}})
 
-// NewTreeView returns a new [TreeView] with the given optional parent:
-// TreeView provides a graphical representation of a tree structure,
+// NewTree returns a new [Tree] with the given optional parent:
+// Tree provides a graphical representation of a tree structure,
 // providing full navigation and manipulation abilities.
 //
 // It does not handle layout by itself, so if you want it to scroll
-// separately from the rest of the surrounding context, use [NewTreeViewFrame].
+// separately from the rest of the surrounding context, use [NewTreeFrame].
 //
 // If the SyncNode field is non-nil, typically via
-// SyncRootNode method, then the TreeView mirrors another
+// SyncRootNode method, then the Tree mirrors another
 // tree structure, and tree editing functions apply to
-// the source tree first, and then to the TreeView by sync.
+// the source tree first, and then to the Tree by sync.
 //
-// Otherwise, data can be directly encoded in a TreeView
+// Otherwise, data can be directly encoded in a Tree
 // derived type, to represent any kind of tree structure
 // and associated data.
 //
 // Standard events.Event are sent to any listeners, including
 // Select, Change, and DoubleClick.  The selected nodes
 // are in the root SelectedNodes list.
-func NewTreeView(parent ...tree.Node) *TreeView { return tree.New[*TreeView](parent...) }
+func NewTree(parent ...tree.Node) *Tree { return tree.New[*Tree](parent...) }
 
-// NodeType returns the [*types.Type] of [TreeView]
-func (t *TreeView) NodeType() *types.Type { return TreeViewType }
+// NodeType returns the [*types.Type] of [Tree]
+func (t *Tree) NodeType() *types.Type { return TreeType }
 
-// New returns a new [*TreeView] value
-func (t *TreeView) New() tree.Node { return &TreeView{} }
+// New returns a new [*Tree] value
+func (t *Tree) New() tree.Node { return &Tree{} }
 
-// SetText sets the [TreeView.Text]:
-// The text to display for the tree view item label, which automatically
-// defaults to the [tree.Node.Name] of the tree view node. It has no effect
-// if [TreeView.SyncNode] is non-nil.
-func (t *TreeView) SetText(v string) *TreeView { t.Text = v; return t }
+// SetText sets the [Tree.Text]:
+// The text to display for the tree item label, which automatically
+// defaults to the [tree.Node.Name] of the tree node. It has no effect
+// if [Tree.SyncNode] is non-nil.
+func (t *Tree) SetText(v string) *Tree { t.Text = v; return t }
 
-// SetIcon sets the [TreeView.Icon]:
+// SetIcon sets the [Tree.Icon]:
 // optional icon, displayed to the the left of the text label
-func (t *TreeView) SetIcon(v icons.Icon) *TreeView { t.Icon = v; return t }
+func (t *Tree) SetIcon(v icons.Icon) *Tree { t.Icon = v; return t }
 
-// SetIconOpen sets the [TreeView.IconOpen]:
+// SetIconOpen sets the [Tree.IconOpen]:
 // icon to use for an open (expanded) branch; defaults to [icons.KeyboardArrowDown]
-func (t *TreeView) SetIconOpen(v icons.Icon) *TreeView { t.IconOpen = v; return t }
+func (t *Tree) SetIconOpen(v icons.Icon) *Tree { t.IconOpen = v; return t }
 
-// SetIconClosed sets the [TreeView.IconClosed]:
+// SetIconClosed sets the [Tree.IconClosed]:
 // icon to use for a closed (collapsed) branch; defaults to [icons.KeyboardArrowRight]
-func (t *TreeView) SetIconClosed(v icons.Icon) *TreeView { t.IconClosed = v; return t }
+func (t *Tree) SetIconClosed(v icons.Icon) *Tree { t.IconClosed = v; return t }
 
-// SetIconLeaf sets the [TreeView.IconLeaf]:
+// SetIconLeaf sets the [Tree.IconLeaf]:
 // icon to use for a terminal node branch that has no children; defaults to [icons.Blank]
-func (t *TreeView) SetIconLeaf(v icons.Icon) *TreeView { t.IconLeaf = v; return t }
+func (t *Tree) SetIconLeaf(v icons.Icon) *Tree { t.IconLeaf = v; return t }
 
-// SetIndent sets the [TreeView.Indent]:
+// SetIndent sets the [Tree.Indent]:
 // amount to indent children relative to this node
-func (t *TreeView) SetIndent(v units.Value) *TreeView { t.Indent = v; return t }
+func (t *Tree) SetIndent(v units.Value) *Tree { t.Indent = v; return t }
 
-// SetOpenDepth sets the [TreeView.OpenDepth]:
+// SetOpenDepth sets the [Tree.OpenDepth]:
 // OpenDepth is the depth for nodes be initialized as open (default 4).
 // Nodes beyond this depth will be initialized as closed.
-func (t *TreeView) SetOpenDepth(v int) *TreeView { t.OpenDepth = v; return t }
+func (t *Tree) SetOpenDepth(v int) *Tree { t.OpenDepth = v; return t }
 
-// SetClosed sets the [TreeView.Closed]:
-// Closed is whether this tree view node is currently toggled closed (children not visible).
-func (t *TreeView) SetClosed(v bool) *TreeView { t.Closed = v; return t }
+// SetClosed sets the [Tree.Closed]:
+// Closed is whether this tree node is currently toggled closed (children not visible).
+func (t *Tree) SetClosed(v bool) *Tree { t.Closed = v; return t }
 
-// SetSelectMode sets the [TreeView.SelectMode]:
+// SetSelectMode sets the [Tree.SelectMode]:
 // SelectMode, when set on the root node, determines whether keyboard movements should update selection.
-func (t *TreeView) SetSelectMode(v bool) *TreeView { t.SelectMode = v; return t }
+func (t *Tree) SetSelectMode(v bool) *Tree { t.SelectMode = v; return t }
 
-// SetRootView sets the [TreeView.RootView]:
+// SetRootView sets the [Tree.RootView]:
 // The cached root of the view. It is automatically set and does not need to be
 // set by the end user.
-func (t *TreeView) SetRootView(v *TreeView) *TreeView { t.RootView = v; return t }
+func (t *Tree) SetRootView(v *Tree) *Tree { t.RootView = v; return t }
 
-// SetSelectedNodes sets the [TreeView.SelectedNodes]:
+// SetSelectedNodes sets the [Tree.SelectedNodes]:
 // SelectedNodes holds the currently selected nodes, on the
 // RootView node only.
-func (t *TreeView) SetSelectedNodes(v ...TreeViewer) *TreeView { t.SelectedNodes = v; return t }
+func (t *Tree) SetSelectedNodes(v ...Treer) *Tree { t.SelectedNodes = v; return t }
 
 // SliceButtonType is the [types.Type] for [SliceButton]
 var SliceButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceButton", IDName: "slice-button", Doc: "SliceButton represents a slice or array value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Slice"}}, Instance: &SliceButton{}})

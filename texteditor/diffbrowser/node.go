@@ -22,7 +22,7 @@ import (
 
 // Node is an element in the diff tree
 type Node struct {
-	views.TreeView
+	views.Tree
 
 	// file names (full path) being compared. Name of node is just the filename.
 	// Typically A is the older, base version and B is the newer one being compared.
@@ -42,7 +42,7 @@ type Node struct {
 }
 
 func (tn *Node) Init() {
-	tn.TreeView.Init()
+	tn.Tree.Init()
 	tn.IconOpen = icons.FolderOpen
 	tn.IconClosed = icons.Folder
 	tn.ContextMenus = nil

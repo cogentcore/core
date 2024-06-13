@@ -368,7 +368,7 @@ func (ev *Env) ConfigGUI() *core.Body {
 
 	split := core.NewSplits(b)
 
-	tv := views.NewTreeView(core.NewFrame(split)).SyncTree(ev.World)
+	tv := views.NewTree(core.NewFrame(split)).SyncTree(ev.World)
 	sv := views.NewForm(split).SetStruct(ev)
 	imfr := core.NewFrame(split)
 	tbvw := core.NewTabs(split)
@@ -380,7 +380,7 @@ func (ev *Env) ConfigGUI() *core.Body {
 
 	tv.OnSelect(func(e events.Event) {
 		if len(tv.SelectedNodes) > 0 {
-			sv.SetStruct(tv.SelectedNodes[0].AsTreeView().SyncNode)
+			sv.SetStruct(tv.SelectedNodes[0].AsCoreTree().SyncNode)
 		}
 	})
 

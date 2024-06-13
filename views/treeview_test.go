@@ -10,7 +10,7 @@ import (
 	"cogentcore.org/core/core"
 )
 
-func TestTreeView(t *testing.T) {
+func TestTree(t *testing.T) {
 	b := core.NewBody()
 
 	fr := core.NewFrame()
@@ -18,11 +18,11 @@ func TestTreeView(t *testing.T) {
 	core.NewText(fr)
 	core.NewButton(core.NewFrame(fr))
 
-	NewTreeView(b).SyncTree(fr)
-	b.AssertRender(t, "tree-view/basic")
+	NewTree(b).SyncTree(fr)
+	b.AssertRender(t, "tree/basic")
 }
 
-func TestTreeViewReadOnly(t *testing.T) {
+func TestTreeReadOnly(t *testing.T) {
 	b := core.NewBody()
 
 	fr := core.NewFrame()
@@ -30,6 +30,6 @@ func TestTreeViewReadOnly(t *testing.T) {
 	core.NewText(fr)
 	core.NewButton(core.NewFrame(fr))
 
-	NewTreeView(b).SyncTree(fr).SetReadOnly(true)
-	b.AssertRender(t, "tree-view/read-only")
+	NewTree(b).SyncTree(fr).SetReadOnly(true)
+	b.AssertRender(t, "tree/read-only")
 }

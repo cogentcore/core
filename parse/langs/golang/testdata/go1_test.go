@@ -353,7 +353,7 @@ func slfaa() {
 	}
 }
 
-func (tv *TreeView) FocusChanged2D(change core.FocusChanges) {
+func (tv *Tree) FocusChanged2D(change core.FocusChanges) {
 	switch change {
 	case core.FocusInactive: // don't care..
 	case core.FocusActive:
@@ -561,7 +561,7 @@ pil:
 	return nil
 }
 
-func (tv *TreeView) FocusChanged2D(change core.FocusChanges) {
+func (tv *Tree) FocusChanged2D(change core.FocusChanges) {
 	switch change {
 	case core.FocusInactive: // don't care..
 	case core.FocusActive:
@@ -606,7 +606,7 @@ func tst() {
 }
 
 func tst() {
-	tvn, two := data.(tree.Node).Embed(views.KiT_TreeView).(*views.TreeView)
+	tvn, two := data.(tree.Node).Embed(views.KiT_Tree).(*views.Tree)
 	for a, b := range cde {
 	}
 }
@@ -718,7 +718,7 @@ func tst() {
 func (pv *PiView) ConfigSplitView() {
 	Connect(func(sig int64) {
 		switch sig {
-		case int64(TreeViewSelected):
+		case int64(TreeSelected):
 			break
 		}
 	})
@@ -1004,9 +1004,9 @@ var tree = (map[token.Tokens]struct{})(optMap)
 
 var partyp = (*int)(tree)
 
-var ExprTypeAssert = absfr.(core.TreeView)
+var ExprTypeAssert = absfr.(core.Tree)
 
-var ExprTypeAssertPtr = absfr.(*core.TreeView)
+var ExprTypeAssertPtr = absfr.(*core.Tree)
 
 var methexpr = abc.meth(a-b * 2 + bf.Meth(22 + 55) / long.meth.Call(tree))
 

@@ -158,8 +158,8 @@ type WidgetBase struct {
 
 	// Parts are a separate tree of sub-widgets that can be used to store
 	// orthogonal parts of a widget when necessary to separate them from children.
-	// For example, tree views use parts to separate their internal parts from
-	// the other child tree view nodes. Composite widgets like buttons should
+	// For example, trees use parts to separate their internal parts from
+	// the other child tree nodes. Composite widgets like buttons should
 	// NOT use parts to store their components; parts should only be used when
 	// absolutely necessary.
 	Parts *Frame `copier:"-" json:"-" xml:"-" set:"-"`

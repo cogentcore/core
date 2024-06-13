@@ -97,7 +97,7 @@ func (pg *Page) Init() {
 		sp := core.NewSplits(pg).SetSplits(0.2, 0.8)
 		sp.SetName("splits")
 
-		nav := views.NewTreeViewFrame(sp).SetText(core.TheApp.Name())
+		nav := views.NewTreeFrame(sp).SetText(core.TheApp.Name())
 		nav.Parent.AsTree().SetName("nav-frame")
 		nav.SetName("nav")
 		nav.SetReadOnly(true)
@@ -142,12 +142,12 @@ func (pg *Page) Init() {
 
 			parent := nav
 			if pdir != "" && pdir != "." {
-				parent = nav.FindPath(pdir).(*views.TreeView)
+				parent = nav.FindPath(pdir).(*views.Tree)
 			}
 
 			nm := strings.TrimSuffix(base, ext)
 			txt := strcase.ToSentence(nm)
-			tv := views.NewTreeView(parent).SetText(txt)
+			tv := views.NewTree(parent).SetText(txt)
 			tv.SetName(nm)
 
 			// need index.md for page path
@@ -266,9 +266,9 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	// need to reset
 	NumExamples[pg.Context.PageURL] = 0
 
-	nav := pg.FindPath("splits/nav-frame/nav").(*views.TreeView)
+	nav := pg.FindPath("splits/nav-frame/nav").(*views.Tree)
 	nav.UnselectAll()
-	utv := nav.FindPath(rawURL).(*views.TreeView)
+	utv := nav.FindPath(rawURL).(*views.Tree)
 	utv.Select()
 	utv.ScrollToMe()
 

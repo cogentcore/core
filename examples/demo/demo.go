@@ -456,8 +456,8 @@ func makeViews(ts *core.Tabs) {
 	tbl[0].StrField = "this is a particularly long field"
 	views.NewTable(vts.NewTab("Table")).SetSlice(&tbl)
 
-	sp := core.NewSplits(vts.NewTab("Tree view")).SetSplits(0.3, 0.7)
-	tv := views.NewTreeViewFrame(sp).SetText("Root")
+	sp := core.NewSplits(vts.NewTab("Tree")).SetSplits(0.3, 0.7)
+	tv := views.NewTreeFrame(sp).SetText("Root")
 	makeTree(tv, 0)
 	tv.RootSetViewIndex()
 
@@ -474,12 +474,12 @@ func makeViews(ts *core.Tabs) {
 	textEditors(vts)
 }
 
-func makeTree(tv *views.TreeView, round int) {
+func makeTree(tv *views.Tree, round int) {
 	if round > 2 {
 		return
 	}
 	for i := range 3 {
-		n := views.NewTreeView(tv).SetText("Child " + strconv.Itoa(i))
+		n := views.NewTree(tv).SetText("Child " + strconv.Itoa(i))
 		makeTree(n, round+1)
 	}
 }

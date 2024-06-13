@@ -985,36 +985,36 @@ func main() {
 			core.MessageSnackbar(parent, "OnInput: "+te.Buffer.String())
 		})
 	},
-	"views/tree-views-0": func(parent core.Widget) {
-		tv := views.NewTreeView(parent).SetText("Root")
-		views.NewTreeView(tv)
-		c2 := views.NewTreeView(tv)
-		views.NewTreeView(c2)
+	"views/trees-0": func(parent core.Widget) {
+		tv := views.NewTree(parent).SetText("Root")
+		views.NewTree(tv)
+		c2 := views.NewTree(tv)
+		views.NewTree(c2)
 	},
-	"views/tree-views-1": func(parent core.Widget) {
+	"views/trees-1": func(parent core.Widget) {
 		n := tree.NewNodeBase()
 		tree.NewNodeBase(n)
 		c2 := tree.NewNodeBase(n)
 		tree.NewNodeBase(c2)
-		views.NewTreeView(parent).SyncTree(n)
+		views.NewTree(parent).SyncTree(n)
 	},
-	"views/tree-views-2": func(parent core.Widget) {
+	"views/trees-2": func(parent core.Widget) {
 		n := tree.NewNodeBase()
 		tree.NewNodeBase(n)
 		c2 := tree.NewNodeBase(n)
 		tree.NewNodeBase(c2)
-		views.NewTreeView(parent).SyncTree(n).OnChange(func(e events.Event) {
-			core.MessageSnackbar(parent, "Tree view changed")
+		views.NewTree(parent).SyncTree(n).OnChange(func(e events.Event) {
+			core.MessageSnackbar(parent, "Tree changed")
 		})
 	},
-	"views/tree-views-3": func(parent core.Widget) {
+	"views/trees-3": func(parent core.Widget) {
 		n := tree.NewNodeBase()
 		tree.NewNodeBase(n)
 		c2 := tree.NewNodeBase(n)
 		tree.NewNodeBase(c2)
-		views.NewTreeView(parent).SyncTree(n).SetReadOnly(true)
+		views.NewTree(parent).SyncTree(n).SetReadOnly(true)
 	},
-	"views/tree-views-4": func(parent core.Widget) {
+	"views/trees-4": func(parent core.Widget) {
 		n := tree.NewNodeBase()
 		tree.NewNodeBase(n)
 		c2 := tree.NewNodeBase(n)

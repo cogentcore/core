@@ -30,15 +30,15 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// TreeViewer is an interface for [TreeView] types
-// providing access to the base [TreeView] and
-// overridable method hooks for actions taken on the [TreeView],
+// Treer is an interface for [Tree] types
+// providing access to the base [Tree] and
+// overridable method hooks for actions taken on the [Tree],
 // including OnOpen, OnClose, etc.
-type TreeViewer interface {
+type Treer interface {
 	core.Widget
 
-	// AsTreeView returns the base [TreeView] for this node.
-	AsTreeView() *TreeView
+	// AsTree returns the base [Tree] for this node.
+	AsCoreTree() *Tree
 
 	// CanOpen returns true if the node is able to open.
 	// By default it checks HasChildren(), but could check other properties
@@ -78,11 +78,11 @@ type TreeViewer interface {
 	MakePasteMenu(m *core.Scene, md mimedata.Mimes, fun func())
 }
 
-// AsTreeView returns the given value as a value of type TreeView if the type
-// of the given value embeds TreeView, or nil otherwise.
-func AsTreeView(n tree.Node) *TreeView {
-	if t, ok := n.(TreeViewer); ok {
-		return t.AsTreeView()
+// AsTree returns the given value as a value of type Tree if the type
+// of the given value embeds Tree, or nil otherwise.
+func AsTree(n tree.Node) *Tree {
+	if t, ok := n.(Treer); ok {
+		return t.AsCoreTree()
 	}
 	return nil
 }
@@ -90,33 +90,33 @@ func AsTreeView(n tree.Node) *TreeView {
 // note: see treesync.go for all the SyncNode mode specific
 // functions.
 
-// TreeView provides a graphical representation of a tree structure,
+// Tree provides a graphical representation of a tree structure,
 // providing full navigation and manipulation abilities.
 //
 // It does not handle layout by itself, so if you want it to scroll
-// separately from the rest of the surrounding context, use [NewTreeViewFrame].
+// separately from the rest of the surrounding context, use [NewTreeFrame].
 //
 // If the SyncNode field is non-nil, typically via
-// SyncRootNode method, then the TreeView mirrors another
+// SyncRootNode method, then the Tree mirrors another
 // tree structure, and tree editing functions apply to
-// the source tree first, and then to the TreeView by sync.
+// the source tree first, and then to the Tree by sync.
 //
-// Otherwise, data can be directly encoded in a TreeView
+// Otherwise, data can be directly encoded in a Tree
 // derived type, to represent any kind of tree structure
 // and associated data.
 //
-// Standard events.Event are sent to any listeners, including
-// Select, Change, and DoubleClick.  The selected nodes
+// Standard [events.Event]s are sent to any listeners, including
+// Select, Change, and DoubleClick. The selected nodes
 // are in the root SelectedNodes list.
-type TreeView struct {
+type Tree struct {
 	core.WidgetBase
 
 	// If non-nil, the [tree.Node] that this widget is viewing in the tree (the source)
 	SyncNode tree.Node `set:"-" copier:"-" json:"-" xml:"-"`
 
-	// The text to display for the tree view item label, which automatically
-	// defaults to the [tree.Node.Name] of the tree view node. It has no effect
-	// if [TreeView.SyncNode] is non-nil.
+	// The text to display for the tree item label, which automatically
+	// defaults to the [tree.Node.Name] of the tree node. It has no effect
+	// if [Tree.SyncNode] is non-nil.
 	Text string
 
 	// optional icon, displayed to the the left of the text label
@@ -138,7 +138,7 @@ type TreeView struct {
 	// Nodes beyond this depth will be initialized as closed.
 	OpenDepth int `copier:"-" json:"-" xml:"-"`
 
-	// Closed is whether this tree view node is currently toggled closed (children not visible).
+	// Closed is whether this tree node is currently toggled closed (children not visible).
 	Closed bool
 
 	// SelectMode, when set on the root node, determines whether keyboard movements should update selection.
@@ -157,16 +157,16 @@ type TreeView struct {
 
 	// The cached root of the view. It is automatically set and does not need to be
 	// set by the end user.
-	RootView *TreeView `copier:"-" json:"-" xml:"-" edit:"-"`
+	RootView *Tree `copier:"-" json:"-" xml:"-" edit:"-"`
 
 	// SelectedNodes holds the currently selected nodes, on the
 	// RootView node only.
-	SelectedNodes []TreeViewer `copier:"-" json:"-" xml:"-" edit:"-"`
+	SelectedNodes []Treer `copier:"-" json:"-" xml:"-" edit:"-"`
 
-	// actStateLayer is the actual state layer of the tree view, which
+	// actStateLayer is the actual state layer of the tree, which
 	// should be used when rendering it and its parts (but not its children).
-	// the reason that it exists is so that the children of the tree view
-	// (other tree views) do not inherit its stateful background color, as
+	// the reason that it exists is so that the children of the tree
+	// (other trees) do not inherit its stateful background color, as
 	// that does not look good.
 	actStateLayer float32
 
@@ -174,22 +174,22 @@ type TreeView struct {
 	inOpen bool
 }
 
-// NewTreeViewFrame adds a new [TreeView] to a new frame with the given
-// optional parent that ensures that the tree view scrolls
+// NewTreeFrame adds a new [Tree] to a new frame with the given
+// optional parent that ensures that the tree scrolls
 // separately from the surrounding context.
-func NewTreeViewFrame(parent ...tree.Node) *TreeView {
+func NewTreeFrame(parent ...tree.Node) *Tree {
 	fr := core.NewFrame(parent...).Styler(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
-	return NewTreeView(fr)
+	return NewTree(fr)
 }
 
-// AsTreeView satisfies the [TreeViewer] interface.
-func (tv *TreeView) AsTreeView() *TreeView {
+// AsCoreTree satisfies the [Treer] interface.
+func (tv *Tree) AsCoreTree() *Tree {
 	return tv
 }
 
-func (tv *TreeView) BaseType() *types.Type {
+func (tv *Tree) BaseType() *types.Type {
 	return tv.NodeType()
 }
 
@@ -197,10 +197,10 @@ func (tv *TreeView) BaseType() *types.Type {
 // This must be called from the root node after
 // construction or any modification to the tree.
 // Returns the total number of leaves in the tree.
-func (tv *TreeView) RootSetViewIndex() int {
+func (tv *Tree) RootSetViewIndex() int {
 	idx := 0
 	tv.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
-		tvn := AsTreeView(wi)
+		tvn := AsTree(wi)
 		if tvn != nil {
 			tvn.viewIndex = idx
 			tvn.RootView = tv
@@ -212,7 +212,7 @@ func (tv *TreeView) RootSetViewIndex() int {
 	return idx
 }
 
-func (tv *TreeView) Init() {
+func (tv *Tree) Init() {
 	tv.WidgetBase.Init()
 	tv.AddContextMenu(tv.ContextMenu)
 	tv.IconOpen = icons.KeyboardArrowDown
@@ -247,7 +247,7 @@ func (tv *TreeView) Init() {
 
 	// We let the parts handle our state
 	// so that we only get it when we are doing
-	// something with this treeview specifically,
+	// something with this tree specifically,
 	// not with any of our children (see OnChildAdded).
 	// we only need to handle the starting ones here,
 	// as the other ones will just set the state to
@@ -265,7 +265,7 @@ func (tv *TreeView) Init() {
 		kf := keymap.Of(e.KeyChord())
 		selMode := events.SelectModeBits(e.Modifiers())
 		if core.DebugSettings.KeyEventTrace {
-			slog.Info("TreeView KeyInput", "widget", tv, "keyFunction", kf, "selMode", selMode)
+			slog.Info("Tree KeyInput", "widget", tv, "keyFunction", kf, "selMode", selMode)
 		}
 
 		if selMode == events.SelectOne {
@@ -274,7 +274,7 @@ func (tv *TreeView) Init() {
 			}
 		}
 
-		tvi := tv.This.(TreeViewer)
+		tvi := tv.This.(Treer)
 
 		// first all the keys that work for ReadOnly and active
 		switch kf {
@@ -345,7 +345,7 @@ func (tv *TreeView) Init() {
 
 	core.AddChildAt(tv, "parts", func(w *core.Frame) {
 		core.InitParts(w)
-		tvi := tv.This.(TreeViewer)
+		tvi := tv.This.(Treer)
 		w.Styler(func(s *styles.Style) {
 			s.Cursor = cursors.Pointer
 			s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
@@ -353,8 +353,8 @@ func (tv *TreeView) Init() {
 			s.Gap.X.Em(0.1)
 			s.Padding.Zero()
 
-			// we manually inherit our state layer from the treeview state
-			// layer so that the parts get it but not the other tree views
+			// we manually inherit our state layer from the tree state
+			// layer so that the parts get it but not the other trees
 			s.StateLayer = tv.actStateLayer
 		})
 		w.AsWidget().FinalStyler(func(s *styles.Style) {
@@ -362,8 +362,8 @@ func (tv *TreeView) Init() {
 		})
 		// we let the parts handle our state
 		// so that we only get it when we are doing
-		// something with this treeview specifically,
-		// not with any of our children (see HandleTreeViewMouse)
+		// something with this tree specifically,
+		// not with any of our children (see HandleTreeMouse)
 		w.On(events.MouseEnter, func(e events.Event) {
 			tv.SetState(true, states.Hovered)
 			tv.Style()
@@ -393,7 +393,7 @@ func (tv *TreeView) Init() {
 			e.SetHandled()
 		})
 		w.AsWidget().OnDoubleClick(func(e events.Event) {
-			tv.This.(TreeViewer).OnDoubleClick(e)
+			tv.This.(Treer).OnDoubleClick(e)
 		})
 		w.On(events.DragStart, func(e events.Event) {
 			tvi.DragStart(e)
@@ -456,7 +456,7 @@ func (tv *TreeView) Init() {
 				}
 			})
 			w.Updater(func() {
-				if tv.This.(TreeViewer).CanOpen() {
+				if tv.This.(Treer).CanOpen() {
 					tv.SetBranchState()
 				}
 			})
@@ -487,10 +487,10 @@ func (tv *TreeView) Init() {
 	})
 }
 
-func (tv *TreeView) OnAdd() {
+func (tv *Tree) OnAdd() {
 	tv.WidgetBase.OnAdd()
 	tv.Text = tv.Name
-	if ptv := AsTreeView(tv.Parent); ptv != nil {
+	if ptv := AsTree(tv.Parent); ptv != nil {
 		tv.RootView = ptv.RootView
 		tv.IconOpen = ptv.IconOpen
 		tv.IconClosed = ptv.IconClosed
@@ -504,7 +504,7 @@ func (tv *TreeView) OnAdd() {
 // RootIsReadOnly returns the ReadOnly status of the root node,
 // which is what controls the functional inactivity of the tree
 // if individual nodes are ReadOnly that only affects display typically.
-func (tv *TreeView) RootIsReadOnly() bool {
+func (tv *Tree) RootIsReadOnly() bool {
 	if tv.RootView == nil {
 		return true
 	}
@@ -512,10 +512,10 @@ func (tv *TreeView) RootIsReadOnly() bool {
 }
 
 // qt calls the open / close thing a "branch"
-// http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtreeview
+// http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtree
 
 // BranchPart returns the branch in parts, if it exists
-func (tv *TreeView) BranchPart() (*core.Switch, bool) {
+func (tv *Tree) BranchPart() (*core.Switch, bool) {
 	if tv.Parts == nil {
 		return nil, false
 	}
@@ -526,7 +526,7 @@ func (tv *TreeView) BranchPart() (*core.Switch, bool) {
 }
 
 // IconPart returns the icon in parts, if it exists
-func (tv *TreeView) IconPart() (*core.Icon, bool) {
+func (tv *Tree) IconPart() (*core.Icon, bool) {
 	if tv.Parts == nil {
 		return nil, false
 	}
@@ -537,7 +537,7 @@ func (tv *TreeView) IconPart() (*core.Icon, bool) {
 }
 
 // LabelPart returns the label in parts, if it exists
-func (tv *TreeView) LabelPart() (*core.Text, bool) {
+func (tv *Tree) LabelPart() (*core.Text, bool) {
 	if tv.Parts == nil {
 		return nil, false
 	}
@@ -547,7 +547,7 @@ func (tv *TreeView) LabelPart() (*core.Text, bool) {
 	return nil, false
 }
 
-func (tv *TreeView) Style() {
+func (tv *Tree) Style() {
 	if !tv.HasChildren() {
 		tv.SetClosed(true)
 	}
@@ -555,16 +555,16 @@ func (tv *TreeView) Style() {
 	tv.WidgetBase.Style()
 }
 
-func (tv *TreeView) UpdateBranchIcons() {
+func (tv *Tree) UpdateBranchIcons() {
 }
 
-func (tv *TreeView) SetBranchState() {
+func (tv *Tree) SetBranchState() {
 	br, ok := tv.BranchPart()
 	if !ok {
 		return
 	}
 	switch {
-	case !tv.This.(TreeViewer).CanOpen():
+	case !tv.This.(Treer).CanOpen():
 		br.SetState(true, states.Indeterminate)
 	case tv.Closed:
 		br.SetState(false, states.Indeterminate)
@@ -577,10 +577,10 @@ func (tv *TreeView) SetBranchState() {
 	}
 }
 
-// TreeView is tricky for alloc because it is both a layout
+// Tree is tricky for alloc because it is both a layout
 // of its children but has to maintain its own bbox for its own widget.
 
-func (tv *TreeView) SizeUp() {
+func (tv *Tree) SizeUp() {
 	tv.WidgetBase.SizeUp()
 	tv.widgetSize = tv.Geom.Size.Actual.Total
 	h := tv.widgetSize.Y
@@ -593,7 +593,7 @@ func (tv *TreeView) SizeUp() {
 			h += kwb.Geom.Size.Actual.Total.Y
 			kw := kwb.Geom.Size.Actual.Total.X
 			if math32.IsNaN(kw) { // somehow getting a nan
-				slog.Error("TreeView, node width is NaN", "node:", kwb)
+				slog.Error("Tree, node width is NaN", "node:", kwb)
 			} else {
 				w = max(w, tv.Indent.Dots+kw)
 			}
@@ -608,21 +608,21 @@ func (tv *TreeView) SizeUp() {
 	tv.widgetSize.X = w  // stretch
 }
 
-func (tv *TreeView) SizeDown(iter int) bool {
+func (tv *Tree) SizeDown(iter int) bool {
 	// note: key to not grab the whole allocation, as widget default does
 	redo := tv.SizeDownParts(iter) // give our content to parts
 	re := tv.SizeDownChildren(iter)
 	return redo || re
 }
 
-func (tv *TreeView) Position() {
+func (tv *Tree) Position() {
 	rn := tv.RootView
 	if rn == nil {
-		slog.Error("views.TreeView: RootView is nil", "in node:", tv)
+		slog.Error("views.Tree: RootView is nil", "in node:", tv)
 		return
 	}
 	tv.SetBranchState()
-	tv.This.(TreeViewer).UpdateBranchIcons()
+	tv.This.(Treer).UpdateBranchIcons()
 
 	tv.Geom.Size.Actual.Total.X = rn.Geom.Size.Actual.Total.X - (tv.Geom.Pos.Total.X - rn.Geom.Pos.Total.X)
 	tv.widgetSize.X = tv.Geom.Size.Actual.Total.X
@@ -641,7 +641,7 @@ func (tv *TreeView) Position() {
 	}
 }
 
-func (tv *TreeView) ScenePos() {
+func (tv *Tree) ScenePos() {
 	sz := &tv.Geom.Size
 	if sz.Actual.Total == tv.widgetSize {
 		sz.SetTotalFromContent(&sz.Actual) // restore after scrolling
@@ -651,7 +651,7 @@ func (tv *TreeView) ScenePos() {
 	tv.Geom.Size.Actual.Total = tv.widgetSize // key: we revert to just ourselves
 }
 
-func (tv *TreeView) Render() {
+func (tv *Tree) Render() {
 	pc := &tv.Scene.PaintContext
 	st := &tv.Styles
 
@@ -672,7 +672,7 @@ func (tv *TreeView) Render() {
 	tv.Styles.ComputeActualBackground(pabg)
 }
 
-func (tv *TreeView) RenderWidget() {
+func (tv *Tree) RenderWidget() {
 	if tv.PushBounds() {
 		tv.Render()
 		if tv.Parts != nil {
@@ -696,9 +696,9 @@ func (tv *TreeView) RenderWidget() {
 //    Selection
 
 // SelectedViews returns a slice of the currently selected
-// TreeViews within the entire tree, using a list maintained
+// Trees within the entire tree, using a list maintained
 // by the root node
-func (tv *TreeView) SelectedViews() []TreeViewer {
+func (tv *Tree) SelectedViews() []Treer {
 	if tv.RootView == nil {
 		return nil
 	}
@@ -710,25 +710,25 @@ func (tv *TreeView) SelectedViews() []TreeViewer {
 }
 
 // SetSelectedViews updates the selected views to given list
-func (tv *TreeView) SetSelectedViews(sl []TreeViewer) {
+func (tv *Tree) SetSelectedViews(sl []Treer) {
 	if tv.RootView != nil {
 		tv.RootView.SelectedNodes = sl
 	}
 }
 
 // HasSelection returns true if there are currently selected items
-func (tv *TreeView) HasSelection() bool {
+func (tv *Tree) HasSelection() bool {
 	return len(tv.SelectedViews()) > 0
 }
 
 // Select selects this node (if not already selected).
 // Must use this method to update global selection list
-func (tv *TreeView) Select() {
+func (tv *Tree) Select() {
 	if !tv.StateIs(states.Selected) {
 		tv.SetSelected(true)
 		tv.Style()
 		sl := tv.SelectedViews()
-		sl = append(sl, tv.This.(TreeViewer))
+		sl = append(sl, tv.This.(Treer))
 		tv.SetSelectedViews(sl)
 		tv.NeedsRender()
 	}
@@ -736,7 +736,7 @@ func (tv *TreeView) Select() {
 
 // Unselect unselects this node (if selected).
 // Must use this method to update global selection list.
-func (tv *TreeView) Unselect() {
+func (tv *Tree) Unselect() {
 	if tv.StateIs(states.Selected) {
 		tv.SetSelected(false)
 		tv.Style()
@@ -754,14 +754,14 @@ func (tv *TreeView) Unselect() {
 }
 
 // UnselectAll unselects all selected items in the view
-func (tv *TreeView) UnselectAll() {
+func (tv *Tree) UnselectAll() {
 	if tv.Scene == nil {
 		return
 	}
 	sl := tv.SelectedViews()
 	tv.SetSelectedViews(nil) // clear in advance
 	for _, v := range sl {
-		vt := v.AsTreeView()
+		vt := v.AsCoreTree()
 		if vt == nil || vt.This == nil {
 			continue
 		}
@@ -773,7 +773,7 @@ func (tv *TreeView) UnselectAll() {
 }
 
 // SelectAll all items in view
-func (tv *TreeView) SelectAll() {
+func (tv *Tree) SelectAll() {
 	if tv.Scene == nil {
 		return
 	}
@@ -789,7 +789,7 @@ func (tv *TreeView) SelectAll() {
 // SelectUpdate updates selection to include this node,
 // using selectmode from mouse event (ExtendContinuous, ExtendOne).
 // Returns true if this node selected
-func (tv *TreeView) SelectUpdate(mode events.SelectModes) bool {
+func (tv *Tree) SelectUpdate(mode events.SelectModes) bool {
 	if mode == events.NoSelect {
 		return false
 	}
@@ -820,7 +820,7 @@ func (tv *TreeView) SelectUpdate(mode events.SelectModes) bool {
 			minIndex := -1
 			maxIndex := 0
 			for _, v := range sl {
-				vn := v.AsTreeView()
+				vn := v.AsCoreTree()
 				if minIndex < 0 {
 					minIndex = vn.viewIndex
 				} else {
@@ -863,28 +863,28 @@ func (tv *TreeView) SelectUpdate(mode events.SelectModes) bool {
 }
 
 // SendSelectEvent sends an [events.Select] event on the RootView node.
-func (tv *TreeView) SendSelectEvent(original ...events.Event) {
+func (tv *Tree) SendSelectEvent(original ...events.Event) {
 	// fmt.Println("root:", &tv.RootView, tv.RootView.Listeners)
 	tv.RootView.Send(events.Select, original...)
 }
 
 // SendChangeEvent sends an [events.Change] event on the RootView node.
-func (tv *TreeView) SendChangeEvent(original ...events.Event) {
+func (tv *Tree) SendChangeEvent(original ...events.Event) {
 	tv.RootView.SendChange(original...)
 }
 
-// TreeViewChanged must be called after any structural
-// change to the TreeView (adding or deleting nodes).
+// TreeChanged must be called after any structural
+// change to the Tree (adding or deleting nodes).
 // It calls RootSetViewIndex to update indexes and
 // SendChangeEvent to notify of changes.
-func (tv *TreeView) TreeViewChanged(original ...events.Event) {
+func (tv *Tree) TreeChanged(original ...events.Event) {
 	tv.RootView.RootSetViewIndex()
 	tv.SendChangeEvent(original...)
 }
 
 // SendChangeEventReSync sends an [events.Change] event on the RootView node.
 // If SyncNode != nil, it also does a re-sync from root.
-func (tv *TreeView) SendChangeEventReSync(original ...events.Event) {
+func (tv *Tree) SendChangeEventReSync(original ...events.Event) {
 	tv.RootView.SendChange(original...)
 	if tv.RootView.SyncNode != nil {
 		tv.RootView.ReSync()
@@ -894,7 +894,7 @@ func (tv *TreeView) SendChangeEventReSync(original ...events.Event) {
 // SelectAction updates selection to include this node,
 // using selectmode from mouse event (ExtendContinuous, ExtendOne),
 // and Root sends selection event.  Returns true if signal emitted.
-func (tv *TreeView) SelectAction(mode events.SelectModes) bool {
+func (tv *Tree) SelectAction(mode events.SelectModes) bool {
 	sel := tv.SelectUpdate(mode)
 	if sel {
 		tv.SendSelectEvent()
@@ -904,7 +904,7 @@ func (tv *TreeView) SelectAction(mode events.SelectModes) bool {
 
 // UnselectAction unselects this node (if selected),
 // and Root sends a selection event.
-func (tv *TreeView) UnselectAction() {
+func (tv *Tree) UnselectAction() {
 	if tv.StateIs(states.Selected) {
 		tv.Unselect()
 		tv.SendSelectEvent()
@@ -917,7 +917,7 @@ func (tv *TreeView) UnselectAction() {
 // MoveDown moves the selection down to next element in the tree,
 // using given select mode (from keyboard modifiers).
 // Returns newly selected node.
-func (tv *TreeView) MoveDown(selMode events.SelectModes) *TreeView {
+func (tv *Tree) MoveDown(selMode events.SelectModes) *Tree {
 	if tv.Parent == nil {
 		return nil
 	}
@@ -925,7 +925,7 @@ func (tv *TreeView) MoveDown(selMode events.SelectModes) *TreeView {
 		return tv.MoveDownSibling(selMode)
 	} else {
 		if tv.HasChildren() {
-			nn := AsTreeView(tv.Child(0))
+			nn := AsTree(tv.Child(0))
 			if nn != nil {
 				nn.SelectUpdate(selMode)
 				return nn
@@ -938,7 +938,7 @@ func (tv *TreeView) MoveDown(selMode events.SelectModes) *TreeView {
 // MoveDownAction moves the selection down to next element in the tree,
 // using given select mode (from keyboard modifiers).
 // Sends select event for newly selected item.
-func (tv *TreeView) MoveDownAction(selMode events.SelectModes) *TreeView {
+func (tv *Tree) MoveDownAction(selMode events.SelectModes) *Tree {
 	nn := tv.MoveDown(selMode)
 	if nn != nil && nn != tv {
 		nn.SetFocus()
@@ -950,7 +950,7 @@ func (tv *TreeView) MoveDownAction(selMode events.SelectModes) *TreeView {
 
 // MoveDownSibling moves down only to siblings, not down into children,
 // using given select mode (from keyboard modifiers)
-func (tv *TreeView) MoveDownSibling(selMode events.SelectModes) *TreeView {
+func (tv *Tree) MoveDownSibling(selMode events.SelectModes) *Tree {
 	if tv.Parent == nil {
 		return nil
 	}
@@ -959,13 +959,13 @@ func (tv *TreeView) MoveDownSibling(selMode events.SelectModes) *TreeView {
 	}
 	myidx := tv.IndexInParent()
 	if myidx < len(tv.Parent.AsTree().Children)-1 {
-		nn := AsTreeView(tv.Parent.AsTree().Child(myidx + 1))
+		nn := AsTree(tv.Parent.AsTree().Child(myidx + 1))
 		if nn != nil {
 			nn.SelectUpdate(selMode)
 			return nn
 		}
 	} else {
-		return AsTreeView(tv.Parent).MoveDownSibling(selMode) // try up
+		return AsTree(tv.Parent).MoveDownSibling(selMode) // try up
 	}
 	return nil
 }
@@ -973,19 +973,19 @@ func (tv *TreeView) MoveDownSibling(selMode events.SelectModes) *TreeView {
 // MoveUp moves selection up to previous element in the tree,
 // using given select mode (from keyboard modifiers).
 // Returns newly selected node
-func (tv *TreeView) MoveUp(selMode events.SelectModes) *TreeView {
+func (tv *Tree) MoveUp(selMode events.SelectModes) *Tree {
 	if tv.Parent == nil || tv == tv.RootView {
 		return nil
 	}
 	myidx := tv.IndexInParent()
 	if myidx > 0 {
-		nn := AsTreeView(tv.Parent.AsTree().Child(myidx - 1))
+		nn := AsTree(tv.Parent.AsTree().Child(myidx - 1))
 		if nn != nil {
 			return nn.MoveToLastChild(selMode)
 		}
 	} else {
 		if tv.Parent != nil {
-			nn := AsTreeView(tv.Parent)
+			nn := AsTree(tv.Parent)
 			if nn != nil {
 				nn.SelectUpdate(selMode)
 				return nn
@@ -998,7 +998,7 @@ func (tv *TreeView) MoveUp(selMode events.SelectModes) *TreeView {
 // MoveUpAction moves the selection up to previous element in the tree,
 // using given select mode (from keyboard modifiers).
 // Sends select event for newly selected item.
-func (tv *TreeView) MoveUpAction(selMode events.SelectModes) *TreeView {
+func (tv *Tree) MoveUpAction(selMode events.SelectModes) *Tree {
 	nn := tv.MoveUp(selMode)
 	if nn != nil && nn != tv {
 		nn.SetFocus()
@@ -1008,14 +1008,14 @@ func (tv *TreeView) MoveUpAction(selMode events.SelectModes) *TreeView {
 	return nn
 }
 
-// TreeViewPageSteps is the number of steps to take in PageUp / Down events
-var TreeViewPageSteps = 10
+// TreePageSteps is the number of steps to take in PageUp / Down events
+var TreePageSteps = 10
 
 // MovePageUpAction moves the selection up to previous
-// TreeViewPageSteps elements in the tree,
+// TreePageSteps elements in the tree,
 // using given select mode (from keyboard modifiers).
 // Sends select event for newly selected item.
-func (tv *TreeView) MovePageUpAction(selMode events.SelectModes) *TreeView {
+func (tv *Tree) MovePageUpAction(selMode events.SelectModes) *Tree {
 	mvMode := selMode
 	if selMode == events.SelectOne {
 		mvMode = events.NoSelect
@@ -1024,7 +1024,7 @@ func (tv *TreeView) MovePageUpAction(selMode events.SelectModes) *TreeView {
 	}
 	fnn := tv.MoveUp(mvMode)
 	if fnn != nil && fnn != tv {
-		for i := 1; i < TreeViewPageSteps; i++ {
+		for i := 1; i < TreePageSteps; i++ {
 			nn := fnn.MoveUp(mvMode)
 			if nn == nil || nn == fnn {
 				break
@@ -1043,10 +1043,10 @@ func (tv *TreeView) MovePageUpAction(selMode events.SelectModes) *TreeView {
 }
 
 // MovePageDownAction moves the selection up to
-// previous TreeViewPageSteps elements in the tree,
+// previous TreePageSteps elements in the tree,
 // using given select mode (from keyboard modifiers).
 // Sends select event for newly selected item.
-func (tv *TreeView) MovePageDownAction(selMode events.SelectModes) *TreeView {
+func (tv *Tree) MovePageDownAction(selMode events.SelectModes) *Tree {
 	mvMode := selMode
 	if selMode == events.SelectOne {
 		mvMode = events.NoSelect
@@ -1055,7 +1055,7 @@ func (tv *TreeView) MovePageDownAction(selMode events.SelectModes) *TreeView {
 	}
 	fnn := tv.MoveDown(mvMode)
 	if fnn != nil && fnn != tv {
-		for i := 1; i < TreeViewPageSteps; i++ {
+		for i := 1; i < TreePageSteps; i++ {
 			nn := fnn.MoveDown(mvMode)
 			if nn == nil || nn == fnn {
 				break
@@ -1075,35 +1075,34 @@ func (tv *TreeView) MovePageDownAction(selMode events.SelectModes) *TreeView {
 
 // MoveToLastChild moves to the last child under me, using given select mode
 // (from keyboard modifiers)
-func (tv *TreeView) MoveToLastChild(selMode events.SelectModes) *TreeView {
+func (tv *Tree) MoveToLastChild(selMode events.SelectModes) *Tree {
 	if tv.Parent == nil || tv == tv.RootView {
 		return nil
 	}
 	if !tv.Closed && tv.HasChildren() {
-		nn := AsTreeView(tv.Child(tv.NumChildren() - 1))
+		nn := AsTree(tv.Child(tv.NumChildren() - 1))
 		return nn.MoveToLastChild(selMode)
 	} else {
 		tv.SelectUpdate(selMode)
 		return tv
 	}
-	return nil
 }
 
 // MoveHomeAction moves the selection up to top of the tree,
 // using given select mode (from keyboard modifiers)
 // and emits select event for newly selected item
-func (tv *TreeView) MoveHomeAction(selMode events.SelectModes) *TreeView {
+func (tv *Tree) MoveHomeAction(selMode events.SelectModes) *Tree {
 	tv.RootView.SelectUpdate(selMode)
 	tv.RootView.SetFocus()
 	tv.RootView.ScrollToMe()
-	// tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), tv.RootView.This)
+	// tv.RootView.TreeSig.Emit(tv.RootView.This, int64(TreeSelected), tv.RootView.This)
 	return tv.RootView
 }
 
 // MoveEndAction moves the selection to the very last node in the tree,
 // using given select mode (from keyboard modifiers)
 // Sends select event for newly selected item.
-func (tv *TreeView) MoveEndAction(selMode events.SelectModes) *TreeView {
+func (tv *Tree) MoveEndAction(selMode events.SelectModes) *Tree {
 	mvMode := selMode
 	if selMode == events.SelectOne {
 		mvMode = events.NoSelect
@@ -1129,9 +1128,9 @@ func (tv *TreeView) MoveEndAction(selMode events.SelectModes) *TreeView {
 	return fnn
 }
 
-func (tv *TreeView) SetKidsVisibility(parentClosed bool) {
+func (tv *Tree) SetKidsVisibility(parentClosed bool) {
 	for _, k := range tv.Children {
-		tvn := AsTreeView(k)
+		tvn := AsTree(k)
 		if tvn != nil {
 			tvn.SetState(parentClosed, states.Invisible)
 		}
@@ -1140,29 +1139,29 @@ func (tv *TreeView) SetKidsVisibility(parentClosed bool) {
 
 // OnClose is called when a node is closed.
 // The base version does nothing.
-func (tv *TreeView) OnClose() {
+func (tv *Tree) OnClose() {
 }
 
 // Close closes the given node and updates the view accordingly
 // (if it is not already closed).
-// Calls OnClose in TreeViewer interface for extensible actions.
-func (tv *TreeView) Close() {
+// Calls OnClose in Treer interface for extensible actions.
+func (tv *Tree) Close() {
 	if tv.Closed {
 		return
 	}
 	tv.SetClosed(true)
 	tv.SetBranchState()
-	tv.This.(TreeViewer).OnClose()
+	tv.This.(Treer).OnClose()
 	tv.SetKidsVisibility(true) // parent closed
 	tv.NeedsLayout()
 }
 
 // OnOpen is called when a node is opened.
 // The base version does nothing.
-func (tv *TreeView) OnOpen() {
+func (tv *Tree) OnOpen() {
 }
 
-func (tv *TreeView) OnDoubleClick(e events.Event) {
+func (tv *Tree) OnDoubleClick(e events.Event) {
 	if tv.HasChildren() {
 		tv.ToggleClose()
 	}
@@ -1171,30 +1170,30 @@ func (tv *TreeView) OnDoubleClick(e events.Event) {
 // CanOpen returns true if the node is able to open.
 // By default it checks HasChildren(), but could check other properties
 // to perform lazy building of the tree.
-func (tv *TreeView) CanOpen() bool {
+func (tv *Tree) CanOpen() bool {
 	return tv.HasChildren()
 }
 
 // Open opens the given node and updates the view accordingly
 // (if it is not already opened).
-// Calls OnOpen in TreeViewer interface for extensible actions.
-func (tv *TreeView) Open() {
+// Calls OnOpen in Treer interface for extensible actions.
+func (tv *Tree) Open() {
 	if !tv.Closed || tv.inOpen {
 		return
 	}
 	tv.inOpen = true
-	if tv.This.(TreeViewer).CanOpen() {
+	if tv.This.(Treer).CanOpen() {
 		tv.SetClosed(false)
 		tv.SetBranchState()
 		tv.SetKidsVisibility(false)
-		tv.This.(TreeViewer).OnOpen()
+		tv.This.(Treer).OnOpen()
 	}
 	tv.inOpen = false
 	tv.NeedsLayout()
 }
 
 // ToggleClose toggles the close / open status: if closed, opens, and vice-versa
-func (tv *TreeView) ToggleClose() {
+func (tv *Tree) ToggleClose() {
 	if tv.Closed {
 		tv.Open()
 	} else {
@@ -1203,9 +1202,9 @@ func (tv *TreeView) ToggleClose() {
 }
 
 // OpenAll opens the given node and all of its sub-nodes
-func (tv *TreeView) OpenAll() { //types:add
+func (tv *Tree) OpenAll() { //types:add
 	tv.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
-		tvn := AsTreeView(wi)
+		tvn := AsTree(wi)
 		if tvn != nil {
 			tvn.Open()
 			return tree.Continue
@@ -1216,9 +1215,9 @@ func (tv *TreeView) OpenAll() { //types:add
 }
 
 // CloseAll closes the given node and all of its sub-nodes.
-func (tv *TreeView) CloseAll() { //types:add
+func (tv *Tree) CloseAll() { //types:add
 	tv.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
-		tvn := AsTreeView(wi)
+		tvn := AsTree(wi)
 		if tvn != nil {
 			tvn.Close()
 			return tree.Continue
@@ -1230,9 +1229,9 @@ func (tv *TreeView) CloseAll() { //types:add
 
 // OpenParents opens all the parents of this node,
 // so that it will be visible.
-func (tv *TreeView) OpenParents() {
+func (tv *Tree) OpenParents() {
 	tv.WalkUpParent(func(k tree.Node) bool {
-		tvn := AsTreeView(k)
+		tvn := AsTree(k)
 		if tvn != nil {
 			tvn.Open()
 			return tree.Continue
@@ -1245,7 +1244,7 @@ func (tv *TreeView) OpenParents() {
 /////////////////////////////////////////////////////////////
 //    Modifying Source Tree
 
-func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
+func (tv *Tree) ContextMenuPos(e events.Event) (pos image.Point) {
 	if e != nil {
 		pos = e.WindowPos()
 		return
@@ -1255,7 +1254,7 @@ func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
 	return
 }
 
-func (tv *TreeView) ContextMenuReadOnly(m *core.Scene) {
+func (tv *Tree) ContextMenuReadOnly(m *core.Scene) {
 	core.NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keymap.Copy).
 		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
@@ -1274,12 +1273,12 @@ func (tv *TreeView) ContextMenuReadOnly(m *core.Scene) {
 		SetEnabled(tv.HasSelection())
 }
 
-func (tv *TreeView) ContextMenu(m *core.Scene) {
+func (tv *Tree) ContextMenu(m *core.Scene) {
 	if tv.IsReadOnly() || tv.RootIsReadOnly() {
 		tv.ContextMenuReadOnly(m)
 		return
 	}
-	tvi := tv.This.(TreeViewer)
+	tvi := tv.This.(Treer)
 	core.NewButton(m).SetText("Add child").SetIcon(icons.Add).
 		SetEnabled(tv.HasSelection()).
 		OnClick(func(e events.Event) {
@@ -1338,7 +1337,7 @@ func (tv *TreeView) ContextMenu(m *core.Scene) {
 }
 
 // IsRoot returns true if given node is the root of the tree.
-func (tv *TreeView) IsRoot(op string) bool {
+func (tv *Tree) IsRoot(op string) bool {
 	if tv.This == tv.RootView.This {
 		if op != "" {
 			core.MessageSnackbar(tv, fmt.Sprintf("Cannot %v the root of the tree", op))
@@ -1352,7 +1351,7 @@ func (tv *TreeView) IsRoot(op string) bool {
 //    Copy / Cut / Paste
 
 // MimeData adds mimedata for this node: a text/plain of the Path.
-func (tv *TreeView) MimeData(md *mimedata.Mimes) {
+func (tv *Tree) MimeData(md *mimedata.Mimes) {
 	if tv.SyncNode != nil {
 		tv.MimeDataSync(md)
 		return
@@ -1368,8 +1367,8 @@ func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 }
 
 // NodesFromMimeData returns a slice of tree nodes for
-// the TreeView nodes and paths from mime data.
-func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
+// the Tree nodes and paths from mime data.
+func (tv *Tree) NodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
 	ni := len(md) / 2
 	sl := make([]tree.Node, 0, ni)
 	pl := make([]string, 0, ni)
@@ -1389,11 +1388,11 @@ func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string)
 }
 
 // Copy copies to system.Clipboard, optionally resetting the selection.
-func (tv *TreeView) Copy(reset bool) { //types:add
+func (tv *Tree) Copy(reset bool) { //types:add
 	sels := tv.SelectedViews()
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
-	tv.This.(TreeViewer).MimeData(&md) // source is always first..
+	tv.This.(Treer).MimeData(&md) // source is always first..
 	if nitms > 1 {
 		for _, sn := range sels {
 			if sn != tv.This {
@@ -1408,7 +1407,7 @@ func (tv *TreeView) Copy(reset bool) { //types:add
 }
 
 // Cut copies to system.Clipboard and deletes selected items.
-func (tv *TreeView) Cut() { //types:add
+func (tv *Tree) Cut() { //types:add
 	if tv.IsRoot("Cut") {
 		return
 	}
@@ -1424,11 +1423,11 @@ func (tv *TreeView) Cut() { //types:add
 		sn.AsTree().Delete()
 	}
 	root.Update()
-	root.TreeViewChanged()
+	root.TreeChanged()
 }
 
 // Paste pastes clipboard at given node.
-func (tv *TreeView) Paste() { //types:add
+func (tv *Tree) Paste() { //types:add
 	md := tv.Clipboard().Read([]string{fileinfo.DataJson})
 	if md != nil {
 		tv.PasteMenu(md)
@@ -1437,10 +1436,10 @@ func (tv *TreeView) Paste() { //types:add
 
 // PasteMenu performs a paste from the clipboard using given data,
 // by popping up a menu to determine what specifically to do.
-func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
+func (tv *Tree) PasteMenu(md mimedata.Mimes) {
 	tv.UnselectAll()
 	mf := func(m *core.Scene) {
-		tv.This.(TreeViewer).MakePasteMenu(m, md, nil)
+		tv.This.(Treer).MakePasteMenu(m, md, nil)
 	}
 	pos := tv.ContextMenuPos(nil)
 	core.NewMenu(mf, tv.This.(core.Widget), pos).Run()
@@ -1449,7 +1448,7 @@ func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
 // MakePasteMenu makes the menu of options for paste events
 // optional function is typically the DropFinalize but could also be other actions
 // to take after each optional action.
-func (tv *TreeView) MakePasteMenu(m *core.Scene, md mimedata.Mimes, fun func()) {
+func (tv *Tree) MakePasteMenu(m *core.Scene, md mimedata.Mimes, fun func()) {
 	core.NewButton(m).SetText("Assign To").OnClick(func(e events.Event) {
 		tv.PasteAssign(md)
 		if fun != nil {
@@ -1480,7 +1479,7 @@ func (tv *TreeView) MakePasteMenu(m *core.Scene, md mimedata.Mimes, fun func()) 
 }
 
 // PasteAssign assigns mime data (only the first one!) to this node
-func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
+func (tv *Tree) PasteAssign(md mimedata.Mimes) {
 	if tv.SyncNode != nil {
 		tv.PasteAssignSync(md)
 		return
@@ -1493,25 +1492,25 @@ func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
 	tv.SetScene(tv.Scene) // ensure children have scene
 	tv.Update()           // could have children
 	tv.Open()
-	tv.TreeViewChanged()
+	tv.TreeChanged()
 }
 
 // PasteBefore inserts object(s) from mime data before this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
-func (tv *TreeView) PasteBefore(md mimedata.Mimes, mod events.DropMods) {
+func (tv *Tree) PasteBefore(md mimedata.Mimes, mod events.DropMods) {
 	tv.PasteAt(md, mod, 0, "Paste Before")
 }
 
 // PasteAfter inserts object(s) from mime data after this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
-func (tv *TreeView) PasteAfter(md mimedata.Mimes, mod events.DropMods) {
+func (tv *Tree) PasteAfter(md mimedata.Mimes, mod events.DropMods) {
 	tv.PasteAt(md, mod, 1, "Paste After")
 }
 
-// TreeViewTempMovedTag is a kind of hack to prevent moved items from being deleted, using DND
-const TreeViewTempMovedTag = `_\&MOVED\&`
+// TreeTempMovedTag is a kind of hack to prevent moved items from being deleted, using DND
+const TreeTempMovedTag = `_\&MOVED\&`
 
 // todo: these methods require an interface to work for descended
 // nodes, based on base code
@@ -1519,11 +1518,11 @@ const TreeViewTempMovedTag = `_\&MOVED\&`
 // PasteAt inserts object(s) from mime data at rel position to this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
-func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
+func (tv *Tree) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
 	if tv.Parent == nil {
 		return
 	}
-	parent := AsTreeView(tv.Parent)
+	parent := AsTree(tv.Parent)
 	if parent == nil {
 		core.MessageSnackbar(tv, "Error: cannot insert after the root of the tree")
 		return
@@ -1540,7 +1539,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 	}
 	myidx += rel
 	sz := len(sl)
-	var selTv *TreeView
+	var selTv *Tree
 	for i, ns := range sl {
 		orgpath := pl[i]
 		if mod != events.DropMove {
@@ -1550,19 +1549,19 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 		}
 		parent.InsertChild(ns, myidx+i)
 		_, nwb := core.AsWidget(ns)
-		ntv := AsTreeView(ns)
+		ntv := AsTree(ns)
 		ntv.RootView = tv.RootView
 		nwb.SetScene(tv.Scene)
 		nwb.Update() // incl children
 		npath := ns.AsTree().PathFrom(tv.RootView)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
-			ns.AsTree().SetName(ns.AsTree().Name + TreeViewTempMovedTag) // special keyword :)
+			ns.AsTree().SetName(ns.AsTree().Name + TreeTempMovedTag) // special keyword :)
 		}
 		if i == sz-1 {
 			selTv = ntv
 		}
 	}
-	tv.TreeViewChanged()
+	tv.TreeChanged()
 	parent.NeedsLayout()
 	if selTv != nil {
 		selTv.SelectAction(events.SelectOne)
@@ -1571,7 +1570,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 
 // PasteChildren inserts object(s) from mime data
 // at end of children of this node
-func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
+func (tv *Tree) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 	if tv.SyncNode != nil {
 		tv.PasteChildrenSync(md, mod)
 		return
@@ -1581,13 +1580,13 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 	for _, ns := range sl {
 		tv.AddChild(ns)
 		_, nwb := core.AsWidget(ns)
-		ntv := AsTreeView(ns)
+		ntv := AsTree(ns)
 		ntv.RootView = tv.RootView
 		nwb.SetScene(tv.Scene)
 	}
 	tv.Update()
 	tv.Open()
-	tv.TreeViewChanged()
+	tv.TreeChanged()
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1595,11 +1594,11 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 
 // DragStart starts a drag-n-drop on this node -- it includes any other
 // selected nodes as well, each as additional records in mimedata.
-func (tv *TreeView) DragStart(e events.Event) {
+func (tv *Tree) DragStart(e events.Event) {
 	sels := tv.SelectedViews()
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
-	tv.This.(TreeViewer).MimeData(&md) // source is always first..
+	tv.This.(Treer).MimeData(&md) // source is always first..
 	if nitms > 1 {
 		for _, sn := range sels {
 			if sn != tv.This {
@@ -1611,12 +1610,12 @@ func (tv *TreeView) DragStart(e events.Event) {
 }
 
 // DropExternal is not handled by base case but could be in derived
-func (tv *TreeView) DropExternal(md mimedata.Mimes, mod events.DropMods) {
+func (tv *Tree) DropExternal(md mimedata.Mimes, mod events.DropMods) {
 	// todo: not yet implemented
 }
 
 // DragClearStates clears the drag-drop related states for this widget
-func (tv *TreeView) DragClearStates() {
+func (tv *Tree) DragClearStates() {
 	tv.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
 	tv.Parts.SetState(false, states.Active, states.Selected, states.Hovered, states.DragHovered)
 	tv.Style()
@@ -1624,12 +1623,12 @@ func (tv *TreeView) DragClearStates() {
 }
 
 // DragDrop handles drag drop event
-func (tv *TreeView) DragDrop(e events.Event) {
+func (tv *Tree) DragDrop(e events.Event) {
 	// todo: some kind of validation for source
-	tvi := tv.This.(TreeViewer)
+	tvi := tv.This.(Treer)
 	tv.UnselectAll()
 	de := e.(*events.DragDrop)
-	stv := AsTreeView(de.Source.(core.Widget))
+	stv := AsTree(de.Source.(core.Widget))
 	if stv != nil {
 		stv.DragClearStates()
 	}
@@ -1646,14 +1645,14 @@ func (tv *TreeView) DragDrop(e events.Event) {
 
 // DropFinalize is called to finalize Drop actions on the Source node.
 // Only relevant for DropMod == DropMove.
-func (tv *TreeView) DropFinalize(de *events.DragDrop) {
+func (tv *Tree) DropFinalize(de *events.DragDrop) {
 	tv.UnselectAll()
 	tv.DragClearStates()
 	tv.Scene.Events.DropFinalize(de) // sends DropDeleteSource to Source
 }
 
 // DropDeleteSource handles delete source event for DropMove case
-func (tv *TreeView) DropDeleteSource(e events.Event) {
+func (tv *Tree) DropDeleteSource(e events.Event) {
 	de := e.(*events.DragDrop)
 	tv.UnselectAll()
 	if tv.SyncNode != nil {
@@ -1671,7 +1670,7 @@ func (tv *TreeView) DropDeleteSource(e events.Event) {
 		if sn != nil {
 			sn.AsTree().Delete()
 		}
-		sn = root.FindPath(path + TreeViewTempMovedTag)
+		sn = root.FindPath(path + TreeTempMovedTag)
 		if sn != nil {
 			psplt := strings.Split(path, "/")
 			orgnm := psplt[len(psplt)-1]

@@ -44,7 +44,7 @@ func (is *Inspector) Init() {
 	})
 	is.OnWidgetAdded(func(w core.Widget) {
 		// TODO(config)
-		if tw, ok := w.(*TreeView); ok {
+		if tw, ok := w.(*Tree); ok {
 			tw.Styler(func(s *styles.Style) {
 				s.Max.X.Em(20)
 			})
@@ -80,12 +80,12 @@ func (is *Inspector) Init() {
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Gap.Zero()
 			})
-			core.AddChildAt(w, "tree", func(w *TreeView) {
+			core.AddChildAt(w, "tree", func(w *Tree) {
 				w.OnSelect(func(e events.Event) {
 					if len(w.SelectedNodes) == 0 {
 						return
 					}
-					sn := w.SelectedNodes[0].AsTreeView().SyncNode
+					sn := w.SelectedNodes[0].AsCoreTree().SyncNode
 					is.CurrentNode = sn
 					// Note: doing Update on the entire inspector reverts all tree expansion,
 					// so we only want to update the title and form
@@ -213,20 +213,20 @@ func (is *Inspector) SelectionMonitor() {
 	if !ok || sw == nil {
 		return
 	}
-	tv := is.TreeView().FindSyncNode(sw)
+	tv := is.Tree().FindSyncNode(sw)
 	if tv == nil {
 		// if we can't be found, we are probably a part,
 		// so we keep going up until we find somebody in
 		// the tree
 		sw.AsTree().WalkUpParent(func(k tree.Node) bool {
-			tv = is.TreeView().FindSyncNode(k)
+			tv = is.Tree().FindSyncNode(k)
 			if tv != nil {
 				return tree.Break
 			}
 			return tree.Continue
 		})
 		if tv == nil {
-			core.MessageSnackbar(is, fmt.Sprintf("Inspector: tree view node missing: %v", sw))
+			core.MessageSnackbar(is, fmt.Sprintf("Inspector: tree node missing: %v", sw))
 			return
 		}
 	}
@@ -255,9 +255,9 @@ func (is *Inspector) InspectApp() { //types:add
 	d.RunFullDialog(is)
 }
 
-// TreeView returns the tree view widget.
-func (is *Inspector) TreeView() *TreeView {
-	return is.FindPath("splits/tree-frame/tree").(*TreeView)
+// Tree returns the tree widget.
+func (is *Inspector) Tree() *Tree {
+	return is.FindPath("splits/tree-frame/tree").(*Tree)
 }
 
 func (is *Inspector) MakeToolbar(p *core.Plan) {

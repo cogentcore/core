@@ -30,7 +30,7 @@ const (
 
 // Tree is the root of a tree representing files in a given directory
 // (and subdirectories thereof), and has some overall management state for how to
-// view things.  The Tree can be viewed by a TreeView to provide a GUI
+// view things.  The Tree can be viewed by a Tree to provide a GUI
 // interface into it.
 type Tree struct {
 	Node
@@ -42,7 +42,7 @@ type Tree struct {
 	// e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree
 	Dirs DirFlagMap `set:"-"`
 
-	// if true, then all directories are placed at the top of the tree view
+	// if true, then all directories are placed at the top of the tree
 	// otherwise everything is mixed
 	DirsOnTop bool
 
@@ -92,7 +92,7 @@ func (fv *Tree) Destroy() {
 		close(fv.DoneWatcher)
 		fv.DoneWatcher = nil
 	}
-	fv.TreeView.Destroy()
+	fv.Tree.Destroy()
 }
 
 // OpenPath opens the filetree at the given directory path. It reads all the files at
@@ -127,7 +127,7 @@ func (ft *Tree) UpdateAll() {
 	// the problem here is that closed dirs are not visited but we want to keep their settings:
 	// ft.Dirs.DeleteStale()
 	ft.Update()
-	ft.TreeViewChanged(nil)
+	ft.TreeChanged(nil)
 	ft.UpdateMu.Unlock()
 	// ft.AsyncUnlock(update) // todo:
 }

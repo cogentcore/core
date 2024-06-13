@@ -39,11 +39,11 @@ import (
 // file node buffers
 var NodeHiStyle = histyle.StyleDefault
 
-// Node represents a file in the file system, as a TreeView node.
+// Node represents a file in the file system, as a Tree node.
 // The name of the node is the name of the file.
 // Folders have children containing further nodes.
 type Node struct { //core:embedder
-	views.TreeView
+	views.Tree
 
 	// full path to this file
 	FPath core.Filename `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
@@ -66,8 +66,8 @@ type Node struct { //core:embedder
 }
 
 func (fn *Node) Init() {
-	fn.TreeView.Init()
-	fn.ContextMenus = nil // do not include treeview
+	fn.Tree.Init()
+	fn.ContextMenus = nil // do not include tree
 	fn.AddContextMenu(fn.ContextMenu)
 	fn.Styler(func(s *styles.Style) {
 		status := fn.Info.VCS
@@ -98,7 +98,7 @@ func (fn *Node) Init() {
 	})
 	fn.On(events.KeyChord, func(e events.Event) {
 		if core.DebugSettings.KeyEventTrace {
-			fmt.Printf("TreeView KeyInput: %v\n", fn.Path())
+			fmt.Printf("Tree KeyInput: %v\n", fn.Path())
 		}
 		kf := keymap.Of(e.KeyChord())
 		selMode := events.SelectModeBits(e.Modifiers())
@@ -312,7 +312,7 @@ func (fn *Node) SyncDir() {
 		root := fn.FRoot
 		fn.Update()
 		if root != nil {
-			root.TreeViewChanged(nil)
+			root.TreeChanged(nil)
 		}
 	}
 }
@@ -532,7 +532,7 @@ func (fn *Node) SortBy(modTime bool) {
 // OpenAll opens all directories under this one
 func (fn *Node) OpenAll() { //types:add
 	fn.FRoot.InOpenAll = true // causes chaining of opening
-	fn.TreeView.OpenAll()
+	fn.Tree.OpenAll()
 	fn.FRoot.InOpenAll = false
 }
 
