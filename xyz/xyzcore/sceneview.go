@@ -16,13 +16,13 @@ import (
 	"cogentcore.org/core/xyz"
 )
 
-// SceneView provides a toolbar controller for an [xyz.Scene],
-// and manipulation abilities.
-type SceneView struct {
+// SceneEditor provides a toolbar controller and manipulation abilities
+// for a [Scene].
+type SceneEditor struct {
 	core.Frame
 }
 
-func (sv *SceneView) Init() {
+func (sv *SceneEditor) Init() {
 	sv.Frame.Init()
 	sv.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
@@ -35,38 +35,17 @@ func (sv *SceneView) Init() {
 	})
 }
 
-// SceneWidget returns the core.Widget Scene (xyzv.Scene)
-func (sv *SceneView) SceneWidget() *Scene {
+// SceneWidget returns the [Scene] widget.
+func (sv *SceneEditor) SceneWidget() *Scene {
 	return sv.ChildByName("scene", 0).(*Scene)
 }
 
-// Scene returns the xyz.Scene
-func (sv *SceneView) SceneXYZ() *xyz.Scene {
+// SceneXYZ returns the [xyz.Scene].
+func (sv *SceneEditor) SceneXYZ() *xyz.Scene {
 	return sv.SceneWidget().XYZ
 }
 
-func (sv *SceneView) Toolbar() *core.Toolbar {
-	tbi := sv.ChildByName("tb", 1)
-	if tbi == nil {
-		return nil
-	}
-	return tbi.(*core.Toolbar)
-}
-
-func (sv *SceneView) UpdateToolbar() {
-	tb := sv.Toolbar()
-	if tb == nil {
-		return
-	}
-	sw := sv.SceneWidget()
-	smi := tb.ChildByName("selmode", 10)
-	if smi != nil {
-		sm := smi.(*core.Chooser)
-		sm.SetCurrentValue(sw.SelectionMode)
-	}
-}
-
-func (sv *SceneView) MakeToolbar(p *core.Plan) {
+func (sv *SceneEditor) MakeToolbar(p *core.Plan) {
 	sw := sv.SceneWidget()
 	sc := sv.SceneXYZ()
 	core.Add(p, func(w *core.Button) {
@@ -225,12 +204,8 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 	}
 	core.Add(p, func(w *core.Separator) {})
 
-	core.AddAt(p, "selmode", func(w *core.Chooser) {
-		w.SetEnum(sw.SelectionMode)
-		w.OnChange(func(e events.Event) {
-			sw.SelectionMode = w.CurrentItem.Value.(SelectionModes)
-		})
-		w.SetCurrentValue(sw.SelectionMode)
+	core.Add(p, func(w *core.Chooser) {
+		core.Bind(&sw.SelectionMode, w)
 	})
 
 	core.Add(p, func(w *core.Button) {

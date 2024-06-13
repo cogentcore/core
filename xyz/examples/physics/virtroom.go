@@ -90,7 +90,7 @@ type Env struct { //types:add
 	View2D *world2d.View
 
 	// 3D visualization of the Scene
-	SceneView *xyzcore.SceneView
+	SceneEditor *xyzcore.SceneEditor
 
 	// 2D visualization of the Scene
 	Scene2D *core.SVG
@@ -235,8 +235,8 @@ func (ev *Env) ViewDepth(depth []float32) {
 
 // UpdateViews updates the 2D and 3D views of the scene
 func (ev *Env) UpdateViews() {
-	if ev.SceneView.IsVisible() {
-		ev.SceneView.NeedsRender()
+	if ev.SceneEditor.IsVisible() {
+		ev.SceneEditor.NeedsRender()
 	}
 	if ev.Scene2D.IsVisible() {
 		ev.Scene2D.NeedsRender()
@@ -386,9 +386,9 @@ func (ev *Env) ConfigGUI() *core.Body {
 	//////////////////////////////////////////
 	//    3D Scene
 
-	ev.SceneView = xyzcore.NewSceneView(scfr)
-	ev.SceneView.UpdateWidget()
-	se := ev.SceneView.SceneXYZ()
+	ev.SceneEditor = xyzcore.NewSceneEditor(scfr)
+	ev.SceneEditor.UpdateWidget()
+	se := ev.SceneEditor.SceneXYZ()
 	ev.ConfigScene(se)
 	ev.ConfigView3D(se)
 

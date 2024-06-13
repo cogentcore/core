@@ -20,9 +20,9 @@ import (
 func main() {
 	b := core.NewBody("XYZ Object Viewer")
 
-	sv := xyzcore.NewSceneView(b)
-	sv.UpdateWidget()
-	sc := sv.SceneXYZ()
+	se := xyzcore.NewSceneEditor(b)
+	se.UpdateWidget()
+	sc := se.SceneXYZ()
 
 	// first, add lights, set camera
 	sc.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
@@ -60,7 +60,7 @@ func main() {
 						errors.Log1(sc.OpenNewObj(selFile, objgp))
 						sc.SetCamera("default")
 						sc.SetNeedsUpdate()
-						sv.NeedsRender()
+						se.NeedsRender()
 					})
 				})
 		})

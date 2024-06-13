@@ -48,19 +48,19 @@ func (t *Scene) SetCurrentManipPoint(v *ManipPoint) *Scene { t.CurrentManipPoint
 // parameters for selection / manipulation box
 func (t *Scene) SetSelectionParams(v SelectionParams) *Scene { t.SelectionParams = v; return t }
 
-// SceneViewType is the [types.Type] for [SceneView]
-var SceneViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzcore.SceneView", IDName: "scene-view", Doc: "SceneView provides a toolbar controller for an [xyz.Scene],\nand manipulation abilities.", Embeds: []types.Field{{Name: "Frame"}}, Instance: &SceneView{}})
+// SceneEditorType is the [types.Type] for [SceneEditor]
+var SceneEditorType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzcore.SceneEditor", IDName: "scene-editor", Doc: "SceneEditor provides a toolbar controller and manipulation abilities\nfor a [Scene].", Embeds: []types.Field{{Name: "Frame"}}, Instance: &SceneEditor{}})
 
-// NewSceneView returns a new [SceneView] with the given optional parent:
-// SceneView provides a toolbar controller for an [xyz.Scene],
-// and manipulation abilities.
-func NewSceneView(parent ...tree.Node) *SceneView { return tree.New[*SceneView](parent...) }
+// NewSceneEditor returns a new [SceneEditor] with the given optional parent:
+// SceneEditor provides a toolbar controller and manipulation abilities
+// for a [Scene].
+func NewSceneEditor(parent ...tree.Node) *SceneEditor { return tree.New[*SceneEditor](parent...) }
 
-// NodeType returns the [*types.Type] of [SceneView]
-func (t *SceneView) NodeType() *types.Type { return SceneViewType }
+// NodeType returns the [*types.Type] of [SceneEditor]
+func (t *SceneEditor) NodeType() *types.Type { return SceneEditorType }
 
-// New returns a new [*SceneView] value
-func (t *SceneView) New() tree.Node { return &SceneView{} }
+// New returns a new [*SceneEditor] value
+func (t *SceneEditor) New() tree.Node { return &SceneEditor{} }
 
 // MeshButtonType is the [types.Type] for [MeshButton]
 var MeshButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzcore.MeshButton", IDName: "mesh-button", Doc: "MeshButton represents an [xyz.MeshName] value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "MeshName"}}, Instance: &MeshButton{}})
