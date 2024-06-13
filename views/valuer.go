@@ -77,7 +77,7 @@ func init() {
 			}
 			isStruct := (reflectx.NonPointerType(elemType).Kind() == reflect.Struct)
 			if !forceNoInline && (forceInline || (!isStruct && sz <= core.SystemSettings.SliceInlineLength && !tree.IsNode(elemType))) {
-				return NewListInline()
+				return NewInlineList()
 			} else {
 				return NewSliceButton()
 			}

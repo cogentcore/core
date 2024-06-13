@@ -347,21 +347,21 @@ func (t *ListGrid) SetLastBackground(v image.Image) *ListGrid {
 	return t
 }
 
-// ListInlineType is the [types.Type] for [ListInline]
-var ListInlineType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ListInline", IDName: "list-inline", Doc: "ListInline represents a slice within a single line of value widgets.\nThis is typically used for smaller slices.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the slice that we are viewing."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}}, Instance: &ListInline{}})
+// InlineListType is the [types.Type] for [InlineList]
+var InlineListType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.InlineList", IDName: "inline-list", Doc: "InlineList represents a slice within a single line of value widgets.\nThis is typically used for smaller slices.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the slice that we are viewing."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}}, Instance: &InlineList{}})
 
-// NewListInline returns a new [ListInline] with the given optional parent:
-// ListInline represents a slice within a single line of value widgets.
+// NewInlineList returns a new [InlineList] with the given optional parent:
+// InlineList represents a slice within a single line of value widgets.
 // This is typically used for smaller slices.
-func NewListInline(parent ...tree.Node) *ListInline {
-	return tree.New[*ListInline](parent...)
+func NewInlineList(parent ...tree.Node) *InlineList {
+	return tree.New[*InlineList](parent...)
 }
 
-// NodeType returns the [*types.Type] of [ListInline]
-func (t *ListInline) NodeType() *types.Type { return ListInlineType }
+// NodeType returns the [*types.Type] of [InlineList]
+func (t *InlineList) NodeType() *types.Type { return InlineListType }
 
-// New returns a new [*ListInline] value
-func (t *ListInline) New() tree.Node { return &ListInline{} }
+// New returns a new [*InlineList] value
+func (t *InlineList) New() tree.Node { return &InlineList{} }
 
 // StructViewType is the [types.Type] for [StructView]
 var StructViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructView", IDName: "struct-view", Doc: "StructView represents a struct with rows of field names and editable values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the struct in one line."}, {Name: "structFields", Doc: "structFields are the fields of the current struct."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [core.ShouldShower], which results\nin additional updating being done at certain points."}}, Instance: &StructView{}})

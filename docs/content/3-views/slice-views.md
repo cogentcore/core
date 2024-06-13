@@ -11,7 +11,7 @@ views.NewList(parent).SetSlice(&[]int{1, 3, 5})
 You can make a list that fits in one line:
 
 ```Go
-views.NewListInline(parent).SetSlice(&[]int{1, 3, 5})
+views.NewInlineList(parent).SetSlice(&[]int{1, 3, 5})
 ```
 
 You can detect when the user changes the value of the slice:

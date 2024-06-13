@@ -10,8 +10,8 @@ import (
 	"cogentcore.org/core/core"
 )
 
-func TestListInline(t *testing.T) {
+func TestInlineList(t *testing.T) {
 	b := core.NewBody()
-	NewListInline(b).SetSlice(&[]int{1, 3, 5})
-	b.AssertRender(t, "list-inline/basic")
+	NewInlineList(b).SetSlice(&[]int{1, 3, 5})
+	b.AssertRender(t, "inline-list/basic")
 }

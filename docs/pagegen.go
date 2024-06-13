@@ -786,7 +786,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		views.NewList(parent).SetSlice(&[]int{1, 3, 5})
 	},
 	"views/lists-1": func(parent core.Widget) {
-		views.NewListInline(parent).SetSlice(&[]int{1, 3, 5})
+		views.NewInlineList(parent).SetSlice(&[]int{1, 3, 5})
 	},
 	"views/lists-2": func(parent core.Widget) {
 		sl := []int{1, 3, 5}
