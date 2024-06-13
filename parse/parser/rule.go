@@ -12,7 +12,6 @@ package parser
 import (
 	"fmt"
 	"io"
-	"reflect"
 	"strconv"
 	"strings"
 	"text/tabwriter"
@@ -132,30 +131,6 @@ type Rule struct {
 	tokenMatchGroup bool
 }
 
-// Parser is the interface type for parsers -- likely not necessary except is essential
-// for defining the BaseInterface for gui in making new nodes
-type Parser interface {
-	tree.Node
-
-	// Compile compiles string rules into their runnable elements
-	Compile(ps *State) bool
-
-	// Validate checks for any errors in the rules and issues warnings,
-	// returns true if valid (no err) and false if invalid (errs)
-	Validate(ps *State) bool
-
-	// Parse tries to apply rule to given input state, returns rule that matched or nil
-	// parent is the parent rule that we're being called from
-	// ast is the current ast node that we add to
-	Parse(ps *State, parent *Rule, ast *Ast, scope lexer.Reg, optMap lexer.TokenMap, depth int) *Rule
-
-	// AsParseRule returns object as a parser.Rule
-	AsParseRule() *Rule
-}
-
-// check that Rule implements Parser interface
-var _ Parser = (*Rule)(nil)
-
 // RuleEl is an element of a parsing rule -- either a pointer to another rule or a token
 type RuleEl struct {
 
@@ -224,14 +199,6 @@ func (mm Matches) StartEndExcl(ps *State) lexer.Reg {
 
 ///////////////////////////////////////////////////////////////////////
 //  Rule
-
-func (pr *Rule) BaseInterface() reflect.Type {
-	return reflect.TypeOf((*Parser)(nil)).Elem()
-}
-
-func (pr *Rule) AsParseRule() *Rule {
-	return pr.This.(*Rule)
-}
 
 // IsGroup returns true if this node is a group, else it should have rules
 func (pr *Rule) IsGroup() bool {
