@@ -62,7 +62,7 @@ func init() {
 		case reflect.Map:
 			len := uv.Len()
 			if !forceNoInline && (forceInline || len <= core.SystemSettings.MapInlineLength) {
-				return NewKeyValueTable().SetInline(true)
+				return NewKeyedList().SetInline(true)
 			} else {
 				return NewMapButton()
 			}

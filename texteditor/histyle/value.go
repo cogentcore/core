@@ -54,7 +54,7 @@ func View(st *Styles) {
 
 	d := core.NewBody("hi-styles").SetData(st)
 	d.AddTitle("Highlighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards.")
-	mv := views.NewKeyValueTable(d).SetMap(st)
+	mv := views.NewKeyedList(d).SetMap(st)
 	StylesChanged = false
 	mv.OnChange(func(e events.Event) {
 		StylesChanged = true

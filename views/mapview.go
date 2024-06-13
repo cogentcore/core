@@ -16,8 +16,8 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// KeyValueTable represents a map value using two columns of editable key and value widgets.
-type KeyValueTable struct {
+// KeyedList represents a map value using two columns of editable key and value widgets.
+type KeyedList struct {
 	core.Frame
 
 	// Map is the pointer to the map that we are viewing.
@@ -29,43 +29,43 @@ type KeyValueTable struct {
 	// SortValue is whether to sort by values instead of keys.
 	SortValues bool
 
-	// ncols is the number of columns to display if the key value table is not inline.
+	// ncols is the number of columns to display if the keyed list is not inline.
 	ncols int
 }
 
-func (kv *KeyValueTable) WidgetValue() any { return &kv.Map }
+func (kl *KeyedList) WidgetValue() any { return &kl.Map }
 
-func (kv *KeyValueTable) Init() {
-	kv.Frame.Init()
-	kv.Styler(func(s *styles.Style) {
-		if kv.Inline {
+func (kl *KeyedList) Init() {
+	kl.Frame.Init()
+	kl.Styler(func(s *styles.Style) {
+		if kl.Inline {
 			return
 		}
 		s.Display = styles.Grid
-		s.Columns = kv.ncols
+		s.Columns = kl.ncols
 		s.Overflow.Set(styles.OverflowAuto)
 		s.Grow.Set(1, 1)
 		s.Min.X.Em(20)
 		s.Min.Y.Em(10)
 	})
 
-	kv.Maker(func(p *core.Plan) {
-		if reflectx.AnyIsNil(kv.Map) {
+	kl.Maker(func(p *core.Plan) {
+		if reflectx.AnyIsNil(kl.Map) {
 			return
 		}
-		mapv := reflectx.Underlying(reflect.ValueOf(kv.Map))
+		mapv := reflectx.Underlying(reflect.ValueOf(kl.Map))
 
-		kv.ncols = 2
+		kl.ncols = 2
 		typeAny := false
 		valueType := mapv.Type().Elem()
 		if valueType.String() == "interface {}" {
-			kv.ncols = 3
+			kl.ncols = 3
 			typeAny = true
 		}
 
 		builtinTypes := types.BuiltinTypes()
 
-		keys := reflectx.MapSort(kv.Map, !kv.SortValues, true)
+		keys := reflectx.MapSort(kl.Map, !kl.SortValues, true)
 		for _, key := range keys {
 			keytxt := reflectx.ToString(key.Interface())
 			keynm := "key-" + keytxt
@@ -76,25 +76,25 @@ func (kv *KeyValueTable) Init() {
 			}, func(w core.Value) {
 				BindMapKey(mapv, key, w)
 				wb := w.AsWidget()
-				wb.SetReadOnly(kv.IsReadOnly())
+				wb.SetReadOnly(kl.IsReadOnly())
 				wb.Styler(func(s *styles.Style) {
-					s.SetReadOnly(kv.IsReadOnly())
+					s.SetReadOnly(kl.IsReadOnly())
 					s.SetTextWrap(false)
 				})
 				wb.OnChange(func(e events.Event) {
-					kv.SendChange(e)
-					kv.Update()
+					kl.SendChange(e)
+					kl.Update()
 				})
-				wb.SetReadOnly(kv.IsReadOnly())
-				wb.OnInput(kv.HandleEvent)
-				if !kv.IsReadOnly() {
+				wb.SetReadOnly(kl.IsReadOnly())
+				wb.OnInput(kl.HandleEvent)
+				if !kl.IsReadOnly() {
 					wb.AddContextMenu(func(m *core.Scene) {
-						kv.ContextMenu(m, key)
+						kl.ContextMenu(m, key)
 					})
 				}
 				wb.Updater(func() {
 					BindMapKey(mapv, key, w)
-					wb.SetReadOnly(kv.IsReadOnly())
+					wb.SetReadOnly(kl.IsReadOnly())
 				})
 			})
 			core.AddNew(p, valnm, func() core.Value {
@@ -103,21 +103,21 @@ func (kv *KeyValueTable) Init() {
 				return BindMapValue(mapv, key, w)
 			}, func(w core.Value) {
 				wb := w.AsWidget()
-				wb.SetReadOnly(kv.IsReadOnly())
-				wb.OnChange(func(e events.Event) { kv.SendChange(e) })
-				wb.OnInput(kv.HandleEvent)
+				wb.SetReadOnly(kl.IsReadOnly())
+				wb.OnChange(func(e events.Event) { kl.SendChange(e) })
+				wb.OnInput(kl.HandleEvent)
 				wb.Styler(func(s *styles.Style) {
-					s.SetReadOnly(kv.IsReadOnly())
+					s.SetReadOnly(kl.IsReadOnly())
 					s.SetTextWrap(false)
 				})
-				if !kv.IsReadOnly() {
+				if !kl.IsReadOnly() {
 					wb.AddContextMenu(func(m *core.Scene) {
-						kv.ContextMenu(m, key)
+						kl.ContextMenu(m, key)
 					})
 				}
 				wb.Updater(func() {
 					BindMapValue(mapv, key, w)
-					wb.SetReadOnly(kv.IsReadOnly())
+					wb.SetReadOnly(kl.IsReadOnly())
 				})
 			})
 
@@ -131,11 +131,11 @@ func (kv *KeyValueTable) Init() {
 						// try our best to convert the existing value to the new type
 						reflectx.SetRobust(newVal.Interface(), mapv.MapIndex(key).Interface())
 						mapv.SetMapIndex(key, newVal.Elem())
-						kv.DeleteChildByName(valnm) // force it to be updated
-						kv.Update()
+						kl.DeleteChildByName(valnm) // force it to be updated
+						kl.Update()
 					})
 					w.Updater(func() {
-						w.SetReadOnly(kv.IsReadOnly())
+						w.SetReadOnly(kl.IsReadOnly())
 						vtyp := types.TypeByValue(mapv.MapIndex(key).Interface())
 						if vtyp == nil {
 							vtyp = types.TypeByName("string") // default to string
@@ -145,13 +145,13 @@ func (kv *KeyValueTable) Init() {
 				})
 			}
 		}
-		if kv.Inline {
-			if !kv.IsReadOnly() {
+		if kl.Inline {
+			if !kl.IsReadOnly() {
 				core.AddAt(p, "add-button", func(w *core.Button) {
 					w.SetIcon(icons.Add).SetType(core.ButtonTonal)
 					w.Tooltip = "Add an element"
 					w.OnClick(func(e events.Event) {
-						kv.MapAdd()
+						kl.MapAdd()
 					})
 				})
 			}
@@ -159,75 +159,75 @@ func (kv *KeyValueTable) Init() {
 				w.SetIcon(icons.Edit).SetType(core.ButtonTonal)
 				w.Tooltip = "Edit in a dialog"
 				w.OnClick(func(e events.Event) {
-					d := core.NewBody().AddTitle(kv.ValueTitle).AddText(kv.Tooltip)
-					NewKeyValueTable(d).SetMap(kv.Map).SetValueTitle(kv.ValueTitle)
+					d := core.NewBody().AddTitle(kl.ValueTitle).AddText(kl.Tooltip)
+					NewKeyedList(d).SetMap(kl.Map).SetValueTitle(kl.ValueTitle)
 					d.OnClose(func(e events.Event) {
-						kv.Update()
-						kv.SendChange()
+						kl.Update()
+						kl.SendChange()
 					})
-					d.RunFullDialog(kv)
+					d.RunFullDialog(kl)
 				})
 			})
 		}
 	})
 }
 
-func (kv *KeyValueTable) ContextMenu(m *core.Scene, keyv reflect.Value) {
-	if kv.IsReadOnly() {
+func (kl *KeyedList) ContextMenu(m *core.Scene, keyv reflect.Value) {
+	if kl.IsReadOnly() {
 		return
 	}
 	core.NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
-		kv.MapAdd()
+		kl.MapAdd()
 	})
 	core.NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
-		kv.MapDelete(keyv)
+		kl.MapDelete(keyv)
 	})
 }
 
 // ToggleSort toggles sorting by values vs. keys
-func (kv *KeyValueTable) ToggleSort() {
-	kv.SortValues = !kv.SortValues
-	kv.Update()
+func (kl *KeyedList) ToggleSort() {
+	kl.SortValues = !kl.SortValues
+	kl.Update()
 }
 
 // MapAdd adds a new entry to the map
-func (kv *KeyValueTable) MapAdd() {
-	if reflectx.AnyIsNil(kv.Map) {
+func (kl *KeyedList) MapAdd() {
+	if reflectx.AnyIsNil(kl.Map) {
 		return
 	}
-	reflectx.MapAdd(kv.Map)
+	reflectx.MapAdd(kl.Map)
 
-	kv.SendChange()
-	kv.Update()
+	kl.SendChange()
+	kl.Update()
 }
 
 // MapDelete deletes a key-value from the map
-func (kv *KeyValueTable) MapDelete(key reflect.Value) {
-	if reflectx.AnyIsNil(kv.Map) {
+func (kl *KeyedList) MapDelete(key reflect.Value) {
+	if reflectx.AnyIsNil(kl.Map) {
 		return
 	}
-	reflectx.MapDelete(kv.Map, reflectx.NonPointerValue(key))
+	reflectx.MapDelete(kl.Map, reflectx.NonPointerValue(key))
 
-	kv.SendChange()
-	kv.Update()
+	kl.SendChange()
+	kl.Update()
 }
 
 // MakeToolbar configures a [core.Toolbar] for this view
-func (kv *KeyValueTable) MakeToolbar(p *core.Plan) {
-	if reflectx.AnyIsNil(kv.Map) {
+func (kl *KeyedList) MakeToolbar(p *core.Plan) {
+	if reflectx.AnyIsNil(kl.Map) {
 		return
 	}
 	core.Add(p, func(w *core.Button) {
 		w.SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys and the values").
 			OnClick(func(e events.Event) {
-				kv.ToggleSort()
+				kl.ToggleSort()
 			})
 	})
-	if !kv.IsReadOnly() {
+	if !kl.IsReadOnly() {
 		core.Add(p, func(w *core.Button) {
 			w.SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
 				OnClick(func(e events.Event) {
-					kv.MapAdd()
+					kl.MapAdd()
 				})
 		})
 	}

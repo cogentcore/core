@@ -232,30 +232,30 @@ func (t *KeyChordButton) New() tree.Node { return &KeyChordButton{} }
 // SetChord sets the [KeyChordButton.Chord]
 func (t *KeyChordButton) SetChord(v key.Chord) *KeyChordButton { t.Chord = v; return t }
 
-// KeyValueTableType is the [types.Type] for [KeyValueTable]
-var KeyValueTableType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.KeyValueTable", IDName: "key-value-table", Doc: "KeyValueTable represents a map using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the map in one line."}, {Name: "SortValues", Doc: "SortValue is whether to sort by values instead of keys."}, {Name: "ncols", Doc: "ncols is the number of columns to display if the key value table is not inline."}}, Instance: &KeyValueTable{}})
+// KeyedListType is the [types.Type] for [KeyedList]
+var KeyedListType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.KeyedList", IDName: "keyed-list", Doc: "KeyedList represents a map using two columns of editable key and value widgets.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Map", Doc: "Map is the pointer to the map that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the map in one line."}, {Name: "SortValues", Doc: "SortValue is whether to sort by values instead of keys."}, {Name: "ncols", Doc: "ncols is the number of columns to display if the keyed list is not inline."}}, Instance: &KeyedList{}})
 
-// NewKeyValueTable returns a new [KeyValueTable] with the given optional parent:
-// KeyValueTable represents a map using two columns of editable key and value widgets.
-func NewKeyValueTable(parent ...tree.Node) *KeyValueTable { return tree.New[*KeyValueTable](parent...) }
+// NewKeyedList returns a new [KeyedList] with the given optional parent:
+// KeyedList represents a map using two columns of editable key and value widgets.
+func NewKeyedList(parent ...tree.Node) *KeyedList { return tree.New[*KeyedList](parent...) }
 
-// NodeType returns the [*types.Type] of [KeyValueTable]
-func (t *KeyValueTable) NodeType() *types.Type { return KeyValueTableType }
+// NodeType returns the [*types.Type] of [KeyedList]
+func (t *KeyedList) NodeType() *types.Type { return KeyedListType }
 
-// New returns a new [*KeyValueTable] value
-func (t *KeyValueTable) New() tree.Node { return &KeyValueTable{} }
+// New returns a new [*KeyedList] value
+func (t *KeyedList) New() tree.Node { return &KeyedList{} }
 
-// SetMap sets the [KeyValueTable.Map]:
+// SetMap sets the [KeyedList.Map]:
 // Map is the pointer to the map that we are viewing.
-func (t *KeyValueTable) SetMap(v any) *KeyValueTable { t.Map = v; return t }
+func (t *KeyedList) SetMap(v any) *KeyedList { t.Map = v; return t }
 
-// SetInline sets the [KeyValueTable.Inline]:
+// SetInline sets the [KeyedList.Inline]:
 // Inline is whether to display the map in one line.
-func (t *KeyValueTable) SetInline(v bool) *KeyValueTable { t.Inline = v; return t }
+func (t *KeyedList) SetInline(v bool) *KeyedList { t.Inline = v; return t }
 
-// SetSortValues sets the [KeyValueTable.SortValues]:
+// SetSortValues sets the [KeyedList.SortValues]:
 // SortValue is whether to sort by values instead of keys.
-func (t *KeyValueTable) SetSortValues(v bool) *KeyValueTable { t.SortValues = v; return t }
+func (t *KeyedList) SetSortValues(v bool) *KeyedList { t.SortValues = v; return t }
 
 // ListType is the [types.Type] for [List]
 var ListType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.List", IDName: "list", Doc: "List represents a slice value with index and value widgets.\nUse [ListBase.BindSelect] to make the list designed for item selection.", Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "StyleFunc", Doc: "StyleFunc is an optional styling function."}}, Instance: &List{}})

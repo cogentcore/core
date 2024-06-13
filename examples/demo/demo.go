@@ -433,20 +433,20 @@ func makeViews(ts *core.Tabs) {
 
 	views.NewForm(vts.NewTab("Form")).SetStruct(&str)
 
-	mp := map[string]any{}
-
-	mp["Go"] = "Elegant, fast, and easy-to-use"
-	mp["Python"] = true
-	mp["C++"] = 4
-
-	views.NewKeyValueTable(vts.NewTab("Key value table")).SetMap(&mp)
-
 	sl := make([]string, 50)
 	for i := 0; i < len(sl); i++ {
 		sl[i] = fmt.Sprintf("el: %v", i)
 	}
-	sl[10] = "this is a particularly long slice value"
+	sl[10] = "this is a particularly long value"
 	views.NewList(vts.NewTab("List")).SetSlice(&sl)
+
+	mp := map[string]string{}
+
+	mp["Go"] = "Elegant, fast, and easy-to-use"
+	mp["Python"] = "Slow and duck-typed"
+	mp["C++"] = "Hard to use and slow to compile"
+
+	views.NewKeyedList(vts.NewTab("Keyed list")).SetMap(&mp)
 
 	tbl := make([]*tableStruct, 50)
 	for i := range tbl {
