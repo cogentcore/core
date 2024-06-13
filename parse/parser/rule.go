@@ -279,16 +279,16 @@ func (pr *Rule) Compile(ps *State) bool {
 	}
 	if pr.Rule == "" { // parent
 		pr.Rules = nil
-		pr.SetFlag(false, SetsScope)
+		pr.setsScope = false
 		return true
 	}
 	valid := true
 	rstr := pr.Rule
 	if pr.Rule[0] == '-' {
 		rstr = rstr[1:]
-		pr.SetFlag(true, Reverse)
+		pr.reverse = true
 	} else {
-		pr.SetFlag(false, Reverse)
+		pr.reverse = false
 	}
 	rs := strings.Split(rstr, " ")
 	nr := len(rs)
@@ -296,10 +296,10 @@ func (pr *Rule) Compile(ps *State) bool {
 	pr.Rules = make(RuleList, nr)
 	pr.ExclFwd = nil
 	pr.ExclRev = nil
-	pr.SetFlag(false, NoTokens)
-	pr.SetFlag(true, OnlyTokens) // default is this..
-	pr.SetFlag(false, SetsScope)
-	pr.SetFlag(false, TokenMatchGroup)
+	pr.noTokens = false
+	pr.onlyTokens = true // default is this..
+	pr.setsScope = false
+	pr.tokenMatchGroup = false
 	pr.Order = nil
 	nmatch := 0
 	ntok := 0
@@ -319,7 +319,7 @@ func (pr *Rule) Compile(ps *State) bool {
 			break
 		}
 		if rn[0] == ':' {
-			pr.SetFlag(true, TokenMatchGroup)
+			pr.tokenMatchGroup = true
 		}
 		rr := &pr.Rules[ri]
 		tokst := strings.Index(rn, "'")
@@ -360,7 +360,7 @@ func (pr *Rule) Compile(ps *State) bool {
 				eoses++
 				if ri == nr-1 {
 					rr.StInc = eoses
-					pr.SetFlag(true, SetsScope)
+					pr.setsScope = true
 				}
 			}
 		} else {
@@ -375,7 +375,7 @@ func (pr *Rule) Compile(ps *State) bool {
 			} else if rn[0] == '@' {
 				st = 1
 				rr.Match = true
-				pr.SetFlag(false, OnlyTokens)
+				pr.onlyTokens = false
 				pr.Order = append(pr.Order, ri)
 				nmatch++
 			} else {
@@ -390,13 +390,13 @@ func (pr *Rule) Compile(ps *State) bool {
 			}
 		}
 	}
-	if pr.Is(Reverse) {
+	if pr.reverse {
 		pr.Ast = AnchorAst // must be
 	}
 	if ntok == 0 && nmatch == 0 {
 		pr.Rules[0].Match = true
 		pr.Order = append(pr.Order, 0)
-		pr.SetFlag(true, NoTokens)
+		pr.noTokens = true
 	} else {
 		pr.OptimizeOrder(ps)
 	}
@@ -558,11 +558,11 @@ func (pr *Rule) Validate(ps *State) bool {
 		ps.Error(lexer.PosZero, "Validate: rule has no rules and no children", pr)
 		valid = false
 	}
-	if !pr.Is(TokenMatchGroup) && len(pr.Rules) > 0 && pr.HasChildren() {
+	if !pr.tokenMatchGroup && len(pr.Rules) > 0 && pr.HasChildren() {
 		ps.Error(lexer.PosZero, "Validate: rule has both rules and children -- should be either-or", pr)
 		valid = false
 	}
-	if pr.Is(Reverse) {
+	if pr.reverse {
 		if len(pr.Rules) != 3 {
 			ps.Error(lexer.PosZero, "Validate: a Reverse (-) rule must have 3 children -- for binary operator expressions only", pr)
 			valid = false
@@ -670,7 +670,7 @@ func (pr *Rule) Parse(ps *State, parent *Rule, parAst *Ast, scope lexer.Reg, opt
 	}
 
 	nr := len(pr.Rules)
-	if !pr.Is(TokenMatchGroup) && nr > 0 {
+	if !pr.tokenMatchGroup && nr > 0 {
 		return pr.ParseRules(ps, parent, parAst, scope, optMap, depth)
 	}
 
@@ -694,7 +694,7 @@ func (pr *Rule) Parse(ps *State, parent *Rule, parAst *Ast, scope lexer.Reg, opt
 // ParseRules parses rules and returns this rule if it matches, nil if not
 func (pr *Rule) ParseRules(ps *State, parent *Rule, parAst *Ast, scope lexer.Reg, optMap lexer.TokenMap, depth int) *Rule {
 	ok := false
-	if pr.Is(SetsScope) {
+	if pr.setsScope {
 		scope, ok = pr.Scope(ps, parAst, scope)
 		if !ok {
 			return nil
@@ -803,7 +803,7 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lexer.Reg, depth int, optMap
 	// defer prf.End()
 
 	nr := len(pr.Rules)
-	if pr.Is(TokenMatchGroup) || nr == 0 { // Group
+	if pr.tokenMatchGroup || nr == 0 { // Group
 		return pr.MatchGroup(ps, parAst, scope, depth, optMap)
 	}
 
@@ -817,9 +817,9 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lexer.Reg, depth int, optMap
 	var mpos Matches
 	match := false
 
-	if pr.Is(NoTokens) {
+	if pr.noTokens {
 		match, mpos = pr.MatchNoToks(ps, parAst, scope, depth, optMap)
-	} else if pr.Is(OnlyTokens) {
+	} else if pr.onlyTokens {
 		match, mpos = pr.MatchOnlyToks(ps, parAst, scope, depth, optMap)
 	} else {
 		match, mpos = pr.MatchMixed(ps, parAst, scope, depth, optMap)
@@ -941,7 +941,7 @@ func (pr *Rule) MatchToken(ps *State, rr *RuleEl, ri int, kt token.KeyToken, cre
 		tpos = creg.Ed
 	} else {
 		// prf := profile.Start("FindToken")
-		if pr.Is(Reverse) {
+		if pr.reverse {
 			tpos, ok = ps.FindTokenReverse(kt, *creg)
 		} else {
 			tpos, ok = ps.FindToken(kt, *creg)
@@ -1053,7 +1053,7 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lexer.Reg, depth int, o
 		// look through smpos for last valid position -- use that as last match pos
 		mreg := smpos.StartEnd()
 		lmnpos, ok := ps.Src.NextTokenPos(mreg.Ed)
-		if !ok && !(ri == nr-1 || (ri == nr-2 && pr.Is(SetsScope))) {
+		if !ok && !(ri == nr-1 || (ri == nr-2 && pr.setsScope)) {
 			// if at end, or ends in EOS, then ok..
 			if ps.Trace.On {
 				ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parAst, fmt.Sprintf("%v sub-rule: %v -- not at end and no tokens left", ri, rr.Rule.Name))
@@ -1271,7 +1271,7 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *Ast, scope lexer.Reg
 		}
 	}
 
-	if pr.Is(Reverse) {
+	if pr.reverse {
 		return pr.DoRulesRevBinExp(ps, parent, parentAst, scope, mpos, ourAst, optMap, depth)
 	}
 
@@ -1310,7 +1310,7 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *Ast, scope lexer.Reg
 		}
 		creg.St = ps.Pos
 		creg.Ed = scope.Ed
-		if !pr.Is(NoTokens) {
+		if !pr.noTokens {
 			for mi := ri + 1; mi < nr; mi++ {
 				if mpos[mi].St != lexer.PosZero {
 					creg.Ed = mpos[mi].St // only look up to point of next matching token
