@@ -99,7 +99,7 @@ type Scene struct { //core:no-new
 
 	// HasShown is whether this scene has been shown.
 	// This is used to ensure that [events.Show] is only sent once.
-	HasShown bool `copier:"-" json:"-" xml:"-" edit:"-" set:"-"`
+	HasShown bool `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// updating means the Scene is in the process of updating.
 	// It is set for any kind of tree-level update.
