@@ -42,38 +42,41 @@ import (
 // a separate RunOnMainThread call).
 func (sc *Scene) DoUpdate() bool {
 	switch {
-	case sc.needsUpdate:
+	case sc.NeedsUpdate:
 		sc.UpdateNodes()
 		sc.Render()
-		sc.needsUpdate = false
-		sc.needsRender = false
-	case sc.needsRender:
+		sc.NeedsUpdate = false
+		sc.NeedsRender = false
+	case sc.NeedsRender:
 		sc.Render()
-		sc.needsRender = false
+		sc.NeedsRender = false
 	default:
 		return false
 	}
 	return true
 }
 
-func (sc *Scene) NeedsRender() {
-	sc.needsRender = true
+// SetNeedsRender sets [Scene.NeedsRender] to true.
+func (sc *Scene) SetNeedsRender() {
+	sc.NeedsRender = true
 }
 
-func (sc *Scene) NeedsUpdate() {
-	sc.needsUpdate = true
+// SetNeedsUpdate sets [Scene.SetNeedsUpdate] to true.
+func (sc *Scene) SetNeedsUpdate() {
+	sc.NeedsUpdate = true
 }
 
-func (sc *Scene) NeedsConfig() {
-	sc.needsConfig = true
+// SetNeedsConfig sets [Scene.SetNeedsConfig] to true.
+func (sc *Scene) SetNeedsConfig() {
+	sc.NeedsConfig = true
 }
 
 // UpdateNodesIfNeeded can be called to update prior to an ad-hoc render
 // if the NeedsUpdate flag has been set (resets flag)
 func (sc *Scene) UpdateNodesIfNeeded() {
-	if sc.needsUpdate {
+	if sc.NeedsUpdate {
 		sc.UpdateNodes()
-		sc.needsUpdate = false
+		sc.NeedsUpdate = false
 	}
 }
 
@@ -295,8 +298,8 @@ func (sc *Scene) Config() {
 	UpdateWorldMatrix(sc.This)
 	sc.ConfigLights()
 	sc.ConfigMeshesTextures()
-	sc.needsConfig = false
-	sc.needsUpdate = true
+	sc.NeedsConfig = false
+	sc.NeedsUpdate = true
 }
 
 // ConfigMeshesTextures configures the meshes and the textures to the Phong
@@ -330,7 +333,7 @@ func (sc *Scene) TrackCamera() bool {
 		return false
 	}
 	tc.TrackCamera()
-	sc.NeedsUpdate() // need to update world model for nodes
+	sc.SetNeedsUpdate() // need to update world model for nodes
 	return true
 }
 

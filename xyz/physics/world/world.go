@@ -54,14 +54,14 @@ func (vw *View) Sync() bool {
 // Essential that both trees are already synchronized.
 func (vw *View) UpdatePose() {
 	vw.UpdatePoseNode(vw.World, vw.Root)
-	vw.Scene.NeedsUpdate()
+	vw.Scene.SetNeedsUpdate()
 }
 
 // UpdateBodyView updates the display properties of given body name
 // recurses the tree until this body name is found.
 func (vw *View) UpdateBodyView(bodyNames ...string) {
 	vw.UpdateBodyViewNode(bodyNames, vw.World, vw.Root)
-	vw.Scene.NeedsUpdate()
+	vw.Scene.SetNeedsUpdate()
 }
 
 // RenderOffNode does an offscreen render using given node
@@ -242,7 +242,7 @@ func (vw *View) SyncNode(wn physics.Node, vn xyz.Node, sc *xyz.Scene) bool {
 		}
 	}
 	if modall {
-		sc.NeedsUpdate()
+		sc.SetNeedsUpdate()
 	}
 	return modall
 }

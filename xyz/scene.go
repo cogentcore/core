@@ -45,18 +45,18 @@ type Scene struct {
 	// which is used directly as an RGB color in Vulkan.
 	BackgroundColor color.RGBA
 
-	// needsConfig means that a GPU resource (Lights, Texture, Meshes,
+	// NeedsConfig means that a GPU resource (Lights, Texture, Meshes,
 	// or more complex Nodes that require ConfigNodes) has been changed
 	// and a Config call is required.
-	needsConfig bool
+	NeedsConfig bool
 
-	// needsUpdate means that Node Pose has changed and an update pass
+	// NeedsUpdate means that Node Pose has changed and an update pass
 	// is required to update matrix and bounding boxes.
-	needsUpdate bool
+	NeedsUpdate bool
 
-	// needsRender means that something has been updated (minimally the
+	// NeedsRender means that something has been updated (minimally the
 	// Camera pose) and a new Render is required.
-	needsRender bool
+	NeedsRender bool
 
 	// Viewport-level viewbox within any parent Viewport2D
 	Geom math32.Geom2DInt `set:"-"`
@@ -123,7 +123,7 @@ func NewOffscreenScene() *Scene {
 // Update is a global update of everything: config, update, and re-render
 func (sc *Scene) Update() {
 	sc.Config()
-	sc.NeedsUpdate()
+	sc.SetNeedsUpdate()
 }
 
 // SaveCamera saves the current camera with given name -- can be restored later with SetCamera.
