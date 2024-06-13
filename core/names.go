@@ -14,9 +14,9 @@ package core
 type FontName string
 
 // Filename is used to specify an filename (including path).
-// Automatically opens the FileView dialog using Value system.
+// Automatically opens the FilePicker dialog using Value system.
 // Use this for any method args that are filenames to trigger
-// use of FileViewDialog under FuncButton automatic method calling.
+// use of FilePickerDialog under FuncButton automatic method calling.
 type Filename string
 
 // HiStyleName is a highlighting style name

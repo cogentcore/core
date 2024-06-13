@@ -10,8 +10,8 @@ import (
 	"cogentcore.org/core/core"
 )
 
-func TestFileView(t *testing.T) {
+func TestFilePicker(t *testing.T) {
 	b := core.NewBody()
-	NewFileView(b)
+	NewFilePicker(b)
 	b.AssertRender(t, "file-view/basic")
 }

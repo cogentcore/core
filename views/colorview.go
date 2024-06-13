@@ -16,41 +16,40 @@ import (
 	"cogentcore.org/core/styles"
 )
 
-/////////////////////////////////////////////////////////////////////////////
-//  ColorView
-
-// ColorView shows a color, using sliders or numbers to set values.
-type ColorView struct {
+// ColorPicker shows a color, using sliders or numbers to set values.
+type ColorPicker struct {
 	core.Frame
 
 	// the color that we view
 	Color hct.HCT `set:"-"`
 }
 
-// SetColor sets the source color
-func (cv *ColorView) SetColor(clr color.Color) *ColorView {
-	return cv.SetHCT(hct.FromColor(clr))
+func (cp *ColorPicker) WidgetValue() any { return &cp.Color }
+
+// SetColor sets the source color.
+func (cp *ColorPicker) SetColor(clr color.Color) *ColorPicker {
+	return cp.SetHCT(hct.FromColor(clr))
 }
 
 // SetHCT sets the source color in terms of HCT
-func (cv *ColorView) SetHCT(hct hct.HCT) *ColorView {
-	cv.Color = hct
-	cv.Update()
-	cv.SendChange()
-	return cv
+func (cp *ColorPicker) SetHCT(hct hct.HCT) *ColorPicker {
+	cp.Color = hct
+	cp.Update()
+	cp.SendChange()
+	return cp
 }
 
-func (cv *ColorView) Init() {
-	cv.Frame.Init()
-	cv.Styler(func(s *styles.Style) {
+func (cp *ColorPicker) Init() {
+	cp.Frame.Init()
+	cp.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 	})
-	cv.Maker(func(p *core.Plan) {
-		if cv.HasChildren() { // TODO(config)
+	cp.Maker(func(p *core.Plan) {
+		if cp.HasChildren() { // TODO(config)
 			return
 		}
 
-		cv.Styler(func(s *styles.Style) {
+		cp.Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
 		})
 
@@ -61,54 +60,54 @@ func (cv *ColorView) Init() {
 			s.Grow.Set(1, 0)
 		}
 
-		hue := core.NewSlider(cv).SetMin(0).SetMax(360).SetValue(cv.Color.Hue)
+		hue := core.NewSlider(cp).SetMin(0).SetMax(360).SetValue(cp.Color.Hue)
 		hue.SetTooltip("The hue, which is the spectral identity of the color (red, green, blue, etc) in degrees")
 		hue.OnInput(func(e events.Event) {
-			cv.Color.SetHue(hue.Value)
-			cv.SetHCT(cv.Color)
+			cp.Color.SetHue(hue.Value)
+			cp.SetHCT(cp.Color)
 		})
 		hue.Styler(func(s *styles.Style) {
 			hue.ValueColor = nil
-			hue.ThumbColor = colors.C(cv.Color)
+			hue.ThumbColor = colors.C(cp.Color)
 			g := gradient.NewLinear()
 			for h := float32(0); h <= 360; h += 5 {
-				gc := cv.Color.WithHue(h)
+				gc := cp.Color.WithHue(h)
 				g.AddStop(gc.AsRGBA(), h/360)
 			}
 			s.Background = g
 		})
 		hue.FinalStyler(sf)
 
-		chroma := core.NewSlider(cv).SetMin(0).SetMax(150).SetValue(cv.Color.Chroma)
+		chroma := core.NewSlider(cp).SetMin(0).SetMax(150).SetValue(cp.Color.Chroma)
 		chroma.SetTooltip("The chroma, which is the colorfulness/saturation of the color")
 		chroma.OnInput(func(e events.Event) {
-			cv.Color.SetChroma(chroma.Value)
-			cv.SetHCT(cv.Color)
+			cp.Color.SetChroma(chroma.Value)
+			cp.SetHCT(cp.Color)
 		})
 		chroma.Styler(func(s *styles.Style) {
 			chroma.ValueColor = nil
-			chroma.ThumbColor = colors.C(cv.Color)
+			chroma.ThumbColor = colors.C(cp.Color)
 			g := gradient.NewLinear()
 			for c := float32(0); c <= 150; c += 5 {
-				gc := cv.Color.WithChroma(c)
+				gc := cp.Color.WithChroma(c)
 				g.AddStop(gc.AsRGBA(), c/150)
 			}
 			s.Background = g
 		})
 		chroma.FinalStyler(sf)
 
-		tone := core.NewSlider(cv).SetMin(0).SetMax(100).SetValue(cv.Color.Tone)
+		tone := core.NewSlider(cp).SetMin(0).SetMax(100).SetValue(cp.Color.Tone)
 		tone.SetTooltip("The tone, which is the lightness of the color")
 		tone.OnInput(func(e events.Event) {
-			cv.Color.SetTone(tone.Value)
-			cv.SetHCT(cv.Color)
+			cp.Color.SetTone(tone.Value)
+			cp.SetHCT(cp.Color)
 		})
 		tone.Styler(func(s *styles.Style) {
 			tone.ValueColor = nil
-			tone.ThumbColor = colors.C(cv.Color)
+			tone.ThumbColor = colors.C(cp.Color)
 			g := gradient.NewLinear()
 			for c := float32(0); c <= 100; c += 5 {
-				gc := cv.Color.WithTone(c)
+				gc := cp.Color.WithTone(c)
 				g.AddStop(gc.AsRGBA(), c/100)
 			}
 			s.Background = g
@@ -118,7 +117,7 @@ func (cv *ColorView) Init() {
 }
 
 /*
-func (cv *ColorView) Init() {
+func (cv *ColorPicker) Init() {
 	cv.OnWidgetAdded(func(w core.Widget) {
 		switch w.PathFrom(cv) {
 		case "value":
@@ -167,7 +166,7 @@ func (cv *ColorView) Init() {
 }
 
 // SetColor sets the source color
-func (cv *ColorView) SetColor(clr color.Color) *ColorView {
+func (cv *ColorPicker) SetColor(clr color.Color) *ColorPicker {
 	update := cv.UpdateStart()
 	cv.Color = colors.AsRGBA(clr)
 	cv.ColorHSLA = hsl.FromColor(clr)
@@ -178,7 +177,7 @@ func (cv *ColorView) SetColor(clr color.Color) *ColorView {
 }
 
 // Config configures a standard setup of entire view
-func (cv *ColorView) Config(sc *core.Scene) {
+func (cv *ColorPicker) Config(sc *core.Scene) {
 	if cv.HasChildren() {
 		return
 	}
@@ -312,23 +311,23 @@ func (cv *ColorView) Config(sc *core.Scene) {
 	cv.UpdateEnd(update)
 }
 
-func (cv *ColorView) NumLay() *core.Frame {
+func (cv *ColorPicker) NumLay() *core.Frame {
 	return cv.ChildByName("num-lay", 1).(*core.Frame)
 }
 
-func (cv *ColorView) SliderLay() *core.Frame {
+func (cv *ColorPicker) SliderLay() *core.Frame {
 	return cv.ChildByName("slider-lay", 0).(*core.Frame)
 }
 
-func (cv *ColorView) Value() *core.Frame {
+func (cv *ColorPicker) Value() *core.Frame {
 	return cv.SliderLay().ChildByName("value", 0).(*core.Frame)
 }
 
-func (cv *ColorView) SliderGrid() *core.Frame {
+func (cv *ColorPicker) SliderGrid() *core.Frame {
 	return cv.SliderLay().ChildByName("slider-grid", 0).(*core.Frame)
 }
 
-func (cv *ColorView) SetRGBValue(val float32, rgb int) {
+func (cv *ColorPicker) SetRGBValue(val float32, rgb int) {
 	if val > 0 && colors.IsNil(cv.Color) { // starting out with dummy color
 		cv.Color.A = 255
 	}
@@ -344,7 +343,7 @@ func (cv *ColorView) SetRGBValue(val float32, rgb int) {
 	}
 }
 
-func (cv *ColorView) ConfigRGBSlider(sl *core.Slider, rgb int) {
+func (cv *ColorPicker) ConfigRGBSlider(sl *core.Slider, rgb int) {
 	sl.Max = 255
 	sl.Step = 1
 	sl.PageStep = 16
@@ -359,7 +358,7 @@ func (cv *ColorView) ConfigRGBSlider(sl *core.Slider, rgb int) {
 	})
 }
 
-func (cv *ColorView) UpdateRGBSlider(sl *core.Slider, rgb int) {
+func (cv *ColorPicker) UpdateRGBSlider(sl *core.Slider, rgb int) {
 	switch rgb {
 	case 0:
 		sl.SetValue(float32(cv.Color.R))
@@ -372,7 +371,7 @@ func (cv *ColorView) UpdateRGBSlider(sl *core.Slider, rgb int) {
 	}
 }
 
-func (cv *ColorView) SetHSLValue(val float32, hsln int) {
+func (cv *ColorPicker) SetHSLValue(val float32, hsln int) {
 	switch hsln {
 	case 0:
 		cv.ColorHSLA.H = val
@@ -383,7 +382,7 @@ func (cv *ColorView) SetHSLValue(val float32, hsln int) {
 	}
 }
 
-func (cv *ColorView) ConfigHSLSlider(sl *core.Slider, hsl int) {
+func (cv *ColorPicker) ConfigHSLSlider(sl *core.Slider, hsl int) {
 	sl.Max = 360
 	sl.Step = 1
 	sl.PageStep = 15
@@ -397,7 +396,7 @@ func (cv *ColorView) ConfigHSLSlider(sl *core.Slider, hsl int) {
 	})
 }
 
-func (cv *ColorView) UpdateHSLSlider(sl *core.Slider, hsl int) {
+func (cv *ColorPicker) UpdateHSLSlider(sl *core.Slider, hsl int) {
 	switch hsl {
 	case 0:
 		sl.SetValue(cv.ColorHSLA.H)
@@ -408,7 +407,7 @@ func (cv *ColorView) UpdateHSLSlider(sl *core.Slider, hsl int) {
 	}
 }
 
-func (cv *ColorView) UpdateSliderGrid() {
+func (cv *ColorPicker) UpdateSliderGrid() {
 	sg := cv.SliderGrid()
 	update := sg.UpdateStart()
 	cv.UpdateRGBSlider(sg.ChildByName("red", 0).(*core.Slider), 0)
@@ -421,7 +420,7 @@ func (cv *ColorView) UpdateSliderGrid() {
 	sg.UpdateEndRender(update)
 }
 
-func (cv *ColorView) ConfigPalette() {
+func (cv *ColorPicker) ConfigPalette() {
 	pg := core.NewFrame(cv, "palette").SetDisplay(styles.Grid)
 
 	// STYTOOD: use hct sorted names here (see https://github.com/cogentcore/core/issues/619)
@@ -437,7 +436,7 @@ func (cv *ColorView) ConfigPalette() {
 	}
 }
 
-func (cv *ColorView) Update() {
+func (cv *ColorPicker) Update() {
 	update := cv.UpdateStart()
 	cv.UpdateImpl()
 	cv.UpdateEndRender(update)
@@ -445,7 +444,7 @@ func (cv *ColorView) Update() {
 
 // UpdateImpl does the raw updates based on current value,
 // without UpdateStart / End wrapper
-func (cv *ColorView) UpdateImpl() {
+func (cv *ColorPicker) UpdateImpl() {
 	cv.UpdateSliderGrid()
 	cv.UpdateNums()
 	cv.UpdateValueFrame()
@@ -456,13 +455,13 @@ func (cv *ColorView) UpdateImpl() {
 
 // UpdateValueFrame updates the value frame of the color view
 // that displays the color.
-func (cv *ColorView) UpdateValueFrame() {
+func (cv *ColorPicker) UpdateValueFrame() {
 	cv.SliderLay().ChildByName("value", 0).(*core.Frame).Styles.BackgroundColor.Solid = cv.Color // direct copy
 }
 
 // UpdateNums updates the values of the number inputs
 // in the color view to reflect the latest values
-func (cv *ColorView) UpdateNums() {
+func (cv *ColorPicker) UpdateNums() {
 	cv.NumLay().ChildByName("nums-rgba-lay", 0).ChildByName("nums-rgba", 0).(*StructViewInline).UpdateFields()
 	cv.NumLay().ChildByName("nums-hsla-lay", 1).ChildByName("nums-hsla", 0).(*StructViewInline).UpdateFields()
 	hs := colors.AsHex(cv.Color)
@@ -474,7 +473,7 @@ func (cv *ColorView) UpdateNums() {
 	cv.NumLay().ChildByName("nums-hex-lay", 2).ChildByName("nums-hex", 1).(*core.TextField).SetText(hs)
 }
 
-// func (cv *ColorView) Render(sc *core.Scene) {
+// func (cv *ColorPicker) Render(sc *core.Scene) {
 // 	if cv.PushBounds(sc) {
 // 		cv.RenderFrame(sc)
 // 		cv.RenderChildren(sc)
@@ -504,9 +503,9 @@ func (cb *ColorButton) Init() {
 	})
 	core.InitValueButton(cb, false, func(d *core.Body) {
 		d.SetTitle("Edit color")
-		cv := NewColorView(d).SetColor(cb.Color)
-		cv.OnChange(func(e events.Event) {
-			cb.Color = cv.Color.AsRGBA()
+		cp := NewColorPicker(d).SetColor(cb.Color)
+		cp.OnChange(func(e events.Event) {
+			cb.Color = cp.Color.AsRGBA()
 		})
 	})
 }

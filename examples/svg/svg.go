@@ -40,8 +40,8 @@ func OpenSVG(fnm string) {
 	TheSVG.UpdateEnd(update)
 }
 
-func FileViewOpenSVG(ctx core.Widget) {
-	views.FileViewDialog(ctx, views.DlgOpts{Title: "Open SVG"}, CurFilename, func(dlg *core.Dialog) {
+func FilePickerOpenSVG(ctx core.Widget) {
+	views.FilePickerDialog(ctx, views.DlgOpts{Title: "Open SVG"}, CurFilename, func(dlg *core.Dialog) {
 		if dlg.Accepted {
 			OpenSVG(dlg.Data.(string))
 		})
@@ -80,7 +80,7 @@ func main() {
 	svge.SetStretchMaxHeight()
 
 	loads := tbar.AddButton(core.ActOpts{Label: "Open SVG", Icon: icons.Open}, func(act *core.Button) {
-		FileViewOpenSVG(act)
+		FilePickerOpenSVG(act)
 	})
 	loads.StartFocus()
 
@@ -183,7 +183,7 @@ func main() {
 	fmen := win.MainMenu.ChildByName("File", 0).(*core.Button)
 	fmen.Menu = make(core.MenuStage, 0, 10)
 	fmen.Menu.AddButton(core.ActOpts{Label: "Open", Shortcut: "Command+O"}, func(act *core.Button) {
-		FileViewOpenSVG(act)
+		FilePickerOpenSVG(act)
 	})
 	fmen.Menu.AddSeparator("csep")
 	fmen.Menu.AddButton(core.ActOpts{Label: "Close RenderWin", Shortcut: "Command+W"},

@@ -493,7 +493,7 @@ type SystemSettingsData struct { //types:add
 	// the limit of file size, above which user will be prompted before opening / copying, etc.
 	BigFileSize int `default:"10000000"`
 
-	// maximum number of saved paths to save in FileView
+	// maximum number of saved paths to save in FilePicker
 	SavedPathsMax int `default:"50"`
 
 	// extra font paths, beyond system defaults -- searched first
@@ -502,11 +502,11 @@ type SystemSettingsData struct { //types:add
 	// user info, which is partially filled-out automatically if empty when settings are first created
 	User User
 
-	// favorite paths, shown in FileViewer and also editable there
+	// favorite paths, shown in FilePickerer and also editable there
 	FavPaths FavPaths
 
-	// column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView
-	FileViewSort string `view:"-"`
+	// column to sort by in FilePicker, and :up or :down for direction -- updated automatically via FilePicker
+	FilePickerSort string `view:"-"`
 
 	// the maximum height of any menu popup panel in units of font height;
 	// scroll bars are enforced beyond that size.

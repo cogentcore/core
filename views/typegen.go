@@ -38,18 +38,18 @@ func (t *ColorMapButton) New() tree.Node { return &ColorMapButton{} }
 // SetMapName sets the [ColorMapButton.MapName]
 func (t *ColorMapButton) SetMapName(v string) *ColorMapButton { t.MapName = v; return t }
 
-// ColorViewType is the [types.Type] for [ColorView]
-var ColorViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ColorView", IDName: "color-view", Doc: "ColorView shows a color, using sliders or numbers to set values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Color", Doc: "the color that we view"}}, Instance: &ColorView{}})
+// ColorPickerType is the [types.Type] for [ColorPicker]
+var ColorPickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ColorPicker", IDName: "color-view", Doc: "ColorPicker shows a color, using sliders or numbers to set values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Color", Doc: "the color that we view"}}, Instance: &ColorPicker{}})
 
-// NewColorView returns a new [ColorView] with the given optional parent:
-// ColorView shows a color, using sliders or numbers to set values.
-func NewColorView(parent ...tree.Node) *ColorView { return tree.New[*ColorView](parent...) }
+// NewColorPicker returns a new [ColorPicker] with the given optional parent:
+// ColorPicker shows a color, using sliders or numbers to set values.
+func NewColorPicker(parent ...tree.Node) *ColorPicker { return tree.New[*ColorPicker](parent...) }
 
-// NodeType returns the [*types.Type] of [ColorView]
-func (t *ColorView) NodeType() *types.Type { return ColorViewType }
+// NodeType returns the [*types.Type] of [ColorPicker]
+func (t *ColorPicker) NodeType() *types.Type { return ColorPickerType }
 
-// New returns a new [*ColorView] value
-func (t *ColorView) New() tree.Node { return &ColorView{} }
+// New returns a new [*ColorPicker] value
+func (t *ColorPicker) New() tree.Node { return &ColorPicker{} }
 
 // ColorButtonType is the [types.Type] for [ColorButton]
 var ColorButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ColorButton", IDName: "color-button", Doc: "ColorButton represents a color value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Color"}}, Instance: &ColorButton{}})
@@ -67,37 +67,37 @@ func (t *ColorButton) New() tree.Node { return &ColorButton{} }
 // SetColor sets the [ColorButton.Color]
 func (t *ColorButton) SetColor(v color.RGBA) *ColorButton { t.Color = v; return t }
 
-// FileViewType is the [types.Type] for [FileView]
-var FileViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FileView", IDName: "file-view", Doc: "FileView is a viewer onto files -- core of the file chooser dialog", Methods: []types.Method{{Name: "UpdateFilesAction", Doc: "UpdateFilesAction updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddPathToFavorites", Doc: "AddPathToFavorites adds the current path to favorites", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DirPathUp", Doc: "DirPathUp moves up one directory in the path", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "NewFolder", Doc: "NewFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "DirPath", Doc: "path to directory of files to display"}, {Name: "CurrentSelectedFile", Doc: "currently selected file"}, {Name: "Ext", Doc: "target extension(s) (comma separated if multiple, including initial .), if any"}, {Name: "FilterFunc", Doc: "optional styling function"}, {Name: "ExtMap", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"}, {Name: "Files", Doc: "files for current directory"}, {Name: "SelectedIndex", Doc: "index of currently selected file in Files list (-1 if none)"}, {Name: "Watcher", Doc: "change notify for current dir"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "UpdateMu", Doc: "UpdateFiles mutex"}, {Name: "PrevPath", Doc: "Previous path that was processed via UpdateFiles"}}, Instance: &FileView{}})
+// FilePickerType is the [types.Type] for [FilePicker]
+var FilePickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FilePicker", IDName: "file-view", Doc: "FilePicker is a viewer onto files -- core of the file chooser dialog", Methods: []types.Method{{Name: "UpdateFilesAction", Doc: "UpdateFilesAction updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddPathToFavorites", Doc: "AddPathToFavorites adds the current path to favorites", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DirPathUp", Doc: "DirPathUp moves up one directory in the path", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "NewFolder", Doc: "NewFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "DirPath", Doc: "path to directory of files to display"}, {Name: "CurrentSelectedFile", Doc: "currently selected file"}, {Name: "Ext", Doc: "target extension(s) (comma separated if multiple, including initial .), if any"}, {Name: "FilterFunc", Doc: "optional styling function"}, {Name: "ExtMap", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"}, {Name: "Files", Doc: "files for current directory"}, {Name: "SelectedIndex", Doc: "index of currently selected file in Files list (-1 if none)"}, {Name: "Watcher", Doc: "change notify for current dir"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "UpdateMu", Doc: "UpdateFiles mutex"}, {Name: "PrevPath", Doc: "Previous path that was processed via UpdateFiles"}}, Instance: &FilePicker{}})
 
-// NewFileView returns a new [FileView] with the given optional parent:
-// FileView is a viewer onto files -- core of the file chooser dialog
-func NewFileView(parent ...tree.Node) *FileView { return tree.New[*FileView](parent...) }
+// NewFilePicker returns a new [FilePicker] with the given optional parent:
+// FilePicker is a viewer onto files -- core of the file chooser dialog
+func NewFilePicker(parent ...tree.Node) *FilePicker { return tree.New[*FilePicker](parent...) }
 
-// NodeType returns the [*types.Type] of [FileView]
-func (t *FileView) NodeType() *types.Type { return FileViewType }
+// NodeType returns the [*types.Type] of [FilePicker]
+func (t *FilePicker) NodeType() *types.Type { return FilePickerType }
 
-// New returns a new [*FileView] value
-func (t *FileView) New() tree.Node { return &FileView{} }
+// New returns a new [*FilePicker] value
+func (t *FilePicker) New() tree.Node { return &FilePicker{} }
 
-// SetFilterFunc sets the [FileView.FilterFunc]:
+// SetFilterFunc sets the [FilePicker.FilterFunc]:
 // optional styling function
-func (t *FileView) SetFilterFunc(v FileViewFilterFunc) *FileView { t.FilterFunc = v; return t }
+func (t *FilePicker) SetFilterFunc(v FilePickerFilterFunc) *FilePicker { t.FilterFunc = v; return t }
 
-// SetExtMap sets the [FileView.ExtMap]:
+// SetExtMap sets the [FilePicker.ExtMap]:
 // map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value
-func (t *FileView) SetExtMap(v map[string]string) *FileView { t.ExtMap = v; return t }
+func (t *FilePicker) SetExtMap(v map[string]string) *FilePicker { t.ExtMap = v; return t }
 
-// SetFiles sets the [FileView.Files]:
+// SetFiles sets the [FilePicker.Files]:
 // files for current directory
-func (t *FileView) SetFiles(v ...*fileinfo.FileInfo) *FileView { t.Files = v; return t }
+func (t *FilePicker) SetFiles(v ...*fileinfo.FileInfo) *FilePicker { t.Files = v; return t }
 
 // FileButtonType is the [types.Type] for [FileButton]
-var FileButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FileButton", IDName: "file-button", Doc: "FileButton represents a filename value with a button\nthat opens a [FileView].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Filename"}}, Instance: &FileButton{}})
+var FileButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FileButton", IDName: "file-button", Doc: "FileButton represents a filename value with a button\nthat opens a [FilePicker].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Filename"}}, Instance: &FileButton{}})
 
 // NewFileButton returns a new [FileButton] with the given optional parent:
 // FileButton represents a filename value with a button
-// that opens a [FileView].
+// that opens a [FilePicker].
 func NewFileButton(parent ...tree.Node) *FileButton { return tree.New[*FileButton](parent...) }
 
 // NodeType returns the [*types.Type] of [FileButton]

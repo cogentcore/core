@@ -11,8 +11,8 @@ import (
 	"cogentcore.org/core/core"
 )
 
-func TestColorView(t *testing.T) {
+func TestColorPicker(t *testing.T) {
 	b := core.NewBody()
-	NewColorView(b).SetColor(colors.Orange)
+	NewColorPicker(b).SetColor(colors.Orange)
 	b.AssertRender(t, "color-view/basic")
 }
