@@ -23,7 +23,7 @@ type Data struct {
 }
 
 func main() {
-	b := core.NewBody("Plot View")
+	b := core.NewBody("Plot Example")
 
 	if true {
 		epc := table.NewTable("epc")
