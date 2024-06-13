@@ -69,7 +69,7 @@ func (is *Inspector) Init() {
 		if !ok {
 			return
 		}
-		sc.RenderContext().SetFlag(true, core.RenderRebuild) // trigger full rebuild
+		sc.RenderContext().Rebuild = true // trigger full rebuild
 	}
 	core.AddChildAt(is, "splits", func(w *core.Splits) {
 		w.SetSplits(.3, .7)
