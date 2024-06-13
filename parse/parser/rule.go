@@ -130,14 +130,6 @@ const (
 	// optimized
 	OnlyTokens
 
-	// MatchEOS means that the rule ends with a *matched* EOS with StInc = 1.
-	// SetsScope applies for optional and matching EOS rules alike.
-	MatchEOS
-
-	// MultiEOS means that the rule has multiple EOS tokens within it --
-	// changes some of the logic
-	MultiEOS
-
 	// TokenMatchGroup is a group node that also has a single token match, so it can
 	// be used in a FirstTokenMap to optimize lookup of rules
 	TokenMatchGroup
@@ -310,8 +302,6 @@ func (pr *Rule) Compile(ps *State) bool {
 	pr.SetFlag(false, NoTokens)
 	pr.SetFlag(true, OnlyTokens) // default is this..
 	pr.SetFlag(false, SetsScope)
-	pr.SetFlag(false, MatchEOS)
-	pr.SetFlag(false, MultiEOS)
 	pr.SetFlag(false, TokenMatchGroup)
 	pr.Order = nil
 	nmatch := 0
@@ -371,15 +361,9 @@ func (pr *Rule) Compile(ps *State) bool {
 			}
 			if rr.Token.Token == token.EOS {
 				eoses++
-				if eoses > 1 {
-					pr.SetFlag(true, MultiEOS)
-				}
 				if ri == nr-1 {
 					rr.StInc = eoses
 					pr.SetFlag(true, SetsScope)
-					if rr.Match && eoses == 1 {
-						pr.SetFlag(true, MatchEOS)
-					}
 				}
 			}
 		} else {
