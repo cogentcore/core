@@ -4,7 +4,6 @@ package parser
 
 import (
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/tree"
 )
 
 var _ActionsValues = []Actions{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
@@ -88,75 +87,6 @@ func (i AstActs) MarshalText() ([]byte, error) { return []byte(i.String()), nil 
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *AstActs) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "AstActs") }
-
-var _RuleFlagsValues = []RuleFlags{1, 2, 3, 4, 5, 6, 7}
-
-// RuleFlagsN is the highest valid value for type RuleFlags, plus one.
-const RuleFlagsN RuleFlags = 8
-
-var _RuleFlagsValueMap = map[string]RuleFlags{`SetsScope`: 1, `Reverse`: 2, `NoTokens`: 3, `OnlyTokens`: 4, `MatchEOS`: 5, `MultiEOS`: 6, `TokenMatchGroup`: 7}
-
-var _RuleFlagsDescMap = map[RuleFlags]string{1: `SetsScope means that this rule sets its own scope, because it ends with EOS`, 2: `Reverse means that this rule runs in reverse (starts with - sign) -- for arithmetic binary expressions only: this is needed to produce proper associativity result for mathematical expressions in the recursive descent parser. Only for rules of form: Expr &#39;+&#39; Expr -- two sub-rules with a token operator in the middle.`, 3: `NoTokens means that this rule doesn&#39;t have any explicit tokens -- only refers to other rules`, 4: `OnlyTokens means that this rule only has explicit tokens for matching -- can be optimized`, 5: `MatchEOS means that the rule ends with a *matched* EOS with StInc = 1. SetsScope applies for optional and matching EOS rules alike.`, 6: `MultiEOS means that the rule has multiple EOS tokens within it -- changes some of the logic`, 7: `TokenMatchGroup is a group node that also has a single token match, so it can be used in a FirstTokenMap to optimize lookup of rules`}
-
-var _RuleFlagsMap = map[RuleFlags]string{1: `SetsScope`, 2: `Reverse`, 3: `NoTokens`, 4: `OnlyTokens`, 5: `MatchEOS`, 6: `MultiEOS`, 7: `TokenMatchGroup`}
-
-// String returns the string representation of this RuleFlags value.
-func (i RuleFlags) String() string {
-	return enums.BitFlagStringExtended(i, _RuleFlagsValues, tree.FlagsValues())
-}
-
-// BitIndexString returns the string representation of this RuleFlags value
-// if it is a bit index value (typically an enum constant), and
-// not an actual bit flag value.
-func (i RuleFlags) BitIndexString() string {
-	return enums.BitIndexStringExtended[RuleFlags, tree.Flags](i, _RuleFlagsMap)
-}
-
-// SetString sets the RuleFlags value from its string representation,
-// and returns an error if the string is invalid.
-func (i *RuleFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
-
-// SetStringOr sets the RuleFlags value from its string representation
-// while preserving any bit flags already set, and returns an
-// error if the string is invalid.
-func (i *RuleFlags) SetStringOr(s string) error {
-	return enums.SetStringOrExtended(i, (*tree.Flags)(i), s, _RuleFlagsValueMap)
-}
-
-// Int64 returns the RuleFlags value as an int64.
-func (i RuleFlags) Int64() int64 { return int64(i) }
-
-// SetInt64 sets the RuleFlags value from an int64.
-func (i *RuleFlags) SetInt64(in int64) { *i = RuleFlags(in) }
-
-// Desc returns the description of the RuleFlags value.
-func (i RuleFlags) Desc() string {
-	return enums.DescExtended[RuleFlags, tree.Flags](i, _RuleFlagsDescMap)
-}
-
-// RuleFlagsValues returns all possible values for the type RuleFlags.
-func RuleFlagsValues() []RuleFlags {
-	return enums.ValuesGlobalExtended(_RuleFlagsValues, tree.FlagsValues())
-}
-
-// Values returns all possible values for the type RuleFlags.
-func (i RuleFlags) Values() []enums.Enum {
-	return enums.ValuesExtended(_RuleFlagsValues, tree.FlagsValues())
-}
-
-// HasFlag returns whether these bit flags have the given bit flag set.
-func (i RuleFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
-
-// SetFlag sets the value of the given flags in these flags to the given value.
-func (i *RuleFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i RuleFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *RuleFlags) UnmarshalText(text []byte) error {
-	return enums.UnmarshalText(i, text, "RuleFlags")
-}
 
 var _StepsValues = []Steps{0, 1, 2, 3, 4}
 

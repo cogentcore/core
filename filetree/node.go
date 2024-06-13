@@ -22,7 +22,6 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/icons"
@@ -66,25 +65,6 @@ type Node struct { //core:embedder
 	RepoFiles vcs.Files `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 }
 
-func (fn *Node) FlagType() enums.BitFlagSetter {
-	return (*NodeFlags)(&fn.Flags)
-}
-
-// NodeFlags define bitflags for Node state -- these extend TreeViewFlags
-// and storage is an int64
-type NodeFlags views.TreeViewFlags //enums:bitflag -trim-prefix Node
-
-const (
-	// NodeOpen means file is open. For directories, this means that
-	// sub-files should be / have been loaded. For files, means that they
-	// have been opened e.g., for editing.
-	NodeOpen NodeFlags = NodeFlags(views.TreeViewFlagsN) + iota
-
-	// NodeSymLink indicates that file is a symbolic link.
-	// File info is all for the target of the symlink.
-	NodeSymLink
-)
-
 func (fn *Node) Init() {
 	fn.TreeView.Init()
 	fn.ContextMenus = nil // do not include treeview
@@ -124,7 +104,7 @@ func (fn *Node) Init() {
 		selMode := events.SelectModeBits(e.Modifiers())
 
 		if selMode == events.SelectOne {
-			if fn.SelectMode() {
+			if fn.SelectMode {
 				selMode = events.ExtendContinuous
 			}
 		}
@@ -235,11 +215,6 @@ func (fn *Node) HasClosedParent() bool {
 	return hasClosed
 }
 
-// IsSymLink returns true if file is a symlink
-func (fn *Node) IsSymLink() bool {
-	return fn.Is(NodeSymLink)
-}
-
 // IsExec returns true if file is an executable file
 func (fn *Node) IsExec() bool {
 	return fn.Info.IsExec()
@@ -247,17 +222,17 @@ func (fn *Node) IsExec() bool {
 
 // IsOpen returns true if file is flagged as open
 func (fn *Node) IsOpen() bool {
-	return !fn.IsClosed()
+	return !fn.Closed
 }
 
 // IsChanged returns true if the file is open and has been changed (edited) since last EditDone
 func (fn *Node) IsChanged() bool {
-	return fn.Buffer != nil && fn.Buffer.IsChanged()
+	return fn.Buffer != nil && fn.Buffer.Changed
 }
 
 // IsNotSaved returns true if the file is open and has been changed (edited) since last Save
 func (fn *Node) IsNotSaved() bool {
-	return fn.Buffer != nil && fn.Buffer.IsNotSaved()
+	return fn.Buffer != nil && fn.Buffer.NotSaved
 }
 
 // IsAutoSave returns true if file is an auto-save file (starts and ends with #)

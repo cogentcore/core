@@ -14,7 +14,6 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/cursors"
-	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
@@ -135,8 +134,9 @@ type Editor struct { //core:embedder
 	// Scopelights is a slice of regions representing the highlighted regions specific to scope markers.
 	Scopelights []textbuf.Region `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// SelectMode is a boolean indicating whether to select text as the cursor moves.
-	SelectMode bool `set:"-" edit:"-" json:"-" xml:"-"`
+	// LinkHandler handles link clicks.
+	// If it is nil, they are sent to the standard web URL handler.
+	LinkHandler func(tl *paint.TextLink)
 
 	// ISearch is the interactive search data.
 	ISearch ISearch `set:"-" edit:"-" json:"-" xml:"-"`
@@ -144,52 +144,70 @@ type Editor struct { //core:embedder
 	// QReplace is the query replace data.
 	QReplace QReplace `set:"-" edit:"-" json:"-" xml:"-"`
 
-	// FontHeight is the font height, cached during styling.
-	FontHeight float32 `set:"-" edit:"-" json:"-" xml:"-"`
+	// selectMode is a boolean indicating whether to select text as the cursor moves.
+	selectMode bool
 
-	// LineHeight is the line height, cached during styling.
-	LineHeight float32 `set:"-" edit:"-" json:"-" xml:"-"`
+	// fontHeight is the font height, cached during styling.
+	fontHeight float32
 
-	// FontAscent is the font ascent, cached during styling.
-	FontAscent float32 `set:"-" edit:"-" json:"-" xml:"-"`
+	// lineHeight is the line height, cached during styling.
+	lineHeight float32
 
-	// FontDescent is the font descent, cached during styling.
-	FontDescent float32 `set:"-" edit:"-" json:"-" xml:"-"`
+	// fontAscent is the font ascent, cached during styling.
+	fontAscent float32
 
-	// NLinesChars is the height in lines and width in chars of the visible area.
-	NLinesChars image.Point `set:"-" edit:"-" json:"-" xml:"-"`
+	// fontDescent is the font descent, cached during styling.
+	fontDescent float32
 
-	// LinesSize is the total size of all lines as rendered.
-	LinesSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
+	// nLinesChars is the height in lines and width in chars of the visible area.
+	nLinesChars image.Point
 
-	// TotalSize is the LinesSize plus extra space and line numbers etc.
-	TotalSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
+	// linesSize is the total size of all lines as rendered.
+	linesSize math32.Vector2
 
-	// LineLayoutSize is the Geom.Size.Actual.Total subtracting extra space and line numbers.
+	// totalSize is the LinesSize plus extra space and line numbers etc.
+	totalSize math32.Vector2
+
+	// lineLayoutSize is the Geom.Size.Actual.Total subtracting extra space and line numbers.
 	// This is what LayoutStdLR sees for laying out each line.
-	LineLayoutSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
+	lineLayoutSize math32.Vector2
 
 	// lastlineLayoutSize is the last LineLayoutSize used in laying out lines.
 	// It is used to trigger a new layout only when needed.
-	lastlineLayoutSize math32.Vector2 `set:"-" edit:"-" json:"-" xml:"-"`
+	lastlineLayoutSize math32.Vector2
 
-	// BlinkOn oscillates between on and off for blinking.
-	BlinkOn bool `set:"-" edit:"-" json:"-" xml:"-"`
+	// blinkOn oscillates between on and off for blinking.
+	blinkOn bool
 
-	// CursorMu is a mutex protecting cursor rendering, shared between blink and main code.
-	CursorMu sync.Mutex `set:"-" json:"-" xml:"-" view:"-"`
+	// cursorMu is a mutex protecting cursor rendering, shared between blink and main code.
+	cursorMu sync.Mutex
 
-	// HasLinks is a boolean indicating if at least one of the renders has links.
+	// hasLinks is a boolean indicating if at least one of the renders has links.
 	// It determines if we set the cursor for hand movements.
-	HasLinks bool `set:"-" edit:"-" json:"-" xml:"-"`
+	hasLinks bool
 
-	// LinkHandler handles link clicks.
-	// If it is nil, they are sent to the standard web URL handler.
-	LinkHandler func(tl *paint.TextLink)
+	// hasLineNumbers indicates that this editor has line numbers
+	// (per [Buffer] option)
+	hasLineNumbers bool // TODO: is this really necessary?
 
-	lastRecenter   int           `set:"-"`
-	lastAutoInsert rune          `set:"-"`
-	lastFilename   core.Filename `set:"-"`
+	// needsLayout is set by NeedsLayout: Editor does significant
+	// internal layout in LayoutAllLines, and its layout is simply based
+	// on what it gets allocated, so it does not affect the rest
+	// of the Scene.
+	needsLayout bool
+
+	// lastWasTabAI indicates that last key was a Tab auto-indent
+	lastWasTabAI bool
+
+	// lastWasUndo indicates that last key was an undo
+	lastWasUndo bool
+
+	// targetSet indicates that the CursorTarget is set
+	targetSet bool
+
+	lastRecenter   int
+	lastAutoInsert rune
+	lastFilename   core.Filename
 }
 
 // NewSoloEditor returns a new [Editor] with an associated [Buffer].
@@ -197,10 +215,6 @@ type Editor struct { //core:embedder
 // is there is one editor per buffer.
 func NewSoloEditor(parent ...tree.Node) *Editor {
 	return NewEditor(parent...).SetBuffer(NewBuffer())
-}
-
-func (ed *Editor) FlagType() enums.BitFlagSetter {
-	return (*EditorFlags)(&ed.Flags)
 }
 
 func (ed *Editor) WidgetValue() any { return &ed.Buffer.Txt }
@@ -256,30 +270,6 @@ func (ed *Editor) Init() {
 	ed.Updater(ed.NeedsLayout)
 }
 
-// EditorFlags extend WidgetFlags to hold [Editor] state
-type EditorFlags core.WidgetFlags //enums:bitflag -trim-prefix View
-
-const (
-	// EditorHasLineNumbers indicates that this editor has line numbers
-	// (per [Buffer] option)
-	EditorHasLineNumbers EditorFlags = EditorFlags(core.WidgetFlagsN) + iota
-
-	// EditorNeedsLayout is set by NeedsLayout: Editor does significant
-	// internal layout in LayoutAllLines, and its layout is simply based
-	// on what it gets allocated, so it does not affect the rest
-	// of the Scene.
-	EditorNeedsLayout
-
-	// EditorLastWasTabAI indicates that last key was a Tab auto-indent
-	EditorLastWasTabAI
-
-	// EditorLastWasUndo indicates that last key was an undo
-	EditorLastWasUndo
-
-	// EditorTargetSet indicates that the CursorTarget is set
-	EditorTargetSet
-)
-
 func (ed *Editor) Destroy() {
 	ed.StopCursor()
 	ed.Frame.Destroy()
@@ -295,7 +285,7 @@ func (ed *Editor) EditDone() {
 	ed.ClearCursor()
 }
 
-// Remarkup triggers a complete re-markup of the entire text --
+// ReMarkup triggers a complete re-markup of the entire text --
 // can do this when needed if the markup gets off due to multi-line
 // formatting issues -- via Recenter key
 func (ed *Editor) ReMarkup() {
@@ -307,18 +297,12 @@ func (ed *Editor) ReMarkup() {
 
 // IsChanged returns true if buffer was changed (edited) since last EditDone
 func (ed *Editor) IsChanged() bool {
-	return ed.Buffer != nil && ed.Buffer.IsChanged()
+	return ed.Buffer != nil && ed.Buffer.Changed
 }
 
 // IsNotSaved returns true if buffer was changed (edited) since last Save
 func (ed *Editor) IsNotSaved() bool {
-	return ed.Buffer != nil && ed.Buffer.IsNotSaved()
-}
-
-// HasLineNumbers returns true if view is showing line numbers
-// (per [Buffer] option, cached here).
-func (ed *Editor) HasLineNumbers() bool {
-	return ed.Is(EditorHasLineNumbers)
+	return ed.Buffer != nil && ed.Buffer.NotSaved
 }
 
 // Clear resets all the text in the buffer for this view

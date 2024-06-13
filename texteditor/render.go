@@ -25,7 +25,7 @@ import (
 
 func (ed *Editor) NeedsLayout() {
 	ed.NeedsRender()
-	ed.SetFlag(true, EditorNeedsLayout)
+	ed.needsLayout = true
 }
 
 func (ed *Editor) RenderLayout() {
@@ -39,11 +39,11 @@ func (ed *Editor) RenderLayout() {
 
 func (ed *Editor) RenderWidget() {
 	if ed.PushBounds() {
-		if ed.Is(EditorNeedsLayout) {
+		if ed.needsLayout {
 			ed.RenderLayout()
-			ed.SetFlag(false, EditorNeedsLayout)
+			ed.needsLayout = false
 		}
-		if ed.Is(EditorTargetSet) {
+		if ed.targetSet {
 			ed.ScrollCursorToTarget()
 		}
 		ed.PositionScrolls()
@@ -132,12 +132,12 @@ func (ed *Editor) CharEndPos(pos lexer.Pos) math32.Vector2 {
 	spos := ed.RenderStartPos()
 	pos.Ln = min(pos.Ln, ed.NLines-1)
 	if pos.Ln < 0 {
-		spos.Y += float32(ed.LinesSize.Y)
+		spos.Y += float32(ed.linesSize.Y)
 		spos.X += ed.LineNumberOffset
 		return spos
 	}
 	if pos.Ln >= len(ed.Offsets) {
-		spos.Y += float32(ed.LinesSize.Y)
+		spos.Y += float32(ed.linesSize.Y)
 		spos.X += ed.LineNumberOffset
 		return spos
 	}
@@ -150,7 +150,7 @@ func (ed *Editor) CharEndPos(pos lexer.Pos) math32.Vector2 {
 		spos.X += rrp.X
 		spos.Y += rrp.Y - r.Spans[0].RelPos.Y // relative
 	}
-	spos.Y += ed.LineHeight // end of that line
+	spos.Y += ed.lineHeight // end of that line
 	return spos
 }
 
@@ -161,7 +161,7 @@ func (ed *Editor) LineBBox(ln int) math32.Box2 {
 	bb.Min = ed.RenderStartPos()
 	bb.Min.X += ed.LineNumberOffset
 	bb.Max = bb.Min
-	bb.Max.Y += ed.LineHeight
+	bb.Max.Y += ed.lineHeight
 	bb.Max.X = float32(tbb.Max.X)
 	if ln >= len(ed.Offsets) {
 		if len(ed.Offsets) > 0 {
@@ -214,7 +214,7 @@ func (ed *Editor) RenderDepthBackground(stln, edln int) {
 	lstdp := 0
 	for ln := stln; ln <= edln; ln++ {
 		lst := ed.CharStartPos(lexer.Pos{Ln: ln}).Y // note: charstart pos includes descent
-		led := lst + math32.Max(ed.Renders[ln].BBox.Size().Y, ed.LineHeight)
+		led := lst + math32.Max(ed.Renders[ln].BBox.Size().Y, ed.lineHeight)
 		if int(math32.Ceil(led)) < bb.Min.Y {
 			continue
 		}
@@ -298,7 +298,7 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bg i
 	end := reg.End
 	spos := ed.CharStartPosVis(st)
 	epos := ed.CharStartPosVis(end)
-	epos.Y += ed.LineHeight
+	epos.Y += ed.lineHeight
 	bb := ed.RenderBBox()
 	stx := math32.Ceil(float32(bb.Min.X) + ed.LineNumberOffset)
 	if int(math32.Ceil(epos.Y)) < bb.Min.Y || int(math32.Floor(spos.Y)) > bb.Max.Y {
@@ -318,19 +318,19 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bg i
 	}
 	// on diff lines: fill to end of stln
 	seb := spos
-	seb.Y += ed.LineHeight
+	seb.Y += ed.lineHeight
 	seb.X = ex
 	pc.FillBox(spos, seb.Sub(spos), bg)
 	sfb := seb
 	sfb.X = stx
 	if sfb.Y < epos.Y { // has some full box
 		efb := epos
-		efb.Y -= ed.LineHeight
+		efb.Y -= ed.lineHeight
 		efb.X = ex
 		pc.FillBox(sfb, efb.Sub(sfb), bg)
 	}
 	sed := epos
-	sed.Y -= ed.LineHeight
+	sed.Y -= ed.lineHeight
 	sed.X = stx
 	pc.FillBox(sed, epos.Sub(sed), bg)
 }
@@ -339,7 +339,7 @@ func (ed *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bg i
 func (ed *Editor) RenderRegionToEnd(st lexer.Pos, sty *styles.Style, bg image.Image) {
 	spos := ed.CharStartPosVis(st)
 	epos := spos
-	epos.Y += ed.LineHeight
+	epos.Y += ed.lineHeight
 	vsz := epos.Sub(spos)
 	if vsz.X <= 0 || vsz.Y <= 0 {
 		return
@@ -362,7 +362,7 @@ func (ed *Editor) RenderAllLines() {
 			break
 		}
 		lst := pos.Y + ed.Offsets[ln]
-		led := lst + math32.Max(ed.Renders[ln].BBox.Size().Y, ed.LineHeight)
+		led := lst + math32.Max(ed.Renders[ln].BBox.Size().Y, ed.lineHeight)
 		if int(math32.Ceil(led)) < bb.Min.Y {
 			continue
 		}
@@ -380,7 +380,7 @@ func (ed *Editor) RenderAllLines() {
 	}
 	pc.PushBounds(bb)
 
-	if ed.HasLineNumbers() {
+	if ed.hasLineNumbers {
 		ed.RenderLineNumbersBoxAll()
 		for ln := stln; ln <= edln; ln++ {
 			ed.RenderLineNumber(ln, false) // don't re-render std fill boxes
@@ -391,7 +391,7 @@ func (ed *Editor) RenderAllLines() {
 	ed.RenderHighlights(stln, edln)
 	ed.RenderScopelights(stln, edln)
 	ed.RenderSelect()
-	if ed.HasLineNumbers() {
+	if ed.hasLineNumbers {
 		tbb := bb
 		tbb.Min.X += int(ed.LineNumberOffset)
 		pc.PushBounds(tbb)
@@ -401,12 +401,12 @@ func (ed *Editor) RenderAllLines() {
 		lp := pos
 		lp.Y = lst
 		lp.X += ed.LineNumberOffset
-		if lp.Y+ed.FontAscent > float32(bb.Max.Y) {
+		if lp.Y+ed.fontAscent > float32(bb.Max.Y) {
 			break
 		}
 		ed.Renders[ln].Render(pc, lp) // not top pos; already has baseline offset
 	}
-	if ed.HasLineNumbers() {
+	if ed.hasLineNumbers {
 		pc.PopBounds()
 	}
 	pc.PopBounds()
@@ -414,7 +414,7 @@ func (ed *Editor) RenderAllLines() {
 
 // RenderLineNumbersBoxAll renders the background for the line numbers in the LineNumberColor
 func (ed *Editor) RenderLineNumbersBoxAll() {
-	if !ed.HasLineNumbers() {
+	if !ed.hasLineNumbers {
 		return
 	}
 	pc := &ed.Scene.PaintContext
@@ -433,13 +433,13 @@ func (ed *Editor) RenderLineNumbersBoxAll() {
 // if defFill is true, it fills box color for default background color (use false for
 // batch mode).
 func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
-	if !ed.HasLineNumbers() || ed.Buffer == nil {
+	if !ed.hasLineNumbers || ed.Buffer == nil {
 		return
 	}
 	bb := ed.RenderBBox()
 	tpos := math32.Vector2{
 		X: float32(bb.Min.X), // + spc.Pos().X
-		Y: ed.CharEndPos(lexer.Pos{Ln: ln}).Y - ed.FontDescent,
+		Y: ed.CharEndPos(lexer.Pos{Ln: ln}).Y - ed.fontDescent,
 	}
 	if tpos.Y > float32(bb.Max.Y) {
 		return
@@ -474,7 +474,7 @@ func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
 		end := ed.CharEndPos(lexer.Pos{Ln: ln + 1})
 
 		if ln < ed.NLines-1 {
-			end.Y -= ed.LineHeight
+			end.Y -= ed.lineHeight
 		}
 		if end.Y >= float32(bb.Max.Y) {
 			return
@@ -503,7 +503,7 @@ func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
 func (ed *Editor) FirstVisibleLine(stln int) int {
 	bb := ed.RenderBBox()
 	if stln == 0 {
-		perln := float32(ed.LinesSize.Y) / float32(ed.NLines)
+		perln := float32(ed.linesSize.Y) / float32(ed.NLines)
 		stln = int(ed.Geom.Scroll.Y/perln) - 1
 		if stln < 0 {
 			stln = 0
@@ -566,7 +566,7 @@ func (ed *Editor) PixelToCursor(pt image.Point) lexer.Pos {
 		for ln := stln; ln < ed.NLines; ln++ {
 			ls := ed.CharStartPos(lexer.Pos{Ln: ln}).Y - yoff
 			es := ls
-			es += math32.Max(ed.Renders[ln].BBox.Size().Y, ed.LineHeight)
+			es += math32.Max(ed.Renders[ln].BBox.Size().Y, ed.lineHeight)
 			if pt.Y >= int(math32.Floor(ls)) && pt.Y < int(math32.Ceil(es)) {
 				got = true
 				cln = ln

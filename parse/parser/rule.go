@@ -12,7 +12,6 @@ package parser
 import (
 	"fmt"
 	"io"
-	"reflect"
 	"strconv"
 	"strings"
 	"text/tabwriter"
@@ -25,10 +24,10 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Set GuiActive to true if the gui (piview) is active -- ensures that the
+// Set GUIActive to true if the gui (parseview) is active -- ensures that the
 // Ast tree is updated when nodes are swapped in reverse mode, and maybe
 // other things
-var GuiActive = false
+var GUIActive = false
 
 // DepthLimit is the infinite recursion prevention cutoff
 var DepthLimit = 10000
@@ -106,66 +105,31 @@ type Rule struct {
 
 	// exclusionary reverse-search rule elements compiled from Rule string
 	ExclRev RuleList `edit:"-" json:"-" xml:"-" set:"-"`
-}
 
-// RuleFlags define bitflags for rule options compiled from rule syntax
-type RuleFlags tree.Flags //enums:bitflag
+	// Bool flags:
 
-const (
-	// SetsScope means that this rule sets its own scope, because it ends with EOS
-	SetsScope RuleFlags = RuleFlags(tree.FlagsN) + iota
+	// setsScope means that this rule sets its own scope, because it ends with EOS
+	setsScope bool
 
-	// Reverse means that this rule runs in reverse (starts with - sign) -- for arithmetic
+	// reverse means that this rule runs in reverse (starts with - sign) -- for arithmetic
 	// binary expressions only: this is needed to produce proper associativity result for
 	// mathematical expressions in the recursive descent parser.
 	// Only for rules of form: Expr '+' Expr -- two sub-rules with a token operator
 	// in the middle.
-	Reverse
+	reverse bool
 
-	// NoTokens means that this rule doesn't have any explicit tokens -- only refers to
+	// noTokens means that this rule doesn't have any explicit tokens -- only refers to
 	// other rules
-	NoTokens
+	noTokens bool
 
-	// OnlyTokens means that this rule only has explicit tokens for matching -- can be
+	// onlyTokens means that this rule only has explicit tokens for matching -- can be
 	// optimized
-	OnlyTokens
+	onlyTokens bool
 
-	// MatchEOS means that the rule ends with a *matched* EOS with StInc = 1.
-	// SetsScope applies for optional and matching EOS rules alike.
-	MatchEOS
-
-	// MultiEOS means that the rule has multiple EOS tokens within it --
-	// changes some of the logic
-	MultiEOS
-
-	// TokenMatchGroup is a group node that also has a single token match, so it can
+	// tokenMatchGroup is a group node that also has a single token match, so it can
 	// be used in a FirstTokenMap to optimize lookup of rules
-	TokenMatchGroup
-)
-
-// Parser is the interface type for parsers -- likely not necessary except is essential
-// for defining the BaseInterface for gui in making new nodes
-type Parser interface {
-	tree.Node
-
-	// Compile compiles string rules into their runnable elements
-	Compile(ps *State) bool
-
-	// Validate checks for any errors in the rules and issues warnings,
-	// returns true if valid (no err) and false if invalid (errs)
-	Validate(ps *State) bool
-
-	// Parse tries to apply rule to given input state, returns rule that matched or nil
-	// parent is the parent rule that we're being called from
-	// ast is the current ast node that we add to
-	Parse(ps *State, parent *Rule, ast *Ast, scope lexer.Reg, optMap lexer.TokenMap, depth int) *Rule
-
-	// AsParseRule returns object as a parser.Rule
-	AsParseRule() *Rule
+	tokenMatchGroup bool
 }
-
-// check that Rule implements Parser interface
-var _ Parser = (*Rule)(nil)
 
 // RuleEl is an element of a parsing rule -- either a pointer to another rule or a token
 type RuleEl struct {
@@ -236,14 +200,6 @@ func (mm Matches) StartEndExcl(ps *State) lexer.Reg {
 ///////////////////////////////////////////////////////////////////////
 //  Rule
 
-func (pr *Rule) BaseInterface() reflect.Type {
-	return reflect.TypeOf((*Parser)(nil)).Elem()
-}
-
-func (pr *Rule) AsParseRule() *Rule {
-	return pr.This.(*Rule)
-}
-
 // IsGroup returns true if this node is a group, else it should have rules
 func (pr *Rule) IsGroup() bool {
 	return pr.HasChildren()
@@ -290,16 +246,16 @@ func (pr *Rule) Compile(ps *State) bool {
 	}
 	if pr.Rule == "" { // parent
 		pr.Rules = nil
-		pr.SetFlag(false, SetsScope)
+		pr.setsScope = false
 		return true
 	}
 	valid := true
 	rstr := pr.Rule
 	if pr.Rule[0] == '-' {
 		rstr = rstr[1:]
-		pr.SetFlag(true, Reverse)
+		pr.reverse = true
 	} else {
-		pr.SetFlag(false, Reverse)
+		pr.reverse = false
 	}
 	rs := strings.Split(rstr, " ")
 	nr := len(rs)
@@ -307,12 +263,10 @@ func (pr *Rule) Compile(ps *State) bool {
 	pr.Rules = make(RuleList, nr)
 	pr.ExclFwd = nil
 	pr.ExclRev = nil
-	pr.SetFlag(false, NoTokens)
-	pr.SetFlag(true, OnlyTokens) // default is this..
-	pr.SetFlag(false, SetsScope)
-	pr.SetFlag(false, MatchEOS)
-	pr.SetFlag(false, MultiEOS)
-	pr.SetFlag(false, TokenMatchGroup)
+	pr.noTokens = false
+	pr.onlyTokens = true // default is this..
+	pr.setsScope = false
+	pr.tokenMatchGroup = false
 	pr.Order = nil
 	nmatch := 0
 	ntok := 0
@@ -332,7 +286,7 @@ func (pr *Rule) Compile(ps *State) bool {
 			break
 		}
 		if rn[0] == ':' {
-			pr.SetFlag(true, TokenMatchGroup)
+			pr.tokenMatchGroup = true
 		}
 		rr := &pr.Rules[ri]
 		tokst := strings.Index(rn, "'")
@@ -371,15 +325,9 @@ func (pr *Rule) Compile(ps *State) bool {
 			}
 			if rr.Token.Token == token.EOS {
 				eoses++
-				if eoses > 1 {
-					pr.SetFlag(true, MultiEOS)
-				}
 				if ri == nr-1 {
 					rr.StInc = eoses
-					pr.SetFlag(true, SetsScope)
-					if rr.Match && eoses == 1 {
-						pr.SetFlag(true, MatchEOS)
-					}
+					pr.setsScope = true
 				}
 			}
 		} else {
@@ -394,7 +342,7 @@ func (pr *Rule) Compile(ps *State) bool {
 			} else if rn[0] == '@' {
 				st = 1
 				rr.Match = true
-				pr.SetFlag(false, OnlyTokens)
+				pr.onlyTokens = false
 				pr.Order = append(pr.Order, ri)
 				nmatch++
 			} else {
@@ -409,13 +357,13 @@ func (pr *Rule) Compile(ps *State) bool {
 			}
 		}
 	}
-	if pr.Is(Reverse) {
+	if pr.reverse {
 		pr.Ast = AnchorAst // must be
 	}
 	if ntok == 0 && nmatch == 0 {
 		pr.Rules[0].Match = true
 		pr.Order = append(pr.Order, 0)
-		pr.SetFlag(true, NoTokens)
+		pr.noTokens = true
 	} else {
 		pr.OptimizeOrder(ps)
 	}
@@ -577,11 +525,11 @@ func (pr *Rule) Validate(ps *State) bool {
 		ps.Error(lexer.PosZero, "Validate: rule has no rules and no children", pr)
 		valid = false
 	}
-	if !pr.Is(TokenMatchGroup) && len(pr.Rules) > 0 && pr.HasChildren() {
+	if !pr.tokenMatchGroup && len(pr.Rules) > 0 && pr.HasChildren() {
 		ps.Error(lexer.PosZero, "Validate: rule has both rules and children -- should be either-or", pr)
 		valid = false
 	}
-	if pr.Is(Reverse) {
+	if pr.reverse {
 		if len(pr.Rules) != 3 {
 			ps.Error(lexer.PosZero, "Validate: a Reverse (-) rule must have 3 children -- for binary operator expressions only", pr)
 			valid = false
@@ -689,7 +637,7 @@ func (pr *Rule) Parse(ps *State, parent *Rule, parAst *Ast, scope lexer.Reg, opt
 	}
 
 	nr := len(pr.Rules)
-	if !pr.Is(TokenMatchGroup) && nr > 0 {
+	if !pr.tokenMatchGroup && nr > 0 {
 		return pr.ParseRules(ps, parent, parAst, scope, optMap, depth)
 	}
 
@@ -713,12 +661,12 @@ func (pr *Rule) Parse(ps *State, parent *Rule, parAst *Ast, scope lexer.Reg, opt
 // ParseRules parses rules and returns this rule if it matches, nil if not
 func (pr *Rule) ParseRules(ps *State, parent *Rule, parAst *Ast, scope lexer.Reg, optMap lexer.TokenMap, depth int) *Rule {
 	ok := false
-	if pr.Is(SetsScope) {
+	if pr.setsScope {
 		scope, ok = pr.Scope(ps, parAst, scope)
 		if !ok {
 			return nil
 		}
-	} else if GuiActive {
+	} else if GUIActive {
 		if scope == lexer.RegZero {
 			ps.Error(scope.St, "scope is empty and no EOS in rule -- invalid rules -- starting rules must all have EOS", pr)
 			return nil
@@ -822,7 +770,7 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lexer.Reg, depth int, optMap
 	// defer prf.End()
 
 	nr := len(pr.Rules)
-	if pr.Is(TokenMatchGroup) || nr == 0 { // Group
+	if pr.tokenMatchGroup || nr == 0 { // Group
 		return pr.MatchGroup(ps, parAst, scope, depth, optMap)
 	}
 
@@ -836,9 +784,9 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lexer.Reg, depth int, optMap
 	var mpos Matches
 	match := false
 
-	if pr.Is(NoTokens) {
+	if pr.noTokens {
 		match, mpos = pr.MatchNoToks(ps, parAst, scope, depth, optMap)
-	} else if pr.Is(OnlyTokens) {
+	} else if pr.onlyTokens {
 		match, mpos = pr.MatchOnlyToks(ps, parAst, scope, depth, optMap)
 	} else {
 		match, mpos = pr.MatchMixed(ps, parAst, scope, depth, optMap)
@@ -960,7 +908,7 @@ func (pr *Rule) MatchToken(ps *State, rr *RuleEl, ri int, kt token.KeyToken, cre
 		tpos = creg.Ed
 	} else {
 		// prf := profile.Start("FindToken")
-		if pr.Is(Reverse) {
+		if pr.reverse {
 			tpos, ok = ps.FindTokenReverse(kt, *creg)
 		} else {
 			tpos, ok = ps.FindToken(kt, *creg)
@@ -1072,7 +1020,7 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lexer.Reg, depth int, o
 		// look through smpos for last valid position -- use that as last match pos
 		mreg := smpos.StartEnd()
 		lmnpos, ok := ps.Src.NextTokenPos(mreg.Ed)
-		if !ok && !(ri == nr-1 || (ri == nr-2 && pr.Is(SetsScope))) {
+		if !ok && !(ri == nr-1 || (ri == nr-2 && pr.setsScope)) {
 			// if at end, or ends in EOS, then ok..
 			if ps.Trace.On {
 				ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parAst, fmt.Sprintf("%v sub-rule: %v -- not at end and no tokens left", ri, rr.Rule.Name))
@@ -1290,7 +1238,7 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *Ast, scope lexer.Reg
 		}
 	}
 
-	if pr.Is(Reverse) {
+	if pr.reverse {
 		return pr.DoRulesRevBinExp(ps, parent, parentAst, scope, mpos, ourAst, optMap, depth)
 	}
 
@@ -1329,7 +1277,7 @@ func (pr *Rule) DoRules(ps *State, parent *Rule, parentAst *Ast, scope lexer.Reg
 		}
 		creg.St = ps.Pos
 		creg.Ed = scope.Ed
-		if !pr.Is(NoTokens) {
+		if !pr.noTokens {
 			for mi := ri + 1; mi < nr; mi++ {
 				if mpos[mi].St != lexer.PosZero {
 					creg.Ed = mpos[mi].St // only look up to point of next matching token

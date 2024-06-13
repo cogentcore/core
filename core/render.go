@@ -79,7 +79,7 @@ func (wb *WidgetBase) AsyncLock() {
 		rc.Unlock()
 		select {}
 	}
-	wb.Scene.SetFlag(true, ScUpdating)
+	wb.Scene.updating = true
 }
 
 // AsyncUnlock must be called after making any updates in a separate goroutine
@@ -91,20 +91,19 @@ func (wb *WidgetBase) AsyncUnlock() {
 		return
 	}
 	rc.Unlock()
-	wb.Scene.SetFlag(false, ScUpdating)
+	if wb.Scene != nil {
+		wb.Scene.updating = false
+	}
 }
 
 // NeedsRender specifies that the widget needs to be rendered.
 func (wb *WidgetBase) NeedsRender() {
-	if wb.Scene == nil {
-		return
-	}
 	if DebugSettings.UpdateTrace {
 		fmt.Println("\tDebugSettings.UpdateTrace: NeedsRender:", wb)
 	}
-	wb.SetFlag(true, NeedsRender)
+	wb.needsRender = true
 	if wb.Scene != nil {
-		wb.Scene.SetFlag(true, ScNeedsRender)
+		wb.Scene.sceneNeedsRender = true
 	}
 }
 
@@ -112,18 +111,12 @@ func (wb *WidgetBase) NeedsRender() {
 // This needs to be called after any changes that affect the structure
 // and/or size of elements.
 func (wb *WidgetBase) NeedsLayout() {
-	if wb.Scene == nil {
-		return
-	}
 	if DebugSettings.UpdateTrace {
 		fmt.Println("\tDebugSettings.UpdateTrace: NeedsLayout:", wb)
 	}
-	wb.Scene.SetFlag(true, ScNeedsLayout)
-}
-
-// AddReRender adds given widget to be re-rendered next pass
-func (sc *Scene) AddReRender(w Widget) {
-	sc.ReRender = append(sc.ReRender, w)
+	if wb.Scene != nil {
+		wb.Scene.needsLayout = true
+	}
 }
 
 // NeedsRebuild returns true if the RenderContext indicates
@@ -136,7 +129,7 @@ func (wb *WidgetBase) NeedsRebuild() bool {
 	if rc == nil {
 		return false
 	}
-	return rc.HasFlag(RenderRebuild)
+	return rc.Rebuild
 }
 
 // LayoutScene does a layout of the scene: Size, Position
@@ -190,9 +183,8 @@ func (wb *WidgetBase) DoNeedsRender() {
 	if wb.This == nil {
 		return
 	}
-	// pr := profile.Start(wb.This.NodeType().ShortName())
 	wb.WidgetWalkDown(func(w Widget, cwb *WidgetBase) bool {
-		if cwb.Is(NeedsRender) {
+		if cwb.needsRender {
 			w.RenderWidget()
 			return tree.Break // done
 		}
@@ -205,7 +197,6 @@ func (wb *WidgetBase) DoNeedsRender() {
 		}
 		return tree.Continue
 	})
-	// pr.End()
 }
 
 //////////////////////////////////////////////////////////////////
@@ -217,60 +208,49 @@ var SceneShowIters = 2
 // returns false if already updating.
 // This is the main update call made by the RenderWindow at FPS frequency.
 func (sc *Scene) DoUpdate() bool {
-	if sc.Is(ScUpdating) {
+	if sc.updating {
 		// fmt.Println("scene bail on update")
 		return false
 	}
-	sc.SetFlag(true, ScUpdating) // prevent rendering
-	defer sc.SetFlag(false, ScUpdating)
+	sc.updating = true // prevent rendering
+	defer func() { sc.updating = false }()
 
 	rc := sc.RenderContext()
 
-	if sc.ShowIter < SceneShowIters {
-		sc.SetFlag(true, ScNeedsLayout)
-		sc.ShowIter++
+	if sc.showIter < SceneShowIters {
+		sc.needsLayout = true
+		sc.showIter++
 	}
 
 	switch {
-	case rc.HasFlag(RenderRebuild):
+	case rc.Rebuild:
 		sc.DoRebuild()
-		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
-		sc.SetFlag(true, ScImageUpdated)
-	case sc.LastRender.NeedsRestyle(rc):
-		// fmt.Println("restyle")
+		sc.needsLayout = false
+		sc.sceneNeedsRender = false
+		sc.imageUpdated = true
+	case sc.lastRender.NeedsRestyle(rc):
 		sc.ApplyStyleScene()
 		sc.LayoutRenderScene()
-		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
-		sc.SetFlag(true, ScImageUpdated)
-		sc.LastRender.SaveRender(rc)
-	case sc.Is(ScNeedsLayout):
-		// fmt.Println("layout")
+		sc.needsLayout = false
+		sc.sceneNeedsRender = false
+		sc.imageUpdated = true
+		sc.lastRender.SaveRender(rc)
+	case sc.needsLayout:
 		sc.LayoutRenderScene()
-		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
-		sc.SetFlag(true, ScImageUpdated)
-	case sc.Is(ScNeedsRender):
-		// fmt.Println("render")
+		sc.needsLayout = false
+		sc.sceneNeedsRender = false
+		sc.imageUpdated = true
+	case sc.sceneNeedsRender:
 		sc.DoNeedsRender()
-		sc.SetFlag(false, ScNeedsRender)
-		sc.SetFlag(true, ScImageUpdated)
-	case len(sc.ReRender) > 0:
-		// fmt.Println("re-render")
-		for _, w := range sc.ReRender {
-			w.AsTree().SetFlag(true, ScNeedsRender)
-			// fmt.Println("rerender:", w)
-		}
-		sc.ReRender = nil
-		sc.DoNeedsRender()
-		sc.SetFlag(false, ScNeedsRender)
-		sc.SetFlag(true, ScImageUpdated)
-
+		sc.sceneNeedsRender = false
+		sc.imageUpdated = true
 	default:
 		return false
 	}
 
-	if sc.ShowIter == SceneShowIters { // end of first pass
-		sc.ShowIter++
-		if !sc.Is(ScPrefSizing) {
+	if sc.showIter == SceneShowIters { // end of first pass
+		sc.showIter++
+		if !sc.prefSizing {
 			sc.Events.ActivateStartFocus()
 		}
 	}
@@ -283,8 +263,8 @@ func (sc *Scene) DoUpdate() bool {
 // This is a top-level call, typically only done when the window
 // is first drawn, once the full sizing information is available.
 func (sc *Scene) MakeSceneWidgets() {
-	sc.SetFlag(true, ScUpdating) // prevent rendering
-	defer sc.SetFlag(false, ScUpdating)
+	sc.updating = true // prevent rendering
+	defer func() { sc.updating = false }()
 
 	sc.UpdateTree()
 }
@@ -293,11 +273,11 @@ func (sc *Scene) MakeSceneWidgets() {
 // This is needed whenever the window geometry, DPI,
 // etc is updated, which affects styling.
 func (sc *Scene) ApplyStyleScene() {
-	sc.SetFlag(true, ScUpdating) // prevent rendering
-	defer sc.SetFlag(false, ScUpdating)
+	sc.updating = true // prevent rendering
+	defer func() { sc.updating = false }()
 
 	sc.StyleTree()
-	sc.SetFlag(true, ScNeedsLayout)
+	sc.needsLayout = true
 }
 
 // DoRebuild does the full re-render and RenderContext Rebuild flag
@@ -313,18 +293,17 @@ func (sc *Scene) DoRebuild() {
 // initSz is the initial size -- e.g., size of screen.
 // Used for auto-sizing windows.
 func (sc *Scene) PrefSize(initSz image.Point) image.Point {
-	sc.SetFlag(true, ScUpdating) // prevent rendering
-	defer sc.SetFlag(false, ScUpdating)
+	sc.updating = true // prevent rendering
+	defer func() { sc.updating = false }()
 
-	sc.SetFlag(true, ScPrefSizing)
+	sc.prefSizing = true
 	sc.MakeSceneWidgets()
 	sc.ApplyStyleScene()
 	sc.LayoutScene()
 	sz := &sc.Geom.Size
 	psz := sz.Actual.Total
-	// fmt.Println("\npref size:", psz, "csz:", sz.Actual.Content, "internal:", sz.Internal, "space:", sc.Geom.Size.Space)
-	sc.SetFlag(false, ScPrefSizing)
-	sc.ShowIter = 0
+	sc.prefSizing = false
+	sc.showIter = 0
 	return psz.ToPointFloor()
 }
 
@@ -340,7 +319,7 @@ func (wb *WidgetBase) PushBounds() bool {
 	if wb == nil || wb.This == nil {
 		return false
 	}
-	wb.SetFlag(false, NeedsRender)     // done!
+	wb.needsRender = false             // done!
 	if !wb.This.(Widget).IsVisible() { // checks deleted etc
 		return false
 	}
@@ -372,7 +351,7 @@ func (wb *WidgetBase) PopBounds() {
 	pc := &wb.Scene.PaintContext
 
 	isSelw := wb.Scene.SelectedWidget == wb.This
-	if wb.Scene.Is(ScRenderBBoxes) || isSelw {
+	if wb.Scene.RenderBBoxes || isSelw {
 		pos := math32.Vector2FromPoint(wb.Geom.TotalBBox.Min)
 		sz := math32.Vector2FromPoint(wb.Geom.TotalBBox.Size())
 		// node: we won't necc. get a push prior to next update, so saving these.
@@ -381,7 +360,7 @@ func (wb *WidgetBase) PopBounds() {
 		pcfc := pc.FillStyle.Color
 		pcop := pc.FillStyle.Opacity
 		pc.StrokeStyle.Width.Dot(1)
-		pc.StrokeStyle.Color = colors.C(hct.New(wb.Scene.RenderBBoxHue, 100, 50))
+		pc.StrokeStyle.Color = colors.C(hct.New(wb.Scene.renderBBoxHue, 100, 50))
 		pc.FillStyle.Color = nil
 		if isSelw {
 			fc := pc.StrokeStyle.Color
@@ -396,10 +375,10 @@ func (wb *WidgetBase) PopBounds() {
 		pc.StrokeStyle.Width = pcsw
 		pc.StrokeStyle.Color = pcsc
 
-		wb.Scene.RenderBBoxHue += 10
-		if wb.Scene.RenderBBoxHue > 360 {
-			rmdr := (int(wb.Scene.RenderBBoxHue-360) + 1) % 9
-			wb.Scene.RenderBBoxHue = float32(rmdr)
+		wb.Scene.renderBBoxHue += 10
+		if wb.Scene.renderBBoxHue > 360 {
+			rmdr := (int(wb.Scene.renderBBoxHue-360) + 1) % 9
+			wb.Scene.renderBBoxHue = float32(rmdr)
 		}
 	}
 

@@ -187,7 +187,6 @@ func (txt *Text2D) UpdateWorldMatrix(parWorld *math32.Matrix4) {
 		txt.Pose.UpdateMatrix()
 	}
 	txt.Pose.UpdateWorldMatrix(parWorld)
-	txt.SetFlag(true, WorldMatrixUpdated)
 }
 
 func (txt *Text2D) IsTransparent() bool {

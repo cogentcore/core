@@ -65,7 +65,7 @@ func (sc *Scene) SlideMoveEvent(e events.Event) {
 		}
 		sc.Camera.Orbit(-dx*orbDel, -dy*orbDel)
 	}
-	sc.SetFlag(true, ScNeedsRender)
+	sc.SetNeedsRender()
 }
 
 func (sc *Scene) MouseScrollEvent(e *events.MouseScroll) {
@@ -84,7 +84,7 @@ func (sc *Scene) MouseScrollEvent(e *events.MouseScroll) {
 	default:
 		sc.Camera.ZoomTo(pt, sz, zoom*zoomDel)
 	}
-	sc.SetFlag(true, ScNeedsRender)
+	sc.SetNeedsRender()
 }
 
 func (sc *Scene) KeyChordEvent(e events.Event) {
@@ -92,7 +92,7 @@ func (sc *Scene) KeyChordEvent(e events.Event) {
 		return
 	}
 	sc.NavKeyEvents(e)
-	sc.SetFlag(true, ScNeedsRender)
+	sc.SetNeedsRender()
 }
 
 // NavKeyEvents handles standard viewer keyboard navigation events

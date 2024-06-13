@@ -24,7 +24,7 @@ import (
 // Unlike core, xyz Config can only be successfully done after the
 // GPU framework has been initialized, because it is all about allocating
 // GPU resources.
-// The Scene ScNeedsConfig flag indicates if any of these resources
+// [Scene.NeedsConfig] indicates if any of these resources
 // have been changed and a new Config is required.
 // * ConfigFrame -- allocates the renderframe -- based on Geom.Size
 // * Lights, Meshes, Textures
@@ -36,44 +36,47 @@ import (
 // Update involves updating Pose
 
 // DoUpdate handles needed updates based on Scene Flags.
-// if ScUpdating is set, then an update is in progress and false is returned.
-// If no updates are required, then false is also returned, else true.
-// ScNeedsConfig is NOT handled here because it must be done on main thread,
+// If no updates are required, then false is returned, else true.
+// NeedsConfig is NOT handled here because it must be done on main thread,
 // so this must be checked separately (e.g., in xyzview.Scene, as it requires
 // a separate RunOnMainThread call).
 func (sc *Scene) DoUpdate() bool {
 	switch {
-	case sc.Is(ScNeedsUpdate):
+	case sc.NeedsUpdate:
 		sc.UpdateNodes()
 		sc.Render()
-		sc.SetFlag(false, ScNeedsUpdate, ScNeedsRender)
-	case sc.Is(ScNeedsRender):
+		sc.NeedsUpdate = false
+		sc.NeedsRender = false
+	case sc.NeedsRender:
 		sc.Render()
-		sc.SetFlag(false, ScNeedsRender)
+		sc.NeedsRender = false
 	default:
 		return false
 	}
 	return true
 }
 
-func (sc *Scene) NeedsRender() {
-	sc.SetFlag(true, ScNeedsRender)
+// SetNeedsRender sets [Scene.NeedsRender] to true.
+func (sc *Scene) SetNeedsRender() {
+	sc.NeedsRender = true
 }
 
-func (sc *Scene) NeedsUpdate() {
-	sc.SetFlag(true, ScNeedsUpdate)
+// SetNeedsUpdate sets [Scene.SetNeedsUpdate] to true.
+func (sc *Scene) SetNeedsUpdate() {
+	sc.NeedsUpdate = true
 }
 
-func (sc *Scene) NeedsConfig() {
-	sc.SetFlag(true, ScNeedsConfig)
+// SetNeedsConfig sets [Scene.SetNeedsConfig] to true.
+func (sc *Scene) SetNeedsConfig() {
+	sc.NeedsConfig = true
 }
 
 // UpdateNodesIfNeeded can be called to update prior to an ad-hoc render
 // if the NeedsUpdate flag has been set (resets flag)
 func (sc *Scene) UpdateNodesIfNeeded() {
-	if sc.Is(ScNeedsUpdate) {
+	if sc.NeedsUpdate {
 		sc.UpdateNodes()
-		sc.SetFlag(false, ScNeedsUpdate)
+		sc.NeedsUpdate = false
 	}
 }
 
@@ -156,9 +159,9 @@ func (sc *Scene) ImageCopy() (*image.RGBA, error) {
 	tcmd := sy.MemCmdStart()
 	fr.GrabImage(tcmd, 0) // note: re-uses a persistent Grab image
 	sy.MemCmdEndSubmitWaitFree()
-	err := fr.Render.Grab.DevGoImageCopy(&sc.ImgCopy)
+	err := fr.Render.Grab.DevGoImageCopy(&sc.imgCopy)
 	if err == nil {
-		return &sc.ImgCopy, err
+		return &sc.imgCopy, err
 	}
 	return nil, err
 }
@@ -295,8 +298,8 @@ func (sc *Scene) Config() {
 	UpdateWorldMatrix(sc.This)
 	sc.ConfigLights()
 	sc.ConfigMeshesTextures()
-	sc.SetFlag(false, ScNeedsConfig)
-	sc.SetFlag(true, ScNeedsUpdate)
+	sc.NeedsConfig = false
+	sc.NeedsUpdate = true
 }
 
 // ConfigMeshesTextures configures the meshes and the textures to the Phong
@@ -330,7 +333,7 @@ func (sc *Scene) TrackCamera() bool {
 		return false
 	}
 	tc.TrackCamera()
-	sc.NeedsUpdate() // need to update world model for nodes
+	sc.SetNeedsUpdate() // need to update world model for nodes
 	return true
 }
 

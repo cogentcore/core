@@ -74,7 +74,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 		w.SetIcon(icons.Update).SetTooltip("reset to default initial display").
 			OnClick(func(e events.Event) {
 				sc.SetCamera("default")
-				sc.NeedsUpdate()
+				sc.SetNeedsUpdate()
 				sv.NeedsRender()
 			})
 	})
@@ -85,7 +85,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 			}).
 			OnClick(func(e events.Event) {
 				sc.Camera.Zoom(-.05)
-				sc.NeedsUpdate()
+				sc.SetNeedsUpdate()
 				sv.NeedsRender()
 			})
 	})
@@ -95,7 +95,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 				s.SetAbilities(true, abilities.RepeatClickable)
 			}).OnClick(func(e events.Event) {
 			sc.Camera.Zoom(.05)
-			sc.NeedsUpdate()
+			sc.SetNeedsUpdate()
 			sv.NeedsRender()
 		})
 	})
@@ -111,7 +111,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 			}).
 			OnClick(func(e events.Event) {
 				sc.Camera.Orbit(5, 0)
-				sc.NeedsUpdate()
+				sc.SetNeedsUpdate()
 				sv.NeedsRender()
 			})
 	})
@@ -122,7 +122,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 			}).
 			OnClick(func(e events.Event) {
 				sc.Camera.Orbit(0, 5)
-				sc.NeedsUpdate()
+				sc.SetNeedsUpdate()
 				sv.NeedsRender()
 			})
 	})
@@ -133,7 +133,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 			}).
 			OnClick(func(e events.Event) {
 				sc.Camera.Orbit(0, -5)
-				sc.NeedsUpdate()
+				sc.SetNeedsUpdate()
 				sv.NeedsRender()
 			})
 	})
@@ -144,7 +144,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 			}).
 			OnClick(func(e events.Event) {
 				sc.Camera.Orbit(-5, 0)
-				sc.NeedsUpdate()
+				sc.SetNeedsUpdate()
 				sv.NeedsRender()
 			})
 	})
@@ -160,7 +160,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 			}).
 			OnClick(func(e events.Event) {
 				sc.Camera.Pan(-.2, 0)
-				sc.NeedsUpdate()
+				sc.SetNeedsUpdate()
 				sv.NeedsRender()
 			})
 	})
@@ -171,7 +171,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 			}).
 			OnClick(func(e events.Event) {
 				sc.Camera.Pan(0, .2)
-				sc.NeedsUpdate()
+				sc.SetNeedsUpdate()
 				sv.NeedsRender()
 			})
 	})
@@ -182,7 +182,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 			}).
 			OnClick(func(e events.Event) {
 				sc.Camera.Pan(0, -.2)
-				sc.NeedsUpdate()
+				sc.SetNeedsUpdate()
 				sv.NeedsRender()
 			})
 	})
@@ -193,7 +193,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 			}).
 			OnClick(func(e events.Event) {
 				sc.Camera.Pan(.2, 0)
-				sc.NeedsUpdate()
+				sc.SetNeedsUpdate()
 				sv.NeedsRender()
 			})
 	})
@@ -219,7 +219,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 						}
 					}
 					fmt.Printf("Camera %s: %v\n", cam, sc.Camera.GenGoSet(""))
-					sc.NeedsUpdate()
+					sc.SetNeedsUpdate()
 					sv.NeedsRender()
 				})
 		})

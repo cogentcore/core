@@ -108,7 +108,7 @@ func (ms *MeshBase) ComputeNorms(pos, norm math32.ArrayF32) {
 // see NewX for convenience methods to add specific shapes
 func (sc *Scene) AddMesh(ms Mesh) {
 	sc.Meshes.Add(ms.AsMeshBase().Name, ms)
-	sc.SetFlag(true, ScNeedsConfig)
+	sc.SetNeedsConfig()
 }
 
 // AddMeshUniqe adds given mesh to mesh collection, ensuring that it has
@@ -121,7 +121,7 @@ func (sc *Scene) AddMeshUnique(ms Mesh) {
 		ms.AsMeshBase().SetName(nm)
 	}
 	sc.Meshes.Add(ms.AsMeshBase().Name, ms)
-	sc.SetFlag(true, ScNeedsConfig)
+	sc.SetNeedsConfig()
 }
 
 // MeshByName looks for mesh by name -- returns nil if not found

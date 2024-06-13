@@ -11,7 +11,6 @@ package tree
 
 import (
 	"cogentcore.org/core/base/plan"
-	"cogentcore.org/core/enums"
 	"cogentcore.org/core/types"
 )
 
@@ -72,14 +71,6 @@ type Node interface {
 	// to do additional necessary destruction; if they do, they should call
 	// [NodeBase.Destroy] at the end of their implementation.
 	Destroy()
-
-	// FlagType returns the flags of the node as the true flag type of the node,
-	// which may be a type that extends the standard [Flags]. Each node type
-	// that extends the flag type should define this method; for example:
-	//	func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
-	//		return (*WidgetFlags)(&wb.Flags)
-	//	}
-	FlagType() enums.BitFlagSetter
 
 	// NodeWalkDown is a method that nodes can implement to traverse additional nodes
 	// like widget parts during [NodeBase.WalkDown]. It is called with the function passed

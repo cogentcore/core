@@ -36,67 +36,67 @@ func (gp *Group) GroupBBox() {
 	gp.BBox.BBox.SetEmpty()
 	gp.BBox.VelBBox.SetEmpty()
 	for _, kid := range gp.Children {
-		nii, ni := AsNode(kid)
-		if nii == nil {
+		n, nb := AsNode(kid)
+		if n == nil {
 			continue
 		}
-		gp.BBox.BBox.ExpandByBox(ni.BBox.BBox)
-		gp.BBox.VelBBox.ExpandByBox(ni.BBox.VelBBox)
-		if nii.IsDynamic() {
+		gp.BBox.BBox.ExpandByBox(nb.BBox.BBox)
+		gp.BBox.VelBBox.ExpandByBox(nb.BBox.VelBBox)
+		if nb.Dynamic {
 			hasDyn = true
 		}
 	}
-	gp.SetFlag(hasDyn, Dynamic)
+	gp.SetDynamic(hasDyn)
 }
 
 // WorldDynGroupBBox does a GroupBBox on all dynamic nodes
 func (gp *Group) WorldDynGroupBBox() {
-	gp.WalkDownPost(func(k tree.Node) bool {
-		nii, _ := AsNode(k)
-		if nii == nil {
+	gp.WalkDownPost(func(tn tree.Node) bool {
+		n, nb := AsNode(tn)
+		if n == nil {
 			return false
 		}
-		if !nii.IsDynamic() {
+		if !nb.Dynamic {
 			return false
 		}
 		return true
-	}, func(k tree.Node) bool {
-		nii, _ := AsNode(k)
-		if nii == nil {
+	}, func(tn tree.Node) bool {
+		n, nb := AsNode(tn)
+		if n == nil {
 			return false
 		}
-		if !nii.IsDynamic() {
+		if !nb.Dynamic {
 			return false
 		}
-		nii.GroupBBox()
+		n.GroupBBox()
 		return true
 	})
 }
 
 // WorldInit does the full tree InitAbs and GroupBBox updates
 func (gp *Group) WorldInit() {
-	gp.WalkDown(func(n tree.Node) bool {
-		pn, _ := AsNode(n)
-		if pn == nil {
+	gp.WalkDown(func(tn tree.Node) bool {
+		n, _ := AsNode(tn)
+		if n == nil {
 			return false
 		}
-		_, pi := AsNode(n.AsTree().Parent)
-		pn.InitAbs(pi)
+		_, pi := AsNode(tn.AsTree().Parent)
+		n.InitAbs(pi)
 		return true
 	})
 
-	gp.WalkDownPost(func(n tree.Node) bool {
-		pn, _ := AsNode(n)
-		if pn == nil {
+	gp.WalkDownPost(func(tn tree.Node) bool {
+		n, _ := AsNode(tn)
+		if n == nil {
 			return false
 		}
 		return true
-	}, func(n tree.Node) bool {
-		pn, _ := AsNode(n)
-		if pn == nil {
+	}, func(tn tree.Node) bool {
+		n, _ := AsNode(tn)
+		if n == nil {
 			return false
 		}
-		pn.GroupBBox()
+		n.GroupBBox()
 		return true
 	})
 
@@ -105,16 +105,16 @@ func (gp *Group) WorldInit() {
 // WorldRelToAbs does a full RelToAbs update for all Dynamic groups, for
 // Scripted mode updates with manual updating of Rel values.
 func (gp *Group) WorldRelToAbs() {
-	gp.WalkDown(func(n tree.Node) bool {
-		pn, _ := AsNode(n)
-		if pn == nil {
+	gp.WalkDown(func(tn tree.Node) bool {
+		n, nb := AsNode(tn)
+		if n == nil {
 			return false // going into a different type of thing, bail
 		}
-		if !pn.IsDynamic() {
+		if !nb.Dynamic {
 			return false
 		}
-		_, pi := AsNode(n.AsTree().Parent)
-		pn.RelToAbs(pi)
+		_, pi := AsNode(tn.AsTree().Parent)
+		n.RelToAbs(pi)
 		return true
 	})
 
@@ -124,15 +124,15 @@ func (gp *Group) WorldRelToAbs() {
 // WorldStep does a full Step update for all Dynamic nodes, for
 // either physics or scripted mode, based on current velocities.
 func (gp *Group) WorldStep(step float32) {
-	gp.WalkDown(func(k tree.Node) bool {
-		nii, _ := AsNode(k)
-		if nii == nil {
+	gp.WalkDown(func(tn tree.Node) bool {
+		n, nb := AsNode(tn)
+		if n == nil {
 			return false // going into a different type of thing, bail
 		}
-		if !nii.IsDynamic() {
+		if !nb.Dynamic {
 			return false
 		}
-		nii.Step(step)
+		n.Step(step)
 		return true
 	})
 
@@ -158,14 +158,14 @@ func (gp *Group) WorldCollide(dynTop bool) []Contacts {
 	var stats []Node
 	var dyns []Node
 	for _, kid := range gp.Children {
-		nii, _ := AsNode(kid)
-		if nii == nil {
+		n, nb := AsNode(kid)
+		if n == nil {
 			continue
 		}
-		if nii.IsDynamic() {
-			dyns = append(dyns, nii)
+		if nb.Dynamic {
+			dyns = append(dyns, n)
 		} else {
-			stats = append(stats, nii)
+			stats = append(stats, n)
 		}
 	}
 

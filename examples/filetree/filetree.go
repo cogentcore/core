@@ -227,7 +227,7 @@ func (fb *FileBrowse) SaveActiveViewAs(filename core.Filename) { //types:add
 func (fb *FileBrowse) ViewFileNode(fn *filetree.Node) {
 	if _, err := fn.OpenBuf(); err == nil {
 		nv, nidx := fb.NextTextEditor()
-		if nv.Buffer != nil && nv.Buffer.IsNotSaved() { // todo: save current changes?
+		if nv.Buffer != nil && nv.Buffer.NotSaved { // todo: save current changes?
 			fmt.Printf("Changes not saved in file: %v before switching view there to new file\n", nv.Buffer.Filename)
 		}
 		nv.SetBuffer(fn.Buffer)

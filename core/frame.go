@@ -10,7 +10,6 @@ import (
 	"unicode"
 
 	"cogentcore.org/core/base/labels"
-	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
@@ -20,54 +19,45 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// FrameFlags has state bit flags for [Frame].
-type FrameFlags WidgetFlags //enums:bitflag -trim-prefix Frame
-
-const (
-	// FrameStackTopOnly is whether to only layout the top widget for a stacked
-	// frame layout. This is appropriate for e.g., tab layout, which does a full
-	// redraw on stack changes, but not for e.g., check boxes which don't.
-	FrameStackTopOnly FrameFlags = FrameFlags(WidgetFlagsN) + iota
-)
-
 // Frame is the primary node type responsible for organizing the sizes
 // and positions of child widgets. It also renders the standard box model.
 // All collections of widgets should generally be contained within a [Frame];
 // otherwise, the parent widget must take over responsibility for positioning.
 // Frames automatically can add scrollbars depending on the [styles.Style.Overflow].
 //
-// For a [styles.Grid] layout, the [styles.Style.Columns] property should
+// For a [styles.Grid] frame, the [styles.Style.Columns] property should
 // generally be set to the desired number of columns, from which the number of rows
 // is computed; otherwise, it uses the square root of number of
 // elements.
 type Frame struct {
 	WidgetBase
 
-	// StackTop, for a [styles.Stacked] layout, is the index of the node to use as the top of the stack.
+	// StackTop, for a [styles.Stacked] frame, is the index of the node to use as the top of the stack.
 	// Only the node at this index is rendered; if not a valid index, nothing is rendered.
-	StackTop int `set:"-"`
+	StackTop int
+
+	// LayoutStackTopOnly is whether to only layout the top widget (specified by [Frame.StackTop])
+	// for a [styles.Stacked] frame. This is appropriate for e.g., [Tabs], which do a full
+	// redraw on stack changes, but not for e.g., [Switch]es which don't.
+	LayoutStackTopOnly bool
 
 	// LayImpl contains implementation state info for doing layout
 	LayImpl LayImplState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
-	// whether scrollbar is used for given dim
+	// HasScroll is whether scrollbar is used for given dim.
 	HasScroll [2]bool `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
-	// scroll bars -- we fully manage them as needed
+	// Scrolls are the scroll bars, which are fully managed as needed.
 	Scrolls [2]*Slider `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// accumulated name to search for when keys are typed
-	FocusName string `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
+	focusName string
 
-	// time of last focus name event -- for timeout
-	FocusNameTime time.Time `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
+	// time of last focus name event; for timeout
+	focusNameTime time.Time
 
-	// last element focused on -- used as a starting point if name is the same
-	FocusNameLast tree.Node `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
-}
-
-func (fr *Frame) FlagType() enums.BitFlagSetter {
-	return (*FrameFlags)(&fr.Flags)
+	// last element focused on; used as a starting point if name is the same
+	focusNameLast tree.Node
 }
 
 func (fr *Frame) Init() {
@@ -307,44 +297,44 @@ func (fr *Frame) FocusOnName(e events.Event) bool {
 	if DebugSettings.KeyEventTrace {
 		slog.Info("Layout FocusOnName", "widget", fr, "keyFunction", kf)
 	}
-	delay := e.Time().Sub(fr.FocusNameTime)
-	fr.FocusNameTime = e.Time()
+	delay := e.Time().Sub(fr.focusNameTime)
+	fr.focusNameTime = e.Time()
 	if kf == keymap.FocusNext { // tab means go to next match -- don't worry about time
-		if fr.FocusName == "" || delay > SystemSettings.LayoutFocusNameTabTime {
-			fr.FocusName = ""
-			fr.FocusNameLast = nil
+		if fr.focusName == "" || delay > SystemSettings.LayoutFocusNameTabTime {
+			fr.focusName = ""
+			fr.focusNameLast = nil
 			return false
 		}
 	} else {
 		if delay > SystemSettings.LayoutFocusNameTimeout {
-			fr.FocusName = ""
+			fr.focusName = ""
 		}
 		if !unicode.IsPrint(e.KeyRune()) || e.Modifiers() != 0 {
 			return false
 		}
 		sr := string(e.KeyRune())
-		if fr.FocusName == sr {
+		if fr.focusName == sr {
 			// re-search same letter
 		} else {
-			fr.FocusName += sr
-			fr.FocusNameLast = nil // only use last if tabbing
+			fr.focusName += sr
+			fr.focusNameLast = nil // only use last if tabbing
 		}
 	}
 	// e.SetHandled()
 	// fmt.Printf("searching for: %v  last: %v\n", ly.FocusName, ly.FocusNameLast)
-	focel := ChildByLabelCanFocus(fr, fr.FocusName, fr.FocusNameLast)
+	focel := ChildByLabelCanFocus(fr, fr.focusName, fr.focusNameLast)
 	if focel != nil {
 		em := fr.Events()
 		if em != nil {
 			em.SetFocusEvent(focel.(Widget)) // this will also scroll by default!
 		}
-		fr.FocusNameLast = focel
+		fr.focusNameLast = focel
 		return true
 	} else {
-		if fr.FocusNameLast == nil {
-			fr.FocusName = "" // nothing being found
+		if fr.focusNameLast == nil {
+			fr.focusName = "" // nothing being found
 		}
-		fr.FocusNameLast = nil // start over
+		fr.focusNameLast = nil // start over
 	}
 	return false
 }

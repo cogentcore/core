@@ -127,7 +127,9 @@ func (fv *FileView) Init() {
 		if len(core.RecentPaths) == 0 {
 			core.OpenRecentPaths()
 		}
-		if !fv.Scene.Is(core.ScPrefSizing) {
+		// if we update the title before the scene is shown, it may incorrectly
+		// override the title of the window of the context widget
+		if fv.Scene.HasShown {
 			fv.Scene.UpdateTitle("Files: " + fv.DirPath)
 		}
 		core.RecentPaths.AddPath(fv.DirPath, core.SystemSettings.SavedPathsMax)
@@ -310,8 +312,7 @@ func (fv *FileView) makeFilesRow(p *core.Plan) {
 	core.AddAt(p, "favorites", func(w *TableView) {
 		w.SelectedIndex = -1
 		w.SetReadOnly(true)
-		w.SetFlag(false, SliceViewShowIndex)
-		w.SetFlag(false, SliceViewReadOnlyKeyNav) // can only have one active -- files..
+		w.ReadOnlyKeyNav = false // keys must go to files, not favorites
 		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(0, 1)
 			s.Min.X.Ch(25)
@@ -326,7 +327,6 @@ func (fv *FileView) makeFilesRow(p *core.Plan) {
 		})
 	})
 	core.AddAt(p, "files", func(w *TableView) {
-		w.SetFlag(false, SliceViewShowIndex)
 		w.SetReadOnly(true)
 		w.SetSlice(&fv.Files)
 		w.SelectedField = "Name"
@@ -819,7 +819,7 @@ func (fb *FileButton) Init() {
 	core.InitValueButton(fb, false, func(d *core.Body) {
 		// ext, _ := v.Tag("ext") // TODO(config)
 		fv = NewFileView(d).SetFilename(fb.Filename, "")
-		fb.SetFlag(true, core.ValueDialogNewWindow)
+		fb.ValueNewWindow = true
 		d.AddAppBar(fv.MakeToolbar)
 	}, func() {
 		fb.Filename = fv.SelectedFile()

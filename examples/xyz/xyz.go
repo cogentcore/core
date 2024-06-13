@@ -125,7 +125,7 @@ func (an *Anim) Animate() {
 			an.Gopher.SetPosePos(gp)
 		}
 
-		sc.NeedsUpdate()
+		sc.SetNeedsUpdate()
 		an.SceneView.SceneWidget().NeedsRender()
 		an.Ang += an.Speed
 	}

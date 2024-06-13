@@ -95,7 +95,7 @@ func (sw *Scene) Init() {
 				sw.XYZ.Config()
 			}
 		})
-		sw.XYZ.SetFlag(true, xyz.ScNeedsRender)
+		sw.XYZ.SetNeedsRender()
 	})
 }
 
@@ -120,7 +120,7 @@ func (sw *Scene) Render() {
 	if sw.XYZ.Frame == nil {
 		return
 	}
-	if sw.XYZ.Is(xyz.ScNeedsConfig) {
+	if sw.XYZ.NeedsConfig {
 		system.TheApp.RunOnMain(func() {
 			sw.XYZ.Config()
 		})

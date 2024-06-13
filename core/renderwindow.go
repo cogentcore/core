@@ -14,7 +14,6 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/matcolor"
-	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
@@ -63,8 +62,6 @@ var RenderWindowGlobalMu sync.Mutex
 // Sprites are managed by the main stage, as layered textures of the same size,
 // to enable unlimited number packed into a few descriptors for standard sizes.
 type RenderWindow struct {
-	// Flags are the flags associated with the window.
-	Flags WindowFlags
 
 	// Name is the name of the window.
 	Name string
@@ -85,62 +82,19 @@ type RenderWindow struct {
 	// arranged in order, and continuously updated during Render.
 	RenderScenes RenderScenes
 
-	// below are internal vars used during the event loop
-
-	// NoEventsChan is a channel on which a signal is sent when there are
+	// noEventsChan is a channel on which a signal is sent when there are
 	// no events left in the window [events.Deque]. It is used internally
-	// for event handling in tests, and should typically not be used by
-	// end-users.
-	NoEventsChan chan struct{}
+	// for event handling in tests.
+	noEventsChan chan struct{}
 
-	// todo: need some other way of freeing GPU resources -- this is not clean:
-	// // the phongs for the window
-	// Phongs []*vphong.Phong ` json:"-" xml:"-" desc:"the phongs for the window"`
-	//
-	// // the render frames for the window
-	// Frames []*vgpu.RenderFrame ` json:"-" xml:"-" desc:"the render frames for the window"`
-}
+	// closing is whether the window is closing.
+	closing bool
 
-// WindowFlags represent RenderWindow state
-type WindowFlags int64 //enums:bitflag -trim-prefix Window
+	// gotFocus indicates that have we received focus.
+	gotFocus bool
 
-const (
-	// WindowHasSavedGeom indicates if this window has WindowGeometry setting that
-	// sized it -- affects whether other default geom should be applied.
-	WindowHasSavedGeom WindowFlags = iota
-
-	// WindowClosing is atomic flag indicating window is closing
-	WindowClosing
-
-	// WindowResizing is atomic flag indicating window is resizing
-	WindowResizing
-
-	// WindowGotFocus indicates that have we received RenderWindow focus
-	WindowGotFocus
-
-	// WindowSentShow have we sent the show event yet?  Only ever sent ONCE
-	WindowSentShow
-
-	// WindowStopEventLoop is set when event loop stop is requested
-	WindowStopEventLoop
-
-	// WindowSelectionMode indicates that the window is in Cogent Core inspect editor edit mode
-	WindowSelectionMode
-)
-
-// HasFlag returns true if given flag is set
-func (w *RenderWindow) HasFlag(flag enums.BitFlag) bool {
-	return w.Flags.HasFlag(flag)
-}
-
-// Is returns true if given flag is set
-func (w *RenderWindow) Is(flag enums.BitFlag) bool {
-	return w.Flags.HasFlag(flag)
-}
-
-// SetFlag sets given flag(s) on or off
-func (w *RenderWindow) SetFlag(on bool, flag ...enums.BitFlag) {
-	w.Flags.SetFlag(on, flag...)
+	// stopEventLoop indicates that the event loop should be stopped.
+	stopEventLoop bool
 }
 
 // NewRenderWindow creates a new window with given internal name handle,
@@ -162,14 +116,14 @@ func NewRenderWindow(name, title string, opts *system.NewWindowOptions) *RenderW
 		rc := w.RenderContext()
 		rc.Lock()
 		defer rc.Unlock()
-		w.SetFlag(true, WindowClosing)
+		w.closing = true
 		// ensure that everyone is closed first
 		for _, kv := range w.Mains.Stack.Order {
 			if kv.Value == nil || kv.Value.Scene == nil || kv.Value.Scene.This == nil {
 				continue
 			}
 			if !kv.Value.Scene.Close() {
-				w.SetFlag(false, WindowClosing)
+				w.closing = false
 				return
 			}
 		}
@@ -325,7 +279,7 @@ func (w *RenderWindow) SetSize(sz image.Point) {
 func (w *RenderWindow) Resized() {
 	rc := w.RenderContext()
 	if !w.IsVisible() {
-		rc.SetFlag(false, RenderVisible)
+		rc.Visible = false
 		return
 	}
 
@@ -351,7 +305,7 @@ func (w *RenderWindow) Resized() {
 	// w.FocusInactivate()
 	// w.InactivateAllSprites()
 	if !w.IsVisible() {
-		rc.SetFlag(false, RenderVisible)
+		rc.Visible = false
 		if DebugSettings.WinEventTrace {
 			fmt.Printf("Win: %v Resized already closed\n", w.Name)
 		}
@@ -361,7 +315,7 @@ func (w *RenderWindow) Resized() {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Name, curRg, rg)
 	}
 	rc.Geom = rg
-	rc.SetFlag(true, RenderVisible)
+	rc.Visible = true
 	rc.LogicalDPI = w.LogicalDPI()
 	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
 	w.Mains.Resize(rg)
@@ -444,7 +398,7 @@ func (w *RenderWindow) SetCloseCleanFunc(fun func(win *RenderWindow)) {
 
 // IsVisible is the main visibility check -- don't do any window updates if not visible!
 func (w *RenderWindow) IsVisible() bool {
-	if w == nil || w.SystemWindow == nil || w.IsClosed() || w.Is(WindowClosing) || !w.SystemWindow.IsVisible() {
+	if w == nil || w.SystemWindow == nil || w.IsClosed() || w.closing || !w.SystemWindow.IsVisible() {
 		return false
 	}
 	return true
@@ -459,11 +413,6 @@ func (w *RenderWindow) IsVisible() bool {
 func (w *RenderWindow) GoStartEventLoop() {
 	WindowWait.Add(1)
 	go w.EventLoop()
-}
-
-// StopEventLoop tells the event loop to stop running when the next event arrives.
-func (w *RenderWindow) StopEventLoop() {
-	w.SetFlag(true, WindowStopEventLoop)
 }
 
 // SendCustomEvent sends a custom event with given data to this window -- widgets can connect
@@ -495,18 +444,18 @@ func (w *RenderWindow) EventLoop() {
 	d := &w.SystemWindow.Events().Deque
 
 	for {
-		if w.HasFlag(WindowStopEventLoop) {
-			w.SetFlag(false, WindowStopEventLoop)
+		if w.stopEventLoop {
+			w.stopEventLoop = false
 			break
 		}
 		e := d.NextEvent()
-		if w.HasFlag(WindowStopEventLoop) {
-			w.SetFlag(false, WindowStopEventLoop)
+		if w.stopEventLoop {
+			w.stopEventLoop = false
 			break
 		}
 		w.HandleEvent(e)
-		if w.NoEventsChan != nil && len(d.Back) == 0 && len(d.Front) == 0 {
-			w.NoEventsChan <- struct{}{}
+		if w.noEventsChan != nil && len(d.Back) == 0 && len(d.Front) == 0 {
+			w.noEventsChan <- struct{}{}
 		}
 	}
 	if DebugSettings.WinEventTrace {
@@ -566,7 +515,7 @@ func (w *RenderWindow) HandleWindowEvents(e events.Event) {
 		case events.WinClose:
 			// fmt.Printf("got close event for window %v \n", w.Name)
 			e.SetHandled()
-			w.StopEventLoop()
+			w.stopEventLoop = true
 			w.Closed()
 		case events.WinMinimize:
 			e.SetHandled()
@@ -595,8 +544,8 @@ func (w *RenderWindow) HandleWindowEvents(e events.Event) {
 				AllRenderWindows.Delete(w)
 				AllRenderWindows.Add(w)
 			}
-			if !w.HasFlag(WindowGotFocus) {
-				w.SetFlag(true, WindowGotFocus)
+			if !w.gotFocus {
+				w.gotFocus = true
 				w.SendWinFocusEvent(events.WinFocus)
 				if DebugSettings.WinEventTrace {
 					fmt.Printf("Win: %v got focus\n", w.Name)
@@ -611,7 +560,7 @@ func (w *RenderWindow) HandleWindowEvents(e events.Event) {
 			if DebugSettings.WinEventTrace {
 				fmt.Printf("Win: %v lost focus\n", w.Name)
 			}
-			w.SetFlag(false, WindowGotFocus)
+			w.gotFocus = false
 			w.SendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
 			w.Resized()
@@ -664,24 +613,11 @@ func (rp *RenderParams) SaveRender(rc *RenderContext) {
 	rp.Geom = rc.Geom
 }
 
-// RenderContextFlags represent RenderContext state
-type RenderContextFlags int64 //enums:bitflag -trim-prefix Render
-
-const (
-	// the window is visible and should be rendered to
-	RenderVisible RenderContextFlags = iota
-
-	// forces a rebuild of all scene elements
-	RenderRebuild
-)
-
-// RenderContext provides rendering context from outer RenderWin
+// RenderContext provides rendering context from outer RenderWindow
 // window to Stage and Scene elements to inform styling, layout
-// and rendering.  It also has the master Mutex for any updates
-// to the window contents: use Read lock for anything updating.
+// and rendering. It also has the main Mutex for any updates
+// to the window contents: use Lock for anything updating.
 type RenderContext struct {
-	// Flags hold binary context state
-	Flags RenderContextFlags
 
 	// LogicalDPI is the current logical dots-per-inch resolution of the
 	// window, which should be used for most conversion of standard units.
@@ -696,6 +632,12 @@ type RenderContext struct {
 	// Use AsyncLock from any outside routine to grab the lock before
 	// doing modifications.
 	Mu sync.Mutex
+
+	// Visible is whether the window is visible and should be rendered to.
+	Visible bool
+
+	// Rebuild is whether to force a rebuild of all Scene elements.
+	Rebuild bool
 }
 
 // NewRenderContext returns a new RenderContext initialized according to
@@ -712,7 +654,7 @@ func NewRenderContext() *RenderContext {
 		rc.Geom = math32.Geom2DInt{Size: image.Pt(1080, 720)}
 		rc.LogicalDPI = 160
 	}
-	rc.SetFlag(true, RenderVisible)
+	rc.Visible = true
 	return rc
 }
 
@@ -729,18 +671,8 @@ func (rc *RenderContext) Unlock() {
 	rc.Mu.Unlock()
 }
 
-// HasFlag returns true if given flag is set
-func (rc *RenderContext) HasFlag(flag enums.BitFlag) bool {
-	return rc.Flags.HasFlag(flag)
-}
-
-// SetFlag sets given flag(s) on or off
-func (rc *RenderContext) SetFlag(on bool, flag ...enums.BitFlag) {
-	rc.Flags.SetFlag(on, flag...)
-}
-
 func (rc *RenderContext) String() string {
-	str := fmt.Sprintf("Geom: %s  Visible: %v", rc.Geom, rc.HasFlag(RenderVisible))
+	str := fmt.Sprintf("Geom: %s  Visible: %v", rc.Geom, rc.Visible)
 	return str
 }
 
@@ -796,10 +728,10 @@ func (rs *RenderScenes) Add(w Widget, scIndex map[Widget]int) int {
 	}
 	if prvIndex, has := rs.SceneIndex[w]; has {
 		if prvIndex != idx {
-			sc.SetFlag(true, ScImageUpdated) // need to copy b/c cur has diff image
+			sc.imageUpdated = true // need to copy b/c cur has diff image
 		}
 	} else {
-		sc.SetFlag(true, ScImageUpdated) // need to copy b/c new
+		sc.imageUpdated = true // need to copy b/c new
 	}
 	scIndex[w] = idx
 	rs.Scenes = append(rs.Scenes, w)
@@ -817,12 +749,12 @@ func (rs *RenderScenes) SetImages(drw system.Drawer) {
 	for i, w := range rs.Scenes {
 		sc := w.AsWidget().Scene
 		_, isSc := w.(*Scene)
-		if isSc && (sc.Is(ScUpdating) || !sc.Is(ScImageUpdated)) {
+		if isSc && (sc.updating || !sc.imageUpdated) {
 			if DebugSettings.WinRenderTrace {
-				if sc.Is(ScUpdating) {
+				if sc.updating {
 					fmt.Println("RenderScenes.SetImages: sc IsUpdating", sc.Name)
 				}
-				if !sc.Is(ScImageUpdated) {
+				if !sc.imageUpdated {
 					fmt.Println("RenderScenes.SetImages: sc Image NotUpdated", sc.Name)
 				}
 			}
@@ -856,7 +788,7 @@ func (rs *RenderScenes) DrawAll(drw system.Drawer) {
 
 func (sc *Scene) DirectRenderImage(drw system.Drawer, idx int) {
 	drw.SetGoImage(idx, 0, sc.Pixels, system.NoFlipY)
-	sc.SetFlag(false, ScImageUpdated)
+	sc.imageUpdated = false
 }
 
 func (sc *Scene) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
@@ -883,10 +815,10 @@ func (w *RenderWindow) RenderWindow() {
 	rc := w.RenderContext()
 	rc.Lock()
 	defer func() {
-		rc.SetFlag(false, RenderRebuild)
+		rc.Rebuild = false
 		rc.Unlock()
 	}()
-	rebuild := rc.HasFlag(RenderRebuild)
+	rebuild := rc.Rebuild
 
 	stageMods, sceneMods := w.Mains.UpdateAll() // handles all Scene / Widget updates!
 	top := w.Mains.Top()
@@ -1018,7 +950,7 @@ func (w *RenderWindow) GatherScenes() bool {
 			}
 			winScene = st.Scene
 			rs.Add(st.Scene, scIndex)
-			for _, w := range st.Scene.DirectRenders {
+			for _, w := range st.Scene.directRenders {
 				rs.Add(w, scIndex)
 			}
 			winIndex = i

@@ -83,7 +83,7 @@ func (sw *Scene) SetSelected(nd xyz.Node) {
 		sw.CurrentSelected = nil
 		xy.DeleteChildByName(SelectedBoxName)
 		xy.DeleteChildByName(ManipBoxName)
-		xy.NeedsRender()
+		xy.SetNeedsRender()
 		return
 	}
 	manip, ok := nd.(*ManipPoint)
@@ -115,7 +115,7 @@ func (sw *Scene) SelectBox() {
 	clr := sw.SelectionParams.Color
 	xyz.NewLineBox(xy, xy, SelectedBoxName, SelectedBoxName, nb.WorldBBox.BBox, sw.SelectionParams.Width, clr, xyz.Inactive)
 
-	xy.NeedsUpdate()
+	xy.SetNeedsUpdate()
 	sw.NeedsRender()
 }
 
@@ -151,7 +151,7 @@ func (sw *Scene) ManipBox() {
 	NewManipPoint(mb, nm+"-uul", mbspm.Name, clr, math32.Vec3(bbox.Max.X, bbox.Max.Y, bbox.Min.Z))
 	NewManipPoint(mb, nm+"-uuu", mbspm.Name, clr, bbox.Max)
 
-	xy.NeedsConfig()
+	xy.SetNeedsConfig()
 	sw.NeedsRender()
 }
 
@@ -293,7 +293,7 @@ func (sw *Scene) handleSlideEvents() {
 			sn.Pose.Pos.SetAdd(mpos)
 			mb.Pose.Pos.SetAdd(dpos)
 		}
-		xy.NeedsUpdate()
+		xy.SetNeedsUpdate()
 		sw.NeedsRender()
 	})
 }

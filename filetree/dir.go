@@ -6,8 +6,10 @@ package filetree
 
 import "sync"
 
-// DirFlags are flags on directories: Open, SortBy etc
+// DirFlags are flags on directories: Open, SortBy, etc.
 // These flags are stored in the DirFlagMap for persistence.
+// This map is saved to a file, so these flags must be stored
+// as bit flags instead of a struct to ensure efficient serialization.
 type DirFlags int64 //enums:bitflag -trim-prefix Dir
 
 const (

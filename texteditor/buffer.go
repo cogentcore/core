@@ -24,7 +24,6 @@ import (
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/base/runes"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/parse"
 	"cogentcore.org/core/parse/complete"
@@ -50,9 +49,6 @@ import (
 type Buffer struct { //types:add
 	// Filename is the filename of the file that was last loaded or saved. It is used when highlighting code.
 	Filename core.Filename `json:"-" xml:"-"`
-
-	// Flags are the key state flags for the buffer.
-	Flags BufferFlags
 
 	// Txt is the current value of the entire text being edited, represented as a byte slice for efficiency.
 	Txt []byte `json:"-" xml:"text"`
@@ -134,6 +130,26 @@ type Buffer struct { //types:add
 
 	// Listeners is used for sending standard system events. Change is sent for BufDone, BufInsert, and BufDelete.
 	Listeners events.Listeners
+
+	// Bool flags:
+
+	// autoSaving is used in atomically safe way to protect autosaving
+	autoSaving bool
+
+	// markingUp indicates current markup operation in progress -- don't redo
+	markingUp bool
+
+	// Changed indicates if the text has been Changed (edited) relative to the
+	// original, since last EditDone
+	Changed bool
+
+	// NotSaved indicates if the text has been changed (edited) relative to the
+	// original, since last Save
+	NotSaved bool
+
+	// fileModOK have already asked about fact that file has changed since being
+	// opened, user is ok
+	fileModOK bool
 }
 
 // NewBuffer makes a new [Buffer] with default settings
@@ -146,7 +162,7 @@ func NewBuffer() *Buffer {
 	return tb
 }
 
-// BufferSignals are signals that text buffer can send to View
+// BufferSignals are signals that [Buffer] can send to [Editor].
 type BufferSignals int32 //enums:enum -trim-prefix Buffer
 
 const (
@@ -208,66 +224,16 @@ func (tb *Buffer) OnInput(fun func(e events.Event)) {
 	tb.Listeners.Add(events.Input, fun)
 }
 
-// BufferFlags hold key Buf state
-type BufferFlags core.WidgetFlags //enums:bitflag -trim-prefix Buffer
-
-const (
-	// BufferAutoSaving is used in atomically safe way to protect autosaving
-	BufferAutoSaving BufferFlags = BufferFlags(core.WidgetFlagsN) + iota
-
-	// BufferMarkingUp indicates current markup operation in progress -- don't redo
-	BufferMarkingUp
-
-	// BufferChanged indicates if the text has been changed (edited) relative to the
-	// original, since last EditDone
-	BufferChanged
-
-	// BufferNotSaved indicates if the text has been changed (edited) relative to the
-	// original, since last Save
-	BufferNotSaved
-
-	// BufferFileModOK have already asked about fact that file has changed since being
-	// opened, user is ok
-	BufferFileModOK
-)
-
-// Is returns true if given flag is set
-func (tb *Buffer) Is(flag enums.BitFlag) bool {
-	return tb.Flags.HasFlag(flag)
+// clearNotSaved sets Changed and NotSaved to false.
+func (tb *Buffer) clearNotSaved() {
+	tb.Changed = false
+	tb.NotSaved = false
 }
 
-// SetFlag sets value of given flag(s)
-func (tb *Buffer) SetFlag(on bool, flag ...enums.BitFlag) {
-	tb.Flags.SetFlag(on, flag...)
-}
-
-// ClearChanged marks buffer as un-changed
-func (tb *Buffer) ClearChanged() {
-	tb.SetFlag(false, BufferChanged)
-}
-
-// ClearNotSaved resets the BufNotSaved flag, and also calls ClearChanged
-func (tb *Buffer) ClearNotSaved() {
-	tb.ClearChanged()
-	tb.SetFlag(false, BufferNotSaved)
-}
-
-// IsChanged indicates if the text has been changed (edited) relative to
-// the original, since last EditDone
-func (tb *Buffer) IsChanged() bool {
-	return tb.Is(BufferChanged)
-}
-
-// IsNotSaved indicates if the text has been changed (edited) relative to
-// the original, since last Save
-func (tb *Buffer) IsNotSaved() bool {
-	return tb.Is(BufferNotSaved)
-}
-
-// SetChanged marks buffer as changed
-func (tb *Buffer) SetChanged() {
-	tb.SetFlag(true, BufferChanged)
-	tb.SetFlag(true, BufferNotSaved)
+// setChanged sets Changed and NotSaved to true.
+func (tb *Buffer) setChanged() {
+	tb.Changed = true
+	tb.NotSaved = true
 }
 
 // SetText sets the text to the given bytes.
@@ -321,7 +287,7 @@ func (tb *Buffer) SetTextLines(lns [][]byte, cpy bool) {
 // EditDone finalizes any current editing, sends signal
 func (tb *Buffer) EditDone() {
 	tb.AutoSaveDelete()
-	tb.ClearChanged()
+	tb.Changed = false
 	tb.LinesToBytes()
 	tb.SignalEditors(BufferDone, nil)
 }
@@ -469,7 +435,7 @@ func (tb *Buffer) NewBuffer(nlines int) {
 
 // Stat gets info about the file, including highlighting language
 func (tb *Buffer) Stat() error {
-	tb.SetFlag(false, BufferFileModOK)
+	tb.fileModOK = false
 	err := tb.Info.InitFile(string(tb.Filename))
 	if err != nil {
 		return err
@@ -497,7 +463,7 @@ func (tb *Buffer) ConfigKnown() bool {
 // Stat (open, save) -- if haven't yet prompted, user is prompted to ensure
 // that this is OK.  returns true if file was modified
 func (tb *Buffer) FileModCheck() bool {
-	if tb.Is(BufferFileModOK) {
+	if tb.fileModOK {
 		return false
 	}
 	info, err := os.Stat(string(tb.Filename))
@@ -505,7 +471,7 @@ func (tb *Buffer) FileModCheck() bool {
 		return false
 	}
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
-		if !tb.Is(BufferChanged) { // we haven't edited: just revert
+		if !tb.Changed { // we haven't edited: just revert
 			tb.Revert()
 			return true
 		}
@@ -523,7 +489,7 @@ func (tb *Buffer) FileModCheck() bool {
 			})
 			core.NewButton(parent).SetText("Ignore and proceed").OnClick(func(e events.Event) {
 				d.Close()
-				tb.SetFlag(true, BufferFileModOK)
+				tb.fileModOK = true
 			})
 		})
 		d.RunDialog(sc)
@@ -606,7 +572,7 @@ func (tb *Buffer) Revert() bool { //types:add
 	if !didDiff {
 		tb.OpenFile(tb.Filename)
 	}
-	tb.ClearNotSaved()
+	tb.clearNotSaved()
 	tb.AutoSaveDelete()
 	tb.SignalEditors(BufferNew, nil)
 	tb.ReMarkup()
@@ -659,7 +625,7 @@ func (tb *Buffer) SaveFile(filename core.Filename) error {
 		core.ErrorSnackbar(tb.SceneFromView(), err)
 		slog.Error(err.Error())
 	} else {
-		tb.ClearNotSaved()
+		tb.clearNotSaved()
 		tb.Filename = filename
 		tb.Stat()
 	}
@@ -700,7 +666,7 @@ func (tb *Buffer) Save() error { //types:add
 // Close closes the buffer -- prompts to save if changes, and disconnects from views
 // if afterFun is non-nil, then it is called with the status of the user action
 func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
-	if tb.IsChanged() {
+	if tb.Changed {
 		tb.StopDelayedReMarkup()
 		sc := tb.SceneFromView()
 		if tb.Filename != "" {
@@ -715,7 +681,7 @@ func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
 				})
 				core.NewButton(parent).SetText("Close without saving").OnClick(func(e events.Event) {
 					d.Close()
-					tb.ClearNotSaved()
+					tb.clearNotSaved()
 					tb.AutoSaveDelete()
 					tb.Close(afterFun)
 				})
@@ -735,7 +701,7 @@ func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
 					}
 				})
 				d.AddOK(parent).SetText("Close without saving").OnClick(func(e events.Event) {
-					tb.ClearNotSaved()
+					tb.clearNotSaved()
 					tb.AutoSaveDelete()
 					tb.Close(afterFun)
 				})
@@ -747,7 +713,7 @@ func (tb *Buffer) Close(afterFun func(canceled bool)) bool {
 	tb.SignalEditors(BufferClosed, nil)
 	tb.NewBuffer(1)
 	tb.Filename = ""
-	tb.ClearNotSaved()
+	tb.clearNotSaved()
 	if afterFun != nil {
 		afterFun(false)
 	}
@@ -785,17 +751,17 @@ func (tb *Buffer) AutoSaveFilename() string {
 
 // AutoSave does the autosave -- safe to call in a separate goroutine
 func (tb *Buffer) AutoSave() error {
-	if tb.Is(BufferAutoSaving) {
+	if tb.autoSaving {
 		return nil
 	}
-	tb.SetFlag(true, BufferAutoSaving)
+	tb.autoSaving = true
 	asfn := tb.AutoSaveFilename()
 	b := tb.LinesToBytesCopy()
 	err := os.WriteFile(asfn, b, 0644)
 	if err != nil {
 		log.Printf("views.Buf: Could not AutoSave file: %v, error: %v\n", asfn, err)
 	}
-	tb.SetFlag(false, BufferAutoSaving)
+	tb.autoSaving = false
 	return err
 }
 
@@ -1158,7 +1124,7 @@ func (tb *Buffer) DeleteText(st, ed lexer.Pos, signal bool) *textbuf.Edit {
 		return nil
 	}
 	tb.FileModCheck()
-	tb.SetChanged()
+	tb.setChanged()
 	tb.LinesMu.Lock()
 	tbe := tb.DeleteTextImpl(st, ed)
 	tb.SaveUndo(tbe)
@@ -1220,7 +1186,7 @@ func (tb *Buffer) DeleteTextRect(st, ed lexer.Pos, signal bool) *textbuf.Edit {
 		return nil
 	}
 	tb.FileModCheck()
-	tb.SetChanged()
+	tb.setChanged()
 	tb.LinesMu.Lock()
 	tbe := tb.DeleteTextRectImpl(st, ed)
 	tb.SaveUndo(tbe)
@@ -1268,7 +1234,7 @@ func (tb *Buffer) InsertText(st lexer.Pos, text []byte, signal bool) *textbuf.Ed
 	}
 	st = tb.ValidPos(st)
 	tb.FileModCheck() // will just revert changes if shouldn't have changed
-	tb.SetChanged()
+	tb.setChanged()
 	if len(tb.Lines) == 0 {
 		tb.NewBuffer(1)
 	}
@@ -1346,7 +1312,7 @@ func (tb *Buffer) InsertTextRect(tbe *textbuf.Edit, signal bool) *textbuf.Edit {
 		return nil
 	}
 	tb.FileModCheck() // will just revert changes if shouldn't have changed
-	tb.SetChanged()
+	tb.setChanged()
 	tb.LinesMu.Lock()
 	nln := tb.NLines
 	re := tb.InsertTextRectImpl(tbe)
@@ -1690,11 +1656,6 @@ func (tb *Buffer) MarkupLine(ln int) {
 	tb.LinesMu.Unlock()
 }
 
-// IsMarkingUp is true if the MarkupAllLines process is currently running
-func (tb *Buffer) IsMarkingUp() bool {
-	return tb.Is(BufferMarkingUp)
-}
-
 // InitialMarkup does the first-pass markup on the file
 func (tb *Buffer) InitialMarkup() {
 	if tb.Hi.UsingParse() {
@@ -1749,7 +1710,7 @@ func (tb *Buffer) ReMarkup() {
 	if !tb.Hi.HasHi() || tb.NLines == 0 {
 		return
 	}
-	if tb.IsMarkingUp() {
+	if tb.markingUp {
 		return
 	}
 	go tb.MarkupAllLines(-1)
@@ -1789,10 +1750,10 @@ func (tb *Buffer) MarkupAllLines(maxLines int) {
 	if !tb.Hi.HasHi() || tb.NLines == 0 {
 		return
 	}
-	if tb.IsMarkingUp() {
+	if tb.markingUp {
 		return
 	}
-	tb.SetFlag(true, BufferMarkingUp)
+	tb.markingUp = true
 
 	tb.MarkupMu.Lock()
 	tb.MarkupEdits = nil
@@ -1810,7 +1771,7 @@ func (tb *Buffer) MarkupAllLines(maxLines int) {
 	}
 	mtags, err := tb.Hi.MarkupTagsAll(txt) // does full parse, outside of markup lock
 	if err != nil {
-		tb.SetFlag(false, BufferMarkingUp)
+		tb.markingUp = false
 		return
 	}
 
@@ -1876,7 +1837,7 @@ func (tb *Buffer) MarkupAllLines(maxLines int) {
 	}
 	tb.MarkupMu.Unlock()
 	tb.LinesMu.Unlock()
-	tb.SetFlag(false, BufferMarkingUp)
+	tb.markingUp = false
 	tb.SignalEditors(BufferMarkupUpdated, nil)
 }
 
@@ -1886,14 +1847,14 @@ func (tb *Buffer) MarkupAllLines(maxLines int) {
 func (tb *Buffer) MarkupFromTags() {
 	tb.MarkupMu.Lock()
 	// getting the lock means we are in control of the flag
-	tb.SetFlag(true, BufferMarkingUp)
+	tb.markingUp = true
 
 	maxln := min(len(tb.HiTags), tb.NLines)
 	for ln := 0; ln < maxln; ln++ {
 		tb.Markup[ln] = tb.Hi.MarkupLine(tb.Lines[ln], tb.HiTags[ln], nil)
 	}
 	tb.MarkupMu.Unlock()
-	tb.SetFlag(false, BufferMarkingUp)
+	tb.markingUp = false
 	tb.SignalEditors(BufferMarkupUpdated, nil)
 }
 
@@ -1946,7 +1907,7 @@ func (tb *Buffer) Undo() *textbuf.Edit {
 	tbe := tb.Undos.UndoPop()
 	if tbe == nil {
 		tb.LinesMu.Unlock()
-		tb.ClearChanged()
+		tb.Changed = false
 		tb.AutoSaveDelete()
 		return nil
 	}
@@ -2001,7 +1962,7 @@ func (tb *Buffer) Undo() *textbuf.Edit {
 	}
 	tb.LinesMu.Unlock()
 	if tb.Undos.Pos == 0 {
-		tb.ClearChanged()
+		tb.Changed = false
 		tb.AutoSaveDelete()
 	}
 	return last

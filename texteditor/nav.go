@@ -86,7 +86,7 @@ func (ed *Editor) SetCursorShow(pos lexer.Pos) {
 
 // SetCursorTarget sets a new cursor target position, ensures that it is visible
 func (ed *Editor) SetCursorTarget(pos lexer.Pos) {
-	ed.SetFlag(true, EditorTargetSet)
+	ed.targetSet = true
 	ed.CursorTarget = pos
 	ed.SetCursorShow(pos)
 	ed.NeedsRender()
@@ -181,7 +181,7 @@ func (ed *Editor) SelectRegUpdate(pos lexer.Pos) {
 // CursorSelect updates selection based on cursor movements, given starting
 // cursor position and ed.CursorPos is current
 func (ed *Editor) CursorSelect(org lexer.Pos) {
-	if !ed.SelectMode {
+	if !ed.selectMode {
 		return
 	}
 	ed.SelectRegUpdate(ed.CursorPos)
@@ -862,7 +862,7 @@ func (ed *Editor) ScrollCursorInView() bool {
 func (ed *Editor) ScrollCursorToCenterIfHidden() bool {
 	curBBox := ed.CursorBBox(ed.CursorPos)
 	did := false
-	lht := int(ed.LineHeight)
+	lht := int(ed.lineHeight)
 	bb := ed.RenderBBox()
 	if bb.Size().Y <= lht {
 		return false
@@ -939,7 +939,7 @@ func (ed *Editor) ScrollCursorToTarget() {
 	// fmt.Println(ed, "to target:", ed.CursorTarg)
 	ed.CursorPos = ed.CursorTarget
 	ed.ScrollCursorToVertCenter()
-	ed.SetFlag(false, EditorTargetSet)
+	ed.targetSet = false
 }
 
 ///////////////////////////////////////////////////////////////////////////////

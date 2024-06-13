@@ -60,13 +60,13 @@ func main() {
 						sc.DeleteTextures()
 						errors.Log1(sc.OpenNewObj(selFile, objgp))
 						sc.SetCamera("default")
-						sc.NeedsUpdate()
+						sc.SetNeedsUpdate()
 						sv.NeedsRender()
 					})
 				})
 		})
 	})
 
-	sc.NeedsConfig()
+	sc.SetNeedsConfig()
 	b.RunMainWindow()
 }

@@ -334,7 +334,7 @@ func MakeEmer(par *physics.Group, height float32) *physics.Group {
 	depth := height * .15
 
 	physics.NewBox(emr).SetSize(math32.Vec3(width, height, depth)).
-		SetColor("purple").SetDynamic().
+		SetColor("purple").SetDynamic(true).
 		SetInitPos(math32.Vec3(0, height/2, 0)).SetName("body")
 	// body := physics.NewCapsule(emr, "body", math32.Vec3(0, height / 2, 0), height, width/2)
 	// body := physics.NewCylinder(emr, "body", math32.Vec3(0, height / 2, 0), height, width/2)
@@ -345,15 +345,15 @@ func MakeEmer(par *physics.Group, height float32) *physics.Group {
 	hgp.SetName("head")
 
 	physics.NewBox(hgp).SetSize(math32.Vec3(headsz, headsz, headsz)).
-		SetColor("tan").SetDynamic().SetInitPos(math32.Vec3(0, 0, 0)).SetName("head")
+		SetColor("tan").SetDynamic(true).SetInitPos(math32.Vec3(0, 0, 0)).SetName("head")
 
 	eyesz := headsz * .2
 	physics.NewBox(hgp).SetSize(math32.Vec3(eyesz, eyesz*.5, eyesz*.2)).
-		SetColor("green").SetDynamic().
+		SetColor("green").SetDynamic(true).
 		SetInitPos(math32.Vec3(-hhsz*.6, headsz*.1, -(hhsz + eyesz*.3))).SetName("eye-l")
 
 	physics.NewBox(hgp).SetSize(math32.Vec3(eyesz, eyesz*.5, eyesz*.2)).
-		SetColor("green").SetDynamic().
+		SetColor("green").SetDynamic(true).
 		SetInitPos(math32.Vec3(hhsz*.6, headsz*.1, -(hhsz + eyesz*.3))).SetName("eye-r")
 
 	return emr

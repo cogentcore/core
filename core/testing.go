@@ -68,9 +68,9 @@ func (b *Body) runAndShowNewWindow() {
 // of the body necessary.
 func (b *Body) waitNoEvents() {
 	rw := b.Scene.RenderWindow()
-	rw.NoEventsChan = make(chan struct{})
-	<-rw.NoEventsChan
-	rw.NoEventsChan = nil
+	rw.noEventsChan = make(chan struct{})
+	<-rw.noEventsChan
+	rw.noEventsChan = nil
 
 	b.AsyncLock()
 	b.DoNeedsRender()

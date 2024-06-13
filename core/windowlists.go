@@ -108,7 +108,7 @@ func (wl *RenderWindowList) Focused() (*RenderWindow, int) {
 	defer RenderWindowGlobalMu.Unlock()
 
 	for i, fw := range *wl {
-		if fw.HasFlag(WindowGotFocus) {
+		if fw.gotFocus {
 			return fw, i
 		}
 	}

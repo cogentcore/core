@@ -7,11 +7,9 @@ package core
 import (
 	"image"
 	"slices"
-	"sync"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
-	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint"
@@ -20,11 +18,6 @@ import (
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 )
-
-// see:
-//	- render.go for scene-based rendering code
-//	- layimpl.go for layout
-//	- style.go for style
 
 // Scene contains a [Widget] tree, rooted in an embedded [Frame] layout,
 // which renders into its [Scene.Pixels] image. The [Scene] is set in a
@@ -75,42 +68,62 @@ type Scene struct { //core:no-new
 	// current stage in which this Scene is set
 	Stage *Stage `copier:"-" json:"-" xml:"-" set:"-"`
 
-	// RenderBBoxHue is current hue for rendering bounding box in ScRenderBBoxes mode
-	RenderBBoxHue float32 `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	// RenderBBoxes indicates to render colored bounding boxes for all of the widgets
+	// in the scene. This is enabled by the [Inspector] in select element mode.
+	RenderBBoxes bool
 
-	// the currently selected/hovered widget through the inspect editor selection mode
-	// that should be highlighted with a background color
+	// renderBBoxHue is current hue for rendering bounding box in [Scene.RenderBBoxes] mode.
+	renderBBoxHue float32
+
+	// SelectedWidget is the currently selected/hovered widget through the [Inspector] selection mode
+	// that should be highlighted with a background color.
 	SelectedWidget Widget
 
-	// the channel on which the selected widget through the inspect editor
-	// selection mode is transmitted to the inspect editor after the user is done selecting
+	// SelectedWidgetChan is the channel on which the selected widget through the inspect editor
+	// selection mode is transmitted to the inspect editor after the user is done selecting.
 	SelectedWidgetChan chan Widget `json:"-" xml:"-"`
 
-	// LastRender captures key params from last render.
+	// lastRender captures key params from last render.
 	// If different then a new ApplyStyleScene is needed.
-	LastRender RenderParams `edit:"-" set:"-"`
+	lastRender RenderParams
 
-	// StyleMu is RW mutex protecting access to Style-related global vars
-	StyleMu sync.RWMutex `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
-
-	// ShowIter counts up at start of showing a Scene
+	// showIter counts up at start of showing a Scene
 	// to trigger Show event and other steps at start of first show
-	ShowIter int `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	showIter int
 
-	// ReRender items are re-rendered after the current pass
-	ReRender []Widget
-
-	// hasShown is whether this scene has already been shown.
-	// This is used to ensure that [events.Show] is only sent once.
-	hasShown bool `set:"-"`
-
-	// DirectRenders are widgets that render directly to the RenderWin
+	// directRenders are widgets that render directly to the RenderWin
 	// instead of rendering into the Scene Pixels image.
-	DirectRenders []Widget
-}
+	directRenders []Widget
 
-func (sc *Scene) FlagType() enums.BitFlagSetter {
-	return (*ScFlags)(&sc.Flags)
+	// State bool values:
+
+	// HasShown is whether this scene has been shown.
+	// This is used to ensure that [events.Show] is only sent once.
+	HasShown bool `copier:"-" json:"-" xml:"-" edit:"-" set:"-"`
+
+	// updating means the Scene is in the process of updating.
+	// It is set for any kind of tree-level update.
+	// Skip any further update passes until it goes off.
+	updating bool
+
+	// sceneNeedsRender is whether anything in the Scene needs to be re-rendered
+	// (but not necessarily the whole scene itself).
+	sceneNeedsRender bool
+
+	// needsLayout is whether the Scene needs a new layout pass.
+	needsLayout bool
+
+	// imageUpdated indicates that the Scene's image has been updated
+	// e.g., due to a render or a resize. This is reset by the
+	// global [RenderWindow] rendering pass, so it knows whether it needs to
+	// copy the image up to the GPU or not.
+	imageUpdated bool
+
+	// prefSizing means that this scene is currently doing a
+	// PrefSize computation to compute the size of the scene
+	// (for sizing window for example); affects layout size computation
+	// only for Over
+	prefSizing bool
 }
 
 // NewBodyScene creates a new Scene for use with an associated Body that
@@ -249,7 +262,7 @@ func (sc *Scene) Resize(geom math32.Geom2DInt) {
 	// and to get FillInsets to overwrite mysterious black bars that otherwise are rendered on both iOS
 	// and Android in different contexts.
 	// TODO(kai): is there a more efficient way to do this, and do we need to do this on all platforms?
-	sc.ShowIter = 0
+	sc.showIter = 0
 	sc.NeedsLayout()
 }
 
@@ -257,7 +270,7 @@ func (sc *Scene) ScIsVisible() bool {
 	if sc.RenderContext() == nil || sc.Pixels == nil {
 		return false
 	}
-	return sc.RenderContext().HasFlag(RenderVisible)
+	return sc.RenderContext().Visible
 }
 
 // Close closes the Stage associated with this Scene.
@@ -282,24 +295,10 @@ func (sc *Scene) Close() bool {
 		return false // todo: needed, but not sure why
 	}
 	mm.DeleteStage(sc.Stage)
-	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() && !mm.RenderWindow.Is(WindowClosing) && !mm.RenderWindow.Is(WindowStopEventLoop) && !TheApp.IsQuitting() {
+	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() && !mm.RenderWindow.closing && !mm.RenderWindow.stopEventLoop && !TheApp.IsQuitting() {
 		mm.RenderWindow.CloseReq()
 	}
 	return true
-}
-
-// Delete this Scene if not Flagged for preservation.
-// Removes Decor and Frame Widgets
-func (sc *Scene) Delete() {
-	if sc.Flags.HasFlag(ScPreserve) {
-		return
-	}
-	sc.DeleteImpl()
-}
-
-// DeleteImpl does the deletion, removing Decor and Frame Widgets.
-func (sc *Scene) DeleteImpl() {
-	sc.DeleteChildren()
 }
 
 // UpdateTitle updates the title of the Scene's associated [Stage],
@@ -356,56 +355,12 @@ func (sc *Scene) ScenePos() {
 }
 
 func (sc *Scene) AddDirectRender(w Widget) {
-	sc.DirectRenders = append(sc.DirectRenders, w)
+	sc.directRenders = append(sc.directRenders, w)
 }
 
 func (sc *Scene) DeleteDirectRender(w Widget) {
-	idx := slices.Index(sc.DirectRenders, w)
+	idx := slices.Index(sc.directRenders, w)
 	if idx >= 0 {
-		sc.DirectRenders = slices.Delete(sc.DirectRenders, idx, idx+1)
+		sc.directRenders = slices.Delete(sc.directRenders, idx, idx+1)
 	}
 }
-
-// ScFlags has critical state information signaling when rendering,
-// styling etc need to be done
-type ScFlags WidgetFlags //enums:bitflag
-
-const (
-	// ScUpdating means scene is in the process of updating:
-	// set for any kind of tree-level update.
-	// skip any further update passes until it goes off.
-	ScUpdating ScFlags = ScFlags(WidgetFlagsN) + iota
-
-	// ScNeedsRender means nodes have flagged that they need a Render
-	// update.
-	ScNeedsRender
-
-	// ScNeedsLayout means that this scene needs DoLayout stack:
-	// GetSize, DoLayout, then Render.  This is true after any Config.
-	ScNeedsLayout
-
-	// ScNeedsRebuild means that this scene needs full Rebuild:
-	// Config, Layout, Render with DoRebuild flag set
-	// (e.g., after global style changes, zooming, etc)
-	ScNeedsRebuild
-
-	// ScImageUpdated indicates that the Scene's image has been updated
-	// e.g., due to a render or a resize.  This is reset by the
-	// global RenderWindow rendering pass, so it knows whether it needs to
-	// copy the image up to the GPU or not.
-	ScImageUpdated
-
-	// ScPrefSizing means that this scene is currently doing a
-	// PrefSize computation to compute the size of the scene
-	// (for sizing window for example) -- affects layout size computation
-	// only for Over
-	ScPrefSizing
-
-	// ScPreserve keeps this scene around instead of deleting
-	// when it is no longer needed.
-	// Set if added to SceneLibrary for example.
-	ScPreserve
-
-	// ScRenderBBoxes renders the bounding boxes for all objects in scene
-	ScRenderBBoxes
-)

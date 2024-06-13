@@ -125,7 +125,7 @@ func (ps *State) Error(pos lexer.Pos, msg string, rule *Rule) {
 		pos = ps.Src.TokenSrcPos(pos).St
 	}
 	e := ps.Errs.Add(pos, ps.Src.Filename, msg, ps.Src.SrcLine(pos.Ln), rule)
-	if GuiActive {
+	if GUIActive {
 		erstr := e.Report(ps.Src.BasePath, true, true)
 		fmt.Fprintln(ps.Trace.OutWrite, "ERROR: "+erstr)
 	}

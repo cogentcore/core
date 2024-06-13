@@ -299,10 +299,10 @@ func (sm *Stages) SendShowEvents() {
 			continue
 		}
 		sc := st.Scene
-		if sc.ShowIter == SceneShowIters+1 {
-			sc.ShowIter++
-			if !sc.hasShown {
-				sc.hasShown = true
+		if sc.showIter == SceneShowIters+1 {
+			sc.showIter++
+			if !sc.HasShown {
+				sc.HasShown = true
 				// profile.Profiling = true
 				// pr := profile.Start("send show")
 				sc.Events.GetShortcuts()

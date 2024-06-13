@@ -7,7 +7,6 @@ package lexer
 import (
 	"fmt"
 	"io"
-	"reflect"
 	"strings"
 	"text/tabwriter"
 	"unicode"
@@ -17,26 +16,8 @@ import (
 	"cogentcore.org/core/tree"
 )
 
+// Trace is whether to print debug trace info.
 var Trace = false
-
-// Lexer is the interface type for lexers -- likely not necessary except is essential
-// for defining the BaseInterface for GUI in making new nodes
-type Lexer interface {
-	tree.Node
-
-	// Compile performs any one-time compilation steps on the rule
-	Compile(ls *State) bool
-
-	// Validate checks for any errors in the rules and issues warnings,
-	// returns true if valid (no err) and false if invalid (errs)
-	Validate(ls *State) bool
-
-	// Lex tries to apply rule to given input state, returns true if matched, false if not
-	Lex(ls *State) *Rule
-
-	// AsLexerRule returns object as a [Rule].
-	AsLexerRule() *Rule
-}
 
 // Rule operates on the text input to produce the lexical tokens.
 //
@@ -92,14 +73,6 @@ type Rule struct {
 
 	// NameMap lookup map -- created during Compile
 	NmMap map[string]*Rule `edit:"-" json:"-" xml:"-"`
-}
-
-func (lr *Rule) BaseInterface() reflect.Type {
-	return reflect.TypeOf((*Lexer)(nil)).Elem()
-}
-
-func (lr *Rule) AsLexRule() *Rule {
-	return lr.This.(*Rule)
 }
 
 // CompileAll is called on the top-level Rule to compile all nodes.

@@ -105,6 +105,9 @@ type NodeBase struct {
 
 	// Paint is the paint style information for this node.
 	Paint styles.Paint `json:"-" xml:"-" set:"-"`
+
+	// isDef is whether this is in [SVG.Defs].
+	isDef bool
 }
 
 func (g *NodeBase) AsNodeBase() *NodeBase {
@@ -272,7 +275,7 @@ func SVGWalkDownNoDefs(n Node, fun func(sn Node, snb *NodeBase) bool) {
 	n.AsTree().WalkDown(func(k tree.Node) bool {
 		sn := k.(Node)
 		snb := sn.AsNodeBase()
-		if snb.Is(IsDef) || sn.NodeType() == MetaDataType {
+		if snb.isDef || sn.NodeType() == MetaDataType {
 			return tree.Break
 		}
 		return fun(sn, snb)
@@ -393,11 +396,6 @@ func (g *NodeBase) StyleCSS(sv *SVG, css map[string]any) {
 	g.ApplyCSS(sv, idnm, css)
 }
 
-// IsDefs returns true if is in the Defs of parent SVG
-func (g *NodeBase) IsDefs() bool {
-	return g.Flags.HasFlag(IsDef)
-}
-
 // LocalBBoxToWin converts a local bounding box to SVG coordinates
 func (g *NodeBase) LocalBBoxToWin(bb math32.Box2) image.Rectangle {
 	mxi := g.ParTransform(true) // include self
@@ -457,7 +455,7 @@ func (g *NodeBase) PushTransform(sv *SVG) (bool, *paint.Context) {
 	nvis := g.VisBBox == image.Rectangle{}
 	// g.SetInvisibleState(nvis) // don't set
 
-	if nvis && !g.IsDefs() {
+	if nvis && !g.isDef {
 		return false, nil
 	}
 
@@ -486,10 +484,3 @@ func (g *NodeBase) Render(sv *SVG) {
 	g.RenderChildren(sv)
 	rs.PopTransform()
 }
-
-// NodeFlags extend [tree.Flags] to hold SVG node state.
-type NodeFlags tree.Flags //enums:bitflag
-
-const (
-	IsDef NodeFlags = NodeFlags(tree.FlagsN) + iota
-)

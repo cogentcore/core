@@ -648,7 +648,7 @@ func (ly *Frame) LaySetContentFitOverflow(nsz math32.Vector2, pass LayoutPasses)
 	oflow := &ly.Styles.Overflow
 	nosz := pass == SizeUpPass && ly.Styles.IsFlexWrap()
 	for d := math32.X; d <= math32.Y; d++ {
-		if (nosz || (!(ly.Scene != nil && ly.Scene.Is(ScPrefSizing)) && oflow.Dim(d) >= styles.OverflowAuto)) && ly.Parent != nil {
+		if (nosz || (!(ly.Scene != nil && ly.Scene.prefSizing) && oflow.Dim(d) >= styles.OverflowAuto)) && ly.Parent != nil {
 			continue
 		}
 		asz.SetDim(d, styles.ClampMin(asz.Dim(d), nsz.Dim(d)))
@@ -750,7 +750,7 @@ func (wb *WidgetBase) SizeUpChildren() {
 
 // SizeUpChildren calls SizeUp on all the children of this node
 func (ly *Frame) SizeUpChildren() {
-	if ly.Styles.Display == styles.Stacked && !ly.Is(FrameStackTopOnly) {
+	if ly.Styles.Display == styles.Stacked && !ly.LayoutStackTopOnly {
 		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.SizeUp()
 			return tree.Continue
@@ -1079,7 +1079,7 @@ func (wb *WidgetBase) SizeDownChildren(iter int) bool {
 // is what Layout type does.  Other special widget types can
 // do custom layout and call this too.
 func (ly *Frame) SizeDownChildren(iter int) bool {
-	if ly.Styles.Display == styles.Stacked && !ly.Is(FrameStackTopOnly) {
+	if ly.Styles.Display == styles.Stacked && !ly.LayoutStackTopOnly {
 		redo := false
 		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			re := kwi.SizeDown(iter)
@@ -1379,7 +1379,7 @@ func (ly *Frame) SizeDownGrowStacked(iter int, extra math32.Vector2) bool {
 	chg := false
 	asz := ly.Geom.Size.Alloc.Content
 	// todo: could actually use the grow factors to decide if growing here?
-	if ly.Is(FrameStackTopOnly) {
+	if ly.LayoutStackTopOnly {
 		_, kwb := ly.StackTopWidget()
 		if kwb != nil {
 			ksz := &kwb.Geom.Size
@@ -1439,7 +1439,7 @@ func (ly *Frame) SizeDownAllocActualStacked(iter int) {
 	// stack just gets everything from us
 	asz := ly.Geom.Size.Actual.Content
 	// todo: could actually use the grow factors to decide if growing here?
-	if ly.Is(FrameStackTopOnly) {
+	if ly.LayoutStackTopOnly {
 		_, kwb := ly.StackTopWidget()
 		if kwb != nil {
 			ksz := &kwb.Geom.Size
@@ -1499,7 +1499,7 @@ func (wb *WidgetBase) SizeFinalWidget() {
 // any factor > 1 produces a full fill along that dimension.
 // Returns true if this resulted in a change in our Total size.
 func (wb *WidgetBase) GrowToAlloc() bool {
-	if (wb.Scene != nil && wb.Scene.Is(ScPrefSizing)) || wb.Styles.GrowWrap {
+	if (wb.Scene != nil && wb.Scene.prefSizing) || wb.Styles.GrowWrap {
 		return false
 	}
 	sz := &wb.Geom.Size
@@ -1557,7 +1557,7 @@ func (wb *WidgetBase) SizeFinalChildren() {
 
 // SizeFinalChildren calls SizeFinal on all the children of this node
 func (ly *Frame) SizeFinalChildren() {
-	if ly.Styles.Display == styles.Stacked && !ly.Is(FrameStackTopOnly) {
+	if ly.Styles.Display == styles.Stacked && !ly.LayoutStackTopOnly {
 		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.SizeFinal()
 			return tree.Continue
@@ -1738,7 +1738,7 @@ func (ly *Frame) PositionWrap() {
 func (ly *Frame) PositionStacked() {
 	ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwb.Geom.RelPos.SetZero()
-		if !ly.Is(FrameStackTopOnly) || i == ly.StackTop {
+		if !ly.LayoutStackTopOnly || i == ly.StackTop {
 			kwi.Position()
 		}
 		return tree.Continue
@@ -1835,7 +1835,7 @@ func (wb *WidgetBase) ScenePosChildren() {
 
 // ScenePosChildren runs ScenePos on the children
 func (ly *Frame) ScenePosChildren() {
-	if ly.Styles.Display == styles.Stacked && !ly.Is(FrameStackTopOnly) {
+	if ly.Styles.Display == styles.Stacked && !ly.LayoutStackTopOnly {
 		ly.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 			kwi.ScenePos()
 			return tree.Continue

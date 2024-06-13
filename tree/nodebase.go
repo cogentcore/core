@@ -8,12 +8,12 @@ import (
 	"log/slog"
 	"maps"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/jinzhu/copier"
 
 	"cogentcore.org/core/base/elide"
-	"cogentcore.org/core/enums"
 	"cogentcore.org/core/types"
 )
 
@@ -60,10 +60,6 @@ type NodeBase struct {
 	// various NodeBase child helper functions when applicable so that everything is updated
 	// properly, such as when deleting children.
 	Children []Node `tableview:"-" copier:"-" set:"-" json:",omitempty"`
-
-	// Flags are bit flags for internal node state, which can be extended using
-	// the enums package.
-	Flags Flags `tableview:"-" copier:"-" json:"-" xml:"-" set:"-" max-width:"80" height:"3"`
 
 	// Properties is a property map for arbitrary key-value properties.
 	// When possible, use typed fields on a new type embedding NodeBase instead of this.
@@ -264,7 +260,9 @@ func (n *NodeBase) PathFrom(parent Node) string {
 // FindPath returns the node at the given path from this node.
 // FindPath only works correctly when names are unique.
 // The given path must be consistent with the format produced
-// by [NodeBase.PathFrom]. It returns nil if no node is found
+// by [NodeBase.PathFrom]. There is also support for index-based
+// access (ie: [0] for the first child) for cases where indexes
+// are more useful than names. It returns nil if no node is found
 // at the given path.
 func (n *NodeBase) FindPath(path string) Node {
 	curn := n.This
@@ -273,13 +271,28 @@ func (n *NodeBase) FindPath(path string) Node {
 		if len(pe) == 0 {
 			continue
 		}
-		idx := IndexByName(curn.AsTree().Children, UnescapePathName(pe))
+		idx := findPathChild(curn, UnescapePathName(pe))
 		if idx < 0 {
 			return nil
 		}
 		curn = curn.AsTree().Children[idx]
 	}
 	return curn
+}
+
+// findPathChild finds the child with the given string representation in [NodeBase.FindPath].
+func findPathChild(n Node, child string) int {
+	if child[0] == '[' && child[len(child)-1] == ']' {
+		idx, err := strconv.Atoi(child[1 : len(child)-1])
+		if err != nil {
+			return idx
+		}
+		if idx < 0 { // from end
+			idx = len(n.AsTree().Children) + idx
+		}
+		return idx
+	}
+	return IndexByName(n.AsTree().Children, child)
 }
 
 // Adding and Inserting Children:
@@ -407,31 +420,6 @@ func (n *NodeBase) Destroy() {
 	}
 	n.DeleteChildren()
 	n.This = nil
-}
-
-// Flags:
-
-// Is checks if the given flag is set, using atomic,
-// which is safe for concurrent access.
-func (n *NodeBase) Is(f enums.BitFlag) bool {
-	return n.Flags.HasFlag(f)
-}
-
-// SetFlag sets the given flag(s) to the given state
-// using atomic, which is safe for concurrent access.
-func (n *NodeBase) SetFlag(on bool, f ...enums.BitFlag) {
-	n.Flags.SetFlag(on, f...)
-}
-
-// FlagType returns the flags of the node as the true flag type of the node,
-// which may be a type that extends the standard [Flags]. Each node type
-// that extends the flag type should define this method; for example:
-//
-//	func (wb *WidgetBase) FlagType() enums.BitFlagSetter {
-//		return (*WidgetFlags)(&wb.Flags)
-//	}
-func (n *NodeBase) FlagType() enums.BitFlagSetter {
-	return &n.Flags
 }
 
 // Property Storage:

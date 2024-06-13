@@ -98,9 +98,9 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		ed.lastRecenter = 0
 	}
 
-	if kf != keymap.Undo && ed.Is(EditorLastWasUndo) {
+	if kf != keymap.Undo && ed.lastWasUndo {
 		ed.Buffer.EmacsUndoSave()
-		ed.SetFlag(false, EditorLastWasUndo)
+		ed.lastWasUndo = false
 	}
 
 	gotTabAI := false // got auto-indent tab this time
@@ -250,7 +250,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		return
 	}
 	if kt.IsHandled() {
-		ed.SetFlag(gotTabAI, EditorLastWasTabAI)
+		ed.lastWasTabAI = gotTabAI
 		return
 	}
 	switch kf {
@@ -314,7 +314,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		cancelAll()
 		kt.SetHandled()
 		ed.Undo()
-		ed.SetFlag(true, EditorLastWasUndo)
+		ed.lastWasUndo = true
 	case keymap.Redo:
 		cancelAll()
 		kt.SetHandled()
@@ -357,7 +357,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
-			lasttab := ed.Is(EditorLastWasTabAI)
+			lasttab := ed.lastWasTabAI
 			if !lasttab && ed.CursorPos.Ch == 0 && ed.Buffer.Options.AutoIndent {
 				_, _, cpos := ed.Buffer.AutoIndent(ed.CursorPos.Ln)
 				ed.CursorPos.Ch = cpos
@@ -392,7 +392,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		}
 		ed.ISpellKeyInput(kt)
 	}
-	ed.SetFlag(gotTabAI, EditorLastWasTabAI)
+	ed.lastWasTabAI = gotTabAI
 }
 
 // KeyInputInsertBra handle input of opening bracket-like entity (paren, brace, bracket)
@@ -600,7 +600,7 @@ func (ed *Editor) HandleMouse() {
 	})
 	ed.On(events.SlideMove, func(e events.Event) {
 		e.SetHandled()
-		if !ed.SelectMode {
+		if !ed.selectMode {
 			ed.SelectModeToggle()
 		}
 		pt := ed.PointToRelPos(e.Pos())
@@ -611,7 +611,7 @@ func (ed *Editor) HandleMouse() {
 
 func (ed *Editor) HandleLinkCursor() {
 	ed.On(events.MouseMove, func(e events.Event) {
-		if !ed.HasLinks {
+		if !ed.hasLinks {
 
 		}
 		pt := ed.PointToRelPos(e.Pos())
@@ -649,7 +649,7 @@ func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lexer.Pos, selMode e
 	//	fmt.Printf("set cursor fm mouse: %v\n", newPos)
 	defer ed.NeedsRender()
 
-	if !ed.SelectMode && selMode == events.ExtendContinuous {
+	if !ed.selectMode && selMode == events.ExtendContinuous {
 		if ed.SelectRegion == textbuf.RegionNil {
 			ed.SelectStart = ed.CursorPos
 		}
@@ -660,9 +660,9 @@ func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lexer.Pos, selMode e
 	}
 
 	ed.SetCursor(newPos)
-	if ed.SelectMode || selMode != events.SelectOne {
-		if !ed.SelectMode && selMode != events.SelectOne {
-			ed.SelectMode = true
+	if ed.selectMode || selMode != events.SelectOne {
+		if !ed.selectMode && selMode != events.SelectOne {
+			ed.selectMode = true
 			ed.SelectStart = newPos
 			ed.SelectRegUpdate(ed.CursorPos)
 		}

@@ -53,7 +53,7 @@ func (tv *TreeView) SetSyncNode(sn tree.Node, tvIndex *int, init bool, depth int
 // ReSync resynchronizes the view relative to the underlying nodes
 // and forces a full rerender
 func (tv *TreeView) ReSync() {
-	tvIndex := tv.ViewIndex
+	tvIndex := tv.viewIndex
 	tv.SyncToSrc(&tvIndex, false, 0)
 	tv.Update()
 }
@@ -69,7 +69,7 @@ func (tv *TreeView) SyncToSrc(tvIndex *int, init bool, depth int) {
 		nm := "tv_" + sn.AsTree().Name
 		tv.SetName(nm)
 	}
-	tv.ViewIndex = *tvIndex
+	tv.viewIndex = *tvIndex
 	*tvIndex++
 	if init && depth >= tv.RootView.OpenDepth {
 		tv.SetClosed(true)

@@ -69,7 +69,7 @@ func (is *Inspector) Init() {
 		if !ok {
 			return
 		}
-		sc.RenderContext().SetFlag(true, core.RenderRebuild) // trigger full rebuild
+		sc.RenderContext().Rebuild = true // trigger full rebuild
 	}
 	core.AddChildAt(is, "splits", func(w *core.Splits) {
 		w.SetSplits(.3, .7)
@@ -121,7 +121,7 @@ func (is *Inspector) Init() {
 				if !ok {
 					return
 				}
-				if sc.Is(core.ScRenderBBoxes) {
+				if sc.RenderBBoxes {
 					is.ToggleSelectionMode()
 				}
 				pselw := sc.SelectedWidget
@@ -189,8 +189,8 @@ func (is *Inspector) ToggleSelectionMode() { //types:add
 	if !ok {
 		return
 	}
-	sc.SetFlag(!sc.Is(core.ScRenderBBoxes), core.ScRenderBBoxes)
-	if sc.Is(core.ScRenderBBoxes) {
+	sc.RenderBBoxes = !sc.RenderBBoxes
+	if sc.RenderBBoxes {
 		sc.SelectedWidgetChan = make(chan core.Widget)
 		go is.SelectionMonitor()
 	} else {
@@ -239,7 +239,7 @@ func (is *Inspector) SelectionMonitor() {
 	is.Scene.Stage.Raise()
 
 	sc.AsyncLock()
-	sc.SetFlag(false, core.ScRenderBBoxes)
+	sc.RenderBBoxes = false
 	if sc.SelectedWidgetChan != nil {
 		close(sc.SelectedWidgetChan)
 	}
