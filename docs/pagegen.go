@@ -757,51 +757,6 @@ var PagesExamples = map[string]func(parent core.Widget){
 	"views/values-2": func(parent core.Widget) {
 		// core.NewValue(parent, 70, `view:"slider"`)
 	},
-	"views/keyed-lists-0": func(parent core.Widget) {
-		core.NewKeyedList(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
-	},
-	"views/keyed-lists-1": func(parent core.Widget) {
-		core.NewKeyedList(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
-	},
-	"views/keyed-lists-2": func(parent core.Widget) {
-		m := map[string]int{"Go": 1, "C++": 3, "Python": 5}
-		core.NewKeyedList(parent).SetMap(&m).OnChange(func(e events.Event) {
-			core.MessageSnackbar(parent, fmt.Sprintf("Map: %v", m))
-		})
-	},
-	"views/keyed-lists-3": func(parent core.Widget) {
-		core.NewKeyedList(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
-	},
-	"views/keyed-lists-4": func(parent core.Widget) {
-		core.NewKeyedList(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
-	},
-	"views/keyed-lists-5": func(parent core.Widget) {
-		// core.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
-	},
-	"views/keyed-lists-6": func(parent core.Widget) {
-		// core.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
-	},
-	"views/lists-0": func(parent core.Widget) {
-		core.NewList(parent).SetSlice(&[]int{1, 3, 5})
-	},
-	"views/lists-1": func(parent core.Widget) {
-		core.NewInlineList(parent).SetSlice(&[]int{1, 3, 5})
-	},
-	"views/lists-2": func(parent core.Widget) {
-		sl := []int{1, 3, 5}
-		core.NewList(parent).SetSlice(&sl).OnChange(func(e events.Event) {
-			core.MessageSnackbar(parent, fmt.Sprintf("Slice: %v", sl))
-		})
-	},
-	"views/lists-3": func(parent core.Widget) {
-		core.NewList(parent).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
-	},
-	"views/lists-4": func(parent core.Widget) {
-		// core.NewValue(parent, &[]int{1, 3, 5})
-	},
-	"views/lists-5": func(parent core.Widget) {
-		// core.NewValue(parent, &[]int{1, 3, 5, 7, 9})
-	},
 	"views/forms-0": func(parent core.Widget) {
 		type person struct {
 			Name string
@@ -903,6 +858,51 @@ var PagesExamples = map[string]func(parent core.Widget){
 			LikesPython bool
 		}
 		// core.NewValue(&person{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true}, "", parent)
+	},
+	"views/keyed-lists-0": func(parent core.Widget) {
+		core.NewKeyedList(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
+	},
+	"views/keyed-lists-1": func(parent core.Widget) {
+		core.NewKeyedList(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
+	},
+	"views/keyed-lists-2": func(parent core.Widget) {
+		m := map[string]int{"Go": 1, "C++": 3, "Python": 5}
+		core.NewKeyedList(parent).SetMap(&m).OnChange(func(e events.Event) {
+			core.MessageSnackbar(parent, fmt.Sprintf("Map: %v", m))
+		})
+	},
+	"views/keyed-lists-3": func(parent core.Widget) {
+		core.NewKeyedList(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
+	},
+	"views/keyed-lists-4": func(parent core.Widget) {
+		core.NewKeyedList(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
+	},
+	"views/keyed-lists-5": func(parent core.Widget) {
+		// core.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
+	},
+	"views/keyed-lists-6": func(parent core.Widget) {
+		// core.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
+	},
+	"views/lists-0": func(parent core.Widget) {
+		core.NewList(parent).SetSlice(&[]int{1, 3, 5})
+	},
+	"views/lists-1": func(parent core.Widget) {
+		core.NewInlineList(parent).SetSlice(&[]int{1, 3, 5})
+	},
+	"views/lists-2": func(parent core.Widget) {
+		sl := []int{1, 3, 5}
+		core.NewList(parent).SetSlice(&sl).OnChange(func(e events.Event) {
+			core.MessageSnackbar(parent, fmt.Sprintf("Slice: %v", sl))
+		})
+	},
+	"views/lists-3": func(parent core.Widget) {
+		core.NewList(parent).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
+	},
+	"views/lists-4": func(parent core.Widget) {
+		// core.NewValue(parent, &[]int{1, 3, 5})
+	},
+	"views/lists-5": func(parent core.Widget) {
+		// core.NewValue(parent, &[]int{1, 3, 5, 7, 9})
 	},
 	"views/tables-0": func(parent core.Widget) {
 		type language struct {

@@ -1,4 +1,4 @@
-# Keyed Lists
+# Keyed lists
 
 Cogent Core provides interactive keyed lists that allow you to display a map value to users and have them edit it. Users can use context menus to add, remove, and move rows.
 
