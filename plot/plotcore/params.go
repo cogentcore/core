@@ -78,7 +78,7 @@ type PlotParams struct { //types:add
 	YAxisLabel string
 
 	// our plot, for update method
-	Plot *PlotView `copier:"-" json:"-" xml:"-" view:"-"`
+	Plot *PlotEditor `copier:"-" json:"-" xml:"-" view:"-"`
 }
 
 // Defaults sets defaults if nil vals present
@@ -232,7 +232,7 @@ type ColumnParams struct { //types:add
 	IsString bool `edit:"-"`
 
 	// our plot, for update method
-	Plot *PlotView `copier:"-" json:"-" xml:"-" view:"-"`
+	Plot *PlotEditor `copier:"-" json:"-" xml:"-" view:"-"`
 }
 
 // Defaults sets defaults if nil vals present

@@ -20,10 +20,9 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
-// Plot is a Widget that renders a [plot.Plot] object.
+// Plot is a widget that renders a [plot.Plot] object.
 // If it is not [states.ReadOnly], the user can pan and zoom the graph.
-// See [ConfigPlotToolbar] for a toolbar with panning, selecting, and I/O buttons,
-// and PlotView for an interactive interface for selecting columns to view.
+// See [PlotEditor] for an interactive interface for selecting columns to view.
 type Plot struct {
 	core.WidgetBase
 

@@ -21,7 +21,7 @@ import (
 // legend values interleaved
 
 // GenPlotBar generates a Bar plot, setting GPlot variable
-func (pl *PlotView) GenPlotBar() {
+func (pl *PlotEditor) GenPlotBar() {
 	plt := plot.New() // note: not clear how to re-use, due to newtablexynames
 	if pl.Params.BarWidth > 1 {
 		pl.Params.BarWidth = .8

@@ -29,7 +29,7 @@ func main() {
 		epc := table.NewTable("epc")
 		epc.OpenFS(tsv, "ra25epoch.tsv", table.Tab)
 
-		pl := plotcore.NewPlotView(b)
+		pl := plotcore.NewPlotEditor(b)
 		pl.Params.Title = "RA25 Epoch Train"
 		pl.Params.XAxisColumn = "Epoch"
 		// pl.Params.Scale = 2
@@ -48,7 +48,7 @@ func main() {
 			slog.Error(err.Error())
 		}
 
-		pl := plotcore.NewPlotView(b)
+		pl := plotcore.NewPlotEditor(b)
 		pl.Params.Title = "Slice Data"
 		pl.Params.XAxisColumn = "City"
 		pl.Params.Points = true

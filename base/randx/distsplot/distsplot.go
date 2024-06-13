@@ -51,7 +51,7 @@ type Sim struct {
 	Hist *table.Table `view:"no-inline"`
 
 	// the plot
-	Plot *plotcore.PlotView `view:"-"`
+	Plot *plotcore.PlotEditor `view:"-"`
 }
 
 // TheSim is the overall state for this simulation
@@ -102,7 +102,7 @@ func (ss *Sim) ConfigTable(dt *table.Table) {
 	dt.AddFloat64Column("Val")
 }
 
-func (ss *Sim) ConfigPlot(plt *plotcore.PlotView, dt *table.Table) *plotcore.PlotView {
+func (ss *Sim) ConfigPlot(plt *plotcore.PlotEditor, dt *table.Table) *plotcore.PlotEditor {
 	plt.Params.Title = "Rand Dist Histogram"
 	plt.Params.XAxisColumn = "Value"
 	plt.Params.Type = plotcore.Bar
@@ -126,7 +126,7 @@ func (ss *Sim) ConfigGUI() *core.Body {
 	tv := core.NewTabs(split)
 
 	pt := tv.NewTab("Histogram")
-	plt := plotcore.NewPlotView(pt)
+	plt := plotcore.NewPlotEditor(pt)
 	ss.Plot = ss.ConfigPlot(plt, ss.Hist)
 
 	split.SetSplits(.3, .7)

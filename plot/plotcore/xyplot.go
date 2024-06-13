@@ -18,7 +18,7 @@ import (
 )
 
 // GenPlotXY generates an XY (lines, points) plot, setting Plot variable
-func (pl *PlotView) GenPlotXY() {
+func (pl *PlotEditor) GenPlotXY() {
 	plt := plot.New()
 
 	// process xaxis first
