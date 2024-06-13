@@ -31,8 +31,8 @@ func SettingsEditorToolbarBase(p *Plan) {
 	*/
 }
 
-// SettingsWindow makes and runs a new window for editing user settings.
-func SettingsWindow() {
+// SettingsWindow opens a window for editing user settings.
+func SettingsWindow() { //types:add
 	if RecycleMainWindow(&AllSettings) {
 		return
 	}

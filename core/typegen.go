@@ -1745,3 +1745,5 @@ var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/core.ProfileToggle"
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/core.ResetAllSettings", Doc: "ResetAllSettings resets all of the settings to their default values.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"error"}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/core.UpdateAll", Doc: "UpdateAll updates all windows and triggers a full render rebuild.\nIt is typically called when user settings are changed.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}})
+
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/core.SettingsWindow", Doc: "SettingsWindow opens a window for editing user settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}})
