@@ -14,7 +14,6 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/matcolor"
-	"cogentcore.org/core/enums"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
@@ -63,8 +62,6 @@ var RenderWindowGlobalMu sync.Mutex
 // Sprites are managed by the main stage, as layered textures of the same size,
 // to enable unlimited number packed into a few descriptors for standard sizes.
 type RenderWindow struct {
-	// Flags are the flags associated with the window.
-	Flags WindowFlags
 
 	// Name is the name of the window.
 	Name string
@@ -85,49 +82,19 @@ type RenderWindow struct {
 	// arranged in order, and continuously updated during Render.
 	RenderScenes RenderScenes
 
-	// below are internal vars used during the event loop
-
-	// NoEventsChan is a channel on which a signal is sent when there are
+	// noEventsChan is a channel on which a signal is sent when there are
 	// no events left in the window [events.Deque]. It is used internally
-	// for event handling in tests, and should typically not be used by
-	// end-users.
-	NoEventsChan chan struct{}
+	// for event handling in tests.
+	noEventsChan chan struct{}
 
-	// todo: need some other way of freeing GPU resources -- this is not clean:
-	// // the phongs for the window
-	// Phongs []*vphong.Phong ` json:"-" xml:"-" desc:"the phongs for the window"`
-	//
-	// // the render frames for the window
-	// Frames []*vgpu.RenderFrame ` json:"-" xml:"-" desc:"the render frames for the window"`
-}
+	// closing is whether the window is closing.
+	closing bool
 
-// WindowFlags represent RenderWindow state
-type WindowFlags int64 //enums:bitflag -trim-prefix Window
+	// gotFocus indicates that have we received focus.
+	gotFocus bool
 
-const (
-	// WindowClosing is atomic flag indicating window is closing
-	WindowClosing WindowFlags = iota
-
-	// WindowGotFocus indicates that have we received RenderWindow focus
-	WindowGotFocus
-
-	// WindowStopEventLoop is set when event loop stop is requested
-	WindowStopEventLoop
-)
-
-// HasFlag returns true if given flag is set
-func (w *RenderWindow) HasFlag(flag enums.BitFlag) bool {
-	return w.Flags.HasFlag(flag)
-}
-
-// Is returns true if given flag is set
-func (w *RenderWindow) Is(flag enums.BitFlag) bool {
-	return w.Flags.HasFlag(flag)
-}
-
-// SetFlag sets given flag(s) on or off
-func (w *RenderWindow) SetFlag(on bool, flag ...enums.BitFlag) {
-	w.Flags.SetFlag(on, flag...)
+	// stopEventLoop indicates that the event loop should be stopped.
+	stopEventLoop bool
 }
 
 // NewRenderWindow creates a new window with given internal name handle,
@@ -492,8 +459,8 @@ func (w *RenderWindow) EventLoop() {
 			break
 		}
 		w.HandleEvent(e)
-		if w.NoEventsChan != nil && len(d.Back) == 0 && len(d.Front) == 0 {
-			w.NoEventsChan <- struct{}{}
+		if w.noEventsChan != nil && len(d.Back) == 0 && len(d.Front) == 0 {
+			w.noEventsChan <- struct{}{}
 		}
 	}
 	if DebugSettings.WinEventTrace {
