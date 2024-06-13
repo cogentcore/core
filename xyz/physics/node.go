@@ -58,6 +58,11 @@ type Node interface {
 type NodeBase struct {
 	tree.NodeBase
 
+	// Dynamic is whether this node can move. If it is false, then this is a Static node.
+	// Any top-level group that is not Dynamic is immediately pruned from further consideration,
+	// so top-level groups should be separated into Dynamic and Static nodes at the start.
+	Dynamic bool
+
 	// initial position, orientation, velocity in *local* coordinates (relative to parent)
 	Initial State `view:"inline"`
 
@@ -77,10 +82,6 @@ func (nb *NodeBase) AsNodeBase() *NodeBase {
 
 func (nb *NodeBase) AsBody() Body {
 	return nil
-}
-
-func (nb *NodeBase) IsDynamic() bool {
-	return nb.Is(Dynamic)
 }
 
 // SetInitPos sets the initial position
@@ -163,17 +164,3 @@ func AsNode(n tree.Node) (Node, *NodeBase) {
 	}
 	return nil, nil
 }
-
-//////////////////////////////////////////////////////////////////////
-// NodeFlags
-
-// NodeFlags define node bitflags -- uses ki Flags field (64 bit capacity)
-type NodeFlags tree.Flags //enums:bitflag
-
-const (
-	// Dynamic means that this node can move -- if not so marked, it is
-	// a Static node.  Any top-level group that is not Dynamic is immediately
-	// pruned from further consideration, so top-level groups should be
-	// separated into Dynamic and Static nodes at the start.
-	Dynamic NodeFlags = NodeFlags(tree.FlagsN) + iota
-)

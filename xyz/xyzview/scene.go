@@ -95,7 +95,7 @@ func (sw *Scene) Init() {
 				sw.XYZ.Config()
 			}
 		})
-		sw.XYZ.SetFlag(true, xyz.ScNeedsRender)
+		sw.XYZ.NeedsRender()
 	})
 }
 
