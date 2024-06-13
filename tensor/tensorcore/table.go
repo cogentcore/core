@@ -29,7 +29,7 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Table provides a GUI view for [table.Table] values.
+// Table provides a GUI widget for representing [table.Table] values.
 type Table struct {
 	core.ListBase
 
