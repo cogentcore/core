@@ -9,14 +9,14 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/htmlview"
+	"cogentcore.org/core/htmlcore"
 )
 
-//go:embed example.md
+//go:embed example.html
 var content string
 
 func main() {
-	b := core.NewBody("HTML View MD")
-	errors.Log(htmlview.ReadMDString(htmlview.NewContext(), b, content))
+	b := core.NewBody("HTML Example")
+	errors.Log(htmlcore.ReadHTMLString(htmlcore.NewContext(), b, content))
 	b.RunMainWindow()
 }

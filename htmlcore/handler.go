@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package htmlview
+package htmlcore
 
 import (
 	"fmt"
@@ -38,7 +38,7 @@ var ElementHandlers = map[string]func(ctx *Context) bool{}
 func New[T core.Widget](ctx *Context) T {
 	parent := ctx.Parent()
 	w := tree.New[T](parent)
-	ctx.Config(w) // TODO(config): better htmlview structure with new config paradigm?
+	ctx.Config(w) // TODO(config): better htmlcore structure with new config paradigm?
 	return w
 }
 
@@ -64,11 +64,11 @@ func HandleElement(ctx *Context) {
 		// we don't render anything
 	case "link":
 		rel := GetAttr(ctx.Node, "rel")
-		// TODO(kai/htmlview): maybe handle preload
+		// TODO(kai/htmlcore): maybe handle preload
 		if rel == "preload" {
 			return
 		}
-		// TODO(kai/htmlview): support links other than stylesheets
+		// TODO(kai/htmlcore): support links other than stylesheets
 		if rel != "stylesheet" {
 			return
 		}
@@ -141,7 +141,7 @@ func HandleElement(ctx *Context) {
 				}
 				start = strconv.Itoa(number) + ". "
 			case "ul":
-				// TODO(kai/htmlview): have different bullets for different depths
+				// TODO(kai/htmlcore): have different bullets for different depths
 				start = "• "
 			}
 		}
@@ -157,7 +157,7 @@ func HandleElement(ctx *Context) {
 			}
 			defer resp.Body.Close()
 			if strings.Contains(resp.Header.Get("Content-Type"), "svg") {
-				// TODO(kai/htmlview): support svg
+				// TODO(kai/htmlcore): support svg
 			} else {
 				im, _, err := imagex.Read(resp.Body)
 				if err != nil {

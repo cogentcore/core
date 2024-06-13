@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package htmlview converts HTML and MD into Cogent Core widget trees.
-package htmlview
+// Package htmlcore converts HTML and MD into Cogent Core widget trees.
+package htmlcore
 
 import (
 	"bytes"

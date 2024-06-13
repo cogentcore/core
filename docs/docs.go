@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/htmlview"
+	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/pages"
 	"cogentcore.org/core/styles"
@@ -43,15 +43,15 @@ var myFile embed.FS
 func main() {
 	b := core.NewBody("Cogent Core Docs")
 	pg := pages.NewPage(b).SetSource(errors.Log1(fs.Sub(content, "content")))
-	pg.Context.WikilinkResolver = htmlview.PkgGoDevWikilink("cogentcore.org/core")
+	pg.Context.WikilinkResolver = htmlcore.PkgGoDevWikilink("cogentcore.org/core")
 	// b.AddAppBar(pg.AppBar)
 
-	htmlview.ElementHandlers["home-page"] = homePage
+	htmlcore.ElementHandlers["home-page"] = homePage
 
 	b.RunMainWindow()
 }
 
-func homePage(ctx *htmlview.Context) bool {
+func homePage(ctx *htmlcore.Context) bool {
 	frame := core.NewFrame(ctx.BlockParent).Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)

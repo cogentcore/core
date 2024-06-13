@@ -1,8 +1,8 @@
-# Gidom in Markdown
+# htmlcore in Markdown
 
 ### Made with ***Cogent Core***
 
-This is a sample _MD_ (markdown) **document** displayed using `htmlview`.
+This is a sample _MD_ (markdown) **document** displayed using `htmlcore`.
 
 This is a [link to the ***Cogent Core*** website](https://cogentcore.org/core), which you can _click_ on to see helpful **documentation** and examples for the *Cogent Core* framework.
 
