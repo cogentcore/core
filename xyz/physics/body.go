@@ -10,11 +10,6 @@ type Body interface {
 
 	// AsBodyBase returns the body as a BodyBase
 	AsBodyBase() *BodyBase
-
-	// SetDynamic sets the Dynamic flag for this body, indicating that it moves.
-	// It is important to collect all dynamic objects into separate top-level group(s)
-	// for more efficiently organizing the collision detection process.
-	SetDynamic() *BodyBase
 }
 
 // BodyBase is the base type for all specific Body types
@@ -39,11 +34,4 @@ func (bb *BodyBase) AsBodyBase() *BodyBase {
 	return bb
 }
 
-func (bb *BodyBase) GroupBBox() {
-
-}
-
-func (bb *BodyBase) SetDynamic() *BodyBase {
-	bb.SetFlag(true, Dynamic)
-	return bb
-}
+func (bb *BodyBase) GroupBBox() {}

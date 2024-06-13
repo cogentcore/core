@@ -11,7 +11,7 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Node is the common interface for all nodes
+// Node is the common interface for all nodes.
 type Node interface {
 	tree.Node
 
@@ -21,10 +21,6 @@ type Node interface {
 
 	// AsBody returns a generic Body interface for our node -- nil if not a Body
 	AsBody() Body
-
-	// IsDynamic returns true if node has Dynamic flag set -- otherwise static
-	// Groups that contain dynamic objects set their dynamic flags.
-	IsDynamic() bool
 
 	// GroupBBox sets bounding boxes for groups based on groups or bodies.
 	// called in a FuncDownMeLast traversal.
