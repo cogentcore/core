@@ -34,9 +34,7 @@ type Node interface {
 	// Validate checks that scene element is valid.
 	Validate() error
 
-	// UpdateWorldMatrix updates this node's local and world matrix based on parent's world matrix
-	// This sets the WorldMatrixUpdated flag but does not check that flag; calling
-	// routine can optionally do so.
+	// UpdateWorldMatrix updates this node's local and world matrix based on parent's world matrix.
 	UpdateWorldMatrix(parWorld *math32.Matrix4)
 
 	// UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
@@ -80,6 +78,9 @@ type Node interface {
 type NodeBase struct {
 	tree.NodeBase
 
+	// Invisible is whether this node is invisible.
+	Invisible bool
+
 	// Pose is the complete specification of position and orientation.
 	Pose Pose `set:"-"`
 
@@ -103,20 +104,6 @@ type NodeBase struct {
 	// This is BBox intersected with Frame bounds.
 	SceneBBox image.Rectangle `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 }
-
-// NodeFlags extend [tree.Flags] to hold 3D node state.
-type NodeFlags tree.Flags //enums:bitflag
-
-const (
-	// WorldMatrixUpdated means that the Pose.WorldMatrix has been updated
-	WorldMatrixUpdated NodeFlags = NodeFlags(tree.FlagsN) + iota
-
-	// VectorsUpdated means that the rendering vectors information is updated
-	VectorsUpdated
-
-	// Invisible marks this node as invisible
-	Invisible
-)
 
 // AsNode converts the given tree node to a [Node] and [NodeBase],
 // returning nil if that is not possible.
@@ -170,7 +157,7 @@ func (nb *NodeBase) Validate() error {
 }
 
 func (nb *NodeBase) IsVisible() bool {
-	if nb == nil || nb.This == nil || nb.Is(Invisible) {
+	if nb == nil || nb.This == nil || nb.Invisible {
 		return false
 	}
 	return true
@@ -182,13 +169,10 @@ func (nb *NodeBase) IsTransparent() bool {
 
 // UpdateWorldMatrix updates this node's world matrix based on parent's world matrix.
 // If a nil matrix is passed, then the previously set parent world matrix is used.
-// This sets the WorldMatrixUpdated flag but does not check that flag -- calling
-// routine can optionally do so.
 func (nb *NodeBase) UpdateWorldMatrix(parWorld *math32.Matrix4) {
 	nb.Pose.UpdateMatrix() // note: can do this in special ways to bake in other
 	// automatic transforms as needed
 	nb.Pose.UpdateWorldMatrix(parWorld)
-	nb.SetFlag(true, WorldMatrixUpdated)
 }
 
 // UpdateMVPMatrix updates this node's MVP matrix based on given view, projection matricies from camera.
