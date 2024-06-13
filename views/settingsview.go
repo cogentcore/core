@@ -10,8 +10,8 @@ import (
 	"cogentcore.org/core/icons"
 )
 
-// SettingsViewToolbarBase is the base toolbar configuration function used in [SettingsView].
-func SettingsViewToolbarBase(p *core.Plan) {
+// SettingsEditorToolbarBase is the base toolbar configuration function used in [SettingsEditor].
+func SettingsEditorToolbarBase(p *core.Plan) {
 	core.Add(p, func(w *FuncButton) {
 		w.SetFunc(core.AppearanceSettings.SaveScreenZoom).
 			SetAfterFunc(func() {
@@ -32,20 +32,20 @@ func SettingsViewToolbarBase(p *core.Plan) {
 	*/
 }
 
-// SettingsWindow makes and runs a new window for viewing user settings.
+// SettingsWindow makes and runs a new window for editing user settings.
 func SettingsWindow() {
 	if core.RecycleMainWindow(&core.AllSettings) {
 		return
 	}
 	d := core.NewBody("settings").SetTitle("Settings").SetData(&core.AllSettings)
-	SettingsView(d)
+	SettingsEditor(d)
 	d.NewWindow().SetCloseOnBack(true).Run()
 }
 
-// SettingsView adds to the given body a view of user settings
-func SettingsView(b *core.Body) {
+// SettingsEditor adds to the given body an editor of user settings.
+func SettingsEditor(b *core.Body) {
 	b.AddAppBar(func(p *core.Plan) {
-		SettingsViewToolbarBase(p)
+		SettingsEditorToolbarBase(p)
 		for _, se := range core.AllSettings {
 			se.MakeToolbar(p)
 		}
