@@ -4,7 +4,6 @@ package xyz
 
 import (
 	"cogentcore.org/core/enums"
-	"cogentcore.org/core/tree"
 )
 
 var _LightColorsValues = []LightColors{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
@@ -50,75 +49,6 @@ func (i *LightColors) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "LightColors")
 }
 
-var _NodeFlagsValues = []NodeFlags{1, 2, 3}
-
-// NodeFlagsN is the highest valid value for type NodeFlags, plus one.
-const NodeFlagsN NodeFlags = 4
-
-var _NodeFlagsValueMap = map[string]NodeFlags{`WorldMatrixUpdated`: 1, `VectorsUpdated`: 2, `Invisible`: 3}
-
-var _NodeFlagsDescMap = map[NodeFlags]string{1: `WorldMatrixUpdated means that the Pose.WorldMatrix has been updated`, 2: `VectorsUpdated means that the rendering vectors information is updated`, 3: `Invisible marks this node as invisible`}
-
-var _NodeFlagsMap = map[NodeFlags]string{1: `WorldMatrixUpdated`, 2: `VectorsUpdated`, 3: `Invisible`}
-
-// String returns the string representation of this NodeFlags value.
-func (i NodeFlags) String() string {
-	return enums.BitFlagStringExtended(i, _NodeFlagsValues, tree.FlagsValues())
-}
-
-// BitIndexString returns the string representation of this NodeFlags value
-// if it is a bit index value (typically an enum constant), and
-// not an actual bit flag value.
-func (i NodeFlags) BitIndexString() string {
-	return enums.BitIndexStringExtended[NodeFlags, tree.Flags](i, _NodeFlagsMap)
-}
-
-// SetString sets the NodeFlags value from its string representation,
-// and returns an error if the string is invalid.
-func (i *NodeFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
-
-// SetStringOr sets the NodeFlags value from its string representation
-// while preserving any bit flags already set, and returns an
-// error if the string is invalid.
-func (i *NodeFlags) SetStringOr(s string) error {
-	return enums.SetStringOrExtended(i, (*tree.Flags)(i), s, _NodeFlagsValueMap)
-}
-
-// Int64 returns the NodeFlags value as an int64.
-func (i NodeFlags) Int64() int64 { return int64(i) }
-
-// SetInt64 sets the NodeFlags value from an int64.
-func (i *NodeFlags) SetInt64(in int64) { *i = NodeFlags(in) }
-
-// Desc returns the description of the NodeFlags value.
-func (i NodeFlags) Desc() string {
-	return enums.DescExtended[NodeFlags, tree.Flags](i, _NodeFlagsDescMap)
-}
-
-// NodeFlagsValues returns all possible values for the type NodeFlags.
-func NodeFlagsValues() []NodeFlags {
-	return enums.ValuesGlobalExtended(_NodeFlagsValues, tree.FlagsValues())
-}
-
-// Values returns all possible values for the type NodeFlags.
-func (i NodeFlags) Values() []enums.Enum {
-	return enums.ValuesExtended(_NodeFlagsValues, tree.FlagsValues())
-}
-
-// HasFlag returns whether these bit flags have the given bit flag set.
-func (i NodeFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
-
-// SetFlag sets the value of the given flags in these flags to the given value.
-func (i *NodeFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i NodeFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *NodeFlags) UnmarshalText(text []byte) error {
-	return enums.UnmarshalText(i, text, "NodeFlags")
-}
-
 var _RenderClassesValues = []RenderClasses{0, 1, 2, 3, 4, 5, 6}
 
 // RenderClassesN is the highest valid value for type RenderClasses, plus one.
@@ -161,66 +91,3 @@ func (i RenderClasses) MarshalText() ([]byte, error) { return []byte(i.String())
 func (i *RenderClasses) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "RenderClasses")
 }
-
-var _ScFlagsValues = []ScFlags{1, 2, 3}
-
-// ScFlagsN is the highest valid value for type ScFlags, plus one.
-const ScFlagsN ScFlags = 4
-
-var _ScFlagsValueMap = map[string]ScFlags{`ScNeedsConfig`: 1, `ScNeedsUpdate`: 2, `ScNeedsRender`: 3}
-
-var _ScFlagsDescMap = map[ScFlags]string{1: `ScNeedsConfig means that a GPU resource (Lights, Texture, Meshes, or more complex Nodes that require ConfigNodes) has been changed and a Config call is required.`, 2: `ScNeedsUpdate means that Node Pose has changed and an update pass is required to update matrix and bounding boxes.`, 3: `ScNeedsRender means that something has been updated (minimally the Camera pose) and a new Render is required.`}
-
-var _ScFlagsMap = map[ScFlags]string{1: `ScNeedsConfig`, 2: `ScNeedsUpdate`, 3: `ScNeedsRender`}
-
-// String returns the string representation of this ScFlags value.
-func (i ScFlags) String() string {
-	return enums.BitFlagStringExtended(i, _ScFlagsValues, tree.FlagsValues())
-}
-
-// BitIndexString returns the string representation of this ScFlags value
-// if it is a bit index value (typically an enum constant), and
-// not an actual bit flag value.
-func (i ScFlags) BitIndexString() string {
-	return enums.BitIndexStringExtended[ScFlags, tree.Flags](i, _ScFlagsMap)
-}
-
-// SetString sets the ScFlags value from its string representation,
-// and returns an error if the string is invalid.
-func (i *ScFlags) SetString(s string) error { *i = 0; return i.SetStringOr(s) }
-
-// SetStringOr sets the ScFlags value from its string representation
-// while preserving any bit flags already set, and returns an
-// error if the string is invalid.
-func (i *ScFlags) SetStringOr(s string) error {
-	return enums.SetStringOrExtended(i, (*tree.Flags)(i), s, _ScFlagsValueMap)
-}
-
-// Int64 returns the ScFlags value as an int64.
-func (i ScFlags) Int64() int64 { return int64(i) }
-
-// SetInt64 sets the ScFlags value from an int64.
-func (i *ScFlags) SetInt64(in int64) { *i = ScFlags(in) }
-
-// Desc returns the description of the ScFlags value.
-func (i ScFlags) Desc() string { return enums.DescExtended[ScFlags, tree.Flags](i, _ScFlagsDescMap) }
-
-// ScFlagsValues returns all possible values for the type ScFlags.
-func ScFlagsValues() []ScFlags { return enums.ValuesGlobalExtended(_ScFlagsValues, tree.FlagsValues()) }
-
-// Values returns all possible values for the type ScFlags.
-func (i ScFlags) Values() []enums.Enum {
-	return enums.ValuesExtended(_ScFlagsValues, tree.FlagsValues())
-}
-
-// HasFlag returns whether these bit flags have the given bit flag set.
-func (i ScFlags) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i), f) }
-
-// SetFlag sets the value of the given flags in these flags to the given value.
-func (i *ScFlags) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i ScFlags) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *ScFlags) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "ScFlags") }
