@@ -5,7 +5,7 @@
 /*
 Package xyz is a 3D graphics framework written in Go.
 It is a separate standalone package that renders to an offscreen Vulkan framebuffer,
-which can easily be converted into a Go `image.RGBA`. The xyzview package provides an
+which can easily be converted into a Go `image.RGBA`. The xyzcore package provides an
 integration of xyz in Cogent Core, for dynamic and efficient 3D rendering within 2D
 GUI windows.
 

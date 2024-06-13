@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package xyzview provides a GUI view for a 3D xyz scene.
-package xyzview
+// Package xyzcore provides a GUI view for a 3D xyz scene.
+package xyzcore
 
 //go:generate core generate
 

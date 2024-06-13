@@ -27,7 +27,7 @@ import (
 	"cogentcore.org/core/xyz/physics"
 	"cogentcore.org/core/xyz/physics/world"
 	"cogentcore.org/core/xyz/physics/world2d"
-	"cogentcore.org/core/xyz/xyzview"
+	"cogentcore.org/core/xyz/xyzcore"
 )
 
 var NoGUI bool
@@ -90,7 +90,7 @@ type Env struct { //types:add
 	View2D *world2d.View
 
 	// 3D visualization of the Scene
-	SceneView *xyzview.SceneView
+	SceneView *xyzcore.SceneView
 
 	// 2D visualization of the Scene
 	Scene2D *core.SVG
@@ -386,7 +386,7 @@ func (ev *Env) ConfigGUI() *core.Body {
 	//////////////////////////////////////////
 	//    3D Scene
 
-	ev.SceneView = xyzview.NewSceneView(scfr)
+	ev.SceneView = xyzcore.NewSceneView(scfr)
 	ev.SceneView.UpdateWidget()
 	se := ev.SceneView.SceneXYZ()
 	ev.ConfigScene(se)
