@@ -91,7 +91,9 @@ func (wb *WidgetBase) AsyncUnlock() {
 		return
 	}
 	rc.Unlock()
-	wb.Scene.updating = false
+	if wb.Scene != nil {
+		wb.Scene.updating = false
+	}
 }
 
 // NeedsRender specifies that the widget needs to be rendered.
@@ -100,7 +102,9 @@ func (wb *WidgetBase) NeedsRender() {
 		fmt.Println("\tDebugSettings.UpdateTrace: NeedsRender:", wb)
 	}
 	wb.needsRender = true
-	wb.Scene.sceneNeedsRender = true
+	if wb.Scene != nil {
+		wb.Scene.sceneNeedsRender = true
+	}
 }
 
 // NeedsLayout specifies that the widget's scene needs to do a layout.
@@ -110,7 +114,9 @@ func (wb *WidgetBase) NeedsLayout() {
 	if DebugSettings.UpdateTrace {
 		fmt.Println("\tDebugSettings.UpdateTrace: NeedsLayout:", wb)
 	}
-	wb.Scene.needsLayout = true
+	if wb.Scene != nil {
+		wb.Scene.needsLayout = true
+	}
 }
 
 // NeedsRebuild returns true if the RenderContext indicates
