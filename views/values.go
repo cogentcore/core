@@ -19,52 +19,52 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// SliceButton represents a slice or array value with a button.
-type SliceButton struct {
+// ListButton represents a slice or array value with a button that opens a [List].
+type ListButton struct {
 	core.Button
 	Slice any
 }
 
-func (sb *SliceButton) WidgetValue() any { return &sb.Slice }
+func (lb *ListButton) WidgetValue() any { return &lb.Slice }
 
-func (sb *SliceButton) Init() {
-	sb.Button.Init()
-	sb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	sb.Updater(func() {
-		sb.SetText(labels.FriendlySliceLabel(reflect.ValueOf(sb.Slice)))
+func (lb *ListButton) Init() {
+	lb.Button.Init()
+	lb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	lb.Updater(func() {
+		lb.SetText(labels.FriendlySliceLabel(reflect.ValueOf(lb.Slice)))
 	})
-	core.InitValueButton(sb, true, func(d *core.Body) {
-		up := reflectx.Underlying(reflect.ValueOf(sb.Slice))
-		if up.Type().Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(sb.Slice)).Kind() == reflect.Struct {
-			tv := NewTable(d).SetSlice(sb.Slice)
-			tv.SetValueTitle(sb.ValueTitle).SetReadOnly(sb.IsReadOnly())
-			d.AddAppBar(tv.MakeToolbar)
+	core.InitValueButton(lb, true, func(d *core.Body) {
+		up := reflectx.Underlying(reflect.ValueOf(lb.Slice))
+		if up.Type().Kind() != reflect.Array && reflectx.NonPointerType(reflectx.SliceElementType(lb.Slice)).Kind() == reflect.Struct {
+			tb := NewTable(d).SetSlice(lb.Slice)
+			tb.SetValueTitle(lb.ValueTitle).SetReadOnly(lb.IsReadOnly())
+			d.AddAppBar(tb.MakeToolbar)
 		} else {
-			sv := NewList(d).SetSlice(sb.Slice)
-			sv.SetValueTitle(sb.ValueTitle).SetReadOnly(sb.IsReadOnly())
+			sv := NewList(d).SetSlice(lb.Slice)
+			sv.SetValueTitle(lb.ValueTitle).SetReadOnly(lb.IsReadOnly())
 			d.AddAppBar(sv.MakeToolbar)
 		}
 	})
 }
 
-// StructButton represents a slice or array value with a button.
-type StructButton struct {
+// FormButton represents a struct value with a button that opens a [Form].
+type FormButton struct {
 	core.Button
 	Struct any
 }
 
-func (sb *StructButton) WidgetValue() any { return &sb.Struct }
+func (fb *FormButton) WidgetValue() any { return &fb.Struct }
 
-func (sb *StructButton) Init() {
-	sb.Button.Init()
-	sb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
-	sb.Updater(func() {
-		sb.SetText(labels.FriendlyStructLabel(reflect.ValueOf(sb.Struct)))
+func (fb *FormButton) Init() {
+	fb.Button.Init()
+	fb.SetType(core.ButtonTonal).SetIcon(icons.Edit)
+	fb.Updater(func() {
+		fb.SetText(labels.FriendlyStructLabel(reflect.ValueOf(fb.Struct)))
 	})
-	core.InitValueButton(sb, true, func(d *core.Body) {
-		sv := NewForm(d).SetStruct(sb.Struct)
-		sv.SetValueTitle(sb.ValueTitle).SetReadOnly(sb.IsReadOnly())
-		if tb, ok := sb.Struct.(core.ToolbarMaker); ok {
+	core.InitValueButton(fb, true, func(d *core.Body) {
+		fm := NewForm(d).SetStruct(fb.Struct)
+		fm.SetValueTitle(fb.ValueTitle).SetReadOnly(fb.IsReadOnly())
+		if tb, ok := fb.Struct.(core.ToolbarMaker); ok {
 			d.AddAppBar(tb.MakeToolbar)
 		}
 	})
@@ -85,9 +85,9 @@ func (mb *MapButton) Init() {
 		mb.SetText(labels.FriendlyMapLabel(reflect.ValueOf(mb.Map)))
 	})
 	core.InitValueButton(mb, true, func(d *core.Body) {
-		mv := NewKeyValueTable(d).SetMap(mb.Map)
-		mv.SetValueTitle(mb.ValueTitle).SetReadOnly(mb.IsReadOnly())
-		d.AddAppBar(mv.MakeToolbar)
+		kv := NewKeyValueTable(d).SetMap(mb.Map)
+		kv.SetValueTitle(mb.ValueTitle).SetReadOnly(mb.IsReadOnly())
+		d.AddAppBar(kv.MakeToolbar)
 	})
 }
 
@@ -183,9 +183,9 @@ func (fb *FontButton) Init() {
 		d.SetTitle("Select a font family")
 		si := 0
 		fi := paint.FontLibrary.FontInfo
-		tv := NewTable(d)
-		tv.SetSlice(&fi).SetSelectedField("Name").SetSelectedValue(fb.Text).BindSelect(&si)
-		tv.SetStyleFunc(func(w core.Widget, s *styles.Style, row, col int) {
+		tb := NewTable(d)
+		tb.SetSlice(&fi).SetSelectedField("Name").SetSelectedValue(fb.Text).BindSelect(&si)
+		tb.SetStyleFunc(func(w core.Widget, s *styles.Style, row, col int) {
 			if col != 4 {
 				return
 			}
@@ -195,7 +195,7 @@ func (fb *FontButton) Init() {
 			s.Font.Style = fi[row].Style
 			s.Font.Size.Pt(18)
 		})
-		tv.OnChange(func(e events.Event) {
+		tb.OnChange(func(e events.Event) {
 			fb.Text = fi[si].Name
 		})
 	})

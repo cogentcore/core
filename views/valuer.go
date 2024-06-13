@@ -57,7 +57,7 @@ func init() {
 			if !forceNoInline && (forceInline || num <= core.SystemSettings.StructInlineLength) {
 				return NewForm().SetInline(true)
 			} else {
-				return NewStructButton()
+				return NewFormButton()
 			}
 		case reflect.Map:
 			len := uv.Len()
@@ -79,7 +79,7 @@ func init() {
 			if !forceNoInline && (forceInline || (!isStruct && sz <= core.SystemSettings.SliceInlineLength && !tree.IsNode(elemType))) {
 				return NewInlineList()
 			} else {
-				return NewSliceButton()
+				return NewListButton()
 			}
 		case reflect.Func:
 			return tree.New[*FuncButton]() // TODO(config): update to NewFuncButton after changing its signature

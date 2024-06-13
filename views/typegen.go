@@ -562,37 +562,37 @@ func (t *Tree) SetRootView(v *Tree) *Tree { t.RootView = v; return t }
 // RootView node only.
 func (t *Tree) SetSelectedNodes(v ...Treer) *Tree { t.SelectedNodes = v; return t }
 
-// SliceButtonType is the [types.Type] for [SliceButton]
-var SliceButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.SliceButton", IDName: "slice-button", Doc: "SliceButton represents a slice or array value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Slice"}}, Instance: &SliceButton{}})
+// ListButtonType is the [types.Type] for [ListButton]
+var ListButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.ListButton", IDName: "list-button", Doc: "ListButton represents a slice or array value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Slice"}}, Instance: &ListButton{}})
 
-// NewSliceButton returns a new [SliceButton] with the given optional parent:
-// SliceButton represents a slice or array value with a button.
-func NewSliceButton(parent ...tree.Node) *SliceButton { return tree.New[*SliceButton](parent...) }
+// NewListButton returns a new [ListButton] with the given optional parent:
+// ListButton represents a slice or array value with a button.
+func NewListButton(parent ...tree.Node) *ListButton { return tree.New[*ListButton](parent...) }
 
-// NodeType returns the [*types.Type] of [SliceButton]
-func (t *SliceButton) NodeType() *types.Type { return SliceButtonType }
+// NodeType returns the [*types.Type] of [ListButton]
+func (t *ListButton) NodeType() *types.Type { return ListButtonType }
 
-// New returns a new [*SliceButton] value
-func (t *SliceButton) New() tree.Node { return &SliceButton{} }
+// New returns a new [*ListButton] value
+func (t *ListButton) New() tree.Node { return &ListButton{} }
 
-// SetSlice sets the [SliceButton.Slice]
-func (t *SliceButton) SetSlice(v any) *SliceButton { t.Slice = v; return t }
+// SetSlice sets the [ListButton.Slice]
+func (t *ListButton) SetSlice(v any) *ListButton { t.Slice = v; return t }
 
-// StructButtonType is the [types.Type] for [StructButton]
-var StructButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.StructButton", IDName: "struct-button", Doc: "StructButton represents a slice or array value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Struct"}}, Instance: &StructButton{}})
+// FormButtonType is the [types.Type] for [FormButton]
+var FormButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.FormButton", IDName: "form-button", Doc: "FormButton represents a slice or array value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Struct"}}, Instance: &FormButton{}})
 
-// NewStructButton returns a new [StructButton] with the given optional parent:
-// StructButton represents a slice or array value with a button.
-func NewStructButton(parent ...tree.Node) *StructButton { return tree.New[*StructButton](parent...) }
+// NewFormButton returns a new [FormButton] with the given optional parent:
+// FormButton represents a slice or array value with a button.
+func NewFormButton(parent ...tree.Node) *FormButton { return tree.New[*FormButton](parent...) }
 
-// NodeType returns the [*types.Type] of [StructButton]
-func (t *StructButton) NodeType() *types.Type { return StructButtonType }
+// NodeType returns the [*types.Type] of [FormButton]
+func (t *FormButton) NodeType() *types.Type { return FormButtonType }
 
-// New returns a new [*StructButton] value
-func (t *StructButton) New() tree.Node { return &StructButton{} }
+// New returns a new [*FormButton] value
+func (t *FormButton) New() tree.Node { return &FormButton{} }
 
-// SetStruct sets the [StructButton.Struct]
-func (t *StructButton) SetStruct(v any) *StructButton { t.Struct = v; return t }
+// SetStruct sets the [FormButton.Struct]
+func (t *FormButton) SetStruct(v any) *FormButton { t.Struct = v; return t }
 
 // MapButtonType is the [types.Type] for [MapButton]
 var MapButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/views.MapButton", IDName: "map-button", Doc: "MapButton represents a slice or array value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Map"}}, Instance: &MapButton{}})
