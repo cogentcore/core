@@ -134,9 +134,15 @@ type TreeView struct {
 	// amount to indent children relative to this node
 	Indent units.Value `copier:"-" json:"-" xml:"-"`
 
-	// depth for nodes be initialized as open (default 4).
+	// OpenDepth is the depth for nodes be initialized as open (default 4).
 	// Nodes beyond this depth will be initialized as closed.
 	OpenDepth int `copier:"-" json:"-" xml:"-"`
+
+	// Closed is whether this tree view node is currently toggled closed (children not visible).
+	Closed bool
+
+	// SelectMode, when set on the root node, determines whether keyboard movements should update selection.
+	SelectMode bool
 
 	// Computed fields:
 
@@ -163,6 +169,9 @@ type TreeView struct {
 	// (other tree views) do not inherit its stateful background color, as
 	// that does not look good.
 	actStateLayer float32
+
+	// inOpen is set in the Open method to prevent recursive opening for lazy-open nodes.
+	inOpen bool
 }
 
 // NewTreeViewFrame adds a new [TreeView] to a new frame with the given
@@ -492,33 +501,6 @@ func (tv *TreeView) OnAdd() {
 	}
 }
 
-// TreeViewFlags extend WidgetFlags to hold TreeView state
-type TreeViewFlags core.WidgetFlags //enums:bitflag -trim-prefix TreeViewFlag
-
-const (
-	// TreeViewFlagClosed means node is toggled closed
-	// (children not visible)  Otherwise Open.
-	TreeViewFlagClosed TreeViewFlags = TreeViewFlags(core.WidgetFlagsN) + iota
-
-	// TreeViewFlagSelectMode, when set on the Root node, determines whether keyboard movements
-	// update selection or not.
-	TreeViewFlagSelectMode
-
-	// TreeViewInOpen is set in the Open method to prevent recursive opening for lazy-open nodes
-	TreeViewInOpen
-)
-
-// IsClosed returns whether this node itself closed?
-func (tv *TreeView) IsClosed() bool {
-	return tv.Is(TreeViewFlagClosed)
-}
-
-// SetClosed sets the closed flag for this node.
-// Call Close() method to close a node and update view.
-func (tv *TreeView) SetClosed(closed bool) {
-	tv.SetFlag(closed, TreeViewFlagClosed)
-}
-
 // RootIsReadOnly returns the ReadOnly status of the root node,
 // which is what controls the functional inactivity of the tree
 // if individual nodes are ReadOnly that only affects display typically.
@@ -712,22 +694,6 @@ func (tv *TreeView) RenderWidget() {
 
 //////////////////////////////////////////////////////////////////////////////
 //    Selection
-
-// SelectMode returns true if keyboard movements
-// should automatically select nodes
-func (tv *TreeView) SelectMode() bool {
-	return tv.RootView.Is(TreeViewFlagSelectMode)
-}
-
-// SetSelectMode updates the select mode
-func (tv *TreeView) SetSelectMode(selMode bool) {
-	tv.RootView.SetFlag(selMode, TreeViewFlagSelectMode)
-}
-
-// SelectModeToggle toggles the SelectMode
-func (tv *TreeView) SelectModeToggle() {
-	tv.SetSelectMode(!tv.SelectMode())
-}
 
 // SelectedViews returns a slice of the currently selected
 // TreeViews within the entire tree, using a list maintained
