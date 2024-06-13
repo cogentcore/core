@@ -19,7 +19,6 @@ import (
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/stats/histogram"
 	"cogentcore.org/core/tensor/table"
-	"cogentcore.org/core/views"
 )
 
 func main() {
@@ -121,7 +120,7 @@ func (ss *Sim) ConfigGUI() *core.Body {
 
 	split := core.NewSplits(b)
 
-	sv := views.NewForm(split)
+	sv := core.NewForm(split)
 	sv.SetStruct(ss)
 
 	tv := core.NewTabs(split)

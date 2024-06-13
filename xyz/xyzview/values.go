@@ -53,7 +53,7 @@ func (mb *MeshButton) Init() {
 
 		// si := 0
 		// cur := reflectx.ToString(v.Value.Interface())
-		// views.NewList(d).SetSlice(&sl).SetSelectedValue(cur).BindSelect(&si)
+		// core.NewList(d).SetSlice(&sl).SetSelectedValue(cur).BindSelect(&si)
 
 		// return true, func() {
 		// 	if si >= 0 {
@@ -70,7 +70,7 @@ func (mb *MeshButton) Init() {
 TODO: This doesn't work because texture is on Material which doesn't have a pointer to the Scene!
 
 // Value restylesers TexValue as the viewer of TexName
-func (mn TexName) Value() views.Value {
+func (mn TexName) Value() core.Value {
 	vv := TexValue{}
 	vv.Init(&vv)
 	return &vv
@@ -79,7 +79,7 @@ func (mn TexName) Value() views.Value {
 // TexValue presents an action for displaying a TexName and selecting
 // textures from a ChooserDialog
 type TexValue struct {
-	views.ValueBase
+	core.ValueBase
 }
 
 func (vv *TexValue) WidgetType() reflect.Type {
@@ -137,11 +137,11 @@ func (vv *TexValue) Activate(vp *core.Viewport2D, dlgRecv tree.Node, dlgFunc tre
 
 	cur := reflectx.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
-	views.ListSelectDialog(vp, &sl, cur, views.DlgOpts{Title: "Select a Texture", Prompt: desc}, nil,
+	core.ListSelectDialog(vp, &sl, cur, core.DlgOpts{Title: "Select a Texture", Prompt: desc}, nil,
 		vv.This, func(recv, send tree.Node, sig int64, data any) {
 			if sig == int64(core.DialogAccepted) {
 				ddlg := send.Embed(core.TypeDialog).(*core.Dialog)
-				si := views.ListSelectDialogValue(ddlg)
+				si := core.ListSelectDialogValue(ddlg)
 				if si >= 0 {
 					vv.SetValue(sl[si])
 					vv.UpdateWidget()

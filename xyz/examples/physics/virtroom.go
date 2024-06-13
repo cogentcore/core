@@ -23,7 +23,6 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/svg"
-	"cogentcore.org/core/views"
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/physics"
 	"cogentcore.org/core/xyz/physics/world"
@@ -79,7 +78,7 @@ type Env struct { //types:add
 	Camera world.Camera
 
 	// color map to use for rendering depth map
-	DepthMap views.ColorMapName
+	DepthMap core.ColorMapName
 
 	// world
 	World *physics.Group `view:"-"`
@@ -120,7 +119,7 @@ func (ev *Env) Defaults() {
 	ev.EmerHt = 1
 	ev.MoveStep = ev.EmerHt * .2
 	ev.RotStep = 15
-	ev.DepthMap = views.ColorMapName("ColdHot")
+	ev.DepthMap = core.ColorMapName("ColdHot")
 	ev.Camera.Defaults()
 	ev.Camera.FOV = 90
 }
@@ -368,8 +367,8 @@ func (ev *Env) ConfigGUI() *core.Body {
 
 	split := core.NewSplits(b)
 
-	tv := views.NewTree(core.NewFrame(split)).SyncTree(ev.World)
-	sv := views.NewForm(split).SetStruct(ev)
+	tv := core.NewTree(core.NewFrame(split)).SyncTree(ev.World)
+	sv := core.NewForm(split).SetStruct(ev)
 	imfr := core.NewFrame(split)
 	tbvw := core.NewTabs(split)
 
@@ -447,48 +446,48 @@ func (ev *Env) ConfigGUI() *core.Body {
 					sv.SetStruct(ev)
 				})
 		})
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.WorldInit).SetText("Init").SetIcon(icons.Update)
 		})
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.ReMakeWorld).SetText("Make").SetIcon(icons.Update)
 		})
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.GrabEyeImg).SetText("Grab Image").SetIcon(icons.Image)
 		})
 		core.Add(p, func(w *core.Separator) {})
 
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.StepForward).SetText("Fwd").SetIcon(icons.SkipNext).
 				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.StepBackward).SetText("Bkw").SetIcon(icons.SkipPrevious).
 				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.RotBodyLeft).SetText("Body Left").SetIcon(icons.KeyboardArrowLeft).
 				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.RotBodyRight).SetText("Body Right").SetIcon(icons.KeyboardArrowRight).
 				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.RotHeadLeft).SetText("Head Left").SetIcon(icons.KeyboardArrowLeft).
 				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.RotHeadRight).SetText("Head Right").SetIcon(icons.KeyboardArrowRight).
 				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)

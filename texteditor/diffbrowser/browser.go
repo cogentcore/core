@@ -82,7 +82,7 @@ func (br *Browser) OpenFiles() { //types:add
 }
 
 func (br *Browser) MakeToolbar(p *core.Plan) {
-	// core.Add(p, func(w *views.FuncButton) {
+	// core.Add(p, func(w *core.FuncButton) {
 	// 	w.SetFunc(br.OpenFiles).SetText("").SetIcon(icons.Refresh).SetShortcut("Command+U")
 	// })
 }

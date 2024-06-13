@@ -14,7 +14,6 @@ import (
 	"cogentcore.org/core/cli"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/views"
 )
 
 // Run runs the given app with the given default
@@ -76,7 +75,7 @@ func GUI[T any](opts *cli.Options, cfg T, cmds ...*cli.Cmd[T]) {
 		}
 	})
 
-	sv := views.NewForm(b)
+	sv := core.NewForm(b)
 	sv.SetStruct(cfg)
 
 	b.RunMainWindow()

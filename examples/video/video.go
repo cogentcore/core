@@ -6,7 +6,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/video"
-	_ "cogentcore.org/core/views"
 )
 
 func main() {

@@ -18,7 +18,6 @@ import (
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/textbuf"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/views"
 )
 
 // FirstVCS returns the first VCS repository starting from this node and going down.
@@ -154,7 +153,7 @@ func (fn *Node) CommitToVCSSel() { //types:add
 	done := false
 	fn.SelectedFunc(func(sn *Node) {
 		if !done {
-			views.CallFunc(sn, fn.CommitToVCS)
+			core.CallFunc(sn, fn.CommitToVCS)
 			done = true
 		}
 	})

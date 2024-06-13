@@ -22,7 +22,6 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/views"
 	"golang.org/x/net/html"
 )
 
@@ -188,11 +187,11 @@ func HandleElement(ctx *Context) {
 		case "button", "submit":
 			New[*core.Button](ctx).SetText(val)
 		case "color":
-			core.Bind(val, New[*views.ColorButton](ctx))
+			core.Bind(val, New[*core.ColorButton](ctx))
 		case "datetime":
-			core.Bind(val, New[*views.TimeInput](ctx))
+			core.Bind(val, New[*core.TimeInput](ctx))
 		case "file":
-			core.Bind(val, New[*views.FileButton](ctx))
+			core.Bind(val, New[*core.FileButton](ctx))
 		default:
 			New[*core.TextField](ctx).SetText(val)
 		}

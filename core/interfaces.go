@@ -14,14 +14,14 @@ type ToolbarMaker interface {
 }
 
 // Validator is an interface for types to provide a Validate method
-// that is used in views to validate string Values using [TextField.Validator].
+// that is used to validate string [Value]s using [TextField.Validator].
 type Validator interface {
 	// Validate returns an error if the value is invalid.
 	Validate() error
 }
 
 // FieldValidator is an interface for types to provide a ValidateField method
-// that is used in views to validate string field Values using [TextField.Validator].
+// that is used to validate string field [Value]s using [TextField.Validator].
 type FieldValidator interface {
 	// ValidateField returns an error if the value of the given named field is invalid.
 	ValidateField(field string) error

@@ -16,7 +16,7 @@ like GUI.
 tensor data.
 
 * TensorGrid provides a 2D colored grid display of tensor data, collapsing
-any higher dimensions down to 2D.  Different views.ColorMaps can be used
+any higher dimensions down to 2D.  Different core.ColorMaps can be used
 to translate values into colors.
 */
 package tensorview

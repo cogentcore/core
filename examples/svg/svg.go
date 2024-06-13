@@ -41,7 +41,7 @@ func OpenSVG(fnm string) {
 }
 
 func FilePickerOpenSVG(ctx core.Widget) {
-	views.FilePickerDialog(ctx, views.DlgOpts{Title: "Open SVG"}, CurFilename, func(dlg *core.Dialog) {
+	core.FilePickerDialog(ctx, core.DlgOpts{Title: "Open SVG"}, CurFilename, func(dlg *core.Dialog) {
 		if dlg.Accepted {
 			OpenSVG(dlg.Data.(string))
 		})

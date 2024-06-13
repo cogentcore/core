@@ -23,7 +23,6 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/views"
 )
 
 func init() {
@@ -746,76 +745,76 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewSlider(parent)
 	},
 	"views/values-0": func(parent core.Widget) {
-		// views.NewValue(parent, colors.Orange)
+		// core.NewValue(parent, colors.Orange)
 	},
 	"views/values-1": func(parent core.Widget) {
 		// t := time.Now()
 		//
-		//	views.NewValue(parent, &t).OnChange(func(e events.Event) {
+		//	core.NewValue(parent, &t).OnChange(func(e events.Event) {
 		//	    core.MessageSnackbar(parent, "The time is "+t.Format(time.DateTime))
 		//	})
 	},
 	"views/values-2": func(parent core.Widget) {
-		// views.NewValue(parent, 70, `view:"slider"`)
+		// core.NewValue(parent, 70, `view:"slider"`)
 	},
 	"views/keyed-lists-0": func(parent core.Widget) {
-		views.NewKeyedList(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
+		core.NewKeyedList(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
 	},
 	"views/keyed-lists-1": func(parent core.Widget) {
-		views.NewKeyedList(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
+		core.NewKeyedList(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
 	},
 	"views/keyed-lists-2": func(parent core.Widget) {
 		m := map[string]int{"Go": 1, "C++": 3, "Python": 5}
-		views.NewKeyedList(parent).SetMap(&m).OnChange(func(e events.Event) {
+		core.NewKeyedList(parent).SetMap(&m).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, fmt.Sprintf("Map: %v", m))
 		})
 	},
 	"views/keyed-lists-3": func(parent core.Widget) {
-		views.NewKeyedList(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
+		core.NewKeyedList(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
 	},
 	"views/keyed-lists-4": func(parent core.Widget) {
-		views.NewKeyedList(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
+		core.NewKeyedList(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
 	},
 	"views/keyed-lists-5": func(parent core.Widget) {
-		// views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
+		// core.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
 	},
 	"views/keyed-lists-6": func(parent core.Widget) {
-		// views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
+		// core.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
 	},
 	"views/lists-0": func(parent core.Widget) {
-		views.NewList(parent).SetSlice(&[]int{1, 3, 5})
+		core.NewList(parent).SetSlice(&[]int{1, 3, 5})
 	},
 	"views/lists-1": func(parent core.Widget) {
-		views.NewInlineList(parent).SetSlice(&[]int{1, 3, 5})
+		core.NewInlineList(parent).SetSlice(&[]int{1, 3, 5})
 	},
 	"views/lists-2": func(parent core.Widget) {
 		sl := []int{1, 3, 5}
-		views.NewList(parent).SetSlice(&sl).OnChange(func(e events.Event) {
+		core.NewList(parent).SetSlice(&sl).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, fmt.Sprintf("Slice: %v", sl))
 		})
 	},
 	"views/lists-3": func(parent core.Widget) {
-		views.NewList(parent).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
+		core.NewList(parent).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
 	},
 	"views/lists-4": func(parent core.Widget) {
-		// views.NewValue(parent, &[]int{1, 3, 5})
+		// core.NewValue(parent, &[]int{1, 3, 5})
 	},
 	"views/lists-5": func(parent core.Widget) {
-		// views.NewValue(parent, &[]int{1, 3, 5, 7, 9})
+		// core.NewValue(parent, &[]int{1, 3, 5, 7, 9})
 	},
 	"views/forms-0": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
-		views.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
+		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
 	},
 	"views/forms-1": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
-		views.NewForm(parent).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
+		core.NewForm(parent).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
 	},
 	"views/forms-2": func(parent core.Widget) {
 		type person struct {
@@ -823,7 +822,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Age  int
 		}
 		p := person{Name: "Go", Age: 35}
-		views.NewForm(parent).SetStruct(&p).OnChange(func(e events.Event) {
+		core.NewForm(parent).SetStruct(&p).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
 		})
 	},
@@ -833,7 +832,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Age  int
 		}
 		p := person{Name: "Go", Age: 35}
-		views.NewForm(parent).SetStruct(&p).OnChange(func(e events.Event) {
+		core.NewForm(parent).SetStruct(&p).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
 		})
 	},
@@ -842,21 +841,21 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Name string
 			Age  int `view:"-"`
 		}
-		views.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
+		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
 	},
 	"views/forms-5": func(parent core.Widget) {
 		type person struct {
 			Name string `edit:"-"`
 			Age  int
 		}
-		views.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
+		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
 	},
 	"views/forms-6": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
-		views.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
+		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
 	},
 	"views/forms-7": func(parent core.Widget) {
 		type Person struct {
@@ -867,7 +866,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Person
 			Role string
 		}
-		views.NewForm(parent).SetStruct(&employee{Person{Name: "Go", Age: 35}, "Programmer"})
+		core.NewForm(parent).SetStruct(&employee{Person{Name: "Go", Age: 35}, "Programmer"})
 	},
 	"views/forms-8": func(parent core.Widget) {
 		type person struct {
@@ -878,7 +877,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Role    string
 			Manager person `view:"add-fields"`
 		}
-		views.NewForm(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
+		core.NewForm(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
 	},
 	"views/forms-9": func(parent core.Widget) {
 		type person struct {
@@ -886,7 +885,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Age       int    `default:"20:30"`
 			Precision int    `default:"64,32"`
 		}
-		views.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
+		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 	},
 	"views/forms-10": func(parent core.Widget) {
 		type person struct {
@@ -910,7 +909,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Name   string
 			Rating int
 		}
-		views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+		core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	},
 	"views/tables-1": func(parent core.Widget) {
 		type language struct {
@@ -918,7 +917,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Rating int
 		}
 		sl := []language{{"Go", 10}, {"Python", 5}}
-		views.NewTable(parent).SetSlice(&sl).OnChange(func(e events.Event) {
+		core.NewTable(parent).SetSlice(&sl).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, fmt.Sprintf("Languages: %v", sl))
 		})
 	},
@@ -927,35 +926,35 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Name   string
 			Rating int `view:"-"`
 		}
-		views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+		core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	},
 	"views/tables-3": func(parent core.Widget) {
 		type language struct {
 			Name   string
 			Rating int `view:"-" table:"+"`
 		}
-		views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+		core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	},
 	"views/tables-4": func(parent core.Widget) {
 		type language struct {
 			Name   string `edit:"-"`
 			Rating int
 		}
-		views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+		core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	},
 	"views/tables-5": func(parent core.Widget) {
 		type language struct {
 			Name   string
 			Rating int
 		}
-		views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
+		core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
 	},
 	"views/tables-6": func(parent core.Widget) {
 		type language struct {
 			Name   string
 			Rating int
 		}
-		// views.NewValue(parent, &[]language{{"Go", 10}, {"Python", 5}})
+		// core.NewValue(parent, &[]language{{"Go", 10}, {"Python", 5}})
 	},
 	"views/text-editors-0": func(parent core.Widget) {
 		texteditor.NewSoloEditor(parent)
@@ -986,24 +985,24 @@ func main() {
 		})
 	},
 	"views/trees-0": func(parent core.Widget) {
-		tv := views.NewTree(parent).SetText("Root")
-		views.NewTree(tv)
-		c2 := views.NewTree(tv)
-		views.NewTree(c2)
+		tv := core.NewTree(parent).SetText("Root")
+		core.NewTree(tv)
+		c2 := core.NewTree(tv)
+		core.NewTree(c2)
 	},
 	"views/trees-1": func(parent core.Widget) {
 		n := tree.NewNodeBase()
 		tree.NewNodeBase(n)
 		c2 := tree.NewNodeBase(n)
 		tree.NewNodeBase(c2)
-		views.NewTree(parent).SyncTree(n)
+		core.NewTree(parent).SyncTree(n)
 	},
 	"views/trees-2": func(parent core.Widget) {
 		n := tree.NewNodeBase()
 		tree.NewNodeBase(n)
 		c2 := tree.NewNodeBase(n)
 		tree.NewNodeBase(c2)
-		views.NewTree(parent).SyncTree(n).OnChange(func(e events.Event) {
+		core.NewTree(parent).SyncTree(n).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, "Tree changed")
 		})
 	},
@@ -1012,14 +1011,14 @@ func main() {
 		tree.NewNodeBase(n)
 		c2 := tree.NewNodeBase(n)
 		tree.NewNodeBase(c2)
-		views.NewTree(parent).SyncTree(n).SetReadOnly(true)
+		core.NewTree(parent).SyncTree(n).SetReadOnly(true)
 	},
 	"views/trees-4": func(parent core.Widget) {
 		n := tree.NewNodeBase()
 		tree.NewNodeBase(n)
 		c2 := tree.NewNodeBase(n)
 		tree.NewNodeBase(c2)
-		// views.NewValue(parent, n)
+		// core.NewValue(parent, n)
 	},
 	"advanced/styling-0": func(parent core.Widget) {
 		fr := core.NewFrame(parent)

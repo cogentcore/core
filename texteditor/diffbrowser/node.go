@@ -17,12 +17,11 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
-	"cogentcore.org/core/views"
 )
 
 // Node is an element in the diff tree
 type Node struct {
-	views.Tree
+	core.Tree
 
 	// file names (full path) being compared. Name of node is just the filename.
 	// Typically A is the older, base version and B is the newer one being compared.

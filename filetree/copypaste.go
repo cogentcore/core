@@ -19,7 +19,6 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/views"
 )
 
 // MimeData adds mimedata for this node: a text/plain of the Path,
@@ -69,7 +68,7 @@ func (fn *Node) DragDrop(e events.Event) {
 	de := e.(*events.DragDrop)
 	md := de.Data.(mimedata.Mimes)
 	fn.PasteFiles(md, de.Source == nil, func() {
-		fn.This.(views.Treer).DropFinalize(de)
+		fn.This.(core.Treer).DropFinalize(de)
 	})
 }
 

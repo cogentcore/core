@@ -27,7 +27,6 @@ import (
 	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/tensor/tensorview"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/views"
 )
 
 // PlotView is a Cogent Core Widget that provides an interactive 2D plot
@@ -495,7 +494,7 @@ func (pl *PlotView) makeColumns(p *core.Plan) {
 			w.SetText("Select Columns").SetType(core.ButtonAction).
 				SetTooltip("click to select columns based on column name").
 				OnClick(func(e events.Event) {
-					views.CallFunc(pl, pl.SetColumnsByName)
+					core.CallFunc(pl, pl.SetColumnsByName)
 				})
 		})
 	})
@@ -522,7 +521,7 @@ func (pl *PlotView) makeColumns(p *core.Plan) {
 					SetTooltip("edit column settings including setting as XAxis or Legend")
 				w.OnClick(func(e events.Event) {
 					d := core.NewBody().AddTitle("Column Params")
-					views.NewForm(d).SetStruct(cp).
+					core.NewForm(d).SetStruct(cp).
 						OnChange(func(e events.Event) {
 							pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
 						})
@@ -581,7 +580,7 @@ func (pl *PlotView) MakeToolbar(p *core.Plan) {
 			SetTooltip("set parameters that control display (font size etc)").
 			OnClick(func(e events.Event) {
 				d := core.NewBody().AddTitle(pl.Name + " Params")
-				views.NewForm(d).SetStruct(&pl.Params).
+				core.NewForm(d).SetStruct(&pl.Params).
 					OnChange(func(e events.Event) {
 						pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
 					})
@@ -602,22 +601,22 @@ func (pl *PlotView) MakeToolbar(p *core.Plan) {
 
 	core.Add(p, func(w *core.Button) {
 		w.SetText("Save").SetIcon(icons.Save).SetMenu(func(m *core.Scene) {
-			views.NewFuncButton(m, pl.SaveSVG).SetIcon(icons.Save)
-			views.NewFuncButton(m, pl.SavePNG).SetIcon(icons.Save)
-			views.NewFuncButton(m, pl.SaveCSV).SetIcon(icons.Save)
+			core.NewFuncButton(m, pl.SaveSVG).SetIcon(icons.Save)
+			core.NewFuncButton(m, pl.SavePNG).SetIcon(icons.Save)
+			core.NewFuncButton(m, pl.SaveCSV).SetIcon(icons.Save)
 			core.NewSeparator(m)
-			views.NewFuncButton(m, pl.SaveAll).SetIcon(icons.Save)
+			core.NewFuncButton(m, pl.SaveAll).SetIcon(icons.Save)
 		})
 	})
-	core.Add(p, func(w *views.FuncButton) {
+	core.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(pl.OpenCSV).SetIcon(icons.Open)
 	})
 	core.Add(p, func(w *core.Separator) {})
-	core.Add(p, func(w *views.FuncButton) {
+	core.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(pl.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
 		w.SetAfterFunc(pl.UpdatePlot)
 	})
-	core.Add(p, func(w *views.FuncButton) {
+	core.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(pl.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
 		w.SetAfterFunc(pl.UpdatePlot)
 	})

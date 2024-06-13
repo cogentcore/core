@@ -53,7 +53,7 @@ This is why the [[cli]] configuration and app command management system is based
 
 # Generate instead of `reflect`
 
-Generated code is faster and cleaner and can be targeted to just what is needed.  `reflect` should be reserved for things like `views.Form` and other such views which need to be truly generic and operate on any kind of type from any package, etc.
+Generated code is faster and cleaner and can be targeted to just what is needed.  `reflect` should be reserved for things like `core.Form` and other such views which need to be truly generic and operate on any kind of type from any package, etc.
 
 # Interfaces instead of `reflect`
 

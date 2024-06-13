@@ -19,7 +19,6 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tensor"
-	"cogentcore.org/core/views"
 )
 
 // TensorLayout are layout options for displaying tensors
@@ -46,7 +45,7 @@ type TensorDisplay struct { //types:add
 	MinMax minmax.F64 `view:"inline"`
 
 	// the name of the color map to use in translating values to colors
-	ColorMap views.ColorMapName
+	ColorMap core.ColorMapName
 
 	// what proportion of grid square should be filled by color block -- 1 = all, .5 = half, etc
 	GridFill float32 `min:"0.1" max:"1" step:"0.1" default:"0.9,1"`
@@ -139,7 +138,7 @@ func (td *TensorDisplay) FromMeta(tsr tensor.Tensor) {
 		}
 	}
 	if op, has := tsr.MetaData("colormap"); has {
-		td.ColorMap = views.ColorMapName(op)
+		td.ColorMap = core.ColorMapName(op)
 	}
 	if op, has := tsr.MetaData("grid-fill"); has {
 		mv, _ := strconv.ParseFloat(op, 32)
@@ -201,7 +200,7 @@ func (tg *TensorGrid) Init() {
 		tg.OpenTensorView()
 	})
 	tg.AddContextMenu(func(m *core.Scene) { // todo: still not getting the context menu event at all
-		views.NewFuncButton(m, tg.EditSettings).SetIcon(icons.Edit)
+		core.NewFuncButton(m, tg.EditSettings).SetIcon(icons.Edit)
 	})
 }
 
@@ -221,7 +220,7 @@ func (tg *TensorGrid) SetTensor(tsr tensor.Tensor) *TensorGrid {
 // OpenTensorView pulls up a TensorView of our tensor
 func (tg *TensorGrid) OpenTensorView() {
 	/*
-		dlg := TensorViewDialog(tg.ViewportSafe(), tg.Tensor, views.DlgOpts{Title: "Edit Tensor", Prompt: "", NoAdd: true, NoDelete: true}, nil, nil)
+		dlg := TensorViewDialog(tg.ViewportSafe(), tg.Tensor, core.DlgOpts{Title: "Edit Tensor", Prompt: "", NoAdd: true, NoDelete: true}, nil, nil)
 		tvk := dlg.Frame().ChildByType(KiT_TensorView, true, 2)
 		if tvk != nil {
 			tv := tvk.(*TensorView)
@@ -237,7 +236,7 @@ func (tg *TensorGrid) OpenTensorView() {
 
 func (tg *TensorGrid) EditSettings() { //types:add
 	d := core.NewBody().AddTitle("Tensor Grid Display Options")
-	views.NewForm(d).SetStruct(&tg.Display).
+	core.NewForm(d).SetStruct(&tg.Display).
 		OnChange(func(e events.Event) {
 			tg.NeedsRender()
 		})

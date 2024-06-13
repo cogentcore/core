@@ -13,7 +13,6 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
-	"cogentcore.org/core/views"
 	"cogentcore.org/core/xyz"
 )
 
@@ -242,7 +241,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 					return
 				}
 				d := core.NewBody().AddTitle("Selected Node")
-				views.NewForm(d).SetStruct(sw.CurrentSelected)
+				core.NewForm(d).SetStruct(sw.CurrentSelected)
 				d.RunWindowDialog(sv)
 			})
 	})
@@ -252,7 +251,7 @@ func (sv *SceneView) MakeToolbar(p *core.Plan) {
 			SetTooltip("edit the 3D Scene object (for access to meshes, textures etc)").
 			OnClick(func(e events.Event) {
 				d := core.NewBody().AddTitle("xyz.Scene")
-				views.NewForm(d).SetStruct(sv.SceneXYZ())
+				core.NewForm(d).SetStruct(sv.SceneXYZ())
 				d.RunWindowDialog(sv)
 			})
 	})

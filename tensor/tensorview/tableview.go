@@ -26,12 +26,11 @@ import (
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/views"
 )
 
 // Table provides a GUI view for [table.Table] values.
 type Table struct {
-	views.ListBase
+	core.ListBase
 
 	// the idx view of the table that we're a view of
 	Table *table.IndexView `set:"-"`
@@ -66,7 +65,7 @@ type Table struct {
 }
 
 // check for interface impl
-var _ views.Lister = (*Table)(nil)
+var _ core.Lister = (*Table)(nil)
 
 func (tb *Table) Init() {
 	tb.ListBase.Init()
@@ -76,7 +75,7 @@ func (tb *Table) Init() {
 	tb.ColumnTensorBlank = map[int]*tensor.Float64{}
 
 	tb.Makers[0] = func(p *core.Plan) { // TODO: reduce redundancy with ListBase Maker
-		svi := tb.This.(views.Lister)
+		svi := tb.This.(core.Lister)
 		svi.UpdateSliceSize()
 
 		scrollTo := -1
@@ -139,7 +138,7 @@ func (tb *Table) SetTable(et *table.Table) *Table {
 
 	tb.SetSliceBase()
 	tb.Table = table.NewIndexView(et)
-	tb.This.(views.Lister).UpdateSliceSize()
+	tb.This.(core.Lister).UpdateSliceSize()
 	tb.Update()
 	return tb
 }
@@ -163,7 +162,7 @@ func (tb *Table) SetIndexView(ix *table.IndexView) *Table {
 
 	tb.Table = ix.Clone() // always copy
 
-	tb.This.(views.Lister).UpdateSliceSize()
+	tb.This.(core.Lister).UpdateSliceSize()
 	tb.StartIndex = 0
 	tb.VisRows = tb.MinRows
 	if !tb.IsReadOnly() {
@@ -274,7 +273,7 @@ func (tb *Table) RowWidgetNs() (nWidgPerRow, idxOff int) {
 }
 
 func (tb *Table) MakeRow(p *core.Plan, i int) {
-	svi := tb.This.(views.Lister)
+	svi := tb.This.(core.Lister)
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
 
@@ -299,7 +298,7 @@ func (tb *Table) MakeRow(p *core.Plan, i int) {
 			}, func(w core.Value) {
 				wb := w.AsWidget()
 				tb.MakeValue(w, i)
-				w.AsTree().SetProperty(views.ListColProperty, fli)
+				w.AsTree().SetProperty(core.ListColProperty, fli)
 				if !tb.IsReadOnly() {
 					wb.OnChange(func(e events.Event) {
 						if si < len(tb.Table.Indexes) {
@@ -343,8 +342,8 @@ func (tb *Table) MakeRow(p *core.Plan, i int) {
 			core.AddAt(p, valnm, func(w *TensorGrid) {
 				w.SetReadOnly(tb.IsReadOnly())
 				wb := w.AsWidget()
-				w.SetProperty(views.ListRowProperty, i)
-				w.SetProperty(views.ListColProperty, fli)
+				w.SetProperty(core.ListRowProperty, i)
+				w.SetProperty(core.ListColProperty, fli)
 				w.Styler(func(s *styles.Style) {
 					s.Grow.Set(0, 0)
 				})
@@ -474,7 +473,7 @@ func (tb *Table) TensorDisplayAction(fldIndex int) {
 		ctd = tb.SetColumnTensorDisplay(fldIndex)
 	}
 	d := core.NewBody().AddTitle("Tensor grid display options")
-	views.NewForm(d).SetStruct(ctd)
+	core.NewForm(d).SetStruct(ctd)
 	d.RunFullDialog(tb)
 	// tv.UpdateSliceGrid()
 	tb.NeedsRender()
@@ -584,7 +583,7 @@ func (tb *Table) RowGrabFocus(row int) *core.WidgetBase {
 
 func (tb *Table) SizeFinal() {
 	tb.ListBase.SizeFinal()
-	sg := tb.This.(views.Lister).SliceGrid()
+	sg := tb.This.(core.Lister).SliceGrid()
 	sh := tb.SliceHeader()
 	sh.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
 		_, sgb := core.AsWidget(sg.Child(i))
@@ -631,27 +630,27 @@ func (tb *Table) MakeToolbar(p *core.Plan) {
 	if tb.Table == nil || tb.Table.Table == nil {
 		return
 	}
-	core.Add(p, func(w *views.FuncButton) {
+	core.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(tb.Table.AddRows).SetIcon(icons.Add)
 		w.SetAfterFunc(func() { tb.Update() })
 	})
-	core.Add(p, func(w *views.FuncButton) {
+	core.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(tb.Table.SortColumnName).SetText("Sort").SetIcon(icons.Sort)
 		w.SetAfterFunc(func() { tb.Update() })
 	})
-	core.Add(p, func(w *views.FuncButton) {
+	core.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(tb.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
 		w.SetAfterFunc(func() { tb.Update() })
 	})
-	core.Add(p, func(w *views.FuncButton) {
+	core.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(tb.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
 		w.SetAfterFunc(func() { tb.Update() })
 	})
-	core.Add(p, func(w *views.FuncButton) {
+	core.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(tb.Table.OpenCSV).SetIcon(icons.Open)
 		w.SetAfterFunc(func() { tb.Update() })
 	})
-	core.Add(p, func(w *views.FuncButton) {
+	core.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(tb.Table.SaveCSV).SetIcon(icons.Save)
 		w.SetAfterFunc(func() { tb.Update() })
 	})

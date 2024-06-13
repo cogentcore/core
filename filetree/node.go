@@ -32,7 +32,6 @@ import (
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
-	"cogentcore.org/core/views"
 )
 
 // NodeHiStyle is the default style for syntax highlighting to use for
@@ -43,7 +42,7 @@ var NodeHiStyle = histyle.StyleDefault
 // The name of the node is the name of the file.
 // Folders have children containing further nodes.
 type Node struct { //core:embedder
-	views.Tree
+	core.Tree
 
 	// full path to this file
 	FPath core.Filename `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
@@ -122,10 +121,10 @@ func (fn *Node) Init() {
 				fn.DuplicateFiles()
 				e.SetHandled()
 			case keymap.Insert: // New File
-				views.CallFunc(fn, fn.NewFile)
+				core.CallFunc(fn, fn.NewFile)
 				e.SetHandled()
 			case keymap.InsertAfter: // New Folder
-				views.CallFunc(fn, fn.NewFolder)
+				core.CallFunc(fn, fn.NewFolder)
 				e.SetHandled()
 			}
 		}
@@ -261,7 +260,7 @@ func (fn *Node) SetPath(path string) error {
 	fn.FPath = core.Filename(pth)
 	err = fn.Info.InitFile(string(fn.FPath))
 	if err != nil {
-		log.Printf("views.Tree: could not read directory: %v err: %v\n", fn.FPath, err)
+		log.Printf("core.Tree: could not read directory: %v err: %v\n", fn.FPath, err)
 		return err
 	}
 

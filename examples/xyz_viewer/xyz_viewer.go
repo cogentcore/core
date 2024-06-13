@@ -12,7 +12,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/views"
 	"cogentcore.org/core/xyz"
 	_ "cogentcore.org/core/xyz/io/obj"
 	"cogentcore.org/core/xyz/xyzview"
@@ -53,7 +52,7 @@ func main() {
 			w.SetText("Open").SetIcon(icons.Open).
 				SetTooltip("Open a 3D object file for viewing").
 				OnClick(func(e events.Event) {
-					views.FilePickerDialog(b, curFn, exts, "Open 3D Object", func(selFile string) {
+					core.FilePickerDialog(b, curFn, exts, "Open 3D Object", func(selFile string) {
 						curFn = selFile
 						objgp.DeleteChildren()
 						sc.DeleteMeshes()

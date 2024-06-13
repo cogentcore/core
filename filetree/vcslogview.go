@@ -18,7 +18,6 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/diffbrowser"
-	"cogentcore.org/core/views"
 )
 
 // VCSLogView is a view of the VCS log data
@@ -59,7 +58,7 @@ func (lv *VCSLogView) Init() {
 	core.AddChildAt(lv, "toolbar", func(w *core.Toolbar) {
 		w.Maker(lv.MakeToolbar)
 	})
-	core.AddChildAt(lv, "log", func(w *views.Table) {
+	core.AddChildAt(lv, "log", func(w *core.Table) {
 		w.SetReadOnly(true)
 		w.SetSlice(&lv.Log)
 		w.AddContextMenu(func(m *core.Scene) {
@@ -185,8 +184,8 @@ func (lv *VCSLogView) Toolbar() *core.Toolbar {
 }
 
 // Table returns the table
-func (lv *VCSLogView) Table() *views.Table {
-	return lv.ChildByName("log", 1).(*views.Table)
+func (lv *VCSLogView) Table() *core.Table {
+	return lv.ChildByName("log", 1).(*core.Table)
 }
 
 func (lv *VCSLogView) MakeToolbar(p *core.Plan) {

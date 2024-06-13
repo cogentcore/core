@@ -12,5 +12,5 @@ Add this to `import` to get these views to be registered with the Cogent Core Va
 
 * `TensorView` provides a spreadsheet-like GUI for viewing and editing tensor data.
 
-* `TensorGrid` provides a 2D colored grid display of tensor data, collapsing any higher dimensions down to 2D.  Different views.ColorMaps can be used to translate values into colors.
+* `TensorGrid` provides a 2D colored grid display of tensor data, collapsing any higher dimensions down to 2D.  Different core.ColorMaps can be used to translate values into colors.
 

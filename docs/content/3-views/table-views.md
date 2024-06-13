@@ -9,7 +9,7 @@ type language struct {
     Name   string
     Rating int
 }
-views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```
 
 You can detect when the user changes the value of the table:
@@ -20,7 +20,7 @@ type language struct {
     Rating int
 }
 sl := []language{{"Go", 10}, {"Python", 5}}
-views.NewTable(parent).SetSlice(&sl).OnChange(func(e events.Event) {
+core.NewTable(parent).SetSlice(&sl).OnChange(func(e events.Event) {
     core.MessageSnackbar(parent, fmt.Sprintf("Languages: %v", sl))
 })
 ```
@@ -32,7 +32,7 @@ type language struct {
     Name   string
     Rating int `view:"-"`
 }
-views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```
 
 You can also use the `table` struct tag, which overrides the `view` struct tag. This allows you to have a struct field displayed in a form but not a table, or vise versa:
@@ -42,7 +42,7 @@ type language struct {
     Name   string
     Rating int `view:"-" table:"+"`
 }
-views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```
 
 You can prevent the user from editing certain columns:
@@ -52,7 +52,7 @@ type language struct {
     Name   string `edit:"-"`
     Rating int
 }
-views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```
 
 You can prevent the user from editing the entire table:
@@ -62,7 +62,7 @@ type language struct {
     Name   string
     Rating int
 }
-views.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
+core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
 ```
 
 You can make it so that the documentation comments for struct fields are used as tooltips for the column headers and value widgets by adding the type to [[types]] and running `core generate`:
@@ -79,12 +79,12 @@ type language struct { //types:add
 }
 ```
 
-When you use [[views.NewValue]] with a slice of structs, it will create a button that opens a dialog with a table:
+When you use [[core.NewValue]] with a slice of structs, it will create a button that opens a dialog with a table:
 
 ```Go
 type language struct {
     Name   string
     Rating int
 }
-// views.NewValue(parent, &[]language{{"Go", 10}, {"Python", 5}})
+// core.NewValue(parent, &[]language{{"Go", 10}, {"Python", 5}})
 ```

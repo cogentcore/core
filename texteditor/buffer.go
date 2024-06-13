@@ -32,7 +32,6 @@ import (
 	"cogentcore.org/core/spell"
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/texteditor/textbuf"
-	"cogentcore.org/core/views"
 )
 
 // Buffer is a buffer of text, which can be viewed by [Editor](s).
@@ -481,7 +480,7 @@ func (tb *Buffer) FileModCheck() bool {
 		d.AddBottomBar(func(parent core.Widget) {
 			core.NewButton(parent).SetText("Save as to different file").OnClick(func(e events.Event) {
 				d.Close()
-				views.CallFunc(sc, tb.SaveAs)
+				core.CallFunc(sc, tb.SaveAs)
 			})
 			core.NewButton(parent).SetText("Revert from disk").OnClick(func(e events.Event) {
 				d.Close()
@@ -636,7 +635,7 @@ func (tb *Buffer) SaveFile(filename core.Filename) error {
 // buffer
 func (tb *Buffer) Save() error { //types:add
 	if tb.Filename == "" {
-		return fmt.Errorf("views.Buf: filename is empty for Save")
+		return fmt.Errorf("core.Buf: filename is empty for Save")
 	}
 	tb.EditDone()
 	info, err := os.Stat(string(tb.Filename))
@@ -647,7 +646,7 @@ func (tb *Buffer) Save() error { //types:add
 		d.AddBottomBar(func(parent core.Widget) {
 			core.NewButton(parent).SetText("Save to different file").OnClick(func(e events.Event) {
 				d.Close()
-				views.CallFunc(sc, tb.SaveAs)
+				core.CallFunc(sc, tb.SaveAs)
 			})
 			core.NewButton(parent).SetText("Open from disk, losing changes").OnClick(func(e events.Event) {
 				d.Close()
@@ -759,7 +758,7 @@ func (tb *Buffer) AutoSave() error {
 	b := tb.LinesToBytesCopy()
 	err := os.WriteFile(asfn, b, 0644)
 	if err != nil {
-		log.Printf("views.Buf: Could not AutoSave file: %v, error: %v\n", asfn, err)
+		log.Printf("core.Buf: Could not AutoSave file: %v, error: %v\n", asfn, err)
 	}
 	tb.autoSaving = false
 	return err
@@ -1120,7 +1119,7 @@ func (tb *Buffer) DeleteText(st, ed lexer.Pos, signal bool) *textbuf.Edit {
 		return nil
 	}
 	if !st.IsLess(ed) {
-		log.Printf("views.Buf DeleteText: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		log.Printf("core.Buf DeleteText: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
 	tb.FileModCheck()
@@ -1182,7 +1181,7 @@ func (tb *Buffer) DeleteTextRect(st, ed lexer.Pos, signal bool) *textbuf.Edit {
 		return nil
 	}
 	if !st.IsLess(ed) {
-		log.Printf("views.Buf DeleteTextRect: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		log.Printf("core.Buf DeleteTextRect: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
 	tb.FileModCheck()
@@ -1397,7 +1396,7 @@ func (tb *Buffer) RegionImpl(st, ed lexer.Pos) *textbuf.Edit {
 		return nil
 	}
 	if !st.IsLess(ed) {
-		log.Printf("views.Buf.Region: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		log.Printf("core.Buf.Region: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
 	tbe := &textbuf.Edit{Reg: textbuf.NewRegionPos(st, ed)}
@@ -1466,7 +1465,7 @@ func (tb *Buffer) RegionRectImpl(st, ed lexer.Pos) *textbuf.Edit {
 		return nil
 	}
 	if !st.IsLess(ed) || st.Ch >= ed.Ch {
-		log.Printf("views.Buf.RegionRect: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		log.Printf("core.Buf.RegionRect: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
 	tbe := &textbuf.Edit{Reg: textbuf.NewRegionPos(st, ed)}
@@ -2338,7 +2337,7 @@ func (tb *Buffer) CommentRegion(st, ed int) {
 
 	comst, comed := tb.Options.CommentStrings()
 	if comst == "" {
-		fmt.Printf("views.Buf: %v attempt to comment region without any comment syntax defined\n", tb.Filename)
+		fmt.Printf("core.Buf: %v attempt to comment region without any comment syntax defined\n", tb.Filename)
 		return
 	}
 

@@ -335,17 +335,17 @@ func (rc *Record) MemUsed() int {
 // if details is true, each record is reported.
 func (us *Stack) MemStats(details bool) string {
 	sb := strings.Builder{}
-	// TODO(kai): add this back once we figure out how to do views.FileSize
+	// TODO(kai): add this back once we figure out how to do core.FileSize
 	/*
 		sum := 0
 		for i, r := range um.Recs {
 			mem := r.MemUsed()
 			sum += mem
 			if details {
-				sb.WriteString(fmt.Sprintf("%d\t%s\tmem:%s\n", i, r.Action, views.FileSize(mem).String()))
+				sb.WriteString(fmt.Sprintf("%d\t%s\tmem:%s\n", i, r.Action, core.FileSize(mem).String()))
 			}
 		}
-		sb.WriteString(fmt.Sprintf("Total: %s\n", views.FileSize(sum).String()))
+		sb.WriteString(fmt.Sprintf("Total: %s\n", core.FileSize(sum).String()))
 	*/
 	return sb.String()
 }

@@ -9,7 +9,7 @@ type person struct {
     Name string
     Age  int
 }
-views.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
+core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
 ```
 
 You can make a form that fits in one line:
@@ -19,7 +19,7 @@ type person struct {
     Name string
     Age  int
 }
-views.NewForm(parent).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
+core.NewForm(parent).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
 ```
 
 You can detect when the user changes the value of the struct:
@@ -30,7 +30,7 @@ type person struct {
     Age  int
 }
 p := person{Name: "Go", Age: 35}
-views.NewForm(parent).SetStruct(&p).OnChange(func(e events.Event) {
+core.NewForm(parent).SetStruct(&p).OnChange(func(e events.Event) {
     core.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
 })
 ```
@@ -43,7 +43,7 @@ type person struct {
     Age  int
 }
 p := person{Name: "Go", Age: 35}
-views.NewForm(parent).SetStruct(&p).OnChange(func(e events.Event) {
+core.NewForm(parent).SetStruct(&p).OnChange(func(e events.Event) {
     core.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
 })
 ```
@@ -55,7 +55,7 @@ type person struct {
     Name string
     Age  int `view:"-"`
 }
-views.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
+core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
 ```
 
 You can prevent the user from editing certain fields:
@@ -65,7 +65,7 @@ type person struct {
     Name string `edit:"-"`
     Age  int
 }
-views.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
+core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
 ```
 
 You can prevent the user from editing the entire struct:
@@ -75,7 +75,7 @@ type person struct {
     Name string
     Age  int
 }
-views.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
+core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
 ```
 
 You can use structs with embedded fields:
@@ -89,7 +89,7 @@ type employee struct {
     Person
     Role string
 }
-views.NewForm(parent).SetStruct(&employee{Person{Name: "Go", Age: 35}, "Programmer"})
+core.NewForm(parent).SetStruct(&employee{Person{Name: "Go", Age: 35}, "Programmer"})
 ```
 
 You can expand fields that are themselves structs:
@@ -103,7 +103,7 @@ type employee struct {
     Role    string
     Manager person `view:"add-fields"`
 }
-views.NewForm(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
+core.NewForm(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
 ```
 
 You can specify a default value (or list or range of values) for a field, which will be displayed in the tooltip for the field label, make the label highlighted when the value is non-default, and allow the user to reset the value to the default value by double clicking on the label:
@@ -114,7 +114,7 @@ type person struct {
     Age       int    `default:"20:30"`
     Precision int    `default:"64,32"`
 }
-views.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
+core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 ```
 
 You can make it so that the documentation comments for struct fields are used as tooltips for the field label and value widgets by adding the type to [[types]] and running `core generate`:

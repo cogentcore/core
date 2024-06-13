@@ -23,7 +23,6 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/views"
 )
 
 //go:embed content
@@ -143,7 +142,7 @@ func homePage(ctx *htmlview.Context) bool {
 	})
 
 	makeBlock("COMPLETELY CUSTOMIZABLE", "Cogent Core allows developers and users to fully customize apps to fit their unique needs and preferences through a robust styling system and a powerful color system that allow developers and users to instantly customize every aspect of the appearance and behavior of an app.", func(parent core.Widget) {
-		views.NewForm(parent).SetStruct(core.AppearanceSettings).OnChange(func(e events.Event) {
+		core.NewForm(parent).SetStruct(core.AppearanceSettings).OnChange(func(e events.Event) {
 			core.UpdateSettings(parent, core.AppearanceSettings)
 		})
 
