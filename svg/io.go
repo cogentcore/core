@@ -747,9 +747,9 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				if curPar == sv.Root.This {
 					break
 				}
-				curSvgk := curPar.AsTree().ParentByType(SVGNodeType, tree.NoEmbeds)
+				curSvgk := curPar.AsTree().ParentByType(RootType, tree.NoEmbeds)
 				if curSvgk != nil {
-					curSvg = curSvgk.(*SVGNode)
+					curSvg = curSvgk.(*Root)
 				}
 			}
 		case xml.CharData:

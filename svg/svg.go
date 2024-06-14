@@ -74,7 +74,7 @@ type SVG struct {
 	Defs *Group
 
 	// Root is the root of the svg tree, which has the top-level viewbox and styles.
-	Root *SVGNode
+	Root *Root
 
 	// map of def names to index. uses starting index to find element.
 	// always updated after each search.
@@ -107,7 +107,7 @@ func (sv *SVG) Config(width, height int) {
 	sv.Scale = 1
 	sv.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
 	sv.RenderState.Init(width, height, sv.Pixels)
-	sv.Root = NewSVGNode()
+	sv.Root = NewRoot()
 	sv.Root.SetName("svg")
 	sv.Defs = NewGroup()
 	sv.Defs.SetName("defs")
@@ -261,24 +261,21 @@ func (sv *SVG) SavePNG(fname string) error {
 	return imagex.Save(sv.Pixels, fname)
 }
 
-//////////////////////////////////////////////////////////////
-// 	SVGNode
-
-// SVGNode represents the root of an SVG tree
-type SVGNode struct {
+// Root represents the root of an SVG tree.
+type Root struct {
 	Group
 
-	// viewbox defines the coordinate system for the drawing.
+	// ViewBox defines the coordinate system for the drawing.
 	// These units are mapped into the screen space allocated
-	// for the SVG during rendering
+	// for the SVG during rendering.
 	ViewBox ViewBox
 }
 
-func (g *SVGNode) SVGName() string { return "svg" }
+func (g *Root) SVGName() string { return "svg" }
 
-func (g *SVGNode) EnforceSVGName() bool { return false }
+func (g *Root) EnforceSVGName() bool { return false }
 
-func (g *SVGNode) NodeBBox(sv *SVG) image.Rectangle {
+func (g *Root) NodeBBox(sv *SVG) image.Rectangle {
 	// todo: return viewbox
 	return sv.Geom.SizeRect()
 }

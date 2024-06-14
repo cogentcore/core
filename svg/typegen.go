@@ -371,24 +371,24 @@ func (t *Rect) SetSize(v math32.Vector2) *Rect { t.Size = v; return t }
 // radii for curved corners, as a proportion of width, height
 func (t *Rect) SetRadius(v math32.Vector2) *Rect { t.Radius = v; return t }
 
-// SVGNodeType is the [types.Type] for [SVGNode]
-var SVGNodeType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.SVGNode", IDName: "svg-node", Doc: "SVGNode represents the root of an SVG tree", Embeds: []types.Field{{Name: "Group"}}, Fields: []types.Field{{Name: "ViewBox", Doc: "viewbox defines the coordinate system for the drawing.\nThese units are mapped into the screen space allocated\nfor the SVG during rendering"}}, Instance: &SVGNode{}})
+// RootType is the [types.Type] for [Root]
+var RootType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Root", IDName: "root", Doc: "Root represents the root of an SVG tree.", Embeds: []types.Field{{Name: "Group"}}, Fields: []types.Field{{Name: "ViewBox", Doc: "ViewBox defines the coordinate system for the drawing.\nThese units are mapped into the screen space allocated\nfor the SVG during rendering."}}, Instance: &Root{}})
 
-// NewSVGNode returns a new [SVGNode] with the given optional parent:
-// SVGNode represents the root of an SVG tree
-func NewSVGNode(parent ...tree.Node) *SVGNode { return tree.New[*SVGNode](parent...) }
+// NewRoot returns a new [Root] with the given optional parent:
+// Root represents the root of an SVG tree.
+func NewRoot(parent ...tree.Node) *Root { return tree.New[*Root](parent...) }
 
-// NodeType returns the [*types.Type] of [SVGNode]
-func (t *SVGNode) NodeType() *types.Type { return SVGNodeType }
+// NodeType returns the [*types.Type] of [Root]
+func (t *Root) NodeType() *types.Type { return RootType }
 
-// New returns a new [*SVGNode] value
-func (t *SVGNode) New() tree.Node { return &SVGNode{} }
+// New returns a new [*Root] value
+func (t *Root) New() tree.Node { return &Root{} }
 
-// SetViewBox sets the [SVGNode.ViewBox]:
-// viewbox defines the coordinate system for the drawing.
+// SetViewBox sets the [Root.ViewBox]:
+// ViewBox defines the coordinate system for the drawing.
 // These units are mapped into the screen space allocated
-// for the SVG during rendering
-func (t *SVGNode) SetViewBox(v ViewBox) *SVGNode { t.ViewBox = v; return t }
+// for the SVG during rendering.
+func (t *Root) SetViewBox(v ViewBox) *Root { t.ViewBox = v; return t }
 
 // TextType is the [types.Type] for [Text]
 var TextType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Text", IDName: "text", Doc: "Text renders SVG text, handling both text and tspan elements.\ntspan is nested under a parent text -- text has empty Text string.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the left, baseline of the text"}, {Name: "Width", Doc: "width of text to render if using word-wrapping"}, {Name: "Text", Doc: "text string to render"}, {Name: "TextRender", Doc: "render version of text"}, {Name: "CharPosX", Doc: "character positions along X axis, if specified"}, {Name: "CharPosY", Doc: "character positions along Y axis, if specified"}, {Name: "CharPosDX", Doc: "character delta-positions along X axis, if specified"}, {Name: "CharPosDY", Doc: "character delta-positions along Y axis, if specified"}, {Name: "CharRots", Doc: "character rotations, if specified"}, {Name: "TextLength", Doc: "author's computed text length, if specified -- we attempt to match"}, {Name: "AdjustGlyphs", Doc: "in attempting to match TextLength, should we adjust glyphs in addition to spacing?"}, {Name: "LastPos", Doc: "last text render position -- lower-left baseline of start"}, {Name: "LastBBox", Doc: "last actual bounding box in display units (dots)"}}, Instance: &Text{}})
