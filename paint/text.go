@@ -550,7 +550,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 				curf := fstack[len(fstack)-1]
 				curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.Background, curf.Decoration)
 			case "a":
-				if curLinkIndex >= 0 {
+				if curLinkIndex >= 0 && curLinkIndex < len(tr.Links) {
 					tl := &tr.Links[curLinkIndex]
 					tl.EndSpan = len(tr.Spans) - 1
 					tl.EndIndex = len(curSp.Text)
@@ -574,7 +574,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 				curSp.SetNewPara()
 			}
 			nextIsParaStart = false
-			if curLinkIndex >= 0 {
+			if curLinkIndex >= 0 && curLinkIndex < len(tr.Links) {
 				tl := &tr.Links[curLinkIndex]
 				tl.Label = sstr
 			}
@@ -654,7 +654,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 					curf := fstack[len(fstack)-1]
 					curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.Background, curf.Decoration)
 				case "a":
-					if curLinkIndex >= 0 {
+					if curLinkIndex >= 0 && curLinkIndex < len(tr.Links) {
 						tl := &tr.Links[curLinkIndex]
 						tl.EndSpan = len(tr.Spans) - 1
 						tl.EndIndex = len(curSp.Text)
