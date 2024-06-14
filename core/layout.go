@@ -317,8 +317,8 @@ func (ls *GeomState) ScrollOffset() image.Point {
 	return ls.ContentBBox.Min.Sub(ls.Pos.Content.ToPoint())
 }
 
-// LayCell holds the layout implementation data for col, row Cells
-type LayCell struct {
+// LayoutCell holds the layout implementation data for col, row Cells
+type LayoutCell struct {
 	// Size has the Actual size of elements (not Alloc)
 	Size math32.Vector2
 
@@ -326,18 +326,18 @@ type LayCell struct {
 	Grow math32.Vector2
 }
 
-func (ls *LayCell) String() string {
+func (ls *LayoutCell) String() string {
 	return fmt.Sprintf("Size: %v, \tGrow: %g", ls.Size, ls.Grow)
 }
 
-func (ls *LayCell) Reset() {
+func (ls *LayoutCell) Reset() {
 	ls.Size.SetZero()
 	ls.Grow.SetZero()
 }
 
-// LayCells holds one set of LayCell cell elements for rows, cols.
+// LayoutCells holds one set of LayoutCell cell elements for rows, cols.
 // There can be multiple of these for Wrap case.
-type LayCells struct {
+type LayoutCells struct {
 	// Shape is number of cells along each dimension for our ColRow cells,
 	Shape image.Point `edit:"-"`
 
@@ -345,12 +345,12 @@ type LayCells struct {
 	// col Size.X = max(X over rows) (cross axis), .Y = sum(Y over rows) (main axis for col)
 	// row Size.X = sum(X over cols) (main axis for row), .Y = max(Y over cols) (cross axis)
 	// see: https://docs.google.com/spreadsheets/d/1eimUOIJLyj60so94qUr4Buzruj2ulpG5o6QwG2nyxRw/edit?usp=sharing
-	ColRow [2][]LayCell `edit:"-"`
+	ColRow [2][]LayoutCell `edit:"-"`
 }
 
 // Cell returns the cell for given dimension and index along that
 // dimension (X = Cols, idx = col, Y = Rows, idx = row)
-func (lc *LayCells) Cell(d math32.Dims, idx int) *LayCell {
+func (lc *LayoutCells) Cell(d math32.Dims, idx int) *LayoutCell {
 	if len(lc.ColRow[d]) <= idx {
 		return nil
 	}
@@ -358,12 +358,12 @@ func (lc *LayCells) Cell(d math32.Dims, idx int) *LayCell {
 }
 
 // Init initializes Cells for given shape
-func (lc *LayCells) Init(shape image.Point) {
+func (lc *LayoutCells) Init(shape image.Point) {
 	lc.Shape = shape
 	for d := math32.X; d <= math32.Y; d++ {
 		n := math32.PointDim(lc.Shape, d)
 		if len(lc.ColRow[d]) != n {
-			lc.ColRow[d] = make([]LayCell, n)
+			lc.ColRow[d] = make([]LayoutCell, n)
 		}
 		for i := 0; i < n; i++ {
 			lc.ColRow[d][i].Reset()
@@ -373,7 +373,7 @@ func (lc *LayCells) Init(shape image.Point) {
 
 // CellsSize returns the total Size represented by the current Cells,
 // which is the Sum of the Max values along each dimension.
-func (lc *LayCells) CellsSize() math32.Vector2 {
+func (lc *LayoutCells) CellsSize() math32.Vector2 {
 	var ksz math32.Vector2
 	for ma := math32.X; ma <= math32.Y; ma++ { // main axis = X then Y
 		n := math32.PointDim(lc.Shape, ma) // cols, rows
@@ -389,12 +389,12 @@ func (lc *LayCells) CellsSize() math32.Vector2 {
 }
 
 // GapSizeDim returns the gap size for given dimension, based on Shape and given gap size
-func (lc *LayCells) GapSizeDim(d math32.Dims, gap float32) float32 {
+func (lc *LayoutCells) GapSizeDim(d math32.Dims, gap float32) float32 {
 	n := math32.PointDim(lc.Shape, d)
 	return float32(n-1) * gap
 }
 
-func (lc *LayCells) String() string {
+func (lc *LayoutCells) String() string {
 	s := ""
 	n := lc.Shape.X
 	for i := 0; i < n; i++ {
@@ -432,7 +432,7 @@ type LayoutState struct {
 	// For non-Wrap, has one element in slice, with cells based on Shape.
 	// For Wrap, slice is number of CrossAxis wraps allocated:
 	// MainAxis X = Rows; MainAxis Y = Cols, and Cells are MainAxis layout x 1 CrossAxis.
-	Cells []LayCells `edit:"-"`
+	Cells []LayoutCells `edit:"-"`
 
 	// ScrollSize has the scrollbar sizes (widths) for each dim, which adds to Space.
 	// If there is a vertical scrollbar, X has width; if horizontal, Y has "width" = height
@@ -454,7 +454,7 @@ type LayoutState struct {
 func (ls *LayoutState) InitCells() {
 	if ls.Wraps == nil {
 		if len(ls.Cells) != 1 {
-			ls.Cells = make([]LayCells, 1)
+			ls.Cells = make([]LayoutCells, 1)
 		}
 		ls.Cells[0].Init(ls.Shape)
 		return
@@ -463,7 +463,7 @@ func (ls *LayoutState) InitCells() {
 	ca := ma.Other()
 	nw := len(ls.Wraps)
 	if len(ls.Cells) != nw {
-		ls.Cells = make([]LayCells, nw)
+		ls.Cells = make([]LayoutCells, nw)
 	}
 	for wi, wn := range ls.Wraps {
 		var shp image.Point
@@ -484,7 +484,7 @@ func (ls *LayoutState) ShapeCheck(w Widget, phase string) bool {
 // Cell returns the cell for given dimension and index along that
 // dimension, and given other-dimension axis which is ignored for non-Wrap cases.
 // Does no range checking and will crash if out of bounds.
-func (ls *LayoutState) Cell(d math32.Dims, dIndex, odIndex int) *LayCell {
+func (ls *LayoutState) Cell(d math32.Dims, dIndex, odIndex int) *LayoutCell {
 	if ls.Wraps == nil {
 		return ls.Cells[0].Cell(d, dIndex)
 	}
