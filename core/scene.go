@@ -154,6 +154,7 @@ func NewScene(name ...string) *Scene {
 func (sc *Scene) Init() {
 	sc.Scene = sc
 	sc.Frame.Init()
+	sc.RenderBox = true
 	sc.Styler(func(s *styles.Style) {
 		s.Cursor = cursors.Arrow
 		s.Background = colors.C(colors.Scheme.Background)

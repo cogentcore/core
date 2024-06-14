@@ -49,6 +49,7 @@ func NewBody(name ...string) *Body {
 
 func (bd *Body) Init() {
 	bd.Frame.Init()
+	bd.RenderBox = true
 	bd.Styler(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 		s.Direction = styles.Column

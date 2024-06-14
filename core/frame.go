@@ -41,6 +41,10 @@ type Frame struct {
 	// redraw on stack changes, but not for e.g., [Switch]es which don't.
 	LayoutStackTopOnly bool
 
+	// RenderBox determines whether the Frame renders a standard box or not.
+	// By default it does not.
+	RenderBox bool
+
 	// LayImpl contains implementation state info for doing layout
 	LayImpl LayImplState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
@@ -191,7 +195,9 @@ func (fr *Frame) RenderChildren() {
 
 func (fr *Frame) RenderWidget() {
 	if fr.PushBounds() {
-		fr.This.(Widget).Render()
+		if fr.RenderBox {
+			fr.This.(Widget).Render()
+		}
 		fr.RenderParts()
 		fr.RenderChildren()
 		fr.RenderScrolls()

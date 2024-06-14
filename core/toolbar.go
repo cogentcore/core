@@ -40,6 +40,7 @@ type Toolbar struct {
 
 func (tb *Toolbar) Init() {
 	tb.Frame.Init()
+	tb.RenderBox = true
 	ToolbarStyles(tb)
 
 	AddChildAt(tb, "overflow-menu", func(w *Button) {
