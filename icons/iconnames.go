@@ -4446,7 +4446,7 @@ const (
 	// Resume is https://github.com/cogentcore/core/blob/main/icons/svg/resume.svg
 	Resume Icon = "resume"
 
-	// Reviews is https://github.com/cogentcore/core/blob/main/icons/svg/recore.svg
+	// Reviews is https://github.com/cogentcore/core/blob/main/icons/svg/reviews.svg
 	Reviews Icon = "reviews"
 
 	// RightClick is https://github.com/cogentcore/core/blob/main/icons/svg/right_click.svg
@@ -4821,7 +4821,7 @@ const (
 	// ShareOff is https://github.com/cogentcore/core/blob/main/icons/svg/share_off.svg
 	ShareOff Icon = "share_off"
 
-	// ShareReviews is https://github.com/cogentcore/core/blob/main/icons/svg/share_recore.svg
+	// ShareReviews is https://github.com/cogentcore/core/blob/main/icons/svg/share_reviews.svg
 	ShareReviews Icon = "share_reviews"
 
 	// ShareWindows is https://github.com/cogentcore/core/blob/main/icons/svg/share_windows.svg

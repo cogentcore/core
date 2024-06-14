@@ -305,10 +305,10 @@ func (t *FilePicker) SetExtMap(v map[string]string) *FilePicker { t.ExtMap = v; 
 func (t *FilePicker) SetFiles(v ...*fileinfo.FileInfo) *FilePicker { t.Files = v; return t }
 
 // FileButtonType is the [types.Type] for [FileButton]
-var FileButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FileButton", IDName: "file-button", Doc: "FileButton represents a filename value with a button\nthat opens a [FilePicker].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Filename"}}, Instance: &FileButton{}})
+var FileButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FileButton", IDName: "file-button", Doc: "FileButton represents a [Filename] value with a button\nthat opens a [FilePicker].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Filename"}}, Instance: &FileButton{}})
 
 // NewFileButton returns a new [FileButton] with the given optional parent:
-// FileButton represents a filename value with a button
+// FileButton represents a [Filename] value with a button
 // that opens a [FilePicker].
 func NewFileButton(parent ...tree.Node) *FileButton { return tree.New[*FileButton](parent...) }
 
