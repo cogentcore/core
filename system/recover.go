@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
+	"strings"
 	"time"
 
 	"cogentcore.org/core/base/errors"
@@ -64,6 +65,7 @@ func HandleRecoverBase(r any) {
 	if errors.Log(err) != nil {
 		return
 	}
+	cfnm = strings.ReplaceAll(cfnm, " ", `\ `) // escape spaces
 	log.Println("SAVED CRASH LOG TO", cfnm)
 }
 

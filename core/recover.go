@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"runtime/debug"
+	"strings"
 
 	"cogentcore.org/core/base/fileinfo/mimedata"
 	"cogentcore.org/core/events"
@@ -45,6 +46,7 @@ func HandleRecover(r any) {
 	b.AddBottomBar(func(parent Widget) {
 		NewButton(parent).SetText("Details").SetType(ButtonOutlined).OnClick(func(e events.Event) {
 			clpath := filepath.Join(TheApp.AppDataDir(), "crash-logs")
+			clpath = strings.ReplaceAll(clpath, " ", `\ `) // escape spaces
 			txt := fmt.Sprintf("Crash log saved in %s\n\n%s", clpath, system.CrashLogText(r, stack))
 			d := NewBody("crash-details").AddTitle("Crash details")
 			NewText(d).SetText(txt).Styler(func(s *styles.Style) {
