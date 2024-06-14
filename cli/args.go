@@ -412,10 +412,12 @@ func AllCases(nm string) []string {
 // AddFlags adds to given the given ordered flags map all of the different ways
 // all of the given fields can can be specified as flags. It also uses the given
 // positional arguments to set the values of the object based on any posarg struct
-// tags that fields have. The posarg struct tag must either be "all" or a valid uint.
-// Finally, it also uses the given map of flags passed to the command as context.
+// tags that fields have. The posarg struct tag must either be "all", "leftover",
+// or a valid uint. Finally, it also uses the given map of flags passed to the
+// command as context.
 func AddFlags(allFields *Fields, allFlags *Fields, args []string, flags map[string]string) ([]string, error) {
 	consumed := map[int]bool{} // which args we have consumed via pos args
+	var leftoverField *Field
 	for _, kv := range allFields.Order {
 		v := kv.Value
 		f := v.Field
@@ -430,7 +432,8 @@ func AddFlags(allFields *Fields, allFlags *Fields, args []string, flags map[stri
 		// set based on pos arg
 		posArgTag, ok := f.Tag.Lookup("posarg")
 		if ok {
-			if posArgTag == "all" {
+			switch posArgTag {
+			case "all":
 				err := reflectx.SetRobust(v.Value.Interface(), args)
 				if err != nil {
 					return nil, fmt.Errorf("error setting field %q to all positional arguments: %v: %w", f.Name, args, err)
@@ -439,7 +442,9 @@ func AddFlags(allFields *Fields, allFlags *Fields, args []string, flags map[stri
 				for i := range args {
 					consumed[i] = true
 				}
-			} else {
+			case "leftover":
+				leftoverField = v // must be handled later once we have all of the leftovers
+			default:
 				ui, err := strconv.ParseUint(posArgTag, 10, 64)
 				if err != nil {
 					return nil, fmt.Errorf("programmer error: invalid value %q for posarg struct tag on field %q: %w", posArgTag, f.Name, err)
@@ -487,6 +492,13 @@ func AddFlags(allFields *Fields, allFlags *Fields, args []string, flags map[stri
 		if !consumed[i] {
 			leftovers = append(leftovers, a)
 		}
+	}
+	if leftoverField != nil {
+		err := reflectx.SetRobust(leftoverField.Value.Interface(), leftovers)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field %q to all leftover arguments: %v: %w", leftoverField.Name, leftovers, err)
+		}
+		return nil, nil // no more leftovers
 	}
 	return leftovers, nil
 }
