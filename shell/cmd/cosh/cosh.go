@@ -64,7 +64,7 @@ func Run(c *Config) error { //cli:cmd -root
 	in := interpreter.NewInterpreter(interp.Options{})
 	in.Config()
 	if len(c.Args) > 0 {
-		in.Eval("args := " + fmt.Sprintf("%#v", c.Args))
+		in.Eval("args := cosh.StringsToAnys(" + fmt.Sprintf("%#v)", c.Args))
 	}
 
 	if c.Input == "" {

@@ -14,6 +14,7 @@ func init() {
 		"ReadFile":      reflect.ValueOf(cosh.ReadFile),
 		"ReplaceInFile": reflect.ValueOf(cosh.ReplaceInFile),
 		"SplitLines":    reflect.ValueOf(cosh.SplitLines),
+		"StringsToAnys": reflect.ValueOf(cosh.StringsToAnys),
 		"WriteFile":     reflect.ValueOf(cosh.WriteFile),
 	}
 }

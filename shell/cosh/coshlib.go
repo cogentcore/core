@@ -12,6 +12,7 @@ import (
 
 	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/base/stringsx"
 )
 
@@ -57,4 +58,12 @@ func ReplaceInFile(filename, old, new string) string {
 	str = strings.ReplaceAll(str, old, new)
 	WriteFile(filename, str)
 	return str
+}
+
+// StringsToAnys converts a slice of strings to a slice of any,
+// using slicesx.ToAny.  The interpreter cannot process generics
+// yet, so this wrapper is needed.  Use for passing args to
+// a command, for example.
+func StringsToAnys(s []string) []any {
+	return slicesx.ToAny(s)
 }

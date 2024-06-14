@@ -71,7 +71,11 @@ As with most scripting languages, a file of cosh code can be made directly execu
 #!/usr/bin/env cosh
 ```
 
-When executed this way, any additional args are available via the `args []string` variable.
+When executed this way, any additional args are available via an `args []any` variable, which can be passed to a command as follows:
+```go
+install {args...}
+```
+or by referring to specific arg indexes etc.
 
 To make a script behave like a standard Makefile, you can define different `command`s for each of the make commands, and then add the following at the end of the file to use the args to run commands:
 
