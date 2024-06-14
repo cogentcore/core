@@ -24,24 +24,28 @@ import (
 // Config is the configuration information for the cosh cli.
 type Config struct {
 
-	// The input file to run/compile.
+	// Input is the input file to run/compile.
 	// If this is provided as the first argument,
 	// then the program will exit after running,
 	// unless the Interactive mode is flagged.
 	Input string `posarg:"0" required:"-"`
 
-	// the Go file to output the transpiled Input file to,
+	// Output is the Go file to output the transpiled input file to,
 	// as an optional second argument in build mode.
 	// It defaults to the input file with .cosh changed to .go.
 	Output string `cmd:"build" posarg:"1" required:"-"`
 
-	// an optional expression to evaluate, which can be used
+	// Expr is an optional expression to evaluate, which can be used
 	// in addition to the Input file to run, to execute commands
 	// defined within that file for example, or as a command to run
 	// prior to starting interactive mode if no Input is specified.
 	Expr string `flag:"e,expr"`
 
-	// runs the interactive command line after processing an Input file.
+	// Args is an optional list of arguments to pass; if this is specified,
+	// these arguments will be turned into an "args" local variable in the shell.
+	Args []string
+
+	// Interactive runs the interactive command line after processing an input file.
 	// Interactive mode is the default for all cases except when
 	// an Input file is specified, and is not available
 	// if an Output file is specified for transpiling.
