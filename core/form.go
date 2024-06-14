@@ -231,3 +231,18 @@ func (fm *Form) Init() {
 		}
 	})
 }
+
+// FormDialog opens a dialog (optionally in a new, separate window)
+// for viewing / editing the given struct object, in the context of given ctx widget
+func FormDialog(ctx Widget, stru any, title string, newWindow bool) {
+	d := NewBody().AddTitle(title)
+	NewForm(d).SetStruct(stru)
+	if tb, ok := stru.(ToolbarMaker); ok {
+		d.AddAppBar(tb.MakeToolbar)
+	}
+	ds := d.NewFullDialog(ctx)
+	if newWindow {
+		ds.SetNewWindow(true)
+	}
+	ds.Run()
+}
