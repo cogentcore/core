@@ -194,6 +194,7 @@ func (pl *PlotEditor) SetColParams(colNm string, on bool, fixMin bool, min float
 // SaveSVG saves the plot to an svg -- first updates to ensure that plot is current
 func (pl *PlotEditor) SaveSVG(fname core.Filename) { //types:add
 	pl.UpdatePlot()
+	// TODO: get plot svg saving working
 	// pc := pl.PlotChild()
 	// SaveSVGView(string(fname), pl.Plot, sv, 2)
 	pl.SVGFile = fname
