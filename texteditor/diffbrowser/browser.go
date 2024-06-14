@@ -87,17 +87,17 @@ func (br *Browser) MakeToolbar(p *core.Plan) {
 	// })
 }
 
-// ViewDiff views diff for given file Node, returning a texteditor.DiffView
-func (br *Browser) ViewDiff(fn *Node) *texteditor.DiffView {
+// ViewDiff views diff for given file Node, returning a texteditor.DiffEditor
+func (br *Browser) ViewDiff(fn *Node) *texteditor.DiffEditor {
 	df := dirs.DirAndFile(fn.FileA)
 	tabs := br.Tabs()
 	tab := tabs.RecycleTab(df, true)
 	if tab.HasChildren() {
-		dv := tab.Child(1).(*texteditor.DiffView)
+		dv := tab.Child(1).(*texteditor.DiffEditor)
 		return dv
 	}
 	tb := core.NewToolbar(tab)
-	dv := texteditor.NewDiffView(tab)
+	dv := texteditor.NewDiffEditor(tab)
 	tb.Maker(dv.MakeToolbar)
 	dv.SetFileA(fn.FileA).SetFileB(fn.FileB).SetRevA(fn.RevA).SetRevB(fn.RevB)
 	dv.DiffStrings(stringsx.SplitLines(fn.TextA), stringsx.SplitLines(fn.TextB))

@@ -30,8 +30,8 @@ import (
 )
 
 // DiffFiles shows the diffs between this file as the A file, and other file as B file,
-// in a DiffViewDialog
-func DiffFiles(ctx core.Widget, afile, bfile string) (*DiffView, error) {
+// in a DiffEditorDialog
+func DiffFiles(ctx core.Widget, afile, bfile string) (*DiffEditor, error) {
 	ab, err := os.ReadFile(afile)
 	if err != nil {
 		slog.Error(err.Error())
@@ -44,15 +44,15 @@ func DiffFiles(ctx core.Widget, afile, bfile string) (*DiffView, error) {
 	}
 	astr := stringsx.SplitLines(string(ab))
 	bstr := stringsx.SplitLines(string(bb))
-	dlg := DiffViewDialog(ctx, "Diff File View", astr, bstr, afile, bfile, "", "")
+	dlg := DiffEditorDialog(ctx, "Diff File View", astr, bstr, afile, bfile, "", "")
 	return dlg, nil
 }
 
-// DiffViewDialogFromRevs opens a dialog for displaying diff between file
+// DiffEditorDialogFromRevs opens a dialog for displaying diff between file
 // at two different revisions from given repository
 // if empty, defaults to: A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
-func DiffViewDialogFromRevs(ctx core.Widget, repo vcs.Repo, file string, fbuf *Buffer, rev_a, rev_b string) (*DiffView, error) {
+func DiffEditorDialogFromRevs(ctx core.Widget, repo vcs.Repo, file string, fbuf *Buffer, rev_a, rev_b string) (*DiffEditor, error) {
 	var astr, bstr []string
 	if rev_b == "" { // default to current file
 		if fbuf != nil {
@@ -82,15 +82,15 @@ func DiffViewDialogFromRevs(ctx core.Widget, repo vcs.Repo, file string, fbuf *B
 	if rev_a == "" {
 		rev_a = "HEAD"
 	}
-	return DiffViewDialog(ctx, "DiffVcs: "+dirs.DirAndFile(file), astr, bstr, file, file, rev_a, rev_b), nil
+	return DiffEditorDialog(ctx, "DiffVcs: "+dirs.DirAndFile(file), astr, bstr, file, file, rev_a, rev_b), nil
 }
 
-// DiffViewDialog opens a dialog for displaying diff between two files as line-strings
-func DiffViewDialog(ctx core.Widget, title string, astr, bstr []string, afile, bfile, arev, brev string) *DiffView {
-	d := core.NewBody("Diffview")
+// DiffEditorDialog opens a dialog for displaying diff between two files as line-strings
+func DiffEditorDialog(ctx core.Widget, title string, astr, bstr []string, afile, bfile, arev, brev string) *DiffEditor {
+	d := core.NewBody("Diff editor")
 	d.SetTitle(title)
 
-	dv := NewDiffView(d)
+	dv := NewDiffEditor(d)
 	dv.SetFileA(afile).SetFileB(bfile).SetRevA(arev).SetRevB(brev)
 	dv.DiffStrings(astr, bstr)
 	d.AddAppBar(dv.MakeToolbar)
@@ -116,11 +116,11 @@ func TextDialog(ctx core.Widget, title, text string) *Editor {
 }
 
 ///////////////////////////////////////////////////////////////////
-// DiffView
+// DiffEditor
 
-// DiffView presents two side-by-side TextEditor windows showing the differences
+// DiffEditor presents two side-by-side [Editor]s showing the differences
 // between two files (represented as lines of strings).
-type DiffView struct {
+type DiffEditor struct {
 	core.Frame
 
 	// first file name being compared
@@ -150,7 +150,7 @@ type DiffView struct {
 	inInputEvent bool
 }
 
-func (dv *DiffView) Init() {
+func (dv *DiffEditor) Init() {
 	dv.Frame.Init()
 	dv.BufA = NewBuffer().SetFilename(dv.FileA)
 	dv.BufB = NewBuffer().SetFilename(dv.FileB)
@@ -184,7 +184,7 @@ func (dv *DiffView) Init() {
 }
 
 // SyncViews synchronizes the text view scrolling and cursor positions
-func (dv *DiffView) SyncViews(typ events.Types, e events.Event, name string) {
+func (dv *DiffEditor) SyncViews(typ events.Types, e events.Event, name string) {
 	tva, tvb := dv.TextEditors()
 	me, other := tva, tvb
 	if name == "text-b" {
@@ -205,7 +205,7 @@ func (dv *DiffView) SyncViews(typ events.Types, e events.Event, name string) {
 }
 
 // NextDiff moves to next diff region
-func (dv *DiffView) NextDiff(ab int) bool {
+func (dv *DiffEditor) NextDiff(ab int) bool {
 	tva, tvb := dv.TextEditors()
 	tv := tva
 	if ab == 1 {
@@ -232,7 +232,7 @@ func (dv *DiffView) NextDiff(ab int) bool {
 }
 
 // PrevDiff moves to previous diff region
-func (dv *DiffView) PrevDiff(ab int) bool {
+func (dv *DiffEditor) PrevDiff(ab int) bool {
 	tva, tvb := dv.TextEditors()
 	tv := tva
 	if ab == 1 {
@@ -259,7 +259,7 @@ func (dv *DiffView) PrevDiff(ab int) bool {
 
 // SaveAs saves A or B edits into given file.
 // It checks for an existing file, prompts to overwrite or not.
-func (dv *DiffView) SaveAs(ab bool, filename core.Filename) {
+func (dv *DiffEditor) SaveAs(ab bool, filename core.Filename) {
 	if !errors.Log1(dirs.FileExists(string(filename))) {
 		dv.SaveFile(ab, filename)
 	} else {
@@ -276,7 +276,7 @@ func (dv *DiffView) SaveAs(ab bool, filename core.Filename) {
 }
 
 // SaveFile writes A or B edits to file, with no prompting, etc
-func (dv *DiffView) SaveFile(ab bool, filename core.Filename) error {
+func (dv *DiffEditor) SaveFile(ab bool, filename core.Filename) error {
 	var txt string
 	if ab {
 		txt = strings.Join(dv.Diffs.B.Edit, "\n")
@@ -292,20 +292,20 @@ func (dv *DiffView) SaveFile(ab bool, filename core.Filename) error {
 }
 
 // SaveFileA saves the current state of file A to given filename
-func (dv *DiffView) SaveFileA(fname core.Filename) { //types:add
+func (dv *DiffEditor) SaveFileA(fname core.Filename) { //types:add
 	dv.SaveAs(false, fname)
 	// dv.UpdateToolbar()
 }
 
 // SaveFileB saves the current state of file B to given filename
-func (dv *DiffView) SaveFileB(fname core.Filename) { //types:add
+func (dv *DiffEditor) SaveFileB(fname core.Filename) { //types:add
 	dv.SaveAs(true, fname)
 	// dv.UpdateToolbar()
 }
 
 // DiffStrings computes differences between two lines-of-strings and displays in
-// DiffView.
-func (dv *DiffView) DiffStrings(astr, bstr []string) {
+// DiffEditor.
+func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
 	dv.Diffs.SetStringLines(astr, bstr)
 
 	dv.BufA.LineColors = nil
@@ -411,7 +411,7 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 
 // TagWordDiffs goes through replace diffs and tags differences at the
 // word level between the two regions.
-func (dv *DiffView) TagWordDiffs() {
+func (dv *DiffEditor) TagWordDiffs() {
 	for _, df := range dv.AlignD {
 		if df.Tag != 'r' {
 			continue
@@ -459,7 +459,7 @@ func (dv *DiffView) TagWordDiffs() {
 
 // ApplyDiff applies change from the other buffer to the buffer for given file
 // name, from diff that includes given line.
-func (dv *DiffView) ApplyDiff(ab int, line int) bool {
+func (dv *DiffEditor) ApplyDiff(ab int, line int) bool {
 	tva, tvb := dv.TextEditors()
 	tv := tva
 	if ab == 1 {
@@ -496,7 +496,7 @@ func (dv *DiffView) ApplyDiff(ab int, line int) bool {
 }
 
 // UndoDiff undoes last applied change, if any.
-func (dv *DiffView) UndoDiff(ab int) error {
+func (dv *DiffEditor) UndoDiff(ab int) error {
 	tva, tvb := dv.TextEditors()
 	if ab == 1 {
 		if !dv.Diffs.B.Undo() {
@@ -516,7 +516,7 @@ func (dv *DiffView) UndoDiff(ab int) error {
 	return nil
 }
 
-func (dv *DiffView) MakeToolbar(p *core.Plan) {
+func (dv *DiffEditor) MakeToolbar(p *core.Plan) {
 	txta := "A: " + dirs.DirAndFile(dv.FileA)
 	if dv.RevA != "" {
 		txta += ": " + dv.RevA
@@ -642,7 +642,7 @@ func (dv *DiffView) MakeToolbar(p *core.Plan) {
 	})
 }
 
-func (dv *DiffView) TextEditors() (*DiffTextEditor, *DiffTextEditor) {
+func (dv *DiffEditor) TextEditors() (*DiffTextEditor, *DiffTextEditor) {
 	av := dv.Child(0).(*DiffTextEditor)
 	bv := dv.Child(1).(*DiffTextEditor)
 	return av, bv
@@ -662,12 +662,12 @@ func (tv *DiffTextEditor) Init() {
 	tv.HandleDoubleClick()
 }
 
-func (tv *DiffTextEditor) DiffView() *DiffView {
-	dvi := tv.ParentByType(DiffViewType, tree.NoEmbeds)
+func (tv *DiffTextEditor) DiffEditor() *DiffEditor {
+	dvi := tv.ParentByType(DiffEditorType, tree.NoEmbeds)
 	if dvi == nil {
 		return nil
 	}
-	return dvi.(*DiffView)
+	return dvi.(*DiffEditor)
 }
 
 func (tv *DiffTextEditor) HandleDoubleClick() {
@@ -676,7 +676,7 @@ func (tv *DiffTextEditor) HandleDoubleClick() {
 		if pt.X >= 0 && pt.X < int(tv.LineNumberOffset) {
 			newPos := tv.PixelToCursor(pt)
 			ln := newPos.Ln
-			dv := tv.DiffView()
+			dv := tv.DiffEditor()
 			if dv != nil && tv.Buffer != nil {
 				if tv.Name == "text-a" {
 					dv.ApplyDiff(0, ln)

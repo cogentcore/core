@@ -212,7 +212,7 @@ func (fn *Node) RevertVCS() (err error) {
 // DiffVCSSel shows the diffs between two versions of selected files, given by the
 // revision specifiers -- if empty, defaults to A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
-// Diffs are shown in a DiffViewDialog.
+// Diffs are shown in a DiffEditorDialog.
 func (fn *Node) DiffVCSSel(rev_a string, rev_b string) { //types:add
 	fn.SelectedFunc(func(sn *Node) {
 		sn.DiffVCS(rev_a, rev_b)
@@ -222,7 +222,7 @@ func (fn *Node) DiffVCSSel(rev_a string, rev_b string) { //types:add
 // DiffVCS shows the diffs between two versions of this file, given by the
 // revision specifiers -- if empty, defaults to A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
-// Diffs are shown in a DiffViewDialog.
+// Diffs are shown in a DiffEditorDialog.
 func (fn *Node) DiffVCS(rev_a, rev_b string) error {
 	repo, _ := fn.Repo()
 	if repo == nil {
@@ -231,7 +231,7 @@ func (fn *Node) DiffVCS(rev_a, rev_b string) error {
 	if fn.Info.VCS == vcs.Untracked {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
-	_, err := texteditor.DiffViewDialogFromRevs(fn, repo, string(fn.FPath), fn.Buffer, rev_a, rev_b)
+	_, err := texteditor.DiffEditorDialogFromRevs(fn, repo, string(fn.FPath), fn.Buffer, rev_a, rev_b)
 	return err
 }
 

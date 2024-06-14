@@ -256,7 +256,7 @@ func (lv *VCSLogView) MakeToolbar(p *core.Plan) {
 				if lv.File == "" {
 					diffbrowser.NewDiffBrowserVCS(lv.Repo, lv.RevA, lv.RevB)
 				} else {
-					texteditor.DiffViewDialogFromRevs(lv, lv.Repo, lv.File, nil, lv.RevA, lv.RevB)
+					texteditor.DiffEditorDialogFromRevs(lv, lv.Repo, lv.File, nil, lv.RevA, lv.RevB)
 				}
 			})
 	})

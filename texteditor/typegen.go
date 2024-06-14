@@ -33,39 +33,39 @@ func (t *Spell) SetStage(v *core.Stage) *Spell { t.Stage = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor.Buffer", IDName: "buffer", Doc: "Buffer is a buffer of text, which can be viewed by [Editor](s).\nIt holds the raw text lines (in original string and rune formats,\nand marked-up from syntax highlighting), and sends signals for making\nedits to the text and coordinating those edits across multiple views.\nViews always only view a single buffer, so they directly call methods\non the buffer to drive updates, which are then broadcast.\nIt also has methods for loading and saving buffers to files.\nUnlike GUI Widgets, its methods generally send events, without an\nexplicit Action suffix.\nInternally, the buffer represents new lines using \\n = LF, but saving\nand loading can deal with Windows/DOS CRLF format.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Methods: []types.Method{{Name: "Open", Doc: "Open loads the given file into the buffer.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "Revert", Doc: "Revert re-opens text from current file, if filename set -- returns false if\nnot -- uses an optimized diff-based update to preserve existing formatting\n-- very fast if not very different", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"bool"}}, {Name: "SaveAs", Doc: "SaveAs saves the current text into given file -- does an EditDone first to save edits\nand checks for an existing file -- if it does exist then prompts to overwrite or not.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}}, {Name: "Save", Doc: "Save saves the current text into current Filename associated with this\nbuffer", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"error"}}}, Fields: []types.Field{{Name: "Filename", Doc: "Filename is the filename of the file that was last loaded or saved. It is used when highlighting code."}, {Name: "Txt", Doc: "Txt is the current value of the entire text being edited, represented as a byte slice for efficiency."}, {Name: "Autosave", Doc: "Autosave specifies whether the file should be automatically saved after changes are made."}, {Name: "Options", Doc: "Options are the options for how text editing and viewing works."}, {Name: "Info", Doc: "Info is the full information about the file."}, {Name: "ParseState", Doc: "ParseState is the parsing state information for the file."}, {Name: "Hi", Doc: "Hi is the syntax highlighting markup parameters, such as the language and style."}, {Name: "NLines", Doc: "NLines is the number of lines in the buffer."}, {Name: "LineColors", Doc: "LineColors are the colors to use for rendering circles next to the line numbers of certain lines."}, {Name: "Lines", Doc: "Lines are the live lines of text being edited, with the latest modifications. They are encoded as runes per line, which is necessary for one-to-one rune/glyph rendering correspondence. All TextPos positions are in rune indexes, not byte indexes."}, {Name: "LineBytes", Doc: "LineBytes are the live lines of text being edited, with the latest modifications. They are encoded in bytes per line, translated from Lines, and used for input to markup. It is essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes."}, {Name: "Tags", Doc: "Tags are the extra custom tagged regions for each line."}, {Name: "HiTags", Doc: "HiTags are the syntax highlighting tags, which are auto-generated."}, {Name: "Markup", Doc: "Markup is the marked-up version of the edited text lines, after being run through the syntax highlighting process. This is what is actually rendered."}, {Name: "MarkupEdits", Doc: "MarkupEdits are the edits that have been made since the last full markup."}, {Name: "ByteOffs", Doc: "ByteOffs are the offsets for the start of each line in the Txt byte slice. This is not updated with edits. Call SetByteOffs to set it when needed. It is used for re-generating the Txt in LinesToBytes and set on initial open in BytesToLines."}, {Name: "TotalBytes", Doc: "TotalBytes is the total number of bytes in the document. See ByteOffs for when it is updated."}, {Name: "LinesMu", Doc: "LinesMu is the mutex for updating lines."}, {Name: "MarkupMu", Doc: "MarkupMu is the mutex for updating markup."}, {Name: "MarkupDelayTimer", Doc: "MarkupDelayTimer is the markup delay timer."}, {Name: "MarkupDelayMu", Doc: "MarkupDelayMu is the mutex for updating the markup delay timer."}, {Name: "Editors", Doc: "Editors are the editors that are currently viewing this buffer."}, {Name: "Undos", Doc: "Undos is the undo manager."}, {Name: "PosHistory", Doc: "PosHistory is the history of cursor positions. It can be used to move back through them."}, {Name: "Complete", Doc: "Complete is the functions and data for text completion."}, {Name: "Spell", Doc: "Spell is the functions and data for spelling correction."}, {Name: "CurrentEditor", Doc: "CurrentEditor is the current text editor, such as the one that initiated the Complete or Correct process. The cursor position in this view is updated, and it is reset to nil after usage."}, {Name: "Listeners", Doc: "Listeners is used for sending standard system events. Change is sent for BufDone, BufInsert, and BufDelete."}, {Name: "autoSaving", Doc: "autoSaving is used in atomically safe way to protect autosaving"}, {Name: "markingUp", Doc: "markingUp indicates current markup operation in progress -- don't redo"}, {Name: "Changed", Doc: "Changed indicates if the text has been Changed (edited) relative to the\noriginal, since last EditDone"}, {Name: "NotSaved", Doc: "NotSaved indicates if the text has been changed (edited) relative to the\noriginal, since last Save"}, {Name: "fileModOK", Doc: "fileModOK have already asked about fact that file has changed since being\nopened, user is ok"}}})
 
-// DiffViewType is the [types.Type] for [DiffView]
-var DiffViewType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor.DiffView", IDName: "diff-view", Doc: "DiffView presents two side-by-side TextEditor windows showing the differences\nbetween two files (represented as lines of strings).", Methods: []types.Method{{Name: "SaveFileA", Doc: "SaveFileA saves the current state of file A to given filename", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}}, {Name: "SaveFileB", Doc: "SaveFileB saves the current state of file B to given filename", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "FileA", Doc: "first file name being compared"}, {Name: "FileB", Doc: "second file name being compared"}, {Name: "RevA", Doc: "revision for first file, if relevant"}, {Name: "RevB", Doc: "revision for second file, if relevant"}, {Name: "BufA", Doc: "textbuf for A showing the aligned edit view"}, {Name: "BufB", Doc: "textbuf for B showing the aligned edit view"}, {Name: "AlignD", Doc: "aligned diffs records diff for aligned lines"}, {Name: "Diffs", Doc: "Diffs applied"}, {Name: "inInputEvent"}}, Instance: &DiffView{}})
+// DiffEditorType is the [types.Type] for [DiffEditor]
+var DiffEditorType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor.DiffEditor", IDName: "diff-editor", Doc: "DiffEditor presents two side-by-side [Editor]s showing the differences\nbetween two files (represented as lines of strings).", Methods: []types.Method{{Name: "SaveFileA", Doc: "SaveFileA saves the current state of file A to given filename", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}}, {Name: "SaveFileB", Doc: "SaveFileB saves the current state of file B to given filename", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"fname"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "FileA", Doc: "first file name being compared"}, {Name: "FileB", Doc: "second file name being compared"}, {Name: "RevA", Doc: "revision for first file, if relevant"}, {Name: "RevB", Doc: "revision for second file, if relevant"}, {Name: "BufA", Doc: "textbuf for A showing the aligned edit view"}, {Name: "BufB", Doc: "textbuf for B showing the aligned edit view"}, {Name: "AlignD", Doc: "aligned diffs records diff for aligned lines"}, {Name: "Diffs", Doc: "Diffs applied"}, {Name: "inInputEvent"}}, Instance: &DiffEditor{}})
 
-// NewDiffView returns a new [DiffView] with the given optional parent:
-// DiffView presents two side-by-side TextEditor windows showing the differences
+// NewDiffEditor returns a new [DiffEditor] with the given optional parent:
+// DiffEditor presents two side-by-side [Editor]s showing the differences
 // between two files (represented as lines of strings).
-func NewDiffView(parent ...tree.Node) *DiffView { return tree.New[*DiffView](parent...) }
+func NewDiffEditor(parent ...tree.Node) *DiffEditor { return tree.New[*DiffEditor](parent...) }
 
-// NodeType returns the [*types.Type] of [DiffView]
-func (t *DiffView) NodeType() *types.Type { return DiffViewType }
+// NodeType returns the [*types.Type] of [DiffEditor]
+func (t *DiffEditor) NodeType() *types.Type { return DiffEditorType }
 
-// New returns a new [*DiffView] value
-func (t *DiffView) New() tree.Node { return &DiffView{} }
+// New returns a new [*DiffEditor] value
+func (t *DiffEditor) New() tree.Node { return &DiffEditor{} }
 
-// SetFileA sets the [DiffView.FileA]:
+// SetFileA sets the [DiffEditor.FileA]:
 // first file name being compared
-func (t *DiffView) SetFileA(v string) *DiffView { t.FileA = v; return t }
+func (t *DiffEditor) SetFileA(v string) *DiffEditor { t.FileA = v; return t }
 
-// SetFileB sets the [DiffView.FileB]:
+// SetFileB sets the [DiffEditor.FileB]:
 // second file name being compared
-func (t *DiffView) SetFileB(v string) *DiffView { t.FileB = v; return t }
+func (t *DiffEditor) SetFileB(v string) *DiffEditor { t.FileB = v; return t }
 
-// SetRevA sets the [DiffView.RevA]:
+// SetRevA sets the [DiffEditor.RevA]:
 // revision for first file, if relevant
-func (t *DiffView) SetRevA(v string) *DiffView { t.RevA = v; return t }
+func (t *DiffEditor) SetRevA(v string) *DiffEditor { t.RevA = v; return t }
 
-// SetRevB sets the [DiffView.RevB]:
+// SetRevB sets the [DiffEditor.RevB]:
 // revision for second file, if relevant
-func (t *DiffView) SetRevB(v string) *DiffView { t.RevB = v; return t }
+func (t *DiffEditor) SetRevB(v string) *DiffEditor { t.RevB = v; return t }
 
-// SetDiffs sets the [DiffView.Diffs]:
+// SetDiffs sets the [DiffEditor.Diffs]:
 // Diffs applied
-func (t *DiffView) SetDiffs(v textbuf.DiffSelected) *DiffView { t.Diffs = v; return t }
+func (t *DiffEditor) SetDiffs(v textbuf.DiffSelected) *DiffEditor { t.Diffs = v; return t }
 
 // DiffTextEditorType is the [types.Type] for [DiffTextEditor]
 var DiffTextEditorType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor.DiffTextEditor", IDName: "diff-text-editor", Doc: "DiffTextEditor supports double-click based application of edits from one\nbuffer to the other.", Embeds: []types.Field{{Name: "Editor"}}, Instance: &DiffTextEditor{}})
