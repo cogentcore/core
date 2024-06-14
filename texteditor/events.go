@@ -722,10 +722,10 @@ func (ed *Editor) ContextMenu(m *core.Scene) {
 				ed.Paste()
 			})
 		core.NewSeparator(m)
-		core.NewFuncButton(m, ed.Buffer.Save).SetIcon(icons.Save)
-		core.NewFuncButton(m, ed.Buffer.SaveAs).SetIcon(icons.SaveAs)
-		core.NewFuncButton(m, ed.Buffer.Open).SetIcon(icons.Open)
-		core.NewFuncButton(m, ed.Buffer.Revert).SetIcon(icons.Reset)
+		core.NewFuncButton(m).SetFunc(ed.Buffer.Save).SetIcon(icons.Save)
+		core.NewFuncButton(m).SetFunc(ed.Buffer.SaveAs).SetIcon(icons.SaveAs)
+		core.NewFuncButton(m).SetFunc(ed.Buffer.Open).SetIcon(icons.Open)
+		core.NewFuncButton(m).SetFunc(ed.Buffer.Revert).SetIcon(icons.Reset)
 	} else {
 		core.NewButton(m).SetText("Clear").SetIcon(icons.ClearAll).
 			OnClick(func(e events.Event) {

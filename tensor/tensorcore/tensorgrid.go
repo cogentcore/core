@@ -200,7 +200,7 @@ func (tg *TensorGrid) Init() {
 		tg.OpenTensorView()
 	})
 	tg.AddContextMenu(func(m *core.Scene) { // todo: still not getting the context menu event at all
-		core.NewFuncButton(m, tg.EditSettings).SetIcon(icons.Edit)
+		core.NewFuncButton(m).SetFunc(tg.EditSettings).SetIcon(icons.Edit)
 	})
 }
 

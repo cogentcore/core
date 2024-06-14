@@ -604,11 +604,11 @@ func (pl *PlotEditor) MakeToolbar(p *core.Plan) {
 
 	core.Add(p, func(w *core.Button) {
 		w.SetText("Save").SetIcon(icons.Save).SetMenu(func(m *core.Scene) {
-			core.NewFuncButton(m, pl.SaveSVG).SetIcon(icons.Save)
-			core.NewFuncButton(m, pl.SavePNG).SetIcon(icons.Save)
-			core.NewFuncButton(m, pl.SaveCSV).SetIcon(icons.Save)
+			core.NewFuncButton(m).SetFunc(pl.SaveSVG).SetIcon(icons.Save)
+			core.NewFuncButton(m).SetFunc(pl.SavePNG).SetIcon(icons.Save)
+			core.NewFuncButton(m).SetFunc(pl.SaveCSV).SetIcon(icons.Save)
 			core.NewSeparator(m)
-			core.NewFuncButton(m, pl.SaveAll).SetIcon(icons.Save)
+			core.NewFuncButton(m).SetFunc(pl.SaveAll).SetIcon(icons.Save)
 		})
 	})
 	core.Add(p, func(w *core.FuncButton) {

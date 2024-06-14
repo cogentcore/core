@@ -400,7 +400,7 @@ func (fp *FilePicker) makeFilesRow(p *Plan) {
 					d.AddOKOnly().RunFullDialog(w)
 				})
 			NewSeparator(m)
-			NewFuncButton(m, fp.NewFolder).SetIcon(icons.CreateNewFolder)
+			NewFuncButton(m).SetFunc(fp.NewFolder).SetIcon(icons.CreateNewFolder)
 		})
 		// w.Updater(func() {})
 	})

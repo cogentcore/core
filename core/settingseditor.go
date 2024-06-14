@@ -22,10 +22,10 @@ func SettingsEditorToolbarBase(p *Plan) {
 
 	/*
 		tb.AddOverflowMenu(func(m *Scene) {
-			NewFuncButton(m, ResetAllSettings).SetText("Reset settings").SetIcon(icons.Delete).SetConfirm(true)
+			NewFuncButton(m).SetFunc(ResetAllSettings).SetText("Reset settings").SetIcon(icons.Delete).SetConfirm(true)
 
-			NewFuncButton(m, AppearanceSettings.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
-			NewFuncButton(m, ProfileToggle).SetText("Profile performance").SetIcon(icons.Analytics)
+			NewFuncButton(m).SetFunc(AppearanceSettings.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
+			NewFuncButton(m).SetFunc(ProfileToggle).SetText("Profile performance").SetIcon(icons.Analytics)
 			NewSeparator(m)
 		})
 	*/

@@ -26,33 +26,33 @@ func VCSLabelFunc(fn *Node, label string) string {
 }
 
 func (fn *Node) VCSContextMenu(m *core.Scene) {
-	core.NewFuncButton(m, fn.AddToVCSSel).SetText(VCSLabelFunc(fn, "Add to VCS")).SetIcon(icons.Add).
+	core.NewFuncButton(m).SetFunc(fn.AddToVCSSel).SetText(VCSLabelFunc(fn, "Add to VCS")).SetIcon(icons.Add).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS != vcs.Untracked, states.Disabled)
 		})
-	core.NewFuncButton(m, fn.DeleteFromVCSSel).SetText(VCSLabelFunc(fn, "Delete from VCS")).SetIcon(icons.Delete).
+	core.NewFuncButton(m).SetFunc(fn.DeleteFromVCSSel).SetText(VCSLabelFunc(fn, "Delete from VCS")).SetIcon(icons.Delete).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
-	core.NewFuncButton(m, fn.CommitToVCSSel).SetText(VCSLabelFunc(fn, "Commit to VCS")).SetIcon(icons.Star).
+	core.NewFuncButton(m).SetFunc(fn.CommitToVCSSel).SetText(VCSLabelFunc(fn, "Commit to VCS")).SetIcon(icons.Star).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
-	core.NewFuncButton(m, fn.RevertVCSSel).SetText(VCSLabelFunc(fn, "Revert from VCS")).SetIcon(icons.Undo).
+	core.NewFuncButton(m).SetFunc(fn.RevertVCSSel).SetText(VCSLabelFunc(fn, "Revert from VCS")).SetIcon(icons.Undo).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
 	core.NewSeparator(m)
 
-	core.NewFuncButton(m, fn.DiffVCSSel).SetText(VCSLabelFunc(fn, "Diff VCS")).SetIcon(icons.Add).
+	core.NewFuncButton(m).SetFunc(fn.DiffVCSSel).SetText(VCSLabelFunc(fn, "Diff VCS")).SetIcon(icons.Add).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
-	core.NewFuncButton(m, fn.LogVCSSel).SetText(VCSLabelFunc(fn, "Log VCS")).SetIcon(icons.List).
+	core.NewFuncButton(m).SetFunc(fn.LogVCSSel).SetText(VCSLabelFunc(fn, "Log VCS")).SetIcon(icons.List).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
-	core.NewFuncButton(m, fn.BlameVCSSel).SetText(VCSLabelFunc(fn, "Blame VC S")).SetIcon(icons.CreditScore).
+	core.NewFuncButton(m).SetFunc(fn.BlameVCSSel).SetText(VCSLabelFunc(fn, "Blame VC S")).SetIcon(icons.CreditScore).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
@@ -94,25 +94,25 @@ func (fn *Node) ContextMenu(m *core.Scene) {
 	})
 	core.NewSeparator(m)
 
-	core.NewFuncButton(m, fn.OpenAll).SetText("Open all").SetIcon(icons.KeyboardArrowDown).
+	core.NewFuncButton(m).SetFunc(fn.OpenAll).SetText("Open all").SetIcon(icons.KeyboardArrowDown).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || !fn.IsDir(), states.Disabled)
 		})
-	core.NewFuncButton(m, fn.CloseAll).SetIcon(icons.KeyboardArrowRight).
+	core.NewFuncButton(m).SetFunc(fn.CloseAll).SetIcon(icons.KeyboardArrowRight).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || !fn.IsDir(), states.Disabled)
 		})
-	core.NewFuncButton(m, fn.SortBys).SetText("Sort by").SetIcon(icons.Sort).
+	core.NewFuncButton(m).SetFunc(fn.SortBys).SetText("Sort by").SetIcon(icons.Sort).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || !fn.IsDir(), states.Disabled)
 		})
 	core.NewSeparator(m)
 
-	core.NewFuncButton(m, fn.NewFiles).SetText("New file").SetIcon(icons.OpenInNew).
+	core.NewFuncButton(m).SetFunc(fn.NewFiles).SetText("New file").SetIcon(icons.OpenInNew).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		})
-	core.NewFuncButton(m, fn.NewFolders).SetText("New folder").SetIcon(icons.CreateNewFolder).
+	core.NewFuncButton(m).SetFunc(fn.NewFolders).SetText("New folder").SetIcon(icons.CreateNewFolder).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		})
@@ -121,7 +121,7 @@ func (fn *Node) ContextMenu(m *core.Scene) {
 	fn.VCSContextMenu(m)
 	core.NewSeparator(m)
 
-	core.NewFuncButton(m, fn.RemoveFromExterns).SetIcon(icons.Delete).
+	core.NewFuncButton(m).SetFunc(fn.RemoveFromExterns).SetIcon(icons.Delete).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection(), states.Disabled)
 		})

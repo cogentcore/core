@@ -187,13 +187,13 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 		NewText(d).SetText("Core version: " + system.CoreVersion)
 		d.AddOKOnly().RunDialog(m)
 	})
-	NewFuncButton(m, SettingsWindow).SetText("Settings").SetIcon(icons.Settings).SetShortcut("Command+,")
+	NewFuncButton(m).SetFunc(SettingsWindow).SetText("Settings").SetIcon(icons.Settings).SetShortcut("Command+,")
 	if webCanInstall {
 		icon := icons.InstallDesktop
 		if TheApp.SystemPlatform().IsMobile() {
 			icon = icons.InstallMobile
 		}
-		NewFuncButton(m, webInstall).SetText("Install").SetIcon(icon).SetTooltip("Install this app to your device as a Progressive Web App (PWA)")
+		NewFuncButton(m).SetFunc(webInstall).SetText("Install").SetIcon(icon).SetTooltip("Install this app to your device as a Progressive Web App (PWA)")
 	}
 	NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetShortcut("Command+Shift+I").
 		SetTooltip("Developer tools for inspecting the content of the app").

@@ -1241,9 +1241,9 @@ func (tr *Tree) ContextMenuReadOnly(m *Scene) {
 		})
 	NewSeparator(m)
 
-	NewFuncButton(m, tr.OpenAll).SetIcon(icons.KeyboardArrowDown).
+	NewFuncButton(m).SetFunc(tr.OpenAll).SetIcon(icons.KeyboardArrowDown).
 		SetEnabled(tr.HasSelection())
-	NewFuncButton(m, tr.CloseAll).SetIcon(icons.KeyboardArrowRight).
+	NewFuncButton(m).SetFunc(tr.CloseAll).SetIcon(icons.KeyboardArrowRight).
 		SetEnabled(tr.HasSelection())
 }
 
@@ -1298,15 +1298,15 @@ func (tr *Tree) ContextMenu(m *Scene) {
 		pbt.SetState(cb.IsEmpty(), states.Disabled)
 	}
 	NewSeparator(m)
-	NewFuncButton(m, tr.EditNode).SetText("Edit").SetIcon(icons.Edit).
+	NewFuncButton(m).SetFunc(tr.EditNode).SetText("Edit").SetIcon(icons.Edit).
 		SetEnabled(tr.HasSelection())
-	NewFuncButton(m, tr.InspectNode).SetText("Inspect").SetIcon(icons.EditDocument).
+	NewFuncButton(m).SetFunc(tr.InspectNode).SetText("Inspect").SetIcon(icons.EditDocument).
 		SetEnabled(tr.HasSelection())
 	NewSeparator(m)
 
-	NewFuncButton(m, tr.OpenAll).SetIcon(icons.KeyboardArrowDown).
+	NewFuncButton(m).SetFunc(tr.OpenAll).SetIcon(icons.KeyboardArrowDown).
 		SetEnabled(tr.HasSelection())
-	NewFuncButton(m, tr.CloseAll).SetIcon(icons.KeyboardArrowRight).
+	NewFuncButton(m).SetFunc(tr.CloseAll).SetIcon(icons.KeyboardArrowRight).
 		SetEnabled(tr.HasSelection())
 }
 
