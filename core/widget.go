@@ -200,39 +200,39 @@ type WidgetBase struct {
 	// thus overrides all other functions) to style the element.
 	// These should be set using FirstStyler function. These stylers
 	// are called before Stylers and FinalStylers.
-	FirstStylers []func(s *styles.Style) `copier:"-" json:"-" xml:"-" set:"-"`
+	FirstStylers []func(s *styles.Style) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// FinalStylers are a slice of functions that are called in sequential
 	// ascending order (so the last added styler is called last and
 	// thus overrides all other functions) to style the element.
 	// These should be set using FinalStyler function. These stylers
 	// are called after FirstStylers and Stylers.
-	FinalStylers []func(s *styles.Style) `copier:"-" json:"-" xml:"-" set:"-"`
+	FinalStylers []func(s *styles.Style) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// Listeners are event listener functions for processing events on this widget.
 	// They are called in sequential descending order (so the last added listener
 	// is called first). They should be added using the On function. FirstListeners
 	// and FinalListeners are called before and after these listeners, respectively.
-	Listeners events.Listeners `copier:"-" json:"-" xml:"-" set:"-"`
+	Listeners events.Listeners `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// FirstListeners are event listener functions for processing events on this widget.
 	// They are called in sequential descending order (so the last added listener
 	// is called first). They should be added using the OnFirst function. These listeners
 	// are called before Listeners and FinalListeners.
-	FirstListeners events.Listeners `copier:"-" json:"-" xml:"-" set:"-"`
+	FirstListeners events.Listeners `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// FinalListeners are event listener functions for processing events on this widget.
 	// They are called in sequential descending order (so the last added listener
 	// is called first). They should be added using the OnFinal function. These listeners
 	// are called after FirstListeners and Listeners.
-	FinalListeners events.Listeners `copier:"-" json:"-" xml:"-" set:"-"`
+	FinalListeners events.Listeners `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// A slice of functions to call on all widgets that are added as children
 	// to this widget or its children. These functions are called in sequential
 	// ascending order, so the last added one is called last and thus can
 	// override anything set by the other ones. These should be set using
 	// OnWidgetAdded, which can be called by both end-user and internal code.
-	OnWidgetAdders []func(w Widget) `copier:"-" json:"-" xml:"-" set:"-"`
+	OnWidgetAdders []func(w Widget) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// ContextMenus is a slice of menu functions to call to construct
 	// the widget's context menu on an [events.ContextMenu]. The
@@ -240,7 +240,7 @@ type WidgetBase struct {
 	// added in the last function are the first in the menu.
 	// Context menus should be added through [WidgetBase.AddContextMenu].
 	// Separators will be added between each context menu function.
-	ContextMenus []func(m *Scene) `copier:"-" json:"-" xml:"-" set:"-"`
+	ContextMenus []func(m *Scene) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// Scene is the overall Scene to which we belong. It is automatically
 	// by widgets whenever they are added to another widget parent.
