@@ -31,15 +31,19 @@ func (sh *Shell) RunSubShell(cmdIO *exec.CmdIO, errOk, output bool, cmd string, 
 			return false, out
 		}
 	}
-	expr := ""
+	// expr := ""
+	// if len(args) > 0 {
+	// 	expr = strings.Join(args, " ")
+	// }
+	// eargs := []any{cmd}
+	// if expr != "" {
+	// 	eargs = append(eargs, "-e", expr)
+	// }
+	eargs := []any{cmd}
 	if len(args) > 0 {
-		expr = strings.Join(args, " ")
+		eargs = append(eargs, "-args", strings.Join(args, ","))
 	}
-	aargs := []any{cmd}
-	if expr != "" {
-		aargs = append(aargs, "-e", expr)
-	}
-	out = sh.Exec(errOk, false, output, "cosh", aargs...)
+	out = sh.Exec(errOk, false, output, "cosh", eargs...)
 	return true, out
 }
 

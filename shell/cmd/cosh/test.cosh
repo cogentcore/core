@@ -1,6 +1,7 @@
 // test file for cosh cli
 
+echo {args}
+
 for i, fn := range cosh.SplitLines(`/bin/ls -1`) {
 	fmt.Println(i, fn)
 }
-
