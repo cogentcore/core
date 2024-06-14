@@ -7,7 +7,7 @@
 This should install into your `$GOPATH/bin` dir:
 
 ```bash
-$ go get github.com/emer/ttail
+$ go install cogentcore.org/core/tensor/cmd/ttail@latest
 ```
 
 # Run
