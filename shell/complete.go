@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/parse/complete"
+	"github.com/mitchellh/go-homedir"
 )
 
 // CompleteMatch is the [complete.MatchFunc] for the shell.
@@ -20,6 +21,7 @@ func (sh *Shell) CompleteMatch(data any, text string, posLine, posChar int) (md 
 	text = text[:posChar]
 	md.Seed = complete.SeedPath(text)
 	fullPath := complete.SeedSpace(text)
+	fullPath = errors.Log1(homedir.Expand(fullPath))
 	parent := strings.TrimSuffix(fullPath, md.Seed)
 	dir := filepath.Join(sh.Config.Dir, parent)
 	if filepath.IsAbs(parent) {
