@@ -54,6 +54,10 @@ type App interface {
 	// returns the platform of the underlying operating system.
 	SystemPlatform() Platforms
 
+	// SystemInfo returns any additional information about the underlying system
+	// that is not otherwise given. It is used in crash logs.
+	SystemInfo() string
+
 	// Name is the overall name of the application -- used for specifying an
 	// application-specific preferences directory, etc
 	Name() string

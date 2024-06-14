@@ -83,5 +83,9 @@ func HandleRecoverPanic(r any) {
 
 // CrashLogText returns an appropriate crash log string for the given recover value and stack trace.
 func CrashLogText(r any, stack string) string {
-	return fmt.Sprintf("Platform: %v\nSystem platform: %v\nApp version: %s\nCore version: %s\nTime: %s\n\npanic: %v\n\n%s", TheApp.Platform(), TheApp.SystemPlatform(), AppVersion, CoreVersion, time.Now().Format(time.DateTime), r, stack)
+	info := TheApp.SystemInfo()
+	if info != "" {
+		info += "\n"
+	}
+	return fmt.Sprintf("Platform: %v\nSystem platform: %v\nApp version: %s\nCore version: %s\nTime: %s\n%s\npanic: %v\n\n%s", TheApp.Platform(), TheApp.SystemPlatform(), AppVersion, CoreVersion, time.Now().Format(time.DateTime), info, r, stack)
 }

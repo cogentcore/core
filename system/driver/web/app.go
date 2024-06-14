@@ -163,6 +163,10 @@ func (a *App) SystemPlatform() system.Platforms {
 	return a.UnderlyingPlatform
 }
 
+func (a *App) SystemInfo() string {
+	return js.Global().Get("navigator").Get("userAgent").String()
+}
+
 func (a *App) OpenURL(url string) {
 	js.Global().Call("open", url)
 }

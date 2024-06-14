@@ -114,6 +114,10 @@ func (a *App) SystemPlatform() system.Platforms {
 	return a.This.Platform()
 }
 
+func (a *App) SystemInfo() string {
+	return "" // no-op by default
+}
+
 func (a *App) Name() string {
 	return a.Nm
 }
