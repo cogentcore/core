@@ -26,15 +26,13 @@ import (
 // values of the function. It is a helper function that uses [NewSoloFuncButton]
 // under the hood.
 func CallFunc(ctx Widget, fun any) {
-	NewSoloFuncButton(ctx, fun).CallFunc()
+	NewSoloFuncButton(ctx).SetFunc(fun).CallFunc()
 }
 
-// NewSoloFuncButton returns a standalone FuncButton with the given context
-// for popping up any dialog elements.
-func NewSoloFuncButton(ctx Widget, fun any) *FuncButton {
-	fb := NewFuncButton(NewWidgetBase()).SetFunc(fun)
-	fb.SetContext(ctx)
-	return fb
+// NewSoloFuncButton returns a standalone [FuncButton] with a fake parent
+// with the given context for popping up any dialogs.
+func NewSoloFuncButton(ctx Widget) *FuncButton {
+	return NewFuncButton(NewWidgetBase()).SetContext(ctx)
 }
 
 // FuncButton is a button that is set up to call a function when it

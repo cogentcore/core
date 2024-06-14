@@ -225,7 +225,7 @@ func (fn *Node) DeleteFile() error {
 func (fn *Node) RenameFiles() { //types:add
 	fn.FRoot.NeedsLayout()
 	fn.SelectedFunc(func(sn *Node) {
-		fb := core.NewSoloFuncButton(sn, sn.RenameFile)
+		fb := core.NewSoloFuncButton(sn).SetFunc(sn.RenameFile)
 		fb.Args[0].SetValue(sn.Name)
 		fb.CallFunc()
 	})

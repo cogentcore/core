@@ -569,7 +569,7 @@ func (dv *DiffEditor) MakeToolbar(p *core.Plan) {
 		w.SetText("Save").SetIcon(icons.Save).
 			SetTooltip("save edited version of file with the given -- prompts for filename").
 			OnClick(func(e events.Event) {
-				fb := core.NewSoloFuncButton(w, dv.SaveFileA)
+				fb := core.NewSoloFuncButton(w).SetFunc(dv.SaveFileA)
 				fb.Args[0].SetValue(dv.FileA)
 				fb.CallFunc()
 			}).
@@ -632,7 +632,7 @@ func (dv *DiffEditor) MakeToolbar(p *core.Plan) {
 		w.SetText("Save").SetIcon(icons.Save).
 			SetTooltip("save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function").
 			OnClick(func(e events.Event) {
-				fb := core.NewSoloFuncButton(w, dv.SaveFileB)
+				fb := core.NewSoloFuncButton(w).SetFunc(dv.SaveFileB)
 				fb.Args[0].SetValue(dv.FileB)
 				fb.CallFunc()
 			}).

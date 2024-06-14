@@ -381,7 +381,7 @@ func (fp *FilePicker) makeFilesRow(p *Plan) {
 				SetTooltip(tip).
 				OnClick(func(e events.Event) {
 					fn := fp.Files[w.SelectedIndex]
-					fb := NewSoloFuncButton(w, fn.Delete).SetConfirm(true).SetAfterFunc(fp.UpdateFilesAction)
+					fb := NewSoloFuncButton(w).SetFunc(fn.Delete).SetConfirm(true).SetAfterFunc(fp.UpdateFilesAction)
 					fb.SetTooltip(tip)
 					fb.CallFunc()
 				})
@@ -389,7 +389,7 @@ func (fp *FilePicker) makeFilesRow(p *Plan) {
 				SetTooltip("Rename the selected file").
 				OnClick(func(e events.Event) {
 					fn := fp.Files[w.SelectedIndex]
-					NewSoloFuncButton(w, fn.Rename).SetAfterFunc(fp.UpdateFilesAction).CallFunc()
+					NewSoloFuncButton(w).SetFunc(fn.Rename).SetAfterFunc(fp.UpdateFilesAction).CallFunc()
 				})
 			NewButton(m).SetText("Info").SetIcon(icons.Info).
 				SetTooltip("View information about the selected file").
