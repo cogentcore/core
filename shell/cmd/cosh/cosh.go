@@ -45,7 +45,7 @@ type Config struct {
 	// These arguments will be turned into an "args" local variable in the shell.
 	// These are automatically processed from any leftover arguments passed, so
 	// you should not need to specify this flag manually.
-	Args []string `cmd:"run" posarg:"leftover"`
+	Args []string `cmd:"run" posarg:"leftover" required:"-"`
 
 	// Interactive runs the interactive command line after processing any input file.
 	// Interactive mode is the default mode for the run command unless an input file

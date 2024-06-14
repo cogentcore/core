@@ -66,9 +66,15 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 
 		posArgTag, ok := f.Tag.Lookup("posarg")
 		if ok {
-			ui, err := strconv.ParseUint(posArgTag, 10, 64)
-			if err != nil {
-				slog.Error("programmer error: invalid value for posarg struct tag", "field", f.Name, "posArgTag", posArgTag, "err", err)
+			ui := uint64(0)
+			if posArgTag == "all" || posArgTag == "leftover" {
+				ui = uint64(len(posArgStrs))
+			} else {
+				var err error
+				ui, err = strconv.ParseUint(posArgTag, 10, 64)
+				if err != nil {
+					slog.Error("programmer error: invalid value for posarg struct tag", "field", f.Name, "posArgTag", posArgTag, "err", err)
+				}
 			}
 			// if the slice isn't big enough, grow it to fit this posarg
 			if ui >= uint64(len(posArgStrs)) {
