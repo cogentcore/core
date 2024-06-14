@@ -28,7 +28,7 @@ func TestParse(t *testing.T) {
 	pr := lp.Lang.Parser()
 	pr.ReportErrs = true
 
-	fs := parse.NewFileStates(filepath.Join("..", "..", "..", "views", "tree.go"), "", fileinfo.Go)
+	fs := parse.NewFileStates(filepath.Join("..", "..", "..", "core", "tree.go"), "", fileinfo.Go)
 	txt, err := lexer.OpenFileBytes(fs.Filename) // and other stuff
 	if err != nil {
 		t.Error(err)
@@ -51,7 +51,7 @@ func TestGoParse(t *testing.T) {
 	// t.Skip("todo: reenable soon")
 	stt := time.Now()
 	fset := token.NewFileSet()
-	_, err := parser.ParseFile(fset, filepath.Join("..", "..", "..", "views", "tree.go"), nil, parser.ParseComments)
+	_, err := parser.ParseFile(fset, filepath.Join("..", "..", "..", "core", "tree.go"), nil, parser.ParseComments)
 	if err != nil {
 		t.Error(err)
 	}
