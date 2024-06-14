@@ -63,9 +63,17 @@ The `command` is transpiled into a Go function that takes `args ...string`.  In 
 
 The command function name is registered so that the standard shell execution code can run the function, passing the args.  You can also call it directly from Go code using the standard parentheses expression.
 
-# Makefile-like functionality
+# Script Files and Makefile-like functionality
 
-A few simple features of `cosh` enable powerful `make` functionality to be easily supported.  See [make.cosh](cmd/cosh/testdata/make.cosh) for an example, in `cmd/cosh/testdata/make.cosh`.
+As with most scripting languages, a file of cosh code can be made directly executable by appending a "shebang" expression at the start of the file:
+
+```sh
+#!/usr/bin/env cosh
+```
+
+When executed this way, any additional args are available via `os.Args` as in a standard Go program.
+
+In addition, a few simple features of `cosh` enable powerful `make` functionality to be easily supported.  See [make.cosh](cmd/cosh/testdata/make.cosh) for an example, in `cmd/cosh/testdata/make.cosh`.
 
 * Any line starting with a name that corresponds to a filename in the current directory with ".cosh" appended to it (e.g., `make` and `make.cosh`) is automatically recognized to run the `cosh` command on that file, with any args after the name appended as an `-e` argument to cosh.  Thus, the script line:
 
