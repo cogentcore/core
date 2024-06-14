@@ -50,16 +50,16 @@ type FileState struct {
 	ExtSyms syms.SymMap `json:"-" xml:"-"`
 
 	// mutex protecting updates / reading of Syms symbols
-	SymsMu sync.RWMutex `view:"-" json:"-" xml:"-"`
+	SymsMu sync.RWMutex `display:"-" json:"-" xml:"-"`
 
 	// waitgroup for coordinating processing of other items
-	WaitGp sync.WaitGroup `view:"-" json:"-" xml:"-"`
+	WaitGp sync.WaitGroup `display:"-" json:"-" xml:"-"`
 
 	// anonymous counter -- counts up
-	AnonCtr int `view:"-" json:"-" xml:"-"`
+	AnonCtr int `display:"-" json:"-" xml:"-"`
 
 	// path mapping cache -- for other files referred to by this file, this stores the full path associated with a logical path (e.g., in go, the logical import path -> local path with actual files) -- protected for access from any thread
-	PathMap sync.Map `view:"-" json:"-" xml:"-"`
+	PathMap sync.Map `display:"-" json:"-" xml:"-"`
 }
 
 // Init initializes the file state

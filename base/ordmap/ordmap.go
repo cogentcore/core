@@ -40,7 +40,7 @@ type Map[K comparable, V any] struct {
 	Order []KeyValue[K, V]
 
 	// Map is the key to index mapping.
-	Map map[K]int `view:"-"`
+	Map map[K]int `display:"-"`
 }
 
 // New returns a new ordered map.

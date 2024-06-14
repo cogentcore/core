@@ -51,7 +51,7 @@ type Tabs struct {
 
 	// Mu is a mutex protecting updates to tabs. Tabs can be driven
 	// programmatically and via user input so need extra protection.
-	Mu sync.Mutex `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	Mu sync.Mutex `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 }
 
 // TabTypes are the different styling types of tabs.

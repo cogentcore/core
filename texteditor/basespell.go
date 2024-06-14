@@ -121,7 +121,7 @@ type Spell struct { //types:add -setters
 	Correction string `set:"-"`
 
 	// the event listeners for the spell (it sends Select events)
-	Listeners events.Listeners `set:"-" view:"-"`
+	Listeners events.Listeners `set:"-" display:"-"`
 
 	// Stage is the [PopupStage] associated with the [Spell]
 	Stage *core.Stage

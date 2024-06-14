@@ -50,7 +50,7 @@ type Complete struct { //types:add -setters
 	Completion string
 
 	// the event listeners for the completer (it sends Select events)
-	Listeners events.Listeners `set:"-" view:"-"`
+	Listeners events.Listeners `set:"-" display:"-"`
 
 	// Stage is the [PopupStage] associated with the [Complete]
 	Stage *Stage

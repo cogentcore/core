@@ -57,7 +57,7 @@ type Material struct { //types:add -setters
 	TextureName TextureName `set:"-"`
 
 	// Tiling is the texture tiling parameters: repeat and offset.
-	Tiling Tiling `view:"inline"`
+	Tiling Tiling `display:"inline"`
 
 	// CullBack indicates to cull the back-facing surfaces.
 	CullBack bool
@@ -66,7 +66,7 @@ type Material struct { //types:add -setters
 	CullFront bool
 
 	// Texture is the cached [Texture] object set based on [Material.TextureName].
-	Texture Texture `set:"-" view:"-"`
+	Texture Texture `set:"-" display:"-"`
 }
 
 // Defaults sets default surface parameters

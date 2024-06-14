@@ -34,13 +34,13 @@ type Scene struct {
 	SelectionMode SelectionModes
 
 	// currently selected node
-	CurrentSelected xyz.Node `copier:"-" json:"-" xml:"-" view:"-"`
+	CurrentSelected xyz.Node `copier:"-" json:"-" xml:"-" display:"-"`
 
 	// currently selected manipulation control point
-	CurrentManipPoint *ManipPoint `copier:"-" json:"-" xml:"-" view:"-"`
+	CurrentManipPoint *ManipPoint `copier:"-" json:"-" xml:"-" display:"-"`
 
 	// parameters for selection / manipulation box
-	SelectionParams SelectionParams `view:"inline"`
+	SelectionParams SelectionParams `display:"inline"`
 }
 
 func (sw *Scene) Init() {

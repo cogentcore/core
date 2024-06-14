@@ -78,18 +78,18 @@ type SVG struct {
 
 	// map of def names to index. uses starting index to find element.
 	// always updated after each search.
-	DefIndexes map[string]int `view:"-" json:"-" xml:"-"`
+	DefIndexes map[string]int `display:"-" json:"-" xml:"-"`
 
 	// map of unique numeric ids for all elements.
 	// Used for allocating new unique id numbers, appended to end of elements.
 	// See NewUniqueID, GatherIDs
-	UniqueIDs map[int]struct{} `view:"-" json:"-" xml:"-"`
+	UniqueIDs map[int]struct{} `display:"-" json:"-" xml:"-"`
 
 	// flag is set when the SVG is rendering
 	IsRendering bool
 
 	// mutex for protecting rendering
-	RenderMu sync.Mutex `view:"-" json:"-" xml:"-"`
+	RenderMu sync.Mutex `display:"-" json:"-" xml:"-"`
 }
 
 // NewSVG creates a SVG with Pixels Image of the specified width and height

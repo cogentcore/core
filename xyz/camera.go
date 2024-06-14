@@ -38,19 +38,19 @@ type Camera struct {
 	Far float32
 
 	// view matrix (inverse of the Pose.Matrix)
-	ViewMatrix math32.Matrix4 `view:"-"`
+	ViewMatrix math32.Matrix4 `display:"-"`
 
 	// projection matrix, defining the camera perspective / ortho transform
-	ProjectionMatrix math32.Matrix4 `view:"-"`
+	ProjectionMatrix math32.Matrix4 `display:"-"`
 
 	// vulkan projection matrix -- required for vgpu -- produces same effect as ProjectionMatrix, which should be used for all other math
-	VkProjectionMatrix math32.Matrix4 `view:"-"`
+	VkProjectionMatrix math32.Matrix4 `display:"-"`
 
 	// inverse of the projection matrix
-	InvProjectionMatrix math32.Matrix4 `view:"-"`
+	InvProjectionMatrix math32.Matrix4 `display:"-"`
 
 	// frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape
-	Frustum *math32.Frustum `view:"-"`
+	Frustum *math32.Frustum `display:"-"`
 }
 
 func (cm *Camera) Defaults() {

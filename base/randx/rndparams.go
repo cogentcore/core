@@ -18,7 +18,7 @@ type RandParams struct { //git:add
 	Var float64
 
 	// extra parameter for distribution (depends on each one)
-	Par float64 `view:"if Dist=Gamma,Binomial,Beta"`
+	Par float64 `display:"if Dist=Gamma,Binomial,Beta"`
 }
 
 func (rp *RandParams) Defaults() {

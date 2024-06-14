@@ -84,7 +84,7 @@ type Rand interface {
 type SysRand struct {
 
 	// if non-nil, use this random number source instead of the global default one
-	Rand *rand.Rand `view:"-"`
+	Rand *rand.Rand `display:"-"`
 }
 
 // NewGlobalRand returns a new SysRand that implements the

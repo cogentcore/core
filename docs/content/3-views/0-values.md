@@ -22,7 +22,7 @@ You can detect when the user changes a value:
 You can customize a value using tags:
 
 ```Go
-// core.NewValue(parent, 70, `view:"slider"`)
+// core.NewValue(parent, 70, `display:"slider"`)
 ```
 
 Cogent Core provides interactive widget values for many types, including most elementary types, like strings, integers, and floats; composite types, like maps, slices, and structs; and widely used other types, like colors, times, and durations. More values are documented in the documentation pages for certain views, like map and lists.

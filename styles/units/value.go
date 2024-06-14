@@ -28,12 +28,12 @@ type Value struct { //types:add
 	Unit Units `label:""`
 
 	// Dots is the computed value in raw pixels (dots in DPI)
-	Dots float32 `view:"-"`
+	Dots float32 `display:"-"`
 
 	// Custom is a custom function that returns the dots of the value.
 	// If it is non-nil, it overrides all other fields.
 	// Otherwise, the standard ToDots with the other fields is used.
-	Custom func(uc *Context) float32 `view:"-" json:"-" xml:"-"`
+	Custom func(uc *Context) float32 `display:"-" json:"-" xml:"-"`
 }
 
 // New creates a new value with the given unit type

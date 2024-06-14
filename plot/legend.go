@@ -34,7 +34,7 @@ type Legend struct {
 	TextStyle TextStyle
 
 	// position of the legend
-	Position LegendPosition `view:"inline"`
+	Position LegendPosition `display:"inline"`
 
 	// ThumbnailWidth is the width of legend thumbnails.
 	ThumbnailWidth units.Value

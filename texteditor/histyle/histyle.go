@@ -53,7 +53,7 @@ type StyleEntry struct {
 	Background color.RGBA
 
 	// border color? not sure what this is -- not really used
-	Border color.RGBA `view:"-"`
+	Border color.RGBA `display:"-"`
 
 	// bold font
 	Bold Trilean

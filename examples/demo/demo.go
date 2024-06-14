@@ -549,7 +549,7 @@ type testStruct struct { //types:add
 	ShowMe string
 
 	// how about that
-	Inline inlineStruct `view:"inline"`
+	Inline inlineStruct `display:"inline"`
 
 	// a conditional
 	Cond int

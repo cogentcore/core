@@ -68,7 +68,7 @@ func (fm *Form) getStructFields() {
 	var fields []*structField
 
 	shouldShow := func(parent reflect.Value, field reflect.StructField) bool {
-		if field.Tag.Get("view") == "-" {
+		if field.Tag.Get("display") == "-" {
 			return false
 		}
 		if ss, ok := reflectx.UnderlyingPointer(parent).Interface().(ShouldShower); ok {
@@ -85,7 +85,7 @@ func (fm *Form) getStructFields() {
 			return shouldShow(parent, field)
 		},
 		func(parent reflect.Value, field reflect.StructField, value reflect.Value) {
-			if field.Tag.Get("view") == "add-fields" && field.Type.Kind() == reflect.Struct {
+			if field.Tag.Get("display") == "add-fields" && field.Type.Kind() == reflect.Struct {
 				reflectx.WalkFields(value,
 					func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) bool {
 						return shouldShow(parent, sfield)

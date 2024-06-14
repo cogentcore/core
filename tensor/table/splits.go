@@ -68,7 +68,7 @@ type Splits struct {
 	Aggs []*SplitAgg
 
 	// current Less function used in sorting
-	lessFunc SplitsLessFunc `copier:"-" view:"-" xml:"-" json:"-"`
+	lessFunc SplitsLessFunc `copier:"-" display:"-" xml:"-" json:"-"`
 }
 
 // SplitsLessFunc is a function used for sort comparisons that returns

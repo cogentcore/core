@@ -23,10 +23,10 @@ type Solid struct {
 	MeshName MeshName `set:"-"`
 
 	// Material contains the material properties of the surface (color, shininess, texture, etc).
-	Material Material `view:"add-fields"`
+	Material Material `display:"add-fields"`
 
 	// Mesh is the cached [Mesh] object set from [Solid.MeshName].
-	Mesh Mesh `view:"-" set:"-"`
+	Mesh Mesh `display:"-" set:"-"`
 }
 
 func (sld *Solid) Init() {

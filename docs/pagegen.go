@@ -755,7 +755,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		//	})
 	},
 	"views/values-2": func(parent core.Widget) {
-		// core.NewValue(parent, 70, `view:"slider"`)
+		// core.NewValue(parent, 70, `display:"slider"`)
 	},
 	"views/forms-0": func(parent core.Widget) {
 		type person struct {
@@ -794,7 +794,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	"views/forms-4": func(parent core.Widget) {
 		type person struct {
 			Name string
-			Age  int `view:"-"`
+			Age  int `display:"-"`
 		}
 		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
 	},
@@ -830,7 +830,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		}
 		type employee struct {
 			Role    string
-			Manager person `view:"add-fields"`
+			Manager person `display:"add-fields"`
 		}
 		core.NewForm(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
 	},
@@ -924,14 +924,14 @@ var PagesExamples = map[string]func(parent core.Widget){
 	"views/tables-2": func(parent core.Widget) {
 		type language struct {
 			Name   string
-			Rating int `view:"-"`
+			Rating int `display:"-"`
 		}
 		core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	},
 	"views/tables-3": func(parent core.Widget) {
 		type language struct {
 			Name   string
-			Rating int `view:"-" table:"+"`
+			Rating int `display:"-" table:"+"`
 		}
 		core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	},

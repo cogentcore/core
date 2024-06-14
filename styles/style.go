@@ -46,11 +46,11 @@ type Style struct { //types:add
 
 	// Padding is the transparent space around central content of box,
 	// which is _included_ in the size of the standard box rendering.
-	Padding SideValues `view:"inline"`
+	Padding SideValues `display:"inline"`
 
 	// Margin is the outer-most transparent space around box element,
 	// which is _excluded_ from standard box rendering.
-	Margin SideValues `view:"inline"`
+	Margin SideValues `display:"inline"`
 
 	// Display controls how items are displayed, in terms of layout
 	Display Displays
@@ -66,22 +66,22 @@ type Style struct { //types:add
 	// Justify specifies the distribution of elements along the main axis,
 	// i.e., the same as Direction, for Flex Display.  For Grid, the main axis is
 	// given by the writing direction (e.g., Row-wise for latin based languages).
-	Justify AlignSet `view:"inline"`
+	Justify AlignSet `display:"inline"`
 
 	// Align specifies the cross-axis alignment of elements, orthogonal to the
 	// main Direction axis. For Grid, the cross-axis is orthogonal to the
 	// writing direction (e.g., Column-wise for latin based languages).
-	Align AlignSet `view:"inline"`
+	Align AlignSet `display:"inline"`
 
 	// Min is the minimum size of the actual content, exclusive of additional space
 	// from padding, border, margin; 0 = default is sum of Min for all content
 	// (which _includes_ space for all sub-elements).
 	// This is equivalent to the Basis for the CSS flex styling model.
-	Min units.XY `view:"inline"`
+	Min units.XY `display:"inline"`
 
 	// Max is the maximum size of the actual content, exclusive of additional space
 	// from padding, border, margin; 0 = default provides no Max size constraint
-	Max units.XY `view:"inline"`
+	Max units.XY `display:"inline"`
 
 	// Grow is the proportional amount that the element can grow (stretch)
 	// if there is more space available.  0 = default = no growth.
@@ -120,7 +120,7 @@ type Style struct { //types:add
 	Overflow XY[Overflows]
 
 	// For layouts, extra space added between elements in the layout.
-	Gap units.XY `view:"inline"`
+	Gap units.XY `display:"inline"`
 
 	// For grid layouts, the number of columns to use.
 	// If > 0, number of rows is computed as N elements / Columns.
@@ -183,7 +183,7 @@ type Style struct { //types:add
 	VirtualKeyboard VirtualKeyboards
 
 	// position is only used for Layout = Nil cases
-	Pos units.XY `view:"inline"`
+	Pos units.XY `display:"inline"`
 
 	// ordering factor for rendering depth -- lower numbers rendered first.
 	// Sort children according to this factor

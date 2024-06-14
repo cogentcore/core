@@ -93,7 +93,7 @@ type NodeBase struct {
 	CSS map[string]any `xml:"css" set:"-"`
 
 	// CSSAgg is the aggregated css properties from all higher nodes down to this node.
-	CSSAgg map[string]any `copier:"-" json:"-" xml:"-" set:"-" view:"no-inline"`
+	CSSAgg map[string]any `copier:"-" json:"-" xml:"-" set:"-" display:"no-inline"`
 
 	// BBox is the bounding box for the node within the SVG Pixels image.
 	// This one can be outside the visible range of the SVG image.

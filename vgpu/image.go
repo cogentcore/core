@@ -331,16 +331,16 @@ type Image struct {
 	Format ImageFormat
 
 	// vulkan image handle, in device memory
-	Image vk.Image `view:"-"`
+	Image vk.Image `display:"-"`
 
 	// vulkan image view
-	View vk.ImageView `view:"-"`
+	View vk.ImageView `display:"-"`
 
 	// memory for image when we allocate it
-	Mem vk.DeviceMemory `view:"-"`
+	Mem vk.DeviceMemory `display:"-"`
 
 	// keep track of device for destroying view
-	Dev vk.Device `view:"-"`
+	Dev vk.Device `display:"-"`
 
 	// host memory buffer representation of the image
 	Host HostImage
@@ -1005,16 +1005,16 @@ type HostImage struct {
 	Size int
 
 	// buffer for host CPU-visible memory, for staging -- can be owned by us or managed by Memory (for Value)
-	Buff vk.Buffer `view:"-"`
+	Buff vk.Buffer `display:"-"`
 
 	// offset into host buffer, when Buff is Memory managed
 	Offset int
 
 	// host CPU-visible memory, for staging, when we manage our own memory
-	Mem vk.DeviceMemory `view:"-"`
+	Mem vk.DeviceMemory `display:"-"`
 
 	// memory mapped pointer into host memory -- remains mapped
-	Ptr unsafe.Pointer `view:"-"`
+	Ptr unsafe.Pointer `display:"-"`
 }
 
 func (hi *HostImage) SetNil() {

@@ -81,7 +81,7 @@ type Env struct { //types:add
 	DepthMap core.ColorMapName
 
 	// world
-	World *physics.Group `view:"-"`
+	World *physics.Group `display:"-"`
 
 	// 3D view of world
 	View3D *world.View
@@ -96,19 +96,19 @@ type Env struct { //types:add
 	Scene2D *core.SVG
 
 	// emer group
-	Emer *physics.Group `view:"-"`
+	Emer *physics.Group `display:"-"`
 
 	// Right eye of emer
-	EyeR physics.Body `view:"-"`
+	EyeR physics.Body `display:"-"`
 
 	// contacts from last step, for body
-	Contacts physics.Contacts `view:"-"`
+	Contacts physics.Contacts `display:"-"`
 
 	// snapshot image
-	EyeRImg *core.Image `view:"-"`
+	EyeRImg *core.Image `display:"-"`
 
 	// depth map image
-	DepthImage *core.Image `view:"-"`
+	DepthImage *core.Image `display:"-"`
 }
 
 func (ev *Env) Defaults() {

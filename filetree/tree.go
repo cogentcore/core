@@ -47,32 +47,32 @@ type Tree struct {
 	DirsOnTop bool
 
 	// type of node to create -- defaults to filetree.Node but can use custom node types
-	FileNodeType *types.Type `view:"-" json:"-" xml:"-"`
+	FileNodeType *types.Type `display:"-" json:"-" xml:"-"`
 
 	// DoubleClickFun is a function to call when a node receives a DoubleClick event.
 	// if not set, defaults to OpenEmptyDir() (for folders)
-	DoubleClickFun func(e events.Event) `copier:"-" view:"-" json:"-" xml:"-"`
+	DoubleClickFun func(e events.Event) `copier:"-" display:"-" json:"-" xml:"-"`
 
 	// if true, we are in midst of an OpenAll call -- nodes should open all dirs
 	InOpenAll bool `copier:"-" set:"-"`
 
 	// change notify for all dirs
-	Watcher *fsnotify.Watcher `copier:"-" set:"-" view:"-"`
+	Watcher *fsnotify.Watcher `copier:"-" set:"-" display:"-"`
 
 	// channel to close watcher watcher
-	DoneWatcher chan bool `copier:"-" set:"-" view:"-"`
+	DoneWatcher chan bool `copier:"-" set:"-" display:"-"`
 
 	// map of paths that have been added to watcher -- only active if bool = true
-	WatchedPaths map[string]bool `copier:"-" set:"-" view:"-"`
+	WatchedPaths map[string]bool `copier:"-" set:"-" display:"-"`
 
 	// last path updated by watcher
-	LastWatchUpdate string `copier:"-" set:"-" view:"-"`
+	LastWatchUpdate string `copier:"-" set:"-" display:"-"`
 
 	// timestamp of last update
-	LastWatchTime time.Time `copier:"-" set:"-" view:"-"`
+	LastWatchTime time.Time `copier:"-" set:"-" display:"-"`
 
 	// Update mutex
-	UpdateMu sync.Mutex `copier:"-" set:"-" view:"-"`
+	UpdateMu sync.Mutex `copier:"-" set:"-" display:"-"`
 }
 
 func (ft *Tree) Init() {

@@ -66,7 +66,7 @@ type PlotParams struct { //types:add
 	LegendColumn string
 
 	// position of the Legend
-	LegendPosition plot.LegendPosition `view:"inline"`
+	LegendPosition plot.LegendPosition `display:"inline"`
 
 	// rotation of the X Axis labels, in degrees
 	XAxisRotation float32
@@ -78,7 +78,7 @@ type PlotParams struct { //types:add
 	YAxisLabel string
 
 	// our plot, for update method
-	Plot *PlotEditor `copier:"-" json:"-" xml:"-" view:"-"`
+	Plot *PlotEditor `copier:"-" json:"-" xml:"-" display:"-"`
 }
 
 // Defaults sets defaults if nil vals present
@@ -208,10 +208,10 @@ type ColumnParams struct { //types:add
 	PointShape option.Option[plots.Shapes]
 
 	// effective range of data to plot -- either end can be fixed
-	Range minmax.Range32 `view:"inline"`
+	Range minmax.Range32 `display:"inline"`
 
 	// full actual range of data -- only valid if specifically computed
-	FullRange minmax.F32 `view:"inline"`
+	FullRange minmax.F32 `display:"inline"`
 
 	// color to use when plotting the line / column
 	Color color.Color
@@ -232,7 +232,7 @@ type ColumnParams struct { //types:add
 	IsString bool `edit:"-"`
 
 	// our plot, for update method
-	Plot *PlotEditor `copier:"-" json:"-" xml:"-" view:"-"`
+	Plot *PlotEditor `copier:"-" json:"-" xml:"-" display:"-"`
 }
 
 // Defaults sets defaults if nil vals present

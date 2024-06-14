@@ -69,7 +69,7 @@ type Rule struct {
 	NameMap bool `json:",omitempty"`
 
 	// length of source that matched -- if Next is called, this is what will be skipped to
-	MatchLen int `view:"-" json:"-" xml:"-"`
+	MatchLen int `display:"-" json:"-" xml:"-"`
 
 	// NameMap lookup map -- created during Compile
 	NmMap map[string]*Rule `edit:"-" json:"-" xml:"-"`

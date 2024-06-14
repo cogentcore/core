@@ -46,7 +46,7 @@ type Text2D struct {
 	TextRender paint.Text `set:"-" xml:"-" json:"-"`
 
 	// render state for rendering text
-	RenderState paint.State `set:"-" copier:"-" json:"-" xml:"-" view:"-"`
+	RenderState paint.State `set:"-" copier:"-" json:"-" xml:"-" display:"-"`
 }
 
 func (txt *Text2D) Init() {

@@ -187,14 +187,14 @@ type GeomSize struct { //types:add
 	// while Internal records the true size of the contents.
 	// For SizeFinal, Actual size can Grow up to the final Alloc size,
 	// while Internal records the actual bottom-up contents size.
-	Actual GeomCT `view:"inline"`
+	Actual GeomCT `display:"inline"`
 
 	// Alloc is the top-down allocated size, based on available visible space,
 	// starting from the Scene geometry and working downward, attempting to
 	// accommodate the Actual contents, and allocating extra space based on
 	// Grow factors.  When Actual < Alloc, alignment factors determine positioning
 	// within the allocated space.
-	Alloc GeomCT `view:"inline"`
+	Alloc GeomCT `display:"inline"`
 
 	// Internal is the internal size representing the true size of all contents
 	// of the widget.  This can be less than Actual.Content if widget has Grow
@@ -255,12 +255,12 @@ func (ls *GeomSize) SetContentFromTotal(ct *GeomCT) {
 type GeomState struct { //types:add
 	// Size has sizing data for the widget: use Actual for rendering.
 	// Alloc shows the potentially larger space top-down allocated.
-	Size GeomSize `view:"add-fields"`
+	Size GeomSize `display:"add-fields"`
 
 	// Pos is position within the overall Scene that we render into,
 	// including effects of scroll offset, for both Total outer dimension
 	// and inner Content dimension.
-	Pos GeomCT `view:"inline" edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
+	Pos GeomCT `display:"inline" edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Cell is the logical X, Y index coordinates (col, row) of element
 	// within its parent layout

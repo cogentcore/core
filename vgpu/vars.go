@@ -38,22 +38,22 @@ type Vars struct {
 	NDescs int
 
 	// our parent memory manager
-	Mem *Memory `view:"-"`
+	Mem *Memory `display:"-"`
 
 	// if true, variables are statically bound to specific offsets in memory buffers, vs. dynamically bound offsets.  Typically a compute shader operating on fixed data variables can use static binding, while graphics (e.g., vphong) requires dynamic binding to efficiently use the same shader code for multiple different values of the same variable type
 	StaticVars bool `edit:"-"`
 
 	// vulkan descriptor layout based on vars
-	VkDescLayout vk.PipelineLayout `view:"-"`
+	VkDescLayout vk.PipelineLayout `display:"-"`
 
 	// vulkan descriptor pool, allocated for NDescs and the different descriptor pools
-	VkDescPool vk.DescriptorPool `view:"-"`
+	VkDescPool vk.DescriptorPool `display:"-"`
 
 	// allocated descriptor sets -- outer index is Vars.NDescs for different groups of descriptor sets, one of which can be bound to a pipeline at any given time.  The inner dimension is per VarSet to cover the different sets of variable updated at different times or with different numbers of items.  This variable is used for whole-pipline binding at start of rendering.
 	VkDescSets [][]vk.DescriptorSet
 
 	// currently accumulating set of vals to write to update bindings -- initiated by BindValuesStart, executed by BindValuesEnd
-	VkWriteValues []vk.WriteDescriptorSet `view:"-"`
+	VkWriteValues []vk.WriteDescriptorSet `display:"-"`
 
 	// current descriptor collection index, set in BindValuesStart
 	BindDescIndex int `edit:"-"`

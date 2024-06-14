@@ -46,7 +46,7 @@ type Font struct { //types:add
 	Shift BaselineShifts
 
 	// full font information including enhanced metrics and actual font codes for drawing text; this is a pointer into FontLibrary of loaded fonts
-	Face *FontFace `view:"-"`
+	Face *FontFace `display:"-"`
 }
 
 func (fs *Font) Defaults() {

@@ -38,7 +38,7 @@ type List struct {
 	ListBase
 
 	// StyleFunc is an optional styling function.
-	StyleFunc ListStyleFunc `copier:"-" view:"-" json:"-" xml:"-"`
+	StyleFunc ListStyleFunc `copier:"-" display:"-" json:"-" xml:"-"`
 }
 
 // ListStyleFunc is a styling function for custom styling and
@@ -167,7 +167,7 @@ type ListBase struct {
 	MinRows int `default:"4"`
 
 	// SelectedValue is the current selection value; initially select this value if set.
-	SelectedValue any `copier:"-" view:"-" json:"-" xml:"-"`
+	SelectedValue any `copier:"-" display:"-" json:"-" xml:"-"`
 
 	// index of currently selected item
 	SelectedIndex int `copier:"-" json:"-" xml:"-"`
@@ -193,13 +193,13 @@ type ListBase struct {
 	CurrentCursor cursors.Cursor `copier:"-" xml:"-" json:"-" set:"-"`
 
 	// SliceUnderlying is the underlying slice value.
-	SliceUnderlying reflect.Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
+	SliceUnderlying reflect.Value `set:"-" copier:"-" display:"-" json:"-" xml:"-"`
 
 	// currently hovered row
 	hoverRow int
 
 	// list of currently dragged indexes
-	DraggedIndexes []int `set:"-" view:"-" copier:"-" json:"-" xml:"-"`
+	DraggedIndexes []int `set:"-" display:"-" copier:"-" json:"-" xml:"-"`
 
 	// total number of rows visible in allocated display size
 	VisRows int `set:"-" edit:"-" copier:"-" json:"-" xml:"-"`
@@ -218,7 +218,7 @@ type ListBase struct {
 
 	// ElementValue is a [reflect.Value] representation of the underlying element type
 	// which is used whenever there are no slice elements available
-	ElementValue reflect.Value `set:"-" copier:"-" view:"-" json:"-" xml:"-"`
+	ElementValue reflect.Value `set:"-" copier:"-" display:"-" json:"-" xml:"-"`
 
 	// maximum width of value column in chars, if string
 	maxWidth int

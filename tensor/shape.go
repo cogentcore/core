@@ -20,10 +20,10 @@ type Shape struct {
 	Sizes []int
 
 	// offsets for each dimension
-	Strides []int `view:"-"`
+	Strides []int `display:"-"`
 
 	// names of each dimension
-	Names []string `view:"-"`
+	Names []string `display:"-"`
 }
 
 // NewShape returns a new shape with given sizes and optional dimension names.

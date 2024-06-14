@@ -40,7 +40,7 @@ type Stages struct { //types:add
 
 	// mutex protecting reading / updating of the Stack.
 	// Destructive stack updating gets a Write lock, else Read.
-	Mu sync.RWMutex `view:"-" set:"-"`
+	Mu sync.RWMutex `display:"-" set:"-"`
 }
 
 // Top returns the top-most Stage in the Stack, under Read Lock

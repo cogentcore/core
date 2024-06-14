@@ -67,7 +67,7 @@ type FilePicker struct {
 	Ext string `set:"-"`
 
 	// optional styling function
-	FilterFunc FilePickerFilterFunc `view:"-" json:"-" xml:"-"`
+	FilterFunc FilePickerFilterFunc `display:"-" json:"-" xml:"-"`
 
 	// map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value
 	ExtMap map[string]string
@@ -79,16 +79,16 @@ type FilePicker struct {
 	SelectedIndex int `set:"-" edit:"-"`
 
 	// change notify for current dir
-	Watcher *fsnotify.Watcher `set:"-" view:"-"`
+	Watcher *fsnotify.Watcher `set:"-" display:"-"`
 
 	// channel to close watcher watcher
-	DoneWatcher chan bool `set:"-" view:"-"`
+	DoneWatcher chan bool `set:"-" display:"-"`
 
 	// UpdateFiles mutex
-	UpdateMu sync.Mutex `set:"-" view:"-"`
+	UpdateMu sync.Mutex `set:"-" display:"-"`
 
 	// Previous path that was processed via UpdateFiles
-	PrevPath string `set:"-" view:"-"`
+	PrevPath string `set:"-" display:"-"`
 }
 
 func (fp *FilePicker) Init() {

@@ -60,13 +60,13 @@ type NodeBase struct {
 	Dynamic bool
 
 	// initial position, orientation, velocity in *local* coordinates (relative to parent)
-	Initial State `view:"inline"`
+	Initial State `display:"inline"`
 
 	// current relative (local) position, orientation, velocity -- only change these values, as abs values are computed therefrom
-	Rel State `view:"inline"`
+	Rel State `display:"inline"`
 
 	// current absolute (world) position, orientation, velocity
-	Abs State `set:"-" edit:"-" view:"inline"`
+	Abs State `set:"-" edit:"-" display:"inline"`
 
 	// bounding box in world coordinates (aggregated for groups)
 	BBox BBox `set:"-"`

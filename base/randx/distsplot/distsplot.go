@@ -45,13 +45,13 @@ type Sim struct {
 	Range minmax.F64
 
 	// table for raw data
-	Table *table.Table `view:"no-inline"`
+	Table *table.Table `display:"no-inline"`
 
 	// histogram of data
-	Hist *table.Table `view:"no-inline"`
+	Hist *table.Table `display:"no-inline"`
 
 	// the plot
-	Plot *plotcore.PlotEditor `view:"-"`
+	Plot *plotcore.PlotEditor `display:"-"`
 }
 
 // TheSim is the overall state for this simulation

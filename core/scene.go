@@ -57,10 +57,10 @@ type Scene struct { //core:no-new
 	SceneGeom math32.Geom2DInt `edit:"-" set:"-"`
 
 	// paint context for rendering
-	PaintContext paint.Context `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	PaintContext paint.Context `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
 	// live pixels that we render into
-	Pixels *image.RGBA `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	Pixels *image.RGBA `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
 	// event manager for this scene
 	Events Events `copier:"-" json:"-" xml:"-" set:"-"`
@@ -99,7 +99,7 @@ type Scene struct { //core:no-new
 
 	// HasShown is whether this scene has been shown.
 	// This is used to ensure that [events.Show] is only sent once.
-	HasShown bool `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	HasShown bool `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
 	// updating means the Scene is in the process of updating.
 	// It is set for any kind of tree-level update.

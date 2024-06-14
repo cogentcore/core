@@ -22,22 +22,22 @@ type Pose struct {
 	Quat math32.Quat
 
 	// Local matrix. Contains all position/rotation/scale information (relative to parent)
-	Matrix math32.Matrix4 `view:"-"`
+	Matrix math32.Matrix4 `display:"-"`
 
 	// Parent's world matrix -- we cache this so that we can independently update our own matrix
-	ParMatrix math32.Matrix4 `view:"-"`
+	ParMatrix math32.Matrix4 `display:"-"`
 
 	// World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)
-	WorldMatrix math32.Matrix4 `view:"-"`
+	WorldMatrix math32.Matrix4 `display:"-"`
 
 	// model * view matrix -- tranforms into camera-centered coords
-	MVMatrix math32.Matrix4 `view:"-"`
+	MVMatrix math32.Matrix4 `display:"-"`
 
 	// model * view * projection matrix -- full final render matrix
-	MVPMatrix math32.Matrix4 `view:"-"`
+	MVPMatrix math32.Matrix4 `display:"-"`
 
 	// normal matrix has no offsets, for normal vector rotation only, based on MVMatrix
-	NormMatrix math32.Matrix3 `view:"-"`
+	NormMatrix math32.Matrix3 `display:"-"`
 }
 
 // Defaults sets defaults only if current values are nil

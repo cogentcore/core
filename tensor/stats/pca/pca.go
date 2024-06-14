@@ -20,13 +20,13 @@ import (
 type PCA struct {
 
 	// the covariance matrix computed on original data, which is then eigen-factored
-	Covar tensor.Tensor `view:"no-inline"`
+	Covar tensor.Tensor `display:"no-inline"`
 
 	// the eigenvectors, in same size as Covar - each eigenvector is a column in this 2D square matrix, ordered *lowest* to *highest* across the columns -- i.e., maximum eigenvector is the last column
-	Vectors tensor.Tensor `view:"no-inline"`
+	Vectors tensor.Tensor `display:"no-inline"`
 
 	// the eigenvalues, ordered *lowest* to *highest*
-	Values []float64 `view:"no-inline"`
+	Values []float64 `display:"no-inline"`
 }
 
 func (pa *PCA) Init() {

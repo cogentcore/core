@@ -53,7 +53,7 @@ You can hide certain fields from the user:
 ```Go
 type person struct {
     Name string
-    Age  int `view:"-"`
+    Age  int `display:"-"`
 }
 core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
 ```
@@ -101,7 +101,7 @@ type person struct {
 }
 type employee struct {
     Role    string
-    Manager person `view:"add-fields"`
+    Manager person `display:"add-fields"`
 }
 core.NewForm(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
 ```

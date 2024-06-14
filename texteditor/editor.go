@@ -85,23 +85,23 @@ type Editor struct { //core:embedder
 
 	// NLines is the number of lines in the view, synced with the Buf after edits,
 	// but always reflects the storage size of Renders etc.
-	NLines int `set:"-" view:"-" json:"-" xml:"-"`
+	NLines int `set:"-" display:"-" json:"-" xml:"-"`
 
 	// Renders is a slice of paint.Text representing the renders of the text lines,
 	// with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines).
 	Renders []paint.Text `set:"-" json:"-" xml:"-"`
 
 	// Offsets is a slice of float32 representing the starting render offsets for the top of each line.
-	Offsets []float32 `set:"-" view:"-" json:"-" xml:"-"`
+	Offsets []float32 `set:"-" display:"-" json:"-" xml:"-"`
 
 	// LineNumberDigits is the number of line number digits needed.
-	LineNumberDigits int `set:"-" view:"-" json:"-" xml:"-"`
+	LineNumberDigits int `set:"-" display:"-" json:"-" xml:"-"`
 
 	// LineNumberOffset is the horizontal offset for the start of text after line numbers.
-	LineNumberOffset float32 `set:"-" view:"-" json:"-" xml:"-"`
+	LineNumberOffset float32 `set:"-" display:"-" json:"-" xml:"-"`
 
 	// LineNumberRender is the render for line numbers.
-	LineNumberRender paint.Text `set:"-" view:"-" json:"-" xml:"-"`
+	LineNumberRender paint.Text `set:"-" display:"-" json:"-" xml:"-"`
 
 	// CursorPos is the current cursor position.
 	CursorPos lexer.Pos `set:"-" edit:"-" json:"-" xml:"-"`

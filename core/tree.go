@@ -122,13 +122,13 @@ type Tree struct {
 	Icon icons.Icon
 
 	// icon to use for an open (expanded) branch; defaults to [icons.KeyboardArrowDown]
-	IconOpen icons.Icon `view:"show-name"`
+	IconOpen icons.Icon `display:"show-name"`
 
 	// icon to use for a closed (collapsed) branch; defaults to [icons.KeyboardArrowRight]
-	IconClosed icons.Icon `view:"show-name"`
+	IconClosed icons.Icon `display:"show-name"`
 
 	// icon to use for a terminal node branch that has no children; defaults to [icons.Blank]
-	IconLeaf icons.Icon `view:"show-name"`
+	IconLeaf icons.Icon `display:"show-name"`
 
 	// amount to indent children relative to this node
 	Indent units.Value `copier:"-" json:"-" xml:"-"`

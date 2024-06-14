@@ -26,17 +26,17 @@ type Window[A system.App] struct {
 
 	// This is the Window as a [system.Window] interface, which preserves the actual identity
 	// of the window when calling interface methods in the base Window.
-	This system.Window `view:"-"`
+	This system.Window `display:"-"`
 
 	// App is the [system.App] associated with the window.
 	App A
 
 	// Mu is the main mutex protecting access to window operations, including [Window.RunOnWin] functions.
-	Mu sync.Mutex `view:"-"`
+	Mu sync.Mutex `display:"-"`
 
 	// WinClose is a channel on which a single is sent to indicate that the
 	// window should close.
-	WinClose chan struct{} `view:"-"`
+	WinClose chan struct{} `display:"-"`
 
 	// CloseReqFunc is the function to call on a close request
 	CloseReqFunc func(win system.Window)

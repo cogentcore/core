@@ -26,18 +26,18 @@ import (
 type App struct {
 	// This is the App as a [system.App] interface, which preserves the actual identity
 	// of the app when calling interface methods in the base App.
-	This system.App `view:"-"`
+	This system.App `display:"-"`
 
 	// Mu is the main mutex protecting access to app operations, including [App.RunOnMain] functions.
-	Mu sync.Mutex `view:"-"`
+	Mu sync.Mutex `display:"-"`
 
 	// MainQueue is the queue of functions to call on the main loop.
 	// To add to it, use [App.RunOnMain].
-	MainQueue chan FuncRun `view:"-"`
+	MainQueue chan FuncRun `display:"-"`
 
 	// MainDone is a channel on which is a signal is sent when the main
 	// loop of the app should be terminated.
-	MainDone chan struct{} `view:"-"`
+	MainDone chan struct{} `display:"-"`
 
 	// Nm is the name of the app.
 	Nm string `label:"Name"`

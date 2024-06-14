@@ -45,40 +45,40 @@ type View struct {
 	Adapted bool `default:"false"`
 
 	// computed from Luminance
-	AdaptingLuminance float32 `view:"-"`
+	AdaptingLuminance float32 `display:"-"`
 
 	//
-	BgYToWhiteY float32 `view:"-"`
+	BgYToWhiteY float32 `display:"-"`
 
 	//
-	AW float32 `view:"-"`
+	AW float32 `display:"-"`
 
 	// luminance level induction factor
-	NBB float32 `view:"-"`
+	NBB float32 `display:"-"`
 
 	// luminance level induction factor
-	NCB float32 `view:"-"`
+	NCB float32 `display:"-"`
 
 	// exponential nonlinearity
-	C float32 `view:"-"`
+	C float32 `display:"-"`
 
 	// chromatic induction factor
-	NC float32 `view:"-"`
+	NC float32 `display:"-"`
 
 	// luminance-level adaptation factor, based on the HuntLiLuo03 equations
-	FL float32 `view:"-"`
+	FL float32 `display:"-"`
 
 	// FL to the 1/4 power
-	FLRoot float32 `view:"-"`
+	FLRoot float32 `display:"-"`
 
 	// base exponential nonlinearity
-	Z float32 `view:"-"`
+	Z float32 `display:"-"`
 
 	// inverse of the RGBD factors
-	DRGBInverse math32.Vector3 `view:"-"`
+	DRGBInverse math32.Vector3 `display:"-"`
 
 	// cone responses to white point, adjusted for discounting
-	RGBD math32.Vector3 `view:"-"`
+	RGBD math32.Vector3 `display:"-"`
 }
 
 // NewView returns a new view with all parameters initialized based on given major params

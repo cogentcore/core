@@ -41,7 +41,7 @@ type Anim struct {
 	Ang float32 `edit:"-"`
 
 	// the time.Ticker for animating the scene
-	Ticker *time.Ticker `view:"-"`
+	Ticker *time.Ticker `display:"-"`
 
 	// the scene editor
 	SceneEditor *xyzcore.SceneEditor

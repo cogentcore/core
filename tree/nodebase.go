@@ -47,13 +47,13 @@ type NodeBase struct {
 	// defined on base types to call methods defined on higher-level types, which
 	// is necessary for various parts of tree and widget functionality. This is set
 	// to nil when the node is deleted.
-	This Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	This Node `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
 	// Parent is the parent of this node, which is set automatically when this node is
 	// added as a child of a parent. To change the parent of a node, use [MoveToParent];
 	// you should typically not set this field directly. Nodes can only have one parent
 	// at a time.
-	Parent Node `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	Parent Node `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
 	// Children is the list of children of this node. All of them are set to have this node
 	// as their parent. You can directly modify this list, but you should typically use the

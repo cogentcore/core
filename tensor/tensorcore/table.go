@@ -55,7 +55,7 @@ type Table struct {
 	SortDescending bool
 
 	// headerWidths has number of characters in each header, per visfields
-	headerWidths []int `copier:"-" view:"-" json:"-" xml:"-"`
+	headerWidths []int `copier:"-" display:"-" json:"-" xml:"-"`
 
 	// colMaxWidths records maximum width in chars of string type fields
 	colMaxWidths []int `set:"-" copier:"-" json:"-" xml:"-"`

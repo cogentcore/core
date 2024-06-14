@@ -30,7 +30,7 @@ You can hide certain columns from the user:
 ```Go
 type language struct {
     Name   string
-    Rating int `view:"-"`
+    Rating int `display:"-"`
 }
 core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```
@@ -40,7 +40,7 @@ You can also use the `table` struct tag, which overrides the `view` struct tag. 
 ```Go
 type language struct {
     Name   string
-    Rating int `view:"-" table:"+"`
+    Rating int `display:"-" table:"+"`
 }
 core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 ```

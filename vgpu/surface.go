@@ -40,19 +40,19 @@ type Surface struct {
 	Frames []*Framebuffer
 
 	// vulkan handle for surface
-	Surface vk.Surface `view:"-"`
+	Surface vk.Surface `display:"-"`
 
 	// vulkan handle for swapchain
-	Swapchain vk.Swapchain `view:"-"`
+	Swapchain vk.Swapchain `display:"-"`
 
 	// semaphore used internally for waiting on acquisition of next frame
-	ImageAcquired vk.Semaphore `view:"-"`
+	ImageAcquired vk.Semaphore `display:"-"`
 
 	// semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method
-	RenderDone vk.Semaphore `view:"-"`
+	RenderDone vk.Semaphore `display:"-"`
 
 	// fence for rendering command running
-	RenderFence vk.Fence `view:"-"`
+	RenderFence vk.Fence `display:"-"`
 
 	// NeedsConfig is whether the surface needs to be configured again without freeing the swapchain.
 	// This is set internally to allow for correct recovery from sudden minimization events that are

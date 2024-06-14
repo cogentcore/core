@@ -23,19 +23,19 @@ type MemBuff struct {
 	Size int
 
 	// logical descriptor for host CPU-visible memory, for staging
-	Host vk.Buffer `view:"-"`
+	Host vk.Buffer `display:"-"`
 
 	// host CPU-visible memory, for staging
-	HostMem vk.DeviceMemory `view:"-"`
+	HostMem vk.DeviceMemory `display:"-"`
 
 	// logical descriptor for device GPU-local memory, for computation
-	Dev vk.Buffer `view:"-"`
+	Dev vk.Buffer `display:"-"`
 
 	// device GPU-local memory, for computation
-	DevMem vk.DeviceMemory `view:"-"`
+	DevMem vk.DeviceMemory `display:"-"`
 
 	// memory mapped pointer into host memory -- remains mapped
-	HostPtr unsafe.Pointer `view:"-"`
+	HostPtr unsafe.Pointer `display:"-"`
 
 	// alignment of offsets into this buffer
 	AlignBytes int

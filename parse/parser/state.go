@@ -16,7 +16,7 @@ import (
 type State struct {
 
 	// source and lexed version of source we're parsing
-	Src *lexer.File `view:"no-inline"`
+	Src *lexer.File `display:"no-inline"`
 
 	// tracing for this parser
 	Trace TraceOptions
@@ -34,16 +34,16 @@ type State struct {
 	Pos lexer.Pos
 
 	// any error messages accumulated during parsing specifically
-	Errs lexer.ErrorList `view:"no-inline"`
+	Errs lexer.ErrorList `display:"no-inline"`
 
 	// rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims
-	Matches [][]MatchStack `view:"no-inline"`
+	Matches [][]MatchStack `display:"no-inline"`
 
 	// rules that did NOT match -- represented as a map by scope of a RuleSet
-	NonMatches ScopeRuleSet `view:"no-inline"`
+	NonMatches ScopeRuleSet `display:"no-inline"`
 
 	// stack for context-sensitive rules
-	Stack lexer.Stack `view:"no-inline"`
+	Stack lexer.Stack `display:"no-inline"`
 }
 
 // Init initializes the state at start of parsing

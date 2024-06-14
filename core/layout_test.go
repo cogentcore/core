@@ -418,7 +418,7 @@ type Wide struct {
 }
 
 type Test struct {
-	Wide Wide `view:"inline"`
+	Wide Wide `display:"inline"`
 	Vec  math32.Vector2
 }
 

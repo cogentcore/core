@@ -57,7 +57,7 @@ The Cogent Core GUI processes `default:"value"` struct tags to highlight values 
 
 # Standard Config Example
 
-Here's the `Config` struct from [axon/examples/ra25](https://github.com/emer/axon), which can provide a useful starting point.  It uses Params, Run and Log sub-structs to better organize things.  For sims with extensive Env config, that should be added as a separate sub-struct as well.  The `view:"add-fields"` struct tag shows all of the fields in one big dialog in the GUI -- if you want separate ones, omit that.
+Here's the `Config` struct from [axon/examples/ra25](https://github.com/emer/axon), which can provide a useful starting point.  It uses Params, Run and Log sub-structs to better organize things.  For sims with extensive Env config, that should be added as a separate sub-struct as well.  The `display:"add-fields"` struct tag shows all of the fields in one big dialog in the GUI -- if you want separate ones, omit that.
 
 ```Go
 // ParamConfig has config parameters related to sim params
@@ -101,9 +101,9 @@ type Config struct {
 	Includes []string    `desc:"specify include files here, and after configuration, it contains list of include files added"`
 	GUI      bool        `default:"true" desc:"open the GUI -- does not automatically run -- if false, then runs automatically and quits"`
 	Debug    bool        `desc:"log debugging information"`
-	Params   ParamConfig `view:"add-fields" desc:"parameter related configuration options"`
-	Run      RunConfig   `view:"add-fields" desc:"sim running related configuration options"`
-	Log      LogConfig   `view:"add-fields" desc:"data logging related configuration options"`
+	Params   ParamConfig `display:"add-fields" desc:"parameter related configuration options"`
+	Run      RunConfig   `display:"add-fields" desc:"sim running related configuration options"`
+	Log      LogConfig   `display:"add-fields" desc:"data logging related configuration options"`
 }
 
 func (cfg *Config) IncludesPtr() *[]string { return &cfg.Includes }

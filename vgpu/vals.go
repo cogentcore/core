@@ -44,7 +44,7 @@ type Value struct {
 	Texture *Texture
 
 	// pointer to the start of the staging memory for this value
-	MemPtr unsafe.Pointer `view:"-"`
+	MemPtr unsafe.Pointer `display:"-"`
 }
 
 // HasFlag checks if flag is set

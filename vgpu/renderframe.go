@@ -33,13 +33,13 @@ type RenderFrame struct {
 	Frames []*Framebuffer
 
 	// semaphore used internally for waiting on acquisition of next frame
-	ImageAcquired vk.Semaphore `view:"-"`
+	ImageAcquired vk.Semaphore `display:"-"`
 
 	// semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method
-	RenderDone vk.Semaphore `view:"-"`
+	RenderDone vk.Semaphore `display:"-"`
 
 	// fence for rendering command running
-	RenderFence vk.Fence `view:"-"`
+	RenderFence vk.Fence `display:"-"`
 
 	// do we own the device?
 	OwnDevice bool

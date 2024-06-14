@@ -41,7 +41,7 @@ type IndexView struct { //types:add
 	Indexes []int
 
 	// current Less function used in sorting
-	lessFunc LessFunc `copier:"-" view:"-" xml:"-" json:"-"`
+	lessFunc LessFunc `copier:"-" display:"-" xml:"-" json:"-"`
 }
 
 // NewIndexView returns a new IndexView based on given table, initialized with sequential idxes

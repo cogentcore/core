@@ -36,14 +36,14 @@ type Button struct { //core:embedder
 
 	// Icon is the icon for the button.
 	// If it is "" or [icons.None], no icon is shown.
-	Icon icons.Icon `xml:"icon" view:"show-name"`
+	Icon icons.Icon `xml:"icon" display:"show-name"`
 
 	// Indicator is the menu indicator icon to present.
 	// If it is "" or [icons.None],, no indicator is shown.
 	// It is automatically set to [icons.KeyboardArrowDown]
 	// when there is a Menu elements present unless it is
 	// set to [icons.None].
-	Indicator icons.Icon `xml:"indicator" view:"show-name"`
+	Indicator icons.Icon `xml:"indicator" display:"show-name"`
 
 	// Shortcut is an optional shortcut keyboard chord to trigger this button,
 	// active in window-wide scope. Avoid conflicts with other shortcuts

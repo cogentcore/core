@@ -39,10 +39,10 @@ type TensorDisplay struct { //types:add
 	TensorLayout
 
 	// range to plot
-	Range minmax.Range64 `view:"inline"`
+	Range minmax.Range64 `display:"inline"`
 
 	// if not using fixed range, this is the actual range of data
-	MinMax minmax.F64 `view:"inline"`
+	MinMax minmax.F64 `display:"inline"`
 
 	// the name of the color map to use in translating values to colors
 	ColorMap core.ColorMapName
@@ -68,7 +68,7 @@ type TensorDisplay struct { //types:add
 	FontSize float32
 
 	// our gridview, for update method
-	GridView *TensorGrid `copier:"-" json:"-" xml:"-" view:"-"`
+	GridView *TensorGrid `copier:"-" json:"-" xml:"-" display:"-"`
 }
 
 // Defaults sets defaults for values that are at nonsensical initial values

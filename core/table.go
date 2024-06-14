@@ -35,10 +35,10 @@ type Table struct {
 	ListBase
 
 	// StyleFunc is an optional styling function.
-	StyleFunc TableStyleFunc `copier:"-" view:"-" json:"-" xml:"-"`
+	StyleFunc TableStyleFunc `copier:"-" display:"-" json:"-" xml:"-"`
 
 	// SelectedField is the current selection field; initially select value in this field.
-	SelectedField string `copier:"-" view:"-" json:"-" xml:"-"`
+	SelectedField string `copier:"-" display:"-" json:"-" xml:"-"`
 
 	// SortIndex is the current sort index.
 	SortIndex int
@@ -169,7 +169,7 @@ func (tb *Table) cacheVisibleFields() {
 		case tvtag == "-edit" && !tb.IsReadOnly():
 			return false
 		default:
-			return field.Tag.Get("view") != "-"
+			return field.Tag.Get("display") != "-"
 		}
 	}
 
@@ -294,7 +294,7 @@ func (tb *Table) MakeRow(p *Plan, i int) {
 		valnm := fmt.Sprintf("value-%d-%s-%s", fli, itxt, reflectx.ShortTypeName(field.Type))
 		tags := field.Tag
 		if fval.Kind() == reflect.Slice || fval.Kind() == reflect.Map {
-			ni := reflect.StructTag(`view:"no-inline"`)
+			ni := reflect.StructTag(`display:"no-inline"`)
 			if tags == "" {
 				tags += " " + ni
 			} else {

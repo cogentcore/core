@@ -77,10 +77,10 @@ type SettingsSaver interface {
 type SettingsBase struct {
 
 	// Name is the name of the settings.
-	Name string `view:"-" save:"-"`
+	Name string `display:"-" save:"-"`
 
 	// File is the full filename/filepath at which the settings are stored.
-	File string `view:"-" save:"-"`
+	File string `display:"-" save:"-"`
 }
 
 // Label returns the label text for the settings.
@@ -506,7 +506,7 @@ type SystemSettingsData struct { //types:add
 	FavPaths FavPaths
 
 	// column to sort by in FilePicker, and :up or :down for direction -- updated automatically via FilePicker
-	FilePickerSort string `view:"-"`
+	FilePickerSort string `display:"-"`
 
 	// the maximum height of any menu popup panel in units of font height;
 	// scroll bars are enforced beyond that size.

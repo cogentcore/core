@@ -133,8 +133,8 @@ func ToValue(value any, tags reflect.StructTag) Value {
 		return NewTreeButton()
 	}
 
-	inline := tags.Get("view") == "inline"
-	noInline := tags.Get("view") == "no-inline"
+	inline := tags.Get("display") == "inline"
+	noInline := tags.Get("display") == "no-inline"
 
 	kind := typ.Kind()
 	switch {

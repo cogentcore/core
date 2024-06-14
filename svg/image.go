@@ -33,7 +33,7 @@ type Image struct {
 	ViewBox ViewBox `xml:"viewbox"`
 
 	// the image pixels
-	Pixels *image.RGBA `xml:"-" json:"-" view:"-"`
+	Pixels *image.RGBA `xml:"-" json:"-" display:"-"`
 }
 
 func (g *Image) SVGName() string { return "image" }

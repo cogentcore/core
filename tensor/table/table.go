@@ -23,7 +23,7 @@ import (
 type Table struct { //types:add
 
 	// columns of data, as tensor.Tensor tensors
-	Columns []tensor.Tensor `view:"no-inline"`
+	Columns []tensor.Tensor `display:"no-inline"`
 
 	// the names of the columns
 	ColumnNames []string
@@ -32,7 +32,7 @@ type Table struct { //types:add
 	Rows int `edit:"-"`
 
 	// the map of column names to column numbers
-	ColumnNameMap map[string]int `view:"-"`
+	ColumnNameMap map[string]int `display:"-"`
 
 	// misc meta data for the table.  We use lower-case key names following the struct tag convention:  name = name of table; desc = description; read-only = gui is read-only; precision = n for precision to write out floats in csv.  For Column-specific data, we look for ColumnName: prefix, specifically ColumnName:desc = description of the column contents, which is shown as tooltip in the tensorcore.Table, and :width for width of a column
 	MetaData map[string]string

@@ -43,13 +43,13 @@ type TraceOptions struct {
 	FullStackOut bool
 
 	// list of rules
-	RulesList []string `view:"-" json:"-" xml:"-"`
+	RulesList []string `display:"-" json:"-" xml:"-"`
 
 	// trace output is written here, connected via os.Pipe to OutRead
-	OutWrite *os.File `view:"-" json:"-" xml:"-"`
+	OutWrite *os.File `display:"-" json:"-" xml:"-"`
 
 	// trace output is read here; can connect this using [texteditor.OutputBuffer] to monitor tracing output
-	OutRead *os.File `view:"-" json:"-" xml:"-"`
+	OutRead *os.File `display:"-" json:"-" xml:"-"`
 }
 
 // Init intializes tracer after any changes -- opens pipe if not already open

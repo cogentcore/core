@@ -75,19 +75,19 @@ type Border struct { //types:add
 	Style Sides[BorderStyles]
 
 	// Width specifies the width of the border
-	Width SideValues `view:"inline"`
+	Width SideValues `display:"inline"`
 
 	// Radius specifies the radius (rounding) of the corners
-	Radius SideValues `view:"inline"`
+	Radius SideValues `display:"inline"`
 
 	// Offset specifies how much, if any, the border is offset
 	// from its element. It is only applicable in the standard
 	// box model, which is used by [paint.Context.DrawStdBox] and
 	// all standard GUI elements.
-	Offset SideValues `view:"inline"`
+	Offset SideValues `display:"inline"`
 
 	// Color specifies the color of the border
-	Color Sides[image.Image] `view:"inline"`
+	Color Sides[image.Image] `display:"inline"`
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels

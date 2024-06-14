@@ -43,11 +43,11 @@ type Chooser struct {
 	Items []ChooserItem
 
 	// Icon is an optional icon displayed on the left side of the chooser.
-	Icon icons.Icon `view:"show-name"`
+	Icon icons.Icon `display:"show-name"`
 
 	// Indicator is the icon to use for the indicator displayed on the
 	// right side of the chooser.
-	Indicator icons.Icon `view:"show-name"`
+	Indicator icons.Icon `display:"show-name"`
 
 	// Editable is whether provide a text field for editing the value,
 	// or just a button for selecting items.

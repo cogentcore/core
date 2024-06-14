@@ -160,7 +160,7 @@ type TextField struct { //core:embedder
 	BlinkOn bool `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// CursorMu is the mutex for updating the cursor between blinker and field.
-	CursorMu sync.Mutex `copier:"-" json:"-" xml:"-" view:"-" set:"-"`
+	CursorMu sync.Mutex `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
 
 	// Undos is the undo manager for the text field.
 	Undos TextFieldUndos `json:"-" xml:"-" set:"-"`
