@@ -23,12 +23,11 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/htmlview"
+	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/pages/wpath"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/views"
 )
 
 // Page represents a content page with support for navigating
@@ -39,8 +38,8 @@ type Page struct {
 	// Source is the filesystem in which the content is located.
 	Source fs.FS
 
-	// Context is the page's [htmlview.Context].
-	Context *htmlview.Context `set:"-"`
+	// Context is the page's [htmlcore.Context].
+	Context *htmlcore.Context `set:"-"`
 
 	// The history of URLs that have been visited. The oldest page is first.
 	History []string `set:"-"`
@@ -67,7 +66,7 @@ var saveWebURL func(u string)
 
 func (pg *Page) Init() {
 	pg.Frame.Init()
-	pg.Context = htmlview.NewContext()
+	pg.Context = htmlcore.NewContext()
 	pg.Context.OpenURL = func(url string) {
 		pg.OpenURL(url, true)
 	}
@@ -97,7 +96,7 @@ func (pg *Page) Init() {
 		sp := core.NewSplits(pg).SetSplits(0.2, 0.8)
 		sp.SetName("splits")
 
-		nav := views.NewTreeViewFrame(sp).SetText(core.TheApp.Name())
+		nav := core.NewTreeFrame(sp).SetText(core.TheApp.Name())
 		nav.Parent.AsTree().SetName("nav-frame")
 		nav.SetName("nav")
 		nav.SetReadOnly(true)
@@ -142,12 +141,12 @@ func (pg *Page) Init() {
 
 			parent := nav
 			if pdir != "" && pdir != "." {
-				parent = nav.FindPath(pdir).(*views.TreeView)
+				parent = nav.FindPath(pdir).(*core.Tree)
 			}
 
 			nm := strings.TrimSuffix(base, ext)
 			txt := strcase.ToSentence(nm)
-			tv := views.NewTreeView(parent).SetText(txt)
+			tv := core.NewTree(parent).SetText(txt)
 			tv.SetName(nm)
 
 			// need index.md for page path
@@ -266,15 +265,15 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	// need to reset
 	NumExamples[pg.Context.PageURL] = 0
 
-	nav := pg.FindPath("splits/nav-frame/nav").(*views.TreeView)
+	nav := pg.FindPath("splits/nav-frame/nav").(*core.Tree)
 	nav.UnselectAll()
-	utv := nav.FindPath(rawURL).(*views.TreeView)
+	utv := nav.FindPath(rawURL).(*core.Tree)
 	utv.Select()
 	utv.ScrollToMe()
 
 	fr := pg.FindPath("splits/body").(*core.Frame)
 	fr.DeleteChildren()
-	err = htmlview.ReadMD(pg.Context, fr, b)
+	err = htmlcore.ReadMD(pg.Context, fr, b)
 	if err != nil {
 		core.ErrorSnackbar(pg, err, "Error loading page")
 		return

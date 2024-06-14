@@ -32,18 +32,17 @@ import (
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
-	"cogentcore.org/core/views"
 )
 
 // NodeHiStyle is the default style for syntax highlighting to use for
 // file node buffers
 var NodeHiStyle = histyle.StyleDefault
 
-// Node represents a file in the file system, as a TreeView node.
+// Node represents a file in the file system, as a Tree node.
 // The name of the node is the name of the file.
 // Folders have children containing further nodes.
 type Node struct { //core:embedder
-	views.TreeView
+	core.Tree
 
 	// full path to this file
 	FPath core.Filename `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
@@ -66,8 +65,8 @@ type Node struct { //core:embedder
 }
 
 func (fn *Node) Init() {
-	fn.TreeView.Init()
-	fn.ContextMenus = nil // do not include treeview
+	fn.Tree.Init()
+	fn.ContextMenus = nil // do not include tree
 	fn.AddContextMenu(fn.ContextMenu)
 	fn.Styler(func(s *styles.Style) {
 		status := fn.Info.VCS
@@ -98,7 +97,7 @@ func (fn *Node) Init() {
 	})
 	fn.On(events.KeyChord, func(e events.Event) {
 		if core.DebugSettings.KeyEventTrace {
-			fmt.Printf("TreeView KeyInput: %v\n", fn.Path())
+			fmt.Printf("Tree KeyInput: %v\n", fn.Path())
 		}
 		kf := keymap.Of(e.KeyChord())
 		selMode := events.SelectModeBits(e.Modifiers())
@@ -122,10 +121,10 @@ func (fn *Node) Init() {
 				fn.DuplicateFiles()
 				e.SetHandled()
 			case keymap.Insert: // New File
-				views.CallFunc(fn, fn.NewFile)
+				core.CallFunc(fn, fn.NewFile)
 				e.SetHandled()
 			case keymap.InsertAfter: // New Folder
-				views.CallFunc(fn, fn.NewFolder)
+				core.CallFunc(fn, fn.NewFolder)
 				e.SetHandled()
 			}
 		}
@@ -261,7 +260,7 @@ func (fn *Node) SetPath(path string) error {
 	fn.FPath = core.Filename(pth)
 	err = fn.Info.InitFile(string(fn.FPath))
 	if err != nil {
-		log.Printf("views.Tree: could not read directory: %v err: %v\n", fn.FPath, err)
+		log.Printf("core.Tree: could not read directory: %v err: %v\n", fn.FPath, err)
 		return err
 	}
 
@@ -312,7 +311,7 @@ func (fn *Node) SyncDir() {
 		root := fn.FRoot
 		fn.Update()
 		if root != nil {
-			root.TreeViewChanged(nil)
+			root.TreeChanged(nil)
 		}
 	}
 }
@@ -375,10 +374,10 @@ func (fn *Node) SetFileIcon() {
 	if !hasic {
 		ic = icons.Blank
 	}
-	if _, ok := fn.BranchPart(); !ok {
+	if _, ok := fn.Branch(); !ok {
 		fn.Update()
 	}
-	if bp, ok := fn.BranchPart(); ok {
+	if bp, ok := fn.Branch(); ok {
 		if bp.IconIndeterminate != ic {
 			bp.SetIcons(icons.FolderOpen, icons.Folder, ic)
 			fn.Update()
@@ -532,7 +531,7 @@ func (fn *Node) SortBy(modTime bool) {
 // OpenAll opens all directories under this one
 func (fn *Node) OpenAll() { //types:add
 	fn.FRoot.InOpenAll = true // causes chaining of opening
-	fn.TreeView.OpenAll()
+	fn.Tree.OpenAll()
 	fn.FRoot.InOpenAll = false
 }
 

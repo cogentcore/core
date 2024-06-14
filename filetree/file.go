@@ -17,7 +17,6 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/system"
-	"cogentcore.org/core/views"
 )
 
 // OSOpenCommand returns the generic file 'open' command to open file with default app
@@ -118,7 +117,7 @@ func (fn *Node) OpenFileDefault() error {
 // OpenFilesWith opens selected files with user-specified command.
 func (fn *Node) OpenFilesWith() {
 	fn.SelectedFunc(func(sn *Node) {
-		views.CallFunc(sn, sn.OpenFileWith) // todo: not using interface?
+		core.CallFunc(sn, sn.OpenFileWith) // todo: not using interface?
 	})
 }
 
@@ -226,7 +225,7 @@ func (fn *Node) DeleteFile() error {
 func (fn *Node) RenameFiles() { //types:add
 	fn.FRoot.NeedsLayout()
 	fn.SelectedFunc(func(sn *Node) {
-		fb := views.NewSoloFuncButton(sn, sn.RenameFile)
+		fb := core.NewSoloFuncButton(sn, sn.RenameFile)
 		fb.Args[0].SetValue(sn.Name)
 		fb.CallFunc()
 	})
@@ -375,7 +374,7 @@ func (fn *Node) CopyFileToDir(filename string, perm os.FileMode) {
 func (fn *Node) ShowFileInfo() { //types:add
 	fn.SelectedFunc(func(sn *Node) {
 		d := core.NewBody().AddTitle("File info")
-		views.NewStructView(d).SetStruct(&sn.Info).SetReadOnly(true)
+		core.NewForm(d).SetStruct(&sn.Info).SetReadOnly(true)
 		d.AddOKOnly().RunFullDialog(sn)
 	})
 }

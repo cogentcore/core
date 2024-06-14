@@ -17,13 +17,12 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/htmlview"
+	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/pages"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/views"
 )
 
 //go:embed content
@@ -44,15 +43,15 @@ var myFile embed.FS
 func main() {
 	b := core.NewBody("Cogent Core Docs")
 	pg := pages.NewPage(b).SetSource(errors.Log1(fs.Sub(content, "content")))
-	pg.Context.WikilinkResolver = htmlview.PkgGoDevWikilink("cogentcore.org/core")
+	pg.Context.WikilinkResolver = htmlcore.PkgGoDevWikilink("cogentcore.org/core")
 	// b.AddAppBar(pg.AppBar)
 
-	htmlview.ElementHandlers["home-page"] = homePage
+	htmlcore.ElementHandlers["home-page"] = homePage
 
 	b.RunMainWindow()
 }
 
-func homePage(ctx *htmlview.Context) bool {
+func homePage(ctx *htmlcore.Context) bool {
 	frame := core.NewFrame(ctx.BlockParent).Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
@@ -143,7 +142,7 @@ func homePage(ctx *htmlview.Context) bool {
 	})
 
 	makeBlock("COMPLETELY CUSTOMIZABLE", "Cogent Core allows developers and users to fully customize apps to fit their unique needs and preferences through a robust styling system and a powerful color system that allow developers and users to instantly customize every aspect of the appearance and behavior of an app.", func(parent core.Widget) {
-		views.NewStructView(parent).SetStruct(core.AppearanceSettings).OnChange(func(e events.Event) {
+		core.NewForm(parent).SetStruct(core.AppearanceSettings).OnChange(func(e events.Event) {
 			core.UpdateSettings(parent, core.AppearanceSettings)
 		})
 

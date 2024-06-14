@@ -6,10 +6,15 @@ package core
 
 import (
 	"fmt"
+	"image/color"
 	"reflect"
+	"time"
 
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/enums"
+	"cogentcore.org/core/events/key"
+	"cogentcore.org/core/icons"
+	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
@@ -110,6 +115,8 @@ func ToValue(value any, tags reflect.StructTag) Value {
 		}
 	}
 
+	// Default bindings:
+
 	if _, ok := value.(enums.BitFlag); ok {
 		return NewSwitches()
 	}
@@ -119,6 +126,15 @@ func ToValue(value any, tags reflect.StructTag) Value {
 		}
 		return NewChooser()
 	}
+	if _, ok := value.(color.Color); ok {
+		return NewColorButton()
+	}
+	if _, ok := value.(tree.Node); ok {
+		return NewTreeButton()
+	}
+
+	inline := tags.Get("view") == "inline"
+	noInline := tags.Get("view") == "no-inline"
 
 	kind := typ.Kind()
 	switch {
@@ -135,7 +151,49 @@ func ToValue(value any, tags reflect.StructTag) Value {
 		return sp
 	case kind == reflect.Bool:
 		return NewSwitch()
+	case kind == reflect.Struct:
+		num := reflectx.NumAllFields(uv)
+		if !noInline && (inline || num <= SystemSettings.StructInlineLength) {
+			return NewForm().SetInline(true)
+		} else {
+			return NewFormButton()
+		}
+	case kind == reflect.Map:
+		len := uv.Len()
+		if !noInline && (inline || len <= SystemSettings.MapInlineLength) {
+			return NewKeyedList().SetInline(true)
+		} else {
+			return NewKeyedListButton()
+		}
+	case kind == reflect.Array, kind == reflect.Slice:
+		sz := uv.Len()
+		elemType := reflectx.SliceElementType(value)
+		if _, ok := value.([]byte); ok {
+			return NewTextField()
+		}
+		if _, ok := value.([]rune); ok {
+			return NewTextField()
+		}
+		isStruct := (reflectx.NonPointerType(elemType).Kind() == reflect.Struct)
+		if !noInline && (inline || (!isStruct && sz <= SystemSettings.SliceInlineLength && !tree.IsNode(elemType))) {
+			return NewInlineList()
+		} else {
+			return NewListButton()
+		}
+	case kind == reflect.Func:
+		return tree.New[*FuncButton]() // TODO(config): update to NewFuncButton after changing its signature
 	}
 
-	return NewTextField()
+	return NewTextField() // final fallback
+}
+
+func init() {
+	AddValueType[icons.Icon, *IconButton]()
+	AddValueType[time.Time, *TimeInput]()
+	AddValueType[time.Duration, *DurationInput]()
+	AddValueType[types.Type, *TypeChooser]()
+	AddValueType[Filename, *FileButton]()
+	AddValueType[FontName, *FontButton]()
+	AddValueType[keymap.MapName, *KeyMapButton]()
+	AddValueType[key.Chord, *KeyChordButton]()
 }

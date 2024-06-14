@@ -278,7 +278,7 @@ func (bt *Button) Init() {
 					})
 				})
 			} else if bt.Shortcut != "" {
-				slog.Error("programmer error: core.Button: shortcut cannot be used on a sub-menu for", "button", bt)
+				slog.Error("programmer error: Button: shortcut cannot be used on a sub-menu for", "button", bt)
 			}
 		}
 	})

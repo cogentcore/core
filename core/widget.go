@@ -130,7 +130,7 @@ type Widget interface {
 
 	// ChildBackground returns the background color (Image) for given child Widget.
 	// By default, this is just our [Styles.Actualbackground] but it can be computed
-	// specifically for the child (e.g., for zebra stripes in views.SliceViewGrid)
+	// specifically for the child (e.g., for zebra stripes in [ListGrid])
 	ChildBackground(child Widget) image.Image
 
 	// DirectRenderImage uploads image directly into given system.Drawer at given index
@@ -158,8 +158,8 @@ type WidgetBase struct {
 
 	// Parts are a separate tree of sub-widgets that can be used to store
 	// orthogonal parts of a widget when necessary to separate them from children.
-	// For example, tree views use parts to separate their internal parts from
-	// the other child tree view nodes. Composite widgets like buttons should
+	// For example, trees use parts to separate their internal parts from
+	// the other child tree nodes. Composite widgets like buttons should
 	// NOT use parts to store their components; parts should only be used when
 	// absolutely necessary.
 	Parts *Frame `copier:"-" json:"-" xml:"-" set:"-"`

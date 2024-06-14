@@ -25,7 +25,7 @@ var Update3DTrace = false
 
 // Scene is the overall scenegraph containing nodes as children.
 // It renders to its own vgpu.RenderFrame.
-// The Image of this Frame is usable directly or, via xyzview.Scene,
+// The Image of this Frame is usable directly or, via xyzcore.Scene,
 // where it is copied into an overall core.Scene image.
 //
 // There is default navigation event processing (disabled by setting NoNav)
@@ -109,7 +109,7 @@ func (sc *Scene) Init() {
 
 // NewOffscreenScene returns a new [Scene] designed for offscreen
 // rendering of 3D content. This can be used in unit tests and other
-// cases not involving xyzview. It makes a new [vgpu.NoDisplayGPU].
+// cases not involving xyzcore. It makes a new [vgpu.NoDisplayGPU].
 func NewOffscreenScene() *Scene {
 	gpu, device, err := vgpu.NoDisplayGPU("offscreen")
 	if err != nil {

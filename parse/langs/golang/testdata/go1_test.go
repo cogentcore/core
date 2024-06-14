@@ -353,7 +353,7 @@ func slfaa() {
 	}
 }
 
-func (tv *TreeView) FocusChanged2D(change core.FocusChanges) {
+func (tv *Tree) FocusChanged2D(change core.FocusChanges) {
 	switch change {
 	case core.FocusInactive: // don't care..
 	case core.FocusActive:
@@ -516,7 +516,7 @@ func bbb() {
 	a := struct{}{}
 }
 
-func (tv *TableView) RowGrabFocus(row int) *core.WidgetBase {
+func (tv *Table) RowGrabFocus(row int) *core.WidgetBase {
 	
 	tv.inFocusGrab = slice{}
 
@@ -561,7 +561,7 @@ pil:
 	return nil
 }
 
-func (tv *TreeView) FocusChanged2D(change core.FocusChanges) {
+func (tv *Tree) FocusChanged2D(change core.FocusChanges) {
 	switch change {
 	case core.FocusInactive: // don't care..
 	case core.FocusActive:
@@ -606,14 +606,14 @@ func tst() {
 }
 
 func tst() {
-	tvn, two := data.(tree.Node).Embed(views.KiT_TreeView).(*views.TreeView)
+	tvn, two := data.(tree.Node).Embed(core.KiT_Tree).(*core.Tree)
 	for a, b := range cde {
 	}
 }
 
 var PiViewProperties = tree.Properties{
 	"MainMenu": tree.Propertieslice{
-		"updatefunc": views.ActionUpdateFunc(func(pvi interface{}, act *core.Button) {
+		"updatefunc": core.ActionUpdateFunc(func(pvi interface{}, act *core.Button) {
 			pv := pvi.(*PiView)
 			act.SetActiveState(pv.Settings.ProjectFile != "")
 		}),
@@ -718,7 +718,7 @@ func tst() {
 func (pv *PiView) ConfigSplitView() {
 	Connect(func(sig int64) {
 		switch sig {
-		case int64(TreeViewSelected):
+		case int64(TreeSelected):
 			break
 		}
 	})
@@ -1004,9 +1004,9 @@ var tree = (map[token.Tokens]struct{})(optMap)
 
 var partyp = (*int)(tree)
 
-var ExprTypeAssert = absfr.(core.TreeView)
+var ExprTypeAssert = absfr.(core.Tree)
 
-var ExprTypeAssertPtr = absfr.(*core.TreeView)
+var ExprTypeAssertPtr = absfr.(*core.Tree)
 
 var methexpr = abc.meth(a-b * 2 + bf.Meth(22 + 55) / long.meth.Call(tree))
 

@@ -15,7 +15,7 @@ import (
 	"cogentcore.org/core/base/logx"
 )
 
-// TODO: can we get rid of ConfigFiles somehow? we need it in cliview and probably other places too
+// TODO: can we get rid of ConfigFiles somehow? we need it in clicore and probably other places too
 
 // ConfigFile are the names of the config file actually loaded, specified by the
 // -config or -cfg command-line arg or the default file given in [Options.DefaultFiles]

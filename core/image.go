@@ -9,6 +9,7 @@ import (
 	"io/fs"
 
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"github.com/anthonynsimon/bild/clone"
@@ -18,8 +19,7 @@ import (
 // Image is a widget that renders a static bitmap image.
 // See [styles.ObjectFits] for how to control the image rendering within
 // the allocated size. The default minimum requested size is the pixel
-// size in [units.Dp] units (1/160th of an inch). See [views.ConfigImageToolbar]
-// for a toolbar with I/O buttons.
+// size in [units.Dp] units (1/160th of an inch).
 type Image struct {
 	WidgetBase
 
@@ -95,4 +95,10 @@ func (im *Image) Render() {
 		im.prevSize = im.Geom.Size.Actual.Content
 	}
 	draw.Draw(im.Scene.Pixels, r, rimg, sp, draw.Over)
+}
+
+func (im *Image) MakeToolbar(p *Plan) {
+	Add(p, func(w *FuncButton) {
+		w.SetFunc(im.Open).SetIcon(icons.Open)
+	})
 }

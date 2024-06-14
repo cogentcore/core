@@ -1,6 +1,6 @@
 # XYZ
 
-`xyz` is a 3D graphics framework written in Go. It is a separate standalone package that renders to an offscreen Vulkan framebuffer, which can easily be converted into a Go `image.RGBA`.  The [xyzview](xyzview) package provides an integration of xyz in Cogent Core, for dynamic and efficient 3D rendering within 2D GUI windows.
+`xyz` is a 3D graphics framework written in Go. It is a separate standalone package that renders to an offscreen Vulkan framebuffer, which can easily be converted into a Go `image.RGBA`.  The [xyzcore](xyzcore) package provides an integration of xyz in Cogent Core, for dynamic and efficient 3D rendering within 2D GUI windows.
 
 `xyz` is built on the [vgpu](https://pkg.go.dev/cogentcore.org/core/vgpu) Vulkan GPU framework, and uses the [tree](../tree) tree structure for the scenegraph.  It currently supports standard Phong-based rendering with different types of lights and materials.  It is designed for scientific and other non-game 3D applications, and lacks almost all of the advanced features one would expect in a modern 3D graphics framework.  Thus, its primary advantage is its simplicity and support for directly programming 3D visualizations in Go, its broad cross-platform support across all major desktop and mobile platforms, and the use of Vulkan which is highly efficient.
 
@@ -58,7 +58,7 @@ Mouse events are handled by the standard Cogent Core Window event dispatching me
 
 # Embedded 2D Viewport
 
-A full 2D Cogent Core GUI can be embedded within a 3D scene using the `xyzview.Embed2D` Node type, which renders a `core.Scene` onto a Texture projected onto a Plane.  It captures events within its own bounding box, and translates them into coordinates for the 2D embedded gui. This allows full 2D interactive control within whatever perspective is present in the 3D scene.  However, things like cursors and popups render in the flat 2D screen and are only approximately located.
+A full 2D Cogent Core GUI can be embedded within a 3D scene using the `xyzcore.Embed2D` Node type, which renders a `core.Scene` onto a Texture projected onto a Plane.  It captures events within its own bounding box, and translates them into coordinates for the 2D embedded gui. This allows full 2D interactive control within whatever perspective is present in the 3D scene.  However, things like cursors and popups render in the flat 2D screen and are only approximately located.
 
 In addition to interactive guis, the embedded 2D node can be used for rendering full SVG graphics to a texture.
 

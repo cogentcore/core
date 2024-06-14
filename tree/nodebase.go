@@ -59,13 +59,13 @@ type NodeBase struct {
 	// as their parent. You can directly modify this list, but you should typically use the
 	// various NodeBase child helper functions when applicable so that everything is updated
 	// properly, such as when deleting children.
-	Children []Node `tableview:"-" copier:"-" set:"-" json:",omitempty"`
+	Children []Node `table:"-" copier:"-" set:"-" json:",omitempty"`
 
 	// Properties is a property map for arbitrary key-value properties.
 	// When possible, use typed fields on a new type embedding NodeBase instead of this.
 	// You should typically use the [NodeBase.SetProperty], [NodeBase.Property], and
 	// [NodeBase.DeleteProperty] methods for modifying and accessing properties.
-	Properties map[string]any `tableview:"-" xml:"-" copier:"-" set:"-" json:",omitempty"`
+	Properties map[string]any `table:"-" xml:"-" copier:"-" set:"-" json:",omitempty"`
 
 	// numLifetimeChildren is the number of children that have ever been added to this
 	// node, which is used for automatic unique naming.

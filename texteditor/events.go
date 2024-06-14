@@ -24,7 +24,6 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/texteditor/textbuf"
-	"cogentcore.org/core/views"
 )
 
 func (ed *Editor) HandleFocus() {
@@ -723,10 +722,10 @@ func (ed *Editor) ContextMenu(m *core.Scene) {
 				ed.Paste()
 			})
 		core.NewSeparator(m)
-		views.NewFuncButton(m, ed.Buffer.Save).SetIcon(icons.Save)
-		views.NewFuncButton(m, ed.Buffer.SaveAs).SetIcon(icons.SaveAs)
-		views.NewFuncButton(m, ed.Buffer.Open).SetIcon(icons.Open)
-		views.NewFuncButton(m, ed.Buffer.Revert).SetIcon(icons.Reset)
+		core.NewFuncButton(m, ed.Buffer.Save).SetIcon(icons.Save)
+		core.NewFuncButton(m, ed.Buffer.SaveAs).SetIcon(icons.SaveAs)
+		core.NewFuncButton(m, ed.Buffer.Open).SetIcon(icons.Open)
+		core.NewFuncButton(m, ed.Buffer.Revert).SetIcon(icons.Reset)
 	} else {
 		core.NewButton(m).SetText("Clear").SetIcon(icons.ClearAll).
 			OnClick(func(e events.Event) {

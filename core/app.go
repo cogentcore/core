@@ -49,7 +49,7 @@ type App struct { //types:add -setters
 	// will be created by default.
 	AppBarConfig func(parent Widget)
 
-	// SceneConfig is the function called on every newly created [core.Scene]
+	// SceneConfig is the function called on every newly created [Scene]
 	// to configure it, if it is non-nil. This can be used to set global
 	// configuration and styling for all widgets using the OnWidgetAdded
 	// method.
@@ -187,28 +187,19 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 		NewText(d).SetText("Core version: " + system.CoreVersion)
 		d.AddOKOnly().RunDialog(m)
 	})
-	if SettingsWindow != nil {
-		NewButton(m).SetText("Settings").SetIcon(icons.Settings).SetShortcut("Command+,").
-			OnClick(func(e events.Event) {
-				SettingsWindow()
-			})
-	}
+	NewFuncButton(m, SettingsWindow).SetText("Settings").SetIcon(icons.Settings).SetShortcut("Command+,")
 	if webCanInstall {
 		icon := icons.InstallDesktop
 		if TheApp.SystemPlatform().IsMobile() {
 			icon = icons.InstallMobile
 		}
-		NewButton(m).SetText("Install").SetIcon(icon).SetTooltip("Install this app to your device as a Progressive Web App (PWA)").OnClick(func(e events.Event) {
-			webInstall()
+		NewFuncButton(m, webInstall).SetText("Install").SetIcon(icon).SetTooltip("Install this app to your device as a Progressive Web App (PWA)")
+	}
+	NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetShortcut("Command+Shift+I").
+		SetTooltip("Developer tools for inspecting the content of the app").
+		OnClick(func(e events.Event) {
+			InspectorWindow(tb.Scene)
 		})
-	}
-	if InspectorWindow != nil {
-		NewButton(m).SetText("Inspect").SetIcon(icons.Edit).SetShortcut("Command+Shift+I").
-			SetTooltip("Developer tools for inspecting the content of the app").
-			OnClick(func(e events.Event) {
-				InspectorWindow(tb.Scene)
-			})
-	}
 	NewButton(m).SetText("Edit").SetMenu(func(m *Scene) {
 		// todo: these need to actually do something -- currently just show keyboard shortcut
 		NewButton(m).SetText("Copy").SetIcon(icons.Copy).SetKey(keymap.Copy)

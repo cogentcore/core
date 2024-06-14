@@ -15,11 +15,10 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32/minmax"
-	"cogentcore.org/core/plot/plotview"
+	"cogentcore.org/core/plot/plotcore"
 	"cogentcore.org/core/tensor"
 	"cogentcore.org/core/tensor/stats/histogram"
 	"cogentcore.org/core/tensor/table"
-	"cogentcore.org/core/views"
 )
 
 func main() {
@@ -52,7 +51,7 @@ type Sim struct {
 	Hist *table.Table `view:"no-inline"`
 
 	// the plot
-	Plot *plotview.PlotView `view:"-"`
+	Plot *plotcore.PlotEditor `view:"-"`
 }
 
 // TheSim is the overall state for this simulation
@@ -103,15 +102,15 @@ func (ss *Sim) ConfigTable(dt *table.Table) {
 	dt.AddFloat64Column("Val")
 }
 
-func (ss *Sim) ConfigPlot(plt *plotview.PlotView, dt *table.Table) *plotview.PlotView {
+func (ss *Sim) ConfigPlot(plt *plotcore.PlotEditor, dt *table.Table) *plotcore.PlotEditor {
 	plt.Params.Title = "Rand Dist Histogram"
 	plt.Params.XAxisColumn = "Value"
-	plt.Params.Type = plotview.Bar
+	plt.Params.Type = plotcore.Bar
 	plt.Params.XAxisRotation = 45
 	plt.SetTable(dt)
 	// order of params: on, fixMin, min, fixMax, max
-	plt.SetColParams("Value", plotview.Off, plotview.FloatMin, 0, plotview.FloatMax, 0)
-	plt.SetColParams("Count", plotview.On, plotview.FixMin, 0, plotview.FloatMax, 0)
+	plt.SetColParams("Value", plotcore.Off, plotcore.FloatMin, 0, plotcore.FloatMax, 0)
+	plt.SetColParams("Count", plotcore.On, plotcore.FixMin, 0, plotcore.FloatMax, 0)
 	return plt
 }
 
@@ -121,13 +120,13 @@ func (ss *Sim) ConfigGUI() *core.Body {
 
 	split := core.NewSplits(b)
 
-	sv := views.NewStructView(split)
+	sv := core.NewForm(split)
 	sv.SetStruct(ss)
 
 	tv := core.NewTabs(split)
 
 	pt := tv.NewTab("Histogram")
-	plt := plotview.NewPlotView(pt)
+	plt := plotcore.NewPlotEditor(pt)
 	ss.Plot = ss.ConfigPlot(plt, ss.Hist)
 
 	split.SetSplits(.3, .7)

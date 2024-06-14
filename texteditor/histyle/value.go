@@ -10,21 +10,20 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/views"
 )
 
 func init() {
-	views.AddValue(core.HiStyleName(""), func() views.Value { return &Value{} })
+	core.AddValue(core.HiStyleName(""), func() core.Value { return &Value{} })
 }
 
 // Value represents a [core.HiStyleName] with a button.
 type Value struct {
-	views.ValueBase[*core.Button]
+	core.ValueBase[*core.Button]
 }
 
 func (v *Value) Config() {
 	v.Widget.SetType(core.ButtonTonal).SetIcon(icons.Brush)
-	views.ConfigDialogWidget(v, false)
+	core.ConfigDialogWidget(v, false)
 }
 
 func (v *Value) Update() {
@@ -36,7 +35,7 @@ func (v *Value) ConfigDialog(d *core.Body) (bool, func()) {
 	d.SetTitle("Select a syntax highlighting style")
 	si := 0
 	cur := reflectx.ToString(v.Value.Interface())
-	views.NewSliceView(d).SetSlice(&StyleNames).SetSelectedValue(cur).BindSelect(&si)
+	core.NewList(d).SetSlice(&StyleNames).SetSelectedValue(cur).BindSelect(&si)
 	return true, func() {
 		if si >= 0 {
 			hs := StyleNames[si]
@@ -54,17 +53,17 @@ func View(st *Styles) {
 
 	d := core.NewBody("hi-styles").SetData(st)
 	d.AddTitle("Highlighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards.")
-	mv := views.NewMapView(d).SetMap(st)
+	mv := core.NewKeyedList(d).SetMap(st)
 	StylesChanged = false
 	mv.OnChange(func(e events.Event) {
 		StylesChanged = true
 	})
 	d.AddAppBar(func(p *core.Plan) {
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
 			w.Args[0].SetTag(`ext:".histy"`)
 		})
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
 			w.Args[0].SetTag(`ext:".histy"`)
 		})

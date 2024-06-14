@@ -22,7 +22,6 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/views"
 )
 
 // FileBrowse is a simple file browser / viewer / editor with a file tree and
@@ -302,21 +301,21 @@ func (fb *FileBrowse) TextEditorByIndex(idx int) *texteditor.Editor {
 }
 
 func (fb *FileBrowse) MakeToolbar(p *core.Plan) { //types:add
-	core.Add(p, func(w *views.FuncButton) {
+	core.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(fb.UpdateFiles).SetIcon(icons.Refresh).SetShortcut("Command+U")
 	})
-	core.Add(p, func(w *views.FuncButton) {
+	core.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(fb.OpenPath).SetKey(keymap.Open)
 		w.Args[0].SetValue(fb.ActiveFilename)
 		w.Args[0].SetTag(`ext:".json"`)
 	})
-	core.Add(p, func(w *views.FuncButton) {
+	core.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(fb.SaveActiveView).SetKey(keymap.Save)
 		w.Styler(func(s *styles.Style) {
 			s.SetEnabled(fb.Changed && fb.ActiveFilename != "")
 		})
 	})
-	core.Add(p, func(w *views.FuncButton) {
+	core.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(fb.SaveActiveViewAs).SetKey(keymap.SaveAs)
 		w.Args[0].SetValue(fb.ActiveFilename)
 		w.Args[0].SetTag(`ext:".json"`)

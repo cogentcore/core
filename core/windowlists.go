@@ -54,7 +54,7 @@ func (wl *RenderWindowList) FindData(data any) (*RenderWindow, bool) {
 	}
 	typ := reflect.TypeOf(data)
 	if !typ.Comparable() {
-		fmt.Printf("programmer error in RenderWinList.FindData: core.Scene.Data type %s not comparable (value: %v)\n", typ.String(), data)
+		fmt.Printf("programmer error in RenderWinList.FindData: Scene.Data type %s not comparable (value: %v)\n", typ.String(), data)
 		return nil, false
 	}
 	RenderWindowGlobalMu.Lock()

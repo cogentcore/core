@@ -10,7 +10,7 @@ import (
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/htmlview"
+	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/styles"
 )
 
@@ -22,19 +22,19 @@ import (
 var Examples = map[string]func(parent core.Widget){}
 
 func init() {
-	htmlview.ElementHandlers["pages-example"] = ExampleHandler
+	htmlcore.ElementHandlers["pages-example"] = ExampleHandler
 }
 
 // NumExamples has the number of examples per page URL.
 var NumExamples = map[string]int{}
 
-// ExampleHandler is the htmlview handler for <pages-example> HTML elements
+// ExampleHandler is the htmlcore handler for <pages-example> HTML elements
 // that handles examples.
-func ExampleHandler(ctx *htmlview.Context) bool {
+func ExampleHandler(ctx *htmlcore.Context) bool {
 	// the node we actually care about is our first child, the <pre> element
 	ctx.Node = ctx.Node.FirstChild
 
-	core.NewText(ctx.Parent()).SetText(htmlview.ExtractText(ctx)).Styler(func(s *styles.Style) {
+	core.NewText(ctx.Parent()).SetText(htmlcore.ExtractText(ctx)).Styler(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 		s.Background = colors.C(colors.Scheme.SurfaceContainer)
 		s.Border.Radius = styles.BorderRadiusMedium

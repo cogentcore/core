@@ -25,7 +25,6 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/views"
 )
 
 //go:embed demo.go
@@ -37,7 +36,7 @@ func main() {
 
 	home(ts)
 	widgets(ts)
-	makeViews(ts)
+	views(ts)
 	values(ts)
 	makeStyles(ts)
 
@@ -277,7 +276,7 @@ func sliders(ts *core.Tabs) {
 }
 
 func textEditors(ts *core.Tabs) {
-	tab := ts.NewTab("Text editors")
+	tab := ts.NewTab("Text editor")
 
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Text editors")
 	core.NewText(tab).SetText("Cogent Core provides powerful text editors that support advanced code editing features, like syntax highlighting, completion, undo and redo, copy and paste, rectangular selection, and word, line, and page based navigation, selection, and deletion.")
@@ -358,40 +357,40 @@ func values(ts *core.Tabs) {
 	})
 
 	color := colors.Orange
-	core.Bind(&color, views.NewColorButton(tab)).OnChange(func(e events.Event) {
+	core.Bind(&color, core.NewColorButton(tab)).OnChange(func(e events.Event) {
 		fmt.Println("The color is now", color)
 	})
 
-	colorMap := views.ColorMapName("ColdHot")
-	core.Bind(&colorMap, views.NewColorMapButton(tab)).OnChange(func(e events.Event) {
+	colorMap := core.ColorMapName("ColdHot")
+	core.Bind(&colorMap, core.NewColorMapButton(tab)).OnChange(func(e events.Event) {
 		fmt.Println("The color map is now", colorMap)
 	})
 
 	t := time.Now()
-	core.Bind(&t, views.NewTimeInput(tab)).OnChange(func(e events.Event) {
+	core.Bind(&t, core.NewTimeInput(tab)).OnChange(func(e events.Event) {
 		fmt.Println("The time is now", t)
 	})
 
 	duration := 5 * time.Minute
-	core.Bind(&duration, views.NewDurationInput(tab)).OnChange(func(e events.Event) {
+	core.Bind(&duration, core.NewDurationInput(tab)).OnChange(func(e events.Event) {
 		fmt.Println("The duration is now", duration)
 	})
 
 	file := core.Filename("demo.go")
-	core.Bind(&file, views.NewFileButton(tab)).OnChange(func(e events.Event) {
+	core.Bind(&file, core.NewFileButton(tab)).OnChange(func(e events.Event) {
 		fmt.Println("The file is now", file)
 	})
 
 	font := core.AppearanceSettings.Font
-	core.Bind(&font, views.NewFontButton(tab)).OnChange(func(e events.Event) {
+	core.Bind(&font, core.NewFontButton(tab)).OnChange(func(e events.Event) {
 		fmt.Println("The font is now", font)
 	})
 
-	core.Bind(hello, tree.New[*views.FuncButton](tab)).SetShowReturn(true) // TODO(config)
-	core.Bind(styles.NewStyle, tree.New[*views.FuncButton](tab)).SetConfirm(true).SetShowReturn(true)
+	core.Bind(hello, tree.New[*core.FuncButton](tab)).SetShowReturn(true) // TODO(config)
+	core.Bind(styles.NewStyle, tree.New[*core.FuncButton](tab)).SetConfirm(true).SetShowReturn(true)
 
 	core.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
-		views.InspectorWindow(ts.Scene)
+		core.InspectorWindow(ts.Scene)
 	})
 }
 
@@ -407,7 +406,7 @@ func hello(firstName string, lastName string, age int, likesGo bool) (greeting s
 	return
 }
 
-func makeViews(ts *core.Tabs) {
+func views(ts *core.Tabs) {
 	tab := ts.NewTab("Views")
 
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Views")
@@ -425,28 +424,28 @@ func makeViews(ts *core.Tabs) {
 			IntField:   22,
 			FloatField: 44.4,
 			StrField:   "fi",
-			File:       "views.go",
+			File:       "core.go",
 		},
 		Things: make([]tableStruct, 2),
 		Stuff:  []float32{0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7},
 	}
 
-	views.NewStructView(vts.NewTab("Struct view")).SetStruct(&str)
-
-	mp := map[string]any{}
-
-	mp["Go"] = "Elegant, fast, and easy-to-use"
-	mp["Python"] = true
-	mp["C++"] = 4
-
-	views.NewMapView(vts.NewTab("Map view")).SetMap(&mp)
+	core.NewForm(vts.NewTab("Form")).SetStruct(&str)
 
 	sl := make([]string, 50)
 	for i := 0; i < len(sl); i++ {
 		sl[i] = fmt.Sprintf("el: %v", i)
 	}
-	sl[10] = "this is a particularly long slice value"
-	views.NewSliceView(vts.NewTab("Slice view")).SetSlice(&sl)
+	sl[10] = "this is a particularly long value"
+	core.NewList(vts.NewTab("List")).SetSlice(&sl)
+
+	mp := map[string]string{}
+
+	mp["Go"] = "Elegant, fast, and easy-to-use"
+	mp["Python"] = "Slow and duck-typed"
+	mp["C++"] = "Hard to use and slow to compile"
+
+	core.NewKeyedList(vts.NewTab("Keyed list")).SetMap(&mp)
 
 	tbl := make([]*tableStruct, 50)
 	for i := range tbl {
@@ -454,14 +453,14 @@ func makeViews(ts *core.Tabs) {
 		tbl[i] = ts
 	}
 	tbl[0].StrField = "this is a particularly long field"
-	views.NewTableView(vts.NewTab("Table view")).SetSlice(&tbl)
+	core.NewTable(vts.NewTab("Table")).SetSlice(&tbl)
 
-	sp := core.NewSplits(vts.NewTab("Tree view")).SetSplits(0.3, 0.7)
-	tv := views.NewTreeViewFrame(sp).SetText("Root")
+	sp := core.NewSplits(vts.NewTab("Tree")).SetSplits(0.3, 0.7)
+	tv := core.NewTreeFrame(sp).SetText("Root")
 	makeTree(tv, 0)
 	tv.RootSetViewIndex()
 
-	sv := views.NewStructView(sp).SetStruct(tv)
+	sv := core.NewForm(sp).SetStruct(tv)
 
 	tv.OnSelect(func(e events.Event) {
 		fmt.Println("sel")
@@ -474,12 +473,12 @@ func makeViews(ts *core.Tabs) {
 	textEditors(vts)
 }
 
-func makeTree(tv *views.TreeView, round int) {
+func makeTree(tv *core.Tree, round int) {
 	if round > 2 {
 		return
 	}
 	for i := range 3 {
-		n := views.NewTreeView(tv).SetText("Child " + strconv.Itoa(i))
+		n := core.NewTree(tv).SetText("Child " + strconv.Itoa(i))
 		makeTree(n, round+1)
 	}
 }
@@ -645,7 +644,7 @@ func dialogs(ts *core.Tabs) {
 	u := &core.User{}
 	fd.OnClick(func(e events.Event) {
 		d := core.NewBody().AddTitle("Full window dialog").AddText("Edit your information")
-		views.NewStructView(d).SetStruct(u).OnInput(func(e events.Event) {
+		core.NewForm(d).SetStruct(u).OnInput(func(e events.Event) {
 			fmt.Println("Got input event")
 		})
 		d.OnClose(func(e events.Event) {
@@ -702,7 +701,7 @@ func makeStyles(ts *core.Tabs) {
 
 	sp := core.NewSplits(tab)
 
-	sv := views.NewStructView(sp)
+	sv := core.NewForm(sp)
 
 	fr := core.NewFrame(core.NewFrame(sp)) // can not control layout when directly in splits
 	sv.SetStruct(&fr.Styles)

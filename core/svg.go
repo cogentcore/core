@@ -6,6 +6,7 @@ package core
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"io"
 	"io/fs"
@@ -13,6 +14,7 @@ import (
 
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
@@ -23,8 +25,7 @@ import (
 
 // SVG is a Widget that renders an [svg.SVG] object.
 // If it is not [states.ReadOnly], the user can pan and zoom the display.
-// By default, it is [states.ReadOnly]. See [views.ConfigSVGToolbar] for a
-// toolbar with panning, selecting, and I/O buttons.
+// By default, it is [states.ReadOnly].
 type SVG struct {
 	WidgetBase
 
@@ -134,4 +135,33 @@ func (sv *SVG) Render() {
 	r := sv.Geom.ContentBBox
 	sp := sv.Geom.ScrollOffset()
 	draw.Draw(sv.Scene.Pixels, r, sv.SVG.Pixels, sp, draw.Over)
+}
+
+func (sv *SVG) MakeToolbar(p *Plan) {
+	// TODO(kai): resolve svg panning and selection structure
+	Add(p, func(w *Button) {
+		w.SetIcon(icons.PanTool)
+		w.SetTooltip("toggle the ability to zoom and pan the view")
+		w.OnClick(func(e events.Event) {
+			sv.SetReadOnly(!sv.IsReadOnly())
+			sv.Restyle()
+		})
+	})
+	Add(p, func(w *Button) {
+		w.SetIcon(icons.ArrowForward)
+		w.SetTooltip("turn on select mode for selecting SVG elements")
+		w.OnClick(func(e events.Event) {
+			fmt.Println("this will select select mode")
+		})
+	})
+	Add(p, func(w *Separator) {})
+	Add(p, func(w *FuncButton) {
+		w.SetFunc(sv.Open)
+	})
+	Add(p, func(w *FuncButton) {
+		w.SetFunc(sv.SaveSVG).SetIcon(icons.Save)
+	})
+	Add(p, func(w *FuncButton) {
+		w.SetFunc(sv.SavePNG).SetIcon(icons.Save)
+	})
 }

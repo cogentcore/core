@@ -23,7 +23,6 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/views"
 )
 
 func init() {
@@ -746,119 +745,74 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewSlider(parent)
 	},
 	"views/values-0": func(parent core.Widget) {
-		// views.NewValue(parent, colors.Orange)
+		// core.NewValue(parent, colors.Orange)
 	},
 	"views/values-1": func(parent core.Widget) {
 		// t := time.Now()
 		//
-		//	views.NewValue(parent, &t).OnChange(func(e events.Event) {
+		//	core.NewValue(parent, &t).OnChange(func(e events.Event) {
 		//	    core.MessageSnackbar(parent, "The time is "+t.Format(time.DateTime))
 		//	})
 	},
 	"views/values-2": func(parent core.Widget) {
-		// views.NewValue(parent, 70, `view:"slider"`)
+		// core.NewValue(parent, 70, `view:"slider"`)
 	},
-	"views/map-views-0": func(parent core.Widget) {
-		views.NewMapView(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
-	},
-	"views/map-views-1": func(parent core.Widget) {
-		views.NewMapView(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
-	},
-	"views/map-views-2": func(parent core.Widget) {
-		m := map[string]int{"Go": 1, "C++": 3, "Python": 5}
-		views.NewMapView(parent).SetMap(&m).OnChange(func(e events.Event) {
-			core.MessageSnackbar(parent, fmt.Sprintf("Map: %v", m))
-		})
-	},
-	"views/map-views-3": func(parent core.Widget) {
-		views.NewMapView(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
-	},
-	"views/map-views-4": func(parent core.Widget) {
-		views.NewMapView(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
-	},
-	"views/map-views-5": func(parent core.Widget) {
-		// views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
-	},
-	"views/map-views-6": func(parent core.Widget) {
-		// views.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
-	},
-	"views/slice-views-0": func(parent core.Widget) {
-		views.NewSliceView(parent).SetSlice(&[]int{1, 3, 5})
-	},
-	"views/slice-views-1": func(parent core.Widget) {
-		views.NewSliceViewInline(parent).SetSlice(&[]int{1, 3, 5})
-	},
-	"views/slice-views-2": func(parent core.Widget) {
-		sl := []int{1, 3, 5}
-		views.NewSliceView(parent).SetSlice(&sl).OnChange(func(e events.Event) {
-			core.MessageSnackbar(parent, fmt.Sprintf("Slice: %v", sl))
-		})
-	},
-	"views/slice-views-3": func(parent core.Widget) {
-		views.NewSliceView(parent).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
-	},
-	"views/slice-views-4": func(parent core.Widget) {
-		// views.NewValue(parent, &[]int{1, 3, 5})
-	},
-	"views/slice-views-5": func(parent core.Widget) {
-		// views.NewValue(parent, &[]int{1, 3, 5, 7, 9})
-	},
-	"views/struct-views-0": func(parent core.Widget) {
+	"views/forms-0": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
-		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35})
+		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
 	},
-	"views/struct-views-1": func(parent core.Widget) {
+	"views/forms-1": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
-		views.NewStructView(parent).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
+		core.NewForm(parent).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
 	},
-	"views/struct-views-2": func(parent core.Widget) {
+	"views/forms-2": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
 		p := person{Name: "Go", Age: 35}
-		views.NewStructView(parent).SetStruct(&p).OnChange(func(e events.Event) {
+		core.NewForm(parent).SetStruct(&p).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
 		})
 	},
-	"views/struct-views-3": func(parent core.Widget) {
+	"views/forms-3": func(parent core.Widget) {
 		type person struct {
 			Name string `immediate:"+"`
 			Age  int
 		}
 		p := person{Name: "Go", Age: 35}
-		views.NewStructView(parent).SetStruct(&p).OnChange(func(e events.Event) {
+		core.NewForm(parent).SetStruct(&p).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, fmt.Sprintf("You are %v", p))
 		})
 	},
-	"views/struct-views-4": func(parent core.Widget) {
+	"views/forms-4": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int `view:"-"`
 		}
-		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35})
+		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
 	},
-	"views/struct-views-5": func(parent core.Widget) {
+	"views/forms-5": func(parent core.Widget) {
 		type person struct {
 			Name string `edit:"-"`
 			Age  int
 		}
-		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35})
+		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
 	},
-	"views/struct-views-6": func(parent core.Widget) {
+	"views/forms-6": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
-		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
+		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
 	},
-	"views/struct-views-7": func(parent core.Widget) {
+	"views/forms-7": func(parent core.Widget) {
 		type Person struct {
 			Name string
 			Age  int
@@ -867,9 +821,9 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Person
 			Role string
 		}
-		views.NewStructView(parent).SetStruct(&employee{Person{Name: "Go", Age: 35}, "Programmer"})
+		core.NewForm(parent).SetStruct(&employee{Person{Name: "Go", Age: 35}, "Programmer"})
 	},
-	"views/struct-views-8": func(parent core.Widget) {
+	"views/forms-8": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
@@ -878,24 +832,24 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Role    string
 			Manager person `view:"add-fields"`
 		}
-		views.NewStructView(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
+		core.NewForm(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
 	},
-	"views/struct-views-9": func(parent core.Widget) {
+	"views/forms-9": func(parent core.Widget) {
 		type person struct {
 			Name      string `default:"Gopher"`
 			Age       int    `default:"20:30"`
 			Precision int    `default:"64,32"`
 		}
-		views.NewStructView(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
+		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 	},
-	"views/struct-views-10": func(parent core.Widget) {
+	"views/forms-10": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
 		// core.NewValue(&person{Name: "Go", Age: 35}, "", parent)
 	},
-	"views/struct-views-11": func(parent core.Widget) {
+	"views/forms-11": func(parent core.Widget) {
 		type person struct {
 			Name        string
 			Age         int
@@ -905,57 +859,102 @@ var PagesExamples = map[string]func(parent core.Widget){
 		}
 		// core.NewValue(&person{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true}, "", parent)
 	},
-	"views/table-views-0": func(parent core.Widget) {
+	"views/keyed-lists-0": func(parent core.Widget) {
+		core.NewKeyedList(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
+	},
+	"views/keyed-lists-1": func(parent core.Widget) {
+		core.NewKeyedList(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
+	},
+	"views/keyed-lists-2": func(parent core.Widget) {
+		m := map[string]int{"Go": 1, "C++": 3, "Python": 5}
+		core.NewKeyedList(parent).SetMap(&m).OnChange(func(e events.Event) {
+			core.MessageSnackbar(parent, fmt.Sprintf("Map: %v", m))
+		})
+	},
+	"views/keyed-lists-3": func(parent core.Widget) {
+		core.NewKeyedList(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
+	},
+	"views/keyed-lists-4": func(parent core.Widget) {
+		core.NewKeyedList(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
+	},
+	"views/keyed-lists-5": func(parent core.Widget) {
+		// core.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
+	},
+	"views/keyed-lists-6": func(parent core.Widget) {
+		// core.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
+	},
+	"views/lists-0": func(parent core.Widget) {
+		core.NewList(parent).SetSlice(&[]int{1, 3, 5})
+	},
+	"views/lists-1": func(parent core.Widget) {
+		core.NewInlineList(parent).SetSlice(&[]int{1, 3, 5})
+	},
+	"views/lists-2": func(parent core.Widget) {
+		sl := []int{1, 3, 5}
+		core.NewList(parent).SetSlice(&sl).OnChange(func(e events.Event) {
+			core.MessageSnackbar(parent, fmt.Sprintf("Slice: %v", sl))
+		})
+	},
+	"views/lists-3": func(parent core.Widget) {
+		core.NewList(parent).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
+	},
+	"views/lists-4": func(parent core.Widget) {
+		// core.NewValue(parent, &[]int{1, 3, 5})
+	},
+	"views/lists-5": func(parent core.Widget) {
+		// core.NewValue(parent, &[]int{1, 3, 5, 7, 9})
+	},
+	"views/tables-0": func(parent core.Widget) {
 		type language struct {
 			Name   string
 			Rating int
 		}
-		views.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+		core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	},
-	"views/table-views-1": func(parent core.Widget) {
+	"views/tables-1": func(parent core.Widget) {
 		type language struct {
 			Name   string
 			Rating int
 		}
 		sl := []language{{"Go", 10}, {"Python", 5}}
-		views.NewTableView(parent).SetSlice(&sl).OnChange(func(e events.Event) {
+		core.NewTable(parent).SetSlice(&sl).OnChange(func(e events.Event) {
 			core.MessageSnackbar(parent, fmt.Sprintf("Languages: %v", sl))
 		})
 	},
-	"views/table-views-2": func(parent core.Widget) {
+	"views/tables-2": func(parent core.Widget) {
 		type language struct {
 			Name   string
 			Rating int `view:"-"`
 		}
-		views.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+		core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	},
-	"views/table-views-3": func(parent core.Widget) {
+	"views/tables-3": func(parent core.Widget) {
 		type language struct {
 			Name   string
-			Rating int `view:"-" tableview:"+"`
+			Rating int `view:"-" table:"+"`
 		}
-		views.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+		core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	},
-	"views/table-views-4": func(parent core.Widget) {
+	"views/tables-4": func(parent core.Widget) {
 		type language struct {
 			Name   string `edit:"-"`
 			Rating int
 		}
-		views.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+		core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	},
-	"views/table-views-5": func(parent core.Widget) {
+	"views/tables-5": func(parent core.Widget) {
 		type language struct {
 			Name   string
 			Rating int
 		}
-		views.NewTableView(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
+		core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
 	},
-	"views/table-views-6": func(parent core.Widget) {
+	"views/tables-6": func(parent core.Widget) {
 		type language struct {
 			Name   string
 			Rating int
 		}
-		// views.NewValue(parent, &[]language{{"Go", 10}, {"Python", 5}})
+		// core.NewValue(parent, &[]language{{"Go", 10}, {"Python", 5}})
 	},
 	"views/text-editors-0": func(parent core.Widget) {
 		texteditor.NewSoloEditor(parent)
@@ -985,41 +984,41 @@ func main() {
 			core.MessageSnackbar(parent, "OnInput: "+te.Buffer.String())
 		})
 	},
-	"views/tree-views-0": func(parent core.Widget) {
-		tv := views.NewTreeView(parent).SetText("Root")
-		views.NewTreeView(tv)
-		c2 := views.NewTreeView(tv)
-		views.NewTreeView(c2)
+	"views/trees-0": func(parent core.Widget) {
+		tv := core.NewTree(parent).SetText("Root")
+		core.NewTree(tv)
+		c2 := core.NewTree(tv)
+		core.NewTree(c2)
 	},
-	"views/tree-views-1": func(parent core.Widget) {
+	"views/trees-1": func(parent core.Widget) {
 		n := tree.NewNodeBase()
 		tree.NewNodeBase(n)
 		c2 := tree.NewNodeBase(n)
 		tree.NewNodeBase(c2)
-		views.NewTreeView(parent).SyncTree(n)
+		core.NewTree(parent).SyncTree(n)
 	},
-	"views/tree-views-2": func(parent core.Widget) {
+	"views/trees-2": func(parent core.Widget) {
 		n := tree.NewNodeBase()
 		tree.NewNodeBase(n)
 		c2 := tree.NewNodeBase(n)
 		tree.NewNodeBase(c2)
-		views.NewTreeView(parent).SyncTree(n).OnChange(func(e events.Event) {
-			core.MessageSnackbar(parent, "Tree view changed")
+		core.NewTree(parent).SyncTree(n).OnChange(func(e events.Event) {
+			core.MessageSnackbar(parent, "Tree changed")
 		})
 	},
-	"views/tree-views-3": func(parent core.Widget) {
+	"views/trees-3": func(parent core.Widget) {
 		n := tree.NewNodeBase()
 		tree.NewNodeBase(n)
 		c2 := tree.NewNodeBase(n)
 		tree.NewNodeBase(c2)
-		views.NewTreeView(parent).SyncTree(n).SetReadOnly(true)
+		core.NewTree(parent).SyncTree(n).SetReadOnly(true)
 	},
-	"views/tree-views-4": func(parent core.Widget) {
+	"views/trees-4": func(parent core.Widget) {
 		n := tree.NewNodeBase()
 		tree.NewNodeBase(n)
 		c2 := tree.NewNodeBase(n)
 		tree.NewNodeBase(c2)
-		// views.NewValue(parent, n)
+		// core.NewValue(parent, n)
 	},
 	"advanced/styling-0": func(parent core.Widget) {
 		fr := core.NewFrame(parent)

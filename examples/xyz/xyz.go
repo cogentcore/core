@@ -17,7 +17,7 @@ import (
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/examples/assets"
 	_ "cogentcore.org/core/xyz/io/obj"
-	"cogentcore.org/core/xyz/xyzview"
+	"cogentcore.org/core/xyz/xyzcore"
 
 	"cogentcore.org/core/math32"
 )
@@ -43,8 +43,8 @@ type Anim struct {
 	// the time.Ticker for animating the scene
 	Ticker *time.Ticker `view:"-"`
 
-	// the scene viewer
-	SceneView *xyzview.SceneView
+	// the scene editor
+	SceneEditor *xyzcore.SceneEditor
 
 	// the torus
 	Torus *xyz.Solid
@@ -61,8 +61,8 @@ type Anim struct {
 
 // Start starts the animation ticker timer -- if on is true, then
 // animation will actually start too.
-func (an *Anim) Start(sv *xyzview.SceneView, on bool) {
-	an.SceneView = sv
+func (an *Anim) Start(sv *xyzcore.SceneEditor, on bool) {
+	an.SceneEditor = sv
 	an.On = on
 	an.DoTorus = true
 	an.DoGopher = true
@@ -74,7 +74,7 @@ func (an *Anim) Start(sv *xyzview.SceneView, on bool) {
 
 // GetObjs gets the objects to animate
 func (an *Anim) GetObjs() {
-	sc := an.SceneView.SceneXYZ()
+	sc := an.SceneEditor.SceneXYZ()
 	torusi := sc.ChildByName("torus", 0)
 	if torusi == nil {
 		return
@@ -97,14 +97,14 @@ func (an *Anim) GetObjs() {
 // Animate
 func (an *Anim) Animate() {
 	for {
-		if an.Ticker == nil || an.SceneView.This == nil {
+		if an.Ticker == nil || an.SceneEditor.This == nil {
 			return
 		}
 		<-an.Ticker.C // wait for tick
-		if !an.On || an.SceneView.This == nil || an.Torus == nil || an.Gopher == nil {
+		if !an.On || an.SceneEditor.This == nil || an.Torus == nil || an.Gopher == nil {
 			continue
 		}
-		sc := an.SceneView.SceneXYZ()
+		sc := an.SceneEditor.SceneXYZ()
 		radius := float32(0.3)
 
 		if an.DoTorus {
@@ -126,7 +126,7 @@ func (an *Anim) Animate() {
 		}
 
 		sc.SetNeedsUpdate()
-		an.SceneView.SceneWidget().NeedsRender()
+		an.SceneEditor.SceneWidget().NeedsRender()
 		an.Ang += an.Speed
 	}
 }
@@ -146,11 +146,11 @@ func main() {
 		anim.On = !anim.On
 	})
 
-	sv := xyzview.NewSceneView(b)
-	sv.UpdateWidget()
-	sw := sv.SceneWidget()
-	sc := sv.SceneXYZ()
-	sw.SelectionMode = xyzview.Manipulable
+	se := xyzcore.NewSceneEditor(b)
+	se.UpdateWidget()
+	sw := se.SceneWidget()
+	sc := se.SceneXYZ()
+	sw.SelectionMode = xyzcore.Manipulable
 
 	// options - must be set here
 	// sc.MultiSample = 1
@@ -265,7 +265,7 @@ func main() {
 	///////////////////////////////////////////////////
 	//  Animation & Embedded controls
 
-	anim.Start(sv, false) // start without animation running
+	anim.Start(se, false) // start without animation running
 
 	/*
 
@@ -297,7 +297,7 @@ func main() {
 			})
 		cmb.Menu.AddAction(core.ActOpts{Label: "Edit Anim"},
 			win.This, func(recv, send tree.Node, sig int64, data any) {
-				views.StructViewDialog(vp, anim, views.DlgOpts{Title: "Animation Parameters"}, nil, nil)
+				core.FormDialog(vp, anim, core.DlgOpts{Title: "Animation Parameters"}, nil, nil)
 			})
 
 		sprw := core.NewFrame(evlay, "speed-lay", core.LayoutHoriz)

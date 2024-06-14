@@ -7,7 +7,6 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/views"
 )
 
 type tableStruct struct {
@@ -23,7 +22,7 @@ const rows = 100000
 func main() {
 	table := make([]*tableStruct, 0, rows)
 	b := core.NewBody("Async Updating")
-	tv := views.NewTableView(b)
+	tv := core.NewTable(b)
 	tv.SetReadOnly(true)
 	tv.SetSlice(&table)
 

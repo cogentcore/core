@@ -1419,10 +1419,10 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, parent *Rule, parentAst *Ast, scope 
 	if len(ourAst.Children) == 2 {
 		slicesx.Swap(ourAst.Children, 0, 1)
 		// if GuiActive {
-		// we have a very strange situation here: the tree view of the Ast will typically
+		// we have a very strange situation here: the tree of the Ast will typically
 		// have two children, named identically (e.g., Expr, Expr) and it will not update
 		// after our swap.  If we could use UniqNames then it would be ok, but that doesn't
-		// work for treeview names.. really need an option that supports uniqname AND reg names
+		// work for tree names.. really need an option that supports uniqname AND reg names
 		// https://cogentcore.org/core/ki/issues/2
 		// ourAst.NewChild(AstType, "Dummy")
 		// ourAst.DeleteChildAt(2, true)

@@ -1,8 +1,8 @@
 # Plot
 
-The `plot` package generates 2D plots of data using the Cogent Core `paint` rendering system.  The `plotview` sub-package has Cogent Core Widgets that can be used in applications.  
+The `plot` package generates 2D plots of data using the Cogent Core `paint` rendering system.  The `plotcore` sub-package has Cogent Core Widgets that can be used in applications.  
 * `Plot` is just a wrapper around a `plot.Plot`, for manually-configured plots.
-* `PlotView` is an interactive plot viewer that supports selection of which data to plot, and configuration of many plot parameters.
+* `PlotEditor` is an interactive plot viewer that supports selection of which data to plot, and configuration of many plot parameters.
 
 The code is adapted from the [gonum plot](https://github.com/gonum/plot) package (which in turn was adapted from google's [plotinum](https://code.google.com/archive/p/plotinum/), to use the Cogent Core [styles](../styles) and [paint](../paint) rendering framework, which also supports SVG output of the rendering.
 

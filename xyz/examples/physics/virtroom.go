@@ -23,12 +23,11 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/svg"
-	"cogentcore.org/core/views"
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/physics"
 	"cogentcore.org/core/xyz/physics/world"
 	"cogentcore.org/core/xyz/physics/world2d"
-	"cogentcore.org/core/xyz/xyzview"
+	"cogentcore.org/core/xyz/xyzcore"
 )
 
 var NoGUI bool
@@ -79,7 +78,7 @@ type Env struct { //types:add
 	Camera world.Camera
 
 	// color map to use for rendering depth map
-	DepthMap views.ColorMapName
+	DepthMap core.ColorMapName
 
 	// world
 	World *physics.Group `view:"-"`
@@ -91,7 +90,7 @@ type Env struct { //types:add
 	View2D *world2d.View
 
 	// 3D visualization of the Scene
-	SceneView *xyzview.SceneView
+	SceneEditor *xyzcore.SceneEditor
 
 	// 2D visualization of the Scene
 	Scene2D *core.SVG
@@ -105,10 +104,10 @@ type Env struct { //types:add
 	// contacts from last step, for body
 	Contacts physics.Contacts `view:"-"`
 
-	// snapshot bitmap view
+	// snapshot image
 	EyeRImg *core.Image `view:"-"`
 
-	// depth map bitmap view
+	// depth map image
 	DepthImage *core.Image `view:"-"`
 }
 
@@ -120,7 +119,7 @@ func (ev *Env) Defaults() {
 	ev.EmerHt = 1
 	ev.MoveStep = ev.EmerHt * .2
 	ev.RotStep = 15
-	ev.DepthMap = views.ColorMapName("ColdHot")
+	ev.DepthMap = core.ColorMapName("ColdHot")
 	ev.Camera.Defaults()
 	ev.Camera.FOV = 90
 }
@@ -236,8 +235,8 @@ func (ev *Env) ViewDepth(depth []float32) {
 
 // UpdateViews updates the 2D and 3D views of the scene
 func (ev *Env) UpdateViews() {
-	if ev.SceneView.IsVisible() {
-		ev.SceneView.NeedsRender()
+	if ev.SceneEditor.IsVisible() {
+		ev.SceneEditor.NeedsRender()
 	}
 	if ev.Scene2D.IsVisible() {
 		ev.Scene2D.NeedsRender()
@@ -368,8 +367,8 @@ func (ev *Env) ConfigGUI() *core.Body {
 
 	split := core.NewSplits(b)
 
-	tv := views.NewTreeView(core.NewFrame(split)).SyncTree(ev.World)
-	sv := views.NewStructView(split).SetStruct(ev)
+	tv := core.NewTree(core.NewFrame(split)).SyncTree(ev.World)
+	sv := core.NewForm(split).SetStruct(ev)
 	imfr := core.NewFrame(split)
 	tbvw := core.NewTabs(split)
 
@@ -380,16 +379,16 @@ func (ev *Env) ConfigGUI() *core.Body {
 
 	tv.OnSelect(func(e events.Event) {
 		if len(tv.SelectedNodes) > 0 {
-			sv.SetStruct(tv.SelectedNodes[0].AsTreeView().SyncNode)
+			sv.SetStruct(tv.SelectedNodes[0].AsCoreTree().SyncNode)
 		}
 	})
 
 	//////////////////////////////////////////
 	//    3D Scene
 
-	ev.SceneView = xyzview.NewSceneView(scfr)
-	ev.SceneView.UpdateWidget()
-	se := ev.SceneView.SceneXYZ()
+	ev.SceneEditor = xyzcore.NewSceneEditor(scfr)
+	ev.SceneEditor.UpdateWidget()
+	se := ev.SceneEditor.SceneXYZ()
 	ev.ConfigScene(se)
 	ev.ConfigView3D(se)
 
@@ -447,48 +446,48 @@ func (ev *Env) ConfigGUI() *core.Body {
 					sv.SetStruct(ev)
 				})
 		})
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.WorldInit).SetText("Init").SetIcon(icons.Update)
 		})
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.ReMakeWorld).SetText("Make").SetIcon(icons.Update)
 		})
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.GrabEyeImg).SetText("Grab Image").SetIcon(icons.Image)
 		})
 		core.Add(p, func(w *core.Separator) {})
 
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.StepForward).SetText("Fwd").SetIcon(icons.SkipNext).
 				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.StepBackward).SetText("Bkw").SetIcon(icons.SkipPrevious).
 				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.RotBodyLeft).SetText("Body Left").SetIcon(icons.KeyboardArrowLeft).
 				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.RotBodyRight).SetText("Body Right").SetIcon(icons.KeyboardArrowRight).
 				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.RotHeadLeft).SetText("Head Left").SetIcon(icons.KeyboardArrowLeft).
 				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)
 				})
 		})
-		core.Add(p, func(w *views.FuncButton) {
+		core.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(ev.RotHeadRight).SetText("Head Right").SetIcon(icons.KeyboardArrowRight).
 				Styler(func(s *styles.Style) {
 					s.SetAbilities(true, abilities.RepeatClickable)

@@ -179,7 +179,7 @@ func Search(reader io.Reader, find []byte, ignoreCase bool) (int, []Match) {
 	if err := scan.Err(); err != nil {
 		// note: we expect: bufio.Scanner: token too long  when reading binary files
 		// not worth printing here.  otherwise is very reliable.
-		// log.Printf("views.FileSearch error: %v\n", err)
+		// log.Printf("core.FileSearch error: %v\n", err)
 	}
 	return cnt, matches
 }
@@ -234,7 +234,7 @@ func SearchRegexp(reader io.Reader, re *regexp.Regexp) (int, []Match) {
 	if err := scan.Err(); err != nil {
 		// note: we expect: bufio.Scanner: token too long  when reading binary files
 		// not worth printing here.  otherwise is very reliable.
-		// log.Printf("views.FileSearch error: %v\n", err)
+		// log.Printf("core.FileSearch error: %v\n", err)
 	}
 	return cnt, matches
 }

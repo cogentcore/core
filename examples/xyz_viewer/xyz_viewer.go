@@ -12,18 +12,17 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
-	"cogentcore.org/core/views"
 	"cogentcore.org/core/xyz"
 	_ "cogentcore.org/core/xyz/io/obj"
-	"cogentcore.org/core/xyz/xyzview"
+	"cogentcore.org/core/xyz/xyzcore"
 )
 
 func main() {
 	b := core.NewBody("XYZ Object Viewer")
 
-	sv := xyzview.NewSceneView(b)
-	sv.UpdateWidget()
-	sc := sv.SceneXYZ()
+	se := xyzcore.NewSceneEditor(b)
+	se.UpdateWidget()
+	sc := se.SceneXYZ()
 
 	// first, add lights, set camera
 	sc.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
@@ -53,7 +52,7 @@ func main() {
 			w.SetText("Open").SetIcon(icons.Open).
 				SetTooltip("Open a 3D object file for viewing").
 				OnClick(func(e events.Event) {
-					views.FileViewDialog(b, curFn, exts, "Open 3D Object", func(selFile string) {
+					core.FilePickerDialog(b, curFn, exts, "Open 3D Object", func(selFile string) {
 						curFn = selFile
 						objgp.DeleteChildren()
 						sc.DeleteMeshes()
@@ -61,7 +60,7 @@ func main() {
 						errors.Log1(sc.OpenNewObj(selFile, objgp))
 						sc.SetCamera("default")
 						sc.SetNeedsUpdate()
-						sv.NeedsRender()
+						se.NeedsRender()
 					})
 				})
 		})

@@ -38,7 +38,7 @@ import (
 // DoUpdate handles needed updates based on Scene Flags.
 // If no updates are required, then false is returned, else true.
 // NeedsConfig is NOT handled here because it must be done on main thread,
-// so this must be checked separately (e.g., in xyzview.Scene, as it requires
+// so this must be checked separately (e.g., in xyzcore.Scene, as it requires
 // a separate RunOnMainThread call).
 func (sc *Scene) DoUpdate() bool {
 	switch {
