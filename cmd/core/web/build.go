@@ -20,6 +20,7 @@ import (
 	"cogentcore.org/core/cmd/core/config"
 	"cogentcore.org/core/cmd/core/rendericon"
 	"cogentcore.org/core/pages/wpath"
+	strip "github.com/grokify/html-strip-tags-go"
 )
 
 // Build builds an app for web using the given configuration information.
@@ -58,6 +59,10 @@ func MakeFiles(c *config.Config) error {
 		t := time.Now().UTC().String()
 		c.Version = fmt.Sprintf(`%x`, sha1.Sum([]byte(t)))
 	}
+
+	// The about text may contain HTML, which we need to get rid of.
+	// It is trusted, so we do not need a more advanced sanitizer.
+	c.About = strip.StripTags(c.About)
 
 	wej := []byte(WASMExecJS())
 	err := os.WriteFile(filepath.Join(odir, "wasm_exec.js"), wej, 0666)

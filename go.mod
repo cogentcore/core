@@ -2,9 +2,6 @@ module cogentcore.org/core
 
 go 1.22
 
-// note: if using yaegi fork locally:
-// replace github.com/traefik/yaegi => ../yaegi
-
 require (
 	github.com/Bios-Marcel/wastebasket v0.0.4-0.20240213135800-f26f1ae0a7c4
 	github.com/Masterminds/semver/v3 v3.2.1
@@ -22,6 +19,7 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240307211618-a69d953ea142
 	github.com/goki/freetype v1.0.5
 	github.com/goki/vulkan v1.0.7
+	github.com/grokify/html-strip-tags-go v0.1.0
 	github.com/h2non/filetype v1.1.3
 	github.com/hack-pad/hackpadfs v0.2.1
 	github.com/jackmordaunt/icns/v2 v2.2.7
