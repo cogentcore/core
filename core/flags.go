@@ -8,6 +8,7 @@ import (
 	"cogentcore.org/core/enums"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/tree"
 )
 
 // StateIs returns whether the widget has the given [states.States] flag set.
@@ -74,4 +75,18 @@ func (wb *WidgetBase) IsReadOnly() bool {
 // SetReadOnly sets the [states.ReadOnly] flag to the given value.
 func (wb *WidgetBase) SetReadOnly(ro bool) *WidgetBase {
 	return wb.SetState(ro, states.ReadOnly)
+}
+
+// HasStateWithin returns whether the current node or any
+// of its children have the given state flag.
+func (wb *WidgetBase) HasStateWithin(state states.States) bool {
+	got := false
+	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
+		if wb.StateIs(state) {
+			got = true
+			return tree.Break
+		}
+		return tree.Continue
+	})
+	return got
 }
