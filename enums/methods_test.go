@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v3"
 )
 
 // it is much easier to test with an independent enum mock
@@ -249,18 +248,6 @@ func TestUnmarshal(t *testing.T) {
 	assert.Equal(t, enum(7), i)
 	i = 4
 	assert.NoError(t, UnmarshalText(&i, []byte("Apple"), "Fruits"))
-	assert.Equal(t, enum(4), i)
-
-	assert.NoError(t, UnmarshalJSON(&i, []byte(`"Orange"`), "Fruits"))
-	assert.Equal(t, enum(7), i)
-	i = 4
-	assert.NoError(t, UnmarshalJSON(&i, []byte(`"Apple"`), "Fruits"))
-	assert.Equal(t, enum(4), i)
-
-	assert.NoError(t, UnmarshalYAML(&i, &yaml.Node{Kind: yaml.ScalarNode, Value: "Orange"}, "Fruits"))
-	assert.Equal(t, enum(7), i)
-	i = 4
-	assert.NoError(t, UnmarshalYAML(&i, &yaml.Node{Kind: yaml.ScalarNode, Value: "Apple"}, "Fruits"))
 	assert.Equal(t, enum(4), i)
 
 	assert.NoError(t, Scan(&i, []byte("Orange"), "Fruits"))

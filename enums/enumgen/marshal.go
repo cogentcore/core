@@ -25,29 +25,3 @@ func (i *{{.Name}}) UnmarshalText(text []byte) error { return enums.UnmarshalTex
 func (g *Generator) BuildTextMethods(runs []Value, typ *Type) {
 	g.ExecTmpl(TextMethodsTmpl, typ)
 }
-
-var JSONMethodsTmpl = template.Must(template.New("JSONMethods").Parse(
-	`
-// MarshalJSON implements the [json.Marshaler] interface.
-func (i {{.Name}}) MarshalJSON() ([]byte, error) { return json.Marshal(i.String()) }
-
-// UnmarshalJSON implements the [json.Unmarshaler] interface.
-func (i *{{.Name}}) UnmarshalJSON(data []byte) error { return enums.UnmarshalJSON(i, data, "{{.Name}}") }
-`))
-
-func (g *Generator) BuildJSONMethods(runs []Value, typ *Type) {
-	g.ExecTmpl(JSONMethodsTmpl, typ)
-}
-
-var YAMLMethodsTmpl = template.Must(template.New("YAMLMethods").Parse(
-	`
-// MarshalYAML implements the [yaml.Marshaler] interface.
-func (i {{.Name}}) MarshalYAML() (any, error) { return i.String(), nil }
-
-// UnmarshalYAML implements the [yaml.Unmarshaler] interface.
-func (i *{{.Name}}) UnmarshalYAML(n *yaml.Node) error { return enums.UnmarshalYAML(i, n, "{{.Name}}") }
-`))
-
-func (g *Generator) BuildYAMLMethods(runs []Value, typ *Type) {
-	g.ExecTmpl(YAMLMethodsTmpl, typ)
-}

@@ -4,12 +4,10 @@ package testdata
 
 import (
 	"database/sql/driver"
-	"encoding/json"
 	"io"
 	"strconv"
 
 	"cogentcore.org/core/enums"
-	"gopkg.in/yaml.v3"
 )
 
 var _FruitsValues = []Fruits{0, 1, 2, 3, 4, 5, 6}
@@ -56,12 +54,6 @@ func (i Fruits) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Fruits) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Fruits") }
 
-// MarshalJSON implements the [json.Marshaler] interface.
-func (i Fruits) MarshalJSON() ([]byte, error) { return json.Marshal(i.String()) }
-
-// UnmarshalJSON implements the [json.Unmarshaler] interface.
-func (i *Fruits) UnmarshalJSON(data []byte) error { return enums.UnmarshalJSON(i, data, "Fruits") }
-
 var _FoodsValues = []Foods{7, 8, 9, 10}
 
 // FoodsN is the highest valid value for type Foods, plus one.
@@ -105,18 +97,6 @@ func (i Foods) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Foods) UnmarshalText(text []byte) error { return enums.UnmarshalText(i, text, "Foods") }
-
-// MarshalJSON implements the [json.Marshaler] interface.
-func (i Foods) MarshalJSON() ([]byte, error) { return json.Marshal(i.String()) }
-
-// UnmarshalJSON implements the [json.Unmarshaler] interface.
-func (i *Foods) UnmarshalJSON(data []byte) error { return enums.UnmarshalJSON(i, data, "Foods") }
-
-// MarshalYAML implements the [yaml.Marshaler] interface.
-func (i Foods) MarshalYAML() (any, error) { return i.String(), nil }
-
-// UnmarshalYAML implements the [yaml.Unmarshaler] interface.
-func (i *Foods) UnmarshalYAML(n *yaml.Node) error { return enums.UnmarshalYAML(i, n, "Foods") }
 
 var _DaysValues = []Days{-11, -9, -7, -5, -3, -1, 1}
 
@@ -214,12 +194,6 @@ func (i States) HasFlag(f enums.BitFlag) bool { return enums.HasFlag((*int64)(&i
 // SetFlag sets the value of the given flags in these flags to the given value.
 func (i *States) SetFlag(on bool, f ...enums.BitFlag) { enums.SetFlag((*int64)(i), on, f...) }
 
-// MarshalJSON implements the [json.Marshaler] interface.
-func (i States) MarshalJSON() ([]byte, error) { return json.Marshal(i.String()) }
-
-// UnmarshalJSON implements the [json.Unmarshaler] interface.
-func (i *States) UnmarshalJSON(data []byte) error { return enums.UnmarshalJSON(i, data, "States") }
-
 // Value implements the [driver.Valuer] interface.
 func (i States) Value() (driver.Value, error) { return i.String(), nil }
 
@@ -283,14 +257,6 @@ func (i Languages) MarshalText() ([]byte, error) { return []byte(i.String()), ni
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Languages) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "Languages")
-}
-
-// MarshalJSON implements the [json.Marshaler] interface.
-func (i Languages) MarshalJSON() ([]byte, error) { return json.Marshal(i.String()) }
-
-// UnmarshalJSON implements the [json.Unmarshaler] interface.
-func (i *Languages) UnmarshalJSON(data []byte) error {
-	return enums.UnmarshalJSON(i, data, "Languages")
 }
 
 var _MoreLanguagesValues = []MoreLanguages{55}
@@ -360,12 +326,4 @@ func (i MoreLanguages) MarshalText() ([]byte, error) { return []byte(i.String())
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *MoreLanguages) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "MoreLanguages")
-}
-
-// MarshalJSON implements the [json.Marshaler] interface.
-func (i MoreLanguages) MarshalJSON() ([]byte, error) { return json.Marshal(i.String()) }
-
-// UnmarshalJSON implements the [json.Unmarshaler] interface.
-func (i *MoreLanguages) UnmarshalJSON(data []byte) error {
-	return enums.UnmarshalJSON(i, data, "MoreLanguages")
 }

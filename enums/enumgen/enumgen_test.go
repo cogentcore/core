@@ -19,7 +19,6 @@ func TestGenerate(t *testing.T) {
 	c := &Config{}
 	assert.NoError(t, cli.SetFromDefaults(c))
 	c.Dir = "./testdata"
-	c.JSON = true
 	assert.NoError(t, Generate(c))
 	have, err := os.ReadFile("testdata/enumgen.go")
 	assert.NoError(t, err)

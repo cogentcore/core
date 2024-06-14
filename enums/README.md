@@ -70,7 +70,7 @@ The behavior of enumgen can be customized in various ways through flags on *eith
 ```go
 package mypackage
 
-//go:generate enumgen -json -transform snake
+//go:generate enumgen -no-text -transform snake
 
 type MyEnum uint32 //enums:enum -add-prefix fruit_ -no-line-comment -sql
 

@@ -203,12 +203,6 @@ func (g *Generator) Generate() (bool, error) {
 		if typ.Config.Text {
 			g.BuildTextMethods(values, typ)
 		}
-		if typ.Config.JSON {
-			g.BuildJSONMethods(values, typ)
-		}
-		if typ.Config.YAML {
-			g.BuildYAMLMethods(values, typ)
-		}
 		if typ.Config.SQL {
 			g.AddValueAndScanMethod(typ)
 		}

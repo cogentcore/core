@@ -45,12 +45,6 @@ type Config struct { //types:add
 	// whether to generate text marshaling methods
 	Text bool `default:"true"`
 
-	// whether to generate JSON marshaling methods (note that text marshaling methods will also work for JSON, so this should be unnecessary in almost all cases; see the text option)
-	JSON bool
-
-	// whether to generate YAML marshaling methods
-	YAML bool
-
 	// whether to generate methods that implement the SQL Scanner and Valuer interfaces
 	SQL bool
 

@@ -15,7 +15,7 @@ const (
 )
 
 // Foods is an enum containing foods
-type Foods Fruits //enums:enum -is-valid -yaml
+type Foods Fruits //enums:enum -is-valid
 
 const (
 	Bread Foods = Foods(FruitsN) + iota
@@ -25,7 +25,7 @@ const (
 )
 
 // Days is an enum containing the days of the week
-type Days int32 //enums:enum -transform=SNAKE -addprefix=DAY_ -gql -no-json -no-accept-lower
+type Days int32 //enums:enum -transform=SNAKE -addprefix=DAY_ -gql -no-accept-lower
 
 const (
 	// Sunday is the first day of the week
