@@ -750,6 +750,9 @@ func (rs *RenderScenes) SetImages(drw system.Drawer) {
 		sc := w.AsWidget().Scene
 		_, isSc := w.(*Scene)
 		if isSc && (sc.updating || !sc.imageUpdated) {
+			if sc.updating {
+				fmt.Println("SetImages scene updating") // TODO(config): remove
+			}
 			if DebugSettings.WinRenderTrace {
 				if sc.updating {
 					fmt.Println("RenderScenes.SetImages: sc IsUpdating", sc.Name)
