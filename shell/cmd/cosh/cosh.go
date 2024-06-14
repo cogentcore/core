@@ -31,7 +31,7 @@ type Config struct {
 	Input string `posarg:"0" required:"-"`
 
 	// Output is the Go file to output the transpiled input file to,
-	// as an optional second argument in build mode.
+	// as an optional second argument for the build command.
 	// It defaults to the input file with .cosh changed to .go.
 	Output string `cmd:"build" posarg:"1" required:"-"`
 
@@ -41,15 +41,14 @@ type Config struct {
 	// prior to starting interactive mode if no Input is specified.
 	Expr string `flag:"e,expr"`
 
-	// Args is an optional list of arguments to pass; if this is specified,
-	// these arguments will be turned into an "args" local variable in the shell.
-	Args []string
+	// Args is an optional list of arguments to pass in the run command.
+	// These arguments will be turned into an "args" local variable in the shell.
+	Args []string `cmd:"run"`
 
-	// Interactive runs the interactive command line after processing an input file.
-	// Interactive mode is the default for all cases except when
-	// an Input file is specified, and is not available
-	// if an Output file is specified for transpiling.
-	Interactive bool `flag:"i,interactive"`
+	// Interactive runs the interactive command line after processing any input file.
+	// Interactive mode is the default mode for the run command unless an input file
+	// is specified.
+	Interactive bool `cmd:"run" flag:"i,interactive"`
 }
 
 func main() { //types:skip
@@ -60,8 +59,14 @@ func main() { //types:skip
 // Run runs the specified cosh file. If no file is specified,
 // it runs an interactive shell that allows the user to input cosh.
 func Run(c *Config) error { //cli:cmd -root
+	in := interpreter.NewInterpreter(interp.Options{})
+	in.Config()
+	if len(c.Args) > 0 {
+		in.Eval("args := " + fmt.Sprintf("%#v", c.Args))
+	}
+
 	if c.Input == "" {
-		return Interactive(c)
+		return Interactive(c, in)
 	}
 	code := ""
 	if errors.Log1(dirs.FileExists(c.Input)) {
@@ -77,22 +82,19 @@ func Run(c *Config) error { //cli:cmd -root
 		}
 		code += c.Expr + "\n"
 	}
-	in := interpreter.NewInterpreter(interp.Options{})
-	in.Config()
+
 	_, _, err := in.Eval(code)
 	if err == nil {
 		err = in.Shell.DepthError()
 	}
 	if c.Interactive {
-		return Interactive(c)
+		return Interactive(c, in)
 	}
 	return err
 }
 
 // Interactive runs an interactive shell that allows the user to input cosh.
-func Interactive(c *Config) error {
-	in := interpreter.NewInterpreter(interp.Options{})
-	in.Config()
+func Interactive(c *Config, in *interpreter.Interpreter) error {
 	if c.Expr != "" {
 		in.Eval(c.Expr)
 	}

@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"log/slog"
 	"os"
 	"os/signal"
 	"reflect"
@@ -80,10 +79,11 @@ func (in *Interpreter) Prompt() string {
 }
 
 // Eval evaluates (interprets) the given code,
-// returning the value returned from the interpreter,
-// and hasPrint indicates whether the last line of code
-// has the string print in it -- for determining whether to
-// print the result in interactive mode.
+// returning the value returned from the interpreter.
+// HasPrint indicates whether the last line of code
+// has the string print in it, which is for determining
+// whether to print the result in interactive mode.
+// It automatically logs any error in addition to returning it.
 func (in *Interpreter) Eval(code string) (v reflect.Value, hasPrint bool, err error) {
 	in.Shell.TranspileCode(code)
 	source := false
@@ -108,7 +108,8 @@ func (in *Interpreter) Eval(code string) (v reflect.Value, hasPrint bool, err er
 }
 
 // RunCode runs the accumulated set of code lines
-// and clears the stack of code lines
+// and clears the stack of code lines.
+// It automatically logs any error in addition to returning it.
 func (in *Interpreter) RunCode() (reflect.Value, error) {
 	if len(in.Shell.Errors) > 0 {
 		return reflect.Value{}, errors.Join(in.Shell.Errors...)
@@ -128,7 +129,7 @@ func (in *Interpreter) RunCode() (reflect.Value, error) {
 			in.Shell.RestoreOrigStdIO()
 			in.Shell.ResetDepth()
 			if !cancelled {
-				slog.Error(err.Error())
+				in.Shell.AddError(err)
 			}
 			break
 		}
