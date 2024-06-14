@@ -20,8 +20,8 @@ import (
 	"cogentcore.org/core/texteditor/diffbrowser"
 )
 
-// VCSLogView is a view of the VCS log data
-type VCSLogView struct {
+// VCSLog is a widget that represents VCS log data.
+type VCSLog struct {
 	core.Frame
 
 	// current log
@@ -46,7 +46,7 @@ type VCSLogView struct {
 	SetA bool
 }
 
-func (lv *VCSLogView) Init() {
+func (lv *VCSLog) Init() {
 	lv.Frame.Init()
 	lv.RevA = "HEAD"
 	lv.RevB = ""
@@ -145,7 +145,7 @@ func (lv *VCSLogView) Init() {
 }
 
 // SetRevA sets the revision to use for buffer A
-func (lv *VCSLogView) SetRevA(rev string) {
+func (lv *VCSLog) SetRevA(rev string) {
 	lv.RevA = rev
 	tb := lv.Toolbar()
 	tfi := tb.ChildByName("a-tf", 2)
@@ -156,7 +156,7 @@ func (lv *VCSLogView) SetRevA(rev string) {
 }
 
 // SetRevB sets the revision to use for buffer B
-func (lv *VCSLogView) SetRevB(rev string) {
+func (lv *VCSLog) SetRevB(rev string) {
 	lv.RevB = rev
 	tb := lv.Toolbar()
 	tfi := tb.ChildByName("b-tf", 2)
@@ -167,7 +167,7 @@ func (lv *VCSLogView) SetRevB(rev string) {
 }
 
 // ToggleRev switches the active revision to set
-func (lv *VCSLogView) ToggleRev() {
+func (lv *VCSLog) ToggleRev() {
 	tb := lv.Toolbar()
 	cba := tb.ChildByName("a-rev", 2).(*core.Switch)
 	cbb := tb.ChildByName("b-rev", 2).(*core.Switch)
@@ -179,16 +179,16 @@ func (lv *VCSLogView) ToggleRev() {
 }
 
 // Toolbar returns the toolbar
-func (lv *VCSLogView) Toolbar() *core.Toolbar {
+func (lv *VCSLog) Toolbar() *core.Toolbar {
 	return lv.ChildByName("toolbar", 0).(*core.Toolbar)
 }
 
 // Table returns the table
-func (lv *VCSLogView) Table() *core.Table {
+func (lv *VCSLog) Table() *core.Table {
 	return lv.ChildByName("log", 1).(*core.Table)
 }
 
-func (lv *VCSLogView) MakeToolbar(p *core.Plan) {
+func (lv *VCSLog) MakeToolbar(p *core.Plan) {
 	core.Add(p, func(w *core.Text) {
 		w.SetText("File: " + dirs.DirAndFile(lv.File))
 	})
@@ -262,8 +262,8 @@ func (lv *VCSLogView) MakeToolbar(p *core.Plan) {
 	})
 }
 
-// VCSLogViewDialog returns a VCS Log View for given repo, log and file (file could be empty)
-func VCSLogViewDialog(ctx core.Widget, repo vcs.Repo, lg vcs.Log, file, since string) *core.Body {
+// VCSLogDialog returns a VCS Log View for given repo, log and file (file could be empty)
+func VCSLogDialog(ctx core.Widget, repo vcs.Repo, lg vcs.Log, file, since string) *core.Body {
 	title := "VCS Log: "
 	if file == "" {
 		title += "All files"
@@ -274,7 +274,7 @@ func VCSLogViewDialog(ctx core.Widget, repo vcs.Repo, lg vcs.Log, file, since st
 		title += " since: " + since
 	}
 	d := core.NewBody().AddTitle(title)
-	lv := NewVCSLogView(d)
+	lv := NewVCSLog(d)
 	lv.SetRepo(repo).SetLog(lg).SetFile(file).SetSince(since)
 	d.RunWindowDialog(ctx)
 	return d

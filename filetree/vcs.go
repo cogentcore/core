@@ -242,7 +242,7 @@ func (fn *Node) DiffVCS(rev_a, rev_b string) error {
 // number as a maximum number of items to return.
 // If allFiles is true, then the log will show revisions for all files, not just
 // this one.
-// Returns the Log and also shows it in a VCSLogView which supports further actions.
+// Returns the Log and also shows it in a VCSLog which supports further actions.
 func (fn *Node) LogVCSSel(allFiles bool, since string) { //types:add
 	fn.SelectedFunc(func(sn *Node) {
 		sn.LogVCS(allFiles, since)
@@ -256,7 +256,7 @@ func (fn *Node) LogVCSSel(allFiles bool, since string) { //types:add
 // number as a maximum number of items to return.
 // If allFiles is true, then the log will show revisions for all files, not just
 // this one.
-// Returns the Log and also shows it in a VCSLogView which supports further actions.
+// Returns the Log and also shows it in a VCSLog which supports further actions.
 func (fn *Node) LogVCS(allFiles bool, since string) (vcs.Log, error) {
 	repo, _ := fn.Repo()
 	if repo == nil {
@@ -273,7 +273,7 @@ func (fn *Node) LogVCS(allFiles bool, since string) (vcs.Log, error) {
 	if err != nil {
 		return lg, err
 	}
-	VCSLogViewDialog(nil, repo, lg, fnm, since)
+	VCSLogDialog(nil, repo, lg, fnm, since)
 	return lg, nil
 }
 
