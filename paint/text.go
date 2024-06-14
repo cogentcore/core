@@ -797,7 +797,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 				unestr := html.UnescapeString(string(tmpbuf))
 				// fmt.Printf("%v added: %v\n", bidx, unestr)
 				curSp.AppendString(unestr, curf.Face.Face, curf.Color, curf.Background, curf.Decoration, font, ctxt)
-				if curLinkIndex >= 0 {
+				if curLinkIndex >= 0 && curLinkIndex < len(tr.Links) {
 					tl := &tr.Links[curLinkIndex]
 					tl.Label = unestr
 				}
