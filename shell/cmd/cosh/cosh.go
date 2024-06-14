@@ -66,6 +66,8 @@ func Run(c *Config) error { //cli:cmd -root
 			return err
 		}
 		code = string(b)
+		// todo: cli needs to remove input from args
+		// os.Args = slices.Delete(os.Args, 1, 2)
 	}
 	if c.Expr != "" {
 		if code != "" {
