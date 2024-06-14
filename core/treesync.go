@@ -351,7 +351,7 @@ func (tr *Tree) DuplicateSync() {
 	}
 }
 
-// EditNode pulls up a FormDialog window on the node.
+// EditNode pulls up a [Form] dialog for the node.
 // If SyncNode is set, operates on Sync Tree.
 func (tr *Tree) EditNode() { //types:add
 	if tr.SyncNode != nil {
