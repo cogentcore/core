@@ -43,7 +43,9 @@ type Config struct {
 
 	// Args is an optional list of arguments to pass in the run command.
 	// These arguments will be turned into an "args" local variable in the shell.
-	Args []string `cmd:"run"`
+	// These are automatically processed from any leftover arguments passed, so
+	// you should not need to specify this flag manually.
+	Args []string `cmd:"run" posarg:"leftover"`
 
 	// Interactive runs the interactive command line after processing any input file.
 	// Interactive mode is the default mode for the run command unless an input file

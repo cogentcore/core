@@ -82,7 +82,6 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 			} else {
 				posArgStrs[ui] = logx.SuccessColor("[" + nm + "]")
 			}
-
 		}
 	}
 	b.WriteString(strings.Join(posArgStrs, " "))
