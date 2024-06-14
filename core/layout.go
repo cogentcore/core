@@ -317,9 +317,6 @@ func (ls *GeomState) ScrollOffset() image.Point {
 	return ls.ContentBBox.Min.Sub(ls.Pos.Content.ToPoint())
 }
 
-//////////////////////////////////////////////////////////////
-//  LayImplState -- for Layout only
-
 // LayCell holds the layout implementation data for col, row Cells
 type LayCell struct {
 	// Size has the Actual size of elements (not Alloc)
@@ -412,8 +409,8 @@ func (lc *LayCells) String() string {
 	return s
 }
 
-// LayImplState has internal state for implementing layout
-type LayImplState struct {
+// LayoutState has internal state for implementing layout
+type LayoutState struct {
 	// Shape is number of cells along each dimension,
 	// computed for each layout type:
 	// For Grid: Max Col, Row.
@@ -454,7 +451,7 @@ type LayImplState struct {
 
 // InitCells initializes the Cells based on Shape, MainAxis, and Wraps
 // which must be set before calling.
-func (ls *LayImplState) InitCells() {
+func (ls *LayoutState) InitCells() {
 	if ls.Wraps == nil {
 		if len(ls.Cells) != 1 {
 			ls.Cells = make([]LayCells, 1)
@@ -476,7 +473,7 @@ func (ls *LayImplState) InitCells() {
 	}
 }
 
-func (ls *LayImplState) ShapeCheck(w Widget, phase string) bool {
+func (ls *LayoutState) ShapeCheck(w Widget, phase string) bool {
 	if w.AsTree().HasChildren() && (ls.Shape == (image.Point{}) || len(ls.Cells) == 0) {
 		// fmt.Println(w, "Shape is nil in:", phase) // TODO: plan for this?
 		return false
@@ -487,7 +484,7 @@ func (ls *LayImplState) ShapeCheck(w Widget, phase string) bool {
 // Cell returns the cell for given dimension and index along that
 // dimension, and given other-dimension axis which is ignored for non-Wrap cases.
 // Does no range checking and will crash if out of bounds.
-func (ls *LayImplState) Cell(d math32.Dims, dIndex, odIndex int) *LayCell {
+func (ls *LayoutState) Cell(d math32.Dims, dIndex, odIndex int) *LayCell {
 	if ls.Wraps == nil {
 		return ls.Cells[0].Cell(d, dIndex)
 	}
@@ -498,7 +495,7 @@ func (ls *LayImplState) Cell(d math32.Dims, dIndex, odIndex int) *LayCell {
 }
 
 // WrapIndexToCoord returns the X,Y coordinates in Wrap case for given sequential idx
-func (ls *LayImplState) WrapIndexToCoord(idx int) image.Point {
+func (ls *LayoutState) WrapIndexToCoord(idx int) image.Point {
 	y := 0
 	x := 0
 	sum := 0
@@ -527,7 +524,7 @@ func (ls *LayImplState) WrapIndexToCoord(idx int) image.Point {
 // CellsSize returns the total Size represented by the current Cells,
 // which is the Sum of the Max values along each dimension within each Cell,
 // Maxed over cross-axis dimension for Wrap case, plus GapSize.
-func (ls *LayImplState) CellsSize() math32.Vector2 {
+func (ls *LayoutState) CellsSize() math32.Vector2 {
 	if ls.Wraps == nil {
 		return ls.Cells[0].CellsSize().Add(ls.GapSize)
 	}
@@ -552,7 +549,7 @@ func (ls *LayImplState) CellsSize() math32.Vector2 {
 // ColWidth returns the width of given column for given row index
 // (ignored for non-Wrap), with full bounds checking.
 // Returns error if out of range.
-func (ls *LayImplState) ColWidth(row, col int) (float32, error) {
+func (ls *LayoutState) ColWidth(row, col int) (float32, error) {
 	if ls.Wraps == nil {
 		n := math32.PointDim(ls.Shape, math32.X)
 		if col >= n {
@@ -584,7 +581,7 @@ func (ls *LayImplState) ColWidth(row, col int) (float32, error) {
 // RowHeight returns the height of given row for given
 // column (ignored for non-Wrap), with full bounds checking.
 // Returns error if out of range.
-func (ls *LayImplState) RowHeight(row, col int) (float32, error) {
+func (ls *LayoutState) RowHeight(row, col int) (float32, error) {
 	if ls.Wraps == nil {
 		n := math32.PointDim(ls.Shape, math32.Y)
 		if row >= n {
@@ -613,7 +610,7 @@ func (ls *LayImplState) RowHeight(row, col int) (float32, error) {
 	return ls.Cell(math32.Y, row, col).Size.Y, nil
 }
 
-func (ls *LayImplState) String() string {
+func (ls *LayoutState) String() string {
 	if ls.Wraps == nil {
 		return ls.Cells[0].String()
 	}
@@ -723,7 +720,7 @@ func (ly *Frame) SizeUpLay() {
 		return
 	}
 	ly.SizeFromStyle()
-	ly.LayImpl.ScrollSize.SetZero() // we don't know yet
+	ly.Layout.ScrollSize.SetZero() // we don't know yet
 	ly.LaySetInitCells()
 	ly.This.(Layouter).LayoutSpace()
 	ly.SizeUpChildren() // kids do their own thing
@@ -737,7 +734,7 @@ func (ly *Frame) SizeUpLay() {
 // Other layout types can change this if they want to.
 func (ly *Frame) LayoutSpace() {
 	ly.SpaceFromStyle()
-	ly.Geom.Size.Space.SetAdd(ly.LayImpl.ScrollSize)
+	ly.Geom.Size.Space.SetAdd(ly.Layout.ScrollSize)
 }
 
 // SizeUpChildren calls SizeUp on all the children of this node
@@ -780,14 +777,14 @@ func (ly *Frame) LaySetInitCells() {
 	default:
 		ly.LaySetInitCellsStacked() // whatever
 	}
-	ly.LayImpl.InitCells()
+	ly.Layout.InitCells()
 	ly.LaySetGapSizeFromCells()
-	ly.LayImpl.ShapeCheck(ly, "SizeUp")
-	// fmt.Println(ly, "SzUp Init", ly.LayImpl.Shape)
+	ly.Layout.ShapeCheck(ly, "SizeUp")
+	// fmt.Println(ly, "SzUp Init", ly.Layout.Shape)
 }
 
 func (ly *Frame) LaySetGapSizeFromCells() {
-	li := &ly.LayImpl
+	li := &ly.Layout
 	li.Gap = ly.Styles.Gap.Dots().Floor()
 	// note: this is not accurate for flex
 	li.GapSize.X = max(float32(li.Shape.X-1)*li.Gap.X, 0)
@@ -796,7 +793,7 @@ func (ly *Frame) LaySetGapSizeFromCells() {
 }
 
 func (ly *Frame) LaySetInitCellsFlex() {
-	li := &ly.LayImpl
+	li := &ly.Layout
 	li.MainAxis = math32.Dims(ly.Styles.Direction)
 	ca := li.MainAxis.Other()
 	li.Wraps = nil
@@ -817,7 +814,7 @@ func (ly *Frame) LaySetInitCellsFlex() {
 }
 
 func (ly *Frame) LaySetInitCellsWrap() {
-	li := &ly.LayImpl
+	li := &ly.Layout
 	li.MainAxis = math32.Dims(ly.Styles.Direction)
 	ni := 0
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
@@ -851,7 +848,7 @@ func (ly *Frame) LaySetInitCellsWrap() {
 
 // LaySetWrapIndexes sets indexes for Wrap case
 func (ly *Frame) LaySetWrapIndexes() {
-	li := &ly.LayImpl
+	li := &ly.Layout
 	idx := 0
 	var maxc image.Point
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
@@ -883,7 +880,7 @@ func (ly *Frame) UpdateStackedVisibility() {
 
 func (ly *Frame) LaySetInitCellsStacked() {
 	ly.UpdateStackedVisibility()
-	ly.LayImpl.Shape = image.Point{1, 1}
+	ly.Layout.Shape = image.Point{1, 1}
 }
 
 func (ly *Frame) LaySetInitCellsGrid() {
@@ -899,7 +896,7 @@ func (ly *Frame) LaySetInitCellsGrid() {
 	if rows == 0 || cols == 0 {
 		fmt.Println(ly, "no rows or cols:", rows, cols)
 	}
-	ly.LayImpl.Shape = image.Point{max(cols, 1), max(rows, 1)}
+	ly.Layout.Shape = image.Point{max(cols, 1), max(rows, 1)}
 	ci := 0
 	ri := 0
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
@@ -953,7 +950,7 @@ func (ly *Frame) SizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 	//   +--+--+
 	// 1 |  |  |
 	//   +--+--+
-	li := &ly.LayImpl
+	li := &ly.Layout
 	li.InitCells()
 	ly.VisibleKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		cidx := kwb.Geom.Cell
@@ -1002,9 +999,9 @@ func (ly *Frame) SizeFromChildrenCells(iter int, pass LayoutPasses) math32.Vecto
 
 // SizeFromChildrenStacked for stacked case
 func (ly *Frame) SizeFromChildrenStacked() math32.Vector2 {
-	ly.LayImpl.InitCells()
+	ly.Layout.InitCells()
 	_, kwb := ly.StackTopWidget()
-	li := &ly.LayImpl
+	li := &ly.Layout
 	var ksz math32.Vector2
 	if kwb != nil {
 		ksz = kwb.Geom.Size.Actual.Total
@@ -1131,7 +1128,7 @@ func (ly *Frame) SizeDown(iter int) bool {
 // iteration is required.  It allocates sizes to fit given parent-allocated
 // total size.
 func (ly *Frame) SizeDownLay(iter int) bool {
-	if !ly.HasChildren() || !ly.LayImpl.ShapeCheck(ly, "SizeDown") {
+	if !ly.HasChildren() || !ly.Layout.ShapeCheck(ly, "SizeDown") {
 		return ly.SizeDownWidget(iter) // behave like a widget
 	}
 	sz := &ly.Geom.Size
@@ -1184,7 +1181,7 @@ func (ly *Frame) ManageOverflow(iter int, updateSize bool) bool {
 	sbw := math32.Ceil(ly.Styles.ScrollBarWidth.Dots)
 	change := false
 	if iter == 0 {
-		ly.LayImpl.ScrollSize.SetZero()
+		ly.Layout.ScrollSize.SetZero()
 		ly.SetScrollsOff()
 		for d := math32.X; d <= math32.Y; d++ {
 			if ly.Styles.Overflow.Dim(d) == styles.OverflowScroll {
@@ -1192,7 +1189,7 @@ func (ly *Frame) ManageOverflow(iter int, updateSize bool) bool {
 					change = true
 				}
 				ly.HasScroll[d] = true
-				ly.LayImpl.ScrollSize.SetDim(d.Other(), sbw)
+				ly.Layout.ScrollSize.SetDim(d.Other(), sbw)
 			}
 		}
 	}
@@ -1211,7 +1208,7 @@ func (ly *Frame) ManageOverflow(iter int, updateSize bool) bool {
 					}
 					change = true
 					ly.HasScroll[d] = false
-					ly.LayImpl.ScrollSize.SetDim(d.Other(), 0)
+					ly.Layout.ScrollSize.SetDim(d.Other(), 0)
 				}
 				continue
 			}
@@ -1219,7 +1216,7 @@ func (ly *Frame) ManageOverflow(iter int, updateSize bool) bool {
 				change = true
 			}
 			ly.HasScroll[d] = true
-			ly.LayImpl.ScrollSize.SetDim(d.Other(), sbw)
+			ly.Layout.ScrollSize.SetDim(d.Other(), sbw)
 			if change && DebugSettings.LayoutTrace {
 				fmt.Println(ly, "OverflowAuto enabling scrollbars for dim for overflow:", d, ofd, "alloc:", sz.Alloc.Content.Dim(d), "internal:", sz.Internal.Dim(d))
 			}
@@ -1252,7 +1249,7 @@ func (ly *Frame) SizeDownGrowCells(iter int, extra math32.Vector2) bool {
 	sz := &ly.Geom.Size
 	alloc := sz.Alloc.Content.Sub(sz.InnerSpace) // inner is fixed
 	// todo: use max growth values instead of individual ones to ensure consistency!
-	li := &ly.LayImpl
+	li := &ly.Layout
 	if len(li.Cells) == 0 {
 		slog.Error("unexpected error: layout has not been initialized", "layout", ly.String())
 		return false
@@ -1295,8 +1292,8 @@ func (ly *Frame) SizeDownGrowCells(iter int, extra math32.Vector2) bool {
 				if asz > math32.Ceil(alloc.Dim(ma))+1 { // bug!
 					fmt.Println(ly, "SizeDownGrowCells error: sub alloc > total to alloc:", asz, alloc.Dim(ma))
 					fmt.Println("ma:", ma, "mi:", mi, "ci:", ci, "mx:", mx, "gsum:", gsum, "gr:", gr, "ex:", exd, "par act:", sz.Actual.Content.Dim(ma))
-					fmt.Println(ly.LayImpl.String())
-					fmt.Println(ly.LayImpl.CellsSize())
+					fmt.Println(ly.Layout.String())
+					fmt.Println(ly.Layout.CellsSize())
 				}
 			}
 			if DebugSettings.LayoutTraceDetail {
@@ -1312,7 +1309,7 @@ func (ly *Frame) SizeDownGrowCells(iter int, extra math32.Vector2) bool {
 
 func (ly *Frame) SizeDownWrap(iter int) bool {
 	wrapped := false
-	li := &ly.LayImpl
+	li := &ly.Layout
 	sz := &ly.Geom.Size
 	d := li.MainAxis
 	alloc := sz.Alloc.Content
@@ -1423,10 +1420,10 @@ func (ly *Frame) SizeDownAllocActualCells(iter int) {
 		ksz := &kwb.Geom.Size
 		cidx := kwb.Geom.Cell
 		for ma := math32.X; ma <= math32.Y; ma++ { // main axis = X then Y
-			ca := ma.Other()                  // cross axis = Y then X
-			mi := math32.PointDim(cidx, ma)   // X, Y
-			ci := math32.PointDim(cidx, ca)   // Y, X
-			md := ly.LayImpl.Cell(ma, mi, ci) // X, Y
+			ca := ma.Other()                 // cross axis = Y then X
+			mi := math32.PointDim(cidx, ma)  // X, Y
+			ci := math32.PointDim(cidx, ca)  // Y, X
+			md := ly.Layout.Cell(ma, mi, ci) // X, Y
 			asz := md.Size.Dim(ma)
 			ksz.Alloc.Total.SetDim(ma, asz)
 		}
@@ -1535,7 +1532,7 @@ func (ly *Frame) SizeFinal() {
 
 // SizeFinalLay is the Layout standard SizeFinal pass
 func (ly *Frame) SizeFinalLay() {
-	if !ly.HasChildren() || !ly.LayImpl.ShapeCheck(ly, "SizeFinal") {
+	if !ly.HasChildren() || !ly.Layout.ShapeCheck(ly, "SizeFinal") {
 		ly.SizeFinalWidget() // behave like a widget
 		return
 	}
@@ -1650,7 +1647,7 @@ func (ly *Frame) Position() {
 }
 
 func (ly *Frame) PositionLay() {
-	if !ly.HasChildren() || !ly.LayImpl.ShapeCheck(ly, "Position") {
+	if !ly.HasChildren() || !ly.Layout.ShapeCheck(ly, "Position") {
 		ly.PositionWidget() // behave like a widget
 		return
 	}
@@ -1678,7 +1675,7 @@ func (ly *Frame) PositionCells() {
 // Main axis = X
 func (ly *Frame) PositionCellsMainX() {
 	// todo: can break apart further into Flex rows
-	gap := ly.LayImpl.Gap
+	gap := ly.Layout.Gap
 	sz := &ly.Geom.Size
 	if DebugSettings.LayoutTraceDetail {
 		fmt.Println(ly, "PositionCells Main X, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
@@ -1706,7 +1703,7 @@ func (ly *Frame) PositionCellsMainX() {
 
 // Main axis = Y
 func (ly *Frame) PositionCellsMainY() {
-	gap := ly.LayImpl.Gap
+	gap := ly.Layout.Gap
 	sz := &ly.Geom.Size
 	if DebugSettings.LayoutTraceDetail {
 		fmt.Println(ly, "PositionCells, alloc:", sz.Alloc.Content, "internal:", sz.Internal)
@@ -1864,7 +1861,7 @@ func (ly *Frame) ScrollResetIfNone() {
 func (ly *Frame) ScenePosLay() {
 	ly.ScrollResetIfNone()
 	// note: ly.Geom.Scroll has the X, Y scrolling offsets, set by Layouter.ScrollChanged function
-	if !ly.HasChildren() || !ly.LayImpl.ShapeCheck(ly, "ScenePos") {
+	if !ly.HasChildren() || !ly.Layout.ShapeCheck(ly, "ScenePos") {
 		ly.ScenePosWidget() // behave like a widget
 		return
 	}

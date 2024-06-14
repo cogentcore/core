@@ -1840,7 +1840,7 @@ func (lg *ListGrid) Init() {
 
 func (lg *ListGrid) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 {
 	csz := lg.Frame.SizeFromChildren(iter, pass)
-	rht, err := lg.LayImpl.RowHeight(0, 0)
+	rht, err := lg.Layout.RowHeight(0, 0)
 	if err != nil {
 		// fmt.Println("ListGrid Sizing Error:", err)
 		lg.RowHeight = 42
@@ -2001,8 +2001,8 @@ func (lg *ListGrid) RenderStripes() {
 	lg.UpdateBackgrounds()
 
 	pc := &lg.Scene.PaintContext
-	rows := lg.LayImpl.Shape.Y
-	cols := lg.LayImpl.Shape.X
+	rows := lg.Layout.Shape.Y
+	cols := lg.Layout.Shape.X
 	st := pos
 	offset := 0
 	_, sv := lg.List()
@@ -2013,7 +2013,7 @@ func (lg *ListGrid) RenderStripes() {
 	}
 	for r := 0; r < rows; r++ {
 		si := r + startIndex
-		ht, _ := lg.LayImpl.RowHeight(r, 0)
+		ht, _ := lg.Layout.RowHeight(r, 0)
 		miny := st.Y
 		for c := 0; c < cols; c++ {
 			ki := r*cols + c
@@ -2031,7 +2031,7 @@ func (lg *ListGrid) RenderStripes() {
 		stripe := (r+offset)%2 == 1
 		sbg := lg.RowBackground(sv.IndexIsSelected(si), stripe, r == sv.hoverRow)
 		pc.BlitBox(st, ssz, sbg)
-		st.Y += ht + lg.LayImpl.Gap.Y
+		st.Y += ht + lg.Layout.Gap.Y
 	}
 }
 
@@ -2058,13 +2058,13 @@ func (lg *ListGrid) IndexFromPixel(pt image.Point) (row, col int, isValid bool) 
 	ptf := math32.Vector2FromPoint(lg.PointToRelPos(pt))
 	sz := math32.Vector2FromPoint(lg.Geom.ContentBBox.Size())
 	isValid = true
-	rows := lg.LayImpl.Shape.Y
-	cols := lg.LayImpl.Shape.X
+	rows := lg.Layout.Shape.Y
+	cols := lg.Layout.Shape.X
 	st := math32.Vector2{}
 	got := false
 	for r := 0; r < rows; r++ {
-		ht, _ := lg.LayImpl.RowHeight(r, 0)
-		ht += lg.LayImpl.Gap.Y
+		ht, _ := lg.Layout.RowHeight(r, 0)
+		ht += lg.Layout.Gap.Y
 		miny := st.Y
 		if r > 0 {
 			for c := 0; c < cols; c++ {

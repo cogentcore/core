@@ -37,7 +37,7 @@ import (
 //   typically by making Parts.  Always calls ApplyStyle.
 // * Layout: does sizing and positioning on tree, arranging widgets.
 //   Needed for whole tree after any Config changes anywhere
-//   See layimpl.go for full details and code.
+//   See layout.go for full details and code.
 // * Render: just draws with current config, layout.
 //
 // ApplyStyle is always called after Config, and after any

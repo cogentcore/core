@@ -41,8 +41,8 @@ type Frame struct {
 	// redraw on stack changes, but not for e.g., [Switch]es which don't.
 	LayoutStackTopOnly bool
 
-	// LayImpl contains implementation state info for doing layout
-	LayImpl LayImplState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
+	// Layout contains implementation state info for doing layout
+	Layout LayoutState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// HasScroll is whether scrollbar is used for given dim.
 	HasScroll [2]bool `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
