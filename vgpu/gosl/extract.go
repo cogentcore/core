@@ -102,7 +102,13 @@ func ExtractGoFiles(files []string) map[string][]byte {
 		outfn := filepath.Join(*outDir, fn+".go")
 		olns := [][]byte{}
 		olns = append(olns, []byte("package main"))
-		olns = append(olns, []byte(`import "math"`))
+		olns = append(olns, []byte(`import (
+	"math"
+	"cogentcore.org/core/vgpu/gosl/slbool"
+	"cogentcore.org/core/vgpu/gosl/slrand"
+	"cogentcore.org/core/vgpu/gosl/sltype"
+)
+`))
 		olns = append(olns, lns...)
 		res := bytes.Join(olns, nl)
 		ioutil.WriteFile(outfn, res, 0644)
