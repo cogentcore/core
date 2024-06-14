@@ -33,21 +33,22 @@ func (sh *Shell) CompleteMatch(data any, text string, posLine, posChar int) (md 
 		if entry.IsDir() {
 			icon = icons.Folder
 		}
+		name := strings.ReplaceAll(entry.Name(), " ", `\ `) // escape spaces
 		comps = append(comps, complete.Completion{
-			Text: entry.Name(),
+			Text: name,
 			Icon: icon,
-			Desc: filepath.Join(sh.Config.Dir, entry.Name()),
+			Desc: filepath.Join(sh.Config.Dir, name),
 		})
 	}
 	if parent == "" {
-		for cmd, _ := range sh.Builtins {
+		for cmd := range sh.Builtins {
 			comps = append(comps, complete.Completion{
 				Text: cmd,
 				Icon: icons.Terminal,
 				Desc: "Builtin command: " + cmd,
 			})
 		}
-		for cmd, _ := range sh.Commands {
+		for cmd := range sh.Commands {
 			comps = append(comps, complete.Completion{
 				Text: cmd,
 				Icon: icons.Terminal,
