@@ -104,12 +104,6 @@ type Shell struct {
 	// if this is non-empty, it is the name of the last command defined.
 	// triggers insertion of the AddCommand call to add to list of defined commands.
 	lastCommand string
-
-	// script files in current working directory: have .cosh suffix
-	cwdScriptFiles []string
-
-	// Dir directory for cwdScriptFiles
-	cwdScriptFilesDir string
 }
 
 // NewShell returns a new [Shell] with default options.
@@ -420,7 +414,21 @@ func (sh *Shell) AddCommand(name string, cmd func(args ...string)) {
 	sh.Commands[name] = cmd
 }
 
-// DeleteJob deletes the given job and returns true if successful
+// RunCommands runs given command(s), to be called from within a cosh script
+func (sh *Shell) RunCommands(name ...string) error {
+	for _, cmd := range name {
+		if cmdFun, hasCmd := sh.Commands[cmd]; hasCmd {
+			cmdFun()
+		} else {
+			err := fmt.Errorf("Command named: %s not found", cmd)
+			slog.Error(err.Error())
+			return err
+		}
+	}
+	return nil
+}
+
+// DeleteJob deletes the given job and returns true if successful,
 func (sh *Shell) DeleteJob(cmdIO *exec.CmdIO) bool {
 	idx := slices.Index(sh.Jobs, cmdIO)
 	if idx >= 0 {

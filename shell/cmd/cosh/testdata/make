@@ -1,0 +1,15 @@
+#!/usr/bin/env cosh
+// test makefile for cosh.
+// example usage:
+// ./make build
+
+command build {
+	println("running the build command")
+}
+
+command test {
+	println("running the test command")
+}
+
+shell.RunCommands(args...)
+

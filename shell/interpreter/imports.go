@@ -36,6 +36,7 @@ func (in *Interpreter) ImportShell() {
 			"OutputErrOK": reflect.ValueOf(in.Shell.OutputErrOK),
 			"Start":       reflect.ValueOf(in.Shell.Start),
 			"AddCommand":  reflect.ValueOf(in.Shell.AddCommand),
+			"RunCommands": reflect.ValueOf(in.Shell.RunCommands),
 		},
 	})
 }

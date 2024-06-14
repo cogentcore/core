@@ -64,7 +64,6 @@ func (sh *Shell) Cd(cmdIO *exec.CmdIO, args ...string) error {
 		return err
 	}
 	sh.Config.Dir = dir
-	sh.cwdScriptFilesDir = ""
 	return nil
 }
 

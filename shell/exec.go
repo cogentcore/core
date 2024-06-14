@@ -97,10 +97,6 @@ func (sh *Shell) RunBuiltinOrCommand(cmdIO *exec.CmdIO, errOk, output bool, cmd 
 	bltFun, hasBlt := sh.Builtins[cmd]
 
 	if !hasCmd && !hasBlt {
-		ran, out := sh.RunSubShell(cmdIO, errOk, output, cmd, args...)
-		if ran {
-			return true, out
-		}
 		return false, out
 	}
 
