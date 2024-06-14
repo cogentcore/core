@@ -10,7 +10,6 @@ package cli
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -206,9 +205,7 @@ func ParseArgs[T any](cfg T, args []string, flags map[string]string, cmds ...*Cm
 		return newCmd, allFields, err
 	}
 	if len(newArgs) > 0 {
-		sarg := append(os.Args[:1], newArgs...)
-		os.Args = sarg
-		return newCmd, allFields, nil
+		return newCmd, allFields, fmt.Errorf("got unused arguments: %v", newArgs)
 	}
 	return newCmd, allFlags, nil
 }

@@ -7,7 +7,6 @@ package shell
 import (
 	"fmt"
 	"go/token"
-	"strings"
 
 	"cogentcore.org/core/base/logx"
 )
@@ -18,9 +17,6 @@ import (
 func (sh *Shell) TranspileLine(ln string) string {
 	if len(ln) == 0 {
 		return ln
-	}
-	if strings.HasPrefix(ln, "#!") {
-		return ""
 	}
 	toks := sh.TranspileLineTokens(ln)
 	paren, brace, brack := toks.BracketDepths()

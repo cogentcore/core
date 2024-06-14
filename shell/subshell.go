@@ -5,8 +5,6 @@
 package shell
 
 import (
-	"bytes"
-	"os"
 	"slices"
 	"strings"
 
@@ -33,24 +31,13 @@ func (sh *Shell) RunSubShell(cmdIO *exec.CmdIO, errOk, output bool, cmd string, 
 			return false, out
 		}
 	}
-	makeMode := true
-	cf, err := os.ReadFile(cmd)
-	if err == nil {
-		if bytes.HasPrefix(cf, []byte("#!")) {
-			makeMode = false
-		}
-	}
 	expr := ""
 	if len(args) > 0 {
 		expr = strings.Join(args, " ")
 	}
 	aargs := []any{cmd}
 	if expr != "" {
-		if makeMode {
-			aargs = append(aargs, "-e", expr)
-		} else {
-			aargs = append(aargs, expr)
-		}
+		aargs = append(aargs, "-e", expr)
 	}
 	out = sh.Exec(errOk, false, output, "cosh", aargs...)
 	return true, out
