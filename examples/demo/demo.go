@@ -24,7 +24,6 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/tree"
 )
 
 //go:embed demo.go
@@ -386,8 +385,8 @@ func values(ts *core.Tabs) {
 		fmt.Println("The font is now", font)
 	})
 
-	core.Bind(hello, tree.New[*core.FuncButton](tab)).SetShowReturn(true) // TODO(config)
-	core.Bind(styles.NewStyle, tree.New[*core.FuncButton](tab)).SetConfirm(true).SetShowReturn(true)
+	core.Bind(hello, core.NewFuncButton(tab)).SetShowReturn(true)
+	core.Bind(styles.NewStyle, core.NewFuncButton(tab)).SetConfirm(true).SetShowReturn(true)
 
 	core.NewButton(tab).SetText("Inspector").OnClick(func(e events.Event) {
 		core.InspectorWindow(ts.Scene)

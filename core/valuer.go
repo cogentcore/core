@@ -181,7 +181,7 @@ func ToValue(value any, tags reflect.StructTag) Value {
 			return NewListButton()
 		}
 	case kind == reflect.Func:
-		return tree.New[*FuncButton]() // TODO(config): update to NewFuncButton after changing its signature
+		return NewFuncButton()
 	}
 
 	return NewTextField() // final fallback
