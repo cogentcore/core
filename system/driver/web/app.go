@@ -164,7 +164,7 @@ func (a *App) SystemPlatform() system.Platforms {
 }
 
 func (a *App) SystemInfo() string {
-	return js.Global().Get("navigator").Get("userAgent").String()
+	return "User agent: " + js.Global().Get("navigator").Get("userAgent").String()
 }
 
 func (a *App) OpenURL(url string) {
