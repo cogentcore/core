@@ -16,3 +16,18 @@ cp.OnChange(func(e events.Event) {
     core.MessageSnackbar(parent, colors.AsHex(cp.Color))
 })
 ```
+
+You can make a button that opens a color picker dialog:
+
+```Go
+core.NewColorButton(parent).SetColor(colors.Purple)
+```
+
+You can detect when the user changes the color using the dialog:
+
+```Go
+cb := core.NewColorButton(parent).SetColor(colors.Gold)
+cb.OnChange(func(e events.Event) {
+    core.MessageSnackbar(parent, colors.AsHex(cb.Color))
+})
+```

@@ -940,6 +940,15 @@ func main() {
 			core.MessageSnackbar(parent, colors.AsHex(cp.Color))
 		})
 	},
+	"widgets/pickers/color-pickers-2": func(parent core.Widget) {
+		core.NewColorButton(parent).SetColor(colors.Purple)
+	},
+	"widgets/pickers/color-pickers-3": func(parent core.Widget) {
+		cb := core.NewColorButton(parent).SetColor(colors.Gold)
+		cb.OnChange(func(e events.Event) {
+			core.MessageSnackbar(parent, colors.AsHex(cb.Color))
+		})
+	},
 	"widgets/media/canvases-0": func(parent core.Widget) {
 		core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
 			pc.FillBox(math32.Vector2{}, math32.Vec2(1, 1), colors.C(colors.Scheme.Primary.Base))
