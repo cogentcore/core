@@ -137,7 +137,7 @@ func (pl *Pipeline) InitPipeline() {
 // The parent System has already done what it can for its config
 func (pl *Pipeline) Config() {
 	if pl.VkPipeline != vk.NullPipeline {
-		return // note: it is not possible to reconfig without loading shaders!
+		pl.DestroyPipeline() // starting over: note: requires keeping shaders around
 	}
 	pl.ConfigStages()
 	if pl.Sys.Compute {
@@ -194,7 +194,7 @@ func (pl *Pipeline) Config() {
 	IfPanic(NewError(ret))
 	pl.VkPipeline = pipeline[0]
 
-	pl.FreeShaders() // not needed once built
+	// pl.FreeShaders() // note: keeping the shaders around so pipelines can be rebuilt!
 }
 
 // ConfigCompute does the configuration for a Compute pipeline

@@ -101,6 +101,8 @@ func main() {
 	//
 	// ph.AddSpotLight(math32.NewVector3Color(color.White), math32.Vec3(-2, 5, -2), math32.Vec3(0, -1, 0), 10, 45, .01, .001)
 
+	ph.Config()
+
 	/////////////////////////////
 	// Meshes
 

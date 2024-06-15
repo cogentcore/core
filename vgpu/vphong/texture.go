@@ -112,9 +112,6 @@ func (ph *Phong) UseNoTexture() {
 func (ph *Phong) UseTextureIndex(idx int) error {
 	ph.Cur.TexIndex = idx // todo: range check
 	ph.Cur.UseTexture = true
-	// sy := &ph.Sys
-	// cmd := sy.CmdPool.Buff
-	// sy.CmdBindTextureVarIndex(cmd, int(TexSet), "Tex", ph.Cur.TexIndex)
 	return nil
 }
 
