@@ -1631,6 +1631,14 @@ func (lb *ListBase) SaveDraggedIndexes(idx int) {
 
 func (lb *ListBase) ContextMenu(m *Scene) {
 	if lb.IsReadOnly() || lb.isArray {
+		NewButton(m).SetText("Copy").SetIcon(icons.Copy).OnClick(func(e events.Event) {
+			lb.CopyIndexes(true)
+		})
+		NewSeparator(m)
+		NewButton(m).SetText("Toggle indexes").SetIcon(icons.Visibility).OnClick(func(e events.Event) {
+			lb.ShowIndexes = !lb.ShowIndexes
+			lb.Update()
+		})
 		return
 	}
 	NewButton(m).SetText("Add row").SetIcon(icons.Add).OnClick(func(e events.Event) {
@@ -1651,6 +1659,11 @@ func (lb *ListBase) ContextMenu(m *Scene) {
 	})
 	NewButton(m).SetText("Duplicate").SetIcon(icons.Copy).OnClick(func(e events.Event) {
 		lb.Duplicate()
+	})
+	NewSeparator(m)
+	NewButton(m).SetText("Toggle indexes").SetIcon(icons.Visibility).OnClick(func(e events.Event) {
+		lb.ShowIndexes = !lb.ShowIndexes
+		lb.Update()
 	})
 }
 
