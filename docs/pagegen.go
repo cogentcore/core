@@ -119,8 +119,20 @@ var PagesExamples = map[string]func(parent core.Widget){
 			Done bool
 			Task string
 		}
-		items := []item{{Task: "Code"}}
+		items := []item{{Task: "Code"}, {Task: "Eat"}}
 		core.NewTable(parent).SetSlice(&items)
+	},
+	"tutorials/todo-list-1": func(parent core.Widget) {
+		type item struct {
+			Done bool
+			Task string
+		}
+		items := []item{{Task: "Code"}, {Task: "Eat"}}
+		var table *core.Table
+		core.NewButton(parent).SetText("Add").OnClick(func(e events.Event) {
+			table.SliceNewAt(0)
+		})
+		table = core.NewTable(parent).SetSlice(&items)
 	},
 	"widgets/buttons-0": func(parent core.Widget) {
 		core.NewButton(parent).SetText("Download")

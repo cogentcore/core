@@ -21,3 +21,18 @@ type item struct {
 items := []item{{Task: "Code"}, {Task: "Eat"}}
 core.NewTable(parent).SetSlice(&items)
 ```
+
+We can add a button for adding a new todo list item:
+
+```Go
+type item struct {
+    Done bool
+    Task string
+}
+items := []item{{Task: "Code"}, {Task: "Eat"}}
+var table *core.Table
+core.NewButton(parent).SetText("Add").OnClick(func(e events.Event) {
+    table.SliceNewAt(0)
+})
+table = core.NewTable(parent).SetSlice(&items)
+```
