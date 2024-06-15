@@ -114,6 +114,14 @@ var PagesExamples = map[string]func(parent core.Widget){
 			buttons.Update()
 		})
 	},
+	"tutorials/todo-list-0": func(parent core.Widget) {
+		type item struct {
+			Done bool
+			Task string
+		}
+		items := []item{{Task: "Code"}}
+		core.NewTable(parent).SetSlice(&items)
+	},
 	"widgets/buttons-0": func(parent core.Widget) {
 		core.NewButton(parent).SetText("Download")
 	},
