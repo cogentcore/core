@@ -585,12 +585,15 @@ func (tb *Table) EditIndex(idx int) {
 }
 
 func (tb *Table) ContextMenu(m *Scene) {
-	if !tb.isArray {
-		NewButton(m).SetText("Edit").SetIcon(icons.Edit).
-			OnClick(func(e events.Event) {
-				tb.EditIndex(tb.SelectedIndex)
-			})
+	e := NewButton(m)
+	if tb.IsReadOnly() {
+		e.SetText("View").SetIcon(icons.Visibility)
+	} else {
+		e.SetText("Edit").SetIcon(icons.Edit)
 	}
+	e.OnClick(func(e events.Event) {
+		tb.EditIndex(tb.SelectedIndex)
+	})
 }
 
 //////////////////////////////////////////////////////

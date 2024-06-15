@@ -1635,7 +1635,7 @@ func (lb *ListBase) ContextMenu(m *Scene) {
 			lb.CopyIndexes(true)
 		})
 		NewSeparator(m)
-		NewButton(m).SetText("Toggle indexes").SetIcon(icons.Visibility).OnClick(func(e events.Event) {
+		NewButton(m).SetText("Toggle indexes").SetIcon(icons.Numbers).OnClick(func(e events.Event) {
 			lb.ShowIndexes = !lb.ShowIndexes
 			lb.Update()
 		})
@@ -1661,7 +1661,7 @@ func (lb *ListBase) ContextMenu(m *Scene) {
 		lb.Duplicate()
 	})
 	NewSeparator(m)
-	NewButton(m).SetText("Toggle indexes").SetIcon(icons.Visibility).OnClick(func(e events.Event) {
+	NewButton(m).SetText("Toggle indexes").SetIcon(icons.Numbers).OnClick(func(e events.Event) {
 		lb.ShowIndexes = !lb.ShowIndexes
 		lb.Update()
 	})
