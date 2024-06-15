@@ -192,9 +192,13 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 		return
 	}
 
-	// if we are not rooted, we go relative to our current fs path
+	// if we are not rooted, we go relative to our current URL
 	if !strings.HasPrefix(rawURL, "/") {
-		rawURL = path.Join(path.Dir(pg.PagePath), rawURL)
+		current := pg.Context.PageURL
+		if !strings.HasSuffix(pg.PagePath, "index.md") && !strings.HasSuffix(pg.PagePath, "index.html") {
+			current = path.Dir(current) // we must go up one if we are not the index page (which is already up one)
+		}
+		rawURL = path.Join(current, rawURL)
 	}
 
 	// the paths in the fs are never rooted, so we trim a rooted one
