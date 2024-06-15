@@ -7,6 +7,7 @@ import (
 	"image"
 	"image/draw"
 	"maps"
+	"strconv"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
@@ -63,6 +64,14 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewFrame(parent).Styler(func(s *styles.Style) {
 			s.Min.Set(units.Dp(50))
 			s.Background = colors.C(colors.Scheme.Primary.Base)
+		})
+	},
+	"basics/updating-0": func(parent core.Widget) {
+		count := 0
+		text := core.NewText(parent).SetText("0")
+		core.NewButton(parent).SetText("Increment").OnClick(func(e events.Event) {
+			count++
+			text.SetText(strconv.Itoa(count)).Update()
 		})
 	},
 	"widgets/buttons-0": func(parent core.Widget) {
