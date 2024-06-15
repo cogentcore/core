@@ -67,7 +67,7 @@ func ValueIsDefault(fv reflect.Value, def string) bool {
 		dtags := strings.Split(def, ":")
 		lo, _ := strconv.ParseFloat(dtags[0], 64)
 		hi, _ := strconv.ParseFloat(dtags[1], 64)
-		vf, err := ToFloat(fv)
+		vf, err := ToFloat(fv.Interface())
 		if err != nil {
 			slog.Error("reflectx.ValueIsDefault: error parsing struct field numerical range def tag", "def", def, "err", err)
 			return true
