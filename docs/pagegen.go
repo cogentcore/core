@@ -937,7 +937,7 @@ func main() {
 	"widgets/pickers/color-pickers-1": func(parent core.Widget) {
 		cp := core.NewColorPicker(parent).SetColor(colors.Green)
 		cp.OnChange(func(e events.Event) {
-			core.MessageSnackbar(parent, colors.AsHex(cp.Color))
+			core.MessageSnackbar(cp, colors.AsHex(cp.Color))
 		})
 	},
 	"widgets/pickers/color-pickers-2": func(parent core.Widget) {
@@ -946,14 +946,26 @@ func main() {
 	"widgets/pickers/color-pickers-3": func(parent core.Widget) {
 		cb := core.NewColorButton(parent).SetColor(colors.Gold)
 		cb.OnChange(func(e events.Event) {
-			core.MessageSnackbar(parent, colors.AsHex(cb.Color))
+			core.MessageSnackbar(cb, colors.AsHex(cb.Color))
 		})
 	},
 	"widgets/pickers/file-pickers-0": func(parent core.Widget) {
 		core.NewFilePicker(parent)
 	},
 	"widgets/pickers/file-pickers-1": func(parent core.Widget) {
+		fp := core.NewFilePicker(parent)
+		fp.OnSelect(func(e events.Event) {
+			core.MessageSnackbar(fp, fp.SelectedFile())
+		})
+	},
+	"widgets/pickers/file-pickers-2": func(parent core.Widget) {
 		core.NewFileButton(parent)
+	},
+	"widgets/pickers/file-pickers-3": func(parent core.Widget) {
+		fb := core.NewFileButton(parent)
+		fb.OnChange(func(e events.Event) {
+			core.MessageSnackbar(fb, fb.Filename)
+		})
 	},
 	"widgets/media/canvases-0": func(parent core.Widget) {
 		core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {

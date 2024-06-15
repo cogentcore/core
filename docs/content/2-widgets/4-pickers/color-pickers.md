@@ -13,7 +13,7 @@ You can detect when the user changes the color:
 ```Go
 cp := core.NewColorPicker(parent).SetColor(colors.Green)
 cp.OnChange(func(e events.Event) {
-    core.MessageSnackbar(parent, colors.AsHex(cp.Color))
+    core.MessageSnackbar(cp, colors.AsHex(cp.Color))
 })
 ```
 
@@ -28,6 +28,6 @@ You can detect when the user changes the color using the dialog:
 ```Go
 cb := core.NewColorButton(parent).SetColor(colors.Gold)
 cb.OnChange(func(e events.Event) {
-    core.MessageSnackbar(parent, colors.AsHex(cb.Color))
+    core.MessageSnackbar(cb, colors.AsHex(cb.Color))
 })
 ```
