@@ -74,6 +74,17 @@ var PagesExamples = map[string]func(parent core.Widget){
 			text.SetText(strconv.Itoa(count)).Update()
 		})
 	},
+	"basics/updating-1": func(parent core.Widget) {
+		count := 0
+		text := core.NewText(parent)
+		text.Updater(func() {
+			text.SetText(strconv.Itoa(count))
+		})
+		core.NewButton(parent).SetText("Increment").OnClick(func(e events.Event) {
+			count++
+			text.Update()
+		})
+	},
 	"widgets/buttons-0": func(parent core.Widget) {
 		core.NewButton(parent).SetText("Download")
 	},

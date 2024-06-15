@@ -12,3 +12,17 @@ core.NewButton(parent).SetText("Increment").OnClick(func(e events.Event) {
     text.SetText(strconv.Itoa(count)).Update()
 })
 ```
+
+You can also register a [[core.WidgetBase.Updater]] that will get called when the widget is updated. This can allow you to more closely couple widgets with their updating logic:
+
+```Go
+count := 0
+text := core.NewText(parent)
+text.Updater(func() {
+    text.SetText(strconv.Itoa(count))
+})
+core.NewButton(parent).SetText("Increment").OnClick(func(e events.Event) {
+    count++
+    text.Update()
+})
+```
