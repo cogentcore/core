@@ -19,13 +19,13 @@ type Body struct { //core:no-new
 	Title string `set:"-"`
 }
 
-// NewBody creates a new Body that will serve as the content of a Scene
-// (e.g., a Window, Dialog, etc).  Body forms the central region
-// of a Scene, and has OverflowAuto scrollbars by default.
-// It will create its own parent Scene at this point, and has wrapper
-// functions to transparently manage everything that the Scene
+// NewBody creates a new [Body] that will serve as the content of a [Scene]
+// (e.g., a Window, Dialog, etc). [Body] forms the central region
+// of a [Scene], and has OverflowAuto scrollbars by default.
+// It will create its own parent [Scene] at this point, and has wrapper
+// functions to transparently manage everything that the [Scene]
 // typically manages during configuration, so you can usually avoid
-// having to access the Scene directly. If a name is given and
+// having to access the [Scene] directly. If a name is given and
 // the name of [TheApp] is unset, it sets it to the given name.
 func NewBody(name ...string) *Body {
 	bd := tree.New[*Body]()
@@ -56,7 +56,7 @@ func (bd *Body) Init() {
 	})
 }
 
-// SetTitle sets the title in the Body, Scene, and Stage, RenderWindow, and title widget.
+// SetTitle sets the title in the [Body], [Scene], [Stage], [RenderWindow], and title widget.
 // This is the one place to change the title for everything.
 func (bd *Body) SetTitle(title string) *Body {
 	bd.Name = title
@@ -77,7 +77,7 @@ func (bd *Body) SetTitle(title string) *Body {
 }
 
 // AddTitle adds [Text] with the given title, and sets the Title text
-// which will be used by the Scene etc.
+// which will be used by the [Scene] etc.
 func (bd *Body) AddTitle(title string) *Body {
 	bd.SetTitle(title)
 	NewText(bd).SetText(title).SetType(TextHeadlineSmall).SetName("body-title")
@@ -94,7 +94,7 @@ func (bd *Body) AddText(text string) *Body {
 	return bd
 }
 
-// SetData sets the Body's [Scene.Data].
+// SetData sets the [Body]'s [Scene.Data].
 func (bd *Body) SetData(data any) *Body {
 	bd.Scene.SetData(data)
 	return bd
