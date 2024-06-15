@@ -14,3 +14,14 @@ core.NewButton(parent).SetText("Increment").OnClick(func(e events.Event) {
 ```
 
 That code uses [[core.Bind]] to bind the value of the variable `count` to the text of the widget `text`, meaning that the text will be updated from the variable whenever [[core.WidgetBase.Update]] is called.
+
+You can use value binding with more than just text widgets; most widgets implement the [[core.Value]] interface and thus support value binding. For example, this code uses value binding with a switch and a corresponding bool value:
+
+```Go
+on := true
+core.Bind(&on, core.NewSwitch(parent)).OnChange(func(e events.Event) {
+    core.MessageSnackbar(parent, "The switch is now "+strconv.FormatBool(on))
+})
+```
+
+Note that value binding goes both ways: not only is the value of the widget updated in [[core.WidgetBase.Update]], the value of the bound variable is updated before [[core.WidgetBase.OnChange]]. This two-way updating makes value binding very useful for creating interactive widgets that represent some underlying value.

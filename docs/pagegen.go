@@ -93,6 +93,12 @@ var PagesExamples = map[string]func(parent core.Widget){
 			text.Update()
 		})
 	},
+	"basics/value-binding-1": func(parent core.Widget) {
+		on := true
+		core.Bind(&on, core.NewSwitch(parent)).OnChange(func(e events.Event) {
+			core.MessageSnackbar(parent, "The switch is now "+strconv.FormatBool(on))
+		})
+	},
 	"widgets/buttons-0": func(parent core.Widget) {
 		core.NewButton(parent).SetText("Download")
 	},
