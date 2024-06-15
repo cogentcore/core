@@ -31,7 +31,7 @@ type Paint struct { //types:add
 	// font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed
 	FontStyle FontRender
 
-	// font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed
+	// TextStyle has the text styling settings.
 	TextStyle Text
 
 	// various rendering special effects settings

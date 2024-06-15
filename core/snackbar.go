@@ -83,13 +83,13 @@ func (bd *Body) SnackbarStyles() {
 
 // AddSnackbarText adds a snackbar [Text] with the given text.
 func (bd *Body) AddSnackbarText(text string) *Body {
-	NewText(bd).SetText(text).SetType(TextBodyMedium).
-		Styler(func(s *styles.Style) {
-			s.SetTextWrap(false)
-			if s.Is(states.Selected) {
-				s.Color = colors.C(colors.Scheme.Select.OnContainer)
-			}
-		})
+	tx := NewText(bd).SetText(text).SetType(TextBodyMedium)
+	tx.Styler(func(s *styles.Style) {
+		s.SetTextWrap(false)
+		if s.Is(states.Selected) {
+			s.Color = colors.C(colors.Scheme.Select.OnContainer)
+		}
+	})
 	return bd
 }
 
