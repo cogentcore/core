@@ -85,6 +85,14 @@ var PagesExamples = map[string]func(parent core.Widget){
 			text.Update()
 		})
 	},
+	"basics/value-binding-0": func(parent core.Widget) {
+		count := 0
+		text := core.Bind(&count, core.NewText(parent))
+		core.NewButton(parent).SetText("Increment").OnClick(func(e events.Event) {
+			count++
+			text.Update()
+		})
+	},
 	"widgets/buttons-0": func(parent core.Widget) {
 		core.NewButton(parent).SetText("Download")
 	},
