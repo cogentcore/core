@@ -99,6 +99,21 @@ var PagesExamples = map[string]func(parent core.Widget){
 			core.MessageSnackbar(parent, "The switch is now "+strconv.FormatBool(on))
 		})
 	},
+	"basics/plans-0": func(parent core.Widget) {
+		number := 3
+		spinner := core.Bind(&number, core.NewSpinner(parent))
+		buttons := core.NewFrame(parent)
+		buttons.Maker(func(p *core.Plan) {
+			for i := range number {
+				core.AddAt(p, strconv.Itoa(i), func(w *core.Button) {
+					w.SetText(strconv.Itoa(i))
+				})
+			}
+		})
+		spinner.OnChange(func(e events.Event) {
+			buttons.Update()
+		})
+	},
 	"widgets/buttons-0": func(parent core.Widget) {
 		core.NewButton(parent).SetText("Download")
 	},
