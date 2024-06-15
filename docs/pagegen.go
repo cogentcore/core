@@ -931,6 +931,9 @@ func main() {
 		tree.NewNodeBase(c2)
 		// core.NewValue(parent, n)
 	},
+	"widgets/pickers/color-pickers-0": func(parent core.Widget) {
+		core.NewColorPicker(parent).SetColor(colors.Orange)
+	},
 	"widgets/media/canvases-0": func(parent core.Widget) {
 		core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
 			pc.FillBox(math32.Vector2{}, math32.Vec2(1, 1), colors.C(colors.Scheme.Primary.Base))

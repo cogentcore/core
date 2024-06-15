@@ -15,7 +15,8 @@ import (
 	"cogentcore.org/core/styles"
 )
 
-// ColorPicker shows a color, using sliders or numbers to set values.
+// ColorPicker represents a color value with an interactive color picker
+// composed of three HCT sliders.
 type ColorPicker struct {
 	Frame
 
@@ -41,7 +42,7 @@ func (cp *ColorPicker) SetHCT(hct hct.HCT) *ColorPicker {
 func (cp *ColorPicker) Init() {
 	cp.Frame.Init()
 	cp.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
+		s.Grow.Set(1, 0)
 	})
 	cp.Maker(func(p *Plan) {
 		if cp.HasChildren() { // TODO(config)
