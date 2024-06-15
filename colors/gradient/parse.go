@@ -302,7 +302,7 @@ func ParseColorStop(stop *Stop, prev color.Color, par string) error {
 	return nil
 }
 
-// NOTE: XML marshalling functionality is at [cogentcore.org/core/svg.SVGNodeXMLGrad] instead of here
+// NOTE: XML marshalling functionality is at [cogentcore.org/core/svg.MarshalXMLGradient] instead of here
 // because it uses a lot of SVG and XML infrastructure defined there.
 
 // ReadXML reads an XML-formatted gradient color from the given io.Reader and

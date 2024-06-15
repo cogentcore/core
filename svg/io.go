@@ -190,7 +190,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "g":
 				curPar = NewGroup(curPar)
 				for _, attr := range se.Attr {
-					if SetStdXMLAttr(curPar.AsNodeBase(), attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(curPar.AsNodeBase(), attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -202,7 +202,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				rect := NewRect(curPar)
 				var x, y, w, h, rx, ry float32
 				for _, attr := range se.Attr {
-					if SetStdXMLAttr(rect, attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(rect, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -232,7 +232,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				circle := NewCircle(curPar)
 				var cx, cy, r float32
 				for _, attr := range se.Attr {
-					if SetStdXMLAttr(circle, attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(circle, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -255,7 +255,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				ellipse := NewEllipse(curPar)
 				var cx, cy, rx, ry float32
 				for _, attr := range se.Attr {
-					if SetStdXMLAttr(ellipse, attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(ellipse, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -280,7 +280,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				line := NewLine(curPar)
 				var x1, x2, y1, y2 float32
 				for _, attr := range se.Attr {
-					if SetStdXMLAttr(line, attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(line, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -304,7 +304,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "polygon":
 				polygon := NewPolygon(curPar)
 				for _, attr := range se.Attr {
-					if SetStdXMLAttr(polygon, attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(polygon, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -333,7 +333,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "polyline":
 				polyline := NewPolyline(curPar)
 				for _, attr := range se.Attr {
-					if SetStdXMLAttr(polyline, attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(polyline, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -365,7 +365,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					if attr.Name.Local == "original-d" {
 						continue
 					}
-					if SetStdXMLAttr(path, attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(path, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -382,7 +382,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				img := NewImage(curPar)
 				var x, y, w, h float32
 				for _, attr := range se.Attr {
-					if SetStdXMLAttr(img, attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(img, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -448,7 +448,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					break
 				}
 				for _, attr := range se.Attr {
-					if SetStdXMLAttr(txt, attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(txt, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -502,7 +502,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "linearGradient":
 				grad := NewGradient(curPar)
 				for _, attr := range se.Attr {
-					if SetStdXMLAttr(grad, attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(grad, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -530,7 +530,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "radialGradient":
 				grad := NewGradient(curPar)
 				for _, attr := range se.Attr {
-					if SetStdXMLAttr(grad, attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(grad, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -558,7 +558,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "style":
 				sty := NewStyleSheet(curPar)
 				for _, attr := range se.Attr {
-					if SetStdXMLAttr(sty, attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(sty, attr.Name.Local, attr.Value) {
 						continue
 					}
 				}
@@ -569,7 +569,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				curPar = NewClipPath(curPar)
 				cp := curPar.(*ClipPath)
 				for _, attr := range se.Attr {
-					if SetStdXMLAttr(cp, attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(cp, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -584,7 +584,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				szx := float32(3)
 				szy := float32(3)
 				for _, attr := range se.Attr {
-					if SetStdXMLAttr(mrk, attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(mrk, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -630,7 +630,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					if cln != nil {
 						curPar.AsTree().AddChild(cln)
 						for _, attr := range se.Attr {
-							if SetStdXMLAttr(cln.AsNodeBase(), attr.Name.Local, attr.Value) {
+							if SetStandardXMLAttr(cln.AsNodeBase(), attr.Name.Local, attr.Value) {
 								continue
 							}
 							switch attr.Name.Local {
@@ -661,7 +661,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				md := curPar.(*MetaData)
 				md.Class = nm
 				for _, attr := range se.Attr {
-					if SetStdXMLAttr(md, attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(md, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -675,7 +675,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				md.Class = nm
 				md.FlowType = nm
 				for _, attr := range se.Attr {
-					if SetStdXMLAttr(md, attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(md, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -693,7 +693,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				md.Class = nm
 				md.FilterType = nm
 				for _, attr := range se.Attr {
-					if SetStdXMLAttr(md, attr.Name.Local, attr.Value) {
+					if SetStandardXMLAttr(md, attr.Name.Local, attr.Value) {
 						continue
 					}
 					switch attr.Name.Local {
@@ -832,22 +832,22 @@ var InkscapeProperties = map[string]bool{
 	"stockid": true,
 }
 
-// SVGNodeMarshalXML encodes just the given node under SVG to XML.
-// returns name of node, for end tag -- if empty, then children will not be
+// MarshalXML encodes just the given node under SVG to XML.
+// It returns the name of node, for end tag; if empty, then children will not be
 // output.
-func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
-	if itm == nil || itm.AsTree().This == nil {
+func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
+	if n == nil || n.AsTree().This == nil {
 		return ""
 	}
 	se := xml.StartElement{}
-	properties := itm.AsTree().Properties
-	if itm.AsTree().Name != "" {
-		XMLAddAttr(&se.Attr, "id", itm.AsTree().Name)
+	properties := n.AsTree().Properties
+	if n.AsTree().Name != "" {
+		XMLAddAttr(&se.Attr, "id", n.AsTree().Name)
 	}
 	text := "" // if non-empty, contains text to render
-	_, issvg := itm.(Node)
-	_, isgp := itm.(*Group)
-	_, ismark := itm.(*Marker)
+	_, issvg := n.(Node)
+	_, isgp := n.(*Group)
+	_, ismark := n.(*Marker)
 	if !isgp {
 		if issvg && !ismark {
 			sp := styles.StylePropertiesXML(properties)
@@ -872,14 +872,14 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 	}
 	var sb strings.Builder
 	nm := ""
-	switch nd := itm.(type) {
+	switch nd := n.(type) {
 	case *Path:
 		nm = "path"
 		nd.DataStr = PathDataString(nd.Data)
 		XMLAddAttr(&se.Attr, "d", nd.DataStr)
 	case *Group:
 		nm = "g"
-		if strings.HasPrefix(strings.ToLower(itm.AsTree().Name), "layer") {
+		if strings.HasPrefix(strings.ToLower(n.AsTree().Name), "layer") {
 		}
 		for k, v := range properties {
 			sv := reflectx.ToString(v)
@@ -962,7 +962,7 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 			nm = "inkscape:grid"
 		}
 	case *Gradient:
-		SVGNodeXMLGrad(nd, nd.Name, enc)
+		MarshalXMLGradient(nd, nd.Name, enc)
 		return "" // exclude -- already written
 	case *Marker:
 		nm = "marker"
@@ -974,7 +974,7 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 	case *StyleSheet:
 		nm = "style"
 	default:
-		nm = itm.NodeType().Name
+		nm = n.NodeType().Name
 	}
 	se.Name.Local = nm
 	if setName != "" {
@@ -988,12 +988,11 @@ func SVGNodeMarshalXML(itm tree.Node, enc *XMLEncoder, setName string) string {
 	return se.Name.Local
 }
 
-// SVGNodeXMLGrad adds the XML for the given gradient to the given encoder.
-// This is not in cogentcore.org/core/colors/gradient because it uses a lot of SVG
+// MarshalXMLGradient adds the XML for the given gradient to the given encoder.
+// This is not in [cogentcore.org/core/colors/gradient] because it uses a lot of SVG
 // and XML infrastructure defined here.
-func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
-	// TODO(kai): why isn't this in colors/gradient?
-	gr := nd.Grad
+func MarshalXMLGradient(n *Gradient, name string, enc *XMLEncoder) {
+	gr := n.Grad
 	if gr == nil {
 		return
 	}
@@ -1042,12 +1041,12 @@ func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
 		XMLAddAttr(&me.Attr, "gradientTransform", fmt.Sprintf("matrix(%g,%g,%g,%g,%g,%g)", gb.Transform.XX, gb.Transform.YX, gb.Transform.XY, gb.Transform.YY, gb.Transform.X0, gb.Transform.Y0))
 	}
 
-	if nd.StopsName != "" {
-		XMLAddAttr(&me.Attr, "href", "#"+nd.StopsName)
+	if n.StopsName != "" {
+		XMLAddAttr(&me.Attr, "href", "#"+n.StopsName)
 	}
 
 	enc.EncodeToken(me)
-	if nd.StopsName == "" {
+	if n.StopsName == "" {
 		for _, gs := range gb.Stops {
 			se := xml.StartElement{}
 			se.Name.Local = "stop"
@@ -1062,16 +1061,16 @@ func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
 	enc.WriteEnd(me.Name.Local)
 }
 
-// SVGNodeTreeMarshalXML encodes item and any children to XML.
-// returns any error, and name of element that enc.WriteEnd() should be
-// called with -- allows for extra elements to be added at end of list.
-func SVGNodeTreeMarshalXML(itm Node, enc *XMLEncoder, setName string) (string, error) {
-	name := SVGNodeMarshalXML(itm, enc, setName)
+// MarshalXMLTree encodes the given node and any children to XML.
+// It returns any error, and name of element that enc.WriteEnd() should be
+// called with; allows for extra elements to be added at end of list.
+func MarshalXMLTree(n Node, enc *XMLEncoder, setName string) (string, error) {
+	name := MarshalXML(n, enc, setName)
 	if name == "" {
 		return "", nil
 	}
-	for _, k := range itm.AsTree().Children {
-		knm, err := SVGNodeTreeMarshalXML(k.(Node), enc, "")
+	for _, k := range n.AsTree().Children {
+		knm, err := MarshalXMLTree(k.(Node), enc, "")
 		if knm != "" {
 			enc.WriteEnd(knm)
 		}
@@ -1095,12 +1094,12 @@ func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	XMLAddAttr(&me.Attr, "xmlns", "http://www.w3.org/2000/svg")
 	enc.EncodeToken(me)
 
-	dnm, err := SVGNodeTreeMarshalXML(sv.Defs, enc, "defs")
+	dnm, err := MarshalXMLTree(sv.Defs, enc, "defs")
 	enc.WriteEnd(dnm)
 
 	for _, k := range sv.Root.Children {
 		var knm string
-		knm, err = SVGNodeTreeMarshalXML(k.(Node), enc, "")
+		knm, err = MarshalXMLTree(k.(Node), enc, "")
 		if knm != "" {
 			enc.WriteEnd(knm)
 		}
@@ -1115,9 +1114,9 @@ func (sv *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	return err
 }
 
-// SetStdXMLAttr sets standard attributes of node given XML-style name /
-// attribute values (e.g., from parsing XML / SVG files) -- returns true if handled
-func SetStdXMLAttr(ni Node, name, val string) bool {
+// SetStandardXMLAttr sets standard attributes of node given XML-style name /
+// attribute values (e.g., from parsing XML / SVG files); returns true if handled.
+func SetStandardXMLAttr(ni Node, name, val string) bool {
 	nb := ni.AsNodeBase()
 	switch name {
 	case "id":
