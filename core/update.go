@@ -31,13 +31,14 @@ func (wb *WidgetBase) Maker(maker func(p *Plan)) {
 // itself and not any of its children. Also, it does not restyle the widget or trigger
 // a new layout pass, while [WidgetBase.Update] does. End-user code should typically
 // call [WidgetBase.Update], not UpdateWidget.
-func (wb *WidgetBase) UpdateWidget() {
+func (wb *WidgetBase) UpdateWidget() *WidgetBase {
 	if wb.ValueUpdate != nil {
 		wb.ValueUpdate()
 	}
 	for i := len(wb.Updaters) - 1; i >= 0; i-- {
 		wb.Updaters[i]()
 	}
+	return wb
 }
 
 // updateFromMake updates the widget using [WidgetBase.Make].
