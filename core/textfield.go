@@ -33,10 +33,10 @@ import (
 // TextField is a widget for editing a line of text.
 // With the default WhiteSpaceNormal style setting,
 // text will wrap onto multiple lines as needed.
-// Set to WhiteSpaceNowrap (e.g., Styles.SetTextWrap(false)) to
+// Set to WhiteSpaceNowrap (e.g., styles.Style.SetTextWrap(false)) to
 // force everything to be on a single line.
-// With multi-line wrapped text, the text is still treated as a contiguous
-// wrapped text.
+// With multi-line wrapped text, the text is still treated as a single
+// contiguous line of wrapped text.
 type TextField struct { //core:embedder
 	Frame
 
