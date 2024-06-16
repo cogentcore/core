@@ -85,10 +85,16 @@ func HandleElement(ctx *Context) {
 	case "style":
 		ctx.AddStyle(ExtractText(ctx))
 	case "body", "main", "div", "section", "nav", "footer", "header", "ol", "ul":
-		ctx.NewParent = New[*core.Frame](ctx)
+		w := New[*core.Frame](ctx)
+		ctx.NewParent = w
 		if tag == "body" {
-			ctx.NewParent.AsWidget().Styler(func(s *styles.Style) {
+			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 1)
+			})
+		}
+		if tag == "ol" || tag == "ul" {
+			w.Styler(func(s *styles.Style) {
+				s.Grow.Set(1, 0)
 			})
 		}
 	case "button":
