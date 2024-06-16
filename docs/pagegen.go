@@ -145,7 +145,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			s.Gap.Zero()
 		})
 		for range 9 {
-			bt := core.NewButton(grid).SetType(core.ButtonAction).SetIcon(icons.Blank)
+			bt := core.NewButton(grid).SetType(core.ButtonAction).SetText(" ")
 			bt.Styler(func(s *styles.Style) {
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
@@ -154,8 +154,8 @@ var PagesExamples = map[string]func(parent core.Widget){
 		}
 	},
 	"tutorials/tic-tac-toe-1": func(parent core.Widget) {
-		isX := true
-		squares := map[int]bool{}
+		current := "X"
+		squares := [9]string{}
 		grid := core.NewFrame(parent)
 		grid.Styler(func(s *styles.Style) {
 			s.Display = styles.Grid
@@ -163,37 +163,32 @@ var PagesExamples = map[string]func(parent core.Widget){
 			s.Gap.Zero()
 		})
 		for i := range 9 {
-			bt := core.NewButton(grid).SetType(core.ButtonAction).SetIcon(icons.Blank)
+			bt := core.NewButton(grid).SetType(core.ButtonAction).SetText(" ")
 			bt.Styler(func(s *styles.Style) {
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 				s.Border.Radius.Zero()
 			})
 			bt.OnClick(func(e events.Event) {
-				if _, set := squares[i]; set {
+				if squares[i] != "" {
 					return
 				}
-				squares[i] = isX
-				if isX {
-					bt.SetIcon(icons.Close)
+				squares[i] = current
+				bt.SetText(current).Update()
+				if current == "X" {
+					current = "O"
 				} else {
-					bt.SetIcon(icons.Circle)
+					current = "X"
 				}
-				bt.Update()
-				isX = !isX
 			})
 		}
 	},
 	"tutorials/tic-tac-toe-2": func(parent core.Widget) {
-		isX := true
-		squares := map[int]bool{}
+		current := "X"
+		squares := [9]string{}
 		status := core.NewText(parent)
 		status.Updater(func() {
-			if isX {
-				status.SetText("Next player: X")
-			} else {
-				status.SetText("Next player: O")
-			}
+			status.SetText("Next player: " + current)
 		})
 		grid := core.NewFrame(parent)
 		grid.Styler(func(s *styles.Style) {
@@ -202,24 +197,23 @@ var PagesExamples = map[string]func(parent core.Widget){
 			s.Gap.Zero()
 		})
 		for i := range 9 {
-			bt := core.NewButton(grid).SetType(core.ButtonAction).SetIcon(icons.Blank)
+			bt := core.NewButton(grid).SetType(core.ButtonAction).SetText(" ")
 			bt.Styler(func(s *styles.Style) {
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 				s.Border.Radius.Zero()
 			})
 			bt.OnClick(func(e events.Event) {
-				if _, set := squares[i]; set {
+				if squares[i] != "" {
 					return
 				}
-				squares[i] = isX
-				if isX {
-					bt.SetIcon(icons.Close)
+				squares[i] = current
+				bt.SetText(current).Update()
+				if current == "X" {
+					current = "O"
 				} else {
-					bt.SetIcon(icons.Circle)
+					current = "X"
 				}
-				isX = !isX
-				bt.Update()
 				status.Update()
 			})
 		}
