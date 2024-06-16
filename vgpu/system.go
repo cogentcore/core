@@ -60,6 +60,10 @@ type System struct {
 
 	// renderpass with depth buffer for this system
 	Render Render
+
+	// number of textures at point of last system Config.
+	// pipelines are not rebuilt if this is the same.
+	configNTextures int
 }
 
 // InitGraphics initializes the System for graphics use, using
@@ -270,12 +274,15 @@ func (sy *System) Config() {
 	} else {
 		sy.Mem.Vars.BindDynVarsAll()
 	}
+	ntextures := sy.Mem.Vars.NTextures
+	rebuild := ntextures != sy.configNTextures
 	if Debug {
 		fmt.Printf("%s\n", sy.Vars().StringDoc())
 	}
 	for _, pl := range sy.Pipelines {
-		pl.Config()
+		pl.Config(rebuild)
 	}
+	sy.configNTextures = ntextures
 }
 
 //////////////////////////////////////////////////////////////

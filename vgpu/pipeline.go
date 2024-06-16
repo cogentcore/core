@@ -134,9 +134,14 @@ func (pl *Pipeline) InitPipeline() {
 
 // Config is called once all the VkConfig options have been set
 // using Set* methods, and the shaders have been loaded.
-// The parent System has already done what it can for its config
-func (pl *Pipeline) Config() {
+// The parent System has already done what it can for its config.
+// The rebuild flag indicates whether pipelines should rebuild,
+// e.g., based on NTextures changing.
+func (pl *Pipeline) Config(rebuild bool) {
 	if pl.VkPipeline != vk.NullPipeline {
+		if !rebuild {
+			return
+		}
 		pl.DestroyPipeline() // starting over: note: requires keeping shaders around
 	}
 	pl.ConfigStages()

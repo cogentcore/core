@@ -60,6 +60,9 @@ type Vars struct {
 
 	// dynamic offsets for Uniform and Storage variables, -- outer index is Vars.NDescs for different groups of descriptor sets, one of which can be bound to a pipeline at any given time, inner index is DynOffIndex on Var -- offsets are set when Value is bound via BindDynValue*.
 	DynOffs [][]uint32
+
+	// number of textures, at point of creating the DescLayout
+	NTextures int
 }
 
 func (vs *Vars) Destroy(dev vk.Device) {
@@ -262,6 +265,7 @@ func (vs *Vars) VkPushConfig() []vk.PushConstantRange {
 // DescLayout configures the PipelineLayout of DescriptorSetLayout
 // info for all of the non-Vertex vars
 func (vs *Vars) DescLayout(dev vk.Device) {
+	vs.NTextures = 0
 	if vs.VkDescLayout != vk.NullPipelineLayout {
 		vk.DestroyPipelineLayout(dev, vs.VkDescLayout, nil)
 	}
@@ -335,6 +339,7 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 			continue
 		}
 		st.DescLayout(dev, vs)
+		vs.NTextures += st.NTextures
 		dlays[si] = st.VkLayout
 	}
 

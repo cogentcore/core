@@ -61,6 +61,9 @@ type VarSet struct {
 	// number of value instances to allocate per variable in this set: each value must be allocated in advance for each unique instance of a variable required across a complete scene rendering -- e.g., if this is an object position matrix, then one per object is required.  If a dynamic number are required, allocate the max possible.  For Texture vars, each of the NDesc sets can have a maximum of MaxTexturesPerSet (16) -- if NValuesPer > MaxTexturesPerSet, then vals are wrapped across sets, and accessing them requires using the appropriate DescIndex, as in System.CmdBindTextureVarIndex.
 	NValuesPer int
 
+	// number of textures, at point of creating the DescLayout
+	NTextures int
+
 	// for texture vars, this is the number of descriptor sets required to represent all of the different Texture image Values that have been allocated.  Use Vars.BindAllTextureValues to bind all such vals, and System.CmdBindTextureVarIndex to automatically bind the correct set.
 	NTextureDescs int
 
@@ -184,6 +187,7 @@ func (st *VarSet) DestroyLayout(dev vk.Device) {
 // Must have set NValuesPer for any TextureRole vars, which require separate descriptors per.
 func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 	st.DestroyLayout(dev)
+	st.NTextures = 0
 	var descLayout vk.DescriptorSetLayout
 	var binds []vk.DescriptorSetLayoutBinding
 	dyno := len(vs.DynOffs[0])
@@ -205,6 +209,7 @@ func (st *VarSet) DescLayout(dev vk.Device, vs *Vars) {
 		if vr.Role > Storage {
 			vals := vr.Values.ActiveValues()
 			nvals := len(vals)
+			st.NTextures += nvals
 			nVarDesc = min(nvals, MaxTexturesPerSet) // per desc
 
 			if nvals > MaxTexturesPerSet {
