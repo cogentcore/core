@@ -15,3 +15,5 @@ core.NewButton(parent).SetText("Click me!").OnClick(func(e events.Event) {
     core.MessageSnackbar(parent, fmt.Sprint("Button clicked at ", e.Pos()))
 })
 ```
+
+You can see the [advanced events page](../advanced/events) for more information if you need it.

@@ -13,3 +13,5 @@ The `core` command line tool provides four main build commands, as documented be
 3. `core pack` packages the app into a self-contained package and builds an installer for it
 
 4. `core install` installs the app on the target system
+
+You can see the [advanced building page](../advanced/building) for more information if you need it.
