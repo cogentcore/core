@@ -422,6 +422,15 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewButton(fr).SetText("Second")
 		core.NewButton(fr).SetText("Third")
 	},
+	"widgets/basic/icons-0": func(parent core.Widget) {
+		core.NewButton(parent).SetIcon(icons.Send)
+	},
+	"widgets/basic/icons-1": func(parent core.Widget) {
+		core.NewIcon(parent).SetIcon(icons.Home)
+	},
+	"widgets/basic/icons-2": func(parent core.Widget) {
+		core.NewButton(parent).SetIcon(icons.Home.Fill())
+	},
 	"widgets/basic/text-0": func(parent core.Widget) {
 		core.NewText(parent).SetText("Hello, world!")
 	},
@@ -1206,15 +1215,6 @@ func main() {
 			s.Min.Set(units.Dp(128))
 		})
 	},
-	"widgets/media/icons-0": func(parent core.Widget) {
-		core.NewButton(parent).SetIcon(icons.Send)
-	},
-	"widgets/media/icons-1": func(parent core.Widget) {
-		core.NewIcon(parent).SetIcon(icons.Home)
-	},
-	"widgets/media/icons-2": func(parent core.Widget) {
-		core.NewButton(parent).SetIcon(icons.Home.Fill())
-	},
 	"widgets/media/images-0": func(parent core.Widget) {
 		errors.Log(core.NewImage(parent).OpenFS(myImage, "image.png"))
 	},
@@ -1231,48 +1231,6 @@ func main() {
 		draw.Draw(img, image.Rect(20, 20, 60, 50), colors.C(colors.Scheme.Success.Base), image.Point{}, draw.Src)
 		draw.Draw(img, image.Rect(60, 70, 80, 100), colors.C(colors.Scheme.Error.Base), image.Point{}, draw.Src)
 		core.NewImage(parent).SetImage(img)
-	},
-	"widgets/media/meters-0": func(parent core.Widget) {
-		core.NewMeter(parent)
-	},
-	"widgets/media/meters-1": func(parent core.Widget) {
-		core.NewMeter(parent).SetValue(0.7)
-	},
-	"widgets/media/meters-2": func(parent core.Widget) {
-		core.NewMeter(parent).SetMin(5.7).SetMax(18).SetValue(10.2)
-	},
-	"widgets/media/meters-3": func(parent core.Widget) {
-		core.NewMeter(parent).Styler(func(s *styles.Style) {
-			s.Direction = styles.Column
-		})
-	},
-	"widgets/media/meters-4": func(parent core.Widget) {
-		core.NewMeter(parent).SetType(core.MeterCircle)
-	},
-	"widgets/media/meters-5": func(parent core.Widget) {
-		core.NewMeter(parent).SetType(core.MeterSemicircle)
-	},
-	"widgets/media/meters-6": func(parent core.Widget) {
-		core.NewMeter(parent).SetType(core.MeterCircle).SetText("50%")
-	},
-	"widgets/media/meters-7": func(parent core.Widget) {
-		core.NewMeter(parent).SetType(core.MeterSemicircle).SetText("50%")
-	},
-	"widgets/media/plots-0": func(parent core.Widget) {
-		type Data struct {
-			Time       float32
-			Population float32
-		}
-		data := []Data{
-			{0, 500},
-			{1, 800},
-			{2, 1600},
-			{3, 1400},
-		}
-		dt := errors.Log1(table.NewSliceTable(data))
-		pe := plotcore.NewPlotEditor(parent).SetTable(dt)
-		pe.Params.XAxisColumn = "Time"
-		pe.ColumnParams("Population").On = true
 	},
 	"widgets/media/svgs-0": func(parent core.Widget) {
 		errors.Log(core.NewSVG(parent).OpenFS(mySVG, "icon.svg"))
@@ -1291,6 +1249,48 @@ func main() {
 	},
 	"widgets/media/svgs-3": func(parent core.Widget) {
 		errors.Log(core.NewSVG(parent).ReadString(`<rect width="100" height="100" fill="red"/>`))
+	},
+	"widgets/other/meters-0": func(parent core.Widget) {
+		core.NewMeter(parent)
+	},
+	"widgets/other/meters-1": func(parent core.Widget) {
+		core.NewMeter(parent).SetValue(0.7)
+	},
+	"widgets/other/meters-2": func(parent core.Widget) {
+		core.NewMeter(parent).SetMin(5.7).SetMax(18).SetValue(10.2)
+	},
+	"widgets/other/meters-3": func(parent core.Widget) {
+		core.NewMeter(parent).Styler(func(s *styles.Style) {
+			s.Direction = styles.Column
+		})
+	},
+	"widgets/other/meters-4": func(parent core.Widget) {
+		core.NewMeter(parent).SetType(core.MeterCircle)
+	},
+	"widgets/other/meters-5": func(parent core.Widget) {
+		core.NewMeter(parent).SetType(core.MeterSemicircle)
+	},
+	"widgets/other/meters-6": func(parent core.Widget) {
+		core.NewMeter(parent).SetType(core.MeterCircle).SetText("50%")
+	},
+	"widgets/other/meters-7": func(parent core.Widget) {
+		core.NewMeter(parent).SetType(core.MeterSemicircle).SetText("50%")
+	},
+	"widgets/other/plots-0": func(parent core.Widget) {
+		type Data struct {
+			Time       float32
+			Population float32
+		}
+		data := []Data{
+			{0, 500},
+			{1, 800},
+			{2, 1600},
+			{3, 1400},
+		}
+		dt := errors.Log1(table.NewSliceTable(data))
+		pe := plotcore.NewPlotEditor(parent).SetTable(dt)
+		pe.Params.XAxisColumn = "Time"
+		pe.ColumnParams("Population").On = true
 	},
 	"advanced/styling-0": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
