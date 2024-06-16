@@ -92,6 +92,20 @@ type employee struct {
 core.NewForm(parent).SetStruct(&employee{Person{Name: "Go", Age: 35}, "Programmer"})
 ```
 
+You can display fields that are themselves structs:
+
+```Go
+type person struct {
+    Name string
+    Age  int
+}
+type employee struct {
+    Role    string
+    Manager person
+}
+core.NewForm(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
+```
+
 You can expand fields that are themselves structs:
 
 ```Go

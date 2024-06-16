@@ -104,7 +104,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"basics/plans-0": func(parent core.Widget) {
 		number := 3
-		spinner := core.Bind(&number, core.NewSpinner(parent))
+		spinner := core.Bind(&number, core.NewSpinner(parent)).SetMin(1)
 		buttons := core.NewFrame(parent)
 		buttons.Maker(func(p *core.Plan) {
 			for i := range number {
@@ -132,7 +132,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		}
 		items := []item{{Task: "Code"}, {Task: "Eat"}}
 		var table *core.Table
-		core.NewButton(parent).SetText("Add").OnClick(func(e events.Event) {
+		core.NewButton(parent).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
 			table.SliceNewAt(0)
 		})
 		table = core.NewTable(parent).SetSlice(&items)
@@ -207,6 +207,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			sets := [][3]int{ // possible sets of three that result in a win
 				{0, 1, 2}, {3, 4, 5}, {6, 7, 8}, {0, 3, 6}, {1, 4, 7}, {2, 5, 8}, {0, 4, 8}, {2, 4, 6},
 			}
+			// check if someone has won
 			for _, set := range sets {
 				if squares[set[0]] != "" && squares[set[0]] == squares[set[1]] && squares[set[0]] == squares[set[2]] {
 					status.SetText(squares[set[0]] + " wins!")
@@ -894,11 +895,22 @@ func main() {
 		}
 		type employee struct {
 			Role    string
-			Manager person `display:"add-fields"`
+			Manager person
 		}
 		core.NewForm(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
 	},
 	"widgets/collections/forms-9": func(parent core.Widget) {
+		type person struct {
+			Name string
+			Age  int
+		}
+		type employee struct {
+			Role    string
+			Manager person `display:"add-fields"`
+		}
+		core.NewForm(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
+	},
+	"widgets/collections/forms-10": func(parent core.Widget) {
 		type person struct {
 			Name      string `default:"Gopher"`
 			Age       int    `default:"20:30"`
@@ -906,14 +918,14 @@ func main() {
 		}
 		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 	},
-	"widgets/collections/forms-10": func(parent core.Widget) {
+	"widgets/collections/forms-11": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
 		}
 		// core.NewValue(&person{Name: "Go", Age: 35}, "", parent)
 	},
-	"widgets/collections/forms-11": func(parent core.Widget) {
+	"widgets/collections/forms-12": func(parent core.Widget) {
 		type person struct {
 			Name        string
 			Age         int

@@ -80,6 +80,7 @@ status.Updater(func() {
     sets := [][3]int{ // possible sets of three that result in a win
         {0, 1, 2}, {3, 4, 5}, {6, 7, 8}, {0, 3, 6}, {1, 4, 7}, {2, 5, 8}, {0, 4, 8}, {2, 4, 6},
     }
+    // check if someone has won
     for _, set := range sets {
         if squares[set[0]] != "" && squares[set[0]] == squares[set[1]] && squares[set[0]] == squares[set[2]] {
             status.SetText(squares[set[0]]+" wins!")

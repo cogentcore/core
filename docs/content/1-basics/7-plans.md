@@ -6,7 +6,7 @@ For example, this code uses [[core.Plan]] through [[core.WidgetBase.Maker]] to d
 
 ```Go
 number := 3
-spinner := core.Bind(&number, core.NewSpinner(parent))
+spinner := core.Bind(&number, core.NewSpinner(parent)).SetMin(1)
 buttons := core.NewFrame(parent)
 buttons.Maker(func(p *core.Plan) {
     for i := range number {
