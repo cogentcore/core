@@ -155,13 +155,14 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"tutorials/tic-tac-toe-1": func(parent core.Widget) {
 		isX := true
+		squares := map[int]bool{}
 		grid := core.NewFrame(parent)
 		grid.Styler(func(s *styles.Style) {
 			s.Display = styles.Grid
 			s.Columns = 3
 			s.Gap.Zero()
 		})
-		for range 9 {
+		for i := range 9 {
 			bt := core.NewButton(grid).SetType(core.ButtonAction).SetIcon(icons.Blank)
 			bt.Styler(func(s *styles.Style) {
 				s.Border.Width.Set(units.Dp(1))
@@ -169,9 +170,10 @@ var PagesExamples = map[string]func(parent core.Widget){
 				s.Border.Radius.Zero()
 			})
 			bt.OnClick(func(e events.Event) {
-				if bt.Icon != icons.Blank {
+				if _, set := squares[i]; set {
 					return
 				}
+				squares[i] = isX
 				if isX {
 					bt.SetIcon(icons.Close)
 				} else {
@@ -184,6 +186,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"tutorials/tic-tac-toe-2": func(parent core.Widget) {
 		isX := true
+		squares := map[int]bool{}
 		status := core.NewText(parent)
 		status.Updater(func() {
 			if isX {
@@ -198,7 +201,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			s.Columns = 3
 			s.Gap.Zero()
 		})
-		for range 9 {
+		for i := range 9 {
 			bt := core.NewButton(grid).SetType(core.ButtonAction).SetIcon(icons.Blank)
 			bt.Styler(func(s *styles.Style) {
 				s.Border.Width.Set(units.Dp(1))
@@ -206,9 +209,10 @@ var PagesExamples = map[string]func(parent core.Widget){
 				s.Border.Radius.Zero()
 			})
 			bt.OnClick(func(e events.Event) {
-				if bt.Icon != icons.Blank {
+				if _, set := squares[i]; set {
 					return
 				}
+				squares[i] = isX
 				if isX {
 					bt.SetIcon(icons.Close)
 				} else {
