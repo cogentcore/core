@@ -6,8 +6,8 @@ package main
 
 import (
 	"embed"
-	"log/slog"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/plot/plotcore"
 	"cogentcore.org/core/tensor/table"
@@ -43,10 +43,7 @@ func main() {
 			{"Boulder", 85000, 800},
 		}
 
-		dt, err := table.NewSliceTable(data)
-		if err != nil {
-			slog.Error(err.Error())
-		}
+		dt := errors.Log1(table.NewSliceTable(data))
 
 		pl := plotcore.NewPlotEditor(b)
 		pl.Params.Title = "Slice Data"

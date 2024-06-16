@@ -21,8 +21,10 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/pages"
 	"cogentcore.org/core/paint"
+	"cogentcore.org/core/plot/plotcore"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
 )
@@ -1121,6 +1123,22 @@ func main() {
 	},
 	"widgets/media/meters-7": func(parent core.Widget) {
 		core.NewMeter(parent).SetType(core.MeterSemicircle).SetText("50%")
+	},
+	"widgets/media/plots-0": func(parent core.Widget) {
+		type Data struct {
+			Time       float32
+			Population float32
+		}
+		data := []Data{
+			{0, 500},
+			{1, 800},
+			{2, 1600},
+			{3, 1400},
+		}
+		dt := errors.Log1(table.NewSliceTable(data))
+		pe := plotcore.NewPlotEditor(parent).SetTable(dt)
+		pe.Params.XAxisColumn = "Time"
+		pe.ColumnParams("Population").On = true
 	},
 	"widgets/media/svgs-0": func(parent core.Widget) {
 		errors.Log(core.NewSVG(parent).OpenFS(mySVG, "icon.svg"))
