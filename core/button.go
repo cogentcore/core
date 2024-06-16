@@ -104,12 +104,12 @@ const (
 	// like a spinner or snackbar. It has no border, background color,
 	// or shadow when not being interacted with. It inherits the text
 	// color of its parent, and it renders a background when
-	// hovered/focused/active. you must ensure it stands out from the
+	// hovered/focused/active. You must ensure it stands out from the
 	// surrounding context sufficiently. It is equivalent to Material Design's
 	// icon button, but it can also contain text and other things (and frequently does).
 	ButtonAction
 
-	// ButtonMenu is similar to [ButtonAction], but it is only
+	// ButtonMenu is similar to [ButtonAction], but it is designed
 	// for buttons located in popup menus.
 	ButtonMenu
 )
@@ -162,7 +162,7 @@ func (bt *Button) Init() {
 		case ButtonMenu:
 			s.Grow.Set(1, 0) // need to go to edge of menu
 			s.Justify.Content = styles.Start
-			s.Border.Radius = styles.BorderRadiusNone
+			s.Border.Radius.Zero()
 			s.Padding.Set(units.Dp(6), units.Dp(12))
 			s.MaxBoxShadow = styles.BoxShadow0()
 		}

@@ -137,6 +137,22 @@ var PagesExamples = map[string]func(parent core.Widget){
 		})
 		table = core.NewTable(parent).SetSlice(&items)
 	},
+	"tutorials/tic-tac-toe-0": func(parent core.Widget) {
+		grid := core.NewFrame(parent)
+		grid.Styler(func(s *styles.Style) {
+			s.Display = styles.Grid
+			s.Columns = 3
+			s.Gap.Zero()
+		})
+		for range 9 {
+			bt := core.NewButton(grid).SetType(core.ButtonAction).SetIcon(icons.Blank)
+			bt.Styler(func(s *styles.Style) {
+				s.Border.Width.Set(units.Dp(1))
+				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+				s.Border.Radius.Zero()
+			})
+		}
+	},
 	"widgets/basic/buttons-0": func(parent core.Widget) {
 		core.NewButton(parent).SetText("Download")
 	},

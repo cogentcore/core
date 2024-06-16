@@ -100,10 +100,6 @@ func (bs *Border) ToDots(uc *units.Context) {
 // Pre-configured border radius values, based on
 // https://m3.material.io/styles/shape/shape-scale-tokens
 var (
-	// BorderRadiusNone indicates to use no border radius,
-	// which creates a fully rectangular element
-	BorderRadiusNone = NewSideValues(units.Zero())
-
 	// BorderRadiusExtraSmall indicates to use extra small
 	// 4dp rounded corners
 	BorderRadiusExtraSmall = NewSideValues(units.Dp(4))
