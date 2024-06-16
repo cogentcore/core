@@ -12,7 +12,7 @@ grid.Styler(func(s *styles.Style) {
     s.Gap.Zero()
 })
 for range 9 {
-    bt := core.NewButton(grid).SetType(core.ButtonAction).SetText(" ")
+    bt := core.NewButton(grid).SetType(core.ButtonAction)
     bt.Styler(func(s *styles.Style) {
         s.Border.Width.Set(units.Dp(1))
         s.Border.Color.Set(colors.C(colors.Scheme.Outline))
@@ -21,7 +21,7 @@ for range 9 {
 }
 ```
 
-Then, we will make it so that clicking on a button sets its text to either X or O based on an alternating variable `current`. We also add a `squares` array that keeps track of the value of each square. This allows us to prevent users from setting a square if it is already set.
+Then, we will make a `squares` array that keeps track of the value of each square, and we will make it so that clicking on a button sets its value in the array to either X or O based on an alternating variable `current`. We also add a [[core.WidgetBase.Updater]] to update the text of each button based on its value in the array. Also, we add a reset button that clears all of the squares.
 
 ```Go
 current := "X"
@@ -33,7 +33,6 @@ grid.Styler(func(s *styles.Style) {
     s.Gap.Zero()
 })
 for i := range 9 {
-    squares[i] = " "
     bt := core.NewButton(grid).SetType(core.ButtonAction)
     bt.Styler(func(s *styles.Style) {
         s.Border.Width.Set(units.Dp(1))
@@ -41,7 +40,8 @@ for i := range 9 {
         s.Border.Radius.Zero()
     })
     bt.OnClick(func(e events.Event) {
-        if squares[i] != " " {
+        // don't set squares that already have a value
+        if squares[i] != "" {
             return
         }
         squares[i] = current
@@ -56,6 +56,10 @@ for i := range 9 {
         bt.SetText(squares[i])
     })
 }
+core.NewButton(parent).SetText("Reset").OnClick(func(e events.Event) {
+    squares = [9]string{}
+    grid.Update()
+})
 ```
 
 Finally, we will add status text that updates according to the current state of the game. This includes checking if there is a winner and displaying it if there is one.
@@ -76,7 +80,7 @@ status.Updater(func() {
         {2, 4, 6},
     }
     for _, set := range sets {
-        if squares[set[0]] != " " && squares[set[0]] == squares[set[1]] && squares[set[0]] == squares[set[2]] {
+        if squares[set[0]] != "" && squares[set[0]] == squares[set[1]] && squares[set[0]] == squares[set[2]] {
             status.SetText(squares[set[0]]+" wins!")
             return
         }
@@ -90,7 +94,6 @@ grid.Styler(func(s *styles.Style) {
     s.Gap.Zero()
 })
 for i := range 9 {
-    squares[i] = " "
     bt := core.NewButton(grid).SetType(core.ButtonAction)
     bt.Styler(func(s *styles.Style) {
         s.Border.Width.Set(units.Dp(1))
@@ -98,7 +101,7 @@ for i := range 9 {
         s.Border.Radius.Zero()
     })
     bt.OnClick(func(e events.Event) {
-        if squares[i] != " " {
+        if squares[i] != "" {
             return
         }
         squares[i] = current
@@ -114,4 +117,8 @@ for i := range 9 {
         bt.SetText(squares[i])
     })
 }
+core.NewButton(parent).SetText("Reset").OnClick(func(e events.Event) {
+    squares = [9]string{}
+    grid.Update()
+})
 ```

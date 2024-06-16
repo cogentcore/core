@@ -145,7 +145,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			s.Gap.Zero()
 		})
 		for range 9 {
-			bt := core.NewButton(grid).SetType(core.ButtonAction).SetText(" ")
+			bt := core.NewButton(grid).SetType(core.ButtonAction)
 			bt.Styler(func(s *styles.Style) {
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
@@ -163,7 +163,6 @@ var PagesExamples = map[string]func(parent core.Widget){
 			s.Gap.Zero()
 		})
 		for i := range 9 {
-			squares[i] = " "
 			bt := core.NewButton(grid).SetType(core.ButtonAction)
 			bt.Styler(func(s *styles.Style) {
 				s.Border.Width.Set(units.Dp(1))
@@ -171,7 +170,8 @@ var PagesExamples = map[string]func(parent core.Widget){
 				s.Border.Radius.Zero()
 			})
 			bt.OnClick(func(e events.Event) {
-				if squares[i] != " " {
+				// don't set squares that already have a value
+				if squares[i] != "" {
 					return
 				}
 				squares[i] = current
@@ -186,6 +186,10 @@ var PagesExamples = map[string]func(parent core.Widget){
 				bt.SetText(squares[i])
 			})
 		}
+		core.NewButton(parent).SetText("Reset").OnClick(func(e events.Event) {
+			squares = [9]string{}
+			grid.Update()
+		})
 	},
 	"tutorials/tic-tac-toe-2": func(parent core.Widget) {
 		current := "X"
@@ -203,7 +207,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 				{2, 4, 6},
 			}
 			for _, set := range sets {
-				if squares[set[0]] != " " && squares[set[0]] == squares[set[1]] && squares[set[0]] == squares[set[2]] {
+				if squares[set[0]] != "" && squares[set[0]] == squares[set[1]] && squares[set[0]] == squares[set[2]] {
 					status.SetText(squares[set[0]] + " wins!")
 					return
 				}
@@ -217,7 +221,6 @@ var PagesExamples = map[string]func(parent core.Widget){
 			s.Gap.Zero()
 		})
 		for i := range 9 {
-			squares[i] = " "
 			bt := core.NewButton(grid).SetType(core.ButtonAction)
 			bt.Styler(func(s *styles.Style) {
 				s.Border.Width.Set(units.Dp(1))
@@ -225,7 +228,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 				s.Border.Radius.Zero()
 			})
 			bt.OnClick(func(e events.Event) {
-				if squares[i] != " " {
+				if squares[i] != "" {
 					return
 				}
 				squares[i] = current
@@ -241,6 +244,10 @@ var PagesExamples = map[string]func(parent core.Widget){
 				bt.SetText(squares[i])
 			})
 		}
+		core.NewButton(parent).SetText("Reset").OnClick(func(e events.Event) {
+			squares = [9]string{}
+			grid.Update()
+		})
 	},
 	"widgets/basic/buttons-0": func(parent core.Widget) {
 		core.NewButton(parent).SetText("Download")
