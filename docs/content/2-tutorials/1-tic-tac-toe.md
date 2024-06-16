@@ -61,6 +61,7 @@ for i := range 9 {
 }
 core.NewButton(parent).SetText("Reset").OnClick(func(e events.Event) {
     squares = [9]string{}
+    current = "X"
     grid.Update()
 })
 ```
@@ -73,18 +74,12 @@ squares := [9]string{}
 status := core.NewText(parent)
 status.Updater(func() {
     sets := [][3]int{ // possible sets of three that result in a win
-        {0, 1, 2},
-        {3, 4, 5},
-        {6, 7, 8},
-        {0, 3, 6},
-        {1, 4, 7},
-        {2, 5, 8},
-        {0, 4, 8},
-        {2, 4, 6},
+        {0, 1, 2}, {3, 4, 5}, {6, 7, 8}, {0, 3, 6}, {1, 4, 7}, {2, 5, 8}, {0, 4, 8}, {2, 4, 6},
     }
     for _, set := range sets {
         if squares[set[0]] != "" && squares[set[0]] == squares[set[1]] && squares[set[0]] == squares[set[2]] {
             status.SetText(squares[set[0]]+" wins!")
+            current = ""
             return
         }
     }
@@ -104,7 +99,8 @@ for i := range 9 {
         s.Border.Radius.Zero()
     })
     bt.OnClick(func(e events.Event) {
-        if squares[i] != "" {
+        // don't set squares if they already have a value or the game is over
+        if squares[i] != "" || current == "" {
             return
         }
         squares[i] = current
@@ -125,6 +121,8 @@ for i := range 9 {
 }
 core.NewButton(parent).SetText("Reset").OnClick(func(e events.Event) {
     squares = [9]string{}
+    current = "X"
     grid.Update()
+    status.Update()
 })
 ```
