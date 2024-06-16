@@ -47,6 +47,11 @@ type Text2D struct {
 
 	// render state for rendering text
 	RenderState paint.State `set:"-" copier:"-" json:"-" xml:"-" display:"-"`
+
+	// automatically set to true if the font render color is the default
+	// colors.Scheme.OnSurface.  If so, it is automatically updated if the default
+	// changes, e.g., in light mode vs dark mode switching.
+	usesDefaultColor bool
 }
 
 func (txt *Text2D) Init() {
@@ -92,6 +97,16 @@ func (txt *Text2D) RenderText() {
 	// TODO(kai): do we need to set unit context sizes? (units.Context.SetSizes)
 	st := &txt.Styles
 	fr := st.FontRender()
+	if fr.Color != nil {
+		if uc, ok := fr.Color.(*image.Uniform); ok {
+			if uc.C == colors.Scheme.OnSurface {
+				txt.usesDefaultColor = true
+			}
+		}
+	}
+	if txt.usesDefaultColor {
+		fr.Color = colors.C(colors.Scheme.OnSurface)
+	}
 	if st.Font.Face == nil {
 		st.Font = paint.OpenFont(fr, &st.UnitContext)
 	}

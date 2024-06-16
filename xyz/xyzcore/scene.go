@@ -73,10 +73,10 @@ func (sw *Scene) Init() {
 		}
 		sw.XYZ.Geom.Size = sz
 
-		doConfig := false
+		doConfig := sw.NeedsRebuild()
 		if sw.XYZ.Frame != nil {
 			cursz := sw.XYZ.Frame.Format.Size
-			if cursz == sz {
+			if cursz == sz && !doConfig {
 				return
 			}
 		} else {

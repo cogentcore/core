@@ -158,7 +158,9 @@ func main() {
 	// sc.NoNav = true
 
 	// first, add lights, set camera
-	sc.BackgroundColor = colors.Scheme.Select.Container
+	se.Styler(func(s *styles.Style) {
+		sc.BackgroundColor = colors.Scheme.Select.Container
+	})
 	xyz.NewAmbientLight(sc, "ambient", 0.3, xyz.DirectSun)
 
 	dir := xyz.NewDirLight(sc, "dir", 1, xyz.DirectSun)

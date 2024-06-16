@@ -125,7 +125,9 @@ func (ev *Env) Defaults() {
 }
 
 func (ev *Env) ConfigScene(se *xyz.Scene) {
-	se.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
+	ev.SceneEditor.Styler(func(s *styles.Style) {
+		se.BackgroundColor = colors.Scheme.Select.Container
+	})
 	xyz.NewAmbientLight(se, "ambient", 0.3, xyz.DirectSun)
 
 	dir := xyz.NewDirLight(se, "dir", 1, xyz.DirectSun)
