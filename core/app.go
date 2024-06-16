@@ -115,12 +115,12 @@ func StandardAppBarConfig(parent Widget) {
 // StandardAppBarMaker adds standard items to start of an AppBar:
 // [AppBarBackMaker] and [AppBarChooserMaker]
 func StandardAppBarMaker(p *Plan) {
-	AppBarBackMaker(p)
-	AppBarChooserMaker(p)
+	MakeAppBack(p)
+	MakeAppChooser(p)
 }
 
-// AppBarBackMaker adds a back button
-func AppBarBackMaker(p *Plan) {
+// MakeAppBack adds a back button to the [Plan] for an app bar.
+func MakeAppBack(p *Plan) {
 	AddAt(p, "back", func(w *Button) {
 		w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev).SetTooltip("Back")
 		w.OnClick(func(e events.Event) {
@@ -147,11 +147,6 @@ func AppBarBackMaker(p *Plan) {
 		// 	s.SetState(tb.Scene.Stage.Mains.Stack.Len() <= 1 && len(AllRenderWins) <= 1, states.Disabled)
 		// })
 	})
-}
-
-// AppBarChooserMaker adds a standard app chooser using [ConfigAppChooser].
-func AppBarChooserMaker(p *Plan) {
-	AddAt(p, "app-chooser", ConfigAppChooser)
 }
 
 // StandardOverflowMenu adds the standard overflow menu function.
@@ -260,62 +255,62 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 //////////////////////////////////////////////////////////////////////////////
 //		AppChooser
 
-// ConfigAppChooser configures the given [Chooser] to give access
+// MakeAppChooser adds a [Chooser] to the given [Plan] to give access
 // to all app resources, such as open scenes and buttons in the
 // given toolbar. This chooser is typically placed at the start
 // of the AppBar. You can extend the resources available for access
 // in the app chooser using [Chooser.AddItemsFunc] and [ChooserItem.Func].
-func ConfigAppChooser(ch *Chooser) {
-	ch.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
-	if TheApp.SystemPlatform().IsMobile() {
-		ch.SetPlaceholder("Search")
-	} else {
-		ch.SetPlaceholder(fmt.Sprintf("Search (%s)", keymap.Menu.Label()))
-	}
-
-	AddChildInit(ch, "text-field", func(w *TextField) {
-		w.Styler(func(s *styles.Style) {
-			s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
-			if !s.Is(states.Focused) && w.Error == nil {
-				s.Border = styles.Border{}
-			}
-			s.Border.Radius = styles.BorderRadiusFull
-			s.Min.X.SetCustom(func(uc *units.Context) float32 {
-				return min(uc.Ch(40), uc.Vw(80)-uc.Ch(20))
-			})
-			s.Max.X = s.Min.X
-		})
-	})
-
-	ch.AddItemsFunc(func() {
-		for _, rw := range AllRenderWindows {
-			for _, kv := range rw.Mains.Stack.Order {
-				st := kv.Value
-				// we do not include ourself
-				if st == ch.Scene.Stage {
-					continue
-				}
-				ch.Items = append(ch.Items, ChooserItem{
-					Text:    st.Title,
-					Icon:    icons.Toolbar,
-					Tooltip: "Show " + st.Title,
-					Func:    st.Raise,
-				})
-			}
+func MakeAppChooser(p *Plan) {
+	AddAt(p, "app-chooser", func(w *Chooser) {
+		w.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
+		if TheApp.SystemPlatform().IsMobile() {
+			w.SetPlaceholder("Search")
+		} else {
+			w.SetPlaceholder(fmt.Sprintf("Search (%s)", keymap.Menu.Label()))
 		}
-	})
-	if tb := ParentToolbar(ch); tb != nil {
-		ch.AddItemsFunc(func() {
-			AddButtonItems(&ch.Items, tb, "")
-		})
-	}
 
-	ch.OnFinal(events.Change, func(e events.Event) {
-		// we must never have a chooser label so that it
-		// always displays the search placeholder
-		ch.CurrentIndex = -1
-		ch.CurrentItem = ChooserItem{}
-		ch.ShowCurrentItem()
+		AddChildInit(w, "text-field", func(w *TextField) {
+			w.Styler(func(s *styles.Style) {
+				s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
+				if !s.Is(states.Focused) && w.Error == nil {
+					s.Border = styles.Border{}
+				}
+				s.Border.Radius = styles.BorderRadiusFull
+				s.Min.X.SetCustom(func(uc *units.Context) float32 {
+					return min(uc.Ch(40), uc.Vw(80)-uc.Ch(20))
+				})
+				s.Max.X = s.Min.X
+			})
+		})
+
+		w.AddItemsFunc(func() {
+			for _, rw := range AllRenderWindows {
+				for _, kv := range rw.Mains.Stack.Order {
+					st := kv.Value
+					// we do not include ourself
+					if st == w.Scene.Stage {
+						continue
+					}
+					w.Items = append(w.Items, ChooserItem{
+						Text:    st.Title,
+						Icon:    icons.Toolbar,
+						Tooltip: "Show " + st.Title,
+						Func:    st.Raise,
+					})
+				}
+			}
+		})
+		w.AddItemsFunc(func() {
+			AddButtonItems(&w.Items, p.Widget, "")
+		})
+
+		w.OnFinal(events.Change, func(e events.Event) {
+			// we must never have a chooser label so that it
+			// always displays the search placeholder
+			w.CurrentIndex = -1
+			w.CurrentItem = ChooserItem{}
+			w.ShowCurrentItem()
+		})
 	})
 }
 
