@@ -953,6 +953,12 @@ func main() {
 	"widgets/pickers/date-pickers-0": func(parent core.Widget) {
 		core.NewDatePicker(parent).SetTime(time.Now())
 	},
+	"widgets/pickers/date-pickers-1": func(parent core.Widget) {
+		dp := core.NewDatePicker(parent).SetTime(time.Now())
+		dp.OnChange(func(e events.Event) {
+			core.MessageSnackbar(dp, dp.Time.Format("1/2/2006"))
+		})
+	},
 	"widgets/pickers/file-pickers-0": func(parent core.Widget) {
 		core.NewFilePicker(parent)
 	},
