@@ -342,6 +342,9 @@ func (tr *Tree) Init() {
 		}
 	})
 
+	tr.Maker(func(p *Plan) {
+		p.EnforceEmpty = false
+	})
 	AddChildAt(tr, "parts", func(w *Frame) {
 		InitParts(w)
 		tvi := tr.This.(Treer)

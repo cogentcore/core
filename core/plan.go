@@ -23,7 +23,22 @@ import (
 // To add a child item to a plan, use [Add], [AddAt], or [AddNew]. To add a child
 // item maker to a widget, use [AddChild] or [AddChildAt]. To extend an existing
 // child item, use [AddInit] or [AddChildInit].
-type Plan []*PlanItem
+type Plan struct {
+	Children []*PlanItem
+
+	// Widget is the parent Widget that the Children are being added to.
+	// This value will be present when the Init methods are being called.
+	// It can be useful to access and update this item in some cases,
+	// for example in MakeToolbar functions, to also add an OverflowMenu
+	// to the toolbar.
+	Widget Widget
+
+	//	EnforceEmpty indicates whether an empty plan results in the removal
+	// of any children on the parent [Plan.Widget].
+	// If there are [WidgetBase.Makers] defined then this is true by default;
+	// otherwise it is false.
+	EnforceEmpty bool
+}
 
 // PlanItem represents a plan for how a child widget should be constructed and initialized.
 // See [Plan] for more information.
@@ -93,7 +108,7 @@ func AddNew[T Widget](p *Plan, name string, new func() T, init func(w T)) {
 // to have its parent set before the init function is called. The init functions are
 // called in sequential ascending order.
 func AddInit[T Widget](p *Plan, name string, init func(w T)) {
-	for _, child := range *p {
+	for _, child := range p.Children {
 		if child.Name == name {
 			child.Init = append(child.Init, func(w Widget) {
 				init(w.(T))
@@ -140,12 +155,12 @@ func AddChildInit[T Widget](parent Widget, name string, init func(w T)) {
 // [Add], [AddAt], [AddNew], [AddChild], [AddChildAt], [AddInit], and [AddChildInit]
 // functions instead.
 func (p *Plan) Add(name string, new func() Widget, init func(w Widget)) {
-	*p = append(*p, &PlanItem{Name: name, New: new, Init: []func(w Widget){init}})
+	p.Children = append(p.Children, &PlanItem{Name: name, New: new, Init: []func(w Widget){init}})
 }
 
 // Update updates the children of the given widget in accordance with the [Plan].
 func (p *Plan) Update(w Widget) {
-	if len(*p) == 0 { // TODO(config): figure out a better way to handle this?
+	if len(p.Children) == 0 && !p.EnforceEmpty {
 		return
 	}
 	wb := w.AsWidget()
@@ -158,24 +173,24 @@ func (p *Plan) Update(w Widget) {
 		}
 		return child
 	}
-	for i, item := range *p { // TODO(config): figure out a better way to handle this?
+	for i, item := range p.Children { // TODO(config): figure out a better way to handle this?
 		if item.Name != "parts" {
 			continue
 		}
 		if wb.Parts == nil {
 			wb.Parts = makeNew(item).(*Frame)
 		}
-		*p = slices.Delete(*p, i, i+1) // not a real child
+		p.Children = slices.Delete(p.Children, i, i+1) // not a real child
 		break
 	}
-	if len(*p) == 0 { // check again after potentially removing parts
+	if len(p.Children) == 0 && !p.EnforceEmpty { // check again after potentially removing parts
 		return
 	}
-	wb.Children, _ = plan.Update(wb.Children, len(*p),
+	wb.Children, _ = plan.Update(wb.Children, len(p.Children),
 		func(i int) string {
-			return (*p)[i].Name
+			return p.Children[i].Name
 		}, func(name string, i int) tree.Node {
-			return makeNew((*p)[i])
+			return makeNew(p.Children[i])
 		}, func(n tree.Node) {
 			n.Destroy()
 		})

@@ -125,9 +125,9 @@ func (bt *Button) Init() {
 		s.Padding.Set(units.Dp(10), units.Dp(24))
 		if bt.Icon.IsSet() {
 			s.Padding.Left.Dp(16)
-		}
-		if bt.Text == "" {
-			s.Padding.Right.Dp(16)
+			if bt.Text == "" {
+				s.Padding.Right.Dp(16)
+			}
 		}
 		s.Gap.Zero()
 		// s.Justify.Content = styles.Center TODO(config): fix layout

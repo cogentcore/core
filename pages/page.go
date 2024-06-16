@@ -90,6 +90,7 @@ func (pg *Page) Init() {
 	})
 
 	pg.Maker(func(p *core.Plan) {
+		p.EnforceEmpty = false
 		if pg.HasChildren() { // TODO(config)
 			return
 		}

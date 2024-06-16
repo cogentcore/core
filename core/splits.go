@@ -87,6 +87,7 @@ func (sl *Splits) Init() {
 	})
 
 	sl.Maker(func(p *Plan) {
+		p.EnforceEmpty = false
 		sl.UpdateSplits()
 		AddAt(p, "parts", func(w *Frame) {
 			InitParts(w)

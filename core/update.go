@@ -44,7 +44,7 @@ func (wb *WidgetBase) UpdateWidget() *WidgetBase {
 // updateFromMake updates the widget using [WidgetBase.Make].
 // It is the base Updater added to [WidgetBase.Updaters] in Init.
 func (wb *WidgetBase) updateFromMake() {
-	p := Plan{}
+	p := Plan{Widget: wb.This.(Widget)}
 	wb.Make(&p)
 	p.Update(wb)
 }
@@ -54,6 +54,9 @@ func (wb *WidgetBase) updateFromMake() {
 // Make is called by [WidgetBase.UpdateWidget] to determine how the widget
 // should be updated.
 func (wb *WidgetBase) Make(p *Plan) {
+	if len(wb.Makers) > 0 { // only enforce empty if makers exist
+		p.EnforceEmpty = true
+	}
 	for _, maker := range wb.Makers {
 		maker(p)
 	}

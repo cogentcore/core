@@ -295,7 +295,6 @@ func (sr *Slider) Init() {
 
 	sr.Maker(func(p *Plan) {
 		if sr.Icon.IsNil() {
-			sr.DeleteChildren()
 			return
 		}
 		AddAt(p, "icon", func(w *Icon) {

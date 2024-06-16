@@ -159,12 +159,12 @@ var PagesExamples = map[string]func(parent core.Widget){
 			s.Gap.Zero()
 		})
 		for range 9 {
-			bt := core.NewButton(grid).SetType(core.ButtonAction).SetText(" ")
+			bt := core.NewButton(grid).SetType(core.ButtonAction)
 			bt.Styler(func(s *styles.Style) {
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 				s.Border.Radius.Zero()
-				s.Min.Set(units.Em(2))
+				s.Min.Set(units.Em(3))
 				s.CenterAll()
 			})
 		}
@@ -184,7 +184,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 				s.Border.Radius.Zero()
-				s.Min.Set(units.Em(2))
+				s.Min.Set(units.Em(3))
 				s.CenterAll()
 			})
 			bt.OnClick(func(e events.Event) {
@@ -202,9 +202,6 @@ var PagesExamples = map[string]func(parent core.Widget){
 			})
 			bt.Updater(func() {
 				bt.SetText(squares[i])
-				if bt.Text == "" {
-					bt.SetText(" ")
-				}
 			})
 		}
 		core.NewButton(parent).SetText("Reset").OnClick(func(e events.Event) {
@@ -243,7 +240,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 				s.Border.Radius.Zero()
-				s.Min.Set(units.Em(2))
+				s.Min.Set(units.Em(3))
 				s.CenterAll()
 			})
 			bt.OnClick(func(e events.Event) {
@@ -262,9 +259,6 @@ var PagesExamples = map[string]func(parent core.Widget){
 			})
 			bt.Updater(func() {
 				bt.SetText(squares[i])
-				if bt.Text == "" {
-					bt.SetText(" ")
-				}
 			})
 		}
 		core.NewButton(parent).SetText("Reset").OnClick(func(e events.Event) {

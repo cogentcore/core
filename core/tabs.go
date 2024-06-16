@@ -149,17 +149,17 @@ func (ts *Tabs) Init() {
 					s.Wrap = true
 				}
 			})
-			w.Maker(func(p *Plan) {
-				if ts.NewTabButton {
-					AddAt(p, "new-tab", func(w *Button) { // TODO(config)
-						w.SetIcon(icons.Add).SetType(ButtonAction)
-						w.OnClick(func(e events.Event) {
-							ts.NewTab("New tab")
-							ts.SelectTabIndex(ts.NumTabs() - 1)
-						})
-					})
-				}
-			})
+			// w.Maker(func(p *Plan) {
+			// 	if ts.NewTabButton {
+			// 		AddAt(p, "new-tab", func(w *Button) { // TODO(config)
+			// 			w.SetIcon(icons.Add).SetType(ButtonAction)
+			// 			w.OnClick(func(e events.Event) {
+			// 				ts.NewTab("New tab")
+			// 				ts.SelectTabIndex(ts.NumTabs() - 1)
+			// 			})
+			// 		})
+			// 	}
+			// })
 		})
 		AddAt(p, "frame", func(w *Frame) {
 			w.LayoutStackTopOnly = true // key for allowing each tab to have its own size
@@ -171,7 +171,7 @@ func (ts *Tabs) Init() {
 		})
 		// frame comes before tabs in bottom navigation bar
 		if ts.Type.Effective(ts) == NavigationBar {
-			(*p)[0], (*p)[1] = (*p)[1], (*p)[0]
+			p.Children[0], p.Children[1] = p.Children[1], p.Children[0]
 		}
 	})
 }
