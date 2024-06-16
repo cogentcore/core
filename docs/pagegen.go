@@ -986,6 +986,15 @@ func main() {
 			core.MessageSnackbar(tp, tp.Time.Format(core.SystemSettings.TimeFormat()))
 		})
 	},
+	"widgets/pickers/time-pickers-2": func(parent core.Widget) {
+		core.NewTimeInput(parent).SetTime(time.Now())
+	},
+	"widgets/pickers/time-pickers-3": func(parent core.Widget) {
+		ti := core.NewTimeInput(parent).SetTime(time.Now())
+		ti.OnChange(func(e events.Event) {
+			core.MessageSnackbar(ti, ti.Time.Format("1/2/2006 "+core.SystemSettings.TimeFormat()))
+		})
+	},
 	"widgets/media/canvases-0": func(parent core.Widget) {
 		core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
 			pc.FillBox(math32.Vector2{}, math32.Vec2(1, 1), colors.C(colors.Scheme.Primary.Base))

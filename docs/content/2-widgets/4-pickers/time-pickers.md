@@ -16,3 +16,18 @@ tp.OnChange(func(e events.Event) {
     core.MessageSnackbar(tp, tp.Time.Format(core.SystemSettings.TimeFormat()))
 })
 ```
+
+You can create a unified time input that allows users to select both a date and time using text fields and dialogs:
+
+```Go
+core.NewTimeInput(parent).SetTime(time.Now())
+```
+
+You can detect when the user changes the value of a unified time input:
+
+```Go
+ti := core.NewTimeInput(parent).SetTime(time.Now())
+ti.OnChange(func(e events.Event) {
+    core.MessageSnackbar(ti, ti.Time.Format("1/2/2006 "+core.SystemSettings.TimeFormat()))
+})
+```
