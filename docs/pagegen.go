@@ -9,6 +9,7 @@ import (
 	"maps"
 	"strconv"
 	"strings"
+	"time"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
@@ -948,6 +949,9 @@ func main() {
 		cb.OnChange(func(e events.Event) {
 			core.MessageSnackbar(cb, colors.AsHex(cb.Color))
 		})
+	},
+	"widgets/pickers/date-pickers-0": func(parent core.Widget) {
+		core.NewDatePicker(parent).SetTime(time.Now())
 	},
 	"widgets/pickers/file-pickers-0": func(parent core.Widget) {
 		core.NewFilePicker(parent)
