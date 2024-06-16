@@ -117,6 +117,20 @@ var PagesExamples = map[string]func(parent core.Widget){
 			buttons.Update()
 		})
 	},
+	"basics/async-0": func(parent core.Widget) {
+		text := core.NewText(parent)
+		text.Updater(func() {
+			text.SetText(time.Now().Format("15:04:05"))
+		})
+		go func() {
+			ticker := time.NewTicker(time.Second)
+			for range ticker.C {
+				text.AsyncLock()
+				text.Update()
+				text.AsyncUnlock()
+			}
+		}()
+	},
 	"tutorials/todo-list-0": func(parent core.Widget) {
 		type item struct {
 			Done bool
@@ -458,6 +472,54 @@ var PagesExamples = map[string]func(parent core.Widget){
 	"widgets/basic/tooltips-1": func(parent core.Widget) {
 		core.NewSlider(parent)
 	},
+	"widgets/inputs/text-fields-0": func(parent core.Widget) {
+		core.NewTextField(parent)
+	},
+	"widgets/inputs/text-fields-1": func(parent core.Widget) {
+		core.NewText(parent).SetText("Name:")
+		core.NewTextField(parent).SetPlaceholder("Jane Doe")
+	},
+	"widgets/inputs/text-fields-2": func(parent core.Widget) {
+		core.NewTextField(parent).SetText("Hello, world!")
+	},
+	"widgets/inputs/text-fields-3": func(parent core.Widget) {
+		core.NewTextField(parent).SetText("This is a long sentence that demonstrates how text field content can overflow onto multiple lines")
+	},
+	"widgets/inputs/text-fields-4": func(parent core.Widget) {
+		core.NewTextField(parent).SetType(core.TextFieldOutlined)
+	},
+	"widgets/inputs/text-fields-5": func(parent core.Widget) {
+		core.NewTextField(parent).SetTypePassword()
+	},
+	"widgets/inputs/text-fields-6": func(parent core.Widget) {
+		core.NewTextField(parent).AddClearButton()
+	},
+	"widgets/inputs/text-fields-7": func(parent core.Widget) {
+		core.NewTextField(parent).SetLeadingIcon(icons.Euro).SetTrailingIcon(icons.OpenInNew, func(e events.Event) {
+			core.MessageSnackbar(parent, "Opening shopping cart")
+		})
+	},
+	"widgets/inputs/text-fields-8": func(parent core.Widget) {
+		tf := core.NewTextField(parent)
+		tf.SetValidator(func() error {
+			if !strings.Contains(tf.Text(), "Go") {
+				return errors.New("Must contain Go")
+			}
+			return nil
+		})
+	},
+	"widgets/inputs/text-fields-9": func(parent core.Widget) {
+		tf := core.NewTextField(parent)
+		tf.OnChange(func(e events.Event) {
+			core.MessageSnackbar(parent, "OnChange: "+tf.Text())
+		})
+	},
+	"widgets/inputs/text-fields-10": func(parent core.Widget) {
+		tf := core.NewTextField(parent)
+		tf.OnInput(func(e events.Event) {
+			core.MessageSnackbar(parent, "OnInput: "+tf.Text())
+		})
+	},
 	"widgets/inputs/choosers-0": func(parent core.Widget) {
 		core.NewChooser(parent).SetStrings("macOS", "Windows", "Linux")
 	},
@@ -631,54 +693,6 @@ func main() {
 		te := texteditor.NewSoloEditor(parent)
 		te.OnInput(func(e events.Event) {
 			core.MessageSnackbar(parent, "OnInput: "+te.Buffer.String())
-		})
-	},
-	"widgets/inputs/text-fields-0": func(parent core.Widget) {
-		core.NewTextField(parent)
-	},
-	"widgets/inputs/text-fields-1": func(parent core.Widget) {
-		core.NewText(parent).SetText("Name:")
-		core.NewTextField(parent).SetPlaceholder("Jane Doe")
-	},
-	"widgets/inputs/text-fields-2": func(parent core.Widget) {
-		core.NewTextField(parent).SetText("Hello, world!")
-	},
-	"widgets/inputs/text-fields-3": func(parent core.Widget) {
-		core.NewTextField(parent).SetText("This is a long sentence that demonstrates how text field content can overflow onto multiple lines")
-	},
-	"widgets/inputs/text-fields-4": func(parent core.Widget) {
-		core.NewTextField(parent).SetType(core.TextFieldOutlined)
-	},
-	"widgets/inputs/text-fields-5": func(parent core.Widget) {
-		core.NewTextField(parent).SetTypePassword()
-	},
-	"widgets/inputs/text-fields-6": func(parent core.Widget) {
-		core.NewTextField(parent).AddClearButton()
-	},
-	"widgets/inputs/text-fields-7": func(parent core.Widget) {
-		core.NewTextField(parent).SetLeadingIcon(icons.Euro).SetTrailingIcon(icons.OpenInNew, func(e events.Event) {
-			core.MessageSnackbar(parent, "Opening shopping cart")
-		})
-	},
-	"widgets/inputs/text-fields-8": func(parent core.Widget) {
-		tf := core.NewTextField(parent)
-		tf.SetValidator(func() error {
-			if !strings.Contains(tf.Text(), "Go") {
-				return errors.New("Must contain Go")
-			}
-			return nil
-		})
-	},
-	"widgets/inputs/text-fields-9": func(parent core.Widget) {
-		tf := core.NewTextField(parent)
-		tf.OnChange(func(e events.Event) {
-			core.MessageSnackbar(parent, "OnChange: "+tf.Text())
-		})
-	},
-	"widgets/inputs/text-fields-10": func(parent core.Widget) {
-		tf := core.NewTextField(parent)
-		tf.OnInput(func(e events.Event) {
-			core.MessageSnackbar(parent, "OnInput: "+tf.Text())
 		})
 	},
 	"widgets/containers/dialogs-0": func(parent core.Widget) {
