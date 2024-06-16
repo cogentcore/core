@@ -12,6 +12,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -123,21 +124,16 @@ func MakeFiles(c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	ic192, err := rendericon.Render(192)
-	if err != nil {
-		return err
-	}
-	err = imagex.Save(ic192, filepath.Join(odir, "icons", "192.png"))
-	if err != nil {
-		return err
-	}
-	ic512, err := rendericon.Render(512)
-	if err != nil {
-		return err
-	}
-	err = imagex.Save(ic512, filepath.Join(odir, "icons", "512.png"))
-	if err != nil {
-		return err
+	sizes := []int{32, 192, 512}
+	for _, size := range sizes {
+		ic, err := rendericon.Render(size)
+		if err != nil {
+			return err
+		}
+		err = imagex.Save(ic, filepath.Join(odir, "icons", strconv.Itoa(size)+".png"))
+		if err != nil {
+			return err
+		}
 	}
 	err = exec.Run("cp", "icon.svg", filepath.Join(odir, "icons", "svg.svg"))
 	if err != nil {
