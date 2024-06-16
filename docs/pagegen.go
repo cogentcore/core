@@ -188,6 +188,22 @@ var PagesExamples = map[string]func(parent core.Widget){
 		squares := [9]string{}
 		status := core.NewText(parent)
 		status.Updater(func() {
+			sets := [][3]int{ // possible sets of three that result in a win
+				{0, 1, 2},
+				{3, 4, 5},
+				{6, 7, 8},
+				{0, 3, 6},
+				{1, 4, 7},
+				{2, 5, 8},
+				{0, 4, 8},
+				{2, 4, 6},
+			}
+			for _, set := range sets {
+				if squares[set[0]] != "" && squares[set[0]] == squares[set[1]] && squares[set[0]] == squares[set[2]] {
+					status.SetText(squares[set[0]] + " wins!")
+					return
+				}
+			}
 			status.SetText("Next player: " + current)
 		})
 		grid := core.NewFrame(parent)
