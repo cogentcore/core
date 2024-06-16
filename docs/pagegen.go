@@ -154,13 +154,13 @@ var PagesExamples = map[string]func(parent core.Widget){
 		}
 	},
 	"tutorials/tic-tac-toe-1": func(parent core.Widget) {
+		isX := true
 		grid := core.NewFrame(parent)
 		grid.Styler(func(s *styles.Style) {
 			s.Display = styles.Grid
 			s.Columns = 3
 			s.Gap.Zero()
 		})
-		isX := true
 		for range 9 {
 			bt := core.NewButton(grid).SetType(core.ButtonAction).SetIcon(icons.Blank)
 			bt.Styler(func(s *styles.Style) {
@@ -179,6 +179,44 @@ var PagesExamples = map[string]func(parent core.Widget){
 				}
 				bt.Update()
 				isX = !isX
+			})
+		}
+	},
+	"tutorials/tic-tac-toe-2": func(parent core.Widget) {
+		isX := true
+		status := core.NewText(parent)
+		status.Updater(func() {
+			if isX {
+				status.SetText("Next player: X")
+			} else {
+				status.SetText("Next player: O")
+			}
+		})
+		grid := core.NewFrame(parent)
+		grid.Styler(func(s *styles.Style) {
+			s.Display = styles.Grid
+			s.Columns = 3
+			s.Gap.Zero()
+		})
+		for range 9 {
+			bt := core.NewButton(grid).SetType(core.ButtonAction).SetIcon(icons.Blank)
+			bt.Styler(func(s *styles.Style) {
+				s.Border.Width.Set(units.Dp(1))
+				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+				s.Border.Radius.Zero()
+			})
+			bt.OnClick(func(e events.Event) {
+				if bt.Icon != icons.Blank {
+					return
+				}
+				if isX {
+					bt.SetIcon(icons.Close)
+				} else {
+					bt.SetIcon(icons.Circle)
+				}
+				isX = !isX
+				bt.Update()
+				status.Update()
 			})
 		}
 	},
