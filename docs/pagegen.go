@@ -150,6 +150,8 @@ var PagesExamples = map[string]func(parent core.Widget){
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 				s.Border.Radius.Zero()
+				s.Min.Set(units.Em(2))
+				s.CenterAll()
 			})
 		}
 	},
@@ -168,6 +170,8 @@ var PagesExamples = map[string]func(parent core.Widget){
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 				s.Border.Radius.Zero()
+				s.Min.Set(units.Em(2))
+				s.CenterAll()
 			})
 			bt.OnClick(func(e events.Event) {
 				// don't set squares that already have a value
@@ -224,6 +228,8 @@ var PagesExamples = map[string]func(parent core.Widget){
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 				s.Border.Radius.Zero()
+				s.Min.Set(units.Em(2))
+				s.CenterAll()
 			})
 			bt.OnClick(func(e events.Event) {
 				// don't set squares if they already have a value or the game is over

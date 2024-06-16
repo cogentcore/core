@@ -130,7 +130,8 @@ func (bt *Button) Init() {
 			s.Padding.Right.Dp(16)
 		}
 		s.Gap.Zero()
-		// s.CenterAll() // TODO(kai): fix button layout
+		// s.Justify.Content = styles.Center TODO(config): fix layout
+		s.Align.Items = styles.Center
 
 		s.MaxBoxShadow = styles.BoxShadow1()
 		switch bt.Type {
