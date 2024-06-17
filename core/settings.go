@@ -374,7 +374,7 @@ var DeviceSettings = &DeviceSettingsData{
 	},
 }
 
-// SaveScreenZoom saves the current zoom factor for current screen.
+// SaveScreenZoom saves the current zoom factor for the current screen.
 func (as *AppearanceSettingsData) SaveScreenZoom() { //types:add
 	sc := system.TheApp.Screen(0)
 	sp, ok := as.Screens[sc.Name]

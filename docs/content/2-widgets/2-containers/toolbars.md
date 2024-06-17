@@ -17,3 +17,17 @@ tb.Maker(func(p *core.Plan) {
     })
 })
 ```
+
+You can add any types of widgets to toolbars, although [buttons](../basic/buttons) and [func buttons](../other/func-buttons) are the most common:
+
+```Go
+tb := core.NewToolbar(parent)
+tb.Maker(func(p *core.Plan) {
+    core.Add(p, func(w *core.FuncButton) {
+        w.SetFunc(core.AppearanceSettings.SaveScreenZoom)
+    })
+    core.Add(p, func(w *core.Switch) {
+        w.SetText("Active")
+    })
+})
+```

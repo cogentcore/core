@@ -850,6 +850,17 @@ func main() {
 			})
 		})
 	},
+	"widgets/containers/toolbars-1": func(parent core.Widget) {
+		tb := core.NewToolbar(parent)
+		tb.Maker(func(p *core.Plan) {
+			core.Add(p, func(w *core.FuncButton) {
+				w.SetFunc(core.AppearanceSettings.SaveScreenZoom)
+			})
+			core.Add(p, func(w *core.Switch) {
+				w.SetText("Active")
+			})
+		})
+	},
 	"widgets/collections/forms-0": func(parent core.Widget) {
 		type person struct {
 			Name string
