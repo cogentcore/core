@@ -131,7 +131,7 @@ type person struct {
 core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 ```
 
-You can make a button that pulls up a dialog with a form:
+You can make a button that opens up a dialog with a form:
 
 ```Go
 type person struct {

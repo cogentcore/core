@@ -1020,10 +1020,7 @@ func main() {
 		core.NewKeyedList(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
 	},
 	"widgets/collections/keyed-lists-5": func(parent core.Widget) {
-		// core.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
-	},
-	"widgets/collections/keyed-lists-6": func(parent core.Widget) {
-		// core.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
+		core.NewKeyedListButton(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
 	},
 	"widgets/collections/lists-0": func(parent core.Widget) {
 		core.NewList(parent).SetSlice(&[]int{1, 3, 5})

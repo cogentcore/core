@@ -35,14 +35,8 @@ You can make a keyed list with elements of any type:
 core.NewKeyedList(parent).SetMap(&map[string]any{"Go": 1, "C++": "C-like", "Python": true})
 ```
 
-When you use [[core.NewValue]] with a map value, it will create an inline keyed list if the map has two or fewer elements:
+You can make a button that opens a dialog with a keyed list:
 
 ```Go
-// core.NewValue(parent, &map[string]int{"Go": 1, "C++": 3})
-```
-
-Otherwise, it will create a button that opens a dialog with a normal keyed list:
-
-```Go
-// core.NewValue(parent, &map[string]int{"Go": 1, "C++": 3, "Python": 5})
+core.NewKeyedListButton(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})
 ```
