@@ -36,7 +36,7 @@ func FilePickerDialog(ctx Widget, filename, exts, title string, fun func(selfile
 	if title != "" {
 		d.SetTitle(title)
 	}
-	fv := NewFilePicker(d) // .SetFilename(filename, exts)
+	fv := NewFilePicker(d).SetFilename(filename).SetExt(exts)
 	d.AddAppBar(fv.MakeToolbar)
 	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)
@@ -198,12 +198,15 @@ func FilePickerExtOnlyFilter(fp *FilePicker, fi *fileinfo.FileInfo) bool {
 
 // SetFilename sets the initial filename (splitting out path and filename) and
 // initializes the view
-func (fp *FilePicker) SetFilename(filename, ext string) *FilePicker {
+func (fp *FilePicker) SetFilename(filename string) *FilePicker {
 	fp.DirPath, fp.CurrentSelectedFile = filepath.Split(filename)
+	if fp.DirPath == "" {
+		fp.DirPath = "./"
+	}
 	if ap, err := filepath.Abs(fp.DirPath); err == nil {
 		fp.DirPath = ap
 	}
-	return fp.SetExt(ext)
+	return fp
 }
 
 // SetPathFile sets the path, initial select file (or "") and initializes the view
@@ -818,7 +821,7 @@ func (fb *FileButton) Init() {
 	var fp *FilePicker
 	InitValueButton(fb, false, func(d *Body) {
 		// ext, _ := v.Tag("ext") // TODO(config)
-		fp = NewFilePicker(d).SetFilename(fb.Filename, "")
+		fp = NewFilePicker(d).SetFilename(fb.Filename)
 		fb.ValueNewWindow = true
 		d.AddAppBar(fp.MakeToolbar)
 	}, func() {
