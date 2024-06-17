@@ -220,6 +220,9 @@ func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctx
 						maxw = ssz.X
 					}
 					si++
+					if si >= len(tr.Spans) {
+						break
+					}
 					sr = &(tr.Spans[si]) // keep going with nsr
 					sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 					ssz = sr.SizeHV()

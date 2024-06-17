@@ -294,7 +294,7 @@ func (sr *Span) UpdateColors(sty *styles.FontRender) {
 	if len(sr.Text) == 0 {
 		return
 	}
-	r := sr.Render[0]
+	r := &sr.Render[0]
 	if sty.Color != nil {
 		r.Color = sty.Color
 	}
