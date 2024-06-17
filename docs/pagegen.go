@@ -1317,6 +1317,11 @@ func main() {
 	"widgets/media/svgs-3": func(parent core.Widget) {
 		errors.Log(core.NewSVG(parent).ReadString(`<rect width="100" height="100" fill="red"/>`))
 	},
+	"widgets/other/func-buttons-0": func(parent core.Widget) {
+		core.NewFuncButton(parent).SetFunc(func() {
+			core.MessageSnackbar(parent, "Function called")
+		})
+	},
 	"widgets/other/meters-0": func(parent core.Widget) {
 		core.NewMeter(parent)
 	},

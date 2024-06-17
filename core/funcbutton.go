@@ -99,7 +99,7 @@ type FuncButton struct {
 	// WarnUnadded is whether to log warnings when a function that
 	// has not been added to [types] is used. It is on by default and
 	// must be set before [FuncButton.SetFunc] is called for it to
-	// have any effect.
+	// have any effect. Warnings are never logged for anonymous functions.
 	WarnUnadded bool `default:"true"`
 
 	// Context is used for opening Dialogs if non-nil.
