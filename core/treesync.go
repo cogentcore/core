@@ -259,7 +259,8 @@ func (tr *Tree) AddChildNode() { //types:add
 	d := NewBody().AddTitle(ttl).AddText("Number and type of items to insert:")
 	nd := &NewItemsData{Number: 1, Type: typ}
 	sv := NewForm(d).SetStruct(nd)
-	tree.ChildByType[*TypeChooser](sv, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0) // TODO(config)
+	_ = sv
+	// tree.ChildByType[*TypeChooser](sv, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0) // TODO(config)
 	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
