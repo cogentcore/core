@@ -1327,6 +1327,11 @@ func main() {
 			core.MessageSnackbar(parent, "Function called")
 		}).SetText("Run").SetTooltip("Click me!")
 	},
+	"widgets/other/func-buttons-2": func(parent core.Widget) {
+		core.NewFuncButton(parent).SetFunc(func(name string, age int) {
+			core.MessageSnackbar(parent, name+" is "+strconv.Itoa(age)+" years old")
+		})
+	},
 	"widgets/other/meters-0": func(parent core.Widget) {
 		core.NewMeter(parent)
 	},
