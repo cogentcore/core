@@ -31,3 +31,9 @@ ti.OnChange(func(e events.Event) {
     core.MessageSnackbar(ti, ti.Time.Format("1/2/2006 "+core.SystemSettings.TimeFormat()))
 })
 ```
+
+You can also create a duration input that allows users to select a duration of time:
+
+```Go
+core.NewDurationInput(parent).SetDuration(3 * time.Second)
+```
