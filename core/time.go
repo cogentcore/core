@@ -381,6 +381,9 @@ func (di *DurationInput) Init() {
 		w.SetStep(1).SetPageStep(10)
 		w.SetTooltip("The value of time")
 		w.Updater(func() {
+			if di.Unit == "" {
+				di.SetAutoUnit()
+			}
 			w.SetValue(float32(di.Duration) / float32(durationUnitsMap[di.Unit]))
 		})
 		w.OnChange(func(e events.Event) {
@@ -398,11 +401,6 @@ func (di *DurationInput) Init() {
 
 		w.SetItems(units...)
 		w.SetTooltip("The unit of time")
-		w.Updater(func() {
-			if di.Unit == "" {
-				di.SetAutoUnit()
-			}
-		})
 		w.OnChange(func(e events.Event) {
 			di.Update()
 		})
