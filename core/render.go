@@ -209,7 +209,6 @@ var SceneShowIters = 2
 // This is the main update call made by the RenderWindow at FPS frequency.
 func (sc *Scene) DoUpdate() bool {
 	if sc.updating {
-		fmt.Println("scene bail on update") // TODO(config): remove
 		return false
 	}
 	sc.updating = true // prevent rendering
