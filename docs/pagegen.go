@@ -839,6 +839,17 @@ func main() {
 		ts.NewTab("First")
 		ts.NewTab("Second")
 	},
+	"widgets/containers/toolbars-0": func(parent core.Widget) {
+		tb := core.NewToolbar(parent)
+		tb.Maker(func(p *core.Plan) {
+			core.Add(p, func(w *core.Button) {
+				w.SetText("Build")
+			})
+			core.Add(p, func(w *core.Button) {
+				w.SetText("Run")
+			})
+		})
+	},
 	"widgets/collections/forms-0": func(parent core.Widget) {
 		type person struct {
 			Name string
