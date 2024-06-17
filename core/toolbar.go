@@ -83,7 +83,9 @@ func (tb *Toolbar) SizeDown(iter int) bool {
 	if iter == 0 {
 		return true // ensure a second pass
 	}
-	tb.MoveToOverflow()
+	if tb.Scene.showIter > 0 {
+		tb.MoveToOverflow()
+	}
 	return redo
 }
 
@@ -122,7 +124,7 @@ func (tb *Toolbar) AllItemsToChildren() {
 		tb.Children = slices.Delete(tb.Children, ovi, ovi+1)
 	}
 	tb.Children = append(tb.Children, tb.overflowButton.This)
-	tb.overflowButton.Update()
+	tb.overflowButton.UpdateTree()
 }
 
 func (tb *Toolbar) ParentSize() float32 {
