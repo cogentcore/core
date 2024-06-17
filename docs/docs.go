@@ -56,7 +56,6 @@ func homePage(ctx *htmlcore.Context) bool {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 		s.CenterAll()
-		// s.Background = gradient.NewLinear().AddStop(colors.Scheme.Primary.Container, 0).AddStop(colors.Scheme.Warn.Container, 1)
 	})
 	errors.Log(core.NewSVG(frame).ReadString(core.AppIcon))
 	img := core.NewImage(frame)

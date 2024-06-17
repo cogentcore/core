@@ -294,8 +294,6 @@ func (pg *Page) MakeToolbar(p *core.Plan) {
 		w.OnClick(func(e events.Event) {
 			if pg.HistoryIndex > 0 {
 				pg.HistoryIndex--
-				// we reverse the order
-				// ch.SelectItem(len(pg.History) - pg.HistoryIndex - 1)
 				// we need a slash so that it doesn't think it's a relative URL
 				pg.OpenURL("/"+pg.History[pg.HistoryIndex], false)
 			}
