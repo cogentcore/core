@@ -37,3 +37,12 @@ You can also create a duration input that allows users to select a duration of t
 ```Go
 core.NewDurationInput(parent).SetDuration(3 * time.Second)
 ```
+
+You can detect when the user changes the value of a duration input:
+
+```Go
+di := core.NewDurationInput(parent).SetDuration(3 * time.Second)
+di.OnChange(func(e events.Event) {
+    core.MessageSnackbar(di, di.Duration.String())
+})
+```
