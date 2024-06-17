@@ -1126,7 +1126,7 @@ func main() {
 		tree.NewNodeBase(n)
 		c2 := tree.NewNodeBase(n)
 		tree.NewNodeBase(c2)
-		// core.NewValue(parent, n)
+		core.NewTreeButton(parent).SetTree(n)
 	},
 	"widgets/pickers/color-pickers-0": func(parent core.Widget) {
 		core.NewColorPicker(parent).SetColor(colors.Orange)
