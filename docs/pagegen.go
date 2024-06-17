@@ -104,7 +104,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"basics/plans-0": func(parent core.Widget) {
 		number := 3
-		spinner := core.Bind(&number, core.NewSpinner(parent)).SetMin(1)
+		spinner := core.Bind(&number, core.NewSpinner(parent)).SetMin(0)
 		buttons := core.NewFrame(parent)
 		buttons.Maker(func(p *core.Plan) {
 			for i := range number {
@@ -164,7 +164,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 				s.Border.Radius.Zero()
-				s.Min.Set(units.Em(3))
+				s.Min.Set(units.Em(2))
 				s.CenterAll()
 			})
 		}
@@ -184,7 +184,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 				s.Border.Radius.Zero()
-				s.Min.Set(units.Em(3))
+				s.Min.Set(units.Em(2))
 				s.CenterAll()
 			})
 			bt.OnClick(func(e events.Event) {
@@ -240,7 +240,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
 				s.Border.Radius.Zero()
-				s.Min.Set(units.Em(3))
+				s.Min.Set(units.Em(2))
 				s.CenterAll()
 			})
 			bt.OnClick(func(e events.Event) {
