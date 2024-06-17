@@ -22,7 +22,7 @@ type person struct {
 core.NewForm(parent).SetInline(true).SetStruct(&person{Name: "Go", Age: 35})
 ```
 
-You can detect when the user changes the value of the struct:
+You can detect when the user changes the value of the form:
 
 ```Go
 type person struct {
@@ -68,7 +68,7 @@ type person struct {
 core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
 ```
 
-You can prevent the user from editing the entire struct:
+You can prevent the user from editing the entire form:
 
 ```Go
 type person struct {

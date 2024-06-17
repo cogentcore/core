@@ -1038,10 +1038,7 @@ func main() {
 		core.NewList(parent).SetSlice(&[]int{1, 3, 5}).SetReadOnly(true)
 	},
 	"widgets/collections/lists-4": func(parent core.Widget) {
-		// core.NewValue(parent, &[]int{1, 3, 5})
-	},
-	"widgets/collections/lists-5": func(parent core.Widget) {
-		// core.NewValue(parent, &[]int{1, 3, 5, 7, 9})
+		core.NewListButton(parent).SetSlice(&[]int{1, 3, 5})
 	},
 	"widgets/collections/tables-0": func(parent core.Widget) {
 		type language struct {

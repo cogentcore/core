@@ -14,7 +14,7 @@ You can make a keyed list that fits in one line:
 core.NewKeyedList(parent).SetInline(true).SetMap(&map[string]int{"Go": 1, "C++": 3})
 ```
 
-You can detect when the user changes the value of the map:
+You can detect when the user changes the value of the keyed list:
 
 ```Go
 m := map[string]int{"Go": 1, "C++": 3, "Python": 5}
@@ -23,7 +23,7 @@ core.NewKeyedList(parent).SetMap(&m).OnChange(func(e events.Event) {
 })
 ```
 
-You can prevent the user from editing the map:
+You can prevent the user from editing the keyed list:
 
 ```Go
 core.NewKeyedList(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5}).SetReadOnly(true)
