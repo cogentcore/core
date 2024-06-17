@@ -49,3 +49,17 @@ You may have noticed in all of the examples so far that the names and tooltips f
 ```Go
 core.NewFuncButton(parent).SetFunc(core.SettingsWindow).SetConfirm(true)
 ```
+
+The process for adding a function to [[types]] is similar to the process for adding a struct described in [forms](../collections/forms):
+
+```go
+// Add this once per package:
+//go:generate core generate
+
+// Add types:add for every function you want the documentation for:
+
+// This comment will be displayed as the tooltip for a func button.
+func DoSomething() { //types:add
+
+}
+```
