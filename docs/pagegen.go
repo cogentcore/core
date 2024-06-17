@@ -1342,6 +1342,9 @@ func main() {
 			core.MessageSnackbar(parent, "Function called")
 		})
 	},
+	"widgets/other/func-buttons-5": func(parent core.Widget) {
+		core.NewFuncButton(parent).SetFunc(core.SettingsWindow).SetConfirm(true)
+	},
 	"widgets/other/meters-0": func(parent core.Widget) {
 		core.NewMeter(parent)
 	},

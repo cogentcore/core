@@ -311,7 +311,7 @@ func StylePropertiesXML(properties map[string]any) string {
 	return sb.String()
 }
 
-// NewStyle returns a new [Style] object with default values
+// NewStyle returns a new [Style] object with default values.
 func NewStyle() *Style {
 	s := &Style{}
 	s.Defaults()

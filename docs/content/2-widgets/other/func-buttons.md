@@ -43,3 +43,9 @@ core.NewFuncButton(parent).SetConfirm(true).SetFunc(func() {
     core.MessageSnackbar(parent, "Function called")
 })
 ```
+
+You may have noticed in all of the examples so far that the names and tooltips for the func buttons are not particularly useful, and the names of the arguments are missing. To solve this, you can use named functions added to [[types]], which gives information about all of those things. For example, here is a func button for [[core.SettingsWindow]]:
+
+```Go
+core.NewFuncButton(parent).SetFunc(core.SettingsWindow).SetConfirm(true)
+```
