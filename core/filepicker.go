@@ -176,8 +176,8 @@ func (fp *FilePicker) Disconnect() {
 	}
 }
 
-// FilePickerFilterFunc is a filtering function for files -- returns true if the
-// file should be visible in the view, and false if not
+// FilePickerFilterFunc is a filtering function for files; returns true if the
+// file should be visible in the picker, and false if not
 type FilePickerFilterFunc func(fp *FilePicker, fi *fileinfo.FileInfo) bool
 
 // FilePickerDirOnlyFilter is a FilePickerFilterFunc that only shows directories (folders).
@@ -196,8 +196,7 @@ func FilePickerExtOnlyFilter(fp *FilePicker, fi *fileinfo.FileInfo) bool {
 	return has
 }
 
-// SetFilename sets the initial filename (splitting out path and filename) and
-// initializes the view
+// SetFilename sets the current filename of the file picker.
 func (fp *FilePicker) SetFilename(filename string) *FilePicker {
 	fp.DirPath, fp.CurrentSelectedFile = filepath.Split(filename)
 	if fp.DirPath == "" {
