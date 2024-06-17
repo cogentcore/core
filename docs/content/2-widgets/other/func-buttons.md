@@ -9,3 +9,13 @@ core.NewFuncButton(parent).SetFunc(func() {
     core.MessageSnackbar(parent, "Function called")
 })
 ```
+
+Notice how the text of the func button above is set to `Main init`. That is because the bound function in that case is an anonymous function defined in `main.init`. You can also see that the tooltip of the function has been set to give more information about the function.
+
+You can always override the text and tooltip of a func button as long as you do so after you call [[core.FuncButton.SetFunc]]:
+
+```Go
+core.NewFuncButton(parent).SetFunc(func() {
+    core.MessageSnackbar(parent, "Function called")
+}).SetText("Run").SetTooltip("Click me!")
+```
