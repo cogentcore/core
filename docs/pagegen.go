@@ -1159,15 +1159,18 @@ func main() {
 		core.NewFilePicker(parent)
 	},
 	"widgets/pickers/file-pickers-1": func(parent core.Widget) {
+		core.NewFilePicker(parent).SetFilename(core.TheApp.DataDir())
+	},
+	"widgets/pickers/file-pickers-2": func(parent core.Widget) {
 		fp := core.NewFilePicker(parent)
 		fp.OnSelect(func(e events.Event) {
 			core.MessageSnackbar(fp, fp.SelectedFile())
 		})
 	},
-	"widgets/pickers/file-pickers-2": func(parent core.Widget) {
+	"widgets/pickers/file-pickers-3": func(parent core.Widget) {
 		core.NewFileButton(parent)
 	},
-	"widgets/pickers/file-pickers-3": func(parent core.Widget) {
+	"widgets/pickers/file-pickers-4": func(parent core.Widget) {
 		fb := core.NewFileButton(parent)
 		fb.OnChange(func(e events.Event) {
 			core.MessageSnackbar(fb, fb.Filename)

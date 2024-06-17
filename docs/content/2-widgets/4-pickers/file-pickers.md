@@ -8,6 +8,12 @@ You can make a file picker:
 core.NewFilePicker(parent)
 ```
 
+You can set the starting file of a file picker:
+
+```Go
+core.NewFilePicker(parent).SetFilename(core.TheApp.DataDir())
+```
+
 You can detect when a user selects a file:
 
 ```Go
