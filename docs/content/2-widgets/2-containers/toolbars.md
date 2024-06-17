@@ -44,3 +44,16 @@ tb.Maker(func(p *core.Plan) {
     }
 })
 ```
+
+Typically, you add elements to the main top app bar (see the toolbar at the top of this documentation for example) instead of making a standalone toolbar (in this example, `b` is the [[core.Body]]):
+
+```go
+b.AddAppBar(func(p *core.Plan) {
+    core.Add(p, func(w *core.Button) {
+        w.SetText("Build")
+    })
+    core.Add(p, func(w *core.Button) {
+        w.SetText("Run")
+    })
+})
+```

@@ -11,11 +11,13 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Body holds the primary content of a Scene
+// Body holds the primary content of a [Scene].
+// It is the main container for app content.
 type Body struct { //core:no-new
 	Frame
 
-	// title of the Body, also used for window title where relevant
+	// Title is the title of the body, which is also
+	// used for the window title where relevant.
 	Title string `set:"-"`
 }
 

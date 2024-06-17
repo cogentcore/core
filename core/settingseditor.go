@@ -12,11 +12,11 @@ import (
 // SettingsEditorToolbarBase is the base toolbar configuration function used in [SettingsEditor].
 func SettingsEditorToolbarBase(p *Plan) {
 	Add(p, func(w *FuncButton) {
-		w.SetFunc(AppearanceSettings.SaveScreenZoom).
-			SetAfterFunc(func() {
-				AppearanceSettings.Apply()
-				UpdateAll()
-			}).SetIcon(icons.ZoomIn)
+		w.SetFunc(AppearanceSettings.SaveScreenZoom).SetIcon(icons.ZoomIn)
+		w.SetAfterFunc(func() {
+			AppearanceSettings.Apply()
+			UpdateAll()
+		})
 		// todo: update..
 	})
 
@@ -36,7 +36,7 @@ func SettingsWindow() { //types:add
 	if RecycleMainWindow(&AllSettings) {
 		return
 	}
-	d := NewBody("settings").SetTitle("Settings").SetData(&AllSettings)
+	d := NewBody("Settings").SetData(&AllSettings)
 	SettingsEditor(d)
 	d.NewWindow().SetCloseOnBack(true).Run()
 }
