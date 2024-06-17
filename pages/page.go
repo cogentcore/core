@@ -53,6 +53,12 @@ type Page struct {
 	// URLToPagePath is a map between user-facing page URLs and underlying
 	// FS page paths.
 	URLToPagePath map[string]string `set:"-"`
+
+	// nav is the navigation tree.
+	nav *core.Tree
+
+	// body is the page body frame.
+	body *core.Frame
 }
 
 var _ tree.Node = (*Page)(nil)
@@ -89,78 +95,76 @@ func (pg *Page) Init() {
 		pg.setStageTitle()
 	})
 
-	pg.Maker(func(p *core.Plan) {
-		p.EnforceEmpty = false
-		if pg.HasChildren() { // TODO(config)
-			return
-		}
-		sp := core.NewSplits(pg).SetSplits(0.2, 0.8)
-		sp.SetName("splits")
+	core.AddChild(pg, func(w *core.Splits) {
+		w.SetSplits(0.2, 0.8)
+		core.AddChild(w, func(w *core.Frame) {
+			w.Styler(func(s *styles.Style) {
+				s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+			})
+			core.AddChild(w, func(w *core.Tree) {
+				pg.nav = w
+				w.SetText(core.TheApp.Name())
+				w.SetReadOnly(true)
+				w.OnSelect(func(e events.Event) {
+					if len(w.SelectedNodes) == 0 {
+						return
+					}
+					sn := w.SelectedNodes[0]
+					url := "/"
+					if sn != w {
+						// we need a slash so that it doesn't think it's a relative URL
+						url = "/" + sn.AsTree().PathFrom(w)
+					}
+					pg.OpenURL(url, true)
+				})
 
-		nav := core.NewTreeFrame(sp).SetText(core.TheApp.Name())
-		nav.Parent.AsTree().SetName("nav-frame")
-		nav.SetName("nav")
-		nav.SetReadOnly(true)
-		nav.ParentWidget().Styler(func(s *styles.Style) {
-			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+				pg.URLToPagePath = map[string]string{"": "index.md"}
+				errors.Log(fs.WalkDir(pg.Source, ".", func(fpath string, d fs.DirEntry, err error) error {
+					// already handled
+					if fpath == "" || fpath == "." {
+						return nil
+					}
+
+					p := wpath.Format(fpath)
+
+					pdir := path.Dir(p)
+					base := path.Base(p)
+
+					// already handled
+					if base == "index.md" {
+						return nil
+					}
+
+					ext := path.Ext(base)
+					if ext != "" && ext != ".md" {
+						return nil
+					}
+
+					parent := w
+					if pdir != "" && pdir != "." {
+						parent = w.FindPath(pdir).(*core.Tree)
+					}
+
+					nm := strings.TrimSuffix(base, ext)
+					txt := strcase.ToSentence(nm)
+					tv := core.NewTree(parent).SetText(txt)
+					tv.SetName(nm)
+
+					// need index.md for page path
+					if d.IsDir() {
+						fpath += "/index.md"
+					}
+					pg.URLToPagePath[tv.PathFrom(w)] = fpath
+					return nil
+				}))
+			})
 		})
-		nav.OnSelect(func(e events.Event) {
-			if len(nav.SelectedNodes) == 0 {
-				return
-			}
-			sn := nav.SelectedNodes[0]
-			url := "/"
-			if sn != nav {
-				// we need a slash so that it doesn't think it's a relative URL
-				url = "/" + sn.AsTree().PathFrom(nav)
-			}
-			pg.OpenURL(url, true)
+		core.AddChild(w, func(w *core.Frame) {
+			pg.body = w
+			w.Styler(func(s *styles.Style) {
+				s.Direction = styles.Column
+			})
 		})
-
-		pg.URLToPagePath = map[string]string{"": "index.md"}
-
-		errors.Log(fs.WalkDir(pg.Source, ".", func(fpath string, d fs.DirEntry, err error) error {
-			// already handled
-			if fpath == "" || fpath == "." {
-				return nil
-			}
-
-			p := wpath.Format(fpath)
-
-			pdir := path.Dir(p)
-			base := path.Base(p)
-
-			// already handled
-			if base == "index.md" {
-				return nil
-			}
-
-			ext := path.Ext(base)
-			if ext != "" && ext != ".md" {
-				return nil
-			}
-
-			parent := nav
-			if pdir != "" && pdir != "." {
-				parent = nav.FindPath(pdir).(*core.Tree)
-			}
-
-			nm := strings.TrimSuffix(base, ext)
-			txt := strcase.ToSentence(nm)
-			tv := core.NewTree(parent).SetText(txt)
-			tv.SetName(nm)
-
-			// need index.md for page path
-			if d.IsDir() {
-				fpath += "/index.md"
-			}
-			pg.URLToPagePath[tv.PathFrom(nav)] = fpath
-			return nil
-		}))
-
-		core.NewFrame(sp).Styler(func(s *styles.Style) {
-			s.Direction = styles.Column
-		}).SetName("body")
 	})
 }
 
@@ -270,20 +274,18 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	// need to reset
 	NumExamples[pg.Context.PageURL] = 0
 
-	nav := pg.FindPath("splits/nav-frame/nav").(*core.Tree)
-	nav.UnselectAll()
-	utv := nav.FindPath(rawURL).(*core.Tree)
+	pg.nav.UnselectAll()
+	utv := pg.nav.FindPath(rawURL).(*core.Tree)
 	utv.Select()
 	utv.ScrollToMe()
 
-	fr := pg.FindPath("splits/body").(*core.Frame)
-	fr.DeleteChildren()
-	err = htmlcore.ReadMD(pg.Context, fr, b)
+	pg.body.DeleteChildren()
+	err = htmlcore.ReadMD(pg.Context, pg.body, b)
 	if err != nil {
 		core.ErrorSnackbar(pg, err, "Error loading page")
 		return
 	}
-	fr.Update()
+	pg.body.Update()
 }
 
 // AppBar is the default app bar for a [Page]
