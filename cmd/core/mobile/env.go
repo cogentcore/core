@@ -452,6 +452,9 @@ func ArchNDK() string {
 				arch = "x86_64"
 				break
 			}
+			if runtime.GOOS == "android" { // termux
+				return "linux-aarch64"
+			}
 			fallthrough
 		default:
 			panic("unsupported GOARCH: " + runtime.GOARCH)
