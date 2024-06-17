@@ -999,17 +999,7 @@ func main() {
 			Name string
 			Age  int
 		}
-		// core.NewValue(&person{Name: "Go", Age: 35}, "", parent)
-	},
-	"widgets/collections/forms-12": func(parent core.Widget) {
-		type person struct {
-			Name        string
-			Age         int
-			Job         string
-			LikesGo     bool
-			LikesPython bool
-		}
-		// core.NewValue(&person{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true}, "", parent)
+		core.NewFormButton(parent).SetStruct(&person{Name: "Go", Age: 35})
 	},
 	"widgets/collections/keyed-lists-0": func(parent core.Widget) {
 		core.NewKeyedList(parent).SetMap(&map[string]int{"Go": 1, "C++": 3, "Python": 5})

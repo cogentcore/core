@@ -131,7 +131,17 @@ type person struct {
 core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 ```
 
-You can make it so that the documentation comments for struct fields are used as tooltips for the field label and value widgets by adding the type to [[types]] and running `core generate`:
+You can make a button that pulls up a dialog with a form:
+
+```Go
+type person struct {
+    Name string
+    Age  int
+}
+core.NewFormButton(parent).SetStruct(&person{Name: "Go", Age: 35})
+```
+
+You can make it so that the documentation comments for struct fields are used as tooltips for the label and value widgets of a form by adding the type to [[types]] and running `core generate`:
 
 ```go
 // Add this once per package:
@@ -143,27 +153,4 @@ type person struct { //types:add
     // This comment will be displayed in the tooltip for this field
     Name string
 }
-```
-
-When you use [[core.NewValue]] with a struct value, it will create an inline form if the struct has four or fewer fields:
-
-```Go
-type person struct {
-    Name string
-    Age  int
-}
-// core.NewValue(&person{Name: "Go", Age: 35}, "", parent)
-```
-
-Otherwise, it will create a button that opens a dialog with a normal form:
-
-```Go
-type person struct {
-    Name        string
-    Age         int
-    Job         string
-    LikesGo     bool
-    LikesPython bool
-}
-// core.NewValue(&person{Name: "Go", Age: 35, Job: "Programmer", LikesGo: true}, "", parent)
 ```
