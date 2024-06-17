@@ -100,9 +100,9 @@ type StyleEntry struct {
 //		return he
 //	}
 
-// Norm normalizes the colors of the style entry such that they have consistent
-// chromas and tones that guarantee sufficient text contrast.
-func (se *StyleEntry) Norm() {
+// UpdateFromTheme normalizes the colors of the style entry such that they have consistent
+// chromas and tones that guarantee sufficient text contrast in accordance with the color theme.
+func (se *StyleEntry) UpdateFromTheme() {
 	hc := hct.FromColor(se.Color)
 	ctone := float32(40)
 	if matcolor.SchemeIsDark {

@@ -32,31 +32,18 @@ var CustomStyles = Styles{}
 // AvailableStyles are all highlighting styles
 var AvailableStyles Styles
 
-// StyleDefaultLight is the default highlighting style name,
-// for light mode
-var StyleDefaultLight = core.HiStyleName("emacs")
-
-// StyleDefaultDark is the default highlighting style name,
-// for dark mode
-var StyleDefaultDark = core.HiStyleName("monokai")
-
-// StyleDefaultDark is the default highlighting style name,
-// for current light / dark mode
-var StyleDefault = StyleDefaultDark
+// StyleDefault is the default highlighting style name
+var StyleDefault = core.HiStyleName("emacs")
 
 // StyleNames are all the names of all the available highlighting styles
 var StyleNames []string
 
-// UpdateLightDark ensures that the StyleDefault is appropriate for current
-// givenn dark / light mode setting.
-func UpdateLightDark(isDark bool) {
-	if isDark {
-		if StyleDefault == StyleDefaultLight {
-			StyleDefault = StyleDefaultDark
-		}
-	} else {
-		if StyleDefault == StyleDefaultDark {
-			StyleDefault = StyleDefaultLight
+// UpdateFromTheme normalizes the colors of all style entry such that they have consistent
+// chromas and tones that guarantee sufficient text contrast in accordance with the color theme.
+func UpdateFromTheme() {
+	for _, s := range AvailableStyles {
+		for _, se := range *s {
+			se.UpdateFromTheme()
 		}
 	}
 }
@@ -200,10 +187,5 @@ func Init() {
 		CustomStyles["custom-sample"] = cs
 	}
 	MergeAvailStyles()
-
-	for _, s := range AvailableStyles {
-		for _, se := range *s {
-			se.Norm()
-		}
-	}
+	UpdateFromTheme()
 }
