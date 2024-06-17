@@ -1090,7 +1090,7 @@ func main() {
 			Name   string
 			Rating int
 		}
-		// core.NewValue(parent, &[]language{{"Go", 10}, {"Python", 5}})
+		core.NewListButton(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	},
 	"widgets/collections/trees-0": func(parent core.Widget) {
 		tv := core.NewTree(parent).SetText("Root")

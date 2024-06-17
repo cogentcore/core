@@ -65,7 +65,17 @@ type language struct {
 core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
 ```
 
-You can make it so that the documentation comments for struct fields are used as tooltips for the column headers and value widgets by adding the type to [[types]] and running `core generate`:
+You can make a button that opens a dialog with a table:
+
+```Go
+type language struct {
+    Name   string
+    Rating int
+}
+core.NewListButton(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+```
+
+You can make it so that the documentation comments for struct fields are used as tooltips for the column headers and value widgets of a table by adding the type to [[types]] and running `core generate`:
 
 ```go
 // Add this once per package:
@@ -77,14 +87,4 @@ type language struct { //types:add
     // This comment will be displayed in the tooltip for this field
     Name string
 }
-```
-
-When you use [[core.NewValue]] with a slice of structs, it will create a button that opens a dialog with a table:
-
-```Go
-type language struct {
-    Name   string
-    Rating int
-}
-// core.NewValue(parent, &[]language{{"Go", 10}, {"Python", 5}})
 ```
