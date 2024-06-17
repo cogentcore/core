@@ -192,6 +192,7 @@ func (tx *Text) Init() {
 	})
 	tx.FinalStyler(func(s *styles.Style) {
 		tx.normalCursor = s.Cursor
+		tx.paintText.UpdateColors(tx.Styles.FontRender())
 	})
 
 	tx.HandleTextClick(func(tl *paint.TextLink) {

@@ -288,6 +288,21 @@ func (sr *Span) SetRunes(str []rune, sty *styles.FontRender, ctxt *units.Context
 	sr.SetRenders(sty, ctxt, noBG, rot, scalex)
 }
 
+// UpdateColors sets the font styling colors the first rune
+// based on the given font style parameters.
+func (sr *Span) UpdateColors(sty *styles.FontRender) {
+	if len(sr.Text) == 0 {
+		return
+	}
+	r := sr.Render[0]
+	if sty.Color != nil {
+		r.Color = sty.Color
+	}
+	if sty.Background != nil {
+		r.Background = sty.Background
+	}
+}
+
 // TextFontRenderMu mutex is required because multiple different goroutines
 // associated with different windows can (and often will be) call font stuff
 // at the same time (curFace.GlyphAdvance, rendering font) at the same time, on

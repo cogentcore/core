@@ -818,6 +818,15 @@ func (tx *Text) String() string {
 	return s
 }
 
+// UpdateColors sets the font styling colors the first rune
+// based on the given font style parameters.
+func (tx *Text) UpdateColors(sty *styles.FontRender) {
+	for i := range tx.Spans {
+		sr := &tx.Spans[i]
+		sr.UpdateColors(sty)
+	}
+}
+
 // SetBackground sets the BackgroundColor of the first Render in each Span
 // to given value, if was not nil.
 func (tx *Text) SetBackground(bg image.Image) {
