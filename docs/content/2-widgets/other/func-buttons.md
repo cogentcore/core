@@ -27,3 +27,19 @@ core.NewFuncButton(parent).SetFunc(func(name string, age int) {
     core.MessageSnackbar(parent, name+" is "+strconv.Itoa(age)+" years old")
 })
 ```
+
+When the bound function returns values, you can set [[core.FuncButton.ShowReturn]] to true for the user to be shown those values:
+
+```Go
+core.NewFuncButton(parent).SetShowReturn(true).SetFunc(func() (string, int) {
+    return "Gopher", 35
+})
+```
+
+You can prompt the user for confirmation before calling the function:
+
+```Go
+core.NewFuncButton(parent).SetConfirm(true).SetFunc(func() {
+    core.MessageSnackbar(parent, "Function called")
+})
+```

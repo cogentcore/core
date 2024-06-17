@@ -1332,6 +1332,16 @@ func main() {
 			core.MessageSnackbar(parent, name+" is "+strconv.Itoa(age)+" years old")
 		})
 	},
+	"widgets/other/func-buttons-3": func(parent core.Widget) {
+		core.NewFuncButton(parent).SetShowReturn(true).SetFunc(func() (string, int) {
+			return "Gopher", 35
+		})
+	},
+	"widgets/other/func-buttons-4": func(parent core.Widget) {
+		core.NewFuncButton(parent).SetConfirm(true).SetFunc(func() {
+			core.MessageSnackbar(parent, "Function called")
+		})
+	},
 	"widgets/other/meters-0": func(parent core.Widget) {
 		core.NewMeter(parent)
 	},
