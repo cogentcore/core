@@ -151,3 +151,29 @@ core.NewButton(fr).SetText("First")
 core.NewButton(fr).SetText("Second")
 core.NewButton(fr).SetText("Third")
 ```
+
+You can add a separator to separate elements inside of a frame:
+
+```Go
+fr := core.NewFrame(parent)
+fr.Styler(func(s *styles.Style) {
+    s.Direction = styles.Column
+})
+core.NewButton(fr).SetText("First")
+core.NewSeparator(fr)
+core.NewButton(fr).SetText("Second")
+core.NewButton(fr).SetText("Third")
+```
+
+Separators can go in either direction:
+
+```Go
+fr := core.NewFrame(parent)
+core.NewButton(fr).SetText("First")
+sp := core.NewSeparator(fr)
+sp.Styler(func(s *styles.Style) {
+    s.Direction = styles.Column
+})
+core.NewButton(fr).SetText("Second")
+core.NewButton(fr).SetText("Third")
+```

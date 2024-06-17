@@ -430,6 +430,26 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewButton(fr).SetText("Second")
 		core.NewButton(fr).SetText("Third")
 	},
+	"widgets/basic/frames-12": func(parent core.Widget) {
+		fr := core.NewFrame(parent)
+		fr.Styler(func(s *styles.Style) {
+			s.Direction = styles.Column
+		})
+		core.NewButton(fr).SetText("First")
+		core.NewSeparator(fr)
+		core.NewButton(fr).SetText("Second")
+		core.NewButton(fr).SetText("Third")
+	},
+	"widgets/basic/frames-13": func(parent core.Widget) {
+		fr := core.NewFrame(parent)
+		core.NewButton(fr).SetText("First")
+		sp := core.NewSeparator(fr)
+		sp.Styler(func(s *styles.Style) {
+			s.Direction = styles.Column
+		})
+		core.NewButton(fr).SetText("Second")
+		core.NewButton(fr).SetText("Third")
+	},
 	"widgets/basic/icons-0": func(parent core.Widget) {
 		core.NewButton(parent).SetIcon(icons.Send)
 	},
