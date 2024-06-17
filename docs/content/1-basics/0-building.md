@@ -14,4 +14,6 @@ The `core` command line tool provides four main build commands, as documented be
 
 4. `core install` installs the app on the target system
 
+You can build for mobile and web platforms by adding the platform name after the command. For example, you can run `core run android` to build and run an app on an Android device, `core build ios` to build an app for an iOS device, and `core run web` to serve an app on the web.
+
 You can see the [advanced building page](../advanced/building) for more information if you need it.
