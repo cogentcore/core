@@ -28,10 +28,9 @@ const (
 	ExternalFilesName = "[external files]"
 )
 
-// Tree is the root of a tree representing files in a given directory
+// Tree is the root widget of a tree representing files in a given directory
 // (and subdirectories thereof), and has some overall management state for how to
-// view things.  The Tree can be viewed by a Tree to provide a GUI
-// interface into it.
+// view things.
 type Tree struct {
 	Node
 
@@ -96,10 +95,8 @@ func (fv *Tree) Destroy() {
 }
 
 // OpenPath opens the filetree at the given directory path. It reads all the files at
-// the given path into this tree. It uses config children to preserve extra info
-// already stored about files. Only paths listed in Dirs will be opened.
+// the given path into this tree. Only paths listed in [Tree.Dirs] will be opened.
 func (ft *Tree) OpenPath(path string) {
-	ft.FRoot = ft // we are our own root..
 	if ft.FileNodeType == nil {
 		ft.FileNodeType = NodeType
 	}

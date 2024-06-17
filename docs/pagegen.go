@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/filetree"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
@@ -1312,6 +1313,9 @@ func main() {
 	},
 	"widgets/media/svgs-3": func(parent core.Widget) {
 		errors.Log(core.NewSVG(parent).ReadString(`<rect width="100" height="100" fill="red"/>`))
+	},
+	"widgets/other/file-trees-0": func(parent core.Widget) {
+		filetree.NewTree(parent).OpenPath(".")
 	},
 	"widgets/other/func-buttons-0": func(parent core.Widget) {
 		core.NewFuncButton(parent).SetFunc(func() {

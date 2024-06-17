@@ -1,6 +1,6 @@
 # Trees
 
-Cogent Core provides interactive trees that allow you to display a nested tree structure. Users can use context menus and drag-and-drop to add, remove, and move tree nodes.
+Cogent Core provides interactive trees that allow you to display a nested tree structure. Users can use context menus and drag-and-drop to add, remove, and move tree nodes. See [file trees](../other/file-trees) for trees designed to display file structures.
 
 You can make a tree and add tree child nodes directly to it:
 
