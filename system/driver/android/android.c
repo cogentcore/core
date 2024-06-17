@@ -77,6 +77,16 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved)
 
 static int main_running = 0;
 
+// ensure we refresh context on resume in case something has changed...
+void onResume(ANativeActivity *activity) {
+	JNIEnv* env = activity->env;
+	setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
+}
+
+void onStart(ANativeActivity *activity) {}
+void onPause(ANativeActivity *activity) {}
+void onStop(ANativeActivity *activity) {}
+
 // Entry point from our subclassed NativeActivity.
 //
 // By here, the Go runtime has been initialized (as we are running in
