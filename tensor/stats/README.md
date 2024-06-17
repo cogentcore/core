@@ -3,7 +3,8 @@
 There are several packages here for operating on vector, [tensor](../tensor), and [table](../table) data, for computing standard statistics and performing related computations, such as normalizing the data.
 
 * [clust](clust) implements agglomerative clustering of items based on [simat](simat) similarity matrix data.
-* [convolve](convolve) convolves data (e.g., for smoothing)
+* [convolve](convolve) convolves data (e.g., for smoothing).
+* [glm](glm) fits a general linear model for one or more dependent variables as a function of one or more independent variables.  This encompasses all forms of regression.
 * [histogram](histogram) bins data into groups and reports the frequency of elements in the bins.
 * [metric](metric) computes similarity / distance metrics for comparing two vectors
 * [norm](norm) normalizes vector data
