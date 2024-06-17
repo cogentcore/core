@@ -22,6 +22,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/system"
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/texteditor/textbuf"
 	"cogentcore.org/core/tree"
@@ -491,6 +492,7 @@ func (ed *Editor) Redo() {
 // StyleView sets the style of widget
 func (ed *Editor) StyleView() {
 	if ed.NeedsRebuild() {
+		histyle.UpdateLightDark(system.TheApp.IsDark())
 		if ed.Buffer != nil {
 			ed.Buffer.SetHiStyle(histyle.StyleDefault)
 		}

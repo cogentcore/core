@@ -32,11 +32,34 @@ var CustomStyles = Styles{}
 // AvailableStyles are all highlighting styles
 var AvailableStyles Styles
 
-// StyleDefault is the default highlighting style name -- can set this to whatever you want
-var StyleDefault = core.HiStyleName("emacs")
+// StyleDefaultLight is the default highlighting style name,
+// for light mode
+var StyleDefaultLight = core.HiStyleName("emacs")
+
+// StyleDefaultDark is the default highlighting style name,
+// for dark mode
+var StyleDefaultDark = core.HiStyleName("monokai")
+
+// StyleDefaultDark is the default highlighting style name,
+// for current light / dark mode
+var StyleDefault = StyleDefaultDark
 
 // StyleNames are all the names of all the available highlighting styles
 var StyleNames []string
+
+// UpdateLightDark ensures that the StyleDefault is appropriate for current
+// givenn dark / light mode setting.
+func UpdateLightDark(isDark bool) {
+	if isDark {
+		if StyleDefault == StyleDefaultLight {
+			StyleDefault = StyleDefaultDark
+		}
+	} else {
+		if StyleDefault == StyleDefaultDark {
+			StyleDefault = StyleDefaultLight
+		}
+	}
+}
 
 // AvailableStyle returns a style by name from the AvailStyles list -- if not found
 // default is used as a fallback
