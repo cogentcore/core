@@ -15,6 +15,7 @@ import (
 	"log/slog"
 	"net/url"
 	"path"
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
@@ -288,14 +289,9 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	pg.body.Update()
 }
 
-// AppBar is the default app bar for a [Page]
-func (pg *Page) AppBar(p *core.Plan) {
-	// TODO(config): needs a different config
-	/*
-		ch := tb.AppChooser()
-
-		back := tb.ChildByName("back").(*core.Button)
-		back.OnClick(func(e events.Event) {
+func (pg *Page) MakeToolbar(p *core.Plan) {
+	core.AddInit(p, "back", func(w *core.Button) {
+		w.OnClick(func(e events.Event) {
 			if pg.HistoryIndex > 0 {
 				pg.HistoryIndex--
 				// we reverse the order
@@ -304,15 +300,16 @@ func (pg *Page) AppBar(p *core.Plan) {
 				pg.OpenURL("/"+pg.History[pg.HistoryIndex], false)
 			}
 		})
-
-		ch.AddItemsFunc(func() {
+	})
+	core.AddInit(p, "app-chooser", func(w *core.Chooser) {
+		w.AddItemsFunc(func() {
 			urls := []string{}
 			for u := range pg.URLToPagePath {
 				urls = append(urls, u)
 			}
 			slices.Sort(urls)
 			for _, u := range urls {
-				ch.Items = append(ch.Items, core.ChooserItem{
+				w.Items = append(w.Items, core.ChooserItem{
 					Value: u,
 					Text:  wpath.Label(u, core.TheApp.Name()),
 					Func: func() {
@@ -321,5 +318,5 @@ func (pg *Page) AppBar(p *core.Plan) {
 				})
 			}
 		})
-	*/
+	})
 }

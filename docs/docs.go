@@ -44,7 +44,7 @@ func main() {
 	b := core.NewBody("Cogent Core Docs")
 	pg := pages.NewPage(b).SetSource(errors.Log1(fs.Sub(content, "content")))
 	pg.Context.WikilinkResolver = htmlcore.PkgGoDevWikilink("cogentcore.org/core")
-	// b.AddAppBar(pg.AppBar)
+	b.AddAppBar(pg.MakeToolbar)
 
 	htmlcore.ElementHandlers["home-page"] = homePage
 
