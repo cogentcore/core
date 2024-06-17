@@ -861,6 +861,16 @@ func main() {
 			})
 		})
 	},
+	"widgets/containers/toolbars-2": func(parent core.Widget) {
+		tb := core.NewToolbar(parent)
+		tb.Maker(func(p *core.Plan) {
+			for i := range 30 {
+				core.AddAt(p, strconv.Itoa(i), func(w *core.Button) {
+					w.SetText("Button " + strconv.Itoa(i))
+				})
+			}
+		})
+	},
 	"widgets/collections/forms-0": func(parent core.Widget) {
 		type person struct {
 			Name string

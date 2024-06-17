@@ -31,3 +31,16 @@ tb.Maker(func(p *core.Plan) {
     })
 })
 ```
+
+When you add more items to a toolbar than can fit on the screen, it places them in an overflow menu:
+
+```Go
+tb := core.NewToolbar(parent)
+tb.Maker(func(p *core.Plan) {
+    for i := range 30 {
+        core.AddAt(p, strconv.Itoa(i), func(w *core.Button) {
+            w.SetText("Button "+strconv.Itoa(i))
+        })
+    }
+})
+```
