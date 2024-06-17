@@ -164,7 +164,7 @@ func homePage(ctx *htmlcore.Context) bool {
 		makeIcon(parent).SetIcon(icons.Code)
 	})
 
-	makeBlock("USED AROUND THE WORLD", "Over six years of development, Cogent Core has been used and thoroughly tested by developers and scientists around the world for a wide variety of use cases. Cogent Core is a production-ready framework actively used to power everything from end-user apps to scientific research.", func(parent core.Widget) {
+	makeBlock("USED AROUND THE WORLD", "Over six years of development, Cogent Core has been used and thoroughly tested by developers and scientists around the world for a wide variety of use cases. Cogent Core is an advanced framework actively used to power everything from end-user apps to scientific research.", func(parent core.Widget) {
 		makeIcon(parent).SetIcon(icons.GlobeAsia)
 	})
 
