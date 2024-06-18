@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/filetree"
+	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/math32"
@@ -1354,6 +1355,9 @@ func main() {
 	},
 	"widgets/other/func-buttons-5": func(parent core.Widget) {
 		core.NewFuncButton(parent).SetFunc(core.SettingsWindow).SetConfirm(true)
+	},
+	"widgets/other/html-0": func(parent core.Widget) {
+		htmlcore.ReadHTMLString(htmlcore.NewContext(), parent, `<h1>Hello</h1><button>Click me!</button>`)
 	},
 	"widgets/other/meters-0": func(parent core.Widget) {
 		core.NewMeter(parent)
