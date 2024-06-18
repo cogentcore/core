@@ -92,8 +92,8 @@ func (nb *NodeBase) RunUpdaters() {
 }
 
 // Add adds a new [PlanItem] to the given [Plan] for a [Node] with
-// the given function to initialize the node. The node
-// is guaranteed to have its parent set before the init function
+// the given function to initialize the node. The node is
+// guaranteed to be added to its parent before the init function
 // is called. The name of the node is automatically generated based
 // on the file and line number of the calling function.
 func Add[T Node](p *Plan, init func(n T)) {
@@ -114,7 +114,7 @@ func autoPlanName(level int) string {
 
 // AddAt adds a new [PlanItem] to the given [Plan] for a [Node] with
 // the given name and function to initialize the node. The node
-// is guaranteed to have its parent set before the init function
+// is guaranteed to be added to its parent before the init function
 // is called.
 func AddAt[T Node](p *Plan, name string, init func(n T)) {
 	p.Add(name, func() Node {
@@ -126,8 +126,8 @@ func AddAt[T Node](p *Plan, name string, init func(n T)) {
 
 // AddNew adds a new [PlanItem] to the given [Plan] for a [Node] with
 // the given name, function for constructing the node, and function
-// for initializing the node. The node is guaranteed to
-// have its parent set before the init function is called.
+// for initializing the node. The node is guaranteed to be added
+// to its parent before the init function is called.
 // It should only be called instead of [Add] and [AddAt] when the node
 // must be made new, like when using [cogentcore.org/core/core.NewValue].
 func AddNew[T Node](p *Plan, name string, new func() T, init func(n T)) {
@@ -140,8 +140,8 @@ func AddNew[T Node](p *Plan, name string, new func() T, init func(n T)) {
 
 // AddInit adds a new function for initializing the [Node] with the given name
 // in the given [Plan]. The node must already exist in the plan; this is for
-// extending an existing [PlanItem], not adding a new one. The node is guaranteed
-// to have its parent set before the init function is called. The init functions are
+// extending an existing [PlanItem], not adding a new one. The node is guaranteed to
+// be added to its parent before the init function is called. The init functions are
 // called in sequential ascending order.
 func AddInit[T Node](p *Plan, name string, init func(n T)) {
 	for _, child := range p.Children {
@@ -178,7 +178,7 @@ func AddChildAt[T Node](parent Node, name string, init func(n T)) {
 // adds a new function for initializing the node with the given name
 // in the given [Plan]. The node must already exist in the plan; this is for
 // extending an existing [PlanItem], not adding a new one. The node is guaranteed
-// to have its parent set before the init function is called. The init functions are
+// to be added to its parent before the init function is called. The init functions are
 // called in sequential ascending order.
 func AddChildInit[T Node](parent Node, name string, init func(n T)) {
 	parent.AsTree().Maker(func(p *Plan) {
