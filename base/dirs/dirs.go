@@ -138,42 +138,6 @@ func LatestMod(path string, exts ...string) time.Time {
 	return tm
 }
 
-// AllFiles returns a slice of all the files, recursively, within a given directory
-// Due to the nature of the filepath.Walk function, the first entry will be the
-// directory itself, for reference -- just skip past that if you don't need it.
-func AllFiles(path string) ([]string, error) {
-	var fnms []string
-	er := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		fnms = append(fnms, path)
-		return nil
-	})
-	return fnms, er
-}
-
-// AllFilesGlob returns a slice of all the files, recursively
-// within a given directory, that match given pattern expression
-// for the individual filename.
-func AllFilesGlob(path, pattern string) ([]string, error) {
-	_, err := filepath.Match("test", pattern)
-	if err != nil {
-		return nil, err
-	}
-	var fnms []string
-	er := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if match, _ := filepath.Match(path, pattern); match {
-			fnms = append(fnms, path)
-		}
-		return nil
-	})
-	return fnms, er
-}
-
 // HasFile returns true if given directory has given file (exact match)
 func HasFile(path, file string) bool {
 	files, err := os.ReadDir(path)
@@ -186,16 +150,6 @@ func HasFile(path, file string) bool {
 		}
 	}
 	return false
-}
-
-// note: rejected from std lib, but often need: https://github.com/golang/go/issues/25012
-// https://github.com/golang/go/issues/5366
-
-// SplitExt returns the base of the file name without extension, and the extension
-func SplitExt(fname string) (fbase, ext string) {
-	ext = filepath.Ext(fname)
-	fbase = strings.TrimSuffix(fname, ext)
-	return
 }
 
 // FindFilesOnPaths attempts to locate given file(s) on given list of paths,
