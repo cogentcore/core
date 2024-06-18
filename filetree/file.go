@@ -108,7 +108,7 @@ func (fn *Node) OpenFilesDefault() { //types:add
 // runs open on Mac, xdg-open on Linux, and start on Windows
 func (fn *Node) OpenFileDefault() error {
 	cstr := OSOpenCommand()
-	cmd := exec.Command(cstr, string(fn.FPath))
+	cmd := exec.Command(cstr, string(fn.Filepath))
 	out, err := cmd.CombinedOutput()
 	fmt.Printf("%s\n", out)
 	return err
@@ -124,7 +124,7 @@ func (fn *Node) OpenFilesWith() {
 // OpenFileWith opens file with given command.
 // does not wait for command to finish in this routine (separate routine Waits)
 func (fn *Node) OpenFileWith(command string) error {
-	cmd := exec.Command(command, string(fn.FPath))
+	cmd := exec.Command(command, string(fn.Filepath))
 	err := cmd.Start()
 	go func() {
 		err := cmd.Wait()
@@ -137,7 +137,7 @@ func (fn *Node) OpenFileWith(command string) error {
 
 // DuplicateFiles makes a copy of selected files
 func (fn *Node) DuplicateFiles() { //types:add
-	fn.FRoot.NeedsLayout()
+	fn.FileRoot.NeedsLayout()
 	fn.SelectedFunc(func(sn *Node) {
 		sn.This.(Filer).DuplicateFile()
 	})
@@ -170,7 +170,7 @@ func (fn *Node) DeleteFiles() { //types:add
 
 // DeleteFilesImpl does the actual deletion, no prompts
 func (fn *Node) DeleteFilesImpl() {
-	fn.FRoot.NeedsLayout()
+	fn.FileRoot.NeedsLayout()
 	fn.SelectedFunc(func(sn *Node) {
 		if !sn.Info.IsDir() {
 			sn.DeleteFile()
@@ -178,7 +178,7 @@ func (fn *Node) DeleteFilesImpl() {
 		}
 		var fns []string
 		sn.Info.Filenames(&fns)
-		ft := sn.FRoot
+		ft := sn.FileRoot
 		for _, filename := range fns {
 			sn, ok := ft.FindFile(filename)
 			if !ok {
@@ -207,7 +207,7 @@ func (fn *Node) DeleteFile() error {
 	var err error
 	if !fn.Info.IsDir() && repo != nil && fn.Info.VCS >= vcs.Stored {
 		// fmt.Printf("del repo: %v\n", fn.FPath)
-		err = repo.Delete(string(fn.FPath))
+		err = repo.Delete(string(fn.Filepath))
 	} else {
 		// fmt.Printf("del raw: %v\n", fn.FPath)
 		err = fn.Info.Delete()
@@ -223,7 +223,7 @@ func (fn *Node) DeleteFile() error {
 
 // renames any selected files
 func (fn *Node) RenameFiles() { //types:add
-	fn.FRoot.NeedsLayout()
+	fn.FileRoot.NeedsLayout()
 	fn.SelectedFunc(func(sn *Node) {
 		fb := core.NewSoloFuncButton(sn).SetFunc(sn.RenameFile)
 		fb.Args[0].SetValue(sn.Name)
@@ -236,17 +236,17 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 	if fn.IsExternal() {
 		return nil
 	}
-	root := fn.FRoot
+	root := fn.FileRoot
 	var err error
 	fn.CloseBuf() // invalid after this point
-	orgpath := fn.FPath
+	orgpath := fn.Filepath
 	newpath, err = fn.Info.Rename(newpath)
 	if len(newpath) == 0 || err != nil {
 		return err
 	}
 	if fn.IsDir() {
-		if fn.FRoot.IsDirOpen(orgpath) {
-			fn.FRoot.SetDirOpen(core.Filename(newpath))
+		if fn.FileRoot.IsDirOpen(orgpath) {
+			fn.FileRoot.SetDirOpen(core.Filename(newpath))
 		}
 	}
 	repo, _ := fn.Repo()
@@ -263,7 +263,7 @@ func (fn *Node) RenameFile(newpath string) error { //types:add
 		err = fn.Info.InitFile(newpath)
 	}
 	if err == nil {
-		fn.FPath = core.Filename(fn.Info.Path)
+		fn.Filepath = core.Filename(fn.Info.Path)
 		fn.SetName(fn.Info.Name)
 		fn.SetText(fn.Info.Name)
 	}
@@ -294,7 +294,7 @@ func (fn *Node) NewFile(filename string, addToVCS bool) { //types:add
 	if fn.IsExternal() {
 		return
 	}
-	ppath := string(fn.FPath)
+	ppath := string(fn.Filepath)
 	if !fn.IsDir() {
 		ppath, _ = filepath.Split(ppath)
 	}
@@ -305,15 +305,15 @@ func (fn *Node) NewFile(filename string, addToVCS bool) { //types:add
 		return
 	}
 	if addToVCS {
-		nfn, ok := fn.FRoot.FindFile(np)
-		if ok && nfn.This != fn.FRoot.This && string(nfn.FPath) == np {
+		nfn, ok := fn.FileRoot.FindFile(np)
+		if ok && nfn.This != fn.FileRoot.This && string(nfn.Filepath) == np {
 			// todo: this is where it is erroneously adding too many files to vcs!
-			fmt.Println("Adding new file to VCS:", nfn.FPath)
-			core.MessageSnackbar(fn, "Adding new file to VCS: "+dirs.DirAndFile(string(nfn.FPath)))
+			fmt.Println("Adding new file to VCS:", nfn.Filepath)
+			core.MessageSnackbar(fn, "Adding new file to VCS: "+dirs.DirAndFile(string(nfn.Filepath)))
 			nfn.AddToVCS()
 		}
 	}
-	fn.FRoot.UpdatePath(np)
+	fn.FileRoot.UpdatePath(np)
 }
 
 // makes a new folder in the given selected directory
@@ -332,7 +332,7 @@ func (fn *Node) NewFolder(foldername string) { //types:add
 	if fn.IsExternal() {
 		return
 	}
-	ppath := string(fn.FPath)
+	ppath := string(fn.Filepath)
 	if !fn.IsDir() {
 		ppath, _ = filepath.Split(ppath)
 	}
@@ -342,7 +342,7 @@ func (fn *Node) NewFolder(foldername string) { //types:add
 		core.ErrorSnackbar(fn, err)
 		return
 	}
-	fn.FRoot.UpdatePath(ppath)
+	fn.FileRoot.UpdatePath(ppath)
 }
 
 // CopyFileToDir copies given file path into node that is a directory.
@@ -351,17 +351,17 @@ func (fn *Node) CopyFileToDir(filename string, perm os.FileMode) {
 	if fn.IsExternal() {
 		return
 	}
-	ppath := string(fn.FPath)
+	ppath := string(fn.Filepath)
 	sfn := filepath.Base(filename)
 	tpath := filepath.Join(ppath, sfn)
 	fileinfo.CopyFile(tpath, filename, perm)
-	fn.FRoot.UpdatePath(ppath)
-	ofn, ok := fn.FRoot.FindFile(filename)
+	fn.FileRoot.UpdatePath(ppath)
+	ofn, ok := fn.FileRoot.FindFile(filename)
 	if ok && ofn.Info.VCS >= vcs.Stored {
-		nfn, ok := fn.FRoot.FindFile(tpath)
-		if ok && nfn.This != fn.FRoot.This {
-			if string(nfn.FPath) != tpath {
-				fmt.Printf("error: nfn.FPath != tpath; %q != %q, see bug #453\n", nfn.FPath, tpath)
+		nfn, ok := fn.FileRoot.FindFile(tpath)
+		if ok && nfn.This != fn.FileRoot.This {
+			if string(nfn.Filepath) != tpath {
+				fmt.Printf("error: nfn.FPath != tpath; %q != %q, see bug #453\n", nfn.Filepath, tpath)
 			} else {
 				nfn.AddToVCS() // todo: this sometimes is not just tpath!  See bug #453
 			}

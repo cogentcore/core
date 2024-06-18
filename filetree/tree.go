@@ -78,7 +78,7 @@ type Tree struct {
 
 func (ft *Tree) Init() {
 	ft.Node.Init()
-	ft.FRoot = ft
+	ft.FileRoot = ft
 	ft.FileNodeType = NodeType
 	ft.OpenDepth = 4
 }
@@ -111,7 +111,7 @@ func (ft *Tree) OpenPath(path string) {
 		log.Printf("core.Tree:OpenPath: %s\n", err)
 		abs = effpath
 	}
-	ft.FPath = core.Filename(abs)
+	ft.Filepath = core.Filename(abs)
 	ft.Open()
 	ft.SetDirOpen(core.Filename(abs))
 	ft.UpdateAll()
@@ -122,7 +122,7 @@ func (ft *Tree) UpdateAll() {
 	// update := ft.AsyncLock() // note: safe for async updating
 	ft.updateMu.Lock()
 	ft.Dirs.ClearMarks()
-	ft.SetPath(string(ft.FPath))
+	ft.SetPath(string(ft.Filepath))
 	// the problem here is that closed dirs are not visited but we want to keep their settings:
 	// ft.Dirs.DeleteStale()
 	ft.Update()
@@ -265,7 +265,7 @@ func (ft *Tree) UnWatchPath(path core.Filename) {
 // IsDirOpen returns true if given directory path is open (i.e., has been
 // opened in the view)
 func (ft *Tree) IsDirOpen(fpath core.Filename) bool {
-	if fpath == ft.FPath { // we are always open
+	if fpath == ft.Filepath { // we are always open
 		return true
 	}
 	return ft.Dirs.IsOpen(ft.RelPath(fpath))
@@ -374,7 +374,7 @@ func (ft *Tree) SyncExternalFiles(efn *Node) {
 	// always go through kids, regardless of mods
 	for i, sfk := range efn.Children {
 		sf := AsNode(sfk)
-		sf.FRoot = ft
+		sf.FileRoot = ft
 		fp := ft.ExternalFiles[i]
 		sf.SetNodePath(fp)
 		sf.Info.VCS = vcs.Stored // no vcs in general

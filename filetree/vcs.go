@@ -51,7 +51,7 @@ func (fn *Node) DetectVCSRepo(updateFiles bool) bool {
 		}
 		return false
 	}
-	path := string(fn.FPath)
+	path := string(fn.Filepath)
 	rtyp := vcs.DetectRepo(path)
 	if rtyp == "" {
 		return false
@@ -120,7 +120,7 @@ func (fn *Node) AddToVCS() {
 		return
 	}
 	// fmt.Printf("adding to vcs: %v\n", fn.FPath)
-	err := repo.Add(string(fn.FPath))
+	err := repo.Add(string(fn.Filepath))
 	if errors.Log(err) == nil {
 		fn.Info.VCS = vcs.Added
 		fn.NeedsRender()
@@ -141,7 +141,7 @@ func (fn *Node) DeleteFromVCS() {
 		return
 	}
 	// fmt.Printf("deleting remote from vcs: %v\n", fn.FPath)
-	err := repo.DeleteRemote(string(fn.FPath))
+	err := repo.DeleteRemote(string(fn.Filepath))
 	if fn != nil && errors.Log(err) == nil {
 		fn.Info.VCS = vcs.Deleted
 		fn.NeedsRender()
@@ -166,9 +166,9 @@ func (fn *Node) CommitToVCS(message string) (err error) {
 		return
 	}
 	if fn.Info.VCS == vcs.Untracked {
-		return errors.New("file not in vcs repo: " + string(fn.FPath))
+		return errors.New("file not in vcs repo: " + string(fn.Filepath))
 	}
-	err = repo.CommitFile(string(fn.FPath), message)
+	err = repo.CommitFile(string(fn.Filepath), message)
 	if err != nil {
 		return err
 	}
@@ -191,9 +191,9 @@ func (fn *Node) RevertVCS() (err error) {
 		return
 	}
 	if fn.Info.VCS == vcs.Untracked {
-		return errors.New("file not in vcs repo: " + string(fn.FPath))
+		return errors.New("file not in vcs repo: " + string(fn.Filepath))
 	}
-	err = repo.RevertFile(string(fn.FPath))
+	err = repo.RevertFile(string(fn.Filepath))
 	if err != nil {
 		return err
 	}
@@ -226,12 +226,12 @@ func (fn *Node) DiffVCSSel(rev_a string, rev_b string) { //types:add
 func (fn *Node) DiffVCS(rev_a, rev_b string) error {
 	repo, _ := fn.Repo()
 	if repo == nil {
-		return errors.New("file not in vcs repo: " + string(fn.FPath))
+		return errors.New("file not in vcs repo: " + string(fn.Filepath))
 	}
 	if fn.Info.VCS == vcs.Untracked {
-		return errors.New("file not in vcs repo: " + string(fn.FPath))
+		return errors.New("file not in vcs repo: " + string(fn.Filepath))
 	}
-	_, err := texteditor.DiffEditorDialogFromRevs(fn, repo, string(fn.FPath), fn.Buffer, rev_a, rev_b)
+	_, err := texteditor.DiffEditorDialogFromRevs(fn, repo, string(fn.Filepath), fn.Buffer, rev_a, rev_b)
 	return err
 }
 
@@ -260,12 +260,12 @@ func (fn *Node) LogVCSSel(allFiles bool, since string) { //types:add
 func (fn *Node) LogVCS(allFiles bool, since string) (vcs.Log, error) {
 	repo, _ := fn.Repo()
 	if repo == nil {
-		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
+		return nil, errors.New("file not in vcs repo: " + string(fn.Filepath))
 	}
 	if fn.Info.VCS == vcs.Untracked {
-		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
+		return nil, errors.New("file not in vcs repo: " + string(fn.Filepath))
 	}
-	fnm := string(fn.FPath)
+	fnm := string(fn.Filepath)
 	if allFiles {
 		fnm = ""
 	}
@@ -336,12 +336,12 @@ func BlameDialog(ctx core.Widget, fname string, blame, fbytes []byte) *textedito
 func (fn *Node) BlameVCS() ([]byte, error) {
 	repo, _ := fn.Repo()
 	if repo == nil {
-		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
+		return nil, errors.New("file not in vcs repo: " + string(fn.Filepath))
 	}
 	if fn.Info.VCS == vcs.Untracked {
-		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
+		return nil, errors.New("file not in vcs repo: " + string(fn.Filepath))
 	}
-	fnm := string(fn.FPath)
+	fnm := string(fn.Filepath)
 	fb, err := textbuf.FileBytes(fnm)
 	if err != nil {
 		return nil, err

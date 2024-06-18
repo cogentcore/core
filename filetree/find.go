@@ -21,7 +21,7 @@ import (
 func (fn *Node) FindDirNode(path string) (*Node, error) {
 	rp := fn.RelPath(core.Filename(path))
 	if rp == "" {
-		return nil, fmt.Errorf("FindDirNode: path: %s is not relative to this node's path: %s", path, fn.FPath)
+		return nil, fmt.Errorf("FindDirNode: path: %s is not relative to this node's path: %s", path, fn.Filepath)
 	}
 	if rp == "." {
 		return fn, nil
@@ -62,11 +62,11 @@ func (fn *Node) FindFile(fnm string) (*Node, bool) {
 		}
 	}
 
-	if efn, err := fn.FRoot.ExternalNodeByPath(fnm); err == nil {
+	if efn, err := fn.FileRoot.ExternalNodeByPath(fnm); err == nil {
 		return efn, true
 	}
 
-	if strings.HasPrefix(fneff, string(fn.FPath)) { // full path
+	if strings.HasPrefix(fneff, string(fn.Filepath)) { // full path
 		ffn, err := fn.DirsTo(fneff)
 		if err == nil {
 			return ffn, true
@@ -81,7 +81,7 @@ func (fn *Node) FindFile(fnm string) (*Node, bool) {
 		if sfn == nil {
 			return tree.Continue
 		}
-		if strings.HasSuffix(string(sfn.FPath), fneff) {
+		if strings.HasSuffix(string(sfn.Filepath), fneff) {
 			ffn = sfn
 			found = true
 			return tree.Break

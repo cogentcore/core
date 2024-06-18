@@ -91,7 +91,7 @@ func Search(start *Node, find string, ignoreCase, regExp bool, loc FindLoc, acti
 			return tree.Continue
 		}
 		if loc == FindLocDir {
-			cdir, _ := filepath.Split(string(sfn.FPath))
+			cdir, _ := filepath.Split(string(sfn.Filepath))
 			if activeDir != cdir {
 				return tree.Continue
 			}
@@ -110,9 +110,9 @@ func Search(start *Node, find string, ignoreCase, regExp bool, loc FindLoc, acti
 			}
 		} else {
 			if regExp {
-				cnt, matches = textbuf.SearchFileRegexp(string(sfn.FPath), re)
+				cnt, matches = textbuf.SearchFileRegexp(string(sfn.Filepath), re)
 			} else {
-				cnt, matches = textbuf.SearchFile(string(sfn.FPath), fb, ignoreCase)
+				cnt, matches = textbuf.SearchFile(string(sfn.Filepath), fb, ignoreCase)
 			}
 		}
 		if cnt > 0 {
@@ -146,7 +146,7 @@ func FindAll(start *Node, find string, ignoreCase, regExp bool, langs []fileinfo
 		}
 	}
 	mls := make([]SearchResults, 0)
-	spath := string(start.FPath) // note: is already Abs
+	spath := string(start.Filepath) // note: is already Abs
 	filepath.Walk(spath, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err

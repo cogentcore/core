@@ -24,8 +24,8 @@ import (
 // MimeData adds mimedata for this node: a text/plain of the Path,
 // text/plain of filename, and text/
 func (fn *Node) MimeData(md *mimedata.Mimes) {
-	froot := fn.FRoot
-	path := string(fn.FPath)
+	froot := fn.FileRoot
+	path := string(fn.Filepath)
 	punq := fn.PathFrom(froot) // note: tree paths have . escaped -> \,
 	*md = append(*md, mimedata.NewTextData(punq))
 	*md = append(*md, mimedata.NewTextData(path))
@@ -76,10 +76,10 @@ func (fn *Node) DragDrop(e events.Event) {
 // that is non-nil (otherwise just uses absolute path), and returns list of existing
 // and node for last one if exists.
 func (fn *Node) PasteCheckExisting(tfn *Node, md mimedata.Mimes, externalDrop bool) ([]string, *Node) {
-	froot := fn.FRoot
+	froot := fn.FileRoot
 	tpath := ""
 	if tfn != nil {
-		tpath = string(tfn.FPath)
+		tpath = string(tfn.Filepath)
 	}
 	nf := len(md)
 	if !externalDrop {
@@ -117,7 +117,7 @@ func (fn *Node) PasteCheckExisting(tfn *Node, md mimedata.Mimes, externalDrop bo
 
 // PasteCopyFiles copies files in given data into given target directory
 func (fn *Node) PasteCopyFiles(tdir *Node, md mimedata.Mimes, externalDrop bool) {
-	froot := fn.FRoot
+	froot := fn.FileRoot
 	nf := len(md)
 	if !externalDrop {
 		nf /= 3
@@ -183,7 +183,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 		return
 	}
 
-	tpath := string(fn.FPath)
+	tpath := string(fn.Filepath)
 	isdir := fn.IsDir()
 	if isdir {
 		fn.PasteCopyFilesCheck(fn, md, externalDrop, dropFinal)
@@ -234,7 +234,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 				texteditor.DiffFiles(fn, tpath, srcpath)
 			})
 			d.AddOK(parent).SetText("Diff to existing").OnClick(func(e events.Event) {
-				npath := filepath.Join(string(tdir.FPath), fname)
+				npath := filepath.Join(string(tdir.Filepath), fname)
 				texteditor.DiffFiles(fn, npath, srcpath)
 			})
 			d.AddOK(parent).SetText("Overwrite target").OnClick(func(e events.Event) {
@@ -244,7 +244,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 				}
 			})
 			d.AddOK(parent).SetText("Overwrite existing").OnClick(func(e events.Event) {
-				npath := filepath.Join(string(tdir.FPath), fname)
+				npath := filepath.Join(string(tdir.Filepath), fname)
 				fileinfo.CopyFile(npath, srcpath, mode)
 				if dropFinal != nil {
 					dropFinal()
@@ -282,7 +282,7 @@ func (fn *Node) PasteFiles(md mimedata.Mimes, externalDrop bool, dropFinal func(
 // satisfies core.DragNDropper interface and can be overridden by subtypes
 func (fn *Node) DropDeleteSource(e events.Event) {
 	de := e.(*events.DragDrop)
-	froot := fn.FRoot
+	froot := fn.FileRoot
 	if froot == nil || fn.IsExternal() {
 		return
 	}

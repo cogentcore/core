@@ -44,23 +44,23 @@ var NodeHiStyle = histyle.StyleDefault
 type Node struct { //core:embedder
 	core.Tree
 
-	// full path to this file
-	FPath core.Filename `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	// Filepath is the full path to this file.
+	Filepath core.Filename `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
-	// full standard file info about this file
+	// Info is the full standard file info about this file.
 	Info fileinfo.FileInfo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
-	// file buffer for editing this file
+	// Buffer is the file buffer for editing this file.
 	Buffer *texteditor.Buffer `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
-	// root of the tree -- has global state
-	FRoot *Tree `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+	// FileRoot is the root [Tree] of the tree, which has global state.
+	FileRoot *Tree `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
-	// version control system repository for this directory,
-	// only non-nil if this is the highest-level directory in the tree under vcs control
+	// DirRepo is the version control system repository for this directory,
+	// only non-nil if this is the highest-level directory in the tree under vcs control.
 	DirRepo vcs.Repo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
-	// version control system repository file status -- only valid during SetPath
+	// RepoFiles has the version control system repository file status; only valid during SetPath.
 	RepoFiles vcs.Files `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 }
 
@@ -139,8 +139,8 @@ func (fn *Node) Init() {
 			}
 		})
 		w.OnDoubleClick(func(e events.Event) {
-			if fn.FRoot != nil && fn.FRoot.DoubleClickFunc != nil {
-				fn.FRoot.DoubleClickFunc(e)
+			if fn.FileRoot != nil && fn.FileRoot.DoubleClickFunc != nil {
+				fn.FileRoot.DoubleClickFunc(e)
 			} else {
 				if fn.IsDir() && fn.OpenEmptyDir() {
 					e.SetHandled()
@@ -241,10 +241,10 @@ func (fn *Node) IsAutoSave() bool {
 
 // MyRelPath returns the relative path from root for this node
 func (fn *Node) MyRelPath() string {
-	if fn.IsIrregular() || fn.FRoot == nil {
+	if fn.IsIrregular() || fn.FileRoot == nil {
 		return fn.Name
 	}
-	return dirs.RelFilePath(string(fn.FPath), string(fn.FRoot.FPath))
+	return dirs.RelFilePath(string(fn.Filepath), string(fn.FileRoot.Filepath))
 }
 
 // SetPath sets the current node to represent the given path.
@@ -257,10 +257,10 @@ func (fn *Node) SetPath(path string) error {
 	if err != nil {
 		return err
 	}
-	fn.FPath = core.Filename(pth)
-	err = fn.Info.InitFile(string(fn.FPath))
+	fn.Filepath = core.Filename(pth)
+	err = fn.Info.InitFile(string(fn.Filepath))
 	if err != nil {
-		log.Printf("core.Tree: could not read directory: %v err: %v\n", fn.FPath, err)
+		log.Printf("core.Tree: could not read directory: %v err: %v\n", fn.Filepath, err)
 		return err
 	}
 
@@ -273,14 +273,14 @@ func (fn *Node) SetPath(path string) error {
 // Plan-based diff-driven updating of only what is different.
 func (fn *Node) SyncDir() {
 	fn.DetectVCSRepo(true) // update files
-	path := string(fn.FPath)
+	path := string(fn.Filepath)
 	repo, rnode := fn.Repo()
 	fn.Open() // ensure
 	plan := fn.PlanOfFiles(path)
 	hasExtFiles := false
-	if fn.This == fn.FRoot.This {
-		if len(fn.FRoot.ExternalFiles) > 0 {
-			plan = append(tree.TypePlan{{Type: fn.FRoot.FileNodeType, Name: ExternalFilesName}}, plan...)
+	if fn.This == fn.FileRoot.This {
+		if len(fn.FileRoot.ExternalFiles) > 0 {
+			plan = append(tree.TypePlan{{Type: fn.FileRoot.FileNodeType, Name: ExternalFilesName}}, plan...)
 			hasExtFiles = true
 		}
 	}
@@ -288,9 +288,9 @@ func (fn *Node) SyncDir() {
 	// always go through kids, regardless of mods
 	for _, sfk := range fn.Children {
 		sf := AsNode(sfk)
-		sf.FRoot = fn.FRoot
+		sf.FileRoot = fn.FileRoot
 		if hasExtFiles && sf.Name == ExternalFilesName {
-			fn.FRoot.SyncExternalFiles(sf)
+			fn.FileRoot.SyncExternalFiles(sf)
 			continue
 		}
 		fp := filepath.Join(path, sf.Name)
@@ -301,14 +301,14 @@ func (fn *Node) SyncDir() {
 		if sf.IsDir() {
 			sf.Info.VCS = vcs.Stored // always
 		} else if repo != nil {
-			rstat := rnode.RepoFiles.Status(repo, string(sf.FPath))
+			rstat := rnode.RepoFiles.Status(repo, string(sf.Filepath))
 			sf.Info.VCS = rstat
 		} else {
 			sf.Info.VCS = vcs.Stored
 		}
 	}
 	if mods {
-		root := fn.FRoot
+		root := fn.FileRoot
 		fn.Update()
 		if root != nil {
 			root.TreeChanged(nil)
@@ -321,7 +321,7 @@ func (fn *Node) SyncDir() {
 func (fn *Node) PlanOfFiles(path string) tree.TypePlan {
 	plan1 := tree.TypePlan{}
 	plan2 := tree.TypePlan{}
-	typ := fn.FRoot.FileNodeType
+	typ := fn.FileRoot.FileNodeType
 	filepath.Walk(path, func(pth string, info os.FileInfo, err error) error {
 		if err != nil {
 			emsg := fmt.Sprintf("filetree.Node PlanFilesIn Path %q: Error: %v", path, err)
@@ -332,7 +332,7 @@ func (fn *Node) PlanOfFiles(path string) tree.TypePlan {
 			return nil
 		}
 		_, fnm := filepath.Split(pth)
-		if fn.FRoot.DirsOnTop {
+		if fn.FileRoot.DirsOnTop {
 			if info.IsDir() {
 				plan1.Add(typ, fnm)
 			} else {
@@ -346,8 +346,8 @@ func (fn *Node) PlanOfFiles(path string) tree.TypePlan {
 		}
 		return nil
 	})
-	modSort := fn.FRoot.DirSortByModTime(core.Filename(path))
-	if fn.FRoot.DirsOnTop {
+	modSort := fn.FileRoot.DirSortByModTime(core.Filename(path))
+	if fn.FileRoot.DirsOnTop {
 		if modSort {
 			fn.SortPlanByModTime(plan2) // just sort files, not dirs
 		}
@@ -363,8 +363,8 @@ func (fn *Node) PlanOfFiles(path string) tree.TypePlan {
 // SortPlanByModTime sorts given plan list by mod time
 func (fn *Node) SortPlanByModTime(confg tree.TypePlan) {
 	sort.Slice(confg, func(i, j int) bool {
-		ifn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[i].Name))
-		jfn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[j].Name))
+		ifn, _ := os.Stat(filepath.Join(string(fn.Filepath), confg[i].Name))
+		jfn, _ := os.Stat(filepath.Join(string(fn.Filepath), confg[j].Name))
 		return ifn.ModTime().After(jfn.ModTime()) // descending
 	})
 }
@@ -391,15 +391,15 @@ func (fn *Node) SetNodePath(path string) error {
 	if err != nil {
 		return err
 	}
-	fn.FPath = core.Filename(pth)
+	fn.Filepath = core.Filename(pth)
 	err = fn.InitFileInfo()
 	if err != nil {
 		return err
 	}
 	if fn.IsDir() && !fn.IsIrregular() {
-		openAll := fn.FRoot.inOpenAll && !fn.Info.IsHidden()
-		if openAll || fn.FRoot.IsDirOpen(fn.FPath) {
-			fn.SetPath(string(fn.FPath)) // keep going down..
+		openAll := fn.FileRoot.inOpenAll && !fn.Info.IsHidden()
+		if openAll || fn.FileRoot.IsDirOpen(fn.Filepath) {
+			fn.SetPath(string(fn.Filepath)) // keep going down..
 		}
 	}
 	fn.SetFileIcon()
@@ -408,16 +408,16 @@ func (fn *Node) SetNodePath(path string) error {
 
 // InitFileInfo initializes file info
 func (fn *Node) InitFileInfo() error {
-	effpath, err := filepath.EvalSymlinks(string(fn.FPath))
+	effpath, err := filepath.EvalSymlinks(string(fn.Filepath))
 	if err != nil {
 		// this happens too often for links -- skip
 		// log.Printf("filetree.Node Path: %v could not be opened -- error: %v\n", fn.FPath, err)
 		return err
 	}
-	fn.FPath = core.Filename(effpath)
-	err = fn.Info.InitFile(string(fn.FPath))
+	fn.Filepath = core.Filename(effpath)
+	err = fn.Info.InitFile(string(fn.Filepath))
 	if err != nil {
-		emsg := fmt.Errorf("filetree.Node InitFileInfo Path %q: Error: %v", fn.FPath, err)
+		emsg := fmt.Errorf("filetree.Node InitFileInfo Path %q: Error: %v", fn.Filepath, err)
 		log.Println(emsg)
 		return emsg
 	}
@@ -435,8 +435,8 @@ func (fn *Node) UpdateNode() error {
 	}
 	// fmt.Println(fn, "update node start")
 	if fn.IsDir() {
-		openAll := fn.FRoot.inOpenAll && !fn.Info.IsHidden()
-		if openAll || fn.FRoot.IsDirOpen(fn.FPath) {
+		openAll := fn.FileRoot.inOpenAll && !fn.Info.IsHidden()
+		if openAll || fn.FileRoot.IsDirOpen(fn.Filepath) {
 			// fmt.Printf("set open: %s\n", fn.FPath)
 			fn.Open()
 			repo, rnode := fn.Repo()
@@ -448,7 +448,7 @@ func (fn *Node) UpdateNode() error {
 	} else {
 		repo, _ := fn.Repo()
 		if repo != nil {
-			fn.Info.VCS, _ = repo.Status(string(fn.FPath))
+			fn.Info.VCS, _ = repo.Status(string(fn.Filepath))
 		}
 		fn.Update()
 		fn.SetFileIcon()
@@ -487,7 +487,7 @@ func (fn *Node) CanOpen() bool {
 // OpenDir opens given directory node
 func (fn *Node) OpenDir() {
 	// fmt.Printf("fn: %s opened\n", fn.FPath)
-	fn.FRoot.SetDirOpen(fn.FPath)
+	fn.FileRoot.SetDirOpen(fn.Filepath)
 	fn.UpdateNode()
 }
 
@@ -498,7 +498,7 @@ func (fn *Node) OnClose() {
 // CloseDir closes given directory node -- updates memory state
 func (fn *Node) CloseDir() {
 	// fmt.Printf("fn: %s closed\n", fn.FPath)
-	fn.FRoot.SetDirClosed(fn.FPath)
+	fn.FileRoot.SetDirClosed(fn.Filepath)
 	// note: not doing anything with open files within directory..
 }
 
@@ -524,15 +524,15 @@ func (fn *Node) SortBys(modTime bool) { //types:add
 // SortBy determines how to sort the files in the directory -- default is alpha by name,
 // optionally can be sorted by modification time.
 func (fn *Node) SortBy(modTime bool) {
-	fn.FRoot.SetDirSortBy(fn.FPath, modTime)
+	fn.FileRoot.SetDirSortBy(fn.Filepath, modTime)
 	fn.NeedsLayout()
 }
 
 // OpenAll opens all directories under this one
 func (fn *Node) OpenAll() { //types:add
-	fn.FRoot.inOpenAll = true // causes chaining of opening
+	fn.FileRoot.inOpenAll = true // causes chaining of opening
 	fn.Tree.OpenAll()
-	fn.FRoot.inOpenAll = false
+	fn.FileRoot.inOpenAll = false
 }
 
 // CloseAll closes all directories under this one, this included
@@ -553,12 +553,12 @@ func (fn *Node) CloseAll() { //types:add
 // returns true if file is newly opened
 func (fn *Node) OpenBuf() (bool, error) {
 	if fn.IsDir() {
-		err := fmt.Errorf("filetree.Node cannot open directory in editor: %v", fn.FPath)
+		err := fmt.Errorf("filetree.Node cannot open directory in editor: %v", fn.Filepath)
 		log.Println(err)
 		return false, err
 	}
 	if fn.Buffer != nil {
-		if fn.Buffer.Filename == fn.FPath { // close resets filename
+		if fn.Buffer.Filename == fn.Filepath { // close resets filename
 			return false, nil
 		}
 	} else {
@@ -570,7 +570,7 @@ func (fn *Node) OpenBuf() (bool, error) {
 		})
 	}
 	fn.Buffer.Hi.Style = NodeHiStyle
-	return true, fn.Buffer.Open(fn.FPath)
+	return true, fn.Buffer.Open(fn.Filepath)
 }
 
 // RemoveFromExterns removes file from list of external files
@@ -579,7 +579,7 @@ func (fn *Node) RemoveFromExterns() { //types:add
 		if !sn.IsExternal() {
 			return
 		}
-		sn.FRoot.RemoveExternalFile(string(sn.FPath))
+		sn.FileRoot.RemoveExternalFile(string(sn.Filepath))
 		sn.CloseBuf()
 		sn.Delete()
 	})
@@ -598,7 +598,7 @@ func (fn *Node) CloseBuf() bool {
 
 // RelPath returns the relative path from node for given full path
 func (fn *Node) RelPath(fpath core.Filename) string {
-	return dirs.RelFilePath(string(fpath), string(fn.FPath))
+	return dirs.RelFilePath(string(fpath), string(fn.Filepath))
 }
 
 // DirsTo opens all the directories above the given filename, and returns the node
@@ -623,7 +623,7 @@ func (fn *Node) DirsTo(path string) (*Node, error) {
 			if i == sz-1 { // ok for terminal -- might not exist yet
 				return cfn, nil
 			} else {
-				err = fmt.Errorf("filetree.Node could not find node %v in: %v, orig: %v, rel: %v", dr, cfn.FPath, pth, rpath)
+				err = fmt.Errorf("filetree.Node could not find node %v in: %v, orig: %v, rel: %v", dr, cfn.Filepath, pth, rpath)
 				// slog.Error(err.Error()) // note: this is expected sometimes
 				return nil, err
 			}
@@ -637,7 +637,7 @@ func (fn *Node) DirsTo(path string) (*Node, error) {
 				cfn = sfn
 			}
 		} else {
-			err := fmt.Errorf("filetree.Node non-terminal node %v is not a directory in: %v", dr, cfn.FPath)
+			err := fmt.Errorf("filetree.Node non-terminal node %v is not a directory in: %v", dr, cfn.Filepath)
 			slog.Error(err.Error())
 			return nil, err
 		}
