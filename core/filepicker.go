@@ -435,14 +435,14 @@ func (fp *FilePicker) makeSelRow(sel *Plan) {
 		})
 	})
 
-	AddAt(sel, "ext-text", func(w *Text) {
+	AddAt(sel, "extension-text", func(w *Text) {
 		w.SetText("Extension(s):").SetTooltip("target extension(s) to highlight; if multiple, separate with commas, and include the . at the start")
 		w.Styler(func(s *styles.Style) {
 			s.SetTextWrap(false)
 		})
 	})
 
-	AddAt(sel, "ext", func(w *TextField) {
+	AddAt(sel, "extension", func(w *TextField) {
 		w.SetText(fp.Extensions)
 		w.OnChange(func(e events.Event) {
 			fp.SetExtensions(w.Text()).Update()
@@ -806,7 +806,7 @@ func (fb *FileButton) Init() {
 	})
 	var fp *FilePicker
 	InitValueButton(fb, false, func(d *Body) {
-		// ext, _ := v.Tag("ext") // TODO(config)
+		// ext, _ := v.Tag("ext") // TODO(config) (also rename to extension)
 		fp = NewFilePicker(d).SetFilename(fb.Filename)
 		fb.ValueNewWindow = true
 		d.AddAppBar(fp.MakeToolbar)
