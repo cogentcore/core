@@ -1359,6 +1359,10 @@ func main() {
 	"widgets/other/html-0": func(parent core.Widget) {
 		htmlcore.ReadHTMLString(htmlcore.NewContext(), parent, `<h1>Hello</h1><button>Click me!</button>`)
 	},
+	"widgets/other/html-1": func(parent core.Widget) {
+		htmlcore.ReadMDString(htmlcore.NewContext(), parent, `# Hello
+**This** is *some* ***Markdown*** [text](https://example.com)`)
+	},
 	"widgets/other/meters-0": func(parent core.Widget) {
 		core.NewMeter(parent)
 	},
