@@ -44,6 +44,7 @@ type OnBinder interface {
 // and during [Widget.UpdateWidget]. It returns the widget to enable method chaining.
 func Bind[T Value](value any, vw T) T {
 	wb := vw.AsWidget()
+	alreadyBound := wb.ValueUpdate != nil
 	wb.ValueUpdate = func() {
 		if vws, ok := any(vw).(ValueSetter); ok {
 			ErrorSnackbar(vw, vws.SetWidgetValue(value))
@@ -53,6 +54,16 @@ func Bind[T Value](value any, vw T) T {
 	}
 	wb.ValueOnChange = func() {
 		ErrorSnackbar(vw, reflectx.SetRobust(value, vw.WidgetValue()))
+	}
+	// If we were already bound to another value previously, we first need to
+	// reset the widget value to zero to avoid any issues with the pointer from
+	// the old value persisting and being updated. For example, that issue happened
+	// with slice and map pointers persisting in forms when a new struct was set.
+	if alreadyBound {
+		rv := reflect.ValueOf(vw.WidgetValue())
+		if rv.IsValid() && rv.Type().Kind() == reflect.Pointer {
+			rv.Elem().SetZero()
+		}
 	}
 	wb.ValueTitle = labels.FriendlyTypeName(reflectx.NonPointerType(reflect.TypeOf(value)))
 	if ob, ok := any(vw).(OnBinder); ok {
