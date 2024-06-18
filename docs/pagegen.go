@@ -1317,6 +1317,16 @@ func main() {
 	"widgets/other/file-trees-0": func(parent core.Widget) {
 		filetree.NewTree(parent).OpenPath(".")
 	},
+	"widgets/other/file-trees-1": func(parent core.Widget) {
+		ft := filetree.NewTree(parent).OpenPath(".")
+		ft.OnSelect(func(e events.Event) {
+			selected := []string{}
+			ft.SelectedFunc(func(n *filetree.Node) {
+				selected = append(selected, string(n.Filepath))
+			})
+			core.MessageSnackbar(ft, strings.Join(selected, " "))
+		})
+	},
 	"widgets/other/func-buttons-0": func(parent core.Widget) {
 		core.NewFuncButton(parent).SetFunc(func() {
 			core.MessageSnackbar(parent, "Function called")

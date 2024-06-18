@@ -6,7 +6,6 @@ package filetree
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -14,6 +13,7 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -98,7 +98,7 @@ func (fv *Tree) Destroy() {
 
 // OpenPath opens the filetree at the given directory path. It reads all the files at
 // the given path into this tree. Only paths listed in [Tree.Dirs] will be opened.
-func (ft *Tree) OpenPath(path string) {
+func (ft *Tree) OpenPath(path string) *Tree {
 	if ft.FileNodeType == nil {
 		ft.FileNodeType = NodeType
 	}
@@ -107,14 +107,14 @@ func (ft *Tree) OpenPath(path string) {
 		effpath = path
 	}
 	abs, err := filepath.Abs(effpath)
-	if err != nil {
-		log.Printf("core.Tree:OpenPath: %s\n", err)
+	if errors.Log(err) != nil {
 		abs = effpath
 	}
 	ft.Filepath = core.Filename(abs)
 	ft.Open()
 	ft.SetDirOpen(core.Filename(abs))
 	ft.UpdateAll()
+	return ft
 }
 
 // UpdateAll does a full update of the tree -- calls SetPath on current path

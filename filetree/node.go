@@ -457,8 +457,8 @@ func (fn *Node) UpdateNode() error {
 	return nil
 }
 
-// SelectedFunc runs given function on selected nodes, in reverse order.
-func (fn *Node) SelectedFunc(fun func(sn *Node)) {
+// SelectedFunc runsthe given function on all selected nodes in reverse order.
+func (fn *Node) SelectedFunc(fun func(n *Node)) {
 	sels := fn.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := AsNode(sels[i])
