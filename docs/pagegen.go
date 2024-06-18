@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
+	"io/fs"
 	"maps"
 	"strconv"
 	"strings"
@@ -1388,6 +1389,9 @@ func main() {
 	},
 	"widgets/other/meters-7": func(parent core.Widget) {
 		core.NewMeter(parent).SetType(core.MeterSemicircle).SetText("50%")
+	},
+	"widgets/other/pages-0": func(parent core.Widget) {
+		pages.NewPage(parent).SetSource(errors.Log1(fs.Sub(content, "content")))
 	},
 	"widgets/other/plots-0": func(parent core.Widget) {
 		type Data struct {

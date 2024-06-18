@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package pages provides an easy way to make content-focused
-// sites consisting of Markdown, HTML, and Cogent Core pages.
+// sites consisting of Markdown, HTML, and Cogent Core.
 package pages
 
 //go:generate core generate
