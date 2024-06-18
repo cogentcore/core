@@ -71,10 +71,6 @@ func (fm *Form) getStructFields() {
 		if field.Tag.Get("display") == "-" {
 			return false
 		}
-		// TODO: these MUST be skipped to allow demo tree to work properly
-		if field.Type.Kind() == reflect.Slice || field.Type.Kind() == reflect.Map {
-			return false
-		}
 		if ss, ok := reflectx.UnderlyingPointer(parent).Interface().(ShouldShower); ok {
 			fm.isShouldShower = true
 			if !ss.ShouldShow(field.Name) {
