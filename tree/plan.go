@@ -199,8 +199,7 @@ func (p *Plan) Update(n Node) {
 	if len(p.Children) == 0 && !p.EnforceEmpty {
 		return
 	}
-	nb := n.AsTree()
-	nb.Children, _ = plan.Update(nb.Children, len(p.Children),
+	plan.Update(&n.AsTree().Children, len(p.Children),
 		func(i int) string {
 			return p.Children[i].Name
 		}, func(name string, i int) Node {
@@ -209,11 +208,12 @@ func (p *Plan) Update(n Node) {
 			child.AsTree().SetName(item.Name)
 			return child
 		}, func(child Node, i int) {
-			SetParent(child, nb)
+			SetParent(child, n)
 			for _, f := range p.Children[i].Init {
 				f(child)
 			}
 		}, func(child Node) {
 			child.Destroy()
-		})
+		},
+	)
 }

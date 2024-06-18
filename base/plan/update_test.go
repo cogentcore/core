@@ -18,7 +18,7 @@ func (n *nameObj) PlanName() string {
 	return n.name
 }
 
-func AssertNames(t *testing.T, names []string, items []*nameObj) {
+func assertNames(t *testing.T, names []string, items []*nameObj) {
 	if len(names) != len(items) {
 		t.Error("lengths of lists are not the same:", len(names), len(items))
 	}
@@ -34,55 +34,46 @@ func TestUpdate(t *testing.T) {
 	var s []*nameObj
 
 	names1 := []string{"a", "b", "c"}
-	// fmt.Println("\n#### target", names1)
 
-	r1, mods := Update(s, len(names1),
+	changed := Update(&s, len(names1),
 		func(i int) string { return names1[i] },
 		func(name string, i int) *nameObj { return &nameObj{name: name} }, nil, nil)
 
-	// fmt.Println(mods, r1)
-	AssertNames(t, names1, r1)
-	assert.Equal(t, true, mods)
+	assertNames(t, names1, s)
+	assert.Equal(t, true, changed)
 
 	names2 := []string{"a", "aa", "b", "c"}
-	// fmt.Println("\n#### target", names2)
-	r2, mods := Update(r1, len(names2),
+	changed = Update(&s, len(names2),
 		func(i int) string { return names2[i] },
 		func(name string, i int) *nameObj {
 			return &nameObj{name: name}
 		}, nil, nil)
-	// fmt.Println(mods, r2)
-	AssertNames(t, names2, r2)
-	assert.Equal(t, true, mods)
+	assertNames(t, names2, s)
+	assert.Equal(t, true, changed)
 
 	names3 := []string{"a", "aa", "bb", "c"}
-	// fmt.Println("\n#### target", names3)
-	r3, mods := Update(r2, len(names3),
+	changed = Update(&s, len(names3),
 		func(i int) string { return names3[i] },
 		func(name string, i int) *nameObj {
 			return &nameObj{name: name}
 		}, nil, nil)
-	// fmt.Println(mods, r3)
-	AssertNames(t, names3, r3)
-	assert.Equal(t, true, mods)
+	assertNames(t, names3, s)
+	assert.Equal(t, true, changed)
 
 	names4 := []string{"aa", "bb", "c"}
-	// fmt.Println("\n#### target", names4)
-	r4, mods := Update(r3, len(names4),
+	changed = Update(&s, len(names4),
 		func(i int) string { return names4[i] },
 		func(name string, i int) *nameObj {
 			return &nameObj{name: name}
 		}, nil, nil)
-	// fmt.Println(mods, r4)
-	AssertNames(t, names4, r4)
-	assert.Equal(t, true, mods)
+	assertNames(t, names4, s)
+	assert.Equal(t, true, changed)
 
-	r5, mods := Update(r4, len(names4),
+	changed = Update(&s, len(names4),
 		func(i int) string { return names4[i] },
 		func(name string, i int) *nameObj {
 			return &nameObj{name: name}
 		}, nil, nil)
-	// fmt.Println(mods, r5)
-	AssertNames(t, names4, r5)
-	assert.Equal(t, false, mods)
+	assertNames(t, names4, s)
+	assert.Equal(t, false, changed)
 }

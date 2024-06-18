@@ -25,16 +25,21 @@ type Namer interface {
 	PlanName() string
 }
 
-// Update ensures that the elements of the slice contain
-// the elements according to the plan, specified by unique
-// element names, with n = the total number of items in the target slice.
-// If a new item is needed then new is called to create it,
-// for the given name at the given index position. After a new
-// element is created, it is added to the slice and then the given optional init
-// function is called with it and the index if it is non-nil. If destroy is not-nil,
-// then it is called on any element that is being deleted from the slice.
-// It returns the updated slice and whether any changes were made.
-func Update[T Namer](s []T, n int, name func(i int) string, new func(name string, i int) T, init func(e T, i int), destroy func(e T)) (r []T, mods bool) {
+// Update ensures that the elements of the given slice contain
+// the elements according to the plan specified by the given arguments.
+// The argument n specifies the total number of items in the target plan.
+// The elements have unique names specified by the given name function.
+// If a new item is needed, the given new function is called to create it
+// for the given name at the given index position. After a new element is
+// created, it is added to the slice, and if the given optional init function
+// is non-nil, it is called with the new element and its index. If the
+// given destroy function is not-nil, then it is called on any element
+// that is being deleted from the slice. Update returns whether any changes
+// were made. The given slice must be a pointer so that it can be modified
+// live, which is required for init functions to run when the slice is
+// correctly updated to the current state.
+func Update[T Namer](s *[]T, n int, name func(i int) string, new func(name string, i int) T, init func(e T, i int), destroy func(e T)) bool {
+	changed := false
 	// first make a map for looking up the indexes of the target names
 	names := make([]string, n)
 	nmap := make(map[string]int, n)
@@ -43,42 +48,41 @@ func Update[T Namer](s []T, n int, name func(i int) string, new func(name string
 		nm := name(i)
 		names[i] = nm
 		if _, has := nmap[nm]; has {
-			slog.Error("plan.Build: duplicate name", "name", nm)
+			slog.Error("plan.Update: duplicate name", "name", nm)
 		}
 		nmap[nm] = i
 	}
 	// first remove anything we don't want
-	r = s
-	rn := len(r)
-	for i := rn - 1; i >= 0; i-- {
-		nm := r[i].PlanName()
+	sn := len(*s)
+	for i := sn - 1; i >= 0; i-- {
+		nm := (*s)[i].PlanName()
 		if _, ok := nmap[nm]; !ok {
-			mods = true
+			changed = true
 			if destroy != nil {
-				destroy(r[i])
+				destroy((*s)[i])
 			}
-			r = slices.Delete(r, i, i+1)
+			*s = slices.Delete(*s, i, i+1)
 		}
 		smap[nm] = i
 	}
 	// next add and move items as needed; in order so guaranteed
 	for i, tn := range names {
-		ci := slicesx.Search(r, func(e T) bool { return e.PlanName() == tn }, smap[tn])
+		ci := slicesx.Search(*s, func(e T) bool { return e.PlanName() == tn }, smap[tn])
 		if ci < 0 { // item not currently on the list
-			mods = true
+			changed = true
 			ne := new(tn, i)
-			r = slices.Insert(r, i, ne)
+			*s = slices.Insert(*s, i, ne)
 			if init != nil {
 				init(ne, i)
 			}
 		} else { // on the list; is it in the right place?
 			if ci != i {
-				mods = true
-				e := r[ci]
-				r = slices.Delete(r, ci, ci+1)
-				r = slices.Insert(r, i, e)
+				changed = true
+				e := (*s)[ci]
+				*s = slices.Delete(*s, ci, ci+1)
+				*s = slices.Insert(*s, i, e)
 			}
 		}
 	}
-	return
+	return changed
 }
