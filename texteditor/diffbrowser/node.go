@@ -46,23 +46,22 @@ func (tn *Node) Init() {
 	tn.IconClosed = icons.Folder
 	tn.ContextMenus = nil
 	tn.AddContextMenu(tn.ContextMenu)
-	core.AddChildInit(tn, "parts", func(w *core.Frame) {
-		w.Styler(func(s *styles.Style) {
-			s.Gap.X.Em(0.4)
-		})
-		core.AddChildInit(w, "branch", func(w *core.Switch) {
-			core.AddChildInit(w, "stack", func(w *core.Frame) {
-				f := func(name string) {
-					core.AddChildInit(w, name, func(w *core.Icon) {
-						w.Styler(func(s *styles.Style) {
-							s.Min.Set(units.Em(1))
-						})
+
+	tn.Parts.Styler(func(s *styles.Style) {
+		s.Gap.X.Em(0.4)
+	})
+	core.AddChildInit(tn.Parts, "branch", func(w *core.Switch) {
+		core.AddChildInit(w, "stack", func(w *core.Frame) {
+			f := func(name string) {
+				core.AddChildInit(w, name, func(w *core.Icon) {
+					w.Styler(func(s *styles.Style) {
+						s.Min.Set(units.Em(1))
 					})
-				}
-				f("icon-on")
-				f("icon-off")
-				f("icon-indeterminate")
-			})
+				})
+			}
+			f("icon-on")
+			f("icon-off")
+			f("icon-indeterminate")
 		})
 	})
 }

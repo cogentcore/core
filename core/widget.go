@@ -407,7 +407,8 @@ func (wb *WidgetBase) BaseType() *types.Type {
 	return WidgetBaseType
 }
 
-// NewParts makes the Parts layout if not already there.
+// NewParts makes the [WidgetBase.Parts] if they don't already exist.
+// It returns the parts regardless.
 func (wb *WidgetBase) NewParts() *Frame {
 	if wb.Parts != nil {
 		return wb.Parts

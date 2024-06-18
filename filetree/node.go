@@ -129,39 +129,38 @@ func (fn *Node) Init() {
 			}
 		}
 	})
-	core.AddChildInit(fn, "parts", func(w *core.Frame) {
-		w.Styler(func(s *styles.Style) {
-			s.Gap.X.Em(0.4)
-		})
-		w.OnClick(func(e events.Event) {
-			if !e.HasAnyModifier(key.Control, key.Meta, key.Alt, key.Shift) {
-				fn.OpenEmptyDir()
+
+	fn.Parts.Styler(func(s *styles.Style) {
+		s.Gap.X.Em(0.4)
+	})
+	fn.Parts.OnClick(func(e events.Event) {
+		if !e.HasAnyModifier(key.Control, key.Meta, key.Alt, key.Shift) {
+			fn.OpenEmptyDir()
+		}
+	})
+	fn.Parts.OnDoubleClick(func(e events.Event) {
+		if fn.FileRoot != nil && fn.FileRoot.DoubleClickFunc != nil {
+			fn.FileRoot.DoubleClickFunc(e)
+		} else {
+			if fn.IsDir() && fn.OpenEmptyDir() {
+				e.SetHandled()
 			}
-		})
-		w.OnDoubleClick(func(e events.Event) {
-			if fn.FileRoot != nil && fn.FileRoot.DoubleClickFunc != nil {
-				fn.FileRoot.DoubleClickFunc(e)
-			} else {
-				if fn.IsDir() && fn.OpenEmptyDir() {
-					e.SetHandled()
-				}
-			}
-		})
-		core.AddChildInit(w, "branch", func(w *core.Switch) {
-			w.SetType(core.SwitchCheckbox)
-			w.SetIcons(icons.FolderOpen, icons.Folder, icons.Blank)
-			core.AddChildInit(w, "stack", func(w *core.Frame) {
-				f := func(name string) {
-					core.AddChildInit(w, name, func(w *core.Icon) {
-						w.Styler(func(s *styles.Style) {
-							s.Min.Set(units.Em(1))
-						})
+		}
+	})
+	core.AddChildInit(fn.Parts, "branch", func(w *core.Switch) {
+		w.SetType(core.SwitchCheckbox)
+		w.SetIcons(icons.FolderOpen, icons.Folder, icons.Blank)
+		core.AddChildInit(w, "stack", func(w *core.Frame) {
+			f := func(name string) {
+				core.AddChildInit(w, name, func(w *core.Icon) {
+					w.Styler(func(s *styles.Style) {
+						s.Min.Set(units.Em(1))
 					})
-				}
-				f("icon-on")
-				f("icon-off")
-				f("icon-indeterminate")
-			})
+				})
+			}
+			f("icon-on")
+			f("icon-off")
+			f("icon-indeterminate")
 		})
 	})
 }
