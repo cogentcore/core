@@ -5,9 +5,9 @@ Cogent Core provides interactive trees that allow you to display a nested tree s
 You can make a tree and add tree child nodes directly to it:
 
 ```Go
-tv := core.NewTree(parent).SetText("Root")
-core.NewTree(tv)
-c2 := core.NewTree(tv)
+tr := core.NewTree(parent).SetText("Root")
+core.NewTree(tr)
+c2 := core.NewTree(tr)
 core.NewTree(c2)
 ```
 

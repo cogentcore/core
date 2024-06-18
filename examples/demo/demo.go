@@ -455,27 +455,27 @@ func views(ts *core.Tabs) {
 	core.NewTable(vts.NewTab("Table")).SetSlice(&tbl)
 
 	sp := core.NewSplits(vts.NewTab("Tree")).SetSplits(0.3, 0.7)
-	tv := core.NewTreeFrame(sp).SetText("Root")
-	makeTree(tv, 0)
-	tv.RootSetViewIndex()
+	tr := core.NewTreeFrame(sp).SetText("Root")
+	makeTree(tr, 0)
+	tr.RootSetViewIndex()
 
-	sv := core.NewForm(sp).SetStruct(tv)
+	sv := core.NewForm(sp).SetStruct(tr)
 
-	tv.OnSelect(func(e events.Event) {
-		if len(tv.SelectedNodes) > 0 {
-			sv.SetStruct(tv.SelectedNodes[0]).Update()
+	tr.OnSelect(func(e events.Event) {
+		if len(tr.SelectedNodes) > 0 {
+			sv.SetStruct(tr.SelectedNodes[0]).Update()
 		}
 	})
 
 	textEditors(vts)
 }
 
-func makeTree(tv *core.Tree, round int) {
+func makeTree(tr *core.Tree, round int) {
 	if round > 2 {
 		return
 	}
 	for i := range 3 {
-		n := core.NewTree(tv).SetText("Child " + strconv.Itoa(i))
+		n := core.NewTree(tr).SetText("Child " + strconv.Itoa(i))
 		makeTree(n, round+1)
 	}
 }

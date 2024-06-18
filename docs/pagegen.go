@@ -1096,9 +1096,9 @@ func main() {
 		core.NewListButton(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
 	},
 	"widgets/collections/trees-0": func(parent core.Widget) {
-		tv := core.NewTree(parent).SetText("Root")
-		core.NewTree(tv)
-		c2 := core.NewTree(tv)
+		tr := core.NewTree(parent).SetText("Root")
+		core.NewTree(tr)
+		c2 := core.NewTree(tr)
 		core.NewTree(c2)
 	},
 	"widgets/collections/trees-1": func(parent core.Widget) {
