@@ -28,7 +28,7 @@ const (
 	ExternalFilesName = "[external files]"
 )
 
-// Tree is the root widget of a tree representing files in a given directory
+// Tree is the root widget of a file tree representing files in a given directory
 // (and subdirectories thereof), and has some overall management state for how to
 // view things.
 type Tree struct {
@@ -50,8 +50,8 @@ type Tree struct {
 	// type of node to create; defaults to [Node] but can use custom node types
 	FileNodeType *types.Type `display:"-" json:"-" xml:"-"`
 
-	// DoubleClickFunc is a function to call when a node receives a DoubleClick event.
-	// if not set, defaults to OpenEmptyDir() (for folders)
+	// DoubleClickFunc is a function to call when a node receives an [events.DoubleClick] event.
+	// If not set, defaults to OpenEmptyDir() (for folders).
 	DoubleClickFunc func(e events.Event) `copier:"-" display:"-" json:"-" xml:"-"`
 
 	// if true, we are in midst of an OpenAll call; nodes should open all dirs

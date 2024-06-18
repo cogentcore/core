@@ -38,7 +38,7 @@ import (
 // file node buffers
 var NodeHiStyle = histyle.StyleDefault
 
-// Node represents a file in the file system, as a Tree node.
+// Node represents a file in the file system, as a [core.Tree] node.
 // The name of the node is the name of the file.
 // Folders have children containing further nodes.
 type Node struct { //core:embedder

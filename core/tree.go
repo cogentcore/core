@@ -154,9 +154,9 @@ type Tree struct {
 	// our alloc includes all of our children, but we only draw us.
 	widgetSize math32.Vector2
 
-	// The cached root of the view. It is automatically set and does not need to be
+	// Root is the cached root of the tree. It is automatically set and does not need to be
 	// set by the end user.
-	RootView *Tree `copier:"-" json:"-" xml:"-" edit:"-"`
+	Root *Tree `copier:"-" json:"-" xml:"-" edit:"-" set:"-"`
 
 	// SelectedNodes holds the currently selected nodes, on the
 	// RootView node only.
@@ -202,7 +202,7 @@ func (tr *Tree) RootSetViewIndex() int {
 		tvn := AsTree(wi)
 		if tvn != nil {
 			tvn.viewIndex = idx
-			tvn.RootView = tr
+			tvn.Root = tr
 			// fmt.Println(idx, tvn, "root:", tv, &tv)
 			idx++
 		}
@@ -493,13 +493,13 @@ func (tr *Tree) OnAdd() {
 	tr.WidgetBase.OnAdd()
 	tr.Text = tr.Name
 	if ptv := AsTree(tr.Parent); ptv != nil {
-		tr.RootView = ptv.RootView
+		tr.Root = ptv.Root
 		tr.IconOpen = ptv.IconOpen
 		tr.IconClosed = ptv.IconClosed
 		tr.IconLeaf = ptv.IconLeaf
 	} else {
 		// fmt.Println("set root to:", tv, &tv)
-		tr.RootView = tr
+		tr.Root = tr
 	}
 }
 
@@ -507,10 +507,10 @@ func (tr *Tree) OnAdd() {
 // which is what controls the functional inactivity of the tree
 // if individual nodes are ReadOnly that only affects display typically.
 func (tr *Tree) RootIsReadOnly() bool {
-	if tr.RootView == nil {
+	if tr.Root == nil {
 		return true
 	}
-	return tr.RootView.IsReadOnly()
+	return tr.Root.IsReadOnly()
 }
 
 // qt calls the open / close thing a "branch"
@@ -595,7 +595,7 @@ func (tr *Tree) SizeDown(iter int) bool {
 }
 
 func (tr *Tree) Position() {
-	rn := tr.RootView
+	rn := tr.Root
 	if rn == nil {
 		slog.Error("core.Tree: RootView is nil", "in node:", tr)
 		return
@@ -678,20 +678,20 @@ func (tr *Tree) RenderWidget() {
 // Trees within the entire tree, using a list maintained
 // by the root node
 func (tr *Tree) SelectedViews() []Treer {
-	if tr.RootView == nil {
+	if tr.Root == nil {
 		return nil
 	}
-	if len(tr.RootView.SelectedNodes) == 0 {
-		return tr.RootView.SelectedNodes
+	if len(tr.Root.SelectedNodes) == 0 {
+		return tr.Root.SelectedNodes
 	}
-	sels := tr.RootView.SelectedNodes
+	sels := tr.Root.SelectedNodes
 	return slices.Clone(sels)
 }
 
 // SetSelectedViews updates the selected views to given list
 func (tr *Tree) SetSelectedViews(sl []Treer) {
-	if tr.RootView != nil {
-		tr.RootView.SelectedNodes = sl
+	if tr.Root != nil {
+		tr.Root.SelectedNodes = sl
 	}
 }
 
@@ -757,7 +757,7 @@ func (tr *Tree) SelectAll() {
 		return
 	}
 	tr.UnselectAll()
-	nn := tr.RootView
+	nn := tr.Root
 	nn.Select()
 	for nn != nil {
 		nn = nn.MoveDown(events.SelectQuiet)
@@ -844,12 +844,12 @@ func (tr *Tree) SelectUpdate(mode events.SelectModes) bool {
 // SendSelectEvent sends an [events.Select] event on the RootView node.
 func (tr *Tree) SendSelectEvent(original ...events.Event) {
 	// fmt.Println("root:", &tv.RootView, tv.RootView.Listeners)
-	tr.RootView.Send(events.Select, original...)
+	tr.Root.Send(events.Select, original...)
 }
 
 // SendChangeEvent sends an [events.Change] event on the RootView node.
 func (tr *Tree) SendChangeEvent(original ...events.Event) {
-	tr.RootView.SendChange(original...)
+	tr.Root.SendChange(original...)
 }
 
 // TreeChanged must be called after any structural
@@ -857,16 +857,16 @@ func (tr *Tree) SendChangeEvent(original ...events.Event) {
 // It calls RootSetViewIndex to update indexes and
 // SendChangeEvent to notify of changes.
 func (tr *Tree) TreeChanged(original ...events.Event) {
-	tr.RootView.RootSetViewIndex()
+	tr.Root.RootSetViewIndex()
 	tr.SendChangeEvent(original...)
 }
 
 // SendChangeEventReSync sends an [events.Change] event on the RootView node.
 // If SyncNode != nil, it also does a re-sync from root.
 func (tr *Tree) SendChangeEventReSync(original ...events.Event) {
-	tr.RootView.SendChange(original...)
-	if tr.RootView.SyncNode != nil {
-		tr.RootView.ReSync()
+	tr.Root.SendChange(original...)
+	if tr.Root.SyncNode != nil {
+		tr.Root.ReSync()
 	}
 }
 
@@ -933,7 +933,7 @@ func (tr *Tree) MoveDownSibling(selMode events.SelectModes) *Tree {
 	if tr.Parent == nil {
 		return nil
 	}
-	if tr == tr.RootView {
+	if tr == tr.Root {
 		return nil
 	}
 	myidx := tr.IndexInParent()
@@ -953,7 +953,7 @@ func (tr *Tree) MoveDownSibling(selMode events.SelectModes) *Tree {
 // using given select mode (from keyboard modifiers).
 // Returns newly selected node
 func (tr *Tree) MoveUp(selMode events.SelectModes) *Tree {
-	if tr.Parent == nil || tr == tr.RootView {
+	if tr.Parent == nil || tr == tr.Root {
 		return nil
 	}
 	myidx := tr.IndexInParent()
@@ -1055,7 +1055,7 @@ func (tr *Tree) MovePageDownAction(selMode events.SelectModes) *Tree {
 // MoveToLastChild moves to the last child under me, using given select mode
 // (from keyboard modifiers)
 func (tr *Tree) MoveToLastChild(selMode events.SelectModes) *Tree {
-	if tr.Parent == nil || tr == tr.RootView {
+	if tr.Parent == nil || tr == tr.Root {
 		return nil
 	}
 	if !tr.Closed && tr.HasChildren() {
@@ -1071,11 +1071,11 @@ func (tr *Tree) MoveToLastChild(selMode events.SelectModes) *Tree {
 // using given select mode (from keyboard modifiers)
 // and emits select event for newly selected item
 func (tr *Tree) MoveHomeAction(selMode events.SelectModes) *Tree {
-	tr.RootView.SelectUpdate(selMode)
-	tr.RootView.SetFocus()
-	tr.RootView.ScrollToMe()
+	tr.Root.SelectUpdate(selMode)
+	tr.Root.SetFocus()
+	tr.Root.ScrollToMe()
 	// tv.RootView.TreeSig.Emit(tv.RootView.This, int64(TreeSelected), tv.RootView.This)
-	return tr.RootView
+	return tr.Root
 }
 
 // MoveEndAction moves the selection to the very last node in the tree,
@@ -1315,7 +1315,7 @@ func (tr *Tree) ContextMenu(m *Scene) {
 
 // IsRoot returns true if given node is the root of the tree.
 func (tr *Tree) IsRoot(op string) bool {
-	if tr.This == tr.RootView.This {
+	if tr.This == tr.Root.This {
 		if op != "" {
 			MessageSnackbar(tr, fmt.Sprintf("Cannot %v the root of the tree", op))
 		}
@@ -1333,7 +1333,7 @@ func (tr *Tree) MimeData(md *mimedata.Mimes) {
 		tr.MimeDataSync(md)
 		return
 	}
-	*md = append(*md, mimedata.NewTextData(tr.PathFrom(tr.RootView)))
+	*md = append(*md, mimedata.NewTextData(tr.PathFrom(tr.Root)))
 	var buf bytes.Buffer
 	err := jsonx.Write(tr.This, &buf)
 	if err == nil {
@@ -1394,7 +1394,7 @@ func (tr *Tree) Cut() { //types:add
 	}
 	tr.Copy(false)
 	sels := tr.SelectedViews()
-	root := tr.RootView
+	root := tr.Root
 	tr.UnselectAll()
 	for _, sn := range sels {
 		sn.AsTree().Delete()
@@ -1438,7 +1438,7 @@ func (tr *Tree) MakePasteMenu(m *Scene, md mimedata.Mimes, fun func()) {
 			fun()
 		}
 	})
-	if !tr.IsRoot("") && tr.RootView.This != tr.This {
+	if !tr.IsRoot("") && tr.Root.This != tr.This {
 		NewButton(m).SetText("Insert Before").OnClick(func(e events.Event) {
 			tr.PasteBefore(md, events.DropCopy)
 			if fun != nil {
@@ -1527,10 +1527,10 @@ func (tr *Tree) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm s
 		parent.InsertChild(ns, myidx+i)
 		_, nwb := AsWidget(ns)
 		ntv := AsTree(ns)
-		ntv.RootView = tr.RootView
+		ntv.Root = tr.Root
 		nwb.SetScene(tr.Scene)
 		nwb.Update() // incl children
-		npath := ns.AsTree().PathFrom(tr.RootView)
+		npath := ns.AsTree().PathFrom(tr.Root)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
 			ns.AsTree().SetName(ns.AsTree().Name + TreeTempMovedTag) // special keyword :)
 		}
@@ -1558,7 +1558,7 @@ func (tr *Tree) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 		tr.AddChild(ns)
 		_, nwb := AsWidget(ns)
 		ntv := AsTree(ns)
-		ntv.RootView = tr.RootView
+		ntv.Root = tr.Root
 		nwb.SetScene(tr.Scene)
 	}
 	tr.Update()
@@ -1637,7 +1637,7 @@ func (tr *Tree) DropDeleteSource(e events.Event) {
 		return
 	}
 	md := de.Data.(mimedata.Mimes)
-	root := tr.RootView
+	root := tr.Root
 	for _, d := range md {
 		if d.Type != fileinfo.TextPlain { // link
 			continue
