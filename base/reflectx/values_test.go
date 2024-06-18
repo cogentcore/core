@@ -180,3 +180,17 @@ func BenchmarkStringToFloat(b *testing.B) {
 	}
 	b.Log(sum)
 }
+
+func TestSliceSetRobust(t *testing.T) {
+	a := &[]int{1, 2, 3}
+	aa := any(a)
+
+	var b any
+	ba := any(&b)
+
+	assert.NoError(t, SetRobust(ba, aa))
+	assert.Equal(t, fmt.Sprintf("%p", a), fmt.Sprintf("%p", b))
+
+	assert.NoError(t, SetRobust(aa, ba))
+	assert.Equal(t, fmt.Sprintf("%p", a), fmt.Sprintf("%p", b))
+}
