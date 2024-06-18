@@ -462,9 +462,7 @@ func views(ts *core.Tabs) {
 	sv := core.NewForm(sp).SetStruct(tv)
 
 	tv.OnSelect(func(e events.Event) {
-		fmt.Println("sel")
 		if len(tv.SelectedNodes) > 0 {
-			fmt.Println("sel", tv.SelectedNodes)
 			sv.SetStruct(tv.SelectedNodes[0]).Update()
 		}
 	})
