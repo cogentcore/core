@@ -11,7 +11,7 @@ import (
 	"log"
 	"log/slog"
 
-	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/vgpu"
 	"cogentcore.org/core/vgpu/vphong"
@@ -76,7 +76,7 @@ type TextureFile struct {
 func NewTextureFile(sc *Scene, name string, filename string) *TextureFile {
 	tx := &TextureFile{}
 	tx.Name = name
-	dfs, fnm, err := dirs.DirFS(filename)
+	dfs, fnm, err := fsx.DirFS(filename)
 	if err != nil {
 		slog.Error("xyz.NewTextureFile: Image not found error", "file:", filename, "error", err)
 		return nil

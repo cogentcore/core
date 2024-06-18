@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/cam/hct"
@@ -22,7 +22,7 @@ func TestSVG(t *testing.T) {
 	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
 
 	dir := filepath.Join("testdata", "svg")
-	files := dirs.ExtFilenames(dir, ".svg")
+	files := fsx.ExtFilenames(dir, ".svg")
 
 	for _, fn := range files {
 		// if fn != "test2.svg" {

@@ -11,9 +11,9 @@ import (
 	"os"
 	"strings"
 
-	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo/mimedata"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/stringsx"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/colors"
@@ -82,7 +82,7 @@ func DiffEditorDialogFromRevs(ctx core.Widget, repo vcs.Repo, file string, fbuf 
 	if rev_a == "" {
 		rev_a = "HEAD"
 	}
-	return DiffEditorDialog(ctx, "DiffVcs: "+dirs.DirAndFile(file), astr, bstr, file, file, rev_a, rev_b), nil
+	return DiffEditorDialog(ctx, "DiffVcs: "+fsx.DirAndFile(file), astr, bstr, file, file, rev_a, rev_b), nil
 }
 
 // DiffEditorDialog opens a dialog for displaying diff between two files as line-strings
@@ -260,7 +260,7 @@ func (dv *DiffEditor) PrevDiff(ab int) bool {
 // SaveAs saves A or B edits into given file.
 // It checks for an existing file, prompts to overwrite or not.
 func (dv *DiffEditor) SaveAs(ab bool, filename core.Filename) {
-	if !errors.Log1(dirs.FileExists(string(filename))) {
+	if !errors.Log1(fsx.FileExists(string(filename))) {
 		dv.SaveFile(ab, filename)
 	} else {
 		d := core.NewBody().AddTitle("File Exists, Overwrite?").
@@ -517,7 +517,7 @@ func (dv *DiffEditor) UndoDiff(ab int) error {
 }
 
 func (dv *DiffEditor) MakeToolbar(p *core.Plan) {
-	txta := "A: " + dirs.DirAndFile(dv.FileA)
+	txta := "A: " + fsx.DirAndFile(dv.FileA)
 	if dv.RevA != "" {
 		txta += ": " + dv.RevA
 	}
@@ -580,7 +580,7 @@ func (dv *DiffEditor) MakeToolbar(p *core.Plan) {
 
 	core.Add(p, func(w *core.Separator) {})
 
-	txtb := "B: " + dirs.DirAndFile(dv.FileB)
+	txtb := "B: " + fsx.DirAndFile(dv.FileB)
 	if dv.RevB != "" {
 		txtb += ": " + dv.RevB
 	}

@@ -16,8 +16,8 @@ import (
 	"strings"
 	"sync"
 
-	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/spell"
@@ -45,7 +45,7 @@ func OpenSpellModel() error {
 
 // NewSpellModelFromText builds a NEW spelling model from text
 func NewSpellModelFromText() error {
-	bigdatapath, err := dirs.GoSrcDir("cogentcore.org/core/spell")
+	bigdatapath, err := fsx.GoSrcDir("cogentcore.org/core/spell")
 	if err != nil {
 		slog.Error("getting path to corpus directory", "err", err)
 		return err

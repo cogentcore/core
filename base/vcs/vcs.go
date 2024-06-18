@@ -13,7 +13,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/fsx"
 	"github.com/Masterminds/vcs"
 )
 
@@ -116,10 +116,10 @@ func NewRepo(remote, local string) (Repo, error) {
 // .git for git
 // .svn for svn -- but note that this will find any subdir in svn repo
 func DetectRepo(path string) vcs.Type {
-	if dirs.HasFile(path, ".git") {
+	if fsx.HasFile(path, ".git") {
 		return vcs.Git
 	}
-	if dirs.HasFile(path, ".svn") {
+	if fsx.HasFile(path, ".svn") {
 		return vcs.Svn
 	}
 	// todo: rest later..

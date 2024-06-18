@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/parse"
 	_ "cogentcore.org/core/parse/langs"
 	"cogentcore.org/core/parse/syms"
@@ -69,7 +69,7 @@ func DoGoPath(path string) {
 
 func DoGoRecursive(path string) {
 	DoGoPath(path)
-	drs := dirs.Dirs(path)
+	drs := fsx.Dirs(path)
 outer:
 	for _, dr := range drs {
 		if dr == "testdata" {

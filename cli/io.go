@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"io/fs"
 
-	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/iox/tomlx"
 	"cogentcore.org/core/base/reflectx"
 )
@@ -20,7 +20,7 @@ import (
 // Is equivalent to Open if there are no Includes. It returns an error if
 // any of the include files cannot be found on [Options.IncludePaths].
 func OpenWithIncludes(opts *Options, cfg any, file string) error {
-	files := dirs.FindFilesOnPaths(opts.IncludePaths, file)
+	files := fsx.FindFilesOnPaths(opts.IncludePaths, file)
 	if len(files) == 0 {
 		return fmt.Errorf("OpenWithIncludes: no files found for %q", file)
 	}
@@ -39,13 +39,13 @@ func OpenWithIncludes(opts *Options, cfg any, file string) error {
 	}
 	for i := ni - 1; i >= 0; i-- {
 		inc := incs[i]
-		err = tomlx.OpenFiles(cfg, dirs.FindFilesOnPaths(opts.IncludePaths, inc)...)
+		err = tomlx.OpenFiles(cfg, fsx.FindFilesOnPaths(opts.IncludePaths, inc)...)
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
 	// reopen original
-	err = tomlx.OpenFiles(cfg, dirs.FindFilesOnPaths(opts.IncludePaths, file)...)
+	err = tomlx.OpenFiles(cfg, fsx.FindFilesOnPaths(opts.IncludePaths, file)...)
 	if err != nil {
 		return err
 	}

@@ -11,7 +11,7 @@ import (
 	"errors"
 	"reflect"
 
-	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/iox/tomlx"
 	"cogentcore.org/core/base/reflectx"
 )
@@ -53,7 +53,7 @@ func includeStackImpl(opts *Options, clone Includer, includes []string) ([]strin
 	var errs []error
 	for _, inc := range incs {
 		*clone.IncludesPtr() = nil
-		err := tomlx.OpenFiles(clone, dirs.FindFilesOnPaths(opts.IncludePaths, inc)...)
+		err := tomlx.OpenFiles(clone, fsx.FindFilesOnPaths(opts.IncludePaths, inc)...)
 		if err == nil {
 			includes, err = includeStackImpl(opts, clone, includes)
 			if err != nil {

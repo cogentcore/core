@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package dirs provides various utility functions in dealing with directories
-// such as a list of all the files with a given (set of) extensions and
-// finding paths within the Go source directory (GOPATH, etc)
-package dirs
+// Package fsx provides various utility functions for dealing with filesystems.
+package fsx
 
 import (
 	"errors"
@@ -20,7 +18,7 @@ import (
 )
 
 // GoSrcDir tries to locate dir in GOPATH/src/ or GOROOT/src/pkg/ and returns its
-// full path. GOPATH may contain a list of paths.  From Robin Elkind github.com/mewkiz/pkg
+// full path. GOPATH may contain a list of paths. From Robin Elkind github.com/mewkiz/pkg.
 func GoSrcDir(dir string) (absDir string, err error) {
 	for _, srcDir := range build.Default.SrcDirs() {
 		absDir = filepath.Join(srcDir, dir)

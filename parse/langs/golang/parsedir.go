@@ -14,8 +14,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/parse"
 	"cogentcore.org/core/parse/syms"
 	"cogentcore.org/core/parse/token"
@@ -114,7 +114,7 @@ func (gl *GoLang) ParseDirImpl(fs *parse.FileState, path string, opts parse.Lang
 			// fmt.Printf("nomod\n")
 			_, err := os.Stat(pkgPathAbs)
 			if os.IsNotExist(err) {
-				pkgPathAbs, err = dirs.GoSrcDir(pkgPathAbs)
+				pkgPathAbs, err = fsx.GoSrcDir(pkgPathAbs)
 				if err != nil {
 					if TraceTypes {
 						log.Println(err)
@@ -160,7 +160,7 @@ func (gl *GoLang) ParseDirImpl(fs *parse.FileState, path string, opts parse.Lang
 		// fmt.Printf("Parsing, loading path: %v\n", path)
 	}
 
-	files = dirs.ExtFilenames(pkgPathAbs, ".go")
+	files = fsx.ExtFilenames(pkgPathAbs, ".go")
 	if len(files) == 0 {
 		// fmt.Printf("No go files, bailing\n")
 		return nil
@@ -180,7 +180,7 @@ func (gl *GoLang) ParseDirImpl(fs *parse.FileState, path string, opts parse.Lang
 			if diffPath || (!gl.Pr.ModTime.IsZero() && cts.Before(gl.Pr.ModTime)) {
 				// fmt.Printf("rebuilding %v because parser: %v is newer than cache: %v\n", path, gl.Pr.ModTime, cts)
 			} else {
-				lstmod := dirs.LatestMod(pkgPathAbs, ".go")
+				lstmod := fsx.LatestMod(pkgPathAbs, ".go")
 				if lstmod.Before(cts) {
 					// fmt.Printf("loaded cache for: %v from: %v\n", pkgPathAbs, cts)
 					return csy

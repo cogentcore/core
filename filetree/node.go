@@ -15,9 +15,9 @@ import (
 	"sort"
 	"strings"
 
-	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
@@ -244,7 +244,7 @@ func (fn *Node) MyRelPath() string {
 	if fn.IsIrregular() || fn.FileRoot == nil {
 		return fn.Name
 	}
-	return dirs.RelFilePath(string(fn.Filepath), string(fn.FileRoot.Filepath))
+	return fsx.RelFilePath(string(fn.Filepath), string(fn.FileRoot.Filepath))
 }
 
 // SetPath sets the current node to represent the given path.
@@ -598,7 +598,7 @@ func (fn *Node) CloseBuf() bool {
 
 // RelPath returns the relative path from node for given full path
 func (fn *Node) RelPath(fpath core.Filename) string {
-	return dirs.RelFilePath(string(fpath), string(fn.Filepath))
+	return fsx.RelFilePath(string(fpath), string(fn.Filepath))
 }
 
 // DirsTo opens all the directories above the given filename, and returns the node

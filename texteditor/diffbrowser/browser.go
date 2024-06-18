@@ -7,7 +7,7 @@ package diffbrowser
 //go:generate core generate
 
 import (
-	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/stringsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -89,7 +89,7 @@ func (br *Browser) MakeToolbar(p *core.Plan) {
 
 // ViewDiff views diff for given file Node, returning a texteditor.DiffEditor
 func (br *Browser) ViewDiff(fn *Node) *texteditor.DiffEditor {
-	df := dirs.DirAndFile(fn.FileA)
+	df := fsx.DirAndFile(fn.FileA)
 	tabs := br.Tabs()
 	tab := tabs.RecycleTab(df, true)
 	if tab.HasChildren() {

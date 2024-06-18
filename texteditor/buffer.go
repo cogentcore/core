@@ -18,9 +18,9 @@ import (
 	"sync"
 	"time"
 
-	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/indent"
 	"cogentcore.org/core/base/runes"
 	"cogentcore.org/core/core"
@@ -475,7 +475,7 @@ func (tb *Buffer) FileModCheck() bool {
 			return true
 		}
 		sc := tb.SceneFromView()
-		d := core.NewBody().AddTitle("File changed on disk: " + dirs.DirAndFile(string(tb.Filename))).
+		d := core.NewBody().AddTitle("File changed on disk: " + fsx.DirAndFile(string(tb.Filename))).
 			AddText(fmt.Sprintf("File has changed on disk since being opened or saved by you; what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename))
 		d.AddBottomBar(func(parent core.Widget) {
 			core.NewButton(parent).SetText("Save as to different file").OnClick(func(e events.Event) {
@@ -585,7 +585,7 @@ func (tb *Buffer) Revert() bool { //types:add
 func (tb *Buffer) SaveAsFunc(filename core.Filename, afterFunc func(canceled bool)) {
 	// todo: filemodcheck!
 	tb.EditDone()
-	if !errors.Log1(dirs.FileExists(string(filename))) {
+	if !errors.Log1(fsx.FileExists(string(filename))) {
 		tb.SaveFile(filename)
 		if afterFunc != nil {
 			afterFunc(false)

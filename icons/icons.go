@@ -10,8 +10,8 @@ import (
 	"io/fs"
 	"strings"
 
-	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/mergefs"
 )
 
@@ -94,7 +94,7 @@ func (i Icon) IsValid() bool {
 	if i.IsNil() {
 		return false
 	}
-	ex, _ := dirs.FileExistsFS(Icons, i.Filename())
+	ex, _ := fsx.FileExistsFS(Icons, i.Filename())
 	return ex
 }
 

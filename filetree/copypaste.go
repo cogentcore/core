@@ -12,10 +12,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fileinfo/mimedata"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/texteditor"
@@ -108,7 +108,7 @@ func (fn *Node) PasteCheckExisting(tfn *Node, md mimedata.Mimes, externalDrop bo
 			_, fnm := filepath.Split(path)
 			path = filepath.Join(tpath, fnm)
 		}
-		if errors.Log1(dirs.FileExists(path)) {
+		if errors.Log1(fsx.FileExists(path)) {
 			existing = append(existing, path)
 		}
 	}

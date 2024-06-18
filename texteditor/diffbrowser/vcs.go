@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/stringsx"
 	"cogentcore.org/core/base/vcs"
 )
@@ -33,7 +33,7 @@ func (br *Browser) DiffVCS(repo vcs.Repo, revA, revB string) {
 	br.PathB = br.PathA
 	files := stringsx.SplitLines(string(cinfo))
 	tv := br.Tree()
-	tv.SetText(dirs.DirAndFile(br.PathA))
+	tv.SetText(fsx.DirAndFile(br.PathA))
 	cdir := ""
 	var cdirs []string
 	var cnodes []*Node

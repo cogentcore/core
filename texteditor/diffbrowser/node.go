@@ -9,8 +9,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/fileinfo"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
@@ -111,15 +111,15 @@ func (br *Browser) DiffDirs(pathA, pathB string, excludeFile func(fname string) 
 	br.PathA = pathA
 	br.PathB = pathB
 	tv := br.Tree()
-	tv.SetText(dirs.DirAndFile(pathA))
+	tv.SetText(fsx.DirAndFile(pathA))
 	br.diffDirsAt(pathA, pathB, tv, excludeFile)
 }
 
 // diffDirsAt creates a tree of files with the same names
 // that differ within two dirs.
 func (br *Browser) diffDirsAt(pathA, pathB string, node *Node, excludeFile func(fname string) bool) {
-	da := dirs.Dirs(pathA)
-	db := dirs.Dirs(pathB)
+	da := fsx.Dirs(pathA)
+	db := fsx.Dirs(pathB)
 
 	node.SetFileA(pathA).SetFileB(pathB)
 
@@ -136,8 +136,8 @@ func (br *Browser) diffDirsAt(pathA, pathB string, node *Node, excludeFile func(
 		}
 	}
 
-	fsa := dirs.ExtFilenames(pathA)
-	fsb := dirs.ExtFilenames(pathB)
+	fsa := fsx.ExtFilenames(pathA)
+	fsb := fsx.ExtFilenames(pathB)
 
 	for _, fa := range fsa {
 		isDir := false

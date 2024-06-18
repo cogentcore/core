@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -368,7 +368,7 @@ func (ft *Tree) SyncExternalFiles(efn *Node) {
 	plan := tree.TypePlan{}
 	typ := ft.FileNodeType
 	for _, f := range ft.ExternalFiles {
-		plan.Add(typ, dirs.DirAndFile(f))
+		plan.Add(typ, fsx.DirAndFile(f))
 	}
 	tree.Update(efn, plan) // NOT unique names
 	// always go through kids, regardless of mods

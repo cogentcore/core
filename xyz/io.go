@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/tree"
 )
 
@@ -62,7 +62,7 @@ var Decoders = map[string]Decoder{}
 //
 //	must have same name as .obj, or a default material is used.
 func DecodeFile(fname string) (Decoder, error) {
-	dfs, fnm, err := dirs.DirFS(fname)
+	dfs, fnm, err := fsx.DirFS(fname)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +128,7 @@ func DecodeFileFS(fsys fs.FS, fname string) (Decoder, error) {
 //
 //	must have same name as .obj, or a default material is used.
 func (sc *Scene) OpenObj(fname string, gp *Group) error {
-	dfs, fnm, err := dirs.DirFS(fname)
+	dfs, fnm, err := fsx.DirFS(fname)
 	if err != nil {
 		return err
 	}
@@ -158,7 +158,7 @@ func (sc *Scene) OpenObjFS(fsys fs.FS, fname string, gp *Group) error {
 //
 //	must have same name as .obj, or a default material is used.
 func (sc *Scene) OpenNewObj(fname string, parent tree.Node) (*Group, error) {
-	dfs, fnm, err := dirs.DirFS(fname)
+	dfs, fnm, err := fsx.DirFS(fname)
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +195,7 @@ func (sc *Scene) OpenNewObjFS(fsys fs.FS, fname string, parent tree.Node) (*Grou
 //
 //	must have same name as .obj, or a default material is used.
 func (sc *Scene) OpenToLibrary(fname string, libnm string) (*Group, error) {
-	dfs, fnm, err := dirs.DirFS(fname)
+	dfs, fnm, err := fsx.DirFS(fname)
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +234,7 @@ func (sc *Scene) OpenToLibraryFS(fsys fs.FS, fname string, libnm string) (*Group
 //	Does not support full scene data so only objects are loaded
 //	into a new group in scene.
 func (sc *Scene) OpenScene(fname string) error {
-	dfs, fnm, err := dirs.DirFS(fname)
+	dfs, fnm, err := fsx.DirFS(fname)
 	if err != nil {
 		return err
 	}
@@ -274,7 +274,7 @@ func (sc *Scene) ReadObj(fname string, rs []io.Reader, gp *Group) error {
 	if !has {
 		return fmt.Errorf("xyz.ReadObj: file extension: %v not found in Decoders list", ext)
 	}
-	dfs, fnm, err := dirs.DirFS(fname)
+	dfs, fnm, err := fsx.DirFS(fname)
 	dec := dt.New()
 	dec.SetFileFS(dfs, fnm)
 	err = dec.Decode(rs)
@@ -302,7 +302,7 @@ func (sc *Scene) ReadScene(fname string, rs []io.Reader, gp *Group) error {
 	if !has {
 		return fmt.Errorf("xyz.ReadScene: file extension: %v not found in Decoders list", ext)
 	}
-	dfs, fnm, err := dirs.DirFS(fname)
+	dfs, fnm, err := fsx.DirFS(fname)
 	dec := dt.New()
 	dec.SetFileFS(dfs, fnm)
 	err = dec.Decode(rs)

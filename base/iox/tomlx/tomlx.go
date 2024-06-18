@@ -9,7 +9,7 @@ import (
 	"io"
 	"io/fs"
 
-	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/iox"
 	"github.com/pelletier/go-toml/v2"
 )
@@ -75,7 +75,7 @@ func WriteBytes(v any) ([]byte, error) {
 // OpenFromPaths reads the given object from the given TOML file,
 // looking on paths for the file.
 func OpenFromPaths(v any, file string, paths ...string) error {
-	filenames := dirs.FindFilesOnPaths(paths, file)
+	filenames := fsx.FindFilesOnPaths(paths, file)
 	if len(filenames) == 0 {
 		return fmt.Errorf("OpenFromPaths: no files found")
 	}

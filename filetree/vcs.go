@@ -10,8 +10,8 @@ import (
 	"log/slog"
 	"strings"
 
-	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
@@ -288,7 +288,7 @@ func (fn *Node) BlameVCSSel() { //types:add
 // BlameDialog opens a dialog for displaying VCS blame data using textview.TwinViews.
 // blame is the annotated blame code, while fbytes is the original file contents.
 func BlameDialog(ctx core.Widget, fname string, blame, fbytes []byte) *texteditor.TwinEditors {
-	title := "VCS Blame: " + dirs.DirAndFile(fname)
+	title := "VCS Blame: " + fsx.DirAndFile(fname)
 
 	d := core.NewBody().AddTitle(title)
 	tv := texteditor.NewTwinEditors(d)

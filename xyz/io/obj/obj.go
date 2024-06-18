@@ -24,7 +24,7 @@ import (
 	"strconv"
 	"strings"
 
-	"cogentcore.org/core/base/dirs"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/xyz"
@@ -91,12 +91,12 @@ func (dec *Decoder) HasScene() bool {
 
 func (dec *Decoder) SetFileFS(fsys fs.FS, fname string) ([]string, error) {
 	dec.FSys = fsys
-	exists, err := dirs.FileExistsFS(dec.FSys, fname)
+	exists, err := fsx.FileExistsFS(dec.FSys, fname)
 	if !exists {
 		return nil, errors.New("xyz obj.Decoder: " + err.Error())
 	}
 	mtlf := strings.TrimSuffix(fname, ".obj") + ".mtl"
-	exists, _ = dirs.FileExistsFS(dec.FSys, fname)
+	exists, _ = fsx.FileExistsFS(dec.FSys, fname)
 	if exists {
 		return []string{fname, mtlf}, nil
 	} else {

@@ -7,9 +7,9 @@ package filetree
 import (
 	"log/slog"
 
-	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo/mimedata"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -190,7 +190,7 @@ func (lv *VCSLog) Table() *core.Table {
 
 func (lv *VCSLog) MakeToolbar(p *core.Plan) {
 	core.Add(p, func(w *core.Text) {
-		w.SetText("File: " + dirs.DirAndFile(lv.File))
+		w.SetText("File: " + fsx.DirAndFile(lv.File))
 	})
 
 	core.AddAt(p, "a-rev", func(w *core.Switch) {
@@ -268,7 +268,7 @@ func VCSLogDialog(ctx core.Widget, repo vcs.Repo, lg vcs.Log, file, since string
 	if file == "" {
 		title += "All files"
 	} else {
-		title += dirs.DirAndFile(file)
+		title += fsx.DirAndFile(file)
 	}
 	if since != "" {
 		title += " since: " + since
@@ -290,7 +290,7 @@ func FileAtRevDialog(ctx core.Widget, repo vcs.Repo, file, rev string) *core.Bod
 	if rev == "" {
 		rev = "HEAD"
 	}
-	title := "File at VCS Revision: " + dirs.DirAndFile(file) + "@" + rev
+	title := "File at VCS Revision: " + fsx.DirAndFile(file) + "@" + rev
 	d := core.NewBody().AddTitle(title)
 
 	tb := texteditor.NewBuffer().SetText(fb).SetFilename(file) // file is key for getting lang

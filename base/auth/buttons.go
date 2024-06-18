@@ -9,8 +9,8 @@ import (
 	"embed"
 	"io/fs"
 
-	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
@@ -116,7 +116,7 @@ func Button(par core.Widget, c *ButtonsConfig, provider string, authFunc func(c 
 		for _, account := range c.Accounts {
 			tf := c.TokenFile(provider, account)
 			if tf != "" {
-				exists, err := dirs.FileExists(tf)
+				exists, err := fsx.FileExists(tf)
 				if err != nil {
 					core.ErrorDialog(bt, err, "Error searching for saved "+strcase.ToSentence(provider)+" auth token file")
 					return bt

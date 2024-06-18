@@ -10,8 +10,8 @@ import (
 	"os"
 	"strings"
 
-	"cogentcore.org/core/base/dirs"
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/base/stringsx"
 )
@@ -28,7 +28,7 @@ func SplitLines(s string) []string {
 
 // FileExists returns true if given file exists
 func FileExists(path string) bool {
-	ex := errors.Log1(dirs.FileExists(path))
+	ex := errors.Log1(fsx.FileExists(path))
 	return ex
 }
 
