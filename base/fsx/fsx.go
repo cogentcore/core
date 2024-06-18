@@ -30,10 +30,10 @@ func GoSrcDir(dir string) (absDir string, err error) {
 	return "", fmt.Errorf("fsx.GoSrcDir: unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
 }
 
-// ExtensionFiles returns all the FileInfo's for files with given extension(s) in directory
+// Files returns all the FileInfo's for files with given extension(s) in directory
 // in sorted order (if extensions are empty then all files are returned).
 // In case of error, returns nil.
-func ExtensionFiles(path string, extensions ...string) []fs.DirEntry {
+func Files(path string, extensions ...string) []fs.DirEntry {
 	files, err := os.ReadDir(path)
 	if err != nil {
 		return nil
@@ -62,9 +62,9 @@ func ExtensionFiles(path string, extensions ...string) []fs.DirEntry {
 	return files
 }
 
-// ExtensionFilenames returns all the file names with given extension(s) in directory
+// Filenames returns all the file names with given extension(s) in directory
 // in sorted order (if extensions is empty then all files are returned)
-func ExtensionFilenames(path string, extensions ...string) []string {
+func Filenames(path string, extensions ...string) []string {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil
@@ -121,7 +121,7 @@ func Dirs(path string) []string {
 // if no files or error, returns zero time value
 func LatestMod(path string, exts ...string) time.Time {
 	tm := time.Time{}
-	files := ExtensionFiles(path, exts...)
+	files := Files(path, exts...)
 	if len(files) == 0 {
 		return tm
 	}

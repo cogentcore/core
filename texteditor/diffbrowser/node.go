@@ -136,8 +136,8 @@ func (br *Browser) diffDirsAt(pathA, pathB string, node *Node, excludeFile func(
 		}
 	}
 
-	fsa := fsx.ExtensionFilenames(pathA)
-	fsb := fsx.ExtensionFilenames(pathB)
+	fsa := fsx.Filenames(pathA)
+	fsb := fsx.Filenames(pathB)
 
 	for _, fa := range fsa {
 		isDir := false

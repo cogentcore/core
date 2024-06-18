@@ -3,24 +3,25 @@
 package interpreter
 
 import (
-	"cogentcore.org/core/base/fsx"
 	"reflect"
+
+	"cogentcore.org/core/base/fsx"
 )
 
 func init() {
 	Symbols["cogentcore.org/core/base/fsx/fsx"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"DirAndFile":         reflect.ValueOf(fsx.DirAndFile),
-		"DirFS":              reflect.ValueOf(fsx.DirFS),
-		"Dirs":               reflect.ValueOf(fsx.Dirs),
-		"ExtensionFilenames": reflect.ValueOf(fsx.ExtensionFilenames),
-		"ExtensionFiles":     reflect.ValueOf(fsx.ExtensionFiles),
-		"FileExists":         reflect.ValueOf(fsx.FileExists),
-		"FileExistsFS":       reflect.ValueOf(fsx.FileExistsFS),
-		"FindFilesOnPaths":   reflect.ValueOf(fsx.FindFilesOnPaths),
-		"GoSrcDir":           reflect.ValueOf(fsx.GoSrcDir),
-		"HasFile":            reflect.ValueOf(fsx.HasFile),
-		"LatestMod":          reflect.ValueOf(fsx.LatestMod),
-		"RelativeFilePath":   reflect.ValueOf(fsx.RelativeFilePath),
+		"DirAndFile":       reflect.ValueOf(fsx.DirAndFile),
+		"DirFS":            reflect.ValueOf(fsx.DirFS),
+		"Dirs":             reflect.ValueOf(fsx.Dirs),
+		"Filenames":        reflect.ValueOf(fsx.Filenames),
+		"Files":            reflect.ValueOf(fsx.Files),
+		"FileExists":       reflect.ValueOf(fsx.FileExists),
+		"FileExistsFS":     reflect.ValueOf(fsx.FileExistsFS),
+		"FindFilesOnPaths": reflect.ValueOf(fsx.FindFilesOnPaths),
+		"GoSrcDir":         reflect.ValueOf(fsx.GoSrcDir),
+		"HasFile":          reflect.ValueOf(fsx.HasFile),
+		"LatestMod":        reflect.ValueOf(fsx.LatestMod),
+		"RelativeFilePath": reflect.ValueOf(fsx.RelativeFilePath),
 	}
 }

@@ -22,7 +22,7 @@ func TestSVG(t *testing.T) {
 	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
 
 	dir := filepath.Join("testdata", "svg")
-	files := fsx.ExtensionFilenames(dir, ".svg")
+	files := fsx.Filenames(dir, ".svg")
 
 	for _, fn := range files {
 		// if fn != "test2.svg" {
