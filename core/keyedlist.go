@@ -235,6 +235,7 @@ func (kl *KeyedList) MakeToolbar(p *Plan) {
 // BindMapKey is a version of [Bind] that works for keys in a map.
 func BindMapKey[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 	wb := vw.AsWidget()
+	alreadyBound := wb.ValueUpdate != nil
 	wb.ValueUpdate = func() {
 		if vws, ok := any(vw).(ValueSetter); ok {
 			ErrorSnackbar(vw, vws.SetWidgetValue(key.Interface()))
@@ -262,15 +263,20 @@ func BindMapKey[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 		})
 		d.RunDialog(vw)
 	}
+	if alreadyBound {
+		resetWidgetValue(vw)
+	}
 	if ob, ok := any(vw).(OnBinder); ok {
 		ob.OnBind(key.Interface())
 	}
+	wb.ValueUpdate() // we update it with the initial value immediately
 	return vw
 }
 
 // BindMapValue is a version of [Bind] that works for values in a map.
 func BindMapValue[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 	wb := vw.AsWidget()
+	alreadyBound := wb.ValueUpdate != nil
 	wb.ValueUpdate = func() {
 		value := mapv.MapIndex(key).Interface()
 		if vws, ok := any(vw).(ValueSetter); ok {
@@ -284,9 +290,13 @@ func BindMapValue[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 		ErrorSnackbar(vw, reflectx.SetRobust(value.Interface(), vw.WidgetValue()))
 		mapv.SetMapIndex(key, value.Elem())
 	}
+	if alreadyBound {
+		resetWidgetValue(vw)
+	}
 	if ob, ok := any(vw).(OnBinder); ok {
 		value := mapv.MapIndex(key).Interface()
 		ob.OnBind(value)
 	}
+	wb.ValueUpdate() // we update it with the initial value immediately
 	return vw
 }

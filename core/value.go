@@ -55,15 +55,8 @@ func Bind[T Value](value any, vw T) T {
 	wb.ValueOnChange = func() {
 		ErrorSnackbar(vw, reflectx.SetRobust(value, vw.WidgetValue()))
 	}
-	// If we were already bound to another value previously, we first need to
-	// reset the widget value to zero to avoid any issues with the pointer from
-	// the old value persisting and being updated. For example, that issue happened
-	// with slice and map pointers persisting in forms when a new struct was set.
 	if alreadyBound {
-		rv := reflect.ValueOf(vw.WidgetValue())
-		if rv.IsValid() && rv.Type().Kind() == reflect.Pointer {
-			rv.Elem().SetZero()
-		}
+		resetWidgetValue(vw)
 	}
 	wb.ValueTitle = labels.FriendlyTypeName(reflectx.NonPointerType(reflect.TypeOf(value)))
 	if ob, ok := any(vw).(OnBinder); ok {
@@ -71,6 +64,17 @@ func Bind[T Value](value any, vw T) T {
 	}
 	wb.ValueUpdate() // we update it with the initial value immediately
 	return vw
+}
+
+// If we were already bound to another value previously, we first need to
+// reset the widget value to zero to avoid any issues with the pointer from
+// the old value persisting and being updated. For example, that issue happened
+// with slice and map pointers persisting in forms when a new struct was set.
+func resetWidgetValue(vw Value) {
+	rv := reflect.ValueOf(vw.WidgetValue())
+	if rv.IsValid() && rv.Type().Kind() == reflect.Pointer {
+		rv.Elem().SetZero()
+	}
 }
 
 // JoinValueTitle returns a [WidgetBase.ValueTitle] string composed
