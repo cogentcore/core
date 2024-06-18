@@ -34,44 +34,46 @@ const (
 type Tree struct {
 	Node
 
-	// external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update
-	ExtFiles []string `set:"-"`
+	// ExternalFiles are external files outside the root path of the tree.
+	// They are stored in terms of their absolute paths. These are shown
+	// in the first sub-node if present; use [Tree.AddExternalFile] to add one.
+	ExternalFiles []string `set:"-"`
 
 	// records state of directories within the tree (encoded using paths relative to root),
 	// e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree
 	Dirs DirFlagMap `set:"-"`
 
-	// if true, then all directories are placed at the top of the tree
-	// otherwise everything is mixed
+	// if true, then all directories are placed at the top of the tree.
+	// Otherwise everything is mixed.
 	DirsOnTop bool
 
-	// type of node to create -- defaults to filetree.Node but can use custom node types
+	// type of node to create; defaults to [Node] but can use custom node types
 	FileNodeType *types.Type `display:"-" json:"-" xml:"-"`
 
-	// DoubleClickFun is a function to call when a node receives a DoubleClick event.
+	// DoubleClickFunc is a function to call when a node receives a DoubleClick event.
 	// if not set, defaults to OpenEmptyDir() (for folders)
-	DoubleClickFun func(e events.Event) `copier:"-" display:"-" json:"-" xml:"-"`
+	DoubleClickFunc func(e events.Event) `copier:"-" display:"-" json:"-" xml:"-"`
 
-	// if true, we are in midst of an OpenAll call -- nodes should open all dirs
-	InOpenAll bool `copier:"-" set:"-"`
+	// if true, we are in midst of an OpenAll call; nodes should open all dirs
+	inOpenAll bool
 
 	// change notify for all dirs
-	Watcher *fsnotify.Watcher `copier:"-" set:"-" display:"-"`
+	watcher *fsnotify.Watcher
 
 	// channel to close watcher watcher
-	DoneWatcher chan bool `copier:"-" set:"-" display:"-"`
+	doneWatcher chan bool
 
-	// map of paths that have been added to watcher -- only active if bool = true
-	WatchedPaths map[string]bool `copier:"-" set:"-" display:"-"`
+	// map of paths that have been added to watcher; only active if bool = true
+	watchedPaths map[string]bool
 
 	// last path updated by watcher
-	LastWatchUpdate string `copier:"-" set:"-" display:"-"`
+	lastWatchUpdate string
 
 	// timestamp of last update
-	LastWatchTime time.Time `copier:"-" set:"-" display:"-"`
+	lastWatchTime time.Time
 
 	// Update mutex
-	UpdateMu sync.Mutex `copier:"-" set:"-" display:"-"`
+	updateMu sync.Mutex
 }
 
 func (ft *Tree) Init() {
@@ -82,14 +84,14 @@ func (ft *Tree) Init() {
 }
 
 func (fv *Tree) Destroy() {
-	if fv.Watcher != nil {
-		fv.Watcher.Close()
-		fv.Watcher = nil
+	if fv.watcher != nil {
+		fv.watcher.Close()
+		fv.watcher = nil
 	}
-	if fv.DoneWatcher != nil {
-		fv.DoneWatcher <- true
-		close(fv.DoneWatcher)
-		fv.DoneWatcher = nil
+	if fv.doneWatcher != nil {
+		fv.doneWatcher <- true
+		close(fv.doneWatcher)
+		fv.doneWatcher = nil
 	}
 	fv.Tree.Destroy()
 }
@@ -118,14 +120,14 @@ func (ft *Tree) OpenPath(path string) {
 // UpdateAll does a full update of the tree -- calls SetPath on current path
 func (ft *Tree) UpdateAll() {
 	// update := ft.AsyncLock() // note: safe for async updating
-	ft.UpdateMu.Lock()
+	ft.updateMu.Lock()
 	ft.Dirs.ClearMarks()
 	ft.SetPath(string(ft.FPath))
 	// the problem here is that closed dirs are not visited but we want to keep their settings:
 	// ft.Dirs.DeleteStale()
 	ft.Update()
 	ft.TreeChanged(nil)
-	ft.UpdateMu.Unlock()
+	ft.updateMu.Unlock()
 	// ft.AsyncUnlock(update) // todo:
 }
 
@@ -153,12 +155,12 @@ func (ft *Tree) UpdatePath(path string) {
 
 // ConfigWatcher configures a new watcher for tree
 func (ft *Tree) ConfigWatcher() error {
-	if ft.Watcher != nil {
+	if ft.watcher != nil {
 		return nil
 	}
-	ft.WatchedPaths = make(map[string]bool)
+	ft.watchedPaths = make(map[string]bool)
 	var err error
-	ft.Watcher, err = fsnotify.NewWatcher()
+	ft.watcher, err = fsnotify.NewWatcher()
 	return err
 }
 
@@ -166,16 +168,16 @@ func (ft *Tree) ConfigWatcher() error {
 // It must be called once some paths have been added to watcher --
 // safe to call multiple times.
 func (ft *Tree) WatchWatcher() {
-	if ft.Watcher == nil || ft.Watcher.Events == nil {
+	if ft.watcher == nil || ft.watcher.Events == nil {
 		return
 	}
-	if ft.DoneWatcher != nil {
+	if ft.doneWatcher != nil {
 		return
 	}
-	ft.DoneWatcher = make(chan bool)
+	ft.doneWatcher = make(chan bool)
 	go func() {
-		watch := ft.Watcher
-		done := ft.DoneWatcher
+		watch := ft.watcher
+		done := ft.doneWatcher
 		for {
 			select {
 			case <-done:
@@ -196,15 +198,15 @@ func (ft *Tree) WatchWatcher() {
 
 // WatchUpdate does the update for given path
 func (ft *Tree) WatchUpdate(path string) {
-	ft.UpdateMu.Lock()
-	defer ft.UpdateMu.Unlock()
+	ft.updateMu.Lock()
+	defer ft.updateMu.Unlock()
 	// fmt.Println(path)
 
 	dir, _ := filepath.Split(path)
 	rp := ft.RelPath(core.Filename(dir))
-	if rp == ft.LastWatchUpdate {
+	if rp == ft.lastWatchUpdate {
 		now := time.Now()
-		lagMs := int(now.Sub(ft.LastWatchTime) / time.Millisecond)
+		lagMs := int(now.Sub(ft.lastWatchTime) / time.Millisecond)
 		if lagMs < 100 {
 			// fmt.Printf("skipping update to: %s  due to lag: %v\n", rp, lagMs)
 			return // no update
@@ -215,8 +217,8 @@ func (ft *Tree) WatchUpdate(path string) {
 		// slog.Error(err.Error())
 		return
 	}
-	ft.LastWatchUpdate = rp
-	ft.LastWatchTime = time.Now()
+	ft.lastWatchUpdate = rp
+	ft.lastWatchTime = time.Now()
 	if !fn.IsOpen() {
 		// fmt.Printf("warning: watcher updating closed node: %s\n", rp)
 		return // shouldn't happen
@@ -232,15 +234,15 @@ func (ft *Tree) WatchPath(path core.Filename) error {
 		return nil // mac is not supported in a high-capacity fashion at this point
 	}
 	rp := ft.RelPath(path)
-	on, has := ft.WatchedPaths[rp]
+	on, has := ft.watchedPaths[rp]
 	if on || has {
 		return nil
 	}
 	ft.ConfigWatcher()
 	// fmt.Printf("watching path: %s\n", path)
-	err := ft.Watcher.Add(string(path))
+	err := ft.watcher.Add(string(path))
 	if err == nil {
-		ft.WatchedPaths[rp] = true
+		ft.watchedPaths[rp] = true
 		ft.WatchWatcher()
 	} else {
 		slog.Error(err.Error())
@@ -251,13 +253,13 @@ func (ft *Tree) WatchPath(path core.Filename) error {
 // UnWatchPath removes given path from those watched
 func (ft *Tree) UnWatchPath(path core.Filename) {
 	rp := ft.RelPath(path)
-	on, has := ft.WatchedPaths[rp]
+	on, has := ft.watchedPaths[rp]
 	if !on || !has {
 		return
 	}
 	ft.ConfigWatcher()
-	ft.Watcher.Remove(string(path))
-	ft.WatchedPaths[rp] = false
+	ft.watcher.Remove(string(path))
+	ft.watchedPaths[rp] = false
 }
 
 // IsDirOpen returns true if given directory path is open (i.e., has been
@@ -301,10 +303,10 @@ func (ft *Tree) DirSortByModTime(fpath core.Filename) bool {
 	return ft.Dirs.SortByModTime(ft.RelPath(fpath))
 }
 
-// AddExtFile adds an external file outside of root of file tree
+// AddExternalFile adds an external file outside of root of file tree
 // and triggers an update, returning the Node for it, or
-// error if filepath.Abs fails.
-func (ft *Tree) AddExtFile(fpath string) (*Node, error) {
+// error if [filepath.Abs] fails.
+func (ft *Tree) AddExternalFile(fpath string) (*Node, error) {
 	pth, err := filepath.Abs(fpath)
 	if err != nil {
 		return nil, err
@@ -312,29 +314,29 @@ func (ft *Tree) AddExtFile(fpath string) (*Node, error) {
 	if _, err := os.Stat(pth); err != nil {
 		return nil, err
 	}
-	if has, _ := ft.HasExtFile(pth); has {
-		return ft.ExtNodeByPath(pth)
+	if has, _ := ft.HasExternalFile(pth); has {
+		return ft.ExternalNodeByPath(pth)
 	}
-	ft.ExtFiles = append(ft.ExtFiles, pth)
+	ft.ExternalFiles = append(ft.ExternalFiles, pth)
 	ft.SyncDir()
-	return ft.ExtNodeByPath(pth)
+	return ft.ExternalNodeByPath(pth)
 }
 
-// RemoveExtFile removes external file from maintained list,  returns true if removed
-func (ft *Tree) RemoveExtFile(fpath string) bool {
-	for i, ef := range ft.ExtFiles {
+// RemoveExternalFile removes external file from maintained list; returns true if removed.
+func (ft *Tree) RemoveExternalFile(fpath string) bool {
+	for i, ef := range ft.ExternalFiles {
 		if ef == fpath {
-			ft.ExtFiles = append(ft.ExtFiles[:i], ft.ExtFiles[i+1:]...)
+			ft.ExternalFiles = append(ft.ExternalFiles[:i], ft.ExternalFiles[i+1:]...)
 			return true
 		}
 	}
 	return false
 }
 
-// HasExtFile returns true and index if given abs path exists on ExtFiles list.
+// HasExternalFile returns true and index if given abs path exists on ExtFiles list.
 // false and -1 if not.
-func (ft *Tree) HasExtFile(fpath string) (bool, int) {
-	for i, f := range ft.ExtFiles {
+func (ft *Tree) HasExternalFile(fpath string) (bool, int) {
+	for i, f := range ft.ExternalFiles {
 		if f == fpath {
 			return true, i
 		}
@@ -342,10 +344,10 @@ func (ft *Tree) HasExtFile(fpath string) (bool, int) {
 	return false, -1
 }
 
-// ExtNodeByPath returns Node for given file path, and true, if it
+// ExternalNodeByPath returns Node for given file path, and true, if it
 // exists in the external files list.  Otherwise returns nil, false.
-func (ft *Tree) ExtNodeByPath(fpath string) (*Node, error) {
-	ehas, i := ft.HasExtFile(fpath)
+func (ft *Tree) ExternalNodeByPath(fpath string) (*Node, error) {
+	ehas, i := ft.HasExternalFile(fpath)
 	if !ehas {
 		return nil, fmt.Errorf("ExtFile not found on list: %v", fpath)
 	}
@@ -359,13 +361,13 @@ func (ft *Tree) ExtNodeByPath(fpath string) (*Node, error) {
 	return nil, fmt.Errorf("ExtFile not updated; index invalid")
 }
 
-// SyncExtFiles returns a type-and-name list for configuring nodes
+// SyncExternalFiles returns a type-and-name list for configuring nodes
 // for ExtFiles
-func (ft *Tree) SyncExtFiles(efn *Node) {
+func (ft *Tree) SyncExternalFiles(efn *Node) {
 	efn.Info.Mode = os.ModeDir | os.ModeIrregular // mark as dir, irregular
 	plan := tree.TypePlan{}
 	typ := ft.FileNodeType
-	for _, f := range ft.ExtFiles {
+	for _, f := range ft.ExternalFiles {
 		plan.Add(typ, dirs.DirAndFile(f))
 	}
 	tree.Update(efn, plan) // NOT unique names
@@ -373,7 +375,7 @@ func (ft *Tree) SyncExtFiles(efn *Node) {
 	for i, sfk := range efn.Children {
 		sf := AsNode(sfk)
 		sf.FRoot = ft
-		fp := ft.ExtFiles[i]
+		fp := ft.ExternalFiles[i]
 		sf.SetNodePath(fp)
 		sf.Info.VCS = vcs.Stored // no vcs in general
 	}

@@ -139,8 +139,8 @@ func (fn *Node) Init() {
 			}
 		})
 		w.OnDoubleClick(func(e events.Event) {
-			if fn.FRoot != nil && fn.FRoot.DoubleClickFun != nil {
-				fn.FRoot.DoubleClickFun(e)
+			if fn.FRoot != nil && fn.FRoot.DoubleClickFunc != nil {
+				fn.FRoot.DoubleClickFunc(e)
 			} else {
 				if fn.IsDir() && fn.OpenEmptyDir() {
 					e.SetHandled()
@@ -279,7 +279,7 @@ func (fn *Node) SyncDir() {
 	plan := fn.PlanOfFiles(path)
 	hasExtFiles := false
 	if fn.This == fn.FRoot.This {
-		if len(fn.FRoot.ExtFiles) > 0 {
+		if len(fn.FRoot.ExternalFiles) > 0 {
 			plan = append(tree.TypePlan{{Type: fn.FRoot.FileNodeType, Name: ExternalFilesName}}, plan...)
 			hasExtFiles = true
 		}
@@ -290,7 +290,7 @@ func (fn *Node) SyncDir() {
 		sf := AsNode(sfk)
 		sf.FRoot = fn.FRoot
 		if hasExtFiles && sf.Name == ExternalFilesName {
-			fn.FRoot.SyncExtFiles(sf)
+			fn.FRoot.SyncExternalFiles(sf)
 			continue
 		}
 		fp := filepath.Join(path, sf.Name)
@@ -397,7 +397,7 @@ func (fn *Node) SetNodePath(path string) error {
 		return err
 	}
 	if fn.IsDir() && !fn.IsIrregular() {
-		openAll := fn.FRoot.InOpenAll && !fn.Info.IsHidden()
+		openAll := fn.FRoot.inOpenAll && !fn.Info.IsHidden()
 		if openAll || fn.FRoot.IsDirOpen(fn.FPath) {
 			fn.SetPath(string(fn.FPath)) // keep going down..
 		}
@@ -435,7 +435,7 @@ func (fn *Node) UpdateNode() error {
 	}
 	// fmt.Println(fn, "update node start")
 	if fn.IsDir() {
-		openAll := fn.FRoot.InOpenAll && !fn.Info.IsHidden()
+		openAll := fn.FRoot.inOpenAll && !fn.Info.IsHidden()
 		if openAll || fn.FRoot.IsDirOpen(fn.FPath) {
 			// fmt.Printf("set open: %s\n", fn.FPath)
 			fn.Open()
@@ -530,9 +530,9 @@ func (fn *Node) SortBy(modTime bool) {
 
 // OpenAll opens all directories under this one
 func (fn *Node) OpenAll() { //types:add
-	fn.FRoot.InOpenAll = true // causes chaining of opening
+	fn.FRoot.inOpenAll = true // causes chaining of opening
 	fn.Tree.OpenAll()
-	fn.FRoot.InOpenAll = false
+	fn.FRoot.inOpenAll = false
 }
 
 // CloseAll closes all directories under this one, this included
@@ -579,7 +579,7 @@ func (fn *Node) RemoveFromExterns() { //types:add
 		if !sn.IsExternal() {
 			return
 		}
-		sn.FRoot.RemoveExtFile(string(sn.FPath))
+		sn.FRoot.RemoveExternalFile(string(sn.FPath))
 		sn.CloseBuf()
 		sn.Delete()
 	})

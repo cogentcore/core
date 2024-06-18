@@ -62,7 +62,7 @@ func (fn *Node) FindFile(fnm string) (*Node, bool) {
 		}
 	}
 
-	if efn, err := fn.FRoot.ExtNodeByPath(fnm); err == nil {
+	if efn, err := fn.FRoot.ExternalNodeByPath(fnm); err == nil {
 		return efn, true
 	}
 

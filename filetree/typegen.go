@@ -42,13 +42,12 @@ func AsNode(n tree.Node) *Node {
 func (t *Node) AsNode() *Node { return t }
 
 // TreeType is the [types.Type] for [Tree]
-var TreeType = types.AddType(&types.Type{Name: "cogentcore.org/core/filetree.Tree", IDName: "tree", Doc: "Tree is the root of a tree representing files in a given directory\n(and subdirectories thereof), and has some overall management state for how to\nview things.  The Tree can be viewed by a Tree to provide a GUI\ninterface into it.", Embeds: []types.Field{{Name: "Node"}}, Fields: []types.Field{{Name: "ExtFiles", Doc: "external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update"}, {Name: "Dirs", Doc: "records state of directories within the tree (encoded using paths relative to root),\ne.g., open (have been opened by the user) -- can persist this to restore prior view of a tree"}, {Name: "DirsOnTop", Doc: "if true, then all directories are placed at the top of the tree\notherwise everything is mixed"}, {Name: "FileNodeType", Doc: "type of node to create -- defaults to filetree.Node but can use custom node types"}, {Name: "DoubleClickFun", Doc: "DoubleClickFun is a function to call when a node receives a DoubleClick event.\nif not set, defaults to OpenEmptyDir() (for folders)"}, {Name: "InOpenAll", Doc: "if true, we are in midst of an OpenAll call -- nodes should open all dirs"}, {Name: "Watcher", Doc: "change notify for all dirs"}, {Name: "DoneWatcher", Doc: "channel to close watcher watcher"}, {Name: "WatchedPaths", Doc: "map of paths that have been added to watcher -- only active if bool = true"}, {Name: "LastWatchUpdate", Doc: "last path updated by watcher"}, {Name: "LastWatchTime", Doc: "timestamp of last update"}, {Name: "UpdateMu", Doc: "Update mutex"}}, Instance: &Tree{}})
+var TreeType = types.AddType(&types.Type{Name: "cogentcore.org/core/filetree.Tree", IDName: "tree", Doc: "Tree is the root widget of a tree representing files in a given directory\n(and subdirectories thereof), and has some overall management state for how to\nview things.", Embeds: []types.Field{{Name: "Node"}}, Fields: []types.Field{{Name: "ExternalFiles", Doc: "ExternalFiles are external files outside the root path of the tree.\nThey are stored in terms of their absolute paths. These are shown\nin the first sub-node if present; use [Tree.AddExternalFile] to add one."}, {Name: "Dirs", Doc: "records state of directories within the tree (encoded using paths relative to root),\ne.g., open (have been opened by the user) -- can persist this to restore prior view of a tree"}, {Name: "DirsOnTop", Doc: "if true, then all directories are placed at the top of the tree.\nOtherwise everything is mixed."}, {Name: "FileNodeType", Doc: "type of node to create; defaults to [Node] but can use custom node types"}, {Name: "DoubleClickFunc", Doc: "DoubleClickFunc is a function to call when a node receives a DoubleClick event.\nif not set, defaults to OpenEmptyDir() (for folders)"}, {Name: "inOpenAll", Doc: "if true, we are in midst of an OpenAll call; nodes should open all dirs"}, {Name: "watcher", Doc: "change notify for all dirs"}, {Name: "doneWatcher", Doc: "channel to close watcher watcher"}, {Name: "watchedPaths", Doc: "map of paths that have been added to watcher; only active if bool = true"}, {Name: "lastWatchUpdate", Doc: "last path updated by watcher"}, {Name: "lastWatchTime", Doc: "timestamp of last update"}, {Name: "updateMu", Doc: "Update mutex"}}, Instance: &Tree{}})
 
 // NewTree returns a new [Tree] with the given optional parent:
-// Tree is the root of a tree representing files in a given directory
+// Tree is the root widget of a tree representing files in a given directory
 // (and subdirectories thereof), and has some overall management state for how to
-// view things.  The Tree can be viewed by a Tree to provide a GUI
-// interface into it.
+// view things.
 func NewTree(parent ...tree.Node) *Tree { return tree.New[*Tree](parent...) }
 
 // NodeType returns the [*types.Type] of [Tree]
@@ -58,18 +57,18 @@ func (t *Tree) NodeType() *types.Type { return TreeType }
 func (t *Tree) New() tree.Node { return &Tree{} }
 
 // SetDirsOnTop sets the [Tree.DirsOnTop]:
-// if true, then all directories are placed at the top of the tree
-// otherwise everything is mixed
+// if true, then all directories are placed at the top of the tree.
+// Otherwise everything is mixed.
 func (t *Tree) SetDirsOnTop(v bool) *Tree { t.DirsOnTop = v; return t }
 
 // SetFileNodeType sets the [Tree.FileNodeType]:
-// type of node to create -- defaults to filetree.Node but can use custom node types
+// type of node to create; defaults to [Node] but can use custom node types
 func (t *Tree) SetFileNodeType(v *types.Type) *Tree { t.FileNodeType = v; return t }
 
-// SetDoubleClickFun sets the [Tree.DoubleClickFun]:
-// DoubleClickFun is a function to call when a node receives a DoubleClick event.
+// SetDoubleClickFunc sets the [Tree.DoubleClickFunc]:
+// DoubleClickFunc is a function to call when a node receives a DoubleClick event.
 // if not set, defaults to OpenEmptyDir() (for folders)
-func (t *Tree) SetDoubleClickFun(v func(e events.Event)) *Tree { t.DoubleClickFun = v; return t }
+func (t *Tree) SetDoubleClickFunc(v func(e events.Event)) *Tree { t.DoubleClickFunc = v; return t }
 
 // VCSLogType is the [types.Type] for [VCSLog]
 var VCSLogType = types.AddType(&types.Type{Name: "cogentcore.org/core/filetree.VCSLog", IDName: "vcs-log", Doc: "VCSLog is a widget that represents VCS log data.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Log", Doc: "current log"}, {Name: "File", Doc: "file that this is a log of -- if blank then it is entire repository"}, {Name: "Since", Doc: "date expression for how long ago to include log entries from"}, {Name: "Repo", Doc: "version control system repository"}, {Name: "RevA", Doc: "revision A -- defaults to HEAD"}, {Name: "RevB", Doc: "revision B -- blank means current working copy"}, {Name: "SetA", Doc: "double-click will set the A revision -- else B"}}, Instance: &VCSLog{}})
