@@ -296,6 +296,7 @@ func (pg *Page) MakeToolbar(p *core.Plan) {
 				pg.HistoryIndex--
 				// we need a slash so that it doesn't think it's a relative URL
 				pg.OpenURL("/"+pg.History[pg.HistoryIndex], false)
+				e.SetHandled()
 			}
 		})
 	})
