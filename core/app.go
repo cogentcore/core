@@ -94,10 +94,7 @@ func AppIconImages() []image.Image {
 	return res
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//		AppBar
-
-// StandardAppBarConfig is the standard impl for a [App.AppBarConfig].
+// StandardAppBarConfig is the standard implementation for a [App.AppBarConfig].
 // It adds a Back navigation buttons and the AppChooser,
 // followed by the [Widget.MakeToolbar] for the current FullWindow
 // Scene being viewed, along with [StandardOverflowMenu] items.
@@ -105,22 +102,15 @@ func AppIconImages() []image.Image {
 // which will appear below any other OverflowMenu items added.
 func StandardAppBarConfig(parent Widget) {
 	tb := RecycleToolbar(parent)
-	tb.Maker(StandardAppBarMaker)
+	tb.Maker(standardAppBarMaker)
 	if len(tb.Scene.AppBars) > 0 {
 		tb.Makers = append(tb.Makers, tb.Scene.AppBars...)
 	}
-	StandardOverflowMenu(tb) // todo -- need a config option for this
+	tb.AddOverflowMenu(tb.standardOverflowMenu) // todo -- need a config option for this
 }
 
-// StandardAppBarMaker adds standard items to start of an AppBar:
-// [AppBarBackMaker] and [AppBarChooserMaker]
-func StandardAppBarMaker(p *tree.Plan) {
-	MakeAppBack(p)
-	MakeAppChooser(p)
-}
-
-// MakeAppBack adds a back button to the [Plan] for an app bar.
-func MakeAppBack(p *tree.Plan) {
+// standardAppBarMaker adds standard items to start of an app bar [tree.Plan].
+func standardAppBarMaker(p *tree.Plan) {
 	tree.AddAt(p, "back", func(w *Button) {
 		w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev).SetTooltip("Back")
 		w.OnClick(func(e events.Event) {
@@ -147,11 +137,57 @@ func MakeAppBack(p *tree.Plan) {
 		// 	s.SetState(tb.Scene.Stage.Mains.Stack.Len() <= 1 && len(AllRenderWins) <= 1, states.Disabled)
 		// })
 	})
-}
+	tree.AddAt(p, "app-chooser", func(w *Chooser) {
+		w.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
+		if TheApp.SystemPlatform().IsMobile() {
+			w.SetPlaceholder("Search")
+		} else {
+			w.SetPlaceholder(fmt.Sprintf("Search (%s)", keymap.Menu.Label()))
+		}
 
-// StandardOverflowMenu adds the standard overflow menu function.
-func StandardOverflowMenu(tb *Toolbar) {
-	tb.AddOverflowMenu(tb.StandardOverflowMenu)
+		tree.AddChildInit(w, "text-field", func(w *TextField) {
+			w.Styler(func(s *styles.Style) {
+				s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
+				if !s.Is(states.Focused) && w.Error == nil {
+					s.Border = styles.Border{}
+				}
+				s.Border.Radius = styles.BorderRadiusFull
+				s.Min.X.SetCustom(func(uc *units.Context) float32 {
+					return min(uc.Ch(40), uc.Vw(80)-uc.Ch(20))
+				})
+				s.Max.X = s.Min.X
+			})
+		})
+
+		w.AddItemsFunc(func() {
+			for _, rw := range AllRenderWindows {
+				for _, kv := range rw.Mains.Stack.Order {
+					st := kv.Value
+					// we do not include ourself
+					if st == w.Scene.Stage {
+						continue
+					}
+					w.Items = append(w.Items, ChooserItem{
+						Text:    st.Title,
+						Icon:    icons.Toolbar,
+						Tooltip: "Show " + st.Title,
+						Func:    st.Raise,
+					})
+				}
+			}
+		})
+		w.AddItemsFunc(func() {
+			addButtonItems(&w.Items, p.Parent, "")
+		})
+
+		w.OnFinal(events.Change, func(e events.Event) {
+			// we must never have a chooser label so that it
+			// always displays the search placeholder
+			w.CurrentIndex = -1
+			w.CurrentItem = ChooserItem{}
+			w.ShowCurrentItem()
+		})
+	})
 }
 
 var (
@@ -164,8 +200,8 @@ var (
 
 // note: StandardOverflowMenu must be a method on toolbar to get context scene
 
-// StandardOverflowMenu adds standard overflow menu items.
-func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
+// standardOverflowMenu adds standard overflow menu items for an app bar.
+func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 	NewButton(m).SetText("About").SetIcon(icons.Info).OnClick(func(e events.Event) {
 		d := NewBody(TheApp.Name())
 		d.Styler(func(s *styles.Style) {
@@ -252,74 +288,12 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 	})
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//		AppChooser
-
-// MakeAppChooser adds a [Chooser] to the given [Plan] to give access
-// to all app resources, such as open scenes and buttons in the
-// given toolbar. This chooser is typically placed at the start
-// of the AppBar. You can extend the resources available for access
-// in the app chooser using [Chooser.AddItemsFunc] and [ChooserItem.Func].
-func MakeAppChooser(p *tree.Plan) {
-	tree.AddAt(p, "app-chooser", func(w *Chooser) {
-		w.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
-		if TheApp.SystemPlatform().IsMobile() {
-			w.SetPlaceholder("Search")
-		} else {
-			w.SetPlaceholder(fmt.Sprintf("Search (%s)", keymap.Menu.Label()))
-		}
-
-		tree.AddChildInit(w, "text-field", func(w *TextField) {
-			w.Styler(func(s *styles.Style) {
-				s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
-				if !s.Is(states.Focused) && w.Error == nil {
-					s.Border = styles.Border{}
-				}
-				s.Border.Radius = styles.BorderRadiusFull
-				s.Min.X.SetCustom(func(uc *units.Context) float32 {
-					return min(uc.Ch(40), uc.Vw(80)-uc.Ch(20))
-				})
-				s.Max.X = s.Min.X
-			})
-		})
-
-		w.AddItemsFunc(func() {
-			for _, rw := range AllRenderWindows {
-				for _, kv := range rw.Mains.Stack.Order {
-					st := kv.Value
-					// we do not include ourself
-					if st == w.Scene.Stage {
-						continue
-					}
-					w.Items = append(w.Items, ChooserItem{
-						Text:    st.Title,
-						Icon:    icons.Toolbar,
-						Tooltip: "Show " + st.Title,
-						Func:    st.Raise,
-					})
-				}
-			}
-		})
-		w.AddItemsFunc(func() {
-			AddButtonItems(&w.Items, p.Parent, "")
-		})
-
-		w.OnFinal(events.Change, func(e events.Event) {
-			// we must never have a chooser label so that it
-			// always displays the search placeholder
-			w.CurrentIndex = -1
-			w.CurrentItem = ChooserItem{}
-			w.ShowCurrentItem()
-		})
-	})
-}
-
-// AddButtonItems adds to the given items all of the buttons under
+// addButtonItems adds to the given items all of the buttons under
 // the given parent. It navigates through button menus to find other
 // buttons using a recursive approach that updates path with context
 // about the original button menu. Consumers of this function should
 // typically set path to "".
-func AddButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
+func addButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 	for _, kid := range parent.AsTree().Children {
 		bt := AsButton(kid)
 		if bt == nil || bt.IsDisabled() {
@@ -339,7 +313,7 @@ func AddButtonItems(items *[]ChooserItem, parent tree.Node, path string) {
 			if bt.Name != "overflow-menu" {
 				npath += label
 			}
-			AddButtonItems(items, tmps, npath)
+			addButtonItems(items, tmps, npath)
 			continue
 		}
 		if path != "" {
