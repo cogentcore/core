@@ -10,8 +10,6 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/base/dirs/dirs"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"AllFiles":         reflect.ValueOf(dirs.AllFiles),
-		"AllFilesGlob":     reflect.ValueOf(dirs.AllFilesGlob),
 		"DirAndFile":       reflect.ValueOf(dirs.DirAndFile),
 		"DirFS":            reflect.ValueOf(dirs.DirFS),
 		"Dirs":             reflect.ValueOf(dirs.Dirs),
@@ -25,6 +23,5 @@ func init() {
 		"HasFile":          reflect.ValueOf(dirs.HasFile),
 		"LatestMod":        reflect.ValueOf(dirs.LatestMod),
 		"RelFilePath":      reflect.ValueOf(dirs.RelFilePath),
-		"SplitExt":         reflect.ValueOf(dirs.SplitExt),
 	}
 }
