@@ -34,6 +34,6 @@ func TestStandardAppBarConfig(t *testing.T) {
 	b.Styler(func(s *styles.Style) {
 		s.Min.X.Dp(500)
 	})
-	StandardAppBarConfig(b)
+	standardAppBarConfig(b)
 	b.AssertRender(t, "app/standard-app-bar-config")
 }

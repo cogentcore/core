@@ -56,16 +56,16 @@ type App struct { //types:add -setters
 	SceneConfig func(sc *Scene)
 }
 
-// AppIconImagesCache is a cached version of [AppIconImages].
-var AppIconImagesCache []image.Image
+// appIconImagesCache is a cached version of [AppIconImages].
+var appIconImagesCache []image.Image
 
 // AppIconImages returns a slice of images of sizes 16x16, 32x32, and 48x48
 // rendered from [AppIcon]. It returns nil if [AppIcon] is "" or if there is
 // an error. It automatically logs any errors. It caches the result for future
-// calls in [AppIconImagesCache].
+// calls.
 func AppIconImages() []image.Image {
-	if AppIconImagesCache != nil {
-		return AppIconImagesCache
+	if appIconImagesCache != nil {
+		return appIconImagesCache
 	}
 	if AppIcon == "" {
 		return nil
@@ -90,27 +90,27 @@ func AppIconImages() []image.Image {
 	sv.Resize(image.Pt(48, 48))
 	sv.Render()
 	res[2] = sv.Pixels
-	AppIconImagesCache = res
+	appIconImagesCache = res
 	return res
 }
 
-// StandardAppBarConfig is the standard implementation for a [App.AppBarConfig].
+// standardAppBarConfig is the standard implementation for a [App.AppBarConfig].
 // It adds a Back navigation buttons and the AppChooser,
 // followed by the [Widget.MakeToolbar] for the current FullWindow
 // Scene being viewed, along with [StandardOverflowMenu] items.
 // and calls AddDefaultOverflowMenu to provide default menu items,
 // which will appear below any other OverflowMenu items added.
-func StandardAppBarConfig(parent Widget) {
+func standardAppBarConfig(parent Widget) {
 	tb := RecycleToolbar(parent)
-	tb.Maker(standardAppBarMaker)
+	tb.Maker(makeStandardAppBar)
 	if len(tb.Scene.AppBars) > 0 {
 		tb.Makers = append(tb.Makers, tb.Scene.AppBars...)
 	}
 	tb.AddOverflowMenu(tb.standardOverflowMenu) // todo -- need a config option for this
 }
 
-// standardAppBarMaker adds standard items to start of an app bar [tree.Plan].
-func standardAppBarMaker(p *tree.Plan) {
+// makeStandardAppBar adds standard items to start of an app bar [tree.Plan].
+func makeStandardAppBar(p *tree.Plan) {
 	tree.AddAt(p, "back", func(w *Button) {
 		w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev).SetTooltip("Back")
 		w.OnClick(func(e events.Event) {
