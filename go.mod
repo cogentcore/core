@@ -43,7 +43,6 @@ require (
 	golang.org/x/sys v0.18.0
 	golang.org/x/tools v0.19.0
 	gonum.org/v1/gonum v0.15.0
-	gopkg.in/fsnotify.v1 v1.4.7
 	gopkg.in/yaml.v3 v3.0.1
 )
 

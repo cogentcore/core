@@ -20,7 +20,7 @@ import (
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
-	"gopkg.in/fsnotify.v1"
+	"github.com/fsnotify/fsnotify"
 )
 
 const (
