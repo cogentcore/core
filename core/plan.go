@@ -8,12 +8,10 @@ import (
 	"log/slog"
 	"path/filepath"
 	"runtime"
-	"slices"
 	"strconv"
 	"strings"
 
 	"cogentcore.org/core/base/plan"
-	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 )
 
@@ -164,43 +162,19 @@ func (p *Plan) Update(w Widget) {
 		return
 	}
 	wb := w.AsWidget()
-	makeNew := func(item *PlanItem) Widget {
-		child := item.New()
-		child.AsTree().SetName(item.Name)
-		tree.SetParent(child, wb)
-		for _, f := range item.Init {
-			f(child)
-		}
-		return child
-	}
-	for i, item := range p.Children { // TODO(config): figure out a better way to handle this?
-		if item.Name != "parts" {
-			continue
-		}
-		if wb.Parts == nil {
-			wb.Parts = makeNew(item).(*Frame)
-		}
-		p.Children = slices.Delete(p.Children, i, i+1) // not a real child
-		break
-	}
-	if len(p.Children) == 0 && !p.EnforceEmpty { // check again after potentially removing parts
-		return
-	}
 	wb.Children, _ = plan.Update(wb.Children, len(p.Children),
 		func(i int) string {
 			return p.Children[i].Name
 		}, func(name string, i int) tree.Node {
-			return makeNew(p.Children[i])
+			item := p.Children[i]
+			child := item.New()
+			child.AsTree().SetName(item.Name)
+			tree.SetParent(child, wb)
+			for _, f := range item.Init {
+				f(child)
+			}
+			return child
 		}, func(n tree.Node) {
 			n.Destroy()
 		})
-}
-
-// InitParts configures the given [Frame] to be ready
-// to serve as [WidgetBase.Parts] in a [Add] context.
-func InitParts(w *Frame) {
-	w.Styler(func(s *styles.Style) {
-		s.Grow.Set(1, 1)
-		s.RenderBox = false
-	})
 }
