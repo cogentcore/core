@@ -9,20 +9,20 @@ import "image/color"
 // Accent contains the four standard variations of a base accent color.
 type Accent struct {
 
-	// Base is the base color
+	// Base is the base color for typically high-emphasis content.
 	Base color.RGBA
 
-	// On is the color applied to content on top of
+	// On is the color applied to content on top of [Accent.Base].
 	On color.RGBA
 
-	// Container is the color applied to elements with less emphasis than
+	// Container is the color applied to elements with less emphasis than [Accent.Base].
 	Container color.RGBA
 
-	// OnContainer is the color applied to content on top of
+	// OnContainer is the color applied to content on top of [Accent.Container].
 	OnContainer color.RGBA
 }
 
-// NewAccentLight returns a new light theme [Accent] from the given [Tones]
+// NewAccentLight returns a new light theme [Accent] from the given [Tones].
 func NewAccentLight(tones Tones) Accent {
 	return Accent{
 		Base:        tones.AbsTone(40),
@@ -32,7 +32,7 @@ func NewAccentLight(tones Tones) Accent {
 	}
 }
 
-// NewAccentDark returns a new dark theme [Accent] from the given [Tones]
+// NewAccentDark returns a new dark theme [Accent] from the given [Tones].
 func NewAccentDark(tones Tones) Accent {
 	return Accent{
 		Base:        tones.AbsTone(80),
