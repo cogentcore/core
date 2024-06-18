@@ -342,149 +342,144 @@ func (tr *Tree) Init() {
 		}
 	})
 
-	tr.Maker(func(p *Plan) {
-		p.EnforceEmpty = false
-	})
-	AddChildAt(tr, "parts", func(w *Frame) {
-		InitParts(w)
-		tvi := tr.This.(Treer)
-		w.Styler(func(s *styles.Style) {
-			s.Cursor = cursors.Pointer
-			s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
-			s.SetAbilities(!tr.IsReadOnly() && !tr.RootIsReadOnly(), abilities.Draggable, abilities.Droppable)
-			s.Gap.X.Em(0.1)
-			s.Padding.Zero()
+	parts := tr.NewParts()
+	tri := tr.This.(Treer)
+	parts.Styler(func(s *styles.Style) {
+		s.Cursor = cursors.Pointer
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable, abilities.DoubleClickable)
+		s.SetAbilities(!tr.IsReadOnly() && !tr.RootIsReadOnly(), abilities.Draggable, abilities.Droppable)
+		s.Gap.X.Em(0.1)
+		s.Padding.Zero()
 
-			// we manually inherit our state layer from the tree state
-			// layer so that the parts get it but not the other trees
-			s.StateLayer = tr.actStateLayer
-		})
-		w.AsWidget().FinalStyler(func(s *styles.Style) {
-			s.Grow.Set(1, 0)
-		})
-		// we let the parts handle our state
-		// so that we only get it when we are doing
-		// something with this tree specifically,
-		// not with any of our children (see HandleTreeMouse)
-		w.On(events.MouseEnter, func(e events.Event) {
-			tr.SetState(true, states.Hovered)
-			tr.Style()
-			tr.NeedsRender()
-			e.SetHandled()
-		})
-		w.On(events.MouseLeave, func(e events.Event) {
-			tr.SetState(false, states.Hovered)
-			tr.Style()
-			tr.NeedsRender()
-			e.SetHandled()
-		})
-		w.On(events.MouseDown, func(e events.Event) {
-			tr.SetState(true, states.Active)
-			tr.Style()
-			tr.NeedsRender()
-			e.SetHandled()
-		})
-		w.On(events.MouseUp, func(e events.Event) {
-			tr.SetState(false, states.Active)
-			tr.Style()
-			tr.NeedsRender()
-			e.SetHandled()
+		// we manually inherit our state layer from the tree state
+		// layer so that the parts get it but not the other trees
+		s.StateLayer = tr.actStateLayer
+	})
+	parts.AsWidget().FinalStyler(func(s *styles.Style) {
+		s.Grow.Set(1, 0)
+	})
+	// we let the parts handle our state
+	// so that we only get it when we are doing
+	// something with this tree specifically,
+	// not with any of our children (see HandleTreeMouse)
+	parts.On(events.MouseEnter, func(e events.Event) {
+		tr.SetState(true, states.Hovered)
+		tr.Style()
+		tr.NeedsRender()
+		e.SetHandled()
+	})
+	parts.On(events.MouseLeave, func(e events.Event) {
+		tr.SetState(false, states.Hovered)
+		tr.Style()
+		tr.NeedsRender()
+		e.SetHandled()
+	})
+	parts.On(events.MouseDown, func(e events.Event) {
+		tr.SetState(true, states.Active)
+		tr.Style()
+		tr.NeedsRender()
+		e.SetHandled()
+	})
+	parts.On(events.MouseUp, func(e events.Event) {
+		tr.SetState(false, states.Active)
+		tr.Style()
+		tr.NeedsRender()
+		e.SetHandled()
+	})
+	parts.OnClick(func(e events.Event) {
+		tr.SelectAction(e.SelectMode())
+		e.SetHandled()
+	})
+	parts.AsWidget().OnDoubleClick(func(e events.Event) {
+		tr.This.(Treer).OnDoubleClick(e)
+	})
+	parts.On(events.DragStart, func(e events.Event) {
+		tri.DragStart(e)
+	})
+	parts.On(events.DragEnter, func(e events.Event) {
+		tr.SetState(true, states.DragHovered)
+		tr.Style()
+		tr.NeedsRender()
+		e.SetHandled()
+	})
+	parts.On(events.DragLeave, func(e events.Event) {
+		tr.SetState(false, states.DragHovered)
+		tr.Style()
+		tr.NeedsRender()
+		e.SetHandled()
+	})
+	parts.On(events.Drop, func(e events.Event) {
+		tri.DragDrop(e)
+	})
+	parts.On(events.DropDeleteSource, func(e events.Event) {
+		tri.DropDeleteSource(e)
+	})
+	// the context menu events will get sent to the parts, so it
+	// needs to intercept them and send them up
+	parts.On(events.ContextMenu, func(e events.Event) {
+		sels := tr.SelectedViews()
+		if len(sels) == 0 {
+			tr.SelectAction(e.SelectMode())
+		}
+		tr.ShowContextMenu(e)
+	})
+	AddChildAt(parts, "branch", func(w *Switch) {
+		w.SetType(SwitchCheckbox)
+		w.SetIcons(tr.IconOpen, tr.IconClosed, tr.IconLeaf)
+		w.Styler(func(s *styles.Style) {
+			s.SetAbilities(false, abilities.Focusable)
+			// parent will handle our cursor
+			s.Cursor = cursors.None
+			s.Color = colors.C(colors.Scheme.Primary.Base)
+			s.Padding.Zero()
+			s.Align.Self = styles.Center
+			if !w.StateIs(states.Indeterminate) {
+				// we amplify any state layer we receiver so that it is clear
+				// we are receiving it, not just our parent
+				s.StateLayer *= 3
+			} else {
+				// no state layer for indeterminate because they are not interactive
+				s.StateLayer = 0
+			}
 		})
 		w.OnClick(func(e events.Event) {
-			tr.SelectAction(e.SelectMode())
-			e.SetHandled()
-		})
-		w.AsWidget().OnDoubleClick(func(e events.Event) {
-			tr.This.(Treer).OnDoubleClick(e)
-		})
-		w.On(events.DragStart, func(e events.Event) {
-			tvi.DragStart(e)
-		})
-		w.On(events.DragEnter, func(e events.Event) {
-			tr.SetState(true, states.DragHovered)
-			tr.Style()
-			tr.NeedsRender()
-			e.SetHandled()
-		})
-		w.On(events.DragLeave, func(e events.Event) {
-			tr.SetState(false, states.DragHovered)
-			tr.Style()
-			tr.NeedsRender()
-			e.SetHandled()
-		})
-		w.On(events.Drop, func(e events.Event) {
-			tvi.DragDrop(e)
-		})
-		w.On(events.DropDeleteSource, func(e events.Event) {
-			tvi.DropDeleteSource(e)
-		})
-		// the context menu events will get sent to the parts, so it
-		// needs to intercept them and send them up
-		w.On(events.ContextMenu, func(e events.Event) {
-			sels := tr.SelectedViews()
-			if len(sels) == 0 {
-				tr.SelectAction(e.SelectMode())
+			if w.IsChecked() && !w.StateIs(states.Indeterminate) {
+				if !tr.Closed {
+					tr.Close()
+				}
+			} else {
+				if tr.Closed {
+					tr.Open()
+				}
 			}
-			tr.ShowContextMenu(e)
 		})
-		AddChildAt(w, "branch", func(w *Switch) {
-			w.SetType(SwitchCheckbox)
-			w.SetIcons(tr.IconOpen, tr.IconClosed, tr.IconLeaf)
-			w.Styler(func(s *styles.Style) {
-				s.SetAbilities(false, abilities.Focusable)
-				// parent will handle our cursor
-				s.Cursor = cursors.None
-				s.Color = colors.C(colors.Scheme.Primary.Base)
-				s.Padding.Zero()
-				s.Align.Self = styles.Center
-				if !w.StateIs(states.Indeterminate) {
-					// we amplify any state layer we receiver so that it is clear
-					// we are receiving it, not just our parent
-					s.StateLayer *= 3
-				} else {
-					// no state layer for indeterminate because they are not interactive
-					s.StateLayer = 0
-				}
-			})
-			w.OnClick(func(e events.Event) {
-				if w.IsChecked() && !w.StateIs(states.Indeterminate) {
-					if !tr.Closed {
-						tr.Close()
-					}
-				} else {
-					if tr.Closed {
-						tr.Open()
-					}
-				}
-			})
-			w.Updater(func() {
-				if tr.This.(Treer).CanOpen() {
-					tr.SetBranchState()
-				}
-			})
+		w.Updater(func() {
+			if tr.This.(Treer).CanOpen() {
+				tr.SetBranchState()
+			}
 		})
-		w.Maker(func(p *Plan) {
-			if tr.Icon.IsSet() {
-				AddAt(p, "icon", func(w *Icon) {
-					w.Styler(func(s *styles.Style) {
-						s.Font.Size.Dp(16)
-					})
-					w.Updater(func() {
-						w.SetIcon(tr.Icon)
-					})
+	})
+	parts.Maker(func(p *Plan) {
+		if tr.Icon.IsSet() {
+			AddAt(p, "icon", func(w *Icon) {
+				w.Styler(func(s *styles.Style) {
+					s.Font.Size.Dp(16)
 				})
-			}
+				w.Updater(func() {
+					w.SetIcon(tr.Icon)
+				})
+			})
+		}
+	})
+	AddChildAt(parts, "text", func(w *Text) {
+		w.Styler(func(s *styles.Style) {
+			s.SetNonSelectable()
+			s.SetTextWrap(false)
+			s.Min.X.Ch(16)
+			s.Min.Y.Em(1.2)
 		})
-		AddChildAt(w, "text", func(w *Text) {
-			w.Styler(func(s *styles.Style) {
-				s.SetNonSelectable()
-				s.SetTextWrap(false)
-				s.Min.X.Ch(16)
-				s.Min.Y.Em(1.2)
-			})
-			w.Updater(func() {
-				w.SetText(tr.Label())
-			})
+		w.Updater(func() {
+			w.SetText(tr.Label())
 		})
 	})
 }

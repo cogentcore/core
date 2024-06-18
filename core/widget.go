@@ -327,6 +327,10 @@ func (wb *WidgetBase) OnAdd() {
 	if pwb := wb.ParentWidget(); pwb != nil {
 		wb.Scene = pwb.Scene
 	}
+	if wb.Parts != nil {
+		// the Scene of the Parts may not have been set yet if they were made in Init
+		wb.Parts.Scene = wb.Scene
+	}
 }
 
 // SetScene sets the Scene pointer for this widget and all of its children.

@@ -48,7 +48,7 @@ func (sl *Splits) Init() {
 		}
 	})
 	sl.OnWidgetAdded(func(w Widget) {
-		if w.AsTree().Parent == sl.This { // TODO(config): need some way to do this with the new config paradigm
+		if w.AsTree().Parent == sl.This && w != sl.Parts { // TODO(config): need some way to do this with the new config paradigm
 			w.AsWidget().Styler(func(s *styles.Style) {
 				// splits elements must scroll independently and grow
 				s.Overflow.Set(styles.OverflowAuto)
@@ -86,24 +86,21 @@ func (sl *Splits) Init() {
 		}
 	})
 
-	sl.Maker(func(p *Plan) {
-		p.EnforceEmpty = false
+	sl.Updater(func() {
 		sl.UpdateSplits()
-		AddAt(p, "parts", func(w *Frame) {
-			InitParts(w)
-			w.Maker(func(p *Plan) {
-				for i := range len(sl.Children) - 1 { // one less handle than children
-					AddAt(p, "handle-"+strconv.Itoa(i), func(w *Handle) {
-						w.OnChange(func(e events.Event) {
-							sl.SetSplitAction(w.IndexInParent(), w.Value())
-						})
-						w.Styler(func(s *styles.Style) {
-							s.Direction = sl.Styles.Direction
-						})
-					})
-				}
+	})
+	parts := sl.NewParts()
+	parts.Maker(func(p *Plan) {
+		for i := range len(sl.Children) - 1 { // one fewer handle than children
+			AddAt(p, "handle-"+strconv.Itoa(i), func(w *Handle) {
+				w.OnChange(func(e events.Event) {
+					sl.SetSplitAction(w.IndexInParent(), w.Value())
+				})
+				w.Styler(func(s *styles.Style) {
+					s.Direction = sl.Styles.Direction
+				})
 			})
-		})
+		}
 	})
 }
 
