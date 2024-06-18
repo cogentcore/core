@@ -207,12 +207,13 @@ func (p *Plan) Update(n Node) {
 			item := p.Children[i]
 			child := item.New()
 			child.AsTree().SetName(item.Name)
+			return child
+		}, func(child Node, i int) {
 			SetParent(child, nb)
-			for _, f := range item.Init {
+			for _, f := range p.Children[i].Init {
 				f(child)
 			}
-			return child
-		}, func(n Node) {
-			n.Destroy()
+		}, func(child Node) {
+			child.Destroy()
 		})
 }

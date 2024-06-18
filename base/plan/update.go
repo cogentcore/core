@@ -27,13 +27,14 @@ type Namer interface {
 
 // Update ensures that the elements of the slice contain
 // the elements according to the plan, specified by unique
-// element names, with n = total number of items in the target slice.
+// element names, with n = the total number of items in the target slice.
 // If a new item is needed then new is called to create it,
-// for given name at given index position.
-// if destroy is not-nil, then it is called on any element
-// that is being deleted from the slice.
+// for the given name at the given index position. After a new
+// element is created, it is added to the slice and then the given optional init
+// function is called with it and the index if it is non-nil. If destroy is not-nil,
+// then it is called on any element that is being deleted from the slice.
 // It returns the updated slice and whether any changes were made.
-func Update[T Namer](s []T, n int, name func(i int) string, new func(name string, i int) T, destroy func(e T)) (r []T, mods bool) {
+func Update[T Namer](s []T, n int, name func(i int) string, new func(name string, i int) T, init func(e T, i int), destroy func(e T)) (r []T, mods bool) {
 	// first make a map for looking up the indexes of the target names
 	names := make([]string, n)
 	nmap := make(map[string]int, n)
@@ -67,6 +68,9 @@ func Update[T Namer](s []T, n int, name func(i int) string, new func(name string
 			mods = true
 			ne := new(tn, i)
 			r = slices.Insert(r, i, ne)
+			if init != nil {
+				init(ne, i)
+			}
 		} else { // on the list; is it in the right place?
 			if ci != i {
 				mods = true

@@ -38,11 +38,15 @@ func UpdateSlice(slice *[]Node, parent Node, p TypePlan) bool {
 			n := NewOfType(p[i].Type)
 			n.AsTree().SetName(name)
 			initNode(n)
-			if parent != nil {
-				SetParent(n, parent)
-			}
 			return n
-		}, func(k Node) { k.Destroy() })
+		}, func(child Node, i int) {
+			if parent != nil {
+				SetParent(child, parent)
+			}
+		},
+		func(child Node) {
+			child.Destroy()
+		})
 	return mods
 }
 

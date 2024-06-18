@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package tree provides a powerful and extensible tree system,
-// centered on the core Node interface.
+// centered on the core [Node] interface.
 package tree
 
 //go:generate core generate
