@@ -10,7 +10,6 @@ import (
 	"io/fs"
 	"strings"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/mergefs"
 )
@@ -21,9 +20,9 @@ import (
 // to contain of the default icons located in the svg directory
 // (https://github.com/cogentcore/core/tree/main/icons/svg), but it can
 // be extended using [AddFS]. All icons should be stored in the root directory
-// of the fs, which can be accomplished using [fs.Sub] if you have icons in a
+// of the fs, which can be accomplished using [fsx.Sub] if you have icons in a
 // subdirectory.
-var Icons = errors.Log1(fs.Sub(defaults, "svg"))
+var Icons = fsx.Sub(defaults, "svg")
 
 // defaults contains the default icons.
 //
@@ -45,7 +44,7 @@ const (
 
 // AddFS adds the given [fs.FS] of icons to the global [Icons] library.
 // All icons should be stored in the root directory of the fs, which can be
-// accomplished using [fs.Sub] if you have icons in a subdirectory.
+// accomplished using [fsx.Sub] if you have icons in a subdirectory.
 func AddFS(fs fs.FS) {
 	Icons = mergefs.Merge(Icons, fs)
 }

@@ -5,5 +5,5 @@ Cogent Core provides [[pages]], a package for creating content-focused sites con
 For example, this code recursively makes a copy of this website embedded into this page:
 
 ```Go
-pages.NewPage(parent).SetSource(errors.Log1(fs.Sub(content, "content")))
+pages.NewPage(parent).SetSource(fsx.Sub(content, "content"))
 ```

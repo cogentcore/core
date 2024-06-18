@@ -7,9 +7,7 @@ package auth
 import (
 	"context"
 	"embed"
-	"io/fs"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/colors"
@@ -26,7 +24,7 @@ import (
 var providerIcons embed.FS
 
 func init() {
-	icons.AddFS(errors.Log1(fs.Sub(providerIcons, "icons")))
+	icons.AddFS(fsx.Sub(providerIcons, "icons"))
 }
 
 // ButtonsConfig is the configuration information passed to [Buttons].

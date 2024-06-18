@@ -5,11 +5,19 @@
 package fsx
 
 import (
-	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
+
+	"cogentcore.org/core/base/errors"
 )
+
+// Sub returns [fs.Sub] with any error automatically logged
+// for cases where the directory is hardcoded and there is
+// no chance of error.
+func Sub(fsys fs.FS, dir string) fs.FS {
+	return errors.Log1(fs.Sub(fsys, dir))
+}
 
 // DirFS returns the directory part of given file path as an os.DirFS
 // and the filename as a string.  These can then be used to access the file

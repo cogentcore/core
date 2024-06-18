@@ -16,6 +16,7 @@ import (
 	"sync"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/styles"
 )
@@ -98,7 +99,7 @@ func (fl *FontLib) Init() {
 	if fl.FontPaths == nil {
 		loadFontMu.Lock()
 		// fmt.Printf("Initializing font lib\n")
-		fl.FontsFS = errors.Log1(fs.Sub(defaultFonts, "fonts"))
+		fl.FontsFS = fsx.Sub(defaultFonts, "fonts")
 		fl.FontPaths = make([]string, 0)
 		fl.FontsAvail = make(map[string]string)
 		fl.FontInfo = make([]FontInfo, 0)

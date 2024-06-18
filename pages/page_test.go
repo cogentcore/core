@@ -6,10 +6,9 @@ package pages
 
 import (
 	"embed"
-	"io/fs"
 	"testing"
 
-	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
@@ -23,6 +22,6 @@ func TestPage(t *testing.T) {
 	b.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(50))
 	})
-	NewPage(b).SetSource(errors.Log1(fs.Sub(content, "examples/basic/content")))
+	NewPage(b).SetSource(fsx.Sub(content, "examples/basic/content"))
 	b.AssertRender(t, "basic")
 }

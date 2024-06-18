@@ -10,9 +10,9 @@ package main
 
 import (
 	"embed"
-	"io/fs"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
@@ -42,7 +42,7 @@ var myFile embed.FS
 
 func main() {
 	b := core.NewBody("Cogent Core Docs")
-	pg := pages.NewPage(b).SetSource(errors.Log1(fs.Sub(content, "content")))
+	pg := pages.NewPage(b).SetSource(fsx.Sub(content, "content"))
 	pg.Context.WikilinkResolver = htmlcore.PkgGoDevWikilink("cogentcore.org/core")
 	b.AddAppBar(pg.MakeToolbar)
 

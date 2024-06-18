@@ -19,7 +19,7 @@ var content embed.FS
 
 func main() {
 	b := core.NewBody("Pages Example")
-	pg := pages.NewPage(b).SetSource(errors.Log1(fs.Sub(content, "content")))
+	pg := pages.NewPage(b).SetSource(fsx.Sub(content, "content"))
 	b.AddAppBar(pg.MakeToolbar)
 	b.RunMainWindow()
 }

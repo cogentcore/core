@@ -7,7 +7,7 @@ You can add custom icons to your app using [[icons.AddFS]]:
 var myIcons embed.FS
 
 func main() { // or init()
-    icons.AddFS(errors.Log1(fs.Sub(myIcons, "icons")))
+    icons.AddFS(fsx.Sub(myIcons, "icons"))
 }
 ```
 

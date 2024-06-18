@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
-	"io/fs"
 	"maps"
 	"strconv"
 	"strings"
 	"time"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/core"
@@ -1391,7 +1391,7 @@ func main() {
 		core.NewMeter(parent).SetType(core.MeterSemicircle).SetText("50%")
 	},
 	"widgets/other/pages-0": func(parent core.Widget) {
-		pages.NewPage(parent).SetSource(errors.Log1(fs.Sub(content, "content")))
+		pages.NewPage(parent).SetSource(fsx.Sub(content, "content"))
 	},
 	"widgets/other/plots-0": func(parent core.Widget) {
 		type Data struct {
