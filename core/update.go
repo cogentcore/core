@@ -22,18 +22,8 @@ func (wb *WidgetBase) UpdateWidget() *WidgetBase {
 	if wb.ValueUpdate != nil {
 		wb.ValueUpdate()
 	}
-	for i := len(wb.Updaters) - 1; i >= 0; i-- {
-		wb.Updaters[i]()
-	}
+	wb.RunUpdaters()
 	return wb
-}
-
-// updateFromMake updates the widget using [WidgetBase.Make].
-// It is the base Updater added to [WidgetBase.Updaters] in Init.
-func (wb *WidgetBase) updateFromMake() {
-	p := Plan{Widget: wb.This.(Widget)}
-	wb.Make(&p)
-	p.Update(wb)
 }
 
 // UpdateTree calls [WidgetBase.UpdateWidget] on every widget in the tree

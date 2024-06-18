@@ -66,13 +66,12 @@ type NodeBase struct {
 	// [NodeBase.DeleteProperty] methods for modifying and accessing properties.
 	Properties map[string]any `table:"-" xml:"-" copier:"-" set:"-" json:",omitempty"`
 
-	// Updaters are a slice of functions called in sequential descending (reverse) order
-	// in [cogentcore.org/core/core.WidgetBase.UpdateWidget] and other places such as in
-	// xyz to update the node. You can use [NodeBase.Updater] to add one. By default,
-	// this slice contains a function that updates the node's children using [NodeBase.Make].
+	// Updaters is a slice of functions called in sequential descending (reverse) order
+	// in [NodeBase.RunUpdaters] to update the node. You can use [NodeBase.Updater] to
+	// add one. This slice typically contains [NodeBase.UpdateFromMake] at the start.
 	Updaters []func() `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
-	// Makers are a slice of functions called in sequential ascending order
+	// Makers is a slice of functions called in sequential ascending order
 	// in [NodeBase.Make] to make the plan for how the node's children should
 	// be configured. You can use [NodeBase.Maker] to add one.
 	Makers []func(p *Plan) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`

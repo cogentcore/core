@@ -52,8 +52,7 @@ type PlanItem struct {
 }
 
 // Updater adds a new function to [NodeBase.Updaters], which are called in sequential
-// descending (reverse) order in [cogentcore.org/core/core.WidgetBase.UpdateWidget] and
-// other places such as xyz to update the node.
+// descending (reverse) order in [NodeBase.RunUpdaters] to update the node.
 func (nb *NodeBase) Updater(updater func()) {
 	nb.Updaters = append(nb.Updaters, updater)
 }
@@ -73,6 +72,22 @@ func (nb *NodeBase) Make(p *Plan) {
 	}
 	for _, maker := range nb.Makers {
 		maker(p)
+	}
+}
+
+// UpdateFromMake updates the node using [NodeBase.Make].
+func (nb *NodeBase) UpdateFromMake() {
+	p := Plan{Parent: nb.This}
+	nb.Make(&p)
+	p.Update(nb)
+}
+
+// RunUpdaters runs the [NodeBase.Updaters] in sequential descending (reverse) order.
+// It is called in [cogentcore.org/core/core.WidgetBase.UpdateWidget] and other places
+// such as in xyz to update the node.
+func (nb *NodeBase) RunUpdaters() {
+	for i := len(nb.Updaters) - 1; i >= 0; i-- {
+		nb.Updaters[i]()
 	}
 }
 
