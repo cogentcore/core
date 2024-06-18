@@ -160,7 +160,7 @@ func (gl *GoLang) ParseDirImpl(fs *parse.FileState, path string, opts parse.Lang
 		// fmt.Printf("Parsing, loading path: %v\n", path)
 	}
 
-	files = fsx.ExtFilenames(pkgPathAbs, ".go")
+	files = fsx.ExtensionFilenames(pkgPathAbs, ".go")
 	if len(files) == 0 {
 		// fmt.Printf("No go files, bailing\n")
 		return nil

@@ -30,15 +30,15 @@ func GoSrcDir(dir string) (absDir string, err error) {
 	return "", fmt.Errorf("fsx.GoSrcDir: unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
 }
 
-// ExtFiles returns all the FileInfo's for files with given extension(s) in directory
-// in sorted order (if exts is empty then all files are returned).
+// ExtensionFiles returns all the FileInfo's for files with given extension(s) in directory
+// in sorted order (if extensions are empty then all files are returned).
 // In case of error, returns nil.
-func ExtFiles(path string, exts ...string) []fs.DirEntry {
+func ExtensionFiles(path string, extensions ...string) []fs.DirEntry {
 	files, err := os.ReadDir(path)
 	if err != nil {
 		return nil
 	}
-	if len(exts) == 0 {
+	if len(extensions) == 0 {
 		return files
 	}
 	sz := len(files)
@@ -49,7 +49,7 @@ func ExtFiles(path string, exts ...string) []fs.DirEntry {
 		fn := files[i]
 		ext := filepath.Ext(fn.Name())
 		keep := false
-		for _, ex := range exts {
+		for _, ex := range extensions {
 			if strings.EqualFold(ext, ex) {
 				keep = true
 				break
@@ -62,9 +62,9 @@ func ExtFiles(path string, exts ...string) []fs.DirEntry {
 	return files
 }
 
-// ExtFilenames returns all the file names with given extension(s) in directory
-// in sorted order (if exts is empty then all files are returned)
-func ExtFilenames(path string, exts ...string) []string {
+// ExtensionFilenames returns all the file names with given extension(s) in directory
+// in sorted order (if extensions is empty then all files are returned)
+func ExtensionFilenames(path string, extensions ...string) []string {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil
@@ -74,7 +74,7 @@ func ExtFilenames(path string, exts ...string) []string {
 	if err != nil {
 		return nil
 	}
-	if len(exts) == 0 {
+	if len(extensions) == 0 {
 		sort.StringSlice(files).Sort()
 		return files
 	}
@@ -86,7 +86,7 @@ func ExtFilenames(path string, exts ...string) []string {
 		fn := files[i]
 		ext := filepath.Ext(fn)
 		keep := false
-		for _, ex := range exts {
+		for _, ex := range extensions {
 			if strings.EqualFold(ext, ex) {
 				keep = true
 				break
@@ -121,7 +121,7 @@ func Dirs(path string) []string {
 // if no files or error, returns zero time value
 func LatestMod(path string, exts ...string) time.Time {
 	tm := time.Time{}
-	files := ExtFiles(path, exts...)
+	files := ExtensionFiles(path, exts...)
 	if len(files) == 0 {
 		return tm
 	}
@@ -185,9 +185,9 @@ func DirAndFile(file string) string {
 	return filepath.Join(filepath.Base(dir), fnm)
 }
 
-// RelFilePath returns the file name relative to given root file path, if it is
-// under that root -- otherwise it returns the final dir and file name.
-func RelFilePath(file, root string) string {
+// RelativeFilePath returns the file name relative to given root file path, if it is
+// under that root; otherwise it returns the final dir and file name.
+func RelativeFilePath(file, root string) string {
 	rp, err := filepath.Rel(root, file)
 	if err == nil && !strings.HasPrefix(rp, "..") {
 		return rp

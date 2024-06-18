@@ -244,7 +244,7 @@ func (fn *Node) MyRelPath() string {
 	if fn.IsIrregular() || fn.FileRoot == nil {
 		return fn.Name
 	}
-	return fsx.RelFilePath(string(fn.Filepath), string(fn.FileRoot.Filepath))
+	return fsx.RelativeFilePath(string(fn.Filepath), string(fn.FileRoot.Filepath))
 }
 
 // SetPath sets the current node to represent the given path.
@@ -598,7 +598,7 @@ func (fn *Node) CloseBuf() bool {
 
 // RelPath returns the relative path from node for given full path
 func (fn *Node) RelPath(fpath core.Filename) string {
-	return fsx.RelFilePath(string(fpath), string(fn.Filepath))
+	return fsx.RelativeFilePath(string(fpath), string(fn.Filepath))
 }
 
 // DirsTo opens all the directories above the given filename, and returns the node

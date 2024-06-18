@@ -9,8 +9,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"sort"
-	"strings"
 )
 
 // DirFS returns the directory part of given file path as an os.DirFS
@@ -24,37 +22,6 @@ func DirFS(fpath string) (fs.FS, string, error) {
 	dir, fname := filepath.Split(fabs)
 	dfs := os.DirFS(dir)
 	return dfs, fname, nil
-}
-
-// ExtFilenamesFS returns all the file names with given extension(s)
-// in given FS filesystem,
-// in sorted order (if exts is empty then all files are returned)
-func ExtFilenamesFS(fsys fs.FS, path string, exts ...string) []string {
-	files, err := fs.ReadDir(fsys, path)
-	if err != nil {
-		return nil
-	}
-	sz := len(files)
-	if sz == 0 {
-		return nil
-	}
-	var fns []string
-	for i := sz - 1; i >= 0; i-- {
-		fn := files[i].Name()
-		ext := filepath.Ext(fn)
-		keep := false
-		for _, ex := range exts {
-			if strings.EqualFold(ext, ex) {
-				keep = true
-				break
-			}
-		}
-		if keep {
-			fns = append(fns, fn)
-		}
-	}
-	sort.StringSlice(fns).Sort()
-	return fns
 }
 
 // FileExistsFS checks whether given file exists, returning true if so,
