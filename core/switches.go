@@ -20,6 +20,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
 
@@ -136,9 +137,9 @@ func (sw *Switches) Init() {
 		}
 	})
 
-	sw.Maker(func(p *Plan) {
+	sw.Maker(func(p *tree.Plan) {
 		for i, item := range sw.Items {
-			AddAt(p, strconv.Itoa(i), func(w *Switch) {
+			tree.AddAt(p, strconv.Itoa(i), func(w *Switch) {
 				w.OnChange(func(e events.Event) {
 					if w.IsChecked() {
 						if sw.Mutex {

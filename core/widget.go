@@ -305,7 +305,7 @@ func (wb *WidgetBase) Init() {
 	wb.HandleWidgetMagnify()
 	wb.HandleValueOnChange()
 
-	wb.Updater(wb.updateFromMake)
+	wb.Updater(wb.UpdateFromMake)
 }
 
 // OnAdd is called when widgets are added to a parent.

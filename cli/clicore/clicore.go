@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/cli"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
+	"cogentcore.org/core/tree"
 )
 
 // Run runs the given app with the given default
@@ -57,12 +58,12 @@ func Run[T any, C cli.CmdOrFunc[T]](opts *cli.Options, cfg T, cmds ...C) error {
 func GUI[T any](opts *cli.Options, cfg T, cmds ...*cli.Cmd[T]) {
 	b := core.NewBody(opts.AppName)
 
-	b.AddAppBar(func(p *core.Plan) {
+	b.AddAppBar(func(p *tree.Plan) {
 		for _, cmd := range cmds {
 			if cmd.Name == "gui" { // we are already in GUI so that command is irrelevant
 				continue
 			}
-			core.AddAt(p, cmd.Name, func(w *core.Button) {
+			tree.AddAt(p, cmd.Name, func(w *core.Button) {
 				w.SetText(strcase.ToSentence(cmd.Name)).SetTooltip(cmd.Doc).
 					OnClick(func(e events.Event) {
 						err := cmd.Func(cfg)

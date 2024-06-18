@@ -203,7 +203,7 @@ func (bd *Body) AddBottomBar(fun func(parent Widget)) {
 }
 
 // AddAppBar adds plan maker function(s) for the top app bar, which can be used to add items to it.
-func (bd *Body) AddAppBar(m ...func(p *Plan)) {
+func (bd *Body) AddAppBar(m ...func(p *tree.Plan)) {
 	bd.Scene.AppBars = append(bd.Scene.AppBars, m...)
 }
 

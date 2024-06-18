@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
 
@@ -115,7 +116,7 @@ func (fm *Form) Init() {
 		}
 	})
 
-	fm.Maker(func(p *Plan) {
+	fm.Maker(func(p *tree.Plan) {
 		if reflectx.AnyIsNil(fm.Struct) {
 			return
 		}
@@ -140,7 +141,7 @@ func (fm *Form) Init() {
 			var labelWidget *Text
 			var valueWidget Value
 
-			AddAt(p, labnm, func(w *Text) {
+			tree.AddAt(p, labnm, func(w *Text) {
 				labelWidget = w
 				w.Styler(func(s *styles.Style) {
 					s.SetTextWrap(false)
@@ -183,7 +184,7 @@ func (fm *Form) Init() {
 				})
 			})
 
-			AddNew(p, valnm, func() Value {
+			tree.AddNew(p, valnm, func() Value {
 				return NewValue(reflectx.UnderlyingPointer(f.value).Interface(), f.field.Tag)
 			}, func(w Value) {
 				valueWidget = w

@@ -96,13 +96,13 @@ func (pg *Page) Init() {
 		pg.setStageTitle()
 	})
 
-	core.AddChild(pg, func(w *core.Splits) {
+	tree.AddChild(pg, func(w *core.Splits) {
 		w.SetSplits(0.2, 0.8)
-		core.AddChild(w, func(w *core.Frame) {
+		tree.AddChild(w, func(w *core.Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
 			})
-			core.AddChild(w, func(w *core.Tree) {
+			tree.AddChild(w, func(w *core.Tree) {
 				pg.nav = w
 				w.SetText(core.TheApp.Name())
 				w.SetReadOnly(true)
@@ -160,7 +160,7 @@ func (pg *Page) Init() {
 				}))
 			})
 		})
-		core.AddChild(w, func(w *core.Frame) {
+		tree.AddChild(w, func(w *core.Frame) {
 			pg.body = w
 			w.Styler(func(s *styles.Style) {
 				s.Direction = styles.Column
@@ -289,8 +289,8 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	pg.body.Update()
 }
 
-func (pg *Page) MakeToolbar(p *core.Plan) {
-	core.AddInit(p, "back", func(w *core.Button) {
+func (pg *Page) MakeToolbar(p *tree.Plan) {
+	tree.AddInit(p, "back", func(w *core.Button) {
 		w.OnClick(func(e events.Event) {
 			if pg.HistoryIndex > 0 {
 				pg.HistoryIndex--
@@ -300,7 +300,7 @@ func (pg *Page) MakeToolbar(p *core.Plan) {
 			}
 		})
 	})
-	core.AddInit(p, "app-chooser", func(w *core.Chooser) {
+	tree.AddInit(p, "app-chooser", func(w *core.Chooser) {
 		w.AddItemsFunc(func() {
 			urls := []string{}
 			for u := range pg.URLToPagePath {

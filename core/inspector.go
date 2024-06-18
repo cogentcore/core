@@ -51,7 +51,7 @@ func (is *Inspector) Init() {
 	})
 
 	var titleWidget *Text
-	AddChildAt(is, "title", func(w *Text) {
+	tree.AddChildAt(is, "title", func(w *Text) {
 		titleWidget = w
 		is.CurrentNode = is.Root
 		w.SetType(TextHeadlineSmall)
@@ -70,16 +70,16 @@ func (is *Inspector) Init() {
 		}
 		sc.RenderContext().Rebuild = true // trigger full rebuild
 	}
-	AddChildAt(is, "splits", func(w *Splits) {
+	tree.AddChildAt(is, "splits", func(w *Splits) {
 		w.SetSplits(.3, .7)
 		var form *Form
-		AddChildAt(w, "tree-frame", func(w *Frame) {
+		tree.AddChildAt(w, "tree-frame", func(w *Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Gap.Zero()
 			})
-			AddChildAt(w, "tree", func(w *Tree) {
+			tree.AddChildAt(w, "tree", func(w *Tree) {
 				w.OnSelect(func(e events.Event) {
 					if len(w.SelectedNodes) == 0 {
 						return
@@ -110,7 +110,7 @@ func (is *Inspector) Init() {
 				w.SyncTree(is.Root)
 			})
 		})
-		AddChildAt(w, "struct", func(w *Form) {
+		tree.AddChildAt(w, "struct", func(w *Form) {
 			form = w
 			w.OnChange(func(e events.Event) {
 				renderRebuild()
@@ -259,31 +259,31 @@ func (is *Inspector) Tree() *Tree {
 	return is.FindPath("splits/tree-frame/tree").(*Tree)
 }
 
-func (is *Inspector) MakeToolbar(p *Plan) {
-	Add(p, func(w *FuncButton) {
+func (is *Inspector) MakeToolbar(p *tree.Plan) {
+	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.ToggleSelectionMode).SetText("Select element").SetIcon(icons.ArrowSelectorTool)
 		w.Updater(func() {
 			_, ok := is.Root.(*Scene)
 			w.SetEnabled(ok)
 		})
 	})
-	Add(p, func(w *Separator) {})
-	Add(p, func(w *FuncButton) {
+	tree.Add(p, func(w *Separator) {})
+	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.Open).SetKey(keymap.Open)
 		w.Args[0].SetValue(is.Filename).SetTag(`ext:".json"`)
 	})
-	Add(p, func(w *FuncButton) {
+	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.Save).SetKey(keymap.Save)
 		w.Updater(func() {
 			w.SetEnabled(is.Filename != "")
 		})
 	})
-	Add(p, func(w *FuncButton) {
+	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.SaveAs).SetKey(keymap.SaveAs)
 		w.Args[0].SetValue(is.Filename).SetTag(`ext:".json"`)
 	})
-	Add(p, func(w *Separator) {})
-	Add(p, func(w *FuncButton) {
+	tree.Add(p, func(w *Separator) {})
+	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(is.InspectApp).SetIcon(icons.Devices)
 	})
 }

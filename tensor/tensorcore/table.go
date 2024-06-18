@@ -75,7 +75,7 @@ func (tb *Table) Init() {
 	tb.ColumnTensorDisplay = map[int]*TensorDisplay{}
 	tb.ColumnTensorBlank = map[int]*tensor.Float64{}
 
-	tb.Makers[0] = func(p *core.Plan) { // TODO: reduce redundancy with ListBase Maker
+	tb.Makers[0] = func(p *tree.Plan) { // TODO: reduce redundancy with ListBase Maker
 		svi := tb.This.(core.Lister)
 		svi.UpdateSliceSize()
 
@@ -98,7 +98,7 @@ func (tb *Table) Init() {
 		})
 
 		tb.MakeHeader(p)
-		tb.MakeGrid(p, func(p *core.Plan) {
+		tb.MakeGrid(p, func(p *tree.Plan) {
 			for i := 0; i < tb.VisRows; i++ {
 				svi.MakeRow(p, i)
 			}
@@ -214,16 +214,16 @@ func (tb *Table) UpdateMaxWidths() {
 	}
 }
 
-func (tb *Table) MakeHeader(p *core.Plan) {
-	core.AddAt(p, "header", func(w *core.Frame) {
+func (tb *Table) MakeHeader(p *tree.Plan) {
+	tree.AddAt(p, "header", func(w *core.Frame) {
 		core.ToolbarStyles(w)
 		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(0, 0)
 			s.Gap.Set(units.Em(0.5)) // matches grid default
 		})
-		w.Maker(func(p *core.Plan) {
+		w.Maker(func(p *tree.Plan) {
 			if tb.ShowIndexes {
-				core.AddAt(p, "head-index", func(w *core.Text) { // TODO: is not working
+				tree.AddAt(p, "head-index", func(w *core.Text) { // TODO: is not working
 					w.SetType(core.TextBodyMedium)
 					w.Styler(func(s *styles.Style) {
 						s.Align.Self = styles.Center
@@ -233,7 +233,7 @@ func (tb *Table) MakeHeader(p *core.Plan) {
 			}
 			for fli := 0; fli < tb.NCols; fli++ {
 				field := tb.Table.Table.ColumnNames[fli]
-				core.AddAt(p, "head-"+field, func(w *core.Button) {
+				tree.AddAt(p, "head-"+field, func(w *core.Button) {
 					w.SetType(core.ButtonMenu)
 					w.SetText(field)
 					w.OnClick(func(e events.Event) {
@@ -273,7 +273,7 @@ func (tb *Table) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	return
 }
 
-func (tb *Table) MakeRow(p *core.Plan, i int) {
+func (tb *Table) MakeRow(p *tree.Plan, i int) {
 	svi := tb.This.(core.Lister)
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
@@ -290,7 +290,7 @@ func (tb *Table) MakeRow(p *core.Plan, i int) {
 		if col.NumDims() == 1 {
 			str := ""
 			fval := float64(0)
-			core.AddNew(p, valnm, func() core.Value {
+			tree.AddNew(p, valnm, func() core.Value {
 				if isstr {
 					return core.NewValue(&str, "")
 				} else {
@@ -340,7 +340,7 @@ func (tb *Table) MakeRow(p *core.Plan, i int) {
 				})
 			})
 		} else {
-			core.AddAt(p, valnm, func(w *TensorGrid) {
+			tree.AddAt(p, valnm, func(w *TensorGrid) {
 				w.SetReadOnly(tb.IsReadOnly())
 				wb := w.AsWidget()
 				w.SetProperty(core.ListRowProperty, i)
@@ -627,31 +627,31 @@ func (tb *Table) SelectedColumnStrings(colName string) []string {
 //////////////////////////////////////////////////////////////////////////////
 //    Copy / Cut / Paste
 
-func (tb *Table) MakeToolbar(p *core.Plan) {
+func (tb *Table) MakeToolbar(p *tree.Plan) {
 	if tb.Table == nil || tb.Table.Table == nil {
 		return
 	}
-	core.Add(p, func(w *core.FuncButton) {
+	tree.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(tb.Table.AddRows).SetIcon(icons.Add)
 		w.SetAfterFunc(func() { tb.Update() })
 	})
-	core.Add(p, func(w *core.FuncButton) {
+	tree.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(tb.Table.SortColumnName).SetText("Sort").SetIcon(icons.Sort)
 		w.SetAfterFunc(func() { tb.Update() })
 	})
-	core.Add(p, func(w *core.FuncButton) {
+	tree.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(tb.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
 		w.SetAfterFunc(func() { tb.Update() })
 	})
-	core.Add(p, func(w *core.FuncButton) {
+	tree.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(tb.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
 		w.SetAfterFunc(func() { tb.Update() })
 	})
-	core.Add(p, func(w *core.FuncButton) {
+	tree.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(tb.Table.OpenCSV).SetIcon(icons.Open)
 		w.SetAfterFunc(func() { tb.Update() })
 	})
-	core.Add(p, func(w *core.FuncButton) {
+	tree.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(tb.Table.SaveCSV).SetIcon(icons.Save)
 		w.SetAfterFunc(func() { tb.Update() })
 	})

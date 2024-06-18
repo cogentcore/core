@@ -423,7 +423,7 @@ func (tr *Tree) Init() {
 		}
 		tr.ShowContextMenu(e)
 	})
-	AddChildAt(parts, "branch", func(w *Switch) {
+	tree.AddChildAt(parts, "branch", func(w *Switch) {
 		w.SetType(SwitchCheckbox)
 		w.SetIcons(tr.IconOpen, tr.IconClosed, tr.IconLeaf)
 		w.Styler(func(s *styles.Style) {
@@ -459,9 +459,9 @@ func (tr *Tree) Init() {
 			}
 		})
 	})
-	parts.Maker(func(p *Plan) {
+	parts.Maker(func(p *tree.Plan) {
 		if tr.Icon.IsSet() {
-			AddAt(p, "icon", func(w *Icon) {
+			tree.AddAt(p, "icon", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
 					s.Font.Size.Dp(16)
 				})
@@ -471,7 +471,7 @@ func (tr *Tree) Init() {
 			})
 		}
 	})
-	AddChildAt(parts, "text", func(w *Text) {
+	tree.AddChildAt(parts, "text", func(w *Text) {
 		w.Styler(func(s *styles.Style) {
 			s.SetNonSelectable()
 			s.SetTextWrap(false)

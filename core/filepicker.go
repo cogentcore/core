@@ -27,6 +27,7 @@ import (
 	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/tree"
 )
 
 // FilePickerDialog opens a dialog for selecting a file.
@@ -121,7 +122,7 @@ func (fp *FilePicker) Init() {
 		}
 	})
 
-	fp.Maker(func(p *Plan) {
+	fp.Maker(func(p *tree.Plan) {
 		if fp.Directory == "" {
 			fp.SetFilename("") // default to current directory
 		}
@@ -153,13 +154,13 @@ func (fp *FilePicker) Init() {
 			fp.prevPath = fp.Directory
 		}
 
-		AddAt(p, "files", func(w *Frame) {
+		tree.AddAt(p, "files", func(w *Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 1)
 			})
 			w.Maker(fp.makeFilesRow)
 		})
-		AddAt(p, "sel", func(w *Frame) {
+		tree.AddAt(p, "sel", func(w *Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Grow.Set(1, 0)
 				s.Gap.X.Dp(4)
@@ -249,20 +250,20 @@ var FilePickerKindColorMap = map[string]string{
 	"folder": "pref(link)",
 }
 
-func (fp *FilePicker) MakeToolbar(p *Plan) {
-	AddInit(p, "app-chooser", func(w *Chooser) {
+func (fp *FilePicker) MakeToolbar(p *tree.Plan) {
+	tree.AddInit(p, "app-chooser", func(w *Chooser) {
 		fp.AddChooserPaths(w)
 	})
-	Add(p, func(w *FuncButton) {
+	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(fp.DirectoryUp).SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
 	})
-	Add(p, func(w *FuncButton) {
+	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(fp.AddPathToFavorites).SetIcon(icons.Favorite).SetText("Favorite")
 	})
-	Add(p, func(w *FuncButton) {
+	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(fp.UpdateFilesAction).SetIcon(icons.Refresh).SetText("Update")
 	})
-	Add(p, func(w *FuncButton) {
+	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(fp.NewFolder).SetIcon(icons.CreateNewFolder)
 	})
 }
@@ -300,8 +301,8 @@ func (fp *FilePicker) AddChooserPaths(ch *Chooser) {
 	})
 }
 
-func (fp *FilePicker) makeFilesRow(p *Plan) {
-	AddAt(p, "favorites", func(w *Table) {
+func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
+	tree.AddAt(p, "favorites", func(w *Table) {
 		w.SelectedIndex = -1
 		w.SetReadOnly(true)
 		w.ReadOnlyKeyNav = false // keys must go to files, not favorites
@@ -318,7 +319,7 @@ func (fp *FilePicker) makeFilesRow(p *Plan) {
 			w.ResetSelectedIndexes()
 		})
 	})
-	AddAt(p, "files", func(w *Table) {
+	tree.AddAt(p, "files", func(w *Table) {
 		w.SetReadOnly(true)
 		w.SetSlice(&fp.files)
 		w.SelectedField = "Name"
@@ -402,8 +403,8 @@ func (fp *FilePicker) makeFilesRow(p *Plan) {
 	})
 }
 
-func (fp *FilePicker) makeSelRow(sel *Plan) {
-	AddAt(sel, "file-text", func(w *Text) {
+func (fp *FilePicker) makeSelRow(sel *tree.Plan) {
+	tree.AddAt(sel, "file-text", func(w *Text) {
 		w.SetText("File: ")
 		w.SetTooltip("Enter file name here (or select from list above)")
 		w.Styler(func(s *styles.Style) {
@@ -411,7 +412,7 @@ func (fp *FilePicker) makeSelRow(sel *Plan) {
 		})
 	})
 
-	AddAt(sel, "file", func(w *TextField) {
+	tree.AddAt(sel, "file", func(w *TextField) {
 		w.SetText(fp.SelectedFilename)
 		w.SetTooltip(fmt.Sprintf("Enter the file name. Special keys: up/down to move selection; %s or %s to go up to parent folder; %s or %s or %s or %s to select current file (if directory, goes into it, if file, selects and closes); %s or %s for prev / next history item; %s return to this field", keymap.WordLeft.Label(), keymap.Jump.Label(), keymap.SelectMode.Label(), keymap.Insert.Label(), keymap.InsertAfter.Label(), keymap.Open.Label(), keymap.HistPrev.Label(), keymap.HistNext.Label(), keymap.Search.Label()))
 		w.SetCompleter(fp, fp.FileComplete, fp.FileCompleteEdit)
@@ -435,14 +436,14 @@ func (fp *FilePicker) makeSelRow(sel *Plan) {
 		})
 	})
 
-	AddAt(sel, "extension-text", func(w *Text) {
+	tree.AddAt(sel, "extension-text", func(w *Text) {
 		w.SetText("Extension(s):").SetTooltip("target extension(s) to highlight; if multiple, separate with commas, and include the . at the start")
 		w.Styler(func(s *styles.Style) {
 			s.SetTextWrap(false)
 		})
 	})
 
-	AddAt(sel, "extension", func(w *TextField) {
+	tree.AddAt(sel, "extension", func(w *TextField) {
 		w.SetText(fp.Extensions)
 		w.OnChange(func(e events.Event) {
 			fp.SetExtensions(w.Text()).Update()

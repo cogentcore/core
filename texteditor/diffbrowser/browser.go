@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
+	"cogentcore.org/core/tree"
 )
 
 // Browser is a diff browser, for browsing a set of paired files
@@ -34,17 +35,17 @@ func (br *Browser) Init() {
 		br.OpenFiles()
 	})
 
-	core.AddChildAt(br, "splits", func(w *core.Splits) {
+	tree.AddChildAt(br, "splits", func(w *core.Splits) {
 		w.SetSplits(.15, .85)
-		core.AddChildAt(w, "treeframe", func(w *core.Frame) {
+		tree.AddChildAt(w, "treeframe", func(w *core.Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Overflow.Set(styles.OverflowAuto)
 				s.Grow.Set(1, 1)
 			})
-			core.AddChildAt(w, "tree", func(w *Node) {})
+			tree.AddChildAt(w, "tree", func(w *Node) {})
 		})
-		core.AddChildAt(w, "tabs", func(w *core.Tabs) {
+		tree.AddChildAt(w, "tabs", func(w *core.Tabs) {
 			w.Type = core.FunctionalTabs
 		})
 	})
@@ -81,8 +82,8 @@ func (br *Browser) OpenFiles() { //types:add
 	tv.Open()
 }
 
-func (br *Browser) MakeToolbar(p *core.Plan) {
-	// core.Add(p, func(w *core.FuncButton) {
+func (br *Browser) MakeToolbar(p *tree.Plan) {
+	// tree.Add(p, func(w *core.FuncButton) {
 	// 	w.SetFunc(br.OpenFiles).SetText("").SetIcon(icons.Refresh).SetShortcut("Command+U")
 	// })
 }

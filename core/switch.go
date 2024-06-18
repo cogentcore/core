@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
 )
 
 // Switch is a widget that can toggle between an on and off state.
@@ -121,7 +122,7 @@ func (sw *Switch) Init() {
 		sw.SendChange(e)
 	})
 
-	sw.Maker(func(p *Plan) {
+	sw.Maker(func(p *tree.Plan) {
 		if sw.IconOn == "" {
 			sw.IconOn = icons.ToggleOn.Fill() // fallback
 		}
@@ -129,7 +130,7 @@ func (sw *Switch) Init() {
 			sw.IconOff = icons.ToggleOff // fallback
 		}
 
-		AddAt(p, "stack", func(w *Frame) {
+		tree.AddAt(p, "stack", func(w *Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Display = styles.Stacked
 				s.Gap.Zero()
@@ -137,8 +138,8 @@ func (sw *Switch) Init() {
 			w.Updater(func() {
 				sw.UpdateStackTop() // need to update here
 			})
-			w.Maker(func(p *Plan) {
-				AddAt(p, "icon-on", func(w *Icon) {
+			w.Maker(func(p *tree.Plan) {
+				tree.AddAt(p, "icon-on", func(w *Icon) {
 					w.Styler(func(s *styles.Style) {
 						if sw.Type == SwitchChip {
 							s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
@@ -169,13 +170,13 @@ func (sw *Switch) Init() {
 						s.Min.Set(units.Em(1.5))
 					}
 				}
-				AddAt(p, "icon-off", func(w *Icon) {
+				tree.AddAt(p, "icon-off", func(w *Icon) {
 					w.Styler(iconStyle)
 					w.Updater(func() {
 						w.SetIcon(sw.IconOff)
 					})
 				})
-				AddAt(p, "icon-indeterminate", func(w *Icon) {
+				tree.AddAt(p, "icon-indeterminate", func(w *Icon) {
 					w.Styler(iconStyle)
 					w.Updater(func() {
 						w.SetIcon(sw.IconIndeterminate)
@@ -185,12 +186,12 @@ func (sw *Switch) Init() {
 		})
 
 		if sw.Text != "" {
-			AddAt(p, "space", func(w *Space) {
+			tree.AddAt(p, "space", func(w *Space) {
 				w.Styler(func(s *styles.Style) {
 					s.Min.X.Ch(0.1)
 				})
 			})
-			AddAt(p, "text", func(w *Text) {
+			tree.AddAt(p, "text", func(w *Text) {
 				w.Styler(func(s *styles.Style) {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)

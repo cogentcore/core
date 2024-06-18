@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
 )
 
 // TimePicker is a widget for picking a time.
@@ -33,7 +34,7 @@ func (tp *TimePicker) WidgetValue() any { return &tp.Time }
 
 func (tp *TimePicker) Init() {
 	tp.Frame.Init()
-	AddChild(tp, func(w *Spinner) {
+	tree.AddChild(tp, func(w *Spinner) {
 		w.SetStep(1).SetEnforceStep(true)
 		if SystemSettings.Clock24 {
 			tp.Hour = tp.Time.Hour()
@@ -66,14 +67,14 @@ func (tp *TimePicker) Init() {
 			tp.SendChange()
 		})
 	})
-	AddChild(tp, func(w *Text) {
+	tree.AddChild(tp, func(w *Text) {
 		w.SetType(TextDisplayLarge).SetText(":")
 		w.Styler(func(s *styles.Style) {
 			s.SetTextWrap(false)
 			s.Min.X.Ch(1)
 		})
 	})
-	AddChild(tp, func(w *Spinner) {
+	tree.AddChild(tp, func(w *Spinner) {
 		w.SetStep(1).SetEnforceStep(true).
 			SetMin(0).SetMax(60).SetFormat("%02d").
 			SetValue(float32(tp.Time.Minute()))
@@ -89,9 +90,9 @@ func (tp *TimePicker) Init() {
 			tp.SendChange()
 		})
 	})
-	tp.Maker(func(p *Plan) {
+	tp.Maker(func(p *tree.Plan) {
 		if !SystemSettings.Clock24 {
-			Add(p, func(w *Switches) {
+			tree.Add(p, func(w *Switches) {
 				w.SetMutex(true).SetType(SwitchSegmentedButton).SetItems(SwitchItem{Value: "AM"}, SwitchItem{Value: "PM"})
 				tp.PM = tp.Time.Hour() >= 12
 				w.Styler(func(s *styles.Style) {
@@ -153,7 +154,7 @@ func (dp *DatePicker) Init() {
 		s.Direction = styles.Column
 	})
 
-	AddChild(dp, func(w *Frame) {
+	tree.AddChild(dp, func(w *Frame) {
 		w.Styler(func(s *styles.Style) {
 			s.Gap.Zero()
 		})
@@ -161,14 +162,14 @@ func (dp *DatePicker) Init() {
 			s.Padding.SetHorizontal(units.Dp(12))
 			s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
 		}
-		AddChild(w, func(w *Button) {
+		tree.AddChild(w, func(w *Button) {
 			w.SetType(ButtonAction).SetIcon(icons.NavigateBefore)
 			w.OnClick(func(e events.Event) {
 				dp.SetTime(dp.Time.AddDate(0, -1, 0))
 			})
 			w.Styler(arrowStyle)
 		})
-		AddChild(w, func(w *Chooser) {
+		tree.AddChild(w, func(w *Chooser) {
 			sms := make([]ChooserItem, len(shortMonths))
 			for i, sm := range shortMonths {
 				sms[i] = ChooserItem{Value: sm}
@@ -180,21 +181,21 @@ func (dp *DatePicker) Init() {
 				dp.SetTime(dp.Time.AddDate(0, w.CurrentIndex+1-int(dp.Time.Month()), 0))
 			})
 		})
-		AddChild(w, func(w *Button) {
+		tree.AddChild(w, func(w *Button) {
 			w.SetType(ButtonAction).SetIcon(icons.NavigateNext)
 			w.OnClick(func(e events.Event) {
 				dp.SetTime(dp.Time.AddDate(0, 1, 0))
 			})
 			w.Styler(arrowStyle)
 		})
-		AddChild(w, func(w *Button) {
+		tree.AddChild(w, func(w *Button) {
 			w.SetType(ButtonAction).SetIcon(icons.NavigateBefore)
 			w.OnClick(func(e events.Event) {
 				dp.SetTime(dp.Time.AddDate(-1, 0, 0))
 			})
 			w.Styler(arrowStyle)
 		})
-		AddChild(w, func(w *Chooser) {
+		tree.AddChild(w, func(w *Chooser) {
 			yr := dp.Time.Year()
 			var yrs []ChooserItem
 			// we go 100 in each direction from the current year
@@ -210,7 +211,7 @@ func (dp *DatePicker) Init() {
 				dp.SetTime(dp.Time.AddDate(nyr-dp.Time.Year(), 0, 0))
 			})
 		})
-		AddChild(w, func(w *Button) {
+		tree.AddChild(w, func(w *Button) {
 			w.SetType(ButtonAction).SetIcon(icons.NavigateNext)
 			w.OnClick(func(e events.Event) {
 				dp.SetTime(dp.Time.AddDate(1, 0, 0))
@@ -218,12 +219,12 @@ func (dp *DatePicker) Init() {
 			w.Styler(arrowStyle)
 		})
 	})
-	AddChild(dp, func(w *Frame) {
+	tree.AddChild(dp, func(w *Frame) {
 		w.Styler(func(s *styles.Style) {
 			s.Display = styles.Grid
 			s.Columns = 7
 		})
-		w.Maker(func(p *Plan) {
+		w.Maker(func(p *tree.Plan) {
 			// start of the month
 			som := dp.Time.AddDate(0, 0, -dp.Time.Day()+1)
 			// end of the month
@@ -242,7 +243,7 @@ func (dp *DatePicker) Init() {
 				eomwyd += time.Date(somw.Year(), 13, -1, 0, 0, 0, 0, somw.Location()).YearDay()
 			}
 			for yd := somwyd; yd <= eomwyd; yd++ {
-				AddAt(p, strconv.Itoa(yd), func(w *Button) { // TODO(config)
+				tree.AddAt(p, strconv.Itoa(yd), func(w *Button) { // TODO(config)
 					// actual time of this date
 					dt := somw.AddDate(0, 0, yd-somwyd)
 					ds := strconv.Itoa(dt.Day())
@@ -267,8 +268,8 @@ func (dp *DatePicker) Init() {
 							s.Color = colors.C(colors.Scheme.Primary.On)
 						}
 					})
-					w.Maker(func(p *Plan) {
-						AddInit(p, "text", func(w *Text) {
+					w.Maker(func(p *tree.Plan) {
+						tree.AddInit(p, "text", func(w *Text) {
 							w.SetType(TextBodyLarge)
 						})
 					})
@@ -298,7 +299,7 @@ func (ti *TimeInput) Init() {
 		}
 	}
 
-	AddChild(ti, func(w *TextField) {
+	tree.AddChild(ti, func(w *TextField) {
 		w.SetTooltip("The date")
 		w.SetLeadingIcon(icons.CalendarToday, func(e events.Event) {
 			d := NewBody().AddTitle("Select date")
@@ -330,7 +331,7 @@ func (ti *TimeInput) Init() {
 		})
 	})
 
-	AddChild(ti, func(w *TextField) {
+	tree.AddChild(ti, func(w *TextField) {
 		w.SetTooltip("The time")
 		w.SetLeadingIcon(icons.Schedule, func(e events.Event) {
 			d := NewBody().AddTitle("Edit time")
@@ -377,7 +378,7 @@ func (di *DurationInput) WidgetValue() any { return &di.Duration }
 
 func (di *DurationInput) Init() {
 	di.Frame.Init()
-	AddChild(di, func(w *Spinner) {
+	tree.AddChild(di, func(w *Spinner) {
 		w.SetStep(1).SetPageStep(10)
 		w.SetTooltip("The value of time")
 		w.Updater(func() {
@@ -391,7 +392,7 @@ func (di *DurationInput) Init() {
 			di.SendChange()
 		})
 	})
-	AddChild(di, func(w *Chooser) {
+	tree.AddChild(di, func(w *Chooser) {
 		Bind(&di.Unit, w)
 
 		units := make([]ChooserItem, len(durationUnits))

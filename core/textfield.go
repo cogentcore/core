@@ -27,6 +27,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
 )
 
@@ -324,13 +325,13 @@ func (tf *TextField) Init() {
 		tf.EditDone() // todo: this must be protected against something else, for race detector
 	})
 
-	tf.Maker(func(p *Plan) {
+	tf.Maker(func(p *tree.Plan) {
 		tf.EditTxt = []rune(tf.Txt)
 		tf.Edited = false
 
 		if !tf.IsReadOnly() {
 			if tf.LeadingIcon.IsSet() {
-				AddAt(p, "lead-icon", func(w *Button) {
+				tree.AddAt(p, "lead-icon", func(w *Button) {
 					w.SetType(ButtonAction)
 					w.Styler(func(s *styles.Style) {
 						s.Padding.Zero()
@@ -364,12 +365,12 @@ func (tf *TextField) Init() {
 				})
 			}
 			if tf.TrailingIcon.IsSet() {
-				AddAt(p, "trail-icon-stretch", func(w *Stretch) {
+				tree.AddAt(p, "trail-icon-stretch", func(w *Stretch) {
 					w.Styler(func(s *styles.Style) {
 						s.Grow.Set(1, 0)
 					})
 				})
-				AddAt(p, "trail-icon", func(w *Button) {
+				tree.AddAt(p, "trail-icon", func(w *Button) {
 					w.SetType(ButtonAction)
 					w.Styler(func(s *styles.Style) {
 						s.Padding.Zero()

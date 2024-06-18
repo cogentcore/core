@@ -107,7 +107,7 @@ func (pl *PlotEditor) Init() {
 	pl.Updater(func() {
 		pl.Params.FromMeta(pl.Table.Table)
 	})
-	core.AddChildAt(pl, "cols", func(w *core.Frame) {
+	tree.AddChildAt(pl, "cols", func(w *core.Frame) {
 		w.Styler(func(s *styles.Style) {
 			s.Direction = styles.Column
 			s.Grow.Set(0, 1)
@@ -116,7 +116,7 @@ func (pl *PlotEditor) Init() {
 		})
 		w.Maker(pl.makeColumns)
 	})
-	core.AddChildAt(pl, "plot", func(w *Plot) {
+	tree.AddChildAt(pl, "plot", func(w *Plot) {
 		w.Plot = pl.Plot
 		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
@@ -479,21 +479,21 @@ func (pl *PlotEditor) SetColumnsByName(nameContains string, on bool) { //types:a
 }
 
 // makeColumns makes the Plans for columns
-func (pl *PlotEditor) makeColumns(p *core.Plan) {
+func (pl *PlotEditor) makeColumns(p *tree.Plan) {
 	pl.ColumnsListUpdate()
-	core.Add(p, func(w *core.Frame) {
+	tree.Add(p, func(w *core.Frame) {
 		w.Styler(func(s *styles.Style) {
 			s.Direction = styles.Row
 			s.Grow.Set(0, 0)
 		})
-		core.AddChild(w, func(w *core.Switch) {
+		tree.AddChild(w, func(w *core.Switch) {
 			w.SetType(core.SwitchCheckbox).SetTooltip("Toggle off all columns")
 			w.OnChange(func(e events.Event) {
 				w.SetChecked(false)
 				pl.SetAllColumns(false)
 			})
 		})
-		core.AddChild(w, func(w *core.Button) {
+		tree.AddChild(w, func(w *core.Button) {
 			w.SetText("Select Columns").SetType(core.ButtonAction).
 				SetTooltip("click to select columns based on column name").
 				OnClick(func(e events.Event) {
@@ -501,15 +501,15 @@ func (pl *PlotEditor) makeColumns(p *core.Plan) {
 				})
 		})
 	})
-	core.Add(p, func(w *core.Separator) {})
+	tree.Add(p, func(w *core.Separator) {})
 	for _, cp := range pl.Columns {
 		cp.Plot = pl
-		core.AddAt(p, cp.Column, func(w *core.Frame) {
+		tree.AddAt(p, cp.Column, func(w *core.Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Direction = styles.Row
 				s.Grow.Set(0, 0)
 			})
-			core.AddChild(w, func(w *core.Switch) {
+			tree.AddChild(w, func(w *core.Switch) {
 				w.SetType(core.SwitchCheckbox).SetTooltip("toggle plot on")
 				w.OnChange(func(e events.Event) {
 					cp.On = w.StateIs(states.Checked)
@@ -519,7 +519,7 @@ func (pl *PlotEditor) makeColumns(p *core.Plan) {
 					w.SetState(cp.On, states.Checked)
 				})
 			})
-			core.AddChild(w, func(w *core.Button) {
+			tree.AddChild(w, func(w *core.Button) {
 				w.SetText(cp.Column).SetType(core.ButtonAction).
 					SetTooltip("edit column settings including setting as XAxis or Legend")
 				w.OnClick(func(e events.Event) {
@@ -528,14 +528,14 @@ func (pl *PlotEditor) makeColumns(p *core.Plan) {
 						OnChange(func(e events.Event) {
 							pl.GoUpdatePlot() // note: because this is a separate window, need "Go" version
 						})
-					d.AddAppBar(func(p *core.Plan) {
-						core.Add(p, func(w *core.Button) {
+					d.AddAppBar(func(p *tree.Plan) {
+						tree.Add(p, func(w *core.Button) {
 							w.SetText("Set X Axis").OnClick(func(e events.Event) {
 								pl.Params.XAxisColumn = cp.Column
 								pl.UpdatePlot()
 							})
 						})
-						core.Add(p, func(w *core.Button) {
+						tree.Add(p, func(w *core.Button) {
 							w.SetText("Set Legend").OnClick(func(e events.Event) {
 								pl.Params.LegendColumn = cp.Column
 								pl.UpdatePlot()
@@ -549,11 +549,11 @@ func (pl *PlotEditor) makeColumns(p *core.Plan) {
 	}
 }
 
-func (pl *PlotEditor) MakeToolbar(p *core.Plan) {
+func (pl *PlotEditor) MakeToolbar(p *tree.Plan) {
 	if pl.Table == nil {
 		return
 	}
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.PanTool).
 			SetTooltip("toggle the ability to zoom and pan the view").OnClick(func(e events.Event) {
 			pc := pl.PlotChild()
@@ -561,16 +561,16 @@ func (pl *PlotEditor) MakeToolbar(p *core.Plan) {
 			pc.Restyle()
 		})
 	})
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.ArrowForward).
 			SetTooltip("turn on select mode for selecting Plot elements").
 			OnClick(func(e events.Event) {
 				fmt.Println("this will select select mode")
 			})
 	})
-	core.Add(p, func(w *core.Separator) {})
+	tree.Add(p, func(w *core.Separator) {})
 
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetText("Update").SetIcon(icons.Update).
 			SetTooltip("update fully redraws display, reflecting any new settings etc").
 			OnClick(func(e events.Event) {
@@ -578,7 +578,7 @@ func (pl *PlotEditor) MakeToolbar(p *core.Plan) {
 				pl.UpdatePlot()
 			})
 	})
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetText("Config").SetIcon(icons.Settings).
 			SetTooltip("set parameters that control display (font size etc)").
 			OnClick(func(e events.Event) {
@@ -590,7 +590,7 @@ func (pl *PlotEditor) MakeToolbar(p *core.Plan) {
 				d.NewFullDialog(pl).SetNewWindow(true).Run()
 			})
 	})
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetText("Table").SetIcon(icons.Edit).
 			SetTooltip("open a Table window of the data").
 			OnClick(func(e events.Event) {
@@ -600,9 +600,9 @@ func (pl *PlotEditor) MakeToolbar(p *core.Plan) {
 				d.NewFullDialog(pl).SetNewWindow(true).Run()
 			})
 	})
-	core.Add(p, func(w *core.Separator) {})
+	tree.Add(p, func(w *core.Separator) {})
 
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetText("Save").SetIcon(icons.Save).SetMenu(func(m *core.Scene) {
 			core.NewFuncButton(m).SetFunc(pl.SaveSVG).SetIcon(icons.Save)
 			core.NewFuncButton(m).SetFunc(pl.SavePNG).SetIcon(icons.Save)
@@ -611,15 +611,15 @@ func (pl *PlotEditor) MakeToolbar(p *core.Plan) {
 			core.NewFuncButton(m).SetFunc(pl.SaveAll).SetIcon(icons.Save)
 		})
 	})
-	core.Add(p, func(w *core.FuncButton) {
+	tree.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(pl.OpenCSV).SetIcon(icons.Open)
 	})
-	core.Add(p, func(w *core.Separator) {})
-	core.Add(p, func(w *core.FuncButton) {
+	tree.Add(p, func(w *core.Separator) {})
+	tree.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(pl.Table.FilterColumnName).SetText("Filter").SetIcon(icons.FilterAlt)
 		w.SetAfterFunc(pl.UpdatePlot)
 	})
-	core.Add(p, func(w *core.FuncButton) {
+	tree.Add(p, func(w *core.FuncButton) {
 		w.SetFunc(pl.Table.Sequential).SetText("Unfilter").SetIcon(icons.FilterAltOff)
 		w.SetAfterFunc(pl.UpdatePlot)
 	})

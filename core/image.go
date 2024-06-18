@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"github.com/anthonynsimon/bild/clone"
 	"golang.org/x/image/draw"
 )
@@ -97,8 +98,8 @@ func (im *Image) Render() {
 	draw.Draw(im.Scene.Pixels, r, rimg, sp, draw.Over)
 }
 
-func (im *Image) MakeToolbar(p *Plan) {
-	Add(p, func(w *FuncButton) {
+func (im *Image) MakeToolbar(p *tree.Plan) {
+	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(im.Open).SetIcon(icons.Open)
 	})
 }

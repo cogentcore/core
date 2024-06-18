@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/diffbrowser"
+	"cogentcore.org/core/tree"
 )
 
 // VCSLog is a widget that represents VCS log data.
@@ -55,10 +56,10 @@ func (lv *VCSLog) Init() {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 1)
 	})
-	core.AddChildAt(lv, "toolbar", func(w *core.Toolbar) {
+	tree.AddChildAt(lv, "toolbar", func(w *core.Toolbar) {
 		w.Maker(lv.MakeToolbar)
 	})
-	core.AddChildAt(lv, "log", func(w *core.Table) {
+	tree.AddChildAt(lv, "log", func(w *core.Table) {
 		w.SetReadOnly(true)
 		w.SetSlice(&lv.Log)
 		w.AddContextMenu(func(m *core.Scene) {
@@ -188,12 +189,12 @@ func (lv *VCSLog) Table() *core.Table {
 	return lv.ChildByName("log", 1).(*core.Table)
 }
 
-func (lv *VCSLog) MakeToolbar(p *core.Plan) {
-	core.Add(p, func(w *core.Text) {
+func (lv *VCSLog) MakeToolbar(p *tree.Plan) {
+	tree.Add(p, func(w *core.Text) {
 		w.SetText("File: " + fsx.DirAndFile(lv.File))
 	})
 
-	core.AddAt(p, "a-rev", func(w *core.Switch) {
+	tree.AddAt(p, "a-rev", func(w *core.Switch) {
 		w.SetText("A Rev: ")
 		w.SetTooltip("If selected, clicking in log will set this A Revision to use for Diff")
 		w.SetState(true, states.Checked)
@@ -204,14 +205,14 @@ func (lv *VCSLog) MakeToolbar(p *core.Plan) {
 			cbb.NeedsRender()
 		})
 	})
-	core.AddAt(p, "a-tf", func(w *core.TextField) {
+	tree.AddAt(p, "a-tf", func(w *core.TextField) {
 		w.SetText(lv.RevA)
 		w.SetTooltip("A revision: typically this is the older, base revision to compare")
 		w.OnChange(func(e events.Event) {
 			lv.RevA = w.Text()
 		})
 	})
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetText("View A").SetIcon(icons.Document).
 			SetTooltip("View file at revision A").
 			OnClick(func(e events.Event) {
@@ -219,9 +220,9 @@ func (lv *VCSLog) MakeToolbar(p *core.Plan) {
 			})
 	})
 
-	core.Add(p, func(w *core.Separator) {})
+	tree.Add(p, func(w *core.Separator) {})
 
-	core.AddAt(p, "b-rev", func(w *core.Switch) {
+	tree.AddAt(p, "b-rev", func(w *core.Switch) {
 		w.SetText("B Rev: ")
 		w.SetTooltip("If selected, clicking in log will set this B Revision to use for Diff")
 		w.OnClick(func(e events.Event) {
@@ -232,14 +233,14 @@ func (lv *VCSLog) MakeToolbar(p *core.Plan) {
 		})
 	})
 
-	core.AddAt(p, "b-tf", func(w *core.TextField) {
+	tree.AddAt(p, "b-tf", func(w *core.TextField) {
 		w.SetText(lv.RevB)
 		w.SetTooltip("B revision: typically this is the newer revision to compare.  Leave blank for the current working directory.")
 		w.OnChange(func(e events.Event) {
 			lv.RevB = w.Text()
 		})
 	})
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetText("View B").SetIcon(icons.Document).
 			SetTooltip("View file at revision B").
 			OnClick(func(e events.Event) {
@@ -247,9 +248,9 @@ func (lv *VCSLog) MakeToolbar(p *core.Plan) {
 			})
 	})
 
-	core.Add(p, func(w *core.Separator) {})
+	tree.Add(p, func(w *core.Separator) {})
 
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetText("Diff").SetIcon(icons.Difference).
 			SetTooltip("Show the diffs between two revisions; if blank, A is current HEAD, and B is current working copy").
 			OnClick(func(e events.Event) {

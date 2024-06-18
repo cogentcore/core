@@ -21,6 +21,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
 )
 
 // Slider is a slideable widget that provides slider functionality for two Types:
@@ -293,11 +294,11 @@ func (sr *Slider) Init() {
 		}
 	})
 
-	sr.Maker(func(p *Plan) {
+	sr.Maker(func(p *tree.Plan) {
 		if sr.Icon.IsNil() {
 			return
 		}
-		AddAt(p, "icon", func(w *Icon) {
+		tree.AddAt(p, "icon", func(w *Icon) {
 			w.Styler(func(s *styles.Style) {
 				s.Font.Size.Dp(24)
 				s.Color = sr.ThumbColor

@@ -109,9 +109,9 @@ var PagesExamples = map[string]func(parent core.Widget){
 		number := 3
 		spinner := core.Bind(&number, core.NewSpinner(parent)).SetMin(0)
 		buttons := core.NewFrame(parent)
-		buttons.Maker(func(p *core.Plan) {
+		buttons.Maker(func(p *tree.Plan) {
 			for i := range number {
-				core.AddAt(p, strconv.Itoa(i), func(w *core.Button) {
+				tree.AddAt(p, strconv.Itoa(i), func(w *core.Button) {
 					w.SetText(strconv.Itoa(i))
 				})
 			}
@@ -871,31 +871,31 @@ func main() {
 	},
 	"widgets/containers/toolbars-0": func(parent core.Widget) {
 		tb := core.NewToolbar(parent)
-		tb.Maker(func(p *core.Plan) {
-			core.Add(p, func(w *core.Button) {
+		tb.Maker(func(p *tree.Plan) {
+			tree.Add(p, func(w *core.Button) {
 				w.SetText("Build")
 			})
-			core.Add(p, func(w *core.Button) {
+			tree.Add(p, func(w *core.Button) {
 				w.SetText("Run")
 			})
 		})
 	},
 	"widgets/containers/toolbars-1": func(parent core.Widget) {
 		tb := core.NewToolbar(parent)
-		tb.Maker(func(p *core.Plan) {
-			core.Add(p, func(w *core.FuncButton) {
+		tb.Maker(func(p *tree.Plan) {
+			tree.Add(p, func(w *core.FuncButton) {
 				w.SetFunc(core.AppearanceSettings.SaveScreenZoom)
 			})
-			core.Add(p, func(w *core.Switch) {
+			tree.Add(p, func(w *core.Switch) {
 				w.SetText("Active")
 			})
 		})
 	},
 	"widgets/containers/toolbars-2": func(parent core.Widget) {
 		tb := core.NewToolbar(parent)
-		tb.Maker(func(p *core.Plan) {
+		tb.Maker(func(p *tree.Plan) {
 			for i := range 30 {
-				core.AddAt(p, strconv.Itoa(i), func(w *core.Button) {
+				tree.AddAt(p, strconv.Itoa(i), func(w *core.Button) {
 					w.SetText("Button " + strconv.Itoa(i))
 				})
 			}

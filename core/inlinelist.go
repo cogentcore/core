@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
+	"cogentcore.org/core/tree"
 )
 
 // InlineList represents a slice within a single line of value widgets.
@@ -29,14 +30,14 @@ func (il *InlineList) WidgetValue() any { return &il.Slice }
 
 func (il *InlineList) Init() {
 	il.Frame.Init()
-	il.Maker(func(p *Plan) {
+	il.Maker(func(p *tree.Plan) {
 		sl := reflectx.NonPointerValue(reflectx.UnderlyingPointer(reflect.ValueOf(il.Slice)))
 
 		sz := min(sl.Len(), SystemSettings.SliceInlineLength)
 		for i := 0; i < sz; i++ {
 			itxt := strconv.Itoa(i)
 			val := reflectx.UnderlyingPointer(sl.Index(i)) // deal with pointer lists
-			AddNew(p, "value-"+itxt, func() Value {
+			tree.AddNew(p, "value-"+itxt, func() Value {
 				return NewValue(val.Interface(), "")
 			}, func(w Value) {
 				wb := w.AsWidget()
@@ -58,7 +59,7 @@ func (il *InlineList) Init() {
 			})
 		}
 		if !il.isArray {
-			AddAt(p, "add-button", func(w *Button) {
+			tree.AddAt(p, "add-button", func(w *Button) {
 				w.SetIcon(icons.Add).SetType(ButtonTonal)
 				w.Tooltip = "Add an element to the list"
 				w.OnClick(func(e events.Event) {
@@ -66,7 +67,7 @@ func (il *InlineList) Init() {
 				})
 			})
 		}
-		AddAt(p, "edit-button", func(w *Button) {
+		tree.AddAt(p, "edit-button", func(w *Button) {
 			w.SetIcon(icons.Edit).SetType(ButtonTonal)
 			w.Tooltip = "Edit list in a dialog"
 			w.OnClick(func(e events.Event) {

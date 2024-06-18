@@ -90,9 +90,9 @@ func (sl *Splits) Init() {
 		sl.UpdateSplits()
 	})
 	parts := sl.NewParts()
-	parts.Maker(func(p *Plan) {
+	parts.Maker(func(p *tree.Plan) {
 		for i := range len(sl.Children) - 1 { // one fewer handle than children
-			AddAt(p, "handle-"+strconv.Itoa(i), func(w *Handle) {
+			tree.AddAt(p, "handle-"+strconv.Itoa(i), func(w *Handle) {
 				w.OnChange(func(e events.Event) {
 					sl.SetSplitAction(w.IndexInParent(), w.Value())
 				})

@@ -147,12 +147,12 @@ func (fn *Node) Init() {
 			}
 		}
 	})
-	core.AddChildInit(fn.Parts, "branch", func(w *core.Switch) {
+	tree.AddChildInit(fn.Parts, "branch", func(w *core.Switch) {
 		w.SetType(core.SwitchCheckbox)
 		w.SetIcons(icons.FolderOpen, icons.Folder, icons.Blank)
-		core.AddChildInit(w, "stack", func(w *core.Frame) {
+		tree.AddChildInit(w, "stack", func(w *core.Frame) {
 			f := func(name string) {
-				core.AddChildInit(w, name, func(w *core.Icon) {
+				tree.AddChildInit(w, name, func(w *core.Icon) {
 					w.Styler(func(s *styles.Style) {
 						s.Min.Set(units.Em(1))
 					})

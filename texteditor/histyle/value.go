@@ -58,16 +58,16 @@ func View(st *Styles) {
 	mv.OnChange(func(e events.Event) {
 		StylesChanged = true
 	})
-	d.AddAppBar(func(p *core.Plan) {
-		core.Add(p, func(w *core.FuncButton) {
+	d.AddAppBar(func(p *tree.Plan) {
+		tree.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(st.OpenJSON).SetText("Open from file").SetIcon(icons.Open)
 			w.Args[0].SetTag(`ext:".histy"`)
 		})
-		core.Add(p, func(w *core.FuncButton) {
+		tree.Add(p, func(w *core.FuncButton) {
 			w.SetFunc(st.SaveJSON).SetText("Save from file").SetIcon(icons.Save)
 			w.Args[0].SetTag(`ext:".histy"`)
 		})
-		core.Add(p, func(w *core.Separator) {})
+		tree.Add(p, func(w *core.Separator) {})
 		mv.MakeToolbar(p)
 	})
 	d.RunWindow() // note: no context here so not dialog

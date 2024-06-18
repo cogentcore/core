@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
 )
 
 const (
@@ -43,9 +44,9 @@ func BenchmarkUpdatePlan(bn *testing.B) {
 	b := NewBody()
 	for range bn.N {
 		for range nUpdates {
-			p := &Plan{}
+			p := &tree.Plan{}
 			for i := range nButtons {
-				AddAt(p, strconv.Itoa(i), func(w *Button) {
+				tree.AddAt(p, strconv.Itoa(i), func(w *Button) {
 					w.SetText(strconv.Itoa(i)).SetIcon(icons.Download).Styler(func(s *styles.Style) {
 						s.Min.Set(units.Em(5))
 						s.CenterAll()

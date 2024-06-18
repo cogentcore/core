@@ -20,6 +20,7 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/svg"
+	"cogentcore.org/core/tree"
 	"golang.org/x/image/draw"
 )
 
@@ -137,9 +138,9 @@ func (sv *SVG) Render() {
 	draw.Draw(sv.Scene.Pixels, r, sv.SVG.Pixels, sp, draw.Over)
 }
 
-func (sv *SVG) MakeToolbar(p *Plan) {
+func (sv *SVG) MakeToolbar(p *tree.Plan) {
 	// TODO(kai): resolve svg panning and selection structure
-	Add(p, func(w *Button) {
+	tree.Add(p, func(w *Button) {
 		w.SetIcon(icons.PanTool)
 		w.SetTooltip("toggle the ability to zoom and pan the view")
 		w.OnClick(func(e events.Event) {
@@ -147,21 +148,21 @@ func (sv *SVG) MakeToolbar(p *Plan) {
 			sv.Restyle()
 		})
 	})
-	Add(p, func(w *Button) {
+	tree.Add(p, func(w *Button) {
 		w.SetIcon(icons.ArrowForward)
 		w.SetTooltip("turn on select mode for selecting SVG elements")
 		w.OnClick(func(e events.Event) {
 			fmt.Println("this will select select mode")
 		})
 	})
-	Add(p, func(w *Separator) {})
-	Add(p, func(w *FuncButton) {
+	tree.Add(p, func(w *Separator) {})
+	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(sv.Open)
 	})
-	Add(p, func(w *FuncButton) {
+	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(sv.SaveSVG).SetIcon(icons.Save)
 	})
-	Add(p, func(w *FuncButton) {
+	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(sv.SavePNG).SetIcon(icons.Save)
 	})
 }

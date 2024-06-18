@@ -114,14 +114,14 @@ func StandardAppBarConfig(parent Widget) {
 
 // StandardAppBarMaker adds standard items to start of an AppBar:
 // [AppBarBackMaker] and [AppBarChooserMaker]
-func StandardAppBarMaker(p *Plan) {
+func StandardAppBarMaker(p *tree.Plan) {
 	MakeAppBack(p)
 	MakeAppChooser(p)
 }
 
 // MakeAppBack adds a back button to the [Plan] for an app bar.
-func MakeAppBack(p *Plan) {
-	AddAt(p, "back", func(w *Button) {
+func MakeAppBack(p *tree.Plan) {
+	tree.AddAt(p, "back", func(w *Button) {
 		w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev).SetTooltip("Back")
 		w.OnClick(func(e events.Event) {
 			if slen := w.Scene.Stage.Mains.Stack.Len(); slen > 1 {
@@ -260,8 +260,8 @@ func (tb *Toolbar) StandardOverflowMenu(m *Scene) { //types:add
 // given toolbar. This chooser is typically placed at the start
 // of the AppBar. You can extend the resources available for access
 // in the app chooser using [Chooser.AddItemsFunc] and [ChooserItem.Func].
-func MakeAppChooser(p *Plan) {
-	AddAt(p, "app-chooser", func(w *Chooser) {
+func MakeAppChooser(p *tree.Plan) {
+	tree.AddAt(p, "app-chooser", func(w *Chooser) {
 		w.SetEditable(true).SetType(ChooserOutlined).SetIcon(icons.Search)
 		if TheApp.SystemPlatform().IsMobile() {
 			w.SetPlaceholder("Search")
@@ -269,7 +269,7 @@ func MakeAppChooser(p *Plan) {
 			w.SetPlaceholder(fmt.Sprintf("Search (%s)", keymap.Menu.Label()))
 		}
 
-		AddChildInit(w, "text-field", func(w *TextField) {
+		tree.AddChildInit(w, "text-field", func(w *TextField) {
 			w.Styler(func(s *styles.Style) {
 				s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
 				if !s.Is(states.Focused) && w.Error == nil {
@@ -301,7 +301,7 @@ func MakeAppChooser(p *Plan) {
 			}
 		})
 		w.AddItemsFunc(func() {
-			AddButtonItems(&w.Items, p.Widget, "")
+			AddButtonItems(&w.Items, p.Parent, "")
 		})
 
 		w.OnFinal(events.Change, func(e events.Event) {

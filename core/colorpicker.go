@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // ColorPicker represents a color value with an interactive color picker
@@ -44,7 +45,7 @@ func (cp *ColorPicker) Init() {
 	cp.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 	})
-	cp.Maker(func(p *Plan) {
+	cp.Maker(func(p *tree.Plan) {
 		if cp.HasChildren() { // TODO(config)
 			return
 		}

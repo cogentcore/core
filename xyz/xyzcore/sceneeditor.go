@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/xyz"
 )
 
@@ -29,8 +30,8 @@ func (sv *SceneEditor) Init() {
 		s.Grow.Set(1, 1)
 	})
 
-	core.AddChildAt(sv, "scene", func(w *Scene) {})
-	core.AddChildAt(sv, "tb", func(w *core.Toolbar) {
+	tree.AddChildAt(sv, "scene", func(w *Scene) {})
+	tree.AddChildAt(sv, "tb", func(w *core.Toolbar) {
 		w.Maker(sv.MakeToolbar)
 	})
 }
@@ -45,10 +46,10 @@ func (sv *SceneEditor) SceneXYZ() *xyz.Scene {
 	return sv.SceneWidget().XYZ
 }
 
-func (sv *SceneEditor) MakeToolbar(p *core.Plan) {
+func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 	sw := sv.SceneWidget()
 	sc := sv.SceneXYZ()
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.Update).SetTooltip("reset to default initial display").
 			OnClick(func(e events.Event) {
 				sc.SetCamera("default")
@@ -56,7 +57,7 @@ func (sv *SceneEditor) MakeToolbar(p *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.ZoomIn).SetTooltip("zoom in").
 			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -67,7 +68,7 @@ func (sv *SceneEditor) MakeToolbar(p *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.ZoomOut).SetTooltip("zoom out").
 			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -77,12 +78,12 @@ func (sv *SceneEditor) MakeToolbar(p *core.Plan) {
 			sv.NeedsRender()
 		})
 	})
-	core.Add(p, func(w *core.Separator) {})
+	tree.Add(p, func(w *core.Separator) {})
 
-	core.Add(p, func(w *core.Text) {
+	tree.Add(p, func(w *core.Text) {
 		w.SetText("Rot:").SetTooltip("rotate display")
 	})
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowLeft).
 			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -93,7 +94,7 @@ func (sv *SceneEditor) MakeToolbar(p *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowUp).
 			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -104,7 +105,7 @@ func (sv *SceneEditor) MakeToolbar(p *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowDown).
 			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -115,7 +116,7 @@ func (sv *SceneEditor) MakeToolbar(p *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowRight).
 			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -126,12 +127,12 @@ func (sv *SceneEditor) MakeToolbar(p *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.Add(p, func(w *core.Separator) {})
+	tree.Add(p, func(w *core.Separator) {})
 
-	core.Add(p, func(w *core.Text) {
+	tree.Add(p, func(w *core.Text) {
 		w.SetText("Pan:").SetTooltip("pan display")
 	})
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowLeft).
 			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -142,7 +143,7 @@ func (sv *SceneEditor) MakeToolbar(p *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowUp).
 			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -153,7 +154,7 @@ func (sv *SceneEditor) MakeToolbar(p *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowDown).
 			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -164,7 +165,7 @@ func (sv *SceneEditor) MakeToolbar(p *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetIcon(icons.KeyboardArrowRight).
 			Styler(func(s *styles.Style) {
 				s.SetAbilities(true, abilities.RepeatClickable)
@@ -175,15 +176,15 @@ func (sv *SceneEditor) MakeToolbar(p *core.Plan) {
 				sv.NeedsRender()
 			})
 	})
-	core.Add(p, func(w *core.Separator) {})
+	tree.Add(p, func(w *core.Separator) {})
 
-	core.Add(p, func(w *core.Text) {
+	tree.Add(p, func(w *core.Text) {
 		w.SetText("Save:")
 	})
 
 	for i := 1; i <= 4; i++ {
 		nm := fmt.Sprintf("%d", i)
-		core.AddAt(p, "save_"+nm, func(w *core.Button) {
+		tree.AddAt(p, "save_"+nm, func(w *core.Button) {
 			w.SetText(nm).
 				SetTooltip("first click (or + Shift) saves current view, second click restores to saved state").
 				OnClick(func(e events.Event) {
@@ -202,13 +203,13 @@ func (sv *SceneEditor) MakeToolbar(p *core.Plan) {
 				})
 		})
 	}
-	core.Add(p, func(w *core.Separator) {})
+	tree.Add(p, func(w *core.Separator) {})
 
-	core.Add(p, func(w *core.Chooser) {
+	tree.Add(p, func(w *core.Chooser) {
 		core.Bind(&sw.SelectionMode, w)
 	})
 
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetText("Edit").SetIcon(icons.Edit).
 			SetTooltip("edit the currently selected object").
 			OnClick(func(e events.Event) {
@@ -221,7 +222,7 @@ func (sv *SceneEditor) MakeToolbar(p *core.Plan) {
 			})
 	})
 
-	core.Add(p, func(w *core.Button) {
+	tree.Add(p, func(w *core.Button) {
 		w.SetText("Edit Scene").SetIcon(icons.Edit).
 			SetTooltip("edit the 3D Scene object (for access to meshes, textures etc)").
 			OnClick(func(e events.Event) {

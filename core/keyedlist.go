@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
 
@@ -48,7 +49,7 @@ func (kl *KeyedList) Init() {
 		s.Min.Y.Em(10)
 	})
 
-	kl.Maker(func(p *Plan) {
+	kl.Maker(func(p *tree.Plan) {
 		if reflectx.AnyIsNil(kl.Map) {
 			return
 		}
@@ -70,7 +71,7 @@ func (kl *KeyedList) Init() {
 			keynm := "key-" + keytxt
 			valnm := "value-" + keytxt
 
-			AddNew(p, keynm, func() Value {
+			tree.AddNew(p, keynm, func() Value {
 				return ToValue(key.Interface(), "")
 			}, func(w Value) {
 				BindMapKey(mapv, key, w)
@@ -96,7 +97,7 @@ func (kl *KeyedList) Init() {
 					wb.SetReadOnly(kl.IsReadOnly())
 				})
 			})
-			AddNew(p, valnm, func() Value {
+			tree.AddNew(p, valnm, func() Value {
 				val := mapv.MapIndex(key).Interface()
 				w := ToValue(val, "")
 				return BindMapValue(mapv, key, w)
@@ -122,7 +123,7 @@ func (kl *KeyedList) Init() {
 
 			if typeAny {
 				typnm := "type-" + keytxt
-				AddAt(p, typnm, func(w *Chooser) {
+				tree.AddAt(p, typnm, func(w *Chooser) {
 					w.SetTypes(builtinTypes...)
 					w.OnChange(func(e events.Event) {
 						typ := reflect.TypeOf(w.CurrentItem.Value.(*types.Type).Instance)
@@ -146,7 +147,7 @@ func (kl *KeyedList) Init() {
 		}
 		if kl.Inline {
 			if !kl.IsReadOnly() {
-				AddAt(p, "add-button", func(w *Button) {
+				tree.AddAt(p, "add-button", func(w *Button) {
 					w.SetIcon(icons.Add).SetType(ButtonTonal)
 					w.Tooltip = "Add an element"
 					w.OnClick(func(e events.Event) {
@@ -154,7 +155,7 @@ func (kl *KeyedList) Init() {
 					})
 				})
 			}
-			AddAt(p, "edit-button", func(w *Button) {
+			tree.AddAt(p, "edit-button", func(w *Button) {
 				w.SetIcon(icons.Edit).SetType(ButtonTonal)
 				w.Tooltip = "Edit in a dialog"
 				w.OnClick(func(e events.Event) {
@@ -212,18 +213,18 @@ func (kl *KeyedList) MapDelete(key reflect.Value) {
 }
 
 // MakeToolbar configures a [Toolbar] for this view
-func (kl *KeyedList) MakeToolbar(p *Plan) {
+func (kl *KeyedList) MakeToolbar(p *tree.Plan) {
 	if reflectx.AnyIsNil(kl.Map) {
 		return
 	}
-	Add(p, func(w *Button) {
+	tree.Add(p, func(w *Button) {
 		w.SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys and the values").
 			OnClick(func(e events.Event) {
 				kl.ToggleSort()
 			})
 	})
 	if !kl.IsReadOnly() {
-		Add(p, func(w *Button) {
+		tree.Add(p, func(w *Button) {
 			w.SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
 				OnClick(func(e events.Event) {
 					kl.MapAdd()

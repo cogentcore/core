@@ -17,6 +17,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
 )
 
 // Node is an element in the diff tree
@@ -50,10 +51,10 @@ func (tn *Node) Init() {
 	tn.Parts.Styler(func(s *styles.Style) {
 		s.Gap.X.Em(0.4)
 	})
-	core.AddChildInit(tn.Parts, "branch", func(w *core.Switch) {
-		core.AddChildInit(w, "stack", func(w *core.Frame) {
+	tree.AddChildInit(tn.Parts, "branch", func(w *core.Switch) {
+		tree.AddChildInit(w, "stack", func(w *core.Frame) {
 			f := func(name string) {
-				core.AddChildInit(w, name, func(w *core.Icon) {
+				tree.AddChildInit(w, name, func(w *core.Icon) {
 					w.Styler(func(s *styles.Style) {
 						s.Min.Set(units.Em(1))
 					})

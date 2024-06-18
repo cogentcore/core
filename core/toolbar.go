@@ -42,7 +42,7 @@ func (tb *Toolbar) Init() {
 	tb.Frame.Init()
 	ToolbarStyles(tb)
 
-	AddChildAt(tb, "overflow-menu", func(w *Button) {
+	tree.AddChildAt(tb, "overflow-menu", func(w *Button) {
 		tb.overflowButton = w
 		ic := icons.MoreVert
 		if tb.Styles.Direction != styles.Row {

@@ -9,6 +9,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/tree"
 )
 
 // TwinEditors presents two side-by-side [Editor]s in [core.Splits]
@@ -31,7 +32,7 @@ func (te *TwinEditors) Init() {
 	te.BufferB = NewBuffer()
 
 	f := func(name string, buf *Buffer) {
-		core.AddChildAt(te, name, func(w *Editor) {
+		tree.AddChildAt(te, name, func(w *Editor) {
 			w.SetBuffer(buf)
 			w.Styler(func(s *styles.Style) {
 				s.Min.X.Ch(80)

@@ -28,6 +28,7 @@ import (
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 )
 
@@ -265,7 +266,7 @@ func (ch *Chooser) Init() {
 		}
 	})
 
-	ch.Maker(func(p *Plan) {
+	ch.Maker(func(p *tree.Plan) {
 		// automatically select the first item if we have nothing selected and no placeholder
 		if !ch.Editable && ch.CurrentIndex < 0 && ch.CurrentItem.Text == "" {
 			ch.SetCurrentIndex(0)
@@ -273,14 +274,14 @@ func (ch *Chooser) Init() {
 
 		// editable handles through TextField
 		if ch.Icon.IsSet() && !ch.Editable {
-			AddAt(p, "icon", func(w *Icon) {
+			tree.AddAt(p, "icon", func(w *Icon) {
 				w.Updater(func() {
 					w.SetIcon(ch.Icon)
 				})
 			})
 		}
 		if ch.Editable {
-			AddAt(p, "text-field", func(w *TextField) {
+			tree.AddAt(p, "text-field", func(w *TextField) {
 				w.SetPlaceholder(ch.Placeholder)
 				w.Styler(func(s *styles.Style) {
 					s.Grow = ch.Styles.Grow // we grow like our parent
@@ -330,8 +331,8 @@ func (ch *Chooser) Init() {
 						w.SetCompleter(w, ch.CompleteMatch, ch.CompleteEdit)
 					}
 				})
-				w.Maker(func(p *Plan) {
-					AddInit(p, "trail-icon", func(w *Button) {
+				w.Maker(func(p *tree.Plan) {
+					tree.AddInit(p, "trail-icon", func(w *Button) {
 						w.Styler(func(s *styles.Style) {
 							// indicator does not need to be focused
 							s.SetAbilities(false, abilities.Focusable)
@@ -340,7 +341,7 @@ func (ch *Chooser) Init() {
 				})
 			})
 		} else {
-			AddAt(p, "text", func(w *Text) {
+			tree.AddAt(p, "text", func(w *Text) {
 				w.Styler(func(s *styles.Style) {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
@@ -355,7 +356,7 @@ func (ch *Chooser) Init() {
 		}
 		// editable handles through TextField
 		if !ch.Editable {
-			AddAt(p, "indicator", func(w *Icon) {
+			tree.AddAt(p, "indicator", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
 					s.Justify.Self = styles.End
 				})

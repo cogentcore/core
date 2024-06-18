@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/tree"
 )
 
 // Button is an interactive button with text, an icon, an indicator, a shortcut,
@@ -189,7 +190,7 @@ func (bt *Button) Init() {
 		bt.Send(events.Click, e)
 	})
 
-	bt.Maker(func(p *Plan) {
+	bt.Maker(func(p *tree.Plan) {
 		// we check if the icons are unset, not if they are nil, so
 		// that people can manually set it to [icons.None]
 		if bt.HasMenu() {
@@ -208,7 +209,7 @@ func (bt *Button) Init() {
 			}
 		}
 		if bt.Icon.IsSet() {
-			AddAt(p, "icon", func(w *Icon) {
+			tree.AddAt(p, "icon", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
 					s.Font.Size.Dp(18)
 				})
@@ -217,11 +218,11 @@ func (bt *Button) Init() {
 				})
 			})
 			if bt.Text != "" {
-				AddAt(p, "space", func(w *Space) {})
+				tree.AddAt(p, "space", func(w *Space) {})
 			}
 		}
 		if bt.Text != "" {
-			AddAt(p, "text", func(w *Text) {
+			tree.AddAt(p, "text", func(w *Text) {
 				w.Styler(func(s *styles.Style) {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
@@ -238,7 +239,7 @@ func (bt *Button) Init() {
 			})
 		}
 		if bt.Indicator.IsSet() {
-			AddAt(p, "indicator-stretch", func(w *Stretch) {
+			tree.AddAt(p, "indicator-stretch", func(w *Stretch) {
 				w.Styler(func(s *styles.Style) {
 					s.Min.Set(units.Em(0.2))
 					if bt.Type == ButtonMenu {
@@ -248,7 +249,7 @@ func (bt *Button) Init() {
 					}
 				})
 			})
-			AddAt(p, "indicator", func(w *Icon) {
+			tree.AddAt(p, "indicator", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
 					s.Min.X.Dp(18)
 					s.Min.Y.Dp(18)
@@ -262,8 +263,8 @@ func (bt *Button) Init() {
 		}
 		if bt.Type == ButtonMenu && (!TheApp.SystemPlatform().IsMobile() || TheApp.Platform() == system.Offscreen) {
 			if !bt.Indicator.IsSet() && bt.Shortcut != "" {
-				AddAt(p, "shortcut-stretch", func(w *Stretch) {})
-				AddAt(p, "shortcut", func(w *Text) {
+				tree.AddAt(p, "shortcut-stretch", func(w *Stretch) {})
+				tree.AddAt(p, "shortcut", func(w *Text) {
 					w.Styler(func(s *styles.Style) {
 						s.SetNonSelectable()
 						s.SetTextWrap(false)

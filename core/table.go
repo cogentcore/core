@@ -68,7 +68,7 @@ func (tb *Table) Init() {
 	tb.AddContextMenu(tb.ContextMenu)
 	tb.SortIndex = -1
 
-	tb.Makers[0] = func(p *Plan) { // TODO: reduce redundancy with ListBase Maker
+	tb.Makers[0] = func(p *tree.Plan) { // TODO: reduce redundancy with ListBase Maker
 		svi := tb.This.(Lister)
 		svi.UpdateSliceSize()
 
@@ -97,7 +97,7 @@ func (tb *Table) Init() {
 		})
 
 		tb.MakeHeader(p)
-		tb.MakeGrid(p, func(p *Plan) {
+		tb.MakeGrid(p, func(p *tree.Plan) {
 			for i := 0; i < tb.VisRows; i++ {
 				svi.MakeRow(p, i)
 			}
@@ -214,16 +214,16 @@ func (tb *Table) SliceHeader() *Frame {
 	return tb.Child(0).(*Frame)
 }
 
-func (tb *Table) MakeHeader(p *Plan) {
-	AddAt(p, "header", func(w *Frame) {
+func (tb *Table) MakeHeader(p *tree.Plan) {
+	tree.AddAt(p, "header", func(w *Frame) {
 		ToolbarStyles(w)
 		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(0, 0)
 			s.Gap.Set(units.Em(0.5)) // matches grid default
 		})
-		w.Maker(func(p *Plan) {
+		w.Maker(func(p *tree.Plan) {
 			if tb.ShowIndexes {
-				AddAt(p, "head-index", func(w *Text) {
+				tree.AddAt(p, "head-index", func(w *Text) {
 					w.SetType(TextBodyMedium)
 					w.Styler(func(s *styles.Style) {
 						s.Align.Self = styles.Center
@@ -233,7 +233,7 @@ func (tb *Table) MakeHeader(p *Plan) {
 			}
 			for fli := 0; fli < tb.numVisibleFields; fli++ {
 				field := tb.visibleFields[fli]
-				AddAt(p, "head-"+field.Name, func(w *Button) {
+				tree.AddAt(p, "head-"+field.Name, func(w *Button) {
 					w.SetType(ButtonMenu)
 					w.OnClick(func(e events.Event) {
 						tb.SortSliceAction(fli)
@@ -277,7 +277,7 @@ func (tb *Table) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	return
 }
 
-func (tb *Table) MakeRow(p *Plan, i int) {
+func (tb *Table) MakeRow(p *tree.Plan, i int) {
 	svi := tb.This.(Lister)
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
@@ -303,7 +303,7 @@ func (tb *Table) MakeRow(p *Plan, i int) {
 		}
 		readOnlyTag := tags.Get("edit") == "-"
 
-		AddNew(p, valnm, func() Value {
+		tree.AddNew(p, valnm, func() Value {
 			return NewValue(fval.Interface(), tags)
 		}, func(w Value) {
 			wb := w.AsWidget()

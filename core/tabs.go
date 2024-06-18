@@ -134,8 +134,8 @@ func (ts *Tabs) Init() {
 		}
 	})
 
-	ts.Maker(func(p *Plan) {
-		AddAt(p, "tabs", func(w *Frame) {
+	ts.Maker(func(p *tree.Plan) {
+		tree.AddAt(p, "tabs", func(w *Frame) {
 			w.Styler(func(s *styles.Style) {
 				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 				s.Gap.Set(units.Dp(4))
@@ -149,7 +149,7 @@ func (ts *Tabs) Init() {
 					s.Wrap = true
 				}
 			})
-			// w.Maker(func(p *Plan) {
+			// w.Maker(func(p *tree.Plan) {
 			// 	if ts.NewTabButton {
 			// 		AddAt(p, "new-tab", func(w *Button) { // TODO(config)
 			// 			w.SetIcon(icons.Add).SetType(ButtonAction)
@@ -161,7 +161,7 @@ func (ts *Tabs) Init() {
 			// 	}
 			// })
 		})
-		AddAt(p, "frame", func(w *Frame) {
+		tree.AddAt(p, "frame", func(w *Frame) {
 			w.LayoutStackTopOnly = true // key for allowing each tab to have its own size
 			w.Styler(func(s *styles.Style) {
 				s.Display = styles.Stacked
@@ -514,13 +514,13 @@ func (tb *Tab) Init() {
 
 	tb.HandleClickOnEnterSpace()
 
-	tb.Maker(func(p *Plan) {
+	tb.Maker(func(p *tree.Plan) {
 		if tb.MaxChars > 0 { // TODO(config): find a better time to do this?
 			tb.Text = elide.Middle(tb.Text, tb.MaxChars)
 		}
 
 		if tb.Icon.IsSet() {
-			AddAt(p, "icon", func(w *Icon) {
+			tree.AddAt(p, "icon", func(w *Icon) {
 				w.Styler(func(s *styles.Style) {
 					s.Font.Size.Dp(18)
 				})
@@ -529,11 +529,11 @@ func (tb *Tab) Init() {
 				})
 			})
 			if tb.Text != "" {
-				AddAt(p, "space", func(w *Space) {})
+				tree.AddAt(p, "space", func(w *Space) {})
 			}
 		}
 		if tb.Text != "" {
-			AddAt(p, "text", func(w *Text) {
+			tree.AddAt(p, "text", func(w *Text) {
 				w.Styler(func(s *styles.Style) {
 					s.SetNonSelectable()
 					s.SetTextWrap(false)
@@ -549,8 +549,8 @@ func (tb *Tab) Init() {
 			})
 		}
 		if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
-			AddAt(p, "close-space", func(w *Space) {})
-			AddAt(p, "close", func(w *Button) {
+			tree.AddAt(p, "close-space", func(w *Space) {})
+			tree.AddAt(p, "close", func(w *Button) {
 				w.SetType(ButtonAction)
 				w.Styler(func(s *styles.Style) {
 					s.Padding.Zero()

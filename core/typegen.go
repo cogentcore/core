@@ -805,7 +805,7 @@ func (t *Scene) SetBarsInherit(v styles.Sides[bool]) *Scene { t.BarsInherit = v;
 
 // SetAppBars sets the [Scene.AppBars]:
 // AppBars contains functions for making the plan for the top app bar.
-func (t *Scene) SetAppBars(v ...func(p *Plan)) *Scene { t.AppBars = v; return t }
+func (t *Scene) SetAppBars(v ...func(p *tree.Plan)) *Scene { t.AppBars = v; return t }
 
 // SetBody sets the [Scene.Body]:
 // Body provides the main contents of scenes that use control Bars

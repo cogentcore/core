@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/tensor/stats/stats"
 	"cogentcore.org/core/tensor/table"
 	"cogentcore.org/core/tensor/tensorcore"
+	"cogentcore.org/core/tree"
 )
 
 // Planets is raw data
@@ -107,8 +108,8 @@ func main() {
 	nt := tv.NewTab("Planets Data")
 	tbv := tensorcore.NewTable(nt).SetTable(Planets)
 	b.AddAppBar(tbv.MakeToolbar)
-	b.AddAppBar(func(p *core.Plan) {
-		core.Add(p, func(w *core.Button) {
+	b.AddAppBar(func(p *tree.Plan) {
+		tree.Add(p, func(w *core.Button) {
 			w.SetText("README").SetIcon(icons.FileMarkdown).
 				SetTooltip("open README help file").OnClick(func(e events.Event) {
 				core.TheApp.OpenURL("https://github.com/cogentcore/core/blob/main/tensor/examples/dataproc/README.md")

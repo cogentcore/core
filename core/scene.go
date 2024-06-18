@@ -40,7 +40,7 @@ type Scene struct { //core:no-new
 	BarsInherit styles.Sides[bool]
 
 	// AppBars contains functions for making the plan for the top app bar.
-	AppBars []func(p *Plan) `json:"-" xml:"-"`
+	AppBars []func(p *tree.Plan) `json:"-" xml:"-"`
 
 	// Body provides the main contents of scenes that use control Bars
 	// to allow the main window contents to be specified separately

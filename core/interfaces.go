@@ -4,13 +4,15 @@
 
 package core
 
+import "cogentcore.org/core/tree"
+
 // This file contains all the special-purpose interfaces
 // beyond the basic [Widget] interface.
 
 // ToolbarMaker is an interface that types can implement to make a toolbar plan.
 // It is automatically used when making value view dialogs.
 type ToolbarMaker interface {
-	MakeToolbar(p *Plan)
+	MakeToolbar(p *tree.Plan)
 }
 
 // Validator is an interface for types to provide a Validate method

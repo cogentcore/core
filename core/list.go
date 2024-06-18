@@ -99,7 +99,7 @@ type Lister interface {
 
 	// MakeRow adds config for one row at given widget row index.
 	// Plan must be the StructGrid Plan.
-	MakeRow(p *Plan, i int)
+	MakeRow(p *tree.Plan, i int)
 
 	// StyleValue performs additional value widget styling
 	StyleValue(w Widget, s *styles.Style, row, col int)
@@ -341,7 +341,7 @@ func (lb *ListBase) Init() {
 		lb.Send(events.DoubleClick, e)
 	})
 
-	lb.Maker(func(p *Plan) {
+	lb.Maker(func(p *tree.Plan) {
 		svi := lb.This.(Lister)
 		svi.UpdateSliceSize()
 
@@ -368,7 +368,7 @@ func (lb *ListBase) Init() {
 			svi.UpdateMaxWidths()
 		})
 
-		lb.MakeGrid(p, func(p *Plan) {
+		lb.MakeGrid(p, func(p *tree.Plan) {
 			for i := 0; i < lb.VisRows; i++ {
 				svi.MakeRow(p, i)
 			}
@@ -523,8 +523,8 @@ func (lb *ListBase) SliceElementValue(si int) reflect.Value {
 	return val
 }
 
-func (lb *ListBase) MakeGrid(p *Plan, maker func(p *Plan)) {
-	AddAt(p, "grid", func(w *ListGrid) {
+func (lb *ListBase) MakeGrid(p *tree.Plan, maker func(p *tree.Plan)) {
+	tree.AddAt(p, "grid", func(w *ListGrid) {
 		w.Styler(func(s *styles.Style) {
 			nWidgPerRow, _ := lb.This.(Lister).RowWidgetNs()
 			w.MinRows = lb.MinRows
@@ -591,7 +591,7 @@ func (lb *ListBase) MakeValue(w Value, i int) {
 	}
 }
 
-func (lb *ListBase) MakeRow(p *Plan, i int) {
+func (lb *ListBase) MakeRow(p *tree.Plan, i int) {
 	svi := lb.This.(Lister)
 	si, vi, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
@@ -602,7 +602,7 @@ func (lb *ListBase) MakeRow(p *Plan, i int) {
 	}
 
 	valnm := fmt.Sprintf("value-%s-%s", itxt, reflectx.ShortTypeName(lb.ElementValue.Type()))
-	AddNew(p, valnm, func() Value {
+	tree.AddNew(p, valnm, func() Value {
 		return NewValue(val.Addr().Interface(), "")
 	}, func(w Value) {
 		wb := w.AsWidget()
@@ -630,9 +630,9 @@ func (lb *ListBase) MakeRow(p *Plan, i int) {
 
 }
 
-func (lb *ListBase) MakeGridIndex(p *Plan, i, si int, itxt string, invis bool) {
+func (lb *ListBase) MakeGridIndex(p *tree.Plan, i, si int, itxt string, invis bool) {
 	svi := lb.This.(Lister)
-	AddAt(p, "index-"+itxt, func(w *Text) {
+	tree.AddAt(p, "index-"+itxt, func(w *Text) {
 		w.SetProperty(ListRowProperty, i)
 		w.Styler(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.DoubleClickable)
@@ -845,14 +845,14 @@ func (lb *ListBase) SliceDeleteAt(i int) {
 }
 
 // MakeToolbar configures a [Toolbar] for this view
-func (lb *ListBase) MakeToolbar(p *Plan) {
+func (lb *ListBase) MakeToolbar(p *tree.Plan) {
 	if reflectx.AnyIsNil(lb.Slice) {
 		return
 	}
 	if lb.isArray || lb.IsReadOnly() {
 		return
 	}
-	Add(p, func(w *Button) {
+	tree.Add(p, func(w *Button) {
 		w.SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the slice").
 			OnClick(func(e events.Event) {
 				lb.This.(Lister).SliceNewAt(-1)
