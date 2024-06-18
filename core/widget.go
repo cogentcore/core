@@ -167,17 +167,6 @@ type WidgetBase struct {
 	// Geom has the full layout geometry for size and position of this Widget
 	Geom GeomState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
-	// Updaters are a slice of functions called in sequential descending (reverse) order
-	// in [WidgetBase.UpdateWidget] to update the widget. You can use
-	// [WidgetBase.Updater] to add one. By default, this slice contains a function
-	// that updates the widget's children using [WidgetBase.Make].
-	Updaters []func() `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
-
-	// Makers are a slice of functions called in sequential ascending order
-	// in [WidgetBase.Make] to make the plan for how the widget's children should
-	// be configured. You can use [WidgetBase.Maker] to add one.
-	Makers []func(p *Plan) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
-
 	// If true, override the computed styles and allow directly editing Styles.
 	OverrideStyle bool `copier:"-" json:"-" xml:"-" set:"-"`
 

@@ -51,6 +51,31 @@ type PlanItem struct {
 	Init []func(n Node)
 }
 
+// Updater adds a new function to [NodeBase.Updaters], which are called in sequential
+// descending (reverse) order in [cogentcore.org/core/core.WidgetBase.UpdateWidget] and
+// other places such as xyz to update the node.
+func (nb *NodeBase) Updater(updater func()) {
+	nb.Updaters = append(nb.Updaters, updater)
+}
+
+// Maker adds a new function to [NodeBase.Makers], which are called in sequential
+// ascending order in [NodeBase.Make] to make the plan for how the node's children
+// should be configured.
+func (nb *NodeBase) Maker(maker func(p *Plan)) {
+	nb.Makers = append(nb.Makers, maker)
+}
+
+// Make makes a plan for how the node's children should be structured.
+// It does this by running [NodeBase.Makers] in sequential ascending order.
+func (nb *NodeBase) Make(p *Plan) {
+	if len(nb.Makers) > 0 { // only enforce empty if makers exist
+		p.EnforceEmpty = true
+	}
+	for _, maker := range nb.Makers {
+		maker(p)
+	}
+}
+
 // Add adds a new [PlanItem] to the given [Plan] for a [Node] with
 // the given function to initialize the node. The node
 // is guaranteed to have its parent set before the init function

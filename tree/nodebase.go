@@ -23,9 +23,8 @@ import (
 //
 // All nodes must be properly initialized by using one of [New], [NodeBase.NewChild],
 // [NodeBase.AddChild], [NodeBase.InsertChild], [NodeBase.InsertNewChild],
-// [NodeBase.Clone], [Update], or [cogentcore.org/core/core.Plan]. This ensures
-// that the [Node.This] field is set correctly and that the [Node.Init] method is
-// called.
+// [NodeBase.Clone], [Update], or [Plan]. This ensures that the [Node.This] field
+// is set correctly and that the [Node.Init] method is called.
 //
 // All nodes support JSON marshalling and unmarshalling through the standard [encoding/json]
 // interfaces, so you can use the standard functions for loading and saving trees. However,
@@ -66,6 +65,17 @@ type NodeBase struct {
 	// You should typically use the [NodeBase.SetProperty], [NodeBase.Property], and
 	// [NodeBase.DeleteProperty] methods for modifying and accessing properties.
 	Properties map[string]any `table:"-" xml:"-" copier:"-" set:"-" json:",omitempty"`
+
+	// Updaters are a slice of functions called in sequential descending (reverse) order
+	// in [cogentcore.org/core/core.WidgetBase.UpdateWidget] and other places such as in
+	// xyz to update the node. You can use [NodeBase.Updater] to add one. By default,
+	// this slice contains a function that updates the node's children using [NodeBase.Make].
+	Updaters []func() `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
+
+	// Makers are a slice of functions called in sequential ascending order
+	// in [NodeBase.Make] to make the plan for how the node's children should
+	// be configured. You can use [NodeBase.Maker] to add one.
+	Makers []func(p *Plan) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// numLifetimeChildren is the number of children that have ever been added to this
 	// node, which is used for automatic unique naming.

@@ -10,19 +10,6 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Updater adds a new function to [WidgetBase.Updaters], which are called in sequential
-// descending (reverse) order in [WidgetBase.UpdateWidget] to update the widget.
-func (wb *WidgetBase) Updater(updater func()) {
-	wb.Updaters = append(wb.Updaters, updater)
-}
-
-// Maker adds a new function to [WidgetBase.Makers], which are called in sequential
-// ascending order in [WidgetBase.Make] to make the plan for how the widget's children
-// should be configured.
-func (wb *WidgetBase) Maker(maker func(p *Plan)) {
-	wb.Makers = append(wb.Makers, maker)
-}
-
 // UpdateWidget updates the widget by running [WidgetBase.Updaters] in
 // sequential descending (reverse) order after calling [WidgetBase.ValueUpdate].
 // This includes applying the result of [WidgetBase.Make].
@@ -47,19 +34,6 @@ func (wb *WidgetBase) updateFromMake() {
 	p := Plan{Widget: wb.This.(Widget)}
 	wb.Make(&p)
 	p.Update(wb)
-}
-
-// Make makes a plan for how the widget's children should be structured.
-// It does this by running [WidgetBase.Makers] in sequential ascending order.
-// Make is called by [WidgetBase.UpdateWidget] to determine how the widget
-// should be updated.
-func (wb *WidgetBase) Make(p *Plan) {
-	if len(wb.Makers) > 0 { // only enforce empty if makers exist
-		p.EnforceEmpty = true
-	}
-	for _, maker := range wb.Makers {
-		maker(p)
-	}
 }
 
 // UpdateTree calls [WidgetBase.UpdateWidget] on every widget in the tree
