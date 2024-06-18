@@ -24,5 +24,5 @@ func TestGoSrcDir(t *testing.T) {
 	dir2 := "nonexistent"
 	_, err = GoSrcDir(dir2)
 	assert.Error(t, err)
-	assert.EqualError(t, err, fmt.Sprintf("dirs.GoSrcDir: unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir2, os.Getenv("GOPATH"), os.Getenv("GOROOT")))
+	assert.EqualError(t, err, fmt.Sprintf("fsx.GoSrcDir: unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir2, os.Getenv("GOPATH"), os.Getenv("GOROOT")))
 }

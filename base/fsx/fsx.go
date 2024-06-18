@@ -27,7 +27,7 @@ func GoSrcDir(dir string) (absDir string, err error) {
 			return absDir, nil
 		}
 	}
-	return "", fmt.Errorf("dirs.GoSrcDir: unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
+	return "", fmt.Errorf("fsx.GoSrcDir: unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
 }
 
 // ExtFiles returns all the FileInfo's for files with given extension(s) in directory
