@@ -4,11 +4,11 @@
 
 package slicesx
 
-// ToAny converts a slice of a specific type to an []any slice
+// ToAny converts a slice of a certain type to a []any slice.
 func ToAny[E any](s []E) []any {
 	as := make([]any, len(s))
 	for i, v := range s {
-		as[i] = any(v)
+		as[i] = v
 	}
 	return as
 }
