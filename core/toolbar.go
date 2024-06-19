@@ -5,10 +5,8 @@
 package core
 
 import (
-	"slices"
-
-	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
@@ -30,9 +28,12 @@ type Toolbar struct {
 	// so that the default items are added last.
 	OverflowMenus []func(m *Scene) `set:"-" json:"-" xml:"-"`
 
+	// allItemsPlan has all the items, during layout sizing
+	allItemsPlan *tree.Plan
+
 	// overflowItems are items moved from the main toolbar that will be
 	// shown in the overflow menu.
-	overflowItems []tree.Node
+	overflowItems []*tree.PlanItem
 
 	// overflowButton is the widget to pull up the overflow menu.
 	overflowButton *Button
@@ -41,19 +42,20 @@ type Toolbar struct {
 func (tb *Toolbar) Init() {
 	tb.Frame.Init()
 	ToolbarStyles(tb)
-
-	tree.AddChildAt(tb, "overflow-menu", func(w *Button) {
-		tb.overflowButton = w
-		ic := icons.MoreVert
-		if tb.Styles.Direction != styles.Row {
-			ic = icons.MoreHoriz
-		}
-		w.SetIcon(ic).SetTooltip("Additional menu items")
-		w.Updater(func() {
-			tb, ok := w.Parent.(*Toolbar)
-			if ok {
-				w.Menu = tb.OverflowMenu
+	tb.OnShow(func(e events.Event) { // must come last, but this is too late
+		// needs to come 1 cycle earlier to get actually rendered
+		tree.AddChildAt(tb, "overflow-menu", func(w *Button) { // must come last
+			ic := icons.MoreVert
+			if tb.Styles.Direction != styles.Row {
+				ic = icons.MoreHoriz
 			}
+			w.SetIcon(ic).SetTooltip("Additional menu items")
+			w.Updater(func() {
+				tb, ok := w.Parent.(*Toolbar)
+				if ok {
+					w.Menu = tb.OverflowMenu
+				}
+			})
 		})
 	})
 }
@@ -67,8 +69,6 @@ func (tb *Toolbar) SizeUp() {
 	tb.AllItemsToChildren()
 	tb.Frame.SizeUp()
 }
-
-// todo: try doing move to overflow in Final
 
 func (tb *Toolbar) SizeDown(iter int) bool {
 	redo := tb.Frame.SizeDown(iter)
@@ -85,7 +85,10 @@ func (tb *Toolbar) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 
 	csz := tb.Frame.SizeFromChildren(iter, pass)
 	if pass == SizeUpPass || (pass == SizeDownPass && iter == 0) {
 		dim := tb.Styles.Direction.Dim()
-		ovsz := tb.overflowButton.Geom.Size.Actual.Total.Dim(dim)
+		ovsz := tb.Styles.UnitContext.FontEm * 2
+		if tb.overflowButton != nil {
+			ovsz = tb.overflowButton.Geom.Size.Actual.Total.Dim(dim)
+		}
 		csz.SetDim(dim, ovsz) // present the minimum size initially
 		return csz
 	}
@@ -97,26 +100,14 @@ func (tb *Toolbar) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 
 // and ensures the overflow button is made and moves it
 // to the end of the list.
 func (tb *Toolbar) AllItemsToChildren() {
-	if len(tb.overflowItems) > 0 {
-		tb.Children = append(tb.Children, tb.overflowItems...)
-		tb.overflowItems = nil
+	tb.overflowItems = nil
+	tb.allItemsPlan = &tree.Plan{Parent: tb.This}
+	tb.Make(tb.allItemsPlan)
+	np := len(tb.allItemsPlan.Children)
+	if tb.NumChildren() != np {
+		tb.Scene.RenderWidget()
+		tb.Update() // todo: needs one more redraw here
 	}
-	ovi := -1
-	for i, k := range tb.Children {
-		_, wb := AsWidget(k)
-		if wb == nil {
-			continue
-		}
-		if wb.This == tb.overflowButton.This {
-			ovi = i
-			break
-		}
-	}
-	if ovi >= 0 {
-		tb.Children = slices.Delete(tb.Children, ovi, ovi+1)
-	}
-	tb.Children = append(tb.Children, tb.overflowButton.This)
-	tb.overflowButton.UpdateTree()
 }
 
 func (tb *Toolbar) ParentSize() float32 {
@@ -128,14 +119,28 @@ func (tb *Toolbar) ParentSize() float32 {
 
 // MoveToOverflow moves overflow out of children to the OverflowItems list
 func (tb *Toolbar) MoveToOverflow() {
+	if !tb.HasChildren() {
+		return
+	}
 	ma := tb.Styles.Direction.Dim()
 	avail := tb.ParentSize()
+	li := tb.Children[tb.NumChildren()-1]
+	tb.overflowButton = nil
+	if li != nil {
+		if ob, ok := li.(*Button); ok {
+			tb.overflowButton = ob
+		}
+	}
+	if tb.overflowButton == nil {
+		return
+	}
 	ovsz := tb.overflowButton.Geom.Size.Actual.Total.Dim(ma)
 	avsz := avail - ovsz
 	sz := &tb.Geom.Size
 	sz.Alloc.Total.SetDim(ma, avail)
 	sz.SetContentFromTotal(&sz.Alloc)
 	n := len(tb.Children)
+	pn := len(tb.allItemsPlan.Children)
 	ovidx := n - 1
 	hasOv := false
 	szsum := float32(0)
@@ -150,13 +155,16 @@ func (tb *Toolbar) MoveToOverflow() {
 				ovidx = i
 				hasOv = true
 			}
-			tb.overflowItems = append(tb.overflowItems, kwi)
+			pi := tb.allItemsPlan.Children[i]
+			tb.overflowItems = append(tb.overflowItems, pi)
 		}
 		return tree.Continue
 	})
-	if ovidx != n-1 {
-		tb.Children = slicesx.Move(tb.Children, n-1, ovidx)
-		tb.Children = tb.Children[:ovidx+1]
+	if hasOv {
+		p := &tree.Plan{Parent: tb.This}
+		p.Children = tb.allItemsPlan.Children[:ovidx]
+		p.Children = append(p.Children, tb.allItemsPlan.Children[pn-1]) // ovm
+		p.Update(tb)
 	}
 	if len(tb.overflowItems) == 0 && len(tb.OverflowMenus) == 0 {
 		tb.overflowButton.SetState(true, states.Invisible)
@@ -169,15 +177,11 @@ func (tb *Toolbar) MoveToOverflow() {
 // OverflowMenu adds the overflow menu to the given Scene.
 func (tb *Toolbar) OverflowMenu(m *Scene) {
 	nm := len(tb.OverflowMenus)
-	if len(tb.overflowItems) > 0 {
-		for _, n := range tb.overflowItems {
-			if n == tb.overflowButton {
-				continue
-			}
-			cl := n.AsTree().Clone()
-			m.AddChild(cl)
-			cl.(Widget).AsWidget().UpdateWidget()
-		}
+	ni := len(tb.overflowItems)
+	if ni > 0 {
+		p := &tree.Plan{Parent: tb.This}
+		p.Children = tb.overflowItems
+		p.Update(m)
 		if nm > 1 { // default includes sep
 			NewSeparator(m)
 		}
