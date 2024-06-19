@@ -249,6 +249,7 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 	od := dim.Other()
 	cszd := csz.Dim(dim)
 	cszod := csz.Dim(od)
+	sl.UpdateSplits()
 	sl.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		sw := math32.Round(sl.Splits[i] * cszd)
 		ksz := &kwb.Geom.Size
