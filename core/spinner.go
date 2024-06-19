@@ -69,6 +69,15 @@ type Spinner struct {
 
 func (sp *Spinner) WidgetValue() any { return &sp.Value }
 
+func (sp *Spinner) SetWidgetValue(value any) error {
+	f, err := reflectx.ToFloat32(value)
+	if err != nil {
+		return err
+	}
+	sp.SetValue(f)
+	return nil
+}
+
 func (sp *Spinner) OnBind(value any) {
 	kind := reflectx.NonPointerType(reflect.TypeOf(value)).Kind()
 	if kind >= reflect.Int && kind <= reflect.Uintptr {

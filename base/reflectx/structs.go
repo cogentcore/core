@@ -130,7 +130,7 @@ func SetFromDefaultTag(v reflect.Value, def string) error {
 	if def == "" {
 		return nil
 	}
-	return SetRobust(PointerValue(v).Interface(), def)
+	return SetRobust(UnderlyingPointer(v).Interface(), def)
 }
 
 // TODO: this needs to return an ordmap of the fields
