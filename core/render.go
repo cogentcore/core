@@ -330,7 +330,7 @@ func (wb *WidgetBase) PushBounds() bool {
 	}
 	wb.Styles.ComputeActualBackground(wb.ParentActualBackground())
 	pc := &wb.Scene.PaintContext
-	if pc.State == nil {
+	if pc.State == nil || pc.Image == nil {
 		return false
 	}
 	pc.PushBounds(wb.Geom.TotalBBox)
