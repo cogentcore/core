@@ -290,10 +290,10 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 
 	for fli := 0; fli < tb.numVisibleFields; fli++ {
 		field := tb.visibleFields[fli]
-		fval := reflectx.OnePointerValue(val.FieldByIndex(field.Index))
+		uv := reflectx.Underlying(val.FieldByIndex(field.Index))
 		valnm := fmt.Sprintf("value-%d-%s-%s", fli, itxt, reflectx.ShortTypeName(field.Type))
 		tags := field.Tag
-		if fval.Kind() == reflect.Slice || fval.Kind() == reflect.Map {
+		if uv.Kind() == reflect.Slice || uv.Kind() == reflect.Map {
 			ni := reflect.StructTag(`display:"no-inline"`)
 			if tags == "" {
 				tags += " " + ni
@@ -304,7 +304,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 		readOnlyTag := tags.Get("edit") == "-"
 
 		tree.AddNew(p, valnm, func() Value {
-			return NewValue(fval.Interface(), tags)
+			return NewValue(uv.Addr().Interface(), tags)
 		}, func(w Value) {
 			wb := w.AsWidget()
 			tb.MakeValue(w, i)
@@ -318,8 +318,8 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 			wb.Updater(func() {
 				si, vi, invis := svi.SliceIndex(i)
 				val := tb.SliceElementValue(vi)
-				fval := reflectx.OnePointerValue(val.FieldByIndex(field.Index))
-				Bind(fval.Interface(), w)
+				upv := reflectx.UnderlyingPointer(val.FieldByIndex(field.Index))
+				Bind(upv.Interface(), w)
 
 				vc := tb.ValueTitle + "[" + strconv.Itoa(si) + "]"
 				if !invis {
