@@ -13,7 +13,7 @@ package events
 // Call SetHandled() on the event to stop further propagation.
 type Listeners map[Types][]func(ev Event)
 
-// Init ensures that map is constructed
+// Init ensures that the map is constructed.
 func (ls *Listeners) Init() {
 	if *ls != nil {
 		return
@@ -30,7 +30,7 @@ func (ls *Listeners) Add(typ Types, fun func(e Event)) {
 	(*ls)[typ] = ets
 }
 
-// HandlesEventType returns true if this listener handles given event type
+// HandlesEventType returns true if this listener handles the given event type.
 func (ls *Listeners) HandlesEventType(typ Types) bool {
 	if *ls == nil {
 		return false
@@ -40,7 +40,7 @@ func (ls *Listeners) HandlesEventType(typ Types) bool {
 }
 
 // Call calls all functions for given event.
-// It goes in _reverse_ order so the last functions added are the first called
+// It goes in reverse order so the last functions added are the first called
 // and it stops when the event is marked as Handled.  This allows for a natural
 // and optional override behavior, as compared to requiring more complex
 // priority-based mechanisms. Also, it takes an optional function that

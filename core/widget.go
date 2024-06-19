@@ -11,7 +11,7 @@ import (
 	"image"
 	"log/slog"
 
-	"cogentcore.org/core/base/slicesx"
+	"cogentcore.org/core/base/tiered"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
@@ -178,30 +178,18 @@ type WidgetBase struct {
 	// added overrides.
 	Styles styles.Style `json:"-" xml:"-" set:"-"`
 
-	// Stylers are a tiered set of slices of functions that are called in sequential
+	// Stylers is a tiered set of functions that are called in sequential
 	// ascending order (so the last added styler is called last and
 	// thus can override all other stylers) to style the element.
 	// These should be set using the [WidgetBase.Styler], [WidgetBase.FirstStyler],
 	// and [WidgetBase.FinalStyler] functions.
-	Stylers slicesx.Tiered[func(s *styles.Style)] `copier:"-" json:"-" xml:"-" set:"-" edit:"-" display:"add-fields"`
+	Stylers tiered.Tiered[[]func(s *styles.Style)] `copier:"-" json:"-" xml:"-" set:"-" edit:"-" display:"add-fields"`
 
-	// Listeners are event listener functions for processing events on this widget.
+	// Listeners is a tiered set of event listener functions for processing events on this widget.
 	// They are called in sequential descending order (so the last added listener
-	// is called first). They should be added using the On function. FirstListeners
-	// and FinalListeners are called before and after these listeners, respectively.
-	Listeners events.Listeners `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
-
-	// FirstListeners are event listener functions for processing events on this widget.
-	// They are called in sequential descending order (so the last added listener
-	// is called first). They should be added using the OnFirst function. These listeners
-	// are called before Listeners and FinalListeners.
-	FirstListeners events.Listeners `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
-
-	// FinalListeners are event listener functions for processing events on this widget.
-	// They are called in sequential descending order (so the last added listener
-	// is called first). They should be added using the OnFinal function. These listeners
-	// are called after FirstListeners and Listeners.
-	FinalListeners events.Listeners `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
+	// is called first). They should be added using the [WidgetBase.On], [WidgetBase.OnFirst],
+	// and [WidgetBase.OnFinal] functions, or any of the various On{EventType} helper functions.
+	Listeners tiered.Tiered[events.Listeners] `copier:"-" json:"-" xml:"-" set:"-" edit:"-" display:"add-fields"`
 
 	// A slice of functions to call on all widgets that are added as children
 	// to this widget or its children. These functions are called in sequential
@@ -358,22 +346,16 @@ func (wb *WidgetBase) CopyFieldsFrom(from tree.Node) {
 		wb.ContextMenus = append(wb.ContextMenus, frm.ContextMenus[n:]...)
 	}
 
-	n = len(wb.Stylers.First)
-	if len(frm.Stylers.First) > n {
-		wb.Stylers.First = append(wb.Stylers.First, frm.Stylers.First[n:]...)
-	}
-	n = len(wb.Stylers.Normal)
-	if len(frm.Stylers.Normal) > n {
-		wb.Stylers.Normal = append(wb.Stylers.Normal, frm.Stylers.Normal[n:]...)
-	}
-	n = len(wb.Stylers.Final)
-	if len(frm.Stylers.Final) > n {
-		wb.Stylers.Final = append(wb.Stylers.Final, frm.Stylers.Final[n:]...)
-	}
+	wb.Stylers.DoWith(&frm.Stylers, func(to, from *[]func(s *styles.Style)) {
+		n := len(*to)
+		if len(*from) > n {
+			*to = append(*to, (*from)[n:]...)
+		}
+	})
 
-	wb.FirstListeners.CopyFromExtra(frm.FirstListeners)
-	wb.Listeners.CopyFromExtra(frm.Listeners)
-	wb.FinalListeners.CopyFromExtra(frm.FinalListeners)
+	wb.Listeners.DoWith(&frm.Listeners, func(to, from *events.Listeners) {
+		to.CopyFromExtra(*from)
+	})
 }
 
 func (wb *WidgetBase) Destroy() {
