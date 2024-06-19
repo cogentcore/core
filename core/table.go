@@ -313,7 +313,6 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 				wb.OnChange(func(e events.Event) {
 					tb.SendChange()
 				})
-				wb.OnInput(tb.HandleEvent)
 			}
 			wb.Updater(func() {
 				si, vi, invis := svi.SliceIndex(i)

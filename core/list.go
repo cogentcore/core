@@ -517,7 +517,7 @@ func (lb *ListBase) SliceElementValue(si int) reflect.Value {
 	} else {
 		val = lb.ElementValue
 	}
-	if val.IsZero() {
+	if !val.IsValid() {
 		val = lb.ElementValue
 	}
 	return val
