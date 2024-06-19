@@ -506,7 +506,7 @@ func (fp *FilePicker) SelectField() *TextField {
 
 // ExtField returns the TextField of the extension
 func (fp *FilePicker) ExtField() *TextField {
-	return fp.FindPath("sel/ext").(*TextField)
+	return fp.FindPath("sel/extension").(*TextField)
 }
 
 // UpdatePath ensures that path is in abs form and ready to be used..
