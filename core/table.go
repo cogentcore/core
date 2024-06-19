@@ -68,7 +68,7 @@ func (tb *Table) Init() {
 	tb.AddContextMenu(tb.ContextMenu)
 	tb.SortIndex = -1
 
-	tb.Makers[0] = func(p *tree.Plan) { // TODO: reduce redundancy with ListBase Maker
+	tb.Makers.Normal[0] = func(p *tree.Plan) { // TODO: reduce redundancy with ListBase Maker
 		svi := tb.This.(Lister)
 		svi.UpdateSliceSize()
 

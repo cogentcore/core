@@ -14,6 +14,7 @@ import (
 	"github.com/jinzhu/copier"
 
 	"cogentcore.org/core/base/elide"
+	"cogentcore.org/core/base/tiered"
 	"cogentcore.org/core/types"
 )
 
@@ -71,10 +72,10 @@ type NodeBase struct {
 	// add one. This slice typically contains [NodeBase.UpdateFromMake] at the start.
 	Updaters []func() `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
-	// Makers is a slice of functions called in sequential ascending order
+	// Makers is a tiered set of functions called in sequential ascending order
 	// in [NodeBase.Make] to make the plan for how the node's children should
 	// be configured. You can use [NodeBase.Maker] to add one.
-	Makers []func(p *Plan) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
+	Makers tiered.Tiered[[]func(p *Plan)] `copier:"-" json:"-" xml:"-" set:"-" edit:"-" display:"add-fields"`
 
 	// numLifetimeChildren is the number of children that have ever been added to this
 	// node, which is used for automatic unique naming.

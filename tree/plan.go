@@ -61,18 +61,21 @@ func (nb *NodeBase) Updater(updater func()) {
 // ascending order in [NodeBase.Make] to make the plan for how the node's children
 // should be configured.
 func (nb *NodeBase) Maker(maker func(p *Plan)) {
-	nb.Makers = append(nb.Makers, maker)
+	nb.Makers.Normal = append(nb.Makers.Normal, maker)
 }
 
 // Make makes a plan for how the node's children should be structured.
 // It does this by running [NodeBase.Makers] in sequential ascending order.
 func (nb *NodeBase) Make(p *Plan) {
-	if len(nb.Makers) > 0 { // only enforce empty if makers exist
+	// only enforce empty if makers exist
+	if len(nb.Makers.First) > 0 || len(nb.Makers.Normal) > 0 || len(nb.Makers.Final) > 0 {
 		p.EnforceEmpty = true
 	}
-	for _, maker := range nb.Makers {
-		maker(p)
-	}
+	nb.Makers.Do(func(makers []func(p *Plan)) {
+		for _, maker := range makers {
+			maker(p)
+		}
+	})
 }
 
 // UpdateFromMake updates the node using [NodeBase.Make].

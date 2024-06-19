@@ -75,7 +75,7 @@ func (tb *Table) Init() {
 	tb.ColumnTensorDisplay = map[int]*TensorDisplay{}
 	tb.ColumnTensorBlank = map[int]*tensor.Float64{}
 
-	tb.Makers[0] = func(p *tree.Plan) { // TODO: reduce redundancy with ListBase Maker
+	tb.Makers.Normal[0] = func(p *tree.Plan) { // TODO: reduce redundancy with ListBase Maker
 		svi := tb.This.(core.Lister)
 		svi.UpdateSliceSize()
 
