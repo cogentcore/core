@@ -74,7 +74,8 @@ type NodeBase struct {
 
 	// Makers is a tiered set of functions called in sequential ascending order
 	// in [NodeBase.Make] to make the plan for how the node's children should
-	// be configured. You can use [NodeBase.Maker] to add one.
+	// be configured. You can use [NodeBase.Maker], [NodeBase.FirstMaker], or
+	// [NodeBase.FinalMaker] to add one.
 	Makers tiered.Tiered[[]func(p *Plan)] `copier:"-" json:"-" xml:"-" set:"-" edit:"-" display:"add-fields"`
 
 	// numLifetimeChildren is the number of children that have ever been added to this

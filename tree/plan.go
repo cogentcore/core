@@ -57,11 +57,25 @@ func (nb *NodeBase) Updater(updater func()) {
 	nb.Updaters = append(nb.Updaters, updater)
 }
 
-// Maker adds a new function to [NodeBase.Makers], which are called in sequential
+// Maker adds a new function to [NodeBase.Makers.Normal], which are called in sequential
 // ascending order in [NodeBase.Make] to make the plan for how the node's children
 // should be configured.
 func (nb *NodeBase) Maker(maker func(p *Plan)) {
 	nb.Makers.Normal = append(nb.Makers.Normal, maker)
+}
+
+// FirstMaker adds a new function to [NodeBase.Makers.First], which are called in sequential
+// ascending order in [NodeBase.Make] to make the plan for how the node's children
+// should be configured.
+func (nb *NodeBase) FirstMaker(maker func(p *Plan)) {
+	nb.Makers.First = append(nb.Makers.First, maker)
+}
+
+// FinalMaker adds a new function to [NodeBase.Makers.Final], which are called in sequential
+// ascending order in [NodeBase.Make] to make the plan for how the node's children
+// should be configured.
+func (nb *NodeBase) FinalMaker(maker func(p *Plan)) {
+	nb.Makers.Final = append(nb.Makers.Final, maker)
 }
 
 // Make makes a plan for how the node's children should be structured.
