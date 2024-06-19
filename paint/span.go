@@ -291,7 +291,7 @@ func (sr *Span) SetRunes(str []rune, sty *styles.FontRender, ctxt *units.Context
 // UpdateColors sets the font styling colors the first rune
 // based on the given font style parameters.
 func (sr *Span) UpdateColors(sty *styles.FontRender) {
-	if len(sr.Text) == 0 {
+	if len(sr.Render) == 0 {
 		return
 	}
 	r := &sr.Render[0]
