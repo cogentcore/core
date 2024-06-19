@@ -18,29 +18,29 @@ import (
 )
 
 // Styler adds the given function for setting the style properties of the widget
-// to [WidgetBase.Stylers]. It is one of the main ways to specify the styles of
+// to [WidgetBase.Stylers.Normal]. It is one of the main ways to specify the styles of
 // a widget, in addition to FirstStyler and FinalStyler, which add stylers that
 // are called before and after the stylers added by this function, respectively.
 func (wb *WidgetBase) Styler(s func(s *styles.Style)) *WidgetBase {
-	wb.Stylers = append(wb.Stylers, s)
+	wb.Stylers.Normal = append(wb.Stylers.Normal, s)
 	return wb
 }
 
 // FirstStyler adds the given function for setting the style properties of the widget
-// to [WidgetBase.FirstStylers]. It is one of the main ways to specify the styles of
-// a widget, in addition to Styler and FinalStyler, which add stylers that are called
-// after the stylers added by this function.
+// to [WidgetBase.Stylers.First]. It is one of the main ways to specify the styles of
+// a widget, in addition to Styler and FinalStyler, which add stylers that
+// are called after the stylers added by this function.
 func (wb *WidgetBase) FirstStyler(s func(s *styles.Style)) *WidgetBase {
-	wb.FirstStylers = append(wb.FirstStylers, s)
+	wb.Stylers.First = append(wb.Stylers.First, s)
 	return wb
 }
 
 // FinalStyler adds the given function for setting the style properties of the widget
-// to [WidgetBase.FinalStylers]. It is one of the main ways to specify the styles of
+// to [WidgetBase.Stylers.Final]. It is one of the main ways to specify the styles of
 // a widget, in addition to FirstStyler and Styler, which add stylers that are called
 // before the stylers added by this function.
 func (wb *WidgetBase) FinalStyler(s func(s *styles.Style)) *WidgetBase {
-	wb.FinalStylers = append(wb.FinalStylers, s)
+	wb.Stylers.Final = append(wb.Stylers.Final, s)
 	return wb
 }
 
@@ -100,18 +100,11 @@ func (wb *WidgetBase) resetStyleWidget() {
 	s.SetMono(false)
 }
 
-// runStylers runs the stylers specified in the widget's FirstStylers,
-// Stylers, and FinalStylers in that order in a sequential ascending order.
+// runStylers runs the [WidgetBase.Stylers].
 func (wb *WidgetBase) runStylers() {
-	for _, s := range wb.FirstStylers {
+	wb.Stylers.Do(func(s func(s *styles.Style)) {
 		s(&wb.Styles)
-	}
-	for _, s := range wb.Stylers {
-		s(&wb.Styles)
-	}
-	for _, s := range wb.FinalStylers {
-		s(&wb.Styles)
-	}
+	})
 }
 
 // resetStyleSettings reverses the effects of [ApplyStyleSettings]

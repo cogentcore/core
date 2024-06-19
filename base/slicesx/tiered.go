@@ -22,3 +22,17 @@ type Tiered[E any] struct {
 	// those in [Tiered.First] and [Tiered.Normal].
 	Final []E
 }
+
+// Do calls the given function for each element in the tiered set of slices,
+// going through first, then normal, then final.
+func (t *Tiered[E]) Do(f func(E)) {
+	for _, e := range t.First {
+		f(e)
+	}
+	for _, e := range t.Normal {
+		f(e)
+	}
+	for _, e := range t.Final {
+		f(e)
+	}
+}

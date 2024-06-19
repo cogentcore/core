@@ -11,6 +11,7 @@ import (
 	"image"
 	"log/slog"
 
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
@@ -177,26 +178,12 @@ type WidgetBase struct {
 	// added overrides.
 	Styles styles.Style `json:"-" xml:"-" set:"-"`
 
-	// Stylers are a slice of functions that are called in sequential
+	// Stylers are a tiered set of slices of functions that are called in sequential
 	// ascending order (so the last added styler is called last and
-	// thus overrides all other functions) to style the element.
-	// These should be set using Styler function. FirstStylers and
-	// FinalStylers are called before and after these stylers, respectively.
-	Stylers []func(s *styles.Style) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
-
-	// FirstStylers are a slice of functions that are called in sequential
-	// ascending order (so the last added styler is called last and
-	// thus overrides all other functions) to style the element.
-	// These should be set using FirstStyler function. These stylers
-	// are called before Stylers and FinalStylers.
-	FirstStylers []func(s *styles.Style) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
-
-	// FinalStylers are a slice of functions that are called in sequential
-	// ascending order (so the last added styler is called last and
-	// thus overrides all other functions) to style the element.
-	// These should be set using FinalStyler function. These stylers
-	// are called after FirstStylers and Stylers.
-	FinalStylers []func(s *styles.Style) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
+	// thus can override all other stylers) to style the element.
+	// These should be set using the [WidgetBase.Styler], [WidgetBase.FirstStyler],
+	// and [WidgetBase.FinalStyler] functions.
+	Stylers slicesx.Tiered[func(s *styles.Style)] `copier:"-" json:"-" xml:"-" set:"-" edit:"-" display:"add-fields"`
 
 	// Listeners are event listener functions for processing events on this widget.
 	// They are called in sequential descending order (so the last added listener
@@ -366,16 +353,26 @@ func (wb *WidgetBase) CopyFieldsFrom(from tree.Node) {
 	wb.NodeBase.CopyFieldsFrom(from)
 	_, frm := AsWidget(from)
 
-	n := len(wb.Stylers)
-	if len(frm.Stylers) > n {
-		wb.Stylers = append(wb.Stylers, frm.Stylers[n:]...)
-	}
-	n = len(wb.ContextMenus)
+	n := len(wb.ContextMenus)
 	if len(frm.ContextMenus) > n {
 		wb.ContextMenus = append(wb.ContextMenus, frm.ContextMenus[n:]...)
 	}
-	wb.Listeners.CopyFromExtra(frm.Listeners)
+
+	n = len(wb.Stylers.First)
+	if len(frm.Stylers.First) > n {
+		wb.Stylers.First = append(wb.Stylers.First, frm.Stylers.First[n:]...)
+	}
+	n = len(wb.Stylers.Normal)
+	if len(frm.Stylers.Normal) > n {
+		wb.Stylers.Normal = append(wb.Stylers.Normal, frm.Stylers.Normal[n:]...)
+	}
+	n = len(wb.Stylers.Final)
+	if len(frm.Stylers.Final) > n {
+		wb.Stylers.Final = append(wb.Stylers.Final, frm.Stylers.Final[n:]...)
+	}
+
 	wb.FirstListeners.CopyFromExtra(frm.FirstListeners)
+	wb.Listeners.CopyFromExtra(frm.Listeners)
 	wb.FinalListeners.CopyFromExtra(frm.FinalListeners)
 }
 
