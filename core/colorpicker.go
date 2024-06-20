@@ -27,16 +27,9 @@ type ColorPicker struct {
 
 func (cp *ColorPicker) WidgetValue() any { return &cp.Color }
 
-// SetColor sets the source color.
-func (cp *ColorPicker) SetColor(clr color.Color) *ColorPicker {
-	return cp.SetHCT(hct.FromColor(clr))
-}
-
-// SetHCT sets the source color in terms of HCT
-func (cp *ColorPicker) SetHCT(hct hct.HCT) *ColorPicker {
-	cp.Color = hct
-	cp.Update()
-	cp.SendChange()
+// SetColor sets the color of the color picker.
+func (cp *ColorPicker) SetColor(c color.Color) *ColorPicker {
+	cp.Color = hct.FromColor(c)
 	return cp
 }
 
@@ -54,11 +47,13 @@ func (cp *ColorPicker) Init() {
 		s.Grow.Set(1, 0)
 	}
 	tree.AddChild(cp, func(w *Slider) {
-		w.SetMin(0).SetMax(360).SetValue(cp.Color.Hue)
+		Bind(&cp.Color.Hue, w)
+		w.SetMin(0).SetMax(360)
 		w.SetTooltip("The hue, which is the spectral identity of the color (red, green, blue, etc) in degrees")
 		w.OnInput(func(e events.Event) {
 			cp.Color.SetHue(w.Value)
-			cp.SetHCT(cp.Color)
+			cp.Update()
+			cp.SendChange()
 		})
 		w.Styler(func(s *styles.Style) {
 			w.ValueColor = nil
@@ -73,11 +68,13 @@ func (cp *ColorPicker) Init() {
 		w.FinalStyler(sf)
 	})
 	tree.AddChild(cp, func(w *Slider) {
-		w.SetMin(0).SetMax(150).SetValue(cp.Color.Chroma)
+		Bind(&cp.Color.Chroma, w)
+		w.SetMin(0).SetMax(150)
 		w.SetTooltip("The chroma, which is the colorfulness/saturation of the color")
 		w.OnInput(func(e events.Event) {
 			cp.Color.SetChroma(w.Value)
-			cp.SetHCT(cp.Color)
+			cp.Update()
+			cp.SendChange()
 		})
 		w.Styler(func(s *styles.Style) {
 			w.ValueColor = nil
@@ -92,11 +89,13 @@ func (cp *ColorPicker) Init() {
 		w.FinalStyler(sf)
 	})
 	tree.AddChild(cp, func(w *Slider) {
-		w.SetMin(0).SetMax(100).SetValue(cp.Color.Tone)
+		Bind(&cp.Color.Tone, w)
+		w.SetMin(0).SetMax(100)
 		w.SetTooltip("The tone, which is the lightness of the color")
 		w.OnInput(func(e events.Event) {
 			cp.Color.SetTone(w.Value)
-			cp.SetHCT(cp.Color)
+			cp.Update()
+			cp.SendChange()
 		})
 		w.Styler(func(s *styles.Style) {
 			w.ValueColor = nil
