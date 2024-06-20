@@ -133,6 +133,9 @@ func (fm *Form) Init() {
 			if sc {
 				label = strcase.ToSentence(label)
 			}
+			if lt, ok := f.field.Tag.Lookup("label"); ok {
+				label = lt
+			}
 			labnm := fmt.Sprintf("label-%s", f.path)
 			valnm := fmt.Sprintf("value-%s-%s", f.path, reflectx.ShortTypeName(f.field.Type))
 			readOnlyTag := f.field.Tag.Get("edit") == "-"
