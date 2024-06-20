@@ -32,6 +32,9 @@ type SVG struct {
 
 	// SVG is the SVG drawing to display in this widget
 	SVG *svg.SVG `set:"-"`
+
+	// prevSize is the cached allocated size for the last rendered image.
+	prevSize image.Point `xml:"-" json:"-" set:"-"`
 }
 
 func (sv *SVG) Init() {
@@ -120,9 +123,8 @@ func (sv *SVG) SizeFinal() {
 	sv.SVG.Resize(sv.Geom.Size.Actual.Content.ToPoint())
 }
 
-func (sv *SVG) Render() {
-	sv.WidgetBase.Render()
-
+// RenderSVG renders the SVG
+func (sv *SVG) RenderSVG() {
 	if sv.SVG == nil {
 		return
 	}
@@ -130,9 +132,29 @@ func (sv *SVG) Render() {
 	// rendering over itself
 	sv.SVG.Pixels = image.NewRGBA(sv.SVG.Pixels.Rect)
 	sv.SVG.RenderState.Init(sv.SVG.Pixels.Rect.Dx(), sv.SVG.Pixels.Rect.Dy(), sv.SVG.Pixels)
-
 	sv.SVG.Render()
+	sv.prevSize = sv.SVG.Pixels.Rect.Size()
+}
 
+func (sv *SVG) Render() {
+	sv.WidgetBase.Render()
+	if sv.SVG == nil {
+		return
+	}
+	needsRender := !sv.IsReadOnly()
+	if !needsRender {
+		if sv.SVG.Pixels == nil {
+			needsRender = true
+		} else {
+			sz := sv.SVG.Pixels.Bounds().Size()
+			if sz != sv.prevSize || sz == (image.Point{}) {
+				needsRender = true
+			}
+		}
+	}
+	if needsRender {
+		sv.RenderSVG()
+	}
 	r := sv.Geom.ContentBBox
 	sp := sv.Geom.ScrollOffset()
 	draw.Draw(sv.Scene.Pixels, r, sv.SVG.Pixels, sp, draw.Over)
