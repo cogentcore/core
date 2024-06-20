@@ -290,7 +290,8 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 
 	for fli := 0; fli < tb.numVisibleFields; fli++ {
 		field := tb.visibleFields[fli]
-		uv := reflectx.Underlying(val.FieldByIndex(field.Index))
+		uvp := reflectx.UnderlyingPointer(val.FieldByIndex(field.Index))
+		uv := uvp.Elem()
 		valnm := fmt.Sprintf("value-%d-%s-%s", fli, itxt, reflectx.ShortTypeName(field.Type))
 		tags := field.Tag
 		if uv.Kind() == reflect.Slice || uv.Kind() == reflect.Map {
@@ -304,7 +305,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 		readOnlyTag := tags.Get("edit") == "-"
 
 		tree.AddNew(p, valnm, func() Value {
-			return NewValue(uv.Addr().Interface(), tags)
+			return NewValue(uvp.Interface(), tags)
 		}, func(w Value) {
 			wb := w.AsWidget()
 			tb.MakeValue(w, i)
