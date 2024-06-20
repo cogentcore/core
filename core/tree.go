@@ -793,6 +793,7 @@ func (tr *Tree) SelectUpdate(mode events.SelectModes) bool {
 		} else {
 			minIndex := -1
 			maxIndex := 0
+			sel = true
 			for _, v := range sl {
 				vn := v.AsCoreTree()
 				if minIndex < 0 {
@@ -1069,7 +1070,7 @@ func (tr *Tree) MoveHomeAction(selMode events.SelectModes) *Tree {
 	tr.Root.SelectUpdate(selMode)
 	tr.Root.SetFocus()
 	tr.Root.ScrollToMe()
-	// tv.RootView.TreeSig.Emit(tv.RootView.This, int64(TreeSelected), tv.RootView.This)
+	tr.Root.SendSelectEvent()
 	return tr.Root
 }
 
