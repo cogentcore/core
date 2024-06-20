@@ -51,10 +51,22 @@ type PlanItem struct {
 	Init []func(n Node)
 }
 
-// Updater adds a new function to [NodeBase.Updaters], which are called in sequential
+// Updater adds a new function to [NodeBase.Updaters.Normal], which are called in sequential
 // descending (reverse) order in [NodeBase.RunUpdaters] to update the node.
 func (nb *NodeBase) Updater(updater func()) {
-	nb.Updaters = append(nb.Updaters, updater)
+	nb.Updaters.Normal = append(nb.Updaters.Normal, updater)
+}
+
+// FirstUpdater adds a new function to [NodeBase.Updaters.First], which are called in sequential
+// descending (reverse) order in [NodeBase.RunUpdaters] to update the node.
+func (nb *NodeBase) FirstUpdater(updater func()) {
+	nb.Updaters.First = append(nb.Updaters.First, updater)
+}
+
+// FinalUpdater adds a new function to [NodeBase.Updaters.Final], which are called in sequential
+// descending (reverse) order in [NodeBase.RunUpdaters] to update the node.
+func (nb *NodeBase) FinalUpdater(updater func()) {
+	nb.Updaters.Final = append(nb.Updaters.Final, updater)
 }
 
 // Maker adds a new function to [NodeBase.Makers.Normal], which are called in sequential
@@ -103,9 +115,11 @@ func (nb *NodeBase) UpdateFromMake() {
 // It is called in [cogentcore.org/core/core.WidgetBase.UpdateWidget] and other places
 // such as in xyz to update the node.
 func (nb *NodeBase) RunUpdaters() {
-	for i := len(nb.Updaters) - 1; i >= 0; i-- {
-		nb.Updaters[i]()
-	}
+	nb.Updaters.Do(func(updaters []func()) {
+		for i := len(updaters) - 1; i >= 0; i-- {
+			updaters[i]()
+		}
+	})
 }
 
 // Add adds a new [PlanItem] to the given [Plan] for a [Node] with

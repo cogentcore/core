@@ -67,10 +67,11 @@ type NodeBase struct {
 	// [NodeBase.DeleteProperty] methods for modifying and accessing properties.
 	Properties map[string]any `table:"-" xml:"-" copier:"-" set:"-" json:",omitempty"`
 
-	// Updaters is a slice of functions called in sequential descending (reverse) order
-	// in [NodeBase.RunUpdaters] to update the node. You can use [NodeBase.Updater] to
-	// add one. This slice typically contains [NodeBase.UpdateFromMake] at the start.
-	Updaters []func() `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
+	// Updaters is a tiered set of functions called in sequential descending (reverse) order
+	// in [NodeBase.RunUpdaters] to update the node. You can use [NodeBase.Updater],
+	// [NodeBase.FirstUpdater], or [NodeBase.FinalUpdater] to add one. This typically
+	// typically contains [NodeBase.UpdateFromMake] at the start of the normal list.
+	Updaters tiered.Tiered[[]func()] `copier:"-" json:"-" xml:"-" set:"-" edit:"-" display:"add-fields"`
 
 	// Makers is a tiered set of functions called in sequential ascending order
 	// in [NodeBase.Make] to make the plan for how the node's children should
