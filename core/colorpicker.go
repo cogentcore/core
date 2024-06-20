@@ -44,32 +44,25 @@ func (cp *ColorPicker) Init() {
 	cp.Frame.Init()
 	cp.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
+		s.Direction = styles.Column
 	})
-	cp.Maker(func(p *tree.Plan) {
-		if cp.HasChildren() { // TODO(config)
-			return
-		}
 
-		cp.Styler(func(s *styles.Style) {
-			s.Direction = styles.Column
-		})
-
-		sf := func(s *styles.Style) {
-			s.Min.Y.Em(2)
-			s.Min.X.Em(6)
-			s.Max.X.Em(40)
-			s.Grow.Set(1, 0)
-		}
-
-		hue := NewSlider(cp).SetMin(0).SetMax(360).SetValue(cp.Color.Hue)
-		hue.SetTooltip("The hue, which is the spectral identity of the color (red, green, blue, etc) in degrees")
-		hue.OnInput(func(e events.Event) {
-			cp.Color.SetHue(hue.Value)
+	sf := func(s *styles.Style) {
+		s.Min.Y.Em(2)
+		s.Min.X.Em(6)
+		s.Max.X.Em(40)
+		s.Grow.Set(1, 0)
+	}
+	tree.AddChild(cp, func(w *Slider) {
+		w.SetMin(0).SetMax(360).SetValue(cp.Color.Hue)
+		w.SetTooltip("The hue, which is the spectral identity of the color (red, green, blue, etc) in degrees")
+		w.OnInput(func(e events.Event) {
+			cp.Color.SetHue(w.Value)
 			cp.SetHCT(cp.Color)
 		})
-		hue.Styler(func(s *styles.Style) {
-			hue.ValueColor = nil
-			hue.ThumbColor = colors.C(cp.Color)
+		w.Styler(func(s *styles.Style) {
+			w.ValueColor = nil
+			w.ThumbColor = colors.C(cp.Color)
 			g := gradient.NewLinear()
 			for h := float32(0); h <= 360; h += 5 {
 				gc := cp.Color.WithHue(h)
@@ -77,17 +70,18 @@ func (cp *ColorPicker) Init() {
 			}
 			s.Background = g
 		})
-		hue.FinalStyler(sf)
-
-		chroma := NewSlider(cp).SetMin(0).SetMax(150).SetValue(cp.Color.Chroma)
-		chroma.SetTooltip("The chroma, which is the colorfulness/saturation of the color")
-		chroma.OnInput(func(e events.Event) {
-			cp.Color.SetChroma(chroma.Value)
+		w.FinalStyler(sf)
+	})
+	tree.AddChild(cp, func(w *Slider) {
+		w.SetMin(0).SetMax(150).SetValue(cp.Color.Chroma)
+		w.SetTooltip("The chroma, which is the colorfulness/saturation of the color")
+		w.OnInput(func(e events.Event) {
+			cp.Color.SetChroma(w.Value)
 			cp.SetHCT(cp.Color)
 		})
-		chroma.Styler(func(s *styles.Style) {
-			chroma.ValueColor = nil
-			chroma.ThumbColor = colors.C(cp.Color)
+		w.Styler(func(s *styles.Style) {
+			w.ValueColor = nil
+			w.ThumbColor = colors.C(cp.Color)
 			g := gradient.NewLinear()
 			for c := float32(0); c <= 150; c += 5 {
 				gc := cp.Color.WithChroma(c)
@@ -95,17 +89,18 @@ func (cp *ColorPicker) Init() {
 			}
 			s.Background = g
 		})
-		chroma.FinalStyler(sf)
-
-		tone := NewSlider(cp).SetMin(0).SetMax(100).SetValue(cp.Color.Tone)
-		tone.SetTooltip("The tone, which is the lightness of the color")
-		tone.OnInput(func(e events.Event) {
-			cp.Color.SetTone(tone.Value)
+		w.FinalStyler(sf)
+	})
+	tree.AddChild(cp, func(w *Slider) {
+		w.SetMin(0).SetMax(100).SetValue(cp.Color.Tone)
+		w.SetTooltip("The tone, which is the lightness of the color")
+		w.OnInput(func(e events.Event) {
+			cp.Color.SetTone(w.Value)
 			cp.SetHCT(cp.Color)
 		})
-		tone.Styler(func(s *styles.Style) {
-			tone.ValueColor = nil
-			tone.ThumbColor = colors.C(cp.Color)
+		w.Styler(func(s *styles.Style) {
+			w.ValueColor = nil
+			w.ThumbColor = colors.C(cp.Color)
 			g := gradient.NewLinear()
 			for c := float32(0); c <= 100; c += 5 {
 				gc := cp.Color.WithTone(c)
@@ -113,7 +108,7 @@ func (cp *ColorPicker) Init() {
 			}
 			s.Background = g
 		})
-		tone.FinalStyler(sf)
+		w.FinalStyler(sf)
 	})
 }
 
