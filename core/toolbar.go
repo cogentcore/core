@@ -6,7 +6,6 @@ package core
 
 import (
 	"cogentcore.org/core/colors"
-	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
@@ -42,9 +41,8 @@ type Toolbar struct {
 func (tb *Toolbar) Init() {
 	tb.Frame.Init()
 	ToolbarStyles(tb)
-	tb.OnShow(func(e events.Event) { // must come last, but this is too late
-		// needs to come 1 cycle earlier to get actually rendered
-		tree.AddChildAt(tb, "overflow-menu", func(w *Button) { // must come last
+	tb.FinalMaker(func(p *tree.Plan) { // must go at end
+		tree.AddAt(p, "overflow-menu", func(w *Button) {
 			ic := icons.MoreVert
 			if tb.Styles.Direction != styles.Row {
 				ic = icons.MoreHoriz
