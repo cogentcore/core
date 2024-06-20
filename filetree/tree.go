@@ -9,7 +9,6 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"sync"
 	"time"
 
 	"cogentcore.org/core/base/errors"
@@ -71,9 +70,6 @@ type Tree struct {
 
 	// timestamp of last update
 	lastWatchTime time.Time
-
-	// Update mutex
-	updateMu sync.Mutex
 }
 
 func (ft *Tree) Init() {
@@ -119,16 +115,12 @@ func (ft *Tree) OpenPath(path string) *Tree {
 
 // UpdateAll does a full update of the tree -- calls SetPath on current path
 func (ft *Tree) UpdateAll() {
-	// update := ft.AsyncLock() // note: safe for async updating
-	ft.updateMu.Lock()
 	ft.Dirs.ClearMarks()
 	ft.SetPath(string(ft.Filepath))
 	// the problem here is that closed dirs are not visited but we want to keep their settings:
 	// ft.Dirs.DeleteStale()
 	ft.Update()
 	ft.TreeChanged(nil)
-	ft.updateMu.Unlock()
-	// ft.AsyncUnlock(update) // todo:
 }
 
 // UpdatePath updates the tree at the directory level for given path
@@ -198,8 +190,8 @@ func (ft *Tree) WatchWatcher() {
 
 // WatchUpdate does the update for given path
 func (ft *Tree) WatchUpdate(path string) {
-	ft.updateMu.Lock()
-	defer ft.updateMu.Unlock()
+	ft.AsyncLock()
+	defer ft.AsyncUnlock()
 	// fmt.Println(path)
 
 	dir, _ := filepath.Split(path)
