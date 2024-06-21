@@ -108,10 +108,9 @@ func (rs *State) PopTransform() {
 // PushBounds pushes current bounds onto stack and sets new bounds.
 // This is the essential first step in rendering.
 // Any further actual rendering should always be surrounded
-// by [State.Lock] and [State.Unlock] calls.
 // It also takes an optional border radius for the current element.
 func (rs *State) PushBounds(b image.Rectangle, radius ...styles.SideFloats) {
-	if rs.Bounds.Empty() { // note: method name should be IsEmpty!
+	if rs.Bounds.Empty() {
 		rs.Bounds = rs.Image.Bounds()
 	}
 	rs.BoundsStack = append(rs.BoundsStack, rs.Bounds)
