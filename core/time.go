@@ -36,17 +36,19 @@ func (tp *TimePicker) Init() {
 	tp.Frame.Init()
 	tree.AddChild(tp, func(w *Spinner) {
 		w.SetStep(1).SetEnforceStep(true)
-		if SystemSettings.Clock24 {
-			tp.Hour = tp.Time.Hour()
-			w.SetMax(24).SetMin(0)
-		} else {
-			tp.Hour = tp.Time.Hour() % 12
-			if tp.Hour == 0 {
-				tp.Hour = 12
+		w.Updater(func() {
+			if SystemSettings.Clock24 {
+				tp.Hour = tp.Time.Hour()
+				w.SetMax(24).SetMin(0)
+			} else {
+				tp.Hour = tp.Time.Hour() % 12
+				if tp.Hour == 0 {
+					tp.Hour = 12
+				}
+				w.SetMax(12).SetMin(1)
 			}
-			w.SetMax(12).SetMin(1)
-		}
-		w.SetValue(float32(tp.Hour))
+			w.SetValue(float32(tp.Hour))
+		})
 		w.Styler(func(s *styles.Style) {
 			s.Font.Size.Dp(57)
 			s.Min.X.Dp(96)
@@ -76,8 +78,10 @@ func (tp *TimePicker) Init() {
 	})
 	tree.AddChild(tp, func(w *Spinner) {
 		w.SetStep(1).SetEnforceStep(true).
-			SetMin(0).SetMax(60).SetFormat("%02d").
-			SetValue(float32(tp.Time.Minute()))
+			SetMin(0).SetMax(60).SetFormat("%02d")
+		w.Updater(func() {
+			w.SetValue(float32(tp.Time.Minute()))
+		})
 		w.Styler(func(s *styles.Style) {
 			s.Font.Size.Dp(57)
 			s.Min.X.Dp(96)
@@ -104,7 +108,6 @@ func (tp *TimePicker) Init() {
 						w.SelectValue("AM")
 					}
 				})
-
 				w.OnChange(func(e events.Event) {
 					si := w.SelectedItem()
 					tt := tp.Time
