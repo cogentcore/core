@@ -174,7 +174,9 @@ func (dp *DatePicker) Init() {
 				sms[i] = ChooserItem{Value: sm}
 			}
 			w.SetItems(sms...)
-			w.SetCurrentIndex(int(dp.Time.Month() - 1))
+			w.Updater(func() {
+				w.SetCurrentIndex(int(dp.Time.Month() - 1))
+			})
 			w.OnChange(func(e events.Event) {
 				// set our month
 				dp.setTime(dp.Time.AddDate(0, w.CurrentIndex+1-int(dp.Time.Month()), 0))
@@ -202,7 +204,9 @@ func (dp *DatePicker) Init() {
 				yrs = append(yrs, ChooserItem{Value: i})
 			}
 			w.SetItems(yrs...)
-			w.SetCurrentValue(yr)
+			w.Updater(func() {
+				w.SetCurrentValue(yr)
+			})
 			w.OnChange(func(e events.Event) {
 				// we are centered at current year with 100 in each direction
 				nyr := w.CurrentIndex + yr - 100
