@@ -23,7 +23,7 @@ func TestColorSpace(t *testing.T) {
 	huePages := 4
 	huePerPage := nHue / huePages
 	chromaInc := 10
-	chromaMax := 150
+	chromaMax := 120
 	nChroma := (chromaMax / chromaInc) + 1
 
 	// y axis is hue then chroma within that

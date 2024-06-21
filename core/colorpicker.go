@@ -69,7 +69,7 @@ func (cp *ColorPicker) Init() {
 	})
 	tree.AddChild(cp, func(w *Slider) {
 		Bind(&cp.Color.Chroma, w)
-		w.SetMin(0).SetMax(150)
+		w.SetMin(0).SetMax(120)
 		w.SetTooltip("The chroma, which is the colorfulness/saturation of the color")
 		w.OnInput(func(e events.Event) {
 			cp.Color.SetChroma(w.Value)
@@ -80,9 +80,9 @@ func (cp *ColorPicker) Init() {
 			w.ValueColor = nil
 			w.ThumbColor = colors.C(cp.Color)
 			g := gradient.NewLinear()
-			for c := float32(0); c <= 150; c += 5 {
+			for c := float32(0); c <= 120; c += 5 {
 				gc := cp.Color.WithChroma(c)
-				g.AddStop(gc.AsRGBA(), c/150)
+				g.AddStop(gc.AsRGBA(), c/120)
 			}
 			s.Background = g
 		})

@@ -42,8 +42,8 @@ type HCT struct {
 	// Chroma (C) is the colorfulness/saturation of the color.
 	// Grayscale colors have no chroma, and fully saturated ones
 	// have high chroma. The maximum varies as a function of hue
-	// and tone, but 150 is an upper bound.
-	Chroma float32 `min:"0" max:"150"`
+	// and tone, but 120 is a general upper bound.
+	Chroma float32 `min:"0" max:"120"`
 
 	// Tone is the L* component from the LAB (L*a*b*) color system,
 	// which is linear in human perception of lightness.
