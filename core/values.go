@@ -143,13 +143,15 @@ func (ib *IconButton) WidgetValue() any { return &ib.Icon }
 func (ib *IconButton) Init() { // TODO(config): display:"show-name"
 	ib.Button.Init()
 	ib.Updater(func() {
+		if ib.Icon.IsNil() {
+			ib.SetText("Select an icon")
+		} else {
+			ib.SetText("")
+		}
 		if ib.IsReadOnly() {
-			ib.SetType(ButtonText)
+			ib.SetType(ButtonText).SetText("")
 		} else {
 			ib.SetType(ButtonTonal)
-		}
-		if ib.Icon.IsNil() {
-			ib.Icon = icons.Blank
 		}
 	})
 	InitValueButton(ib, false, func(d *Body) {
