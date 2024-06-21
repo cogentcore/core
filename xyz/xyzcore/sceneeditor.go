@@ -58,21 +58,22 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 			})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.ZoomIn).SetTooltip("zoom in").
-			Styler(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.RepeatClickable)
-			}).
-			OnClick(func(e events.Event) {
-				sc.Camera.Zoom(-.05)
-				sc.SetNeedsUpdate()
-				sv.NeedsRender()
-			})
+		w.SetIcon(icons.ZoomIn).SetTooltip("zoom in")
+		w.Styler(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		})
+		w.OnClick(func(e events.Event) {
+			sc.Camera.Zoom(-.05)
+			sc.SetNeedsUpdate()
+			sv.NeedsRender()
+		})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.ZoomOut).SetTooltip("zoom out").
-			Styler(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.RepeatClickable)
-			}).OnClick(func(e events.Event) {
+		w.SetIcon(icons.ZoomOut).SetTooltip("zoom out")
+		w.Styler(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		})
+		w.OnClick(func(e events.Event) {
 			sc.Camera.Zoom(.05)
 			sc.SetNeedsUpdate()
 			sv.NeedsRender()
@@ -84,48 +85,48 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		w.SetText("Rot:").SetTooltip("rotate display")
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.KeyboardArrowLeft).
-			Styler(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.RepeatClickable)
-			}).
-			OnClick(func(e events.Event) {
-				sc.Camera.Orbit(5, 0)
-				sc.SetNeedsUpdate()
-				sv.NeedsRender()
-			})
+		w.SetIcon(icons.KeyboardArrowLeft)
+		w.Styler(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		})
+		w.OnClick(func(e events.Event) {
+			sc.Camera.Orbit(5, 0)
+			sc.SetNeedsUpdate()
+			sv.NeedsRender()
+		})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.KeyboardArrowUp).
-			Styler(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.RepeatClickable)
-			}).
-			OnClick(func(e events.Event) {
-				sc.Camera.Orbit(0, 5)
-				sc.SetNeedsUpdate()
-				sv.NeedsRender()
-			})
+		w.SetIcon(icons.KeyboardArrowUp)
+		w.Styler(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		})
+		w.OnClick(func(e events.Event) {
+			sc.Camera.Orbit(0, 5)
+			sc.SetNeedsUpdate()
+			sv.NeedsRender()
+		})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.KeyboardArrowDown).
-			Styler(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.RepeatClickable)
-			}).
-			OnClick(func(e events.Event) {
-				sc.Camera.Orbit(0, -5)
-				sc.SetNeedsUpdate()
-				sv.NeedsRender()
-			})
+		w.SetIcon(icons.KeyboardArrowDown)
+		w.Styler(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		})
+		w.OnClick(func(e events.Event) {
+			sc.Camera.Orbit(0, -5)
+			sc.SetNeedsUpdate()
+			sv.NeedsRender()
+		})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.KeyboardArrowRight).
-			Styler(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.RepeatClickable)
-			}).
-			OnClick(func(e events.Event) {
-				sc.Camera.Orbit(-5, 0)
-				sc.SetNeedsUpdate()
-				sv.NeedsRender()
-			})
+		w.SetIcon(icons.KeyboardArrowRight)
+		w.Styler(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		})
+		w.OnClick(func(e events.Event) {
+			sc.Camera.Orbit(-5, 0)
+			sc.SetNeedsUpdate()
+			sv.NeedsRender()
+		})
 	})
 	tree.Add(p, func(w *core.Separator) {})
 
@@ -133,48 +134,48 @@ func (sv *SceneEditor) MakeToolbar(p *tree.Plan) {
 		w.SetText("Pan:").SetTooltip("pan display")
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.KeyboardArrowLeft).
-			Styler(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.RepeatClickable)
-			}).
-			OnClick(func(e events.Event) {
-				sc.Camera.Pan(-.2, 0)
-				sc.SetNeedsUpdate()
-				sv.NeedsRender()
-			})
+		w.SetIcon(icons.KeyboardArrowLeft)
+		w.Styler(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		})
+		w.OnClick(func(e events.Event) {
+			sc.Camera.Pan(-.2, 0)
+			sc.SetNeedsUpdate()
+			sv.NeedsRender()
+		})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.KeyboardArrowUp).
-			Styler(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.RepeatClickable)
-			}).
-			OnClick(func(e events.Event) {
-				sc.Camera.Pan(0, .2)
-				sc.SetNeedsUpdate()
-				sv.NeedsRender()
-			})
+		w.SetIcon(icons.KeyboardArrowUp)
+		w.Styler(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		})
+		w.OnClick(func(e events.Event) {
+			sc.Camera.Pan(0, .2)
+			sc.SetNeedsUpdate()
+			sv.NeedsRender()
+		})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.KeyboardArrowDown).
-			Styler(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.RepeatClickable)
-			}).
-			OnClick(func(e events.Event) {
-				sc.Camera.Pan(0, -.2)
-				sc.SetNeedsUpdate()
-				sv.NeedsRender()
-			})
+		w.SetIcon(icons.KeyboardArrowDown)
+		w.Styler(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		})
+		w.OnClick(func(e events.Event) {
+			sc.Camera.Pan(0, -.2)
+			sc.SetNeedsUpdate()
+			sv.NeedsRender()
+		})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetIcon(icons.KeyboardArrowRight).
-			Styler(func(s *styles.Style) {
-				s.SetAbilities(true, abilities.RepeatClickable)
-			}).
-			OnClick(func(e events.Event) {
-				sc.Camera.Pan(.2, 0)
-				sc.SetNeedsUpdate()
-				sv.NeedsRender()
-			})
+		w.SetIcon(icons.KeyboardArrowRight)
+		w.Styler(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.RepeatClickable)
+		})
+		w.OnClick(func(e events.Event) {
+			sc.Camera.Pan(.2, 0)
+			sc.SetNeedsUpdate()
+			sv.NeedsRender()
+		})
 	})
 	tree.Add(p, func(w *core.Separator) {})
 
