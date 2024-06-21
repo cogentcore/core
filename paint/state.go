@@ -49,7 +49,9 @@ type State struct {
 	// current mask
 	Mask *image.Alpha
 
-	// boundaries to restrict drawing to -- much faster than clip mask for basic square region exclusion -- used for restricting drawing
+	// Bounds are the boundaries to restrict drawing to.
+	// This is much faster than using a clip mask for basic
+	// square region exclusion.
 	Bounds image.Rectangle
 
 	// bounding box of last object rendered; computed by renderer during Fill or Stroke, grabbed by SVG objects
@@ -62,8 +64,13 @@ type State struct {
 	// Every render starts with a push onto this stack, and finishes with a pop.
 	BoundsStack []image.Rectangle
 
+	// Radius is the border radius of the element that is currently being rendered.
+	// This is only relevant when using [State.PushBoundsGeom].
+	Radius styles.SideFloats
+
 	// RadiusStack is a stack of the border radii for the parent elements,
-	// with each one corresponding to the same entry in [State.BoundsStack].
+	// with each one corresponding to the entry with the same index in
+	// [State.BoundsStack].
 	RadiusStack []styles.SideFloats
 
 	// stack of clips, if needed
@@ -122,8 +129,9 @@ func (rs *State) PushBoundsGeom(total, content image.Rectangle, radius styles.Si
 		rs.Bounds = rs.Image.Bounds()
 	}
 	rs.BoundsStack = append(rs.BoundsStack, rs.Bounds)
-	rs.RadiusStack = append(rs.RadiusStack, radius)
+	rs.RadiusStack = append(rs.RadiusStack, rs.Radius)
 	rs.Bounds = total
+	rs.Radius = radius
 }
 
 // PopBounds pops the bounds off the stack and sets the current bounds.
@@ -136,6 +144,7 @@ func (rs *State) PopBounds() {
 		return
 	}
 	rs.Bounds = rs.BoundsStack[sz-1]
+	rs.Radius = rs.RadiusStack[sz-1]
 	rs.BoundsStack = rs.BoundsStack[:sz-1]
 	rs.RadiusStack = rs.RadiusStack[:sz-1]
 }
