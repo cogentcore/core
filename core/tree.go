@@ -68,7 +68,7 @@ type Treer interface {
 	InsertAfter()
 	MimeData(md *mimedata.Mimes)
 	Cut()
-	Copy(reset bool)
+	Copy()
 	Paste()
 	DragStart(e events.Event)
 	DragDrop(e events.Event)
@@ -177,7 +177,8 @@ type Tree struct {
 // optional parent that ensures that the tree scrolls
 // separately from the surrounding context.
 func NewTreeFrame(parent ...tree.Node) *Tree {
-	fr := NewFrame(parent...).Styler(func(s *styles.Style) {
+	fr := NewFrame(parent...)
+	fr.Styler(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	return NewTree(fr)
@@ -315,7 +316,7 @@ func (tr *Tree) Init() {
 			tr.ToggleClose()
 			e.SetHandled()
 		case keymap.Copy:
-			tvi.Copy(true)
+			tvi.Copy()
 			e.SetHandled()
 		}
 		if !tr.RootIsReadOnly() && !e.IsHandled() {
@@ -1228,22 +1229,13 @@ func (tr *Tree) ContextMenuPos(e events.Event) (pos image.Point) {
 }
 
 func (tr *Tree) ContextMenuReadOnly(m *Scene) {
-	NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keymap.Copy).
-		SetEnabled(tr.HasSelection()).
-		OnClick(func(e events.Event) {
-			tr.Copy(true)
-		})
-	NewButton(m).SetText("View").SetIcon(icons.Visibility).
-		SetEnabled(tr.HasSelection()).
-		OnClick(func(e events.Event) {
-			tr.EditNode()
-		})
+	tri := tr.This.(Treer)
+	NewFuncButton(m).SetFunc(tri.Copy).SetKey(keymap.Copy).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.EditNode).SetText("View").SetIcon(icons.Visibility).SetEnabled(tr.HasSelection())
 	NewSeparator(m)
 
-	NewFuncButton(m).SetFunc(tr.OpenAll).SetIcon(icons.KeyboardArrowDown).
-		SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tr.CloseAll).SetIcon(icons.KeyboardArrowRight).
-		SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.OpenAll).SetIcon(icons.KeyboardArrowDown).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.CloseAll).SetIcon(icons.KeyboardArrowRight).SetEnabled(tr.HasSelection())
 }
 
 func (tr *Tree) ContextMenu(m *Scene) {
@@ -1251,62 +1243,28 @@ func (tr *Tree) ContextMenu(m *Scene) {
 		tr.ContextMenuReadOnly(m)
 		return
 	}
-	tvi := tr.This.(Treer)
-	NewButton(m).SetText("Add child").SetIcon(icons.Add).
-		SetEnabled(tr.HasSelection()).
-		OnClick(func(e events.Event) {
-			tvi.AddChildNode()
-		})
-	NewButton(m).SetText("Insert before").SetIcon(icons.Add).
-		SetEnabled(tr.HasSelection()).
-		OnClick(func(e events.Event) {
-			tvi.InsertBefore()
-		})
-	NewButton(m).SetText("Insert after").SetIcon(icons.Add).
-		SetEnabled(tr.HasSelection()).
-		OnClick(func(e events.Event) {
-			tvi.InsertAfter()
-		})
-	NewButton(m).SetText("Duplicate").SetIcon(icons.ContentCopy).
-		SetEnabled(tr.HasSelection()).
-		OnClick(func(e events.Event) {
-			tvi.Duplicate()
-		})
-	NewButton(m).SetText("Delete").SetIcon(icons.Delete).
-		SetEnabled(tr.HasSelection()).
-		OnClick(func(e events.Event) {
-			tvi.DeleteNode()
-		})
+	tri := tr.This.(Treer)
+	NewFuncButton(m).SetFunc(tri.AddChildNode).SetText("Add child").SetIcon(icons.Add).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tri.InsertBefore).SetIcon(icons.Add).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tri.InsertAfter).SetIcon(icons.Add).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tri.Duplicate).SetIcon(icons.ContentCopy).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tri.DeleteNode).SetText("Delete").SetIcon(icons.Delete).
+		SetEnabled(tr.HasSelection())
 	NewSeparator(m)
-	NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keymap.Copy).
-		SetEnabled(tr.HasSelection()).
-		OnClick(func(e events.Event) {
-			tvi.Copy(true)
-		})
-	NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keymap.Cut).
-		SetEnabled(tr.HasSelection()).
-		OnClick(func(e events.Event) {
-			tvi.Cut()
-		})
-	pbt := NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keymap.Paste).
-		OnClick(func(e events.Event) {
-			tvi.Paste()
-		})
+	NewFuncButton(m).SetFunc(tri.Copy).SetKey(keymap.Copy).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tri.Cut).SetKey(keymap.Cut).SetEnabled(tr.HasSelection())
+	paste := NewFuncButton(m).SetFunc(tri.Paste).SetKey(keymap.Paste)
 	cb := tr.Scene.Events.Clipboard()
 	if cb != nil {
-		pbt.SetState(cb.IsEmpty(), states.Disabled)
+		paste.SetState(cb.IsEmpty(), states.Disabled)
 	}
 	NewSeparator(m)
-	NewFuncButton(m).SetFunc(tr.EditNode).SetText("Edit").SetIcon(icons.Edit).
-		SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tr.InspectNode).SetText("Inspect").SetIcon(icons.EditDocument).
-		SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.EditNode).SetText("Edit").SetIcon(icons.Edit).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.InspectNode).SetText("Inspect").SetIcon(icons.EditDocument).SetEnabled(tr.HasSelection())
 	NewSeparator(m)
 
-	NewFuncButton(m).SetFunc(tr.OpenAll).SetIcon(icons.KeyboardArrowDown).
-		SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tr.CloseAll).SetIcon(icons.KeyboardArrowRight).
-		SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.OpenAll).SetIcon(icons.KeyboardArrowDown).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tr.CloseAll).SetIcon(icons.KeyboardArrowRight).SetEnabled(tr.HasSelection())
 }
 
 // IsRoot returns true if given node is the root of the tree.
@@ -1360,8 +1318,8 @@ func (tr *Tree) NodesFromMimeData(md mimedata.Mimes) ([]tree.Node, []string) {
 	return sl, pl
 }
 
-// Copy copies to system.Clipboard, optionally resetting the selection.
-func (tr *Tree) Copy(reset bool) { //types:add
+// Copy copies the tree to the clipboard.
+func (tr *Tree) Copy() { //types:add
 	sels := tr.SelectedViews()
 	nitms := max(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
@@ -1374,9 +1332,6 @@ func (tr *Tree) Copy(reset bool) { //types:add
 		}
 	}
 	tr.Clipboard().Write(md)
-	if reset {
-		tr.UnselectAll()
-	}
 }
 
 // Cut copies to system.Clipboard and deletes selected items.
@@ -1388,7 +1343,7 @@ func (tr *Tree) Cut() { //types:add
 		tr.CutSync()
 		return
 	}
-	tr.Copy(false)
+	tr.Copy()
 	sels := tr.SelectedViews()
 	root := tr.Root
 	tr.UnselectAll()

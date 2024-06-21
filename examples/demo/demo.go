@@ -77,6 +77,15 @@ func text(ts *core.Tabs) {
 	}
 }
 
+func makeRow(parent core.Widget) *core.Frame {
+	row := core.NewFrame(parent)
+	row.Styler(func(s *styles.Style) {
+		s.Wrap = true
+		s.Align.Items = styles.Center
+	})
+	return row
+}
+
 func buttons(ts *core.Tabs) {
 	tab := ts.NewTab("Buttons")
 
@@ -84,22 +93,15 @@ func buttons(ts *core.Tabs) {
 
 	core.NewText(tab).SetText("Cogent Core provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of text, an icon, and an indicator.")
 
-	makeRow := func() core.Widget {
-		return core.NewFrame(tab).Styler(func(s *styles.Style) {
-			s.Wrap = true
-			s.Align.Items = styles.Center
-		})
-	}
-
 	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Standard buttons")
-	brow := makeRow()
-	browt := makeRow()
-	browi := makeRow()
+	brow := makeRow(tab)
+	browt := makeRow(tab)
+	browi := makeRow(tab)
 
 	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Menu buttons")
-	mbrow := makeRow()
-	mbrowt := makeRow()
-	mbrowi := makeRow()
+	mbrow := makeRow(tab)
+	mbrowt := makeRow(tab)
+	mbrowi := makeRow(tab)
 
 	menu := func(m *core.Scene) {
 		m1 := core.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Control+Shift+1")
@@ -306,7 +308,8 @@ func makeIcons(ts *core.Tabs) {
 			if strings.HasSuffix(sic, "-fill") {
 				continue
 			}
-			vb := core.NewFrame(grid).Styler(func(s *styles.Style) {
+			vb := core.NewFrame(grid)
+			vb.Styler(func(s *styles.Style) {
 				s.Direction = styles.Column
 				s.Max.X.Em(15) // constraining width exactly gives nice grid-like appearance
 				s.Min.X.Em(15)
@@ -590,15 +593,8 @@ func dialogs(ts *core.Tabs) {
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Dialogs, snackbars, and windows")
 	core.NewText(tab).SetText("Cogent Core provides completely customizable dialogs, snackbars, and windows that allow you to easily display, obtain, and organize information.")
 
-	makeRow := func() core.Widget {
-		return core.NewFrame(tab).Styler(func(s *styles.Style) {
-			s.Wrap = true
-			s.Align.Items = styles.Center
-		})
-	}
-
 	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Dialogs")
-	drow := makeRow()
+	drow := makeRow(tab)
 
 	md := core.NewButton(drow).SetText("Message")
 	md.OnClick(func(e events.Event) {
@@ -656,7 +652,7 @@ func dialogs(ts *core.Tabs) {
 	})
 
 	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Snackbars")
-	srow := makeRow()
+	srow := makeRow(tab)
 
 	ms := core.NewButton(srow).SetText("Message")
 	ms.OnClick(func(e events.Event) {
@@ -677,7 +673,7 @@ func dialogs(ts *core.Tabs) {
 	})
 
 	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Windows")
-	wrow := makeRow()
+	wrow := makeRow(tab)
 
 	nw := core.NewButton(wrow).SetText("New window")
 	nw.OnClick(func(e events.Event) {

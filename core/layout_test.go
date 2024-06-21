@@ -450,7 +450,8 @@ func TestLayoutScrollLabel(t *testing.T) {
 	b.Styler(func(s *styles.Style) {
 		s.Max.Set(units.Dp(50))
 	})
-	fr := NewFrame(b).Styler(func(s *styles.Style) {
+	fr := NewFrame(b)
+	fr.Styler(func(s *styles.Style) {
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	NewText(fr).SetText(LongText)

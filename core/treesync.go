@@ -480,7 +480,7 @@ func (tr *Tree) PasteChildrenSync(md mimedata.Mimes, mod events.DropMods) {
 
 // CutSync copies to system.Clipboard and deletes selected items.
 func (tr *Tree) CutSync() {
-	tr.Copy(false)
+	tr.Copy()
 	sels := tr.SelectedSyncNodes()
 	tr.UnselectAll()
 	for _, sn := range sels {

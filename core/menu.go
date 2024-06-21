@@ -128,9 +128,8 @@ func NewMenu(menu func(m *Scene), ctx Widget, pos image.Point) *Stage {
 // It is the main way that code should modify a widget's context menus.
 // Context menu functions are run in reverse order, and separators are
 // automatically added between each context menu function.
-func (wb *WidgetBase) AddContextMenu(menu func(m *Scene)) *WidgetBase {
+func (wb *WidgetBase) AddContextMenu(menu func(m *Scene)) {
 	wb.ContextMenus = append(wb.ContextMenus, menu)
-	return wb
 }
 
 // ApplyContextMenus adds the [Widget.ContextMenus] to the given menu scene
@@ -183,7 +182,8 @@ func (wb *WidgetBase) ShowContextMenu(e events.Event) {
 func NewMenuFromStrings(strs []string, sel string, fun func(idx int)) *Scene {
 	return NewMenuScene(func(m *Scene) {
 		for i, s := range strs {
-			b := NewButton(m).SetText(s).OnClick(func(e events.Event) {
+			b := NewButton(m).SetText(s)
+			b.OnClick(func(e events.Event) {
 				fun(i)
 			})
 			if s == sel {

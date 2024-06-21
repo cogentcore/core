@@ -37,7 +37,8 @@ func TestRenderParentBorderRadius(t *testing.T) {
 // For https://github.com/cogentcore/core/issues/810
 func TestRenderButtonAlignment(t *testing.T) {
 	b := NewBody()
-	NewButton(b).SetType(ButtonAction).SetIcon(icons.Square).Styler(func(s *styles.Style) {
+	bt := NewButton(b).SetType(ButtonAction).SetIcon(icons.Square)
+	bt.Styler(func(s *styles.Style) {
 		s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
 		s.Border = styles.Border{}
 		s.MaxBorder = styles.Border{}
@@ -48,7 +49,8 @@ func TestRenderButtonAlignment(t *testing.T) {
 // For https://github.com/cogentcore/core/issues/810
 func TestRenderFrameAlignment(t *testing.T) {
 	b := NewBody()
-	outer := NewFrame(b).Styler(func(s *styles.Style) {
+	outer := NewFrame(b)
+	outer.Styler(func(s *styles.Style) {
 		s.Background = colors.C(colors.Orange)
 		s.Min.Set(units.Dp(30))
 		s.Padding.Zero()
@@ -64,7 +66,8 @@ func TestRenderFrameAlignment(t *testing.T) {
 // For https://github.com/cogentcore/core/issues/810
 func TestRenderFrameAlignmentCenter(t *testing.T) {
 	b := NewBody()
-	outer := NewFrame(b).Styler(func(s *styles.Style) {
+	outer := NewFrame(b)
+	outer.Styler(func(s *styles.Style) {
 		s.Background = colors.C(colors.Orange)
 		s.Min.Set(units.Dp(30))
 		s.Padding.Zero()
@@ -99,7 +102,8 @@ func TestRenderNestedScroll(t *testing.T) {
 		s.Overflow.Set(styles.OverflowAuto)
 		s.Direction = styles.Row
 	})
-	fr := NewFrame(b).Styler(func(s *styles.Style) {
+	fr := NewFrame(b)
+	fr.Styler(func(s *styles.Style) {
 		s.Background = colors.C(colors.Blue)
 		s.Min.Set(units.Dp(200))
 		s.Max.Set(units.Dp(200))

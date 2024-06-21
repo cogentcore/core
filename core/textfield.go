@@ -1013,9 +1013,7 @@ func (tf *TextField) DeleteSelection() string {
 }
 
 // Copy copies any selected text to the clipboard.
-// Satisfies Clipper interface -- can be extended in subtypes.
-// optionally resetting the current selection
-func (tf *TextField) Copy(reset bool) {
+func (tf *TextField) Copy() {
 	if tf.NoEcho {
 		return
 	}
@@ -1026,9 +1024,6 @@ func (tf *TextField) Copy(reset bool) {
 
 	md := mimedata.NewText(tf.Text())
 	tf.Clipboard().Write(md)
-	if reset {
-		tf.SelectReset()
-	}
 }
 
 // Paste inserts text from the clipboard at current cursor position -- if
@@ -1062,22 +1057,13 @@ func (tf *TextField) InsertAtCursor(str string) {
 }
 
 func (tf *TextField) ContextMenu(m *Scene) {
-	NewButton(m).SetText("Copy").SetIcon(icons.ContentCopy).SetKey(keymap.Copy).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
-		OnClick(func(e events.Event) {
-			tf.Copy(true)
-		})
+	NewFuncButton(m).SetFunc(tf.Copy).SetKey(keymap.Copy).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled)
 	if !tf.IsReadOnly() {
-		NewButton(m).SetText("Cut").SetIcon(icons.ContentCut).SetKey(keymap.Cut).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
-			OnClick(func(e events.Event) {
-				tf.Cut()
-			})
-		pbt := NewButton(m).SetText("Paste").SetIcon(icons.ContentPaste).SetKey(keymap.Paste).
-			OnClick(func(e events.Event) {
-				tf.Paste()
-			})
+		NewFuncButton(m).SetFunc(tf.Cut).SetKey(keymap.Cut).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled)
+		paste := NewFuncButton(m).SetFunc(tf.Paste).SetKey(keymap.Paste)
 		cb := tf.Scene.Events.Clipboard()
 		if cb != nil {
-			pbt.SetState(cb.IsEmpty(), states.Disabled)
+			paste.SetState(cb.IsEmpty(), states.Disabled)
 		}
 	}
 }
@@ -1693,7 +1679,7 @@ func (tf *TextField) HandleKeyEvents() {
 		case keymap.Copy:
 			e.SetHandled()
 			tf.CancelComplete()
-			tf.Copy(true) // reset
+			tf.Copy()
 		}
 		if tf.IsReadOnly() || e.IsHandled() {
 			return

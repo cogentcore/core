@@ -169,20 +169,21 @@ func (c *Complete) ShowNowImpl(ctx Widget, pos image.Point, text string) bool {
 			text = cmp.Label
 		}
 		icon := cmp.Icon
-		mi := NewButton(sc).SetText(text).SetIcon(icons.Icon(icon)).SetTooltip(cmp.Desc).
-			OnClick(func(e events.Event) {
+		mi := NewButton(sc).SetText(text).SetIcon(icons.Icon(icon))
+		mi.SetTooltip(cmp.Desc)
+		mi.OnClick(func(e events.Event) {
+			c.Complete(cmp.Text)
+		})
+		mi.OnKeyChord(func(e events.Event) {
+			kf := keymap.Of(e.KeyChord())
+			if e.KeyRune() == ' ' {
+				ctx.AsWidget().HandleEvent(e) // bypass button handler!
+			}
+			if kf == keymap.Enter {
+				e.SetHandled()
 				c.Complete(cmp.Text)
-			}).
-			OnKeyChord(func(e events.Event) {
-				kf := keymap.Of(e.KeyChord())
-				if e.KeyRune() == ' ' {
-					ctx.AsWidget().HandleEvent(e) // bypass button handler!
-				}
-				if kf == keymap.Enter {
-					e.SetHandled()
-					c.Complete(cmp.Text)
-				}
-			})
+			}
+		})
 		if i == 0 {
 			sc.Events.SetStartFocus(mi)
 		}

@@ -21,27 +21,24 @@ import (
 // to [WidgetBase.Stylers.Normal]. It is one of the main ways to specify the styles of
 // a widget, in addition to FirstStyler and FinalStyler, which add stylers that
 // are called before and after the stylers added by this function, respectively.
-func (wb *WidgetBase) Styler(s func(s *styles.Style)) *WidgetBase {
+func (wb *WidgetBase) Styler(s func(s *styles.Style)) {
 	wb.Stylers.Normal = append(wb.Stylers.Normal, s)
-	return wb
 }
 
 // FirstStyler adds the given function for setting the style properties of the widget
 // to [WidgetBase.Stylers.First]. It is one of the main ways to specify the styles of
 // a widget, in addition to Styler and FinalStyler, which add stylers that
 // are called after the stylers added by this function.
-func (wb *WidgetBase) FirstStyler(s func(s *styles.Style)) *WidgetBase {
+func (wb *WidgetBase) FirstStyler(s func(s *styles.Style)) {
 	wb.Stylers.First = append(wb.Stylers.First, s)
-	return wb
 }
 
 // FinalStyler adds the given function for setting the style properties of the widget
 // to [WidgetBase.Stylers.Final]. It is one of the main ways to specify the styles of
 // a widget, in addition to FirstStyler and Styler, which add stylers that are called
 // before the stylers added by this function.
-func (wb *WidgetBase) FinalStyler(s func(s *styles.Style)) *WidgetBase {
+func (wb *WidgetBase) FinalStyler(s func(s *styles.Style)) {
 	wb.Stylers.Final = append(wb.Stylers.Final, s)
-	return wb
 }
 
 // Style updates the style properties of the widget based on [WidgetBase.Stylers].

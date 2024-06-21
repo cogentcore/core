@@ -45,9 +45,8 @@ func (wb *WidgetBase) Clipboard() system.Clipboard {
 // and internal code to add an event handler to a widget, in addition to OnFirst and
 // OnFinal, which add event handlers that are called before and after those added
 // by this function, respectively.
-func (wb *WidgetBase) On(etype events.Types, fun func(e events.Event)) *WidgetBase {
+func (wb *WidgetBase) On(etype events.Types, fun func(e events.Event)) {
 	wb.Listeners.Normal.Add(etype, fun)
-	return wb
 }
 
 // OnFirst adds the given event handler to the [WidgetBase.Listeners.First] for the given event type.
@@ -55,9 +54,8 @@ func (wb *WidgetBase) On(etype events.Types, fun func(e events.Event)) *WidgetBa
 // before all of the ones added before it. OnFirst is one of the main ways for both end-user
 // and internal code to add an event handler to a widget, in addition to On and OnFinal,
 // which add event handlers that are called after those added by this function.
-func (wb *WidgetBase) OnFirst(etype events.Types, fun func(e events.Event)) *WidgetBase {
+func (wb *WidgetBase) OnFirst(etype events.Types, fun func(e events.Event)) {
 	wb.Listeners.First.Add(etype, fun)
-	return wb
 }
 
 // OnFinal adds the given event handler to the [WidgetBase.Listeners.Final] for the given event type.
@@ -65,61 +63,60 @@ func (wb *WidgetBase) OnFirst(etype events.Types, fun func(e events.Event)) *Wid
 // before all of the ones added before it. OnFinal is one of the main ways for both end-user
 // and internal code to add an event handler to a widget, in addition to OnFirst and On,
 // which add event handlers that are called before those added by this function.
-func (wb *WidgetBase) OnFinal(etype events.Types, fun func(e events.Event)) *WidgetBase {
+func (wb *WidgetBase) OnFinal(etype events.Types, fun func(e events.Event)) {
 	wb.Listeners.Final.Add(etype, fun)
-	return wb
 }
 
 // Helper functions for common event types:
 
 // OnClick adds an event listener function for [events.Click] events.
-func (wb *WidgetBase) OnClick(fun func(e events.Event)) *WidgetBase {
-	return wb.On(events.Click, fun)
+func (wb *WidgetBase) OnClick(fun func(e events.Event)) {
+	wb.On(events.Click, fun)
 }
 
 // OnDoubleClick adds an event listener function for [events.DoubleClick] events.
-func (wb *WidgetBase) OnDoubleClick(fun func(e events.Event)) *WidgetBase {
-	return wb.On(events.DoubleClick, fun)
+func (wb *WidgetBase) OnDoubleClick(fun func(e events.Event)) {
+	wb.On(events.DoubleClick, fun)
 }
 
 // OnChange adds an event listener function for [events.Change] events.
-func (wb *WidgetBase) OnChange(fun func(e events.Event)) *WidgetBase {
-	return wb.On(events.Change, fun)
+func (wb *WidgetBase) OnChange(fun func(e events.Event)) {
+	wb.On(events.Change, fun)
 }
 
 // OnInput adds an event listener function for [events.Input] events.
-func (wb *WidgetBase) OnInput(fun func(e events.Event)) *WidgetBase {
-	return wb.On(events.Input, fun)
+func (wb *WidgetBase) OnInput(fun func(e events.Event)) {
+	wb.On(events.Input, fun)
 }
 
 // OnKeyChord adds an event listener function for [events.KeyChord] events.
-func (wb *WidgetBase) OnKeyChord(fun func(e events.Event)) *WidgetBase {
-	return wb.On(events.KeyChord, fun)
+func (wb *WidgetBase) OnKeyChord(fun func(e events.Event)) {
+	wb.On(events.KeyChord, fun)
 }
 
 // OnFocus adds an event listener function for [events.Focus] events.
-func (wb *WidgetBase) OnFocus(fun func(e events.Event)) *WidgetBase {
-	return wb.On(events.Focus, fun)
+func (wb *WidgetBase) OnFocus(fun func(e events.Event)) {
+	wb.On(events.Focus, fun)
 }
 
 // OnFocusLost adds an event listener function for [events.FocusLost] events.
-func (wb *WidgetBase) OnFocusLost(fun func(e events.Event)) *WidgetBase {
-	return wb.On(events.FocusLost, fun)
+func (wb *WidgetBase) OnFocusLost(fun func(e events.Event)) {
+	wb.On(events.FocusLost, fun)
 }
 
 // OnSelect adds an event listener function for [events.Select] events.
-func (wb *WidgetBase) OnSelect(fun func(e events.Event)) *WidgetBase {
-	return wb.On(events.Select, fun)
+func (wb *WidgetBase) OnSelect(fun func(e events.Event)) {
+	wb.On(events.Select, fun)
 }
 
 // OnShow adds an event listener function for [events.Show] events.
-func (wb *WidgetBase) OnShow(fun func(e events.Event)) *WidgetBase {
-	return wb.On(events.Show, fun)
+func (wb *WidgetBase) OnShow(fun func(e events.Event)) {
+	wb.On(events.Show, fun)
 }
 
 // OnClose adds an event listener function for [events.Close] events.
-func (wb *WidgetBase) OnClose(fun func(e events.Event)) *WidgetBase {
-	return wb.On(events.Close, fun)
+func (wb *WidgetBase) OnClose(fun func(e events.Event)) {
+	wb.On(events.Close, fun)
 }
 
 // AddCloseDialog adds a dialog that confirms that the user wants to close the Scene
@@ -128,7 +125,7 @@ func (wb *WidgetBase) OnClose(fun func(e events.Event)) *WidgetBase {
 // to add the title and close button to the dialog, which is necessary so that the close
 // dialog can be fully customized. If this function returns false, it does not make the dialog.
 // This can be used to make the dialog conditional on other things, like whether something is saved.
-func (wb *WidgetBase) AddCloseDialog(config func(d *Body) bool) *WidgetBase {
+func (wb *WidgetBase) AddCloseDialog(config func(d *Body) bool) {
 	var inClose, canClose bool
 	wb.OnClose(func(e events.Event) {
 		if canClose {
@@ -160,7 +157,6 @@ func (wb *WidgetBase) AddCloseDialog(config func(d *Body) bool) *WidgetBase {
 		e.SetHandled()
 		d.RunDialog(wb)
 	})
-	return wb
 }
 
 // Send sends an NEW event of given type to this widget,

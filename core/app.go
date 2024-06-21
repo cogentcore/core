@@ -262,10 +262,10 @@ func (tb *Toolbar) standardOverflowMenu(m *Scene) { //types:add
 					win.CloseReq()
 				}
 			})
-		quit := NewButton(m).SetText("Quit").SetIcon(icons.Close).SetShortcut("Command+Q").
-			OnClick(func(e events.Event) {
-				go TheApp.QuitReq()
-			})
+		quit := NewButton(m).SetText("Quit").SetIcon(icons.Close).SetShortcut("Command+Q")
+		quit.OnClick(func(e events.Event) {
+			go TheApp.QuitReq()
+		})
 		quit.SetName("quit-app")
 		NewSeparator(m)
 		for _, w := range MainRenderWindows {

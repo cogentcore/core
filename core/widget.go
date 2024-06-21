@@ -319,9 +319,8 @@ func (wb *WidgetBase) OnChildAdded(child tree.Node) {
 
 // OnWidgetAdded adds a function to call when a widget is added
 // as a child to the widget or any of its children.
-func (wb *WidgetBase) OnWidgetAdded(fun func(w Widget)) *WidgetBase {
+func (wb *WidgetBase) OnWidgetAdded(fun func(w Widget)) {
 	wb.OnWidgetAdders = append(wb.OnWidgetAdders, fun)
-	return wb
 }
 
 // AsWidget returns the given [tree.Node]

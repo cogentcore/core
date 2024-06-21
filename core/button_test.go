@@ -38,7 +38,8 @@ func TestButtonTextIcon(t *testing.T) {
 func TestButtonClick(t *testing.T) {
 	b := NewBody()
 	clicked := false
-	bt := NewButton(b).OnClick(func(e events.Event) {
+	bt := NewButton(b)
+	bt.OnClick(func(e events.Event) {
 		clicked = true
 	})
 	bt.Send(events.Click)
