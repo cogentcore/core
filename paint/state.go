@@ -105,21 +105,25 @@ func (rs *State) PopTransform() {
 	rs.TransformStack = rs.TransformStack[:sz-1]
 }
 
-// PushBounds pushes current bounds onto stack and sets new bounds.
-// This is the essential first step in rendering.
-// Any further actual rendering should always be surrounded
-// It also takes an optional border radius for the current element.
-func (rs *State) PushBounds(b image.Rectangle, radius ...styles.SideFloats) {
+// PushBounds pushes the current bounds onto the stack and sets new bounds.
+// This is the essential first step in rendering. See [State.PushBoundsGeom]
+// for a version that takes more arguments.
+func (rs *State) PushBounds(b image.Rectangle) {
+	rs.PushBoundsGeom(b, b, styles.SideFloats{})
+}
+
+// PushBoundsGeom pushes the current bounds onto the stack and sets new bounds.
+// This is the essential first step in rendering. It takes the total bounds,
+// which include any margin or shadow associated with an element, and the content
+// bounds, which do not include those things. It also takes the border radius of
+// the current element.
+func (rs *State) PushBoundsGeom(total, content image.Rectangle, radius styles.SideFloats) {
 	if rs.Bounds.Empty() {
 		rs.Bounds = rs.Image.Bounds()
 	}
 	rs.BoundsStack = append(rs.BoundsStack, rs.Bounds)
-	r := styles.SideFloats{}
-	if len(radius) > 0 {
-		r = radius[0]
-	}
-	rs.RadiusStack = append(rs.RadiusStack, r)
-	rs.Bounds = b
+	rs.RadiusStack = append(rs.RadiusStack, radius)
+	rs.Bounds = total
 }
 
 // PopBounds pops the bounds off the stack and sets the current bounds.
