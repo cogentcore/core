@@ -52,7 +52,7 @@ func (fn *Node) Cut() {
 	if fn.IsRoot("Cut") {
 		return
 	}
-	fn.Copy(false)
+	fn.Copy()
 	// todo: move files somewhere temporary, then use those temps for paste..
 	core.MessageDialog(fn, "File names were copied to clipboard and can be pasted to copy elsewhere, but files are not deleted because contents of files are not placed on the clipboard and thus cannot be pasted as such.  Use Delete to delete files.")
 }
