@@ -467,7 +467,7 @@ func (sr *Slider) WidgetTooltip(pos image.Point) (string, image.Point) {
 	if res != "" {
 		res += " "
 	}
-	res += fmt.Sprintf("(value: %.4g, minimum: %g, maximum: %g)", sr.Value, sr.Min, sr.Max)
+	res += fmt.Sprintf("(value: %.4g, minimum: %.4g, maximum: %.4g)", sr.Value, sr.Min, sr.Max)
 	return res, sr.DefaultTooltipPos()
 }
 

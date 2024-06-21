@@ -71,6 +71,9 @@ func (cp *ColorPicker) Init() {
 		Bind(&cp.Color.Chroma, w)
 		w.SetMin(0).SetMax(120)
 		w.SetTooltip("The chroma, which is the colorfulness/saturation of the color")
+		w.Updater(func() {
+			w.SetMax(cp.Color.MaximumChroma())
+		})
 		w.OnInput(func(e events.Event) {
 			cp.Color.SetChroma(w.Value)
 			cp.Update()

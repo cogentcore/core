@@ -42,7 +42,8 @@ type HCT struct {
 	// Chroma (C) is the colorfulness/saturation of the color.
 	// Grayscale colors have no chroma, and fully saturated ones
 	// have high chroma. The maximum varies as a function of hue
-	// and tone, but 120 is a general upper bound.
+	// and tone, but 120 is a general upper bound (see
+	// [HCT.MaximumChroma] to get a specific value).
 	Chroma float32 `min:"0" max:"120"`
 
 	// Tone is the L* component from the LAB (L*a*b*) color system,
@@ -147,6 +148,14 @@ func (h *HCT) SetTone(tone float32) *HCT {
 func (h HCT) WithTone(tone float32) HCT {
 	r, g, b := SolveToRGB(h.Hue, h.Chroma, tone)
 	return SRGBToHCT(r, g, b)
+}
+
+// MaximumChroma returns the maximum [HCT.Chroma] value for the hue
+// and tone of this color. This will always be between 0 and 120.
+func (h HCT) MaximumChroma() float32 {
+	// WithChroma does a round trip, so the resultant chroma will only
+	// be as high as the maximum chroma.
+	return h.WithChroma(120).Chroma
 }
 
 // SRGBToHCT returns an HCT from given SRGB color coordinates,
