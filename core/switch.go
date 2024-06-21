@@ -163,8 +163,8 @@ func (sw *Switch) Init() {
 					case SwitchSwitch:
 						// switches need to be bigger
 						s.Min.Set(units.Em(2), units.Em(1.5))
-					case SwitchChip:
-						// chips render no icon when off
+					case SwitchChip, SwitchSegmentedButton:
+						// chips and segmented buttons render no icon when off
 						s.Min.Zero()
 					default:
 						s.Min.Set(units.Em(1.5))
