@@ -135,13 +135,13 @@ var shortMonths = []string{"Jan", "Feb", "Apr", "Mar", "May", "Jun", "Jul", "Aug
 type DatePicker struct {
 	Frame
 
-	// Time is the time that we are viewing
-	Time time.Time `set:"-"`
+	// Time is the time that we are viewing.
+	Time time.Time
 }
 
-// SetTime sets the source time and updates the view
-func (dp *DatePicker) SetTime(tim time.Time) *DatePicker { // TODO(config)
-	dp.Time = tim
+// setTime sets the source time and updates the picker.
+func (dp *DatePicker) setTime(tim time.Time) *DatePicker { // TODO(config)
+	dp.SetTime(tim)
 	dp.SendChange()
 	dp.Update()
 	return dp
@@ -164,7 +164,7 @@ func (dp *DatePicker) Init() {
 		tree.AddChild(w, func(w *Button) {
 			w.SetType(ButtonAction).SetIcon(icons.NavigateBefore)
 			w.OnClick(func(e events.Event) {
-				dp.SetTime(dp.Time.AddDate(0, -1, 0))
+				dp.setTime(dp.Time.AddDate(0, -1, 0))
 			})
 			w.Styler(arrowStyle)
 		})
@@ -177,20 +177,20 @@ func (dp *DatePicker) Init() {
 			w.SetCurrentIndex(int(dp.Time.Month() - 1))
 			w.OnChange(func(e events.Event) {
 				// set our month
-				dp.SetTime(dp.Time.AddDate(0, w.CurrentIndex+1-int(dp.Time.Month()), 0))
+				dp.setTime(dp.Time.AddDate(0, w.CurrentIndex+1-int(dp.Time.Month()), 0))
 			})
 		})
 		tree.AddChild(w, func(w *Button) {
 			w.SetType(ButtonAction).SetIcon(icons.NavigateNext)
 			w.OnClick(func(e events.Event) {
-				dp.SetTime(dp.Time.AddDate(0, 1, 0))
+				dp.setTime(dp.Time.AddDate(0, 1, 0))
 			})
 			w.Styler(arrowStyle)
 		})
 		tree.AddChild(w, func(w *Button) {
 			w.SetType(ButtonAction).SetIcon(icons.NavigateBefore)
 			w.OnClick(func(e events.Event) {
-				dp.SetTime(dp.Time.AddDate(-1, 0, 0))
+				dp.setTime(dp.Time.AddDate(-1, 0, 0))
 			})
 			w.Styler(arrowStyle)
 		})
@@ -207,13 +207,13 @@ func (dp *DatePicker) Init() {
 				// we are centered at current year with 100 in each direction
 				nyr := w.CurrentIndex + yr - 100
 				// set our year
-				dp.SetTime(dp.Time.AddDate(nyr-dp.Time.Year(), 0, 0))
+				dp.setTime(dp.Time.AddDate(nyr-dp.Time.Year(), 0, 0))
 			})
 		})
 		tree.AddChild(w, func(w *Button) {
 			w.SetType(ButtonAction).SetIcon(icons.NavigateNext)
 			w.OnClick(func(e events.Event) {
-				dp.SetTime(dp.Time.AddDate(1, 0, 0))
+				dp.setTime(dp.Time.AddDate(1, 0, 0))
 			})
 			w.Styler(arrowStyle)
 		})
@@ -248,7 +248,7 @@ func (dp *DatePicker) Init() {
 					ds := strconv.Itoa(dt.Day())
 					w.SetType(ButtonAction).SetText(ds)
 					w.OnClick(func(e events.Event) {
-						dp.SetTime(dt)
+						dp.setTime(dt)
 					})
 					w.Styler(func(s *styles.Style) {
 						s.CenterAll()
