@@ -525,57 +525,52 @@ func (dv *DiffEditor) MakeToolbar(p *tree.Plan) {
 		w.SetText(txta)
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetText("Next").SetIcon(icons.KeyboardArrowDown).
-			SetTooltip("move down to next diff region").
-			OnClick(func(e events.Event) {
-				dv.NextDiff(0)
-			}).
-			Styler(func(s *styles.Style) {
-				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
-			})
+		w.SetText("Next").SetIcon(icons.KeyboardArrowDown).SetTooltip("move down to next diff region")
+		w.OnClick(func(e events.Event) {
+			dv.NextDiff(0)
+		})
+		w.Styler(func(s *styles.Style) {
+			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
+		})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetText("Prev").SetIcon(icons.KeyboardArrowUp).
-			SetTooltip("move up to previous diff region").
-			OnClick(func(e events.Event) {
-				dv.PrevDiff(0)
-			}).
-			Styler(func(s *styles.Style) {
-				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
-			})
+		w.SetText("Prev").SetIcon(icons.KeyboardArrowUp).SetTooltip("move up to previous diff region")
+		w.OnClick(func(e events.Event) {
+			dv.PrevDiff(0)
+		})
+		w.Styler(func(s *styles.Style) {
+			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
+		})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetText("A &lt;- B").SetIcon(icons.ContentCopy).
-			SetTooltip("for current diff region, apply change from corresponding version in B, and move to next diff").
-			OnClick(func(e events.Event) {
-				dv.ApplyDiff(0, -1)
-				dv.NextDiff(0)
-			}).
-			Styler(func(s *styles.Style) {
-				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
-			})
+		w.SetText("A &lt;- B").SetIcon(icons.ContentCopy).SetTooltip("for current diff region, apply change from corresponding version in B, and move to next diff")
+		w.OnClick(func(e events.Event) {
+			dv.ApplyDiff(0, -1)
+			dv.NextDiff(0)
+		})
+		w.Styler(func(s *styles.Style) {
+			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
+		})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetText("Undo").SetIcon(icons.Undo).
-			SetTooltip("undo last diff apply action (A &lt;- B)").
-			OnClick(func(e events.Event) {
-				dv.UndoDiff(0)
-			}).
-			Styler(func(s *styles.Style) {
-				s.SetState(!dv.BufA.Changed, states.Disabled)
-			})
+		w.SetText("Undo").SetIcon(icons.Undo).SetTooltip("undo last diff apply action (A &lt;- B)")
+		w.OnClick(func(e events.Event) {
+			dv.UndoDiff(0)
+		})
+		w.Styler(func(s *styles.Style) {
+			s.SetState(!dv.BufA.Changed, states.Disabled)
+		})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetText("Save").SetIcon(icons.Save).
-			SetTooltip("save edited version of file with the given -- prompts for filename").
-			OnClick(func(e events.Event) {
-				fb := core.NewSoloFuncButton(w).SetFunc(dv.SaveFileA)
-				fb.Args[0].SetValue(dv.FileA)
-				fb.CallFunc()
-			}).
-			Styler(func(s *styles.Style) {
-				s.SetState(!dv.BufA.Changed, states.Disabled)
-			})
+		w.SetText("Save").SetIcon(icons.Save).SetTooltip("save edited version of file with the given; prompts for filename")
+		w.OnClick(func(e events.Event) {
+			fb := core.NewSoloFuncButton(w).SetFunc(dv.SaveFileA)
+			fb.Args[0].SetValue(dv.FileA)
+			fb.CallFunc()
+		})
+		w.Styler(func(s *styles.Style) {
+			s.SetState(!dv.BufA.Changed, states.Disabled)
+		})
 	})
 
 	tree.Add(p, func(w *core.Separator) {})
@@ -588,57 +583,52 @@ func (dv *DiffEditor) MakeToolbar(p *tree.Plan) {
 		w.SetText(txtb)
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetText("Next").SetIcon(icons.KeyboardArrowDown).
-			SetTooltip("move down to next diff region").
-			OnClick(func(e events.Event) {
-				dv.NextDiff(1)
-			}).
-			Styler(func(s *styles.Style) {
-				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
-			})
+		w.SetText("Next").SetIcon(icons.KeyboardArrowDown).SetTooltip("move down to next diff region")
+		w.OnClick(func(e events.Event) {
+			dv.NextDiff(1)
+		})
+		w.Styler(func(s *styles.Style) {
+			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
+		})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetText("Prev").SetIcon(icons.KeyboardArrowUp).
-			SetTooltip("move up to previous diff region").
-			OnClick(func(e events.Event) {
-				dv.PrevDiff(1)
-			}).
-			Styler(func(s *styles.Style) {
-				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
-			})
+		w.SetText("Prev").SetIcon(icons.KeyboardArrowUp).SetTooltip("move up to previous diff region")
+		w.OnClick(func(e events.Event) {
+			dv.PrevDiff(1)
+		})
+		w.Styler(func(s *styles.Style) {
+			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
+		})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetText("A -&gt; B").SetIcon(icons.ContentCopy).
-			SetTooltip("for current diff region, apply change from corresponding version in A, and move to next diff").
-			OnClick(func(e events.Event) {
-				dv.ApplyDiff(1, -1)
-				dv.NextDiff(1)
-			}).
-			Styler(func(s *styles.Style) {
-				s.SetState(len(dv.AlignD) <= 1, states.Disabled)
-			})
+		w.SetText("A -&gt; B").SetIcon(icons.ContentCopy).SetTooltip("for current diff region, apply change from corresponding version in A, and move to next diff")
+		w.OnClick(func(e events.Event) {
+			dv.ApplyDiff(1, -1)
+			dv.NextDiff(1)
+		})
+		w.Styler(func(s *styles.Style) {
+			s.SetState(len(dv.AlignD) <= 1, states.Disabled)
+		})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetText("Undo").SetIcon(icons.Undo).
-			SetTooltip("undo last diff apply action (A -&gt; B)").
-			OnClick(func(e events.Event) {
-				dv.UndoDiff(1)
-			}).
-			Styler(func(s *styles.Style) {
-				s.SetState(!dv.BufB.Changed, states.Disabled)
-			})
+		w.SetText("Undo").SetIcon(icons.Undo).SetTooltip("undo last diff apply action (A -&gt; B)")
+		w.OnClick(func(e events.Event) {
+			dv.UndoDiff(1)
+		})
+		w.Styler(func(s *styles.Style) {
+			s.SetState(!dv.BufB.Changed, states.Disabled)
+		})
 	})
 	tree.Add(p, func(w *core.Button) {
-		w.SetText("Save").SetIcon(icons.Save).
-			SetTooltip("save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function").
-			OnClick(func(e events.Event) {
-				fb := core.NewSoloFuncButton(w).SetFunc(dv.SaveFileB)
-				fb.Args[0].SetValue(dv.FileB)
-				fb.CallFunc()
-			}).
-			Styler(func(s *styles.Style) {
-				s.SetState(!dv.BufB.Changed, states.Disabled)
-			})
+		w.SetText("Save").SetIcon(icons.Save).SetTooltip("save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function")
+		w.OnClick(func(e events.Event) {
+			fb := core.NewSoloFuncButton(w).SetFunc(dv.SaveFileB)
+			fb.Args[0].SetValue(dv.FileB)
+			fb.CallFunc()
+		})
+		w.Styler(func(s *styles.Style) {
+			s.SetState(!dv.BufB.Changed, states.Disabled)
+		})
 	})
 }
 

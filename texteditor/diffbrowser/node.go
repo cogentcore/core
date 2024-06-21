@@ -89,10 +89,11 @@ func (tn *Node) Browser() *Browser {
 }
 
 func (tn *Node) ContextMenu(m *core.Scene) {
-	core.NewButton(m).SetText("View Diffs").SetIcon(icons.Add).
-		Styler(func(s *styles.Style) {
-			s.SetState(!tn.HasSelection(), states.Disabled)
-		}).OnClick(func(e events.Event) {
+	vd := core.NewButton(m).SetText("View Diffs").SetIcon(icons.Add)
+	vd.Styler(func(s *styles.Style) {
+		s.SetState(!tn.HasSelection(), states.Disabled)
+	})
+	vd.OnClick(func(e events.Event) {
 		br := tn.Browser()
 		if br == nil {
 			return
