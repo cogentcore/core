@@ -23,6 +23,12 @@ func TestSwitchText(t *testing.T) {
 	b.AssertRender(t, "switch/text")
 }
 
+func TestSwitchChip(t *testing.T) {
+	b := NewBody()
+	NewSwitch(b).SetType(SwitchChip).SetText("Remember me")
+	b.AssertRender(t, "switch/chip")
+}
+
 func TestSwitchCheckbox(t *testing.T) {
 	b := NewBody()
 	NewSwitch(b).SetType(SwitchCheckbox).SetText("Remember me")
