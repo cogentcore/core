@@ -12,17 +12,18 @@ import (
 	"cogentcore.org/core/styles"
 )
 
-// DrawStandardBox draws the CSS "standard box" model using the given styling information,
+// DrawStandardBox draws the CSS standard box model using the given styling information,
 // position, size, and parent actual background. This is used for rendering
 // widgets such as buttons, textfields, etc in a GUI.
-func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, sz math32.Vector2, pabg image.Image) {
+func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size math32.Vector2, pabg image.Image) {
 	if !st.RenderBox {
 		return
 	}
 	tm := st.TotalMargin().Round()
 	mpos := pos.Add(tm.Pos())
-	msz := sz.Sub(tm.Size())
-	rad := st.Border.Radius.Dots()
+	msize := size.Sub(tm.Size())
+	radius := st.Border.Radius.Dots()
+	radius = pc.fixRadius(radius, pos, size)
 
 	if st.ActualBackground == nil {
 		// we need to do this to prevent
@@ -46,7 +47,7 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, sz math
 		// so TODO: maybe come up with a better solution for this.
 		// We need to use raw geom data because we need to clear
 		// any box shadow that may have gone in margin.
-		pc.BlitBox(pos, sz, pabg)
+		pc.BlitBox(pos, size, pabg)
 	}
 
 	pc.StrokeStyle.Opacity = st.Opacity
@@ -62,7 +63,7 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, sz math
 			// material design shadows, at their specified alpha levels.
 			pc.FillStyle.Color = gradient.ApplyOpacityImage(shadow.Color, 0.5)
 			spos := shadow.BasePos(mpos)
-			ssz := shadow.BaseSize(msz)
+			ssz := shadow.BaseSize(msize)
 
 			// note: we are using EdgeBlurFactors with radiusFactor = 1
 			// (sigma == radius), so we divide Blur / 2 relative to the
@@ -74,7 +75,7 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, sz math
 			// If a higher-contrast shadow is used, it would look better
 			// with radiusFactor = 2, and you'd have to remove this /2 factor.
 
-			pc.DrawRoundedShadowBlur(shadow.Blur.Dots/2, 1, spos.X, spos.Y, ssz.X, ssz.Y, st.Border.Radius.Dots())
+			pc.DrawRoundedShadowBlur(shadow.Blur.Dots/2, 1, spos.X, spos.Y, ssz.X, ssz.Y, radius)
 		}
 	}
 
@@ -82,21 +83,63 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, sz math
 	// we need to draw things twice here because we need to clear
 	// the whole area with the background color first so the border
 	// doesn't render weirdly
-	if styles.SidesAreZero(rad.Sides) {
-		pc.FillBox(mpos, msz, st.ActualBackground)
+	if styles.SidesAreZero(radius.Sides) {
+		pc.FillBox(mpos, msize, st.ActualBackground)
 	} else {
 		pc.FillStyle.Color = st.ActualBackground
 		// no border; fill on
-		pc.DrawRoundedRectangle(mpos.X, mpos.Y, msz.X, msz.Y, rad)
+		pc.DrawRoundedRectangle(mpos.X, mpos.Y, msize.X, msize.Y, radius)
 		pc.Fill()
 	}
 
 	// now that we have drawn background color
 	// above, we can draw the border
 	mpos.SetAdd(st.Border.Width.Dots().Pos().MulScalar(0.5))
-	msz.SetSub(st.Border.Width.Dots().Size().MulScalar(0.5))
+	msize.SetSub(st.Border.Width.Dots().Size().MulScalar(0.5))
 	mpos.SetSub(st.Border.Offset.Dots().Pos())
-	msz.SetAdd(st.Border.Offset.Dots().Size())
+	msize.SetAdd(st.Border.Offset.Dots().Size())
 	pc.FillStyle.Color = nil
-	pc.DrawBorder(mpos.X, mpos.Y, msz.X, msz.Y, st.Border)
+	pc.DrawBorder(mpos.X, mpos.Y, msize.X, msize.Y, st.Border)
+}
+
+// fixRadius returns a version of the given border radius that is guaranteed
+// to have appropriate values for each corner such that they do not go outside
+// of the parent effective bounds.
+func (pc *Context) fixRadius(r styles.SideFloats, pos, size math32.Vector2) styles.SideFloats {
+	if len(pc.RadiusStack) == 0 {
+		return r
+	}
+	rtop := pos.ToPoint()
+	rright := pos.AddDim(math32.X, size.X).ToPoint()
+	rbottom := pos.Add(size).ToPoint()
+	rleft := pos.AddDim(math32.Y, size.Y).ToPoint()
+
+	// For each parent and corner, if our corner is outside of the inset effective
+	// border radius corner of the parent, we ensure that our border radius is at
+	// least as large as that of the parent, thereby ensuring that we do not go
+	// outside of the parent effective bounds.
+	for i, pbox := range pc.BoundsStack {
+		pr := pc.RadiusStack[i]
+
+		ptop := pbox.Min.Add(image.Pt(int(pr.Top), int(pr.Top)))
+		if rtop.X < ptop.X && rtop.Y < ptop.Y {
+			r.Top = max(r.Top, pr.Top)
+		}
+
+		pright := pbox.Min.Add(image.Pt(pbox.Size().X-int(pr.Right), int(pr.Right)))
+		if rright.X > pright.X && rright.Y < pright.Y {
+			r.Right = max(r.Right, pr.Right)
+		}
+
+		pbottom := pbox.Min.Add(image.Pt(pbox.Size().X-int(pr.Bottom), pbox.Size().Y-int(pr.Bottom)))
+		if rbottom.X > pbottom.X && rbottom.Y > pbottom.Y {
+			r.Bottom = max(r.Bottom, pr.Bottom)
+		}
+
+		pleft := pbox.Min.Add(image.Pt(int(pr.Left), pbox.Size().Y-int(pr.Left)))
+		if rleft.X < pleft.X && rleft.Y > pleft.Y {
+			r.Left = max(r.Left, pr.Left)
+		}
+	}
+	return r
 }

@@ -333,7 +333,7 @@ func (wb *WidgetBase) PushBounds() bool {
 	if pc.State == nil || pc.Image == nil {
 		return false
 	}
-	pc.PushBounds(wb.Geom.TotalBBox)
+	pc.PushBounds(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots())
 	pc.Defaults() // start with default values
 	if DebugSettings.RenderTrace {
 		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.Geom.TotalBBox)

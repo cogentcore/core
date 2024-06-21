@@ -12,6 +12,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/paint/raster"
 	"cogentcore.org/core/paint/scan"
+	"cogentcore.org/core/styles"
 )
 
 // The State holds all the current rendering state information used
@@ -51,14 +52,19 @@ type State struct {
 	// boundaries to restrict drawing to -- much faster than clip mask for basic square region exclusion -- used for restricting drawing
 	Bounds image.Rectangle
 
-	// bounding box of last object rendered -- computed by renderer during Fill or Stroke, grabbed by SVG objects
+	// bounding box of last object rendered; computed by renderer during Fill or Stroke, grabbed by SVG objects
 	LastRenderBBox image.Rectangle
 
 	// stack of transforms
 	TransformStack []math32.Matrix2
 
-	// stack of bounds -- every render starts with a push onto this stack, and finishes with a pop
+	// BoundsStack is the stack of parent bounds.
+	// Every render starts with a push onto this stack, and finishes with a pop.
 	BoundsStack []image.Rectangle
+
+	// RadiusStack is a stack of the border radii for the parent elements,
+	// with each one corresponding to the same entry in [State.BoundsStack].
+	RadiusStack []styles.SideFloats
 
 	// stack of clips, if needed
 	ClipStack []*image.Alpha
@@ -67,7 +73,7 @@ type State struct {
 	SVGOut io.Writer
 }
 
-// Init initializes State -- must be called whenever image size changes
+// Init initializes the [State]. It must be called whenever the image size changes.
 func (rs *State) Init(width, height int, img *image.RGBA) {
 	rs.CurrentTransform = math32.Identity2()
 	rs.Image = img
@@ -103,14 +109,17 @@ func (rs *State) PopTransform() {
 // This is the essential first step in rendering.
 // Any further actual rendering should always be surrounded
 // by [State.Lock] and [State.Unlock] calls.
-func (rs *State) PushBounds(b image.Rectangle) {
-	if rs.BoundsStack == nil {
-		rs.BoundsStack = make([]image.Rectangle, 0, 100)
-	}
+// It also takes an optional border radius for the current element.
+func (rs *State) PushBounds(b image.Rectangle, radius ...styles.SideFloats) {
 	if rs.Bounds.Empty() { // note: method name should be IsEmpty!
 		rs.Bounds = rs.Image.Bounds()
 	}
 	rs.BoundsStack = append(rs.BoundsStack, rs.Bounds)
+	r := styles.SideFloats{}
+	if len(radius) > 0 {
+		r = radius[0]
+	}
+	rs.RadiusStack = append(rs.RadiusStack, r)
 	rs.Bounds = b
 }
 
@@ -125,6 +134,7 @@ func (rs *State) PopBounds() {
 	}
 	rs.Bounds = rs.BoundsStack[sz-1]
 	rs.BoundsStack = rs.BoundsStack[:sz-1]
+	rs.RadiusStack = rs.RadiusStack[:sz-1]
 }
 
 // PushClip pushes current Mask onto the clip stack
