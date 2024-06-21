@@ -84,16 +84,15 @@ func (tp *TimePicker) Init() {
 		})
 		w.OnChange(func(e events.Event) {
 			// we set our minute and keep everything else
-			// TODO(config)
-			// tt := tp.Time
-			// tp.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), int(minute.Value), tt.Second(), tt.Nanosecond(), tt.Location())
+			tt := tp.Time
+			tp.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tt.Hour(), int(w.Value), tt.Second(), tt.Nanosecond(), tt.Location())
 			tp.SendChange()
 		})
 	})
 	tp.Maker(func(p *tree.Plan) {
 		if !SystemSettings.Clock24 {
 			tree.Add(p, func(w *Switches) {
-				w.SetMutex(true).SetType(SwitchSegmentedButton).SetItems(SwitchItem{Value: "AM"}, SwitchItem{Value: "PM"})
+				w.SetMutex(true).SetAllowNone(false).SetType(SwitchSegmentedButton).SetItems(SwitchItem{Value: "AM"}, SwitchItem{Value: "PM"})
 				tp.PM = tp.Time.Hour() >= 12
 				w.Styler(func(s *styles.Style) {
 					s.Direction = styles.Column
@@ -119,11 +118,8 @@ func (tp *TimePicker) Init() {
 					case "PM":
 						tp.PM = true
 						tp.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tp.Hour+12, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
-					default:
-						// must always have something valid selected
-						tp.PM = false
-						tp.Time = time.Date(tt.Year(), tt.Month(), tt.Day(), tp.Hour, tt.Minute(), tt.Second(), tt.Nanosecond(), tt.Location())
 					}
+					tp.SendChange()
 				})
 			})
 		}
