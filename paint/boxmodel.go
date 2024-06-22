@@ -118,7 +118,7 @@ func (pc *Context) fixRadius(r styles.SideFloats, pos, size math32.Vector2) styl
 	// border radius corner of the parent, we ensure that our border radius is at
 	// least as large as that of the parent, thereby ensuring that we do not go
 	// outside of the parent effective bounds.
-	for i, pbox := range pc.BoundsStack {
+	for i, pbox := range pc.ContentBoundsStack {
 		pr := pc.RadiusStack[i]
 
 		ptop := pbox.Min.Add(image.Pt(int(pr.Top), int(pr.Top)))
