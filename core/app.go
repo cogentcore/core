@@ -42,13 +42,6 @@ var (
 type App struct { //types:add -setters
 	system.App `set:"-"`
 
-	// AppBarConfig is the function that configures the AppBar,
-	// typically put in the [Scene.Bars.Top] (i.e., a TopAppBar).
-	// It is set to StdAppBarConfig by default, which makes the
-	// standard AppBar behavior. If this is nil, then no AppBar
-	// will be created by default.
-	AppBarConfig func(parent Widget)
-
 	// SceneConfig is the function called on every newly created [Scene]
 	// to configure it, if it is non-nil. This can be used to set global
 	// configuration and styling for all widgets using the OnWidgetAdded
@@ -94,19 +87,16 @@ func AppIconImages() []image.Image {
 	return res
 }
 
-// standardAppBarConfig is the standard implementation for a [App.AppBarConfig].
-// It adds a Back navigation buttons and the AppChooser,
-// followed by the [Widget.MakeToolbar] for the current FullWindow
-// Scene being viewed, along with [StandardOverflowMenu] items.
-// and calls AddDefaultOverflowMenu to provide default menu items,
-// which will appear below any other OverflowMenu items added.
-func standardAppBarConfig(parent Widget) {
-	tb := RecycleToolbar(parent)
+// MakeAppBar configures a new top app bar in the given parent.
+// It adds a back navigation button and an app chooser,
+// followed by standard overflow menu items.
+func MakeAppBar(parent Widget) {
+	tb := NewToolbar(parent)
 	tb.Maker(makeStandardAppBar)
 	if len(tb.Scene.AppBars) > 0 {
 		tb.Makers.Normal = append(tb.Makers.Normal, tb.Scene.AppBars...)
 	}
-	tb.AddOverflowMenu(tb.standardOverflowMenu) // todo -- need a config option for this
+	tb.AddOverflowMenu(tb.standardOverflowMenu)
 }
 
 // makeStandardAppBar adds standard items to start of an app bar [tree.Plan].

@@ -14,15 +14,14 @@ import (
 func init() {
 	system.HandleRecover = HandleRecover
 	system.InitScreenLogicalDPIFunc = AppearanceSettings.ApplyDPI // called when screens are initialized
-	TheApp.AppBarConfig = standardAppBarConfig
-	TheApp.CogentCoreDataDir()            // ensure it exists
-	TheWindowGeometrySaver.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
+	TheApp.CogentCoreDataDir()                                    // ensure it exists
+	TheWindowGeometrySaver.NeedToReload()                         // gets time stamp associated with open, so it doesn't re-open
 	TheWindowGeometrySaver.Open()
 	styles.SettingsFont = (*string)(&AppearanceSettings.Font)
 	styles.SettingsMonoFont = (*string)(&AppearanceSettings.MonoFont)
 
 	if testing.Testing() {
-		TheApp.AppBarConfig = nil
+		// TheApp.AppBarConfig = nil // TODO(config)
 		// needed to prevent app from quitting prematurely
 		NewBody().RunWindow()
 	}

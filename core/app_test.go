@@ -29,11 +29,11 @@ func TestSceneConfig(t *testing.T) {
 	b.AssertRender(t, "app/scene-config")
 }
 
-func TestStandardAppBarConfig(t *testing.T) {
+func TestMakeAppBar(t *testing.T) {
 	b := NewBody()
 	b.Styler(func(s *styles.Style) {
 		s.Min.X.Dp(500)
 	})
-	standardAppBarConfig(b)
+	MakeAppBar(b)
 	b.AssertRender(t, "app/standard-app-bar-config")
 }

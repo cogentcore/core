@@ -49,9 +49,9 @@ func (bf *BarFuncs) Inherit(obf BarFuncs) {
 // MakeSceneBars configures the side control bars, for main scenes
 func (sc *Scene) MakeSceneBars() {
 	// at last possible moment, add app-specific app bar config
-	if TheApp.AppBarConfig != nil && sc.Stage.Type.IsMain() && (sc.Stage.NewWindow || sc.Stage.FullWindow) {
+	if sc.Stage.Type.IsMain() && (sc.Stage.NewWindow || sc.Stage.FullWindow) {
 		if sc.Bars.Top.IsEmpty() {
-			sc.Bars.Top.Add(TheApp.AppBarConfig) // put in the top by default
+			sc.Bars.Top.Add(MakeAppBar) // put in the top by default
 		}
 	}
 	if !sc.Bars.Top.IsEmpty() {
@@ -127,15 +127,6 @@ func (sc *Scene) GetTopAppBar() *Toolbar {
 		return tab.(*Toolbar)
 	}
 	return nil
-}
-
-// RecycleToolbar constructs or returns a Toolbar in given parent Widget
-func RecycleToolbar(parent Widget) *Toolbar {
-	tb := parent.AsTree().ChildByType(ToolbarType, tree.NoEmbeds)
-	if tb != nil {
-		return tb.(*Toolbar)
-	}
-	return NewToolbar(parent)
 }
 
 // InheritBarsWidget inherits Bar functions based on a source widget
