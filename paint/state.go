@@ -60,9 +60,19 @@ type State struct {
 	// stack of transforms
 	TransformStack []math32.Matrix2
 
-	// BoundsStack is the stack of parent bounds.
+	// BoundsStack is a stack of parent bounds.
 	// Every render starts with a push onto this stack, and finishes with a pop.
 	BoundsStack []image.Rectangle
+
+	// ContentBounds are the boundaries of the content of the current element, not
+	// including any margin or shadow. This is only relevant when using
+	// [State.PushBoundsGeom].
+	ContentBounds image.Rectangle
+
+	// ContentBoundsStack is a stack of the content boundaries for the parent elements,
+	// with each one corresponding to the entry with the same index in
+	// [State.BoundsStack]. This is only relevant when using [State.PushBoundsGeom].
+	ContentBoundsStack []image.Rectangle
 
 	// Radius is the border radius of the element that is currently being rendered.
 	// This is only relevant when using [State.PushBoundsGeom].
@@ -70,7 +80,7 @@ type State struct {
 
 	// RadiusStack is a stack of the border radii for the parent elements,
 	// with each one corresponding to the entry with the same index in
-	// [State.BoundsStack].
+	// [State.BoundsStack]. This is only relevant when using [State.PushBoundsGeom].
 	RadiusStack []styles.SideFloats
 
 	// stack of clips, if needed
@@ -128,9 +138,14 @@ func (rs *State) PushBoundsGeom(total, content image.Rectangle, radius styles.Si
 	if rs.Bounds.Empty() {
 		rs.Bounds = rs.Image.Bounds()
 	}
+	if rs.ContentBounds.Empty() {
+		rs.ContentBounds = rs.Bounds
+	}
 	rs.BoundsStack = append(rs.BoundsStack, rs.Bounds)
+	rs.ContentBoundsStack = append(rs.ContentBoundsStack, rs.ContentBounds)
 	rs.RadiusStack = append(rs.RadiusStack, rs.Radius)
 	rs.Bounds = total
+	rs.ContentBounds = content
 	rs.Radius = radius
 }
 
@@ -144,8 +159,10 @@ func (rs *State) PopBounds() {
 		return
 	}
 	rs.Bounds = rs.BoundsStack[sz-1]
+	rs.ContentBounds = rs.ContentBoundsStack[sz-1]
 	rs.Radius = rs.RadiusStack[sz-1]
 	rs.BoundsStack = rs.BoundsStack[:sz-1]
+	rs.ContentBoundsStack = rs.ContentBoundsStack[:sz-1]
 	rs.RadiusStack = rs.RadiusStack[:sz-1]
 }
 
