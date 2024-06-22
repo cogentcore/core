@@ -21,7 +21,6 @@ func init() {
 	styles.SettingsMonoFont = (*string)(&AppearanceSettings.MonoFont)
 
 	if testing.Testing() {
-		// TheApp.AppBarConfig = nil // TODO(config)
 		// needed to prevent app from quitting prematurely
 		NewBody().RunWindow()
 	}
