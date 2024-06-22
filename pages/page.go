@@ -278,7 +278,7 @@ func (pg *Page) OpenURL(rawURL string, addToHistory bool) {
 	pg.nav.UnselectAll()
 	utv := pg.nav.FindPath(rawURL).(*core.Tree)
 	utv.Select()
-	utv.ScrollToMe()
+	utv.ScrollToThis()
 
 	pg.body.DeleteChildren()
 	err = htmlcore.ReadMD(pg.Context, pg.body, b)

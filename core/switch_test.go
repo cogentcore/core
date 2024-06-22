@@ -41,6 +41,12 @@ func TestSwitchRadioButton(t *testing.T) {
 	b.AssertRender(t, "switch/radio-button")
 }
 
+func TestSwitchChipChecked(t *testing.T) {
+	b := NewBody()
+	NewSwitch(b).SetType(SwitchChip).SetText("Remember me").SetChecked(true)
+	b.AssertRender(t, "switch/chip-checked")
+}
+
 func TestSwitchChange(t *testing.T) {
 	b := NewBody()
 	sw := NewSwitch(b)

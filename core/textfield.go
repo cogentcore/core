@@ -1250,18 +1250,6 @@ func (tf *TextField) CharRenderPos(charidx int, wincoords bool) math32.Vector2 {
 	return pos.Add(cpos)
 }
 
-// ScrollLayoutToCursor scrolls any scrolling layout above us so that the cursor is in view
-func (tf *TextField) ScrollLayoutToCursor() bool {
-	ly := tf.ParentScrollLayout()
-	if ly == nil {
-		return false
-	}
-	cpos := tf.CharRenderPos(tf.CursorPos, false).ToPointFloor()
-	bbsz := image.Point{int(math32.Ceil(tf.CursorWidth.Dots)), int(math32.Ceil(tf.FontHeight))}
-	bbox := image.Rectangle{Min: cpos, Max: cpos.Add(bbsz)}
-	return ly.ScrollToBox(bbox)
-}
-
 var (
 	// TextFieldBlinker manages cursor blinking
 	TextFieldBlinker = Blinker{}

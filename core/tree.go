@@ -918,7 +918,7 @@ func (tr *Tree) MoveDownAction(selMode events.SelectModes) *Tree {
 	nn := tr.MoveDown(selMode)
 	if nn != nil && nn != tr {
 		nn.SetFocus()
-		nn.ScrollToMe()
+		nn.ScrollToThis()
 		tr.SendSelectEvent()
 	}
 	return nn
@@ -978,7 +978,7 @@ func (tr *Tree) MoveUpAction(selMode events.SelectModes) *Tree {
 	nn := tr.MoveUp(selMode)
 	if nn != nil && nn != tr {
 		nn.SetFocus()
-		nn.ScrollToMe()
+		nn.ScrollToThis()
 		tr.SendSelectEvent()
 	}
 	return nn
@@ -1011,7 +1011,7 @@ func (tr *Tree) MovePageUpAction(selMode events.SelectModes) *Tree {
 			fnn.SelectUpdate(selMode)
 		}
 		fnn.SetFocus()
-		fnn.ScrollToMe()
+		fnn.ScrollToThis()
 		tr.SendSelectEvent()
 	}
 	tr.NeedsRender()
@@ -1042,7 +1042,7 @@ func (tr *Tree) MovePageDownAction(selMode events.SelectModes) *Tree {
 			fnn.SelectUpdate(selMode)
 		}
 		fnn.SetFocus()
-		fnn.ScrollToMe()
+		fnn.ScrollToThis()
 		tr.SendSelectEvent()
 	}
 	tr.NeedsRender()
@@ -1070,7 +1070,7 @@ func (tr *Tree) MoveToLastChild(selMode events.SelectModes) *Tree {
 func (tr *Tree) MoveHomeAction(selMode events.SelectModes) *Tree {
 	tr.Root.SelectUpdate(selMode)
 	tr.Root.SetFocus()
-	tr.Root.ScrollToMe()
+	tr.Root.ScrollToThis()
 	tr.Root.SendSelectEvent()
 	return tr.Root
 }
@@ -1098,7 +1098,7 @@ func (tr *Tree) MoveEndAction(selMode events.SelectModes) *Tree {
 			fnn.SelectUpdate(selMode)
 		}
 		fnn.SetFocus()
-		fnn.ScrollToMe()
+		fnn.ScrollToThis()
 		tr.SendSelectEvent()
 	}
 	return fnn

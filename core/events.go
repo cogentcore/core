@@ -884,7 +884,7 @@ func (em *Events) SetFocus(w Widget) bool {
 		return false
 	}
 	if w != nil {
-		w.AsWidget().ScrollToMe()
+		w.AsWidget().ScrollToThis()
 	}
 	return got
 }
@@ -905,7 +905,7 @@ func (em *Events) SetFocusEvent(w Widget) bool {
 		return false
 	}
 	if w != nil {
-		w.AsWidget().ScrollToMe()
+		w.AsWidget().ScrollToThis()
 	}
 	return got
 }

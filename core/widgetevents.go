@@ -420,7 +420,7 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 func (wb *WidgetBase) HandleWidgetStateFromFocus() {
 	wb.OnFocus(func(e events.Event) {
 		if wb.AbilityIs(abilities.Focusable) {
-			wb.ScrollToMe()
+			wb.ScrollToThis()
 			wb.SetState(true, states.Focused)
 			if wb.Styles.VirtualKeyboard != styles.KeyboardNone {
 				TheApp.ShowVirtualKeyboard(wb.Styles.VirtualKeyboard)
