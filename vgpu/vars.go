@@ -262,16 +262,28 @@ func (vs *Vars) VkPushConfig() []vk.PushConstantRange {
 // key info on descriptorCount -- very confusing.
 // https://stackoverflow.com/questions/51715944/descriptor-set-count-ambiguity-in-vulkan
 
+var nPoolDelete = 0
+
 // DescLayout configures the PipelineLayout of DescriptorSetLayout
 // info for all of the non-Vertex vars
 func (vs *Vars) DescLayout(dev vk.Device) {
 	vs.NTextures = 0
 	if vs.VkDescLayout != vk.NullPipelineLayout {
-		vk.DestroyPipelineLayout(dev, vs.VkDescLayout, nil)
+		// note: this fixes a reliable crash on windows, where
+		// deleting the DescriptorPool causes a crash most of the time
+		// during the xyz demo, when manipulating the scene, and adding
+		// new elements, which drives a new DescLayout call.
+		// https://github.com/cogentcore/core/issues/536
+		if nPoolDelete < 3 {
+			nPoolDelete++
+		} else {
+			vk.DestroyPipelineLayout(dev, vs.VkDescLayout, nil)
+			if vs.VkDescPool != vk.NullDescriptorPool {
+				vk.DestroyDescriptorPool(dev, vs.VkDescPool, nil)
+			}
+		}
 	}
-	if vs.VkDescPool != vk.NullDescriptorPool {
-		vk.DestroyDescriptorPool(dev, vs.VkDescPool, nil)
-	}
+
 	if vs.NDescs < 1 {
 		vs.NDescs = 1
 	}
