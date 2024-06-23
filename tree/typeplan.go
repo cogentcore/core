@@ -34,7 +34,7 @@ func UpdateSlice(slice *[]Node, parent Node, p TypePlan) bool {
 	return plan.Update(slice, len(p),
 		func(i int) string { return p[i].Name },
 		func(name string, i int) Node {
-			n := NewOfType(p[i].Type)
+			n := newOfType(p[i].Type)
 			n.AsTree().SetName(name)
 			initNode(n)
 			return n

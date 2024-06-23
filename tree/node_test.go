@@ -504,15 +504,3 @@ func TestClone(t *testing.T) {
 			}
 	*/
 }
-
-func BenchmarkNewOfType(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		_ = NewOfType(NodeBaseType)
-	}
-}
-
-func BenchmarkStdNew(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		_ = new(NodeBase)
-	}
-}

@@ -330,7 +330,7 @@ func (n *NodeBase) NewChild(typ *types.Type) Node {
 	if err := checkThis(n); err != nil {
 		return nil
 	}
-	kid := NewOfType(typ)
+	kid := newOfType(typ)
 	initNode(kid)
 	n.Children = append(n.Children, kid)
 	SetParent(kid, n)
@@ -358,7 +358,7 @@ func (n *NodeBase) InsertNewChild(typ *types.Type, index int) Node {
 	if err := checkThis(n); err != nil {
 		return nil
 	}
-	kid := NewOfType(typ)
+	kid := newOfType(typ)
 	initNode(kid)
 	n.Children = slices.Insert(n.Children, index, kid)
 	SetParent(kid, n)
@@ -718,7 +718,7 @@ func copyFrom(to, from Node) {
 // Any pointers within the cloned tree will correctly point within the new
 // cloned tree (see [Node.CopyFrom] for more information).
 func (n *NodeBase) Clone() Node {
-	nc := NewOfType(n.This.NodeType())
+	nc := newOfType(n.This.NodeType())
 	initNode(nc)
 	nc.AsTree().SetName(n.Name)
 	nc.AsTree().CopyFrom(n.This)

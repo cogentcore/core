@@ -17,22 +17,27 @@ import (
 
 // admin.go has infrastructure code outside of the [Node] interface.
 
-// New returns a new node of the given the type with the given optional parent.
+// New returns a new node of the given type with the given optional parent.
 // If the name is unspecified, it defaults to the ID (kebab-case) name of
 // the type, plus the [Node.NumLifetimeChildren] of the parent.
 func New[T Node](parent ...Node) T {
-	if len(parent) == 0 {
-		return newRoot[T]()
-	}
 	var n T
-	return parent[0].AsTree().NewChild(n.NodeType()).(T)
+	return NewOfType(n.NodeType(), parent...).(T)
+}
+
+// NewOfType returns a new node of the given [types.Type] with the given optional parent.
+// If the name is unspecified, it defaults to the ID (kebab-case) name of
+// the type, plus the [Node.NumLifetimeChildren] of the parent.
+func NewOfType(typ *types.Type, parent ...Node) Node {
+	if len(parent) == 0 {
+		return newRoot(typ)
+	}
+	return parent[0].AsTree().NewChild(typ)
 }
 
 // newRoot returns a new initialized node of the given type without a parent.
-func newRoot[T Node]() T {
-	var n T
-	typ := n.NodeType()
-	n = NewOfType(typ).(T)
+func newRoot(typ *types.Type) Node {
+	n := newOfType(typ)
 	initNode(n)
 	n.AsTree().SetName(n.NodeType().IDName)
 	return n
@@ -131,8 +136,8 @@ func IsNode(typ reflect.Type) bool {
 	return typ.Implements(nodeType) || reflect.PointerTo(typ).Implements(nodeType)
 }
 
-// NewOfType returns a new instance of the given [Node] type.
-func NewOfType(typ *types.Type) Node {
+// newOfType returns a new instance of the given [Node] type.
+func newOfType(typ *types.Type) Node {
 	return typ.Instance.(Node).New()
 }
 
