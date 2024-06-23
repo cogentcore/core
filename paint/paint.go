@@ -541,12 +541,7 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	pc.DrawRoundedRectangle(x, y, w, h, r)
 	pc.Fill()
 
-	// clamp border radius values
-	min := math32.Min(w/2, h/2)
-	r.Top = math32.Clamp(r.Top, 0, min)
-	r.Right = math32.Clamp(r.Right, 0, min)
-	r.Bottom = math32.Clamp(r.Bottom, 0, min)
-	r.Left = math32.Clamp(r.Left, 0, min)
+	r = ClampBorderRadius(r, w, h)
 
 	// position values
 	var (
@@ -623,6 +618,17 @@ func (pc *Context) DrawBorder(x, y, w, h float32, bs styles.Border) {
 	}
 	pc.LineTo(xtli, ytl)
 	pc.Stroke()
+}
+
+// ClampBorderRadius returns the given border radius clamped to fit based
+// on the given width and height of the object.
+func ClampBorderRadius(r styles.SideFloats, w, h float32) styles.SideFloats {
+	min := math32.Min(w/2, h/2)
+	r.Top = math32.Clamp(r.Top, 0, min)
+	r.Right = math32.Clamp(r.Right, 0, min)
+	r.Bottom = math32.Clamp(r.Bottom, 0, min)
+	r.Left = math32.Clamp(r.Left, 0, min)
+	return r
 }
 
 // DrawRectangle draws (but does not stroke or fill) a standard rectangle with a consistent border
