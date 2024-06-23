@@ -12,12 +12,9 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/fsx"
-	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/system"
-	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 	"github.com/fsnotify/fsnotify"
 )
@@ -109,18 +106,8 @@ func (ft *Tree) OpenPath(path string) *Tree {
 	ft.Filepath = core.Filename(abs)
 	ft.Open()
 	ft.SetDirOpen(core.Filename(abs))
-	ft.UpdateAll()
-	return ft
-}
-
-// UpdateAll does a full update of the tree -- calls SetPath on current path
-func (ft *Tree) UpdateAll() {
-	ft.Dirs.ClearMarks()
-	ft.SetPath(string(ft.Filepath))
-	// the problem here is that closed dirs are not visited but we want to keep their settings:
-	// ft.Dirs.DeleteStale()
 	ft.Update()
-	ft.TreeChanged(nil)
+	return ft
 }
 
 // UpdatePath updates the tree at the directory level for given path
@@ -133,13 +120,13 @@ func (ft *Tree) UpdatePath(path string) {
 	ft.DirsTo(path)
 	if fn, ok := ft.FindFile(path); ok {
 		if fn.IsDir() {
-			fn.UpdateNode()
+			fn.Update()
 			return
 		}
 	}
 	fpath, _ := filepath.Split(path)
 	if fn, ok := ft.FindFile(fpath); ok {
-		fn.UpdateNode()
+		fn.Update()
 		return
 	}
 	// core.MessageSnackbar(ft, "UpdatePath: path not found in tree: "+path)
@@ -215,8 +202,7 @@ func (ft *Tree) WatchUpdate(path string) {
 		// fmt.Printf("warning: watcher updating closed node: %s\n", rp)
 		return // shouldn't happen
 	}
-	// update node
-	fn.UpdateNode()
+	fn.Update()
 }
 
 // WatchPath adds given path to those watched
@@ -268,7 +254,6 @@ func (ft *Tree) SetDirOpen(fpath core.Filename) {
 	rp := ft.RelPath(fpath)
 	// fmt.Printf("setdiropen: %s\n", rp)
 	ft.Dirs.SetOpen(rp, true)
-	ft.Dirs.SetMark(rp)
 	ft.WatchPath(fpath)
 }
 
@@ -276,7 +261,6 @@ func (ft *Tree) SetDirOpen(fpath core.Filename) {
 func (ft *Tree) SetDirClosed(fpath core.Filename) {
 	rp := ft.RelPath(fpath)
 	ft.Dirs.SetOpen(rp, false)
-	ft.Dirs.SetMark(rp)
 	ft.UnWatchPath(fpath)
 }
 
@@ -310,7 +294,7 @@ func (ft *Tree) AddExternalFile(fpath string) (*Node, error) {
 		return ft.ExternalNodeByPath(pth)
 	}
 	ft.ExternalFiles = append(ft.ExternalFiles, pth)
-	ft.SyncDir()
+	// ft.SyncDir()
 	return ft.ExternalNodeByPath(pth)
 }
 
@@ -355,6 +339,7 @@ func (ft *Tree) ExternalNodeByPath(fpath string) (*Node, error) {
 
 // SyncExternalFiles returns a type-and-name list for configuring nodes
 // for ExtFiles
+/*
 func (ft *Tree) SyncExternalFiles(efn *Node) {
 	efn.Info.Mode = os.ModeDir | os.ModeIrregular // mark as dir, irregular
 	plan := tree.TypePlan{}
@@ -372,3 +357,4 @@ func (ft *Tree) SyncExternalFiles(efn *Node) {
 		sf.Info.VCS = vcs.Stored // no vcs in general
 	}
 }
+*/

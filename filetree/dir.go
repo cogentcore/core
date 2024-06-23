@@ -13,11 +13,8 @@ import "sync"
 type DirFlags int64 //enums:bitflag -trim-prefix Dir
 
 const (
-	// DirMark means directory is marked -- unmarked entries are deleted post-update
-	DirMark DirFlags = iota
-
 	// DirIsOpen means directory is open -- else closed
-	DirIsOpen
+	DirIsOpen DirFlags = iota
 
 	// DirSortByName means sort the directory entries by name.
 	// this is mutex with other sorts -- keeping option open for non-binary sort choices.
@@ -100,36 +97,4 @@ func (dm *DirFlagMap) SetSortBy(path string, modTime bool) {
 		df.SetFlag(true, DirSortByName)
 	}
 	dm.Map[path] = df
-}
-
-// SetMark sets the mark flag indicating we visited file
-func (dm *DirFlagMap) SetMark(path string) {
-	dm.Init()
-	defer dm.Mu.Unlock()
-	df := dm.Map[path]
-	df.SetFlag(true, DirMark)
-	dm.Map[path] = df
-}
-
-// ClearMarks clears all the marks -- do this prior to traversing
-// full set of active paths -- can then call DeleteStale to get rid of unused paths.
-func (dm *DirFlagMap) ClearMarks() {
-	dm.Init()
-	defer dm.Mu.Unlock()
-	for key, df := range dm.Map {
-		df.SetFlag(false, DirMark)
-		dm.Map[key] = df
-	}
-}
-
-// DeleteStale removes all entries with a bool = false value indicating that
-// they have not been accessed since ClearFlags was called.
-func (dm *DirFlagMap) DeleteStale() {
-	dm.Init()
-	defer dm.Mu.Unlock()
-	for key, df := range dm.Map {
-		if !df.HasFlag(DirMark) {
-			delete(dm.Map, key)
-		}
-	}
 }

@@ -163,6 +163,42 @@ func (fn *Node) Init() {
 			f("icon-indeterminate")
 		})
 	})
+
+	fn.Updater(func() {
+		fn.InitFileInfo()
+		fn.SetFileIcon()
+	})
+
+	// todo: tree does external
+
+	fn.Maker(func(p *tree.Plan) {
+		err := fn.InitFileInfo()
+		if err != nil {
+			return
+		}
+		if fn.IsIrregular() {
+			return
+		}
+		fn.DetectVCSRepo(true) // update files
+		if !fn.IsDir() {
+			return
+		}
+		if !((fn.FileRoot.inOpenAll && !fn.Info.IsHidden()) || fn.FileRoot.IsDirOpen(fn.Filepath)) {
+			return
+		}
+		repo, rnode := fn.Repo()
+		if repo != nil {
+			rnode.UpdateRepoFiles()
+		}
+		files := fn.DirFileList()
+		for _, fi := range files {
+			tree.AddAt(p, fi.Name(), func(w *Node) {
+				w.FileRoot = fn.FileRoot
+				w.Filepath = core.Filename(filepath.Join(string(fn.Filepath), fi.Name()))
+				fn.InitFileInfo()
+			})
+		}
+	})
 }
 
 func (fn *Node) BaseType() *types.Type {
@@ -246,125 +282,60 @@ func (fn *Node) MyRelPath() string {
 	return fsx.RelativeFilePath(string(fn.Filepath), string(fn.FileRoot.Filepath))
 }
 
-// SetPath sets the current node to represent the given path.
-// This then calls [SyncDir] to synchronize the tree with the file
-// system tree at this path.
-func (fn *Node) SetPath(path string) error {
-	_, fnm := filepath.Split(path)
-	fn.SetText(fnm)
-	pth, err := filepath.Abs(path)
-	if err != nil {
-		return err
-	}
-	fn.Filepath = core.Filename(pth)
-	err = fn.Info.InitFile(string(fn.Filepath))
-	if err != nil {
-		log.Printf("core.Tree: could not read directory: %v err: %v\n", fn.Filepath, err)
-		return err
-	}
+// hasExtFiles := false
+// if fn.This == fn.FileRoot.This {
+// 	if len(fn.FileRoot.ExternalFiles) > 0 {
+// 		plan = append(tree.TypePlan{{Type: fn.FileRoot.FileNodeType, Name: ExternalFilesName}}, plan...)
+// 		hasExtFiles = true
+// 	}
+// }
 
-	fn.SyncDir()
-	return nil
-}
-
-// SyncDir synchronizes the current directory node with all the files
-// contained within the directory on the filesystem, using the efficient
-// Plan-based diff-driven updating of only what is different.
-func (fn *Node) SyncDir() {
-	fn.DetectVCSRepo(true) // update files
+// DirFileList returns the list of files in this directory,
+// sorted according to DirsOnTop and SortByModTime options
+func (fn *Node) DirFileList() []os.FileInfo {
 	path := string(fn.Filepath)
-	repo, rnode := fn.Repo()
-	fn.Open() // ensure
-	plan := fn.PlanOfFiles(path)
-	hasExtFiles := false
-	if fn.This == fn.FileRoot.This {
-		if len(fn.FileRoot.ExternalFiles) > 0 {
-			plan = append(tree.TypePlan{{Type: fn.FileRoot.FileNodeType, Name: ExternalFilesName}}, plan...)
-			hasExtFiles = true
-		}
-	}
-	mods := tree.Update(fn, plan)
-	// always go through kids, regardless of mods
-	for _, sfk := range fn.Children {
-		sf := AsNode(sfk)
-		sf.FileRoot = fn.FileRoot
-		if hasExtFiles && sf.Name == ExternalFilesName {
-			fn.FileRoot.SyncExternalFiles(sf)
-			continue
-		}
-		fp := filepath.Join(path, sf.Name)
-		// if sf.Buf != nil {
-		// 	fmt.Printf("fp: %v  nm: %v\n", fp, sf.Nm)
-		// }
-		sf.SetNodePath(fp)
-		if sf.IsDir() {
-			sf.Info.VCS = vcs.Stored // always
-		} else if repo != nil {
-			rstat := rnode.RepoFiles.Status(repo, string(sf.Filepath))
-			sf.Info.VCS = rstat
-		} else {
-			sf.Info.VCS = vcs.Stored
-		}
-	}
-	if mods {
-		root := fn.FileRoot
-		fn.Update()
-		if root != nil {
-			root.TreeChanged(nil)
-		}
-	}
-}
-
-// PlanOfFiles returns a tree.TypePlan for building nodes based on
-// files immediately within given path.
-func (fn *Node) PlanOfFiles(path string) tree.TypePlan {
-	plan1 := tree.TypePlan{}
-	plan2 := tree.TypePlan{}
-	typ := fn.FileRoot.FileNodeType
+	var files []os.FileInfo
+	var dirs []os.FileInfo // for DirsOnTop mode
 	filepath.Walk(path, func(pth string, info os.FileInfo, err error) error {
 		if err != nil {
-			emsg := fmt.Sprintf("filetree.Node PlanFilesIn Path %q: Error: %v", path, err)
+			emsg := fmt.Sprintf("filetree.Node DirFileList Path %q: Error: %v", path, err)
 			log.Println(emsg)
 			return nil // ignore
 		}
 		if pth == path { // proceed..
 			return nil
 		}
-		_, fnm := filepath.Split(pth)
 		if fn.FileRoot.DirsOnTop {
 			if info.IsDir() {
-				plan1.Add(typ, fnm)
+				dirs = append(dirs, info)
 			} else {
-				plan2.Add(typ, fnm)
+				files = append(files, info)
 			}
 		} else {
-			plan1.Add(typ, fnm)
+			files = append(files, info)
 		}
 		if info.IsDir() {
 			return filepath.SkipDir
 		}
 		return nil
 	})
-	modSort := fn.FileRoot.DirSortByModTime(core.Filename(path))
+	doModSort := fn.FileRoot.DirSortByModTime(core.Filename(path))
 	if fn.FileRoot.DirsOnTop {
-		if modSort {
-			fn.SortPlanByModTime(plan2) // just sort files, not dirs
+		if doModSort {
+			sortByModTime(files) // just sort files, not dirs
 		}
-		plan1 = append(plan1, plan2...)
+		files = append(dirs, files...)
 	} else {
-		if modSort {
-			fn.SortPlanByModTime(plan1) // all
+		if doModSort {
+			sortByModTime(files)
 		}
 	}
-	return plan1
+	return files
 }
 
-// SortPlanByModTime sorts given plan list by mod time
-func (fn *Node) SortPlanByModTime(confg tree.TypePlan) {
-	sort.Slice(confg, func(i, j int) bool {
-		ifn, _ := os.Stat(filepath.Join(string(fn.Filepath), confg[i].Name))
-		jfn, _ := os.Stat(filepath.Join(string(fn.Filepath), confg[j].Name))
-		return ifn.ModTime().After(jfn.ModTime()) // descending
+func sortByModTime(files []os.FileInfo) {
+	sort.Slice(files, func(i, j int) bool {
+		return files[i].ModTime().After(files[j].ModTime()) // descending
 	})
 }
 
@@ -373,36 +344,12 @@ func (fn *Node) SetFileIcon() {
 	if !hasic {
 		ic = icons.Blank
 	}
-	if _, ok := fn.Branch(); !ok {
-		fn.Update()
-	}
 	if bp, ok := fn.Branch(); ok {
 		if bp.IconIndeterminate != ic {
 			bp.SetIcons(icons.FolderOpen, icons.Folder, ic)
-			fn.Update()
+			bp.Update()
 		}
 	}
-}
-
-// SetNodePath sets the path for given node and updates it based on associated file
-func (fn *Node) SetNodePath(path string) error {
-	pth, err := filepath.Abs(path)
-	if err != nil {
-		return err
-	}
-	fn.Filepath = core.Filename(pth)
-	err = fn.InitFileInfo()
-	if err != nil {
-		return err
-	}
-	if fn.IsDir() && !fn.IsIrregular() {
-		openAll := fn.FileRoot.inOpenAll && !fn.Info.IsHidden()
-		if openAll || fn.FileRoot.IsDirOpen(fn.Filepath) {
-			fn.SetPath(string(fn.Filepath)) // keep going down..
-		}
-	}
-	fn.SetFileIcon()
-	return nil
 }
 
 // InitFileInfo initializes file info
@@ -420,39 +367,15 @@ func (fn *Node) InitFileInfo() error {
 		log.Println(emsg)
 		return emsg
 	}
-	return nil
-}
-
-// UpdateNode updates information in node based on its associated file in FPath.
-func (fn *Node) UpdateNode() error {
-	err := fn.InitFileInfo()
-	if err != nil {
-		return err
-	}
-	if fn.IsIrregular() {
-		return nil
-	}
-	// fmt.Println(fn, "update node start")
-	if fn.IsDir() {
-		openAll := fn.FileRoot.inOpenAll && !fn.Info.IsHidden()
-		if openAll || fn.FileRoot.IsDirOpen(fn.Filepath) {
-			// fmt.Printf("set open: %s\n", fn.FPath)
-			fn.Open()
-			repo, rnode := fn.Repo()
-			if repo != nil {
-				rnode.UpdateRepoFiles()
-			}
-			fn.SyncDir()
+	repo, _ := fn.Repo()
+	if repo != nil {
+		fn.Info.VCS, _ = repo.Status(string(fn.Filepath))
+		if fn.IsDir() {
+			fn.Info.VCS = vcs.Stored // always
 		}
 	} else {
-		repo, _ := fn.Repo()
-		if repo != nil {
-			fn.Info.VCS, _ = repo.Status(string(fn.Filepath))
-		}
-		fn.Update()
-		fn.SetFileIcon()
+		fn.Info.VCS = vcs.Stored
 	}
-	// fmt.Println(fn, "update node end")
 	return nil
 }
 
@@ -468,13 +391,6 @@ func (fn *Node) SelectedFunc(fun func(n *Node)) {
 	}
 }
 
-// OpenDirs opens directories for selected views
-func (fn *Node) OpenDirs() {
-	fn.SelectedFunc(func(sn *Node) {
-		sn.OpenDir()
-	})
-}
-
 func (fn *Node) OnOpen() {
 	fn.OpenDir()
 }
@@ -487,7 +403,7 @@ func (fn *Node) CanOpen() bool {
 func (fn *Node) OpenDir() {
 	// fmt.Printf("fn: %s opened\n", fn.FPath)
 	fn.FileRoot.SetDirOpen(fn.Filepath)
-	fn.UpdateNode()
+	fn.Update()
 }
 
 func (fn *Node) OnClose() {
@@ -631,7 +547,6 @@ func (fn *Node) DirsTo(path string) (*Node, error) {
 		if sfn.IsDir() || i == sz-1 {
 			if i < sz-1 && !sfn.IsOpen() {
 				sfn.OpenDir()
-				sfn.UpdateNode()
 			} else {
 				cfn = sfn
 			}

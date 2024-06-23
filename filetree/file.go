@@ -131,7 +131,7 @@ func (fn *Node) DuplicateFile() error {
 	_, err := fn.Info.Duplicate()
 	if err == nil && fn.Parent != nil {
 		fnp := AsNode(fn.Parent)
-		fnp.UpdateNode()
+		fnp.Update()
 	}
 	return err
 }
@@ -198,7 +198,7 @@ func (fn *Node) DeleteFile() error {
 		fn.Delete()
 	}
 	if parent != nil {
-		parent.UpdateNode()
+		parent.Update()
 	}
 	return err
 }
@@ -347,7 +347,7 @@ func (fn *Node) CopyFileToDir(filename string, perm os.FileMode) {
 			} else {
 				nfn.AddToVCS() // todo: this sometimes is not just tpath!  See bug #453
 			}
-			nfn.UpdateNode()
+			nfn.Update()
 		}
 	}
 }
