@@ -15,7 +15,6 @@ import (
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
-	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/types"
@@ -169,12 +168,6 @@ func (fb *FuncButton) SetText(v string) *FuncButton {
 		fb.Func.Doc = types.FormatDoc(fb.Func.Doc, ptext, fb.Text)
 		fb.SetTooltip(fb.Func.Doc)
 	}
-	return fb
-}
-
-// SetKey sets the shortcut of the function button from the given [keymap.Functions].
-func (fb *FuncButton) SetKey(kf keymap.Functions) *FuncButton {
-	fb.Button.SetKey(kf)
 	return fb
 }
 

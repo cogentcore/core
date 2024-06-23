@@ -18,18 +18,15 @@ func SettingsEditorToolbarBase(p *tree.Plan) {
 			AppearanceSettings.Apply()
 			UpdateAll()
 		})
-		// todo: update..
-	})
 
-	/*
-		tb.AddOverflowMenu(func(m *Scene) {
-			NewFuncButton(m).SetFunc(ResetAllSettings).SetText("Reset settings").SetIcon(icons.Delete).SetConfirm(true)
+		p.Parent.(*Toolbar).AddOverflowMenu(func(m *Scene) {
+			NewFuncButton(m).SetFunc(ResetAllSettings).SetConfirm(true).SetText("Reset settings").SetIcon(icons.Delete)
 
 			NewFuncButton(m).SetFunc(AppearanceSettings.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
-			NewFuncButton(m).SetFunc(ProfileToggle).SetText("Profile performance").SetIcon(icons.Analytics)
+			NewFuncButton(m).SetFunc(ProfileToggle).SetShortcut("Control+Alt+R").SetText("Profile performance").SetIcon(icons.Analytics)
 			NewSeparator(m)
 		})
-	*/
+	})
 }
 
 // SettingsWindow opens a window for editing user settings.

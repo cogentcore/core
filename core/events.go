@@ -1145,18 +1145,15 @@ func (em *Events) ManagerKeyChordEvents(e events.Event) {
 		e.SetHandled()
 		AllRenderWindows.FocusNext()
 	}
-	// TODO(kai): maybe clean up / document this
+	// TODO(kai): remove this
 	switch cs { // some other random special codes, during dev..
-	case "Control+Alt+R":
-		e.SetHandled()
-		ProfileToggle()
 	case "Control+Alt+F":
 		e.SetHandled()
 		sc.BenchmarkFullRender()
 	case "Control+Alt+H":
 		e.SetHandled()
 		sc.BenchmarkReRender()
-	case "Command+Shift+I": // TODO(config):
+	case "Command+Shift+I": // TODO(config)
 		e.SetHandled()
 		InspectorWindow(sc)
 	}

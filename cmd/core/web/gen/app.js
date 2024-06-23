@@ -169,11 +169,11 @@ const appCanvasCtx = appCanvas.getContext('2d');
 // and its length. Then, it gets the resulting byte slice and creates an image data
 // with the given width and height.
 function displayImage(pointer, length, w, h) {
-  let memoryBytes = new Uint8ClampedArray(wasm.instance.exports.mem.buffer);
+  const memoryBytes = new Uint8ClampedArray(wasm.instance.exports.mem.buffer);
 
   // using subarray instead of slice gives a 5x performance improvement due to no copying
-  let bytes = memoryBytes.subarray(pointer, pointer + length);
-  let data = new ImageData(bytes, w, h);
+  const bytes = memoryBytes.subarray(pointer, pointer + length);
+  const data = new ImageData(bytes, w, h);
   appCanvasCtx.putImageData(data, 0, 0);
 }
 
