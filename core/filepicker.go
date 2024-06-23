@@ -363,7 +363,7 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 				TheApp.OpenURL("file://" + fp.SelectedFile())
 			})
 			if TheApp.Platform() == system.Web {
-				open.SetText("Download").SetIcon(icons.Download).SetTooltip("Download this file to the device")
+				open.SetText("Download").SetIcon(icons.Download).SetTooltip("Download this file to your device")
 			}
 			NewSeparator(m)
 			NewButton(m).SetText("Duplicate").SetIcon(icons.FileCopy).

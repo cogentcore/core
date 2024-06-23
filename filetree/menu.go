@@ -64,7 +64,7 @@ func (fn *Node) ContextMenu(m *core.Scene) {
 	open := core.NewFuncButton(m).SetFunc(fl.OpenFilesDefault).SetText("Open").SetIcon(icons.Open)
 	open.SetEnabled(fn.HasSelection())
 	if core.TheApp.Platform() == system.Web {
-		open.SetText("Download").SetIcon(icons.Download).SetTooltip("Download this file to the device")
+		open.SetText("Download").SetIcon(icons.Download).SetTooltip("Download this file to your device")
 	}
 	core.NewSeparator(m)
 
