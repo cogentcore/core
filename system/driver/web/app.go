@@ -12,9 +12,12 @@ import (
 	"image"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"strings"
 	"syscall/js"
 
+	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/events/key"
 	"cogentcore.org/core/math32"
@@ -172,7 +175,8 @@ func (a *App) OpenURL(url string) {
 		js.Global().Call("open", url)
 		return
 	}
-	b, err := os.ReadFile(strings.TrimPrefix(url, "file://"))
+	filename := strings.TrimPrefix(url, "file://")
+	b, err := os.ReadFile(filename)
 	if err != nil {
 		js.Global().Call("open", url)
 		return
@@ -181,12 +185,16 @@ func (a *App) OpenURL(url string) {
 	// we make an <a> element to download it to the device.
 	jb := js.Global().Get("Uint8ClampedArray").New(len(b))
 	js.CopyBytesToJS(jb, b)
-	blob := js.Global().Get("Blob").New([]any{jb}, map[string]any{"type": "text/plain"})
+	mtype, _, err := fileinfo.MimeFromFile(filename)
+	if errors.Log(err) != nil {
+		mtype = "text/plain"
+	}
+	blob := js.Global().Get("Blob").New([]any{jb}, map[string]any{"type": mtype})
 	objectURL := js.Global().Get("URL").Call("createObjectURL", blob)
 	anchor := js.Global().Get("document").Call("createElement", "a")
 	anchor.Set("style", "display: none;")
 	anchor.Set("href", objectURL)
-	anchor.Set("download", true)
+	anchor.Set("download", filepath.Base(filename))
 	js.Global().Get("document").Get("body").Call("appendChild", anchor)
 	anchor.Call("click")
 	js.Global().Get("document").Get("body").Call("removeChild", anchor)
