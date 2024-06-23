@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/keymap"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/system"
 )
 
 // VCSLabelFunc gets the appropriate label for removing from version control
@@ -60,7 +61,11 @@ func (fn *Node) VCSContextMenu(m *core.Scene) {
 func (fn *Node) ContextMenu(m *core.Scene) {
 	fl := fn.This.(Filer)
 	core.NewFuncButton(m).SetFunc(fl.ShowFileInfo).SetText("Info").SetIcon(icons.Info).SetEnabled(fn.HasSelection())
-	core.NewFuncButton(m).SetFunc(fl.OpenFilesDefault).SetText("Open").SetIcon(icons.Open).SetEnabled(fn.HasSelection())
+	open := core.NewFuncButton(m).SetFunc(fl.OpenFilesDefault).SetText("Open").SetIcon(icons.Open)
+	open.SetEnabled(fn.HasSelection())
+	if core.TheApp.Platform() == system.Web {
+		open.SetText("Download").SetIcon(icons.Download).SetTooltip("Download this file to the device")
+	}
 	core.NewSeparator(m)
 
 	core.NewFuncButton(m).SetFunc(fl.DuplicateFiles).SetText("Duplicate").SetIcon(icons.Copy).SetKey(keymap.Duplicate).SetEnabled(fn.HasSelection())

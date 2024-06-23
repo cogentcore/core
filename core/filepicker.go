@@ -357,11 +357,14 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 		})
 		w.ContextMenus = nil
 		w.AddContextMenu(func(m *Scene) {
-			NewButton(m).SetText("Open").SetIcon(icons.Open).
-				SetTooltip("Open the selected file using the default app").
-				OnClick(func(e events.Event) {
-					TheApp.OpenURL(fp.SelectedFile())
-				})
+			open := NewButton(m).SetText("Open").SetIcon(icons.Open)
+			open.SetTooltip("Open the selected file using the default app")
+			open.OnClick(func(e events.Event) {
+				TheApp.OpenURL("file://" + fp.SelectedFile())
+			})
+			if TheApp.Platform() == system.Web {
+				open.SetText("Download").SetIcon(icons.Download).SetTooltip("Download this file to the device")
+			}
 			NewSeparator(m)
 			NewButton(m).SetText("Duplicate").SetIcon(icons.FileCopy).
 				SetTooltip("Make a copy of the selected file").

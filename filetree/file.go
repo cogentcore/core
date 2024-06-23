@@ -16,31 +16,16 @@ import (
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/system"
 )
-
-// OSOpenCommand returns the generic file 'open' command to open file with default app
-// open on Mac, xdg-open on Linux, and start on Windows
-func OSOpenCommand() string {
-	switch core.TheApp.Platform() {
-	case system.MacOS:
-		return "open"
-	case system.Linux:
-		return "xdg-open"
-	case system.Windows:
-		return "start"
-	}
-	return "open"
-}
 
 // Filer is an interface for Filetree File actions
 type Filer interface {
 	// OpenFilesDefault opens selected files with default app for that file type (os defined).
-	// runs open on Mac, xdg-open on Linux, and start on Windows
+	// It runs open on Mac, xdg-open on Linux, and start on Windows.
 	OpenFilesDefault()
 
 	// OpenFileDefault opens file with default app for that file type (os defined)
-	// runs open on Mac, xdg-open on Linux, and start on Windows
+	// It runs open on Mac, xdg-open on Linux, and start on Windows.
 	OpenFileDefault() error
 
 	// OpenFilesWith opens selected files with user-specified command.
@@ -107,11 +92,8 @@ func (fn *Node) OpenFilesDefault() { //types:add
 // OpenFileDefault opens file with default app for that file type (os defined)
 // runs open on Mac, xdg-open on Linux, and start on Windows
 func (fn *Node) OpenFileDefault() error {
-	cstr := OSOpenCommand()
-	cmd := exec.Command(cstr, string(fn.Filepath))
-	out, err := cmd.CombinedOutput()
-	fmt.Printf("%s\n", out)
-	return err
+	core.TheApp.OpenURL("file://" + string(fn.Filepath))
+	return nil
 }
 
 // OpenFilesWith opens selected files with user-specified command.

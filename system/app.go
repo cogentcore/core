@@ -129,8 +129,8 @@ type App interface {
 	CogentCoreDataDir() string
 
 	// OpenURL opens the given URL in the user's default browser.  On Linux
-	// this requires that xdg-utils package has been installed -- uses
-	// xdg-open command.
+	// this requires that xdg-utils package has been installed, since it uses
+	// the xdg-open command.
 	OpenURL(url string)
 
 	// OpenFiles returns file names that have been set to be open at startup.
