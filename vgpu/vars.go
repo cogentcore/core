@@ -7,6 +7,7 @@ package vgpu
 import (
 	"fmt"
 	"log"
+	"runtime"
 	"strings"
 
 	"cogentcore.org/core/base/indent"
@@ -274,7 +275,7 @@ func (vs *Vars) DescLayout(dev vk.Device) {
 		// during the xyz demo, when manipulating the scene, and adding
 		// new elements, which drives a new DescLayout call.
 		// https://github.com/cogentcore/core/issues/536
-		if nPoolDelete < 3 {
+		if runtime.GOOS == "windows" && nPoolDelete < 3 {
 			nPoolDelete++
 		} else {
 			vk.DestroyPipelineLayout(dev, vs.VkDescLayout, nil)
