@@ -184,16 +184,13 @@ func (ch *Chooser) Init() {
 		}
 		// textfield handles everything
 		if ch.Editable {
+			s.RenderBox = false
 			s.Border = styles.Border{}
 			s.MaxBorder = s.Border
 			s.Background = nil
 			s.StateLayer = 0
 			s.Padding.Zero()
-			if ch.Type == ChooserFilled {
-				s.Border.Radius = styles.BorderRadiusExtraSmallTop
-			} else {
-				s.Border.Radius = styles.BorderRadiusExtraSmall
-			}
+			s.Border.Radius.Zero()
 		}
 	})
 

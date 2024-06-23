@@ -35,5 +35,5 @@ func TestMakeAppBar(t *testing.T) {
 		s.Min.X.Dp(500)
 	})
 	MakeAppBar(b)
-	b.AssertRender(t, "app/standard-app-bar-config")
+	b.AssertRender(t, "app/make-app-bar")
 }
