@@ -28,25 +28,10 @@ import (
 // it has embedded should be handled (a return value of true indicates to continue
 // down and a value of false indicates to not).
 func WalkFields(parent reflect.Value, should func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool, walk func(parent reflect.Value, parentField *reflect.StructField, field reflect.StructField, value reflect.Value)) {
-	typ := parent.Type()
-	for i := 0; i < typ.NumField(); i++ {
-		field := typ.Field(i)
-		if !field.IsExported() {
-			continue
-		}
-		value := parent.Field(i)
-		if !should(parent, field, value) {
-			continue
-		}
-		if field.Type.Kind() == reflect.Struct && field.Anonymous {
-			walkFieldsSub(value, field, should, walk)
-		} else {
-			walk(parent, nil, field, value)
-		}
-	}
+	walkFields(parent, nil, should, walk)
 }
 
-func walkFieldsSub(parent reflect.Value, parentField reflect.StructField, should func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool, walk func(parent reflect.Value, parentField *reflect.StructField, field reflect.StructField, value reflect.Value)) {
+func walkFields(parent reflect.Value, parentField *reflect.StructField, should func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool, walk func(parent reflect.Value, parentField *reflect.StructField, field reflect.StructField, value reflect.Value)) {
 	typ := parent.Type()
 	for i := 0; i < typ.NumField(); i++ {
 		field := typ.Field(i)
@@ -58,9 +43,9 @@ func walkFieldsSub(parent reflect.Value, parentField reflect.StructField, should
 			continue
 		}
 		if field.Type.Kind() == reflect.Struct && field.Anonymous {
-			walkFieldsSub(value, field, should, walk)
+			walkFields(value, &field, should, walk)
 		} else {
-			walk(parent, &parentField, field, value)
+			walk(parent, parentField, field, value)
 		}
 	}
 }

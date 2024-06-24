@@ -284,6 +284,17 @@ func (sf SideFloats) Sub(other SideFloats) SideFloats {
 	)
 }
 
+// MulScalar multiplies each value by the given scalar value
+// and returns the result.
+func (sf SideFloats) MulScalar(s float32) SideFloats {
+	return NewSideFloats(
+		sf.Top*s,
+		sf.Right*s,
+		sf.Bottom*s,
+		sf.Left*s,
+	)
+}
+
 // Min returns a new side floats containing the
 // minimum values of the two side floats
 func (sf SideFloats) Min(other SideFloats) SideFloats {

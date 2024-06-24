@@ -40,6 +40,7 @@ type Toolbar struct {
 
 func (tb *Toolbar) Init() {
 	tb.Frame.Init()
+	tb.renderContainer = false
 	ToolbarStyles(tb)
 	tb.FinalMaker(func(p *tree.Plan) { // must go at end
 		tree.AddAt(p, "overflow-menu", func(w *Button) {

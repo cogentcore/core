@@ -341,7 +341,11 @@ func (wb *WidgetBase) PushBounds() bool {
 	if pc.State == nil || pc.Image == nil {
 		return false
 	}
-	pc.PushBoundsGeom(wb.Geom.TotalBBox, wb.Geom.ContentBBox, wb.Styles.Border.Radius.Dots())
+	radius := wb.Styles.Border.Radius.Dots()
+	if wb.renderContainer {
+		radius.Set(-1)
+	}
+	pc.PushBoundsGeom(wb.Geom.TotalBBox, wb.Geom.ContentBBox, radius)
 	pc.Defaults() // start with default values
 	if DebugSettings.RenderTrace {
 		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.Geom.TotalBBox)

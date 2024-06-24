@@ -30,7 +30,7 @@ import (
 // [enums.Enum] and [enums.BitFlag] values with appropriate properties
 // automatically set.
 type Switches struct {
-	Frame
+	WidgetBase
 
 	// Type is the type of switches that will be made.
 	Type SwitchTypes
@@ -117,7 +117,7 @@ func (sw *Switches) OnBind(value any) {
 }
 
 func (sw *Switches) Init() {
-	sw.Frame.Init()
+	sw.WidgetBase.Init()
 	sw.AllowNone = true
 	sw.Styler(func(s *styles.Style) {
 		s.Padding.Set(units.Dp(2))
@@ -137,7 +137,8 @@ func (sw *Switches) Init() {
 		}
 	})
 
-	sw.Maker(func(p *tree.Plan) {
+	parts := sw.NewParts()
+	parts.Maker(func(p *tree.Plan) {
 		for i, item := range sw.Items {
 			tree.AddAt(p, strconv.Itoa(i), func(w *Switch) {
 				w.OnChange(func(e events.Event) {
@@ -168,7 +169,7 @@ func (sw *Switches) Init() {
 						} else {
 							s.Border.Radius.Set(brf, brf, units.Zero(), units.Zero())
 						}
-					} else if ip == sw.NumChildren()-1 {
+					} else if ip == sw.Parts.NumChildren()-1 {
 						if ps.Direction == styles.Row {
 							if !s.Is(states.Focused) {
 								s.Border.Width.SetLeft(units.Zero())

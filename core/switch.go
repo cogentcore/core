@@ -20,7 +20,7 @@ import (
 // Switch is a widget that can toggle between an on and off state.
 // It can be displayed as a switch, checkbox, or radio button.
 type Switch struct {
-	Frame
+	WidgetBase
 
 	// Type is the styling type of switch.
 	Type SwitchTypes `set:"-"`
@@ -72,7 +72,7 @@ func (sw *Switch) SetWidgetValue(value any) error {
 }
 
 func (sw *Switch) Init() {
-	sw.Frame.Init()
+	sw.WidgetBase.Init()
 	sw.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Checkable)
 		if !sw.IsReadOnly() {
@@ -122,7 +122,8 @@ func (sw *Switch) Init() {
 		sw.SendChange(e)
 	})
 
-	sw.Maker(func(p *tree.Plan) {
+	parts := sw.NewParts()
+	parts.Maker(func(p *tree.Plan) {
 		if sw.IconOn == "" {
 			sw.IconOn = icons.ToggleOn.Fill() // fallback
 		}
@@ -131,6 +132,7 @@ func (sw *Switch) Init() {
 		}
 
 		tree.AddAt(p, "stack", func(w *Frame) {
+			w.renderContainer = false
 			w.Styler(func(s *styles.Style) {
 				s.Display = styles.Stacked
 				s.Gap.Zero()
@@ -221,7 +223,7 @@ func (sw *Switch) SetChecked(on bool) *Switch {
 // according to the current icon. It is called automatically to keep the
 // switch up-to-date.
 func (sw *Switch) UpdateStackTop() {
-	st, ok := sw.ChildByName("stack", 0).(*Frame)
+	st, ok := sw.Parts.ChildByName("stack", 0).(*Frame)
 	if !ok {
 		return
 	}
@@ -287,7 +289,7 @@ func (sw *Switch) ClearIcons() *Switch {
 
 func (sw *Switch) Render() {
 	sw.UpdateStackTop() // important: make sure we're always up-to-date on render
-	st, ok := sw.ChildByName("stack", 0).(*Frame)
+	st, ok := sw.Parts.ChildByName("stack", 0).(*Frame)
 	if ok {
 		st.UpdateStackedVisibility()
 	}

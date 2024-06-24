@@ -26,7 +26,7 @@ import (
 // and/or a menu. The standard behavior is to register a click event handler with
 // OnClick.
 type Button struct { //core:embedder
-	Frame
+	WidgetBase
 
 	// Type is the type of button.
 	Type ButtonTypes
@@ -116,7 +116,7 @@ const (
 )
 
 func (bt *Button) Init() {
-	bt.Frame.Init()
+	bt.WidgetBase.Init()
 	bt.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.DoubleClickable, abilities.TripleClickable)
 		if !bt.IsDisabled() {
@@ -190,7 +190,8 @@ func (bt *Button) Init() {
 		bt.Send(events.Click, e)
 	})
 
-	bt.Maker(func(p *tree.Plan) {
+	parts := bt.NewParts()
+	parts.Maker(func(p *tree.Plan) {
 		// we check if the icons are unset, not if they are nil, so
 		// that people can manually set it to [icons.None]
 		if bt.HasMenu() {

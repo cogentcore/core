@@ -19,6 +19,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/styles/states"
+	"cogentcore.org/core/tree"
 )
 
 // Spinner is a [TextField] for editing numerical values. It comes with
@@ -110,18 +111,6 @@ func (sp *Spinner) Init() {
 		}
 		// s.Text.Align = styles.End // this doesn't work
 	})
-	sp.OnWidgetAdded(func(w Widget) {
-		switch w.AsTree().PathFrom(sp) {
-		case "lead-icon", "trail-icon": // TODO(config)
-			w.AsWidget().Styler(func(s *styles.Style) {
-				// icons do not get separate focus, as people can
-				// use the arrow keys to get the same effect
-				s.SetAbilities(false, abilities.Focusable)
-				s.SetAbilities(true, abilities.RepeatClickable)
-			})
-		}
-	})
-
 	sp.On(events.Scroll, func(e events.Event) {
 		if sp.IsReadOnly() || !sp.StateIs(states.Focused) {
 			return
@@ -161,6 +150,24 @@ func (sp *Spinner) Init() {
 			e.SetHandled()
 			sp.PageIncrementValue(-1)
 		}
+	})
+	sp.Parts.Maker(func(p *tree.Plan) {
+		tree.AddInit(p, "lead-icon", func(w *Button) {
+			w.Styler(func(s *styles.Style) {
+				// icons do not get separate focus, as people can
+				// use the arrow keys to get the same effect
+				s.SetAbilities(false, abilities.Focusable)
+				s.SetAbilities(true, abilities.RepeatClickable)
+			})
+		})
+		tree.AddInit(p, "trail-icon", func(w *Button) {
+			w.Styler(func(s *styles.Style) {
+				// icons do not get separate focus, as people can
+				// use the arrow keys to get the same effect
+				s.SetAbilities(false, abilities.Focusable)
+				s.SetAbilities(true, abilities.RepeatClickable)
+			})
+		})
 	})
 }
 

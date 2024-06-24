@@ -39,7 +39,7 @@ import (
 // With multi-line wrapped text, the text is still treated as a single
 // contiguous line of wrapped text.
 type TextField struct { //core:embedder
-	Frame
+	WidgetBase
 
 	// Type is the styling type of the text field.
 	Type TextFieldTypes
@@ -185,7 +185,7 @@ const (
 func (tf *TextField) WidgetValue() any { return &tf.Txt }
 
 func (tf *TextField) Init() {
-	tf.Frame.Init()
+	tf.WidgetBase.Init()
 	tf.AddContextMenu(tf.ContextMenu)
 
 	tf.Styler(func(s *styles.Style) {
@@ -325,7 +325,8 @@ func (tf *TextField) Init() {
 		tf.EditDone() // todo: this must be protected against something else, for race detector
 	})
 
-	tf.Maker(func(p *tree.Plan) {
+	parts := tf.NewParts()
+	parts.Maker(func(p *tree.Plan) {
 		tf.EditTxt = []rune(tf.Txt)
 		tf.Edited = false
 
@@ -409,7 +410,7 @@ func (tf *TextField) Init() {
 
 func (tf *TextField) Destroy() {
 	tf.StopCursor()
-	tf.Frame.Destroy()
+	tf.WidgetBase.Destroy()
 }
 
 // Text returns the current text -- applies any unapplied changes first, and
@@ -1812,7 +1813,7 @@ func (tf *TextField) IconsSize() math32.Vector2 {
 }
 
 func (tf *TextField) SizeUp() {
-	tf.Frame.SizeUp()
+	tf.WidgetBase.SizeUp()
 	tmptxt := tf.EditTxt
 	if len(tf.Txt) == 0 && len(tf.Placeholder) > 0 {
 		tf.EditTxt = []rune(tf.Placeholder)
@@ -1844,7 +1845,7 @@ func (tf *TextField) SizeUp() {
 
 func (tf *TextField) SizeDown(iter int) bool {
 	if !tf.HasWordWrap() {
-		return tf.Frame.SizeDown(iter)
+		return tf.WidgetBase.SizeDown(iter)
 	}
 	sz := &tf.Geom.Size
 	pgrow, _ := tf.GrowToAllocSize(sz.Actual.Content, sz.Alloc.Content) // key to grow
@@ -1863,24 +1864,24 @@ func (tf *TextField) SizeDown(iter int) bool {
 			fmt.Println(tf, "TextField Size Changed:", sz.Actual.Content, "was:", prevContent)
 		}
 	}
-	sdp := tf.Frame.SizeDown(iter)
+	sdp := tf.WidgetBase.SizeDown(iter)
 	return chg || sdp
 }
 
 func (tf *TextField) ScenePos() {
-	tf.Frame.ScenePos()
+	tf.WidgetBase.ScenePos()
 	tf.SetEffPosAndSize()
 }
 
 // LeadingIconButton returns the [LeadingIcon] [Button] if present.
 func (tf *TextField) LeadingIconButton() *Button {
-	bt, _ := tf.ChildByName("lead-icon", 0).(*Button)
+	bt, _ := tf.Parts.ChildByName("lead-icon", 0).(*Button)
 	return bt
 }
 
 // TrailingIconButton returns the [TrailingIcon] [Button] if present.
 func (tf *TextField) TrailingIconButton() *Button {
-	bt, _ := tf.ChildByName("trail-icon", 1).(*Button)
+	bt, _ := tf.Parts.ChildByName("trail-icon", 1).(*Button)
 	return bt
 }
 

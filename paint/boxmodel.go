@@ -116,11 +116,16 @@ func (pc *Context) fixBounds(pos, size math32.Vector2) (math32.Vector2, math32.V
 	// border radius corner of the parent, we ensure that our border radius is at
 	// least as large as that of the parent, thereby ensuring that we do not go
 	// outside of the parent effective bounds.
-	for i, pbox := range pc.ContentBoundsStack {
+	n := len(pc.RadiusStack)
+	for i := n - 2; i >= 0; i-- {
 		pr := pc.RadiusStack[i]
+		if pr.Top < 0 { // negative numbers indicate a break of constraints
+			break
+		}
+		pbox := pc.ContentBoundsStack[i]
 
 		psz := math32.Vector2FromPoint(pbox.Size())
-		pr = ClampBorderRadius(pr, psz.X, psz.Y)
+		pr = ClampBorderRadius(pr, psz.X, psz.Y).MulScalar(0.5)
 
 		ptop := pbox.Min.Add(image.Pt(int(pr.Top), int(pr.Top)))
 		if rect.Min.X < ptop.X && rect.Min.Y < ptop.Y {

@@ -35,7 +35,7 @@ import (
 // the rendered area.
 // The [styles.Style.Direction] determines the direction in which the slider slides.
 type Slider struct {
-	Frame
+	WidgetBase
 
 	// Type is the type of the slider, which determines its visual
 	// and functional properties. The default type, [SliderSlider],
@@ -154,7 +154,7 @@ func (sr *Slider) OnBind(value any) {
 }
 
 func (sr *Slider) Init() {
-	sr.Frame.Init()
+	sr.WidgetBase.Init()
 	sr.Value = 0.5
 	sr.Max = 1
 	sr.VisiblePct = 1
@@ -294,7 +294,8 @@ func (sr *Slider) Init() {
 		}
 	})
 
-	sr.Maker(func(p *tree.Plan) {
+	parts := sr.NewParts()
+	parts.Maker(func(p *tree.Plan) {
 		if sr.Icon.IsNil() {
 			return
 		}

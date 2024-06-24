@@ -556,6 +556,9 @@ func (fp *FilePicker) ReadFiles() {
 			return nil
 		}
 		fi, ferr := fileinfo.NewFileInfo(path)
+		if fi.Ic == "" {
+			fi.Ic = "Blank"
+		}
 		keep := ferr == nil
 		if fp.FilterFunc != nil {
 			keep = fp.FilterFunc(fp, fi)

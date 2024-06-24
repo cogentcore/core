@@ -135,7 +135,7 @@ func makeStandardAppBar(p *tree.Plan) {
 			w.SetPlaceholder(fmt.Sprintf("Search (%s)", keymap.Menu.Label()))
 		}
 
-		tree.AddChildInit(w, "text-field", func(w *TextField) {
+		tree.AddChildInit(w.Parts, "text-field", func(w *TextField) {
 			w.Styler(func(s *styles.Style) {
 				s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
 				if !s.Is(states.Focused) && w.Error == nil {

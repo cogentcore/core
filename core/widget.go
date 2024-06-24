@@ -232,6 +232,12 @@ type WidgetBase struct {
 
 	// needsRender is whether the widget needs to be rendered on the next render iteration.
 	needsRender bool
+
+	// renderContainer indicates that this widget is a larger container (i.e., Frame),
+	// which is the stopping point for imposing various rendering constraints on
+	// elements within it.  This is not true for Parts, but is set by default for all
+	// Frame elements: turn off where not relevant.
+	renderContainer bool
 }
 
 // Init should be called by every Widget type in its custom
@@ -383,6 +389,7 @@ func (wb *WidgetBase) NewParts() *Frame {
 	wb.Parts = NewFrame()
 	wb.Parts.SetName("parts")
 	tree.SetParent(wb.Parts, wb) // don't add to children list
+	wb.Parts.renderContainer = false
 	wb.Parts.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
 		s.RenderBox = false

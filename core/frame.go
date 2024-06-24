@@ -62,6 +62,7 @@ type Frame struct {
 
 func (fr *Frame) Init() {
 	fr.WidgetBase.Init()
+	fr.renderContainer = true
 	fr.FinalStyler(func(s *styles.Style) {
 		// we only enable, not disable, since some other widget like Slider may want to enable
 		if s.Overflow.X == styles.OverflowAuto || s.Overflow.Y == styles.OverflowAuto {

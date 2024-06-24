@@ -35,7 +35,7 @@ import (
 // Chooser is a drop down selection widget that allows users to choose
 // one option among a list of items.
 type Chooser struct {
-	Frame
+	WidgetBase
 
 	// Type is the styling type of the chooser.
 	Type ChooserTypes
@@ -159,7 +159,7 @@ func (ch *Chooser) OnBind(value any) {
 }
 
 func (ch *Chooser) Init() {
-	ch.Frame.Init()
+	ch.WidgetBase.Init()
 	ch.SetIcon(icons.None).SetIndicator(icons.KeyboardArrowDown)
 	ch.CurrentIndex = -1
 	ch.Styler(func(s *styles.Style) {
@@ -263,7 +263,8 @@ func (ch *Chooser) Init() {
 		}
 	})
 
-	ch.Maker(func(p *tree.Plan) {
+	parts := ch.NewParts()
+	parts.Maker(func(p *tree.Plan) {
 		// automatically select the first item if we have nothing selected and no placeholder
 		if !ch.Editable && ch.CurrentIndex < 0 && ch.CurrentItem.Text == "" {
 			ch.SetCurrentIndex(0)
@@ -328,7 +329,7 @@ func (ch *Chooser) Init() {
 						w.SetCompleter(w, ch.CompleteMatch, ch.CompleteEdit)
 					}
 				})
-				w.Maker(func(p *tree.Plan) {
+				w.Parts.Maker(func(p *tree.Plan) {
 					tree.AddInit(p, "trail-icon", func(w *Button) {
 						w.Styler(func(s *styles.Style) {
 							// indicator does not need to be focused
@@ -373,7 +374,7 @@ func (ch *Chooser) TextWidget() *Text {
 
 // TextField returns the text field widget of an editable Chooser if present.
 func (ch *Chooser) TextField() *TextField {
-	tf, _ := ch.ChildByName("text-field").(*TextField)
+	tf, _ := ch.Parts.ChildByName("text-field").(*TextField)
 	return tf
 }
 
