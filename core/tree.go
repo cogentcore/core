@@ -52,7 +52,8 @@ type Treer interface { //types:add
 	// The base version does nothing.
 	OnClose()
 
-	// Following are all tree editing functions:
+	// The following are all tree editing functions:
+
 	DeleteNode()
 	Duplicate()
 	AddChildNode()

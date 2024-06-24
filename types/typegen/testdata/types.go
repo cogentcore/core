@@ -76,5 +76,5 @@ type Setter interface { //types:add
 	Set(value string) error
 
 	// Clear clears the value.
-	Clear()
+	Clear() // A line comment.
 }

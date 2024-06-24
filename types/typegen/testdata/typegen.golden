@@ -39,7 +39,7 @@ func (t *CommaFieldType) SetA(v int) *CommaFieldType { t.A = v; return t }
 // SetB sets the [CommaFieldType.B]
 func (t *CommaFieldType) SetB(v int) *CommaFieldType { t.B = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/types/typegen/testdata.Setter", IDName: "setter", Doc: "Setter is a type that can set a value.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Methods: []types.Method{{Name: "Set", Doc: "Set sets the value.", Args: []string{"value"}, Returns: []string{"error"}}, {Name: "Clear", Doc: "Clear clears the value."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/types/typegen/testdata.Setter", IDName: "setter", Doc: "Setter is a type that can set a value.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Methods: []types.Method{{Name: "Set", Doc: "Set sets the value.", Args: []string{"value"}, Returns: []string{"error"}}, {Name: "Clear", Doc: "Clear clears the value.\nA line comment."}}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/types/typegen/testdata.Alert", Doc: "Alert prints an alert with the given message", Args: []string{"msg"}})
 

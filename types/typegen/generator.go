@@ -222,8 +222,18 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 			typ.Fields = fields
 		}
 		if in, ok := ts.Type.(*ast.InterfaceType); ok {
+			prev := cfg.AddMethods
+			// the only point of an interface is the methods,
+			// so we add them by default
+			cfg.AddMethods = true
 			for _, m := range in.Methods.List {
 				if f, ok := m.Type.(*ast.FuncType); ok {
+					// add in any line comments
+					if m.Doc == nil {
+						m.Doc = m.Comment
+					} else if m.Comment != nil {
+						m.Doc.List = append(m.Doc.List, m.Comment.List...)
+					}
 					g.InspectFuncDecl(&ast.FuncDecl{
 						Doc:  m.Doc,
 						Recv: &ast.FieldList{List: []*ast.Field{{Type: ts.Name}}},
@@ -232,6 +242,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 					})
 				}
 			}
+			cfg.AddMethods = prev
 		}
 		g.Types = append(g.Types, typ)
 	}
