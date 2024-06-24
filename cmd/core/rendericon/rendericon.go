@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"image"
 	"io/fs"
+	"os"
 	"strings"
 
 	"cogentcore.org/core/icons"
@@ -29,6 +30,10 @@ func Render(size int) (*image.RGBA, error) {
 	if err != nil {
 		if !errors.Is(err, fs.ErrNotExist) {
 			return nil, fmt.Errorf("error opening svg icon file: %w", err)
+		}
+		err = os.WriteFile(spath, []byte(icons.DefaultAppIcon), 0666)
+		if err != nil {
+			return nil, err
 		}
 		err = sv.ReadXML(strings.NewReader(icons.DefaultAppIcon))
 		if err != nil {
