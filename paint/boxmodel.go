@@ -105,44 +105,46 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size ma
 
 // fixBounds returns a version of the given position and size such that they
 // do not go outside of the parent effective bounds based on their border radius.
+// For each corner, if our corner is outside of the inset effective
+// border radius corner of our parent, we ensure that our border radius is at
+// least as large as that of our parent, thereby ensuring that we do not go
+// outside of our parent effective bounds.
 func (pc *Context) fixBounds(pos, size math32.Vector2) (math32.Vector2, math32.Vector2) {
-	if len(pc.RadiusStack) == 0 {
+	if len(pc.ContentBoundsStack) == 0 {
 		return pos, size
 	}
 
+	pr := pc.RadiusStack[len(pc.RadiusStack)-1]
+	if styles.SidesAreZero(pr.Sides) {
+		return pos, size
+	}
+
+	pbox := pc.ContentBoundsStack[len(pc.ContentBoundsStack)-1]
+	psz := math32.Vector2FromPoint(pbox.Size())
+	pr = ClampBorderRadius(pr, psz.X, psz.Y)
+
 	rect := math32.RectFromPosSizeMax(pos, size)
 
-	// For each parent and corner, if our corner is outside of the inset effective
-	// border radius corner of the parent, we ensure that our border radius is at
-	// least as large as that of the parent, thereby ensuring that we do not go
-	// outside of the parent effective bounds.
-	for i, pbox := range pc.ContentBoundsStack {
-		pr := pc.RadiusStack[i]
+	ptop := pbox.Min.Add(image.Pt(int(pr.Top), int(pr.Top)))
+	if rect.Min.X < ptop.X && rect.Min.Y < ptop.Y {
+		rect.Min = ptop
+	}
 
-		psz := math32.Vector2FromPoint(pbox.Size())
-		pr = ClampBorderRadius(pr, psz.X, psz.Y)
+	pright := pbox.Min.Add(image.Pt(pbox.Size().X-int(pr.Right), int(pr.Right)))
+	if rect.Max.X > pright.X && rect.Min.Y < pright.Y {
+		rect.Min.Y = pright.Y
+		rect.Max.X = pright.X
+	}
 
-		ptop := pbox.Min.Add(image.Pt(int(pr.Top), int(pr.Top)))
-		if rect.Min.X < ptop.X && rect.Min.Y < ptop.Y {
-			rect.Min = ptop
-		}
+	pbottom := pbox.Min.Add(image.Pt(pbox.Size().X-int(pr.Bottom), pbox.Size().Y-int(pr.Bottom)))
+	if rect.Max.X > pbottom.X && rect.Max.Y > pbottom.Y {
+		rect.Max = pbottom
+	}
 
-		pright := pbox.Min.Add(image.Pt(pbox.Size().X-int(pr.Right), int(pr.Right)))
-		if rect.Max.X > pright.X && rect.Min.Y < pright.Y {
-			rect.Min.Y = pright.Y
-			rect.Max.X = pright.X
-		}
-
-		pbottom := pbox.Min.Add(image.Pt(pbox.Size().X-int(pr.Bottom), pbox.Size().Y-int(pr.Bottom)))
-		if rect.Max.X > pbottom.X && rect.Max.Y > pbottom.Y {
-			rect.Max = pbottom
-		}
-
-		pleft := pbox.Min.Add(image.Pt(int(pr.Left), pbox.Size().Y-int(pr.Left)))
-		if rect.Min.X < pleft.X && rect.Max.Y > pleft.Y {
-			rect.Min.X = pleft.X
-			rect.Max.Y = pleft.Y
-		}
+	pleft := pbox.Min.Add(image.Pt(int(pr.Left), pbox.Size().Y-int(pr.Left)))
+	if rect.Min.X < pleft.X && rect.Max.Y > pleft.Y {
+		rect.Min.X = pleft.X
+		rect.Max.Y = pleft.Y
 	}
 	return math32.Vector2FromPoint(rect.Min), math32.Vector2FromPoint(rect.Size())
 }
