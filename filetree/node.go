@@ -386,7 +386,11 @@ func (fn *Node) InitFileInfo() error {
 			fn.Info.VCS = vcs.Stored // always
 		} else {
 			go func() { // this is very slow, do offline
-				fn.Info.VCS, _ = repo.Status(string(fn.Filepath))
+				vcstat, _ := repo.Status(string(fn.Filepath))
+				if vcstat != fn.Info.VCS {
+					fn.Info.VCS = vcstat
+					fn.NeedsRender()
+				}
 			}()
 		}
 	} else {
