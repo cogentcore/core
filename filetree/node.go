@@ -60,7 +60,9 @@ type Node struct { //core:embedder
 	// only non-nil if this is the highest-level directory in the tree under vcs control.
 	DirRepo vcs.Repo `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 
-	// RepoFiles has the version control system repository file status; only valid during SetPath.
+	// RepoFiles has the version control system repository file status,
+	// providing a much faster way to get file status, vs. the repo.Status
+	// call which is exceptionally slow.
 	RepoFiles vcs.Files `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
 }
 
@@ -380,18 +382,16 @@ func (fn *Node) InitFileInfo() error {
 		log.Println(emsg)
 		return emsg
 	}
-	repo, _ := fn.Repo()
+	repo, rnode := fn.Repo()
 	if repo != nil {
 		if fn.IsDir() {
 			fn.Info.VCS = vcs.Stored // always
 		} else {
-			go func() { // this is very slow, do offline
-				vcstat, _ := repo.Status(string(fn.Filepath))
-				if vcstat != fn.Info.VCS {
-					fn.Info.VCS = vcstat
-					fn.NeedsRender()
-				}
-			}()
+			rstat := rnode.RepoFiles.Status(repo, string(fn.Filepath))
+			if rstat != fn.Info.VCS {
+				fn.Info.VCS = rstat
+				fn.NeedsRender()
+			}
 		}
 	} else {
 		fn.Info.VCS = vcs.Stored
