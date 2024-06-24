@@ -71,18 +71,12 @@ func (fn *Node) AsFileNode() *Node {
 
 func (fn *Node) Init() {
 	fn.Tree.Init()
+	fn.IconOpen = icons.FolderOpen
+	fn.IconClosed = icons.Folder
 	fn.ContextMenus = nil // do not include tree
 	fn.AddContextMenu(fn.ContextMenu)
 	fn.Styler(func(s *styles.Style) {
 		status := fn.Info.VCS
-		s.Font.Weight = styles.WeightNormal
-		s.Font.Style = styles.FontNormal
-		if fn.IsExec() && !fn.IsDir() {
-			s.Font.Weight = styles.WeightBold // todo: somehow not working
-		}
-		if fn.Buffer != nil {
-			s.Font.Style = styles.Italic
-		}
 		switch {
 		case status == vcs.Untracked:
 			s.Color = errors.Must1(gradient.FromString("#808080"))
@@ -144,18 +138,14 @@ func (fn *Node) Init() {
 		}
 	})
 	fn.Parts.OnDoubleClick(func(e events.Event) {
-		if fn.FileRoot != nil && fn.FileRoot.DoubleClickFunc != nil {
-			fn.FileRoot.DoubleClickFunc(e)
-		} else {
-			if fn.IsDir() {
-				fn.Open()
-				e.SetHandled()
-			}
+		if fn.IsDir() {
+			fn.Open()
+			e.SetHandled()
 		}
 	})
 	tree.AddChildInit(fn.Parts, "branch", func(w *core.Switch) {
 		w.SetType(core.SwitchCheckbox)
-		w.SetIcons(icons.FolderOpen, icons.Folder, fn.Info.Ic)
+		w.SetIcons(fn.IconOpen, fn.IconClosed, fn.IconLeaf)
 		tree.AddChildInit(w, "stack", func(w *core.Frame) {
 			f := func(name string) {
 				tree.AddChildInit(w, name, func(w *core.Icon) {
@@ -169,18 +159,24 @@ func (fn *Node) Init() {
 			f("icon-indeterminate")
 		})
 	})
+	tree.AddChildInit(fn.Parts, "text", func(w *core.Text) {
+		w.Styler(func(s *styles.Style) {
+			if fn.IsExec() && !fn.IsDir() {
+				s.Font.Weight = styles.WeightBold
+			}
+			if fn.Buffer != nil {
+				s.Font.Style = styles.Italic
+			}
+		})
+	})
 
 	fn.Updater(func() {
-		fn.InitFileInfo()
+		fn.SetFileIcon()
 	})
 
 	// todo: tree does external
 
 	fn.Maker(func(p *tree.Plan) {
-		// err := fn.InitFileInfo()
-		// if err != nil {
-		// 	return
-		// }
 		if fn.Filepath == "" || fn.IsIrregular() {
 			return
 		}
@@ -197,7 +193,7 @@ func (fn *Node) Init() {
 		files := fn.DirFileList()
 		for _, fi := range files {
 			tree.AddNew(p, fi.Name(), func() Filer {
-				return tree.NewOfType(fn.NodeType()).(Filer)
+				return tree.NewOfType(fn.FileRoot.FileNodeType).(Filer)
 			}, func(wf Filer) {
 				w := wf.AsFileNode()
 				w.FileRoot = fn.FileRoot
@@ -353,13 +349,6 @@ func (fn *Node) SetFileIcon() {
 
 // InitFileInfo initializes file info
 func (fn *Node) InitFileInfo() error {
-	if fn.Filepath != "" {
-		_, fnm := filepath.Split(string(fn.Filepath))
-		if fn.Info.Name == fnm {
-			fn.SetFileIcon()
-			return nil
-		}
-	}
 	ls, err := os.Lstat(string(fn.Filepath))
 	if err != nil {
 		return err
@@ -430,17 +419,6 @@ func (fn *Node) OpenDir() {
 	pr.End()
 }
 
-// OpenEmptyDir will attempt to open a directory that has no children
-// which presumably was not processed originally
-// func (fn *Node) OpenEmptyDir() bool {
-// 	if fn.IsDir() && !fn.HasChildren() {
-// 		fn.OpenDir()
-// 		fn.NeedsLayout()
-// 		return true
-// 	}
-// 	return false
-// }
-
 // SortBys determines how to sort the selected files in the directory.
 // Default is alpha by name, optionally can be sorted by modification time.
 func (fn *Node) SortBys(modTime bool) { //types:add
@@ -463,19 +441,19 @@ func (fn *Node) OpenAll() { //types:add
 	fn.FileRoot.inOpenAll = false
 }
 
-// CloseAll closes all directories under this one, this included
-func (fn *Node) CloseAll() { //types:add
-	fn.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
-		sfn := AsNode(wi)
-		if sfn == nil {
-			return tree.Continue
-		}
-		if sfn.IsDir() {
-			sfn.Close()
-		}
-		return tree.Continue
-	})
-}
+// // CloseAll closes all directories under this one, this included
+// func (fn *Node) CloseAll() { //types:add
+// 	fn.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
+// 		sfn := AsNode(wi)
+// 		if sfn == nil {
+// 			return tree.Continue
+// 		}
+// 		if sfn.IsDir() {
+// 			sfn.Close()
+// 		}
+// 		return tree.Continue
+// 	})
+// }
 
 // OpenBuf opens the file in its buffer if it is not already open.
 // returns true if file is newly opened

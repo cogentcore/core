@@ -13,7 +13,6 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
-	"cogentcore.org/core/events"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/types"
 	"github.com/fsnotify/fsnotify"
@@ -45,10 +44,6 @@ type Tree struct {
 
 	// type of node to create; defaults to [Node] but can use custom node types
 	FileNodeType *types.Type `display:"-" json:"-" xml:"-"`
-
-	// DoubleClickFunc is a function to call when a node receives an [events.DoubleClick] event.
-	// If not set, defaults to OpenEmptyDir() (for folders).
-	DoubleClickFunc func(e events.Event) `copier:"-" display:"-" json:"-" xml:"-"`
 
 	// if true, we are in midst of an OpenAll call; nodes should open all dirs
 	inOpenAll bool

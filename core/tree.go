@@ -52,14 +52,6 @@ type Treer interface {
 	// The base version does nothing.
 	OnClose()
 
-	// OnDoubleClick is called when a node is double-clicked
-	// The base version does ToggleClose
-	OnDoubleClick(e events.Event)
-
-	// UpdateBranchIcons is called during DoLayout to update branch icons
-	// when everything should be configured, prior to rendering.
-	UpdateBranchIcons()
-
 	// Following are all tree editing functions:
 	DeleteNode()
 	Duplicate()
@@ -392,7 +384,10 @@ func (tr *Tree) Init() {
 		e.SetHandled()
 	})
 	parts.AsWidget().OnDoubleClick(func(e events.Event) {
-		tr.This.(Treer).OnDoubleClick(e)
+		if tr.HasChildren() {
+			tr.ToggleClose()
+		}
+		// tr.This.(Treer).OnDoubleClick(e)
 	})
 	parts.On(events.DragStart, func(e events.Event) {
 		tri.DragStart(e)
@@ -531,8 +526,6 @@ func (tr *Tree) Style() {
 	tr.WidgetBase.Style()
 }
 
-func (tr *Tree) UpdateBranchIcons() {}
-
 func (tr *Tree) SetBranchState() {
 	br, ok := tr.Branch()
 	if !ok {
@@ -597,8 +590,6 @@ func (tr *Tree) Position() {
 		return
 	}
 	tr.SetBranchState()
-	tr.This.(Treer).UpdateBranchIcons()
-
 	tr.Geom.Size.Actual.Total.X = rn.Geom.Size.Actual.Total.X - (tr.Geom.Pos.Total.X - rn.Geom.Pos.Total.X)
 	tr.widgetSize.X = tr.Geom.Size.Actual.Total.X
 

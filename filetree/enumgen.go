@@ -6,16 +6,16 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-var _DirFlagsValues = []DirFlags{0, 1, 2, 3}
+var _DirFlagsValues = []DirFlags{0, 1, 2}
 
 // DirFlagsN is the highest valid value for type DirFlags, plus one.
-const DirFlagsN DirFlags = 4
+const DirFlagsN DirFlags = 3
 
-var _DirFlagsValueMap = map[string]DirFlags{`Mark`: 0, `IsOpen`: 1, `SortByName`: 2, `SortByModTime`: 3}
+var _DirFlagsValueMap = map[string]DirFlags{`IsOpen`: 0, `SortByName`: 1, `SortByModTime`: 2}
 
-var _DirFlagsDescMap = map[DirFlags]string{0: `DirMark means directory is marked -- unmarked entries are deleted post-update`, 1: `DirIsOpen means directory is open -- else closed`, 2: `DirSortByName means sort the directory entries by name. this is mutex with other sorts -- keeping option open for non-binary sort choices.`, 3: `DirSortByModTime means sort the directory entries by modification time`}
+var _DirFlagsDescMap = map[DirFlags]string{0: `DirIsOpen means directory is open -- else closed`, 1: `DirSortByName means sort the directory entries by name. this is mutex with other sorts -- keeping option open for non-binary sort choices.`, 2: `DirSortByModTime means sort the directory entries by modification time`}
 
-var _DirFlagsMap = map[DirFlags]string{0: `Mark`, 1: `IsOpen`, 2: `SortByName`, 3: `SortByModTime`}
+var _DirFlagsMap = map[DirFlags]string{0: `IsOpen`, 1: `SortByName`, 2: `SortByModTime`}
 
 // String returns the string representation of this DirFlags value.
 func (i DirFlags) String() string { return enums.BitFlagString(i, _DirFlagsValues) }
