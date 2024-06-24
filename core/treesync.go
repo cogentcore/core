@@ -359,12 +359,12 @@ func (tr *Tree) EditNode() { //types:add
 		tynm := tr.SyncNode.NodeType().Name
 		d := NewBody().AddTitle(tynm)
 		NewForm(d).SetStruct(tr.SyncNode).SetReadOnly(tr.IsReadOnly())
-		d.NewFullDialog(tr).SetNewWindow(true).Run()
+		d.RunWindowDialog(tr)
 	} else {
 		tynm := tr.NodeType().Name
 		d := NewBody().AddTitle(tynm)
 		NewForm(d).SetStruct(tr.This).SetReadOnly(tr.IsReadOnly())
-		d.NewFullDialog(tr).SetNewWindow(true).Run()
+		d.RunWindowDialog(tr)
 	}
 }
 
