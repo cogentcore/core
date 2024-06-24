@@ -27,7 +27,7 @@ import (
 // on embedded structs themselves) to determine whether that field and any fields
 // it has embedded should be handled (a return value of true indicates to continue
 // down and a value of false indicates to not).
-func WalkFields(parent reflect.Value, should func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool, walk func(parent reflect.Value, field reflect.StructField, value reflect.Value)) {
+func WalkFields(parent reflect.Value, should func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool, walk func(parent reflect.Value, parentField *reflect.StructField, field reflect.StructField, value reflect.Value)) {
 	typ := parent.Type()
 	for i := 0; i < typ.NumField(); i++ {
 		field := typ.Field(i)
@@ -39,9 +39,28 @@ func WalkFields(parent reflect.Value, should func(parent reflect.Value, field re
 			continue
 		}
 		if field.Type.Kind() == reflect.Struct && field.Anonymous {
-			WalkFields(value, should, walk)
+			walkFieldsSub(value, field, should, walk)
 		} else {
-			walk(parent, field, value)
+			walk(parent, nil, field, value)
+		}
+	}
+}
+
+func walkFieldsSub(parent reflect.Value, parentField reflect.StructField, should func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool, walk func(parent reflect.Value, parentField *reflect.StructField, field reflect.StructField, value reflect.Value)) {
+	typ := parent.Type()
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		if !field.IsExported() {
+			continue
+		}
+		value := parent.Field(i)
+		if !should(parent, field, value) {
+			continue
+		}
+		if field.Type.Kind() == reflect.Struct && field.Anonymous {
+			walkFieldsSub(value, field, should, walk)
+		} else {
+			walk(parent, &parentField, field, value)
 		}
 	}
 }
@@ -53,7 +72,7 @@ func NumAllFields(parent reflect.Value) int {
 	WalkFields(parent,
 		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
 			return true
-		}, func(parent reflect.Value, field reflect.StructField, value reflect.Value) {
+		}, func(parent reflect.Value, parentField *reflect.StructField, field reflect.StructField, value reflect.Value) {
 			n++
 		})
 	return n

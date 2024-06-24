@@ -85,13 +85,13 @@ func (fm *Form) getStructFields() {
 		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
 			return shouldShow(parent, field)
 		},
-		func(parent reflect.Value, field reflect.StructField, value reflect.Value) {
+		func(parent reflect.Value, parentField *reflect.StructField, field reflect.StructField, value reflect.Value) {
 			if field.Tag.Get("display") == "add-fields" && field.Type.Kind() == reflect.Struct {
 				reflectx.WalkFields(value,
 					func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) bool {
 						return shouldShow(parent, sfield)
 					},
-					func(parent reflect.Value, sfield reflect.StructField, value reflect.Value) {
+					func(parent reflect.Value, parentField *reflect.StructField, sfield reflect.StructField, value reflect.Value) {
 						fields = append(fields, &structField{path: field.Name + " • " + sfield.Name, field: sfield, value: value, parent: parent})
 					})
 			} else {

@@ -177,7 +177,10 @@ func (tb *Table) cacheVisibleFields() {
 		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
 			return shouldShow(field)
 		},
-		func(parent reflect.Value, field reflect.StructField, value reflect.Value) {
+		func(parent reflect.Value, parentField *reflect.StructField, field reflect.StructField, value reflect.Value) {
+			if parentField != nil {
+				field.Index = append(parentField.Index, field.Index...)
+			}
 			tb.visibleFields = append(tb.visibleFields, field)
 		})
 	tb.numVisibleFields = len(tb.visibleFields)
