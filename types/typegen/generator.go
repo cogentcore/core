@@ -222,10 +222,10 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 			typ.Fields = fields
 		}
 		if in, ok := ts.Type.(*ast.InterfaceType); ok {
-			prev := cfg.AddMethods
+			prev := g.Config.AddMethods
 			// the only point of an interface is the methods,
 			// so we add them by default
-			cfg.AddMethods = true
+			g.Config.AddMethods = true
 			for _, m := range in.Methods.List {
 				if f, ok := m.Type.(*ast.FuncType); ok {
 					// add in any line comments
@@ -242,7 +242,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 					})
 				}
 			}
-			cfg.AddMethods = prev
+			g.Config.AddMethods = prev
 		}
 		g.Types = append(g.Types, typ)
 	}
