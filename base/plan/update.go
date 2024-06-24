@@ -12,7 +12,6 @@
 package plan
 
 import (
-	"log/slog"
 	"slices"
 
 	"cogentcore.org/core/base/slicesx"
@@ -48,7 +47,7 @@ func Update[T Namer](s *[]T, n int, name func(i int) string, new func(name strin
 		nm := name(i)
 		names[i] = nm
 		if _, has := nmap[nm]; has {
-			slog.Error("plan.Update: duplicate name", "name", nm)
+			panic("plan.Update: duplicate name: " + nm) // no way to recover
 		}
 		nmap[nm] = i
 	}
