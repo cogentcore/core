@@ -17,5 +17,3 @@ Package types provides type information for Go types, methods, and functions.
 # Notes
 
 * It is NOT Go ast because it doesn't store type info for fields, methods, etc.  There is no assumption that all types are processed, only designated types.  It only records names, comments and directives.
-
-

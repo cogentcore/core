@@ -7,7 +7,7 @@ import (
 )
 
 // PersonType is the [types.Type] for [Person]
-var PersonType = types.AddType(&types.Type{Name: "cogentcore.org/core/types/typegen/testdata.Person", IDName: "person", Doc: "Person represents a person and their attributes.\nThe zero value of a Person is not valid.", Directives: []types.Directive{{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}}, {Tool: "core", Directive: "embedder"}}, Methods: []types.Method{{Name: "Introduction", Doc: "Introduction returns an introduction for the person.\nIt contains the name of the person and their age.", Directives: []types.Directive{{Tool: "gi", Directive: "toolbar", Args: []string{"-name", "ShowIntroduction", "-icon", "play", "-show-result", "-confirm"}}, {Tool: "types", Directive: "add"}}, Returns: []string{"string"}}}, Embeds: []types.Field{{Name: "RGBA"}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the person"}, {Name: "Age", Doc: "Age is the age of the person"}, {Name: "Type", Doc: "Type is the type of the person"}, {Name: "unexportedField"}, {Name: "Nicknames", Doc: "Nicknames are the nicknames of the person"}}, Instance: &Person{}})
+var PersonType = types.AddType(&types.Type{Name: "cogentcore.org/core/types/typegen/testdata.Person", IDName: "person", Doc: "Person represents a person and their attributes.\nThe zero value of a Person is not valid.", Directives: []types.Directive{{Tool: "tree", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}}, {Tool: "core", Directive: "embedder"}}, Methods: []types.Method{{Name: "Introduction", Doc: "Introduction returns an introduction for the person.\nIt contains the name of the person and their age.", Directives: []types.Directive{{Tool: "core", Directive: "toolbar", Args: []string{"-name", "ShowIntroduction", "-icon", "play", "-show-result", "-confirm"}}, {Tool: "types", Directive: "add"}}, Returns: []string{"string"}}}, Embeds: []types.Field{{Name: "RGBA"}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the person"}, {Name: "Age", Doc: "Age is the age of the person"}, {Name: "Type", Doc: "Type is the type of the person"}, {Name: "unexportedField"}, {Name: "Nicknames", Doc: "Nicknames are the nicknames of the person"}}, Instance: &Person{}})
 
 func (t *Person) MyCustomFuncForStringers(a any) error {
 	return nil
@@ -38,6 +38,8 @@ func (t *CommaFieldType) SetA(v int) *CommaFieldType { t.A = v; return t }
 
 // SetB sets the [CommaFieldType.B]
 func (t *CommaFieldType) SetB(v int) *CommaFieldType { t.B = v; return t }
+
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/types/typegen/testdata.Setter", IDName: "setter", Doc: "Setter is a type that can set a value.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Methods: []types.Method{{Name: "Set", Doc: "Set sets the value.", Args: []string{"value"}, Returns: []string{"error"}}, {Name: "Clear", Doc: "Clear clears the value."}}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/types/typegen/testdata.Alert", Doc: "Alert prints an alert with the given message", Args: []string{"msg"}})
 

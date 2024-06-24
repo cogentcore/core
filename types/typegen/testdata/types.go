@@ -14,7 +14,7 @@ import (
 // Person represents a person and their attributes.
 // The zero value of a Person is not valid.
 //
-//ki:flagtype NodeFlags -field Flag
+//tree:flagtype NodeFlags -field Flag
 type Person struct { //core:embedder
 	color.RGBA
 
@@ -41,7 +41,7 @@ func (p Person) String() string { return p.Name }
 // Introduction returns an introduction for the person.
 // It contains the name of the person and their age.
 //
-//gi:toolbar -name ShowIntroduction -icon play -show-result -confirm
+//core:toolbar -name ShowIntroduction -icon play -show-result -confirm
 func (p *Person) Introduction() string { //types:add
 	return fmt.Sprintf("%s is %d years old", p.Name, p.Age)
 }
@@ -68,3 +68,13 @@ func TypeOmittedArgs1(x int, y, z struct{})        {}
 func TypeOmittedArgs2(x, y, z int)                 {}
 func TypeOmittedArgs3(x int, y, z bool, w float32) {}
 func TypeOmittedArgs4(x, y, z string, w bool)      {}
+
+// Setter is a type that can set a value.
+type Setter interface { //types:add
+
+	// Set sets the value.
+	Set(value string) error
+
+	// Clear clears the value.
+	Clear()
+}
