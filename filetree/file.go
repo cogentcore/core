@@ -20,6 +20,11 @@ import (
 
 // Filer is an interface for Filetree File actions
 type Filer interface {
+	core.Treer
+
+	// AsFileNode returns the filetree.Node
+	AsFileNode() *Node
+
 	// OpenFilesDefault opens selected files with default app for that file type (os defined).
 	// It runs open on Mac, xdg-open on Linux, and start on Windows.
 	OpenFilesDefault()

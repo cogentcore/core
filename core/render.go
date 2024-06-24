@@ -223,26 +223,34 @@ func (sc *Scene) DoUpdate() bool {
 
 	switch {
 	case rc.Rebuild:
+		pr := profile.Start("rebuild")
 		sc.DoRebuild()
 		sc.needsLayout = false
 		sc.sceneNeedsRender = false
 		sc.imageUpdated = true
+		pr.End()
 	case sc.lastRender.NeedsRestyle(rc):
+		pr := profile.Start("restyle")
 		sc.ApplyStyleScene()
 		sc.LayoutRenderScene()
 		sc.needsLayout = false
 		sc.sceneNeedsRender = false
 		sc.imageUpdated = true
 		sc.lastRender.SaveRender(rc)
+		pr.End()
 	case sc.needsLayout:
+		pr := profile.Start("layout")
 		sc.LayoutRenderScene()
 		sc.needsLayout = false
 		sc.sceneNeedsRender = false
 		sc.imageUpdated = true
+		pr.End()
 	case sc.sceneNeedsRender:
+		pr := profile.Start("render")
 		sc.DoNeedsRender()
 		sc.sceneNeedsRender = false
 		sc.imageUpdated = true
+		pr.End()
 	default:
 		return false
 	}

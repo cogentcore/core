@@ -127,9 +127,10 @@ func (p *Profile) End() {
 	p.Timing = false
 }
 
-func (p *Profile) Report(tot, units float64) {
-	fmt.Printf("%-60sTotal:%8.2f\tAvg:%6.2f\tN:%6d\tPct:%6.2f\n",
-		p.Name, float64(p.Tot)/units, p.Avg/units, p.N, 100.0*float64(p.Tot)/tot)
+func (p *Profile) Report(tot float64, units time.Duration) {
+	us := strings.TrimPrefix(units.String(), "1")
+	fmt.Printf("%-60sTotal:%8.2f %s\tAvg:%6.2f\tN:%6d\tPct:%6.2f\n",
+		p.Name, float64(p.Tot)/float64(units), us, p.Avg/float64(units), p.N, 100.0*float64(p.Tot)/tot)
 }
 
 // Profiler manages a map of profiled functions.
@@ -176,7 +177,7 @@ func (p *Profiler) Report(units time.Duration) {
 		return cmp.Compare(b.Tot, a.Tot)
 	})
 	for _, pr := range list {
-		pr.Report(tot, float64(units))
+		pr.Report(tot, units)
 	}
 }
 

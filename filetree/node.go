@@ -12,12 +12,13 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"sort"
+	"slices"
 	"strings"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fsx"
+	"cogentcore.org/core/base/profile"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
@@ -62,6 +63,10 @@ type Node struct { //core:embedder
 
 	// RepoFiles has the version control system repository file status; only valid during SetPath.
 	RepoFiles vcs.Files `edit:"-" set:"-" json:"-" xml:"-" copier:"-"`
+}
+
+func (fn *Node) AsFileNode() *Node {
+	return fn
 }
 
 func (fn *Node) Init() {
@@ -135,21 +140,22 @@ func (fn *Node) Init() {
 	})
 	fn.Parts.OnClick(func(e events.Event) {
 		if !e.HasAnyModifier(key.Control, key.Meta, key.Alt, key.Shift) {
-			fn.OpenEmptyDir()
+			fn.Open()
 		}
 	})
 	fn.Parts.OnDoubleClick(func(e events.Event) {
 		if fn.FileRoot != nil && fn.FileRoot.DoubleClickFunc != nil {
 			fn.FileRoot.DoubleClickFunc(e)
 		} else {
-			if fn.IsDir() && fn.OpenEmptyDir() {
+			if fn.IsDir() {
+				fn.Open()
 				e.SetHandled()
 			}
 		}
 	})
 	tree.AddChildInit(fn.Parts, "branch", func(w *core.Switch) {
 		w.SetType(core.SwitchCheckbox)
-		w.SetIcons(icons.FolderOpen, icons.Folder, icons.Blank)
+		w.SetIcons(icons.FolderOpen, icons.Folder, fn.Info.Ic)
 		tree.AddChildInit(w, "stack", func(w *core.Frame) {
 			f := func(name string) {
 				tree.AddChildInit(w, name, func(w *core.Icon) {
@@ -166,20 +172,18 @@ func (fn *Node) Init() {
 
 	fn.Updater(func() {
 		fn.InitFileInfo()
-		fn.SetFileIcon()
 	})
 
 	// todo: tree does external
 
 	fn.Maker(func(p *tree.Plan) {
-		err := fn.InitFileInfo()
-		if err != nil {
+		// err := fn.InitFileInfo()
+		// if err != nil {
+		// 	return
+		// }
+		if fn.Filepath == "" || fn.IsIrregular() {
 			return
 		}
-		if fn.IsIrregular() {
-			return
-		}
-		fn.DetectVCSRepo(true) // update files
 		if !fn.IsDir() {
 			return
 		}
@@ -192,10 +196,15 @@ func (fn *Node) Init() {
 		}
 		files := fn.DirFileList()
 		for _, fi := range files {
-			tree.AddAt(p, fi.Name(), func(w *Node) {
+			tree.AddNew(p, fi.Name(), func() Filer {
+				return tree.NewOfType(fn.NodeType()).(Filer)
+			}, func(wf Filer) {
+				w := wf.AsFileNode()
 				w.FileRoot = fn.FileRoot
 				w.Filepath = core.Filename(filepath.Join(string(fn.Filepath), fi.Name()))
-				fn.InitFileInfo()
+				// fmt.Println("new:", w.Filepath)
+				w.InitFileInfo()
+				w.DetectVCSRepo(true) // update files
 			})
 		}
 	})
@@ -230,23 +239,6 @@ func (fn *Node) IsExternal() bool {
 		return tree.Continue
 	})
 	return isExt
-}
-
-// HasClosedParent returns true if node has a parent node with !IsOpen flag set
-func (fn *Node) HasClosedParent() bool {
-	hasClosed := false
-	fn.WalkUpParent(func(k tree.Node) bool {
-		sfn := AsNode(k)
-		if sfn == nil {
-			return tree.Break
-		}
-		if !sfn.IsOpen() {
-			hasClosed = true
-			return tree.Break
-		}
-		return tree.Continue
-	})
-	return hasClosed
 }
 
 // IsExec returns true if file is an executable file
@@ -334,8 +326,14 @@ func (fn *Node) DirFileList() []os.FileInfo {
 }
 
 func sortByModTime(files []os.FileInfo) {
-	sort.Slice(files, func(i, j int) bool {
-		return files[i].ModTime().After(files[j].ModTime()) // descending
+	slices.SortFunc(files, func(a, b os.FileInfo) int {
+		if a.ModTime().After(b.ModTime()) {
+			return -1
+		}
+		if b.ModTime().After(a.ModTime()) {
+			return 1
+		}
+		return 0
 	})
 }
 
@@ -344,23 +342,38 @@ func (fn *Node) SetFileIcon() {
 	if !hasic {
 		ic = icons.Blank
 	}
+	fn.IconLeaf = ic
 	if bp, ok := fn.Branch(); ok {
 		if bp.IconIndeterminate != ic {
 			bp.SetIcons(icons.FolderOpen, icons.Folder, ic)
-			bp.Update()
+			bp.UpdateTree()
 		}
 	}
 }
 
 // InitFileInfo initializes file info
 func (fn *Node) InitFileInfo() error {
-	effpath, err := filepath.EvalSymlinks(string(fn.Filepath))
+	if fn.Filepath != "" {
+		_, fnm := filepath.Split(string(fn.Filepath))
+		if fn.Info.Name == fnm {
+			fn.SetFileIcon()
+			return nil
+		}
+	}
+	ls, err := os.Lstat(string(fn.Filepath))
 	if err != nil {
-		// this happens too often for links -- skip
-		// log.Printf("filetree.Node Path: %v could not be opened -- error: %v\n", fn.FPath, err)
 		return err
 	}
-	fn.Filepath = core.Filename(effpath)
+	if ls.Mode() == os.ModeSymlink {
+		effpath, err := filepath.EvalSymlinks(string(fn.Filepath))
+		if err != nil {
+			// this happens too often for links -- skip
+			// log.Printf("filetree.Node Path: %v could not be opened -- error: %v\n", fn.Filepath, err)
+			return err
+		}
+		fn.Filepath = core.Filename(effpath)
+	}
+
 	err = fn.Info.InitFile(string(fn.Filepath))
 	if err != nil {
 		emsg := fmt.Errorf("filetree.Node InitFileInfo Path %q: Error: %v", fn.Filepath, err)
@@ -395,38 +408,38 @@ func (fn *Node) OnOpen() {
 	fn.OpenDir()
 }
 
+func (fn *Node) OnClose() {
+	if !fn.IsDir() {
+		return
+	}
+	fn.FileRoot.SetDirClosed(fn.Filepath)
+}
+
 func (fn *Node) CanOpen() bool {
 	return fn.HasChildren() || fn.IsDir()
 }
 
 // OpenDir opens given directory node
 func (fn *Node) OpenDir() {
-	// fmt.Printf("fn: %s opened\n", fn.FPath)
+	if !fn.IsDir() {
+		return
+	}
+	pr := profile.Start("OpenDir")
 	fn.FileRoot.SetDirOpen(fn.Filepath)
 	fn.Update()
-}
-
-func (fn *Node) OnClose() {
-	fn.CloseDir()
-}
-
-// CloseDir closes given directory node -- updates memory state
-func (fn *Node) CloseDir() {
-	// fmt.Printf("fn: %s closed\n", fn.FPath)
-	fn.FileRoot.SetDirClosed(fn.Filepath)
-	// note: not doing anything with open files within directory..
+	pr.End()
 }
 
 // OpenEmptyDir will attempt to open a directory that has no children
 // which presumably was not processed originally
-func (fn *Node) OpenEmptyDir() bool {
-	if fn.IsDir() && !fn.HasChildren() {
-		fn.OpenDir()
-		fn.NeedsLayout()
-		return true
-	}
-	return false
-}
+// func (fn *Node) OpenEmptyDir() bool {
+// 	if fn.IsDir() && !fn.HasChildren() {
+// 		fn.OpenDir()
+// 		fn.NeedsLayout()
+// 		return true
+// 	}
+// 	return false
+// }
 
 // SortBys determines how to sort the selected files in the directory.
 // Default is alpha by name, optionally can be sorted by modification time.

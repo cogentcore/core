@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"cogentcore.org/core/base/plan"
+	"cogentcore.org/core/base/profile"
 )
 
 // Plan represents a plan for how the children of a [Node] should be configured.
@@ -230,6 +231,7 @@ func (p *Plan) Update(n Node) {
 	if len(p.Children) == 0 && !p.EnforceEmpty {
 		return
 	}
+	pr := profile.Start("plan.Update")
 	plan.Update(&n.AsTree().Children, len(p.Children),
 		func(i int) string {
 			return p.Children[i].Name
@@ -247,4 +249,5 @@ func (p *Plan) Update(n Node) {
 			child.Destroy()
 		},
 	)
+	pr.End()
 }

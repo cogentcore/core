@@ -104,8 +104,9 @@ func (ft *Tree) OpenPath(path string) *Tree {
 		abs = effpath
 	}
 	ft.Filepath = core.Filename(abs)
-	ft.Open()
 	ft.SetDirOpen(core.Filename(abs))
+	ft.InitFileInfo()
+	ft.Open()
 	ft.Update()
 	return ft
 }
