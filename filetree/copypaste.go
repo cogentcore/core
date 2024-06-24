@@ -47,8 +47,8 @@ func (fn *Node) MimeData(md *mimedata.Mimes) {
 	}
 }
 
-// Cut copies to system.Clipboard and deletes selected items
-func (fn *Node) Cut() {
+// Cut copies the selected files to the clipboard and then deletes them.
+func (fn *Node) Cut() { //types:add
 	if fn.IsRoot("Cut") {
 		return
 	}
@@ -57,7 +57,8 @@ func (fn *Node) Cut() {
 	core.MessageDialog(fn, "File names were copied to clipboard and can be pasted to copy elsewhere, but files are not deleted because contents of files are not placed on the clipboard and thus cannot be pasted as such.  Use Delete to delete files.")
 }
 
-func (fn *Node) Paste() {
+// Paste inserts files from the clipboard.
+func (fn *Node) Paste() { //types:add
 	md := fn.Clipboard().Read([]string{fileinfo.TextPlain})
 	if md != nil {
 		fn.PasteFiles(md, false, nil)

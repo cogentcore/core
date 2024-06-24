@@ -18,8 +18,8 @@ import (
 	"cogentcore.org/core/events"
 )
 
-// Filer is an interface for Filetree File actions
-type Filer interface {
+// Filer is an interface for file tree file actions that all [Node]s satisfy.
+type Filer interface { //types:add
 	core.Treer
 
 	// AsFileNode returns the filetree.Node
