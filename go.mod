@@ -31,7 +31,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.1.2-0.20240227203013-2b69615b5d55
 	github.com/stretchr/testify v1.9.0
 	github.com/traefik/yaegi v0.16.1
-	github.com/yuin/goldmark v1.7.0
+	github.com/yuin/goldmark v1.7.3
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
 	github.com/zergon321/reisen v0.1.9
 	go.abhg.dev/goldmark/wikilink v0.5.0
