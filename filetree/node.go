@@ -18,7 +18,6 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/fileinfo"
 	"cogentcore.org/core/base/fsx"
-	"cogentcore.org/core/base/profile"
 	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
@@ -172,6 +171,12 @@ func (fn *Node) Init() {
 
 	fn.Updater(func() {
 		fn.SetFileIcon()
+		if fn.IsDir() {
+			repo, rnode := fn.Repo()
+			if repo != nil && rnode.This == fn.This {
+				go rnode.UpdateRepoFiles()
+			}
+		}
 	})
 
 	// todo: tree does external
@@ -186,10 +191,7 @@ func (fn *Node) Init() {
 		if !((fn.FileRoot.inOpenAll && !fn.Info.IsHidden()) || fn.FileRoot.IsDirOpen(fn.Filepath)) {
 			return
 		}
-		repo, rnode := fn.Repo()
-		if repo != nil {
-			rnode.UpdateRepoFiles()
-		}
+		repo, _ := fn.Repo()
 		files := fn.DirFileList()
 		for _, fi := range files {
 			tree.AddNew(p, fi.Name(), func() Filer {
@@ -198,9 +200,10 @@ func (fn *Node) Init() {
 				w := wf.AsFileNode()
 				w.FileRoot = fn.FileRoot
 				w.Filepath = core.Filename(filepath.Join(string(fn.Filepath), fi.Name()))
-				// fmt.Println("new:", w.Filepath)
 				w.InitFileInfo()
-				w.DetectVCSRepo(true) // update files
+				if w.IsDir() && repo == nil {
+					w.DetectVCSRepo(true) // update files
+				}
 			})
 		}
 	})
@@ -353,7 +356,7 @@ func (fn *Node) InitFileInfo() error {
 	if err != nil {
 		return err
 	}
-	if ls.Mode() == os.ModeSymlink {
+	if ls.Mode()&os.ModeSymlink != 0 {
 		effpath, err := filepath.EvalSymlinks(string(fn.Filepath))
 		if err != nil {
 			// this happens too often for links -- skip
@@ -371,9 +374,12 @@ func (fn *Node) InitFileInfo() error {
 	}
 	repo, _ := fn.Repo()
 	if repo != nil {
-		fn.Info.VCS, _ = repo.Status(string(fn.Filepath))
 		if fn.IsDir() {
 			fn.Info.VCS = vcs.Stored // always
+		} else {
+			go func() { // this is very slow, do offline
+				fn.Info.VCS, _ = repo.Status(string(fn.Filepath))
+			}()
 		}
 	} else {
 		fn.Info.VCS = vcs.Stored
@@ -413,10 +419,8 @@ func (fn *Node) OpenDir() {
 	if !fn.IsDir() {
 		return
 	}
-	pr := profile.Start("OpenDir")
 	fn.FileRoot.SetDirOpen(fn.Filepath)
 	fn.Update()
-	pr.End()
 }
 
 // SortBys determines how to sort the selected files in the directory.
@@ -440,20 +444,6 @@ func (fn *Node) OpenAll() { //types:add
 	fn.Tree.OpenAll()
 	fn.FileRoot.inOpenAll = false
 }
-
-// // CloseAll closes all directories under this one, this included
-// func (fn *Node) CloseAll() { //types:add
-// 	fn.WidgetWalkDown(func(wi core.Widget, wb *core.WidgetBase) bool {
-// 		sfn := AsNode(wi)
-// 		if sfn == nil {
-// 			return tree.Continue
-// 		}
-// 		if sfn.IsDir() {
-// 			sfn.Close()
-// 		}
-// 		return tree.Continue
-// 	})
-// }
 
 // OpenBuf opens the file in its buffer if it is not already open.
 // returns true if file is newly opened

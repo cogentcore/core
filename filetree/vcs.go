@@ -46,9 +46,6 @@ func (fn *Node) FirstVCS() (vcs.Repo, *Node) {
 func (fn *Node) DetectVCSRepo(updateFiles bool) bool {
 	repo, _ := fn.Repo()
 	if repo != nil {
-		if updateFiles {
-			fn.UpdateRepoFiles()
-		}
 		return false
 	}
 	path := string(fn.Filepath)
