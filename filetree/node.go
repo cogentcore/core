@@ -201,6 +201,7 @@ func (fn *Node) Init() {
 					return tree.NewOfType(fn.FileRoot.FileNodeType).(Filer)
 				}, func(wf Filer) {
 					w := wf.AsFileNode()
+					w.NeedsLayout()
 					w.FileRoot = fn.FileRoot
 					w.Filepath = core.Filename(fi)
 					w.Info.Mode = os.ModeIrregular
@@ -216,6 +217,7 @@ func (fn *Node) Init() {
 				return tree.NewOfType(fn.FileRoot.FileNodeType).(Filer)
 			}, func(wf Filer) {
 				w := wf.AsFileNode()
+				w.NeedsLayout()
 				w.FileRoot = fn.FileRoot
 				w.Filepath = core.Filename(filepath.Join(string(fn.Filepath), fi.Name()))
 				w.InitFileInfo()
