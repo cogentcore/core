@@ -33,7 +33,7 @@ import (
 // providing access to the base [Tree] and
 // overridable method hooks for actions taken on the [Tree],
 // including OnOpen, OnClose, etc.
-type Treer interface {
+type Treer interface { //types:add
 	Widget
 
 	// AsTree returns the base [Tree] for this node.

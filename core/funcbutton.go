@@ -146,7 +146,7 @@ func (fb *FuncButton) OnBind(value any) {
 
 func (fb *FuncButton) Init() {
 	fb.Button.Init()
-	fb.WarnUnadded = false // true
+	fb.WarnUnadded = true
 	fb.Styler(func(s *styles.Style) {
 		if fb.IsReadOnly() {
 			s.SetAbilities(false, abilities.Hoverable, abilities.Clickable, abilities.Activatable)
