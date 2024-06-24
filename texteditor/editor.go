@@ -214,7 +214,13 @@ type Editor struct { //core:embedder
 // This is appropriate for making a standalone editor in which there
 // is there is one editor per buffer.
 func NewSoloEditor(parent ...tree.Node) *Editor {
-	return NewEditor(parent...).SetBuffer(NewBuffer())
+	return NewEditor(parent...).SetNewBuffer()
+}
+
+// SetNewBuffer sets the [Buffer] for this [Editor] to a [NewBuffer].
+func (ed *Editor) SetNewBuffer() *Editor {
+	ed.SetBuffer(NewBuffer())
+	return ed
 }
 
 func (ed *Editor) WidgetValue() any { return &ed.Buffer.Txt }
