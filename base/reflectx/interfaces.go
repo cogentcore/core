@@ -4,6 +4,8 @@
 
 package reflectx
 
+import "image/color"
+
 // SetAnyer represents a type that can be set from any value.
 // It is checked in [SetRobust].
 type SetAnyer interface {
@@ -14,4 +16,10 @@ type SetAnyer interface {
 // value. It is checked in [SetRobust].
 type SetStringer interface {
 	SetString(s string) error
+}
+
+// SetColorer represents a type that can be set from a color value.
+// It is checked in [SetRobust].
+type SetColorer interface {
+	SetColor(c color.Color)
 }

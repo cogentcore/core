@@ -68,9 +68,14 @@ func New(hue, chroma, tone float32) HCT {
 	return SRGBToHCT(r, g, b)
 }
 
-// FromColor constructs a new HCT color from a standard [color.Color]
+// FromColor constructs a new HCT color from a standard [color.Color].
 func FromColor(c color.Color) HCT {
 	return Uint32ToHCT(c.RGBA())
+}
+
+// SetColor sets the HCT color from a standard [color.Color].
+func (h *HCT) SetColor(c color.Color) {
+	*h = FromColor(c)
 }
 
 // Model is the standard [color.Model] that converts colors to HCT.

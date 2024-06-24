@@ -9,6 +9,7 @@ package reflectx
 import (
 	"encoding/json"
 	"fmt"
+	"image"
 	"image/color"
 	"reflect"
 	"strconv"
@@ -979,13 +980,22 @@ func SetRobust(to, from any) error {
 			return nil
 		}
 	}
-	if cd, ok := to.(*color.RGBA); ok {
+	if _, ok := to.(color.Color); ok {
 		fc, err := colors.FromAny(from)
 		if err != nil {
 			return err
 		}
-		*cd = fc
-		return nil
+		switch c := to.(type) {
+		case *color.RGBA:
+			*c = fc
+			return nil
+		case *image.Uniform:
+			c.C = fc
+			return nil
+		case SetColorer:
+			c.SetColor(fc)
+			return nil
+		}
 	}
 
 	if AnyIsNil(to) {
