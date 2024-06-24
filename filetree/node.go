@@ -179,9 +179,8 @@ func (fn *Node) Init() {
 		} else {
 			fn.InitFileInfo()
 		}
+		fn.Text = fn.Info.Name
 	})
-
-	// todo: tree does external
 
 	fn.Maker(func(p *tree.Plan) {
 		if fn.Filepath == "" || fn.IsIrregular() {
@@ -191,6 +190,21 @@ func (fn *Node) Init() {
 			return
 		}
 		if !((fn.FileRoot.inOpenAll && !fn.Info.IsHidden()) || fn.FileRoot.IsDirOpen(fn.Filepath)) {
+			return
+		}
+		if fn.Name == ExternalFilesName {
+			files := fn.FileRoot.ExternalFiles
+			for _, fi := range files {
+				tree.AddNew(p, fi, func() Filer {
+					return tree.NewOfType(fn.FileRoot.FileNodeType).(Filer)
+				}, func(wf Filer) {
+					w := wf.AsFileNode()
+					w.FileRoot = fn.FileRoot
+					w.Filepath = core.Filename(fi)
+					w.Info.Mode = os.ModeIrregular
+					w.Info.VCS = vcs.Stored
+				})
+			}
 			return
 		}
 		repo, _ := fn.Repo()
@@ -274,14 +288,6 @@ func (fn *Node) MyRelPath() string {
 	}
 	return fsx.RelativeFilePath(string(fn.Filepath), string(fn.FileRoot.Filepath))
 }
-
-// hasExtFiles := false
-// if fn.This == fn.FileRoot.This {
-// 	if len(fn.FileRoot.ExternalFiles) > 0 {
-// 		plan = append(tree.TypePlan{{Type: fn.FileRoot.FileNodeType, Name: ExternalFilesName}}, plan...)
-// 		hasExtFiles = true
-// 	}
-// }
 
 // DirFileList returns the list of files in this directory,
 // sorted according to DirsOnTop and SortByModTime options

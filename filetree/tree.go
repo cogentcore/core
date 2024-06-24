@@ -12,8 +12,10 @@ import (
 	"time"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/vcs"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
 	"github.com/fsnotify/fsnotify"
 )
@@ -69,6 +71,17 @@ func (ft *Tree) Init() {
 	ft.FileRoot = ft
 	ft.FileNodeType = NodeType
 	ft.OpenDepth = 4
+	ft.FirstMaker(func(p *tree.Plan) {
+		tree.AddNew(p, ExternalFilesName, func() Filer {
+			return tree.NewOfType(ft.FileNodeType).(Filer)
+		}, func(wf Filer) {
+			w := wf.AsFileNode()
+			w.FileRoot = ft
+			w.Filepath = ExternalFilesName
+			w.Info.Mode = os.ModeDir
+			w.Info.VCS = vcs.Stored
+		})
+	})
 }
 
 func (fv *Tree) Destroy() {
@@ -290,7 +303,7 @@ func (ft *Tree) AddExternalFile(fpath string) (*Node, error) {
 		return ft.ExternalNodeByPath(pth)
 	}
 	ft.ExternalFiles = append(ft.ExternalFiles, pth)
-	// ft.SyncDir()
+	ft.Child(0).(Filer).AsFileNode().Update()
 	return ft.ExternalNodeByPath(pth)
 }
 
@@ -332,25 +345,3 @@ func (ft *Tree) ExternalNodeByPath(fpath string) (*Node, error) {
 	}
 	return nil, fmt.Errorf("ExtFile not updated; index invalid")
 }
-
-// SyncExternalFiles returns a type-and-name list for configuring nodes
-// for ExtFiles
-/*
-func (ft *Tree) SyncExternalFiles(efn *Node) {
-	efn.Info.Mode = os.ModeDir | os.ModeIrregular // mark as dir, irregular
-	plan := tree.TypePlan{}
-	typ := ft.FileNodeType
-	for _, f := range ft.ExternalFiles {
-		plan.Add(typ, fsx.DirAndFile(f))
-	}
-	tree.Update(efn, plan) // NOT unique names
-	// always go through kids, regardless of mods
-	for i, sfk := range efn.Children {
-		sf := AsNode(sfk)
-		sf.FileRoot = ft
-		fp := ft.ExternalFiles[i]
-		sf.SetNodePath(fp)
-		sf.Info.VCS = vcs.Stored // no vcs in general
-	}
-}
-*/
