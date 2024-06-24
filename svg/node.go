@@ -143,7 +143,6 @@ func (g *NodeBase) PaintStyle() *styles.Paint {
 
 func (g *NodeBase) Init() {
 	g.Paint.Defaults()
-	fmt.Println("defaults:", g.Paint.Transform)
 }
 
 // SetColorProperties sets color property from a string representation.
