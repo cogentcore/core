@@ -147,7 +147,7 @@ func (fn *Node) Init() {
 	tree.AddChildInit(fn.Parts, "branch", func(w *core.Switch) {
 		w.SetType(core.SwitchCheckbox)
 		w.SetIcons(fn.IconOpen, fn.IconClosed, fn.IconLeaf)
-		tree.AddChildInit(w, "stack", func(w *core.Frame) {
+		tree.AddChildInit(w.Parts, "stack", func(w *core.Frame) {
 			f := func(name string) {
 				tree.AddChildInit(w, name, func(w *core.Icon) {
 					w.Styler(func(s *styles.Style) {
