@@ -176,6 +176,8 @@ func (fn *Node) Init() {
 			if repo != nil && rnode.This == fn.This {
 				go rnode.UpdateRepoFiles()
 			}
+		} else {
+			fn.InitFileInfo()
 		}
 	})
 
