@@ -149,7 +149,10 @@ func (ib *IconButton) Init() { // TODO(config): display:"show-name"
 			ib.SetText("")
 		}
 		if ib.IsReadOnly() {
-			ib.SetType(ButtonText).SetText("")
+			ib.SetType(ButtonText)
+			if ib.Icon.IsNil() {
+				ib.SetText("").SetIcon(icons.Blank)
+			}
 		} else {
 			ib.SetType(ButtonTonal)
 		}
