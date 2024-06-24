@@ -141,6 +141,11 @@ func (g *NodeBase) PaintStyle() *styles.Paint {
 	return &g.Paint
 }
 
+func (g *NodeBase) Init() {
+	g.Paint.Defaults()
+	fmt.Println("defaults:", g.Paint.Transform)
+}
+
 // SetColorProperties sets color property from a string representation.
 // It breaks color alpha out as opacity.  prop is either "stroke" or "fill"
 func (g *NodeBase) SetColorProperties(prop, color string) {

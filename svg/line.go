@@ -22,6 +22,7 @@ type Line struct {
 func (g *Line) SVGName() string { return "line" }
 
 func (g *Line) Init() {
+	g.NodeBase.Init()
 	g.End.Set(1, 1)
 }
 

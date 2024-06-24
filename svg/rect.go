@@ -27,6 +27,7 @@ type Rect struct {
 func (g *Rect) SVGName() string { return "rect" }
 
 func (g *Rect) Init() {
+	g.NodeBase.Init()
 	g.Size.Set(1, 1)
 }
 
@@ -96,8 +97,11 @@ func (g *Rect) ApplyDeltaTransform(sv *SVG, trans math32.Vector2, scale math32.V
 		g.Paint.Transform.SetMulCenter(xf, lpt)                   // todo: this might be backwards for everything
 		g.SetProperty("transform", g.Paint.Transform.String())
 	} else {
+		// fmt.Println("adt", trans, scale, rot, pt)
 		xf, lpt := g.DeltaTransform(trans, scale, rot, pt, true) // include self
+		// opos := g.Pos
 		g.Pos = xf.MulVector2AsPointCenter(g.Pos, lpt)
+		// fmt.Println("apply delta trans:", opos, g.Pos, xf)
 		g.Size = xf.MulVector2AsVector(g.Size)
 		g.GradientApplyTransformPt(sv, xf, lpt)
 	}
