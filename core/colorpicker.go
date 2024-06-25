@@ -17,11 +17,11 @@ import (
 )
 
 // ColorPicker represents a color value with an interactive color picker
-// composed of three HCT sliders.
+// composed of three HCT sliders and standard accent color buttons.
 type ColorPicker struct {
 	Frame
 
-	// the color that we view
+	// Color is the current color.
 	Color hct.HCT `set:"-"`
 }
 
@@ -38,6 +38,20 @@ func (cp *ColorPicker) Init() {
 	cp.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
 		s.Direction = styles.Column
+	})
+
+	tree.AddChild(cp, func(w *Frame) {
+		tree.AddChild(w, func(w *Button) {
+			w.SetIcon(icons.Blank)
+			w.Styler(func(s *styles.Style) {
+				s.Background = colors.Uniform(colors.ToBase(cp.Color))
+			})
+			w.OnClick(func(e events.Event) {
+				cp.SetColor(colors.ToUniform(w.Styles.Background))
+				cp.Update()
+				cp.SendChange()
+			})
+		})
 	})
 
 	sf := func(s *styles.Style) {
@@ -83,7 +97,7 @@ func (cp *ColorPicker) Init() {
 			w.ValueColor = nil
 			w.ThumbColor = colors.Uniform(cp.Color)
 			g := gradient.NewLinear()
-			for c := float32(0); c <= 120; c += 5 {
+			for c := float32(0); c <= w.Max; c += 5 {
 				gc := cp.Color.WithChroma(c)
 				g.AddStop(gc.AsRGBA(), c/120)
 			}
