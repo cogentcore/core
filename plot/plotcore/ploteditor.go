@@ -16,6 +16,7 @@ import (
 	"reflect"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
@@ -175,8 +176,7 @@ const (
 // SetColParams sets main parameters for one column
 func (pl *PlotEditor) SetColParams(colNm string, on bool, fixMin bool, min float32, fixMax bool, max float32) *ColumnParams {
 	cp, err := pl.ColParamsTry(colNm)
-	if err != nil {
-		log.Println(err)
+	if errors.Log(err) != nil {
 		return nil
 	}
 	cp.On = on
