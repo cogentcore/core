@@ -6,6 +6,7 @@ package core
 
 import (
 	"image/color"
+	"strconv"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/cam/hct"
@@ -33,6 +34,18 @@ func (cp *ColorPicker) SetColor(c color.Color) *ColorPicker {
 	return cp
 }
 
+type accent struct {
+	f       func(c color.Color) color.RGBA
+	tooltip string
+}
+
+var accents = []accent{
+	{colors.ToBase, "A version of the color that should be used for high emphasis content"},
+	{colors.ToOn, "A version of the color that should be placed on top of high emphasis content"},
+	{colors.ToContainer, "A version of the color that should be used for lower emphasis content"},
+	{colors.ToOnContainer, "A version of the color that should be placed on top of lower emphasis content"},
+}
+
 func (cp *ColorPicker) Init() {
 	cp.Frame.Init()
 	cp.Styler(func(s *styles.Style) {
@@ -41,17 +54,19 @@ func (cp *ColorPicker) Init() {
 	})
 
 	tree.AddChild(cp, func(w *Frame) {
-		tree.AddChild(w, func(w *Button) {
-			w.SetIcon(icons.Blank)
-			w.Styler(func(s *styles.Style) {
-				s.Background = colors.Uniform(colors.ToBase(cp.Color))
+		for i, a := range accents {
+			tree.AddChildAt(w, strconv.Itoa(i), func(w *Button) {
+				w.SetIcon(icons.Blank).SetTooltip(a.tooltip)
+				w.Styler(func(s *styles.Style) {
+					s.Background = colors.Uniform(a.f(cp.Color))
+				})
+				w.OnClick(func(e events.Event) {
+					cp.SetColor(colors.ToUniform(w.Styles.Background))
+					cp.Update()
+					cp.SendChange()
+				})
 			})
-			w.OnClick(func(e events.Event) {
-				cp.SetColor(colors.ToUniform(w.Styles.Background))
-				cp.Update()
-				cp.SendChange()
-			})
-		})
+		}
 	})
 
 	sf := func(s *styles.Style) {
