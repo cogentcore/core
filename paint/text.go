@@ -114,7 +114,7 @@ func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 		if g, ok := curColor.(gradient.Gradient); ok {
 			g.Update(pc.FontStyle.Opacity, math32.B2FromRect(pc.LastRenderBBox), pc.CurrentTransform)
 		} else {
-			curColor = gradient.ApplyOpacityImage(curColor, pc.FontStyle.Opacity)
+			curColor = gradient.ApplyOpacity(curColor, pc.FontStyle.Opacity)
 		}
 		tpos := pos.Add(sr.RelPos)
 
@@ -151,7 +151,7 @@ func (tr *Text) Render(pc *Context, pos math32.Vector2) {
 			rr := &(sr.Render[i])
 			if rr.Color != nil {
 				curColor := rr.Color
-				curColor = gradient.ApplyOpacityImage(curColor, pc.FontStyle.Opacity)
+				curColor = gradient.ApplyOpacity(curColor, pc.FontStyle.Opacity)
 				d.Src = curColor
 			}
 			curFace = rr.CurFace(curFace)
@@ -382,7 +382,7 @@ func SetHTMLSimpleTag(tag string, fs *styles.FontRender, ctxt *units.Context, cs
 		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "mark":
-		fs.Background = colors.C(colors.Scheme.Warn.Container)
+		fs.Background = colors.Scheme.Warn.Container
 		did = true
 	case "abbr", "acronym":
 		fs.SetDecoration(styles.DecoDottedUnderline)
@@ -390,7 +390,7 @@ func SetHTMLSimpleTag(tag string, fs *styles.FontRender, ctxt *units.Context, cs
 	case "tt", "kbd", "samp", "code":
 		fs.Family = "monospace"
 		fs.Font = OpenFont(fs, ctxt)
-		fs.Background = colors.C(colors.Scheme.SurfaceContainer)
+		fs.Background = colors.Scheme.SurfaceContainer
 		did = true
 	}
 	return did
@@ -473,7 +473,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles
 			if !SetHTMLSimpleTag(nm, &fs, ctxt, cssAgg) {
 				switch nm {
 				case "a":
-					fs.Color = colors.C(colors.Scheme.Primary.Base)
+					fs.Color = colors.Scheme.Primary.Base
 					fs.SetDecoration(styles.Underline)
 					curLinkIndex = len(tr.Links)
 					tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIndex: len(curSp.Text)}
@@ -685,7 +685,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.T
 				if !SetHTMLSimpleTag(stag, &fs, ctxt, cssAgg) {
 					switch stag {
 					case "a":
-						fs.Color = colors.C(colors.Scheme.Primary.Base)
+						fs.Color = colors.Scheme.Primary.Base
 						fs.SetDecoration(styles.Underline)
 						curLinkIndex = len(tr.Links)
 						tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIndex: len(curSp.Text)}

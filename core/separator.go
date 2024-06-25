@@ -21,7 +21,7 @@ func (sp *Separator) Init() {
 	sp.Styler(func(s *styles.Style) {
 		s.Align.Self = styles.Center
 		s.Justify.Self = styles.Center
-		s.Background = colors.C(colors.Scheme.OutlineVariant)
+		s.Background = colors.Scheme.OutlineVariant
 	})
 	sp.FinalStyler(func(s *styles.Style) {
 		if s.Direction == styles.Row {

@@ -232,9 +232,9 @@ func (ed *Editor) Init() {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		ed.CursorWidth.Dp(2)
 		ed.LineNumberColor = colors.C(colors.Transparent)
-		ed.SelectColor = colors.C(colors.Scheme.Select.Container)
-		ed.HighlightColor = colors.C(colors.Scheme.Warn.Container)
-		ed.CursorColor = colors.C(colors.Scheme.Primary.Base)
+		ed.SelectColor = colors.Scheme.Select.Container
+		ed.HighlightColor = colors.Scheme.Warn.Container
+		ed.CursorColor = colors.Scheme.Primary.Base
 
 		s.VirtualKeyboard = styles.KeyboardMultiLine
 		s.Cursor = cursors.Text
@@ -253,11 +253,11 @@ func (ed *Editor) Init() {
 		s.Align.Items = styles.Start
 		s.Text.Align = styles.Start
 		s.Text.TabSize = core.SystemSettings.Editor.TabSize
-		s.Color = colors.C(colors.Scheme.OnSurface)
+		s.Color = colors.Scheme.OnSurface
 		s.Min.Set(units.Em(10), units.Em(5)) // TODO: remove after #900 is fixed
 
 		s.MaxBorder.Width.Set(units.Dp(2))
-		s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+		s.Background = colors.Scheme.SurfaceContainerLow
 		// note: a blank background does NOT work for depth color rendering
 		if s.Is(states.Focused) {
 			s.StateLayer = 0

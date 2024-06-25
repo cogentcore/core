@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
@@ -95,21 +96,21 @@ func TestShadowBlur(t *testing.T) {
 		OffsetY: units.Dp(6),
 		Blur:    units.Dp(30),
 		Spread:  units.Dp(5),
-		Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 1)), // opacity 1 to see clearly
+		Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 1), // opacity 1 to see clearly
 	})
 	RunShadowBlur(t, "shadow5big-op12", styles.Shadow{
 		OffsetX: units.Zero(),
 		OffsetY: units.Dp(6),
 		Blur:    units.Dp(30),
 		Spread:  units.Dp(5),
-		Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.12)), // actual
+		Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 0.12), // actual
 	})
 	RunShadowBlur(t, "shadow5big-op1off36", styles.Shadow{
 		OffsetX: units.Zero(),
 		OffsetY: units.Dp(36),
 		Blur:    units.Dp(30),
 		Spread:  units.Dp(5),
-		Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 1)), // opacity 1 to see clearly
+		Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 1), // opacity 1 to see clearly
 	})
 
 	RunShadowBlur(t, "shadow1sm-op1", styles.Shadow{
@@ -117,13 +118,13 @@ func TestShadowBlur(t *testing.T) {
 		OffsetY: units.Dp(3),
 		Blur:    units.Dp(1),
 		Spread:  units.Dp(-2),
-		Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 1)),
+		Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 1),
 	})
 	RunShadowBlur(t, "shadow1sm-op12", styles.Shadow{
 		OffsetX: units.Zero(),
 		OffsetY: units.Dp(3),
 		Blur:    units.Dp(1),
 		Spread:  units.Dp(-2),
-		Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.12)),
+		Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 0.12),
 	})
 }

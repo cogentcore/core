@@ -37,13 +37,13 @@ func (cm *ColorMapButton) Init() {
 		s.Min.Set(units.Em(10), units.Em(2))
 
 		if cm.MapName == "" {
-			s.Background = colors.C(colors.Scheme.OutlineVariant)
+			s.Background = colors.Scheme.OutlineVariant
 			return
 		}
 		cm, ok := colormap.AvailableMaps[cm.MapName]
 		if !ok {
 			slog.Error("got invalid color map name", "name", cm.Name)
-			s.Background = colors.C(colors.Scheme.OutlineVariant)
+			s.Background = colors.Scheme.OutlineVariant
 			return
 		}
 		g := gradient.NewLinear()

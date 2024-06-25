@@ -19,8 +19,8 @@ func TestRenderOneSideBorder(t *testing.T) {
 	NewWidgetBase(b).Styler(func(s *styles.Style) {
 		s.Min.Set(units.Dp(100))
 		s.Border.Width.Bottom.Dp(10)
-		s.Border.Color.Bottom = colors.C(colors.Scheme.Outline)
-		s.Background = colors.C(colors.Scheme.SurfaceContainerHigh)
+		s.Border.Color.Bottom = colors.Scheme.Outline
+		s.Background = colors.Scheme.SurfaceContainerHigh
 	})
 	b.AssertRender(t, "render/one-side-border")
 }
@@ -39,7 +39,7 @@ func TestRenderButtonAlignment(t *testing.T) {
 	b := NewBody()
 	bt := NewButton(b).SetType(ButtonAction).SetIcon(icons.Square)
 	bt.Styler(func(s *styles.Style) {
-		s.Background = colors.C(colors.Scheme.SurfaceContainerHighest)
+		s.Background = colors.Scheme.SurfaceContainerHighest
 		s.Border = styles.Border{}
 		s.MaxBorder = styles.Border{}
 	})

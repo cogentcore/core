@@ -89,7 +89,7 @@ func (ic *Icon) RenderSVG() {
 	rc := ic.Scene.RenderContext()
 	sv := &ic.SVG
 	sz := ic.Geom.Size.Actual.Content.ToPoint()
-	clr := gradient.ApplyOpacityImage(ic.Styles.Color, ic.Styles.Opacity)
+	clr := gradient.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
 	if !rc.Rebuild && sv.Pixels != nil { // if rebuilding rebuild..
 		isz := sv.Pixels.Bounds().Size()
 		// if nothing has changed, we don't need to re-render

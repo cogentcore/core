@@ -29,9 +29,9 @@ You can set an image directly to any bounded Go image:
 
 ```Go
 img := image.NewRGBA(image.Rect(0, 0, 100, 100))
-draw.Draw(img, image.Rect(10, 5, 100, 90), colors.C(colors.Scheme.Warn.Container), image.Point{}, draw.Src)
-draw.Draw(img, image.Rect(20, 20, 60, 50), colors.C(colors.Scheme.Success.Base), image.Point{}, draw.Src)
-draw.Draw(img, image.Rect(60, 70, 80, 100), colors.C(colors.Scheme.Error.Base), image.Point{}, draw.Src)
+draw.Draw(img, image.Rect(10, 5, 100, 90), colors.Scheme.Warn.Container, image.Point{}, draw.Src)
+draw.Draw(img, image.Rect(20, 20, 60, 50), colors.Scheme.Success.Base, image.Point{}, draw.Src)
+draw.Draw(img, image.Rect(60, 70, 80, 100), colors.Scheme.Error.Base, image.Point{}, draw.Src)
 core.NewImage(parent).SetImage(img)
 ```
 

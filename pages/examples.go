@@ -36,7 +36,7 @@ func ExampleHandler(ctx *htmlcore.Context) bool {
 
 	core.NewText(ctx.Parent()).SetText(htmlcore.ExtractText(ctx)).Styler(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePreWrap
-		s.Background = colors.C(colors.Scheme.SurfaceContainer)
+		s.Background = colors.Scheme.SurfaceContainer
 		s.Border.Radius = styles.BorderRadiusMedium
 	})
 

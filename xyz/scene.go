@@ -104,7 +104,7 @@ type Scene struct {
 func (sc *Scene) Init() {
 	sc.MultiSample = 4
 	sc.Camera.Defaults()
-	sc.BackgroundColor = colors.Scheme.Background
+	sc.BackgroundColor = colors.ToUniform(colors.Scheme.Surface)
 }
 
 // NewOffscreenScene returns a new [Scene] designed for offscreen

@@ -86,26 +86,26 @@ func (sw *Switch) Init() {
 
 		if sw.Type == SwitchChip {
 			if s.Is(states.Checked) {
-				s.Background = colors.C(colors.Scheme.SurfaceVariant)
-				s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+				s.Background = colors.Scheme.SurfaceVariant
+				s.Color = colors.Scheme.OnSurfaceVariant
 			} else if !s.Is(states.Focused) {
-				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+				s.Border.Color.Set(colors.Scheme.Outline)
 				s.Border.Width.Set(units.Dp(1))
 			}
 		}
 		if sw.Type == SwitchSegmentedButton {
 			if !s.Is(states.Focused) {
-				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+				s.Border.Color.Set(colors.Scheme.Outline)
 				s.Border.Width.Set(units.Dp(1))
 			}
 			if s.Is(states.Checked) {
-				s.Background = colors.C(colors.Scheme.SurfaceVariant)
-				s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+				s.Background = colors.Scheme.SurfaceVariant
+				s.Color = colors.Scheme.OnSurfaceVariant
 			}
 		}
 
 		if s.Is(states.Selected) {
-			s.Background = colors.C(colors.Scheme.Select.Container)
+			s.Background = colors.Scheme.Select.Container
 		}
 	})
 
@@ -142,9 +142,9 @@ func (sw *Switch) Init() {
 				tree.AddAt(p, "icon-on", func(w *Icon) {
 					w.Styler(func(s *styles.Style) {
 						if sw.Type == SwitchChip {
-							s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+							s.Color = colors.Scheme.OnSurfaceVariant
 						} else {
-							s.Color = colors.C(colors.Scheme.Primary.Base)
+							s.Color = colors.Scheme.Primary.Base
 						}
 						// switches need to be bigger
 						if sw.Type == SwitchSwitch {

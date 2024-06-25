@@ -335,9 +335,9 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 			fn := fp.files[row].Name
 			ext := strings.ToLower(filepath.Ext(fn))
 			if _, has := fp.extensionMap[ext]; has {
-				s.Color = colors.C(colors.Scheme.Primary.Base)
+				s.Color = colors.Scheme.Primary.Base
 			} else {
-				s.Color = colors.C(colors.Scheme.OnSurface)
+				s.Color = colors.Scheme.OnSurface
 			}
 		}
 		w.Styler(func(s *styles.Style) {

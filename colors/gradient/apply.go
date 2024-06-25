@@ -77,12 +77,12 @@ func Apply(img image.Image, f ApplyFunc) image.Image {
 	}
 }
 
-// ApplyOpacityImage applies the given opacity (0-1) to the given image,
+// ApplyOpacity applies the given opacity (0-1) to the given image,
 // handling the following special cases, and using an Applier for the general case.
 // [image.Uniform] is optimized and must be preserved as such: color is directly updated.
 // [gradient.Gradient] must have Update called prior to rendering, with
 // the current bounding box. Multiplies the opacity of the stops.
-func ApplyOpacityImage(img image.Image, opacity float32) image.Image {
+func ApplyOpacity(img image.Image, opacity float32) image.Image {
 	if img == nil {
 		return nil
 	}

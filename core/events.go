@@ -755,7 +755,7 @@ func (em *Events) DragStart(w Widget, data any, e events.Event) {
 	em.DragData = data
 	sp := NewSprite(DragSpriteName, image.Point{}, e.WindowPos())
 	sp.GrabRenderFrom(w) // TODO: maybe show the number of items being dragged
-	sp.Pixels = clone.AsRGBA(gradient.ApplyOpacityImage(sp.Pixels, 0.5))
+	sp.Pixels = clone.AsRGBA(gradient.ApplyOpacity(sp.Pixels, 0.5))
 	sp.Active = true
 	ms.Sprites.Add(sp)
 }

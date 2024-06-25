@@ -48,14 +48,14 @@ func TestParentActualBackground(t *testing.T) {
 
 	sc, fr = make()
 	fr.Styler(func(s *styles.Style) {
-		s.Background = colors.C(colors.Scheme.OutlineVariant)
+		s.Background = colors.Scheme.OutlineVariant
 	})
 	sc.AssertRender(t, "style/parent-background-color/gray")
 
 	sc, fr = make()
 	fr.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Hoverable)
-		s.Background = colors.C(colors.Scheme.OutlineVariant)
+		s.Background = colors.Scheme.OutlineVariant
 	})
 	fr.SetState(true, states.Hovered)
 	sc.AssertRender(t, "style/parent-background-color/gray-hovered-pre")
@@ -63,7 +63,7 @@ func TestParentActualBackground(t *testing.T) {
 	sc, fr = make()
 	fr.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Hoverable)
-		s.Background = colors.C(colors.Scheme.OutlineVariant)
+		s.Background = colors.Scheme.OutlineVariant
 	})
 	sc.AssertRender(t, "style/parent-background-color/gray-hovered-post", func() {
 		fr.SetState(true, states.Hovered)
@@ -78,7 +78,7 @@ func TestParentUnits(t *testing.T) {
 		s.Min.Set(units.Em(10), units.Em(20))
 	})
 	NewWidgetBase(b).Styler(func(s *styles.Style) {
-		s.Background = colors.C(colors.Scheme.Primary.Base)
+		s.Background = colors.Scheme.Primary.Base
 		s.Min.Set(units.Pw(50), units.Ph(75))
 	})
 	b.AssertRender(t, "style/parent-units")

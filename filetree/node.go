@@ -92,7 +92,7 @@ func (fn *Node) Init() {
 		case status == vcs.Updated:
 			s.Color = errors.Must1(gradient.FromString("#008060"))
 		case status == vcs.Stored:
-			s.Color = colors.C(colors.Scheme.OnSurface)
+			s.Color = colors.Scheme.OnSurface
 		}
 	})
 	fn.On(events.KeyChord, func(e events.Event) {

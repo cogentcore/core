@@ -1962,13 +1962,13 @@ func (lg *ListGrid) UpdateBackgrounds() {
 		return colors.AlphaBlend(c, zhclr)
 	})
 
-	lg.BgSelect = colors.C(colors.Scheme.Select.Container)
+	lg.BgSelect = colors.Scheme.Select.Container
 
-	lg.BgSelectStripe = colors.C(colors.AlphaBlend(colors.Scheme.Select.Container, zclr))
+	lg.BgSelectStripe = colors.C(colors.AlphaBlend(colors.ToUniform(colors.Scheme.Select.Container), zclr))
 
-	lg.BgHoverSelect = colors.C(colors.AlphaBlend(colors.Scheme.Select.Container, hclr))
+	lg.BgHoverSelect = colors.C(colors.AlphaBlend(colors.ToUniform(colors.Scheme.Select.Container), hclr))
 
-	lg.BgHoverSelectStripe = colors.C(colors.AlphaBlend(colors.Scheme.Select.Container, zhclr))
+	lg.BgHoverSelectStripe = colors.C(colors.AlphaBlend(colors.ToUniform(colors.Scheme.Select.Container), zhclr))
 
 }
 

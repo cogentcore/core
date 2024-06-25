@@ -14,8 +14,8 @@ You can change the colors of a widget using Cogent Core's dynamic color scheme s
 
 ```Go
 core.NewButton(parent).SetText("Success button").Styler(func(s *styles.Style) {
-    s.Background = colors.C(colors.Scheme.Success.Base)
-    s.Color = colors.C(colors.Scheme.Success.On)
+    s.Background = colors.Scheme.Success.Base
+    s.Color = colors.Scheme.Success.On
 })
 ```
 
@@ -24,7 +24,7 @@ You can change the size of a widget using Cogent Core's flexible unit system:
 ```Go
 core.NewFrame(parent).Styler(func(s *styles.Style) {
     s.Min.Set(units.Dp(50))
-    s.Background = colors.C(colors.Scheme.Primary.Base)
+    s.Background = colors.Scheme.Primary.Base
 })
 ```
 

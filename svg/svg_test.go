@@ -85,14 +85,14 @@ func TestCoreLogo(t *testing.T) {
 	sv.Root.ViewBox.Size.Set(1, 1)
 
 	outer := colors.Scheme.Primary.Base // #005BC0
-	hctOuter := hct.FromColor(outer)
+	hctOuter := hct.FromColor(colors.ToUniform(outer))
 	core := hct.New(hctOuter.Hue+180, hctOuter.Chroma, hctOuter.Tone+40) // #FBBD0E
 
 	x := float32(0.53)
 	sw := float32(0.27)
 
 	o := NewPath(sv.Root)
-	o.SetProperty("stroke", colors.AsHex(outer))
+	o.SetProperty("stroke", colors.AsHex(colors.ToUniform(outer)))
 	o.SetProperty("stroke-width", sw)
 	o.SetProperty("fill", "none")
 	o.AddPath(PcM, x, 0.5)

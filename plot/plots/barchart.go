@@ -107,7 +107,7 @@ func (b *BarChart) Defaults() {
 	b.Stride = 1
 	b.Width = .8
 	b.Pad = 1
-	b.Color = colors.Scheme.OnSurface
+	b.Color = colors.ToUniform(colors.Scheme.OnSurface)
 	b.LineStyle.Defaults()
 }
 

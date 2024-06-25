@@ -92,7 +92,7 @@ You can add a background to a frame:
 ```Go
 fr := core.NewFrame(parent)
 fr.Styler(func(s *styles.Style) {
-    s.Background = colors.C(colors.Scheme.Warn.Container)
+    s.Background = colors.Scheme.Warn.Container
 })
 core.NewButton(fr).SetText("First")
 core.NewButton(fr).SetText("Second")
@@ -117,7 +117,7 @@ You can add a border to a frame:
 fr := core.NewFrame(parent)
 fr.Styler(func(s *styles.Style) {
     s.Border.Width.Set(units.Dp(4))
-    s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+    s.Border.Color.Set(colors.Scheme.Outline)
 })
 core.NewButton(fr).SetText("First")
 core.NewButton(fr).SetText("Second")
@@ -131,7 +131,7 @@ fr := core.NewFrame(parent)
 fr.Styler(func(s *styles.Style) {
     s.Border.Radius = styles.BorderRadiusLarge
     s.Border.Width.Set(units.Dp(4))
-    s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+    s.Border.Color.Set(colors.Scheme.Outline)
 })
 core.NewButton(fr).SetText("First")
 core.NewButton(fr).SetText("Second")
@@ -145,7 +145,7 @@ fr := core.NewFrame(parent)
 fr.Styler(func(s *styles.Style) {
     s.Grow.Set(1, 1)
     s.Border.Width.Set(units.Dp(4))
-    s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+    s.Border.Color.Set(colors.Scheme.Outline)
 })
 core.NewButton(fr).SetText("First")
 core.NewButton(fr).SetText("Second")

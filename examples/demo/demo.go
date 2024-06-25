@@ -700,7 +700,7 @@ func makeStyles(ts *core.Tabs) {
 	sv.SetStruct(&fr.Styles)
 
 	fr.Styler(func(s *styles.Style) {
-		s.Background = colors.C(colors.Scheme.Select.Container)
+		s.Background = colors.Scheme.Select.Container
 	})
 
 	fr.OnShow(func(e events.Event) {
@@ -723,7 +723,7 @@ func makeStyles(ts *core.Tabs) {
 		core.NewFrame(fr).Styler(func(s *styles.Style) {
 			s.Min.Set(units.Px(sz.X), units.Px(sz.Y))
 			s.Grow.Set(0, 0)
-			s.Background = colors.C(colors.Scheme.Primary.Base)
+			s.Background = colors.Scheme.Primary.Base
 		})
 	}
 }

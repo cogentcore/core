@@ -27,7 +27,7 @@ type LineStyle struct {
 }
 
 func (ls *LineStyle) Defaults() {
-	ls.Color = colors.C(colors.Scheme.OnSurface)
+	ls.Color = colors.Scheme.OnSurface
 	ls.Width.Pt(1)
 }
 

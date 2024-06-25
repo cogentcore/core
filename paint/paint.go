@@ -313,7 +313,7 @@ func (pc *Context) StrokePreserve() {
 		pc.Raster.SetColor(pc.StrokeStyle.Color)
 	} else {
 		if pc.StrokeStyle.Opacity < 1 {
-			pc.Raster.SetColor(gradient.ApplyOpacityImage(pc.StrokeStyle.Color, pc.StrokeStyle.Opacity))
+			pc.Raster.SetColor(gradient.ApplyOpacity(pc.StrokeStyle.Color, pc.StrokeStyle.Opacity))
 		} else {
 			pc.Raster.SetColor(pc.StrokeStyle.Color)
 		}
@@ -353,7 +353,7 @@ func (pc *Context) FillPreserve() {
 		rf.SetColor(pc.FillStyle.Color)
 	} else {
 		if pc.FillStyle.Opacity < 1 {
-			rf.SetColor(gradient.ApplyOpacityImage(pc.FillStyle.Color, pc.FillStyle.Opacity))
+			rf.SetColor(gradient.ApplyOpacity(pc.FillStyle.Color, pc.FillStyle.Opacity))
 		} else {
 			rf.SetColor(pc.FillStyle.Color)
 		}
@@ -397,7 +397,7 @@ func (pc *Context) DrawBox(pos, size math32.Vector2, img image.Image, op draw.Op
 	if g, ok := img.(gradient.Gradient); ok {
 		g.Update(pc.FillStyle.Opacity, math32.B2FromRect(b), pc.CurrentTransform)
 	} else {
-		img = gradient.ApplyOpacityImage(img, pc.FillStyle.Opacity)
+		img = gradient.ApplyOpacity(img, pc.FillStyle.Opacity)
 	}
 	draw.Draw(pc.Image, b, img, b.Min, op)
 }

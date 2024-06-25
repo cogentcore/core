@@ -137,27 +137,27 @@ func (bt *Button) Init() {
 		s.MaxBoxShadow = styles.BoxShadow1()
 		switch bt.Type {
 		case ButtonFilled:
-			s.Background = colors.C(colors.Scheme.Primary.Base)
-			s.Color = colors.C(colors.Scheme.Primary.On)
+			s.Background = colors.Scheme.Primary.Base
+			s.Color = colors.Scheme.Primary.On
 			s.Border.Offset.Set(units.Dp(2))
 		case ButtonTonal:
-			s.Background = colors.C(colors.Scheme.Secondary.Container)
-			s.Color = colors.C(colors.Scheme.Secondary.OnContainer)
+			s.Background = colors.Scheme.Secondary.Container
+			s.Color = colors.Scheme.Secondary.OnContainer
 		case ButtonElevated:
-			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
-			s.Color = colors.C(colors.Scheme.Primary.Base)
+			s.Background = colors.Scheme.SurfaceContainerLow
+			s.Color = colors.Scheme.Primary.Base
 			s.MaxBoxShadow = styles.BoxShadow2()
 			s.BoxShadow = styles.BoxShadow1()
 		case ButtonOutlined:
-			s.Color = colors.C(colors.Scheme.Primary.Base)
+			s.Color = colors.Scheme.Primary.Base
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Width.Set(units.Dp(1))
 			// if focused then default primary
 			if !s.Is(states.Focused) {
-				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+				s.Border.Color.Set(colors.Scheme.Outline)
 			}
 		case ButtonText:
-			s.Color = colors.C(colors.Scheme.Primary.Base)
+			s.Color = colors.Scheme.Primary.Base
 		case ButtonAction:
 			s.MaxBoxShadow = styles.BoxShadow0()
 			s.Justify.Content = styles.Start
@@ -268,7 +268,7 @@ func (bt *Button) Init() {
 					w.Styler(func(s *styles.Style) {
 						s.SetNonSelectable()
 						s.SetTextWrap(false)
-						s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+						s.Color = colors.Scheme.OnSurfaceVariant
 					})
 					w.Updater(func() {
 						if bt.Type == ButtonMenu {

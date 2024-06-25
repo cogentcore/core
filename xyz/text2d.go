@@ -97,15 +97,11 @@ func (txt *Text2D) RenderText() {
 	// TODO(kai): do we need to set unit context sizes? (units.Context.SetSizes)
 	st := &txt.Styles
 	fr := st.FontRender()
-	if fr.Color != nil {
-		if uc, ok := fr.Color.(*image.Uniform); ok {
-			if uc.C == colors.Scheme.OnSurface {
-				txt.usesDefaultColor = true
-			}
-		}
+	if fr.Color == colors.Scheme.OnSurface {
+		txt.usesDefaultColor = true
 	}
 	if txt.usesDefaultColor {
-		fr.Color = colors.C(colors.Scheme.OnSurface)
+		fr.Color = colors.Scheme.OnSurface
 	}
 	if st.Font.Face == nil {
 		st.Font = paint.OpenFont(fr, &st.UnitContext)

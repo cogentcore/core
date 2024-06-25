@@ -32,7 +32,7 @@ type TextStyle struct {
 
 func (ts *TextStyle) Defaults() {
 	ts.FontRender.Defaults()
-	ts.Color = colors.C(colors.Scheme.OnSurface)
+	ts.Color = colors.Scheme.OnSurface
 	ts.Align = styles.Center
 	if DefaultFontFamily != "" {
 		ts.FontRender.Family = DefaultFontFamily

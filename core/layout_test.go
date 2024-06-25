@@ -295,7 +295,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 			s.Min.Y.Dp(40)
 			s.Padding.Zero()
 			s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
-			s.Color = colors.C(colors.Scheme.Primary.On)
+			s.Color = colors.Scheme.Primary.On
 		})
 		bt.Config(sc)
 		bt.Parts.Styler(func(s *styles.Style) {
@@ -330,7 +330,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 		NewText(fr).SetType(LabelBodyLarge).
 			SetText("Thank you for reporting your issue!").
 			Style(func(s *styles.Style) {
-				s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+				s.Color = colors.Scheme.OnSurfaceVariant
 				s.Align.Set(styles.Center)
 			})
 		NewButton(fr).SetType(ButtonTonal).SetText("Return home").
@@ -351,7 +351,7 @@ func TestLayoutFramesAlignSelf(t *testing.T) {
 func BoxFrame(parent Widget) *Frame {
 	fr := NewFrame(parent)
 	fr.Styler(func(s *styles.Style) {
-		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+		s.Border.Color.Set(colors.Scheme.Outline)
 		s.Border.Width.Set(units.Dp(2))
 	})
 	return fr
@@ -360,7 +360,7 @@ func BoxFrame(parent Widget) *Frame {
 func SpaceFrame(parent Widget) (*Frame, *Space) {
 	fr := NewFrame(parent)
 	fr.Styler(func(s *styles.Style) {
-		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+		s.Border.Color.Set(colors.Scheme.Outline)
 		s.Border.Width.Set(units.Dp(2))
 	})
 	sp := NewSpace(fr)

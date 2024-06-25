@@ -116,7 +116,7 @@ func (ts *Tabs) Init() {
 	ts.MaxChars = 16
 	ts.CloseIcon = icons.Close
 	ts.Styler(func(s *styles.Style) {
-		s.Color = colors.C(colors.Scheme.OnBackground)
+		s.Color = colors.Scheme.OnBackground
 		s.Grow.Set(1, 1)
 		if ts.Type.Effective(ts).IsColumn() {
 			s.Direction = styles.Row
@@ -503,11 +503,11 @@ func (tb *Tab) Init() {
 		s.Align.Items = styles.Center
 
 		if tb.StateIs(states.Selected) {
-			s.Color = colors.C(colors.Scheme.Select.OnContainer)
+			s.Color = colors.Scheme.Select.OnContainer
 		} else {
-			s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+			s.Color = colors.Scheme.OnSurfaceVariant
 			if tb.Type.Effective(tb) == FunctionalTabs {
-				s.Background = colors.C(colors.Scheme.SurfaceContainer)
+				s.Background = colors.Scheme.SurfaceContainer
 			}
 		}
 	})

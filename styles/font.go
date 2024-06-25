@@ -419,7 +419,7 @@ func (s *Style) FontRender() *FontRender {
 }
 
 func (fr *FontRender) Defaults() {
-	fr.Color = colors.C(colors.Scheme.OnSurface)
+	fr.Color = colors.Scheme.OnSurface
 	fr.Opacity = 1
 	fr.Font.Defaults()
 }

@@ -156,8 +156,8 @@ func (sc *Scene) Init() {
 	sc.Frame.Init()
 	sc.Styler(func(s *styles.Style) {
 		s.Cursor = cursors.Arrow
-		s.Background = colors.C(colors.Scheme.Background)
-		s.Color = colors.C(colors.Scheme.OnBackground)
+		s.Background = colors.Scheme.Background
+		s.Color = colors.Scheme.OnBackground
 		// we never want borders on scenes
 		s.MaxBorder = styles.Border{}
 		s.Direction = styles.Column

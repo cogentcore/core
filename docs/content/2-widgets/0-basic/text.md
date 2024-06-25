@@ -33,7 +33,7 @@ core.NewText(parent).SetText("Hello,\n\tworld!").Styler(func(s *styles.Style) {
     s.Font.Size.Dp(21)
     s.Font.Style = styles.Italic
     s.Text.WhiteSpace = styles.WhiteSpacePre
-    s.Color = colors.C(colors.Scheme.Success.Base)
+    s.Color = colors.Scheme.Success.Base
     s.SetMono(true)
 })
 ```

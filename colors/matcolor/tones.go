@@ -5,6 +5,7 @@
 package matcolor
 
 import (
+	"image"
 	"image/color"
 
 	"cogentcore.org/core/colors/cam/hct"
@@ -43,6 +44,11 @@ func (t *Tones) AbsTone(tone int) color.RGBA {
 	r := c.AsRGBA()
 	t.Tones[tone] = r
 	return r
+}
+
+// AbsToneUniform returns [image.Uniform] of [Tones.AbsTone].
+func (t *Tones) AbsToneUniform(tone int) *image.Uniform {
+	return image.NewUniform(t.AbsTone(tone))
 }
 
 // Tone returns the color at the given tone, relative to the "0" tone

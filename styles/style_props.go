@@ -193,7 +193,7 @@ var StyleStyleFuncs = map[string]StyleFunc{
 			if inh {
 				fs.Color = parent.(*Style).Color
 			} else if init {
-				fs.Color = colors.C(colors.Scheme.OnSurface)
+				fs.Color = colors.Scheme.OnSurface
 			}
 			return
 		}
@@ -403,7 +403,7 @@ var StyleFontRenderFuncs = map[string]StyleFunc{
 			if inh {
 				fs.Color = parent.(*FontRender).Color
 			} else if init {
-				fs.Color = colors.C(colors.Scheme.OnSurface)
+				fs.Color = colors.Scheme.OnSurface
 			}
 			return
 		}
@@ -525,7 +525,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Color = parent.(*Border).Color
 			} else if init {
-				bs.Color.Set(colors.C(colors.Scheme.Outline))
+				bs.Color.Set(colors.Scheme.Outline)
 			}
 			return
 		}
@@ -595,7 +595,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 			if inh {
 				bs.Color = parent.(*Border).Color
 			} else if init {
-				bs.Color.Set(colors.C(colors.Scheme.Outline))
+				bs.Color.Set(colors.Scheme.Outline)
 			}
 			return
 		}
@@ -623,7 +623,7 @@ var StyleShadowFuncs = map[string]StyleFunc{
 			if inh {
 				ss.Color = parent.(*Shadow).Color
 			} else if init {
-				ss.Color = colors.C(colors.Scheme.Shadow)
+				ss.Color = colors.Scheme.Shadow
 			}
 			return
 		}

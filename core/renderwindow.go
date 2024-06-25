@@ -913,7 +913,7 @@ func (w *RenderWindow) FillInsets() {
 		if r.Dx() == 0 || r.Dy() == 0 {
 			return
 		}
-		drw.Fill(colors.Scheme.Background, math32.Identity3(), r, draw.Src)
+		drw.Fill(colors.ToUniform(colors.Scheme.Background), math32.Identity3(), r, draw.Src)
 	}
 	rb := rg.Bounds()
 	wb := wg.Bounds()
@@ -1009,5 +1009,5 @@ func (sr *Scrim) DirectRenderImage(drw system.Drawer, idx int) {
 
 func (sr *Scrim) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 	sc := sr.Parent.(*Scene)
-	drw.Fill(colors.ApplyOpacity(colors.Scheme.Scrim, .5), math32.Identity3(), sc.Geom.TotalBBox, draw.Over)
+	drw.Fill(colors.ApplyOpacity(colors.ToUniform(colors.Scheme.Scrim), 0.5), math32.Identity3(), sc.Geom.TotalBBox, draw.Over)
 }

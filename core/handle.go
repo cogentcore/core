@@ -37,7 +37,7 @@ func (hl *Handle) Init() {
 		s.SetAbilities(true, abilities.Clickable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 
 		s.Border.Radius = styles.BorderRadiusFull
-		s.Background = colors.C(colors.Scheme.OutlineVariant)
+		s.Background = colors.Scheme.OutlineVariant
 	})
 	hl.FinalStyler(func(s *styles.Style) {
 		if s.Direction == styles.Row {

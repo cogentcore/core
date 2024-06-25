@@ -33,7 +33,7 @@ type Plot struct {
 	Title Text
 
 	// Background is the background color of the plot.
-	// The default is White.
+	// The default is [colors.Scheme.Surface].
 	Background color.Color
 
 	// standard text style with default params
@@ -72,7 +72,7 @@ type Plot struct {
 func (pt *Plot) Defaults() {
 	pt.Title.Defaults()
 	pt.Title.Style.Size.Dp(24)
-	pt.Background = colors.Scheme.Surface
+	pt.Background = colors.ToUniform(colors.Scheme.Surface)
 	pt.X.Defaults(math32.X)
 	pt.Y.Defaults(math32.Y)
 	pt.Legend.Defaults()

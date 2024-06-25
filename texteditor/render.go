@@ -456,12 +456,12 @@ func (ed *Editor) RenderLineNumber(ln int, defFill bool) {
 	lnstr := fmt.Sprintf(lfmt, ln+1)
 
 	if ed.CursorPos.Ln == ln {
-		fst.Color = colors.C(colors.Scheme.Primary.Base)
+		fst.Color = colors.Scheme.Primary.Base
 		fst.Weight = styles.WeightBold
 		// need to open with new weight
 		fst.Font = paint.OpenFont(fst, &ed.Styles.UnitContext)
 	} else {
-		fst.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+		fst.Color = colors.Scheme.OnSurfaceVariant
 	}
 	ed.LineNumberRender.SetString(lnstr, fst, &sty.UnitContext, &sty.Text, true, 0, 0)
 

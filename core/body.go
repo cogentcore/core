@@ -91,7 +91,7 @@ func (bd *Body) AddTitle(title string) *Body {
 func (bd *Body) AddText(text string) *Body {
 	NewText(bd).SetText(text).
 		SetType(TextBodyMedium).Styler(func(s *styles.Style) {
-		s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+		s.Color = colors.Scheme.OnSurfaceVariant
 	})
 	return bd
 }

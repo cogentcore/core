@@ -62,7 +62,7 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size ma
 			pc.StrokeStyle.Color = nil
 			// note: applying 0.5 here does a reasonable job of matching
 			// material design shadows, at their specified alpha levels.
-			pc.FillStyle.Color = gradient.ApplyOpacityImage(shadow.Color, 0.5)
+			pc.FillStyle.Color = gradient.ApplyOpacity(shadow.Color, 0.5)
 			spos := shadow.BasePos(mpos)
 			ssz := shadow.BaseSize(msize)
 

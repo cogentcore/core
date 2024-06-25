@@ -173,13 +173,13 @@ func (ch *Chooser) Init() {
 		s.Padding.Set(units.Dp(8), units.Dp(16))
 		switch ch.Type {
 		case ChooserFilled:
-			s.Background = colors.C(colors.Scheme.Secondary.Container)
-			s.Color = colors.C(colors.Scheme.Secondary.OnContainer)
+			s.Background = colors.Scheme.Secondary.Container
+			s.Color = colors.Scheme.Secondary.OnContainer
 		case ChooserOutlined:
 			if !s.Is(states.Focused) {
 				s.Border.Style.Set(styles.BorderSolid)
 				s.Border.Width.Set(units.Dp(1))
-				s.Border.Color.Set(colors.C(colors.Scheme.OnSurfaceVariant))
+				s.Border.Color.Set(colors.Scheme.OnSurfaceVariant)
 			}
 		}
 		// textfield handles everything

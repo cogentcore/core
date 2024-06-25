@@ -62,14 +62,14 @@ var PagesExamples = map[string]func(parent core.Widget){
 	},
 	"basics/styling-1": func(parent core.Widget) {
 		core.NewButton(parent).SetText("Success button").Styler(func(s *styles.Style) {
-			s.Background = colors.C(colors.Scheme.Success.Base)
-			s.Color = colors.C(colors.Scheme.Success.On)
+			s.Background = colors.Scheme.Success.Base
+			s.Color = colors.Scheme.Success.On
 		})
 	},
 	"basics/styling-2": func(parent core.Widget) {
 		core.NewFrame(parent).Styler(func(s *styles.Style) {
 			s.Min.Set(units.Dp(50))
-			s.Background = colors.C(colors.Scheme.Primary.Base)
+			s.Background = colors.Scheme.Primary.Base
 		})
 	},
 	"basics/updating-0": func(parent core.Widget) {
@@ -165,7 +165,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			bt := core.NewButton(grid).SetType(core.ButtonAction)
 			bt.Styler(func(s *styles.Style) {
 				s.Border.Width.Set(units.Dp(1))
-				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+				s.Border.Color.Set(colors.Scheme.Outline)
 				s.Border.Radius.Zero()
 				s.Min.Set(units.Em(2))
 				s.CenterAll()
@@ -185,7 +185,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			bt := core.NewButton(grid).SetType(core.ButtonAction)
 			bt.Styler(func(s *styles.Style) {
 				s.Border.Width.Set(units.Dp(1))
-				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+				s.Border.Color.Set(colors.Scheme.Outline)
 				s.Border.Radius.Zero()
 				s.Min.Set(units.Em(2))
 				s.CenterAll()
@@ -241,7 +241,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			bt := core.NewButton(grid).SetType(core.ButtonAction)
 			bt.Styler(func(s *styles.Style) {
 				s.Border.Width.Set(units.Dp(1))
-				s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+				s.Border.Color.Set(colors.Scheme.Outline)
 				s.Border.Radius.Zero()
 				s.Min.Set(units.Em(2))
 				s.CenterAll()
@@ -386,7 +386,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 	"widgets/basic/frames-7": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
 		fr.Styler(func(s *styles.Style) {
-			s.Background = colors.C(colors.Scheme.Warn.Container)
+			s.Background = colors.Scheme.Warn.Container
 		})
 		core.NewButton(fr).SetText("First")
 		core.NewButton(fr).SetText("Second")
@@ -405,7 +405,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		fr := core.NewFrame(parent)
 		fr.Styler(func(s *styles.Style) {
 			s.Border.Width.Set(units.Dp(4))
-			s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+			s.Border.Color.Set(colors.Scheme.Outline)
 		})
 		core.NewButton(fr).SetText("First")
 		core.NewButton(fr).SetText("Second")
@@ -416,7 +416,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		fr.Styler(func(s *styles.Style) {
 			s.Border.Radius = styles.BorderRadiusLarge
 			s.Border.Width.Set(units.Dp(4))
-			s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+			s.Border.Color.Set(colors.Scheme.Outline)
 		})
 		core.NewButton(fr).SetText("First")
 		core.NewButton(fr).SetText("Second")
@@ -427,7 +427,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		fr.Styler(func(s *styles.Style) {
 			s.Grow.Set(1, 1)
 			s.Border.Width.Set(units.Dp(4))
-			s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+			s.Border.Color.Set(colors.Scheme.Outline)
 		})
 		core.NewButton(fr).SetText("First")
 		core.NewButton(fr).SetText("Second")
@@ -486,7 +486,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 			s.Font.Size.Dp(21)
 			s.Font.Style = styles.Italic
 			s.Text.WhiteSpace = styles.WhiteSpacePre
-			s.Color = colors.C(colors.Scheme.Success.Base)
+			s.Color = colors.Scheme.Success.Base
 			s.SetMono(true)
 		})
 	},
@@ -1208,14 +1208,14 @@ func main() {
 	},
 	"widgets/media/canvases-0": func(parent core.Widget) {
 		core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			pc.FillBox(math32.Vector2{}, math32.Vec2(1, 1), colors.C(colors.Scheme.Primary.Base))
+			pc.FillBox(math32.Vector2{}, math32.Vec2(1, 1), colors.Scheme.Primary.Base)
 		})
 	},
 	"widgets/media/canvases-1": func(parent core.Widget) {
 		core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
 			pc.MoveTo(0, 0)
 			pc.LineTo(1, 1)
-			pc.StrokeStyle.Color = colors.C(colors.Scheme.Error.Base)
+			pc.StrokeStyle.Color = colors.Scheme.Error.Base
 			pc.Stroke()
 		})
 	},
@@ -1223,7 +1223,7 @@ func main() {
 		core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
 			pc.MoveTo(0, 0)
 			pc.LineTo(1, 1)
-			pc.StrokeStyle.Color = colors.C(colors.Scheme.Error.Base)
+			pc.StrokeStyle.Color = colors.Scheme.Error.Base
 			pc.StrokeStyle.Width.Dp(8)
 			pc.ToDots()
 			pc.Stroke()
@@ -1232,28 +1232,28 @@ func main() {
 	"widgets/media/canvases-3": func(parent core.Widget) {
 		core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
 			pc.DrawCircle(0.5, 0.5, 0.5)
-			pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
+			pc.FillStyle.Color = colors.Scheme.Success.Base
 			pc.Fill()
 		})
 	},
 	"widgets/media/canvases-4": func(parent core.Widget) {
 		core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
 			pc.DrawEllipse(0.5, 0.5, 0.5, 0.25)
-			pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
+			pc.FillStyle.Color = colors.Scheme.Success.Base
 			pc.Fill()
 		})
 	},
 	"widgets/media/canvases-5": func(parent core.Widget) {
 		core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
 			pc.DrawEllipticalArc(0.5, 0.5, 0.5, 0.25, math32.Pi, 2*math32.Pi)
-			pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
+			pc.FillStyle.Color = colors.Scheme.Success.Base
 			pc.Fill()
 		})
 	},
 	"widgets/media/canvases-6": func(parent core.Widget) {
 		core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
 			pc.DrawRegularPolygon(6, 0.5, 0.5, 0.5, math32.Pi)
-			pc.FillStyle.Color = colors.C(colors.Scheme.Success.Base)
+			pc.FillStyle.Color = colors.Scheme.Success.Base
 			pc.Fill()
 		})
 	},
@@ -1261,7 +1261,7 @@ func main() {
 		core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
 			pc.MoveTo(0, 0)
 			pc.QuadraticTo(0.5, 0.25, 1, 1)
-			pc.StrokeStyle.Color = colors.C(colors.Scheme.Error.Base)
+			pc.StrokeStyle.Color = colors.Scheme.Error.Base
 			pc.Stroke()
 		})
 	},
@@ -1269,13 +1269,13 @@ func main() {
 		core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
 			pc.MoveTo(0, 0)
 			pc.CubicTo(0.5, 0.25, 0.25, 0.5, 1, 1)
-			pc.StrokeStyle.Color = colors.C(colors.Scheme.Error.Base)
+			pc.StrokeStyle.Color = colors.Scheme.Error.Base
 			pc.Stroke()
 		})
 	},
 	"widgets/media/canvases-9": func(parent core.Widget) {
 		c := core.NewCanvas(parent).SetDraw(func(pc *paint.Context) {
-			pc.FillBox(math32.Vector2{}, math32.Vec2(1, 1), colors.C(colors.Scheme.Warn.Base))
+			pc.FillBox(math32.Vector2{}, math32.Vec2(1, 1), colors.Scheme.Warn.Base)
 		})
 		c.Styler(func(s *styles.Style) {
 			s.Min.Set(units.Dp(128))
@@ -1293,9 +1293,9 @@ func main() {
 	},
 	"widgets/media/images-2": func(parent core.Widget) {
 		img := image.NewRGBA(image.Rect(0, 0, 100, 100))
-		draw.Draw(img, image.Rect(10, 5, 100, 90), colors.C(colors.Scheme.Warn.Container), image.Point{}, draw.Src)
-		draw.Draw(img, image.Rect(20, 20, 60, 50), colors.C(colors.Scheme.Success.Base), image.Point{}, draw.Src)
-		draw.Draw(img, image.Rect(60, 70, 80, 100), colors.C(colors.Scheme.Error.Base), image.Point{}, draw.Src)
+		draw.Draw(img, image.Rect(10, 5, 100, 90), colors.Scheme.Warn.Container, image.Point{}, draw.Src)
+		draw.Draw(img, image.Rect(20, 20, 60, 50), colors.Scheme.Success.Base, image.Point{}, draw.Src)
+		draw.Draw(img, image.Rect(60, 70, 80, 100), colors.Scheme.Error.Base, image.Point{}, draw.Src)
 		core.NewImage(parent).SetImage(img)
 	},
 	"widgets/media/svgs-0": func(parent core.Widget) {
@@ -1413,7 +1413,7 @@ func main() {
 		fr := core.NewFrame(parent)
 		fr.OnWidgetAdded(func(w core.Widget) { // TODO(config)
 			w.AsWidget().Styler(func(s *styles.Style) {
-				s.Color = colors.C(colors.Scheme.Error.Base)
+				s.Color = colors.Scheme.Error.Base
 			})
 		})
 		core.NewText(fr).SetText("Label")

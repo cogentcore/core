@@ -82,7 +82,7 @@ func LevelColor(level slog.Level, str string) string {
 // the given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func DebugColor(str string) string {
-	return ApplyColor(ColorScheme().Tertiary.Base, str)
+	return ApplyColor(colors.ToUniform(ColorScheme().Tertiary.Base), str)
 }
 
 // InfoColor applies the color associated with the info level to
@@ -97,33 +97,33 @@ func InfoColor(str string) string {
 // the given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func WarnColor(str string) string {
-	return ApplyColor(ColorScheme().Warn.Base, str)
+	return ApplyColor(colors.ToUniform(ColorScheme().Warn.Base), str)
 }
 
 // ErrorColor applies the color associated with the error level to
 // the given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func ErrorColor(str string) string {
-	return ApplyColor(ColorScheme().Error.Base, str)
+	return ApplyColor(colors.ToUniform(ColorScheme().Error.Base), str)
 }
 
 // SuccessColor applies the color associated with success to the
 // given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func SuccessColor(str string) string {
-	return ApplyColor(ColorScheme().Success.Base, str)
+	return ApplyColor(colors.ToUniform(ColorScheme().Success.Base), str)
 }
 
 // CmdColor applies the color associated with terminal commands and arguments
 // to the given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func CmdColor(str string) string {
-	return ApplyColor(ColorScheme().Primary.Base, str)
+	return ApplyColor(colors.ToUniform(ColorScheme().Primary.Base), str)
 }
 
 // TitleColor applies the color associated with titles and section headers
 // to the given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func TitleColor(str string) string {
-	return ApplyColor(ColorScheme().Warn.Base, str)
+	return ApplyColor(colors.ToUniform(ColorScheme().Warn.Base), str)
 }

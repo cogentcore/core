@@ -203,7 +203,7 @@ func (tb *Toolbar) AddOverflowMenu(fun func(m *Scene)) *Toolbar {
 func ToolbarStyles(w Widget) {
 	w.AsWidget().Styler(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusFull
-		s.Background = colors.C(colors.Scheme.SurfaceContainer)
+		s.Background = colors.Scheme.SurfaceContainer
 		s.Gap.Zero()
 		s.Align.Items = styles.Center
 	})

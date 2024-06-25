@@ -158,7 +158,7 @@ func (fm *Form) Init() {
 						isDef = reflectx.ValueIsDefault(f.value, def)
 						dcr := "(Double click to reset to default) "
 						if !isDef {
-							s.Color = colors.C(colors.Scheme.Primary.Base)
+							s.Color = colors.Scheme.Primary.Base
 							s.Cursor = cursors.Poof
 							if !strings.HasPrefix(w.Tooltip, dcr) {
 								w.SetTooltip(dcr + w.Tooltip)

@@ -100,7 +100,7 @@ func (pg *Page) Init() {
 		w.SetSplits(0.2, 0.8)
 		tree.AddChild(w, func(w *core.Frame) {
 			w.Styler(func(s *styles.Style) {
-				s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+				s.Background = colors.Scheme.SurfaceContainerLow
 			})
 			tree.AddChild(w, func(w *core.Tree) {
 				pg.nav = w

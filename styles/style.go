@@ -220,7 +220,7 @@ func (s *Style) Defaults() {
 	// mostly all the defaults are 0 initial values, except these..
 	s.UnitContext.Defaults()
 	s.LayoutDefaults()
-	s.Color = colors.C(colors.Scheme.OnSurface)
+	s.Color = colors.Scheme.OnSurface
 	s.Opacity = 1
 	s.RenderBox = true
 	s.FillMargin = true

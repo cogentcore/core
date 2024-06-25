@@ -61,8 +61,8 @@ func (bd *Body) SnackbarStyles() {
 		s.Overflow.Set(styles.OverflowVisible) // key for avoiding sizing errors when re-rendering with small pref size
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Padding.SetHorizontal(units.Dp(16))
-		s.Background = colors.C(colors.Scheme.InverseSurface)
-		s.Color = colors.C(colors.Scheme.InverseOnSurface)
+		s.Background = colors.Scheme.InverseSurface
+		s.Color = colors.Scheme.InverseOnSurface
 		// we go on top of things so we want no margin background
 		s.FillMargin = false
 		s.Align.Content = styles.Center
@@ -87,7 +87,7 @@ func (bd *Body) AddSnackbarText(text string) *Body {
 	tx.Styler(func(s *styles.Style) {
 		s.SetTextWrap(false)
 		if s.Is(states.Selected) {
-			s.Color = colors.C(colors.Scheme.Select.OnContainer)
+			s.Color = colors.Scheme.Select.OnContainer
 		}
 	})
 	return bd
@@ -101,7 +101,7 @@ func (bd *Body) AddSnackbarButton(text string, onClick ...func(e events.Event)) 
 	NewStretch(bd)
 	bt := NewButton(bd).SetType(ButtonText).SetText(text)
 	bt.Styler(func(s *styles.Style) {
-		s.Color = colors.C(colors.Scheme.InversePrimary)
+		s.Color = colors.Scheme.InversePrimary
 	})
 	bt.OnClick(func(e events.Event) {
 		if len(onClick) > 0 {
@@ -119,7 +119,7 @@ func (bd *Body) AddSnackbarButton(text string, onClick ...func(e events.Event)) 
 func (bd *Body) AddSnackbarIcon(icon icons.Icon, onClick ...func(e events.Event)) *Body {
 	ic := NewButton(bd).SetType(ButtonAction).SetIcon(icon)
 	ic.Styler(func(s *styles.Style) {
-		s.Color = colors.C(colors.Scheme.InverseOnSurface)
+		s.Color = colors.Scheme.InverseOnSurface
 	})
 	ic.OnClick(func(e events.Event) {
 		if len(onClick) > 0 {

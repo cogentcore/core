@@ -8,6 +8,7 @@ import (
 	"image"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles/units"
 )
@@ -331,21 +332,21 @@ func BoxShadow1() []Shadow {
 			OffsetY: units.Dp(3),
 			Blur:    units.Dp(1),
 			Spread:  units.Dp(-2),
-			Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.2)),
+			Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 0.2),
 		},
 		{
 			OffsetX: units.Zero(),
 			OffsetY: units.Dp(2),
 			Blur:    units.Dp(2),
 			Spread:  units.Zero(),
-			Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.14)),
+			Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 0.14),
 		},
 		{
 			OffsetX: units.Zero(),
 			OffsetY: units.Dp(1),
 			Blur:    units.Dp(5),
 			Spread:  units.Zero(),
-			Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.12)),
+			Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 0.12),
 		},
 	}
 }
@@ -359,21 +360,21 @@ func BoxShadow2() []Shadow {
 			OffsetY: units.Dp(2),
 			Blur:    units.Dp(4),
 			Spread:  units.Dp(-1),
-			Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.2)),
+			Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 0.2),
 		},
 		{
 			OffsetX: units.Zero(),
 			OffsetY: units.Dp(4),
 			Blur:    units.Dp(5),
 			Spread:  units.Zero(),
-			Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.14)),
+			Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 0.14),
 		},
 		{
 			OffsetX: units.Zero(),
 			OffsetY: units.Dp(1),
 			Blur:    units.Dp(10),
 			Spread:  units.Zero(),
-			Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.12)),
+			Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 0.12),
 		},
 	}
 }
@@ -389,21 +390,21 @@ func BoxShadow3() []Shadow {
 			OffsetY: units.Dp(5),
 			Blur:    units.Dp(5),
 			Spread:  units.Dp(-3),
-			Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.2)),
+			Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 0.2),
 		},
 		{
 			OffsetX: units.Zero(),
 			OffsetY: units.Dp(8),
 			Blur:    units.Dp(10),
 			Spread:  units.Dp(1),
-			Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.14)),
+			Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 0.14),
 		},
 		{
 			OffsetX: units.Zero(),
 			OffsetY: units.Dp(3),
 			Blur:    units.Dp(14),
 			Spread:  units.Dp(2),
-			Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.12)),
+			Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 0.12),
 		},
 	}
 }
@@ -417,21 +418,21 @@ func BoxShadow4() []Shadow {
 			OffsetY: units.Dp(5),
 			Blur:    units.Dp(5),
 			Spread:  units.Dp(-3),
-			Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.2)),
+			Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 0.2),
 		},
 		{
 			OffsetX: units.Zero(),
 			OffsetY: units.Dp(8),
 			Blur:    units.Dp(10),
 			Spread:  units.Dp(1),
-			Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.14)),
+			Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 0.14),
 		},
 		{
 			OffsetX: units.Zero(),
 			OffsetY: units.Dp(3),
 			Blur:    units.Dp(14),
 			Spread:  units.Dp(2),
-			Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.12)),
+			Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 0.12),
 		},
 	}
 }
@@ -445,21 +446,21 @@ func BoxShadow5() []Shadow {
 			OffsetY: units.Dp(8),
 			Blur:    units.Dp(10),
 			Spread:  units.Dp(-6),
-			Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.2)),
+			Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 0.2),
 		},
 		{
 			OffsetX: units.Zero(),
 			OffsetY: units.Dp(16),
 			Blur:    units.Dp(24),
 			Spread:  units.Dp(2),
-			Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.14)),
+			Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 0.14),
 		},
 		{
 			OffsetX: units.Zero(),
 			OffsetY: units.Dp(6),
 			Blur:    units.Dp(30),
 			Spread:  units.Dp(5),
-			Color:   colors.C(colors.WithAF32(colors.Scheme.Shadow, 0.12)),
+			Color:   gradient.ApplyOpacity(colors.Scheme.Shadow, 0.12),
 		},
 	}
 }

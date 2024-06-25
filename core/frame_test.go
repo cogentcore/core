@@ -30,7 +30,7 @@ func TestFrameBackground(t *testing.T) {
 	b := NewBody()
 	fr := NewFrame(b)
 	fr.Styler(func(s *styles.Style) {
-		s.Background = colors.C(colors.Scheme.Warn.Container)
+		s.Background = colors.Scheme.Warn.Container
 	})
 	frameTestButtons(fr)
 	b.AssertRender(t, "frame/background")
@@ -51,7 +51,7 @@ func TestFrameBorder(t *testing.T) {
 	fr := NewFrame(b)
 	fr.Styler(func(s *styles.Style) {
 		s.Border.Width.Set(units.Dp(4))
-		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+		s.Border.Color.Set(colors.Scheme.Outline)
 	})
 	frameTestButtons(fr)
 	b.AssertRender(t, "frame/border")
@@ -62,7 +62,7 @@ func TestFrameBorderRadius(t *testing.T) {
 	fr.Styler(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusLarge
 		s.Border.Width.Set(units.Dp(4))
-		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+		s.Border.Color.Set(colors.Scheme.Outline)
 	})
 	frameTestButtons(fr)
 	b.AssertRender(t, "frame/border-radius")
@@ -74,7 +74,7 @@ func TestFrameNoGrow(t *testing.T) {
 	fr.Styler(func(s *styles.Style) {
 		s.Grow.Set(0, 0)
 		s.Border.Width.Set(units.Dp(4))
-		s.Border.Color.Set(colors.C(colors.Scheme.Outline))
+		s.Border.Color.Set(colors.Scheme.Outline)
 	})
 	frameTestButtons(fr)
 	b.AssertRender(t, "frame/no-grow")

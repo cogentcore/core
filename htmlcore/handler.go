@@ -118,7 +118,7 @@ func HandleElement(ctx *Context) {
 		HandleText(ctx).Styler(func(s *styles.Style) {
 			s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 			if hasCode {
-				s.Background = colors.C(colors.Scheme.SurfaceContainer)
+				s.Background = colors.Scheme.SurfaceContainer
 				s.Border.Radius = styles.BorderRadiusMedium
 			}
 		})

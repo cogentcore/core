@@ -53,7 +53,7 @@ func (lg *Legend) Defaults() {
 	lg.TextStyle.Font.Size.Dp(20)
 	lg.Position.Defaults()
 	lg.ThumbnailWidth.Pt(20)
-	lg.FillColor = colors.Clearer(colors.Scheme.Surface, 25)
+	lg.FillColor = colors.Clearer(colors.ToUniform(colors.Scheme.Surface), 25)
 }
 
 // Add adds an entry to the legend with the given name.

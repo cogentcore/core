@@ -310,9 +310,9 @@ func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
 
 	dv.BufA.LineColors = nil
 	dv.BufB.LineColors = nil
-	del := colors.C(colors.Scheme.Error.Base)
-	ins := colors.C(colors.Scheme.Success.Base)
-	chg := colors.C(colors.Scheme.Primary.Base)
+	del := colors.Scheme.Error.Base
+	ins := colors.Scheme.Success.Base
+	chg := colors.Scheme.Primary.Base
 
 	nd := len(dv.Diffs.Diffs)
 	dv.AlignD = make(textbuf.Diffs, nd)

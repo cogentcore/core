@@ -159,7 +159,7 @@ func main() {
 
 	// first, add lights, set camera
 	se.Styler(func(s *styles.Style) {
-		sc.BackgroundColor = colors.Scheme.Select.Container
+		sc.BackgroundColor = colors.ToUniform(colors.Scheme.Select.Container)
 	})
 	xyz.NewAmbientLight(sc, "ambient", 0.3, xyz.DirectSun)
 

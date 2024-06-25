@@ -71,8 +71,8 @@ func (m *Meter) Init() {
 	m.Value = 0.5
 	m.Max = 1
 	m.Styler(func(s *styles.Style) {
-		m.ValueColor = colors.C(colors.Scheme.Primary.Base)
-		s.Background = colors.C(colors.Scheme.SurfaceVariant)
+		m.ValueColor = colors.Scheme.Primary.Base
+		s.Background = colors.Scheme.SurfaceVariant
 		s.Border.Radius = styles.BorderRadiusFull
 	})
 	m.FinalStyler(func(s *styles.Style) {

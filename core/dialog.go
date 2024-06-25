@@ -189,12 +189,12 @@ func (bd *Body) DialogStyles() {
 	bd.Scene.BarsInherit.Top = true
 	bd.Scene.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
-		s.Color = colors.C(colors.Scheme.OnSurface)
+		s.Color = colors.Scheme.OnSurface
 		if !bd.Scene.Stage.NewWindow && !bd.Scene.Stage.FullWindow {
 			s.Padding.Set(units.Dp(24))
 			s.Border.Radius = styles.BorderRadiusLarge
 			s.BoxShadow = styles.BoxShadow3()
-			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+			s.Background = colors.Scheme.SurfaceContainerLow
 		}
 	})
 }

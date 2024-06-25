@@ -4,40 +4,42 @@
 
 package matcolor
 
-import "image/color"
+import (
+	"image"
+)
 
 // Accent contains the four standard variations of a base accent color.
 type Accent struct {
 
 	// Base is the base color for typically high-emphasis content.
-	Base color.RGBA
+	Base image.Image
 
 	// On is the color applied to content on top of [Accent.Base].
-	On color.RGBA
+	On image.Image
 
 	// Container is the color applied to elements with less emphasis than [Accent.Base].
-	Container color.RGBA
+	Container image.Image
 
 	// OnContainer is the color applied to content on top of [Accent.Container].
-	OnContainer color.RGBA
+	OnContainer image.Image
 }
 
 // NewAccentLight returns a new light theme [Accent] from the given [Tones].
 func NewAccentLight(tones Tones) Accent {
 	return Accent{
-		Base:        tones.AbsTone(40),
-		On:          tones.AbsTone(100),
-		Container:   tones.AbsTone(90),
-		OnContainer: tones.AbsTone(10),
+		Base:        tones.AbsToneUniform(40),
+		On:          tones.AbsToneUniform(100),
+		Container:   tones.AbsToneUniform(90),
+		OnContainer: tones.AbsToneUniform(10),
 	}
 }
 
 // NewAccentDark returns a new dark theme [Accent] from the given [Tones].
 func NewAccentDark(tones Tones) Accent {
 	return Accent{
-		Base:        tones.AbsTone(80),
-		On:          tones.AbsTone(20),
-		Container:   tones.AbsTone(30),
-		OnContainer: tones.AbsTone(90),
+		Base:        tones.AbsToneUniform(80),
+		On:          tones.AbsToneUniform(20),
+		Container:   tones.AbsToneUniform(30),
+		OnContainer: tones.AbsToneUniform(90),
 	}
 }

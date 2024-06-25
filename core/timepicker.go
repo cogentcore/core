@@ -159,7 +159,7 @@ func (dp *DatePicker) Init() {
 		})
 		arrowStyle := func(s *styles.Style) {
 			s.Padding.SetHorizontal(units.Dp(12))
-			s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+			s.Color = colors.Scheme.OnSurfaceVariant
 		}
 		tree.AddChild(w, func(w *Button) {
 			w.SetType(ButtonAction).SetIcon(icons.NavigateBefore)
@@ -259,16 +259,16 @@ func (dp *DatePicker) Init() {
 						s.Min.Set(units.Dp(32))
 						s.Padding.Set(units.Dp(6))
 						if dt.Month() != som.Month() {
-							s.Color = colors.C(colors.Scheme.OnSurfaceVariant)
+							s.Color = colors.Scheme.OnSurfaceVariant
 						}
 						if dt.Year() == time.Now().Year() && dt.YearDay() == time.Now().YearDay() {
 							s.Border.Width.Set(units.Dp(1))
-							s.Border.Color.Set(colors.C(colors.Scheme.Primary.Base))
-							s.Color = colors.C(colors.Scheme.Primary.Base)
+							s.Border.Color.Set(colors.Scheme.Primary.Base)
+							s.Color = colors.Scheme.Primary.Base
 						}
 						if dt.Year() == dp.Time.Year() && dt.YearDay() == dp.Time.YearDay() {
-							s.Background = colors.C(colors.Scheme.Primary.Base)
-							s.Color = colors.C(colors.Scheme.Primary.On)
+							s.Background = colors.Scheme.Primary.Base
+							s.Color = colors.Scheme.Primary.On
 						}
 					})
 					w.Maker(func(p *tree.Plan) {

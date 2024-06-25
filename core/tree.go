@@ -230,7 +230,7 @@ func (tr *Tree) Init() {
 			// render handles manually, similar to with actStateLayer
 			s.Background = nil
 		} else {
-			s.Color = colors.C(colors.Scheme.OnSurface)
+			s.Color = colors.Scheme.OnSurface
 		}
 	})
 	tr.FinalStyler(func(s *styles.Style) {
@@ -427,7 +427,7 @@ func (tr *Tree) Init() {
 			s.SetAbilities(false, abilities.Focusable)
 			// parent will handle our cursor
 			s.Cursor = cursors.None
-			s.Color = colors.C(colors.Scheme.Primary.Base)
+			s.Color = colors.Scheme.Primary.Base
 			s.Padding.Zero()
 			s.Align.Self = styles.Center
 			if !w.StateIs(states.Indeterminate) {
@@ -627,7 +627,7 @@ func (tr *Tree) Render() {
 	// must use workaround act values
 	st.StateLayer = tr.actStateLayer
 	if st.Is(states.Selected) {
-		st.Background = colors.C(colors.Scheme.Select.Container)
+		st.Background = colors.Scheme.Select.Container
 	}
 	tr.Styles.ComputeActualBackground(pabg)
 
@@ -646,7 +646,7 @@ func (tr *Tree) RenderWidget() {
 			// we must copy from actual values in parent
 			tr.Parts.Styles.StateLayer = tr.actStateLayer
 			if tr.StateIs(states.Selected) {
-				tr.Parts.Styles.Background = colors.C(colors.Scheme.Select.Container)
+				tr.Parts.Styles.Background = colors.Scheme.Select.Container
 			}
 			tr.RenderParts()
 		}

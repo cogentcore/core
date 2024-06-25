@@ -113,7 +113,7 @@ func (pl *PlotEditor) Init() {
 			s.Direction = styles.Column
 			s.Grow.Set(0, 1)
 			s.Overflow.Y = styles.OverflowAuto
-			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+			s.Background = colors.Scheme.SurfaceContainerLow
 		})
 		w.Maker(pl.makeColumns)
 	})

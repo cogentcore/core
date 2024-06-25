@@ -150,7 +150,7 @@ func (pt *Plot) Render() {
 	r := pt.Geom.ContentBBox
 	sp := pt.Geom.ScrollOffset()
 	if pt.Plot == nil || pt.Plot.Pixels == nil {
-		draw.Draw(pt.Scene.Pixels, r, colors.C(colors.Scheme.Surface), sp, draw.Src)
+		draw.Draw(pt.Scene.Pixels, r, colors.Scheme.Surface, sp, draw.Src)
 		return
 	}
 	draw.Draw(pt.Scene.Pixels, r, pt.Plot.Pixels, sp, draw.Src)

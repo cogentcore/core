@@ -169,22 +169,22 @@ func (sr *Slider) Init() {
 		// we use a different color for the thumb and value color
 		// (compared to the background color) so that they get the
 		// correct state layer
-		s.Color = colors.C(colors.Scheme.Primary.On)
+		s.Color = colors.Scheme.Primary.On
 
 		if sr.Type == SliderSlider {
-			sr.ValueColor = colors.C(colors.Scheme.Primary.Base)
-			sr.ThumbColor = colors.C(colors.Scheme.Primary.Base)
+			sr.ValueColor = colors.Scheme.Primary.Base
+			sr.ThumbColor = colors.Scheme.Primary.Base
 			s.Padding.Set(units.Dp(8))
-			s.Background = colors.C(colors.Scheme.SurfaceVariant)
+			s.Background = colors.Scheme.SurfaceVariant
 		} else {
-			sr.ValueColor = colors.C(colors.Scheme.OutlineVariant)
-			sr.ThumbColor = colors.C(colors.Scheme.OutlineVariant)
-			s.Background = colors.C(colors.Scheme.SurfaceContainerLow)
+			sr.ValueColor = colors.Scheme.OutlineVariant
+			sr.ThumbColor = colors.Scheme.OutlineVariant
+			s.Background = colors.Scheme.SurfaceContainerLow
 		}
 
 		// sr.ValueColor = s.StateBackgroundColor(sr.ValueColor)
 		// sr.ThumbColor = s.StateBackgroundColor(sr.ThumbColor)
-		s.Color = colors.C(colors.Scheme.OnSurface)
+		s.Color = colors.Scheme.OnSurface
 
 		s.Border.Radius = styles.BorderRadiusFull
 		if !sr.IsReadOnly() {

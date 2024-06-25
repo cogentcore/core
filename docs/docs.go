@@ -77,7 +77,7 @@ func makeBlock[T core.Widget](title, text string, graphic func(w T)) {
 					w.SetType(core.TextHeadlineLarge).SetText(title)
 					w.Styler(func(s *styles.Style) {
 						s.Font.Weight = styles.WeightBold
-						s.Color = colors.C(colors.Scheme.Primary.Base)
+						s.Color = colors.Scheme.Primary.Base
 					})
 				})
 				tree.AddChild(w, func(w *core.Text) {
@@ -126,7 +126,7 @@ func homePage(ctx *htmlcore.Context) bool {
 	initIcon := func(w *core.Icon) *core.Icon {
 		w.Styler(func(s *styles.Style) {
 			s.Min.Set(units.Dp(256))
-			s.Color = colors.C(colors.Scheme.Primary.Base)
+			s.Color = colors.Scheme.Primary.Base
 		})
 		return w
 	}

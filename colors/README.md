@@ -16,7 +16,7 @@ We often need to apply opacity transformations to colors, which have the effect 
 
 There is an `gradient.Applier` that implements the `image.Image` interface (so it can be used for any such color), which applies the color transformation via the `At(x,y)` method, so it automatically transforms the color output of any source image (where the `image.Image` is an embedded field) of the struct type.
 
-Finally, there is an `ApplyOpacityImage` method that is extra efficient for the Uniform and Gradient cases, directly transforming the uniform color or color of the Stops in the gradient, to avoid the extra ApplyFunc call (which is used for the general case of an actual image).
+Finally, there is an `ApplyOpacity` method that is extra efficient for the Uniform and Gradient cases, directly transforming the uniform color or color of the Stops in the gradient, to avoid the extra ApplyFunc call (which is used for the general case of an actual image).
 
 The reason this Apply logic is in `gradient` is so it can manage the Gradient case.
 
