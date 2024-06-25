@@ -45,7 +45,7 @@ func StyleFuncInt[T any, F num.Integer](initVal F, getField func(obj *T) *F) Sty
 			return
 		}
 		fv, _ := reflectx.ToInt(val)
-		num.SetNumber(fp, fv)
+		*fp = F(fv)
 	}
 }
 
@@ -62,7 +62,7 @@ func StyleFuncFloat[T any, F num.Float](initVal F, getField func(obj *T) *F) Sty
 			return
 		}
 		fv, _ := reflectx.ToFloat(val) // can represent any number, ToFloat is fast type switch
-		num.SetNumber(fp, fv)
+		*fp = F(fv)
 	}
 }
 

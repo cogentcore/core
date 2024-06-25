@@ -6,17 +6,6 @@ package num
 
 import "testing"
 
-func TestConvert(t *testing.T) {
-	f32 := Convert[float32](int(2))
-	if f32 != 2 {
-		t.Errorf("failed: %g != 2", f32)
-	}
-	SetNumber(&f32, uint8(5))
-	if f32 != 5 {
-		t.Errorf("failed: %g != 5", f32)
-	}
-}
-
 func TestBool(t *testing.T) {
 	b := ToBool(1)
 	if !b {
