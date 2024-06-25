@@ -475,11 +475,10 @@ func (wb *WidgetBase) WinPos(x, y float32) image.Point {
 	return pt
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//	Profiling and Benchmarking, controlled by app bar buttons and keyboard shortcuts
+// Profiling and Benchmarking, controlled by settings app bar:
 
 // ProfileToggle turns profiling on or off, which does both
-// targeted and global CPU and Memory profiling.
+// targeted profiling and global CPU and memory profiling.
 func ProfileToggle() { //types:add
 	if profile.Profiling {
 		EndTargetedProfile()
@@ -528,39 +527,4 @@ func StartTargetedProfile() {
 func EndTargetedProfile() {
 	profile.Report(time.Millisecond)
 	profile.Profiling = false
-}
-
-// BenchmarkFullRender runs benchmark of 50 full re-renders (full restyling, layout,
-// and everything), reporting targeted profile results and generating standard
-// Go cpu.prof and mem.prof outputs.
-func (sc *Scene) BenchmarkFullRender() {
-	fmt.Println("Starting BenchmarkFullRender")
-	StartCPUMemoryProfile()
-	StartTargetedProfile()
-	ts := time.Now()
-	n := 50
-	for i := 0; i < n; i++ {
-		sc.LayoutScene()
-		sc.RenderWidget()
-	}
-	td := time.Since(ts)
-	fmt.Printf("Time for %v full renders: %12.2f s\n", n, float64(td)/float64(time.Second))
-	EndTargetedProfile()
-	EndCPUMemoryProfile()
-}
-
-// BenchmarkReRender runs benchmark of 50 re-render-only updates of display
-// (just the raw rendering, no styling or layout), reporting targeted profile
-// results and generating standard Go cpu.prof and mem.prof outputs.
-func (sc *Scene) BenchmarkReRender() {
-	fmt.Println("Starting BenchmarkReRender")
-	StartTargetedProfile()
-	start := time.Now()
-	n := 50
-	for range n {
-		sc.RenderWidget()
-	}
-	td := time.Since(start)
-	fmt.Printf("Time for %v renders: %12.2f s\n", n, float64(td)/float64(time.Second))
-	EndTargetedProfile()
 }
