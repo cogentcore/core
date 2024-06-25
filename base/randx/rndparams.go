@@ -18,12 +18,20 @@ type RandParams struct { //git:add
 	Var float64
 
 	// extra parameter for distribution (depends on each one)
-	Par float64 `display:"if Dist=Gamma,Binomial,Beta"`
+	Par float64
 }
 
 func (rp *RandParams) Defaults() {
 	rp.Var = 1
 	rp.Par = 1
+}
+
+func (rp *RandParams) ShouldShow(field string) bool {
+	switch field {
+	case "Par":
+		return rp.Dist == Gamma || rp.Dist == Binomial || rp.Dist == Beta
+	}
+	return true
 }
 
 // Gen generates a random variable according to current parameters.
