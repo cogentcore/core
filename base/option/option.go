@@ -41,6 +41,10 @@ func (o *Option[T]) Or(or T) T {
 	return or
 }
 
+func (o *Option[T]) ShouldSave() bool {
+	return o.Valid
+}
+
 func (o *Option[T]) ShouldShow(field string) bool {
 	switch field {
 	case "Value":

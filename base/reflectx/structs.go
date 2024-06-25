@@ -137,14 +137,24 @@ func SetFromDefaultTag(v reflect.Value, def string) error {
 	return SetRobust(UnderlyingPointer(v).Interface(), def)
 }
 
-// TODO: this needs to return an ordmap of the fields
+// ShouldSaver is an interface that types can implement to specify
+// whether a value should be included in the result of [NonDefaultFields].
+type ShouldSaver interface {
+
+	// ShouldSave returns whether this value should be included in the
+	// result of [NonDefaultFields].
+	ShouldSave() bool
+}
+
+// TODO: this needs to return an ordmap or struct of the fields
 
 // NonDefaultFields returns a map representing all of the fields of the given
 // struct (or pointer to a struct) that have values different than their default
 // values as specified by the `default:` struct tag. The resulting map is then typically
 // saved using something like JSON or TOML. If a value has no default value, it
 // checks whether its value is non-zero. If a field has a `save:"-"` tag, it wil
-// not be included in the resulting map.
+// not be included in the resulting map. If a field implements [ShouldSaver] and
+// returns false, it will not be included in the resulting map.
 func NonDefaultFields(v any) map[string]any {
 	res := map[string]any{}
 
@@ -159,6 +169,11 @@ func NonDefaultFields(v any) map[string]any {
 		ft := rt.Field(i)
 		if ft.Tag.Get("save") == "-" {
 			continue
+		}
+		if ss, ok := UnderlyingPointer(fv).Interface().(ShouldSaver); ok {
+			if !ss.ShouldSave() {
+				continue
+			}
 		}
 		def := ft.Tag.Get("default")
 		if NonPointerType(ft.Type).Kind() == reflect.Struct && def == "" {
