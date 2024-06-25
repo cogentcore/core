@@ -99,7 +99,7 @@ func (cp *ColorPicker) Init() {
 			g := gradient.NewLinear()
 			for c := float32(0); c <= w.Max; c += 5 {
 				gc := cp.Color.WithChroma(c)
-				g.AddStop(gc.AsRGBA(), c/120)
+				g.AddStop(gc.AsRGBA(), c/w.Max)
 			}
 			s.Background = g
 		})
