@@ -51,10 +51,12 @@ func (cp *ColorPicker) Init() {
 	cp.Frame.Init()
 	cp.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 0)
-		s.Direction = styles.Column
 	})
 
 	tree.AddChild(cp, func(w *Frame) {
+		w.Styler(func(s *styles.Style) {
+			s.Direction = styles.Column
+		})
 		for i, a := range accents {
 			tree.AddChildAt(w, strconv.Itoa(i), func(w *Button) {
 				w.SetIcon(icons.Blank).SetTooltip(a.tooltip)
@@ -83,71 +85,77 @@ func (cp *ColorPicker) Init() {
 		s.Max.X.Em(40)
 		s.Grow.Set(1, 0)
 	}
-	tree.AddChild(cp, func(w *Slider) {
-		Bind(&cp.Color.Hue, w)
-		w.SetMin(0).SetMax(360)
-		w.SetTooltip("The hue, which is the spectral identity of the color (red, green, blue, etc) in degrees")
-		w.OnInput(func(e events.Event) {
-			cp.Color.SetHue(w.Value)
-			cp.Update()
-			cp.SendChange()
-		})
+	tree.AddChild(cp, func(w *Frame) {
 		w.Styler(func(s *styles.Style) {
-			w.ValueColor = nil
-			w.ThumbColor = colors.Uniform(cp.Color)
-			g := gradient.NewLinear()
-			for h := float32(0); h <= 360; h += 5 {
-				gc := cp.Color.WithHue(h)
-				g.AddStop(gc.AsRGBA(), h/360)
-			}
-			s.Background = g
+			s.Direction = styles.Column
+			s.Grow.Set(1, 0)
 		})
-		w.FinalStyler(sf)
-	})
-	tree.AddChild(cp, func(w *Slider) {
-		Bind(&cp.Color.Chroma, w)
-		w.SetMin(0).SetMax(120)
-		w.SetTooltip("The chroma, which is the colorfulness/saturation of the color")
-		w.Updater(func() {
-			w.SetMax(cp.Color.MaximumChroma())
+		tree.AddChild(w, func(w *Slider) {
+			Bind(&cp.Color.Hue, w)
+			w.SetMin(0).SetMax(360)
+			w.SetTooltip("The hue, which is the spectral identity of the color (red, green, blue, etc) in degrees")
+			w.OnInput(func(e events.Event) {
+				cp.Color.SetHue(w.Value)
+				cp.Update()
+				cp.SendChange()
+			})
+			w.Styler(func(s *styles.Style) {
+				w.ValueColor = nil
+				w.ThumbColor = colors.Uniform(cp.Color)
+				g := gradient.NewLinear()
+				for h := float32(0); h <= 360; h += 5 {
+					gc := cp.Color.WithHue(h)
+					g.AddStop(gc.AsRGBA(), h/360)
+				}
+				s.Background = g
+			})
+			w.FinalStyler(sf)
 		})
-		w.OnInput(func(e events.Event) {
-			cp.Color.SetChroma(w.Value)
-			cp.Update()
-			cp.SendChange()
+		tree.AddChild(w, func(w *Slider) {
+			Bind(&cp.Color.Chroma, w)
+			w.SetMin(0).SetMax(120)
+			w.SetTooltip("The chroma, which is the colorfulness/saturation of the color")
+			w.Updater(func() {
+				w.SetMax(cp.Color.MaximumChroma())
+			})
+			w.OnInput(func(e events.Event) {
+				cp.Color.SetChroma(w.Value)
+				cp.Update()
+				cp.SendChange()
+			})
+			w.Styler(func(s *styles.Style) {
+				w.ValueColor = nil
+				w.ThumbColor = colors.Uniform(cp.Color)
+				g := gradient.NewLinear()
+				for c := float32(0); c <= w.Max; c += 5 {
+					gc := cp.Color.WithChroma(c)
+					g.AddStop(gc.AsRGBA(), c/w.Max)
+				}
+				s.Background = g
+			})
+			w.FinalStyler(sf)
 		})
-		w.Styler(func(s *styles.Style) {
-			w.ValueColor = nil
-			w.ThumbColor = colors.Uniform(cp.Color)
-			g := gradient.NewLinear()
-			for c := float32(0); c <= w.Max; c += 5 {
-				gc := cp.Color.WithChroma(c)
-				g.AddStop(gc.AsRGBA(), c/w.Max)
-			}
-			s.Background = g
+		tree.AddChild(w, func(w *Slider) {
+			Bind(&cp.Color.Tone, w)
+			w.SetMin(0).SetMax(100)
+			w.SetTooltip("The tone, which is the lightness of the color")
+			w.OnInput(func(e events.Event) {
+				cp.Color.SetTone(w.Value)
+				cp.Update()
+				cp.SendChange()
+			})
+			w.Styler(func(s *styles.Style) {
+				w.ValueColor = nil
+				w.ThumbColor = colors.Uniform(cp.Color)
+				g := gradient.NewLinear()
+				for c := float32(0); c <= 100; c += 5 {
+					gc := cp.Color.WithTone(c)
+					g.AddStop(gc.AsRGBA(), c/100)
+				}
+				s.Background = g
+			})
+			w.FinalStyler(sf)
 		})
-		w.FinalStyler(sf)
-	})
-	tree.AddChild(cp, func(w *Slider) {
-		Bind(&cp.Color.Tone, w)
-		w.SetMin(0).SetMax(100)
-		w.SetTooltip("The tone, which is the lightness of the color")
-		w.OnInput(func(e events.Event) {
-			cp.Color.SetTone(w.Value)
-			cp.Update()
-			cp.SendChange()
-		})
-		w.Styler(func(s *styles.Style) {
-			w.ValueColor = nil
-			w.ThumbColor = colors.Uniform(cp.Color)
-			g := gradient.NewLinear()
-			for c := float32(0); c <= 100; c += 5 {
-				gc := cp.Color.WithTone(c)
-				g.AddStop(gc.AsRGBA(), c/100)
-			}
-			s.Background = g
-		})
-		w.FinalStyler(sf)
 	})
 }
 
