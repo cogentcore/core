@@ -109,7 +109,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 			if inh {
 				fs.Color = parent.(*Stroke).Color
 			} else if init {
-				fs.Color = colors.C(colors.Black)
+				fs.Color = colors.Uniform(colors.Black)
 			}
 			return
 		}
@@ -159,7 +159,7 @@ var StyleFillFuncs = map[string]StyleFunc{
 			if inh {
 				fs.Color = parent.(*Fill).Color
 			} else if init {
-				fs.Color = colors.C(colors.Black)
+				fs.Color = colors.Uniform(colors.Black)
 			}
 			return
 		}

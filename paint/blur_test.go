@@ -75,7 +75,7 @@ func TestEdgeBlurFactors(t *testing.T) {
 func RunShadowBlur(t *testing.T, imgName string, shadow styles.Shadow) {
 	RunTest(t, imgName, 300, 300, func(pc *Context) {
 		st := styles.NewStyle()
-		st.Color = colors.C(colors.Black)
+		st.Color = colors.Uniform(colors.Black)
 		st.Border.Width.Set(units.Dp(0))
 		st.Border.Radius = styles.BorderRadiusFull
 		st.BoxShadow = []styles.Shadow{shadow}
@@ -83,7 +83,7 @@ func RunShadowBlur(t *testing.T, imgName string, shadow styles.Shadow) {
 
 		spc := st.BoxSpace().Size()
 		sz := spc.Add(math32.Vec2(200, 100))
-		pc.DrawStandardBox(st, math32.Vec2(50, 100), sz, colors.C(colors.White))
+		pc.DrawStandardBox(st, math32.Vec2(50, 100), sz, colors.Uniform(colors.White))
 	})
 }
 

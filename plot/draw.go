@@ -72,7 +72,7 @@ func (pt *Plot) Draw() {
 	pc.PushBounds(ptb)
 
 	if pt.Background != nil {
-		pc.BlitBox(math32.Vector2{}, math32.Vector2FromPoint(pt.Size), colors.C(pt.Background))
+		pc.BlitBox(math32.Vector2{}, math32.Vector2FromPoint(pt.Size), colors.Uniform(pt.Background))
 	}
 
 	if pt.Title.Text != "" {
@@ -429,7 +429,7 @@ func (lg *Legend) draw(pt *Plot) {
 	}
 
 	if lg.FillColor != nil {
-		pc.FillBox(math32.Vector2FromPoint(pos), math32.Vector2FromPoint(sz), colors.C(lg.FillColor))
+		pc.FillBox(math32.Vector2FromPoint(pos), math32.Vector2FromPoint(sz), colors.Uniform(lg.FillColor))
 	}
 	cp := pos
 	thsz := image.Point{X: int(lg.ThumbnailWidth.Dots), Y: maxTht - 2*int(pad)}

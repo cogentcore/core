@@ -231,7 +231,7 @@ func (ed *Editor) Init() {
 	ed.Styler(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable, abilities.DoubleClickable, abilities.TripleClickable)
 		ed.CursorWidth.Dp(2)
-		ed.LineNumberColor = colors.C(colors.Transparent)
+		ed.LineNumberColor = colors.Uniform(colors.Transparent)
 		ed.SelectColor = colors.Scheme.Select.Container
 		ed.HighlightColor = colors.Scheme.Warn.Container
 		ed.CursorColor = colors.Scheme.Primary.Base

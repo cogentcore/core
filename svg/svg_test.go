@@ -50,7 +50,7 @@ func TestViewBox(t *testing.T) {
 
 	tests := []string{"none", "xMinYMin", "xMidYMid", "xMaxYMax", "xMaxYMax slice"}
 	sv := NewSVG(640, 480)
-	sv.Background = colors.C(colors.White)
+	sv.Background = colors.Uniform(colors.White)
 	err := sv.OpenXML(file)
 	if err != nil {
 		t.Error("error opening xml:", err)
@@ -107,11 +107,11 @@ func TestCoreLogo(t *testing.T) {
 
 	sv.SaveXML("testdata/logo.svg")
 
-	sv.Background = colors.C(colors.Black)
+	sv.Background = colors.Uniform(colors.Black)
 	sv.Render()
 	imagex.Assert(t, sv.Pixels, "logo-black")
 
-	sv.Background = colors.C(colors.White)
+	sv.Background = colors.Uniform(colors.White)
 	sv.Render()
 	imagex.Assert(t, sv.Pixels, "logo-white")
 }

@@ -16,9 +16,9 @@ import (
 
 func TestBackgroundColor(t *testing.T) {
 	RunTest(t, "background-color", 300, 300, func(pc *Context) {
-		pabg := colors.C(colors.White)
+		pabg := colors.Uniform(colors.White)
 		st := styles.NewStyle()
-		st.Background = colors.C(colors.Blue)
+		st.Background = colors.Uniform(colors.Blue)
 		st.ComputeActualBackground(pabg)
 		st.ToDots()
 
@@ -31,7 +31,7 @@ func TestBackgroundImage(t *testing.T) {
 	img, _, err := imagex.Open("test.png")
 	assert.NoError(t, err)
 	RunTest(t, "background-image", 1260, 200, func(pc *Context) {
-		pabg := colors.C(colors.White)
+		pabg := colors.Uniform(colors.White)
 		st := styles.NewStyle()
 		st.Background = img
 		st.ComputeActualBackground(pabg)

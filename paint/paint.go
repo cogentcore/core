@@ -389,7 +389,7 @@ func (pc *Context) BlitBox(pos, size math32.Vector2, img image.Image) {
 // with the given image, using the given draw operation.
 func (pc *Context) DrawBox(pos, size math32.Vector2, img image.Image, op draw.Op) {
 	if img == nil {
-		img = colors.C(color.RGBA{})
+		img = colors.Uniform(color.RGBA{})
 	}
 	pos = pc.CurrentTransform.MulVector2AsPoint(pos)
 	size = pc.CurrentTransform.MulVector2AsVector(size)

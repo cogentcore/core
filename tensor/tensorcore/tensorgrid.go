@@ -354,7 +354,7 @@ func (tg *TensorGrid) Render() {
 					}
 					cr := math32.Vec2(float32(x), float32(ey))
 					pr := pos.Add(cr.Mul(gsz))
-					pc.StrokeStyle.Color = colors.C(colors.FromFloat64(r, g, b, a))
+					pc.StrokeStyle.Color = colors.Uniform(colors.FromFloat64(r, g, b, a))
 					pc.FillBox(pr, gsz, pc.StrokeStyle.Color)
 				case nclr > 1:
 					var r, g, b, a float64
@@ -367,13 +367,13 @@ func (tg *TensorGrid) Render() {
 					}
 					cr := math32.Vec2(float32(x), float32(ey))
 					pr := pos.Add(cr.Mul(gsz))
-					pc.StrokeStyle.Color = colors.C(colors.FromFloat64(r, g, b, a))
+					pc.StrokeStyle.Color = colors.Uniform(colors.FromFloat64(r, g, b, a))
 					pc.FillBox(pr, gsz, pc.StrokeStyle.Color)
 				default:
 					val := tg.Display.Range.ClipNormValue(tsr.Float([]int{y, x}))
 					cr := math32.Vec2(float32(x), float32(ey))
 					pr := pos.Add(cr.Mul(gsz))
-					pc.StrokeStyle.Color = colors.C(colors.FromFloat64(val, val, val, 1))
+					pc.StrokeStyle.Color = colors.Uniform(colors.FromFloat64(val, val, val, 1))
 					pc.FillBox(pr, gsz, pc.StrokeStyle.Color)
 				}
 			}
@@ -407,7 +407,7 @@ func (tg *TensorGrid) Render() {
 			cr := math32.Vec2(float32(x)+xex, float32(y)+yex)
 			pr := pos.Add(cr.Mul(gsz))
 			_, clr := tg.Color(val)
-			pc.FillBox(pr, ssz, colors.C(clr))
+			pc.FillBox(pr, ssz, colors.Uniform(clr))
 		}
 	}
 }

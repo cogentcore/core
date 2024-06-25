@@ -148,7 +148,7 @@ func (b *BarChart) StackOn(on *BarChart) {
 func (b *BarChart) Plot(plt *plot.Plot) {
 	pc := plt.Paint
 	if b.Color != nil {
-		pc.FillStyle.Color = colors.C(b.Color)
+		pc.FillStyle.Color = colors.Uniform(b.Color)
 	} else {
 		pc.FillStyle.Color = nil
 	}
@@ -237,7 +237,7 @@ func (b *BarChart) DataRange() (xmin, xmax, ymin, ymax float32) {
 func (b *BarChart) Thumbnail(plt *plot.Plot) {
 	pc := plt.Paint
 	if b.Color != nil {
-		pc.FillStyle.Color = colors.C(b.Color)
+		pc.FillStyle.Color = colors.Uniform(b.Color)
 	} else {
 		pc.FillStyle.Color = nil
 	}

@@ -57,7 +57,7 @@ func (cp *ColorPicker) Init() {
 		})
 		w.Styler(func(s *styles.Style) {
 			w.ValueColor = nil
-			w.ThumbColor = colors.C(cp.Color)
+			w.ThumbColor = colors.Uniform(cp.Color)
 			g := gradient.NewLinear()
 			for h := float32(0); h <= 360; h += 5 {
 				gc := cp.Color.WithHue(h)
@@ -81,7 +81,7 @@ func (cp *ColorPicker) Init() {
 		})
 		w.Styler(func(s *styles.Style) {
 			w.ValueColor = nil
-			w.ThumbColor = colors.C(cp.Color)
+			w.ThumbColor = colors.Uniform(cp.Color)
 			g := gradient.NewLinear()
 			for c := float32(0); c <= 120; c += 5 {
 				gc := cp.Color.WithChroma(c)
@@ -102,7 +102,7 @@ func (cp *ColorPicker) Init() {
 		})
 		w.Styler(func(s *styles.Style) {
 			w.ValueColor = nil
-			w.ThumbColor = colors.C(cp.Color)
+			w.ThumbColor = colors.Uniform(cp.Color)
 			g := gradient.NewLinear()
 			for c := float32(0); c <= 100; c += 5 {
 				gc := cp.Color.WithTone(c)
@@ -496,8 +496,8 @@ func (cb *ColorButton) Init() {
 		// we need to display button as non-transparent
 		// so that it can be seen
 		dclr := colors.WithAF32(cb.Color, 1)
-		s.Background = colors.C(dclr)
-		s.Color = colors.C(hct.ContrastColor(dclr, hct.ContrastAAA))
+		s.Background = colors.Uniform(dclr)
+		s.Color = colors.Uniform(hct.ContrastColor(dclr, hct.ContrastAAA))
 	})
 	InitValueButton(cb, false, func(d *Body) {
 		d.SetTitle("Edit color")

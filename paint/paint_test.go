@@ -42,7 +42,7 @@ func TestRender(t *testing.T) {
 		radial := gradient.NewRadial()
 		radial.AddStop(colors.Green, 0).AddStop(colors.Blue, 0.6, 0.4).AddStop(colors.Purple, 0.9, 0.8)
 
-		imgs := []image.Image{colors.C(colors.Blue), linear, radial, testimg}
+		imgs := []image.Image{colors.Uniform(colors.Blue), linear, radial, testimg}
 
 		bs := styles.Border{}
 		bs.Color.Set(imgs...)
@@ -51,7 +51,7 @@ func TestRender(t *testing.T) {
 
 		// first, draw a frame around the entire image
 		// pc.StrokeStyle.Color = colors.C(blk)
-		pc.FillStyle.Color = colors.C(colors.White)
+		pc.FillStyle.Color = colors.Uniform(colors.White)
 		// pc.StrokeStyle.Width.SetDot(1) // use dots directly to render in literal pixels
 		pc.DrawBorder(0, 0, 300, 300, bs)
 		pc.FillStrokeClear() // actually render path that has been setup
@@ -61,7 +61,7 @@ func TestRender(t *testing.T) {
 		bs.Color.Set(imgs...)
 		// bs.Width.Set(units.NewDot(10))
 		bs.Radius.Set(units.Dot(0), units.Dot(30), units.Dot(10))
-		pc.FillStyle.Color = colors.C(colors.Lightblue)
+		pc.FillStyle.Color = colors.Uniform(colors.Lightblue)
 		pc.StrokeStyle.Width.Dot(10)
 		bs.ToDots(&pc.UnitContext)
 		pc.DrawBorder(60, 60, 150, 100, bs)
@@ -91,10 +91,10 @@ func TestRender(t *testing.T) {
 func TestPaintPath(t *testing.T) {
 	test := func(nm string, f func(pc *Context)) {
 		RunTest(t, nm, 300, 300, func(pc *Context) {
-			pc.FillBox(math32.Vector2{}, math32.Vec2(300, 300), colors.C(colors.White))
+			pc.FillBox(math32.Vector2{}, math32.Vec2(300, 300), colors.Uniform(colors.White))
 			f(pc)
-			pc.StrokeStyle.Color = colors.C(colors.Blue)
-			pc.FillStyle.Color = colors.C(colors.Yellow)
+			pc.StrokeStyle.Color = colors.Uniform(colors.Blue)
+			pc.FillStyle.Color = colors.Uniform(colors.Yellow)
 			pc.StrokeStyle.Width.Dot(3)
 			pc.FillStrokeClear()
 		})
@@ -131,10 +131,10 @@ func TestPaintFill(t *testing.T) {
 		})
 	}
 	test("fill-box-color", func(pc *Context) {
-		pc.FillBox(math32.Vec2(10, 100), math32.Vec2(200, 100), colors.C(colors.Green))
+		pc.FillBox(math32.Vec2(10, 100), math32.Vec2(200, 100), colors.Uniform(colors.Green))
 	})
 	test("fill-box-solid", func(pc *Context) {
-		pc.FillBox(math32.Vec2(10, 100), math32.Vec2(200, 100), colors.C(colors.Blue))
+		pc.FillBox(math32.Vec2(10, 100), math32.Vec2(200, 100), colors.Uniform(colors.Blue))
 	})
 	test("fill-box-linear-gradient-black-white", func(pc *Context) {
 		g := gradient.NewLinear().AddStop(colors.Black, 0).AddStop(colors.White, 1)
@@ -154,33 +154,33 @@ func TestPaintFill(t *testing.T) {
 		pc.FillBox(math32.Vec2(10, 100), math32.Vec2(200, 100), g)
 	})
 	test("blur-box", func(pc *Context) {
-		pc.FillBox(math32.Vec2(10, 100), math32.Vec2(200, 100), colors.C(colors.Green))
+		pc.FillBox(math32.Vec2(10, 100), math32.Vec2(200, 100), colors.Uniform(colors.Green))
 		pc.BlurBox(math32.Vec2(0, 50), math32.Vec2(300, 200), 10)
 	})
 
 	test("fill", func(pc *Context) {
-		pc.FillStyle.Color = colors.C(colors.Purple)
-		pc.StrokeStyle.Color = colors.C(colors.Orange)
+		pc.FillStyle.Color = colors.Uniform(colors.Purple)
+		pc.StrokeStyle.Color = colors.Uniform(colors.Orange)
 		pc.DrawRectangle(50, 25, 150, 200)
 		pc.Fill()
 	})
 	test("stroke", func(pc *Context) {
-		pc.FillStyle.Color = colors.C(colors.Purple)
-		pc.StrokeStyle.Color = colors.C(colors.Orange)
+		pc.FillStyle.Color = colors.Uniform(colors.Purple)
+		pc.StrokeStyle.Color = colors.Uniform(colors.Orange)
 		pc.DrawRectangle(50, 25, 150, 200)
 		pc.Stroke()
 	})
 
 	// testing whether nil values turn off stroking/filling with FillStrokeClear
 	test("fill-stroke-clear-fill", func(pc *Context) {
-		pc.FillStyle.Color = colors.C(colors.Purple)
+		pc.FillStyle.Color = colors.Uniform(colors.Purple)
 		pc.StrokeStyle.Color = nil
 		pc.DrawRectangle(50, 25, 150, 200)
 		pc.FillStrokeClear()
 	})
 	test("fill-stroke-clear-stroke", func(pc *Context) {
 		pc.FillStyle.Color = nil
-		pc.StrokeStyle.Color = colors.C(colors.Orange)
+		pc.StrokeStyle.Color = colors.Uniform(colors.Orange)
 		pc.DrawRectangle(50, 25, 150, 200)
 		pc.FillStrokeClear()
 	})

@@ -67,7 +67,7 @@ func AppIconImages() []image.Image {
 	res := make([]image.Image, 3)
 
 	sv := svg.NewSVG(16, 16)
-	sv.Color = colors.C(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
+	sv.Color = colors.Uniform(colors.FromRGB(66, 133, 244)) // Google Blue (#4285f4)
 	err := sv.ReadXML(strings.NewReader(AppIcon))
 	if errors.Log(err) != nil {
 		return nil

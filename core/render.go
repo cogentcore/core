@@ -367,7 +367,7 @@ func (wb *WidgetBase) PopBounds() {
 		pcfc := pc.FillStyle.Color
 		pcop := pc.FillStyle.Opacity
 		pc.StrokeStyle.Width.Dot(1)
-		pc.StrokeStyle.Color = colors.C(hct.New(wb.Scene.renderBBoxHue, 100, 50))
+		pc.StrokeStyle.Color = colors.Uniform(hct.New(wb.Scene.renderBBoxHue, 100, 50))
 		pc.FillStyle.Color = nil
 		if isSelw {
 			fc := pc.StrokeStyle.Color

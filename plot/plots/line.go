@@ -106,7 +106,7 @@ func (pts *Line) Plot(plt *plot.Plot) {
 	pts.PXYs = ps
 
 	if pts.FillColor != nil {
-		pc.FillStyle.Color = colors.C(pts.FillColor)
+		pc.FillStyle.Color = colors.Uniform(pts.FillColor)
 		minY := plt.PY(plt.Y.Min)
 		prev := math32.Vec2(ps[0].X, minY)
 		pc.MoveTo(prev.X, prev.Y)
@@ -209,7 +209,7 @@ func (pts *Line) Thumbnail(plt *plot.Plot) {
 		if pts.LineStyle.Width.Value > 0 {
 			tb.Min.Y = int(midY)
 		}
-		pc.FillBox(math32.Vector2FromPoint(tb.Min), math32.Vector2FromPoint(tb.Size()), colors.C(pts.FillColor))
+		pc.FillBox(math32.Vector2FromPoint(tb.Min), math32.Vector2FromPoint(tb.Size()), colors.Uniform(pts.FillColor))
 	}
 
 	if pts.LineStyle.SetStroke(plt) {

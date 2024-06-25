@@ -225,7 +225,7 @@ func (tg *SimMatGrid) Render() {
 			cr := math32.Vec2(float32(x)+xex, float32(y)+yex)
 			pr := pos.Add(cr.Mul(gsz))
 			_, clr := tg.Color(val)
-			pc.FillBox(pr, ssz, colors.C(clr))
+			pc.FillBox(pr, ssz, colors.Uniform(clr))
 			if len(xlb) == 0 {
 				prvxblk = true
 			}

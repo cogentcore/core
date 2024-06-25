@@ -51,13 +51,13 @@ func TestRenderFrameAlignment(t *testing.T) {
 	b := NewBody()
 	outer := NewFrame(b)
 	outer.Styler(func(s *styles.Style) {
-		s.Background = colors.C(colors.Orange)
+		s.Background = colors.Uniform(colors.Orange)
 		s.Min.Set(units.Dp(30))
 		s.Padding.Zero()
 		s.Gap.Zero()
 	})
 	NewWidgetBase(outer).Styler(func(s *styles.Style) {
-		s.Background = colors.C(colors.Blue)
+		s.Background = colors.Uniform(colors.Blue)
 		s.Grow.Set(1, 1)
 	})
 	b.AssertRender(t, "render/frame-alignment")
@@ -68,14 +68,14 @@ func TestRenderFrameAlignmentCenter(t *testing.T) {
 	b := NewBody()
 	outer := NewFrame(b)
 	outer.Styler(func(s *styles.Style) {
-		s.Background = colors.C(colors.Orange)
+		s.Background = colors.Uniform(colors.Orange)
 		s.Min.Set(units.Dp(30))
 		s.Padding.Zero()
 		s.Gap.Zero()
 		s.CenterAll()
 	})
 	NewWidgetBase(outer).Styler(func(s *styles.Style) {
-		s.Background = colors.C(colors.Blue)
+		s.Background = colors.Uniform(colors.Blue)
 		s.Min.Set(units.Dp(15))
 	})
 	b.AssertRender(t, "render/frame-alignment-center")
@@ -98,23 +98,23 @@ func TestRenderNestedScroll(t *testing.T) {
 	b := NewBody()
 	b.Styler(func(s *styles.Style) {
 		s.Max.Set(units.Dp(300))
-		s.Background = colors.C(colors.Orange)
+		s.Background = colors.Uniform(colors.Orange)
 		s.Overflow.Set(styles.OverflowAuto)
 		s.Direction = styles.Row
 	})
 	fr := NewFrame(b)
 	fr.Styler(func(s *styles.Style) {
-		s.Background = colors.C(colors.Blue)
+		s.Background = colors.Uniform(colors.Blue)
 		s.Min.Set(units.Dp(200))
 		s.Max.Set(units.Dp(200))
 		s.Overflow.Set(styles.OverflowAuto)
 	})
 	NewFrame(fr).Styler(func(s *styles.Style) {
-		s.Background = colors.C(colors.Red)
+		s.Background = colors.Uniform(colors.Red)
 		s.Min.Set(units.Dp(400))
 	})
 	NewFrame(b).Styler(func(s *styles.Style) {
-		s.Background = colors.C(colors.Purple)
+		s.Background = colors.Uniform(colors.Purple)
 		s.Min.Set(units.Dp(300))
 	})
 	b.AssertRender(t, "render/nested-scroll")
