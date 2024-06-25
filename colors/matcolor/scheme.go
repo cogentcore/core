@@ -98,42 +98,6 @@ type Scheme struct {
 
 	// Scrim is the color applied to scrims (semi-transparent overlays)
 	Scrim color.RGBA
-
-	// // PrimaryFixed is a primary fill color that stays the same regardless of color scheme type (light/dark)
-	// PrimaryFixed color.RGBA `desc:"PrimaryFixed is a primary fill color that stays the same regardless of color scheme type (light/dark)"`
-
-	// // PrimaryFixedDim is a higher-emphasis, dimmer primary fill color that stays the same regardless of color scheme type (light/dark)
-	// PrimaryFixedDim color.RGBA `desc:"PrimaryFixedDim is a higher-emphasis, dimmer primary fill color that stays the same regardless of color scheme type (light/dark)"`
-
-	// // OnPrimaryFixed is the color applied to high-emphasis content on top of PrimaryFixed
-	// OnPrimaryFixed color.RGBA `desc:"OnPrimaryFixed is the color applied to high-emphasis content on top of PrimaryFixed"`
-
-	// // OnPrimaryFixedVariant is the color applied to low-emphasis content on top of PrimaryFixed
-	// OnPrimaryFixedVariant color.RGBA `desc:"OnPrimaryFixedVariant is the color applied to low-emphasis content on top of PrimaryFixed"`
-
-	// // SecondaryFixed is a secondary fill color that stays the same regardless of color scheme type (light/dark)
-	// SecondaryFixed color.RGBA `desc:"SecondaryFixed is a secondary fill color that stays the same regardless of color scheme type (light/dark)"`
-
-	// // SecondaryFixedDim is a higher-emphasis, dimmer secondary fill color that stays the same regardless of color scheme type (light/dark)
-	// SecondaryFixedDim color.RGBA `desc:"SecondaryFixedDim is a higher-emphasis, dimmer secondary fill color that stays the same regardless of color scheme type (light/dark)"`
-
-	// // OnSecondaryFixed is the color applied to high-emphasis content on top of SecondaryFixed
-	// OnSecondaryFixed color.RGBA `desc:"OnSecondaryFixed is the color applied to high-emphasis content on top of SecondaryFixed"`
-
-	// // OnSecondaryFixedVariant is the color applied to low-emphasis content on top of SecondaryFixed
-	// OnSecondaryFixedVariant color.RGBA `desc:"OnSecondaryFixedVariant is the color applied to low-emphasis content on top of SecondaryFixed"`
-
-	// // TertiaryFixed is a tertiary fill color that stays the same regardless of color scheme type (light/dark)
-	// TertiaryFixed color.RGBA `desc:"TertiaryFixed is a tertiary fill color that stays the same regardless of color scheme type (light/dark)"`
-
-	// // TertiaryFixedDim is a higher-emphasis, dimmer tertiary fill color that stays the same regardless of color scheme type (light/dark)
-	// TertiaryFixedDim color.RGBA `desc:"TertiaryFixedDim is a higher-emphasis, dimmer tertiary fill color that stays the same regardless of color scheme type (light/dark)"`
-
-	// // OnTertiaryFixed is the color applied to high-emphasis content on top of TertiaryFixed
-	// OnTertiaryFixed color.RGBA `desc:"OnTertiaryFixed is the color applied to high-emphasis content on top of TertiaryFixed"`
-
-	// // OnTertiaryFixedVariant is the color applied to low-emphasis content on top of TertiaryFixed
-	// OnTertiaryFixedVariant color.RGBA `desc:"OnTertiaryFixedVariant is the color applied to low-emphasis content on top of TertiaryFixed"`
 }
 
 // NewLightScheme returns a new light-themed [Scheme]
@@ -229,7 +193,7 @@ func NewDarkScheme(p *Palette) Scheme {
 		s.Custom[nm] = NewAccentDark(c)
 	}
 	return s
-	// TODO: custom and fixed colors
+	// TODO: custom and fixed colors?
 }
 
 // SchemeIsDark is whether the currently active color scheme
