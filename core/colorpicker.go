@@ -11,6 +11,7 @@ import (
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/cam/hct"
 	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/colors/matcolor"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
@@ -57,6 +58,13 @@ func (cp *ColorPicker) Init() {
 		for i, a := range accents {
 			tree.AddChildAt(w, strconv.Itoa(i), func(w *Button) {
 				w.SetIcon(icons.Blank).SetTooltip(a.tooltip)
+				w.Updater(func() {
+					if i == 1 && !matcolor.SchemeIsDark {
+						w.SetType(ButtonOutlined) // needed for contrast
+					} else {
+						w.SetType(ButtonFilled)
+					}
+				})
 				w.Styler(func(s *styles.Style) {
 					s.Background = colors.Uniform(a.f(cp.Color))
 				})
