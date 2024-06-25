@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestOrdMap(t *testing.T) {
+func TestMap(t *testing.T) {
 	om := New[string, int]()
 	om.Add("key0", 0)
 	om.Add("key1", 1)

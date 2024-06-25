@@ -456,9 +456,7 @@ func (ds *DeviceSettingsData) Apply() {
 	events.ScrollWheelSpeed = ds.ScrollWheelSpeed
 }
 
-// ScreenSettings are the per-screen settings -- see [system.App.Screen] for
-// info on the different screens -- these prefs are indexed by the Screen.Name
-// -- settings here override those in the global settings.
+// ScreenSettings are per-screen settings that override the global settings.
 type ScreenSettings struct { //types:add
 
 	// overall zoom factor as a percentage of the default zoom
