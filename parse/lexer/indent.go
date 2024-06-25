@@ -16,7 +16,7 @@ import (
 // based on target tab-size (only relevant for spaces).
 // If line starts with tabs, then those are counted, else spaces --
 // combinations of tabs and spaces won't produce sensible results.
-func LineIndent(src []rune, tabSz int) (ind int, ichr indent.Char) {
+func LineIndent(src []rune, tabSz int) (ind int, ichr indent.Character) {
 	ichr = indent.Tab
 	sz := len(src)
 	if sz == 0 {
@@ -58,7 +58,7 @@ func LineIndent(src []rune, tabSz int) (ind int, ichr indent.Char) {
 // Returns indent level and previous line number, and indent char.
 // indent level is in increments of tabSz for spaces, and tabs for tabs.
 // Operates on rune source with markup lex tags per line.
-func PrevLineIndent(src [][]rune, tags []Line, ln int, tabSz int) (ind, pln int, ichr indent.Char) {
+func PrevLineIndent(src [][]rune, tags []Line, ln int, tabSz int) (ind, pln int, ichr indent.Character) {
 	ln--
 	for ln >= 0 {
 		if len(src[ln]) == 0 {
@@ -79,7 +79,7 @@ func PrevLineIndent(src [][]rune, tags []Line, ln int, tabSz int) (ind, pln int,
 // brackets starting or ending the previous or current line.
 // indent level is in increments of tabSz for spaces, and tabs for tabs.
 // Operates on rune source with markup lex tags per line.
-func BracketIndentLine(src [][]rune, tags []Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char) {
+func BracketIndentLine(src [][]rune, tags []Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Character) {
 	pInd, pLn, ichr = PrevLineIndent(src, tags, ln, tabSz)
 
 	curUnd, _ := LineStartEndBracket(src[ln], tags[ln])

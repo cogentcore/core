@@ -74,7 +74,7 @@ type Lang interface {
 	// other language-specific keywords.  See lexer.BracketIndentLine for example.
 	// Indent level is in increments of tabSz for spaces, and tabs for tabs.
 	// Operates on rune source with markup lex tags per line.
-	IndentLine(fs *FileStates, src [][]rune, tags []lexer.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char)
+	IndentLine(fs *FileStates, src [][]rune, tags []lexer.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Character)
 
 	// AutoBracket returns what to do when a user types a starting bracket character
 	// (bracket, brace, paren) while typing.

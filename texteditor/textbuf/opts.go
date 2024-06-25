@@ -40,7 +40,7 @@ func (tb *Options) CommentStrings() (comst, comed string) {
 }
 
 // IndentChar returns the indent character based on SpaceIndent option
-func (tb *Options) IndentChar() indent.Char {
+func (tb *Options) IndentChar() indent.Character {
 	if tb.SpaceIndent {
 		return indent.Space
 	}

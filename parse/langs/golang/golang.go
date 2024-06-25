@@ -145,7 +145,7 @@ func (gl *GoLang) HiLine(fss *parse.FileStates, line int, txt []rune) lexer.Line
 // other language-specific keywords.  See lexer.BracketIndentLine for example.
 // Indent level is in increments of tabSz for spaces, and tabs for tabs.
 // Operates on rune source with markup lex tags per line.
-func (gl *GoLang) IndentLine(fs *parse.FileStates, src [][]rune, tags []lexer.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char) {
+func (gl *GoLang) IndentLine(fs *parse.FileStates, src [][]rune, tags []lexer.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Character) {
 	pInd, pLn, ichr = lexer.PrevLineIndent(src, tags, ln, tabSz)
 
 	curUnd, _ := lexer.LineStartEndBracket(src[ln], tags[ln])

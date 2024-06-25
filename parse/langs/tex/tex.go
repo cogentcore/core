@@ -93,7 +93,7 @@ func (tl *TexLang) ParseDir(fs *parse.FileState, path string, opts parse.LangDir
 // other language-specific keywords.  See lexer.BracketIndentLine for example.
 // Indent level is in increments of tabSz for spaces, and tabs for tabs.
 // Operates on rune source with markup lex tags per line.
-func (tl *TexLang) IndentLine(fs *parse.FileStates, src [][]rune, tags []lexer.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char) {
+func (tl *TexLang) IndentLine(fs *parse.FileStates, src [][]rune, tags []lexer.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Character) {
 	pInd, pLn, ichr = lexer.PrevLineIndent(src, tags, ln, tabSz)
 
 	curUnd, _ := lexer.LineStartEndBracket(src[ln], tags[ln])

@@ -86,7 +86,7 @@ func TestSpaceBytes(t *testing.T) {
 
 func TestString(t *testing.T) {
 	tests := []struct {
-		ich      Char
+		ich      Character
 		n        int
 		width    int
 		expected string
@@ -111,7 +111,7 @@ func TestString(t *testing.T) {
 
 func TestBytes(t *testing.T) {
 	tests := []struct {
-		ich      Char
+		ich      Character
 		n        int
 		width    int
 		expected []byte
@@ -136,7 +136,7 @@ func TestBytes(t *testing.T) {
 
 func TestLen(t *testing.T) {
 	tests := []struct {
-		ich      Char
+		ich      Character
 		n        int
 		width    int
 		expected int
