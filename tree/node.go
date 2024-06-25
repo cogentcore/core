@@ -19,6 +19,8 @@ import (
 // must embed it. This interface only contains the tree functionality that
 // higher-level tree types may need to override. You can call [Node.AsTree]
 // to get the [NodeBase] of a Node and access the core tree functionality.
+// All values that implement [Node] are pointer values; see [NodeValue]
+// for an interface for non-pointer values.
 type Node interface {
 
 	// AsTree returns the [NodeBase] of this Node. Most core
@@ -92,3 +94,15 @@ type Node interface {
 	// This is necessary for tree planning to work.
 	plan.Namer
 }
+
+// NodeValue is an interface that all non-pointer tree nodes satisfy.
+// Pointer tree nodes satisfy [Node], not NodeValue. NodeValue and [Node]
+// are mutually exclusive; a [Node] cannot be a NodeValue and vice versa.
+// However, a pointer to a NodeValue type is guaranteed to be a [Node],
+// and a non-pointer version of a [Node] type is guaranteed to be a NodeValue.
+type NodeValue interface {
+	nodeValue()
+}
+
+// NodeBase is the only way to implement [NodeValue].
+func (nb NodeBase) nodeValue() {}
