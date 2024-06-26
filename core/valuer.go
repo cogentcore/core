@@ -36,15 +36,15 @@ type Valuer interface {
 // helper function. These functions must NOT call [Bind].
 var ValueTypes = map[string]func(value any) Value{}
 
-// AddValueType binds the given value type to the given [Value] type,
-// meaning that [ToValue] will return a new [Value] of the given type
+// AddValueType binds the given value type to the given [Value] [tree.NodeValue]
+// type, meaning that [ToValue] will return a new [Value] of the given type
 // when it receives values of the given value type. It uses [ValueTypes].
 // This function is called with various standard types automatically.
-func AddValueType[T any, W Value]() {
+func AddValueType[T any, W tree.NodeValue]() {
 	var v T
 	name := types.TypeNameValue(v)
 	ValueTypes[name] = func(value any) Value {
-		return tree.New[W]()
+		return any(tree.New[W]()).(Value)
 	}
 }
 
@@ -188,12 +188,12 @@ func ToValue(value any, tags reflect.StructTag) Value {
 }
 
 func init() {
-	AddValueType[icons.Icon, *IconButton]()
-	AddValueType[time.Time, *TimeInput]()
-	AddValueType[time.Duration, *DurationInput]()
-	AddValueType[types.Type, *TypeChooser]()
-	AddValueType[Filename, *FileButton]()
-	AddValueType[FontName, *FontButton]()
-	AddValueType[keymap.MapName, *KeyMapButton]()
-	AddValueType[key.Chord, *KeyChordButton]()
+	AddValueType[icons.Icon, IconButton]()
+	AddValueType[time.Time, TimeInput]()
+	AddValueType[time.Duration, DurationInput]()
+	AddValueType[types.Type, TypeChooser]()
+	AddValueType[Filename, FileButton]()
+	AddValueType[FontName, FontButton]()
+	AddValueType[keymap.MapName, KeyMapButton]()
+	AddValueType[key.Chord, KeyChordButton]()
 }

@@ -215,7 +215,8 @@ func (ts *Tabs) NewTab(label string, icon ...icons.Icon) *Frame {
 // can also be passed for the tab button.
 func (ts *Tabs) InsertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
 	tfr := ts.FrameWidget()
-	frame := tree.InsertNewChild[*Frame](tfr, idx)
+	frame := NewFrame()
+	tfr.InsertChild(frame, idx)
 	frame.SetName(label)
 	frame.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
@@ -239,7 +240,8 @@ func (ts *Tabs) AddTab(frame *Frame, label string) int {
 // for internal use only. An optional icon can also be passed for the tab button.
 func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, icon ...icons.Icon) {
 	tb := ts.Tabs()
-	tab := tree.InsertNewChild[*Tab](tb, idx)
+	tab := tree.New[Tab]()
+	tb.InsertChild(tab, idx)
 	tab.SetName(label)
 	tab.SetText(label).SetType(ts.Type).SetCloseIcon(ts.CloseIcon).SetMaxChars(ts.MaxChars).SetTooltip(label)
 	if len(icon) > 0 {

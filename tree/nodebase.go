@@ -366,14 +366,9 @@ func (n *NodeBase) InsertChild(kid Node, index int) error {
 // in children list. The name defaults to the ID (kebab-case) name
 // of the type, plus the [Node.NumLifetimeChildren] of the parent.
 func (n *NodeBase) InsertNewChild(typ *types.Type, index int) Node {
-	if err := checkThis(n); err != nil {
-		return nil
-	}
-	kid := newOfType(typ)
-	initNode(kid)
-	n.Children = slices.Insert(n.Children, index, kid)
-	SetParent(kid, n)
-	return kid
+	c := NewOfType(typ)
+	n.InsertChild(c, index)
+	return c
 }
 
 // Deleting Children:
@@ -729,7 +724,7 @@ func copyFrom(to, from Node) {
 // Any pointers within the cloned tree will correctly point within the new
 // cloned tree (see [Node.CopyFrom] for more information).
 func (n *NodeBase) Clone() Node {
-	nc := newOfType(n.NodeType()) // TODO(config): optimize
+	nc := n.New()
 	initNode(nc)
 	nc.AsTree().SetName(n.Name)
 	nc.AsTree().CopyFrom(n.This)

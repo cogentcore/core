@@ -95,12 +95,6 @@ func MoveToParent(child Node, parent Node) {
 	parent.AsTree().AddChild(child)
 }
 
-// InsertNewChild is a generic helper function for [NodeBase.InsertNewChild].
-func InsertNewChild[T Node](parent Node, at int) T {
-	var n T
-	return parent.AsTree().InsertNewChild(n.AsTree().NodeType(), at).(T)
-}
-
 // ParentByType is a generic helper function for [NodeBase.ParentByType].
 func ParentByType[T Node](n Node, embeds bool) T {
 	var nt T
