@@ -124,7 +124,7 @@ func (n *NodeBase) New() Node {
 // BaseType returns the base node type for all elements within this tree.
 // This is used in the GUI for determining what types of children can be created.
 func (n *NodeBase) BaseType() *types.Type {
-	return NodeBaseType
+	return types.For[NodeBase]()
 }
 
 // Parents:

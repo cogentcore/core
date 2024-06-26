@@ -125,8 +125,8 @@ func TestNodeFindType(t *testing.T) {
 	ne := testdata.NewNodeEmbed(parent)
 	nb := NewNodeBase(parent)
 
-	assert.True(t, ne.NodeType().HasEmbed(NodeBaseType))
-	assert.True(t, nb.NodeType().HasEmbed(NodeBaseType))
+	assert.True(t, ne.NodeType().HasEmbed(types.For[NodeBase]()))
+	assert.True(t, nb.NodeType().HasEmbed(types.For[NodeBase]()))
 
 	c0 := ChildByType[*testdata.NodeEmbed](parent)
 	assert.Equal(t, ne, c0)
@@ -177,9 +177,9 @@ func TestNodeUpdate(t *testing.T) {
 	NewNodeBase(parent).SetName("child3")
 
 	plan1 := TypePlan{
-		{Type: testdata.NodeEmbedType, Name: "child2"},
-		{Type: testdata.NodeEmbedType, Name: "child3"},
-		{Type: testdata.NodeEmbedType, Name: "child1"},
+		{Type: types.For[testdata.NodeEmbed](), Name: "child2"},
+		{Type: types.For[testdata.NodeEmbed](), Name: "child3"},
+		{Type: types.For[testdata.NodeEmbed](), Name: "child1"},
 	}
 
 	Update(parent, plan1)
@@ -187,11 +187,11 @@ func TestNodeUpdate(t *testing.T) {
 	cf1 := fmt.Sprintf("plan1:\n%v\n", parent.Children)
 
 	plan2 := TypePlan{
-		{testdata.NodeEmbedType, "child4"},
-		{NodeBaseType, "child1"}, // note: changing this to Node type removes child1.subchild1
-		{testdata.NodeEmbedType, "child5"},
-		{testdata.NodeEmbedType, "child3"},
-		{testdata.NodeEmbedType, "child6"},
+		{types.For[testdata.NodeEmbed](), "child4"},
+		{types.For[NodeBase](), "child1"}, // note: changing this to Node type removes child1.subchild1
+		{types.For[testdata.NodeEmbed](), "child5"},
+		{types.For[testdata.NodeEmbed](), "child3"},
+		{types.For[testdata.NodeEmbed](), "child6"},
 	}
 
 	Update(parent, plan2)

@@ -68,6 +68,12 @@ func TypeByReflectType(typ reflect.Type) *Type {
 	return TypeByName(TypeName(typ))
 }
 
+// For returns the [Type] of the generic type parameter.
+func For[T any]() *Type {
+	var v T
+	return TypeByValue(v)
+}
+
 // AddType adds a constructed [Type] to the registry
 // and returns it. This sets the ID.
 func AddType(typ *Type) *Type {
