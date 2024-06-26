@@ -142,7 +142,7 @@ func IsNode(typ reflect.Type) bool {
 
 // newOfType returns a new instance of the given [Node] type.
 func newOfType(typ *types.Type) Node {
-	return typ.Instance.(Node).AsTree().New()
+	return reflect.New(reflect.TypeOf(typ.Instance).Elem()).Interface().(Node)
 }
 
 // SetUniqueName sets the name of the node to be unique, using
