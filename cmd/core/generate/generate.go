@@ -38,12 +38,6 @@ var TreeMethodsTmpl = template.Must(template.New("TreeMethods").
 	{{DocToComment .Doc}}
 	func New{{.LocalName}}(parent ...{{TreePkg .}}Node) *{{.LocalName}} { return {{TreePkg .}}New[{{.LocalName}}](parent...) }
 	{{end}}
-
-	// NodeType returns the [*types.Type] of [{{.LocalName}}]
-	func (t *{{.LocalName}}) NodeType() *types.Type { return {{.LocalName}}Type }
-
-	// New returns a new [*{{.LocalName}}] value
-	func (t *{{.LocalName}}) New() {{TreePkg .}}Node { return &{{.LocalName}}{} }
 	
 	{{if HasEmbedDirective .}}
 	// {{.LocalName}}Embedder is an interface that all types that embed {{.LocalName}} satisfy
