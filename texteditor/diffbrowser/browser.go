@@ -92,7 +92,7 @@ func (br *Browser) MakeToolbar(p *tree.Plan) {
 func (br *Browser) ViewDiff(fn *Node) *texteditor.DiffEditor {
 	df := fsx.DirAndFile(fn.FileA)
 	tabs := br.Tabs()
-	tab := tabs.RecycleTab(df, true)
+	tab := tabs.RecycleTab(df)
 	if tab.HasChildren() {
 		dv := tab.Child(1).(*texteditor.DiffEditor)
 		return dv
