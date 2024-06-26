@@ -505,6 +505,18 @@ func TestClone(t *testing.T) {
 	*/
 }
 
+func TestLiveType(t *testing.T) {
+	type myNode struct {
+		NodeBase
+		MyField string
+	}
+	n := New[myNode]()
+	assert.Equal(t, "cogentcore.org/core/tree_test.myNode", n.NodeType().Name)
+	assert.Equal(t, "my-node", n.NodeType().IDName)
+	assert.IsType(t, &myNode{}, n.NodeType().Instance)
+	assert.IsType(t, &myNode{}, n.New())
+}
+
 func BenchmarkNodeType(b *testing.B) {
 	n := NewNodeBase()
 	for range b.N {

@@ -15,6 +15,7 @@ import (
 	"github.com/jinzhu/copier"
 
 	"cogentcore.org/core/base/elide"
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/base/tiered"
 	"cogentcore.org/core/types"
 )
@@ -112,8 +113,19 @@ func (n *NodeBase) PlanName() string {
 }
 
 // NodeType returns the [types.Type] of this node.
+// If there is no [types.Type] registered for this node already,
+// it registers one and then returns it.
 func (n *NodeBase) NodeType() *types.Type {
-	return types.TypeByValue(n.This)
+	if t := types.TypeByValue(n.This); t != nil {
+		return t
+	}
+	name := types.TypeNameValue(n.This)
+	li := strings.LastIndex(name, ".")
+	return types.AddType(&types.Type{
+		Name:     name,
+		IDName:   strcase.ToKebab(name[li+1:]),
+		Instance: n.New(),
+	})
 }
 
 // New returns a new instance of this node type.
