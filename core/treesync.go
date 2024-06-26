@@ -176,7 +176,8 @@ func (tr *Tree) InsertBefore() { //types:add
 func (tr *Tree) AddTreeNodes(rel, myidx int, typ *types.Type, n int) {
 	var stv *Tree
 	for i := 0; i < n; i++ {
-		nn := tr.InsertNewChild(typ, myidx+i)
+		nn := tree.NewOfType(typ)
+		tr.InsertChild(nn, myidx+i)
 		nn.AsTree().SetName(fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i))
 		ntv := AsTree(nn)
 		ntv.Update()
@@ -196,7 +197,8 @@ func (tr *Tree) AddSyncNodes(rel, myidx int, typ *types.Type, n int) {
 	parent := tr.SyncNode
 	var sn tree.Node
 	for i := 0; i < n; i++ {
-		nn := parent.AsTree().InsertNewChild(typ, myidx+i)
+		nn := tree.NewOfType(typ)
+		parent.AsTree().InsertChild(nn, myidx+i)
 		nn.AsTree().SetName(fmt.Sprintf("new-%v-%v", typ.IDName, myidx+rel+i))
 		if i == n-1 {
 			sn = nn

@@ -65,7 +65,8 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 		index := n.IndexInParent()
 		if index >= 0 {
 			n.Delete()
-			n.This = parent.AsTree().InsertNewChild(typ, index)
+			n.This = NewOfType(typ)
+			parent.AsTree().InsertChild(n.This, index)
 			n = n.This.AsTree() // our NodeBase pointer is now different
 		}
 	}

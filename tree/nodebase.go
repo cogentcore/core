@@ -362,15 +362,6 @@ func (n *NodeBase) InsertChild(kid Node, index int) error {
 	return nil
 }
 
-// InsertNewChild creates a new child of given type and add at position
-// in children list. The name defaults to the ID (kebab-case) name
-// of the type, plus the [Node.NumLifetimeChildren] of the parent.
-func (n *NodeBase) InsertNewChild(typ *types.Type, index int) Node {
-	c := NewOfType(typ)
-	n.InsertChild(c, index)
-	return c
-}
-
 // Deleting Children:
 
 // DeleteChildAt deletes child at the given index. It returns false
