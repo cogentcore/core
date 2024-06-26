@@ -18,7 +18,6 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/types"
 )
 
 // Tabs divide widgets into logical groups and give users the ability
@@ -349,35 +348,27 @@ func (ts *Tabs) SelectTabByName(name string) *Frame {
 }
 
 // RecycleTab returns a tab with given name, first by looking for an existing one,
-// and if not found, making a new one. If sel, then select it. It returns the
-// frame for the tab.
-func (ts *Tabs) RecycleTab(name string, sel bool) *Frame {
+// and if not found, making a new one. It returns the frame for the tab.
+func (ts *Tabs) RecycleTab(name string) *Frame {
 	frame := ts.TabByName(name)
-	if frame != nil {
-		if sel {
-			ts.SelectTabByName(name)
-		}
-		return frame
+	if frame == nil {
+		frame = ts.NewTab(name)
 	}
-	frame = ts.NewTab(name)
-	if sel {
-		ts.SelectTabByName(name)
-	}
+	ts.SelectTabByName(name)
 	return frame
 }
 
-// RecycleTabWidget returns a tab with given widget type in the tab frame,
+// RecycleTabWidget returns a tab with the given widget type in the tab frame,
 // first by looking for an existing one, with given name, and if not found,
-// making and configuring a new one.
-// If sel, then select it. It returns the Widget item for the tab.
-func (ts *Tabs) RecycleTabWidget(name string, sel bool, typ *types.Type) Widget {
-	fr := ts.RecycleTab(name, sel)
+// making and configuring a new one. It returns the resulting widget.
+func RecycleTabWidget[T tree.NodeValue](ts *Tabs, name string) *T {
+	fr := ts.RecycleTab(name)
 	if fr.HasChildren() {
-		return fr.Child(0).(Widget)
+		return any(fr.Child(0)).(*T)
 	}
-	wi := fr.NewChild(typ).(Widget)
-	wi.AsWidget().UpdateWidget()
-	return wi
+	w := tree.New[T](fr)
+	any(w).(Widget).AsWidget().UpdateWidget()
+	return w
 }
 
 // DeleteTabIndex deletes tab at given index, returning whether it was successful.
