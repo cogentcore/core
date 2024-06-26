@@ -6,7 +6,6 @@ package tree
 
 import (
 	"cogentcore.org/core/base/slicesx"
-	"cogentcore.org/core/types"
 )
 
 // IndexOf returns the index of the given node in the given slice,
@@ -23,14 +22,4 @@ func IndexOf(slice []Node, child Node, startIndex ...int) int {
 // has the given name, or -1 if none is found. See [IndexOf] for info on startIndex.
 func IndexByName(slice []Node, name string, startIndex ...int) int {
 	return slicesx.Search(slice, func(ch Node) bool { return ch.AsTree().Name == name }, startIndex...)
-}
-
-// IndexByType returns the index of the first element that either is the given type
-// or embeds it if embeds it true. It returns -1 if no such node is found.
-// See [IndexOf] for info on startIndex.
-func IndexByType(slice []Node, t *types.Type, embeds bool, startIndex ...int) int {
-	if embeds {
-		return slicesx.Search(slice, func(ch Node) bool { return ch.AsTree().NodeType().HasEmbed(t) }, startIndex...)
-	}
-	return slicesx.Search(slice, func(ch Node) bool { return ch.AsTree().NodeType() == t }, startIndex...)
 }

@@ -12,6 +12,7 @@ import (
 	"sync/atomic"
 
 	"cogentcore.org/core/base/errors"
+	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/types"
 )
 
@@ -109,10 +110,18 @@ func ParentByType[T Node](n Node) T {
 }
 
 // ChildByType is a generic helper function for [NodeBase.ChildByType].
-func ChildByType[T Node](k Node, embeds bool, startIndex ...int) T {
-	var n T
-	v, _ := k.AsTree().ChildByType(n.AsTree().NodeType(), embeds, startIndex...).(T)
-	return v
+func ChildByType[T Node](n Node, startIndex ...int) T {
+	nb := n.AsTree()
+	idx := slicesx.Search(nb.Children, func(ch Node) bool {
+		_, ok := ch.(T)
+		return ok
+	}, startIndex...)
+	ch := nb.Child(idx)
+	if ch == nil {
+		var z T
+		return z
+	}
+	return ch.(T)
 }
 
 // IsRoot returns whether the given node is the root node in its tree.

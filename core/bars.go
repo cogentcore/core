@@ -123,11 +123,7 @@ func (sc *Scene) GetTopAppBar() *Toolbar {
 	if tb == nil {
 		return nil
 	}
-	tab := tb.ChildByType(ToolbarType, tree.NoEmbeds)
-	if tab != nil {
-		return tab.(*Toolbar)
-	}
-	return nil
+	return tree.ChildByType[*Toolbar](tb)
 }
 
 // InheritBarsWidget inherits Bar functions based on a source widget

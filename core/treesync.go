@@ -234,7 +234,7 @@ func (tr *Tree) InsertAt(rel int, actNm string) {
 	d := NewBody().AddTitle(actNm).AddText("Number and type of items to insert:")
 	nd := &NewItemsData{Number: 1, Type: typ}
 	sv := NewForm(d).SetStruct(nd) // TODO(config)
-	tree.ChildByType[*Chooser](sv, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
+	tree.ChildByType[*Chooser](sv).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
 	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {

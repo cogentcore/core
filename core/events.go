@@ -1111,7 +1111,7 @@ func (em *Events) ManagerKeyChordEvents(e events.Event) {
 		}
 	case keymap.Menu:
 		if tb := sc.GetTopAppBar(); tb != nil {
-			ch := tree.ChildByType[*Chooser](tb, true)
+			ch := tree.ChildByType[*Chooser](tb)
 			if ch != nil {
 				ch.SetFocusEvent()
 				ch.TextField().OfferComplete()

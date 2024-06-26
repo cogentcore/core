@@ -129,10 +129,10 @@ func TestNodeFindType(t *testing.T) {
 	assert.True(t, ne.NodeType().HasEmbed(NodeBaseType))
 	assert.True(t, nb.NodeType().HasEmbed(NodeBaseType))
 
-	idx := IndexByType(parent.Children, testdata.NodeEmbedType, NoEmbeds, 0)
-	assert.Equal(t, 0, idx)
-	idx = IndexByType(parent.Children, NodeBaseType, NoEmbeds, 0)
-	assert.Equal(t, 1, idx)
+	c0 := ChildByType[*testdata.NodeEmbed](parent)
+	assert.Equal(t, ne, c0)
+	c1 := ChildByType[*NodeBase](parent)
+	assert.Equal(t, nb, c1)
 }
 
 func TestNodeMove(t *testing.T) {

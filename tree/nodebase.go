@@ -200,17 +200,6 @@ func (n *NodeBase) ChildByName(name string, startIndex ...int) Node {
 	return n.Child(IndexByName(n.Children, name, startIndex...))
 }
 
-// ChildByType returns the first child that has the given type, and nil
-// if not found. If embeds is true, then it also looks for any type that
-// embeds the given type at any level of anonymous embedding.
-// startIndex arg allows for optimized bidirectional find if you have an
-// idea where it might be, which can be a key speedup for large lists. If
-// no value is specified for startIndex, it starts in the middle, which is a
-// good default.
-func (n *NodeBase) ChildByType(t *types.Type, embeds bool, startIndex ...int) Node {
-	return n.Child(IndexByType(n.Children, t, embeds, startIndex...))
-}
-
 // Paths:
 
 // TODO: is this the best way to escape paths?
