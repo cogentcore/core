@@ -170,25 +170,6 @@ func (n *NodeBase) ParentByName(name string) Node {
 	return n.Parent.AsTree().ParentByName(name)
 }
 
-// ParentByType finds parent recursively up hierarchy, by type, and
-// returns nil if not found. If embeds is true, then it looks for any
-// type that embeds the given type at any level of anonymous embedding.
-func (n *NodeBase) ParentByType(t *types.Type, embeds bool) Node {
-	if IsRoot(n) {
-		return nil
-	}
-	if embeds {
-		if n.Parent.AsTree().NodeType().HasEmbed(t) {
-			return n.Parent
-		}
-	} else {
-		if n.Parent.AsTree().NodeType() == t {
-			return n.Parent
-		}
-	}
-	return n.Parent.AsTree().ParentByType(t, embeds)
-}
-
 // Children:
 
 // HasChildren returns whether this node has any children.

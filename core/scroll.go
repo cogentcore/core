@@ -265,11 +265,8 @@ func (fr *Frame) ScrollDelta(e events.Event) {
 
 // ParentScrollFrame returns the first parent frame that has active scrollbars.
 func (wb *WidgetBase) ParentScrollFrame() *Frame {
-	fri := wb.ParentByType(FrameType, tree.Embeds)
-	if fri == nil {
-		return nil
-	}
-	fr := AsFrame(fri)
+	ly := tree.ParentByType[Layouter](wb)
+	fr := ly.AsFrame()
 	if fr.HasAnyScroll() {
 		return fr
 	}

@@ -81,11 +81,7 @@ func (tn *Node) OnDoubleClick(e events.Event) {
 
 // Browser returns the parent browser
 func (tn *Node) Browser() *Browser {
-	bri := tn.ParentByType(BrowserType, false)
-	if bri != nil {
-		return bri.(*Browser)
-	}
-	return nil
+	return tree.ParentByType[*Browser](tn)
 }
 
 func (tn *Node) ContextMenu(m *core.Scene) {

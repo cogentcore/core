@@ -70,6 +70,8 @@ const (
 // Lister is the interface used by [ListBase] to
 // support any abstractions needed for different types of lists.
 type Lister interface {
+	tree.Node
+
 	// AsListBase returns the base for direct access to relevant fields etc
 	AsListBase() *ListBase
 
@@ -1895,12 +1897,11 @@ func (lg *ListGrid) SetScrollParams(d math32.Dims, sb *Slider) {
 }
 
 func (lg *ListGrid) List() (Lister, *ListBase) {
-	svi := lg.ParentByType(ListBaseType, tree.Embeds)
-	if svi == nil {
+	ls := tree.ParentByType[Lister](lg)
+	if ls == nil {
 		return nil, nil
 	}
-	sv := svi.(Lister)
-	return sv, sv.AsListBase()
+	return ls, ls.AsListBase()
 }
 
 func (lg *ListGrid) ScrollChanged(d math32.Dims, sb *Slider) {

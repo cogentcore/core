@@ -95,11 +95,17 @@ func MoveToParent(child Node, parent Node) {
 	parent.AsTree().AddChild(child)
 }
 
-// ParentByType is a generic helper function for [NodeBase.ParentByType].
-func ParentByType[T Node](n Node, embeds bool) T {
-	var nt T
-	v, _ := n.AsTree().ParentByType(nt.AsTree().NodeType(), embeds).(T)
-	return v
+// ParentByType returns the first parent of the given node that is
+// of the given type, if any such node exists.
+func ParentByType[T Node](n Node) T {
+	if IsRoot(n) {
+		var z T
+		return z
+	}
+	if p, ok := n.AsTree().Parent.(T); ok {
+		return p
+	}
+	return ParentByType[T](n.AsTree().Parent)
 }
 
 // ChildByType is a generic helper function for [NodeBase.ChildByType].

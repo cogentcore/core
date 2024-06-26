@@ -144,8 +144,8 @@ type Layouter interface {
 
 // AsFrame returns the given value as a value of type [Frame] if the type
 // of the given value embeds [Frame], or nil otherwise.
-func AsFrame(k tree.Node) *Frame {
-	if t, ok := k.(Layouter); ok {
+func AsFrame(n tree.Node) *Frame {
+	if t, ok := n.(Layouter); ok {
 		return t.AsFrame()
 	}
 	return nil

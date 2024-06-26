@@ -653,11 +653,7 @@ func (tv *DiffTextEditor) Init() {
 }
 
 func (tv *DiffTextEditor) DiffEditor() *DiffEditor {
-	dvi := tv.ParentByType(DiffEditorType, tree.NoEmbeds)
-	if dvi == nil {
-		return nil
-	}
-	return dvi.(*DiffEditor)
+	return tree.ParentByType[*DiffEditor](tv)
 }
 
 func (tv *DiffTextEditor) HandleDoubleClick() {
