@@ -24,7 +24,7 @@ var SceneType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzcore
 // Scene is a core.Widget that manages a xyz.Scene,
 // providing the basic rendering logic for the 3D scene
 // in the 2D core GUI context.
-func NewScene(parent ...tree.Node) *Scene { return tree.New[*Scene](parent...) }
+func NewScene(parent ...tree.Node) *Scene { return tree.New[Scene](parent...) }
 
 // NodeType returns the [*types.Type] of [Scene]
 func (t *Scene) NodeType() *types.Type { return SceneType }
@@ -54,7 +54,7 @@ var SceneEditorType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/x
 // NewSceneEditor returns a new [SceneEditor] with the given optional parent:
 // SceneEditor provides a toolbar controller and manipulation abilities
 // for a [Scene].
-func NewSceneEditor(parent ...tree.Node) *SceneEditor { return tree.New[*SceneEditor](parent...) }
+func NewSceneEditor(parent ...tree.Node) *SceneEditor { return tree.New[SceneEditor](parent...) }
 
 // NodeType returns the [*types.Type] of [SceneEditor]
 func (t *SceneEditor) NodeType() *types.Type { return SceneEditorType }
@@ -67,7 +67,7 @@ var MeshButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xy
 
 // NewMeshButton returns a new [MeshButton] with the given optional parent:
 // MeshButton represents an [xyz.MeshName] value with a button.
-func NewMeshButton(parent ...tree.Node) *MeshButton { return tree.New[*MeshButton](parent...) }
+func NewMeshButton(parent ...tree.Node) *MeshButton { return tree.New[MeshButton](parent...) }
 
 // NodeType returns the [*types.Type] of [MeshButton]
 func (t *MeshButton) NodeType() *types.Type { return MeshButtonType }

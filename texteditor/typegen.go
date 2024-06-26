@@ -39,7 +39,7 @@ var DiffEditorType = types.AddType(&types.Type{Name: "cogentcore.org/core/texted
 // NewDiffEditor returns a new [DiffEditor] with the given optional parent:
 // DiffEditor presents two side-by-side [Editor]s showing the differences
 // between two files (represented as lines of strings).
-func NewDiffEditor(parent ...tree.Node) *DiffEditor { return tree.New[*DiffEditor](parent...) }
+func NewDiffEditor(parent ...tree.Node) *DiffEditor { return tree.New[DiffEditor](parent...) }
 
 // NodeType returns the [*types.Type] of [DiffEditor]
 func (t *DiffEditor) NodeType() *types.Type { return DiffEditorType }
@@ -74,7 +74,7 @@ var DiffTextEditorType = types.AddType(&types.Type{Name: "cogentcore.org/core/te
 // DiffTextEditor supports double-click based application of edits from one
 // buffer to the other.
 func NewDiffTextEditor(parent ...tree.Node) *DiffTextEditor {
-	return tree.New[*DiffTextEditor](parent...)
+	return tree.New[DiffTextEditor](parent...)
 }
 
 // NodeType returns the [*types.Type] of [DiffTextEditor]
@@ -101,7 +101,7 @@ var EditorType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor
 // Multiple editors can be attached to a given buffer.  All updating in the
 // Editor should be within a single goroutine, as it would require
 // extensive protections throughout code otherwise.
-func NewEditor(parent ...tree.Node) *Editor { return tree.New[*Editor](parent...) }
+func NewEditor(parent ...tree.Node) *Editor { return tree.New[Editor](parent...) }
 
 // NodeType returns the [*types.Type] of [Editor]
 func (t *Editor) NodeType() *types.Type { return EditorType }
@@ -161,7 +161,7 @@ var TwinEditorsType = types.AddType(&types.Type{Name: "cogentcore.org/core/texte
 // NewTwinEditors returns a new [TwinEditors] with the given optional parent:
 // TwinEditors presents two side-by-side [Editor]s in [core.Splits]
 // that scroll in sync with each other.
-func NewTwinEditors(parent ...tree.Node) *TwinEditors { return tree.New[*TwinEditors](parent...) }
+func NewTwinEditors(parent ...tree.Node) *TwinEditors { return tree.New[TwinEditors](parent...) }
 
 // NodeType returns the [*types.Type] of [TwinEditors]
 func (t *TwinEditors) NodeType() *types.Type { return TwinEditorsType }

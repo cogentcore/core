@@ -17,7 +17,7 @@ var SimMatGridType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor
 // NewSimMatGrid returns a new [SimMatGrid] with the given optional parent:
 // SimMatGrid is a widget that displays a similarity / distance matrix
 // with tensor values as a grid of colored squares, and labels for rows and columns.
-func NewSimMatGrid(parent ...tree.Node) *SimMatGrid { return tree.New[*SimMatGrid](parent...) }
+func NewSimMatGrid(parent ...tree.Node) *SimMatGrid { return tree.New[SimMatGrid](parent...) }
 
 // NodeType returns the [*types.Type] of [SimMatGrid]
 func (t *SimMatGrid) NodeType() *types.Type { return SimMatGridType }
@@ -30,7 +30,7 @@ var TableType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tens
 
 // NewTable returns a new [Table] with the given optional parent:
 // Table provides a GUI widget for representing [table.Table] values.
-func NewTable(parent ...tree.Node) *Table { return tree.New[*Table](parent...) }
+func NewTable(parent ...tree.Node) *Table { return tree.New[Table](parent...) }
 
 // NodeType returns the [*types.Type] of [Table]
 func (t *Table) NodeType() *types.Type { return TableType }
@@ -67,7 +67,7 @@ var TensorGridType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor
 
 // NewTensorGrid returns a new [TensorGrid] with the given optional parent:
 // TensorGrid is a widget that displays tensor values as a grid of colored squares.
-func NewTensorGrid(parent ...tree.Node) *TensorGrid { return tree.New[*TensorGrid](parent...) }
+func NewTensorGrid(parent ...tree.Node) *TensorGrid { return tree.New[TensorGrid](parent...) }
 
 // NodeType returns the [*types.Type] of [TensorGrid]
 func (t *TensorGrid) NodeType() *types.Type { return TensorGridType }
@@ -89,7 +89,7 @@ var TensorButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/tens
 // NewTensorButton returns a new [TensorButton] with the given optional parent:
 // TensorButton represents a Tensor with a button for making a [TensorView]
 // viewer for an [tensor.Tensor].
-func NewTensorButton(parent ...tree.Node) *TensorButton { return tree.New[*TensorButton](parent...) }
+func NewTensorButton(parent ...tree.Node) *TensorButton { return tree.New[TensorButton](parent...) }
 
 // NodeType returns the [*types.Type] of [TensorButton]
 func (t *TensorButton) NodeType() *types.Type { return TensorButtonType }
@@ -105,7 +105,7 @@ var TableButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/tenso
 
 // NewTableButton returns a new [TableButton] with the given optional parent:
 // TableButton presents a button that pulls up the [Table] viewer for a [table.Table].
-func NewTableButton(parent ...tree.Node) *TableButton { return tree.New[*TableButton](parent...) }
+func NewTableButton(parent ...tree.Node) *TableButton { return tree.New[TableButton](parent...) }
 
 // NodeType returns the [*types.Type] of [TableButton]
 func (t *TableButton) NodeType() *types.Type { return TableButtonType }
@@ -121,7 +121,7 @@ var SimMatButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/tens
 
 // NewSimMatButton returns a new [SimMatButton] with the given optional parent:
 // SimMatValue presents a button that pulls up the [SimMatGridView] viewer for a [table.Table].
-func NewSimMatButton(parent ...tree.Node) *SimMatButton { return tree.New[*SimMatButton](parent...) }
+func NewSimMatButton(parent ...tree.Node) *SimMatButton { return tree.New[SimMatButton](parent...) }
 
 // NodeType returns the [*types.Type] of [SimMatButton]
 func (t *SimMatButton) NodeType() *types.Type { return SimMatButtonType }

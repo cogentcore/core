@@ -20,9 +20,18 @@ import (
 // New returns a new node of the given type with the given optional parent.
 // If the name is unspecified, it defaults to the ID (kebab-case) name of
 // the type, plus the [Node.NumLifetimeChildren] of the parent.
-func New[T Node](parent ...Node) T {
-	var n T
-	return NewOfType(n.AsTree().NodeType(), parent...).(T)
+func New[T NodeValue](parent ...Node) *T {
+	n := new(T)
+	ni := any(n).(Node)
+	initNode(ni)
+	if len(parent) == 0 {
+		ni.AsTree().SetName(ni.AsTree().NodeType().IDName)
+		return n
+	}
+	p := parent[0]
+	p.AsTree().Children = append(p.AsTree().Children, ni)
+	SetParent(ni, p)
+	return n
 }
 
 // NewOfType returns a new node of the given [types.Type] with the given optional parent.
@@ -30,17 +39,12 @@ func New[T Node](parent ...Node) T {
 // the type, plus the [Node.NumLifetimeChildren] of the parent.
 func NewOfType(typ *types.Type, parent ...Node) Node {
 	if len(parent) == 0 {
-		return newRoot(typ)
+		n := newOfType(typ)
+		initNode(n)
+		n.AsTree().SetName(n.AsTree().NodeType().IDName)
+		return n
 	}
 	return parent[0].AsTree().NewChild(typ)
-}
-
-// newRoot returns a new initialized node of the given type without a parent.
-func newRoot(typ *types.Type) Node {
-	n := newOfType(typ)
-	initNode(n)
-	n.AsTree().SetName(n.AsTree().NodeType().IDName)
-	return n
 }
 
 // initNode initializes the node.

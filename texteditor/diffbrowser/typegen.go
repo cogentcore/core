@@ -15,7 +15,7 @@ var BrowserType = types.AddType(&types.Type{Name: "cogentcore.org/core/textedito
 // Browser is a diff browser, for browsing a set of paired files
 // for viewing differences between them, organized into a tree
 // structure, e.g., reflecting their source in a filesystem.
-func NewBrowser(parent ...tree.Node) *Browser { return tree.New[*Browser](parent...) }
+func NewBrowser(parent ...tree.Node) *Browser { return tree.New[Browser](parent...) }
 
 // NodeType returns the [*types.Type] of [Browser]
 func (t *Browser) NodeType() *types.Type { return BrowserType }
@@ -36,7 +36,7 @@ var NodeType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor/d
 
 // NewNode returns a new [Node] with the given optional parent:
 // Node is an element in the diff tree
-func NewNode(parent ...tree.Node) *Node { return tree.New[*Node](parent...) }
+func NewNode(parent ...tree.Node) *Node { return tree.New[Node](parent...) }
 
 // NodeType returns the [*types.Type] of [Node]
 func (t *Node) NodeType() *types.Type { return NodeType }

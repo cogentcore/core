@@ -13,7 +13,7 @@ var NodeEmbedType = types.AddType(&types.Type{Name: "cogentcore.org/core/tree/te
 // NewNodeEmbed returns a new [NodeEmbed] with the given optional parent:
 // NodeEmbed embeds tree.Node and adds a couple of fields.
 // It also has a directive processed by typegen.
-func NewNodeEmbed(parent ...tree.Node) *NodeEmbed { return tree.New[*NodeEmbed](parent...) }
+func NewNodeEmbed(parent ...tree.Node) *NodeEmbed { return tree.New[NodeEmbed](parent...) }
 
 // NodeType returns the [*types.Type] of [NodeEmbed]
 func (t *NodeEmbed) NodeType() *types.Type { return NodeEmbedType }

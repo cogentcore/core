@@ -143,7 +143,7 @@ func NewBodyScene(body *Body) *Scene {
 // NewScene creates a new Scene object without a Body, e.g., for use
 // in a Menu, Tooltip or other such simple popups or non-control-bar Scenes.
 func NewScene(name ...string) *Scene {
-	sc := tree.New[*Scene]()
+	sc := tree.New[Scene]()
 	if len(name) > 0 {
 		sc.SetName(name[0])
 	}

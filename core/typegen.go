@@ -46,7 +46,7 @@ var ButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Butto
 // Button is an interactive button with text, an icon, an indicator, a shortcut,
 // and/or a menu. The standard behavior is to register a click event handler with
 // OnClick.
-func NewButton(parent ...tree.Node) *Button { return tree.New[*Button](parent...) }
+func NewButton(parent ...tree.Node) *Button { return tree.New[Button](parent...) }
 
 // NodeType returns the [*types.Type] of [Button]
 func (t *Button) NodeType() *types.Type { return ButtonType }
@@ -114,7 +114,7 @@ var CanvasType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Canva
 // NewCanvas returns a new [Canvas] with the given optional parent:
 // Canvas is a widget that can be arbitrarily drawn to by setting
 // its Draw function using [Canvas.SetDraw].
-func NewCanvas(parent ...tree.Node) *Canvas { return tree.New[*Canvas](parent...) }
+func NewCanvas(parent ...tree.Node) *Canvas { return tree.New[Canvas](parent...) }
 
 // NodeType returns the [*types.Type] of [Canvas]
 func (t *Canvas) NodeType() *types.Type { return CanvasType }
@@ -135,7 +135,7 @@ var ChooserType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Choo
 // NewChooser returns a new [Chooser] with the given optional parent:
 // Chooser is a drop down selection widget that allows users to choose
 // one option among a list of items.
-func NewChooser(parent ...tree.Node) *Chooser { return tree.New[*Chooser](parent...) }
+func NewChooser(parent ...tree.Node) *Chooser { return tree.New[Chooser](parent...) }
 
 // NodeType returns the [*types.Type] of [Chooser]
 func (t *Chooser) NodeType() *types.Type { return ChooserType }
@@ -187,7 +187,7 @@ var ColorMapButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/co
 // to display a dialog for selecting different color map options.
 // It represents a [ColorMapName] value.
 func NewColorMapButton(parent ...tree.Node) *ColorMapButton {
-	return tree.New[*ColorMapButton](parent...)
+	return tree.New[ColorMapButton](parent...)
 }
 
 // NodeType returns the [*types.Type] of [ColorMapButton]
@@ -205,7 +205,7 @@ var ColorPickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.
 // NewColorPicker returns a new [ColorPicker] with the given optional parent:
 // ColorPicker represents a color value with an interactive color picker
 // composed of three HCT sliders.
-func NewColorPicker(parent ...tree.Node) *ColorPicker { return tree.New[*ColorPicker](parent...) }
+func NewColorPicker(parent ...tree.Node) *ColorPicker { return tree.New[ColorPicker](parent...) }
 
 // NodeType returns the [*types.Type] of [ColorPicker]
 func (t *ColorPicker) NodeType() *types.Type { return ColorPickerType }
@@ -218,7 +218,7 @@ var ColorButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.
 
 // NewColorButton returns a new [ColorButton] with the given optional parent:
 // ColorButton represents a color value with a button.
-func NewColorButton(parent ...tree.Node) *ColorButton { return tree.New[*ColorButton](parent...) }
+func NewColorButton(parent ...tree.Node) *ColorButton { return tree.New[ColorButton](parent...) }
 
 // NodeType returns the [*types.Type] of [ColorButton]
 func (t *ColorButton) NodeType() *types.Type { return ColorButtonType }
@@ -276,7 +276,7 @@ var FilePickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.F
 
 // NewFilePicker returns a new [FilePicker] with the given optional parent:
 // FilePicker is a widget for selecting files.
-func NewFilePicker(parent ...tree.Node) *FilePicker { return tree.New[*FilePicker](parent...) }
+func NewFilePicker(parent ...tree.Node) *FilePicker { return tree.New[FilePicker](parent...) }
 
 // NodeType returns the [*types.Type] of [FilePicker]
 func (t *FilePicker) NodeType() *types.Type { return FilePickerType }
@@ -294,7 +294,7 @@ var FileButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.F
 // NewFileButton returns a new [FileButton] with the given optional parent:
 // FileButton represents a [Filename] value with a button
 // that opens a [FilePicker].
-func NewFileButton(parent ...tree.Node) *FileButton { return tree.New[*FileButton](parent...) }
+func NewFileButton(parent ...tree.Node) *FileButton { return tree.New[FileButton](parent...) }
 
 // NodeType returns the [*types.Type] of [FileButton]
 func (t *FileButton) NodeType() *types.Type { return FileButtonType }
@@ -310,7 +310,7 @@ var FormType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Form", 
 
 // NewForm returns a new [Form] with the given optional parent:
 // Form represents a struct with rows of field names and editable values.
-func NewForm(parent ...tree.Node) *Form { return tree.New[*Form](parent...) }
+func NewForm(parent ...tree.Node) *Form { return tree.New[Form](parent...) }
 
 // NodeType returns the [*types.Type] of [Form]
 func (t *Form) NodeType() *types.Type { return FormType }
@@ -340,7 +340,7 @@ var FrameType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Frame"
 // generally be set to the desired number of columns, from which the number of rows
 // is computed; otherwise, it uses the square root of number of
 // elements.
-func NewFrame(parent ...tree.Node) *Frame { return tree.New[*Frame](parent...) }
+func NewFrame(parent ...tree.Node) *Frame { return tree.New[Frame](parent...) }
 
 // NodeType returns the [*types.Type] of [Frame]
 func (t *Frame) NodeType() *types.Type { return FrameType }
@@ -367,7 +367,7 @@ var StretchType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Stre
 // available space. You can set [styles.Style.Grow] to change
 // how much it grows relative to other growing elements.
 // It does not render anything.
-func NewStretch(parent ...tree.Node) *Stretch { return tree.New[*Stretch](parent...) }
+func NewStretch(parent ...tree.Node) *Stretch { return tree.New[Stretch](parent...) }
 
 // NodeType returns the [*types.Type] of [Stretch]
 func (t *Stretch) NodeType() *types.Type { return StretchType }
@@ -383,7 +383,7 @@ var SpaceType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Space"
 // a default width of 1ch and a height of 1em.
 // You can set [styles.Style.Min] to change its size.
 // It does not render anything.
-func NewSpace(parent ...tree.Node) *Space { return tree.New[*Space](parent...) }
+func NewSpace(parent ...tree.Node) *Space { return tree.New[Space](parent...) }
 
 // NodeType returns the [*types.Type] of [Space]
 func (t *Space) NodeType() *types.Type { return SpaceType }
@@ -404,7 +404,7 @@ var FuncButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.F
 // required; add a `//types:add` comment directive and run `core generate`
 // if you want tooltips. If the function is a method, both the method and
 // its receiver type must be added to [types] to get documentation.
-func NewFuncButton(parent ...tree.Node) *FuncButton { return tree.New[*FuncButton](parent...) }
+func NewFuncButton(parent ...tree.Node) *FuncButton { return tree.New[FuncButton](parent...) }
 
 // NodeType returns the [*types.Type] of [FuncButton]
 func (t *FuncButton) NodeType() *types.Type { return FuncButtonType }
@@ -479,7 +479,7 @@ var HandleType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Handl
 // Handle represents a draggable handle that can be used to
 // control the size of an element. The [Handle.Styles.Direction]
 // controls the direction in which the handle moves.
-func NewHandle(parent ...tree.Node) *Handle { return tree.New[*Handle](parent...) }
+func NewHandle(parent ...tree.Node) *Handle { return tree.New[Handle](parent...) }
 
 // NodeType returns the [*types.Type] of [Handle]
 func (t *Handle) NodeType() *types.Type { return HandleType }
@@ -510,7 +510,7 @@ var IconType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Icon", 
 // The rendered version is cached for a given size.
 // Icons do not render a background or border independent of their SVG object.
 // The size of on Icon is determined by the [styles.Font.Size] property.
-func NewIcon(parent ...tree.Node) *Icon { return tree.New[*Icon](parent...) }
+func NewIcon(parent ...tree.Node) *Icon { return tree.New[Icon](parent...) }
 
 // NodeType returns the [*types.Type] of [Icon]
 func (t *Icon) NodeType() *types.Type { return IconType }
@@ -526,7 +526,7 @@ var ImageType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Image"
 // See [styles.ObjectFits] for how to control the image rendering within
 // the allocated size. The default minimum requested size is the pixel
 // size in [units.Dp] units (1/160th of an inch).
-func NewImage(parent ...tree.Node) *Image { return tree.New[*Image](parent...) }
+func NewImage(parent ...tree.Node) *Image { return tree.New[Image](parent...) }
 
 // NodeType returns the [*types.Type] of [Image]
 func (t *Image) NodeType() *types.Type { return ImageType }
@@ -540,7 +540,7 @@ var InlineListType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.I
 // NewInlineList returns a new [InlineList] with the given optional parent:
 // InlineList represents a slice within a single line of value widgets.
 // This is typically used for smaller slices.
-func NewInlineList(parent ...tree.Node) *InlineList { return tree.New[*InlineList](parent...) }
+func NewInlineList(parent ...tree.Node) *InlineList { return tree.New[InlineList](parent...) }
 
 // NodeType returns the [*types.Type] of [InlineList]
 func (t *InlineList) NodeType() *types.Type { return InlineListType }
@@ -556,7 +556,7 @@ var InspectorType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.In
 // constructs Children widgets to show the field names and editor fields for
 // each field, within an overall frame with an optional title, and a button
 // box at the bottom where methods can be invoked
-func NewInspector(parent ...tree.Node) *Inspector { return tree.New[*Inspector](parent...) }
+func NewInspector(parent ...tree.Node) *Inspector { return tree.New[Inspector](parent...) }
 
 // NodeType returns the [*types.Type] of [Inspector]
 func (t *Inspector) NodeType() *types.Type { return InspectorType }
@@ -573,7 +573,7 @@ var KeyMapButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core
 
 // NewKeyMapButton returns a new [KeyMapButton] with the given optional parent:
 // KeyMapButton represents a [keymap.MapName] value with a button.
-func NewKeyMapButton(parent ...tree.Node) *KeyMapButton { return tree.New[*KeyMapButton](parent...) }
+func NewKeyMapButton(parent ...tree.Node) *KeyMapButton { return tree.New[KeyMapButton](parent...) }
 
 // NodeType returns the [*types.Type] of [KeyMapButton]
 func (t *KeyMapButton) NodeType() *types.Type { return KeyMapButtonType }
@@ -590,7 +590,7 @@ var KeyChordButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/co
 // NewKeyChordButton returns a new [KeyChordButton] with the given optional parent:
 // KeyChordButton represents a [key.Chord] value with a button.
 func NewKeyChordButton(parent ...tree.Node) *KeyChordButton {
-	return tree.New[*KeyChordButton](parent...)
+	return tree.New[KeyChordButton](parent...)
 }
 
 // NodeType returns the [*types.Type] of [KeyChordButton]
@@ -607,7 +607,7 @@ var KeyedListType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Ke
 
 // NewKeyedList returns a new [KeyedList] with the given optional parent:
 // KeyedList represents a map value using two columns of editable key and value widgets.
-func NewKeyedList(parent ...tree.Node) *KeyedList { return tree.New[*KeyedList](parent...) }
+func NewKeyedList(parent ...tree.Node) *KeyedList { return tree.New[KeyedList](parent...) }
 
 // NodeType returns the [*types.Type] of [KeyedList]
 func (t *KeyedList) NodeType() *types.Type { return KeyedListType }
@@ -639,7 +639,7 @@ var ListType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.List", 
 // NewList returns a new [List] with the given optional parent:
 // List represents a slice value with a list of value widgets and optional index widgets.
 // Use [ListBase.BindSelect] to make the list designed for item selection.
-func NewList(parent ...tree.Node) *List { return tree.New[*List](parent...) }
+func NewList(parent ...tree.Node) *List { return tree.New[List](parent...) }
 
 // NodeType returns the [*types.Type] of [List]
 func (t *List) NodeType() *types.Type { return ListType }
@@ -660,7 +660,7 @@ var ListBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Lis
 // within its allocated space, and manages the offset view window into the full
 // list of items, and supports row selection, copy / paste, Drag-n-Drop, etc.
 // Use [ListBase.BindSelect] to make the list designed for item selection.
-func NewListBase(parent ...tree.Node) *ListBase { return tree.New[*ListBase](parent...) }
+func NewListBase(parent ...tree.Node) *ListBase { return tree.New[ListBase](parent...) }
 
 // NodeType returns the [*types.Type] of [ListBase]
 func (t *ListBase) NodeType() *types.Type { return ListBaseType }
@@ -704,7 +704,7 @@ var ListGridType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Lis
 
 // NewListGrid returns a new [ListGrid] with the given optional parent:
 // ListGrid handles the resizing logic for [List], [Table].
-func NewListGrid(parent ...tree.Node) *ListGrid { return tree.New[*ListGrid](parent...) }
+func NewListGrid(parent ...tree.Node) *ListGrid { return tree.New[ListGrid](parent...) }
 
 // NodeType returns the [*types.Type] of [ListGrid]
 func (t *ListGrid) NodeType() *types.Type { return ListGridType }
@@ -723,7 +723,7 @@ var MeterType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Meter"
 // NewMeter returns a new [Meter] with the given optional parent:
 // Meter is a widget that renders a current value on as a filled
 // bar/semicircle relative to a minimum and maximum potential value.
-func NewMeter(parent ...tree.Node) *Meter { return tree.New[*Meter](parent...) }
+func NewMeter(parent ...tree.Node) *Meter { return tree.New[Meter](parent...) }
 
 // NodeType returns the [*types.Type] of [Meter]
 func (t *Meter) NodeType() *types.Type { return MeterType }
@@ -818,7 +818,7 @@ var SeparatorType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Se
 // NewSeparator returns a new [Separator] with the given optional parent:
 // Separator draws a separator line. It goes in the direction
 // specified by [style.Style.Direction].
-func NewSeparator(parent ...tree.Node) *Separator { return tree.New[*Separator](parent...) }
+func NewSeparator(parent ...tree.Node) *Separator { return tree.New[Separator](parent...) }
 
 // NodeType returns the [*types.Type] of [Separator]
 func (t *Separator) NodeType() *types.Type { return SeparatorType }
@@ -856,7 +856,7 @@ var SliderType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Slide
 // The Content size (inside the margin and padding) determines the outer bounds of
 // the rendered area.
 // The [styles.Style.Direction] determines the direction in which the slider slides.
-func NewSlider(parent ...tree.Node) *Slider { return tree.New[*Slider](parent...) }
+func NewSlider(parent ...tree.Node) *Slider { return tree.New[Slider](parent...) }
 
 // NodeType returns the [*types.Type] of [Slider]
 func (t *Slider) NodeType() *types.Type { return SliderType }
@@ -949,7 +949,7 @@ var SpinnerType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Spin
 // NewSpinner returns a new [Spinner] with the given optional parent:
 // Spinner is a [TextField] for editing numerical values. It comes with
 // fields, methods, buttons, and shortcuts to enhance numerical value editing.
-func NewSpinner(parent ...tree.Node) *Spinner { return tree.New[*Spinner](parent...) }
+func NewSpinner(parent ...tree.Node) *Spinner { return tree.New[Spinner](parent...) }
 
 // NodeType returns the [*types.Type] of [Spinner]
 func (t *Spinner) NodeType() *types.Type { return SpinnerType }
@@ -994,7 +994,7 @@ var SplitsType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Split
 // Splits allocates a certain proportion of its space to each of its children
 // along [styles.Style.Direction]. It adds [Handle] widgets to its parts that
 // allow the user to customize the amount of space allocated to each child.
-func NewSplits(parent ...tree.Node) *Splits { return tree.New[*Splits](parent...) }
+func NewSplits(parent ...tree.Node) *Splits { return tree.New[Splits](parent...) }
 
 // NodeType returns the [*types.Type] of [Splits]
 func (t *Splits) NodeType() *types.Type { return SplitsType }
@@ -1114,7 +1114,7 @@ var SVGType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.SVG", ID
 // SVG is a Widget that renders an [svg.SVG] object.
 // If it is not [states.ReadOnly], the user can pan and zoom the display.
 // By default, it is [states.ReadOnly].
-func NewSVG(parent ...tree.Node) *SVG { return tree.New[*SVG](parent...) }
+func NewSVG(parent ...tree.Node) *SVG { return tree.New[SVG](parent...) }
 
 // NodeType returns the [*types.Type] of [SVG]
 func (t *SVG) NodeType() *types.Type { return SVGType }
@@ -1128,7 +1128,7 @@ var SwitchType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Switc
 // NewSwitch returns a new [Switch] with the given optional parent:
 // Switch is a widget that can toggle between an on and off state.
 // It can be displayed as a switch, checkbox, or radio button.
-func NewSwitch(parent ...tree.Node) *Switch { return tree.New[*Switch](parent...) }
+func NewSwitch(parent ...tree.Node) *Switch { return tree.New[Switch](parent...) }
 
 // NodeType returns the [*types.Type] of [Switch]
 func (t *Switch) NodeType() *types.Type { return SwitchType }
@@ -1161,7 +1161,7 @@ var SwitchesType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Swi
 // through the [Switches.Mutex] field. It supports binding to
 // [enums.Enum] and [enums.BitFlag] values with appropriate properties
 // automatically set.
-func NewSwitches(parent ...tree.Node) *Switches { return tree.New[*Switches](parent...) }
+func NewSwitches(parent ...tree.Node) *Switches { return tree.New[Switches](parent...) }
 
 // NodeType returns the [*types.Type] of [Switches]
 func (t *Switches) NodeType() *types.Type { return SwitchesType }
@@ -1195,7 +1195,7 @@ var TableType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Table"
 // the columns and the elements are the rows. It is a full-featured editor with
 // multiple-selection, cut-and-paste, and drag-and-drop.
 // Use [ListBase.BindSelect] to make the table designed for item selection.
-func NewTable(parent ...tree.Node) *Table { return tree.New[*Table](parent...) }
+func NewTable(parent ...tree.Node) *Table { return tree.New[Table](parent...) }
 
 // NodeType returns the [*types.Type] of [Table]
 func (t *Table) NodeType() *types.Type { return TableType }
@@ -1225,7 +1225,7 @@ var TabsType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tabs", 
 // NewTabs returns a new [Tabs] with the given optional parent:
 // Tabs divide widgets into logical groups and give users the ability
 // to freely navigate between them using tab buttons.
-func NewTabs(parent ...tree.Node) *Tabs { return tree.New[*Tabs](parent...) }
+func NewTabs(parent ...tree.Node) *Tabs { return tree.New[Tabs](parent...) }
 
 // NodeType returns the [*types.Type] of [Tabs]
 func (t *Tabs) NodeType() *types.Type { return TabsType }
@@ -1301,7 +1301,7 @@ var TextType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Text", 
 // Text is a widget for rendering text. It supports full HTML styling,
 // including links. By default, text wraps and collapses whitespace, although
 // you can change this by changing [styles.Text.WhiteSpace].
-func NewText(parent ...tree.Node) *Text { return tree.New[*Text](parent...) }
+func NewText(parent ...tree.Node) *Text { return tree.New[Text](parent...) }
 
 // NodeType returns the [*types.Type] of [Text]
 func (t *Text) NodeType() *types.Type { return TextType }
@@ -1328,7 +1328,7 @@ var TextFieldType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Te
 // force everything to be on a single line.
 // With multi-line wrapped text, the text is still treated as a single
 // contiguous line of wrapped text.
-func NewTextField(parent ...tree.Node) *TextField { return tree.New[*TextField](parent...) }
+func NewTextField(parent ...tree.Node) *TextField { return tree.New[TextField](parent...) }
 
 // NodeType returns the [*types.Type] of [TextField]
 func (t *TextField) NodeType() *types.Type { return TextFieldType }
@@ -1424,7 +1424,7 @@ var TimePickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.T
 
 // NewTimePicker returns a new [TimePicker] with the given optional parent:
 // TimePicker is a widget for picking a time.
-func NewTimePicker(parent ...tree.Node) *TimePicker { return tree.New[*TimePicker](parent...) }
+func NewTimePicker(parent ...tree.Node) *TimePicker { return tree.New[TimePicker](parent...) }
 
 // NodeType returns the [*types.Type] of [TimePicker]
 func (t *TimePicker) NodeType() *types.Type { return TimePickerType }
@@ -1441,7 +1441,7 @@ var DatePickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.D
 
 // NewDatePicker returns a new [DatePicker] with the given optional parent:
 // DatePicker is a widget for picking a date.
-func NewDatePicker(parent ...tree.Node) *DatePicker { return tree.New[*DatePicker](parent...) }
+func NewDatePicker(parent ...tree.Node) *DatePicker { return tree.New[DatePicker](parent...) }
 
 // NodeType returns the [*types.Type] of [DatePicker]
 func (t *DatePicker) NodeType() *types.Type { return DatePickerType }
@@ -1459,7 +1459,7 @@ var TimeInputType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Ti
 // NewTimeInput returns a new [TimeInput] with the given optional parent:
 // TimeInput presents two text fields for editing a date and time,
 // both of which can pull up corresponding picker dialogs.
-func NewTimeInput(parent ...tree.Node) *TimeInput { return tree.New[*TimeInput](parent...) }
+func NewTimeInput(parent ...tree.Node) *TimeInput { return tree.New[TimeInput](parent...) }
 
 // NodeType returns the [*types.Type] of [TimeInput]
 func (t *TimeInput) NodeType() *types.Type { return TimeInputType }
@@ -1475,7 +1475,7 @@ var DurationInputType = types.AddType(&types.Type{Name: "cogentcore.org/core/cor
 
 // NewDurationInput returns a new [DurationInput] with the given optional parent:
 // DurationInput represents a [time.Duration] value with a spinner and unit chooser.
-func NewDurationInput(parent ...tree.Node) *DurationInput { return tree.New[*DurationInput](parent...) }
+func NewDurationInput(parent ...tree.Node) *DurationInput { return tree.New[DurationInput](parent...) }
 
 // NodeType returns the [*types.Type] of [DurationInput]
 func (t *DurationInput) NodeType() *types.Type { return DurationInputType }
@@ -1498,7 +1498,7 @@ var ToolbarType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tool
 // It automatically moves items that do not fit into an overflow menu, and
 // manages additional items that are always placed onto this overflow menu.
 // Use [Body.AddAppBar] to add to the default toolbar at the top of an app.
-func NewToolbar(parent ...tree.Node) *Toolbar { return tree.New[*Toolbar](parent...) }
+func NewToolbar(parent ...tree.Node) *Toolbar { return tree.New[Toolbar](parent...) }
 
 // NodeType returns the [*types.Type] of [Toolbar]
 func (t *Toolbar) NodeType() *types.Type { return ToolbarType }
@@ -1512,7 +1512,7 @@ var BasicBarType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Bas
 // NewBasicBar returns a new [BasicBar] with the given optional parent:
 // BasicBar is a [Frame] that automatically has [ToolbarStyles] applied but does
 // not have the more advanced features of a [Toolbar].
-func NewBasicBar(parent ...tree.Node) *BasicBar { return tree.New[*BasicBar](parent...) }
+func NewBasicBar(parent ...tree.Node) *BasicBar { return tree.New[BasicBar](parent...) }
 
 // NodeType returns the [*types.Type] of [BasicBar]
 func (t *BasicBar) NodeType() *types.Type { return BasicBarType }
@@ -1544,7 +1544,7 @@ var TreeType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tree", 
 // Standard [events.Event]s are sent to any listeners, including
 // Select, Change, and DoubleClick. The selected nodes
 // are in the root SelectedNodes list.
-func NewTree(parent ...tree.Node) *Tree { return tree.New[*Tree](parent...) }
+func NewTree(parent ...tree.Node) *Tree { return tree.New[Tree](parent...) }
 
 // NodeType returns the [*types.Type] of [Tree]
 func (t *Tree) NodeType() *types.Type { return TreeType }
@@ -1601,7 +1601,7 @@ var ListButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.L
 
 // NewListButton returns a new [ListButton] with the given optional parent:
 // ListButton represents a slice or array value with a button that opens a [List].
-func NewListButton(parent ...tree.Node) *ListButton { return tree.New[*ListButton](parent...) }
+func NewListButton(parent ...tree.Node) *ListButton { return tree.New[ListButton](parent...) }
 
 // NodeType returns the [*types.Type] of [ListButton]
 func (t *ListButton) NodeType() *types.Type { return ListButtonType }
@@ -1617,7 +1617,7 @@ var FormButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.F
 
 // NewFormButton returns a new [FormButton] with the given optional parent:
 // FormButton represents a struct value with a button that opens a [Form].
-func NewFormButton(parent ...tree.Node) *FormButton { return tree.New[*FormButton](parent...) }
+func NewFormButton(parent ...tree.Node) *FormButton { return tree.New[FormButton](parent...) }
 
 // NodeType returns the [*types.Type] of [FormButton]
 func (t *FormButton) NodeType() *types.Type { return FormButtonType }
@@ -1634,7 +1634,7 @@ var KeyedListButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/c
 // NewKeyedListButton returns a new [KeyedListButton] with the given optional parent:
 // KeyedListButton represents a map value with a button that opens a [KeyedList].
 func NewKeyedListButton(parent ...tree.Node) *KeyedListButton {
-	return tree.New[*KeyedListButton](parent...)
+	return tree.New[KeyedListButton](parent...)
 }
 
 // NodeType returns the [*types.Type] of [KeyedListButton]
@@ -1651,7 +1651,7 @@ var TreeButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.T
 
 // NewTreeButton returns a new [TreeButton] with the given optional parent:
 // TreeButton represents a [tree.Node] value with a button.
-func NewTreeButton(parent ...tree.Node) *TreeButton { return tree.New[*TreeButton](parent...) }
+func NewTreeButton(parent ...tree.Node) *TreeButton { return tree.New[TreeButton](parent...) }
 
 // NodeType returns the [*types.Type] of [TreeButton]
 func (t *TreeButton) NodeType() *types.Type { return TreeButtonType }
@@ -1667,7 +1667,7 @@ var TypeChooserType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.
 
 // NewTypeChooser returns a new [TypeChooser] with the given optional parent:
 // TypeChooser represents a [types.Type] value with a chooser.
-func NewTypeChooser(parent ...tree.Node) *TypeChooser { return tree.New[*TypeChooser](parent...) }
+func NewTypeChooser(parent ...tree.Node) *TypeChooser { return tree.New[TypeChooser](parent...) }
 
 // NodeType returns the [*types.Type] of [TypeChooser]
 func (t *TypeChooser) NodeType() *types.Type { return TypeChooserType }
@@ -1681,7 +1681,7 @@ var IconButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.I
 // NewIconButton returns a new [IconButton] with the given optional parent:
 // IconButton represents an [icons.Icon] with a [Button] that opens
 // a dialog for selecting the icon.
-func NewIconButton(parent ...tree.Node) *IconButton { return tree.New[*IconButton](parent...) }
+func NewIconButton(parent ...tree.Node) *IconButton { return tree.New[IconButton](parent...) }
 
 // NodeType returns the [*types.Type] of [IconButton]
 func (t *IconButton) NodeType() *types.Type { return IconButtonType }
@@ -1695,7 +1695,7 @@ var FontButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.F
 // NewFontButton returns a new [FontButton] with the given optional parent:
 // FontButton represents a [FontName] with a [Button] that opens
 // a dialog for selecting the font family.
-func NewFontButton(parent ...tree.Node) *FontButton { return tree.New[*FontButton](parent...) }
+func NewFontButton(parent ...tree.Node) *FontButton { return tree.New[FontButton](parent...) }
 
 // NodeType returns the [*types.Type] of [FontButton]
 func (t *FontButton) NodeType() *types.Type { return FontButtonType }
@@ -1711,7 +1711,7 @@ var WidgetBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.W
 // of a widget. You must use WidgetBase as an embedded struct in all higher-level
 // widget types. It renders the standard box model, but does not layout or render
 // any children; see [Frame] for that.
-func NewWidgetBase(parent ...tree.Node) *WidgetBase { return tree.New[*WidgetBase](parent...) }
+func NewWidgetBase(parent ...tree.Node) *WidgetBase { return tree.New[WidgetBase](parent...) }
 
 // NodeType returns the [*types.Type] of [WidgetBase]
 func (t *WidgetBase) NodeType() *types.Type { return WidgetBaseType }

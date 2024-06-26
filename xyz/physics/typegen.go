@@ -17,7 +17,7 @@ var BodyBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/phys
 
 // NewBodyBase returns a new [BodyBase] with the given optional parent:
 // BodyBase is the base type for all specific Body types
-func NewBodyBase(parent ...tree.Node) *BodyBase { return tree.New[*BodyBase](parent...) }
+func NewBodyBase(parent ...tree.Node) *BodyBase { return tree.New[BodyBase](parent...) }
 
 // NodeType returns the [*types.Type] of [BodyBase]
 func (t *BodyBase) NodeType() *types.Type { return BodyBaseType }
@@ -42,7 +42,7 @@ var BoxType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.B
 
 // NewBox returns a new [Box] with the given optional parent:
 // Box is a box body shape
-func NewBox(parent ...tree.Node) *Box { return tree.New[*Box](parent...) }
+func NewBox(parent ...tree.Node) *Box { return tree.New[Box](parent...) }
 
 // NodeType returns the [*types.Type] of [Box]
 func (t *Box) NodeType() *types.Type { return BoxType }
@@ -60,7 +60,7 @@ var CapsuleType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physi
 // NewCapsule returns a new [Capsule] with the given optional parent:
 // Capsule is a generalized cylinder body shape, with hemispheres at each end,
 // with separate radii for top and bottom.
-func NewCapsule(parent ...tree.Node) *Capsule { return tree.New[*Capsule](parent...) }
+func NewCapsule(parent ...tree.Node) *Capsule { return tree.New[Capsule](parent...) }
 
 // NodeType returns the [*types.Type] of [Capsule]
 func (t *Capsule) NodeType() *types.Type { return CapsuleType }
@@ -90,7 +90,7 @@ var CylinderType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/phys
 // NewCylinder returns a new [Cylinder] with the given optional parent:
 // Cylinder is a generalized cylinder body shape, with separate radii for top and bottom.
 // A cone has a zero radius at one end.
-func NewCylinder(parent ...tree.Node) *Cylinder { return tree.New[*Cylinder](parent...) }
+func NewCylinder(parent ...tree.Node) *Cylinder { return tree.New[Cylinder](parent...) }
 
 // NodeType returns the [*types.Type] of [Cylinder]
 func (t *Cylinder) NodeType() *types.Type { return CylinderType }
@@ -118,7 +118,7 @@ var GroupType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics
 // it should be used strategically to partition the space
 // and its BBox is used to optimize tree-based collision detection.
 // Use a group for the top-level World node as well.
-func NewGroup(parent ...tree.Node) *Group { return tree.New[*Group](parent...) }
+func NewGroup(parent ...tree.Node) *Group { return tree.New[Group](parent...) }
 
 // NodeType returns the [*types.Type] of [Group]
 func (t *Group) NodeType() *types.Type { return GroupType }
@@ -137,7 +137,7 @@ var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/phys
 // NodeBase is the basic node, which has position, rotation, velocity
 // and computed bounding boxes, etc.
 // There are only three different kinds of Nodes: Group, Body, and Joint
-func NewNodeBase(parent ...tree.Node) *NodeBase { return tree.New[*NodeBase](parent...) }
+func NewNodeBase(parent ...tree.Node) *NodeBase { return tree.New[NodeBase](parent...) }
 
 // NodeType returns the [*types.Type] of [NodeBase]
 func (t *NodeBase) NodeType() *types.Type { return NodeBaseType }
@@ -166,7 +166,7 @@ var SphereType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physic
 
 // NewSphere returns a new [Sphere] with the given optional parent:
 // Sphere is a spherical body shape.
-func NewSphere(parent ...tree.Node) *Sphere { return tree.New[*Sphere](parent...) }
+func NewSphere(parent ...tree.Node) *Sphere { return tree.New[Sphere](parent...) }
 
 // NodeType returns the [*types.Type] of [Sphere]
 func (t *Sphere) NodeType() *types.Type { return SphereType }

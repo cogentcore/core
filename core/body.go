@@ -30,7 +30,7 @@ type Body struct { //core:no-new
 // having to access the [Scene] directly. If a name is given and
 // the name of [TheApp] is unset, it sets it to the given name.
 func NewBody(name ...string) *Body {
-	bd := tree.New[*Body]()
+	bd := tree.New[Body]()
 	nm := "body"
 	if len(name) > 0 {
 		nm = name[0]

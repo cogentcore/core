@@ -85,7 +85,7 @@ func HandleElement(ctx *Context) {
 	case "style":
 		ctx.AddStyle(ExtractText(ctx))
 	case "body", "main", "div", "section", "nav", "footer", "header", "ol", "ul":
-		w := New[*core.Frame](ctx)
+		w := New[core.Frame](ctx)
 		ctx.NewParent = w
 		if tag == "body" {
 			w.Styler(func(s *styles.Style) {
@@ -98,7 +98,7 @@ func HandleElement(ctx *Context) {
 			})
 		}
 	case "button":
-		New[*core.Button](ctx).SetText(ExtractText(ctx))
+		New[core.Button](ctx).SetText(ExtractText(ctx))
 	case "h1":
 		HandleText(ctx).SetType(core.TextHeadlineLarge)
 	case "h2":
@@ -153,7 +153,7 @@ func HandleElement(ctx *Context) {
 		}
 		text.SetText(start + text.Text)
 	case "img":
-		img := New[*core.Image](ctx)
+		img := New[core.Image](ctx)
 		n := ctx.Node
 		go func() {
 			src := GetAttr(n, "src")
@@ -180,31 +180,31 @@ func HandleElement(ctx *Context) {
 		switch ityp {
 		case "number":
 			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
-			New[*core.Spinner](ctx).SetValue(fval)
+			New[core.Spinner](ctx).SetValue(fval)
 		case "checkbox":
-			New[*core.Switch](ctx).SetType(core.SwitchCheckbox).
+			New[core.Switch](ctx).SetType(core.SwitchCheckbox).
 				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
 		case "radio":
-			New[*core.Switch](ctx).SetType(core.SwitchRadioButton).
+			New[core.Switch](ctx).SetType(core.SwitchRadioButton).
 				SetState(HasAttr(ctx.Node, "checked"), states.Checked)
 		case "range":
 			fval := float32(errors.Log1(strconv.ParseFloat(val, 32)))
-			New[*core.Slider](ctx).SetValue(fval)
+			New[core.Slider](ctx).SetValue(fval)
 		case "button", "submit":
-			New[*core.Button](ctx).SetText(val)
+			New[core.Button](ctx).SetText(val)
 		case "color":
-			core.Bind(val, New[*core.ColorButton](ctx))
+			core.Bind(val, New[core.ColorButton](ctx))
 		case "datetime":
-			core.Bind(val, New[*core.TimeInput](ctx))
+			core.Bind(val, New[core.TimeInput](ctx))
 		case "file":
-			core.Bind(val, New[*core.FileButton](ctx))
+			core.Bind(val, New[core.FileButton](ctx))
 		default:
-			New[*core.TextField](ctx).SetText(val)
+			New[core.TextField](ctx).SetText(val)
 		}
 	case "textarea":
 		buf := texteditor.NewBuffer()
 		buf.SetText([]byte(ExtractText(ctx)))
-		New[*texteditor.Editor](ctx).SetBuffer(buf)
+		New[texteditor.Editor](ctx).SetBuffer(buf)
 	default:
 		ctx.NewParent = ctx.Parent()
 	}
@@ -213,7 +213,7 @@ func HandleElement(ctx *Context) {
 // HandleText creates a new [core.Text] from the given information, setting the text and
 // the text click function so that URLs are opened according to [Context.OpenURL].
 func HandleText(ctx *Context) *core.Text {
-	lb := New[*core.Text](ctx).SetText(ExtractText(ctx))
+	lb := New[core.Text](ctx).SetText(ExtractText(ctx))
 	lb.HandleTextClick(func(tl *paint.TextLink) {
 		ctx.OpenURL(tl.URL)
 	})
@@ -228,7 +228,7 @@ func HandleText(ctx *Context) *core.Text {
 func HandleTextTag(ctx *Context) *core.Text {
 	start, end := NodeString(ctx.Node)
 	str := start + ExtractText(ctx) + end
-	lb := New[*core.Text](ctx).SetText(str)
+	lb := New[core.Text](ctx).SetText(str)
 	lb.HandleTextClick(func(tl *paint.TextLink) {
 		ctx.OpenURL(tl.URL)
 	})

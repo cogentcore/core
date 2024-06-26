@@ -128,7 +128,7 @@ func (nb *NodeBase) RunUpdaters() {
 // guaranteed to be added to its parent before the init function
 // is called. The name of the node is automatically generated based
 // on the file and line number of the calling function.
-func Add[T Node](p *Plan, init func(n T)) {
+func Add[T NodeValue](p *Plan, init func(n *T)) {
 	AddAt(p, autoPlanName(2), init)
 }
 
@@ -148,11 +148,11 @@ func autoPlanName(level int) string {
 // the given name and function to initialize the node. The node
 // is guaranteed to be added to its parent before the init function
 // is called.
-func AddAt[T Node](p *Plan, name string, init func(n T)) {
+func AddAt[T NodeValue](p *Plan, name string, init func(n *T)) {
 	p.Add(name, func() Node {
-		return New[T]()
+		return any(New[T]()).(Node)
 	}, func(n Node) {
-		init(n.(T))
+		init(any(n).(*T))
 	})
 }
 
@@ -175,11 +175,11 @@ func AddNew[T Node](p *Plan, name string, new func() T, init func(n T)) {
 // extending an existing [PlanItem], not adding a new one. The node is guaranteed to
 // be added to its parent before the init function is called. The init functions are
 // called in sequential ascending order.
-func AddInit[T Node](p *Plan, name string, init func(n T)) {
+func AddInit[T NodeValue](p *Plan, name string, init func(n *T)) {
 	for _, child := range p.Children {
 		if child.Name == name {
 			child.Init = append(child.Init, func(n Node) {
-				init(n.(T))
+				init(any(n).(*T))
 			})
 			return
 		}
@@ -190,7 +190,7 @@ func AddInit[T Node](p *Plan, name string, init func(n T)) {
 // AddChild adds a new [NodeBase.Maker] to the the given parent [Node] that
 // adds a [PlanItem] with the given init function using [Add]. In other words,
 // this adds a maker that will add a child to the given parent.
-func AddChild[T Node](parent Node, init func(n T)) {
+func AddChild[T NodeValue](parent Node, init func(n *T)) {
 	name := autoPlanName(2) // must get here to get correct name
 	parent.AsTree().Maker(func(p *Plan) {
 		AddAt(p, name, init)
@@ -200,7 +200,7 @@ func AddChild[T Node](parent Node, init func(n T)) {
 // AddChildAt adds a new [NodeBase.Maker] to the the given parent [Node] that
 // adds a [PlanItem] with the given name and init function using [AddAt]. In other
 // words, this adds a maker that will add a child to the given parent.
-func AddChildAt[T Node](parent Node, name string, init func(n T)) {
+func AddChildAt[T NodeValue](parent Node, name string, init func(n *T)) {
 	parent.AsTree().Maker(func(p *Plan) {
 		AddAt(p, name, init)
 	})
@@ -212,7 +212,7 @@ func AddChildAt[T Node](parent Node, name string, init func(n T)) {
 // extending an existing [PlanItem], not adding a new one. The node is guaranteed
 // to be added to its parent before the init function is called. The init functions are
 // called in sequential ascending order.
-func AddChildInit[T Node](parent Node, name string, init func(n T)) {
+func AddChildInit[T NodeValue](parent Node, name string, init func(n *T)) {
 	parent.AsTree().Maker(func(p *Plan) {
 		AddInit(p, name, init)
 	})

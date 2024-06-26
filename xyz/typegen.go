@@ -21,7 +21,7 @@ var GroupType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Group",
 // NewGroup returns a new [Group] with the given optional parent:
 // Group collects individual elements in a scene but does not have a Mesh or Material of
 // its own.  It does have a transform that applies to all nodes under it.
-func NewGroup(parent ...tree.Node) *Group { return tree.New[*Group](parent...) }
+func NewGroup(parent ...tree.Node) *Group { return tree.New[Group](parent...) }
 
 // NodeType returns the [*types.Type] of [Group]
 func (t *Group) NodeType() *types.Type { return GroupType }
@@ -141,7 +141,7 @@ var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Node
 // relative to parent, and computed bounding boxes, etc.
 // It implements the [Node] interface and contains the core functionality
 // common to all 3D nodes.
-func NewNodeBase(parent ...tree.Node) *NodeBase { return tree.New[*NodeBase](parent...) }
+func NewNodeBase(parent ...tree.Node) *NodeBase { return tree.New[NodeBase](parent...) }
 
 // NodeType returns the [*types.Type] of [NodeBase]
 func (t *NodeBase) NodeType() *types.Type { return NodeBaseType }
@@ -176,7 +176,7 @@ var SceneType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Scene",
 // the camera (i.e., its Pose is copied) -- Solids in that group can
 // set their relative Pos etc to display relative to the camera, to achieve
 // "first person" effects.
-func NewScene(parent ...tree.Node) *Scene { return tree.New[*Scene](parent...) }
+func NewScene(parent ...tree.Node) *Scene { return tree.New[Scene](parent...) }
 
 // NodeType returns the [*types.Type] of [Scene]
 func (t *Scene) NodeType() *types.Type { return SceneType }
@@ -368,7 +368,7 @@ var SolidType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Solid",
 // Solid represents an individual 3D solid element.
 // It has its own unique spatial transforms and material properties,
 // and points to a mesh structure defining the shape of the solid.
-func NewSolid(parent ...tree.Node) *Solid { return tree.New[*Solid](parent...) }
+func NewSolid(parent ...tree.Node) *Solid { return tree.New[Solid](parent...) }
 
 // NodeType returns the [*types.Type] of [Solid]
 func (t *Solid) NodeType() *types.Type { return SolidType }
@@ -397,7 +397,7 @@ var Text2DType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Text2D
 // The margin property creates blank margin of the background color around the text
 // (2 px default) and the background-color defaults to transparent
 // but can be set to any color.
-func NewText2D(parent ...tree.Node) *Text2D { return tree.New[*Text2D](parent...) }
+func NewText2D(parent ...tree.Node) *Text2D { return tree.New[Text2D](parent...) }
 
 // NodeType returns the [*types.Type] of [Text2D]
 func (t *Text2D) NodeType() *types.Type { return Text2DType }

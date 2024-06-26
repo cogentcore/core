@@ -998,7 +998,7 @@ type Scrim struct { //core:no-new
 // It does not actually add the Scrim to the Scene,
 // just sets its pointers.
 func NewScrim(sc *Scene) *Scrim {
-	sr := tree.New[*Scrim]() // critical to not add to scene!
+	sr := tree.New[Scrim]() // critical to not add to scene!
 	tree.SetParent(sr, sc)
 	return sr
 }

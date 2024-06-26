@@ -19,7 +19,7 @@ var PlotType = types.AddType(&types.Type{Name: "cogentcore.org/core/plot/plotcor
 // Plot is a widget that renders a [plot.Plot] object.
 // If it is not [states.ReadOnly], the user can pan and zoom the graph.
 // See [PlotEditor] for an interactive interface for selecting columns to view.
-func NewPlot(parent ...tree.Node) *Plot { return tree.New[*Plot](parent...) }
+func NewPlot(parent ...tree.Node) *Plot { return tree.New[Plot](parent...) }
 
 // NodeType returns the [*types.Type] of [Plot]
 func (t *Plot) NodeType() *types.Type { return PlotType }
@@ -42,7 +42,7 @@ var PlotEditorType = types.AddType(&types.Type{Name: "cogentcore.org/core/plot/p
 // of selected columns of tabular data, represented by a [table.IndexView] into
 // a [table.Table]. Other types of tabular data can be converted into this format.
 // The user can change various options for the plot and also modify the underlying data.
-func NewPlotEditor(parent ...tree.Node) *PlotEditor { return tree.New[*PlotEditor](parent...) }
+func NewPlotEditor(parent ...tree.Node) *PlotEditor { return tree.New[PlotEditor](parent...) }
 
 // NodeType returns the [*types.Type] of [PlotEditor]
 func (t *PlotEditor) NodeType() *types.Type { return PlotEditorType }

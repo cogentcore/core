@@ -28,7 +28,7 @@ var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/tree.Nod
 // All node types must be added to the Cogent Core type registry via typegen,
 // so you must add a go:generate line that runs `core generate` to any packages
 // you write that have new node types defined.
-func NewNodeBase(parent ...Node) *NodeBase { return New[*NodeBase](parent...) }
+func NewNodeBase(parent ...Node) *NodeBase { return New[NodeBase](parent...) }
 
 // SetName sets the [NodeBase.Name]:
 // Name is the name of this node, which is typically unique relative to other children of

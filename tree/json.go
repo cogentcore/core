@@ -88,7 +88,7 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 		// We make placeholder NodeBase children that will be replaced
 		// with children of the correct type during their UnmarshalJSON.
 		for range numChildren {
-			New[*NodeBase](n)
+			New[NodeBase](n)
 		}
 	}
 
@@ -122,9 +122,9 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 // the correct type with all properties and children loaded.
 func UnmarshalRootJSON(b []byte) (Node, error) {
 	// we must make a temporary parent so that the type of the node can be updated
-	parent := New[*NodeBase]()
+	parent := New[NodeBase]()
 	// this NodeBase type is just temporary and will be fixed by [NodeBase.UnmarshalJSON]
-	nb := New[*NodeBase](parent)
+	nb := New[NodeBase](parent)
 	err := nb.UnmarshalJSON(b)
 	if err != nil {
 		return nil, err
