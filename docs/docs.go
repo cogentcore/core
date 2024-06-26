@@ -53,7 +53,7 @@ func main() {
 
 var home *core.Frame
 
-func makeBlock[T core.Widget](title, text string, graphic func(w T)) {
+func makeBlock[T tree.NodeValue](title, text string, graphic func(w *T)) {
 	tree.AddChildAt(home, title, func(w *core.Frame) {
 		w.Styler(func(s *styles.Style) {
 			s.Gap.Set(units.Em(1))

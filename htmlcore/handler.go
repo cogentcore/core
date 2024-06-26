@@ -35,10 +35,10 @@ var ElementHandlers = map[string]func(ctx *Context) bool{}
 
 // New adds a new widget of the given type to the context parent.
 // It automatically calls [Context.Config] on the resulting widget.
-func New[T core.Widget](ctx *Context) T {
+func New[T tree.NodeValue](ctx *Context) *T {
 	parent := ctx.Parent()
 	w := tree.New[T](parent)
-	ctx.Config(w) // TODO(config): better htmlcore structure with new config paradigm?
+	ctx.Config(any(w).(core.Widget)) // TODO(config): better htmlcore structure with new config paradigm?
 	return w
 }
 
