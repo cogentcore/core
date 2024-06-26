@@ -20,8 +20,7 @@ var TypeTmpl = template.Must(template.New("Type").
 		"TypesTypeOf": TypesTypeOf,
 	}).Parse(
 	`
-	{{if .Config.TypeVar}} // {{.LocalName}}Type is the [types.Type] for [{{.LocalName}}]
-	var {{.LocalName}}Type {{else}} var _ {{end}} = types.AddType(&types.Type
+	var _ = types.AddType(&types.Type
 		{{- $typ := TypesTypeOf . -}}
 		{{- printf "%#v" $typ -}}
 	)

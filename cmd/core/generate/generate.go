@@ -96,7 +96,6 @@ func Generate(c *config.Config) error { //types:add
 	c.Generate.Typegen.InterfaceConfigs.Add("cogentcore.org/core/tree.Node", &typegen.Config{
 		AddTypes:  true,
 		Instance:  true,
-		TypeVar:   true,
 		Setters:   true,
 		Templates: []*template.Template{TreeMethodsTmpl},
 	})

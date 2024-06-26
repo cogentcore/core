@@ -25,7 +25,6 @@ func TestGenerate(t *testing.T) {
 		InterfaceConfigs: ordmap.Make([]ordmap.KeyValue[string, *Config]{{
 			"fmt.Stringer", &Config{
 				AddTypes: true,
-				TypeVar:  true,
 				Instance: true,
 				Setters:  true,
 				Templates: []*template.Template{
@@ -71,7 +70,7 @@ func TestGenerate(t *testing.T) {
 }
 
 func TestPerson(t *testing.T) {
-	want := testdata.PersonType
+	want := types.For[testdata.Person]()
 	have := types.TypeByName("cogentcore.org/core/types/typegen/testdata.Person")
 	assert.Equal(t, want, have)
 	have = types.TypeByValue(testdata.Person{})
