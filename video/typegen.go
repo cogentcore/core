@@ -16,12 +16,6 @@ var VideoType = types.AddType(&types.Type{Name: "cogentcore.org/core/video.Video
 // See [Player] for a version with controls.
 func NewVideo(parent ...tree.Node) *Video { return tree.New[Video](parent...) }
 
-// NodeType returns the [*types.Type] of [Video]
-func (t *Video) NodeType() *types.Type { return VideoType }
-
-// New returns a new [*Video] value
-func (t *Video) New() tree.Node { return &Video{} }
-
 // SetMedia sets the [Video.Media]:
 // Media is the video media.
 func (t *Video) SetMedia(v *reisen.Media) *Video { t.Media = v; return t }

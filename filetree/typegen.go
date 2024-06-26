@@ -19,12 +19,6 @@ var NodeType = types.AddType(&types.Type{Name: "cogentcore.org/core/filetree.Nod
 // Folders have children containing further nodes.
 func NewNode(parent ...tree.Node) *Node { return tree.New[Node](parent...) }
 
-// NodeType returns the [*types.Type] of [Node]
-func (t *Node) NodeType() *types.Type { return NodeType }
-
-// New returns a new [*Node] value
-func (t *Node) New() tree.Node { return &Node{} }
-
 // NodeEmbedder is an interface that all types that embed Node satisfy
 type NodeEmbedder interface {
 	AsNode() *Node
@@ -51,12 +45,6 @@ var TreeType = types.AddType(&types.Type{Name: "cogentcore.org/core/filetree.Tre
 // view things.
 func NewTree(parent ...tree.Node) *Tree { return tree.New[Tree](parent...) }
 
-// NodeType returns the [*types.Type] of [Tree]
-func (t *Tree) NodeType() *types.Type { return TreeType }
-
-// New returns a new [*Tree] value
-func (t *Tree) New() tree.Node { return &Tree{} }
-
 // SetDirsOnTop sets the [Tree.DirsOnTop]:
 // if true, then all directories are placed at the top of the tree.
 // Otherwise everything is mixed.
@@ -72,12 +60,6 @@ var VCSLogType = types.AddType(&types.Type{Name: "cogentcore.org/core/filetree.V
 // NewVCSLog returns a new [VCSLog] with the given optional parent:
 // VCSLog is a widget that represents VCS log data.
 func NewVCSLog(parent ...tree.Node) *VCSLog { return tree.New[VCSLog](parent...) }
-
-// NodeType returns the [*types.Type] of [VCSLog]
-func (t *VCSLog) NodeType() *types.Type { return VCSLogType }
-
-// New returns a new [*VCSLog] value
-func (t *VCSLog) New() tree.Node { return &VCSLog{} }
 
 // SetLog sets the [VCSLog.Log]:
 // current log

@@ -24,12 +24,6 @@ var RuleType = types.AddType(&types.Type{Name: "cogentcore.org/core/parse/lexer.
 // leave the more complex things for the parsing step.
 func NewRule(parent ...tree.Node) *Rule { return tree.New[Rule](parent...) }
 
-// NodeType returns the [*types.Type] of [Rule]
-func (t *Rule) NodeType() *types.Type { return RuleType }
-
-// New returns a new [*Rule] value
-func (t *Rule) New() tree.Node { return &Rule{} }
-
 // SetOff sets the [Rule.Off]:
 // disable this rule -- useful for testing and exploration
 func (t *Rule) SetOff(v bool) *Rule { t.Off = v; return t }

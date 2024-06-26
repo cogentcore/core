@@ -10,7 +10,7 @@ import (
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.BBox", IDName: "b-box", Doc: "BBox contains bounding box and other gross object properties", Fields: []types.Field{{Name: "BBox", Doc: "bounding box in world coords (Axis-Aligned Bounding Box = AABB)"}, {Name: "VelBBox", Doc: "velocity-projected bounding box in world coords: extend BBox to include future position of moving bodies -- collision must be made on this basis"}, {Name: "BSphere", Doc: "bounding sphere in local coords"}, {Name: "Area", Doc: "area"}, {Name: "Volume", Doc: "volume"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Body", IDName: "body", Doc: "Body is the common interface for all body types"})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Body", IDName: "body", Doc: "Body is the common interface for all body types", Methods: []types.Method{{Name: "AsBodyBase", Doc: "AsBodyBase returns the body as a BodyBase", Returns: []string{"BodyBase"}}}})
 
 // BodyBaseType is the [types.Type] for [BodyBase]
 var BodyBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.BodyBase", IDName: "body-base", Doc: "BodyBase is the base type for all specific Body types", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Rigid", Doc: "rigid body properties, including mass, bounce, friction etc"}, {Name: "Vis", Doc: "visualization name -- looks up an entry in the scene library that provides the visual representation of this body"}, {Name: "Color", Doc: "default color of body for basic InitLibrary configuration"}}, Instance: &BodyBase{}})
@@ -18,12 +18,6 @@ var BodyBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/phys
 // NewBodyBase returns a new [BodyBase] with the given optional parent:
 // BodyBase is the base type for all specific Body types
 func NewBodyBase(parent ...tree.Node) *BodyBase { return tree.New[BodyBase](parent...) }
-
-// NodeType returns the [*types.Type] of [BodyBase]
-func (t *BodyBase) NodeType() *types.Type { return BodyBaseType }
-
-// New returns a new [*BodyBase] value
-func (t *BodyBase) New() tree.Node { return &BodyBase{} }
 
 // SetRigid sets the [BodyBase.Rigid]:
 // rigid body properties, including mass, bounce, friction etc
@@ -44,12 +38,6 @@ var BoxType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.B
 // Box is a box body shape
 func NewBox(parent ...tree.Node) *Box { return tree.New[Box](parent...) }
 
-// NodeType returns the [*types.Type] of [Box]
-func (t *Box) NodeType() *types.Type { return BoxType }
-
-// New returns a new [*Box] value
-func (t *Box) New() tree.Node { return &Box{} }
-
 // SetSize sets the [Box.Size]:
 // size of box in each dimension (units arbitrary, as long as they are all consistent -- meters is typical)
 func (t *Box) SetSize(v math32.Vector3) *Box { t.Size = v; return t }
@@ -61,12 +49,6 @@ var CapsuleType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physi
 // Capsule is a generalized cylinder body shape, with hemispheres at each end,
 // with separate radii for top and bottom.
 func NewCapsule(parent ...tree.Node) *Capsule { return tree.New[Capsule](parent...) }
-
-// NodeType returns the [*types.Type] of [Capsule]
-func (t *Capsule) NodeType() *types.Type { return CapsuleType }
-
-// New returns a new [*Capsule] value
-func (t *Capsule) New() tree.Node { return &Capsule{} }
 
 // SetHeight sets the [Capsule.Height]:
 // height of the cylinder portion of the capsule
@@ -92,12 +74,6 @@ var CylinderType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/phys
 // A cone has a zero radius at one end.
 func NewCylinder(parent ...tree.Node) *Cylinder { return tree.New[Cylinder](parent...) }
 
-// NodeType returns the [*types.Type] of [Cylinder]
-func (t *Cylinder) NodeType() *types.Type { return CylinderType }
-
-// New returns a new [*Cylinder] value
-func (t *Cylinder) New() tree.Node { return &Cylinder{} }
-
 // SetHeight sets the [Cylinder.Height]:
 // height of the cylinder
 func (t *Cylinder) SetHeight(v float32) *Cylinder { t.Height = v; return t }
@@ -120,15 +96,9 @@ var GroupType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics
 // Use a group for the top-level World node as well.
 func NewGroup(parent ...tree.Node) *Group { return tree.New[Group](parent...) }
 
-// NodeType returns the [*types.Type] of [Group]
-func (t *Group) NodeType() *types.Type { return GroupType }
-
-// New returns a new [*Group] value
-func (t *Group) New() tree.Node { return &Group{} }
-
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.BodyPoint", IDName: "body-point", Doc: "BodyPoint contains a Body and a Point on that body", Fields: []types.Field{{Name: "Body"}, {Name: "Point"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Node", IDName: "node", Doc: "Node is the common interface for all nodes."})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.Node", IDName: "node", Doc: "Node is the common interface for all nodes.", Methods: []types.Method{{Name: "AsNodeBase", Doc: "AsNodeBase returns a generic NodeBase for our node -- gives generic\naccess to all the base-level data structures without needing interface methods.", Returns: []string{"NodeBase"}}, {Name: "AsBody", Doc: "AsBody returns a generic Body interface for our node -- nil if not a Body", Returns: []string{"Body"}}, {Name: "GroupBBox", Doc: "GroupBBox sets bounding boxes for groups based on groups or bodies.\ncalled in a FuncDownMeLast traversal."}, {Name: "InitAbs", Doc: "InitAbs sets current Abs physical state parameters from Initial values\nwhich are local, relative to parent -- is passed the parent (nil = top).\nBody nodes should also set their bounding boxes.\nCalled in a FuncDownMeFirst traversal.", Args: []string{"par"}}, {Name: "RelToAbs", Doc: "RelToAbs updates current world Abs physical state parameters\nbased on Rel values added to updated Abs values at higher levels.\nAbs.LinVel is updated from the resulting change from prior position.\nThis is useful for manual updating of relative positions (scripted movement).\nIt is passed the parent (nil = top).\nBody nodes should also update their bounding boxes.\nCalled in a FuncDownMeFirst traversal.", Args: []string{"par"}}, {Name: "Step", Doc: "Step computes one update of the world Abs physical state parameters,\nusing *current* velocities -- add forces prior to calling.\nUse this for physics-based state updates.\nBody nodes should also update their bounding boxes.", Args: []string{"step"}}}})
 
 // NodeBaseType is the [types.Type] for [NodeBase]
 var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physics.NodeBase", IDName: "node-base", Doc: "NodeBase is the basic node, which has position, rotation, velocity\nand computed bounding boxes, etc.\nThere are only three different kinds of Nodes: Group, Body, and Joint", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Dynamic", Doc: "Dynamic is whether this node can move. If it is false, then this is a Static node.\nAny top-level group that is not Dynamic is immediately pruned from further consideration,\nso top-level groups should be separated into Dynamic and Static nodes at the start."}, {Name: "Initial", Doc: "initial position, orientation, velocity in *local* coordinates (relative to parent)"}, {Name: "Rel", Doc: "current relative (local) position, orientation, velocity -- only change these values, as abs values are computed therefrom"}, {Name: "Abs", Doc: "current absolute (world) position, orientation, velocity"}, {Name: "BBox", Doc: "bounding box in world coordinates (aggregated for groups)"}}, Instance: &NodeBase{}})
@@ -138,12 +108,6 @@ var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/phys
 // and computed bounding boxes, etc.
 // There are only three different kinds of Nodes: Group, Body, and Joint
 func NewNodeBase(parent ...tree.Node) *NodeBase { return tree.New[NodeBase](parent...) }
-
-// NodeType returns the [*types.Type] of [NodeBase]
-func (t *NodeBase) NodeType() *types.Type { return NodeBaseType }
-
-// New returns a new [*NodeBase] value
-func (t *NodeBase) New() tree.Node { return &NodeBase{} }
 
 // SetDynamic sets the [NodeBase.Dynamic]:
 // Dynamic is whether this node can move. If it is false, then this is a Static node.
@@ -167,12 +131,6 @@ var SphereType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/physic
 // NewSphere returns a new [Sphere] with the given optional parent:
 // Sphere is a spherical body shape.
 func NewSphere(parent ...tree.Node) *Sphere { return tree.New[Sphere](parent...) }
-
-// NodeType returns the [*types.Type] of [Sphere]
-func (t *Sphere) NodeType() *types.Type { return SphereType }
-
-// New returns a new [*Sphere] value
-func (t *Sphere) New() tree.Node { return &Sphere{} }
 
 // SetRadius sets the [Sphere.Radius]:
 // radius

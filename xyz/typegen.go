@@ -23,17 +23,11 @@ var GroupType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Group",
 // its own.  It does have a transform that applies to all nodes under it.
 func NewGroup(parent ...tree.Node) *Group { return tree.New[Group](parent...) }
 
-// NodeType returns the [*types.Type] of [Group]
-func (t *Group) NodeType() *types.Type { return GroupType }
-
-// New returns a new [*Group] value
-func (t *Group) New() tree.Node { return &Group{} }
-
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.SolidPoint", IDName: "solid-point", Doc: "SolidPoint contains a Solid and a Point on that solid", Fields: []types.Field{{Name: "Solid"}, {Name: "Point"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Decoder", IDName: "decoder", Doc: "Decoder parses 3D object / scene file(s) and imports into a Group or Scene.\nThis interface is implemented by the different format-specific decoders."})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Decoder", IDName: "decoder", Doc: "Decoder parses 3D object / scene file(s) and imports into a Group or Scene.\nThis interface is implemented by the different format-specific decoders.", Methods: []types.Method{{Name: "New", Doc: "New returns a new instance of the decoder used for a specific decoding", Returns: []string{"Decoder"}}, {Name: "Desc", Doc: "Desc returns the description of this decoder", Returns: []string{"string"}}, {Name: "SetFileFS", Doc: "SetFile sets the file name being used for decoding, or error if not found.\nReturns a list of files that should be loaded along with the main one, if needed.\nFor example, .obj decoder adds a corresponding .mtl file.  In addition,\ndecoded files may specify further files (textures, etc) that must be located\nrelative to the same fsys directory.\nAll file operations use the fsys file system for access, and this should be a\nSub FS anchored at the directory where the filename is located.", Args: []string{"fsys", "fname"}, Returns: []string{"[]string", "error"}}, {Name: "Decode", Doc: "Decode reads the given data and decodes it, returning a new instance\nof the Decoder that contains all the decoded info.\nSome formats (e.g., Wavefront .obj) have separate .obj and .mtl files\nwhich are passed as two reader args.", Args: []string{"rs"}, Returns: []string{"error"}}, {Name: "SetGroup", Doc: "SetGroup sets the group to contain the decoded objects within the\ngiven scene.", Args: []string{"sc", "gp"}}, {Name: "HasScene", Doc: "HasScene returns true if this decoder has full scene information --\notherwise it only supports objects to be used in SetGroup.", Returns: []string{"bool"}}, {Name: "SetScene", Doc: "SetScene sets the scene according to the decoded data.", Args: []string{"sc"}}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Light", IDName: "light", Doc: "Light represents a light that illuminates a scene.\nThese are stored on the [Scene] object and not within the tree."})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Light", IDName: "light", Doc: "Light represents a light that illuminates a scene.\nThese are stored on the [Scene] object and not within the tree.", Methods: []types.Method{{Name: "AsLightBase", Doc: "AsLightBase returns the [LightBase] for this Light,\nwhich provides the core functionality of a light.", Returns: []string{"LightBase"}}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.LightBase", IDName: "light-base", Doc: "LightBase provides the core implementation of the [Light] interface.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"--setters"}}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the light, which matters since lights are accessed by name."}, {Name: "On", Doc: "On is whether the light is turned on. TODO: support this being false."}, {Name: "Lumens", Doc: "Lumens is the brightness/intensity/strength of the light in normalized 0-1 units.\nIt is just multiplied by the color, and is convenient for easily modulating overall brightness."}, {Name: "Color", Doc: "Color is the color of the light at full intensity."}}})
 
@@ -104,7 +98,7 @@ func (t *Material) SetCullFront(v bool) *Material { t.CullFront = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshName", IDName: "mesh-name", Doc: "MeshName is a [Mesh] name. This type provides an automatic GUI chooser for meshes.\nIt is used on [Solid] to link to meshes by name."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Mesh", IDName: "mesh", Doc: "Mesh parametrizes the mesh-based shape used for rendering a [Solid].\nOnly indexed triangle meshes are supported.\nAll Meshes must know in advance the number of vertex and index points\nthey require, and the SetVertices method operates on data from the\nvgpu staging buffer to set the relevant data post-allocation.\nThe vgpu vshape library is used for all basic shapes, and it follows\nthis same logic.\nPer-vertex Color is optional, as is the ability to update the data\nafter initial SetVertices call (default is to do nothing)."})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Mesh", IDName: "mesh", Doc: "Mesh parametrizes the mesh-based shape used for rendering a [Solid].\nOnly indexed triangle meshes are supported.\nAll Meshes must know in advance the number of vertex and index points\nthey require, and the SetVertices method operates on data from the\nvgpu staging buffer to set the relevant data post-allocation.\nThe vgpu vshape library is used for all basic shapes, and it follows\nthis same logic.\nPer-vertex Color is optional, as is the ability to update the data\nafter initial SetVertices call (default is to do nothing).", Methods: []types.Method{{Name: "AsMeshBase", Doc: "AsMeshBase returns the [MeshBase] for this Mesh,\nwhich provides the core functionality of a mesh.", Returns: []string{"MeshBase"}}, {Name: "Sizes", Doc: "Sizes returns the number of vertex and index elements required for this mesh\nincluding a bool representing whether it has per-vertex color.", Returns: []string{"numVertex", "numIndex", "hasColor"}}, {Name: "Set", Doc: "Set sets the mesh points into given arrays, which have been allocated\naccording to the Sizes() returned by this Mesh.\nThe mesh is automatically marked with SetMod so that does not need to be done here.", Args: []string{"sc", "vertexArray", "normArray", "textureArray", "colorArray", "indexArray"}}, {Name: "Update", Doc: "Update updates the mesh points into given arrays, which have previously\nbeen set with SetVertices; this can optimize by only updating whatever might\nneed to be updated for dynamically changing meshes.\nYou must call SetMod if the mesh was actually updated at this point.", Args: []string{"sc", "vertexArray", "normArray", "textureArray", "colorArray", "indexArray"}}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.MeshBase", IDName: "mesh-base", Doc: "MeshBase provides the core implementation of the [Mesh] interface.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the mesh. [Mesh]es are linked to [Solid]s\nby name so this matters."}, {Name: "NumVertex", Doc: "NumVertex is the number of [math32.Vector3] vertex points. This always\nincludes [math32.Vector3] normals and [math32.Vector2] texture coordinates.\nThis is only valid after [Mesh.Sizes] has been called."}, {Name: "NumIndex", Doc: "NumIndex is the number of [math32.ArrayU32] indexes.\nThis is only valid after [Mesh.Sizes] has been called."}, {Name: "HasColor", Doc: "HasColor is whether the mesh has per-vertex colors\nas [math32.Vector4] per vertex."}, {Name: "Dynamic", Doc: "Dynamic is whether this mesh changes frequently;\notherwise considered to be static."}, {Name: "Transparent", Doc: "Transparent is whether the color has transparency;\nnot worth checking manually. This is only valid if\n[MeshBase.HasColor] is true."}, {Name: "BBox", Doc: "BBox has the computed bounding-box and other gross solid properties."}}})
 
@@ -131,7 +125,7 @@ func (t *MeshBase) SetTransparent(v bool) *MeshBase { t.Transparent = v; return 
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.GenMesh", IDName: "gen-mesh", Doc: "GenMesh is a generic, arbitrary Mesh, storing its values", Embeds: []types.Field{{Name: "MeshBase"}}, Fields: []types.Field{{Name: "Vertex"}, {Name: "Norm"}, {Name: "Texture"}, {Name: "Color"}, {Name: "Index"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Node", IDName: "node", Doc: "Node is the common interface for all xyz 3D tree nodes.\n[Solid] and [Group] are the two main types of nodes,\nwhich both extend [NodeBase] for the core functionality."})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Node", IDName: "node", Doc: "Node is the common interface for all xyz 3D tree nodes.\n[Solid] and [Group] are the two main types of nodes,\nwhich both extend [NodeBase] for the core functionality.", Methods: []types.Method{{Name: "AsNodeBase", Doc: "AsNodeBase returns the [NodeBase] for our node, which gives\naccess to all the base-level data structures and methods\nwithout requiring interface methods.", Returns: []string{"NodeBase"}}, {Name: "IsSolid", Doc: "IsSolid returns true if this is an [Solid] node (otherwise a [Group]).", Returns: []string{"bool"}}, {Name: "AsSolid", Doc: "AsSolid returns the node as a [Solid] (nil if not).", Returns: []string{"Solid"}}, {Name: "Validate", Doc: "Validate checks that scene element is valid.", Returns: []string{"error"}}, {Name: "UpdateWorldMatrix", Doc: "UpdateWorldMatrix updates this node's local and world matrix based on parent's world matrix.", Args: []string{"parWorld"}}, {Name: "UpdateMeshBBox", Doc: "UpdateMeshBBox updates the Mesh-based BBox info for all nodes.\ngroups aggregate over elements. It is called from WalkPost traversal."}, {Name: "IsVisible", Doc: "IsVisible provides the definitive answer as to whether a given node\nis currently visible.  It is only entirely valid after a render pass\nfor widgets in a visible window, but it checks the window and viewport\nfor their visibility status as well, which is available always.\nNon-visible nodes are automatically not rendered and not connected to\nwindow events.  The Invisible flag is one key element of the IsVisible\ncalculus; it is set by e.g., TabView for invisible tabs, and is also\nset if a widget is entirely out of render range.  But again, use\nIsVisible as the main end-user method.\nFor robustness, it recursively calls the parent; this is typically\na short path; propagating the Invisible flag properly can be\nvery challenging without mistakenly overwriting invisibility at various\nlevels.", Returns: []string{"bool"}}, {Name: "IsTransparent", Doc: "IsTransparent returns true if solid has transparent color.", Returns: []string{"bool"}}, {Name: "Config", Doc: "Config configures the node."}, {Name: "RenderClass", Doc: "RenderClass returns the class of rendering for this solid.\nIt is used for organizing the ordering of rendering.", Returns: []string{"RenderClasses"}}, {Name: "Render", Doc: "Render is called by Scene Render on main thread\nwhen everything is ready to go."}}})
 
 // NodeBaseType is the [types.Type] for [NodeBase]
 var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.NodeBase", IDName: "node-base", Doc: "NodeBase is the basic 3D tree node, which has the full transform information\nrelative to parent, and computed bounding boxes, etc.\nIt implements the [Node] interface and contains the core functionality\ncommon to all 3D nodes.", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Invisible", Doc: "Invisible is whether this node is invisible."}, {Name: "Pose", Doc: "Pose is the complete specification of position and orientation."}, {Name: "Scene", Doc: "Scene is the cached [Scene]."}, {Name: "MeshBBox", Doc: "mesh-based local bounding box (aggregated for groups)"}, {Name: "WorldBBox", Doc: "world coordinates bounding box"}, {Name: "NDCBBox", Doc: "normalized display coordinates bounding box, used for frustrum clipping"}, {Name: "BBox", Doc: "raw original bounding box for the widget within its parent Scene.\nThis is prior to intersecting with Frame bounds."}, {Name: "SceneBBox", Doc: "2D bounding box for region occupied within Scene Frame that we render onto.\nThis is BBox intersected with Frame bounds."}}, Instance: &NodeBase{}})
@@ -142,12 +136,6 @@ var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Node
 // It implements the [Node] interface and contains the core functionality
 // common to all 3D nodes.
 func NewNodeBase(parent ...tree.Node) *NodeBase { return tree.New[NodeBase](parent...) }
-
-// NodeType returns the [*types.Type] of [NodeBase]
-func (t *NodeBase) NodeType() *types.Type { return NodeBaseType }
-
-// New returns a new [*NodeBase] value
-func (t *NodeBase) New() tree.Node { return &NodeBase{} }
 
 // SetInvisible sets the [NodeBase.Invisible]:
 // Invisible is whether this node is invisible.
@@ -177,12 +165,6 @@ var SceneType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Scene",
 // set their relative Pos etc to display relative to the camera, to achieve
 // "first person" effects.
 func NewScene(parent ...tree.Node) *Scene { return tree.New[Scene](parent...) }
-
-// NodeType returns the [*types.Type] of [Scene]
-func (t *Scene) NodeType() *types.Type { return SceneType }
-
-// New returns a new [*Scene] value
-func (t *Scene) New() tree.Node { return &Scene{} }
 
 // SetBackgroundColor sets the [Scene.BackgroundColor]:
 // BackgroundColor is the background color of the scene,
@@ -370,18 +352,12 @@ var SolidType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Solid",
 // and points to a mesh structure defining the shape of the solid.
 func NewSolid(parent ...tree.Node) *Solid { return tree.New[Solid](parent...) }
 
-// NodeType returns the [*types.Type] of [Solid]
-func (t *Solid) NodeType() *types.Type { return SolidType }
-
-// New returns a new [*Solid] value
-func (t *Solid) New() tree.Node { return &Solid{} }
-
 // SetMaterial sets the [Solid.Material]:
 // Material contains the material properties of the surface (color, shininess, texture, etc).
 func (t *Solid) SetMaterial(v Material) *Solid { t.Material = v; return t }
 
 // Text2DType is the [types.Type] for [Text2D]
-var Text2DType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Text2D", IDName: "text2-d", Doc: "Text2D presents 2D rendered text on a vertically oriented plane, using a texture.\nCall SetText() which calls RenderText to update fortext changes (re-renders texture).\nThe native scale is such that a unit height value is the height of the default font\nset by the font-size property, and the X axis is scaled proportionally based on the\nrendered text size to maintain the aspect ratio.  Further scaling can be applied on\ntop of that by setting the Pose.Scale values as usual.\nStandard styling properties can be set on the node to set font size, family,\nand text alignment relative to the Pose.Pos position (e.g., Left, Top puts the\nupper-left corner of text at Pos).\nNote that higher quality is achieved by using a larger font size (36 default).\nThe margin property creates blank margin of the background color around the text\n(2 px default) and the background-color defaults to transparent\nbut can be set to any color.", Embeds: []types.Field{{Name: "Solid"}}, Fields: []types.Field{{Name: "Text", Doc: "the text string to display"}, {Name: "Styles", Doc: "styling settings for the text"}, {Name: "TextPos", Doc: "position offset of start of text rendering relative to upper-left corner"}, {Name: "TextRender", Doc: "render data for text label"}, {Name: "RenderState", Doc: "render state for rendering text"}}, Instance: &Text2D{}})
+var Text2DType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Text2D", IDName: "text2-d", Doc: "Text2D presents 2D rendered text on a vertically oriented plane, using a texture.\nCall SetText() which calls RenderText to update fortext changes (re-renders texture).\nThe native scale is such that a unit height value is the height of the default font\nset by the font-size property, and the X axis is scaled proportionally based on the\nrendered text size to maintain the aspect ratio.  Further scaling can be applied on\ntop of that by setting the Pose.Scale values as usual.\nStandard styling properties can be set on the node to set font size, family,\nand text alignment relative to the Pose.Pos position (e.g., Left, Top puts the\nupper-left corner of text at Pos).\nNote that higher quality is achieved by using a larger font size (36 default).\nThe margin property creates blank margin of the background color around the text\n(2 px default) and the background-color defaults to transparent\nbut can be set to any color.", Embeds: []types.Field{{Name: "Solid"}}, Fields: []types.Field{{Name: "Text", Doc: "the text string to display"}, {Name: "Styles", Doc: "styling settings for the text"}, {Name: "TextPos", Doc: "position offset of start of text rendering relative to upper-left corner"}, {Name: "TextRender", Doc: "render data for text label"}, {Name: "RenderState", Doc: "render state for rendering text"}, {Name: "usesDefaultColor", Doc: "automatically set to true if the font render color is the default\ncolors.Scheme.OnSurface.  If so, it is automatically updated if the default\nchanges, e.g., in light mode vs dark mode switching."}}, Instance: &Text2D{}})
 
 // NewText2D returns a new [Text2D] with the given optional parent:
 // Text2D presents 2D rendered text on a vertically oriented plane, using a texture.
@@ -399,19 +375,13 @@ var Text2DType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Text2D
 // but can be set to any color.
 func NewText2D(parent ...tree.Node) *Text2D { return tree.New[Text2D](parent...) }
 
-// NodeType returns the [*types.Type] of [Text2D]
-func (t *Text2D) NodeType() *types.Type { return Text2DType }
-
-// New returns a new [*Text2D] value
-func (t *Text2D) New() tree.Node { return &Text2D{} }
-
 // SetText sets the [Text2D.Text]:
 // the text string to display
 func (t *Text2D) SetText(v string) *Text2D { t.Text = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TextureName", IDName: "texture-name", Doc: "TextureName provides a GUI interface for choosing textures."})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Texture", IDName: "texture", Doc: "Texture is the interface for all textures."})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.Texture", IDName: "texture", Doc: "Texture is the interface for all textures.", Methods: []types.Method{{Name: "AsTextureBase", Doc: "AsTextureBase returns the [TextureBase] for this texture,\nwhich contains the core data and functionality.", Returns: []string{"TextureBase"}}, {Name: "Image", Doc: "Image returns the image for the texture in the [image.RGBA] format used internally.", Returns: []string{"RGBA"}}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz.TextureBase", IDName: "texture-base", Doc: "TextureBase is the base texture implementation.\nIt uses an [image.RGBA] as the underlying image storage\nto facilitate interface with GPU.", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"--setters"}}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the texture;\ntextures are connected to [Material]s by name."}, {Name: "Transparent", Doc: "Transprent is whether the texture has transparency."}, {Name: "RGBA", Doc: "RGBA is the cached internal representation of the image."}}})
 

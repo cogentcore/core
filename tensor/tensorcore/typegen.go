@@ -19,24 +19,12 @@ var SimMatGridType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor
 // with tensor values as a grid of colored squares, and labels for rows and columns.
 func NewSimMatGrid(parent ...tree.Node) *SimMatGrid { return tree.New[SimMatGrid](parent...) }
 
-// NodeType returns the [*types.Type] of [SimMatGrid]
-func (t *SimMatGrid) NodeType() *types.Type { return SimMatGridType }
-
-// New returns a new [*SimMatGrid] value
-func (t *SimMatGrid) New() tree.Node { return &SimMatGrid{} }
-
 // TableType is the [types.Type] for [Table]
 var TableType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor/tensorcore.Table", IDName: "table", Doc: "Table provides a GUI widget for representing [table.Table] values.", Embeds: []types.Field{{Name: "ListBase"}}, Fields: []types.Field{{Name: "Table", Doc: "the idx view of the table that we're a view of"}, {Name: "TensorDisplay", Doc: "overall display options for tensor display"}, {Name: "ColumnTensorDisplay", Doc: "per column tensor display params"}, {Name: "ColumnTensorBlank", Doc: "per column blank tensor values"}, {Name: "NCols", Doc: "number of columns in table (as of last update)"}, {Name: "SortIndex", Doc: "current sort index"}, {Name: "SortDescending", Doc: "whether current sort order is descending"}, {Name: "headerWidths", Doc: "headerWidths has number of characters in each header, per visfields"}, {Name: "colMaxWidths", Doc: "colMaxWidths records maximum width in chars of string type fields"}, {Name: "BlankString", Doc: "\tblank values for out-of-range rows"}, {Name: "BlankFloat"}}, Instance: &Table{}})
 
 // NewTable returns a new [Table] with the given optional parent:
 // Table provides a GUI widget for representing [table.Table] values.
 func NewTable(parent ...tree.Node) *Table { return tree.New[Table](parent...) }
-
-// NodeType returns the [*types.Type] of [Table]
-func (t *Table) NodeType() *types.Type { return TableType }
-
-// New returns a new [*Table] value
-func (t *Table) New() tree.Node { return &Table{} }
 
 // SetNCols sets the [Table.NCols]:
 // number of columns in table (as of last update)
@@ -69,12 +57,6 @@ var TensorGridType = types.AddType(&types.Type{Name: "cogentcore.org/core/tensor
 // TensorGrid is a widget that displays tensor values as a grid of colored squares.
 func NewTensorGrid(parent ...tree.Node) *TensorGrid { return tree.New[TensorGrid](parent...) }
 
-// NodeType returns the [*types.Type] of [TensorGrid]
-func (t *TensorGrid) NodeType() *types.Type { return TensorGridType }
-
-// New returns a new [*TensorGrid] value
-func (t *TensorGrid) New() tree.Node { return &TensorGrid{} }
-
 // SetDisplay sets the [TensorGrid.Display]:
 // display options
 func (t *TensorGrid) SetDisplay(v TensorDisplay) *TensorGrid { t.Display = v; return t }
@@ -91,12 +73,6 @@ var TensorButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/tens
 // viewer for an [tensor.Tensor].
 func NewTensorButton(parent ...tree.Node) *TensorButton { return tree.New[TensorButton](parent...) }
 
-// NodeType returns the [*types.Type] of [TensorButton]
-func (t *TensorButton) NodeType() *types.Type { return TensorButtonType }
-
-// New returns a new [*TensorButton] value
-func (t *TensorButton) New() tree.Node { return &TensorButton{} }
-
 // SetTensor sets the [TensorButton.Tensor]
 func (t *TensorButton) SetTensor(v tensor.Tensor) *TensorButton { t.Tensor = v; return t }
 
@@ -107,12 +83,6 @@ var TableButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/tenso
 // TableButton presents a button that pulls up the [Table] viewer for a [table.Table].
 func NewTableButton(parent ...tree.Node) *TableButton { return tree.New[TableButton](parent...) }
 
-// NodeType returns the [*types.Type] of [TableButton]
-func (t *TableButton) NodeType() *types.Type { return TableButtonType }
-
-// New returns a new [*TableButton] value
-func (t *TableButton) New() tree.Node { return &TableButton{} }
-
 // SetTable sets the [TableButton.Table]
 func (t *TableButton) SetTable(v *table.Table) *TableButton { t.Table = v; return t }
 
@@ -122,12 +92,6 @@ var SimMatButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/tens
 // NewSimMatButton returns a new [SimMatButton] with the given optional parent:
 // SimMatValue presents a button that pulls up the [SimMatGridView] viewer for a [table.Table].
 func NewSimMatButton(parent ...tree.Node) *SimMatButton { return tree.New[SimMatButton](parent...) }
-
-// NodeType returns the [*types.Type] of [SimMatButton]
-func (t *SimMatButton) NodeType() *types.Type { return SimMatButtonType }
-
-// New returns a new [*SimMatButton] value
-func (t *SimMatButton) New() tree.Node { return &SimMatButton{} }
 
 // SetSimMat sets the [SimMatButton.SimMat]
 func (t *SimMatButton) SetSimMat(v *simat.SimMat) *SimMatButton { t.SimMat = v; return t }

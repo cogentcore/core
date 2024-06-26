@@ -33,12 +33,6 @@ func (t *App) SetSceneConfig(v func(sc *Scene)) *App { t.SceneConfig = v; return
 // BodyType is the [types.Type] for [Body]
 var BodyType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Body", IDName: "body", Doc: "Body holds the primary content of a [Scene].\nIt is the main container for app content.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Title", Doc: "Title is the title of the body, which is also\nused for the window title where relevant."}}, Instance: &Body{}})
 
-// NodeType returns the [*types.Type] of [Body]
-func (t *Body) NodeType() *types.Type { return BodyType }
-
-// New returns a new [*Body] value
-func (t *Body) New() tree.Node { return &Body{} }
-
 // ButtonType is the [types.Type] for [Button]
 var ButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Button", IDName: "button", Doc: "Button is an interactive button with text, an icon, an indicator, a shortcut,\nand/or a menu. The standard behavior is to register a click event handler with\nOnClick.", Directives: []types.Directive{{Tool: "core", Directive: "embedder"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of button."}, {Name: "Text", Doc: "Text is the text for the button.\nIf it is blank, no text is shown."}, {Name: "Icon", Doc: "Icon is the icon for the button.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "Indicator", Doc: "Indicator is the menu indicator icon to present.\nIf it is \"\" or [icons.None],, no indicator is shown.\nIt is automatically set to [icons.KeyboardArrowDown]\nwhen there is a Menu elements present unless it is\nset to [icons.None]."}, {Name: "Shortcut", Doc: "Shortcut is an optional shortcut keyboard chord to trigger this button,\nactive in window-wide scope. Avoid conflicts with other shortcuts\n(a log message will be emitted if so). Shortcuts are processed after\nall other processing of keyboard input. Command is automatically translated\ninto Meta on macOS and Control on all other platforms."}, {Name: "Menu", Doc: "Menu is a menu constructor function used to build and display\na menu whenever the button is clicked. There will be no menu\nif it is nil. The constructor function should add buttons\nto the Scene that it is passed."}}, Instance: &Button{}})
 
@@ -47,12 +41,6 @@ var ButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Butto
 // and/or a menu. The standard behavior is to register a click event handler with
 // OnClick.
 func NewButton(parent ...tree.Node) *Button { return tree.New[Button](parent...) }
-
-// NodeType returns the [*types.Type] of [Button]
-func (t *Button) NodeType() *types.Type { return ButtonType }
-
-// New returns a new [*Button] value
-func (t *Button) New() tree.Node { return &Button{} }
 
 // ButtonEmbedder is an interface that all types that embed Button satisfy
 type ButtonEmbedder interface {
@@ -116,12 +104,6 @@ var CanvasType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Canva
 // its Draw function using [Canvas.SetDraw].
 func NewCanvas(parent ...tree.Node) *Canvas { return tree.New[Canvas](parent...) }
 
-// NodeType returns the [*types.Type] of [Canvas]
-func (t *Canvas) NodeType() *types.Type { return CanvasType }
-
-// New returns a new [*Canvas] value
-func (t *Canvas) New() tree.Node { return &Canvas{} }
-
 // SetDraw sets the [Canvas.Draw]:
 // Draw is the function used to draw the content of the
 // canvas every time that it is rendered. The paint context
@@ -136,12 +118,6 @@ var ChooserType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Choo
 // Chooser is a drop down selection widget that allows users to choose
 // one option among a list of items.
 func NewChooser(parent ...tree.Node) *Chooser { return tree.New[Chooser](parent...) }
-
-// NodeType returns the [*types.Type] of [Chooser]
-func (t *Chooser) NodeType() *types.Type { return ChooserType }
-
-// New returns a new [*Chooser] value
-func (t *Chooser) New() tree.Node { return &Chooser{} }
 
 // SetType sets the [Chooser.Type]:
 // Type is the styling type of the chooser.
@@ -190,28 +166,16 @@ func NewColorMapButton(parent ...tree.Node) *ColorMapButton {
 	return tree.New[ColorMapButton](parent...)
 }
 
-// NodeType returns the [*types.Type] of [ColorMapButton]
-func (t *ColorMapButton) NodeType() *types.Type { return ColorMapButtonType }
-
-// New returns a new [*ColorMapButton] value
-func (t *ColorMapButton) New() tree.Node { return &ColorMapButton{} }
-
 // SetMapName sets the [ColorMapButton.MapName]
 func (t *ColorMapButton) SetMapName(v string) *ColorMapButton { t.MapName = v; return t }
 
 // ColorPickerType is the [types.Type] for [ColorPicker]
-var ColorPickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ColorPicker", IDName: "color-picker", Doc: "ColorPicker represents a color value with an interactive color picker\ncomposed of three HCT sliders.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Color", Doc: "the color that we view"}}, Instance: &ColorPicker{}})
+var ColorPickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ColorPicker", IDName: "color-picker", Doc: "ColorPicker represents a color value with an interactive color picker\ncomposed of three HCT sliders and standard accent color buttons.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Color", Doc: "Color is the current color."}}, Instance: &ColorPicker{}})
 
 // NewColorPicker returns a new [ColorPicker] with the given optional parent:
 // ColorPicker represents a color value with an interactive color picker
-// composed of three HCT sliders.
+// composed of three HCT sliders and standard accent color buttons.
 func NewColorPicker(parent ...tree.Node) *ColorPicker { return tree.New[ColorPicker](parent...) }
-
-// NodeType returns the [*types.Type] of [ColorPicker]
-func (t *ColorPicker) NodeType() *types.Type { return ColorPickerType }
-
-// New returns a new [*ColorPicker] value
-func (t *ColorPicker) New() tree.Node { return &ColorPicker{} }
 
 // ColorButtonType is the [types.Type] for [ColorButton]
 var ColorButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ColorButton", IDName: "color-button", Doc: "ColorButton represents a color value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Color"}}, Instance: &ColorButton{}})
@@ -219,12 +183,6 @@ var ColorButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.
 // NewColorButton returns a new [ColorButton] with the given optional parent:
 // ColorButton represents a color value with a button.
 func NewColorButton(parent ...tree.Node) *ColorButton { return tree.New[ColorButton](parent...) }
-
-// NodeType returns the [*types.Type] of [ColorButton]
-func (t *ColorButton) NodeType() *types.Type { return ColorButtonType }
-
-// New returns a new [*ColorButton] value
-func (t *ColorButton) New() tree.Node { return &ColorButton{} }
 
 // SetColor sets the [ColorButton.Color]
 func (t *ColorButton) SetColor(v color.RGBA) *ColorButton { t.Color = v; return t }
@@ -278,12 +236,6 @@ var FilePickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.F
 // FilePicker is a widget for selecting files.
 func NewFilePicker(parent ...tree.Node) *FilePicker { return tree.New[FilePicker](parent...) }
 
-// NodeType returns the [*types.Type] of [FilePicker]
-func (t *FilePicker) NodeType() *types.Type { return FilePickerType }
-
-// New returns a new [*FilePicker] value
-func (t *FilePicker) New() tree.Node { return &FilePicker{} }
-
 // SetFilterFunc sets the [FilePicker.FilterFunc]:
 // FilterFunc is an optional filtering function for which files to display.
 func (t *FilePicker) SetFilterFunc(v FilePickerFilterFunc) *FilePicker { t.FilterFunc = v; return t }
@@ -296,12 +248,6 @@ var FileButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.F
 // that opens a [FilePicker].
 func NewFileButton(parent ...tree.Node) *FileButton { return tree.New[FileButton](parent...) }
 
-// NodeType returns the [*types.Type] of [FileButton]
-func (t *FileButton) NodeType() *types.Type { return FileButtonType }
-
-// New returns a new [*FileButton] value
-func (t *FileButton) New() tree.Node { return &FileButton{} }
-
 // SetFilename sets the [FileButton.Filename]
 func (t *FileButton) SetFilename(v string) *FileButton { t.Filename = v; return t }
 
@@ -311,12 +257,6 @@ var FormType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Form", 
 // NewForm returns a new [Form] with the given optional parent:
 // Form represents a struct with rows of field names and editable values.
 func NewForm(parent ...tree.Node) *Form { return tree.New[Form](parent...) }
-
-// NodeType returns the [*types.Type] of [Form]
-func (t *Form) NodeType() *types.Type { return FormType }
-
-// New returns a new [*Form] value
-func (t *Form) New() tree.Node { return &Form{} }
 
 // SetStruct sets the [Form.Struct]:
 // Struct is the pointer to the struct that we are viewing.
@@ -342,12 +282,6 @@ var FrameType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Frame"
 // elements.
 func NewFrame(parent ...tree.Node) *Frame { return tree.New[Frame](parent...) }
 
-// NodeType returns the [*types.Type] of [Frame]
-func (t *Frame) NodeType() *types.Type { return FrameType }
-
-// New returns a new [*Frame] value
-func (t *Frame) New() tree.Node { return &Frame{} }
-
 // SetStackTop sets the [Frame.StackTop]:
 // StackTop, for a [styles.Stacked] frame, is the index of the node to use as the top of the stack.
 // Only the node at this index is rendered; if not a valid index, nothing is rendered.
@@ -369,12 +303,6 @@ var StretchType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Stre
 // It does not render anything.
 func NewStretch(parent ...tree.Node) *Stretch { return tree.New[Stretch](parent...) }
 
-// NodeType returns the [*types.Type] of [Stretch]
-func (t *Stretch) NodeType() *types.Type { return StretchType }
-
-// New returns a new [*Stretch] value
-func (t *Stretch) New() tree.Node { return &Stretch{} }
-
 // SpaceType is the [types.Type] for [Space]
 var SpaceType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Space", IDName: "space", Doc: "Space is a fixed size blank space, with\na default width of 1ch and a height of 1em.\nYou can set [styles.Style.Min] to change its size.\nIt does not render anything.", Embeds: []types.Field{{Name: "WidgetBase"}}, Instance: &Space{}})
 
@@ -384,12 +312,6 @@ var SpaceType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Space"
 // You can set [styles.Style.Min] to change its size.
 // It does not render anything.
 func NewSpace(parent ...tree.Node) *Space { return tree.New[Space](parent...) }
-
-// NodeType returns the [*types.Type] of [Space]
-func (t *Space) NodeType() *types.Type { return SpaceType }
-
-// New returns a new [*Space] value
-func (t *Space) New() tree.Node { return &Space{} }
 
 // FuncButtonType is the [types.Type] for [FuncButton]
 var FuncButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FuncButton", IDName: "func-button", Doc: "FuncButton is a button that is set up to call a function when it\nis pressed, using a dialog to prompt the user for any arguments.\nAlso, it automatically sets various properties of the button like\nthe name, text, tooltip, and icon based on the properties of the\nfunction, using [reflect] and [types]. The function must be registered\nwith [types] to get documentation information, but that is not\nrequired; add a `//types:add` comment directive and run `core generate`\nif you want tooltips. If the function is a method, both the method and\nits receiver type must be added to [types] to get documentation.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Func", Doc: "Func is the [types.Func] associated with this button.\nThis function can also be a method, but it must be\nconverted to a [types.Func] first. It should typically\nbe set using [FuncButton.SetFunc]."}, {Name: "ReflectFunc", Doc: "ReflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc]."}, {Name: "Args", Doc: "Args are the [FuncArg] objects associated with the\narguments of the function. They are automatically set in\n[SetFunc], but they can be customized to configure\ndefault values and other options."}, {Name: "Returns", Doc: "Returns are the [FuncArg] objects associated with the\nreturn values of the function. They are automatically\nset in [SetFunc], but they can be customized to configure\noptions. The [FuncArg.Value]s are not set until the\nfunction is called, and are thus not typically applicable\nto access."}, {Name: "Confirm", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function."}, {Name: "ShowReturn", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. Non-nil error return values will\nalways be shown, even if ShowReturn is set to false."}, {Name: "ShowReturnAsDialog", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there are multiple return values from the function, or if\none of them is a complex type (pointer, struct, slice,\narray, map), then ShowReturnAsDialog will\nautomatically be set to true."}, {Name: "NewWindow", Doc: "NewWindow makes the ReturnDialog a NewWindow dialog\n(if supported by platform)."}, {Name: "WarnUnadded", Doc: "WarnUnadded is whether to log warnings when a function that\nhas not been added to [types] is used. It is on by default and\nmust be set before [FuncButton.SetFunc] is called for it to\nhave any effect. Warnings are never logged for anonymous functions."}, {Name: "Context", Doc: "Context is used for opening Dialogs if non-nil."}, {Name: "AfterFunc", Doc: "AfterFunc is an optional function called after the func button\nfunction is executed"}}, Instance: &FuncButton{}})
@@ -405,12 +327,6 @@ var FuncButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.F
 // if you want tooltips. If the function is a method, both the method and
 // its receiver type must be added to [types] to get documentation.
 func NewFuncButton(parent ...tree.Node) *FuncButton { return tree.New[FuncButton](parent...) }
-
-// NodeType returns the [*types.Type] of [FuncButton]
-func (t *FuncButton) NodeType() *types.Type { return FuncButtonType }
-
-// New returns a new [*FuncButton] value
-func (t *FuncButton) New() tree.Node { return &FuncButton{} }
 
 // SetConfirm sets the [FuncButton.Confirm]:
 // Confirm is whether to prompt the user for confirmation
@@ -481,12 +397,6 @@ var HandleType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Handl
 // controls the direction in which the handle moves.
 func NewHandle(parent ...tree.Node) *Handle { return tree.New[Handle](parent...) }
 
-// NodeType returns the [*types.Type] of [Handle]
-func (t *Handle) NodeType() *types.Type { return HandleType }
-
-// New returns a new [*Handle] value
-func (t *Handle) New() tree.Node { return &Handle{} }
-
 // SetMin sets the [Handle.Min]:
 // Min is the minimum value that the handle can go to
 // (typically the lower bound of the dialog/splits)
@@ -512,12 +422,6 @@ var IconType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Icon", 
 // The size of on Icon is determined by the [styles.Font.Size] property.
 func NewIcon(parent ...tree.Node) *Icon { return tree.New[Icon](parent...) }
 
-// NodeType returns the [*types.Type] of [Icon]
-func (t *Icon) NodeType() *types.Type { return IconType }
-
-// New returns a new [*Icon] value
-func (t *Icon) New() tree.Node { return &Icon{} }
-
 // ImageType is the [types.Type] for [Image]
 var ImageType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Image", IDName: "image", Doc: "Image is a widget that renders a static bitmap image.\nSee [styles.ObjectFits] for how to control the image rendering within\nthe allocated size. The default minimum requested size is the pixel\nsize in [units.Dp] units (1/160th of an inch).", Methods: []types.Method{{Name: "Open", Doc: "Open sets the image to the image located at the given filename.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Image", Doc: "Image is the bitmap image."}, {Name: "prevPixels", Doc: "prevPixels is the cached last rendered image."}, {Name: "prevObjectFit", Doc: "prevObjectFit is the cached [styles.Style.ObjectFit] of the last rendered image."}, {Name: "prevSize", Doc: "prevSize is the cached allocated size for the last rendered image."}}, Instance: &Image{}})
 
@@ -528,12 +432,6 @@ var ImageType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Image"
 // size in [units.Dp] units (1/160th of an inch).
 func NewImage(parent ...tree.Node) *Image { return tree.New[Image](parent...) }
 
-// NodeType returns the [*types.Type] of [Image]
-func (t *Image) NodeType() *types.Type { return ImageType }
-
-// New returns a new [*Image] value
-func (t *Image) New() tree.Node { return &Image{} }
-
 // InlineListType is the [types.Type] for [InlineList]
 var InlineListType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.InlineList", IDName: "inline-list", Doc: "InlineList represents a slice within a single line of value widgets.\nThis is typically used for smaller slices.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Slice", Doc: "Slice is the slice that we are viewing."}, {Name: "isArray", Doc: "isArray is whether the slice is actually an array."}}, Instance: &InlineList{}})
 
@@ -541,12 +439,6 @@ var InlineListType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.I
 // InlineList represents a slice within a single line of value widgets.
 // This is typically used for smaller slices.
 func NewInlineList(parent ...tree.Node) *InlineList { return tree.New[InlineList](parent...) }
-
-// NodeType returns the [*types.Type] of [InlineList]
-func (t *InlineList) NodeType() *types.Type { return InlineListType }
-
-// New returns a new [*InlineList] value
-func (t *InlineList) New() tree.Node { return &InlineList{} }
 
 // InspectorType is the [types.Type] for [Inspector]
 var InspectorType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Inspector", IDName: "inspector", Doc: "Inspector represents a struct, creating a property editor of the fields --\nconstructs Children widgets to show the field names and editor fields for\neach field, within an overall frame with an optional title, and a button\nbox at the bottom where methods can be invoked", Methods: []types.Method{{Name: "Save", Doc: "Save saves tree to current filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"error"}}, {Name: "SaveAs", Doc: "SaveAs saves tree to given filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "Open", Doc: "Open opens tree from given filename, in a standard JSON-formatted file", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}, {Name: "ToggleSelectionMode", Doc: "ToggleSelectionMode toggles the editor between selection mode or not.\nIn selection mode, bounding boxes are rendered around each Widget,\nand clicking on a Widget pulls it up in the inspector.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "InspectApp", Doc: "InspectApp displays the underlying operating system app", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Root", Doc: "Root is the root of the tree being edited."}, {Name: "CurrentNode", Doc: "CurrentNode is the currently selected node in the tree."}, {Name: "Filename", Doc: "Filename is the current filename for saving / loading"}}, Instance: &Inspector{}})
@@ -558,12 +450,6 @@ var InspectorType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.In
 // box at the bottom where methods can be invoked
 func NewInspector(parent ...tree.Node) *Inspector { return tree.New[Inspector](parent...) }
 
-// NodeType returns the [*types.Type] of [Inspector]
-func (t *Inspector) NodeType() *types.Type { return InspectorType }
-
-// New returns a new [*Inspector] value
-func (t *Inspector) New() tree.Node { return &Inspector{} }
-
 // SetRoot sets the [Inspector.Root]:
 // Root is the root of the tree being edited.
 func (t *Inspector) SetRoot(v tree.Node) *Inspector { t.Root = v; return t }
@@ -574,12 +460,6 @@ var KeyMapButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core
 // NewKeyMapButton returns a new [KeyMapButton] with the given optional parent:
 // KeyMapButton represents a [keymap.MapName] value with a button.
 func NewKeyMapButton(parent ...tree.Node) *KeyMapButton { return tree.New[KeyMapButton](parent...) }
-
-// NodeType returns the [*types.Type] of [KeyMapButton]
-func (t *KeyMapButton) NodeType() *types.Type { return KeyMapButtonType }
-
-// New returns a new [*KeyMapButton] value
-func (t *KeyMapButton) New() tree.Node { return &KeyMapButton{} }
 
 // SetMapName sets the [KeyMapButton.MapName]
 func (t *KeyMapButton) SetMapName(v keymap.MapName) *KeyMapButton { t.MapName = v; return t }
@@ -593,12 +473,6 @@ func NewKeyChordButton(parent ...tree.Node) *KeyChordButton {
 	return tree.New[KeyChordButton](parent...)
 }
 
-// NodeType returns the [*types.Type] of [KeyChordButton]
-func (t *KeyChordButton) NodeType() *types.Type { return KeyChordButtonType }
-
-// New returns a new [*KeyChordButton] value
-func (t *KeyChordButton) New() tree.Node { return &KeyChordButton{} }
-
 // SetChord sets the [KeyChordButton.Chord]
 func (t *KeyChordButton) SetChord(v key.Chord) *KeyChordButton { t.Chord = v; return t }
 
@@ -608,12 +482,6 @@ var KeyedListType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Ke
 // NewKeyedList returns a new [KeyedList] with the given optional parent:
 // KeyedList represents a map value using two columns of editable key and value widgets.
 func NewKeyedList(parent ...tree.Node) *KeyedList { return tree.New[KeyedList](parent...) }
-
-// NodeType returns the [*types.Type] of [KeyedList]
-func (t *KeyedList) NodeType() *types.Type { return KeyedListType }
-
-// New returns a new [*KeyedList] value
-func (t *KeyedList) New() tree.Node { return &KeyedList{} }
 
 // SetMap sets the [KeyedList.Map]:
 // Map is the pointer to the map that we are viewing.
@@ -641,12 +509,6 @@ var ListType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.List", 
 // Use [ListBase.BindSelect] to make the list designed for item selection.
 func NewList(parent ...tree.Node) *List { return tree.New[List](parent...) }
 
-// NodeType returns the [*types.Type] of [List]
-func (t *List) NodeType() *types.Type { return ListType }
-
-// New returns a new [*List] value
-func (t *List) New() tree.Node { return &List{} }
-
 // SetStyleFunc sets the [List.StyleFunc]:
 // StyleFunc is an optional styling function.
 func (t *List) SetStyleFunc(v ListStyleFunc) *List { t.StyleFunc = v; return t }
@@ -661,12 +523,6 @@ var ListBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Lis
 // list of items, and supports row selection, copy / paste, Drag-n-Drop, etc.
 // Use [ListBase.BindSelect] to make the list designed for item selection.
 func NewListBase(parent ...tree.Node) *ListBase { return tree.New[ListBase](parent...) }
-
-// NodeType returns the [*types.Type] of [ListBase]
-func (t *ListBase) NodeType() *types.Type { return ListBaseType }
-
-// New returns a new [*ListBase] value
-func (t *ListBase) New() tree.Node { return &ListBase{} }
 
 // SetShowIndexes sets the [ListBase.ShowIndexes]:
 // ShowIndexes is whether to show the indexes of rows or not (default false).
@@ -706,12 +562,6 @@ var ListGridType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Lis
 // ListGrid handles the resizing logic for [List], [Table].
 func NewListGrid(parent ...tree.Node) *ListGrid { return tree.New[ListGrid](parent...) }
 
-// NodeType returns the [*types.Type] of [ListGrid]
-func (t *ListGrid) NodeType() *types.Type { return ListGridType }
-
-// New returns a new [*ListGrid] value
-func (t *ListGrid) New() tree.Node { return &ListGrid{} }
-
 // SetLastBackground sets the [ListGrid.LastBackground]:
 // LastBackground is the background for which modified
 // backgrounds were computed -- don't update if same
@@ -724,12 +574,6 @@ var MeterType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Meter"
 // Meter is a widget that renders a current value on as a filled
 // bar/semicircle relative to a minimum and maximum potential value.
 func NewMeter(parent ...tree.Node) *Meter { return tree.New[Meter](parent...) }
-
-// NodeType returns the [*types.Type] of [Meter]
-func (t *Meter) NodeType() *types.Type { return MeterType }
-
-// New returns a new [*Meter] value
-func (t *Meter) New() tree.Node { return &Meter{} }
 
 // SetType sets the [Meter.Type]:
 // Type is the styling type of the meter.
@@ -768,20 +612,8 @@ func (t *Meter) SetWidth(v units.Value) *Meter { t.Width = v; return t }
 // ScrimType is the [types.Type] for [Scrim]
 var ScrimType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Scrim", IDName: "scrim", Doc: "A Scrim is just a dummy Widget used for rendering a Scrim.\nOnly used for its type. Everything else managed by RenderWindow.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Instance: &Scrim{}})
 
-// NodeType returns the [*types.Type] of [Scrim]
-func (t *Scrim) NodeType() *types.Type { return ScrimType }
-
-// New returns a new [*Scrim] value
-func (t *Scrim) New() tree.Node { return &Scrim{} }
-
 // SceneType is the [types.Type] for [Scene]
 var SceneType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Scene", IDName: "scene", Doc: "Scene contains a [Widget] tree, rooted in an embedded [Frame] layout,\nwhich renders into its [Scene.Pixels] image. The [Scene] is set in a\n[Stage], which the [Scene] has a pointer to.\n\nEach [Scene] contains state specific to its particular usage\nwithin a given [Stage] and overall rendering context, representing the unit\nof rendering in the Cogent Core framework.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Bars", Doc: "Bars contains functions for constructing the control bars for this Scene,\nattached to different sides of a Scene (e.g., TopAppBar at Top,\nNavBar at Bottom, etc).  Functions are called in forward order\nso first added are called first."}, {Name: "BarsInherit", Doc: "BarsInherit determines which of the Bars side functions are inherited\nfrom the context widget, for FullWindow Dialogs"}, {Name: "AppBars", Doc: "AppBars contains functions for making the plan for the top app bar."}, {Name: "Body", Doc: "Body provides the main contents of scenes that use control Bars\nto allow the main window contents to be specified separately\nfrom that dynamic control content.  When constructing scenes using\na Body, you can operate directly on the [Body], which has wrappers\nfor most major Scene functions."}, {Name: "Data", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one."}, {Name: "SceneGeom", Doc: "Size and position relative to overall rendering context."}, {Name: "PaintContext", Doc: "paint context for rendering"}, {Name: "Pixels", Doc: "live pixels that we render into"}, {Name: "Events", Doc: "event manager for this scene"}, {Name: "Stage", Doc: "current stage in which this Scene is set"}, {Name: "renderBBoxes", Doc: "renderBBoxes indicates to render colored bounding boxes for all of the widgets\nin the scene. This is enabled by the [Inspector] in select element mode."}, {Name: "renderBBoxHue", Doc: "renderBBoxHue is current hue for rendering bounding box in [Scene.RenderBBoxes] mode."}, {Name: "selectedWidget", Doc: "selectedWidget is the currently selected/hovered widget through the [Inspector] selection mode\nthat should be highlighted with a background color."}, {Name: "selectedWidgetChan", Doc: "selectedWidgetChan is the channel on which the selected widget through the inspect editor\nselection mode is transmitted to the inspect editor after the user is done selecting."}, {Name: "lastRender", Doc: "lastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed."}, {Name: "showIter", Doc: "showIter counts up at start of showing a Scene\nto trigger Show event and other steps at start of first show"}, {Name: "directRenders", Doc: "directRenders are widgets that render directly to the RenderWin\ninstead of rendering into the Scene Pixels image."}, {Name: "HasShown", Doc: "HasShown is whether this scene has been shown.\nThis is used to ensure that [events.Show] is only sent once."}, {Name: "updating", Doc: "updating means the Scene is in the process of updating.\nIt is set for any kind of tree-level update.\nSkip any further update passes until it goes off."}, {Name: "sceneNeedsRender", Doc: "sceneNeedsRender is whether anything in the Scene needs to be re-rendered\n(but not necessarily the whole scene itself)."}, {Name: "needsLayout", Doc: "needsLayout is whether the Scene needs a new layout pass."}, {Name: "imageUpdated", Doc: "imageUpdated indicates that the Scene's image has been updated\ne.g., due to a render or a resize. This is reset by the\nglobal [RenderWindow] rendering pass, so it knows whether it needs to\ncopy the image up to the GPU or not."}, {Name: "prefSizing", Doc: "prefSizing means that this scene is currently doing a\nPrefSize computation to compute the size of the scene\n(for sizing window for example); affects layout size computation\nonly for Over"}}, Instance: &Scene{}})
-
-// NodeType returns the [*types.Type] of [Scene]
-func (t *Scene) NodeType() *types.Type { return SceneType }
-
-// New returns a new [*Scene] value
-func (t *Scene) New() tree.Node { return &Scene{} }
 
 // SetBars sets the [Scene.Bars]:
 // Bars contains functions for constructing the control bars for this Scene,
@@ -820,17 +652,11 @@ var SeparatorType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Se
 // specified by [style.Style.Direction].
 func NewSeparator(parent ...tree.Node) *Separator { return tree.New[Separator](parent...) }
 
-// NodeType returns the [*types.Type] of [Separator]
-func (t *Separator) NodeType() *types.Type { return SeparatorType }
-
-// New returns a new [*Separator] value
-func (t *Separator) New() tree.Node { return &Separator{} }
-
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.AppearanceSettingsData", IDName: "appearance-settings-data", Doc: "AppearanceSettingsData is the data type for the global Cogent Core appearance settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Methods: []types.Method{{Name: "Apply", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DeleteSavedWindowGeoms", Doc: "DeleteSavedWindowGeoms deletes the file that saves the position and size of\neach window, by screen, and clear current in-memory cache. You shouldn't generally\nneed to do this, but sometimes it is useful for testing or windows that are\nshowing up in bad places that you can't recover from.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "SaveScreenZoom", Doc: "SaveScreenZoom saves the current zoom factor for the current screen.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "SettingsBase"}}, Fields: []types.Field{{Name: "Theme", Doc: "the color theme"}, {Name: "Color", Doc: "the primary color used to generate the color scheme"}, {Name: "Zoom", Doc: "overall zoom factor as a percentage of the default zoom"}, {Name: "Spacing", Doc: "the overall spacing factor as a percentage of the default amount of spacing\n(higher numbers lead to more space and lower numbers lead to higher density)"}, {Name: "FontSize", Doc: "the overall font size factor applied to all text as a percentage\nof the default font size (higher numbers lead to larger text)"}, {Name: "ZebraStripes", Doc: "the amount that alternating rows are highlighted when showing tabular data (set to 0 to disable zebra striping)"}, {Name: "Screens", Doc: "screen-specific settings, which will override overall defaults if set"}, {Name: "HiStyle", Doc: "text highlighting style / theme"}, {Name: "Font", Doc: "Font is the default font family to use."}, {Name: "MonoFont", Doc: "MonoFont is the default mono-spaced font family to use."}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.DeviceSettingsData", IDName: "device-settings-data", Doc: "DeviceSettingsData is the data type for the device settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "SettingsBase"}}, Fields: []types.Field{{Name: "KeyMap", Doc: "The keyboard shortcut map to use"}, {Name: "KeyMaps", Doc: "The keyboard shortcut maps available as options for Key map.\nIf you do not want to have custom key maps, you should leave\nthis unset so that you always have the latest standard key maps."}, {Name: "DoubleClickInterval", Doc: "The maximum time interval between button press events to count as a double-click"}, {Name: "ScrollWheelSpeed", Doc: "How fast the scroll wheel moves, which is typically pixels per wheel step\nbut units can be arbitrary. It is generally impossible to standardize speed\nand variable across devices, and we don't have access to the system settings,\nso unfortunately you have to set it here."}, {Name: "SlideStartTime", Doc: "The amount of time to wait before initiating a slide event\n(as opposed to a basic press event)"}, {Name: "DragStartTime", Doc: "The amount of time to wait before initiating a drag (drag and drop) event\n(as opposed to a basic press or slide event)"}, {Name: "RepeatClickTime", Doc: "The amount of time to wait between each repeat click event,\nwhen the mouse is pressed down.  The first click is 8x this."}, {Name: "DragStartDistance", Doc: "The number of pixels that must be moved before initiating a slide/drag\nevent (as opposed to a basic press event)"}, {Name: "LongHoverTime", Doc: "The amount of time to wait before initiating a long hover event (e.g., for opening a tooltip)"}, {Name: "LongHoverStopDistance", Doc: "The maximum number of pixels that mouse can move and still register a long hover event"}, {Name: "LongPressTime", Doc: "The amount of time to wait before initiating a long press event (e.g., for opening a tooltip)"}, {Name: "LongPressStopDistance", Doc: "The maximum number of pixels that mouse/finger can move and still register a long press event"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ScreenSettings", IDName: "screen-settings", Doc: "ScreenSettings are the per-screen settings -- see [system.App.Screen] for\ninfo on the different screens -- these prefs are indexed by the Screen.Name\n-- settings here override those in the global settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Zoom", Doc: "overall zoom factor as a percentage of the default zoom"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ScreenSettings", IDName: "screen-settings", Doc: "ScreenSettings are per-screen settings that override the global settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Zoom", Doc: "overall zoom factor as a percentage of the default zoom"}}})
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.SystemSettingsData", IDName: "system-settings-data", Doc: "SystemSettingsData is the data type of the global Cogent Core settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Methods: []types.Method{{Name: "Apply", Doc: "Apply detailed settings to all the relevant settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "SettingsBase"}}, Fields: []types.Field{{Name: "Editor", Doc: "text editor settings"}, {Name: "Clock24", Doc: "whether to use a 24-hour clock (instead of AM and PM)"}, {Name: "SnackbarTimeout", Doc: "SnackbarTimeout is the default amount of time until snackbars\ndisappear (snackbars show short updates about app processes\nat the bottom of the screen)"}, {Name: "OnlyCloseActiveTab", Doc: "only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it"}, {Name: "BigFileSize", Doc: "the limit of file size, above which user will be prompted before opening / copying, etc."}, {Name: "SavedPathsMax", Doc: "maximum number of saved paths to save in FilePicker"}, {Name: "FontPaths", Doc: "extra font paths, beyond system defaults -- searched first"}, {Name: "User", Doc: "user info, which is partially filled-out automatically if empty when settings are first created"}, {Name: "FavPaths", Doc: "favorite paths, shown in FilePickerer and also editable there"}, {Name: "FilePickerSort", Doc: "column to sort by in FilePicker, and :up or :down for direction -- updated automatically via FilePicker"}, {Name: "MenuMaxHeight", Doc: "the maximum height of any menu popup panel in units of font height;\nscroll bars are enforced beyond that size."}, {Name: "CompleteWaitDuration", Doc: "the amount of time to wait before offering completions"}, {Name: "CompleteMaxItems", Doc: "the maximum number of completions offered in popup"}, {Name: "CursorBlinkTime", Doc: "time interval for cursor blinking on and off -- set to 0 to disable blinking"}, {Name: "LayoutAutoScrollDelay", Doc: "The amount of time to wait before trying to autoscroll again"}, {Name: "LayoutPageSteps", Doc: "number of steps to take in PageUp / Down events in terms of number of items"}, {Name: "LayoutFocusNameTimeout", Doc: "the amount of time between keypresses to combine characters into name to search for within layout -- starts over after this delay"}, {Name: "LayoutFocusNameTabTime", Doc: "the amount of time since last focus name event to allow tab to focus on next element with same name."}, {Name: "MapInlineLength", Doc: "the number of map elements at or below which an inline representation\nof the map will be presented, which is more convenient for small #'s of properties"}, {Name: "StructInlineLength", Doc: "the number of elemental struct fields at or below which an inline representation\nof the struct will be presented, which is more convenient for small structs"}, {Name: "SliceInlineLength", Doc: "the number of slice elements below which inline will be used"}}})
 
@@ -857,12 +683,6 @@ var SliderType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Slide
 // the rendered area.
 // The [styles.Style.Direction] determines the direction in which the slider slides.
 func NewSlider(parent ...tree.Node) *Slider { return tree.New[Slider](parent...) }
-
-// NodeType returns the [*types.Type] of [Slider]
-func (t *Slider) NodeType() *types.Type { return SliderType }
-
-// New returns a new [*Slider] value
-func (t *Slider) New() tree.Node { return &Slider{} }
 
 // SetType sets the [Slider.Type]:
 // Type is the type of the slider, which determines its visual
@@ -951,12 +771,6 @@ var SpinnerType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Spin
 // fields, methods, buttons, and shortcuts to enhance numerical value editing.
 func NewSpinner(parent ...tree.Node) *Spinner { return tree.New[Spinner](parent...) }
 
-// NodeType returns the [*types.Type] of [Spinner]
-func (t *Spinner) NodeType() *types.Type { return SpinnerType }
-
-// New returns a new [*Spinner] value
-func (t *Spinner) New() tree.Node { return &Spinner{} }
-
 // SetStep sets the [Spinner.Step]:
 // Step is the amount that the up and down buttons and arrow keys
 // increment/decrement the value by. It defaults to 0.1.
@@ -995,12 +809,6 @@ var SplitsType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Split
 // along [styles.Style.Direction]. It adds [Handle] widgets to its parts that
 // allow the user to customize the amount of space allocated to each child.
 func NewSplits(parent ...tree.Node) *Splits { return tree.New[Splits](parent...) }
-
-// NodeType returns the [*types.Type] of [Splits]
-func (t *Splits) NodeType() *types.Type { return SplitsType }
-
-// New returns a new [*Splits] value
-func (t *Splits) New() tree.Node { return &Splits{} }
 
 // SetSplits sets the [Splits.Splits]:
 // Splits is the proportion (0-1 normalized, enforced) of space
@@ -1116,12 +924,6 @@ var SVGType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.SVG", ID
 // By default, it is [states.ReadOnly].
 func NewSVG(parent ...tree.Node) *SVG { return tree.New[SVG](parent...) }
 
-// NodeType returns the [*types.Type] of [SVG]
-func (t *SVG) NodeType() *types.Type { return SVGType }
-
-// New returns a new [*SVG] value
-func (t *SVG) New() tree.Node { return &SVG{} }
-
 // SwitchType is the [types.Type] for [Switch]
 var SwitchType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Switch", IDName: "switch", Doc: "Switch is a widget that can toggle between an on and off state.\nIt can be displayed as a switch, checkbox, or radio button.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of switch."}, {Name: "Text", Doc: "Text is the text for the switch."}, {Name: "IconOn", Doc: "IconOn is the icon to use for the on, checked state of the switch."}, {Name: "IconOff", Doc: "Iconoff is the icon to use for the off, unchecked state of the switch."}, {Name: "IconIndeterminate", Doc: "IconIndeterminate is the icon to use for the indeterminate (unknown) state."}}, Instance: &Switch{}})
 
@@ -1129,12 +931,6 @@ var SwitchType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Switc
 // Switch is a widget that can toggle between an on and off state.
 // It can be displayed as a switch, checkbox, or radio button.
 func NewSwitch(parent ...tree.Node) *Switch { return tree.New[Switch](parent...) }
-
-// NodeType returns the [*types.Type] of [Switch]
-func (t *Switch) NodeType() *types.Type { return SwitchType }
-
-// New returns a new [*Switch] value
-func (t *Switch) New() tree.Node { return &Switch{} }
 
 // SetText sets the [Switch.Text]:
 // Text is the text for the switch.
@@ -1162,12 +958,6 @@ var SwitchesType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Swi
 // [enums.Enum] and [enums.BitFlag] values with appropriate properties
 // automatically set.
 func NewSwitches(parent ...tree.Node) *Switches { return tree.New[Switches](parent...) }
-
-// NodeType returns the [*types.Type] of [Switches]
-func (t *Switches) NodeType() *types.Type { return SwitchesType }
-
-// New returns a new [*Switches] value
-func (t *Switches) New() tree.Node { return &Switches{} }
 
 // SetType sets the [Switches.Type]:
 // Type is the type of switches that will be made.
@@ -1197,12 +987,6 @@ var TableType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Table"
 // Use [ListBase.BindSelect] to make the table designed for item selection.
 func NewTable(parent ...tree.Node) *Table { return tree.New[Table](parent...) }
 
-// NodeType returns the [*types.Type] of [Table]
-func (t *Table) NodeType() *types.Type { return TableType }
-
-// New returns a new [*Table] value
-func (t *Table) New() tree.Node { return &Table{} }
-
 // SetStyleFunc sets the [Table.StyleFunc]:
 // StyleFunc is an optional styling function.
 func (t *Table) SetStyleFunc(v TableStyleFunc) *Table { t.StyleFunc = v; return t }
@@ -1226,12 +1010,6 @@ var TabsType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tabs", 
 // Tabs divide widgets into logical groups and give users the ability
 // to freely navigate between them using tab buttons.
 func NewTabs(parent ...tree.Node) *Tabs { return tree.New[Tabs](parent...) }
-
-// NodeType returns the [*types.Type] of [Tabs]
-func (t *Tabs) NodeType() *types.Type { return TabsType }
-
-// New returns a new [*Tabs] value
-func (t *Tabs) New() tree.Node { return &Tabs{} }
 
 // SetType sets the [Tabs.Type]:
 // Type is the styling type of the tabs. If it is changed after
@@ -1258,12 +1036,6 @@ func (t *Tabs) SetCloseIcon(v icons.Icon) *Tabs { t.CloseIcon = v; return t }
 
 // TabType is the [types.Type] for [Tab]
 var TabType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tab", IDName: "tab", Doc: "Tab is a tab button that contains any, all, or none of a label, an icon,\nand a close icon. Tabs should be made using the [Tabs.NewTab] function.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tab. This property\nmust be set on the parent [Tabs] for it to work correctly."}, {Name: "Text", Doc: "Text is the text for the tab.\nIf it is nil, no text is shown.\nText is never shown for [NavigationRail] tabs."}, {Name: "Icon", Doc: "Icon is the icon for the tab.\nIf it is \"\" or [icons.None], no icon is shown."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used as a close button for the tab.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in tab text.\nIt elides text that is longer than that."}}, Instance: &Tab{}})
-
-// NodeType returns the [*types.Type] of [Tab]
-func (t *Tab) NodeType() *types.Type { return TabType }
-
-// New returns a new [*Tab] value
-func (t *Tab) New() tree.Node { return &Tab{} }
 
 // SetType sets the [Tab.Type]:
 // Type is the styling type of the tab. This property
@@ -1303,12 +1075,6 @@ var TextType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Text", 
 // you can change this by changing [styles.Text.WhiteSpace].
 func NewText(parent ...tree.Node) *Text { return tree.New[Text](parent...) }
 
-// NodeType returns the [*types.Type] of [Text]
-func (t *Text) NodeType() *types.Type { return TextType }
-
-// New returns a new [*Text] value
-func (t *Text) New() tree.Node { return &Text{} }
-
 // SetText sets the [Text.Text]:
 // Text is the text to display.
 func (t *Text) SetText(v string) *Text { t.Text = v; return t }
@@ -1329,12 +1095,6 @@ var TextFieldType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Te
 // With multi-line wrapped text, the text is still treated as a single
 // contiguous line of wrapped text.
 func NewTextField(parent ...tree.Node) *TextField { return tree.New[TextField](parent...) }
-
-// NodeType returns the [*types.Type] of [TextField]
-func (t *TextField) NodeType() *types.Type { return TextFieldType }
-
-// New returns a new [*TextField] value
-func (t *TextField) New() tree.Node { return &TextField{} }
 
 // TextFieldEmbedder is an interface that all types that embed TextField satisfy
 type TextFieldEmbedder interface {
@@ -1426,12 +1186,6 @@ var TimePickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.T
 // TimePicker is a widget for picking a time.
 func NewTimePicker(parent ...tree.Node) *TimePicker { return tree.New[TimePicker](parent...) }
 
-// NodeType returns the [*types.Type] of [TimePicker]
-func (t *TimePicker) NodeType() *types.Type { return TimePickerType }
-
-// New returns a new [*TimePicker] value
-func (t *TimePicker) New() tree.Node { return &TimePicker{} }
-
 // SetTime sets the [TimePicker.Time]:
 // Time is the time that we are viewing
 func (t *TimePicker) SetTime(v time.Time) *TimePicker { t.Time = v; return t }
@@ -1442,12 +1196,6 @@ var DatePickerType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.D
 // NewDatePicker returns a new [DatePicker] with the given optional parent:
 // DatePicker is a widget for picking a date.
 func NewDatePicker(parent ...tree.Node) *DatePicker { return tree.New[DatePicker](parent...) }
-
-// NodeType returns the [*types.Type] of [DatePicker]
-func (t *DatePicker) NodeType() *types.Type { return DatePickerType }
-
-// New returns a new [*DatePicker] value
-func (t *DatePicker) New() tree.Node { return &DatePicker{} }
 
 // SetTime sets the [DatePicker.Time]:
 // Time is the time that we are viewing.
@@ -1461,12 +1209,6 @@ var TimeInputType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Ti
 // both of which can pull up corresponding picker dialogs.
 func NewTimeInput(parent ...tree.Node) *TimeInput { return tree.New[TimeInput](parent...) }
 
-// NodeType returns the [*types.Type] of [TimeInput]
-func (t *TimeInput) NodeType() *types.Type { return TimeInputType }
-
-// New returns a new [*TimeInput] value
-func (t *TimeInput) New() tree.Node { return &TimeInput{} }
-
 // SetTime sets the [TimeInput.Time]
 func (t *TimeInput) SetTime(v time.Time) *TimeInput { t.Time = v; return t }
 
@@ -1476,12 +1218,6 @@ var DurationInputType = types.AddType(&types.Type{Name: "cogentcore.org/core/cor
 // NewDurationInput returns a new [DurationInput] with the given optional parent:
 // DurationInput represents a [time.Duration] value with a spinner and unit chooser.
 func NewDurationInput(parent ...tree.Node) *DurationInput { return tree.New[DurationInput](parent...) }
-
-// NodeType returns the [*types.Type] of [DurationInput]
-func (t *DurationInput) NodeType() *types.Type { return DurationInputType }
-
-// New returns a new [*DurationInput] value
-func (t *DurationInput) New() tree.Node { return &DurationInput{} }
 
 // SetDuration sets the [DurationInput.Duration]
 func (t *DurationInput) SetDuration(v time.Duration) *DurationInput { t.Duration = v; return t }
@@ -1500,12 +1236,6 @@ var ToolbarType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tool
 // Use [Body.AddAppBar] to add to the default toolbar at the top of an app.
 func NewToolbar(parent ...tree.Node) *Toolbar { return tree.New[Toolbar](parent...) }
 
-// NodeType returns the [*types.Type] of [Toolbar]
-func (t *Toolbar) NodeType() *types.Type { return ToolbarType }
-
-// New returns a new [*Toolbar] value
-func (t *Toolbar) New() tree.Node { return &Toolbar{} }
-
 // BasicBarType is the [types.Type] for [BasicBar]
 var BasicBarType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.BasicBar", IDName: "basic-bar", Doc: "BasicBar is a [Frame] that automatically has [ToolbarStyles] applied but does\nnot have the more advanced features of a [Toolbar].", Embeds: []types.Field{{Name: "Frame"}}, Instance: &BasicBar{}})
 
@@ -1513,12 +1243,6 @@ var BasicBarType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Bas
 // BasicBar is a [Frame] that automatically has [ToolbarStyles] applied but does
 // not have the more advanced features of a [Toolbar].
 func NewBasicBar(parent ...tree.Node) *BasicBar { return tree.New[BasicBar](parent...) }
-
-// NodeType returns the [*types.Type] of [BasicBar]
-func (t *BasicBar) NodeType() *types.Type { return BasicBarType }
-
-// New returns a new [*BasicBar] value
-func (t *BasicBar) New() tree.Node { return &BasicBar{} }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Treer", IDName: "treer", Doc: "Treer is an interface for [Tree] types\nproviding access to the base [Tree] and\noverridable method hooks for actions taken on the [Tree],\nincluding OnOpen, OnClose, etc.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Methods: []types.Method{{Name: "AsCoreTree", Doc: "AsTree returns the base [Tree] for this node.", Returns: []string{"Tree"}}, {Name: "CanOpen", Doc: "CanOpen returns true if the node is able to open.\nBy default it checks HasChildren(), but could check other properties\nto perform lazy building of the tree.", Returns: []string{"bool"}}, {Name: "OnOpen", Doc: "OnOpen is called when a node is opened.\nThe base version does nothing."}, {Name: "OnClose", Doc: "OnClose is called when a node is closed\nThe base version does nothing."}, {Name: "DeleteNode"}, {Name: "Duplicate"}, {Name: "AddChildNode"}, {Name: "InsertBefore"}, {Name: "InsertAfter"}, {Name: "MimeData", Args: []string{"md"}}, {Name: "Cut"}, {Name: "Copy"}, {Name: "Paste"}, {Name: "DragStart", Args: []string{"e"}}, {Name: "DragDrop", Args: []string{"e"}}, {Name: "DropFinalize", Args: []string{"de"}}, {Name: "DropDeleteSource", Args: []string{"e"}}, {Name: "MakePasteMenu", Args: []string{"m", "md", "fun"}}}})
 
@@ -1545,12 +1269,6 @@ var TreeType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tree", 
 // Select, Change, and DoubleClick. The selected nodes
 // are in the root SelectedNodes list.
 func NewTree(parent ...tree.Node) *Tree { return tree.New[Tree](parent...) }
-
-// NodeType returns the [*types.Type] of [Tree]
-func (t *Tree) NodeType() *types.Type { return TreeType }
-
-// New returns a new [*Tree] value
-func (t *Tree) New() tree.Node { return &Tree{} }
 
 // SetText sets the [Tree.Text]:
 // The text to display for the tree item label, which automatically
@@ -1603,12 +1321,6 @@ var ListButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.L
 // ListButton represents a slice or array value with a button that opens a [List].
 func NewListButton(parent ...tree.Node) *ListButton { return tree.New[ListButton](parent...) }
 
-// NodeType returns the [*types.Type] of [ListButton]
-func (t *ListButton) NodeType() *types.Type { return ListButtonType }
-
-// New returns a new [*ListButton] value
-func (t *ListButton) New() tree.Node { return &ListButton{} }
-
 // SetSlice sets the [ListButton.Slice]
 func (t *ListButton) SetSlice(v any) *ListButton { t.Slice = v; return t }
 
@@ -1618,12 +1330,6 @@ var FormButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.F
 // NewFormButton returns a new [FormButton] with the given optional parent:
 // FormButton represents a struct value with a button that opens a [Form].
 func NewFormButton(parent ...tree.Node) *FormButton { return tree.New[FormButton](parent...) }
-
-// NodeType returns the [*types.Type] of [FormButton]
-func (t *FormButton) NodeType() *types.Type { return FormButtonType }
-
-// New returns a new [*FormButton] value
-func (t *FormButton) New() tree.Node { return &FormButton{} }
 
 // SetStruct sets the [FormButton.Struct]
 func (t *FormButton) SetStruct(v any) *FormButton { t.Struct = v; return t }
@@ -1637,12 +1343,6 @@ func NewKeyedListButton(parent ...tree.Node) *KeyedListButton {
 	return tree.New[KeyedListButton](parent...)
 }
 
-// NodeType returns the [*types.Type] of [KeyedListButton]
-func (t *KeyedListButton) NodeType() *types.Type { return KeyedListButtonType }
-
-// New returns a new [*KeyedListButton] value
-func (t *KeyedListButton) New() tree.Node { return &KeyedListButton{} }
-
 // SetMap sets the [KeyedListButton.Map]
 func (t *KeyedListButton) SetMap(v any) *KeyedListButton { t.Map = v; return t }
 
@@ -1652,12 +1352,6 @@ var TreeButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.T
 // NewTreeButton returns a new [TreeButton] with the given optional parent:
 // TreeButton represents a [tree.Node] value with a button.
 func NewTreeButton(parent ...tree.Node) *TreeButton { return tree.New[TreeButton](parent...) }
-
-// NodeType returns the [*types.Type] of [TreeButton]
-func (t *TreeButton) NodeType() *types.Type { return TreeButtonType }
-
-// New returns a new [*TreeButton] value
-func (t *TreeButton) New() tree.Node { return &TreeButton{} }
 
 // SetTree sets the [TreeButton.Tree]
 func (t *TreeButton) SetTree(v tree.Node) *TreeButton { t.Tree = v; return t }
@@ -1669,12 +1363,6 @@ var TypeChooserType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.
 // TypeChooser represents a [types.Type] value with a chooser.
 func NewTypeChooser(parent ...tree.Node) *TypeChooser { return tree.New[TypeChooser](parent...) }
 
-// NodeType returns the [*types.Type] of [TypeChooser]
-func (t *TypeChooser) NodeType() *types.Type { return TypeChooserType }
-
-// New returns a new [*TypeChooser] value
-func (t *TypeChooser) New() tree.Node { return &TypeChooser{} }
-
 // IconButtonType is the [types.Type] for [IconButton]
 var IconButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.IconButton", IDName: "icon-button", Doc: "IconButton represents an [icons.Icon] with a [Button] that opens\na dialog for selecting the icon.", Embeds: []types.Field{{Name: "Button"}}, Instance: &IconButton{}})
 
@@ -1683,12 +1371,6 @@ var IconButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.I
 // a dialog for selecting the icon.
 func NewIconButton(parent ...tree.Node) *IconButton { return tree.New[IconButton](parent...) }
 
-// NodeType returns the [*types.Type] of [IconButton]
-func (t *IconButton) NodeType() *types.Type { return IconButtonType }
-
-// New returns a new [*IconButton] value
-func (t *IconButton) New() tree.Node { return &IconButton{} }
-
 // FontButtonType is the [types.Type] for [FontButton]
 var FontButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FontButton", IDName: "font-button", Doc: "FontButton represents a [FontName] with a [Button] that opens\na dialog for selecting the font family.", Embeds: []types.Field{{Name: "Button"}}, Instance: &FontButton{}})
 
@@ -1696,12 +1378,6 @@ var FontButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.F
 // FontButton represents a [FontName] with a [Button] that opens
 // a dialog for selecting the font family.
 func NewFontButton(parent ...tree.Node) *FontButton { return tree.New[FontButton](parent...) }
-
-// NodeType returns the [*types.Type] of [FontButton]
-func (t *FontButton) NodeType() *types.Type { return FontButtonType }
-
-// New returns a new [*FontButton] value
-func (t *FontButton) New() tree.Node { return &FontButton{} }
 
 // WidgetBaseType is the [types.Type] for [WidgetBase]
 var WidgetBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.WidgetBase", IDName: "widget-base", Doc: "WidgetBase implements the [Widget] interface and provides the core functionality\nof a widget. You must use WidgetBase as an embedded struct in all higher-level\nwidget types. It renders the standard box model, but does not layout or render\nany children; see [Frame] for that.", Methods: []types.Method{{Name: "Update", Doc: "Update updates the widget and all of its children by running [WidgetBase.UpdateWidget]\nand [WidgetBase.Style] on each one, and triggering a new layout pass with\n[WidgetBase.NeedsLayout]. It is the main way that end users should trigger widget\nupdates, and it is guaranteed to fully update a widget to the current state.\nFor example, it should be called after making any changes to the core properties\nof a widget, such as the text of [Text], the icon of a [Button], or the slice\nof a [Table].\n\nUpdate differs from [WidgetBase.UpdateWidget] in that it updates the widget and all\nof its children down the tree, whereas [WidgetBase.UpdateWidget] only updates the widget\nitself. Also, Update also calls [WidgetBase.Style] and [WidgetBase.NeedsLayout],\nwhereas [WidgetBase.UpdateWidget] does not. End-user code should typically call Update,\nnot [WidgetBase.UpdateWidget].\n\nIf you are calling this in a separate goroutine outside of the main\nconfiguration, rendering, and event handling structure, you need to\ncall [WidgetBase.AsyncLock] and [WidgetBase.AsyncUnlock] before and\nafter this, respectively.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}}, Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Tooltip", Doc: "Tooltip is the text for the tooltip for this widget,\nwhich can use HTML formatting."}, {Name: "Parts", Doc: "Parts are a separate tree of sub-widgets that can be used to store\northogonal parts of a widget when necessary to separate them from children.\nFor example, trees use parts to separate their internal parts from\nthe other child tree nodes. Composite widgets like buttons should\nNOT use parts to store their components; parts should only be used when\nabsolutely necessary."}, {Name: "Geom", Doc: "Geom has the full layout geometry for size and position of this Widget"}, {Name: "OverrideStyle", Doc: "If true, override the computed styles and allow directly editing Styles."}, {Name: "Styles", Doc: "Styles are styling settings for this widget.\nThese are set in SetApplyStyle which should be called after any Config\nchange (e.g., as done by the Update method).  See Stylers for functions\nthat set all of the styles, ordered from initial base defaults to later\nadded overrides."}, {Name: "Stylers", Doc: "Stylers is a tiered set of functions that are called in sequential\nascending order (so the last added styler is called last and\nthus can override all other stylers) to style the element.\nThese should be set using the [WidgetBase.Styler], [WidgetBase.FirstStyler],\nand [WidgetBase.FinalStyler] functions."}, {Name: "Listeners", Doc: "Listeners is a tiered set of event listener functions for processing events on this widget.\nThey are called in sequential descending order (so the last added listener\nis called first). They should be added using the [WidgetBase.On], [WidgetBase.OnFirst],\nand [WidgetBase.OnFinal] functions, or any of the various On{EventType} helper functions."}, {Name: "OnWidgetAdders", Doc: "A slice of functions to call on all widgets that are added as children\nto this widget or its children. These functions are called in sequential\nascending order, so the last added one is called last and thus can\noverride anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code."}, {Name: "ContextMenus", Doc: "ContextMenus is a slice of menu functions to call to construct\nthe widget's context menu on an [events.ContextMenu]. The\nfunctions are called in reverse order such that the elements\nadded in the last function are the first in the menu.\nContext menus should be added through [WidgetBase.AddContextMenu].\nSeparators will be added between each context menu function."}, {Name: "Scene", Doc: "Scene is the overall Scene to which we belong. It is automatically\nby widgets whenever they are added to another widget parent."}, {Name: "ValueUpdate", Doc: "ValueUpdate is a function set by [Bind] that is called in\n[WidgetBase.UpdateWidget] to update the widget's value from the bound value."}, {Name: "ValueOnChange", Doc: "ValueOnChange is a function set by [Bind] that is called when\nthe widget receives an [events.Change] event to update the bound value\nfrom the widget's value."}, {Name: "ValueTitle", Doc: "ValueTitle is the title to display for a dialog for this [Value]."}, {Name: "ValueNewWindow", Doc: "ValueNewWindow indicates that the dialog of a [Value] should be opened\nas a new window, instead of a typical full window in the same current window.\nThis is set by [InitValueButton] and handled by [OpenValueDialog].\nThis is triggered by holding down the Shift key while clicking on a\n[Value] button. Certain values such as [FileButton] may set this to true\nin their [InitValueButton] function."}, {Name: "needsRender", Doc: "needsRender is whether the widget needs to be rendered on the next render iteration."}}, Instance: &WidgetBase{}})
@@ -1712,12 +1388,6 @@ var WidgetBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/core.W
 // widget types. It renders the standard box model, but does not layout or render
 // any children; see [Frame] for that.
 func NewWidgetBase(parent ...tree.Node) *WidgetBase { return tree.New[WidgetBase](parent...) }
-
-// NodeType returns the [*types.Type] of [WidgetBase]
-func (t *WidgetBase) NodeType() *types.Type { return WidgetBaseType }
-
-// New returns a new [*WidgetBase] value
-func (t *WidgetBase) New() tree.Node { return &WidgetBase{} }
 
 // SetTooltip sets the [WidgetBase.Tooltip]:
 // Tooltip is the text for the tooltip for this widget,
@@ -1737,7 +1407,7 @@ func (t *WidgetBase) SetValueTitle(v string) *WidgetBase { t.ValueTitle = v; ret
 // in their [InitValueButton] function.
 func (t *WidgetBase) SetValueNewWindow(v bool) *WidgetBase { t.ValueNewWindow = v; return t }
 
-var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/core.ProfileToggle", Doc: "ProfileToggle turns profiling on or off, which does both\ntargeted and global CPU and Memory profiling.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}})
+var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/core.ProfileToggle", Doc: "ProfileToggle turns profiling on or off, which does both\ntargeted profiling and global CPU and memory profiling.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}})
 
 var _ = types.AddFunc(&types.Func{Name: "cogentcore.org/core/core.ResetAllSettings", Doc: "ResetAllSettings resets all of the settings to their default values.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Returns: []string{"error"}})
 

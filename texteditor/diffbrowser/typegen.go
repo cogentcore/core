@@ -17,12 +17,6 @@ var BrowserType = types.AddType(&types.Type{Name: "cogentcore.org/core/textedito
 // structure, e.g., reflecting their source in a filesystem.
 func NewBrowser(parent ...tree.Node) *Browser { return tree.New[Browser](parent...) }
 
-// NodeType returns the [*types.Type] of [Browser]
-func (t *Browser) NodeType() *types.Type { return BrowserType }
-
-// New returns a new [*Browser] value
-func (t *Browser) New() tree.Node { return &Browser{} }
-
 // SetPathA sets the [Browser.PathA]:
 // starting paths for the files being compared
 func (t *Browser) SetPathA(v string) *Browser { t.PathA = v; return t }
@@ -37,12 +31,6 @@ var NodeType = types.AddType(&types.Type{Name: "cogentcore.org/core/texteditor/d
 // NewNode returns a new [Node] with the given optional parent:
 // Node is an element in the diff tree
 func NewNode(parent ...tree.Node) *Node { return tree.New[Node](parent...) }
-
-// NodeType returns the [*types.Type] of [Node]
-func (t *Node) NodeType() *types.Type { return NodeType }
-
-// New returns a new [*Node] value
-func (t *Node) New() tree.Node { return &Node{} }
 
 // SetFileA sets the [Node.FileA]:
 // file names (full path) being compared. Name of node is just the filename.

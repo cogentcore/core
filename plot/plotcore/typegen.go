@@ -21,12 +21,6 @@ var PlotType = types.AddType(&types.Type{Name: "cogentcore.org/core/plot/plotcor
 // See [PlotEditor] for an interactive interface for selecting columns to view.
 func NewPlot(parent ...tree.Node) *Plot { return tree.New[Plot](parent...) }
 
-// NodeType returns the [*types.Type] of [Plot]
-func (t *Plot) NodeType() *types.Type { return PlotType }
-
-// New returns a new [*Plot] value
-func (t *Plot) New() tree.Node { return &Plot{} }
-
 // SetScale sets the [Plot.Scale]:
 // Scale multiplies the plot DPI value, to change the overall scale
 // of the rendered plot.  Larger numbers produce larger scaling.
@@ -43,12 +37,6 @@ var PlotEditorType = types.AddType(&types.Type{Name: "cogentcore.org/core/plot/p
 // a [table.Table]. Other types of tabular data can be converted into this format.
 // The user can change various options for the plot and also modify the underlying data.
 func NewPlotEditor(parent ...tree.Node) *PlotEditor { return tree.New[PlotEditor](parent...) }
-
-// NodeType returns the [*types.Type] of [PlotEditor]
-func (t *PlotEditor) NodeType() *types.Type { return PlotEditorType }
-
-// New returns a new [*PlotEditor] value
-func (t *PlotEditor) New() tree.Node { return &PlotEditor{} }
 
 // SetParams sets the [PlotEditor.Params]:
 // the overall plot parameters

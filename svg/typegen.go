@@ -20,12 +20,6 @@ var CircleType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Circle
 // Circle is a SVG circle
 func NewCircle(parent ...tree.Node) *Circle { return tree.New[Circle](parent...) }
 
-// NodeType returns the [*types.Type] of [Circle]
-func (t *Circle) NodeType() *types.Type { return CircleType }
-
-// New returns a new [*Circle] value
-func (t *Circle) New() tree.Node { return &Circle{} }
-
 // SetPos sets the [Circle.Pos]:
 // position of the center of the circle
 func (t *Circle) SetPos(v math32.Vector2) *Circle { t.Pos = v; return t }
@@ -41,12 +35,6 @@ var ClipPathType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Clip
 // ClipPath is used for holding a path that renders as a clip path
 func NewClipPath(parent ...tree.Node) *ClipPath { return tree.New[ClipPath](parent...) }
 
-// NodeType returns the [*types.Type] of [ClipPath]
-func (t *ClipPath) NodeType() *types.Type { return ClipPathType }
-
-// New returns a new [*ClipPath] value
-func (t *ClipPath) New() tree.Node { return &ClipPath{} }
-
 // StyleSheetType is the [types.Type] for [StyleSheet]
 var StyleSheetType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.StyleSheet", IDName: "style-sheet", Doc: "StyleSheet is a Node2D node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into tree.Properties and set in CSS\nfield of appropriate node", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Sheet"}}, Instance: &StyleSheet{}})
 
@@ -55,12 +43,6 @@ var StyleSheetType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.St
 // contained in this sheet can be transformed into tree.Properties and set in CSS
 // field of appropriate node
 func NewStyleSheet(parent ...tree.Node) *StyleSheet { return tree.New[StyleSheet](parent...) }
-
-// NodeType returns the [*types.Type] of [StyleSheet]
-func (t *StyleSheet) NodeType() *types.Type { return StyleSheetType }
-
-// New returns a new [*StyleSheet] value
-func (t *StyleSheet) New() tree.Node { return &StyleSheet{} }
 
 // SetSheet sets the [StyleSheet.Sheet]
 func (t *StyleSheet) SetSheet(v *css.Stylesheet) *StyleSheet { t.Sheet = v; return t }
@@ -72,12 +54,6 @@ var MetaDataType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Meta
 // MetaData is used for holding meta data info
 func NewMetaData(parent ...tree.Node) *MetaData { return tree.New[MetaData](parent...) }
 
-// NodeType returns the [*types.Type] of [MetaData]
-func (t *MetaData) NodeType() *types.Type { return MetaDataType }
-
-// New returns a new [*MetaData] value
-func (t *MetaData) New() tree.Node { return &MetaData{} }
-
 // SetMetaData sets the [MetaData.MetaData]
 func (t *MetaData) SetMetaData(v string) *MetaData { t.MetaData = v; return t }
 
@@ -87,12 +63,6 @@ var EllipseType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Ellip
 // NewEllipse returns a new [Ellipse] with the given optional parent:
 // Ellipse is a SVG ellipse
 func NewEllipse(parent ...tree.Node) *Ellipse { return tree.New[Ellipse](parent...) }
-
-// NodeType returns the [*types.Type] of [Ellipse]
-func (t *Ellipse) NodeType() *types.Type { return EllipseType }
-
-// New returns a new [*Ellipse] value
-func (t *Ellipse) New() tree.Node { return &Ellipse{} }
 
 // SetPos sets the [Ellipse.Pos]:
 // position of the center of the ellipse
@@ -109,12 +79,6 @@ var FilterType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Filter
 // Filter represents SVG filter* elements
 func NewFilter(parent ...tree.Node) *Filter { return tree.New[Filter](parent...) }
 
-// NodeType returns the [*types.Type] of [Filter]
-func (t *Filter) NodeType() *types.Type { return FilterType }
-
-// New returns a new [*Filter] value
-func (t *Filter) New() tree.Node { return &Filter{} }
-
 // SetFilterType sets the [Filter.FilterType]
 func (t *Filter) SetFilterType(v string) *Filter { t.FilterType = v; return t }
 
@@ -124,12 +88,6 @@ var FlowType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Flow", I
 // NewFlow returns a new [Flow] with the given optional parent:
 // Flow represents SVG flow* elements
 func NewFlow(parent ...tree.Node) *Flow { return tree.New[Flow](parent...) }
-
-// NodeType returns the [*types.Type] of [Flow]
-func (t *Flow) NodeType() *types.Type { return FlowType }
-
-// New returns a new [*Flow] value
-func (t *Flow) New() tree.Node { return &Flow{} }
 
 // SetFlowType sets the [Flow.FlowType]
 func (t *Flow) SetFlowType(v string) *Flow { t.FlowType = v; return t }
@@ -141,12 +99,6 @@ var GradientType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Grad
 // Gradient is used for holding a specified color gradient.
 // The name is the id for lookup in url
 func NewGradient(parent ...tree.Node) *Gradient { return tree.New[Gradient](parent...) }
-
-// NodeType returns the [*types.Type] of [Gradient]
-func (t *Gradient) NodeType() *types.Type { return GradientType }
-
-// New returns a new [*Gradient] value
-func (t *Gradient) New() tree.Node { return &Gradient{} }
 
 // SetGrad sets the [Gradient.Grad]:
 // the color gradient
@@ -165,24 +117,12 @@ var GroupType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Group",
 // and shared style properties.
 func NewGroup(parent ...tree.Node) *Group { return tree.New[Group](parent...) }
 
-// NodeType returns the [*types.Type] of [Group]
-func (t *Group) NodeType() *types.Type { return GroupType }
-
-// New returns a new [*Group] value
-func (t *Group) New() tree.Node { return &Group{} }
-
 // ImageType is the [types.Type] for [Image]
 var ImageType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Image", IDName: "image", Doc: "Image is an SVG image (bitmap)", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Pos", Doc: "position of the top-left of the image"}, {Name: "Size", Doc: "rendered size of the image (imposes a scaling on image when it is rendered)"}, {Name: "Filename", Doc: "file name of image loaded -- set by OpenImage"}, {Name: "ViewBox", Doc: "how to scale and align the image"}, {Name: "Pixels", Doc: "the image pixels"}}, Instance: &Image{}})
 
 // NewImage returns a new [Image] with the given optional parent:
 // Image is an SVG image (bitmap)
 func NewImage(parent ...tree.Node) *Image { return tree.New[Image](parent...) }
-
-// NodeType returns the [*types.Type] of [Image]
-func (t *Image) NodeType() *types.Type { return ImageType }
-
-// New returns a new [*Image] value
-func (t *Image) New() tree.Node { return &Image{} }
 
 // SetPos sets the [Image.Pos]:
 // position of the top-left of the image
@@ -211,12 +151,6 @@ var LineType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Line", I
 // Line is a SVG line
 func NewLine(parent ...tree.Node) *Line { return tree.New[Line](parent...) }
 
-// NodeType returns the [*types.Type] of [Line]
-func (t *Line) NodeType() *types.Type { return LineType }
-
-// New returns a new [*Line] value
-func (t *Line) New() tree.Node { return &Line{} }
-
 // SetStart sets the [Line.Start]:
 // position of the start of the line
 func (t *Line) SetStart(v math32.Vector2) *Line { t.Start = v; return t }
@@ -231,12 +165,6 @@ var MarkerType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Marker
 // NewMarker returns a new [Marker] with the given optional parent:
 // Marker represents marker elements that can be drawn along paths (arrow heads, etc)
 func NewMarker(parent ...tree.Node) *Marker { return tree.New[Marker](parent...) }
-
-// NodeType returns the [*types.Type] of [Marker]
-func (t *Marker) NodeType() *types.Type { return MarkerType }
-
-// New returns a new [*Marker] value
-func (t *Marker) New() tree.Node { return &Marker{} }
 
 // SetRefPos sets the [Marker.RefPos]:
 // reference position to align the vertex position with, specified in ViewBox coordinates
@@ -286,12 +214,6 @@ var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Node
 // It implements the [Node] interface and contains the core functionality.
 func NewNodeBase(parent ...tree.Node) *NodeBase { return tree.New[NodeBase](parent...) }
 
-// NodeType returns the [*types.Type] of [NodeBase]
-func (t *NodeBase) NodeType() *types.Type { return NodeBaseType }
-
-// New returns a new [*NodeBase] value
-func (t *NodeBase) New() tree.Node { return &NodeBase{} }
-
 // SetClass sets the [NodeBase.Class]:
 // Class contains user-defined class name(s) used primarily for attaching
 // CSS styles to different display elements.
@@ -306,12 +228,6 @@ var PathType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Path", I
 // Path renders SVG data sequences that can render just about anything
 func NewPath(parent ...tree.Node) *Path { return tree.New[Path](parent...) }
 
-// NodeType returns the [*types.Type] of [Path]
-func (t *Path) NodeType() *types.Type { return PathType }
-
-// New returns a new [*Path] value
-func (t *Path) New() tree.Node { return &Path{} }
-
 // SetDataStr sets the [Path.DataStr]:
 // string version of the path data
 func (t *Path) SetDataStr(v string) *Path { t.DataStr = v; return t }
@@ -323,24 +239,12 @@ var PolygonType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Polyg
 // Polygon is a SVG polygon
 func NewPolygon(parent ...tree.Node) *Polygon { return tree.New[Polygon](parent...) }
 
-// NodeType returns the [*types.Type] of [Polygon]
-func (t *Polygon) NodeType() *types.Type { return PolygonType }
-
-// New returns a new [*Polygon] value
-func (t *Polygon) New() tree.Node { return &Polygon{} }
-
 // PolylineType is the [types.Type] for [Polyline]
 var PolylineType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Polyline", IDName: "polyline", Doc: "Polyline is a SVG multi-line shape", Embeds: []types.Field{{Name: "NodeBase"}}, Fields: []types.Field{{Name: "Points", Doc: "the coordinates to draw -- does a moveto on the first, then lineto for all the rest"}}, Instance: &Polyline{}})
 
 // NewPolyline returns a new [Polyline] with the given optional parent:
 // Polyline is a SVG multi-line shape
 func NewPolyline(parent ...tree.Node) *Polyline { return tree.New[Polyline](parent...) }
-
-// NodeType returns the [*types.Type] of [Polyline]
-func (t *Polyline) NodeType() *types.Type { return PolylineType }
-
-// New returns a new [*Polyline] value
-func (t *Polyline) New() tree.Node { return &Polyline{} }
 
 // SetPoints sets the [Polyline.Points]:
 // the coordinates to draw -- does a moveto on the first, then lineto for all the rest
@@ -352,12 +256,6 @@ var RectType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Rect", I
 // NewRect returns a new [Rect] with the given optional parent:
 // Rect is a SVG rectangle, optionally with rounded corners
 func NewRect(parent ...tree.Node) *Rect { return tree.New[Rect](parent...) }
-
-// NodeType returns the [*types.Type] of [Rect]
-func (t *Rect) NodeType() *types.Type { return RectType }
-
-// New returns a new [*Rect] value
-func (t *Rect) New() tree.Node { return &Rect{} }
 
 // SetPos sets the [Rect.Pos]:
 // position of the top-left of the rectangle
@@ -378,12 +276,6 @@ var RootType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Root", I
 // Root represents the root of an SVG tree.
 func NewRoot(parent ...tree.Node) *Root { return tree.New[Root](parent...) }
 
-// NodeType returns the [*types.Type] of [Root]
-func (t *Root) NodeType() *types.Type { return RootType }
-
-// New returns a new [*Root] value
-func (t *Root) New() tree.Node { return &Root{} }
-
 // SetViewBox sets the [Root.ViewBox]:
 // ViewBox defines the coordinate system for the drawing.
 // These units are mapped into the screen space allocated
@@ -397,12 +289,6 @@ var TextType = types.AddType(&types.Type{Name: "cogentcore.org/core/svg.Text", I
 // Text renders SVG text, handling both text and tspan elements.
 // tspan is nested under a parent text -- text has empty Text string.
 func NewText(parent ...tree.Node) *Text { return tree.New[Text](parent...) }
-
-// NodeType returns the [*types.Type] of [Text]
-func (t *Text) NodeType() *types.Type { return TextType }
-
-// New returns a new [*Text] value
-func (t *Text) New() tree.Node { return &Text{} }
 
 // SetPos sets the [Text.Pos]:
 // position of the left, baseline of the text
