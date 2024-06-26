@@ -7,7 +7,6 @@ package tree_test
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -506,24 +505,16 @@ func TestClone(t *testing.T) {
 	*/
 }
 
-func BenchmarkTypeByValue(b *testing.B) {
+func BenchmarkNodeType(b *testing.B) {
 	n := NewNodeBase()
 	for range b.N {
-		types.TypeByValue(n)
+		n.NodeType()
 	}
 }
 
-func BenchmarkReflectNewOfType(b *testing.B) {
+func BenchmarkNodeNew(b *testing.B) {
 	n := NewNodeBase()
 	for range b.N {
-		reflect.New(reflect.TypeOf(n).Elem()).Interface()
-	}
-}
-
-func BenchmarkReflectNewOfTypeCache(b *testing.B) {
-	n := NewNodeBase()
-	typ := reflect.TypeOf(n).Elem()
-	for range b.N {
-		reflect.New(typ).Interface()
+		n.New()
 	}
 }
