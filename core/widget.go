@@ -371,7 +371,7 @@ func (wb *WidgetBase) DeleteParts() {
 }
 
 func (wb *WidgetBase) BaseType() *types.Type {
-	return WidgetBaseType
+	return types.For[WidgetBase]()
 }
 
 // NewParts makes the [WidgetBase.Parts] if they don't already exist.

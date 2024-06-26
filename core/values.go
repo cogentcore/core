@@ -120,7 +120,7 @@ type TypeChooser struct {
 
 func (tc *TypeChooser) Init() {
 	tc.Chooser.Init()
-	typEmbeds := WidgetBaseType
+	typEmbeds := types.For[WidgetBase]()
 	// if tetag, ok := tc.Tag("type-embeds"); ok { // TODO(config)
 	// 	typ := types.TypeByName(tetag)
 	// 	if typ != nil {

@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/svg"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 	"cogentcore.org/core/xyz/physics"
 )
 
@@ -271,9 +272,9 @@ func (vw *View) SyncNode(wn physics.Node, vn svg.Node) bool {
 	nm := wn.AsTree().Name
 	vn.AsTree().SetName(nm) // guaranteed to be unique
 	skids := wn.AsTree().Children
-	p := make(tree.TypePlan, 0, len(skids))
+	p := make(tree.TypePlan, 0, len(skids)) // TODO(config): update to new plan structure
 	for _, skid := range skids {
-		p.Add(svg.GroupType, skid.AsTree().Name)
+		p.Add(types.For[svg.Group](), skid.AsTree().Name)
 	}
 	mod := tree.Update(vn, p)
 	modall := mod

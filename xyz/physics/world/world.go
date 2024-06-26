@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/types"
 	"cogentcore.org/core/xyz"
 	"cogentcore.org/core/xyz/physics"
 )
@@ -226,7 +227,7 @@ func (vw *View) SyncNode(wn physics.Node, vn xyz.Node, sc *xyz.Scene) bool {
 	skids := wn.AsTree().Children
 	p := make(tree.TypePlan, 0, len(skids))
 	for _, skid := range skids {
-		p.Add(xyz.GroupType, skid.AsTree().Name)
+		p.Add(types.For[xyz.Group](), skid.AsTree().Name)
 	}
 	mod := tree.Update(vn, p)
 	modall := mod

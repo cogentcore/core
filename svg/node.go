@@ -276,10 +276,11 @@ func SVGWalkDown(n Node, fun func(sn Node, snb *NodeBase) bool) {
 // with SVG Node parameters.  Automatically filters Defs nodes (IsDef) and MetaData,
 // i.e., it only processes concrete graphical nodes.
 func SVGWalkDownNoDefs(n Node, fun func(sn Node, snb *NodeBase) bool) {
-	n.AsTree().WalkDown(func(k tree.Node) bool {
-		sn := k.(Node)
+	n.AsTree().WalkDown(func(cn tree.Node) bool {
+		sn := cn.(Node)
 		snb := sn.AsNodeBase()
-		if snb.isDef || snb.NodeType() == MetaDataType {
+		_, md := sn.(*MetaData)
+		if snb.isDef || md {
 			return tree.Break
 		}
 		return fun(sn, snb)

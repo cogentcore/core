@@ -69,7 +69,7 @@ type Tree struct {
 func (ft *Tree) Init() {
 	ft.Node.Init()
 	ft.FileRoot = ft
-	ft.FileNodeType = NodeType
+	ft.FileNodeType = types.For[Node]()
 	ft.OpenDepth = 4
 	ft.FirstMaker(func(p *tree.Plan) {
 		tree.AddNew(p, ExternalFilesName, func() Filer {
@@ -101,7 +101,7 @@ func (fv *Tree) Destroy() {
 // the given path into this tree. Only paths listed in [Tree.Dirs] will be opened.
 func (ft *Tree) OpenPath(path string) *Tree {
 	if ft.FileNodeType == nil {
-		ft.FileNodeType = NodeType
+		ft.FileNodeType = types.For[Node]()
 	}
 	effpath, err := filepath.EvalSymlinks(path)
 	if err != nil {
