@@ -8,11 +8,9 @@ import (
 	"cogentcore.org/core/xyz"
 )
 
-// ManipPointType is the [types.Type] for [ManipPoint]
-var ManipPointType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzcore.ManipPoint", IDName: "manip-point", Doc: "ManipPoint is a manipulation control point.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Solid"}}, Instance: &ManipPoint{}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzcore.ManipPoint", IDName: "manip-point", Doc: "ManipPoint is a manipulation control point.", Directives: []types.Directive{{Tool: "core", Directive: "no-new"}}, Embeds: []types.Field{{Name: "Solid"}}, Instance: &ManipPoint{}})
 
-// SceneType is the [types.Type] for [Scene]
-var SceneType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzcore.Scene", IDName: "scene", Doc: "Scene is a core.Widget that manages a xyz.Scene,\nproviding the basic rendering logic for the 3D scene\nin the 2D core GUI context.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "XYZ", Doc: "XYZ is the 3D xyz.Scene"}, {Name: "SelectionMode", Doc: "how to deal with selection / manipulation events"}, {Name: "CurrentSelected", Doc: "currently selected node"}, {Name: "CurrentManipPoint", Doc: "currently selected manipulation control point"}, {Name: "SelectionParams", Doc: "parameters for selection / manipulation box"}}, Instance: &Scene{}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzcore.Scene", IDName: "scene", Doc: "Scene is a core.Widget that manages a xyz.Scene,\nproviding the basic rendering logic for the 3D scene\nin the 2D core GUI context.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "XYZ", Doc: "XYZ is the 3D xyz.Scene"}, {Name: "SelectionMode", Doc: "how to deal with selection / manipulation events"}, {Name: "CurrentSelected", Doc: "currently selected node"}, {Name: "CurrentManipPoint", Doc: "currently selected manipulation control point"}, {Name: "SelectionParams", Doc: "parameters for selection / manipulation box"}}, Instance: &Scene{}})
 
 // NewScene returns a new [Scene] with the given optional parent:
 // Scene is a core.Widget that manages a xyz.Scene,
@@ -36,16 +34,14 @@ func (t *Scene) SetCurrentManipPoint(v *ManipPoint) *Scene { t.CurrentManipPoint
 // parameters for selection / manipulation box
 func (t *Scene) SetSelectionParams(v SelectionParams) *Scene { t.SelectionParams = v; return t }
 
-// SceneEditorType is the [types.Type] for [SceneEditor]
-var SceneEditorType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzcore.SceneEditor", IDName: "scene-editor", Doc: "SceneEditor provides a toolbar controller and manipulation abilities\nfor a [Scene].", Embeds: []types.Field{{Name: "Frame"}}, Instance: &SceneEditor{}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzcore.SceneEditor", IDName: "scene-editor", Doc: "SceneEditor provides a toolbar controller and manipulation abilities\nfor a [Scene].", Embeds: []types.Field{{Name: "Frame"}}, Instance: &SceneEditor{}})
 
 // NewSceneEditor returns a new [SceneEditor] with the given optional parent:
 // SceneEditor provides a toolbar controller and manipulation abilities
 // for a [Scene].
 func NewSceneEditor(parent ...tree.Node) *SceneEditor { return tree.New[SceneEditor](parent...) }
 
-// MeshButtonType is the [types.Type] for [MeshButton]
-var MeshButtonType = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzcore.MeshButton", IDName: "mesh-button", Doc: "MeshButton represents an [xyz.MeshName] value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "MeshName"}}, Instance: &MeshButton{}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/xyz/xyzcore.MeshButton", IDName: "mesh-button", Doc: "MeshButton represents an [xyz.MeshName] value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "MeshName"}}, Instance: &MeshButton{}})
 
 // NewMeshButton returns a new [MeshButton] with the given optional parent:
 // MeshButton represents an [xyz.MeshName] value with a button.
