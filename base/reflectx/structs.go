@@ -114,6 +114,9 @@ func SetFromDefaultTags(v any) error {
 	typ := val.Type()
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
+		if !f.IsExported() {
+			continue
+		}
 		fv := val.Field(i)
 		def := f.Tag.Get("default")
 		if NonPointerType(f.Type).Kind() == reflect.Struct && def == "" {
