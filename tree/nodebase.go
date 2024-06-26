@@ -427,6 +427,16 @@ func (n *NodeBase) DeleteProperty(key string) {
 
 // Tree Walking:
 
+const (
+	// Continue = true can be returned from tree iteration functions to continue
+	// processing down the tree, as compared to Break = false which stops this branch.
+	Continue = true
+
+	// Break = false can be returned from tree iteration functions to stop processing
+	// this branch of the tree.
+	Break = false
+)
+
 // WalkUp calls the given function on the node and all of its parents,
 // sequentially in the current goroutine (generally necessary for going up,
 // which is typically quite fast anyway). It stops walking if the function
