@@ -109,7 +109,8 @@ func ParentByType[T Node](n Node) T {
 	return ParentByType[T](n.AsTree().Parent)
 }
 
-// ChildByType is a generic helper function for [NodeBase.ChildByType].
+// ChildByType returns the first child of the given node that is
+// of the given type, if any such node exists.
 func ChildByType[T Node](n Node, startIndex ...int) T {
 	nb := n.AsTree()
 	idx := slicesx.Search(nb.Children, func(ch Node) bool {
