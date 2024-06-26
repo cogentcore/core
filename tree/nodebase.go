@@ -7,6 +7,7 @@ package tree
 import (
 	"log/slog"
 	"maps"
+	"reflect"
 	"slices"
 	"strconv"
 	"strings"
@@ -110,6 +111,16 @@ func (n *NodeBase) PlanName() string {
 	return n.Name
 }
 
+// NodeType returns the [types.Type] of this node.
+func (n *NodeBase) NodeType() *types.Type {
+	return types.TypeByValue(n.This)
+}
+
+// New returns a new instance of this node type.
+func (n *NodeBase) New() Node {
+	return reflect.New(reflect.TypeOf(n.This).Elem()).Interface().(Node)
+}
+
 // BaseType returns the base node type for all elements within this tree.
 // This is used in the GUI for determining what types of children can be created.
 func (n *NodeBase) BaseType() *types.Type {
@@ -167,11 +178,11 @@ func (n *NodeBase) ParentByType(t *types.Type, embeds bool) Node {
 		return nil
 	}
 	if embeds {
-		if n.Parent.NodeType().HasEmbed(t) {
+		if n.Parent.AsTree().NodeType().HasEmbed(t) {
 			return n.Parent
 		}
 	} else {
-		if n.Parent.NodeType() == t {
+		if n.Parent.AsTree().NodeType() == t {
 			return n.Parent
 		}
 	}
@@ -699,7 +710,7 @@ func copyFrom(to, from Node) {
 	} else {
 		p := make(TypePlan, len(fc))
 		for i, c := range fc {
-			p[i].Type = c.NodeType()
+			p[i].Type = c.AsTree().NodeType()
 			p[i].Name = c.AsTree().Name
 		}
 		UpdateSlice(&to.AsTree().Children, to, p)
@@ -718,7 +729,7 @@ func copyFrom(to, from Node) {
 // Any pointers within the cloned tree will correctly point within the new
 // cloned tree (see [Node.CopyFrom] for more information).
 func (n *NodeBase) Clone() Node {
-	nc := newOfType(n.This.NodeType())
+	nc := newOfType(n.NodeType()) // TODO(config): optimize
 	initNode(nc)
 	nc.AsTree().SetName(n.Name)
 	nc.AsTree().CopyFrom(n.This)

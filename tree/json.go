@@ -26,7 +26,7 @@ func (n *NodeBase) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return b, err
 	}
-	data := `"nodeType":"` + n.This.NodeType().Name + `",`
+	data := `"nodeType":"` + n.NodeType().Name + `",`
 	if n.NumChildren() > 0 {
 		data += `"numChildren":` + strconv.Itoa(n.NumChildren()) + ","
 	}
@@ -60,7 +60,7 @@ func (n *NodeBase) UnmarshalJSON(b []byte) error {
 	}
 
 	// if our type does not match, we must replace our This to make it match
-	if n.This.NodeType() != typ {
+	if n.NodeType() != typ {
 		parent := n.Parent
 		index := n.IndexInParent()
 		if index >= 0 {

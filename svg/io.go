@@ -974,7 +974,7 @@ func MarshalXML(n tree.Node, enc *XMLEncoder, setName string) string {
 	case *StyleSheet:
 		nm = "style"
 	default:
-		nm = n.NodeType().Name
+		nm = n.AsTree().NodeType().Name
 	}
 	se.Name.Local = nm
 	if setName != "" {

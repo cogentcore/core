@@ -75,7 +75,7 @@ func (tr *Tree) SyncToSrc(tvIndex *int, init bool, depth int) {
 	}
 	skids := sn.AsTree().Children
 	p := make(tree.TypePlan, 0, len(skids))
-	typ := tr.This.NodeType()
+	typ := tr.NodeType()
 	for _, skid := range skids {
 		p.Add(typ, "tv_"+skid.AsTree().Name)
 	}
@@ -356,7 +356,7 @@ func (tr *Tree) DuplicateSync() {
 // If SyncNode is set, operates on Sync Tree.
 func (tr *Tree) EditNode() { //types:add
 	if tr.SyncNode != nil {
-		tynm := tr.SyncNode.NodeType().Name
+		tynm := tr.SyncNode.AsTree().NodeType().Name
 		d := NewBody().AddTitle(tynm)
 		NewForm(d).SetStruct(tr.SyncNode).SetReadOnly(tr.IsReadOnly())
 		d.RunWindowDialog(tr)

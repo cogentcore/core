@@ -279,7 +279,7 @@ func SVGWalkDownNoDefs(n Node, fun func(sn Node, snb *NodeBase) bool) {
 	n.AsTree().WalkDown(func(k tree.Node) bool {
 		sn := k.(Node)
 		snb := sn.AsNodeBase()
-		if snb.isDef || sn.NodeType() == MetaDataType {
+		if snb.isDef || snb.NodeType() == MetaDataType {
 			return tree.Break
 		}
 		return fun(sn, snb)

@@ -30,7 +30,7 @@ func IndexByName(slice []Node, name string, startIndex ...int) int {
 // See [IndexOf] for info on startIndex.
 func IndexByType(slice []Node, t *types.Type, embeds bool, startIndex ...int) int {
 	if embeds {
-		return slicesx.Search(slice, func(ch Node) bool { return ch.NodeType().HasEmbed(t) }, startIndex...)
+		return slicesx.Search(slice, func(ch Node) bool { return ch.AsTree().NodeType().HasEmbed(t) }, startIndex...)
 	}
-	return slicesx.Search(slice, func(ch Node) bool { return ch.NodeType() == t }, startIndex...)
+	return slicesx.Search(slice, func(ch Node) bool { return ch.AsTree().NodeType() == t }, startIndex...)
 }

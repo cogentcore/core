@@ -22,7 +22,7 @@ import (
 // the type, plus the [Node.NumLifetimeChildren] of the parent.
 func New[T Node](parent ...Node) T {
 	var n T
-	return NewOfType(n.NodeType(), parent...).(T)
+	return NewOfType(n.AsTree().NodeType(), parent...).(T)
 }
 
 // NewOfType returns a new node of the given [types.Type] with the given optional parent.
@@ -39,7 +39,7 @@ func NewOfType(typ *types.Type, parent ...Node) Node {
 func newRoot(typ *types.Type) Node {
 	n := newOfType(typ)
 	initNode(n)
-	n.AsTree().SetName(n.NodeType().IDName)
+	n.AsTree().SetName(n.AsTree().NodeType().IDName)
 	return n
 }
 
@@ -94,20 +94,20 @@ func MoveToParent(child Node, parent Node) {
 // InsertNewChild is a generic helper function for [NodeBase.InsertNewChild].
 func InsertNewChild[T Node](parent Node, at int) T {
 	var n T
-	return parent.AsTree().InsertNewChild(n.NodeType(), at).(T)
+	return parent.AsTree().InsertNewChild(n.AsTree().NodeType(), at).(T)
 }
 
 // ParentByType is a generic helper function for [NodeBase.ParentByType].
 func ParentByType[T Node](n Node, embeds bool) T {
 	var nt T
-	v, _ := n.AsTree().ParentByType(nt.NodeType(), embeds).(T)
+	v, _ := n.AsTree().ParentByType(nt.AsTree().NodeType(), embeds).(T)
 	return v
 }
 
 // ChildByType is a generic helper function for [NodeBase.ChildByType].
 func ChildByType[T Node](k Node, embeds bool, startIndex ...int) T {
 	var n T
-	v, _ := k.AsTree().ChildByType(n.NodeType(), embeds, startIndex...).(T)
+	v, _ := k.AsTree().ChildByType(n.AsTree().NodeType(), embeds, startIndex...).(T)
 	return v
 }
 
@@ -138,7 +138,7 @@ func IsNode(typ reflect.Type) bool {
 
 // newOfType returns a new instance of the given [Node] type.
 func newOfType(typ *types.Type) Node {
-	return typ.Instance.(Node).New()
+	return typ.Instance.(Node).AsTree().New()
 }
 
 // SetUniqueName sets the name of the node to be unique, using
@@ -160,8 +160,7 @@ func setUniqueName(n Node, addIfSet bool) {
 	c := atomic.AddUint64(&pn.AsTree().numLifetimeChildren, 1)
 	id := "-" + strconv.FormatUint(c-1, 10) // must subtract 1 so we start at 0
 	if nb.Name == "" {
-		// must get This for accurate NodeType
-		nb.SetName(nb.This.NodeType().IDName + id)
+		nb.SetName(nb.NodeType().IDName + id)
 	} else if addIfSet {
 		nb.SetName(nb.Name + id)
 	}

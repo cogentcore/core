@@ -45,7 +45,7 @@ func TestNodeEmbedNewChild(t *testing.T) {
 	child.AsTree().SetName("child1")
 	assert.Len(t, parent.Children, 1)
 	assert.Equal(t, "/node-embed/child1", child.AsTree().Path())
-	assert.Equal(t, parent.NodeType(), child.NodeType())
+	assert.Equal(t, parent.NodeType(), child.AsTree().NodeType())
 }
 
 func TestNodePath(t *testing.T) {

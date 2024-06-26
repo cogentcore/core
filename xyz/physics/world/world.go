@@ -131,7 +131,7 @@ func (vw *View) InitLibSolid(bod physics.Body, sc *xyz.Scene) {
 	lgp := sc.NewInLibrary(nm)
 	sld := xyz.NewSolid(lgp)
 	sld.SetName(nm)
-	wt := bod.NodeType().ShortName()
+	wt := bb.NodeType().ShortName()
 	switch wt {
 	case "physics.Box":
 		mnm := "eveBox"
@@ -166,7 +166,7 @@ func (vw *View) InitLibSolid(bod physics.Body, sc *xyz.Scene) {
 
 // ConfigBodySolid configures a solid for a body with current values
 func (vw *View) ConfigBodySolid(bod physics.Body, sld *xyz.Solid) {
-	wt := bod.NodeType().ShortName()
+	wt := bod.AsTree().NodeType().ShortName()
 	switch wt {
 	case "physics.Box":
 		bx := bod.(*physics.Box)

@@ -167,7 +167,7 @@ func (vw *View) InitLibShape(bod physics.Body) {
 		return
 	}
 	lgp := vw.NewInLibrary(nm)
-	wt := bod.NodeType().ShortName()
+	wt := bb.NodeType().ShortName()
 	switch wt {
 	case "physics.Box":
 		mnm := "eveBox"
@@ -186,7 +186,7 @@ func (vw *View) InitLibShape(bod physics.Body) {
 
 // ConfigBodyShape configures a shape for a body with current values
 func (vw *View) ConfigBodyShape(bod physics.Body, shp svg.Node) {
-	wt := bod.NodeType().ShortName()
+	wt := bod.AsTree().NodeType().ShortName()
 	sb := shp.AsNodeBase()
 	sb.Name = bod.AsTree().Name
 	switch wt {

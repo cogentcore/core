@@ -30,12 +30,6 @@ var NodeBaseType = types.AddType(&types.Type{Name: "cogentcore.org/core/tree.Nod
 // you write that have new node types defined.
 func NewNodeBase(parent ...Node) *NodeBase { return New[*NodeBase](parent...) }
 
-// NodeType returns the [*types.Type] of [NodeBase]
-func (t *NodeBase) NodeType() *types.Type { return NodeBaseType }
-
-// New returns a new [*NodeBase] value
-func (t *NodeBase) New() Node { return &NodeBase{} }
-
 // SetName sets the [NodeBase.Name]:
 // Name is the name of this node, which is typically unique relative to other children of
 // the same parent. It can be used for finding and serializing nodes. If not otherwise set,
