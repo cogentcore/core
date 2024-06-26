@@ -117,6 +117,9 @@ func (n *NodeBase) PlanName() string {
 // it registers one and then returns it.
 func (n *NodeBase) NodeType() *types.Type {
 	if t := types.TypeByValue(n.This); t != nil {
+		if t.Instance == nil {
+			t.Instance = n.New()
+		}
 		return t
 	}
 	name := types.TypeNameValue(n.This)

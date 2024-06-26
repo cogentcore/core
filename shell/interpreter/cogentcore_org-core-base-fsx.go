@@ -3,9 +3,8 @@
 package interpreter
 
 import (
-	"reflect"
-
 	"cogentcore.org/core/base/fsx"
+	"reflect"
 )
 
 func init() {
@@ -14,14 +13,15 @@ func init() {
 		"DirAndFile":       reflect.ValueOf(fsx.DirAndFile),
 		"DirFS":            reflect.ValueOf(fsx.DirFS),
 		"Dirs":             reflect.ValueOf(fsx.Dirs),
-		"Filenames":        reflect.ValueOf(fsx.Filenames),
-		"Files":            reflect.ValueOf(fsx.Files),
 		"FileExists":       reflect.ValueOf(fsx.FileExists),
 		"FileExistsFS":     reflect.ValueOf(fsx.FileExistsFS),
+		"Filenames":        reflect.ValueOf(fsx.Filenames),
+		"Files":            reflect.ValueOf(fsx.Files),
 		"FindFilesOnPaths": reflect.ValueOf(fsx.FindFilesOnPaths),
 		"GoSrcDir":         reflect.ValueOf(fsx.GoSrcDir),
 		"HasFile":          reflect.ValueOf(fsx.HasFile),
 		"LatestMod":        reflect.ValueOf(fsx.LatestMod),
 		"RelativeFilePath": reflect.ValueOf(fsx.RelativeFilePath),
+		"Sub":              reflect.ValueOf(fsx.Sub),
 	}
 }
