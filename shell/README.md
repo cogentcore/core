@@ -2,7 +2,7 @@
 
 Cogent Shell (cosh) is a shell that combines the best parts of Go and command-based shell languages like `bash` to provide an integrated shell experience that allows you to easily run terminal commands while using Go for complicated logic. This allows you to write concise, elegant, and readable shell code that runs quickly on all platforms, and transpiles to Go (i.e, can be compiled by `go build`).
 
-The simple idea is that each line is either Go or shell commands, determined in a fairly intuitive way mostly by the content at the start of the line (formal rules below), and they can be intermixed by wrapping Go within `{ }` and shell code from within backticks (`````).  We henceforth refer to shell code as `exec` code (in reference to the Go & Cogent `exec` package that we use to execute programs), given the potential ambituity of the entire `cosh` language being the shell. There are different syntactic formatting rules for these two domains of Go and Exec, within cosh:
+The simple idea is that each line is either Go or shell commands, determined in a fairly intuitive way mostly by the content at the start of the line (formal rules below), and they can be intermixed by wrapping Go within `{ }` and shell code from within backticks (\`).  We henceforth refer to shell code as `exec` code (in reference to the Go & Cogent `exec` package that we use to execute programs), given the potential ambituity of the entire `cosh` language being the shell. There are different syntactic formatting rules for these two domains of Go and Exec, within cosh:
 
 * Go code is processed and formatted as usual (e.g., white space is irrelevant, etc).
 * Exec code is space separated, like normal command-line invocations.
@@ -15,7 +15,14 @@ for i, f := range shell.SplitLines(`ls -la`) {   // `ls` executes returns string
 }
 ```
 
-`splitLines` is a function that runs `strings.Split(arg, "\n")`, defined in the cosh standard library of such frequently-used helper functions.
+`shell.SplitLines` is a function that runs `strings.Split(arg, "\n")`, defined in the cosh standard library of such frequently-used helper functions.
+
+You can easily perform handy duration and data size formatting:
+
+```go
+22010706 * time.Nanosecond  // 22.010706ms
+datasize.Size(44610930)     // 42.5 MB
+```
 
 # Special syntax
 
