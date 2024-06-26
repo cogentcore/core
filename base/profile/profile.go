@@ -9,17 +9,17 @@
 // Here's how you use it:
 //
 //	// somewhere near start of program (e.g., using flag package)
-//	profFlag := flag.Bool("prof", false, "turn on targeted profiling")
+//	profileFlag := flag.Bool("profile", false, "turn on targeted profiling")
 //	...
 //	flag.Parse()
-//	profile.Profiling = *profFlag
+//	profile.Profiling = *profileFlag
 //	...
 //	// surrounding the code of interest:
 //	pr := profile.Start()
 //	... code
 //	pr.End()
 //	...
-//	// at end or whenever you've got enough data:
+//	// at the end or whenever you've got enough data:
 //	profile.Report(time.Millisecond) // or time.Second or whatever
 package profile
 
@@ -81,12 +81,12 @@ func StartName(name string, info ...string) *Profile {
 	return TheProfiler.Start(name)
 }
 
-// Report generates a report of all the profile data collected
+// Report generates a report of all the profile data collected.
 func Report(units time.Duration) {
 	TheProfiler.Report(units)
 }
 
-// Reset all data
+// Reset resets all of the profiling data.
 func Reset() {
 	TheProfiler.Reset()
 }
@@ -100,7 +100,7 @@ var TheProfiler = Profiler{}
 // Profile represents one profiled function.
 type Profile struct {
 	Name   string
-	Tot    time.Duration
+	Total  time.Duration
 	N      int64
 	Avg    float64
 	St     time.Time
@@ -121,16 +121,16 @@ func (p *Profile) End() {
 		return
 	}
 	dur := time.Since(p.St)
-	p.Tot += dur
+	p.Total += dur
 	p.N++
-	p.Avg = float64(p.Tot) / float64(p.N)
+	p.Avg = float64(p.Total) / float64(p.N)
 	p.Timing = false
 }
 
 func (p *Profile) Report(tot float64, units time.Duration) {
 	us := strings.TrimPrefix(units.String(), "1")
 	fmt.Printf("%-60sTotal:%8.2f %s\tAvg:%6.2f\tN:%6d\tPct:%6.2f\n",
-		p.Name, float64(p.Tot)/float64(units), us, p.Avg/float64(units), p.N, 100.0*float64(p.Tot)/tot)
+		p.Name, float64(p.Total)/float64(units), us, p.Avg/float64(units), p.N, 100.0*float64(p.Total)/tot)
 }
 
 // Profiler manages a map of profiled functions.
@@ -162,19 +162,18 @@ func (p *Profiler) Start(name string) *Profile {
 // Report generates a report of all the profile data collected
 func (p *Profiler) Report(units time.Duration) {
 	if !Profiling {
-		// fmt.Printf("Profiling not turned on -- set global core.Profiling variable\n")
 		return
 	}
 	list := make([]*Profile, len(p.Profiles))
 	tot := 0.0
 	idx := 0
 	for _, pr := range p.Profiles {
-		tot += float64(pr.Tot)
+		tot += float64(pr.Total)
 		list[idx] = pr
 		idx++
 	}
 	slices.SortFunc(list, func(a, b *Profile) int {
-		return cmp.Compare(b.Tot, a.Tot)
+		return cmp.Compare(b.Total, a.Total)
 	})
 	for _, pr := range list {
 		pr.Report(tot, units)
