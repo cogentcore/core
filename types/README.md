@@ -12,7 +12,7 @@ Package types provides type information for Go types, methods, and functions.
 
 * In tree (optional) generate a new token of given type by name
 
-* Package tree needs type variables when making children
+* Package tree needs type variables when making children from serialized data
 
 # Notes
 
