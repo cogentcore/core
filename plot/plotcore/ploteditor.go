@@ -420,7 +420,7 @@ func (pl *PlotEditor) ColumnsListUpdate() {
 		if cn == pl.Params.XAxisColumn || tcol.IsString() || tcol.DataType() == reflect.Int || tcol.DataType() == reflect.Int64 || tcol.DataType() == reflect.Int32 || tcol.DataType() == reflect.Uint8 {
 			inc = 0
 		}
-		cp.Color = colors.Spaced(clri)
+		cp.Color = colors.Uniform(colors.Spaced(clri))
 		pl.Columns[ci] = cp
 		clri += inc
 	}

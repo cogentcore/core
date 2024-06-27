@@ -5,9 +5,10 @@
 package plot
 
 import (
-	"image/color"
+	"image"
 
 	"cogentcore.org/core/colors"
+	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/styles/units"
 )
 
@@ -39,9 +40,9 @@ type Legend struct {
 	// ThumbnailWidth is the width of legend thumbnails.
 	ThumbnailWidth units.Value
 
-	// FillColor specifies the background fill color for the legend box,
+	// Fill specifies the background fill color for the legend box,
 	// if non-nil.
-	FillColor color.Color
+	Fill image.Image
 
 	// Entries are all of the LegendEntries described by this legend.
 	Entries []LegendEntry
@@ -53,7 +54,7 @@ func (lg *Legend) Defaults() {
 	lg.TextStyle.Font.Size.Dp(20)
 	lg.Position.Defaults()
 	lg.ThumbnailWidth.Pt(20)
-	lg.FillColor = colors.Clearer(colors.ToUniform(colors.Scheme.Surface), 25)
+	lg.Fill = gradient.ApplyOpacity(colors.Scheme.Surface, 0.75)
 }
 
 // Add adds an entry to the legend with the given name.

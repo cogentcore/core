@@ -108,10 +108,10 @@ func (pl *PlotEditor) GenPlotXY() {
 				}
 				if nleg > 1 {
 					cidx := yidx*nleg + li
-					clr = colors.Spaced(cidx)
+					clr = colors.Uniform(colors.Spaced(cidx))
 				}
 				if nidx > 1 {
-					clr = colors.Spaced(idx)
+					clr = colors.Uniform(colors.Spaced(idx))
 					lbl = fmt.Sprintf("%s_%02d", lbl, idx)
 				}
 				if cp.Lines.Or(pl.Params.Lines) && cp.Points.Or(pl.Params.Points) {
@@ -123,7 +123,7 @@ func (pl *PlotEditor) GenPlotXY() {
 				}
 				if lns != nil {
 					lns.LineStyle.Width.Pt(float32(cp.LineWidth.Or(pl.Params.LineWidth)))
-					lns.LineStyle.Color = colors.Uniform(clr)
+					lns.LineStyle.Color = clr
 					lns.NegativeXDraw = pl.Params.NegativeXDraw
 					plt.Add(lns)
 					if pts != nil {
@@ -133,7 +133,7 @@ func (pl *PlotEditor) GenPlotXY() {
 					}
 				}
 				if pts != nil {
-					pts.LineStyle.Color = colors.Uniform(clr)
+					pts.LineStyle.Color = clr
 					pts.LineStyle.Width.Pt(float32(cp.LineWidth.Or(pl.Params.LineWidth)))
 					pts.PointSize.Pt(float32(cp.PointSize.Or(pl.Params.PointSize)))
 					pts.PointShape = cp.PointShape.Or(pl.Params.PointShape)
@@ -147,7 +147,7 @@ func (pl *PlotEditor) GenPlotXY() {
 					if ec >= 0 {
 						xy.ErrColumn = ec
 						eb, _ := plots.NewYErrorBars(xy)
-						eb.LineStyle.Color = colors.Uniform(clr)
+						eb.LineStyle.Color = clr
 						plt.Add(eb)
 					}
 				}

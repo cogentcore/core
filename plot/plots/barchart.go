@@ -12,7 +12,7 @@
 package plots
 
 import (
-	"image/color"
+	"image"
 
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
@@ -62,7 +62,7 @@ type BarChart struct {
 	Pad float32
 
 	// Color is the fill color of the bars.
-	Color color.Color
+	Color image.Image
 
 	// LineStyle is the style of the line connecting the points.
 	// Use zero width to disable lines.
@@ -107,7 +107,7 @@ func (b *BarChart) Defaults() {
 	b.Stride = 1
 	b.Width = .8
 	b.Pad = 1
-	b.Color = colors.ToUniform(colors.Scheme.OnSurface)
+	b.Color = colors.Scheme.OnSurface
 	b.LineStyle.Defaults()
 }
 
@@ -147,11 +147,7 @@ func (b *BarChart) StackOn(on *BarChart) {
 // Plot implements the plot.Plotter interface.
 func (b *BarChart) Plot(plt *plot.Plot) {
 	pc := plt.Paint
-	if b.Color != nil {
-		pc.FillStyle.Color = colors.Uniform(b.Color)
-	} else {
-		pc.FillStyle.Color = nil
-	}
+	pc.FillStyle.Color = b.Color
 	b.LineStyle.SetStroke(plt)
 
 	nv := len(b.Values)
@@ -236,11 +232,7 @@ func (b *BarChart) DataRange() (xmin, xmax, ymin, ymax float32) {
 // Thumbnail fulfills the plot.Thumbnailer interface.
 func (b *BarChart) Thumbnail(plt *plot.Plot) {
 	pc := plt.Paint
-	if b.Color != nil {
-		pc.FillStyle.Color = colors.Uniform(b.Color)
-	} else {
-		pc.FillStyle.Color = nil
-	}
+	pc.FillStyle.Color = b.Color
 	b.LineStyle.SetStroke(plt)
 	ptb := pc.Bounds
 	pc.DrawRectangle(float32(ptb.Min.X), float32(ptb.Min.Y), float32(ptb.Size().X), float32(ptb.Size().Y))

@@ -13,7 +13,6 @@ package plot
 
 import (
 	"image"
-	"image/color"
 
 	"cogentcore.org/core/base/iox/imagex"
 	"cogentcore.org/core/colors"
@@ -32,12 +31,12 @@ type Plot struct {
 	// Title of the plot
 	Title Text
 
-	// Background is the background color of the plot.
+	// Background is the background of the plot.
 	// The default is [colors.Scheme.Surface].
-	Background color.Color
+	Background image.Image
 
 	// standard text style with default params
-	StdTextStyle styles.Text
+	StandardTextStyle styles.Text
 
 	// X and Y are the horizontal and vertical axes
 	// of the plot respectively.
@@ -72,14 +71,14 @@ type Plot struct {
 func (pt *Plot) Defaults() {
 	pt.Title.Defaults()
 	pt.Title.Style.Size.Dp(24)
-	pt.Background = colors.ToUniform(colors.Scheme.Surface)
+	pt.Background = colors.Scheme.Surface
 	pt.X.Defaults(math32.X)
 	pt.Y.Defaults(math32.Y)
 	pt.Legend.Defaults()
 	pt.DPI = 96
 	pt.Size = image.Point{1280, 1024}
-	pt.StdTextStyle.Defaults()
-	pt.StdTextStyle.WhiteSpace = styles.WhiteSpaceNowrap
+	pt.StandardTextStyle.Defaults()
+	pt.StandardTextStyle.WhiteSpace = styles.WhiteSpaceNowrap
 }
 
 // New returns a new plot with some reasonable default settings.

@@ -16,7 +16,6 @@ import (
 	"io"
 	"os"
 
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 )
@@ -72,7 +71,7 @@ func (pt *Plot) Draw() {
 	pc.PushBounds(ptb)
 
 	if pt.Background != nil {
-		pc.BlitBox(math32.Vector2{}, math32.Vector2FromPoint(pt.Size), colors.Uniform(pt.Background))
+		pc.BlitBox(math32.Vector2{}, math32.Vector2FromPoint(pt.Size), pt.Background)
 	}
 
 	if pt.Title.Text != "" {
@@ -428,8 +427,8 @@ func (lg *Legend) draw(pt *Plot) {
 		pos.Y = ptb.Max.Y - sz.Y - int(lg.Position.YOffs.Dots)
 	}
 
-	if lg.FillColor != nil {
-		pc.FillBox(math32.Vector2FromPoint(pos), math32.Vector2FromPoint(sz), colors.Uniform(lg.FillColor))
+	if lg.Fill != nil {
+		pc.FillBox(math32.Vector2FromPoint(pos), math32.Vector2FromPoint(sz), lg.Fill)
 	}
 	cp := pos
 	thsz := image.Point{X: int(lg.ThumbnailWidth.Dots), Y: maxTht - 2*int(pad)}

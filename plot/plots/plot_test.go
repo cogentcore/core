@@ -56,7 +56,7 @@ func TestLine(t *testing.T) {
 	pt.Draw()
 	imagex.Assert(t, pt.Pixels, "line.png")
 
-	l1.FillColor = colors.Yellow
+	l1.Fill = colors.Uniform(colors.Yellow)
 	pt.Draw()
 	imagex.Assert(t, pt.Pixels, "line-fill.png")
 
@@ -73,7 +73,7 @@ func TestLine(t *testing.T) {
 	imagex.Assert(t, pt.Pixels, "line-poststep.png")
 
 	l1.StepStyle = NoStep
-	l1.FillColor = nil
+	l1.Fill = nil
 	l1.NegativeXDraw = true
 	pt.Draw()
 	imagex.Assert(t, pt.Pixels, "line-negx.png")
@@ -173,7 +173,7 @@ func TestBarChart(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	l1.Color = colors.Red
+	l1.Color = colors.Uniform(colors.Red)
 	pt.Add(l1)
 	pt.Legend.Add("Sine", l1)
 
@@ -185,7 +185,7 @@ func TestBarChart(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	l2.Color = colors.Blue
+	l2.Color = colors.Uniform(colors.Blue)
 	pt.Legend.Add("Cosine", l2)
 
 	l1.Stride = 2
@@ -221,7 +221,7 @@ func TestBarChartErr(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	l1.Color = colors.Red
+	l1.Color = colors.Uniform(colors.Red)
 	pt.Add(l1)
 	pt.Legend.Add("Sine", l1)
 
@@ -261,7 +261,7 @@ func TestBarChartStack(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	l1.Color = colors.Red
+	l1.Color = colors.Uniform(colors.Red)
 	pt.Add(l1)
 	pt.Legend.Add("Sine", l1)
 
@@ -269,7 +269,7 @@ func TestBarChartStack(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	l2.Color = colors.Blue
+	l2.Color = colors.Uniform(colors.Blue)
 	l2.StackedOn = l1
 	pt.Add(l2)
 	pt.Legend.Add("Cos", l2)

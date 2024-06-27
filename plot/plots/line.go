@@ -12,9 +12,8 @@ package plots
 //go:generate core generate
 
 import (
-	"image/color"
+	"image"
 
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/plot"
 )
@@ -52,9 +51,9 @@ type Line struct {
 	// Use zero width to disable lines.
 	LineStyle plot.LineStyle
 
-	// FillColor is the color to fill the area below the plot.
-	// Use nil to disable the filling. This is the default.
-	FillColor color.Color
+	// Fill is the color to fill the area below the plot.
+	// Use nil to disable filling, which is the default.
+	Fill image.Image
 
 	// if true, draw lines that connect points with a negative X-axis direction;
 	// otherwise there is a break in the line.
@@ -105,8 +104,8 @@ func (pts *Line) Plot(plt *plot.Plot) {
 	np := len(ps)
 	pts.PXYs = ps
 
-	if pts.FillColor != nil {
-		pc.FillStyle.Color = colors.Uniform(pts.FillColor)
+	if pts.Fill != nil {
+		pc.FillStyle.Color = pts.Fill
 		minY := plt.PY(plt.Y.Min)
 		prev := math32.Vec2(ps[0].X, minY)
 		pc.MoveTo(prev.X, prev.Y)
@@ -204,12 +203,12 @@ func (pts *Line) Thumbnail(plt *plot.Plot) {
 	ptb := pc.Bounds
 	midY := 0.5 * float32(ptb.Min.Y+ptb.Max.Y)
 
-	if pts.FillColor != nil {
+	if pts.Fill != nil {
 		tb := ptb
 		if pts.LineStyle.Width.Value > 0 {
 			tb.Min.Y = int(midY)
 		}
-		pc.FillBox(math32.Vector2FromPoint(tb.Min), math32.Vector2FromPoint(tb.Size()), colors.Uniform(pts.FillColor))
+		pc.FillBox(math32.Vector2FromPoint(tb.Min), math32.Vector2FromPoint(tb.Size()), pts.Fill)
 	}
 
 	if pts.LineStyle.SetStroke(plt) {

@@ -79,7 +79,7 @@ func (tx *Text) Config(pt *Plot) {
 	txln := float32(len(tx.Text))
 	fht := fs.Size.Dots
 	hsz := float32(12) * txln
-	txs := &pt.StdTextStyle
+	txs := &pt.StandardTextStyle
 	tx.PaintText.SetHTML(tx.Text, fs, txs, uc, nil)
 	tx.PaintText.Layout(txs, fs, uc, math32.Vector2{X: hsz, Y: fht})
 	if tx.Style.Rotation != 0 {

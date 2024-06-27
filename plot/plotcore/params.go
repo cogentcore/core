@@ -5,7 +5,7 @@
 package plotcore
 
 import (
-	"image/color"
+	"image"
 	"strings"
 
 	"cogentcore.org/core/base/option"
@@ -214,7 +214,7 @@ type ColumnParams struct { //types:add
 	FullRange minmax.F32 `display:"inline"`
 
 	// color to use when plotting the line / column
-	Color color.Color
+	Color image.Image
 
 	// desired number of ticks
 	NTicks int

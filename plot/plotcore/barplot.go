@@ -119,10 +119,10 @@ func (pl *PlotEditor) GenPlotBar() {
 				}
 				if nleg > 1 {
 					cidx := yidx*nleg + li
-					clr = colors.Spaced(cidx)
+					clr = colors.Uniform(colors.Spaced(cidx))
 				}
 				if nidx > 1 {
-					clr = colors.Spaced(idx)
+					clr = colors.Uniform(colors.Spaced(idx))
 					lbl = fmt.Sprintf("%s_%02d", lbl, idx)
 				}
 				ec := -1
