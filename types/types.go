@@ -68,10 +68,15 @@ func TypeByReflectType(typ reflect.Type) *Type {
 	return TypeByName(TypeName(typ))
 }
 
-// For returns the [Type] of the generic type parameter.
+// For returns the [Type] of the generic type parameter,
+// setting its [Type.Instance] to a new(T) if it is nil.
 func For[T any]() *Type {
 	var v T
-	return TypeByValue(v)
+	t := TypeByValue(v)
+	if t != nil && t.Instance == nil {
+		t.Instance = new(T)
+	}
+	return t
 }
 
 // AddType adds a constructed [Type] to the registry
