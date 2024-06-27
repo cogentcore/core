@@ -23,8 +23,7 @@ func main() {
 	// sc.Wireframe = true
 	// sc.NoNav = true
 
-	// first, add lights, set camera
-	sc.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
+	sc.Background = colors.Scheme.Select.Container
 	xyz.NewAmbientLight(sc, "ambient", 0.3, xyz.DirectSun)
 
 	// sc.Camera.Pose.Pos.Set(-2, 9, 3)

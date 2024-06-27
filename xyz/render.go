@@ -10,6 +10,7 @@ import (
 	"sort"
 
 	"cogentcore.org/core/base/iox/imagex"
+	"cogentcore.org/core/colors"
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/vgpu"
@@ -291,7 +292,7 @@ func (sc *Scene) ConfigNodes() {
 // This must be called on the main thread.
 func (sc *Scene) Config() {
 	sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
-	clr := math32.NewVector3Color(sc.BackgroundColor).SRGBToLinear()
+	clr := math32.NewVector3Color(colors.ToUniform(sc.Background)).SRGBToLinear()
 	sc.Frame.Render.SetClearColor(clr.X, clr.Y, clr.Z, 1)
 	// gpu.Draw.Wireframe(sc.Wireframe)
 	sc.ConfigNodes()

@@ -157,9 +157,8 @@ func main() {
 	// se.Wireframe = true
 	// sc.NoNav = true
 
-	// first, add lights, set camera
 	se.Styler(func(s *styles.Style) {
-		sc.BackgroundColor = colors.ToUniform(colors.Scheme.Select.Container)
+		sc.Background = colors.Scheme.Select.Container
 	})
 	xyz.NewAmbientLight(sc, "ambient", 0.3, xyz.DirectSun)
 

@@ -127,7 +127,7 @@ func (ev *Env) Defaults() {
 
 func (ev *Env) ConfigScene(se *xyz.Scene) {
 	ev.SceneEditor.Styler(func(s *styles.Style) {
-		se.BackgroundColor = colors.ToUniform(colors.Scheme.Select.Container)
+		se.Background = colors.Scheme.Select.Container
 	})
 	xyz.NewAmbientLight(se, "ambient", 0.3, xyz.DirectSun)
 

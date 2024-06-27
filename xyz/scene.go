@@ -10,7 +10,6 @@ package xyz
 import (
 	"fmt"
 	"image"
-	"image/color"
 
 	"cogentcore.org/core/base/ordmap"
 	"cogentcore.org/core/colors"
@@ -41,9 +40,9 @@ var Update3DTrace = false
 type Scene struct {
 	tree.NodeBase
 
-	// BackgroundColor is the background color of the scene,
-	// which is used directly as an RGB color in Vulkan.
-	BackgroundColor color.RGBA
+	// Background is the background of the scene,
+	// which is used directly as a solid color in Vulkan.
+	Background image.Image
 
 	// NeedsConfig means that a GPU resource (Lights, Texture, Meshes,
 	// or more complex Nodes that require ConfigNodes) has been changed
@@ -104,7 +103,7 @@ type Scene struct {
 func (sc *Scene) Init() {
 	sc.MultiSample = 4
 	sc.Camera.Defaults()
-	sc.BackgroundColor = colors.ToUniform(colors.Scheme.Surface)
+	sc.Background = colors.Scheme.Surface
 }
 
 // NewOffscreenScene returns a new [Scene] designed for offscreen
