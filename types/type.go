@@ -7,44 +7,47 @@ package types
 import (
 	"fmt"
 	"reflect"
-	"regexp"
 	"strings"
 )
 
 // Type represents a type.
 type Type struct {
-	// Name is the fully package-path-qualified name of the type (eg: cogentcore.org/core/core.Button)
+	// Name is the fully package-path-qualified name of the type
+	// (eg: cogentcore.org/core/core.Button).
 	Name string
 
-	// IDName is the short, package-unqualified, kebab-case name of the type that is suitable
-	// for use in an ID (eg: button)
+	// IDName is the short, package-unqualified, kebab-case name of
+	// the type that is suitable for use in an ID (eg: button).
 	IDName string
 
 	// Doc has all of the comment documentation
 	// info as one string with directives removed.
 	Doc string
 
-	// Directives has the parsed comment directives
+	// Directives has the parsed comment directives.
 	Directives []Directive
 
-	// Methods are available for all types
+	// Methods of the type, which are available for all types.
 	Methods []Method
 
-	// Embedded fields for struct types
+	// Embedded fields of struct types.
 	Embeds []Field
 
-	// Fields for struct types
+	// Fields of struct types.
 	Fields []Field
 
-	// Instance is an optional instance of the type
+	// Instance is an instance of a non-nil pointer to the type,
+	// which is set by [For] and other external functions such that
+	// a [Type] can be used to make new instances of the type by
+	// reflection. It is not set by typegen.
 	Instance any
 
-	// ID is the unique type ID number
+	// ID is the unique type ID number set by [AddType].
 	ID uint64
 
-	// All embedded fields (including nested ones) for struct types;
-	// not set by typegen -- HasEmbed automatically compiles it as needed.
-	// Key is the ID of the type.
+	// AllEmbeds contains all embedded fields (including nested ones) for struct types;
+	// not set by typegen; HasEmbed automatically compiles it as needed.
+	// The key is the ID of the type.
 	AllEmbeds map[uint64]*Type
 }
 
@@ -62,7 +65,7 @@ func (tp *Type) Label() string {
 	return tp.ShortName()
 }
 
-// ReflectType returns the [reflect.Type] for this type, using the Instance
+// ReflectType returns the [reflect.Type] for this type, using [Type.Instance].
 func (tp *Type) ReflectType() reflect.Type {
 	if tp.Instance == nil {
 		return nil
@@ -140,13 +143,4 @@ func StructGoString(str any) string {
 	return "{" + strings.Join(strs, ", ") + "}"
 }
 
-// need to get rid of quotes around instance
-var typeInstanceRegexp = regexp.MustCompile(`Instance: "(.+)"`)
-
-func (tp Type) GoString() string {
-	res := StructGoString(tp)
-	if tp.Instance == nil {
-		return res
-	}
-	return typeInstanceRegexp.ReplaceAllString(res, "Instance: $1")
-}
+func (tp Type) GoString() string { return StructGoString(tp) }

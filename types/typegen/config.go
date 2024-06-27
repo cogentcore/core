@@ -38,9 +38,6 @@ type Config struct { //types:add
 	// Note: typegen will still succeed if it can not find one of the interfaces specified here in order to allow it to work generically across multiple directories; you can use the -v flag to get log warnings about this if you suspect that it is not finding interfaces when it should.
 	InterfaceConfigs *ordmap.Map[string, *Config]
 
-	// whether to generate an instance of the type(s)
-	Instance bool
-
 	// Whether to generate chaining `Set*` methods for each exported field of each type (eg: "SetText" for field "Text").
 	// If this is set to true, then you can add `set:"-"` struct tags to individual fields
 	// to prevent Set methods being generated for them.

@@ -32,10 +32,6 @@ func TypesTypeOf(typ *Type) *types.Type {
 	res := &cp
 	res.Fields = typ.Fields.Fields
 	res.Embeds = typ.Embeds.Fields
-	if typ.Config.Instance {
-		// quotes are removed in types.Type.GoString
-		res.Instance = "&" + typ.LocalName + "{}"
-	}
 	return res
 }
 

@@ -25,7 +25,6 @@ func TestGenerate(t *testing.T) {
 		InterfaceConfigs: ordmap.Make([]ordmap.KeyValue[string, *Config]{{
 			"fmt.Stringer", &Config{
 				AddTypes: true,
-				Instance: true,
 				Setters:  true,
 				Templates: []*template.Template{
 					template.Must(template.New("Stringer").Parse(`
