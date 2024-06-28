@@ -36,6 +36,7 @@ require (
 	github.com/zergon321/reisen v0.1.9
 	go.abhg.dev/goldmark/wikilink v0.5.0
 	golang.org/x/crypto v0.23.0
+	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 	golang.org/x/image v0.18.0
 	golang.org/x/mod v0.17.0
 	golang.org/x/net v0.25.0
