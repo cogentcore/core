@@ -33,7 +33,7 @@ type Value struct { //types:add
 	// Custom is a custom function that returns the dots of the value.
 	// If it is non-nil, it overrides all other fields.
 	// Otherwise, the standard ToDots with the other fields is used.
-	Custom func(uc *Context) float32 `display:"-" json:"-" xml:"-"`
+	Custom func(uc *Context) float32 `display:"-" json:"-" xml:"-" toml:"-" save:"-"`
 }
 
 // New creates a new value with the given unit type
