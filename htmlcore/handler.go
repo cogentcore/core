@@ -15,7 +15,6 @@ import (
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/iox/imagex"
-	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/paint"
 	"cogentcore.org/core/styles"
@@ -115,13 +114,20 @@ func HandleElement(ctx *Context) {
 		HandleText(ctx)
 	case "pre":
 		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
-		HandleText(ctx).Styler(func(s *styles.Style) {
-			s.Text.WhiteSpace = styles.WhiteSpacePreWrap
-			if hasCode {
-				s.Background = colors.Scheme.SurfaceContainer
-				s.Border.Radius = styles.BorderRadiusMedium
+		if hasCode {
+			ed := New[texteditor.Editor](ctx).SetNewBuffer()
+			ed.SetReadOnly(true)
+			ctx.Node = ctx.Node.FirstChild // go to the code element
+			ed.Buffer.SetTextString(ExtractText(ctx))
+			lang := GetLanguage(GetAttr(ctx.Node, "class"))
+			if lang != "" {
+				ed.Buffer.SetLang(lang)
 			}
-		})
+		} else {
+			HandleText(ctx).Styler(func(s *styles.Style) {
+				s.Text.WhiteSpace = styles.WhiteSpacePreWrap
+			})
+		}
 	case "li":
 		// if we have a p as our first or second child, which is typical
 		// for markdown-generated HTML, we use it directly for data extraction
@@ -252,6 +258,18 @@ func HasAttr(n *html.Node, attr string) bool {
 	return slices.ContainsFunc(n.Attr, func(a html.Attribute) bool {
 		return a.Key == attr
 	})
+}
+
+// GetLanguages returns the 'x' in a `language-x` class from the given
+// string of class(es).
+func GetLanguage(class string) string {
+	fields := strings.Fields(class)
+	for _, field := range fields {
+		if strings.HasPrefix(field, "language-") {
+			return strings.TrimPrefix(field, "language-")
+		}
+	}
+	return ""
 }
 
 // Get is a helper function that calls [http.Get] with the given URL, parsed
