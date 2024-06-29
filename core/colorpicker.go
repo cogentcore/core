@@ -160,6 +160,27 @@ func (cp *ColorPicker) Init() {
 		})
 		w.FinalStyler(sf)
 	})
+	tree.AddChild(cp, func(w *Slider) {
+		Bind(&cp.Color.A, w)
+		w.SetMin(0).SetMax(1)
+		w.SetTooltip("The opacity of the color")
+		w.OnInput(func(e events.Event) {
+			cp.Color.SetColor(colors.WithAF32(cp.Color, w.Value))
+			cp.Update()
+			cp.SendChange()
+		})
+		w.Styler(func(s *styles.Style) {
+			w.ValueColor = nil
+			w.ThumbColor = colors.Uniform(cp.Color)
+			g := gradient.NewLinear()
+			for c := float32(0); c <= 1; c += 0.05 {
+				gc := colors.WithAF32(cp.Color, c)
+				g.AddStop(gc, c)
+			}
+			s.Background = g
+		})
+		w.FinalStyler(sf)
+	})
 
 	tree.AddChild(cp, func(w *Frame) {
 		for _, name := range namedColors {
