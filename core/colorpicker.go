@@ -44,6 +44,45 @@ func (cp *ColorPicker) Init() {
 		s.Grow.Set(1, 0)
 	})
 
+	colorButton := func(w *Button, c color.Color) {
+		w.Styler(func(s *styles.Style) {
+			s.Background = colors.Uniform(c)
+			s.Padding.Set(units.Dp(16))
+		})
+		w.OnClick(func(e events.Event) {
+			cp.SetColor(c)
+			cp.Update()
+			cp.SendChange()
+		})
+	}
+
+	tree.AddChild(cp, func(w *Frame) {
+		tree.AddChild(w, func(w *Button) {
+			w.SetTooltip("Current color")
+			colorButton(w, &cp.Color) // a pointer so it updates
+		})
+		tree.AddChild(w, func(w *Button) {
+			w.SetTooltip("Previous color")
+			colorButton(w, cp.Color) // not a pointer so it does not update
+		})
+		tree.AddChild(w, func(w *TextField) {
+			w.SetTooltip("Hex color")
+			w.Updater(func() {
+				w.SetText(colors.AsHex(cp.Color))
+			})
+			w.SetValidator(func() error {
+				c, err := colors.FromHex(w.Text())
+				if err != nil {
+					return err
+				}
+				cp.SetColor(c)
+				cp.Update()
+				cp.SendChange()
+				return nil
+			})
+		})
+	})
+
 	sf := func(s *styles.Style) {
 		s.Min.Y.Em(2)
 		s.Min.X.Em(6)
@@ -119,18 +158,10 @@ func (cp *ColorPicker) Init() {
 
 	tree.AddChild(cp, func(w *Frame) {
 		for _, name := range namedColors {
-			color := colors.Map[name]
+			c := colors.Map[name]
 			tree.AddChildAt(w, name, func(w *Button) {
 				w.SetTooltip(strcase.ToSentence(name))
-				w.Styler(func(s *styles.Style) {
-					s.Background = colors.Uniform(color)
-					s.Padding.Set(units.Dp(16))
-				})
-				w.OnClick(func(e events.Event) {
-					cp.SetColor(color)
-					cp.Update()
-					cp.SendChange()
-				})
+				colorButton(w, c)
 			})
 		}
 	})
