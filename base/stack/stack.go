@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package stack provides a generic stack implementation
+// Package stack provides a generic stack implementation.
 package stack
 
-// Stack provides a basic stack using a slice
+// Stack provides a generic stack using a slice.
 type Stack[T any] []T
 
-// Push pushes item(s) on the stack
+// Push pushes item(s) onto the stack.
 func (st *Stack[T]) Push(it ...T) {
 	*st = append(*st, it...)
 }
