@@ -67,6 +67,10 @@ func (cp *ColorPicker) Init() {
 		})
 		tree.AddChild(w, func(w *TextField) {
 			w.SetTooltip("Hex color")
+			w.Styler(func(s *styles.Style) {
+				s.Min.X.Em(5)
+				s.Max.X.Em(5)
+			})
 			w.Updater(func() {
 				w.SetText(colors.AsHex(cp.Color))
 			})
