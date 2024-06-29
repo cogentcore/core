@@ -40,7 +40,12 @@ func BindTextEditor(ed *texteditor.Editor, parent tree.Node) {
 	in.ImportUsed()
 	errors.Log1(in.Eval("parent := tmp.Parent"))
 	ed.OnInput(func(e events.Event) {
+		parent.AsTree().DeleteChildren()
 		_, err := in.Eval(ed.Buffer.String())
-		core.ErrorSnackbar(ed, err, "Error interpreting Go code")
+		if err != nil {
+			core.ErrorSnackbar(ed, err, "Error interpreting Go code")
+			return
+		}
+		parent.(core.Widget).AsWidget().Update()
 	})
 }

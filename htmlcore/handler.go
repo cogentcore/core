@@ -128,7 +128,8 @@ func HandleElement(ctx *Context) {
 				ed.Buffer.SetLang(lang)
 			}
 			if BindTextEditor != nil && lang == "Go" {
-				BindTextEditor(ed, ed.Parent)
+				parent := core.NewFrame(ed.Parent)
+				BindTextEditor(ed, parent)
 			} else {
 				ed.SetReadOnly(true)
 			}
