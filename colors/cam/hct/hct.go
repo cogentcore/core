@@ -60,7 +60,7 @@ type HCT struct {
 // hue = 0..360
 // chroma = 0..? depends on other params
 // tone = 0..100
-// also computes and sets the sRGB normalized, gamma corrected R,G,B values
+// also computes and sets the sRGB normalized, gamma corrected RGB values
 // while keeping the sRGB representation within its gamut,
 // which may cause the chroma to decrease until it is inside the gamut.
 func New(hue, chroma, tone float32) HCT {
@@ -103,8 +103,7 @@ func (h HCT) AsRGBA() color.RGBA {
 // SetUint32 sets components from unsigned 32bit integers (alpha-premultiplied)
 func (h *HCT) SetUint32(r, g, b, a uint32) {
 	fr, fg, fb, fa := cie.SRGBUint32ToFloat(r, g, b, a)
-	*h = SRGBToHCT(fr, fg, fb)
-	h.A = fa
+	*h = SRGBAToHCT(fr, fg, fb, fa)
 }
 
 // SetHue sets the hue of this color. Chroma may decrease because chroma has a
@@ -112,7 +111,7 @@ func (h *HCT) SetUint32(r, g, b, a uint32) {
 // 0 <= hue < 360; invalid values are corrected.
 func (h *HCT) SetHue(hue float32) *HCT {
 	r, g, b := SolveToRGB(hue, h.Chroma, h.Tone)
-	*h = SRGBToHCT(r, g, b)
+	*h = SRGBAToHCT(r, g, b, h.A)
 	return h
 }
 
@@ -120,7 +119,7 @@ func (h *HCT) SetHue(hue float32) *HCT {
 // instead of setting the existing one.
 func (h HCT) WithHue(hue float32) HCT {
 	r, g, b := SolveToRGB(hue, h.Chroma, h.Tone)
-	return SRGBToHCT(r, g, b)
+	return SRGBAToHCT(r, g, b, h.A)
 }
 
 // SetChroma sets the chroma of this color (0 to max that depends on other params),
@@ -128,7 +127,7 @@ func (h HCT) WithHue(hue float32) HCT {
 // which may cause the chroma to decrease until it is inside the gamut.
 func (h *HCT) SetChroma(chroma float32) *HCT {
 	r, g, b := SolveToRGB(h.Hue, chroma, h.Tone)
-	*h = SRGBToHCT(r, g, b)
+	*h = SRGBAToHCT(r, g, b, h.A)
 	return h
 }
 
@@ -136,7 +135,7 @@ func (h *HCT) SetChroma(chroma float32) *HCT {
 // instead of setting the existing one.
 func (h HCT) WithChroma(chroma float32) HCT {
 	r, g, b := SolveToRGB(h.Hue, chroma, h.Tone)
-	return SRGBToHCT(r, g, b)
+	return SRGBAToHCT(r, g, b, h.A)
 }
 
 // SetTone sets the tone of this color (0 < tone < 100),
@@ -144,7 +143,7 @@ func (h HCT) WithChroma(chroma float32) HCT {
 // which may cause the chroma to decrease until it is inside the gamut.
 func (h *HCT) SetTone(tone float32) *HCT {
 	r, g, b := SolveToRGB(h.Hue, h.Chroma, tone)
-	*h = SRGBToHCT(r, g, b)
+	*h = SRGBAToHCT(r, g, b, h.A)
 	return h
 }
 
@@ -152,7 +151,7 @@ func (h *HCT) SetTone(tone float32) *HCT {
 // instead of setting the existing one.
 func (h HCT) WithTone(tone float32) HCT {
 	r, g, b := SolveToRGB(h.Hue, h.Chroma, tone)
-	return SRGBToHCT(r, g, b)
+	return SRGBAToHCT(r, g, b, h.A)
 }
 
 // MaximumChroma returns the maximum [HCT.Chroma] value for the hue
@@ -163,9 +162,21 @@ func (h HCT) MaximumChroma() float32 {
 	return h.WithChroma(120).Chroma
 }
 
-// SRGBToHCT returns an HCT from given SRGB color coordinates,
-// under standard viewing conditions.  The RGB value range is 0-1,
-// and RGB values have gamma correction.  Alpha is always 1.
+// SRGBAToHCT returns an HCT from the given SRGBA color coordinates
+// under standard viewing conditions. The RGB value range is 0-1,
+// and RGB values have gamma correction. The RGB values must be
+// premultiplied by the given alpha value. See [SRGBToHCT] for
+// a version that does not take the alpha value.
+func SRGBAToHCT(r, g, b, a float32) HCT {
+	h := SRGBToHCT(r, g, b)
+	h.A = a
+	return h
+}
+
+// SRGBToHCT returns an HCT from the given SRGB color coordinates
+// under standard viewing conditions. The RGB value range is 0-1,
+// and RGB values have gamma correction. Alpha is always 1; see
+// [SRGBAToHCT] for a version that takes the alpha value.
 func SRGBToHCT(r, g, b float32) HCT {
 	x, y, z := cie.SRGBToXYZ(r, g, b)
 	cam := cam16.FromXYZ(100*x, 100*y, 100*z)
