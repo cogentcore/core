@@ -10,10 +10,8 @@ import (
 
 	"cogentcore.org/core/core"
 	"github.com/yuin/goldmark"
-	highlighting "github.com/yuin/goldmark-highlighting/v2"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/renderer/html"
-	"github.com/yuin/goldmark/util"
 	"go.abhg.dev/goldmark/wikilink"
 )
 
@@ -24,10 +22,6 @@ func ReadMD(ctx *Context, parent core.Widget, b []byte) error {
 		goldmark.WithExtensions(
 			extension.GFM,
 			&wikilink.Extender{ctx},
-			highlighting.NewHighlighting(
-				highlighting.WithStyle(string(core.AppearanceSettings.HiStyle)),
-				highlighting.WithWrapperRenderer(HighlightingWrapperRenderer),
-			),
 		),
 		goldmark.WithRendererOptions(
 			html.WithUnsafe(),
@@ -45,18 +39,4 @@ func ReadMD(ctx *Context, parent core.Widget, b []byte) error {
 // corresponding Cogent Core widgets to the given [core.Widget], using the given context.
 func ReadMDString(ctx *Context, parent core.Widget, s string) error {
 	return ReadMD(ctx, parent, []byte(s))
-}
-
-// HighlightingWrapperRenderer is the [highlighting.WrapperRenderer] for markdown rendering
-// that enables pages runnable Go code examples to work correctly.
-func HighlightingWrapperRenderer(w util.BufWriter, context highlighting.CodeBlockContext, entering bool) {
-	lang, ok := context.Language()
-	if !ok || string(lang) != "Go" {
-		return
-	}
-	if entering {
-		w.WriteString("<pages-example>")
-	} else {
-		w.WriteString("</pages-example>")
-	}
 }
