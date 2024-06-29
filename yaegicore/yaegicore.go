@@ -7,6 +7,8 @@
 package yaegicore
 
 import (
+	"reflect"
+
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
@@ -30,7 +32,13 @@ func BindTextEditor(ed *texteditor.Editor, parent tree.Node) {
 	in := interp.New(interp.Options{})
 	errors.Log(in.Use(stdlib.Symbols))
 	errors.Log(in.Use(symbols.Symbols))
+	errors.Log(in.Use(interp.Exports{
+		"tmp/tmp": map[string]reflect.Value{
+			"Parent": reflect.ValueOf(parent),
+		},
+	}))
 	in.ImportUsed()
+	errors.Log1(in.Eval("parent := tmp.Parent"))
 	ed.OnInput(func(e events.Event) {
 		_, err := in.Eval(ed.Buffer.String())
 		core.ErrorSnackbar(ed, err, "Error interpreting Go code")
