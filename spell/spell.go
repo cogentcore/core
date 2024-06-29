@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"embed"
 	"log"
+	"log/slog"
 	"os"
 	"regexp"
 	"strings"
@@ -51,6 +52,23 @@ func ModTime(path string) (time.Time, error) {
 
 func ResetLearnTime() {
 	learnTime = time.Time{}
+}
+
+// OpenFromDict opens dictionary of words and creates
+// suggestions based on that.
+func OpenFromDict(path string) error {
+	spellMu.Lock()
+	defer spellMu.Unlock()
+	d, err := OpenDict(path)
+	if err != nil {
+		slog.Error(err.Error())
+		return err
+	}
+	// todo: do in background
+	model = NewModel()
+	model.Threshold = 1
+	model.Train(d.List())
+	return nil
 }
 
 // Open loads the saved model stored in json format

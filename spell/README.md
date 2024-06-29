@@ -20,4 +20,5 @@ It is somewhat difficult to find suitable lists of words, especially in differen
 
 * https://web.archive.org/web/20120215032551/http://en-gb.pyxidium.co.uk/dictionary
 
+* https://www.cs.hmc.edu/~geoff/ispell-dictionaries.html -- source with lots of different languages.
 

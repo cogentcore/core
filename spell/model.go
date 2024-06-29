@@ -27,6 +27,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 )
 
 const (
@@ -357,10 +358,12 @@ func Levenshtein(a, b *string) int {
 
 // Add an array of words to train the model in bulk
 func (md *Model) Train(terms []string) {
+	st := time.Now()
 	for _, term := range terms {
 		md.TrainWord(term)
 	}
 	md.updateSuffixArr()
+	fmt.Println("train took:", time.Since(st))
 }
 
 // Manually set the count of a word. Optionally trigger the
