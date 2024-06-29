@@ -10,23 +10,9 @@ import (
 	"github.com/traefik/yaegi/interp"
 )
 
-// Symbols variable stores the map of stdlib symbols per package.
 var Symbols = map[string]map[string]reflect.Value{}
 
-// MapTypes variable contains a map of functions which have an interface{} as parameter but
-// do something special if the parameter implements a given interface.
-var MapTypes = map[reflect.Value][]reflect.Type{}
-
-func init() {
-	Symbols["cogentcore.org/core/shell/interpreter/interpreter"] = map[string]reflect.Value{
-		"Symbols": reflect.ValueOf(Symbols),
-	}
-	Symbols["."] = map[string]reflect.Value{
-		"MapTypes": reflect.ValueOf(MapTypes),
-	}
-}
-
-// ImportShell imports special symbols from shell package
+// ImportShell imports special symbols from the shell package.
 func (in *Interpreter) ImportShell() {
 	in.Interp.Use(interp.Exports{
 		"cogentcore.org/core/shell/shell": map[string]reflect.Value{
