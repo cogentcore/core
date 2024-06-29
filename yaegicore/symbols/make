@@ -1,0 +1,11 @@
+#!/usr/bin/env cosh
+
+command core {
+	yaegi extract cogentcore.org/core/core
+}
+
+command all {
+    core
+}
+
+shell.RunCommands(args...)
