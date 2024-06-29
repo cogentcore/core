@@ -13,6 +13,7 @@ import (
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
+	"cogentcore.org/core/yaegicore/symbols"
 	"github.com/traefik/yaegi/interp"
 	"github.com/traefik/yaegi/stdlib"
 )
@@ -28,6 +29,7 @@ func init() {
 func BindTextEditor(ed *texteditor.Editor, parent tree.Node) {
 	in := interp.New(interp.Options{})
 	errors.Log(in.Use(stdlib.Symbols))
+	errors.Log(in.Use(symbols.Symbols))
 	in.ImportUsed()
 	ed.OnInput(func(e events.Event) {
 		_, err := in.Eval(ed.Buffer.String())
