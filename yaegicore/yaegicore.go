@@ -7,12 +7,14 @@
 package yaegicore
 
 import (
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
 	"github.com/traefik/yaegi/interp"
+	"github.com/traefik/yaegi/stdlib"
 )
 
 func init() {
@@ -25,6 +27,8 @@ func init() {
 // It is used as the default value of [htmlcore.BindTextEditor].
 func BindTextEditor(ed *texteditor.Editor, parent tree.Node) {
 	in := interp.New(interp.Options{})
+	errors.Log(in.Use(stdlib.Symbols))
+	in.ImportUsed()
 	ed.OnInput(func(e events.Event) {
 		_, err := in.Eval(ed.Buffer.String())
 		core.ErrorSnackbar(ed, err, "Error interpreting Go code")
