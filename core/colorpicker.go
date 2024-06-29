@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
+	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
 )
 
@@ -41,23 +42,6 @@ func (cp *ColorPicker) Init() {
 	cp.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 		s.Grow.Set(1, 0)
-	})
-
-	tree.AddChild(cp, func(w *Frame) {
-		for _, name := range namedColors {
-			color := colors.Map[name]
-			tree.AddChildAt(w, name, func(w *Button) {
-				w.SetIcon(icons.Blank).SetTooltip(strcase.ToSentence(name))
-				w.Styler(func(s *styles.Style) {
-					s.Background = colors.Uniform(color)
-				})
-				w.OnClick(func(e events.Event) {
-					cp.SetColor(color)
-					cp.Update()
-					cp.SendChange()
-				})
-			})
-		}
 	})
 
 	sf := func(s *styles.Style) {
@@ -131,6 +115,24 @@ func (cp *ColorPicker) Init() {
 			s.Background = g
 		})
 		w.FinalStyler(sf)
+	})
+
+	tree.AddChild(cp, func(w *Frame) {
+		for _, name := range namedColors {
+			color := colors.Map[name]
+			tree.AddChildAt(w, name, func(w *Button) {
+				w.SetTooltip(strcase.ToSentence(name))
+				w.Styler(func(s *styles.Style) {
+					s.Background = colors.Uniform(color)
+					s.Padding.Set(units.Dp(16))
+				})
+				w.OnClick(func(e events.Event) {
+					cp.SetColor(color)
+					cp.Update()
+					cp.SendChange()
+				})
+			})
+		}
 	})
 }
 
