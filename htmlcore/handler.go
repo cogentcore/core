@@ -119,7 +119,7 @@ func HandleElement(ctx *Context) {
 			ed.SetReadOnly(true)
 			ctx.Node = ctx.Node.FirstChild // go to the code element
 			ed.Buffer.SetTextString(ExtractText(ctx))
-			lang := GetLanguage(GetAttr(ctx.Node, "class"))
+			lang := getLanguage(GetAttr(ctx.Node, "class"))
 			if lang != "" {
 				ed.Buffer.SetLang(lang)
 			}
@@ -260,9 +260,9 @@ func HasAttr(n *html.Node, attr string) bool {
 	})
 }
 
-// GetLanguages returns the 'x' in a `language-x` class from the given
+// getLanguage returns the 'x' in a `language-x` class from the given
 // string of class(es).
-func GetLanguage(class string) string {
+func getLanguage(class string) string {
 	fields := strings.Fields(class)
 	for _, field := range fields {
 		if strings.HasPrefix(field, "language-") {
