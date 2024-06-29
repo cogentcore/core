@@ -32,6 +32,11 @@ import (
 // for an element is used.
 var ElementHandlers = map[string]func(ctx *Context) bool{}
 
+// BindTextEditor is a function set to [cogentcore.org/core/yaegicore.BindTextEditor]
+// when importing yaegicore, which provides interactive editing functionality for Go
+// code blocks in text editors.
+var BindTextEditor func(ed *texteditor.Editor, parent tree.Node)
+
 // New adds a new widget of the given type to the context parent.
 // It automatically calls [Context.Config] on the resulting widget.
 func New[T tree.NodeValue](ctx *Context) *T {
@@ -116,12 +121,16 @@ func HandleElement(ctx *Context) {
 		hasCode := ctx.Node.FirstChild != nil && ctx.Node.FirstChild.Data == "code"
 		if hasCode {
 			ed := New[texteditor.Editor](ctx).SetNewBuffer()
-			ed.SetReadOnly(true)
 			ctx.Node = ctx.Node.FirstChild // go to the code element
 			ed.Buffer.SetTextString(ExtractText(ctx))
 			lang := getLanguage(GetAttr(ctx.Node, "class"))
 			if lang != "" {
 				ed.Buffer.SetLang(lang)
+			}
+			if BindTextEditor != nil && lang == "Go" {
+				BindTextEditor(ed, ed.Parent)
+			} else {
+				ed.SetReadOnly(true)
 			}
 		} else {
 			HandleText(ctx).Styler(func(s *styles.Style) {

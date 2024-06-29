@@ -23,6 +23,7 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
+	_ "cogentcore.org/core/yaegicore"
 )
 
 //go:embed content
