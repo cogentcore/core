@@ -23,6 +23,15 @@ func Swap[E any](s []E, i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
+// ToAny converts a slice of the given type to a []any slice.
+func ToAny[E any](s []E) []any {
+	as := make([]any, len(s))
+	for i, v := range s {
+		as[i] = v
+	}
+	return as
+}
+
 // Search returns the index of the item in the given slice that matches the target
 // according to the given match function, using the given optional starting index
 // to optimize the search by searching bidirectionally outward from given index.

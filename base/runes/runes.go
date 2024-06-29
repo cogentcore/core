@@ -3,12 +3,12 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package runes provides a small subset of functions that are found in strings, bytes
-standard packages, for rune slices.  For rendering, and other logic, it is best to
-keep raw data in runes, and not having to convert back and forth to byte or string
+Package runes provides a small subset of functions for rune slices that are found in the
+strings and bytes standard packages. For rendering and other logic, it is best to
+keep raw data in runes, and not having to convert back and forth to bytes or strings
 is more efficient.
 
-These are largely copied from strings or bytes packages.
+These are largely copied from the strings or bytes packages.
 */
 package runes
 
