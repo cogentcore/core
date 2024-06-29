@@ -21,7 +21,6 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/types"
 )
 
 // Widget is the interface that all Cogent Core satisfy.
@@ -368,10 +367,6 @@ func (wb *WidgetBase) DeleteParts() {
 		wb.Parts.Destroy()
 	}
 	wb.Parts = nil
-}
-
-func (wb *WidgetBase) BaseType() *types.Type {
-	return types.For[WidgetBase]()
 }
 
 // NewParts makes the [WidgetBase.Parts] if they don't already exist.

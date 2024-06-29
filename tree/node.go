@@ -11,7 +11,6 @@ package tree
 
 import (
 	"cogentcore.org/core/base/plan"
-	"cogentcore.org/core/types"
 )
 
 // Node is an interface that all tree nodes satisfy. The core functionality
@@ -53,10 +52,6 @@ type Node interface {
 	// This function does nothing by default, but it can be
 	// implemented by higher-level types that want to do something.
 	OnChildAdded(child Node)
-
-	// BaseType returns the base node type for all elements within this tree.
-	// This is used in the GUI for determining what types of children can be created.
-	BaseType() *types.Type
 
 	// Destroy recursively deletes and destroys the node, all of its children,
 	// and all of its children's children, etc. Node types can implement this

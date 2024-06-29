@@ -115,21 +115,6 @@ func BuiltinTypes() []*Type {
 	return res
 }
 
-// AllEmbeddersOf returns all registered types that embed the given type.
-// List is sorted in alpha order by fully package-path-qualified Name.
-func AllEmbeddersOf(typ *Type) []*Type {
-	var res []*Type
-	for _, t := range Types {
-		if t.HasEmbed(typ) {
-			res = append(res, t)
-		}
-	}
-	slices.SortFunc(res, func(a, b *Type) int {
-		return cmp.Compare(a.Name, b.Name)
-	})
-	return res
-}
-
 // GetDoc gets the documentation for the given value with the given parent struct, field, and label.
 // The value, parent value, and field may be nil/invalid. GetDoc uses the given label to format
 // the documentation with [FormatDoc] before returning it.

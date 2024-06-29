@@ -44,11 +44,6 @@ type Type struct {
 
 	// ID is the unique type ID number set by [AddType].
 	ID uint64
-
-	// AllEmbeds contains all embedded fields (including nested ones) for struct types;
-	// not set by typegen; HasEmbed automatically compiles it as needed.
-	// The key is the ID of the type.
-	AllEmbeds map[uint64]*Type
 }
 
 func (tp *Type) String() string {
@@ -71,58 +66,6 @@ func (tp *Type) ReflectType() reflect.Type {
 		return nil
 	}
 	return reflect.TypeOf(tp.Instance).Elem()
-}
-
-// HasEmbed returns true if this type has the given type
-// at any level of embedding depth, including if this type is
-// the given type.  The first time called it will Compile
-// a map of all embedded types so subsequent calls are very fast.
-func (tp *Type) HasEmbed(typ *Type) bool {
-	if tp.AllEmbeds == nil {
-		tp.CompileEmbeds()
-		if tp.AllEmbeds == nil {
-			return typ == tp
-		}
-	}
-	if tp == typ {
-		return true
-	}
-	_, has := tp.AllEmbeds[typ.ID]
-	return has
-}
-
-func (tp *Type) CompileEmbeds() {
-	if len(tp.Embeds) == 0 {
-		return
-	}
-	rt := tp.ReflectType()
-	if rt == nil {
-		return
-	}
-	tp.AllEmbeds = make(map[uint64]*Type)
-	for _, em := range tp.Embeds {
-		enm := em.Name
-		if idx := strings.LastIndex(enm, "."); idx >= 0 {
-			enm = enm[idx+1:]
-		}
-		etf, has := rt.FieldByName(enm)
-		if !has {
-			continue
-		}
-		etft := TypeName(etf.Type)
-		et := TypeByName(etft)
-		if et == nil {
-			continue
-		}
-		tp.AllEmbeds[et.ID] = et
-		et.CompileEmbeds()
-		if et.AllEmbeds == nil {
-			continue
-		}
-		for id, ct := range et.AllEmbeds {
-			tp.AllEmbeds[id] = ct
-		}
-	}
 }
 
 // StructGoString creates a GoString for the given struct,

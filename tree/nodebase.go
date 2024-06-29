@@ -136,12 +136,6 @@ func (n *NodeBase) New() Node {
 	return reflect.New(reflect.TypeOf(n.This).Elem()).Interface().(Node)
 }
 
-// BaseType returns the base node type for all elements within this tree.
-// This is used in the GUI for determining what types of children can be created.
-func (n *NodeBase) BaseType() *types.Type {
-	return types.For[NodeBase]()
-}
-
 // Parents:
 
 // IndexInParent returns our index within our parent node. It caches the

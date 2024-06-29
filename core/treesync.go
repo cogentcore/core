@@ -227,14 +227,15 @@ func (tr *Tree) InsertAt(rel int, actNm string) {
 		return
 	}
 	myidx += rel
-	typ := tr.This.BaseType()
-	if tr.SyncNode != nil {
-		typ = tr.SyncNode.BaseType()
+	var typ *types.Type
+	if tr.SyncNode == nil {
+		typ = types.TypeByValue(tr.This)
+	} else {
+		typ = types.TypeByValue(tr.SyncNode)
 	}
 	d := NewBody().AddTitle(actNm).AddText("Number and type of items to insert:")
 	nd := &NewItemsData{Number: 1, Type: typ}
-	sv := NewForm(d).SetStruct(nd) // TODO(config)
-	tree.ChildByType[*Chooser](sv).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0)
+	NewForm(d).SetStruct(nd)
 	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
@@ -254,15 +255,15 @@ func (tr *Tree) InsertAt(rel int, actNm string) {
 // If SyncNode is set, operates on Sync Tree.
 func (tr *Tree) AddChildNode() { //types:add
 	ttl := "Add child"
-	typ := tr.This.BaseType()
-	if tr.SyncNode != nil {
-		typ = tr.SyncNode.BaseType()
+	var typ *types.Type
+	if tr.SyncNode == nil {
+		typ = types.TypeByValue(tr.This)
+	} else {
+		typ = types.TypeByValue(tr.SyncNode)
 	}
 	d := NewBody().AddTitle(ttl).AddText("Number and type of items to insert:")
 	nd := &NewItemsData{Number: 1, Type: typ}
-	sv := NewForm(d).SetStruct(nd)
-	_ = sv
-	// tree.ChildByType[*TypeChooser](sv, tree.Embeds).SetTypes(types.AllEmbeddersOf(typ)...).SetCurrentIndex(0) // TODO(config)
+	NewForm(d).SetStruct(nd)
 	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {

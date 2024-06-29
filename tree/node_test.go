@@ -125,9 +125,6 @@ func TestNodeFindType(t *testing.T) {
 	ne := testdata.NewNodeEmbed(parent)
 	nb := NewNodeBase(parent)
 
-	assert.True(t, ne.NodeType().HasEmbed(types.For[NodeBase]()))
-	assert.True(t, nb.NodeType().HasEmbed(types.For[NodeBase]()))
-
 	c0 := ChildByType[*testdata.NodeEmbed](parent)
 	assert.Equal(t, ne, c0)
 	c1 := ChildByType[*NodeBase](parent)

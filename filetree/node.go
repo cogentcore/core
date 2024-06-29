@@ -31,7 +31,6 @@ import (
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/texteditor/histyle"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/types"
 )
 
 // NodeHiStyle is the default style for syntax highlighting to use for
@@ -227,10 +226,6 @@ func (fn *Node) Init() {
 			})
 		}
 	})
-}
-
-func (fn *Node) BaseType() *types.Type {
-	return fn.NodeType()
 }
 
 // IsDir returns true if file is a directory (folder)

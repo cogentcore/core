@@ -26,7 +26,6 @@ import (
 	"cogentcore.org/core/styles/states"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/tree"
-	"cogentcore.org/core/types"
 )
 
 // Treer is an interface for [Tree] types
@@ -180,10 +179,6 @@ func NewTreeFrame(parent ...tree.Node) *Tree {
 // AsCoreTree satisfies the [Treer] interface.
 func (tr *Tree) AsCoreTree() *Tree {
 	return tr
-}
-
-func (tr *Tree) BaseType() *types.Type {
-	return tr.NodeType()
 }
 
 // RootSetViewIndex sets the RootView and ViewIndex for all nodes.

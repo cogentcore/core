@@ -16,6 +16,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
 	"cogentcore.org/core/types"
+	"golang.org/x/exp/maps"
 )
 
 // ListButton represents a slice or array value with a button that opens a [List].
@@ -120,16 +121,7 @@ type TypeChooser struct {
 
 func (tc *TypeChooser) Init() {
 	tc.Chooser.Init()
-	typEmbeds := types.For[WidgetBase]()
-	// if tetag, ok := tc.Tag("type-embeds"); ok { // TODO(config)
-	// 	typ := types.TypeByName(tetag)
-	// 	if typ != nil {
-	// 		typEmbeds = typ
-	// 	}
-	// }
-
-	tl := types.AllEmbeddersOf(typEmbeds)
-	tc.SetTypes(tl...)
+	tc.SetTypes(maps.Values(types.Types)...)
 }
 
 // IconButton represents an [icons.Icon] with a [Button] that opens
