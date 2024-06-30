@@ -38,7 +38,7 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 	}))
 	in.ImportUsed()
 	errors.Log1(in.Eval("parent := tmp.Parent"))
-	ed.OnInput(func(e events.Event) {
+	oi := func() {
 		parent.AsTree().DeleteChildren()
 		_, err := in.Eval(ed.Buffer.String())
 		if err != nil {
@@ -46,5 +46,7 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 			return
 		}
 		parent.AsWidget().Update()
-	})
+	}
+	ed.OnInput(func(e events.Event) { oi() })
+	oi()
 }

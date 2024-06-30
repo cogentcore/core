@@ -1,11 +1,9 @@
 #!/usr/bin/env cosh
 
-command core {
-	yaegi extract cogentcore.org/core/core
+command extract {
+    for _, pkg := range args {
+        yaegi extract {"cogentcore.org/core/"+pkg}
+    }
 }
 
-command all {
-    core
-}
-
-shell.RunCommands(args...)
+extract core icons events styles styles/states styles/abilities styles/units tree keymap colors colors/gradient
