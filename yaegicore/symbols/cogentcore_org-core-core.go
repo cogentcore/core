@@ -66,6 +66,7 @@ func init() {
 		"EndTargetedProfile":        reflect.ValueOf(core.EndTargetedProfile),
 		"ErrorDialog":               reflect.ValueOf(core.ErrorDialog),
 		"ErrorSnackbar":             reflect.ValueOf(core.ErrorSnackbar),
+		"ExternalParent":            reflect.ValueOf(&core.ExternalParent).Elem(),
 		"FilePickerDialog":          reflect.ValueOf(core.FilePickerDialog),
 		"FilePickerDirOnlyFilter":   reflect.ValueOf(core.FilePickerDirOnlyFilter),
 		"FilePickerExtOnlyFilter":   reflect.ValueOf(core.FilePickerExtOnlyFilter),

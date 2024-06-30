@@ -15,6 +15,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/system"
+	"cogentcore.org/core/tree"
 )
 
 // NewMainStage returns a new MainStage with given type and scene contents.
@@ -31,12 +32,27 @@ func NewMainStage(typ StageTypes, sc *Scene) *Stage {
 	return st
 }
 
+// ExternalParent is a parent widget external to this program.
+// If it is set, [Body.RunMainWindow] will add the [Body] to this
+// parent instead of creating a new window and starting the app loop.
+var ExternalParent Widget
+
 // RunMainWindow creates a new main window from the body,
 // runs it, starts the app's main loop, and waits for all windows
 // to close. It should typically be called once by every app at
 // the end of their main function. It can not be called more than
 // once for one app. For secondary windows, see [Body.RunWindow].
 func (bd *Body) RunMainWindow() {
+	fmt.Println("rmw", ExternalParent)
+	if ExternalParent != nil {
+		fmt.Println("extpar")
+		ExternalParent.AsWidget().AddChild(bd)
+		ExternalParent.AsWidget().WalkDown(func(n tree.Node) bool {
+			tree.SetParent(n, n.AsTree().Parent)
+			return tree.Continue
+		})
+		return
+	}
 	bd.RunWindow().Wait()
 }
 
