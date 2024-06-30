@@ -35,7 +35,7 @@ var ElementHandlers = map[string]func(ctx *Context) bool{}
 // BindTextEditor is a function set to [cogentcore.org/core/yaegicore.BindTextEditor]
 // when importing yaegicore, which provides interactive editing functionality for Go
 // code blocks in text editors.
-var BindTextEditor func(ed *texteditor.Editor, parent tree.Node)
+var BindTextEditor func(ed *texteditor.Editor, parent core.Widget)
 
 // New adds a new widget of the given type to the context parent.
 // It automatically calls [Context.Config] on the resulting widget.

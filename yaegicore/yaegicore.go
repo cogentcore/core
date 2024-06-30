@@ -14,7 +14,6 @@ import (
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
 	"cogentcore.org/core/texteditor"
-	"cogentcore.org/core/tree"
 	"cogentcore.org/core/yaegicore/symbols"
 	"github.com/traefik/yaegi/interp"
 	"github.com/traefik/yaegi/stdlib"
@@ -26,9 +25,9 @@ func init() {
 
 // BindTextEditor binds the given text editor to a yaegi interpreter
 // such that the contents of the text editor are interpreted as Go
-// code, which is run in the context of the given parent widget node.
+// code, which is run in the context of the given parent widget.
 // It is used as the default value of [htmlcore.BindTextEditor].
-func BindTextEditor(ed *texteditor.Editor, parent tree.Node) {
+func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 	in := interp.New(interp.Options{})
 	errors.Log(in.Use(stdlib.Symbols))
 	errors.Log(in.Use(symbols.Symbols))
@@ -46,6 +45,6 @@ func BindTextEditor(ed *texteditor.Editor, parent tree.Node) {
 			core.ErrorSnackbar(ed, err, "Error interpreting Go code")
 			return
 		}
-		parent.(core.Widget).AsWidget().Update()
+		parent.AsWidget().Update()
 	})
 }
