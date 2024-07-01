@@ -7,7 +7,6 @@
 package yaegicore
 
 import (
-	"fmt"
 	"reflect"
 
 	"cogentcore.org/core/base/errors"
@@ -43,7 +42,6 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 			core.ErrorSnackbar(ed, err, "Error interpreting Go code")
 			return
 		}
-		fmt.Println(parent.AsTree().Children)
 		parent.AsWidget().Update()
 	}
 	ed.OnInput(func(e events.Event) { oi() })

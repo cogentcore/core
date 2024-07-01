@@ -43,13 +43,16 @@ var ExternalParent Widget
 // the end of their main function. It can not be called more than
 // once for one app. For secondary windows, see [Body.RunWindow].
 func (bd *Body) RunMainWindow() {
-	fmt.Println("rmw", ExternalParent)
 	if ExternalParent != nil {
-		fmt.Println("extpar")
 		ExternalParent.AsWidget().AddChild(bd)
-		ExternalParent.AsWidget().WalkDown(func(n tree.Node) bool {
-			tree.SetParent(n, n.AsTree().Parent)
+		// we must set the correct scene for each node
+		bd.WalkDown(func(n tree.Node) bool {
+			n.(Widget).AsWidget().Scene = bd.Scene
 			return tree.Continue
+		})
+		// we must not get additional scrollbars here
+		bd.Styler(func(s *styles.Style) {
+			s.Overflow.Set(styles.OverflowVisible)
 		})
 		return
 	}
@@ -306,7 +309,6 @@ func (st *Stage) RunDialog() *Stage {
 		return st
 	}
 	sc.SceneGeom.Size = sz
-	// fmt.Println("dlg:", sc.SceneGeom, "win:", winGeom)
 	sc.FitInWindow(st.RenderContext.Geom) // does resize
 	ms.Push(st)
 	// st.SetMains(ms) // already set
