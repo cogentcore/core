@@ -8,6 +8,7 @@ package yaegicore
 
 import (
 	"reflect"
+	"strings"
 
 	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/core"
@@ -37,7 +38,12 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 	errors.Log1(in.Eval("parent := core.ExternalParent"))
 	oi := func() {
 		parent.AsTree().DeleteChildren()
-		_, err := in.Eval(ed.Buffer.String())
+		str := ed.Buffer.String()
+		// all code must be in a function for declarations to be handled correctly
+		if !strings.Contains(str, "func main()") {
+			str = "func main() {\n" + str + "\n}"
+		}
+		_, err := in.Eval(str)
 		if err != nil {
 			core.ErrorSnackbar(ed, err, "Error interpreting Go code")
 			return
