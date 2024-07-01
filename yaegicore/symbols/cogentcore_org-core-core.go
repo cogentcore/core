@@ -10,6 +10,7 @@ import (
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/system"
 	"cogentcore.org/core/tree"
+	"github.com/traefik/yaegi/interp"
 	"go/constant"
 	"go/token"
 	"image"
@@ -20,6 +21,7 @@ func init() {
 	Symbols["cogentcore.org/core/core/core"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"AddValueConverter":         reflect.ValueOf(core.AddValueConverter),
+		"AddValueType":              reflect.ValueOf(interp.GenericFunc("func AddValueType[T any, W tree.NodeValue]() {\n\tvar v T\n\tname := types.TypeNameValue(v)\n\tValueTypes[name] = func(value any) Value {\n\t\treturn any(tree.New[W]()).(Value)\n\t}\n}")),
 		"AllRenderWindows":          reflect.ValueOf(&core.AllRenderWindows).Elem(),
 		"AllSettings":               reflect.ValueOf(&core.AllSettings).Elem(),
 		"AppAbout":                  reflect.ValueOf(&core.AppAbout).Elem(),
@@ -33,6 +35,9 @@ func init() {
 		"AsTree":                    reflect.ValueOf(core.AsTree),
 		"AsWidget":                  reflect.ValueOf(core.AsWidget),
 		"AutoScrollRate":            reflect.ValueOf(&core.AutoScrollRate).Elem(),
+		"Bind":                      reflect.ValueOf(interp.GenericFunc("func Bind[T Value](value any, vw T) T {\n\twb := vw.AsWidget()\n\talreadyBound := wb.ValueUpdate != nil\n\twb.ValueUpdate = func() {\n\t\tif vws, ok := any(vw).(ValueSetter); ok {\n\t\t\tErrorSnackbar(vw, vws.SetWidgetValue(value))\n\t\t} else {\n\t\t\tErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))\n\t\t}\n\t}\n\twb.ValueOnChange = func() {\n\t\tErrorSnackbar(vw, reflectx.SetRobust(value, vw.WidgetValue()))\n\t}\n\tif alreadyBound {\n\t\tresetWidgetValue(vw)\n\t}\n\twb.ValueTitle = labels.FriendlyTypeName(reflectx.NonPointerType(reflect.TypeOf(value)))\n\tif ob, ok := any(vw).(OnBinder); ok {\n\t\tob.OnBind(value)\n\t}\n\twb.ValueUpdate() // we update it with the initial value immediately\n\treturn vw\n}")),
+		"BindMapKey":                reflect.ValueOf(interp.GenericFunc("func BindMapKey[T Value](mapv reflect.Value, key reflect.Value, vw T) T {\n\twb := vw.AsWidget()\n\talreadyBound := wb.ValueUpdate != nil\n\twb.ValueUpdate = func() {\n\t\tif vws, ok := any(vw).(ValueSetter); ok {\n\t\t\tErrorSnackbar(vw, vws.SetWidgetValue(key.Interface()))\n\t\t} else {\n\t\t\tErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), key.Interface()))\n\t\t}\n\t}\n\twb.ValueOnChange = func() {\n\t\tnewKey := reflect.New(key.Type())\n\t\tErrorSnackbar(vw, reflectx.SetRobust(newKey.Interface(), vw.WidgetValue()))\n\t\tnewKey = newKey.Elem()\n\t\tif !mapv.MapIndex(newKey).IsValid() { // not already taken\n\t\t\tmapv.SetMapIndex(newKey, mapv.MapIndex(key))\n\t\t\tmapv.SetMapIndex(key, reflect.Value{})\n\t\t\treturn\n\t\t}\n\t\td := NewBody().AddTitle(\"Key already exists\").AddText(fmt.Sprintf(\"The key %q already exists\", reflectx.ToString(newKey.Interface())))\n\t\td.AddBottomBar(func(parent Widget) {\n\t\t\td.AddCancel(parent)\n\t\t\td.AddOK(parent).SetText(\"Overwrite\").OnClick(func(e events.Event) {\n\t\t\t\tmapv.SetMapIndex(newKey, mapv.MapIndex(key))\n\t\t\t\tmapv.SetMapIndex(key, reflect.Value{})\n\t\t\t\twb.SendChange()\n\t\t\t})\n\t\t})\n\t\td.RunDialog(vw)\n\t}\n\tif alreadyBound {\n\t\tresetWidgetValue(vw)\n\t}\n\tif ob, ok := any(vw).(OnBinder); ok {\n\t\tob.OnBind(key.Interface())\n\t}\n\twb.ValueUpdate() // we update it with the initial value immediately\n\treturn vw\n}")),
+		"BindMapValue":              reflect.ValueOf(interp.GenericFunc("func BindMapValue[T Value](mapv reflect.Value, key reflect.Value, vw T) T {\n\twb := vw.AsWidget()\n\talreadyBound := wb.ValueUpdate != nil\n\twb.ValueUpdate = func() {\n\t\tvalue := mapv.MapIndex(key).Interface()\n\t\tif vws, ok := any(vw).(ValueSetter); ok {\n\t\t\tErrorSnackbar(vw, vws.SetWidgetValue(value))\n\t\t} else {\n\t\t\tErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))\n\t\t}\n\t}\n\twb.ValueOnChange = func() {\n\t\tvalue := reflect.New(mapv.Type().Elem())\n\t\tErrorSnackbar(vw, reflectx.SetRobust(value.Interface(), vw.WidgetValue()))\n\t\tmapv.SetMapIndex(key, value.Elem())\n\t}\n\tif alreadyBound {\n\t\tresetWidgetValue(vw)\n\t}\n\tif ob, ok := any(vw).(OnBinder); ok {\n\t\tvalue := mapv.MapIndex(key).Interface()\n\t\tob.OnBind(value)\n\t}\n\twb.ValueUpdate() // we update it with the initial value immediately\n\treturn vw\n}")),
 		"ButtonAction":              reflect.ValueOf(core.ButtonAction),
 		"ButtonElevated":            reflect.ValueOf(core.ButtonElevated),
 		"ButtonFilled":              reflect.ValueOf(core.ButtonFilled),
@@ -187,6 +192,7 @@ func init() {
 		"RecentPaths":               reflect.ValueOf(&core.RecentPaths).Elem(),
 		"RecycleDialog":             reflect.ValueOf(core.RecycleDialog),
 		"RecycleMainWindow":         reflect.ValueOf(core.RecycleMainWindow),
+		"RecycleTabWidget":          reflect.ValueOf(interp.GenericFunc("func RecycleTabWidget[T tree.NodeValue](ts *Tabs, name string) *T {\n\tfr := ts.RecycleTab(name)\n\tif fr.HasChildren() {\n\t\treturn any(fr.Child(0)).(*T)\n\t}\n\tw := tree.New[T](fr)\n\tany(w).(Widget).AsWidget().UpdateWidget()\n\treturn w\n}")),
 		"RenderWindowGlobalMu":      reflect.ValueOf(&core.RenderWindowGlobalMu).Elem(),
 		"ResetAllSettings":          reflect.ValueOf(core.ResetAllSettings),
 		"ResetSettings":             reflect.ValueOf(core.ResetSettings),
