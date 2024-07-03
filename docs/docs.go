@@ -181,8 +181,8 @@ func homePage(ctx *htmlcore.Context) bool {
 		errors.Log(w.OpenFS(resources, "code-icon.svg"))
 	})
 
-	makeBlock("COGENT VECTOR", "Cogent Vector is a powerful vector graphics editor with complete support for shapes, paths, curves, text, images, gradients, groups, alignment, styling, importing, exporting, undo, redo, and various other features.", func(w *core.SVG) {
-		errors.Log(w.OpenFS(resources, "vector-icon.svg"))
+	makeBlock("COGENT CANVAS", "Cogent Canvas is a powerful vector graphics editor with complete support for shapes, paths, curves, text, images, gradients, groups, alignment, styling, importing, exporting, undo, redo, and various other features.", func(w *core.SVG) {
+		errors.Log(w.OpenFS(resources, "canvas-icon.svg"))
 	})
 
 	makeBlock("COGENT NUMBERS", "Cogent Numbers is a highly extensible math, data science, and statistics platform that combines the power of programming with the convenience of spreadsheets and graphing calculators.", func(w *core.SVG) {
