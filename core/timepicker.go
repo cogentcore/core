@@ -141,9 +141,7 @@ type DatePicker struct {
 
 // setTime sets the source time and updates the picker.
 func (dp *DatePicker) setTime(tim time.Time) *DatePicker { // TODO(config)
-	dp.SetTime(tim)
-	dp.SendChange()
-	dp.Update()
+	dp.SetTime(tim).UpdateChange()
 	return dp
 }
 
@@ -311,8 +309,7 @@ func (ti *TimeInput) Init() {
 				d.AddCancel(parent)
 				d.AddOK(parent).OnClick(func(e events.Event) {
 					ti.Time = dp.Time
-					ti.SendChange()
-					ti.Update()
+					ti.UpdateChange()
 				})
 			})
 			d.RunDialog(w)
@@ -343,8 +340,7 @@ func (ti *TimeInput) Init() {
 				d.AddCancel(parent)
 				d.AddOK(parent).OnClick(func(e events.Event) {
 					ti.Time = tp.Time
-					ti.SendChange()
-					ti.Update()
+					ti.UpdateChange()
 				})
 			})
 			d.RunDialog(w)

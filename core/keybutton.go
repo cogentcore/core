@@ -55,8 +55,7 @@ func (kc *KeyChordButton) Init() {
 		}
 		kc.Chord = e.KeyChord()
 		e.SetHandled()
-		kc.SendChange()
-		kc.Update()
+		kc.UpdateChange()
 	})
 	kc.Updater(func() {
 		kc.SetText(kc.Chord.Label())
@@ -64,8 +63,7 @@ func (kc *KeyChordButton) Init() {
 	kc.AddContextMenu(func(m *Scene) {
 		NewButton(m).SetText("Clear").SetIcon(icons.ClearAll).OnClick(func(e events.Event) {
 			kc.Chord = ""
-			kc.SendChange()
-			kc.Update()
+			kc.UpdateChange()
 		})
 	})
 }

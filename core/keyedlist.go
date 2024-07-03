@@ -82,8 +82,7 @@ func (kl *KeyedList) Init() {
 					s.SetTextWrap(false)
 				})
 				wb.OnChange(func(e events.Event) {
-					kl.SendChange(e)
-					kl.Update()
+					kl.UpdateChange(e)
 				})
 				wb.SetReadOnly(kl.IsReadOnly())
 				wb.OnInput(kl.HandleEvent)
@@ -162,8 +161,7 @@ func (kl *KeyedList) Init() {
 					d := NewBody().AddTitle(kl.ValueTitle).AddText(kl.Tooltip)
 					NewKeyedList(d).SetMap(kl.Map).SetValueTitle(kl.ValueTitle)
 					d.OnClose(func(e events.Event) {
-						kl.Update()
-						kl.SendChange()
+						kl.UpdateChange(e)
 					})
 					d.RunFullDialog(kl)
 				})
@@ -196,9 +194,7 @@ func (kl *KeyedList) MapAdd() {
 		return
 	}
 	reflectx.MapAdd(kl.Map)
-
-	kl.SendChange()
-	kl.Update()
+	kl.UpdateChange()
 }
 
 // MapDelete deletes a key-value from the map
@@ -207,9 +203,7 @@ func (kl *KeyedList) MapDelete(key reflect.Value) {
 		return
 	}
 	reflectx.MapDelete(kl.Map, reflectx.NonPointerValue(key))
-
-	kl.SendChange()
-	kl.Update()
+	kl.UpdateChange()
 }
 
 // MakeToolbar configures a [Toolbar] for this view

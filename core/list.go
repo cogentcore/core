@@ -785,8 +785,7 @@ func (lb *ListBase) SliceNewAt(idx int) {
 	lb.This.(Lister).UpdateSliceSize()
 
 	lb.SelectIndexAction(idx, events.SelectOne)
-	lb.SendChange()
-	lb.Update()
+	lb.UpdateChange()
 	lb.IndexGrabFocus(idx)
 }
 
@@ -835,15 +834,10 @@ func (lb *ListBase) SliceDeleteAt(i int) {
 	if i < 0 || i >= lb.SliceSize {
 		return
 	}
-
 	lb.SliceDeleteAtSelect(i)
-
 	reflectx.SliceDeleteAt(lb.Slice, i)
-
 	lb.This.(Lister).UpdateSliceSize()
-
-	lb.SendChange()
-	lb.Update()
+	lb.UpdateChange()
 }
 
 // MakeToolbar configures a [Toolbar] for this view
@@ -1392,13 +1386,11 @@ func (lb *ListBase) DeleteIndexes() { //types:add
 	if len(lb.SelectedIndexes) == 0 {
 		return
 	}
-
 	ixs := lb.SelectedIndexesList(true) // descending sort
 	for _, i := range ixs {
 		lb.This.(Lister).SliceDeleteAt(i)
 	}
-	lb.SendChange()
-	lb.Update()
+	lb.UpdateChange()
 }
 
 // CutIndexes copies selected indexes to system.Clipboard and deletes selected indexes
@@ -1474,8 +1466,7 @@ func (lb *ListBase) PasteAssign(md mimedata.Mimes, idx int) {
 	}
 	ns := sl[0]
 	lb.SliceUnderlying.Index(idx).Set(reflect.ValueOf(ns).Elem())
-	lb.SendChange()
-	lb.Update()
+	lb.UpdateChange()
 }
 
 // PasteAtIndex inserts object(s) from mime data at (before) given slice index

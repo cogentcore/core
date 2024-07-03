@@ -74,8 +74,7 @@ func (il *InlineList) Init() {
 				d := NewBody().AddTitle(il.ValueTitle).AddText(il.Tooltip)
 				NewList(d).SetSlice(il.Slice).SetValueTitle(il.ValueTitle)
 				d.OnClose(func(e events.Event) {
-					il.Update()
-					il.SendChange()
+					il.UpdateChange()
 				})
 				d.RunFullDialog(il)
 			})
@@ -110,9 +109,7 @@ func (il *InlineList) SliceNewAt(idx int) {
 		return
 	}
 	reflectx.SliceNewAt(il.Slice, idx)
-
-	il.SendChange()
-	il.Update()
+	il.UpdateChange()
 }
 
 // SliceDeleteAt deletes element at given index from slice
@@ -121,9 +118,7 @@ func (il *InlineList) SliceDeleteAt(idx int) {
 		return
 	}
 	reflectx.SliceDeleteAt(il.Slice, idx)
-
-	il.SendChange()
-	il.Update()
+	il.UpdateChange()
 }
 
 func (il *InlineList) ContextMenu(m *Scene, idx int) {

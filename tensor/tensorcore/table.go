@@ -708,8 +708,7 @@ func (tb *Table) PasteAssign(md mimedata.Mimes, idx int) {
 		return
 	}
 	tb.Table.Table.ReadCSVRow(recs[1], tb.Table.Indexes[idx])
-	tb.SendChange()
-	tb.Update()
+	tb.UpdateChange()
 }
 
 // PasteAtIndex inserts object(s) from mime data at (before) given slice index

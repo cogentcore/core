@@ -186,6 +186,13 @@ func (wb *WidgetBase) SendChange(original ...events.Event) {
 	wb.Send(events.Change, original...)
 }
 
+// UpdateChange is a helper function that calls [WidgetBase.SendChange]
+// and then [WidgetBase.Update] (which is critically the only correct order).
+func (wb *WidgetBase) UpdateChange(original ...events.Event) {
+	wb.SendChange(original...)
+	wb.Update()
+}
+
 func (wb *WidgetBase) SendKey(kf keymap.Functions, original ...events.Event) {
 	if wb.This == nil {
 		return

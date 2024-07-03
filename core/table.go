@@ -368,8 +368,7 @@ func (tb *Table) SliceNewAt(idx int) {
 
 	tb.This.(Lister).UpdateSliceSize()
 	tb.SelectIndexAction(idx, events.SelectOne)
-	tb.SendChange()
-	tb.Update()
+	tb.UpdateChange()
 	tb.IndexGrabFocus(idx)
 }
 
@@ -384,8 +383,7 @@ func (tb *Table) SliceDeleteAt(idx int) {
 	reflectx.SliceDeleteAt(tb.Slice, idx)
 
 	tb.This.(Lister).UpdateSliceSize()
-	tb.SendChange()
-	tb.Update()
+	tb.UpdateChange()
 }
 
 // SortSlice sorts the slice according to current settings
