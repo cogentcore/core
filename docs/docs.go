@@ -175,7 +175,9 @@ func homePage(ctx *htmlcore.Context) bool {
 		initIcon(w).SetIcon(icons.GlobeAsia)
 	})
 
-	core.NewText(home).SetType(core.TextDisplaySmall).SetText("<b>What can Cogent Core do?</b>")
+	tree.AddChild(home, func(w *core.Text) {
+		w.SetType(core.TextDisplaySmall).SetText("<b>What can Cogent Core do?</b>")
+	})
 
 	makeBlock("COGENT CODE", "Cogent Code is a fully featured Go IDE with support for syntax highlighting, code completion, symbol lookup, building and debugging, version control, keyboard shortcuts, and many other features.", func(w *core.SVG) {
 		errors.Log(w.OpenFS(resources, "code-icon.svg"))
@@ -193,18 +195,24 @@ func homePage(ctx *htmlcore.Context) bool {
 		errors.Log(w.OpenFS(resources, "mail-icon.svg"))
 	})
 
+	makeBlock("COGENT CRAFT", "Cogent Craft is a powerful 3D modeling app with support for creating, loading, and editing 3D object files using an interactive WYSIWYG editor.", func(w *core.SVG) {
+		errors.Log(w.OpenFS(resources, "craft-icon.svg"))
+	})
+
 	makeBlock(`<a href="https://emersim.org">EMERGENT</a>`, "Emergent is a collection of biologically based 3D neural network models of the brain that power ongoing research in computational cognitive neuroscience.", func(w *core.SVG) {
 		errors.Log(w.OpenFS(resources, "emergent-icon.svg"))
 	})
 
-	makeBlock(`<a href="https://github.com/WaveELD/WELDBook/blob/main/textmd/ch01_intro.md">WELD</a>`, "WELD is a set of 3D computational models of a new approach to quantum physics based on the de Broglie-Bohm pilot wave theory.", func(w *core.Image) {
-		errors.Log(w.OpenFS(resources, "weld-icon.png"))
-		w.Styler(func(s *styles.Style) {
-			s.Min.Set(units.Dp(256))
-		})
-	})
+	// makeBlock(`<a href="https://github.com/WaveELD/WELDBook/blob/main/textmd/ch01_intro.md">WELD</a>`, "WELD is a set of 3D computational models of a new approach to quantum physics based on the de Broglie-Bohm pilot wave theory.", func(w *core.Image) {
+	// 	errors.Log(w.OpenFS(resources, "weld-icon.png"))
+	// 	w.Styler(func(s *styles.Style) {
+	// 		s.Min.Set(units.Dp(256))
+	// 	})
+	// })
 
-	core.NewText(home).SetType(core.TextDisplaySmall).SetText("<b>Why Cogent Core instead of something else?</b>")
+	tree.AddChild(home, func(w *core.Text) {
+		w.SetType(core.TextDisplaySmall).SetText("<b>Why Cogent Core instead of something else?</b>")
+	})
 
 	makeBlock(`THE PROBLEM`, "After using other frameworks built on HTML and Qt for years to make various apps ranging from simple tools to complex scientific models, we realized that we were spending more time dealing with excessive boilerplate, browser inconsistencies, and dependency management issues than actual app development.", func(w *core.Icon) {
 		initIcon(w).SetIcon(icons.Problem)
