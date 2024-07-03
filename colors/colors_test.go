@@ -125,8 +125,8 @@ func ExampleFromHex_lower() {
 }
 
 func ExampleFromHex_opacity() {
-	fmt.Println(FromHex("#1ABC2EEE"))
-	// Output: {26 188 46 238} <nil>
+	fmt.Println(FromHex("#FF00FFEE"))
+	// Output: {238 0 238 238} <nil>
 }
 
 func ExampleFromHex_short() {
