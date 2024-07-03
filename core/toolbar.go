@@ -228,14 +228,3 @@ func ToolbarStyles(w Widget) {
 		}
 	})
 }
-
-// BasicBar is a [Frame] that automatically has [ToolbarStyles] applied but does
-// not have the more advanced features of a [Toolbar].
-type BasicBar struct {
-	Frame
-}
-
-func (tb *BasicBar) Init() {
-	tb.Frame.Init()
-	ToolbarStyles(tb)
-}

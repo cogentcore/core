@@ -164,11 +164,12 @@ func NewColorMapButton(parent ...tree.Node) *ColorMapButton {
 // SetMapName sets the [ColorMapButton.MapName]
 func (t *ColorMapButton) SetMapName(v string) *ColorMapButton { t.MapName = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ColorPicker", IDName: "color-picker", Doc: "ColorPicker represents a color value with an interactive color picker\ncomposed of three HCT sliders and standard accent color buttons.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Color", Doc: "Color is the current color."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ColorPicker", IDName: "color-picker", Doc: "ColorPicker represents a color value with an interactive color picker\ncomposed of history buttons, a hex input, three HCT sliders, and standard\nnamed color buttons.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Color", Doc: "Color is the current color."}}})
 
 // NewColorPicker returns a new [ColorPicker] with the given optional parent:
 // ColorPicker represents a color value with an interactive color picker
-// composed of three HCT sliders and standard accent color buttons.
+// composed of history buttons, a hex input, three HCT sliders, and standard
+// named color buttons.
 func NewColorPicker(parent ...tree.Node) *ColorPicker { return tree.New[ColorPicker](parent...) }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ColorButton", IDName: "color-button", Doc: "ColorButton represents a color value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Color"}}})
@@ -1190,13 +1191,6 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Toolbar", IDNa
 // manages additional items that are always placed onto this overflow menu.
 // Use [Body.AddAppBar] to add to the default toolbar at the top of an app.
 func NewToolbar(parent ...tree.Node) *Toolbar { return tree.New[Toolbar](parent...) }
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.BasicBar", IDName: "basic-bar", Doc: "BasicBar is a [Frame] that automatically has [ToolbarStyles] applied but does\nnot have the more advanced features of a [Toolbar].", Embeds: []types.Field{{Name: "Frame"}}})
-
-// NewBasicBar returns a new [BasicBar] with the given optional parent:
-// BasicBar is a [Frame] that automatically has [ToolbarStyles] applied but does
-// not have the more advanced features of a [Toolbar].
-func NewBasicBar(parent ...tree.Node) *BasicBar { return tree.New[BasicBar](parent...) }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Treer", IDName: "treer", Doc: "Treer is an interface for [Tree] types\nproviding access to the base [Tree] and\noverridable method hooks for actions taken on the [Tree],\nincluding OnOpen, OnClose, etc.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Methods: []types.Method{{Name: "AsCoreTree", Doc: "AsTree returns the base [Tree] for this node.", Returns: []string{"Tree"}}, {Name: "CanOpen", Doc: "CanOpen returns true if the node is able to open.\nBy default it checks HasChildren(), but could check other properties\nto perform lazy building of the tree.", Returns: []string{"bool"}}, {Name: "OnOpen", Doc: "OnOpen is called when a node is opened.\nThe base version does nothing."}, {Name: "OnClose", Doc: "OnClose is called when a node is closed\nThe base version does nothing."}, {Name: "DeleteNode"}, {Name: "Duplicate"}, {Name: "AddChildNode"}, {Name: "InsertBefore"}, {Name: "InsertAfter"}, {Name: "MimeData", Args: []string{"md"}}, {Name: "Cut"}, {Name: "Copy"}, {Name: "Paste"}, {Name: "DragStart", Args: []string{"e"}}, {Name: "DragDrop", Args: []string{"e"}}, {Name: "DropFinalize", Args: []string{"de"}}, {Name: "DropDeleteSource", Args: []string{"e"}}, {Name: "MakePasteMenu", Args: []string{"m", "md", "fun"}}}})
 
