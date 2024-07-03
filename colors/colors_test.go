@@ -124,6 +124,11 @@ func ExampleFromHex_lower() {
 	// Output: {26 188 46 255} <nil>
 }
 
+func ExampleFromHex_opacity() {
+	fmt.Println(FromHex("#1ABC2EEE"))
+	// Output: {26 188 46 238} <nil>
+}
+
 func ExampleFromHex_short() {
 	fmt.Println(FromHex("F3A"))
 	// Output: {255 51 170 255} <nil>
