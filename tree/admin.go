@@ -5,13 +5,11 @@
 package tree
 
 import (
-	"fmt"
 	"reflect"
 	"slices"
 	"strconv"
 	"sync/atomic"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/types"
 )
@@ -55,15 +53,6 @@ func initNode(n Node) {
 		nb.This = n
 		nb.This.Init()
 	}
-}
-
-// checkThis checks that [Node.This] is non-nil.
-// It returns and logs an error otherwise.
-func checkThis(n Node) error {
-	if n.AsTree().This != nil {
-		return nil
-	}
-	return errors.Log(fmt.Errorf("tree.Node %q has nil tree.NodeBase.This; you must use tree.New or New* so that the node is initialized", n.AsTree().Path()))
 }
 
 // SetParent sets the parent of the given node to the given parent node.

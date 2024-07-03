@@ -302,24 +302,16 @@ func findPathChild(n Node, child string) int {
 // AddChild adds given child at end of children list.
 // The kid node is assumed to not be on another tree (see [MoveToParent])
 // and the existing name should be unique among children.
-// Any error is automatically logged in addition to being returned.
-func (n *NodeBase) AddChild(kid Node) error {
-	if err := checkThis(n); err != nil {
-		return err
-	}
+func (n *NodeBase) AddChild(kid Node) {
 	initNode(kid)
 	n.Children = append(n.Children, kid)
 	SetParent(kid, n) // key to set new parent before deleting: indicates move instead of delete
-	return nil
 }
 
 // NewChild creates a new child of the given type and adds it at the end
 // of the list of children. The name defaults to the ID (kebab-case) name
 // of the type, plus the [Node.NumLifetimeChildren] of the parent.
 func (n *NodeBase) NewChild(typ *types.Type) Node {
-	if err := checkThis(n); err != nil {
-		return nil
-	}
 	kid := newOfType(typ)
 	initNode(kid)
 	n.Children = append(n.Children, kid)
@@ -330,15 +322,10 @@ func (n *NodeBase) NewChild(typ *types.Type) Node {
 // InsertChild adds given child at position in children list.
 // The kid node is assumed to not be on another tree (see [MoveToParent])
 // and the existing name should be unique among children.
-// Any error is automatically logged in addition to being returned.
-func (n *NodeBase) InsertChild(kid Node, index int) error {
-	if err := checkThis(n); err != nil {
-		return err
-	}
+func (n *NodeBase) InsertChild(kid Node, index int) {
 	initNode(kid)
 	n.Children = slices.Insert(n.Children, index, kid)
 	SetParent(kid, n)
-	return nil
 }
 
 // Deleting Children:

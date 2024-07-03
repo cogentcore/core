@@ -7,7 +7,6 @@ package tree
 import (
 	"encoding/xml"
 	"io"
-	"log"
 
 	"cogentcore.org/core/base/errors"
 )
@@ -17,11 +16,8 @@ import (
 // WriteXML writes the tree to an XML-encoded byte string over io.Writer
 // using MarshalXML.
 func (n *NodeBase) WriteXML(writer io.Writer, indent bool) error {
-	err := checkThis(n)
-	if err != nil {
-		return err
-	}
 	var b []byte
+	var err error
 	if indent {
 		b, err = xml.MarshalIndent(n.This, "", "  ")
 	} else {
@@ -41,16 +37,11 @@ func (n *NodeBase) WriteXML(writer io.Writer, indent bool) error {
 // UnmarshalPost to recover pointers from paths.
 func (n *NodeBase) ReadXML(reader io.Reader) error {
 	var err error
-	if err = checkThis(n); err != nil {
-		log.Println(err)
-		return err
-	}
 	b, err := io.ReadAll(reader)
 	if err != nil {
-		log.Println(err)
-		return err
+		return errors.Log(err)
 	}
-	err = xml.Unmarshal(b, n.This) // key use of this!
+	err = xml.Unmarshal(b, n.This) // key use of This!
 	return err
 }
 
