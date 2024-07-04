@@ -22,6 +22,7 @@ import (
 	"cogentcore.org/core/base/exec"
 	"cogentcore.org/core/base/logx"
 	"cogentcore.org/core/base/num"
+	"cogentcore.org/core/base/reflectx"
 	"cogentcore.org/core/base/sshclient"
 	"cogentcore.org/core/base/stack"
 	"github.com/mitchellh/go-homedir"
@@ -414,15 +415,14 @@ func (sh *Shell) AddCommand(name string, cmd func(args ...string)) {
 	sh.Commands[name] = cmd
 }
 
-// RunCommands runs given command(s), to be called from within a cosh script
-func (sh *Shell) RunCommands(name ...string) error {
-	for _, cmd := range name {
-		if cmdFun, hasCmd := sh.Commands[cmd]; hasCmd {
+// RunCommands runs the given command(s). This is typically called
+// from a Makefile-style cosh script.
+func (sh *Shell) RunCommands(cmds []any) error {
+	for _, cmd := range cmds {
+		if cmdFun, hasCmd := sh.Commands[reflectx.ToString(cmd)]; hasCmd {
 			cmdFun()
 		} else {
-			err := fmt.Errorf("Command named: %s not found", cmd)
-			slog.Error(err.Error())
-			return err
+			return errors.Log(fmt.Errorf("command %q not found", cmd))
 		}
 	}
 	return nil

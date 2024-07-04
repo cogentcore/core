@@ -87,7 +87,7 @@ or by referring to specific arg indexes etc.
 To make a script behave like a standard Makefile, you can define different `command`s for each of the make commands, and then add the following at the end of the file to use the args to run commands:
 
 ```go
-shell.RunCommands(args...)
+shell.RunCommands(args)
 ```
 
 See [make](cmd/cosh/testdata/make) for an example, in `cmd/cosh/testdata/make`, which can be run for example using:
