@@ -250,9 +250,9 @@ func (wb *WidgetBase) HandleEvent(e events.Event) {
 	}
 }
 
-// FirstHandleEvent sends the given event to the FirstListeners for that event type.
+// firstHandleEvent sends the given event to the Listeners.First for that event type.
 // Does NOT do any state updating.
-func (wb *WidgetBase) FirstHandleEvent(e events.Event) {
+func (wb *WidgetBase) firstHandleEvent(e events.Event) {
 	if DebugSettings.EventTrace {
 		if e.Type() != events.MouseMove {
 			fmt.Println(e, "first to", wb)
@@ -263,9 +263,9 @@ func (wb *WidgetBase) FirstHandleEvent(e events.Event) {
 	})
 }
 
-// FinalHandleEvent sends the given event to the FinalListeners for that event type.
+// finalHandleEvent sends the given event to the Listeners.Final for that event type.
 // Does NOT do any state updating.
-func (wb *WidgetBase) FinalHandleEvent(e events.Event) {
+func (wb *WidgetBase) finalHandleEvent(e events.Event) {
 	if DebugSettings.EventTrace {
 		if e.Type() != events.MouseMove {
 			fmt.Println(e, "final to", wb)

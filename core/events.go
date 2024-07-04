@@ -206,7 +206,7 @@ func (em *Events) HandleFocusEvent(e events.Event) {
 			if !wb.IsVisible() {
 				return tree.Break
 			}
-			wb.FirstHandleEvent(e)
+			wb.firstHandleEvent(e)
 			return !e.IsHandled()
 		})
 		if !e.IsHandled() {
@@ -218,7 +218,7 @@ func (em *Events) HandleFocusEvent(e events.Event) {
 				if !wb.IsVisible() {
 					return tree.Break
 				}
-				wb.FinalHandleEvent(e)
+				wb.finalHandleEvent(e)
 				return !e.IsHandled()
 			})
 		}
