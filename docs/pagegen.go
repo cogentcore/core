@@ -957,6 +957,13 @@ func main() {
 		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
 	},
 	"widgets/collections/forms-7": func(parent core.Widget) {
+		type person struct {
+			Name string `label:"Nickname"`
+			Age  int
+		}
+		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
+	},
+	"widgets/collections/forms-8": func(parent core.Widget) {
 		type Person struct {
 			Name string
 			Age  int
@@ -967,7 +974,7 @@ func main() {
 		}
 		core.NewForm(parent).SetStruct(&employee{Person{Name: "Go", Age: 35}, "Programmer"})
 	},
-	"widgets/collections/forms-8": func(parent core.Widget) {
+	"widgets/collections/forms-9": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
@@ -978,7 +985,7 @@ func main() {
 		}
 		core.NewForm(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
 	},
-	"widgets/collections/forms-9": func(parent core.Widget) {
+	"widgets/collections/forms-10": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
@@ -989,7 +996,7 @@ func main() {
 		}
 		core.NewForm(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
 	},
-	"widgets/collections/forms-10": func(parent core.Widget) {
+	"widgets/collections/forms-11": func(parent core.Widget) {
 		type person struct {
 			Name      string `default:"Gopher"`
 			Age       int    `default:"20:30"`
@@ -997,7 +1004,7 @@ func main() {
 		}
 		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 	},
-	"widgets/collections/forms-11": func(parent core.Widget) {
+	"widgets/collections/forms-12": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
