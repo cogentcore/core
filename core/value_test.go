@@ -81,16 +81,16 @@ func (v *validator) Validate() error {
 
 func TestValidatorValid(t *testing.T) {
 	b := NewBody()
-	v := NewValue(validator("my@string"), "", b)
-	b.AssertRender(t, "text/validator-valid", func() {
-		v.AsWidget().SendChange() // trigger validation
+	tf := Bind(validator("my@string"), NewTextField(b))
+	b.AssertRender(t, "bind/validator-valid", func() {
+		tf.SendChange() // trigger validation
 	})
 }
 
 func TestValidatorInvalid(t *testing.T) {
 	b := NewBody()
-	v := NewValue(validator("my string"), "", b)
-	b.AssertRender(t, "text/validator-invalid", func() {
-		v.AsWidget().SendChange() // trigger validation
+	v := Bind(validator("my string"), NewTextField(b))
+	b.AssertRender(t, "bind/validator-invalid", func() {
+		v.SendChange() // trigger validation
 	})
 }
