@@ -32,9 +32,9 @@ func main() {
 			Documentation: "DefaultAppWorkersJS is the default template used in [MakeAppWorkerJS] to generate app-worker.js.",
 		},
 		{
-			Var:           "WASMExecJSGoCurrent",
+			Var:           "WASMExecJS",
 			Filename:      "gen/wasm_exec.js",
-			Documentation: "WASMExecJSGoCurrent is the wasm_exec.js file for the current version of Go.",
+			Documentation: "WASMExecJS is the wasm_exec.js file.",
 		},
 		{
 			Var:           "AppJS",

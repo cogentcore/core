@@ -65,7 +65,7 @@ func MakeFiles(c *config.Config) error {
 	// It is trusted, so we do not need a more advanced sanitizer.
 	c.About = strip.StripTags(c.About)
 
-	wej := []byte(WASMExecJS())
+	wej := []byte(WASMExecJS)
 	err := os.WriteFile(filepath.Join(odir, "wasm_exec.js"), wej, 0666)
 	if err != nil {
 		return err
