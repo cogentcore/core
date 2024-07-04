@@ -72,8 +72,8 @@ func TestBindText(t *testing.T) {
 
 type validator string
 
-func (v *validator) Validate() error {
-	if !strings.Contains(string(*v), "@") {
+func (v validator) Validate() error {
+	if !strings.Contains(string(v), "@") {
 		return errors.New("must have an @")
 	}
 	return nil

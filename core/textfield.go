@@ -191,6 +191,12 @@ type Validator interface {
 
 func (tf *TextField) WidgetValue() any { return &tf.Txt }
 
+func (tf *TextField) OnBind(value any) {
+	if vd, ok := value.(Validator); ok {
+		tf.Validator = vd.Validate
+	}
+}
+
 func (tf *TextField) Init() {
 	tf.Frame.Init()
 	tf.AddContextMenu(tf.ContextMenu)
