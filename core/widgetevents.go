@@ -142,7 +142,7 @@ func (wb *WidgetBase) AddCloseDialog(config func(d *Body) bool) {
 				inClose = false
 				canClose = false
 			})
-			parent.AsWidget().OnWidgetAdded(func(w Widget) { // TODO(config)
+			parent.AsWidget().OnWidgetAdded(func(w Widget) {
 				if bt := AsButton(w); bt != nil {
 					bt.OnFirst(events.Click, func(e events.Event) {
 						// any button click gives us permission to close

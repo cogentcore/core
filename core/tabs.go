@@ -123,15 +123,6 @@ func (ts *Tabs) Init() {
 			s.Direction = styles.Column
 		}
 	})
-	ts.OnWidgetAdded(func(w Widget) {
-		if w.AsTree().Parent == ts.ChildByName("frame") { // TODO(config): figure out how to get this to work with new config paradigm
-			w.AsWidget().Styler(func(s *styles.Style) {
-				// tab frames must scroll independently and grow
-				s.Overflow.Set(styles.OverflowAuto)
-				s.Grow.Set(1, 1)
-			})
-		}
-	})
 
 	ts.Maker(func(p *tree.Plan) {
 		tree.AddAt(p, "tabs", func(w *Frame) {
@@ -166,6 +157,13 @@ func (ts *Tabs) Init() {
 				s.Display = styles.Stacked
 				s.Min.Set(units.Dp(160), units.Dp(96))
 				s.Grow.Set(1, 1)
+			})
+			w.OnWidgetAdded(func(w Widget) {
+				w.AsWidget().Styler(func(s *styles.Style) {
+					// tab frames must scroll independently and grow
+					s.Overflow.Set(styles.OverflowAuto)
+					s.Grow.Set(1, 1)
+				})
 			})
 		})
 		// frame comes before tabs in bottom navigation bar

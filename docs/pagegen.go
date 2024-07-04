@@ -1425,7 +1425,7 @@ func main() {
 	},
 	"advanced/styling-0": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
-		fr.OnWidgetAdded(func(w core.Widget) { // TODO(config)
+		fr.OnWidgetAdded(func(w core.Widget) {
 			w.AsWidget().Styler(func(s *styles.Style) {
 				s.Color = colors.Scheme.Error.Base
 			})

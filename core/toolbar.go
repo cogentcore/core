@@ -216,7 +216,7 @@ func ToolbarStyles(w Widget) {
 			s.Padding.SetVertical(units.Dp(16))
 		}
 	})
-	w.AsWidget().OnWidgetAdded(func(w Widget) { // TODO(config)
+	w.AsWidget().OnWidgetAdded(func(w Widget) {
 		if bt := AsButton(w); bt != nil {
 			bt.Type = ButtonAction
 			return
