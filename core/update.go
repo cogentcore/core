@@ -57,10 +57,21 @@ func (wb *WidgetBase) Update() { //types:add
 	if DebugSettings.UpdateTrace {
 		fmt.Println("\tDebugSettings.UpdateTrace Update:", wb)
 	}
-	wb.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
+	wb.WidgetWalkDown(func(w Widget, wb *WidgetBase) bool {
 		wb.UpdateWidget()
-		wi.Style()
+		w.Style()
 		return tree.Continue
 	})
 	wb.NeedsLayout()
+}
+
+// UpdateRender is the same as [WidgetBase.Update], except that it calls
+// [WidgetBase.NeedsRender] instead of [WidgetBase.NeedsLayout].
+func (wb *WidgetBase) UpdateRender() {
+	wb.WidgetWalkDown(func(w Widget, wb *WidgetBase) bool {
+		wb.UpdateWidget()
+		w.Style()
+		return tree.Continue
+	})
+	wb.NeedsRender()
 }
