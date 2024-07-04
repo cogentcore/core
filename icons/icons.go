@@ -27,7 +27,7 @@ var Icons = fsx.Sub(defaults, "svg")
 // defaults contains the default icons.
 var defaults embed.FS
 
-const (
+var (
 	// None is an icon that indicates to not use an icon.
 	// It completely prevents the rendering of an icon,
 	// whereas [Blank] renders a blank icon.
@@ -37,7 +37,9 @@ const (
 	// placeholder when no other icon is appropriate.
 	// It still renders an icon, just a blank one,
 	// whereas [None] indicates to not render one at all.
-	Blank Icon = "blank"
+	//
+	//go:embed svg/blank.svg
+	Blank Icon
 )
 
 // AddFS adds the given [fs.FS] of icons to the global [Icons] library.

@@ -7,6 +7,7 @@ package core
 import (
 	"image"
 	"log/slog"
+	"strings"
 
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/icons"
@@ -71,9 +72,8 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 		// fmt.Println("icon already set:", icon)
 		return false, nil
 	}
-	fnm := icon.Filename()
 	ic.SVG.Config(2, 2)
-	err := ic.SVG.OpenFS(icons.Icons, fnm)
+	err := ic.SVG.ReadXML(strings.NewReader(string(icon)))
 	if err != nil {
 		ic.UpdateWidget()
 		return false, err
