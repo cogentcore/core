@@ -92,7 +92,7 @@ func ProcessFiles(paths []string) (map[string][]byte, error) {
 		}
 
 		var buf bytes.Buffer
-		cfg := slprint.Config{Mode: printerMode, Tabwidth: tabWidth, ExcludeFuns: excludeFunMap}
+		cfg := slprint.Config{Mode: printerMode, Tabwidth: tabWidth, ExcludeFunctions: excludeFunctionMap}
 		cfg.Fprint(&buf, pkg, fpos, afile)
 		// ioutil.WriteFile(filepath.Join(*outDir, fn+".tmp"), buf.Bytes(), 0644)
 		slfix, hasSlrand := SlEdits(buf.Bytes())

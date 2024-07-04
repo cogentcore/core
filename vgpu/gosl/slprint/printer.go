@@ -1301,10 +1301,10 @@ const (
 
 // A Config node controls the output of Fprint.
 type Config struct {
-	Mode        Mode // default: 0
-	Tabwidth    int  // default: 8
-	Indent      int  // default: 0 (all code is indented at least by this much)
-	ExcludeFuns map[string]bool
+	Mode             Mode // default: 0
+	Tabwidth         int  // default: 8
+	Indent           int  // default: 0 (all code is indented at least by this much)
+	ExcludeFunctions map[string]bool
 }
 
 // fprint implements Fprint and takes a nodesSizes map for setting up the printer state.
