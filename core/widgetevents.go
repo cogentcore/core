@@ -39,29 +39,29 @@ func (wb *WidgetBase) Clipboard() system.Clipboard {
 	return wb.Events().Clipboard()
 }
 
-// On adds the given event handler to the [WidgetBase.Listeners.Normal] for the given event type.
-// Listeners are called in sequential descending order, so this listener will be called
-// before all of the ones added before it. On is one of the main ways for both end-user
-// and internal code to add an event handler to a widget, in addition to OnFirst and
-// OnFinal, which add event handlers that are called before and after those added
-// by this function, respectively.
+// On adds the given event handler to the [WidgetBase.Listeners.Normal] for the given
+// event type. Listeners are called in sequential descending order, so this listener
+// will be called before all of the ones added before it. On is one of the main ways
+// to add an event handler to a widget, in addition to OnFirst and OnFinal, which add
+// event handlers that are called before and after those added by this function,
+// respectively.
 func (wb *WidgetBase) On(etype events.Types, fun func(e events.Event)) {
 	wb.Listeners.Normal.Add(etype, fun)
 }
 
-// OnFirst adds the given event handler to the [WidgetBase.Listeners.First] for the given event type.
-// FirstListeners are called in sequential descending order, so this first listener will be called
-// before all of the ones added before it. OnFirst is one of the main ways for both end-user
-// and internal code to add an event handler to a widget, in addition to On and OnFinal,
+// OnFirst adds the given event handler to the [WidgetBase.Listeners.First] for the given
+// event type. FirstListeners are called in sequential descending order, so this first
+// listener will be called before all of the ones added before it. OnFirst is one of the
+// main ways to add an event handler to a widget, in addition to On and OnFinal,
 // which add event handlers that are called after those added by this function.
 func (wb *WidgetBase) OnFirst(etype events.Types, fun func(e events.Event)) {
 	wb.Listeners.First.Add(etype, fun)
 }
 
-// OnFinal adds the given event handler to the [WidgetBase.Listeners.Final] for the given event type.
-// FinalListeners are called in sequential descending order, so this final listener will be called
-// before all of the ones added before it. OnFinal is one of the main ways for both end-user
-// and internal code to add an event handler to a widget, in addition to OnFirst and On,
+// OnFinal adds the given event handler to the [WidgetBase.Listeners.Final] for the given
+// event type. FinalListeners are called in sequential descending order, so this final
+// listener will be called before all of the ones added before it. OnFinal is one of the
+// main ways to add an event handler to a widget, in addition to OnFirst and On,
 // which add event handlers that are called before those added by this function.
 func (wb *WidgetBase) OnFinal(etype events.Types, fun func(e events.Event)) {
 	wb.Listeners.Final.Add(etype, fun)

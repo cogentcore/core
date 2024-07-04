@@ -61,14 +61,11 @@ func initNode(n Node) {
 // parent's list of children; see [Node.AddChild] for a version that does.
 // It automatically gets the [Node.This] of the parent.
 func SetParent(child Node, parent Node) {
-	n := child.AsTree()
-	n.Parent = parent.AsTree().This
-	setUniqueName(n, false)
+	nb := child.AsTree()
+	nb.Parent = parent.AsTree().This
+	setUniqueName(child, false)
 	child.AsTree().This.OnAdd()
-	n.WalkUpParent(func(pn Node) bool {
-		pn.AsTree().This.OnChildAdded(child)
-		return Continue
-	})
+	nb.Parent.OnChildAdded(child)
 }
 
 // MoveToParent removes the given node from its current parent
