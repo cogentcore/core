@@ -990,8 +990,8 @@ func (tf *TextField) SelectUpdate() {
 	}
 }
 
-// Cut cuts any selected text and adds it to the clipboard
-func (tf *TextField) Cut() {
+// Cut cuts any selected text and adds it to the clipboard.
+func (tf *TextField) Cut() { //types:add
 	if tf.NoEcho {
 		return
 	}
@@ -1027,7 +1027,7 @@ func (tf *TextField) DeleteSelection() string {
 }
 
 // Copy copies any selected text to the clipboard.
-func (tf *TextField) Copy() {
+func (tf *TextField) Copy() { //types:add
 	if tf.NoEcho {
 		return
 	}
@@ -1040,10 +1040,9 @@ func (tf *TextField) Copy() {
 	tf.Clipboard().Write(md)
 }
 
-// Paste inserts text from the clipboard at current cursor position -- if
+// Paste inserts text from the clipboard at current cursor position; if
 // cursor is within a current selection, that selection is replaced.
-// Satisfies Clipper interface -- can be extended in subtypes.
-func (tf *TextField) Paste() {
+func (tf *TextField) Paste() { //types:add
 	data := tf.Clipboard().Read([]string{mimedata.TextPlain})
 	if data != nil {
 		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
@@ -1053,7 +1052,7 @@ func (tf *TextField) Paste() {
 	}
 }
 
-// InsertAtCursor inserts given text at current cursor position
+// InsertAtCursor inserts the given text at current cursor position.
 func (tf *TextField) InsertAtCursor(str string) {
 	if tf.HasSelection() {
 		tf.Cut()
