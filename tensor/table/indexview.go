@@ -19,10 +19,10 @@ import (
 // indexes when used for sorting via Indexes.
 type LessFunc func(et *Table, i, j int) bool
 
-// FilterFunc is a function used for filtering that returns
+// Filterer is a function used for filtering that returns
 // true if Table row should be included in the current filtered
 // view of the table, and false if it should be removed.
-type FilterFunc func(et *Table, row int) bool
+type Filterer func(et *Table, row int) bool
 
 // IndexView is an indexed wrapper around an table.Table that provides a
 // specific view onto the Table defined by the set of indexes.
@@ -347,10 +347,10 @@ func (ix *IndexView) SortStableColumns(colIndexes []int, ascending bool) {
 // Filter filters the indexes into our Table using given Filter function.
 // The Filter function operates directly on row numbers into the Table
 // as these row numbers have already been projected through the indexes.
-func (ix *IndexView) Filter(filterFunc func(et *Table, row int) bool) {
+func (ix *IndexView) Filter(filterer func(et *Table, row int) bool) {
 	sz := len(ix.Indexes)
 	for i := sz - 1; i >= 0; i-- { // always go in reverse for filtering
-		if !filterFunc(ix.Table, ix.Indexes[i]) { // delete
+		if !filterer(ix.Table, ix.Indexes[i]) { // delete
 			ix.Indexes = append(ix.Indexes[:i], ix.Indexes[i+1:]...)
 		}
 	}
