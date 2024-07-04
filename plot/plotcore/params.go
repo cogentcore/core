@@ -16,8 +16,8 @@ import (
 	"cogentcore.org/core/tensor/table"
 )
 
-// PlotParams are parameters for overall plot
-type PlotParams struct { //types:add
+// PlotOptions are options for the overall plot.
+type PlotOptions struct { //types:add
 
 	// optional title at top of plot
 	Title string
@@ -81,41 +81,31 @@ type PlotParams struct { //types:add
 	Plot *PlotEditor `copier:"-" json:"-" xml:"-" display:"-"`
 }
 
-// Defaults sets defaults if nil vals present
-func (pp *PlotParams) Defaults() {
-	if pp.LineWidth == 0 {
-		pp.LineWidth = 1
-		pp.Lines = true
-		pp.Points = false
-		pp.PointSize = 3
-		pp.BarWidth = .8
-		pp.LegendPosition.Defaults()
+// Defaults sets defaults if unset values are present.
+func (po *PlotOptions) Defaults() {
+	if po.LineWidth == 0 {
+		po.LineWidth = 1
+		po.Lines = true
+		po.Points = false
+		po.PointSize = 3
+		po.BarWidth = .8
+		po.LegendPosition.Defaults()
 	}
-	if pp.Scale == 0 {
-		pp.Scale = 1
-	}
-}
-
-// Update satisfies the core.Updater interface and will trigger display update on edits
-func (pp *PlotParams) Update() {
-	if pp.BarWidth > 1 {
-		pp.BarWidth = .8
-	}
-	if pp.Plot != nil {
-		pp.Plot.Update()
+	if po.Scale == 0 {
+		po.Scale = 1
 	}
 }
 
-// CopyFrom copies from other col params
-func (pp *PlotParams) CopyFrom(fr *PlotParams) {
-	pl := pp.Plot
-	*pp = *fr
-	pp.Plot = pl
+// CopyFrom copies from other plot options.
+func (po *PlotOptions) CopyFrom(fr *PlotOptions) {
+	pl := po.Plot
+	*po = *fr
+	po.Plot = pl
 }
 
-// FromMeta sets plot params from meta data
-func (pp *PlotParams) FromMeta(dt *table.Table) {
-	pp.FromMetaMap(dt.MetaData)
+// FromMeta sets plot options from meta data.
+func (po *PlotOptions) FromMeta(dt *table.Table) {
+	po.FromMetaMap(dt.MetaData)
 }
 
 // MetaMapLower tries meta data access by lower-case version of key too
@@ -128,68 +118,68 @@ func MetaMapLower(meta map[string]string, key string) (string, bool) {
 	return vl, has
 }
 
-// FromMetaMap sets plot params from meta data map
-func (pp *PlotParams) FromMetaMap(meta map[string]string) {
+// FromMetaMap sets plot options from meta data map.
+func (po *PlotOptions) FromMetaMap(meta map[string]string) {
 	if typ, has := MetaMapLower(meta, "Type"); has {
-		pp.Type.SetString(typ)
+		po.Type.SetString(typ)
 	}
 	if op, has := MetaMapLower(meta, "Lines"); has {
 		if op == "+" || op == "true" {
-			pp.Lines = true
+			po.Lines = true
 		} else {
-			pp.Lines = false
+			po.Lines = false
 		}
 	}
 	if op, has := MetaMapLower(meta, "Points"); has {
 		if op == "+" || op == "true" {
-			pp.Points = true
+			po.Points = true
 		} else {
-			pp.Points = false
+			po.Points = false
 		}
 	}
 	if lw, has := MetaMapLower(meta, "LineWidth"); has {
-		pp.LineWidth, _ = reflectx.ToFloat32(lw)
+		po.LineWidth, _ = reflectx.ToFloat32(lw)
 	}
 	if ps, has := MetaMapLower(meta, "PointSize"); has {
-		pp.PointSize, _ = reflectx.ToFloat32(ps)
+		po.PointSize, _ = reflectx.ToFloat32(ps)
 	}
 	if bw, has := MetaMapLower(meta, "BarWidth"); has {
-		pp.BarWidth, _ = reflectx.ToFloat32(bw)
+		po.BarWidth, _ = reflectx.ToFloat32(bw)
 	}
 	if op, has := MetaMapLower(meta, "NegativeXDraw"); has {
 		if op == "+" || op == "true" {
-			pp.NegativeXDraw = true
+			po.NegativeXDraw = true
 		} else {
-			pp.NegativeXDraw = false
+			po.NegativeXDraw = false
 		}
 	}
 	if scl, has := MetaMapLower(meta, "Scale"); has {
-		pp.Scale, _ = reflectx.ToFloat32(scl)
+		po.Scale, _ = reflectx.ToFloat32(scl)
 	}
 	if xc, has := MetaMapLower(meta, "XAxisColumn"); has {
-		pp.XAxisColumn = xc
+		po.XAxisColumn = xc
 	}
 	if lc, has := MetaMapLower(meta, "LegendColumn"); has {
-		pp.LegendColumn = lc
+		po.LegendColumn = lc
 	}
 	if xrot, has := MetaMapLower(meta, "XAxisRotation"); has {
-		pp.XAxisRotation, _ = reflectx.ToFloat32(xrot)
+		po.XAxisRotation, _ = reflectx.ToFloat32(xrot)
 	}
 	if lb, has := MetaMapLower(meta, "XAxisLabel"); has {
-		pp.XAxisLabel = lb
+		po.XAxisLabel = lb
 	}
 	if lb, has := MetaMapLower(meta, "YAxisLabel"); has {
-		pp.YAxisLabel = lb
+		po.YAxisLabel = lb
 	}
 }
 
-// ColumnParams are parameters for plotting one column of data
-type ColumnParams struct { //types:add
+// ColumnOptions are options for plotting one column of data.
+type ColumnOptions struct { //types:add
 
 	// whether to plot this column
 	On bool
 
-	// name of column we're plotting
+	// name of column being plotting
 	Column string
 
 	// whether to plot lines; uses the overall plot option if unset
@@ -219,8 +209,8 @@ type ColumnParams struct { //types:add
 	// desired number of ticks
 	NTicks int
 
-	// if non-empty, this is an alternative label to use in plotting
-	Lbl string `label:"Label"`
+	// if specified, this is an alternative label to use when plotting
+	Label string
 
 	// if column has n-dimensional tensor cells in each row, this is the index within each cell to plot -- use -1 to plot *all* indexes as separate lines
 	TensorIndex int
@@ -235,103 +225,97 @@ type ColumnParams struct { //types:add
 	Plot *PlotEditor `copier:"-" json:"-" xml:"-" display:"-"`
 }
 
-// Defaults sets defaults if nil vals present
-func (cp *ColumnParams) Defaults() {
-	if cp.NTicks == 0 {
-		cp.NTicks = 10
+// Defaults sets defaults if unset values are present.
+func (co *ColumnOptions) Defaults() {
+	if co.NTicks == 0 {
+		co.NTicks = 10
 	}
 }
 
-// Update satisfies the core.Updater interface and will trigger display update on edits
-func (cp *ColumnParams) Update() {
-	if cp.Plot != nil {
-		cp.Plot.Update()
+// CopyFrom copies from other column options.
+func (co *ColumnOptions) CopyFrom(fr *ColumnOptions) {
+	pl := co.Plot
+	*co = *fr
+	co.Plot = pl
+}
+
+// GetLabel returns the effective label of the column.
+func (co *ColumnOptions) GetLabel() string {
+	if co.Label != "" {
+		return co.Label
 	}
+	return co.Column
 }
 
-// CopyFrom copies from other col params
-func (cp *ColumnParams) CopyFrom(fr *ColumnParams) {
-	pl := cp.Plot
-	*cp = *fr
-	cp.Plot = pl
-}
-
-func (cp *ColumnParams) Label() string {
-	if cp.Lbl != "" {
-		return cp.Lbl
-	}
-	return cp.Column
-}
-
-// FromMetaMap sets plot params from meta data map
-func (cp *ColumnParams) FromMetaMap(meta map[string]string) {
-	if op, has := MetaMapLower(meta, cp.Column+":On"); has {
+// FromMetaMap sets column options from meta data map.
+func (co *ColumnOptions) FromMetaMap(meta map[string]string) {
+	if op, has := MetaMapLower(meta, co.Column+":On"); has {
 		if op == "+" || op == "true" || op == "" {
-			cp.On = true
+			co.On = true
 		} else {
-			cp.On = false
+			co.On = false
 		}
 	}
-	if op, has := MetaMapLower(meta, cp.Column+":Off"); has {
+	if op, has := MetaMapLower(meta, co.Column+":Off"); has {
 		if op == "+" || op == "true" || op == "" {
-			cp.On = false
+			co.On = false
 		} else {
-			cp.On = true
+			co.On = true
 		}
 	}
-	if op, has := MetaMapLower(meta, cp.Column+":FixMin"); has {
+	if op, has := MetaMapLower(meta, co.Column+":FixMin"); has {
 		if op == "+" || op == "true" {
-			cp.Range.FixMin = true
+			co.Range.FixMin = true
 		} else {
-			cp.Range.FixMin = false
+			co.Range.FixMin = false
 		}
 	}
-	if op, has := MetaMapLower(meta, cp.Column+":FixMax"); has {
+	if op, has := MetaMapLower(meta, co.Column+":FixMax"); has {
 		if op == "+" || op == "true" {
-			cp.Range.FixMax = true
+			co.Range.FixMax = true
 		} else {
-			cp.Range.FixMax = false
+			co.Range.FixMax = false
 		}
 	}
-	if op, has := MetaMapLower(meta, cp.Column+":FloatMin"); has {
+	if op, has := MetaMapLower(meta, co.Column+":FloatMin"); has {
 		if op == "+" || op == "true" {
-			cp.Range.FixMin = false
+			co.Range.FixMin = false
 		} else {
-			cp.Range.FixMin = true
+			co.Range.FixMin = true
 		}
 	}
-	if op, has := MetaMapLower(meta, cp.Column+":FloatMax"); has {
+	if op, has := MetaMapLower(meta, co.Column+":FloatMax"); has {
 		if op == "+" || op == "true" {
-			cp.Range.FixMax = false
+			co.Range.FixMax = false
 		} else {
-			cp.Range.FixMax = true
+			co.Range.FixMax = true
 		}
 	}
-	if vl, has := MetaMapLower(meta, cp.Column+":Max"); has {
-		cp.Range.Max, _ = reflectx.ToFloat32(vl)
+	if vl, has := MetaMapLower(meta, co.Column+":Max"); has {
+		co.Range.Max, _ = reflectx.ToFloat32(vl)
 	}
-	if vl, has := MetaMapLower(meta, cp.Column+":Min"); has {
-		cp.Range.Min, _ = reflectx.ToFloat32(vl)
+	if vl, has := MetaMapLower(meta, co.Column+":Min"); has {
+		co.Range.Min, _ = reflectx.ToFloat32(vl)
 	}
-	if lb, has := MetaMapLower(meta, cp.Column+":Label"); has {
-		cp.Lbl = lb
+	if lb, has := MetaMapLower(meta, co.Column+":Label"); has {
+		co.Label = lb
 	}
-	if lb, has := MetaMapLower(meta, cp.Column+":ErrColumn"); has {
-		cp.ErrColumn = lb
+	if lb, has := MetaMapLower(meta, co.Column+":ErrColumn"); has {
+		co.ErrColumn = lb
 	}
-	if vl, has := MetaMapLower(meta, cp.Column+":TensorIndex"); has {
+	if vl, has := MetaMapLower(meta, co.Column+":TensorIndex"); has {
 		iv, _ := reflectx.ToInt(vl)
-		cp.TensorIndex = int(iv)
+		co.TensorIndex = int(iv)
 	}
 }
 
-// PlotTypes are different types of plots
+// PlotTypes are different types of plots.
 type PlotTypes int32 //enums:enum
 
 const (
-	// XY is a standard line / point plot
+	// XY is a standard line / point plot.
 	XY PlotTypes = iota
 
-	// Bar plots vertical bars
+	// Bar plots vertical bars.
 	Bar
 )

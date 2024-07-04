@@ -1431,8 +1431,8 @@ func main() {
 		}
 		dt := errors.Log1(table.NewSliceTable(data))
 		pe := plotcore.NewPlotEditor(parent).SetTable(dt)
-		pe.Params.XAxisColumn = "Time"
-		pe.ColumnParams("Population").On = true
+		pe.Options.XAxisColumn = "Time"
+		pe.ColumnOptions("Population").On = true
 	},
 	"advanced/styling-0": func(parent core.Widget) {
 		fr := core.NewFrame(parent)

@@ -135,7 +135,7 @@ func (b *BarChart) BarHeight(i int) float32 {
 }
 
 // StackOn stacks a bar chart on top of another,
-// and sets the bar positioning params to that of the
+// and sets the bar positioning options to that of the
 // chart upon which it is being stacked.
 func (b *BarChart) StackOn(on *BarChart) {
 	b.Offset = on.Offset

@@ -30,19 +30,19 @@ func (pl *PlotEditor) GenPlotXY() {
 
 	var lsplit *table.Splits
 	nleg := 1
-	if pl.Params.LegendColumn != "" {
-		_, err = pl.Table.Table.ColumnIndexTry(pl.Params.LegendColumn)
+	if pl.Options.LegendColumn != "" {
+		_, err = pl.Table.Table.ColumnIndexTry(pl.Options.LegendColumn)
 		if err != nil {
 			slog.Error("plot.LegendColumn", "err", err.Error())
 		} else {
-			errors.Log(xview.SortStableColumnNames([]string{pl.Params.LegendColumn, xp.Column}, table.Ascending))
-			lsplit = split.GroupBy(xview, pl.Params.LegendColumn)
+			errors.Log(xview.SortStableColumnNames([]string{pl.Options.LegendColumn, xp.Column}, table.Ascending))
+			lsplit = split.GroupBy(xview, pl.Options.LegendColumn)
 			nleg = max(lsplit.Len(), 1)
 		}
 	}
 
 	var firstXY *TableXY
-	var strCols []*ColumnParams
+	var strCols []*ColumnOptions
 	nys := 0
 	for _, cp := range pl.Columns {
 		if !cp.On {
@@ -101,7 +101,7 @@ func (pl *PlotEditor) GenPlotXY() {
 				}
 				var pts *plots.Scatter
 				var lns *plots.Line
-				lbl := cp.Label()
+				lbl := cp.GetLabel()
 				clr := cp.Color
 				if leg != "" {
 					lbl = leg + " " + lbl
@@ -114,17 +114,17 @@ func (pl *PlotEditor) GenPlotXY() {
 					clr = colors.Uniform(colors.Spaced(idx))
 					lbl = fmt.Sprintf("%s_%02d", lbl, idx)
 				}
-				if cp.Lines.Or(pl.Params.Lines) && cp.Points.Or(pl.Params.Points) {
+				if cp.Lines.Or(pl.Options.Lines) && cp.Points.Or(pl.Options.Points) {
 					lns, pts, _ = plots.NewLinePoints(xy)
-				} else if cp.Points.Or(pl.Params.Points) {
+				} else if cp.Points.Or(pl.Options.Points) {
 					pts, _ = plots.NewScatter(xy)
 				} else {
 					lns, _ = plots.NewLine(xy)
 				}
 				if lns != nil {
-					lns.LineStyle.Width.Pt(float32(cp.LineWidth.Or(pl.Params.LineWidth)))
+					lns.LineStyle.Width.Pt(float32(cp.LineWidth.Or(pl.Options.LineWidth)))
 					lns.LineStyle.Color = clr
-					lns.NegativeXDraw = pl.Params.NegativeXDraw
+					lns.NegativeXDraw = pl.Options.NegativeXDraw
 					plt.Add(lns)
 					if pts != nil {
 						plt.Legend.Add(lbl, lns, pts)
@@ -134,9 +134,9 @@ func (pl *PlotEditor) GenPlotXY() {
 				}
 				if pts != nil {
 					pts.LineStyle.Color = clr
-					pts.LineStyle.Width.Pt(float32(cp.LineWidth.Or(pl.Params.LineWidth)))
-					pts.PointSize.Pt(float32(cp.PointSize.Or(pl.Params.PointSize)))
-					pts.PointShape = cp.PointShape.Or(pl.Params.PointShape)
+					pts.LineStyle.Width.Pt(float32(cp.LineWidth.Or(pl.Options.LineWidth)))
+					pts.PointSize.Pt(float32(cp.PointSize.Or(pl.Options.PointSize)))
+					pts.PointShape = cp.PointShape.Or(pl.Options.PointShape)
 					plt.Add(pts)
 					if lns == nil {
 						plt.Legend.Add(lbl, pts)

@@ -23,8 +23,8 @@ import (
 // GenPlotBar generates a Bar plot, setting GPlot variable
 func (pl *PlotEditor) GenPlotBar() {
 	plt := plot.New() // note: not clear how to re-use, due to newtablexynames
-	if pl.Params.BarWidth > 1 {
-		pl.Params.BarWidth = .8
+	if pl.Options.BarWidth > 1 {
+		pl.Options.BarWidth = .8
 	}
 
 	// process xaxis first
@@ -36,19 +36,19 @@ func (pl *PlotEditor) GenPlotBar() {
 
 	var lsplit *table.Splits
 	nleg := 1
-	if pl.Params.LegendColumn != "" {
-		_, err = pl.Table.Table.ColumnIndexTry(pl.Params.LegendColumn)
+	if pl.Options.LegendColumn != "" {
+		_, err = pl.Table.Table.ColumnIndexTry(pl.Options.LegendColumn)
 		if err != nil {
 			log.Println("plot.LegendColumn: " + err.Error())
 		} else {
-			xview.SortColumnNames([]string{pl.Params.LegendColumn, xp.Column}, table.Ascending) // make it fit!
-			lsplit = split.GroupBy(xview, pl.Params.LegendColumn)
+			xview.SortColumnNames([]string{pl.Options.LegendColumn, xp.Column}, table.Ascending) // make it fit!
+			lsplit = split.GroupBy(xview, pl.Options.LegendColumn)
 			nleg = max(lsplit.Len(), 1)
 		}
 	}
 
 	var firstXY *TableXY
-	var strCols []*ColumnParams
+	var strCols []*ColumnOptions
 	nys := 0
 	for _, cp := range pl.Columns {
 		if !cp.On {
@@ -112,7 +112,7 @@ func (pl *PlotEditor) GenPlotBar() {
 				if firstXY == nil {
 					firstXY = xy
 				}
-				lbl := cp.Label()
+				lbl := cp.GetLabel()
 				clr := cp.Color
 				if leg != "" {
 					lbl = leg + " " + lbl
@@ -147,7 +147,7 @@ func (pl *PlotEditor) GenPlotBar() {
 				bar.Color = clr
 				bar.Stride = float32(stride)
 				bar.Offset = float32(start)
-				bar.Width = pl.Params.BarWidth
+				bar.Width = pl.Options.BarWidth
 				plt.Add(bar)
 				plt.Legend.Add(lbl, bar)
 				start++
