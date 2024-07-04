@@ -511,7 +511,7 @@ func TestLiveType(t *testing.T) {
 	assert.Equal(t, "cogentcore.org/core/tree_test.myNode", n.NodeType().Name)
 	assert.Equal(t, "my-node", n.NodeType().IDName)
 	assert.IsType(t, &myNode{}, n.NodeType().Instance)
-	assert.IsType(t, &myNode{}, n.New())
+	assert.IsType(t, &myNode{}, n.NewInstance())
 }
 
 func BenchmarkNodeType(b *testing.B) {
@@ -521,9 +521,9 @@ func BenchmarkNodeType(b *testing.B) {
 	}
 }
 
-func BenchmarkNodeNew(b *testing.B) {
+func BenchmarkNodeNewInstance(b *testing.B) {
 	n := NewNodeBase()
 	for range b.N {
-		n.New()
+		n.NewInstance()
 	}
 }

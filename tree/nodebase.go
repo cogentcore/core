@@ -25,9 +25,9 @@ import (
 // in all higher-level tree types.
 //
 // All nodes must be properly initialized by using one of [New], [NodeBase.NewChild],
-// [NodeBase.AddChild], [NodeBase.InsertChild], [NodeBase.InsertNewChild],
-// [NodeBase.Clone], [Update], or [Plan]. This ensures that the [Node.This] field
-// is set correctly and that the [Node.Init] method is called.
+// [NodeBase.AddChild], [NodeBase.InsertChild], [NodeBase.Clone], [Update], or [Plan].
+// This ensures that the [NodeBase.This] field is set correctly and the [Node.Init]
+// method is called.
 //
 // All nodes support JSON marshalling and unmarshalling through the standard [encoding/json]
 // interfaces, so you can use the standard functions for loading and saving trees. However,
@@ -118,7 +118,7 @@ func (n *NodeBase) PlanName() string {
 func (n *NodeBase) NodeType() *types.Type {
 	if t := types.TypeByValue(n.This); t != nil {
 		if t.Instance == nil {
-			t.Instance = n.New()
+			t.Instance = n.NewInstance()
 		}
 		return t
 	}
@@ -127,12 +127,12 @@ func (n *NodeBase) NodeType() *types.Type {
 	return types.AddType(&types.Type{
 		Name:     name,
 		IDName:   strcase.ToKebab(name[li+1:]),
-		Instance: n.New(),
+		Instance: n.NewInstance(),
 	})
 }
 
-// New returns a new instance of this node type.
-func (n *NodeBase) New() Node {
+// NewInstance returns a new instance of this node type.
+func (n *NodeBase) NewInstance() Node {
 	return reflect.New(reflect.TypeOf(n.This).Elem()).Interface().(Node)
 }
 
@@ -691,7 +691,7 @@ func copyFrom(to, from Node) {
 // Any pointers within the cloned tree will correctly point within the new
 // cloned tree (see [Node.CopyFrom] for more information).
 func (n *NodeBase) Clone() Node {
-	nc := n.New()
+	nc := n.NewInstance()
 	initNode(nc)
 	nc.AsTree().SetName(n.Name)
 	nc.AsTree().CopyFrom(n.This)
