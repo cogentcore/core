@@ -161,7 +161,7 @@ type WidgetBase struct {
 	// For example, trees use parts to separate their internal parts from
 	// the other child tree nodes. Composite widgets like buttons should
 	// NOT use parts to store their components; parts should only be used when
-	// absolutely necessary.
+	// absolutely necessary. Use [WidgetBase.NewParts] to make the parts.
 	Parts *Frame `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Geom has the full layout geometry for size and position of this Widget
