@@ -161,8 +161,13 @@ func (sp *Spinner) Init() {
 			s.SetAbilities(true, abilities.RepeatClickable)
 		})
 	}
-	tree.AddChildInit(sp, "lead-icon", i)
-	tree.AddChildInit(sp, "trail-icon", i)
+	sp.Maker(func(p *tree.Plan) {
+		if sp.IsReadOnly() {
+			return
+		}
+		tree.AddInit(p, "lead-icon", i)
+		tree.AddInit(p, "trail-icon", i)
+	})
 }
 
 func (sp *Spinner) SetTextToValue() {
