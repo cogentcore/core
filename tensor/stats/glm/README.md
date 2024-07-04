@@ -1,6 +1,6 @@
 # GLM = general linear model
 
-GLM contains results and parameters for running a [general linear model](https://en.wikipedia.org/wiki/General_linear_model) (wikipedia link), which is a general form of multivariate linear regression, supporting multiple independent and dependent variables.
+GLM contains results and parameters for running a [general linear model](https://en.wikipedia.org/wiki/General_linear_model), which is a general form of multivariate linear regression, supporting multiple independent and dependent variables.
 
 Make a `NewGLM` and then do `Run()` on a tensor [IndexView](../table/IndexView) with the relevant data in columns of the table.
 
