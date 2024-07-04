@@ -9,7 +9,7 @@ package states
 import "cogentcore.org/core/enums"
 
 // States are GUI states of elements that are relevant for styling based on
-// [CSS Pseudo-classes](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes)
+// CSS pseudo-classes (https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes).
 type States int64 //enums:bitflag
 
 const (
@@ -54,9 +54,6 @@ const (
 	// It should also still be Active.
 	Sliding
 
-	// Scrolling means this element is currently being scrolled.
-	Scrolling
-
 	// Focused elements receive keyboard input.
 	Focused
 
@@ -84,32 +81,9 @@ const (
 	LongPressed
 
 	// DragHovered indicates that a mouse pointer has entered the space over
-	// an element, during a drag-n-drop sequence.  This makes it a candidate
-	// for a potential drop target.  See DropOK for state in relation to that.
+	// an element during a drag-n-drop sequence.  This makes it a candidate
+	// for a potential drop target.
 	DragHovered
-
-	// DropOK indicates that a DragHovered element is OK to receive a Drop
-	// from the current Dragged item, subject also to the Droppable ability.
-	DropOK
-
-	// Invalid indicates that the element has invalid input and
-	// needs to be corrected by the user
-	Invalid
-
-	// Required indicates that the element must be set by the user
-	Required
-
-	// Blank indicates that the element has yet to be set by user
-	Blank
-
-	// Link indicates a URL link that has not been visited yet
-	Link
-
-	// Visited indicates a URL link that has been visited
-	Visited
-
-	// AnyLink is either Link or Visited
-	AnyLink
 )
 
 // Is is a shortcut for HasFlag for States
