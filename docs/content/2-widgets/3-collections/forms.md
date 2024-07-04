@@ -78,6 +78,16 @@ type person struct {
 core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
 ```
 
+You can change the label of a field:
+
+```Go
+type person struct {
+    Name string `label:"Nickname"`
+    Age  int
+}
+core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
+```
+
 You can use structs with embedded fields:
 
 ```Go

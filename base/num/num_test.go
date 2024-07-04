@@ -4,36 +4,28 @@
 
 package num
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestBool(t *testing.T) {
-	b := ToBool(1)
-	if !b {
-		t.Errorf("failed: %v != true", b)
-	}
-	b = ToBool(0.0)
-	if b {
-		t.Errorf("failed: %v != false", b)
-	}
+	assert.True(t, ToBool(1))
+	assert.False(t, ToBool(0.0))
+
 	f32 := FromBool[float32](true)
-	if f32 != 1 {
-		t.Errorf("failed: %g != 1", f32)
-	}
+	assert.Equal(t, float32(1), f32)
+
 	SetFromBool(&f32, false)
-	if f32 != 0 {
-		t.Errorf("failed: %g != 0", f32)
-	}
+	assert.Equal(t, float32(0), f32)
 }
 
 func TestAbs(t *testing.T) {
-	i := Abs(-22)
-	if i != 22 {
-		t.Errorf("failed: %d != 22", i)
-	}
-	// this correctly does not compile:
-	// ib := Abs(uint8(5))
-	f := Abs(-4.31)
-	if f != 4.31 {
-		t.Errorf("failed: %g != 4.31", f)
-	}
+	assert.Equal(t, 22, Abs(-22))
+
+	// This correctly does not compile:
+	// assert.Equal(t, uint8(5), Abs(uint8(5)))
+
+	assert.Equal(t, 4.31, Abs(-4.31))
 }

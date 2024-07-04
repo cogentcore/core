@@ -25,12 +25,12 @@ func TestTablePlotEditor(t *testing.T) {
 	epc.OpenCSV("testdata/ra25epoch.tsv", table.Tab)
 
 	pl := NewPlotEditor(b)
-	pl.Params.Title = "RA25 Epoch Train"
-	pl.Params.XAxisColumn = "Epoch"
-	// pl.Params.Scale = 2
-	pl.Params.Points = true
+	pl.Options.Title = "RA25 Epoch Train"
+	pl.Options.XAxisColumn = "Epoch"
+	// pl.Options.Scale = 2
+	pl.Options.Points = true
 	pl.SetTable(epc)
-	pl.ColumnParams("UnitErr").On = true
+	pl.ColumnOptions("UnitErr").On = true
 	b.AddAppBar(pl.MakeToolbar)
 	b.AssertRender(t, "plotcore_table")
 }
@@ -48,11 +48,11 @@ func TestSlicePlotEditor(t *testing.T) {
 	}
 
 	pl := NewPlotEditor(b)
-	pl.Params.Title = "Slice Data"
-	pl.Params.XAxisColumn = "City"
-	pl.Params.Points = true
+	pl.Options.Title = "Slice Data"
+	pl.Options.XAxisColumn = "City"
+	pl.Options.Points = true
 	pl.SetTable(dt)
-	pl.ColumnParams("Population").On = true
+	pl.ColumnOptions("Population").On = true
 	b.AddAppBar(pl.MakeToolbar)
 
 	b.AssertRender(t, "plotcore_slice")

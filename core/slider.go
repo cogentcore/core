@@ -233,7 +233,7 @@ func (sr *Slider) Init() {
 	change := func(e events.Event) {
 		pos := sr.PointToRelPos(e.Pos())
 		sr.SetSliderPosAction(pos)
-		sr.SendChanged()
+		sr.sendChange()
 	}
 	sr.On(events.SlideStop, change)
 	sr.On(events.Click, change)
@@ -253,7 +253,7 @@ func (sr *Slider) Init() {
 		}
 		edel := sr.ScrollScale(del)
 		sr.SetValueAction(sr.Value + edel)
-		sr.SendChanged()
+		sr.sendChange()
 	})
 	sr.OnKeyChord(func(e events.Event) {
 		kf := keymap.Of(e.KeyChord())
@@ -319,9 +319,9 @@ func (sr *Slider) SnapValue() {
 	sr.Value = sr.Step * math32.Round(sr.Value/sr.Step)
 }
 
-// SendChanged sends a Changed message if given new value is
-// different from the existing Value.
-func (sr *Slider) SendChanged(e ...events.Event) bool {
+// sendChange calls [WidgetBase.SendChange] if the current value
+// is different from the last value.
+func (sr *Slider) sendChange(e ...events.Event) bool {
 	if sr.Value == sr.LastValue {
 		return false
 	}

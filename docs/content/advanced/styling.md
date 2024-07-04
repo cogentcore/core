@@ -8,11 +8,11 @@ As with event handlers, there are three levels of stylers: `First`, regular, and
 
 ## Styling multiple widgets
 
-You can style all widgets within a certain container at once using [[core.Widget.OnWidgetAdded]]:
+You can style all direct children of a container at once using [[core.Widget.OnWidgetAdded]]:
 
 ```Go
 fr := core.NewFrame(parent)
-fr.OnWidgetAdded(func(w core.Widget) { // TODO(config)
+fr.OnWidgetAdded(func(w core.Widget) {
     w.AsWidget().Styler(func(s *styles.Style) {
         s.Color = colors.Scheme.Error.Base
     })
@@ -22,7 +22,7 @@ core.NewSwitch(fr).SetText("Switch")
 core.NewTextField(fr).SetText("Text field")
 ```
 
-You can style all widgets of a certain type within a certain container:
+You can style all direct children of a certain type in a container:
 
 ```Go
 fr := core.NewFrame(parent)
@@ -39,7 +39,7 @@ core.NewButton(fr).SetText("Second")
 core.NewButton(fr).SetText("Third")
 ```
 
-You can style all widgets in the entire app using [[core.App.SceneConfig]] in combination with [[core.WidgetBase.OnWidgetAdded]]. For example, to make all buttons in your app have a small border radius, you can do the following:
+TODO(config): You can style all widgets in the entire app using [[core.App.SceneConfig]] in combination with [[core.WidgetBase.OnWidgetAdded]]. For example, to make all buttons in your app have a small border radius, you can do the following:
 
 ```go
 core.TheApp.SetSceneConfig(func(sc *core.Scene) {

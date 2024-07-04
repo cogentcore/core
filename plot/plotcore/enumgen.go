@@ -13,7 +13,7 @@ const PlotTypesN PlotTypes = 2
 
 var _PlotTypesValueMap = map[string]PlotTypes{`XY`: 0, `Bar`: 1}
 
-var _PlotTypesDescMap = map[PlotTypes]string{0: `XY is a standard line / point plot`, 1: `Bar plots vertical bars`}
+var _PlotTypesDescMap = map[PlotTypes]string{0: `XY is a standard line / point plot.`, 1: `Bar plots vertical bars.`}
 
 var _PlotTypesMap = map[PlotTypes]string{0: `XY`, 1: `Bar`}
 

@@ -164,7 +164,7 @@ func (h HCT) MaximumChroma() float32 {
 
 // SRGBAToHCT returns an HCT from the given SRGBA color coordinates
 // under standard viewing conditions. The RGB value range is 0-1,
-// and RGB values have gamma correction. The RGB values must be
+// and RGB values have gamma correction. The RGB values must not be
 // premultiplied by the given alpha value. See [SRGBToHCT] for
 // a version that does not take the alpha value.
 func SRGBAToHCT(r, g, b, a float32) HCT {

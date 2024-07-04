@@ -5,13 +5,11 @@
 package tree
 
 import (
-	"fmt"
 	"reflect"
 	"slices"
 	"strconv"
 	"sync/atomic"
 
-	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/base/slicesx"
 	"cogentcore.org/core/types"
 )
@@ -57,29 +55,17 @@ func initNode(n Node) {
 	}
 }
 
-// checkThis checks that [Node.This] is non-nil.
-// It returns and logs an error otherwise.
-func checkThis(n Node) error {
-	if n.AsTree().This != nil {
-		return nil
-	}
-	return errors.Log(fmt.Errorf("tree.Node %q has nil tree.NodeBase.This; you must use tree.New or New* so that the node is initialized", n.AsTree().Path()))
-}
-
 // SetParent sets the parent of the given node to the given parent node.
 // This is only for nodes with no existing parent; see [MoveToParent] to
 // move nodes that already have a parent. It does not add the node to the
 // parent's list of children; see [Node.AddChild] for a version that does.
 // It automatically gets the [Node.This] of the parent.
 func SetParent(child Node, parent Node) {
-	n := child.AsTree()
-	n.Parent = parent.AsTree().This
-	setUniqueName(n, false)
+	nb := child.AsTree()
+	nb.Parent = parent.AsTree().This
+	setUniqueName(child, false)
 	child.AsTree().This.OnAdd()
-	n.WalkUpParent(func(pn Node) bool {
-		pn.AsTree().This.OnChildAdded(child)
-		return Continue
-	})
+	nb.Parent.OnChildAdded(child)
 }
 
 // MoveToParent removes the given node from its current parent

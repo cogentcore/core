@@ -30,12 +30,12 @@ func main() {
 		epc.OpenFS(tsv, "ra25epoch.tsv", table.Tab)
 
 		pl := plotcore.NewPlotEditor(b)
-		pl.Params.Title = "RA25 Epoch Train"
-		pl.Params.XAxisColumn = "Epoch"
-		// pl.Params.Scale = 2
-		pl.Params.Points = true
+		pl.Options.Title = "RA25 Epoch Train"
+		pl.Options.XAxisColumn = "Epoch"
+		// pl.Options.Scale = 2
+		pl.Options.Points = true
 		pl.SetTable(epc)
-		pl.ColumnParams("UnitErr").On = true
+		pl.ColumnOptions("UnitErr").On = true
 		b.AddAppBar(pl.MakeToolbar)
 	} else {
 		data := []Data{
@@ -46,11 +46,11 @@ func main() {
 		dt := errors.Log1(table.NewSliceTable(data))
 
 		pl := plotcore.NewPlotEditor(b)
-		pl.Params.Title = "Slice Data"
-		pl.Params.XAxisColumn = "City"
-		pl.Params.Points = true
+		pl.Options.Title = "Slice Data"
+		pl.Options.XAxisColumn = "City"
+		pl.Options.Points = true
 		pl.SetTable(dt)
-		pl.ColumnParams("Population").On = true
+		pl.ColumnOptions("Population").On = true
 		b.AddAppBar(pl.MakeToolbar)
 	}
 

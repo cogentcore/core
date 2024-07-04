@@ -150,7 +150,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		items := []item{{Task: "Code"}, {Task: "Eat"}}
 		var table *core.Table
 		core.NewButton(parent).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
-			table.SliceNewAt(0)
+			table.NewAt(0)
 		})
 		table = core.NewTable(parent).SetSlice(&items)
 	},
@@ -901,6 +901,17 @@ func main() {
 			}
 		})
 	},
+	"widgets/containers/toolbars-3": func(parent core.Widget) {
+		tb := core.NewToolbar(parent)
+		tb.Maker(func(p *tree.Plan) {
+			tree.Add(p, func(w *core.Button) {
+				w.SetText("Build")
+			})
+		})
+		tb.AddOverflowMenu(func(m *core.Scene) {
+			core.NewButton(m).SetText("Run")
+		})
+	},
 	"widgets/collections/forms-0": func(parent core.Widget) {
 		type person struct {
 			Name string
@@ -957,6 +968,13 @@ func main() {
 		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35}).SetReadOnly(true)
 	},
 	"widgets/collections/forms-7": func(parent core.Widget) {
+		type person struct {
+			Name string `label:"Nickname"`
+			Age  int
+		}
+		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35})
+	},
+	"widgets/collections/forms-8": func(parent core.Widget) {
 		type Person struct {
 			Name string
 			Age  int
@@ -967,7 +985,7 @@ func main() {
 		}
 		core.NewForm(parent).SetStruct(&employee{Person{Name: "Go", Age: 35}, "Programmer"})
 	},
-	"widgets/collections/forms-8": func(parent core.Widget) {
+	"widgets/collections/forms-9": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
@@ -978,7 +996,7 @@ func main() {
 		}
 		core.NewForm(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
 	},
-	"widgets/collections/forms-9": func(parent core.Widget) {
+	"widgets/collections/forms-10": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
@@ -989,7 +1007,7 @@ func main() {
 		}
 		core.NewForm(parent).SetStruct(&employee{"Programmer", person{Name: "Go", Age: 35}})
 	},
-	"widgets/collections/forms-10": func(parent core.Widget) {
+	"widgets/collections/forms-11": func(parent core.Widget) {
 		type person struct {
 			Name      string `default:"Gopher"`
 			Age       int    `default:"20:30"`
@@ -997,7 +1015,7 @@ func main() {
 		}
 		core.NewForm(parent).SetStruct(&person{Name: "Go", Age: 35, Precision: 50})
 	},
-	"widgets/collections/forms-11": func(parent core.Widget) {
+	"widgets/collections/forms-12": func(parent core.Widget) {
 		type person struct {
 			Name string
 			Age  int
@@ -1089,6 +1107,13 @@ func main() {
 		core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
 	},
 	"widgets/collections/tables-6": func(parent core.Widget) {
+		type language struct {
+			Name   string
+			Rating int `label:"Score"`
+		}
+		core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+	},
+	"widgets/collections/tables-7": func(parent core.Widget) {
 		type language struct {
 			Name   string
 			Rating int
@@ -1406,12 +1431,12 @@ func main() {
 		}
 		dt := errors.Log1(table.NewSliceTable(data))
 		pe := plotcore.NewPlotEditor(parent).SetTable(dt)
-		pe.Params.XAxisColumn = "Time"
-		pe.ColumnParams("Population").On = true
+		pe.Options.XAxisColumn = "Time"
+		pe.ColumnOptions("Population").On = true
 	},
 	"advanced/styling-0": func(parent core.Widget) {
 		fr := core.NewFrame(parent)
-		fr.OnWidgetAdded(func(w core.Widget) { // TODO(config)
+		fr.OnWidgetAdded(func(w core.Widget) {
 			w.AsWidget().Styler(func(s *styles.Style) {
 				s.Color = colors.Scheme.Error.Base
 			})

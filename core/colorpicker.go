@@ -51,9 +51,7 @@ func (cp *ColorPicker) Init() {
 			s.Padding.Set(units.Dp(16))
 		})
 		w.OnClick(func(e events.Event) {
-			cp.SetColor(c)
-			cp.Update()
-			cp.SendChange()
+			cp.SetColor(c).UpdateChange()
 		})
 	}
 
@@ -80,9 +78,7 @@ func (cp *ColorPicker) Init() {
 				if err != nil {
 					return err
 				}
-				cp.SetColor(c)
-				cp.Update()
-				cp.SendChange()
+				cp.SetColor(c).UpdateChange()
 				return nil
 			})
 		})
@@ -100,8 +96,7 @@ func (cp *ColorPicker) Init() {
 		w.SetTooltip("The hue, which is the spectral identity of the color (red, green, blue, etc) in degrees")
 		w.OnInput(func(e events.Event) {
 			cp.Color.SetHue(w.Value)
-			cp.Update()
-			cp.SendChange()
+			cp.UpdateChange()
 		})
 		w.Styler(func(s *styles.Style) {
 			w.ValueColor = nil
@@ -124,8 +119,7 @@ func (cp *ColorPicker) Init() {
 		})
 		w.OnInput(func(e events.Event) {
 			cp.Color.SetChroma(w.Value)
-			cp.Update()
-			cp.SendChange()
+			cp.UpdateChange()
 		})
 		w.Styler(func(s *styles.Style) {
 			w.ValueColor = nil
@@ -145,8 +139,7 @@ func (cp *ColorPicker) Init() {
 		w.SetTooltip("The tone, which is the lightness of the color")
 		w.OnInput(func(e events.Event) {
 			cp.Color.SetTone(w.Value)
-			cp.Update()
-			cp.SendChange()
+			cp.UpdateChange()
 		})
 		w.Styler(func(s *styles.Style) {
 			w.ValueColor = nil
@@ -166,8 +159,7 @@ func (cp *ColorPicker) Init() {
 		w.SetTooltip("The opacity of the color")
 		w.OnInput(func(e events.Event) {
 			cp.Color.SetColor(colors.WithAF32(cp.Color, w.Value))
-			cp.Update()
-			cp.SendChange()
+			cp.UpdateChange()
 		})
 		w.Styler(func(s *styles.Style) {
 			w.ValueColor = nil

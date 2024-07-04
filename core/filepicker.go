@@ -30,23 +30,6 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// FilePickerDialog opens a dialog for selecting a file.
-func FilePickerDialog(ctx Widget, filename, exts, title string, fun func(selfile string)) {
-	d := NewBody()
-	if title != "" {
-		d.SetTitle(title)
-	}
-	fv := NewFilePicker(d).SetFilename(filename).SetExtensions(exts)
-	d.AddAppBar(fv.MakeToolbar)
-	d.AddBottomBar(func(parent Widget) {
-		d.AddCancel(parent)
-		d.AddOK(parent).OnClick(func(e events.Event) {
-			fun(fv.SelectedFile())
-		})
-	})
-	d.RunWindowDialog(ctx)
-}
-
 // todo:
 
 // * search: use highlighting, not filtering -- < > arrows etc
@@ -70,8 +53,8 @@ type FilePicker struct {
 	// They must be set using [FilePicker.SetExtensions].
 	Extensions string `set:"-"`
 
-	// FilterFunc is an optional filtering function for which files to display.
-	FilterFunc FilePickerFilterFunc `display:"-" json:"-" xml:"-"`
+	// Filterer is an optional filtering function for which files to display.
+	Filterer FilePickerFilterer `display:"-" json:"-" xml:"-"`
 
 	// extensionMap is a map of lower-cased extensions from Extensions.
 	// It used for highlighting files with one of these extensions;
@@ -182,16 +165,16 @@ func (fp *FilePicker) Disconnect() {
 	}
 }
 
-// FilePickerFilterFunc is a filtering function for files; returns true if the
+// FilePickerFilterer is a filtering function for files; returns true if the
 // file should be visible in the picker, and false if not
-type FilePickerFilterFunc func(fp *FilePicker, fi *fileinfo.FileInfo) bool
+type FilePickerFilterer func(fp *FilePicker, fi *fileinfo.FileInfo) bool
 
-// FilePickerDirOnlyFilter is a FilePickerFilterFunc that only shows directories (folders).
+// FilePickerDirOnlyFilter is a FilePickerFilterer that only shows directories (folders).
 func FilePickerDirOnlyFilter(fp *FilePicker, fi *fileinfo.FileInfo) bool {
 	return fi.IsDir()
 }
 
-// FilePickerExtOnlyFilter is a FilePickerFilterFunc that only shows files that
+// FilePickerExtOnlyFilter is a FilePickerFilterer that only shows files that
 // match the target extensions, and directories.
 func FilePickerExtOnlyFilter(fp *FilePicker, fi *fileinfo.FileInfo) bool {
 	if fi.IsDir() {
@@ -557,8 +540,8 @@ func (fp *FilePicker) ReadFiles() {
 		}
 		fi, ferr := fileinfo.NewFileInfo(path)
 		keep := ferr == nil
-		if fp.FilterFunc != nil {
-			keep = fp.FilterFunc(fp, fi)
+		if fp.Filterer != nil {
+			keep = fp.Filterer(fp, fi)
 		}
 		if keep {
 			fp.files = append(fp.files, fi)

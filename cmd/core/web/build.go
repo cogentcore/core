@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package web provides functions for building Cogent Core apps for the web.
 package web
-
-//go:generate go run gen/scripts.go
 
 import (
 	"crypto/sha1"
@@ -65,13 +64,13 @@ func MakeFiles(c *config.Config) error {
 	// It is trusted, so we do not need a more advanced sanitizer.
 	c.About = strip.StripTags(c.About)
 
-	wej := []byte(WASMExecJS())
+	wej := []byte(wasmExecJS)
 	err := os.WriteFile(filepath.Join(odir, "wasm_exec.js"), wej, 0666)
 	if err != nil {
 		return err
 	}
 
-	ajs, err := MakeAppJS(c)
+	ajs, err := makeAppJS(c)
 	if err != nil {
 		return err
 	}
@@ -80,7 +79,7 @@ func MakeFiles(c *config.Config) error {
 		return err
 	}
 
-	awjs, err := MakeAppWorkerJS(c)
+	awjs, err := makeAppWorkerJS(c)
 	if err != nil {
 		return err
 	}
@@ -89,7 +88,7 @@ func MakeFiles(c *config.Config) error {
 		return err
 	}
 
-	man, err := MakeManifestJSON(c)
+	man, err := makeManifestJSON(c)
 	if err != nil {
 		return err
 	}
@@ -98,13 +97,13 @@ func MakeFiles(c *config.Config) error {
 		return err
 	}
 
-	acs := []byte(AppCSS)
+	acs := []byte(appCSS)
 	err = os.WriteFile(filepath.Join(odir, "app.css"), acs, 0666)
 	if err != nil {
 		return err
 	}
 
-	iht, err := MakeIndexHTML(c, "", "")
+	iht, err := makeIndexHTML(c, "", "")
 	if err != nil {
 		return err
 	}
@@ -179,7 +178,7 @@ func MakePages(c *config.Config) error {
 		if title != c.Name {
 			title += " • " + c.Name
 		}
-		b, err := MakeIndexHTML(c, basePath, title)
+		b, err := makeIndexHTML(c, basePath, title)
 		if err != nil {
 			return err
 		}

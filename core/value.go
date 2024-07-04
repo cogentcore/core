@@ -136,8 +136,7 @@ func OpenValueDialog(v Value, make func(d *Body), after ...func()) {
 	// OK and Cancel buttons
 	if len(after) == 0 {
 		d.OnClose(func(e events.Event) {
-			wb.SendChange()
-			wb.Update()
+			wb.UpdateChange()
 		})
 	} else {
 		// otherwise, we have to make the bottom bar
@@ -145,8 +144,7 @@ func OpenValueDialog(v Value, make func(d *Body), after ...func()) {
 			d.AddCancel(parent)
 			d.AddOK(parent).OnClick(func(e events.Event) {
 				after[0]()
-				wb.SendChange()
-				wb.Update()
+				wb.UpdateChange()
 			})
 		})
 	}

@@ -53,10 +53,10 @@ func (br *Browser) Init() {
 
 // NewBrowserWindow opens a new diff Browser in a new window
 func NewBrowserWindow() (*Browser, *core.Body) {
-	b := core.NewBody("Diff Browser")
+	b := core.NewBody("Diff browser")
 	br := NewBrowser(b)
 	br.UpdateTree() // must have tree
-	// b.AddAppBar(br.MakeToolbar)
+	b.AddAppBar(br.MakeToolbar)
 	return br, b
 }
 

@@ -122,12 +122,12 @@ type Lister interface {
 	// note: grid must have already rendered for focus to be grabbed!
 	RowGrabFocus(row int) *WidgetBase
 
-	// SliceNewAt inserts a new blank element at given
-	// index in the slice. -1 means the end.
-	SliceNewAt(idx int)
+	// NewAt inserts a new blank element at the given index in the slice.
+	// -1 indicates to insert the element at the end.
+	NewAt(idx int)
 
-	// SliceDeleteAt deletes element at given index from slice
-	SliceDeleteAt(idx int)
+	// DeleteAt deletes the element at the given index from the slice.
+	DeleteAt(idx int)
 
 	// MimeDataType returns the data type for mime clipboard
 	// (copy / paste) data e.g., fileinfo.DataJson
@@ -747,19 +747,19 @@ func (lb *ListBase) UpdateScroll() {
 	sg.UpdateScroll(lb.StartIndex)
 }
 
-// SliceNewAtRow inserts a new blank element at given display row
-func (lb *ListBase) SliceNewAtRow(row int) {
-	lb.This.(Lister).SliceNewAt(lb.StartIndex + row)
+// NewAtRow inserts a new blank element at the given display row.
+func (lb *ListBase) NewAtRow(row int) {
+	lb.This.(Lister).NewAt(lb.StartIndex + row)
 }
 
-// SliceNewAt inserts a new blank element at given index in the slice -- -1
-// means the end
-func (lb *ListBase) SliceNewAt(idx int) {
+// NewAt inserts a new blank element at the given index in the slice.
+// -1 indicates to insert the element at the end.
+func (lb *ListBase) NewAt(idx int) {
 	if lb.isArray {
 		return
 	}
 
-	lb.SliceNewAtSelect(idx)
+	lb.NewAtSelect(idx)
 
 	sltyp := reflectx.SliceElementType(lb.Slice) // has pointer if it is there
 	slptr := sltyp.Kind() == reflect.Pointer
@@ -785,21 +785,18 @@ func (lb *ListBase) SliceNewAt(idx int) {
 	lb.This.(Lister).UpdateSliceSize()
 
 	lb.SelectIndexAction(idx, events.SelectOne)
-	lb.SendChange()
-	lb.Update()
+	lb.UpdateChange()
 	lb.IndexGrabFocus(idx)
 }
 
-// SliceDeleteAtRow deletes element at given display row
-// if update is true, then update the grid after
-func (lb *ListBase) SliceDeleteAtRow(row int) {
-	lb.This.(Lister).SliceDeleteAt(lb.StartIndex + row)
+// DeleteAtRow deletes the element at the given display row.
+func (lb *ListBase) DeleteAtRow(row int) {
+	lb.This.(Lister).DeleteAt(lb.StartIndex + row)
 }
 
-// SliceNewAtSelect updates selected rows based on
-// inserting new element at given index.
-// must be called with successful SliceNewAt
-func (lb *ListBase) SliceNewAtSelect(i int) {
+// NewAtSelect updates the selected rows based on
+// inserting a new element at the given index.
+func (lb *ListBase) NewAtSelect(i int) {
 	sl := lb.SelectedIndexesList(false) // ascending
 	lb.ResetSelectedIndexes()
 	for _, ix := range sl {
@@ -810,10 +807,9 @@ func (lb *ListBase) SliceNewAtSelect(i int) {
 	}
 }
 
-// SliceDeleteAtSelect updates selected rows based on
-// deleting element at given index
-// must be called with successful SliceDeleteAt
-func (lb *ListBase) SliceDeleteAtSelect(i int) {
+// DeleteAtSelect updates the selected rows based on
+// deleting the element at the given index.
+func (lb *ListBase) DeleteAtSelect(i int) {
 	sl := lb.SelectedIndexesList(true) // desscending
 	lb.ResetSelectedIndexes()
 	for _, ix := range sl {
@@ -827,23 +823,18 @@ func (lb *ListBase) SliceDeleteAtSelect(i int) {
 	}
 }
 
-// SliceDeleteAt deletes element at given index from slice
-func (lb *ListBase) SliceDeleteAt(i int) {
+// DeleteAt deletes the element at the given index from the slice.
+func (lb *ListBase) DeleteAt(i int) {
 	if lb.isArray {
 		return
 	}
 	if i < 0 || i >= lb.SliceSize {
 		return
 	}
-
-	lb.SliceDeleteAtSelect(i)
-
+	lb.DeleteAtSelect(i)
 	reflectx.SliceDeleteAt(lb.Slice, i)
-
 	lb.This.(Lister).UpdateSliceSize()
-
-	lb.SendChange()
-	lb.Update()
+	lb.UpdateChange()
 }
 
 // MakeToolbar configures a [Toolbar] for this view
@@ -857,7 +848,7 @@ func (lb *ListBase) MakeToolbar(p *tree.Plan) {
 	tree.Add(p, func(w *Button) {
 		w.SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the slice").
 			OnClick(func(e events.Event) {
-				lb.This.(Lister).SliceNewAt(-1)
+				lb.This.(Lister).NewAt(-1)
 			})
 	})
 }
@@ -1392,13 +1383,11 @@ func (lb *ListBase) DeleteIndexes() { //types:add
 	if len(lb.SelectedIndexes) == 0 {
 		return
 	}
-
 	ixs := lb.SelectedIndexesList(true) // descending sort
 	for _, i := range ixs {
-		lb.This.(Lister).SliceDeleteAt(i)
+		lb.This.(Lister).DeleteAt(i)
 	}
-	lb.SendChange()
-	lb.Update()
+	lb.UpdateChange()
 }
 
 // CutIndexes copies selected indexes to system.Clipboard and deletes selected indexes
@@ -1412,7 +1401,7 @@ func (lb *ListBase) CutIndexes() { //types:add
 	idx := ixs[0]
 	lb.UnselectAllIndexes()
 	for _, i := range ixs {
-		lb.This.(Lister).SliceDeleteAt(i)
+		lb.This.(Lister).DeleteAt(i)
 	}
 	lb.SendChange()
 	lb.SelectIndexAction(idx, events.SelectOne)
@@ -1474,8 +1463,7 @@ func (lb *ListBase) PasteAssign(md mimedata.Mimes, idx int) {
 	}
 	ns := sl[0]
 	lb.SliceUnderlying.Index(idx).Set(reflect.ValueOf(ns).Elem())
-	lb.SendChange()
-	lb.Update()
+	lb.UpdateChange()
 }
 
 // PasteAtIndex inserts object(s) from mime data at (before) given slice index
@@ -1603,7 +1591,7 @@ func (lb *ListBase) DropDeleteSource(e events.Event) {
 	})
 	idx := lb.DraggedIndexes[0]
 	for _, i := range lb.DraggedIndexes {
-		lb.This.(Lister).SliceDeleteAt(i)
+		lb.This.(Lister).DeleteAt(i)
 	}
 	lb.DraggedIndexes = nil
 	lb.SelectIndexAction(idx, events.SelectOne)
@@ -1644,10 +1632,10 @@ func (lb *ListBase) ContextMenu(m *Scene) {
 		return
 	}
 	NewButton(m).SetText("Add row").SetIcon(icons.Add).OnClick(func(e events.Event) {
-		lb.SliceNewAtRow((lb.SelectedIndex - lb.StartIndex) + 1)
+		lb.NewAtRow((lb.SelectedIndex - lb.StartIndex) + 1)
 	})
 	NewButton(m).SetText("Delete row").SetIcon(icons.Delete).OnClick(func(e events.Event) {
-		lb.SliceDeleteAtRow(lb.SelectedIndex - lb.StartIndex)
+		lb.DeleteAtRow(lb.SelectedIndex - lb.StartIndex)
 	})
 	NewSeparator(m)
 	NewButton(m).SetText("Copy").SetIcon(icons.Copy).OnClick(func(e events.Event) {
@@ -1729,12 +1717,12 @@ func (lb *ListBase) KeyInputEditable(kt events.Event) {
 		}
 		kt.SetHandled()
 	case keymap.Insert:
-		lb.This.(Lister).SliceNewAt(idx)
+		lb.This.(Lister).NewAt(idx)
 		lb.SelectMode = false
 		lb.SelectIndexAction(idx+1, events.SelectOne) // todo: somehow nidx not working
 		kt.SetHandled()
 	case keymap.InsertAfter:
-		lb.This.(Lister).SliceNewAt(idx + 1)
+		lb.This.(Lister).NewAt(idx + 1)
 		lb.SelectMode = false
 		lb.SelectIndexAction(idx+1, events.SelectOne)
 		kt.SetHandled()

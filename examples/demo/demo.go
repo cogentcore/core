@@ -232,20 +232,16 @@ func inputs(ts *core.Tabs) {
 
 	core.NewSwitches(tab).SetType(core.SwitchChip).SetStrings("Chip 1", "Chip 2", "Chip 3")
 	core.NewSwitches(tab).SetType(core.SwitchCheckbox).SetStrings("Checkbox 1", "Checkbox 2", "Checkbox 3")
-	core.NewSwitches(tab).SetType(core.SwitchCheckbox).SetStrings("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
-		OnWidgetAdded(func(w core.Widget) { // TODO(config)
-			if sw, ok := w.(*core.Switch); ok {
-				sw.SetState(true, states.Indeterminate)
-			}
-		})
+	cs := core.NewSwitches(tab).SetType(core.SwitchCheckbox).SetStrings("Indeterminate 1", "Indeterminate 2", "Indeterminate 3")
+	cs.OnWidgetAdded(func(w core.Widget) {
+		w.AsWidget().SetState(true, states.Indeterminate)
+	})
 
 	core.NewSwitches(tab).SetType(core.SwitchRadioButton).SetMutex(true).SetStrings("Radio Button 1", "Radio Button 2", "Radio Button 3")
-	core.NewSwitches(tab).SetType(core.SwitchRadioButton).SetMutex(true).SetStrings("Indeterminate 1", "Indeterminate 2", "Indeterminate 3").
-		OnWidgetAdded(func(w core.Widget) {
-			if sw, ok := w.(*core.Switch); ok {
-				sw.SetState(true, states.Indeterminate)
-			}
-		})
+	rs := core.NewSwitches(tab).SetType(core.SwitchRadioButton).SetMutex(true).SetStrings("Indeterminate 1", "Indeterminate 2", "Indeterminate 3")
+	rs.OnWidgetAdded(func(w core.Widget) {
+		w.AsWidget().SetState(true, states.Indeterminate)
+	})
 
 	core.NewSwitches(tab).SetType(core.SwitchSegmentedButton).SetMutex(true).SetStrings("Segmented Button 1", "Segmented Button 2", "Segmented Button 3")
 }

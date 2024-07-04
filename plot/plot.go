@@ -35,7 +35,7 @@ type Plot struct {
 	// The default is [colors.Scheme.Surface].
 	Background image.Image
 
-	// standard text style with default params
+	// standard text style with default options
 	StandardTextStyle styles.Text
 
 	// X and Y are the horizontal and vertical axes

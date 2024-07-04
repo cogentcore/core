@@ -194,9 +194,8 @@ func (tb *Toolbar) OverflowMenu(m *Scene) {
 // AddOverflowMenu adds the given menu function to the overflow menu list.
 // These functions are called in reverse order such that the last added function
 // is called first when constructing the menu.
-func (tb *Toolbar) AddOverflowMenu(fun func(m *Scene)) *Toolbar {
+func (tb *Toolbar) AddOverflowMenu(fun func(m *Scene)) {
 	tb.OverflowMenus = append(tb.OverflowMenus, fun)
-	return tb
 }
 
 // ToolbarStyles styles the given widget to have standard toolbar styling.
@@ -216,7 +215,7 @@ func ToolbarStyles(w Widget) {
 			s.Padding.SetVertical(units.Dp(16))
 		}
 	})
-	w.AsWidget().OnWidgetAdded(func(w Widget) { // TODO(config)
+	w.AsWidget().OnWidgetAdded(func(w Widget) {
 		if bt := AsButton(w); bt != nil {
 			bt.Type = ButtonAction
 			return
@@ -227,15 +226,4 @@ func ToolbarStyles(w Widget) {
 			})
 		}
 	})
-}
-
-// BasicBar is a [Frame] that automatically has [ToolbarStyles] applied but does
-// not have the more advanced features of a [Toolbar].
-type BasicBar struct {
-	Frame
-}
-
-func (tb *BasicBar) Init() {
-	tb.Frame.Init()
-	ToolbarStyles(tb)
 }

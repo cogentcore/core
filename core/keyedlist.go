@@ -82,8 +82,7 @@ func (kl *KeyedList) Init() {
 					s.SetTextWrap(false)
 				})
 				wb.OnChange(func(e events.Event) {
-					kl.SendChange(e)
-					kl.Update()
+					kl.UpdateChange(e)
 				})
 				wb.SetReadOnly(kl.IsReadOnly())
 				wb.OnInput(kl.HandleEvent)
@@ -151,7 +150,7 @@ func (kl *KeyedList) Init() {
 					w.SetIcon(icons.Add).SetType(ButtonTonal)
 					w.Tooltip = "Add an element"
 					w.OnClick(func(e events.Event) {
-						kl.MapAdd()
+						kl.AddItem()
 					})
 				})
 			}
@@ -162,8 +161,7 @@ func (kl *KeyedList) Init() {
 					d := NewBody().AddTitle(kl.ValueTitle).AddText(kl.Tooltip)
 					NewKeyedList(d).SetMap(kl.Map).SetValueTitle(kl.ValueTitle)
 					d.OnClose(func(e events.Event) {
-						kl.Update()
-						kl.SendChange()
+						kl.UpdateChange(e)
 					})
 					d.RunFullDialog(kl)
 				})
@@ -177,10 +175,10 @@ func (kl *KeyedList) ContextMenu(m *Scene, keyv reflect.Value) {
 		return
 	}
 	NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
-		kl.MapAdd()
+		kl.AddItem()
 	})
 	NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
-		kl.MapDelete(keyv)
+		kl.DeleteItem(keyv)
 	})
 }
 
@@ -190,26 +188,22 @@ func (kl *KeyedList) ToggleSort() {
 	kl.Update()
 }
 
-// MapAdd adds a new entry to the map
-func (kl *KeyedList) MapAdd() {
+// AddItem adds a new key-value item to the map.
+func (kl *KeyedList) AddItem() {
 	if reflectx.AnyIsNil(kl.Map) {
 		return
 	}
 	reflectx.MapAdd(kl.Map)
-
-	kl.SendChange()
-	kl.Update()
+	kl.UpdateChange()
 }
 
-// MapDelete deletes a key-value from the map
-func (kl *KeyedList) MapDelete(key reflect.Value) {
+// DeleteItem deletes a key-value item from the map.
+func (kl *KeyedList) DeleteItem(key reflect.Value) {
 	if reflectx.AnyIsNil(kl.Map) {
 		return
 	}
 	reflectx.MapDelete(kl.Map, reflectx.NonPointerValue(key))
-
-	kl.SendChange()
-	kl.Update()
+	kl.UpdateChange()
 }
 
 // MakeToolbar configures a [Toolbar] for this view
@@ -227,7 +221,7 @@ func (kl *KeyedList) MakeToolbar(p *tree.Plan) {
 		tree.Add(p, func(w *Button) {
 			w.SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
 				OnClick(func(e events.Event) {
-					kl.MapAdd()
+					kl.AddItem()
 				})
 		})
 	}

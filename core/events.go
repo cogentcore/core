@@ -206,7 +206,7 @@ func (em *Events) HandleFocusEvent(e events.Event) {
 			if !wb.IsVisible() {
 				return tree.Break
 			}
-			wb.FirstHandleEvent(e)
+			wb.firstHandleEvent(e)
 			return !e.IsHandled()
 		})
 		if !e.IsHandled() {
@@ -218,7 +218,7 @@ func (em *Events) HandleFocusEvent(e events.Event) {
 				if !wb.IsVisible() {
 					return tree.Break
 				}
-				wb.FinalHandleEvent(e)
+				wb.finalHandleEvent(e)
 				return !e.IsHandled()
 			})
 		}
@@ -1121,10 +1121,11 @@ func (em *Events) ManagerKeyChordEvents(e events.Event) {
 			e.SetHandled()
 		}
 	case keymap.WinSnapshot:
-		dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
-		fnm, _ := filepath.Abs("./GrabOf_" + sc.Name + "_" + dstr + ".png")
-		imagex.Save(sc.Pixels, fnm)
-		fmt.Printf("Saved RenderWindow Image to: %s\n", fnm)
+		dstr := time.Now().Format(time.DateOnly + "-" + "15-04-05")
+		fnm := filepath.Join(TheApp.AppDataDir(), "screenshot-"+sc.Name+"-"+dstr+".png")
+		if errors.Log(imagex.Save(sc.Pixels, fnm)) == nil {
+			fmt.Println("Saved screenshot to", strings.ReplaceAll(fnm, " ", `\ `))
+		}
 		e.SetHandled()
 	case keymap.ZoomIn:
 		win.StepZoom(1)

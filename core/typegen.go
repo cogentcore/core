@@ -164,11 +164,12 @@ func NewColorMapButton(parent ...tree.Node) *ColorMapButton {
 // SetMapName sets the [ColorMapButton.MapName]
 func (t *ColorMapButton) SetMapName(v string) *ColorMapButton { t.MapName = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ColorPicker", IDName: "color-picker", Doc: "ColorPicker represents a color value with an interactive color picker\ncomposed of three HCT sliders and standard accent color buttons.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Color", Doc: "Color is the current color."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ColorPicker", IDName: "color-picker", Doc: "ColorPicker represents a color value with an interactive color picker\ncomposed of history buttons, a hex input, three HCT sliders, and standard\nnamed color buttons.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Color", Doc: "Color is the current color."}}})
 
 // NewColorPicker returns a new [ColorPicker] with the given optional parent:
 // ColorPicker represents a color value with an interactive color picker
-// composed of three HCT sliders and standard accent color buttons.
+// composed of history buttons, a hex input, three HCT sliders, and standard
+// named color buttons.
 func NewColorPicker(parent ...tree.Node) *ColorPicker { return tree.New[ColorPicker](parent...) }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.ColorButton", IDName: "color-button", Doc: "ColorButton represents a color value with a button.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Color"}}})
@@ -222,15 +223,15 @@ func (t *Complete) SetCompletion(v string) *Complete { t.Completion = v; return 
 // Stage is the [PopupStage] associated with the [Complete]
 func (t *Complete) SetStage(v *Stage) *Complete { t.Stage = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FilePicker", IDName: "file-picker", Doc: "FilePicker is a widget for selecting files.", Methods: []types.Method{{Name: "UpdateFilesAction", Doc: "UpdateFilesAction updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddPathToFavorites", Doc: "AddPathToFavorites adds the current path to favorites", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DirectoryUp", Doc: "DirectoryUp moves up one directory in the path", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "NewFolder", Doc: "NewFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Directory", Doc: "Directory is the absolute path to the directory of files to display."}, {Name: "SelectedFilename", Doc: "SelectedFilename is the name of the currently selected file, not including the directory.\nSee [FilePicker.SelectedFile] for the full path."}, {Name: "Extensions", Doc: "Extensions is a list of the target file extensions.\nIf there are multiple, they must be comma separated.\nThe extensions must include the dot (\".\") at the start.\nThey must be set using [FilePicker.SetExtensions]."}, {Name: "FilterFunc", Doc: "FilterFunc is an optional filtering function for which files to display."}, {Name: "extensionMap", Doc: "extensionMap is a map of lower-cased extensions from Extensions.\nIt used for highlighting files with one of these extensions;\nmaps onto original Extensions value."}, {Name: "files", Doc: "files for current directory"}, {Name: "selectedIndex", Doc: "index of currently selected file in Files list (-1 if none)"}, {Name: "watcher", Doc: "change notify for current dir"}, {Name: "doneWatcher", Doc: "channel to close watcher watcher"}, {Name: "prevPath", Doc: "Previous path that was processed via UpdateFiles"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FilePicker", IDName: "file-picker", Doc: "FilePicker is a widget for selecting files.", Methods: []types.Method{{Name: "UpdateFilesAction", Doc: "UpdateFilesAction updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddPathToFavorites", Doc: "AddPathToFavorites adds the current path to favorites", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DirectoryUp", Doc: "DirectoryUp moves up one directory in the path", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "NewFolder", Doc: "NewFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Directory", Doc: "Directory is the absolute path to the directory of files to display."}, {Name: "SelectedFilename", Doc: "SelectedFilename is the name of the currently selected file, not including the directory.\nSee [FilePicker.SelectedFile] for the full path."}, {Name: "Extensions", Doc: "Extensions is a list of the target file extensions.\nIf there are multiple, they must be comma separated.\nThe extensions must include the dot (\".\") at the start.\nThey must be set using [FilePicker.SetExtensions]."}, {Name: "Filterer", Doc: "Filterer is an optional filtering function for which files to display."}, {Name: "extensionMap", Doc: "extensionMap is a map of lower-cased extensions from Extensions.\nIt used for highlighting files with one of these extensions;\nmaps onto original Extensions value."}, {Name: "files", Doc: "files for current directory"}, {Name: "selectedIndex", Doc: "index of currently selected file in Files list (-1 if none)"}, {Name: "watcher", Doc: "change notify for current dir"}, {Name: "doneWatcher", Doc: "channel to close watcher watcher"}, {Name: "prevPath", Doc: "Previous path that was processed via UpdateFiles"}}})
 
 // NewFilePicker returns a new [FilePicker] with the given optional parent:
 // FilePicker is a widget for selecting files.
 func NewFilePicker(parent ...tree.Node) *FilePicker { return tree.New[FilePicker](parent...) }
 
-// SetFilterFunc sets the [FilePicker.FilterFunc]:
-// FilterFunc is an optional filtering function for which files to display.
-func (t *FilePicker) SetFilterFunc(v FilePickerFilterFunc) *FilePicker { t.FilterFunc = v; return t }
+// SetFilterer sets the [FilePicker.Filterer]:
+// Filterer is an optional filtering function for which files to display.
+func (t *FilePicker) SetFilterer(v FilePickerFilterer) *FilePicker { t.Filterer = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FileButton", IDName: "file-button", Doc: "FileButton represents a [Filename] value with a button\nthat opens a [FilePicker].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Filename"}}})
 
@@ -1190,13 +1191,6 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Toolbar", IDNa
 // manages additional items that are always placed onto this overflow menu.
 // Use [Body.AddAppBar] to add to the default toolbar at the top of an app.
 func NewToolbar(parent ...tree.Node) *Toolbar { return tree.New[Toolbar](parent...) }
-
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.BasicBar", IDName: "basic-bar", Doc: "BasicBar is a [Frame] that automatically has [ToolbarStyles] applied but does\nnot have the more advanced features of a [Toolbar].", Embeds: []types.Field{{Name: "Frame"}}})
-
-// NewBasicBar returns a new [BasicBar] with the given optional parent:
-// BasicBar is a [Frame] that automatically has [ToolbarStyles] applied but does
-// not have the more advanced features of a [Toolbar].
-func NewBasicBar(parent ...tree.Node) *BasicBar { return tree.New[BasicBar](parent...) }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Treer", IDName: "treer", Doc: "Treer is an interface for [Tree] types\nproviding access to the base [Tree] and\noverridable method hooks for actions taken on the [Tree],\nincluding OnOpen, OnClose, etc.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Methods: []types.Method{{Name: "AsCoreTree", Doc: "AsTree returns the base [Tree] for this node.", Returns: []string{"Tree"}}, {Name: "CanOpen", Doc: "CanOpen returns true if the node is able to open.\nBy default it checks HasChildren(), but could check other properties\nto perform lazy building of the tree.", Returns: []string{"bool"}}, {Name: "OnOpen", Doc: "OnOpen is called when a node is opened.\nThe base version does nothing."}, {Name: "OnClose", Doc: "OnClose is called when a node is closed\nThe base version does nothing."}, {Name: "DeleteNode"}, {Name: "Duplicate"}, {Name: "AddChildNode"}, {Name: "InsertBefore"}, {Name: "InsertAfter"}, {Name: "MimeData", Args: []string{"md"}}, {Name: "Cut"}, {Name: "Copy"}, {Name: "Paste"}, {Name: "DragStart", Args: []string{"e"}}, {Name: "DragDrop", Args: []string{"e"}}, {Name: "DropFinalize", Args: []string{"de"}}, {Name: "DropDeleteSource", Args: []string{"e"}}, {Name: "MakePasteMenu", Args: []string{"m", "md", "fun"}}}})
 

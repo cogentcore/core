@@ -6,6 +6,8 @@ package ordmap
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMap(t *testing.T) {
@@ -14,62 +16,26 @@ func TestMap(t *testing.T) {
 	om.Add("key1", 1)
 	om.Add("key2", 2)
 
-	if v, ok := om.ValueByKeyTry("key1"); !ok || v != 1 {
-		t.Error("ValByKey")
-	}
+	assert.Equal(t, 1, om.ValueByKey("key1"))
+	assert.Equal(t, 2, om.IndexByKey("key2"))
 
-	if i, ok := om.IndexByKeyTry("key2"); !ok || i != 2 {
-		t.Error("IndexByKey")
-	}
+	assert.Equal(t, "key0", om.KeyByIndex(0))
+	assert.Equal(t, 1, om.ValueByIndex(1))
 
-	if om.KeyByIndex(0) != "key0" {
-		t.Error("KeyByIndex")
-	}
-
-	if om.ValueByIndex(1) != 1 {
-		t.Error("ValByIndex")
-	}
-
-	if om.Len() != 3 {
-		t.Error("Len")
-	}
+	assert.Equal(t, 3, om.Len())
 
 	om.DeleteIndex(1, 2)
-	// for i, kv := range om.Order {
-	// 	fmt.Printf("i: %d\tkv: %v\n", i, kv)
-	// }
-	if om.ValueByIndex(1) != 2 {
-		t.Error("DeleteIndex")
-	}
-	if i, ok := om.IndexByKeyTry("key2"); !ok || i != 1 {
-		t.Error("Delete IndexByKey")
-	}
+	assert.Equal(t, 2, om.ValueByIndex(1))
+	assert.Equal(t, 1, om.IndexByKey("key2"))
 
-	// fmt.Printf("%v\n", om.Map)
 	om.InsertAtIndex(0, "new0", 3)
-	// fmt.Printf("%v\n", om.Map)
-	if om.ValueByIndex(0) != 3 {
-		t.Error("InsertAtIndex ValByIndex 0")
-	}
-	if om.ValueByIndex(1) != 0 {
-		t.Error("InsertAtIndex ValByIndex 1")
-	}
-	if i, ok := om.IndexByKeyTry("key2"); !ok || i != 2 {
-		t.Errorf("InsertAtIndex IndexByKey: %d != 2", i)
-	}
-
-	// constr
+	assert.Equal(t, 3, om.ValueByIndex(0))
+	assert.Equal(t, 0, om.ValueByIndex(1))
+	assert.Equal(t, 2, om.IndexByKey("key2"))
 
 	nm := Make([]KeyValue[string, int]{{"one", 1}, {"two", 2}, {"three", 3}})
 
-	if nm.ValueByIndex(2) != 3 {
-		t.Error("Make ValByIndex 2")
-	}
-	if nm.ValueByIndex(1) != 2 {
-		t.Error("Make ValByIndex 1")
-	}
-	if val, ok := nm.ValueByKeyTry("three"); !ok || val != 3 {
-		t.Error("Make ValByKey 3")
-	}
-
+	assert.Equal(t, 3, nm.ValueByIndex(2))
+	assert.Equal(t, 2, nm.ValueByIndex(1))
+	assert.Equal(t, 3, nm.ValueByKey("three"))
 }

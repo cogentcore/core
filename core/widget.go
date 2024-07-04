@@ -161,7 +161,7 @@ type WidgetBase struct {
 	// For example, trees use parts to separate their internal parts from
 	// the other child tree nodes. Composite widgets like buttons should
 	// NOT use parts to store their components; parts should only be used when
-	// absolutely necessary.
+	// absolutely necessary. Use [WidgetBase.NewParts] to make the parts.
 	Parts *Frame `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Geom has the full layout geometry for size and position of this Widget
@@ -190,11 +190,11 @@ type WidgetBase struct {
 	// and [WidgetBase.OnFinal] functions, or any of the various On{EventType} helper functions.
 	Listeners tiered.Tiered[events.Listeners] `copier:"-" json:"-" xml:"-" set:"-" edit:"-" display:"add-fields"`
 
-	// A slice of functions to call on all widgets that are added as children
-	// to this widget or its children. These functions are called in sequential
+	// OnWidgetAdders is a slice of functions called on widgets that are added as
+	// direct children of this widget. These functions are called in sequential
 	// ascending order, so the last added one is called last and thus can
 	// override anything set by the other ones. These should be set using
-	// OnWidgetAdded, which can be called by both end-user and internal code.
+	// [WidgetBase.OnWidgetAdded].
 	OnWidgetAdders []func(w Widget) `copier:"-" json:"-" xml:"-" set:"-" edit:"-"`
 
 	// ContextMenus is a slice of menu functions to call to construct
@@ -307,17 +307,14 @@ func (wb *WidgetBase) SetScene(sc *Scene) {
 }
 
 func (wb *WidgetBase) OnChildAdded(child tree.Node) {
-	w, _ := AsWidget(child)
-	if w == nil {
-		return
-	}
+	w := child.(Widget)
 	for _, f := range wb.OnWidgetAdders {
 		f(w)
 	}
 }
 
-// OnWidgetAdded adds a function to call when a widget is added
-// as a child to the widget or any of its children.
+// OnWidgetAdded adds a function that is called when a widget is added
+// as a direct child of the widget.
 func (wb *WidgetBase) OnWidgetAdded(fun func(w Widget)) {
 	wb.OnWidgetAdders = append(wb.OnWidgetAdders, fun)
 }

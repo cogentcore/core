@@ -45,11 +45,9 @@ type Node interface {
 	// by higher-level types that want to do something.
 	OnAdd()
 
-	// OnChildAdded is called when a node is added to
-	// this node or any of its children. When a node is added to
-	// a tree, it calls [OnAdd] and then this function on each of its parents,
-	// going in order from the closest parent to the furthest parent.
-	// This function does nothing by default, but it can be
+	// OnChildAdded is called when a node is added as a direct child of this node.
+	// When a node is added to a parent, it calls [OnAdd] and then this function on
+	// its parent. This function does nothing by default, but it can be
 	// implemented by higher-level types that want to do something.
 	OnChildAdded(child Node)
 
