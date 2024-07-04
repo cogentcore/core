@@ -187,7 +187,9 @@ func (wb *WidgetBase) SendChange(original ...events.Event) {
 }
 
 // UpdateChange is a helper function that calls [WidgetBase.SendChange]
-// and then [WidgetBase.Update] (which is critically the only correct order).
+// and then [WidgetBase.Update]. That is the only correct order, since
+// calling [WidgetBase.Update] first would cause the value of the widget
+// to be incorrectly overridden in a [Value] context.
 func (wb *WidgetBase) UpdateChange(original ...events.Event) {
 	wb.SendChange(original...)
 	wb.Update()
