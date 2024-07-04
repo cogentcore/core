@@ -14,18 +14,18 @@ import (
 	"cogentcore.org/core/cmd/core/config"
 )
 
-// AppJSTmpl is the template used in [MakeAppJS] to build the app.js file
-var AppJSTmpl = template.Must(template.New("app.js").Parse(AppJS))
+// appJSTmpl is the template used in [makeAppJS] to build the app.js file
+var appJSTmpl = template.Must(template.New("app.js").Parse(appJS))
 
-// AppJSData is the data passed to AppJSTmpl
-type AppJSData struct {
+// appJSData is the data passed to [appJSTmpl]
+type appJSData struct {
 	Env                     string
 	WasmContentLengthHeader string
 	AutoUpdateInterval      int64
 }
 
-// MakeAppJS exectues [AppJSTmpl] based on the given configuration information.
-func MakeAppJS(c *config.Config) ([]byte, error) {
+// makeAppJS exectues [appJSTmpl] based on the given configuration information.
+func makeAppJS(c *config.Config) ([]byte, error) {
 	if c.Web.Env == nil {
 		c.Web.Env = make(map[string]string)
 	}
@@ -43,28 +43,28 @@ func MakeAppJS(c *config.Config) ([]byte, error) {
 		return nil, err
 	}
 
-	d := AppJSData{
+	d := appJSData{
 		Env:                     string(wenv),
 		WasmContentLengthHeader: c.Web.WasmContentLengthHeader,
 		AutoUpdateInterval:      c.Web.AutoUpdateInterval.Milliseconds(),
 	}
 	b := &bytes.Buffer{}
-	err = AppJSTmpl.Execute(b, d)
+	err = appJSTmpl.Execute(b, d)
 	if err != nil {
 		return nil, err
 	}
 	return b.Bytes(), nil
 }
 
-// AppWorkerJSData is the data passed to [config.Config.Web.ServiceWorkerTemplate]
-type AppWorkerJSData struct {
+// appWorkerJSData is the data passed to [config.Config.Web.ServiceWorkerTemplate]
+type appWorkerJSData struct {
 	Version          string
 	ResourcesToCache string
 }
 
-// MakeWorkerJS executes [config.Config.Web.ServiceWorkerTemplate]. If it empty, it
-// sets it to [DefaultAppWorkerJS].
-func MakeAppWorkerJS(c *config.Config) ([]byte, error) {
+// makeAppWorkerJS executes [config.Config.Web.ServiceWorkerTemplate]. If it empty, it
+// sets it to [appWorkerJS].
+func makeAppWorkerJS(c *config.Config) ([]byte, error) {
 	resources := []string{
 		"app.css",
 		"app.js",
@@ -74,7 +74,7 @@ func MakeAppWorkerJS(c *config.Config) ([]byte, error) {
 		"index.html",
 	}
 
-	tmpl, err := template.New("app-worker.js").Parse(DefaultAppWorkerJS)
+	tmpl, err := template.New("app-worker.js").Parse(appWorkerJS)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func MakeAppWorkerJS(c *config.Config) ([]byte, error) {
 		return nil, err
 	}
 
-	d := AppWorkerJSData{
+	d := appWorkerJSData{
 		Version:          c.Version,
 		ResourcesToCache: string(rstr),
 	}
@@ -97,37 +97,37 @@ func MakeAppWorkerJS(c *config.Config) ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-// ManifestJSONTmpl is the template used in [MakeManifestJSON] to build the mainfest.webmanifest file
-var ManifestJSONTmpl = template.Must(template.New("manifest.webmanifest").Parse(ManifestJSON))
+// manifestJSONTmpl is the template used in [makeManifestJSON] to build the mainfest.webmanifest file
+var manifestJSONTmpl = template.Must(template.New("manifest.webmanifest").Parse(manifestJSON))
 
-// ManifestJSONData is the data passed to [ManifestJSONTmpl]
-type ManifestJSONData struct {
+// manifestJSONData is the data passed to [manifestJSONTmpl]
+type manifestJSONData struct {
 	ShortName   string
 	Name        string
 	Description string
 }
 
-// MakeManifestJSON exectues [ManifestJSONTmpl] based on the given configuration information.
-func MakeManifestJSON(c *config.Config) ([]byte, error) {
-	d := ManifestJSONData{
+// makeManifestJSON exectues [manifestJSONTmpl] based on the given configuration information.
+func makeManifestJSON(c *config.Config) ([]byte, error) {
+	d := manifestJSONData{
 		ShortName:   c.Name,
 		Name:        c.Name,
 		Description: c.About,
 	}
 
 	b := &bytes.Buffer{}
-	err := ManifestJSONTmpl.Execute(b, d)
+	err := manifestJSONTmpl.Execute(b, d)
 	if err != nil {
 		return nil, err
 	}
 	return b.Bytes(), nil
 }
 
-// IndexHTMLTmpl is the template used in [MakeIndexHTML] to build the index.html file
-var IndexHTMLTmpl = template.Must(template.New("index.html").Parse(IndexHTML))
+// indexHTMLTmpl is the template used in [makeIndexHTML] to build the index.html file
+var indexHTMLTmpl = template.Must(template.New("index.html").Parse(indexHTML))
 
-// IndexHTMLData is the data passed to [IndexHTMLTmpl]
-type IndexHTMLData struct {
+// indexHTMLData is the data passed to [indexHTMLTmpl]
+type indexHTMLData struct {
 	BasePath               string
 	Author                 string
 	Desc                   string
@@ -139,14 +139,14 @@ type IndexHTMLData struct {
 	GithubVanityRepository string
 }
 
-// MakeIndexHTML exectues [IndexHTMLTmpl] based on the given configuration information,
+// makeIndexHTML exectues [indexHTMLTmpl] based on the given configuration information,
 // base path for app resources (used in [MakePages]), and optional title (used in [MakePages],
 // defaults to [config.Config.Name] otherwise).
-func MakeIndexHTML(c *config.Config, basePath string, title string) ([]byte, error) {
+func makeIndexHTML(c *config.Config, basePath string, title string) ([]byte, error) {
 	if title == "" {
 		title = c.Name
 	}
-	d := IndexHTMLData{
+	d := indexHTMLData{
 		BasePath:               basePath,
 		Author:                 c.Web.Author,
 		Desc:                   c.About,
@@ -159,7 +159,7 @@ func MakeIndexHTML(c *config.Config, basePath string, title string) ([]byte, err
 	}
 
 	b := &bytes.Buffer{}
-	err := IndexHTMLTmpl.Execute(b, d)
+	err := indexHTMLTmpl.Execute(b, d)
 	if err != nil {
 		return nil, err
 	}
