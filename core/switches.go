@@ -151,9 +151,7 @@ func (sw *Switches) Init() {
 						sw.SelectedIndexes = slices.DeleteFunc(sw.SelectedIndexes, func(v int) bool { return v == i })
 					}
 					sw.SendChange(e)
-					sw.UpdateTree()
-					sw.StyleTree()
-					sw.NeedsRender()
+					sw.UpdateRender()
 				})
 				w.Styler(func(s *styles.Style) {
 					if sw.Type != SwitchSegmentedButton {

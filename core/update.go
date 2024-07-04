@@ -67,6 +67,10 @@ func (wb *WidgetBase) Update() { //types:add
 
 // UpdateRender is the same as [WidgetBase.Update], except that it calls
 // [WidgetBase.NeedsRender] instead of [WidgetBase.NeedsLayout].
+// This should be called when the changes made to the widget do not
+// require a new layout pass (if you change the size, spacing, alignment,
+// or other layout properties of the widget, you need a new layout pass
+// and should call [WidgetBase.Update] instead).
 func (wb *WidgetBase) UpdateRender() {
 	wb.WidgetWalkDown(func(w Widget, wb *WidgetBase) bool {
 		wb.UpdateWidget()
