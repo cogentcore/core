@@ -25,8 +25,6 @@ import (
 var Icons = fsx.Sub(defaults, "svg")
 
 // defaults contains the default icons.
-//
-//go:embed svg/*.svg
 var defaults embed.FS
 
 const (

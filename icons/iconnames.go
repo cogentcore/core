@@ -2,6190 +2,8213 @@
 
 package icons
 
-const (
-	// Abc is https://github.com/cogentcore/core/blob/main/icons/svg/abc.svg
-	Abc Icon = "abc"
-
-	// AccountCircle is https://github.com/cogentcore/core/blob/main/icons/svg/account_circle.svg
-	AccountCircle Icon = "account_circle"
-
-	// AccountCircleOff is https://github.com/cogentcore/core/blob/main/icons/svg/account_circle_off.svg
-	AccountCircleOff Icon = "account_circle_off"
-
-	// Ad is https://github.com/cogentcore/core/blob/main/icons/svg/ad.svg
-	Ad Icon = "ad"
-
-	// AdOff is https://github.com/cogentcore/core/blob/main/icons/svg/ad_off.svg
-	AdOff Icon = "ad_off"
-
-	// Adb is https://github.com/cogentcore/core/blob/main/icons/svg/adb.svg
-	Adb Icon = "adb"
-
-	// Add is https://github.com/cogentcore/core/blob/main/icons/svg/add.svg
-	Add Icon = "add"
-
-	// AddAPhoto is https://github.com/cogentcore/core/blob/main/icons/svg/add_a_photo.svg
-	AddAPhoto Icon = "add_a_photo"
-
-	// AddAlert is https://github.com/cogentcore/core/blob/main/icons/svg/add_alert.svg
-	AddAlert Icon = "add_alert"
-
-	// AddBox is https://github.com/cogentcore/core/blob/main/icons/svg/add_box.svg
-	AddBox Icon = "add_box"
-
-	// AddCall is https://github.com/cogentcore/core/blob/main/icons/svg/add_call.svg
-	AddCall Icon = "add_call"
-
-	// AddCard is https://github.com/cogentcore/core/blob/main/icons/svg/add_card.svg
-	AddCard Icon = "add_card"
-
-	// AddChart is https://github.com/cogentcore/core/blob/main/icons/svg/add_chart.svg
-	AddChart Icon = "add_chart"
-
-	// AddCircle is https://github.com/cogentcore/core/blob/main/icons/svg/add_circle.svg
-	AddCircle Icon = "add_circle"
-
-	// AddComment is https://github.com/cogentcore/core/blob/main/icons/svg/add_comment.svg
-	AddComment Icon = "add_comment"
-
-	// AddHome is https://github.com/cogentcore/core/blob/main/icons/svg/add_home.svg
-	AddHome Icon = "add_home"
-
-	// AddHomeWork is https://github.com/cogentcore/core/blob/main/icons/svg/add_home_work.svg
-	AddHomeWork Icon = "add_home_work"
-
-	// AddLink is https://github.com/cogentcore/core/blob/main/icons/svg/add_link.svg
-	AddLink Icon = "add_link"
-
-	// AddLocation is https://github.com/cogentcore/core/blob/main/icons/svg/add_location.svg
-	AddLocation Icon = "add_location"
-
-	// AddNotes is https://github.com/cogentcore/core/blob/main/icons/svg/add_notes.svg
-	AddNotes Icon = "add_notes"
-
-	// AddShoppingCart is https://github.com/cogentcore/core/blob/main/icons/svg/add_shopping_cart.svg
-	AddShoppingCart Icon = "add_shopping_cart"
-
-	// AddTask is https://github.com/cogentcore/core/blob/main/icons/svg/add_task.svg
-	AddTask Icon = "add_task"
-
-	// AddToQueue is https://github.com/cogentcore/core/blob/main/icons/svg/add_to_queue.svg
-	AddToQueue Icon = "add_to_queue"
-
-	// Adjust is https://github.com/cogentcore/core/blob/main/icons/svg/adjust.svg
-	Adjust Icon = "adjust"
-
-	// AdminMeds is https://github.com/cogentcore/core/blob/main/icons/svg/admin_meds.svg
-	AdminMeds Icon = "admin_meds"
-
-	// AdminPanelSettings is https://github.com/cogentcore/core/blob/main/icons/svg/admin_panel_settings.svg
-	AdminPanelSettings Icon = "admin_panel_settings"
-
-	// Agender is https://github.com/cogentcore/core/blob/main/icons/svg/agender.svg
-	Agender Icon = "agender"
-
-	// Agriculture is https://github.com/cogentcore/core/blob/main/icons/svg/agriculture.svg
-	Agriculture Icon = "agriculture"
-
-	// Air is https://github.com/cogentcore/core/blob/main/icons/svg/air.svg
-	Air Icon = "air"
-
-	// Airplay is https://github.com/cogentcore/core/blob/main/icons/svg/airplay.svg
-	Airplay Icon = "airplay"
-
-	// Alarm is https://github.com/cogentcore/core/blob/main/icons/svg/alarm.svg
-	Alarm Icon = "alarm"
-
-	// AlarmAdd is https://github.com/cogentcore/core/blob/main/icons/svg/alarm_add.svg
-	AlarmAdd Icon = "alarm_add"
-
-	// AlarmOff is https://github.com/cogentcore/core/blob/main/icons/svg/alarm_off.svg
-	AlarmOff Icon = "alarm_off"
-
-	// AlarmOn is https://github.com/cogentcore/core/blob/main/icons/svg/alarm_on.svg
-	AlarmOn Icon = "alarm_on"
-
-	// Album is https://github.com/cogentcore/core/blob/main/icons/svg/album.svg
-	Album Icon = "album"
-
-	// AlignCenter is https://github.com/cogentcore/core/blob/main/icons/svg/align_center.svg
-	AlignCenter Icon = "align_center"
-
-	// AlignEnd is https://github.com/cogentcore/core/blob/main/icons/svg/align_end.svg
-	AlignEnd Icon = "align_end"
-
-	// AlignFlexCenter is https://github.com/cogentcore/core/blob/main/icons/svg/align_flex_center.svg
-	AlignFlexCenter Icon = "align_flex_center"
-
-	// AlignFlexEnd is https://github.com/cogentcore/core/blob/main/icons/svg/align_flex_end.svg
-	AlignFlexEnd Icon = "align_flex_end"
-
-	// AlignFlexStart is https://github.com/cogentcore/core/blob/main/icons/svg/align_flex_start.svg
-	AlignFlexStart Icon = "align_flex_start"
-
-	// AlignHorizontalCenter is https://github.com/cogentcore/core/blob/main/icons/svg/align_horizontal_center.svg
-	AlignHorizontalCenter Icon = "align_horizontal_center"
-
-	// AlignHorizontalLeft is https://github.com/cogentcore/core/blob/main/icons/svg/align_horizontal_left.svg
-	AlignHorizontalLeft Icon = "align_horizontal_left"
-
-	// AlignHorizontalRight is https://github.com/cogentcore/core/blob/main/icons/svg/align_horizontal_right.svg
-	AlignHorizontalRight Icon = "align_horizontal_right"
-
-	// AlignItemsStretch is https://github.com/cogentcore/core/blob/main/icons/svg/align_items_stretch.svg
-	AlignItemsStretch Icon = "align_items_stretch"
-
-	// AlignJustifyCenter is https://github.com/cogentcore/core/blob/main/icons/svg/align_justify_center.svg
-	AlignJustifyCenter Icon = "align_justify_center"
-
-	// AlignJustifyFlexEnd is https://github.com/cogentcore/core/blob/main/icons/svg/align_justify_flex_end.svg
-	AlignJustifyFlexEnd Icon = "align_justify_flex_end"
-
-	// AlignJustifyFlexStart is https://github.com/cogentcore/core/blob/main/icons/svg/align_justify_flex_start.svg
-	AlignJustifyFlexStart Icon = "align_justify_flex_start"
-
-	// AlignJustifySpaceAround is https://github.com/cogentcore/core/blob/main/icons/svg/align_justify_space_around.svg
-	AlignJustifySpaceAround Icon = "align_justify_space_around"
-
-	// AlignJustifySpaceBetween is https://github.com/cogentcore/core/blob/main/icons/svg/align_justify_space_between.svg
-	AlignJustifySpaceBetween Icon = "align_justify_space_between"
-
-	// AlignJustifySpaceEven is https://github.com/cogentcore/core/blob/main/icons/svg/align_justify_space_even.svg
-	AlignJustifySpaceEven Icon = "align_justify_space_even"
-
-	// AlignJustifyStretch is https://github.com/cogentcore/core/blob/main/icons/svg/align_justify_stretch.svg
-	AlignJustifyStretch Icon = "align_justify_stretch"
-
-	// AlignSelfStretch is https://github.com/cogentcore/core/blob/main/icons/svg/align_self_stretch.svg
-	AlignSelfStretch Icon = "align_self_stretch"
-
-	// AlignSpaceAround is https://github.com/cogentcore/core/blob/main/icons/svg/align_space_around.svg
-	AlignSpaceAround Icon = "align_space_around"
-
-	// AlignSpaceBetween is https://github.com/cogentcore/core/blob/main/icons/svg/align_space_between.svg
-	AlignSpaceBetween Icon = "align_space_between"
-
-	// AlignSpaceEven is https://github.com/cogentcore/core/blob/main/icons/svg/align_space_even.svg
-	AlignSpaceEven Icon = "align_space_even"
-
-	// AlignStart is https://github.com/cogentcore/core/blob/main/icons/svg/align_start.svg
-	AlignStart Icon = "align_start"
-
-	// AlignStretch is https://github.com/cogentcore/core/blob/main/icons/svg/align_stretch.svg
-	AlignStretch Icon = "align_stretch"
-
-	// AlignVerticalBottom is https://github.com/cogentcore/core/blob/main/icons/svg/align_vertical_bottom.svg
-	AlignVerticalBottom Icon = "align_vertical_bottom"
-
-	// AlignVerticalCenter is https://github.com/cogentcore/core/blob/main/icons/svg/align_vertical_center.svg
-	AlignVerticalCenter Icon = "align_vertical_center"
-
-	// AlignVerticalTop is https://github.com/cogentcore/core/blob/main/icons/svg/align_vertical_top.svg
-	AlignVerticalTop Icon = "align_vertical_top"
-
-	// AllInbox is https://github.com/cogentcore/core/blob/main/icons/svg/all_inbox.svg
-	AllInbox Icon = "all_inbox"
-
-	// AllMatch is https://github.com/cogentcore/core/blob/main/icons/svg/all_match.svg
-	AllMatch Icon = "all_match"
-
-	// AllOut is https://github.com/cogentcore/core/blob/main/icons/svg/all_out.svg
-	AllOut Icon = "all_out"
-
-	// AltRoute is https://github.com/cogentcore/core/blob/main/icons/svg/alt_route.svg
-	AltRoute Icon = "alt_route"
-
-	// AlternateEmail is https://github.com/cogentcore/core/blob/main/icons/svg/alternate_email.svg
-	AlternateEmail Icon = "alternate_email"
-
-	// Altitude is https://github.com/cogentcore/core/blob/main/icons/svg/altitude.svg
-	Altitude Icon = "altitude"
-
-	// Amend is https://github.com/cogentcore/core/blob/main/icons/svg/amend.svg
-	Amend Icon = "amend"
-
-	// Analytics is https://github.com/cogentcore/core/blob/main/icons/svg/analytics.svg
-	Analytics Icon = "analytics"
-
-	// Anchor is https://github.com/cogentcore/core/blob/main/icons/svg/anchor.svg
-	Anchor Icon = "anchor"
-
-	// Android is https://github.com/cogentcore/core/blob/main/icons/svg/android.svg
-	Android Icon = "android"
-
-	// Animation is https://github.com/cogentcore/core/blob/main/icons/svg/animation.svg
-	Animation Icon = "animation"
-
-	// Apartment is https://github.com/cogentcore/core/blob/main/icons/svg/apartment.svg
-	Apartment Icon = "apartment"
-
-	// Api is https://github.com/cogentcore/core/blob/main/icons/svg/api.svg
-	Api Icon = "api"
-
-	// ApkDocument is https://github.com/cogentcore/core/blob/main/icons/svg/apk_document.svg
-	ApkDocument Icon = "apk_document"
-
-	// ApkInstall is https://github.com/cogentcore/core/blob/main/icons/svg/apk_install.svg
-	ApkInstall Icon = "apk_install"
-
-	// AppBadging is https://github.com/cogentcore/core/blob/main/icons/svg/app_badging.svg
-	AppBadging Icon = "app_badging"
-
-	// AppBlocking is https://github.com/cogentcore/core/blob/main/icons/svg/app_blocking.svg
-	AppBlocking Icon = "app_blocking"
-
-	// AppPromo is https://github.com/cogentcore/core/blob/main/icons/svg/app_promo.svg
-	AppPromo Icon = "app_promo"
-
-	// AppRegistration is https://github.com/cogentcore/core/blob/main/icons/svg/app_registration.svg
-	AppRegistration Icon = "app_registration"
-
-	// AppShortcut is https://github.com/cogentcore/core/blob/main/icons/svg/app_shortcut.svg
-	AppShortcut Icon = "app_shortcut"
-
-	// Approval is https://github.com/cogentcore/core/blob/main/icons/svg/approval.svg
-	Approval Icon = "approval"
-
-	// ApprovalDelegation is https://github.com/cogentcore/core/blob/main/icons/svg/approval_delegation.svg
-	ApprovalDelegation Icon = "approval_delegation"
-
-	// Apps is https://github.com/cogentcore/core/blob/main/icons/svg/apps.svg
-	Apps Icon = "apps"
-
-	// AppsOutage is https://github.com/cogentcore/core/blob/main/icons/svg/apps_outage.svg
-	AppsOutage Icon = "apps_outage"
-
-	// ArOnYou is https://github.com/cogentcore/core/blob/main/icons/svg/ar_on_you.svg
-	ArOnYou Icon = "ar_on_you"
-
-	// Architecture is https://github.com/cogentcore/core/blob/main/icons/svg/architecture.svg
-	Architecture Icon = "architecture"
-
-	// Archive is https://github.com/cogentcore/core/blob/main/icons/svg/archive.svg
-	Archive Icon = "archive"
-
-	// AreaChart is https://github.com/cogentcore/core/blob/main/icons/svg/area_chart.svg
-	AreaChart Icon = "area_chart"
-
-	// ArrowAndEdge is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_and_edge.svg
-	ArrowAndEdge Icon = "arrow_and_edge"
-
-	// ArrowBack is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_back.svg
-	ArrowBack Icon = "arrow_back"
-
-	// ArrowBackIos is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_back_ios.svg
-	ArrowBackIos Icon = "arrow_back_ios"
-
-	// ArrowBackIosNew is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_back_ios_new.svg
-	ArrowBackIosNew Icon = "arrow_back_ios_new"
-
-	// ArrowCircleDown is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_circle_down.svg
-	ArrowCircleDown Icon = "arrow_circle_down"
-
-	// ArrowCircleLeft is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_circle_left.svg
-	ArrowCircleLeft Icon = "arrow_circle_left"
-
-	// ArrowCircleRight is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_circle_right.svg
-	ArrowCircleRight Icon = "arrow_circle_right"
-
-	// ArrowCircleUp is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_circle_up.svg
-	ArrowCircleUp Icon = "arrow_circle_up"
-
-	// ArrowDownward is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_downward.svg
-	ArrowDownward Icon = "arrow_downward"
-
-	// ArrowDownwardAlt is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_downward_alt.svg
-	ArrowDownwardAlt Icon = "arrow_downward_alt"
-
-	// ArrowDropDown is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_drop_down.svg
-	ArrowDropDown Icon = "arrow_drop_down"
-
-	// ArrowDropDownCircle is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_drop_down_circle.svg
-	ArrowDropDownCircle Icon = "arrow_drop_down_circle"
-
-	// ArrowDropUp is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_drop_up.svg
-	ArrowDropUp Icon = "arrow_drop_up"
-
-	// ArrowForward is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_forward.svg
-	ArrowForward Icon = "arrow_forward"
-
-	// ArrowForwardIos is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_forward_ios.svg
-	ArrowForwardIos Icon = "arrow_forward_ios"
-
-	// ArrowInsert is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_insert.svg
-	ArrowInsert Icon = "arrow_insert"
-
-	// ArrowLeft is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_left.svg
-	ArrowLeft Icon = "arrow_left"
-
-	// ArrowLeftAlt is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_left_alt.svg
-	ArrowLeftAlt Icon = "arrow_left_alt"
-
-	// ArrowOrEdge is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_or_edge.svg
-	ArrowOrEdge Icon = "arrow_or_edge"
-
-	// ArrowOutward is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_outward.svg
-	ArrowOutward Icon = "arrow_outward"
-
-	// ArrowRange is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_range.svg
-	ArrowRange Icon = "arrow_range"
-
-	// ArrowRight is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_right.svg
-	ArrowRight Icon = "arrow_right"
-
-	// ArrowRightAlt is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_right_alt.svg
-	ArrowRightAlt Icon = "arrow_right_alt"
-
-	// ArrowSelectorTool is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_selector_tool.svg
-	ArrowSelectorTool Icon = "arrow_selector_tool"
-
-	// ArrowSplit is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_split.svg
-	ArrowSplit Icon = "arrow_split"
-
-	// ArrowTopLeft is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_top_left.svg
-	ArrowTopLeft Icon = "arrow_top_left"
-
-	// ArrowTopRight is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_top_right.svg
-	ArrowTopRight Icon = "arrow_top_right"
-
-	// ArrowUpward is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_upward.svg
-	ArrowUpward Icon = "arrow_upward"
-
-	// ArrowUpwardAlt is https://github.com/cogentcore/core/blob/main/icons/svg/arrow_upward_alt.svg
-	ArrowUpwardAlt Icon = "arrow_upward_alt"
-
-	// ArrowsMoreDown is https://github.com/cogentcore/core/blob/main/icons/svg/arrows_more_down.svg
-	ArrowsMoreDown Icon = "arrows_more_down"
-
-	// ArrowsMoreUp is https://github.com/cogentcore/core/blob/main/icons/svg/arrows_more_up.svg
-	ArrowsMoreUp Icon = "arrows_more_up"
-
-	// ArrowsOutward is https://github.com/cogentcore/core/blob/main/icons/svg/arrows_outward.svg
-	ArrowsOutward Icon = "arrows_outward"
-
-	// Article is https://github.com/cogentcore/core/blob/main/icons/svg/article.svg
-	Article Icon = "article"
-
-	// AspectRatio is https://github.com/cogentcore/core/blob/main/icons/svg/aspect_ratio.svg
-	AspectRatio Icon = "aspect_ratio"
-
-	// AssistantDirection is https://github.com/cogentcore/core/blob/main/icons/svg/assistant_direction.svg
-	AssistantDirection Icon = "assistant_direction"
-
-	// AssistantNavigation is https://github.com/cogentcore/core/blob/main/icons/svg/assistant_navigation.svg
-	AssistantNavigation Icon = "assistant_navigation"
-
-	// AttachEmail is https://github.com/cogentcore/core/blob/main/icons/svg/attach_email.svg
-	AttachEmail Icon = "attach_email"
-
-	// AttachFile is https://github.com/cogentcore/core/blob/main/icons/svg/attach_file.svg
-	AttachFile Icon = "attach_file"
-
-	// AttachFileAdd is https://github.com/cogentcore/core/blob/main/icons/svg/attach_file_add.svg
-	AttachFileAdd Icon = "attach_file_add"
-
-	// AttachMoney is https://github.com/cogentcore/core/blob/main/icons/svg/attach_money.svg
-	AttachMoney Icon = "attach_money"
-
-	// Attachment is https://github.com/cogentcore/core/blob/main/icons/svg/attachment.svg
-	Attachment Icon = "attachment"
-
-	// Attribution is https://github.com/cogentcore/core/blob/main/icons/svg/attribution.svg
-	Attribution Icon = "attribution"
-
-	// AudioFile is https://github.com/cogentcore/core/blob/main/icons/svg/audio_file.svg
-	AudioFile Icon = "audio_file"
-
-	// AudioVideoReceiver is https://github.com/cogentcore/core/blob/main/icons/svg/audio_video_receiver.svg
-	AudioVideoReceiver Icon = "audio_video_receiver"
-
-	// AutoDelete is https://github.com/cogentcore/core/blob/main/icons/svg/auto_delete.svg
-	AutoDelete Icon = "auto_delete"
-
-	// AutoReadPause is https://github.com/cogentcore/core/blob/main/icons/svg/auto_read_pause.svg
-	AutoReadPause Icon = "auto_read_pause"
-
-	// AutoReadPlay is https://github.com/cogentcore/core/blob/main/icons/svg/auto_read_play.svg
-	AutoReadPlay Icon = "auto_read_play"
-
-	// AutofpsSelect is https://github.com/cogentcore/core/blob/main/icons/svg/autofps_select.svg
-	AutofpsSelect Icon = "autofps_select"
-
-	// Autopause is https://github.com/cogentcore/core/blob/main/icons/svg/autopause.svg
-	Autopause Icon = "autopause"
-
-	// Autoplay is https://github.com/cogentcore/core/blob/main/icons/svg/autoplay.svg
-	Autoplay Icon = "autoplay"
-
-	// Autorenew is https://github.com/cogentcore/core/blob/main/icons/svg/autorenew.svg
-	Autorenew Icon = "autorenew"
-
-	// Autostop is https://github.com/cogentcore/core/blob/main/icons/svg/autostop.svg
-	Autostop Icon = "autostop"
-
-	// AvTimer is https://github.com/cogentcore/core/blob/main/icons/svg/av_timer.svg
-	AvTimer Icon = "av_timer"
-
-	// AwardStar is https://github.com/cogentcore/core/blob/main/icons/svg/award_star.svg
-	AwardStar Icon = "award_star"
-
-	// BackHand is https://github.com/cogentcore/core/blob/main/icons/svg/back_hand.svg
-	BackHand Icon = "back_hand"
-
-	// BackToTab is https://github.com/cogentcore/core/blob/main/icons/svg/back_to_tab.svg
-	BackToTab Icon = "back_to_tab"
-
-	// BackgroundDotLarge is https://github.com/cogentcore/core/blob/main/icons/svg/background_dot_large.svg
-	BackgroundDotLarge Icon = "background_dot_large"
-
-	// BackgroundGridSmall is https://github.com/cogentcore/core/blob/main/icons/svg/background_grid_small.svg
-	BackgroundGridSmall Icon = "background_grid_small"
-
-	// BackgroundReplace is https://github.com/cogentcore/core/blob/main/icons/svg/background_replace.svg
-	BackgroundReplace Icon = "background_replace"
-
-	// BacklightHigh is https://github.com/cogentcore/core/blob/main/icons/svg/backlight_high.svg
-	BacklightHigh Icon = "backlight_high"
-
-	// BacklightLow is https://github.com/cogentcore/core/blob/main/icons/svg/backlight_low.svg
-	BacklightLow Icon = "backlight_low"
-
-	// Backspace is https://github.com/cogentcore/core/blob/main/icons/svg/backspace.svg
-	Backspace Icon = "backspace"
-
-	// Backup is https://github.com/cogentcore/core/blob/main/icons/svg/backup.svg
-	Backup Icon = "backup"
-
-	// BackupTable is https://github.com/cogentcore/core/blob/main/icons/svg/backup_table.svg
-	BackupTable Icon = "backup_table"
-
-	// Badge is https://github.com/cogentcore/core/blob/main/icons/svg/badge.svg
-	Badge Icon = "badge"
-
-	// BadgeCriticalBattery is https://github.com/cogentcore/core/blob/main/icons/svg/badge_critical_battery.svg
-	BadgeCriticalBattery Icon = "badge_critical_battery"
-
-	// Balance is https://github.com/cogentcore/core/blob/main/icons/svg/balance.svg
-	Balance Icon = "balance"
-
-	// Ballot is https://github.com/cogentcore/core/blob/main/icons/svg/ballot.svg
-	Ballot Icon = "ballot"
-
-	// BarChart is https://github.com/cogentcore/core/blob/main/icons/svg/bar_chart.svg
-	BarChart Icon = "bar_chart"
-
-	// BarChart4Bars is https://github.com/cogentcore/core/blob/main/icons/svg/bar_chart_4_bars.svg
-	BarChart4Bars Icon = "bar_chart_4_bars"
-
-	// Barcode is https://github.com/cogentcore/core/blob/main/icons/svg/barcode.svg
-	Barcode Icon = "barcode"
-
-	// BarcodeReader is https://github.com/cogentcore/core/blob/main/icons/svg/barcode_reader.svg
-	BarcodeReader Icon = "barcode_reader"
-
-	// BarcodeScanner is https://github.com/cogentcore/core/blob/main/icons/svg/barcode_scanner.svg
-	BarcodeScanner Icon = "barcode_scanner"
-
-	// BatchPrediction is https://github.com/cogentcore/core/blob/main/icons/svg/batch_prediction.svg
-	BatchPrediction Icon = "batch_prediction"
-
-	// Battery0Bar is https://github.com/cogentcore/core/blob/main/icons/svg/battery_0_bar.svg
-	Battery0Bar Icon = "battery_0_bar"
-
-	// Battery1Bar is https://github.com/cogentcore/core/blob/main/icons/svg/battery_1_bar.svg
-	Battery1Bar Icon = "battery_1_bar"
-
-	// Battery2Bar is https://github.com/cogentcore/core/blob/main/icons/svg/battery_2_bar.svg
-	Battery2Bar Icon = "battery_2_bar"
-
-	// Battery3Bar is https://github.com/cogentcore/core/blob/main/icons/svg/battery_3_bar.svg
-	Battery3Bar Icon = "battery_3_bar"
-
-	// Battery4Bar is https://github.com/cogentcore/core/blob/main/icons/svg/battery_4_bar.svg
-	Battery4Bar Icon = "battery_4_bar"
-
-	// Battery5Bar is https://github.com/cogentcore/core/blob/main/icons/svg/battery_5_bar.svg
-	Battery5Bar Icon = "battery_5_bar"
-
-	// Battery6Bar is https://github.com/cogentcore/core/blob/main/icons/svg/battery_6_bar.svg
-	Battery6Bar Icon = "battery_6_bar"
-
-	// BatteryAlert is https://github.com/cogentcore/core/blob/main/icons/svg/battery_alert.svg
-	BatteryAlert Icon = "battery_alert"
-
-	// BatteryChange is https://github.com/cogentcore/core/blob/main/icons/svg/battery_change.svg
-	BatteryChange Icon = "battery_change"
-
-	// BatteryCharging20 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_charging_20.svg
-	BatteryCharging20 Icon = "battery_charging_20"
-
-	// BatteryCharging30 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_charging_30.svg
-	BatteryCharging30 Icon = "battery_charging_30"
-
-	// BatteryCharging50 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_charging_50.svg
-	BatteryCharging50 Icon = "battery_charging_50"
-
-	// BatteryCharging60 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_charging_60.svg
-	BatteryCharging60 Icon = "battery_charging_60"
-
-	// BatteryCharging80 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_charging_80.svg
-	BatteryCharging80 Icon = "battery_charging_80"
-
-	// BatteryCharging90 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_charging_90.svg
-	BatteryCharging90 Icon = "battery_charging_90"
-
-	// BatteryChargingFull is https://github.com/cogentcore/core/blob/main/icons/svg/battery_charging_full.svg
-	BatteryChargingFull Icon = "battery_charging_full"
-
-	// BatteryError is https://github.com/cogentcore/core/blob/main/icons/svg/battery_error.svg
-	BatteryError Icon = "battery_error"
-
-	// BatteryHoriz000 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_horiz_000.svg
-	BatteryHoriz000 Icon = "battery_horiz_000"
-
-	// BatteryHoriz050 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_horiz_050.svg
-	BatteryHoriz050 Icon = "battery_horiz_050"
-
-	// BatteryHoriz075 is https://github.com/cogentcore/core/blob/main/icons/svg/battery_horiz_075.svg
-	BatteryHoriz075 Icon = "battery_horiz_075"
-
-	// BatteryLow is https://github.com/cogentcore/core/blob/main/icons/svg/battery_low.svg
-	BatteryLow Icon = "battery_low"
-
-	// BatteryPlus is https://github.com/cogentcore/core/blob/main/icons/svg/battery_plus.svg
-	BatteryPlus Icon = "battery_plus"
-
-	// BatteryProfile is https://github.com/cogentcore/core/blob/main/icons/svg/battery_profile.svg
-	BatteryProfile Icon = "battery_profile"
-
-	// BatterySaver is https://github.com/cogentcore/core/blob/main/icons/svg/battery_saver.svg
-	BatterySaver Icon = "battery_saver"
-
-	// BatteryShare is https://github.com/cogentcore/core/blob/main/icons/svg/battery_share.svg
-	BatteryShare Icon = "battery_share"
-
-	// BatteryStatusGood is https://github.com/cogentcore/core/blob/main/icons/svg/battery_status_good.svg
-	BatteryStatusGood Icon = "battery_status_good"
-
-	// BatteryUnknown is https://github.com/cogentcore/core/blob/main/icons/svg/battery_unknown.svg
-	BatteryUnknown Icon = "battery_unknown"
-
-	// BatteryVeryLow is https://github.com/cogentcore/core/blob/main/icons/svg/battery_very_low.svg
-	BatteryVeryLow Icon = "battery_very_low"
-
-	// Bed is https://github.com/cogentcore/core/blob/main/icons/svg/bed.svg
-	Bed Icon = "bed"
-
-	// Bedtime is https://github.com/cogentcore/core/blob/main/icons/svg/bedtime.svg
-	Bedtime Icon = "bedtime"
-
-	// BedtimeOff is https://github.com/cogentcore/core/blob/main/icons/svg/bedtime_off.svg
-	BedtimeOff Icon = "bedtime_off"
-
-	// Blanket is https://github.com/cogentcore/core/blob/main/icons/svg/blanket.svg
-	Blanket Icon = "blanket"
-
-	// Blender is https://github.com/cogentcore/core/blob/main/icons/svg/blender.svg
-	Blender Icon = "blender"
-
-	// Blind is https://github.com/cogentcore/core/blob/main/icons/svg/blind.svg
-	Blind Icon = "blind"
-
-	// Blinds is https://github.com/cogentcore/core/blob/main/icons/svg/blinds.svg
-	Blinds Icon = "blinds"
-
-	// BlindsClosed is https://github.com/cogentcore/core/blob/main/icons/svg/blinds_closed.svg
-	BlindsClosed Icon = "blinds_closed"
-
-	// Block is https://github.com/cogentcore/core/blob/main/icons/svg/block.svg
-	Block Icon = "block"
-
-	// Bluetooth is https://github.com/cogentcore/core/blob/main/icons/svg/bluetooth.svg
-	Bluetooth Icon = "bluetooth"
-
-	// BluetoothConnected is https://github.com/cogentcore/core/blob/main/icons/svg/bluetooth_connected.svg
-	BluetoothConnected Icon = "bluetooth_connected"
-
-	// BluetoothDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/bluetooth_disabled.svg
-	BluetoothDisabled Icon = "bluetooth_disabled"
-
-	// BluetoothDrive is https://github.com/cogentcore/core/blob/main/icons/svg/bluetooth_drive.svg
-	BluetoothDrive Icon = "bluetooth_drive"
-
-	// BluetoothSearching is https://github.com/cogentcore/core/blob/main/icons/svg/bluetooth_searching.svg
-	BluetoothSearching Icon = "bluetooth_searching"
-
-	// BlurCircular is https://github.com/cogentcore/core/blob/main/icons/svg/blur_circular.svg
-	BlurCircular Icon = "blur_circular"
-
-	// BlurLinear is https://github.com/cogentcore/core/blob/main/icons/svg/blur_linear.svg
-	BlurLinear Icon = "blur_linear"
-
-	// BlurMedium is https://github.com/cogentcore/core/blob/main/icons/svg/blur_medium.svg
-	BlurMedium Icon = "blur_medium"
-
-	// BlurOff is https://github.com/cogentcore/core/blob/main/icons/svg/blur_off.svg
-	BlurOff Icon = "blur_off"
-
-	// BlurOn is https://github.com/cogentcore/core/blob/main/icons/svg/blur_on.svg
-	BlurOn Icon = "blur_on"
-
-	// BlurShort is https://github.com/cogentcore/core/blob/main/icons/svg/blur_short.svg
-	BlurShort Icon = "blur_short"
-
-	// Bolt is https://github.com/cogentcore/core/blob/main/icons/svg/bolt.svg
-	Bolt Icon = "bolt"
-
-	// Book is https://github.com/cogentcore/core/blob/main/icons/svg/book.svg
-	Book Icon = "book"
-
-	// BookOnline is https://github.com/cogentcore/core/blob/main/icons/svg/book_online.svg
-	BookOnline Icon = "book_online"
-
-	// Bookmark is https://github.com/cogentcore/core/blob/main/icons/svg/bookmark.svg
-	Bookmark Icon = "bookmark"
-
-	// BookmarkAdd is https://github.com/cogentcore/core/blob/main/icons/svg/bookmark_add.svg
-	BookmarkAdd Icon = "bookmark_add"
-
-	// BookmarkAdded is https://github.com/cogentcore/core/blob/main/icons/svg/bookmark_added.svg
-	BookmarkAdded Icon = "bookmark_added"
-
-	// BookmarkManager is https://github.com/cogentcore/core/blob/main/icons/svg/bookmark_manager.svg
-	BookmarkManager Icon = "bookmark_manager"
-
-	// BookmarkRemove is https://github.com/cogentcore/core/blob/main/icons/svg/bookmark_remove.svg
-	BookmarkRemove Icon = "bookmark_remove"
-
-	// Bookmarks is https://github.com/cogentcore/core/blob/main/icons/svg/bookmarks.svg
-	Bookmarks Icon = "bookmarks"
-
-	// BorderAll is https://github.com/cogentcore/core/blob/main/icons/svg/border_all.svg
-	BorderAll Icon = "border_all"
-
-	// BorderBottom is https://github.com/cogentcore/core/blob/main/icons/svg/border_bottom.svg
-	BorderBottom Icon = "border_bottom"
-
-	// BorderClear is https://github.com/cogentcore/core/blob/main/icons/svg/border_clear.svg
-	BorderClear Icon = "border_clear"
-
-	// BorderColor is https://github.com/cogentcore/core/blob/main/icons/svg/border_color.svg
-	BorderColor Icon = "border_color"
-
-	// BorderHorizontal is https://github.com/cogentcore/core/blob/main/icons/svg/border_horizontal.svg
-	BorderHorizontal Icon = "border_horizontal"
-
-	// BorderInner is https://github.com/cogentcore/core/blob/main/icons/svg/border_inner.svg
-	BorderInner Icon = "border_inner"
-
-	// BorderLeft is https://github.com/cogentcore/core/blob/main/icons/svg/border_left.svg
-	BorderLeft Icon = "border_left"
-
-	// BorderOuter is https://github.com/cogentcore/core/blob/main/icons/svg/border_outer.svg
-	BorderOuter Icon = "border_outer"
-
-	// BorderRight is https://github.com/cogentcore/core/blob/main/icons/svg/border_right.svg
-	BorderRight Icon = "border_right"
-
-	// BorderStyle is https://github.com/cogentcore/core/blob/main/icons/svg/border_style.svg
-	BorderStyle Icon = "border_style"
-
-	// BorderTop is https://github.com/cogentcore/core/blob/main/icons/svg/border_top.svg
-	BorderTop Icon = "border_top"
-
-	// BorderVertical is https://github.com/cogentcore/core/blob/main/icons/svg/border_vertical.svg
-	BorderVertical Icon = "border_vertical"
-
-	// BottomAppBar is https://github.com/cogentcore/core/blob/main/icons/svg/bottom_app_bar.svg
-	BottomAppBar Icon = "bottom_app_bar"
-
-	// BottomDrawer is https://github.com/cogentcore/core/blob/main/icons/svg/bottom_drawer.svg
-	BottomDrawer Icon = "bottom_drawer"
-
-	// BottomNavigation is https://github.com/cogentcore/core/blob/main/icons/svg/bottom_navigation.svg
-	BottomNavigation Icon = "bottom_navigation"
-
-	// BottomPanelClose is https://github.com/cogentcore/core/blob/main/icons/svg/bottom_panel_close.svg
-	BottomPanelClose Icon = "bottom_panel_close"
-
-	// BottomPanelOpen is https://github.com/cogentcore/core/blob/main/icons/svg/bottom_panel_open.svg
-	BottomPanelOpen Icon = "bottom_panel_open"
-
-	// BottomRightClick is https://github.com/cogentcore/core/blob/main/icons/svg/bottom_right_click.svg
-	BottomRightClick Icon = "bottom_right_click"
-
-	// BottomSheets is https://github.com/cogentcore/core/blob/main/icons/svg/bottom_sheets.svg
-	BottomSheets Icon = "bottom_sheets"
-
-	// Box is https://github.com/cogentcore/core/blob/main/icons/svg/box.svg
-	Box Icon = "box"
-
-	// BoxAdd is https://github.com/cogentcore/core/blob/main/icons/svg/box_add.svg
-	BoxAdd Icon = "box_add"
-
-	// BoxEdit is https://github.com/cogentcore/core/blob/main/icons/svg/box_edit.svg
-	BoxEdit Icon = "box_edit"
-
-	// Boy is https://github.com/cogentcore/core/blob/main/icons/svg/boy.svg
-	Boy Icon = "boy"
-
-	// Brightness1 is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_1.svg
-	Brightness1 Icon = "brightness_1"
-
-	// Brightness2 is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_2.svg
-	Brightness2 Icon = "brightness_2"
-
-	// Brightness3 is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_3.svg
-	Brightness3 Icon = "brightness_3"
-
-	// Brightness4 is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_4.svg
-	Brightness4 Icon = "brightness_4"
-
-	// Brightness5 is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_5.svg
-	Brightness5 Icon = "brightness_5"
-
-	// Brightness6 is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_6.svg
-	Brightness6 Icon = "brightness_6"
-
-	// Brightness7 is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_7.svg
-	Brightness7 Icon = "brightness_7"
-
-	// BrightnessAlert is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_alert.svg
-	BrightnessAlert Icon = "brightness_alert"
-
-	// BrightnessAuto is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_auto.svg
-	BrightnessAuto Icon = "brightness_auto"
-
-	// BrightnessEmpty is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_empty.svg
-	BrightnessEmpty Icon = "brightness_empty"
-
-	// BrightnessHigh is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_high.svg
-	BrightnessHigh Icon = "brightness_high"
-
-	// BrightnessLow is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_low.svg
-	BrightnessLow Icon = "brightness_low"
-
-	// BrightnessMedium is https://github.com/cogentcore/core/blob/main/icons/svg/brightness_medium.svg
-	BrightnessMedium Icon = "brightness_medium"
-
-	// BroadcastOnHome is https://github.com/cogentcore/core/blob/main/icons/svg/broadcast_on_home.svg
-	BroadcastOnHome Icon = "broadcast_on_home"
-
-	// BroadcastOnPersonal is https://github.com/cogentcore/core/blob/main/icons/svg/broadcast_on_personal.svg
-	BroadcastOnPersonal Icon = "broadcast_on_personal"
-
-	// BrokenImage is https://github.com/cogentcore/core/blob/main/icons/svg/broken_image.svg
-	BrokenImage Icon = "broken_image"
-
-	// Browse is https://github.com/cogentcore/core/blob/main/icons/svg/browse.svg
-	Browse Icon = "browse"
-
-	// BrowseActivity is https://github.com/cogentcore/core/blob/main/icons/svg/browse_activity.svg
-	BrowseActivity Icon = "browse_activity"
-
-	// BrowseGallery is https://github.com/cogentcore/core/blob/main/icons/svg/browse_gallery.svg
-	BrowseGallery Icon = "browse_gallery"
-
-	// BrowserUpdated is https://github.com/cogentcore/core/blob/main/icons/svg/browser_updated.svg
-	BrowserUpdated Icon = "browser_updated"
-
-	// Brush is https://github.com/cogentcore/core/blob/main/icons/svg/brush.svg
-	Brush Icon = "brush"
-
-	// Bubble is https://github.com/cogentcore/core/blob/main/icons/svg/bubble.svg
-	Bubble Icon = "bubble"
-
-	// BubbleChart is https://github.com/cogentcore/core/blob/main/icons/svg/bubble_chart.svg
-	BubbleChart Icon = "bubble_chart"
-
-	// Bubbles is https://github.com/cogentcore/core/blob/main/icons/svg/bubbles.svg
-	Bubbles Icon = "bubbles"
-
-	// BugReport is https://github.com/cogentcore/core/blob/main/icons/svg/bug_report.svg
-	BugReport Icon = "bug_report"
-
-	// Build is https://github.com/cogentcore/core/blob/main/icons/svg/build.svg
-	Build Icon = "build"
-
-	// BuildCircle is https://github.com/cogentcore/core/blob/main/icons/svg/build_circle.svg
-	BuildCircle Icon = "build_circle"
-
-	// BurstMode is https://github.com/cogentcore/core/blob/main/icons/svg/burst_mode.svg
-	BurstMode Icon = "burst_mode"
-
-	// BusinessChip is https://github.com/cogentcore/core/blob/main/icons/svg/business_chip.svg
-	BusinessChip Icon = "business_chip"
-
-	// BusinessMessages is https://github.com/cogentcore/core/blob/main/icons/svg/business_messages.svg
-	BusinessMessages Icon = "business_messages"
-
-	// ButtonsAlt is https://github.com/cogentcore/core/blob/main/icons/svg/buttons_alt.svg
-	ButtonsAlt Icon = "buttons_alt"
-
-	// Cable is https://github.com/cogentcore/core/blob/main/icons/svg/cable.svg
-	Cable Icon = "cable"
-
-	// Cached is https://github.com/cogentcore/core/blob/main/icons/svg/cached.svg
-	Cached Icon = "cached"
-
-	// Cake is https://github.com/cogentcore/core/blob/main/icons/svg/cake.svg
-	Cake Icon = "cake"
-
-	// CakeAdd is https://github.com/cogentcore/core/blob/main/icons/svg/cake_add.svg
-	CakeAdd Icon = "cake_add"
-
-	// Calculate is https://github.com/cogentcore/core/blob/main/icons/svg/calculate.svg
-	Calculate Icon = "calculate"
-
-	// CalendarAddOn is https://github.com/cogentcore/core/blob/main/icons/svg/calendar_add_on.svg
-	CalendarAddOn Icon = "calendar_add_on"
-
-	// CalendarAppsScript is https://github.com/cogentcore/core/blob/main/icons/svg/calendar_apps_script.svg
-	CalendarAppsScript Icon = "calendar_apps_script"
-
-	// CalendarMonth is https://github.com/cogentcore/core/blob/main/icons/svg/calendar_month.svg
-	CalendarMonth Icon = "calendar_month"
-
-	// CalendarToday is https://github.com/cogentcore/core/blob/main/icons/svg/calendar_today.svg
-	CalendarToday Icon = "calendar_today"
-
-	// CalendarViewDay is https://github.com/cogentcore/core/blob/main/icons/svg/calendar_view_day.svg
-	CalendarViewDay Icon = "calendar_view_day"
-
-	// CalendarViewMonth is https://github.com/cogentcore/core/blob/main/icons/svg/calendar_view_month.svg
-	CalendarViewMonth Icon = "calendar_view_month"
-
-	// CalendarViewWeek is https://github.com/cogentcore/core/blob/main/icons/svg/calendar_view_week.svg
-	CalendarViewWeek Icon = "calendar_view_week"
-
-	// Camera is https://github.com/cogentcore/core/blob/main/icons/svg/camera.svg
-	Camera Icon = "camera"
-
-	// CameraFront is https://github.com/cogentcore/core/blob/main/icons/svg/camera_front.svg
-	CameraFront Icon = "camera_front"
-
-	// CameraIndoor is https://github.com/cogentcore/core/blob/main/icons/svg/camera_indoor.svg
-	CameraIndoor Icon = "camera_indoor"
-
-	// CameraOutdoor is https://github.com/cogentcore/core/blob/main/icons/svg/camera_outdoor.svg
-	CameraOutdoor Icon = "camera_outdoor"
-
-	// CameraRear is https://github.com/cogentcore/core/blob/main/icons/svg/camera_rear.svg
-	CameraRear Icon = "camera_rear"
-
-	// CameraRoll is https://github.com/cogentcore/core/blob/main/icons/svg/camera_roll.svg
-	CameraRoll Icon = "camera_roll"
-
-	// CameraVideo is https://github.com/cogentcore/core/blob/main/icons/svg/camera_video.svg
-	CameraVideo Icon = "camera_video"
-
-	// Cameraswitch is https://github.com/cogentcore/core/blob/main/icons/svg/cameraswitch.svg
-	Cameraswitch Icon = "cameraswitch"
-
-	// Cancel is https://github.com/cogentcore/core/blob/main/icons/svg/cancel.svg
-	Cancel Icon = "cancel"
-
-	// CancelPresentation is https://github.com/cogentcore/core/blob/main/icons/svg/cancel_presentation.svg
-	CancelPresentation Icon = "cancel_presentation"
-
-	// CancelScheduleSend is https://github.com/cogentcore/core/blob/main/icons/svg/cancel_schedule_send.svg
-	CancelScheduleSend Icon = "cancel_schedule_send"
-
-	// CandlestickChart is https://github.com/cogentcore/core/blob/main/icons/svg/candlestick_chart.svg
-	CandlestickChart Icon = "candlestick_chart"
-
-	// Capture is https://github.com/cogentcore/core/blob/main/icons/svg/capture.svg
-	Capture Icon = "capture"
-
-	// CardMembership is https://github.com/cogentcore/core/blob/main/icons/svg/card_membership.svg
-	CardMembership Icon = "card_membership"
-
-	// Cards is https://github.com/cogentcore/core/blob/main/icons/svg/cards.svg
-	Cards Icon = "cards"
-
-	// Cast is https://github.com/cogentcore/core/blob/main/icons/svg/cast.svg
-	Cast Icon = "cast"
-
-	// CastConnected is https://github.com/cogentcore/core/blob/main/icons/svg/cast_connected.svg
-	CastConnected Icon = "cast_connected"
-
-	// CastPause is https://github.com/cogentcore/core/blob/main/icons/svg/cast_pause.svg
-	CastPause Icon = "cast_pause"
-
-	// CastWarning is https://github.com/cogentcore/core/blob/main/icons/svg/cast_warning.svg
-	CastWarning Icon = "cast_warning"
-
-	// Category is https://github.com/cogentcore/core/blob/main/icons/svg/category.svg
-	Category Icon = "category"
-
-	// Celebration is https://github.com/cogentcore/core/blob/main/icons/svg/celebration.svg
-	Celebration Icon = "celebration"
-
-	// CellMerge is https://github.com/cogentcore/core/blob/main/icons/svg/cell_merge.svg
-	CellMerge Icon = "cell_merge"
-
-	// CenterFocusStrong is https://github.com/cogentcore/core/blob/main/icons/svg/center_focus_strong.svg
-	CenterFocusStrong Icon = "center_focus_strong"
-
-	// CenterFocusWeak is https://github.com/cogentcore/core/blob/main/icons/svg/center_focus_weak.svg
-	CenterFocusWeak Icon = "center_focus_weak"
-
-	// Chair is https://github.com/cogentcore/core/blob/main/icons/svg/chair.svg
-	Chair Icon = "chair"
-
-	// ChangeCircle is https://github.com/cogentcore/core/blob/main/icons/svg/change_circle.svg
-	ChangeCircle Icon = "change_circle"
-
-	// ChangeHistory is https://github.com/cogentcore/core/blob/main/icons/svg/change_history.svg
-	ChangeHistory Icon = "change_history"
-
-	// Charger is https://github.com/cogentcore/core/blob/main/icons/svg/charger.svg
-	Charger Icon = "charger"
-
-	// ChartData is https://github.com/cogentcore/core/blob/main/icons/svg/chart_data.svg
-	ChartData Icon = "chart_data"
-
-	// Chat is https://github.com/cogentcore/core/blob/main/icons/svg/chat.svg
-	Chat Icon = "chat"
-
-	// ChatAddOn is https://github.com/cogentcore/core/blob/main/icons/svg/chat_add_on.svg
-	ChatAddOn Icon = "chat_add_on"
-
-	// ChatAppsScript is https://github.com/cogentcore/core/blob/main/icons/svg/chat_apps_script.svg
-	ChatAppsScript Icon = "chat_apps_script"
-
-	// ChatBubble is https://github.com/cogentcore/core/blob/main/icons/svg/chat_bubble.svg
-	ChatBubble Icon = "chat_bubble"
-
-	// ChatError is https://github.com/cogentcore/core/blob/main/icons/svg/chat_error.svg
-	ChatError Icon = "chat_error"
-
-	// ChatPasteGo is https://github.com/cogentcore/core/blob/main/icons/svg/chat_paste_go.svg
-	ChatPasteGo Icon = "chat_paste_go"
-
-	// Check is https://github.com/cogentcore/core/blob/main/icons/svg/check.svg
-	Check Icon = "check"
-
-	// CheckBox is https://github.com/cogentcore/core/blob/main/icons/svg/check_box.svg
-	CheckBox Icon = "check_box"
-
-	// CheckBoxOutlineBlank is https://github.com/cogentcore/core/blob/main/icons/svg/check_box_outline_blank.svg
-	CheckBoxOutlineBlank Icon = "check_box_outline_blank"
-
-	// CheckCircle is https://github.com/cogentcore/core/blob/main/icons/svg/check_circle.svg
-	CheckCircle Icon = "check_circle"
-
-	// CheckInOut is https://github.com/cogentcore/core/blob/main/icons/svg/check_in_out.svg
-	CheckInOut Icon = "check_in_out"
-
-	// CheckIndeterminateSmall is https://github.com/cogentcore/core/blob/main/icons/svg/check_indeterminate_small.svg
-	CheckIndeterminateSmall Icon = "check_indeterminate_small"
-
-	// CheckSmall is https://github.com/cogentcore/core/blob/main/icons/svg/check_small.svg
-	CheckSmall Icon = "check_small"
-
-	// Checklist is https://github.com/cogentcore/core/blob/main/icons/svg/checklist.svg
-	Checklist Icon = "checklist"
-
-	// ChecklistRtl is https://github.com/cogentcore/core/blob/main/icons/svg/checklist_rtl.svg
-	ChecklistRtl Icon = "checklist_rtl"
-
-	// Cheer is https://github.com/cogentcore/core/blob/main/icons/svg/cheer.svg
-	Cheer Icon = "cheer"
-
-	// Chess is https://github.com/cogentcore/core/blob/main/icons/svg/chess.svg
-	Chess Icon = "chess"
-
-	// ChevronLeft is https://github.com/cogentcore/core/blob/main/icons/svg/chevron_left.svg
-	ChevronLeft Icon = "chevron_left"
-
-	// ChevronRight is https://github.com/cogentcore/core/blob/main/icons/svg/chevron_right.svg
-	ChevronRight Icon = "chevron_right"
-
-	// Chips is https://github.com/cogentcore/core/blob/main/icons/svg/chips.svg
-	Chips Icon = "chips"
-
-	// Chronic is https://github.com/cogentcore/core/blob/main/icons/svg/chronic.svg
-	Chronic Icon = "chronic"
-
-	// Circle is https://github.com/cogentcore/core/blob/main/icons/svg/circle.svg
-	Circle Icon = "circle"
-
-	// CircleNotifications is https://github.com/cogentcore/core/blob/main/icons/svg/circle_notifications.svg
-	CircleNotifications Icon = "circle_notifications"
-
-	// Circles is https://github.com/cogentcore/core/blob/main/icons/svg/circles.svg
-	Circles Icon = "circles"
-
-	// CirclesExt is https://github.com/cogentcore/core/blob/main/icons/svg/circles_ext.svg
-	CirclesExt Icon = "circles_ext"
-
-	// Clarify is https://github.com/cogentcore/core/blob/main/icons/svg/clarify.svg
-	Clarify Icon = "clarify"
-
-	// ClearAll is https://github.com/cogentcore/core/blob/main/icons/svg/clear_all.svg
-	ClearAll Icon = "clear_all"
-
-	// ClearDay is https://github.com/cogentcore/core/blob/main/icons/svg/clear_day.svg
-	ClearDay Icon = "clear_day"
-
-	// ClearNight is https://github.com/cogentcore/core/blob/main/icons/svg/clear_night.svg
-	ClearNight Icon = "clear_night"
-
-	// ClockLoader10 is https://github.com/cogentcore/core/blob/main/icons/svg/clock_loader_10.svg
-	ClockLoader10 Icon = "clock_loader_10"
-
-	// ClockLoader20 is https://github.com/cogentcore/core/blob/main/icons/svg/clock_loader_20.svg
-	ClockLoader20 Icon = "clock_loader_20"
-
-	// ClockLoader40 is https://github.com/cogentcore/core/blob/main/icons/svg/clock_loader_40.svg
-	ClockLoader40 Icon = "clock_loader_40"
-
-	// ClockLoader60 is https://github.com/cogentcore/core/blob/main/icons/svg/clock_loader_60.svg
-	ClockLoader60 Icon = "clock_loader_60"
-
-	// ClockLoader80 is https://github.com/cogentcore/core/blob/main/icons/svg/clock_loader_80.svg
-	ClockLoader80 Icon = "clock_loader_80"
-
-	// ClockLoader90 is https://github.com/cogentcore/core/blob/main/icons/svg/clock_loader_90.svg
-	ClockLoader90 Icon = "clock_loader_90"
-
-	// Close is https://github.com/cogentcore/core/blob/main/icons/svg/close.svg
-	Close Icon = "close"
-
-	// CloseFullscreen is https://github.com/cogentcore/core/blob/main/icons/svg/close_fullscreen.svg
-	CloseFullscreen Icon = "close_fullscreen"
-
-	// ClosedCaption is https://github.com/cogentcore/core/blob/main/icons/svg/closed_caption.svg
-	ClosedCaption Icon = "closed_caption"
-
-	// ClosedCaptionDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/closed_caption_disabled.svg
-	ClosedCaptionDisabled Icon = "closed_caption_disabled"
-
-	// Cloud is https://github.com/cogentcore/core/blob/main/icons/svg/cloud.svg
-	Cloud Icon = "cloud"
-
-	// CloudCircle is https://github.com/cogentcore/core/blob/main/icons/svg/cloud_circle.svg
-	CloudCircle Icon = "cloud_circle"
-
-	// CloudDone is https://github.com/cogentcore/core/blob/main/icons/svg/cloud_done.svg
-	CloudDone Icon = "cloud_done"
-
-	// CloudDownload is https://github.com/cogentcore/core/blob/main/icons/svg/cloud_download.svg
-	CloudDownload Icon = "cloud_download"
-
-	// CloudOff is https://github.com/cogentcore/core/blob/main/icons/svg/cloud_off.svg
-	CloudOff Icon = "cloud_off"
-
-	// CloudSync is https://github.com/cogentcore/core/blob/main/icons/svg/cloud_sync.svg
-	CloudSync Icon = "cloud_sync"
-
-	// CloudUpload is https://github.com/cogentcore/core/blob/main/icons/svg/cloud_upload.svg
-	CloudUpload Icon = "cloud_upload"
-
-	// Code is https://github.com/cogentcore/core/blob/main/icons/svg/code.svg
-	Code Icon = "code"
-
-	// CodeBlocks is https://github.com/cogentcore/core/blob/main/icons/svg/code_blocks.svg
-	CodeBlocks Icon = "code_blocks"
-
-	// CodeOff is https://github.com/cogentcore/core/blob/main/icons/svg/code_off.svg
-	CodeOff Icon = "code_off"
-
-	// Coffee is https://github.com/cogentcore/core/blob/main/icons/svg/coffee.svg
-	Coffee Icon = "coffee"
-
-	// Cognition is https://github.com/cogentcore/core/blob/main/icons/svg/cognition.svg
-	Cognition Icon = "cognition"
-
-	// CollapseAll is https://github.com/cogentcore/core/blob/main/icons/svg/collapse_all.svg
-	CollapseAll Icon = "collapse_all"
-
-	// CollectionsBookmark is https://github.com/cogentcore/core/blob/main/icons/svg/collections_bookmark.svg
-	CollectionsBookmark Icon = "collections_bookmark"
-
-	// Colorize is https://github.com/cogentcore/core/blob/main/icons/svg/colorize.svg
-	Colorize Icon = "colorize"
-
-	// Colors is https://github.com/cogentcore/core/blob/main/icons/svg/colors.svg
-	Colors Icon = "colors"
-
-	// ComicBubble is https://github.com/cogentcore/core/blob/main/icons/svg/comic_bubble.svg
-	ComicBubble Icon = "comic_bubble"
-
-	// Comment is https://github.com/cogentcore/core/blob/main/icons/svg/comment.svg
-	Comment Icon = "comment"
-
-	// CommentBank is https://github.com/cogentcore/core/blob/main/icons/svg/comment_bank.svg
-	CommentBank Icon = "comment_bank"
-
-	// CommentsDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/comments_disabled.svg
-	CommentsDisabled Icon = "comments_disabled"
-
-	// Commit is https://github.com/cogentcore/core/blob/main/icons/svg/commit.svg
-	Commit Icon = "commit"
-
-	// Communication is https://github.com/cogentcore/core/blob/main/icons/svg/communication.svg
-	Communication Icon = "communication"
-
-	// Communities is https://github.com/cogentcore/core/blob/main/icons/svg/communities.svg
-	Communities Icon = "communities"
-
-	// Compare is https://github.com/cogentcore/core/blob/main/icons/svg/compare.svg
-	Compare Icon = "compare"
-
-	// CompareArrows is https://github.com/cogentcore/core/blob/main/icons/svg/compare_arrows.svg
-	CompareArrows Icon = "compare_arrows"
-
-	// ComponentExchange is https://github.com/cogentcore/core/blob/main/icons/svg/component_exchange.svg
-	ComponentExchange Icon = "component_exchange"
-
-	// Compress is https://github.com/cogentcore/core/blob/main/icons/svg/compress.svg
-	Compress Icon = "compress"
-
-	// Computer is https://github.com/cogentcore/core/blob/main/icons/svg/computer.svg
-	Computer Icon = "computer"
-
-	// ConfirmationNumber is https://github.com/cogentcore/core/blob/main/icons/svg/confirmation_number.svg
-	ConfirmationNumber Icon = "confirmation_number"
-
-	// ConnectWithoutContact is https://github.com/cogentcore/core/blob/main/icons/svg/connect_without_contact.svg
-	ConnectWithoutContact Icon = "connect_without_contact"
-
-	// ConnectedTv is https://github.com/cogentcore/core/blob/main/icons/svg/connected_tv.svg
-	ConnectedTv Icon = "connected_tv"
-
-	// ConnectingAirports is https://github.com/cogentcore/core/blob/main/icons/svg/connecting_airports.svg
-	ConnectingAirports Icon = "connecting_airports"
-
-	// Constant is https://github.com/cogentcore/core/blob/main/icons/svg/constant.svg
-	Constant Icon = "constant"
-
-	// Construction is https://github.com/cogentcore/core/blob/main/icons/svg/construction.svg
-	Construction Icon = "construction"
-
-	// ContactEmergency is https://github.com/cogentcore/core/blob/main/icons/svg/contact_emergency.svg
-	ContactEmergency Icon = "contact_emergency"
-
-	// ContactMail is https://github.com/cogentcore/core/blob/main/icons/svg/contact_mail.svg
-	ContactMail Icon = "contact_mail"
-
-	// ContactPage is https://github.com/cogentcore/core/blob/main/icons/svg/contact_page.svg
-	ContactPage Icon = "contact_page"
-
-	// ContactPhone is https://github.com/cogentcore/core/blob/main/icons/svg/contact_phone.svg
-	ContactPhone Icon = "contact_phone"
-
-	// ContactSupport is https://github.com/cogentcore/core/blob/main/icons/svg/contact_support.svg
-	ContactSupport Icon = "contact_support"
-
-	// Contactless is https://github.com/cogentcore/core/blob/main/icons/svg/contactless.svg
-	Contactless Icon = "contactless"
-
-	// ContactlessOff is https://github.com/cogentcore/core/blob/main/icons/svg/contactless_off.svg
-	ContactlessOff Icon = "contactless_off"
-
-	// Contacts is https://github.com/cogentcore/core/blob/main/icons/svg/contacts.svg
-	Contacts Icon = "contacts"
-
-	// ContentCopy is https://github.com/cogentcore/core/blob/main/icons/svg/content_copy.svg
-	ContentCopy Icon = "content_copy"
-
-	// ContentCut is https://github.com/cogentcore/core/blob/main/icons/svg/content_cut.svg
-	ContentCut Icon = "content_cut"
-
-	// ContentPaste is https://github.com/cogentcore/core/blob/main/icons/svg/content_paste.svg
-	ContentPaste Icon = "content_paste"
-
-	// ContentPasteGo is https://github.com/cogentcore/core/blob/main/icons/svg/content_paste_go.svg
-	ContentPasteGo Icon = "content_paste_go"
-
-	// ContentPasteOff is https://github.com/cogentcore/core/blob/main/icons/svg/content_paste_off.svg
-	ContentPasteOff Icon = "content_paste_off"
-
-	// ContentPasteSearch is https://github.com/cogentcore/core/blob/main/icons/svg/content_paste_search.svg
-	ContentPasteSearch Icon = "content_paste_search"
-
-	// Contract is https://github.com/cogentcore/core/blob/main/icons/svg/contract.svg
-	Contract Icon = "contract"
-
-	// ContractDelete is https://github.com/cogentcore/core/blob/main/icons/svg/contract_delete.svg
-	ContractDelete Icon = "contract_delete"
-
-	// ContractEdit is https://github.com/cogentcore/core/blob/main/icons/svg/contract_edit.svg
-	ContractEdit Icon = "contract_edit"
-
-	// Contrast is https://github.com/cogentcore/core/blob/main/icons/svg/contrast.svg
-	Contrast Icon = "contrast"
-
-	// ContrastRtlOff is https://github.com/cogentcore/core/blob/main/icons/svg/contrast_rtl_off.svg
-	ContrastRtlOff Icon = "contrast_rtl_off"
-
-	// ControlCamera is https://github.com/cogentcore/core/blob/main/icons/svg/control_camera.svg
-	ControlCamera Icon = "control_camera"
-
-	// ControlPointDuplicate is https://github.com/cogentcore/core/blob/main/icons/svg/control_point_duplicate.svg
-	ControlPointDuplicate Icon = "control_point_duplicate"
-
-	// ControllerGen is https://github.com/cogentcore/core/blob/main/icons/svg/controller_gen.svg
-	ControllerGen Icon = "controller_gen"
-
-	// ConversionPath is https://github.com/cogentcore/core/blob/main/icons/svg/conversion_path.svg
-	ConversionPath Icon = "conversion_path"
-
-	// ConversionPathOff is https://github.com/cogentcore/core/blob/main/icons/svg/conversion_path_off.svg
-	ConversionPathOff Icon = "conversion_path_off"
-
-	// ConveyorBelt is https://github.com/cogentcore/core/blob/main/icons/svg/conveyor_belt.svg
-	ConveyorBelt Icon = "conveyor_belt"
-
-	// Cookie is https://github.com/cogentcore/core/blob/main/icons/svg/cookie.svg
-	Cookie Icon = "cookie"
-
-	// CookieOff is https://github.com/cogentcore/core/blob/main/icons/svg/cookie_off.svg
-	CookieOff Icon = "cookie_off"
-
-	// Copy is https://github.com/cogentcore/core/blob/main/icons/svg/copy.svg
-	Copy Icon = "copy"
-
-	// CopyAll is https://github.com/cogentcore/core/blob/main/icons/svg/copy_all.svg
-	CopyAll Icon = "copy_all"
-
-	// Copyright is https://github.com/cogentcore/core/blob/main/icons/svg/copyright.svg
-	Copyright Icon = "copyright"
-
-	// Counter0 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_0.svg
-	Counter0 Icon = "counter_0"
-
-	// Counter1 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_1.svg
-	Counter1 Icon = "counter_1"
-
-	// Counter2 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_2.svg
-	Counter2 Icon = "counter_2"
-
-	// Counter3 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_3.svg
-	Counter3 Icon = "counter_3"
-
-	// Counter4 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_4.svg
-	Counter4 Icon = "counter_4"
-
-	// Counter5 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_5.svg
-	Counter5 Icon = "counter_5"
-
-	// Counter6 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_6.svg
-	Counter6 Icon = "counter_6"
-
-	// Counter7 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_7.svg
-	Counter7 Icon = "counter_7"
-
-	// Counter8 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_8.svg
-	Counter8 Icon = "counter_8"
-
-	// Counter9 is https://github.com/cogentcore/core/blob/main/icons/svg/counter_9.svg
-	Counter9 Icon = "counter_9"
-
-	// CreateNewFolder is https://github.com/cogentcore/core/blob/main/icons/svg/create_new_folder.svg
-	CreateNewFolder Icon = "create_new_folder"
-
-	// CreditCard is https://github.com/cogentcore/core/blob/main/icons/svg/credit_card.svg
-	CreditCard Icon = "credit_card"
-
-	// CreditCardOff is https://github.com/cogentcore/core/blob/main/icons/svg/credit_card_off.svg
-	CreditCardOff Icon = "credit_card_off"
-
-	// CreditScore is https://github.com/cogentcore/core/blob/main/icons/svg/credit_score.svg
-	CreditScore Icon = "credit_score"
-
-	// CrisisAlert is https://github.com/cogentcore/core/blob/main/icons/svg/crisis_alert.svg
-	CrisisAlert Icon = "crisis_alert"
-
-	// Crop is https://github.com/cogentcore/core/blob/main/icons/svg/crop.svg
-	Crop Icon = "crop"
-
-	// Crop169 is https://github.com/cogentcore/core/blob/main/icons/svg/crop_16_9.svg
-	Crop169 Icon = "crop_16_9"
-
-	// Crop32 is https://github.com/cogentcore/core/blob/main/icons/svg/crop_3_2.svg
-	Crop32 Icon = "crop_3_2"
-
-	// Crop54 is https://github.com/cogentcore/core/blob/main/icons/svg/crop_5_4.svg
-	Crop54 Icon = "crop_5_4"
-
-	// Crop75 is https://github.com/cogentcore/core/blob/main/icons/svg/crop_7_5.svg
-	Crop75 Icon = "crop_7_5"
-
-	// CropFree is https://github.com/cogentcore/core/blob/main/icons/svg/crop_free.svg
-	CropFree Icon = "crop_free"
-
-	// CropLandscape is https://github.com/cogentcore/core/blob/main/icons/svg/crop_landscape.svg
-	CropLandscape Icon = "crop_landscape"
-
-	// CropPortrait is https://github.com/cogentcore/core/blob/main/icons/svg/crop_portrait.svg
-	CropPortrait Icon = "crop_portrait"
-
-	// CropRotate is https://github.com/cogentcore/core/blob/main/icons/svg/crop_rotate.svg
-	CropRotate Icon = "crop_rotate"
-
-	// CropSquare is https://github.com/cogentcore/core/blob/main/icons/svg/crop_square.svg
-	CropSquare Icon = "crop_square"
-
-	// Crowdsource is https://github.com/cogentcore/core/blob/main/icons/svg/crowdsource.svg
-	Crowdsource Icon = "crowdsource"
-
-	// Css is https://github.com/cogentcore/core/blob/main/icons/svg/css.svg
-	Css Icon = "css"
-
-	// Csv is https://github.com/cogentcore/core/blob/main/icons/svg/csv.svg
-	Csv Icon = "csv"
-
-	// CurrencyBitcoin is https://github.com/cogentcore/core/blob/main/icons/svg/currency_bitcoin.svg
-	CurrencyBitcoin Icon = "currency_bitcoin"
-
-	// CurrencyExchange is https://github.com/cogentcore/core/blob/main/icons/svg/currency_exchange.svg
-	CurrencyExchange Icon = "currency_exchange"
-
-	// CurrencyFranc is https://github.com/cogentcore/core/blob/main/icons/svg/currency_franc.svg
-	CurrencyFranc Icon = "currency_franc"
-
-	// CurrencyLira is https://github.com/cogentcore/core/blob/main/icons/svg/currency_lira.svg
-	CurrencyLira Icon = "currency_lira"
-
-	// CurrencyPound is https://github.com/cogentcore/core/blob/main/icons/svg/currency_pound.svg
-	CurrencyPound Icon = "currency_pound"
-
-	// CurrencyRuble is https://github.com/cogentcore/core/blob/main/icons/svg/currency_ruble.svg
-	CurrencyRuble Icon = "currency_ruble"
-
-	// CurrencyRupee is https://github.com/cogentcore/core/blob/main/icons/svg/currency_rupee.svg
-	CurrencyRupee Icon = "currency_rupee"
-
-	// CurrencyYen is https://github.com/cogentcore/core/blob/main/icons/svg/currency_yen.svg
-	CurrencyYen Icon = "currency_yen"
-
-	// CurrencyYuan is https://github.com/cogentcore/core/blob/main/icons/svg/currency_yuan.svg
-	CurrencyYuan Icon = "currency_yuan"
-
-	// CustomTypography is https://github.com/cogentcore/core/blob/main/icons/svg/custom_typography.svg
-	CustomTypography Icon = "custom_typography"
-
-	// Cut is https://github.com/cogentcore/core/blob/main/icons/svg/cut.svg
-	Cut Icon = "cut"
-
-	// Cycle is https://github.com/cogentcore/core/blob/main/icons/svg/cycle.svg
-	Cycle Icon = "cycle"
-
-	// Cyclone is https://github.com/cogentcore/core/blob/main/icons/svg/cyclone.svg
-	Cyclone Icon = "cyclone"
-
-	// Dangerous is https://github.com/cogentcore/core/blob/main/icons/svg/dangerous.svg
-	Dangerous Icon = "dangerous"
-
-	// DarkMode is https://github.com/cogentcore/core/blob/main/icons/svg/dark_mode.svg
-	DarkMode Icon = "dark_mode"
-
-	// Dashboard is https://github.com/cogentcore/core/blob/main/icons/svg/dashboard.svg
-	Dashboard Icon = "dashboard"
-
-	// DashboardCustomize is https://github.com/cogentcore/core/blob/main/icons/svg/dashboard_customize.svg
-	DashboardCustomize Icon = "dashboard_customize"
-
-	// DataAlert is https://github.com/cogentcore/core/blob/main/icons/svg/data_alert.svg
-	DataAlert Icon = "data_alert"
-
-	// DataArray is https://github.com/cogentcore/core/blob/main/icons/svg/data_array.svg
-	DataArray Icon = "data_array"
-
-	// DataCheck is https://github.com/cogentcore/core/blob/main/icons/svg/data_check.svg
-	DataCheck Icon = "data_check"
-
-	// DataExploration is https://github.com/cogentcore/core/blob/main/icons/svg/data_exploration.svg
-	DataExploration Icon = "data_exploration"
-
-	// DataInfoAlert is https://github.com/cogentcore/core/blob/main/icons/svg/data_info_alert.svg
-	DataInfoAlert Icon = "data_info_alert"
-
-	// DataLossPrevention is https://github.com/cogentcore/core/blob/main/icons/svg/data_loss_prevention.svg
-	DataLossPrevention Icon = "data_loss_prevention"
-
-	// DataObject is https://github.com/cogentcore/core/blob/main/icons/svg/data_object.svg
-	DataObject Icon = "data_object"
-
-	// DataSaverOn is https://github.com/cogentcore/core/blob/main/icons/svg/data_saver_on.svg
-	DataSaverOn Icon = "data_saver_on"
-
-	// DataTable is https://github.com/cogentcore/core/blob/main/icons/svg/data_table.svg
-	DataTable Icon = "data_table"
-
-	// DataThresholding is https://github.com/cogentcore/core/blob/main/icons/svg/data_thresholding.svg
-	DataThresholding Icon = "data_thresholding"
-
-	// DataUsage is https://github.com/cogentcore/core/blob/main/icons/svg/data_usage.svg
-	DataUsage Icon = "data_usage"
-
-	// Database is https://github.com/cogentcore/core/blob/main/icons/svg/database.svg
-	Database Icon = "database"
-
-	// Dataset is https://github.com/cogentcore/core/blob/main/icons/svg/dataset.svg
-	Dataset Icon = "dataset"
-
-	// DatasetLinked is https://github.com/cogentcore/core/blob/main/icons/svg/dataset_linked.svg
-	DatasetLinked Icon = "dataset_linked"
-
-	// DateRange is https://github.com/cogentcore/core/blob/main/icons/svg/date_range.svg
-	DateRange Icon = "date_range"
-
-	// Deblur is https://github.com/cogentcore/core/blob/main/icons/svg/deblur.svg
-	Deblur Icon = "deblur"
-
-	// Debug is https://github.com/cogentcore/core/blob/main/icons/svg/debug.svg
-	Debug Icon = "debug"
-
-	// DecimalDecrease is https://github.com/cogentcore/core/blob/main/icons/svg/decimal_decrease.svg
-	DecimalDecrease Icon = "decimal_decrease"
-
-	// DecimalIncrease is https://github.com/cogentcore/core/blob/main/icons/svg/decimal_increase.svg
-	DecimalIncrease Icon = "decimal_increase"
-
-	// Deck is https://github.com/cogentcore/core/blob/main/icons/svg/deck.svg
-	Deck Icon = "deck"
-
-	// Dehaze is https://github.com/cogentcore/core/blob/main/icons/svg/dehaze.svg
-	Dehaze Icon = "dehaze"
-
-	// Delete is https://github.com/cogentcore/core/blob/main/icons/svg/delete.svg
-	Delete Icon = "delete"
-
-	// DeleteForever is https://github.com/cogentcore/core/blob/main/icons/svg/delete_forever.svg
-	DeleteForever Icon = "delete_forever"
-
-	// DeleteSweep is https://github.com/cogentcore/core/blob/main/icons/svg/delete_sweep.svg
-	DeleteSweep Icon = "delete_sweep"
-
-	// DensityLarge is https://github.com/cogentcore/core/blob/main/icons/svg/density_large.svg
-	DensityLarge Icon = "density_large"
-
-	// DensityMedium is https://github.com/cogentcore/core/blob/main/icons/svg/density_medium.svg
-	DensityMedium Icon = "density_medium"
-
-	// DensitySmall is https://github.com/cogentcore/core/blob/main/icons/svg/density_small.svg
-	DensitySmall Icon = "density_small"
-
-	// DeployedCode is https://github.com/cogentcore/core/blob/main/icons/svg/deployed_code.svg
-	DeployedCode Icon = "deployed_code"
-
-	// DeployedCodeAlert is https://github.com/cogentcore/core/blob/main/icons/svg/deployed_code_alert.svg
-	DeployedCodeAlert Icon = "deployed_code_alert"
-
-	// DeployedCodeHistory is https://github.com/cogentcore/core/blob/main/icons/svg/deployed_code_history.svg
-	DeployedCodeHistory Icon = "deployed_code_history"
-
-	// DeployedCodeUpdate is https://github.com/cogentcore/core/blob/main/icons/svg/deployed_code_update.svg
-	DeployedCodeUpdate Icon = "deployed_code_update"
-
-	// Description is https://github.com/cogentcore/core/blob/main/icons/svg/description.svg
-	Description Icon = "description"
-
-	// Deselect is https://github.com/cogentcore/core/blob/main/icons/svg/deselect.svg
-	Deselect Icon = "deselect"
-
-	// DesignServices is https://github.com/cogentcore/core/blob/main/icons/svg/design_services.svg
-	DesignServices Icon = "design_services"
-
-	// Desk is https://github.com/cogentcore/core/blob/main/icons/svg/desk.svg
-	Desk Icon = "desk"
-
-	// Deskphone is https://github.com/cogentcore/core/blob/main/icons/svg/deskphone.svg
-	Deskphone Icon = "deskphone"
-
-	// Desktop is https://github.com/cogentcore/core/blob/main/icons/svg/desktop.svg
-	Desktop Icon = "desktop"
-
-	// DesktopAccessDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/desktop_access_disabled.svg
-	DesktopAccessDisabled Icon = "desktop_access_disabled"
-
-	// DesktopMac is https://github.com/cogentcore/core/blob/main/icons/svg/desktop_mac.svg
-	DesktopMac Icon = "desktop_mac"
-
-	// DesktopWindows is https://github.com/cogentcore/core/blob/main/icons/svg/desktop_windows.svg
-	DesktopWindows Icon = "desktop_windows"
-
-	// Details is https://github.com/cogentcore/core/blob/main/icons/svg/details.svg
-	Details Icon = "details"
-
-	// Detector is https://github.com/cogentcore/core/blob/main/icons/svg/detector.svg
-	Detector Icon = "detector"
-
-	// DetectorAlarm is https://github.com/cogentcore/core/blob/main/icons/svg/detector_alarm.svg
-	DetectorAlarm Icon = "detector_alarm"
-
-	// DetectorBattery is https://github.com/cogentcore/core/blob/main/icons/svg/detector_battery.svg
-	DetectorBattery Icon = "detector_battery"
-
-	// DetectorCo is https://github.com/cogentcore/core/blob/main/icons/svg/detector_co.svg
-	DetectorCo Icon = "detector_co"
-
-	// DetectorOffline is https://github.com/cogentcore/core/blob/main/icons/svg/detector_offline.svg
-	DetectorOffline Icon = "detector_offline"
-
-	// DetectorSmoke is https://github.com/cogentcore/core/blob/main/icons/svg/detector_smoke.svg
-	DetectorSmoke Icon = "detector_smoke"
-
-	// DetectorStatus is https://github.com/cogentcore/core/blob/main/icons/svg/detector_status.svg
-	DetectorStatus Icon = "detector_status"
-
-	// DeveloperBoard is https://github.com/cogentcore/core/blob/main/icons/svg/developer_board.svg
-	DeveloperBoard Icon = "developer_board"
-
-	// DeveloperBoardOff is https://github.com/cogentcore/core/blob/main/icons/svg/developer_board_off.svg
-	DeveloperBoardOff Icon = "developer_board_off"
-
-	// DeveloperGuide is https://github.com/cogentcore/core/blob/main/icons/svg/developer_guide.svg
-	DeveloperGuide Icon = "developer_guide"
-
-	// DeveloperMode is https://github.com/cogentcore/core/blob/main/icons/svg/developer_mode.svg
-	DeveloperMode Icon = "developer_mode"
-
-	// DeveloperModeTv is https://github.com/cogentcore/core/blob/main/icons/svg/developer_mode_tv.svg
-	DeveloperModeTv Icon = "developer_mode_tv"
-
-	// DeviceHub is https://github.com/cogentcore/core/blob/main/icons/svg/device_hub.svg
-	DeviceHub Icon = "device_hub"
-
-	// DeviceReset is https://github.com/cogentcore/core/blob/main/icons/svg/device_reset.svg
-	DeviceReset Icon = "device_reset"
-
-	// DeviceThermostat is https://github.com/cogentcore/core/blob/main/icons/svg/device_thermostat.svg
-	DeviceThermostat Icon = "device_thermostat"
-
-	// DeviceUnknown is https://github.com/cogentcore/core/blob/main/icons/svg/device_unknown.svg
-	DeviceUnknown Icon = "device_unknown"
-
-	// Devices is https://github.com/cogentcore/core/blob/main/icons/svg/devices.svg
-	Devices Icon = "devices"
-
-	// DevicesFold is https://github.com/cogentcore/core/blob/main/icons/svg/devices_fold.svg
-	DevicesFold Icon = "devices_fold"
-
-	// DevicesOff is https://github.com/cogentcore/core/blob/main/icons/svg/devices_off.svg
-	DevicesOff Icon = "devices_off"
-
-	// DevicesOther is https://github.com/cogentcore/core/blob/main/icons/svg/devices_other.svg
-	DevicesOther Icon = "devices_other"
-
-	// DevicesWearables is https://github.com/cogentcore/core/blob/main/icons/svg/devices_wearables.svg
-	DevicesWearables Icon = "devices_wearables"
-
-	// DialerSip is https://github.com/cogentcore/core/blob/main/icons/svg/dialer_sip.svg
-	DialerSip Icon = "dialer_sip"
-
-	// Dialogs is https://github.com/cogentcore/core/blob/main/icons/svg/dialogs.svg
-	Dialogs Icon = "dialogs"
-
-	// Dialpad is https://github.com/cogentcore/core/blob/main/icons/svg/dialpad.svg
-	Dialpad Icon = "dialpad"
-
-	// Diamond is https://github.com/cogentcore/core/blob/main/icons/svg/diamond.svg
-	Diamond Icon = "diamond"
-
-	// Difference is https://github.com/cogentcore/core/blob/main/icons/svg/difference.svg
-	Difference Icon = "difference"
-
-	// Dining is https://github.com/cogentcore/core/blob/main/icons/svg/dining.svg
-	Dining Icon = "dining"
-
-	// DinnerDining is https://github.com/cogentcore/core/blob/main/icons/svg/dinner_dining.svg
-	DinnerDining Icon = "dinner_dining"
-
-	// Directions is https://github.com/cogentcore/core/blob/main/icons/svg/directions.svg
-	Directions Icon = "directions"
-
-	// DirectionsOff is https://github.com/cogentcore/core/blob/main/icons/svg/directions_off.svg
-	DirectionsOff Icon = "directions_off"
-
-	// DirectorySync is https://github.com/cogentcore/core/blob/main/icons/svg/directory_sync.svg
-	DirectorySync Icon = "directory_sync"
-
-	// DirtyLens is https://github.com/cogentcore/core/blob/main/icons/svg/dirty_lens.svg
-	DirtyLens Icon = "dirty_lens"
-
-	// DisabledByDefault is https://github.com/cogentcore/core/blob/main/icons/svg/disabled_by_default.svg
-	DisabledByDefault Icon = "disabled_by_default"
-
-	// DisabledVisible is https://github.com/cogentcore/core/blob/main/icons/svg/disabled_visible.svg
-	DisabledVisible Icon = "disabled_visible"
-
-	// DiscFull is https://github.com/cogentcore/core/blob/main/icons/svg/disc_full.svg
-	DiscFull Icon = "disc_full"
-
-	// DisplayExternalInput is https://github.com/cogentcore/core/blob/main/icons/svg/display_external_input.svg
-	DisplayExternalInput Icon = "display_external_input"
-
-	// DisplaySettings is https://github.com/cogentcore/core/blob/main/icons/svg/display_settings.svg
-	DisplaySettings Icon = "display_settings"
-
-	// Distance is https://github.com/cogentcore/core/blob/main/icons/svg/distance.svg
-	Distance Icon = "distance"
-
-	// Diversity1 is https://github.com/cogentcore/core/blob/main/icons/svg/diversity_1.svg
-	Diversity1 Icon = "diversity_1"
-
-	// Diversity2 is https://github.com/cogentcore/core/blob/main/icons/svg/diversity_2.svg
-	Diversity2 Icon = "diversity_2"
-
-	// Diversity3 is https://github.com/cogentcore/core/blob/main/icons/svg/diversity_3.svg
-	Diversity3 Icon = "diversity_3"
-
-	// Diversity4 is https://github.com/cogentcore/core/blob/main/icons/svg/diversity_4.svg
-	Diversity4 Icon = "diversity_4"
-
-	// Dns is https://github.com/cogentcore/core/blob/main/icons/svg/dns.svg
-	Dns Icon = "dns"
-
-	// DoNotDisturbOff is https://github.com/cogentcore/core/blob/main/icons/svg/do_not_disturb_off.svg
-	DoNotDisturbOff Icon = "do_not_disturb_off"
-
-	// DoNotDisturbOn is https://github.com/cogentcore/core/blob/main/icons/svg/do_not_disturb_on.svg
-	DoNotDisturbOn Icon = "do_not_disturb_on"
-
-	// Dock is https://github.com/cogentcore/core/blob/main/icons/svg/dock.svg
-	Dock Icon = "dock"
-
-	// DockToBottom is https://github.com/cogentcore/core/blob/main/icons/svg/dock_to_bottom.svg
-	DockToBottom Icon = "dock_to_bottom"
-
-	// DockToLeft is https://github.com/cogentcore/core/blob/main/icons/svg/dock_to_left.svg
-	DockToLeft Icon = "dock_to_left"
-
-	// DockToRight is https://github.com/cogentcore/core/blob/main/icons/svg/dock_to_right.svg
-	DockToRight Icon = "dock_to_right"
-
-	// DocsAddOn is https://github.com/cogentcore/core/blob/main/icons/svg/docs_add_on.svg
-	DocsAddOn Icon = "docs_add_on"
-
-	// DocsAppsScript is https://github.com/cogentcore/core/blob/main/icons/svg/docs_apps_script.svg
-	DocsAppsScript Icon = "docs_apps_script"
-
-	// Document is https://github.com/cogentcore/core/blob/main/icons/svg/document.svg
-	Document Icon = "document"
-
-	// DocumentScanner is https://github.com/cogentcore/core/blob/main/icons/svg/document_scanner.svg
-	DocumentScanner Icon = "document_scanner"
-
-	// Domain is https://github.com/cogentcore/core/blob/main/icons/svg/domain.svg
-	Domain Icon = "domain"
-
-	// DomainAdd is https://github.com/cogentcore/core/blob/main/icons/svg/domain_add.svg
-	DomainAdd Icon = "domain_add"
-
-	// DomainDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/domain_disabled.svg
-	DomainDisabled Icon = "domain_disabled"
-
-	// DomainVerification is https://github.com/cogentcore/core/blob/main/icons/svg/domain_verification.svg
-	DomainVerification Icon = "domain_verification"
-
-	// DomainVerificationOff is https://github.com/cogentcore/core/blob/main/icons/svg/domain_verification_off.svg
-	DomainVerificationOff Icon = "domain_verification_off"
-
-	// Done is https://github.com/cogentcore/core/blob/main/icons/svg/done.svg
-	Done Icon = "done"
-
-	// DoneAll is https://github.com/cogentcore/core/blob/main/icons/svg/done_all.svg
-	DoneAll Icon = "done_all"
-
-	// DoneOutline is https://github.com/cogentcore/core/blob/main/icons/svg/done_outline.svg
-	DoneOutline Icon = "done_outline"
-
-	// DonutLarge is https://github.com/cogentcore/core/blob/main/icons/svg/donut_large.svg
-	DonutLarge Icon = "donut_large"
-
-	// DonutSmall is https://github.com/cogentcore/core/blob/main/icons/svg/donut_small.svg
-	DonutSmall Icon = "donut_small"
-
-	// DoorOpen is https://github.com/cogentcore/core/blob/main/icons/svg/door_open.svg
-	DoorOpen Icon = "door_open"
-
-	// DoubleArrow is https://github.com/cogentcore/core/blob/main/icons/svg/double_arrow.svg
-	DoubleArrow Icon = "double_arrow"
-
-	// Download is https://github.com/cogentcore/core/blob/main/icons/svg/download.svg
-	Download Icon = "download"
-
-	// DownloadDone is https://github.com/cogentcore/core/blob/main/icons/svg/download_done.svg
-	DownloadDone Icon = "download_done"
-
-	// DownloadForOffline is https://github.com/cogentcore/core/blob/main/icons/svg/download_for_offline.svg
-	DownloadForOffline Icon = "download_for_offline"
-
-	// Downloading is https://github.com/cogentcore/core/blob/main/icons/svg/downloading.svg
-	Downloading Icon = "downloading"
-
-	// Draft is https://github.com/cogentcore/core/blob/main/icons/svg/draft.svg
-	Draft Icon = "draft"
-
-	// DraftOrders is https://github.com/cogentcore/core/blob/main/icons/svg/draft_orders.svg
-	DraftOrders Icon = "draft_orders"
-
-	// Drafts is https://github.com/cogentcore/core/blob/main/icons/svg/drafts.svg
-	Drafts Icon = "drafts"
-
-	// DragClick is https://github.com/cogentcore/core/blob/main/icons/svg/drag_click.svg
-	DragClick Icon = "drag_click"
-
-	// DragHandle is https://github.com/cogentcore/core/blob/main/icons/svg/drag_handle.svg
-	DragHandle Icon = "drag_handle"
-
-	// DragIndicator is https://github.com/cogentcore/core/blob/main/icons/svg/drag_indicator.svg
-	DragIndicator Icon = "drag_indicator"
-
-	// DragPan is https://github.com/cogentcore/core/blob/main/icons/svg/drag_pan.svg
-	DragPan Icon = "drag_pan"
-
-	// Draw is https://github.com/cogentcore/core/blob/main/icons/svg/draw.svg
-	Draw Icon = "draw"
-
-	// DrawAbstract is https://github.com/cogentcore/core/blob/main/icons/svg/draw_abstract.svg
-	DrawAbstract Icon = "draw_abstract"
-
-	// DrawCollage is https://github.com/cogentcore/core/blob/main/icons/svg/draw_collage.svg
-	DrawCollage Icon = "draw_collage"
-
-	// DriveFileMove is https://github.com/cogentcore/core/blob/main/icons/svg/drive_file_move.svg
-	DriveFileMove Icon = "drive_file_move"
-
-	// DriveFolderUpload is https://github.com/cogentcore/core/blob/main/icons/svg/drive_folder_upload.svg
-	DriveFolderUpload Icon = "drive_folder_upload"
-
-	// Dropdown is https://github.com/cogentcore/core/blob/main/icons/svg/dropdown.svg
-	Dropdown Icon = "dropdown"
-
-	// DualScreen is https://github.com/cogentcore/core/blob/main/icons/svg/dual_screen.svg
-	DualScreen Icon = "dual_screen"
-
-	// Dvr is https://github.com/cogentcore/core/blob/main/icons/svg/dvr.svg
-	Dvr Icon = "dvr"
-
-	// DynamicFeed is https://github.com/cogentcore/core/blob/main/icons/svg/dynamic_feed.svg
-	DynamicFeed Icon = "dynamic_feed"
-
-	// DynamicForm is https://github.com/cogentcore/core/blob/main/icons/svg/dynamic_form.svg
-	DynamicForm Icon = "dynamic_form"
-
-	// Earbuds is https://github.com/cogentcore/core/blob/main/icons/svg/earbuds.svg
-	Earbuds Icon = "earbuds"
-
-	// EarbudsBattery is https://github.com/cogentcore/core/blob/main/icons/svg/earbuds_battery.svg
-	EarbudsBattery Icon = "earbuds_battery"
-
-	// East is https://github.com/cogentcore/core/blob/main/icons/svg/east.svg
-	East Icon = "east"
-
-	// Eco is https://github.com/cogentcore/core/blob/main/icons/svg/eco.svg
-	Eco Icon = "eco"
-
-	// Edit is https://github.com/cogentcore/core/blob/main/icons/svg/edit.svg
-	Edit Icon = "edit"
-
-	// EditAttributes is https://github.com/cogentcore/core/blob/main/icons/svg/edit_attributes.svg
-	EditAttributes Icon = "edit_attributes"
-
-	// EditCalendar is https://github.com/cogentcore/core/blob/main/icons/svg/edit_calendar.svg
-	EditCalendar Icon = "edit_calendar"
-
-	// EditDocument is https://github.com/cogentcore/core/blob/main/icons/svg/edit_document.svg
-	EditDocument Icon = "edit_document"
-
-	// EditLocation is https://github.com/cogentcore/core/blob/main/icons/svg/edit_location.svg
-	EditLocation Icon = "edit_location"
-
-	// EditLocationAlt is https://github.com/cogentcore/core/blob/main/icons/svg/edit_location_alt.svg
-	EditLocationAlt Icon = "edit_location_alt"
-
-	// EditNote is https://github.com/cogentcore/core/blob/main/icons/svg/edit_note.svg
-	EditNote Icon = "edit_note"
-
-	// EditNotifications is https://github.com/cogentcore/core/blob/main/icons/svg/edit_notifications.svg
-	EditNotifications Icon = "edit_notifications"
-
-	// EditOff is https://github.com/cogentcore/core/blob/main/icons/svg/edit_off.svg
-	EditOff Icon = "edit_off"
-
-	// EditSquare is https://github.com/cogentcore/core/blob/main/icons/svg/edit_square.svg
-	EditSquare Icon = "edit_square"
-
-	// Egg is https://github.com/cogentcore/core/blob/main/icons/svg/egg.svg
-	Egg Icon = "egg"
-
-	// EggAlt is https://github.com/cogentcore/core/blob/main/icons/svg/egg_alt.svg
-	EggAlt Icon = "egg_alt"
-
-	// Eject is https://github.com/cogentcore/core/blob/main/icons/svg/eject.svg
-	Eject Icon = "eject"
-
-	// ElectricalServices is https://github.com/cogentcore/core/blob/main/icons/svg/electrical_services.svg
-	ElectricalServices Icon = "electrical_services"
-
-	// Elevation is https://github.com/cogentcore/core/blob/main/icons/svg/elevation.svg
-	Elevation Icon = "elevation"
-
-	// Emergency is https://github.com/cogentcore/core/blob/main/icons/svg/emergency.svg
-	Emergency Icon = "emergency"
-
-	// EmojiEvents is https://github.com/cogentcore/core/blob/main/icons/svg/emoji_events.svg
-	EmojiEvents Icon = "emoji_events"
-
-	// EmojiFlags is https://github.com/cogentcore/core/blob/main/icons/svg/emoji_flags.svg
-	EmojiFlags Icon = "emoji_flags"
-
-	// EmojiFoodBeverage is https://github.com/cogentcore/core/blob/main/icons/svg/emoji_food_beverage.svg
-	EmojiFoodBeverage Icon = "emoji_food_beverage"
-
-	// EmojiNature is https://github.com/cogentcore/core/blob/main/icons/svg/emoji_nature.svg
-	EmojiNature Icon = "emoji_nature"
-
-	// EmojiObjects is https://github.com/cogentcore/core/blob/main/icons/svg/emoji_objects.svg
-	EmojiObjects Icon = "emoji_objects"
-
-	// EmojiPeople is https://github.com/cogentcore/core/blob/main/icons/svg/emoji_people.svg
-	EmojiPeople Icon = "emoji_people"
-
-	// EmojiSymbols is https://github.com/cogentcore/core/blob/main/icons/svg/emoji_symbols.svg
-	EmojiSymbols Icon = "emoji_symbols"
-
-	// EmojiTransportation is https://github.com/cogentcore/core/blob/main/icons/svg/emoji_transportation.svg
-	EmojiTransportation Icon = "emoji_transportation"
-
-	// Emoticon is https://github.com/cogentcore/core/blob/main/icons/svg/emoticon.svg
-	Emoticon Icon = "emoticon"
-
-	// EmptyDashboard is https://github.com/cogentcore/core/blob/main/icons/svg/empty_dashboard.svg
-	EmptyDashboard Icon = "empty_dashboard"
-
-	// Enable is https://github.com/cogentcore/core/blob/main/icons/svg/enable.svg
-	Enable Icon = "enable"
-
-	// Encrypted is https://github.com/cogentcore/core/blob/main/icons/svg/encrypted.svg
-	Encrypted Icon = "encrypted"
-
-	// EnergySavingsLeaf is https://github.com/cogentcore/core/blob/main/icons/svg/energy_savings_leaf.svg
-	EnergySavingsLeaf Icon = "energy_savings_leaf"
-
-	// Engineering is https://github.com/cogentcore/core/blob/main/icons/svg/engineering.svg
-	Engineering Icon = "engineering"
-
-	// EnhancedEncryption is https://github.com/cogentcore/core/blob/main/icons/svg/enhanced_encryption.svg
-	EnhancedEncryption Icon = "enhanced_encryption"
-
-	// Equal is https://github.com/cogentcore/core/blob/main/icons/svg/equal.svg
-	Equal Icon = "equal"
-
-	// Equalizer is https://github.com/cogentcore/core/blob/main/icons/svg/equalizer.svg
-	Equalizer Icon = "equalizer"
-
-	// Error is https://github.com/cogentcore/core/blob/main/icons/svg/error.svg
-	Error Icon = "error"
-
-	// Euro is https://github.com/cogentcore/core/blob/main/icons/svg/euro.svg
-	Euro Icon = "euro"
-
-	// EuroSymbol is https://github.com/cogentcore/core/blob/main/icons/svg/euro_symbol.svg
-	EuroSymbol Icon = "euro_symbol"
-
-	// Event is https://github.com/cogentcore/core/blob/main/icons/svg/event.svg
-	Event Icon = "event"
-
-	// EventAvailable is https://github.com/cogentcore/core/blob/main/icons/svg/event_available.svg
-	EventAvailable Icon = "event_available"
-
-	// EventBusy is https://github.com/cogentcore/core/blob/main/icons/svg/event_busy.svg
-	EventBusy Icon = "event_busy"
-
-	// EventList is https://github.com/cogentcore/core/blob/main/icons/svg/event_list.svg
-	EventList Icon = "event_list"
-
-	// EventNote is https://github.com/cogentcore/core/blob/main/icons/svg/event_note.svg
-	EventNote Icon = "event_note"
-
-	// EventRepeat is https://github.com/cogentcore/core/blob/main/icons/svg/event_repeat.svg
-	EventRepeat Icon = "event_repeat"
-
-	// EventSeat is https://github.com/cogentcore/core/blob/main/icons/svg/event_seat.svg
-	EventSeat Icon = "event_seat"
-
-	// EventUpcoming is https://github.com/cogentcore/core/blob/main/icons/svg/event_upcoming.svg
-	EventUpcoming Icon = "event_upcoming"
-
-	// Exclamation is https://github.com/cogentcore/core/blob/main/icons/svg/exclamation.svg
-	Exclamation Icon = "exclamation"
-
-	// Exercise is https://github.com/cogentcore/core/blob/main/icons/svg/exercise.svg
-	Exercise Icon = "exercise"
-
-	// ExitToApp is https://github.com/cogentcore/core/blob/main/icons/svg/exit_to_app.svg
-	ExitToApp Icon = "exit_to_app"
-
-	// Expand is https://github.com/cogentcore/core/blob/main/icons/svg/expand.svg
-	Expand Icon = "expand"
-
-	// ExpandAll is https://github.com/cogentcore/core/blob/main/icons/svg/expand_all.svg
-	ExpandAll Icon = "expand_all"
-
-	// ExpandCircleDown is https://github.com/cogentcore/core/blob/main/icons/svg/expand_circle_down.svg
-	ExpandCircleDown Icon = "expand_circle_down"
-
-	// ExpandCircleRight is https://github.com/cogentcore/core/blob/main/icons/svg/expand_circle_right.svg
-	ExpandCircleRight Icon = "expand_circle_right"
-
-	// ExpandCircleUp is https://github.com/cogentcore/core/blob/main/icons/svg/expand_circle_up.svg
-	ExpandCircleUp Icon = "expand_circle_up"
-
-	// ExpandContent is https://github.com/cogentcore/core/blob/main/icons/svg/expand_content.svg
-	ExpandContent Icon = "expand_content"
-
-	// ExpandLess is https://github.com/cogentcore/core/blob/main/icons/svg/expand_less.svg
-	ExpandLess Icon = "expand_less"
-
-	// ExpandMore is https://github.com/cogentcore/core/blob/main/icons/svg/expand_more.svg
-	ExpandMore Icon = "expand_more"
-
-	// Explicit is https://github.com/cogentcore/core/blob/main/icons/svg/explicit.svg
-	Explicit Icon = "explicit"
-
-	// Explore is https://github.com/cogentcore/core/blob/main/icons/svg/explore.svg
-	Explore Icon = "explore"
-
-	// ExploreOff is https://github.com/cogentcore/core/blob/main/icons/svg/explore_off.svg
-	ExploreOff Icon = "explore_off"
-
-	// Explosion is https://github.com/cogentcore/core/blob/main/icons/svg/explosion.svg
-	Explosion Icon = "explosion"
-
-	// ExportNotes is https://github.com/cogentcore/core/blob/main/icons/svg/export_notes.svg
-	ExportNotes Icon = "export_notes"
-
-	// Exposure is https://github.com/cogentcore/core/blob/main/icons/svg/exposure.svg
-	Exposure Icon = "exposure"
-
-	// ExposureNeg1 is https://github.com/cogentcore/core/blob/main/icons/svg/exposure_neg_1.svg
-	ExposureNeg1 Icon = "exposure_neg_1"
-
-	// ExposureNeg2 is https://github.com/cogentcore/core/blob/main/icons/svg/exposure_neg_2.svg
-	ExposureNeg2 Icon = "exposure_neg_2"
-
-	// ExposurePlus1 is https://github.com/cogentcore/core/blob/main/icons/svg/exposure_plus_1.svg
-	ExposurePlus1 Icon = "exposure_plus_1"
-
-	// ExposurePlus2 is https://github.com/cogentcore/core/blob/main/icons/svg/exposure_plus_2.svg
-	ExposurePlus2 Icon = "exposure_plus_2"
-
-	// ExposureZero is https://github.com/cogentcore/core/blob/main/icons/svg/exposure_zero.svg
-	ExposureZero Icon = "exposure_zero"
-
-	// Extension is https://github.com/cogentcore/core/blob/main/icons/svg/extension.svg
-	Extension Icon = "extension"
-
-	// ExtensionOff is https://github.com/cogentcore/core/blob/main/icons/svg/extension_off.svg
-	ExtensionOff Icon = "extension_off"
-
-	// Face is https://github.com/cogentcore/core/blob/main/icons/svg/face.svg
-	Face Icon = "face"
-
-	// Face2 is https://github.com/cogentcore/core/blob/main/icons/svg/face_2.svg
-	Face2 Icon = "face_2"
-
-	// Face3 is https://github.com/cogentcore/core/blob/main/icons/svg/face_3.svg
-	Face3 Icon = "face_3"
-
-	// Face4 is https://github.com/cogentcore/core/blob/main/icons/svg/face_4.svg
-	Face4 Icon = "face_4"
-
-	// Face5 is https://github.com/cogentcore/core/blob/main/icons/svg/face_5.svg
-	Face5 Icon = "face_5"
-
-	// Face6 is https://github.com/cogentcore/core/blob/main/icons/svg/face_6.svg
-	Face6 Icon = "face_6"
-
-	// FaceRetouchingOff is https://github.com/cogentcore/core/blob/main/icons/svg/face_retouching_off.svg
-	FaceRetouchingOff Icon = "face_retouching_off"
-
-	// FactCheck is https://github.com/cogentcore/core/blob/main/icons/svg/fact_check.svg
-	FactCheck Icon = "fact_check"
-
-	// Factory is https://github.com/cogentcore/core/blob/main/icons/svg/factory.svg
-	Factory Icon = "factory"
-
-	// FamilyHistory is https://github.com/cogentcore/core/blob/main/icons/svg/family_history.svg
-	FamilyHistory Icon = "family_history"
-
-	// FamilyLink is https://github.com/cogentcore/core/blob/main/icons/svg/family_link.svg
-	FamilyLink Icon = "family_link"
-
-	// FastForward is https://github.com/cogentcore/core/blob/main/icons/svg/fast_forward.svg
-	FastForward Icon = "fast_forward"
-
-	// FastRewind is https://github.com/cogentcore/core/blob/main/icons/svg/fast_rewind.svg
-	FastRewind Icon = "fast_rewind"
-
-	// Faucet is https://github.com/cogentcore/core/blob/main/icons/svg/faucet.svg
-	Faucet Icon = "faucet"
-
-	// Favorite is https://github.com/cogentcore/core/blob/main/icons/svg/favorite.svg
-	Favorite Icon = "favorite"
-
-	// Fax is https://github.com/cogentcore/core/blob/main/icons/svg/fax.svg
-	Fax Icon = "fax"
-
-	// FeatureSearch is https://github.com/cogentcore/core/blob/main/icons/svg/feature_search.svg
-	FeatureSearch Icon = "feature_search"
-
-	// FeaturedPlayList is https://github.com/cogentcore/core/blob/main/icons/svg/featured_play_list.svg
-	FeaturedPlayList Icon = "featured_play_list"
-
-	// FeaturedVideo is https://github.com/cogentcore/core/blob/main/icons/svg/featured_video.svg
-	FeaturedVideo Icon = "featured_video"
-
-	// Feed is https://github.com/cogentcore/core/blob/main/icons/svg/feed.svg
-	Feed Icon = "feed"
-
-	// Feedback is https://github.com/cogentcore/core/blob/main/icons/svg/feedback.svg
-	Feedback Icon = "feedback"
-
-	// Female is https://github.com/cogentcore/core/blob/main/icons/svg/female.svg
-	Female Icon = "female"
-
-	// Fence is https://github.com/cogentcore/core/blob/main/icons/svg/fence.svg
-	Fence Icon = "fence"
-
-	// Festival is https://github.com/cogentcore/core/blob/main/icons/svg/festival.svg
-	Festival Icon = "festival"
-
-	// Field is https://github.com/cogentcore/core/blob/main/icons/svg/field.svg
-	Field Icon = "field"
-
-	// FileExe is https://github.com/cogentcore/core/blob/main/icons/svg/file-exe.svg
-	FileExe Icon = "file-exe"
-
-	// FileMarkdown is https://github.com/cogentcore/core/blob/main/icons/svg/file-markdown.svg
-	FileMarkdown Icon = "file-markdown"
-
-	// File is https://github.com/cogentcore/core/blob/main/icons/svg/file.svg
-	File Icon = "file"
-
-	// FileCopy is https://github.com/cogentcore/core/blob/main/icons/svg/file_copy.svg
-	FileCopy Icon = "file_copy"
-
-	// FileDownloadDone is https://github.com/cogentcore/core/blob/main/icons/svg/file_download_done.svg
-	FileDownloadDone Icon = "file_download_done"
-
-	// FileDownloadOff is https://github.com/cogentcore/core/blob/main/icons/svg/file_download_off.svg
-	FileDownloadOff Icon = "file_download_off"
-
-	// FileOpen is https://github.com/cogentcore/core/blob/main/icons/svg/file_open.svg
-	FileOpen Icon = "file_open"
-
-	// FilePresent is https://github.com/cogentcore/core/blob/main/icons/svg/file_present.svg
-	FilePresent Icon = "file_present"
-
-	// FileUploadOff is https://github.com/cogentcore/core/blob/main/icons/svg/file_upload_off.svg
-	FileUploadOff Icon = "file_upload_off"
-
-	// Filter is https://github.com/cogentcore/core/blob/main/icons/svg/filter.svg
-	Filter Icon = "filter"
-
-	// Filter1 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_1.svg
-	Filter1 Icon = "filter_1"
-
-	// Filter2 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_2.svg
-	Filter2 Icon = "filter_2"
-
-	// Filter3 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_3.svg
-	Filter3 Icon = "filter_3"
-
-	// Filter4 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_4.svg
-	Filter4 Icon = "filter_4"
-
-	// Filter5 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_5.svg
-	Filter5 Icon = "filter_5"
-
-	// Filter6 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_6.svg
-	Filter6 Icon = "filter_6"
-
-	// Filter7 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_7.svg
-	Filter7 Icon = "filter_7"
-
-	// Filter8 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_8.svg
-	Filter8 Icon = "filter_8"
-
-	// Filter9 is https://github.com/cogentcore/core/blob/main/icons/svg/filter_9.svg
-	Filter9 Icon = "filter_9"
-
-	// Filter9Plus is https://github.com/cogentcore/core/blob/main/icons/svg/filter_9_plus.svg
-	Filter9Plus Icon = "filter_9_plus"
-
-	// FilterAlt is https://github.com/cogentcore/core/blob/main/icons/svg/filter_alt.svg
-	FilterAlt Icon = "filter_alt"
-
-	// FilterAltOff is https://github.com/cogentcore/core/blob/main/icons/svg/filter_alt_off.svg
-	FilterAltOff Icon = "filter_alt_off"
-
-	// FilterBAndW is https://github.com/cogentcore/core/blob/main/icons/svg/filter_b_and_w.svg
-	FilterBAndW Icon = "filter_b_and_w"
-
-	// FilterCenterFocus is https://github.com/cogentcore/core/blob/main/icons/svg/filter_center_focus.svg
-	FilterCenterFocus Icon = "filter_center_focus"
-
-	// FilterDrama is https://github.com/cogentcore/core/blob/main/icons/svg/filter_drama.svg
-	FilterDrama Icon = "filter_drama"
-
-	// FilterFrames is https://github.com/cogentcore/core/blob/main/icons/svg/filter_frames.svg
-	FilterFrames Icon = "filter_frames"
-
-	// FilterHdr is https://github.com/cogentcore/core/blob/main/icons/svg/filter_hdr.svg
-	FilterHdr Icon = "filter_hdr"
-
-	// FilterList is https://github.com/cogentcore/core/blob/main/icons/svg/filter_list.svg
-	FilterList Icon = "filter_list"
-
-	// FilterListOff is https://github.com/cogentcore/core/blob/main/icons/svg/filter_list_off.svg
-	FilterListOff Icon = "filter_list_off"
-
-	// FilterNone is https://github.com/cogentcore/core/blob/main/icons/svg/filter_none.svg
-	FilterNone Icon = "filter_none"
-
-	// FilterTiltShift is https://github.com/cogentcore/core/blob/main/icons/svg/filter_tilt_shift.svg
-	FilterTiltShift Icon = "filter_tilt_shift"
-
-	// FilterVintage is https://github.com/cogentcore/core/blob/main/icons/svg/filter_vintage.svg
-	FilterVintage Icon = "filter_vintage"
-
-	// Finance is https://github.com/cogentcore/core/blob/main/icons/svg/finance.svg
-	Finance Icon = "finance"
-
-	// FinanceChip is https://github.com/cogentcore/core/blob/main/icons/svg/finance_chip.svg
-	FinanceChip Icon = "finance_chip"
-
-	// FindInPage is https://github.com/cogentcore/core/blob/main/icons/svg/find_in_page.svg
-	FindInPage Icon = "find_in_page"
-
-	// FindReplace is https://github.com/cogentcore/core/blob/main/icons/svg/find_replace.svg
-	FindReplace Icon = "find_replace"
-
-	// Fingerprint is https://github.com/cogentcore/core/blob/main/icons/svg/fingerprint.svg
-	Fingerprint Icon = "fingerprint"
-
-	// FirstPage is https://github.com/cogentcore/core/blob/main/icons/svg/first_page.svg
-	FirstPage Icon = "first_page"
-
-	// FitPage is https://github.com/cogentcore/core/blob/main/icons/svg/fit_page.svg
-	FitPage Icon = "fit_page"
-
-	// FitScreen is https://github.com/cogentcore/core/blob/main/icons/svg/fit_screen.svg
-	FitScreen Icon = "fit_screen"
-
-	// FitWidth is https://github.com/cogentcore/core/blob/main/icons/svg/fit_width.svg
-	FitWidth Icon = "fit_width"
-
-	// Flag is https://github.com/cogentcore/core/blob/main/icons/svg/flag.svg
-	Flag Icon = "flag"
-
-	// FlagCircle is https://github.com/cogentcore/core/blob/main/icons/svg/flag_circle.svg
-	FlagCircle Icon = "flag_circle"
-
-	// Flaky is https://github.com/cogentcore/core/blob/main/icons/svg/flaky.svg
-	Flaky Icon = "flaky"
-
-	// Flare is https://github.com/cogentcore/core/blob/main/icons/svg/flare.svg
-	Flare Icon = "flare"
-
-	// FlashlightOff is https://github.com/cogentcore/core/blob/main/icons/svg/flashlight_off.svg
-	FlashlightOff Icon = "flashlight_off"
-
-	// FlashlightOn is https://github.com/cogentcore/core/blob/main/icons/svg/flashlight_on.svg
-	FlashlightOn Icon = "flashlight_on"
-
-	// FlexDirection is https://github.com/cogentcore/core/blob/main/icons/svg/flex_direction.svg
-	FlexDirection Icon = "flex_direction"
-
-	// FlexNoWrap is https://github.com/cogentcore/core/blob/main/icons/svg/flex_no_wrap.svg
-	FlexNoWrap Icon = "flex_no_wrap"
-
-	// FlexWrap is https://github.com/cogentcore/core/blob/main/icons/svg/flex_wrap.svg
-	FlexWrap Icon = "flex_wrap"
-
-	// Flight is https://github.com/cogentcore/core/blob/main/icons/svg/flight.svg
-	Flight Icon = "flight"
-
-	// Flightsmode is https://github.com/cogentcore/core/blob/main/icons/svg/flightsmode.svg
-	Flightsmode Icon = "flightsmode"
-
-	// Flip is https://github.com/cogentcore/core/blob/main/icons/svg/flip.svg
-	Flip Icon = "flip"
-
-	// FlipCameraAndroid is https://github.com/cogentcore/core/blob/main/icons/svg/flip_camera_android.svg
-	FlipCameraAndroid Icon = "flip_camera_android"
-
-	// FlipCameraIos is https://github.com/cogentcore/core/blob/main/icons/svg/flip_camera_ios.svg
-	FlipCameraIos Icon = "flip_camera_ios"
-
-	// FlipToBack is https://github.com/cogentcore/core/blob/main/icons/svg/flip_to_back.svg
-	FlipToBack Icon = "flip_to_back"
-
-	// FlipToFront is https://github.com/cogentcore/core/blob/main/icons/svg/flip_to_front.svg
-	FlipToFront Icon = "flip_to_front"
-
-	// Floor is https://github.com/cogentcore/core/blob/main/icons/svg/floor.svg
-	Floor Icon = "floor"
-
-	// Flowsheet is https://github.com/cogentcore/core/blob/main/icons/svg/flowsheet.svg
-	Flowsheet Icon = "flowsheet"
-
-	// Fluid is https://github.com/cogentcore/core/blob/main/icons/svg/fluid.svg
-	Fluid Icon = "fluid"
-
-	// FluidBalance is https://github.com/cogentcore/core/blob/main/icons/svg/fluid_balance.svg
-	FluidBalance Icon = "fluid_balance"
-
-	// FluidMed is https://github.com/cogentcore/core/blob/main/icons/svg/fluid_med.svg
-	FluidMed Icon = "fluid_med"
-
-	// Flutter is https://github.com/cogentcore/core/blob/main/icons/svg/flutter.svg
-	Flutter Icon = "flutter"
-
-	// FlutterDash is https://github.com/cogentcore/core/blob/main/icons/svg/flutter_dash.svg
-	FlutterDash Icon = "flutter_dash"
-
-	// Folder is https://github.com/cogentcore/core/blob/main/icons/svg/folder.svg
-	Folder Icon = "folder"
-
-	// FolderCopy is https://github.com/cogentcore/core/blob/main/icons/svg/folder_copy.svg
-	FolderCopy Icon = "folder_copy"
-
-	// FolderDelete is https://github.com/cogentcore/core/blob/main/icons/svg/folder_delete.svg
-	FolderDelete Icon = "folder_delete"
-
-	// FolderManaged is https://github.com/cogentcore/core/blob/main/icons/svg/folder_managed.svg
-	FolderManaged Icon = "folder_managed"
-
-	// FolderOff is https://github.com/cogentcore/core/blob/main/icons/svg/folder_off.svg
-	FolderOff Icon = "folder_off"
-
-	// FolderOpen is https://github.com/cogentcore/core/blob/main/icons/svg/folder_open.svg
-	FolderOpen Icon = "folder_open"
-
-	// FolderShared is https://github.com/cogentcore/core/blob/main/icons/svg/folder_shared.svg
-	FolderShared Icon = "folder_shared"
-
-	// FolderSpecial is https://github.com/cogentcore/core/blob/main/icons/svg/folder_special.svg
-	FolderSpecial Icon = "folder_special"
-
-	// FolderSupervised is https://github.com/cogentcore/core/blob/main/icons/svg/folder_supervised.svg
-	FolderSupervised Icon = "folder_supervised"
-
-	// FolderZip is https://github.com/cogentcore/core/blob/main/icons/svg/folder_zip.svg
-	FolderZip Icon = "folder_zip"
-
-	// FontDownload is https://github.com/cogentcore/core/blob/main/icons/svg/font_download.svg
-	FontDownload Icon = "font_download"
-
-	// FontDownloadOff is https://github.com/cogentcore/core/blob/main/icons/svg/font_download_off.svg
-	FontDownloadOff Icon = "font_download_off"
-
-	// FormatAlignCenter is https://github.com/cogentcore/core/blob/main/icons/svg/format_align_center.svg
-	FormatAlignCenter Icon = "format_align_center"
-
-	// FormatAlignJustify is https://github.com/cogentcore/core/blob/main/icons/svg/format_align_justify.svg
-	FormatAlignJustify Icon = "format_align_justify"
-
-	// FormatAlignLeft is https://github.com/cogentcore/core/blob/main/icons/svg/format_align_left.svg
-	FormatAlignLeft Icon = "format_align_left"
-
-	// FormatAlignRight is https://github.com/cogentcore/core/blob/main/icons/svg/format_align_right.svg
-	FormatAlignRight Icon = "format_align_right"
-
-	// FormatBold is https://github.com/cogentcore/core/blob/main/icons/svg/format_bold.svg
-	FormatBold Icon = "format_bold"
-
-	// FormatClear is https://github.com/cogentcore/core/blob/main/icons/svg/format_clear.svg
-	FormatClear Icon = "format_clear"
-
-	// FormatColorFill is https://github.com/cogentcore/core/blob/main/icons/svg/format_color_fill.svg
-	FormatColorFill Icon = "format_color_fill"
-
-	// FormatColorReset is https://github.com/cogentcore/core/blob/main/icons/svg/format_color_reset.svg
-	FormatColorReset Icon = "format_color_reset"
-
-	// FormatColorText is https://github.com/cogentcore/core/blob/main/icons/svg/format_color_text.svg
-	FormatColorText Icon = "format_color_text"
-
-	// FormatH1 is https://github.com/cogentcore/core/blob/main/icons/svg/format_h1.svg
-	FormatH1 Icon = "format_h1"
-
-	// FormatH2 is https://github.com/cogentcore/core/blob/main/icons/svg/format_h2.svg
-	FormatH2 Icon = "format_h2"
-
-	// FormatH3 is https://github.com/cogentcore/core/blob/main/icons/svg/format_h3.svg
-	FormatH3 Icon = "format_h3"
-
-	// FormatH4 is https://github.com/cogentcore/core/blob/main/icons/svg/format_h4.svg
-	FormatH4 Icon = "format_h4"
-
-	// FormatH5 is https://github.com/cogentcore/core/blob/main/icons/svg/format_h5.svg
-	FormatH5 Icon = "format_h5"
-
-	// FormatH6 is https://github.com/cogentcore/core/blob/main/icons/svg/format_h6.svg
-	FormatH6 Icon = "format_h6"
-
-	// FormatImageLeft is https://github.com/cogentcore/core/blob/main/icons/svg/format_image_left.svg
-	FormatImageLeft Icon = "format_image_left"
-
-	// FormatImageRight is https://github.com/cogentcore/core/blob/main/icons/svg/format_image_right.svg
-	FormatImageRight Icon = "format_image_right"
-
-	// FormatIndentDecrease is https://github.com/cogentcore/core/blob/main/icons/svg/format_indent_decrease.svg
-	FormatIndentDecrease Icon = "format_indent_decrease"
-
-	// FormatIndentIncrease is https://github.com/cogentcore/core/blob/main/icons/svg/format_indent_increase.svg
-	FormatIndentIncrease Icon = "format_indent_increase"
-
-	// FormatInkHighlighter is https://github.com/cogentcore/core/blob/main/icons/svg/format_ink_highlighter.svg
-	FormatInkHighlighter Icon = "format_ink_highlighter"
-
-	// FormatItalic is https://github.com/cogentcore/core/blob/main/icons/svg/format_italic.svg
-	FormatItalic Icon = "format_italic"
-
-	// FormatLetterSpacing is https://github.com/cogentcore/core/blob/main/icons/svg/format_letter_spacing.svg
-	FormatLetterSpacing Icon = "format_letter_spacing"
-
-	// FormatLetterSpacing2 is https://github.com/cogentcore/core/blob/main/icons/svg/format_letter_spacing_2.svg
-	FormatLetterSpacing2 Icon = "format_letter_spacing_2"
-
-	// FormatLetterSpacingStandard is https://github.com/cogentcore/core/blob/main/icons/svg/format_letter_spacing_standard.svg
-	FormatLetterSpacingStandard Icon = "format_letter_spacing_standard"
-
-	// FormatLetterSpacingWide is https://github.com/cogentcore/core/blob/main/icons/svg/format_letter_spacing_wide.svg
-	FormatLetterSpacingWide Icon = "format_letter_spacing_wide"
-
-	// FormatLetterSpacingWider is https://github.com/cogentcore/core/blob/main/icons/svg/format_letter_spacing_wider.svg
-	FormatLetterSpacingWider Icon = "format_letter_spacing_wider"
-
-	// FormatLineSpacing is https://github.com/cogentcore/core/blob/main/icons/svg/format_line_spacing.svg
-	FormatLineSpacing Icon = "format_line_spacing"
-
-	// FormatListBulleted is https://github.com/cogentcore/core/blob/main/icons/svg/format_list_bulleted.svg
-	FormatListBulleted Icon = "format_list_bulleted"
-
-	// FormatListBulletedAdd is https://github.com/cogentcore/core/blob/main/icons/svg/format_list_bulleted_add.svg
-	FormatListBulletedAdd Icon = "format_list_bulleted_add"
-
-	// FormatListNumbered is https://github.com/cogentcore/core/blob/main/icons/svg/format_list_numbered.svg
-	FormatListNumbered Icon = "format_list_numbered"
-
-	// FormatListNumberedRtl is https://github.com/cogentcore/core/blob/main/icons/svg/format_list_numbered_rtl.svg
-	FormatListNumberedRtl Icon = "format_list_numbered_rtl"
-
-	// FormatOverline is https://github.com/cogentcore/core/blob/main/icons/svg/format_overline.svg
-	FormatOverline Icon = "format_overline"
-
-	// FormatPaint is https://github.com/cogentcore/core/blob/main/icons/svg/format_paint.svg
-	FormatPaint Icon = "format_paint"
-
-	// FormatParagraph is https://github.com/cogentcore/core/blob/main/icons/svg/format_paragraph.svg
-	FormatParagraph Icon = "format_paragraph"
-
-	// FormatQuote is https://github.com/cogentcore/core/blob/main/icons/svg/format_quote.svg
-	FormatQuote Icon = "format_quote"
-
-	// FormatShapes is https://github.com/cogentcore/core/blob/main/icons/svg/format_shapes.svg
-	FormatShapes Icon = "format_shapes"
-
-	// FormatSize is https://github.com/cogentcore/core/blob/main/icons/svg/format_size.svg
-	FormatSize Icon = "format_size"
-
-	// FormatStrikethrough is https://github.com/cogentcore/core/blob/main/icons/svg/format_strikethrough.svg
-	FormatStrikethrough Icon = "format_strikethrough"
-
-	// FormatTextClip is https://github.com/cogentcore/core/blob/main/icons/svg/format_text_clip.svg
-	FormatTextClip Icon = "format_text_clip"
-
-	// FormatTextOverflow is https://github.com/cogentcore/core/blob/main/icons/svg/format_text_overflow.svg
-	FormatTextOverflow Icon = "format_text_overflow"
-
-	// FormatTextWrap is https://github.com/cogentcore/core/blob/main/icons/svg/format_text_wrap.svg
-	FormatTextWrap Icon = "format_text_wrap"
-
-	// FormatTextdirectionLToR is https://github.com/cogentcore/core/blob/main/icons/svg/format_textdirection_l_to_r.svg
-	FormatTextdirectionLToR Icon = "format_textdirection_l_to_r"
-
-	// FormatTextdirectionRToL is https://github.com/cogentcore/core/blob/main/icons/svg/format_textdirection_r_to_l.svg
-	FormatTextdirectionRToL Icon = "format_textdirection_r_to_l"
-
-	// FormatUnderlined is https://github.com/cogentcore/core/blob/main/icons/svg/format_underlined.svg
-	FormatUnderlined Icon = "format_underlined"
-
-	// FormatUnderlinedSquiggle is https://github.com/cogentcore/core/blob/main/icons/svg/format_underlined_squiggle.svg
-	FormatUnderlinedSquiggle Icon = "format_underlined_squiggle"
-
-	// FormsAddOn is https://github.com/cogentcore/core/blob/main/icons/svg/forms_add_on.svg
-	FormsAddOn Icon = "forms_add_on"
-
-	// FormsAppsScript is https://github.com/cogentcore/core/blob/main/icons/svg/forms_apps_script.svg
-	FormsAppsScript Icon = "forms_apps_script"
-
-	// Forum is https://github.com/cogentcore/core/blob/main/icons/svg/forum.svg
-	Forum Icon = "forum"
-
-	// Forward is https://github.com/cogentcore/core/blob/main/icons/svg/forward.svg
-	Forward Icon = "forward"
-
-	// Forward10 is https://github.com/cogentcore/core/blob/main/icons/svg/forward_10.svg
-	Forward10 Icon = "forward_10"
-
-	// Forward30 is https://github.com/cogentcore/core/blob/main/icons/svg/forward_30.svg
-	Forward30 Icon = "forward_30"
-
-	// Forward5 is https://github.com/cogentcore/core/blob/main/icons/svg/forward_5.svg
-	Forward5 Icon = "forward_5"
-
-	// ForwardCircle is https://github.com/cogentcore/core/blob/main/icons/svg/forward_circle.svg
-	ForwardCircle Icon = "forward_circle"
-
-	// ForwardMedia is https://github.com/cogentcore/core/blob/main/icons/svg/forward_media.svg
-	ForwardMedia Icon = "forward_media"
-
-	// ForwardToInbox is https://github.com/cogentcore/core/blob/main/icons/svg/forward_to_inbox.svg
-	ForwardToInbox Icon = "forward_to_inbox"
-
-	// FrameInspect is https://github.com/cogentcore/core/blob/main/icons/svg/frame_inspect.svg
-	FrameInspect Icon = "frame_inspect"
-
-	// FramePerson is https://github.com/cogentcore/core/blob/main/icons/svg/frame_person.svg
-	FramePerson Icon = "frame_person"
-
-	// FramePersonOff is https://github.com/cogentcore/core/blob/main/icons/svg/frame_person_off.svg
-	FramePersonOff Icon = "frame_person_off"
-
-	// FrameReload is https://github.com/cogentcore/core/blob/main/icons/svg/frame_reload.svg
-	FrameReload Icon = "frame_reload"
-
-	// FrameSource is https://github.com/cogentcore/core/blob/main/icons/svg/frame_source.svg
-	FrameSource Icon = "frame_source"
-
-	// FreeCancellation is https://github.com/cogentcore/core/blob/main/icons/svg/free_cancellation.svg
-	FreeCancellation Icon = "free_cancellation"
-
-	// FrontHand is https://github.com/cogentcore/core/blob/main/icons/svg/front_hand.svg
-	FrontHand Icon = "front_hand"
-
-	// FullCoverage is https://github.com/cogentcore/core/blob/main/icons/svg/full_coverage.svg
-	FullCoverage Icon = "full_coverage"
-
-	// FullStackedBarChart is https://github.com/cogentcore/core/blob/main/icons/svg/full_stacked_bar_chart.svg
-	FullStackedBarChart Icon = "full_stacked_bar_chart"
-
-	// Fullscreen is https://github.com/cogentcore/core/blob/main/icons/svg/fullscreen.svg
-	Fullscreen Icon = "fullscreen"
-
-	// FullscreenExit is https://github.com/cogentcore/core/blob/main/icons/svg/fullscreen_exit.svg
-	FullscreenExit Icon = "fullscreen_exit"
-
-	// Function is https://github.com/cogentcore/core/blob/main/icons/svg/function.svg
-	Function Icon = "function"
-
-	// Functions is https://github.com/cogentcore/core/blob/main/icons/svg/functions.svg
-	Functions Icon = "functions"
-
-	// GTranslate is https://github.com/cogentcore/core/blob/main/icons/svg/g_translate.svg
-	GTranslate Icon = "g_translate"
-
-	// GalleryThumbnail is https://github.com/cogentcore/core/blob/main/icons/svg/gallery_thumbnail.svg
-	GalleryThumbnail Icon = "gallery_thumbnail"
-
-	// Gamepad is https://github.com/cogentcore/core/blob/main/icons/svg/gamepad.svg
-	Gamepad Icon = "gamepad"
-
-	// Genres is https://github.com/cogentcore/core/blob/main/icons/svg/genres.svg
-	Genres Icon = "genres"
-
-	// Gesture is https://github.com/cogentcore/core/blob/main/icons/svg/gesture.svg
-	Gesture Icon = "gesture"
-
-	// GestureSelect is https://github.com/cogentcore/core/blob/main/icons/svg/gesture_select.svg
-	GestureSelect Icon = "gesture_select"
-
-	// Gif is https://github.com/cogentcore/core/blob/main/icons/svg/gif.svg
-	Gif Icon = "gif"
-
-	// GifBox is https://github.com/cogentcore/core/blob/main/icons/svg/gif_box.svg
-	GifBox Icon = "gif_box"
-
-	// Girl is https://github.com/cogentcore/core/blob/main/icons/svg/girl.svg
-	Girl Icon = "girl"
-
-	// Git is https://github.com/cogentcore/core/blob/main/icons/svg/git.svg
-	Git Icon = "git"
-
-	// GlassCup is https://github.com/cogentcore/core/blob/main/icons/svg/glass_cup.svg
-	GlassCup Icon = "glass_cup"
-
-	// GlobeAsia is https://github.com/cogentcore/core/blob/main/icons/svg/globe_asia.svg
-	GlobeAsia Icon = "globe_asia"
-
-	// GlobeUk is https://github.com/cogentcore/core/blob/main/icons/svg/globe_uk.svg
-	GlobeUk Icon = "globe_uk"
-
-	// Glyphs is https://github.com/cogentcore/core/blob/main/icons/svg/glyphs.svg
-	Glyphs Icon = "glyphs"
-
-	// Go is https://github.com/cogentcore/core/blob/main/icons/svg/go.svg
-	Go Icon = "go"
-
-	// GoToLine is https://github.com/cogentcore/core/blob/main/icons/svg/go_to_line.svg
-	GoToLine Icon = "go_to_line"
-
-	// Grade is https://github.com/cogentcore/core/blob/main/icons/svg/grade.svg
-	Grade Icon = "grade"
-
-	// Gradient is https://github.com/cogentcore/core/blob/main/icons/svg/gradient.svg
-	Gradient Icon = "gradient"
-
-	// Grading is https://github.com/cogentcore/core/blob/main/icons/svg/grading.svg
-	Grading Icon = "grading"
-
-	// GraphicEq is https://github.com/cogentcore/core/blob/main/icons/svg/graphic_eq.svg
-	GraphicEq Icon = "graphic_eq"
-
-	// Grid3x3 is https://github.com/cogentcore/core/blob/main/icons/svg/grid_3x3.svg
-	Grid3x3 Icon = "grid_3x3"
-
-	// Grid3x3Off is https://github.com/cogentcore/core/blob/main/icons/svg/grid_3x3_off.svg
-	Grid3x3Off Icon = "grid_3x3_off"
-
-	// Grid4x4 is https://github.com/cogentcore/core/blob/main/icons/svg/grid_4x4.svg
-	Grid4x4 Icon = "grid_4x4"
-
-	// GridGoldenratio is https://github.com/cogentcore/core/blob/main/icons/svg/grid_goldenratio.svg
-	GridGoldenratio Icon = "grid_goldenratio"
-
-	// GridGuides is https://github.com/cogentcore/core/blob/main/icons/svg/grid_guides.svg
-	GridGuides Icon = "grid_guides"
-
-	// GridOff is https://github.com/cogentcore/core/blob/main/icons/svg/grid_off.svg
-	GridOff Icon = "grid_off"
-
-	// GridOn is https://github.com/cogentcore/core/blob/main/icons/svg/grid_on.svg
-	GridOn Icon = "grid_on"
-
-	// GridView is https://github.com/cogentcore/core/blob/main/icons/svg/grid_view.svg
-	GridView Icon = "grid_view"
-
-	// Group is https://github.com/cogentcore/core/blob/main/icons/svg/group.svg
-	Group Icon = "group"
-
-	// GroupAdd is https://github.com/cogentcore/core/blob/main/icons/svg/group_add.svg
-	GroupAdd Icon = "group_add"
-
-	// GroupOff is https://github.com/cogentcore/core/blob/main/icons/svg/group_off.svg
-	GroupOff Icon = "group_off"
-
-	// GroupRemove is https://github.com/cogentcore/core/blob/main/icons/svg/group_remove.svg
-	GroupRemove Icon = "group_remove"
-
-	// GroupWork is https://github.com/cogentcore/core/blob/main/icons/svg/group_work.svg
-	GroupWork Icon = "group_work"
-
-	// GroupedBarChart is https://github.com/cogentcore/core/blob/main/icons/svg/grouped_bar_chart.svg
-	GroupedBarChart Icon = "grouped_bar_chart"
-
-	// Groups is https://github.com/cogentcore/core/blob/main/icons/svg/groups.svg
-	Groups Icon = "groups"
-
-	// Groups2 is https://github.com/cogentcore/core/blob/main/icons/svg/groups_2.svg
-	Groups2 Icon = "groups_2"
-
-	// Groups3 is https://github.com/cogentcore/core/blob/main/icons/svg/groups_3.svg
-	Groups3 Icon = "groups_3"
-
-	// HandGesture is https://github.com/cogentcore/core/blob/main/icons/svg/hand_gesture.svg
-	HandGesture Icon = "hand_gesture"
-
-	// Handshake is https://github.com/cogentcore/core/blob/main/icons/svg/handshake.svg
-	Handshake Icon = "handshake"
-
-	// HangoutVideo is https://github.com/cogentcore/core/blob/main/icons/svg/hangout_video.svg
-	HangoutVideo Icon = "hangout_video"
-
-	// HangoutVideoOff is https://github.com/cogentcore/core/blob/main/icons/svg/hangout_video_off.svg
-	HangoutVideoOff Icon = "hangout_video_off"
-
-	// HardDrive is https://github.com/cogentcore/core/blob/main/icons/svg/hard_drive.svg
-	HardDrive Icon = "hard_drive"
-
-	// HardDrive2 is https://github.com/cogentcore/core/blob/main/icons/svg/hard_drive_2.svg
-	HardDrive2 Icon = "hard_drive_2"
-
-	// Hardware is https://github.com/cogentcore/core/blob/main/icons/svg/hardware.svg
-	Hardware Icon = "hardware"
-
-	// Hd is https://github.com/cogentcore/core/blob/main/icons/svg/hd.svg
-	Hd Icon = "hd"
-
-	// Headphones is https://github.com/cogentcore/core/blob/main/icons/svg/headphones.svg
-	Headphones Icon = "headphones"
-
-	// HeadphonesBattery is https://github.com/cogentcore/core/blob/main/icons/svg/headphones_battery.svg
-	HeadphonesBattery Icon = "headphones_battery"
-
-	// HeadsetMic is https://github.com/cogentcore/core/blob/main/icons/svg/headset_mic.svg
-	HeadsetMic Icon = "headset_mic"
-
-	// HeadsetOff is https://github.com/cogentcore/core/blob/main/icons/svg/headset_off.svg
-	HeadsetOff Icon = "headset_off"
-
-	// Hearing is https://github.com/cogentcore/core/blob/main/icons/svg/hearing.svg
-	Hearing Icon = "hearing"
-
-	// HearingDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/hearing_disabled.svg
-	HearingDisabled Icon = "hearing_disabled"
-
-	// HeartMinus is https://github.com/cogentcore/core/blob/main/icons/svg/heart_minus.svg
-	HeartMinus Icon = "heart_minus"
-
-	// HeartPlus is https://github.com/cogentcore/core/blob/main/icons/svg/heart_plus.svg
-	HeartPlus Icon = "heart_plus"
-
-	// Height is https://github.com/cogentcore/core/blob/main/icons/svg/height.svg
-	Height Icon = "height"
-
-	// Help is https://github.com/cogentcore/core/blob/main/icons/svg/help.svg
-	Help Icon = "help"
-
-	// Hexagon is https://github.com/cogentcore/core/blob/main/icons/svg/hexagon.svg
-	Hexagon Icon = "hexagon"
-
-	// Hide is https://github.com/cogentcore/core/blob/main/icons/svg/hide.svg
-	Hide Icon = "hide"
-
-	// HideImage is https://github.com/cogentcore/core/blob/main/icons/svg/hide_image.svg
-	HideImage Icon = "hide_image"
-
-	// HideSource is https://github.com/cogentcore/core/blob/main/icons/svg/hide_source.svg
-	HideSource Icon = "hide_source"
-
-	// HighDensity is https://github.com/cogentcore/core/blob/main/icons/svg/high_density.svg
-	HighDensity Icon = "high_density"
-
-	// HighQuality is https://github.com/cogentcore/core/blob/main/icons/svg/high_quality.svg
-	HighQuality Icon = "high_quality"
-
-	// Highlight is https://github.com/cogentcore/core/blob/main/icons/svg/highlight.svg
-	Highlight Icon = "highlight"
-
-	// HighlighterSize1 is https://github.com/cogentcore/core/blob/main/icons/svg/highlighter_size_1.svg
-	HighlighterSize1 Icon = "highlighter_size_1"
-
-	// HighlighterSize2 is https://github.com/cogentcore/core/blob/main/icons/svg/highlighter_size_2.svg
-	HighlighterSize2 Icon = "highlighter_size_2"
-
-	// HighlighterSize3 is https://github.com/cogentcore/core/blob/main/icons/svg/highlighter_size_3.svg
-	HighlighterSize3 Icon = "highlighter_size_3"
-
-	// HighlighterSize4 is https://github.com/cogentcore/core/blob/main/icons/svg/highlighter_size_4.svg
-	HighlighterSize4 Icon = "highlighter_size_4"
-
-	// HighlighterSize5 is https://github.com/cogentcore/core/blob/main/icons/svg/highlighter_size_5.svg
-	HighlighterSize5 Icon = "highlighter_size_5"
-
-	// History is https://github.com/cogentcore/core/blob/main/icons/svg/history.svg
-	History Icon = "history"
-
-	// HistoryToggleOff is https://github.com/cogentcore/core/blob/main/icons/svg/history_toggle_off.svg
-	HistoryToggleOff Icon = "history_toggle_off"
-
-	// Hive is https://github.com/cogentcore/core/blob/main/icons/svg/hive.svg
-	Hive Icon = "hive"
-
-	// Home is https://github.com/cogentcore/core/blob/main/icons/svg/home.svg
-	Home Icon = "home"
-
-	// HomeAppLogo is https://github.com/cogentcore/core/blob/main/icons/svg/home_app_logo.svg
-	HomeAppLogo Icon = "home_app_logo"
-
-	// HomeIotDevice is https://github.com/cogentcore/core/blob/main/icons/svg/home_iot_device.svg
-	HomeIotDevice Icon = "home_iot_device"
-
-	// HomePin is https://github.com/cogentcore/core/blob/main/icons/svg/home_pin.svg
-	HomePin Icon = "home_pin"
-
-	// HomeStorage is https://github.com/cogentcore/core/blob/main/icons/svg/home_storage.svg
-	HomeStorage Icon = "home_storage"
-
-	// HorizontalDistribute is https://github.com/cogentcore/core/blob/main/icons/svg/horizontal_distribute.svg
-	HorizontalDistribute Icon = "horizontal_distribute"
-
-	// HorizontalRule is https://github.com/cogentcore/core/blob/main/icons/svg/horizontal_rule.svg
-	HorizontalRule Icon = "horizontal_rule"
-
-	// HorizontalSplit is https://github.com/cogentcore/core/blob/main/icons/svg/horizontal_split.svg
-	HorizontalSplit Icon = "horizontal_split"
-
-	// HourglassBottom is https://github.com/cogentcore/core/blob/main/icons/svg/hourglass_bottom.svg
-	HourglassBottom Icon = "hourglass_bottom"
-
-	// HourglassDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/hourglass_disabled.svg
-	HourglassDisabled Icon = "hourglass_disabled"
-
-	// HourglassEmpty is https://github.com/cogentcore/core/blob/main/icons/svg/hourglass_empty.svg
-	HourglassEmpty Icon = "hourglass_empty"
-
-	// HourglassTop is https://github.com/cogentcore/core/blob/main/icons/svg/hourglass_top.svg
-	HourglassTop Icon = "hourglass_top"
-
-	// House is https://github.com/cogentcore/core/blob/main/icons/svg/house.svg
-	House Icon = "house"
-
-	// Html is https://github.com/cogentcore/core/blob/main/icons/svg/html.svg
-	Html Icon = "html"
-
-	// Http is https://github.com/cogentcore/core/blob/main/icons/svg/http.svg
-	Http Icon = "http"
-
-	// Hub is https://github.com/cogentcore/core/blob/main/icons/svg/hub.svg
-	Hub Icon = "hub"
-
-	// Iframe is https://github.com/cogentcore/core/blob/main/icons/svg/iframe.svg
-	Iframe Icon = "iframe"
-
-	// IframeOff is https://github.com/cogentcore/core/blob/main/icons/svg/iframe_off.svg
-	IframeOff Icon = "iframe_off"
-
-	// Image is https://github.com/cogentcore/core/blob/main/icons/svg/image.svg
-	Image Icon = "image"
-
-	// ImageAspectRatio is https://github.com/cogentcore/core/blob/main/icons/svg/image_aspect_ratio.svg
-	ImageAspectRatio Icon = "image_aspect_ratio"
-
-	// ImageNotSupported is https://github.com/cogentcore/core/blob/main/icons/svg/image_not_supported.svg
-	ImageNotSupported Icon = "image_not_supported"
-
-	// ImageSearch is https://github.com/cogentcore/core/blob/main/icons/svg/image_search.svg
-	ImageSearch Icon = "image_search"
-
-	// Imagesmode is https://github.com/cogentcore/core/blob/main/icons/svg/imagesmode.svg
-	Imagesmode Icon = "imagesmode"
-
-	// ImportContacts is https://github.com/cogentcore/core/blob/main/icons/svg/import_contacts.svg
-	ImportContacts Icon = "import_contacts"
-
-	// ImportantDevices is https://github.com/cogentcore/core/blob/main/icons/svg/important_devices.svg
-	ImportantDevices Icon = "important_devices"
-
-	// InactiveOrder is https://github.com/cogentcore/core/blob/main/icons/svg/inactive_order.svg
-	InactiveOrder Icon = "inactive_order"
-
-	// Inbox is https://github.com/cogentcore/core/blob/main/icons/svg/inbox.svg
-	Inbox Icon = "inbox"
-
-	// InboxCustomize is https://github.com/cogentcore/core/blob/main/icons/svg/inbox_customize.svg
-	InboxCustomize Icon = "inbox_customize"
-
-	// IncompleteCircle is https://github.com/cogentcore/core/blob/main/icons/svg/incomplete_circle.svg
-	IncompleteCircle Icon = "incomplete_circle"
-
-	// IndeterminateCheckBox is https://github.com/cogentcore/core/blob/main/icons/svg/indeterminate_check_box.svg
-	IndeterminateCheckBox Icon = "indeterminate_check_box"
-
-	// Info is https://github.com/cogentcore/core/blob/main/icons/svg/info.svg
-	Info Icon = "info"
-
-	// InfoI is https://github.com/cogentcore/core/blob/main/icons/svg/info_i.svg
-	InfoI Icon = "info_i"
-
-	// Infrared is https://github.com/cogentcore/core/blob/main/icons/svg/infrared.svg
-	Infrared Icon = "infrared"
-
-	// InkEraser is https://github.com/cogentcore/core/blob/main/icons/svg/ink_eraser.svg
-	InkEraser Icon = "ink_eraser"
-
-	// InkEraserOff is https://github.com/cogentcore/core/blob/main/icons/svg/ink_eraser_off.svg
-	InkEraserOff Icon = "ink_eraser_off"
-
-	// InkHighlighter is https://github.com/cogentcore/core/blob/main/icons/svg/ink_highlighter.svg
-	InkHighlighter Icon = "ink_highlighter"
-
-	// InkMarker is https://github.com/cogentcore/core/blob/main/icons/svg/ink_marker.svg
-	InkMarker Icon = "ink_marker"
-
-	// InkPen is https://github.com/cogentcore/core/blob/main/icons/svg/ink_pen.svg
-	InkPen Icon = "ink_pen"
-
-	// Input is https://github.com/cogentcore/core/blob/main/icons/svg/input.svg
-	Input Icon = "input"
-
-	// InputCircle is https://github.com/cogentcore/core/blob/main/icons/svg/input_circle.svg
-	InputCircle Icon = "input_circle"
-
-	// InsertChart is https://github.com/cogentcore/core/blob/main/icons/svg/insert_chart.svg
-	InsertChart Icon = "insert_chart"
-
-	// InsertPageBreak is https://github.com/cogentcore/core/blob/main/icons/svg/insert_page_break.svg
-	InsertPageBreak Icon = "insert_page_break"
-
-	// InsertText is https://github.com/cogentcore/core/blob/main/icons/svg/insert_text.svg
-	InsertText Icon = "insert_text"
-
-	// InstallDesktop is https://github.com/cogentcore/core/blob/main/icons/svg/install_desktop.svg
-	InstallDesktop Icon = "install_desktop"
-
-	// InstallMobile is https://github.com/cogentcore/core/blob/main/icons/svg/install_mobile.svg
-	InstallMobile Icon = "install_mobile"
-
-	// InstantMix is https://github.com/cogentcore/core/blob/main/icons/svg/instant_mix.svg
-	InstantMix Icon = "instant_mix"
-
-	// IntegrationInstructions is https://github.com/cogentcore/core/blob/main/icons/svg/integration_instructions.svg
-	IntegrationInstructions Icon = "integration_instructions"
-
-	// InteractiveSpace is https://github.com/cogentcore/core/blob/main/icons/svg/interactive_space.svg
-	InteractiveSpace Icon = "interactive_space"
-
-	// Interests is https://github.com/cogentcore/core/blob/main/icons/svg/interests.svg
-	Interests Icon = "interests"
-
-	// Inventory is https://github.com/cogentcore/core/blob/main/icons/svg/inventory.svg
-	Inventory Icon = "inventory"
-
-	// Inventory2 is https://github.com/cogentcore/core/blob/main/icons/svg/inventory_2.svg
-	Inventory2 Icon = "inventory_2"
-
-	// InvertColors is https://github.com/cogentcore/core/blob/main/icons/svg/invert_colors.svg
-	InvertColors Icon = "invert_colors"
-
-	// InvertColorsOff is https://github.com/cogentcore/core/blob/main/icons/svg/invert_colors_off.svg
-	InvertColorsOff Icon = "invert_colors_off"
-
-	// IosShare is https://github.com/cogentcore/core/blob/main/icons/svg/ios_share.svg
-	IosShare Icon = "ios_share"
-
-	// Javascript is https://github.com/cogentcore/core/blob/main/icons/svg/javascript.svg
-	Javascript Icon = "javascript"
-
-	// Join is https://github.com/cogentcore/core/blob/main/icons/svg/join.svg
-	Join Icon = "join"
-
-	// JoinInner is https://github.com/cogentcore/core/blob/main/icons/svg/join_inner.svg
-	JoinInner Icon = "join_inner"
-
-	// JoinLeft is https://github.com/cogentcore/core/blob/main/icons/svg/join_left.svg
-	JoinLeft Icon = "join_left"
-
-	// JoinRight is https://github.com/cogentcore/core/blob/main/icons/svg/join_right.svg
-	JoinRight Icon = "join_right"
-
-	// Joystick is https://github.com/cogentcore/core/blob/main/icons/svg/joystick.svg
-	Joystick Icon = "joystick"
-
-	// Json is https://github.com/cogentcore/core/blob/main/icons/svg/json.svg
-	Json Icon = "json"
-
-	// JumpToElement is https://github.com/cogentcore/core/blob/main/icons/svg/jump_to_element.svg
-	JumpToElement Icon = "jump_to_element"
-
-	// Key is https://github.com/cogentcore/core/blob/main/icons/svg/key.svg
-	Key Icon = "key"
-
-	// KeyOff is https://github.com/cogentcore/core/blob/main/icons/svg/key_off.svg
-	KeyOff Icon = "key_off"
-
-	// KeyVisualizer is https://github.com/cogentcore/core/blob/main/icons/svg/key_visualizer.svg
-	KeyVisualizer Icon = "key_visualizer"
-
-	// Keyboard is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard.svg
-	Keyboard Icon = "keyboard"
-
-	// KeyboardAlt is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_alt.svg
-	KeyboardAlt Icon = "keyboard_alt"
-
-	// KeyboardArrowDown is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_arrow_down.svg
-	KeyboardArrowDown Icon = "keyboard_arrow_down"
-
-	// KeyboardArrowLeft is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_arrow_left.svg
-	KeyboardArrowLeft Icon = "keyboard_arrow_left"
-
-	// KeyboardArrowRight is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_arrow_right.svg
-	KeyboardArrowRight Icon = "keyboard_arrow_right"
-
-	// KeyboardArrowUp is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_arrow_up.svg
-	KeyboardArrowUp Icon = "keyboard_arrow_up"
-
-	// KeyboardBackspace is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_backspace.svg
-	KeyboardBackspace Icon = "keyboard_backspace"
-
-	// KeyboardCapslock is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_capslock.svg
-	KeyboardCapslock Icon = "keyboard_capslock"
-
-	// KeyboardCapslockBadge is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_capslock_badge.svg
-	KeyboardCapslockBadge Icon = "keyboard_capslock_badge"
-
-	// KeyboardCommandKey is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_command_key.svg
-	KeyboardCommandKey Icon = "keyboard_command_key"
-
-	// KeyboardControlKey is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_control_key.svg
-	KeyboardControlKey Icon = "keyboard_control_key"
-
-	// KeyboardDoubleArrowDown is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_double_arrow_down.svg
-	KeyboardDoubleArrowDown Icon = "keyboard_double_arrow_down"
-
-	// KeyboardDoubleArrowLeft is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_double_arrow_left.svg
-	KeyboardDoubleArrowLeft Icon = "keyboard_double_arrow_left"
-
-	// KeyboardDoubleArrowRight is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_double_arrow_right.svg
-	KeyboardDoubleArrowRight Icon = "keyboard_double_arrow_right"
-
-	// KeyboardDoubleArrowUp is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_double_arrow_up.svg
-	KeyboardDoubleArrowUp Icon = "keyboard_double_arrow_up"
-
-	// KeyboardExternalInput is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_external_input.svg
-	KeyboardExternalInput Icon = "keyboard_external_input"
-
-	// KeyboardFull is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_full.svg
-	KeyboardFull Icon = "keyboard_full"
-
-	// KeyboardHide is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_hide.svg
-	KeyboardHide Icon = "keyboard_hide"
-
-	// KeyboardKeys is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_keys.svg
-	KeyboardKeys Icon = "keyboard_keys"
-
-	// KeyboardOff is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_off.svg
-	KeyboardOff Icon = "keyboard_off"
-
-	// KeyboardOnscreen is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_onscreen.svg
-	KeyboardOnscreen Icon = "keyboard_onscreen"
-
-	// KeyboardOptionKey is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_option_key.svg
-	KeyboardOptionKey Icon = "keyboard_option_key"
-
-	// KeyboardPreviousLanguage is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_previous_language.svg
-	KeyboardPreviousLanguage Icon = "keyboard_previous_language"
-
-	// KeyboardReturn is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_return.svg
-	KeyboardReturn Icon = "keyboard_return"
-
-	// KeyboardTab is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_tab.svg
-	KeyboardTab Icon = "keyboard_tab"
-
-	// KeyboardTabRtl is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_tab_rtl.svg
-	KeyboardTabRtl Icon = "keyboard_tab_rtl"
-
-	// KeyboardVoice is https://github.com/cogentcore/core/blob/main/icons/svg/keyboard_voice.svg
-	KeyboardVoice Icon = "keyboard_voice"
-
-	// Label is https://github.com/cogentcore/core/blob/main/icons/svg/label.svg
-	Label Icon = "label"
-
-	// LabelImportant is https://github.com/cogentcore/core/blob/main/icons/svg/label_important.svg
-	LabelImportant Icon = "label_important"
-
-	// LabelOff is https://github.com/cogentcore/core/blob/main/icons/svg/label_off.svg
-	LabelOff Icon = "label_off"
-
-	// Labs is https://github.com/cogentcore/core/blob/main/icons/svg/labs.svg
-	Labs Icon = "labs"
-
-	// Lan is https://github.com/cogentcore/core/blob/main/icons/svg/lan.svg
-	Lan Icon = "lan"
-
-	// Landscape is https://github.com/cogentcore/core/blob/main/icons/svg/landscape.svg
-	Landscape Icon = "landscape"
-
-	// Landslide is https://github.com/cogentcore/core/blob/main/icons/svg/landslide.svg
-	Landslide Icon = "landslide"
-
-	// Language is https://github.com/cogentcore/core/blob/main/icons/svg/language.svg
-	Language Icon = "language"
-
-	// LanguageChineseArray is https://github.com/cogentcore/core/blob/main/icons/svg/language_chinese_array.svg
-	LanguageChineseArray Icon = "language_chinese_array"
-
-	// LanguageChineseCangjie is https://github.com/cogentcore/core/blob/main/icons/svg/language_chinese_cangjie.svg
-	LanguageChineseCangjie Icon = "language_chinese_cangjie"
-
-	// LanguageChineseDayi is https://github.com/cogentcore/core/blob/main/icons/svg/language_chinese_dayi.svg
-	LanguageChineseDayi Icon = "language_chinese_dayi"
-
-	// LanguageChinesePinyin is https://github.com/cogentcore/core/blob/main/icons/svg/language_chinese_pinyin.svg
-	LanguageChinesePinyin Icon = "language_chinese_pinyin"
-
-	// LanguageChineseQuick is https://github.com/cogentcore/core/blob/main/icons/svg/language_chinese_quick.svg
-	LanguageChineseQuick Icon = "language_chinese_quick"
-
-	// LanguageChineseWubi is https://github.com/cogentcore/core/blob/main/icons/svg/language_chinese_wubi.svg
-	LanguageChineseWubi Icon = "language_chinese_wubi"
-
-	// LanguageFrench is https://github.com/cogentcore/core/blob/main/icons/svg/language_french.svg
-	LanguageFrench Icon = "language_french"
-
-	// LanguageGbEnglish is https://github.com/cogentcore/core/blob/main/icons/svg/language_gb_english.svg
-	LanguageGbEnglish Icon = "language_gb_english"
-
-	// LanguageInternational is https://github.com/cogentcore/core/blob/main/icons/svg/language_international.svg
-	LanguageInternational Icon = "language_international"
-
-	// LanguageKoreanLatin is https://github.com/cogentcore/core/blob/main/icons/svg/language_korean_latin.svg
-	LanguageKoreanLatin Icon = "language_korean_latin"
-
-	// LanguagePinyin is https://github.com/cogentcore/core/blob/main/icons/svg/language_pinyin.svg
-	LanguagePinyin Icon = "language_pinyin"
-
-	// LanguageSpanish is https://github.com/cogentcore/core/blob/main/icons/svg/language_spanish.svg
-	LanguageSpanish Icon = "language_spanish"
-
-	// LanguageUs is https://github.com/cogentcore/core/blob/main/icons/svg/language_us.svg
-	LanguageUs Icon = "language_us"
-
-	// LanguageUsColemak is https://github.com/cogentcore/core/blob/main/icons/svg/language_us_colemak.svg
-	LanguageUsColemak Icon = "language_us_colemak"
-
-	// LanguageUsDvorak is https://github.com/cogentcore/core/blob/main/icons/svg/language_us_dvorak.svg
-	LanguageUsDvorak Icon = "language_us_dvorak"
-
-	// Laps is https://github.com/cogentcore/core/blob/main/icons/svg/laps.svg
-	Laps Icon = "laps"
-
-	// LaptopChromebook is https://github.com/cogentcore/core/blob/main/icons/svg/laptop_chromebook.svg
-	LaptopChromebook Icon = "laptop_chromebook"
-
-	// LaptopMac is https://github.com/cogentcore/core/blob/main/icons/svg/laptop_mac.svg
-	LaptopMac Icon = "laptop_mac"
-
-	// LaptopWindows is https://github.com/cogentcore/core/blob/main/icons/svg/laptop_windows.svg
-	LaptopWindows Icon = "laptop_windows"
-
-	// LassoSelect is https://github.com/cogentcore/core/blob/main/icons/svg/lasso_select.svg
-	LassoSelect Icon = "lasso_select"
-
-	// LastPage is https://github.com/cogentcore/core/blob/main/icons/svg/last_page.svg
-	LastPage Icon = "last_page"
-
-	// Latex is https://github.com/cogentcore/core/blob/main/icons/svg/latex.svg
-	Latex Icon = "latex"
-
-	// Layers is https://github.com/cogentcore/core/blob/main/icons/svg/layers.svg
-	Layers Icon = "layers"
-
-	// LayersClear is https://github.com/cogentcore/core/blob/main/icons/svg/layers_clear.svg
-	LayersClear Icon = "layers_clear"
-
-	// Leaderboard is https://github.com/cogentcore/core/blob/main/icons/svg/leaderboard.svg
-	Leaderboard Icon = "leaderboard"
-
-	// LeftClick is https://github.com/cogentcore/core/blob/main/icons/svg/left_click.svg
-	LeftClick Icon = "left_click"
-
-	// LeftPanelClose is https://github.com/cogentcore/core/blob/main/icons/svg/left_panel_close.svg
-	LeftPanelClose Icon = "left_panel_close"
-
-	// LeftPanelOpen is https://github.com/cogentcore/core/blob/main/icons/svg/left_panel_open.svg
-	LeftPanelOpen Icon = "left_panel_open"
-
-	// LegendToggle is https://github.com/cogentcore/core/blob/main/icons/svg/legend_toggle.svg
-	LegendToggle Icon = "legend_toggle"
-
-	// LensBlur is https://github.com/cogentcore/core/blob/main/icons/svg/lens_blur.svg
-	LensBlur Icon = "lens_blur"
-
-	// LetterSwitch is https://github.com/cogentcore/core/blob/main/icons/svg/letter_switch.svg
-	LetterSwitch Icon = "letter_switch"
-
-	// LibraryAdd is https://github.com/cogentcore/core/blob/main/icons/svg/library_add.svg
-	LibraryAdd Icon = "library_add"
-
-	// LibraryAddCheck is https://github.com/cogentcore/core/blob/main/icons/svg/library_add_check.svg
-	LibraryAddCheck Icon = "library_add_check"
-
-	// LibraryBooks is https://github.com/cogentcore/core/blob/main/icons/svg/library_books.svg
-	LibraryBooks Icon = "library_books"
-
-	// LibraryMusic is https://github.com/cogentcore/core/blob/main/icons/svg/library_music.svg
-	LibraryMusic Icon = "library_music"
-
-	// Light is https://github.com/cogentcore/core/blob/main/icons/svg/light.svg
-	Light Icon = "light"
-
-	// Lightbulb is https://github.com/cogentcore/core/blob/main/icons/svg/lightbulb.svg
-	Lightbulb Icon = "lightbulb"
-
-	// LightbulbCircle is https://github.com/cogentcore/core/blob/main/icons/svg/lightbulb_circle.svg
-	LightbulbCircle Icon = "lightbulb_circle"
-
-	// LineAxis is https://github.com/cogentcore/core/blob/main/icons/svg/line_axis.svg
-	LineAxis Icon = "line_axis"
-
-	// LineCurve is https://github.com/cogentcore/core/blob/main/icons/svg/line_curve.svg
-	LineCurve Icon = "line_curve"
-
-	// LineEnd is https://github.com/cogentcore/core/blob/main/icons/svg/line_end.svg
-	LineEnd Icon = "line_end"
-
-	// LineEndArrow is https://github.com/cogentcore/core/blob/main/icons/svg/line_end_arrow.svg
-	LineEndArrow Icon = "line_end_arrow"
-
-	// LineEndArrowNotch is https://github.com/cogentcore/core/blob/main/icons/svg/line_end_arrow_notch.svg
-	LineEndArrowNotch Icon = "line_end_arrow_notch"
-
-	// LineEndCircle is https://github.com/cogentcore/core/blob/main/icons/svg/line_end_circle.svg
-	LineEndCircle Icon = "line_end_circle"
-
-	// LineEndDiamond is https://github.com/cogentcore/core/blob/main/icons/svg/line_end_diamond.svg
-	LineEndDiamond Icon = "line_end_diamond"
-
-	// LineEndSquare is https://github.com/cogentcore/core/blob/main/icons/svg/line_end_square.svg
-	LineEndSquare Icon = "line_end_square"
-
-	// LineStart is https://github.com/cogentcore/core/blob/main/icons/svg/line_start.svg
-	LineStart Icon = "line_start"
-
-	// LineStartArrow is https://github.com/cogentcore/core/blob/main/icons/svg/line_start_arrow.svg
-	LineStartArrow Icon = "line_start_arrow"
-
-	// LineStartArrowNotch is https://github.com/cogentcore/core/blob/main/icons/svg/line_start_arrow_notch.svg
-	LineStartArrowNotch Icon = "line_start_arrow_notch"
-
-	// LineStartCircle is https://github.com/cogentcore/core/blob/main/icons/svg/line_start_circle.svg
-	LineStartCircle Icon = "line_start_circle"
-
-	// LineStartDiamond is https://github.com/cogentcore/core/blob/main/icons/svg/line_start_diamond.svg
-	LineStartDiamond Icon = "line_start_diamond"
-
-	// LineStartSquare is https://github.com/cogentcore/core/blob/main/icons/svg/line_start_square.svg
-	LineStartSquare Icon = "line_start_square"
-
-	// LineStyle is https://github.com/cogentcore/core/blob/main/icons/svg/line_style.svg
-	LineStyle Icon = "line_style"
-
-	// LineWeight is https://github.com/cogentcore/core/blob/main/icons/svg/line_weight.svg
-	LineWeight Icon = "line_weight"
-
-	// LinearScale is https://github.com/cogentcore/core/blob/main/icons/svg/linear_scale.svg
-	LinearScale Icon = "linear_scale"
-
-	// Link is https://github.com/cogentcore/core/blob/main/icons/svg/link.svg
-	Link Icon = "link"
-
-	// LinkOff is https://github.com/cogentcore/core/blob/main/icons/svg/link_off.svg
-	LinkOff Icon = "link_off"
-
-	// List is https://github.com/cogentcore/core/blob/main/icons/svg/list.svg
-	List Icon = "list"
-
-	// ListAlt is https://github.com/cogentcore/core/blob/main/icons/svg/list_alt.svg
-	ListAlt Icon = "list_alt"
-
-	// ListAltAdd is https://github.com/cogentcore/core/blob/main/icons/svg/list_alt_add.svg
-	ListAltAdd Icon = "list_alt_add"
-
-	// Lists is https://github.com/cogentcore/core/blob/main/icons/svg/lists.svg
-	Lists Icon = "lists"
-
-	// LiveHelp is https://github.com/cogentcore/core/blob/main/icons/svg/live_help.svg
-	LiveHelp Icon = "live_help"
-
-	// LiveTv is https://github.com/cogentcore/core/blob/main/icons/svg/live_tv.svg
-	LiveTv Icon = "live_tv"
-
-	// LocationAway is https://github.com/cogentcore/core/blob/main/icons/svg/location_away.svg
-	LocationAway Icon = "location_away"
-
-	// LocationChip is https://github.com/cogentcore/core/blob/main/icons/svg/location_chip.svg
-	LocationChip Icon = "location_chip"
-
-	// LocationHome is https://github.com/cogentcore/core/blob/main/icons/svg/location_home.svg
-	LocationHome Icon = "location_home"
-
-	// LocationOff is https://github.com/cogentcore/core/blob/main/icons/svg/location_off.svg
-	LocationOff Icon = "location_off"
-
-	// LocationOn is https://github.com/cogentcore/core/blob/main/icons/svg/location_on.svg
-	LocationOn Icon = "location_on"
-
-	// Lock is https://github.com/cogentcore/core/blob/main/icons/svg/lock.svg
-	Lock Icon = "lock"
-
-	// LockClock is https://github.com/cogentcore/core/blob/main/icons/svg/lock_clock.svg
-	LockClock Icon = "lock_clock"
-
-	// LockOpen is https://github.com/cogentcore/core/blob/main/icons/svg/lock_open.svg
-	LockOpen Icon = "lock_open"
-
-	// LockOpenRight is https://github.com/cogentcore/core/blob/main/icons/svg/lock_open_right.svg
-	LockOpenRight Icon = "lock_open_right"
-
-	// LockPerson is https://github.com/cogentcore/core/blob/main/icons/svg/lock_person.svg
-	LockPerson Icon = "lock_person"
-
-	// LockReset is https://github.com/cogentcore/core/blob/main/icons/svg/lock_reset.svg
-	LockReset Icon = "lock_reset"
-
-	// Login is https://github.com/cogentcore/core/blob/main/icons/svg/login.svg
-	Login Icon = "login"
-
-	// LogoDev is https://github.com/cogentcore/core/blob/main/icons/svg/logo_dev.svg
-	LogoDev Icon = "logo_dev"
-
-	// Logout is https://github.com/cogentcore/core/blob/main/icons/svg/logout.svg
-	Logout Icon = "logout"
-
-	// Loupe is https://github.com/cogentcore/core/blob/main/icons/svg/loupe.svg
-	Loupe Icon = "loupe"
-
-	// LowDensity is https://github.com/cogentcore/core/blob/main/icons/svg/low_density.svg
-	LowDensity Icon = "low_density"
-
-	// LowPriority is https://github.com/cogentcore/core/blob/main/icons/svg/low_priority.svg
-	LowPriority Icon = "low_priority"
-
-	// Loyalty is https://github.com/cogentcore/core/blob/main/icons/svg/loyalty.svg
-	Loyalty Icon = "loyalty"
-
-	// Lyrics is https://github.com/cogentcore/core/blob/main/icons/svg/lyrics.svg
-	Lyrics Icon = "lyrics"
-
-	// MacroAuto is https://github.com/cogentcore/core/blob/main/icons/svg/macro_auto.svg
-	MacroAuto Icon = "macro_auto"
-
-	// MacroOff is https://github.com/cogentcore/core/blob/main/icons/svg/macro_off.svg
-	MacroOff Icon = "macro_off"
-
-	// MagnificationLarge is https://github.com/cogentcore/core/blob/main/icons/svg/magnification_large.svg
-	MagnificationLarge Icon = "magnification_large"
-
-	// MagnificationSmall is https://github.com/cogentcore/core/blob/main/icons/svg/magnification_small.svg
-	MagnificationSmall Icon = "magnification_small"
-
-	// MagnifyDocked is https://github.com/cogentcore/core/blob/main/icons/svg/magnify_docked.svg
-	MagnifyDocked Icon = "magnify_docked"
-
-	// MagnifyFullscreen is https://github.com/cogentcore/core/blob/main/icons/svg/magnify_fullscreen.svg
-	MagnifyFullscreen Icon = "magnify_fullscreen"
-
-	// Mail is https://github.com/cogentcore/core/blob/main/icons/svg/mail.svg
-	Mail Icon = "mail"
-
-	// MailLock is https://github.com/cogentcore/core/blob/main/icons/svg/mail_lock.svg
-	MailLock Icon = "mail_lock"
-
-	// Make is https://github.com/cogentcore/core/blob/main/icons/svg/make.svg
-	Make Icon = "make"
-
-	// Makefile is https://github.com/cogentcore/core/blob/main/icons/svg/makefile.svg
-	Makefile Icon = "makefile"
-
-	// Male is https://github.com/cogentcore/core/blob/main/icons/svg/male.svg
-	Male Icon = "male"
-
-	// Man is https://github.com/cogentcore/core/blob/main/icons/svg/man.svg
-	Man Icon = "man"
-
-	// Man2 is https://github.com/cogentcore/core/blob/main/icons/svg/man_2.svg
-	Man2 Icon = "man_2"
-
-	// Man3 is https://github.com/cogentcore/core/blob/main/icons/svg/man_3.svg
-	Man3 Icon = "man_3"
-
-	// Man4 is https://github.com/cogentcore/core/blob/main/icons/svg/man_4.svg
-	Man4 Icon = "man_4"
-
-	// ManageAccounts is https://github.com/cogentcore/core/blob/main/icons/svg/manage_accounts.svg
-	ManageAccounts Icon = "manage_accounts"
-
-	// ManageHistory is https://github.com/cogentcore/core/blob/main/icons/svg/manage_history.svg
-	ManageHistory Icon = "manage_history"
-
-	// ManageSearch is https://github.com/cogentcore/core/blob/main/icons/svg/manage_search.svg
-	ManageSearch Icon = "manage_search"
-
-	// Manga is https://github.com/cogentcore/core/blob/main/icons/svg/manga.svg
-	Manga Icon = "manga"
-
-	// Map is https://github.com/cogentcore/core/blob/main/icons/svg/map.svg
-	Map Icon = "map"
-
-	// Margin is https://github.com/cogentcore/core/blob/main/icons/svg/margin.svg
-	Margin Icon = "margin"
-
-	// MarkAsUnread is https://github.com/cogentcore/core/blob/main/icons/svg/mark_as_unread.svg
-	MarkAsUnread Icon = "mark_as_unread"
-
-	// MarkChatRead is https://github.com/cogentcore/core/blob/main/icons/svg/mark_chat_read.svg
-	MarkChatRead Icon = "mark_chat_read"
-
-	// MarkChatUnread is https://github.com/cogentcore/core/blob/main/icons/svg/mark_chat_unread.svg
-	MarkChatUnread Icon = "mark_chat_unread"
-
-	// MarkEmailRead is https://github.com/cogentcore/core/blob/main/icons/svg/mark_email_read.svg
-	MarkEmailRead Icon = "mark_email_read"
-
-	// MarkEmailUnread is https://github.com/cogentcore/core/blob/main/icons/svg/mark_email_unread.svg
-	MarkEmailUnread Icon = "mark_email_unread"
-
-	// MarkUnreadChatAlt is https://github.com/cogentcore/core/blob/main/icons/svg/mark_unread_chat_alt.svg
-	MarkUnreadChatAlt Icon = "mark_unread_chat_alt"
-
-	// MarkunreadMailbox is https://github.com/cogentcore/core/blob/main/icons/svg/markunread_mailbox.svg
-	MarkunreadMailbox Icon = "markunread_mailbox"
-
-	// MaskedTransitions is https://github.com/cogentcore/core/blob/main/icons/svg/masked_transitions.svg
-	MaskedTransitions Icon = "masked_transitions"
-
-	// MatchCase is https://github.com/cogentcore/core/blob/main/icons/svg/match_case.svg
-	MatchCase Icon = "match_case"
-
-	// MatchWord is https://github.com/cogentcore/core/blob/main/icons/svg/match_word.svg
-	MatchWord Icon = "match_word"
-
-	// Maximize is https://github.com/cogentcore/core/blob/main/icons/svg/maximize.svg
-	Maximize Icon = "maximize"
-
-	// MeasuringTape is https://github.com/cogentcore/core/blob/main/icons/svg/measuring_tape.svg
-	MeasuringTape Icon = "measuring_tape"
-
-	// MediaBluetoothOff is https://github.com/cogentcore/core/blob/main/icons/svg/media_bluetooth_off.svg
-	MediaBluetoothOff Icon = "media_bluetooth_off"
-
-	// MediaBluetoothOn is https://github.com/cogentcore/core/blob/main/icons/svg/media_bluetooth_on.svg
-	MediaBluetoothOn Icon = "media_bluetooth_on"
-
-	// MediaLink is https://github.com/cogentcore/core/blob/main/icons/svg/media_link.svg
-	MediaLink Icon = "media_link"
-
-	// Memory is https://github.com/cogentcore/core/blob/main/icons/svg/memory.svg
-	Memory Icon = "memory"
-
-	// MemoryAlt is https://github.com/cogentcore/core/blob/main/icons/svg/memory_alt.svg
-	MemoryAlt Icon = "memory_alt"
-
-	// Menu is https://github.com/cogentcore/core/blob/main/icons/svg/menu.svg
-	Menu Icon = "menu"
-
-	// MenuBook is https://github.com/cogentcore/core/blob/main/icons/svg/menu_book.svg
-	MenuBook Icon = "menu_book"
-
-	// MenuOpen is https://github.com/cogentcore/core/blob/main/icons/svg/menu_open.svg
-	MenuOpen Icon = "menu_open"
-
-	// Merge is https://github.com/cogentcore/core/blob/main/icons/svg/merge.svg
-	Merge Icon = "merge"
-
-	// MergeType is https://github.com/cogentcore/core/blob/main/icons/svg/merge_type.svg
-	MergeType Icon = "merge_type"
-
-	// Method is https://github.com/cogentcore/core/blob/main/icons/svg/method.svg
-	Method Icon = "method"
-
-	// Mic is https://github.com/cogentcore/core/blob/main/icons/svg/mic.svg
-	Mic Icon = "mic"
-
-	// MicDouble is https://github.com/cogentcore/core/blob/main/icons/svg/mic_double.svg
-	MicDouble Icon = "mic_double"
-
-	// MicExternalOff is https://github.com/cogentcore/core/blob/main/icons/svg/mic_external_off.svg
-	MicExternalOff Icon = "mic_external_off"
-
-	// MicExternalOn is https://github.com/cogentcore/core/blob/main/icons/svg/mic_external_on.svg
-	MicExternalOn Icon = "mic_external_on"
-
-	// MicOff is https://github.com/cogentcore/core/blob/main/icons/svg/mic_off.svg
-	MicOff Icon = "mic_off"
-
-	// Minimize is https://github.com/cogentcore/core/blob/main/icons/svg/minimize.svg
-	Minimize Icon = "minimize"
-
-	// MissedVideoCall is https://github.com/cogentcore/core/blob/main/icons/svg/missed_video_call.svg
-	MissedVideoCall Icon = "missed_video_call"
-
-	// Mms is https://github.com/cogentcore/core/blob/main/icons/svg/mms.svg
-	Mms Icon = "mms"
-
-	// MobileFriendly is https://github.com/cogentcore/core/blob/main/icons/svg/mobile_friendly.svg
-	MobileFriendly Icon = "mobile_friendly"
-
-	// MobileOff is https://github.com/cogentcore/core/blob/main/icons/svg/mobile_off.svg
-	MobileOff Icon = "mobile_off"
-
-	// MobileScreenShare is https://github.com/cogentcore/core/blob/main/icons/svg/mobile_screen_share.svg
-	MobileScreenShare Icon = "mobile_screen_share"
-
-	// MobiledataOff is https://github.com/cogentcore/core/blob/main/icons/svg/mobiledata_off.svg
-	MobiledataOff Icon = "mobiledata_off"
-
-	// ModeCool is https://github.com/cogentcore/core/blob/main/icons/svg/mode_cool.svg
-	ModeCool Icon = "mode_cool"
-
-	// ModeCoolOff is https://github.com/cogentcore/core/blob/main/icons/svg/mode_cool_off.svg
-	ModeCoolOff Icon = "mode_cool_off"
-
-	// ModeFan is https://github.com/cogentcore/core/blob/main/icons/svg/mode_fan.svg
-	ModeFan Icon = "mode_fan"
-
-	// ModeFanOff is https://github.com/cogentcore/core/blob/main/icons/svg/mode_fan_off.svg
-	ModeFanOff Icon = "mode_fan_off"
-
-	// ModeHeat is https://github.com/cogentcore/core/blob/main/icons/svg/mode_heat.svg
-	ModeHeat Icon = "mode_heat"
-
-	// ModeHeatCool is https://github.com/cogentcore/core/blob/main/icons/svg/mode_heat_cool.svg
-	ModeHeatCool Icon = "mode_heat_cool"
-
-	// ModeHeatOff is https://github.com/cogentcore/core/blob/main/icons/svg/mode_heat_off.svg
-	ModeHeatOff Icon = "mode_heat_off"
-
-	// ModeOffOn is https://github.com/cogentcore/core/blob/main/icons/svg/mode_off_on.svg
-	ModeOffOn Icon = "mode_off_on"
-
-	// ModeStandby is https://github.com/cogentcore/core/blob/main/icons/svg/mode_standby.svg
-	ModeStandby Icon = "mode_standby"
-
-	// ModelTraining is https://github.com/cogentcore/core/blob/main/icons/svg/model_training.svg
-	ModelTraining Icon = "model_training"
-
-	// MonetizationOn is https://github.com/cogentcore/core/blob/main/icons/svg/monetization_on.svg
-	MonetizationOn Icon = "monetization_on"
-
-	// Money is https://github.com/cogentcore/core/blob/main/icons/svg/money.svg
-	Money Icon = "money"
-
-	// MoneyOff is https://github.com/cogentcore/core/blob/main/icons/svg/money_off.svg
-	MoneyOff Icon = "money_off"
-
-	// Monitor is https://github.com/cogentcore/core/blob/main/icons/svg/monitor.svg
-	Monitor Icon = "monitor"
-
-	// Monitoring is https://github.com/cogentcore/core/blob/main/icons/svg/monitoring.svg
-	Monitoring Icon = "monitoring"
-
-	// MonochromePhotos is https://github.com/cogentcore/core/blob/main/icons/svg/monochrome_photos.svg
-	MonochromePhotos Icon = "monochrome_photos"
-
-	// Mood is https://github.com/cogentcore/core/blob/main/icons/svg/mood.svg
-	Mood Icon = "mood"
-
-	// MoodBad is https://github.com/cogentcore/core/blob/main/icons/svg/mood_bad.svg
-	MoodBad Icon = "mood_bad"
-
-	// More is https://github.com/cogentcore/core/blob/main/icons/svg/more.svg
-	More Icon = "more"
-
-	// MoreDown is https://github.com/cogentcore/core/blob/main/icons/svg/more_down.svg
-	MoreDown Icon = "more_down"
-
-	// MoreHoriz is https://github.com/cogentcore/core/blob/main/icons/svg/more_horiz.svg
-	MoreHoriz Icon = "more_horiz"
-
-	// MoreTime is https://github.com/cogentcore/core/blob/main/icons/svg/more_time.svg
-	MoreTime Icon = "more_time"
-
-	// MoreUp is https://github.com/cogentcore/core/blob/main/icons/svg/more_up.svg
-	MoreUp Icon = "more_up"
-
-	// MoreVert is https://github.com/cogentcore/core/blob/main/icons/svg/more_vert.svg
-	MoreVert Icon = "more_vert"
-
-	// Mouse is https://github.com/cogentcore/core/blob/main/icons/svg/mouse.svg
-	Mouse Icon = "mouse"
-
-	// Move is https://github.com/cogentcore/core/blob/main/icons/svg/move.svg
-	Move Icon = "move"
-
-	// MoveDown is https://github.com/cogentcore/core/blob/main/icons/svg/move_down.svg
-	MoveDown Icon = "move_down"
-
-	// MoveGroup is https://github.com/cogentcore/core/blob/main/icons/svg/move_group.svg
-	MoveGroup Icon = "move_group"
-
-	// MoveItem is https://github.com/cogentcore/core/blob/main/icons/svg/move_item.svg
-	MoveItem Icon = "move_item"
-
-	// MoveLocation is https://github.com/cogentcore/core/blob/main/icons/svg/move_location.svg
-	MoveLocation Icon = "move_location"
-
-	// MoveSelectionDown is https://github.com/cogentcore/core/blob/main/icons/svg/move_selection_down.svg
-	MoveSelectionDown Icon = "move_selection_down"
-
-	// MoveSelectionLeft is https://github.com/cogentcore/core/blob/main/icons/svg/move_selection_left.svg
-	MoveSelectionLeft Icon = "move_selection_left"
-
-	// MoveSelectionRight is https://github.com/cogentcore/core/blob/main/icons/svg/move_selection_right.svg
-	MoveSelectionRight Icon = "move_selection_right"
-
-	// MoveSelectionUp is https://github.com/cogentcore/core/blob/main/icons/svg/move_selection_up.svg
-	MoveSelectionUp Icon = "move_selection_up"
-
-	// MoveToInbox is https://github.com/cogentcore/core/blob/main/icons/svg/move_to_inbox.svg
-	MoveToInbox Icon = "move_to_inbox"
-
-	// MoveUp is https://github.com/cogentcore/core/blob/main/icons/svg/move_up.svg
-	MoveUp Icon = "move_up"
-
-	// MovedLocation is https://github.com/cogentcore/core/blob/main/icons/svg/moved_location.svg
-	MovedLocation Icon = "moved_location"
-
-	// Movie is https://github.com/cogentcore/core/blob/main/icons/svg/movie.svg
-	Movie Icon = "movie"
-
-	// MovieEdit is https://github.com/cogentcore/core/blob/main/icons/svg/movie_edit.svg
-	MovieEdit Icon = "movie_edit"
-
-	// MovieInfo is https://github.com/cogentcore/core/blob/main/icons/svg/movie_info.svg
-	MovieInfo Icon = "movie_info"
-
-	// Moving is https://github.com/cogentcore/core/blob/main/icons/svg/moving.svg
-	Moving Icon = "moving"
-
-	// MultilineChart is https://github.com/cogentcore/core/blob/main/icons/svg/multiline_chart.svg
-	MultilineChart Icon = "multiline_chart"
-
-	// MultipleStop is https://github.com/cogentcore/core/blob/main/icons/svg/multiple_stop.svg
-	MultipleStop Icon = "multiple_stop"
-
-	// MusicNote is https://github.com/cogentcore/core/blob/main/icons/svg/music_note.svg
-	MusicNote Icon = "music_note"
-
-	// MusicOff is https://github.com/cogentcore/core/blob/main/icons/svg/music_off.svg
-	MusicOff Icon = "music_off"
-
-	// MusicVideo is https://github.com/cogentcore/core/blob/main/icons/svg/music_video.svg
-	MusicVideo Icon = "music_video"
-
-	// MyLocation is https://github.com/cogentcore/core/blob/main/icons/svg/my_location.svg
-	MyLocation Icon = "my_location"
-
-	// Mystery is https://github.com/cogentcore/core/blob/main/icons/svg/mystery.svg
-	Mystery Icon = "mystery"
-
-	// Nature is https://github.com/cogentcore/core/blob/main/icons/svg/nature.svg
-	Nature Icon = "nature"
-
-	// NavigateBefore is https://github.com/cogentcore/core/blob/main/icons/svg/navigate_before.svg
-	NavigateBefore Icon = "navigate_before"
-
-	// NavigateNext is https://github.com/cogentcore/core/blob/main/icons/svg/navigate_next.svg
-	NavigateNext Icon = "navigate_next"
-
-	// Navigation is https://github.com/cogentcore/core/blob/main/icons/svg/navigation.svg
-	Navigation Icon = "navigation"
-
-	// NetworkCell is https://github.com/cogentcore/core/blob/main/icons/svg/network_cell.svg
-	NetworkCell Icon = "network_cell"
-
-	// NetworkCheck is https://github.com/cogentcore/core/blob/main/icons/svg/network_check.svg
-	NetworkCheck Icon = "network_check"
-
-	// NetworkLocked is https://github.com/cogentcore/core/blob/main/icons/svg/network_locked.svg
-	NetworkLocked Icon = "network_locked"
-
-	// NetworkManage is https://github.com/cogentcore/core/blob/main/icons/svg/network_manage.svg
-	NetworkManage Icon = "network_manage"
-
-	// NetworkPing is https://github.com/cogentcore/core/blob/main/icons/svg/network_ping.svg
-	NetworkPing Icon = "network_ping"
-
-	// NetworkWifi is https://github.com/cogentcore/core/blob/main/icons/svg/network_wifi.svg
-	NetworkWifi Icon = "network_wifi"
-
-	// NetworkWifi1Bar is https://github.com/cogentcore/core/blob/main/icons/svg/network_wifi_1_bar.svg
-	NetworkWifi1Bar Icon = "network_wifi_1_bar"
-
-	// NetworkWifi2Bar is https://github.com/cogentcore/core/blob/main/icons/svg/network_wifi_2_bar.svg
-	NetworkWifi2Bar Icon = "network_wifi_2_bar"
-
-	// NetworkWifi3Bar is https://github.com/cogentcore/core/blob/main/icons/svg/network_wifi_3_bar.svg
-	NetworkWifi3Bar Icon = "network_wifi_3_bar"
-
-	// NewLabel is https://github.com/cogentcore/core/blob/main/icons/svg/new_label.svg
-	NewLabel Icon = "new_label"
-
-	// NewReleases is https://github.com/cogentcore/core/blob/main/icons/svg/new_releases.svg
-	NewReleases Icon = "new_releases"
-
-	// NewWindow is https://github.com/cogentcore/core/blob/main/icons/svg/new_window.svg
-	NewWindow Icon = "new_window"
-
-	// News is https://github.com/cogentcore/core/blob/main/icons/svg/news.svg
-	News Icon = "news"
-
-	// Newsmode is https://github.com/cogentcore/core/blob/main/icons/svg/newsmode.svg
-	Newsmode Icon = "newsmode"
-
-	// Newspaper is https://github.com/cogentcore/core/blob/main/icons/svg/newspaper.svg
-	Newspaper Icon = "newspaper"
-
-	// NextPlan is https://github.com/cogentcore/core/blob/main/icons/svg/next_plan.svg
-	NextPlan Icon = "next_plan"
-
-	// NextWeek is https://github.com/cogentcore/core/blob/main/icons/svg/next_week.svg
-	NextWeek Icon = "next_week"
-
-	// Nfc is https://github.com/cogentcore/core/blob/main/icons/svg/nfc.svg
-	Nfc Icon = "nfc"
-
-	// NoAccounts is https://github.com/cogentcore/core/blob/main/icons/svg/no_accounts.svg
-	NoAccounts Icon = "no_accounts"
-
-	// NoAdultContent is https://github.com/cogentcore/core/blob/main/icons/svg/no_adult_content.svg
-	NoAdultContent Icon = "no_adult_content"
-
-	// NoCrash is https://github.com/cogentcore/core/blob/main/icons/svg/no_crash.svg
-	NoCrash Icon = "no_crash"
-
-	// NoEncryption is https://github.com/cogentcore/core/blob/main/icons/svg/no_encryption.svg
-	NoEncryption Icon = "no_encryption"
-
-	// NoFlash is https://github.com/cogentcore/core/blob/main/icons/svg/no_flash.svg
-	NoFlash Icon = "no_flash"
-
-	// NoSim is https://github.com/cogentcore/core/blob/main/icons/svg/no_sim.svg
-	NoSim Icon = "no_sim"
-
-	// NoSound is https://github.com/cogentcore/core/blob/main/icons/svg/no_sound.svg
-	NoSound Icon = "no_sound"
-
-	// NoTransfer is https://github.com/cogentcore/core/blob/main/icons/svg/no_transfer.svg
-	NoTransfer Icon = "no_transfer"
-
-	// North is https://github.com/cogentcore/core/blob/main/icons/svg/north.svg
-	North Icon = "north"
-
-	// NorthEast is https://github.com/cogentcore/core/blob/main/icons/svg/north_east.svg
-	NorthEast Icon = "north_east"
-
-	// NorthWest is https://github.com/cogentcore/core/blob/main/icons/svg/north_west.svg
-	NorthWest Icon = "north_west"
-
-	// NotStarted is https://github.com/cogentcore/core/blob/main/icons/svg/not_started.svg
-	NotStarted Icon = "not_started"
-
-	// Note is https://github.com/cogentcore/core/blob/main/icons/svg/note.svg
-	Note Icon = "note"
-
-	// NoteAdd is https://github.com/cogentcore/core/blob/main/icons/svg/note_add.svg
-	NoteAdd Icon = "note_add"
-
-	// NoteAlt is https://github.com/cogentcore/core/blob/main/icons/svg/note_alt.svg
-	NoteAlt Icon = "note_alt"
-
-	// Notes is https://github.com/cogentcore/core/blob/main/icons/svg/notes.svg
-	Notes Icon = "notes"
-
-	// NotificationAdd is https://github.com/cogentcore/core/blob/main/icons/svg/notification_add.svg
-	NotificationAdd Icon = "notification_add"
-
-	// NotificationImportant is https://github.com/cogentcore/core/blob/main/icons/svg/notification_important.svg
-	NotificationImportant Icon = "notification_important"
-
-	// NotificationMultiple is https://github.com/cogentcore/core/blob/main/icons/svg/notification_multiple.svg
-	NotificationMultiple Icon = "notification_multiple"
-
-	// Notifications is https://github.com/cogentcore/core/blob/main/icons/svg/notifications.svg
-	Notifications Icon = "notifications"
-
-	// NotificationsActive is https://github.com/cogentcore/core/blob/main/icons/svg/notifications_active.svg
-	NotificationsActive Icon = "notifications_active"
-
-	// NotificationsOff is https://github.com/cogentcore/core/blob/main/icons/svg/notifications_off.svg
-	NotificationsOff Icon = "notifications_off"
-
-	// NotificationsPaused is https://github.com/cogentcore/core/blob/main/icons/svg/notifications_paused.svg
-	NotificationsPaused Icon = "notifications_paused"
-
-	// Numbers is https://github.com/cogentcore/core/blob/main/icons/svg/numbers.svg
-	Numbers Icon = "numbers"
-
-	// OfflineBolt is https://github.com/cogentcore/core/blob/main/icons/svg/offline_bolt.svg
-	OfflineBolt Icon = "offline_bolt"
-
-	// OfflinePin is https://github.com/cogentcore/core/blob/main/icons/svg/offline_pin.svg
-	OfflinePin Icon = "offline_pin"
-
-	// OfflineShare is https://github.com/cogentcore/core/blob/main/icons/svg/offline_share.svg
-	OfflineShare Icon = "offline_share"
-
-	// OnDeviceTraining is https://github.com/cogentcore/core/blob/main/icons/svg/on_device_training.svg
-	OnDeviceTraining Icon = "on_device_training"
-
-	// OnlinePrediction is https://github.com/cogentcore/core/blob/main/icons/svg/online_prediction.svg
-	OnlinePrediction Icon = "online_prediction"
-
-	// Opacity is https://github.com/cogentcore/core/blob/main/icons/svg/opacity.svg
-	Opacity Icon = "opacity"
-
-	// Open is https://github.com/cogentcore/core/blob/main/icons/svg/open.svg
-	Open Icon = "open"
-
-	// OpenInBrowser is https://github.com/cogentcore/core/blob/main/icons/svg/open_in_browser.svg
-	OpenInBrowser Icon = "open_in_browser"
-
-	// OpenInFull is https://github.com/cogentcore/core/blob/main/icons/svg/open_in_full.svg
-	OpenInFull Icon = "open_in_full"
-
-	// OpenInNew is https://github.com/cogentcore/core/blob/main/icons/svg/open_in_new.svg
-	OpenInNew Icon = "open_in_new"
-
-	// OpenInNewDown is https://github.com/cogentcore/core/blob/main/icons/svg/open_in_new_down.svg
-	OpenInNewDown Icon = "open_in_new_down"
-
-	// OpenInNewOff is https://github.com/cogentcore/core/blob/main/icons/svg/open_in_new_off.svg
-	OpenInNewOff Icon = "open_in_new_off"
-
-	// OpenInPhone is https://github.com/cogentcore/core/blob/main/icons/svg/open_in_phone.svg
-	OpenInPhone Icon = "open_in_phone"
-
-	// OpenWith is https://github.com/cogentcore/core/blob/main/icons/svg/open_with.svg
-	OpenWith Icon = "open_with"
-
-	// OrderApprove is https://github.com/cogentcore/core/blob/main/icons/svg/order_approve.svg
-	OrderApprove Icon = "order_approve"
-
-	// OrderPlay is https://github.com/cogentcore/core/blob/main/icons/svg/order_play.svg
-	OrderPlay Icon = "order_play"
-
-	// Outbound is https://github.com/cogentcore/core/blob/main/icons/svg/outbound.svg
-	Outbound Icon = "outbound"
-
-	// Outbox is https://github.com/cogentcore/core/blob/main/icons/svg/outbox.svg
-	Outbox Icon = "outbox"
-
-	// OutboxAlt is https://github.com/cogentcore/core/blob/main/icons/svg/outbox_alt.svg
-	OutboxAlt Icon = "outbox_alt"
-
-	// OutgoingMail is https://github.com/cogentcore/core/blob/main/icons/svg/outgoing_mail.svg
-	OutgoingMail Icon = "outgoing_mail"
-
-	// Outlet is https://github.com/cogentcore/core/blob/main/icons/svg/outlet.svg
-	Outlet Icon = "outlet"
-
-	// Output is https://github.com/cogentcore/core/blob/main/icons/svg/output.svg
-	Output Icon = "output"
-
-	// OutputCircle is https://github.com/cogentcore/core/blob/main/icons/svg/output_circle.svg
-	OutputCircle Icon = "output_circle"
-
-	// Overview is https://github.com/cogentcore/core/blob/main/icons/svg/overview.svg
-	Overview Icon = "overview"
-
-	// OverviewKey is https://github.com/cogentcore/core/blob/main/icons/svg/overview_key.svg
-	OverviewKey Icon = "overview_key"
-
-	// Pace is https://github.com/cogentcore/core/blob/main/icons/svg/pace.svg
-	Pace Icon = "pace"
-
-	// Package is https://github.com/cogentcore/core/blob/main/icons/svg/package.svg
-	Package Icon = "package"
-
-	// Padding is https://github.com/cogentcore/core/blob/main/icons/svg/padding.svg
-	Padding Icon = "padding"
-
-	// PageControl is https://github.com/cogentcore/core/blob/main/icons/svg/page_control.svg
-	PageControl Icon = "page_control"
-
-	// PageInfo is https://github.com/cogentcore/core/blob/main/icons/svg/page_info.svg
-	PageInfo Icon = "page_info"
-
-	// Pages is https://github.com/cogentcore/core/blob/main/icons/svg/pages.svg
-	Pages Icon = "pages"
-
-	// Pageview is https://github.com/cogentcore/core/blob/main/icons/svg/pageview.svg
-	Pageview Icon = "pageview"
-
-	// Paid is https://github.com/cogentcore/core/blob/main/icons/svg/paid.svg
-	Paid Icon = "paid"
-
-	// Palette is https://github.com/cogentcore/core/blob/main/icons/svg/palette.svg
-	Palette Icon = "palette"
-
-	// Pallet is https://github.com/cogentcore/core/blob/main/icons/svg/pallet.svg
-	Pallet Icon = "pallet"
-
-	// PanTool is https://github.com/cogentcore/core/blob/main/icons/svg/pan_tool.svg
-	PanTool Icon = "pan_tool"
-
-	// PanToolAlt is https://github.com/cogentcore/core/blob/main/icons/svg/pan_tool_alt.svg
-	PanToolAlt Icon = "pan_tool_alt"
-
-	// PanZoom is https://github.com/cogentcore/core/blob/main/icons/svg/pan_zoom.svg
-	PanZoom Icon = "pan_zoom"
-
-	// Panorama is https://github.com/cogentcore/core/blob/main/icons/svg/panorama.svg
-	Panorama Icon = "panorama"
-
-	// Password is https://github.com/cogentcore/core/blob/main/icons/svg/password.svg
-	Password Icon = "password"
-
-	// Paste is https://github.com/cogentcore/core/blob/main/icons/svg/paste.svg
-	Paste Icon = "paste"
-
-	// Pattern is https://github.com/cogentcore/core/blob/main/icons/svg/pattern.svg
-	Pattern Icon = "pattern"
-
-	// Pause is https://github.com/cogentcore/core/blob/main/icons/svg/pause.svg
-	Pause Icon = "pause"
-
-	// PauseCircle is https://github.com/cogentcore/core/blob/main/icons/svg/pause_circle.svg
-	PauseCircle Icon = "pause_circle"
-
-	// PausePresentation is https://github.com/cogentcore/core/blob/main/icons/svg/pause_presentation.svg
-	PausePresentation Icon = "pause_presentation"
-
-	// Payments is https://github.com/cogentcore/core/blob/main/icons/svg/payments.svg
-	Payments Icon = "payments"
-
-	// PenSize1 is https://github.com/cogentcore/core/blob/main/icons/svg/pen_size_1.svg
-	PenSize1 Icon = "pen_size_1"
-
-	// PenSize2 is https://github.com/cogentcore/core/blob/main/icons/svg/pen_size_2.svg
-	PenSize2 Icon = "pen_size_2"
-
-	// PenSize3 is https://github.com/cogentcore/core/blob/main/icons/svg/pen_size_3.svg
-	PenSize3 Icon = "pen_size_3"
-
-	// PenSize4 is https://github.com/cogentcore/core/blob/main/icons/svg/pen_size_4.svg
-	PenSize4 Icon = "pen_size_4"
-
-	// PenSize5 is https://github.com/cogentcore/core/blob/main/icons/svg/pen_size_5.svg
-	PenSize5 Icon = "pen_size_5"
-
-	// Pending is https://github.com/cogentcore/core/blob/main/icons/svg/pending.svg
-	Pending Icon = "pending"
-
-	// PendingActions is https://github.com/cogentcore/core/blob/main/icons/svg/pending_actions.svg
-	PendingActions Icon = "pending_actions"
-
-	// Pentagon is https://github.com/cogentcore/core/blob/main/icons/svg/pentagon.svg
-	Pentagon Icon = "pentagon"
-
-	// Percent is https://github.com/cogentcore/core/blob/main/icons/svg/percent.svg
-	Percent Icon = "percent"
-
-	// PermCameraMic is https://github.com/cogentcore/core/blob/main/icons/svg/perm_camera_mic.svg
-	PermCameraMic Icon = "perm_camera_mic"
-
-	// PermContactCalendar is https://github.com/cogentcore/core/blob/main/icons/svg/perm_contact_calendar.svg
-	PermContactCalendar Icon = "perm_contact_calendar"
-
-	// PermDataSetting is https://github.com/cogentcore/core/blob/main/icons/svg/perm_data_setting.svg
-	PermDataSetting Icon = "perm_data_setting"
-
-	// PermDeviceInformation is https://github.com/cogentcore/core/blob/main/icons/svg/perm_device_information.svg
-	PermDeviceInformation Icon = "perm_device_information"
-
-	// PermMedia is https://github.com/cogentcore/core/blob/main/icons/svg/perm_media.svg
-	PermMedia Icon = "perm_media"
-
-	// PermPhoneMsg is https://github.com/cogentcore/core/blob/main/icons/svg/perm_phone_msg.svg
-	PermPhoneMsg Icon = "perm_phone_msg"
-
-	// PermScanWifi is https://github.com/cogentcore/core/blob/main/icons/svg/perm_scan_wifi.svg
-	PermScanWifi Icon = "perm_scan_wifi"
-
-	// Person is https://github.com/cogentcore/core/blob/main/icons/svg/person.svg
-	Person Icon = "person"
-
-	// Person2 is https://github.com/cogentcore/core/blob/main/icons/svg/person_2.svg
-	Person2 Icon = "person_2"
-
-	// Person3 is https://github.com/cogentcore/core/blob/main/icons/svg/person_3.svg
-	Person3 Icon = "person_3"
-
-	// Person4 is https://github.com/cogentcore/core/blob/main/icons/svg/person_4.svg
-	Person4 Icon = "person_4"
-
-	// PersonAdd is https://github.com/cogentcore/core/blob/main/icons/svg/person_add.svg
-	PersonAdd Icon = "person_add"
-
-	// PersonAddDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/person_add_disabled.svg
-	PersonAddDisabled Icon = "person_add_disabled"
-
-	// PersonApron is https://github.com/cogentcore/core/blob/main/icons/svg/person_apron.svg
-	PersonApron Icon = "person_apron"
-
-	// PersonBook is https://github.com/cogentcore/core/blob/main/icons/svg/person_book.svg
-	PersonBook Icon = "person_book"
-
-	// PersonCelebrate is https://github.com/cogentcore/core/blob/main/icons/svg/person_celebrate.svg
-	PersonCelebrate Icon = "person_celebrate"
-
-	// PersonOff is https://github.com/cogentcore/core/blob/main/icons/svg/person_off.svg
-	PersonOff Icon = "person_off"
-
-	// PersonPin is https://github.com/cogentcore/core/blob/main/icons/svg/person_pin.svg
-	PersonPin Icon = "person_pin"
-
-	// PersonPinCircle is https://github.com/cogentcore/core/blob/main/icons/svg/person_pin_circle.svg
-	PersonPinCircle Icon = "person_pin_circle"
-
-	// PersonPlay is https://github.com/cogentcore/core/blob/main/icons/svg/person_play.svg
-	PersonPlay Icon = "person_play"
-
-	// PersonRaisedHand is https://github.com/cogentcore/core/blob/main/icons/svg/person_raised_hand.svg
-	PersonRaisedHand Icon = "person_raised_hand"
-
-	// PersonRemove is https://github.com/cogentcore/core/blob/main/icons/svg/person_remove.svg
-	PersonRemove Icon = "person_remove"
-
-	// PersonSearch is https://github.com/cogentcore/core/blob/main/icons/svg/person_search.svg
-	PersonSearch Icon = "person_search"
-
-	// Phishing is https://github.com/cogentcore/core/blob/main/icons/svg/phishing.svg
-	Phishing Icon = "phishing"
-
-	// PhoneAndroid is https://github.com/cogentcore/core/blob/main/icons/svg/phone_android.svg
-	PhoneAndroid Icon = "phone_android"
-
-	// PhoneBluetoothSpeaker is https://github.com/cogentcore/core/blob/main/icons/svg/phone_bluetooth_speaker.svg
-	PhoneBluetoothSpeaker Icon = "phone_bluetooth_speaker"
-
-	// PhoneCallback is https://github.com/cogentcore/core/blob/main/icons/svg/phone_callback.svg
-	PhoneCallback Icon = "phone_callback"
-
-	// PhoneDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/phone_disabled.svg
-	PhoneDisabled Icon = "phone_disabled"
-
-	// PhoneEnabled is https://github.com/cogentcore/core/blob/main/icons/svg/phone_enabled.svg
-	PhoneEnabled Icon = "phone_enabled"
-
-	// PhoneForwarded is https://github.com/cogentcore/core/blob/main/icons/svg/phone_forwarded.svg
-	PhoneForwarded Icon = "phone_forwarded"
-
-	// PhoneInTalk is https://github.com/cogentcore/core/blob/main/icons/svg/phone_in_talk.svg
-	PhoneInTalk Icon = "phone_in_talk"
-
-	// PhoneIphone is https://github.com/cogentcore/core/blob/main/icons/svg/phone_iphone.svg
-	PhoneIphone Icon = "phone_iphone"
-
-	// PhoneLocked is https://github.com/cogentcore/core/blob/main/icons/svg/phone_locked.svg
-	PhoneLocked Icon = "phone_locked"
-
-	// PhoneMissed is https://github.com/cogentcore/core/blob/main/icons/svg/phone_missed.svg
-	PhoneMissed Icon = "phone_missed"
-
-	// PhonePaused is https://github.com/cogentcore/core/blob/main/icons/svg/phone_paused.svg
-	PhonePaused Icon = "phone_paused"
-
-	// Photo is https://github.com/cogentcore/core/blob/main/icons/svg/photo.svg
-	Photo Icon = "photo"
-
-	// PhotoAlbum is https://github.com/cogentcore/core/blob/main/icons/svg/photo_album.svg
-	PhotoAlbum Icon = "photo_album"
-
-	// PhotoCamera is https://github.com/cogentcore/core/blob/main/icons/svg/photo_camera.svg
-	PhotoCamera Icon = "photo_camera"
-
-	// PhotoCameraBack is https://github.com/cogentcore/core/blob/main/icons/svg/photo_camera_back.svg
-	PhotoCameraBack Icon = "photo_camera_back"
-
-	// PhotoCameraFront is https://github.com/cogentcore/core/blob/main/icons/svg/photo_camera_front.svg
-	PhotoCameraFront Icon = "photo_camera_front"
-
-	// PhotoFrame is https://github.com/cogentcore/core/blob/main/icons/svg/photo_frame.svg
-	PhotoFrame Icon = "photo_frame"
-
-	// PhotoLibrary is https://github.com/cogentcore/core/blob/main/icons/svg/photo_library.svg
-	PhotoLibrary Icon = "photo_library"
-
-	// PhotoPrints is https://github.com/cogentcore/core/blob/main/icons/svg/photo_prints.svg
-	PhotoPrints Icon = "photo_prints"
-
-	// PhotoSizeSelectLarge is https://github.com/cogentcore/core/blob/main/icons/svg/photo_size_select_large.svg
-	PhotoSizeSelectLarge Icon = "photo_size_select_large"
-
-	// PhotoSizeSelectSmall is https://github.com/cogentcore/core/blob/main/icons/svg/photo_size_select_small.svg
-	PhotoSizeSelectSmall Icon = "photo_size_select_small"
-
-	// Php is https://github.com/cogentcore/core/blob/main/icons/svg/php.svg
-	Php Icon = "php"
-
-	// Piano is https://github.com/cogentcore/core/blob/main/icons/svg/piano.svg
-	Piano Icon = "piano"
-
-	// PianoOff is https://github.com/cogentcore/core/blob/main/icons/svg/piano_off.svg
-	PianoOff Icon = "piano_off"
-
-	// PictureAsPdf is https://github.com/cogentcore/core/blob/main/icons/svg/picture_as_pdf.svg
-	PictureAsPdf Icon = "picture_as_pdf"
-
-	// PictureInPicture is https://github.com/cogentcore/core/blob/main/icons/svg/picture_in_picture.svg
-	PictureInPicture Icon = "picture_in_picture"
-
-	// PictureInPictureAlt is https://github.com/cogentcore/core/blob/main/icons/svg/picture_in_picture_alt.svg
-	PictureInPictureAlt Icon = "picture_in_picture_alt"
-
-	// PieChart is https://github.com/cogentcore/core/blob/main/icons/svg/pie_chart.svg
-	PieChart Icon = "pie_chart"
-
-	// Pill is https://github.com/cogentcore/core/blob/main/icons/svg/pill.svg
-	Pill Icon = "pill"
-
-	// PillOff is https://github.com/cogentcore/core/blob/main/icons/svg/pill_off.svg
-	PillOff Icon = "pill_off"
-
-	// Pin is https://github.com/cogentcore/core/blob/main/icons/svg/pin.svg
-	Pin Icon = "pin"
-
-	// PinDrop is https://github.com/cogentcore/core/blob/main/icons/svg/pin_drop.svg
-	PinDrop Icon = "pin_drop"
-
-	// PinEnd is https://github.com/cogentcore/core/blob/main/icons/svg/pin_end.svg
-	PinEnd Icon = "pin_end"
-
-	// PinInvoke is https://github.com/cogentcore/core/blob/main/icons/svg/pin_invoke.svg
-	PinInvoke Icon = "pin_invoke"
-
-	// Pinch is https://github.com/cogentcore/core/blob/main/icons/svg/pinch.svg
-	Pinch Icon = "pinch"
-
-	// PinchZoomIn is https://github.com/cogentcore/core/blob/main/icons/svg/pinch_zoom_in.svg
-	PinchZoomIn Icon = "pinch_zoom_in"
-
-	// PinchZoomOut is https://github.com/cogentcore/core/blob/main/icons/svg/pinch_zoom_out.svg
-	PinchZoomOut Icon = "pinch_zoom_out"
-
-	// Pip is https://github.com/cogentcore/core/blob/main/icons/svg/pip.svg
-	Pip Icon = "pip"
-
-	// PipExit is https://github.com/cogentcore/core/blob/main/icons/svg/pip_exit.svg
-	PipExit Icon = "pip_exit"
-
-	// PivotTableChart is https://github.com/cogentcore/core/blob/main/icons/svg/pivot_table_chart.svg
-	PivotTableChart Icon = "pivot_table_chart"
-
-	// PlaceItem is https://github.com/cogentcore/core/blob/main/icons/svg/place_item.svg
-	PlaceItem Icon = "place_item"
-
-	// Plagiarism is https://github.com/cogentcore/core/blob/main/icons/svg/plagiarism.svg
-	Plagiarism Icon = "plagiarism"
-
-	// PlayArrow is https://github.com/cogentcore/core/blob/main/icons/svg/play_arrow.svg
-	PlayArrow Icon = "play_arrow"
-
-	// PlayCircle is https://github.com/cogentcore/core/blob/main/icons/svg/play_circle.svg
-	PlayCircle Icon = "play_circle"
-
-	// PlayDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/play_disabled.svg
-	PlayDisabled Icon = "play_disabled"
-
-	// PlayForWork is https://github.com/cogentcore/core/blob/main/icons/svg/play_for_work.svg
-	PlayForWork Icon = "play_for_work"
-
-	// PlayLesson is https://github.com/cogentcore/core/blob/main/icons/svg/play_lesson.svg
-	PlayLesson Icon = "play_lesson"
-
-	// PlayPause is https://github.com/cogentcore/core/blob/main/icons/svg/play_pause.svg
-	PlayPause Icon = "play_pause"
-
-	// PlayShapes is https://github.com/cogentcore/core/blob/main/icons/svg/play_shapes.svg
-	PlayShapes Icon = "play_shapes"
-
-	// PlayingCards is https://github.com/cogentcore/core/blob/main/icons/svg/playing_cards.svg
-	PlayingCards Icon = "playing_cards"
-
-	// PlaylistAdd is https://github.com/cogentcore/core/blob/main/icons/svg/playlist_add.svg
-	PlaylistAdd Icon = "playlist_add"
-
-	// PlaylistAddCheck is https://github.com/cogentcore/core/blob/main/icons/svg/playlist_add_check.svg
-	PlaylistAddCheck Icon = "playlist_add_check"
-
-	// PlaylistAddCheckCircle is https://github.com/cogentcore/core/blob/main/icons/svg/playlist_add_check_circle.svg
-	PlaylistAddCheckCircle Icon = "playlist_add_check_circle"
-
-	// PlaylistAddCircle is https://github.com/cogentcore/core/blob/main/icons/svg/playlist_add_circle.svg
-	PlaylistAddCircle Icon = "playlist_add_circle"
-
-	// PlaylistPlay is https://github.com/cogentcore/core/blob/main/icons/svg/playlist_play.svg
-	PlaylistPlay Icon = "playlist_play"
-
-	// PlaylistRemove is https://github.com/cogentcore/core/blob/main/icons/svg/playlist_remove.svg
-	PlaylistRemove Icon = "playlist_remove"
-
-	// Podcasts is https://github.com/cogentcore/core/blob/main/icons/svg/podcasts.svg
-	Podcasts Icon = "podcasts"
-
-	// Podium is https://github.com/cogentcore/core/blob/main/icons/svg/podium.svg
-	Podium Icon = "podium"
-
-	// PointOfSale is https://github.com/cogentcore/core/blob/main/icons/svg/point_of_sale.svg
-	PointOfSale Icon = "point_of_sale"
-
-	// PointScan is https://github.com/cogentcore/core/blob/main/icons/svg/point_scan.svg
-	PointScan Icon = "point_scan"
-
-	// Policy is https://github.com/cogentcore/core/blob/main/icons/svg/policy.svg
-	Policy Icon = "policy"
-
-	// Polyline is https://github.com/cogentcore/core/blob/main/icons/svg/polyline.svg
-	Polyline Icon = "polyline"
-
-	// Polymer is https://github.com/cogentcore/core/blob/main/icons/svg/polymer.svg
-	Polymer Icon = "polymer"
-
-	// PortableWifiOff is https://github.com/cogentcore/core/blob/main/icons/svg/portable_wifi_off.svg
-	PortableWifiOff Icon = "portable_wifi_off"
-
-	// PositionBottomLeft is https://github.com/cogentcore/core/blob/main/icons/svg/position_bottom_left.svg
-	PositionBottomLeft Icon = "position_bottom_left"
-
-	// PositionBottomRight is https://github.com/cogentcore/core/blob/main/icons/svg/position_bottom_right.svg
-	PositionBottomRight Icon = "position_bottom_right"
-
-	// PositionTopRight is https://github.com/cogentcore/core/blob/main/icons/svg/position_top_right.svg
-	PositionTopRight Icon = "position_top_right"
-
-	// Post is https://github.com/cogentcore/core/blob/main/icons/svg/post.svg
-	Post Icon = "post"
-
-	// PostAdd is https://github.com/cogentcore/core/blob/main/icons/svg/post_add.svg
-	PostAdd Icon = "post_add"
-
-	// Power is https://github.com/cogentcore/core/blob/main/icons/svg/power.svg
-	Power Icon = "power"
-
-	// PowerInput is https://github.com/cogentcore/core/blob/main/icons/svg/power_input.svg
-	PowerInput Icon = "power_input"
-
-	// PowerOff is https://github.com/cogentcore/core/blob/main/icons/svg/power_off.svg
-	PowerOff Icon = "power_off"
-
-	// PowerSettingsNew is https://github.com/cogentcore/core/blob/main/icons/svg/power_settings_new.svg
-	PowerSettingsNew Icon = "power_settings_new"
-
-	// Preliminary is https://github.com/cogentcore/core/blob/main/icons/svg/preliminary.svg
-	Preliminary Icon = "preliminary"
-
-	// PresentToAll is https://github.com/cogentcore/core/blob/main/icons/svg/present_to_all.svg
-	PresentToAll Icon = "present_to_all"
-
-	// Preview is https://github.com/cogentcore/core/blob/main/icons/svg/preview.svg
-	Preview Icon = "preview"
-
-	// PreviewOff is https://github.com/cogentcore/core/blob/main/icons/svg/preview_off.svg
-	PreviewOff Icon = "preview_off"
-
-	// PriceChange is https://github.com/cogentcore/core/blob/main/icons/svg/price_change.svg
-	PriceChange Icon = "price_change"
-
-	// PriceCheck is https://github.com/cogentcore/core/blob/main/icons/svg/price_check.svg
-	PriceCheck Icon = "price_check"
-
-	// Print is https://github.com/cogentcore/core/blob/main/icons/svg/print.svg
-	Print Icon = "print"
-
-	// PrintAdd is https://github.com/cogentcore/core/blob/main/icons/svg/print_add.svg
-	PrintAdd Icon = "print_add"
-
-	// PrintConnect is https://github.com/cogentcore/core/blob/main/icons/svg/print_connect.svg
-	PrintConnect Icon = "print_connect"
-
-	// PrintDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/print_disabled.svg
-	PrintDisabled Icon = "print_disabled"
-
-	// PrintError is https://github.com/cogentcore/core/blob/main/icons/svg/print_error.svg
-	PrintError Icon = "print_error"
-
-	// PrintLock is https://github.com/cogentcore/core/blob/main/icons/svg/print_lock.svg
-	PrintLock Icon = "print_lock"
-
-	// Priority is https://github.com/cogentcore/core/blob/main/icons/svg/priority.svg
-	Priority Icon = "priority"
-
-	// PriorityHigh is https://github.com/cogentcore/core/blob/main/icons/svg/priority_high.svg
-	PriorityHigh Icon = "priority_high"
-
-	// Privacy is https://github.com/cogentcore/core/blob/main/icons/svg/privacy.svg
-	Privacy Icon = "privacy"
-
-	// PrivacyTip is https://github.com/cogentcore/core/blob/main/icons/svg/privacy_tip.svg
-	PrivacyTip Icon = "privacy_tip"
-
-	// PrivateConnectivity is https://github.com/cogentcore/core/blob/main/icons/svg/private_connectivity.svg
-	PrivateConnectivity Icon = "private_connectivity"
-
-	// Problem is https://github.com/cogentcore/core/blob/main/icons/svg/problem.svg
-	Problem Icon = "problem"
-
-	// ProcessChart is https://github.com/cogentcore/core/blob/main/icons/svg/process_chart.svg
-	ProcessChart Icon = "process_chart"
-
-	// Productivity is https://github.com/cogentcore/core/blob/main/icons/svg/productivity.svg
-	Productivity Icon = "productivity"
-
-	// ProgressActivity is https://github.com/cogentcore/core/blob/main/icons/svg/progress_activity.svg
-	ProgressActivity Icon = "progress_activity"
-
-	// Publish is https://github.com/cogentcore/core/blob/main/icons/svg/publish.svg
-	Publish Icon = "publish"
-
-	// PublishedWithChanges is https://github.com/cogentcore/core/blob/main/icons/svg/published_with_changes.svg
-	PublishedWithChanges Icon = "published_with_changes"
-
-	// PunchClock is https://github.com/cogentcore/core/blob/main/icons/svg/punch_clock.svg
-	PunchClock Icon = "punch_clock"
-
-	// PushPin is https://github.com/cogentcore/core/blob/main/icons/svg/push_pin.svg
-	PushPin Icon = "push_pin"
-
-	// QrCode is https://github.com/cogentcore/core/blob/main/icons/svg/qr_code.svg
-	QrCode Icon = "qr_code"
-
-	// QrCode2 is https://github.com/cogentcore/core/blob/main/icons/svg/qr_code_2.svg
-	QrCode2 Icon = "qr_code_2"
-
-	// QrCode2Add is https://github.com/cogentcore/core/blob/main/icons/svg/qr_code_2_add.svg
-	QrCode2Add Icon = "qr_code_2_add"
-
-	// QrCodeScanner is https://github.com/cogentcore/core/blob/main/icons/svg/qr_code_scanner.svg
-	QrCodeScanner Icon = "qr_code_scanner"
-
-	// QueryStats is https://github.com/cogentcore/core/blob/main/icons/svg/query_stats.svg
-	QueryStats Icon = "query_stats"
-
-	// QuestionExchange is https://github.com/cogentcore/core/blob/main/icons/svg/question_exchange.svg
-	QuestionExchange Icon = "question_exchange"
-
-	// QuestionMark is https://github.com/cogentcore/core/blob/main/icons/svg/question_mark.svg
-	QuestionMark Icon = "question_mark"
-
-	// QueueMusic is https://github.com/cogentcore/core/blob/main/icons/svg/queue_music.svg
-	QueueMusic Icon = "queue_music"
-
-	// QueuePlayNext is https://github.com/cogentcore/core/blob/main/icons/svg/queue_play_next.svg
-	QueuePlayNext Icon = "queue_play_next"
-
-	// QuickPhrases is https://github.com/cogentcore/core/blob/main/icons/svg/quick_phrases.svg
-	QuickPhrases Icon = "quick_phrases"
-
-	// QuickReference is https://github.com/cogentcore/core/blob/main/icons/svg/quick_reference.svg
-	QuickReference Icon = "quick_reference"
-
-	// QuickReferenceAll is https://github.com/cogentcore/core/blob/main/icons/svg/quick_reference_all.svg
-	QuickReferenceAll Icon = "quick_reference_all"
-
-	// Quickreply is https://github.com/cogentcore/core/blob/main/icons/svg/quickreply.svg
-	Quickreply Icon = "quickreply"
-
-	// Quiz is https://github.com/cogentcore/core/blob/main/icons/svg/quiz.svg
-	Quiz Icon = "quiz"
-
-	// Radar is https://github.com/cogentcore/core/blob/main/icons/svg/radar.svg
-	Radar Icon = "radar"
-
-	// Radio is https://github.com/cogentcore/core/blob/main/icons/svg/radio.svg
-	Radio Icon = "radio"
-
-	// RadioButtonChecked is https://github.com/cogentcore/core/blob/main/icons/svg/radio_button_checked.svg
-	RadioButtonChecked Icon = "radio_button_checked"
-
-	// RadioButtonPartial is https://github.com/cogentcore/core/blob/main/icons/svg/radio_button_partial.svg
-	RadioButtonPartial Icon = "radio_button_partial"
-
-	// RadioButtonUnchecked is https://github.com/cogentcore/core/blob/main/icons/svg/radio_button_unchecked.svg
-	RadioButtonUnchecked Icon = "radio_button_unchecked"
-
-	// RateReview is https://github.com/cogentcore/core/blob/main/icons/svg/rate_review.svg
-	RateReview Icon = "rate_review"
-
-	// ReadMore is https://github.com/cogentcore/core/blob/main/icons/svg/read_more.svg
-	ReadMore Icon = "read_more"
-
-	// ReadinessScore is https://github.com/cogentcore/core/blob/main/icons/svg/readiness_score.svg
-	ReadinessScore Icon = "readiness_score"
-
-	// RearCamera is https://github.com/cogentcore/core/blob/main/icons/svg/rear_camera.svg
-	RearCamera Icon = "rear_camera"
-
-	// Rebase is https://github.com/cogentcore/core/blob/main/icons/svg/rebase.svg
-	Rebase Icon = "rebase"
-
-	// RebaseEdit is https://github.com/cogentcore/core/blob/main/icons/svg/rebase_edit.svg
-	RebaseEdit Icon = "rebase_edit"
-
-	// Receipt is https://github.com/cogentcore/core/blob/main/icons/svg/receipt.svg
-	Receipt Icon = "receipt"
-
-	// ReceiptLong is https://github.com/cogentcore/core/blob/main/icons/svg/receipt_long.svg
-	ReceiptLong Icon = "receipt_long"
-
-	// Recommend is https://github.com/cogentcore/core/blob/main/icons/svg/recommend.svg
-	Recommend Icon = "recommend"
-
-	// RecordVoiceOver is https://github.com/cogentcore/core/blob/main/icons/svg/record_voice_over.svg
-	RecordVoiceOver Icon = "record_voice_over"
-
-	// Rectangle is https://github.com/cogentcore/core/blob/main/icons/svg/rectangle.svg
-	Rectangle Icon = "rectangle"
-
-	// Recycling is https://github.com/cogentcore/core/blob/main/icons/svg/recycling.svg
-	Recycling Icon = "recycling"
-
-	// Redeem is https://github.com/cogentcore/core/blob/main/icons/svg/redeem.svg
-	Redeem Icon = "redeem"
-
-	// Redo is https://github.com/cogentcore/core/blob/main/icons/svg/redo.svg
-	Redo Icon = "redo"
-
-	// ReduceCapacity is https://github.com/cogentcore/core/blob/main/icons/svg/reduce_capacity.svg
-	ReduceCapacity Icon = "reduce_capacity"
-
-	// Refresh is https://github.com/cogentcore/core/blob/main/icons/svg/refresh.svg
-	Refresh Icon = "refresh"
-
-	// RegularExpression is https://github.com/cogentcore/core/blob/main/icons/svg/regular_expression.svg
-	RegularExpression Icon = "regular_expression"
-
-	// Relax is https://github.com/cogentcore/core/blob/main/icons/svg/relax.svg
-	Relax Icon = "relax"
-
-	// ReleaseAlert is https://github.com/cogentcore/core/blob/main/icons/svg/release_alert.svg
-	ReleaseAlert Icon = "release_alert"
-
-	// RememberMe is https://github.com/cogentcore/core/blob/main/icons/svg/remember_me.svg
-	RememberMe Icon = "remember_me"
-
-	// Reminder is https://github.com/cogentcore/core/blob/main/icons/svg/reminder.svg
-	Reminder Icon = "reminder"
-
-	// RemoteGen is https://github.com/cogentcore/core/blob/main/icons/svg/remote_gen.svg
-	RemoteGen Icon = "remote_gen"
-
-	// Remove is https://github.com/cogentcore/core/blob/main/icons/svg/remove.svg
-	Remove Icon = "remove"
-
-	// RemoveDone is https://github.com/cogentcore/core/blob/main/icons/svg/remove_done.svg
-	RemoveDone Icon = "remove_done"
-
-	// RemoveFromQueue is https://github.com/cogentcore/core/blob/main/icons/svg/remove_from_queue.svg
-	RemoveFromQueue Icon = "remove_from_queue"
-
-	// RemoveModerator is https://github.com/cogentcore/core/blob/main/icons/svg/remove_moderator.svg
-	RemoveModerator Icon = "remove_moderator"
-
-	// RemoveSelection is https://github.com/cogentcore/core/blob/main/icons/svg/remove_selection.svg
-	RemoveSelection Icon = "remove_selection"
-
-	// RemoveShoppingCart is https://github.com/cogentcore/core/blob/main/icons/svg/remove_shopping_cart.svg
-	RemoveShoppingCart Icon = "remove_shopping_cart"
-
-	// ReopenWindow is https://github.com/cogentcore/core/blob/main/icons/svg/reopen_window.svg
-	ReopenWindow Icon = "reopen_window"
-
-	// Reorder is https://github.com/cogentcore/core/blob/main/icons/svg/reorder.svg
-	Reorder Icon = "reorder"
-
-	// Repartition is https://github.com/cogentcore/core/blob/main/icons/svg/repartition.svg
-	Repartition Icon = "repartition"
-
-	// Repeat is https://github.com/cogentcore/core/blob/main/icons/svg/repeat.svg
-	Repeat Icon = "repeat"
-
-	// RepeatOn is https://github.com/cogentcore/core/blob/main/icons/svg/repeat_on.svg
-	RepeatOn Icon = "repeat_on"
-
-	// RepeatOne is https://github.com/cogentcore/core/blob/main/icons/svg/repeat_one.svg
-	RepeatOne Icon = "repeat_one"
-
-	// RepeatOneOn is https://github.com/cogentcore/core/blob/main/icons/svg/repeat_one_on.svg
-	RepeatOneOn Icon = "repeat_one_on"
-
-	// Replay is https://github.com/cogentcore/core/blob/main/icons/svg/replay.svg
-	Replay Icon = "replay"
-
-	// Replay10 is https://github.com/cogentcore/core/blob/main/icons/svg/replay_10.svg
-	Replay10 Icon = "replay_10"
-
-	// Replay30 is https://github.com/cogentcore/core/blob/main/icons/svg/replay_30.svg
-	Replay30 Icon = "replay_30"
-
-	// Replay5 is https://github.com/cogentcore/core/blob/main/icons/svg/replay_5.svg
-	Replay5 Icon = "replay_5"
-
-	// Reply is https://github.com/cogentcore/core/blob/main/icons/svg/reply.svg
-	Reply Icon = "reply"
-
-	// ReplyAll is https://github.com/cogentcore/core/blob/main/icons/svg/reply_all.svg
-	ReplyAll Icon = "reply_all"
-
-	// Report is https://github.com/cogentcore/core/blob/main/icons/svg/report.svg
-	Report Icon = "report"
-
-	// ReportOff is https://github.com/cogentcore/core/blob/main/icons/svg/report_off.svg
-	ReportOff Icon = "report_off"
-
-	// RequestPage is https://github.com/cogentcore/core/blob/main/icons/svg/request_page.svg
-	RequestPage Icon = "request_page"
-
-	// RequestQuote is https://github.com/cogentcore/core/blob/main/icons/svg/request_quote.svg
-	RequestQuote Icon = "request_quote"
-
-	// Reset is https://github.com/cogentcore/core/blob/main/icons/svg/reset.svg
-	Reset Icon = "reset"
-
-	// ResetImage is https://github.com/cogentcore/core/blob/main/icons/svg/reset_image.svg
-	ResetImage Icon = "reset_image"
-
-	// ResetTv is https://github.com/cogentcore/core/blob/main/icons/svg/reset_tv.svg
-	ResetTv Icon = "reset_tv"
-
-	// Resize is https://github.com/cogentcore/core/blob/main/icons/svg/resize.svg
-	Resize Icon = "resize"
-
-	// Restart is https://github.com/cogentcore/core/blob/main/icons/svg/restart.svg
-	Restart Icon = "restart"
-
-	// RestoreFromTrash is https://github.com/cogentcore/core/blob/main/icons/svg/restore_from_trash.svg
-	RestoreFromTrash Icon = "restore_from_trash"
-
-	// RestorePage is https://github.com/cogentcore/core/blob/main/icons/svg/restore_page.svg
-	RestorePage Icon = "restore_page"
-
-	// Resume is https://github.com/cogentcore/core/blob/main/icons/svg/resume.svg
-	Resume Icon = "resume"
-
-	// Reviews is https://github.com/cogentcore/core/blob/main/icons/svg/reviews.svg
-	Reviews Icon = "reviews"
-
-	// RightClick is https://github.com/cogentcore/core/blob/main/icons/svg/right_click.svg
-	RightClick Icon = "right_click"
-
-	// RightPanelClose is https://github.com/cogentcore/core/blob/main/icons/svg/right_panel_close.svg
-	RightPanelClose Icon = "right_panel_close"
-
-	// RightPanelOpen is https://github.com/cogentcore/core/blob/main/icons/svg/right_panel_open.svg
-	RightPanelOpen Icon = "right_panel_open"
-
-	// RingVolume is https://github.com/cogentcore/core/blob/main/icons/svg/ring_volume.svg
-	RingVolume Icon = "ring_volume"
-
-	// Robot is https://github.com/cogentcore/core/blob/main/icons/svg/robot.svg
-	Robot Icon = "robot"
-
-	// Robot2 is https://github.com/cogentcore/core/blob/main/icons/svg/robot_2.svg
-	Robot2 Icon = "robot_2"
-
-	// Rocket is https://github.com/cogentcore/core/blob/main/icons/svg/rocket.svg
-	Rocket Icon = "rocket"
-
-	// RocketLaunch is https://github.com/cogentcore/core/blob/main/icons/svg/rocket_launch.svg
-	RocketLaunch Icon = "rocket_launch"
-
-	// Rotate90DegreesCcw is https://github.com/cogentcore/core/blob/main/icons/svg/rotate_90_degrees_ccw.svg
-	Rotate90DegreesCcw Icon = "rotate_90_degrees_ccw"
-
-	// Rotate90DegreesCw is https://github.com/cogentcore/core/blob/main/icons/svg/rotate_90_degrees_cw.svg
-	Rotate90DegreesCw Icon = "rotate_90_degrees_cw"
-
-	// RotateLeft is https://github.com/cogentcore/core/blob/main/icons/svg/rotate_left.svg
-	RotateLeft Icon = "rotate_left"
-
-	// RotateRight is https://github.com/cogentcore/core/blob/main/icons/svg/rotate_right.svg
-	RotateRight Icon = "rotate_right"
-
-	// RoundedCorner is https://github.com/cogentcore/core/blob/main/icons/svg/rounded_corner.svg
-	RoundedCorner Icon = "rounded_corner"
-
-	// Route is https://github.com/cogentcore/core/blob/main/icons/svg/route.svg
-	Route Icon = "route"
-
-	// Router is https://github.com/cogentcore/core/blob/main/icons/svg/router.svg
-	Router Icon = "router"
-
-	// Routine is https://github.com/cogentcore/core/blob/main/icons/svg/routine.svg
-	Routine Icon = "routine"
-
-	// RssFeed is https://github.com/cogentcore/core/blob/main/icons/svg/rss_feed.svg
-	RssFeed Icon = "rss_feed"
-
-	// Rsvp is https://github.com/cogentcore/core/blob/main/icons/svg/rsvp.svg
-	Rsvp Icon = "rsvp"
-
-	// Rtt is https://github.com/cogentcore/core/blob/main/icons/svg/rtt.svg
-	Rtt Icon = "rtt"
-
-	// Rule is https://github.com/cogentcore/core/blob/main/icons/svg/rule.svg
-	Rule Icon = "rule"
-
-	// RuleFolder is https://github.com/cogentcore/core/blob/main/icons/svg/rule_folder.svg
-	RuleFolder Icon = "rule_folder"
-
-	// RuleSettings is https://github.com/cogentcore/core/blob/main/icons/svg/rule_settings.svg
-	RuleSettings Icon = "rule_settings"
-
-	// RunCircle is https://github.com/cogentcore/core/blob/main/icons/svg/run_circle.svg
-	RunCircle Icon = "run_circle"
-
-	// RunningWithErrors is https://github.com/cogentcore/core/blob/main/icons/svg/running_with_errors.svg
-	RunningWithErrors Icon = "running_with_errors"
-
-	// SafetyCheck is https://github.com/cogentcore/core/blob/main/icons/svg/safety_check.svg
-	SafetyCheck Icon = "safety_check"
-
-	// SafetyCheckOff is https://github.com/cogentcore/core/blob/main/icons/svg/safety_check_off.svg
-	SafetyCheckOff Icon = "safety_check_off"
-
-	// Sanitizer is https://github.com/cogentcore/core/blob/main/icons/svg/sanitizer.svg
-	Sanitizer Icon = "sanitizer"
-
-	// Satellite is https://github.com/cogentcore/core/blob/main/icons/svg/satellite.svg
-	Satellite Icon = "satellite"
-
-	// SatelliteAlt is https://github.com/cogentcore/core/blob/main/icons/svg/satellite_alt.svg
-	SatelliteAlt Icon = "satellite_alt"
-
-	// Save is https://github.com/cogentcore/core/blob/main/icons/svg/save.svg
-	Save Icon = "save"
-
-	// SaveAs is https://github.com/cogentcore/core/blob/main/icons/svg/save_as.svg
-	SaveAs Icon = "save_as"
-
-	// SavedSearch is https://github.com/cogentcore/core/blob/main/icons/svg/saved_search.svg
-	SavedSearch Icon = "saved_search"
-
-	// Savings is https://github.com/cogentcore/core/blob/main/icons/svg/savings.svg
-	Savings Icon = "savings"
-
-	// Scale is https://github.com/cogentcore/core/blob/main/icons/svg/scale.svg
-	Scale Icon = "scale"
-
-	// Scan is https://github.com/cogentcore/core/blob/main/icons/svg/scan.svg
-	Scan Icon = "scan"
-
-	// ScanDelete is https://github.com/cogentcore/core/blob/main/icons/svg/scan_delete.svg
-	ScanDelete Icon = "scan_delete"
-
-	// Scanner is https://github.com/cogentcore/core/blob/main/icons/svg/scanner.svg
-	Scanner Icon = "scanner"
-
-	// ScatterPlot is https://github.com/cogentcore/core/blob/main/icons/svg/scatter_plot.svg
-	ScatterPlot Icon = "scatter_plot"
-
-	// Scene is https://github.com/cogentcore/core/blob/main/icons/svg/scene.svg
-	Scene Icon = "scene"
-
-	// Schedule is https://github.com/cogentcore/core/blob/main/icons/svg/schedule.svg
-	Schedule Icon = "schedule"
-
-	// ScheduleSend is https://github.com/cogentcore/core/blob/main/icons/svg/schedule_send.svg
-	ScheduleSend Icon = "schedule_send"
-
-	// Schema is https://github.com/cogentcore/core/blob/main/icons/svg/schema.svg
-	Schema Icon = "schema"
-
-	// School is https://github.com/cogentcore/core/blob/main/icons/svg/school.svg
-	School Icon = "school"
-
-	// Science is https://github.com/cogentcore/core/blob/main/icons/svg/science.svg
-	Science Icon = "science"
-
-	// Score is https://github.com/cogentcore/core/blob/main/icons/svg/score.svg
-	Score Icon = "score"
-
-	// Scoreboard is https://github.com/cogentcore/core/blob/main/icons/svg/scoreboard.svg
-	Scoreboard Icon = "scoreboard"
-
-	// ScreenLockLandscape is https://github.com/cogentcore/core/blob/main/icons/svg/screen_lock_landscape.svg
-	ScreenLockLandscape Icon = "screen_lock_landscape"
-
-	// ScreenLockPortrait is https://github.com/cogentcore/core/blob/main/icons/svg/screen_lock_portrait.svg
-	ScreenLockPortrait Icon = "screen_lock_portrait"
-
-	// ScreenLockRotation is https://github.com/cogentcore/core/blob/main/icons/svg/screen_lock_rotation.svg
-	ScreenLockRotation Icon = "screen_lock_rotation"
-
-	// ScreenRecord is https://github.com/cogentcore/core/blob/main/icons/svg/screen_record.svg
-	ScreenRecord Icon = "screen_record"
-
-	// ScreenRotation is https://github.com/cogentcore/core/blob/main/icons/svg/screen_rotation.svg
-	ScreenRotation Icon = "screen_rotation"
-
-	// ScreenRotationAlt is https://github.com/cogentcore/core/blob/main/icons/svg/screen_rotation_alt.svg
-	ScreenRotationAlt Icon = "screen_rotation_alt"
-
-	// ScreenRotationUp is https://github.com/cogentcore/core/blob/main/icons/svg/screen_rotation_up.svg
-	ScreenRotationUp Icon = "screen_rotation_up"
-
-	// ScreenSearchDesktop is https://github.com/cogentcore/core/blob/main/icons/svg/screen_search_desktop.svg
-	ScreenSearchDesktop Icon = "screen_search_desktop"
-
-	// ScreenShare is https://github.com/cogentcore/core/blob/main/icons/svg/screen_share.svg
-	ScreenShare Icon = "screen_share"
-
-	// Screenshot is https://github.com/cogentcore/core/blob/main/icons/svg/screenshot.svg
-	Screenshot Icon = "screenshot"
-
-	// ScreenshotFrame is https://github.com/cogentcore/core/blob/main/icons/svg/screenshot_frame.svg
-	ScreenshotFrame Icon = "screenshot_frame"
-
-	// ScreenshotKeyboard is https://github.com/cogentcore/core/blob/main/icons/svg/screenshot_keyboard.svg
-	ScreenshotKeyboard Icon = "screenshot_keyboard"
-
-	// ScreenshotMonitor is https://github.com/cogentcore/core/blob/main/icons/svg/screenshot_monitor.svg
-	ScreenshotMonitor Icon = "screenshot_monitor"
-
-	// ScreenshotRegion is https://github.com/cogentcore/core/blob/main/icons/svg/screenshot_region.svg
-	ScreenshotRegion Icon = "screenshot_region"
-
-	// ScreenshotTablet is https://github.com/cogentcore/core/blob/main/icons/svg/screenshot_tablet.svg
-	ScreenshotTablet Icon = "screenshot_tablet"
-
-	// ScrollableHeader is https://github.com/cogentcore/core/blob/main/icons/svg/scrollable_header.svg
-	ScrollableHeader Icon = "scrollable_header"
-
-	// Sd is https://github.com/cogentcore/core/blob/main/icons/svg/sd.svg
-	Sd Icon = "sd"
-
-	// SdCard is https://github.com/cogentcore/core/blob/main/icons/svg/sd_card.svg
-	SdCard Icon = "sd_card"
-
-	// SdCardAlert is https://github.com/cogentcore/core/blob/main/icons/svg/sd_card_alert.svg
-	SdCardAlert Icon = "sd_card_alert"
-
-	// Search is https://github.com/cogentcore/core/blob/main/icons/svg/search.svg
-	Search Icon = "search"
-
-	// SearchCheck is https://github.com/cogentcore/core/blob/main/icons/svg/search_check.svg
-	SearchCheck Icon = "search_check"
-
-	// SearchOff is https://github.com/cogentcore/core/blob/main/icons/svg/search_off.svg
-	SearchOff Icon = "search_off"
-
-	// Security is https://github.com/cogentcore/core/blob/main/icons/svg/security.svg
-	Security Icon = "security"
-
-	// SecurityUpdateGood is https://github.com/cogentcore/core/blob/main/icons/svg/security_update_good.svg
-	SecurityUpdateGood Icon = "security_update_good"
-
-	// SecurityUpdateWarning is https://github.com/cogentcore/core/blob/main/icons/svg/security_update_warning.svg
-	SecurityUpdateWarning Icon = "security_update_warning"
-
-	// Segment is https://github.com/cogentcore/core/blob/main/icons/svg/segment.svg
-	Segment Icon = "segment"
-
-	// Select is https://github.com/cogentcore/core/blob/main/icons/svg/select.svg
-	Select Icon = "select"
-
-	// SelectAll is https://github.com/cogentcore/core/blob/main/icons/svg/select_all.svg
-	SelectAll Icon = "select_all"
-
-	// SelectCheckBox is https://github.com/cogentcore/core/blob/main/icons/svg/select_check_box.svg
-	SelectCheckBox Icon = "select_check_box"
-
-	// SelectToSpeak is https://github.com/cogentcore/core/blob/main/icons/svg/select_to_speak.svg
-	SelectToSpeak Icon = "select_to_speak"
-
-	// SelectWindow is https://github.com/cogentcore/core/blob/main/icons/svg/select_window.svg
-	SelectWindow Icon = "select_window"
-
-	// SelectWindowOff is https://github.com/cogentcore/core/blob/main/icons/svg/select_window_off.svg
-	SelectWindowOff Icon = "select_window_off"
-
-	// Sell is https://github.com/cogentcore/core/blob/main/icons/svg/sell.svg
-	Sell Icon = "sell"
-
-	// Send is https://github.com/cogentcore/core/blob/main/icons/svg/send.svg
-	Send Icon = "send"
-
-	// SendAndArchive is https://github.com/cogentcore/core/blob/main/icons/svg/send_and_archive.svg
-	SendAndArchive Icon = "send_and_archive"
-
-	// SendMoney is https://github.com/cogentcore/core/blob/main/icons/svg/send_money.svg
-	SendMoney Icon = "send_money"
-
-	// SendTimeExtension is https://github.com/cogentcore/core/blob/main/icons/svg/send_time_extension.svg
-	SendTimeExtension Icon = "send_time_extension"
-
-	// SendToMobile is https://github.com/cogentcore/core/blob/main/icons/svg/send_to_mobile.svg
-	SendToMobile Icon = "send_to_mobile"
-
-	// Sensors is https://github.com/cogentcore/core/blob/main/icons/svg/sensors.svg
-	Sensors Icon = "sensors"
-
-	// SensorsOff is https://github.com/cogentcore/core/blob/main/icons/svg/sensors_off.svg
-	SensorsOff Icon = "sensors_off"
-
-	// SentimentCalm is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_calm.svg
-	SentimentCalm Icon = "sentiment_calm"
-
-	// SentimentContent is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_content.svg
-	SentimentContent Icon = "sentiment_content"
-
-	// SentimentDissatisfied is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_dissatisfied.svg
-	SentimentDissatisfied Icon = "sentiment_dissatisfied"
-
-	// SentimentExcited is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_excited.svg
-	SentimentExcited Icon = "sentiment_excited"
-
-	// SentimentExtremelyDissatisfied is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_extremely_dissatisfied.svg
-	SentimentExtremelyDissatisfied Icon = "sentiment_extremely_dissatisfied"
-
-	// SentimentFrustrated is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_frustrated.svg
-	SentimentFrustrated Icon = "sentiment_frustrated"
-
-	// SentimentNeutral is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_neutral.svg
-	SentimentNeutral Icon = "sentiment_neutral"
-
-	// SentimentSad is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_sad.svg
-	SentimentSad Icon = "sentiment_sad"
-
-	// SentimentSatisfied is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_satisfied.svg
-	SentimentSatisfied Icon = "sentiment_satisfied"
-
-	// SentimentStressed is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_stressed.svg
-	SentimentStressed Icon = "sentiment_stressed"
-
-	// SentimentVeryDissatisfied is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_very_dissatisfied.svg
-	SentimentVeryDissatisfied Icon = "sentiment_very_dissatisfied"
-
-	// SentimentVerySatisfied is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_very_satisfied.svg
-	SentimentVerySatisfied Icon = "sentiment_very_satisfied"
-
-	// SentimentWorried is https://github.com/cogentcore/core/blob/main/icons/svg/sentiment_worried.svg
-	SentimentWorried Icon = "sentiment_worried"
-
-	// Settings is https://github.com/cogentcore/core/blob/main/icons/svg/settings.svg
-	Settings Icon = "settings"
-
-	// SettingsAccessibility is https://github.com/cogentcore/core/blob/main/icons/svg/settings_accessibility.svg
-	SettingsAccessibility Icon = "settings_accessibility"
-
-	// SettingsAccountBox is https://github.com/cogentcore/core/blob/main/icons/svg/settings_account_box.svg
-	SettingsAccountBox Icon = "settings_account_box"
-
-	// SettingsAlert is https://github.com/cogentcore/core/blob/main/icons/svg/settings_alert.svg
-	SettingsAlert Icon = "settings_alert"
-
-	// SettingsApplications is https://github.com/cogentcore/core/blob/main/icons/svg/settings_applications.svg
-	SettingsApplications Icon = "settings_applications"
-
-	// SettingsBRoll is https://github.com/cogentcore/core/blob/main/icons/svg/settings_b_roll.svg
-	SettingsBRoll Icon = "settings_b_roll"
-
-	// SettingsBackupRestore is https://github.com/cogentcore/core/blob/main/icons/svg/settings_backup_restore.svg
-	SettingsBackupRestore Icon = "settings_backup_restore"
-
-	// SettingsBluetooth is https://github.com/cogentcore/core/blob/main/icons/svg/settings_bluetooth.svg
-	SettingsBluetooth Icon = "settings_bluetooth"
-
-	// SettingsBrightness is https://github.com/cogentcore/core/blob/main/icons/svg/settings_brightness.svg
-	SettingsBrightness Icon = "settings_brightness"
-
-	// SettingsCell is https://github.com/cogentcore/core/blob/main/icons/svg/settings_cell.svg
-	SettingsCell Icon = "settings_cell"
-
-	// SettingsEthernet is https://github.com/cogentcore/core/blob/main/icons/svg/settings_ethernet.svg
-	SettingsEthernet Icon = "settings_ethernet"
-
-	// SettingsInputAntenna is https://github.com/cogentcore/core/blob/main/icons/svg/settings_input_antenna.svg
-	SettingsInputAntenna Icon = "settings_input_antenna"
-
-	// SettingsInputComponent is https://github.com/cogentcore/core/blob/main/icons/svg/settings_input_component.svg
-	SettingsInputComponent Icon = "settings_input_component"
-
-	// SettingsPhone is https://github.com/cogentcore/core/blob/main/icons/svg/settings_phone.svg
-	SettingsPhone Icon = "settings_phone"
-
-	// SettingsPhotoCamera is https://github.com/cogentcore/core/blob/main/icons/svg/settings_photo_camera.svg
-	SettingsPhotoCamera Icon = "settings_photo_camera"
-
-	// SettingsPower is https://github.com/cogentcore/core/blob/main/icons/svg/settings_power.svg
-	SettingsPower Icon = "settings_power"
-
-	// SettingsRemote is https://github.com/cogentcore/core/blob/main/icons/svg/settings_remote.svg
-	SettingsRemote Icon = "settings_remote"
-
-	// SettingsVideoCamera is https://github.com/cogentcore/core/blob/main/icons/svg/settings_video_camera.svg
-	SettingsVideoCamera Icon = "settings_video_camera"
-
-	// SettingsVoice is https://github.com/cogentcore/core/blob/main/icons/svg/settings_voice.svg
-	SettingsVoice Icon = "settings_voice"
-
-	// Shadow is https://github.com/cogentcore/core/blob/main/icons/svg/shadow.svg
-	Shadow Icon = "shadow"
-
-	// ShapeLine is https://github.com/cogentcore/core/blob/main/icons/svg/shape_line.svg
-	ShapeLine Icon = "shape_line"
-
-	// Shapes is https://github.com/cogentcore/core/blob/main/icons/svg/shapes.svg
-	Shapes Icon = "shapes"
-
-	// Share is https://github.com/cogentcore/core/blob/main/icons/svg/share.svg
-	Share Icon = "share"
-
-	// ShareLocation is https://github.com/cogentcore/core/blob/main/icons/svg/share_location.svg
-	ShareLocation Icon = "share_location"
-
-	// ShareOff is https://github.com/cogentcore/core/blob/main/icons/svg/share_off.svg
-	ShareOff Icon = "share_off"
-
-	// ShareReviews is https://github.com/cogentcore/core/blob/main/icons/svg/share_reviews.svg
-	ShareReviews Icon = "share_reviews"
-
-	// ShareWindows is https://github.com/cogentcore/core/blob/main/icons/svg/share_windows.svg
-	ShareWindows Icon = "share_windows"
-
-	// SheetsRtl is https://github.com/cogentcore/core/blob/main/icons/svg/sheets_rtl.svg
-	SheetsRtl Icon = "sheets_rtl"
-
-	// ShelfAutoHide is https://github.com/cogentcore/core/blob/main/icons/svg/shelf_auto_hide.svg
-	ShelfAutoHide Icon = "shelf_auto_hide"
-
-	// ShelfPosition is https://github.com/cogentcore/core/blob/main/icons/svg/shelf_position.svg
-	ShelfPosition Icon = "shelf_position"
-
-	// Shelves is https://github.com/cogentcore/core/blob/main/icons/svg/shelves.svg
-	Shelves Icon = "shelves"
-
-	// Shield is https://github.com/cogentcore/core/blob/main/icons/svg/shield.svg
-	Shield Icon = "shield"
-
-	// ShieldLock is https://github.com/cogentcore/core/blob/main/icons/svg/shield_lock.svg
-	ShieldLock Icon = "shield_lock"
-
-	// ShieldLocked is https://github.com/cogentcore/core/blob/main/icons/svg/shield_locked.svg
-	ShieldLocked Icon = "shield_locked"
-
-	// ShieldMoon is https://github.com/cogentcore/core/blob/main/icons/svg/shield_moon.svg
-	ShieldMoon Icon = "shield_moon"
-
-	// ShieldPerson is https://github.com/cogentcore/core/blob/main/icons/svg/shield_person.svg
-	ShieldPerson Icon = "shield_person"
-
-	// ShieldWithHeart is https://github.com/cogentcore/core/blob/main/icons/svg/shield_with_heart.svg
-	ShieldWithHeart Icon = "shield_with_heart"
-
-	// ShieldWithHouse is https://github.com/cogentcore/core/blob/main/icons/svg/shield_with_house.svg
-	ShieldWithHouse Icon = "shield_with_house"
-
-	// Shift is https://github.com/cogentcore/core/blob/main/icons/svg/shift.svg
-	Shift Icon = "shift"
-
-	// ShiftLock is https://github.com/cogentcore/core/blob/main/icons/svg/shift_lock.svg
-	ShiftLock Icon = "shift_lock"
-
-	// Shop is https://github.com/cogentcore/core/blob/main/icons/svg/shop.svg
-	Shop Icon = "shop"
-
-	// ShopTwo is https://github.com/cogentcore/core/blob/main/icons/svg/shop_two.svg
-	ShopTwo Icon = "shop_two"
-
-	// ShoppingBag is https://github.com/cogentcore/core/blob/main/icons/svg/shopping_bag.svg
-	ShoppingBag Icon = "shopping_bag"
-
-	// ShoppingBasket is https://github.com/cogentcore/core/blob/main/icons/svg/shopping_basket.svg
-	ShoppingBasket Icon = "shopping_basket"
-
-	// ShoppingCart is https://github.com/cogentcore/core/blob/main/icons/svg/shopping_cart.svg
-	ShoppingCart Icon = "shopping_cart"
-
-	// ShoppingCartCheckout is https://github.com/cogentcore/core/blob/main/icons/svg/shopping_cart_checkout.svg
-	ShoppingCartCheckout Icon = "shopping_cart_checkout"
-
-	// ShortText is https://github.com/cogentcore/core/blob/main/icons/svg/short_text.svg
-	ShortText Icon = "short_text"
-
-	// ShowChart is https://github.com/cogentcore/core/blob/main/icons/svg/show_chart.svg
-	ShowChart Icon = "show_chart"
-
-	// Shuffle is https://github.com/cogentcore/core/blob/main/icons/svg/shuffle.svg
-	Shuffle Icon = "shuffle"
-
-	// ShuffleOn is https://github.com/cogentcore/core/blob/main/icons/svg/shuffle_on.svg
-	ShuffleOn Icon = "shuffle_on"
-
-	// SideNavigation is https://github.com/cogentcore/core/blob/main/icons/svg/side_navigation.svg
-	SideNavigation Icon = "side_navigation"
-
-	// SignLanguage is https://github.com/cogentcore/core/blob/main/icons/svg/sign_language.svg
-	SignLanguage Icon = "sign_language"
-
-	// SignalCellular0Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_0_bar.svg
-	SignalCellular0Bar Icon = "signal_cellular_0_bar"
-
-	// SignalCellular1Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_1_bar.svg
-	SignalCellular1Bar Icon = "signal_cellular_1_bar"
-
-	// SignalCellular2Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_2_bar.svg
-	SignalCellular2Bar Icon = "signal_cellular_2_bar"
-
-	// SignalCellular3Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_3_bar.svg
-	SignalCellular3Bar Icon = "signal_cellular_3_bar"
-
-	// SignalCellular4Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_4_bar.svg
-	SignalCellular4Bar Icon = "signal_cellular_4_bar"
-
-	// SignalCellularAdd is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_add.svg
-	SignalCellularAdd Icon = "signal_cellular_add"
-
-	// SignalCellularAlt is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_alt.svg
-	SignalCellularAlt Icon = "signal_cellular_alt"
-
-	// SignalCellularAlt1Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_alt_1_bar.svg
-	SignalCellularAlt1Bar Icon = "signal_cellular_alt_1_bar"
-
-	// SignalCellularAlt2Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_alt_2_bar.svg
-	SignalCellularAlt2Bar Icon = "signal_cellular_alt_2_bar"
-
-	// SignalCellularConnectedNoInternet0Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_connected_no_internet_0_bar.svg
-	SignalCellularConnectedNoInternet0Bar Icon = "signal_cellular_connected_no_internet_0_bar"
-
-	// SignalCellularConnectedNoInternet4Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_connected_no_internet_4_bar.svg
-	SignalCellularConnectedNoInternet4Bar Icon = "signal_cellular_connected_no_internet_4_bar"
-
-	// SignalCellularNodata is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_nodata.svg
-	SignalCellularNodata Icon = "signal_cellular_nodata"
-
-	// SignalCellularNull is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_null.svg
-	SignalCellularNull Icon = "signal_cellular_null"
-
-	// SignalCellularOff is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_off.svg
-	SignalCellularOff Icon = "signal_cellular_off"
-
-	// SignalCellularPause is https://github.com/cogentcore/core/blob/main/icons/svg/signal_cellular_pause.svg
-	SignalCellularPause Icon = "signal_cellular_pause"
-
-	// SignalDisconnected is https://github.com/cogentcore/core/blob/main/icons/svg/signal_disconnected.svg
-	SignalDisconnected Icon = "signal_disconnected"
-
-	// SignalWifi0Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_wifi_0_bar.svg
-	SignalWifi0Bar Icon = "signal_wifi_0_bar"
-
-	// SignalWifi4Bar is https://github.com/cogentcore/core/blob/main/icons/svg/signal_wifi_4_bar.svg
-	SignalWifi4Bar Icon = "signal_wifi_4_bar"
-
-	// SignalWifiBad is https://github.com/cogentcore/core/blob/main/icons/svg/signal_wifi_bad.svg
-	SignalWifiBad Icon = "signal_wifi_bad"
-
-	// SignalWifiOff is https://github.com/cogentcore/core/blob/main/icons/svg/signal_wifi_off.svg
-	SignalWifiOff Icon = "signal_wifi_off"
-
-	// SignalWifiStatusbarNotConnected is https://github.com/cogentcore/core/blob/main/icons/svg/signal_wifi_statusbar_not_connected.svg
-	SignalWifiStatusbarNotConnected Icon = "signal_wifi_statusbar_not_connected"
-
-	// SignalWifiStatusbarNull is https://github.com/cogentcore/core/blob/main/icons/svg/signal_wifi_statusbar_null.svg
-	SignalWifiStatusbarNull Icon = "signal_wifi_statusbar_null"
-
-	// Signature is https://github.com/cogentcore/core/blob/main/icons/svg/signature.svg
-	Signature Icon = "signature"
-
-	// SkipNext is https://github.com/cogentcore/core/blob/main/icons/svg/skip_next.svg
-	SkipNext Icon = "skip_next"
-
-	// SkipPrevious is https://github.com/cogentcore/core/blob/main/icons/svg/skip_previous.svg
-	SkipPrevious Icon = "skip_previous"
-
-	// SlideLibrary is https://github.com/cogentcore/core/blob/main/icons/svg/slide_library.svg
-	SlideLibrary Icon = "slide_library"
-
-	// Sliders is https://github.com/cogentcore/core/blob/main/icons/svg/sliders.svg
-	Sliders Icon = "sliders"
-
-	// Slideshow is https://github.com/cogentcore/core/blob/main/icons/svg/slideshow.svg
-	Slideshow Icon = "slideshow"
-
-	// SlowMotionVideo is https://github.com/cogentcore/core/blob/main/icons/svg/slow_motion_video.svg
-	SlowMotionVideo Icon = "slow_motion_video"
-
-	// SmartDisplay is https://github.com/cogentcore/core/blob/main/icons/svg/smart_display.svg
-	SmartDisplay Icon = "smart_display"
-
-	// SmartOutlet is https://github.com/cogentcore/core/blob/main/icons/svg/smart_outlet.svg
-	SmartOutlet Icon = "smart_outlet"
-
-	// SmartScreen is https://github.com/cogentcore/core/blob/main/icons/svg/smart_screen.svg
-	SmartScreen Icon = "smart_screen"
-
-	// SmartToy is https://github.com/cogentcore/core/blob/main/icons/svg/smart_toy.svg
-	SmartToy Icon = "smart_toy"
-
-	// Smartphone is https://github.com/cogentcore/core/blob/main/icons/svg/smartphone.svg
-	Smartphone Icon = "smartphone"
-
-	// SmbShare is https://github.com/cogentcore/core/blob/main/icons/svg/smb_share.svg
-	SmbShare Icon = "smb_share"
-
-	// Sms is https://github.com/cogentcore/core/blob/main/icons/svg/sms.svg
-	Sms Icon = "sms"
-
-	// SnippetFolder is https://github.com/cogentcore/core/blob/main/icons/svg/snippet_folder.svg
-	SnippetFolder Icon = "snippet_folder"
-
-	// Snooze is https://github.com/cogentcore/core/blob/main/icons/svg/snooze.svg
-	Snooze Icon = "snooze"
-
-	// SocialLeaderboard is https://github.com/cogentcore/core/blob/main/icons/svg/social_leaderboard.svg
-	SocialLeaderboard Icon = "social_leaderboard"
-
-	// Sort is https://github.com/cogentcore/core/blob/main/icons/svg/sort.svg
-	Sort Icon = "sort"
-
-	// SortByAlpha is https://github.com/cogentcore/core/blob/main/icons/svg/sort_by_alpha.svg
-	SortByAlpha Icon = "sort_by_alpha"
-
-	// Sos is https://github.com/cogentcore/core/blob/main/icons/svg/sos.svg
-	Sos Icon = "sos"
-
-	// SourceNotes is https://github.com/cogentcore/core/blob/main/icons/svg/source_notes.svg
-	SourceNotes Icon = "source_notes"
-
-	// South is https://github.com/cogentcore/core/blob/main/icons/svg/south.svg
-	South Icon = "south"
-
-	// SouthAmerica is https://github.com/cogentcore/core/blob/main/icons/svg/south_america.svg
-	SouthAmerica Icon = "south_america"
-
-	// SouthEast is https://github.com/cogentcore/core/blob/main/icons/svg/south_east.svg
-	SouthEast Icon = "south_east"
-
-	// SouthWest is https://github.com/cogentcore/core/blob/main/icons/svg/south_west.svg
-	SouthWest Icon = "south_west"
-
-	// SpaceBar is https://github.com/cogentcore/core/blob/main/icons/svg/space_bar.svg
-	SpaceBar Icon = "space_bar"
-
-	// SpaceDashboard is https://github.com/cogentcore/core/blob/main/icons/svg/space_dashboard.svg
-	SpaceDashboard Icon = "space_dashboard"
-
-	// SpatialAudio is https://github.com/cogentcore/core/blob/main/icons/svg/spatial_audio.svg
-	SpatialAudio Icon = "spatial_audio"
-
-	// SpatialAudioOff is https://github.com/cogentcore/core/blob/main/icons/svg/spatial_audio_off.svg
-	SpatialAudioOff Icon = "spatial_audio_off"
-
-	// SpatialTracking is https://github.com/cogentcore/core/blob/main/icons/svg/spatial_tracking.svg
-	SpatialTracking Icon = "spatial_tracking"
-
-	// Speaker is https://github.com/cogentcore/core/blob/main/icons/svg/speaker.svg
-	Speaker Icon = "speaker"
-
-	// SpeakerGroup is https://github.com/cogentcore/core/blob/main/icons/svg/speaker_group.svg
-	SpeakerGroup Icon = "speaker_group"
-
-	// SpeakerNotes is https://github.com/cogentcore/core/blob/main/icons/svg/speaker_notes.svg
-	SpeakerNotes Icon = "speaker_notes"
-
-	// SpeakerNotesOff is https://github.com/cogentcore/core/blob/main/icons/svg/speaker_notes_off.svg
-	SpeakerNotesOff Icon = "speaker_notes_off"
-
-	// SpeakerPhone is https://github.com/cogentcore/core/blob/main/icons/svg/speaker_phone.svg
-	SpeakerPhone Icon = "speaker_phone"
-
-	// SpecialCharacter is https://github.com/cogentcore/core/blob/main/icons/svg/special_character.svg
-	SpecialCharacter Icon = "special_character"
-
-	// SpeechToText is https://github.com/cogentcore/core/blob/main/icons/svg/speech_to_text.svg
-	SpeechToText Icon = "speech_to_text"
-
-	// Speed is https://github.com/cogentcore/core/blob/main/icons/svg/speed.svg
-	Speed Icon = "speed"
-
-	// Spellcheck is https://github.com/cogentcore/core/blob/main/icons/svg/spellcheck.svg
-	Spellcheck Icon = "spellcheck"
-
-	// Splitscreen is https://github.com/cogentcore/core/blob/main/icons/svg/splitscreen.svg
-	Splitscreen Icon = "splitscreen"
-
-	// SplitscreenBottom is https://github.com/cogentcore/core/blob/main/icons/svg/splitscreen_bottom.svg
-	SplitscreenBottom Icon = "splitscreen_bottom"
-
-	// SplitscreenLeft is https://github.com/cogentcore/core/blob/main/icons/svg/splitscreen_left.svg
-	SplitscreenLeft Icon = "splitscreen_left"
-
-	// SplitscreenRight is https://github.com/cogentcore/core/blob/main/icons/svg/splitscreen_right.svg
-	SplitscreenRight Icon = "splitscreen_right"
-
-	// SplitscreenTop is https://github.com/cogentcore/core/blob/main/icons/svg/splitscreen_top.svg
-	SplitscreenTop Icon = "splitscreen_top"
-
-	// Spoke is https://github.com/cogentcore/core/blob/main/icons/svg/spoke.svg
-	Spoke Icon = "spoke"
-
-	// Sports is https://github.com/cogentcore/core/blob/main/icons/svg/sports.svg
-	Sports Icon = "sports"
-
-	// Sprint is https://github.com/cogentcore/core/blob/main/icons/svg/sprint.svg
-	Sprint Icon = "sprint"
-
-	// Square is https://github.com/cogentcore/core/blob/main/icons/svg/square.svg
-	Square Icon = "square"
-
-	// SquareFoot is https://github.com/cogentcore/core/blob/main/icons/svg/square_foot.svg
-	SquareFoot Icon = "square_foot"
-
-	// Stack is https://github.com/cogentcore/core/blob/main/icons/svg/stack.svg
-	Stack Icon = "stack"
-
-	// StackOff is https://github.com/cogentcore/core/blob/main/icons/svg/stack_off.svg
-	StackOff Icon = "stack_off"
-
-	// StackStar is https://github.com/cogentcore/core/blob/main/icons/svg/stack_star.svg
-	StackStar Icon = "stack_star"
-
-	// StackedBarChart is https://github.com/cogentcore/core/blob/main/icons/svg/stacked_bar_chart.svg
-	StackedBarChart Icon = "stacked_bar_chart"
-
-	// StackedEmail is https://github.com/cogentcore/core/blob/main/icons/svg/stacked_email.svg
-	StackedEmail Icon = "stacked_email"
-
-	// StackedInbox is https://github.com/cogentcore/core/blob/main/icons/svg/stacked_inbox.svg
-	StackedInbox Icon = "stacked_inbox"
-
-	// StackedLineChart is https://github.com/cogentcore/core/blob/main/icons/svg/stacked_line_chart.svg
-	StackedLineChart Icon = "stacked_line_chart"
-
-	// Star is https://github.com/cogentcore/core/blob/main/icons/svg/star.svg
-	Star Icon = "star"
-
-	// StarHalf is https://github.com/cogentcore/core/blob/main/icons/svg/star_half.svg
-	StarHalf Icon = "star_half"
-
-	// StarRate is https://github.com/cogentcore/core/blob/main/icons/svg/star_rate.svg
-	StarRate Icon = "star_rate"
-
-	// StarRateHalf is https://github.com/cogentcore/core/blob/main/icons/svg/star_rate_half.svg
-	StarRateHalf Icon = "star_rate_half"
-
-	// Stars is https://github.com/cogentcore/core/blob/main/icons/svg/stars.svg
-	Stars Icon = "stars"
-
-	// Start is https://github.com/cogentcore/core/blob/main/icons/svg/start.svg
-	Start Icon = "start"
-
-	// Stat1 is https://github.com/cogentcore/core/blob/main/icons/svg/stat_1.svg
-	Stat1 Icon = "stat_1"
-
-	// Stat2 is https://github.com/cogentcore/core/blob/main/icons/svg/stat_2.svg
-	Stat2 Icon = "stat_2"
-
-	// Stat3 is https://github.com/cogentcore/core/blob/main/icons/svg/stat_3.svg
-	Stat3 Icon = "stat_3"
-
-	// StatMinus1 is https://github.com/cogentcore/core/blob/main/icons/svg/stat_minus_1.svg
-	StatMinus1 Icon = "stat_minus_1"
-
-	// StatMinus2 is https://github.com/cogentcore/core/blob/main/icons/svg/stat_minus_2.svg
-	StatMinus2 Icon = "stat_minus_2"
-
-	// StatMinus3 is https://github.com/cogentcore/core/blob/main/icons/svg/stat_minus_3.svg
-	StatMinus3 Icon = "stat_minus_3"
-
-	// StayCurrentLandscape is https://github.com/cogentcore/core/blob/main/icons/svg/stay_current_landscape.svg
-	StayCurrentLandscape Icon = "stay_current_landscape"
-
-	// StayCurrentPortrait is https://github.com/cogentcore/core/blob/main/icons/svg/stay_current_portrait.svg
-	StayCurrentPortrait Icon = "stay_current_portrait"
-
-	// StayPrimaryLandscape is https://github.com/cogentcore/core/blob/main/icons/svg/stay_primary_landscape.svg
-	StayPrimaryLandscape Icon = "stay_primary_landscape"
-
-	// StayPrimaryPortrait is https://github.com/cogentcore/core/blob/main/icons/svg/stay_primary_portrait.svg
-	StayPrimaryPortrait Icon = "stay_primary_portrait"
-
-	// Step is https://github.com/cogentcore/core/blob/main/icons/svg/step.svg
-	Step Icon = "step"
-
-	// StepInto is https://github.com/cogentcore/core/blob/main/icons/svg/step_into.svg
-	StepInto Icon = "step_into"
-
-	// StepOut is https://github.com/cogentcore/core/blob/main/icons/svg/step_out.svg
-	StepOut Icon = "step_out"
-
-	// StepOver is https://github.com/cogentcore/core/blob/main/icons/svg/step_over.svg
-	StepOver Icon = "step_over"
-
-	// Steppers is https://github.com/cogentcore/core/blob/main/icons/svg/steppers.svg
-	Steppers Icon = "steppers"
-
-	// Steps is https://github.com/cogentcore/core/blob/main/icons/svg/steps.svg
-	Steps Icon = "steps"
-
-	// StickyNote is https://github.com/cogentcore/core/blob/main/icons/svg/sticky_note.svg
-	StickyNote Icon = "sticky_note"
-
-	// StickyNote2 is https://github.com/cogentcore/core/blob/main/icons/svg/sticky_note_2.svg
-	StickyNote2 Icon = "sticky_note_2"
-
-	// Stop is https://github.com/cogentcore/core/blob/main/icons/svg/stop.svg
-	Stop Icon = "stop"
-
-	// StopCircle is https://github.com/cogentcore/core/blob/main/icons/svg/stop_circle.svg
-	StopCircle Icon = "stop_circle"
-
-	// StopScreenShare is https://github.com/cogentcore/core/blob/main/icons/svg/stop_screen_share.svg
-	StopScreenShare Icon = "stop_screen_share"
-
-	// Straight is https://github.com/cogentcore/core/blob/main/icons/svg/straight.svg
-	Straight Icon = "straight"
-
-	// Straighten is https://github.com/cogentcore/core/blob/main/icons/svg/straighten.svg
-	Straighten Icon = "straighten"
-
-	// Strategy is https://github.com/cogentcore/core/blob/main/icons/svg/strategy.svg
-	Strategy Icon = "strategy"
-
-	// Stream is https://github.com/cogentcore/core/blob/main/icons/svg/stream.svg
-	Stream Icon = "stream"
-
-	// StreamApps is https://github.com/cogentcore/core/blob/main/icons/svg/stream_apps.svg
-	StreamApps Icon = "stream_apps"
-
-	// Streetview is https://github.com/cogentcore/core/blob/main/icons/svg/streetview.svg
-	Streetview Icon = "streetview"
-
-	// StrikethroughS is https://github.com/cogentcore/core/blob/main/icons/svg/strikethrough_s.svg
-	StrikethroughS Icon = "strikethrough_s"
-
-	// StrokeFull is https://github.com/cogentcore/core/blob/main/icons/svg/stroke_full.svg
-	StrokeFull Icon = "stroke_full"
-
-	// StrokePartial is https://github.com/cogentcore/core/blob/main/icons/svg/stroke_partial.svg
-	StrokePartial Icon = "stroke_partial"
-
-	// Style is https://github.com/cogentcore/core/blob/main/icons/svg/style.svg
-	Style Icon = "style"
-
-	// Styler is https://github.com/cogentcore/core/blob/main/icons/svg/styler.svg
-	Styler Icon = "styler"
-
-	// Stylus is https://github.com/cogentcore/core/blob/main/icons/svg/stylus.svg
-	Stylus Icon = "stylus"
-
-	// StylusLaserPointer is https://github.com/cogentcore/core/blob/main/icons/svg/stylus_laser_pointer.svg
-	StylusLaserPointer Icon = "stylus_laser_pointer"
-
-	// StylusNote is https://github.com/cogentcore/core/blob/main/icons/svg/stylus_note.svg
-	StylusNote Icon = "stylus_note"
-
-	// SubdirectoryArrowLeft is https://github.com/cogentcore/core/blob/main/icons/svg/subdirectory_arrow_left.svg
-	SubdirectoryArrowLeft Icon = "subdirectory_arrow_left"
-
-	// SubdirectoryArrowRight is https://github.com/cogentcore/core/blob/main/icons/svg/subdirectory_arrow_right.svg
-	SubdirectoryArrowRight Icon = "subdirectory_arrow_right"
-
-	// Subheader is https://github.com/cogentcore/core/blob/main/icons/svg/subheader.svg
-	Subheader Icon = "subheader"
-
-	// Subject is https://github.com/cogentcore/core/blob/main/icons/svg/subject.svg
-	Subject Icon = "subject"
-
-	// Subscript is https://github.com/cogentcore/core/blob/main/icons/svg/subscript.svg
-	Subscript Icon = "subscript"
-
-	// Subtitles is https://github.com/cogentcore/core/blob/main/icons/svg/subtitles.svg
-	Subtitles Icon = "subtitles"
-
-	// SubtitlesOff is https://github.com/cogentcore/core/blob/main/icons/svg/subtitles_off.svg
-	SubtitlesOff Icon = "subtitles_off"
-
-	// Subway is https://github.com/cogentcore/core/blob/main/icons/svg/subway.svg
-	Subway Icon = "subway"
-
-	// Summarize is https://github.com/cogentcore/core/blob/main/icons/svg/summarize.svg
-	Summarize Icon = "summarize"
-
-	// Superscript is https://github.com/cogentcore/core/blob/main/icons/svg/superscript.svg
-	Superscript Icon = "superscript"
-
-	// SupervisorAccount is https://github.com/cogentcore/core/blob/main/icons/svg/supervisor_account.svg
-	SupervisorAccount Icon = "supervisor_account"
-
-	// Support is https://github.com/cogentcore/core/blob/main/icons/svg/support.svg
-	Support Icon = "support"
-
-	// SupportAgent is https://github.com/cogentcore/core/blob/main/icons/svg/support_agent.svg
-	SupportAgent Icon = "support_agent"
-
-	// SurroundSound is https://github.com/cogentcore/core/blob/main/icons/svg/surround_sound.svg
-	SurroundSound Icon = "surround_sound"
-
-	// Svg is https://github.com/cogentcore/core/blob/main/icons/svg/svg.svg
-	Svg Icon = "svg"
-
-	// SwapHoriz is https://github.com/cogentcore/core/blob/main/icons/svg/swap_horiz.svg
-	SwapHoriz Icon = "swap_horiz"
-
-	// SwapHorizontalCircle is https://github.com/cogentcore/core/blob/main/icons/svg/swap_horizontal_circle.svg
-	SwapHorizontalCircle Icon = "swap_horizontal_circle"
-
-	// SwapVert is https://github.com/cogentcore/core/blob/main/icons/svg/swap_vert.svg
-	SwapVert Icon = "swap_vert"
-
-	// SwapVerticalCircle is https://github.com/cogentcore/core/blob/main/icons/svg/swap_vertical_circle.svg
-	SwapVerticalCircle Icon = "swap_vertical_circle"
-
-	// Sweep is https://github.com/cogentcore/core/blob/main/icons/svg/sweep.svg
-	Sweep Icon = "sweep"
-
-	// Swipe is https://github.com/cogentcore/core/blob/main/icons/svg/swipe.svg
-	Swipe Icon = "swipe"
-
-	// SwipeDown is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_down.svg
-	SwipeDown Icon = "swipe_down"
-
-	// SwipeDownAlt is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_down_alt.svg
-	SwipeDownAlt Icon = "swipe_down_alt"
-
-	// SwipeLeft is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_left.svg
-	SwipeLeft Icon = "swipe_left"
-
-	// SwipeLeftAlt is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_left_alt.svg
-	SwipeLeftAlt Icon = "swipe_left_alt"
-
-	// SwipeRight is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_right.svg
-	SwipeRight Icon = "swipe_right"
-
-	// SwipeRightAlt is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_right_alt.svg
-	SwipeRightAlt Icon = "swipe_right_alt"
-
-	// SwipeUp is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_up.svg
-	SwipeUp Icon = "swipe_up"
-
-	// SwipeUpAlt is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_up_alt.svg
-	SwipeUpAlt Icon = "swipe_up_alt"
-
-	// SwipeVertical is https://github.com/cogentcore/core/blob/main/icons/svg/swipe_vertical.svg
-	SwipeVertical Icon = "swipe_vertical"
-
-	// Switch is https://github.com/cogentcore/core/blob/main/icons/svg/switch.svg
-	Switch Icon = "switch"
-
-	// SwitchAccess is https://github.com/cogentcore/core/blob/main/icons/svg/switch_access.svg
-	SwitchAccess Icon = "switch_access"
-
-	// SwitchAccount is https://github.com/cogentcore/core/blob/main/icons/svg/switch_account.svg
-	SwitchAccount Icon = "switch_account"
-
-	// SwitchCamera is https://github.com/cogentcore/core/blob/main/icons/svg/switch_camera.svg
-	SwitchCamera Icon = "switch_camera"
-
-	// SwitchLeft is https://github.com/cogentcore/core/blob/main/icons/svg/switch_left.svg
-	SwitchLeft Icon = "switch_left"
-
-	// SwitchRight is https://github.com/cogentcore/core/blob/main/icons/svg/switch_right.svg
-	SwitchRight Icon = "switch_right"
-
-	// SwitchVideo is https://github.com/cogentcore/core/blob/main/icons/svg/switch_video.svg
-	SwitchVideo Icon = "switch_video"
-
-	// Switches is https://github.com/cogentcore/core/blob/main/icons/svg/switches.svg
-	Switches Icon = "switches"
-
-	// Sync is https://github.com/cogentcore/core/blob/main/icons/svg/sync.svg
-	Sync Icon = "sync"
-
-	// SyncAlt is https://github.com/cogentcore/core/blob/main/icons/svg/sync_alt.svg
-	SyncAlt Icon = "sync_alt"
-
-	// SyncDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/sync_disabled.svg
-	SyncDisabled Icon = "sync_disabled"
-
-	// SyncLock is https://github.com/cogentcore/core/blob/main/icons/svg/sync_lock.svg
-	SyncLock Icon = "sync_lock"
-
-	// SyncProblem is https://github.com/cogentcore/core/blob/main/icons/svg/sync_problem.svg
-	SyncProblem Icon = "sync_problem"
-
-	// SyncSavedLocally is https://github.com/cogentcore/core/blob/main/icons/svg/sync_saved_locally.svg
-	SyncSavedLocally Icon = "sync_saved_locally"
-
-	// SystemUpdate is https://github.com/cogentcore/core/blob/main/icons/svg/system_update.svg
-	SystemUpdate Icon = "system_update"
-
-	// Tab is https://github.com/cogentcore/core/blob/main/icons/svg/tab.svg
-	Tab Icon = "tab"
-
-	// TabClose is https://github.com/cogentcore/core/blob/main/icons/svg/tab_close.svg
-	TabClose Icon = "tab_close"
-
-	// TabCloseRight is https://github.com/cogentcore/core/blob/main/icons/svg/tab_close_right.svg
-	TabCloseRight Icon = "tab_close_right"
-
-	// TabDuplicate is https://github.com/cogentcore/core/blob/main/icons/svg/tab_duplicate.svg
-	TabDuplicate Icon = "tab_duplicate"
-
-	// TabGroup is https://github.com/cogentcore/core/blob/main/icons/svg/tab_group.svg
-	TabGroup Icon = "tab_group"
-
-	// TabMove is https://github.com/cogentcore/core/blob/main/icons/svg/tab_move.svg
-	TabMove Icon = "tab_move"
-
-	// TabNewRight is https://github.com/cogentcore/core/blob/main/icons/svg/tab_new_right.svg
-	TabNewRight Icon = "tab_new_right"
-
-	// TabRecent is https://github.com/cogentcore/core/blob/main/icons/svg/tab_recent.svg
-	TabRecent Icon = "tab_recent"
-
-	// TabUnselected is https://github.com/cogentcore/core/blob/main/icons/svg/tab_unselected.svg
-	TabUnselected Icon = "tab_unselected"
-
-	// Table is https://github.com/cogentcore/core/blob/main/icons/svg/table.svg
-	Table Icon = "table"
-
-	// TableChart is https://github.com/cogentcore/core/blob/main/icons/svg/table_chart.svg
-	TableChart Icon = "table_chart"
-
-	// TableChartView is https://github.com/cogentcore/core/blob/main/icons/svg/table_chart_view.svg
-	TableChartView Icon = "table_chart_view"
-
-	// TableRows is https://github.com/cogentcore/core/blob/main/icons/svg/table_rows.svg
-	TableRows Icon = "table_rows"
-
-	// TableRowsNarrow is https://github.com/cogentcore/core/blob/main/icons/svg/table_rows_narrow.svg
-	TableRowsNarrow Icon = "table_rows_narrow"
-
-	// TableView is https://github.com/cogentcore/core/blob/main/icons/svg/table_view.svg
-	TableView Icon = "table_view"
-
-	// Tablet is https://github.com/cogentcore/core/blob/main/icons/svg/tablet.svg
-	Tablet Icon = "tablet"
-
-	// TabletAndroid is https://github.com/cogentcore/core/blob/main/icons/svg/tablet_android.svg
-	TabletAndroid Icon = "tablet_android"
-
-	// TabletMac is https://github.com/cogentcore/core/blob/main/icons/svg/tablet_mac.svg
-	TabletMac Icon = "tablet_mac"
-
-	// Tabs is https://github.com/cogentcore/core/blob/main/icons/svg/tabs.svg
-	Tabs Icon = "tabs"
-
-	// Tag is https://github.com/cogentcore/core/blob/main/icons/svg/tag.svg
-	Tag Icon = "tag"
-
-	// TapAndPlay is https://github.com/cogentcore/core/blob/main/icons/svg/tap_and_play.svg
-	TapAndPlay Icon = "tap_and_play"
-
-	// Tapas is https://github.com/cogentcore/core/blob/main/icons/svg/tapas.svg
-	Tapas Icon = "tapas"
-
-	// Target is https://github.com/cogentcore/core/blob/main/icons/svg/target.svg
-	Target Icon = "target"
-
-	// Task is https://github.com/cogentcore/core/blob/main/icons/svg/task.svg
-	Task Icon = "task"
-
-	// TaskAlt is https://github.com/cogentcore/core/blob/main/icons/svg/task_alt.svg
-	TaskAlt Icon = "task_alt"
-
-	// Terminal is https://github.com/cogentcore/core/blob/main/icons/svg/terminal.svg
-	Terminal Icon = "terminal"
-
-	// Tex is https://github.com/cogentcore/core/blob/main/icons/svg/tex.svg
-	Tex Icon = "tex"
-
-	// TextAd is https://github.com/cogentcore/core/blob/main/icons/svg/text_ad.svg
-	TextAd Icon = "text_ad"
-
-	// TextDecrease is https://github.com/cogentcore/core/blob/main/icons/svg/text_decrease.svg
-	TextDecrease Icon = "text_decrease"
-
-	// TextFields is https://github.com/cogentcore/core/blob/main/icons/svg/text_fields.svg
-	TextFields Icon = "text_fields"
-
-	// TextFormat is https://github.com/cogentcore/core/blob/main/icons/svg/text_format.svg
-	TextFormat Icon = "text_format"
-
-	// TextIncrease is https://github.com/cogentcore/core/blob/main/icons/svg/text_increase.svg
-	TextIncrease Icon = "text_increase"
-
-	// TextRotateUp is https://github.com/cogentcore/core/blob/main/icons/svg/text_rotate_up.svg
-	TextRotateUp Icon = "text_rotate_up"
-
-	// TextRotateVertical is https://github.com/cogentcore/core/blob/main/icons/svg/text_rotate_vertical.svg
-	TextRotateVertical Icon = "text_rotate_vertical"
-
-	// TextRotationAngledown is https://github.com/cogentcore/core/blob/main/icons/svg/text_rotation_angledown.svg
-	TextRotationAngledown Icon = "text_rotation_angledown"
-
-	// TextRotationAngleup is https://github.com/cogentcore/core/blob/main/icons/svg/text_rotation_angleup.svg
-	TextRotationAngleup Icon = "text_rotation_angleup"
-
-	// TextRotationDown is https://github.com/cogentcore/core/blob/main/icons/svg/text_rotation_down.svg
-	TextRotationDown Icon = "text_rotation_down"
-
-	// TextRotationNone is https://github.com/cogentcore/core/blob/main/icons/svg/text_rotation_none.svg
-	TextRotationNone Icon = "text_rotation_none"
-
-	// TextSelectEnd is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_end.svg
-	TextSelectEnd Icon = "text_select_end"
-
-	// TextSelectJumpToBeginning is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_jump_to_beginning.svg
-	TextSelectJumpToBeginning Icon = "text_select_jump_to_beginning"
-
-	// TextSelectJumpToEnd is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_jump_to_end.svg
-	TextSelectJumpToEnd Icon = "text_select_jump_to_end"
-
-	// TextSelectMoveBackCharacter is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_move_back_character.svg
-	TextSelectMoveBackCharacter Icon = "text_select_move_back_character"
-
-	// TextSelectMoveBackWord is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_move_back_word.svg
-	TextSelectMoveBackWord Icon = "text_select_move_back_word"
-
-	// TextSelectMoveDown is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_move_down.svg
-	TextSelectMoveDown Icon = "text_select_move_down"
-
-	// TextSelectMoveForwardCharacter is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_move_forward_character.svg
-	TextSelectMoveForwardCharacter Icon = "text_select_move_forward_character"
-
-	// TextSelectMoveForwardWord is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_move_forward_word.svg
-	TextSelectMoveForwardWord Icon = "text_select_move_forward_word"
-
-	// TextSelectMoveUp is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_move_up.svg
-	TextSelectMoveUp Icon = "text_select_move_up"
-
-	// TextSelectStart is https://github.com/cogentcore/core/blob/main/icons/svg/text_select_start.svg
-	TextSelectStart Icon = "text_select_start"
-
-	// TextSnippet is https://github.com/cogentcore/core/blob/main/icons/svg/text_snippet.svg
-	TextSnippet Icon = "text_snippet"
-
-	// TextToSpeech is https://github.com/cogentcore/core/blob/main/icons/svg/text_to_speech.svg
-	TextToSpeech Icon = "text_to_speech"
-
-	// Texture is https://github.com/cogentcore/core/blob/main/icons/svg/texture.svg
-	Texture Icon = "texture"
-
-	// Thermometer is https://github.com/cogentcore/core/blob/main/icons/svg/thermometer.svg
-	Thermometer Icon = "thermometer"
-
-	// ThermometerGain is https://github.com/cogentcore/core/blob/main/icons/svg/thermometer_gain.svg
-	ThermometerGain Icon = "thermometer_gain"
-
-	// ThermometerLoss is https://github.com/cogentcore/core/blob/main/icons/svg/thermometer_loss.svg
-	ThermometerLoss Icon = "thermometer_loss"
-
-	// Thermostat is https://github.com/cogentcore/core/blob/main/icons/svg/thermostat.svg
-	Thermostat Icon = "thermostat"
-
-	// ThermostatAuto is https://github.com/cogentcore/core/blob/main/icons/svg/thermostat_auto.svg
-	ThermostatAuto Icon = "thermostat_auto"
-
-	// ThermostatCarbon is https://github.com/cogentcore/core/blob/main/icons/svg/thermostat_carbon.svg
-	ThermostatCarbon Icon = "thermostat_carbon"
-
-	// ThumbDown is https://github.com/cogentcore/core/blob/main/icons/svg/thumb_down.svg
-	ThumbDown Icon = "thumb_down"
-
-	// ThumbUp is https://github.com/cogentcore/core/blob/main/icons/svg/thumb_up.svg
-	ThumbUp Icon = "thumb_up"
-
-	// ThumbnailBar is https://github.com/cogentcore/core/blob/main/icons/svg/thumbnail_bar.svg
-	ThumbnailBar Icon = "thumbnail_bar"
-
-	// ThumbsUpDown is https://github.com/cogentcore/core/blob/main/icons/svg/thumbs_up_down.svg
-	ThumbsUpDown Icon = "thumbs_up_down"
-
-	// TimeAuto is https://github.com/cogentcore/core/blob/main/icons/svg/time_auto.svg
-	TimeAuto Icon = "time_auto"
-
-	// Timelapse is https://github.com/cogentcore/core/blob/main/icons/svg/timelapse.svg
-	Timelapse Icon = "timelapse"
-
-	// Timeline is https://github.com/cogentcore/core/blob/main/icons/svg/timeline.svg
-	Timeline Icon = "timeline"
-
-	// Timer is https://github.com/cogentcore/core/blob/main/icons/svg/timer.svg
-	Timer Icon = "timer"
-
-	// Timer10 is https://github.com/cogentcore/core/blob/main/icons/svg/timer_10.svg
-	Timer10 Icon = "timer_10"
-
-	// Timer10Alt1 is https://github.com/cogentcore/core/blob/main/icons/svg/timer_10_alt_1.svg
-	Timer10Alt1 Icon = "timer_10_alt_1"
-
-	// Timer10Select is https://github.com/cogentcore/core/blob/main/icons/svg/timer_10_select.svg
-	Timer10Select Icon = "timer_10_select"
-
-	// Timer3 is https://github.com/cogentcore/core/blob/main/icons/svg/timer_3.svg
-	Timer3 Icon = "timer_3"
-
-	// Timer3Alt1 is https://github.com/cogentcore/core/blob/main/icons/svg/timer_3_alt_1.svg
-	Timer3Alt1 Icon = "timer_3_alt_1"
-
-	// Timer3Select is https://github.com/cogentcore/core/blob/main/icons/svg/timer_3_select.svg
-	Timer3Select Icon = "timer_3_select"
-
-	// TimerOff is https://github.com/cogentcore/core/blob/main/icons/svg/timer_off.svg
-	TimerOff Icon = "timer_off"
-
-	// TireRepair is https://github.com/cogentcore/core/blob/main/icons/svg/tire_repair.svg
-	TireRepair Icon = "tire_repair"
-
-	// Title is https://github.com/cogentcore/core/blob/main/icons/svg/title.svg
-	Title Icon = "title"
-
-	// Toc is https://github.com/cogentcore/core/blob/main/icons/svg/toc.svg
-	Toc Icon = "toc"
-
-	// Today is https://github.com/cogentcore/core/blob/main/icons/svg/today.svg
-	Today Icon = "today"
-
-	// ToggleMid is https://github.com/cogentcore/core/blob/main/icons/svg/toggle_mid.svg
-	ToggleMid Icon = "toggle_mid"
-
-	// ToggleOff is https://github.com/cogentcore/core/blob/main/icons/svg/toggle_off.svg
-	ToggleOff Icon = "toggle_off"
-
-	// ToggleOn is https://github.com/cogentcore/core/blob/main/icons/svg/toggle_on.svg
-	ToggleOn Icon = "toggle_on"
-
-	// Token is https://github.com/cogentcore/core/blob/main/icons/svg/token.svg
-	Token Icon = "token"
-
-	// Toml is https://github.com/cogentcore/core/blob/main/icons/svg/toml.svg
-	Toml Icon = "toml"
-
-	// Tonality is https://github.com/cogentcore/core/blob/main/icons/svg/tonality.svg
-	Tonality Icon = "tonality"
-
-	// Toolbar is https://github.com/cogentcore/core/blob/main/icons/svg/toolbar.svg
-	Toolbar Icon = "toolbar"
-
-	// Tooltip is https://github.com/cogentcore/core/blob/main/icons/svg/tooltip.svg
-	Tooltip Icon = "tooltip"
-
-	// TopPanelClose is https://github.com/cogentcore/core/blob/main/icons/svg/top_panel_close.svg
-	TopPanelClose Icon = "top_panel_close"
-
-	// TopPanelOpen is https://github.com/cogentcore/core/blob/main/icons/svg/top_panel_open.svg
-	TopPanelOpen Icon = "top_panel_open"
-
-	// Topic is https://github.com/cogentcore/core/blob/main/icons/svg/topic.svg
-	Topic Icon = "topic"
-
-	// TouchApp is https://github.com/cogentcore/core/blob/main/icons/svg/touch_app.svg
-	TouchApp Icon = "touch_app"
-
-	// TouchpadMouse is https://github.com/cogentcore/core/blob/main/icons/svg/touchpad_mouse.svg
-	TouchpadMouse Icon = "touchpad_mouse"
-
-	// Tour is https://github.com/cogentcore/core/blob/main/icons/svg/tour.svg
-	Tour Icon = "tour"
-
-	// Toys is https://github.com/cogentcore/core/blob/main/icons/svg/toys.svg
-	Toys Icon = "toys"
-
-	// ToysFan is https://github.com/cogentcore/core/blob/main/icons/svg/toys_fan.svg
-	ToysFan Icon = "toys_fan"
-
-	// TrackChanges is https://github.com/cogentcore/core/blob/main/icons/svg/track_changes.svg
-	TrackChanges Icon = "track_changes"
-
-	// Traffic is https://github.com/cogentcore/core/blob/main/icons/svg/traffic.svg
-	Traffic Icon = "traffic"
-
-	// Transcribe is https://github.com/cogentcore/core/blob/main/icons/svg/transcribe.svg
-	Transcribe Icon = "transcribe"
-
-	// Transform is https://github.com/cogentcore/core/blob/main/icons/svg/transform.svg
-	Transform Icon = "transform"
-
-	// Translate is https://github.com/cogentcore/core/blob/main/icons/svg/translate.svg
-	Translate Icon = "translate"
-
-	// TrendingDown is https://github.com/cogentcore/core/blob/main/icons/svg/trending_down.svg
-	TrendingDown Icon = "trending_down"
-
-	// TrendingFlat is https://github.com/cogentcore/core/blob/main/icons/svg/trending_flat.svg
-	TrendingFlat Icon = "trending_flat"
-
-	// TrendingUp is https://github.com/cogentcore/core/blob/main/icons/svg/trending_up.svg
-	TrendingUp Icon = "trending_up"
-
-	// Trophy is https://github.com/cogentcore/core/blob/main/icons/svg/trophy.svg
-	Trophy Icon = "trophy"
-
-	// Troubleshoot is https://github.com/cogentcore/core/blob/main/icons/svg/troubleshoot.svg
-	Troubleshoot Icon = "troubleshoot"
-
-	// Tsv is https://github.com/cogentcore/core/blob/main/icons/svg/tsv.svg
-	Tsv Icon = "tsv"
-
-	// Tty is https://github.com/cogentcore/core/blob/main/icons/svg/tty.svg
-	Tty Icon = "tty"
-
-	// Tune is https://github.com/cogentcore/core/blob/main/icons/svg/tune.svg
-	Tune Icon = "tune"
-
-	// TurnLeft is https://github.com/cogentcore/core/blob/main/icons/svg/turn_left.svg
-	TurnLeft Icon = "turn_left"
-
-	// TurnRight is https://github.com/cogentcore/core/blob/main/icons/svg/turn_right.svg
-	TurnRight Icon = "turn_right"
-
-	// TurnSharpLeft is https://github.com/cogentcore/core/blob/main/icons/svg/turn_sharp_left.svg
-	TurnSharpLeft Icon = "turn_sharp_left"
-
-	// TurnSharpRight is https://github.com/cogentcore/core/blob/main/icons/svg/turn_sharp_right.svg
-	TurnSharpRight Icon = "turn_sharp_right"
-
-	// TurnSlightLeft is https://github.com/cogentcore/core/blob/main/icons/svg/turn_slight_left.svg
-	TurnSlightLeft Icon = "turn_slight_left"
-
-	// TurnSlightRight is https://github.com/cogentcore/core/blob/main/icons/svg/turn_slight_right.svg
-	TurnSlightRight Icon = "turn_slight_right"
-
-	// Tv is https://github.com/cogentcore/core/blob/main/icons/svg/tv.svg
-	Tv Icon = "tv"
-
-	// TvGen is https://github.com/cogentcore/core/blob/main/icons/svg/tv_gen.svg
-	TvGen Icon = "tv_gen"
-
-	// TvGuide is https://github.com/cogentcore/core/blob/main/icons/svg/tv_guide.svg
-	TvGuide Icon = "tv_guide"
-
-	// TvOff is https://github.com/cogentcore/core/blob/main/icons/svg/tv_off.svg
-	TvOff Icon = "tv_off"
-
-	// TvRemote is https://github.com/cogentcore/core/blob/main/icons/svg/tv_remote.svg
-	TvRemote Icon = "tv_remote"
-
-	// TvSignin is https://github.com/cogentcore/core/blob/main/icons/svg/tv_signin.svg
-	TvSignin Icon = "tv_signin"
-
-	// Type is https://github.com/cogentcore/core/blob/main/icons/svg/type.svg
-	Type Icon = "type"
-
-	// Unarchive is https://github.com/cogentcore/core/blob/main/icons/svg/unarchive.svg
-	Unarchive Icon = "unarchive"
-
-	// Undo is https://github.com/cogentcore/core/blob/main/icons/svg/undo.svg
-	Undo Icon = "undo"
-
-	// UnfoldLess is https://github.com/cogentcore/core/blob/main/icons/svg/unfold_less.svg
-	UnfoldLess Icon = "unfold_less"
-
-	// UnfoldLessDouble is https://github.com/cogentcore/core/blob/main/icons/svg/unfold_less_double.svg
-	UnfoldLessDouble Icon = "unfold_less_double"
-
-	// UnfoldMore is https://github.com/cogentcore/core/blob/main/icons/svg/unfold_more.svg
-	UnfoldMore Icon = "unfold_more"
-
-	// UnfoldMoreDouble is https://github.com/cogentcore/core/blob/main/icons/svg/unfold_more_double.svg
-	UnfoldMoreDouble Icon = "unfold_more_double"
-
-	// Ungroup is https://github.com/cogentcore/core/blob/main/icons/svg/ungroup.svg
-	Ungroup Icon = "ungroup"
-
-	// UniversalCurrencyAlt is https://github.com/cogentcore/core/blob/main/icons/svg/universal_currency_alt.svg
-	UniversalCurrencyAlt Icon = "universal_currency_alt"
-
-	// Unknown2 is https://github.com/cogentcore/core/blob/main/icons/svg/unknown_2.svg
-	Unknown2 Icon = "unknown_2"
-
-	// Unknown5 is https://github.com/cogentcore/core/blob/main/icons/svg/unknown_5.svg
-	Unknown5 Icon = "unknown_5"
-
-	// UnknownDocument is https://github.com/cogentcore/core/blob/main/icons/svg/unknown_document.svg
-	UnknownDocument Icon = "unknown_document"
-
-	// UnknownMed is https://github.com/cogentcore/core/blob/main/icons/svg/unknown_med.svg
-	UnknownMed Icon = "unknown_med"
-
-	// Unpublished is https://github.com/cogentcore/core/blob/main/icons/svg/unpublished.svg
-	Unpublished Icon = "unpublished"
-
-	// Unsubscribe is https://github.com/cogentcore/core/blob/main/icons/svg/unsubscribe.svg
-	Unsubscribe Icon = "unsubscribe"
-
-	// Upcoming is https://github.com/cogentcore/core/blob/main/icons/svg/upcoming.svg
-	Upcoming Icon = "upcoming"
-
-	// Update is https://github.com/cogentcore/core/blob/main/icons/svg/update.svg
-	Update Icon = "update"
-
-	// UpdateDisabled is https://github.com/cogentcore/core/blob/main/icons/svg/update_disabled.svg
-	UpdateDisabled Icon = "update_disabled"
-
-	// Upgrade is https://github.com/cogentcore/core/blob/main/icons/svg/upgrade.svg
-	Upgrade Icon = "upgrade"
-
-	// Upload is https://github.com/cogentcore/core/blob/main/icons/svg/upload.svg
-	Upload Icon = "upload"
-
-	// UploadFile is https://github.com/cogentcore/core/blob/main/icons/svg/upload_file.svg
-	UploadFile Icon = "upload_file"
-
-	// Urology is https://github.com/cogentcore/core/blob/main/icons/svg/urology.svg
-	Urology Icon = "urology"
-
-	// Usb is https://github.com/cogentcore/core/blob/main/icons/svg/usb.svg
-	Usb Icon = "usb"
-
-	// UsbOff is https://github.com/cogentcore/core/blob/main/icons/svg/usb_off.svg
-	UsbOff Icon = "usb_off"
-
-	// Valve is https://github.com/cogentcore/core/blob/main/icons/svg/valve.svg
-	Valve Icon = "valve"
-
-	// Variable is https://github.com/cogentcore/core/blob/main/icons/svg/variable.svg
-	Variable Icon = "variable"
-
-	// Variables is https://github.com/cogentcore/core/blob/main/icons/svg/variables.svg
-	Variables Icon = "variables"
-
-	// Verified is https://github.com/cogentcore/core/blob/main/icons/svg/verified.svg
-	Verified Icon = "verified"
-
-	// VerifiedUser is https://github.com/cogentcore/core/blob/main/icons/svg/verified_user.svg
-	VerifiedUser Icon = "verified_user"
-
-	// VerticalAlignBottom is https://github.com/cogentcore/core/blob/main/icons/svg/vertical_align_bottom.svg
-	VerticalAlignBottom Icon = "vertical_align_bottom"
-
-	// VerticalAlignCenter is https://github.com/cogentcore/core/blob/main/icons/svg/vertical_align_center.svg
-	VerticalAlignCenter Icon = "vertical_align_center"
-
-	// VerticalAlignTop is https://github.com/cogentcore/core/blob/main/icons/svg/vertical_align_top.svg
-	VerticalAlignTop Icon = "vertical_align_top"
-
-	// VerticalDistribute is https://github.com/cogentcore/core/blob/main/icons/svg/vertical_distribute.svg
-	VerticalDistribute Icon = "vertical_distribute"
-
-	// VerticalShades is https://github.com/cogentcore/core/blob/main/icons/svg/vertical_shades.svg
-	VerticalShades Icon = "vertical_shades"
-
-	// VerticalShadesClosed is https://github.com/cogentcore/core/blob/main/icons/svg/vertical_shades_closed.svg
-	VerticalShadesClosed Icon = "vertical_shades_closed"
-
-	// VerticalSplit is https://github.com/cogentcore/core/blob/main/icons/svg/vertical_split.svg
-	VerticalSplit Icon = "vertical_split"
-
-	// VideoCall is https://github.com/cogentcore/core/blob/main/icons/svg/video_call.svg
-	VideoCall Icon = "video_call"
-
-	// VideoCameraBack is https://github.com/cogentcore/core/blob/main/icons/svg/video_camera_back.svg
-	VideoCameraBack Icon = "video_camera_back"
-
-	// VideoCameraFront is https://github.com/cogentcore/core/blob/main/icons/svg/video_camera_front.svg
-	VideoCameraFront Icon = "video_camera_front"
-
-	// VideoCameraFrontOff is https://github.com/cogentcore/core/blob/main/icons/svg/video_camera_front_off.svg
-	VideoCameraFrontOff Icon = "video_camera_front_off"
-
-	// VideoChat is https://github.com/cogentcore/core/blob/main/icons/svg/video_chat.svg
-	VideoChat Icon = "video_chat"
-
-	// VideoFile is https://github.com/cogentcore/core/blob/main/icons/svg/video_file.svg
-	VideoFile Icon = "video_file"
-
-	// VideoLabel is https://github.com/cogentcore/core/blob/main/icons/svg/video_label.svg
-	VideoLabel Icon = "video_label"
-
-	// VideoLibrary is https://github.com/cogentcore/core/blob/main/icons/svg/video_library.svg
-	VideoLibrary Icon = "video_library"
-
-	// VideoSearch is https://github.com/cogentcore/core/blob/main/icons/svg/video_search.svg
-	VideoSearch Icon = "video_search"
-
-	// VideoSettings is https://github.com/cogentcore/core/blob/main/icons/svg/video_settings.svg
-	VideoSettings Icon = "video_settings"
-
-	// VideoStable is https://github.com/cogentcore/core/blob/main/icons/svg/video_stable.svg
-	VideoStable Icon = "video_stable"
-
-	// Videocam is https://github.com/cogentcore/core/blob/main/icons/svg/videocam.svg
-	Videocam Icon = "videocam"
-
-	// VideocamOff is https://github.com/cogentcore/core/blob/main/icons/svg/videocam_off.svg
-	VideocamOff Icon = "videocam_off"
-
-	// VideogameAsset is https://github.com/cogentcore/core/blob/main/icons/svg/videogame_asset.svg
-	VideogameAsset Icon = "videogame_asset"
-
-	// VideogameAssetOff is https://github.com/cogentcore/core/blob/main/icons/svg/videogame_asset_off.svg
-	VideogameAssetOff Icon = "videogame_asset_off"
-
-	// ViewAgenda is https://github.com/cogentcore/core/blob/main/icons/svg/view_agenda.svg
-	ViewAgenda Icon = "view_agenda"
-
-	// ViewArray is https://github.com/cogentcore/core/blob/main/icons/svg/view_array.svg
-	ViewArray Icon = "view_array"
-
-	// ViewCarousel is https://github.com/cogentcore/core/blob/main/icons/svg/view_carousel.svg
-	ViewCarousel Icon = "view_carousel"
-
-	// ViewColumn is https://github.com/cogentcore/core/blob/main/icons/svg/view_column.svg
-	ViewColumn Icon = "view_column"
-
-	// ViewColumn2 is https://github.com/cogentcore/core/blob/main/icons/svg/view_column_2.svg
-	ViewColumn2 Icon = "view_column_2"
-
-	// ViewComfy is https://github.com/cogentcore/core/blob/main/icons/svg/view_comfy.svg
-	ViewComfy Icon = "view_comfy"
-
-	// ViewComfyAlt is https://github.com/cogentcore/core/blob/main/icons/svg/view_comfy_alt.svg
-	ViewComfyAlt Icon = "view_comfy_alt"
-
-	// ViewCompact is https://github.com/cogentcore/core/blob/main/icons/svg/view_compact.svg
-	ViewCompact Icon = "view_compact"
-
-	// ViewCompactAlt is https://github.com/cogentcore/core/blob/main/icons/svg/view_compact_alt.svg
-	ViewCompactAlt Icon = "view_compact_alt"
-
-	// ViewCozy is https://github.com/cogentcore/core/blob/main/icons/svg/view_cozy.svg
-	ViewCozy Icon = "view_cozy"
-
-	// ViewDay is https://github.com/cogentcore/core/blob/main/icons/svg/view_day.svg
-	ViewDay Icon = "view_day"
-
-	// ViewHeadline is https://github.com/cogentcore/core/blob/main/icons/svg/view_headline.svg
-	ViewHeadline Icon = "view_headline"
-
-	// ViewInAr is https://github.com/cogentcore/core/blob/main/icons/svg/view_in_ar.svg
-	ViewInAr Icon = "view_in_ar"
-
-	// ViewInArOff is https://github.com/cogentcore/core/blob/main/icons/svg/view_in_ar_off.svg
-	ViewInArOff Icon = "view_in_ar_off"
-
-	// ViewKanban is https://github.com/cogentcore/core/blob/main/icons/svg/view_kanban.svg
-	ViewKanban Icon = "view_kanban"
-
-	// ViewList is https://github.com/cogentcore/core/blob/main/icons/svg/view_list.svg
-	ViewList Icon = "view_list"
-
-	// ViewModule is https://github.com/cogentcore/core/blob/main/icons/svg/view_module.svg
-	ViewModule Icon = "view_module"
-
-	// ViewQuilt is https://github.com/cogentcore/core/blob/main/icons/svg/view_quilt.svg
-	ViewQuilt Icon = "view_quilt"
-
-	// ViewSidebar is https://github.com/cogentcore/core/blob/main/icons/svg/view_sidebar.svg
-	ViewSidebar Icon = "view_sidebar"
-
-	// ViewStream is https://github.com/cogentcore/core/blob/main/icons/svg/view_stream.svg
-	ViewStream Icon = "view_stream"
-
-	// ViewTimeline is https://github.com/cogentcore/core/blob/main/icons/svg/view_timeline.svg
-	ViewTimeline Icon = "view_timeline"
-
-	// ViewWeek is https://github.com/cogentcore/core/blob/main/icons/svg/view_week.svg
-	ViewWeek Icon = "view_week"
-
-	// Vignette is https://github.com/cogentcore/core/blob/main/icons/svg/vignette.svg
-	Vignette Icon = "vignette"
-
-	// Visibility is https://github.com/cogentcore/core/blob/main/icons/svg/visibility.svg
-	Visibility Icon = "visibility"
-
-	// VisibilityLock is https://github.com/cogentcore/core/blob/main/icons/svg/visibility_lock.svg
-	VisibilityLock Icon = "visibility_lock"
-
-	// VisibilityOff is https://github.com/cogentcore/core/blob/main/icons/svg/visibility_off.svg
-	VisibilityOff Icon = "visibility_off"
-
-	// VoiceChat is https://github.com/cogentcore/core/blob/main/icons/svg/voice_chat.svg
-	VoiceChat Icon = "voice_chat"
-
-	// VoiceOverOff is https://github.com/cogentcore/core/blob/main/icons/svg/voice_over_off.svg
-	VoiceOverOff Icon = "voice_over_off"
-
-	// Voicemail is https://github.com/cogentcore/core/blob/main/icons/svg/voicemail.svg
-	Voicemail Icon = "voicemail"
-
-	// VolumeDown is https://github.com/cogentcore/core/blob/main/icons/svg/volume_down.svg
-	VolumeDown Icon = "volume_down"
-
-	// VolumeDownAlt is https://github.com/cogentcore/core/blob/main/icons/svg/volume_down_alt.svg
-	VolumeDownAlt Icon = "volume_down_alt"
-
-	// VolumeMute is https://github.com/cogentcore/core/blob/main/icons/svg/volume_mute.svg
-	VolumeMute Icon = "volume_mute"
-
-	// VolumeOff is https://github.com/cogentcore/core/blob/main/icons/svg/volume_off.svg
-	VolumeOff Icon = "volume_off"
-
-	// VolumeUp is https://github.com/cogentcore/core/blob/main/icons/svg/volume_up.svg
-	VolumeUp Icon = "volume_up"
-
-	// VotingChip is https://github.com/cogentcore/core/blob/main/icons/svg/voting_chip.svg
-	VotingChip Icon = "voting_chip"
-
-	// VpnKey is https://github.com/cogentcore/core/blob/main/icons/svg/vpn_key.svg
-	VpnKey Icon = "vpn_key"
-
-	// VpnKeyAlert is https://github.com/cogentcore/core/blob/main/icons/svg/vpn_key_alert.svg
-	VpnKeyAlert Icon = "vpn_key_alert"
-
-	// VpnKeyOff is https://github.com/cogentcore/core/blob/main/icons/svg/vpn_key_off.svg
-	VpnKeyOff Icon = "vpn_key_off"
-
-	// VpnLock is https://github.com/cogentcore/core/blob/main/icons/svg/vpn_lock.svg
-	VpnLock Icon = "vpn_lock"
-
-	// Wallet is https://github.com/cogentcore/core/blob/main/icons/svg/wallet.svg
-	Wallet Icon = "wallet"
-
-	// Wallpaper is https://github.com/cogentcore/core/blob/main/icons/svg/wallpaper.svg
-	Wallpaper Icon = "wallpaper"
-
-	// WallpaperSlideshow is https://github.com/cogentcore/core/blob/main/icons/svg/wallpaper_slideshow.svg
-	WallpaperSlideshow Icon = "wallpaper_slideshow"
-
-	// Warehouse is https://github.com/cogentcore/core/blob/main/icons/svg/warehouse.svg
-	Warehouse Icon = "warehouse"
-
-	// Warning is https://github.com/cogentcore/core/blob/main/icons/svg/warning.svg
-	Warning Icon = "warning"
-
-	// WarningOff is https://github.com/cogentcore/core/blob/main/icons/svg/warning_off.svg
-	WarningOff Icon = "warning_off"
-
-	// Wash is https://github.com/cogentcore/core/blob/main/icons/svg/wash.svg
-	Wash Icon = "wash"
-
-	// Watch is https://github.com/cogentcore/core/blob/main/icons/svg/watch.svg
-	Watch Icon = "watch"
-
-	// WatchButtonPress is https://github.com/cogentcore/core/blob/main/icons/svg/watch_button_press.svg
-	WatchButtonPress Icon = "watch_button_press"
-
-	// WatchOff is https://github.com/cogentcore/core/blob/main/icons/svg/watch_off.svg
-	WatchOff Icon = "watch_off"
-
-	// WatchScreentime is https://github.com/cogentcore/core/blob/main/icons/svg/watch_screentime.svg
-	WatchScreentime Icon = "watch_screentime"
-
-	// WatchWake is https://github.com/cogentcore/core/blob/main/icons/svg/watch_wake.svg
-	WatchWake Icon = "watch_wake"
-
-	// Water is https://github.com/cogentcore/core/blob/main/icons/svg/water.svg
-	Water Icon = "water"
-
-	// WaterfallChart is https://github.com/cogentcore/core/blob/main/icons/svg/waterfall_chart.svg
-	WaterfallChart Icon = "waterfall_chart"
-
-	// WavingHand is https://github.com/cogentcore/core/blob/main/icons/svg/waving_hand.svg
-	WavingHand Icon = "waving_hand"
-
-	// Web is https://github.com/cogentcore/core/blob/main/icons/svg/web.svg
-	Web Icon = "web"
-
-	// WebAsset is https://github.com/cogentcore/core/blob/main/icons/svg/web_asset.svg
-	WebAsset Icon = "web_asset"
-
-	// WebAssetOff is https://github.com/cogentcore/core/blob/main/icons/svg/web_asset_off.svg
-	WebAssetOff Icon = "web_asset_off"
-
-	// WebStories is https://github.com/cogentcore/core/blob/main/icons/svg/web_stories.svg
-	WebStories Icon = "web_stories"
-
-	// Webhook is https://github.com/cogentcore/core/blob/main/icons/svg/webhook.svg
-	Webhook Icon = "webhook"
-
-	// Weekend is https://github.com/cogentcore/core/blob/main/icons/svg/weekend.svg
-	Weekend Icon = "weekend"
-
-	// West is https://github.com/cogentcore/core/blob/main/icons/svg/west.svg
-	West Icon = "west"
-
-	// Whatshot is https://github.com/cogentcore/core/blob/main/icons/svg/whatshot.svg
-	Whatshot Icon = "whatshot"
-
-	// Widgets is https://github.com/cogentcore/core/blob/main/icons/svg/widgets.svg
-	Widgets Icon = "widgets"
-
-	// Width is https://github.com/cogentcore/core/blob/main/icons/svg/width.svg
-	Width Icon = "width"
-
-	// WidthFull is https://github.com/cogentcore/core/blob/main/icons/svg/width_full.svg
-	WidthFull Icon = "width_full"
-
-	// WidthNormal is https://github.com/cogentcore/core/blob/main/icons/svg/width_normal.svg
-	WidthNormal Icon = "width_normal"
-
-	// WidthWide is https://github.com/cogentcore/core/blob/main/icons/svg/width_wide.svg
-	WidthWide Icon = "width_wide"
-
-	// Wifi is https://github.com/cogentcore/core/blob/main/icons/svg/wifi.svg
-	Wifi Icon = "wifi"
-
-	// Wifi1Bar is https://github.com/cogentcore/core/blob/main/icons/svg/wifi_1_bar.svg
-	Wifi1Bar Icon = "wifi_1_bar"
-
-	// Wifi2Bar is https://github.com/cogentcore/core/blob/main/icons/svg/wifi_2_bar.svg
-	Wifi2Bar Icon = "wifi_2_bar"
-
-	// WifiAdd is https://github.com/cogentcore/core/blob/main/icons/svg/wifi_add.svg
-	WifiAdd Icon = "wifi_add"
-
-	// WifiFind is https://github.com/cogentcore/core/blob/main/icons/svg/wifi_find.svg
-	WifiFind Icon = "wifi_find"
-
-	// WifiHome is https://github.com/cogentcore/core/blob/main/icons/svg/wifi_home.svg
-	WifiHome Icon = "wifi_home"
-
-	// WifiLock is https://github.com/cogentcore/core/blob/main/icons/svg/wifi_lock.svg
-	WifiLock Icon = "wifi_lock"
-
-	// WifiNotification is https://github.com/cogentcore/core/blob/main/icons/svg/wifi_notification.svg
-	WifiNotification Icon = "wifi_notification"
-
-	// WifiOff is https://github.com/cogentcore/core/blob/main/icons/svg/wifi_off.svg
-	WifiOff Icon = "wifi_off"
-
-	// Window is https://github.com/cogentcore/core/blob/main/icons/svg/window.svg
-	Window Icon = "window"
-
-	// WindowClosed is https://github.com/cogentcore/core/blob/main/icons/svg/window_closed.svg
-	WindowClosed Icon = "window_closed"
-
-	// WindowOpen is https://github.com/cogentcore/core/blob/main/icons/svg/window_open.svg
-	WindowOpen Icon = "window_open"
-
-	// WindowSensor is https://github.com/cogentcore/core/blob/main/icons/svg/window_sensor.svg
-	WindowSensor Icon = "window_sensor"
-
-	// Woman is https://github.com/cogentcore/core/blob/main/icons/svg/woman.svg
-	Woman Icon = "woman"
-
-	// Woman2 is https://github.com/cogentcore/core/blob/main/icons/svg/woman_2.svg
-	Woman2 Icon = "woman_2"
-
-	// Work is https://github.com/cogentcore/core/blob/main/icons/svg/work.svg
-	Work Icon = "work"
-
-	// WorkAlert is https://github.com/cogentcore/core/blob/main/icons/svg/work_alert.svg
-	WorkAlert Icon = "work_alert"
-
-	// WorkHistory is https://github.com/cogentcore/core/blob/main/icons/svg/work_history.svg
-	WorkHistory Icon = "work_history"
-
-	// WorkUpdate is https://github.com/cogentcore/core/blob/main/icons/svg/work_update.svg
-	WorkUpdate Icon = "work_update"
-
-	// WorkspacePremium is https://github.com/cogentcore/core/blob/main/icons/svg/workspace_premium.svg
-	WorkspacePremium Icon = "workspace_premium"
-
-	// Workspaces is https://github.com/cogentcore/core/blob/main/icons/svg/workspaces.svg
-	Workspaces Icon = "workspaces"
-
-	// WrapText is https://github.com/cogentcore/core/blob/main/icons/svg/wrap_text.svg
-	WrapText Icon = "wrap_text"
-
-	// WrongLocation is https://github.com/cogentcore/core/blob/main/icons/svg/wrong_location.svg
-	WrongLocation Icon = "wrong_location"
-
-	// Wysiwyg is https://github.com/cogentcore/core/blob/main/icons/svg/wysiwyg.svg
-	Wysiwyg Icon = "wysiwyg"
-
-	// YoutubeActivity is https://github.com/cogentcore/core/blob/main/icons/svg/youtube_activity.svg
-	YoutubeActivity Icon = "youtube_activity"
-
-	// YoutubeSearchedFor is https://github.com/cogentcore/core/blob/main/icons/svg/youtube_searched_for.svg
-	YoutubeSearchedFor Icon = "youtube_searched_for"
-
-	// ZoomIn is https://github.com/cogentcore/core/blob/main/icons/svg/zoom_in.svg
-	ZoomIn Icon = "zoom_in"
-
-	// ZoomInMap is https://github.com/cogentcore/core/blob/main/icons/svg/zoom_in_map.svg
-	ZoomInMap Icon = "zoom_in_map"
-
-	// ZoomOut is https://github.com/cogentcore/core/blob/main/icons/svg/zoom_out.svg
-	ZoomOut Icon = "zoom_out"
-
-	// ZoomOutMap is https://github.com/cogentcore/core/blob/main/icons/svg/zoom_out_map.svg
-	ZoomOutMap Icon = "zoom_out_map"
+import _ "embed"
+
+var (
+	//go:embed svg/abc-fill.svg
+	AbcFill Icon
+	//go:embed svg/abc.svg
+	Abc Icon
+	//go:embed svg/account_circle-fill.svg
+	AccountCircleFill Icon
+	//go:embed svg/account_circle.svg
+	AccountCircle Icon
+	//go:embed svg/account_circle_off-fill.svg
+	AccountCircleOffFill Icon
+	//go:embed svg/account_circle_off.svg
+	AccountCircleOff Icon
+	//go:embed svg/ad-fill.svg
+	AdFill Icon
+	//go:embed svg/ad.svg
+	Ad Icon
+	//go:embed svg/ad_off-fill.svg
+	AdOffFill Icon
+	//go:embed svg/ad_off.svg
+	AdOff Icon
+	//go:embed svg/adb-fill.svg
+	AdbFill Icon
+	//go:embed svg/adb.svg
+	Adb Icon
+	//go:embed svg/add-fill.svg
+	AddFill Icon
+	//go:embed svg/add.svg
+	Add Icon
+	//go:embed svg/add_a_photo-fill.svg
+	AddAPhotoFill Icon
+	//go:embed svg/add_a_photo.svg
+	AddAPhoto Icon
+	//go:embed svg/add_alert-fill.svg
+	AddAlertFill Icon
+	//go:embed svg/add_alert.svg
+	AddAlert Icon
+	//go:embed svg/add_box-fill.svg
+	AddBoxFill Icon
+	//go:embed svg/add_box.svg
+	AddBox Icon
+	//go:embed svg/add_call-fill.svg
+	AddCallFill Icon
+	//go:embed svg/add_call.svg
+	AddCall Icon
+	//go:embed svg/add_card-fill.svg
+	AddCardFill Icon
+	//go:embed svg/add_card.svg
+	AddCard Icon
+	//go:embed svg/add_chart-fill.svg
+	AddChartFill Icon
+	//go:embed svg/add_chart.svg
+	AddChart Icon
+	//go:embed svg/add_circle-fill.svg
+	AddCircleFill Icon
+	//go:embed svg/add_circle.svg
+	AddCircle Icon
+	//go:embed svg/add_comment-fill.svg
+	AddCommentFill Icon
+	//go:embed svg/add_comment.svg
+	AddComment Icon
+	//go:embed svg/add_home-fill.svg
+	AddHomeFill Icon
+	//go:embed svg/add_home.svg
+	AddHome Icon
+	//go:embed svg/add_home_work-fill.svg
+	AddHomeWorkFill Icon
+	//go:embed svg/add_home_work.svg
+	AddHomeWork Icon
+	//go:embed svg/add_link-fill.svg
+	AddLinkFill Icon
+	//go:embed svg/add_link.svg
+	AddLink Icon
+	//go:embed svg/add_location-fill.svg
+	AddLocationFill Icon
+	//go:embed svg/add_location.svg
+	AddLocation Icon
+	//go:embed svg/add_notes-fill.svg
+	AddNotesFill Icon
+	//go:embed svg/add_notes.svg
+	AddNotes Icon
+	//go:embed svg/add_shopping_cart-fill.svg
+	AddShoppingCartFill Icon
+	//go:embed svg/add_shopping_cart.svg
+	AddShoppingCart Icon
+	//go:embed svg/add_task-fill.svg
+	AddTaskFill Icon
+	//go:embed svg/add_task.svg
+	AddTask Icon
+	//go:embed svg/add_to_queue-fill.svg
+	AddToQueueFill Icon
+	//go:embed svg/add_to_queue.svg
+	AddToQueue Icon
+	//go:embed svg/adjust-fill.svg
+	AdjustFill Icon
+	//go:embed svg/adjust.svg
+	Adjust Icon
+	//go:embed svg/admin_meds-fill.svg
+	AdminMedsFill Icon
+	//go:embed svg/admin_meds.svg
+	AdminMeds Icon
+	//go:embed svg/admin_panel_settings-fill.svg
+	AdminPanelSettingsFill Icon
+	//go:embed svg/admin_panel_settings.svg
+	AdminPanelSettings Icon
+	//go:embed svg/agender-fill.svg
+	AgenderFill Icon
+	//go:embed svg/agender.svg
+	Agender Icon
+	//go:embed svg/agriculture-fill.svg
+	AgricultureFill Icon
+	//go:embed svg/agriculture.svg
+	Agriculture Icon
+	//go:embed svg/air-fill.svg
+	AirFill Icon
+	//go:embed svg/air.svg
+	Air Icon
+	//go:embed svg/airplay-fill.svg
+	AirplayFill Icon
+	//go:embed svg/airplay.svg
+	Airplay Icon
+	//go:embed svg/alarm-fill.svg
+	AlarmFill Icon
+	//go:embed svg/alarm.svg
+	Alarm Icon
+	//go:embed svg/alarm_add-fill.svg
+	AlarmAddFill Icon
+	//go:embed svg/alarm_add.svg
+	AlarmAdd Icon
+	//go:embed svg/alarm_off-fill.svg
+	AlarmOffFill Icon
+	//go:embed svg/alarm_off.svg
+	AlarmOff Icon
+	//go:embed svg/alarm_on-fill.svg
+	AlarmOnFill Icon
+	//go:embed svg/alarm_on.svg
+	AlarmOn Icon
+	//go:embed svg/album-fill.svg
+	AlbumFill Icon
+	//go:embed svg/album.svg
+	Album Icon
+	//go:embed svg/align_center-fill.svg
+	AlignCenterFill Icon
+	//go:embed svg/align_center.svg
+	AlignCenter Icon
+	//go:embed svg/align_end-fill.svg
+	AlignEndFill Icon
+	//go:embed svg/align_end.svg
+	AlignEnd Icon
+	//go:embed svg/align_flex_center-fill.svg
+	AlignFlexCenterFill Icon
+	//go:embed svg/align_flex_center.svg
+	AlignFlexCenter Icon
+	//go:embed svg/align_flex_end-fill.svg
+	AlignFlexEndFill Icon
+	//go:embed svg/align_flex_end.svg
+	AlignFlexEnd Icon
+	//go:embed svg/align_flex_start-fill.svg
+	AlignFlexStartFill Icon
+	//go:embed svg/align_flex_start.svg
+	AlignFlexStart Icon
+	//go:embed svg/align_horizontal_center-fill.svg
+	AlignHorizontalCenterFill Icon
+	//go:embed svg/align_horizontal_center.svg
+	AlignHorizontalCenter Icon
+	//go:embed svg/align_horizontal_left-fill.svg
+	AlignHorizontalLeftFill Icon
+	//go:embed svg/align_horizontal_left.svg
+	AlignHorizontalLeft Icon
+	//go:embed svg/align_horizontal_right-fill.svg
+	AlignHorizontalRightFill Icon
+	//go:embed svg/align_horizontal_right.svg
+	AlignHorizontalRight Icon
+	//go:embed svg/align_items_stretch-fill.svg
+	AlignItemsStretchFill Icon
+	//go:embed svg/align_items_stretch.svg
+	AlignItemsStretch Icon
+	//go:embed svg/align_justify_center-fill.svg
+	AlignJustifyCenterFill Icon
+	//go:embed svg/align_justify_center.svg
+	AlignJustifyCenter Icon
+	//go:embed svg/align_justify_flex_end-fill.svg
+	AlignJustifyFlexEndFill Icon
+	//go:embed svg/align_justify_flex_end.svg
+	AlignJustifyFlexEnd Icon
+	//go:embed svg/align_justify_flex_start-fill.svg
+	AlignJustifyFlexStartFill Icon
+	//go:embed svg/align_justify_flex_start.svg
+	AlignJustifyFlexStart Icon
+	//go:embed svg/align_justify_space_around-fill.svg
+	AlignJustifySpaceAroundFill Icon
+	//go:embed svg/align_justify_space_around.svg
+	AlignJustifySpaceAround Icon
+	//go:embed svg/align_justify_space_between-fill.svg
+	AlignJustifySpaceBetweenFill Icon
+	//go:embed svg/align_justify_space_between.svg
+	AlignJustifySpaceBetween Icon
+	//go:embed svg/align_justify_space_even-fill.svg
+	AlignJustifySpaceEvenFill Icon
+	//go:embed svg/align_justify_space_even.svg
+	AlignJustifySpaceEven Icon
+	//go:embed svg/align_justify_stretch-fill.svg
+	AlignJustifyStretchFill Icon
+	//go:embed svg/align_justify_stretch.svg
+	AlignJustifyStretch Icon
+	//go:embed svg/align_self_stretch-fill.svg
+	AlignSelfStretchFill Icon
+	//go:embed svg/align_self_stretch.svg
+	AlignSelfStretch Icon
+	//go:embed svg/align_space_around-fill.svg
+	AlignSpaceAroundFill Icon
+	//go:embed svg/align_space_around.svg
+	AlignSpaceAround Icon
+	//go:embed svg/align_space_between-fill.svg
+	AlignSpaceBetweenFill Icon
+	//go:embed svg/align_space_between.svg
+	AlignSpaceBetween Icon
+	//go:embed svg/align_space_even-fill.svg
+	AlignSpaceEvenFill Icon
+	//go:embed svg/align_space_even.svg
+	AlignSpaceEven Icon
+	//go:embed svg/align_start-fill.svg
+	AlignStartFill Icon
+	//go:embed svg/align_start.svg
+	AlignStart Icon
+	//go:embed svg/align_stretch-fill.svg
+	AlignStretchFill Icon
+	//go:embed svg/align_stretch.svg
+	AlignStretch Icon
+	//go:embed svg/align_vertical_bottom-fill.svg
+	AlignVerticalBottomFill Icon
+	//go:embed svg/align_vertical_bottom.svg
+	AlignVerticalBottom Icon
+	//go:embed svg/align_vertical_center-fill.svg
+	AlignVerticalCenterFill Icon
+	//go:embed svg/align_vertical_center.svg
+	AlignVerticalCenter Icon
+	//go:embed svg/align_vertical_top-fill.svg
+	AlignVerticalTopFill Icon
+	//go:embed svg/align_vertical_top.svg
+	AlignVerticalTop Icon
+	//go:embed svg/all_inbox-fill.svg
+	AllInboxFill Icon
+	//go:embed svg/all_inbox.svg
+	AllInbox Icon
+	//go:embed svg/all_match-fill.svg
+	AllMatchFill Icon
+	//go:embed svg/all_match.svg
+	AllMatch Icon
+	//go:embed svg/all_out-fill.svg
+	AllOutFill Icon
+	//go:embed svg/all_out.svg
+	AllOut Icon
+	//go:embed svg/alt_route-fill.svg
+	AltRouteFill Icon
+	//go:embed svg/alt_route.svg
+	AltRoute Icon
+	//go:embed svg/alternate_email-fill.svg
+	AlternateEmailFill Icon
+	//go:embed svg/alternate_email.svg
+	AlternateEmail Icon
+	//go:embed svg/altitude-fill.svg
+	AltitudeFill Icon
+	//go:embed svg/altitude.svg
+	Altitude Icon
+	//go:embed svg/amend-fill.svg
+	AmendFill Icon
+	//go:embed svg/amend.svg
+	Amend Icon
+	//go:embed svg/analytics-fill.svg
+	AnalyticsFill Icon
+	//go:embed svg/analytics.svg
+	Analytics Icon
+	//go:embed svg/anchor-fill.svg
+	AnchorFill Icon
+	//go:embed svg/anchor.svg
+	Anchor Icon
+	//go:embed svg/android-fill.svg
+	AndroidFill Icon
+	//go:embed svg/android.svg
+	Android Icon
+	//go:embed svg/animation-fill.svg
+	AnimationFill Icon
+	//go:embed svg/animation.svg
+	Animation Icon
+	//go:embed svg/apartment-fill.svg
+	ApartmentFill Icon
+	//go:embed svg/apartment.svg
+	Apartment Icon
+	//go:embed svg/api-fill.svg
+	ApiFill Icon
+	//go:embed svg/api.svg
+	Api Icon
+	//go:embed svg/apk_document-fill.svg
+	ApkDocumentFill Icon
+	//go:embed svg/apk_document.svg
+	ApkDocument Icon
+	//go:embed svg/apk_install-fill.svg
+	ApkInstallFill Icon
+	//go:embed svg/apk_install.svg
+	ApkInstall Icon
+	//go:embed svg/app_badging-fill.svg
+	AppBadgingFill Icon
+	//go:embed svg/app_badging.svg
+	AppBadging Icon
+	//go:embed svg/app_blocking-fill.svg
+	AppBlockingFill Icon
+	//go:embed svg/app_blocking.svg
+	AppBlocking Icon
+	//go:embed svg/app_promo-fill.svg
+	AppPromoFill Icon
+	//go:embed svg/app_promo.svg
+	AppPromo Icon
+	//go:embed svg/app_registration-fill.svg
+	AppRegistrationFill Icon
+	//go:embed svg/app_registration.svg
+	AppRegistration Icon
+	//go:embed svg/app_shortcut-fill.svg
+	AppShortcutFill Icon
+	//go:embed svg/app_shortcut.svg
+	AppShortcut Icon
+	//go:embed svg/approval-fill.svg
+	ApprovalFill Icon
+	//go:embed svg/approval.svg
+	Approval Icon
+	//go:embed svg/approval_delegation-fill.svg
+	ApprovalDelegationFill Icon
+	//go:embed svg/approval_delegation.svg
+	ApprovalDelegation Icon
+	//go:embed svg/apps-fill.svg
+	AppsFill Icon
+	//go:embed svg/apps.svg
+	Apps Icon
+	//go:embed svg/apps_outage-fill.svg
+	AppsOutageFill Icon
+	//go:embed svg/apps_outage.svg
+	AppsOutage Icon
+	//go:embed svg/ar_on_you-fill.svg
+	ArOnYouFill Icon
+	//go:embed svg/ar_on_you.svg
+	ArOnYou Icon
+	//go:embed svg/architecture-fill.svg
+	ArchitectureFill Icon
+	//go:embed svg/architecture.svg
+	Architecture Icon
+	//go:embed svg/archive-fill.svg
+	ArchiveFill Icon
+	//go:embed svg/archive.svg
+	Archive Icon
+	//go:embed svg/area_chart-fill.svg
+	AreaChartFill Icon
+	//go:embed svg/area_chart.svg
+	AreaChart Icon
+	//go:embed svg/arrow_and_edge-fill.svg
+	ArrowAndEdgeFill Icon
+	//go:embed svg/arrow_and_edge.svg
+	ArrowAndEdge Icon
+	//go:embed svg/arrow_back-fill.svg
+	ArrowBackFill Icon
+	//go:embed svg/arrow_back.svg
+	ArrowBack Icon
+	//go:embed svg/arrow_back_ios-fill.svg
+	ArrowBackIosFill Icon
+	//go:embed svg/arrow_back_ios.svg
+	ArrowBackIos Icon
+	//go:embed svg/arrow_back_ios_new-fill.svg
+	ArrowBackIosNewFill Icon
+	//go:embed svg/arrow_back_ios_new.svg
+	ArrowBackIosNew Icon
+	//go:embed svg/arrow_circle_down-fill.svg
+	ArrowCircleDownFill Icon
+	//go:embed svg/arrow_circle_down.svg
+	ArrowCircleDown Icon
+	//go:embed svg/arrow_circle_left-fill.svg
+	ArrowCircleLeftFill Icon
+	//go:embed svg/arrow_circle_left.svg
+	ArrowCircleLeft Icon
+	//go:embed svg/arrow_circle_right-fill.svg
+	ArrowCircleRightFill Icon
+	//go:embed svg/arrow_circle_right.svg
+	ArrowCircleRight Icon
+	//go:embed svg/arrow_circle_up-fill.svg
+	ArrowCircleUpFill Icon
+	//go:embed svg/arrow_circle_up.svg
+	ArrowCircleUp Icon
+	//go:embed svg/arrow_downward-fill.svg
+	ArrowDownwardFill Icon
+	//go:embed svg/arrow_downward.svg
+	ArrowDownward Icon
+	//go:embed svg/arrow_downward_alt-fill.svg
+	ArrowDownwardAltFill Icon
+	//go:embed svg/arrow_downward_alt.svg
+	ArrowDownwardAlt Icon
+	//go:embed svg/arrow_drop_down-fill.svg
+	ArrowDropDownFill Icon
+	//go:embed svg/arrow_drop_down.svg
+	ArrowDropDown Icon
+	//go:embed svg/arrow_drop_down_circle-fill.svg
+	ArrowDropDownCircleFill Icon
+	//go:embed svg/arrow_drop_down_circle.svg
+	ArrowDropDownCircle Icon
+	//go:embed svg/arrow_drop_up-fill.svg
+	ArrowDropUpFill Icon
+	//go:embed svg/arrow_drop_up.svg
+	ArrowDropUp Icon
+	//go:embed svg/arrow_forward-fill.svg
+	ArrowForwardFill Icon
+	//go:embed svg/arrow_forward.svg
+	ArrowForward Icon
+	//go:embed svg/arrow_forward_ios-fill.svg
+	ArrowForwardIosFill Icon
+	//go:embed svg/arrow_forward_ios.svg
+	ArrowForwardIos Icon
+	//go:embed svg/arrow_insert-fill.svg
+	ArrowInsertFill Icon
+	//go:embed svg/arrow_insert.svg
+	ArrowInsert Icon
+	//go:embed svg/arrow_left-fill.svg
+	ArrowLeftFill Icon
+	//go:embed svg/arrow_left.svg
+	ArrowLeft Icon
+	//go:embed svg/arrow_left_alt-fill.svg
+	ArrowLeftAltFill Icon
+	//go:embed svg/arrow_left_alt.svg
+	ArrowLeftAlt Icon
+	//go:embed svg/arrow_or_edge-fill.svg
+	ArrowOrEdgeFill Icon
+	//go:embed svg/arrow_or_edge.svg
+	ArrowOrEdge Icon
+	//go:embed svg/arrow_outward-fill.svg
+	ArrowOutwardFill Icon
+	//go:embed svg/arrow_outward.svg
+	ArrowOutward Icon
+	//go:embed svg/arrow_range-fill.svg
+	ArrowRangeFill Icon
+	//go:embed svg/arrow_range.svg
+	ArrowRange Icon
+	//go:embed svg/arrow_right-fill.svg
+	ArrowRightFill Icon
+	//go:embed svg/arrow_right.svg
+	ArrowRight Icon
+	//go:embed svg/arrow_right_alt-fill.svg
+	ArrowRightAltFill Icon
+	//go:embed svg/arrow_right_alt.svg
+	ArrowRightAlt Icon
+	//go:embed svg/arrow_selector_tool-fill.svg
+	ArrowSelectorToolFill Icon
+	//go:embed svg/arrow_selector_tool.svg
+	ArrowSelectorTool Icon
+	//go:embed svg/arrow_split-fill.svg
+	ArrowSplitFill Icon
+	//go:embed svg/arrow_split.svg
+	ArrowSplit Icon
+	//go:embed svg/arrow_top_left-fill.svg
+	ArrowTopLeftFill Icon
+	//go:embed svg/arrow_top_left.svg
+	ArrowTopLeft Icon
+	//go:embed svg/arrow_top_right-fill.svg
+	ArrowTopRightFill Icon
+	//go:embed svg/arrow_top_right.svg
+	ArrowTopRight Icon
+	//go:embed svg/arrow_upward-fill.svg
+	ArrowUpwardFill Icon
+	//go:embed svg/arrow_upward.svg
+	ArrowUpward Icon
+	//go:embed svg/arrow_upward_alt-fill.svg
+	ArrowUpwardAltFill Icon
+	//go:embed svg/arrow_upward_alt.svg
+	ArrowUpwardAlt Icon
+	//go:embed svg/arrows_more_down-fill.svg
+	ArrowsMoreDownFill Icon
+	//go:embed svg/arrows_more_down.svg
+	ArrowsMoreDown Icon
+	//go:embed svg/arrows_more_up-fill.svg
+	ArrowsMoreUpFill Icon
+	//go:embed svg/arrows_more_up.svg
+	ArrowsMoreUp Icon
+	//go:embed svg/arrows_outward-fill.svg
+	ArrowsOutwardFill Icon
+	//go:embed svg/arrows_outward.svg
+	ArrowsOutward Icon
+	//go:embed svg/article-fill.svg
+	ArticleFill Icon
+	//go:embed svg/article.svg
+	Article Icon
+	//go:embed svg/aspect_ratio-fill.svg
+	AspectRatioFill Icon
+	//go:embed svg/aspect_ratio.svg
+	AspectRatio Icon
+	//go:embed svg/assistant_direction-fill.svg
+	AssistantDirectionFill Icon
+	//go:embed svg/assistant_direction.svg
+	AssistantDirection Icon
+	//go:embed svg/assistant_navigation-fill.svg
+	AssistantNavigationFill Icon
+	//go:embed svg/assistant_navigation.svg
+	AssistantNavigation Icon
+	//go:embed svg/attach_email-fill.svg
+	AttachEmailFill Icon
+	//go:embed svg/attach_email.svg
+	AttachEmail Icon
+	//go:embed svg/attach_file-fill.svg
+	AttachFileFill Icon
+	//go:embed svg/attach_file.svg
+	AttachFile Icon
+	//go:embed svg/attach_file_add-fill.svg
+	AttachFileAddFill Icon
+	//go:embed svg/attach_file_add.svg
+	AttachFileAdd Icon
+	//go:embed svg/attach_money-fill.svg
+	AttachMoneyFill Icon
+	//go:embed svg/attach_money.svg
+	AttachMoney Icon
+	//go:embed svg/attachment-fill.svg
+	AttachmentFill Icon
+	//go:embed svg/attachment.svg
+	Attachment Icon
+	//go:embed svg/attribution-fill.svg
+	AttributionFill Icon
+	//go:embed svg/attribution.svg
+	Attribution Icon
+	//go:embed svg/audio_file-fill.svg
+	AudioFileFill Icon
+	//go:embed svg/audio_file.svg
+	AudioFile Icon
+	//go:embed svg/audio_video_receiver-fill.svg
+	AudioVideoReceiverFill Icon
+	//go:embed svg/audio_video_receiver.svg
+	AudioVideoReceiver Icon
+	//go:embed svg/auto_delete-fill.svg
+	AutoDeleteFill Icon
+	//go:embed svg/auto_delete.svg
+	AutoDelete Icon
+	//go:embed svg/auto_read_pause-fill.svg
+	AutoReadPauseFill Icon
+	//go:embed svg/auto_read_pause.svg
+	AutoReadPause Icon
+	//go:embed svg/auto_read_play-fill.svg
+	AutoReadPlayFill Icon
+	//go:embed svg/auto_read_play.svg
+	AutoReadPlay Icon
+	//go:embed svg/autofps_select-fill.svg
+	AutofpsSelectFill Icon
+	//go:embed svg/autofps_select.svg
+	AutofpsSelect Icon
+	//go:embed svg/autopause-fill.svg
+	AutopauseFill Icon
+	//go:embed svg/autopause.svg
+	Autopause Icon
+	//go:embed svg/autoplay-fill.svg
+	AutoplayFill Icon
+	//go:embed svg/autoplay.svg
+	Autoplay Icon
+	//go:embed svg/autorenew-fill.svg
+	AutorenewFill Icon
+	//go:embed svg/autorenew.svg
+	Autorenew Icon
+	//go:embed svg/autostop-fill.svg
+	AutostopFill Icon
+	//go:embed svg/autostop.svg
+	Autostop Icon
+	//go:embed svg/av_timer-fill.svg
+	AvTimerFill Icon
+	//go:embed svg/av_timer.svg
+	AvTimer Icon
+	//go:embed svg/award_star-fill.svg
+	AwardStarFill Icon
+	//go:embed svg/award_star.svg
+	AwardStar Icon
+	//go:embed svg/back_hand-fill.svg
+	BackHandFill Icon
+	//go:embed svg/back_hand.svg
+	BackHand Icon
+	//go:embed svg/back_to_tab-fill.svg
+	BackToTabFill Icon
+	//go:embed svg/back_to_tab.svg
+	BackToTab Icon
+	//go:embed svg/background_dot_large-fill.svg
+	BackgroundDotLargeFill Icon
+	//go:embed svg/background_dot_large.svg
+	BackgroundDotLarge Icon
+	//go:embed svg/background_grid_small-fill.svg
+	BackgroundGridSmallFill Icon
+	//go:embed svg/background_grid_small.svg
+	BackgroundGridSmall Icon
+	//go:embed svg/background_replace-fill.svg
+	BackgroundReplaceFill Icon
+	//go:embed svg/background_replace.svg
+	BackgroundReplace Icon
+	//go:embed svg/backlight_high-fill.svg
+	BacklightHighFill Icon
+	//go:embed svg/backlight_high.svg
+	BacklightHigh Icon
+	//go:embed svg/backlight_low-fill.svg
+	BacklightLowFill Icon
+	//go:embed svg/backlight_low.svg
+	BacklightLow Icon
+	//go:embed svg/backspace-fill.svg
+	BackspaceFill Icon
+	//go:embed svg/backspace.svg
+	Backspace Icon
+	//go:embed svg/backup-fill.svg
+	BackupFill Icon
+	//go:embed svg/backup.svg
+	Backup Icon
+	//go:embed svg/backup_table-fill.svg
+	BackupTableFill Icon
+	//go:embed svg/backup_table.svg
+	BackupTable Icon
+	//go:embed svg/badge-fill.svg
+	BadgeFill Icon
+	//go:embed svg/badge.svg
+	Badge Icon
+	//go:embed svg/badge_critical_battery-fill.svg
+	BadgeCriticalBatteryFill Icon
+	//go:embed svg/badge_critical_battery.svg
+	BadgeCriticalBattery Icon
+	//go:embed svg/balance-fill.svg
+	BalanceFill Icon
+	//go:embed svg/balance.svg
+	Balance Icon
+	//go:embed svg/ballot-fill.svg
+	BallotFill Icon
+	//go:embed svg/ballot.svg
+	Ballot Icon
+	//go:embed svg/bar_chart-fill.svg
+	BarChartFill Icon
+	//go:embed svg/bar_chart.svg
+	BarChart Icon
+	//go:embed svg/bar_chart_4_bars-fill.svg
+	BarChart4BarsFill Icon
+	//go:embed svg/bar_chart_4_bars.svg
+	BarChart4Bars Icon
+	//go:embed svg/barcode-fill.svg
+	BarcodeFill Icon
+	//go:embed svg/barcode.svg
+	Barcode Icon
+	//go:embed svg/barcode_reader-fill.svg
+	BarcodeReaderFill Icon
+	//go:embed svg/barcode_reader.svg
+	BarcodeReader Icon
+	//go:embed svg/barcode_scanner-fill.svg
+	BarcodeScannerFill Icon
+	//go:embed svg/barcode_scanner.svg
+	BarcodeScanner Icon
+	//go:embed svg/batch_prediction-fill.svg
+	BatchPredictionFill Icon
+	//go:embed svg/batch_prediction.svg
+	BatchPrediction Icon
+	//go:embed svg/battery_0_bar-fill.svg
+	Battery0BarFill Icon
+	//go:embed svg/battery_0_bar.svg
+	Battery0Bar Icon
+	//go:embed svg/battery_1_bar-fill.svg
+	Battery1BarFill Icon
+	//go:embed svg/battery_1_bar.svg
+	Battery1Bar Icon
+	//go:embed svg/battery_2_bar-fill.svg
+	Battery2BarFill Icon
+	//go:embed svg/battery_2_bar.svg
+	Battery2Bar Icon
+	//go:embed svg/battery_3_bar-fill.svg
+	Battery3BarFill Icon
+	//go:embed svg/battery_3_bar.svg
+	Battery3Bar Icon
+	//go:embed svg/battery_4_bar-fill.svg
+	Battery4BarFill Icon
+	//go:embed svg/battery_4_bar.svg
+	Battery4Bar Icon
+	//go:embed svg/battery_5_bar-fill.svg
+	Battery5BarFill Icon
+	//go:embed svg/battery_5_bar.svg
+	Battery5Bar Icon
+	//go:embed svg/battery_6_bar-fill.svg
+	Battery6BarFill Icon
+	//go:embed svg/battery_6_bar.svg
+	Battery6Bar Icon
+	//go:embed svg/battery_alert-fill.svg
+	BatteryAlertFill Icon
+	//go:embed svg/battery_alert.svg
+	BatteryAlert Icon
+	//go:embed svg/battery_change-fill.svg
+	BatteryChangeFill Icon
+	//go:embed svg/battery_change.svg
+	BatteryChange Icon
+	//go:embed svg/battery_charging_20-fill.svg
+	BatteryCharging20Fill Icon
+	//go:embed svg/battery_charging_20.svg
+	BatteryCharging20 Icon
+	//go:embed svg/battery_charging_30-fill.svg
+	BatteryCharging30Fill Icon
+	//go:embed svg/battery_charging_30.svg
+	BatteryCharging30 Icon
+	//go:embed svg/battery_charging_50-fill.svg
+	BatteryCharging50Fill Icon
+	//go:embed svg/battery_charging_50.svg
+	BatteryCharging50 Icon
+	//go:embed svg/battery_charging_60-fill.svg
+	BatteryCharging60Fill Icon
+	//go:embed svg/battery_charging_60.svg
+	BatteryCharging60 Icon
+	//go:embed svg/battery_charging_80-fill.svg
+	BatteryCharging80Fill Icon
+	//go:embed svg/battery_charging_80.svg
+	BatteryCharging80 Icon
+	//go:embed svg/battery_charging_90-fill.svg
+	BatteryCharging90Fill Icon
+	//go:embed svg/battery_charging_90.svg
+	BatteryCharging90 Icon
+	//go:embed svg/battery_charging_full-fill.svg
+	BatteryChargingFullFill Icon
+	//go:embed svg/battery_charging_full.svg
+	BatteryChargingFull Icon
+	//go:embed svg/battery_error-fill.svg
+	BatteryErrorFill Icon
+	//go:embed svg/battery_error.svg
+	BatteryError Icon
+	//go:embed svg/battery_horiz_000-fill.svg
+	BatteryHoriz000Fill Icon
+	//go:embed svg/battery_horiz_000.svg
+	BatteryHoriz000 Icon
+	//go:embed svg/battery_horiz_050-fill.svg
+	BatteryHoriz050Fill Icon
+	//go:embed svg/battery_horiz_050.svg
+	BatteryHoriz050 Icon
+	//go:embed svg/battery_horiz_075-fill.svg
+	BatteryHoriz075Fill Icon
+	//go:embed svg/battery_horiz_075.svg
+	BatteryHoriz075 Icon
+	//go:embed svg/battery_low-fill.svg
+	BatteryLowFill Icon
+	//go:embed svg/battery_low.svg
+	BatteryLow Icon
+	//go:embed svg/battery_plus-fill.svg
+	BatteryPlusFill Icon
+	//go:embed svg/battery_plus.svg
+	BatteryPlus Icon
+	//go:embed svg/battery_profile-fill.svg
+	BatteryProfileFill Icon
+	//go:embed svg/battery_profile.svg
+	BatteryProfile Icon
+	//go:embed svg/battery_saver-fill.svg
+	BatterySaverFill Icon
+	//go:embed svg/battery_saver.svg
+	BatterySaver Icon
+	//go:embed svg/battery_share-fill.svg
+	BatteryShareFill Icon
+	//go:embed svg/battery_share.svg
+	BatteryShare Icon
+	//go:embed svg/battery_status_good-fill.svg
+	BatteryStatusGoodFill Icon
+	//go:embed svg/battery_status_good.svg
+	BatteryStatusGood Icon
+	//go:embed svg/battery_unknown-fill.svg
+	BatteryUnknownFill Icon
+	//go:embed svg/battery_unknown.svg
+	BatteryUnknown Icon
+	//go:embed svg/battery_very_low-fill.svg
+	BatteryVeryLowFill Icon
+	//go:embed svg/battery_very_low.svg
+	BatteryVeryLow Icon
+	//go:embed svg/bed-fill.svg
+	BedFill Icon
+	//go:embed svg/bed.svg
+	Bed Icon
+	//go:embed svg/bedtime-fill.svg
+	BedtimeFill Icon
+	//go:embed svg/bedtime.svg
+	Bedtime Icon
+	//go:embed svg/bedtime_off-fill.svg
+	BedtimeOffFill Icon
+	//go:embed svg/bedtime_off.svg
+	BedtimeOff Icon
+	//go:embed svg/blanket-fill.svg
+	BlanketFill Icon
+	//go:embed svg/blanket.svg
+	Blanket Icon
+	//go:embed svg/blender-fill.svg
+	BlenderFill Icon
+	//go:embed svg/blender.svg
+	Blender Icon
+	//go:embed svg/blind-fill.svg
+	BlindFill Icon
+	//go:embed svg/blind.svg
+	Blind Icon
+	//go:embed svg/blinds-fill.svg
+	BlindsFill Icon
+	//go:embed svg/blinds.svg
+	Blinds Icon
+	//go:embed svg/blinds_closed-fill.svg
+	BlindsClosedFill Icon
+	//go:embed svg/blinds_closed.svg
+	BlindsClosed Icon
+	//go:embed svg/block-fill.svg
+	BlockFill Icon
+	//go:embed svg/block.svg
+	Block Icon
+	//go:embed svg/bluetooth-fill.svg
+	BluetoothFill Icon
+	//go:embed svg/bluetooth.svg
+	Bluetooth Icon
+	//go:embed svg/bluetooth_connected-fill.svg
+	BluetoothConnectedFill Icon
+	//go:embed svg/bluetooth_connected.svg
+	BluetoothConnected Icon
+	//go:embed svg/bluetooth_disabled-fill.svg
+	BluetoothDisabledFill Icon
+	//go:embed svg/bluetooth_disabled.svg
+	BluetoothDisabled Icon
+	//go:embed svg/bluetooth_drive-fill.svg
+	BluetoothDriveFill Icon
+	//go:embed svg/bluetooth_drive.svg
+	BluetoothDrive Icon
+	//go:embed svg/bluetooth_searching-fill.svg
+	BluetoothSearchingFill Icon
+	//go:embed svg/bluetooth_searching.svg
+	BluetoothSearching Icon
+	//go:embed svg/blur_circular-fill.svg
+	BlurCircularFill Icon
+	//go:embed svg/blur_circular.svg
+	BlurCircular Icon
+	//go:embed svg/blur_linear-fill.svg
+	BlurLinearFill Icon
+	//go:embed svg/blur_linear.svg
+	BlurLinear Icon
+	//go:embed svg/blur_medium-fill.svg
+	BlurMediumFill Icon
+	//go:embed svg/blur_medium.svg
+	BlurMedium Icon
+	//go:embed svg/blur_off-fill.svg
+	BlurOffFill Icon
+	//go:embed svg/blur_off.svg
+	BlurOff Icon
+	//go:embed svg/blur_on-fill.svg
+	BlurOnFill Icon
+	//go:embed svg/blur_on.svg
+	BlurOn Icon
+	//go:embed svg/blur_short-fill.svg
+	BlurShortFill Icon
+	//go:embed svg/blur_short.svg
+	BlurShort Icon
+	//go:embed svg/bolt-fill.svg
+	BoltFill Icon
+	//go:embed svg/bolt.svg
+	Bolt Icon
+	//go:embed svg/book-fill.svg
+	BookFill Icon
+	//go:embed svg/book.svg
+	Book Icon
+	//go:embed svg/book_online-fill.svg
+	BookOnlineFill Icon
+	//go:embed svg/book_online.svg
+	BookOnline Icon
+	//go:embed svg/bookmark-fill.svg
+	BookmarkFill Icon
+	//go:embed svg/bookmark.svg
+	Bookmark Icon
+	//go:embed svg/bookmark_add-fill.svg
+	BookmarkAddFill Icon
+	//go:embed svg/bookmark_add.svg
+	BookmarkAdd Icon
+	//go:embed svg/bookmark_added-fill.svg
+	BookmarkAddedFill Icon
+	//go:embed svg/bookmark_added.svg
+	BookmarkAdded Icon
+	//go:embed svg/bookmark_manager-fill.svg
+	BookmarkManagerFill Icon
+	//go:embed svg/bookmark_manager.svg
+	BookmarkManager Icon
+	//go:embed svg/bookmark_remove-fill.svg
+	BookmarkRemoveFill Icon
+	//go:embed svg/bookmark_remove.svg
+	BookmarkRemove Icon
+	//go:embed svg/bookmarks-fill.svg
+	BookmarksFill Icon
+	//go:embed svg/bookmarks.svg
+	Bookmarks Icon
+	//go:embed svg/border_all-fill.svg
+	BorderAllFill Icon
+	//go:embed svg/border_all.svg
+	BorderAll Icon
+	//go:embed svg/border_bottom-fill.svg
+	BorderBottomFill Icon
+	//go:embed svg/border_bottom.svg
+	BorderBottom Icon
+	//go:embed svg/border_clear-fill.svg
+	BorderClearFill Icon
+	//go:embed svg/border_clear.svg
+	BorderClear Icon
+	//go:embed svg/border_color-fill.svg
+	BorderColorFill Icon
+	//go:embed svg/border_color.svg
+	BorderColor Icon
+	//go:embed svg/border_horizontal-fill.svg
+	BorderHorizontalFill Icon
+	//go:embed svg/border_horizontal.svg
+	BorderHorizontal Icon
+	//go:embed svg/border_inner-fill.svg
+	BorderInnerFill Icon
+	//go:embed svg/border_inner.svg
+	BorderInner Icon
+	//go:embed svg/border_left-fill.svg
+	BorderLeftFill Icon
+	//go:embed svg/border_left.svg
+	BorderLeft Icon
+	//go:embed svg/border_outer-fill.svg
+	BorderOuterFill Icon
+	//go:embed svg/border_outer.svg
+	BorderOuter Icon
+	//go:embed svg/border_right-fill.svg
+	BorderRightFill Icon
+	//go:embed svg/border_right.svg
+	BorderRight Icon
+	//go:embed svg/border_style-fill.svg
+	BorderStyleFill Icon
+	//go:embed svg/border_style.svg
+	BorderStyle Icon
+	//go:embed svg/border_top-fill.svg
+	BorderTopFill Icon
+	//go:embed svg/border_top.svg
+	BorderTop Icon
+	//go:embed svg/border_vertical-fill.svg
+	BorderVerticalFill Icon
+	//go:embed svg/border_vertical.svg
+	BorderVertical Icon
+	//go:embed svg/bottom_app_bar-fill.svg
+	BottomAppBarFill Icon
+	//go:embed svg/bottom_app_bar.svg
+	BottomAppBar Icon
+	//go:embed svg/bottom_drawer-fill.svg
+	BottomDrawerFill Icon
+	//go:embed svg/bottom_drawer.svg
+	BottomDrawer Icon
+	//go:embed svg/bottom_navigation-fill.svg
+	BottomNavigationFill Icon
+	//go:embed svg/bottom_navigation.svg
+	BottomNavigation Icon
+	//go:embed svg/bottom_panel_close-fill.svg
+	BottomPanelCloseFill Icon
+	//go:embed svg/bottom_panel_close.svg
+	BottomPanelClose Icon
+	//go:embed svg/bottom_panel_open-fill.svg
+	BottomPanelOpenFill Icon
+	//go:embed svg/bottom_panel_open.svg
+	BottomPanelOpen Icon
+	//go:embed svg/bottom_right_click-fill.svg
+	BottomRightClickFill Icon
+	//go:embed svg/bottom_right_click.svg
+	BottomRightClick Icon
+	//go:embed svg/bottom_sheets-fill.svg
+	BottomSheetsFill Icon
+	//go:embed svg/bottom_sheets.svg
+	BottomSheets Icon
+	//go:embed svg/box-fill.svg
+	BoxFill Icon
+	//go:embed svg/box.svg
+	Box Icon
+	//go:embed svg/box_add-fill.svg
+	BoxAddFill Icon
+	//go:embed svg/box_add.svg
+	BoxAdd Icon
+	//go:embed svg/box_edit-fill.svg
+	BoxEditFill Icon
+	//go:embed svg/box_edit.svg
+	BoxEdit Icon
+	//go:embed svg/boy-fill.svg
+	BoyFill Icon
+	//go:embed svg/boy.svg
+	Boy Icon
+	//go:embed svg/brightness_1-fill.svg
+	Brightness1Fill Icon
+	//go:embed svg/brightness_1.svg
+	Brightness1 Icon
+	//go:embed svg/brightness_2-fill.svg
+	Brightness2Fill Icon
+	//go:embed svg/brightness_2.svg
+	Brightness2 Icon
+	//go:embed svg/brightness_3-fill.svg
+	Brightness3Fill Icon
+	//go:embed svg/brightness_3.svg
+	Brightness3 Icon
+	//go:embed svg/brightness_4-fill.svg
+	Brightness4Fill Icon
+	//go:embed svg/brightness_4.svg
+	Brightness4 Icon
+	//go:embed svg/brightness_5-fill.svg
+	Brightness5Fill Icon
+	//go:embed svg/brightness_5.svg
+	Brightness5 Icon
+	//go:embed svg/brightness_6-fill.svg
+	Brightness6Fill Icon
+	//go:embed svg/brightness_6.svg
+	Brightness6 Icon
+	//go:embed svg/brightness_7-fill.svg
+	Brightness7Fill Icon
+	//go:embed svg/brightness_7.svg
+	Brightness7 Icon
+	//go:embed svg/brightness_alert-fill.svg
+	BrightnessAlertFill Icon
+	//go:embed svg/brightness_alert.svg
+	BrightnessAlert Icon
+	//go:embed svg/brightness_auto-fill.svg
+	BrightnessAutoFill Icon
+	//go:embed svg/brightness_auto.svg
+	BrightnessAuto Icon
+	//go:embed svg/brightness_empty-fill.svg
+	BrightnessEmptyFill Icon
+	//go:embed svg/brightness_empty.svg
+	BrightnessEmpty Icon
+	//go:embed svg/brightness_high-fill.svg
+	BrightnessHighFill Icon
+	//go:embed svg/brightness_high.svg
+	BrightnessHigh Icon
+	//go:embed svg/brightness_low-fill.svg
+	BrightnessLowFill Icon
+	//go:embed svg/brightness_low.svg
+	BrightnessLow Icon
+	//go:embed svg/brightness_medium-fill.svg
+	BrightnessMediumFill Icon
+	//go:embed svg/brightness_medium.svg
+	BrightnessMedium Icon
+	//go:embed svg/broadcast_on_home-fill.svg
+	BroadcastOnHomeFill Icon
+	//go:embed svg/broadcast_on_home.svg
+	BroadcastOnHome Icon
+	//go:embed svg/broadcast_on_personal-fill.svg
+	BroadcastOnPersonalFill Icon
+	//go:embed svg/broadcast_on_personal.svg
+	BroadcastOnPersonal Icon
+	//go:embed svg/broken_image-fill.svg
+	BrokenImageFill Icon
+	//go:embed svg/broken_image.svg
+	BrokenImage Icon
+	//go:embed svg/browse-fill.svg
+	BrowseFill Icon
+	//go:embed svg/browse.svg
+	Browse Icon
+	//go:embed svg/browse_activity-fill.svg
+	BrowseActivityFill Icon
+	//go:embed svg/browse_activity.svg
+	BrowseActivity Icon
+	//go:embed svg/browse_gallery-fill.svg
+	BrowseGalleryFill Icon
+	//go:embed svg/browse_gallery.svg
+	BrowseGallery Icon
+	//go:embed svg/browser_updated-fill.svg
+	BrowserUpdatedFill Icon
+	//go:embed svg/browser_updated.svg
+	BrowserUpdated Icon
+	//go:embed svg/brush-fill.svg
+	BrushFill Icon
+	//go:embed svg/brush.svg
+	Brush Icon
+	//go:embed svg/bubble-fill.svg
+	BubbleFill Icon
+	//go:embed svg/bubble.svg
+	Bubble Icon
+	//go:embed svg/bubble_chart-fill.svg
+	BubbleChartFill Icon
+	//go:embed svg/bubble_chart.svg
+	BubbleChart Icon
+	//go:embed svg/bubbles-fill.svg
+	BubblesFill Icon
+	//go:embed svg/bubbles.svg
+	Bubbles Icon
+	//go:embed svg/bug_report-fill.svg
+	BugReportFill Icon
+	//go:embed svg/bug_report.svg
+	BugReport Icon
+	//go:embed svg/build-fill.svg
+	BuildFill Icon
+	//go:embed svg/build.svg
+	Build Icon
+	//go:embed svg/build_circle-fill.svg
+	BuildCircleFill Icon
+	//go:embed svg/build_circle.svg
+	BuildCircle Icon
+	//go:embed svg/burst_mode-fill.svg
+	BurstModeFill Icon
+	//go:embed svg/burst_mode.svg
+	BurstMode Icon
+	//go:embed svg/business_chip-fill.svg
+	BusinessChipFill Icon
+	//go:embed svg/business_chip.svg
+	BusinessChip Icon
+	//go:embed svg/business_messages-fill.svg
+	BusinessMessagesFill Icon
+	//go:embed svg/business_messages.svg
+	BusinessMessages Icon
+	//go:embed svg/buttons_alt-fill.svg
+	ButtonsAltFill Icon
+	//go:embed svg/buttons_alt.svg
+	ButtonsAlt Icon
+	//go:embed svg/cable-fill.svg
+	CableFill Icon
+	//go:embed svg/cable.svg
+	Cable Icon
+	//go:embed svg/cached-fill.svg
+	CachedFill Icon
+	//go:embed svg/cached.svg
+	Cached Icon
+	//go:embed svg/cake-fill.svg
+	CakeFill Icon
+	//go:embed svg/cake.svg
+	Cake Icon
+	//go:embed svg/cake_add-fill.svg
+	CakeAddFill Icon
+	//go:embed svg/cake_add.svg
+	CakeAdd Icon
+	//go:embed svg/calculate-fill.svg
+	CalculateFill Icon
+	//go:embed svg/calculate.svg
+	Calculate Icon
+	//go:embed svg/calendar_add_on-fill.svg
+	CalendarAddOnFill Icon
+	//go:embed svg/calendar_add_on.svg
+	CalendarAddOn Icon
+	//go:embed svg/calendar_apps_script-fill.svg
+	CalendarAppsScriptFill Icon
+	//go:embed svg/calendar_apps_script.svg
+	CalendarAppsScript Icon
+	//go:embed svg/calendar_month-fill.svg
+	CalendarMonthFill Icon
+	//go:embed svg/calendar_month.svg
+	CalendarMonth Icon
+	//go:embed svg/calendar_today-fill.svg
+	CalendarTodayFill Icon
+	//go:embed svg/calendar_today.svg
+	CalendarToday Icon
+	//go:embed svg/calendar_view_day-fill.svg
+	CalendarViewDayFill Icon
+	//go:embed svg/calendar_view_day.svg
+	CalendarViewDay Icon
+	//go:embed svg/calendar_view_month-fill.svg
+	CalendarViewMonthFill Icon
+	//go:embed svg/calendar_view_month.svg
+	CalendarViewMonth Icon
+	//go:embed svg/calendar_view_week-fill.svg
+	CalendarViewWeekFill Icon
+	//go:embed svg/calendar_view_week.svg
+	CalendarViewWeek Icon
+	//go:embed svg/camera-fill.svg
+	CameraFill Icon
+	//go:embed svg/camera.svg
+	Camera Icon
+	//go:embed svg/camera_front-fill.svg
+	CameraFrontFill Icon
+	//go:embed svg/camera_front.svg
+	CameraFront Icon
+	//go:embed svg/camera_indoor-fill.svg
+	CameraIndoorFill Icon
+	//go:embed svg/camera_indoor.svg
+	CameraIndoor Icon
+	//go:embed svg/camera_outdoor-fill.svg
+	CameraOutdoorFill Icon
+	//go:embed svg/camera_outdoor.svg
+	CameraOutdoor Icon
+	//go:embed svg/camera_rear-fill.svg
+	CameraRearFill Icon
+	//go:embed svg/camera_rear.svg
+	CameraRear Icon
+	//go:embed svg/camera_roll-fill.svg
+	CameraRollFill Icon
+	//go:embed svg/camera_roll.svg
+	CameraRoll Icon
+	//go:embed svg/camera_video-fill.svg
+	CameraVideoFill Icon
+	//go:embed svg/camera_video.svg
+	CameraVideo Icon
+	//go:embed svg/cameraswitch-fill.svg
+	CameraswitchFill Icon
+	//go:embed svg/cameraswitch.svg
+	Cameraswitch Icon
+	//go:embed svg/cancel-fill.svg
+	CancelFill Icon
+	//go:embed svg/cancel.svg
+	Cancel Icon
+	//go:embed svg/cancel_presentation-fill.svg
+	CancelPresentationFill Icon
+	//go:embed svg/cancel_presentation.svg
+	CancelPresentation Icon
+	//go:embed svg/cancel_schedule_send-fill.svg
+	CancelScheduleSendFill Icon
+	//go:embed svg/cancel_schedule_send.svg
+	CancelScheduleSend Icon
+	//go:embed svg/candlestick_chart-fill.svg
+	CandlestickChartFill Icon
+	//go:embed svg/candlestick_chart.svg
+	CandlestickChart Icon
+	//go:embed svg/capture-fill.svg
+	CaptureFill Icon
+	//go:embed svg/capture.svg
+	Capture Icon
+	//go:embed svg/card_membership-fill.svg
+	CardMembershipFill Icon
+	//go:embed svg/card_membership.svg
+	CardMembership Icon
+	//go:embed svg/cards-fill.svg
+	CardsFill Icon
+	//go:embed svg/cards.svg
+	Cards Icon
+	//go:embed svg/cast-fill.svg
+	CastFill Icon
+	//go:embed svg/cast.svg
+	Cast Icon
+	//go:embed svg/cast_connected-fill.svg
+	CastConnectedFill Icon
+	//go:embed svg/cast_connected.svg
+	CastConnected Icon
+	//go:embed svg/cast_pause-fill.svg
+	CastPauseFill Icon
+	//go:embed svg/cast_pause.svg
+	CastPause Icon
+	//go:embed svg/cast_warning-fill.svg
+	CastWarningFill Icon
+	//go:embed svg/cast_warning.svg
+	CastWarning Icon
+	//go:embed svg/category-fill.svg
+	CategoryFill Icon
+	//go:embed svg/category.svg
+	Category Icon
+	//go:embed svg/celebration-fill.svg
+	CelebrationFill Icon
+	//go:embed svg/celebration.svg
+	Celebration Icon
+	//go:embed svg/cell_merge-fill.svg
+	CellMergeFill Icon
+	//go:embed svg/cell_merge.svg
+	CellMerge Icon
+	//go:embed svg/center_focus_strong-fill.svg
+	CenterFocusStrongFill Icon
+	//go:embed svg/center_focus_strong.svg
+	CenterFocusStrong Icon
+	//go:embed svg/center_focus_weak-fill.svg
+	CenterFocusWeakFill Icon
+	//go:embed svg/center_focus_weak.svg
+	CenterFocusWeak Icon
+	//go:embed svg/chair-fill.svg
+	ChairFill Icon
+	//go:embed svg/chair.svg
+	Chair Icon
+	//go:embed svg/change_circle-fill.svg
+	ChangeCircleFill Icon
+	//go:embed svg/change_circle.svg
+	ChangeCircle Icon
+	//go:embed svg/change_history-fill.svg
+	ChangeHistoryFill Icon
+	//go:embed svg/change_history.svg
+	ChangeHistory Icon
+	//go:embed svg/charger-fill.svg
+	ChargerFill Icon
+	//go:embed svg/charger.svg
+	Charger Icon
+	//go:embed svg/chart_data-fill.svg
+	ChartDataFill Icon
+	//go:embed svg/chart_data.svg
+	ChartData Icon
+	//go:embed svg/chat-fill.svg
+	ChatFill Icon
+	//go:embed svg/chat.svg
+	Chat Icon
+	//go:embed svg/chat_add_on-fill.svg
+	ChatAddOnFill Icon
+	//go:embed svg/chat_add_on.svg
+	ChatAddOn Icon
+	//go:embed svg/chat_apps_script-fill.svg
+	ChatAppsScriptFill Icon
+	//go:embed svg/chat_apps_script.svg
+	ChatAppsScript Icon
+	//go:embed svg/chat_bubble-fill.svg
+	ChatBubbleFill Icon
+	//go:embed svg/chat_bubble.svg
+	ChatBubble Icon
+	//go:embed svg/chat_error-fill.svg
+	ChatErrorFill Icon
+	//go:embed svg/chat_error.svg
+	ChatError Icon
+	//go:embed svg/chat_paste_go-fill.svg
+	ChatPasteGoFill Icon
+	//go:embed svg/chat_paste_go.svg
+	ChatPasteGo Icon
+	//go:embed svg/check-fill.svg
+	CheckFill Icon
+	//go:embed svg/check.svg
+	Check Icon
+	//go:embed svg/check_box-fill.svg
+	CheckBoxFill Icon
+	//go:embed svg/check_box.svg
+	CheckBox Icon
+	//go:embed svg/check_box_outline_blank-fill.svg
+	CheckBoxOutlineBlankFill Icon
+	//go:embed svg/check_box_outline_blank.svg
+	CheckBoxOutlineBlank Icon
+	//go:embed svg/check_circle-fill.svg
+	CheckCircleFill Icon
+	//go:embed svg/check_circle.svg
+	CheckCircle Icon
+	//go:embed svg/check_in_out-fill.svg
+	CheckInOutFill Icon
+	//go:embed svg/check_in_out.svg
+	CheckInOut Icon
+	//go:embed svg/check_indeterminate_small-fill.svg
+	CheckIndeterminateSmallFill Icon
+	//go:embed svg/check_indeterminate_small.svg
+	CheckIndeterminateSmall Icon
+	//go:embed svg/check_small-fill.svg
+	CheckSmallFill Icon
+	//go:embed svg/check_small.svg
+	CheckSmall Icon
+	//go:embed svg/checklist-fill.svg
+	ChecklistFill Icon
+	//go:embed svg/checklist.svg
+	Checklist Icon
+	//go:embed svg/checklist_rtl-fill.svg
+	ChecklistRtlFill Icon
+	//go:embed svg/checklist_rtl.svg
+	ChecklistRtl Icon
+	//go:embed svg/cheer-fill.svg
+	CheerFill Icon
+	//go:embed svg/cheer.svg
+	Cheer Icon
+	//go:embed svg/chess-fill.svg
+	ChessFill Icon
+	//go:embed svg/chess.svg
+	Chess Icon
+	//go:embed svg/chevron_left-fill.svg
+	ChevronLeftFill Icon
+	//go:embed svg/chevron_left.svg
+	ChevronLeft Icon
+	//go:embed svg/chevron_right-fill.svg
+	ChevronRightFill Icon
+	//go:embed svg/chevron_right.svg
+	ChevronRight Icon
+	//go:embed svg/chips-fill.svg
+	ChipsFill Icon
+	//go:embed svg/chips.svg
+	Chips Icon
+	//go:embed svg/chronic-fill.svg
+	ChronicFill Icon
+	//go:embed svg/chronic.svg
+	Chronic Icon
+	//go:embed svg/circle-fill.svg
+	CircleFill Icon
+	//go:embed svg/circle.svg
+	Circle Icon
+	//go:embed svg/circle_notifications-fill.svg
+	CircleNotificationsFill Icon
+	//go:embed svg/circle_notifications.svg
+	CircleNotifications Icon
+	//go:embed svg/circles-fill.svg
+	CirclesFill Icon
+	//go:embed svg/circles.svg
+	Circles Icon
+	//go:embed svg/circles_ext-fill.svg
+	CirclesExtFill Icon
+	//go:embed svg/circles_ext.svg
+	CirclesExt Icon
+	//go:embed svg/clarify-fill.svg
+	ClarifyFill Icon
+	//go:embed svg/clarify.svg
+	Clarify Icon
+	//go:embed svg/clear_all-fill.svg
+	ClearAllFill Icon
+	//go:embed svg/clear_all.svg
+	ClearAll Icon
+	//go:embed svg/clear_day-fill.svg
+	ClearDayFill Icon
+	//go:embed svg/clear_day.svg
+	ClearDay Icon
+	//go:embed svg/clear_night-fill.svg
+	ClearNightFill Icon
+	//go:embed svg/clear_night.svg
+	ClearNight Icon
+	//go:embed svg/clock_loader_10-fill.svg
+	ClockLoader10Fill Icon
+	//go:embed svg/clock_loader_10.svg
+	ClockLoader10 Icon
+	//go:embed svg/clock_loader_20-fill.svg
+	ClockLoader20Fill Icon
+	//go:embed svg/clock_loader_20.svg
+	ClockLoader20 Icon
+	//go:embed svg/clock_loader_40-fill.svg
+	ClockLoader40Fill Icon
+	//go:embed svg/clock_loader_40.svg
+	ClockLoader40 Icon
+	//go:embed svg/clock_loader_60-fill.svg
+	ClockLoader60Fill Icon
+	//go:embed svg/clock_loader_60.svg
+	ClockLoader60 Icon
+	//go:embed svg/clock_loader_80-fill.svg
+	ClockLoader80Fill Icon
+	//go:embed svg/clock_loader_80.svg
+	ClockLoader80 Icon
+	//go:embed svg/clock_loader_90-fill.svg
+	ClockLoader90Fill Icon
+	//go:embed svg/clock_loader_90.svg
+	ClockLoader90 Icon
+	//go:embed svg/close-fill.svg
+	CloseFill Icon
+	//go:embed svg/close.svg
+	Close Icon
+	//go:embed svg/close_fullscreen-fill.svg
+	CloseFullscreenFill Icon
+	//go:embed svg/close_fullscreen.svg
+	CloseFullscreen Icon
+	//go:embed svg/closed_caption-fill.svg
+	ClosedCaptionFill Icon
+	//go:embed svg/closed_caption.svg
+	ClosedCaption Icon
+	//go:embed svg/closed_caption_disabled-fill.svg
+	ClosedCaptionDisabledFill Icon
+	//go:embed svg/closed_caption_disabled.svg
+	ClosedCaptionDisabled Icon
+	//go:embed svg/cloud-fill.svg
+	CloudFill Icon
+	//go:embed svg/cloud.svg
+	Cloud Icon
+	//go:embed svg/cloud_circle-fill.svg
+	CloudCircleFill Icon
+	//go:embed svg/cloud_circle.svg
+	CloudCircle Icon
+	//go:embed svg/cloud_done-fill.svg
+	CloudDoneFill Icon
+	//go:embed svg/cloud_done.svg
+	CloudDone Icon
+	//go:embed svg/cloud_download-fill.svg
+	CloudDownloadFill Icon
+	//go:embed svg/cloud_download.svg
+	CloudDownload Icon
+	//go:embed svg/cloud_off-fill.svg
+	CloudOffFill Icon
+	//go:embed svg/cloud_off.svg
+	CloudOff Icon
+	//go:embed svg/cloud_sync-fill.svg
+	CloudSyncFill Icon
+	//go:embed svg/cloud_sync.svg
+	CloudSync Icon
+	//go:embed svg/cloud_upload-fill.svg
+	CloudUploadFill Icon
+	//go:embed svg/cloud_upload.svg
+	CloudUpload Icon
+	//go:embed svg/code-fill.svg
+	CodeFill Icon
+	//go:embed svg/code.svg
+	Code Icon
+	//go:embed svg/code_blocks-fill.svg
+	CodeBlocksFill Icon
+	//go:embed svg/code_blocks.svg
+	CodeBlocks Icon
+	//go:embed svg/code_off-fill.svg
+	CodeOffFill Icon
+	//go:embed svg/code_off.svg
+	CodeOff Icon
+	//go:embed svg/coffee-fill.svg
+	CoffeeFill Icon
+	//go:embed svg/coffee.svg
+	Coffee Icon
+	//go:embed svg/cognition-fill.svg
+	CognitionFill Icon
+	//go:embed svg/cognition.svg
+	Cognition Icon
+	//go:embed svg/collapse_all-fill.svg
+	CollapseAllFill Icon
+	//go:embed svg/collapse_all.svg
+	CollapseAll Icon
+	//go:embed svg/collections_bookmark-fill.svg
+	CollectionsBookmarkFill Icon
+	//go:embed svg/collections_bookmark.svg
+	CollectionsBookmark Icon
+	//go:embed svg/colorize-fill.svg
+	ColorizeFill Icon
+	//go:embed svg/colorize.svg
+	Colorize Icon
+	//go:embed svg/colors-fill.svg
+	ColorsFill Icon
+	//go:embed svg/colors.svg
+	Colors Icon
+	//go:embed svg/comic_bubble-fill.svg
+	ComicBubbleFill Icon
+	//go:embed svg/comic_bubble.svg
+	ComicBubble Icon
+	//go:embed svg/comment-fill.svg
+	CommentFill Icon
+	//go:embed svg/comment.svg
+	Comment Icon
+	//go:embed svg/comment_bank-fill.svg
+	CommentBankFill Icon
+	//go:embed svg/comment_bank.svg
+	CommentBank Icon
+	//go:embed svg/comments_disabled-fill.svg
+	CommentsDisabledFill Icon
+	//go:embed svg/comments_disabled.svg
+	CommentsDisabled Icon
+	//go:embed svg/commit-fill.svg
+	CommitFill Icon
+	//go:embed svg/commit.svg
+	Commit Icon
+	//go:embed svg/communication-fill.svg
+	CommunicationFill Icon
+	//go:embed svg/communication.svg
+	Communication Icon
+	//go:embed svg/communities-fill.svg
+	CommunitiesFill Icon
+	//go:embed svg/communities.svg
+	Communities Icon
+	//go:embed svg/compare-fill.svg
+	CompareFill Icon
+	//go:embed svg/compare.svg
+	Compare Icon
+	//go:embed svg/compare_arrows-fill.svg
+	CompareArrowsFill Icon
+	//go:embed svg/compare_arrows.svg
+	CompareArrows Icon
+	//go:embed svg/component_exchange-fill.svg
+	ComponentExchangeFill Icon
+	//go:embed svg/component_exchange.svg
+	ComponentExchange Icon
+	//go:embed svg/compress-fill.svg
+	CompressFill Icon
+	//go:embed svg/compress.svg
+	Compress Icon
+	//go:embed svg/computer-fill.svg
+	ComputerFill Icon
+	//go:embed svg/computer.svg
+	Computer Icon
+	//go:embed svg/confirmation_number-fill.svg
+	ConfirmationNumberFill Icon
+	//go:embed svg/confirmation_number.svg
+	ConfirmationNumber Icon
+	//go:embed svg/connect_without_contact-fill.svg
+	ConnectWithoutContactFill Icon
+	//go:embed svg/connect_without_contact.svg
+	ConnectWithoutContact Icon
+	//go:embed svg/connected_tv-fill.svg
+	ConnectedTvFill Icon
+	//go:embed svg/connected_tv.svg
+	ConnectedTv Icon
+	//go:embed svg/connecting_airports-fill.svg
+	ConnectingAirportsFill Icon
+	//go:embed svg/connecting_airports.svg
+	ConnectingAirports Icon
+	//go:embed svg/constant.svg
+	Constant Icon
+	//go:embed svg/construction-fill.svg
+	ConstructionFill Icon
+	//go:embed svg/construction.svg
+	Construction Icon
+	//go:embed svg/contact_emergency-fill.svg
+	ContactEmergencyFill Icon
+	//go:embed svg/contact_emergency.svg
+	ContactEmergency Icon
+	//go:embed svg/contact_mail-fill.svg
+	ContactMailFill Icon
+	//go:embed svg/contact_mail.svg
+	ContactMail Icon
+	//go:embed svg/contact_page-fill.svg
+	ContactPageFill Icon
+	//go:embed svg/contact_page.svg
+	ContactPage Icon
+	//go:embed svg/contact_phone-fill.svg
+	ContactPhoneFill Icon
+	//go:embed svg/contact_phone.svg
+	ContactPhone Icon
+	//go:embed svg/contact_support-fill.svg
+	ContactSupportFill Icon
+	//go:embed svg/contact_support.svg
+	ContactSupport Icon
+	//go:embed svg/contactless-fill.svg
+	ContactlessFill Icon
+	//go:embed svg/contactless.svg
+	Contactless Icon
+	//go:embed svg/contactless_off-fill.svg
+	ContactlessOffFill Icon
+	//go:embed svg/contactless_off.svg
+	ContactlessOff Icon
+	//go:embed svg/contacts-fill.svg
+	ContactsFill Icon
+	//go:embed svg/contacts.svg
+	Contacts Icon
+	//go:embed svg/content_copy-fill.svg
+	ContentCopyFill Icon
+	//go:embed svg/content_copy.svg
+	ContentCopy Icon
+	//go:embed svg/content_cut-fill.svg
+	ContentCutFill Icon
+	//go:embed svg/content_cut.svg
+	ContentCut Icon
+	//go:embed svg/content_paste-fill.svg
+	ContentPasteFill Icon
+	//go:embed svg/content_paste.svg
+	ContentPaste Icon
+	//go:embed svg/content_paste_go-fill.svg
+	ContentPasteGoFill Icon
+	//go:embed svg/content_paste_go.svg
+	ContentPasteGo Icon
+	//go:embed svg/content_paste_off-fill.svg
+	ContentPasteOffFill Icon
+	//go:embed svg/content_paste_off.svg
+	ContentPasteOff Icon
+	//go:embed svg/content_paste_search-fill.svg
+	ContentPasteSearchFill Icon
+	//go:embed svg/content_paste_search.svg
+	ContentPasteSearch Icon
+	//go:embed svg/contract-fill.svg
+	ContractFill Icon
+	//go:embed svg/contract.svg
+	Contract Icon
+	//go:embed svg/contract_delete-fill.svg
+	ContractDeleteFill Icon
+	//go:embed svg/contract_delete.svg
+	ContractDelete Icon
+	//go:embed svg/contract_edit-fill.svg
+	ContractEditFill Icon
+	//go:embed svg/contract_edit.svg
+	ContractEdit Icon
+	//go:embed svg/contrast-fill.svg
+	ContrastFill Icon
+	//go:embed svg/contrast.svg
+	Contrast Icon
+	//go:embed svg/contrast_rtl_off-fill.svg
+	ContrastRtlOffFill Icon
+	//go:embed svg/contrast_rtl_off.svg
+	ContrastRtlOff Icon
+	//go:embed svg/control_camera-fill.svg
+	ControlCameraFill Icon
+	//go:embed svg/control_camera.svg
+	ControlCamera Icon
+	//go:embed svg/control_point_duplicate-fill.svg
+	ControlPointDuplicateFill Icon
+	//go:embed svg/control_point_duplicate.svg
+	ControlPointDuplicate Icon
+	//go:embed svg/controller_gen-fill.svg
+	ControllerGenFill Icon
+	//go:embed svg/controller_gen.svg
+	ControllerGen Icon
+	//go:embed svg/conversion_path-fill.svg
+	ConversionPathFill Icon
+	//go:embed svg/conversion_path.svg
+	ConversionPath Icon
+	//go:embed svg/conversion_path_off-fill.svg
+	ConversionPathOffFill Icon
+	//go:embed svg/conversion_path_off.svg
+	ConversionPathOff Icon
+	//go:embed svg/conveyor_belt-fill.svg
+	ConveyorBeltFill Icon
+	//go:embed svg/conveyor_belt.svg
+	ConveyorBelt Icon
+	//go:embed svg/cookie-fill.svg
+	CookieFill Icon
+	//go:embed svg/cookie.svg
+	Cookie Icon
+	//go:embed svg/cookie_off-fill.svg
+	CookieOffFill Icon
+	//go:embed svg/cookie_off.svg
+	CookieOff Icon
+	//go:embed svg/copy.svg
+	Copy Icon
+	//go:embed svg/copy_all-fill.svg
+	CopyAllFill Icon
+	//go:embed svg/copy_all.svg
+	CopyAll Icon
+	//go:embed svg/copyright-fill.svg
+	CopyrightFill Icon
+	//go:embed svg/copyright.svg
+	Copyright Icon
+	//go:embed svg/counter_0-fill.svg
+	Counter0Fill Icon
+	//go:embed svg/counter_0.svg
+	Counter0 Icon
+	//go:embed svg/counter_1-fill.svg
+	Counter1Fill Icon
+	//go:embed svg/counter_1.svg
+	Counter1 Icon
+	//go:embed svg/counter_2-fill.svg
+	Counter2Fill Icon
+	//go:embed svg/counter_2.svg
+	Counter2 Icon
+	//go:embed svg/counter_3-fill.svg
+	Counter3Fill Icon
+	//go:embed svg/counter_3.svg
+	Counter3 Icon
+	//go:embed svg/counter_4-fill.svg
+	Counter4Fill Icon
+	//go:embed svg/counter_4.svg
+	Counter4 Icon
+	//go:embed svg/counter_5-fill.svg
+	Counter5Fill Icon
+	//go:embed svg/counter_5.svg
+	Counter5 Icon
+	//go:embed svg/counter_6-fill.svg
+	Counter6Fill Icon
+	//go:embed svg/counter_6.svg
+	Counter6 Icon
+	//go:embed svg/counter_7-fill.svg
+	Counter7Fill Icon
+	//go:embed svg/counter_7.svg
+	Counter7 Icon
+	//go:embed svg/counter_8-fill.svg
+	Counter8Fill Icon
+	//go:embed svg/counter_8.svg
+	Counter8 Icon
+	//go:embed svg/counter_9-fill.svg
+	Counter9Fill Icon
+	//go:embed svg/counter_9.svg
+	Counter9 Icon
+	//go:embed svg/create_new_folder-fill.svg
+	CreateNewFolderFill Icon
+	//go:embed svg/create_new_folder.svg
+	CreateNewFolder Icon
+	//go:embed svg/credit_card-fill.svg
+	CreditCardFill Icon
+	//go:embed svg/credit_card.svg
+	CreditCard Icon
+	//go:embed svg/credit_card_off-fill.svg
+	CreditCardOffFill Icon
+	//go:embed svg/credit_card_off.svg
+	CreditCardOff Icon
+	//go:embed svg/credit_score-fill.svg
+	CreditScoreFill Icon
+	//go:embed svg/credit_score.svg
+	CreditScore Icon
+	//go:embed svg/crisis_alert-fill.svg
+	CrisisAlertFill Icon
+	//go:embed svg/crisis_alert.svg
+	CrisisAlert Icon
+	//go:embed svg/crop-fill.svg
+	CropFill Icon
+	//go:embed svg/crop.svg
+	Crop Icon
+	//go:embed svg/crop_16_9-fill.svg
+	Crop169Fill Icon
+	//go:embed svg/crop_16_9.svg
+	Crop169 Icon
+	//go:embed svg/crop_3_2-fill.svg
+	Crop32Fill Icon
+	//go:embed svg/crop_3_2.svg
+	Crop32 Icon
+	//go:embed svg/crop_5_4-fill.svg
+	Crop54Fill Icon
+	//go:embed svg/crop_5_4.svg
+	Crop54 Icon
+	//go:embed svg/crop_7_5-fill.svg
+	Crop75Fill Icon
+	//go:embed svg/crop_7_5.svg
+	Crop75 Icon
+	//go:embed svg/crop_free-fill.svg
+	CropFreeFill Icon
+	//go:embed svg/crop_free.svg
+	CropFree Icon
+	//go:embed svg/crop_landscape-fill.svg
+	CropLandscapeFill Icon
+	//go:embed svg/crop_landscape.svg
+	CropLandscape Icon
+	//go:embed svg/crop_portrait-fill.svg
+	CropPortraitFill Icon
+	//go:embed svg/crop_portrait.svg
+	CropPortrait Icon
+	//go:embed svg/crop_rotate-fill.svg
+	CropRotateFill Icon
+	//go:embed svg/crop_rotate.svg
+	CropRotate Icon
+	//go:embed svg/crop_square-fill.svg
+	CropSquareFill Icon
+	//go:embed svg/crop_square.svg
+	CropSquare Icon
+	//go:embed svg/crowdsource-fill.svg
+	CrowdsourceFill Icon
+	//go:embed svg/crowdsource.svg
+	Crowdsource Icon
+	//go:embed svg/css-fill.svg
+	CssFill Icon
+	//go:embed svg/css.svg
+	Css Icon
+	//go:embed svg/csv-fill.svg
+	CsvFill Icon
+	//go:embed svg/csv.svg
+	Csv Icon
+	//go:embed svg/currency_bitcoin-fill.svg
+	CurrencyBitcoinFill Icon
+	//go:embed svg/currency_bitcoin.svg
+	CurrencyBitcoin Icon
+	//go:embed svg/currency_exchange-fill.svg
+	CurrencyExchangeFill Icon
+	//go:embed svg/currency_exchange.svg
+	CurrencyExchange Icon
+	//go:embed svg/currency_franc-fill.svg
+	CurrencyFrancFill Icon
+	//go:embed svg/currency_franc.svg
+	CurrencyFranc Icon
+	//go:embed svg/currency_lira-fill.svg
+	CurrencyLiraFill Icon
+	//go:embed svg/currency_lira.svg
+	CurrencyLira Icon
+	//go:embed svg/currency_pound-fill.svg
+	CurrencyPoundFill Icon
+	//go:embed svg/currency_pound.svg
+	CurrencyPound Icon
+	//go:embed svg/currency_ruble-fill.svg
+	CurrencyRubleFill Icon
+	//go:embed svg/currency_ruble.svg
+	CurrencyRuble Icon
+	//go:embed svg/currency_rupee-fill.svg
+	CurrencyRupeeFill Icon
+	//go:embed svg/currency_rupee.svg
+	CurrencyRupee Icon
+	//go:embed svg/currency_yen-fill.svg
+	CurrencyYenFill Icon
+	//go:embed svg/currency_yen.svg
+	CurrencyYen Icon
+	//go:embed svg/currency_yuan-fill.svg
+	CurrencyYuanFill Icon
+	//go:embed svg/currency_yuan.svg
+	CurrencyYuan Icon
+	//go:embed svg/custom_typography-fill.svg
+	CustomTypographyFill Icon
+	//go:embed svg/custom_typography.svg
+	CustomTypography Icon
+	//go:embed svg/cut-fill.svg
+	CutFill Icon
+	//go:embed svg/cut.svg
+	Cut Icon
+	//go:embed svg/cycle-fill.svg
+	CycleFill Icon
+	//go:embed svg/cycle.svg
+	Cycle Icon
+	//go:embed svg/cyclone-fill.svg
+	CycloneFill Icon
+	//go:embed svg/cyclone.svg
+	Cyclone Icon
+	//go:embed svg/dangerous-fill.svg
+	DangerousFill Icon
+	//go:embed svg/dangerous.svg
+	Dangerous Icon
+	//go:embed svg/dark_mode-fill.svg
+	DarkModeFill Icon
+	//go:embed svg/dark_mode.svg
+	DarkMode Icon
+	//go:embed svg/dashboard-fill.svg
+	DashboardFill Icon
+	//go:embed svg/dashboard.svg
+	Dashboard Icon
+	//go:embed svg/dashboard_customize-fill.svg
+	DashboardCustomizeFill Icon
+	//go:embed svg/dashboard_customize.svg
+	DashboardCustomize Icon
+	//go:embed svg/data_alert-fill.svg
+	DataAlertFill Icon
+	//go:embed svg/data_alert.svg
+	DataAlert Icon
+	//go:embed svg/data_array-fill.svg
+	DataArrayFill Icon
+	//go:embed svg/data_array.svg
+	DataArray Icon
+	//go:embed svg/data_check-fill.svg
+	DataCheckFill Icon
+	//go:embed svg/data_check.svg
+	DataCheck Icon
+	//go:embed svg/data_exploration-fill.svg
+	DataExplorationFill Icon
+	//go:embed svg/data_exploration.svg
+	DataExploration Icon
+	//go:embed svg/data_info_alert-fill.svg
+	DataInfoAlertFill Icon
+	//go:embed svg/data_info_alert.svg
+	DataInfoAlert Icon
+	//go:embed svg/data_loss_prevention-fill.svg
+	DataLossPreventionFill Icon
+	//go:embed svg/data_loss_prevention.svg
+	DataLossPrevention Icon
+	//go:embed svg/data_object-fill.svg
+	DataObjectFill Icon
+	//go:embed svg/data_object.svg
+	DataObject Icon
+	//go:embed svg/data_saver_on-fill.svg
+	DataSaverOnFill Icon
+	//go:embed svg/data_saver_on.svg
+	DataSaverOn Icon
+	//go:embed svg/data_table-fill.svg
+	DataTableFill Icon
+	//go:embed svg/data_table.svg
+	DataTable Icon
+	//go:embed svg/data_thresholding-fill.svg
+	DataThresholdingFill Icon
+	//go:embed svg/data_thresholding.svg
+	DataThresholding Icon
+	//go:embed svg/data_usage-fill.svg
+	DataUsageFill Icon
+	//go:embed svg/data_usage.svg
+	DataUsage Icon
+	//go:embed svg/database-fill.svg
+	DatabaseFill Icon
+	//go:embed svg/database.svg
+	Database Icon
+	//go:embed svg/dataset-fill.svg
+	DatasetFill Icon
+	//go:embed svg/dataset.svg
+	Dataset Icon
+	//go:embed svg/dataset_linked-fill.svg
+	DatasetLinkedFill Icon
+	//go:embed svg/dataset_linked.svg
+	DatasetLinked Icon
+	//go:embed svg/date_range-fill.svg
+	DateRangeFill Icon
+	//go:embed svg/date_range.svg
+	DateRange Icon
+	//go:embed svg/deblur-fill.svg
+	DeblurFill Icon
+	//go:embed svg/deblur.svg
+	Deblur Icon
+	//go:embed svg/debug-fill.svg
+	DebugFill Icon
+	//go:embed svg/debug.svg
+	Debug Icon
+	//go:embed svg/decimal_decrease-fill.svg
+	DecimalDecreaseFill Icon
+	//go:embed svg/decimal_decrease.svg
+	DecimalDecrease Icon
+	//go:embed svg/decimal_increase-fill.svg
+	DecimalIncreaseFill Icon
+	//go:embed svg/decimal_increase.svg
+	DecimalIncrease Icon
+	//go:embed svg/deck-fill.svg
+	DeckFill Icon
+	//go:embed svg/deck.svg
+	Deck Icon
+	//go:embed svg/dehaze-fill.svg
+	DehazeFill Icon
+	//go:embed svg/dehaze.svg
+	Dehaze Icon
+	//go:embed svg/delete-fill.svg
+	DeleteFill Icon
+	//go:embed svg/delete.svg
+	Delete Icon
+	//go:embed svg/delete_forever-fill.svg
+	DeleteForeverFill Icon
+	//go:embed svg/delete_forever.svg
+	DeleteForever Icon
+	//go:embed svg/delete_sweep-fill.svg
+	DeleteSweepFill Icon
+	//go:embed svg/delete_sweep.svg
+	DeleteSweep Icon
+	//go:embed svg/density_large-fill.svg
+	DensityLargeFill Icon
+	//go:embed svg/density_large.svg
+	DensityLarge Icon
+	//go:embed svg/density_medium-fill.svg
+	DensityMediumFill Icon
+	//go:embed svg/density_medium.svg
+	DensityMedium Icon
+	//go:embed svg/density_small-fill.svg
+	DensitySmallFill Icon
+	//go:embed svg/density_small.svg
+	DensitySmall Icon
+	//go:embed svg/deployed_code-fill.svg
+	DeployedCodeFill Icon
+	//go:embed svg/deployed_code.svg
+	DeployedCode Icon
+	//go:embed svg/deployed_code_alert-fill.svg
+	DeployedCodeAlertFill Icon
+	//go:embed svg/deployed_code_alert.svg
+	DeployedCodeAlert Icon
+	//go:embed svg/deployed_code_history-fill.svg
+	DeployedCodeHistoryFill Icon
+	//go:embed svg/deployed_code_history.svg
+	DeployedCodeHistory Icon
+	//go:embed svg/deployed_code_update-fill.svg
+	DeployedCodeUpdateFill Icon
+	//go:embed svg/deployed_code_update.svg
+	DeployedCodeUpdate Icon
+	//go:embed svg/description-fill.svg
+	DescriptionFill Icon
+	//go:embed svg/description.svg
+	Description Icon
+	//go:embed svg/deselect-fill.svg
+	DeselectFill Icon
+	//go:embed svg/deselect.svg
+	Deselect Icon
+	//go:embed svg/design_services-fill.svg
+	DesignServicesFill Icon
+	//go:embed svg/design_services.svg
+	DesignServices Icon
+	//go:embed svg/desk-fill.svg
+	DeskFill Icon
+	//go:embed svg/desk.svg
+	Desk Icon
+	//go:embed svg/deskphone-fill.svg
+	DeskphoneFill Icon
+	//go:embed svg/deskphone.svg
+	Deskphone Icon
+	//go:embed svg/desktop-fill.svg
+	DesktopFill Icon
+	//go:embed svg/desktop.svg
+	Desktop Icon
+	//go:embed svg/desktop_access_disabled-fill.svg
+	DesktopAccessDisabledFill Icon
+	//go:embed svg/desktop_access_disabled.svg
+	DesktopAccessDisabled Icon
+	//go:embed svg/desktop_mac-fill.svg
+	DesktopMacFill Icon
+	//go:embed svg/desktop_mac.svg
+	DesktopMac Icon
+	//go:embed svg/desktop_windows-fill.svg
+	DesktopWindowsFill Icon
+	//go:embed svg/desktop_windows.svg
+	DesktopWindows Icon
+	//go:embed svg/details-fill.svg
+	DetailsFill Icon
+	//go:embed svg/details.svg
+	Details Icon
+	//go:embed svg/detector-fill.svg
+	DetectorFill Icon
+	//go:embed svg/detector.svg
+	Detector Icon
+	//go:embed svg/detector_alarm-fill.svg
+	DetectorAlarmFill Icon
+	//go:embed svg/detector_alarm.svg
+	DetectorAlarm Icon
+	//go:embed svg/detector_battery-fill.svg
+	DetectorBatteryFill Icon
+	//go:embed svg/detector_battery.svg
+	DetectorBattery Icon
+	//go:embed svg/detector_co-fill.svg
+	DetectorCoFill Icon
+	//go:embed svg/detector_co.svg
+	DetectorCo Icon
+	//go:embed svg/detector_offline-fill.svg
+	DetectorOfflineFill Icon
+	//go:embed svg/detector_offline.svg
+	DetectorOffline Icon
+	//go:embed svg/detector_smoke-fill.svg
+	DetectorSmokeFill Icon
+	//go:embed svg/detector_smoke.svg
+	DetectorSmoke Icon
+	//go:embed svg/detector_status-fill.svg
+	DetectorStatusFill Icon
+	//go:embed svg/detector_status.svg
+	DetectorStatus Icon
+	//go:embed svg/developer_board-fill.svg
+	DeveloperBoardFill Icon
+	//go:embed svg/developer_board.svg
+	DeveloperBoard Icon
+	//go:embed svg/developer_board_off-fill.svg
+	DeveloperBoardOffFill Icon
+	//go:embed svg/developer_board_off.svg
+	DeveloperBoardOff Icon
+	//go:embed svg/developer_guide-fill.svg
+	DeveloperGuideFill Icon
+	//go:embed svg/developer_guide.svg
+	DeveloperGuide Icon
+	//go:embed svg/developer_mode-fill.svg
+	DeveloperModeFill Icon
+	//go:embed svg/developer_mode.svg
+	DeveloperMode Icon
+	//go:embed svg/developer_mode_tv-fill.svg
+	DeveloperModeTvFill Icon
+	//go:embed svg/developer_mode_tv.svg
+	DeveloperModeTv Icon
+	//go:embed svg/device_hub-fill.svg
+	DeviceHubFill Icon
+	//go:embed svg/device_hub.svg
+	DeviceHub Icon
+	//go:embed svg/device_reset-fill.svg
+	DeviceResetFill Icon
+	//go:embed svg/device_reset.svg
+	DeviceReset Icon
+	//go:embed svg/device_thermostat-fill.svg
+	DeviceThermostatFill Icon
+	//go:embed svg/device_thermostat.svg
+	DeviceThermostat Icon
+	//go:embed svg/device_unknown-fill.svg
+	DeviceUnknownFill Icon
+	//go:embed svg/device_unknown.svg
+	DeviceUnknown Icon
+	//go:embed svg/devices-fill.svg
+	DevicesFill Icon
+	//go:embed svg/devices.svg
+	Devices Icon
+	//go:embed svg/devices_fold-fill.svg
+	DevicesFoldFill Icon
+	//go:embed svg/devices_fold.svg
+	DevicesFold Icon
+	//go:embed svg/devices_off-fill.svg
+	DevicesOffFill Icon
+	//go:embed svg/devices_off.svg
+	DevicesOff Icon
+	//go:embed svg/devices_other-fill.svg
+	DevicesOtherFill Icon
+	//go:embed svg/devices_other.svg
+	DevicesOther Icon
+	//go:embed svg/devices_wearables-fill.svg
+	DevicesWearablesFill Icon
+	//go:embed svg/devices_wearables.svg
+	DevicesWearables Icon
+	//go:embed svg/dialer_sip-fill.svg
+	DialerSipFill Icon
+	//go:embed svg/dialer_sip.svg
+	DialerSip Icon
+	//go:embed svg/dialogs-fill.svg
+	DialogsFill Icon
+	//go:embed svg/dialogs.svg
+	Dialogs Icon
+	//go:embed svg/dialpad-fill.svg
+	DialpadFill Icon
+	//go:embed svg/dialpad.svg
+	Dialpad Icon
+	//go:embed svg/diamond-fill.svg
+	DiamondFill Icon
+	//go:embed svg/diamond.svg
+	Diamond Icon
+	//go:embed svg/difference-fill.svg
+	DifferenceFill Icon
+	//go:embed svg/difference.svg
+	Difference Icon
+	//go:embed svg/dining-fill.svg
+	DiningFill Icon
+	//go:embed svg/dining.svg
+	Dining Icon
+	//go:embed svg/dinner_dining-fill.svg
+	DinnerDiningFill Icon
+	//go:embed svg/dinner_dining.svg
+	DinnerDining Icon
+	//go:embed svg/directions-fill.svg
+	DirectionsFill Icon
+	//go:embed svg/directions.svg
+	Directions Icon
+	//go:embed svg/directions_off-fill.svg
+	DirectionsOffFill Icon
+	//go:embed svg/directions_off.svg
+	DirectionsOff Icon
+	//go:embed svg/directory_sync-fill.svg
+	DirectorySyncFill Icon
+	//go:embed svg/directory_sync.svg
+	DirectorySync Icon
+	//go:embed svg/dirty_lens-fill.svg
+	DirtyLensFill Icon
+	//go:embed svg/dirty_lens.svg
+	DirtyLens Icon
+	//go:embed svg/disabled_by_default-fill.svg
+	DisabledByDefaultFill Icon
+	//go:embed svg/disabled_by_default.svg
+	DisabledByDefault Icon
+	//go:embed svg/disabled_visible-fill.svg
+	DisabledVisibleFill Icon
+	//go:embed svg/disabled_visible.svg
+	DisabledVisible Icon
+	//go:embed svg/disc_full-fill.svg
+	DiscFullFill Icon
+	//go:embed svg/disc_full.svg
+	DiscFull Icon
+	//go:embed svg/display_external_input-fill.svg
+	DisplayExternalInputFill Icon
+	//go:embed svg/display_external_input.svg
+	DisplayExternalInput Icon
+	//go:embed svg/display_settings-fill.svg
+	DisplaySettingsFill Icon
+	//go:embed svg/display_settings.svg
+	DisplaySettings Icon
+	//go:embed svg/distance-fill.svg
+	DistanceFill Icon
+	//go:embed svg/distance.svg
+	Distance Icon
+	//go:embed svg/diversity_1-fill.svg
+	Diversity1Fill Icon
+	//go:embed svg/diversity_1.svg
+	Diversity1 Icon
+	//go:embed svg/diversity_2-fill.svg
+	Diversity2Fill Icon
+	//go:embed svg/diversity_2.svg
+	Diversity2 Icon
+	//go:embed svg/diversity_3-fill.svg
+	Diversity3Fill Icon
+	//go:embed svg/diversity_3.svg
+	Diversity3 Icon
+	//go:embed svg/diversity_4-fill.svg
+	Diversity4Fill Icon
+	//go:embed svg/diversity_4.svg
+	Diversity4 Icon
+	//go:embed svg/dns-fill.svg
+	DnsFill Icon
+	//go:embed svg/dns.svg
+	Dns Icon
+	//go:embed svg/do_not_disturb_off-fill.svg
+	DoNotDisturbOffFill Icon
+	//go:embed svg/do_not_disturb_off.svg
+	DoNotDisturbOff Icon
+	//go:embed svg/do_not_disturb_on-fill.svg
+	DoNotDisturbOnFill Icon
+	//go:embed svg/do_not_disturb_on.svg
+	DoNotDisturbOn Icon
+	//go:embed svg/dock-fill.svg
+	DockFill Icon
+	//go:embed svg/dock.svg
+	Dock Icon
+	//go:embed svg/dock_to_bottom-fill.svg
+	DockToBottomFill Icon
+	//go:embed svg/dock_to_bottom.svg
+	DockToBottom Icon
+	//go:embed svg/dock_to_left-fill.svg
+	DockToLeftFill Icon
+	//go:embed svg/dock_to_left.svg
+	DockToLeft Icon
+	//go:embed svg/dock_to_right-fill.svg
+	DockToRightFill Icon
+	//go:embed svg/dock_to_right.svg
+	DockToRight Icon
+	//go:embed svg/docs_add_on-fill.svg
+	DocsAddOnFill Icon
+	//go:embed svg/docs_add_on.svg
+	DocsAddOn Icon
+	//go:embed svg/docs_apps_script-fill.svg
+	DocsAppsScriptFill Icon
+	//go:embed svg/docs_apps_script.svg
+	DocsAppsScript Icon
+	//go:embed svg/document-fill.svg
+	DocumentFill Icon
+	//go:embed svg/document.svg
+	Document Icon
+	//go:embed svg/document_scanner-fill.svg
+	DocumentScannerFill Icon
+	//go:embed svg/document_scanner.svg
+	DocumentScanner Icon
+	//go:embed svg/domain-fill.svg
+	DomainFill Icon
+	//go:embed svg/domain.svg
+	Domain Icon
+	//go:embed svg/domain_add-fill.svg
+	DomainAddFill Icon
+	//go:embed svg/domain_add.svg
+	DomainAdd Icon
+	//go:embed svg/domain_disabled-fill.svg
+	DomainDisabledFill Icon
+	//go:embed svg/domain_disabled.svg
+	DomainDisabled Icon
+	//go:embed svg/domain_verification-fill.svg
+	DomainVerificationFill Icon
+	//go:embed svg/domain_verification.svg
+	DomainVerification Icon
+	//go:embed svg/domain_verification_off-fill.svg
+	DomainVerificationOffFill Icon
+	//go:embed svg/domain_verification_off.svg
+	DomainVerificationOff Icon
+	//go:embed svg/done-fill.svg
+	DoneFill Icon
+	//go:embed svg/done.svg
+	Done Icon
+	//go:embed svg/done_all-fill.svg
+	DoneAllFill Icon
+	//go:embed svg/done_all.svg
+	DoneAll Icon
+	//go:embed svg/done_outline-fill.svg
+	DoneOutlineFill Icon
+	//go:embed svg/done_outline.svg
+	DoneOutline Icon
+	//go:embed svg/donut_large-fill.svg
+	DonutLargeFill Icon
+	//go:embed svg/donut_large.svg
+	DonutLarge Icon
+	//go:embed svg/donut_small-fill.svg
+	DonutSmallFill Icon
+	//go:embed svg/donut_small.svg
+	DonutSmall Icon
+	//go:embed svg/door_open-fill.svg
+	DoorOpenFill Icon
+	//go:embed svg/door_open.svg
+	DoorOpen Icon
+	//go:embed svg/double_arrow-fill.svg
+	DoubleArrowFill Icon
+	//go:embed svg/double_arrow.svg
+	DoubleArrow Icon
+	//go:embed svg/download-fill.svg
+	DownloadFill Icon
+	//go:embed svg/download.svg
+	Download Icon
+	//go:embed svg/download_done-fill.svg
+	DownloadDoneFill Icon
+	//go:embed svg/download_done.svg
+	DownloadDone Icon
+	//go:embed svg/download_for_offline-fill.svg
+	DownloadForOfflineFill Icon
+	//go:embed svg/download_for_offline.svg
+	DownloadForOffline Icon
+	//go:embed svg/downloading-fill.svg
+	DownloadingFill Icon
+	//go:embed svg/downloading.svg
+	Downloading Icon
+	//go:embed svg/draft-fill.svg
+	DraftFill Icon
+	//go:embed svg/draft.svg
+	Draft Icon
+	//go:embed svg/draft_orders-fill.svg
+	DraftOrdersFill Icon
+	//go:embed svg/draft_orders.svg
+	DraftOrders Icon
+	//go:embed svg/drafts-fill.svg
+	DraftsFill Icon
+	//go:embed svg/drafts.svg
+	Drafts Icon
+	//go:embed svg/drag_click-fill.svg
+	DragClickFill Icon
+	//go:embed svg/drag_click.svg
+	DragClick Icon
+	//go:embed svg/drag_handle-fill.svg
+	DragHandleFill Icon
+	//go:embed svg/drag_handle.svg
+	DragHandle Icon
+	//go:embed svg/drag_indicator-fill.svg
+	DragIndicatorFill Icon
+	//go:embed svg/drag_indicator.svg
+	DragIndicator Icon
+	//go:embed svg/drag_pan-fill.svg
+	DragPanFill Icon
+	//go:embed svg/drag_pan.svg
+	DragPan Icon
+	//go:embed svg/draw-fill.svg
+	DrawFill Icon
+	//go:embed svg/draw.svg
+	Draw Icon
+	//go:embed svg/draw_abstract-fill.svg
+	DrawAbstractFill Icon
+	//go:embed svg/draw_abstract.svg
+	DrawAbstract Icon
+	//go:embed svg/draw_collage-fill.svg
+	DrawCollageFill Icon
+	//go:embed svg/draw_collage.svg
+	DrawCollage Icon
+	//go:embed svg/drive_file_move-fill.svg
+	DriveFileMoveFill Icon
+	//go:embed svg/drive_file_move.svg
+	DriveFileMove Icon
+	//go:embed svg/drive_folder_upload-fill.svg
+	DriveFolderUploadFill Icon
+	//go:embed svg/drive_folder_upload.svg
+	DriveFolderUpload Icon
+	//go:embed svg/dropdown-fill.svg
+	DropdownFill Icon
+	//go:embed svg/dropdown.svg
+	Dropdown Icon
+	//go:embed svg/dual_screen-fill.svg
+	DualScreenFill Icon
+	//go:embed svg/dual_screen.svg
+	DualScreen Icon
+	//go:embed svg/dvr-fill.svg
+	DvrFill Icon
+	//go:embed svg/dvr.svg
+	Dvr Icon
+	//go:embed svg/dynamic_feed-fill.svg
+	DynamicFeedFill Icon
+	//go:embed svg/dynamic_feed.svg
+	DynamicFeed Icon
+	//go:embed svg/dynamic_form-fill.svg
+	DynamicFormFill Icon
+	//go:embed svg/dynamic_form.svg
+	DynamicForm Icon
+	//go:embed svg/earbuds-fill.svg
+	EarbudsFill Icon
+	//go:embed svg/earbuds.svg
+	Earbuds Icon
+	//go:embed svg/earbuds_battery-fill.svg
+	EarbudsBatteryFill Icon
+	//go:embed svg/earbuds_battery.svg
+	EarbudsBattery Icon
+	//go:embed svg/east-fill.svg
+	EastFill Icon
+	//go:embed svg/east.svg
+	East Icon
+	//go:embed svg/eco-fill.svg
+	EcoFill Icon
+	//go:embed svg/eco.svg
+	Eco Icon
+	//go:embed svg/edit-fill.svg
+	EditFill Icon
+	//go:embed svg/edit.svg
+	Edit Icon
+	//go:embed svg/edit_attributes-fill.svg
+	EditAttributesFill Icon
+	//go:embed svg/edit_attributes.svg
+	EditAttributes Icon
+	//go:embed svg/edit_calendar-fill.svg
+	EditCalendarFill Icon
+	//go:embed svg/edit_calendar.svg
+	EditCalendar Icon
+	//go:embed svg/edit_document-fill.svg
+	EditDocumentFill Icon
+	//go:embed svg/edit_document.svg
+	EditDocument Icon
+	//go:embed svg/edit_location-fill.svg
+	EditLocationFill Icon
+	//go:embed svg/edit_location.svg
+	EditLocation Icon
+	//go:embed svg/edit_location_alt-fill.svg
+	EditLocationAltFill Icon
+	//go:embed svg/edit_location_alt.svg
+	EditLocationAlt Icon
+	//go:embed svg/edit_note-fill.svg
+	EditNoteFill Icon
+	//go:embed svg/edit_note.svg
+	EditNote Icon
+	//go:embed svg/edit_notifications-fill.svg
+	EditNotificationsFill Icon
+	//go:embed svg/edit_notifications.svg
+	EditNotifications Icon
+	//go:embed svg/edit_off-fill.svg
+	EditOffFill Icon
+	//go:embed svg/edit_off.svg
+	EditOff Icon
+	//go:embed svg/edit_square-fill.svg
+	EditSquareFill Icon
+	//go:embed svg/edit_square.svg
+	EditSquare Icon
+	//go:embed svg/egg-fill.svg
+	EggFill Icon
+	//go:embed svg/egg.svg
+	Egg Icon
+	//go:embed svg/egg_alt-fill.svg
+	EggAltFill Icon
+	//go:embed svg/egg_alt.svg
+	EggAlt Icon
+	//go:embed svg/eject-fill.svg
+	EjectFill Icon
+	//go:embed svg/eject.svg
+	Eject Icon
+	//go:embed svg/electrical_services-fill.svg
+	ElectricalServicesFill Icon
+	//go:embed svg/electrical_services.svg
+	ElectricalServices Icon
+	//go:embed svg/elevation-fill.svg
+	ElevationFill Icon
+	//go:embed svg/elevation.svg
+	Elevation Icon
+	//go:embed svg/emergency-fill.svg
+	EmergencyFill Icon
+	//go:embed svg/emergency.svg
+	Emergency Icon
+	//go:embed svg/emoji_events-fill.svg
+	EmojiEventsFill Icon
+	//go:embed svg/emoji_events.svg
+	EmojiEvents Icon
+	//go:embed svg/emoji_flags-fill.svg
+	EmojiFlagsFill Icon
+	//go:embed svg/emoji_flags.svg
+	EmojiFlags Icon
+	//go:embed svg/emoji_food_beverage-fill.svg
+	EmojiFoodBeverageFill Icon
+	//go:embed svg/emoji_food_beverage.svg
+	EmojiFoodBeverage Icon
+	//go:embed svg/emoji_nature-fill.svg
+	EmojiNatureFill Icon
+	//go:embed svg/emoji_nature.svg
+	EmojiNature Icon
+	//go:embed svg/emoji_objects-fill.svg
+	EmojiObjectsFill Icon
+	//go:embed svg/emoji_objects.svg
+	EmojiObjects Icon
+	//go:embed svg/emoji_people-fill.svg
+	EmojiPeopleFill Icon
+	//go:embed svg/emoji_people.svg
+	EmojiPeople Icon
+	//go:embed svg/emoji_symbols-fill.svg
+	EmojiSymbolsFill Icon
+	//go:embed svg/emoji_symbols.svg
+	EmojiSymbols Icon
+	//go:embed svg/emoji_transportation-fill.svg
+	EmojiTransportationFill Icon
+	//go:embed svg/emoji_transportation.svg
+	EmojiTransportation Icon
+	//go:embed svg/emoticon-fill.svg
+	EmoticonFill Icon
+	//go:embed svg/emoticon.svg
+	Emoticon Icon
+	//go:embed svg/empty_dashboard-fill.svg
+	EmptyDashboardFill Icon
+	//go:embed svg/empty_dashboard.svg
+	EmptyDashboard Icon
+	//go:embed svg/enable-fill.svg
+	EnableFill Icon
+	//go:embed svg/enable.svg
+	Enable Icon
+	//go:embed svg/encrypted-fill.svg
+	EncryptedFill Icon
+	//go:embed svg/encrypted.svg
+	Encrypted Icon
+	//go:embed svg/energy_savings_leaf-fill.svg
+	EnergySavingsLeafFill Icon
+	//go:embed svg/energy_savings_leaf.svg
+	EnergySavingsLeaf Icon
+	//go:embed svg/engineering-fill.svg
+	EngineeringFill Icon
+	//go:embed svg/engineering.svg
+	Engineering Icon
+	//go:embed svg/enhanced_encryption-fill.svg
+	EnhancedEncryptionFill Icon
+	//go:embed svg/enhanced_encryption.svg
+	EnhancedEncryption Icon
+	//go:embed svg/equal-fill.svg
+	EqualFill Icon
+	//go:embed svg/equal.svg
+	Equal Icon
+	//go:embed svg/equalizer-fill.svg
+	EqualizerFill Icon
+	//go:embed svg/equalizer.svg
+	Equalizer Icon
+	//go:embed svg/error-fill.svg
+	ErrorFill Icon
+	//go:embed svg/error.svg
+	Error Icon
+	//go:embed svg/euro-fill.svg
+	EuroFill Icon
+	//go:embed svg/euro.svg
+	Euro Icon
+	//go:embed svg/euro_symbol-fill.svg
+	EuroSymbolFill Icon
+	//go:embed svg/euro_symbol.svg
+	EuroSymbol Icon
+	//go:embed svg/event-fill.svg
+	EventFill Icon
+	//go:embed svg/event.svg
+	Event Icon
+	//go:embed svg/event_available-fill.svg
+	EventAvailableFill Icon
+	//go:embed svg/event_available.svg
+	EventAvailable Icon
+	//go:embed svg/event_busy-fill.svg
+	EventBusyFill Icon
+	//go:embed svg/event_busy.svg
+	EventBusy Icon
+	//go:embed svg/event_list-fill.svg
+	EventListFill Icon
+	//go:embed svg/event_list.svg
+	EventList Icon
+	//go:embed svg/event_note-fill.svg
+	EventNoteFill Icon
+	//go:embed svg/event_note.svg
+	EventNote Icon
+	//go:embed svg/event_repeat-fill.svg
+	EventRepeatFill Icon
+	//go:embed svg/event_repeat.svg
+	EventRepeat Icon
+	//go:embed svg/event_seat-fill.svg
+	EventSeatFill Icon
+	//go:embed svg/event_seat.svg
+	EventSeat Icon
+	//go:embed svg/event_upcoming-fill.svg
+	EventUpcomingFill Icon
+	//go:embed svg/event_upcoming.svg
+	EventUpcoming Icon
+	//go:embed svg/exclamation-fill.svg
+	ExclamationFill Icon
+	//go:embed svg/exclamation.svg
+	Exclamation Icon
+	//go:embed svg/exercise-fill.svg
+	ExerciseFill Icon
+	//go:embed svg/exercise.svg
+	Exercise Icon
+	//go:embed svg/exit_to_app-fill.svg
+	ExitToAppFill Icon
+	//go:embed svg/exit_to_app.svg
+	ExitToApp Icon
+	//go:embed svg/expand-fill.svg
+	ExpandFill Icon
+	//go:embed svg/expand.svg
+	Expand Icon
+	//go:embed svg/expand_all-fill.svg
+	ExpandAllFill Icon
+	//go:embed svg/expand_all.svg
+	ExpandAll Icon
+	//go:embed svg/expand_circle_down-fill.svg
+	ExpandCircleDownFill Icon
+	//go:embed svg/expand_circle_down.svg
+	ExpandCircleDown Icon
+	//go:embed svg/expand_circle_right-fill.svg
+	ExpandCircleRightFill Icon
+	//go:embed svg/expand_circle_right.svg
+	ExpandCircleRight Icon
+	//go:embed svg/expand_circle_up-fill.svg
+	ExpandCircleUpFill Icon
+	//go:embed svg/expand_circle_up.svg
+	ExpandCircleUp Icon
+	//go:embed svg/expand_content-fill.svg
+	ExpandContentFill Icon
+	//go:embed svg/expand_content.svg
+	ExpandContent Icon
+	//go:embed svg/expand_less-fill.svg
+	ExpandLessFill Icon
+	//go:embed svg/expand_less.svg
+	ExpandLess Icon
+	//go:embed svg/expand_more-fill.svg
+	ExpandMoreFill Icon
+	//go:embed svg/expand_more.svg
+	ExpandMore Icon
+	//go:embed svg/explicit-fill.svg
+	ExplicitFill Icon
+	//go:embed svg/explicit.svg
+	Explicit Icon
+	//go:embed svg/explore-fill.svg
+	ExploreFill Icon
+	//go:embed svg/explore.svg
+	Explore Icon
+	//go:embed svg/explore_off-fill.svg
+	ExploreOffFill Icon
+	//go:embed svg/explore_off.svg
+	ExploreOff Icon
+	//go:embed svg/explosion-fill.svg
+	ExplosionFill Icon
+	//go:embed svg/explosion.svg
+	Explosion Icon
+	//go:embed svg/export_notes-fill.svg
+	ExportNotesFill Icon
+	//go:embed svg/export_notes.svg
+	ExportNotes Icon
+	//go:embed svg/exposure-fill.svg
+	ExposureFill Icon
+	//go:embed svg/exposure.svg
+	Exposure Icon
+	//go:embed svg/exposure_neg_1-fill.svg
+	ExposureNeg1Fill Icon
+	//go:embed svg/exposure_neg_1.svg
+	ExposureNeg1 Icon
+	//go:embed svg/exposure_neg_2-fill.svg
+	ExposureNeg2Fill Icon
+	//go:embed svg/exposure_neg_2.svg
+	ExposureNeg2 Icon
+	//go:embed svg/exposure_plus_1-fill.svg
+	ExposurePlus1Fill Icon
+	//go:embed svg/exposure_plus_1.svg
+	ExposurePlus1 Icon
+	//go:embed svg/exposure_plus_2-fill.svg
+	ExposurePlus2Fill Icon
+	//go:embed svg/exposure_plus_2.svg
+	ExposurePlus2 Icon
+	//go:embed svg/exposure_zero-fill.svg
+	ExposureZeroFill Icon
+	//go:embed svg/exposure_zero.svg
+	ExposureZero Icon
+	//go:embed svg/extension-fill.svg
+	ExtensionFill Icon
+	//go:embed svg/extension.svg
+	Extension Icon
+	//go:embed svg/extension_off-fill.svg
+	ExtensionOffFill Icon
+	//go:embed svg/extension_off.svg
+	ExtensionOff Icon
+	//go:embed svg/face-fill.svg
+	FaceFill Icon
+	//go:embed svg/face.svg
+	Face Icon
+	//go:embed svg/face_2-fill.svg
+	Face2Fill Icon
+	//go:embed svg/face_2.svg
+	Face2 Icon
+	//go:embed svg/face_3-fill.svg
+	Face3Fill Icon
+	//go:embed svg/face_3.svg
+	Face3 Icon
+	//go:embed svg/face_4-fill.svg
+	Face4Fill Icon
+	//go:embed svg/face_4.svg
+	Face4 Icon
+	//go:embed svg/face_5-fill.svg
+	Face5Fill Icon
+	//go:embed svg/face_5.svg
+	Face5 Icon
+	//go:embed svg/face_6-fill.svg
+	Face6Fill Icon
+	//go:embed svg/face_6.svg
+	Face6 Icon
+	//go:embed svg/face_retouching_off-fill.svg
+	FaceRetouchingOffFill Icon
+	//go:embed svg/face_retouching_off.svg
+	FaceRetouchingOff Icon
+	//go:embed svg/fact_check-fill.svg
+	FactCheckFill Icon
+	//go:embed svg/fact_check.svg
+	FactCheck Icon
+	//go:embed svg/factory-fill.svg
+	FactoryFill Icon
+	//go:embed svg/factory.svg
+	Factory Icon
+	//go:embed svg/family_history-fill.svg
+	FamilyHistoryFill Icon
+	//go:embed svg/family_history.svg
+	FamilyHistory Icon
+	//go:embed svg/family_link-fill.svg
+	FamilyLinkFill Icon
+	//go:embed svg/family_link.svg
+	FamilyLink Icon
+	//go:embed svg/fast_forward-fill.svg
+	FastForwardFill Icon
+	//go:embed svg/fast_forward.svg
+	FastForward Icon
+	//go:embed svg/fast_rewind-fill.svg
+	FastRewindFill Icon
+	//go:embed svg/fast_rewind.svg
+	FastRewind Icon
+	//go:embed svg/faucet-fill.svg
+	FaucetFill Icon
+	//go:embed svg/faucet.svg
+	Faucet Icon
+	//go:embed svg/favorite-fill.svg
+	FavoriteFill Icon
+	//go:embed svg/favorite.svg
+	Favorite Icon
+	//go:embed svg/fax-fill.svg
+	FaxFill Icon
+	//go:embed svg/fax.svg
+	Fax Icon
+	//go:embed svg/feature_search-fill.svg
+	FeatureSearchFill Icon
+	//go:embed svg/feature_search.svg
+	FeatureSearch Icon
+	//go:embed svg/featured_play_list-fill.svg
+	FeaturedPlayListFill Icon
+	//go:embed svg/featured_play_list.svg
+	FeaturedPlayList Icon
+	//go:embed svg/featured_video-fill.svg
+	FeaturedVideoFill Icon
+	//go:embed svg/featured_video.svg
+	FeaturedVideo Icon
+	//go:embed svg/feed-fill.svg
+	FeedFill Icon
+	//go:embed svg/feed.svg
+	Feed Icon
+	//go:embed svg/feedback-fill.svg
+	FeedbackFill Icon
+	//go:embed svg/feedback.svg
+	Feedback Icon
+	//go:embed svg/female-fill.svg
+	FemaleFill Icon
+	//go:embed svg/female.svg
+	Female Icon
+	//go:embed svg/fence-fill.svg
+	FenceFill Icon
+	//go:embed svg/fence.svg
+	Fence Icon
+	//go:embed svg/festival-fill.svg
+	FestivalFill Icon
+	//go:embed svg/festival.svg
+	Festival Icon
+	//go:embed svg/field.svg
+	Field Icon
+	//go:embed svg/file-exe.svg
+	FileExe Icon
+	//go:embed svg/file-markdown.svg
+	FileMarkdown Icon
+	//go:embed svg/file.svg
+	File Icon
+	//go:embed svg/file_copy-fill.svg
+	FileCopyFill Icon
+	//go:embed svg/file_copy.svg
+	FileCopy Icon
+	//go:embed svg/file_download_done-fill.svg
+	FileDownloadDoneFill Icon
+	//go:embed svg/file_download_done.svg
+	FileDownloadDone Icon
+	//go:embed svg/file_download_off-fill.svg
+	FileDownloadOffFill Icon
+	//go:embed svg/file_download_off.svg
+	FileDownloadOff Icon
+	//go:embed svg/file_open-fill.svg
+	FileOpenFill Icon
+	//go:embed svg/file_open.svg
+	FileOpen Icon
+	//go:embed svg/file_present-fill.svg
+	FilePresentFill Icon
+	//go:embed svg/file_present.svg
+	FilePresent Icon
+	//go:embed svg/file_upload_off-fill.svg
+	FileUploadOffFill Icon
+	//go:embed svg/file_upload_off.svg
+	FileUploadOff Icon
+	//go:embed svg/filter-fill.svg
+	FilterFill Icon
+	//go:embed svg/filter.svg
+	Filter Icon
+	//go:embed svg/filter_1-fill.svg
+	Filter1Fill Icon
+	//go:embed svg/filter_1.svg
+	Filter1 Icon
+	//go:embed svg/filter_2-fill.svg
+	Filter2Fill Icon
+	//go:embed svg/filter_2.svg
+	Filter2 Icon
+	//go:embed svg/filter_3-fill.svg
+	Filter3Fill Icon
+	//go:embed svg/filter_3.svg
+	Filter3 Icon
+	//go:embed svg/filter_4-fill.svg
+	Filter4Fill Icon
+	//go:embed svg/filter_4.svg
+	Filter4 Icon
+	//go:embed svg/filter_5-fill.svg
+	Filter5Fill Icon
+	//go:embed svg/filter_5.svg
+	Filter5 Icon
+	//go:embed svg/filter_6-fill.svg
+	Filter6Fill Icon
+	//go:embed svg/filter_6.svg
+	Filter6 Icon
+	//go:embed svg/filter_7-fill.svg
+	Filter7Fill Icon
+	//go:embed svg/filter_7.svg
+	Filter7 Icon
+	//go:embed svg/filter_8-fill.svg
+	Filter8Fill Icon
+	//go:embed svg/filter_8.svg
+	Filter8 Icon
+	//go:embed svg/filter_9-fill.svg
+	Filter9Fill Icon
+	//go:embed svg/filter_9.svg
+	Filter9 Icon
+	//go:embed svg/filter_9_plus-fill.svg
+	Filter9PlusFill Icon
+	//go:embed svg/filter_9_plus.svg
+	Filter9Plus Icon
+	//go:embed svg/filter_alt-fill.svg
+	FilterAltFill Icon
+	//go:embed svg/filter_alt.svg
+	FilterAlt Icon
+	//go:embed svg/filter_alt_off-fill.svg
+	FilterAltOffFill Icon
+	//go:embed svg/filter_alt_off.svg
+	FilterAltOff Icon
+	//go:embed svg/filter_b_and_w-fill.svg
+	FilterBAndWFill Icon
+	//go:embed svg/filter_b_and_w.svg
+	FilterBAndW Icon
+	//go:embed svg/filter_center_focus-fill.svg
+	FilterCenterFocusFill Icon
+	//go:embed svg/filter_center_focus.svg
+	FilterCenterFocus Icon
+	//go:embed svg/filter_drama-fill.svg
+	FilterDramaFill Icon
+	//go:embed svg/filter_drama.svg
+	FilterDrama Icon
+	//go:embed svg/filter_frames-fill.svg
+	FilterFramesFill Icon
+	//go:embed svg/filter_frames.svg
+	FilterFrames Icon
+	//go:embed svg/filter_hdr-fill.svg
+	FilterHdrFill Icon
+	//go:embed svg/filter_hdr.svg
+	FilterHdr Icon
+	//go:embed svg/filter_list-fill.svg
+	FilterListFill Icon
+	//go:embed svg/filter_list.svg
+	FilterList Icon
+	//go:embed svg/filter_list_off-fill.svg
+	FilterListOffFill Icon
+	//go:embed svg/filter_list_off.svg
+	FilterListOff Icon
+	//go:embed svg/filter_none-fill.svg
+	FilterNoneFill Icon
+	//go:embed svg/filter_none.svg
+	FilterNone Icon
+	//go:embed svg/filter_tilt_shift-fill.svg
+	FilterTiltShiftFill Icon
+	//go:embed svg/filter_tilt_shift.svg
+	FilterTiltShift Icon
+	//go:embed svg/filter_vintage-fill.svg
+	FilterVintageFill Icon
+	//go:embed svg/filter_vintage.svg
+	FilterVintage Icon
+	//go:embed svg/finance-fill.svg
+	FinanceFill Icon
+	//go:embed svg/finance.svg
+	Finance Icon
+	//go:embed svg/finance_chip-fill.svg
+	FinanceChipFill Icon
+	//go:embed svg/finance_chip.svg
+	FinanceChip Icon
+	//go:embed svg/find_in_page-fill.svg
+	FindInPageFill Icon
+	//go:embed svg/find_in_page.svg
+	FindInPage Icon
+	//go:embed svg/find_replace-fill.svg
+	FindReplaceFill Icon
+	//go:embed svg/find_replace.svg
+	FindReplace Icon
+	//go:embed svg/fingerprint-fill.svg
+	FingerprintFill Icon
+	//go:embed svg/fingerprint.svg
+	Fingerprint Icon
+	//go:embed svg/first_page-fill.svg
+	FirstPageFill Icon
+	//go:embed svg/first_page.svg
+	FirstPage Icon
+	//go:embed svg/fit_page-fill.svg
+	FitPageFill Icon
+	//go:embed svg/fit_page.svg
+	FitPage Icon
+	//go:embed svg/fit_screen-fill.svg
+	FitScreenFill Icon
+	//go:embed svg/fit_screen.svg
+	FitScreen Icon
+	//go:embed svg/fit_width-fill.svg
+	FitWidthFill Icon
+	//go:embed svg/fit_width.svg
+	FitWidth Icon
+	//go:embed svg/flag-fill.svg
+	FlagFill Icon
+	//go:embed svg/flag.svg
+	Flag Icon
+	//go:embed svg/flag_circle-fill.svg
+	FlagCircleFill Icon
+	//go:embed svg/flag_circle.svg
+	FlagCircle Icon
+	//go:embed svg/flaky-fill.svg
+	FlakyFill Icon
+	//go:embed svg/flaky.svg
+	Flaky Icon
+	//go:embed svg/flare-fill.svg
+	FlareFill Icon
+	//go:embed svg/flare.svg
+	Flare Icon
+	//go:embed svg/flashlight_off-fill.svg
+	FlashlightOffFill Icon
+	//go:embed svg/flashlight_off.svg
+	FlashlightOff Icon
+	//go:embed svg/flashlight_on-fill.svg
+	FlashlightOnFill Icon
+	//go:embed svg/flashlight_on.svg
+	FlashlightOn Icon
+	//go:embed svg/flex_direction-fill.svg
+	FlexDirectionFill Icon
+	//go:embed svg/flex_direction.svg
+	FlexDirection Icon
+	//go:embed svg/flex_no_wrap-fill.svg
+	FlexNoWrapFill Icon
+	//go:embed svg/flex_no_wrap.svg
+	FlexNoWrap Icon
+	//go:embed svg/flex_wrap-fill.svg
+	FlexWrapFill Icon
+	//go:embed svg/flex_wrap.svg
+	FlexWrap Icon
+	//go:embed svg/flight-fill.svg
+	FlightFill Icon
+	//go:embed svg/flight.svg
+	Flight Icon
+	//go:embed svg/flightsmode-fill.svg
+	FlightsmodeFill Icon
+	//go:embed svg/flightsmode.svg
+	Flightsmode Icon
+	//go:embed svg/flip-fill.svg
+	FlipFill Icon
+	//go:embed svg/flip.svg
+	Flip Icon
+	//go:embed svg/flip_camera_android-fill.svg
+	FlipCameraAndroidFill Icon
+	//go:embed svg/flip_camera_android.svg
+	FlipCameraAndroid Icon
+	//go:embed svg/flip_camera_ios-fill.svg
+	FlipCameraIosFill Icon
+	//go:embed svg/flip_camera_ios.svg
+	FlipCameraIos Icon
+	//go:embed svg/flip_to_back-fill.svg
+	FlipToBackFill Icon
+	//go:embed svg/flip_to_back.svg
+	FlipToBack Icon
+	//go:embed svg/flip_to_front-fill.svg
+	FlipToFrontFill Icon
+	//go:embed svg/flip_to_front.svg
+	FlipToFront Icon
+	//go:embed svg/floor-fill.svg
+	FloorFill Icon
+	//go:embed svg/floor.svg
+	Floor Icon
+	//go:embed svg/flowsheet-fill.svg
+	FlowsheetFill Icon
+	//go:embed svg/flowsheet.svg
+	Flowsheet Icon
+	//go:embed svg/fluid-fill.svg
+	FluidFill Icon
+	//go:embed svg/fluid.svg
+	Fluid Icon
+	//go:embed svg/fluid_balance-fill.svg
+	FluidBalanceFill Icon
+	//go:embed svg/fluid_balance.svg
+	FluidBalance Icon
+	//go:embed svg/fluid_med-fill.svg
+	FluidMedFill Icon
+	//go:embed svg/fluid_med.svg
+	FluidMed Icon
+	//go:embed svg/flutter-fill.svg
+	FlutterFill Icon
+	//go:embed svg/flutter.svg
+	Flutter Icon
+	//go:embed svg/flutter_dash-fill.svg
+	FlutterDashFill Icon
+	//go:embed svg/flutter_dash.svg
+	FlutterDash Icon
+	//go:embed svg/folder-fill.svg
+	FolderFill Icon
+	//go:embed svg/folder.svg
+	Folder Icon
+	//go:embed svg/folder_copy-fill.svg
+	FolderCopyFill Icon
+	//go:embed svg/folder_copy.svg
+	FolderCopy Icon
+	//go:embed svg/folder_delete-fill.svg
+	FolderDeleteFill Icon
+	//go:embed svg/folder_delete.svg
+	FolderDelete Icon
+	//go:embed svg/folder_managed-fill.svg
+	FolderManagedFill Icon
+	//go:embed svg/folder_managed.svg
+	FolderManaged Icon
+	//go:embed svg/folder_off-fill.svg
+	FolderOffFill Icon
+	//go:embed svg/folder_off.svg
+	FolderOff Icon
+	//go:embed svg/folder_open-fill.svg
+	FolderOpenFill Icon
+	//go:embed svg/folder_open.svg
+	FolderOpen Icon
+	//go:embed svg/folder_shared-fill.svg
+	FolderSharedFill Icon
+	//go:embed svg/folder_shared.svg
+	FolderShared Icon
+	//go:embed svg/folder_special-fill.svg
+	FolderSpecialFill Icon
+	//go:embed svg/folder_special.svg
+	FolderSpecial Icon
+	//go:embed svg/folder_supervised-fill.svg
+	FolderSupervisedFill Icon
+	//go:embed svg/folder_supervised.svg
+	FolderSupervised Icon
+	//go:embed svg/folder_zip-fill.svg
+	FolderZipFill Icon
+	//go:embed svg/folder_zip.svg
+	FolderZip Icon
+	//go:embed svg/font_download-fill.svg
+	FontDownloadFill Icon
+	//go:embed svg/font_download.svg
+	FontDownload Icon
+	//go:embed svg/font_download_off-fill.svg
+	FontDownloadOffFill Icon
+	//go:embed svg/font_download_off.svg
+	FontDownloadOff Icon
+	//go:embed svg/format_align_center-fill.svg
+	FormatAlignCenterFill Icon
+	//go:embed svg/format_align_center.svg
+	FormatAlignCenter Icon
+	//go:embed svg/format_align_justify-fill.svg
+	FormatAlignJustifyFill Icon
+	//go:embed svg/format_align_justify.svg
+	FormatAlignJustify Icon
+	//go:embed svg/format_align_left-fill.svg
+	FormatAlignLeftFill Icon
+	//go:embed svg/format_align_left.svg
+	FormatAlignLeft Icon
+	//go:embed svg/format_align_right-fill.svg
+	FormatAlignRightFill Icon
+	//go:embed svg/format_align_right.svg
+	FormatAlignRight Icon
+	//go:embed svg/format_bold-fill.svg
+	FormatBoldFill Icon
+	//go:embed svg/format_bold.svg
+	FormatBold Icon
+	//go:embed svg/format_clear-fill.svg
+	FormatClearFill Icon
+	//go:embed svg/format_clear.svg
+	FormatClear Icon
+	//go:embed svg/format_color_fill-fill.svg
+	FormatColorFillFill Icon
+	//go:embed svg/format_color_fill.svg
+	FormatColorFill Icon
+	//go:embed svg/format_color_reset-fill.svg
+	FormatColorResetFill Icon
+	//go:embed svg/format_color_reset.svg
+	FormatColorReset Icon
+	//go:embed svg/format_color_text-fill.svg
+	FormatColorTextFill Icon
+	//go:embed svg/format_color_text.svg
+	FormatColorText Icon
+	//go:embed svg/format_h1-fill.svg
+	FormatH1Fill Icon
+	//go:embed svg/format_h1.svg
+	FormatH1 Icon
+	//go:embed svg/format_h2-fill.svg
+	FormatH2Fill Icon
+	//go:embed svg/format_h2.svg
+	FormatH2 Icon
+	//go:embed svg/format_h3-fill.svg
+	FormatH3Fill Icon
+	//go:embed svg/format_h3.svg
+	FormatH3 Icon
+	//go:embed svg/format_h4-fill.svg
+	FormatH4Fill Icon
+	//go:embed svg/format_h4.svg
+	FormatH4 Icon
+	//go:embed svg/format_h5-fill.svg
+	FormatH5Fill Icon
+	//go:embed svg/format_h5.svg
+	FormatH5 Icon
+	//go:embed svg/format_h6-fill.svg
+	FormatH6Fill Icon
+	//go:embed svg/format_h6.svg
+	FormatH6 Icon
+	//go:embed svg/format_image_left-fill.svg
+	FormatImageLeftFill Icon
+	//go:embed svg/format_image_left.svg
+	FormatImageLeft Icon
+	//go:embed svg/format_image_right-fill.svg
+	FormatImageRightFill Icon
+	//go:embed svg/format_image_right.svg
+	FormatImageRight Icon
+	//go:embed svg/format_indent_decrease-fill.svg
+	FormatIndentDecreaseFill Icon
+	//go:embed svg/format_indent_decrease.svg
+	FormatIndentDecrease Icon
+	//go:embed svg/format_indent_increase-fill.svg
+	FormatIndentIncreaseFill Icon
+	//go:embed svg/format_indent_increase.svg
+	FormatIndentIncrease Icon
+	//go:embed svg/format_ink_highlighter-fill.svg
+	FormatInkHighlighterFill Icon
+	//go:embed svg/format_ink_highlighter.svg
+	FormatInkHighlighter Icon
+	//go:embed svg/format_italic-fill.svg
+	FormatItalicFill Icon
+	//go:embed svg/format_italic.svg
+	FormatItalic Icon
+	//go:embed svg/format_letter_spacing-fill.svg
+	FormatLetterSpacingFill Icon
+	//go:embed svg/format_letter_spacing.svg
+	FormatLetterSpacing Icon
+	//go:embed svg/format_letter_spacing_2-fill.svg
+	FormatLetterSpacing2Fill Icon
+	//go:embed svg/format_letter_spacing_2.svg
+	FormatLetterSpacing2 Icon
+	//go:embed svg/format_letter_spacing_standard-fill.svg
+	FormatLetterSpacingStandardFill Icon
+	//go:embed svg/format_letter_spacing_standard.svg
+	FormatLetterSpacingStandard Icon
+	//go:embed svg/format_letter_spacing_wide-fill.svg
+	FormatLetterSpacingWideFill Icon
+	//go:embed svg/format_letter_spacing_wide.svg
+	FormatLetterSpacingWide Icon
+	//go:embed svg/format_letter_spacing_wider-fill.svg
+	FormatLetterSpacingWiderFill Icon
+	//go:embed svg/format_letter_spacing_wider.svg
+	FormatLetterSpacingWider Icon
+	//go:embed svg/format_line_spacing-fill.svg
+	FormatLineSpacingFill Icon
+	//go:embed svg/format_line_spacing.svg
+	FormatLineSpacing Icon
+	//go:embed svg/format_list_bulleted-fill.svg
+	FormatListBulletedFill Icon
+	//go:embed svg/format_list_bulleted.svg
+	FormatListBulleted Icon
+	//go:embed svg/format_list_bulleted_add-fill.svg
+	FormatListBulletedAddFill Icon
+	//go:embed svg/format_list_bulleted_add.svg
+	FormatListBulletedAdd Icon
+	//go:embed svg/format_list_numbered-fill.svg
+	FormatListNumberedFill Icon
+	//go:embed svg/format_list_numbered.svg
+	FormatListNumbered Icon
+	//go:embed svg/format_list_numbered_rtl-fill.svg
+	FormatListNumberedRtlFill Icon
+	//go:embed svg/format_list_numbered_rtl.svg
+	FormatListNumberedRtl Icon
+	//go:embed svg/format_overline-fill.svg
+	FormatOverlineFill Icon
+	//go:embed svg/format_overline.svg
+	FormatOverline Icon
+	//go:embed svg/format_paint-fill.svg
+	FormatPaintFill Icon
+	//go:embed svg/format_paint.svg
+	FormatPaint Icon
+	//go:embed svg/format_paragraph-fill.svg
+	FormatParagraphFill Icon
+	//go:embed svg/format_paragraph.svg
+	FormatParagraph Icon
+	//go:embed svg/format_quote-fill.svg
+	FormatQuoteFill Icon
+	//go:embed svg/format_quote.svg
+	FormatQuote Icon
+	//go:embed svg/format_shapes-fill.svg
+	FormatShapesFill Icon
+	//go:embed svg/format_shapes.svg
+	FormatShapes Icon
+	//go:embed svg/format_size-fill.svg
+	FormatSizeFill Icon
+	//go:embed svg/format_size.svg
+	FormatSize Icon
+	//go:embed svg/format_strikethrough-fill.svg
+	FormatStrikethroughFill Icon
+	//go:embed svg/format_strikethrough.svg
+	FormatStrikethrough Icon
+	//go:embed svg/format_text_clip-fill.svg
+	FormatTextClipFill Icon
+	//go:embed svg/format_text_clip.svg
+	FormatTextClip Icon
+	//go:embed svg/format_text_overflow-fill.svg
+	FormatTextOverflowFill Icon
+	//go:embed svg/format_text_overflow.svg
+	FormatTextOverflow Icon
+	//go:embed svg/format_text_wrap-fill.svg
+	FormatTextWrapFill Icon
+	//go:embed svg/format_text_wrap.svg
+	FormatTextWrap Icon
+	//go:embed svg/format_textdirection_l_to_r-fill.svg
+	FormatTextdirectionLToRFill Icon
+	//go:embed svg/format_textdirection_l_to_r.svg
+	FormatTextdirectionLToR Icon
+	//go:embed svg/format_textdirection_r_to_l-fill.svg
+	FormatTextdirectionRToLFill Icon
+	//go:embed svg/format_textdirection_r_to_l.svg
+	FormatTextdirectionRToL Icon
+	//go:embed svg/format_underlined-fill.svg
+	FormatUnderlinedFill Icon
+	//go:embed svg/format_underlined.svg
+	FormatUnderlined Icon
+	//go:embed svg/format_underlined_squiggle-fill.svg
+	FormatUnderlinedSquiggleFill Icon
+	//go:embed svg/format_underlined_squiggle.svg
+	FormatUnderlinedSquiggle Icon
+	//go:embed svg/forms_add_on-fill.svg
+	FormsAddOnFill Icon
+	//go:embed svg/forms_add_on.svg
+	FormsAddOn Icon
+	//go:embed svg/forms_apps_script-fill.svg
+	FormsAppsScriptFill Icon
+	//go:embed svg/forms_apps_script.svg
+	FormsAppsScript Icon
+	//go:embed svg/forum-fill.svg
+	ForumFill Icon
+	//go:embed svg/forum.svg
+	Forum Icon
+	//go:embed svg/forward-fill.svg
+	ForwardFill Icon
+	//go:embed svg/forward.svg
+	Forward Icon
+	//go:embed svg/forward_10-fill.svg
+	Forward10Fill Icon
+	//go:embed svg/forward_10.svg
+	Forward10 Icon
+	//go:embed svg/forward_30-fill.svg
+	Forward30Fill Icon
+	//go:embed svg/forward_30.svg
+	Forward30 Icon
+	//go:embed svg/forward_5-fill.svg
+	Forward5Fill Icon
+	//go:embed svg/forward_5.svg
+	Forward5 Icon
+	//go:embed svg/forward_circle-fill.svg
+	ForwardCircleFill Icon
+	//go:embed svg/forward_circle.svg
+	ForwardCircle Icon
+	//go:embed svg/forward_media-fill.svg
+	ForwardMediaFill Icon
+	//go:embed svg/forward_media.svg
+	ForwardMedia Icon
+	//go:embed svg/forward_to_inbox-fill.svg
+	ForwardToInboxFill Icon
+	//go:embed svg/forward_to_inbox.svg
+	ForwardToInbox Icon
+	//go:embed svg/frame_inspect-fill.svg
+	FrameInspectFill Icon
+	//go:embed svg/frame_inspect.svg
+	FrameInspect Icon
+	//go:embed svg/frame_person-fill.svg
+	FramePersonFill Icon
+	//go:embed svg/frame_person.svg
+	FramePerson Icon
+	//go:embed svg/frame_person_off-fill.svg
+	FramePersonOffFill Icon
+	//go:embed svg/frame_person_off.svg
+	FramePersonOff Icon
+	//go:embed svg/frame_reload-fill.svg
+	FrameReloadFill Icon
+	//go:embed svg/frame_reload.svg
+	FrameReload Icon
+	//go:embed svg/frame_source-fill.svg
+	FrameSourceFill Icon
+	//go:embed svg/frame_source.svg
+	FrameSource Icon
+	//go:embed svg/free_cancellation-fill.svg
+	FreeCancellationFill Icon
+	//go:embed svg/free_cancellation.svg
+	FreeCancellation Icon
+	//go:embed svg/front_hand-fill.svg
+	FrontHandFill Icon
+	//go:embed svg/front_hand.svg
+	FrontHand Icon
+	//go:embed svg/full_coverage-fill.svg
+	FullCoverageFill Icon
+	//go:embed svg/full_coverage.svg
+	FullCoverage Icon
+	//go:embed svg/full_stacked_bar_chart-fill.svg
+	FullStackedBarChartFill Icon
+	//go:embed svg/full_stacked_bar_chart.svg
+	FullStackedBarChart Icon
+	//go:embed svg/fullscreen-fill.svg
+	FullscreenFill Icon
+	//go:embed svg/fullscreen.svg
+	Fullscreen Icon
+	//go:embed svg/fullscreen_exit-fill.svg
+	FullscreenExitFill Icon
+	//go:embed svg/fullscreen_exit.svg
+	FullscreenExit Icon
+	//go:embed svg/function-fill.svg
+	FunctionFill Icon
+	//go:embed svg/function.svg
+	Function Icon
+	//go:embed svg/functions-fill.svg
+	FunctionsFill Icon
+	//go:embed svg/functions.svg
+	Functions Icon
+	//go:embed svg/g_translate-fill.svg
+	GTranslateFill Icon
+	//go:embed svg/g_translate.svg
+	GTranslate Icon
+	//go:embed svg/gallery_thumbnail-fill.svg
+	GalleryThumbnailFill Icon
+	//go:embed svg/gallery_thumbnail.svg
+	GalleryThumbnail Icon
+	//go:embed svg/gamepad-fill.svg
+	GamepadFill Icon
+	//go:embed svg/gamepad.svg
+	Gamepad Icon
+	//go:embed svg/genres-fill.svg
+	GenresFill Icon
+	//go:embed svg/genres.svg
+	Genres Icon
+	//go:embed svg/gesture-fill.svg
+	GestureFill Icon
+	//go:embed svg/gesture.svg
+	Gesture Icon
+	//go:embed svg/gesture_select-fill.svg
+	GestureSelectFill Icon
+	//go:embed svg/gesture_select.svg
+	GestureSelect Icon
+	//go:embed svg/gif-fill.svg
+	GifFill Icon
+	//go:embed svg/gif.svg
+	Gif Icon
+	//go:embed svg/gif_box-fill.svg
+	GifBoxFill Icon
+	//go:embed svg/gif_box.svg
+	GifBox Icon
+	//go:embed svg/girl-fill.svg
+	GirlFill Icon
+	//go:embed svg/girl.svg
+	Girl Icon
+	//go:embed svg/git.svg
+	Git Icon
+	//go:embed svg/glass_cup-fill.svg
+	GlassCupFill Icon
+	//go:embed svg/glass_cup.svg
+	GlassCup Icon
+	//go:embed svg/globe_asia-fill.svg
+	GlobeAsiaFill Icon
+	//go:embed svg/globe_asia.svg
+	GlobeAsia Icon
+	//go:embed svg/globe_uk-fill.svg
+	GlobeUkFill Icon
+	//go:embed svg/globe_uk.svg
+	GlobeUk Icon
+	//go:embed svg/glyphs-fill.svg
+	GlyphsFill Icon
+	//go:embed svg/glyphs.svg
+	Glyphs Icon
+	//go:embed svg/go.svg
+	Go Icon
+	//go:embed svg/go_to_line-fill.svg
+	GoToLineFill Icon
+	//go:embed svg/go_to_line.svg
+	GoToLine Icon
+	//go:embed svg/grade-fill.svg
+	GradeFill Icon
+	//go:embed svg/grade.svg
+	Grade Icon
+	//go:embed svg/gradient-fill.svg
+	GradientFill Icon
+	//go:embed svg/gradient.svg
+	Gradient Icon
+	//go:embed svg/grading-fill.svg
+	GradingFill Icon
+	//go:embed svg/grading.svg
+	Grading Icon
+	//go:embed svg/graphic_eq-fill.svg
+	GraphicEqFill Icon
+	//go:embed svg/graphic_eq.svg
+	GraphicEq Icon
+	//go:embed svg/grid_3x3-fill.svg
+	Grid3x3Fill Icon
+	//go:embed svg/grid_3x3.svg
+	Grid3x3 Icon
+	//go:embed svg/grid_3x3_off-fill.svg
+	Grid3x3OffFill Icon
+	//go:embed svg/grid_3x3_off.svg
+	Grid3x3Off Icon
+	//go:embed svg/grid_4x4-fill.svg
+	Grid4x4Fill Icon
+	//go:embed svg/grid_4x4.svg
+	Grid4x4 Icon
+	//go:embed svg/grid_goldenratio-fill.svg
+	GridGoldenratioFill Icon
+	//go:embed svg/grid_goldenratio.svg
+	GridGoldenratio Icon
+	//go:embed svg/grid_guides-fill.svg
+	GridGuidesFill Icon
+	//go:embed svg/grid_guides.svg
+	GridGuides Icon
+	//go:embed svg/grid_off-fill.svg
+	GridOffFill Icon
+	//go:embed svg/grid_off.svg
+	GridOff Icon
+	//go:embed svg/grid_on-fill.svg
+	GridOnFill Icon
+	//go:embed svg/grid_on.svg
+	GridOn Icon
+	//go:embed svg/grid_view-fill.svg
+	GridViewFill Icon
+	//go:embed svg/grid_view.svg
+	GridView Icon
+	//go:embed svg/group-fill.svg
+	GroupFill Icon
+	//go:embed svg/group.svg
+	Group Icon
+	//go:embed svg/group_add-fill.svg
+	GroupAddFill Icon
+	//go:embed svg/group_add.svg
+	GroupAdd Icon
+	//go:embed svg/group_off-fill.svg
+	GroupOffFill Icon
+	//go:embed svg/group_off.svg
+	GroupOff Icon
+	//go:embed svg/group_remove-fill.svg
+	GroupRemoveFill Icon
+	//go:embed svg/group_remove.svg
+	GroupRemove Icon
+	//go:embed svg/group_work-fill.svg
+	GroupWorkFill Icon
+	//go:embed svg/group_work.svg
+	GroupWork Icon
+	//go:embed svg/grouped_bar_chart-fill.svg
+	GroupedBarChartFill Icon
+	//go:embed svg/grouped_bar_chart.svg
+	GroupedBarChart Icon
+	//go:embed svg/groups-fill.svg
+	GroupsFill Icon
+	//go:embed svg/groups.svg
+	Groups Icon
+	//go:embed svg/groups_2-fill.svg
+	Groups2Fill Icon
+	//go:embed svg/groups_2.svg
+	Groups2 Icon
+	//go:embed svg/groups_3-fill.svg
+	Groups3Fill Icon
+	//go:embed svg/groups_3.svg
+	Groups3 Icon
+	//go:embed svg/hand_gesture-fill.svg
+	HandGestureFill Icon
+	//go:embed svg/hand_gesture.svg
+	HandGesture Icon
+	//go:embed svg/handshake-fill.svg
+	HandshakeFill Icon
+	//go:embed svg/handshake.svg
+	Handshake Icon
+	//go:embed svg/hangout_video-fill.svg
+	HangoutVideoFill Icon
+	//go:embed svg/hangout_video.svg
+	HangoutVideo Icon
+	//go:embed svg/hangout_video_off-fill.svg
+	HangoutVideoOffFill Icon
+	//go:embed svg/hangout_video_off.svg
+	HangoutVideoOff Icon
+	//go:embed svg/hard_drive-fill.svg
+	HardDriveFill Icon
+	//go:embed svg/hard_drive.svg
+	HardDrive Icon
+	//go:embed svg/hard_drive_2-fill.svg
+	HardDrive2Fill Icon
+	//go:embed svg/hard_drive_2.svg
+	HardDrive2 Icon
+	//go:embed svg/hardware-fill.svg
+	HardwareFill Icon
+	//go:embed svg/hardware.svg
+	Hardware Icon
+	//go:embed svg/hd-fill.svg
+	HdFill Icon
+	//go:embed svg/hd.svg
+	Hd Icon
+	//go:embed svg/headphones-fill.svg
+	HeadphonesFill Icon
+	//go:embed svg/headphones.svg
+	Headphones Icon
+	//go:embed svg/headphones_battery-fill.svg
+	HeadphonesBatteryFill Icon
+	//go:embed svg/headphones_battery.svg
+	HeadphonesBattery Icon
+	//go:embed svg/headset_mic-fill.svg
+	HeadsetMicFill Icon
+	//go:embed svg/headset_mic.svg
+	HeadsetMic Icon
+	//go:embed svg/headset_off-fill.svg
+	HeadsetOffFill Icon
+	//go:embed svg/headset_off.svg
+	HeadsetOff Icon
+	//go:embed svg/hearing-fill.svg
+	HearingFill Icon
+	//go:embed svg/hearing.svg
+	Hearing Icon
+	//go:embed svg/hearing_disabled-fill.svg
+	HearingDisabledFill Icon
+	//go:embed svg/hearing_disabled.svg
+	HearingDisabled Icon
+	//go:embed svg/heart_minus-fill.svg
+	HeartMinusFill Icon
+	//go:embed svg/heart_minus.svg
+	HeartMinus Icon
+	//go:embed svg/heart_plus-fill.svg
+	HeartPlusFill Icon
+	//go:embed svg/heart_plus.svg
+	HeartPlus Icon
+	//go:embed svg/height-fill.svg
+	HeightFill Icon
+	//go:embed svg/height.svg
+	Height Icon
+	//go:embed svg/help-fill.svg
+	HelpFill Icon
+	//go:embed svg/help.svg
+	Help Icon
+	//go:embed svg/hexagon-fill.svg
+	HexagonFill Icon
+	//go:embed svg/hexagon.svg
+	Hexagon Icon
+	//go:embed svg/hide-fill.svg
+	HideFill Icon
+	//go:embed svg/hide.svg
+	Hide Icon
+	//go:embed svg/hide_image-fill.svg
+	HideImageFill Icon
+	//go:embed svg/hide_image.svg
+	HideImage Icon
+	//go:embed svg/hide_source-fill.svg
+	HideSourceFill Icon
+	//go:embed svg/hide_source.svg
+	HideSource Icon
+	//go:embed svg/high_density-fill.svg
+	HighDensityFill Icon
+	//go:embed svg/high_density.svg
+	HighDensity Icon
+	//go:embed svg/high_quality-fill.svg
+	HighQualityFill Icon
+	//go:embed svg/high_quality.svg
+	HighQuality Icon
+	//go:embed svg/highlight-fill.svg
+	HighlightFill Icon
+	//go:embed svg/highlight.svg
+	Highlight Icon
+	//go:embed svg/highlighter_size_1-fill.svg
+	HighlighterSize1Fill Icon
+	//go:embed svg/highlighter_size_1.svg
+	HighlighterSize1 Icon
+	//go:embed svg/highlighter_size_2-fill.svg
+	HighlighterSize2Fill Icon
+	//go:embed svg/highlighter_size_2.svg
+	HighlighterSize2 Icon
+	//go:embed svg/highlighter_size_3-fill.svg
+	HighlighterSize3Fill Icon
+	//go:embed svg/highlighter_size_3.svg
+	HighlighterSize3 Icon
+	//go:embed svg/highlighter_size_4-fill.svg
+	HighlighterSize4Fill Icon
+	//go:embed svg/highlighter_size_4.svg
+	HighlighterSize4 Icon
+	//go:embed svg/highlighter_size_5-fill.svg
+	HighlighterSize5Fill Icon
+	//go:embed svg/highlighter_size_5.svg
+	HighlighterSize5 Icon
+	//go:embed svg/history-fill.svg
+	HistoryFill Icon
+	//go:embed svg/history.svg
+	History Icon
+	//go:embed svg/history_toggle_off-fill.svg
+	HistoryToggleOffFill Icon
+	//go:embed svg/history_toggle_off.svg
+	HistoryToggleOff Icon
+	//go:embed svg/hive-fill.svg
+	HiveFill Icon
+	//go:embed svg/hive.svg
+	Hive Icon
+	//go:embed svg/home-fill.svg
+	HomeFill Icon
+	//go:embed svg/home.svg
+	Home Icon
+	//go:embed svg/home_app_logo-fill.svg
+	HomeAppLogoFill Icon
+	//go:embed svg/home_app_logo.svg
+	HomeAppLogo Icon
+	//go:embed svg/home_iot_device-fill.svg
+	HomeIotDeviceFill Icon
+	//go:embed svg/home_iot_device.svg
+	HomeIotDevice Icon
+	//go:embed svg/home_pin-fill.svg
+	HomePinFill Icon
+	//go:embed svg/home_pin.svg
+	HomePin Icon
+	//go:embed svg/home_storage-fill.svg
+	HomeStorageFill Icon
+	//go:embed svg/home_storage.svg
+	HomeStorage Icon
+	//go:embed svg/horizontal_distribute-fill.svg
+	HorizontalDistributeFill Icon
+	//go:embed svg/horizontal_distribute.svg
+	HorizontalDistribute Icon
+	//go:embed svg/horizontal_rule-fill.svg
+	HorizontalRuleFill Icon
+	//go:embed svg/horizontal_rule.svg
+	HorizontalRule Icon
+	//go:embed svg/horizontal_split-fill.svg
+	HorizontalSplitFill Icon
+	//go:embed svg/horizontal_split.svg
+	HorizontalSplit Icon
+	//go:embed svg/hourglass_bottom-fill.svg
+	HourglassBottomFill Icon
+	//go:embed svg/hourglass_bottom.svg
+	HourglassBottom Icon
+	//go:embed svg/hourglass_disabled-fill.svg
+	HourglassDisabledFill Icon
+	//go:embed svg/hourglass_disabled.svg
+	HourglassDisabled Icon
+	//go:embed svg/hourglass_empty-fill.svg
+	HourglassEmptyFill Icon
+	//go:embed svg/hourglass_empty.svg
+	HourglassEmpty Icon
+	//go:embed svg/hourglass_top-fill.svg
+	HourglassTopFill Icon
+	//go:embed svg/hourglass_top.svg
+	HourglassTop Icon
+	//go:embed svg/house-fill.svg
+	HouseFill Icon
+	//go:embed svg/house.svg
+	House Icon
+	//go:embed svg/html-fill.svg
+	HtmlFill Icon
+	//go:embed svg/html.svg
+	Html Icon
+	//go:embed svg/http-fill.svg
+	HttpFill Icon
+	//go:embed svg/http.svg
+	Http Icon
+	//go:embed svg/hub-fill.svg
+	HubFill Icon
+	//go:embed svg/hub.svg
+	Hub Icon
+	//go:embed svg/iframe-fill.svg
+	IframeFill Icon
+	//go:embed svg/iframe.svg
+	Iframe Icon
+	//go:embed svg/iframe_off-fill.svg
+	IframeOffFill Icon
+	//go:embed svg/iframe_off.svg
+	IframeOff Icon
+	//go:embed svg/image-fill.svg
+	ImageFill Icon
+	//go:embed svg/image.svg
+	Image Icon
+	//go:embed svg/image_aspect_ratio-fill.svg
+	ImageAspectRatioFill Icon
+	//go:embed svg/image_aspect_ratio.svg
+	ImageAspectRatio Icon
+	//go:embed svg/image_not_supported-fill.svg
+	ImageNotSupportedFill Icon
+	//go:embed svg/image_not_supported.svg
+	ImageNotSupported Icon
+	//go:embed svg/image_search-fill.svg
+	ImageSearchFill Icon
+	//go:embed svg/image_search.svg
+	ImageSearch Icon
+	//go:embed svg/imagesmode-fill.svg
+	ImagesmodeFill Icon
+	//go:embed svg/imagesmode.svg
+	Imagesmode Icon
+	//go:embed svg/import_contacts-fill.svg
+	ImportContactsFill Icon
+	//go:embed svg/import_contacts.svg
+	ImportContacts Icon
+	//go:embed svg/important_devices-fill.svg
+	ImportantDevicesFill Icon
+	//go:embed svg/important_devices.svg
+	ImportantDevices Icon
+	//go:embed svg/inactive_order-fill.svg
+	InactiveOrderFill Icon
+	//go:embed svg/inactive_order.svg
+	InactiveOrder Icon
+	//go:embed svg/inbox-fill.svg
+	InboxFill Icon
+	//go:embed svg/inbox.svg
+	Inbox Icon
+	//go:embed svg/inbox_customize-fill.svg
+	InboxCustomizeFill Icon
+	//go:embed svg/inbox_customize.svg
+	InboxCustomize Icon
+	//go:embed svg/incomplete_circle-fill.svg
+	IncompleteCircleFill Icon
+	//go:embed svg/incomplete_circle.svg
+	IncompleteCircle Icon
+	//go:embed svg/indeterminate_check_box-fill.svg
+	IndeterminateCheckBoxFill Icon
+	//go:embed svg/indeterminate_check_box.svg
+	IndeterminateCheckBox Icon
+	//go:embed svg/info-fill.svg
+	InfoFill Icon
+	//go:embed svg/info.svg
+	Info Icon
+	//go:embed svg/info_i-fill.svg
+	InfoIFill Icon
+	//go:embed svg/info_i.svg
+	InfoI Icon
+	//go:embed svg/infrared-fill.svg
+	InfraredFill Icon
+	//go:embed svg/infrared.svg
+	Infrared Icon
+	//go:embed svg/ink_eraser-fill.svg
+	InkEraserFill Icon
+	//go:embed svg/ink_eraser.svg
+	InkEraser Icon
+	//go:embed svg/ink_eraser_off-fill.svg
+	InkEraserOffFill Icon
+	//go:embed svg/ink_eraser_off.svg
+	InkEraserOff Icon
+	//go:embed svg/ink_highlighter-fill.svg
+	InkHighlighterFill Icon
+	//go:embed svg/ink_highlighter.svg
+	InkHighlighter Icon
+	//go:embed svg/ink_marker-fill.svg
+	InkMarkerFill Icon
+	//go:embed svg/ink_marker.svg
+	InkMarker Icon
+	//go:embed svg/ink_pen-fill.svg
+	InkPenFill Icon
+	//go:embed svg/ink_pen.svg
+	InkPen Icon
+	//go:embed svg/input-fill.svg
+	InputFill Icon
+	//go:embed svg/input.svg
+	Input Icon
+	//go:embed svg/input_circle-fill.svg
+	InputCircleFill Icon
+	//go:embed svg/input_circle.svg
+	InputCircle Icon
+	//go:embed svg/insert_chart-fill.svg
+	InsertChartFill Icon
+	//go:embed svg/insert_chart.svg
+	InsertChart Icon
+	//go:embed svg/insert_page_break-fill.svg
+	InsertPageBreakFill Icon
+	//go:embed svg/insert_page_break.svg
+	InsertPageBreak Icon
+	//go:embed svg/insert_text-fill.svg
+	InsertTextFill Icon
+	//go:embed svg/insert_text.svg
+	InsertText Icon
+	//go:embed svg/install_desktop-fill.svg
+	InstallDesktopFill Icon
+	//go:embed svg/install_desktop.svg
+	InstallDesktop Icon
+	//go:embed svg/install_mobile-fill.svg
+	InstallMobileFill Icon
+	//go:embed svg/install_mobile.svg
+	InstallMobile Icon
+	//go:embed svg/instant_mix-fill.svg
+	InstantMixFill Icon
+	//go:embed svg/instant_mix.svg
+	InstantMix Icon
+	//go:embed svg/integration_instructions-fill.svg
+	IntegrationInstructionsFill Icon
+	//go:embed svg/integration_instructions.svg
+	IntegrationInstructions Icon
+	//go:embed svg/interactive_space-fill.svg
+	InteractiveSpaceFill Icon
+	//go:embed svg/interactive_space.svg
+	InteractiveSpace Icon
+	//go:embed svg/interests-fill.svg
+	InterestsFill Icon
+	//go:embed svg/interests.svg
+	Interests Icon
+	//go:embed svg/inventory-fill.svg
+	InventoryFill Icon
+	//go:embed svg/inventory.svg
+	Inventory Icon
+	//go:embed svg/inventory_2-fill.svg
+	Inventory2Fill Icon
+	//go:embed svg/inventory_2.svg
+	Inventory2 Icon
+	//go:embed svg/invert_colors-fill.svg
+	InvertColorsFill Icon
+	//go:embed svg/invert_colors.svg
+	InvertColors Icon
+	//go:embed svg/invert_colors_off-fill.svg
+	InvertColorsOffFill Icon
+	//go:embed svg/invert_colors_off.svg
+	InvertColorsOff Icon
+	//go:embed svg/ios_share-fill.svg
+	IosShareFill Icon
+	//go:embed svg/ios_share.svg
+	IosShare Icon
+	//go:embed svg/javascript-fill.svg
+	JavascriptFill Icon
+	//go:embed svg/javascript.svg
+	Javascript Icon
+	//go:embed svg/join-fill.svg
+	JoinFill Icon
+	//go:embed svg/join.svg
+	Join Icon
+	//go:embed svg/join_inner-fill.svg
+	JoinInnerFill Icon
+	//go:embed svg/join_inner.svg
+	JoinInner Icon
+	//go:embed svg/join_left-fill.svg
+	JoinLeftFill Icon
+	//go:embed svg/join_left.svg
+	JoinLeft Icon
+	//go:embed svg/join_right-fill.svg
+	JoinRightFill Icon
+	//go:embed svg/join_right.svg
+	JoinRight Icon
+	//go:embed svg/joystick-fill.svg
+	JoystickFill Icon
+	//go:embed svg/joystick.svg
+	Joystick Icon
+	//go:embed svg/json.svg
+	Json Icon
+	//go:embed svg/jump_to_element-fill.svg
+	JumpToElementFill Icon
+	//go:embed svg/jump_to_element.svg
+	JumpToElement Icon
+	//go:embed svg/key-fill.svg
+	KeyFill Icon
+	//go:embed svg/key.svg
+	Key Icon
+	//go:embed svg/key_off-fill.svg
+	KeyOffFill Icon
+	//go:embed svg/key_off.svg
+	KeyOff Icon
+	//go:embed svg/key_visualizer-fill.svg
+	KeyVisualizerFill Icon
+	//go:embed svg/key_visualizer.svg
+	KeyVisualizer Icon
+	//go:embed svg/keyboard-fill.svg
+	KeyboardFill Icon
+	//go:embed svg/keyboard.svg
+	Keyboard Icon
+	//go:embed svg/keyboard_alt-fill.svg
+	KeyboardAltFill Icon
+	//go:embed svg/keyboard_alt.svg
+	KeyboardAlt Icon
+	//go:embed svg/keyboard_arrow_down-fill.svg
+	KeyboardArrowDownFill Icon
+	//go:embed svg/keyboard_arrow_down.svg
+	KeyboardArrowDown Icon
+	//go:embed svg/keyboard_arrow_left-fill.svg
+	KeyboardArrowLeftFill Icon
+	//go:embed svg/keyboard_arrow_left.svg
+	KeyboardArrowLeft Icon
+	//go:embed svg/keyboard_arrow_right-fill.svg
+	KeyboardArrowRightFill Icon
+	//go:embed svg/keyboard_arrow_right.svg
+	KeyboardArrowRight Icon
+	//go:embed svg/keyboard_arrow_up-fill.svg
+	KeyboardArrowUpFill Icon
+	//go:embed svg/keyboard_arrow_up.svg
+	KeyboardArrowUp Icon
+	//go:embed svg/keyboard_backspace-fill.svg
+	KeyboardBackspaceFill Icon
+	//go:embed svg/keyboard_backspace.svg
+	KeyboardBackspace Icon
+	//go:embed svg/keyboard_capslock-fill.svg
+	KeyboardCapslockFill Icon
+	//go:embed svg/keyboard_capslock.svg
+	KeyboardCapslock Icon
+	//go:embed svg/keyboard_capslock_badge-fill.svg
+	KeyboardCapslockBadgeFill Icon
+	//go:embed svg/keyboard_capslock_badge.svg
+	KeyboardCapslockBadge Icon
+	//go:embed svg/keyboard_command_key-fill.svg
+	KeyboardCommandKeyFill Icon
+	//go:embed svg/keyboard_command_key.svg
+	KeyboardCommandKey Icon
+	//go:embed svg/keyboard_control_key-fill.svg
+	KeyboardControlKeyFill Icon
+	//go:embed svg/keyboard_control_key.svg
+	KeyboardControlKey Icon
+	//go:embed svg/keyboard_double_arrow_down-fill.svg
+	KeyboardDoubleArrowDownFill Icon
+	//go:embed svg/keyboard_double_arrow_down.svg
+	KeyboardDoubleArrowDown Icon
+	//go:embed svg/keyboard_double_arrow_left-fill.svg
+	KeyboardDoubleArrowLeftFill Icon
+	//go:embed svg/keyboard_double_arrow_left.svg
+	KeyboardDoubleArrowLeft Icon
+	//go:embed svg/keyboard_double_arrow_right-fill.svg
+	KeyboardDoubleArrowRightFill Icon
+	//go:embed svg/keyboard_double_arrow_right.svg
+	KeyboardDoubleArrowRight Icon
+	//go:embed svg/keyboard_double_arrow_up-fill.svg
+	KeyboardDoubleArrowUpFill Icon
+	//go:embed svg/keyboard_double_arrow_up.svg
+	KeyboardDoubleArrowUp Icon
+	//go:embed svg/keyboard_external_input-fill.svg
+	KeyboardExternalInputFill Icon
+	//go:embed svg/keyboard_external_input.svg
+	KeyboardExternalInput Icon
+	//go:embed svg/keyboard_full-fill.svg
+	KeyboardFullFill Icon
+	//go:embed svg/keyboard_full.svg
+	KeyboardFull Icon
+	//go:embed svg/keyboard_hide-fill.svg
+	KeyboardHideFill Icon
+	//go:embed svg/keyboard_hide.svg
+	KeyboardHide Icon
+	//go:embed svg/keyboard_keys-fill.svg
+	KeyboardKeysFill Icon
+	//go:embed svg/keyboard_keys.svg
+	KeyboardKeys Icon
+	//go:embed svg/keyboard_off-fill.svg
+	KeyboardOffFill Icon
+	//go:embed svg/keyboard_off.svg
+	KeyboardOff Icon
+	//go:embed svg/keyboard_onscreen-fill.svg
+	KeyboardOnscreenFill Icon
+	//go:embed svg/keyboard_onscreen.svg
+	KeyboardOnscreen Icon
+	//go:embed svg/keyboard_option_key-fill.svg
+	KeyboardOptionKeyFill Icon
+	//go:embed svg/keyboard_option_key.svg
+	KeyboardOptionKey Icon
+	//go:embed svg/keyboard_previous_language-fill.svg
+	KeyboardPreviousLanguageFill Icon
+	//go:embed svg/keyboard_previous_language.svg
+	KeyboardPreviousLanguage Icon
+	//go:embed svg/keyboard_return-fill.svg
+	KeyboardReturnFill Icon
+	//go:embed svg/keyboard_return.svg
+	KeyboardReturn Icon
+	//go:embed svg/keyboard_tab-fill.svg
+	KeyboardTabFill Icon
+	//go:embed svg/keyboard_tab.svg
+	KeyboardTab Icon
+	//go:embed svg/keyboard_tab_rtl-fill.svg
+	KeyboardTabRtlFill Icon
+	//go:embed svg/keyboard_tab_rtl.svg
+	KeyboardTabRtl Icon
+	//go:embed svg/keyboard_voice-fill.svg
+	KeyboardVoiceFill Icon
+	//go:embed svg/keyboard_voice.svg
+	KeyboardVoice Icon
+	//go:embed svg/label-fill.svg
+	LabelFill Icon
+	//go:embed svg/label.svg
+	Label Icon
+	//go:embed svg/label_important-fill.svg
+	LabelImportantFill Icon
+	//go:embed svg/label_important.svg
+	LabelImportant Icon
+	//go:embed svg/label_off-fill.svg
+	LabelOffFill Icon
+	//go:embed svg/label_off.svg
+	LabelOff Icon
+	//go:embed svg/labs-fill.svg
+	LabsFill Icon
+	//go:embed svg/labs.svg
+	Labs Icon
+	//go:embed svg/lan-fill.svg
+	LanFill Icon
+	//go:embed svg/lan.svg
+	Lan Icon
+	//go:embed svg/landscape-fill.svg
+	LandscapeFill Icon
+	//go:embed svg/landscape.svg
+	Landscape Icon
+	//go:embed svg/landslide-fill.svg
+	LandslideFill Icon
+	//go:embed svg/landslide.svg
+	Landslide Icon
+	//go:embed svg/language-fill.svg
+	LanguageFill Icon
+	//go:embed svg/language.svg
+	Language Icon
+	//go:embed svg/language_chinese_array-fill.svg
+	LanguageChineseArrayFill Icon
+	//go:embed svg/language_chinese_array.svg
+	LanguageChineseArray Icon
+	//go:embed svg/language_chinese_cangjie-fill.svg
+	LanguageChineseCangjieFill Icon
+	//go:embed svg/language_chinese_cangjie.svg
+	LanguageChineseCangjie Icon
+	//go:embed svg/language_chinese_dayi-fill.svg
+	LanguageChineseDayiFill Icon
+	//go:embed svg/language_chinese_dayi.svg
+	LanguageChineseDayi Icon
+	//go:embed svg/language_chinese_pinyin-fill.svg
+	LanguageChinesePinyinFill Icon
+	//go:embed svg/language_chinese_pinyin.svg
+	LanguageChinesePinyin Icon
+	//go:embed svg/language_chinese_quick-fill.svg
+	LanguageChineseQuickFill Icon
+	//go:embed svg/language_chinese_quick.svg
+	LanguageChineseQuick Icon
+	//go:embed svg/language_chinese_wubi-fill.svg
+	LanguageChineseWubiFill Icon
+	//go:embed svg/language_chinese_wubi.svg
+	LanguageChineseWubi Icon
+	//go:embed svg/language_french-fill.svg
+	LanguageFrenchFill Icon
+	//go:embed svg/language_french.svg
+	LanguageFrench Icon
+	//go:embed svg/language_gb_english-fill.svg
+	LanguageGbEnglishFill Icon
+	//go:embed svg/language_gb_english.svg
+	LanguageGbEnglish Icon
+	//go:embed svg/language_international-fill.svg
+	LanguageInternationalFill Icon
+	//go:embed svg/language_international.svg
+	LanguageInternational Icon
+	//go:embed svg/language_korean_latin-fill.svg
+	LanguageKoreanLatinFill Icon
+	//go:embed svg/language_korean_latin.svg
+	LanguageKoreanLatin Icon
+	//go:embed svg/language_pinyin-fill.svg
+	LanguagePinyinFill Icon
+	//go:embed svg/language_pinyin.svg
+	LanguagePinyin Icon
+	//go:embed svg/language_spanish-fill.svg
+	LanguageSpanishFill Icon
+	//go:embed svg/language_spanish.svg
+	LanguageSpanish Icon
+	//go:embed svg/language_us-fill.svg
+	LanguageUsFill Icon
+	//go:embed svg/language_us.svg
+	LanguageUs Icon
+	//go:embed svg/language_us_colemak-fill.svg
+	LanguageUsColemakFill Icon
+	//go:embed svg/language_us_colemak.svg
+	LanguageUsColemak Icon
+	//go:embed svg/language_us_dvorak-fill.svg
+	LanguageUsDvorakFill Icon
+	//go:embed svg/language_us_dvorak.svg
+	LanguageUsDvorak Icon
+	//go:embed svg/laps-fill.svg
+	LapsFill Icon
+	//go:embed svg/laps.svg
+	Laps Icon
+	//go:embed svg/laptop_chromebook-fill.svg
+	LaptopChromebookFill Icon
+	//go:embed svg/laptop_chromebook.svg
+	LaptopChromebook Icon
+	//go:embed svg/laptop_mac-fill.svg
+	LaptopMacFill Icon
+	//go:embed svg/laptop_mac.svg
+	LaptopMac Icon
+	//go:embed svg/laptop_windows-fill.svg
+	LaptopWindowsFill Icon
+	//go:embed svg/laptop_windows.svg
+	LaptopWindows Icon
+	//go:embed svg/lasso_select-fill.svg
+	LassoSelectFill Icon
+	//go:embed svg/lasso_select.svg
+	LassoSelect Icon
+	//go:embed svg/last_page-fill.svg
+	LastPageFill Icon
+	//go:embed svg/last_page.svg
+	LastPage Icon
+	//go:embed svg/latex.svg
+	Latex Icon
+	//go:embed svg/layers-fill.svg
+	LayersFill Icon
+	//go:embed svg/layers.svg
+	Layers Icon
+	//go:embed svg/layers_clear-fill.svg
+	LayersClearFill Icon
+	//go:embed svg/layers_clear.svg
+	LayersClear Icon
+	//go:embed svg/leaderboard-fill.svg
+	LeaderboardFill Icon
+	//go:embed svg/leaderboard.svg
+	Leaderboard Icon
+	//go:embed svg/left_click-fill.svg
+	LeftClickFill Icon
+	//go:embed svg/left_click.svg
+	LeftClick Icon
+	//go:embed svg/left_panel_close-fill.svg
+	LeftPanelCloseFill Icon
+	//go:embed svg/left_panel_close.svg
+	LeftPanelClose Icon
+	//go:embed svg/left_panel_open-fill.svg
+	LeftPanelOpenFill Icon
+	//go:embed svg/left_panel_open.svg
+	LeftPanelOpen Icon
+	//go:embed svg/legend_toggle-fill.svg
+	LegendToggleFill Icon
+	//go:embed svg/legend_toggle.svg
+	LegendToggle Icon
+	//go:embed svg/lens_blur-fill.svg
+	LensBlurFill Icon
+	//go:embed svg/lens_blur.svg
+	LensBlur Icon
+	//go:embed svg/letter_switch-fill.svg
+	LetterSwitchFill Icon
+	//go:embed svg/letter_switch.svg
+	LetterSwitch Icon
+	//go:embed svg/library_add-fill.svg
+	LibraryAddFill Icon
+	//go:embed svg/library_add.svg
+	LibraryAdd Icon
+	//go:embed svg/library_add_check-fill.svg
+	LibraryAddCheckFill Icon
+	//go:embed svg/library_add_check.svg
+	LibraryAddCheck Icon
+	//go:embed svg/library_books-fill.svg
+	LibraryBooksFill Icon
+	//go:embed svg/library_books.svg
+	LibraryBooks Icon
+	//go:embed svg/library_music-fill.svg
+	LibraryMusicFill Icon
+	//go:embed svg/library_music.svg
+	LibraryMusic Icon
+	//go:embed svg/light-fill.svg
+	LightFill Icon
+	//go:embed svg/light.svg
+	Light Icon
+	//go:embed svg/lightbulb-fill.svg
+	LightbulbFill Icon
+	//go:embed svg/lightbulb.svg
+	Lightbulb Icon
+	//go:embed svg/lightbulb_circle-fill.svg
+	LightbulbCircleFill Icon
+	//go:embed svg/lightbulb_circle.svg
+	LightbulbCircle Icon
+	//go:embed svg/line_axis-fill.svg
+	LineAxisFill Icon
+	//go:embed svg/line_axis.svg
+	LineAxis Icon
+	//go:embed svg/line_curve-fill.svg
+	LineCurveFill Icon
+	//go:embed svg/line_curve.svg
+	LineCurve Icon
+	//go:embed svg/line_end-fill.svg
+	LineEndFill Icon
+	//go:embed svg/line_end.svg
+	LineEnd Icon
+	//go:embed svg/line_end_arrow-fill.svg
+	LineEndArrowFill Icon
+	//go:embed svg/line_end_arrow.svg
+	LineEndArrow Icon
+	//go:embed svg/line_end_arrow_notch-fill.svg
+	LineEndArrowNotchFill Icon
+	//go:embed svg/line_end_arrow_notch.svg
+	LineEndArrowNotch Icon
+	//go:embed svg/line_end_circle-fill.svg
+	LineEndCircleFill Icon
+	//go:embed svg/line_end_circle.svg
+	LineEndCircle Icon
+	//go:embed svg/line_end_diamond-fill.svg
+	LineEndDiamondFill Icon
+	//go:embed svg/line_end_diamond.svg
+	LineEndDiamond Icon
+	//go:embed svg/line_end_square-fill.svg
+	LineEndSquareFill Icon
+	//go:embed svg/line_end_square.svg
+	LineEndSquare Icon
+	//go:embed svg/line_start-fill.svg
+	LineStartFill Icon
+	//go:embed svg/line_start.svg
+	LineStart Icon
+	//go:embed svg/line_start_arrow-fill.svg
+	LineStartArrowFill Icon
+	//go:embed svg/line_start_arrow.svg
+	LineStartArrow Icon
+	//go:embed svg/line_start_arrow_notch-fill.svg
+	LineStartArrowNotchFill Icon
+	//go:embed svg/line_start_arrow_notch.svg
+	LineStartArrowNotch Icon
+	//go:embed svg/line_start_circle-fill.svg
+	LineStartCircleFill Icon
+	//go:embed svg/line_start_circle.svg
+	LineStartCircle Icon
+	//go:embed svg/line_start_diamond-fill.svg
+	LineStartDiamondFill Icon
+	//go:embed svg/line_start_diamond.svg
+	LineStartDiamond Icon
+	//go:embed svg/line_start_square-fill.svg
+	LineStartSquareFill Icon
+	//go:embed svg/line_start_square.svg
+	LineStartSquare Icon
+	//go:embed svg/line_style-fill.svg
+	LineStyleFill Icon
+	//go:embed svg/line_style.svg
+	LineStyle Icon
+	//go:embed svg/line_weight-fill.svg
+	LineWeightFill Icon
+	//go:embed svg/line_weight.svg
+	LineWeight Icon
+	//go:embed svg/linear_scale-fill.svg
+	LinearScaleFill Icon
+	//go:embed svg/linear_scale.svg
+	LinearScale Icon
+	//go:embed svg/link-fill.svg
+	LinkFill Icon
+	//go:embed svg/link.svg
+	Link Icon
+	//go:embed svg/link_off-fill.svg
+	LinkOffFill Icon
+	//go:embed svg/link_off.svg
+	LinkOff Icon
+	//go:embed svg/list-fill.svg
+	ListFill Icon
+	//go:embed svg/list.svg
+	List Icon
+	//go:embed svg/list_alt-fill.svg
+	ListAltFill Icon
+	//go:embed svg/list_alt.svg
+	ListAlt Icon
+	//go:embed svg/list_alt_add-fill.svg
+	ListAltAddFill Icon
+	//go:embed svg/list_alt_add.svg
+	ListAltAdd Icon
+	//go:embed svg/lists-fill.svg
+	ListsFill Icon
+	//go:embed svg/lists.svg
+	Lists Icon
+	//go:embed svg/live_help-fill.svg
+	LiveHelpFill Icon
+	//go:embed svg/live_help.svg
+	LiveHelp Icon
+	//go:embed svg/live_tv-fill.svg
+	LiveTvFill Icon
+	//go:embed svg/live_tv.svg
+	LiveTv Icon
+	//go:embed svg/location_away-fill.svg
+	LocationAwayFill Icon
+	//go:embed svg/location_away.svg
+	LocationAway Icon
+	//go:embed svg/location_chip-fill.svg
+	LocationChipFill Icon
+	//go:embed svg/location_chip.svg
+	LocationChip Icon
+	//go:embed svg/location_home-fill.svg
+	LocationHomeFill Icon
+	//go:embed svg/location_home.svg
+	LocationHome Icon
+	//go:embed svg/location_off-fill.svg
+	LocationOffFill Icon
+	//go:embed svg/location_off.svg
+	LocationOff Icon
+	//go:embed svg/location_on-fill.svg
+	LocationOnFill Icon
+	//go:embed svg/location_on.svg
+	LocationOn Icon
+	//go:embed svg/lock-fill.svg
+	LockFill Icon
+	//go:embed svg/lock.svg
+	Lock Icon
+	//go:embed svg/lock_clock-fill.svg
+	LockClockFill Icon
+	//go:embed svg/lock_clock.svg
+	LockClock Icon
+	//go:embed svg/lock_open-fill.svg
+	LockOpenFill Icon
+	//go:embed svg/lock_open.svg
+	LockOpen Icon
+	//go:embed svg/lock_open_right-fill.svg
+	LockOpenRightFill Icon
+	//go:embed svg/lock_open_right.svg
+	LockOpenRight Icon
+	//go:embed svg/lock_person-fill.svg
+	LockPersonFill Icon
+	//go:embed svg/lock_person.svg
+	LockPerson Icon
+	//go:embed svg/lock_reset-fill.svg
+	LockResetFill Icon
+	//go:embed svg/lock_reset.svg
+	LockReset Icon
+	//go:embed svg/login-fill.svg
+	LoginFill Icon
+	//go:embed svg/login.svg
+	Login Icon
+	//go:embed svg/logo_dev-fill.svg
+	LogoDevFill Icon
+	//go:embed svg/logo_dev.svg
+	LogoDev Icon
+	//go:embed svg/logout-fill.svg
+	LogoutFill Icon
+	//go:embed svg/logout.svg
+	Logout Icon
+	//go:embed svg/loupe-fill.svg
+	LoupeFill Icon
+	//go:embed svg/loupe.svg
+	Loupe Icon
+	//go:embed svg/low_density-fill.svg
+	LowDensityFill Icon
+	//go:embed svg/low_density.svg
+	LowDensity Icon
+	//go:embed svg/low_priority-fill.svg
+	LowPriorityFill Icon
+	//go:embed svg/low_priority.svg
+	LowPriority Icon
+	//go:embed svg/loyalty-fill.svg
+	LoyaltyFill Icon
+	//go:embed svg/loyalty.svg
+	Loyalty Icon
+	//go:embed svg/lyrics-fill.svg
+	LyricsFill Icon
+	//go:embed svg/lyrics.svg
+	Lyrics Icon
+	//go:embed svg/macro_auto-fill.svg
+	MacroAutoFill Icon
+	//go:embed svg/macro_auto.svg
+	MacroAuto Icon
+	//go:embed svg/macro_off-fill.svg
+	MacroOffFill Icon
+	//go:embed svg/macro_off.svg
+	MacroOff Icon
+	//go:embed svg/magnification_large-fill.svg
+	MagnificationLargeFill Icon
+	//go:embed svg/magnification_large.svg
+	MagnificationLarge Icon
+	//go:embed svg/magnification_small-fill.svg
+	MagnificationSmallFill Icon
+	//go:embed svg/magnification_small.svg
+	MagnificationSmall Icon
+	//go:embed svg/magnify_docked-fill.svg
+	MagnifyDockedFill Icon
+	//go:embed svg/magnify_docked.svg
+	MagnifyDocked Icon
+	//go:embed svg/magnify_fullscreen-fill.svg
+	MagnifyFullscreenFill Icon
+	//go:embed svg/magnify_fullscreen.svg
+	MagnifyFullscreen Icon
+	//go:embed svg/mail-fill.svg
+	MailFill Icon
+	//go:embed svg/mail.svg
+	Mail Icon
+	//go:embed svg/mail_lock-fill.svg
+	MailLockFill Icon
+	//go:embed svg/mail_lock.svg
+	MailLock Icon
+	//go:embed svg/make.svg
+	Make Icon
+	//go:embed svg/makefile.svg
+	Makefile Icon
+	//go:embed svg/male-fill.svg
+	MaleFill Icon
+	//go:embed svg/male.svg
+	Male Icon
+	//go:embed svg/man-fill.svg
+	ManFill Icon
+	//go:embed svg/man.svg
+	Man Icon
+	//go:embed svg/man_2-fill.svg
+	Man2Fill Icon
+	//go:embed svg/man_2.svg
+	Man2 Icon
+	//go:embed svg/man_3-fill.svg
+	Man3Fill Icon
+	//go:embed svg/man_3.svg
+	Man3 Icon
+	//go:embed svg/man_4-fill.svg
+	Man4Fill Icon
+	//go:embed svg/man_4.svg
+	Man4 Icon
+	//go:embed svg/manage_accounts-fill.svg
+	ManageAccountsFill Icon
+	//go:embed svg/manage_accounts.svg
+	ManageAccounts Icon
+	//go:embed svg/manage_history-fill.svg
+	ManageHistoryFill Icon
+	//go:embed svg/manage_history.svg
+	ManageHistory Icon
+	//go:embed svg/manage_search-fill.svg
+	ManageSearchFill Icon
+	//go:embed svg/manage_search.svg
+	ManageSearch Icon
+	//go:embed svg/manga-fill.svg
+	MangaFill Icon
+	//go:embed svg/manga.svg
+	Manga Icon
+	//go:embed svg/map-fill.svg
+	MapFill Icon
+	//go:embed svg/map.svg
+	Map Icon
+	//go:embed svg/margin-fill.svg
+	MarginFill Icon
+	//go:embed svg/margin.svg
+	Margin Icon
+	//go:embed svg/mark_as_unread-fill.svg
+	MarkAsUnreadFill Icon
+	//go:embed svg/mark_as_unread.svg
+	MarkAsUnread Icon
+	//go:embed svg/mark_chat_read-fill.svg
+	MarkChatReadFill Icon
+	//go:embed svg/mark_chat_read.svg
+	MarkChatRead Icon
+	//go:embed svg/mark_chat_unread-fill.svg
+	MarkChatUnreadFill Icon
+	//go:embed svg/mark_chat_unread.svg
+	MarkChatUnread Icon
+	//go:embed svg/mark_email_read-fill.svg
+	MarkEmailReadFill Icon
+	//go:embed svg/mark_email_read.svg
+	MarkEmailRead Icon
+	//go:embed svg/mark_email_unread-fill.svg
+	MarkEmailUnreadFill Icon
+	//go:embed svg/mark_email_unread.svg
+	MarkEmailUnread Icon
+	//go:embed svg/mark_unread_chat_alt-fill.svg
+	MarkUnreadChatAltFill Icon
+	//go:embed svg/mark_unread_chat_alt.svg
+	MarkUnreadChatAlt Icon
+	//go:embed svg/markunread_mailbox-fill.svg
+	MarkunreadMailboxFill Icon
+	//go:embed svg/markunread_mailbox.svg
+	MarkunreadMailbox Icon
+	//go:embed svg/masked_transitions-fill.svg
+	MaskedTransitionsFill Icon
+	//go:embed svg/masked_transitions.svg
+	MaskedTransitions Icon
+	//go:embed svg/match_case-fill.svg
+	MatchCaseFill Icon
+	//go:embed svg/match_case.svg
+	MatchCase Icon
+	//go:embed svg/match_word-fill.svg
+	MatchWordFill Icon
+	//go:embed svg/match_word.svg
+	MatchWord Icon
+	//go:embed svg/maximize-fill.svg
+	MaximizeFill Icon
+	//go:embed svg/maximize.svg
+	Maximize Icon
+	//go:embed svg/measuring_tape-fill.svg
+	MeasuringTapeFill Icon
+	//go:embed svg/measuring_tape.svg
+	MeasuringTape Icon
+	//go:embed svg/media_bluetooth_off-fill.svg
+	MediaBluetoothOffFill Icon
+	//go:embed svg/media_bluetooth_off.svg
+	MediaBluetoothOff Icon
+	//go:embed svg/media_bluetooth_on-fill.svg
+	MediaBluetoothOnFill Icon
+	//go:embed svg/media_bluetooth_on.svg
+	MediaBluetoothOn Icon
+	//go:embed svg/media_link-fill.svg
+	MediaLinkFill Icon
+	//go:embed svg/media_link.svg
+	MediaLink Icon
+	//go:embed svg/memory-fill.svg
+	MemoryFill Icon
+	//go:embed svg/memory.svg
+	Memory Icon
+	//go:embed svg/memory_alt-fill.svg
+	MemoryAltFill Icon
+	//go:embed svg/memory_alt.svg
+	MemoryAlt Icon
+	//go:embed svg/menu-fill.svg
+	MenuFill Icon
+	//go:embed svg/menu.svg
+	Menu Icon
+	//go:embed svg/menu_book-fill.svg
+	MenuBookFill Icon
+	//go:embed svg/menu_book.svg
+	MenuBook Icon
+	//go:embed svg/menu_open-fill.svg
+	MenuOpenFill Icon
+	//go:embed svg/menu_open.svg
+	MenuOpen Icon
+	//go:embed svg/merge-fill.svg
+	MergeFill Icon
+	//go:embed svg/merge.svg
+	Merge Icon
+	//go:embed svg/merge_type-fill.svg
+	MergeTypeFill Icon
+	//go:embed svg/merge_type.svg
+	MergeType Icon
+	//go:embed svg/method.svg
+	Method Icon
+	//go:embed svg/mic-fill.svg
+	MicFill Icon
+	//go:embed svg/mic.svg
+	Mic Icon
+	//go:embed svg/mic_double-fill.svg
+	MicDoubleFill Icon
+	//go:embed svg/mic_double.svg
+	MicDouble Icon
+	//go:embed svg/mic_external_off-fill.svg
+	MicExternalOffFill Icon
+	//go:embed svg/mic_external_off.svg
+	MicExternalOff Icon
+	//go:embed svg/mic_external_on-fill.svg
+	MicExternalOnFill Icon
+	//go:embed svg/mic_external_on.svg
+	MicExternalOn Icon
+	//go:embed svg/mic_off-fill.svg
+	MicOffFill Icon
+	//go:embed svg/mic_off.svg
+	MicOff Icon
+	//go:embed svg/minimize-fill.svg
+	MinimizeFill Icon
+	//go:embed svg/minimize.svg
+	Minimize Icon
+	//go:embed svg/missed_video_call-fill.svg
+	MissedVideoCallFill Icon
+	//go:embed svg/missed_video_call.svg
+	MissedVideoCall Icon
+	//go:embed svg/mms-fill.svg
+	MmsFill Icon
+	//go:embed svg/mms.svg
+	Mms Icon
+	//go:embed svg/mobile_friendly-fill.svg
+	MobileFriendlyFill Icon
+	//go:embed svg/mobile_friendly.svg
+	MobileFriendly Icon
+	//go:embed svg/mobile_off-fill.svg
+	MobileOffFill Icon
+	//go:embed svg/mobile_off.svg
+	MobileOff Icon
+	//go:embed svg/mobile_screen_share-fill.svg
+	MobileScreenShareFill Icon
+	//go:embed svg/mobile_screen_share.svg
+	MobileScreenShare Icon
+	//go:embed svg/mobiledata_off-fill.svg
+	MobiledataOffFill Icon
+	//go:embed svg/mobiledata_off.svg
+	MobiledataOff Icon
+	//go:embed svg/mode_cool-fill.svg
+	ModeCoolFill Icon
+	//go:embed svg/mode_cool.svg
+	ModeCool Icon
+	//go:embed svg/mode_cool_off-fill.svg
+	ModeCoolOffFill Icon
+	//go:embed svg/mode_cool_off.svg
+	ModeCoolOff Icon
+	//go:embed svg/mode_fan-fill.svg
+	ModeFanFill Icon
+	//go:embed svg/mode_fan.svg
+	ModeFan Icon
+	//go:embed svg/mode_fan_off-fill.svg
+	ModeFanOffFill Icon
+	//go:embed svg/mode_fan_off.svg
+	ModeFanOff Icon
+	//go:embed svg/mode_heat-fill.svg
+	ModeHeatFill Icon
+	//go:embed svg/mode_heat.svg
+	ModeHeat Icon
+	//go:embed svg/mode_heat_cool-fill.svg
+	ModeHeatCoolFill Icon
+	//go:embed svg/mode_heat_cool.svg
+	ModeHeatCool Icon
+	//go:embed svg/mode_heat_off-fill.svg
+	ModeHeatOffFill Icon
+	//go:embed svg/mode_heat_off.svg
+	ModeHeatOff Icon
+	//go:embed svg/mode_off_on-fill.svg
+	ModeOffOnFill Icon
+	//go:embed svg/mode_off_on.svg
+	ModeOffOn Icon
+	//go:embed svg/mode_standby-fill.svg
+	ModeStandbyFill Icon
+	//go:embed svg/mode_standby.svg
+	ModeStandby Icon
+	//go:embed svg/model_training-fill.svg
+	ModelTrainingFill Icon
+	//go:embed svg/model_training.svg
+	ModelTraining Icon
+	//go:embed svg/monetization_on-fill.svg
+	MonetizationOnFill Icon
+	//go:embed svg/monetization_on.svg
+	MonetizationOn Icon
+	//go:embed svg/money-fill.svg
+	MoneyFill Icon
+	//go:embed svg/money.svg
+	Money Icon
+	//go:embed svg/money_off-fill.svg
+	MoneyOffFill Icon
+	//go:embed svg/money_off.svg
+	MoneyOff Icon
+	//go:embed svg/monitor-fill.svg
+	MonitorFill Icon
+	//go:embed svg/monitor.svg
+	Monitor Icon
+	//go:embed svg/monitoring-fill.svg
+	MonitoringFill Icon
+	//go:embed svg/monitoring.svg
+	Monitoring Icon
+	//go:embed svg/monochrome_photos-fill.svg
+	MonochromePhotosFill Icon
+	//go:embed svg/monochrome_photos.svg
+	MonochromePhotos Icon
+	//go:embed svg/mood-fill.svg
+	MoodFill Icon
+	//go:embed svg/mood.svg
+	Mood Icon
+	//go:embed svg/mood_bad-fill.svg
+	MoodBadFill Icon
+	//go:embed svg/mood_bad.svg
+	MoodBad Icon
+	//go:embed svg/more-fill.svg
+	MoreFill Icon
+	//go:embed svg/more.svg
+	More Icon
+	//go:embed svg/more_down-fill.svg
+	MoreDownFill Icon
+	//go:embed svg/more_down.svg
+	MoreDown Icon
+	//go:embed svg/more_horiz-fill.svg
+	MoreHorizFill Icon
+	//go:embed svg/more_horiz.svg
+	MoreHoriz Icon
+	//go:embed svg/more_time-fill.svg
+	MoreTimeFill Icon
+	//go:embed svg/more_time.svg
+	MoreTime Icon
+	//go:embed svg/more_up-fill.svg
+	MoreUpFill Icon
+	//go:embed svg/more_up.svg
+	MoreUp Icon
+	//go:embed svg/more_vert-fill.svg
+	MoreVertFill Icon
+	//go:embed svg/more_vert.svg
+	MoreVert Icon
+	//go:embed svg/mouse-fill.svg
+	MouseFill Icon
+	//go:embed svg/mouse.svg
+	Mouse Icon
+	//go:embed svg/move-fill.svg
+	MoveFill Icon
+	//go:embed svg/move.svg
+	Move Icon
+	//go:embed svg/move_down-fill.svg
+	MoveDownFill Icon
+	//go:embed svg/move_down.svg
+	MoveDown Icon
+	//go:embed svg/move_group-fill.svg
+	MoveGroupFill Icon
+	//go:embed svg/move_group.svg
+	MoveGroup Icon
+	//go:embed svg/move_item-fill.svg
+	MoveItemFill Icon
+	//go:embed svg/move_item.svg
+	MoveItem Icon
+	//go:embed svg/move_location-fill.svg
+	MoveLocationFill Icon
+	//go:embed svg/move_location.svg
+	MoveLocation Icon
+	//go:embed svg/move_selection_down-fill.svg
+	MoveSelectionDownFill Icon
+	//go:embed svg/move_selection_down.svg
+	MoveSelectionDown Icon
+	//go:embed svg/move_selection_left-fill.svg
+	MoveSelectionLeftFill Icon
+	//go:embed svg/move_selection_left.svg
+	MoveSelectionLeft Icon
+	//go:embed svg/move_selection_right-fill.svg
+	MoveSelectionRightFill Icon
+	//go:embed svg/move_selection_right.svg
+	MoveSelectionRight Icon
+	//go:embed svg/move_selection_up-fill.svg
+	MoveSelectionUpFill Icon
+	//go:embed svg/move_selection_up.svg
+	MoveSelectionUp Icon
+	//go:embed svg/move_to_inbox-fill.svg
+	MoveToInboxFill Icon
+	//go:embed svg/move_to_inbox.svg
+	MoveToInbox Icon
+	//go:embed svg/move_up-fill.svg
+	MoveUpFill Icon
+	//go:embed svg/move_up.svg
+	MoveUp Icon
+	//go:embed svg/moved_location-fill.svg
+	MovedLocationFill Icon
+	//go:embed svg/moved_location.svg
+	MovedLocation Icon
+	//go:embed svg/movie-fill.svg
+	MovieFill Icon
+	//go:embed svg/movie.svg
+	Movie Icon
+	//go:embed svg/movie_edit-fill.svg
+	MovieEditFill Icon
+	//go:embed svg/movie_edit.svg
+	MovieEdit Icon
+	//go:embed svg/movie_info-fill.svg
+	MovieInfoFill Icon
+	//go:embed svg/movie_info.svg
+	MovieInfo Icon
+	//go:embed svg/moving-fill.svg
+	MovingFill Icon
+	//go:embed svg/moving.svg
+	Moving Icon
+	//go:embed svg/multiline_chart-fill.svg
+	MultilineChartFill Icon
+	//go:embed svg/multiline_chart.svg
+	MultilineChart Icon
+	//go:embed svg/multiple_stop-fill.svg
+	MultipleStopFill Icon
+	//go:embed svg/multiple_stop.svg
+	MultipleStop Icon
+	//go:embed svg/music_note-fill.svg
+	MusicNoteFill Icon
+	//go:embed svg/music_note.svg
+	MusicNote Icon
+	//go:embed svg/music_off-fill.svg
+	MusicOffFill Icon
+	//go:embed svg/music_off.svg
+	MusicOff Icon
+	//go:embed svg/music_video-fill.svg
+	MusicVideoFill Icon
+	//go:embed svg/music_video.svg
+	MusicVideo Icon
+	//go:embed svg/my_location-fill.svg
+	MyLocationFill Icon
+	//go:embed svg/my_location.svg
+	MyLocation Icon
+	//go:embed svg/mystery-fill.svg
+	MysteryFill Icon
+	//go:embed svg/mystery.svg
+	Mystery Icon
+	//go:embed svg/nature-fill.svg
+	NatureFill Icon
+	//go:embed svg/nature.svg
+	Nature Icon
+	//go:embed svg/navigate_before-fill.svg
+	NavigateBeforeFill Icon
+	//go:embed svg/navigate_before.svg
+	NavigateBefore Icon
+	//go:embed svg/navigate_next-fill.svg
+	NavigateNextFill Icon
+	//go:embed svg/navigate_next.svg
+	NavigateNext Icon
+	//go:embed svg/navigation-fill.svg
+	NavigationFill Icon
+	//go:embed svg/navigation.svg
+	Navigation Icon
+	//go:embed svg/network_cell-fill.svg
+	NetworkCellFill Icon
+	//go:embed svg/network_cell.svg
+	NetworkCell Icon
+	//go:embed svg/network_check-fill.svg
+	NetworkCheckFill Icon
+	//go:embed svg/network_check.svg
+	NetworkCheck Icon
+	//go:embed svg/network_locked-fill.svg
+	NetworkLockedFill Icon
+	//go:embed svg/network_locked.svg
+	NetworkLocked Icon
+	//go:embed svg/network_manage-fill.svg
+	NetworkManageFill Icon
+	//go:embed svg/network_manage.svg
+	NetworkManage Icon
+	//go:embed svg/network_ping-fill.svg
+	NetworkPingFill Icon
+	//go:embed svg/network_ping.svg
+	NetworkPing Icon
+	//go:embed svg/network_wifi-fill.svg
+	NetworkWifiFill Icon
+	//go:embed svg/network_wifi.svg
+	NetworkWifi Icon
+	//go:embed svg/network_wifi_1_bar-fill.svg
+	NetworkWifi1BarFill Icon
+	//go:embed svg/network_wifi_1_bar.svg
+	NetworkWifi1Bar Icon
+	//go:embed svg/network_wifi_2_bar-fill.svg
+	NetworkWifi2BarFill Icon
+	//go:embed svg/network_wifi_2_bar.svg
+	NetworkWifi2Bar Icon
+	//go:embed svg/network_wifi_3_bar-fill.svg
+	NetworkWifi3BarFill Icon
+	//go:embed svg/network_wifi_3_bar.svg
+	NetworkWifi3Bar Icon
+	//go:embed svg/new_label-fill.svg
+	NewLabelFill Icon
+	//go:embed svg/new_label.svg
+	NewLabel Icon
+	//go:embed svg/new_releases-fill.svg
+	NewReleasesFill Icon
+	//go:embed svg/new_releases.svg
+	NewReleases Icon
+	//go:embed svg/new_window-fill.svg
+	NewWindowFill Icon
+	//go:embed svg/new_window.svg
+	NewWindow Icon
+	//go:embed svg/news-fill.svg
+	NewsFill Icon
+	//go:embed svg/news.svg
+	News Icon
+	//go:embed svg/newsmode-fill.svg
+	NewsmodeFill Icon
+	//go:embed svg/newsmode.svg
+	Newsmode Icon
+	//go:embed svg/newspaper-fill.svg
+	NewspaperFill Icon
+	//go:embed svg/newspaper.svg
+	Newspaper Icon
+	//go:embed svg/next_plan-fill.svg
+	NextPlanFill Icon
+	//go:embed svg/next_plan.svg
+	NextPlan Icon
+	//go:embed svg/next_week-fill.svg
+	NextWeekFill Icon
+	//go:embed svg/next_week.svg
+	NextWeek Icon
+	//go:embed svg/nfc-fill.svg
+	NfcFill Icon
+	//go:embed svg/nfc.svg
+	Nfc Icon
+	//go:embed svg/no_accounts-fill.svg
+	NoAccountsFill Icon
+	//go:embed svg/no_accounts.svg
+	NoAccounts Icon
+	//go:embed svg/no_adult_content-fill.svg
+	NoAdultContentFill Icon
+	//go:embed svg/no_adult_content.svg
+	NoAdultContent Icon
+	//go:embed svg/no_crash-fill.svg
+	NoCrashFill Icon
+	//go:embed svg/no_crash.svg
+	NoCrash Icon
+	//go:embed svg/no_encryption-fill.svg
+	NoEncryptionFill Icon
+	//go:embed svg/no_encryption.svg
+	NoEncryption Icon
+	//go:embed svg/no_flash-fill.svg
+	NoFlashFill Icon
+	//go:embed svg/no_flash.svg
+	NoFlash Icon
+	//go:embed svg/no_sim-fill.svg
+	NoSimFill Icon
+	//go:embed svg/no_sim.svg
+	NoSim Icon
+	//go:embed svg/no_sound-fill.svg
+	NoSoundFill Icon
+	//go:embed svg/no_sound.svg
+	NoSound Icon
+	//go:embed svg/no_transfer-fill.svg
+	NoTransferFill Icon
+	//go:embed svg/no_transfer.svg
+	NoTransfer Icon
+	//go:embed svg/north-fill.svg
+	NorthFill Icon
+	//go:embed svg/north.svg
+	North Icon
+	//go:embed svg/north_east-fill.svg
+	NorthEastFill Icon
+	//go:embed svg/north_east.svg
+	NorthEast Icon
+	//go:embed svg/north_west-fill.svg
+	NorthWestFill Icon
+	//go:embed svg/north_west.svg
+	NorthWest Icon
+	//go:embed svg/not_started-fill.svg
+	NotStartedFill Icon
+	//go:embed svg/not_started.svg
+	NotStarted Icon
+	//go:embed svg/note-fill.svg
+	NoteFill Icon
+	//go:embed svg/note.svg
+	Note Icon
+	//go:embed svg/note_add-fill.svg
+	NoteAddFill Icon
+	//go:embed svg/note_add.svg
+	NoteAdd Icon
+	//go:embed svg/note_alt-fill.svg
+	NoteAltFill Icon
+	//go:embed svg/note_alt.svg
+	NoteAlt Icon
+	//go:embed svg/notes-fill.svg
+	NotesFill Icon
+	//go:embed svg/notes.svg
+	Notes Icon
+	//go:embed svg/notification_add-fill.svg
+	NotificationAddFill Icon
+	//go:embed svg/notification_add.svg
+	NotificationAdd Icon
+	//go:embed svg/notification_important-fill.svg
+	NotificationImportantFill Icon
+	//go:embed svg/notification_important.svg
+	NotificationImportant Icon
+	//go:embed svg/notification_multiple-fill.svg
+	NotificationMultipleFill Icon
+	//go:embed svg/notification_multiple.svg
+	NotificationMultiple Icon
+	//go:embed svg/notifications-fill.svg
+	NotificationsFill Icon
+	//go:embed svg/notifications.svg
+	Notifications Icon
+	//go:embed svg/notifications_active-fill.svg
+	NotificationsActiveFill Icon
+	//go:embed svg/notifications_active.svg
+	NotificationsActive Icon
+	//go:embed svg/notifications_off-fill.svg
+	NotificationsOffFill Icon
+	//go:embed svg/notifications_off.svg
+	NotificationsOff Icon
+	//go:embed svg/notifications_paused-fill.svg
+	NotificationsPausedFill Icon
+	//go:embed svg/notifications_paused.svg
+	NotificationsPaused Icon
+	//go:embed svg/numbers-fill.svg
+	NumbersFill Icon
+	//go:embed svg/numbers.svg
+	Numbers Icon
+	//go:embed svg/offline_bolt-fill.svg
+	OfflineBoltFill Icon
+	//go:embed svg/offline_bolt.svg
+	OfflineBolt Icon
+	//go:embed svg/offline_pin-fill.svg
+	OfflinePinFill Icon
+	//go:embed svg/offline_pin.svg
+	OfflinePin Icon
+	//go:embed svg/offline_share-fill.svg
+	OfflineShareFill Icon
+	//go:embed svg/offline_share.svg
+	OfflineShare Icon
+	//go:embed svg/on_device_training-fill.svg
+	OnDeviceTrainingFill Icon
+	//go:embed svg/on_device_training.svg
+	OnDeviceTraining Icon
+	//go:embed svg/online_prediction-fill.svg
+	OnlinePredictionFill Icon
+	//go:embed svg/online_prediction.svg
+	OnlinePrediction Icon
+	//go:embed svg/opacity-fill.svg
+	OpacityFill Icon
+	//go:embed svg/opacity.svg
+	Opacity Icon
+	//go:embed svg/open-fill.svg
+	OpenFill Icon
+	//go:embed svg/open.svg
+	Open Icon
+	//go:embed svg/open_in_browser-fill.svg
+	OpenInBrowserFill Icon
+	//go:embed svg/open_in_browser.svg
+	OpenInBrowser Icon
+	//go:embed svg/open_in_full-fill.svg
+	OpenInFullFill Icon
+	//go:embed svg/open_in_full.svg
+	OpenInFull Icon
+	//go:embed svg/open_in_new-fill.svg
+	OpenInNewFill Icon
+	//go:embed svg/open_in_new.svg
+	OpenInNew Icon
+	//go:embed svg/open_in_new_down-fill.svg
+	OpenInNewDownFill Icon
+	//go:embed svg/open_in_new_down.svg
+	OpenInNewDown Icon
+	//go:embed svg/open_in_new_off-fill.svg
+	OpenInNewOffFill Icon
+	//go:embed svg/open_in_new_off.svg
+	OpenInNewOff Icon
+	//go:embed svg/open_in_phone-fill.svg
+	OpenInPhoneFill Icon
+	//go:embed svg/open_in_phone.svg
+	OpenInPhone Icon
+	//go:embed svg/open_with-fill.svg
+	OpenWithFill Icon
+	//go:embed svg/open_with.svg
+	OpenWith Icon
+	//go:embed svg/order_approve-fill.svg
+	OrderApproveFill Icon
+	//go:embed svg/order_approve.svg
+	OrderApprove Icon
+	//go:embed svg/order_play-fill.svg
+	OrderPlayFill Icon
+	//go:embed svg/order_play.svg
+	OrderPlay Icon
+	//go:embed svg/outbound-fill.svg
+	OutboundFill Icon
+	//go:embed svg/outbound.svg
+	Outbound Icon
+	//go:embed svg/outbox-fill.svg
+	OutboxFill Icon
+	//go:embed svg/outbox.svg
+	Outbox Icon
+	//go:embed svg/outbox_alt-fill.svg
+	OutboxAltFill Icon
+	//go:embed svg/outbox_alt.svg
+	OutboxAlt Icon
+	//go:embed svg/outgoing_mail-fill.svg
+	OutgoingMailFill Icon
+	//go:embed svg/outgoing_mail.svg
+	OutgoingMail Icon
+	//go:embed svg/outlet-fill.svg
+	OutletFill Icon
+	//go:embed svg/outlet.svg
+	Outlet Icon
+	//go:embed svg/output-fill.svg
+	OutputFill Icon
+	//go:embed svg/output.svg
+	Output Icon
+	//go:embed svg/output_circle-fill.svg
+	OutputCircleFill Icon
+	//go:embed svg/output_circle.svg
+	OutputCircle Icon
+	//go:embed svg/overview-fill.svg
+	OverviewFill Icon
+	//go:embed svg/overview.svg
+	Overview Icon
+	//go:embed svg/overview_key-fill.svg
+	OverviewKeyFill Icon
+	//go:embed svg/overview_key.svg
+	OverviewKey Icon
+	//go:embed svg/pace-fill.svg
+	PaceFill Icon
+	//go:embed svg/pace.svg
+	Pace Icon
+	//go:embed svg/package-fill.svg
+	PackageFill Icon
+	//go:embed svg/package.svg
+	Package Icon
+	//go:embed svg/padding-fill.svg
+	PaddingFill Icon
+	//go:embed svg/padding.svg
+	Padding Icon
+	//go:embed svg/page_control-fill.svg
+	PageControlFill Icon
+	//go:embed svg/page_control.svg
+	PageControl Icon
+	//go:embed svg/page_info-fill.svg
+	PageInfoFill Icon
+	//go:embed svg/page_info.svg
+	PageInfo Icon
+	//go:embed svg/pages-fill.svg
+	PagesFill Icon
+	//go:embed svg/pages.svg
+	Pages Icon
+	//go:embed svg/pageview-fill.svg
+	PageviewFill Icon
+	//go:embed svg/pageview.svg
+	Pageview Icon
+	//go:embed svg/paid-fill.svg
+	PaidFill Icon
+	//go:embed svg/paid.svg
+	Paid Icon
+	//go:embed svg/palette-fill.svg
+	PaletteFill Icon
+	//go:embed svg/palette.svg
+	Palette Icon
+	//go:embed svg/pallet-fill.svg
+	PalletFill Icon
+	//go:embed svg/pallet.svg
+	Pallet Icon
+	//go:embed svg/pan_tool-fill.svg
+	PanToolFill Icon
+	//go:embed svg/pan_tool.svg
+	PanTool Icon
+	//go:embed svg/pan_tool_alt-fill.svg
+	PanToolAltFill Icon
+	//go:embed svg/pan_tool_alt.svg
+	PanToolAlt Icon
+	//go:embed svg/pan_zoom-fill.svg
+	PanZoomFill Icon
+	//go:embed svg/pan_zoom.svg
+	PanZoom Icon
+	//go:embed svg/panorama-fill.svg
+	PanoramaFill Icon
+	//go:embed svg/panorama.svg
+	Panorama Icon
+	//go:embed svg/password-fill.svg
+	PasswordFill Icon
+	//go:embed svg/password.svg
+	Password Icon
+	//go:embed svg/paste.svg
+	Paste Icon
+	//go:embed svg/pattern-fill.svg
+	PatternFill Icon
+	//go:embed svg/pattern.svg
+	Pattern Icon
+	//go:embed svg/pause-fill.svg
+	PauseFill Icon
+	//go:embed svg/pause.svg
+	Pause Icon
+	//go:embed svg/pause_circle-fill.svg
+	PauseCircleFill Icon
+	//go:embed svg/pause_circle.svg
+	PauseCircle Icon
+	//go:embed svg/pause_presentation-fill.svg
+	PausePresentationFill Icon
+	//go:embed svg/pause_presentation.svg
+	PausePresentation Icon
+	//go:embed svg/payments-fill.svg
+	PaymentsFill Icon
+	//go:embed svg/payments.svg
+	Payments Icon
+	//go:embed svg/pen_size_1-fill.svg
+	PenSize1Fill Icon
+	//go:embed svg/pen_size_1.svg
+	PenSize1 Icon
+	//go:embed svg/pen_size_2-fill.svg
+	PenSize2Fill Icon
+	//go:embed svg/pen_size_2.svg
+	PenSize2 Icon
+	//go:embed svg/pen_size_3-fill.svg
+	PenSize3Fill Icon
+	//go:embed svg/pen_size_3.svg
+	PenSize3 Icon
+	//go:embed svg/pen_size_4-fill.svg
+	PenSize4Fill Icon
+	//go:embed svg/pen_size_4.svg
+	PenSize4 Icon
+	//go:embed svg/pen_size_5-fill.svg
+	PenSize5Fill Icon
+	//go:embed svg/pen_size_5.svg
+	PenSize5 Icon
+	//go:embed svg/pending-fill.svg
+	PendingFill Icon
+	//go:embed svg/pending.svg
+	Pending Icon
+	//go:embed svg/pending_actions-fill.svg
+	PendingActionsFill Icon
+	//go:embed svg/pending_actions.svg
+	PendingActions Icon
+	//go:embed svg/pentagon-fill.svg
+	PentagonFill Icon
+	//go:embed svg/pentagon.svg
+	Pentagon Icon
+	//go:embed svg/percent-fill.svg
+	PercentFill Icon
+	//go:embed svg/percent.svg
+	Percent Icon
+	//go:embed svg/perm_camera_mic-fill.svg
+	PermCameraMicFill Icon
+	//go:embed svg/perm_camera_mic.svg
+	PermCameraMic Icon
+	//go:embed svg/perm_contact_calendar-fill.svg
+	PermContactCalendarFill Icon
+	//go:embed svg/perm_contact_calendar.svg
+	PermContactCalendar Icon
+	//go:embed svg/perm_data_setting-fill.svg
+	PermDataSettingFill Icon
+	//go:embed svg/perm_data_setting.svg
+	PermDataSetting Icon
+	//go:embed svg/perm_device_information-fill.svg
+	PermDeviceInformationFill Icon
+	//go:embed svg/perm_device_information.svg
+	PermDeviceInformation Icon
+	//go:embed svg/perm_media-fill.svg
+	PermMediaFill Icon
+	//go:embed svg/perm_media.svg
+	PermMedia Icon
+	//go:embed svg/perm_phone_msg-fill.svg
+	PermPhoneMsgFill Icon
+	//go:embed svg/perm_phone_msg.svg
+	PermPhoneMsg Icon
+	//go:embed svg/perm_scan_wifi-fill.svg
+	PermScanWifiFill Icon
+	//go:embed svg/perm_scan_wifi.svg
+	PermScanWifi Icon
+	//go:embed svg/person-fill.svg
+	PersonFill Icon
+	//go:embed svg/person.svg
+	Person Icon
+	//go:embed svg/person_2-fill.svg
+	Person2Fill Icon
+	//go:embed svg/person_2.svg
+	Person2 Icon
+	//go:embed svg/person_3-fill.svg
+	Person3Fill Icon
+	//go:embed svg/person_3.svg
+	Person3 Icon
+	//go:embed svg/person_4-fill.svg
+	Person4Fill Icon
+	//go:embed svg/person_4.svg
+	Person4 Icon
+	//go:embed svg/person_add-fill.svg
+	PersonAddFill Icon
+	//go:embed svg/person_add.svg
+	PersonAdd Icon
+	//go:embed svg/person_add_disabled-fill.svg
+	PersonAddDisabledFill Icon
+	//go:embed svg/person_add_disabled.svg
+	PersonAddDisabled Icon
+	//go:embed svg/person_apron-fill.svg
+	PersonApronFill Icon
+	//go:embed svg/person_apron.svg
+	PersonApron Icon
+	//go:embed svg/person_book-fill.svg
+	PersonBookFill Icon
+	//go:embed svg/person_book.svg
+	PersonBook Icon
+	//go:embed svg/person_celebrate-fill.svg
+	PersonCelebrateFill Icon
+	//go:embed svg/person_celebrate.svg
+	PersonCelebrate Icon
+	//go:embed svg/person_off-fill.svg
+	PersonOffFill Icon
+	//go:embed svg/person_off.svg
+	PersonOff Icon
+	//go:embed svg/person_pin-fill.svg
+	PersonPinFill Icon
+	//go:embed svg/person_pin.svg
+	PersonPin Icon
+	//go:embed svg/person_pin_circle-fill.svg
+	PersonPinCircleFill Icon
+	//go:embed svg/person_pin_circle.svg
+	PersonPinCircle Icon
+	//go:embed svg/person_play-fill.svg
+	PersonPlayFill Icon
+	//go:embed svg/person_play.svg
+	PersonPlay Icon
+	//go:embed svg/person_raised_hand-fill.svg
+	PersonRaisedHandFill Icon
+	//go:embed svg/person_raised_hand.svg
+	PersonRaisedHand Icon
+	//go:embed svg/person_remove-fill.svg
+	PersonRemoveFill Icon
+	//go:embed svg/person_remove.svg
+	PersonRemove Icon
+	//go:embed svg/person_search-fill.svg
+	PersonSearchFill Icon
+	//go:embed svg/person_search.svg
+	PersonSearch Icon
+	//go:embed svg/phishing-fill.svg
+	PhishingFill Icon
+	//go:embed svg/phishing.svg
+	Phishing Icon
+	//go:embed svg/phone_android-fill.svg
+	PhoneAndroidFill Icon
+	//go:embed svg/phone_android.svg
+	PhoneAndroid Icon
+	//go:embed svg/phone_bluetooth_speaker-fill.svg
+	PhoneBluetoothSpeakerFill Icon
+	//go:embed svg/phone_bluetooth_speaker.svg
+	PhoneBluetoothSpeaker Icon
+	//go:embed svg/phone_callback-fill.svg
+	PhoneCallbackFill Icon
+	//go:embed svg/phone_callback.svg
+	PhoneCallback Icon
+	//go:embed svg/phone_disabled-fill.svg
+	PhoneDisabledFill Icon
+	//go:embed svg/phone_disabled.svg
+	PhoneDisabled Icon
+	//go:embed svg/phone_enabled-fill.svg
+	PhoneEnabledFill Icon
+	//go:embed svg/phone_enabled.svg
+	PhoneEnabled Icon
+	//go:embed svg/phone_forwarded-fill.svg
+	PhoneForwardedFill Icon
+	//go:embed svg/phone_forwarded.svg
+	PhoneForwarded Icon
+	//go:embed svg/phone_in_talk-fill.svg
+	PhoneInTalkFill Icon
+	//go:embed svg/phone_in_talk.svg
+	PhoneInTalk Icon
+	//go:embed svg/phone_iphone-fill.svg
+	PhoneIphoneFill Icon
+	//go:embed svg/phone_iphone.svg
+	PhoneIphone Icon
+	//go:embed svg/phone_locked-fill.svg
+	PhoneLockedFill Icon
+	//go:embed svg/phone_locked.svg
+	PhoneLocked Icon
+	//go:embed svg/phone_missed-fill.svg
+	PhoneMissedFill Icon
+	//go:embed svg/phone_missed.svg
+	PhoneMissed Icon
+	//go:embed svg/phone_paused-fill.svg
+	PhonePausedFill Icon
+	//go:embed svg/phone_paused.svg
+	PhonePaused Icon
+	//go:embed svg/photo-fill.svg
+	PhotoFill Icon
+	//go:embed svg/photo.svg
+	Photo Icon
+	//go:embed svg/photo_album-fill.svg
+	PhotoAlbumFill Icon
+	//go:embed svg/photo_album.svg
+	PhotoAlbum Icon
+	//go:embed svg/photo_camera-fill.svg
+	PhotoCameraFill Icon
+	//go:embed svg/photo_camera.svg
+	PhotoCamera Icon
+	//go:embed svg/photo_camera_back-fill.svg
+	PhotoCameraBackFill Icon
+	//go:embed svg/photo_camera_back.svg
+	PhotoCameraBack Icon
+	//go:embed svg/photo_camera_front-fill.svg
+	PhotoCameraFrontFill Icon
+	//go:embed svg/photo_camera_front.svg
+	PhotoCameraFront Icon
+	//go:embed svg/photo_frame-fill.svg
+	PhotoFrameFill Icon
+	//go:embed svg/photo_frame.svg
+	PhotoFrame Icon
+	//go:embed svg/photo_library-fill.svg
+	PhotoLibraryFill Icon
+	//go:embed svg/photo_library.svg
+	PhotoLibrary Icon
+	//go:embed svg/photo_prints-fill.svg
+	PhotoPrintsFill Icon
+	//go:embed svg/photo_prints.svg
+	PhotoPrints Icon
+	//go:embed svg/photo_size_select_large-fill.svg
+	PhotoSizeSelectLargeFill Icon
+	//go:embed svg/photo_size_select_large.svg
+	PhotoSizeSelectLarge Icon
+	//go:embed svg/photo_size_select_small-fill.svg
+	PhotoSizeSelectSmallFill Icon
+	//go:embed svg/photo_size_select_small.svg
+	PhotoSizeSelectSmall Icon
+	//go:embed svg/php-fill.svg
+	PhpFill Icon
+	//go:embed svg/php.svg
+	Php Icon
+	//go:embed svg/piano-fill.svg
+	PianoFill Icon
+	//go:embed svg/piano.svg
+	Piano Icon
+	//go:embed svg/piano_off-fill.svg
+	PianoOffFill Icon
+	//go:embed svg/piano_off.svg
+	PianoOff Icon
+	//go:embed svg/picture_as_pdf-fill.svg
+	PictureAsPdfFill Icon
+	//go:embed svg/picture_as_pdf.svg
+	PictureAsPdf Icon
+	//go:embed svg/picture_in_picture-fill.svg
+	PictureInPictureFill Icon
+	//go:embed svg/picture_in_picture.svg
+	PictureInPicture Icon
+	//go:embed svg/picture_in_picture_alt-fill.svg
+	PictureInPictureAltFill Icon
+	//go:embed svg/picture_in_picture_alt.svg
+	PictureInPictureAlt Icon
+	//go:embed svg/pie_chart-fill.svg
+	PieChartFill Icon
+	//go:embed svg/pie_chart.svg
+	PieChart Icon
+	//go:embed svg/pill-fill.svg
+	PillFill Icon
+	//go:embed svg/pill.svg
+	Pill Icon
+	//go:embed svg/pill_off-fill.svg
+	PillOffFill Icon
+	//go:embed svg/pill_off.svg
+	PillOff Icon
+	//go:embed svg/pin-fill.svg
+	PinFill Icon
+	//go:embed svg/pin.svg
+	Pin Icon
+	//go:embed svg/pin_drop-fill.svg
+	PinDropFill Icon
+	//go:embed svg/pin_drop.svg
+	PinDrop Icon
+	//go:embed svg/pin_end-fill.svg
+	PinEndFill Icon
+	//go:embed svg/pin_end.svg
+	PinEnd Icon
+	//go:embed svg/pin_invoke-fill.svg
+	PinInvokeFill Icon
+	//go:embed svg/pin_invoke.svg
+	PinInvoke Icon
+	//go:embed svg/pinch-fill.svg
+	PinchFill Icon
+	//go:embed svg/pinch.svg
+	Pinch Icon
+	//go:embed svg/pinch_zoom_in-fill.svg
+	PinchZoomInFill Icon
+	//go:embed svg/pinch_zoom_in.svg
+	PinchZoomIn Icon
+	//go:embed svg/pinch_zoom_out-fill.svg
+	PinchZoomOutFill Icon
+	//go:embed svg/pinch_zoom_out.svg
+	PinchZoomOut Icon
+	//go:embed svg/pip-fill.svg
+	PipFill Icon
+	//go:embed svg/pip.svg
+	Pip Icon
+	//go:embed svg/pip_exit-fill.svg
+	PipExitFill Icon
+	//go:embed svg/pip_exit.svg
+	PipExit Icon
+	//go:embed svg/pivot_table_chart-fill.svg
+	PivotTableChartFill Icon
+	//go:embed svg/pivot_table_chart.svg
+	PivotTableChart Icon
+	//go:embed svg/place_item-fill.svg
+	PlaceItemFill Icon
+	//go:embed svg/place_item.svg
+	PlaceItem Icon
+	//go:embed svg/plagiarism-fill.svg
+	PlagiarismFill Icon
+	//go:embed svg/plagiarism.svg
+	Plagiarism Icon
+	//go:embed svg/play_arrow-fill.svg
+	PlayArrowFill Icon
+	//go:embed svg/play_arrow.svg
+	PlayArrow Icon
+	//go:embed svg/play_circle-fill.svg
+	PlayCircleFill Icon
+	//go:embed svg/play_circle.svg
+	PlayCircle Icon
+	//go:embed svg/play_disabled-fill.svg
+	PlayDisabledFill Icon
+	//go:embed svg/play_disabled.svg
+	PlayDisabled Icon
+	//go:embed svg/play_for_work-fill.svg
+	PlayForWorkFill Icon
+	//go:embed svg/play_for_work.svg
+	PlayForWork Icon
+	//go:embed svg/play_lesson-fill.svg
+	PlayLessonFill Icon
+	//go:embed svg/play_lesson.svg
+	PlayLesson Icon
+	//go:embed svg/play_pause-fill.svg
+	PlayPauseFill Icon
+	//go:embed svg/play_pause.svg
+	PlayPause Icon
+	//go:embed svg/play_shapes-fill.svg
+	PlayShapesFill Icon
+	//go:embed svg/play_shapes.svg
+	PlayShapes Icon
+	//go:embed svg/playing_cards-fill.svg
+	PlayingCardsFill Icon
+	//go:embed svg/playing_cards.svg
+	PlayingCards Icon
+	//go:embed svg/playlist_add-fill.svg
+	PlaylistAddFill Icon
+	//go:embed svg/playlist_add.svg
+	PlaylistAdd Icon
+	//go:embed svg/playlist_add_check-fill.svg
+	PlaylistAddCheckFill Icon
+	//go:embed svg/playlist_add_check.svg
+	PlaylistAddCheck Icon
+	//go:embed svg/playlist_add_check_circle-fill.svg
+	PlaylistAddCheckCircleFill Icon
+	//go:embed svg/playlist_add_check_circle.svg
+	PlaylistAddCheckCircle Icon
+	//go:embed svg/playlist_add_circle-fill.svg
+	PlaylistAddCircleFill Icon
+	//go:embed svg/playlist_add_circle.svg
+	PlaylistAddCircle Icon
+	//go:embed svg/playlist_play-fill.svg
+	PlaylistPlayFill Icon
+	//go:embed svg/playlist_play.svg
+	PlaylistPlay Icon
+	//go:embed svg/playlist_remove-fill.svg
+	PlaylistRemoveFill Icon
+	//go:embed svg/playlist_remove.svg
+	PlaylistRemove Icon
+	//go:embed svg/podcasts-fill.svg
+	PodcastsFill Icon
+	//go:embed svg/podcasts.svg
+	Podcasts Icon
+	//go:embed svg/podium-fill.svg
+	PodiumFill Icon
+	//go:embed svg/podium.svg
+	Podium Icon
+	//go:embed svg/point_of_sale-fill.svg
+	PointOfSaleFill Icon
+	//go:embed svg/point_of_sale.svg
+	PointOfSale Icon
+	//go:embed svg/point_scan-fill.svg
+	PointScanFill Icon
+	//go:embed svg/point_scan.svg
+	PointScan Icon
+	//go:embed svg/policy-fill.svg
+	PolicyFill Icon
+	//go:embed svg/policy.svg
+	Policy Icon
+	//go:embed svg/polyline-fill.svg
+	PolylineFill Icon
+	//go:embed svg/polyline.svg
+	Polyline Icon
+	//go:embed svg/polymer-fill.svg
+	PolymerFill Icon
+	//go:embed svg/polymer.svg
+	Polymer Icon
+	//go:embed svg/portable_wifi_off-fill.svg
+	PortableWifiOffFill Icon
+	//go:embed svg/portable_wifi_off.svg
+	PortableWifiOff Icon
+	//go:embed svg/position_bottom_left-fill.svg
+	PositionBottomLeftFill Icon
+	//go:embed svg/position_bottom_left.svg
+	PositionBottomLeft Icon
+	//go:embed svg/position_bottom_right-fill.svg
+	PositionBottomRightFill Icon
+	//go:embed svg/position_bottom_right.svg
+	PositionBottomRight Icon
+	//go:embed svg/position_top_right-fill.svg
+	PositionTopRightFill Icon
+	//go:embed svg/position_top_right.svg
+	PositionTopRight Icon
+	//go:embed svg/post-fill.svg
+	PostFill Icon
+	//go:embed svg/post.svg
+	Post Icon
+	//go:embed svg/post_add-fill.svg
+	PostAddFill Icon
+	//go:embed svg/post_add.svg
+	PostAdd Icon
+	//go:embed svg/power-fill.svg
+	PowerFill Icon
+	//go:embed svg/power.svg
+	Power Icon
+	//go:embed svg/power_input-fill.svg
+	PowerInputFill Icon
+	//go:embed svg/power_input.svg
+	PowerInput Icon
+	//go:embed svg/power_off-fill.svg
+	PowerOffFill Icon
+	//go:embed svg/power_off.svg
+	PowerOff Icon
+	//go:embed svg/power_settings_new-fill.svg
+	PowerSettingsNewFill Icon
+	//go:embed svg/power_settings_new.svg
+	PowerSettingsNew Icon
+	//go:embed svg/preliminary-fill.svg
+	PreliminaryFill Icon
+	//go:embed svg/preliminary.svg
+	Preliminary Icon
+	//go:embed svg/present_to_all-fill.svg
+	PresentToAllFill Icon
+	//go:embed svg/present_to_all.svg
+	PresentToAll Icon
+	//go:embed svg/preview-fill.svg
+	PreviewFill Icon
+	//go:embed svg/preview.svg
+	Preview Icon
+	//go:embed svg/preview_off-fill.svg
+	PreviewOffFill Icon
+	//go:embed svg/preview_off.svg
+	PreviewOff Icon
+	//go:embed svg/price_change-fill.svg
+	PriceChangeFill Icon
+	//go:embed svg/price_change.svg
+	PriceChange Icon
+	//go:embed svg/price_check-fill.svg
+	PriceCheckFill Icon
+	//go:embed svg/price_check.svg
+	PriceCheck Icon
+	//go:embed svg/print-fill.svg
+	PrintFill Icon
+	//go:embed svg/print.svg
+	Print Icon
+	//go:embed svg/print_add-fill.svg
+	PrintAddFill Icon
+	//go:embed svg/print_add.svg
+	PrintAdd Icon
+	//go:embed svg/print_connect-fill.svg
+	PrintConnectFill Icon
+	//go:embed svg/print_connect.svg
+	PrintConnect Icon
+	//go:embed svg/print_disabled-fill.svg
+	PrintDisabledFill Icon
+	//go:embed svg/print_disabled.svg
+	PrintDisabled Icon
+	//go:embed svg/print_error-fill.svg
+	PrintErrorFill Icon
+	//go:embed svg/print_error.svg
+	PrintError Icon
+	//go:embed svg/print_lock-fill.svg
+	PrintLockFill Icon
+	//go:embed svg/print_lock.svg
+	PrintLock Icon
+	//go:embed svg/priority-fill.svg
+	PriorityFill Icon
+	//go:embed svg/priority.svg
+	Priority Icon
+	//go:embed svg/priority_high-fill.svg
+	PriorityHighFill Icon
+	//go:embed svg/priority_high.svg
+	PriorityHigh Icon
+	//go:embed svg/privacy-fill.svg
+	PrivacyFill Icon
+	//go:embed svg/privacy.svg
+	Privacy Icon
+	//go:embed svg/privacy_tip-fill.svg
+	PrivacyTipFill Icon
+	//go:embed svg/privacy_tip.svg
+	PrivacyTip Icon
+	//go:embed svg/private_connectivity-fill.svg
+	PrivateConnectivityFill Icon
+	//go:embed svg/private_connectivity.svg
+	PrivateConnectivity Icon
+	//go:embed svg/problem-fill.svg
+	ProblemFill Icon
+	//go:embed svg/problem.svg
+	Problem Icon
+	//go:embed svg/process_chart-fill.svg
+	ProcessChartFill Icon
+	//go:embed svg/process_chart.svg
+	ProcessChart Icon
+	//go:embed svg/productivity-fill.svg
+	ProductivityFill Icon
+	//go:embed svg/productivity.svg
+	Productivity Icon
+	//go:embed svg/progress_activity-fill.svg
+	ProgressActivityFill Icon
+	//go:embed svg/progress_activity.svg
+	ProgressActivity Icon
+	//go:embed svg/publish-fill.svg
+	PublishFill Icon
+	//go:embed svg/publish.svg
+	Publish Icon
+	//go:embed svg/published_with_changes-fill.svg
+	PublishedWithChangesFill Icon
+	//go:embed svg/published_with_changes.svg
+	PublishedWithChanges Icon
+	//go:embed svg/punch_clock-fill.svg
+	PunchClockFill Icon
+	//go:embed svg/punch_clock.svg
+	PunchClock Icon
+	//go:embed svg/push_pin-fill.svg
+	PushPinFill Icon
+	//go:embed svg/push_pin.svg
+	PushPin Icon
+	//go:embed svg/qr_code-fill.svg
+	QrCodeFill Icon
+	//go:embed svg/qr_code.svg
+	QrCode Icon
+	//go:embed svg/qr_code_2-fill.svg
+	QrCode2Fill Icon
+	//go:embed svg/qr_code_2.svg
+	QrCode2 Icon
+	//go:embed svg/qr_code_2_add-fill.svg
+	QrCode2AddFill Icon
+	//go:embed svg/qr_code_2_add.svg
+	QrCode2Add Icon
+	//go:embed svg/qr_code_scanner-fill.svg
+	QrCodeScannerFill Icon
+	//go:embed svg/qr_code_scanner.svg
+	QrCodeScanner Icon
+	//go:embed svg/query_stats-fill.svg
+	QueryStatsFill Icon
+	//go:embed svg/query_stats.svg
+	QueryStats Icon
+	//go:embed svg/question_exchange-fill.svg
+	QuestionExchangeFill Icon
+	//go:embed svg/question_exchange.svg
+	QuestionExchange Icon
+	//go:embed svg/question_mark-fill.svg
+	QuestionMarkFill Icon
+	//go:embed svg/question_mark.svg
+	QuestionMark Icon
+	//go:embed svg/queue_music-fill.svg
+	QueueMusicFill Icon
+	//go:embed svg/queue_music.svg
+	QueueMusic Icon
+	//go:embed svg/queue_play_next-fill.svg
+	QueuePlayNextFill Icon
+	//go:embed svg/queue_play_next.svg
+	QueuePlayNext Icon
+	//go:embed svg/quick_phrases-fill.svg
+	QuickPhrasesFill Icon
+	//go:embed svg/quick_phrases.svg
+	QuickPhrases Icon
+	//go:embed svg/quick_reference-fill.svg
+	QuickReferenceFill Icon
+	//go:embed svg/quick_reference.svg
+	QuickReference Icon
+	//go:embed svg/quick_reference_all-fill.svg
+	QuickReferenceAllFill Icon
+	//go:embed svg/quick_reference_all.svg
+	QuickReferenceAll Icon
+	//go:embed svg/quickreply-fill.svg
+	QuickreplyFill Icon
+	//go:embed svg/quickreply.svg
+	Quickreply Icon
+	//go:embed svg/quiz-fill.svg
+	QuizFill Icon
+	//go:embed svg/quiz.svg
+	Quiz Icon
+	//go:embed svg/radar-fill.svg
+	RadarFill Icon
+	//go:embed svg/radar.svg
+	Radar Icon
+	//go:embed svg/radio-fill.svg
+	RadioFill Icon
+	//go:embed svg/radio.svg
+	Radio Icon
+	//go:embed svg/radio_button_checked-fill.svg
+	RadioButtonCheckedFill Icon
+	//go:embed svg/radio_button_checked.svg
+	RadioButtonChecked Icon
+	//go:embed svg/radio_button_partial.svg
+	RadioButtonPartial Icon
+	//go:embed svg/radio_button_unchecked-fill.svg
+	RadioButtonUncheckedFill Icon
+	//go:embed svg/radio_button_unchecked.svg
+	RadioButtonUnchecked Icon
+	//go:embed svg/rate_review-fill.svg
+	RateReviewFill Icon
+	//go:embed svg/rate_review.svg
+	RateReview Icon
+	//go:embed svg/read_more-fill.svg
+	ReadMoreFill Icon
+	//go:embed svg/read_more.svg
+	ReadMore Icon
+	//go:embed svg/readiness_score-fill.svg
+	ReadinessScoreFill Icon
+	//go:embed svg/readiness_score.svg
+	ReadinessScore Icon
+	//go:embed svg/rear_camera-fill.svg
+	RearCameraFill Icon
+	//go:embed svg/rear_camera.svg
+	RearCamera Icon
+	//go:embed svg/rebase-fill.svg
+	RebaseFill Icon
+	//go:embed svg/rebase.svg
+	Rebase Icon
+	//go:embed svg/rebase_edit-fill.svg
+	RebaseEditFill Icon
+	//go:embed svg/rebase_edit.svg
+	RebaseEdit Icon
+	//go:embed svg/receipt-fill.svg
+	ReceiptFill Icon
+	//go:embed svg/receipt.svg
+	Receipt Icon
+	//go:embed svg/receipt_long-fill.svg
+	ReceiptLongFill Icon
+	//go:embed svg/receipt_long.svg
+	ReceiptLong Icon
+	//go:embed svg/recommend-fill.svg
+	RecommendFill Icon
+	//go:embed svg/recommend.svg
+	Recommend Icon
+	//go:embed svg/record_voice_over-fill.svg
+	RecordVoiceOverFill Icon
+	//go:embed svg/record_voice_over.svg
+	RecordVoiceOver Icon
+	//go:embed svg/rectangle-fill.svg
+	RectangleFill Icon
+	//go:embed svg/rectangle.svg
+	Rectangle Icon
+	//go:embed svg/recycling-fill.svg
+	RecyclingFill Icon
+	//go:embed svg/recycling.svg
+	Recycling Icon
+	//go:embed svg/redeem-fill.svg
+	RedeemFill Icon
+	//go:embed svg/redeem.svg
+	Redeem Icon
+	//go:embed svg/redo-fill.svg
+	RedoFill Icon
+	//go:embed svg/redo.svg
+	Redo Icon
+	//go:embed svg/reduce_capacity-fill.svg
+	ReduceCapacityFill Icon
+	//go:embed svg/reduce_capacity.svg
+	ReduceCapacity Icon
+	//go:embed svg/refresh-fill.svg
+	RefreshFill Icon
+	//go:embed svg/refresh.svg
+	Refresh Icon
+	//go:embed svg/regular_expression-fill.svg
+	RegularExpressionFill Icon
+	//go:embed svg/regular_expression.svg
+	RegularExpression Icon
+	//go:embed svg/relax-fill.svg
+	RelaxFill Icon
+	//go:embed svg/relax.svg
+	Relax Icon
+	//go:embed svg/release_alert-fill.svg
+	ReleaseAlertFill Icon
+	//go:embed svg/release_alert.svg
+	ReleaseAlert Icon
+	//go:embed svg/remember_me-fill.svg
+	RememberMeFill Icon
+	//go:embed svg/remember_me.svg
+	RememberMe Icon
+	//go:embed svg/reminder-fill.svg
+	ReminderFill Icon
+	//go:embed svg/reminder.svg
+	Reminder Icon
+	//go:embed svg/remote_gen-fill.svg
+	RemoteGenFill Icon
+	//go:embed svg/remote_gen.svg
+	RemoteGen Icon
+	//go:embed svg/remove-fill.svg
+	RemoveFill Icon
+	//go:embed svg/remove.svg
+	Remove Icon
+	//go:embed svg/remove_done-fill.svg
+	RemoveDoneFill Icon
+	//go:embed svg/remove_done.svg
+	RemoveDone Icon
+	//go:embed svg/remove_from_queue-fill.svg
+	RemoveFromQueueFill Icon
+	//go:embed svg/remove_from_queue.svg
+	RemoveFromQueue Icon
+	//go:embed svg/remove_moderator-fill.svg
+	RemoveModeratorFill Icon
+	//go:embed svg/remove_moderator.svg
+	RemoveModerator Icon
+	//go:embed svg/remove_selection-fill.svg
+	RemoveSelectionFill Icon
+	//go:embed svg/remove_selection.svg
+	RemoveSelection Icon
+	//go:embed svg/remove_shopping_cart-fill.svg
+	RemoveShoppingCartFill Icon
+	//go:embed svg/remove_shopping_cart.svg
+	RemoveShoppingCart Icon
+	//go:embed svg/reopen_window-fill.svg
+	ReopenWindowFill Icon
+	//go:embed svg/reopen_window.svg
+	ReopenWindow Icon
+	//go:embed svg/reorder-fill.svg
+	ReorderFill Icon
+	//go:embed svg/reorder.svg
+	Reorder Icon
+	//go:embed svg/repartition-fill.svg
+	RepartitionFill Icon
+	//go:embed svg/repartition.svg
+	Repartition Icon
+	//go:embed svg/repeat-fill.svg
+	RepeatFill Icon
+	//go:embed svg/repeat.svg
+	Repeat Icon
+	//go:embed svg/repeat_on-fill.svg
+	RepeatOnFill Icon
+	//go:embed svg/repeat_on.svg
+	RepeatOn Icon
+	//go:embed svg/repeat_one-fill.svg
+	RepeatOneFill Icon
+	//go:embed svg/repeat_one.svg
+	RepeatOne Icon
+	//go:embed svg/repeat_one_on-fill.svg
+	RepeatOneOnFill Icon
+	//go:embed svg/repeat_one_on.svg
+	RepeatOneOn Icon
+	//go:embed svg/replay-fill.svg
+	ReplayFill Icon
+	//go:embed svg/replay.svg
+	Replay Icon
+	//go:embed svg/replay_10-fill.svg
+	Replay10Fill Icon
+	//go:embed svg/replay_10.svg
+	Replay10 Icon
+	//go:embed svg/replay_30-fill.svg
+	Replay30Fill Icon
+	//go:embed svg/replay_30.svg
+	Replay30 Icon
+	//go:embed svg/replay_5-fill.svg
+	Replay5Fill Icon
+	//go:embed svg/replay_5.svg
+	Replay5 Icon
+	//go:embed svg/reply-fill.svg
+	ReplyFill Icon
+	//go:embed svg/reply.svg
+	Reply Icon
+	//go:embed svg/reply_all-fill.svg
+	ReplyAllFill Icon
+	//go:embed svg/reply_all.svg
+	ReplyAll Icon
+	//go:embed svg/report-fill.svg
+	ReportFill Icon
+	//go:embed svg/report.svg
+	Report Icon
+	//go:embed svg/report_off-fill.svg
+	ReportOffFill Icon
+	//go:embed svg/report_off.svg
+	ReportOff Icon
+	//go:embed svg/request_page-fill.svg
+	RequestPageFill Icon
+	//go:embed svg/request_page.svg
+	RequestPage Icon
+	//go:embed svg/request_quote-fill.svg
+	RequestQuoteFill Icon
+	//go:embed svg/request_quote.svg
+	RequestQuote Icon
+	//go:embed svg/reset-fill.svg
+	ResetFill Icon
+	//go:embed svg/reset.svg
+	Reset Icon
+	//go:embed svg/reset_image-fill.svg
+	ResetImageFill Icon
+	//go:embed svg/reset_image.svg
+	ResetImage Icon
+	//go:embed svg/reset_tv-fill.svg
+	ResetTvFill Icon
+	//go:embed svg/reset_tv.svg
+	ResetTv Icon
+	//go:embed svg/resize-fill.svg
+	ResizeFill Icon
+	//go:embed svg/resize.svg
+	Resize Icon
+	//go:embed svg/restart-fill.svg
+	RestartFill Icon
+	//go:embed svg/restart.svg
+	Restart Icon
+	//go:embed svg/restore_from_trash-fill.svg
+	RestoreFromTrashFill Icon
+	//go:embed svg/restore_from_trash.svg
+	RestoreFromTrash Icon
+	//go:embed svg/restore_page-fill.svg
+	RestorePageFill Icon
+	//go:embed svg/restore_page.svg
+	RestorePage Icon
+	//go:embed svg/resume-fill.svg
+	ResumeFill Icon
+	//go:embed svg/resume.svg
+	Resume Icon
+	//go:embed svg/reviews-fill.svg
+	ReviewsFill Icon
+	//go:embed svg/reviews.svg
+	Reviews Icon
+	//go:embed svg/right_click-fill.svg
+	RightClickFill Icon
+	//go:embed svg/right_click.svg
+	RightClick Icon
+	//go:embed svg/right_panel_close-fill.svg
+	RightPanelCloseFill Icon
+	//go:embed svg/right_panel_close.svg
+	RightPanelClose Icon
+	//go:embed svg/right_panel_open-fill.svg
+	RightPanelOpenFill Icon
+	//go:embed svg/right_panel_open.svg
+	RightPanelOpen Icon
+	//go:embed svg/ring_volume-fill.svg
+	RingVolumeFill Icon
+	//go:embed svg/ring_volume.svg
+	RingVolume Icon
+	//go:embed svg/robot-fill.svg
+	RobotFill Icon
+	//go:embed svg/robot.svg
+	Robot Icon
+	//go:embed svg/robot_2-fill.svg
+	Robot2Fill Icon
+	//go:embed svg/robot_2.svg
+	Robot2 Icon
+	//go:embed svg/rocket-fill.svg
+	RocketFill Icon
+	//go:embed svg/rocket.svg
+	Rocket Icon
+	//go:embed svg/rocket_launch-fill.svg
+	RocketLaunchFill Icon
+	//go:embed svg/rocket_launch.svg
+	RocketLaunch Icon
+	//go:embed svg/rotate_90_degrees_ccw-fill.svg
+	Rotate90DegreesCcwFill Icon
+	//go:embed svg/rotate_90_degrees_ccw.svg
+	Rotate90DegreesCcw Icon
+	//go:embed svg/rotate_90_degrees_cw-fill.svg
+	Rotate90DegreesCwFill Icon
+	//go:embed svg/rotate_90_degrees_cw.svg
+	Rotate90DegreesCw Icon
+	//go:embed svg/rotate_left-fill.svg
+	RotateLeftFill Icon
+	//go:embed svg/rotate_left.svg
+	RotateLeft Icon
+	//go:embed svg/rotate_right-fill.svg
+	RotateRightFill Icon
+	//go:embed svg/rotate_right.svg
+	RotateRight Icon
+	//go:embed svg/rounded_corner-fill.svg
+	RoundedCornerFill Icon
+	//go:embed svg/rounded_corner.svg
+	RoundedCorner Icon
+	//go:embed svg/route-fill.svg
+	RouteFill Icon
+	//go:embed svg/route.svg
+	Route Icon
+	//go:embed svg/router-fill.svg
+	RouterFill Icon
+	//go:embed svg/router.svg
+	Router Icon
+	//go:embed svg/routine-fill.svg
+	RoutineFill Icon
+	//go:embed svg/routine.svg
+	Routine Icon
+	//go:embed svg/rss_feed-fill.svg
+	RssFeedFill Icon
+	//go:embed svg/rss_feed.svg
+	RssFeed Icon
+	//go:embed svg/rsvp-fill.svg
+	RsvpFill Icon
+	//go:embed svg/rsvp.svg
+	Rsvp Icon
+	//go:embed svg/rtt-fill.svg
+	RttFill Icon
+	//go:embed svg/rtt.svg
+	Rtt Icon
+	//go:embed svg/rule-fill.svg
+	RuleFill Icon
+	//go:embed svg/rule.svg
+	Rule Icon
+	//go:embed svg/rule_folder-fill.svg
+	RuleFolderFill Icon
+	//go:embed svg/rule_folder.svg
+	RuleFolder Icon
+	//go:embed svg/rule_settings-fill.svg
+	RuleSettingsFill Icon
+	//go:embed svg/rule_settings.svg
+	RuleSettings Icon
+	//go:embed svg/run_circle-fill.svg
+	RunCircleFill Icon
+	//go:embed svg/run_circle.svg
+	RunCircle Icon
+	//go:embed svg/running_with_errors-fill.svg
+	RunningWithErrorsFill Icon
+	//go:embed svg/running_with_errors.svg
+	RunningWithErrors Icon
+	//go:embed svg/safety_check-fill.svg
+	SafetyCheckFill Icon
+	//go:embed svg/safety_check.svg
+	SafetyCheck Icon
+	//go:embed svg/safety_check_off-fill.svg
+	SafetyCheckOffFill Icon
+	//go:embed svg/safety_check_off.svg
+	SafetyCheckOff Icon
+	//go:embed svg/sanitizer-fill.svg
+	SanitizerFill Icon
+	//go:embed svg/sanitizer.svg
+	Sanitizer Icon
+	//go:embed svg/satellite-fill.svg
+	SatelliteFill Icon
+	//go:embed svg/satellite.svg
+	Satellite Icon
+	//go:embed svg/satellite_alt-fill.svg
+	SatelliteAltFill Icon
+	//go:embed svg/satellite_alt.svg
+	SatelliteAlt Icon
+	//go:embed svg/save-fill.svg
+	SaveFill Icon
+	//go:embed svg/save.svg
+	Save Icon
+	//go:embed svg/save_as-fill.svg
+	SaveAsFill Icon
+	//go:embed svg/save_as.svg
+	SaveAs Icon
+	//go:embed svg/saved_search-fill.svg
+	SavedSearchFill Icon
+	//go:embed svg/saved_search.svg
+	SavedSearch Icon
+	//go:embed svg/savings-fill.svg
+	SavingsFill Icon
+	//go:embed svg/savings.svg
+	Savings Icon
+	//go:embed svg/scale-fill.svg
+	ScaleFill Icon
+	//go:embed svg/scale.svg
+	Scale Icon
+	//go:embed svg/scan-fill.svg
+	ScanFill Icon
+	//go:embed svg/scan.svg
+	Scan Icon
+	//go:embed svg/scan_delete-fill.svg
+	ScanDeleteFill Icon
+	//go:embed svg/scan_delete.svg
+	ScanDelete Icon
+	//go:embed svg/scanner-fill.svg
+	ScannerFill Icon
+	//go:embed svg/scanner.svg
+	Scanner Icon
+	//go:embed svg/scatter_plot-fill.svg
+	ScatterPlotFill Icon
+	//go:embed svg/scatter_plot.svg
+	ScatterPlot Icon
+	//go:embed svg/scene-fill.svg
+	SceneFill Icon
+	//go:embed svg/scene.svg
+	Scene Icon
+	//go:embed svg/schedule-fill.svg
+	ScheduleFill Icon
+	//go:embed svg/schedule.svg
+	Schedule Icon
+	//go:embed svg/schedule_send-fill.svg
+	ScheduleSendFill Icon
+	//go:embed svg/schedule_send.svg
+	ScheduleSend Icon
+	//go:embed svg/schema-fill.svg
+	SchemaFill Icon
+	//go:embed svg/schema.svg
+	Schema Icon
+	//go:embed svg/school-fill.svg
+	SchoolFill Icon
+	//go:embed svg/school.svg
+	School Icon
+	//go:embed svg/science-fill.svg
+	ScienceFill Icon
+	//go:embed svg/science.svg
+	Science Icon
+	//go:embed svg/score-fill.svg
+	ScoreFill Icon
+	//go:embed svg/score.svg
+	Score Icon
+	//go:embed svg/scoreboard-fill.svg
+	ScoreboardFill Icon
+	//go:embed svg/scoreboard.svg
+	Scoreboard Icon
+	//go:embed svg/screen_lock_landscape-fill.svg
+	ScreenLockLandscapeFill Icon
+	//go:embed svg/screen_lock_landscape.svg
+	ScreenLockLandscape Icon
+	//go:embed svg/screen_lock_portrait-fill.svg
+	ScreenLockPortraitFill Icon
+	//go:embed svg/screen_lock_portrait.svg
+	ScreenLockPortrait Icon
+	//go:embed svg/screen_lock_rotation-fill.svg
+	ScreenLockRotationFill Icon
+	//go:embed svg/screen_lock_rotation.svg
+	ScreenLockRotation Icon
+	//go:embed svg/screen_record-fill.svg
+	ScreenRecordFill Icon
+	//go:embed svg/screen_record.svg
+	ScreenRecord Icon
+	//go:embed svg/screen_rotation-fill.svg
+	ScreenRotationFill Icon
+	//go:embed svg/screen_rotation.svg
+	ScreenRotation Icon
+	//go:embed svg/screen_rotation_alt-fill.svg
+	ScreenRotationAltFill Icon
+	//go:embed svg/screen_rotation_alt.svg
+	ScreenRotationAlt Icon
+	//go:embed svg/screen_rotation_up-fill.svg
+	ScreenRotationUpFill Icon
+	//go:embed svg/screen_rotation_up.svg
+	ScreenRotationUp Icon
+	//go:embed svg/screen_search_desktop-fill.svg
+	ScreenSearchDesktopFill Icon
+	//go:embed svg/screen_search_desktop.svg
+	ScreenSearchDesktop Icon
+	//go:embed svg/screen_share-fill.svg
+	ScreenShareFill Icon
+	//go:embed svg/screen_share.svg
+	ScreenShare Icon
+	//go:embed svg/screenshot-fill.svg
+	ScreenshotFill Icon
+	//go:embed svg/screenshot.svg
+	Screenshot Icon
+	//go:embed svg/screenshot_frame-fill.svg
+	ScreenshotFrameFill Icon
+	//go:embed svg/screenshot_frame.svg
+	ScreenshotFrame Icon
+	//go:embed svg/screenshot_keyboard-fill.svg
+	ScreenshotKeyboardFill Icon
+	//go:embed svg/screenshot_keyboard.svg
+	ScreenshotKeyboard Icon
+	//go:embed svg/screenshot_monitor-fill.svg
+	ScreenshotMonitorFill Icon
+	//go:embed svg/screenshot_monitor.svg
+	ScreenshotMonitor Icon
+	//go:embed svg/screenshot_region-fill.svg
+	ScreenshotRegionFill Icon
+	//go:embed svg/screenshot_region.svg
+	ScreenshotRegion Icon
+	//go:embed svg/screenshot_tablet-fill.svg
+	ScreenshotTabletFill Icon
+	//go:embed svg/screenshot_tablet.svg
+	ScreenshotTablet Icon
+	//go:embed svg/scrollable_header-fill.svg
+	ScrollableHeaderFill Icon
+	//go:embed svg/scrollable_header.svg
+	ScrollableHeader Icon
+	//go:embed svg/sd-fill.svg
+	SdFill Icon
+	//go:embed svg/sd.svg
+	Sd Icon
+	//go:embed svg/sd_card-fill.svg
+	SdCardFill Icon
+	//go:embed svg/sd_card.svg
+	SdCard Icon
+	//go:embed svg/sd_card_alert-fill.svg
+	SdCardAlertFill Icon
+	//go:embed svg/sd_card_alert.svg
+	SdCardAlert Icon
+	//go:embed svg/search-fill.svg
+	SearchFill Icon
+	//go:embed svg/search.svg
+	Search Icon
+	//go:embed svg/search_check-fill.svg
+	SearchCheckFill Icon
+	//go:embed svg/search_check.svg
+	SearchCheck Icon
+	//go:embed svg/search_off-fill.svg
+	SearchOffFill Icon
+	//go:embed svg/search_off.svg
+	SearchOff Icon
+	//go:embed svg/security-fill.svg
+	SecurityFill Icon
+	//go:embed svg/security.svg
+	Security Icon
+	//go:embed svg/security_update_good-fill.svg
+	SecurityUpdateGoodFill Icon
+	//go:embed svg/security_update_good.svg
+	SecurityUpdateGood Icon
+	//go:embed svg/security_update_warning-fill.svg
+	SecurityUpdateWarningFill Icon
+	//go:embed svg/security_update_warning.svg
+	SecurityUpdateWarning Icon
+	//go:embed svg/segment-fill.svg
+	SegmentFill Icon
+	//go:embed svg/segment.svg
+	Segment Icon
+	//go:embed svg/select-fill.svg
+	SelectFill Icon
+	//go:embed svg/select.svg
+	Select Icon
+	//go:embed svg/select_all-fill.svg
+	SelectAllFill Icon
+	//go:embed svg/select_all.svg
+	SelectAll Icon
+	//go:embed svg/select_check_box-fill.svg
+	SelectCheckBoxFill Icon
+	//go:embed svg/select_check_box.svg
+	SelectCheckBox Icon
+	//go:embed svg/select_to_speak-fill.svg
+	SelectToSpeakFill Icon
+	//go:embed svg/select_to_speak.svg
+	SelectToSpeak Icon
+	//go:embed svg/select_window-fill.svg
+	SelectWindowFill Icon
+	//go:embed svg/select_window.svg
+	SelectWindow Icon
+	//go:embed svg/select_window_off-fill.svg
+	SelectWindowOffFill Icon
+	//go:embed svg/select_window_off.svg
+	SelectWindowOff Icon
+	//go:embed svg/sell-fill.svg
+	SellFill Icon
+	//go:embed svg/sell.svg
+	Sell Icon
+	//go:embed svg/send-fill.svg
+	SendFill Icon
+	//go:embed svg/send.svg
+	Send Icon
+	//go:embed svg/send_and_archive-fill.svg
+	SendAndArchiveFill Icon
+	//go:embed svg/send_and_archive.svg
+	SendAndArchive Icon
+	//go:embed svg/send_money-fill.svg
+	SendMoneyFill Icon
+	//go:embed svg/send_money.svg
+	SendMoney Icon
+	//go:embed svg/send_time_extension-fill.svg
+	SendTimeExtensionFill Icon
+	//go:embed svg/send_time_extension.svg
+	SendTimeExtension Icon
+	//go:embed svg/send_to_mobile-fill.svg
+	SendToMobileFill Icon
+	//go:embed svg/send_to_mobile.svg
+	SendToMobile Icon
+	//go:embed svg/sensors-fill.svg
+	SensorsFill Icon
+	//go:embed svg/sensors.svg
+	Sensors Icon
+	//go:embed svg/sensors_off-fill.svg
+	SensorsOffFill Icon
+	//go:embed svg/sensors_off.svg
+	SensorsOff Icon
+	//go:embed svg/sentiment_calm-fill.svg
+	SentimentCalmFill Icon
+	//go:embed svg/sentiment_calm.svg
+	SentimentCalm Icon
+	//go:embed svg/sentiment_content-fill.svg
+	SentimentContentFill Icon
+	//go:embed svg/sentiment_content.svg
+	SentimentContent Icon
+	//go:embed svg/sentiment_dissatisfied-fill.svg
+	SentimentDissatisfiedFill Icon
+	//go:embed svg/sentiment_dissatisfied.svg
+	SentimentDissatisfied Icon
+	//go:embed svg/sentiment_excited-fill.svg
+	SentimentExcitedFill Icon
+	//go:embed svg/sentiment_excited.svg
+	SentimentExcited Icon
+	//go:embed svg/sentiment_extremely_dissatisfied-fill.svg
+	SentimentExtremelyDissatisfiedFill Icon
+	//go:embed svg/sentiment_extremely_dissatisfied.svg
+	SentimentExtremelyDissatisfied Icon
+	//go:embed svg/sentiment_frustrated-fill.svg
+	SentimentFrustratedFill Icon
+	//go:embed svg/sentiment_frustrated.svg
+	SentimentFrustrated Icon
+	//go:embed svg/sentiment_neutral-fill.svg
+	SentimentNeutralFill Icon
+	//go:embed svg/sentiment_neutral.svg
+	SentimentNeutral Icon
+	//go:embed svg/sentiment_sad-fill.svg
+	SentimentSadFill Icon
+	//go:embed svg/sentiment_sad.svg
+	SentimentSad Icon
+	//go:embed svg/sentiment_satisfied-fill.svg
+	SentimentSatisfiedFill Icon
+	//go:embed svg/sentiment_satisfied.svg
+	SentimentSatisfied Icon
+	//go:embed svg/sentiment_stressed-fill.svg
+	SentimentStressedFill Icon
+	//go:embed svg/sentiment_stressed.svg
+	SentimentStressed Icon
+	//go:embed svg/sentiment_very_dissatisfied-fill.svg
+	SentimentVeryDissatisfiedFill Icon
+	//go:embed svg/sentiment_very_dissatisfied.svg
+	SentimentVeryDissatisfied Icon
+	//go:embed svg/sentiment_very_satisfied-fill.svg
+	SentimentVerySatisfiedFill Icon
+	//go:embed svg/sentiment_very_satisfied.svg
+	SentimentVerySatisfied Icon
+	//go:embed svg/sentiment_worried-fill.svg
+	SentimentWorriedFill Icon
+	//go:embed svg/sentiment_worried.svg
+	SentimentWorried Icon
+	//go:embed svg/settings-fill.svg
+	SettingsFill Icon
+	//go:embed svg/settings.svg
+	Settings Icon
+	//go:embed svg/settings_accessibility-fill.svg
+	SettingsAccessibilityFill Icon
+	//go:embed svg/settings_accessibility.svg
+	SettingsAccessibility Icon
+	//go:embed svg/settings_account_box-fill.svg
+	SettingsAccountBoxFill Icon
+	//go:embed svg/settings_account_box.svg
+	SettingsAccountBox Icon
+	//go:embed svg/settings_alert-fill.svg
+	SettingsAlertFill Icon
+	//go:embed svg/settings_alert.svg
+	SettingsAlert Icon
+	//go:embed svg/settings_applications-fill.svg
+	SettingsApplicationsFill Icon
+	//go:embed svg/settings_applications.svg
+	SettingsApplications Icon
+	//go:embed svg/settings_b_roll-fill.svg
+	SettingsBRollFill Icon
+	//go:embed svg/settings_b_roll.svg
+	SettingsBRoll Icon
+	//go:embed svg/settings_backup_restore-fill.svg
+	SettingsBackupRestoreFill Icon
+	//go:embed svg/settings_backup_restore.svg
+	SettingsBackupRestore Icon
+	//go:embed svg/settings_bluetooth-fill.svg
+	SettingsBluetoothFill Icon
+	//go:embed svg/settings_bluetooth.svg
+	SettingsBluetooth Icon
+	//go:embed svg/settings_brightness-fill.svg
+	SettingsBrightnessFill Icon
+	//go:embed svg/settings_brightness.svg
+	SettingsBrightness Icon
+	//go:embed svg/settings_cell-fill.svg
+	SettingsCellFill Icon
+	//go:embed svg/settings_cell.svg
+	SettingsCell Icon
+	//go:embed svg/settings_ethernet-fill.svg
+	SettingsEthernetFill Icon
+	//go:embed svg/settings_ethernet.svg
+	SettingsEthernet Icon
+	//go:embed svg/settings_input_antenna-fill.svg
+	SettingsInputAntennaFill Icon
+	//go:embed svg/settings_input_antenna.svg
+	SettingsInputAntenna Icon
+	//go:embed svg/settings_input_component-fill.svg
+	SettingsInputComponentFill Icon
+	//go:embed svg/settings_input_component.svg
+	SettingsInputComponent Icon
+	//go:embed svg/settings_phone-fill.svg
+	SettingsPhoneFill Icon
+	//go:embed svg/settings_phone.svg
+	SettingsPhone Icon
+	//go:embed svg/settings_photo_camera-fill.svg
+	SettingsPhotoCameraFill Icon
+	//go:embed svg/settings_photo_camera.svg
+	SettingsPhotoCamera Icon
+	//go:embed svg/settings_power-fill.svg
+	SettingsPowerFill Icon
+	//go:embed svg/settings_power.svg
+	SettingsPower Icon
+	//go:embed svg/settings_remote-fill.svg
+	SettingsRemoteFill Icon
+	//go:embed svg/settings_remote.svg
+	SettingsRemote Icon
+	//go:embed svg/settings_video_camera-fill.svg
+	SettingsVideoCameraFill Icon
+	//go:embed svg/settings_video_camera.svg
+	SettingsVideoCamera Icon
+	//go:embed svg/settings_voice-fill.svg
+	SettingsVoiceFill Icon
+	//go:embed svg/settings_voice.svg
+	SettingsVoice Icon
+	//go:embed svg/shadow-fill.svg
+	ShadowFill Icon
+	//go:embed svg/shadow.svg
+	Shadow Icon
+	//go:embed svg/shape_line-fill.svg
+	ShapeLineFill Icon
+	//go:embed svg/shape_line.svg
+	ShapeLine Icon
+	//go:embed svg/shapes-fill.svg
+	ShapesFill Icon
+	//go:embed svg/shapes.svg
+	Shapes Icon
+	//go:embed svg/share-fill.svg
+	ShareFill Icon
+	//go:embed svg/share.svg
+	Share Icon
+	//go:embed svg/share_location-fill.svg
+	ShareLocationFill Icon
+	//go:embed svg/share_location.svg
+	ShareLocation Icon
+	//go:embed svg/share_off-fill.svg
+	ShareOffFill Icon
+	//go:embed svg/share_off.svg
+	ShareOff Icon
+	//go:embed svg/share_reviews-fill.svg
+	ShareReviewsFill Icon
+	//go:embed svg/share_reviews.svg
+	ShareReviews Icon
+	//go:embed svg/share_windows-fill.svg
+	ShareWindowsFill Icon
+	//go:embed svg/share_windows.svg
+	ShareWindows Icon
+	//go:embed svg/sheets_rtl-fill.svg
+	SheetsRtlFill Icon
+	//go:embed svg/sheets_rtl.svg
+	SheetsRtl Icon
+	//go:embed svg/shelf_auto_hide-fill.svg
+	ShelfAutoHideFill Icon
+	//go:embed svg/shelf_auto_hide.svg
+	ShelfAutoHide Icon
+	//go:embed svg/shelf_position-fill.svg
+	ShelfPositionFill Icon
+	//go:embed svg/shelf_position.svg
+	ShelfPosition Icon
+	//go:embed svg/shelves-fill.svg
+	ShelvesFill Icon
+	//go:embed svg/shelves.svg
+	Shelves Icon
+	//go:embed svg/shield-fill.svg
+	ShieldFill Icon
+	//go:embed svg/shield.svg
+	Shield Icon
+	//go:embed svg/shield_lock-fill.svg
+	ShieldLockFill Icon
+	//go:embed svg/shield_lock.svg
+	ShieldLock Icon
+	//go:embed svg/shield_locked-fill.svg
+	ShieldLockedFill Icon
+	//go:embed svg/shield_locked.svg
+	ShieldLocked Icon
+	//go:embed svg/shield_moon-fill.svg
+	ShieldMoonFill Icon
+	//go:embed svg/shield_moon.svg
+	ShieldMoon Icon
+	//go:embed svg/shield_person-fill.svg
+	ShieldPersonFill Icon
+	//go:embed svg/shield_person.svg
+	ShieldPerson Icon
+	//go:embed svg/shield_with_heart-fill.svg
+	ShieldWithHeartFill Icon
+	//go:embed svg/shield_with_heart.svg
+	ShieldWithHeart Icon
+	//go:embed svg/shield_with_house-fill.svg
+	ShieldWithHouseFill Icon
+	//go:embed svg/shield_with_house.svg
+	ShieldWithHouse Icon
+	//go:embed svg/shift-fill.svg
+	ShiftFill Icon
+	//go:embed svg/shift.svg
+	Shift Icon
+	//go:embed svg/shift_lock-fill.svg
+	ShiftLockFill Icon
+	//go:embed svg/shift_lock.svg
+	ShiftLock Icon
+	//go:embed svg/shop-fill.svg
+	ShopFill Icon
+	//go:embed svg/shop.svg
+	Shop Icon
+	//go:embed svg/shop_two-fill.svg
+	ShopTwoFill Icon
+	//go:embed svg/shop_two.svg
+	ShopTwo Icon
+	//go:embed svg/shopping_bag-fill.svg
+	ShoppingBagFill Icon
+	//go:embed svg/shopping_bag.svg
+	ShoppingBag Icon
+	//go:embed svg/shopping_basket-fill.svg
+	ShoppingBasketFill Icon
+	//go:embed svg/shopping_basket.svg
+	ShoppingBasket Icon
+	//go:embed svg/shopping_cart-fill.svg
+	ShoppingCartFill Icon
+	//go:embed svg/shopping_cart.svg
+	ShoppingCart Icon
+	//go:embed svg/shopping_cart_checkout-fill.svg
+	ShoppingCartCheckoutFill Icon
+	//go:embed svg/shopping_cart_checkout.svg
+	ShoppingCartCheckout Icon
+	//go:embed svg/short_text-fill.svg
+	ShortTextFill Icon
+	//go:embed svg/short_text.svg
+	ShortText Icon
+	//go:embed svg/show_chart-fill.svg
+	ShowChartFill Icon
+	//go:embed svg/show_chart.svg
+	ShowChart Icon
+	//go:embed svg/shuffle-fill.svg
+	ShuffleFill Icon
+	//go:embed svg/shuffle.svg
+	Shuffle Icon
+	//go:embed svg/shuffle_on-fill.svg
+	ShuffleOnFill Icon
+	//go:embed svg/shuffle_on.svg
+	ShuffleOn Icon
+	//go:embed svg/side_navigation-fill.svg
+	SideNavigationFill Icon
+	//go:embed svg/side_navigation.svg
+	SideNavigation Icon
+	//go:embed svg/sign_language-fill.svg
+	SignLanguageFill Icon
+	//go:embed svg/sign_language.svg
+	SignLanguage Icon
+	//go:embed svg/signal_cellular_0_bar-fill.svg
+	SignalCellular0BarFill Icon
+	//go:embed svg/signal_cellular_0_bar.svg
+	SignalCellular0Bar Icon
+	//go:embed svg/signal_cellular_1_bar-fill.svg
+	SignalCellular1BarFill Icon
+	//go:embed svg/signal_cellular_1_bar.svg
+	SignalCellular1Bar Icon
+	//go:embed svg/signal_cellular_2_bar-fill.svg
+	SignalCellular2BarFill Icon
+	//go:embed svg/signal_cellular_2_bar.svg
+	SignalCellular2Bar Icon
+	//go:embed svg/signal_cellular_3_bar-fill.svg
+	SignalCellular3BarFill Icon
+	//go:embed svg/signal_cellular_3_bar.svg
+	SignalCellular3Bar Icon
+	//go:embed svg/signal_cellular_4_bar-fill.svg
+	SignalCellular4BarFill Icon
+	//go:embed svg/signal_cellular_4_bar.svg
+	SignalCellular4Bar Icon
+	//go:embed svg/signal_cellular_add-fill.svg
+	SignalCellularAddFill Icon
+	//go:embed svg/signal_cellular_add.svg
+	SignalCellularAdd Icon
+	//go:embed svg/signal_cellular_alt-fill.svg
+	SignalCellularAltFill Icon
+	//go:embed svg/signal_cellular_alt.svg
+	SignalCellularAlt Icon
+	//go:embed svg/signal_cellular_alt_1_bar-fill.svg
+	SignalCellularAlt1BarFill Icon
+	//go:embed svg/signal_cellular_alt_1_bar.svg
+	SignalCellularAlt1Bar Icon
+	//go:embed svg/signal_cellular_alt_2_bar-fill.svg
+	SignalCellularAlt2BarFill Icon
+	//go:embed svg/signal_cellular_alt_2_bar.svg
+	SignalCellularAlt2Bar Icon
+	//go:embed svg/signal_cellular_connected_no_internet_0_bar-fill.svg
+	SignalCellularConnectedNoInternet0BarFill Icon
+	//go:embed svg/signal_cellular_connected_no_internet_0_bar.svg
+	SignalCellularConnectedNoInternet0Bar Icon
+	//go:embed svg/signal_cellular_connected_no_internet_4_bar-fill.svg
+	SignalCellularConnectedNoInternet4BarFill Icon
+	//go:embed svg/signal_cellular_connected_no_internet_4_bar.svg
+	SignalCellularConnectedNoInternet4Bar Icon
+	//go:embed svg/signal_cellular_nodata-fill.svg
+	SignalCellularNodataFill Icon
+	//go:embed svg/signal_cellular_nodata.svg
+	SignalCellularNodata Icon
+	//go:embed svg/signal_cellular_null-fill.svg
+	SignalCellularNullFill Icon
+	//go:embed svg/signal_cellular_null.svg
+	SignalCellularNull Icon
+	//go:embed svg/signal_cellular_off-fill.svg
+	SignalCellularOffFill Icon
+	//go:embed svg/signal_cellular_off.svg
+	SignalCellularOff Icon
+	//go:embed svg/signal_cellular_pause-fill.svg
+	SignalCellularPauseFill Icon
+	//go:embed svg/signal_cellular_pause.svg
+	SignalCellularPause Icon
+	//go:embed svg/signal_disconnected-fill.svg
+	SignalDisconnectedFill Icon
+	//go:embed svg/signal_disconnected.svg
+	SignalDisconnected Icon
+	//go:embed svg/signal_wifi_0_bar-fill.svg
+	SignalWifi0BarFill Icon
+	//go:embed svg/signal_wifi_0_bar.svg
+	SignalWifi0Bar Icon
+	//go:embed svg/signal_wifi_4_bar-fill.svg
+	SignalWifi4BarFill Icon
+	//go:embed svg/signal_wifi_4_bar.svg
+	SignalWifi4Bar Icon
+	//go:embed svg/signal_wifi_bad-fill.svg
+	SignalWifiBadFill Icon
+	//go:embed svg/signal_wifi_bad.svg
+	SignalWifiBad Icon
+	//go:embed svg/signal_wifi_off-fill.svg
+	SignalWifiOffFill Icon
+	//go:embed svg/signal_wifi_off.svg
+	SignalWifiOff Icon
+	//go:embed svg/signal_wifi_statusbar_not_connected-fill.svg
+	SignalWifiStatusbarNotConnectedFill Icon
+	//go:embed svg/signal_wifi_statusbar_not_connected.svg
+	SignalWifiStatusbarNotConnected Icon
+	//go:embed svg/signal_wifi_statusbar_null-fill.svg
+	SignalWifiStatusbarNullFill Icon
+	//go:embed svg/signal_wifi_statusbar_null.svg
+	SignalWifiStatusbarNull Icon
+	//go:embed svg/signature-fill.svg
+	SignatureFill Icon
+	//go:embed svg/signature.svg
+	Signature Icon
+	//go:embed svg/skip_next-fill.svg
+	SkipNextFill Icon
+	//go:embed svg/skip_next.svg
+	SkipNext Icon
+	//go:embed svg/skip_previous-fill.svg
+	SkipPreviousFill Icon
+	//go:embed svg/skip_previous.svg
+	SkipPrevious Icon
+	//go:embed svg/slide_library-fill.svg
+	SlideLibraryFill Icon
+	//go:embed svg/slide_library.svg
+	SlideLibrary Icon
+	//go:embed svg/sliders-fill.svg
+	SlidersFill Icon
+	//go:embed svg/sliders.svg
+	Sliders Icon
+	//go:embed svg/slideshow-fill.svg
+	SlideshowFill Icon
+	//go:embed svg/slideshow.svg
+	Slideshow Icon
+	//go:embed svg/slow_motion_video-fill.svg
+	SlowMotionVideoFill Icon
+	//go:embed svg/slow_motion_video.svg
+	SlowMotionVideo Icon
+	//go:embed svg/smart_display-fill.svg
+	SmartDisplayFill Icon
+	//go:embed svg/smart_display.svg
+	SmartDisplay Icon
+	//go:embed svg/smart_outlet-fill.svg
+	SmartOutletFill Icon
+	//go:embed svg/smart_outlet.svg
+	SmartOutlet Icon
+	//go:embed svg/smart_screen-fill.svg
+	SmartScreenFill Icon
+	//go:embed svg/smart_screen.svg
+	SmartScreen Icon
+	//go:embed svg/smart_toy-fill.svg
+	SmartToyFill Icon
+	//go:embed svg/smart_toy.svg
+	SmartToy Icon
+	//go:embed svg/smartphone-fill.svg
+	SmartphoneFill Icon
+	//go:embed svg/smartphone.svg
+	Smartphone Icon
+	//go:embed svg/smb_share-fill.svg
+	SmbShareFill Icon
+	//go:embed svg/smb_share.svg
+	SmbShare Icon
+	//go:embed svg/sms-fill.svg
+	SmsFill Icon
+	//go:embed svg/sms.svg
+	Sms Icon
+	//go:embed svg/snippet_folder-fill.svg
+	SnippetFolderFill Icon
+	//go:embed svg/snippet_folder.svg
+	SnippetFolder Icon
+	//go:embed svg/snooze-fill.svg
+	SnoozeFill Icon
+	//go:embed svg/snooze.svg
+	Snooze Icon
+	//go:embed svg/social_leaderboard-fill.svg
+	SocialLeaderboardFill Icon
+	//go:embed svg/social_leaderboard.svg
+	SocialLeaderboard Icon
+	//go:embed svg/sort-fill.svg
+	SortFill Icon
+	//go:embed svg/sort.svg
+	Sort Icon
+	//go:embed svg/sort_by_alpha-fill.svg
+	SortByAlphaFill Icon
+	//go:embed svg/sort_by_alpha.svg
+	SortByAlpha Icon
+	//go:embed svg/sos-fill.svg
+	SosFill Icon
+	//go:embed svg/sos.svg
+	Sos Icon
+	//go:embed svg/source_notes-fill.svg
+	SourceNotesFill Icon
+	//go:embed svg/source_notes.svg
+	SourceNotes Icon
+	//go:embed svg/south-fill.svg
+	SouthFill Icon
+	//go:embed svg/south.svg
+	South Icon
+	//go:embed svg/south_america-fill.svg
+	SouthAmericaFill Icon
+	//go:embed svg/south_america.svg
+	SouthAmerica Icon
+	//go:embed svg/south_east-fill.svg
+	SouthEastFill Icon
+	//go:embed svg/south_east.svg
+	SouthEast Icon
+	//go:embed svg/south_west-fill.svg
+	SouthWestFill Icon
+	//go:embed svg/south_west.svg
+	SouthWest Icon
+	//go:embed svg/space_bar-fill.svg
+	SpaceBarFill Icon
+	//go:embed svg/space_bar.svg
+	SpaceBar Icon
+	//go:embed svg/space_dashboard-fill.svg
+	SpaceDashboardFill Icon
+	//go:embed svg/space_dashboard.svg
+	SpaceDashboard Icon
+	//go:embed svg/spatial_audio-fill.svg
+	SpatialAudioFill Icon
+	//go:embed svg/spatial_audio.svg
+	SpatialAudio Icon
+	//go:embed svg/spatial_audio_off-fill.svg
+	SpatialAudioOffFill Icon
+	//go:embed svg/spatial_audio_off.svg
+	SpatialAudioOff Icon
+	//go:embed svg/spatial_tracking-fill.svg
+	SpatialTrackingFill Icon
+	//go:embed svg/spatial_tracking.svg
+	SpatialTracking Icon
+	//go:embed svg/speaker-fill.svg
+	SpeakerFill Icon
+	//go:embed svg/speaker.svg
+	Speaker Icon
+	//go:embed svg/speaker_group-fill.svg
+	SpeakerGroupFill Icon
+	//go:embed svg/speaker_group.svg
+	SpeakerGroup Icon
+	//go:embed svg/speaker_notes-fill.svg
+	SpeakerNotesFill Icon
+	//go:embed svg/speaker_notes.svg
+	SpeakerNotes Icon
+	//go:embed svg/speaker_notes_off-fill.svg
+	SpeakerNotesOffFill Icon
+	//go:embed svg/speaker_notes_off.svg
+	SpeakerNotesOff Icon
+	//go:embed svg/speaker_phone-fill.svg
+	SpeakerPhoneFill Icon
+	//go:embed svg/speaker_phone.svg
+	SpeakerPhone Icon
+	//go:embed svg/special_character-fill.svg
+	SpecialCharacterFill Icon
+	//go:embed svg/special_character.svg
+	SpecialCharacter Icon
+	//go:embed svg/speech_to_text-fill.svg
+	SpeechToTextFill Icon
+	//go:embed svg/speech_to_text.svg
+	SpeechToText Icon
+	//go:embed svg/speed-fill.svg
+	SpeedFill Icon
+	//go:embed svg/speed.svg
+	Speed Icon
+	//go:embed svg/spellcheck-fill.svg
+	SpellcheckFill Icon
+	//go:embed svg/spellcheck.svg
+	Spellcheck Icon
+	//go:embed svg/splitscreen-fill.svg
+	SplitscreenFill Icon
+	//go:embed svg/splitscreen.svg
+	Splitscreen Icon
+	//go:embed svg/splitscreen_bottom-fill.svg
+	SplitscreenBottomFill Icon
+	//go:embed svg/splitscreen_bottom.svg
+	SplitscreenBottom Icon
+	//go:embed svg/splitscreen_left-fill.svg
+	SplitscreenLeftFill Icon
+	//go:embed svg/splitscreen_left.svg
+	SplitscreenLeft Icon
+	//go:embed svg/splitscreen_right-fill.svg
+	SplitscreenRightFill Icon
+	//go:embed svg/splitscreen_right.svg
+	SplitscreenRight Icon
+	//go:embed svg/splitscreen_top-fill.svg
+	SplitscreenTopFill Icon
+	//go:embed svg/splitscreen_top.svg
+	SplitscreenTop Icon
+	//go:embed svg/spoke-fill.svg
+	SpokeFill Icon
+	//go:embed svg/spoke.svg
+	Spoke Icon
+	//go:embed svg/sports-fill.svg
+	SportsFill Icon
+	//go:embed svg/sports.svg
+	Sports Icon
+	//go:embed svg/sprint-fill.svg
+	SprintFill Icon
+	//go:embed svg/sprint.svg
+	Sprint Icon
+	//go:embed svg/square-fill.svg
+	SquareFill Icon
+	//go:embed svg/square.svg
+	Square Icon
+	//go:embed svg/square_foot-fill.svg
+	SquareFootFill Icon
+	//go:embed svg/square_foot.svg
+	SquareFoot Icon
+	//go:embed svg/stack-fill.svg
+	StackFill Icon
+	//go:embed svg/stack.svg
+	Stack Icon
+	//go:embed svg/stack_off-fill.svg
+	StackOffFill Icon
+	//go:embed svg/stack_off.svg
+	StackOff Icon
+	//go:embed svg/stack_star-fill.svg
+	StackStarFill Icon
+	//go:embed svg/stack_star.svg
+	StackStar Icon
+	//go:embed svg/stacked_bar_chart-fill.svg
+	StackedBarChartFill Icon
+	//go:embed svg/stacked_bar_chart.svg
+	StackedBarChart Icon
+	//go:embed svg/stacked_email-fill.svg
+	StackedEmailFill Icon
+	//go:embed svg/stacked_email.svg
+	StackedEmail Icon
+	//go:embed svg/stacked_inbox-fill.svg
+	StackedInboxFill Icon
+	//go:embed svg/stacked_inbox.svg
+	StackedInbox Icon
+	//go:embed svg/stacked_line_chart-fill.svg
+	StackedLineChartFill Icon
+	//go:embed svg/stacked_line_chart.svg
+	StackedLineChart Icon
+	//go:embed svg/star-fill.svg
+	StarFill Icon
+	//go:embed svg/star.svg
+	Star Icon
+	//go:embed svg/star_half-fill.svg
+	StarHalfFill Icon
+	//go:embed svg/star_half.svg
+	StarHalf Icon
+	//go:embed svg/star_rate-fill.svg
+	StarRateFill Icon
+	//go:embed svg/star_rate.svg
+	StarRate Icon
+	//go:embed svg/star_rate_half-fill.svg
+	StarRateHalfFill Icon
+	//go:embed svg/star_rate_half.svg
+	StarRateHalf Icon
+	//go:embed svg/stars-fill.svg
+	StarsFill Icon
+	//go:embed svg/stars.svg
+	Stars Icon
+	//go:embed svg/start-fill.svg
+	StartFill Icon
+	//go:embed svg/start.svg
+	Start Icon
+	//go:embed svg/stat_1-fill.svg
+	Stat1Fill Icon
+	//go:embed svg/stat_1.svg
+	Stat1 Icon
+	//go:embed svg/stat_2-fill.svg
+	Stat2Fill Icon
+	//go:embed svg/stat_2.svg
+	Stat2 Icon
+	//go:embed svg/stat_3-fill.svg
+	Stat3Fill Icon
+	//go:embed svg/stat_3.svg
+	Stat3 Icon
+	//go:embed svg/stat_minus_1-fill.svg
+	StatMinus1Fill Icon
+	//go:embed svg/stat_minus_1.svg
+	StatMinus1 Icon
+	//go:embed svg/stat_minus_2-fill.svg
+	StatMinus2Fill Icon
+	//go:embed svg/stat_minus_2.svg
+	StatMinus2 Icon
+	//go:embed svg/stat_minus_3-fill.svg
+	StatMinus3Fill Icon
+	//go:embed svg/stat_minus_3.svg
+	StatMinus3 Icon
+	//go:embed svg/stay_current_landscape-fill.svg
+	StayCurrentLandscapeFill Icon
+	//go:embed svg/stay_current_landscape.svg
+	StayCurrentLandscape Icon
+	//go:embed svg/stay_current_portrait-fill.svg
+	StayCurrentPortraitFill Icon
+	//go:embed svg/stay_current_portrait.svg
+	StayCurrentPortrait Icon
+	//go:embed svg/stay_primary_landscape-fill.svg
+	StayPrimaryLandscapeFill Icon
+	//go:embed svg/stay_primary_landscape.svg
+	StayPrimaryLandscape Icon
+	//go:embed svg/stay_primary_portrait-fill.svg
+	StayPrimaryPortraitFill Icon
+	//go:embed svg/stay_primary_portrait.svg
+	StayPrimaryPortrait Icon
+	//go:embed svg/step-fill.svg
+	StepFill Icon
+	//go:embed svg/step.svg
+	Step Icon
+	//go:embed svg/step_into-fill.svg
+	StepIntoFill Icon
+	//go:embed svg/step_into.svg
+	StepInto Icon
+	//go:embed svg/step_out-fill.svg
+	StepOutFill Icon
+	//go:embed svg/step_out.svg
+	StepOut Icon
+	//go:embed svg/step_over-fill.svg
+	StepOverFill Icon
+	//go:embed svg/step_over.svg
+	StepOver Icon
+	//go:embed svg/steppers-fill.svg
+	SteppersFill Icon
+	//go:embed svg/steppers.svg
+	Steppers Icon
+	//go:embed svg/steps-fill.svg
+	StepsFill Icon
+	//go:embed svg/steps.svg
+	Steps Icon
+	//go:embed svg/sticky_note-fill.svg
+	StickyNoteFill Icon
+	//go:embed svg/sticky_note.svg
+	StickyNote Icon
+	//go:embed svg/sticky_note_2-fill.svg
+	StickyNote2Fill Icon
+	//go:embed svg/sticky_note_2.svg
+	StickyNote2 Icon
+	//go:embed svg/stop-fill.svg
+	StopFill Icon
+	//go:embed svg/stop.svg
+	Stop Icon
+	//go:embed svg/stop_circle-fill.svg
+	StopCircleFill Icon
+	//go:embed svg/stop_circle.svg
+	StopCircle Icon
+	//go:embed svg/stop_screen_share-fill.svg
+	StopScreenShareFill Icon
+	//go:embed svg/stop_screen_share.svg
+	StopScreenShare Icon
+	//go:embed svg/straight-fill.svg
+	StraightFill Icon
+	//go:embed svg/straight.svg
+	Straight Icon
+	//go:embed svg/straighten-fill.svg
+	StraightenFill Icon
+	//go:embed svg/straighten.svg
+	Straighten Icon
+	//go:embed svg/strategy-fill.svg
+	StrategyFill Icon
+	//go:embed svg/strategy.svg
+	Strategy Icon
+	//go:embed svg/stream-fill.svg
+	StreamFill Icon
+	//go:embed svg/stream.svg
+	Stream Icon
+	//go:embed svg/stream_apps-fill.svg
+	StreamAppsFill Icon
+	//go:embed svg/stream_apps.svg
+	StreamApps Icon
+	//go:embed svg/streetview-fill.svg
+	StreetviewFill Icon
+	//go:embed svg/streetview.svg
+	Streetview Icon
+	//go:embed svg/strikethrough_s-fill.svg
+	StrikethroughSFill Icon
+	//go:embed svg/strikethrough_s.svg
+	StrikethroughS Icon
+	//go:embed svg/stroke_full-fill.svg
+	StrokeFullFill Icon
+	//go:embed svg/stroke_full.svg
+	StrokeFull Icon
+	//go:embed svg/stroke_partial-fill.svg
+	StrokePartialFill Icon
+	//go:embed svg/stroke_partial.svg
+	StrokePartial Icon
+	//go:embed svg/style-fill.svg
+	StyleFill Icon
+	//go:embed svg/style.svg
+	Style Icon
+	//go:embed svg/styler-fill.svg
+	StylerFill Icon
+	//go:embed svg/styler.svg
+	Styler Icon
+	//go:embed svg/stylus-fill.svg
+	StylusFill Icon
+	//go:embed svg/stylus.svg
+	Stylus Icon
+	//go:embed svg/stylus_laser_pointer-fill.svg
+	StylusLaserPointerFill Icon
+	//go:embed svg/stylus_laser_pointer.svg
+	StylusLaserPointer Icon
+	//go:embed svg/stylus_note-fill.svg
+	StylusNoteFill Icon
+	//go:embed svg/stylus_note.svg
+	StylusNote Icon
+	//go:embed svg/subdirectory_arrow_left-fill.svg
+	SubdirectoryArrowLeftFill Icon
+	//go:embed svg/subdirectory_arrow_left.svg
+	SubdirectoryArrowLeft Icon
+	//go:embed svg/subdirectory_arrow_right-fill.svg
+	SubdirectoryArrowRightFill Icon
+	//go:embed svg/subdirectory_arrow_right.svg
+	SubdirectoryArrowRight Icon
+	//go:embed svg/subheader-fill.svg
+	SubheaderFill Icon
+	//go:embed svg/subheader.svg
+	Subheader Icon
+	//go:embed svg/subject-fill.svg
+	SubjectFill Icon
+	//go:embed svg/subject.svg
+	Subject Icon
+	//go:embed svg/subscript-fill.svg
+	SubscriptFill Icon
+	//go:embed svg/subscript.svg
+	Subscript Icon
+	//go:embed svg/subtitles-fill.svg
+	SubtitlesFill Icon
+	//go:embed svg/subtitles.svg
+	Subtitles Icon
+	//go:embed svg/subtitles_off-fill.svg
+	SubtitlesOffFill Icon
+	//go:embed svg/subtitles_off.svg
+	SubtitlesOff Icon
+	//go:embed svg/subway-fill.svg
+	SubwayFill Icon
+	//go:embed svg/subway.svg
+	Subway Icon
+	//go:embed svg/summarize-fill.svg
+	SummarizeFill Icon
+	//go:embed svg/summarize.svg
+	Summarize Icon
+	//go:embed svg/superscript-fill.svg
+	SuperscriptFill Icon
+	//go:embed svg/superscript.svg
+	Superscript Icon
+	//go:embed svg/supervisor_account-fill.svg
+	SupervisorAccountFill Icon
+	//go:embed svg/supervisor_account.svg
+	SupervisorAccount Icon
+	//go:embed svg/support-fill.svg
+	SupportFill Icon
+	//go:embed svg/support.svg
+	Support Icon
+	//go:embed svg/support_agent-fill.svg
+	SupportAgentFill Icon
+	//go:embed svg/support_agent.svg
+	SupportAgent Icon
+	//go:embed svg/surround_sound-fill.svg
+	SurroundSoundFill Icon
+	//go:embed svg/surround_sound.svg
+	SurroundSound Icon
+	//go:embed svg/svg.svg
+	Svg Icon
+	//go:embed svg/swap_horiz-fill.svg
+	SwapHorizFill Icon
+	//go:embed svg/swap_horiz.svg
+	SwapHoriz Icon
+	//go:embed svg/swap_horizontal_circle-fill.svg
+	SwapHorizontalCircleFill Icon
+	//go:embed svg/swap_horizontal_circle.svg
+	SwapHorizontalCircle Icon
+	//go:embed svg/swap_vert-fill.svg
+	SwapVertFill Icon
+	//go:embed svg/swap_vert.svg
+	SwapVert Icon
+	//go:embed svg/swap_vertical_circle-fill.svg
+	SwapVerticalCircleFill Icon
+	//go:embed svg/swap_vertical_circle.svg
+	SwapVerticalCircle Icon
+	//go:embed svg/sweep-fill.svg
+	SweepFill Icon
+	//go:embed svg/sweep.svg
+	Sweep Icon
+	//go:embed svg/swipe-fill.svg
+	SwipeFill Icon
+	//go:embed svg/swipe.svg
+	Swipe Icon
+	//go:embed svg/swipe_down-fill.svg
+	SwipeDownFill Icon
+	//go:embed svg/swipe_down.svg
+	SwipeDown Icon
+	//go:embed svg/swipe_down_alt-fill.svg
+	SwipeDownAltFill Icon
+	//go:embed svg/swipe_down_alt.svg
+	SwipeDownAlt Icon
+	//go:embed svg/swipe_left-fill.svg
+	SwipeLeftFill Icon
+	//go:embed svg/swipe_left.svg
+	SwipeLeft Icon
+	//go:embed svg/swipe_left_alt-fill.svg
+	SwipeLeftAltFill Icon
+	//go:embed svg/swipe_left_alt.svg
+	SwipeLeftAlt Icon
+	//go:embed svg/swipe_right-fill.svg
+	SwipeRightFill Icon
+	//go:embed svg/swipe_right.svg
+	SwipeRight Icon
+	//go:embed svg/swipe_right_alt-fill.svg
+	SwipeRightAltFill Icon
+	//go:embed svg/swipe_right_alt.svg
+	SwipeRightAlt Icon
+	//go:embed svg/swipe_up-fill.svg
+	SwipeUpFill Icon
+	//go:embed svg/swipe_up.svg
+	SwipeUp Icon
+	//go:embed svg/swipe_up_alt-fill.svg
+	SwipeUpAltFill Icon
+	//go:embed svg/swipe_up_alt.svg
+	SwipeUpAlt Icon
+	//go:embed svg/swipe_vertical-fill.svg
+	SwipeVerticalFill Icon
+	//go:embed svg/swipe_vertical.svg
+	SwipeVertical Icon
+	//go:embed svg/switch-fill.svg
+	SwitchFill Icon
+	//go:embed svg/switch.svg
+	Switch Icon
+	//go:embed svg/switch_access-fill.svg
+	SwitchAccessFill Icon
+	//go:embed svg/switch_access.svg
+	SwitchAccess Icon
+	//go:embed svg/switch_account-fill.svg
+	SwitchAccountFill Icon
+	//go:embed svg/switch_account.svg
+	SwitchAccount Icon
+	//go:embed svg/switch_camera-fill.svg
+	SwitchCameraFill Icon
+	//go:embed svg/switch_camera.svg
+	SwitchCamera Icon
+	//go:embed svg/switch_left-fill.svg
+	SwitchLeftFill Icon
+	//go:embed svg/switch_left.svg
+	SwitchLeft Icon
+	//go:embed svg/switch_right-fill.svg
+	SwitchRightFill Icon
+	//go:embed svg/switch_right.svg
+	SwitchRight Icon
+	//go:embed svg/switch_video-fill.svg
+	SwitchVideoFill Icon
+	//go:embed svg/switch_video.svg
+	SwitchVideo Icon
+	//go:embed svg/switches-fill.svg
+	SwitchesFill Icon
+	//go:embed svg/switches.svg
+	Switches Icon
+	//go:embed svg/sync-fill.svg
+	SyncFill Icon
+	//go:embed svg/sync.svg
+	Sync Icon
+	//go:embed svg/sync_alt-fill.svg
+	SyncAltFill Icon
+	//go:embed svg/sync_alt.svg
+	SyncAlt Icon
+	//go:embed svg/sync_disabled-fill.svg
+	SyncDisabledFill Icon
+	//go:embed svg/sync_disabled.svg
+	SyncDisabled Icon
+	//go:embed svg/sync_lock-fill.svg
+	SyncLockFill Icon
+	//go:embed svg/sync_lock.svg
+	SyncLock Icon
+	//go:embed svg/sync_problem-fill.svg
+	SyncProblemFill Icon
+	//go:embed svg/sync_problem.svg
+	SyncProblem Icon
+	//go:embed svg/sync_saved_locally-fill.svg
+	SyncSavedLocallyFill Icon
+	//go:embed svg/sync_saved_locally.svg
+	SyncSavedLocally Icon
+	//go:embed svg/system_update-fill.svg
+	SystemUpdateFill Icon
+	//go:embed svg/system_update.svg
+	SystemUpdate Icon
+	//go:embed svg/tab-fill.svg
+	TabFill Icon
+	//go:embed svg/tab.svg
+	Tab Icon
+	//go:embed svg/tab_close-fill.svg
+	TabCloseFill Icon
+	//go:embed svg/tab_close.svg
+	TabClose Icon
+	//go:embed svg/tab_close_right-fill.svg
+	TabCloseRightFill Icon
+	//go:embed svg/tab_close_right.svg
+	TabCloseRight Icon
+	//go:embed svg/tab_duplicate-fill.svg
+	TabDuplicateFill Icon
+	//go:embed svg/tab_duplicate.svg
+	TabDuplicate Icon
+	//go:embed svg/tab_group-fill.svg
+	TabGroupFill Icon
+	//go:embed svg/tab_group.svg
+	TabGroup Icon
+	//go:embed svg/tab_move-fill.svg
+	TabMoveFill Icon
+	//go:embed svg/tab_move.svg
+	TabMove Icon
+	//go:embed svg/tab_new_right-fill.svg
+	TabNewRightFill Icon
+	//go:embed svg/tab_new_right.svg
+	TabNewRight Icon
+	//go:embed svg/tab_recent-fill.svg
+	TabRecentFill Icon
+	//go:embed svg/tab_recent.svg
+	TabRecent Icon
+	//go:embed svg/tab_unselected-fill.svg
+	TabUnselectedFill Icon
+	//go:embed svg/tab_unselected.svg
+	TabUnselected Icon
+	//go:embed svg/table-fill.svg
+	TableFill Icon
+	//go:embed svg/table.svg
+	Table Icon
+	//go:embed svg/table_chart-fill.svg
+	TableChartFill Icon
+	//go:embed svg/table_chart.svg
+	TableChart Icon
+	//go:embed svg/table_chart_view-fill.svg
+	TableChartViewFill Icon
+	//go:embed svg/table_chart_view.svg
+	TableChartView Icon
+	//go:embed svg/table_rows-fill.svg
+	TableRowsFill Icon
+	//go:embed svg/table_rows.svg
+	TableRows Icon
+	//go:embed svg/table_rows_narrow-fill.svg
+	TableRowsNarrowFill Icon
+	//go:embed svg/table_rows_narrow.svg
+	TableRowsNarrow Icon
+	//go:embed svg/table_view-fill.svg
+	TableViewFill Icon
+	//go:embed svg/table_view.svg
+	TableView Icon
+	//go:embed svg/tablet-fill.svg
+	TabletFill Icon
+	//go:embed svg/tablet.svg
+	Tablet Icon
+	//go:embed svg/tablet_android-fill.svg
+	TabletAndroidFill Icon
+	//go:embed svg/tablet_android.svg
+	TabletAndroid Icon
+	//go:embed svg/tablet_mac-fill.svg
+	TabletMacFill Icon
+	//go:embed svg/tablet_mac.svg
+	TabletMac Icon
+	//go:embed svg/tabs-fill.svg
+	TabsFill Icon
+	//go:embed svg/tabs.svg
+	Tabs Icon
+	//go:embed svg/tag-fill.svg
+	TagFill Icon
+	//go:embed svg/tag.svg
+	Tag Icon
+	//go:embed svg/tap_and_play-fill.svg
+	TapAndPlayFill Icon
+	//go:embed svg/tap_and_play.svg
+	TapAndPlay Icon
+	//go:embed svg/tapas-fill.svg
+	TapasFill Icon
+	//go:embed svg/tapas.svg
+	Tapas Icon
+	//go:embed svg/target-fill.svg
+	TargetFill Icon
+	//go:embed svg/target.svg
+	Target Icon
+	//go:embed svg/task-fill.svg
+	TaskFill Icon
+	//go:embed svg/task.svg
+	Task Icon
+	//go:embed svg/task_alt-fill.svg
+	TaskAltFill Icon
+	//go:embed svg/task_alt.svg
+	TaskAlt Icon
+	//go:embed svg/terminal-fill.svg
+	TerminalFill Icon
+	//go:embed svg/terminal.svg
+	Terminal Icon
+	//go:embed svg/tex.svg
+	Tex Icon
+	//go:embed svg/text_ad-fill.svg
+	TextAdFill Icon
+	//go:embed svg/text_ad.svg
+	TextAd Icon
+	//go:embed svg/text_decrease-fill.svg
+	TextDecreaseFill Icon
+	//go:embed svg/text_decrease.svg
+	TextDecrease Icon
+	//go:embed svg/text_fields-fill.svg
+	TextFieldsFill Icon
+	//go:embed svg/text_fields.svg
+	TextFields Icon
+	//go:embed svg/text_format-fill.svg
+	TextFormatFill Icon
+	//go:embed svg/text_format.svg
+	TextFormat Icon
+	//go:embed svg/text_increase-fill.svg
+	TextIncreaseFill Icon
+	//go:embed svg/text_increase.svg
+	TextIncrease Icon
+	//go:embed svg/text_rotate_up-fill.svg
+	TextRotateUpFill Icon
+	//go:embed svg/text_rotate_up.svg
+	TextRotateUp Icon
+	//go:embed svg/text_rotate_vertical-fill.svg
+	TextRotateVerticalFill Icon
+	//go:embed svg/text_rotate_vertical.svg
+	TextRotateVertical Icon
+	//go:embed svg/text_rotation_angledown-fill.svg
+	TextRotationAngledownFill Icon
+	//go:embed svg/text_rotation_angledown.svg
+	TextRotationAngledown Icon
+	//go:embed svg/text_rotation_angleup-fill.svg
+	TextRotationAngleupFill Icon
+	//go:embed svg/text_rotation_angleup.svg
+	TextRotationAngleup Icon
+	//go:embed svg/text_rotation_down-fill.svg
+	TextRotationDownFill Icon
+	//go:embed svg/text_rotation_down.svg
+	TextRotationDown Icon
+	//go:embed svg/text_rotation_none-fill.svg
+	TextRotationNoneFill Icon
+	//go:embed svg/text_rotation_none.svg
+	TextRotationNone Icon
+	//go:embed svg/text_select_end-fill.svg
+	TextSelectEndFill Icon
+	//go:embed svg/text_select_end.svg
+	TextSelectEnd Icon
+	//go:embed svg/text_select_jump_to_beginning-fill.svg
+	TextSelectJumpToBeginningFill Icon
+	//go:embed svg/text_select_jump_to_beginning.svg
+	TextSelectJumpToBeginning Icon
+	//go:embed svg/text_select_jump_to_end-fill.svg
+	TextSelectJumpToEndFill Icon
+	//go:embed svg/text_select_jump_to_end.svg
+	TextSelectJumpToEnd Icon
+	//go:embed svg/text_select_move_back_character-fill.svg
+	TextSelectMoveBackCharacterFill Icon
+	//go:embed svg/text_select_move_back_character.svg
+	TextSelectMoveBackCharacter Icon
+	//go:embed svg/text_select_move_back_word-fill.svg
+	TextSelectMoveBackWordFill Icon
+	//go:embed svg/text_select_move_back_word.svg
+	TextSelectMoveBackWord Icon
+	//go:embed svg/text_select_move_down-fill.svg
+	TextSelectMoveDownFill Icon
+	//go:embed svg/text_select_move_down.svg
+	TextSelectMoveDown Icon
+	//go:embed svg/text_select_move_forward_character-fill.svg
+	TextSelectMoveForwardCharacterFill Icon
+	//go:embed svg/text_select_move_forward_character.svg
+	TextSelectMoveForwardCharacter Icon
+	//go:embed svg/text_select_move_forward_word-fill.svg
+	TextSelectMoveForwardWordFill Icon
+	//go:embed svg/text_select_move_forward_word.svg
+	TextSelectMoveForwardWord Icon
+	//go:embed svg/text_select_move_up-fill.svg
+	TextSelectMoveUpFill Icon
+	//go:embed svg/text_select_move_up.svg
+	TextSelectMoveUp Icon
+	//go:embed svg/text_select_start-fill.svg
+	TextSelectStartFill Icon
+	//go:embed svg/text_select_start.svg
+	TextSelectStart Icon
+	//go:embed svg/text_snippet-fill.svg
+	TextSnippetFill Icon
+	//go:embed svg/text_snippet.svg
+	TextSnippet Icon
+	//go:embed svg/text_to_speech-fill.svg
+	TextToSpeechFill Icon
+	//go:embed svg/text_to_speech.svg
+	TextToSpeech Icon
+	//go:embed svg/texture-fill.svg
+	TextureFill Icon
+	//go:embed svg/texture.svg
+	Texture Icon
+	//go:embed svg/thermometer-fill.svg
+	ThermometerFill Icon
+	//go:embed svg/thermometer.svg
+	Thermometer Icon
+	//go:embed svg/thermometer_gain-fill.svg
+	ThermometerGainFill Icon
+	//go:embed svg/thermometer_gain.svg
+	ThermometerGain Icon
+	//go:embed svg/thermometer_loss-fill.svg
+	ThermometerLossFill Icon
+	//go:embed svg/thermometer_loss.svg
+	ThermometerLoss Icon
+	//go:embed svg/thermostat-fill.svg
+	ThermostatFill Icon
+	//go:embed svg/thermostat.svg
+	Thermostat Icon
+	//go:embed svg/thermostat_auto-fill.svg
+	ThermostatAutoFill Icon
+	//go:embed svg/thermostat_auto.svg
+	ThermostatAuto Icon
+	//go:embed svg/thermostat_carbon-fill.svg
+	ThermostatCarbonFill Icon
+	//go:embed svg/thermostat_carbon.svg
+	ThermostatCarbon Icon
+	//go:embed svg/thumb_down-fill.svg
+	ThumbDownFill Icon
+	//go:embed svg/thumb_down.svg
+	ThumbDown Icon
+	//go:embed svg/thumb_up-fill.svg
+	ThumbUpFill Icon
+	//go:embed svg/thumb_up.svg
+	ThumbUp Icon
+	//go:embed svg/thumbnail_bar-fill.svg
+	ThumbnailBarFill Icon
+	//go:embed svg/thumbnail_bar.svg
+	ThumbnailBar Icon
+	//go:embed svg/thumbs_up_down-fill.svg
+	ThumbsUpDownFill Icon
+	//go:embed svg/thumbs_up_down.svg
+	ThumbsUpDown Icon
+	//go:embed svg/time_auto-fill.svg
+	TimeAutoFill Icon
+	//go:embed svg/time_auto.svg
+	TimeAuto Icon
+	//go:embed svg/timelapse-fill.svg
+	TimelapseFill Icon
+	//go:embed svg/timelapse.svg
+	Timelapse Icon
+	//go:embed svg/timeline-fill.svg
+	TimelineFill Icon
+	//go:embed svg/timeline.svg
+	Timeline Icon
+	//go:embed svg/timer-fill.svg
+	TimerFill Icon
+	//go:embed svg/timer.svg
+	Timer Icon
+	//go:embed svg/timer_10-fill.svg
+	Timer10Fill Icon
+	//go:embed svg/timer_10.svg
+	Timer10 Icon
+	//go:embed svg/timer_10_alt_1-fill.svg
+	Timer10Alt1Fill Icon
+	//go:embed svg/timer_10_alt_1.svg
+	Timer10Alt1 Icon
+	//go:embed svg/timer_10_select-fill.svg
+	Timer10SelectFill Icon
+	//go:embed svg/timer_10_select.svg
+	Timer10Select Icon
+	//go:embed svg/timer_3-fill.svg
+	Timer3Fill Icon
+	//go:embed svg/timer_3.svg
+	Timer3 Icon
+	//go:embed svg/timer_3_alt_1-fill.svg
+	Timer3Alt1Fill Icon
+	//go:embed svg/timer_3_alt_1.svg
+	Timer3Alt1 Icon
+	//go:embed svg/timer_3_select-fill.svg
+	Timer3SelectFill Icon
+	//go:embed svg/timer_3_select.svg
+	Timer3Select Icon
+	//go:embed svg/timer_off-fill.svg
+	TimerOffFill Icon
+	//go:embed svg/timer_off.svg
+	TimerOff Icon
+	//go:embed svg/tire_repair-fill.svg
+	TireRepairFill Icon
+	//go:embed svg/tire_repair.svg
+	TireRepair Icon
+	//go:embed svg/title-fill.svg
+	TitleFill Icon
+	//go:embed svg/title.svg
+	Title Icon
+	//go:embed svg/toc-fill.svg
+	TocFill Icon
+	//go:embed svg/toc.svg
+	Toc Icon
+	//go:embed svg/today-fill.svg
+	TodayFill Icon
+	//go:embed svg/today.svg
+	Today Icon
+	//go:embed svg/toggle_mid.svg
+	ToggleMid Icon
+	//go:embed svg/toggle_off-fill.svg
+	ToggleOffFill Icon
+	//go:embed svg/toggle_off.svg
+	ToggleOff Icon
+	//go:embed svg/toggle_on-fill.svg
+	ToggleOnFill Icon
+	//go:embed svg/toggle_on.svg
+	ToggleOn Icon
+	//go:embed svg/token-fill.svg
+	TokenFill Icon
+	//go:embed svg/token.svg
+	Token Icon
+	//go:embed svg/toml.svg
+	Toml Icon
+	//go:embed svg/tonality-fill.svg
+	TonalityFill Icon
+	//go:embed svg/tonality.svg
+	Tonality Icon
+	//go:embed svg/toolbar-fill.svg
+	ToolbarFill Icon
+	//go:embed svg/toolbar.svg
+	Toolbar Icon
+	//go:embed svg/tooltip-fill.svg
+	TooltipFill Icon
+	//go:embed svg/tooltip.svg
+	Tooltip Icon
+	//go:embed svg/top_panel_close-fill.svg
+	TopPanelCloseFill Icon
+	//go:embed svg/top_panel_close.svg
+	TopPanelClose Icon
+	//go:embed svg/top_panel_open-fill.svg
+	TopPanelOpenFill Icon
+	//go:embed svg/top_panel_open.svg
+	TopPanelOpen Icon
+	//go:embed svg/topic-fill.svg
+	TopicFill Icon
+	//go:embed svg/topic.svg
+	Topic Icon
+	//go:embed svg/touch_app-fill.svg
+	TouchAppFill Icon
+	//go:embed svg/touch_app.svg
+	TouchApp Icon
+	//go:embed svg/touchpad_mouse-fill.svg
+	TouchpadMouseFill Icon
+	//go:embed svg/touchpad_mouse.svg
+	TouchpadMouse Icon
+	//go:embed svg/tour-fill.svg
+	TourFill Icon
+	//go:embed svg/tour.svg
+	Tour Icon
+	//go:embed svg/toys-fill.svg
+	ToysFill Icon
+	//go:embed svg/toys.svg
+	Toys Icon
+	//go:embed svg/toys_fan-fill.svg
+	ToysFanFill Icon
+	//go:embed svg/toys_fan.svg
+	ToysFan Icon
+	//go:embed svg/track_changes-fill.svg
+	TrackChangesFill Icon
+	//go:embed svg/track_changes.svg
+	TrackChanges Icon
+	//go:embed svg/traffic-fill.svg
+	TrafficFill Icon
+	//go:embed svg/traffic.svg
+	Traffic Icon
+	//go:embed svg/transcribe-fill.svg
+	TranscribeFill Icon
+	//go:embed svg/transcribe.svg
+	Transcribe Icon
+	//go:embed svg/transform-fill.svg
+	TransformFill Icon
+	//go:embed svg/transform.svg
+	Transform Icon
+	//go:embed svg/translate-fill.svg
+	TranslateFill Icon
+	//go:embed svg/translate.svg
+	Translate Icon
+	//go:embed svg/trending_down-fill.svg
+	TrendingDownFill Icon
+	//go:embed svg/trending_down.svg
+	TrendingDown Icon
+	//go:embed svg/trending_flat-fill.svg
+	TrendingFlatFill Icon
+	//go:embed svg/trending_flat.svg
+	TrendingFlat Icon
+	//go:embed svg/trending_up-fill.svg
+	TrendingUpFill Icon
+	//go:embed svg/trending_up.svg
+	TrendingUp Icon
+	//go:embed svg/trophy-fill.svg
+	TrophyFill Icon
+	//go:embed svg/trophy.svg
+	Trophy Icon
+	//go:embed svg/troubleshoot-fill.svg
+	TroubleshootFill Icon
+	//go:embed svg/troubleshoot.svg
+	Troubleshoot Icon
+	//go:embed svg/tsv-fill.svg
+	TsvFill Icon
+	//go:embed svg/tsv.svg
+	Tsv Icon
+	//go:embed svg/tty-fill.svg
+	TtyFill Icon
+	//go:embed svg/tty.svg
+	Tty Icon
+	//go:embed svg/tune-fill.svg
+	TuneFill Icon
+	//go:embed svg/tune.svg
+	Tune Icon
+	//go:embed svg/turn_left-fill.svg
+	TurnLeftFill Icon
+	//go:embed svg/turn_left.svg
+	TurnLeft Icon
+	//go:embed svg/turn_right-fill.svg
+	TurnRightFill Icon
+	//go:embed svg/turn_right.svg
+	TurnRight Icon
+	//go:embed svg/turn_sharp_left-fill.svg
+	TurnSharpLeftFill Icon
+	//go:embed svg/turn_sharp_left.svg
+	TurnSharpLeft Icon
+	//go:embed svg/turn_sharp_right-fill.svg
+	TurnSharpRightFill Icon
+	//go:embed svg/turn_sharp_right.svg
+	TurnSharpRight Icon
+	//go:embed svg/turn_slight_left-fill.svg
+	TurnSlightLeftFill Icon
+	//go:embed svg/turn_slight_left.svg
+	TurnSlightLeft Icon
+	//go:embed svg/turn_slight_right-fill.svg
+	TurnSlightRightFill Icon
+	//go:embed svg/turn_slight_right.svg
+	TurnSlightRight Icon
+	//go:embed svg/tv-fill.svg
+	TvFill Icon
+	//go:embed svg/tv.svg
+	Tv Icon
+	//go:embed svg/tv_gen-fill.svg
+	TvGenFill Icon
+	//go:embed svg/tv_gen.svg
+	TvGen Icon
+	//go:embed svg/tv_guide-fill.svg
+	TvGuideFill Icon
+	//go:embed svg/tv_guide.svg
+	TvGuide Icon
+	//go:embed svg/tv_off-fill.svg
+	TvOffFill Icon
+	//go:embed svg/tv_off.svg
+	TvOff Icon
+	//go:embed svg/tv_remote-fill.svg
+	TvRemoteFill Icon
+	//go:embed svg/tv_remote.svg
+	TvRemote Icon
+	//go:embed svg/tv_signin-fill.svg
+	TvSigninFill Icon
+	//go:embed svg/tv_signin.svg
+	TvSignin Icon
+	//go:embed svg/type.svg
+	Type Icon
+	//go:embed svg/unarchive-fill.svg
+	UnarchiveFill Icon
+	//go:embed svg/unarchive.svg
+	Unarchive Icon
+	//go:embed svg/undo-fill.svg
+	UndoFill Icon
+	//go:embed svg/undo.svg
+	Undo Icon
+	//go:embed svg/unfold_less-fill.svg
+	UnfoldLessFill Icon
+	//go:embed svg/unfold_less.svg
+	UnfoldLess Icon
+	//go:embed svg/unfold_less_double-fill.svg
+	UnfoldLessDoubleFill Icon
+	//go:embed svg/unfold_less_double.svg
+	UnfoldLessDouble Icon
+	//go:embed svg/unfold_more-fill.svg
+	UnfoldMoreFill Icon
+	//go:embed svg/unfold_more.svg
+	UnfoldMore Icon
+	//go:embed svg/unfold_more_double-fill.svg
+	UnfoldMoreDoubleFill Icon
+	//go:embed svg/unfold_more_double.svg
+	UnfoldMoreDouble Icon
+	//go:embed svg/ungroup-fill.svg
+	UngroupFill Icon
+	//go:embed svg/ungroup.svg
+	Ungroup Icon
+	//go:embed svg/universal_currency_alt-fill.svg
+	UniversalCurrencyAltFill Icon
+	//go:embed svg/universal_currency_alt.svg
+	UniversalCurrencyAlt Icon
+	//go:embed svg/unknown_2-fill.svg
+	Unknown2Fill Icon
+	//go:embed svg/unknown_2.svg
+	Unknown2 Icon
+	//go:embed svg/unknown_5-fill.svg
+	Unknown5Fill Icon
+	//go:embed svg/unknown_5.svg
+	Unknown5 Icon
+	//go:embed svg/unknown_document-fill.svg
+	UnknownDocumentFill Icon
+	//go:embed svg/unknown_document.svg
+	UnknownDocument Icon
+	//go:embed svg/unknown_med-fill.svg
+	UnknownMedFill Icon
+	//go:embed svg/unknown_med.svg
+	UnknownMed Icon
+	//go:embed svg/unpublished-fill.svg
+	UnpublishedFill Icon
+	//go:embed svg/unpublished.svg
+	Unpublished Icon
+	//go:embed svg/unsubscribe-fill.svg
+	UnsubscribeFill Icon
+	//go:embed svg/unsubscribe.svg
+	Unsubscribe Icon
+	//go:embed svg/upcoming-fill.svg
+	UpcomingFill Icon
+	//go:embed svg/upcoming.svg
+	Upcoming Icon
+	//go:embed svg/update-fill.svg
+	UpdateFill Icon
+	//go:embed svg/update.svg
+	Update Icon
+	//go:embed svg/update_disabled-fill.svg
+	UpdateDisabledFill Icon
+	//go:embed svg/update_disabled.svg
+	UpdateDisabled Icon
+	//go:embed svg/upgrade-fill.svg
+	UpgradeFill Icon
+	//go:embed svg/upgrade.svg
+	Upgrade Icon
+	//go:embed svg/upload-fill.svg
+	UploadFill Icon
+	//go:embed svg/upload.svg
+	Upload Icon
+	//go:embed svg/upload_file-fill.svg
+	UploadFileFill Icon
+	//go:embed svg/upload_file.svg
+	UploadFile Icon
+	//go:embed svg/urology-fill.svg
+	UrologyFill Icon
+	//go:embed svg/urology.svg
+	Urology Icon
+	//go:embed svg/usb-fill.svg
+	UsbFill Icon
+	//go:embed svg/usb.svg
+	Usb Icon
+	//go:embed svg/usb_off-fill.svg
+	UsbOffFill Icon
+	//go:embed svg/usb_off.svg
+	UsbOff Icon
+	//go:embed svg/valve-fill.svg
+	ValveFill Icon
+	//go:embed svg/valve.svg
+	Valve Icon
+	//go:embed svg/variable.svg
+	Variable Icon
+	//go:embed svg/variables-fill.svg
+	VariablesFill Icon
+	//go:embed svg/variables.svg
+	Variables Icon
+	//go:embed svg/verified-fill.svg
+	VerifiedFill Icon
+	//go:embed svg/verified.svg
+	Verified Icon
+	//go:embed svg/verified_user-fill.svg
+	VerifiedUserFill Icon
+	//go:embed svg/verified_user.svg
+	VerifiedUser Icon
+	//go:embed svg/vertical_align_bottom-fill.svg
+	VerticalAlignBottomFill Icon
+	//go:embed svg/vertical_align_bottom.svg
+	VerticalAlignBottom Icon
+	//go:embed svg/vertical_align_center-fill.svg
+	VerticalAlignCenterFill Icon
+	//go:embed svg/vertical_align_center.svg
+	VerticalAlignCenter Icon
+	//go:embed svg/vertical_align_top-fill.svg
+	VerticalAlignTopFill Icon
+	//go:embed svg/vertical_align_top.svg
+	VerticalAlignTop Icon
+	//go:embed svg/vertical_distribute-fill.svg
+	VerticalDistributeFill Icon
+	//go:embed svg/vertical_distribute.svg
+	VerticalDistribute Icon
+	//go:embed svg/vertical_shades-fill.svg
+	VerticalShadesFill Icon
+	//go:embed svg/vertical_shades.svg
+	VerticalShades Icon
+	//go:embed svg/vertical_shades_closed-fill.svg
+	VerticalShadesClosedFill Icon
+	//go:embed svg/vertical_shades_closed.svg
+	VerticalShadesClosed Icon
+	//go:embed svg/vertical_split-fill.svg
+	VerticalSplitFill Icon
+	//go:embed svg/vertical_split.svg
+	VerticalSplit Icon
+	//go:embed svg/video_call-fill.svg
+	VideoCallFill Icon
+	//go:embed svg/video_call.svg
+	VideoCall Icon
+	//go:embed svg/video_camera_back-fill.svg
+	VideoCameraBackFill Icon
+	//go:embed svg/video_camera_back.svg
+	VideoCameraBack Icon
+	//go:embed svg/video_camera_front-fill.svg
+	VideoCameraFrontFill Icon
+	//go:embed svg/video_camera_front.svg
+	VideoCameraFront Icon
+	//go:embed svg/video_camera_front_off-fill.svg
+	VideoCameraFrontOffFill Icon
+	//go:embed svg/video_camera_front_off.svg
+	VideoCameraFrontOff Icon
+	//go:embed svg/video_chat-fill.svg
+	VideoChatFill Icon
+	//go:embed svg/video_chat.svg
+	VideoChat Icon
+	//go:embed svg/video_file-fill.svg
+	VideoFileFill Icon
+	//go:embed svg/video_file.svg
+	VideoFile Icon
+	//go:embed svg/video_label-fill.svg
+	VideoLabelFill Icon
+	//go:embed svg/video_label.svg
+	VideoLabel Icon
+	//go:embed svg/video_library-fill.svg
+	VideoLibraryFill Icon
+	//go:embed svg/video_library.svg
+	VideoLibrary Icon
+	//go:embed svg/video_search-fill.svg
+	VideoSearchFill Icon
+	//go:embed svg/video_search.svg
+	VideoSearch Icon
+	//go:embed svg/video_settings-fill.svg
+	VideoSettingsFill Icon
+	//go:embed svg/video_settings.svg
+	VideoSettings Icon
+	//go:embed svg/video_stable-fill.svg
+	VideoStableFill Icon
+	//go:embed svg/video_stable.svg
+	VideoStable Icon
+	//go:embed svg/videocam-fill.svg
+	VideocamFill Icon
+	//go:embed svg/videocam.svg
+	Videocam Icon
+	//go:embed svg/videocam_off-fill.svg
+	VideocamOffFill Icon
+	//go:embed svg/videocam_off.svg
+	VideocamOff Icon
+	//go:embed svg/videogame_asset-fill.svg
+	VideogameAssetFill Icon
+	//go:embed svg/videogame_asset.svg
+	VideogameAsset Icon
+	//go:embed svg/videogame_asset_off-fill.svg
+	VideogameAssetOffFill Icon
+	//go:embed svg/videogame_asset_off.svg
+	VideogameAssetOff Icon
+	//go:embed svg/view_agenda-fill.svg
+	ViewAgendaFill Icon
+	//go:embed svg/view_agenda.svg
+	ViewAgenda Icon
+	//go:embed svg/view_array-fill.svg
+	ViewArrayFill Icon
+	//go:embed svg/view_array.svg
+	ViewArray Icon
+	//go:embed svg/view_carousel-fill.svg
+	ViewCarouselFill Icon
+	//go:embed svg/view_carousel.svg
+	ViewCarousel Icon
+	//go:embed svg/view_column-fill.svg
+	ViewColumnFill Icon
+	//go:embed svg/view_column.svg
+	ViewColumn Icon
+	//go:embed svg/view_column_2-fill.svg
+	ViewColumn2Fill Icon
+	//go:embed svg/view_column_2.svg
+	ViewColumn2 Icon
+	//go:embed svg/view_comfy-fill.svg
+	ViewComfyFill Icon
+	//go:embed svg/view_comfy.svg
+	ViewComfy Icon
+	//go:embed svg/view_comfy_alt-fill.svg
+	ViewComfyAltFill Icon
+	//go:embed svg/view_comfy_alt.svg
+	ViewComfyAlt Icon
+	//go:embed svg/view_compact-fill.svg
+	ViewCompactFill Icon
+	//go:embed svg/view_compact.svg
+	ViewCompact Icon
+	//go:embed svg/view_compact_alt-fill.svg
+	ViewCompactAltFill Icon
+	//go:embed svg/view_compact_alt.svg
+	ViewCompactAlt Icon
+	//go:embed svg/view_cozy-fill.svg
+	ViewCozyFill Icon
+	//go:embed svg/view_cozy.svg
+	ViewCozy Icon
+	//go:embed svg/view_day-fill.svg
+	ViewDayFill Icon
+	//go:embed svg/view_day.svg
+	ViewDay Icon
+	//go:embed svg/view_headline-fill.svg
+	ViewHeadlineFill Icon
+	//go:embed svg/view_headline.svg
+	ViewHeadline Icon
+	//go:embed svg/view_in_ar-fill.svg
+	ViewInArFill Icon
+	//go:embed svg/view_in_ar.svg
+	ViewInAr Icon
+	//go:embed svg/view_in_ar_off-fill.svg
+	ViewInArOffFill Icon
+	//go:embed svg/view_in_ar_off.svg
+	ViewInArOff Icon
+	//go:embed svg/view_kanban-fill.svg
+	ViewKanbanFill Icon
+	//go:embed svg/view_kanban.svg
+	ViewKanban Icon
+	//go:embed svg/view_list-fill.svg
+	ViewListFill Icon
+	//go:embed svg/view_list.svg
+	ViewList Icon
+	//go:embed svg/view_module-fill.svg
+	ViewModuleFill Icon
+	//go:embed svg/view_module.svg
+	ViewModule Icon
+	//go:embed svg/view_quilt-fill.svg
+	ViewQuiltFill Icon
+	//go:embed svg/view_quilt.svg
+	ViewQuilt Icon
+	//go:embed svg/view_sidebar-fill.svg
+	ViewSidebarFill Icon
+	//go:embed svg/view_sidebar.svg
+	ViewSidebar Icon
+	//go:embed svg/view_stream-fill.svg
+	ViewStreamFill Icon
+	//go:embed svg/view_stream.svg
+	ViewStream Icon
+	//go:embed svg/view_timeline-fill.svg
+	ViewTimelineFill Icon
+	//go:embed svg/view_timeline.svg
+	ViewTimeline Icon
+	//go:embed svg/view_week-fill.svg
+	ViewWeekFill Icon
+	//go:embed svg/view_week.svg
+	ViewWeek Icon
+	//go:embed svg/vignette-fill.svg
+	VignetteFill Icon
+	//go:embed svg/vignette.svg
+	Vignette Icon
+	//go:embed svg/visibility-fill.svg
+	VisibilityFill Icon
+	//go:embed svg/visibility.svg
+	Visibility Icon
+	//go:embed svg/visibility_lock-fill.svg
+	VisibilityLockFill Icon
+	//go:embed svg/visibility_lock.svg
+	VisibilityLock Icon
+	//go:embed svg/visibility_off-fill.svg
+	VisibilityOffFill Icon
+	//go:embed svg/visibility_off.svg
+	VisibilityOff Icon
+	//go:embed svg/voice_chat-fill.svg
+	VoiceChatFill Icon
+	//go:embed svg/voice_chat.svg
+	VoiceChat Icon
+	//go:embed svg/voice_over_off-fill.svg
+	VoiceOverOffFill Icon
+	//go:embed svg/voice_over_off.svg
+	VoiceOverOff Icon
+	//go:embed svg/voicemail-fill.svg
+	VoicemailFill Icon
+	//go:embed svg/voicemail.svg
+	Voicemail Icon
+	//go:embed svg/volume_down-fill.svg
+	VolumeDownFill Icon
+	//go:embed svg/volume_down.svg
+	VolumeDown Icon
+	//go:embed svg/volume_down_alt-fill.svg
+	VolumeDownAltFill Icon
+	//go:embed svg/volume_down_alt.svg
+	VolumeDownAlt Icon
+	//go:embed svg/volume_mute-fill.svg
+	VolumeMuteFill Icon
+	//go:embed svg/volume_mute.svg
+	VolumeMute Icon
+	//go:embed svg/volume_off-fill.svg
+	VolumeOffFill Icon
+	//go:embed svg/volume_off.svg
+	VolumeOff Icon
+	//go:embed svg/volume_up-fill.svg
+	VolumeUpFill Icon
+	//go:embed svg/volume_up.svg
+	VolumeUp Icon
+	//go:embed svg/voting_chip-fill.svg
+	VotingChipFill Icon
+	//go:embed svg/voting_chip.svg
+	VotingChip Icon
+	//go:embed svg/vpn_key-fill.svg
+	VpnKeyFill Icon
+	//go:embed svg/vpn_key.svg
+	VpnKey Icon
+	//go:embed svg/vpn_key_alert-fill.svg
+	VpnKeyAlertFill Icon
+	//go:embed svg/vpn_key_alert.svg
+	VpnKeyAlert Icon
+	//go:embed svg/vpn_key_off-fill.svg
+	VpnKeyOffFill Icon
+	//go:embed svg/vpn_key_off.svg
+	VpnKeyOff Icon
+	//go:embed svg/vpn_lock-fill.svg
+	VpnLockFill Icon
+	//go:embed svg/vpn_lock.svg
+	VpnLock Icon
+	//go:embed svg/wallet-fill.svg
+	WalletFill Icon
+	//go:embed svg/wallet.svg
+	Wallet Icon
+	//go:embed svg/wallpaper-fill.svg
+	WallpaperFill Icon
+	//go:embed svg/wallpaper.svg
+	Wallpaper Icon
+	//go:embed svg/wallpaper_slideshow-fill.svg
+	WallpaperSlideshowFill Icon
+	//go:embed svg/wallpaper_slideshow.svg
+	WallpaperSlideshow Icon
+	//go:embed svg/warehouse-fill.svg
+	WarehouseFill Icon
+	//go:embed svg/warehouse.svg
+	Warehouse Icon
+	//go:embed svg/warning-fill.svg
+	WarningFill Icon
+	//go:embed svg/warning.svg
+	Warning Icon
+	//go:embed svg/warning_off-fill.svg
+	WarningOffFill Icon
+	//go:embed svg/warning_off.svg
+	WarningOff Icon
+	//go:embed svg/wash-fill.svg
+	WashFill Icon
+	//go:embed svg/wash.svg
+	Wash Icon
+	//go:embed svg/watch-fill.svg
+	WatchFill Icon
+	//go:embed svg/watch.svg
+	Watch Icon
+	//go:embed svg/watch_button_press-fill.svg
+	WatchButtonPressFill Icon
+	//go:embed svg/watch_button_press.svg
+	WatchButtonPress Icon
+	//go:embed svg/watch_off-fill.svg
+	WatchOffFill Icon
+	//go:embed svg/watch_off.svg
+	WatchOff Icon
+	//go:embed svg/watch_screentime-fill.svg
+	WatchScreentimeFill Icon
+	//go:embed svg/watch_screentime.svg
+	WatchScreentime Icon
+	//go:embed svg/watch_wake-fill.svg
+	WatchWakeFill Icon
+	//go:embed svg/watch_wake.svg
+	WatchWake Icon
+	//go:embed svg/water-fill.svg
+	WaterFill Icon
+	//go:embed svg/water.svg
+	Water Icon
+	//go:embed svg/waterfall_chart-fill.svg
+	WaterfallChartFill Icon
+	//go:embed svg/waterfall_chart.svg
+	WaterfallChart Icon
+	//go:embed svg/waving_hand-fill.svg
+	WavingHandFill Icon
+	//go:embed svg/waving_hand.svg
+	WavingHand Icon
+	//go:embed svg/web-fill.svg
+	WebFill Icon
+	//go:embed svg/web.svg
+	Web Icon
+	//go:embed svg/web_asset-fill.svg
+	WebAssetFill Icon
+	//go:embed svg/web_asset.svg
+	WebAsset Icon
+	//go:embed svg/web_asset_off-fill.svg
+	WebAssetOffFill Icon
+	//go:embed svg/web_asset_off.svg
+	WebAssetOff Icon
+	//go:embed svg/web_stories-fill.svg
+	WebStoriesFill Icon
+	//go:embed svg/web_stories.svg
+	WebStories Icon
+	//go:embed svg/webhook-fill.svg
+	WebhookFill Icon
+	//go:embed svg/webhook.svg
+	Webhook Icon
+	//go:embed svg/weekend-fill.svg
+	WeekendFill Icon
+	//go:embed svg/weekend.svg
+	Weekend Icon
+	//go:embed svg/west-fill.svg
+	WestFill Icon
+	//go:embed svg/west.svg
+	West Icon
+	//go:embed svg/whatshot-fill.svg
+	WhatshotFill Icon
+	//go:embed svg/whatshot.svg
+	Whatshot Icon
+	//go:embed svg/widgets-fill.svg
+	WidgetsFill Icon
+	//go:embed svg/widgets.svg
+	Widgets Icon
+	//go:embed svg/width-fill.svg
+	WidthFill Icon
+	//go:embed svg/width.svg
+	Width Icon
+	//go:embed svg/width_full-fill.svg
+	WidthFullFill Icon
+	//go:embed svg/width_full.svg
+	WidthFull Icon
+	//go:embed svg/width_normal-fill.svg
+	WidthNormalFill Icon
+	//go:embed svg/width_normal.svg
+	WidthNormal Icon
+	//go:embed svg/width_wide-fill.svg
+	WidthWideFill Icon
+	//go:embed svg/width_wide.svg
+	WidthWide Icon
+	//go:embed svg/wifi-fill.svg
+	WifiFill Icon
+	//go:embed svg/wifi.svg
+	Wifi Icon
+	//go:embed svg/wifi_1_bar-fill.svg
+	Wifi1BarFill Icon
+	//go:embed svg/wifi_1_bar.svg
+	Wifi1Bar Icon
+	//go:embed svg/wifi_2_bar-fill.svg
+	Wifi2BarFill Icon
+	//go:embed svg/wifi_2_bar.svg
+	Wifi2Bar Icon
+	//go:embed svg/wifi_add-fill.svg
+	WifiAddFill Icon
+	//go:embed svg/wifi_add.svg
+	WifiAdd Icon
+	//go:embed svg/wifi_find-fill.svg
+	WifiFindFill Icon
+	//go:embed svg/wifi_find.svg
+	WifiFind Icon
+	//go:embed svg/wifi_home-fill.svg
+	WifiHomeFill Icon
+	//go:embed svg/wifi_home.svg
+	WifiHome Icon
+	//go:embed svg/wifi_lock-fill.svg
+	WifiLockFill Icon
+	//go:embed svg/wifi_lock.svg
+	WifiLock Icon
+	//go:embed svg/wifi_notification-fill.svg
+	WifiNotificationFill Icon
+	//go:embed svg/wifi_notification.svg
+	WifiNotification Icon
+	//go:embed svg/wifi_off-fill.svg
+	WifiOffFill Icon
+	//go:embed svg/wifi_off.svg
+	WifiOff Icon
+	//go:embed svg/window-fill.svg
+	WindowFill Icon
+	//go:embed svg/window.svg
+	Window Icon
+	//go:embed svg/window_closed-fill.svg
+	WindowClosedFill Icon
+	//go:embed svg/window_closed.svg
+	WindowClosed Icon
+	//go:embed svg/window_open-fill.svg
+	WindowOpenFill Icon
+	//go:embed svg/window_open.svg
+	WindowOpen Icon
+	//go:embed svg/window_sensor-fill.svg
+	WindowSensorFill Icon
+	//go:embed svg/window_sensor.svg
+	WindowSensor Icon
+	//go:embed svg/woman-fill.svg
+	WomanFill Icon
+	//go:embed svg/woman.svg
+	Woman Icon
+	//go:embed svg/woman_2-fill.svg
+	Woman2Fill Icon
+	//go:embed svg/woman_2.svg
+	Woman2 Icon
+	//go:embed svg/work-fill.svg
+	WorkFill Icon
+	//go:embed svg/work.svg
+	Work Icon
+	//go:embed svg/work_alert-fill.svg
+	WorkAlertFill Icon
+	//go:embed svg/work_alert.svg
+	WorkAlert Icon
+	//go:embed svg/work_history-fill.svg
+	WorkHistoryFill Icon
+	//go:embed svg/work_history.svg
+	WorkHistory Icon
+	//go:embed svg/work_update-fill.svg
+	WorkUpdateFill Icon
+	//go:embed svg/work_update.svg
+	WorkUpdate Icon
+	//go:embed svg/workspace_premium-fill.svg
+	WorkspacePremiumFill Icon
+	//go:embed svg/workspace_premium.svg
+	WorkspacePremium Icon
+	//go:embed svg/workspaces-fill.svg
+	WorkspacesFill Icon
+	//go:embed svg/workspaces.svg
+	Workspaces Icon
+	//go:embed svg/wrap_text-fill.svg
+	WrapTextFill Icon
+	//go:embed svg/wrap_text.svg
+	WrapText Icon
+	//go:embed svg/wrong_location-fill.svg
+	WrongLocationFill Icon
+	//go:embed svg/wrong_location.svg
+	WrongLocation Icon
+	//go:embed svg/wysiwyg-fill.svg
+	WysiwygFill Icon
+	//go:embed svg/wysiwyg.svg
+	Wysiwyg Icon
+	//go:embed svg/youtube_activity-fill.svg
+	YoutubeActivityFill Icon
+	//go:embed svg/youtube_activity.svg
+	YoutubeActivity Icon
+	//go:embed svg/youtube_searched_for-fill.svg
+	YoutubeSearchedForFill Icon
+	//go:embed svg/youtube_searched_for.svg
+	YoutubeSearchedFor Icon
+	//go:embed svg/zoom_in-fill.svg
+	ZoomInFill Icon
+	//go:embed svg/zoom_in.svg
+	ZoomIn Icon
+	//go:embed svg/zoom_in_map-fill.svg
+	ZoomInMapFill Icon
+	//go:embed svg/zoom_in_map.svg
+	ZoomInMap Icon
+	//go:embed svg/zoom_out-fill.svg
+	ZoomOutFill Icon
+	//go:embed svg/zoom_out.svg
+	ZoomOut Icon
+	//go:embed svg/zoom_out_map-fill.svg
+	ZoomOutMapFill Icon
+	//go:embed svg/zoom_out_map.svg
+	ZoomOutMap Icon
 )
