@@ -150,7 +150,7 @@ func (kl *KeyedList) Init() {
 					w.SetIcon(icons.Add).SetType(ButtonTonal)
 					w.Tooltip = "Add an element"
 					w.OnClick(func(e events.Event) {
-						kl.MapAdd()
+						kl.AddItem()
 					})
 				})
 			}
@@ -175,10 +175,10 @@ func (kl *KeyedList) ContextMenu(m *Scene, keyv reflect.Value) {
 		return
 	}
 	NewButton(m).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
-		kl.MapAdd()
+		kl.AddItem()
 	})
 	NewButton(m).SetText("Delete").SetIcon(icons.Delete).OnClick(func(e events.Event) {
-		kl.MapDelete(keyv)
+		kl.DeleteItem(keyv)
 	})
 }
 
@@ -188,8 +188,8 @@ func (kl *KeyedList) ToggleSort() {
 	kl.Update()
 }
 
-// MapAdd adds a new entry to the map
-func (kl *KeyedList) MapAdd() {
+// AddItem adds a new key-value item to the map.
+func (kl *KeyedList) AddItem() {
 	if reflectx.AnyIsNil(kl.Map) {
 		return
 	}
@@ -197,8 +197,8 @@ func (kl *KeyedList) MapAdd() {
 	kl.UpdateChange()
 }
 
-// MapDelete deletes a key-value from the map
-func (kl *KeyedList) MapDelete(key reflect.Value) {
+// DeleteItem deletes a key-value item from the map.
+func (kl *KeyedList) DeleteItem(key reflect.Value) {
 	if reflectx.AnyIsNil(kl.Map) {
 		return
 	}
@@ -221,7 +221,7 @@ func (kl *KeyedList) MakeToolbar(p *tree.Plan) {
 		tree.Add(p, func(w *Button) {
 			w.SetText("Add").SetIcon(icons.Add).SetTooltip("Add a new element to the map").
 				OnClick(func(e events.Event) {
-					kl.MapAdd()
+					kl.AddItem()
 				})
 		})
 	}

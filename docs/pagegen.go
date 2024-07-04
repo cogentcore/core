@@ -150,7 +150,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		items := []item{{Task: "Code"}, {Task: "Eat"}}
 		var table *core.Table
 		core.NewButton(parent).SetText("Add").SetIcon(icons.Add).OnClick(func(e events.Event) {
-			table.SliceNewAt(0)
+			table.NewAt(0)
 		})
 		table = core.NewTable(parent).SetSlice(&items)
 	},

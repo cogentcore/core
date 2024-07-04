@@ -357,10 +357,10 @@ func (tb *Table) StyleRow(w Widget, idx, fidx int) {
 	}
 }
 
-// SliceNewAt inserts a new blank element at given index in the slice -- -1
-// means the end
-func (tb *Table) SliceNewAt(idx int) {
-	tb.SliceNewAtSelect(idx)
+// NewAt inserts a new blank element at the given index in the slice.
+// -1 indicates to insert the element at the end.
+func (tb *Table) NewAt(idx int) {
+	tb.NewAtSelect(idx)
 	reflectx.SliceNewAt(tb.Slice, idx)
 	if idx < 0 {
 		idx = tb.SliceSize
@@ -372,13 +372,13 @@ func (tb *Table) SliceNewAt(idx int) {
 	tb.IndexGrabFocus(idx)
 }
 
-// SliceDeleteAt deletes element at given index from slice
-func (tb *Table) SliceDeleteAt(idx int) {
+// DeleteAt deletes the element at the given index from the slice.
+func (tb *Table) DeleteAt(idx int) {
 	if idx < 0 || idx >= tb.SliceSize {
 		return
 	}
 
-	tb.SliceDeleteAtSelect(idx)
+	tb.DeleteAtSelect(idx)
 
 	reflectx.SliceDeleteAt(tb.Slice, idx)
 

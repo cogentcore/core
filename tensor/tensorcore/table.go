@@ -407,10 +407,10 @@ func (tb *Table) SetColumnTensorDisplay(col int) *TensorDisplay {
 	return ctd
 }
 
-// SliceNewAt inserts a new blank element at given index in the slice -- -1
+// NewAt inserts a new blank element at given index in the slice -- -1
 // means the end
-func (tb *Table) SliceNewAt(idx int) {
-	tb.SliceNewAtSelect(idx)
+func (tb *Table) NewAt(idx int) {
+	tb.NewAtSelect(idx)
 
 	tb.Table.InsertRows(idx, 1)
 
@@ -419,12 +419,12 @@ func (tb *Table) SliceNewAt(idx int) {
 	tb.IndexGrabFocus(idx)
 }
 
-// SliceDeleteAt deletes element at given index from slice
-func (tb *Table) SliceDeleteAt(idx int) {
+// DeleteAt deletes element at given index from slice
+func (tb *Table) DeleteAt(idx int) {
 	if idx < 0 || idx >= tb.SliceSize {
 		return
 	}
-	tb.SliceDeleteAtSelect(idx)
+	tb.DeleteAtSelect(idx)
 	tb.Table.DeleteRows(idx, 1)
 	tb.Update()
 }
