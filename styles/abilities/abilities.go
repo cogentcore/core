@@ -15,12 +15,8 @@ import "cogentcore.org/core/enums"
 type Abilities int64 //enums:bitflag
 
 const (
-	// Editable means the element can be edited.  Otherwise, it remains in
-	// ReadOnly mode.
-	Editable Abilities = iota
-
 	// Selectable means it can be Selected
-	Selectable
+	Selectable Abilities = iota
 
 	// Activatable means it can be made Active by pressing down on it,
 	// which gives it a visible state layer color change.
