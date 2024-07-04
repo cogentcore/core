@@ -35,7 +35,7 @@ type ValueSetter interface {
 // do something when the widget is bound to the given value.
 type OnBinder interface {
 
-	// OnBind is called when the widget is bound to given value.
+	// OnBind is called when the widget is bound to the given value.
 	OnBind(value any)
 }
 
