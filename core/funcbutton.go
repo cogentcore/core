@@ -14,7 +14,6 @@ import (
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/types"
@@ -278,10 +277,10 @@ func (fb *FuncButton) setFuncImpl(gfun *types.Func, rfun reflect.Value) *FuncBut
 	fb.SetTooltip(fb.Func.Doc)
 	// we default to the icon with the same name as
 	// the function, if it exists
-	ic := icons.Icon(strcase.ToSnake(snm))
-	if ic.IsValid() {
-		fb.SetIcon(ic)
-	}
+	// ic := icons.Icon(strcase.ToSnake(snm)) // TODO(config)
+	// if ic.IsValid() {
+	// 	fb.SetIcon(ic)
+	// }
 	return fb
 }
 

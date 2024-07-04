@@ -63,7 +63,7 @@ func (ic *Icon) SetIcon(icon icons.Icon) *Icon {
 // and returning true if a new icon was actually set.
 // Does nothing and returns false if Icon is already equal to the given icon.
 func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
-	if icon.IsNil() {
+	if !icon.IsSet() {
 		ic.Icon = icon
 		ic.SVG.DeleteAll()
 		return false, nil

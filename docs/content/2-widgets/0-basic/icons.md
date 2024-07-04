@@ -14,10 +14,10 @@ However, you can also make a standalone icon widget:
 core.NewIcon(parent).SetIcon(icons.Home)
 ```
 
-You can convert an icon into its filled version:
+You can use the filled version of an icon:
 
 ```Go
-core.NewButton(parent).SetIcon(icons.Home.Fill())
+core.NewButton(parent).SetIcon(icons.HomeFill)
 ```
 
 You can see the [advanced icons page](../../advanced/icons) for information about custom icons if you need it.

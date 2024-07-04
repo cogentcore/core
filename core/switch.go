@@ -124,7 +124,7 @@ func (sw *Switch) Init() {
 
 	sw.Maker(func(p *tree.Plan) {
 		if sw.IconOn == "" {
-			sw.IconOn = icons.ToggleOn.Fill() // fallback
+			sw.IconOn = icons.ToggleOnFill // fallback
 		}
 		if sw.IconOff == "" {
 			sw.IconOff = icons.ToggleOff // fallback
@@ -248,7 +248,7 @@ func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 	case SwitchSwitch:
 		// TODO: material has more advanced switches with a checkmark
 		// if they are turned on; we could implement that at some point
-		sw.IconOn = icons.ToggleOn.Fill()
+		sw.IconOn = icons.ToggleOnFill
 		sw.IconOff = icons.ToggleOff
 		sw.IconIndeterminate = icons.ToggleMid
 	case SwitchChip, SwitchSegmentedButton:
@@ -256,7 +256,7 @@ func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 		sw.IconOff = icons.None
 		sw.IconIndeterminate = icons.None
 	case SwitchCheckbox:
-		sw.IconOn = icons.CheckBox.Fill()
+		sw.IconOn = icons.CheckBoxFill
 		sw.IconOff = icons.CheckBoxOutlineBlank
 		sw.IconIndeterminate = icons.IndeterminateCheckBox
 	case SwitchRadioButton:

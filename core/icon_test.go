@@ -18,6 +18,6 @@ func TestIcon(t *testing.T) {
 
 func TestIconFilled(t *testing.T) {
 	b := NewBody()
-	NewIcon(b).SetIcon(icons.Home.Fill())
+	NewIcon(b).SetIcon(icons.HomeFill)
 	b.AssertRender(t, "icon/filled")
 }
