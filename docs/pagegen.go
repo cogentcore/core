@@ -1098,6 +1098,13 @@ func main() {
 	"widgets/collections/tables-6": func(parent core.Widget) {
 		type language struct {
 			Name   string
+			Rating int `label:"Score"`
+		}
+		core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+	},
+	"widgets/collections/tables-7": func(parent core.Widget) {
+		type language struct {
+			Name   string
 			Rating int
 		}
 		core.NewListButton(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})

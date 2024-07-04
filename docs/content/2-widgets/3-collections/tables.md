@@ -65,6 +65,16 @@ type language struct {
 core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}}).SetReadOnly(true)
 ```
 
+You can change the label of a column:
+
+```Go
+type language struct {
+    Name   string
+    Rating int `label:"Score"`
+}
+core.NewTable(parent).SetSlice(&[]language{{"Go", 10}, {"Python", 5}})
+```
+
 You can make a button that opens a dialog with a table:
 
 ```Go
