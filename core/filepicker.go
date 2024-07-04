@@ -30,23 +30,6 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// FilePickerDialog opens a dialog for selecting a file.
-func FilePickerDialog(ctx Widget, filename, exts, title string, fun func(selfile string)) {
-	d := NewBody()
-	if title != "" {
-		d.SetTitle(title)
-	}
-	fv := NewFilePicker(d).SetFilename(filename).SetExtensions(exts)
-	d.AddAppBar(fv.MakeToolbar)
-	d.AddBottomBar(func(parent Widget) {
-		d.AddCancel(parent)
-		d.AddOK(parent).OnClick(func(e events.Event) {
-			fun(fv.SelectedFile())
-		})
-	})
-	d.RunWindowDialog(ctx)
-}
-
 // todo:
 
 // * search: use highlighting, not filtering -- < > arrows etc
