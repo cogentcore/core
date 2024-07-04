@@ -45,6 +45,20 @@ tb.Maker(func(p *tree.Plan) {
 })
 ```
 
+You can also directly add items to the overflow menu of a toolbar:
+
+```Go
+tb := core.NewToolbar(parent)
+tb.Maker(func(p *tree.Plan) {
+    tree.Add(p, func(w *core.Button) {
+        w.SetText("Build")
+    })
+})
+tb.AddOverflowMenu(func(m *core.Scene) {
+    core.NewButton(m).SetText("Run")
+})
+```
+
 Typically, you add elements to the main top app bar (see the toolbar at the top of this documentation for example) instead of making a standalone toolbar (in this example, `b` is the [[core.Body]]):
 
 ```go

@@ -194,9 +194,8 @@ func (tb *Toolbar) OverflowMenu(m *Scene) {
 // AddOverflowMenu adds the given menu function to the overflow menu list.
 // These functions are called in reverse order such that the last added function
 // is called first when constructing the menu.
-func (tb *Toolbar) AddOverflowMenu(fun func(m *Scene)) *Toolbar {
+func (tb *Toolbar) AddOverflowMenu(fun func(m *Scene)) {
 	tb.OverflowMenus = append(tb.OverflowMenus, fun)
-	return tb
 }
 
 // ToolbarStyles styles the given widget to have standard toolbar styling.

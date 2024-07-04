@@ -901,6 +901,17 @@ func main() {
 			}
 		})
 	},
+	"widgets/containers/toolbars-3": func(parent core.Widget) {
+		tb := core.NewToolbar(parent)
+		tb.Maker(func(p *tree.Plan) {
+			tree.Add(p, func(w *core.Button) {
+				w.SetText("Build")
+			})
+		})
+		tb.AddOverflowMenu(func(m *core.Scene) {
+			core.NewButton(m).SetText("Run")
+		})
+	},
 	"widgets/collections/forms-0": func(parent core.Widget) {
 		type person struct {
 			Name string
