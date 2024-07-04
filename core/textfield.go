@@ -182,6 +182,13 @@ const (
 	TextFieldOutlined
 )
 
+// Validator is an interface for types to provide a Validate method
+// that is used to validate string [Value]s using [TextField.Validator].
+type Validator interface {
+	// Validate returns an error if the value is invalid.
+	Validate() error
+}
+
 func (tf *TextField) WidgetValue() any { return &tf.Txt }
 
 func (tf *TextField) Init() {

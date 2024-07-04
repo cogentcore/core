@@ -63,6 +63,15 @@ type Form struct {
 	isShouldShower bool
 }
 
+// ShouldShower is an interface determining when you should take a shower.
+// Actually, it determines whether a named field should be displayed
+// in [Form].
+type ShouldShower interface {
+
+	// ShouldShow returns whether the given named field should be displayed.
+	ShouldShow(field string) bool
+}
+
 func (fm *Form) WidgetValue() any { return &fm.Struct }
 
 func (fm *Form) getStructFields() {
