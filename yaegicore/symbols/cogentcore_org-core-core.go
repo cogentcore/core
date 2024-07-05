@@ -312,7 +312,6 @@ func init() {
 		"Events":                 reflect.ValueOf((*core.Events)(nil)),
 		"FavPathItem":            reflect.ValueOf((*core.FavPathItem)(nil)),
 		"FavPaths":               reflect.ValueOf((*core.FavPaths)(nil)),
-		"FieldValidator":         reflect.ValueOf((*core.FieldValidator)(nil)),
 		"FileButton":             reflect.ValueOf((*core.FileButton)(nil)),
 		"FilePaths":              reflect.ValueOf((*core.FilePaths)(nil)),
 		"FilePicker":             reflect.ValueOf((*core.FilePicker)(nil)),
