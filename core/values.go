@@ -9,6 +9,7 @@ import (
 
 	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/paint"
@@ -150,16 +151,16 @@ func (ib *IconButton) Init() { // TODO(config): display:"show-name"
 	})
 	InitValueButton(ib, false, func(d *Body) {
 		d.SetTitle("Select an icon")
-		// si := 0 // TODO(config)
-		// all := icons.All()
-		// sv := NewList(d)
-		// sv.SetSlice(&all).SetSelectedValue(ib.Icon).BindSelect(&si)
-		// sv.SetStyleFunc(func(w Widget, s *styles.Style, row int) {
-		// 	w.(*IconButton).SetText(strcase.ToSentence(string(all[row])))
-		// })
-		// sv.OnChange(func(e events.Event) {
-		// 	ib.Icon = icons.AllIcons[si]
-		// })
+		si := 0
+		used := maps.Keys(icons.Used)
+		sv := NewList(d)
+		sv.SetSlice(&used).SetSelectedValue(ib.Icon).BindSelect(&si)
+		sv.SetStyleFunc(func(w Widget, s *styles.Style, row int) {
+			w.(*IconButton).SetText(strcase.ToSentence(string(used[row])))
+		})
+		sv.OnChange(func(e events.Event) {
+			ib.Icon = used[si]
+		})
 	})
 }
 
