@@ -1,6 +1,6 @@
 # Custom icons
 
-You can add custom icons to your app using icongen, a part of the `core generate` tool. Custom icons are typically placed in a `cicons` (custom icons) directory. In it, you add all of your custom SVG icon files and a file with the following code:
+You can add custom icons to your app using icongen, a part of the `core generate` tool. Custom icons are typically placed in a `cicons` (custom icons) directory. In it, you can add all of your custom SVG icon files and an `icons.go` file with the following code:
 
 ```go
 package cicons
@@ -8,7 +8,7 @@ package cicons
 //go:generate core generate -icons .
 ```
 
-Then, once you run `go generate`, you can access your icons through the cicons package:
+Then, once you run `go generate`, you can access your icons through your cicons package:
 
 ```go
 core.NewButton(parent).SetIcon(cicons.MyIconName)
