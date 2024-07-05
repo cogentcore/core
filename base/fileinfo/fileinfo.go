@@ -133,6 +133,7 @@ func (fi *FileInfo) Stat() error {
 		if fi.Cat == UnknownCategory {
 			if fi.IsExec() {
 				fi.Cat = Exe
+				fi.Known = AnyExe
 			}
 		}
 	}
@@ -291,48 +292,7 @@ func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 	if fi.IsDir() {
 		return icons.Folder, true
 	}
-	if fi.Known != Unknown {
-		snm := strings.ToLower(fi.Known.String())
-		if icn := icons.Icon(snm); icn.IsValid() {
-			return icn, true
-		}
-		if icn := icons.Icon("file-" + snm); icn.IsValid() {
-			return icn, true
-		}
-		if icn := icons.Icon(snm + "_file"); icn.IsValid() {
-			return icn, true
-		}
-	}
-	subt := strings.ToLower(MimeSub(fi.Mime))
-	if subt != "" {
-		if icn := icons.Icon(subt); icn.IsValid() {
-			return icn, true
-		}
-	}
-	if fi.Cat != UnknownCategory {
-		cat := strings.ToLower(fi.Cat.String())
-		if icn := icons.Icon(cat); icn.IsValid() {
-			return icn, true
-		}
-		if icn := icons.Icon("file-" + cat); icn.IsValid() {
-			return icn, true
-		}
-		if icn := icons.Icon(cat + "_file"); icn.IsValid() {
-			return icn, true
-		}
-	}
-	ext := filepath.Ext(fi.Name)
-	if ext != "" {
-		if icn := icons.Icon(ext[1:]); icn.IsValid() {
-			return icn, true
-		}
-	}
-	if fi.IsExec() {
-		return icons.PlayArrow, true
-	}
-
-	icn := icons.None
-	return icn, false
+	return Icons[fi.Known], true
 }
 
 // Note: can get all the detailed birth, access, change times from this package

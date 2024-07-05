@@ -170,7 +170,7 @@ func (sv *SVG) MakeToolbar(p *tree.Plan) {
 	})
 	tree.Add(p, func(w *Separator) {})
 	tree.Add(p, func(w *FuncButton) {
-		w.SetFunc(sv.Open)
+		w.SetFunc(sv.Open).SetIcon(icons.Open)
 	})
 	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(sv.SaveSVG).SetIcon(icons.Save)

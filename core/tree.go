@@ -1231,9 +1231,9 @@ func (tr *Tree) ContextMenu(m *Scene) {
 	NewFuncButton(m).SetFunc(tri.DeleteNode).SetText("Delete").SetIcon(icons.Delete).
 		SetEnabled(tr.HasSelection())
 	NewSeparator(m)
-	NewFuncButton(m).SetFunc(tri.Copy).SetKey(keymap.Copy).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tri.Cut).SetKey(keymap.Cut).SetEnabled(tr.HasSelection())
-	paste := NewFuncButton(m).SetFunc(tri.Paste).SetKey(keymap.Paste)
+	NewFuncButton(m).SetFunc(tri.Copy).SetIcon(icons.Copy).SetKey(keymap.Copy).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tri.Cut).SetIcon(icons.Cut).SetKey(keymap.Cut).SetEnabled(tr.HasSelection())
+	paste := NewFuncButton(m).SetFunc(tri.Paste).SetIcon(icons.Paste).SetKey(keymap.Paste)
 	cb := tr.Scene.Events.Clipboard()
 	if cb != nil {
 		paste.SetState(cb.IsEmpty(), states.Disabled)

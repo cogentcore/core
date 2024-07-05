@@ -1070,10 +1070,10 @@ func (tf *TextField) InsertAtCursor(str string) {
 }
 
 func (tf *TextField) ContextMenu(m *Scene) {
-	NewFuncButton(m).SetFunc(tf.Copy).SetKey(keymap.Copy).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled)
+	NewFuncButton(m).SetFunc(tf.Copy).SetIcon(icons.Copy).SetKey(keymap.Copy).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled)
 	if !tf.IsReadOnly() {
-		NewFuncButton(m).SetFunc(tf.Cut).SetKey(keymap.Cut).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled)
-		paste := NewFuncButton(m).SetFunc(tf.Paste).SetKey(keymap.Paste)
+		NewFuncButton(m).SetFunc(tf.Cut).SetIcon(icons.Cut).SetKey(keymap.Cut).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled)
+		paste := NewFuncButton(m).SetFunc(tf.Paste).SetIcon(icons.Paste).SetKey(keymap.Paste)
 		cb := tf.Scene.Events.Clipboard()
 		if cb != nil {
 			paste.SetState(cb.IsEmpty(), states.Disabled)

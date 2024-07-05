@@ -14,7 +14,6 @@ import (
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/cursors"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/styles/abilities"
 	"cogentcore.org/core/types"
@@ -37,8 +36,8 @@ func NewSoloFuncButton(ctx Widget) *FuncButton {
 // FuncButton is a button that is set up to call a function when it
 // is pressed, using a dialog to prompt the user for any arguments.
 // Also, it automatically sets various properties of the button like
-// the name, text, tooltip, and icon based on the properties of the
-// function, using [reflect] and [types]. The function must be registered
+// the text and tooltip based on the properties of the function,
+// using [reflect] and [types]. The function must be registered
 // with [types] to get documentation information, but that is not
 // required; add a `//types:add` comment directive and run `core generate`
 // if you want tooltips. If the function is a method, both the method and
@@ -276,12 +275,6 @@ func (fb *FuncButton) setFuncImpl(gfun *types.Func, rfun reflect.Value) *FuncBut
 		fb.Func.Doc = types.FormatDoc(fb.Func.Doc, snm, txt)
 	}
 	fb.SetTooltip(fb.Func.Doc)
-	// we default to the icon with the same name as
-	// the function, if it exists
-	ic := icons.Icon(strcase.ToSnake(snm))
-	if ic.IsValid() {
-		fb.SetIcon(ic)
-	}
 	return fb
 }
 

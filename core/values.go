@@ -135,14 +135,14 @@ func (ib *IconButton) WidgetValue() any { return &ib.Icon }
 func (ib *IconButton) Init() { // TODO(config): display:"show-name"
 	ib.Button.Init()
 	ib.Updater(func() {
-		if ib.Icon.IsNil() {
+		if !ib.Icon.IsSet() {
 			ib.SetText("Select an icon")
 		} else {
 			ib.SetText("")
 		}
 		if ib.IsReadOnly() {
 			ib.SetType(ButtonText)
-			if ib.Icon.IsNil() {
+			if !ib.Icon.IsSet() {
 				ib.SetText("").SetIcon(icons.Blank)
 			}
 		} else {
@@ -152,14 +152,14 @@ func (ib *IconButton) Init() { // TODO(config): display:"show-name"
 	InitValueButton(ib, false, func(d *Body) {
 		d.SetTitle("Select an icon")
 		si := 0
-		all := icons.All()
+		used := maps.Keys(icons.Used)
 		sv := NewList(d)
-		sv.SetSlice(&all).SetSelectedValue(ib.Icon).BindSelect(&si)
+		sv.SetSlice(&used).SetSelectedValue(ib.Icon).BindSelect(&si)
 		sv.SetStyleFunc(func(w Widget, s *styles.Style, row int) {
-			w.(*IconButton).SetText(strcase.ToSentence(string(all[row])))
+			w.(*IconButton).SetText(strcase.ToSentence(string(used[row])))
 		})
 		sv.OnChange(func(e events.Event) {
-			ib.Icon = icons.AllIcons[si]
+			ib.Icon = used[si]
 		})
 	})
 }

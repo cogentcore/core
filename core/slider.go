@@ -295,7 +295,7 @@ func (sr *Slider) Init() {
 	})
 
 	sr.Maker(func(p *tree.Plan) {
-		if sr.Icon.IsNil() {
+		if !sr.Icon.IsSet() {
 			return
 		}
 		tree.AddAt(p, "icon", func(w *Icon) {
