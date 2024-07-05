@@ -57,7 +57,7 @@ func (md *Model) SetDicts(base, user Dict) {
 	md.Dict = base
 	md.UserDict = user
 	maps.Copy(md.Dict, md.UserDict)
-	md.addSuggestionsForWords(md.Dict.List())
+	go md.addSuggestionsForWords(md.Dict.List())
 }
 
 // addSuggestionsForWords
