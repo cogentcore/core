@@ -6,8 +6,8 @@ package spell
 
 import (
 	"bufio"
-	"bytes"
 	"embed"
+	"io/fs"
 	"log"
 	"log/slog"
 	"os"
@@ -19,30 +19,43 @@ import (
 	"cogentcore.org/core/parse/lexer"
 )
 
-//go:embed spell_en_us.json
-var content embed.FS
+//go:embed dict_en_us
+var embedDict embed.FS
 
-// SaveAfterLearnIntervalSecs is number of seconds since file has been opened / saved
+// SaveAfterLearnIntervalSecs is number of seconds since
+// dict file has been opened / saved
 // above which model is saved after learning.
 const SaveAfterLearnIntervalSecs = 20
 
-var (
-	inited    bool
-	spellMu   sync.RWMutex // we need our own mutex in case of loading a new model
-	model     *Model
-	openTime  time.Time // ModTime() on file
-	learnTime time.Time // last time when a Learn function was called -- last mod to model -- zero if not mod
-	openFPath string
-	Ignore    = map[string]struct{}{}
-)
+// global shared spell
+var global *SpellData
 
-// Initialized returns true if the model has been loaded or created anew
-func Initialized() bool {
-	return inited
+// Spell returns the global spelling dictionary
+func Spell() *SpellData {
+	if global != nil {
+		return global
+	}
+	global = NewSpell()
+	return global
 }
 
-// ModTime returns the modification time of given file path
-func ModTime(path string) (time.Time, error) {
+type SpellData struct {
+	// UserFile is path to user's dictionary where learned words go
+	UserFile string
+
+	model     *Model
+	openTime  time.Time    // ModTime() on file
+	learnTime time.Time    // last time when a Learn function was called 	-- last mod to model -- zero if not mod
+	mu        sync.RWMutex // we need our own mutex in case of loading a new model
+}
+
+// NewSpell opens the default dictionary
+func NewSpell() *SpellData {
+
+}
+
+// modTime returns the modification time of given file path
+func modTime(path string) (time.Time, error) {
 	info, err := os.Stat(path)
 	if err != nil {
 		return time.Time{}, err
@@ -50,46 +63,48 @@ func ModTime(path string) (time.Time, error) {
 	return info.ModTime(), nil
 }
 
-func ResetLearnTime() {
-	learnTime = time.Time{}
+func (sp *SpellData) ResetLearnTime() {
+	sp.learnTime = time.Time{}
 }
 
-// OpenFromDict opens dictionary of words and creates
+// Open opens dictionary of words and creates
 // suggestions based on that.
-func OpenFromDict(path string) error {
+func Open(path string) error {
 	spellMu.Lock()
 	defer spellMu.Unlock()
 	d, err := OpenDict(path)
 	if err != nil {
+		// slog.Error(err.Error())
+		return err
+	}
+	openTime, err = ModTime(path)
+	InitFromDict(d)
+	return err
+}
+
+// OpenFS opens dictionary of words and creates
+// suggestions based on that.
+func OpenFS(fsys fs.FS, path string) error {
+	spellMu.Lock()
+	defer spellMu.Unlock()
+	d, err := OpenDictFS(fsys, path)
+	if err != nil {
 		slog.Error(err.Error())
 		return err
 	}
-	// todo: do in background
-	model = NewModel()
-	model.Threshold = 1
-	model.Train(d.List())
-	return nil
+	openTime = time.Date(2024, 06, 30, 00, 00, 00, 0, time.UTC)
+	InitFromDict(d)
+	return err
 }
 
-// Open loads the saved model stored in json format
-func Open(path string) error {
-	spellMu.Lock()
-	defer spellMu.Unlock()
-
+// InitFromDict initializes model from given dict.
+// assumed to be under mutex lock
+func InitFromDict(base, user Dict) {
 	ResetLearnTime()
-	var err error
-	openTime, err = ModTime(path)
-	if err != nil {
-		openFPath = path // save for later, so it will save when learning
-		openTime = time.Now()
-		return err
-	}
-	model, err = Load(path)
-	if err == nil {
-		openFPath = path
-		inited = true
-	}
-	return err
+	model = NewModel()
+	model.SetDicts(base, user)
+	inited = true
+	go model.Train(d.List())
 }
 
 // OpenCheck checks if the current file has been modified since last open time
@@ -105,9 +120,8 @@ func OpenCheck() error {
 		return err
 	}
 	if tm.After(openTime) {
-		model, err = Load(openFPath)
+		Open(openFPath)
 		openTime = tm
-		ResetLearnTime()
 		// log.Printf("opened newer spell file: %s\n", openTime.String())
 	}
 	return err
@@ -116,27 +130,18 @@ func OpenCheck() error {
 // OpenDefault loads the default spelling file.
 // TODO: need different languages obviously!
 func OpenDefault() error {
-	fn := "spell_en_us.json"
-	return OpenEmbed(fn)
+	fn := "dict_en_us"
+	return OpenFS(fn)
 }
 
-// OpenEmbed loads json-formatted model from embedded data
+// OpenEmbed loads dict from embedded file
 func OpenEmbed(fname string) error {
 	spellMu.Lock()
 	defer spellMu.Unlock()
-
-	ResetLearnTime()
-	defb, err := content.ReadFile(fname)
-	if err != nil {
-		return err
-	}
-	openTime = time.Date(2022, 02, 10, 00, 00, 00, 0, time.UTC)
-	inited = true
-	model, err = FromReader(bytes.NewBuffer(defb))
-	return err
+	return OpenFS(content, fname)
 }
 
-// Save saves the spelling model which includes the data and parameters
+// Save saves the dictionary
 // note: this will overwrite any existing file -- be sure to have opened
 // the current file before making any changes.
 func Save(filename string) error {
