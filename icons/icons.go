@@ -33,6 +33,20 @@ func (i Icon) IsSet() bool {
 	return i != "" && i != None
 }
 
+// All is a list of all icons compiled into the app.
+// It does not contain unused icons, since those are
+// not compiled. [Register] adds to it in generated
+// icongen code.
+var All []Icon
+
+// Register adds the given [Icon] to [All] and then
+// returns the same icon. This should only be used
+// in generated icongen code.
+func Register(i Icon) Icon {
+	All = append(All, i)
+	return i
+}
+
 // DefaultAppIcon is the default icon used for apps during packaging and in the app
 // if no icon is specified in the icon.svg file. It defaults to a Google Blue version
 // of [Toolbar].
