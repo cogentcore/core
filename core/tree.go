@@ -383,7 +383,6 @@ func (tr *Tree) Init() {
 		if tr.HasChildren() {
 			tr.ToggleClose()
 		}
-		// tr.This.(Treer).OnDoubleClick(e)
 	})
 	parts.On(events.DragStart, func(e events.Event) {
 		tri.DragStart(e)
@@ -518,8 +517,8 @@ func (tr *Tree) Style() {
 	if !tr.HasChildren() {
 		tr.SetClosed(true)
 	}
-	tr.Indent.ToDots(&tr.Styles.UnitContext)
 	tr.WidgetBase.Style()
+	tr.Indent.ToDots(&tr.Styles.UnitContext)
 }
 
 func (tr *Tree) SetBranchState() {
@@ -1121,12 +1120,6 @@ func (tr *Tree) Close() {
 // OnOpen is called when a node is opened.
 // The base version does nothing.
 func (tr *Tree) OnOpen() {}
-
-func (tr *Tree) OnDoubleClick(e events.Event) {
-	if tr.HasChildren() {
-		tr.ToggleClose()
-	}
-}
 
 // CanOpen returns true if the node is able to open.
 // By default it checks HasChildren(), but could check other properties

@@ -12,7 +12,6 @@ import (
 	"cogentcore.org/core/parse/complete"
 	"cogentcore.org/core/parse/lexer"
 	"cogentcore.org/core/parse/parser"
-	"cogentcore.org/core/spell"
 	"cogentcore.org/core/texteditor/textbuf"
 )
 
@@ -109,7 +108,9 @@ func CompleteText(data any, text string, posLine, posChar int) (md complete.Matc
 	if md.Seed == "" {
 		return md
 	}
-	result := spell.Complete(md.Seed)
+	// todo: is this used? fix or remove
+	// result := spell.Complete(md.Seed)
+	result := []string{}
 	possibles := complete.MatchSeedString(result, md.Seed)
 	for _, p := range possibles {
 		m := complete.Completion{Text: p}

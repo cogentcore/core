@@ -101,6 +101,23 @@ func (fi *FileInfo) InitFile(fname string) error {
 // file info, including mime type, which then drives Kind and Icon -- this is
 // the main function to call to update state.
 func (fi *FileInfo) Stat() error {
+	fi.Cat = UnknownCategory
+	fi.Known = Unknown
+	fi.Kind = ""
+	mtyp, _, err := MimeFromFile(fi.Path)
+	if err == nil {
+		fi.Mime = mtyp
+		fi.Cat = CategoryFromMime(fi.Mime)
+		fi.Known = MimeKnown(fi.Mime)
+		if fi.Cat != UnknownCategory {
+			fi.Kind = fi.Cat.String() + ": "
+		}
+		if fi.Known != Unknown {
+			fi.Kind += fi.Known.String()
+		} else {
+			fi.Kind += MimeSub(fi.Mime)
+		}
+	}
 	info, err := os.Stat(fi.Path)
 	if err != nil {
 		return err
@@ -113,23 +130,6 @@ func (fi *FileInfo) Stat() error {
 		fi.Cat = Folder
 		fi.Known = AnyFolder
 	} else {
-		fi.Cat = UnknownCategory
-		fi.Known = Unknown
-		fi.Kind = ""
-		mtyp, _, err := MimeFromFile(fi.Path)
-		if err == nil {
-			fi.Mime = mtyp
-			fi.Cat = CategoryFromMime(fi.Mime)
-			fi.Known = MimeKnown(fi.Mime)
-			if fi.Cat != UnknownCategory {
-				fi.Kind = fi.Cat.String() + ": "
-			}
-			if fi.Known != Unknown {
-				fi.Kind += fi.Known.String()
-			} else {
-				fi.Kind += MimeSub(fi.Mime)
-			}
-		}
 		if fi.Cat == UnknownCategory {
 			if fi.IsExec() {
 				fi.Cat = Exe

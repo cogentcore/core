@@ -52,7 +52,7 @@ func (fn *Node) VCSContextMenu(m *core.Scene) {
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
-	core.NewFuncButton(m).SetFunc(fn.BlameVCSSel).SetText(VCSLabelFunc(fn, "Blame VC S")).SetIcon(icons.CreditScore).
+	core.NewFuncButton(m).SetFunc(fn.BlameVCSSel).SetText(VCSLabelFunc(fn, "Blame VCS")).SetIcon(icons.CreditScore).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})

@@ -6,49 +6,6 @@ import (
 	"cogentcore.org/core/enums"
 )
 
-var _SpellSignalsValues = []SpellSignals{0, 1}
-
-// SpellSignalsN is the highest valid value for type SpellSignals, plus one.
-const SpellSignalsN SpellSignals = 2
-
-var _SpellSignalsValueMap = map[string]SpellSignals{`Select`: 0, `Ignore`: 1}
-
-var _SpellSignalsDescMap = map[SpellSignals]string{0: `SpellSelect means the user chose one of the possible corrections`, 1: `SpellIgnore signals the user chose ignore so clear the tag`}
-
-var _SpellSignalsMap = map[SpellSignals]string{0: `Select`, 1: `Ignore`}
-
-// String returns the string representation of this SpellSignals value.
-func (i SpellSignals) String() string { return enums.String(i, _SpellSignalsMap) }
-
-// SetString sets the SpellSignals value from its string representation,
-// and returns an error if the string is invalid.
-func (i *SpellSignals) SetString(s string) error {
-	return enums.SetString(i, s, _SpellSignalsValueMap, "SpellSignals")
-}
-
-// Int64 returns the SpellSignals value as an int64.
-func (i SpellSignals) Int64() int64 { return int64(i) }
-
-// SetInt64 sets the SpellSignals value from an int64.
-func (i *SpellSignals) SetInt64(in int64) { *i = SpellSignals(in) }
-
-// Desc returns the description of the SpellSignals value.
-func (i SpellSignals) Desc() string { return enums.Desc(i, _SpellSignalsDescMap) }
-
-// SpellSignalsValues returns all possible values for the type SpellSignals.
-func SpellSignalsValues() []SpellSignals { return _SpellSignalsValues }
-
-// Values returns all possible values for the type SpellSignals.
-func (i SpellSignals) Values() []enums.Enum { return enums.Values(_SpellSignalsValues) }
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i SpellSignals) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *SpellSignals) UnmarshalText(text []byte) error {
-	return enums.UnmarshalText(i, text, "SpellSignals")
-}
-
 var _BufferSignalsValues = []BufferSignals{0, 1, 2, 3, 4, 5, 6}
 
 // BufferSignalsN is the highest valid value for type BufferSignals, plus one.
