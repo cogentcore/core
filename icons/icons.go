@@ -33,9 +33,9 @@ func (i Icon) IsSet() bool {
 	return i != "" && i != None
 }
 
-// Used is a list of all icons that have been used.
+// Used is a map containing icons that have been used.
 // It is added to by [cogentcore.org/core/core.Icon].
-var Used []Icon
+var Used = map[Icon]bool{}
 
 // DefaultAppIcon is the default icon used for apps during packaging and in the app
 // if no icon is specified in the icon.svg file. It defaults to a Google Blue version

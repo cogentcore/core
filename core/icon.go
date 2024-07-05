@@ -72,6 +72,7 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 		// fmt.Println("icon already set:", icon)
 		return false, nil
 	}
+	icons.Used[icon] = true
 	ic.SVG.Config(2, 2)
 	err := ic.SVG.ReadXML(strings.NewReader(string(icon)))
 	if err != nil {
