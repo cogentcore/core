@@ -298,7 +298,7 @@ func makeIcons(ts *core.Tabs) {
 			s.Overflow.Y = styles.OverflowAuto
 		})
 
-		ics := icons.All()
+		ics := icons.Used()
 		for _, ic := range ics {
 			sic := string(ic)
 			if strings.HasSuffix(sic, "-fill") {
