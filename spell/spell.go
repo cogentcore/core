@@ -73,6 +73,7 @@ func (sp *SpellData) OpenUser() error {
 	d, err := OpenDict(sp.UserFile)
 	if err != nil {
 		// slog.Error(err.Error())
+		sp.model.UserDict = make(Dict)
 		return err
 	}
 	// note: does not have suggestions for new words

@@ -1132,7 +1132,7 @@ func (tr *Tree) CanOpen() bool {
 // (if it is not already opened).
 // Calls OnOpen in Treer interface for extensible actions.
 func (tr *Tree) Open() {
-	if !tr.Closed || tr.inOpen {
+	if !tr.Closed || tr.inOpen || tr.This == nil {
 		return
 	}
 	tr.inOpen = true
