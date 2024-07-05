@@ -14,10 +14,8 @@
 package spell
 
 import (
-	"fmt"
 	"strings"
 	"sync"
-	"time"
 
 	"golang.org/x/exp/maps"
 )
@@ -50,6 +48,7 @@ func NewModel() *Model {
 
 func (md *Model) Init() *Model {
 	md.Suggest = make(map[string][]string)
+	md.Ignore = make(Dict)
 	md.Depth = 2
 	return md
 }
@@ -58,66 +57,29 @@ func (md *Model) SetDicts(base, user Dict) {
 	md.Dict = base
 	md.UserDict = user
 	maps.Copy(md.Dict, md.UserDict)
-	md.Ignore = make(Dict)
+	md.addSuggestionsForWords(md.Dict.List())
 }
 
-// Calculate the Levenshtein distance between two strings
-func Levenshtein(a, b *string) int {
-	la := len(*a)
-	lb := len(*b)
-	d := make([]int, la+1)
-	var lastdiag, olddiag, temp int
-
-	for i := 1; i <= la; i++ {
-		d[i] = i
-	}
-	for i := 1; i <= lb; i++ {
-		d[0] = i
-		lastdiag = i - 1
-		for j := 1; j <= la; j++ {
-			olddiag = d[j]
-			min := d[j] + 1
-			if (d[j-1] + 1) < min {
-				min = d[j-1] + 1
-			}
-			if (*a)[j-1] == (*b)[i-1] {
-				temp = 0
-			} else {
-				temp = 1
-			}
-			if (lastdiag + temp) < min {
-				min = lastdiag + temp
-			}
-			d[j] = min
-			lastdiag = olddiag
-		}
-	}
-	return d[la]
-}
-
-// Add an array of words to
-func (md *Model) AddWords(terms []string) {
+// addSuggestionsForWords
+func (md *Model) addSuggestionsForWords(terms []string) {
 	md.Lock()
-	st := time.Now()
+	// st := time.Now()
 	for _, term := range terms {
-		md.trainWord(term)
+		md.createSuggestKeys(term)
 	}
-	fmt.Println("train took:", time.Since(st)) // about 500 msec for 32k words, 5 sec for 235k
+	// fmt.Println("train took:", time.Since(st)) // about 500 msec for 32k words, 5 sec for 235k
 	md.Unlock()
 }
 
-// TrainWord adds word to model.
-func (md *Model) TrainWord(term string) {
+// AddWord adds a new word to user dictionary,
+// and generates new suggestions for it
+func (md *Model) AddWord(term string) {
 	md.Lock()
-	md.trainWord(term)
-	md.Unlock()
-}
-
-// trainWord implements training one word
-func (md *Model) trainWord(term string) {
+	defer md.Unlock()
 	if md.Dict.Exists(term) {
 		return
 	}
+	md.UserDict.Add(term)
 	md.Dict.Add(term)
 	md.createSuggestKeys(term)
 }
@@ -285,4 +247,38 @@ func (md *Model) Suggestions(input string, n int) []string {
 	suggestions := md.suggestPotential(input)
 	md.RUnlock()
 	return suggestions
+}
+
+// Calculate the Levenshtein distance between two strings
+func Levenshtein(a, b *string) int {
+	la := len(*a)
+	lb := len(*b)
+	d := make([]int, la+1)
+	var lastdiag, olddiag, temp int
+
+	for i := 1; i <= la; i++ {
+		d[i] = i
+	}
+	for i := 1; i <= lb; i++ {
+		d[0] = i
+		lastdiag = i - 1
+		for j := 1; j <= la; j++ {
+			olddiag = d[j]
+			min := d[j] + 1
+			if (d[j-1] + 1) < min {
+				min = d[j-1] + 1
+			}
+			if (*a)[j-1] == (*b)[i-1] {
+				temp = 0
+			} else {
+				temp = 1
+			}
+			if (lastdiag + temp) < min {
+				min = lastdiag + temp
+			}
+			d[j] = min
+			lastdiag = olddiag
+		}
+	}
+	return d[la]
 }

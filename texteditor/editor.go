@@ -289,6 +289,7 @@ func (ed *Editor) EditDone() {
 	}
 	ed.ClearSelected()
 	ed.ClearCursor()
+	ed.Send(events.Change)
 }
 
 // ReMarkup triggers a complete re-markup of the entire text --
