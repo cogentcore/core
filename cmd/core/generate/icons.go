@@ -20,15 +20,16 @@ import (
 
 // iconData contains the data for an icon
 type iconData struct {
-	Dir   string // Dir is the directory in which the icon is contained
-	Snake string // Snake is the snake_case name of the icon
-	Camel string // Camel is the CamelCase name of the icon
+	Dir          string // Dir is the directory in which the icon is contained
+	Snake        string // Snake is the snake_case name of the icon
+	Camel        string // Camel is the CamelCase name of the icon
+	IconsPackage string // IconsPackage is "icons." or ""
 }
 
 var iconTmpl = template.Must(template.New("icon").Parse(
 	`
-	//go:embed {{.Dir}}/{{.Snake}}.svg
-	{{.Camel}} Icon`,
+	//go:embed {{.Dir}}{{.Snake}}.svg
+	{{.Camel}} {{.IconsPackage}}Icon`,
 ))
 
 // Icons does any necessary generation for icons.
@@ -47,7 +48,7 @@ func Icons(c *config.Config) error {
 var (`)
 
 	fs.WalkDir(os.DirFS(c.Generate.Icons), ".", func(path string, d fs.DirEntry, err error) error {
-		if d.IsDir() {
+		if d.IsDir() || filepath.Ext(path) != ".svg" {
 			return nil
 		}
 		name := strings.TrimSuffix(path, ".svg")
@@ -61,9 +62,15 @@ var (`)
 			camel = "X" + camel
 		}
 		data := iconData{
-			Dir:   c.Generate.Icons,
 			Snake: name,
 			Camel: camel,
+		}
+		data.Dir = c.Generate.Icons + "/"
+		if data.Dir == "./" {
+			data.Dir = ""
+		}
+		if !strings.HasSuffix(wd, filepath.Join("core", "icons")) {
+			data.IconsPackage = "icons."
 		}
 		return iconTmpl.Execute(b, data)
 	})
