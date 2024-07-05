@@ -152,12 +152,10 @@ type DiffEditor struct {
 
 func (dv *DiffEditor) Init() {
 	dv.Frame.Init()
-	dv.BufA = NewBuffer().SetFilename(dv.FileA)
-	dv.BufB = NewBuffer().SetFilename(dv.FileB)
+	dv.BufA = NewBuffer()
+	dv.BufB = NewBuffer()
 	dv.BufA.Options.LineNumbers = true
-	dv.BufA.Stat() // update markup
 	dv.BufB.Options.LineNumbers = true
-	dv.BufB.Stat() // update markup
 
 	dv.Styler(func(s *styles.Style) {
 		s.Grow.Set(1, 1)
@@ -181,6 +179,15 @@ func (dv *DiffEditor) Init() {
 	}
 	f("text-a", dv.BufA)
 	f("text-b", dv.BufB)
+}
+
+// SetFilenames sets the filenames and updates markup accordingly.
+// Called in DiffStrings
+func (dv *DiffEditor) SetFilenames() {
+	dv.BufA.SetFilename(dv.FileA)
+	dv.BufB.SetFilename(dv.FileB)
+	dv.BufA.Stat()
+	dv.BufB.Stat()
 }
 
 // SyncViews synchronizes the text view scrolling and cursor positions
@@ -306,6 +313,7 @@ func (dv *DiffEditor) SaveFileB(fname core.Filename) { //types:add
 // DiffStrings computes differences between two lines-of-strings and displays in
 // DiffEditor.
 func (dv *DiffEditor) DiffStrings(astr, bstr []string) {
+	dv.SetFilenames()
 	dv.Diffs.SetStringLines(astr, bstr)
 
 	dv.BufA.LineColors = nil
