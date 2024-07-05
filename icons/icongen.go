@@ -1461,6 +1461,8 @@ var (
 	CoffeeFill Icon
 	//go:embed svg/coffee.svg
 	Coffee Icon
+	//go:embed svg/cogent-core.svg
+	CogentCore Icon
 	//go:embed svg/cognition-fill.svg
 	CognitionFill Icon
 	//go:embed svg/cognition.svg
