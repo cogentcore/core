@@ -383,7 +383,6 @@ func (tr *Tree) Init() {
 		if tr.HasChildren() {
 			tr.ToggleClose()
 		}
-		// tr.This.(Treer).OnDoubleClick(e)
 	})
 	parts.On(events.DragStart, func(e events.Event) {
 		tri.DragStart(e)
@@ -518,8 +517,8 @@ func (tr *Tree) Style() {
 	if !tr.HasChildren() {
 		tr.SetClosed(true)
 	}
-	tr.Indent.ToDots(&tr.Styles.UnitContext)
 	tr.WidgetBase.Style()
+	tr.Indent.ToDots(&tr.Styles.UnitContext)
 }
 
 func (tr *Tree) SetBranchState() {
@@ -1122,12 +1121,6 @@ func (tr *Tree) Close() {
 // The base version does nothing.
 func (tr *Tree) OnOpen() {}
 
-func (tr *Tree) OnDoubleClick(e events.Event) {
-	if tr.HasChildren() {
-		tr.ToggleClose()
-	}
-}
-
 // CanOpen returns true if the node is able to open.
 // By default it checks HasChildren(), but could check other properties
 // to perform lazy building of the tree.
@@ -1238,9 +1231,9 @@ func (tr *Tree) ContextMenu(m *Scene) {
 	NewFuncButton(m).SetFunc(tri.DeleteNode).SetText("Delete").SetIcon(icons.Delete).
 		SetEnabled(tr.HasSelection())
 	NewSeparator(m)
-	NewFuncButton(m).SetFunc(tri.Copy).SetKey(keymap.Copy).SetEnabled(tr.HasSelection())
-	NewFuncButton(m).SetFunc(tri.Cut).SetKey(keymap.Cut).SetEnabled(tr.HasSelection())
-	paste := NewFuncButton(m).SetFunc(tri.Paste).SetKey(keymap.Paste)
+	NewFuncButton(m).SetFunc(tri.Copy).SetIcon(icons.Copy).SetKey(keymap.Copy).SetEnabled(tr.HasSelection())
+	NewFuncButton(m).SetFunc(tri.Cut).SetIcon(icons.Cut).SetKey(keymap.Cut).SetEnabled(tr.HasSelection())
+	paste := NewFuncButton(m).SetFunc(tri.Paste).SetIcon(icons.Paste).SetKey(keymap.Paste)
 	cb := tr.Scene.Events.Clipboard()
 	if cb != nil {
 		paste.SetState(cb.IsEmpty(), states.Disabled)

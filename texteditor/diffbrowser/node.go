@@ -48,6 +48,19 @@ func (tn *Node) Init() {
 	tn.ContextMenus = nil
 	tn.AddContextMenu(tn.ContextMenu)
 
+	tn.Parts.AsWidget().OnDoubleClick(func(e events.Event) {
+		if tn.HasChildren() {
+			return
+		}
+		br := tn.Browser()
+		if br == nil {
+			return
+		}
+		sels := tn.SelectedViews()
+		if sels != nil {
+			br.ViewDiff(tn)
+		}
+	})
 	tn.Parts.Styler(func(s *styles.Style) {
 		s.Gap.X.Em(0.4)
 	})
@@ -65,18 +78,6 @@ func (tn *Node) Init() {
 			f("icon-indeterminate")
 		})
 	})
-}
-
-func (tn *Node) OnDoubleClick(e events.Event) {
-	e.SetHandled()
-	br := tn.Browser()
-	if br == nil {
-		return
-	}
-	sels := tn.SelectedViews()
-	if sels != nil {
-		br.ViewDiff(tn)
-	}
 }
 
 // Browser returns the parent browser

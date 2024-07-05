@@ -9,98 +9,28 @@ package texteditor
 
 import (
 	"image"
-	"log"
 	"log/slog"
-	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 
-	"cogentcore.org/core/base/errors"
-	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/spell"
 )
 
-// InitSpell tries to load the saved fuzzy.spell model.
-// If unsuccessful tries to create a new model from a text file used as input
+// InitSpell ensures that the spell.Spell spell checker is setup
 func InitSpell() error {
-	if spell.Initialized() {
+	if spell.Spell != nil {
 		return nil
 	}
-	err := OpenSpellModel()
-	if err != nil {
-		errors.Log(spell.OpenDefault())
-	}
-	return nil
-}
-
-// OpenSpellModel loads a saved spelling model
-func OpenSpellModel() error {
 	pdir := core.TheApp.CogentCoreDataDir()
-	openpath := filepath.Join(pdir, "spell_en_us.json")
-	return spell.Open(openpath)
-}
-
-// NewSpellModelFromText builds a NEW spelling model from text
-func NewSpellModelFromText() error {
-	bigdatapath, err := fsx.GoSrcDir("cogentcore.org/core/spell")
-	if err != nil {
-		slog.Error("getting path to corpus directory", "err", err)
-		return err
-	}
-
-	bigdatafile := filepath.Join(bigdatapath, "big.txt")
-	file, err := os.Open(bigdatafile)
-	if err != nil {
-		slog.Error("Could not open corpus file. This file is used to create the spelling model", "file", bigdatafile, "err", err)
-		return err
-	}
-
-	err = spell.Train(*file, true) // true - create a NEW spelling model
-	if err != nil {
-		slog.Error("Failed building model from corpus file", "err", err)
-		return err
-	}
-
-	SaveSpellModel()
-
+	openpath := filepath.Join(pdir, "user_dict_en_us")
+	spell.Spell = spell.NewSpell(openpath)
 	return nil
 }
 
-// AddToSpellModel trains on additional text - extends model
-func AddToSpellModel(filepath string) error {
-	InitSpell() // make sure model is initialized
-	file, err := os.Open(filepath)
-	if err != nil {
-		log.Printf("Could not open text file selected for training: %v.\n", err)
-		return err
-	}
-
-	err = spell.Train(*file, false) // false - append rather than create new
-	if err != nil {
-		log.Printf("Failed appending to spell model: %v.\n", err)
-		return err
-	}
-	return nil
-}
-
-// SaveSpellModel saves the spelling model which includes the data and parameters
-func SaveSpellModel() error {
-	pdir := core.TheApp.CogentCoreDataDir()
-	path := filepath.Join(pdir, "spell_en_us.json")
-	err := spell.Save(path)
-	if err != nil {
-		log.Printf("Could not save spelling model to file: %v.\n", err)
-	}
-	return err
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// Spell
-
-// Spell
+// Spell has all the texteditor spell check state
 type Spell struct { //types:add -setters
 	// line number in source that spelling is operating on, if relevant
 	SrcLn int
@@ -127,31 +57,19 @@ type Spell struct { //types:add -setters
 	Stage *core.Stage
 
 	ShowMu sync.Mutex `set:"-"`
-
-	// the scene where the current popup menu is presented
-	// Sc *Scene ` set:"-"`
 }
-
-// SpellSignals are signals that are sent by Spell
-type SpellSignals int32 //enums:enum -trim-prefix Spell
-
-const (
-	// SpellSelect means the user chose one of the possible corrections
-	SpellSelect SpellSignals = iota
-
-	// SpellIgnore signals the user chose ignore so clear the tag
-	SpellIgnore
-)
 
 // NewSpell returns a new [Spell]
 func NewSpell() *Spell {
+	InitSpell()
 	return &Spell{}
 }
 
-// CheckWord checks the model to determine if the word is known.
-// automatically checks the Ignore list first.
+// CheckWord checks the model to determine if the word is known,
+// bool is true if known, false otherwise. If not known,
+// returns suggestions for close matching words.
 func (sp *Spell) CheckWord(word string) ([]string, bool) {
-	return spell.CheckWord(word)
+	return spell.Spell.CheckWord(word)
 }
 
 // SetWord sets the word to spell and other associated info
@@ -246,7 +164,7 @@ func (sp *Spell) On(etype events.Types, fun func(e events.Event)) {
 // LearnWord gets the misspelled/unknown word and passes to LearnWord
 func (sp *Spell) LearnWord() {
 	sp.LastLearned = strings.ToLower(sp.Word)
-	spell.LearnWord(sp.Word)
+	spell.Spell.AddWord(sp.Word)
 }
 
 // IsLastLearned returns true if given word was the last one learned
@@ -263,12 +181,12 @@ func (sp *Spell) UnLearnLast() {
 	}
 	lword := sp.LastLearned
 	sp.LastLearned = ""
-	spell.UnLearnWord(lword)
+	spell.Spell.DeleteWord(lword)
 }
 
 // IgnoreWord adds the word to the ignore list
 func (sp *Spell) IgnoreWord() {
-	spell.IgnoreWord(sp.Word)
+	spell.Spell.IgnoreWord(sp.Word)
 }
 
 // Cancel cancels any pending spell correction.

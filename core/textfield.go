@@ -182,7 +182,20 @@ const (
 	TextFieldOutlined
 )
 
+// Validator is an interface for types to provide a Validate method
+// that is used to validate string [Value]s using [TextField.Validator].
+type Validator interface {
+	// Validate returns an error if the value is invalid.
+	Validate() error
+}
+
 func (tf *TextField) WidgetValue() any { return &tf.Txt }
+
+func (tf *TextField) OnBind(value any) {
+	if vd, ok := value.(Validator); ok {
+		tf.Validator = vd.Validate
+	}
+}
 
 func (tf *TextField) Init() {
 	tf.Frame.Init()
@@ -329,80 +342,81 @@ func (tf *TextField) Init() {
 		tf.EditTxt = []rune(tf.Txt)
 		tf.Edited = false
 
-		if !tf.IsReadOnly() {
-			if tf.LeadingIcon.IsSet() {
-				tree.AddAt(p, "lead-icon", func(w *Button) {
-					w.SetType(ButtonAction)
-					w.Styler(func(s *styles.Style) {
-						s.Padding.Zero()
-						s.Color = colors.Scheme.OnSurfaceVariant
-						s.Margin.SetRight(units.Dp(8))
-						if tf.LeadingIconOnClick == nil {
-							s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
-							s.Cursor = cursors.None
-						}
-						// If we are responsible for a positive (non-disabled) state layer
-						// (instead of our parent), then we amplify it so that it is clear
-						// that we ourself are receiving a state layer amplifying event.
-						// Otherwise, we set our state color to that of our parent
-						// so that it does not appear as if we are getting interaction ourself;
-						// instead, we are a part of our parent and render a background color no
-						// different than them.
-						if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
-							s.StateLayer *= 3
-						} else {
-							s.StateColor = tf.Styles.Color
-						}
-					})
-					w.OnClick(func(e events.Event) {
-						if tf.LeadingIconOnClick != nil {
-							tf.LeadingIconOnClick(e)
-						}
-					})
-					w.Updater(func() {
-						w.SetIcon(tf.LeadingIcon)
-					})
+		if tf.IsReadOnly() {
+			return
+		}
+		if tf.LeadingIcon.IsSet() {
+			tree.AddAt(p, "lead-icon", func(w *Button) {
+				w.SetType(ButtonAction)
+				w.Styler(func(s *styles.Style) {
+					s.Padding.Zero()
+					s.Color = colors.Scheme.OnSurfaceVariant
+					s.Margin.SetRight(units.Dp(8))
+					if tf.LeadingIconOnClick == nil {
+						s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
+						s.Cursor = cursors.None
+					}
+					// If we are responsible for a positive (non-disabled) state layer
+					// (instead of our parent), then we amplify it so that it is clear
+					// that we ourself are receiving a state layer amplifying event.
+					// Otherwise, we set our state color to that of our parent
+					// so that it does not appear as if we are getting interaction ourself;
+					// instead, we are a part of our parent and render a background color no
+					// different than them.
+					if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
+						s.StateLayer *= 3
+					} else {
+						s.StateColor = tf.Styles.Color
+					}
 				})
-			}
-			if tf.TrailingIcon.IsSet() {
-				tree.AddAt(p, "trail-icon-stretch", func(w *Stretch) {
-					w.Styler(func(s *styles.Style) {
-						s.Grow.Set(1, 0)
-					})
+				w.OnClick(func(e events.Event) {
+					if tf.LeadingIconOnClick != nil {
+						tf.LeadingIconOnClick(e)
+					}
 				})
-				tree.AddAt(p, "trail-icon", func(w *Button) {
-					w.SetType(ButtonAction)
-					w.Styler(func(s *styles.Style) {
-						s.Padding.Zero()
-						s.Color = colors.Scheme.OnSurfaceVariant
-						if tf.Error != nil {
-							s.Color = colors.Scheme.Error.Base
-						}
-						s.Margin.SetLeft(units.Dp(8))
-						if tf.TrailingIconOnClick == nil || tf.Error != nil {
-							s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
-							s.Cursor = cursors.None
-							// need to clear state in case it was set when there
-							// was no error
-							s.State = 0
-						}
-						// same reasoning as for leading icon
-						if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
-							s.StateLayer *= 3
-						} else {
-							s.StateColor = tf.Styles.Color
-						}
-					})
-					w.OnClick(func(e events.Event) {
-						if tf.TrailingIconOnClick != nil {
-							tf.TrailingIconOnClick(e)
-						}
-					})
-					w.Updater(func() {
-						w.SetIcon(tf.TrailingIcon)
-					})
+				w.Updater(func() {
+					w.SetIcon(tf.LeadingIcon)
 				})
-			}
+			})
+		}
+		if tf.TrailingIcon.IsSet() {
+			tree.AddAt(p, "trail-icon-stretch", func(w *Stretch) {
+				w.Styler(func(s *styles.Style) {
+					s.Grow.Set(1, 0)
+				})
+			})
+			tree.AddAt(p, "trail-icon", func(w *Button) {
+				w.SetType(ButtonAction)
+				w.Styler(func(s *styles.Style) {
+					s.Padding.Zero()
+					s.Color = colors.Scheme.OnSurfaceVariant
+					if tf.Error != nil {
+						s.Color = colors.Scheme.Error.Base
+					}
+					s.Margin.SetLeft(units.Dp(8))
+					if tf.TrailingIconOnClick == nil || tf.Error != nil {
+						s.SetAbilities(false, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
+						s.Cursor = cursors.None
+						// need to clear state in case it was set when there
+						// was no error
+						s.State = 0
+					}
+					// same reasoning as for leading icon
+					if s.Is(states.Hovered) || s.Is(states.Focused) || s.Is(states.Active) {
+						s.StateLayer *= 3
+					} else {
+						s.StateColor = tf.Styles.Color
+					}
+				})
+				w.OnClick(func(e events.Event) {
+					if tf.TrailingIconOnClick != nil {
+						tf.TrailingIconOnClick(e)
+					}
+				})
+				w.Updater(func() {
+					w.SetIcon(tf.TrailingIcon)
+				})
+			})
 		}
 	})
 }
@@ -976,8 +990,8 @@ func (tf *TextField) SelectUpdate() {
 	}
 }
 
-// Cut cuts any selected text and adds it to the clipboard
-func (tf *TextField) Cut() {
+// Cut cuts any selected text and adds it to the clipboard.
+func (tf *TextField) Cut() { //types:add
 	if tf.NoEcho {
 		return
 	}
@@ -1013,7 +1027,7 @@ func (tf *TextField) DeleteSelection() string {
 }
 
 // Copy copies any selected text to the clipboard.
-func (tf *TextField) Copy() {
+func (tf *TextField) Copy() { //types:add
 	if tf.NoEcho {
 		return
 	}
@@ -1026,10 +1040,9 @@ func (tf *TextField) Copy() {
 	tf.Clipboard().Write(md)
 }
 
-// Paste inserts text from the clipboard at current cursor position -- if
+// Paste inserts text from the clipboard at current cursor position; if
 // cursor is within a current selection, that selection is replaced.
-// Satisfies Clipper interface -- can be extended in subtypes.
-func (tf *TextField) Paste() {
+func (tf *TextField) Paste() { //types:add
 	data := tf.Clipboard().Read([]string{mimedata.TextPlain})
 	if data != nil {
 		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
@@ -1039,7 +1052,7 @@ func (tf *TextField) Paste() {
 	}
 }
 
-// InsertAtCursor inserts given text at current cursor position
+// InsertAtCursor inserts the given text at current cursor position.
 func (tf *TextField) InsertAtCursor(str string) {
 	if tf.HasSelection() {
 		tf.Cut()
@@ -1057,10 +1070,10 @@ func (tf *TextField) InsertAtCursor(str string) {
 }
 
 func (tf *TextField) ContextMenu(m *Scene) {
-	NewFuncButton(m).SetFunc(tf.Copy).SetKey(keymap.Copy).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled)
+	NewFuncButton(m).SetFunc(tf.Copy).SetIcon(icons.Copy).SetKey(keymap.Copy).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled)
 	if !tf.IsReadOnly() {
-		NewFuncButton(m).SetFunc(tf.Cut).SetKey(keymap.Cut).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled)
-		paste := NewFuncButton(m).SetFunc(tf.Paste).SetKey(keymap.Paste)
+		NewFuncButton(m).SetFunc(tf.Cut).SetIcon(icons.Cut).SetKey(keymap.Cut).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled)
+		paste := NewFuncButton(m).SetFunc(tf.Paste).SetIcon(icons.Paste).SetKey(keymap.Paste)
 		cb := tf.Scene.Events.Clipboard()
 		if cb != nil {
 			paste.SetState(cb.IsEmpty(), states.Disabled)

@@ -417,7 +417,7 @@ type DeviceSettingsData struct { //types:add
 
 	// The amount of time to wait before initiating a drag (drag and drop) event
 	// (as opposed to a basic press or slide event)
-	DragStartTime time.Duration `default:"250ms" min:"5ms" max:"1s" step:"5ms"`
+	DragStartTime time.Duration `default:"150ms" min:"5ms" max:"1s" step:"5ms"`
 
 	// The amount of time to wait between each repeat click event,
 	// when the mouse is pressed down.  The first click is 8x this.

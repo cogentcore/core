@@ -467,7 +467,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewIcon(parent).SetIcon(icons.Home)
 	},
 	"widgets/basic/icons-2": func(parent core.Widget) {
-		core.NewButton(parent).SetIcon(icons.Home.Fill())
+		core.NewButton(parent).SetIcon(icons.HomeFill)
 	},
 	"widgets/basic/text-0": func(parent core.Widget) {
 		core.NewText(parent).SetText("Hello, world!")
@@ -596,7 +596,7 @@ var PagesExamples = map[string]func(parent core.Widget){
 		core.NewSlider(parent).SetStep(0.2).SetEnforceStep(true)
 	},
 	"widgets/inputs/sliders-5": func(parent core.Widget) {
-		core.NewSlider(parent).SetIcon(icons.DeployedCode.Fill())
+		core.NewSlider(parent).SetIcon(icons.DeployedCodeFill)
 	},
 	"widgets/inputs/sliders-6": func(parent core.Widget) {
 		sr := core.NewSlider(parent)

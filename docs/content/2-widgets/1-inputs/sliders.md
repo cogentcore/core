@@ -35,7 +35,7 @@ core.NewSlider(parent).SetStep(0.2).SetEnforceStep(true)
 You can use an icon for the thumb of the slider:
 
 ```Go
-core.NewSlider(parent).SetIcon(icons.DeployedCode.Fill())
+core.NewSlider(parent).SetIcon(icons.DeployedCodeFill)
 ```
 
 You can detect when the user changes the value of the slider and then stops:

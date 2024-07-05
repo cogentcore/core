@@ -232,17 +232,10 @@ func (fn *Node) DiffVCS(rev_a, rev_b string) error {
 	return err
 }
 
-// LogVCSSel shows the VCS log of commits for selected files, optionally with a
-// since date qualifier: If since is non-empty, it should be
-// a date-like expression that the VCS will understand, such as
-// 1/1/2020, yesterday, last year, etc.  SVN only understands a
-// number as a maximum number of items to return.
-// If allFiles is true, then the log will show revisions for all files, not just
-// this one.
-// Returns the Log and also shows it in a VCSLog which supports further actions.
-func (fn *Node) LogVCSSel(allFiles bool, since string) { //types:add
+// LogVCSSel shows the VCS log of commits for selected files.
+func (fn *Node) LogVCSSel() { //types:add
 	fn.SelectedFunc(func(sn *Node) {
-		sn.LogVCS(allFiles, since)
+		sn.LogVCS(false, "")
 	})
 }
 

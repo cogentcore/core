@@ -2104,7 +2104,7 @@ func (p *printer) funcDecl(d *ast.FuncDecl) {
 	// FUNC is emitted).
 	startCol := p.out.Column - len("func ")
 	if d.Recv != nil {
-		for ex := range p.ExcludeFuns {
+		for ex := range p.ExcludeFunctions {
 			if d.Name.Name == ex {
 				return
 			}

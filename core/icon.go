@@ -7,6 +7,7 @@ package core
 import (
 	"image"
 	"log/slog"
+	"strings"
 
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/icons"
@@ -62,7 +63,7 @@ func (ic *Icon) SetIcon(icon icons.Icon) *Icon {
 // and returning true if a new icon was actually set.
 // Does nothing and returns false if Icon is already equal to the given icon.
 func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
-	if icon.IsNil() {
+	if !icon.IsSet() {
 		ic.Icon = icon
 		ic.SVG.DeleteAll()
 		return false, nil
@@ -71,9 +72,9 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 		// fmt.Println("icon already set:", icon)
 		return false, nil
 	}
-	fnm := icon.Filename()
+	icons.Used[icon] = true
 	ic.SVG.Config(2, 2)
-	err := ic.SVG.OpenFS(icons.Icons, fnm)
+	err := ic.SVG.ReadXML(strings.NewReader(string(icon)))
 	if err != nil {
 		ic.UpdateWidget()
 		return false, err

@@ -52,7 +52,7 @@ func (fn *Node) VCSContextMenu(m *core.Scene) {
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
-	core.NewFuncButton(m).SetFunc(fn.BlameVCSSel).SetText(VCSLabelFunc(fn, "Blame VC S")).SetIcon(icons.CreditScore).
+	core.NewFuncButton(m).SetFunc(fn.BlameVCSSel).SetText(VCSLabelFunc(fn, "Blame VCS")).SetIcon(icons.CreditScore).
 		Styler(func(s *styles.Style) {
 			s.SetState(!fn.HasSelection() || fn.Info.VCS == vcs.Untracked, states.Disabled)
 		})
@@ -88,9 +88,9 @@ func (fn *Node) ContextMenu(m *core.Scene) {
 	core.NewFuncButton(m).SetFunc(fn.RemoveFromExterns).SetIcon(icons.Delete).SetEnabled(fn.HasSelection())
 
 	core.NewSeparator(m)
-	core.NewFuncButton(m).SetFunc(fn.Copy).SetKey(keymap.Copy).SetEnabled(fn.HasSelection())
-	core.NewFuncButton(m).SetFunc(fn.Cut).SetKey(keymap.Cut).SetEnabled(fn.HasSelection())
-	paste := core.NewFuncButton(m).SetFunc(fn.Paste).SetKey(keymap.Paste).SetEnabled(fn.HasSelection())
+	core.NewFuncButton(m).SetFunc(fn.Copy).SetIcon(icons.Copy).SetKey(keymap.Copy).SetEnabled(fn.HasSelection())
+	core.NewFuncButton(m).SetFunc(fn.Cut).SetIcon(icons.Cut).SetKey(keymap.Cut).SetEnabled(fn.HasSelection())
+	paste := core.NewFuncButton(m).SetFunc(fn.Paste).SetIcon(icons.Paste).SetKey(keymap.Paste).SetEnabled(fn.HasSelection())
 	cb := fn.Events().Clipboard()
 	if cb != nil {
 		paste.SetState(cb.IsEmpty(), states.Disabled)

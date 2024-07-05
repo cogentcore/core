@@ -24,7 +24,7 @@ func CheckLexLine(src []rune, tags lexer.Line) lexer.Line {
 		if len(lwrd) <= 2 {
 			continue
 		}
-		_, known := CheckWord(lwrd)
+		_, known := Spell.CheckWord(lwrd)
 		if !known {
 			t.Token.Token = token.TextSpellErr
 			widx := strings.Index(wrd, lwrd)

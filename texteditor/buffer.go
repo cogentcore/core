@@ -436,11 +436,8 @@ func (tb *Buffer) NewBuffer(nlines int) {
 func (tb *Buffer) Stat() error {
 	tb.fileModOK = false
 	err := tb.Info.InitFile(string(tb.Filename))
-	if err != nil {
-		return err
-	}
-	tb.ConfigKnown()
-	return nil
+	tb.ConfigKnown() // may have gotten file type info even if not existing
+	return err
 }
 
 // ConfigKnown configures options based on the supported language info in parse.

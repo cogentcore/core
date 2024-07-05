@@ -5,13 +5,10 @@
 package spell
 
 import (
-	"bufio"
-	"bytes"
 	"embed"
 	"log"
 	"log/slog"
 	"os"
-	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -19,30 +16,45 @@ import (
 	"cogentcore.org/core/parse/lexer"
 )
 
-//go:embed spell_en_us.json
-var content embed.FS
+//go:embed dict_en_us
+var embedDict embed.FS
 
-// SaveAfterLearnIntervalSecs is number of seconds since file has been opened / saved
+// SaveAfterLearnIntervalSecs is number of seconds since
+// dict file has been opened / saved
 // above which model is saved after learning.
 const SaveAfterLearnIntervalSecs = 20
 
-var (
-	inited    bool
-	spellMu   sync.RWMutex // we need our own mutex in case of loading a new model
-	model     *Model
-	openTime  time.Time // ModTime() on file
-	learnTime time.Time // last time when a Learn function was called -- last mod to model -- zero if not mod
-	openFPath string
-	Ignore    = map[string]struct{}{}
-)
+// Spell is the global shared spell
+var Spell *SpellData
 
-// Initialized returns true if the model has been loaded or created anew
-func Initialized() bool {
-	return inited
+type SpellData struct {
+	// UserFile is path to user's dictionary where learned words go
+	UserFile string
+
+	model     *Model
+	openTime  time.Time    // ModTime() on file
+	learnTime time.Time    // last time when a Learn function was called 	-- last mod to model -- zero if not mod
+	mu        sync.RWMutex // we need our own mutex in case of loading a new model
 }
 
-// ModTime returns the modification time of given file path
-func ModTime(path string) (time.Time, error) {
+// NewSpell opens spell data with given user dictionary file
+func NewSpell(userFile string) *SpellData {
+	d, err := OpenDictFS(embedDict, "dict_en_us")
+	if err != nil {
+		slog.Error(err.Error())
+		return nil
+	}
+	sp := &SpellData{UserFile: userFile}
+	sp.ResetLearnTime()
+	sp.model = NewModel()
+	sp.openTime = time.Date(2024, 06, 30, 00, 00, 00, 0, time.UTC)
+	sp.OpenUser()
+	sp.model.SetDicts(d, sp.model.UserDict)
+	return sp
+}
+
+// modTime returns the modification time of given file path
+func modTime(path string) (time.Time, error) {
 	info, err := os.Stat(path)
 	if err != nil {
 		return time.Time{}, err
@@ -50,254 +62,166 @@ func ModTime(path string) (time.Time, error) {
 	return info.ModTime(), nil
 }
 
-func ResetLearnTime() {
-	learnTime = time.Time{}
+func (sp *SpellData) ResetLearnTime() {
+	sp.learnTime = time.Time{}
 }
 
-// OpenFromDict opens dictionary of words and creates
-// suggestions based on that.
-func OpenFromDict(path string) error {
-	spellMu.Lock()
-	defer spellMu.Unlock()
-	d, err := OpenDict(path)
+// OpenUser opens user dictionary of words
+func (sp *SpellData) OpenUser() error {
+	sp.mu.Lock()
+	defer sp.mu.Unlock()
+	d, err := OpenDict(sp.UserFile)
 	if err != nil {
-		slog.Error(err.Error())
+		// slog.Error(err.Error())
 		return err
 	}
-	// todo: do in background
-	model = NewModel()
-	model.Threshold = 1
-	model.Train(d.List())
-	return nil
-}
-
-// Open loads the saved model stored in json format
-func Open(path string) error {
-	spellMu.Lock()
-	defer spellMu.Unlock()
-
-	ResetLearnTime()
-	var err error
-	openTime, err = ModTime(path)
-	if err != nil {
-		openFPath = path // save for later, so it will save when learning
-		openTime = time.Now()
-		return err
-	}
-	model, err = Load(path)
-	if err == nil {
-		openFPath = path
-		inited = true
-	}
+	// note: does not have suggestions for new words
+	// future impl will not precompile suggs so it is not worth it
+	sp.openTime, err = modTime(sp.UserFile)
+	sp.model.UserDict = d
 	return err
 }
 
-// OpenCheck checks if the current file has been modified since last open time
-// and re-opens it if so -- call this prior to checking.
-func OpenCheck() error {
-	if !inited || openFPath == "" {
+// OpenUserCheck checks if the current user dict file has been modified
+// since last open time and re-opens it if so.
+func (sp *SpellData) OpenUserCheck() error {
+	if sp.UserFile == "" {
 		return nil
 	}
-	spellMu.Lock()
-	defer spellMu.Unlock()
-	tm, err := ModTime(openFPath)
+	sp.mu.Lock()
+	defer sp.mu.Unlock()
+	tm, err := modTime(sp.UserFile)
 	if err != nil {
 		return err
 	}
-	if tm.After(openTime) {
-		model, err = Load(openFPath)
-		openTime = tm
-		ResetLearnTime()
+	if tm.After(sp.openTime) {
+		sp.OpenUser()
+		sp.openTime = tm
 		// log.Printf("opened newer spell file: %s\n", openTime.String())
 	}
 	return err
 }
 
-// OpenDefault loads the default spelling file.
-// TODO: need different languages obviously!
-func OpenDefault() error {
-	fn := "spell_en_us.json"
-	return OpenEmbed(fn)
-}
-
-// OpenEmbed loads json-formatted model from embedded data
-func OpenEmbed(fname string) error {
-	spellMu.Lock()
-	defer spellMu.Unlock()
-
-	ResetLearnTime()
-	defb, err := content.ReadFile(fname)
-	if err != nil {
-		return err
-	}
-	openTime = time.Date(2022, 02, 10, 00, 00, 00, 0, time.UTC)
-	inited = true
-	model, err = FromReader(bytes.NewBuffer(defb))
-	return err
-}
-
-// Save saves the spelling model which includes the data and parameters
-// note: this will overwrite any existing file -- be sure to have opened
+// SaveUser saves the user dictionary
+// note: this will overwrite any existing file; be sure to have opened
 // the current file before making any changes.
-func Save(filename string) error {
-	spellMu.RLock()
-	defer spellMu.RUnlock()
+func (sp *SpellData) SaveUser() error {
+	sp.mu.RLock()
+	defer sp.mu.RUnlock()
 
-	if model == nil {
+	if sp.model == nil {
 		return nil
 	}
-	ResetLearnTime()
-	err := model.Save(filename)
+	sp.ResetLearnTime()
+	err := sp.model.UserDict.Save(sp.UserFile)
 	if err == nil {
-		openTime, err = ModTime(filename)
+		sp.openTime, err = modTime(sp.UserFile)
 	} else {
-		log.Printf("spell.Spell: Error saving file %q: %v\n", filename, err)
+		log.Printf("spell.Spell: Error saving file %q: %v\n", sp.UserFile, err)
 	}
 	return err
 }
 
-// SaveIfLearn saves the spelling model to file path that was used in last
-// Open command, if learning has occurred since last save / open.
+// SaveUserIfLearn saves the user dictionary
+// if learning has occurred since last save / open.
 // If no changes also checks if file has been modified and opens it if so.
-func SaveIfLearn() error {
-	if !inited || openFPath == "" {
+func (sp *SpellData) SaveUserIfLearn() error {
+	if sp == nil {
 		return nil
 	}
-	if learnTime.IsZero() {
-		return OpenCheck()
+	if sp.UserFile == "" {
+		return nil
 	}
-	go Save(openFPath)
+	if sp.learnTime.IsZero() {
+		return sp.OpenUserCheck()
+	}
+	sp.SaveUser()
 	return nil
 }
 
-// Train trains the model based on a text file
-func Train(file os.File, new bool) (err error) {
-	spellMu.Lock()
-	defer spellMu.Unlock()
-
-	var out []string
-
-	scanner := bufio.NewScanner(&file)
-	// Count the words.
-	count := 0
-	exp, _ := regexp.Compile("[a-zA-Z]+")
-	for scanner.Scan() {
-		words := exp.FindAll(scanner.Bytes(), -1)
-		for _, word := range words {
-			if len(word) > 1 {
-				out = append(out, strings.ToLower(string(word)))
-				count++
-			}
-		}
-	}
-
-	if err = scanner.Err(); err != nil {
-		log.Println(err)
-		return err
-	}
-	if new {
-		model = NewModel()
-	}
-	model.Train(out)
-	inited = true
-	openTime = time.Now()
-	return err
-}
-
-// CheckWord checks a single word and returns suggestions if word is unknown
-func CheckWord(word string) ([]string, bool) {
-	if model == nil {
+// CheckWord checks a single word and returns suggestions if word is unknown.
+// bool is true if word is in the dictionary, false otherwise.
+func (sp *SpellData) CheckWord(word string) ([]string, bool) {
+	if sp.model == nil {
 		log.Println("spell.CheckWord: programmer error -- Spelling not initialized!")
-		OpenDefault() // backup
+		return nil, false
 	}
-	known := false
 	w := lexer.FirstWordApostrophe(word) // only lookup words
 	orig := w
 	w = strings.ToLower(w)
 
-	spellMu.RLock()
-	defer spellMu.RUnlock()
-	ignore := CheckIgnore(w)
-	if ignore {
+	sp.mu.RLock()
+	defer sp.mu.RUnlock()
+	if sp.model.Ignore.Exists(w) {
 		return nil, true
 	}
-	suggests := model.SpellCheckSuggestions(w, 10)
+	suggests := sp.model.Suggestions(w, 10)
 	if suggests == nil { // no sug and not known
 		return nil, false
+	}
+	if len(suggests) == 1 && suggests[0] == w {
+		return nil, true
 	}
 	for i, s := range suggests {
 		suggests[i] = lexer.MatchCase(orig, s)
 	}
-	if len(suggests) > 0 && suggests[0] == orig {
-		known = true
-	}
-	return suggests, known
+	return suggests, false
 }
 
-// LearnWord adds a single word to the corpus: this is deterministic
-// and we set the threshold to 1 to make it learn it immediately.
-func LearnWord(word string) {
-	if learnTime.IsZero() {
-		OpenCheck() // be sure we have latest before learning!
+// AddWord adds given word to the User dictionary
+func (sp *SpellData) AddWord(word string) {
+	if sp.learnTime.IsZero() {
+		sp.OpenUserCheck() // be sure we have latest before learning!
 	}
-
-	spellMu.Lock()
+	sp.mu.Lock()
 	lword := strings.ToLower(word)
-	mthr := model.Threshold
-	model.Threshold = 1
-	model.TrainWord(lword)
-	model.Threshold = mthr
-	learnTime = time.Now()
-	sint := learnTime.Sub(openTime) / time.Second
-	spellMu.Unlock()
+	sp.model.AddWord(lword)
+	sp.learnTime = time.Now()
+	sint := sp.learnTime.Sub(sp.openTime) / time.Second
+	sp.mu.Unlock()
 
-	if openFPath != "" && sint > SaveAfterLearnIntervalSecs {
-		go Save(openFPath)
+	if sp.UserFile != "" && sint > SaveAfterLearnIntervalSecs {
+		sp.SaveUser()
 		// log.Printf("spell.LearnWord: saved updated model after %d seconds\n", sint)
 	}
 }
 
-// UnLearnWord removes word from dictionary -- in case accidentally added
-func UnLearnWord(word string) {
-	if learnTime.IsZero() {
-		OpenCheck() // be sure we have latest before learning!
+// DeleteWord removes word from dictionary, in case accidentally added
+func (sp *SpellData) DeleteWord(word string) {
+	if sp.learnTime.IsZero() {
+		sp.OpenUserCheck() // be sure we have latest before learning!
 	}
 
-	spellMu.Lock()
+	sp.mu.Lock()
 	lword := strings.ToLower(word)
-	model.Delete(lword)
-	learnTime = time.Now()
-	sint := learnTime.Sub(openTime) / time.Second
-	spellMu.Unlock()
+	sp.model.Delete(lword)
+	sp.learnTime = time.Now()
+	sint := sp.learnTime.Sub(sp.openTime) / time.Second
+	sp.mu.Unlock()
 
-	if openFPath != "" && sint > SaveAfterLearnIntervalSecs {
-		go Save(openFPath)
+	if sp.UserFile != "" && sint > SaveAfterLearnIntervalSecs {
+		sp.SaveUser()
 	}
-	log.Printf("spell.UnLearnLast: unlearned: %s\n", lword)
+	log.Printf("spell.DeleteWord: %s\n", lword)
 }
 
+/*
 // Complete finds possible completions based on the prefix s
-func Complete(s string) []string {
+func (sp *SpellData) Complete(s string) []string {
 	if model == nil {
 		log.Println("spell.Complete: programmer error -- Spelling not initialized!")
 		OpenDefault() // backup
 	}
-	spellMu.RLock()
-	defer spellMu.RUnlock()
+	sp.mu.RLock()
+	defer sp.mu.RUnlock()
 
 	result, _ := model.Autocomplete(s)
 	return result
 }
+*/
 
 // IgnoreWord adds the word to the Ignore list
-func IgnoreWord(word string) {
+func (sp *SpellData) IgnoreWord(word string) {
 	word = strings.ToLower(word)
-	Ignore[word] = struct{}{}
-}
-
-// CheckIgnore returns true if the word is found in the Ignore list
-func CheckIgnore(word string) bool {
-	word = strings.ToLower(word)
-	_, has := Ignore[word]
-	return has
+	sp.model.Ignore.Add(word)
 }

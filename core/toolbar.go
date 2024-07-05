@@ -38,6 +38,12 @@ type Toolbar struct {
 	overflowButton *Button
 }
 
+// ToolbarMaker is an interface that types can implement to make a toolbar plan.
+// It is automatically used when making [Value] dialogs.
+type ToolbarMaker interface {
+	MakeToolbar(p *tree.Plan)
+}
+
 func (tb *Toolbar) Init() {
 	tb.Frame.Init()
 	ToolbarStyles(tb)

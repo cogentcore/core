@@ -62,7 +62,6 @@ func widgets(ts *core.Tabs) {
 	inputs(wts)
 	sliders(wts)
 	dialogs(wts)
-	makeIcons(wts)
 }
 
 func text(ts *core.Tabs) {
@@ -282,43 +281,6 @@ func textEditors(ts *core.Tabs) {
 
 	errors.Log(texteditor.NewSoloEditor(sp).Buffer.OpenFS(demoFile, "demo.go"))
 	texteditor.NewSoloEditor(sp).Buffer.SetLang("svg").SetTextString(core.AppIcon)
-}
-
-func makeIcons(ts *core.Tabs) {
-	tab := ts.NewTab("Icons")
-
-	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Icons")
-	core.NewText(tab).SetText("Cogent Core provides more than 2,000 unique icons from the Material Symbols collection, allowing you to easily represent many things in a concise, visually pleasing, and language-independent way.")
-
-	core.NewButton(tab).SetText("View icons").OnClick(func(e events.Event) {
-		d := core.NewBody().AddTitle("Cogent Core Icons")
-		grid := core.NewFrame(d)
-		grid.Styler(func(s *styles.Style) {
-			s.Wrap = true
-			s.Overflow.Y = styles.OverflowAuto
-		})
-
-		ics := icons.All()
-		for _, ic := range ics {
-			sic := string(ic)
-			if strings.HasSuffix(sic, "-fill") {
-				continue
-			}
-			vb := core.NewFrame(grid)
-			vb.Styler(func(s *styles.Style) {
-				s.Direction = styles.Column
-				s.Max.X.Em(15) // constraining width exactly gives nice grid-like appearance
-				s.Min.X.Em(15)
-			})
-			core.NewIcon(vb).SetIcon(ic).Styler(func(s *styles.Style) {
-				s.Min.Set(units.Em(4))
-			})
-			core.NewText(vb).SetText(strcase.ToSentence(sic)).Styler(func(s *styles.Style) {
-				s.SetTextWrap(false)
-			})
-		}
-		d.RunFullDialog(tab)
-	})
 }
 
 func values(ts *core.Tabs) {

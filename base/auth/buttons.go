@@ -6,26 +6,18 @@ package auth
 
 import (
 	"context"
-	"embed"
 
+	"cogentcore.org/core/base/auth/cicons"
 	"cogentcore.org/core/base/fsx"
 	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
-	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
 	"github.com/coreos/go-oidc/v3/oidc"
 
 	"golang.org/x/oauth2"
 )
-
-//go:embed icons/*.svg
-var providerIcons embed.FS
-
-func init() {
-	icons.AddFS(fsx.Sub(providerIcons, "icons"))
-}
 
 // ButtonsConfig is the configuration information passed to [Buttons].
 type ButtonsConfig struct {
@@ -135,7 +127,7 @@ func Button(par core.Widget, c *ButtonsConfig, provider string, authFunc func(c 
 // to the given parent using the given configuration information.
 func GoogleButton(par core.Widget, c *ButtonsConfig) *core.Button {
 	bt := Button(par, c, "google", Google).SetType(core.ButtonOutlined).
-		SetText("Sign in with Google").SetIcon("sign-in-with-google")
+		SetText("Sign in with Google").SetIcon(cicons.SignInWithGoogle)
 	bt.Styler(func(s *styles.Style) {
 		s.Color = colors.Scheme.OnSurface
 	})

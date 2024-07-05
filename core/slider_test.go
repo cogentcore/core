@@ -86,7 +86,7 @@ func TestSliderEnforceStep(t *testing.T) {
 
 func TestSliderIcon(t *testing.T) {
 	b := NewBody()
-	NewSlider(b).SetIcon(icons.DeployedCode.Fill())
+	NewSlider(b).SetIcon(icons.DeployedCodeFill)
 	b.AssertRender(t, "slider/icon")
 }
 

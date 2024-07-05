@@ -229,6 +229,7 @@ const (
 	Uri
 	Color
 	Yaml
+	Toml
 
 	// Text is some other kind of text file
 	AnyText
@@ -262,6 +263,7 @@ const (
 	AnyModel
 	Vrml
 	X3d
+	Obj
 
 	// Audio is an audio file
 	AnyAudio

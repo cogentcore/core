@@ -122,6 +122,10 @@ type Generate struct { //types:add
 
 	// the source directory to run generate on (can be multiple through ./...)
 	Dir string `default:"." posarg:"0" required:"-" nest:"-"`
+
+	// Icons, if specified, indicates to generate an icongen.go file with
+	// icon variables for the icon svg files in the specified folder.
+	Icons string
 }
 
 func (c *Config) OnConfig(cmd string) error {

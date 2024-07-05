@@ -447,6 +447,9 @@ var StandardMimes = []MimeType{
 	{"text/x-ini-file", nil, Data, Ini},
 	{"text/uri-list", nil, Data, Uri},
 	{"application/x-color", nil, Data, Color},
+	{"text/toml", []string{".toml"}, Data, Toml},
+	{"application/toml", nil, Data, Toml},
+	{"application/yaml", []string{".yaml"}, Data, Yaml},
 
 	{"application/rdf+xml", []string{".rdf"}, Data, Unknown},
 	{"application/msaccess", []string{".mdb"}, Data, Unknown},
@@ -522,6 +525,7 @@ var StandardMimes = []MimeType{
 	{"model/x3d+xml", []string{".x3dv", ".x3d", ".x3db"}, Model, X3d},
 	{"model/x3d+vrml", nil, Model, X3d},
 	{"model/x3d+binary", nil, Model, X3d},
+	{"application/object", []string{".obj", ".mtl"}, Model, Obj},
 
 	// Audio
 	{"audio/aac", []string{".aac"}, Audio, Aac},
