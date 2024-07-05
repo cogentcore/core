@@ -126,6 +126,9 @@ func (sp *SpellData) SaveUser() error {
 // if learning has occurred since last save / open.
 // If no changes also checks if file has been modified and opens it if so.
 func (sp *SpellData) SaveUserIfLearn() error {
+	if sp == nil {
+		return nil
+	}
 	if sp.UserFile == "" {
 		return nil
 	}

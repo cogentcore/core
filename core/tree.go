@@ -517,8 +517,8 @@ func (tr *Tree) Style() {
 	if !tr.HasChildren() {
 		tr.SetClosed(true)
 	}
-	tr.Indent.ToDots(&tr.Styles.UnitContext)
 	tr.WidgetBase.Style()
+	tr.Indent.ToDots(&tr.Styles.UnitContext)
 }
 
 func (tr *Tree) SetBranchState() {
