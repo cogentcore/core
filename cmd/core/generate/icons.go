@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/template"
 	"unicode"
@@ -36,7 +37,11 @@ func Icons(c *config.Config) error {
 		return nil
 	}
 	b := &bytes.Buffer{}
-	generate.PrintHeader(b, "icons")
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	generate.PrintHeader(b, filepath.Base(wd))
 	b.WriteString(`import _ "embed"
 
 var (`)
