@@ -7,7 +7,7 @@ package icons
 
 import _ "embed"
 
-//go:generate go run gen.go
+//go:generate core generate -icons svg
 
 // Icon represents the SVG data of an icon. It can be
 // set to "" or [None] to indicate that no icon should be used.
