@@ -119,8 +119,10 @@ func (wb *WidgetBase) NeedsLayout() {
 	}
 }
 
-// NeedsRebuild returns true if the RenderContext indicates
-// a full rebuild is needed.
+// NeedsRebuild returns whether the [RenderContext] indicates
+// a full rebuild is needed. This is typically used to detect
+// when the settings have been changed, such as when the color
+// scheme or zoom is changed.
 func (wb *WidgetBase) NeedsRebuild() bool {
 	if wb.This == nil || wb.Scene == nil || wb.Scene.Stage == nil {
 		return false
