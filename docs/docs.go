@@ -50,7 +50,7 @@ func main() {
 		tree.Add(p, func(w *core.Button) {
 			w.SetText("Playground").SetIcon(icons.PlayCircle)
 			w.OnClick(func(e events.Event) {
-				pg.Context.OpenURL("playground")
+				pg.Context.OpenURL("/playground")
 			})
 		})
 	})
