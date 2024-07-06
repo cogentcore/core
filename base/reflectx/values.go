@@ -987,11 +987,8 @@ func SetRobust(to, from any) error {
 			return nil
 		}
 	}
-	if _, ok := ti.(color.Color); ok {
-		fc, err := colors.FromAny(from)
-		if err != nil {
-			return err
-		}
+
+	if fc, err := colors.FromAny(from); err == nil {
 		switch c := ti.(type) {
 		case *color.RGBA:
 			*c = fc
@@ -1001,6 +998,9 @@ func SetRobust(to, from any) error {
 			return nil
 		case SetColorer:
 			c.SetColor(fc)
+			return nil
+		case *image.Image:
+			*c = colors.Uniform(fc)
 			return nil
 		}
 	}
