@@ -36,7 +36,7 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 	errors.Log(in.Use(symbols.Symbols))
 	in.ImportUsed()
 	errors.Log1(in.Eval("parent := core.ExternalParent"))
-	oi := func() {
+	oc := func() {
 		parent.AsTree().DeleteChildren()
 		str := ed.Buffer.String()
 		// all code must be in a function for declarations to be handled correctly
@@ -50,6 +50,6 @@ func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 		}
 		parent.AsWidget().Update()
 	}
-	ed.OnInput(func(e events.Event) { oi() })
-	oi()
+	ed.OnChange(func(e events.Event) { oc() })
+	oc()
 }
