@@ -33,9 +33,7 @@ type _cogentcore_org_core_base_labels_Labeler struct {
 	WLabel func() string
 }
 
-func (W _cogentcore_org_core_base_labels_Labeler) Label() string {
-	return W.WLabel()
-}
+func (W _cogentcore_org_core_base_labels_Labeler) Label() string { return W.WLabel() }
 
 // _cogentcore_org_core_base_labels_SliceLabeler is an interface wrapper for SliceLabeler type
 type _cogentcore_org_core_base_labels_SliceLabeler struct {

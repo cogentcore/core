@@ -77,9 +77,7 @@ type _cogentcore_org_core_base_reflectx_SetAnyer struct {
 	WSetAny func(v any) error
 }
 
-func (W _cogentcore_org_core_base_reflectx_SetAnyer) SetAny(v any) error {
-	return W.WSetAny(v)
-}
+func (W _cogentcore_org_core_base_reflectx_SetAnyer) SetAny(v any) error { return W.WSetAny(v) }
 
 // _cogentcore_org_core_base_reflectx_SetColorer is an interface wrapper for SetColorer type
 type _cogentcore_org_core_base_reflectx_SetColorer struct {
@@ -87,9 +85,7 @@ type _cogentcore_org_core_base_reflectx_SetColorer struct {
 	WSetColor func(c color.Color)
 }
 
-func (W _cogentcore_org_core_base_reflectx_SetColorer) SetColor(c color.Color) {
-	W.WSetColor(c)
-}
+func (W _cogentcore_org_core_base_reflectx_SetColorer) SetColor(c color.Color) { W.WSetColor(c) }
 
 // _cogentcore_org_core_base_reflectx_SetStringer is an interface wrapper for SetStringer type
 type _cogentcore_org_core_base_reflectx_SetStringer struct {
@@ -107,6 +103,4 @@ type _cogentcore_org_core_base_reflectx_ShouldSaver struct {
 	WShouldSave func() bool
 }
 
-func (W _cogentcore_org_core_base_reflectx_ShouldSaver) ShouldSave() bool {
-	return W.WShouldSave()
-}
+func (W _cogentcore_org_core_base_reflectx_ShouldSaver) ShouldSave() bool { return W.WShouldSave() }
