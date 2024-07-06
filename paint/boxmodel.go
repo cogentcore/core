@@ -110,7 +110,7 @@ func (pc *Context) DrawStandardBox(st *styles.Style, pos math32.Vector2, size ma
 // least as large as that of our parent, thereby ensuring that we do not go
 // outside of our parent effective bounds.
 func (pc *Context) fixBounds(pos, size math32.Vector2) (math32.Vector2, math32.Vector2) {
-	if len(pc.ContentBoundsStack) == 0 {
+	if len(pc.BoundsStack) == 0 {
 		return pos, size
 	}
 
@@ -119,7 +119,7 @@ func (pc *Context) fixBounds(pos, size math32.Vector2) (math32.Vector2, math32.V
 		return pos, size
 	}
 
-	pbox := pc.ContentBoundsStack[len(pc.ContentBoundsStack)-1]
+	pbox := pc.BoundsStack[len(pc.BoundsStack)-1]
 	psz := math32.Vector2FromPoint(pbox.Size())
 	pr = ClampBorderRadius(pr, psz.X, psz.Y)
 

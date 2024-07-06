@@ -64,16 +64,6 @@ type State struct {
 	// Every render starts with a push onto this stack, and finishes with a pop.
 	BoundsStack []image.Rectangle
 
-	// ContentBounds are the boundaries of the content of the current element, not
-	// including any margin or shadow. This is only relevant when using
-	// [State.PushBoundsGeom].
-	ContentBounds image.Rectangle
-
-	// ContentBoundsStack is a stack of the content boundaries for the parent elements,
-	// with each one corresponding to the entry with the same index in
-	// [State.BoundsStack]. This is only relevant when using [State.PushBoundsGeom].
-	ContentBoundsStack []image.Rectangle
-
 	// Radius is the border radius of the element that is currently being rendered.
 	// This is only relevant when using [State.PushBoundsGeom].
 	Radius styles.SideFloats
@@ -126,26 +116,19 @@ func (rs *State) PopTransform() {
 // This is the essential first step in rendering. See [State.PushBoundsGeom]
 // for a version that takes more arguments.
 func (rs *State) PushBounds(b image.Rectangle) {
-	rs.PushBoundsGeom(b, b, styles.SideFloats{})
+	rs.PushBoundsGeom(b, styles.SideFloats{})
 }
 
 // PushBoundsGeom pushes the current bounds onto the stack and sets new bounds.
-// This is the essential first step in rendering. It takes the total bounds,
-// which include any margin or shadow associated with an element, and the content
-// bounds, which do not include those things. It also takes the border radius of
-// the current element.
-func (rs *State) PushBoundsGeom(total, content image.Rectangle, radius styles.SideFloats) {
+// This is the essential first step in rendering. It also takes the border radius
+// of the current element.
+func (rs *State) PushBoundsGeom(total image.Rectangle, radius styles.SideFloats) {
 	if rs.Bounds.Empty() {
 		rs.Bounds = rs.Image.Bounds()
 	}
-	if rs.ContentBounds.Empty() {
-		rs.ContentBounds = rs.Bounds
-	}
 	rs.BoundsStack = append(rs.BoundsStack, rs.Bounds)
-	rs.ContentBoundsStack = append(rs.ContentBoundsStack, rs.ContentBounds)
 	rs.RadiusStack = append(rs.RadiusStack, rs.Radius)
 	rs.Bounds = total
-	rs.ContentBounds = content
 	rs.Radius = radius
 }
 
@@ -159,10 +142,8 @@ func (rs *State) PopBounds() {
 		return
 	}
 	rs.Bounds = rs.BoundsStack[sz-1]
-	rs.ContentBounds = rs.ContentBoundsStack[sz-1]
 	rs.Radius = rs.RadiusStack[sz-1]
 	rs.BoundsStack = rs.BoundsStack[:sz-1]
-	rs.ContentBoundsStack = rs.ContentBoundsStack[:sz-1]
 	rs.RadiusStack = rs.RadiusStack[:sz-1]
 }
 
