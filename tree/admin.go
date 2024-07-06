@@ -19,7 +19,7 @@ import (
 // New returns a new node of the given type with the given optional parent.
 // If the name is unspecified, it defaults to the ID (kebab-case) name of
 // the type, plus the [Node.NumLifetimeChildren] of the parent.
-func New[T NodeValue](parent ...Node) *T {
+func New[T NodeValue](parent ...Node) *T { //yaegi:add
 	n := new(T)
 	ni := any(n).(Node)
 	initNode(ni)

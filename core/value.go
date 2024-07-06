@@ -42,7 +42,7 @@ type OnBinder interface {
 // Bind binds the given value to the given [Value] such that the values of
 // the two will be linked and updated appropriately after [events.Change] events
 // and during [Widget.UpdateWidget]. It returns the widget to enable method chaining.
-func Bind[T Value](value any, vw T) T {
+func Bind[T Value](value any, vw T) T { //yaegi:add
 	wb := vw.AsWidget()
 	alreadyBound := wb.ValueUpdate != nil
 	wb.ValueUpdate = func() {
