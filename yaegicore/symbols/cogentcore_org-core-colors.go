@@ -237,9 +237,7 @@ type _cogentcore_org_core_colors_Context struct {
 	WImageByURL func(url string) image.Image
 }
 
-func (W _cogentcore_org_core_colors_Context) Base() color.RGBA {
-	return W.WBase()
-}
+func (W _cogentcore_org_core_colors_Context) Base() color.RGBA { return W.WBase() }
 func (W _cogentcore_org_core_colors_Context) ImageByURL(url string) image.Image {
 	return W.WImageByURL(url)
 }

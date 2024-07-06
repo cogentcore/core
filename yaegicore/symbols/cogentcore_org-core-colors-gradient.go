@@ -3,12 +3,11 @@
 package symbols
 
 import (
+	"cogentcore.org/core/colors/gradient"
+	"cogentcore.org/core/math32"
 	"image"
 	"image/color"
 	"reflect"
-
-	"cogentcore.org/core/colors/gradient"
-	"cogentcore.org/core/math32"
 )
 
 func init() {
@@ -71,15 +70,11 @@ type _cogentcore_org_core_colors_gradient_Gradient struct {
 	WUpdate     func(opacity float32, box math32.Box2, objTransform math32.Matrix2)
 }
 
-func (W _cogentcore_org_core_colors_gradient_Gradient) AsBase() *gradient.Base {
-	return W.WAsBase()
-}
+func (W _cogentcore_org_core_colors_gradient_Gradient) AsBase() *gradient.Base { return W.WAsBase() }
 func (W _cogentcore_org_core_colors_gradient_Gradient) At(x int, y int) color.Color {
 	return W.WAt(x, y)
 }
-func (W _cogentcore_org_core_colors_gradient_Gradient) Bounds() image.Rectangle {
-	return W.WBounds()
-}
+func (W _cogentcore_org_core_colors_gradient_Gradient) Bounds() image.Rectangle { return W.WBounds() }
 func (W _cogentcore_org_core_colors_gradient_Gradient) ColorModel() color.Model {
 	return W.WColorModel()
 }

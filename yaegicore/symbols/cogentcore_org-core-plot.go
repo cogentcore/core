@@ -89,9 +89,7 @@ type _cogentcore_org_core_plot_Labeller struct {
 	WLabel func(i int) string
 }
 
-func (W _cogentcore_org_core_plot_Labeller) Label(i int) string {
-	return W.WLabel(i)
-}
+func (W _cogentcore_org_core_plot_Labeller) Label(i int) string { return W.WLabel(i) }
 
 // _cogentcore_org_core_plot_Normalizer is an interface wrapper for Normalizer type
 type _cogentcore_org_core_plot_Normalizer struct {
@@ -110,9 +108,7 @@ type _cogentcore_org_core_plot_Plotter struct {
 	WXYData func() (data plot.XYer, pixels plot.XYer)
 }
 
-func (W _cogentcore_org_core_plot_Plotter) Plot(pt *plot.Plot) {
-	W.WPlot(pt)
-}
+func (W _cogentcore_org_core_plot_Plotter) Plot(pt *plot.Plot) { W.WPlot(pt) }
 func (W _cogentcore_org_core_plot_Plotter) XYData() (data plot.XYer, pixels plot.XYer) {
 	return W.WXYData()
 }
@@ -123,9 +119,7 @@ type _cogentcore_org_core_plot_Thumbnailer struct {
 	WThumbnail func(pt *plot.Plot)
 }
 
-func (W _cogentcore_org_core_plot_Thumbnailer) Thumbnail(pt *plot.Plot) {
-	W.WThumbnail(pt)
-}
+func (W _cogentcore_org_core_plot_Thumbnailer) Thumbnail(pt *plot.Plot) { W.WThumbnail(pt) }
 
 // _cogentcore_org_core_plot_Ticker is an interface wrapper for Ticker type
 type _cogentcore_org_core_plot_Ticker struct {
@@ -144,12 +138,8 @@ type _cogentcore_org_core_plot_Valuer struct {
 	WValue func(i int) float32
 }
 
-func (W _cogentcore_org_core_plot_Valuer) Len() int {
-	return W.WLen()
-}
-func (W _cogentcore_org_core_plot_Valuer) Value(i int) float32 {
-	return W.WValue(i)
-}
+func (W _cogentcore_org_core_plot_Valuer) Len() int            { return W.WLen() }
+func (W _cogentcore_org_core_plot_Valuer) Value(i int) float32 { return W.WValue(i) }
 
 // _cogentcore_org_core_plot_XYZer is an interface wrapper for XYZer type
 type _cogentcore_org_core_plot_XYZer struct {
@@ -159,15 +149,9 @@ type _cogentcore_org_core_plot_XYZer struct {
 	WXYZ   func(i int) (float32, float32, float32)
 }
 
-func (W _cogentcore_org_core_plot_XYZer) Len() int {
-	return W.WLen()
-}
-func (W _cogentcore_org_core_plot_XYZer) XY(i int) (float32, float32) {
-	return W.WXY(i)
-}
-func (W _cogentcore_org_core_plot_XYZer) XYZ(i int) (float32, float32, float32) {
-	return W.WXYZ(i)
-}
+func (W _cogentcore_org_core_plot_XYZer) Len() int                              { return W.WLen() }
+func (W _cogentcore_org_core_plot_XYZer) XY(i int) (float32, float32)           { return W.WXY(i) }
+func (W _cogentcore_org_core_plot_XYZer) XYZ(i int) (float32, float32, float32) { return W.WXYZ(i) }
 
 // _cogentcore_org_core_plot_XYer is an interface wrapper for XYer type
 type _cogentcore_org_core_plot_XYer struct {
@@ -176,9 +160,5 @@ type _cogentcore_org_core_plot_XYer struct {
 	WXY    func(i int) (x float32, y float32)
 }
 
-func (W _cogentcore_org_core_plot_XYer) Len() int {
-	return W.WLen()
-}
-func (W _cogentcore_org_core_plot_XYer) XY(i int) (x float32, y float32) {
-	return W.WXY(i)
-}
+func (W _cogentcore_org_core_plot_XYer) Len() int                        { return W.WLen() }
+func (W _cogentcore_org_core_plot_XYer) XY(i int) (x float32, y float32) { return W.WXY(i) }

@@ -4,13 +4,13 @@ package symbols
 
 import (
 	"cogentcore.org/core/htmlcore"
-	"github.com/traefik/yaegi/interp"
 	"reflect"
 )
 
 func init() {
 	Symbols["cogentcore.org/core/htmlcore/htmlcore"] = map[string]reflect.Value{
 		// function, constant and variable definitions
+		"BindTextEditor":   reflect.ValueOf(&htmlcore.BindTextEditor).Elem(),
 		"ElementHandlers":  reflect.ValueOf(&htmlcore.ElementHandlers).Elem(),
 		"ExtractText":      reflect.ValueOf(htmlcore.ExtractText),
 		"Get":              reflect.ValueOf(htmlcore.Get),
@@ -21,7 +21,6 @@ func init() {
 		"HasAttr":          reflect.ValueOf(htmlcore.HasAttr),
 		"IsText":           reflect.ValueOf(htmlcore.IsText),
 		"IsURL":            reflect.ValueOf(htmlcore.IsURL),
-		"New":              reflect.ValueOf(interp.GenericFunc("func New[T tree.NodeValue](ctx *Context) *T {\n\tparent := ctx.Parent()\n\tw := tree.New[T](parent)\n\tctx.Config(any(w).(core.Widget)) // TODO(config): better htmlcore structure with new config paradigm?\n\treturn w\n}")),
 		"NewContext":       reflect.ValueOf(htmlcore.NewContext),
 		"NodeString":       reflect.ValueOf(htmlcore.NodeString),
 		"NormalizeURL":     reflect.ValueOf(htmlcore.NormalizeURL),

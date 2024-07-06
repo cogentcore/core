@@ -21,7 +21,6 @@ func init() {
 	Symbols["cogentcore.org/core/core/core"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"AddValueConverter":         reflect.ValueOf(core.AddValueConverter),
-		"AddValueType":              reflect.ValueOf(interp.GenericFunc("func AddValueType[T any, W tree.NodeValue]() {\n\tvar v T\n\tname := types.TypeNameValue(v)\n\tValueTypes[name] = func(value any) Value {\n\t\treturn any(tree.New[W]()).(Value)\n\t}\n}")),
 		"AllRenderWindows":          reflect.ValueOf(&core.AllRenderWindows).Elem(),
 		"AllSettings":               reflect.ValueOf(&core.AllSettings).Elem(),
 		"AppAbout":                  reflect.ValueOf(&core.AppAbout).Elem(),
@@ -35,9 +34,7 @@ func init() {
 		"AsTree":                    reflect.ValueOf(core.AsTree),
 		"AsWidget":                  reflect.ValueOf(core.AsWidget),
 		"AutoScrollRate":            reflect.ValueOf(&core.AutoScrollRate).Elem(),
-		"Bind":                      reflect.ValueOf(interp.GenericFunc("func Bind[T Value](value any, vw T) T {\n\twb := vw.AsWidget()\n\talreadyBound := wb.ValueUpdate != nil\n\twb.ValueUpdate = func() {\n\t\tif vws, ok := any(vw).(ValueSetter); ok {\n\t\t\tErrorSnackbar(vw, vws.SetWidgetValue(value))\n\t\t} else {\n\t\t\tErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))\n\t\t}\n\t}\n\twb.ValueOnChange = func() {\n\t\tErrorSnackbar(vw, reflectx.SetRobust(value, vw.WidgetValue()))\n\t}\n\tif alreadyBound {\n\t\tresetWidgetValue(vw)\n\t}\n\twb.ValueTitle = labels.FriendlyTypeName(reflectx.NonPointerType(reflect.TypeOf(value)))\n\tif ob, ok := any(vw).(OnBinder); ok {\n\t\tob.OnBind(value)\n\t}\n\twb.ValueUpdate() // we update it with the initial value immediately\n\treturn vw\n}")),
-		"BindMapKey":                reflect.ValueOf(interp.GenericFunc("func BindMapKey[T Value](mapv reflect.Value, key reflect.Value, vw T) T {\n\twb := vw.AsWidget()\n\talreadyBound := wb.ValueUpdate != nil\n\twb.ValueUpdate = func() {\n\t\tif vws, ok := any(vw).(ValueSetter); ok {\n\t\t\tErrorSnackbar(vw, vws.SetWidgetValue(key.Interface()))\n\t\t} else {\n\t\t\tErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), key.Interface()))\n\t\t}\n\t}\n\twb.ValueOnChange = func() {\n\t\tnewKey := reflect.New(key.Type())\n\t\tErrorSnackbar(vw, reflectx.SetRobust(newKey.Interface(), vw.WidgetValue()))\n\t\tnewKey = newKey.Elem()\n\t\tif !mapv.MapIndex(newKey).IsValid() { // not already taken\n\t\t\tmapv.SetMapIndex(newKey, mapv.MapIndex(key))\n\t\t\tmapv.SetMapIndex(key, reflect.Value{})\n\t\t\treturn\n\t\t}\n\t\td := NewBody().AddTitle(\"Key already exists\").AddText(fmt.Sprintf(\"The key %q already exists\", reflectx.ToString(newKey.Interface())))\n\t\td.AddBottomBar(func(parent Widget) {\n\t\t\td.AddCancel(parent)\n\t\t\td.AddOK(parent).SetText(\"Overwrite\").OnClick(func(e events.Event) {\n\t\t\t\tmapv.SetMapIndex(newKey, mapv.MapIndex(key))\n\t\t\t\tmapv.SetMapIndex(key, reflect.Value{})\n\t\t\t\twb.SendChange()\n\t\t\t})\n\t\t})\n\t\td.RunDialog(vw)\n\t}\n\tif alreadyBound {\n\t\tresetWidgetValue(vw)\n\t}\n\tif ob, ok := any(vw).(OnBinder); ok {\n\t\tob.OnBind(key.Interface())\n\t}\n\twb.ValueUpdate() // we update it with the initial value immediately\n\treturn vw\n}")),
-		"BindMapValue":              reflect.ValueOf(interp.GenericFunc("func BindMapValue[T Value](mapv reflect.Value, key reflect.Value, vw T) T {\n\twb := vw.AsWidget()\n\talreadyBound := wb.ValueUpdate != nil\n\twb.ValueUpdate = func() {\n\t\tvalue := mapv.MapIndex(key).Interface()\n\t\tif vws, ok := any(vw).(ValueSetter); ok {\n\t\t\tErrorSnackbar(vw, vws.SetWidgetValue(value))\n\t\t} else {\n\t\t\tErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))\n\t\t}\n\t}\n\twb.ValueOnChange = func() {\n\t\tvalue := reflect.New(mapv.Type().Elem())\n\t\tErrorSnackbar(vw, reflectx.SetRobust(value.Interface(), vw.WidgetValue()))\n\t\tmapv.SetMapIndex(key, value.Elem())\n\t}\n\tif alreadyBound {\n\t\tresetWidgetValue(vw)\n\t}\n\tif ob, ok := any(vw).(OnBinder); ok {\n\t\tvalue := mapv.MapIndex(key).Interface()\n\t\tob.OnBind(value)\n\t}\n\twb.ValueUpdate() // we update it with the initial value immediately\n\treturn vw\n}")),
+		"Bind":                      reflect.ValueOf(interp.GenericFunc("func Bind[T Value](value any, vw T) T { //yaegi:add\n\twb := vw.AsWidget()\n\talreadyBound := wb.ValueUpdate != nil\n\twb.ValueUpdate = func() {\n\t\tif vws, ok := any(vw).(ValueSetter); ok {\n\t\t\tErrorSnackbar(vw, vws.SetWidgetValue(value))\n\t\t} else {\n\t\t\tErrorSnackbar(vw, reflectx.SetRobust(vw.WidgetValue(), value))\n\t\t}\n\t}\n\twb.ValueOnChange = func() {\n\t\tErrorSnackbar(vw, reflectx.SetRobust(value, vw.WidgetValue()))\n\t}\n\tif alreadyBound {\n\t\tresetWidgetValue(vw)\n\t}\n\twb.ValueTitle = labels.FriendlyTypeName(reflectx.NonPointerType(reflect.TypeOf(value)))\n\tif ob, ok := any(vw).(OnBinder); ok {\n\t\tob.OnBind(value)\n\t}\n\twb.ValueUpdate() // we update it with the initial value immediately\n\treturn vw\n}")),
 		"ButtonAction":              reflect.ValueOf(core.ButtonAction),
 		"ButtonElevated":            reflect.ValueOf(core.ButtonElevated),
 		"ButtonFilled":              reflect.ValueOf(core.ButtonFilled),
@@ -190,7 +187,6 @@ func init() {
 		"RecentPaths":               reflect.ValueOf(&core.RecentPaths).Elem(),
 		"RecycleDialog":             reflect.ValueOf(core.RecycleDialog),
 		"RecycleMainWindow":         reflect.ValueOf(core.RecycleMainWindow),
-		"RecycleTabWidget":          reflect.ValueOf(interp.GenericFunc("func RecycleTabWidget[T tree.NodeValue](ts *Tabs, name string) *T {\n\tfr := ts.RecycleTab(name)\n\tif fr.HasChildren() {\n\t\treturn any(fr.Child(0)).(*T)\n\t}\n\tw := tree.New[T](fr)\n\tany(w).(Widget).AsWidget().UpdateWidget()\n\treturn w\n}")),
 		"RenderWindowGlobalMu":      reflect.ValueOf(&core.RenderWindowGlobalMu).Elem(),
 		"ResetAllSettings":          reflect.ValueOf(core.ResetAllSettings),
 		"ResetSettings":             reflect.ValueOf(core.ResetSettings),
@@ -315,6 +311,7 @@ func init() {
 		"FileButton":             reflect.ValueOf((*core.FileButton)(nil)),
 		"FilePaths":              reflect.ValueOf((*core.FilePaths)(nil)),
 		"FilePicker":             reflect.ValueOf((*core.FilePicker)(nil)),
+		"FilePickerFilterer":     reflect.ValueOf((*core.FilePickerFilterer)(nil)),
 		"Filename":               reflect.ValueOf((*core.Filename)(nil)),
 		"FontButton":             reflect.ValueOf((*core.FontButton)(nil)),
 		"FontName":               reflect.ValueOf((*core.FontName)(nil)),
@@ -419,7 +416,6 @@ func init() {
 
 		// interface wrapper definitions
 		"_ButtonEmbedder":    reflect.ValueOf((*_cogentcore_org_core_core_ButtonEmbedder)(nil)),
-		"_FieldValidator":    reflect.ValueOf((*_cogentcore_org_core_core_FieldValidator)(nil)),
 		"_Layouter":          reflect.ValueOf((*_cogentcore_org_core_core_Layouter)(nil)),
 		"_Lister":            reflect.ValueOf((*_cogentcore_org_core_core_Lister)(nil)),
 		"_OnBinder":          reflect.ValueOf((*_cogentcore_org_core_core_OnBinder)(nil)),
@@ -444,19 +440,7 @@ type _cogentcore_org_core_core_ButtonEmbedder struct {
 	WAsButton func() *core.Button
 }
 
-func (W _cogentcore_org_core_core_ButtonEmbedder) AsButton() *core.Button {
-	return W.WAsButton()
-}
-
-// _cogentcore_org_core_core_FieldValidator is an interface wrapper for FieldValidator type
-type _cogentcore_org_core_core_FieldValidator struct {
-	IValue         interface{}
-	WValidateField func(field string) error
-}
-
-func (W _cogentcore_org_core_core_FieldValidator) ValidateField(field string) error {
-	return W.WValidateField(field)
-}
+func (W _cogentcore_org_core_core_ButtonEmbedder) AsButton() *core.Button { return W.WAsButton() }
 
 // _cogentcore_org_core_core_Layouter is an interface wrapper for Layouter type
 type _cogentcore_org_core_core_Layouter struct {
@@ -496,69 +480,39 @@ type _cogentcore_org_core_core_Layouter struct {
 	WWidgetTooltip     func(pos image.Point) (string, image.Point)
 }
 
-func (W _cogentcore_org_core_core_Layouter) AsFrame() *core.Frame {
-	return W.WAsFrame()
-}
-func (W _cogentcore_org_core_core_Layouter) AsTree() *tree.NodeBase {
-	return W.WAsTree()
-}
-func (W _cogentcore_org_core_core_Layouter) AsWidget() *core.WidgetBase {
-	return W.WAsWidget()
-}
+func (W _cogentcore_org_core_core_Layouter) AsFrame() *core.Frame       { return W.WAsFrame() }
+func (W _cogentcore_org_core_core_Layouter) AsTree() *tree.NodeBase     { return W.WAsTree() }
+func (W _cogentcore_org_core_core_Layouter) AsWidget() *core.WidgetBase { return W.WAsWidget() }
 func (W _cogentcore_org_core_core_Layouter) ChildBackground(child core.Widget) image.Image {
 	return W.WChildBackground(child)
 }
 func (W _cogentcore_org_core_core_Layouter) ContextMenuPos(e events.Event) image.Point {
 	return W.WContextMenuPos(e)
 }
-func (W _cogentcore_org_core_core_Layouter) CopyFieldsFrom(from tree.Node) {
-	W.WCopyFieldsFrom(from)
-}
-func (W _cogentcore_org_core_core_Layouter) Destroy() {
-	W.WDestroy()
-}
+func (W _cogentcore_org_core_core_Layouter) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
+func (W _cogentcore_org_core_core_Layouter) Destroy()                      { W.WDestroy() }
 func (W _cogentcore_org_core_core_Layouter) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 	W.WDirectRenderDraw(drw, idx, flipY)
 }
 func (W _cogentcore_org_core_core_Layouter) DirectRenderImage(drw system.Drawer, idx int) {
 	W.WDirectRenderImage(drw, idx)
 }
-func (W _cogentcore_org_core_core_Layouter) Init() {
-	W.WInit()
-}
-func (W _cogentcore_org_core_core_Layouter) IsVisible() bool {
-	return W.WIsVisible()
-}
-func (W _cogentcore_org_core_core_Layouter) LayoutSpace() {
-	W.WLayoutSpace()
-}
+func (W _cogentcore_org_core_core_Layouter) Init()           { W.WInit() }
+func (W _cogentcore_org_core_core_Layouter) IsVisible() bool { return W.WIsVisible() }
+func (W _cogentcore_org_core_core_Layouter) LayoutSpace()    { W.WLayoutSpace() }
 func (W _cogentcore_org_core_core_Layouter) ManageOverflow(iter int, updateSize bool) bool {
 	return W.WManageOverflow(iter, updateSize)
 }
 func (W _cogentcore_org_core_core_Layouter) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }
-func (W _cogentcore_org_core_core_Layouter) OnAdd() {
-	W.WOnAdd()
-}
-func (W _cogentcore_org_core_core_Layouter) OnChildAdded(child tree.Node) {
-	W.WOnChildAdded(child)
-}
-func (W _cogentcore_org_core_core_Layouter) PlanName() string {
-	return W.WPlanName()
-}
-func (W _cogentcore_org_core_core_Layouter) Position() {
-	W.WPosition()
-}
-func (W _cogentcore_org_core_core_Layouter) Render() {
-	W.WRender()
-}
-func (W _cogentcore_org_core_core_Layouter) RenderWidget() {
-	W.WRenderWidget()
-}
-func (W _cogentcore_org_core_core_Layouter) ScenePos() {
-	W.WScenePos()
-}
+func (W _cogentcore_org_core_core_Layouter) OnAdd()                       { W.WOnAdd() }
+func (W _cogentcore_org_core_core_Layouter) OnChildAdded(child tree.Node) { W.WOnChildAdded(child) }
+func (W _cogentcore_org_core_core_Layouter) PlanName() string             { return W.WPlanName() }
+func (W _cogentcore_org_core_core_Layouter) Position()                    { W.WPosition() }
+func (W _cogentcore_org_core_core_Layouter) Render()                      { W.WRender() }
+func (W _cogentcore_org_core_core_Layouter) RenderWidget()                { W.WRenderWidget() }
+func (W _cogentcore_org_core_core_Layouter) ScenePos()                    { W.WScenePos() }
 func (W _cogentcore_org_core_core_Layouter) ScrollChanged(d math32.Dims, sb *core.Slider) {
 	W.WScrollChanged(d, sb)
 }
@@ -571,27 +525,15 @@ func (W _cogentcore_org_core_core_Layouter) ScrollValues(d math32.Dims) (maxSize
 func (W _cogentcore_org_core_core_Layouter) SetScrollParams(d math32.Dims, sb *core.Slider) {
 	W.WSetScrollParams(d, sb)
 }
-func (W _cogentcore_org_core_core_Layouter) ShowContextMenu(e events.Event) {
-	W.WShowContextMenu(e)
-}
-func (W _cogentcore_org_core_core_Layouter) SizeDown(iter int) bool {
-	return W.WSizeDown(iter)
-}
-func (W _cogentcore_org_core_core_Layouter) SizeDownSetAllocs(iter int) {
-	W.WSizeDownSetAllocs(iter)
-}
-func (W _cogentcore_org_core_core_Layouter) SizeFinal() {
-	W.WSizeFinal()
-}
+func (W _cogentcore_org_core_core_Layouter) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }
+func (W _cogentcore_org_core_core_Layouter) SizeDown(iter int) bool         { return W.WSizeDown(iter) }
+func (W _cogentcore_org_core_core_Layouter) SizeDownSetAllocs(iter int)     { W.WSizeDownSetAllocs(iter) }
+func (W _cogentcore_org_core_core_Layouter) SizeFinal()                     { W.WSizeFinal() }
 func (W _cogentcore_org_core_core_Layouter) SizeFromChildren(iter int, pass core.LayoutPasses) math32.Vector2 {
 	return W.WSizeFromChildren(iter, pass)
 }
-func (W _cogentcore_org_core_core_Layouter) SizeUp() {
-	W.WSizeUp()
-}
-func (W _cogentcore_org_core_core_Layouter) Style() {
-	W.WStyle()
-}
+func (W _cogentcore_org_core_core_Layouter) SizeUp() { W.WSizeUp() }
+func (W _cogentcore_org_core_core_Layouter) Style()  { W.WStyle() }
 func (W _cogentcore_org_core_core_Layouter) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return W.WWidgetTooltip(pos)
 }
@@ -603,6 +545,7 @@ type _cogentcore_org_core_core_Lister struct {
 	WAsTree           func() *tree.NodeBase
 	WCopyFieldsFrom   func(from tree.Node)
 	WCopySelectToMime func() mimedata.Mimes
+	WDeleteAt         func(idx int)
 	WDestroy          func()
 	WDragDrop         func(e events.Event)
 	WDragStart        func(e events.Event)
@@ -613,6 +556,7 @@ type _cogentcore_org_core_core_Lister struct {
 	WMakePasteMenu    func(m *core.Scene, md mimedata.Mimes, idx int, mod events.DropMods, fun func())
 	WMakeRow          func(p *tree.Plan, i int)
 	WMimeDataType     func() string
+	WNewAt            func(idx int)
 	WNodeWalkDown     func(fun func(n tree.Node) bool)
 	WOnAdd            func()
 	WOnChildAdded     func(child tree.Node)
@@ -622,76 +566,46 @@ type _cogentcore_org_core_core_Lister struct {
 	WRowFirstWidget   func(row int) (*core.WidgetBase, bool)
 	WRowGrabFocus     func(row int) *core.WidgetBase
 	WRowWidgetNs      func() (nWidgPerRow int, idxOff int)
-	WSliceDeleteAt    func(idx int)
 	WSliceGrid        func() *core.ListGrid
 	WSliceIndex       func(i int) (si int, vi int, invis bool)
-	WSliceNewAt       func(idx int)
 	WStyleRow         func(w core.Widget, idx int, fidx int)
 	WStyleValue       func(w core.Widget, s *styles.Style, row int, col int)
 	WUpdateMaxWidths  func()
 	WUpdateSliceSize  func() int
 }
 
-func (W _cogentcore_org_core_core_Lister) AsListBase() *core.ListBase {
-	return W.WAsListBase()
-}
-func (W _cogentcore_org_core_core_Lister) AsTree() *tree.NodeBase {
-	return W.WAsTree()
-}
-func (W _cogentcore_org_core_core_Lister) CopyFieldsFrom(from tree.Node) {
-	W.WCopyFieldsFrom(from)
-}
+func (W _cogentcore_org_core_core_Lister) AsListBase() *core.ListBase    { return W.WAsListBase() }
+func (W _cogentcore_org_core_core_Lister) AsTree() *tree.NodeBase        { return W.WAsTree() }
+func (W _cogentcore_org_core_core_Lister) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
 func (W _cogentcore_org_core_core_Lister) CopySelectToMime() mimedata.Mimes {
 	return W.WCopySelectToMime()
 }
-func (W _cogentcore_org_core_core_Lister) Destroy() {
-	W.WDestroy()
-}
-func (W _cogentcore_org_core_core_Lister) DragDrop(e events.Event) {
-	W.WDragDrop(e)
-}
-func (W _cogentcore_org_core_core_Lister) DragStart(e events.Event) {
-	W.WDragStart(e)
-}
-func (W _cogentcore_org_core_core_Lister) DropDeleteSource(e events.Event) {
-	W.WDropDeleteSource(e)
-}
-func (W _cogentcore_org_core_core_Lister) DropFinalize(de *events.DragDrop) {
-	W.WDropFinalize(de)
-}
-func (W _cogentcore_org_core_core_Lister) HasStyleFunc() bool {
-	return W.WHasStyleFunc()
-}
-func (W _cogentcore_org_core_core_Lister) Init() {
-	W.WInit()
-}
+func (W _cogentcore_org_core_core_Lister) DeleteAt(idx int)                 { W.WDeleteAt(idx) }
+func (W _cogentcore_org_core_core_Lister) Destroy()                         { W.WDestroy() }
+func (W _cogentcore_org_core_core_Lister) DragDrop(e events.Event)          { W.WDragDrop(e) }
+func (W _cogentcore_org_core_core_Lister) DragStart(e events.Event)         { W.WDragStart(e) }
+func (W _cogentcore_org_core_core_Lister) DropDeleteSource(e events.Event)  { W.WDropDeleteSource(e) }
+func (W _cogentcore_org_core_core_Lister) DropFinalize(de *events.DragDrop) { W.WDropFinalize(de) }
+func (W _cogentcore_org_core_core_Lister) HasStyleFunc() bool               { return W.WHasStyleFunc() }
+func (W _cogentcore_org_core_core_Lister) Init()                            { W.WInit() }
 func (W _cogentcore_org_core_core_Lister) MakePasteMenu(m *core.Scene, md mimedata.Mimes, idx int, mod events.DropMods, fun func()) {
 	W.WMakePasteMenu(m, md, idx, mod, fun)
 }
-func (W _cogentcore_org_core_core_Lister) MakeRow(p *tree.Plan, i int) {
-	W.WMakeRow(p, i)
-}
-func (W _cogentcore_org_core_core_Lister) MimeDataType() string {
-	return W.WMimeDataType()
-}
+func (W _cogentcore_org_core_core_Lister) MakeRow(p *tree.Plan, i int) { W.WMakeRow(p, i) }
+func (W _cogentcore_org_core_core_Lister) MimeDataType() string        { return W.WMimeDataType() }
+func (W _cogentcore_org_core_core_Lister) NewAt(idx int)               { W.WNewAt(idx) }
 func (W _cogentcore_org_core_core_Lister) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }
-func (W _cogentcore_org_core_core_Lister) OnAdd() {
-	W.WOnAdd()
-}
-func (W _cogentcore_org_core_core_Lister) OnChildAdded(child tree.Node) {
-	W.WOnChildAdded(child)
-}
+func (W _cogentcore_org_core_core_Lister) OnAdd()                       { W.WOnAdd() }
+func (W _cogentcore_org_core_core_Lister) OnChildAdded(child tree.Node) { W.WOnChildAdded(child) }
 func (W _cogentcore_org_core_core_Lister) PasteAssign(md mimedata.Mimes, idx int) {
 	W.WPasteAssign(md, idx)
 }
 func (W _cogentcore_org_core_core_Lister) PasteAtIndex(md mimedata.Mimes, idx int) {
 	W.WPasteAtIndex(md, idx)
 }
-func (W _cogentcore_org_core_core_Lister) PlanName() string {
-	return W.WPlanName()
-}
+func (W _cogentcore_org_core_core_Lister) PlanName() string { return W.WPlanName() }
 func (W _cogentcore_org_core_core_Lister) RowFirstWidget(row int) (*core.WidgetBase, bool) {
 	return W.WRowFirstWidget(row)
 }
@@ -701,17 +615,9 @@ func (W _cogentcore_org_core_core_Lister) RowGrabFocus(row int) *core.WidgetBase
 func (W _cogentcore_org_core_core_Lister) RowWidgetNs() (nWidgPerRow int, idxOff int) {
 	return W.WRowWidgetNs()
 }
-func (W _cogentcore_org_core_core_Lister) SliceDeleteAt(idx int) {
-	W.WSliceDeleteAt(idx)
-}
-func (W _cogentcore_org_core_core_Lister) SliceGrid() *core.ListGrid {
-	return W.WSliceGrid()
-}
+func (W _cogentcore_org_core_core_Lister) SliceGrid() *core.ListGrid { return W.WSliceGrid() }
 func (W _cogentcore_org_core_core_Lister) SliceIndex(i int) (si int, vi int, invis bool) {
 	return W.WSliceIndex(i)
-}
-func (W _cogentcore_org_core_core_Lister) SliceNewAt(idx int) {
-	W.WSliceNewAt(idx)
 }
 func (W _cogentcore_org_core_core_Lister) StyleRow(w core.Widget, idx int, fidx int) {
 	W.WStyleRow(w, idx, fidx)
@@ -719,12 +625,8 @@ func (W _cogentcore_org_core_core_Lister) StyleRow(w core.Widget, idx int, fidx 
 func (W _cogentcore_org_core_core_Lister) StyleValue(w core.Widget, s *styles.Style, row int, col int) {
 	W.WStyleValue(w, s, row, col)
 }
-func (W _cogentcore_org_core_core_Lister) UpdateMaxWidths() {
-	W.WUpdateMaxWidths()
-}
-func (W _cogentcore_org_core_core_Lister) UpdateSliceSize() int {
-	return W.WUpdateSliceSize()
-}
+func (W _cogentcore_org_core_core_Lister) UpdateMaxWidths()     { W.WUpdateMaxWidths() }
+func (W _cogentcore_org_core_core_Lister) UpdateSliceSize() int { return W.WUpdateSliceSize() }
 
 // _cogentcore_org_core_core_OnBinder is an interface wrapper for OnBinder type
 type _cogentcore_org_core_core_OnBinder struct {
@@ -732,9 +634,7 @@ type _cogentcore_org_core_core_OnBinder struct {
 	WOnBind func(value any)
 }
 
-func (W _cogentcore_org_core_core_OnBinder) OnBind(value any) {
-	W.WOnBind(value)
-}
+func (W _cogentcore_org_core_core_OnBinder) OnBind(value any) { W.WOnBind(value) }
 
 // _cogentcore_org_core_core_Settings is an interface wrapper for Settings type
 type _cogentcore_org_core_core_Settings struct {
@@ -746,21 +646,11 @@ type _cogentcore_org_core_core_Settings struct {
 	WMakeToolbar func(p *tree.Plan)
 }
 
-func (W _cogentcore_org_core_core_Settings) Apply() {
-	W.WApply()
-}
-func (W _cogentcore_org_core_core_Settings) Defaults() {
-	W.WDefaults()
-}
-func (W _cogentcore_org_core_core_Settings) Filename() string {
-	return W.WFilename()
-}
-func (W _cogentcore_org_core_core_Settings) Label() string {
-	return W.WLabel()
-}
-func (W _cogentcore_org_core_core_Settings) MakeToolbar(p *tree.Plan) {
-	W.WMakeToolbar(p)
-}
+func (W _cogentcore_org_core_core_Settings) Apply()                   { W.WApply() }
+func (W _cogentcore_org_core_core_Settings) Defaults()                { W.WDefaults() }
+func (W _cogentcore_org_core_core_Settings) Filename() string         { return W.WFilename() }
+func (W _cogentcore_org_core_core_Settings) Label() string            { return W.WLabel() }
+func (W _cogentcore_org_core_core_Settings) MakeToolbar(p *tree.Plan) { W.WMakeToolbar(p) }
 
 // _cogentcore_org_core_core_SettingsOpener is an interface wrapper for SettingsOpener type
 type _cogentcore_org_core_core_SettingsOpener struct {
@@ -773,24 +663,12 @@ type _cogentcore_org_core_core_SettingsOpener struct {
 	WOpen        func() error
 }
 
-func (W _cogentcore_org_core_core_SettingsOpener) Apply() {
-	W.WApply()
-}
-func (W _cogentcore_org_core_core_SettingsOpener) Defaults() {
-	W.WDefaults()
-}
-func (W _cogentcore_org_core_core_SettingsOpener) Filename() string {
-	return W.WFilename()
-}
-func (W _cogentcore_org_core_core_SettingsOpener) Label() string {
-	return W.WLabel()
-}
-func (W _cogentcore_org_core_core_SettingsOpener) MakeToolbar(p *tree.Plan) {
-	W.WMakeToolbar(p)
-}
-func (W _cogentcore_org_core_core_SettingsOpener) Open() error {
-	return W.WOpen()
-}
+func (W _cogentcore_org_core_core_SettingsOpener) Apply()                   { W.WApply() }
+func (W _cogentcore_org_core_core_SettingsOpener) Defaults()                { W.WDefaults() }
+func (W _cogentcore_org_core_core_SettingsOpener) Filename() string         { return W.WFilename() }
+func (W _cogentcore_org_core_core_SettingsOpener) Label() string            { return W.WLabel() }
+func (W _cogentcore_org_core_core_SettingsOpener) MakeToolbar(p *tree.Plan) { W.WMakeToolbar(p) }
+func (W _cogentcore_org_core_core_SettingsOpener) Open() error              { return W.WOpen() }
 
 // _cogentcore_org_core_core_SettingsSaver is an interface wrapper for SettingsSaver type
 type _cogentcore_org_core_core_SettingsSaver struct {
@@ -803,24 +681,12 @@ type _cogentcore_org_core_core_SettingsSaver struct {
 	WSave        func() error
 }
 
-func (W _cogentcore_org_core_core_SettingsSaver) Apply() {
-	W.WApply()
-}
-func (W _cogentcore_org_core_core_SettingsSaver) Defaults() {
-	W.WDefaults()
-}
-func (W _cogentcore_org_core_core_SettingsSaver) Filename() string {
-	return W.WFilename()
-}
-func (W _cogentcore_org_core_core_SettingsSaver) Label() string {
-	return W.WLabel()
-}
-func (W _cogentcore_org_core_core_SettingsSaver) MakeToolbar(p *tree.Plan) {
-	W.WMakeToolbar(p)
-}
-func (W _cogentcore_org_core_core_SettingsSaver) Save() error {
-	return W.WSave()
-}
+func (W _cogentcore_org_core_core_SettingsSaver) Apply()                   { W.WApply() }
+func (W _cogentcore_org_core_core_SettingsSaver) Defaults()                { W.WDefaults() }
+func (W _cogentcore_org_core_core_SettingsSaver) Filename() string         { return W.WFilename() }
+func (W _cogentcore_org_core_core_SettingsSaver) Label() string            { return W.WLabel() }
+func (W _cogentcore_org_core_core_SettingsSaver) MakeToolbar(p *tree.Plan) { W.WMakeToolbar(p) }
+func (W _cogentcore_org_core_core_SettingsSaver) Save() error              { return W.WSave() }
 
 // _cogentcore_org_core_core_ShouldShower is an interface wrapper for ShouldShower type
 type _cogentcore_org_core_core_ShouldShower struct {
@@ -848,9 +714,7 @@ type _cogentcore_org_core_core_ToolbarMaker struct {
 	WMakeToolbar func(p *tree.Plan)
 }
 
-func (W _cogentcore_org_core_core_ToolbarMaker) MakeToolbar(p *tree.Plan) {
-	W.WMakeToolbar(p)
-}
+func (W _cogentcore_org_core_core_ToolbarMaker) MakeToolbar(p *tree.Plan) { W.WMakeToolbar(p) }
 
 // _cogentcore_org_core_core_Treer is an interface wrapper for Treer type
 type _cogentcore_org_core_core_Treer struct {
@@ -899,129 +763,59 @@ type _cogentcore_org_core_core_Treer struct {
 	WWidgetTooltip     func(pos image.Point) (string, image.Point)
 }
 
-func (W _cogentcore_org_core_core_Treer) AddChildNode() {
-	W.WAddChildNode()
-}
-func (W _cogentcore_org_core_core_Treer) AsCoreTree() *core.Tree {
-	return W.WAsCoreTree()
-}
-func (W _cogentcore_org_core_core_Treer) AsTree() *tree.NodeBase {
-	return W.WAsTree()
-}
-func (W _cogentcore_org_core_core_Treer) AsWidget() *core.WidgetBase {
-	return W.WAsWidget()
-}
-func (W _cogentcore_org_core_core_Treer) CanOpen() bool {
-	return W.WCanOpen()
-}
+func (W _cogentcore_org_core_core_Treer) AddChildNode()              { W.WAddChildNode() }
+func (W _cogentcore_org_core_core_Treer) AsCoreTree() *core.Tree     { return W.WAsCoreTree() }
+func (W _cogentcore_org_core_core_Treer) AsTree() *tree.NodeBase     { return W.WAsTree() }
+func (W _cogentcore_org_core_core_Treer) AsWidget() *core.WidgetBase { return W.WAsWidget() }
+func (W _cogentcore_org_core_core_Treer) CanOpen() bool              { return W.WCanOpen() }
 func (W _cogentcore_org_core_core_Treer) ChildBackground(child core.Widget) image.Image {
 	return W.WChildBackground(child)
 }
 func (W _cogentcore_org_core_core_Treer) ContextMenuPos(e events.Event) image.Point {
 	return W.WContextMenuPos(e)
 }
-func (W _cogentcore_org_core_core_Treer) Copy() {
-	W.WCopy()
-}
-func (W _cogentcore_org_core_core_Treer) CopyFieldsFrom(from tree.Node) {
-	W.WCopyFieldsFrom(from)
-}
-func (W _cogentcore_org_core_core_Treer) Cut() {
-	W.WCut()
-}
-func (W _cogentcore_org_core_core_Treer) DeleteNode() {
-	W.WDeleteNode()
-}
-func (W _cogentcore_org_core_core_Treer) Destroy() {
-	W.WDestroy()
-}
+func (W _cogentcore_org_core_core_Treer) Copy()                         { W.WCopy() }
+func (W _cogentcore_org_core_core_Treer) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
+func (W _cogentcore_org_core_core_Treer) Cut()                          { W.WCut() }
+func (W _cogentcore_org_core_core_Treer) DeleteNode()                   { W.WDeleteNode() }
+func (W _cogentcore_org_core_core_Treer) Destroy()                      { W.WDestroy() }
 func (W _cogentcore_org_core_core_Treer) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 	W.WDirectRenderDraw(drw, idx, flipY)
 }
 func (W _cogentcore_org_core_core_Treer) DirectRenderImage(drw system.Drawer, idx int) {
 	W.WDirectRenderImage(drw, idx)
 }
-func (W _cogentcore_org_core_core_Treer) DragDrop(e events.Event) {
-	W.WDragDrop(e)
-}
-func (W _cogentcore_org_core_core_Treer) DragStart(e events.Event) {
-	W.WDragStart(e)
-}
-func (W _cogentcore_org_core_core_Treer) DropDeleteSource(e events.Event) {
-	W.WDropDeleteSource(e)
-}
-func (W _cogentcore_org_core_core_Treer) DropFinalize(de *events.DragDrop) {
-	W.WDropFinalize(de)
-}
-func (W _cogentcore_org_core_core_Treer) Duplicate() {
-	W.WDuplicate()
-}
-func (W _cogentcore_org_core_core_Treer) Init() {
-	W.WInit()
-}
-func (W _cogentcore_org_core_core_Treer) InsertAfter() {
-	W.WInsertAfter()
-}
-func (W _cogentcore_org_core_core_Treer) InsertBefore() {
-	W.WInsertBefore()
-}
-func (W _cogentcore_org_core_core_Treer) IsVisible() bool {
-	return W.WIsVisible()
-}
+func (W _cogentcore_org_core_core_Treer) DragDrop(e events.Event)          { W.WDragDrop(e) }
+func (W _cogentcore_org_core_core_Treer) DragStart(e events.Event)         { W.WDragStart(e) }
+func (W _cogentcore_org_core_core_Treer) DropDeleteSource(e events.Event)  { W.WDropDeleteSource(e) }
+func (W _cogentcore_org_core_core_Treer) DropFinalize(de *events.DragDrop) { W.WDropFinalize(de) }
+func (W _cogentcore_org_core_core_Treer) Duplicate()                       { W.WDuplicate() }
+func (W _cogentcore_org_core_core_Treer) Init()                            { W.WInit() }
+func (W _cogentcore_org_core_core_Treer) InsertAfter()                     { W.WInsertAfter() }
+func (W _cogentcore_org_core_core_Treer) InsertBefore()                    { W.WInsertBefore() }
+func (W _cogentcore_org_core_core_Treer) IsVisible() bool                  { return W.WIsVisible() }
 func (W _cogentcore_org_core_core_Treer) MakePasteMenu(m *core.Scene, md mimedata.Mimes, fun func()) {
 	W.WMakePasteMenu(m, md, fun)
 }
-func (W _cogentcore_org_core_core_Treer) MimeData(md *mimedata.Mimes) {
-	W.WMimeData(md)
-}
+func (W _cogentcore_org_core_core_Treer) MimeData(md *mimedata.Mimes) { W.WMimeData(md) }
 func (W _cogentcore_org_core_core_Treer) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }
-func (W _cogentcore_org_core_core_Treer) OnAdd() {
-	W.WOnAdd()
-}
-func (W _cogentcore_org_core_core_Treer) OnChildAdded(child tree.Node) {
-	W.WOnChildAdded(child)
-}
-func (W _cogentcore_org_core_core_Treer) OnClose() {
-	W.WOnClose()
-}
-func (W _cogentcore_org_core_core_Treer) OnOpen() {
-	W.WOnOpen()
-}
-func (W _cogentcore_org_core_core_Treer) Paste() {
-	W.WPaste()
-}
-func (W _cogentcore_org_core_core_Treer) PlanName() string {
-	return W.WPlanName()
-}
-func (W _cogentcore_org_core_core_Treer) Position() {
-	W.WPosition()
-}
-func (W _cogentcore_org_core_core_Treer) Render() {
-	W.WRender()
-}
-func (W _cogentcore_org_core_core_Treer) RenderWidget() {
-	W.WRenderWidget()
-}
-func (W _cogentcore_org_core_core_Treer) ScenePos() {
-	W.WScenePos()
-}
-func (W _cogentcore_org_core_core_Treer) ShowContextMenu(e events.Event) {
-	W.WShowContextMenu(e)
-}
-func (W _cogentcore_org_core_core_Treer) SizeDown(iter int) bool {
-	return W.WSizeDown(iter)
-}
-func (W _cogentcore_org_core_core_Treer) SizeFinal() {
-	W.WSizeFinal()
-}
-func (W _cogentcore_org_core_core_Treer) SizeUp() {
-	W.WSizeUp()
-}
-func (W _cogentcore_org_core_core_Treer) Style() {
-	W.WStyle()
-}
+func (W _cogentcore_org_core_core_Treer) OnAdd()                         { W.WOnAdd() }
+func (W _cogentcore_org_core_core_Treer) OnChildAdded(child tree.Node)   { W.WOnChildAdded(child) }
+func (W _cogentcore_org_core_core_Treer) OnClose()                       { W.WOnClose() }
+func (W _cogentcore_org_core_core_Treer) OnOpen()                        { W.WOnOpen() }
+func (W _cogentcore_org_core_core_Treer) Paste()                         { W.WPaste() }
+func (W _cogentcore_org_core_core_Treer) PlanName() string               { return W.WPlanName() }
+func (W _cogentcore_org_core_core_Treer) Position()                      { W.WPosition() }
+func (W _cogentcore_org_core_core_Treer) Render()                        { W.WRender() }
+func (W _cogentcore_org_core_core_Treer) RenderWidget()                  { W.WRenderWidget() }
+func (W _cogentcore_org_core_core_Treer) ScenePos()                      { W.WScenePos() }
+func (W _cogentcore_org_core_core_Treer) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }
+func (W _cogentcore_org_core_core_Treer) SizeDown(iter int) bool         { return W.WSizeDown(iter) }
+func (W _cogentcore_org_core_core_Treer) SizeFinal()                     { W.WSizeFinal() }
+func (W _cogentcore_org_core_core_Treer) SizeUp()                        { W.WSizeUp() }
+func (W _cogentcore_org_core_core_Treer) Style()                         { W.WStyle() }
 func (W _cogentcore_org_core_core_Treer) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return W.WWidgetTooltip(pos)
 }
@@ -1032,9 +826,7 @@ type _cogentcore_org_core_core_Validator struct {
 	WValidate func() error
 }
 
-func (W _cogentcore_org_core_core_Validator) Validate() error {
-	return W.WValidate()
-}
+func (W _cogentcore_org_core_core_Validator) Validate() error { return W.WValidate() }
 
 // _cogentcore_org_core_core_Value is an interface wrapper for Value type
 type _cogentcore_org_core_core_Value struct {
@@ -1066,81 +858,43 @@ type _cogentcore_org_core_core_Value struct {
 	WWidgetValue       func() any
 }
 
-func (W _cogentcore_org_core_core_Value) AsTree() *tree.NodeBase {
-	return W.WAsTree()
-}
-func (W _cogentcore_org_core_core_Value) AsWidget() *core.WidgetBase {
-	return W.WAsWidget()
-}
+func (W _cogentcore_org_core_core_Value) AsTree() *tree.NodeBase     { return W.WAsTree() }
+func (W _cogentcore_org_core_core_Value) AsWidget() *core.WidgetBase { return W.WAsWidget() }
 func (W _cogentcore_org_core_core_Value) ChildBackground(child core.Widget) image.Image {
 	return W.WChildBackground(child)
 }
 func (W _cogentcore_org_core_core_Value) ContextMenuPos(e events.Event) image.Point {
 	return W.WContextMenuPos(e)
 }
-func (W _cogentcore_org_core_core_Value) CopyFieldsFrom(from tree.Node) {
-	W.WCopyFieldsFrom(from)
-}
-func (W _cogentcore_org_core_core_Value) Destroy() {
-	W.WDestroy()
-}
+func (W _cogentcore_org_core_core_Value) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
+func (W _cogentcore_org_core_core_Value) Destroy()                      { W.WDestroy() }
 func (W _cogentcore_org_core_core_Value) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 	W.WDirectRenderDraw(drw, idx, flipY)
 }
 func (W _cogentcore_org_core_core_Value) DirectRenderImage(drw system.Drawer, idx int) {
 	W.WDirectRenderImage(drw, idx)
 }
-func (W _cogentcore_org_core_core_Value) Init() {
-	W.WInit()
-}
-func (W _cogentcore_org_core_core_Value) IsVisible() bool {
-	return W.WIsVisible()
-}
+func (W _cogentcore_org_core_core_Value) Init()           { W.WInit() }
+func (W _cogentcore_org_core_core_Value) IsVisible() bool { return W.WIsVisible() }
 func (W _cogentcore_org_core_core_Value) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }
-func (W _cogentcore_org_core_core_Value) OnAdd() {
-	W.WOnAdd()
-}
-func (W _cogentcore_org_core_core_Value) OnChildAdded(child tree.Node) {
-	W.WOnChildAdded(child)
-}
-func (W _cogentcore_org_core_core_Value) PlanName() string {
-	return W.WPlanName()
-}
-func (W _cogentcore_org_core_core_Value) Position() {
-	W.WPosition()
-}
-func (W _cogentcore_org_core_core_Value) Render() {
-	W.WRender()
-}
-func (W _cogentcore_org_core_core_Value) RenderWidget() {
-	W.WRenderWidget()
-}
-func (W _cogentcore_org_core_core_Value) ScenePos() {
-	W.WScenePos()
-}
-func (W _cogentcore_org_core_core_Value) ShowContextMenu(e events.Event) {
-	W.WShowContextMenu(e)
-}
-func (W _cogentcore_org_core_core_Value) SizeDown(iter int) bool {
-	return W.WSizeDown(iter)
-}
-func (W _cogentcore_org_core_core_Value) SizeFinal() {
-	W.WSizeFinal()
-}
-func (W _cogentcore_org_core_core_Value) SizeUp() {
-	W.WSizeUp()
-}
-func (W _cogentcore_org_core_core_Value) Style() {
-	W.WStyle()
-}
+func (W _cogentcore_org_core_core_Value) OnAdd()                         { W.WOnAdd() }
+func (W _cogentcore_org_core_core_Value) OnChildAdded(child tree.Node)   { W.WOnChildAdded(child) }
+func (W _cogentcore_org_core_core_Value) PlanName() string               { return W.WPlanName() }
+func (W _cogentcore_org_core_core_Value) Position()                      { W.WPosition() }
+func (W _cogentcore_org_core_core_Value) Render()                        { W.WRender() }
+func (W _cogentcore_org_core_core_Value) RenderWidget()                  { W.WRenderWidget() }
+func (W _cogentcore_org_core_core_Value) ScenePos()                      { W.WScenePos() }
+func (W _cogentcore_org_core_core_Value) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }
+func (W _cogentcore_org_core_core_Value) SizeDown(iter int) bool         { return W.WSizeDown(iter) }
+func (W _cogentcore_org_core_core_Value) SizeFinal()                     { W.WSizeFinal() }
+func (W _cogentcore_org_core_core_Value) SizeUp()                        { W.WSizeUp() }
+func (W _cogentcore_org_core_core_Value) Style()                         { W.WStyle() }
 func (W _cogentcore_org_core_core_Value) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return W.WWidgetTooltip(pos)
 }
-func (W _cogentcore_org_core_core_Value) WidgetValue() any {
-	return W.WWidgetValue()
-}
+func (W _cogentcore_org_core_core_Value) WidgetValue() any { return W.WWidgetValue() }
 
 // _cogentcore_org_core_core_ValueSetter is an interface wrapper for ValueSetter type
 type _cogentcore_org_core_core_ValueSetter struct {
@@ -1158,9 +912,7 @@ type _cogentcore_org_core_core_Valuer struct {
 	WValue func() core.Value
 }
 
-func (W _cogentcore_org_core_core_Valuer) Value() core.Value {
-	return W.WValue()
-}
+func (W _cogentcore_org_core_core_Valuer) Value() core.Value { return W.WValue() }
 
 // _cogentcore_org_core_core_Widget is an interface wrapper for Widget type
 type _cogentcore_org_core_core_Widget struct {
@@ -1191,75 +943,39 @@ type _cogentcore_org_core_core_Widget struct {
 	WWidgetTooltip     func(pos image.Point) (string, image.Point)
 }
 
-func (W _cogentcore_org_core_core_Widget) AsTree() *tree.NodeBase {
-	return W.WAsTree()
-}
-func (W _cogentcore_org_core_core_Widget) AsWidget() *core.WidgetBase {
-	return W.WAsWidget()
-}
+func (W _cogentcore_org_core_core_Widget) AsTree() *tree.NodeBase     { return W.WAsTree() }
+func (W _cogentcore_org_core_core_Widget) AsWidget() *core.WidgetBase { return W.WAsWidget() }
 func (W _cogentcore_org_core_core_Widget) ChildBackground(child core.Widget) image.Image {
 	return W.WChildBackground(child)
 }
 func (W _cogentcore_org_core_core_Widget) ContextMenuPos(e events.Event) image.Point {
 	return W.WContextMenuPos(e)
 }
-func (W _cogentcore_org_core_core_Widget) CopyFieldsFrom(from tree.Node) {
-	W.WCopyFieldsFrom(from)
-}
-func (W _cogentcore_org_core_core_Widget) Destroy() {
-	W.WDestroy()
-}
+func (W _cogentcore_org_core_core_Widget) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
+func (W _cogentcore_org_core_core_Widget) Destroy()                      { W.WDestroy() }
 func (W _cogentcore_org_core_core_Widget) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 	W.WDirectRenderDraw(drw, idx, flipY)
 }
 func (W _cogentcore_org_core_core_Widget) DirectRenderImage(drw system.Drawer, idx int) {
 	W.WDirectRenderImage(drw, idx)
 }
-func (W _cogentcore_org_core_core_Widget) Init() {
-	W.WInit()
-}
-func (W _cogentcore_org_core_core_Widget) IsVisible() bool {
-	return W.WIsVisible()
-}
+func (W _cogentcore_org_core_core_Widget) Init()           { W.WInit() }
+func (W _cogentcore_org_core_core_Widget) IsVisible() bool { return W.WIsVisible() }
 func (W _cogentcore_org_core_core_Widget) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }
-func (W _cogentcore_org_core_core_Widget) OnAdd() {
-	W.WOnAdd()
-}
-func (W _cogentcore_org_core_core_Widget) OnChildAdded(child tree.Node) {
-	W.WOnChildAdded(child)
-}
-func (W _cogentcore_org_core_core_Widget) PlanName() string {
-	return W.WPlanName()
-}
-func (W _cogentcore_org_core_core_Widget) Position() {
-	W.WPosition()
-}
-func (W _cogentcore_org_core_core_Widget) Render() {
-	W.WRender()
-}
-func (W _cogentcore_org_core_core_Widget) RenderWidget() {
-	W.WRenderWidget()
-}
-func (W _cogentcore_org_core_core_Widget) ScenePos() {
-	W.WScenePos()
-}
-func (W _cogentcore_org_core_core_Widget) ShowContextMenu(e events.Event) {
-	W.WShowContextMenu(e)
-}
-func (W _cogentcore_org_core_core_Widget) SizeDown(iter int) bool {
-	return W.WSizeDown(iter)
-}
-func (W _cogentcore_org_core_core_Widget) SizeFinal() {
-	W.WSizeFinal()
-}
-func (W _cogentcore_org_core_core_Widget) SizeUp() {
-	W.WSizeUp()
-}
-func (W _cogentcore_org_core_core_Widget) Style() {
-	W.WStyle()
-}
+func (W _cogentcore_org_core_core_Widget) OnAdd()                         { W.WOnAdd() }
+func (W _cogentcore_org_core_core_Widget) OnChildAdded(child tree.Node)   { W.WOnChildAdded(child) }
+func (W _cogentcore_org_core_core_Widget) PlanName() string               { return W.WPlanName() }
+func (W _cogentcore_org_core_core_Widget) Position()                      { W.WPosition() }
+func (W _cogentcore_org_core_core_Widget) Render()                        { W.WRender() }
+func (W _cogentcore_org_core_core_Widget) RenderWidget()                  { W.WRenderWidget() }
+func (W _cogentcore_org_core_core_Widget) ScenePos()                      { W.WScenePos() }
+func (W _cogentcore_org_core_core_Widget) ShowContextMenu(e events.Event) { W.WShowContextMenu(e) }
+func (W _cogentcore_org_core_core_Widget) SizeDown(iter int) bool         { return W.WSizeDown(iter) }
+func (W _cogentcore_org_core_core_Widget) SizeFinal()                     { W.WSizeFinal() }
+func (W _cogentcore_org_core_core_Widget) SizeUp()                        { W.WSizeUp() }
+func (W _cogentcore_org_core_core_Widget) Style()                         { W.WStyle() }
 func (W _cogentcore_org_core_core_Widget) WidgetTooltip(pos image.Point) (string, image.Point) {
 	return W.WWidgetTooltip(pos)
 }

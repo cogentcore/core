@@ -83,15 +83,9 @@ type _cogentcore_org_core_plot_plots_Table struct {
 	WPlotData   func(column int, row int) float32
 }
 
-func (W _cogentcore_org_core_plot_plots_Table) ColumnName(i int) string {
-	return W.WColumnName(i)
-}
-func (W _cogentcore_org_core_plot_plots_Table) NumColumns() int {
-	return W.WNumColumns()
-}
-func (W _cogentcore_org_core_plot_plots_Table) NumRows() int {
-	return W.WNumRows()
-}
+func (W _cogentcore_org_core_plot_plots_Table) ColumnName(i int) string { return W.WColumnName(i) }
+func (W _cogentcore_org_core_plot_plots_Table) NumColumns() int         { return W.WNumColumns() }
+func (W _cogentcore_org_core_plot_plots_Table) NumRows() int            { return W.WNumRows() }
 func (W _cogentcore_org_core_plot_plots_Table) PlotData(column int, row int) float32 {
 	return W.WPlotData(column, row)
 }
@@ -114,15 +108,9 @@ type _cogentcore_org_core_plot_plots_XYLabeller struct {
 	WXY    func(i int) (x float32, y float32)
 }
 
-func (W _cogentcore_org_core_plot_plots_XYLabeller) Label(i int) string {
-	return W.WLabel(i)
-}
-func (W _cogentcore_org_core_plot_plots_XYLabeller) Len() int {
-	return W.WLen()
-}
-func (W _cogentcore_org_core_plot_plots_XYLabeller) XY(i int) (x float32, y float32) {
-	return W.WXY(i)
-}
+func (W _cogentcore_org_core_plot_plots_XYLabeller) Label(i int) string              { return W.WLabel(i) }
+func (W _cogentcore_org_core_plot_plots_XYLabeller) Len() int                        { return W.WLen() }
+func (W _cogentcore_org_core_plot_plots_XYLabeller) XY(i int) (x float32, y float32) { return W.WXY(i) }
 
 // _cogentcore_org_core_plot_plots_YErrorer is an interface wrapper for YErrorer type
 type _cogentcore_org_core_plot_plots_YErrorer struct {

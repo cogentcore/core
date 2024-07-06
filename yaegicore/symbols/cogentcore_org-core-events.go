@@ -190,117 +190,51 @@ type _cogentcore_org_core_events_Event struct {
 	WWindowStartPos  func() image.Point
 }
 
-func (W _cogentcore_org_core_events_Event) AsBase() *events.Base {
-	return W.WAsBase()
-}
-func (W _cogentcore_org_core_events_Event) ClearHandled() {
-	W.WClearHandled()
-}
-func (W _cogentcore_org_core_events_Event) Clone() events.Event {
-	return W.WClone()
-}
+func (W _cogentcore_org_core_events_Event) AsBase() *events.Base { return W.WAsBase() }
+func (W _cogentcore_org_core_events_Event) ClearHandled()        { W.WClearHandled() }
+func (W _cogentcore_org_core_events_Event) Clone() events.Event  { return W.WClone() }
 func (W _cogentcore_org_core_events_Event) HasAllModifiers(mods ...enums.BitFlag) bool {
 	return W.WHasAllModifiers(mods...)
 }
 func (W _cogentcore_org_core_events_Event) HasAnyModifier(mods ...enums.BitFlag) bool {
 	return W.WHasAnyModifier(mods...)
 }
-func (W _cogentcore_org_core_events_Event) HasPos() bool {
-	return W.WHasPos()
-}
-func (W _cogentcore_org_core_events_Event) Init() {
-	W.WInit()
-}
-func (W _cogentcore_org_core_events_Event) IsHandled() bool {
-	return W.WIsHandled()
-}
-func (W _cogentcore_org_core_events_Event) IsSame(oth events.Event) bool {
-	return W.WIsSame(oth)
-}
-func (W _cogentcore_org_core_events_Event) IsUnique() bool {
-	return W.WIsUnique()
-}
-func (W _cogentcore_org_core_events_Event) KeyChord() key.Chord {
-	return W.WKeyChord()
-}
-func (W _cogentcore_org_core_events_Event) KeyCode() key.Codes {
-	return W.WKeyCode()
-}
-func (W _cogentcore_org_core_events_Event) KeyRune() rune {
-	return W.WKeyRune()
-}
-func (W _cogentcore_org_core_events_Event) LocalOff() image.Point {
-	return W.WLocalOff()
-}
-func (W _cogentcore_org_core_events_Event) Modifiers() key.Modifiers {
-	return W.WModifiers()
-}
-func (W _cogentcore_org_core_events_Event) MouseButton() events.Buttons {
-	return W.WMouseButton()
-}
-func (W _cogentcore_org_core_events_Event) NeedsFocus() bool {
-	return W.WNeedsFocus()
-}
+func (W _cogentcore_org_core_events_Event) HasPos() bool                 { return W.WHasPos() }
+func (W _cogentcore_org_core_events_Event) Init()                        { W.WInit() }
+func (W _cogentcore_org_core_events_Event) IsHandled() bool              { return W.WIsHandled() }
+func (W _cogentcore_org_core_events_Event) IsSame(oth events.Event) bool { return W.WIsSame(oth) }
+func (W _cogentcore_org_core_events_Event) IsUnique() bool               { return W.WIsUnique() }
+func (W _cogentcore_org_core_events_Event) KeyChord() key.Chord          { return W.WKeyChord() }
+func (W _cogentcore_org_core_events_Event) KeyCode() key.Codes           { return W.WKeyCode() }
+func (W _cogentcore_org_core_events_Event) KeyRune() rune                { return W.WKeyRune() }
+func (W _cogentcore_org_core_events_Event) LocalOff() image.Point        { return W.WLocalOff() }
+func (W _cogentcore_org_core_events_Event) Modifiers() key.Modifiers     { return W.WModifiers() }
+func (W _cogentcore_org_core_events_Event) MouseButton() events.Buttons  { return W.WMouseButton() }
+func (W _cogentcore_org_core_events_Event) NeedsFocus() bool             { return W.WNeedsFocus() }
 func (W _cogentcore_org_core_events_Event) NewFromClone(typ events.Types) events.Event {
 	return W.WNewFromClone(typ)
 }
-func (W _cogentcore_org_core_events_Event) Pos() image.Point {
-	return W.WPos()
-}
-func (W _cogentcore_org_core_events_Event) PrevDelta() image.Point {
-	return W.WPrevDelta()
-}
-func (W _cogentcore_org_core_events_Event) PrevPos() image.Point {
-	return W.WPrevPos()
-}
-func (W _cogentcore_org_core_events_Event) PrevTime() time.Time {
-	return W.WPrevTime()
-}
-func (W _cogentcore_org_core_events_Event) SelectMode() events.SelectModes {
-	return W.WSelectMode()
-}
-func (W _cogentcore_org_core_events_Event) SetHandled() {
-	W.WSetHandled()
-}
-func (W _cogentcore_org_core_events_Event) SetLocalOff(off image.Point) {
-	W.WSetLocalOff(off)
-}
-func (W _cogentcore_org_core_events_Event) SetTime() {
-	W.WSetTime()
-}
-func (W _cogentcore_org_core_events_Event) SincePrev() time.Duration {
-	return W.WSincePrev()
-}
-func (W _cogentcore_org_core_events_Event) SinceStart() time.Duration {
-	return W.WSinceStart()
-}
-func (W _cogentcore_org_core_events_Event) StartDelta() image.Point {
-	return W.WStartDelta()
-}
-func (W _cogentcore_org_core_events_Event) StartPos() image.Point {
-	return W.WStartPos()
-}
-func (W _cogentcore_org_core_events_Event) StartTime() time.Time {
-	return W.WStartTime()
-}
+func (W _cogentcore_org_core_events_Event) Pos() image.Point               { return W.WPos() }
+func (W _cogentcore_org_core_events_Event) PrevDelta() image.Point         { return W.WPrevDelta() }
+func (W _cogentcore_org_core_events_Event) PrevPos() image.Point           { return W.WPrevPos() }
+func (W _cogentcore_org_core_events_Event) PrevTime() time.Time            { return W.WPrevTime() }
+func (W _cogentcore_org_core_events_Event) SelectMode() events.SelectModes { return W.WSelectMode() }
+func (W _cogentcore_org_core_events_Event) SetHandled()                    { W.WSetHandled() }
+func (W _cogentcore_org_core_events_Event) SetLocalOff(off image.Point)    { W.WSetLocalOff(off) }
+func (W _cogentcore_org_core_events_Event) SetTime()                       { W.WSetTime() }
+func (W _cogentcore_org_core_events_Event) SincePrev() time.Duration       { return W.WSincePrev() }
+func (W _cogentcore_org_core_events_Event) SinceStart() time.Duration      { return W.WSinceStart() }
+func (W _cogentcore_org_core_events_Event) StartDelta() image.Point        { return W.WStartDelta() }
+func (W _cogentcore_org_core_events_Event) StartPos() image.Point          { return W.WStartPos() }
+func (W _cogentcore_org_core_events_Event) StartTime() time.Time           { return W.WStartTime() }
 func (W _cogentcore_org_core_events_Event) String() string {
 	if W.WString == nil {
 		return ""
 	}
 	return W.WString()
 }
-func (W _cogentcore_org_core_events_Event) Time() time.Time {
-	return W.WTime()
-}
-func (W _cogentcore_org_core_events_Event) Type() events.Types {
-	return W.WType()
-}
-func (W _cogentcore_org_core_events_Event) WindowPos() image.Point {
-	return W.WWindowPos()
-}
-func (W _cogentcore_org_core_events_Event) WindowPrevPos() image.Point {
-	return W.WWindowPrevPos()
-}
-func (W _cogentcore_org_core_events_Event) WindowStartPos() image.Point {
-	return W.WWindowStartPos()
-}
+func (W _cogentcore_org_core_events_Event) Time() time.Time             { return W.WTime() }
+func (W _cogentcore_org_core_events_Event) Type() events.Types          { return W.WType() }
+func (W _cogentcore_org_core_events_Event) WindowPos() image.Point      { return W.WWindowPos() }
+func (W _cogentcore_org_core_events_Event) WindowPrevPos() image.Point  { return W.WWindowPrevPos() }
+func (W _cogentcore_org_core_events_Event) WindowStartPos() image.Point { return W.WWindowStartPos() }

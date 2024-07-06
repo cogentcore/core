@@ -4,7 +4,6 @@ package symbols
 
 import (
 	"cogentcore.org/core/styles"
-	"github.com/traefik/yaegi/interp"
 	"reflect"
 )
 
@@ -150,7 +149,6 @@ func init() {
 		"NewSideColors":                reflect.ValueOf(styles.NewSideColors),
 		"NewSideFloats":                reflect.ValueOf(styles.NewSideFloats),
 		"NewSideValues":                reflect.ValueOf(styles.NewSideValues),
-		"NewSides":                     reflect.ValueOf(interp.GenericFunc("func NewSides[T any](vals ...T) *Sides[T] {\n\treturn (&Sides[T]{}).Set(vals...)\n}")),
 		"NewStyle":                     reflect.ValueOf(styles.NewStyle),
 		"NoLayout":                     reflect.ValueOf(styles.NoLayout),
 		"ObjectFitsN":                  reflect.ValueOf(styles.ObjectFitsN),
@@ -184,8 +182,6 @@ func init() {
 		"ShiftSuper":                   reflect.ValueOf(styles.ShiftSuper),
 		"SideIndexesN":                 reflect.ValueOf(styles.SideIndexesN),
 		"SideIndexesValues":            reflect.ValueOf(styles.SideIndexesValues),
-		"SidesAreSame":                 reflect.ValueOf(interp.GenericFunc("func SidesAreSame[T comparable](s Sides[T]) bool {\n\treturn s.Right == s.Top && s.Bottom == s.Top && s.Left == s.Top\n}")),
-		"SidesAreZero":                 reflect.ValueOf(interp.GenericFunc("func SidesAreZero[T comparable](s Sides[T]) bool {\n\tvar zv T\n\treturn s.Top == zv && s.Right == zv && s.Bottom == zv && s.Left == zv\n}")),
 		"SpaceAround":                  reflect.ValueOf(styles.SpaceAround),
 		"SpaceBetween":                 reflect.ValueOf(styles.SpaceBetween),
 		"SpaceEvenly":                  reflect.ValueOf(styles.SpaceEvenly),
@@ -196,11 +192,6 @@ func init() {
 		"StyleFillFuncs":               reflect.ValueOf(&styles.StyleFillFuncs).Elem(),
 		"StyleFontFuncs":               reflect.ValueOf(&styles.StyleFontFuncs).Elem(),
 		"StyleFontRenderFuncs":         reflect.ValueOf(&styles.StyleFontRenderFuncs).Elem(),
-		"StyleFuncBool":                reflect.ValueOf(interp.GenericFunc("func StyleFuncBool[T any](initVal bool, getField func(obj *T) *bool) StyleFunc {\n\treturn func(obj any, key string, val any, parent any, cc colors.Context) {\n\t\tfp := getField(obj.(*T))\n\t\tif inh, init := StyleInhInit(val, parent); inh || init {\n\t\t\tif inh {\n\t\t\t\t*fp = *getField(parent.(*T))\n\t\t\t} else if init {\n\t\t\t\t*fp = initVal\n\t\t\t}\n\t\t\treturn\n\t\t}\n\t\tfv, _ := reflectx.ToBool(val)\n\t\t*fp = fv\n\t}\n}")),
-		"StyleFuncEnum":                reflect.ValueOf(interp.GenericFunc("func StyleFuncEnum[T any](initVal enums.Enum, getField func(obj *T) enums.EnumSetter) StyleFunc {\n\treturn func(obj any, key string, val any, parent any, cc colors.Context) {\n\t\tfp := getField(obj.(*T))\n\t\tif inh, init := StyleInhInit(val, parent); inh || init {\n\t\t\tif inh {\n\t\t\t\tfp.SetInt64(getField(parent.(*T)).Int64())\n\t\t\t} else if init {\n\t\t\t\tfp.SetInt64(initVal.Int64())\n\t\t\t}\n\t\t\treturn\n\t\t}\n\t\tif st, ok := val.(string); ok {\n\t\t\tfp.SetString(st)\n\t\t\treturn\n\t\t}\n\t\tif en, ok := val.(enums.Enum); ok {\n\t\t\tfp.SetInt64(en.Int64())\n\t\t\treturn\n\t\t}\n\t\tiv, _ := reflectx.ToInt(val)\n\t\tfp.SetInt64(int64(iv))\n\t}\n}")),
-		"StyleFuncFloat":               reflect.ValueOf(interp.GenericFunc("func StyleFuncFloat[T any, F num.Float](initVal F, getField func(obj *T) *F) StyleFunc {\n\treturn func(obj any, key string, val any, parent any, cc colors.Context) {\n\t\tfp := getField(obj.(*T))\n\t\tif inh, init := StyleInhInit(val, parent); inh || init {\n\t\t\tif inh {\n\t\t\t\t*fp = *getField(parent.(*T))\n\t\t\t} else if init {\n\t\t\t\t*fp = initVal\n\t\t\t}\n\t\t\treturn\n\t\t}\n\t\tfv, _ := reflectx.ToFloat(val) // can represent any number, ToFloat is fast type switch\n\t\t*fp = F(fv)\n\t}\n}")),
-		"StyleFuncInt":                 reflect.ValueOf(interp.GenericFunc("func StyleFuncInt[T any, F num.Integer](initVal F, getField func(obj *T) *F) StyleFunc {\n\treturn func(obj any, key string, val any, parent any, cc colors.Context) {\n\t\tfp := getField(obj.(*T))\n\t\tif inh, init := StyleInhInit(val, parent); inh || init {\n\t\t\tif inh {\n\t\t\t\t*fp = *getField(parent.(*T))\n\t\t\t} else if init {\n\t\t\t\t*fp = initVal\n\t\t\t}\n\t\t\treturn\n\t\t}\n\t\tfv, _ := reflectx.ToInt(val)\n\t\t*fp = F(fv)\n\t}\n}")),
-		"StyleFuncUnits":               reflect.ValueOf(interp.GenericFunc("func StyleFuncUnits[T any](initVal units.Value, getField func(obj *T) *units.Value) StyleFunc {\n\treturn func(obj any, key string, val any, parent any, cc colors.Context) {\n\t\tfp := getField(obj.(*T))\n\t\tif inh, init := StyleInhInit(val, parent); inh || init {\n\t\t\tif inh {\n\t\t\t\t*fp = *getField(parent.(*T))\n\t\t\t} else if init {\n\t\t\t\t*fp = initVal\n\t\t\t}\n\t\t\treturn\n\t\t}\n\t\tfp.SetAny(val, key)\n\t}\n}")),
 		"StyleInhInit":                 reflect.ValueOf(styles.StyleInhInit),
 		"StyleLayoutFuncs":             reflect.ValueOf(&styles.StyleLayoutFuncs).Elem(),
 		"StyleOutlineFuncs":            reflect.ValueOf(&styles.StyleOutlineFuncs).Elem(),

@@ -31,11 +31,11 @@ func init() {
 		"XY":                 reflect.ValueOf(plotcore.XY),
 
 		// type definitions
-		"ColumnParams": reflect.ValueOf((*plotcore.ColumnOptions)(nil)),
-		"Plot":         reflect.ValueOf((*plotcore.Plot)(nil)),
-		"PlotEditor":   reflect.ValueOf((*plotcore.PlotEditor)(nil)),
-		"PlotParams":   reflect.ValueOf((*plotcore.PlotOptions)(nil)),
-		"PlotTypes":    reflect.ValueOf((*plotcore.PlotTypes)(nil)),
-		"TableXY":      reflect.ValueOf((*plotcore.TableXY)(nil)),
+		"ColumnOptions": reflect.ValueOf((*plotcore.ColumnOptions)(nil)),
+		"Plot":          reflect.ValueOf((*plotcore.Plot)(nil)),
+		"PlotEditor":    reflect.ValueOf((*plotcore.PlotEditor)(nil)),
+		"PlotOptions":   reflect.ValueOf((*plotcore.PlotOptions)(nil)),
+		"PlotTypes":     reflect.ValueOf((*plotcore.PlotTypes)(nil)),
+		"TableXY":       reflect.ValueOf((*plotcore.TableXY)(nil)),
 	}
 }

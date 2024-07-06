@@ -11,15 +11,14 @@ import (
 func init() {
 	Symbols["cogentcore.org/core/tree/tree"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"Add":               reflect.ValueOf(interp.GenericFunc("func Add[T NodeValue](p *Plan, init func(n *T)) {\n\tAddAt(p, autoPlanName(2), init)\n}")),
-		"AddAt":             reflect.ValueOf(interp.GenericFunc("func AddAt[T NodeValue](p *Plan, name string, init func(n *T)) {\n\tp.Add(name, func() Node {\n\t\treturn any(New[T]()).(Node)\n\t}, func(n Node) {\n\t\tinit(any(n).(*T))\n\t})\n}")),
-		"AddChild":          reflect.ValueOf(interp.GenericFunc("func AddChild[T NodeValue](parent Node, init func(n *T)) {\n\tname := autoPlanName(2) // must get here to get correct name\n\tparent.AsTree().Maker(func(p *Plan) {\n\t\tAddAt(p, name, init)\n\t})\n}")),
-		"AddChildAt":        reflect.ValueOf(interp.GenericFunc("func AddChildAt[T NodeValue](parent Node, name string, init func(n *T)) {\n\tparent.AsTree().Maker(func(p *Plan) {\n\t\tAddAt(p, name, init)\n\t})\n}")),
-		"AddChildInit":      reflect.ValueOf(interp.GenericFunc("func AddChildInit[T NodeValue](parent Node, name string, init func(n *T)) {\n\tparent.AsTree().Maker(func(p *Plan) {\n\t\tAddInit(p, name, init)\n\t})\n}")),
-		"AddInit":           reflect.ValueOf(interp.GenericFunc("func AddInit[T NodeValue](p *Plan, name string, init func(n *T)) {\n\tfor _, child := range p.Children {\n\t\tif child.Name == name {\n\t\t\tchild.Init = append(child.Init, func(n Node) {\n\t\t\t\tinit(any(n).(*T))\n\t\t\t})\n\t\t\treturn\n\t\t}\n\t}\n\tslog.Error(\"AddInit: child not found\", \"name\", name)\n}")),
-		"AddNew":            reflect.ValueOf(interp.GenericFunc("func AddNew[T Node](p *Plan, name string, new func() T, init func(n T)) {\n\tp.Add(name, func() Node {\n\t\treturn new()\n\t}, func(n Node) {\n\t\tinit(n.(T))\n\t})\n}")),
+		"Add":               reflect.ValueOf(interp.GenericFunc("func Add[T NodeValue](p *Plan, init func(n *T)) { //yaegi:add\n\tAddAt(p, autoPlanName(2), init)\n}")),
+		"AddAt":             reflect.ValueOf(interp.GenericFunc("func AddAt[T NodeValue](p *Plan, name string, init func(n *T)) { //yaegi:add\n\tp.Add(name, func() Node {\n\t\treturn any(New[T]()).(Node)\n\t}, func(n Node) {\n\t\tinit(any(n).(*T))\n\t})\n}")),
+		"AddChild":          reflect.ValueOf(interp.GenericFunc("func AddChild[T NodeValue](parent Node, init func(n *T)) { //yaegi:add\n\tname := autoPlanName(2) // must get here to get correct name\n\tparent.AsTree().Maker(func(p *Plan) {\n\t\tAddAt(p, name, init)\n\t})\n}")),
+		"AddChildAt":        reflect.ValueOf(interp.GenericFunc("func AddChildAt[T NodeValue](parent Node, name string, init func(n *T)) { //yaegi:add\n\tparent.AsTree().Maker(func(p *Plan) {\n\t\tAddAt(p, name, init)\n\t})\n}")),
+		"AddChildInit":      reflect.ValueOf(interp.GenericFunc("func AddChildInit[T NodeValue](parent Node, name string, init func(n *T)) { //yaegi:add\n\tparent.AsTree().Maker(func(p *Plan) {\n\t\tAddInit(p, name, init)\n\t})\n}")),
+		"AddInit":           reflect.ValueOf(interp.GenericFunc("func AddInit[T NodeValue](p *Plan, name string, init func(n *T)) { //yaegi:add\n\tfor _, child := range p.Children {\n\t\tif child.Name == name {\n\t\t\tchild.Init = append(child.Init, func(n Node) {\n\t\t\t\tinit(any(n).(*T))\n\t\t\t})\n\t\t\treturn\n\t\t}\n\t}\n\tslog.Error(\"AddInit: child not found\", \"name\", name)\n}")),
+		"AddNew":            reflect.ValueOf(interp.GenericFunc("func AddNew[T Node](p *Plan, name string, new func() T, init func(n T)) { //yaegi:add\n\tp.Add(name, func() Node {\n\t\treturn new()\n\t}, func(n Node) {\n\t\tinit(n.(T))\n\t})\n}")),
 		"Break":             reflect.ValueOf(tree.Break),
-		"ChildByType":       reflect.ValueOf(interp.GenericFunc("func ChildByType[T Node](n Node, startIndex ...int) T {\n\tnb := n.AsTree()\n\tidx := slicesx.Search(nb.Children, func(ch Node) bool {\n\t\t_, ok := ch.(T)\n\t\treturn ok\n\t}, startIndex...)\n\tch := nb.Child(idx)\n\tif ch == nil {\n\t\tvar z T\n\t\treturn z\n\t}\n\treturn ch.(T)\n}")),
 		"Continue":          reflect.ValueOf(tree.Continue),
 		"EscapePathName":    reflect.ValueOf(tree.EscapePathName),
 		"IndexByName":       reflect.ValueOf(tree.IndexByName),
@@ -29,12 +28,11 @@ func init() {
 		"Last":              reflect.ValueOf(tree.Last),
 		"LastChild":         reflect.ValueOf(tree.LastChild),
 		"MoveToParent":      reflect.ValueOf(tree.MoveToParent),
-		"New":               reflect.ValueOf(interp.GenericFunc("func New[T NodeValue](parent ...Node) *T {\n\tn := new(T)\n\tni := any(n).(Node)\n\tinitNode(ni)\n\tif len(parent) == 0 {\n\t\tni.AsTree().SetName(ni.AsTree().NodeType().IDName)\n\t\treturn n\n\t}\n\tp := parent[0]\n\tp.AsTree().Children = append(p.AsTree().Children, ni)\n\tSetParent(ni, p)\n\treturn n\n}")),
+		"New":               reflect.ValueOf(interp.GenericFunc("func New[T NodeValue](parent ...Node) *T { //yaegi:add\n\tn := new(T)\n\tni := any(n).(Node)\n\tinitNode(ni)\n\tif len(parent) == 0 {\n\t\tni.AsTree().SetName(ni.AsTree().NodeType().IDName)\n\t\treturn n\n\t}\n\tp := parent[0]\n\tp.AsTree().Children = append(p.AsTree().Children, ni)\n\tSetParent(ni, p)\n\treturn n\n}")),
 		"NewNodeBase":       reflect.ValueOf(tree.NewNodeBase),
 		"NewOfType":         reflect.ValueOf(tree.NewOfType),
 		"Next":              reflect.ValueOf(tree.Next),
 		"NextSibling":       reflect.ValueOf(tree.NextSibling),
-		"ParentByType":      reflect.ValueOf(interp.GenericFunc("func ParentByType[T Node](n Node) T {\n\tif IsRoot(n) {\n\t\tvar z T\n\t\treturn z\n\t}\n\tif p, ok := n.AsTree().Parent.(T); ok {\n\t\treturn p\n\t}\n\treturn ParentByType[T](n.AsTree().Parent)\n}")),
 		"Previous":          reflect.ValueOf(tree.Previous),
 		"Root":              reflect.ValueOf(tree.Root),
 		"SetParent":         reflect.ValueOf(tree.SetParent),
@@ -72,30 +70,16 @@ type _cogentcore_org_core_tree_Node struct {
 	WPlanName       func() string
 }
 
-func (W _cogentcore_org_core_tree_Node) AsTree() *tree.NodeBase {
-	return W.WAsTree()
-}
-func (W _cogentcore_org_core_tree_Node) CopyFieldsFrom(from tree.Node) {
-	W.WCopyFieldsFrom(from)
-}
-func (W _cogentcore_org_core_tree_Node) Destroy() {
-	W.WDestroy()
-}
-func (W _cogentcore_org_core_tree_Node) Init() {
-	W.WInit()
-}
+func (W _cogentcore_org_core_tree_Node) AsTree() *tree.NodeBase        { return W.WAsTree() }
+func (W _cogentcore_org_core_tree_Node) CopyFieldsFrom(from tree.Node) { W.WCopyFieldsFrom(from) }
+func (W _cogentcore_org_core_tree_Node) Destroy()                      { W.WDestroy() }
+func (W _cogentcore_org_core_tree_Node) Init()                         { W.WInit() }
 func (W _cogentcore_org_core_tree_Node) NodeWalkDown(fun func(n tree.Node) bool) {
 	W.WNodeWalkDown(fun)
 }
-func (W _cogentcore_org_core_tree_Node) OnAdd() {
-	W.WOnAdd()
-}
-func (W _cogentcore_org_core_tree_Node) OnChildAdded(child tree.Node) {
-	W.WOnChildAdded(child)
-}
-func (W _cogentcore_org_core_tree_Node) PlanName() string {
-	return W.WPlanName()
-}
+func (W _cogentcore_org_core_tree_Node) OnAdd()                       { W.WOnAdd() }
+func (W _cogentcore_org_core_tree_Node) OnChildAdded(child tree.Node) { W.WOnChildAdded(child) }
+func (W _cogentcore_org_core_tree_Node) PlanName() string             { return W.WPlanName() }
 
 // _cogentcore_org_core_tree_NodeValue is an interface wrapper for NodeValue type
 type _cogentcore_org_core_tree_NodeValue struct {
