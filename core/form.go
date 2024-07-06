@@ -186,7 +186,8 @@ func (fm *Form) Init() {
 							ErrorSnackbar(w, err, "Error setting default value")
 						} else {
 							w.Update()
-							valueWidget.AsWidget().UpdateChange(e)
+							valueWidget.AsWidget().Update()
+							valueWidget.AsWidget().SendChange(e)
 						}
 					})
 				}
