@@ -46,6 +46,14 @@ func main() {
 	pg := pages.NewPage(b).SetSource(fsx.Sub(content, "content"))
 	pg.Context.WikilinkResolver = htmlcore.PkgGoDevWikilink("cogentcore.org/core")
 	b.AddAppBar(pg.MakeToolbar)
+	b.AddAppBar(func(p *tree.Plan) {
+		tree.Add(p, func(w *core.Button) {
+			w.SetText("Playground").SetIcon(icons.PlayCircle)
+			w.OnClick(func(e events.Event) {
+				pg.Context.OpenURL("playground")
+			})
+		})
+	})
 
 	htmlcore.ElementHandlers["home-page"] = homePage
 	htmlcore.ElementHandlers["core-playground"] = func(ctx *htmlcore.Context) bool {
