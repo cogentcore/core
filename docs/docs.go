@@ -23,7 +23,7 @@ import (
 	"cogentcore.org/core/styles/units"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/tree"
-	_ "cogentcore.org/core/yaegicore"
+	"cogentcore.org/core/yaegicore"
 )
 
 //go:embed content
@@ -48,6 +48,20 @@ func main() {
 	b.AddAppBar(pg.MakeToolbar)
 
 	htmlcore.ElementHandlers["home-page"] = homePage
+	htmlcore.ElementHandlers["core-playground"] = func(ctx *htmlcore.Context) bool {
+		splits := core.NewSplits(ctx.BlockParent)
+		te := texteditor.NewSoloEditor(splits)
+		te.Buffer.SetLang("go").SetTextString(`package main
+
+func main() {
+	b := core.NewBody("Hello")
+	core.NewButton(b).SetText("Hello, World!")
+	b.RunMainWindow()
+}`)
+		parent := core.NewFrame(splits)
+		yaegicore.BindTextEditor(te, parent)
+		return true
+	}
 
 	b.RunMainWindow()
 }
@@ -139,10 +153,10 @@ func homePage(ctx *htmlcore.Context) bool {
 	makeBlock("EFFORTLESS ELEGANCE", "Cogent Core is built on Go, a high-level language designed for building elegant, readable, and scalable code with full type safety and a robust design that never gets in your way. Cogent Core makes it easy to get started with cross-platform app development in just two commands and seven lines of simple code.", func(w *texteditor.Editor) {
 		w.SetNewBuffer()
 		w.Buffer.SetLang("go").SetTextString(`func main() {
-			b := core.NewBody("Hello")
-			core.NewButton(b).SetText("Hello, World!")
-			b.RunMainWindow()
-		}`)
+	b := core.NewBody("Hello")
+	core.NewButton(b).SetText("Hello, World!")
+	b.RunMainWindow()
+}`)
 		w.Styler(func(s *styles.Style) {
 			s.Min.X.Pw(50)
 		})
