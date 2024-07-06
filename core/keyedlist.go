@@ -259,7 +259,7 @@ func BindMapKey[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 		d.RunDialog(vw)
 	}
 	if alreadyBound {
-		resetWidgetValue(vw)
+		ResetWidgetValue(vw)
 	}
 	if ob, ok := any(vw).(OnBinder); ok {
 		ob.OnBind(key.Interface())
@@ -286,7 +286,7 @@ func BindMapValue[T Value](mapv reflect.Value, key reflect.Value, vw T) T {
 		mapv.SetMapIndex(key, value.Elem())
 	}
 	if alreadyBound {
-		resetWidgetValue(vw)
+		ResetWidgetValue(vw)
 	}
 	if ob, ok := any(vw).(OnBinder); ok {
 		value := mapv.MapIndex(key).Interface()

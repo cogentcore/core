@@ -56,7 +56,7 @@ func Bind[T Value](value any, vw T) T { //yaegi:add
 		ErrorSnackbar(vw, reflectx.SetRobust(value, vw.WidgetValue()))
 	}
 	if alreadyBound {
-		resetWidgetValue(vw)
+		ResetWidgetValue(vw)
 	}
 	wb.ValueTitle = labels.FriendlyTypeName(reflectx.NonPointerType(reflect.TypeOf(value)))
 	if ob, ok := any(vw).(OnBinder); ok {
@@ -66,11 +66,12 @@ func Bind[T Value](value any, vw T) T { //yaegi:add
 	return vw
 }
 
-// If we were already bound to another value previously, we first need to
-// reset the widget value to zero to avoid any issues with the pointer from
+// ResetWidgetValue resets the [Value] if it was already bound to another value previously.
+// We first need to reset the widget value to zero to avoid any issues with the pointer from
 // the old value persisting and being updated. For example, that issue happened
 // with slice and map pointers persisting in forms when a new struct was set.
-func resetWidgetValue(vw Value) {
+// It should not be called by end-user code.
+func ResetWidgetValue(vw Value) {
 	rv := reflect.ValueOf(vw.WidgetValue())
 	if rv.IsValid() && rv.Type().Kind() == reflect.Pointer {
 		rv.Elem().SetZero()

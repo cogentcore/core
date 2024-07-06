@@ -6,4 +6,5 @@ command extract {
     }
 }
 
-extract core icons events styles styles/states styles/abilities styles/units tree keymap colors colors/gradient filetree texteditor htmlcore pages plot plot/plots plot/plotcore
+extract core icons events styles styles/states styles/abilities styles/units tree keymap colors colors/gradient filetree texteditor htmlcore pages plot plot/plots plot/plotcore base/reflectx base/labels
+

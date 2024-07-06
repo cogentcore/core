@@ -129,13 +129,13 @@ func (nb *NodeBase) RunUpdaters() {
 // is called. The name of the node is automatically generated based
 // on the file and line number of the calling function.
 func Add[T NodeValue](p *Plan, init func(n *T)) { //yaegi:add
-	AddAt(p, autoPlanName(2), init)
+	AddAt(p, AutoPlanName(2), init)
 }
 
-// autoPlanName returns the dir-filename of [runtime.Caller](level),
+// AutoPlanName returns the dir-filename of [runtime.Caller](level),
 // with all / . replaced to -, which is suitable as a unique name
 // for a [PlanItem.Name].
-func autoPlanName(level int) string {
+func AutoPlanName(level int) string {
 	_, file, line, _ := runtime.Caller(level)
 	name := filepath.Base(file)
 	dir := filepath.Base(filepath.Dir(file))
@@ -191,7 +191,7 @@ func AddInit[T NodeValue](p *Plan, name string, init func(n *T)) { //yaegi:add
 // adds a [PlanItem] with the given init function using [Add]. In other words,
 // this adds a maker that will add a child to the given parent.
 func AddChild[T NodeValue](parent Node, init func(n *T)) { //yaegi:add
-	name := autoPlanName(2) // must get here to get correct name
+	name := AutoPlanName(2) // must get here to get correct name
 	parent.AsTree().Maker(func(p *Plan) {
 		AddAt(p, name, init)
 	})

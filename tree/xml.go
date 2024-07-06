@@ -223,7 +223,7 @@ func (sl *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 					return fmt.Errorf("tree.Slice UnmarshalXML: %w", err)
 				}
 				kid := NewOfType(typ)
-				initNode(kid)
+				InitNode(kid)
 				nwk = append(nwk, kid)
 			}
 		}
