@@ -5,6 +5,8 @@
 // Package symbols contains yaegi symbols for core packages.
 package symbols
 
+//go:generate ./make
+
 import "reflect"
 
 var Symbols = map[string]map[string]reflect.Value{}
