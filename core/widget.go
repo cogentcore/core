@@ -231,6 +231,10 @@ type WidgetBase struct {
 
 	// needsRender is whether the widget needs to be rendered on the next render iteration.
 	needsRender bool
+
+	// firstRender indicates that we were the first to render, and pushed our parent's
+	// bounds, which then need to be popped.
+	firstRender bool
 }
 
 // Init should be called by every Widget type in its custom

@@ -188,7 +188,7 @@ func (wb *WidgetBase) DoNeedsRender() {
 	wb.WidgetWalkDown(func(w Widget, cwb *WidgetBase) bool {
 		if cwb.needsRender {
 			w.RenderWidget()
-			return tree.Break // done
+			return tree.Break // don't go any deeper
 		}
 		if ly := AsFrame(w); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
@@ -343,6 +343,14 @@ func (wb *WidgetBase) PushBounds() bool {
 	if pc.State == nil || pc.Image == nil {
 		return false
 	}
+	if len(pc.BoundsStack) == 0 && wb.Parent != nil {
+		wb.firstRender = true
+		// push our parent's bounds if we are the first to render
+		pw := wb.ParentWidget()
+		pc.PushBoundsGeom(pw.Geom.TotalBBox, pw.Styles.Border.Radius.Dots())
+	} else {
+		wb.firstRender = false
+	}
 	pc.PushBoundsGeom(wb.Geom.TotalBBox, wb.Styles.Border.Radius.Dots())
 	pc.Defaults() // start with default values
 	if DebugSettings.RenderTrace {
@@ -392,6 +400,10 @@ func (wb *WidgetBase) PopBounds() {
 	}
 
 	pc.PopBounds()
+	if wb.firstRender {
+		pc.PopBounds()
+		wb.firstRender = false
+	}
 }
 
 // Render is the method that widgets should implement to define their
