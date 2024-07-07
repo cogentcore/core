@@ -5,7 +5,6 @@
 package paint
 
 import (
-	"fmt"
 	"image"
 
 	"cogentcore.org/core/colors/gradient"
@@ -124,34 +123,89 @@ func (pc *Context) fixBounds(pos, size math32.Vector2) (math32.Vector2, math32.V
 	psz := math32.Vector2FromPoint(pbox.Size())
 	pr = ClampBorderRadius(pr, psz.X, psz.Y)
 
-	// rect := math32.RectFromPosSizeMax(pos, size)
+	rect := math32.Box2{Min: pos, Max: pos.Add(size)}
 
-	radius := max(pr.Top, pr.Right)
-	height := radius - (pos.Y - float32(pbox.Min.Y))
-	if height > 0 {
-		hypot := math32.Hypot(radius, height)
-		x := radius * radius / hypot
-		y := height * radius / hypot
-		pos.X += radius - x
-		pos.Y += radius - y
-		fmt.Println(height, hypot, x, y, pos)
+	horizFit := func(width, radius float32) (x, y float32) {
+		norm := width / radius
+		if norm < .5 {
+			ang := math32.Acos(norm)
+			x = width
+			y = radius * math32.Sin(ang)
+		} else {
+			x = radius * (math32.Sqrt2 / 2)
+			y = x
+		}
+		return
+	}
+	vertFit := func(height, radius float32) (x, y float32) {
+		norm := height / radius
+		if norm < .5 {
+			ang := math32.Asin(norm)
+			x = radius * math32.Cos(ang)
+			y = height
+		} else {
+			x = radius * (math32.Sqrt2 / 2)
+			y = x
+		}
+		return
 	}
 
-	// pright := pbox.Min.Add(image.Pt(pbox.Size().X-int(pr.Right), int(pr.Right)))
-	// if rect.Max.X > pright.X && rect.Min.Y < pright.Y {
-	// 	rect.Min.Y = pright.Y
-	// 	rect.Max.X = pright.X
-	// }
+	// logic is currently based on consistent radius for all corners
+	radius := max(pr.Top, pr.Left, pr.Right, pr.Bottom)
 
-	// pbottom := pbox.Min.Add(image.Pt(pbox.Size().X-int(pr.Bottom), pbox.Size().Y-int(pr.Bottom)))
-	// if rect.Max.X > pbottom.X && rect.Max.Y > pbottom.Y {
-	// 	rect.Max = pbottom
-	// }
+	// each of these is how much the element is encroaching into each
+	// side of the bounding rectangle, within the radius curve.
+	// if the number is negative, then it isn't encroaching at all and can
+	// be ignored.
+	top := radius - (rect.Min.Y - float32(pbox.Min.Y))
+	left := radius - (rect.Min.X - float32(pbox.Min.X))
+	right := radius - (float32(pbox.Max.X) - rect.Max.X)
+	bottom := radius - (float32(pbox.Max.Y) - rect.Max.Y)
 
-	// pleft := pbox.Min.Add(image.Pt(int(pr.Left), pbox.Size().Y-int(pr.Left)))
-	// if rect.Min.X < pleft.X && rect.Max.Y > pleft.Y {
-	// 	rect.Min.X = pleft.X
-	// 	rect.Max.Y = pleft.Y
-	// }
-	return pos, size
+	if top > 0 && left > 0 {
+		if left < top {
+			x, y := horizFit(left, radius)
+			rect.Min.X = max(rect.Min.X, pos.X-(1+(left-x)))
+			rect.Min.Y = max(rect.Min.Y, pos.Y+1+radius-y)
+		} else {
+			x, y := vertFit(top, radius)
+			rect.Min.X = max(rect.Min.X, pos.X+1+radius-x)
+			rect.Min.Y = max(rect.Min.Y, pos.Y+1+(top-y))
+		}
+	}
+	if top > 0 && right > 0 {
+		if right < top {
+			x, y := horizFit(right, radius)
+			rect.Max.X = min(rect.Max.X, pos.X+size.X-(1+(right-x)))
+			rect.Min.Y = max(rect.Min.Y, pos.Y+1+radius-y)
+		} else {
+			x, y := vertFit(top, radius)
+			rect.Max.X = min(rect.Max.X, pos.X+size.X-(1+radius-x))
+			rect.Min.Y = max(rect.Min.Y, pos.Y+1+(top-y))
+		}
+	}
+	if bottom > 0 && right > 0 {
+		if right < bottom {
+			x, y := horizFit(right, radius)
+			rect.Max.X = min(rect.Max.X, pos.X+size.X-(1+(right-x)))
+			rect.Max.Y = min(rect.Max.Y, pos.Y+size.Y+(1+radius-y))
+		} else {
+			x, y := vertFit(bottom, radius)
+			rect.Max.X = min(rect.Max.X, pos.X+size.X-(1+radius-x))
+			rect.Max.Y = min(rect.Max.Y, pos.Y+size.Y-(1+(bottom-y)))
+		}
+	}
+	if bottom > 0 && left > 0 {
+		if left < bottom {
+			x, y := horizFit(left, radius)
+			rect.Min.X = max(rect.Min.X, pos.X-(1+(left-x)))
+			rect.Max.Y = min(rect.Max.Y, pos.Y+size.Y-(1+radius-y))
+		} else {
+			x, y := vertFit(bottom, radius)
+			rect.Min.X = max(rect.Min.X, pos.X+(1+radius-x))
+			rect.Max.Y = min(rect.Max.Y, pos.Y+size.Y-(1+(bottom-y)))
+		}
+	}
+
+	return rect.Min, rect.Max.Sub(rect.Min)
 }
