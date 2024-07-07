@@ -8,8 +8,8 @@ package stringsx
 
 import "strings"
 
-// SplitLines is a windows-safe version of strings.Split(s, "\n")
-// that replaces the carriage return, newline sequence with just newline.
+// SplitLines is a windows-safe version of [strings.Split](s, "\n")
+// that replaces "\r\n" with "\n" first.
 func SplitLines(s string) []string {
-	return strings.Split(strings.Replace(s, "\r\n", "\n", -1), "\n")
+	return strings.Split(strings.ReplaceAll(s, "\r\n", "\n"), "\n")
 }
