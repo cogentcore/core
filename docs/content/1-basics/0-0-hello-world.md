@@ -1,6 +1,6 @@
-# Hello World
+# Hello world
 
-This page teaches you how to make a simple Hello World example app with Cogent Core.
+This page shows you how to make a simple hello world example app with Cogent Core.
 
 1. Run `mkdir hello && cd hello && go mod init hello && touch main.go` to make a new Go project
 2. Open `main.go` using an editor of your choice
