@@ -10,6 +10,7 @@ spinner := core.Bind(&number, core.NewSpinner(parent)).SetMin(0)
 buttons := core.NewFrame(parent)
 buttons.Maker(func(p *tree.Plan) {
     for i := 0; i < number; i++ {
+        i := i
         tree.AddAt(p, strconv.Itoa(i), func(w *core.Button) {
             w.SetText(strconv.Itoa(i))
         })

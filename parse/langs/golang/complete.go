@@ -212,7 +212,7 @@ func (gl *GoLang) CompleteLine(fss *parse.FileStates, str string, pos lexer.Pos)
 	if nxt != nil {
 		lststr = nxt.Src
 	}
-	if got {
+	if got && typ != nil {
 		// fmt.Printf("got completion type: %v, last str: %v\n", typ.String(), lststr)
 		syms.AddCompleteTypeNames(typ, typ.Name, lststr, &md)
 	} else {
