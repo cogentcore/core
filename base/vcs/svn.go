@@ -1,4 +1,4 @@
-// Copyright (c) 2019, The Gide Authors. All rights reserved.
+// Copyright (c) 2019, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -38,14 +38,16 @@ func (gr *SvnRepo) CharToStat(stat byte) FileStatus {
 	default:
 		return Stored
 	}
-	return Untracked
 }
 
 func (gr *SvnRepo) Files() (Files, error) {
-	f := make(Files, 1000)
+	f := make(Files)
 
 	lpath := gr.LocalPath()
-	allfs, err := AllFiles(lpath) // much faster than svn list --recursive
+	allfs, err := allFiles(lpath) // much faster than svn list --recursive
+	if err != nil {
+		return nil, err
+	}
 	for _, fn := range allfs {
 		rpath, _ := filepath.Rel(lpath, fn)
 		f[rpath] = Stored
@@ -69,9 +71,9 @@ func (gr *SvnRepo) Files() (Files, error) {
 	return f, nil
 }
 
-// Status returns status of given file -- returns Untracked on any error
+// Status returns status of given file; returns Untracked on any error
 func (gr *SvnRepo) Status(fname string) (FileStatus, string) {
-	out, err := gr.RunFromDir("svn", "status", RelPath(gr, fname))
+	out, err := gr.RunFromDir("svn", "status", relPath(gr, fname))
 	if err != nil {
 		return Untracked, err.Error()
 	}
@@ -89,7 +91,7 @@ func (gr *SvnRepo) Status(fname string) (FileStatus, string) {
 
 // Add adds the file to the repo
 func (gr *SvnRepo) Add(fname string) error {
-	oscmd := exec.Command("svn", "add", RelPath(gr, fname))
+	oscmd := exec.Command("svn", "add", relPath(gr, fname))
 	stdoutStderr, err := oscmd.CombinedOutput()
 	if err != nil {
 		log.Println(string(stdoutStderr))
@@ -111,7 +113,7 @@ func (gr *SvnRepo) Move(oldpath, newpath string) error {
 
 // Delete removes the file from the repo -- uses "force" option to ensure deletion
 func (gr *SvnRepo) Delete(fname string) error {
-	oscmd := exec.Command("svn", "rm", "-f", RelPath(gr, fname))
+	oscmd := exec.Command("svn", "rm", "-f", relPath(gr, fname))
 	stdoutStderr, err := oscmd.CombinedOutput()
 	if err != nil {
 		log.Println(string(stdoutStderr))
@@ -122,7 +124,7 @@ func (gr *SvnRepo) Delete(fname string) error {
 
 // DeleteRemote removes the file from the repo, but keeps local copy
 func (gr *SvnRepo) DeleteRemote(fname string) error {
-	oscmd := exec.Command("svn", "delete", "--keep-local", RelPath(gr, fname))
+	oscmd := exec.Command("svn", "delete", "--keep-local", relPath(gr, fname))
 	stdoutStderr, err := oscmd.CombinedOutput()
 	if err != nil {
 		log.Println(string(stdoutStderr))
@@ -133,7 +135,7 @@ func (gr *SvnRepo) DeleteRemote(fname string) error {
 
 // CommitFile commits single file to repo staging
 func (gr *SvnRepo) CommitFile(fname string, message string) error {
-	oscmd := exec.Command("svn", "commit", RelPath(gr, fname), "-m", message)
+	oscmd := exec.Command("svn", "commit", relPath(gr, fname), "-m", message)
 	stdoutStderr, err := oscmd.CombinedOutput()
 	if err != nil {
 		log.Println(string(stdoutStderr))
@@ -144,7 +146,7 @@ func (gr *SvnRepo) CommitFile(fname string, message string) error {
 
 // RevertFile reverts a single file to last commit of master
 func (gr *SvnRepo) RevertFile(fname string) error {
-	oscmd := exec.Command("svn", "revert", RelPath(gr, fname))
+	oscmd := exec.Command("svn", "revert", relPath(gr, fname))
 	stdoutStderr, err := oscmd.CombinedOutput()
 	if err != nil {
 		log.Println(string(stdoutStderr))
@@ -165,7 +167,7 @@ func (gr *SvnRepo) FileContents(fname string, rev string) ([]byte, error) {
 		// 		rev = fmt.Sprintf("HEAD~%d:", rsp)
 		// 	}
 	}
-	out, err := gr.RunFromDir("svn", "-r", "rev", "cat", RelPath(gr, fname))
+	out, err := gr.RunFromDir("svn", "-r", "rev", "cat", relPath(gr, fname))
 	if err != nil {
 		log.Println(string(out))
 		return nil, err

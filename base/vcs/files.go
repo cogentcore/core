@@ -20,15 +20,15 @@ func (fl *Files) Status(repo Repo, fname string) FileStatus {
 	if *fl == nil || len(*fl) == 0 {
 		return Untracked
 	}
-	st, ok := (*fl)[RelPath(repo, fname)]
+	st, ok := (*fl)[relPath(repo, fname)]
 	if !ok {
 		return Untracked
 	}
 	return st
 }
 
-// AllFiles returns a slice of all the files, recursively, within a given directory
-func AllFiles(path string) ([]string, error) {
+// allFiles returns a slice of all the files, recursively, within a given directory
+func allFiles(path string) ([]string, error) {
 	var fnms []string
 	er := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {

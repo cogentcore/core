@@ -4,7 +4,7 @@
 
 package vcs
 
-// Commit is one VCS commit entry, as returned in a Log
+// Commit is one VCS commit entry, as returned in a [Log].
 type Commit struct {
 
 	// revision number / hash code / unique id
@@ -23,9 +23,10 @@ type Commit struct {
 	Message string `width:"100"`
 }
 
-// Log is the listing of commits
+// Log is a listing of commits.
 type Log []*Commit
 
+// Add adds a new [Commit] to the [Log], returning the [Commit].
 func (lg *Log) Add(rev, date, author, email, message string) *Commit {
 	cm := &Commit{Rev: rev, Date: date, Author: author, Email: email, Message: message}
 	*lg = append(*lg, cm)

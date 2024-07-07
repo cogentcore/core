@@ -1,4 +1,4 @@
-// Copyright (c) 2019, The Gide Authors. All rights reserved.
+// Copyright (c) 2019, Cogent Core. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -22,7 +22,7 @@ type GitRepo struct {
 }
 
 func (gr *GitRepo) Files() (Files, error) {
-	f := make(Files, 1000)
+	f := make(Files)
 
 	out, err := gr.RunFromDir("git", "ls-files", "-o") // other -- untracked
 	if err != nil {
@@ -87,7 +87,7 @@ func (gr *GitRepo) Files() (Files, error) {
 	return f, nil
 }
 
-func (gr *GitRepo) CharToStat(stat byte) FileStatus {
+func (gr *GitRepo) charToStat(stat byte) FileStatus {
 	switch stat {
 	case 'M':
 		return Modified
@@ -103,9 +103,9 @@ func (gr *GitRepo) CharToStat(stat byte) FileStatus {
 	return Untracked
 }
 
-// Status returns status of given file -- returns Untracked on any error
+// Status returns status of given file; returns Untracked on any error
 func (gr *GitRepo) Status(fname string) (FileStatus, string) {
-	out, err := gr.RunFromDir("git", "status", "--porcelain", RelPath(gr, fname))
+	out, err := gr.RunFromDir("git", "status", "--porcelain", relPath(gr, fname))
 	if err != nil {
 		return Untracked, err.Error()
 	}
@@ -118,12 +118,12 @@ func (gr *GitRepo) Status(fname string) (FileStatus, string) {
 		return Stored, ostr
 	}
 	stat := sf[0][0]
-	return gr.CharToStat(stat), ostr
+	return gr.charToStat(stat), ostr
 }
 
 // Add adds the file to the repo
 func (gr *GitRepo) Add(fname string) error {
-	out, err := gr.RunFromDir("git", "add", RelPath(gr, fname))
+	out, err := gr.RunFromDir("git", "add", relPath(gr, fname))
 	if err != nil {
 		log.Println(string(out))
 		return err
@@ -133,13 +133,12 @@ func (gr *GitRepo) Add(fname string) error {
 
 // Move moves updates the repo with the rename
 func (gr *GitRepo) Move(oldpath, newpath string) error {
-	out, err := gr.RunFromDir("git", "mv", RelPath(gr, oldpath), RelPath(gr, newpath))
-	// if err != nil {
-	// 	log.Println(string(out))
-	// 	fmt.Printf("%s\n", out)
-	// 	return err
-	// }
-	out, err = gr.RunFromDir("git", "add", RelPath(gr, newpath))
+	out, err := gr.RunFromDir("git", "mv", relPath(gr, oldpath), relPath(gr, newpath))
+	if err != nil {
+		log.Println(string(out))
+		return err
+	}
+	out, err = gr.RunFromDir("git", "add", relPath(gr, newpath))
 	if err != nil {
 		log.Println(string(out))
 		return err
@@ -147,9 +146,9 @@ func (gr *GitRepo) Move(oldpath, newpath string) error {
 	return nil
 }
 
-// Delete removes the file from the repo -- uses "force" option to ensure deletion
+// Delete removes the file from the repo; uses "force" option to ensure deletion
 func (gr *GitRepo) Delete(fname string) error {
-	out, err := gr.RunFromDir("git", "rm", "-f", RelPath(gr, fname))
+	out, err := gr.RunFromDir("git", "rm", "-f", relPath(gr, fname))
 	if err != nil {
 		log.Println(string(out))
 		fmt.Printf("%s\n", out)
@@ -160,7 +159,7 @@ func (gr *GitRepo) Delete(fname string) error {
 
 // Delete removes the file from the repo
 func (gr *GitRepo) DeleteRemote(fname string) error {
-	out, err := gr.RunFromDir("git", "rm", "--cached", RelPath(gr, fname))
+	out, err := gr.RunFromDir("git", "rm", "--cached", relPath(gr, fname))
 	if err != nil {
 		log.Println(string(out))
 		return err
@@ -170,7 +169,7 @@ func (gr *GitRepo) DeleteRemote(fname string) error {
 
 // CommitFile commits single file to repo staging
 func (gr *GitRepo) CommitFile(fname string, message string) error {
-	out, err := gr.RunFromDir("git", "commit", RelPath(gr, fname), "-m", message)
+	out, err := gr.RunFromDir("git", "commit", relPath(gr, fname), "-m", message)
 	if err != nil {
 		log.Println(string(out))
 		return err
@@ -180,7 +179,7 @@ func (gr *GitRepo) CommitFile(fname string, message string) error {
 
 // RevertFile reverts a single file to last commit of master
 func (gr *GitRepo) RevertFile(fname string) error {
-	out, err := gr.RunFromDir("git", "checkout", RelPath(gr, fname))
+	out, err := gr.RunFromDir("git", "checkout", relPath(gr, fname))
 	if err != nil {
 		log.Println(string(out))
 		return err
@@ -189,7 +188,7 @@ func (gr *GitRepo) RevertFile(fname string) error {
 }
 
 // FileContents returns the contents of given file, as a []byte array
-// at given revision specifier.  -1, -2 etc also work as universal
+// at given revision specifier. -1, -2 etc also work as universal
 // ways of specifying prior revisions.
 func (gr *GitRepo) FileContents(fname string, rev string) ([]byte, error) {
 	if rev == "" {
@@ -206,7 +205,7 @@ func (gr *GitRepo) FileContents(fname string, rev string) ([]byte, error) {
 	} else {
 		rev += ":"
 	}
-	fspec := rev + RelPath(gr, fname)
+	fspec := rev + relPath(gr, fname)
 	out, err := gr.RunFromDir("git", "show", fspec)
 	if err != nil {
 		log.Println(string(out))
@@ -215,9 +214,9 @@ func (gr *GitRepo) FileContents(fname string, rev string) ([]byte, error) {
 	return out, nil
 }
 
-// FieldsThroughDelim gets the concatenated byte through to point where
+// fieldsThroughDelim gets the concatenated byte through to point where
 // field ends with given delimiter, starting at given index
-func FieldsThroughDelim(flds [][]byte, delim byte, idx int) (int, string) {
+func fieldsThroughDelim(flds [][]byte, delim byte, idx int) (int, string) {
 	ln := len(flds)
 	for i := idx; i < ln; i++ {
 		fld := flds[i]
@@ -256,9 +255,9 @@ func (gr *GitRepo) Log(fname string, since string) (Log, error) {
 			continue
 		}
 		rev := string(flds[0])
-		ni, date := FieldsThroughDelim(flds, '}', 1)
-		ni, author := FieldsThroughDelim(flds, '}', ni)
-		ni, email := FieldsThroughDelim(flds, '}', ni)
+		ni, date := fieldsThroughDelim(flds, '}', 1)
+		ni, author := fieldsThroughDelim(flds, '}', ni)
+		ni, email := fieldsThroughDelim(flds, '}', ni)
 		msg := string(bytes.Join(flds[ni:], []byte(" ")))
 		lg.Add(rev, date, author, email, msg)
 	}
