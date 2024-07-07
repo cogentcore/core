@@ -174,21 +174,9 @@ func inputs(ts *core.Tabs) {
 	core.NewText(tab).SetText("Cogent Core provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.")
 
 	core.NewTextField(tab).SetPlaceholder("Text field")
-	core.NewTextField(tab).SetPlaceholder("Email").SetType(core.TextFieldOutlined).Styler(func(s *styles.Style) {
-		s.VirtualKeyboard = styles.KeyboardEmail
-	})
-	core.NewTextField(tab).SetPlaceholder("Phone number").AddClearButton().Styler(func(s *styles.Style) {
-		s.VirtualKeyboard = styles.KeyboardPhone
-	})
-	core.NewTextField(tab).SetPlaceholder("URL").SetType(core.TextFieldOutlined).AddClearButton().Styler(func(s *styles.Style) {
-		s.VirtualKeyboard = styles.KeyboardURL
-	})
 	core.NewTextField(tab).AddClearButton().SetLeadingIcon(icons.Search)
 	core.NewTextField(tab).SetType(core.TextFieldOutlined).SetTypePassword().SetPlaceholder("Password")
-	core.NewTextField(tab).SetText("Multiline textfield with a relatively long initial text").
-		Styler(func(s *styles.Style) {
-			s.SetTextWrap(true)
-		})
+	core.NewTextField(tab).SetText("Text field with relatively long initial text")
 
 	spinners := core.NewFrame(tab)
 
