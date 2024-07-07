@@ -1,10 +1,6 @@
 # Hello world
 
-This page shows you how to make a simple hello world example app with Cogent Core.
-
-1. Run `mkdir hello && cd hello && go mod init hello && touch main.go` to make a new Go project
-2. Open `main.go` using an editor of your choice
-3. Add the following code to your editor:
+This code makes a simple hello world example app using Cogent Core:
 
 ```Go
 package main
@@ -18,7 +14,6 @@ func main() {
 }
 ```
 
-4. Update your dependencies by running `go mod tidy`
-5. Build and run the code by running `core run`. This should create a window with a button that says "Hello, World!", similar to the one below:
+Notice how you can see the result of the code above, a button with the text "Hello, World!". Not only can you see the result of the code, you can edit the code live. Try changing "Hello, World!" to "Click me!" and you will see the button update.
 
-![Hello World App](hello-world.png)
+Even though Cogent Core is written in Go, a compiled language, it uses the interpreter [yaegi](https://github.com/traefik/yaegi) to provide a live editing experience. You can edit almost all of the examples on this website and see the result immediately. You can also use the [Cogent Core playground](../playground) to experiment interactively with Cogent Core.

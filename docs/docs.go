@@ -142,7 +142,7 @@ func homePage(ctx *htmlcore.Context) bool {
 	tree.AddChild(home, func(w *core.Button) {
 		w.SetText("Get started")
 		w.OnClick(func(e events.Event) {
-			ctx.OpenURL("getting-started")
+			ctx.OpenURL("basics")
 		})
 	})
 
@@ -252,7 +252,7 @@ func homePage(ctx *htmlcore.Context) bool {
 	tree.AddChild(home, func(w *core.Button) {
 		w.SetText("Get started")
 		w.OnClick(func(e events.Event) {
-			ctx.OpenURL("getting-started")
+			ctx.OpenURL("basics")
 		})
 	})
 
