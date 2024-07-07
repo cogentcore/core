@@ -153,6 +153,9 @@ func (pc *Context) fixBounds(pos, size math32.Vector2) (math32.Vector2, math32.V
 	// logic is currently based on consistent radius for all corners
 	radius := max(pr.Top, pr.Left, pr.Right, pr.Bottom)
 
+	// todo: should this be based on anything?
+	extra := float32(2)
+
 	// each of these is how much the element is encroaching into each
 	// side of the bounding rectangle, within the radius curve.
 	// if the number is negative, then it isn't encroaching at all and can
@@ -165,45 +168,45 @@ func (pc *Context) fixBounds(pos, size math32.Vector2) (math32.Vector2, math32.V
 	if top > 0 && left > 0 {
 		if left < top {
 			x, y := horizFit(left, radius)
-			rect.Min.X = max(rect.Min.X, pos.X-(1+(left-x)))
-			rect.Min.Y = max(rect.Min.Y, pos.Y+1+radius-y)
+			rect.Min.X = max(rect.Min.X, pos.X-(extra+(left-x)))
+			rect.Min.Y = max(rect.Min.Y, pos.Y+extra+radius-y)
 		} else {
 			x, y := vertFit(top, radius)
-			rect.Min.X = max(rect.Min.X, pos.X+1+radius-x)
-			rect.Min.Y = max(rect.Min.Y, pos.Y+1+(top-y))
+			rect.Min.X = max(rect.Min.X, pos.X+extra+radius-x)
+			rect.Min.Y = max(rect.Min.Y, pos.Y+extra+(top-y))
 		}
 	}
 	if top > 0 && right > 0 {
 		if right < top {
 			x, y := horizFit(right, radius)
-			rect.Max.X = min(rect.Max.X, pos.X+size.X-(1+(right-x)))
-			rect.Min.Y = max(rect.Min.Y, pos.Y+1+radius-y)
+			rect.Max.X = min(rect.Max.X, pos.X+size.X-(extra+(right-x)))
+			rect.Min.Y = max(rect.Min.Y, pos.Y+extra+radius-y)
 		} else {
 			x, y := vertFit(top, radius)
-			rect.Max.X = min(rect.Max.X, pos.X+size.X-(1+radius-x))
-			rect.Min.Y = max(rect.Min.Y, pos.Y+1+(top-y))
+			rect.Max.X = min(rect.Max.X, pos.X+size.X-(extra+radius-x))
+			rect.Min.Y = max(rect.Min.Y, pos.Y+extra+(top-y))
 		}
 	}
 	if bottom > 0 && right > 0 {
 		if right < bottom {
 			x, y := horizFit(right, radius)
-			rect.Max.X = min(rect.Max.X, pos.X+size.X-(1+(right-x)))
-			rect.Max.Y = min(rect.Max.Y, pos.Y+size.Y+(1+radius-y))
+			rect.Max.X = min(rect.Max.X, pos.X+size.X-(extra+(right-x)))
+			rect.Max.Y = min(rect.Max.Y, pos.Y+size.Y+(extra+radius-y))
 		} else {
 			x, y := vertFit(bottom, radius)
-			rect.Max.X = min(rect.Max.X, pos.X+size.X-(1+radius-x))
-			rect.Max.Y = min(rect.Max.Y, pos.Y+size.Y-(1+(bottom-y)))
+			rect.Max.X = min(rect.Max.X, pos.X+size.X-(extra+radius-x))
+			rect.Max.Y = min(rect.Max.Y, pos.Y+size.Y-(extra+(bottom-y)))
 		}
 	}
 	if bottom > 0 && left > 0 {
 		if left < bottom {
 			x, y := horizFit(left, radius)
-			rect.Min.X = max(rect.Min.X, pos.X-(1+(left-x)))
-			rect.Max.Y = min(rect.Max.Y, pos.Y+size.Y-(1+radius-y))
+			rect.Min.X = max(rect.Min.X, pos.X-(extra+(left-x)))
+			rect.Max.Y = min(rect.Max.Y, pos.Y+size.Y-(extra+radius-y))
 		} else {
 			x, y := vertFit(bottom, radius)
-			rect.Min.X = max(rect.Min.X, pos.X+(1+radius-x))
-			rect.Max.Y = min(rect.Max.Y, pos.Y+size.Y-(1+(bottom-y)))
+			rect.Min.X = max(rect.Min.X, pos.X+(extra+radius-x))
+			rect.Max.Y = min(rect.Max.Y, pos.Y+size.Y-(extra+(bottom-y)))
 		}
 	}
 
