@@ -49,25 +49,25 @@ However, using a `struct` with appropriately named fields has the following adva
 * GUI editor of config opts as a Form has full access to field tag GUI hints, etc.
 * [[types]] can provide access to field comments for full docs for each option, whereas the map implementation requires separate maps of docs and values.
 
-This is why the [[cli]] configuration and app command management system is based structs, and v2 of core uses "direct styling" functions that directly set values on the `styles.Style` style structs.
+This is why the [[cli]] configuration and app command management system is based on structs, and why Cogent Core uses direct styling functions that directly set values on the [[styles.Style]] structs.
 
 # Generate instead of `reflect`
 
-Generated code is faster and cleaner and can be targeted to just what is needed.  `reflect` should be reserved for things like `core.Form` and other such views which need to be truly generic and operate on any kind of type from any package, etc.
+Generated code is faster and cleaner and can be targeted to just what is needed.  `reflect` should be reserved for things like [[core.Form]] and other such widgets which need to be truly generic and operate on any kind of type from any package, etc.
 
 # Interfaces instead of `reflect`
 
 Interfaces go hand-in-hand with generated code: the boilerplate code that satisfies the interfaces is auto-generated as needed.
 
-The prototype here is [[enums]]
+The prototype here is [[enums]].
 
 # Packages should be small, focused, and minimal
 
-Find the coherent chunks of functionality and encapsulate them in separate packages, instead of creating sprawling mega-packages like `ki` was before.  Now that we know all the functionality we need, we can think more carefully about how to package it.
+We find the coherent chunks of functionality and encapsulate them in separate packages, instead of creating sprawling mega-packages like `ki` was before.  Now that we know all the functionality we need, we can think more carefully about how to package it.
 
 Try to make these packages as independent as possible; don't have them depend on other infrastructure unless absolutely necessary, so that they can be used by anyone in an unencumbered way.
 
-This is what we look for, in considering whether to import a given package, so it is what we should provide.
+This is what we look for in considering whether to import a given package, so it is what we should provide.
 
 Examples:
 * [[colors]] pulled out of core
@@ -76,12 +76,13 @@ Examples:
 
 # Use function libraries instead of putting lots of methods on a type
 
-Go uses the `strings` package instead of adding a lot of builtin methods on the `string` type.  The advantages are:
+Go uses the `strings` package instead of adding a lot of builtin methods on the `string` type. The advantages are:
+
 * More flexibility to add and change implementations; can even have a replacement implementation with the same signatures.
 * Multiple different such packages can be used for different subsets of functionality (e.g., regex, unicode etc are all separate).
-* Type itself remains small and only handles most basic functionality -- presumably this works better for checking Interface implementation etc.
+* Type itself remains small and only handles most basic functionality; presumably this works better for checking interface implementation etc.
 
-Consistent with this approach, [[colors]] implements functions operating on the standard `color.RGBA` data type, instead of the many methods we defined on `gist.Color` in V1.
+Consistent with this approach, [[colors]] implements functions operating on the standard `color.RGBA` data type, instead of the many methods we defined on `gist.Color` in the old version.
 
 # Collections are plural
 
