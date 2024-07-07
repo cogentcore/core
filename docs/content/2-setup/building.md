@@ -1,4 +1,4 @@
-# Building Cogent Core Apps
+# Building Cogent Core apps
 
 All Cogent Core apps can be built using normal `go` commands (`go build`, `go run`, `go install`, etc).
 
