@@ -84,8 +84,14 @@ type Node interface {
 // However, a pointer to a NodeValue type is guaranteed to be a [Node],
 // and a non-pointer version of a [Node] type is guaranteed to be a NodeValue.
 type NodeValue interface {
-	nodeValue()
+
+	// NodeValue should only be implemented by [NodeBase],
+	// and it should not be called. It must be exported due
+	// to a nuance with the way that [reflect.StructOf] works,
+	// which results in panics with embedded structs that have
+	// unexported non-pointer methods.
+	NodeValue()
 }
 
-// NodeBase is the only way to implement [NodeValue].
-func (nb NodeBase) nodeValue() {}
+// NodeValue implements [NodeValue]. It should not be called.
+func (nb NodeBase) NodeValue() {}
