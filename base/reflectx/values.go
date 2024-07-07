@@ -937,6 +937,28 @@ func SetRobust(to, from any) error {
 	pointer := UnderlyingPointer(v)
 	ti := pointer.Interface()
 
+	typ := pointer.Elem().Type()
+	kind := typ.Kind()
+	if !pointer.Elem().CanSet() {
+		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", pointer, pointer)
+	}
+
+	// first we do the generic AssignableTo case
+	if v.Kind() == reflect.Pointer {
+		fv := reflect.ValueOf(from)
+		if fv.IsValid() {
+			if fv.Type().AssignableTo(typ) {
+				pointer.Elem().Set(fv)
+				return nil
+			}
+			ufv := Underlying(fv)
+			if ufv.IsValid() && ufv.Type().AssignableTo(typ) {
+				pointer.Elem().Set(ufv)
+				return nil
+			}
+		}
+	}
+
 	if sa, ok := ti.(SetAnyer); ok {
 		err := sa.SetAny(from)
 		if err != nil {
@@ -1002,27 +1024,6 @@ func SetRobust(to, from any) error {
 		case *image.Image:
 			*c = colors.Uniform(fc)
 			return nil
-		}
-	}
-
-	typ := pointer.Elem().Type()
-	kind := typ.Kind()
-	if !pointer.Elem().CanSet() {
-		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", pointer, pointer)
-	}
-
-	if v.Kind() == reflect.Pointer {
-		fv := reflect.ValueOf(from)
-		if fv.IsValid() {
-			if fv.Type().AssignableTo(typ) {
-				pointer.Elem().Set(fv)
-				return nil
-			}
-			ufv := Underlying(fv)
-			if ufv.IsValid() && ufv.Type().AssignableTo(typ) {
-				pointer.Elem().Set(ufv)
-				return nil
-			}
 		}
 	}
 
