@@ -93,15 +93,10 @@ func buttons(ts *core.Tabs) {
 
 	core.NewText(tab).SetText("Cogent Core provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of text, an icon, and an indicator.")
 
-	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Standard buttons")
-	brow := makeRow(tab)
-	browt := makeRow(tab)
-	browi := makeRow(tab)
-
-	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Menu buttons")
-	mbrow := makeRow(tab)
-	mbrowt := makeRow(tab)
-	mbrowi := makeRow(tab)
+	rowm := makeRow(tab)
+	rowti := makeRow(tab)
+	rowt := makeRow(tab)
+	rowi := makeRow(tab)
 
 	menu := func(m *core.Scene) {
 		m1 := core.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Control+Shift+1")
@@ -134,7 +129,6 @@ func buttons(ts *core.Tabs) {
 		icons.Search, icons.Home, icons.Close, icons.Done, icons.Favorite, icons.PlayArrow,
 		icons.Add, icons.Delete, icons.ArrowBack, icons.Info, icons.Refresh, icons.VideoCall,
 		icons.Menu, icons.Settings, icons.AccountCircle, icons.Download, icons.Sort, icons.DateRange,
-		icons.Undo, icons.OpenInFull, icons.IosShare, icons.LibraryAdd, icons.OpenWith,
 	}
 
 	for _, typ := range core.ButtonTypesValues() {
@@ -150,32 +144,26 @@ func buttons(ts *core.Tabs) {
 			art = "An "
 		}
 
-		b := core.NewButton(brow).SetType(typ).SetText(s).SetIcon(ics[typ]).
-			SetTooltip("A standard " + sl + " button with text and an icon")
+		core.NewButton(rowm).SetType(typ).SetText(s).SetIcon(ics[typ]).SetMenu(menu).
+			SetTooltip(art + sl + " menu button with text and an icon")
+
+		b := core.NewButton(rowti).SetType(typ).SetText(s).SetIcon(ics[typ+6]).
+			SetTooltip("A " + sl + " button with text and an icon")
 		b.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", b.Name)
 		})
 
-		bt := core.NewButton(browt).SetType(typ).SetText(s).
-			SetTooltip("A standard " + sl + " button with text")
+		bt := core.NewButton(rowt).SetType(typ).SetText(s).
+			SetTooltip("A " + sl + " button with text")
 		bt.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", bt.Name)
 		})
 
-		bi := core.NewButton(browi).SetType(typ).SetIcon(ics[typ+5]).
-			SetTooltip("A standard " + sl + " button with an icon")
+		bi := core.NewButton(rowi).SetType(typ).SetIcon(ics[typ+12]).
+			SetTooltip("A " + sl + " button with an icon")
 		bi.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", bi.Name)
 		})
-
-		core.NewButton(mbrow).SetType(typ).SetText(s).SetIcon(ics[typ+10]).SetMenu(menu).
-			SetTooltip(art + sl + " menu button with text and an icon")
-
-		core.NewButton(mbrowt).SetType(typ).SetText(s).SetMenu(menu).
-			SetTooltip(art + sl + " menu button with text")
-
-		core.NewButton(mbrowi).SetType(typ).SetIcon(ics[typ+15]).SetMenu(menu).
-			SetTooltip(art + sl + " menu button with an icon")
 	}
 }
 
