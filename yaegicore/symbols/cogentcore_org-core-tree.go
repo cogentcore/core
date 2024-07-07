@@ -85,5 +85,8 @@ func (W _cogentcore_org_core_tree_Node) PlanName() string             { return W
 
 // _cogentcore_org_core_tree_NodeValue is an interface wrapper for NodeValue type
 type _cogentcore_org_core_tree_NodeValue struct {
-	IValue interface{}
+	IValue     interface{}
+	WNodeValue func()
 }
+
+func (W _cogentcore_org_core_tree_NodeValue) NodeValue() { W.WNodeValue() }
