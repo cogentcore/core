@@ -35,8 +35,8 @@ func main() {
 
 	home(ts)
 	widgets(ts)
-	views(ts)
-	values(ts)
+	collections(ts)
+	valueBinding(ts)
 	makeStyles(ts)
 
 	b.RunMainWindow()
@@ -62,6 +62,7 @@ func widgets(ts *core.Tabs) {
 	inputs(wts)
 	sliders(wts)
 	dialogs(wts)
+	textEditors(wts)
 }
 
 func text(ts *core.Tabs) {
@@ -272,7 +273,7 @@ func sliders(ts *core.Tabs) {
 }
 
 func textEditors(ts *core.Tabs) {
-	tab := ts.NewTab("Text editor")
+	tab := ts.NewTab("Text editors")
 
 	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Text editors")
 	core.NewText(tab).SetText("Cogent Core provides powerful text editors that support advanced code editing features, like syntax highlighting, completion, undo and redo, copy and paste, rectangular selection, and word, line, and page based navigation, selection, and deletion.")
@@ -283,11 +284,11 @@ func textEditors(ts *core.Tabs) {
 	texteditor.NewSoloEditor(sp).Buffer.SetLang("svg").SetTextString(core.AppIcon)
 }
 
-func values(ts *core.Tabs) {
-	tab := ts.NewTab("Values")
+func valueBinding(ts *core.Tabs) {
+	tab := ts.NewTab("Value binding")
 
-	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Values")
-	core.NewText(tab).SetText("Cogent Core provides the value widget system, which allows you to instantly bind Go values to interactive widgets with just a single simple line of code. For example, you can dynamically edit this very GUI right now by clicking the Inspector button below.")
+	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Value binding")
+	core.NewText(tab).SetText("Cogent Core provides the value binding system, which allows you to instantly bind Go values to interactive widgets with just a single simple line of code.")
 
 	name := "Gopher"
 	core.Bind(&name, core.NewTextField(tab)).OnChange(func(e events.Event) {
@@ -366,11 +367,11 @@ func hello(firstName string, lastName string, age int, likesGo bool) (greeting s
 	return
 }
 
-func views(ts *core.Tabs) {
-	tab := ts.NewTab("Views")
+func collections(ts *core.Tabs) {
+	tab := ts.NewTab("Collections")
 
-	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Views")
-	core.NewText(tab).SetText("Cogent Core provides powerful views that allow you to easily view and edit complex data types like structs, maps, and slices, allowing you to easily create widgets like lists, tables, and forms.")
+	core.NewText(tab).SetType(core.TextHeadlineLarge).SetText("Collections")
+	core.NewText(tab).SetText("Cogent Core provides powerful collection widgets that allow you to easily view and edit complex data types like structs, maps, and slices, allowing you to easily create widgets like lists, tables, and forms.")
 
 	vts := core.NewTabs(tab)
 
@@ -390,14 +391,14 @@ func views(ts *core.Tabs) {
 		Stuff:  []float32{0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7},
 	}
 
-	core.NewForm(vts.NewTab("Form")).SetStruct(&str)
+	core.NewForm(vts.NewTab("Forms")).SetStruct(&str)
 
 	sl := make([]string, 50)
 	for i := 0; i < len(sl); i++ {
 		sl[i] = fmt.Sprintf("el: %v", i)
 	}
 	sl[10] = "this is a particularly long value"
-	core.NewList(vts.NewTab("List")).SetSlice(&sl)
+	core.NewList(vts.NewTab("Lists")).SetSlice(&sl)
 
 	mp := map[string]string{}
 
@@ -405,7 +406,7 @@ func views(ts *core.Tabs) {
 	mp["Python"] = "Slow and duck-typed"
 	mp["C++"] = "Hard to use and slow to compile"
 
-	core.NewKeyedList(vts.NewTab("Keyed list")).SetMap(&mp)
+	core.NewKeyedList(vts.NewTab("Keyed lists")).SetMap(&mp)
 
 	tbl := make([]*tableStruct, 50)
 	for i := range tbl {
@@ -413,9 +414,9 @@ func views(ts *core.Tabs) {
 		tbl[i] = ts
 	}
 	tbl[0].StrField = "this is a particularly long field"
-	core.NewTable(vts.NewTab("Table")).SetSlice(&tbl)
+	core.NewTable(vts.NewTab("Tables")).SetSlice(&tbl)
 
-	sp := core.NewSplits(vts.NewTab("Tree")).SetSplits(0.3, 0.7)
+	sp := core.NewSplits(vts.NewTab("Trees")).SetSplits(0.3, 0.7)
 	tr := core.NewTreeFrame(sp).SetText("Root")
 	makeTree(tr, 0)
 	tr.RootSetViewIndex()
@@ -427,8 +428,6 @@ func views(ts *core.Tabs) {
 			sv.SetStruct(tr.SelectedNodes[0]).Update()
 		}
 	})
-
-	textEditors(vts)
 }
 
 func makeTree(tr *core.Tree, round int) {
