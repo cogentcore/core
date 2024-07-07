@@ -14,6 +14,7 @@ import (
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/htmlcore"
+	"cogentcore.org/core/styles"
 	"cogentcore.org/core/texteditor"
 	"cogentcore.org/core/yaegicore/symbols"
 	"github.com/traefik/yaegi/interp"
@@ -30,6 +31,10 @@ func init() {
 // It is used as the default value of [htmlcore.BindTextEditor].
 func BindTextEditor(ed *texteditor.Editor, parent core.Widget) {
 	symbols.Symbols["cogentcore.org/core/core/core"]["ExternalParent"].Set(reflect.ValueOf(parent))
+	parent.AsWidget().Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+		s.Grow.Set(1, 0)
+	})
 
 	in := interp.New(interp.Options{})
 	errors.Log(in.Use(stdlib.Symbols))
