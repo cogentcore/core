@@ -44,6 +44,7 @@ func TestRenderParentBorderRadiusVerticalToolbar(t *testing.T) {
 	tb := NewToolbar(b)
 	tb.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
+		s.Background = colors.Scheme.Select.Container
 	})
 	tree.AddChild(tb, func(w *Button) {
 		w.SetIcon(icons.Close)
