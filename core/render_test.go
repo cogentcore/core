@@ -34,6 +34,17 @@ func TestRenderParentBorderRadius(t *testing.T) {
 	b.AssertRender(t, "render/parent-border-radius")
 }
 
+// For https://github.com/cogentcore/core/issues/989
+func TestRenderParentBorderRadiusVerticalToolbar(t *testing.T) {
+	b := NewBody()
+	tb := NewToolbar(b)
+	tb.Styler(func(s *styles.Style) {
+		s.Direction = styles.Column
+	})
+	NewButton(tb).SetIcon(icons.Close)
+	b.AssertRender(t, "render/parent-border-radius-vertical-toolbar")
+}
+
 // For https://github.com/cogentcore/core/issues/810
 func TestRenderButtonAlignment(t *testing.T) {
 	b := NewBody()
