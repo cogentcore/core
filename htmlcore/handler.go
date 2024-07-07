@@ -129,6 +129,10 @@ func HandleElement(ctx *Context) {
 			}
 			if BindTextEditor != nil && lang == "Go" {
 				parent := core.NewFrame(ed.Parent)
+				parent.Styler(func(s *styles.Style) {
+					s.Direction = styles.Column
+					s.Grow.Set(1, 0)
+				})
 				BindTextEditor(ed, parent)
 			} else {
 				ed.SetReadOnly(true)
