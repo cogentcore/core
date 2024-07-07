@@ -5,6 +5,7 @@
 package paint
 
 import (
+	"fmt"
 	"image"
 
 	"cogentcore.org/core/colors/gradient"
@@ -123,28 +124,34 @@ func (pc *Context) fixBounds(pos, size math32.Vector2) (math32.Vector2, math32.V
 	psz := math32.Vector2FromPoint(pbox.Size())
 	pr = ClampBorderRadius(pr, psz.X, psz.Y)
 
-	rect := math32.RectFromPosSizeMax(pos, size)
+	// rect := math32.RectFromPosSizeMax(pos, size)
 
-	ptop := pbox.Min.Add(image.Pt(int(pr.Top), int(pr.Top)))
-	if rect.Min.X < ptop.X && rect.Min.Y < ptop.Y {
-		rect.Min = ptop
+	radius := max(pr.Top, pr.Right)
+	height := radius - (pos.Y - float32(pbox.Min.Y))
+	if height > 0 {
+		hypot := math32.Hypot(radius, height)
+		x := radius * radius / hypot
+		y := height * radius / hypot
+		pos.X += radius - x
+		pos.Y += radius - y
+		fmt.Println(height, hypot, x, y, pos)
 	}
 
-	pright := pbox.Min.Add(image.Pt(pbox.Size().X-int(pr.Right), int(pr.Right)))
-	if rect.Max.X > pright.X && rect.Min.Y < pright.Y {
-		rect.Min.Y = pright.Y
-		rect.Max.X = pright.X
-	}
+	// pright := pbox.Min.Add(image.Pt(pbox.Size().X-int(pr.Right), int(pr.Right)))
+	// if rect.Max.X > pright.X && rect.Min.Y < pright.Y {
+	// 	rect.Min.Y = pright.Y
+	// 	rect.Max.X = pright.X
+	// }
 
-	pbottom := pbox.Min.Add(image.Pt(pbox.Size().X-int(pr.Bottom), pbox.Size().Y-int(pr.Bottom)))
-	if rect.Max.X > pbottom.X && rect.Max.Y > pbottom.Y {
-		rect.Max = pbottom
-	}
+	// pbottom := pbox.Min.Add(image.Pt(pbox.Size().X-int(pr.Bottom), pbox.Size().Y-int(pr.Bottom)))
+	// if rect.Max.X > pbottom.X && rect.Max.Y > pbottom.Y {
+	// 	rect.Max = pbottom
+	// }
 
-	pleft := pbox.Min.Add(image.Pt(int(pr.Left), pbox.Size().Y-int(pr.Left)))
-	if rect.Min.X < pleft.X && rect.Max.Y > pleft.Y {
-		rect.Min.X = pleft.X
-		rect.Max.Y = pleft.Y
-	}
-	return math32.Vector2FromPoint(rect.Min), math32.Vector2FromPoint(rect.Size())
+	// pleft := pbox.Min.Add(image.Pt(int(pr.Left), pbox.Size().Y-int(pr.Left)))
+	// if rect.Min.X < pleft.X && rect.Max.Y > pleft.Y {
+	// 	rect.Min.X = pleft.X
+	// 	rect.Max.Y = pleft.Y
+	// }
+	return pos, size
 }
