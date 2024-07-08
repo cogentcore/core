@@ -29,7 +29,7 @@ func Release(c *config.Config) error { //types:add
 // NextRelease releases the project with the current git version
 // tag incremented by one patch version.
 func NextRelease(c *config.Config) error { //types:add
-	ver, err := NextVersion(c)
+	ver, err := nextVersion(c)
 	if err != nil {
 		return err
 	}
@@ -37,9 +37,9 @@ func NextRelease(c *config.Config) error { //types:add
 	return Release(c)
 }
 
-// NextVersion returns the version of the project
+// nextVersion returns the version of the project
 // incremented by one patch version.
-func NextVersion(c *config.Config) (string, error) {
+func nextVersion(c *config.Config) (string, error) {
 	cur, err := exec.Output("git", "describe", "--tags", "--abbrev=0")
 	if err != nil {
 		return "", err

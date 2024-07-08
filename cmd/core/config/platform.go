@@ -25,7 +25,7 @@ func (p Platform) String() string {
 // OSSupported determines whether the given operating system is supported by Cogent Core. If it is, it returns nil.
 // If it isn't, it returns an error detailing the issue with the operating system (not found or not supported).
 func OSSupported(os string) error {
-	supported, ok := SupportedOS[os]
+	supported, ok := supportedOS[os]
 	if !ok {
 		return fmt.Errorf("could not find operating system %s; please check that you spelled it correctly", os)
 	}
@@ -38,7 +38,7 @@ func OSSupported(os string) error {
 // ArchSupported determines whether the given architecture is supported by Cogent Core. If it is, it returns nil.
 // If it isn't, it also returns an error detailing the issue with the architecture (not found or not supported).
 func ArchSupported(arch string) error {
-	supported, ok := SupportedArch[arch]
+	supported, ok := supportedArch[arch]
 	if !ok {
 		return fmt.Errorf("could not find architecture %s; please check that you spelled it correctly", arch)
 	}
@@ -78,8 +78,8 @@ var ArchsForOS = map[string][]string{
 	"ios":     {"arm64"},
 }
 
-// SupportedOS is a map containing all operating systems and whether they are supported by Cogent Core.
-var SupportedOS = map[string]bool{
+// supportedOS is a map containing all operating systems and whether they are supported by Cogent Core.
+var supportedOS = map[string]bool{
 	"aix":       false,
 	"android":   true,
 	"darwin":    true,
@@ -100,8 +100,8 @@ var SupportedOS = map[string]bool{
 	"zos":       false,
 }
 
-// SupportedArch is a map containing all computer architectures and whether they are supported by Cogent Core.
-var SupportedArch = map[string]bool{
+// supportedArch is a map containing all computer architectures and whether they are supported by Cogent Core.
+var supportedArch = map[string]bool{
 	"386":         true,
 	"amd64":       true,
 	"amd64p32":    true,
