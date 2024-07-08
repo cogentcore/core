@@ -11,7 +11,7 @@ grid.Styler(func(s *styles.Style) {
     s.Columns = 3
     s.Gap.Zero()
 })
-for range 9 {
+for i := range 9 {
     bt := core.NewButton(grid).SetType(core.ButtonAction)
     bt.Styler(func(s *styles.Style) {
         s.Border.Width.Set(units.Dp(1))
@@ -34,7 +34,8 @@ grid.Styler(func(s *styles.Style) {
     s.Columns = 3
     s.Gap.Zero()
 })
-for i := range 9 {
+for oi := range 9 {
+    i := oi
     bt := core.NewButton(grid).SetType(core.ButtonAction)
     bt.Styler(func(s *styles.Style) {
         s.Border.Width.Set(units.Dp(1))
@@ -79,6 +80,7 @@ status.Updater(func() {
     }
     // check if someone has won
     for _, set := range sets {
+        set := set
         if squares[set[0]] != "" && squares[set[0]] == squares[set[1]] && squares[set[0]] == squares[set[2]] {
             status.SetText(squares[set[0]]+" wins!")
             current = ""
@@ -93,7 +95,8 @@ grid.Styler(func(s *styles.Style) {
     s.Columns = 3
     s.Gap.Zero()
 })
-for i := range 9 {
+for oi := range 9 {
+    i := oi
     bt := core.NewButton(grid).SetType(core.ButtonAction)
     bt.Styler(func(s *styles.Style) {
         s.Border.Width.Set(units.Dp(1))
