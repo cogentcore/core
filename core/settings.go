@@ -268,6 +268,12 @@ type AppearanceSettingsData struct { //types:add
 	MonoFont FontName `default:"Roboto Mono"`
 }
 
+// ConstantSpacing returns a value that will remain constant regardless
+// of changes in the AppearanceSettings.Spacing setting
+func ConstantSpacing(val float32) float32 {
+	return (100 * val) / AppearanceSettings.Spacing
+}
+
 // Themes are the different possible themes that a user can select in their settings.
 type Themes int32 //enums:enum -trim-prefix Theme
 

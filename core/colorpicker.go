@@ -48,7 +48,7 @@ func (cp *ColorPicker) Init() {
 	colorButton := func(w *Button, c color.Color) {
 		w.Styler(func(s *styles.Style) {
 			s.Background = colors.Uniform(c)
-			s.Padding.Set(units.Dp(16))
+			s.Padding.Set(units.Dp(ConstantSpacing(16)))
 		})
 		w.OnClick(func(e events.Event) {
 			cp.SetColor(c).UpdateChange()
