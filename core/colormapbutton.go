@@ -15,12 +15,13 @@ import (
 	"cogentcore.org/core/styles/units"
 )
 
-// ColorMapName represents the name of a color map, which can be edited using a [ColorMapButton].
+// ColorMapName represents the name of a [colormap.Map],
+// which can be edited using a [ColorMapButton].
 type ColorMapName string
 
 func (cm ColorMapName) Value() Value { return NewColorMapButton() }
 
-// ColorMapButton displays a color map spectrum and can be clicked on
+// ColorMapButton displays a [colormap.Map] and can be clicked on
 // to display a dialog for selecting different color map options.
 // It represents a [ColorMapName] value.
 type ColorMapButton struct {
