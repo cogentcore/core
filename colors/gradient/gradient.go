@@ -214,7 +214,7 @@ func (b *Base) CopyStopsFrom(cp *Base) {
 	}
 }
 
-// ApplyOpacityToStops multiplies all stop opacities by given opacity
+// ApplyOpacityToStops multiplies all stop opacities by the given opacity.
 func (b *Base) ApplyOpacityToStops(opacity float32) {
 	for _, s := range b.Stops {
 		s.Opacity *= opacity
@@ -227,35 +227,35 @@ func (b *Base) ApplyOpacityToStops(opacity float32) {
 	}
 }
 
-// UpdateBase updates the computed fields of the base gradient. It should only be called
-// by other gradient types in their [Gradient.Update] functions. It is named UpdateBase
+// updateBase updates the computed fields of the base gradient. It should only be called
+// by other gradient types in their [Gradient.Update] functions. It is named updateBase
 // to avoid people accidentally calling it instead of [Gradient.Update].
-func (b *Base) UpdateBase() {
-	b.ComputeObjectMatrix()
-	b.UpdateRGBStops()
+func (b *Base) updateBase() {
+	b.computeObjectMatrix()
+	b.updateRGBStops()
 }
 
-// ComputeObjectMatrix computes the effective object transformation
+// computeObjectMatrix computes the effective object transformation
 // matrix for a gradient with [Units] of [ObjectBoundingBox], setting
 // [Base.boxTransform].
-func (b *Base) ComputeObjectMatrix() {
+func (b *Base) computeObjectMatrix() {
 	w, h := b.Box.Size().X, b.Box.Size().Y
 	oriX, oriY := b.Box.Min.X, b.Box.Min.Y
 	b.boxTransform = math32.Identity2().Translate(oriX, oriY).Scale(w, h).Mul(b.Transform).
 		Scale(1/w, 1/h).Translate(-oriX, -oriY).Inverse()
 }
 
-// GetColor returns the color at the given normalized position along the
+// getColor returns the color at the given normalized position along the
 // gradient's stops using its spread method and blend algorithm.
-func (b *Base) GetColor(pos float32) color.Color {
+func (b *Base) getColor(pos float32) color.Color {
 	if b.Blend == colors.RGB {
-		return b.GetColorImpl(pos, b.Stops)
+		return b.getColorImpl(pos, b.Stops)
 	}
-	return b.GetColorImpl(pos, b.stopsRGB)
+	return b.getColorImpl(pos, b.stopsRGB)
 }
 
-// GetColorImpl implements GetColor with given stops
-func (b *Base) GetColorImpl(pos float32, stops []Stop) color.Color {
+// getColorImpl implements [Base.getColor] with given stops
+func (b *Base) getColorImpl(pos float32, stops []Stop) color.Color {
 	d := len(stops)
 	// These cases can be taken care of early on
 	if b.Spread == Pad {
@@ -289,7 +289,7 @@ func (b *Base) GetColorImpl(pos float32, stops []Stop) color.Color {
 		default:
 			s1, s2 = stops[place-1], stops[place]
 		}
-		return b.BlendStops(mod, s1, s2, false)
+		return b.blendStops(mod, s1, s2, false)
 	case Reflect:
 		switch place {
 		case 0:
@@ -307,10 +307,10 @@ func (b *Base) GetColorImpl(pos float32, stops []Stop) color.Color {
 			case d * 2:
 				return stops[0].OpacityColor(b.Opacity, b.ApplyFuncs)
 			default:
-				return b.BlendStops(mod-1, stops[d*2-place], stops[d*2-place-1], true)
+				return b.blendStops(mod-1, stops[d*2-place], stops[d*2-place-1], true)
 			}
 		default:
-			return b.BlendStops(mod, stops[place-1], stops[place], false)
+			return b.blendStops(mod, stops[place-1], stops[place], false)
 		}
 	default: // PadSpread
 		switch place {
@@ -319,14 +319,14 @@ func (b *Base) GetColorImpl(pos float32, stops []Stop) color.Color {
 		case d:
 			return stops[d-1].OpacityColor(b.Opacity, b.ApplyFuncs)
 		default:
-			return b.BlendStops(mod, stops[place-1], stops[place], false)
+			return b.blendStops(mod, stops[place-1], stops[place], false)
 		}
 	}
 }
 
-// BlendStops blends the given two gradient stops together based on the given position,
+// blendStops blends the given two gradient stops together based on the given position,
 // using the gradient's blending algorithm. If flip is true, it flips the given position.
-func (b *Base) BlendStops(pos float32, s1, s2 Stop, flip bool) color.Color {
+func (b *Base) blendStops(pos float32, s1, s2 Stop, flip bool) color.Color {
 	s1off := s1.Pos
 	if s1.Pos > s2.Pos && !flip { // happens in repeat spread mode
 		s1off--
@@ -346,8 +346,8 @@ func (b *Base) BlendStops(pos float32, s1, s2 Stop, flip bool) color.Color {
 	return b.ApplyFuncs.Apply(colors.ApplyOpacity(colors.Blend(colors.RGB, 100*(1-tp), s1.Color, s2.Color), opacity))
 }
 
-// UpdateRGBStops updates StopsRGB from original Stops, for other blend types
-func (b *Base) UpdateRGBStops() {
+// updateRGBStops updates stopsRGB from original Stops, for other blend types
+func (b *Base) updateRGBStops() {
 	if b.Blend == colors.RGB || len(b.Stops) == 0 {
 		b.stopsRGB = nil
 		b.stopsRGBSrc = nil

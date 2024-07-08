@@ -57,7 +57,7 @@ func (l *Linear) AddStop(color color.RGBA, pos float32, opacity ...float32) *Lin
 func (l *Linear) Update(opacity float32, box math32.Box2, objTransform math32.Matrix2) {
 	l.Box = box
 	l.Opacity = opacity
-	l.UpdateBase()
+	l.updateBase()
 
 	if l.Units == ObjectBoundingBox {
 		sz := l.Box.Size()
@@ -89,5 +89,5 @@ func (l *Linear) At(x, y int) color.Color {
 	}
 	df := pt.Sub(l.rStart)
 	pos := (l.distance.X*df.X + l.distance.Y*df.Y) / l.distanceLengthSquared
-	return l.GetColor(pos)
+	return l.getColor(pos)
 }

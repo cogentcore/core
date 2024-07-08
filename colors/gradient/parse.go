@@ -24,7 +24,8 @@ import (
 	"golang.org/x/net/html/charset"
 )
 
-// XMLAttr searches for given attribute in slice of xml attributes -- returns "" if not found
+// XMLAttr searches for given attribute in slice of xml attributes;
+// returns "" if not found.
 func XMLAttr(name string, attrs []xml.Attr) string {
 	for _, attr := range attrs {
 		if attr.Name.Local == name {
@@ -99,7 +100,7 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 		if err != nil {
 			return nil, err
 		}
-		FixGradientStops(l.Stops)
+		fixGradientStops(l.Stops)
 		Cache[cnm] = l
 		return l, nil
 	case "radial", "repeating-radial":
@@ -111,7 +112,7 @@ func FromString(str string, ctx ...colors.Context) (image.Image, error) {
 		if err != nil {
 			return nil, err
 		}
-		FixGradientStops(r.Stops)
+		fixGradientStops(r.Stops)
 		Cache[cnm] = r
 		return r, nil
 	}
@@ -133,8 +134,8 @@ func FromAny(val any, ctx ...colors.Context) (image.Image, error) {
 	return nil, fmt.Errorf("gradient.FromAny: got unsupported type %T", val)
 }
 
-// GradientDegToSides maps gradient degree notation to side notation
-var GradientDegToSides = map[string]string{
+// gradientDegToSides maps gradient degree notation to side notation
+var gradientDegToSides = map[string]string{
 	"0deg":    "top",
 	"360deg":  "top",
 	"45deg":   "top right",
@@ -170,7 +171,7 @@ outer:
 			// TODO(kai): this is not true and should be fixed to use trig
 			// can't use trig, b/c need to be full 1, 0 values -- just use map
 			var ok bool
-			par, ok = GradientDegToSides[par]
+			par, ok = gradientDegToSides[par]
 			if !ok {
 				return fmt.Errorf("invalid gradient angle %q: must be at 45 degree increments", origPar)
 			}
@@ -204,7 +205,7 @@ outer:
 			} else {
 				stop = &Stop{Opacity: 1}
 			}
-			err := ParseColorStop(stop, prevColor, par)
+			err := parseColorStop(stop, prevColor, par)
 			if err != nil {
 				return err
 			}
@@ -264,7 +265,7 @@ outer:
 			} else {
 				stop = &Stop{Opacity: 1}
 			}
-			err := ParseColorStop(stop, prevColor, par)
+			err := parseColorStop(stop, prevColor, par)
 			if err != nil {
 				return err
 			}
@@ -281,14 +282,14 @@ outer:
 	return nil
 }
 
-// ParseColorStop parses the given color stop based on the given previous color
+// parseColorStop parses the given color stop based on the given previous color
 // and parent gradient string.
-func ParseColorStop(stop *Stop, prev color.Color, par string) error {
+func parseColorStop(stop *Stop, prev color.Color, par string) error {
 	cnm := par
 	if spcidx := strings.Index(par, " "); spcidx > 0 {
 		cnm = par[:spcidx]
 		offs := strings.TrimSpace(par[spcidx+1:])
-		off, err := ReadFraction(offs)
+		off, err := readFraction(offs)
 		if err != nil {
 			return fmt.Errorf("invalid offset %q: %w", offs, err)
 		}
@@ -367,15 +368,15 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 					switch attr.Name.Local {
 					// note: id not processed here - must be done externally
 					case "x1":
-						l.Start.X, err = ReadFraction(attr.Value)
+						l.Start.X, err = readFraction(attr.Value)
 					case "y1":
-						l.Start.Y, err = ReadFraction(attr.Value)
+						l.Start.Y, err = readFraction(attr.Value)
 					case "x2":
-						l.End.X, err = ReadFraction(attr.Value)
+						l.End.X, err = readFraction(attr.Value)
 					case "y2":
-						l.End.Y, err = ReadFraction(attr.Value)
+						l.End.Y, err = readFraction(attr.Value)
 					default:
-						err = ReadGradAttr(*g, attr)
+						err = readGradAttr(*g, attr)
 					}
 					if err != nil {
 						return fmt.Errorf("error parsing linear gradient: %w", err)
@@ -397,20 +398,20 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 					// note: id not processed here - must be done externally
 					case "r":
 						var radius float32
-						radius, err = ReadFraction(attr.Value)
+						radius, err = readFraction(attr.Value)
 						r.Radius.SetScalar(radius)
 					case "cx":
-						r.Center.X, err = ReadFraction(attr.Value)
+						r.Center.X, err = readFraction(attr.Value)
 					case "cy":
-						r.Center.Y, err = ReadFraction(attr.Value)
+						r.Center.Y, err = readFraction(attr.Value)
 					case "fx":
 						setFx = true
-						r.Focal.X, err = ReadFraction(attr.Value)
+						r.Focal.X, err = readFraction(attr.Value)
 					case "fy":
 						setFy = true
-						r.Focal.Y, err = ReadFraction(attr.Value)
+						r.Focal.Y, err = readFraction(attr.Value)
 					default:
-						err = ReadGradAttr(*g, attr)
+						err = readGradAttr(*g, attr)
 					}
 					if err != nil {
 						return fmt.Errorf("error parsing radial gradient: %w", err)
@@ -443,7 +444,7 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 				for _, attr := range ats {
 					switch attr.Name.Local {
 					case "offset":
-						stop.Pos, err = ReadFraction(attr.Value)
+						stop.Pos, err = readFraction(attr.Value)
 						if err != nil {
 							return err
 						}
@@ -454,7 +455,7 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 						}
 						stop.Color = clr
 					case "stop-opacity":
-						opacity, err := ReadFraction(attr.Value)
+						opacity, err := readFraction(attr.Value)
 						if err != nil {
 							return fmt.Errorf("invalid stop opacity: %w", err)
 						}
@@ -483,8 +484,8 @@ func UnmarshalXML(g *Gradient, decoder *xml.Decoder, se xml.StartElement) error 
 	return nil
 }
 
-// ReadFraction reads a decimal value from the given string.
-func ReadFraction(v string) (float32, error) {
+// readFraction reads a decimal value from the given string.
+func readFraction(v string) (float32, error) {
 	v = strings.TrimSpace(v)
 	d := float32(1)
 	if strings.HasSuffix(v, "%") {
@@ -503,8 +504,8 @@ func ReadFraction(v string) (float32, error) {
 	return f, nil
 }
 
-// ReadGradAttr reads the given xml attribute onto the given gradient.
-func ReadGradAttr(g Gradient, attr xml.Attr) error {
+// readGradAttr reads the given xml attribute onto the given gradient.
+func readGradAttr(g Gradient, attr xml.Attr) error {
 	gb := g.AsBase()
 	switch attr.Name.Local {
 	case "gradientTransform":
@@ -520,9 +521,9 @@ func ReadGradAttr(g Gradient, attr xml.Attr) error {
 	return nil
 }
 
-// FixGradientStops applies the CSS rules to regularize the given gradient stops:
+// fixGradientStops applies the CSS rules to regularize the given gradient stops:
 // https://www.w3.org/TR/css3-images/#color-stop-syntax
-func FixGradientStops(stops []Stop) {
+func fixGradientStops(stops []Stop) {
 	sz := len(stops)
 	if sz == 0 {
 		return
