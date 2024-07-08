@@ -1514,7 +1514,7 @@ func (tr *Tree) DragStart(e events.Event) {
 			}
 		}
 	}
-	tr.Scene.Events.DragStart(tr.This.(Widget), md, e)
+	tr.Scene.Events.dragStart(tr.This.(Widget), md, e)
 }
 
 // DropExternal is not handled by base case but could be in derived
@@ -1542,7 +1542,7 @@ func (tr *Tree) DragDrop(e events.Event) {
 	}
 	md := de.Data.(mimedata.Mimes)
 	mf := func(m *Scene) {
-		tr.Scene.Events.DragMenuAddModText(m, de.DropMod)
+		tr.Scene.Events.dragMenuAddModText(m, de.DropMod)
 		tvi.MakePasteMenu(m, md, func() {
 			tvi.DropFinalize(de)
 		})
@@ -1556,7 +1556,7 @@ func (tr *Tree) DragDrop(e events.Event) {
 func (tr *Tree) DropFinalize(de *events.DragDrop) {
 	tr.UnselectAll()
 	tr.DragClearStates()
-	tr.Scene.Events.DropFinalize(de) // sends DropDeleteSource to Source
+	tr.Scene.Events.dropFinalize(de) // sends DropDeleteSource to Source
 }
 
 // DropDeleteSource handles delete source event for DropMove case

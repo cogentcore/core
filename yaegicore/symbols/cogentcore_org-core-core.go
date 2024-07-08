@@ -359,7 +359,6 @@ func init() {
 		"SettingsBase":           reflect.ValueOf((*core.SettingsBase)(nil)),
 		"SettingsOpener":         reflect.ValueOf((*core.SettingsOpener)(nil)),
 		"SettingsSaver":          reflect.ValueOf((*core.SettingsSaver)(nil)),
-		"Shortcuts":              reflect.ValueOf((*core.Shortcuts)(nil)),
 		"ShouldShower":           reflect.ValueOf((*core.ShouldShower)(nil)),
 		"SizeClasses":            reflect.ValueOf((*core.SizeClasses)(nil)),
 		"Slider":                 reflect.ValueOf((*core.Slider)(nil)),

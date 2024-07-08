@@ -500,7 +500,7 @@ func (wb *WidgetBase) SetFocus() {
 	em := wb.Events()
 	if em != nil {
 		// fmt.Println("grab focus:", foc)
-		em.SetFocus(foc) // doesn't send event
+		em.setFocus(foc) // doesn't send event
 	}
 }
 
@@ -519,7 +519,7 @@ func (wb *WidgetBase) SetFocusEvent() {
 	em := wb.Events()
 	if em != nil {
 		// fmt.Println("grab focus:", foc)
-		em.SetFocusEvent(foc) // doesn't send event
+		em.setFocusEvent(foc) // doesn't send event
 	}
 }
 
@@ -540,7 +540,7 @@ func (wb *WidgetBase) FocusableInMe() Widget {
 func (wb *WidgetBase) FocusNext() {
 	em := wb.Events()
 	if em != nil {
-		em.FocusNext()
+		em.focusNext()
 	}
 }
 
@@ -548,7 +548,7 @@ func (wb *WidgetBase) FocusNext() {
 func (wb *WidgetBase) FocusPrev() {
 	em := wb.Events()
 	if em != nil {
-		em.FocusPrev()
+		em.focusPrev()
 	}
 }
 
@@ -556,7 +556,7 @@ func (wb *WidgetBase) FocusPrev() {
 func (wb *WidgetBase) FocusClear() {
 	em := wb.Events()
 	if em != nil {
-		em.FocusClear()
+		em.focusClear()
 	}
 }
 
@@ -575,7 +575,7 @@ func (wb *WidgetBase) ContainsFocus() bool {
 	if em == nil {
 		return false
 	}
-	cur := em.Focus
+	cur := em.focus
 	if cur == nil {
 		return false
 	}

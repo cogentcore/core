@@ -260,7 +260,7 @@ func (sc *Scene) DoUpdate() bool {
 	if sc.showIter == SceneShowIters { // end of first pass
 		sc.showIter++
 		if !sc.prefSizing {
-			sc.Events.ActivateStartFocus()
+			sc.Events.activateStartFocus()
 		}
 	}
 

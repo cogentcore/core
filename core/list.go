@@ -1545,7 +1545,7 @@ func (lb *ListBase) DragStart(e events.Event) {
 	md := lb.This.(Lister).CopySelectToMime()
 	w, ok := lb.This.(Lister).RowFirstWidget(ixs[0] - lb.StartIndex)
 	if ok {
-		lb.Scene.Events.DragStart(w, md, e)
+		lb.Scene.Events.dragStart(w, md, e)
 		e.SetHandled()
 		// } else {
 		// 	fmt.Println("List DND programmer error")
@@ -1566,7 +1566,7 @@ func (lb *ListBase) DragDrop(e events.Event) {
 		lb.SaveDraggedIndexes(idx)
 		md := de.Data.(mimedata.Mimes)
 		mf := func(m *Scene) {
-			lb.Scene.Events.DragMenuAddModText(m, de.DropMod)
+			lb.Scene.Events.dragMenuAddModText(m, de.DropMod)
 			svi.MakePasteMenu(m, md, idx, de.DropMod, func() {
 				svi.DropFinalize(de)
 			})
@@ -1581,7 +1581,7 @@ func (lb *ListBase) DragDrop(e events.Event) {
 func (lb *ListBase) DropFinalize(de *events.DragDrop) {
 	lb.NeedsLayout()
 	lb.UnselectAllIndexes()
-	lb.Scene.Events.DropFinalize(de) // sends DropDeleteSource to Source
+	lb.Scene.Events.dropFinalize(de) // sends DropDeleteSource to Source
 }
 
 // DropDeleteSource handles delete source event for DropMove case

@@ -147,7 +147,7 @@ func NewScene(name ...string) *Scene {
 	if len(name) > 0 {
 		sc.SetName(name[0])
 	}
-	sc.Events.Scene = sc
+	sc.Events.scene = sc
 	return sc
 }
 

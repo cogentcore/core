@@ -238,7 +238,7 @@ func (fr *Frame) FocusNextChild(updn bool) bool {
 	if em == nil {
 		return false
 	}
-	cur := em.Focus
+	cur := em.focus
 	nxti := idx + 1
 	if fr.Styles.Display == styles.Grid && updn {
 		nxti = idx + fr.Styles.Columns
@@ -246,12 +246,12 @@ func (fr *Frame) FocusNextChild(updn bool) bool {
 	did := false
 	if nxti < sz {
 		nx := fr.Child(nxti).(Widget)
-		did = em.FocusOnOrNext(nx)
+		did = em.focusOnOrNext(nx)
 	} else {
 		nx := fr.Child(0).(Widget)
-		did = em.FocusOnOrNext(nx)
+		did = em.focusOnOrNext(nx)
 	}
-	if !did || em.Focus == cur {
+	if !did || em.focus == cur {
 		return false
 	}
 	return true
@@ -274,18 +274,18 @@ func (fr *Frame) FocusPreviousChild(updn bool) bool {
 	if em == nil {
 		return false
 	}
-	cur := em.Focus
+	cur := em.focus
 	nxti := idx - 1
 	if fr.Styles.Display == styles.Grid && updn {
 		nxti = idx - fr.Styles.Columns
 	}
 	did := false
 	if nxti >= 0 {
-		did = em.FocusOnOrPrev(fr.Child(nxti).(Widget))
+		did = em.focusOnOrPrev(fr.Child(nxti).(Widget))
 	} else {
-		did = em.FocusOnOrPrev(fr.Child(sz - 1).(Widget))
+		did = em.focusOnOrPrev(fr.Child(sz - 1).(Widget))
 	}
-	if !did || em.Focus == cur {
+	if !did || em.focus == cur {
 		return false
 	}
 	return true
@@ -326,7 +326,7 @@ func (fr *Frame) FocusOnName(e events.Event) bool {
 	if focel != nil {
 		em := fr.Events()
 		if em != nil {
-			em.SetFocusEvent(focel.(Widget)) // this will also scroll by default!
+			em.setFocusEvent(focel.(Widget)) // this will also scroll by default!
 		}
 		fr.focusNameLast = focel
 		return true
