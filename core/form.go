@@ -253,9 +253,9 @@ func FormDialog(ctx Widget, stru any, title string, newWindow bool) {
 	if tb, ok := stru.(ToolbarMaker); ok {
 		d.AddAppBar(tb.MakeToolbar)
 	}
-	ds := d.NewFullDialog(ctx)
 	if newWindow {
-		ds.SetNewWindow(true)
+		d.RunWindowDialog(ctx)
+	} else {
+		d.RunFullDialog(ctx)
 	}
-	ds.Run()
 }

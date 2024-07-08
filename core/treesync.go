@@ -213,6 +213,18 @@ func (tr *Tree) AddSyncNodes(rel, myidx int, typ *types.Type, n int) {
 	}
 }
 
+// newItemsData contains the data necessary to make a certain
+// number of items of a certain type, which can be used with a
+// [Form] in new item dialogs.
+type newItemsData struct {
+
+	// Number is the number of elements to create
+	Number int
+
+	// Type is the type of elements to create
+	Type *types.Type
+}
+
 // InsertAt inserts a new node in the tree
 // at given relative offset from this node,
 // at the same (sibling) level,
@@ -234,7 +246,7 @@ func (tr *Tree) InsertAt(rel int, actNm string) {
 		typ = types.TypeByValue(tr.SyncNode)
 	}
 	d := NewBody().AddTitle(actNm).AddText("Number and type of items to insert:")
-	nd := &NewItemsData{Number: 1, Type: typ}
+	nd := &newItemsData{Number: 1, Type: typ}
 	NewForm(d).SetStruct(nd)
 	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)
@@ -262,7 +274,7 @@ func (tr *Tree) AddChildNode() { //types:add
 		typ = types.TypeByValue(tr.SyncNode)
 	}
 	d := NewBody().AddTitle(ttl).AddText("Number and type of items to insert:")
-	nd := &NewItemsData{Number: 1, Type: typ}
+	nd := &newItemsData{Number: 1, Type: typ}
 	NewForm(d).SetStruct(nd)
 	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)

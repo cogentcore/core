@@ -344,7 +344,6 @@ func init() {
 		"Lister":                 reflect.ValueOf((*core.Lister)(nil)),
 		"Meter":                  reflect.ValueOf((*core.Meter)(nil)),
 		"MeterTypes":             reflect.ValueOf((*core.MeterTypes)(nil)),
-		"NewItemsData":           reflect.ValueOf((*core.NewItemsData)(nil)),
 		"OnBinder":               reflect.ValueOf((*core.OnBinder)(nil)),
 		"RenderContext":          reflect.ValueOf((*core.RenderContext)(nil)),
 		"RenderParams":           reflect.ValueOf((*core.RenderParams)(nil)),
