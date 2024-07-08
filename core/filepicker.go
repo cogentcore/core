@@ -75,6 +75,9 @@ type FilePicker struct {
 
 	// Previous path that was processed via UpdateFiles
 	prevPath string
+
+	favoritesTable, filesTable  *Table
+	selectField, extensionField *TextField
 }
 
 func (fp *FilePicker) Init() {
@@ -92,7 +95,7 @@ func (fp *FilePicker) Init() {
 		switch kf {
 		case keymap.Jump, keymap.WordLeft:
 			e.SetHandled()
-			fp.DirectoryUp()
+			fp.directoryUp()
 		case keymap.Insert, keymap.InsertAfter, keymap.Open, keymap.SelectMode:
 			e.SetHandled()
 			if fp.selectFile() {
@@ -100,7 +103,7 @@ func (fp *FilePicker) Init() {
 			}
 		case keymap.Search:
 			e.SetHandled()
-			sf := fp.SelectField()
+			sf := fp.selectField
 			sf.SetFocusEvent()
 		}
 	})
@@ -119,7 +122,7 @@ func (fp *FilePicker) Init() {
 		}
 		RecentPaths.AddPath(fp.directory, SystemSettings.SavedPathsMax)
 		SaveRecentPaths()
-		fp.ReadFiles()
+		fp.readFiles()
 
 		if fp.prevPath != fp.directory {
 			if TheApp.Platform() != system.MacOS {
@@ -153,17 +156,18 @@ func (fp *FilePicker) Init() {
 	})
 }
 
-// func (fp *FilePicker) disconnect() {
-// 	if fp.watcher != nil {
-// 		fp.watcher.Close()
-// 		fp.watcher = nil
-// 	}
-// 	if fp.doneWatcher != nil {
-// 		fp.doneWatcher <- true
-// 		close(fp.doneWatcher)
-// 		fp.doneWatcher = nil
-// 	}
-// }
+func (fp *FilePicker) Destroy() {
+	fp.Frame.Destroy()
+	if fp.watcher != nil {
+		fp.watcher.Close()
+		fp.watcher = nil
+	}
+	if fp.doneWatcher != nil {
+		fp.doneWatcher <- true
+		close(fp.doneWatcher)
+		fp.doneWatcher = nil
+	}
+}
 
 // FilePickerFilterer is a filtering function for files; returns true if the
 // file should be visible in the picker, and false if not
@@ -195,7 +199,7 @@ func (fp *FilePicker) SetFilename(filename string) *FilePicker {
 
 // SelectedFile returns the full path to the currently selected file.
 func (fp *FilePicker) SelectedFile() string {
-	sf := fp.SelectField()
+	sf := fp.selectField
 	sf.EditDone()
 	return filepath.Join(fp.directory, fp.selectedFilename)
 }
@@ -231,16 +235,16 @@ func (fp *FilePicker) MakeToolbar(p *tree.Plan) {
 		fp.addChooserPaths(w)
 	})
 	tree.Add(p, func(w *FuncButton) {
-		w.SetFunc(fp.DirectoryUp).SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
+		w.SetFunc(fp.directoryUp).SetIcon(icons.ArrowUpward).SetKey(keymap.Jump).SetText("Up")
 	})
 	tree.Add(p, func(w *FuncButton) {
-		w.SetFunc(fp.AddPathToFavorites).SetIcon(icons.Favorite).SetText("Favorite")
+		w.SetFunc(fp.addPathToFavorites).SetIcon(icons.Favorite).SetText("Favorite")
 	})
 	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(fp.updateFilesAction).SetIcon(icons.Refresh).SetText("Update")
 	})
 	tree.Add(p, func(w *FuncButton) {
-		w.SetFunc(fp.NewFolder).SetIcon(icons.CreateNewFolder)
+		w.SetFunc(fp.newFolder).SetIcon(icons.CreateNewFolder)
 	})
 }
 
@@ -271,7 +275,7 @@ func (fp *FilePicker) addChooserPaths(ch *Chooser) {
 			Value: "Edit recent paths",
 			Icon:  icons.Edit,
 			Func: func() {
-				fp.EditRecentPaths()
+				fp.editRecentPaths()
 			},
 		})
 	})
@@ -279,6 +283,7 @@ func (fp *FilePicker) addChooserPaths(ch *Chooser) {
 
 func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 	tree.AddAt(p, "favorites", func(w *Table) {
+		fp.favoritesTable = w
 		w.SelectedIndex = -1
 		w.SetReadOnly(true)
 		w.ReadOnlyKeyNav = false // keys must go to files, not favorites
@@ -289,13 +294,14 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 		})
 		w.SetSlice(&SystemSettings.FavPaths)
 		w.OnSelect(func(e events.Event) {
-			fp.FavoritesSelect(w.SelectedIndex)
+			fp.favoritesSelect(w.SelectedIndex)
 		})
 		w.Updater(func() {
 			w.ResetSelectedIndexes()
 		})
 	})
 	tree.AddAt(p, "files", func(w *Table) {
+		fp.filesTable = w
 		w.SetReadOnly(true)
 		w.SetSlice(&fp.files)
 		w.SelectedField = "Name"
@@ -316,7 +322,7 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 			s.Cursor = cursors.Pointer
 		})
 		w.OnSelect(func(e events.Event) {
-			fp.FileSelect(w.SelectedIndex)
+			fp.fileSelect(w.SelectedIndex)
 		})
 		w.OnDoubleClick(func(e events.Event) {
 			if w.ClickSelectEvent(e) {
@@ -372,7 +378,7 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 					d.AddOKOnly().RunFullDialog(w)
 				})
 			NewSeparator(m)
-			NewFuncButton(m).SetFunc(fp.NewFolder).SetIcon(icons.CreateNewFolder)
+			NewFuncButton(m).SetFunc(fp.newFolder).SetIcon(icons.CreateNewFolder)
 		})
 		// w.Updater(func() {})
 	})
@@ -388,21 +394,22 @@ func (fp *FilePicker) makeSelectedRow(selected *tree.Plan) {
 	})
 
 	tree.AddAt(selected, "file", func(w *TextField) {
+		fp.selectField = w
 		w.SetText(fp.selectedFilename)
 		w.SetTooltip(fmt.Sprintf("Enter the file name. Special keys: up/down to move selection; %s or %s to go up to parent folder; %s or %s or %s or %s to select current file (if directory, goes into it, if file, selects and closes); %s or %s for prev / next history item; %s return to this field", keymap.WordLeft.Label(), keymap.Jump.Label(), keymap.SelectMode.Label(), keymap.Insert.Label(), keymap.InsertAfter.Label(), keymap.Open.Label(), keymap.HistPrev.Label(), keymap.HistNext.Label(), keymap.Search.Label()))
-		w.SetCompleter(fp, fp.FileComplete, fp.FileCompleteEdit)
+		w.SetCompleter(fp, fp.fileComplete, fp.fileCompleteEdit)
 		w.Styler(func(s *styles.Style) {
 			s.Min.X.Ch(60)
 			s.Max.X.Zero()
 			s.Grow.Set(1, 0)
 		})
 		w.OnChange(func(e events.Event) {
-			fp.SetSelectedFile(w.Text())
+			fp.setSelectedFile(w.Text())
 		})
 		w.OnKeyChord(func(e events.Event) {
 			kf := keymap.Of(e.KeyChord())
 			if kf == keymap.Accept {
-				fp.SetSelectedFile(w.Text())
+				fp.setSelectedFile(w.Text())
 			}
 		})
 		w.StartFocus()
@@ -419,6 +426,7 @@ func (fp *FilePicker) makeSelectedRow(selected *tree.Plan) {
 	})
 
 	tree.AddAt(selected, "extension", func(w *TextField) {
+		fp.extensionField = w
 		w.SetText(fp.extensions)
 		w.OnChange(func(e events.Event) {
 			fp.SetExtensions(w.Text()).Update()
@@ -464,35 +472,15 @@ func (fp *FilePicker) watchWatcher() {
 	}()
 }
 
-// FavoritesView returns the Table of the favorites
-func (fp *FilePicker) FavoritesView() *Table {
-	return fp.FindPath("files/favorites").(*Table)
-}
-
-// FilesView returns the Table of the files
-func (fp *FilePicker) FilesView() *Table {
-	return fp.FindPath("files/files").(*Table)
-}
-
-// SelectField returns the TextField of the select file
-func (fp *FilePicker) SelectField() *TextField {
-	return fp.FindPath("sel/file").(*TextField)
-}
-
-// ExtField returns the TextField of the extension
-func (fp *FilePicker) ExtField() *TextField {
-	return fp.FindPath("sel/extension").(*TextField)
-}
-
 // updateFilesAction updates the list of files and other views for the current path.
 func (fp *FilePicker) updateFilesAction() { //types:add
-	fp.ReadFiles()
+	fp.readFiles()
 	fp.Update()
 	// sf := fv.SelectField()
 	// sf.SetFocusEvent()
 }
 
-func (fp *FilePicker) ReadFiles() {
+func (fp *FilePicker) readFiles() {
 	effpath, err := filepath.EvalSymlinks(fp.directory)
 	if err != nil {
 		log.Printf("FilePicker Path: %v could not be opened -- error: %v\n", effpath, err)
@@ -533,14 +521,14 @@ func (fp *FilePicker) ReadFiles() {
 	})
 }
 
-// UpdateFavorites updates list of files and other views for current path
-func (fp *FilePicker) UpdateFavorites() {
-	sv := fp.FavoritesView()
+// updateFavorites updates list of files and other views for current path
+func (fp *FilePicker) updateFavorites() {
+	sv := fp.favoritesTable
 	sv.Update()
 }
 
-// AddPathToFavorites adds the current path to favorites
-func (fp *FilePicker) AddPathToFavorites() { //types:add
+// addPathToFavorites adds the current path to favorites
+func (fp *FilePicker) addPathToFavorites() { //types:add
 	dp := fp.directory
 	if dp == "" {
 		return
@@ -562,11 +550,11 @@ func (fp *FilePicker) AddPathToFavorites() { //types:add
 	SystemSettings.FavPaths = append(SystemSettings.FavPaths, fi)
 	ErrorSnackbar(fp, SaveSettings(SystemSettings), "Error saving settings")
 	// fv.FileSig.Emit(fv.This, int64(FilePickerFavAdded), fi)
-	fp.UpdateFavorites()
+	fp.updateFavorites()
 }
 
-// DirectoryUp moves up one directory in the path
-func (fp *FilePicker) DirectoryUp() { //types:add
+// directoryUp moves up one directory in the path
+func (fp *FilePicker) directoryUp() { //types:add
 	pdr := filepath.Dir(fp.directory)
 	if pdr == "" {
 		return
@@ -575,8 +563,8 @@ func (fp *FilePicker) DirectoryUp() { //types:add
 	fp.updateFilesAction()
 }
 
-// NewFolder creates a new folder with the given name in the current directory.
-func (fp *FilePicker) NewFolder(name string) error { //types:add
+// newFolder creates a new folder with the given name in the current directory.
+func (fp *FilePicker) newFolder(name string) error { //types:add
 	dp := fp.directory
 	if dp == "" {
 		return nil
@@ -590,12 +578,12 @@ func (fp *FilePicker) NewFolder(name string) error { //types:add
 	return nil
 }
 
-// SetSelectedFile sets the currently selected file to the given name, sends
+// setSelectedFile sets the currently selected file to the given name, sends
 // a selection event, and updates the selection in the table.
-func (fp *FilePicker) SetSelectedFile(file string) {
+func (fp *FilePicker) setSelectedFile(file string) {
 	fp.selectedFilename = file
-	sv := fp.FilesView()
-	ef := fp.ExtField()
+	sv := fp.filesTable
+	ef := fp.extensionField
 	exts := ef.Text()
 	if !sv.SelectFieldVal("Name", fp.selectedFilename) { // not found
 		extl := strings.Split(exts, ",")
@@ -606,22 +594,22 @@ func (fp *FilePicker) SetSelectedFile(file string) {
 		}
 	}
 	fp.selectedIndex = sv.SelectedIndex
-	sf := fp.SelectField()
+	sf := fp.selectField
 	sf.SetText(fp.selectedFilename) // make sure
 	fp.Send(events.Select)          // receiver needs to get selectedFile
 }
 
-// FileSelect updates the selection with the given selected file index and
+// fileSelect updates the selection with the given selected file index and
 // sends a select event.
-func (fp *FilePicker) FileSelect(idx int) {
+func (fp *FilePicker) fileSelect(idx int) {
 	if idx < 0 {
 		return
 	}
-	fp.SaveSortSettings()
+	fp.saveSortSettings()
 	fi := fp.files[idx]
 	fp.selectedIndex = idx
 	fp.selectedFilename = fi.Name
-	sf := fp.SelectField()
+	sf := fp.selectField
 	sf.SetText(fp.selectedFilename)
 	fp.Send(events.Select)
 }
@@ -650,8 +638,8 @@ func (fp *FilePicker) SetExtensions(ext string) *FilePicker {
 	return fp
 }
 
-// FavoritesSelect selects a favorite path and goes there
-func (fp *FilePicker) FavoritesSelect(idx int) {
+// favoritesSelect selects a favorite path and goes there
+func (fp *FilePicker) favoritesSelect(idx int) {
 	if idx < 0 || idx >= len(SystemSettings.FavPaths) {
 		return
 	}
@@ -660,9 +648,9 @@ func (fp *FilePicker) FavoritesSelect(idx int) {
 	fp.updateFilesAction()
 }
 
-// SaveSortSettings saves current sorting preferences
-func (fp *FilePicker) SaveSortSettings() {
-	sv := fp.FilesView()
+// saveSortSettings saves current sorting preferences
+func (fp *FilePicker) saveSortSettings() {
+	sv := fp.filesTable
 	if sv == nil {
 		return
 	}
@@ -671,8 +659,8 @@ func (fp *FilePicker) SaveSortSettings() {
 	ErrorSnackbar(fp, SaveSettings(SystemSettings), "Error saving settings")
 }
 
-// FileComplete finds the possible completions for the file field
-func (fp *FilePicker) FileComplete(data any, text string, posLine, posChar int) (md complete.Matches) {
+// fileComplete finds the possible completions for the file field
+func (fp *FilePicker) fileComplete(data any, text string, posLine, posChar int) (md complete.Matches) {
 	md.Seed = complete.SeedPath(text)
 
 	var files = []string{}
@@ -691,51 +679,15 @@ func (fp *FilePicker) FileComplete(data any, text string, posLine, posChar int) 
 	return md
 }
 
-// PathComplete finds the possible completions for the path field
-func (fp *FilePicker) PathComplete(data any, path string, posLine, posChar int) (md complete.Matches) {
-	dir, seed := filepath.Split(path)
-	md.Seed = seed
-
-	files, err := os.ReadDir(dir)
-	if err != nil {
-		return md
-	}
-	var dirs = []string{}
-	for _, f := range files {
-		if f.IsDir() && !strings.HasPrefix(f.Name(), ".") {
-			dirs = append(dirs, f.Name())
-		}
-	}
-
-	if len(md.Seed) > 0 { // return all directories
-		dirs = complete.MatchSeedString(dirs, md.Seed)
-	}
-
-	for _, d := range dirs {
-		m := complete.Completion{Text: d}
-		md.Matches = append(md.Matches, m)
-	}
-	return md
-}
-
-// PathCompleteEdit is the editing function called when inserting the completion selection in the path field
-func (fp *FilePicker) PathCompleteEdit(data any, text string, cursorPos int, c complete.Completion, seed string) (ed complete.Edit) {
-	ed = complete.EditWord(text, cursorPos, c.Text, seed)
-	path := ed.NewText + string(filepath.Separator)
-	ed.NewText = path
-	ed.CursorAdjust += 1
-	return ed
-}
-
-// FileCompleteEdit is the editing function called when inserting the completion selection in the file field
-func (fp *FilePicker) FileCompleteEdit(data any, text string, cursorPos int, c complete.Completion, seed string) (ed complete.Edit) {
+// fileCompleteEdit is the editing function called when inserting the completion selection in the file field
+func (fp *FilePicker) fileCompleteEdit(data any, text string, cursorPos int, c complete.Completion, seed string) (ed complete.Edit) {
 	ed = complete.EditWord(text, cursorPos, c.Text, seed)
 	return ed
 }
 
-// EditRecentPaths displays a dialog allowing the user to
+// editRecentPaths displays a dialog allowing the user to
 // edit the recent paths list.
-func (fp *FilePicker) EditRecentPaths() {
+func (fp *FilePicker) editRecentPaths() {
 	d := NewBody().AddTitle("Recent file paths").AddText("You can delete paths you no longer use")
 	NewList(d).SetSlice(&RecentPaths)
 	d.AddBottomBar(func(parent Widget) {
