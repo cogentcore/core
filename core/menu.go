@@ -35,7 +35,7 @@ func MenuSceneConfigStyles(msc *Scene) {
 				kf := keymap.Of(e.KeyChord())
 				switch kf {
 				case keymap.MoveRight:
-					if bt.OpenMenu(e) {
+					if bt.openMenu(e) {
 						e.SetHandled()
 					}
 				case keymap.MoveLeft:

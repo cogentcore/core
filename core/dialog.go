@@ -54,7 +54,7 @@ func (bd *Body) NewFullDialog(ctx Widget) *Stage {
 	bd.Scene.Stage.SetContext(ctx)
 	bd.Scene.Stage.SetFullWindow(true)
 	if ctx != nil {
-		bd.Scene.InheritBarsWidget(ctx)
+		bd.Scene.inheritBarsWidget(ctx)
 	}
 	return bd.Scene.Stage
 }

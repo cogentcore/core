@@ -23,7 +23,7 @@ type Body struct { //core:no-new
 
 // NewBody creates a new [Body] that will serve as the content of a [Scene]
 // (e.g., a Window, Dialog, etc). [Body] forms the central region
-// of a [Scene], and has OverflowAuto scrollbars by default.
+// of a [Scene], and has [styles.OverflowAuto] scrollbars by default.
 // It will create its own parent [Scene] at this point, and has wrapper
 // functions to transparently manage everything that the [Scene]
 // typically manages during configuration, so you can usually avoid
@@ -58,8 +58,8 @@ func (bd *Body) Init() {
 	})
 }
 
-// SetTitle sets the title in the [Body], [Scene], [Stage], [RenderWindow], and title widget.
-// This is the one place to change the title for everything.
+// SetTitle sets the title in the [Body], [Scene], [Stage], [RenderWindow],
+// and title widget. This is the one place to change the title for everything.
 func (bd *Body) SetTitle(title string) *Body {
 	bd.Name = title
 	bd.Title = title
@@ -78,8 +78,8 @@ func (bd *Body) SetTitle(title string) *Body {
 	return bd
 }
 
-// AddTitle adds [Text] with the given title, and sets the Title text
-// which will be used by the [Scene] etc.
+// AddTitle adds [Text] with the given title, and sets the [Body.Title]
+// text which will be used by the [Scene] etc.
 func (bd *Body) AddTitle(title string) *Body {
 	bd.SetTitle(title)
 	NewText(bd).SetText(title).SetType(TextHeadlineSmall).SetName("body-title")

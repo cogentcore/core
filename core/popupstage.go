@@ -58,7 +58,7 @@ func (st *Stage) RunPopup() *Stage {
 	}
 
 	if st.Type == SnackbarStage {
-		st.Scene.MakeSceneBars()
+		st.Scene.makeSceneBars()
 	}
 	st.Scene.MakeSceneWidgets()
 	sc := st.Scene

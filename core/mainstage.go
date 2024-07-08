@@ -137,7 +137,7 @@ func (st *Stage) addDialogParts() *Stage {
 }
 
 func (st *Stage) InheritBars() {
-	st.Scene.InheritBarsWidget(st.Context)
+	st.Scene.inheritBarsWidget(st.Context)
 }
 
 // FirstWindowStages creates a temporary [Stages] for the first window
@@ -162,7 +162,7 @@ func (st *Stage) ConfigMainStage() {
 		st.Scrim = false
 	}
 	sc := st.Scene
-	sc.MakeSceneBars()
+	sc.makeSceneBars()
 	sc.MakeSceneWidgets()
 }
 
