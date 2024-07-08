@@ -1022,30 +1022,6 @@ func (em *Events) focusLastFrom(from Widget) bool {
 	return em.focusOnOrPrev(last)
 }
 
-// clearNonFocus clears the focus of any non-w.Focus item.
-func (em *Events) clearNonFocus(foc Widget) {
-	focRoot := em.scene
-
-	focRoot.WidgetWalkDown(func(wi Widget, wb *WidgetBase) bool {
-		if wi == focRoot { // skip top-level
-			return tree.Continue
-		}
-		if !wb.IsVisible() {
-			return tree.Continue
-		}
-		if foc == wi {
-			return tree.Continue
-		}
-		if wb.StateIs(states.Focused) {
-			if DebugSettings.EventTrace {
-				fmt.Printf("ClearNonFocus: had focus: %v\n", wb.Path())
-			}
-			wi.AsWidget().Send(events.FocusLost)
-		}
-		return tree.Continue
-	})
-}
-
 // SetStartFocus sets the given item to be the first focus when the window opens.
 func (em *Events) SetStartFocus(k Widget) {
 	em.startFocus = k
