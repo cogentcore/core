@@ -39,6 +39,8 @@ func (ic *Icon) WidgetValue() any { return &ic.Icon }
 func (ic *Icon) Init() {
 	ic.WidgetBase.Init()
 	ic.svg.Scale = 1
+
+	ic.Updater(ic.readIcon)
 	ic.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(1))
 	})
@@ -50,32 +52,30 @@ func (ic *Icon) Init() {
 }
 
 // readIcon reads the [Icon.Icon] if necessary.
-func (ic *Icon) readIcon() error {
+func (ic *Icon) readIcon() {
 	if ic.Icon == ic.prevIcon {
 		// if nothing has changed, we don't need to read it
-		return nil
+		return
 	}
-
-	ic.svg.Config(2, 2)
-	err := ic.svg.ReadXML(strings.NewReader(string(ic.Icon)))
-	if err != nil {
-		return err
-	}
-	icons.Used[ic.Icon] = true
-	ic.prevIcon = ic.Icon
-	return nil
-}
-
-// renderSVG renders the [Icon.svg] if necessary.
-func (ic *Icon) renderSVG() {
 	if !ic.Icon.IsSet() {
 		ic.svg.Pixels = nil
 		ic.svg.DeleteAll()
 		ic.prevIcon = ic.Icon
 		return
 	}
-	err := ic.readIcon()
+
+	ic.svg.Config(2, 2)
+	err := ic.svg.ReadXML(strings.NewReader(string(ic.Icon)))
 	if errors.Log(err) != nil {
+		return
+	}
+	icons.Used[ic.Icon] = true
+	ic.prevIcon = ic.Icon
+}
+
+// renderSVG renders the [Icon.svg] if necessary.
+func (ic *Icon) renderSVG() {
+	if ic.svg.Root == nil || !ic.svg.Root.HasChildren() {
 		return
 	}
 
