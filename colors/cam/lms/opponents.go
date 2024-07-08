@@ -6,10 +6,10 @@ package lms
 
 //go:generate core generate
 
-// OpVals holds color opponent values based on cone-like L,M,S inputs
+// OpponentValues holds color opponent values based on cone-like L,M,S inputs
 // These values are useful for generating inputs to vision models that
 // simulate color opponency representations in the brain.
-type OpVals struct {
+type OpponentValues struct {
 
 	// red vs. green (long vs. medium)
 	RedGreen float32
@@ -21,15 +21,15 @@ type OpVals struct {
 	Grey float32
 }
 
-// NewOpVals returns a new opponent color values from values representing
-// the LMS long, medium, short cone responses, and an overall grey value
-func NewOpVals(l, m, s, lm, grey float32) OpVals {
-	return OpVals{RedGreen: l - m, BlueYellow: s - lm, Grey: grey}
+// NewOpponentValues returns a new [OpponentValues] from values representing
+// the LMS long, medium, short cone responses, and an overall grey value.
+func NewOpponentValues(l, m, s, lm, grey float32) OpponentValues {
+	return OpponentValues{RedGreen: l - m, BlueYellow: s - lm, Grey: grey}
 }
 
 // Opponents enumerates the three primary opponency channels:
-// WhiteBlack, RedGreen, BlueYellow
-// using colloquial "everyday" terms.
+// [WhiteBlack], [RedGreen], and [BlueYellow] using colloquial
+// "everyday" terms.
 type Opponents int32 //enums:enum
 
 const (
