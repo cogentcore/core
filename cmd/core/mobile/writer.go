@@ -78,16 +78,16 @@ import (
 	"io"
 )
 
-// NewWriter returns a new Writer writing an APK file to w.
+// newWriter returns a new Writer writing an APK file to w.
 // The APK will be signed with key.
-func NewWriter(w io.Writer, priv *rsa.PrivateKey) *Writer {
-	apkw := &Writer{priv: priv}
+func newWriter(w io.Writer, priv *rsa.PrivateKey) *writer {
+	apkw := &writer{priv: priv}
 	apkw.w = zip.NewWriter(&countWriter{apkw: apkw, w: w})
 	return apkw
 }
 
-// Writer implements an APK file writer.
-type Writer struct {
+// writer implements an APK file writer.
+type writer struct {
 	offset   int
 	w        *zip.Writer
 	priv     *rsa.PrivateKey
@@ -99,7 +99,7 @@ type Writer struct {
 //
 // The name must be a relative path. The file's contents must be written to
 // the returned io.Writer before the next call to Create or Close.
-func (w *Writer) Create(name string) (io.Writer, error) {
+func (w *writer) Create(name string) (io.Writer, error) {
 	if err := w.clearCur(); err != nil {
 		return nil, fmt.Errorf("apk: Create(%s): %v", name, err)
 	}
@@ -110,7 +110,7 @@ func (w *Writer) Create(name string) (io.Writer, error) {
 	return res, nil
 }
 
-func (w *Writer) create(name string) (io.Writer, error) {
+func (w *writer) create(name string) (io.Writer, error) {
 	// Align start of file contents by using Extra as padding.
 	if err := w.w.Flush(); err != nil { // for exact offset
 		return nil, err
@@ -138,7 +138,7 @@ func (w *Writer) create(name string) (io.Writer, error) {
 // signing the archive, and writing the ZIP central directory.
 //
 // It does not close the underlying writer.
-func (w *Writer) Close() error {
+func (w *writer) Close() error {
 	if err := w.clearCur(); err != nil {
 		return fmt.Errorf("apk: %v", err)
 	}
@@ -192,7 +192,7 @@ func (w *Writer) Close() error {
 		return err
 	}
 
-	rsa, err := SignPKCS7(rand.Reader, w.priv, cert.Bytes())
+	rsa, err := signPKCS7(rand.Reader, w.priv, cert.Bytes())
 	if err != nil {
 		return fmt.Errorf("apk: %v", err)
 	}
@@ -222,7 +222,7 @@ const certHeader = `Signature-Version: 1.0
 Created-By: 1.0 (Go)
 `
 
-func (w *Writer) clearCur() error {
+func (w *writer) clearCur() error {
 	if w.cur == nil {
 		return nil
 	}
@@ -241,7 +241,7 @@ type manifestEntry struct {
 }
 
 type countWriter struct {
-	apkw *Writer
+	apkw *writer
 	w    io.Writer
 }
 

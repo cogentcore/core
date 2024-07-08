@@ -16,12 +16,12 @@ import (
 	"time"
 )
 
-// SignPKCS7 does the minimal amount of work necessary to embed an RSA
+// signPKCS7 does the minimal amount of work necessary to embed an RSA
 // signature into a PKCS#7 certificate.
 //
 // We prepare the certificate using the x509 package, read it back in
 // to our custom data type and then write it back out with the signature.
-func SignPKCS7(rand io.Reader, priv *rsa.PrivateKey, msg []byte) ([]byte, error) {
+func signPKCS7(rand io.Reader, priv *rsa.PrivateKey, msg []byte) ([]byte, error) {
 	const serialNumber = 0x5462c4dd // arbitrary
 	name := pkix.Name{CommonName: "gomobile"}
 
@@ -36,7 +36,7 @@ func SignPKCS7(rand io.Reader, priv *rsa.PrivateKey, msg []byte) ([]byte, error)
 		return nil, err
 	}
 
-	c := Certificate{}
+	c := certificate{}
 	if _, err := asn1.Unmarshal(b, &c); err != nil {
 		return nil, err
 	}
@@ -50,28 +50,28 @@ func SignPKCS7(rand io.Reader, priv *rsa.PrivateKey, msg []byte) ([]byte, error)
 		return nil, err
 	}
 
-	content := Pkcs7SignedData{
-		ContentType: OIDSignedData,
-		Content: SignedData{
+	content := pkcs7SignedData{
+		ContentType: oidSignedData,
+		Content: signedData{
 			Version: 1,
 			DigestAlgorithms: []pkix.AlgorithmIdentifier{{
-				Algorithm:  OIDSHA1,
+				Algorithm:  oidSHA1,
 				Parameters: asn1.RawValue{Tag: 5},
 			}},
-			ContentInfo:  ContentInfo{Type: OIDData},
+			ContentInfo:  contentInfo{Type: oidData},
 			Certificates: c,
-			SignerInfos: []SignerInfo{{
+			SignerInfos: []signerInfo{{
 				Version: 1,
-				IssuerAndSerialNumber: IssuerAndSerialNumber{
+				IssuerAndSerialNumber: issuerAndSerialNumber{
 					Issuer:       name.ToRDNSequence(),
 					SerialNumber: serialNumber,
 				},
 				DigestAlgorithm: pkix.AlgorithmIdentifier{
-					Algorithm:  OIDSHA1,
+					Algorithm:  oidSHA1,
 					Parameters: asn1.RawValue{Tag: 5},
 				},
 				DigestEncryptionAlgorithm: pkix.AlgorithmIdentifier{
-					Algorithm:  OIDRSAEncryption,
+					Algorithm:  oidRSAEncryption,
 					Parameters: asn1.RawValue{Tag: 5},
 				},
 				EncryptedDigest: signed,
@@ -82,73 +82,73 @@ func SignPKCS7(rand io.Reader, priv *rsa.PrivateKey, msg []byte) ([]byte, error)
 	return asn1.Marshal(content)
 }
 
-type Pkcs7SignedData struct {
+type pkcs7SignedData struct {
 	ContentType asn1.ObjectIdentifier
-	Content     SignedData `asn1:"tag:0,explicit"`
+	Content     signedData `asn1:"tag:0,explicit"`
 }
 
-// SignedData is defined in rfc2315, section 9.1.
-type SignedData struct {
+// signedData is defined in rfc2315, section 9.1.
+type signedData struct {
 	Version          int
 	DigestAlgorithms []pkix.AlgorithmIdentifier `asn1:"set"`
-	ContentInfo      ContentInfo
-	Certificates     Certificate  `asn1:"tag0,explicit"`
-	SignerInfos      []SignerInfo `asn1:"set"`
+	ContentInfo      contentInfo
+	Certificates     certificate  `asn1:"tag0,explicit"`
+	SignerInfos      []signerInfo `asn1:"set"`
 }
 
-type ContentInfo struct {
+type contentInfo struct {
 	Type asn1.ObjectIdentifier
 	// Content is optional in PKCS#7 and not provided here.
 }
 
-// Certificate is defined in rfc2459, section 4.1.
-type Certificate struct {
-	TBSCertificate     TBSCertificate
+// certificate is defined in rfc2459, section 4.1.
+type certificate struct {
+	TBSCertificate     tbsCertificate
 	SignatureAlgorithm pkix.AlgorithmIdentifier
 	SignatureValue     asn1.BitString
 }
 
-// TBSCertificate is defined in rfc2459, section 4.1.
-type TBSCertificate struct {
+// tbsCertificate is defined in rfc2459, section 4.1.
+type tbsCertificate struct {
 	Version      int `asn1:"tag:0,default:2,explicit"`
 	SerialNumber int
 	Signature    pkix.AlgorithmIdentifier
 	Issuer       pkix.RDNSequence // pkix.Name
-	Validity     Validity
+	Validity     validity
 	Subject      pkix.RDNSequence // pkix.Name
-	SubjectPKI   SubjectPublicKeyInfo
+	SubjectPKI   subjectPublicKeyInfo
 }
 
-// Validity is defined in rfc2459, section 4.1.
-type Validity struct {
+// validity is defined in rfc2459, section 4.1.
+type validity struct {
 	NotBefore time.Time
 	NotAfter  time.Time
 }
 
-// SubjectPublicKeyInfo is defined in rfc2459, section 4.1.
-type SubjectPublicKeyInfo struct {
+// subjectPublicKeyInfo is defined in rfc2459, section 4.1.
+type subjectPublicKeyInfo struct {
 	Algorithm        pkix.AlgorithmIdentifier
 	SubjectPublicKey asn1.BitString
 }
 
-type SignerInfo struct {
+type signerInfo struct {
 	Version                   int
-	IssuerAndSerialNumber     IssuerAndSerialNumber
+	IssuerAndSerialNumber     issuerAndSerialNumber
 	DigestAlgorithm           pkix.AlgorithmIdentifier
 	DigestEncryptionAlgorithm pkix.AlgorithmIdentifier
 	EncryptedDigest           []byte
 }
 
-type IssuerAndSerialNumber struct {
+type issuerAndSerialNumber struct {
 	Issuer       pkix.RDNSequence // pkix.Name
 	SerialNumber int
 }
 
 // Various ASN.1 Object Identifies, mostly from rfc3852.
 var (
-	OIDPKCS7         = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7}
-	OIDData          = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 1}
-	OIDSignedData    = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 2}
-	OIDSHA1          = asn1.ObjectIdentifier{1, 3, 14, 3, 2, 26}
-	OIDRSAEncryption = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 1}
+	// oidPKCS7         = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7}
+	oidData          = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 1}
+	oidSignedData    = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 2}
+	oidSHA1          = asn1.ObjectIdentifier{1, 3, 14, 3, 2, 26}
+	oidRSAEncryption = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 1}
 )

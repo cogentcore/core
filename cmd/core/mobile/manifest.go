@@ -11,24 +11,24 @@ import (
 	"html/template"
 )
 
-type ManifestXML struct {
-	Activity ActivityXML `xml:"application>activity"`
+type manifestXML struct {
+	Activity activityXML `xml:"application>activity"`
 }
 
-type ActivityXML struct {
+type activityXML struct {
 	Name     string        `xml:"name,attr"`
-	MetaData []MetaDataXML `xml:"meta-data"`
+	MetaData []metaDataXML `xml:"meta-data"`
 }
 
-type MetaDataXML struct {
+type metaDataXML struct {
 	Name  string `xml:"name,attr"`
 	Value string `xml:"value,attr"`
 }
 
-// ManifestLibName parses the AndroidManifest.xml and finds the library
+// manifestLibName parses the AndroidManifest.xml and finds the library
 // name of the NativeActivity.
-func ManifestLibName(data []byte) (string, error) {
-	manifest := new(ManifestXML)
+func manifestLibName(data []byte) (string, error) {
+	manifest := new(manifestXML)
 	if err := xml.Unmarshal(data, manifest); err != nil {
 		return "", err
 	}
@@ -48,13 +48,13 @@ func ManifestLibName(data []byte) (string, error) {
 	return libName, nil
 }
 
-type ManifestTmplData struct {
+type manifestTmplData struct {
 	JavaPkgPath string
 	Name        string
 	LibName     string
 }
 
-var ManifestTmpl = template.Must(template.New("manifest").Parse(`
+var manifestTmpl = template.Must(template.New("manifest").Parse(`
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	package="{{.JavaPkgPath}}"

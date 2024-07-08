@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:generate go run gendex.go -o dex.go
-
+// Package mobile provides functions for building Cogent Core apps for mobile devices.
 package mobile
+
+//go:generate go run gendex.go -o dex.go
 
 import (
 	"bufio"
@@ -27,7 +28,7 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-var TmpDir string
+var tmpDir string
 
 // Build compiles and encodes the app named by the import path.
 //
@@ -57,14 +58,14 @@ var TmpDir string
 // If the package directory contains an assets subdirectory, its contents
 // are copied into the output.
 func Build(c *config.Config) error {
-	_, err := BuildImpl(c)
+	_, err := buildImpl(c)
 	return err
 }
 
-// BuildImpl builds a package for mobiles based on the given config info.
-// BuildImpl returns a built package information and an error if exists.
-func BuildImpl(c *config.Config) (*packages.Package, error) {
-	cleanup, err := BuildEnvInit(c)
+// buildImpl builds a package for mobiles based on the given config info.
+// buildImpl returns a built package information and an error if exists.
+func buildImpl(c *config.Config) (*packages.Package, error) {
+	cleanup, err := buildEnvInit(c)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +92,7 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 
 	// TODO(ydnar): this should work, unless build tags affect loading a single package.
 	// Should we try to import packages with different build tags per platform?
-	pkgs, err := packages.Load(PackagesConfig(c, &c.Build.Target[0]), ".")
+	pkgs, err := packages.Load(packagesConfig(&c.Build.Target[0]), ".")
 	if err != nil {
 		return nil, err
 	}
@@ -112,21 +113,21 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 	}
 
 	switch {
-	case IsAndroidPlatform(c.Build.Target[0].OS):
+	case isAndroidPlatform(c.Build.Target[0].OS):
 		if pkg.Name != "main" {
 			for _, t := range c.Build.Target {
-				if err := GoBuild(c, pkg.PkgPath, AndroidEnv[t.Arch]); err != nil {
+				if err := goBuild(c, pkg.PkgPath, androidEnv[t.Arch]); err != nil {
 					return nil, err
 				}
 			}
 			return pkg, nil
 		}
-		_, err = GoAndroidBuild(c, pkg, c.Build.Target)
+		_, err = goAndroidBuild(c, pkg, c.Build.Target)
 		if err != nil {
 			return nil, err
 		}
-	case IsApplePlatform(c.Build.Target[0].OS):
-		if !XCodeAvailable() {
+	case isApplePlatform(c.Build.Target[0].OS):
+		if !xCodeAvailable() {
 			return nil, fmt.Errorf("-target=%s requires XCode", c.Build.Target)
 		}
 		if pkg.Name != "main" {
@@ -136,13 +137,13 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 				if t.OS == "maccatalyst" && v < 13.0 {
 					return nil, errors.New("catalyst requires -iosversion=13 or higher")
 				}
-				if err := GoBuild(c, pkg.PkgPath, AppleEnv[t.String()]); err != nil {
+				if err := goBuild(c, pkg.PkgPath, appleEnv[t.String()]); err != nil {
 					return nil, err
 				}
 			}
 			return pkg, nil
 		}
-		_, err = GoAppleBuild(c, pkg, c.Build.Target)
+		_, err = goAppleBuild(c, pkg, c.Build.Target)
 		if err != nil {
 			return nil, err
 		}
@@ -151,9 +152,9 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 	return pkg, nil
 }
 
-var NmRE = regexp.MustCompile(`[0-9a-f]{8} t _?(?:.*/vendor/)?(golang.org/x.*/[^.]*)`)
+var nmRE = regexp.MustCompile(`[0-9a-f]{8} t _?(?:.*/vendor/)?(golang.org/x.*/[^.]*)`)
 
-func ExtractPkgs(c *config.Config, nm string, path string) (map[string]bool, error) {
+func extractPkgs(nm string, path string) (map[string]bool, error) {
 	r, w := io.Pipe()
 
 	nmpkgs := make(map[string]bool)
@@ -161,7 +162,7 @@ func ExtractPkgs(c *config.Config, nm string, path string) (map[string]bool, err
 	go func() {
 		s := bufio.NewScanner(r)
 		for s.Scan() {
-			if res := NmRE.FindStringSubmatch(s.Text()); res != nil {
+			if res := nmRE.FindStringSubmatch(s.Text()); res != nil {
 				nmpkgs[res[1]] = true
 			}
 		}
@@ -179,23 +180,15 @@ func ExtractPkgs(c *config.Config, nm string, path string) (map[string]bool, err
 	return nmpkgs, nil
 }
 
-func GoBuild(c *config.Config, src string, env map[string]string, args ...string) error {
-	return GoCmd(c, "build", []string{src}, env, args...)
+func goBuild(c *config.Config, src string, env map[string]string, args ...string) error {
+	return goCmd(c, "build", []string{src}, env, args...)
 }
 
-func GoBuildAt(c *config.Config, at string, src string, env map[string]string, args ...string) error {
-	return GoCmdAt(c, at, "build", []string{src}, env, args...)
+func goCmd(c *config.Config, subcmd string, srcs []string, env map[string]string, args ...string) error {
+	return goCmdAt(c, "", subcmd, srcs, env, args...)
 }
 
-func GoInstall(c *config.Config, srcs []string, env map[string]string, args ...string) error {
-	return GoCmd(c, "install", srcs, env, args...)
-}
-
-func GoCmd(c *config.Config, subcmd string, srcs []string, env map[string]string, args ...string) error {
-	return GoCmdAt(c, "", subcmd, srcs, env, args...)
-}
-
-func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env map[string]string, args ...string) error {
+func goCmdAt(c *config.Config, at string, subcmd string, srcs []string, env map[string]string, args ...string) error {
 	cargs := []string{subcmd}
 	// cmd := exec.Command("go", subcmd)
 	var tags []string
@@ -216,29 +209,13 @@ func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env map[
 
 	// Specify GOMODCACHE explicitly. The default cache path is GOPATH[0]/pkg/mod,
 	// but the path varies when GOPATH is specified at env, which results in cold cache.
-	if gmc, err := GoModCachePath(); err == nil {
+	if gmc, err := goModCachePath(); err == nil {
 		xc.SetEnv("GOMODCACHE", gmc)
 	}
 	return xc.Run("go", cargs...)
 }
 
-func GoModTidyAt(c *config.Config, at string, env map[string]string) error {
-	args := []string{"mod", "tidy"}
-	if logx.UserLevel <= slog.LevelInfo {
-		args = append(args, "-v")
-	}
-	xc := exec.Major().SetDir(at)
-	maps.Copy(xc.Env, env)
-
-	// Specify GOMODCACHE explicitly. The default cache path is GOPATH[0]/pkg/mod,
-	// but the path varies when GOPATH is specified at env, which results in cold cache.
-	if gmc, err := GoModCachePath(); err == nil {
-		xc.SetEnv("GOMODCACHE", gmc)
-	}
-	return exec.Run("go", args...)
-}
-
-func GoModCachePath() (string, error) {
+func goModCachePath() (string, error) {
 	out, err := exec.Output("go", "env", "GOMODCACHE")
 	if err != nil {
 		return "", err
