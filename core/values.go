@@ -110,7 +110,7 @@ func (tb *TreeButton) Init() {
 		tb.SetText(path)
 	})
 	InitValueButton(tb, true, func(d *Body) {
-		InspectorView(d, tb.Tree)
+		makeInspector(d, tb.Tree)
 	})
 }
 

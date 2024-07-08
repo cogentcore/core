@@ -72,7 +72,6 @@ func init() {
 		"GrabRenderFrom":            reflect.ValueOf(core.GrabRenderFrom),
 		"HandleRecover":             reflect.ValueOf(core.HandleRecover),
 		"InitValueButton":           reflect.ValueOf(core.InitValueButton),
-		"InspectorView":             reflect.ValueOf(core.InspectorView),
 		"InspectorWindow":           reflect.ValueOf(core.InspectorWindow),
 		"IsWordBreak":               reflect.ValueOf(core.IsWordBreak),
 		"JoinValueTitle":            reflect.ValueOf(core.JoinValueTitle),
