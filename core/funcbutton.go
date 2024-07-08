@@ -42,31 +42,32 @@ func NewSoloFuncButton(ctx Widget) *FuncButton {
 // required; add a `//types:add` comment directive and run `core generate`
 // if you want tooltips. If the function is a method, both the method and
 // its receiver type must be added to [types] to get documentation.
+// The main function to call first is [FuncButton.SetFunc].
 type FuncButton struct {
 	Button
 
-	// Func is the [types.Func] associated with this button.
+	// typesFunc is the [types.Func] associated with this button.
 	// This function can also be a method, but it must be
 	// converted to a [types.Func] first. It should typically
 	// be set using [FuncButton.SetFunc].
-	Func *types.Func `set:"-"`
+	typesFunc *types.Func
 
-	// ReflectFunc is the [reflect.Value] of the function or
+	// reflectFunc is the [reflect.Value] of the function or
 	// method associated with this button. It should typically
 	// bet set using [FuncButton.SetFunc].
-	ReflectFunc reflect.Value `set:"-"`
+	reflectFunc reflect.Value
 
 	// Args are the [FuncArg] objects associated with the
 	// arguments of the function. They are automatically set in
-	// [SetFunc], but they can be customized to configure
+	// [FuncButton.SetFunc], but they can be customized to configure
 	// default values and other options.
 	Args []FuncArg `set:"-"`
 
 	// Returns are the [FuncArg] objects associated with the
 	// return values of the function. They are automatically
-	// set in [SetFunc], but they can be customized to configure
-	// options. The [FuncArg.Value]s are not set until the
-	// function is called, and are thus not typically applicable
+	// set in [FuncButton.SetFunc], but they can be customized
+	// to configure options. The [FuncArg.Value]s are not set until
+	// the function is called, and are thus not typically applicable
 	// to access.
 	Returns []FuncArg `set:"-"`
 
@@ -90,8 +91,7 @@ type FuncButton struct {
 	// automatically be set to true.
 	ShowReturnAsDialog bool
 
-	// NewWindow makes the ReturnDialog a NewWindow dialog
-	// (if supported by platform).
+	// NewWindow makes the return value dialog a NewWindow dialog.
 	NewWindow bool
 
 	// WarnUnadded is whether to log warnings when a function that
@@ -100,11 +100,11 @@ type FuncButton struct {
 	// have any effect. Warnings are never logged for anonymous functions.
 	WarnUnadded bool `default:"true"`
 
-	// Context is used for opening Dialogs if non-nil.
+	// Context is used for opening dialogs if non-nil.
 	Context Widget
 
 	// AfterFunc is an optional function called after the func button
-	// function is executed
+	// function is executed.
 	AfterFunc func()
 }
 
@@ -125,10 +125,10 @@ type FuncArg struct { //types:add -setters
 }
 
 func (fb *FuncButton) WidgetValue() any {
-	if !fb.ReflectFunc.IsValid() {
+	if !fb.reflectFunc.IsValid() {
 		return nil
 	}
-	return fb.ReflectFunc.Interface()
+	return fb.reflectFunc.Interface()
 }
 
 func (fb *FuncButton) SetWidgetValue(value any) error {
@@ -159,13 +159,14 @@ func (fb *FuncButton) Init() {
 	})
 }
 
-// SetText sets the [FuncButton.Text] and updates the tooltip to correspond to the new name.
+// SetText sets the [FuncButton.Text] and updates the tooltip to
+// correspond to the new name.
 func (fb *FuncButton) SetText(v string) *FuncButton {
 	ptext := fb.Text
 	fb.Text = v
-	if fb.Func != nil && fb.Text != ptext && ptext != "" {
-		fb.Func.Doc = types.FormatDoc(fb.Func.Doc, ptext, fb.Text)
-		fb.SetTooltip(fb.Func.Doc)
+	if fb.typesFunc != nil && fb.Text != ptext && ptext != "" {
+		fb.typesFunc.Doc = types.FormatDoc(fb.typesFunc.Doc, ptext, fb.Text)
+		fb.SetTooltip(fb.typesFunc.Doc)
 	}
 	return fb
 }
@@ -237,11 +238,11 @@ func isAnonymousFunction(fnm string) bool {
 // setFuncImpl is the underlying implementation of [FuncButton.SetFunc].
 // It should typically not be used by end-user code.
 func (fb *FuncButton) setFuncImpl(gfun *types.Func, rfun reflect.Value) *FuncButton {
-	fb.Func = gfun
-	fb.ReflectFunc = rfun
+	fb.typesFunc = gfun
+	fb.reflectFunc = rfun
 	fb.setArgs()
 	fb.setReturns()
-	snm := fb.Func.Name
+	snm := fb.typesFunc.Name
 	// get name without package
 	li := strings.LastIndex(snm, ".")
 	isAnonymous := isAnonymousFunction(snm)
@@ -272,9 +273,9 @@ func (fb *FuncButton) setFuncImpl(gfun *types.Func, rfun reflect.Value) *FuncBut
 	fb.SetText(txt)
 	// doc formatting interferes with anonymous functions
 	if !isAnonymous {
-		fb.Func.Doc = types.FormatDoc(fb.Func.Doc, snm, txt)
+		fb.typesFunc.Doc = types.FormatDoc(fb.typesFunc.Doc, snm, txt)
 	}
-	fb.SetTooltip(fb.Func.Doc)
+	fb.SetTooltip(fb.typesFunc.Doc)
 	return fb
 }
 
@@ -294,7 +295,7 @@ func (fb *FuncButton) callFuncShowReturns() {
 		defer fb.AfterFunc()
 	}
 	if len(fb.Args) == 0 {
-		rets := fb.ReflectFunc.Call(nil)
+		rets := fb.reflectFunc.Call(nil)
 		fb.showReturnsDialog(rets)
 		return
 	}
@@ -302,7 +303,7 @@ func (fb *FuncButton) callFuncShowReturns() {
 	for i, arg := range fb.Args {
 		rargs[i] = reflect.ValueOf(arg.Value)
 	}
-	rets := fb.ReflectFunc.Call(rargs)
+	rets := fb.reflectFunc.Call(rargs)
 	fb.showReturnsDialog(rets)
 }
 
@@ -322,7 +323,7 @@ func (fb *FuncButton) confirmDialog() {
 // CallFunc calls the function associated with this button,
 // prompting the user for any arguments.
 func (fb *FuncButton) CallFunc() {
-	if !fb.ReflectFunc.IsValid() {
+	if !fb.reflectFunc.IsValid() {
 		return
 	}
 	ctx := fb.goodContext()
@@ -335,7 +336,7 @@ func (fb *FuncButton) CallFunc() {
 		return
 	}
 	d := NewBody().AddTitle(fb.Text).AddText(fb.Tooltip)
-	str := FuncArgsToStruct(fb.Args)
+	str := funcArgsToStruct(fb.Args)
 	sv := NewForm(d).SetStruct(str.Addr().Interface())
 
 	accept := func() {
@@ -371,9 +372,9 @@ func (fb *FuncButton) CallFunc() {
 	d.RunDialog(ctx)
 }
 
-// FuncArgsToStruct converts a slice of [FuncArg] objects
+// funcArgsToStruct converts a slice of [FuncArg] objects
 // to a new non-pointer struct [reflect.Value].
-func FuncArgsToStruct(args []FuncArg) reflect.Value {
+func funcArgsToStruct(args []FuncArg) reflect.Value {
 	fields := make([]reflect.StructField, len(args))
 	for i, arg := range args {
 		fields[i] = reflect.StructField{
@@ -442,7 +443,7 @@ func (fb *FuncButton) showReturnsDialog(rets []reflect.Value) {
 	}
 
 	d := NewBody().AddTitle(main).AddText(fb.Tooltip).AddOKOnly()
-	str := FuncArgsToStruct(fb.Returns)
+	str := funcArgsToStruct(fb.Returns)
 	sv := NewForm(d).SetStruct(str.Addr().Interface()).SetReadOnly(true)
 
 	// If there is a single value button, automatically
@@ -467,14 +468,14 @@ func (fb *FuncButton) showReturnsDialog(rets []reflect.Value) {
 // setArgs sets the appropriate [Value] objects for the
 // arguments of the function associated with the function button.
 func (fb *FuncButton) setArgs() {
-	narg := fb.ReflectFunc.Type().NumIn()
+	narg := fb.reflectFunc.Type().NumIn()
 	fb.Args = make([]FuncArg, narg)
 	for i := range fb.Args {
-		typ := fb.ReflectFunc.Type().In(i)
+		typ := fb.reflectFunc.Type().In(i)
 
 		name := ""
-		if fb.Func.Args != nil && len(fb.Func.Args) > i {
-			name = fb.Func.Args[i]
+		if fb.typesFunc.Args != nil && len(fb.typesFunc.Args) > i {
+			name = fb.typesFunc.Args[i]
 		} else {
 			name = reflectx.NonPointerType(typ).Name()
 		}
@@ -490,11 +491,11 @@ func (fb *FuncButton) setArgs() {
 // return values of the function associated with the function
 // button.
 func (fb *FuncButton) setReturns() {
-	nret := fb.ReflectFunc.Type().NumOut()
+	nret := fb.reflectFunc.Type().NumOut()
 	fb.Returns = make([]FuncArg, nret)
 	hasComplex := false
 	for i := range fb.Returns {
-		typ := fb.ReflectFunc.Type().Out(i)
+		typ := fb.reflectFunc.Type().Out(i)
 		if !hasComplex {
 			k := typ.Kind()
 			if k == reflect.Pointer || k == reflect.Struct || k == reflect.Slice || k == reflect.Array || k == reflect.Map {
@@ -503,8 +504,8 @@ func (fb *FuncButton) setReturns() {
 		}
 
 		name := ""
-		if fb.Func.Returns != nil && len(fb.Func.Returns) > i {
-			name = fb.Func.Returns[i]
+		if fb.typesFunc.Returns != nil && len(fb.typesFunc.Returns) > i {
+			name = fb.typesFunc.Returns[i]
 		} else {
 			name = reflectx.NonPointerType(typ).Name()
 		}

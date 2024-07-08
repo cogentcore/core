@@ -68,7 +68,6 @@ func init() {
 		"FilePickerDirOnlyFilter":   reflect.ValueOf(core.FilePickerDirOnlyFilter),
 		"FilePickerExtensionOnlyFilter":   reflect.ValueOf(core.FilePickerExtensionOnlyFilter),
 		"ForceAppColor":             reflect.ValueOf(&core.ForceAppColor).Elem(),
-		"FuncArgsToStruct":          reflect.ValueOf(core.FuncArgsToStruct),
 		"FunctionalTabs":            reflect.ValueOf(core.FunctionalTabs),
 		"GrabRenderFrom":            reflect.ValueOf(core.GrabRenderFrom),
 		"HandleRecover":             reflect.ValueOf(core.HandleRecover),
