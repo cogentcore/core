@@ -17,8 +17,8 @@ import (
 	"golang.org/x/image/draw"
 )
 
-// Image is a widget that renders a static bitmap image.
-// See [styles.ObjectFits] for how to control the image rendering within
+// Image is a widget that renders a static bitmap [image.RGBA].
+// See [styles.Style.ObjectFit] to control the image rendering within
 // the allocated size. The default minimum requested size is the pixel
 // size in [units.Dp] units (1/160th of an inch).
 type Image struct {
@@ -36,6 +36,8 @@ type Image struct {
 	// prevSize is the cached allocated size for the last rendered image.
 	prevSize math32.Vector2 `xml:"-" json:"-" set:"-"`
 }
+
+func (im *Image) WidgetValue() any { return &im.Image }
 
 func (im *Image) Init() {
 	im.WidgetBase.Init()
