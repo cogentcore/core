@@ -153,7 +153,7 @@ func TestRun(t *testing.T) {
 func TestConfigFunc(t *testing.T) {
 	cfg := &TestConfig{}
 	os.Args = []string{"myapp", "-no-net-data", "build", "-gpu", "../main", "-Note", "Hello, World", "-v", "-PAT_PARAMS_SPARSENESS=4"}
-	cmd, err := Config(DefaultOptions("My App", "My App is an awesome app"), cfg, &Cmd[*TestConfig]{
+	cmd, err := config(DefaultOptions("My App", "My App is an awesome app"), cfg, &Cmd[*TestConfig]{
 		Func: func(tc *TestConfig) error { return nil },
 		Name: "build",
 		Doc:  "build builds stuff",
@@ -192,8 +192,8 @@ func TestDefaults(t *testing.T) {
 
 func TestGetArgs(t *testing.T) {
 	sargs := []string{"-gui", "run", "-param-set", "std", "-no-net-data", "main", "-epochs=5", "-note", "hello", "-debug=0", "-enum", "TestValue1", "-sparseness", "5.0", "-pat-params-n-pats", "28"}
-	bf := BoolFlags(&TestConfig{})
-	args, flags, err := GetArgs(sargs, bf)
+	bf := boolFlags(&TestConfig{})
+	args, flags, err := getArgs(sargs, bf)
 	if err != nil {
 		t.Errorf("error getting args: %v", err)
 	}
@@ -211,10 +211,10 @@ func TestArgsPrint(t *testing.T) {
 	t.Skip("prints all possible args")
 
 	cfg := &TestConfig{}
-	allFields := &Fields{}
-	AddFields(cfg, allFields, "")
-	allFlags := &Fields{}
-	AddFlags(allFields, allFlags, []string{}, map[string]string{})
+	allFields := &fields{}
+	addFields(cfg, allFields, "")
+	allFlags := &fields{}
+	addFlags(allFields, allFlags, []string{}, map[string]string{})
 
 	fmt.Println("Args:")
 	fmt.Println(strings.Join(allFlags.Keys(), "\n"))
@@ -300,7 +300,7 @@ func TestOpen(t *testing.T) {
 	opts := DefaultOptions("Test")
 	opts.IncludePaths = []string{".", "testdata"}
 	cfg := &TestConfig{}
-	err := OpenWithIncludes(opts, cfg, "testcfg.toml")
+	err := openWithIncludes(opts, cfg, "testcfg.toml")
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -340,7 +340,7 @@ func TestOpen(t *testing.T) {
 func TestUsage(t *testing.T) {
 	t.Skip("prints usage string")
 	cfg := &TestConfig{}
-	us := Usage(DefaultOptions("Test"), cfg, "")
+	us := usage(DefaultOptions("Test"), cfg, "")
 	fmt.Println(us)
 }
 
@@ -349,7 +349,7 @@ func TestSave(t *testing.T) {
 	opts := DefaultOptions("Test")
 	opts.IncludePaths = []string{".", "testdata"}
 	cfg := &TestConfig{}
-	OpenWithIncludes(opts, cfg, "testcfg.toml")
+	openWithIncludes(opts, cfg, "testcfg.toml")
 	tomlx.Save(cfg, "testdata/testwrite.toml")
 }
 
@@ -359,21 +359,21 @@ func TestConfigOpen(t *testing.T) {
 	opts.IncludePaths = []string{".", "testdata"}
 	opts.NeedConfigFile = true
 	cfg := &TestConfig{}
-	_, err := Config(opts, cfg)
+	_, err := config(opts, cfg)
 	if err == nil {
 		t.Errorf("should have Config error")
 		// } else {
 		// 	fmt.Println(err)
 	}
 	opts.DefaultFiles = []string{"aldfkj.toml"}
-	_, err = Config(opts, cfg)
+	_, err = config(opts, cfg)
 	if err == nil {
 		t.Errorf("should have Config error")
 		// } else {
 		// 	fmt.Println(err)
 	}
 	opts.DefaultFiles = []string{"aldfkj.toml", "testcfg.toml"}
-	_, err = Config(opts, cfg)
+	_, err = config(opts, cfg)
 	if err != nil {
 		t.Error(err)
 	}

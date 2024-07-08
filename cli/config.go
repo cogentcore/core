@@ -15,22 +15,14 @@ import (
 	"cogentcore.org/core/base/logx"
 )
 
-// TODO: can we get rid of ConfigFiles somehow? we need it in clicore and probably other places too
+// IMPORTANT: all changes to [metaConfig] must be updated in [metaConfigFields]
 
-// ConfigFile are the names of the config file actually loaded, specified by the
-// -config or -cfg command-line arg or the default file given in [Options.DefaultFiles]
-var ConfigFiles []string
-
-// IMPORTANT: all changes to [MetaConfig] must be updated in [metaConfigFields]
-
-// MetaConfig contains meta configuration information specified
+// metaConfig contains meta configuration information specified
 // via command line arguments that controls the initial behavior
 // of cli for all apps before anything else is loaded. Its
 // main purpose is to support the help command and flag and
 // the specification of custom config files on the command line.
-// In almost all circumstances, it should only be used internally
-// and not by end-user code.
-type MetaConfig struct {
+type metaConfig struct {
 	// the file name of the config file to load
 	Config string `flag:"cfg,config"`
 
@@ -58,12 +50,12 @@ type MetaConfig struct {
 }
 
 // metaConfigFields is the struct used for the implementation
-// of [AddMetaConfigFields], and for the usage information for
-// meta configuration options in [Usage].
-// NOTE: we could do this through [MetaConfig], but that
+// of [addMetaConfigFields], and for the usage information for
+// meta configuration options in [usage].
+// NOTE: we could do this through [metaConfig], but that
 // causes problems with the HelpCmd field capturing
 // everything, so it easier to just add through a separate struct.
-// TODO: maybe improve the structure of this
+// TODO: maybe improve the structure of this.
 // TODO: can we get HelpCmd to display correctly in usage?
 type metaConfigFields struct { //types:add
 	// the file name of the config file to load
@@ -89,22 +81,20 @@ type metaConfigFields struct { //types:add
 	Quiet bool `flag:"q,quiet"`
 }
 
-// AddMetaConfigFields adds meta fields that control the config process
+// addMetaConfigFields adds meta fields that control the config process
 // to the given map of fields. These fields have no actual effect and
 // map to a placeholder value because they are handled elsewhere, but
 // they must be set to prevent errors about missing flags. The flags
-// that it adds are those in [MetaConfig].
-func AddMetaConfigFields(allFields *Fields) {
-	AddFields(&metaConfigFields{}, allFields, "")
+// that it adds are those in [metaConfig].
+func addMetaConfigFields(allFields *fields) {
+	addFields(&metaConfigFields{}, allFields, "")
 }
 
-// MetaCmds is a set of commands based on [MetaConfig] that
-// contains a shell implementation of the help command. In
-// almost all circumstances, it should only be used internally
-// and not by end-user code.
-var MetaCmds = []*Cmd[*MetaConfig]{
+// metaCmds is a set of commands based on [metaConfig] that
+// contains a shell implementation of the help command.
+var metaCmds = []*Cmd[*metaConfig]{
 	{
-		Func: func(mc *MetaConfig) error { return nil }, // this gets handled seperately in [Config], so we don't actually need to do anything here
+		Func: func(mc *metaConfig) error { return nil }, // this gets handled seperately in [Config], so we don't actually need to do anything here
 		Name: "help",
 		Doc:  "show usage information for a command",
 		Root: true,
@@ -112,31 +102,31 @@ var MetaCmds = []*Cmd[*MetaConfig]{
 }
 
 // OnConfigurer represents a configuration object that specifies a method to
-// be called at the end of the [Config] function, with the command that has
+// be called at the end of the [config] function, with the command that has
 // been parsed as an argument.
 type OnConfigurer interface {
 	OnConfig(cmd string) error
 }
 
-// Config is the main, high-level configuration setting function,
+// config is the main, high-level configuration setting function,
 // processing config files and command-line arguments in the following order:
 //   - Apply any `default:` field tag default values.
 //   - Look for `--config`, `--cfg`, or `-c` arg, specifying a config file on the command line.
-//   - Fall back on default config file name passed to `Config` function, if arg not found.
+//   - Fall back on default config file name passed to `config` function, if arg not found.
 //   - Read any `Include[s]` files in config file in deepest-first (natural) order,
 //     then the specified config file last.
 //   - If multiple config files are found, then they are applied in reverse order, meaning
 //     that the first specified file takes the highest precedence.
-//   - Process command-line args based on Config field names.
+//   - Process command-line args based on config field names.
 //   - Boolean flags are set on with plain -flag; use No prefix to turn off
 //     (or explicitly set values to true or false).
 //
-// Config also processes -help and -h by printing the [Usage] and quitting immediately.
+// config also processes -help and -h by printing the [usage] and quitting immediately.
 // It takes [Options] that control its behavior, the configuration struct, which is
 // what it sets, and the commands, which it uses for context. Also, it uses [os.Args]
 // for its command-line arguments. It returns the command, if any, that was passed in
 // [os.Args], and any error that ocurred during the configuration process.
-func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
+func config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	var errs []error
 	err := SetFromDefaults(cfg)
 	if err != nil {
@@ -148,9 +138,9 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	// first, we do a pass to get the meta command flags
 	// (help and config), which we need to know before
 	// we can do other configuration.
-	mc := &MetaConfig{}
+	mc := &metaConfig{}
 	// we ignore not found flags in meta config, because we only care about meta config and not anything else being passed to the command
-	cmd, err := SetFromArgs(mc, args, NoErrNotFound, MetaCmds...)
+	cmd, err := SetFromArgs(mc, args, NoErrNotFound, metaCmds...)
 	if err != nil {
 		// if we can't do first set for meta flags, we return immediately (we only do AllErrors for more specific errors)
 		return cmd, fmt.Errorf("error doing meta configuration: %w", err)
@@ -165,7 +155,7 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 		if mc.HelpCmd == "nil" {
 			mc.HelpCmd = ""
 		}
-		fmt.Println(Usage(opts, cfg, mc.HelpCmd, cmds...))
+		fmt.Println(usage(opts, cfg, mc.HelpCmd, cmds...))
 		os.Exit(0)
 	}
 
@@ -197,11 +187,9 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 
 	slices.Reverse(opts.IncludePaths)
 
-	// TODO(kai): this is not necessarily accurate given IncludePaths
-	ConfigFiles = cfgFiles
 	gotAny := false
 	for _, fn := range cfgFiles {
-		err = OpenWithIncludes(opts, cfg, fn)
+		err = openWithIncludes(opts, cfg, fn)
 		if err == nil {
 			gotAny = true
 		}

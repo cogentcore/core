@@ -43,7 +43,7 @@ func Run[T any, C cli.CmdOrFunc[T]](opts *cli.Options, cfg T, cmds ...C) error {
 	}
 	cs = cli.AddCmd(cs, &cli.Cmd[T]{
 		Func: func(t T) error {
-			GUI(opts, t, cs...)
+			gui(opts, t, cs...)
 			return nil
 		},
 		Name: "gui",
@@ -53,9 +53,9 @@ func Run[T any, C cli.CmdOrFunc[T]](opts *cli.Options, cfg T, cmds ...C) error {
 	return cli.Run(opts, cfg, cs...)
 }
 
-// GUI starts the GUI for the given cli app, which must be passed as
-// a pointer. It should typically not be called by end-user code; see [Run].
-func GUI[T any](opts *cli.Options, cfg T, cmds ...*cli.Cmd[T]) {
+// gui starts the gui for the given cli app, which must be passed as
+// a pointer.
+func gui[T any](opts *cli.Options, cfg T, cmds ...*cli.Cmd[T]) {
 	b := core.NewBody(opts.AppName)
 
 	b.AddAppBar(func(p *tree.Plan) {
