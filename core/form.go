@@ -20,31 +20,6 @@ import (
 	"cogentcore.org/core/types"
 )
 
-// NoSentenceCaseFor indicates to not transform field names in
-// [Form]s into "Sentence case" for types whose full,
-// package-path-qualified name contains any of these strings.
-// For example, this can be used to disable sentence casing
-// for types with scientific abbreviations in field names,
-// which are more readable when not sentence cased. However,
-// this should not be needed in most circumstances.
-var NoSentenceCaseFor []string
-
-// noSentenceCaseForType returns whether the given fully
-// package-path-qualified name contains anything in the
-// [NoSentenceCaseFor] list.
-func noSentenceCaseForType(tnm string) bool {
-	return slices.ContainsFunc(NoSentenceCaseFor, func(s string) bool {
-		return strings.Contains(tnm, s)
-	})
-}
-
-// structField represents the values of one struct field being viewed.
-type structField struct {
-	path          string
-	field         reflect.StructField
-	value, parent reflect.Value
-}
-
 // Form represents a struct with rows of field names and editable values.
 type Form struct {
 	Frame
@@ -61,6 +36,31 @@ type Form struct {
 	// isShouldShower is whether the struct implements [ShouldShower], which results
 	// in additional updating being done at certain points.
 	isShouldShower bool
+}
+
+// structField represents the values of one struct field being viewed.
+type structField struct {
+	path          string
+	field         reflect.StructField
+	value, parent reflect.Value
+}
+
+// NoSentenceCaseFor indicates to not transform field names in
+// [Form]s into "Sentence case" for types whose full,
+// package-path-qualified name contains any of these strings.
+// For example, this can be used to disable sentence casing
+// for types with scientific abbreviations in field names,
+// which are more readable when not sentence cased. However,
+// this should not be needed in most circumstances.
+var NoSentenceCaseFor []string
+
+// noSentenceCaseForType returns whether the given fully
+// package-path-qualified name contains anything in the
+// [NoSentenceCaseFor] list.
+func noSentenceCaseForType(tnm string) bool {
+	return slices.ContainsFunc(NoSentenceCaseFor, func(s string) bool {
+		return strings.Contains(tnm, s)
+	})
 }
 
 // ShouldShower is an interface that determines whether a named field
