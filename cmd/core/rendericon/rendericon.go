@@ -18,8 +18,7 @@ import (
 )
 
 // Render renders the icon located at icon.svg at the given size.
-// If no such icon exists, it sets it to a placeholder icon, a blue version of
-// [icons.Toolbar].
+// If no such icon exists, it sets it to a placeholder icon, [icons.DefaultAppIcon].
 func Render(size int) (*image.RGBA, error) {
 	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
 

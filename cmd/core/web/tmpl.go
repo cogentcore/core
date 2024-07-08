@@ -34,7 +34,7 @@ func makeAppJS(c *config.Config) ([]byte, error) {
 
 	for k, v := range c.Web.Env {
 		if err := os.Setenv(k, v); err != nil {
-			slog.Error("setting app env variable failed", "name", k, "value", "err", err)
+			slog.Error("setting app env variable failed", "name", k, "value", v, "err", err)
 		}
 	}
 
@@ -140,7 +140,7 @@ type indexHTMLData struct {
 }
 
 // makeIndexHTML exectues [indexHTMLTmpl] based on the given configuration information,
-// base path for app resources (used in [MakePages]), and optional title (used in [MakePages],
+// base path for app resources (used in [makePages]), and optional title (used in [makePages],
 // defaults to [config.Config.Name] otherwise).
 func makeIndexHTML(c *config.Config, basePath string, title string) ([]byte, error) {
 	if title == "" {
