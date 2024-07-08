@@ -6,9 +6,9 @@ package core
 
 import (
 	"image"
-	"log/slog"
 	"strings"
 
+	"cogentcore.org/core/base/errors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/styles"
@@ -25,7 +25,10 @@ type Icon struct {
 	WidgetBase
 
 	// Icon is the [icons.Icon] used to render the [Icon].
-	Icon icons.Icon `set:"-"`
+	Icon icons.Icon
+
+	// prevIcon is the previously rendered icon.
+	prevIcon icons.Icon
 
 	// svg drawing of the icon
 	svg svg.SVG
@@ -46,56 +49,47 @@ func (ic *Icon) Init() {
 	})
 }
 
-// SetIcon sets the icon, logging error if not found.
-// Does nothing if Icon is already equal to the given icon.
-func (ic *Icon) SetIcon(icon icons.Icon) *Icon {
-	_, err := ic.setIconTry(icon)
-	if err != nil {
-		slog.Error("error opening icon named", "name", icon, "err", err)
+// readIcon reads the [Icon.Icon] if necessary.
+func (ic *Icon) readIcon() error {
+	if ic.Icon == ic.prevIcon {
+		// if nothing has changed, we don't need to read it
+		return nil
 	}
-	return ic
-}
 
-// setIconTry sets the icon, returning error message if not found etc,
-// and returning true if a new icon was actually set.
-// Does nothing and returns false if Icon is already equal to the given icon.
-func (ic *Icon) setIconTry(icon icons.Icon) (bool, error) {
-	if !icon.IsSet() {
-		ic.Icon = icon
-		ic.svg.DeleteAll()
-		return false, nil
-	}
-	if ic.svg.Root != nil && ic.svg.Root.HasChildren() && ic.Icon == icon {
-		// fmt.Println("icon already set:", icon)
-		return false, nil
-	}
-	icons.Used[icon] = true
 	ic.svg.Config(2, 2)
-	err := ic.svg.ReadXML(strings.NewReader(string(icon)))
+	err := ic.svg.ReadXML(strings.NewReader(string(ic.Icon)))
 	if err != nil {
-		ic.UpdateWidget()
-		return false, err
+		return err
 	}
-	ic.Icon = icon
-	// fmt.Println("icon set:", icon)
-	return true, nil
-
+	icons.Used[ic.Icon] = true
+	ic.prevIcon = ic.Icon
+	return nil
 }
 
-// renderSVG renders the [Icon.SVG] to the [Icon.Pixels] if they need to be updated.
+// renderSVG renders the [Icon.svg] if necessary.
 func (ic *Icon) renderSVG() {
+	if !ic.Icon.IsSet() {
+		ic.svg.Pixels = nil
+		ic.svg.DeleteAll()
+		ic.prevIcon = ic.Icon
+		return
+	}
+	err := ic.readIcon()
+	if errors.Log(err) != nil {
+		return
+	}
+
 	rc := ic.Scene.RenderContext()
 	sv := &ic.svg
 	sz := ic.Geom.Size.Actual.Content.ToPoint()
 	clr := gradient.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
-	if !rc.Rebuild && sv.Pixels != nil { // if rebuilding rebuild..
+	if !rc.Rebuild && sv.Pixels != nil { // if rebuilding then rebuild
 		isz := sv.Pixels.Bounds().Size()
 		// if nothing has changed, we don't need to re-render
 		if isz == sz && sv.Name == string(ic.Icon) && sv.Color == clr {
 			return
 		}
 	}
-	// todo: units context from us to SVG??
 
 	if sz == (image.Point{}) {
 		return

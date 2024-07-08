@@ -215,7 +215,7 @@ func (t *Complete) SetSeed(v string) *Complete { t.Seed = v; return t }
 // the user's completion selection
 func (t *Complete) SetCompletion(v string) *Complete { t.Completion = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FilePicker", IDName: "file-picker", Doc: "FilePicker is a widget for selecting files.", Methods: []types.Method{{Name: "UpdateFilesAction", Doc: "UpdateFilesAction updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "AddPathToFavorites", Doc: "AddPathToFavorites adds the current path to favorites", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "DirectoryUp", Doc: "DirectoryUp moves up one directory in the path", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "NewFolder", Doc: "NewFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Directory", Doc: "Directory is the absolute path to the directory of files to display."}, {Name: "SelectedFilename", Doc: "SelectedFilename is the name of the currently selected file, not including the directory.\nSee [FilePicker.SelectedFile] for the full path."}, {Name: "Extensions", Doc: "Extensions is a list of the target file extensions.\nIf there are multiple, they must be comma separated.\nThe extensions must include the dot (\".\") at the start.\nThey must be set using [FilePicker.SetExtensions]."}, {Name: "Filterer", Doc: "Filterer is an optional filtering function for which files to display."}, {Name: "extensionMap", Doc: "extensionMap is a map of lower-cased extensions from Extensions.\nIt used for highlighting files with one of these extensions;\nmaps onto original Extensions value."}, {Name: "files", Doc: "files for current directory"}, {Name: "selectedIndex", Doc: "index of currently selected file in Files list (-1 if none)"}, {Name: "watcher", Doc: "change notify for current dir"}, {Name: "doneWatcher", Doc: "channel to close watcher watcher"}, {Name: "prevPath", Doc: "Previous path that was processed via UpdateFiles"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FilePicker", IDName: "file-picker", Doc: "FilePicker is a widget for selecting files.", Methods: []types.Method{{Name: "updateFilesAction", Doc: "updateFilesAction updates the list of files and other views for the current path.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "addPathToFavorites", Doc: "addPathToFavorites adds the current path to favorites", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "directoryUp", Doc: "directoryUp moves up one directory in the path", Directives: []types.Directive{{Tool: "types", Directive: "add"}}}, {Name: "newFolder", Doc: "newFolder creates a new folder with the given name in the current directory.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"name"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Filterer", Doc: "Filterer is an optional filtering function for which files to display."}, {Name: "directory", Doc: "directory is the absolute path to the directory of files to display."}, {Name: "selectedFilename", Doc: "selectedFilename is the name of the currently selected file,\nnot including the directory. See [FilePicker.SelectedFile]\nfor the full path."}, {Name: "extensions", Doc: "extensions is a list of the target file extensions.\nIf there are multiple, they must be comma separated.\nThe extensions must include the dot (\".\") at the start.\nThey must be set using [FilePicker.SetExtensions]."}, {Name: "extensionMap", Doc: "extensionMap is a map of lower-cased extensions from Extensions.\nIt used for highlighting files with one of these extensions;\nmaps onto original Extensions value."}, {Name: "files", Doc: "files for current directory"}, {Name: "selectedIndex", Doc: "index of currently selected file in Files list (-1 if none)"}, {Name: "watcher", Doc: "change notify for current dir"}, {Name: "doneWatcher", Doc: "channel to close watcher watcher"}, {Name: "prevPath", Doc: "Previous path that was processed via UpdateFiles"}, {Name: "favoritesTable"}, {Name: "filesTable"}, {Name: "selectField"}, {Name: "extensionField"}}})
 
 // NewFilePicker returns a new [FilePicker] with the given optional parent:
 // FilePicker is a widget for selecting files.
@@ -249,7 +249,7 @@ func (t *Form) SetStruct(v any) *Form { t.Struct = v; return t }
 // Inline is whether to display the form in one line.
 func (t *Form) SetInline(v bool) *Form { t.Inline = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Frame", IDName: "frame", Doc: "Frame is the primary node type responsible for organizing the sizes\nand positions of child widgets. It also renders the standard box model.\nAll collections of widgets should generally be contained within a [Frame];\notherwise, the parent widget must take over responsibility for positioning.\nFrames automatically can add scrollbars depending on the [styles.Style.Overflow].\n\nFor a [styles.Grid] frame, the [styles.Style.Columns] property should\ngenerally be set to the desired number of columns, from which the number of rows\nis computed; otherwise, it uses the square root of number of\nelements.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "StackTop", Doc: "StackTop, for a [styles.Stacked] frame, is the index of the node to use as the top of the stack.\nOnly the node at this index is rendered; if not a valid index, nothing is rendered."}, {Name: "LayoutStackTopOnly", Doc: "LayoutStackTopOnly is whether to only layout the top widget (specified by [Frame.StackTop])\nfor a [styles.Stacked] frame. This is appropriate for e.g., [Tabs], which do a full\nredraw on stack changes, but not for e.g., [Switch]es which don't."}, {Name: "Layout", Doc: "Layout contains implementation state info for doing layout"}, {Name: "HasScroll", Doc: "HasScroll is whether scrollbar is used for given dim."}, {Name: "Scrolls", Doc: "Scrolls are the scroll bars, which are fully managed as needed."}, {Name: "focusName", Doc: "accumulated name to search for when keys are typed"}, {Name: "focusNameTime", Doc: "time of last focus name event; for timeout"}, {Name: "focusNameLast", Doc: "last element focused on; used as a starting point if name is the same"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Frame", IDName: "frame", Doc: "Frame is the primary node type responsible for organizing the sizes\nand positions of child widgets. It also renders the standard box model.\nAll collections of widgets should generally be contained within a [Frame];\notherwise, the parent widget must take over responsibility for positioning.\nFrames automatically can add scrollbars depending on the [styles.Style.Overflow].\n\nFor a [styles.Grid] frame, the [styles.Style.Columns] property should\ngenerally be set to the desired number of columns, from which the number of rows\nis computed; otherwise, it uses the square root of number of\nelements.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "StackTop", Doc: "StackTop, for a [styles.Stacked] frame, is the index of the node to use\nas the top of the stack. Only the node at this index is rendered; if it is\nnot a valid index, nothing is rendered."}, {Name: "LayoutStackTopOnly", Doc: "LayoutStackTopOnly is whether to only layout the top widget\n(specified by [Frame.StackTop]) for a [styles.Stacked] frame.\nThis is appropriate for widgets such as [Tabs], which do a full\nredraw on stack changes, but not for widgets such as [Switch]es\nwhich don't."}, {Name: "layout", Doc: "layout contains implementation state info for doing layout"}, {Name: "HasScroll", Doc: "HasScroll is whether scrollbars exist for each dimension."}, {Name: "scrolls", Doc: "scrolls are the scroll bars, which are fully managed as needed."}, {Name: "focusName", Doc: "accumulated name to search for when keys are typed"}, {Name: "focusNameTime", Doc: "time of last focus name event; for timeout"}, {Name: "focusNameLast", Doc: "last element focused on; used as a starting point if name is the same"}}})
 
 // NewFrame returns a new [Frame] with the given optional parent:
 // Frame is the primary node type responsible for organizing the sizes
@@ -265,14 +265,17 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Frame", IDName
 func NewFrame(parent ...tree.Node) *Frame { return tree.New[Frame](parent...) }
 
 // SetStackTop sets the [Frame.StackTop]:
-// StackTop, for a [styles.Stacked] frame, is the index of the node to use as the top of the stack.
-// Only the node at this index is rendered; if not a valid index, nothing is rendered.
+// StackTop, for a [styles.Stacked] frame, is the index of the node to use
+// as the top of the stack. Only the node at this index is rendered; if it is
+// not a valid index, nothing is rendered.
 func (t *Frame) SetStackTop(v int) *Frame { t.StackTop = v; return t }
 
 // SetLayoutStackTopOnly sets the [Frame.LayoutStackTopOnly]:
-// LayoutStackTopOnly is whether to only layout the top widget (specified by [Frame.StackTop])
-// for a [styles.Stacked] frame. This is appropriate for e.g., [Tabs], which do a full
-// redraw on stack changes, but not for e.g., [Switch]es which don't.
+// LayoutStackTopOnly is whether to only layout the top widget
+// (specified by [Frame.StackTop]) for a [styles.Stacked] frame.
+// This is appropriate for widgets such as [Tabs], which do a full
+// redraw on stack changes, but not for widgets such as [Switch]es
+// which don't.
 func (t *Frame) SetLayoutStackTopOnly(v bool) *Frame { t.LayoutStackTopOnly = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Stretch", IDName: "stretch", Doc: "Stretch adds a stretchy element that grows to fill all\navailable space. You can set [styles.Style.Grow] to change\nhow much it grows relative to other growing elements.\nIt does not render anything.", Embeds: []types.Field{{Name: "WidgetBase"}}})
@@ -293,7 +296,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Space", IDName
 // It does not render anything.
 func NewSpace(parent ...tree.Node) *Space { return tree.New[Space](parent...) }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FuncButton", IDName: "func-button", Doc: "FuncButton is a button that is set up to call a function when it\nis pressed, using a dialog to prompt the user for any arguments.\nAlso, it automatically sets various properties of the button like\nthe text and tooltip based on the properties of the function,\nusing [reflect] and [types]. The function must be registered\nwith [types] to get documentation information, but that is not\nrequired; add a `//types:add` comment directive and run `core generate`\nif you want tooltips. If the function is a method, both the method and\nits receiver type must be added to [types] to get documentation.", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "Func", Doc: "Func is the [types.Func] associated with this button.\nThis function can also be a method, but it must be\nconverted to a [types.Func] first. It should typically\nbe set using [FuncButton.SetFunc]."}, {Name: "ReflectFunc", Doc: "ReflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc]."}, {Name: "Args", Doc: "Args are the [FuncArg] objects associated with the\narguments of the function. They are automatically set in\n[SetFunc], but they can be customized to configure\ndefault values and other options."}, {Name: "Returns", Doc: "Returns are the [FuncArg] objects associated with the\nreturn values of the function. They are automatically\nset in [SetFunc], but they can be customized to configure\noptions. The [FuncArg.Value]s are not set until the\nfunction is called, and are thus not typically applicable\nto access."}, {Name: "Confirm", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function."}, {Name: "ShowReturn", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. Non-nil error return values will\nalways be shown, even if ShowReturn is set to false."}, {Name: "ShowReturnAsDialog", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there are multiple return values from the function, or if\none of them is a complex type (pointer, struct, slice,\narray, map), then ShowReturnAsDialog will\nautomatically be set to true."}, {Name: "NewWindow", Doc: "NewWindow makes the ReturnDialog a NewWindow dialog\n(if supported by platform)."}, {Name: "WarnUnadded", Doc: "WarnUnadded is whether to log warnings when a function that\nhas not been added to [types] is used. It is on by default and\nmust be set before [FuncButton.SetFunc] is called for it to\nhave any effect. Warnings are never logged for anonymous functions."}, {Name: "Context", Doc: "Context is used for opening Dialogs if non-nil."}, {Name: "AfterFunc", Doc: "AfterFunc is an optional function called after the func button\nfunction is executed"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FuncButton", IDName: "func-button", Doc: "FuncButton is a button that is set up to call a function when it\nis pressed, using a dialog to prompt the user for any arguments.\nAlso, it automatically sets various properties of the button like\nthe text and tooltip based on the properties of the function,\nusing [reflect] and [types]. The function must be registered\nwith [types] to get documentation information, but that is not\nrequired; add a `//types:add` comment directive and run `core generate`\nif you want tooltips. If the function is a method, both the method and\nits receiver type must be added to [types] to get documentation.\nThe main function to call first is [FuncButton.SetFunc].", Embeds: []types.Field{{Name: "Button"}}, Fields: []types.Field{{Name: "typesFunc", Doc: "typesFunc is the [types.Func] associated with this button.\nThis function can also be a method, but it must be\nconverted to a [types.Func] first. It should typically\nbe set using [FuncButton.SetFunc]."}, {Name: "reflectFunc", Doc: "reflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc]."}, {Name: "Args", Doc: "Args are the [FuncArg] objects associated with the\narguments of the function. They are automatically set in\n[FuncButton.SetFunc], but they can be customized to configure\ndefault values and other options."}, {Name: "Returns", Doc: "Returns are the [FuncArg] objects associated with the\nreturn values of the function. They are automatically\nset in [FuncButton.SetFunc], but they can be customized\nto configure options. The [FuncArg.Value]s are not set until\nthe function is called, and are thus not typically applicable\nto access."}, {Name: "Confirm", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function."}, {Name: "ShowReturn", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. Non-nil error return values will\nalways be shown, even if ShowReturn is set to false."}, {Name: "ShowReturnAsDialog", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there are multiple return values from the function, or if\none of them is a complex type (pointer, struct, slice,\narray, map), then ShowReturnAsDialog will\nautomatically be set to true."}, {Name: "NewWindow", Doc: "NewWindow makes the return value dialog a NewWindow dialog."}, {Name: "WarnUnadded", Doc: "WarnUnadded is whether to log warnings when a function that\nhas not been added to [types] is used. It is on by default and\nmust be set before [FuncButton.SetFunc] is called for it to\nhave any effect. Warnings are never logged for anonymous functions."}, {Name: "Context", Doc: "Context is used for opening dialogs if non-nil."}, {Name: "AfterFunc", Doc: "AfterFunc is an optional function called after the func button\nfunction is executed."}}})
 
 // NewFuncButton returns a new [FuncButton] with the given optional parent:
 // FuncButton is a button that is set up to call a function when it
@@ -305,6 +308,7 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FuncButton", I
 // required; add a `//types:add` comment directive and run `core generate`
 // if you want tooltips. If the function is a method, both the method and
 // its receiver type must be added to [types] to get documentation.
+// The main function to call first is [FuncButton.SetFunc].
 func NewFuncButton(parent ...tree.Node) *FuncButton { return tree.New[FuncButton](parent...) }
 
 // SetConfirm sets the [FuncButton.Confirm]:
@@ -331,8 +335,7 @@ func (t *FuncButton) SetShowReturn(v bool) *FuncButton { t.ShowReturn = v; retur
 func (t *FuncButton) SetShowReturnAsDialog(v bool) *FuncButton { t.ShowReturnAsDialog = v; return t }
 
 // SetNewWindow sets the [FuncButton.NewWindow]:
-// NewWindow makes the ReturnDialog a NewWindow dialog
-// (if supported by platform).
+// NewWindow makes the return value dialog a NewWindow dialog.
 func (t *FuncButton) SetNewWindow(v bool) *FuncButton { t.NewWindow = v; return t }
 
 // SetWarnUnadded sets the [FuncButton.WarnUnadded]:
@@ -343,12 +346,12 @@ func (t *FuncButton) SetNewWindow(v bool) *FuncButton { t.NewWindow = v; return 
 func (t *FuncButton) SetWarnUnadded(v bool) *FuncButton { t.WarnUnadded = v; return t }
 
 // SetContext sets the [FuncButton.Context]:
-// Context is used for opening Dialogs if non-nil.
+// Context is used for opening dialogs if non-nil.
 func (t *FuncButton) SetContext(v Widget) *FuncButton { t.Context = v; return t }
 
 // SetAfterFunc sets the [FuncButton.AfterFunc]:
 // AfterFunc is an optional function called after the func button
-// function is executed
+// function is executed.
 func (t *FuncButton) SetAfterFunc(v func()) *FuncButton { t.AfterFunc = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.FuncArg", IDName: "func-arg", Doc: "FuncArg represents one argument or return value of a function\nin the context of a [FuncButton].", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Name", Doc: "Name is the name of the argument or return value."}, {Name: "Tag", Doc: "Tag contains any tags associated with the argument or return value,\nwhich can be added programmatically to customize [Value] behavior."}, {Name: "Value", Doc: "Value is the actual value of the function argument or return value.\nIt can be modified when creating a [FuncButton] to set a default value."}}})
@@ -367,11 +370,11 @@ func (t *FuncArg) SetTag(v reflect.StructTag) *FuncArg { t.Tag = v; return t }
 // It can be modified when creating a [FuncButton] to set a default value.
 func (t *FuncArg) SetValue(v any) *FuncArg { t.Value = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Handle", IDName: "handle", Doc: "Handle represents a draggable handle that can be used to\ncontrol the size of an element. The [Handle.Styles.Direction]\ncontrols the direction in which the handle moves.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Min", Doc: "Min is the minimum value that the handle can go to\n(typically the lower bound of the dialog/splits)"}, {Name: "Max", Doc: "Max is the maximum value that the handle can go to\n(typically the upper bound of the dialog/splits)"}, {Name: "Pos", Doc: "Pos is the current position of the handle on the\nscale of [Handle.Min] to [Handle.Max]"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Handle", IDName: "handle", Doc: "Handle represents a draggable handle that can be used to\ncontrol the size of an element. The [styles.Style.Direction]\ncontrols the direction in which the handle moves.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Min", Doc: "Min is the minimum value that the handle can go to\n(typically the lower bound of the dialog/splits)"}, {Name: "Max", Doc: "Max is the maximum value that the handle can go to\n(typically the upper bound of the dialog/splits)"}, {Name: "Pos", Doc: "Pos is the current position of the handle on the\nscale of [Handle.Min] to [Handle.Max]."}}})
 
 // NewHandle returns a new [Handle] with the given optional parent:
 // Handle represents a draggable handle that can be used to
-// control the size of an element. The [Handle.Styles.Direction]
+// control the size of an element. The [styles.Style.Direction]
 // controls the direction in which the handle moves.
 func NewHandle(parent ...tree.Node) *Handle { return tree.New[Handle](parent...) }
 
@@ -387,17 +390,21 @@ func (t *Handle) SetMax(v float32) *Handle { t.Max = v; return t }
 
 // SetPos sets the [Handle.Pos]:
 // Pos is the current position of the handle on the
-// scale of [Handle.Min] to [Handle.Max]
+// scale of [Handle.Min] to [Handle.Max].
 func (t *Handle) SetPos(v float32) *Handle { t.Pos = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Icon", IDName: "icon", Doc: "Icon renders an [svg.SVG] icon.\nThe rendered version is cached for a given size.\nIcons do not render a background or border independent of their SVG object.\nThe size of on Icon is determined by the [styles.Font.Size] property.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Icon", Doc: "icon name that has been set."}, {Name: "Filename", Doc: "file name for the loaded icon, if loaded"}, {Name: "SVG", Doc: "SVG drawing of the icon"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Icon", IDName: "icon", Doc: "Icon renders an [icons.Icon].\nThe rendered version is cached for the current size.\nIcons do not render a background or border independent of their SVG object.\nThe size of an Icon is determined by the [styles.Font.Size] property.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Icon", Doc: "Icon is the [icons.Icon] used to render the [Icon]."}, {Name: "prevIcon", Doc: "prevIcon is the previously rendered icon."}, {Name: "svg", Doc: "svg drawing of the icon"}}})
 
 // NewIcon returns a new [Icon] with the given optional parent:
-// Icon renders an [svg.SVG] icon.
-// The rendered version is cached for a given size.
+// Icon renders an [icons.Icon].
+// The rendered version is cached for the current size.
 // Icons do not render a background or border independent of their SVG object.
-// The size of on Icon is determined by the [styles.Font.Size] property.
+// The size of an Icon is determined by the [styles.Font.Size] property.
 func NewIcon(parent ...tree.Node) *Icon { return tree.New[Icon](parent...) }
+
+// SetIcon sets the [Icon.Icon]:
+// Icon is the [icons.Icon] used to render the [Icon].
+func (t *Icon) SetIcon(v icons.Icon) *Icon { t.Icon = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Image", IDName: "image", Doc: "Image is a widget that renders a static bitmap image.\nSee [styles.ObjectFits] for how to control the image rendering within\nthe allocated size. The default minimum requested size is the pixel\nsize in [units.Dp] units (1/160th of an inch).", Methods: []types.Method{{Name: "Open", Doc: "Open sets the image to the image located at the given filename.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Args: []string{"filename"}, Returns: []string{"error"}}}, Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Image", Doc: "Image is the bitmap image."}, {Name: "prevPixels", Doc: "prevPixels is the cached last rendered image."}, {Name: "prevObjectFit", Doc: "prevObjectFit is the cached [styles.Style.ObjectFit] of the last rendered image."}, {Name: "prevSize", Doc: "prevSize is the cached allocated size for the last rendered image."}}})
 
