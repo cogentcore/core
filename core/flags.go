@@ -31,16 +31,6 @@ func (wb *WidgetBase) SetState(on bool, state ...states.States) *WidgetBase {
 	return wb
 }
 
-// SetAbilities sets the given [abilities.Abilities] flags to the given value.
-func (wb *WidgetBase) SetAbilities(on bool, able ...abilities.Abilities) *WidgetBase {
-	bfs := make([]enums.BitFlag, len(able))
-	for i, st := range able {
-		bfs[i] = st
-	}
-	wb.Styles.Abilities.SetFlag(on, bfs...)
-	return wb
-}
-
 // SetSelected sets the [states.Selected] flag to given value for the entire Widget
 // and calls [WidgetBase.Restyle] to apply any resultant style changes.
 func (wb *WidgetBase) SetSelected(sel bool) *WidgetBase {
@@ -77,7 +67,7 @@ func (wb *WidgetBase) SetReadOnly(ro bool) *WidgetBase {
 	return wb.SetState(ro, states.ReadOnly)
 }
 
-// HasStateWithin returns whether the current node or any
+// HasStateWithin returns whether this widget or any
 // of its children have the given state flag.
 func (wb *WidgetBase) HasStateWithin(state states.States) bool {
 	got := false

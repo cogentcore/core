@@ -270,7 +270,7 @@ func (tf *TextField) Init() {
 		}
 	})
 	tf.FinalStyler(func(s *styles.Style) {
-		tf.SetAbilities(!tf.IsReadOnly(), abilities.Focusable)
+		s.SetAbilities(!tf.IsReadOnly(), abilities.Focusable)
 	})
 
 	tf.HandleKeyEvents()

@@ -28,7 +28,7 @@ func TestHandleWidgetState(t *testing.T) {
 		assert.Equal(t, expect, w.Styles.State)
 
 		w.Styler(func(s *styles.Style) {
-			w.SetAbilities(true, ability)
+			s.SetAbilities(true, ability)
 		})
 		w.Style()
 
