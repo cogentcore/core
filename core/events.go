@@ -1114,7 +1114,7 @@ func (em *Events) ManagerKeyChordEvents(e events.Event) {
 			ch := tree.ChildByType[*Chooser](tb)
 			if ch != nil {
 				ch.SetFocusEvent()
-				ch.TextField().OfferComplete()
+				ch.textField.OfferComplete()
 			} else {
 				tb.SetFocusEvent()
 			}

@@ -175,7 +175,7 @@ func makeStandardAppBar(p *tree.Plan) {
 			// always displays the search placeholder
 			w.CurrentIndex = -1
 			w.CurrentItem = ChooserItem{}
-			w.ShowCurrentItem()
+			w.showCurrentItem()
 		})
 	})
 }

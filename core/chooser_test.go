@@ -95,7 +95,7 @@ func TestChooserEditableTextFieldClick(t *testing.T) {
 	})
 	ch := NewChooser(b).SetEditable(true).SetStrings("Newest", "Oldest", "Popular")
 	b.AssertRenderScreen(t, "chooser/editable-text-field-click", func() {
-		ch.TextField().Send(events.Click)
+		ch.textField.Send(events.Click)
 	})
 }
 
@@ -128,9 +128,9 @@ func TestChooserEditableAllowNewTextFieldClick(t *testing.T) {
 	})
 	ch := NewChooser(b).SetEditable(true).SetAllowNew(true).SetStrings("Newest", "Oldest", "Popular")
 	b.AssertRenderScreen(t, "chooser/editable-allow-new-text-field-click", func() {
-		ch.TextField().HandleEvent(events.NewKey(events.KeyChord, 'O', 0, 0))
+		ch.textField.HandleEvent(events.NewKey(events.KeyChord, 'O', 0, 0))
 	}, func() {
-		ch.TextField().Send(events.Click)
+		ch.textField.Send(events.Click)
 	})
 }
 
@@ -144,7 +144,7 @@ func TestChooserChange(t *testing.T) {
 		item = ch.CurrentItem
 	})
 	b.AssertRender(t, "chooser/change", func() {
-		ch.SelectItemAction(1)
+		ch.selectItemAction(1)
 		assert.Equal(t, 1, index)
 		assert.Equal(t, ChooserItem{Value: "Oldest"}, item)
 	})
