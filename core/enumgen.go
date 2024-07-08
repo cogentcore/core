@@ -92,49 +92,6 @@ func (i *ChooserTypes) UnmarshalText(text []byte) error {
 	return enums.UnmarshalText(i, text, "ChooserTypes")
 }
 
-var _CompleteSignalsValues = []CompleteSignals{0, 1}
-
-// CompleteSignalsN is the highest valid value for type CompleteSignals, plus one.
-const CompleteSignalsN CompleteSignals = 2
-
-var _CompleteSignalsValueMap = map[string]CompleteSignals{`Select`: 0, `Extend`: 1}
-
-var _CompleteSignalsDescMap = map[CompleteSignals]string{0: `CompleteSelect means the user chose one of the possible completions`, 1: `CompleteExtend means user has requested that the seed extend if all completions have a common prefix longer than current seed`}
-
-var _CompleteSignalsMap = map[CompleteSignals]string{0: `Select`, 1: `Extend`}
-
-// String returns the string representation of this CompleteSignals value.
-func (i CompleteSignals) String() string { return enums.String(i, _CompleteSignalsMap) }
-
-// SetString sets the CompleteSignals value from its string representation,
-// and returns an error if the string is invalid.
-func (i *CompleteSignals) SetString(s string) error {
-	return enums.SetString(i, s, _CompleteSignalsValueMap, "CompleteSignals")
-}
-
-// Int64 returns the CompleteSignals value as an int64.
-func (i CompleteSignals) Int64() int64 { return int64(i) }
-
-// SetInt64 sets the CompleteSignals value from an int64.
-func (i *CompleteSignals) SetInt64(in int64) { *i = CompleteSignals(in) }
-
-// Desc returns the description of the CompleteSignals value.
-func (i CompleteSignals) Desc() string { return enums.Desc(i, _CompleteSignalsDescMap) }
-
-// CompleteSignalsValues returns all possible values for the type CompleteSignals.
-func CompleteSignalsValues() []CompleteSignals { return _CompleteSignalsValues }
-
-// Values returns all possible values for the type CompleteSignals.
-func (i CompleteSignals) Values() []enums.Enum { return enums.Values(_CompleteSignalsValues) }
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i CompleteSignals) MarshalText() ([]byte, error) { return []byte(i.String()), nil }
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *CompleteSignals) UnmarshalText(text []byte) error {
-	return enums.UnmarshalText(i, text, "CompleteSignals")
-}
-
 var _LayoutPassesValues = []LayoutPasses{0, 1, 2}
 
 // LayoutPassesN is the highest valid value for type LayoutPasses, plus one.

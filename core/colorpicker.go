@@ -185,7 +185,7 @@ func (cp *ColorPicker) Init() {
 	})
 }
 
-// ColorButton represents a color value with a button.
+// ColorButton represents a color value with a button that opens a [ColorPicker].
 type ColorButton struct {
 	Button
 	Color color.RGBA
