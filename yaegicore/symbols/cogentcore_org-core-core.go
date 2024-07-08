@@ -45,7 +45,6 @@ func init() {
 		"ButtonTypesN":              reflect.ValueOf(core.ButtonTypesN),
 		"ButtonTypesValues":         reflect.ValueOf(core.ButtonTypesValues),
 		"CallFunc":                  reflect.ValueOf(core.CallFunc),
-		"ChildByLabelCanFocus":      reflect.ValueOf(core.ChildByLabelCanFocus),
 		"ChooserFilled":             reflect.ValueOf(core.ChooserFilled),
 		"ChooserOutlined":           reflect.ValueOf(core.ChooserOutlined),
 		"ChooserTypesN":             reflect.ValueOf(core.ChooserTypesN),

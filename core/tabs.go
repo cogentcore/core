@@ -152,7 +152,7 @@ func (ts *Tabs) Init() {
 			// })
 		})
 		tree.AddAt(p, "frame", func(w *Frame) {
-			w.LayoutStackTopOnly = true // key for allowing each tab to have its own size
+			w.layoutStackTopOnly = true // key for allowing each tab to have its own size
 			w.Styler(func(s *styles.Style) {
 				s.Display = styles.Stacked
 				s.Min.Set(units.Dp(160), units.Dp(96))
