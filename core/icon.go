@@ -17,34 +17,31 @@ import (
 	"golang.org/x/image/draw"
 )
 
-// Icon renders an [svg.SVG] icon.
-// The rendered version is cached for a given size.
+// Icon renders an [icons.Icon].
+// The rendered version is cached for the current size.
 // Icons do not render a background or border independent of their SVG object.
-// The size of on Icon is determined by the [styles.Font.Size] property.
+// The size of an Icon is determined by the [styles.Font.Size] property.
 type Icon struct {
 	WidgetBase
 
-	// icon name that has been set.
+	// Icon is the [icons.Icon] used to render the [Icon].
 	Icon icons.Icon `set:"-"`
 
-	// file name for the loaded icon, if loaded
-	Filename string `set:"-"`
-
-	// SVG drawing of the icon
-	SVG svg.SVG `set:"-" copier:"-"`
+	// svg drawing of the icon
+	svg svg.SVG
 }
 
 func (ic *Icon) WidgetValue() any { return &ic.Icon }
 
 func (ic *Icon) Init() {
 	ic.WidgetBase.Init()
-	ic.SVG.Scale = 1
+	ic.svg.Scale = 1
 	ic.Styler(func(s *styles.Style) {
 		s.Min.Set(units.Em(1))
 	})
 	ic.FinalStyler(func(s *styles.Style) {
-		if ic.SVG.Root != nil {
-			ic.SVG.Root.ViewBox.PreserveAspectRatio.SetFromStyle(s)
+		if ic.svg.Root != nil {
+			ic.svg.Root.ViewBox.PreserveAspectRatio.SetFromStyle(s)
 		}
 	})
 }
@@ -52,29 +49,29 @@ func (ic *Icon) Init() {
 // SetIcon sets the icon, logging error if not found.
 // Does nothing if Icon is already equal to the given icon.
 func (ic *Icon) SetIcon(icon icons.Icon) *Icon {
-	_, err := ic.SetIconTry(icon)
+	_, err := ic.setIconTry(icon)
 	if err != nil {
 		slog.Error("error opening icon named", "name", icon, "err", err)
 	}
 	return ic
 }
 
-// SetIconTry sets the icon, returning error message if not found etc,
+// setIconTry sets the icon, returning error message if not found etc,
 // and returning true if a new icon was actually set.
 // Does nothing and returns false if Icon is already equal to the given icon.
-func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
+func (ic *Icon) setIconTry(icon icons.Icon) (bool, error) {
 	if !icon.IsSet() {
 		ic.Icon = icon
-		ic.SVG.DeleteAll()
+		ic.svg.DeleteAll()
 		return false, nil
 	}
-	if ic.SVG.Root != nil && ic.SVG.Root.HasChildren() && ic.Icon == icon {
+	if ic.svg.Root != nil && ic.svg.Root.HasChildren() && ic.Icon == icon {
 		// fmt.Println("icon already set:", icon)
 		return false, nil
 	}
 	icons.Used[icon] = true
-	ic.SVG.Config(2, 2)
-	err := ic.SVG.ReadXML(strings.NewReader(string(icon)))
+	ic.svg.Config(2, 2)
+	err := ic.svg.ReadXML(strings.NewReader(string(icon)))
 	if err != nil {
 		ic.UpdateWidget()
 		return false, err
@@ -85,10 +82,10 @@ func (ic *Icon) SetIconTry(icon icons.Icon) (bool, error) {
 
 }
 
-// RenderSVG renders the [Icon.SVG] to the [Icon.Pixels] if they need to be updated.
-func (ic *Icon) RenderSVG() {
+// renderSVG renders the [Icon.SVG] to the [Icon.Pixels] if they need to be updated.
+func (ic *Icon) renderSVG() {
 	rc := ic.Scene.RenderContext()
-	sv := &ic.SVG
+	sv := &ic.svg
 	sz := ic.Geom.Size.Actual.Content.ToPoint()
 	clr := gradient.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
 	if !rc.Rebuild && sv.Pixels != nil { // if rebuilding rebuild..
@@ -119,12 +116,12 @@ func (ic *Icon) RenderSVG() {
 }
 
 func (ic *Icon) Render() {
-	ic.RenderSVG()
+	ic.renderSVG()
 
-	if ic.SVG.Pixels == nil {
+	if ic.svg.Pixels == nil {
 		return
 	}
 	r := ic.Geom.ContentBBox
 	sp := ic.Geom.ScrollOffset()
-	draw.Draw(ic.Scene.Pixels, r, ic.SVG.Pixels, sp, draw.Over)
+	draw.Draw(ic.Scene.Pixels, r, ic.svg.Pixels, sp, draw.Over)
 }
