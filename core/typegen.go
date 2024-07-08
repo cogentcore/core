@@ -273,7 +273,7 @@ func (t *Frame) SetStackTop(v int) *Frame { t.StackTop = v; return t }
 // LayoutStackTopOnly is whether to only layout the top widget (specified by [Frame.StackTop])
 // for a [styles.Stacked] frame. This is appropriate for e.g., [Tabs], which do a full
 // redraw on stack changes, but not for e.g., [Switch]es which don't.
-func (t *Frame) SetLayoutStackTopOnly(v bool) *Frame { t.layoutStackTopOnly = v; return t }
+func (t *Frame) SetLayoutStackTopOnly(v bool) *Frame { t.LayoutStackTopOnly = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Stretch", IDName: "stretch", Doc: "Stretch adds a stretchy element that grows to fill all\navailable space. You can set [styles.Style.Grow] to change\nhow much it grows relative to other growing elements.\nIt does not render anything.", Embeds: []types.Field{{Name: "WidgetBase"}}})
 
