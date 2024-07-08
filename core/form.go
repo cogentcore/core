@@ -29,10 +29,10 @@ import (
 // this should not be needed in most circumstances.
 var NoSentenceCaseFor []string
 
-// NoSentenceCaseForType returns whether the given fully
+// noSentenceCaseForType returns whether the given fully
 // package-path-qualified name contains anything in the
 // [NoSentenceCaseFor] list.
-func NoSentenceCaseForType(tnm string) bool {
+func noSentenceCaseForType(tnm string) bool {
 	return slices.ContainsFunc(NoSentenceCaseFor, func(s string) bool {
 		return strings.Contains(tnm, s)
 	})
@@ -63,9 +63,8 @@ type Form struct {
 	isShouldShower bool
 }
 
-// ShouldShower is an interface determining when you should take a shower.
-// Actually, it determines whether a named field should be displayed
-// in [Form].
+// ShouldShower is an interface that determines whether a named field
+// should be displayed in [Form].
 type ShouldShower interface {
 
 	// ShouldShow returns whether the given named field should be displayed.
@@ -134,7 +133,7 @@ func (fm *Form) Init() {
 
 		sc := true
 		if len(NoSentenceCaseFor) > 0 {
-			sc = !NoSentenceCaseForType(types.TypeNameValue(fm.Struct))
+			sc = !noSentenceCaseForType(types.TypeNameValue(fm.Struct))
 		}
 
 		for i, f := range fm.structFields {
@@ -243,19 +242,4 @@ func (fm *Form) Init() {
 			})
 		}
 	})
-}
-
-// FormDialog opens a dialog (optionally in a new, separate window)
-// for viewing / editing the given struct object, in the context of given ctx widget
-func FormDialog(ctx Widget, stru any, title string, newWindow bool) {
-	d := NewBody().AddTitle(title)
-	NewForm(d).SetStruct(stru)
-	if tb, ok := stru.(ToolbarMaker); ok {
-		d.AddAppBar(tb.MakeToolbar)
-	}
-	if newWindow {
-		d.RunWindowDialog(ctx)
-	} else {
-		d.RunFullDialog(ctx)
-	}
 }
