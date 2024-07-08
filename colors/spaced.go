@@ -21,7 +21,7 @@ func Spaced(idx int) color.RGBA {
 	return SpacedLight(idx)
 }
 
-// SpacedLight is the Light mode version of Spaced
+// SpacedLight is the light mode version of [Spaced].
 func SpacedLight(idx int) color.RGBA {
 	// red, blue, green, yellow, violet, aqua, orange, blueviolet
 	// hues := []float32{30, 280, 140, 110, 330, 200, 70, 305}
@@ -41,7 +41,7 @@ func SpacedLight(idx int) color.RGBA {
 	return hct.New(hue, float32(chroma), tone).AsRGBA()
 }
 
-// SpacedDark is the Dark mode version of Spaced
+// SpacedDark is the dark mode version of [Spaced].
 func SpacedDark(idx int) color.RGBA {
 	// red, blue, green, yellow, violet, aqua, orange, blueviolet
 	// hues := []float32{30, 280, 140, 110, 330, 200, 70, 305}

@@ -6,7 +6,7 @@ Package colors provides named colors, utilities for manipulating colors, and Mat
 
 The Go standard library defines the `image.Image` interface, which returns a color at a given x,y coordinate via the `At(x,y) color.Color` method.  This provides the most general way of specifying a color, encompassing everything from a single solid color to a pattern to a gradient to an actual image.  Thus, `image.Image` is used to specify colors in most places in the Cogent Core system.
 
-* `image.Uniform` always returns a single uniform color, ignoring the coordinates.  Use `colors.C` helper function to create a new uniform color (it just returns `image.NewUniform(c)`).
+* `image.Uniform` always returns a single uniform color, ignoring the coordinates. Use the `colors.Uniform` helper function to create a new uniform color (it just returns `image.NewUniform(c)`).
 
 * `gradient.Gradient` (from `colors/gradient`) is an `image.Image` interface that specifies an SVG-compatible color gradient using Stops to define specific points of color, with the specific color at each point as a proportional blend between the two nearest stops.  There are `gradient.Linear` and `gradient.Radial` subtypes.
 
