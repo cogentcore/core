@@ -24,7 +24,7 @@ type Canvas struct {
 	Draw func(pc *paint.Context)
 
 	// context is the paint context used for drawing.
-	context *paint.Context `set:"-"`
+	context *paint.Context
 }
 
 func (c *Canvas) Init() {
