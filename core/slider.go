@@ -487,7 +487,7 @@ func (sr *Slider) Render() {
 	sz := sr.Geom.Size.Actual.Content
 	pos := sr.Geom.Pos.Content
 
-	pabg := sr.ParentActualBackground()
+	pabg := sr.parentActualBackground()
 
 	if sr.Type == SliderScrollbar {
 		pc.DrawStandardBox(st, pos, sz, pabg) // track

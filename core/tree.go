@@ -616,7 +616,7 @@ func (tr *Tree) Render() {
 	pc := &tr.Scene.PaintContext
 	st := &tr.Styles
 
-	pabg := tr.ParentActualBackground()
+	pabg := tr.parentActualBackground()
 
 	// must use workaround act values
 	st.StateLayer = tr.actStateLayer

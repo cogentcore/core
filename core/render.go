@@ -338,7 +338,7 @@ func (wb *WidgetBase) PushBounds() bool {
 		}
 		return false
 	}
-	wb.Styles.ComputeActualBackground(wb.ParentActualBackground())
+	wb.Styles.ComputeActualBackground(wb.parentActualBackground())
 	pc := &wb.Scene.PaintContext
 	if pc.State == nil || pc.Image == nil {
 		return false
@@ -453,7 +453,7 @@ func (wb *WidgetBase) RenderBoxGeom(pos math32.Vector2, sz math32.Vector2, bs st
 func (wb *WidgetBase) RenderStandardBox() {
 	pos := wb.Geom.Pos.Total
 	sz := wb.Geom.Size.Actual.Total
-	wb.Scene.PaintContext.DrawStandardBox(&wb.Styles, pos, sz, wb.ParentActualBackground())
+	wb.Scene.PaintContext.DrawStandardBox(&wb.Styles, pos, sz, wb.parentActualBackground())
 }
 
 //////////////////////////////////////////////////////////////////

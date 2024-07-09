@@ -193,9 +193,9 @@ func (wb *WidgetBase) ChildBackground(child Widget) image.Image {
 	return wb.Styles.ActualBackground
 }
 
-// ParentActualBackground returns the actual background of
+// parentActualBackground returns the actual background of
 // the parent of the widget. If it has no parent, it returns nil.
-func (wb *WidgetBase) ParentActualBackground() image.Image {
+func (wb *WidgetBase) parentActualBackground() image.Image {
 	pwb := wb.ParentWidget()
 	if pwb == nil {
 		return nil
@@ -203,10 +203,10 @@ func (wb *WidgetBase) ParentActualBackground() image.Image {
 	return pwb.This.(Widget).ChildBackground(wb.This.(Widget))
 }
 
-// StyleFromTags adds a [WidgetBase.Styler] to the given widget
+// styleFromTags adds a [WidgetBase.Styler] to the given widget
 // to set its style properties based on the given [reflect.StructTag].
 // Width, height, and grow properties are supported.
-func StyleFromTags(w Widget, tags reflect.StructTag) {
+func styleFromTags(w Widget, tags reflect.StructTag) {
 	style := func(tag string, set func(v float32)) {
 		if v, ok := tags.Lookup(tag); ok {
 			f, err := reflectx.ToFloat32(v)
