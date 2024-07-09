@@ -32,7 +32,7 @@ func (b *Body) AssertRender(t imagex.TestingT, filename string, fun ...func()) {
 		b.waitNoEvents()
 	}
 
-	b.Scene.AssertPixels(t, filename)
+	b.Scene.assertPixels(t, filename)
 	b.Close()
 }
 
@@ -77,7 +77,7 @@ func (b *Body) waitNoEvents() {
 	b.AsyncUnlock()
 }
 
-// AssertPixels asserts that [Scene.Pixels] is equivalent
+// assertPixels asserts that [Scene.Pixels] is equivalent
 // to the image stored at the given filename in the testdata directory,
 // with ".png" added to the filename if there is no extension
 // (eg: "button" becomes "testdata/button.png"). Forward slashes are
@@ -85,6 +85,6 @@ func (b *Body) waitNoEvents() {
 // If it is not, it fails the test with an error, but continues its
 // execution. If there is no image at the given filename in the testdata
 // directory, it creates the image.
-func (sc *Scene) AssertPixels(t imagex.TestingT, filename string) {
+func (sc *Scene) assertPixels(t imagex.TestingT, filename string) {
 	imagex.Assert(t, sc.Pixels, filename)
 }
