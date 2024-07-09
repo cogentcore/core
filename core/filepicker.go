@@ -173,12 +173,12 @@ func (fp *FilePicker) Destroy() {
 // file should be visible in the picker, and false if not
 type FilePickerFilterer func(fp *FilePicker, fi *fileinfo.FileInfo) bool
 
-// FilePickerDirOnlyFilter is a FilePickerFilterer that only shows directories (folders).
+// FilePickerDirOnlyFilter is a [FilePickerFilterer] that only shows directories (folders).
 func FilePickerDirOnlyFilter(fp *FilePicker, fi *fileinfo.FileInfo) bool {
 	return fi.IsDir()
 }
 
-// FilePickerExtensionOnlyFilter is a FilePickerFilterer that only shows files that
+// FilePickerExtensionOnlyFilter is a [FilePickerFilterer] that only shows files that
 // match the target extensions, and directories.
 func FilePickerExtensionOnlyFilter(fp *FilePicker, fi *fileinfo.FileInfo) bool {
 	if fi.IsDir() {
