@@ -87,10 +87,10 @@ func appIconImages() []image.Image {
 	return res
 }
 
-// MakeAppBar configures a new top app bar in the given parent.
+// makeAppBar configures a new top app bar in the given parent.
 // It adds a back navigation button and an app chooser,
 // followed by standard overflow menu items.
-func MakeAppBar(parent Widget) {
+func makeAppBar(parent Widget) {
 	tb := NewToolbar(parent)
 	tb.Maker(makeStandardAppBar)
 	if len(tb.Scene.AppBars) > 0 {

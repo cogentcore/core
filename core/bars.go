@@ -52,7 +52,7 @@ func (sc *Scene) makeSceneBars() {
 	// at last possible moment, add app-specific app bar config
 	if sc.Stage.Type.IsMain() && (sc.Stage.NewWindow || sc.Stage.FullWindow) {
 		if sc.Bars.Top.IsEmpty() && !testing.Testing() { // no app bar while testing
-			sc.Bars.Top.Add(MakeAppBar) // put in the top by default
+			sc.Bars.Top.Add(makeAppBar) // put in the top by default
 		}
 	}
 	if !sc.Bars.Top.IsEmpty() {

@@ -82,7 +82,6 @@ func init() {
 		"LoadAllSettings":           reflect.ValueOf(core.LoadAllSettings),
 		"LoadSettings":              reflect.ValueOf(core.LoadSettings),
 		"MainRenderWindows":         reflect.ValueOf(&core.MainRenderWindows).Elem(),
-		"MakeAppBar":                reflect.ValueOf(core.MakeAppBar),
 		"MaxSpriteTextures":         reflect.ValueOf(constant.MakeFromLiteral("16", token.INT, 0)),
 		"MaxSpritesPerTexture":      reflect.ValueOf(constant.MakeFromLiteral("128", token.INT, 0)),
 		"MenuSceneConfigStyles":     reflect.ValueOf(core.StyleMenuScene),
