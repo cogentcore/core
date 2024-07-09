@@ -171,23 +171,25 @@ type TextField struct { //core:embedder
 }
 
 // TextFieldTypes is an enum containing the
-// different possible types of text fields
+// different possible types of text fields.
 type TextFieldTypes int32 //enums:enum -trim-prefix TextField
 
 const (
 	// TextFieldFilled represents a filled
-	// TextField with a background color
-	// and a bottom border
+	// [TextField] with a background color
+	// and a bottom border.
 	TextFieldFilled TextFieldTypes = iota
+
 	// TextFieldOutlined represents an outlined
-	// TextField with a border on all sides
-	// and no background color
+	// [TextField] with a border on all sides
+	// and no background color.
 	TextFieldOutlined
 )
 
 // Validator is an interface for types to provide a Validate method
 // that is used to validate string [Value]s using [TextField.Validator].
 type Validator interface {
+
 	// Validate returns an error if the value is invalid.
 	Validate() error
 }
@@ -279,7 +281,7 @@ func (tf *TextField) Init() {
 	tf.HandleKeyEvents()
 	tf.HandleSelectToggle()
 	tf.OnFirst(events.Change, func(e events.Event) {
-		tf.Validate()
+		tf.validate()
 		if tf.error != nil {
 			e.SetHandled()
 		}
@@ -338,7 +340,7 @@ func (tf *TextField) Init() {
 		tf.SetCursorFromPixel(e.Pos(), events.SelectOne)
 	})
 	tf.OnClose(func(e events.Event) {
-		tf.EditDone() // todo: this must be protected against something else, for race detector
+		tf.editDone() // todo: this must be protected against something else, for race detector
 	})
 
 	tf.Maker(func(p *tree.Plan) {
@@ -429,29 +431,29 @@ func (tf *TextField) Destroy() {
 	tf.Frame.Destroy()
 }
 
-// Text returns the current text -- applies any unapplied changes first, and
-// sends a signal if so -- this is the end-user method to get the current
-// value of the field.
+// Text returns the current text of the text field. It applies any unapplied changes
+// first, and sends an [events.Change] event if applicable. This is the main end-user
+// method to get the current value of the text field.
 func (tf *TextField) Text() string {
-	tf.EditDone()
+	tf.editDone()
 	return tf.text
 }
 
-// SetText sets the text to be edited and reverts any current edit
+// SetText sets the text of the text field and reverts any current edits
 // to reflect this new text.
-func (tf *TextField) SetText(txt string) *TextField {
-	if tf.text == txt && !tf.edited {
+func (tf *TextField) SetText(text string) *TextField {
+	if tf.text == text && !tf.edited {
 		return tf
 	}
-	tf.text = txt
-	tf.Revert()
+	tf.text = text
+	tf.revert()
 	return tf
 }
 
-// SetLeadingIcon sets the leading icon of the text field to the given icon.
-// If an on click function is specified, it also sets the leading icon on click
-// function to that function. If no function is specified, it does not
-// override any already set function.
+// SetLeadingIcon sets the [TextField.LeadingIcon] to the given icon. If an
+// on click function is specified, it also sets the [TextField.LeadingIconOnClick]
+// to that function. If no function is specified, it does not override any already
+// set function.
 func (tf *TextField) SetLeadingIcon(icon icons.Icon, onClick ...func(e events.Event)) *TextField {
 	tf.LeadingIcon = icon
 	if len(onClick) > 0 {
@@ -460,10 +462,10 @@ func (tf *TextField) SetLeadingIcon(icon icons.Icon, onClick ...func(e events.Ev
 	return tf
 }
 
-// SetTrailingIcon sets the trailing icon of the text field to the given icon.
-// If an on click function is specified, it also sets the trailing icon on click
-// function to that function. If no function is specified, it does not
-// override any already set function.
+// SetTrailingIcon sets the [TextField.TrailingIcon] to the given icon. If an
+// on click function is specified, it also sets the [TextField.TrailingIconOnClick]
+// to that function. If no function is specified, it does not override any already
+// set function.
 func (tf *TextField) SetTrailingIcon(icon icons.Icon, onClick ...func(e events.Event)) *TextField {
 	tf.TrailingIcon = icon
 	if len(onClick) > 0 {
@@ -473,10 +475,11 @@ func (tf *TextField) SetTrailingIcon(icon icons.Icon, onClick ...func(e events.E
 }
 
 // AddClearButton adds a trailing icon button at the end
-// of the textfield that clears the text in the textfield when pressed
+// of the text field that clears the text in the text field
+// when it is clicked.
 func (tf *TextField) AddClearButton() *TextField {
 	return tf.SetTrailingIcon(icons.Close, func(e events.Event) {
-		tf.Clear()
+		tf.clear()
 	})
 }
 
@@ -500,9 +503,9 @@ func (tf *TextField) SetTypePassword() *TextField {
 	return tf
 }
 
-// EditDone completes editing and copies the active edited text to the text --
-// called when the return key is pressed or goes out of focus
-func (tf *TextField) EditDone() {
+// editDone completes editing and copies the active edited text to the [TextField.text].
+// It is called when the return key is pressed or the text field goes out of focus.
+func (tf *TextField) editDone() {
 	if tf.edited {
 		tf.edited = false
 		tf.text = string(tf.editText)
@@ -516,8 +519,8 @@ func (tf *TextField) EditDone() {
 	tf.ClearCursor()
 }
 
-// Revert aborts editing and reverts to last saved text
-func (tf *TextField) Revert() {
+// revert aborts editing and reverts to the last saved text.
+func (tf *TextField) revert() {
 	tf.editText = []rune(tf.text)
 	tf.edited = false
 	tf.startPos = 0
@@ -526,8 +529,8 @@ func (tf *TextField) Revert() {
 	tf.NeedsRender()
 }
 
-// Clear clears any existing text
-func (tf *TextField) Clear() {
+// clear clears any existing text.
+func (tf *TextField) clear() {
 	tf.edited = true
 	tf.editText = tf.editText[:0]
 	tf.startPos = 0
@@ -537,15 +540,15 @@ func (tf *TextField) Clear() {
 	tf.NeedsRender()
 }
 
-// ClearError clears any existing validation error
-func (tf *TextField) ClearError() {
+// clearError clears any existing validation error.
+func (tf *TextField) clearError() {
 	tf.error = nil
 	tf.NeedsRender()
 }
 
-// Validate runs [TextField.Validator] and takes any necessary actions
+// validate runs [TextField.Validator] and takes any necessary actions
 // as a result of that.
-func (tf *TextField) Validate() {
+func (tf *TextField) validate() {
 	if tf.Validator == nil {
 		return
 	}
@@ -577,8 +580,8 @@ func (tf *TextField) WidgetTooltip(pos image.Point) (string, image.Point) {
 //////////////////////////////////////////////////////////////////////////////////////////
 //  Cursor Navigation
 
-// CursorForward moves the cursor forward
-func (tf *TextField) CursorForward(steps int) {
+// cursorForward moves the cursor forward
+func (tf *TextField) cursorForward(steps int) {
 	tf.cursorPos += steps
 	if tf.cursorPos > len(tf.editText) {
 		tf.cursorPos = len(tf.editText)
@@ -594,8 +597,8 @@ func (tf *TextField) CursorForward(steps int) {
 	tf.NeedsRender()
 }
 
-// CursorForwardWord moves the cursor forward by words
-func (tf *TextField) CursorForwardWord(steps int) {
+// cursorForwardWord moves the cursor forward by words
+func (tf *TextField) cursorForwardWord(steps int) {
 	for i := 0; i < steps; i++ {
 		sz := len(tf.editText)
 		if sz > 0 && tf.cursorPos < sz {
@@ -645,8 +648,8 @@ func (tf *TextField) CursorForwardWord(steps int) {
 	tf.NeedsRender()
 }
 
-// CursorBackward moves the cursor backward
-func (tf *TextField) CursorBackward(steps int) {
+// cursorBackward moves the cursor backward
+func (tf *TextField) cursorBackward(steps int) {
 	tf.cursorPos -= steps
 	if tf.cursorPos < 0 {
 		tf.cursorPos = 0
@@ -662,8 +665,8 @@ func (tf *TextField) CursorBackward(steps int) {
 	tf.NeedsRender()
 }
 
-// CursorBackwardWord moves the cursor backward by words
-func (tf *TextField) CursorBackwardWord(steps int) {
+// cursorBackwardWord moves the cursor backward by words
+func (tf *TextField) cursorBackwardWord(steps int) {
 	for i := 0; i < steps; i++ {
 		sz := len(tf.editText)
 		if sz > 0 && tf.cursorPos > 0 {
@@ -716,8 +719,8 @@ func (tf *TextField) CursorBackwardWord(steps int) {
 	tf.NeedsRender()
 }
 
-// CursorDown moves the cursor down
-func (tf *TextField) CursorDown(steps int) {
+// cursorDown moves the cursor down
+func (tf *TextField) cursorDown(steps int) {
 	if tf.numLines <= 1 {
 		return
 	}
@@ -734,8 +737,8 @@ func (tf *TextField) CursorDown(steps int) {
 	tf.NeedsRender()
 }
 
-// CursorUp moves the cursor up
-func (tf *TextField) CursorUp(steps int) {
+// cursorUp moves the cursor up
+func (tf *TextField) cursorUp(steps int) {
 	if tf.numLines <= 1 {
 		return
 	}
@@ -753,7 +756,7 @@ func (tf *TextField) CursorUp(steps int) {
 }
 
 // CursorStart moves the cursor to the start of the text, updating selection
-// if select mode is active
+// if select mode is active.
 func (tf *TextField) CursorStart() {
 	tf.cursorPos = 0
 	tf.startPos = 0
@@ -764,7 +767,8 @@ func (tf *TextField) CursorStart() {
 	tf.NeedsRender()
 }
 
-// CursorEnd moves the cursor to the end of the text
+// CursorEnd moves the cursor to the end of the text, updating selection
+// if select mode is active.
 func (tf *TextField) CursorEnd() {
 	ed := len(tf.editText)
 	tf.cursorPos = ed
@@ -790,7 +794,7 @@ func (tf *TextField) CursorBackspace(steps int) {
 	}
 	tf.edited = true
 	tf.editText = append(tf.editText[:tf.cursorPos-steps], tf.editText[tf.cursorPos:]...)
-	tf.CursorBackward(steps)
+	tf.cursorBackward(steps)
 	tf.NeedsRender()
 }
 
@@ -818,7 +822,7 @@ func (tf *TextField) CursorBackspaceWord(steps int) {
 		return
 	}
 	org := tf.cursorPos
-	tf.CursorBackwardWord(steps)
+	tf.cursorBackwardWord(steps)
 	tf.edited = true
 	tf.editText = append(tf.editText[:tf.cursorPos], tf.editText[org:]...)
 	tf.NeedsRender()
@@ -832,7 +836,7 @@ func (tf *TextField) CursorDeleteWord(steps int) {
 	}
 	// note: no update b/c signal from buf will drive update
 	org := tf.cursorPos
-	tf.CursorForwardWord(steps)
+	tf.cursorForwardWord(steps)
 	tf.edited = true
 	tf.editText = append(tf.editText[:tf.cursorPos], tf.editText[org:]...)
 	tf.NeedsRender()
@@ -1068,7 +1072,7 @@ func (tf *TextField) InsertAtCursor(str string) {
 	copy(nt[tf.cursorPos:], rs)                    // copy into position
 	tf.editText = nt
 	tf.endPos += rsl
-	tf.CursorForward(rsl)
+	tf.cursorForward(rsl)
 	tf.NeedsRender()
 }
 
@@ -1223,7 +1227,7 @@ func (tf *TextField) CompleteText(s string) {
 	tf.cursorPos = st
 	tf.CursorDelete(ed.ForwardDelete)
 	tf.InsertAtCursor(ed.NewText)
-	tf.EditDone()
+	tf.editDone()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1629,34 +1633,34 @@ func (tf *TextField) HandleKeyEvents() {
 		case keymap.MoveRight:
 			e.SetHandled()
 			tf.ShiftSelect(e)
-			tf.CursorForward(1)
+			tf.cursorForward(1)
 			tf.OfferComplete()
 		case keymap.WordRight:
 			e.SetHandled()
 			tf.ShiftSelect(e)
-			tf.CursorForwardWord(1)
+			tf.cursorForwardWord(1)
 			tf.OfferComplete()
 		case keymap.MoveLeft:
 			e.SetHandled()
 			tf.ShiftSelect(e)
-			tf.CursorBackward(1)
+			tf.cursorBackward(1)
 			tf.OfferComplete()
 		case keymap.WordLeft:
 			e.SetHandled()
 			tf.ShiftSelect(e)
-			tf.CursorBackwardWord(1)
+			tf.cursorBackwardWord(1)
 			tf.OfferComplete()
 		case keymap.MoveDown:
 			if tf.numLines > 1 {
 				e.SetHandled()
 				tf.ShiftSelect(e)
-				tf.CursorDown(1)
+				tf.cursorDown(1)
 			}
 		case keymap.MoveUp:
 			if tf.numLines > 1 {
 				e.SetHandled()
 				tf.ShiftSelect(e)
-				tf.CursorUp(1)
+				tf.cursorUp(1)
 			}
 		case keymap.Home:
 			e.SetHandled()
@@ -1694,21 +1698,21 @@ func (tf *TextField) HandleKeyEvents() {
 		case keymap.FocusNext: // we process tab to make it EditDone as opposed to other ways of losing focus
 			e.SetHandled()
 			tf.CancelComplete()
-			tf.EditDone()
+			tf.editDone()
 			tf.FocusNext()
 		case keymap.Accept: // ctrl+enter
 			e.SetHandled()
 			tf.CancelComplete()
-			tf.EditDone()
+			tf.editDone()
 		case keymap.FocusPrev:
 			e.SetHandled()
 			tf.CancelComplete()
-			tf.EditDone()
+			tf.editDone()
 			tf.FocusPrev()
 		case keymap.Abort: // esc
 			e.SetHandled()
 			tf.CancelComplete()
-			tf.Revert()
+			tf.revert()
 			// tf.FocusChanged(FocusInactive)
 		case keymap.Backspace:
 			e.SetHandled()
@@ -1786,7 +1790,7 @@ func (tf *TextField) HandleKeyEvents() {
 			e.SetHandled()
 			return
 		}
-		tf.EditDone()
+		tf.editDone()
 	})
 }
 

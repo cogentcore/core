@@ -200,7 +200,7 @@ func (fp *FilePicker) SetFilename(filename string) *FilePicker {
 // SelectedFile returns the full path to the currently selected file.
 func (fp *FilePicker) SelectedFile() string {
 	sf := fp.selectField
-	sf.EditDone()
+	sf.editDone()
 	return filepath.Join(fp.directory, fp.selectedFilename)
 }
 

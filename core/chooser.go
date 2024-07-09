@@ -311,8 +311,8 @@ func (ch *Chooser) Init() {
 					kf := keymap.Of(e.KeyChord())
 					if kf == keymap.Abort {
 						if w.error != nil {
-							w.Clear()
-							w.ClearError()
+							w.clear()
+							w.clearError()
 							e.SetHandled()
 						}
 					}
@@ -556,7 +556,7 @@ func (ch *Chooser) ClearError() {
 	if tf == nil {
 		return
 	}
-	tf.ClearError()
+	tf.clearError()
 }
 
 // makeItemsMenu constructs a menu of all the items.
