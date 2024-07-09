@@ -10,8 +10,9 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// SettingsEditorToolbarBase is the base toolbar configuration function used in [SettingsEditor].
-func SettingsEditorToolbarBase(p *tree.Plan) {
+// settingsEditorToolbarBase is the base toolbar configuration
+// function used in [SettingsEditor].
+func settingsEditorToolbarBase(p *tree.Plan) {
 	tree.Add(p, func(w *FuncButton) {
 		w.SetFunc(AppearanceSettings.SaveScreenZoom).SetIcon(icons.ZoomIn)
 		w.SetAfterFunc(func() {
@@ -42,7 +43,7 @@ func SettingsWindow() { //types:add
 // SettingsEditor adds to the given body an editor of user settings.
 func SettingsEditor(b *Body) {
 	b.AddAppBar(func(p *tree.Plan) {
-		SettingsEditorToolbarBase(p)
+		settingsEditorToolbarBase(p)
 		for _, se := range AllSettings {
 			se.MakeToolbar(p)
 		}

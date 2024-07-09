@@ -160,7 +160,6 @@ func init() {
 		"ResetWidgetValue":          reflect.ValueOf(core.ResetWidgetValue),
 		"SaveSettings":              reflect.ValueOf(core.SaveSettings),
 		"SettingsEditor":            reflect.ValueOf(core.SettingsEditor),
-		"SettingsEditorToolbarBase": reflect.ValueOf(core.SettingsEditorToolbarBase),
 		"SettingsWindow":            reflect.ValueOf(core.SettingsWindow),
 		"SizeClassesN":              reflect.ValueOf(core.SizeClassesN),
 		"SizeClassesValues":         reflect.ValueOf(core.SizeClassesValues),
