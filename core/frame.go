@@ -45,7 +45,7 @@ type Frame struct {
 	LayoutStackTopOnly bool
 
 	// layout contains implementation state info for doing layout
-	layout LayoutState
+	layout layoutState
 
 	// HasScroll is whether scrollbars exist for each dimension.
 	HasScroll [2]bool `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`

@@ -318,8 +318,8 @@ func (sc *Scene) UpdateTitle(title string) {
 	}
 }
 
-func (sc *Scene) ScenePos() {
-	sc.Frame.ScenePos()
+func (sc *Scene) ApplyScenePos() {
+	sc.Frame.ApplyScenePos()
 	if sc.Parts == nil {
 		return
 	}
@@ -332,16 +332,16 @@ func (sc *Scene) ScenePos() {
 
 	sc.Parts.Geom.Pos.Total.Y = math32.Ceil(0.5 * mv.Geom.Size.Actual.Total.Y)
 	sc.Parts.Geom.Size.Actual = sc.Geom.Size.Actual
-	sc.Parts.SetContentPosFromPos()
-	sc.Parts.SetBBoxesFromAllocs()
-	sc.Parts.ScenePosChildren()
+	sc.Parts.setContentPosFromPos()
+	sc.Parts.setBBoxesFromAllocs()
+	sc.Parts.applyScenePosChildren()
 
 	psz := sc.Parts.Geom.Size.Actual.Content
 
 	mv.Geom.RelPos.X = 0.5*psz.X - 0.5*mv.Geom.Size.Actual.Total.X
 	mv.Geom.RelPos.Y = 0
-	mv.SetPosFromParent()
-	mv.SetBBoxesFromAllocs()
+	mv.setPosFromParent()
+	mv.setBBoxesFromAllocs()
 
 	rszi := sc.Parts.ChildByName("resize", 1)
 	if rszi == nil {
@@ -350,8 +350,8 @@ func (sc *Scene) ScenePos() {
 	rsz := rszi.(Widget).AsWidget()
 	rsz.Geom.RelPos.X = psz.X // - 0.5*rsz.Geom.Size.Actual.Total.X
 	rsz.Geom.RelPos.Y = psz.Y // - 0.5*rsz.Geom.Size.Actual.Total.Y
-	rsz.SetPosFromParent()
-	rsz.SetBBoxesFromAllocs()
+	rsz.setPosFromParent()
+	rsz.setBBoxesFromAllocs()
 }
 
 func (sc *Scene) AddDirectRender(w Widget) {

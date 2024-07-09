@@ -72,11 +72,11 @@ type Widget interface {
 	// Alloc size per Styles settings and widget-specific behavior.
 	Position()
 
-	// ScenePos computes scene-based absolute positions and final BBox
+	// ApplyScenePos computes scene-based absolute positions and final BBox
 	// bounding boxes for rendering, based on relative positions from
 	// Position step and parents accumulated position and scroll offset.
 	// This is the only step needed when scrolling (very fast).
-	ScenePos()
+	ApplyScenePos()
 
 	// Render is the method that widgets should implement to define their
 	// custom rendering steps. It should not typically be called outside of
@@ -165,7 +165,7 @@ type WidgetBase struct {
 	Parts *Frame `copier:"-" json:"-" xml:"-" set:"-"`
 
 	// Geom has the full layout geometry for size and position of this Widget
-	Geom GeomState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
+	Geom geomState `edit:"-" copier:"-" json:"-" xml:"-" set:"-"`
 
 	// If true, override the computed styles and allow directly editing Styles.
 	OverrideStyle bool `copier:"-" json:"-" xml:"-" set:"-"`

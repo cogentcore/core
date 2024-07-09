@@ -1846,8 +1846,8 @@ func (tf *TextField) SizeUp() {
 		rsz = tf.ConfigTextSize(availSz)
 	}
 	rsz.SetAdd(icsz)
-	sz.FitSizeMax(&sz.Actual.Content, rsz)
-	sz.SetTotalFromContent(&sz.Actual)
+	sz.fitSizeMax(&sz.Actual.Content, rsz)
+	sz.setTotalFromContent(&sz.Actual)
 	tf.FontHeight = tf.Styles.Font.Face.Metrics.Height
 	tf.EditTxt = tmptxt
 	if DebugSettings.LayoutTrace {
@@ -1860,16 +1860,16 @@ func (tf *TextField) SizeDown(iter int) bool {
 		return tf.Frame.SizeDown(iter)
 	}
 	sz := &tf.Geom.Size
-	pgrow, _ := tf.GrowToAllocSize(sz.Actual.Content, sz.Alloc.Content) // key to grow
+	pgrow, _ := tf.growToAllocSize(sz.Actual.Content, sz.Alloc.Content) // key to grow
 	icsz := tf.IconsSize()
 	prevContent := sz.Actual.Content
 	availSz := pgrow.Sub(icsz)
 	rsz := tf.ConfigTextSize(availSz)
 	rsz.SetAdd(icsz)
 	// start over so we don't reflect hysteresis of prior guess
-	sz.SetInitContentMin(tf.Styles.Min.Dots().Ceil())
-	sz.FitSizeMax(&sz.Actual.Content, rsz)
-	sz.SetTotalFromContent(&sz.Actual)
+	sz.setInitContentMin(tf.Styles.Min.Dots().Ceil())
+	sz.fitSizeMax(&sz.Actual.Content, rsz)
+	sz.setTotalFromContent(&sz.Actual)
 	chg := prevContent != sz.Actual.Content
 	if chg {
 		if DebugSettings.LayoutTrace {
@@ -1880,8 +1880,8 @@ func (tf *TextField) SizeDown(iter int) bool {
 	return chg || sdp
 }
 
-func (tf *TextField) ScenePos() {
-	tf.Frame.ScenePos()
+func (tf *TextField) ApplyScenePos() {
+	tf.Frame.ApplyScenePos()
 	tf.SetEffPosAndSize()
 }
 

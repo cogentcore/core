@@ -566,15 +566,15 @@ func (tr *Tree) SizeUp() {
 	}
 	sz := &tr.Geom.Size
 	sz.Actual.Content = math32.Vec2(w, h)
-	sz.SetTotalFromContent(&sz.Actual)
+	sz.setTotalFromContent(&sz.Actual)
 	sz.Alloc = sz.Actual // need allocation to match!
 	tr.widgetSize.X = w  // stretch
 }
 
 func (tr *Tree) SizeDown(iter int) bool {
 	// note: key to not grab the whole allocation, as widget default does
-	redo := tr.SizeDownParts(iter) // give our content to parts
-	re := tr.SizeDownChildren(iter)
+	redo := tr.sizeDownParts(iter) // give our content to parts
+	re := tr.sizeDownChildren(iter)
 	return redo || re
 }
 
@@ -602,13 +602,13 @@ func (tr *Tree) Position() {
 	}
 }
 
-func (tr *Tree) ScenePos() {
+func (tr *Tree) ApplyScenePos() {
 	sz := &tr.Geom.Size
 	if sz.Actual.Total == tr.widgetSize {
-		sz.SetTotalFromContent(&sz.Actual) // restore after scrolling
+		sz.setTotalFromContent(&sz.Actual) // restore after scrolling
 	}
-	tr.WidgetBase.ScenePos()
-	tr.ScenePosChildren()
+	tr.WidgetBase.ApplyScenePos()
+	tr.applyScenePosChildren()
 	tr.Geom.Size.Actual.Total = tr.widgetSize // key: we revert to just ourselves
 }
 

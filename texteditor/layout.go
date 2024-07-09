@@ -173,8 +173,8 @@ func (ed *Editor) Position() {
 	ed.ConfigScrolls()
 }
 
-func (ed *Editor) ScenePos() {
-	ed.Frame.ScenePos()
+func (ed *Editor) ApplyScenePos() {
+	ed.Frame.ApplyScenePos()
 	ed.PositionScrolls()
 }
 

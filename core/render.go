@@ -142,7 +142,7 @@ func (sc *Scene) LayoutScene() {
 	sc.SizeUp()
 	sz := &sc.Geom.Size
 	sz.Alloc.Total.SetPoint(sc.SceneGeom.Size)
-	sz.SetContentFromTotal(&sz.Alloc)
+	sz.setContentFromTotal(&sz.Alloc)
 	// sz.Actual = sz.Alloc // todo: is this needed??
 	if DebugSettings.LayoutTrace {
 		fmt.Println("\n############################\nSizeDown start:", sc)
@@ -169,7 +169,7 @@ func (sc *Scene) LayoutScene() {
 	if DebugSettings.LayoutTrace {
 		fmt.Println("\n############################\nScenePos start:", sc)
 	}
-	sc.ScenePos()
+	sc.ApplyScenePos()
 }
 
 // LayoutRenderScene does a layout and render of the tree:

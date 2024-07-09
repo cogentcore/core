@@ -142,7 +142,7 @@ func (tb *Toolbar) MoveToOverflow() {
 	avsz := avail - ovsz
 	sz := &tb.Geom.Size
 	sz.Alloc.Total.SetDim(ma, avail)
-	sz.SetContentFromTotal(&sz.Alloc)
+	sz.setContentFromTotal(&sz.Alloc)
 	n := len(tb.Children)
 	pn := len(tb.allItemsPlan.Children)
 	ovidx := n - 1

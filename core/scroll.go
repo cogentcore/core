@@ -101,7 +101,7 @@ func (fr *Frame) ConfigScroll(d math32.Dims) {
 // This is part of the Layouter interface.
 func (fr *Frame) ScrollChanged(d math32.Dims, sb *Slider) {
 	fr.Geom.Scroll.SetDim(d, -sb.Value)
-	fr.This.(Layouter).ScenePos() // computes updated positions
+	fr.This.(Layouter).ApplyScenePos() // computes updated positions
 	fr.NeedsRender()
 }
 
@@ -115,7 +115,7 @@ func (fr *Frame) ScrollUpdateFromGeom(d math32.Dims) {
 	sb := fr.scrolls[d]
 	cv := fr.Geom.Scroll.Dim(d)
 	sb.SetValueAction(-cv)
-	fr.This.(Layouter).ScenePos() // computes updated positions
+	fr.This.(Layouter).ApplyScenePos() // computes updated positions
 	fr.NeedsRender()
 }
 
@@ -175,10 +175,10 @@ func (fr *Frame) PositionScroll(d math32.Dims) {
 	sb.SizeDown(0)
 
 	sb.Geom.Pos.Total = pos
-	sb.SetContentPosFromPos()
+	sb.setContentPosFromPos()
 	// note: usually these are intersected with parent *content* bbox,
 	// but scrolls are specifically outside of that.
-	sb.SetBBoxesFromAllocs()
+	sb.setBBoxesFromAllocs()
 }
 
 // RenderScrolls draws the scrollbars
@@ -290,7 +290,7 @@ func (wb *WidgetBase) ScrollToThis() bool {
 // It returns whether scrolling was needed.
 func (fr *Frame) ScrollToWidget(w Widget) bool {
 	// note: critical to NOT use BBox b/c it is zero for invisible items!
-	return fr.ScrollToBox(w.AsWidget().Geom.TotalRect())
+	return fr.ScrollToBox(w.AsWidget().Geom.totalRect())
 }
 
 // AutoScrollDim auto-scrolls along one dimension, based on the current
@@ -361,7 +361,7 @@ func (fr *Frame) ScrollToBoxDim(d math32.Dims, tmini, tmaxi int) bool {
 		return false
 	}
 	tmin, tmax := float32(tmini), float32(tmaxi)
-	cmin, cmax := fr.Geom.ContentRangeDim(d)
+	cmin, cmax := fr.Geom.contentRangeDim(d)
 	if tmin >= cmin && tmax <= cmax {
 		return false
 	}
@@ -409,7 +409,7 @@ func (fr *Frame) ScrollDimToStart(d math32.Dims, posi int) bool {
 		return false
 	}
 	pos := float32(posi)
-	cmin, _ := fr.Geom.ContentRangeDim(d)
+	cmin, _ := fr.Geom.contentRangeDim(d)
 	if pos == cmin {
 		return false
 	}
@@ -427,7 +427,7 @@ func (fr *Frame) ScrollDimToEnd(d math32.Dims, posi int) bool {
 		return false
 	}
 	pos := float32(posi)
-	_, cmax := fr.Geom.ContentRangeDim(d)
+	_, cmax := fr.Geom.contentRangeDim(d)
 	if pos == cmax {
 		return false
 	}
@@ -452,7 +452,7 @@ func (fr *Frame) ScrollDimToCenter(d math32.Dims, posi int) bool {
 		return false
 	}
 	pos := float32(posi)
-	cmin, cmax := fr.Geom.ContentRangeDim(d)
+	cmin, cmax := fr.Geom.contentRangeDim(d)
 	mid := 0.5 * (cmin + cmax)
 	if pos == mid {
 		return false

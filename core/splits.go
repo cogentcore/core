@@ -255,7 +255,7 @@ func (sl *Splits) SizeDownSetAllocs(iter int) {
 		ksz := &kwb.Geom.Size
 		ksz.Alloc.Total.SetDim(dim, sw)
 		ksz.Alloc.Total.SetDim(od, cszod)
-		ksz.SetContentFromTotal(&ksz.Alloc)
+		ksz.setContentFromTotal(&ksz.Alloc)
 		// ksz.Actual = ksz.Alloc
 		return tree.Continue
 	})
@@ -269,7 +269,7 @@ func (sl *Splits) Position() {
 	sl.UpdateSplits()
 	sl.ConfigScrolls()
 	sl.PositionSplits()
-	sl.PositionChildren()
+	sl.positionChildren()
 }
 
 func (sl *Splits) PositionSplits() {

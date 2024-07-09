@@ -1803,7 +1803,7 @@ func (lb *ListBase) SizeFinal() {
 		} else {
 			sg.StyleTree()
 		}
-		sg.SizeFinalUpdateChildrenSizes()
+		sg.sizeFinalUpdateChildrenSizes()
 		lb.MakeIter++
 		localIter++
 	}
@@ -1843,7 +1843,7 @@ func (lg *ListGrid) Init() {
 
 func (lg *ListGrid) SizeFromChildren(iter int, pass LayoutPasses) math32.Vector2 {
 	csz := lg.Frame.SizeFromChildren(iter, pass)
-	rht, err := lg.layout.RowHeight(0, 0)
+	rht, err := lg.layout.rowHeight(0, 0)
 	if err != nil {
 		// fmt.Println("ListGrid Sizing Error:", err)
 		lg.RowHeight = 42
@@ -2015,7 +2015,7 @@ func (lg *ListGrid) RenderStripes() {
 	}
 	for r := 0; r < rows; r++ {
 		si := r + startIndex
-		ht, _ := lg.layout.RowHeight(r, 0)
+		ht, _ := lg.layout.rowHeight(r, 0)
 		miny := st.Y
 		for c := 0; c < cols; c++ {
 			ki := r*cols + c
@@ -2065,7 +2065,7 @@ func (lg *ListGrid) IndexFromPixel(pt image.Point) (row, col int, isValid bool) 
 	st := math32.Vector2{}
 	got := false
 	for r := 0; r < rows; r++ {
-		ht, _ := lg.layout.RowHeight(r, 0)
+		ht, _ := lg.layout.rowHeight(r, 0)
 		ht += lg.layout.Gap.Y
 		miny := st.Y
 		if r > 0 {

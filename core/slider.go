@@ -552,8 +552,8 @@ func (sr *Slider) Render() {
 			ic := sr.Child(0).(*Icon)
 			tpos.SetSub(thsz.MulScalar(.5))
 			ic.Geom.Pos.Total = tpos
-			ic.SetContentPosFromPos()
-			ic.SetBBoxes()
+			ic.setContentPosFromPos()
+			ic.setBBoxes()
 		} else {
 			tabg := sr.Styles.ComputeActualBackgroundFor(sr.ThumbColor, pabg)
 			pc.FillStyle.Color = tabg
@@ -563,8 +563,8 @@ func (sr *Slider) Render() {
 	}
 }
 
-func (sr *Slider) ScenePos() {
-	sr.WidgetBase.ScenePos()
+func (sr *Slider) ApplyScenePos() {
+	sr.WidgetBase.ApplyScenePos()
 	if !sr.StayInView {
 		return
 	}
@@ -576,6 +576,6 @@ func (sr *Slider) ScenePos() {
 	sbw := math32.Ceil(sr.Styles.ScrollBarWidth.Dots)
 	scmax := math32.Vector2FromPoint(sr.Scene.Geom.ContentBBox.Max).SubScalar(sbw)
 	sr.Geom.Pos.Total.SetMin(scmax)
-	sr.SetContentPosFromPos()
-	sr.SetBBoxesFromAllocs()
+	sr.setContentPosFromPos()
+	sr.setBBoxesFromAllocs()
 }
