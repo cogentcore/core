@@ -144,8 +144,6 @@ func (fn *Node) Init() {
 		}
 	})
 	tree.AddChildInit(fn.Parts, "branch", func(w *core.Switch) {
-		w.SetType(core.SwitchCheckbox)
-		w.SetIcons(fn.IconOpen, fn.IconClosed, fn.IconLeaf)
 		tree.AddChildInit(w, "stack", func(w *core.Frame) {
 			f := func(name string) {
 				tree.AddChildInit(w, name, func(w *core.Icon) {
@@ -351,7 +349,7 @@ func (fn *Node) SetFileIcon() {
 	fn.IconLeaf = ic
 	if bp, ok := fn.Branch(); ok {
 		if bp.IconIndeterminate != ic {
-			bp.SetIcons(icons.FolderOpen, icons.Folder, ic)
+			bp.SetIconOn(icons.FolderOpen).SetIconOff(icons.Folder).SetIconIndeterminate(ic)
 			bp.UpdateTree()
 		}
 	}

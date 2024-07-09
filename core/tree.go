@@ -416,7 +416,7 @@ func (tr *Tree) Init() {
 	})
 	tree.AddChildAt(parts, "branch", func(w *Switch) {
 		w.SetType(SwitchCheckbox)
-		w.SetIcons(tr.IconOpen, tr.IconClosed, tr.IconLeaf)
+		w.SetIconOn(tr.IconOpen).SetIconOff(tr.IconClosed).SetIconIndeterminate(tr.IconLeaf)
 		w.Styler(func(s *styles.Style) {
 			s.SetAbilities(false, abilities.Focusable)
 			// parent will handle our cursor

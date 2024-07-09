@@ -18,14 +18,15 @@ import (
 )
 
 // Switch is a widget that can toggle between an on and off state.
-// It can be displayed as a switch, checkbox, or radio button.
+// It can be displayed as a switch, chip, checkbox, radio button,
+// or segmented button.
 type Switch struct {
 	Frame
 
 	// Type is the styling type of switch.
 	Type SwitchTypes `set:"-"`
 
-	// Text is the text for the switch.
+	// Text is the optional text of the switch.
 	Text string
 
 	// IconOn is the icon to use for the on, checked state of the switch.
@@ -38,15 +39,15 @@ type Switch struct {
 	IconIndeterminate icons.Icon
 }
 
-// SwitchTypes contains the different types of [Switch]es
+// SwitchTypes contains the different types of [Switch]es.
 type SwitchTypes int32 //enums:enum -trim-prefix Switch
 
 const (
 	// SwitchSwitch indicates to display a switch as a switch (toggle slider).
 	SwitchSwitch SwitchTypes = iota
 
-	// SwitchChip indicates to display a switch as chip (like Material Design's filter chip),
-	// which is typically only used in the context of [Switches].
+	// SwitchChip indicates to display a switch as chip (like Material Design's
+	// filter chip), which is typically only used in the context of [Switches].
 	SwitchChip
 
 	// SwitchCheckbox indicates to display a switch as a checkbox.
@@ -55,8 +56,8 @@ const (
 	// SwitchRadioButton indicates to display a switch as a radio button.
 	SwitchRadioButton
 
-	// SwitchSegmentedButton indicates to display a segmented button, which is typically only used in
-	// the context of [Switches].
+	// SwitchSegmentedButton indicates to display a segmented button, which is
+	// typically only used in the context of [Switches].
 	SwitchSegmentedButton
 )
 
@@ -114,7 +115,7 @@ func (sw *Switch) Init() {
 	sw.OnFinal(events.Click, func(e events.Event) {
 		sw.SetChecked(sw.IsChecked())
 		if sw.Type == SwitchChip {
-			sw.UpdateStackTop() // must update here
+			sw.updateStackTop() // must update here
 			sw.NeedsLayout()
 		} else {
 			sw.NeedsRender()
@@ -136,7 +137,7 @@ func (sw *Switch) Init() {
 				s.Gap.Zero()
 			})
 			w.Updater(func() {
-				sw.UpdateStackTop() // need to update here
+				sw.updateStackTop() // need to update here
 			})
 			w.Maker(func(p *tree.Plan) {
 				tree.AddAt(p, "icon-on", func(w *Icon) {
@@ -217,10 +218,10 @@ func (sw *Switch) SetChecked(on bool) *Switch {
 	return sw
 }
 
-// UpdateStackTop updates the [Frame.StackTop] of the stack in the switch
+// updateStackTop updates the [Frame.StackTop] of the stack in the switch
 // according to the current icon. It is called automatically to keep the
 // switch up-to-date.
-func (sw *Switch) UpdateStackTop() {
+func (sw *Switch) updateStackTop() {
 	st, ok := sw.ChildByName("stack", 0).(*Frame)
 	if !ok {
 		return
@@ -240,7 +241,7 @@ func (sw *Switch) UpdateStackTop() {
 	}
 }
 
-// SetType sets the styling type of the switch
+// SetType sets the styling type of the switch.
 func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 	sw.Type = typ
 	sw.IconIndeterminate = icons.Blank
@@ -268,25 +269,8 @@ func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 	return sw
 }
 
-// SetIcons sets the icons for the on (checked), off (unchecked)
-// and indeterminate (unknown) states.
-func (sw *Switch) SetIcons(on, off, ind icons.Icon) *Switch {
-	sw.IconOn = on
-	sw.IconOff = off
-	sw.IconIndeterminate = ind
-	return sw
-}
-
-// ClearIcons sets all of the switch icons to [icons.None]
-func (sw *Switch) ClearIcons() *Switch {
-	sw.IconOn = icons.None
-	sw.IconOff = icons.None
-	sw.IconIndeterminate = icons.None
-	return sw
-}
-
 func (sw *Switch) Render() {
-	sw.UpdateStackTop() // important: make sure we're always up-to-date on render
+	sw.updateStackTop() // important: make sure we're always up-to-date on render
 	st, ok := sw.ChildByName("stack", 0).(*Frame)
 	if ok {
 		st.UpdateStackedVisibility()
