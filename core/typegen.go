@@ -471,7 +471,7 @@ func (t *KeyedList) SetInline(v bool) *KeyedList { t.Inline = v; return t }
 
 // SetSortValues sets the [KeyedList.SortValues]:
 // SortValue is whether to sort by values instead of keys.
-func (t *KeyedList) SetSortValues(v bool) *KeyedList { t.SortValues = v; return t }
+func (t *KeyedList) SetSortValues(v bool) *KeyedList { t.SortByValues = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.GeomCT", IDName: "geom-ct", Doc: "GeomCT has core layout elements: Content and Total", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Content", Doc: "Content is for the contents (children, parts) of the widget,\nexcluding the Space (margin, padding, scrollbars).\nThis content includes the InnerSpace factor (Gaps in Layout)\nwhich must therefore be subtracted when allocating down to children."}, {Name: "Total", Doc: "Total is for the total exterior of the widget: Content + Space"}}})
 
