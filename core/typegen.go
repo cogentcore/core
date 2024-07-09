@@ -691,7 +691,7 @@ func (t *Slider) SetInputThreshold(v float32) *Slider { t.InputThreshold = v; re
 // specifies the precision of decimal places (total, not after the decimal point)
 // to use in representing the number. This helps to truncate small weird floating
 // point values in the nether regions.
-func (t *Slider) SetPrec(v int) *Slider { t.Prec = v; return t }
+func (t *Slider) SetPrec(v int) *Slider { t.Precision = v; return t }
 
 // SetValueColor sets the [Slider.ValueColor]:
 // The background color that is used for styling the selected value section of the slider.

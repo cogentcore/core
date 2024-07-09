@@ -114,7 +114,7 @@ func (fr *Frame) ScrollUpdateFromGeom(d math32.Dims) {
 	}
 	sb := fr.scrolls[d]
 	cv := fr.Geom.Scroll.Dim(d)
-	sb.SetValueAction(-cv)
+	sb.setValueAction(-cv)
 	fr.This.(Layouter).ApplyScenePos() // computes updated positions
 	fr.NeedsRender()
 }
@@ -155,7 +155,7 @@ func (fr *Frame) positionScroll(d math32.Dims) {
 	sb := fr.scrolls[d]
 	pos, ssz := fr.This.(Layouter).ScrollGeom(d)
 	maxSize, _, visPct := fr.This.(Layouter).ScrollValues(d)
-	if sb.Geom.Pos.Total == pos && sb.Geom.Size.Actual.Content == ssz && sb.VisiblePct == visPct {
+	if sb.Geom.Pos.Total == pos && sb.Geom.Size.Actual.Content == ssz && sb.visiblePercent == visPct {
 		return
 	}
 	if ssz.X <= 0 || ssz.Y <= 0 {
@@ -164,7 +164,7 @@ func (fr *Frame) positionScroll(d math32.Dims) {
 	}
 	sb.SetState(false, states.Invisible)
 	sb.Max = maxSize
-	sb.SetVisiblePct(visPct)
+	sb.setVisiblePercent(visPct)
 	// fmt.Println(ly, d, "vis pct:", asz/csz)
 	sb.SetValue(sb.Value) // keep in range
 	fr.This.(Layouter).SetScrollParams(d, sb)
@@ -201,8 +201,8 @@ func (fr *Frame) setScrollsOff() {
 func (fr *Frame) scrollActionDelta(d math32.Dims, delta float32) {
 	if fr.HasScroll[d] && fr.scrolls[d] != nil {
 		sb := fr.scrolls[d]
-		nval := sb.Value + sb.ScrollScale(delta)
-		sb.SetValueAction(nval)
+		nval := sb.Value + sb.scrollScale(delta)
+		sb.setValueAction(nval)
 		fr.NeedsRender() // only render needed -- scroll updates pos
 	}
 }
@@ -279,8 +279,8 @@ func (fr *Frame) autoScrollDim(d math32.Dims, pos float32) bool {
 		return false
 	}
 	sb := fr.scrolls[d]
-	smax := sb.EffectiveMax()
-	ssz := sb.ScrollThumbValue()
+	smax := sb.effectiveMax()
+	ssz := sb.scrollThumbValue()
 	dst := sb.Step * autoScrollRate
 
 	mind := max(0, (pos - sb.Value))
@@ -290,14 +290,14 @@ func (fr *Frame) autoScrollDim(d math32.Dims, pos float32) bool {
 		pct := mind / ssz
 		if pct < .1 && sb.Value > 0 {
 			dst = min(dst, sb.Value)
-			sb.SetValueAction(sb.Value - dst)
+			sb.setValueAction(sb.Value - dst)
 			return true
 		}
 	} else {
 		pct := maxd / ssz
 		if pct < .1 && sb.Value < smax {
 			dst = min(dst, (smax - sb.Value))
-			sb.SetValueAction(sb.Value + dst)
+			sb.setValueAction(sb.Value + dst)
 			return true
 		}
 	}
@@ -350,12 +350,12 @@ func (fr *Frame) scrollToBoxDim(d math32.Dims, tmini, tmaxi int) bool {
 		if trg < 0 {
 			trg = 0
 		}
-		sb.SetValueAction(trg)
+		sb.setValueAction(trg)
 		return true
 	} else {
-		if (tmax - tmin) < sb.ScrollThumbValue() { // only if whole thing fits
+		if (tmax - tmin) < sb.scrollThumbValue() { // only if whole thing fits
 			trg := sb.Value + float32(tmax-cmax) + h
-			sb.SetValueAction(trg)
+			sb.setValueAction(trg)
 			return true
 		}
 	}
@@ -393,8 +393,8 @@ func (fr *Frame) ScrollDimToStart(d math32.Dims, posi int) bool {
 		return false
 	}
 	sb := fr.scrolls[d]
-	trg := math32.Clamp(sb.Value+(pos-cmin), 0, sb.EffectiveMax())
-	sb.SetValueAction(trg)
+	trg := math32.Clamp(sb.Value+(pos-cmin), 0, sb.effectiveMax())
+	sb.setValueAction(trg)
 	return true
 }
 
@@ -411,8 +411,8 @@ func (fr *Frame) ScrollDimToEnd(d math32.Dims, posi int) bool {
 		return false
 	}
 	sb := fr.scrolls[d]
-	trg := math32.Clamp(sb.Value+(pos-cmax), 0, sb.EffectiveMax())
-	sb.SetValueAction(trg)
+	trg := math32.Clamp(sb.Value+(pos-cmax), 0, sb.effectiveMax())
+	sb.setValueAction(trg)
 	return true
 }
 
@@ -437,7 +437,7 @@ func (fr *Frame) ScrollDimToCenter(d math32.Dims, posi int) bool {
 		return false
 	}
 	sb := fr.scrolls[d]
-	trg := math32.Clamp(sb.Value+(pos-mid), 0, sb.EffectiveMax())
-	sb.SetValueAction(trg)
+	trg := math32.Clamp(sb.Value+(pos-mid), 0, sb.effectiveMax())
+	sb.setValueAction(trg)
 	return true
 }
