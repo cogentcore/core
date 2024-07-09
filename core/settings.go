@@ -18,6 +18,7 @@ import (
 	"cogentcore.org/core/base/iox/tomlx"
 	"cogentcore.org/core/base/option"
 	"cogentcore.org/core/base/reflectx"
+	"cogentcore.org/core/base/stringsx"
 	"cogentcore.org/core/colors"
 	"cogentcore.org/core/colors/gradient"
 	"cogentcore.org/core/colors/matcolor"
@@ -705,7 +706,7 @@ func (fp *FilePaths) Save(filename string) error { //types:add
 // AddPath inserts a path to the file paths (at the start), subject to max
 // length -- if path is already on the list then it is moved to the start.
 func (fp *FilePaths) AddPath(path string, max int) {
-	StringsInsertFirstUnique((*[]string)(fp), path, max)
+	stringsx.InsertFirstUnique((*[]string)(fp), path, max)
 }
 
 // savedPathsFilename is the name of the saved file paths file in

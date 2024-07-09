@@ -177,7 +177,6 @@ func init() {
 		"StageTypesN":               reflect.ValueOf(core.StageTypesN),
 		"StageTypesValues":          reflect.ValueOf(core.StageTypesValues),
 		"StandardTabs":              reflect.ValueOf(core.StandardTabs),
-		"StringsInsertFirstUnique":  reflect.ValueOf(core.StringsInsertFirstUnique),
 		"StructSliceIndexByValue":   reflect.ValueOf(core.StructSliceIndexByValue),
 		"StyleFromTags":             reflect.ValueOf(core.StyleFromTags),
 		"SwitchCheckbox":            reflect.ValueOf(core.SwitchCheckbox),

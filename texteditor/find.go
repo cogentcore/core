@@ -7,6 +7,7 @@ package texteditor
 import (
 	"unicode"
 
+	"cogentcore.org/core/base/stringsx"
 	"cogentcore.org/core/core"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/parse/lexer"
@@ -340,8 +341,8 @@ func (ed *Editor) QReplaceStart(find, repl string, lexItems bool) {
 	ed.QReplace.Matches = nil
 	ed.QReplace.Pos = -1
 
-	core.StringsInsertFirstUnique(&PrevQReplaceFinds, find, core.SystemSettings.SavedPathsMax)
-	core.StringsInsertFirstUnique(&PrevQReplaceRepls, repl, core.SystemSettings.SavedPathsMax)
+	stringsx.InsertFirstUnique(&PrevQReplaceFinds, find, core.SystemSettings.SavedPathsMax)
+	stringsx.InsertFirstUnique(&PrevQReplaceRepls, repl, core.SystemSettings.SavedPathsMax)
 
 	ed.QReplaceMatches()
 	ed.QReplace.Pos, _ = ed.MatchFromPos(ed.QReplace.Matches, ed.CursorPos)
