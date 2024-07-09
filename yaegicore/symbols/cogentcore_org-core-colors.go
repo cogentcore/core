@@ -188,8 +188,6 @@ func init() {
 		"Slategrey":            reflect.ValueOf(&colors.Slategrey).Elem(),
 		"Snow":                 reflect.ValueOf(&colors.Snow).Elem(),
 		"Spaced":               reflect.ValueOf(colors.Spaced),
-		"SpacedDark":           reflect.ValueOf(colors.SpacedDark),
-		"SpacedLight":          reflect.ValueOf(colors.SpacedLight),
 		"Springgreen":          reflect.ValueOf(&colors.Springgreen).Elem(),
 		"Steelblue":            reflect.ValueOf(&colors.Steelblue).Elem(),
 		"Sub":                  reflect.ValueOf(colors.Sub),
