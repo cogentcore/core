@@ -163,10 +163,8 @@ func (sw *Switches) Init() {
 					if ip == 0 {
 						if ps.Direction == styles.Row {
 							s.Border.Radius.Set(brf, units.Zero(), units.Zero(), brf)
-							s.Padding.SetHorizontal(units.Dp(ConstantSpacing(4)))
 						} else {
 							s.Border.Radius.Set(brf, brf, units.Zero(), units.Zero())
-							s.Padding.SetVertical(units.Dp(ConstantSpacing(4)))
 						}
 					} else if ip == sw.NumChildren()-1 {
 						if ps.Direction == styles.Row {
