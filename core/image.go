@@ -13,19 +13,18 @@ import (
 	"cogentcore.org/core/math32"
 	"cogentcore.org/core/styles"
 	"cogentcore.org/core/tree"
-	"github.com/anthonynsimon/bild/clone"
 	"golang.org/x/image/draw"
 )
 
-// Image is a widget that renders a static bitmap [image.RGBA].
+// Image is a widget that renders an [image.Image].
 // See [styles.Style.ObjectFit] to control the image rendering within
 // the allocated size. The default minimum requested size is the pixel
 // size in [units.Dp] units (1/160th of an inch).
 type Image struct {
 	WidgetBase
 
-	// Image is the bitmap image.
-	Image *image.RGBA `xml:"-" json:"-" set:"-"`
+	// Image is the [image.Image].
+	Image image.Image `xml:"-" json:"-" set:"-"`
 
 	// prevPixels is the cached last rendered image.
 	prevPixels image.Image `xml:"-" json:"-" set:"-"`
@@ -71,11 +70,9 @@ func (im *Image) OpenFS(fsys fs.FS, filename string) error {
 }
 
 // SetImage sets the image to the given image.
-// It copies from the given image into an internal image.
 func (im *Image) SetImage(img image.Image) *Image {
-	im.Image = clone.AsRGBA(img)
+	im.Image = img
 	im.prevPixels = nil
-	im.NeedsRender()
 	return im
 }
 
