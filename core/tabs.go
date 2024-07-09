@@ -44,13 +44,11 @@ type Tabs struct {
 	// tabs will not render a close button and can not be closed.
 	CloseIcon icons.Icon
 
-	// PrevEffectiveType is the previous effective type of the tabs
-	// as computed by [TabTypes.Effective].
-	PrevEffectiveType TabTypes `copier:"-" json:"-" xml:"-" set:"-"`
-
-	// Mu is a mutex protecting updates to tabs. Tabs can be driven
+	// mu is a mutex protecting updates to tabs. Tabs can be driven
 	// programmatically and via user input so need extra protection.
-	Mu sync.Mutex `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
+	mu sync.Mutex
+
+	tabs, frame *Frame
 }
 
 // TabTypes are the different styling types of tabs.
@@ -64,7 +62,7 @@ const (
 	// FunctionalTabs indicates to render functional tabs
 	// like those in Google Chrome. These tabs take up less
 	// space and are the only kind that can be closed.
-	// They can also be moved.
+	// They will also support being moved at some point.
 	FunctionalTabs
 
 	// NavigationAuto indicates to render the tabs as either
@@ -88,10 +86,10 @@ const (
 	NavigationDrawer
 )
 
-// EffectiveType returns the effective tab type in the context
+// effective returns the effective tab type in the context
 // of the given widget, handling [NavigationAuto] based on
 // [WidgetBase.SizeClass].
-func (tt TabTypes) Effective(w Widget) TabTypes {
+func (tt TabTypes) effective(w Widget) TabTypes {
 	if tt != NavigationAuto {
 		return tt
 	}
@@ -105,8 +103,8 @@ func (tt TabTypes) Effective(w Widget) TabTypes {
 	}
 }
 
-// IsColumn returns whether the tabs should be arranged in a column.
-func (tt TabTypes) IsColumn() bool {
+// isColumn returns whether the tabs should be arranged in a column.
+func (tt TabTypes) isColumn() bool {
 	return tt == NavigationRail || tt == NavigationDrawer
 }
 
@@ -117,7 +115,7 @@ func (ts *Tabs) Init() {
 	ts.Styler(func(s *styles.Style) {
 		s.Color = colors.Scheme.OnBackground
 		s.Grow.Set(1, 1)
-		if ts.Type.Effective(ts).IsColumn() {
+		if ts.Type.effective(ts).isColumn() {
 			s.Direction = styles.Row
 		} else {
 			s.Direction = styles.Column
@@ -126,11 +124,12 @@ func (ts *Tabs) Init() {
 
 	ts.Maker(func(p *tree.Plan) {
 		tree.AddAt(p, "tabs", func(w *Frame) {
+			ts.tabs = w
 			w.Styler(func(s *styles.Style) {
 				s.Overflow.Set(styles.OverflowHidden) // no scrollbars!
 				s.Gap.Set(units.Dp(4))
 
-				if ts.Type.Effective(ts).IsColumn() {
+				if ts.Type.effective(ts).isColumn() {
 					s.Direction = styles.Column
 					s.Grow.Set(0, 1)
 				} else {
@@ -152,6 +151,7 @@ func (ts *Tabs) Init() {
 			// })
 		})
 		tree.AddAt(p, "frame", func(w *Frame) {
+			ts.frame = w
 			w.LayoutStackTopOnly = true // key for allowing each tab to have its own size
 			w.Styler(func(s *styles.Style) {
 				s.Display = styles.Stacked
@@ -167,7 +167,7 @@ func (ts *Tabs) Init() {
 			})
 		})
 		// frame comes before tabs in bottom navigation bar
-		if ts.Type.Effective(ts) == NavigationBar {
+		if ts.Type.effective(ts) == NavigationBar {
 			p.Children[0], p.Children[1] = p.Children[1], p.Children[0]
 		}
 	})
@@ -175,7 +175,7 @@ func (ts *Tabs) Init() {
 
 // NumTabs returns the number of tabs.
 func (ts *Tabs) NumTabs() int {
-	fr := ts.FrameWidget()
+	fr := ts.getFrame()
 	if fr == nil {
 		return 0
 	}
@@ -187,9 +187,9 @@ func (ts *Tabs) CurrentTab() (Widget, int) {
 	if ts.NumTabs() == 0 {
 		return nil, -1
 	}
-	ts.Mu.Lock()
-	defer ts.Mu.Unlock()
-	fr := ts.FrameWidget()
+	ts.mu.Lock()
+	defer ts.mu.Unlock()
+	fr := ts.getFrame()
 	if fr.StackTop < 0 {
 		return nil, -1
 	}
@@ -201,42 +201,33 @@ func (ts *Tabs) CurrentTab() (Widget, int) {
 // It is the main end-user API for creating new tabs. An optional icon can also
 // be passed for the tab button.
 func (ts *Tabs) NewTab(label string, icon ...icons.Icon) *Frame {
-	fr := ts.FrameWidget()
+	fr := ts.getFrame()
 	idx := len(fr.Children)
-	frame := ts.InsertNewTab(label, idx, icon...)
+	frame := ts.insertNewTab(label, idx, icon...)
 	return frame
 }
 
-// InsertNewTab inserts a new tab with the given label at the given index position
+// insertNewTab inserts a new tab with the given label at the given index position
 // within the list of tabs and returns the resulting tab frame. An optional icon
 // can also be passed for the tab button.
-func (ts *Tabs) InsertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
-	tfr := ts.FrameWidget()
+func (ts *Tabs) insertNewTab(label string, idx int, icon ...icons.Icon) *Frame {
+	tfr := ts.getFrame()
 	frame := NewFrame()
 	tfr.InsertChild(frame, idx)
 	frame.SetName(label)
 	frame.Styler(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	ts.InsertTabOnlyAt(frame, label, idx, icon...)
+	ts.insertTabOnlyAt(label, idx, icon...)
 	ts.Update()
 	return frame
 }
 
-// AddTab adds an already existing frame as a new tab with the given tab label
-// and returns the index of that tab.
-func (ts *Tabs) AddTab(frame *Frame, label string) int {
-	fr := ts.FrameWidget()
-	idx := len(fr.Children)
-	ts.InsertTab(frame, label, idx)
-	return idx
-}
-
-// InsertTabOnlyAt inserts just the tab button at given index, after the panel has
+// insertTabOnlyAt inserts just the tab button at given index, after the panel has
 // already been added to the frame; assumed to be wrapped in update. Generally
 // for internal use only. An optional icon can also be passed for the tab button.
-func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, icon ...icons.Icon) {
-	tb := ts.Tabs()
+func (ts *Tabs) insertTabOnlyAt(label string, idx int, icon ...icons.Icon) {
+	tb := ts.getTabs()
 	tab := tree.New[Tab]()
 	tb.InsertChild(tab, idx)
 	tab.SetName(label)
@@ -247,7 +238,7 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, icon ...ico
 	tab.OnClick(func(e events.Event) {
 		ts.SelectTabByName(tab.Name)
 	})
-	fr := ts.FrameWidget()
+	fr := ts.getFrame()
 	if len(fr.Children) == 1 {
 		fr.StackTop = 0
 		tab.SetSelected(true)
@@ -256,76 +247,63 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, icon ...ico
 	}
 }
 
-// InsertTab inserts a frame into given index position within list of tabs.
-// An optional icon can also be passed for the tab button.
-func (ts *Tabs) InsertTab(frame *Frame, label string, idx int, icon ...icons.Icon) {
-	ts.Mu.Lock()
-	defer ts.Mu.Unlock()
+// tabAtIndex returns content frame and tab button at given index, nil if
+// index out of range (emits log message).
+func (ts *Tabs) tabAtIndex(idx int) (*Frame, *Tab) {
+	ts.mu.Lock()
+	defer ts.mu.Unlock()
 
-	fr := ts.FrameWidget()
-	fr.InsertChild(frame, idx)
-	ts.InsertTabOnlyAt(frame, label, idx, icon...)
-	ts.NeedsLayout()
-}
-
-// TabAtIndex returns content frame and tab button at given index, false if
-// index out of range (emits log message)
-func (ts *Tabs) TabAtIndex(idx int) (*Frame, *Tab, bool) {
-	ts.Mu.Lock()
-	defer ts.Mu.Unlock()
-
-	fr := ts.FrameWidget()
-	tb := ts.Tabs()
+	fr := ts.getFrame()
+	tb := ts.getTabs()
 	sz := len(fr.Children)
 	if idx < 0 || idx >= sz {
 		slog.Error("Tabs: index out of range for number of tabs", "index", idx, "numTabs", sz)
-		return nil, nil, false
+		return nil, nil
 	}
 	tab := tb.Child(idx).(*Tab)
 	frame := fr.Child(idx).(*Frame)
-	return frame, tab, true
+	return frame, tab
 }
 
-// SelectTabIndex selects tab at given index, returning it.
-// Returns false if index is invalid.  This is the final
-// tab selection path.
-func (ts *Tabs) SelectTabIndex(idx int) (*Frame, bool) {
-	frame, tab, ok := ts.TabAtIndex(idx)
-	if !ok {
-		return nil, false
+// SelectTabIndex selects the tab at the given index, returning it or nil.
+// This is the final tab selection path.
+func (ts *Tabs) SelectTabIndex(idx int) *Frame {
+	frame, tab := ts.tabAtIndex(idx)
+	if frame == nil {
+		return nil
 	}
-	fr := ts.FrameWidget()
+	fr := ts.getFrame()
 	if fr.StackTop == idx {
-		return frame, true
+		return frame
 	}
-	ts.Mu.Lock()
-	ts.UnselectOtherTabs(idx)
+	ts.mu.Lock()
+	ts.unselectOtherTabs(idx)
 	tab.SetSelected(true)
 	fr.StackTop = idx
 	fr.Update()
-	ts.Mu.Unlock()
-	return frame, true
+	ts.mu.Unlock()
+	return frame
 }
 
-// TabByName returns tab Frame with given widget name
-// (nil if not found)
-// The widget name is the original full tab label, prior to any eliding.
+// TabByName returns the tab [Frame] with the given widget name
+// (nil if not found). The widget name is the original full tab label,
+// prior to any eliding.
 func (ts *Tabs) TabByName(name string) *Frame {
-	ts.Mu.Lock()
-	defer ts.Mu.Unlock()
-	fr := ts.FrameWidget()
+	ts.mu.Lock()
+	defer ts.mu.Unlock()
+	fr := ts.getFrame()
 	frame, _ := fr.ChildByName(name).(*Frame)
 	return frame
 }
 
-// TabIndexByName returns the tab index for the given tab widget name
+// tabIndexByName returns the tab index for the given tab widget name
 // and -1 if it can not be found.
 // The widget name is the original full tab label, prior to any eliding.
-func (ts *Tabs) TabIndexByName(name string) int {
-	ts.Mu.Lock()
-	defer ts.Mu.Unlock()
+func (ts *Tabs) tabIndexByName(name string) int {
+	ts.mu.Lock()
+	defer ts.mu.Unlock()
 
-	tb := ts.Tabs()
+	tb := ts.getTabs()
 	tab := tb.ChildByName(name)
 	if tab == nil {
 		return -1
@@ -333,19 +311,19 @@ func (ts *Tabs) TabIndexByName(name string) int {
 	return tab.AsTree().IndexInParent()
 }
 
-// SelectTabByName selects tab by widget name, returning it.
+// SelectTabByName selects the tab by widget name, returning it.
 // The widget name is the original full tab label, prior to any eliding.
 func (ts *Tabs) SelectTabByName(name string) *Frame {
-	idx := ts.TabIndexByName(name)
+	idx := ts.tabIndexByName(name)
 	if idx < 0 {
 		return nil
 	}
 	ts.SelectTabIndex(idx)
-	fr := ts.FrameWidget()
+	fr := ts.getFrame()
 	return fr.Child(idx).(*Frame)
 }
 
-// RecycleTab returns a tab with given name, first by looking for an existing one,
+// RecycleTab returns a tab with the given name, first by looking for an existing one,
 // and if not found, making a new one. It returns the frame for the tab.
 func (ts *Tabs) RecycleTab(name string) *Frame {
 	frame := ts.TabByName(name)
@@ -357,7 +335,7 @@ func (ts *Tabs) RecycleTab(name string) *Frame {
 }
 
 // RecycleTabWidget returns a tab with the given widget type in the tab frame,
-// first by looking for an existing one, with given name, and if not found,
+// first by looking for an existing one with the given name, and if not found,
 // making and configuring a new one. It returns the resulting widget.
 func RecycleTabWidget[T tree.NodeValue](ts *Tabs, name string) *T {
 	fr := ts.RecycleTab(name)
@@ -369,17 +347,17 @@ func RecycleTabWidget[T tree.NodeValue](ts *Tabs, name string) *T {
 	return w
 }
 
-// DeleteTabIndex deletes tab at given index, returning whether it was successful.
-func (ts *Tabs) DeleteTabIndex(idx int) bool {
-	_, _, ok := ts.TabAtIndex(idx)
-	if !ok {
+// deleteTabIndex deletes the tab at the given index, returning whether it was successful.
+func (ts *Tabs) deleteTabIndex(idx int) bool {
+	frame, _ := ts.tabAtIndex(idx)
+	if frame == nil {
 		return false
 	}
 
-	ts.Mu.Lock()
-	fr := ts.FrameWidget()
+	ts.mu.Lock()
+	fr := ts.getFrame()
 	sz := len(fr.Children)
-	tb := ts.Tabs()
+	tb := ts.getTabs()
 	nidx := -1
 	if fr.StackTop == idx {
 		if idx > 0 {
@@ -395,7 +373,7 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 	}
 	fr.DeleteChildAt(idx)
 	tb.DeleteChildAt(idx)
-	ts.Mu.Unlock()
+	ts.mu.Unlock()
 
 	if nidx >= 0 {
 		ts.SelectTabIndex(nidx)
@@ -404,28 +382,28 @@ func (ts *Tabs) DeleteTabIndex(idx int) bool {
 	return true
 }
 
-// Tabs returns the layout containing the tabs (the first element within us).
-// It configures the Tabs if necessary.
-func (ts *Tabs) Tabs() *Frame {
-	if ts.ChildByName("tabs", 0) == nil {
+// getTabs returns the [Frame] containing the tabs (the first element within us).
+// It configures the [Tabs] if necessary.
+func (ts *Tabs) getTabs() *Frame {
+	if ts.tabs == nil {
 		ts.UpdateWidget()
 	}
-	return ts.ChildByName("tabs", 0).(*Frame)
+	return ts.tabs
 }
 
-// Frame returns the stacked frame layout (the second element within us).
+// Frame returns the stacked [Frame] (the second element within us).
 // It configures the Tabs if necessary.
-func (ts *Tabs) FrameWidget() *Frame {
-	if ts.ChildByName("frame", 1) == nil {
+func (ts *Tabs) getFrame() *Frame {
+	if ts.frame == nil {
 		ts.UpdateWidget()
 	}
-	return ts.ChildByName("frame", 1).(*Frame)
+	return ts.frame
 }
 
-// UnselectOtherTabs turns off all the tabs except given one
-func (ts *Tabs) UnselectOtherTabs(idx int) {
+// unselectOtherTabs turns off all the tabs except given one
+func (ts *Tabs) unselectOtherTabs(idx int) {
 	sz := ts.NumTabs()
-	tbs := ts.Tabs()
+	tbs := ts.getTabs()
 	for i := 0; i < sz; i++ {
 		if i == idx {
 			continue
@@ -480,7 +458,7 @@ func (tb *Tab) Init() {
 			s.Cursor = cursors.Pointer
 		}
 
-		if tb.Type.Effective(tb).IsColumn() {
+		if tb.Type.effective(tb).isColumn() {
 			s.Grow.X = 1
 			s.Border.Radius = styles.BorderRadiusFull
 			s.Padding.Set(units.Dp(16))
@@ -497,7 +475,7 @@ func (tb *Tab) Init() {
 			s.Color = colors.Scheme.Select.OnContainer
 		} else {
 			s.Color = colors.Scheme.OnSurfaceVariant
-			if tb.Type.Effective(tb) == FunctionalTabs {
+			if tb.Type.effective(tb) == FunctionalTabs {
 				s.Background = colors.Scheme.SurfaceContainer
 			}
 		}
@@ -530,7 +508,7 @@ func (tb *Tab) Init() {
 					s.SetTextWrap(false)
 				})
 				w.Updater(func() {
-					if tb.Type.Effective(tb) == FunctionalTabs {
+					if tb.Type.effective(tb) == FunctionalTabs {
 						w.SetType(TextBodyMedium)
 					} else {
 						w.SetType(TextLabelLarge)
@@ -539,7 +517,7 @@ func (tb *Tab) Init() {
 				})
 			})
 		}
-		if tb.Type.Effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
+		if tb.Type.effective(tb) == FunctionalTabs && tb.CloseIcon.IsSet() {
 			tree.AddAt(p, "close-space", func(w *Space) {})
 			tree.AddAt(p, "close", func(w *Button) {
 				w.SetType(ButtonAction)
@@ -549,12 +527,12 @@ func (tb *Tab) Init() {
 				})
 				w.OnClick(func(e events.Event) {
 					ts := tb.Tabs()
-					idx := ts.TabIndexByName(tb.Name)
+					idx := ts.tabIndexByName(tb.Name)
 					// if OnlyCloseActiveTab is on, only process delete when already selected
 					if SystemSettings.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
 						ts.SelectTabIndex(idx)
 					} else {
-						ts.DeleteTabIndex(idx)
+						ts.deleteTabIndex(idx)
 					}
 				})
 				w.Updater(func() {
