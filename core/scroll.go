@@ -17,11 +17,11 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// AutoScrollRate determines the rate of auto-scrolling of layouts
-var AutoScrollRate = float32(1)
+// autoScrollRate determines the rate of auto-scrolling of layouts
+var autoScrollRate = float32(1)
 
-// HasAnyScroll returns true if the frame has any scrollbars.
-func (fr *Frame) HasAnyScroll() bool {
+// hasAnyScroll returns true if the frame has any scrollbars.
+func (fr *Frame) hasAnyScroll() bool {
 	return fr.HasScroll[math32.X] || fr.HasScroll[math32.Y]
 }
 
@@ -52,13 +52,13 @@ func (fr *Frame) ScrollGeom(d math32.Dims) (pos, sz math32.Vector2) {
 func (fr *Frame) ConfigScrolls() {
 	for d := math32.X; d <= math32.Y; d++ {
 		if fr.HasScroll[d] {
-			fr.ConfigScroll(d)
+			fr.configScroll(d)
 		}
 	}
 }
 
-// ConfigScroll configures scroll for given dimension
-func (fr *Frame) ConfigScroll(d math32.Dims) {
+// configScroll configures scroll for given dimension
+func (fr *Frame) configScroll(d math32.Dims) {
 	if fr.scrolls[d] != nil {
 		return
 	}
@@ -144,14 +144,14 @@ func (fr *Frame) SetScrollParams(d math32.Dims, sb *Slider) {
 func (fr *Frame) PositionScrolls() {
 	for d := math32.X; d <= math32.Y; d++ {
 		if fr.HasScroll[d] && fr.scrolls[d] != nil {
-			fr.PositionScroll(d)
+			fr.positionScroll(d)
 		} else {
 			fr.Geom.Scroll.SetDim(d, 0)
 		}
 	}
 }
 
-func (fr *Frame) PositionScroll(d math32.Dims) {
+func (fr *Frame) positionScroll(d math32.Dims) {
 	sb := fr.scrolls[d]
 	pos, ssz := fr.This.(Layouter).ScrollGeom(d)
 	maxSize, _, visPct := fr.This.(Layouter).ScrollValues(d)
@@ -181,7 +181,7 @@ func (fr *Frame) PositionScroll(d math32.Dims) {
 	sb.setBBoxesFromAllocs()
 }
 
-// RenderScrolls draws the scrollbars
+// RenderScrolls renders the scrollbars.
 func (fr *Frame) RenderScrolls() {
 	for d := math32.X; d <= math32.Y; d++ {
 		if fr.HasScroll[d] && fr.scrolls[d] != nil {
@@ -190,16 +190,15 @@ func (fr *Frame) RenderScrolls() {
 	}
 }
 
-// SetScrollsOff turns off the scrollbars
-func (fr *Frame) SetScrollsOff() {
+// setScrollsOff turns off the scrollbars.
+func (fr *Frame) setScrollsOff() {
 	for d := math32.X; d <= math32.Y; d++ {
 		fr.HasScroll[d] = false
 	}
 }
 
-// ScrollActionDelta moves the scrollbar in given dimension by given delta
-// and emits a ScrollSig signal.
-func (fr *Frame) ScrollActionDelta(d math32.Dims, delta float32) {
+// scrollActionDelta moves the scrollbar in given dimension by given delta.
+func (fr *Frame) scrollActionDelta(d math32.Dims, delta float32) {
 	if fr.HasScroll[d] && fr.scrolls[d] != nil {
 		sb := fr.scrolls[d]
 		nval := sb.Value + sb.ScrollScale(delta)
@@ -208,31 +207,11 @@ func (fr *Frame) ScrollActionDelta(d math32.Dims, delta float32) {
 	}
 }
 
-// ScrollActionPos moves the scrollbar in given dimension to given
-// position and emits a ScrollSig signal.
-func (fr *Frame) ScrollActionPos(d math32.Dims, pos float32) {
-	if fr.HasScroll[d] && fr.scrolls[d] != nil {
-		sb := fr.scrolls[d]
-		sb.SetValueAction(pos)
-		fr.NeedsRender()
-	}
-}
-
-// ScrollToPos moves the scrollbar in given dimension to given
-// position and DOES NOT emit a ScrollSig signal.
-func (fr *Frame) ScrollToPos(d math32.Dims, pos float32) {
-	if fr.HasScroll[d] && fr.scrolls[d] != nil {
-		sb := fr.scrolls[d]
-		sb.SetValueAction(pos)
-		fr.NeedsRender()
-	}
-}
-
-// ScrollDelta processes a scroll event.  If only one dimension is processed,
+// scrollDelta processes a scroll event.  If only one dimension is processed,
 // and there is a non-zero in other, then the consumed dimension is reset to 0
 // and the event is left unprocessed, so a higher level can consume the
 // remainder.
-func (fr *Frame) ScrollDelta(e events.Event) {
+func (fr *Frame) scrollDelta(e events.Event) {
 	se := e.(*events.MouseScroll)
 	fdel := se.Delta
 
@@ -241,21 +220,21 @@ func (fr *Frame) ScrollDelta(e events.Event) {
 		if !fr.HasScroll[math32.X] { // if we have shift, we can only horizontal scroll
 			return
 		}
-		fr.ScrollActionDelta(math32.X, fdel.Y)
+		fr.scrollActionDelta(math32.X, fdel.Y)
 		return
 	}
 
 	if fr.HasScroll[math32.Y] && fr.HasScroll[math32.X] {
-		fr.ScrollActionDelta(math32.Y, fdel.Y)
-		fr.ScrollActionDelta(math32.X, fdel.X)
+		fr.scrollActionDelta(math32.Y, fdel.Y)
+		fr.scrollActionDelta(math32.X, fdel.X)
 	} else if fr.HasScroll[math32.Y] {
-		fr.ScrollActionDelta(math32.Y, fdel.Y)
+		fr.scrollActionDelta(math32.Y, fdel.Y)
 		if se.Delta.X != 0 {
 			se.Delta.Y = 0
 		}
 	} else if fr.HasScroll[math32.X] {
 		if se.Delta.X != 0 {
-			fr.ScrollActionDelta(math32.X, fdel.X)
+			fr.scrollActionDelta(math32.X, fdel.X)
 			if se.Delta.Y != 0 {
 				se.Delta.X = 0
 			}
@@ -263,46 +242,46 @@ func (fr *Frame) ScrollDelta(e events.Event) {
 	}
 }
 
-// ParentScrollFrame returns the first parent frame that has active scrollbars.
-func (wb *WidgetBase) ParentScrollFrame() *Frame {
+// parentScrollFrame returns the first parent frame that has active scrollbars.
+func (wb *WidgetBase) parentScrollFrame() *Frame {
 	ly := tree.ParentByType[Layouter](wb)
 	if ly == nil {
 		return nil
 	}
 	fr := ly.AsFrame()
-	if fr.HasAnyScroll() {
+	if fr.hasAnyScroll() {
 		return fr
 	}
-	return fr.ParentScrollFrame()
+	return fr.parentScrollFrame()
 }
 
 // ScrollToThis tells this widget's parent frame to scroll to keep
 // this widget in view. It returns whether any scrolling was done.
 func (wb *WidgetBase) ScrollToThis() bool {
-	ly := wb.ParentScrollFrame()
-	if ly == nil {
+	fr := wb.parentScrollFrame()
+	if fr == nil {
 		return false
 	}
-	return ly.ScrollToWidget(wb.This.(Widget))
+	return fr.scrollToWidget(wb.This.(Widget))
 }
 
-// ScrollToWidget scrolls the layout to ensure that the given widget is in view.
+// scrollToWidget scrolls the layout to ensure that the given widget is in view.
 // It returns whether scrolling was needed.
-func (fr *Frame) ScrollToWidget(w Widget) bool {
+func (fr *Frame) scrollToWidget(w Widget) bool {
 	// note: critical to NOT use BBox b/c it is zero for invisible items!
 	return fr.ScrollToBox(w.AsWidget().Geom.totalRect())
 }
 
-// AutoScrollDim auto-scrolls along one dimension, based on the current
+// autoScrollDim auto-scrolls along one dimension, based on the current
 // position value, which is in the current scroll value range.
-func (fr *Frame) AutoScrollDim(d math32.Dims, pos float32) bool {
+func (fr *Frame) autoScrollDim(d math32.Dims, pos float32) bool {
 	if !fr.HasScroll[d] || fr.scrolls[d] == nil {
 		return false
 	}
 	sb := fr.scrolls[d]
 	smax := sb.EffectiveMax()
 	ssz := sb.ScrollThumbValue()
-	dst := sb.Step * AutoScrollRate
+	dst := sb.Step * autoScrollRate
 
 	mind := max(0, (pos - sb.Value))
 	maxd := max(0, (sb.Value+ssz)-pos)
@@ -325,34 +304,34 @@ func (fr *Frame) AutoScrollDim(d math32.Dims, pos float32) bool {
 	return false
 }
 
-var LayoutLastAutoScroll time.Time
+var lastAutoScroll time.Time
 
 // AutoScroll scrolls the layout based on given position in scroll
 // coordinates (i.e., already subtracing the BBox Min for a mouse event).
 func (fr *Frame) AutoScroll(pos math32.Vector2) bool {
 	now := time.Now()
-	lag := now.Sub(LayoutLastAutoScroll)
+	lag := now.Sub(lastAutoScroll)
 	if lag < SystemSettings.LayoutAutoScrollDelay {
 		return false
 	}
 	did := false
 	if fr.HasScroll[math32.Y] && fr.HasScroll[math32.X] {
-		did = fr.AutoScrollDim(math32.Y, pos.Y)
-		did = did || fr.AutoScrollDim(math32.X, pos.X)
+		did = fr.autoScrollDim(math32.Y, pos.Y)
+		did = did || fr.autoScrollDim(math32.X, pos.X)
 	} else if fr.HasScroll[math32.Y] {
-		did = fr.AutoScrollDim(math32.Y, pos.Y)
+		did = fr.autoScrollDim(math32.Y, pos.Y)
 	} else if fr.HasScroll[math32.X] {
-		did = fr.AutoScrollDim(math32.X, pos.X)
+		did = fr.autoScrollDim(math32.X, pos.X)
 	}
 	if did {
-		LayoutLastAutoScroll = time.Now()
+		lastAutoScroll = time.Now()
 	}
 	return did
 }
 
-// ScrollToBoxDim scrolls to ensure that given target [min..max] range
+// scrollToBoxDim scrolls to ensure that given target [min..max] range
 // along one dimension is in view. Returns true if scrolling was needed
-func (fr *Frame) ScrollToBoxDim(d math32.Dims, tmini, tmaxi int) bool {
+func (fr *Frame) scrollToBoxDim(d math32.Dims, tmini, tmaxi int) bool {
 	if !fr.HasScroll[d] || fr.scrolls[d] == nil {
 		return false
 	}
@@ -388,12 +367,12 @@ func (fr *Frame) ScrollToBoxDim(d math32.Dims, tmini, tmaxi int) bool {
 func (fr *Frame) ScrollToBox(box image.Rectangle) bool {
 	did := false
 	if fr.HasScroll[math32.Y] && fr.HasScroll[math32.X] {
-		did = fr.ScrollToBoxDim(math32.Y, box.Min.Y, box.Max.Y)
-		did = did || fr.ScrollToBoxDim(math32.X, box.Min.X, box.Max.X)
+		did = fr.scrollToBoxDim(math32.Y, box.Min.Y, box.Max.Y)
+		did = did || fr.scrollToBoxDim(math32.X, box.Min.X, box.Max.X)
 	} else if fr.HasScroll[math32.Y] {
-		did = fr.ScrollToBoxDim(math32.Y, box.Min.Y, box.Max.Y)
+		did = fr.scrollToBoxDim(math32.Y, box.Min.Y, box.Max.Y)
 	} else if fr.HasScroll[math32.X] {
-		did = fr.ScrollToBoxDim(math32.X, box.Min.X, box.Max.X)
+		did = fr.scrollToBoxDim(math32.X, box.Min.X, box.Max.X)
 	}
 	if did {
 		fr.NeedsRender()

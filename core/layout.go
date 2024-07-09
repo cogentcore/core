@@ -1145,7 +1145,7 @@ func (fr *Frame) ManageOverflow(iter int, updateSize bool) bool {
 	change := false
 	if iter == 0 {
 		fr.layout.ScrollSize.SetZero()
-		fr.SetScrollsOff()
+		fr.setScrollsOff()
 		for d := math32.X; d <= math32.Y; d++ {
 			if fr.Styles.Overflow.Dim(d) == styles.OverflowScroll {
 				if !fr.HasScroll[d] {
