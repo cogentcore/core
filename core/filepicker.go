@@ -112,16 +112,16 @@ func (fp *FilePicker) Init() {
 		if fp.directory == "" {
 			fp.SetFilename("") // default to current directory
 		}
-		if len(RecentPaths) == 0 {
-			OpenRecentPaths()
+		if len(recentPaths) == 0 {
+			openRecentPaths()
 		}
 		// if we update the title before the scene is shown, it may incorrectly
 		// override the title of the window of the context widget
 		if fp.Scene.hasShown {
 			fp.Scene.Body.SetTitle("Files: " + fp.directory)
 		}
-		RecentPaths.AddPath(fp.directory, SystemSettings.SavedPathsMax)
-		SaveRecentPaths()
+		recentPaths.AddPath(fp.directory, SystemSettings.SavedPathsMax)
+		saveRecentPaths()
 		fp.readFiles()
 
 		if fp.prevPath != fp.directory {
@@ -251,7 +251,7 @@ func (fp *FilePicker) MakeToolbar(p *tree.Plan) {
 // addChooserPaths adds paths to the app chooser
 func (fp *FilePicker) addChooserPaths(ch *Chooser) {
 	ch.ItemsFuncs = slices.Insert(ch.ItemsFuncs, 0, func() {
-		for _, sp := range RecentPaths {
+		for _, sp := range recentPaths {
 			ch.Items = append(ch.Items, ChooserItem{
 				Value: sp,
 				Icon:  icons.Folder,
@@ -266,8 +266,8 @@ func (fp *FilePicker) addChooserPaths(ch *Chooser) {
 			Icon:            icons.Refresh,
 			SeparatorBefore: true,
 			Func: func() {
-				RecentPaths = make(FilePaths, 1, SystemSettings.SavedPathsMax)
-				RecentPaths[0] = fp.directory
+				recentPaths = make(FilePaths, 1, SystemSettings.SavedPathsMax)
+				recentPaths[0] = fp.directory
 				fp.Update()
 			},
 		})
@@ -542,11 +542,11 @@ func (fp *FilePicker) addPathToFavorites() { //types:add
 	if fnm == "" {
 		fnm = dp
 	}
-	if _, found := SystemSettings.FavPaths.FindPath(dp); found {
+	if _, found := SystemSettings.FavPaths.findPath(dp); found {
 		MessageSnackbar(fp, "Error: path is already on the favorites list")
 		return
 	}
-	fi := FavPathItem{"folder", fnm, dp}
+	fi := favoritePathItem{"folder", fnm, dp}
 	SystemSettings.FavPaths = append(SystemSettings.FavPaths, fi)
 	ErrorSnackbar(fp, SaveSettings(SystemSettings), "Error saving settings")
 	// fv.FileSig.Emit(fv.This, int64(FilePickerFavAdded), fi)
@@ -689,11 +689,11 @@ func (fp *FilePicker) fileCompleteEdit(data any, text string, cursorPos int, c c
 // edit the recent paths list.
 func (fp *FilePicker) editRecentPaths() {
 	d := NewBody().AddTitle("Recent file paths").AddText("You can delete paths you no longer use")
-	NewList(d).SetSlice(&RecentPaths)
+	NewList(d).SetSlice(&recentPaths)
 	d.AddBottomBar(func(parent Widget) {
 		d.AddCancel(parent)
 		d.AddOK(parent).OnClick(func(e events.Event) {
-			SaveRecentPaths()
+			saveRecentPaths()
 			fp.Update()
 		})
 	})
