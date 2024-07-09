@@ -18,8 +18,8 @@ import (
 func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *Stage {
 	ctx = nonNilContext(ctx)
 	st := &Stage{}
-	st.SetType(typ)
-	st.SetScene(sc)
+	st.setType(typ)
+	st.setScene(sc)
 	st.Context = ctx
 	st.Pos = ctx.ContextMenuPos(nil)
 	sc.Stage = st
@@ -72,7 +72,7 @@ func (st *Stage) runPopup() *Stage {
 	}
 
 	ms.popups.Push(st)
-	st.SetPopups(ms) // sets all pointers
+	st.setPopups(ms) // sets all pointers
 
 	maxSz := msc.sceneGeom.Size
 

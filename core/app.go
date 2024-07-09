@@ -108,7 +108,7 @@ func makeStandardAppBar(p *tree.Plan) {
 				if w.Scene.Stage.CloseOnBack {
 					w.Scene.Close()
 				} else {
-					w.Scene.Stage.Mains.Stack.ValueByIndex(slen - 2).Raise()
+					w.Scene.Stage.Mains.Stack.ValueByIndex(slen - 2).raise()
 				}
 				return
 			}
@@ -161,7 +161,7 @@ func makeStandardAppBar(p *tree.Plan) {
 						Text:    st.Title,
 						Icon:    icons.Toolbar,
 						Tooltip: "Show " + st.Title,
-						Func:    st.Raise,
+						Func:    st.raise,
 					})
 				}
 			}

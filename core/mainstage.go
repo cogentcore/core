@@ -24,8 +24,8 @@ import (
 // Use an appropriate Run call at the end to start the Stage running.
 func newMainStage(typ StageTypes, sc *Scene) *Stage {
 	st := &Stage{}
-	st.SetType(typ)
-	st.SetScene(sc)
+	st.setType(typ)
+	st.setScene(sc)
 	st.popups = &Stages{}
 	st.popups.Main = st
 	st.Main = st
@@ -56,7 +56,8 @@ func (bd *Body) RunMainWindow() {
 		})
 		return
 	}
-	bd.RunWindow().Wait()
+	bd.RunWindow()
+	Wait()
 }
 
 // RunWindow returns and runs a new [WindowStage] that is placed in
@@ -168,9 +169,9 @@ func (st *Stage) runWindow() *Stage {
 	if currentRenderWindow == nil {
 		// If we have no current render window, we need to be in a new window,
 		// and we need a *temporary* Mains to get initial pref size
-		st.SetMains(st.firstWindowStages())
+		st.setMains(st.firstWindowStages())
 	} else {
-		st.SetMains(&currentRenderWindow.mains)
+		st.setMains(&currentRenderWindow.mains)
 	}
 	st.configMainStage()
 
@@ -232,14 +233,14 @@ func (st *Stage) runWindow() *Stage {
 		sc.sceneGeom.Size = sz
 		sc.fitInWindow(msc.sceneGeom) // does resize
 		ms.Push(st)
-		st.SetMains(ms)
+		st.setMains(ms)
 	} else {
 		ms := &currentRenderWindow.mains
 		msc := ms.Top().Scene
 		sc.sceneGeom.Size = sz
 		sc.fitInWindow(msc.sceneGeom) // does resize
 		ms.Push(st)
-		st.SetMains(ms)
+		st.setMains(ms)
 	}
 	return st
 }
@@ -281,7 +282,7 @@ func (st *Stage) runDialog() *Stage {
 	st.addDialogParts()
 	sc.sceneGeom.Pos = st.Pos
 
-	st.SetMains(ms) // temporary for prefs
+	st.setMains(ms) // temporary for prefs
 
 	sz := ms.RenderContext.geom.Size
 	if !st.FullWindow || st.NewWindow {
@@ -346,7 +347,7 @@ func (st *Stage) newRenderWindow() *renderWindow {
 	// note: win is not yet created by the OS and we don't yet know its actual size
 	// or dpi.
 	win.mains.Push(st)
-	st.SetMains(&win.mains)
+	st.setMains(&win.mains)
 	return win
 }
 

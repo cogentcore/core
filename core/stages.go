@@ -140,7 +140,7 @@ func (sm *Stages) DeleteStage(st *Stage) bool {
 		if st == s {
 			sm.Modified = true
 			sm.Stack.DeleteIndex(i, i+1)
-			st.Delete()
+			st.delete()
 			return true
 		}
 	}
@@ -165,13 +165,13 @@ func (sm *Stages) DeleteStageAndBelow(st *Stage) bool {
 			if st == s {
 				sm.Modified = true
 				sm.Stack.DeleteIndex(i, i+1)
-				st.Delete()
+				st.delete()
 				got = true
 			}
 		} else {
 			if s.Type == styp {
 				sm.Stack.DeleteIndex(i, i+1)
-				st.Delete()
+				st.delete()
 			}
 		}
 	}
@@ -220,7 +220,7 @@ func (sm *Stages) PopType(typ StageTypes) *Stage {
 func (sm *Stages) PopDelete() {
 	st := sm.Pop()
 	if st != nil {
-		st.Delete()
+		st.delete()
 	}
 }
 
@@ -229,7 +229,7 @@ func (sm *Stages) PopDelete() {
 func (sm *Stages) PopDeleteType(typ StageTypes) {
 	st := sm.PopType(typ)
 	if st != nil {
-		st.Delete()
+		st.delete()
 	}
 }
 
@@ -247,7 +247,7 @@ func (sm *Stages) DeleteAll() {
 	sm.Modified = true
 	for i := sz - 1; i >= 0; i-- {
 		st := sm.Stack.ValueByIndex(i)
-		st.Delete()
+		st.delete()
 		sm.Stack.DeleteIndex(i, i+1)
 	}
 }
@@ -285,7 +285,7 @@ func (sm *Stages) UpdateAll() (stageMods, sceneMods bool) {
 	}
 	for _, kv := range sm.Stack.Order {
 		st := kv.Value
-		stMod, scMod := st.DoUpdate()
+		stMod, scMod := st.doUpdate()
 		stageMods = stageMods || stMod
 		sceneMods = sceneMods || scMod
 	}

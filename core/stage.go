@@ -168,12 +168,9 @@ func (st *Stage) String() string {
 	return str
 }
 
-// Note: Set* methods are designed to be called in sequence to efficiently set
-// desired properties.
-
-// SetNameFromString sets the name of this Stage based on existing
+// setNameFromScene sets the name of this Stage based on existing
 // Scene and Type settings.
-func (st *Stage) SetNameFromScene() *Stage {
+func (st *Stage) setNameFromScene() *Stage {
 	if st.Scene == nil {
 		return nil
 	}
@@ -185,26 +182,26 @@ func (st *Stage) SetNameFromScene() *Stage {
 	return st
 }
 
-func (st *Stage) SetScene(sc *Scene) *Stage {
+func (st *Stage) setScene(sc *Scene) *Stage {
 	st.Scene = sc
 	if sc != nil {
 		sc.Stage = st
-		st.SetNameFromScene()
+		st.setNameFromScene()
 	}
 	return st
 }
 
-// SetMains sets the [Stage.Mains] to the given stack of main stages,
+// setMains sets the [Stage.Mains] to the given stack of main stages,
 // and also sets the RenderContext from that.
-func (st *Stage) SetMains(sm *Stages) *Stage {
+func (st *Stage) setMains(sm *Stages) *Stage {
 	st.Mains = sm
 	st.renderContext = sm.RenderContext
 	return st
 }
 
-// SetPopups sets the [Stage.Popups] and [Stage.Mains] from the given main
+// setPopups sets the [Stage.Popups] and [Stage.Mains] from the given main
 // stage to which this popup stage belongs.
-func (st *Stage) SetPopups(mainSt *Stage) *Stage {
+func (st *Stage) setPopups(mainSt *Stage) *Stage {
 	st.Main = mainSt
 	st.Mains = mainSt.Mains
 	st.popups = mainSt.popups
@@ -212,8 +209,8 @@ func (st *Stage) SetPopups(mainSt *Stage) *Stage {
 	return st
 }
 
-// SetType sets the type and also sets default parameters based on that type
-func (st *Stage) SetType(typ StageTypes) *Stage {
+// setType sets the type and also sets default parameters based on that type
+func (st *Stage) setType(typ StageTypes) *Stage {
 	st.Type = typ
 	switch st.Type {
 	case WindowStage:
@@ -247,7 +244,7 @@ func (st *Stage) SetType(typ StageTypes) *Stage {
 }
 
 // SetModal sets modal flag for blocking other input (for dialogs).
-// Also updates Scrim accordingly if not modal.
+// Also updates [Stage.Scrim] accordingly if not modal.
 func (st *Stage) SetModal(modal bool) *Stage {
 	st.Modal = modal
 	if !st.Modal {
@@ -259,7 +256,7 @@ func (st *Stage) SetModal(modal bool) *Stage {
 // Run runs the stage using the default run behavior based on the type of stage.
 func (st *Stage) Run() *Stage {
 	if system.OnSystemWindowCreated == nil {
-		return st.RunImpl()
+		return st.run()
 	}
 	// need to prevent premature quitting by ensuring
 	// that WinWait is not done until we run the Stage
@@ -267,7 +264,7 @@ func (st *Stage) Run() *Stage {
 	go func() {
 		<-system.OnSystemWindowCreated
 		system.OnSystemWindowCreated = nil // no longer applicable
-		st.RunImpl()
+		st.run()
 		// now that we have run the Stage, WinWait is accurate and
 		// we no longer need to prevent it from being done
 		windowWait.Done()
@@ -275,9 +272,9 @@ func (st *Stage) Run() *Stage {
 	return st
 }
 
-// RunImpl is the implementation of [Stage.Run]; it should not typically be called by end-users.
-func (st *Stage) RunImpl() *Stage {
-	// defer func() { system.HandleRecover(recover()) }()
+// run is the implementation of [Stage.Run].
+func (st *Stage) run() *Stage {
+	defer func() { system.HandleRecover(recover()) }()
 	switch st.Type {
 	case WindowStage:
 		return st.runWindow()
@@ -288,16 +285,10 @@ func (st *Stage) RunImpl() *Stage {
 	}
 }
 
-// Wait waits for all windows to close and runs the main app loop.
-// This should be put at the end of the main function.
-func (st *Stage) Wait() {
-	Wait()
-}
-
-// DoUpdate calls DoUpdate on our Scene and UpdateAll on our Popups for Main types.
+// doUpdate calls doUpdate on our Scene and UpdateAll on our Popups for Main types.
 // returns stageMods = true if any Popup Stages have been modified
 // and sceneMods = true if any Scenes have been modified.
-func (st *Stage) DoUpdate() (stageMods, sceneMods bool) {
+func (st *Stage) doUpdate() (stageMods, sceneMods bool) {
 	if st.Scene == nil {
 		return
 	}
@@ -312,9 +303,9 @@ func (st *Stage) DoUpdate() (stageMods, sceneMods bool) {
 	return
 }
 
-// Raise moves the Stage to the top of its main [Stages]
+// raise moves the Stage to the top of its main [Stages]
 // and raises the [renderWindow] it is in if necessary.
-func (st *Stage) Raise() {
+func (st *Stage) raise() {
 	if st.Mains.RenderWindow != currentRenderWindow {
 		st.Mains.RenderWindow.Raise()
 	}
@@ -322,7 +313,7 @@ func (st *Stage) Raise() {
 	currentRenderWindow.SetStageTitle(st.Title)
 }
 
-func (st *Stage) Delete() {
+func (st *Stage) delete() {
 	if st.Type.isMain() && st.popups != nil {
 		st.popups.DeleteAll()
 		st.Sprites.reset()

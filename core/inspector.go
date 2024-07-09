@@ -207,7 +207,7 @@ func (is *Inspector) selectionMonitor() {
 	if !ok {
 		return
 	}
-	sc.Stage.Raise()
+	sc.Stage.raise()
 	sw, ok := <-sc.selectedWidgetChan
 	if !ok || sw == nil {
 		return
@@ -234,7 +234,7 @@ func (is *Inspector) selectionMonitor() {
 	tv.SelectAction(events.SelectOne)
 	tv.ScrollToThis()
 	is.AsyncUnlock()
-	is.Scene.Stage.Raise()
+	is.Scene.Stage.raise()
 
 	sc.AsyncLock()
 	sc.renderBBoxes = false
