@@ -310,7 +310,7 @@ func (ch *Chooser) Init() {
 				w.OnKeyChord(func(e events.Event) {
 					kf := keymap.Of(e.KeyChord())
 					if kf == keymap.Abort {
-						if w.Error != nil {
+						if w.error != nil {
 							w.Clear()
 							w.ClearError()
 							e.SetHandled()
@@ -327,9 +327,9 @@ func (ch *Chooser) Init() {
 					} else {
 						w.SetType(TextFieldOutlined)
 					}
-					if ch.DefaultNew && w.Complete != nil {
-						w.Complete = nil
-					} else if !ch.DefaultNew && w.Complete == nil {
+					if ch.DefaultNew && w.complete != nil {
+						w.complete = nil
+					} else if !ch.DefaultNew && w.complete == nil {
 						w.SetCompleter(w, ch.completeMatch, ch.completeEdit)
 					}
 				})

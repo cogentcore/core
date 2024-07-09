@@ -318,7 +318,7 @@ func (sp *Spinner) stringToValue(str string) (float32, error) {
 
 func (sp *Spinner) WidgetTooltip(pos image.Point) (string, image.Point) {
 	res, rpos := sp.TextField.WidgetTooltip(pos)
-	if sp.Error != nil {
+	if sp.error != nil {
 		return res, rpos
 	}
 	if sp.HasMin {

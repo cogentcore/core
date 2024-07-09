@@ -1068,7 +1068,7 @@ func (t *TextField) SetSelectColor(v image.Image) *TextField { t.SelectColor = v
 
 // SetSelectMode sets the [TextField.SelectMode]:
 // SelectMode is whether to select text as the cursor moves.
-func (t *TextField) SetSelectMode(v bool) *TextField { t.SelectMode = v; return t }
+func (t *TextField) SetSelectMode(v bool) *TextField { t.selectMode = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.TimePicker", IDName: "time-picker", Doc: "TimePicker is a widget for picking a time.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Time", Doc: "Time is the time that we are viewing"}, {Name: "Hour", Doc: "the raw input hour"}, {Name: "PM", Doc: "whether we are in PM mode (so we have to add 12h to everything)"}}})
 

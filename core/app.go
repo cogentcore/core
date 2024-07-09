@@ -138,7 +138,7 @@ func makeStandardAppBar(p *tree.Plan) {
 		tree.AddChildInit(w, "text-field", func(w *TextField) {
 			w.Styler(func(s *styles.Style) {
 				s.Background = colors.Scheme.SurfaceContainerHighest
-				if !s.Is(states.Focused) && w.Error == nil {
+				if !s.Is(states.Focused) && w.error == nil {
 					s.Border = styles.Border{}
 				}
 				s.Border.Radius = styles.BorderRadiusFull
