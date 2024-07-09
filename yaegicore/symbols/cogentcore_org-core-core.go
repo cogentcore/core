@@ -198,7 +198,6 @@ func init() {
 		"SizeFinalPass":             reflect.ValueOf(core.SizeFinalPass),
 		"SizeMedium":                reflect.ValueOf(core.SizeMedium),
 		"SizeUpPass":                reflect.ValueOf(core.SizeUpPass),
-		"SliceIndexByValue":         reflect.ValueOf(core.SliceIndexByValue),
 		"SliderScrollbar":           reflect.ValueOf(core.SliderScrollbar),
 		"SliderSlider":              reflect.ValueOf(core.SliderSlider),
 		"SliderTypesN":              reflect.ValueOf(core.SliderTypesN),

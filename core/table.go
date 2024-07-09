@@ -532,7 +532,7 @@ func (tb *Table) SelectFieldVal(fld, val string) bool {
 		idx, _ := StructSliceIndexByValue(tb.Slice, tb.SelectedField, tb.SelectedValue)
 		if idx >= 0 {
 			tb.ScrollToIndex(idx)
-			tb.UpdateSelectIndex(idx, true, events.SelectOne)
+			tb.updateSelectIndex(idx, true, events.SelectOne)
 			return true
 		}
 	}

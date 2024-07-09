@@ -535,7 +535,7 @@ func NewListGrid(parent ...tree.Node) *ListGrid { return tree.New[ListGrid](pare
 // SetLastBackground sets the [ListGrid.LastBackground]:
 // LastBackground is the background for which modified
 // backgrounds were computed -- don't update if same
-func (t *ListGrid) SetLastBackground(v image.Image) *ListGrid { t.LastBackground = v; return t }
+func (t *ListGrid) SetLastBackground(v image.Image) *ListGrid { t.lastBackground = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Meter", IDName: "meter", Doc: "Meter is a widget that renders a current value on as a filled\nbar/semicircle relative to a minimum and maximum potential value.", Embeds: []types.Field{{Name: "WidgetBase"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the meter."}, {Name: "Value", Doc: "Value is the current value of the meter.\nIt defaults to 0.5."}, {Name: "Min", Doc: "Min is the minimum possible value of the meter.\nIt defaults to 0."}, {Name: "Max", Doc: "Max is the maximum possible value of the meter.\nIt defaults to 1."}, {Name: "Text", Doc: "Text, for [MeterCircle] and [MeterSemicircle], is the\ntext to render inside of the circle/semicircle."}, {Name: "ValueColor", Doc: "ValueColor is the image color that will be used to\nrender the filled value bar. It should be set in Style."}, {Name: "Width", Doc: "Width, for [MeterCircle] and [MeterSemicircle], is the\nwidth of the circle/semicircle. It should be set in Style."}}})
 
