@@ -35,7 +35,6 @@ grid.Styler(func(s *styles.Style) {
     s.Gap.Zero()
 })
 for i := range 9 {
-    i := i
     bt := core.NewButton(grid).SetType(core.ButtonAction)
     bt.Styler(func(s *styles.Style) {
         s.Border.Width.Set(units.Dp(1))
@@ -95,7 +94,6 @@ grid.Styler(func(s *styles.Style) {
     s.Gap.Zero()
 })
 for i := range 9 {
-    i := i
     bt := core.NewButton(grid).SetType(core.ButtonAction)
     bt.Styler(func(s *styles.Style) {
         s.Border.Width.Set(units.Dp(1))
