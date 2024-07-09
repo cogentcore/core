@@ -5,7 +5,6 @@
 package core
 
 import (
-	"bytes"
 	"image"
 	"io"
 	"io/fs"
@@ -29,7 +28,7 @@ import (
 type SVG struct {
 	WidgetBase
 
-	// SVG is the SVG drawing to display in this widget
+	// SVG is the SVG drawing to display.
 	SVG *svg.SVG `set:"-"`
 
 	// prevSize is the cached allocated size for the last rendered image.
@@ -97,11 +96,6 @@ func (sv *SVG) Read(r io.Reader) error {
 	return sv.SVG.ReadXML(r)
 }
 
-// ReadBytes reads an XML-formatted SVG file from the given bytes.
-func (sv *SVG) ReadBytes(b []byte) error {
-	return sv.SVG.ReadXML(bytes.NewReader(b))
-}
-
 // ReadString reads an XML-formatted SVG file from the given string.
 func (sv *SVG) ReadString(s string) error {
 	return sv.SVG.ReadXML(strings.NewReader(s))
@@ -122,8 +116,8 @@ func (sv *SVG) SizeFinal() {
 	sv.SVG.Resize(sv.Geom.Size.Actual.Content.ToPoint())
 }
 
-// RenderSVG renders the SVG
-func (sv *SVG) RenderSVG() {
+// renderSVG renders the SVG
+func (sv *SVG) renderSVG() {
 	if sv.SVG == nil {
 		return
 	}
@@ -152,7 +146,7 @@ func (sv *SVG) Render() {
 		}
 	}
 	if needsRender {
-		sv.RenderSVG()
+		sv.renderSVG()
 	}
 	r := sv.Geom.ContentBBox
 	sp := sv.Geom.ScrollOffset()
