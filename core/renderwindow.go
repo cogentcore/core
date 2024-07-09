@@ -255,7 +255,7 @@ func (w *renderWindow) setZoom(zoom float32) {
 			w.setZoom(100)
 		})
 		b.DeleteChildByName("stretch")
-		b.NewSnackbar(ms).Run()
+		b.RunSnackbar(ms)
 	}
 }
 

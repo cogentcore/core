@@ -26,19 +26,19 @@ func (bd *Body) RunSnackbar(ctx Widget) *Stage {
 // automatically runs it.
 func (bd *Body) NewSnackbar(ctx Widget) *Stage {
 	ctx = nonNilContext(ctx)
-	bd.SnackbarStyles()
+	bd.snackbarStyles()
 	bd.Scene.Stage = NewPopupStage(SnackbarStage, bd.Scene, ctx).
 		SetTimeout(SystemSettings.SnackbarTimeout)
 	return bd.Scene.Stage
 }
 
-// MessageSnackbar opens a [Snackbar] displaying the given message
+// MessageSnackbar opens a [SnackbarStage] displaying the given message
 // in the context of the given widget.
 func MessageSnackbar(ctx Widget, message string) {
-	NewBody().AddSnackbarText(message).NewSnackbar(ctx).Run()
+	NewBody().AddSnackbarText(message).RunSnackbar(ctx)
 }
 
-// ErrorSnackbar opens a [Snackbar] displaying the given error
+// ErrorSnackbar opens a [SnackbarStage] displaying the given error
 // in the context of the given widget. Optional label text can be
 // provided; if it is not, the label text will default to "Error".
 // If the given error is nil, no snackbar is created.
@@ -53,9 +53,9 @@ func ErrorSnackbar(ctx Widget, err error, label ...string) {
 	MessageSnackbar(ctx, lbl+": "+err.Error())
 }
 
-// SnackbarStyles sets default stylers for snackbar bodies.
+// snackbarStyles sets default stylers for snackbar bodies.
 // It is automatically called in [Body.NewSnackbar].
-func (bd *Body) SnackbarStyles() {
+func (bd *Body) snackbarStyles() {
 	bd.Styler(func(s *styles.Style) {
 		s.Direction = styles.Row
 		s.Overflow.Set(styles.OverflowVisible) // key for avoiding sizing errors when re-rendering with small pref size

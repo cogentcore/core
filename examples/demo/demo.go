@@ -605,7 +605,7 @@ func dialogs(ts *core.Tabs) {
 		core.NewBody().AddSnackbarText("Files updated").
 			AddSnackbarButton("Refresh", func(e events.Event) {
 				core.MessageSnackbar(cs, "Refreshed files")
-			}).AddSnackbarIcon(icons.Close).NewSnackbar(cs).Run()
+			}).AddSnackbarIcon(icons.Close).RunSnackbar(cs)
 	})
 
 	core.NewText(tab).SetType(core.TextHeadlineSmall).SetText("Windows")

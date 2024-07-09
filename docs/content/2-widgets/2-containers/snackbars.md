@@ -28,6 +28,6 @@ bt.OnClick(func(e events.Event) {
     core.NewBody().AddSnackbarText("Files updated").
         AddSnackbarButton("Refresh", func(e events.Event) {
             core.MessageSnackbar(bt, "Refreshed files")
-        }).AddSnackbarIcon(icons.Close).NewSnackbar(bt).Run()
+        }).AddSnackbarIcon(icons.Close).RunSnackbar(bt)
 })
 ```
