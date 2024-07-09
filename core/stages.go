@@ -25,7 +25,7 @@ type Stages struct { //types:add
 
 	// rendering context provides key rendering information and locking
 	// for the RenderWindow in which the stages are running.
-	RenderContext *RenderContext
+	RenderContext *renderContext
 
 	// render window to which we are rendering.
 	// rely on the RenderContext wherever possible.

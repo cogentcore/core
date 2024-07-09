@@ -218,8 +218,8 @@ func UpdateAll() { //types:add
 	gradient.Cache = nil // the cache is invalid now
 	for _, w := range AllRenderWindows {
 		rc := w.mains.RenderContext
-		rc.LogicalDPI = w.logicalDPI()
-		rc.Rebuild = true // trigger full rebuild
+		rc.logicalDPI = w.logicalDPI()
+		rc.rebuild = true // trigger full rebuild
 	}
 }
 

@@ -866,7 +866,7 @@ func (t *Stage) SetMain(v *Stage) *Stage { t.Main = v; return t }
 // This should be used instead of the RenderWindow itself for all relevant
 // rendering information.  This is only available once a Stage is Run,
 // and must always be checked for nil.
-func (t *Stage) SetRenderContext(v *RenderContext) *Stage { t.RenderContext = v; return t }
+func (t *Stage) SetRenderContext(v *renderContext) *Stage { t.RenderContext = v; return t }
 
 // SetSprites sets the [Stage.Sprites]:
 // sprites are named images that are rendered last overlaying everything else.

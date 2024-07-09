@@ -79,11 +79,10 @@ func (ic *Icon) renderSVG() {
 		return
 	}
 
-	rc := ic.Scene.RenderContext()
 	sv := &ic.svg
 	sz := ic.Geom.Size.Actual.Content.ToPoint()
 	clr := gradient.ApplyOpacity(ic.Styles.Color, ic.Styles.Opacity)
-	if !rc.Rebuild && sv.Pixels != nil { // if rebuilding then rebuild
+	if !ic.NeedsRebuild() && sv.Pixels != nil { // if rebuilding then rebuild
 		isz := sv.Pixels.Bounds().Size()
 		// if nothing has changed, we don't need to re-render
 		if isz == sz && sv.Name == string(ic.Icon) && sv.Color == clr {

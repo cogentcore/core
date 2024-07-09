@@ -74,9 +74,9 @@ func (wb *WidgetBase) AsyncLock() {
 		// being deleted, so we just block forever
 		select {}
 	}
-	rc.Lock()
+	rc.lock()
 	if wb.This == nil {
-		rc.Unlock()
+		rc.unlock()
 		select {}
 	}
 	wb.Scene.updating = true
@@ -90,7 +90,7 @@ func (wb *WidgetBase) AsyncUnlock() {
 	if rc == nil {
 		return
 	}
-	rc.Unlock()
+	rc.unlock()
 	if wb.Scene != nil {
 		wb.Scene.updating = false
 	}
@@ -119,7 +119,7 @@ func (wb *WidgetBase) NeedsLayout() {
 	}
 }
 
-// NeedsRebuild returns whether the [RenderContext] indicates
+// NeedsRebuild returns whether the [renderContext] indicates
 // a full rebuild is needed. This is typically used to detect
 // when the settings have been changed, such as when the color
 // scheme or zoom is changed.
@@ -131,7 +131,7 @@ func (wb *WidgetBase) NeedsRebuild() bool {
 	if rc == nil {
 		return false
 	}
-	return rc.Rebuild
+	return rc.rebuild
 }
 
 // layoutScene does a layout of the scene: Size, Position
@@ -224,7 +224,7 @@ func (sc *Scene) doUpdate() bool {
 	}
 
 	switch {
-	case rc.Rebuild:
+	case rc.rebuild:
 		pr := profile.Start("rebuild")
 		sc.doRebuild()
 		sc.needsLayout = false

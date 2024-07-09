@@ -642,9 +642,9 @@ func (em *Events) handleLong(e events.Event, deep Widget, w *Widget, pos *image.
 		if win == nil {
 			return
 		}
-		rc := win.RenderContext() // have to get this one first
-		rc.Lock()
-		defer rc.Unlock()
+		rc := win.renderContext() // have to get this one first
+		rc.lock()
+		defer rc.unlock()
 
 		em.timerMu.Lock() // then can get this
 		defer em.timerMu.Unlock()

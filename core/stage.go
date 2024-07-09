@@ -164,7 +164,7 @@ type Stage struct { //types:add -setters
 	// This should be used instead of the RenderWindow itself for all relevant
 	// rendering information.  This is only available once a Stage is Run,
 	// and must always be checked for nil.
-	RenderContext *RenderContext
+	RenderContext *renderContext
 
 	// sprites are named images that are rendered last overlaying everything else.
 	Sprites Sprites `json:"-" xml:"-"`

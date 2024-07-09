@@ -141,7 +141,7 @@ func (st *Stage) addDialogParts() *Stage {
 // based on the system App Screen Size. Only adds a RenderContext.
 func (st *Stage) firstWindowStages() *Stages {
 	ms := &Stages{}
-	ms.RenderContext = NewRenderContext()
+	ms.RenderContext = newRenderContext()
 	return ms
 }
 
@@ -174,7 +174,7 @@ func (st *Stage) runWindow() *Stage {
 	}
 	st.configMainStage()
 
-	sz := st.RenderContext.Geom.Size
+	sz := st.RenderContext.geom.Size
 	// offscreen windows always consider pref size because
 	// they must be unbounded by any previous window sizes
 	// non-offscreen mobile windows must take up the whole window
@@ -219,7 +219,7 @@ func (st *Stage) runWindow() *Stage {
 	}
 
 	if st.NewWindow || currentRenderWindow == nil {
-		sc.Resize(math32.Geom2DInt{st.RenderContext.Geom.Pos, sz})
+		sc.Resize(math32.Geom2DInt{st.RenderContext.geom.Pos, sz})
 		win := st.newRenderWindow()
 		MainRenderWindows.Add(win)
 		currentRenderWindow = win
@@ -283,7 +283,7 @@ func (st *Stage) runDialog() *Stage {
 
 	st.SetMains(ms) // temporary for prefs
 
-	sz := ms.RenderContext.Geom.Size
+	sz := ms.RenderContext.geom.Size
 	if !st.FullWindow || st.NewWindow {
 		sz = sc.prefSize(sz)
 		sz = sz.Add(image.Point{50, 50})
@@ -295,7 +295,7 @@ func (st *Stage) runDialog() *Stage {
 
 	if st.NewWindow {
 		st.Mains = nil
-		sc.Resize(math32.Geom2DInt{st.RenderContext.Geom.Pos, sz})
+		sc.Resize(math32.Geom2DInt{st.RenderContext.geom.Pos, sz})
 		st.Type = WindowStage            // critical: now is its own window!
 		sc.SceneGeom.Pos = image.Point{} // ignore pos
 		win := st.newRenderWindow()
@@ -305,7 +305,7 @@ func (st *Stage) runDialog() *Stage {
 		return st
 	}
 	sc.SceneGeom.Size = sz
-	sc.FitInWindow(st.RenderContext.Geom) // does resize
+	sc.FitInWindow(st.RenderContext.geom) // does resize
 	ms.Push(st)
 	// st.SetMains(ms) // already set
 	return st
@@ -342,7 +342,7 @@ func (st *Stage) newRenderWindow() *renderWindow {
 	AllRenderWindows.Add(win)
 	// initialize Mains
 	win.mains.RenderWindow = win
-	win.mains.RenderContext = NewRenderContext() // sets defaults according to Screen
+	win.mains.RenderContext = newRenderContext() // sets defaults according to Screen
 	// note: win is not yet created by the OS and we don't yet know its actual size
 	// or dpi.
 	win.mains.Push(st)

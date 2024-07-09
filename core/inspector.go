@@ -67,7 +67,7 @@ func (is *Inspector) Init() {
 		if !ok {
 			return
 		}
-		sc.RenderContext().Rebuild = true // trigger full rebuild
+		sc.RenderContext().rebuild = true // trigger full rebuild
 	}
 	tree.AddChildAt(is, "splits", func(w *Splits) {
 		w.SetSplits(.3, .7)

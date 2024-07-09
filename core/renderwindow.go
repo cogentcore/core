@@ -80,7 +80,7 @@ type renderWindow struct {
 
 	// renderScenes are the Scene elements that draw directly to the window,
 	// arranged in order, and continuously updated during Render.
-	renderScenes RenderScenes
+	renderScenes renderScenes
 
 	// noEventsChan is a channel on which a signal is sent when there are
 	// no events left in the window [events.Deque]. It is used internally
@@ -113,9 +113,9 @@ func newRenderWindow(name, title string, opts *system.NewWindowOptions) *renderW
 	w.SystemWindow.SetName(title)
 	w.SystemWindow.SetTitleBarIsDark(matcolor.SchemeIsDark)
 	w.SystemWindow.SetCloseReqFunc(func(win system.Window) {
-		rc := w.RenderContext()
-		rc.Lock()
-		defer rc.Unlock()
+		rc := w.renderContext()
+		rc.lock()
+		defer rc.unlock()
 		w.closing = true
 		// ensure that everyone is closed first
 		for _, kv := range w.mains.Stack.Order {
@@ -132,7 +132,7 @@ func newRenderWindow(name, title string, opts *system.NewWindowOptions) *renderW
 
 	drw := w.SystemWindow.Drawer()
 	drw.SetMaxTextures(system.MaxTexturesPerSet * 3)       // use 3 sets
-	w.renderScenes.MaxIndex = system.MaxTexturesPerSet * 2 // reserve last for sprites
+	w.renderScenes.maxIndex = system.MaxTexturesPerSet * 2 // reserve last for sprites
 
 	// win.SystemWin.SetDestroyGPUResourcesFunc(func() {
 	// 	for _, ph := range win.Phongs {
@@ -261,9 +261,9 @@ func (w *renderWindow) setZoom(zoom float32) {
 
 // resized updates internal buffers after a window has been resized.
 func (w *renderWindow) resized() {
-	rc := w.RenderContext()
+	rc := w.renderContext()
 	if !w.isVisible() {
-		rc.Visible = false
+		rc.visible = false
 		return
 	}
 
@@ -271,7 +271,7 @@ func (w *renderWindow) resized() {
 
 	rg := w.SystemWindow.RenderGeom()
 
-	curRg := rc.Geom
+	curRg := rc.geom
 	if curRg == rg {
 		if DebugSettings.WinEventTrace {
 			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.name, curRg)
@@ -289,7 +289,7 @@ func (w *renderWindow) resized() {
 	// w.FocusInactivate()
 	// w.InactivateAllSprites()
 	if !w.isVisible() {
-		rc.Visible = false
+		rc.visible = false
 		if DebugSettings.WinEventTrace {
 			fmt.Printf("Win: %v Resized already closed\n", w.name)
 		}
@@ -298,9 +298,9 @@ func (w *renderWindow) resized() {
 	if DebugSettings.WinEventTrace {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.name, curRg, rg)
 	}
-	rc.Geom = rg
-	rc.Visible = true
-	rc.LogicalDPI = w.logicalDPI()
+	rc.geom = rg
+	rc.visible = true
+	rc.logicalDPI = w.logicalDPI()
 	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
 	w.mains.Resize(rg)
 	if DebugSettings.WinGeomTrace {
@@ -325,14 +325,14 @@ func (w *renderWindow) minimize() {
 }
 
 // closeReq requests that the window be closed, which could be rejected.
-// It firsts unlocks and then locks the [RenderContext] to prevent deadlocks.
+// It firsts unlocks and then locks the [renderContext] to prevent deadlocks.
 // If this is called asynchronously outside of the main event loop,
 // [renderWindow.SystemWin.closeReq] should be called directly instead.
 func (w *renderWindow) closeReq() {
-	rc := w.RenderContext()
-	rc.Unlock()
+	rc := w.renderContext()
+	rc.unlock()
 	w.SystemWindow.CloseReq()
-	rc.Lock()
+	rc.lock()
 }
 
 // closed frees any resources after the window has been closed.
@@ -353,7 +353,7 @@ func (w *renderWindow) closed() {
 	// these are managed by the window itself
 	// w.Sprites.Reset()
 
-	w.renderScenes.Reset()
+	w.renderScenes.reset()
 	// todo: delete the contents of the window here??
 }
 
@@ -424,8 +424,8 @@ func (w *renderWindow) eventLoop() {
 // is redundant in this case, but other non-event-driven updates require
 // the lock protection.
 func (w *renderWindow) handleEvent(e events.Event) {
-	rc := w.RenderContext()
-	rc.Lock()
+	rc := w.renderContext()
+	rc.lock()
 	// we manually handle Unlock's in this function instead of deferring
 	// it to avoid a cryptic "sync: can't unlock an already unlocked Mutex"
 	// error when panicking in the rendering goroutine. This is critical for
@@ -437,12 +437,12 @@ func (w *renderWindow) handleEvent(e events.Event) {
 	}
 	if et >= events.Window && et <= events.WindowPaint {
 		w.handleWindowEvents(e)
-		rc.Unlock()
+		rc.unlock()
 		return
 	}
 	// fmt.Printf("got event type: %v: %v\n", et.BitIndexString(), evi)
 	w.mains.mainHandleEvent(e)
-	rc.Unlock()
+	rc.unlock()
 }
 
 func (w *renderWindow) handleWindowEvents(e events.Event) {
@@ -450,10 +450,10 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 	switch et {
 	case events.WindowPaint:
 		e.SetHandled()
-		rc := w.RenderContext()
-		rc.Unlock() // one case where we need to break lock
-		w.RenderWindow()
-		rc.Lock()
+		rc := w.renderContext()
+		rc.unlock() // one case where we need to break lock
+		w.renderWindow()
+		rc.lock()
 		w.mains.SendShowEvents()
 
 	case events.WindowResize:
@@ -548,130 +548,118 @@ type renderParams struct {
 
 // needsRestyle returns true if the current render context
 // params differ from those used in last render.
-func (rp *renderParams) needsRestyle(rc *RenderContext) bool {
-	return rp.logicalDPI != rc.LogicalDPI || rp.geom != rc.Geom
+func (rp *renderParams) needsRestyle(rc *renderContext) bool {
+	return rp.logicalDPI != rc.logicalDPI || rp.geom != rc.geom
 }
 
 // saveRender grabs current render context params
-func (rp *renderParams) saveRender(rc *RenderContext) {
-	rp.logicalDPI = rc.LogicalDPI
-	rp.geom = rc.Geom
+func (rp *renderParams) saveRender(rc *renderContext) {
+	rp.logicalDPI = rc.logicalDPI
+	rp.geom = rc.geom
 }
 
-// RenderContext provides rendering context from outer RenderWindow
+// renderContext provides rendering context from outer RenderWindow
 // window to Stage and Scene elements to inform styling, layout
 // and rendering. It also has the main Mutex for any updates
 // to the window contents: use Lock for anything updating.
-type RenderContext struct {
+type renderContext struct {
 
-	// LogicalDPI is the current logical dots-per-inch resolution of the
+	// logicalDPI is the current logical dots-per-inch resolution of the
 	// window, which should be used for most conversion of standard units.
-	LogicalDPI float32
+	logicalDPI float32
 
 	// Geometry of the rendering window, in actual "dot" pixels used for rendering.
-	Geom math32.Geom2DInt
+	geom math32.Geom2DInt
 
-	// Mu is mutex for locking out rendering and any destructive updates.
+	// mu is mutex for locking out rendering and any destructive updates.
 	// It is locked at the RenderWindow level during rendering and
 	// event processing to provide exclusive blocking of external updates.
 	// Use AsyncLock from any outside routine to grab the lock before
 	// doing modifications.
-	Mu sync.Mutex
+	mu sync.Mutex
 
-	// Visible is whether the window is visible and should be rendered to.
-	Visible bool
+	// visible is whether the window is visible and should be rendered to.
+	visible bool
 
-	// Rebuild is whether to force a rebuild of all Scene elements.
-	Rebuild bool
+	// rebuild is whether to force a rebuild of all Scene elements.
+	rebuild bool
 }
 
-// NewRenderContext returns a new RenderContext initialized according to
+// newRenderContext returns a new [renderContext] initialized according to
 // the main Screen size and LogicalDPI as initial defaults.
 // The actual window size is set during Resized method, which is typically
 // called after the window is created by the OS.
-func NewRenderContext() *RenderContext {
-	rc := &RenderContext{}
+func newRenderContext() *renderContext {
+	rc := &renderContext{}
 	scr := system.TheApp.Screen(0)
 	if scr != nil {
-		rc.Geom.SetRect(scr.Geometry)
-		rc.LogicalDPI = scr.LogicalDPI
+		rc.geom.SetRect(scr.Geometry)
+		rc.logicalDPI = scr.LogicalDPI
 	} else {
-		rc.Geom = math32.Geom2DInt{Size: image.Pt(1080, 720)}
-		rc.LogicalDPI = 160
+		rc.geom = math32.Geom2DInt{Size: image.Pt(1080, 720)}
+		rc.logicalDPI = 160
 	}
-	rc.Visible = true
+	rc.visible = true
 	return rc
 }
 
-// Lock is called by RenderWindow during RenderWindow and HandleEvent
+// lock is called by RenderWindow during RenderWindow and HandleEvent
 // when updating all widgets and rendering the screen.
 // Any outside access to window contents / scene must acquire this
 // lock first.  In general, use AsyncLock to do this.
-func (rc *RenderContext) Lock() {
-	rc.Mu.Lock()
+func (rc *renderContext) lock() {
+	rc.mu.Lock()
 }
 
-// Unlock must be called for each Lock, when done.
-func (rc *RenderContext) Unlock() {
-	rc.Mu.Unlock()
+// unlock must be called for each Lock, when done.
+func (rc *renderContext) unlock() {
+	rc.mu.Unlock()
 }
 
-func (rc *RenderContext) String() string {
-	str := fmt.Sprintf("Geom: %s  Visible: %v", rc.Geom, rc.Visible)
+func (rc *renderContext) String() string {
+	str := fmt.Sprintf("Geom: %s  Visible: %v", rc.geom, rc.visible)
 	return str
 }
 
-//////////////////////////////////////////////////////////////////////
-//  RenderScenes
-
-// RenderScenes are a list of Scene and direct rendering widgets,
+// renderScenes are a list of Scene and direct rendering widgets,
 // compiled in rendering order, whose Pixels images are composed
 // directly to the RenderWindow window.
-type RenderScenes struct {
-
-	// starting index for this set of Scenes
-	StartIndex int
+type renderScenes struct {
 
 	// max index (exclusive) for this set of Scenes
-	MaxIndex int
+	maxIndex int
 
 	// set to true to flip Y axis in drawing these images
-	FlipY bool
+	flipY bool
 
 	// ordered list of scenes and direct rendering widgets. Index is Drawer image index.
-	Scenes []Widget
+	scenes []Widget
 
-	// SceneIndex holds the index for each scene / direct render widget.
+	// sceneIndex holds the index for each scene / direct render widget.
 	// Used to detect changes in index.
-	SceneIndex map[Widget]int
+	sceneIndex map[Widget]int
 }
 
-// SetIndexRange sets the index range based on starting index and n
-func (rs *RenderScenes) SetIndexRange(st, n int) {
-	rs.StartIndex = st
-	rs.MaxIndex = st + n
-}
-
-// Reset resets the list
-func (rs *RenderScenes) Reset() {
-	rs.Scenes = nil
-	if rs.SceneIndex == nil {
-		rs.SceneIndex = make(map[Widget]int)
+// reset resets the list
+func (rs *renderScenes) reset() {
+	rs.scenes = nil
+	if rs.sceneIndex == nil {
+		rs.sceneIndex = make(map[Widget]int)
 	}
 }
 
-// Add adds a new node, returning index
-func (rs *RenderScenes) Add(w Widget, scIndex map[Widget]int) int {
+// add adds a new node, returning index
+func (rs *renderScenes) add(w Widget, scIndex map[Widget]int) int {
 	sc := w.AsWidget().Scene
 	if sc.Pixels == nil {
 		return -1
 	}
-	idx := len(rs.Scenes)
-	if idx >= rs.MaxIndex {
-		slog.Error("RenderScenes: too many Scenes to render all of them!", "max", rs.MaxIndex)
+	idx := len(rs.scenes)
+	if idx >= rs.maxIndex {
+		slog.Error("RenderScenes: too many Scenes to render all of them!", "max", rs.maxIndex)
 		return -1
 	}
-	if prvIndex, has := rs.SceneIndex[w]; has {
+	if prvIndex, has := rs.sceneIndex[w]; has {
 		if prvIndex != idx {
 			sc.imageUpdated = true // need to copy b/c cur has diff image
 		}
@@ -679,19 +667,19 @@ func (rs *RenderScenes) Add(w Widget, scIndex map[Widget]int) int {
 		sc.imageUpdated = true // need to copy b/c new
 	}
 	scIndex[w] = idx
-	rs.Scenes = append(rs.Scenes, w)
+	rs.scenes = append(rs.scenes, w)
 	return idx
 }
 
-// SetImages calls drw.SetGoImage on all updated Scene images
-func (rs *RenderScenes) SetImages(drw system.Drawer) {
-	if len(rs.Scenes) == 0 {
+// setImages calls drw.SetGoImage on all updated Scene images
+func (rs *renderScenes) setImages(drw system.Drawer) {
+	if len(rs.scenes) == 0 {
 		if DebugSettings.WinRenderTrace {
 			fmt.Println("RenderScene.SetImages: no scenes")
 		}
 	}
 	var skipScene *Scene
-	for i, w := range rs.Scenes {
+	for i, w := range rs.scenes {
 		sc := w.AsWidget().Scene
 		_, isSc := w.(*Scene)
 		if isSc && (sc.updating || !sc.imageUpdated) {
@@ -715,19 +703,19 @@ func (rs *RenderScenes) SetImages(drw system.Drawer) {
 	}
 }
 
-// DrawAll does drw.Copy drawing call for all Scenes,
+// drawAll does drw.Copy drawing call for all Scenes,
 // using proper TextureSet for each of system.MaxTexturesPerSet Scenes.
-func (rs *RenderScenes) DrawAll(drw system.Drawer) {
+func (rs *renderScenes) drawAll(drw system.Drawer) {
 	nPerSet := system.MaxTexturesPerSet
-	if len(rs.Scenes) == 0 {
+	if len(rs.scenes) == 0 {
 		return
 	}
-	for i, w := range rs.Scenes {
+	for i, w := range rs.scenes {
 		set := i / nPerSet
 		if i%nPerSet == 0 && set > 0 {
 			drw.UseTextureSet(set)
 		}
-		w.DirectRenderDraw(drw, i, rs.FlipY)
+		w.DirectRenderDraw(drw, i, rs.flipY)
 	}
 }
 
@@ -745,25 +733,22 @@ func (sc *Scene) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 	drw.Copy(idx, 0, sc.SceneGeom.Pos, bb, op, flipY)
 }
 
-//////////////////////////////////////////////////////////////////////
-//  RenderWindow methods
-
-func (w *renderWindow) RenderContext() *RenderContext {
+func (w *renderWindow) renderContext() *renderContext {
 	return w.mains.RenderContext
 }
 
-// RenderWindow performs all rendering based on current Stages config.
+// renderWindow performs all rendering based on current Stages config.
 // It sets the Write lock on RenderContext Mutex, so nothing else can update
 // during this time.  All other updates are done with a Read lock so they
 // won't interfere with each other.
-func (w *renderWindow) RenderWindow() {
-	rc := w.RenderContext()
-	rc.Lock()
+func (w *renderWindow) renderWindow() {
+	rc := w.renderContext()
+	rc.lock()
 	defer func() {
-		rc.Rebuild = false
-		rc.Unlock()
+		rc.rebuild = false
+		rc.unlock()
 	}()
-	rebuild := rc.Rebuild
+	rebuild := rc.rebuild
 
 	stageMods, sceneMods := w.mains.UpdateAll() // handles all Scene / Widget updates!
 	top := w.mains.Top()
@@ -781,16 +766,16 @@ func (w *renderWindow) RenderWindow() {
 	}
 
 	if stageMods || rebuild {
-		if !w.GatherScenes() {
+		if !w.gatherScenes() {
 			slog.Error("RenderWindow: no scenes")
 			return
 		}
 	}
-	w.DrawScenes()
+	w.drawScenes()
 }
 
-// DrawScenes does the drawing of RenderScenes to the window.
-func (w *renderWindow) DrawScenes() {
+// drawScenes does the drawing of RenderScenes to the window.
+func (w *renderWindow) drawScenes() {
 	if !w.isVisible() || w.SystemWindow.Is(system.Minimized) {
 		if DebugSettings.WinRenderTrace {
 			fmt.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.name)
@@ -813,7 +798,7 @@ func (w *renderWindow) DrawScenes() {
 	drw := w.SystemWindow.Drawer()
 	rs := &w.renderScenes
 
-	rs.SetImages(drw) // ensure all updated images copied
+	rs.setImages(drw) // ensure all updated images copied
 
 	top := w.mains.Top()
 	if top.Sprites.Modified {
@@ -821,12 +806,12 @@ func (w *renderWindow) DrawScenes() {
 	}
 
 	drw.SyncImages()
-	w.FillInsets()
+	w.fillInsets()
 	if !drw.StartDraw(0) {
 		return
 	}
 	drw.UseTextureSet(0)
-	rs.DrawAll(drw)
+	rs.drawAll(drw)
 
 	drw.UseTextureSet(2)
 	top.Sprites.DrawSprites(drw)
@@ -836,8 +821,8 @@ func (w *renderWindow) DrawScenes() {
 	// pr.End()
 }
 
-// FillInsets fills the window insets, if any, with [colors.Scheme.Background].
-func (w *renderWindow) FillInsets() {
+// fillInsets fills the window insets, if any, with [colors.Scheme.Background].
+func (w *renderWindow) fillInsets() {
 	// render geom and window geom
 	rg := w.SystemWindow.RenderGeom()
 	wg := math32.Geom2DInt{Size: w.SystemWindow.Size()}
@@ -870,11 +855,11 @@ func (w *renderWindow) FillInsets() {
 	drw.EndFill()
 }
 
-// GatherScenes finds all the Scene elements that drive rendering
+// gatherScenes finds all the Scene elements that drive rendering
 // into the RenderScenes list.  Returns false on failure / nothing to render.
-func (w *renderWindow) GatherScenes() bool {
+func (w *renderWindow) gatherScenes() bool {
 	rs := &w.renderScenes
-	rs.Reset()
+	rs.reset()
 	scIndex := make(map[Widget]int)
 
 	sm := &w.mains
@@ -894,9 +879,9 @@ func (w *renderWindow) GatherScenes() bool {
 				fmt.Println("GatherScenes: main Window:", st.String())
 			}
 			winScene = st.Scene
-			rs.Add(st.Scene, scIndex)
+			rs.add(st.Scene, scIndex)
 			for _, w := range st.Scene.directRenders {
-				rs.Add(w, scIndex)
+				rs.add(w, scIndex)
 			}
 			winIndex = i
 			break
@@ -907,9 +892,9 @@ func (w *renderWindow) GatherScenes() bool {
 	for i := winIndex + 1; i < n; i++ {
 		st := sm.Stack.ValueByIndex(i)
 		if st.Scrim && i == n-1 {
-			rs.Add(NewScrim(winScene), scIndex)
+			rs.add(newScrim(winScene), scIndex)
 		}
-		rs.Add(st.Scene, scIndex)
+		rs.add(st.Scene, scIndex)
 		if DebugSettings.WinRenderTrace {
 			fmt.Println("GatherScenes: overlay Stage:", st.String())
 		}
@@ -921,38 +906,35 @@ func (w *renderWindow) GatherScenes() bool {
 	// then add the popups for the top main stage
 	for _, kv := range top.Popups.Stack.Order {
 		st := kv.Value
-		rs.Add(st.Scene, scIndex)
+		rs.add(st.Scene, scIndex)
 		if DebugSettings.WinRenderTrace {
 			fmt.Println("GatherScenes: popup:", st.String())
 		}
 	}
-	rs.SceneIndex = scIndex
+	rs.sceneIndex = scIndex
 	return true
 }
 
-////////////////////////////////////////////////////////////////////////////
-//  Scrim
-
-// A Scrim is just a dummy Widget used for rendering a Scrim.
-// Only used for its type. Everything else managed by RenderWindow.
-type Scrim struct { //core:no-new
+// A scrim is just a dummy Widget used for rendering a scrim.
+// Only used for its type. Everything else managed by [renderWindow].
+type scrim struct { //core:no-new
 	WidgetBase
 }
 
-// NewScrim creates a new Scrim for use in rendering.
+// newScrim creates a new [scrim] for use in rendering.
 // It does not actually add the Scrim to the Scene,
 // just sets its pointers.
-func NewScrim(sc *Scene) *Scrim {
-	sr := tree.New[Scrim]() // critical to not add to scene!
+func newScrim(sc *Scene) *scrim {
+	sr := tree.New[scrim]() // critical to not add to scene!
 	tree.SetParent(sr, sc)
 	return sr
 }
 
-func (sr *Scrim) DirectRenderImage(drw system.Drawer, idx int) {
+func (sr *scrim) DirectRenderImage(drw system.Drawer, idx int) {
 	// no-op
 }
 
-func (sr *Scrim) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
+func (sr *scrim) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 	sc := sr.Parent.(*Scene)
 	drw.Fill(colors.ApplyOpacity(colors.ToUniform(colors.Scheme.Scrim), 0.5), math32.Identity3(), sc.Geom.TotalBBox, draw.Over)
 }

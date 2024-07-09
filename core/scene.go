@@ -198,7 +198,7 @@ func (sc *Scene) Init() {
 
 // RenderContext returns the current render context.
 // This will be nil prior to actual rendering.
-func (sc *Scene) RenderContext() *RenderContext {
+func (sc *Scene) RenderContext() *renderContext {
 	if sc.Stage == nil {
 		return nil
 	}
@@ -270,7 +270,7 @@ func (sc *Scene) ScIsVisible() bool {
 	if sc.RenderContext() == nil || sc.Pixels == nil {
 		return false
 	}
-	return sc.RenderContext().Visible
+	return sc.RenderContext().visible
 }
 
 // Close closes the Stage associated with this Scene.

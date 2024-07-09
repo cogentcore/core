@@ -167,7 +167,7 @@ func (wb *WidgetBase) Restyle() {
 // Zero values for element and parent size are ignored.
 func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
 	rebuild := false
-	var rc *RenderContext
+	var rc *renderContext
 	sz := image.Point{1920, 1280}
 	if sc != nil {
 		rebuild = sc.NeedsRebuild()
@@ -175,7 +175,7 @@ func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
 		sz = sc.SceneGeom.Size
 	}
 	if rc != nil {
-		st.UnitContext.DPI = rc.LogicalDPI
+		st.UnitContext.DPI = rc.logicalDPI
 	} else {
 		st.UnitContext.DPI = 160
 	}
