@@ -235,7 +235,7 @@ func NewFileButton(parent ...tree.Node) *FileButton { return tree.New[FileButton
 // SetFilename sets the [FileButton.Filename]
 func (t *FileButton) SetFilename(v string) *FileButton { t.Filename = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Form", IDName: "form", Doc: "Form represents a struct with rows of field names and editable values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the form in one line."}, {Name: "structFields", Doc: "structFields are the fields of the current struct."}, {Name: "isShouldShower", Doc: "isShouldShower is whether the struct implements [ShouldShower], which results\nin additional updating being done at certain points."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Form", IDName: "form", Doc: "Form represents a struct with rows of field names and editable values.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Struct", Doc: "Struct is the pointer to the struct that we are viewing."}, {Name: "Inline", Doc: "Inline is whether to display the form in one line."}, {Name: "structFields", Doc: "structFields are the fields of the current struct."}, {Name: "isShouldDisplayer", Doc: "isShouldDisplayer is whether the struct implements [ShouldDisplayer], which results\nin additional updating being done at certain points."}}})
 
 // NewForm returns a new [Form] with the given optional parent:
 // Form represents a struct with rows of field names and editable values.

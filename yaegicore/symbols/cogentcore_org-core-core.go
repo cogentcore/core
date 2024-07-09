@@ -347,7 +347,7 @@ func init() {
 		"SettingsBase":           reflect.ValueOf((*core.SettingsBase)(nil)),
 		"SettingsOpener":         reflect.ValueOf((*core.SettingsOpener)(nil)),
 		"SettingsSaver":          reflect.ValueOf((*core.SettingsSaver)(nil)),
-		"ShouldShower":           reflect.ValueOf((*core.ShouldShower)(nil)),
+		"ShouldDisplayer":           reflect.ValueOf((*core.ShouldDisplayer)(nil)),
 		"SizeClasses":            reflect.ValueOf((*core.SizeClasses)(nil)),
 		"Slider":                 reflect.ValueOf((*core.Slider)(nil)),
 		"SliderTypes":            reflect.ValueOf((*core.SliderTypes)(nil)),
@@ -405,7 +405,7 @@ func init() {
 		"_Settings":          reflect.ValueOf((*_cogentcore_org_core_core_Settings)(nil)),
 		"_SettingsOpener":    reflect.ValueOf((*_cogentcore_org_core_core_SettingsOpener)(nil)),
 		"_SettingsSaver":     reflect.ValueOf((*_cogentcore_org_core_core_SettingsSaver)(nil)),
-		"_ShouldShower":      reflect.ValueOf((*_cogentcore_org_core_core_ShouldShower)(nil)),
+		"_ShouldDisplayer":      reflect.ValueOf((*_cogentcore_org_core_core_ShouldDisplayer)(nil)),
 		"_TextFieldEmbedder": reflect.ValueOf((*_cogentcore_org_core_core_TextFieldEmbedder)(nil)),
 		"_ToolbarMaker":      reflect.ValueOf((*_cogentcore_org_core_core_ToolbarMaker)(nil)),
 		"_Treer":             reflect.ValueOf((*_cogentcore_org_core_core_Treer)(nil)),
@@ -671,13 +671,13 @@ func (W _cogentcore_org_core_core_SettingsSaver) Label() string            { ret
 func (W _cogentcore_org_core_core_SettingsSaver) MakeToolbar(p *tree.Plan) { W.WMakeToolbar(p) }
 func (W _cogentcore_org_core_core_SettingsSaver) Save() error              { return W.WSave() }
 
-// _cogentcore_org_core_core_ShouldShower is an interface wrapper for ShouldShower type
-type _cogentcore_org_core_core_ShouldShower struct {
+// _cogentcore_org_core_core_ShouldDisplayer is an interface wrapper for ShouldDisplayer type
+type _cogentcore_org_core_core_ShouldDisplayer struct {
 	IValue      interface{}
 	WShouldShow func(field string) bool
 }
 
-func (W _cogentcore_org_core_core_ShouldShower) ShouldShow(field string) bool {
+func (W _cogentcore_org_core_core_ShouldDisplayer) ShouldShow(field string) bool {
 	return W.WShouldShow(field)
 }
 

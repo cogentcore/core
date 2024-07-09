@@ -33,9 +33,9 @@ type Form struct {
 	// structFields are the fields of the current struct.
 	structFields []*structField
 
-	// isShouldShower is whether the struct implements [ShouldShower], which results
+	// isShouldDisplayer is whether the struct implements [ShouldDisplayer], which results
 	// in additional updating being done at certain points.
-	isShouldShower bool
+	isShouldDisplayer bool
 }
 
 // structField represents the values of one struct field being viewed.
@@ -63,12 +63,12 @@ func noSentenceCaseForType(tnm string) bool {
 	})
 }
 
-// ShouldShower is an interface that determines whether a named field
+// ShouldDisplayer is an interface that determines whether a named field
 // should be displayed in [Form].
-type ShouldShower interface {
+type ShouldDisplayer interface {
 
-	// ShouldShow returns whether the given named field should be displayed.
-	ShouldShow(field string) bool
+	// ShouldDisplay returns whether the given named field should be displayed.
+	ShouldDisplay(field string) bool
 }
 
 func (fm *Form) WidgetValue() any { return &fm.Struct }
@@ -80,9 +80,9 @@ func (fm *Form) getStructFields() {
 		if field.Tag.Get("display") == "-" {
 			return false
 		}
-		if ss, ok := reflectx.UnderlyingPointer(parent).Interface().(ShouldShower); ok {
-			fm.isShouldShower = true
-			if !ss.ShouldShow(field.Name) {
+		if ss, ok := reflectx.UnderlyingPointer(parent).Interface().(ShouldDisplayer); ok {
+			fm.isShouldDisplayer = true
+			if !ss.ShouldDisplay(field.Name) {
 				return false
 			}
 		}
@@ -224,7 +224,7 @@ func (fm *Form) Init() {
 						if hasDef {
 							labelWidget.Update()
 						}
-						if fm.isShouldShower {
+						if fm.isShouldDisplayer {
 							fm.Update()
 						}
 					})
