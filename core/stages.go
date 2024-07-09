@@ -15,7 +15,7 @@ import (
 )
 
 // stages manages a stack of [Stage]s.
-type stages struct { //types:add
+type stages struct {
 
 	// stack is the stack of stages managed by this stage manager.
 	stack ordmap.Map[string, *Stage]
