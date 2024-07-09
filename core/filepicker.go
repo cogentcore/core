@@ -325,7 +325,7 @@ func (fp *FilePicker) makeFilesRow(p *tree.Plan) {
 			fp.fileSelect(w.SelectedIndex)
 		})
 		w.OnDoubleClick(func(e events.Event) {
-			if w.ClickSelectEvent(e) {
+			if w.clickSelectEvent(e) {
 				if !fp.selectFile() {
 					e.SetHandled() // don't pass along; keep dialog open
 				} else {

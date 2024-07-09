@@ -99,7 +99,7 @@ func (tb *Table) Init() {
 
 		tb.MakeHeader(p)
 		tb.MakeGrid(p, func(p *tree.Plan) {
-			for i := 0; i < tb.VisRows; i++ {
+			for i := 0; i < tb.VisibleRows; i++ {
 				svi.MakeRow(p, i)
 			}
 		})
@@ -165,7 +165,7 @@ func (tb *Table) SetIndexView(ix *table.IndexView) *Table {
 
 	tb.This.(core.Lister).UpdateSliceSize()
 	tb.StartIndex = 0
-	tb.VisRows = tb.MinRows
+	tb.VisibleRows = tb.MinRows
 	if !tb.IsReadOnly() {
 		tb.SelectedIndex = -1
 	}
@@ -535,14 +535,14 @@ func (tb *Table) RowFirstVisWidget(row int) (*core.WidgetBase, bool) {
 		return nil, false
 	}
 	nWidgPerRow, idxOff := tb.RowWidgetNs()
-	sg := tb.SliceGrid()
-	w := sg.Children[row*nWidgPerRow].(core.Widget).AsWidget()
+	lg := tb.ListGrid
+	w := lg.Children[row*nWidgPerRow].(core.Widget).AsWidget()
 	if w.Geom.TotalBBox != (image.Rectangle{}) {
 		return w, true
 	}
 	ridx := nWidgPerRow * row
 	for fli := 0; fli < tb.NCols; fli++ {
-		w := sg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
+		w := lg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.Geom.TotalBBox != (image.Rectangle{}) {
 			return w, true
 		}
@@ -559,10 +559,10 @@ func (tb *Table) RowGrabFocus(row int) *core.WidgetBase {
 	}
 	nWidgPerRow, idxOff := tb.RowWidgetNs()
 	ridx := nWidgPerRow * row
-	sg := tb.SliceGrid()
+	lg := tb.ListGrid
 	// first check if we already have focus
 	for fli := 0; fli < tb.NCols; fli++ {
-		w := sg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
+		w := lg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.StateIs(states.Focused) || w.ContainsFocus() {
 			return w
 		}
@@ -570,7 +570,7 @@ func (tb *Table) RowGrabFocus(row int) *core.WidgetBase {
 	tb.InFocusGrab = true
 	defer func() { tb.InFocusGrab = false }()
 	for fli := 0; fli < tb.NCols; fli++ {
-		w := sg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
+		w := lg.Child(ridx + idxOff + fli).(core.Widget).AsWidget()
 		if w.CanFocus() {
 			w.SetFocusEvent()
 			return w
@@ -584,10 +584,10 @@ func (tb *Table) RowGrabFocus(row int) *core.WidgetBase {
 
 func (tb *Table) SizeFinal() {
 	tb.ListBase.SizeFinal()
-	sg := tb.This.(core.Lister).SliceGrid()
+	lg := tb.ListGrid
 	sh := tb.SliceHeader()
 	sh.WidgetKidsIter(func(i int, kwi core.Widget, kwb *core.WidgetBase) bool {
-		_, sgb := core.AsWidget(sg.Child(i))
+		_, sgb := core.AsWidget(lg.Child(i))
 		gsz := &sgb.Geom.Size
 		if gsz.Actual.Total.X == 0 {
 			return tree.Continue
@@ -599,7 +599,7 @@ func (tb *Table) SizeFinal() {
 		ksz.Alloc.Content.X = gsz.Alloc.Content.X
 		return tree.Continue
 	})
-	gsz := &sg.Geom.Size
+	gsz := &lg.Geom.Size
 	ksz := &sh.Geom.Size
 	if gsz.Actual.Total.X > 0 {
 		ksz.Actual.Total.X = gsz.Actual.Total.X

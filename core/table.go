@@ -98,7 +98,7 @@ func (tb *Table) Init() {
 
 		tb.MakeHeader(p)
 		tb.MakeGrid(p, func(p *tree.Plan) {
-			for i := 0; i < tb.VisRows; i++ {
+			for i := 0; i < tb.VisibleRows; i++ {
 				svi.MakeRow(p, i)
 			}
 		})
@@ -148,8 +148,8 @@ func (tb *Table) SetSlice(sl any) *Table {
 
 	tb.SetSliceBase()
 	tb.Slice = sl
-	tb.SliceUnderlying = reflectx.Underlying(reflect.ValueOf(tb.Slice))
-	tb.ElementValue = reflectx.Underlying(reflectx.SliceElementValue(sl))
+	tb.sliceUnderlying = reflectx.Underlying(reflect.ValueOf(tb.Slice))
+	tb.elementValue = reflectx.Underlying(reflectx.SliceElementValue(sl))
 	tb.cacheVisibleFields()
 	return tb
 }
@@ -173,7 +173,7 @@ func (tb *Table) cacheVisibleFields() {
 		}
 	}
 
-	reflectx.WalkFields(tb.ElementValue,
+	reflectx.WalkFields(tb.elementValue,
 		func(parent reflect.Value, field reflect.StructField, value reflect.Value) bool {
 			return shouldShow(field)
 		},
@@ -195,7 +195,7 @@ func (tb *Table) UpdateMaxWidths() {
 	for fli := 0; fli < tb.numVisibleFields; fli++ {
 		field := tb.visibleFields[fli]
 		tb.colMaxWidths[fli] = 0
-		val := tb.SliceElementValue(0)
+		val := tb.sliceElementValue(0)
 		fval := val.FieldByIndex(field.Index)
 		_, isicon := fval.Interface().(icons.Icon)
 		isString := fval.Type().Kind() == reflect.String
@@ -204,7 +204,7 @@ func (tb *Table) UpdateMaxWidths() {
 		}
 		mxw := 0
 		for rw := 0; rw < tb.SliceSize; rw++ {
-			val := tb.SliceElementValue(rw)
+			val := tb.sliceElementValue(rw)
 			str := reflectx.ToString(val.FieldByIndex(field.Index).Interface())
 			mxw = max(mxw, len(str))
 		}
@@ -250,7 +250,7 @@ func (tb *Table) MakeHeader(p *tree.Plan) {
 						}
 						w.SetText(htxt)
 						w.Tooltip = htxt + " (click to sort by)"
-						doc, ok := types.GetDoc(reflect.Value{}, tb.ElementValue, field, htxt)
+						doc, ok := types.GetDoc(reflect.Value{}, tb.elementValue, field, htxt)
 						if ok && doc != "" {
 							w.Tooltip += ": " + doc
 						}
@@ -284,7 +284,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 	svi := tb.This.(Lister)
 	si, _, invis := svi.SliceIndex(i)
 	itxt := strconv.Itoa(i)
-	val := tb.SliceElementValue(si)
+	val := tb.sliceElementValue(si)
 	// stru := val.Interface()
 
 	if tb.ShowIndexes {
@@ -320,7 +320,7 @@ func (tb *Table) MakeRow(p *tree.Plan, i int) {
 			}
 			wb.Updater(func() {
 				si, vi, invis := svi.SliceIndex(i)
-				val := tb.SliceElementValue(vi)
+				val := tb.sliceElementValue(vi)
 				upv := reflectx.UnderlyingPointer(val.FieldByIndex(field.Index))
 				Bind(upv.Interface(), w)
 
@@ -478,14 +478,14 @@ func (tb *Table) RowFirstVisWidget(row int) (*WidgetBase, bool) {
 		return nil, false
 	}
 	nWidgPerRow, idxOff := tb.RowWidgetNs()
-	sg := tb.SliceGrid()
-	w := sg.Children[row*nWidgPerRow].(Widget).AsWidget()
+	lg := tb.ListGrid
+	w := lg.Children[row*nWidgPerRow].(Widget).AsWidget()
 	if w.Geom.TotalBBox != (image.Rectangle{}) {
 		return w, true
 	}
 	ridx := nWidgPerRow * row
 	for fli := 0; fli < tb.numVisibleFields; fli++ {
-		w := sg.Child(ridx + idxOff + fli).(Widget).AsWidget()
+		w := lg.Child(ridx + idxOff + fli).(Widget).AsWidget()
 		if w.Geom.TotalBBox != (image.Rectangle{}) {
 			return w, true
 		}
@@ -502,10 +502,10 @@ func (tb *Table) RowGrabFocus(row int) *WidgetBase {
 	}
 	nWidgPerRow, idxOff := tb.RowWidgetNs()
 	ridx := nWidgPerRow * row
-	sg := tb.SliceGrid()
+	lg := tb.ListGrid
 	// first check if we already have focus
 	for fli := 0; fli < tb.numVisibleFields; fli++ {
-		w := sg.Child(ridx + idxOff + fli).(Widget).AsWidget()
+		w := lg.Child(ridx + idxOff + fli).(Widget).AsWidget()
 		if w.StateIs(states.Focused) || w.ContainsFocus() {
 			return w
 		}
@@ -513,7 +513,7 @@ func (tb *Table) RowGrabFocus(row int) *WidgetBase {
 	tb.InFocusGrab = true
 	defer func() { tb.InFocusGrab = false }()
 	for fli := 0; fli < tb.numVisibleFields; fli++ {
-		w := sg.Child(ridx + idxOff + fli).(Widget).AsWidget()
+		w := lg.Child(ridx + idxOff + fli).(Widget).AsWidget()
 		if w.CanFocus() {
 			w.SetFocusEvent()
 			return w
@@ -566,10 +566,10 @@ func StructSliceIndexByValue(structSlice any, fieldName string, fieldValue any) 
 }
 
 func (tb *Table) EditIndex(idx int) {
-	if idx < 0 || idx >= tb.SliceUnderlying.Len() {
+	if idx < 0 || idx >= tb.sliceUnderlying.Len() {
 		return
 	}
-	val := reflectx.UnderlyingPointer(tb.SliceUnderlying.Index(idx))
+	val := reflectx.UnderlyingPointer(tb.sliceUnderlying.Index(idx))
 	stru := val.Interface()
 	tynm := reflectx.NonPointerType(val.Type()).Name()
 	lbl := labels.ToLabel(stru)
@@ -602,7 +602,7 @@ func (tb *Table) ContextMenu(m *Scene) {
 
 func (tb *Table) SizeFinal() {
 	tb.ListBase.SizeFinal()
-	sg := tb.This.(Lister).SliceGrid()
+	sg := tb.ListGrid
 	if sg == nil {
 		return
 	}
