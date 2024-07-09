@@ -76,23 +76,6 @@ func (sm *stages) push(st *Stage) {
 	sm.stack.Add(sm.uniqueName(st.Name), st)
 }
 
-// pop pops current Stage off the stack, returning it or nil if none.
-// It runs under Write lock.
-func (sm *stages) pop() *Stage {
-	sm.mu.Lock()
-	defer sm.mu.Unlock()
-
-	sz := sm.stack.Len()
-	if sz == 0 {
-		return nil
-	}
-
-	sm.modified = true
-	st := sm.stack.ValueByIndex(sz - 1)
-	sm.stack.DeleteIndex(sz-1, sz)
-	return st
-}
-
 // deleteStage deletes given stage (removing from stack, calling Delete
 // on Stage), returning true if found.
 // It runs under Write lock.
