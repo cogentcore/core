@@ -159,7 +159,7 @@ func (st *Stage) configMainStage() {
 	}
 	sc := st.Scene
 	sc.makeSceneBars()
-	sc.MakeSceneWidgets()
+	sc.makeSceneWidgets()
 }
 
 // runWindow runs a Window with current settings.
@@ -183,7 +183,7 @@ func (st *Stage) runWindow() *Stage {
 	if TheApp.Platform() == system.Offscreen ||
 		(!TheApp.Platform().IsMobile() &&
 			(st.NewWindow || !st.FullWindow || CurrentRenderWindow == nil)) {
-		sz = sc.PrefSize(sz)
+		sz = sc.prefSize(sz)
 		// on offscreen, we don't want any extra space, as we want the smallest
 		// possible representation of the content
 		// also, on offscreen, if the new size is bigger than the current size,
@@ -285,7 +285,7 @@ func (st *Stage) runDialog() *Stage {
 
 	sz := ms.RenderContext.Geom.Size
 	if !st.FullWindow || st.NewWindow {
-		sz = sc.PrefSize(sz)
+		sz = sc.prefSize(sz)
 		sz = sz.Add(image.Point{50, 50})
 		sc.Events.startFocusFirst = true // popup dialogs always need focus
 	}

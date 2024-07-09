@@ -299,7 +299,7 @@ func (sm *Stages) SendShowEvents() {
 			continue
 		}
 		sc := st.Scene
-		if sc.showIter == SceneShowIters+1 {
+		if sc.showIter == sceneShowIters+1 {
 			sc.showIter++
 			if !sc.HasShown {
 				sc.HasShown = true

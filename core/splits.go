@@ -320,7 +320,7 @@ func (sl *Splits) RenderWidget() {
 			kwi.RenderWidget()
 			return tree.Continue
 		})
-		sl.RenderParts()
+		sl.renderParts()
 		sl.PopBounds()
 	}
 }

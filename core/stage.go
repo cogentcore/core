@@ -321,7 +321,7 @@ func (st *Stage) DoUpdate() (stageMods, sceneMods bool) {
 	if st.Type.IsMain() && st.Popups != nil {
 		stageMods, sceneMods = st.Popups.UpdateAll()
 	}
-	scMods := st.Scene.DoUpdate()
+	scMods := st.Scene.doUpdate()
 	sceneMods = sceneMods || scMods
 	// if scMods {
 	// 	fmt.Println("scene mod", st.Scene.Name)

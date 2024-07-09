@@ -255,7 +255,7 @@ func (sc *Scene) Resize(geom math32.Geom2DInt) {
 	sc.PaintContext.Init(geom.Size.X, geom.Size.Y, sc.Pixels)
 	sc.SceneGeom.Size = geom.Size // make sure
 
-	sc.ApplyStyleScene()
+	sc.applyStyleScene()
 	// restart the multi-render updating after resize, to get windows to update correctly while
 	// resizing on Windows (OS) and Linux (see https://github.com/cogentcore/core/issues/584), to get
 	// windows on Windows (OS) to update after a window snap (see https://github.com/cogentcore/core/issues/497),

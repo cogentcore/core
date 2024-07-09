@@ -512,7 +512,7 @@ func (sr *Slider) Render() {
 			tpos = tpos.AddDim(od, 0.5*(osz-origsz))
 			vabg := sr.Styles.ComputeActualBackgroundFor(sr.ValueColor, pabg)
 			pc.FillStyle.Color = vabg
-			sr.RenderBoxImpl(tpos, tsz, styles.Border{Radius: st.Border.Radius}) // thumb
+			sr.RenderBoxGeom(tpos, tsz, styles.Border{Radius: st.Border.Radius}) // thumb
 		}
 	} else {
 		prevbg := st.Background
@@ -533,13 +533,13 @@ func (sr *Slider) Render() {
 		bpos := pos
 		bpos = bpos.AddDim(od, .5*(sz.Dim(od)-trsz))
 		pc.FillStyle.Color = st.ActualBackground
-		sr.RenderBoxImpl(bpos, bsz, styles.Border{Radius: st.Border.Radius}) // track
+		sr.RenderBoxGeom(bpos, bsz, styles.Border{Radius: st.Border.Radius}) // track
 
 		if sr.ValueColor != nil {
 			bsz.SetDim(dim, sr.Pos)
 			vabg := sr.Styles.ComputeActualBackgroundFor(sr.ValueColor, pabg)
 			pc.FillStyle.Color = vabg
-			sr.RenderBoxImpl(bpos, bsz, styles.Border{Radius: st.Border.Radius})
+			sr.RenderBoxGeom(bpos, bsz, styles.Border{Radius: st.Border.Radius})
 		}
 
 		thsz := sr.ThumbSizeDots()
@@ -558,7 +558,7 @@ func (sr *Slider) Render() {
 			tabg := sr.Styles.ComputeActualBackgroundFor(sr.ThumbColor, pabg)
 			pc.FillStyle.Color = tabg
 			tpos.SetSub(thsz.MulScalar(0.5))
-			sr.RenderBoxImpl(tpos, thsz, styles.Border{Radius: st.Border.Radius})
+			sr.RenderBoxGeom(tpos, thsz, styles.Border{Radius: st.Border.Radius})
 		}
 	}
 }

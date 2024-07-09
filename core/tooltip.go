@@ -15,7 +15,7 @@ import (
 // DefaultTooltipPos returns the default position for the tooltip,
 // in Window coordinates, using the Window bounding box.
 func (wb *WidgetBase) DefaultTooltipPos() image.Point {
-	bb := wb.WinBBox()
+	bb := wb.winBBox()
 	pos := bb.Min
 	pos.X += (bb.Max.X - bb.Min.X) / 2 // center on X
 	// top of Y
@@ -35,7 +35,7 @@ func NewTooltipFromScene(sc *Scene, ctx Widget) *Stage {
 // for the given widget based at the given window-level position, with the size
 // defaulting to the size of the widget.
 func NewTooltip(w Widget, tooltip string, pos image.Point) *Stage {
-	return NewTooltipTextSize(w, tooltip, pos, w.AsWidget().WinBBox().Size())
+	return NewTooltipTextSize(w, tooltip, pos, w.AsWidget().winBBox().Size())
 }
 
 // NewTooltipTextSize returns a new tooltip stage displaying the given tooltip text

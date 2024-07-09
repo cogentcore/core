@@ -134,8 +134,8 @@ func (wb *WidgetBase) NeedsRebuild() bool {
 	return rc.Rebuild
 }
 
-// LayoutScene does a layout of the scene: Size, Position
-func (sc *Scene) LayoutScene() {
+// layoutScene does a layout of the scene: Size, Position
+func (sc *Scene) layoutScene() {
 	if DebugSettings.LayoutTrace {
 		fmt.Println("\n############################\nLayoutScene SizeUp start:", sc)
 	}
@@ -172,16 +172,16 @@ func (sc *Scene) LayoutScene() {
 	sc.ApplyScenePos()
 }
 
-// LayoutRenderScene does a layout and render of the tree:
+// layoutRenderScene does a layout and render of the tree:
 // GetSize, DoLayout, Render.  Needed after Config.
-func (sc *Scene) LayoutRenderScene() {
-	sc.LayoutScene()
+func (sc *Scene) layoutRenderScene() {
+	sc.layoutScene()
 	sc.RenderWidget()
 }
 
-// DoNeedsRender calls Render on tree from me for nodes
+// doNeedsRender calls Render on tree from me for nodes
 // with NeedsRender flags set
-func (wb *WidgetBase) DoNeedsRender() {
+func (wb *WidgetBase) doNeedsRender() {
 	if wb.This == nil {
 		return
 	}
@@ -193,7 +193,7 @@ func (wb *WidgetBase) DoNeedsRender() {
 		if ly := AsFrame(w); ly != nil {
 			for d := math32.X; d <= math32.Y; d++ {
 				if ly.HasScroll[d] && ly.scrolls[d] != nil {
-					ly.scrolls[d].DoNeedsRender()
+					ly.scrolls[d].doNeedsRender()
 				}
 			}
 		}
@@ -204,12 +204,12 @@ func (wb *WidgetBase) DoNeedsRender() {
 //////////////////////////////////////////////////////////////////
 //		Scene
 
-var SceneShowIters = 2
+var sceneShowIters = 2
 
-// DoUpdate checks scene Needs flags to do whatever updating is required.
+// doUpdate checks scene Needs flags to do whatever updating is required.
 // returns false if already updating.
 // This is the main update call made by the RenderWindow at FPS frequency.
-func (sc *Scene) DoUpdate() bool {
+func (sc *Scene) doUpdate() bool {
 	if sc.updating {
 		return false
 	}
@@ -218,7 +218,7 @@ func (sc *Scene) DoUpdate() bool {
 
 	rc := sc.RenderContext()
 
-	if sc.showIter < SceneShowIters {
+	if sc.showIter < sceneShowIters {
 		sc.needsLayout = true
 		sc.showIter++
 	}
@@ -226,15 +226,15 @@ func (sc *Scene) DoUpdate() bool {
 	switch {
 	case rc.Rebuild:
 		pr := profile.Start("rebuild")
-		sc.DoRebuild()
+		sc.doRebuild()
 		sc.needsLayout = false
 		sc.sceneNeedsRender = false
 		sc.imageUpdated = true
 		pr.End()
 	case sc.lastRender.NeedsRestyle(rc):
 		pr := profile.Start("restyle")
-		sc.ApplyStyleScene()
-		sc.LayoutRenderScene()
+		sc.applyStyleScene()
+		sc.layoutRenderScene()
 		sc.needsLayout = false
 		sc.sceneNeedsRender = false
 		sc.imageUpdated = true
@@ -242,14 +242,14 @@ func (sc *Scene) DoUpdate() bool {
 		pr.End()
 	case sc.needsLayout:
 		pr := profile.Start("layout")
-		sc.LayoutRenderScene()
+		sc.layoutRenderScene()
 		sc.needsLayout = false
 		sc.sceneNeedsRender = false
 		sc.imageUpdated = true
 		pr.End()
 	case sc.sceneNeedsRender:
 		pr := profile.Start("render")
-		sc.DoNeedsRender()
+		sc.doNeedsRender()
 		sc.sceneNeedsRender = false
 		sc.imageUpdated = true
 		pr.End()
@@ -257,7 +257,7 @@ func (sc *Scene) DoUpdate() bool {
 		return false
 	}
 
-	if sc.showIter == SceneShowIters { // end of first pass
+	if sc.showIter == sceneShowIters { // end of first pass
 		sc.showIter++
 		if !sc.prefSizing {
 			sc.Events.activateStartFocus()
@@ -267,21 +267,21 @@ func (sc *Scene) DoUpdate() bool {
 	return true
 }
 
-// MakeSceneWidgets calls Config on all widgets in the Scene,
+// makeSceneWidgets calls UpdateWidget on all widgets in the Scene,
 // which will set NeedsLayout to drive subsequent layout and render.
 // This is a top-level call, typically only done when the window
 // is first drawn, once the full sizing information is available.
-func (sc *Scene) MakeSceneWidgets() {
+func (sc *Scene) makeSceneWidgets() {
 	sc.updating = true // prevent rendering
 	defer func() { sc.updating = false }()
 
 	sc.UpdateTree()
 }
 
-// ApplyStyleScene calls ApplyStyle on all widgets in the Scene,
+// applyStyleScene calls ApplyStyle on all widgets in the Scene,
 // This is needed whenever the window geometry, DPI,
 // etc is updated, which affects styling.
-func (sc *Scene) ApplyStyleScene() {
+func (sc *Scene) applyStyleScene() {
 	sc.updating = true // prevent rendering
 	defer func() { sc.updating = false }()
 
@@ -289,26 +289,26 @@ func (sc *Scene) ApplyStyleScene() {
 	sc.needsLayout = true
 }
 
-// DoRebuild does the full re-render and RenderContext Rebuild flag
+// doRebuild does the full re-render and RenderContext Rebuild flag
 // should be used by Widgets to rebuild things that are otherwise
 // cached (e.g., Icon, TextCursor).
-func (sc *Scene) DoRebuild() {
-	sc.MakeSceneWidgets()
-	sc.ApplyStyleScene()
-	sc.LayoutRenderScene()
+func (sc *Scene) doRebuild() {
+	sc.makeSceneWidgets()
+	sc.applyStyleScene()
+	sc.layoutRenderScene()
 }
 
-// PrefSize computes the preferred size of the scene based on current contents.
+// prefSize computes the preferred size of the scene based on current contents.
 // initSz is the initial size -- e.g., size of screen.
 // Used for auto-sizing windows.
-func (sc *Scene) PrefSize(initSz image.Point) image.Point {
+func (sc *Scene) prefSize(initSz image.Point) image.Point {
 	sc.updating = true // prevent rendering
 	defer func() { sc.updating = false }()
 
 	sc.prefSizing = true
-	sc.MakeSceneWidgets()
-	sc.ApplyStyleScene()
-	sc.LayoutScene()
+	sc.makeSceneWidgets()
+	sc.applyStyleScene()
+	sc.layoutScene()
 	sz := &sc.Geom.Size
 	psz := sz.Actual.Total
 	sc.prefSizing = false
@@ -421,20 +421,20 @@ func (wb *WidgetBase) Render() {
 func (wb *WidgetBase) RenderWidget() {
 	if wb.PushBounds() {
 		wb.This.(Widget).Render()
-		wb.RenderParts()
-		wb.RenderChildren()
+		wb.renderParts()
+		wb.renderChildren()
 		wb.PopBounds()
 	}
 }
 
-func (wb *WidgetBase) RenderParts() {
+func (wb *WidgetBase) renderParts() {
 	if wb.Parts != nil {
 		wb.Parts.RenderWidget()
 	}
 }
 
-// RenderChildren renders all of the widget's children.
-func (wb *WidgetBase) RenderChildren() {
+// renderChildren renders all of the widget's children.
+func (wb *WidgetBase) renderChildren() {
 	wb.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		kwi.RenderWidget()
 		return tree.Continue
@@ -444,9 +444,8 @@ func (wb *WidgetBase) RenderChildren() {
 ////////////////////////////////////////////////////////////////////////////////
 //  Standard Box Model rendering
 
-// RenderBoxImpl implements the standard box model rendering, assuming all
-// paint parameters have already been set.
-func (wb *WidgetBase) RenderBoxImpl(pos math32.Vector2, sz math32.Vector2, bs styles.Border) {
+// RenderBoxGeom renders a box with the given geometry.
+func (wb *WidgetBase) RenderBoxGeom(pos math32.Vector2, sz math32.Vector2, bs styles.Border) {
 	wb.Scene.PaintContext.DrawBorder(pos.X, pos.Y, sz.X, sz.Y, bs)
 }
 
@@ -466,9 +465,9 @@ func (wb *WidgetBase) PointToRelPos(pt image.Point) image.Point {
 	return pt.Sub(wb.Geom.ContentBBox.Min)
 }
 
-// WinBBox returns the RenderWindow based bounding box for the widget
+// winBBox returns the RenderWindow based bounding box for the widget
 // by adding the Scene position to the ScBBox
-func (wb *WidgetBase) WinBBox() image.Rectangle {
+func (wb *WidgetBase) winBBox() image.Rectangle {
 	bb := wb.Geom.TotalBBox
 	if wb.Scene != nil {
 		return bb.Add(wb.Scene.SceneGeom.Pos)
@@ -476,12 +475,12 @@ func (wb *WidgetBase) WinBBox() image.Rectangle {
 	return bb
 }
 
-// WinPos returns the RenderWindow based position within the
+// winPos returns the RenderWindow based position within the
 // bounding box of the widget, where the x, y coordinates
 // are the proportion across the bounding box to use:
 // 0 = left / top, 1 = right / bottom
-func (wb *WidgetBase) WinPos(x, y float32) image.Point {
-	bb := wb.WinBBox()
+func (wb *WidgetBase) winPos(x, y float32) image.Point {
+	bb := wb.winBBox()
 	sz := bb.Size()
 	var pt image.Point
 	pt.X = bb.Min.X + int(math32.Round(float32(sz.X)*x))
@@ -495,20 +494,20 @@ func (wb *WidgetBase) WinPos(x, y float32) image.Point {
 // targeted profiling and global CPU and memory profiling.
 func ProfileToggle() { //types:add
 	if profile.Profiling {
-		EndTargetedProfile()
-		EndCPUMemoryProfile()
+		endTargetedProfile()
+		endCPUMemoryProfile()
 	} else {
-		StartTargetedProfile()
-		StartCPUMemoryProfile()
+		startTargetedProfile()
+		startCPUMemoryProfile()
 	}
 }
 
-// cpuProfileFile is the file created by [StartCPUMemoryProfile],
-// which needs to be stored so that it can be closed in [EndCPUMemoryProfile].
+// cpuProfileFile is the file created by [startCPUMemoryProfile],
+// which needs to be stored so that it can be closed in [endCPUMemoryProfile].
 var cpuProfileFile *os.File
 
-// StartCPUMemoryProfile starts the standard Go cpu and memory profiling.
-func StartCPUMemoryProfile() {
+// startCPUMemoryProfile starts the standard Go cpu and memory profiling.
+func startCPUMemoryProfile() {
 	fmt.Println("Starting standard cpu and memory profiling")
 	f, err := os.Create("cpu.prof")
 	if errors.Log(err) == nil {
@@ -517,8 +516,8 @@ func StartCPUMemoryProfile() {
 	}
 }
 
-// EndCPUMemoryProfile ends the standard Go cpu and memory profiling.
-func EndCPUMemoryProfile() {
+// endCPUMemoryProfile ends the standard Go cpu and memory profiling.
+func endCPUMemoryProfile() {
 	fmt.Println("Ending standard cpu and memory profiling")
 	pprof.StopCPUProfile()
 	errors.Log(cpuProfileFile.Close())
@@ -530,15 +529,15 @@ func EndCPUMemoryProfile() {
 	}
 }
 
-// StartTargetedProfile starts targeted profiling using the prof package.
-func StartTargetedProfile() {
+// startTargetedProfile starts targeted profiling using the [profile] package.
+func startTargetedProfile() {
 	fmt.Println("Starting targeted profiling")
 	profile.Reset()
 	profile.Profiling = true
 }
 
-// EndTargetedProfile ends targeted profiling and prints report.
-func EndTargetedProfile() {
+// endTargetedProfile ends targeted profiling and prints the report.
+func endTargetedProfile() {
 	profile.Report(time.Millisecond)
 	profile.Profiling = false
 }

@@ -128,7 +128,7 @@ func (m *Meter) Render() {
 			dim := m.Styles.Direction.Dim()
 			size := m.Geom.Size.Actual.Content.MulDim(dim, prop)
 			pc.FillStyle.Color = m.ValueColor
-			m.RenderBoxImpl(m.Geom.Pos.Content, size, st.Border)
+			m.RenderBoxGeom(m.Geom.Pos.Content, size, st.Border)
 		}
 		return
 	}

@@ -73,7 +73,7 @@ func (b *Body) waitNoEvents() {
 	rw.noEventsChan = nil
 
 	b.AsyncLock()
-	b.DoNeedsRender()
+	b.doNeedsRender()
 	b.AsyncUnlock()
 }
 

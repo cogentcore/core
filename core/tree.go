@@ -642,14 +642,14 @@ func (tr *Tree) RenderWidget() {
 			if tr.StateIs(states.Selected) {
 				tr.Parts.Styles.Background = colors.Scheme.Select.Container
 			}
-			tr.RenderParts()
+			tr.renderParts()
 		}
 		tr.PopBounds()
 	}
 	// we always have to render our kids b/c
 	// we could be out of scope but they could be in!
 	if !tr.Closed {
-		tr.RenderChildren()
+		tr.renderChildren()
 	}
 }
 

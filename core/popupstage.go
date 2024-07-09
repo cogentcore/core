@@ -60,7 +60,7 @@ func (st *Stage) runPopup() *Stage {
 	if st.Type == SnackbarStage {
 		st.Scene.makeSceneBars()
 	}
-	st.Scene.MakeSceneWidgets()
+	st.Scene.makeSceneWidgets()
 	sc := st.Scene
 
 	ms := ctx.Scene.Stage.Main
@@ -82,7 +82,7 @@ func (st *Stage) runPopup() *Stage {
 
 	sc.SceneGeom.Size = maxSz
 	sc.SceneGeom.Pos = st.Pos
-	sz := sc.PrefSize(maxSz)
+	sz := sc.prefSize(maxSz)
 	scrollWd := int(sc.Styles.ScrollBarWidth.Dots)
 	fontHt := 16
 	if sc.Styles.Font.Face != nil {

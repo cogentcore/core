@@ -195,7 +195,7 @@ func (fr *Frame) RenderChildren() {
 func (fr *Frame) RenderWidget() {
 	if fr.PushBounds() {
 		fr.This.(Widget).Render()
-		fr.RenderParts()
+		fr.renderParts()
 		fr.RenderChildren()
 		fr.RenderScrolls()
 		fr.PopBounds()

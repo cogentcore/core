@@ -295,7 +295,7 @@ func (w *RenderWindow) Resized() {
 		// still need to apply style even if size is same
 		for _, kv := range w.Mains.Stack.Order {
 			sc := kv.Value.Scene
-			sc.ApplyStyleScene()
+			sc.applyStyleScene()
 		}
 		return
 	}
