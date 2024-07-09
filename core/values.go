@@ -9,7 +9,6 @@ import (
 
 	"cogentcore.org/core/base/labels"
 	"cogentcore.org/core/base/reflectx"
-	"cogentcore.org/core/base/strcase"
 	"cogentcore.org/core/events"
 	"cogentcore.org/core/icons"
 	"cogentcore.org/core/paint"
@@ -153,12 +152,9 @@ func (ib *IconButton) Init() {
 		d.SetTitle("Select an icon")
 		si := 0
 		used := maps.Keys(icons.Used)
-		sv := NewList(d)
-		sv.SetSlice(&used).SetSelectedValue(ib.Icon).BindSelect(&si)
-		sv.SetStyleFunc(func(w Widget, s *styles.Style, row int) {
-			w.(*IconButton).SetText(strcase.ToSentence(string(used[row])))
-		})
-		sv.OnChange(func(e events.Event) {
+		ls := NewList(d)
+		ls.SetSlice(&used).SetSelectedValue(ib.Icon).BindSelect(&si)
+		ls.OnChange(func(e events.Event) {
 			ib.Icon = used[si]
 		})
 	})
@@ -185,7 +181,7 @@ func (fb *FontButton) Init() {
 		fi := paint.FontLibrary.FontInfo
 		tb := NewTable(d)
 		tb.SetSlice(&fi).SetSelectedField("Name").SetSelectedValue(fb.Text).BindSelect(&si)
-		tb.SetStyleFunc(func(w Widget, s *styles.Style, row, col int) {
+		tb.SetTableStyler(func(w Widget, s *styles.Style, row, col int) {
 			if col != 4 {
 				return
 			}
