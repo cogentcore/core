@@ -16,7 +16,8 @@ import (
 )
 
 // Meter is a widget that renders a current value on as a filled
-// bar/semicircle relative to a minimum and maximum potential value.
+// bar/circle/semicircle relative to a minimum and maximum potential
+// value.
 type Meter struct {
 	WidgetBase
 
@@ -40,11 +41,11 @@ type Meter struct {
 	Text string
 
 	// ValueColor is the image color that will be used to
-	// render the filled value bar. It should be set in Style.
+	// render the filled value bar. It should be set in a Styler.
 	ValueColor image.Image
 
 	// Width, for [MeterCircle] and [MeterSemicircle], is the
-	// width of the circle/semicircle. It should be set in Style.
+	// width of the circle/semicircle. It should be set in a Styler.
 	Width units.Value
 }
 
