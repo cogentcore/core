@@ -14,132 +14,98 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// Stages manages a stack of [Stages].
-type Stages struct { //types:add
-	// stack of stages managed by this stage manager.
-	Stack ordmap.Map[string, *Stage] `set:"-"`
+// stages manages a stack of [Stage]s.
+type stages struct { //types:add
 
-	// Modified is set to true whenever the stack has been modified.
+	// stack is the stack of stages managed by this stage manager.
+	stack ordmap.Map[string, *Stage]
+
+	// modified is set to true whenever the stack has been modified.
 	// This is cleared by the RenderWindow each render cycle.
-	Modified bool
+	modified bool
 
 	// rendering context provides key rendering information and locking
 	// for the RenderWindow in which the stages are running.
-	RenderContext *renderContext
+	renderContext *renderContext
 
 	// render window to which we are rendering.
 	// rely on the RenderContext wherever possible.
-	RenderWindow *renderWindow
+	renderWindow *renderWindow
 
-	// growing stack of viewing history of all stages.
-	History []*Stage `set:"-"`
-
-	// Main is the main stage that owns this [Stages].
+	// main is the main stage that owns this [Stages].
 	// This is only set for popup stages.
-	Main *Stage
+	main *Stage
 
 	// mutex protecting reading / updating of the Stack.
 	// Destructive stack updating gets a Write lock, else Read.
-	Mu sync.RWMutex `display:"-" set:"-"`
+	mu sync.RWMutex
 }
 
-// Top returns the top-most Stage in the Stack, under Read Lock
-func (sm *Stages) Top() *Stage {
-	sm.Mu.RLock()
-	defer sm.Mu.RUnlock()
+// top returns the top-most Stage in the Stack, under Read Lock
+func (sm *stages) top() *Stage {
+	sm.mu.RLock()
+	defer sm.mu.RUnlock()
 
-	sz := sm.Stack.Len()
+	sz := sm.stack.Len()
 	if sz == 0 {
 		return nil
 	}
-	return sm.Stack.ValueByIndex(sz - 1)
+	return sm.stack.ValueByIndex(sz - 1)
 }
 
-// TopOfType returns the top-most Stage in the Stack
-// of the given type, under Read Lock
-func (sm *Stages) TopOfType(typ StageTypes) *Stage {
-	sm.Mu.RLock()
-	defer sm.Mu.RUnlock()
-
-	l := sm.Stack.Len()
-	for i := l - 1; i >= 0; i-- {
-		st := sm.Stack.ValueByIndex(i)
-		if st.Type == typ {
-			return st
-		}
-	}
-	return nil
-}
-
-// TopNotType returns the top-most Stage in the Stack
-// that is NOT the given type, under Read Lock
-func (sm *Stages) TopNotType(typ StageTypes) *Stage {
-	sm.Mu.RLock()
-	defer sm.Mu.RUnlock()
-
-	l := sm.Stack.Len()
-	for i := l - 1; i >= 0; i-- {
-		st := sm.Stack.ValueByIndex(i)
-		if st.Type != typ {
-			return st
-		}
-	}
-	return nil
-}
-
-// UniqueName returns unique name for given item
-func (sm *Stages) UniqueName(nm string) string {
+// uniqueName returns unique name for given item
+func (sm *stages) uniqueName(nm string) string {
 	ctr := 0
-	for _, kv := range sm.Stack.Order {
+	for _, kv := range sm.stack.Order {
 		if kv.Key == nm {
 			ctr++
 		}
 	}
 	if ctr > 0 {
-		return fmt.Sprintf("%s-%d", nm, len(sm.Stack.Order))
+		return fmt.Sprintf("%s-%d", nm, len(sm.stack.Order))
 	}
 	return nm
 }
 
-// Push pushes a new Stage to top, under Write lock
-func (sm *Stages) Push(st *Stage) {
-	sm.Mu.Lock()
-	defer sm.Mu.Unlock()
+// push pushes a new Stage to top, under Write lock
+func (sm *stages) push(st *Stage) {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
 
-	sm.Modified = true
-	sm.Stack.Add(sm.UniqueName(st.Name), st)
+	sm.modified = true
+	sm.stack.Add(sm.uniqueName(st.Name), st)
 }
 
-// Pop pops current Stage off the stack, returning it or nil if none.
+// pop pops current Stage off the stack, returning it or nil if none.
 // It runs under Write lock.
-func (sm *Stages) Pop() *Stage {
-	sm.Mu.Lock()
-	defer sm.Mu.Unlock()
+func (sm *stages) pop() *Stage {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
 
-	sz := sm.Stack.Len()
+	sz := sm.stack.Len()
 	if sz == 0 {
 		return nil
 	}
 
-	sm.Modified = true
-	st := sm.Stack.ValueByIndex(sz - 1)
-	sm.Stack.DeleteIndex(sz-1, sz)
+	sm.modified = true
+	st := sm.stack.ValueByIndex(sz - 1)
+	sm.stack.DeleteIndex(sz-1, sz)
 	return st
 }
 
-// DeleteStage deletes given stage (removing from stack, calling Delete
+// deleteStage deletes given stage (removing from stack, calling Delete
 // on Stage), returning true if found.
 // It runs under Write lock.
-func (sm *Stages) DeleteStage(st *Stage) bool {
-	sm.Mu.Lock()
-	defer sm.Mu.Unlock()
+func (sm *stages) deleteStage(st *Stage) bool {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
 
-	l := sm.Stack.Len()
+	l := sm.stack.Len()
 	for i := l - 1; i >= 0; i-- {
-		s := sm.Stack.ValueByIndex(i)
+		s := sm.stack.ValueByIndex(i)
 		if st == s {
-			sm.Modified = true
-			sm.Stack.DeleteIndex(i, i+1)
+			sm.modified = true
+			sm.stack.DeleteIndex(i, i+1)
 			st.delete()
 			return true
 		}
@@ -147,30 +113,30 @@ func (sm *Stages) DeleteStage(st *Stage) bool {
 	return false
 }
 
-// DeleteStageAndBelow deletes given stage (removing from stack,
+// deleteStageAndBelow deletes given stage (removing from stack,
 // calling Delete on Stage), returning true if found.
 // And also deletes all stages of the same type immediately below it.
 // It runs under Write lock.
-func (sm *Stages) DeleteStageAndBelow(st *Stage) bool {
-	sm.Mu.Lock()
-	defer sm.Mu.Unlock()
+func (sm *stages) deleteStageAndBelow(st *Stage) bool {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
 
 	styp := st.Type
 
-	l := sm.Stack.Len()
+	l := sm.stack.Len()
 	got := false
 	for i := l - 1; i >= 0; i-- {
-		s := sm.Stack.ValueByIndex(i)
+		s := sm.stack.ValueByIndex(i)
 		if !got {
 			if st == s {
-				sm.Modified = true
-				sm.Stack.DeleteIndex(i, i+1)
+				sm.modified = true
+				sm.stack.DeleteIndex(i, i+1)
 				st.delete()
 				got = true
 			}
 		} else {
 			if s.Type == styp {
-				sm.Stack.DeleteIndex(i, i+1)
+				sm.stack.DeleteIndex(i, i+1)
 				st.delete()
 			}
 		}
@@ -178,84 +144,76 @@ func (sm *Stages) DeleteStageAndBelow(st *Stage) bool {
 	return got
 }
 
-// MoveToTop moves the given stage to the top of the stack,
+// moveToTop moves the given stage to the top of the stack,
 // returning true if found. It runs under Write lock.
-func (sm *Stages) MoveToTop(st *Stage) bool {
-	sm.Mu.Lock()
-	defer sm.Mu.Unlock()
+func (sm *stages) moveToTop(st *Stage) bool {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
 
-	l := sm.Stack.Len()
+	l := sm.stack.Len()
 	for i := l - 1; i >= 0; i-- {
-		s := sm.Stack.ValueByIndex(i)
+		s := sm.stack.ValueByIndex(i)
 		if st == s {
-			k := sm.Stack.KeyByIndex(i)
-			sm.Modified = true
-			sm.Stack.DeleteIndex(i, i+1)
-			sm.Stack.InsertAtIndex(sm.Stack.Len(), k, s)
+			k := sm.stack.KeyByIndex(i)
+			sm.modified = true
+			sm.stack.DeleteIndex(i, i+1)
+			sm.stack.InsertAtIndex(sm.stack.Len(), k, s)
 			return true
 		}
 	}
 	return false
 }
 
-// PopType pops the top-most Stage of the given type of the stack,
+// popType pops the top-most Stage of the given type of the stack,
 // returning it or nil if none. It runs under Write lock.
-func (sm *Stages) PopType(typ StageTypes) *Stage {
-	sm.Mu.Lock()
-	defer sm.Mu.Unlock()
+func (sm *stages) popType(typ StageTypes) *Stage {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
 
-	l := sm.Stack.Len()
+	l := sm.stack.Len()
 	for i := l - 1; i >= 0; i-- {
-		st := sm.Stack.ValueByIndex(i)
+		st := sm.stack.ValueByIndex(i)
 		if st.Type == typ {
-			sm.Modified = true
-			sm.Stack.DeleteIndex(i, i+1)
+			sm.modified = true
+			sm.stack.DeleteIndex(i, i+1)
 			return st
 		}
 	}
 	return nil
 }
 
-// PopDelete pops current top--most Stage off the stack and calls Delete on it.
-func (sm *Stages) PopDelete() {
-	st := sm.Pop()
-	if st != nil {
-		st.delete()
-	}
-}
-
-// PopDeleteType pops the top-most Stage of the given type off the stack
+// popDeleteType pops the top-most Stage of the given type off the stack
 // and calls Delete on it.
-func (sm *Stages) PopDeleteType(typ StageTypes) {
-	st := sm.PopType(typ)
+func (sm *stages) popDeleteType(typ StageTypes) {
+	st := sm.popType(typ)
 	if st != nil {
 		st.delete()
 	}
 }
 
-// DeleteAll deletes all of the stages.
+// deleteAll deletes all of the stages.
 // For when Stage with Popups is Deleted, or when a RenderWindow is closed.
 // requires outer RenderContext mutex!
-func (sm *Stages) DeleteAll() {
-	sm.Mu.Lock()
-	defer sm.Mu.Unlock()
+func (sm *stages) deleteAll() {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
 
-	sz := sm.Stack.Len()
+	sz := sm.stack.Len()
 	if sz == 0 {
 		return
 	}
-	sm.Modified = true
+	sm.modified = true
 	for i := sz - 1; i >= 0; i-- {
-		st := sm.Stack.ValueByIndex(i)
+		st := sm.stack.ValueByIndex(i)
 		st.delete()
-		sm.Stack.DeleteIndex(i, i+1)
+		sm.stack.DeleteIndex(i, i+1)
 	}
 }
 
-// Resize calls Resize on all stages within based on the given
+// resize calls resize on all stages within based on the given
 // window render geom.
-func (sm *Stages) Resize(rg math32.Geom2DInt) {
-	for _, kv := range sm.Stack.Order {
+func (sm *stages) resize(rg math32.Geom2DInt) {
+	for _, kv := range sm.stack.Order {
 		st := kv.Value
 		if st.Type == WindowStage || (st.Type == DialogStage && st.FullWindow) {
 			st.Scene.resize(rg)
@@ -265,25 +223,25 @@ func (sm *Stages) Resize(rg math32.Geom2DInt) {
 	}
 }
 
-// UpdateAll iterates through all Stages and calls DoUpdate on them.
+// updateAll iterates through all Stages and calls DoUpdate on them.
 // returns stageMods = true if any Stages have been modified (Main or Popup),
 // and sceneMods = true if any Scenes have been modified.
 // Stage calls DoUpdate on its Scene, ensuring everything is updated at the
 // Widget level.  If nothing is needed, nothing is done.
 // This is called only during RenderWindow.RenderWindow,
 // under the global RenderContext.Mu Write lock so nothing else can happen.
-func (sm *Stages) UpdateAll() (stageMods, sceneMods bool) {
-	sm.Mu.Lock()
-	defer sm.Mu.Unlock()
+func (sm *stages) updateAll() (stageMods, sceneMods bool) {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
 
-	stageMods = sm.Modified
-	sm.Modified = false
+	stageMods = sm.modified
+	sm.modified = false
 
-	sz := sm.Stack.Len()
+	sz := sm.stack.Len()
 	if sz == 0 {
 		return
 	}
-	for _, kv := range sm.Stack.Order {
+	for _, kv := range sm.stack.Order {
 		st := kv.Value
 		stMod, scMod := st.doUpdate()
 		stageMods = stageMods || stMod
@@ -292,8 +250,8 @@ func (sm *Stages) UpdateAll() (stageMods, sceneMods bool) {
 	return
 }
 
-func (sm *Stages) SendShowEvents() {
-	for _, kv := range sm.Stack.Order {
+func (sm *stages) sendShowEvents() {
+	for _, kv := range sm.stack.Order {
 		st := kv.Value
 		if st.Scene == nil {
 			continue

@@ -26,8 +26,8 @@ func newMainStage(typ StageTypes, sc *Scene) *Stage {
 	st := &Stage{}
 	st.setType(typ)
 	st.setScene(sc)
-	st.popups = &Stages{}
-	st.popups.Main = st
+	st.popups = &stages{}
+	st.popups.main = st
 	st.Main = st
 	return st
 }
@@ -137,12 +137,12 @@ func (st *Stage) addDialogParts() *Stage {
 	return st
 }
 
-// firstWindowStages creates a temporary [Stages] for the first window
+// firstWindowStages creates a temporary [stages] for the first window
 // to be able to get sizing information prior to having a RenderWindow,
 // based on the system App Screen Size. Only adds a RenderContext.
-func (st *Stage) firstWindowStages() *Stages {
-	ms := &Stages{}
-	ms.RenderContext = newRenderContext()
+func (st *Stage) firstWindowStages() *stages {
+	ms := &stages{}
+	ms.renderContext = newRenderContext()
 	return ms
 }
 
@@ -229,17 +229,17 @@ func (st *Stage) runWindow() *Stage {
 	}
 	if st.Context != nil {
 		ms := st.Context.AsWidget().Scene.Stage.Mains
-		msc := ms.Top().Scene
+		msc := ms.top().Scene
 		sc.sceneGeom.Size = sz
 		sc.fitInWindow(msc.sceneGeom) // does resize
-		ms.Push(st)
+		ms.push(st)
 		st.setMains(ms)
 	} else {
 		ms := &currentRenderWindow.mains
-		msc := ms.Top().Scene
+		msc := ms.top().Scene
 		sc.sceneGeom.Size = sz
 		sc.fitInWindow(msc.sceneGeom) // does resize
-		ms.Push(st)
+		ms.push(st)
 		st.setMains(ms)
 	}
 	return st
@@ -255,7 +255,7 @@ func (st *Stage) getValidContext() bool {
 			slog.Error("Stage.Run: Context is nil and CurrentRenderWindow is nil, so cannot Run", "Name", st.Name, "Title", st.Title)
 			return false
 		}
-		st.Context = currentRenderWindow.mains.Top().Scene
+		st.Context = currentRenderWindow.mains.top().Scene
 	}
 	return true
 }
@@ -284,7 +284,7 @@ func (st *Stage) runDialog() *Stage {
 
 	st.setMains(ms) // temporary for prefs
 
-	sz := ms.RenderContext.geom.Size
+	sz := ms.renderContext.geom.Size
 	if !st.FullWindow || st.NewWindow {
 		sz = sc.prefSize(sz)
 		sz = sz.Add(image.Point{50, 50})
@@ -307,7 +307,7 @@ func (st *Stage) runDialog() *Stage {
 	}
 	sc.sceneGeom.Size = sz
 	sc.fitInWindow(st.renderContext.geom) // does resize
-	ms.Push(st)
+	ms.push(st)
 	// st.SetMains(ms) // already set
 	return st
 }
@@ -342,11 +342,11 @@ func (st *Stage) newRenderWindow() *renderWindow {
 	}
 	AllRenderWindows.Add(win)
 	// initialize Mains
-	win.mains.RenderWindow = win
-	win.mains.RenderContext = newRenderContext() // sets defaults according to Screen
+	win.mains.renderWindow = win
+	win.mains.renderContext = newRenderContext() // sets defaults according to Screen
 	// note: win is not yet created by the OS and we don't yet know its actual size
 	// or dpi.
-	win.mains.Push(st)
+	win.mains.push(st)
 	st.setMains(&win.mains)
 	return win
 }
@@ -368,10 +368,10 @@ func (st *Stage) mainHandleEvent(e events.Event) {
 }
 
 // mainHandleEvent calls mainHandleEvent on relevant stages in reverse order.
-func (sm *Stages) mainHandleEvent(e events.Event) {
-	n := sm.Stack.Len()
+func (sm *stages) mainHandleEvent(e events.Event) {
+	n := sm.stack.Len()
 	for i := n - 1; i >= 0; i-- {
-		st := sm.Stack.ValueByIndex(i)
+		st := sm.stack.ValueByIndex(i)
 		st.mainHandleEvent(e)
 		if e.IsHandled() || st.Modal || st.Type == WindowStage || st.FullWindow {
 			break

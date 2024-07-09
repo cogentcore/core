@@ -51,14 +51,14 @@ var renderWindowGlobalMu sync.Mutex
 // renderWindow provides an outer "actual" window where everything is rendered,
 // and is the point of entry for all events coming in from user actions.
 //
-// renderWindow contents are all managed by the [Stages] stack that
+// renderWindow contents are all managed by the [stages] stack that
 // handles main [Stage] elements such as [WindowStage] and [DialogStage], which in
 // turn manage their own stack of popup stage elements such as menus and tooltips.
 // The contents of each Stage is provided by a Scene, containing Widgets,
 // and the Stage Pixels image is drawn to the renderWindow in the renderWindow method.
 //
 // Rendering is handled by the [system.Drawer]. It is akin to a window manager overlaying Go image bitmaps
-// on top of each other in the proper order, based on the [Stages] stacking order.
+// on top of each other in the proper order, based on the [stages] stacking order.
 // Sprites are managed by the main stage, as layered textures of the same size,
 // to enable unlimited number packed into a few descriptors for standard sizes.
 type renderWindow struct {
@@ -76,7 +76,7 @@ type renderWindow struct {
 
 	// mains is the stack of main stages in this render window.
 	// The [RenderContext] in this manager is the original source for all Stages.
-	mains Stages
+	mains stages
 
 	// renderScenes are the Scene elements that draw directly to the window,
 	// arranged in order, and continuously updated during Render.
@@ -118,7 +118,7 @@ func newRenderWindow(name, title string, opts *system.NewWindowOptions) *renderW
 		defer rc.unlock()
 		w.closing = true
 		// ensure that everyone is closed first
-		for _, kv := range w.mains.Stack.Order {
+		for _, kv := range w.mains.stack.Order {
 			if kv.Value == nil || kv.Value.Scene == nil || kv.Value.Scene.This == nil {
 				continue
 			}
@@ -148,7 +148,7 @@ func newRenderWindow(name, title string, opts *system.NewWindowOptions) *renderW
 // MainScene returns the current [renderWindow.mains] top Scene,
 // which is the current window or full window dialog occupying the RenderWindow.
 func (w *renderWindow) MainScene() *Scene {
-	top := w.mains.Top()
+	top := w.mains.top()
 	if top == nil {
 		return nil
 	}
@@ -277,7 +277,7 @@ func (w *renderWindow) resized() {
 			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.name, curRg)
 		}
 		// still need to apply style even if size is same
-		for _, kv := range w.mains.Stack.Order {
+		for _, kv := range w.mains.stack.Order {
 			sc := kv.Value.Scene
 			sc.applyStyleScene()
 		}
@@ -302,7 +302,7 @@ func (w *renderWindow) resized() {
 	rc.visible = true
 	rc.logicalDPI = w.logicalDPI()
 	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
-	w.mains.Resize(rg)
+	w.mains.resize(rg)
 	if DebugSettings.WinGeomTrace {
 		log.Printf("WindowGeometry: recording from Resize\n")
 	}
@@ -359,7 +359,7 @@ func (w *renderWindow) closed() {
 
 // isClosed reports if the window has been closed
 func (w *renderWindow) isClosed() bool {
-	return w.SystemWindow.IsClosed() || w.mains.Stack.Len() == 0
+	return w.SystemWindow.IsClosed() || w.mains.stack.Len() == 0
 }
 
 // isVisible is the main visibility check; don't do any window updates if not visible!
@@ -414,7 +414,7 @@ func (w *renderWindow) eventLoop() {
 	}
 	windowWait.Done()
 	// our last act must be self destruction!
-	w.mains.DeleteAll()
+	w.mains.deleteAll()
 }
 
 // handleEvent processes given events.Event.
@@ -454,7 +454,7 @@ func (w *renderWindow) handleWindowEvents(e events.Event) {
 		rc.unlock() // one case where we need to break lock
 		w.renderWindow()
 		rc.lock()
-		w.mains.SendShowEvents()
+		w.mains.sendShowEvents()
 
 	case events.WindowResize:
 		e.SetHandled()
@@ -734,7 +734,7 @@ func (sc *Scene) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 }
 
 func (w *renderWindow) renderContext() *renderContext {
-	return w.mains.RenderContext
+	return w.mains.renderContext
 }
 
 // renderWindow performs all rendering based on current Stages config.
@@ -750,8 +750,8 @@ func (w *renderWindow) renderWindow() {
 	}()
 	rebuild := rc.rebuild
 
-	stageMods, sceneMods := w.mains.UpdateAll() // handles all Scene / Widget updates!
-	top := w.mains.Top()
+	stageMods, sceneMods := w.mains.updateAll() // handles all Scene / Widget updates!
+	top := w.mains.top()
 	if top == nil {
 		return
 	}
@@ -800,7 +800,7 @@ func (w *renderWindow) drawScenes() {
 
 	rs.setImages(drw) // ensure all updated images copied
 
-	top := w.mains.Top()
+	top := w.mains.top()
 	if top.Sprites.Modified {
 		top.Sprites.configSprites(drw)
 	}
@@ -863,7 +863,7 @@ func (w *renderWindow) gatherScenes() bool {
 	scIndex := make(map[Widget]int)
 
 	sm := &w.mains
-	n := sm.Stack.Len()
+	n := sm.stack.Len()
 	if n == 0 {
 		slog.Error("GatherScenes stack empty")
 		return false // shouldn't happen!
@@ -873,7 +873,7 @@ func (w *renderWindow) gatherScenes() bool {
 	winIndex := 0
 	var winScene *Scene
 	for i := n - 1; i >= 0; i-- {
-		st := sm.Stack.ValueByIndex(i)
+		st := sm.stack.ValueByIndex(i)
 		if st.Type == WindowStage {
 			if DebugSettings.WinRenderTrace {
 				fmt.Println("GatherScenes: main Window:", st.String())
@@ -890,7 +890,7 @@ func (w *renderWindow) gatherScenes() bool {
 
 	// then add everyone above that
 	for i := winIndex + 1; i < n; i++ {
-		st := sm.Stack.ValueByIndex(i)
+		st := sm.stack.ValueByIndex(i)
 		if st.Scrim && i == n-1 {
 			rs.add(newScrim(winScene), scIndex)
 		}
@@ -900,11 +900,11 @@ func (w *renderWindow) gatherScenes() bool {
 		}
 	}
 
-	top := sm.Top()
+	top := sm.top()
 	top.Sprites.Modified = true // ensure configured
 
 	// then add the popups for the top main stage
-	for _, kv := range top.popups.Stack.Order {
+	for _, kv := range top.popups.stack.Order {
 		st := kv.Value
 		rs.add(st.Scene, scIndex)
 		if DebugSettings.WinRenderTrace {

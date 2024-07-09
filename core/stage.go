@@ -20,8 +20,8 @@ import (
 // dismissed. PopupStages are [MenuStage], [TooltipStage],
 // [SnackbarStage], and [CompleterStage], which are transitory
 // and simple, without additional decorations. MainStages live
-// in a [Stages] associated with a [renderWindow] and manage
-// their own set of PopupStages via another [Stages].
+// in a [stages] associated with a [renderWindow] and manage
+// their own set of PopupStages via another [stages].
 type StageTypes int32 //enums:enum
 
 const (
@@ -140,11 +140,11 @@ type Stage struct { //types:add -setters
 	// (created specifically for the main stage).
 	// For popups, this is the pointer to the popups within the
 	// main stage managing it.
-	popups *Stages
+	popups *stages
 
 	// For all stages, this is the main [Stages] that lives in a [renderWindow]
 	// and manages the main stages.
-	Mains *Stages `set:"-"`
+	Mains *stages `set:"-"`
 
 	// rendering context which has info about the RenderWindow onto which we render.
 	// This should be used instead of the RenderWindow itself for all relevant
@@ -193,9 +193,9 @@ func (st *Stage) setScene(sc *Scene) *Stage {
 
 // setMains sets the [Stage.Mains] to the given stack of main stages,
 // and also sets the RenderContext from that.
-func (st *Stage) setMains(sm *Stages) *Stage {
+func (st *Stage) setMains(sm *stages) *Stage {
 	st.Mains = sm
-	st.renderContext = sm.RenderContext
+	st.renderContext = sm.renderContext
 	return st
 }
 
@@ -205,7 +205,7 @@ func (st *Stage) setPopups(mainSt *Stage) *Stage {
 	st.Main = mainSt
 	st.Mains = mainSt.Mains
 	st.popups = mainSt.popups
-	st.renderContext = st.Mains.RenderContext
+	st.renderContext = st.Mains.renderContext
 	return st
 }
 
@@ -293,7 +293,7 @@ func (st *Stage) doUpdate() (stageMods, sceneMods bool) {
 		return
 	}
 	if st.Type.isMain() && st.popups != nil {
-		stageMods, sceneMods = st.popups.UpdateAll()
+		stageMods, sceneMods = st.popups.updateAll()
 	}
 	scMods := st.Scene.doUpdate()
 	sceneMods = sceneMods || scMods
@@ -303,19 +303,19 @@ func (st *Stage) doUpdate() (stageMods, sceneMods bool) {
 	return
 }
 
-// raise moves the Stage to the top of its main [Stages]
+// raise moves the Stage to the top of its main [stages]
 // and raises the [renderWindow] it is in if necessary.
 func (st *Stage) raise() {
-	if st.Mains.RenderWindow != currentRenderWindow {
-		st.Mains.RenderWindow.Raise()
+	if st.Mains.renderWindow != currentRenderWindow {
+		st.Mains.renderWindow.Raise()
 	}
-	st.Mains.MoveToTop(st)
+	st.Mains.moveToTop(st)
 	currentRenderWindow.SetStageTitle(st.Title)
 }
 
 func (st *Stage) delete() {
 	if st.Type.isMain() && st.popups != nil {
-		st.popups.DeleteAll()
+		st.popups.deleteAll()
 		st.Sprites.reset()
 	}
 	if st.Scene != nil {

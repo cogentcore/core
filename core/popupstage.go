@@ -68,10 +68,10 @@ func (st *Stage) runPopup() *Stage {
 
 	if st.Type == SnackbarStage {
 		// only one snackbar can exist
-		ms.popups.PopDeleteType(SnackbarStage)
+		ms.popups.popDeleteType(SnackbarStage)
 	}
 
-	ms.popups.Push(st)
+	ms.popups.push(st)
 	st.setPopups(ms) // sets all pointers
 
 	maxSz := msc.sceneGeom.Size
@@ -127,7 +127,7 @@ func (st *Stage) runPopup() *Stage {
 			if st.Main == nil {
 				return
 			}
-			st.popups.DeleteStage(st)
+			st.popups.deleteStage(st)
 		})
 	}
 
@@ -138,7 +138,7 @@ func (st *Stage) runPopup() *Stage {
 // This version is for Asynchronous usage outside the main event loop,
 // for example in a delayed callback AfterFunc etc.
 func (st *Stage) closePopupAsync() {
-	rc := st.Mains.RenderContext
+	rc := st.Mains.renderContext
 	rc.lock()
 	defer rc.unlock()
 	st.ClosePopup()
@@ -150,7 +150,7 @@ func (st *Stage) ClosePopup() bool {
 	if st.Main == nil || st.popups == nil || st.Mains == nil {
 		return false
 	}
-	return st.popups.DeleteStage(st)
+	return st.popups.deleteStage(st)
 }
 
 // closePopupAndBelow closes this stage as a popup,
@@ -161,7 +161,7 @@ func (st *Stage) closePopupAndBelow() bool {
 	if st.Main == nil || st.popups == nil || st.Mains == nil {
 		return false
 	}
-	return st.popups.DeleteStageAndBelow(st)
+	return st.popups.deleteStageAndBelow(st)
 }
 
 func (st *Stage) popupHandleEvent(e events.Event) {
@@ -177,8 +177,8 @@ func (st *Stage) popupHandleEvent(e events.Event) {
 }
 
 // topIsModal returns true if there is a Top PopupStage and it is Modal.
-func (pm *Stages) topIsModal() bool {
-	top := pm.Top()
+func (pm *stages) topIsModal() bool {
+	top := pm.top()
 	if top == nil {
 		return false
 	}
@@ -187,8 +187,8 @@ func (pm *Stages) topIsModal() bool {
 
 // popupHandleEvent processes Popup events.
 // requires outer RenderContext mutex.
-func (pm *Stages) popupHandleEvent(e events.Event) {
-	top := pm.Top()
+func (pm *stages) popupHandleEvent(e events.Event) {
+	top := pm.top()
 	if top == nil {
 		return
 	}
@@ -197,8 +197,8 @@ func (pm *Stages) popupHandleEvent(e events.Event) {
 	// we must get the top stage that does not ignore events
 	if top.ignoreEvents {
 		var ntop *Stage
-		for i := pm.Stack.Len() - 1; i >= 0; i-- {
-			s := pm.Stack.ValueByIndex(i)
+		for i := pm.stack.Len() - 1; i >= 0; i-- {
+			s := pm.stack.ValueByIndex(i)
 			if !s.ignoreEvents {
 				ntop = s
 				break
@@ -228,8 +228,8 @@ func (pm *Stages) popupHandleEvent(e events.Event) {
 		}
 		// otherwise not Handled, so pass on to first lower stage
 		// that accepts events and is in bounds
-		for i := pm.Stack.Len() - 1; i >= 0; i-- {
-			s := pm.Stack.ValueByIndex(i)
+		for i := pm.stack.Len() - 1; i >= 0; i-- {
+			s := pm.stack.ValueByIndex(i)
 			ss := s.Scene
 			if !s.ignoreEvents && pos.In(ss.sceneGeom.Bounds()) {
 				s.popupHandleEvent(e)

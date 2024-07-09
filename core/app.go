@@ -104,11 +104,11 @@ func makeStandardAppBar(p *tree.Plan) {
 	tree.AddAt(p, "back", func(w *Button) {
 		w.SetIcon(icons.ArrowBack).SetKey(keymap.HistPrev).SetTooltip("Back")
 		w.OnClick(func(e events.Event) {
-			if slen := w.Scene.Stage.Mains.Stack.Len(); slen > 1 {
+			if slen := w.Scene.Stage.Mains.stack.Len(); slen > 1 {
 				if w.Scene.Stage.CloseOnBack {
 					w.Scene.Close()
 				} else {
-					w.Scene.Stage.Mains.Stack.ValueByIndex(slen - 2).raise()
+					w.Scene.Stage.Mains.stack.ValueByIndex(slen - 2).raise()
 				}
 				return
 			}
@@ -151,7 +151,7 @@ func makeStandardAppBar(p *tree.Plan) {
 
 		w.AddItemsFunc(func() {
 			for _, rw := range AllRenderWindows {
-				for _, kv := range rw.mains.Stack.Order {
+				for _, kv := range rw.mains.stack.Order {
 					st := kv.Value
 					// we do not include ourself
 					if st == w.Scene.Stage {

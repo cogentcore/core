@@ -316,7 +316,6 @@ func init() {
 		"Sprite":                 reflect.ValueOf((*core.Sprite)(nil)),
 		"Stage":                  reflect.ValueOf((*core.Stage)(nil)),
 		"StageTypes":             reflect.ValueOf((*core.StageTypes)(nil)),
-		"Stages":                 reflect.ValueOf((*core.Stages)(nil)),
 		"Stretch":                reflect.ValueOf((*core.Stretch)(nil)),
 		"Switch":                 reflect.ValueOf((*core.Switch)(nil)),
 		"SwitchItem":             reflect.ValueOf((*core.SwitchItem)(nil)),

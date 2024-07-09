@@ -140,7 +140,7 @@ type Events struct {
 }
 
 // mains returns the stack of main stages for our scene.
-func (em *Events) mains() *Stages {
+func (em *Events) mains() *stages {
 	if em.scene == nil {
 		return nil
 	}
@@ -154,7 +154,7 @@ func (em *Events) RenderWindow() *renderWindow {
 	if mgr == nil {
 		return nil
 	}
-	return mgr.RenderWindow
+	return mgr.renderWindow
 }
 
 func (em *Events) handleEvent(e events.Event) {

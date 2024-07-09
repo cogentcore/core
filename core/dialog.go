@@ -199,5 +199,5 @@ func nonNilContext(ctx Widget) Widget {
 	if !reflectx.AnyIsNil(ctx) {
 		return ctx
 	}
-	return currentRenderWindow.mains.Top().Scene
+	return currentRenderWindow.mains.top().Scene
 }

@@ -181,14 +181,14 @@ func (sc *Scene) Init() {
 		if sm == nil {
 			return
 		}
-		sm.Mu.RLock()
-		defer sm.Mu.RUnlock()
+		sm.mu.RLock()
+		defer sm.mu.RUnlock()
 
-		if sm.Stack.Len() < 2 {
+		if sm.stack.Len() < 2 {
 			return
 		}
 		// the stage that will be visible next
-		st := sm.Stack.ValueByIndex(sm.Stack.Len() - 2)
+		st := sm.stack.ValueByIndex(sm.stack.Len() - 2)
 		currentRenderWindow.SetStageTitle(st.Title)
 	})
 	if TheApp.SceneConfig != nil {
@@ -206,7 +206,7 @@ func (sc *Scene) renderContext() *renderContext {
 	if sm == nil {
 		return nil
 	}
-	return sm.RenderContext
+	return sm.renderContext
 }
 
 // RenderWindow returns the current render window for this scene.
@@ -220,7 +220,7 @@ func (sc *Scene) RenderWindow() *renderWindow {
 	if sm == nil {
 		return nil
 	}
-	return sm.RenderWindow
+	return sm.renderWindow
 }
 
 // fitInWindow fits Scene geometry (pos, size) into given window geom.
@@ -287,9 +287,9 @@ func (sc *Scene) Close() bool {
 	if mm == nil {
 		return false // todo: needed, but not sure why
 	}
-	mm.DeleteStage(sc.Stage)
-	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() && !mm.RenderWindow.closing && !mm.RenderWindow.stopEventLoop && !TheApp.IsQuitting() {
-		mm.RenderWindow.closeReq()
+	mm.deleteStage(sc.Stage)
+	if sc.Stage.NewWindow && !TheApp.Platform().IsMobile() && !mm.renderWindow.closing && !mm.renderWindow.stopEventLoop && !TheApp.IsQuitting() {
+		mm.renderWindow.closeReq()
 	}
 	return true
 }
