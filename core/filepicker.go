@@ -117,8 +117,8 @@ func (fp *FilePicker) Init() {
 		}
 		// if we update the title before the scene is shown, it may incorrectly
 		// override the title of the window of the context widget
-		if fp.Scene.HasShown {
-			fp.Scene.UpdateTitle("Files: " + fp.directory)
+		if fp.Scene.hasShown {
+			fp.Scene.Body.SetTitle("Files: " + fp.directory)
 		}
 		RecentPaths.AddPath(fp.directory, SystemSettings.SavedPathsMax)
 		SaveRecentPaths()

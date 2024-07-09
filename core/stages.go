@@ -258,9 +258,9 @@ func (sm *Stages) Resize(rg math32.Geom2DInt) {
 	for _, kv := range sm.Stack.Order {
 		st := kv.Value
 		if st.Type == WindowStage || (st.Type == DialogStage && st.FullWindow) {
-			st.Scene.Resize(rg)
+			st.Scene.resize(rg)
 		} else {
-			st.Scene.FitInWindow(rg)
+			st.Scene.fitInWindow(rg)
 		}
 	}
 }
@@ -301,8 +301,8 @@ func (sm *Stages) SendShowEvents() {
 		sc := st.Scene
 		if sc.showIter == sceneShowIters+1 {
 			sc.showIter++
-			if !sc.HasShown {
-				sc.HasShown = true
+			if !sc.hasShown {
+				sc.hasShown = true
 				// profile.Profiling = true
 				// pr := profile.Start("send show")
 				sc.Events.getShortcuts()

@@ -45,7 +45,7 @@ func NewBody(name ...string) *Body {
 	}
 	bd.SetName(nm)
 	bd.Title = nm
-	bd.Scene = NewBodyScene(bd)
+	bd.Scene = newBodyScene(bd)
 	return bd
 }
 

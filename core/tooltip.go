@@ -49,8 +49,8 @@ func NewTooltipTextSize(w Widget, tooltip string, pos, sz image.Point) *Stage {
 func NewTooltipScene(w Widget, tooltip string, pos, sz image.Point) *Scene {
 	sc := NewScene(w.AsTree().Name + "-tooltip")
 	// tooltip positioning uses the original scene geom as the context values
-	sc.SceneGeom.Pos = pos
-	sc.SceneGeom.Size = sz // used for positioning if needed
+	sc.sceneGeom.Pos = pos
+	sc.sceneGeom.Size = sz // used for positioning if needed
 	sc.Styler(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Grow.Set(1, 1)

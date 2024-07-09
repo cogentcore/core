@@ -68,7 +68,7 @@ import (
 // outside of the main configuration, rendering, and event handling structure.
 // It must have a matching [WidgetBase.AsyncUnlock] after it.
 func (wb *WidgetBase) AsyncLock() {
-	rc := wb.Scene.RenderContext()
+	rc := wb.Scene.renderContext()
 	if rc == nil {
 		// if there is no render context, we are probably
 		// being deleted, so we just block forever
@@ -86,7 +86,7 @@ func (wb *WidgetBase) AsyncLock() {
 // outside of the main configuration, rendering, and event handling structure.
 // It must have a matching [WidgetBase.AsyncLock] before it.
 func (wb *WidgetBase) AsyncUnlock() {
-	rc := wb.Scene.RenderContext()
+	rc := wb.Scene.renderContext()
 	if rc == nil {
 		return
 	}
@@ -127,7 +127,7 @@ func (wb *WidgetBase) NeedsRebuild() bool {
 	if wb.This == nil || wb.Scene == nil || wb.Scene.Stage == nil {
 		return false
 	}
-	rc := wb.Scene.RenderContext()
+	rc := wb.Scene.renderContext()
 	if rc == nil {
 		return false
 	}
@@ -141,7 +141,7 @@ func (sc *Scene) layoutScene() {
 	}
 	sc.SizeUp()
 	sz := &sc.Geom.Size
-	sz.Alloc.Total.SetPoint(sc.SceneGeom.Size)
+	sz.Alloc.Total.SetPoint(sc.sceneGeom.Size)
 	sz.setContentFromTotal(&sz.Alloc)
 	// sz.Actual = sz.Alloc // todo: is this needed??
 	if DebugSettings.LayoutTrace {
@@ -216,7 +216,7 @@ func (sc *Scene) doUpdate() bool {
 	sc.updating = true // prevent rendering
 	defer func() { sc.updating = false }()
 
-	rc := sc.RenderContext()
+	rc := sc.renderContext()
 
 	if sc.showIter < sceneShowIters {
 		sc.needsLayout = true
@@ -470,7 +470,7 @@ func (wb *WidgetBase) PointToRelPos(pt image.Point) image.Point {
 func (wb *WidgetBase) winBBox() image.Rectangle {
 	bb := wb.Geom.TotalBBox
 	if wb.Scene != nil {
-		return bb.Add(wb.Scene.SceneGeom.Pos)
+		return bb.Add(wb.Scene.sceneGeom.Pos)
 	}
 	return bb
 }

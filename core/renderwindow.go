@@ -730,7 +730,7 @@ func (sc *Scene) DirectRenderDraw(drw system.Drawer, idx int, flipY bool) {
 		op = draw.Src
 	}
 	bb := sc.Pixels.Bounds()
-	drw.Copy(idx, 0, sc.SceneGeom.Pos, bb, op, flipY)
+	drw.Copy(idx, 0, sc.sceneGeom.Pos, bb, op, flipY)
 }
 
 func (w *renderWindow) renderContext() *renderContext {

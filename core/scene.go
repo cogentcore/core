@@ -54,7 +54,7 @@ type Scene struct { //core:no-new
 	Data any
 
 	// Size and position relative to overall rendering context.
-	SceneGeom math32.Geom2DInt `edit:"-" set:"-"`
+	sceneGeom math32.Geom2DInt `edit:"-" set:"-"`
 
 	// paint context for rendering
 	PaintContext paint.Context `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
@@ -97,9 +97,9 @@ type Scene struct { //core:no-new
 
 	// State bool values:
 
-	// HasShown is whether this scene has been shown.
+	// hasShown is whether this scene has been shown.
 	// This is used to ensure that [events.Show] is only sent once.
-	HasShown bool `copier:"-" json:"-" xml:"-" display:"-" set:"-"`
+	hasShown bool
 
 	// updating means the Scene is in the process of updating.
 	// It is set for any kind of tree-level update.
@@ -126,11 +126,11 @@ type Scene struct { //core:no-new
 	prefSizing bool
 }
 
-// NewBodyScene creates a new Scene for use with an associated Body that
+// newBodyScene creates a new Scene for use with an associated Body that
 // contains the main content of the Scene (e.g., a Window, Dialog, etc).
 // It will be constructed from the Bars-configured control bars on each
 // side, with the given Body as the central content.
-func NewBodyScene(body *Body) *Scene {
+func newBodyScene(body *Body) *Scene {
 	sc := NewScene(body.Name + " scene")
 	sc.Body = body
 	// need to set parent immediately so that SceneConfig works,
@@ -140,7 +140,7 @@ func NewBodyScene(body *Body) *Scene {
 	return sc
 }
 
-// NewScene creates a new Scene object without a Body, e.g., for use
+// NewScene creates a new [Scene] object without a [Body], e.g., for use
 // in a Menu, Tooltip or other such simple popups or non-control-bar Scenes.
 func NewScene(name ...string) *Scene {
 	sc := tree.New[Scene]()
@@ -196,9 +196,9 @@ func (sc *Scene) Init() {
 	}
 }
 
-// RenderContext returns the current render context.
+// renderContext returns the current render context.
 // This will be nil prior to actual rendering.
-func (sc *Scene) RenderContext() *renderContext {
+func (sc *Scene) renderContext() *renderContext {
 	if sc.Stage == nil {
 		return nil
 	}
@@ -210,7 +210,7 @@ func (sc *Scene) RenderContext() *renderContext {
 }
 
 // RenderWindow returns the current render window for this scene.
-// In general it is best to go through RenderContext instead of the window.
+// In general it is best to go through [renderContext] instead of the window.
 // This will be nil prior to actual rendering.
 func (sc *Scene) RenderWindow() *renderWindow {
 	if sc.Stage == nil {
@@ -223,22 +223,22 @@ func (sc *Scene) RenderWindow() *renderWindow {
 	return sm.RenderWindow
 }
 
-// FitInWindow fits Scene geometry (pos, size) into given window geom.
+// fitInWindow fits Scene geometry (pos, size) into given window geom.
 // Calls resize for the new size.
-func (sc *Scene) FitInWindow(winGeom math32.Geom2DInt) {
-	geom := sc.SceneGeom
+func (sc *Scene) fitInWindow(winGeom math32.Geom2DInt) {
+	geom := sc.sceneGeom
 	// full offscreen windows ignore any window geometry constraints
 	// because they must be unbounded by any previous window sizes
 	if TheApp.Platform() != system.Offscreen || !sc.Stage.FullWindow {
 		geom = geom.FitInWindow(winGeom)
 	}
-	sc.Resize(geom)
-	sc.SceneGeom.Pos = geom.Pos
+	sc.resize(geom)
+	sc.sceneGeom.Pos = geom.Pos
 	// fmt.Println("win", winGeom, "geom", geom)
 }
 
-// Resize resizes the scene, creating a new image; updates Geom
-func (sc *Scene) Resize(geom math32.Geom2DInt) {
+// resize resizes the scene, creating a new image; updates Geom
+func (sc *Scene) resize(geom math32.Geom2DInt) {
 	if geom.Size.X <= 0 || geom.Size.Y <= 0 {
 		return
 	}
@@ -248,12 +248,12 @@ func (sc *Scene) Resize(geom math32.Geom2DInt) {
 	if sc.PaintContext.Paint == nil {
 		sc.PaintContext.Paint = &styles.Paint{}
 	}
-	sc.SceneGeom.Pos = geom.Pos
+	sc.sceneGeom.Pos = geom.Pos
 	if sc.Pixels == nil || sc.Pixels.Bounds().Size() != geom.Size {
 		sc.Pixels = image.NewRGBA(image.Rectangle{Max: geom.Size})
 	}
 	sc.PaintContext.Init(geom.Size.X, geom.Size.Y, sc.Pixels)
-	sc.SceneGeom.Size = geom.Size // make sure
+	sc.sceneGeom.Size = geom.Size // make sure
 
 	sc.applyStyleScene()
 	// restart the multi-render updating after resize, to get windows to update correctly while
@@ -266,16 +266,9 @@ func (sc *Scene) Resize(geom math32.Geom2DInt) {
 	sc.NeedsLayout()
 }
 
-func (sc *Scene) ScIsVisible() bool {
-	if sc.RenderContext() == nil || sc.Pixels == nil {
-		return false
-	}
-	return sc.RenderContext().visible
-}
-
-// Close closes the Stage associated with this Scene.
+// Close closes the [Stage] associated with this [Scene].
 // This only works for main stages (windows and dialogs).
-// It returns whether the Stage was successfully closed.
+// It returns whether the [Stage] was successfully closed.
 func (sc *Scene) Close() bool {
 	if sc == nil {
 		return true
@@ -299,23 +292,6 @@ func (sc *Scene) Close() bool {
 		mm.RenderWindow.closeReq()
 	}
 	return true
-}
-
-// UpdateTitle updates the title of the Scene's associated [Stage],
-// [renderWindow], and [Body], if applicable.
-func (sc *Scene) UpdateTitle(title string) {
-	if sc.Scene != nil {
-		sc.Stage.Title = title
-	}
-	if rw := sc.RenderWindow(); rw != nil {
-		rw.setTitle(title)
-	}
-	if sc.Body != nil {
-		sc.Body.Title = title
-		if tw, ok := sc.Body.ChildByName("title").(*Text); ok {
-			tw.SetText(title)
-		}
-	}
 }
 
 func (sc *Scene) ApplyScenePos() {

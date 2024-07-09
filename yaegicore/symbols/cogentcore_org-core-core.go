@@ -94,7 +94,6 @@ func init() {
 		"NavigationDrawer":          reflect.ValueOf(core.NavigationDrawer),
 		"NavigationRail":            reflect.ValueOf(core.NavigationRail),
 		"NewBody":                   reflect.ValueOf(core.NewBody),
-		"NewBodyScene":              reflect.ValueOf(core.NewBodyScene),
 		"NewButton":                 reflect.ValueOf(core.NewButton),
 		"NewCanvas":                 reflect.ValueOf(core.NewCanvas),
 		"NewChooser":                reflect.ValueOf(core.NewChooser),

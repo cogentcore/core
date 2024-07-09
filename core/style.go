@@ -171,8 +171,8 @@ func setUnitContext(st *styles.Style, sc *Scene, el, parent math32.Vector2) {
 	sz := image.Point{1920, 1280}
 	if sc != nil {
 		rebuild = sc.NeedsRebuild()
-		rc = sc.RenderContext()
-		sz = sc.SceneGeom.Size
+		rc = sc.renderContext()
+		sz = sc.sceneGeom.Size
 	}
 	if rc != nil {
 		st.UnitContext.DPI = rc.logicalDPI
