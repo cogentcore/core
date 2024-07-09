@@ -415,7 +415,7 @@ func (ts *Tabs) unselectOtherTabs(idx int) {
 	}
 }
 
-// Tab is a tab button that contains any, all, or none of a label, an icon,
+// Tab is a tab button that contains one or more of a label, an icon,
 // and a close icon. Tabs should be made using the [Tabs.NewTab] function.
 type Tab struct { //core:no-new
 	Frame
@@ -424,8 +424,7 @@ type Tab struct { //core:no-new
 	// must be set on the parent [Tabs] for it to work correctly.
 	Type TabTypes
 
-	// Text is the text for the tab.
-	// If it is nil, no text is shown.
+	// Text is the text for the tab. If it is blank, no text is shown.
 	// Text is never shown for [NavigationRail] tabs.
 	Text string
 
@@ -526,7 +525,7 @@ func (tb *Tab) Init() {
 					s.Border.Radius = styles.BorderRadiusFull
 				})
 				w.OnClick(func(e events.Event) {
-					ts := tb.Tabs()
+					ts := tb.tabs()
 					idx := ts.tabIndexByName(tb.Name)
 					// if OnlyCloseActiveTab is on, only process delete when already selected
 					if SystemSettings.OnlyCloseActiveTab && !tb.StateIs(states.Selected) {
@@ -543,7 +542,7 @@ func (tb *Tab) Init() {
 	})
 }
 
-// Tabs returns the parent [Tabs] of this [Tab].
-func (tb *Tab) Tabs() *Tabs {
+// tabs returns the parent [Tabs] of this [Tab].
+func (tb *Tab) tabs() *Tabs {
 	return tb.Parent.AsTree().Parent.(*Tabs)
 }
