@@ -36,7 +36,7 @@ func (st *Stage) runPopupAsync() *Stage {
 		return st.runPopup()
 	}
 	ms := ctx.Scene.Stage.Main
-	rc := ms.RenderContext
+	rc := ms.renderContext
 	rc.lock()
 	defer rc.unlock()
 	return st.runPopup()
@@ -68,10 +68,10 @@ func (st *Stage) runPopup() *Stage {
 
 	if st.Type == SnackbarStage {
 		// only one snackbar can exist
-		ms.Popups.PopDeleteType(SnackbarStage)
+		ms.popups.PopDeleteType(SnackbarStage)
 	}
 
-	ms.Popups.Push(st)
+	ms.popups.Push(st)
 	st.SetPopups(ms) // sets all pointers
 
 	maxSz := msc.sceneGeom.Size
@@ -127,7 +127,7 @@ func (st *Stage) runPopup() *Stage {
 			if st.Main == nil {
 				return
 			}
-			st.Popups.DeleteStage(st)
+			st.popups.DeleteStage(st)
 		})
 	}
 
@@ -147,10 +147,10 @@ func (st *Stage) closePopupAsync() {
 // ClosePopup closes this stage as a popup, returning whether it was closed.
 func (st *Stage) ClosePopup() bool {
 	// NOTE: this is critical for Completer to not crash due to async closing
-	if st.Main == nil || st.Popups == nil || st.Mains == nil {
+	if st.Main == nil || st.popups == nil || st.Mains == nil {
 		return false
 	}
-	return st.Popups.DeleteStage(st)
+	return st.popups.DeleteStage(st)
 }
 
 // closePopupAndBelow closes this stage as a popup,
@@ -158,10 +158,10 @@ func (st *Stage) ClosePopup() bool {
 // It returns whether it successfully closed popups.
 func (st *Stage) closePopupAndBelow() bool {
 	// NOTE: this is critical for Completer to not crash due to async closing
-	if st.Main == nil || st.Popups == nil || st.Mains == nil {
+	if st.Main == nil || st.popups == nil || st.Mains == nil {
 		return false
 	}
-	return st.Popups.DeleteStageAndBelow(st)
+	return st.popups.DeleteStageAndBelow(st)
 }
 
 func (st *Stage) popupHandleEvent(e events.Event) {
@@ -195,11 +195,11 @@ func (pm *Stages) popupHandleEvent(e events.Event) {
 	ts := top.Scene
 
 	// we must get the top stage that does not ignore events
-	if top.IgnoreEvents {
+	if top.ignoreEvents {
 		var ntop *Stage
 		for i := pm.Stack.Len() - 1; i >= 0; i-- {
 			s := pm.Stack.ValueByIndex(i)
-			if !s.IgnoreEvents {
+			if !s.ignoreEvents {
 				ntop = s
 				break
 			}
@@ -231,7 +231,7 @@ func (pm *Stages) popupHandleEvent(e events.Event) {
 		for i := pm.Stack.Len() - 1; i >= 0; i-- {
 			s := pm.Stack.ValueByIndex(i)
 			ss := s.Scene
-			if !s.IgnoreEvents && pos.In(ss.sceneGeom.Bounds()) {
+			if !s.ignoreEvents && pos.In(ss.sceneGeom.Bounds()) {
 				s.popupHandleEvent(e)
 				e.SetHandled()
 				return

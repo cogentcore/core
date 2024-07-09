@@ -904,7 +904,7 @@ func (w *renderWindow) gatherScenes() bool {
 	top.Sprites.Modified = true // ensure configured
 
 	// then add the popups for the top main stage
-	for _, kv := range top.Popups.Stack.Order {
+	for _, kv := range top.popups.Stack.Order {
 		st := kv.Value
 		rs.add(st.Scene, scIndex)
 		if DebugSettings.WinRenderTrace {

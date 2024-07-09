@@ -620,19 +620,12 @@ var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.favoritePathIt
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.DebugSettingsData", IDName: "debug-settings-data", Doc: "DebugSettingsData is the data type for debugging settings.", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Embeds: []types.Field{{Name: "SettingsBase"}}, Fields: []types.Field{{Name: "UpdateTrace", Doc: "Print a trace of updates that trigger re-rendering"}, {Name: "RenderTrace", Doc: "Print a trace of the nodes rendering"}, {Name: "LayoutTrace", Doc: "Print a trace of all layouts"}, {Name: "LayoutTraceDetail", Doc: "Print more detailed info about the underlying layout computations"}, {Name: "WinEventTrace", Doc: "Print a trace of window events"}, {Name: "WinRenderTrace", Doc: "Print the stack trace leading up to win publish events\nwhich are expensive"}, {Name: "WinGeomTrace", Doc: "Print a trace of window geometry saving / loading functions"}, {Name: "KeyEventTrace", Doc: "Print a trace of keyboard events"}, {Name: "EventTrace", Doc: "Print a trace of event handling"}, {Name: "FocusTrace", Doc: "Print a trace of focus changes"}, {Name: "DNDTrace", Doc: "Print a trace of DND event handling"}, {Name: "GoCompleteTrace", Doc: "Print a trace of Go language completion and lookup process"}, {Name: "GoTypeTrace", Doc: "Print a trace of Go language type parsing and inference process"}}})
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Slider", IDName: "slider", Doc: "Slider is a slideable widget that provides slider functionality for two Types:\nSlider type provides a movable thumb that represents Value as the center of thumb\nPos position, with room reserved at ends for 1/2 of the thumb size.\nScrollbar has a VisiblePct factor that specifies the percent of the content\ncurrently visible, which determines the size of the thumb, and thus the range of motion\nremaining for the thumb Value (VisiblePct = 1 means thumb is full size, and no remaining\nrange of motion).\nThe Content size (inside the margin and padding) determines the outer bounds of\nthe rendered area.\nThe [styles.Style.Direction] determines the direction in which the slider slides.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of the slider, which determines its visual\nand functional properties. The default type, [SliderSlider],\nshould work for most end-user use cases."}, {Name: "Value", Doc: "Value is the current value, represented by the position of the thumb.\nIt defaults to 0.5."}, {Name: "Min", Doc: "Min is the minimum possible value.\nIt defaults to 0."}, {Name: "Max", Doc: "Max is the maximum value supported.\nIt defaults to 1."}, {Name: "Step", Doc: "Step is the amount that the arrow keys increment/decrement the value by.\nIt defaults to 0.1."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value is always\na multiple of [Slider.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by.\nIt defaults to 0.2, and will be at least as big as [Slider.Step]."}, {Name: "Icon", Doc: "Icon is an optional icon to use for the dragging knob."}, {Name: "VisiblePct", Doc: "For Scrollbar type only: proportion (1 max) of the full range of scrolled data\nthat is currently visible.  This determines the thumb size and range of motion:\nif 1, full slider is the thumb and no motion is possible."}, {Name: "ThumbSize", Doc: "Size of the thumb as a proportion of the slider thickness, which is\nContent size (inside the padding).  This is for actual X,Y dimensions,\nso must be sensitive to Dim dimension alignment."}, {Name: "TrackSize", Doc: "TrackSize is the proportion of slider thickness for the visible track\nfor the Slider type.  It is often thinner than the thumb, achieved by\nvalues < 1 (.5 default)"}, {Name: "InputThreshold", Doc: "threshold for amount of change in scroll value before emitting an input event"}, {Name: "Prec", Doc: "specifies the precision of decimal places (total, not after the decimal point)\nto use in representing the number. This helps to truncate small weird floating\npoint values in the nether regions."}, {Name: "ValueColor", Doc: "The background color that is used for styling the selected value section of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no value is rendered, so the value section of the slider\njust looks like the rest of the slider."}, {Name: "ThumbColor", Doc: "The background color that is used for styling the thumb (handle) of the slider.\nIt should be set in the StyleFuncs, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the slider\njust looks like the rest of the slider."}, {Name: "StayInView", Doc: "If true, keep the slider (typically a Scrollbar) within the parent Scene\nbounding box, if the parent is in view.  This is the default behavior\nfor Layout scrollbars, and setting this flag replicates that behavior\nin other scrollbars."}, {Name: "Pos", Doc: "logical position of the slider relative to Size"}, {Name: "LastValue", Doc: "previous Change event emitted value - don't re-emit Change if it is the same"}, {Name: "PrevSlide", Doc: "previous sliding value - for computing the Input change"}, {Name: "Size", Doc: "Computed size of the slide box in the relevant dimension\nrange of motion, exclusive of spacing, based on layout allocation."}, {Name: "SlideStartPos", Doc: "underlying drag position of slider -- not subject to snapping"}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Slider", IDName: "slider", Doc: "Slider is a slideable widget that provides slider functionality with a draggable\nthumb and a clickable track. The [styles.Style.Direction] determines the direction\nin which the slider slides.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of the slider, which determines its visual\nand functional properties. The default type, [SliderSlider],\nshould work for most end-user use cases."}, {Name: "Value", Doc: "Value is the current value, represented by the position of the thumb.\nIt defaults to 0.5."}, {Name: "Min", Doc: "Min is the minimum possible value.\nIt defaults to 0."}, {Name: "Max", Doc: "Max is the maximum value supported.\nIt defaults to 1."}, {Name: "Step", Doc: "Step is the amount that the arrow keys increment/decrement the value by.\nIt defaults to 0.1."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value is always\na multiple of [Slider.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by.\nIt defaults to 0.2, and will be at least as big as [Slider.Step]."}, {Name: "Icon", Doc: "Icon is an optional icon to use for the dragging thumb."}, {Name: "visiblePercent", Doc: "For Scrollbar type only: proportion (1 max) of the full range of scrolled data\nthat is currently visible.  This determines the thumb size and range of motion:\nif 1, full slider is the thumb and no motion is possible."}, {Name: "ThumbSize", Doc: "ThumbSize is the size of the thumb as a proportion of the slider thickness,\nwhich is the content size (inside the padding)."}, {Name: "TrackSize", Doc: "TrackSize is the proportion of slider thickness for the visible track\nfor the [SliderSlider] type. It is often thinner than the thumb, achieved\nby values less than 1 (0.5 default)."}, {Name: "InputThreshold", Doc: "InputThreshold is the threshold for the amount of change in scroll\nvalue before emitting an input event."}, {Name: "Precision", Doc: "Precision specifies the precision of decimal places (total, not after the decimal\npoint) to use in representing the number. This helps to truncate small weird\nfloating point values."}, {Name: "ValueColor", Doc: "ValueColor is the background color that is used for styling the selected value\nsection of the slider. It should be set in a Styler, just like the main style\nobject is. If it is set to transparent, no value is rendered, so the value\nsection of the slider just looks like the rest of the slider."}, {Name: "ThumbColor", Doc: "ThumbColor is the background color that is used for styling the thumb (handle)\nof the slider. It should be set in a Styler, just like the main style object is.\nIf it is set to transparent, no thumb is rendered, so the thumb section of the\nslider just looks like the rest of the slider."}, {Name: "StayInView", Doc: "StayInView is whether to keep the slider (typically a [SliderScrollbar]) within\nthe parent [Scene] bounding box, if the parent is in view. This is the default\nbehavior for [Frame] scrollbars, and setting this flag replicates that behavior\nin other scrollbars."}, {Name: "pos", Doc: "logical position of the slider relative to Size"}, {Name: "lastValue", Doc: "previous Change event emitted value; don't re-emit Change if it is the same"}, {Name: "prevSlide", Doc: "previous sliding value (for computing the Input change)"}, {Name: "slideStartPos", Doc: "underlying drag position of slider; not subject to snapping"}}})
 
 // NewSlider returns a new [Slider] with the given optional parent:
-// Slider is a slideable widget that provides slider functionality for two Types:
-// Slider type provides a movable thumb that represents Value as the center of thumb
-// Pos position, with room reserved at ends for 1/2 of the thumb size.
-// Scrollbar has a VisiblePct factor that specifies the percent of the content
-// currently visible, which determines the size of the thumb, and thus the range of motion
-// remaining for the thumb Value (VisiblePct = 1 means thumb is full size, and no remaining
-// range of motion).
-// The Content size (inside the margin and padding) determines the outer bounds of
-// the rendered area.
-// The [styles.Style.Direction] determines the direction in which the slider slides.
+// Slider is a slideable widget that provides slider functionality with a draggable
+// thumb and a clickable track. The [styles.Style.Direction] determines the direction
+// in which the slider slides.
 func NewSlider(parent ...tree.Node) *Slider { return tree.New[Slider](parent...) }
 
 // SetType sets the [Slider.Type]:
@@ -668,53 +661,53 @@ func (t *Slider) SetEnforceStep(v bool) *Slider { t.EnforceStep = v; return t }
 func (t *Slider) SetPageStep(v float32) *Slider { t.PageStep = v; return t }
 
 // SetIcon sets the [Slider.Icon]:
-// Icon is an optional icon to use for the dragging knob.
+// Icon is an optional icon to use for the dragging thumb.
 func (t *Slider) SetIcon(v icons.Icon) *Slider { t.Icon = v; return t }
 
 // SetThumbSize sets the [Slider.ThumbSize]:
-// Size of the thumb as a proportion of the slider thickness, which is
-// Content size (inside the padding).  This is for actual X,Y dimensions,
-// so must be sensitive to Dim dimension alignment.
+// ThumbSize is the size of the thumb as a proportion of the slider thickness,
+// which is the content size (inside the padding).
 func (t *Slider) SetThumbSize(v math32.Vector2) *Slider { t.ThumbSize = v; return t }
 
 // SetTrackSize sets the [Slider.TrackSize]:
 // TrackSize is the proportion of slider thickness for the visible track
-// for the Slider type.  It is often thinner than the thumb, achieved by
-// values < 1 (.5 default)
+// for the [SliderSlider] type. It is often thinner than the thumb, achieved
+// by values less than 1 (0.5 default).
 func (t *Slider) SetTrackSize(v float32) *Slider { t.TrackSize = v; return t }
 
 // SetInputThreshold sets the [Slider.InputThreshold]:
-// threshold for amount of change in scroll value before emitting an input event
+// InputThreshold is the threshold for the amount of change in scroll
+// value before emitting an input event.
 func (t *Slider) SetInputThreshold(v float32) *Slider { t.InputThreshold = v; return t }
 
-// SetPrec sets the [Slider.Prec]:
-// specifies the precision of decimal places (total, not after the decimal point)
-// to use in representing the number. This helps to truncate small weird floating
-// point values in the nether regions.
-func (t *Slider) SetPrec(v int) *Slider { t.Precision = v; return t }
+// SetPrecision sets the [Slider.Precision]:
+// Precision specifies the precision of decimal places (total, not after the decimal
+// point) to use in representing the number. This helps to truncate small weird
+// floating point values.
+func (t *Slider) SetPrecision(v int) *Slider { t.Precision = v; return t }
 
 // SetValueColor sets the [Slider.ValueColor]:
-// The background color that is used for styling the selected value section of the slider.
-// It should be set in the StyleFuncs, just like the main style object is.
-// If it is set to transparent, no value is rendered, so the value section of the slider
-// just looks like the rest of the slider.
+// ValueColor is the background color that is used for styling the selected value
+// section of the slider. It should be set in a Styler, just like the main style
+// object is. If it is set to transparent, no value is rendered, so the value
+// section of the slider just looks like the rest of the slider.
 func (t *Slider) SetValueColor(v image.Image) *Slider { t.ValueColor = v; return t }
 
 // SetThumbColor sets the [Slider.ThumbColor]:
-// The background color that is used for styling the thumb (handle) of the slider.
-// It should be set in the StyleFuncs, just like the main style object is.
-// If it is set to transparent, no thumb is rendered, so the thumb section of the slider
-// just looks like the rest of the slider.
+// ThumbColor is the background color that is used for styling the thumb (handle)
+// of the slider. It should be set in a Styler, just like the main style object is.
+// If it is set to transparent, no thumb is rendered, so the thumb section of the
+// slider just looks like the rest of the slider.
 func (t *Slider) SetThumbColor(v image.Image) *Slider { t.ThumbColor = v; return t }
 
 // SetStayInView sets the [Slider.StayInView]:
-// If true, keep the slider (typically a Scrollbar) within the parent Scene
-// bounding box, if the parent is in view.  This is the default behavior
-// for Layout scrollbars, and setting this flag replicates that behavior
+// StayInView is whether to keep the slider (typically a [SliderScrollbar]) within
+// the parent [Scene] bounding box, if the parent is in view. This is the default
+// behavior for [Frame] scrollbars, and setting this flag replicates that behavior
 // in other scrollbars.
 func (t *Slider) SetStayInView(v bool) *Slider { t.StayInView = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Spinner", IDName: "spinner", Doc: "Spinner is a [TextField] for editing numerical values. It comes with\nfields, methods, buttons, and shortcuts to enhance numerical value editing.", Embeds: []types.Field{{Name: "TextField"}}, Fields: []types.Field{{Name: "Value", Doc: "Value is the current value."}, {Name: "HasMin", Doc: "HasMin is whether there is a minimum value to enforce."}, {Name: "Min", Doc: "Min, if HasMin is true, is the the minimum value in range."}, {Name: "HasMax", Doc: "HaxMax is whether there is a maximum value to enforce."}, {Name: "Max", Doc: "Max, if HasMax is true, is the maximum value in range."}, {Name: "Step", Doc: "Step is the amount that the up and down buttons and arrow keys\nincrement/decrement the value by. It defaults to 0.1."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value of the spinner\nis always a multiple of [Spinner.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by.\nIt defaults to 0.2, and will be at least as big as [Spinner.Step]."}, {Name: "Prec", Doc: "Prec specifies the precision of decimal places\n(total, not after the decimal point) to use in\nrepresenting the number. This helps to truncate\nsmall weird floating point values."}, {Name: "Format", Doc: "Format is the format string to use for printing the value.\nIf it unset, %g is used. If it is decimal based\n(ends in d, b, c, o, O, q, x, X, or U) then the value is\nconverted to decimal prior to printing."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Spinner", IDName: "spinner", Doc: "Spinner is a [TextField] for editing numerical values. It comes with\nfields, methods, buttons, and shortcuts to enhance numerical value editing.", Embeds: []types.Field{{Name: "TextField"}}, Fields: []types.Field{{Name: "Value", Doc: "Value is the current value."}, {Name: "HasMin", Doc: "HasMin is whether there is a minimum value to enforce.\nIt should be set using [Spinner.SetMin]."}, {Name: "Min", Doc: "Min, if [Spinner.HasMin] is true, is the the minimum value in range.\nIt should be set using [Spinner.SetMin]."}, {Name: "HasMax", Doc: "HaxMax is whether there is a maximum value to enforce.\nIt should be set using [Spinner.SetMax]."}, {Name: "Max", Doc: "Max, if [Spinner.HasMax] is true, is the maximum value in range.\nIt should be set using [Spinner.SetMax]."}, {Name: "Step", Doc: "Step is the amount that the up and down buttons and arrow keys\nincrement/decrement the value by. It defaults to 0.1."}, {Name: "EnforceStep", Doc: "EnforceStep is whether to ensure that the value of the spinner\nis always a multiple of [Spinner.Step]."}, {Name: "PageStep", Doc: "PageStep is the amount that the PageUp and PageDown keys\nincrement/decrement the value by.\nIt defaults to 0.2, and will be at least as big as [Spinner.Step]."}, {Name: "Precision", Doc: "Precision specifies the precision of decimal places\n(total, not after the decimal point) to use in\nrepresenting the number. This helps to truncate\nsmall weird floating point values."}, {Name: "Format", Doc: "Format is the format string to use for printing the value.\nIf it unset, %g is used. If it is decimal based\n(ends in d, b, c, o, O, q, x, X, or U) then the value is\nconverted to decimal prior to printing."}}})
 
 // NewSpinner returns a new [Spinner] with the given optional parent:
 // Spinner is a [TextField] for editing numerical values. It comes with
@@ -737,12 +730,12 @@ func (t *Spinner) SetEnforceStep(v bool) *Spinner { t.EnforceStep = v; return t 
 // It defaults to 0.2, and will be at least as big as [Spinner.Step].
 func (t *Spinner) SetPageStep(v float32) *Spinner { t.PageStep = v; return t }
 
-// SetPrec sets the [Spinner.Prec]:
-// Prec specifies the precision of decimal places
+// SetPrecision sets the [Spinner.Precision]:
+// Precision specifies the precision of decimal places
 // (total, not after the decimal point) to use in
 // representing the number. This helps to truncate
 // small weird floating point values.
-func (t *Spinner) SetPrec(v int) *Spinner { t.Precision = v; return t }
+func (t *Spinner) SetPrecision(v int) *Spinner { t.Precision = v; return t }
 
 // SetFormat sets the [Spinner.Format]:
 // Format is the format string to use for printing the value.
@@ -751,7 +744,7 @@ func (t *Spinner) SetPrec(v int) *Spinner { t.Precision = v; return t }
 // converted to decimal prior to printing.
 func (t *Spinner) SetFormat(v string) *Spinner { t.Format = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Splits", IDName: "splits", Doc: "Splits allocates a certain proportion of its space to each of its children\nalong [styles.Style.Direction]. It adds [Handle] widgets to its parts that\nallow the user to customize the amount of space allocated to each child.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Splits", Doc: "Splits is the proportion (0-1 normalized, enforced) of space\nallocated to each element. 0 indicates that an element should\nbe completely collapsed. By default, each element gets the\nsame amount of space."}, {Name: "SavedSplits", Doc: "SavedSplits is a saved version of the splits that can be restored\nfor dynamic collapse/expand operations."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Splits", IDName: "splits", Doc: "Splits allocates a certain proportion of its space to each of its children\nalong [styles.Style.Direction]. It adds [Handle] widgets to its parts that\nallow the user to customize the amount of space allocated to each child.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Splits", Doc: "Splits is the proportion (0-1 normalized, enforced) of space\nallocated to each element. 0 indicates that an element should\nbe completely collapsed. By default, each element gets the\nsame amount of space."}, {Name: "savedSplits", Doc: "savedSplits is a saved version of the splits that can be restored\nfor dynamic collapse/expand operations."}}})
 
 // NewSplits returns a new [Splits] with the given optional parent:
 // Splits allocates a certain proportion of its space to each of its children
@@ -766,101 +759,60 @@ func NewSplits(parent ...tree.Node) *Splits { return tree.New[Splits](parent...)
 // same amount of space.
 func (t *Splits) SetSplits(v ...float32) *Splits { t.Splits = v; return t }
 
-var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Stage", IDName: "stage", Doc: "Stage is a container and manager for displaying a Scene\nin different functional ways, defined by StageTypes, in two categories:\nMain types (WindowStage and DialogStage) and Popup types\n(Menu, Tooltip, Snackbar, Chooser).", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Type", Doc: "type of Stage: determines behavior and Styling"}, {Name: "Scene", Doc: "Scene contents of this Stage (what it displays)."}, {Name: "Context", Doc: "widget in another scene that requested this stage to be created\nand provides context (stage)"}, {Name: "Name", Doc: "Name is the name of the Stage, which is generally auto-set\nbased on the Scene Name."}, {Name: "Title", Doc: "Title is the title of the Stage, which is generally auto-set\nbased on the Scene Title. Used for title of WindowStage and\nDialogStage types."}, {Name: "Modal", Doc: "Modal, if true, blocks input to all other stages."}, {Name: "Scrim", Doc: "Scrim, if true, places a darkening scrim over other stages,\nif not a full window."}, {Name: "ClickOff", Doc: "ClickOff, if true, dismisses the Stage if user clicks anywhere\noff the Stage."}, {Name: "IgnoreEvents", Doc: "IgnoreEvents is whether to send no events to the stage and\njust pass them down to lower stages."}, {Name: "NewWindow", Doc: "NewWindow, if true, opens a WindowStage or DialogStage in its own\nseparate operating system window (RenderWindow).  This is true by\ndefault for WindowStage on non-mobile platforms, otherwise false."}, {Name: "FullWindow", Doc: "FullWindow, if NewWindow is false, makes DialogStages and\nWindowStages take up the entire window they are created in."}, {Name: "CloseOnBack", Doc: "CloseOnBack is whether to close the stage when the back button\nis pressed in the app bar. Otherwise, it goes back to the next\nstage but keeps this one open. This is on by default for\nDialogStages and off for WindowStages."}, {Name: "Closeable", Doc: "Closeable, if true, includes a close button for closing dialogs."}, {Name: "Movable", Doc: "Movable, if true, adds a handle titlebar Decor for moving dialogs."}, {Name: "Resizable", Doc: "Resizable, if true, adds a resize handle Decor for resizing dialogs."}, {Name: "Timeout", Doc: "Timeout, if greater than 0, results in a popup stages disappearing\nafter a timeout duration."}, {Name: "Pos", Doc: "Pos is the target position for Scene to be placed within RenderWindow."}, {Name: "Data", Doc: "Data is item represented by this main stage; used for recycling windows"}, {Name: "Main", Doc: "If a popup stage, this is the main stage that owns it (via its Popups).\nIf a main stage, it points to itself."}, {Name: "Popups", Doc: "For main stages, this is the stack of the popups within it\n(created specifically for the main stage).\nFor popups, this is the pointer to the Popups within the\nmain stage managing it."}, {Name: "Mains", Doc: "For all stages, this is the main [Stages] that lives in a [RenderWindow]\nand manages the main stages."}, {Name: "RenderContext", Doc: "rendering context which has info about the RenderWindow onto which we render.\nThis should be used instead of the RenderWindow itself for all relevant\nrendering information.  This is only available once a Stage is Run,\nand must always be checked for nil."}, {Name: "Sprites", Doc: "sprites are named images that are rendered last overlaying everything else."}, {Name: "SpriteDragging", Doc: "name of sprite that is being dragged -- sprite event function is responsible for setting this."}}})
+var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Stage", IDName: "stage", Doc: "Stage is a container and manager for displaying a [Scene]\nin different functional ways, defined by [StageTypes].", Directives: []types.Directive{{Tool: "types", Directive: "add", Args: []string{"-setters"}}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the type of [Stage], which determines behavior and styling."}, {Name: "Scene", Doc: "Scene contents of this [Stage] (what it displays)."}, {Name: "Context", Doc: "Context is a widget in another scene that requested this stage to be created\nand provides context."}, {Name: "Name", Doc: "Name is the name of the Stage, which is generally auto-set\nbased on the [Scene.Name]."}, {Name: "Title", Doc: "Title is the title of the Stage, which is generally auto-set\nbased on the [Body.Title]. It used for the title of [WindowStage]\nand [DialogStage] types."}, {Name: "Modal", Doc: "Modal, if true, blocks input to all other stages."}, {Name: "Scrim", Doc: "Scrim, if true, places a darkening scrim over other stages."}, {Name: "ClickOff", Doc: "ClickOff, if true, dismisses the [Stage] if the user clicks anywhere\noff of the [Stage]."}, {Name: "ignoreEvents", Doc: "ignoreEvents is whether to send no events to the stage and\njust pass them down to lower stages."}, {Name: "NewWindow", Doc: "NewWindow, if true, opens a [WindowStage] or [DialogStage] in its own\nseparate operating system window ([renderWindow]). This is true by\ndefault for [WindowStage] on non-mobile platforms, otherwise false."}, {Name: "FullWindow", Doc: "FullWindow, if [Stage.NewWindow] is false, makes [DialogStage]s and\n[WindowStage]s take up the entire window they are created in."}, {Name: "CloseOnBack", Doc: "CloseOnBack is whether to close the stage when the back button\nis pressed in the app bar. Otherwise, it goes back to the next\nstage but keeps this one open. This is on by default for\n[DialogStage]s and off for [WindowStage]s."}, {Name: "Timeout", Doc: "Timeout, if greater than 0, results in a popup stages disappearing\nafter this timeout duration."}, {Name: "Pos", Doc: "Pos is the target position for the [Stage] to be placed within\nthe surrounding window."}, {Name: "Main", Doc: "If a popup stage, this is the main stage that owns it (via its [Stage.popups]).\nIf a main stage, it points to itself."}, {Name: "popups", Doc: "For main stages, this is the stack of the popups within it\n(created specifically for the main stage).\nFor popups, this is the pointer to the popups within the\nmain stage managing it."}, {Name: "Mains", Doc: "For all stages, this is the main [Stages] that lives in a [renderWindow]\nand manages the main stages."}, {Name: "renderContext", Doc: "rendering context which has info about the RenderWindow onto which we render.\nThis should be used instead of the RenderWindow itself for all relevant\nrendering information. This is only available once a Stage is Run,\nand must always be checked for nil."}, {Name: "Sprites", Doc: "Sprites are named images that are rendered last overlaying everything else."}}})
 
 // SetContext sets the [Stage.Context]:
-// widget in another scene that requested this stage to be created
-// and provides context (stage)
+// Context is a widget in another scene that requested this stage to be created
+// and provides context.
 func (t *Stage) SetContext(v Widget) *Stage { t.Context = v; return t }
 
 // SetName sets the [Stage.Name]:
 // Name is the name of the Stage, which is generally auto-set
-// based on the Scene Name.
+// based on the [Scene.Name].
 func (t *Stage) SetName(v string) *Stage { t.Name = v; return t }
 
 // SetTitle sets the [Stage.Title]:
 // Title is the title of the Stage, which is generally auto-set
-// based on the Scene Title. Used for title of WindowStage and
-// DialogStage types.
+// based on the [Body.Title]. It used for the title of [WindowStage]
+// and [DialogStage] types.
 func (t *Stage) SetTitle(v string) *Stage { t.Title = v; return t }
 
 // SetScrim sets the [Stage.Scrim]:
-// Scrim, if true, places a darkening scrim over other stages,
-// if not a full window.
+// Scrim, if true, places a darkening scrim over other stages.
 func (t *Stage) SetScrim(v bool) *Stage { t.Scrim = v; return t }
 
 // SetClickOff sets the [Stage.ClickOff]:
-// ClickOff, if true, dismisses the Stage if user clicks anywhere
-// off the Stage.
+// ClickOff, if true, dismisses the [Stage] if the user clicks anywhere
+// off of the [Stage].
 func (t *Stage) SetClickOff(v bool) *Stage { t.ClickOff = v; return t }
 
-// SetIgnoreEvents sets the [Stage.IgnoreEvents]:
-// IgnoreEvents is whether to send no events to the stage and
-// just pass them down to lower stages.
-func (t *Stage) SetIgnoreEvents(v bool) *Stage { t.IgnoreEvents = v; return t }
-
 // SetNewWindow sets the [Stage.NewWindow]:
-// NewWindow, if true, opens a WindowStage or DialogStage in its own
-// separate operating system window (RenderWindow).  This is true by
-// default for WindowStage on non-mobile platforms, otherwise false.
+// NewWindow, if true, opens a [WindowStage] or [DialogStage] in its own
+// separate operating system window ([renderWindow]). This is true by
+// default for [WindowStage] on non-mobile platforms, otherwise false.
 func (t *Stage) SetNewWindow(v bool) *Stage { t.NewWindow = v; return t }
 
 // SetFullWindow sets the [Stage.FullWindow]:
-// FullWindow, if NewWindow is false, makes DialogStages and
-// WindowStages take up the entire window they are created in.
+// FullWindow, if [Stage.NewWindow] is false, makes [DialogStage]s and
+// [WindowStage]s take up the entire window they are created in.
 func (t *Stage) SetFullWindow(v bool) *Stage { t.FullWindow = v; return t }
 
 // SetCloseOnBack sets the [Stage.CloseOnBack]:
 // CloseOnBack is whether to close the stage when the back button
 // is pressed in the app bar. Otherwise, it goes back to the next
 // stage but keeps this one open. This is on by default for
-// DialogStages and off for WindowStages.
+// [DialogStage]s and off for [WindowStage]s.
 func (t *Stage) SetCloseOnBack(v bool) *Stage { t.CloseOnBack = v; return t }
-
-// SetCloseable sets the [Stage.Closeable]:
-// Closeable, if true, includes a close button for closing dialogs.
-func (t *Stage) SetCloseable(v bool) *Stage { t.Closeable = v; return t }
-
-// SetMovable sets the [Stage.Movable]:
-// Movable, if true, adds a handle titlebar Decor for moving dialogs.
-func (t *Stage) SetMovable(v bool) *Stage { t.Movable = v; return t }
-
-// SetResizable sets the [Stage.Resizable]:
-// Resizable, if true, adds a resize handle Decor for resizing dialogs.
-func (t *Stage) SetResizable(v bool) *Stage { t.Resizable = v; return t }
 
 // SetTimeout sets the [Stage.Timeout]:
 // Timeout, if greater than 0, results in a popup stages disappearing
-// after a timeout duration.
+// after this timeout duration.
 func (t *Stage) SetTimeout(v time.Duration) *Stage { t.Timeout = v; return t }
 
 // SetPos sets the [Stage.Pos]:
-// Pos is the target position for Scene to be placed within RenderWindow.
+// Pos is the target position for the [Stage] to be placed within
+// the surrounding window.
 func (t *Stage) SetPos(v image.Point) *Stage { t.Pos = v; return t }
-
-// SetData sets the [Stage.Data]:
-// Data is item represented by this main stage; used for recycling windows
-func (t *Stage) SetData(v any) *Stage { t.Data = v; return t }
-
-// SetMain sets the [Stage.Main]:
-// If a popup stage, this is the main stage that owns it (via its Popups).
-// If a main stage, it points to itself.
-func (t *Stage) SetMain(v *Stage) *Stage { t.Main = v; return t }
-
-// SetRenderContext sets the [Stage.RenderContext]:
-// rendering context which has info about the RenderWindow onto which we render.
-// This should be used instead of the RenderWindow itself for all relevant
-// rendering information.  This is only available once a Stage is Run,
-// and must always be checked for nil.
-func (t *Stage) SetRenderContext(v *renderContext) *Stage { t.RenderContext = v; return t }
-
-// SetSprites sets the [Stage.Sprites]:
-// sprites are named images that are rendered last overlaying everything else.
-func (t *Stage) SetSprites(v Sprites) *Stage { t.Sprites = v; return t }
-
-// SetSpriteDragging sets the [Stage.SpriteDragging]:
-// name of sprite that is being dragged -- sprite event function is responsible for setting this.
-func (t *Stage) SetSpriteDragging(v string) *Stage { t.SpriteDragging = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Stages", IDName: "stages", Doc: "Stages manages a stack of [Stages].", Directives: []types.Directive{{Tool: "types", Directive: "add"}}, Fields: []types.Field{{Name: "Stack", Doc: "stack of stages managed by this stage manager."}, {Name: "Modified", Doc: "Modified is set to true whenever the stack has been modified.\nThis is cleared by the RenderWindow each render cycle."}, {Name: "RenderContext", Doc: "rendering context provides key rendering information and locking\nfor the RenderWindow in which the stages are running."}, {Name: "RenderWindow", Doc: "render window to which we are rendering.\nrely on the RenderContext wherever possible."}, {Name: "History", Doc: "growing stack of viewing history of all stages."}, {Name: "Main", Doc: "Main is the main stage that owns this [Stages].\nThis is only set for popup stages."}, {Name: "Mu", Doc: "mutex protecting reading / updating of the Stack.\nDestructive stack updating gets a Write lock, else Read."}}})
 

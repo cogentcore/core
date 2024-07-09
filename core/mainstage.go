@@ -26,8 +26,8 @@ func newMainStage(typ StageTypes, sc *Scene) *Stage {
 	st := &Stage{}
 	st.SetType(typ)
 	st.SetScene(sc)
-	st.Popups = &Stages{}
-	st.Popups.Main = st
+	st.popups = &Stages{}
+	st.popups.Main = st
 	st.Main = st
 	return st
 }
@@ -174,7 +174,7 @@ func (st *Stage) runWindow() *Stage {
 	}
 	st.configMainStage()
 
-	sz := st.RenderContext.geom.Size
+	sz := st.renderContext.geom.Size
 	// offscreen windows always consider pref size because
 	// they must be unbounded by any previous window sizes
 	// non-offscreen mobile windows must take up the whole window
@@ -219,7 +219,7 @@ func (st *Stage) runWindow() *Stage {
 	}
 
 	if st.NewWindow || currentRenderWindow == nil {
-		sc.resize(math32.Geom2DInt{st.RenderContext.geom.Pos, sz})
+		sc.resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
 		win := st.newRenderWindow()
 		MainRenderWindows.Add(win)
 		currentRenderWindow = win
@@ -295,7 +295,7 @@ func (st *Stage) runDialog() *Stage {
 
 	if st.NewWindow {
 		st.Mains = nil
-		sc.resize(math32.Geom2DInt{st.RenderContext.geom.Pos, sz})
+		sc.resize(math32.Geom2DInt{st.renderContext.geom.Pos, sz})
 		st.Type = WindowStage            // critical: now is its own window!
 		sc.sceneGeom.Pos = image.Point{} // ignore pos
 		win := st.newRenderWindow()
@@ -305,7 +305,7 @@ func (st *Stage) runDialog() *Stage {
 		return st
 	}
 	sc.sceneGeom.Size = sz
-	sc.fitInWindow(st.RenderContext.geom) // does resize
+	sc.fitInWindow(st.renderContext.geom) // does resize
 	ms.Push(st)
 	// st.SetMains(ms) // already set
 	return st
@@ -355,8 +355,8 @@ func (st *Stage) mainHandleEvent(e events.Event) {
 	if st.Scene == nil {
 		return
 	}
-	st.Popups.popupHandleEvent(e)
-	if e.IsHandled() || (st.Popups != nil && st.Popups.topIsModal()) {
+	st.popups.popupHandleEvent(e)
+	if e.IsHandled() || (st.popups != nil && st.popups.topIsModal()) {
 		if DebugSettings.EventTrace && e.Type() != events.MouseMove {
 			fmt.Println("Event handled by popup:", e)
 		}

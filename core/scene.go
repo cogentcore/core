@@ -167,7 +167,7 @@ func (sc *Scene) Init() {
 		if sc.Stage == nil {
 			return
 		}
-		if sc.Stage.Type.IsPopup() || (sc.Stage.Type == DialogStage && !sc.Stage.FullWindow) {
+		if sc.Stage.Type.isPopup() || (sc.Stage.Type == DialogStage && !sc.Stage.FullWindow) {
 			return
 		}
 
