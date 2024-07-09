@@ -101,7 +101,7 @@ func (sp *Spell) ShowNow(word string, ctx core.Widget, pos image.Point) {
 	defer sp.ShowMu.Unlock()
 
 	sc := core.NewScene(ctx.AsTree().Name + "-spell")
-	core.MenuSceneConfigStyles(sc)
+	core.StyleMenuScene(sc)
 	sp.Stage = core.NewPopupStage(core.CompleterStage, sc, ctx).SetPos(pos)
 
 	if sp.IsLastLearned(word) {

@@ -279,7 +279,7 @@ func (wb *WidgetBase) Init() {
 	wb.HandleWidgetStateFromMouse()
 	wb.HandleLongHoverTooltip()
 	wb.HandleWidgetStateFromFocus()
-	wb.HandleWidgetContextMenu()
+	wb.handleWidgetContextMenu()
 	wb.HandleWidgetMagnify()
 	wb.HandleValueOnChange()
 
