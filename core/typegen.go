@@ -742,7 +742,7 @@ func (t *Spinner) SetPageStep(v float32) *Spinner { t.PageStep = v; return t }
 // (total, not after the decimal point) to use in
 // representing the number. This helps to truncate
 // small weird floating point values.
-func (t *Spinner) SetPrec(v int) *Spinner { t.Prec = v; return t }
+func (t *Spinner) SetPrec(v int) *Spinner { t.Precision = v; return t }
 
 // SetFormat sets the [Spinner.Format]:
 // Format is the format string to use for printing the value.
