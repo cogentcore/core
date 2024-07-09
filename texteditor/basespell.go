@@ -139,7 +139,7 @@ func (sp *Spell) ShowNow(word string, ctx core.Widget, pos image.Point) {
 	if sc.NumChildren() > 0 {
 		sc.Events.SetStartFocus(sc.Child(0).(core.Widget))
 	}
-	sp.Stage.RunPopup()
+	sp.Stage.Run()
 }
 
 // Spell sends a Select event to Listeners indicating that the user has made a

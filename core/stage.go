@@ -301,7 +301,7 @@ func (st *Stage) RunImpl() *Stage {
 	case DialogStage:
 		return st.runDialog()
 	default:
-		return st.RunPopup()
+		return st.runPopup()
 	}
 }
 

@@ -327,7 +327,7 @@ func (bt *Button) openMenu(e events.Event) bool {
 func (bt *Button) handleClickDismissMenu() {
 	// note: must be called last so widgets aren't deleted when the click arrives
 	bt.OnFinal(events.Click, func(e events.Event) {
-		bt.Scene.Stage.ClosePopupAndBelow()
+		bt.Scene.Stage.closePopupAndBelow()
 	})
 }
 

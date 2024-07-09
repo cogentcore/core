@@ -111,7 +111,7 @@ func (c *Complete) showNow(ctx Widget, pos image.Point, text string) {
 	c.showMu.Lock()
 	defer c.showMu.Unlock()
 	if c.showNowImpl(ctx, pos, text) {
-		c.stage.RunPopup()
+		c.stage.runPopup()
 	}
 }
 
@@ -124,7 +124,7 @@ func (c *Complete) showNowAsync(ctx Widget, pos image.Point, text string) {
 	c.showMu.Lock()
 	defer c.showMu.Unlock()
 	if c.showNowImpl(ctx, pos, text) {
-		c.stage.RunPopupAsync()
+		c.stage.runPopupAsync()
 	}
 }
 
@@ -200,7 +200,7 @@ func (c *Complete) cancelAsync() bool {
 	}
 	st := c.stage
 	c.stage = nil
-	st.ClosePopupAsync()
+	st.closePopupAsync()
 	return true
 }
 

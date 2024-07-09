@@ -77,7 +77,7 @@ func (fr *Frame) Init() {
 			slog.Info("Layout KeyInput", "widget", fr, "keyFunction", kf)
 		}
 		if kf == keymap.Abort {
-			if fr.Scene.Stage.ClosePopupAndBelow() {
+			if fr.Scene.Stage.closePopupAndBelow() {
 				e.SetHandled()
 			}
 			return

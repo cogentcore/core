@@ -27,23 +27,23 @@ func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *Stage {
 	return st
 }
 
-// RunPopupAsync runs a popup-style Stage in context widget's popups.
+// runPopupAsync runs a popup-style Stage in context widget's popups.
 // This version is for Asynchronous usage outside the main event loop,
 // for example in a delayed callback AfterFunc etc.
-func (st *Stage) RunPopupAsync() *Stage {
+func (st *Stage) runPopupAsync() *Stage {
 	ctx := st.Context.AsWidget()
 	if ctx.Scene.Stage == nil {
-		return st.RunPopup()
+		return st.runPopup()
 	}
 	ms := ctx.Scene.Stage.Main
 	rc := ms.RenderContext
 	rc.Lock()
 	defer rc.Unlock()
-	return st.RunPopup()
+	return st.runPopup()
 }
 
-// RunPopup runs a popup-style Stage in context widget's popups.
-func (st *Stage) RunPopup() *Stage {
+// runPopup runs a popup-style Stage in context widget's popups.
+func (st *Stage) runPopup() *Stage {
 	if !st.getValidContext() { // doesn't even have a scene
 		return st
 	}
@@ -52,7 +52,7 @@ func (st *Stage) RunPopup() *Stage {
 	// our context is shown and then try again
 	if ctx.Scene.Stage == nil {
 		ctx.OnShow(func(e events.Event) {
-			st.RunPopup()
+			st.runPopup()
 		})
 		return st
 	}
@@ -134,10 +134,10 @@ func (st *Stage) RunPopup() *Stage {
 	return st
 }
 
-// ClosePopupAsync closes this stage as a popup.
+// closePopupAsync closes this stage as a popup.
 // This version is for Asynchronous usage outside the main event loop,
 // for example in a delayed callback AfterFunc etc.
-func (st *Stage) ClosePopupAsync() {
+func (st *Stage) closePopupAsync() {
 	rc := st.Mains.RenderContext
 	rc.Lock()
 	defer rc.Unlock()
@@ -153,22 +153,10 @@ func (st *Stage) ClosePopup() bool {
 	return st.Popups.DeleteStage(st)
 }
 
-// ClosePopupAndBelowAsync closes this stage as a popup,
-// and all those immediately below it of the same type.
-// This version is for Asynchronous usage outside the main event loop,
-// for example in a delayed callback AfterFunc etc.
-// It returns whether it successfully closed popups.
-func (st *Stage) ClosePopupAndBelowAsync() bool {
-	rc := st.Mains.RenderContext
-	rc.Lock()
-	defer rc.Unlock()
-	return st.ClosePopupAndBelow()
-}
-
-// ClosePopupAndBelow closes this stage as a popup,
+// closePopupAndBelow closes this stage as a popup,
 // and all those immediately below it of the same type.
 // It returns whether it successfully closed popups.
-func (st *Stage) ClosePopupAndBelow() bool {
+func (st *Stage) closePopupAndBelow() bool {
 	// NOTE: this is critical for Completer to not crash due to async closing
 	if st.Main == nil || st.Popups == nil || st.Mains == nil {
 		return false
@@ -176,7 +164,7 @@ func (st *Stage) ClosePopupAndBelow() bool {
 	return st.Popups.DeleteStageAndBelow(st)
 }
 
-func (st *Stage) PopupHandleEvent(e events.Event) {
+func (st *Stage) popupHandleEvent(e events.Event) {
 	if st.Scene == nil {
 		return
 	}
@@ -188,11 +176,8 @@ func (st *Stage) PopupHandleEvent(e events.Event) {
 	st.Scene.Events.handleEvent(e)
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// 	[Stages] for popups
-
-// TopIsModal returns true if there is a Top PopupStage and it is Modal.
-func (pm *Stages) TopIsModal() bool {
+// topIsModal returns true if there is a Top PopupStage and it is Modal.
+func (pm *Stages) topIsModal() bool {
 	top := pm.Top()
 	if top == nil {
 		return false
@@ -200,9 +185,9 @@ func (pm *Stages) TopIsModal() bool {
 	return top.Modal
 }
 
-// PopupHandleEvent processes Popup events.
+// popupHandleEvent processes Popup events.
 // requires outer RenderContext mutex.
-func (pm *Stages) PopupHandleEvent(e events.Event) {
+func (pm *Stages) popupHandleEvent(e events.Event) {
 	top := pm.Top()
 	if top == nil {
 		return
@@ -230,12 +215,12 @@ func (pm *Stages) PopupHandleEvent(e events.Event) {
 		pos := e.WindowPos()
 		// fmt.Println("pos:", pos, "top geom:", ts.SceneGeom)
 		if pos.In(ts.SceneGeom.Bounds()) {
-			top.PopupHandleEvent(e)
+			top.popupHandleEvent(e)
 			e.SetHandled()
 			return
 		}
 		if top.ClickOff && e.Type() == events.MouseUp {
-			top.ClosePopupAndBelow()
+			top.closePopupAndBelow()
 		}
 		if top.Modal { // absorb any other events!
 			e.SetHandled()
@@ -247,12 +232,12 @@ func (pm *Stages) PopupHandleEvent(e events.Event) {
 			s := pm.Stack.ValueByIndex(i)
 			ss := s.Scene
 			if !s.IgnoreEvents && pos.In(ss.SceneGeom.Bounds()) {
-				s.PopupHandleEvent(e)
+				s.popupHandleEvent(e)
 				e.SetHandled()
 				return
 			}
 		}
 	} else { // typically focus, so handle even if not in bounds
-		top.PopupHandleEvent(e) // could be set as Handled or not
+		top.popupHandleEvent(e) // could be set as Handled or not
 	}
 }
