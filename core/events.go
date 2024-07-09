@@ -246,8 +246,8 @@ func (em *Events) handlePosEvent(e events.Event) {
 		em.resetOnMouseDown()
 	case events.MouseDrag:
 		if em.spriteSlide != nil {
-			em.spriteSlide.HandleEvent(e)
-			em.spriteSlide.Send(events.SlideMove, e)
+			em.spriteSlide.handleEvent(e)
+			em.spriteSlide.send(events.SlideMove, e)
 			return
 		}
 		if em.slide != nil {
@@ -740,7 +740,7 @@ func (em *Events) dragStart(w Widget, data any, e events.Event) {
 	em.drag = w
 	em.dragData = data
 	sp := NewSprite(dragSpriteName, image.Point{}, e.WindowPos())
-	sp.GrabRenderFrom(w) // TODO: maybe show the number of items being dragged
+	sp.grabRenderFrom(w) // TODO: maybe show the number of items being dragged
 	sp.Pixels = clone.AsRGBA(gradient.ApplyOpacity(sp.Pixels, 0.5))
 	sp.Active = true
 	ms.Sprites.Add(sp)
@@ -1212,7 +1212,7 @@ func (em *Events) getSpriteInBBox(sc *Scene, pos image.Point) {
 		if !sp.Active {
 			continue
 		}
-		if sp.Listeners == nil {
+		if sp.listeners == nil {
 			continue
 		}
 		r := sp.Geom.Bounds()
@@ -1231,25 +1231,25 @@ loop:
 		if e.IsHandled() {
 			break
 		}
-		sp.Listeners.Call(e) // everyone gets the primary event who is in scope, deepest first
+		sp.listeners.Call(e) // everyone gets the primary event who is in scope, deepest first
 		switch et {
 		case events.MouseDown:
-			if sp.Listeners.HandlesEventType(events.SlideMove) {
+			if sp.listeners.HandlesEventType(events.SlideMove) {
 				e.SetHandled()
 				em.spriteSlide = sp
-				em.spriteSlide.Send(events.SlideStart, e)
+				em.spriteSlide.send(events.SlideStart, e)
 			}
-			if sp.Listeners.HandlesEventType(events.Click) {
+			if sp.listeners.HandlesEventType(events.Click) {
 				em.spritePress = sp
 			}
 			break loop
 		case events.MouseUp:
-			sp.HandleEvent(e)
+			sp.handleEvent(e)
 			if em.spriteSlide == sp {
-				sp.Send(events.SlideStop, e)
+				sp.send(events.SlideStop, e)
 			}
 			if em.spritePress == sp {
-				sp.Send(events.Click, e)
+				sp.send(events.Click, e)
 			}
 		}
 	}

@@ -802,7 +802,7 @@ func (w *renderWindow) drawScenes() {
 
 	top := w.mains.Top()
 	if top.Sprites.Modified {
-		top.Sprites.ConfigSprites(drw)
+		top.Sprites.configSprites(drw)
 	}
 
 	drw.SyncImages()
@@ -814,7 +814,7 @@ func (w *renderWindow) drawScenes() {
 	rs.drawAll(drw)
 
 	drw.UseTextureSet(2)
-	top.Sprites.DrawSprites(drw)
+	top.Sprites.drawSprites(drw)
 
 	drw.EndDraw()
 

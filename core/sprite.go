@@ -21,10 +21,10 @@ import (
 // and for dynamic editing / interactive GUI elements (e.g., drag-n-drop elements)
 type Sprite struct {
 
-	// whether this sprite is active now or not
+	// Active is whether this sprite is Active now or not.
 	Active bool
 
-	// unique name of sprite
+	// Name is the unique name of the sprite.
 	Name string
 
 	// properties for sprite, which allow for user-extensible data
@@ -33,28 +33,28 @@ type Sprite struct {
 	// position and size of the image within the RenderWindow
 	Geom math32.Geom2DInt
 
-	// pixels to render -- should be same size as Geom.Size
+	// pixels to render, which should be the same size as [Sprite.Geom.Size]
 	Pixels *image.RGBA
 
-	// Listeners are event listener functions for processing events on this widget.
+	// listeners are event listener functions for processing events on this widget.
 	// They are called in sequential descending order (so the last added listener
 	// is called first). They should be added using the On function. FirstListeners
 	// and FinalListeners are called before and after these listeners, respectively.
-	Listeners events.Listeners `copier:"-" json:"-" xml:"-" set:"-"`
+	listeners events.Listeners `copier:"-" json:"-" xml:"-" set:"-"`
 }
 
-// NewSprite returns a new sprite with given name, which must remain
+// NewSprite returns a new [Sprite] with the given name, which must remain
 // invariant and unique among all sprites in use, and is used for all access;
-// prefix with package and type name to ensure uniqueness.  Starts out in
-// inactive state; must call ActivateSprite.  If size is 0, no image is made.
-func NewSprite(nm string, sz image.Point, pos image.Point) *Sprite {
-	sp := &Sprite{Name: nm}
+// prefix with package and type name to ensure uniqueness. Starts out in
+// inactive state; must call ActivateSprite. If size is 0, no image is made.
+func NewSprite(name string, sz image.Point, pos image.Point) *Sprite {
+	sp := &Sprite{Name: name}
 	sp.SetSize(sz)
 	sp.Geom.Pos = pos
 	return sp
 }
 
-// SetSize sets sprite image to given size -- makes a new image (does not resize)
+// SetSize sets sprite image to given size; makes a new image (does not resize)
 // returns true if a new image was set
 func (sp *Sprite) SetSize(nwsz image.Point) bool {
 	if nwsz.X == 0 || nwsz.Y == 0 {
@@ -68,18 +68,9 @@ func (sp *Sprite) SetSize(nwsz image.Point) bool {
 	return true
 }
 
-// SetBottomPos sets the sprite's bottom position to given point
-// the Geom.Pos represents its top position
-func (sp *Sprite) SetBottomPos(pos image.Point) {
-	sp.Geom.Pos = pos
-	sp.Geom.Pos.Y -= sp.Geom.Size.Y
-	sp.Geom.Pos.Y = max(sp.Geom.Pos.Y, 0)
-	sp.Geom.Pos.X = max(sp.Geom.Pos.X, 0)
-}
-
-// GrabRenderFrom grabs the rendered image from the given widget.
-func (sp *Sprite) GrabRenderFrom(w Widget) {
-	img := GrabRenderFrom(w)
+// grabRenderFrom grabs the rendered image from the given widget.
+func (sp *Sprite) grabRenderFrom(w Widget) {
+	img := grabRenderFrom(w)
 	if img != nil {
 		sp.Pixels = img
 		sp.Geom.Size = sp.Pixels.Bounds().Size()
@@ -88,9 +79,9 @@ func (sp *Sprite) GrabRenderFrom(w Widget) {
 	}
 }
 
-// GrabRenderFrom grabs the rendered image from the given widget.
+// grabRenderFrom grabs the rendered image from the given widget.
 // If it returns nil, then the image could not be fetched.
-func GrabRenderFrom(w Widget) *image.RGBA {
+func grabRenderFrom(w Widget) *image.RGBA {
 	wb := w.AsWidget()
 	if wb.Scene.Pixels == nil {
 		return nil
@@ -108,7 +99,7 @@ func GrabRenderFrom(w Widget) *image.RGBA {
 // Listeners are called in sequential descending order, so this listener will be called
 // before all of the ones added before it.
 func (sp *Sprite) On(etype events.Types, fun func(e events.Event)) *Sprite {
-	sp.Listeners.Add(etype, fun)
+	sp.listeners.Add(etype, fun)
 	return sp
 }
 
@@ -132,58 +123,47 @@ func (sp *Sprite) OnSlideStop(fun func(e events.Event)) *Sprite {
 	return sp.On(events.SlideStop, fun)
 }
 
-// Send sends an NEW event of given type to this sprite,
-// optionally starting from values in the given original event
-// (recommended to include where possible).
-// Do NOT send an existing event using this method if you
-// want the Handled state to persist throughout the call chain;
-// call HandleEvent directly for any existing events.
-func (sp *Sprite) HandleEvent(e events.Event) {
-	sp.Listeners.Call(e)
+// HandleEvent sends the given event to all listeners for that event type.
+func (sp *Sprite) handleEvent(e events.Event) {
+	sp.listeners.Call(e)
 }
 
-// Send sends an NEW event of given type to this sprite,
+// send sends an new event of the given type to this sprite,
 // optionally starting from values in the given original event
 // (recommended to include where possible).
-// Do NOT send an existing event using this method if you
+// Do not send an existing event using this method if you
 // want the Handled state to persist throughout the call chain;
-// call HandleEvent directly for any existing events.
-func (sp *Sprite) Send(typ events.Types, orig ...events.Event) {
+// call [Sprite.handleEvent] directly for any existing events.
+func (sp *Sprite) send(typ events.Types, original ...events.Event) {
 	var e events.Event
-	if len(orig) > 0 && orig[0] != nil {
-		e = orig[0].NewFromClone(typ)
+	if len(original) > 0 && original[0] != nil {
+		e = original[0].NewFromClone(typ)
 	} else {
 		e = &events.Base{Typ: typ}
 		e.Init()
 	}
-	sp.HandleEvent(e)
+	sp.handleEvent(e)
 }
 
-/////////////////////////////////////////////////////////////////////
-// Sprites
-
-// Sprites manages a collection of sprites organized by size and name
+// Sprites manages a collection of Sprites organized by size and name.
 type Sprites struct {
 
 	// map of uniquely named sprites
 	Names ordmap.Map[string, *Sprite]
 
 	// allocation of sprites by size for rendering
-	SzAlloc szalloc.SzAlloc
+	szAlloc szalloc.SzAlloc
 
 	// set to true if sprites have been modified since last config
 	Modified bool
-
-	// number of active sprites
-	Active int
 }
 
-func (ss *Sprites) Init() {
+func (ss *Sprites) init() {
 	ss.Names.Init()
 }
 
-// AllocSizes allocates the sprites by size to fixed set of images and layers
-func (ss *Sprites) AllocSizes() {
+// allocSizes allocates the sprites by size to fixed set of images and layers
+func (ss *Sprites) allocSizes() {
 	ns := ss.Names.Len()
 	szs := make([]image.Point, ns)
 	idx := 0
@@ -198,8 +178,8 @@ func (ss *Sprites) AllocSizes() {
 	if idx != ns {
 		szs = szs[:idx]
 	}
-	ss.SzAlloc.SetSizes(image.Point{4, 4}, system.MaxImageLayers, szs)
-	ss.SzAlloc.Alloc()
+	ss.szAlloc.SetSizes(image.Point{4, 4}, system.MaxImageLayers, szs)
+	ss.szAlloc.Alloc()
 }
 
 // Add adds sprite to list, and returns the image index and
@@ -207,7 +187,7 @@ func (ss *Sprites) AllocSizes() {
 // exists on list, then it is returned, with size allocation
 // updated as needed.
 func (ss *Sprites) Add(sp *Sprite) {
-	ss.Init()
+	ss.init()
 	ss.Names.Add(sp.Name, sp)
 	ss.Modified = true
 }
@@ -219,32 +199,13 @@ func (ss *Sprites) Delete(sp *Sprite) {
 	ss.Modified = true
 }
 
-// HasSizeChanged returns true if a sprite's size has changed relative to
-// its last allocated value, in SzAlloc.  Returns true and sets Modified
-// flag to true if so.
-func (ss *Sprites) HasSizeChanged() bool {
-	if len(ss.SzAlloc.ItemSizes) != ss.Names.Len() {
-		ss.Modified = true
-		return true
-	}
-	for i, kv := range ss.Names.Order {
-		sp := kv.Value
-		ssz := ss.SzAlloc.ItemSizes[i]
-		if sp.Geom.Size != ssz {
-			ss.Modified = true
-			return true
-		}
-	}
-	return false
-}
-
 // SpriteByName returns the sprite by name
 func (ss *Sprites) SpriteByName(name string) (*Sprite, bool) {
 	return ss.Names.ValueByKeyTry(name)
 }
 
-// Reset removes all sprites
-func (ss *Sprites) Reset() {
+// reset removes all sprites
+func (ss *Sprites) reset() {
 	ss.Names.Reset()
 	ss.Modified = true
 }
@@ -273,22 +234,12 @@ func (ss *Sprites) InactivateSprite(name string) {
 	}
 }
 
-// InactivateAllSprites inactivates all sprites, setting Modified if wasn't before
-func (ss *Sprites) InactivateAllSprites() {
-	for _, sp := range ss.Names.Order {
-		if sp.Value.Active {
-			sp.Value.Active = false
-			ss.Modified = true
-		}
-	}
-}
-
-// ConfigSprites updates the Drawer configuration of sprites.
+// configSprites updates the Drawer configuration of sprites.
 // Does a new SzAlloc, and sets corresponding images.
-func (ss *Sprites) ConfigSprites(drw system.Drawer) {
+func (ss *Sprites) configSprites(drw system.Drawer) {
 	// fmt.Println("config sprites")
-	ss.AllocSizes()
-	sa := &ss.SzAlloc
+	ss.allocSizes()
+	sa := &ss.szAlloc
 	for gpi, ga := range sa.GpAllocs {
 		gsz := sa.GpSizes[gpi]
 		imgidx := spriteStart + gpi
@@ -305,10 +256,10 @@ func (ss *Sprites) ConfigSprites(drw system.Drawer) {
 	ss.Modified = false
 }
 
-// DrawSprites draws sprites
-func (ss *Sprites) DrawSprites(drw system.Drawer) {
+// drawSprites draws sprites
+func (ss *Sprites) drawSprites(drw system.Drawer) {
 	// fmt.Println("draw sprites")
-	sa := &ss.SzAlloc
+	sa := &ss.szAlloc
 	for gpi, ga := range sa.GpAllocs {
 		imgidx := spriteStart + gpi
 		for ii, spi := range ga {

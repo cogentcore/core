@@ -342,7 +342,7 @@ func (st *Stage) Raise() {
 func (st *Stage) Delete() {
 	if st.Type.IsMain() && st.Popups != nil {
 		st.Popups.DeleteAll()
-		st.Sprites.Reset()
+		st.Sprites.reset()
 	}
 	if st.Scene != nil {
 		st.Scene.DeleteChildren()
