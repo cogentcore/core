@@ -69,7 +69,6 @@ func init() {
 		"ForceAppColor":             reflect.ValueOf(&core.ForceAppColor).Elem(),
 		"FunctionalTabs":            reflect.ValueOf(core.FunctionalTabs),
 		"GrabRenderFrom":            reflect.ValueOf(core.GrabRenderFrom),
-		"HandleRecover":             reflect.ValueOf(core.HandleRecover),
 		"InitValueButton":           reflect.ValueOf(core.InitValueButton),
 		"InspectorWindow":           reflect.ValueOf(core.InspectorWindow),
 		"IsWordBreak":               reflect.ValueOf(core.IsWordBreak),

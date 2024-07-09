@@ -22,10 +22,10 @@ import (
 // when rendering the crash window.
 var timesCrashed int
 
-// HandleRecover is the core value of [system.HandleRecover]. If r is not nil,
+// handleRecover is the core value of [system.HandleRecover]. If r is not nil,
 // it makes a window displaying information about the panic. [system.HandleRecover]
 // is initialized to this in init.
-func HandleRecover(r any) {
+func handleRecover(r any) {
 	if r == nil {
 		return
 	}
