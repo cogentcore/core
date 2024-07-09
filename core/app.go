@@ -49,14 +49,14 @@ type App struct { //types:add -setters
 	SceneConfig func(sc *Scene)
 }
 
-// appIconImagesCache is a cached version of [AppIconImages].
+// appIconImagesCache is a cached version of [appIconImages].
 var appIconImagesCache []image.Image
 
-// AppIconImages returns a slice of images of sizes 16x16, 32x32, and 48x48
+// appIconImages returns a slice of images of sizes 16x16, 32x32, and 48x48
 // rendered from [AppIcon]. It returns nil if [AppIcon] is "" or if there is
 // an error. It automatically logs any errors. It caches the result for future
 // calls.
-func AppIconImages() []image.Image {
+func appIconImages() []image.Image {
 	if appIconImagesCache != nil {
 		return appIconImagesCache
 	}

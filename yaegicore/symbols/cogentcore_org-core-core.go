@@ -26,7 +26,6 @@ func init() {
 		"AppAbout":                  reflect.ValueOf(&core.AppAbout).Elem(),
 		"AppColor":                  reflect.ValueOf(&core.AppColor).Elem(),
 		"AppIcon":                   reflect.ValueOf(&core.AppIcon).Elem(),
-		"AppIconImages":             reflect.ValueOf(core.AppIconImages),
 		"AppearanceSettings":        reflect.ValueOf(&core.AppearanceSettings).Elem(),
 		"AsButton":                  reflect.ValueOf(core.AsButton),
 		"AsFrame":                   reflect.ValueOf(core.AsFrame),
