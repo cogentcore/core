@@ -18,11 +18,11 @@ import (
 	"cogentcore.org/core/tree"
 )
 
-// NewMainStage returns a new MainStage with given type and scene contents.
+// newMainStage returns a new MainStage with given type and scene contents.
 // Make further configuration choices using Set* methods, which
-// can be chained directly after the NewMainStage call.
+// can be chained directly after the newMainStage call.
 // Use an appropriate Run call at the end to start the Stage running.
-func NewMainStage(typ StageTypes, sc *Scene) *Stage {
+func newMainStage(typ StageTypes, sc *Scene) *Stage {
 	st := &Stage{}
 	st.SetType(typ)
 	st.SetScene(sc)
@@ -73,7 +73,7 @@ func (bd *Body) RunWindow() *Stage {
 // You must call [Stage.Run] to run the window; see [Body.RunWindow]
 // for a version that automatically runs it.
 func (bd *Body) NewWindow() *Stage {
-	ms := NewMainStage(WindowStage, bd.Scene)
+	ms := newMainStage(WindowStage, bd.Scene)
 	ms.SetNewWindow(true)
 	return ms
 }
@@ -136,21 +136,17 @@ func (st *Stage) addDialogParts() *Stage {
 	return st
 }
 
-func (st *Stage) InheritBars() {
-	st.Scene.inheritBarsWidget(st.Context)
-}
-
-// FirstWindowStages creates a temporary [Stages] for the first window
+// firstWindowStages creates a temporary [Stages] for the first window
 // to be able to get sizing information prior to having a RenderWindow,
 // based on the system App Screen Size. Only adds a RenderContext.
-func (st *Stage) FirstWindowStages() *Stages {
+func (st *Stage) firstWindowStages() *Stages {
 	ms := &Stages{}
 	ms.RenderContext = NewRenderContext()
 	return ms
 }
 
-// ConfigMainStage does main-stage configuration steps
-func (st *Stage) ConfigMainStage() {
+// configMainStage does main-stage configuration steps
+func (st *Stage) configMainStage() {
 	if st.NewWindow {
 		st.FullWindow = true
 	}
@@ -166,17 +162,17 @@ func (st *Stage) ConfigMainStage() {
 	sc.MakeSceneWidgets()
 }
 
-// RunWindow runs a Window with current settings.
-func (st *Stage) RunWindow() *Stage {
+// runWindow runs a Window with current settings.
+func (st *Stage) runWindow() *Stage {
 	sc := st.Scene
 	if CurrentRenderWindow == nil {
 		// If we have no current render window, we need to be in a new window,
 		// and we need a *temporary* Mains to get initial pref size
-		st.SetMains(st.FirstWindowStages())
+		st.SetMains(st.firstWindowStages())
 	} else {
 		st.SetMains(&CurrentRenderWindow.Mains)
 	}
-	st.ConfigMainStage()
+	st.configMainStage()
 
 	sz := st.RenderContext.Geom.Size
 	// offscreen windows always consider pref size because
@@ -224,7 +220,7 @@ func (st *Stage) RunWindow() *Stage {
 
 	if st.NewWindow || CurrentRenderWindow == nil {
 		sc.Resize(math32.Geom2DInt{st.RenderContext.Geom.Pos, sz})
-		win := st.NewRenderWindow()
+		win := st.newRenderWindow()
 		MainRenderWindows.Add(win)
 		CurrentRenderWindow = win
 		win.GoStartEventLoop()
@@ -248,11 +244,11 @@ func (st *Stage) RunWindow() *Stage {
 	return st
 }
 
-// GetValidContext ensures that the Context is non-nil and has a valid
+// getValidContext ensures that the Context is non-nil and has a valid
 // Scene pointer, using CurrentRenderWindow if the current Context is not valid.
 // If CurrentRenderWindow is nil (should not happen), then it returns false and
 // the calling function must bail.
-func (st *Stage) GetValidContext() bool {
+func (st *Stage) getValidContext() bool {
 	if st.Context == nil || st.Context.AsTree().This == nil || st.Context.AsWidget().Scene == nil {
 		if CurrentRenderWindow == nil {
 			slog.Error("Stage.Run: Context is nil and CurrentRenderWindow is nil, so cannot Run", "Name", st.Name, "Title", st.Title)
@@ -263,9 +259,9 @@ func (st *Stage) GetValidContext() bool {
 	return true
 }
 
-// RunDialog runs a Dialog with current settings.
-func (st *Stage) RunDialog() *Stage {
-	if !st.GetValidContext() {
+// runDialog runs a Dialog with current settings.
+func (st *Stage) runDialog() *Stage {
+	if !st.getValidContext() {
 		return st
 	}
 	ctx := st.Context.AsWidget()
@@ -273,7 +269,7 @@ func (st *Stage) RunDialog() *Stage {
 	// if our main stages are nil, we wait until our context is shown and then try again
 	if ctx.Scene.Stage == nil || ctx.Scene.Stage.Mains == nil {
 		ctx.OnShow(func(e events.Event) {
-			st.RunDialog()
+			st.runDialog()
 		})
 		return st
 	}
@@ -281,7 +277,7 @@ func (st *Stage) RunDialog() *Stage {
 	ms := ctx.Scene.Stage.Mains
 
 	sc := st.Scene
-	st.ConfigMainStage()
+	st.configMainStage()
 	st.addDialogParts()
 	sc.SceneGeom.Pos = st.Pos
 
@@ -302,7 +298,7 @@ func (st *Stage) RunDialog() *Stage {
 		sc.Resize(math32.Geom2DInt{st.RenderContext.Geom.Pos, sz})
 		st.Type = WindowStage            // critical: now is its own window!
 		sc.SceneGeom.Pos = image.Point{} // ignore pos
-		win := st.NewRenderWindow()
+		win := st.newRenderWindow()
 		DialogRenderWindows.Add(win)
 		CurrentRenderWindow = win
 		win.GoStartEventLoop()
@@ -315,7 +311,7 @@ func (st *Stage) RunDialog() *Stage {
 	return st
 }
 
-func (st *Stage) NewRenderWindow() *RenderWindow {
+func (st *Stage) newRenderWindow() *RenderWindow {
 	name := st.Name
 	title := st.Title
 	opts := &system.NewWindowOptions{
@@ -354,8 +350,8 @@ func (st *Stage) NewRenderWindow() *RenderWindow {
 	return win
 }
 
-// MainHandleEvent handles main stage events
-func (st *Stage) MainHandleEvent(e events.Event) {
+// mainHandleEvent handles main stage events
+func (st *Stage) mainHandleEvent(e events.Event) {
 	if st.Scene == nil {
 		return
 	}
@@ -370,12 +366,12 @@ func (st *Stage) MainHandleEvent(e events.Event) {
 	st.Scene.Events.handleEvent(e)
 }
 
-// MainHandleEvent calls MainHandleEvent on relevant stages in reverse order.
-func (sm *Stages) MainHandleEvent(e events.Event) {
+// mainHandleEvent calls mainHandleEvent on relevant stages in reverse order.
+func (sm *Stages) mainHandleEvent(e events.Event) {
 	n := sm.Stack.Len()
 	for i := n - 1; i >= 0; i-- {
 		st := sm.Stack.ValueByIndex(i)
-		st.MainHandleEvent(e)
+		st.mainHandleEvent(e)
 		if e.IsHandled() || st.Modal || st.Type == WindowStage || st.FullWindow {
 			break
 		}

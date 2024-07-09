@@ -28,7 +28,7 @@ func (bd *Body) RunDialog(ctx Widget) *Stage {
 func (bd *Body) NewDialog(ctx Widget) *Stage {
 	ctx = nonNilContext(ctx)
 	bd.dialogStyles()
-	bd.Scene.Stage = NewMainStage(DialogStage, bd.Scene)
+	bd.Scene.Stage = newMainStage(DialogStage, bd.Scene)
 	bd.Scene.Stage.SetModal(true)
 	bd.Scene.Stage.SetContext(ctx)
 	bd.Scene.Stage.Pos = ctx.ContextMenuPos(nil)
@@ -48,7 +48,7 @@ func (bd *Body) RunFullDialog(ctx Widget) *Stage {
 // for a version that automatically runs it.
 func (bd *Body) NewFullDialog(ctx Widget) *Stage {
 	bd.dialogStyles()
-	bd.Scene.Stage = NewMainStage(DialogStage, bd.Scene)
+	bd.Scene.Stage = newMainStage(DialogStage, bd.Scene)
 	bd.Scene.Stage.SetModal(true)
 	bd.Scene.Stage.SetContext(ctx)
 	bd.Scene.Stage.SetFullWindow(true)

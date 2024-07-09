@@ -490,7 +490,7 @@ func (w *RenderWindow) HandleEvent(e events.Event) {
 		return
 	}
 	// fmt.Printf("got event type: %v: %v\n", et.BitIndexString(), evi)
-	w.Mains.MainHandleEvent(e)
+	w.Mains.mainHandleEvent(e)
 	rc.Unlock()
 }
 

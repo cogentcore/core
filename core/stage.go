@@ -297,9 +297,9 @@ func (st *Stage) RunImpl() *Stage {
 	// defer func() { system.HandleRecover(recover()) }()
 	switch st.Type {
 	case WindowStage:
-		return st.RunWindow()
+		return st.runWindow()
 	case DialogStage:
-		return st.RunDialog()
+		return st.runDialog()
 	default:
 		return st.RunPopup()
 	}

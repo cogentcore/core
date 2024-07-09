@@ -131,7 +131,6 @@ func init() {
 		"NewListBase":               reflect.ValueOf(core.NewListBase),
 		"NewListButton":             reflect.ValueOf(core.NewListButton),
 		"NewListGrid":               reflect.ValueOf(core.NewListGrid),
-		"NewMainStage":              reflect.ValueOf(core.NewMainStage),
 		"NewMenu":                   reflect.ValueOf(core.NewMenu),
 		"NewMenuFromStrings":        reflect.ValueOf(core.NewMenuFromStrings),
 		"NewMenuScene":              reflect.ValueOf(core.NewMenuScene),
