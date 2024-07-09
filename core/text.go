@@ -30,6 +30,7 @@ type Text struct {
 	Text string
 
 	// Type is the styling type of text to use.
+	// It defaults to [TextBodyLarge].
 	Type TextTypes
 
 	// paintText is the [paint.Text] for the text.
@@ -212,11 +213,11 @@ func (tx *Text) Init() {
 		kf := keymap.Of(e.KeyChord())
 		if kf == keymap.Copy {
 			e.SetHandled()
-			tx.Copy(true)
+			tx.copy()
 		}
 	})
 	tx.On(events.MouseMove, func(e events.Event) {
-		tl, _ := tx.FindLink(e.Pos())
+		tl, _ := tx.findLink(e.Pos())
 		if tl != nil {
 			tx.Styles.Cursor = cursors.Pointer
 		} else {
@@ -233,9 +234,9 @@ func (tx *Text) Init() {
 	})
 }
 
-// FindLink finds the text link at the given scene-local position. If it
+// findLink finds the text link at the given scene-local position. If it
 // finds it, it returns it and its bounds; otherwise, it returns nil.
-func (tx *Text) FindLink(pos image.Point) (*paint.TextLink, image.Rectangle) {
+func (tx *Text) findLink(pos image.Point) (*paint.TextLink, image.Rectangle) {
 	for _, tl := range tx.paintText.Links {
 		// TODO(kai/link): is there a better way to be safe here?
 		if tl.Label == "" {
@@ -253,7 +254,7 @@ func (tx *Text) FindLink(pos image.Point) (*paint.TextLink, image.Rectangle) {
 // on any links that are clicked on.
 func (tx *Text) HandleTextClick(openLink func(tl *paint.TextLink)) {
 	tx.OnClick(func(e events.Event) {
-		tl, _ := tx.FindLink(e.Pos())
+		tl, _ := tx.findLink(e.Pos())
 		if tl == nil {
 			return
 		}
@@ -266,14 +267,14 @@ func (tx *Text) WidgetTooltip(pos image.Point) (string, image.Point) {
 	if pos == image.Pt(-1, -1) {
 		return tx.Tooltip, image.Point{}
 	}
-	tl, bounds := tx.FindLink(pos)
+	tl, bounds := tx.findLink(pos)
 	if tl == nil {
 		return tx.Tooltip, tx.DefaultTooltipPos()
 	}
 	return tl.URL, bounds.Min
 }
 
-func (tx *Text) Copy(reset bool) {
+func (tx *Text) copy() {
 	md := mimedata.NewText(tx.Text)
 	em := tx.Events()
 	if em != nil {
