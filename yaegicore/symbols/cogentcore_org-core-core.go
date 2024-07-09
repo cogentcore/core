@@ -674,11 +674,11 @@ func (W _cogentcore_org_core_core_SettingsSaver) Save() error              { ret
 // _cogentcore_org_core_core_ShouldDisplayer is an interface wrapper for ShouldDisplayer type
 type _cogentcore_org_core_core_ShouldDisplayer struct {
 	IValue      interface{}
-	WShouldShow func(field string) bool
+	WShouldDisplay func(field string) bool
 }
 
-func (W _cogentcore_org_core_core_ShouldDisplayer) ShouldShow(field string) bool {
-	return W.WShouldShow(field)
+func (W _cogentcore_org_core_core_ShouldDisplayer) ShouldDisplay(field string) bool {
+	return W.WShouldDisplay(field)
 }
 
 // _cogentcore_org_core_core_TextFieldEmbedder is an interface wrapper for TextFieldEmbedder type

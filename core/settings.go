@@ -289,7 +289,7 @@ const (
 	ThemeDark
 )
 
-func (as *AppearanceSettingsData) ShouldShow(field string) bool {
+func (as *AppearanceSettingsData) ShouldDisplay(field string) bool {
 	switch field {
 	case "Color":
 		return !ForceAppColor

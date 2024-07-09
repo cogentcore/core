@@ -26,7 +26,7 @@ func (rp *RandParams) Defaults() {
 	rp.Par = 1
 }
 
-func (rp *RandParams) ShouldShow(field string) bool {
+func (rp *RandParams) ShouldDisplay(field string) bool {
 	switch field {
 	case "Par":
 		return rp.Dist == Gamma || rp.Dist == Binomial || rp.Dist == Beta

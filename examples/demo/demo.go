@@ -455,7 +455,7 @@ type inlineStruct struct { //types:add
 	Value float32
 }
 
-func (il *inlineStruct) ShouldShow(field string) bool {
+func (il *inlineStruct) ShouldDisplay(field string) bool {
 	switch field {
 	case "ShowMe", "Condition":
 		return il.On
@@ -509,7 +509,7 @@ type testStruct struct { //types:add
 	File core.Filename
 }
 
-func (ts *testStruct) ShouldShow(field string) bool {
+func (ts *testStruct) ShouldDisplay(field string) bool {
 	switch field {
 	case "Name":
 		return ts.Enum <= core.ButtonElevated

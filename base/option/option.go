@@ -45,7 +45,7 @@ func (o *Option[T]) ShouldSave() bool {
 	return o.Valid
 }
 
-func (o *Option[T]) ShouldShow(field string) bool {
+func (o *Option[T]) ShouldDisplay(field string) bool {
 	switch field {
 	case "Value":
 		return o.Valid
