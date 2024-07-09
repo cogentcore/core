@@ -6,7 +6,6 @@ package core
 
 import (
 	"fmt"
-	"image"
 	"log/slog"
 	"reflect"
 	"strconv"
@@ -40,11 +39,11 @@ type Table struct {
 	// SelectedField is the current selection field; initially select value in this field.
 	SelectedField string `copier:"-" display:"-" json:"-" xml:"-"`
 
-	// SortIndex is the current sort index.
-	SortIndex int
+	// sortIndex is the current sort index.
+	sortIndex int
 
-	// SortDescending is whether the current sort order is descending.
-	SortDescending bool
+	// sortDescending is whether the current sort order is descending.
+	sortDescending bool
 
 	// visibleFields are the visible fields.
 	visibleFields []reflect.StructField
@@ -57,6 +56,8 @@ type Table struct {
 
 	// colMaxWidths records maximum width in chars of string type fields.
 	colMaxWidths []int
+
+	header *Frame
 }
 
 // TableStyler is a styling function for custom styling and
@@ -65,8 +66,8 @@ type TableStyler func(w Widget, s *styles.Style, row, col int)
 
 func (tb *Table) Init() {
 	tb.ListBase.Init()
-	tb.AddContextMenu(tb.ContextMenu)
-	tb.SortIndex = -1
+	tb.AddContextMenu(tb.contextMenu)
+	tb.sortIndex = -1
 
 	tb.Makers.Normal[0] = func(p *tree.Plan) { // TODO: reduce redundancy with ListBase Maker
 		svi := tb.This.(Lister)
@@ -76,7 +77,7 @@ func (tb *Table) Init() {
 
 		scrollTo := -1
 		if tb.SelectedField != "" && tb.SelectedValue != nil {
-			tb.SelectedIndex, _ = StructSliceIndexByValue(tb.Slice, tb.SelectedField, tb.SelectedValue)
+			tb.SelectedIndex, _ = structSliceIndexByValue(tb.Slice, tb.SelectedField, tb.SelectedValue)
 			tb.SelectedField = ""
 			tb.SelectedValue = nil
 			tb.InitSelectedIndex = -1
@@ -96,7 +97,7 @@ func (tb *Table) Init() {
 			svi.UpdateMaxWidths()
 		})
 
-		tb.MakeHeader(p)
+		tb.makeHeader(p)
 		tb.MakeGrid(p, func(p *tree.Plan) {
 			for i := 0; i < tb.VisibleRows; i++ {
 				svi.MakeRow(p, i)
@@ -108,7 +109,7 @@ func (tb *Table) Init() {
 // StyleValue performs additional value widget styling
 func (tb *Table) StyleValue(w Widget, s *styles.Style, row, col int) {
 	hw := float32(tb.headerWidths[col])
-	if col == tb.SortIndex {
+	if col == tb.sortIndex {
 		hw += 6
 	}
 	if len(tb.colMaxWidths) > col {
@@ -120,7 +121,6 @@ func (tb *Table) StyleValue(w Widget, s *styles.Style, row, col int) {
 }
 
 // SetSlice sets the source slice that we are viewing.
-// Must call Update if already open.
 func (tb *Table) SetSlice(sl any) *Table {
 	if reflectx.AnyIsNil(sl) {
 		tb.Slice = nil
@@ -212,13 +212,9 @@ func (tb *Table) UpdateMaxWidths() {
 	}
 }
 
-// SliceHeader returns the Frame header for slice grid
-func (tb *Table) SliceHeader() *Frame {
-	return tb.Child(0).(*Frame)
-}
-
-func (tb *Table) MakeHeader(p *tree.Plan) {
+func (tb *Table) makeHeader(p *tree.Plan) {
 	tree.AddAt(p, "header", func(w *Frame) {
+		tb.header = w
 		ToolbarStyles(w)
 		w.Styler(func(s *styles.Style) {
 			s.Grow.Set(0, 0)
@@ -239,7 +235,7 @@ func (tb *Table) MakeHeader(p *tree.Plan) {
 				tree.AddAt(p, "head-"+field.Name, func(w *Button) {
 					w.SetType(ButtonMenu)
 					w.OnClick(func(e events.Event) {
-						tb.SortSliceAction(fli)
+						tb.SortColumn(fli)
 					})
 					w.Updater(func() {
 						htxt := ""
@@ -255,8 +251,8 @@ func (tb *Table) MakeHeader(p *tree.Plan) {
 							w.Tooltip += ": " + doc
 						}
 						tb.headerWidths[fli] = len(htxt)
-						if fli == tb.SortIndex {
-							if tb.SortDescending {
+						if fli == tb.sortIndex {
+							if tb.sortDescending {
 								w.SetIcon(icons.KeyboardArrowDown)
 							} else {
 								w.SetIcon(icons.KeyboardArrowUp)
@@ -386,19 +382,20 @@ func (tb *Table) DeleteAt(idx int) {
 	tb.UpdateChange()
 }
 
-// SortSlice sorts the slice according to current settings
+// SortSlice sorts the slice according to current settings.
 func (tb *Table) SortSlice() {
-	if tb.SortIndex < 0 || tb.SortIndex >= len(tb.visibleFields) {
+	if tb.sortIndex < 0 || tb.sortIndex >= len(tb.visibleFields) {
 		return
 	}
-	rawIndex := tb.visibleFields[tb.SortIndex].Index
-	reflectx.StructSliceSort(tb.Slice, rawIndex, !tb.SortDescending)
+	rawIndex := tb.visibleFields[tb.sortIndex].Index
+	reflectx.StructSliceSort(tb.Slice, rawIndex, !tb.sortDescending)
 }
 
-// SortSliceAction sorts the slice for given field index -- toggles ascending
-// vs. descending if already sorting on this dimension
-func (tb *Table) SortSliceAction(fldIndex int) {
-	sgh := tb.SliceHeader()
+// SortColumn sorts the slice for the given field index.
+// It toggles between ascending and descending if already
+// sorting on this field.
+func (tb *Table) SortColumn(fieldIndex int) {
+	sgh := tb.header
 	_, idxOff := tb.RowWidgetNs()
 
 	ascending := true
@@ -406,12 +403,12 @@ func (tb *Table) SortSliceAction(fldIndex int) {
 	for fli := 0; fli < tb.numVisibleFields; fli++ {
 		hdr := sgh.Child(idxOff + fli).(*Button)
 		hdr.SetType(ButtonAction)
-		if fli == fldIndex {
-			if tb.SortIndex == fli {
-				tb.SortDescending = !tb.SortDescending
-				ascending = !tb.SortDescending
+		if fli == fieldIndex {
+			if tb.sortIndex == fli {
+				tb.sortDescending = !tb.sortDescending
+				ascending = !tb.sortDescending
 			} else {
-				tb.SortDescending = false
+				tb.sortDescending = false
 			}
 			if ascending {
 				hdr.SetIcon(icons.KeyboardArrowUp)
@@ -423,17 +420,17 @@ func (tb *Table) SortSliceAction(fldIndex int) {
 		}
 	}
 
-	tb.SortIndex = fldIndex
+	tb.sortIndex = fieldIndex
 	tb.SortSlice()
 	tb.Update()
 }
 
-// SortFieldName returns the name of the field being sorted, along with :up or
-// :down depending on descending
-func (tb *Table) SortFieldName() string {
-	if tb.SortIndex >= 0 && tb.SortIndex < tb.numVisibleFields {
-		nm := tb.visibleFields[tb.SortIndex].Name
-		if tb.SortDescending {
+// sortFieldName returns the name of the field being sorted, along with :up or
+// :down depending on ascending or descending sorting.
+func (tb *Table) sortFieldName() string {
+	if tb.sortIndex >= 0 && tb.sortIndex < tb.numVisibleFields {
+		nm := tb.visibleFields[tb.sortIndex].Name
+		if tb.sortDescending {
 			nm += ":down"
 		} else {
 			nm += ":up"
@@ -443,9 +440,9 @@ func (tb *Table) SortFieldName() string {
 	return ""
 }
 
-// SetSortFieldName sets sorting to happen on given field and direction -- see
-// SortFieldName for details
-func (tb *Table) SetSortFieldName(nm string) {
+// setSortFieldName sets sorting to happen on given field and direction
+// see [Table.sortFieldName] for details.
+func (tb *Table) setSortFieldName(nm string) {
 	if nm == "" {
 		return
 	}
@@ -456,14 +453,14 @@ func (tb *Table) SetSortFieldName(nm string) {
 		if fld.Name == spnm[0] {
 			got = true
 			// fmt.Println("sorting on:", fld.Name, fli, "from:", nm)
-			tb.SortIndex = fli
+			tb.sortIndex = fli
 		}
 	}
 	if len(spnm) == 2 {
 		if spnm[1] == "down" {
-			tb.SortDescending = true
+			tb.sortDescending = true
 		} else {
-			tb.SortDescending = false
+			tb.sortDescending = false
 		}
 	}
 	if got {
@@ -471,30 +468,8 @@ func (tb *Table) SetSortFieldName(nm string) {
 	}
 }
 
-// RowFirstVisWidget returns the first visible widget for given row (could be
-// index or not) -- false if out of range
-func (tb *Table) RowFirstVisWidget(row int) (*WidgetBase, bool) {
-	if !tb.IsRowInBounds(row) {
-		return nil, false
-	}
-	nWidgPerRow, idxOff := tb.RowWidgetNs()
-	lg := tb.ListGrid
-	w := lg.Children[row*nWidgPerRow].(Widget).AsWidget()
-	if w.Geom.TotalBBox != (image.Rectangle{}) {
-		return w, true
-	}
-	ridx := nWidgPerRow * row
-	for fli := 0; fli < tb.numVisibleFields; fli++ {
-		w := lg.Child(ridx + idxOff + fli).(Widget).AsWidget()
-		if w.Geom.TotalBBox != (image.Rectangle{}) {
-			return w, true
-		}
-	}
-	return nil, false
-}
-
-// RowGrabFocus grabs the focus for the first focusable widget in given row --
-// returns that element or nil if not successful -- note: grid must have
+// RowGrabFocus grabs the focus for the first focusable widget in given row;
+// returns that element or nil if not successful. Note: grid must have
 // already rendered for focus to be grabbed!
 func (tb *Table) RowGrabFocus(row int) *WidgetBase {
 	if !tb.IsRowInBounds(row) || tb.InFocusGrab { // range check
@@ -522,14 +497,14 @@ func (tb *Table) RowGrabFocus(row int) *WidgetBase {
 	return nil
 }
 
-// SelectFieldVal sets SelField and SelVal and attempts to find corresponding
-// row, setting SelectedIndex and selecting row if found -- returns true if
-// found, false otherwise
-func (tb *Table) SelectFieldVal(fld, val string) bool {
+// selectFieldValue sets SelectedField and SelectedValue and attempts to find
+// corresponding row, setting SelectedIndex and selecting row if found; returns
+// true if found, false otherwise.
+func (tb *Table) selectFieldValue(fld, val string) bool {
 	tb.SelectedField = fld
 	tb.SelectedValue = val
 	if tb.SelectedField != "" && tb.SelectedValue != nil {
-		idx, _ := StructSliceIndexByValue(tb.Slice, tb.SelectedField, tb.SelectedValue)
+		idx, _ := structSliceIndexByValue(tb.Slice, tb.SelectedField, tb.SelectedValue)
 		if idx >= 0 {
 			tb.ScrollToIndex(idx)
 			tb.updateSelectIndex(idx, true, events.SelectOne)
@@ -539,9 +514,9 @@ func (tb *Table) SelectFieldVal(fld, val string) bool {
 	return false
 }
 
-// StructSliceIndexByValue searches for first index that contains given value in field of
+// structSliceIndexByValue searches for first index that contains given value in field of
 // given name.
-func StructSliceIndexByValue(structSlice any, fieldName string, fieldValue any) (int, error) {
+func structSliceIndexByValue(structSlice any, fieldName string, fieldValue any) (int, error) {
 	svnp := reflectx.NonPointerValue(reflect.ValueOf(structSlice))
 	sz := svnp.Len()
 	struTyp := reflectx.NonPointerType(reflect.TypeOf(structSlice).Elem().Elem())
@@ -565,7 +540,7 @@ func StructSliceIndexByValue(structSlice any, fieldName string, fieldValue any) 
 	return -1, nil
 }
 
-func (tb *Table) EditIndex(idx int) {
+func (tb *Table) editIndex(idx int) {
 	if idx < 0 || idx >= tb.sliceUnderlying.Len() {
 		return
 	}
@@ -585,7 +560,7 @@ func (tb *Table) EditIndex(idx int) {
 	d.RunFullDialog(tb)
 }
 
-func (tb *Table) ContextMenu(m *Scene) {
+func (tb *Table) contextMenu(m *Scene) {
 	e := NewButton(m)
 	if tb.IsReadOnly() {
 		e.SetText("View").SetIcon(icons.Visibility)
@@ -593,12 +568,11 @@ func (tb *Table) ContextMenu(m *Scene) {
 		e.SetText("Edit").SetIcon(icons.Edit)
 	}
 	e.OnClick(func(e events.Event) {
-		tb.EditIndex(tb.SelectedIndex)
+		tb.editIndex(tb.SelectedIndex)
 	})
 }
 
-//////////////////////////////////////////////////////
-// 	Header layout
+// Header layout:
 
 func (tb *Table) SizeFinal() {
 	tb.ListBase.SizeFinal()
@@ -606,7 +580,7 @@ func (tb *Table) SizeFinal() {
 	if sg == nil {
 		return
 	}
-	sh := tb.SliceHeader()
+	sh := tb.header
 	sh.WidgetKidsIter(func(i int, kwi Widget, kwb *WidgetBase) bool {
 		_, sgb := AsWidget(sg.Child(i))
 		gsz := &sgb.Geom.Size

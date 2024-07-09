@@ -892,11 +892,11 @@ func (t *Table) SetSelectedField(v string) *Table { t.SelectedField = v; return 
 
 // SetSortIndex sets the [Table.SortIndex]:
 // SortIndex is the current sort index.
-func (t *Table) SetSortIndex(v int) *Table { t.SortIndex = v; return t }
+func (t *Table) SetSortIndex(v int) *Table { t.sortIndex = v; return t }
 
 // SetSortDescending sets the [Table.SortDescending]:
 // SortDescending is whether the current sort order is descending.
-func (t *Table) SetSortDescending(v bool) *Table { t.SortDescending = v; return t }
+func (t *Table) SetSortDescending(v bool) *Table { t.sortDescending = v; return t }
 
 var _ = types.AddType(&types.Type{Name: "cogentcore.org/core/core.Tabs", IDName: "tabs", Doc: "Tabs divide widgets into logical groups and give users the ability\nto freely navigate between them using tab buttons.", Embeds: []types.Field{{Name: "Frame"}}, Fields: []types.Field{{Name: "Type", Doc: "Type is the styling type of the tabs. If it is changed after\nthe tabs are first configured, Update needs to be called on\nthe tabs."}, {Name: "NewTabButton", Doc: "NewTabButton is whether to show a new tab button at the end of the list of tabs."}, {Name: "MaxChars", Doc: "MaxChars is the maximum number of characters to include in the tab text.\nIt elides text that are longer than that."}, {Name: "CloseIcon", Doc: "CloseIcon is the icon used for tab close buttons.\nIf it is \"\" or [icons.None], the tab is not closeable.\nThe default value is [icons.Close].\nOnly [FunctionalTabs] can be closed; all other types of\ntabs will not render a close button and can not be closed."}, {Name: "PrevEffectiveType", Doc: "PrevEffectiveType is the previous effective type of the tabs\nas computed by [TabTypes.Effective]."}, {Name: "Mu", Doc: "Mu is a mutex protecting updates to tabs. Tabs can be driven\nprogrammatically and via user input so need extra protection."}}})
 

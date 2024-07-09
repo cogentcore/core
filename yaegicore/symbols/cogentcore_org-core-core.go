@@ -177,7 +177,6 @@ func init() {
 		"StageTypesN":               reflect.ValueOf(core.StageTypesN),
 		"StageTypesValues":          reflect.ValueOf(core.StageTypesValues),
 		"StandardTabs":              reflect.ValueOf(core.StandardTabs),
-		"StructSliceIndexByValue":   reflect.ValueOf(core.StructSliceIndexByValue),
 		"SwitchCheckbox":            reflect.ValueOf(core.SwitchCheckbox),
 		"SwitchChip":                reflect.ValueOf(core.SwitchChip),
 		"SwitchRadioButton":         reflect.ValueOf(core.SwitchRadioButton),
